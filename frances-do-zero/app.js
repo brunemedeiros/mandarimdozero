@@ -724,11 +724,12 @@ function renderLevelModalList(){
     const moduleCount = modulesOfLevel(lvl.id).length;
     const sub = moduleCount ? `${moduleCount} módulo${moduleCount === 1 ? '' : 's'}` : 'Em breve';
     // Se existe um teste de nível que credita ESTE nível ao ser aprovado
-    // (ex: o Teste de Nível A1 libera o A2), mostra um atalho pra quem quer
-    // pular direto pra cá sem passar pelo nível anterior.
+    // (ex: o Teste de Nível A1 libera o A2), mostra um chip de atalho embutido
+    // na própria linha do nível, pra quem quer pular direto sem passar pelo
+    // nível anterior.
     const skipTest = LEVEL_TESTS.find(t => t.nextLevel === lvl.id);
     const skipHTML = skipTest ? `
-      <button class="level-skip-btn" data-test="${skipTest.id}">🎓 Pular pro ${lvl.id} com o ${skipTest.title}</button>
+      <button class="level-skip-chip" data-test="${skipTest.id}" title="${skipTest.title}">🎓 Pular</button>
     ` : '';
     return `
       <div class="level-list-row">
@@ -750,7 +751,7 @@ function renderLevelModalList(){
       renderUnitsGrid();
     });
   });
-  wrap.querySelectorAll('.level-skip-btn').forEach(btn => {
+  wrap.querySelectorAll('.level-skip-chip').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       document.getElementById('level-modal').style.display = 'none';

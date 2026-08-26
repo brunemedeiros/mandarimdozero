@@ -119,16 +119,16 @@ body{
 .level-empty{ text-align:center; padding:50px 20px; color: var(--ink-soft); }
 .level-empty .big-emoji{ font-size:40px; margin-bottom:10px; }
 
-.level-list{ display:flex; flex-direction:column; gap:14px; }
-.level-list-row{ display:flex; flex-direction:column; gap:6px; }
-.level-skip-btn{
-  align-self:flex-start; margin-left:58px; background:none; border:none; cursor:pointer;
-  font-family: var(--font-body); font-weight:700; font-size:12.5px; color: var(--brand-purple);
-  padding:2px 0; text-decoration: underline; text-underline-offset:2px;
+.level-list{ display:flex; flex-direction:column; gap:8px; }
+.level-list-row{ display:flex; align-items:center; gap:8px; }
+.level-skip-chip{
+  flex-shrink:0; background: var(--brand-purple); color: var(--paper); border:none; cursor:pointer;
+  font-family: var(--font-body); font-weight:800; font-size:12px; border-radius:999px;
+  padding:8px 14px; white-space:nowrap; transition: background .15s ease;
 }
-.level-skip-btn:hover{ color: var(--seal-red-dark); }
+.level-skip-chip:hover{ background: var(--seal-red-dark); }
 .level-list-item{
-  display:flex; align-items:center; gap:14px; width:100%; text-align:left;
+  display:flex; align-items:center; gap:14px; flex:1; min-width:0; text-align:left;
   background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
   padding:14px 16px; cursor:pointer; font-family: var(--font-body); transition: all .15s ease;
 }
