@@ -109,17 +109,31 @@ body{
 .path-header p{ margin:0; color:var(--ink-soft); font-size:14px; }
 .path-header-btn{ font-size:13px; padding:10px 16px; white-space:nowrap; }
 
-/* ---------- Seletor de nível (A1/A2/...) ---------- */
-.level-select{ display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
-.level-chip{
-  padding:8px 16px; border-radius:999px; border:1px solid var(--paper-line); background:var(--paper);
-  font-family: var(--font-body); font-weight:800; font-size:13px; cursor:pointer; color:var(--ink-soft);
-  transition: all .15s ease;
+/* ---------- Seletor de nível (toggle + modal, estilo Busuu) ---------- */
+.level-toggle-btn{
+  display:flex; align-items:center; gap:6px; background:none; border:none; cursor:pointer;
+  padding:4px 0 12px; font-family: var(--font-heading); font-weight:800; font-size:20px; color: var(--ink);
 }
-.level-chip:hover{ border-color: var(--imperial-gold); }
-.level-chip.active{ background: var(--seal-red); border-color: var(--seal-red); color:white; }
+.level-toggle-chevron{ font-size:16px; color: var(--ink-soft); transition: transform .15s ease; }
+.level-toggle-btn:hover .level-toggle-chevron{ transform: translateY(2px); }
 .level-empty{ text-align:center; padding:50px 20px; color: var(--ink-soft); }
 .level-empty .big-emoji{ font-size:40px; margin-bottom:10px; }
+
+.level-list{ display:flex; flex-direction:column; gap:8px; }
+.level-list-item{
+  display:flex; align-items:center; gap:14px; width:100%; text-align:left;
+  background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding:14px 16px; cursor:pointer; font-family: var(--font-body); transition: all .15s ease;
+}
+.level-list-item:hover{ border-color: var(--imperial-gold); }
+.level-list-item.active{ background: rgba(52,152,214,0.08); border-color: var(--seal-red); }
+.level-list-badge{
+  flex-shrink:0; width:44px; height:44px; border-radius:12px; background: var(--paper-warm);
+  display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; color: var(--ink-soft);
+}
+.level-list-item.active .level-list-badge{ background: var(--seal-red); color:white; }
+.level-list-title{ font-weight:800; font-size:15px; }
+.level-list-sub{ font-size:12.5px; color: var(--ink-soft); margin-top:2px; }
 
 .units-grid{ display:block; }
 .unit-card{
@@ -763,11 +777,13 @@ footer.app-footer img{ height:56px; opacity:.9; }
   <!-- ===== TRILHA ===== -->
   <div class="view active" id="view-path">
     <div id="path-list-wrap">
-      <div class="level-select" id="level-select"></div>
+      <button class="level-toggle-btn" id="level-toggle-btn">
+        <span id="path-level-title"></span>
+        <span class="level-toggle-chevron">⌄</span>
+      </button>
       <div class="path-header">
         <div class="path-header-top">
           <div>
-            <h2 id="path-level-title"></h2>
             <p>Unidades organizadas por objetivo comunicacional. Complete uma unidade para desbloquear a próxima.</p>
           </div>
           <button class="btn btn-secondary path-header-btn" id="export-open-btn">📦 Exportar</button>
@@ -887,6 +903,19 @@ footer.app-footer img{ height:56px; opacity:.9; }
         <button class="btn btn-gold btn-block" id="export-btn" style="max-width:320px; margin:0 auto;">Gerar arquivo .apkg</button>
         <div class="export-status" id="export-status"></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: SELECIONAR NÍVEL ===== -->
+<div id="level-modal" class="app-modal-overlay" style="display:none;">
+  <div class="app-modal">
+    <div class="app-modal-header">
+      <h3>Français complet</h3>
+      <button class="app-modal-close" id="level-modal-close">✕</button>
+    </div>
+    <div class="app-modal-body">
+      <div class="level-list" id="level-modal-list"></div>
     </div>
   </div>
 </div>

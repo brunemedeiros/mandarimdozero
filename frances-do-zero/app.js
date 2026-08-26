@@ -704,23 +704,49 @@ const UNIT_ICONS = {
   'A1-19': '🎬', 'A1-g8': '🔁', 'A1-20': '🕰️', 'A1-g9': '✅'
 };
 
-// ---------- Seletor de nível (A1/A2/...) ----------
+// ---------- Seletor de nível (toggle + modal, estilo Busuu) ----------
 function renderLevelSelect(){
-  const el = document.getElementById('level-select');
-  el.innerHTML = LEVELS.map(lvl => `
-    <button class="level-chip ${STATE.currentLevel === lvl.id ? 'active' : ''}" data-level="${lvl.id}">${lvl.id}</button>
-  `).join('');
-  el.querySelectorAll('.level-chip').forEach(btn => {
-    btn.addEventListener('click', () => {
-      STATE.currentLevel = btn.dataset.level;
-      renderUnitsGrid();
-    });
-  });
-
   const currentLevelInfo = LEVELS.find(l => l.id === STATE.currentLevel);
   document.getElementById('path-level-title').innerHTML =
     `${currentLevelInfo.label} <span style="color:var(--ink-soft); font-weight:600; font-size:14px;">(${currentLevelInfo.id})</span>`;
 }
+
+function renderLevelModalList(){
+  const wrap = document.getElementById('level-modal-list');
+  wrap.innerHTML = LEVELS.map(lvl => {
+    const moduleCount = modulesOfLevel(lvl.id).length;
+    const sub = moduleCount ? `${moduleCount} módulo${moduleCount === 1 ? '' : 's'}` : 'Em breve';
+    return `
+      <button class="level-list-item ${STATE.currentLevel === lvl.id ? 'active' : ''}" data-level="${lvl.id}">
+        <div class="level-list-badge">${lvl.id}</div>
+        <div>
+          <div class="level-list-title">${lvl.label}</div>
+          <div class="level-list-sub">${sub}</div>
+        </div>
+      </button>
+    `;
+  }).join('');
+  wrap.querySelectorAll('.level-list-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      STATE.currentLevel = btn.dataset.level;
+      document.getElementById('level-modal').style.display = 'none';
+      renderUnitsGrid();
+    });
+  });
+}
+
+document.getElementById('level-toggle-btn').addEventListener('click', () => {
+  renderLevelModalList();
+  document.getElementById('level-modal').style.display = 'flex';
+});
+document.getElementById('level-modal-close').addEventListener('click', () => {
+  document.getElementById('level-modal').style.display = 'none';
+});
+document.getElementById('level-modal').addEventListener('click', (e) => {
+  if (e.target.id === 'level-modal'){
+    document.getElementById('level-modal').style.display = 'none';
+  }
+});
 
 // ---------- Módulos (estilo Busuu): agrupam unidades em blocos menores ----------
 function modulesOfLevel(level){
