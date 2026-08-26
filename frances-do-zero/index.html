@@ -121,7 +121,7 @@ body{
 .level-empty{ text-align:center; padding:50px 20px; color: var(--ink-soft); }
 .level-empty .big-emoji{ font-size:40px; margin-bottom:10px; }
 
-.units-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap:12px; }
+.units-grid{ display:block; }
 .unit-card{
   position:relative;
   background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
@@ -159,6 +159,20 @@ body{
 .unit-card.grammar.done .unit-icon{ background: rgba(58,115,89,0.14); }
 .unit-card.grammar .unit-badge{ background: var(--brand-purple); color: var(--paper); }
 .gram-pill{ background: var(--brand-purple); color: var(--paper); font-weight:800; font-size:10px; text-transform:uppercase; letter-spacing:.04em; padding:3px 8px; border-radius:999px; }
+
+/* ---------- Módulos (estilo Busuu) ---------- */
+.module-section{ margin-bottom: 28px; }
+.module-section.locked{ opacity: .55; }
+.module-header{ margin-bottom: 14px; }
+.module-header h3{ margin: 0 0 8px; font-size: 16px; }
+.module-progress-track{ height: 7px; border-radius: 4px; background: var(--paper-warm); overflow: hidden; }
+.module-progress-fill{ height: 100%; border-radius: 4px; background: var(--jade); transition: width .3s ease; }
+.module-units-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap:12px; }
+
+.unit-card.checkpoint{ border-color: var(--imperial-gold); background: rgba(227,107,202,0.06); }
+.unit-card.checkpoint .unit-icon{ background: rgba(227,107,202,0.14); }
+.unit-card.checkpoint.done .unit-icon{ background: rgba(58,115,89,0.14); }
+.unit-card.checkpoint .unit-badge{ background: var(--jade); color: white; }
 
 /* ---------- Unit detail ---------- */
 .back-link{ display:inline-flex; align-items:center; gap:6px; background:none; border:none; color:var(--ink-soft); font-weight:700; font-size:13px; cursor:pointer; padding:6px 0; margin-bottom:8px; }

@@ -216,6 +216,7 @@ const STATE = {
   reviewShowingAnswer: false,
   reviewSessionUnitFilter: null,
   currentLevel: LEVELS[0].id,
+  checkpointProgress: {},
   daily: {
     date: null, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
     grammarLessons: 0, conjugationSessions: 0, conjugationCorrect: 0,
@@ -232,6 +233,10 @@ function isFirstOfLevel(u){
 
 UNITS.forEach((u) => {
   STATE.unitProgress[u.id] = { started:false, completed:false, unlocked: isFirstOfLevel(u) };
+});
+
+MODULES.forEach((m) => {
+  STATE.checkpointProgress[m.id] = { completed: false, bestScore: 0 };
 });
 
 // ---------- Supabase: conexão, autenticação e persistência na nuvem ----------
@@ -393,7 +398,8 @@ function serializeState(){
     lastStudyDay: STATE.lastStudyDay,
     activityLog: STATE.activityLog,
     totalReviews: STATE.totalReviews,
-    daily: STATE.daily
+    daily: STATE.daily,
+    checkpointProgress: STATE.checkpointProgress
   };
 }
 
@@ -411,6 +417,7 @@ function applySerializedState(data){
   if (data.activityLog) Object.assign(STATE.activityLog, data.activityLog);
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
   if (data.daily) Object.assign(STATE.daily, data.daily);
+  if (data.checkpointProgress) Object.assign(STATE.checkpointProgress, data.checkpointProgress);
 }
 
 // ---------- SM-2 algorithm (idêntico em espírito ao Anki) ----------
@@ -715,14 +722,78 @@ function renderLevelSelect(){
     `${currentLevelInfo.label} <span style="color:var(--ink-soft); font-weight:600; font-size:14px;">(${currentLevelInfo.id})</span>`;
 }
 
+// ---------- Módulos (estilo Busuu): agrupam unidades em blocos menores ----------
+function modulesOfLevel(level){
+  return MODULES.filter(m => m.level === level);
+}
+function moduleUnlocked(module){
+  return !!STATE.unitProgress[module.unitIds[0]]?.unlocked;
+}
+function moduleProgressPct(module){
+  const done = module.unitIds.filter(id => STATE.unitProgress[id]?.completed).length;
+  return Math.round((done / module.unitIds.length) * 100);
+}
+
+function buildUnitCard(u){
+  const levelUnits = unitsOfLevel(u.level);
+  const prog = STATE.unitProgress[u.id];
+  const unlocked = prog.unlocked;
+  const { total, learned } = unitCardCounts(u.id);
+  const pct = total ? Math.round((learned/total)*100) : 0;
+
+  const isGrammar = u.type === 'grammar';
+  const card = document.createElement('button');
+  card.className = 'unit-card' + (isGrammar ? ' grammar' : '') + (!unlocked ? ' locked' : '') + (prog.completed ? ' done' : '') + (unlocked && !prog.completed && learned>0 ? ' current' : '');
+  const metaHTML = isGrammar
+    ? `<div class="unit-meta"><span class="gram-pill">Gramática</span><span>${prog.completed ? 'Concluído' : ''}</span></div>`
+    : `<div class="unit-progress-bar"><div class="unit-progress-fill" style="width:${pct}%"></div></div>
+       <div class="unit-meta"><span>${learned}/${total} palavras</span><span>${pct}%</span></div>`;
+  // Unidades de gramática não mostram um número visível (fica só internamente,
+  // via unitOrdinalInfo, pra cálculos como "Gramática X de Y" no cabeçalho —
+  // que também não é mais exibido — e pro rótulo de exportação).
+  const badgeHTML = prog.completed
+    ? `<div class="unit-badge">✓</div>`
+    : (isGrammar ? '' : `<div class="unit-badge">${unitOrdinalInfo(u, levelUnits).num}</div>`);
+  card.innerHTML = `
+    <div class="unit-icon-wrap">
+      <div class="unit-icon">${UNIT_ICONS[u.id] || '📖'}</div>
+      ${badgeHTML}
+    </div>
+    <div class="unit-title">${u.title}</div>
+    ${metaHTML}
+  `;
+  if (unlocked){
+    card.addEventListener('click', () => openUnitDetail(u.id));
+  }
+  return card;
+}
+
+function buildCheckpointCard(module, unlocked){
+  const cp = STATE.checkpointProgress[module.id];
+  const card = document.createElement('button');
+  card.className = 'unit-card checkpoint' + (!unlocked ? ' locked' : '') + (cp.completed ? ' done' : '');
+  card.innerHTML = `
+    <div class="unit-icon-wrap">
+      <div class="unit-icon">🏆</div>
+      ${cp.completed ? `<div class="unit-badge">✓</div>` : ''}
+    </div>
+    <div class="unit-title">Ponto de verificação</div>
+    <div class="unit-meta"><span>${cp.completed ? 'Concluído' : 'Teste seus conhecimentos'}</span></div>
+  `;
+  if (unlocked){
+    card.addEventListener('click', () => openCheckpoint(module.id));
+  }
+  return card;
+}
+
 function renderUnitsGrid(){
   recalculateUnlockedUnits();
   renderLevelSelect();
 
   const grid = document.getElementById('units-grid');
-  const levelUnits = unitsOfLevel(STATE.currentLevel);
+  const levelModules = modulesOfLevel(STATE.currentLevel);
 
-  if (!levelUnits.length){
+  if (!levelModules.length){
     grid.innerHTML = `
       <div class="level-empty" style="grid-column: 1 / -1;">
         <div class="big-emoji">🚧</div>
@@ -734,32 +805,26 @@ function renderUnitsGrid(){
   }
 
   grid.innerHTML = '';
-  levelUnits.forEach((u) => {
-    const prog = STATE.unitProgress[u.id];
-    const unlocked = prog.unlocked;
-    const { total, learned } = unitCardCounts(u.id);
-    const pct = total ? Math.round((learned/total)*100) : 0;
+  levelModules.forEach((module, mIdx) => {
+    const unlocked = moduleUnlocked(module);
+    const pct = moduleProgressPct(module);
 
-    const isGrammar = u.type === 'grammar';
-    const { num: ordinalNum } = unitOrdinalInfo(u, levelUnits);
-    const card = document.createElement('button');
-    card.className = 'unit-card' + (isGrammar ? ' grammar' : '') + (!unlocked ? ' locked' : '') + (prog.completed ? ' done' : '') + (unlocked && !prog.completed && learned>0 ? ' current' : '');
-    const metaHTML = isGrammar
-      ? `<div class="unit-meta"><span class="gram-pill">Gramática</span><span>${prog.completed ? 'Concluído' : ''}</span></div>`
-      : `<div class="unit-progress-bar"><div class="unit-progress-fill" style="width:${pct}%"></div></div>
-         <div class="unit-meta"><span>${learned}/${total} palavras</span><span>${pct}%</span></div>`;
-    card.innerHTML = `
-      <div class="unit-icon-wrap">
-        <div class="unit-icon">${UNIT_ICONS[u.id] || '📖'}</div>
-        <div class="unit-badge">${prog.completed ? '✓' : (isGrammar ? `G${ordinalNum}` : ordinalNum)}</div>
+    const section = document.createElement('div');
+    section.className = 'module-section' + (unlocked ? '' : ' locked');
+    section.innerHTML = `
+      <div class="module-header">
+        <h3>Módulo ${mIdx + 1}: ${module.title}</h3>
+        <div class="module-progress-track"><div class="module-progress-fill" style="width:${pct}%"></div></div>
       </div>
-      <div class="unit-title">${u.title}</div>
-      ${metaHTML}
+      <div class="module-units-grid"></div>
     `;
-    if (unlocked){
-      card.addEventListener('click', () => openUnitDetail(u.id));
-    }
-    grid.appendChild(card);
+    const subGrid = section.querySelector('.module-units-grid');
+    module.unitIds.forEach(id => {
+      subGrid.appendChild(buildUnitCard(UNITS.find(u => u.id === id)));
+    });
+    subGrid.appendChild(buildCheckpointCard(module, unlocked));
+
+    grid.appendChild(section);
   });
 }
 
@@ -798,23 +863,30 @@ const STEP_STATE = {
   gramExerciseUnitId: null,
   gramExerciseIndex: 0,
   gramExerciseScore: 0,
-  onChallengesScreen: false
+  onChallengesScreen: false,
+  onCheckpoint: null
 };
 
 function openUnitDetail(unitId){
   STATE.currentUnitId = unitId;
   STATE.unitProgress[unitId].started = true;
   STEP_STATE.onChallengesScreen = false;
+  STEP_STATE.onCheckpoint = null;
 
   document.getElementById('path-list-wrap').style.display = 'none';
   document.getElementById('unit-detail-wrap').style.display = 'block';
   document.getElementById('step-progress-wrap').style.display = '';
+  document.getElementById('step-back-btn').style.display = '';
 
   const u = UNITS.find(x => x.id === unitId);
   const levelUnits = unitsOfLevel(u.level);
-  const { num: ordinalNum, total: ordinalTotal } = unitOrdinalInfo(u, levelUnits);
-  const eyebrowLabel = u.type === 'grammar' ? 'Unidade de gramática' : 'Unidade';
-  document.getElementById('ud-eyebrow').textContent = `${eyebrowLabel} ${ordinalNum} de ${ordinalTotal} · ${u.level}`;
+  // Unidades de gramática não mostram numeração ao aluno — só "Gramática",
+  // sem "X de Y" (o cálculo interno via unitOrdinalInfo continua existindo,
+  // só não é mais renderizado aqui).
+  const eyebrowLabel = u.type === 'grammar'
+    ? 'Gramática'
+    : `Unidade ${unitOrdinalInfo(u, levelUnits).num} de ${unitOrdinalInfo(u, levelUnits).total}`;
+  document.getElementById('ud-eyebrow').textContent = `${eyebrowLabel} · ${u.level}`;
   document.getElementById('ud-title').textContent = u.title;
   document.getElementById('ud-goal').textContent = u.goal;
 
@@ -827,6 +899,7 @@ function openUnitDetail(unitId){
 
 document.getElementById('back-to-path').addEventListener('click', () => {
   STEP_STATE.onChallengesScreen = false;
+  STEP_STATE.onCheckpoint = null;
   document.getElementById('path-list-wrap').style.display = 'block';
   document.getElementById('unit-detail-wrap').style.display = 'none';
   renderUnitsGrid();
@@ -1135,6 +1208,18 @@ document.getElementById('step-back-btn').addEventListener('click', () => {
 document.getElementById('step-next-btn').addEventListener('click', () => {
   if (STEP_STATE.onChallengesScreen){
     STEP_STATE.onChallengesScreen = false;
+    document.getElementById('path-list-wrap').style.display = 'block';
+    document.getElementById('unit-detail-wrap').style.display = 'none';
+    renderUnitsGrid();
+    return;
+  }
+
+  if (STEP_STATE.onCheckpoint){
+    const module = MODULES.find(m => m.id === STEP_STATE.onCheckpoint);
+    if (CHECKPOINT_STATE.lastPct >= CHECKPOINT_PASS_THRESHOLD){
+      completeModuleUnits(module, CHECKPOINT_STATE.lastPct);
+    }
+    STEP_STATE.onCheckpoint = null;
     document.getElementById('path-list-wrap').style.display = 'block';
     document.getElementById('unit-detail-wrap').style.display = 'none';
     renderUnitsGrid();
@@ -1944,6 +2029,160 @@ function markUnitCompleted(unitId, scorePct){
   }
   showToast(`Unidade concluída! 🥐`);
   saveState();
+}
+
+// ---------- Ponto de verificação (checkpoint) de cada módulo ----------
+// Pode ser feito a qualquer momento, mesmo sem ter aberto nenhuma unidade do
+// módulo ainda. Se aprovado (nota >= CHECKPOINT_PASS_THRESHOLD), marca todas
+// as unidades do módulo como concluídas de uma vez — um jeito do aluno que já
+// sabe o conteúdo "pular" o módulo sem precisar abrir unidade por unidade.
+const CHECKPOINT_PASS_THRESHOLD = 70;
+
+const CHECKPOINT_STATE = {
+  moduleId: null,
+  queue: [],
+  index: 0,
+  score: 0,
+  lastPct: 0
+};
+
+function buildCheckpointQueue(module){
+  const moduleUnits = module.unitIds.map(id => UNITS.find(u => u.id === id));
+  let queue = [];
+  moduleUnits.forEach(u => {
+    if (u.type === 'grammar'){
+      u.grammar.exercises.forEach(ex => {
+        queue.push({ prompt: ex.prompt, hint: ex.hint, answer: ex.answer });
+      });
+    } else {
+      // Ignora entradas com forma dupla (ex: "français / française") — não
+      // dá pra cobrar digitação exata de uma tradução com duas respostas.
+      u.vocab.filter(v => !v.f.includes(' / ')).forEach(v => {
+        queue.push({ prompt: `Como se diz "${v.t}" em francês?`, hint: null, answer: v.f });
+      });
+    }
+  });
+  return shuffle(queue).slice(0, Math.min(12, queue.length));
+}
+
+function recordCheckpointAttempt(module, scorePct){
+  const cp = STATE.checkpointProgress[module.id];
+  cp.bestScore = Math.max(cp.bestScore || 0, scorePct);
+  saveState();
+}
+
+function completeModuleUnits(module, scorePct){
+  module.unitIds.forEach(id => {
+    STATE.unitProgress[id].started = true;
+    STATE.unitProgress[id].completed = true;
+  });
+  STATE.checkpointProgress[module.id].completed = true;
+  STATE.checkpointProgress[module.id].bestScore = Math.max(STATE.checkpointProgress[module.id].bestScore || 0, scorePct);
+  addXP(50);
+  registerStudyToday();
+  registerDailyStars(lessonStars(scorePct));
+  registerDailyLessonCompleted(scorePct, false);
+  recalculateUnlockedUnits();
+  showToast('Ponto de verificação aprovado! 🏆');
+  saveState();
+}
+
+function openCheckpoint(moduleId){
+  const module = MODULES.find(m => m.id === moduleId);
+  STEP_STATE.onChallengesScreen = false;
+  STEP_STATE.onCheckpoint = moduleId;
+
+  document.getElementById('path-list-wrap').style.display = 'none';
+  document.getElementById('unit-detail-wrap').style.display = 'block';
+  document.getElementById('step-progress-wrap').style.display = 'none';
+  document.getElementById('step-back-btn').style.display = 'none';
+
+  document.getElementById('ud-eyebrow').textContent = 'Ponto de verificação';
+  document.getElementById('ud-title').textContent = module.title;
+  document.getElementById('ud-goal').textContent = 'Teste o que você já sabe desta seção. Se for bem, todas as unidades dela são marcadas como concluídas — não precisa fazer uma por uma.';
+
+  CHECKPOINT_STATE.moduleId = moduleId;
+  CHECKPOINT_STATE.queue = buildCheckpointQueue(module);
+  CHECKPOINT_STATE.index = 0;
+  CHECKPOINT_STATE.score = 0;
+  CHECKPOINT_STATE.lastPct = 0;
+  renderCheckpointQuizStep();
+
+  renderTopbarStats();
+}
+
+function renderCheckpointQuizStep(){
+  const contentEl = document.getElementById('step-content');
+  const nextBtn = document.getElementById('step-next-btn');
+  const module = MODULES.find(m => m.id === CHECKPOINT_STATE.moduleId);
+  const total = CHECKPOINT_STATE.queue.length;
+
+  if (CHECKPOINT_STATE.index >= total){
+    const pct = total ? Math.round((CHECKPOINT_STATE.score / total) * 100) : 0;
+    CHECKPOINT_STATE.lastPct = pct;
+    recordCheckpointAttempt(module, pct);
+    const passed = pct >= CHECKPOINT_PASS_THRESHOLD;
+    const recapItems = module.unitIds
+      .map(id => UNITS.find(u => u.id === id))
+      .filter(u => u.type !== 'grammar')
+      .flatMap(u => u.vocab)
+      .slice(0, 12);
+    renderLessonCompleteScreen(contentEl, nextBtn, {
+      correct: CHECKPOINT_STATE.score, total, recapItems,
+      nextLabel: passed ? 'Concluir seção ✓' : 'Voltar à trilha'
+    });
+    return;
+  }
+
+  const ex = CHECKPOINT_STATE.queue[CHECKPOINT_STATE.index];
+  nextBtn.style.display = 'none';
+
+  contentEl.innerHTML = `
+    <div class="conj-progress">Pergunta ${CHECKPOINT_STATE.index + 1} de ${total}</div>
+    <div class="gram-exercise">
+      <div class="gram-exercise-prompt">${ex.prompt}</div>
+      ${ex.hint ? `<div class="gram-exercise-hint">${ex.hint}</div>` : ''}
+      <input type="text" id="checkpoint-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a resposta">
+      <div class="expected" id="checkpoint-expected"></div>
+    </div>
+    <button class="btn btn-primary btn-block" id="checkpoint-verify-btn">Vérifier</button>
+  `;
+
+  const inputEl = document.getElementById('checkpoint-input');
+  inputEl.focus();
+  inputEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('checkpoint-verify-btn').click();
+  });
+
+  document.getElementById('checkpoint-verify-btn').addEventListener('click', () => {
+    const given = inputEl.value;
+    const expected = ex.answer;
+    const wrapEl = contentEl.querySelector('.gram-exercise');
+    const expectedEl = document.getElementById('checkpoint-expected');
+    inputEl.disabled = true;
+
+    if (given.trim() === expected.trim()){
+      wrapEl.classList.add('ok');
+      CHECKPOINT_STATE.score += 1;
+    } else if (normalizeLoose(given) === normalizeLoose(expected)){
+      wrapEl.classList.add('almost');
+      expectedEl.textContent = `Quase! → ${expected}`;
+      CHECKPOINT_STATE.score += 0.5;
+    } else {
+      wrapEl.classList.add('wrong');
+      expectedEl.textContent = `→ ${expected}`;
+    }
+
+    document.getElementById('checkpoint-verify-btn').style.display = 'none';
+    const goNextBtn = document.createElement('button');
+    goNextBtn.className = 'btn btn-secondary btn-block';
+    goNextBtn.textContent = CHECKPOINT_STATE.index < total - 1 ? 'Próxima →' : 'Ver resultado →';
+    goNextBtn.addEventListener('click', () => {
+      CHECKPOINT_STATE.index += 1;
+      renderCheckpointQuizStep();
+    });
+    contentEl.appendChild(goNextBtn);
+  });
 }
 
 function checkUnitCompletion(explicitUnitId){

@@ -1404,3 +1404,24 @@ const UNITS = [
     }
   }
 ];
+
+// ============================================================
+// MÓDULOS (estilo Busuu): agrupam as unidades em blocos temáticos menores,
+// pra não apresentar as 29 unidades do A1 de uma vez só. Cada módulo termina
+// com um "Ponto de verificação" — um teste rápido que pode ser feito a
+// qualquer momento (não precisa ter completado as unidades antes) e que, se
+// aprovado, marca todas as unidades do módulo como concluídas de uma vez.
+const MODULES = [
+  { id: "A1-m1", level: "A1", title: "Primeiros contatos",
+    unitIds: ["A1-1", "A1-2", "A1-3", "A1-g1", "A1-4", "A1-g2"] },
+  { id: "A1-m2", level: "A1", title: "Rotina do dia a dia",
+    unitIds: ["A1-5", "A1-6", "A1-g3", "A1-7"] },
+  { id: "A1-m3", level: "A1", title: "Cidade e identidade",
+    unitIds: ["A1-8", "A1-g4", "A1-9", "A1-10", "A1-11", "A1-12"] },
+  { id: "A1-m4", level: "A1", title: "Deslocando-se e cuidando de si",
+    unitIds: ["A1-13", "A1-14", "A1-g5", "A1-15", "A1-g6"] },
+  { id: "A1-m5", level: "A1", title: "Descrevendo o mundo ao redor",
+    unitIds: ["A1-16", "A1-g7", "A1-17", "A1-18"] },
+  { id: "A1-m6", level: "A1", title: "Lazer e o passado",
+    unitIds: ["A1-19", "A1-g8", "A1-20", "A1-g9"] }
+];
