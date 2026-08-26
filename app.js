@@ -524,6 +524,10 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 
 // ---------- Persistência: Supabase (usuário logado) ou memória local (convidado) ----------
 const STORAGE_KEY = 'mandarim_zero_state_v1';
+// Esta tabela `progress` passou a ser compartilhada com o Francês do Zero (mesmo
+// Supabase, mesma linha por user_id). Cada app guarda seu estado sob sua própria
+// chave dentro da coluna `data` para não sobrescrever o progresso do outro app.
+const APP_KEY = 'mandarim';
 let saveInFlight = false;
 let savePending = false;
 
@@ -536,9 +540,17 @@ async function saveState(){
 
   try{
     const payload = serializeState();
+    const { data: existing, error: fetchError } = await supabaseClient
+      .from('progress')
+      .select('data')
+      .eq('user_id', CURRENT_USER.id)
+      .maybeSingle();
+    if (fetchError) console.error('Erro ao ler progresso antes de salvar:', fetchError);
+
+    const merged = Object.assign({}, existing && existing.data, { [APP_KEY]: payload });
     const { error } = await supabaseClient
       .from('progress')
-      .upsert({ user_id: CURRENT_USER.id, data: payload }, { onConflict: 'user_id' });
+      .upsert({ user_id: CURRENT_USER.id, data: merged }, { onConflict: 'user_id' });
     if (error) console.error('Erro ao salvar progresso:', error);
   }catch(e){
     console.error('Erro ao salvar progresso:', e);
@@ -559,7 +571,11 @@ async function loadState(){
       .maybeSingle();
 
     if (error){ console.error('Erro ao carregar progresso:', error); return; }
-    if (data && data.data){
+    if (data && data.data && data.data[APP_KEY]){
+      applySerializedState(data.data[APP_KEY]);
+    }else if (data && data.data && (data.data.hanziCards || data.data.cards)){
+      // Formato antigo (salvo antes de existir o namespacing por app): é o
+      // próprio estado do Mandarim do Zero, salvo direto na raiz do JSON.
       applySerializedState(data.data);
     }
   }catch(e){
