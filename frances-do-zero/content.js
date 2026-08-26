@@ -163,7 +163,7 @@ const UNITS = [
   {
     id: 5,
     title: "Comida e bebida",
-    goal: "Pedir comida e bebida num café ou restaurante.",
+    goal: "Falar sobre alimentos, bebidas e gostos alimentares (o que você gosta e não gosta de comer).",
     vocab: [
       { f: "le pain", t: "o pão" },
       { f: "l'eau", t: "a água" },
@@ -171,18 +171,18 @@ const UNITS = [
       { f: "le lait", t: "o leite" },
       { f: "le fromage", t: "o queijo" },
       { f: "la pomme", t: "a maçã" },
-      { f: "la viande", t: "a carne" },
       { f: "le poisson", t: "o peixe" },
-      { f: "un croissant", t: "um croissant" },
-      { f: "le sucre", t: "o açúcar" }
+      { f: "manger", t: "comer" },
+      { f: "boire", t: "beber" },
+      { f: "détester", t: "odiar / detestar" }
     ],
     phrases: [
-      { f: "Je voudrais un café, s'il vous plaît.", t: "Eu queria um café, por favor.",
-        blocks: [{f:"Je voudrais"},{f:"un café,"},{f:"s'il vous plaît."}] },
-      { f: "J'aime le pain français.", t: "Eu gosto do pão francês.",
-        blocks: [{f:"J'aime"},{f:"le pain"},{f:"français."}] },
-      { f: "Tu manges du fromage ?", t: "Você come queijo?",
-        blocks: [{f:"Tu manges"},{f:"du fromage ?"}] },
+      { f: "Je mange du pain le matin.", t: "Eu como pão de manhã.",
+        blocks: [{f:"Je mange"},{f:"du pain"},{f:"le matin."}] },
+      { f: "J'aime le fromage, mais je déteste le poisson.", t: "Eu gosto de queijo, mas odeio peixe.",
+        blocks: [{f:"J'aime"},{f:"le fromage,"},{f:"mais je déteste"},{f:"le poisson."}] },
+      { f: "Tu bois du café ou du lait ?", t: "Você bebe café ou leite?",
+        blocks: [{f:"Tu bois"},{f:"du café"},{f:"ou du lait ?"}] },
       { f: "L'addition, s'il vous plaît.", t: "A conta, por favor.",
         blocks: [{f:"L'addition,"},{f:"s'il vous plaît."}] }
     ],
@@ -454,6 +454,78 @@ const UNITS = [
   },
   {
     id: 13,
+    title: "A casa e os cômodos",
+    goal: "Descrever uma casa, dizer o que tem (e o que não tem) nela.",
+    vocab: [
+      { f: "la maison", t: "a casa" },
+      { f: "l'appartement", t: "o apartamento" },
+      { f: "la chambre", t: "o quarto" },
+      { f: "la cuisine", t: "a cozinha" },
+      { f: "la salle de bain", t: "o banheiro" },
+      { f: "le salon", t: "a sala" },
+      { f: "la porte", t: "a porta" },
+      { f: "la fenêtre", t: "a janela" },
+      { f: "il y a", t: "tem / há" },
+      { f: "il n'y a pas de", t: "não tem / não há" }
+    ],
+    phrases: [
+      { f: "Il y a une chambre.", t: "Tem um quarto.",
+        blocks: [{f:"Il y a"},{f:"une chambre."}] },
+      { f: "Il y a deux salles de bain.", t: "Tem dois banheiros.",
+        blocks: [{f:"Il y a"},{f:"deux"},{f:"salles de bain."}] },
+      { f: "Il n'y a pas de jardin.", t: "Não tem jardim.",
+        blocks: [{f:"Il n'y a pas"},{f:"de jardin."}] },
+      { f: "C'est une grande maison.", t: "É uma casa grande.",
+        blocks: [{f:"C'est"},{f:"une grande"},{f:"maison."}] }
+    ],
+    dialogue: {
+      title: "Visitando um apartamento",
+      lines: [
+        { spk: "A", f: "Il y a combien de chambres ?", t: "Tem quantos quartos?" },
+        { spk: "B", f: "Il y a deux chambres et une cuisine.", t: "Tem dois quartos e uma cozinha." },
+        { spk: "A", f: "Il y a un balcon ?", t: "Tem uma varanda?" },
+        { spk: "B", f: "Non, il n'y a pas de balcon, mais il y a un beau salon.", t: "Não, não tem varanda, mas tem uma sala bonita." }
+      ]
+    }
+  },
+  {
+    id: 14,
+    title: "Onde as coisas estão",
+    goal: "Descrever a posição de móveis e objetos usando preposições de lugar.",
+    vocab: [
+      { f: "le lit", t: "a cama" },
+      { f: "la table", t: "a mesa" },
+      { f: "la chaise", t: "a cadeira" },
+      { f: "le canapé", t: "o sofá" },
+      { f: "la lampe", t: "a luminária" },
+      { f: "sur", t: "em cima de" },
+      { f: "sous", t: "embaixo de" },
+      { f: "devant", t: "na frente de" },
+      { f: "derrière", t: "atrás de" },
+      { f: "à côté de", t: "ao lado de" }
+    ],
+    phrases: [
+      { f: "Le lit est à côté de la fenêtre.", t: "A cama fica ao lado da janela.",
+        blocks: [{f:"Le lit"},{f:"est à côté de"},{f:"la fenêtre."}] },
+      { f: "Il y a une lampe sur la table.", t: "Tem uma luminária em cima da mesa.",
+        blocks: [{f:"Il y a"},{f:"une lampe"},{f:"sur la table."}] },
+      { f: "Le chat est sous le canapé.", t: "O gato está embaixo do sofá.",
+        blocks: [{f:"Le chat"},{f:"est sous"},{f:"le canapé."}] },
+      { f: "La chaise bleue est devant la table.", t: "A cadeira azul fica na frente da mesa.",
+        blocks: [{f:"La chaise bleue"},{f:"est devant"},{f:"la table."}] }
+    ],
+    dialogue: {
+      title: "Arrumando o quarto",
+      lines: [
+        { spk: "A", f: "Où est mon sac ?", t: "Onde está minha mochila?" },
+        { spk: "B", f: "Il est sous le lit.", t: "Está embaixo da cama." },
+        { spk: "A", f: "Et mes clés ?", t: "E minhas chaves?" },
+        { spk: "B", f: "Elles sont sur la table, à côté de la lampe.", t: "Estão em cima da mesa, do lado da luminária." }
+      ]
+    }
+  },
+  {
+    id: 15,
     title: "Dias e datas",
     goal: "Dizer os dias da semana, meses e marcar um encontro.",
     vocab: [
@@ -489,7 +561,7 @@ const UNITS = [
     }
   },
   {
-    id: 14,
+    id: 16,
     title: "Lazer e atividades",
     goal: "Falar sobre hobbies e combinar programas de fim de semana.",
     vocab: [
