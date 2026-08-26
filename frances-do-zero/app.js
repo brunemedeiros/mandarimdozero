@@ -216,7 +216,11 @@ const STATE = {
   reviewShowingAnswer: false,
   reviewSessionUnitFilter: null,
   currentLevel: LEVELS[0].id,
-  daily: { date: null, stars: 0, lessons: 0, highScoreLessons: 0, conjugationSessions: 0 }
+  daily: {
+    date: null, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
+    grammarLessons: 0, conjugationSessions: 0, conjugationCorrect: 0,
+    conjugationTenses: [], reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0
+  }
 };
 
 // Cada nível é acessível livremente (o aluno escolhe o nível quando quiser);
@@ -489,14 +493,22 @@ function registerStudyToday(){
 }
 
 // ---------- Desafios de hoje (estilo Busuu) ----------
-// Contadores do dia (zeram sozinhos quando a data muda). Dois desafios fixos
-// aparecem todo dia; um terceiro, variável, é sorteado de um pool maior de
-// forma determinística a partir da data — então muda de dia pra dia, mas é
-// sempre o mesmo dentro do mesmo dia (não muda a cada re-render).
+// Contadores do dia (zeram sozinhos quando a data muda). Todo dia mostra
+// exatamente 3 desafios, um de cada categoria — sorteados de forma
+// determinística a partir da data (mudam de dia pra dia, mas são sempre os
+// mesmos dentro do mesmo dia):
+//   1. Fácil (EASY_CHALLENGES) — uma vitória rápida, garantida todo dia.
+//   2. Revisão OU Conjugação (REVISAO_CONJ_CHALLENGES) — sempre puxa o aluno
+//      pra uma dessas duas abas, que ele não necessariamente abriria sozinho.
+//   3. Geral (GENERAL_CHALLENGES) — mais variado, ligado à Trilha em geral.
 function ensureDailyBucket(){
   const today = todayStr();
   if (STATE.daily.date !== today){
-    STATE.daily = { date: today, stars: 0, lessons: 0, highScoreLessons: 0, conjugationSessions: 0 };
+    STATE.daily = {
+      date: today, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
+      grammarLessons: 0, conjugationSessions: 0, conjugationCorrect: 0,
+      conjugationTenses: [], reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0
+    };
   }
 }
 
@@ -504,25 +516,58 @@ function registerDailyStars(amount){
   ensureDailyBucket();
   STATE.daily.stars += amount;
 }
-function registerDailyLessonCompleted(scorePct){
+function registerDailyLessonCompleted(scorePct, isGrammar){
   ensureDailyBucket();
   STATE.daily.lessons += 1;
   if (scorePct >= 80) STATE.daily.highScoreLessons += 1;
+  if (scorePct >= 100) STATE.daily.perfectLessons += 1;
+  if (isGrammar) STATE.daily.grammarLessons += 1;
 }
 function registerDailyConjugationSession(){
   ensureDailyBucket();
   STATE.daily.conjugationSessions += 1;
 }
+function registerDailyConjugationCorrect(count){
+  ensureDailyBucket();
+  STATE.daily.conjugationCorrect += count;
+}
+function registerDailyConjugationTense(tenseKey){
+  ensureDailyBucket();
+  if (!STATE.daily.conjugationTenses.includes(tenseKey)){
+    STATE.daily.conjugationTenses.push(tenseKey);
+  }
+}
+function registerDailyReviewCard(){
+  ensureDailyBucket();
+  STATE.daily.reviewsDone += 1;
+}
+function registerDailySpeedReview(){
+  ensureDailyBucket();
+  STATE.daily.speedReviewSessions += 1;
+}
+function registerDailyMatchGame(){
+  ensureDailyBucket();
+  STATE.daily.matchGamesPlayed += 1;
+}
 
-const FIXED_CHALLENGES = [
-  { id:'stars20', icon:'⭐', color:'gold', label:'Ganhe 20 estrelas', target:20, get: d => d.stars },
-  { id:'lessons3', icon:'🏆', color:'purple', label:'Complete 3 lições', target:3, get: d => d.lessons }
+const EASY_CHALLENGES = [
+  { id:'streak', icon:'🔥', color:'gold', label:'Mantenha sua sequência de dias viva hoje', target:1, get: () => STATE.lastStudyDay === todayStr() ? 1 : 0 },
+  { id:'firstLesson', icon:'🌅', color:'gold', label:'Complete sua primeira lição do dia', target:1, get: d => d.lessons }
 ];
-const VARIABLE_CHALLENGES = [
-  { id:'highscore2', icon:'📈', color:'blue', label:'Pontue mais de 80% em 2 lições', target:2, get: d => d.highScoreLessons },
+const REVISAO_CONJ_CHALLENGES = [
   { id:'conj1', icon:'🗣️', color:'blue', label:'Pratique conjugação 1 vez', target:1, get: d => d.conjugationSessions },
-  { id:'lessons5', icon:'📚', color:'blue', label:'Complete 5 lições', target:5, get: d => d.lessons },
-  { id:'stars40', icon:'⭐', color:'blue', label:'Ganhe 40 estrelas', target:40, get: d => d.stars }
+  { id:'conjCorrect10', icon:'✅', color:'blue', label:'Acerte 10 formas verbais numa sessão de conjugação', target:10, get: d => d.conjugationCorrect },
+  { id:'conjTenses2', icon:'🔤', color:'blue', label:'Pratique conjugação em 2 tempos verbais diferentes', target:2, get: d => d.conjugationTenses.length },
+  { id:'reviews15', icon:'🔁', color:'blue', label:'Revise 15 cartões', target:15, get: d => d.reviewsDone },
+  { id:'speedReview1', icon:'⚡', color:'blue', label:'Complete uma sessão de Revisão Rápida', target:1, get: d => d.speedReviewSessions },
+  { id:'matchGame1', icon:'🎴', color:'blue', label:'Jogue o jogo da memória 1 vez', target:1, get: d => d.matchGamesPlayed }
+];
+const GENERAL_CHALLENGES = [
+  { id:'stars40', icon:'⭐', color:'purple', label:'Ganhe 40 estrelas', target:40, get: d => d.stars },
+  { id:'highscore2', icon:'📈', color:'purple', label:'Pontue mais de 80% em 2 lições', target:2, get: d => d.highScoreLessons },
+  { id:'perfect1', icon:'🎯', color:'purple', label:'Complete uma lição sem errar', target:1, get: d => d.perfectLessons },
+  { id:'lessons5', icon:'📚', color:'purple', label:'Complete 5 lições', target:5, get: d => d.lessons },
+  { id:'grammar1', icon:'🧠', color:'purple', label:'Complete 1 unidade de gramática', target:1, get: d => d.grammarLessons }
 ];
 
 function dailySeed(str){
@@ -531,10 +576,17 @@ function dailySeed(str){
   return h;
 }
 
+function pickDailyFromPool(pool, salt){
+  return pool[dailySeed(STATE.daily.date + ':' + salt) % pool.length];
+}
+
 function todaysChallenges(){
   ensureDailyBucket();
-  const variable = VARIABLE_CHALLENGES[dailySeed(STATE.daily.date) % VARIABLE_CHALLENGES.length];
-  return [...FIXED_CHALLENGES, variable];
+  return [
+    pickDailyFromPool(EASY_CHALLENGES, 'easy'),
+    pickDailyFromPool(REVISAO_CONJ_CHALLENGES, 'revcon'),
+    pickDailyFromPool(GENERAL_CHALLENGES, 'general')
+  ];
 }
 
 function renderDailyChallengesScreen(){
@@ -1354,7 +1406,8 @@ const SPEED_STATE = {
   streak: 0,
   timerStart: 0,
   timerHandle: null,
-  answered: false
+  answered: false,
+  dailyCounted: false
 };
 
 function buildSpeedQueue(){
@@ -1558,6 +1611,7 @@ function onMatchTileClick(btn){
       if (MATCH_STATE.matchedCount === MATCH_STATE.pairs.length){
         registerStudyToday();
         STATE.totalReviews += MATCH_STATE.pairs.length;
+        registerDailyMatchGame();
         saveState();
         renderTopbarStats();
         setTimeout(() => {
@@ -1593,6 +1647,7 @@ function startSpeedReview(){
   SPEED_STATE.score = 0;
   SPEED_STATE.streak = 0;
   SPEED_STATE.active = true;
+  SPEED_STATE.dailyCounted = false;
   renderSpeedReview();
 }
 
@@ -1619,6 +1674,7 @@ function renderSpeedReview(){
 
   if (SPEED_STATE.hearts <= 0){
     stopSpeedTimer();
+    if (!SPEED_STATE.dailyCounted){ SPEED_STATE.dailyCounted = true; registerDailySpeedReview(); }
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">💔</div>
@@ -1634,6 +1690,7 @@ function renderSpeedReview(){
 
   if (SPEED_STATE.index >= SPEED_STATE.queue.length){
     stopSpeedTimer();
+    if (!SPEED_STATE.dailyCounted){ SPEED_STATE.dailyCounted = true; registerDailySpeedReview(); }
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">🏆</div>
@@ -1853,6 +1910,7 @@ function gradeCurrentCard(grade){
   applySM2(card, grade);
   STATE.totalReviews += 1;
   registerStudyToday();
+  registerDailyReviewCard();
   addXP(XP_PER_GRADE[grade]);
 
   if (grade === 0){
@@ -1876,9 +1934,10 @@ function markUnitCompleted(unitId, scorePct){
     STATE.unitProgress[levelUnits[idx+1].id].unlocked = true;
   }
   addXP(25);
+  registerStudyToday();
   if (typeof scorePct === 'number'){
     registerDailyStars(lessonStars(scorePct));
-    registerDailyLessonCompleted(scorePct);
+    registerDailyLessonCompleted(scorePct, u.type === 'grammar');
   }
   showToast(`Unidade concluída! 🥐`);
   saveState();
@@ -2502,6 +2561,8 @@ function renderConjPracticeStep(){
     });
 
     CONJ_STATE.score += activeCount ? correctCount / activeCount : 0;
+    registerDailyConjugationCorrect(Math.round(correctCount));
+    registerDailyConjugationTense(combo.tense);
     document.getElementById('conj-verify-btn').style.display = 'none';
 
     const nextBtn = document.createElement('button');
