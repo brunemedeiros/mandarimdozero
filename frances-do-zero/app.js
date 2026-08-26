@@ -1028,18 +1028,26 @@ function renderReviewModeSelect(){
       <div class="name">Palavras difíceis</div>
       <div class="desc">As que você mais erra</div>
     </button>
+    <button class="review-mode-card" id="mode-card-match" ${pool.filter(c=>c.reps>0).length < 4 ? 'disabled' : ''}>
+      <div class="icon">🧩</div>
+      <div class="count">${pool.filter(c=>c.reps>0).length}</div>
+      <div class="name">Combinar</div>
+      <div class="desc">Jogo de pares</div>
+    </button>
   `;
 
   document.getElementById('mode-card-flashcard').addEventListener('click', () => openReviewSession('flashcard'));
   document.getElementById('mode-card-speed').addEventListener('click', () => openReviewSession('speed'));
   document.getElementById('mode-card-hard').addEventListener('click', () => openReviewSession('hard'));
+  document.getElementById('mode-card-match').addEventListener('click', () => openReviewSession('match'));
 }
 
 function openReviewSession(mode){
   document.getElementById('review-mode-select-wrap').style.display = 'none';
   document.getElementById('review-session-wrap').style.display = 'block';
-  document.getElementById('review-content').style.display = mode === 'speed' ? 'none' : 'block';
+  document.getElementById('review-content').style.display = mode === 'speed' || mode === 'match' ? 'none' : 'block';
   document.getElementById('speed-review-content').style.display = mode === 'speed' ? 'block' : 'none';
+  document.getElementById('match-review-content').style.display = mode === 'match' ? 'block' : 'none';
 
   if (mode === 'flashcard'){
     STATE.reviewSessionUnitFilter = null;
@@ -1050,6 +1058,8 @@ function openReviewSession(mode){
     STATE.reviewIndex = 0;
     STATE.reviewShowingAnswer = false;
     renderReviewView();
+  } else if (mode === 'match'){
+    startMatchGame();
   } else {
     startSpeedReview();
   }
@@ -1057,11 +1067,149 @@ function openReviewSession(mode){
 
 document.getElementById('review-back-to-modes').addEventListener('click', () => {
   stopSpeedTimer();
+  stopMatchTimer();
   SPEED_STATE.active = false;
   document.getElementById('review-mode-select-wrap').style.display = 'block';
   document.getElementById('review-session-wrap').style.display = 'none';
   renderReviewModeSelect();
 });
+
+// ---------- Combinar: jogo de pares (francês <-> tradução) ----------
+// Pool: vocabulário já estudado ao menos uma vez (mesma regra do Speed
+// Review) — não faz sentido pedir pra combinar uma palavra nunca vista.
+const MATCH_STATE = {
+  pairs: [],       // [{cardId, front, back}]
+  tiles: [],       // [{cardId, side:'front'|'back', text}]
+  selected: null,  // tile element selecionado aguardando o par
+  matchedCount: 0,
+  startTime: 0,
+  timerHandle: null,
+  busy: false      // trava cliques durante a animação de erro
+};
+
+function stopMatchTimer(){
+  if (MATCH_STATE.timerHandle){
+    clearInterval(MATCH_STATE.timerHandle);
+    MATCH_STATE.timerHandle = null;
+  }
+}
+
+function startMatchGame(){
+  const pool = shuffle(STATE.cards.filter(c => STATE.unitProgress[c.unitId]?.started && c.reps > 0));
+  const pairCount = Math.min(6, pool.length);
+  MATCH_STATE.pairs = pool.slice(0, pairCount);
+  MATCH_STATE.tiles = shuffle([
+    ...MATCH_STATE.pairs.map(c => ({ cardId: c.id, side: 'front', text: c.front })),
+    ...MATCH_STATE.pairs.map(c => ({ cardId: c.id, side: 'back', text: c.back_trans }))
+  ]);
+  MATCH_STATE.selected = null;
+  MATCH_STATE.matchedCount = 0;
+  MATCH_STATE.busy = false;
+  MATCH_STATE.startTime = Date.now();
+
+  renderMatchGame();
+  stopMatchTimer();
+  MATCH_STATE.timerHandle = setInterval(() => {
+    const timerEl = document.querySelector('.match-timer');
+    if (timerEl) timerEl.textContent = formatMatchTime(Date.now() - MATCH_STATE.startTime);
+  }, 250);
+}
+
+function formatMatchTime(ms){
+  const s = Math.floor(ms / 1000);
+  return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+}
+
+function renderMatchGame(){
+  const el = document.getElementById('match-review-content');
+
+  if (MATCH_STATE.pairs.length < 4){
+    el.innerHTML = `
+      <div class="review-empty">
+        <div class="big-emoji">🧩</div>
+        <h3>Vocabulário insuficiente ainda</h3>
+        <p>O jogo de Combinar precisa de pelo menos algumas palavras já estudadas com sucesso na Trilha.</p>
+      </div>
+    `;
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="match-header">
+      <span>${MATCH_STATE.matchedCount}/${MATCH_STATE.pairs.length} pares</span>
+      <span class="match-timer">0:00</span>
+    </div>
+    <div class="match-grid" id="match-grid"></div>
+  `;
+  renderMatchTiles();
+}
+
+function renderMatchTiles(){
+  const gridEl = document.getElementById('match-grid');
+  gridEl.innerHTML = MATCH_STATE.tiles.map((t, i) => `
+    <button class="match-tile" data-idx="${i}" data-card-id="${t.cardId}" data-side="${t.side}">${t.text}</button>
+  `).join('');
+
+  gridEl.querySelectorAll('.match-tile').forEach(btn => {
+    btn.addEventListener('click', () => onMatchTileClick(btn));
+  });
+}
+
+function onMatchTileClick(btn){
+  if (MATCH_STATE.busy) return;
+  if (btn.classList.contains('matched') || btn.classList.contains('selected')) return;
+
+  if (!MATCH_STATE.selected){
+    MATCH_STATE.selected = btn;
+    btn.classList.add('selected');
+    return;
+  }
+
+  const first = MATCH_STATE.selected;
+  const second = btn;
+
+  const isMatch = first.dataset.cardId === second.dataset.cardId && first.dataset.side !== second.dataset.side;
+
+  if (isMatch){
+    first.classList.remove('selected');
+    first.classList.add('matched');
+    second.classList.add('matched');
+    MATCH_STATE.selected = null;
+    MATCH_STATE.matchedCount += 1;
+    document.querySelector('.match-header span').textContent = `${MATCH_STATE.matchedCount}/${MATCH_STATE.pairs.length} pares`;
+    addXP(2);
+
+    if (MATCH_STATE.matchedCount === MATCH_STATE.pairs.length){
+      stopMatchTimer();
+      registerStudyToday();
+      STATE.totalReviews += MATCH_STATE.pairs.length;
+      saveState();
+      renderTopbarStats();
+      const elapsed = formatMatchTime(Date.now() - MATCH_STATE.startTime);
+      setTimeout(() => {
+        document.getElementById('match-review-content').innerHTML = `
+          <div class="match-complete">
+            <div class="big-emoji">🎉</div>
+            <h3>Todos os pares combinados!</h3>
+            <div class="score-num">${elapsed}</div>
+            <button class="btn btn-primary" id="match-restart-btn">Jogar de novo</button>
+          </div>
+        `;
+        document.getElementById('match-restart-btn').addEventListener('click', startMatchGame);
+      }, 400);
+    }
+  } else {
+    MATCH_STATE.busy = true;
+    second.classList.add('wrong');
+    first.classList.add('wrong');
+    setTimeout(() => {
+      first.classList.remove('selected', 'wrong');
+      second.classList.remove('wrong');
+      MATCH_STATE.selected = null;
+      MATCH_STATE.busy = false;
+    }, 500);
+  }
+}
 
 function startSpeedReview(){
   SPEED_STATE.queue = buildSpeedQueue();
@@ -1285,7 +1433,7 @@ function renderReviewView(){
     </div>
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${card.unitTitle}</div>
-      <div class="flashcard-french">${card.front} ${STATE.reviewShowingAnswer ? audioBtnHTML(card.front, 'audio-btn-lg') : ''}</div>
+      <div class="flashcard-french">${card.front} ${audioBtnHTML(card.front, 'audio-btn-lg')}</div>
       ${STATE.reviewShowingAnswer ? `
         <div class="divider-line"></div>
         <div class="flashcard-trans">${card.back_trans}</div>
@@ -1308,6 +1456,13 @@ function renderReviewView(){
     }
   });
 
+  // Áudio disponível (e tocado automaticamente) em ambos os lados do cartão —
+  // frente (francês) e, ao virar, de novo caso o aluno queira reouvir.
+  wireAudioButtons(el);
+  if (TTS.voice){
+    speakFrench(card.front, el.querySelector('.audio-btn-lg'));
+  }
+
   if (STATE.reviewShowingAnswer){
     el.querySelectorAll('.grade-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -1315,10 +1470,6 @@ function renderReviewView(){
         gradeCurrentCard(parseInt(btn.dataset.grade));
       });
     });
-    wireAudioButtons(el);
-    if (TTS.voice){
-      speakFrench(card.front, el.querySelector('.audio-btn-lg'));
-    }
   }
 }
 
@@ -1549,6 +1700,7 @@ function switchTab(tab){
 
   if (tab !== 'review'){
     stopSpeedTimer();
+    stopMatchTimer();
   }
 
   if (tab === 'review'){
