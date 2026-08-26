@@ -1144,10 +1144,19 @@ function renderMatchGame(){
   renderMatchTiles();
 }
 
+// Verso da carta (virada pra baixo) — mesmo ícone da marca, sem texto,
+// pra não dar nenhuma pista do conteúdo antes de virar.
+const MATCH_CARD_BACK_SVG = `<svg viewBox="0 0 83.44 94.95" xmlns="http://www.w3.org/2000/svg"><path d="M82.19,54.16c-.25-.82-1.05-3.05-1.06-3.07-2.71-6.58-11.08-1.57-9.93,3.9.31,1.46.68,2.86.68,2.86,3.51,12.91-6.77,26.21-20.18,26.02,0,0-40.62,0-40.62,0L.83,94.12c.51.51,1.22.83,2,.83h48.7c9.66,0,18.32-4.29,24.17-11.08,6.81-7.58,9.57-19.61,6.49-29.71Z" style="fill:#fff;opacity:.85;"/><path d="M45.92,31.12H11.08V11.07h0L.83.82C.32,1.34,0,2.04,0,2.83v36.55c0,1.56,1.27,2.83,2.83,2.83h44.95c2.8,0,10.09.14,12.52,1.15,0,0,2.62-1.92,4.67-9.26-4.14-1.95-14.19-2.97-19.05-2.97Z" style="fill:#fff;opacity:.85;"/><path d="M69.7,11.08C64.22,4.32,55.86,0,46.48,0H2.83c-.78,0-1.49.32-2,.83l10.25,10.25h32.67c12.91,0,24.17,9.85,21.35,22.52-.04.17-.07.33-.11.5,0,0-.01,0-.02,0-4.11,14.7-20.74,14.56-23.25,14.56H2.83c-1.56,0-2.83,1.27-2.83,2.83v40.63c0,.78.32,1.49.83,2l10.25-10.25h0v-24.13h35.4c8.58,0,16.31-3.61,21.73-9.4,2.65-2.76,4.71-6.06,6.1-9.63,3.99-9.68,1.92-21.88-4.61-29.63Z" style="fill:#fff;"/></svg>`;
+
 function renderMatchTiles(){
   const gridEl = document.getElementById('match-grid');
   gridEl.innerHTML = MATCH_STATE.tiles.map((t, i) => `
-    <button class="match-tile" data-idx="${i}" data-card-id="${t.cardId}" data-side="${t.side}">${t.text}</button>
+    <button class="match-tile" data-idx="${i}" data-card-id="${t.cardId}" data-side="${t.side}">
+      <div class="match-tile-inner">
+        <div class="match-tile-face match-tile-back">${MATCH_CARD_BACK_SVG}</div>
+        <div class="match-tile-face match-tile-front">${t.text}</div>
+      </div>
+    </button>
   `).join('');
 
   gridEl.querySelectorAll('.match-tile').forEach(btn => {
@@ -1157,57 +1166,64 @@ function renderMatchTiles(){
 
 function onMatchTileClick(btn){
   if (MATCH_STATE.busy) return;
-  if (btn.classList.contains('matched') || btn.classList.contains('selected')) return;
+  if (btn.classList.contains('matched') || btn.classList.contains('flipped')) return;
+
+  btn.classList.add('flipped');
 
   if (!MATCH_STATE.selected){
     MATCH_STATE.selected = btn;
-    btn.classList.add('selected');
     return;
   }
 
   const first = MATCH_STATE.selected;
   const second = btn;
+  MATCH_STATE.selected = null;
+  MATCH_STATE.busy = true;
 
   const isMatch = first.dataset.cardId === second.dataset.cardId && first.dataset.side !== second.dataset.side;
 
   if (isMatch){
-    first.classList.remove('selected');
-    first.classList.add('matched');
-    second.classList.add('matched');
-    MATCH_STATE.selected = null;
+    first.classList.add('match-ok');
+    second.classList.add('match-ok');
     MATCH_STATE.matchedCount += 1;
     document.querySelector('.match-header span').textContent = `${MATCH_STATE.matchedCount}/${MATCH_STATE.pairs.length} pares`;
     addXP(2);
 
-    if (MATCH_STATE.matchedCount === MATCH_STATE.pairs.length){
-      stopMatchTimer();
-      registerStudyToday();
-      STATE.totalReviews += MATCH_STATE.pairs.length;
-      saveState();
-      renderTopbarStats();
-      const elapsed = formatMatchTime(Date.now() - MATCH_STATE.startTime);
-      setTimeout(() => {
-        document.getElementById('match-review-content').innerHTML = `
-          <div class="match-complete">
-            <div class="big-emoji">🎉</div>
-            <h3>Todos os pares combinados!</h3>
-            <div class="score-num">${elapsed}</div>
-            <button class="btn btn-primary" id="match-restart-btn">Jogar de novo</button>
-          </div>
-        `;
-        document.getElementById('match-restart-btn').addEventListener('click', startMatchGame);
-      }, 400);
-    }
-  } else {
-    MATCH_STATE.busy = true;
-    second.classList.add('wrong');
-    first.classList.add('wrong');
     setTimeout(() => {
-      first.classList.remove('selected', 'wrong');
-      second.classList.remove('wrong');
-      MATCH_STATE.selected = null;
+      first.classList.add('matched');
+      second.classList.add('matched');
       MATCH_STATE.busy = false;
-    }, 500);
+
+      if (MATCH_STATE.matchedCount === MATCH_STATE.pairs.length){
+        stopMatchTimer();
+        registerStudyToday();
+        STATE.totalReviews += MATCH_STATE.pairs.length;
+        saveState();
+        renderTopbarStats();
+        const elapsed = formatMatchTime(Date.now() - MATCH_STATE.startTime);
+        setTimeout(() => {
+          document.getElementById('match-review-content').innerHTML = `
+            <div class="match-complete">
+              <div class="big-emoji">🎉</div>
+              <h3>Todos os pares combinados!</h3>
+              <div class="score-num">${elapsed}</div>
+              <button class="btn btn-primary" id="match-restart-btn">Jogar de novo</button>
+            </div>
+          `;
+          document.getElementById('match-restart-btn').addEventListener('click', startMatchGame);
+        }, 300);
+      }
+    }, 550);
+  } else {
+    setTimeout(() => {
+      first.classList.add('wrong');
+      second.classList.add('wrong');
+    }, 400);
+    setTimeout(() => {
+      first.classList.remove('flipped', 'wrong');
+      second.classList.remove('flipped', 'wrong');
+      MATCH_STATE.busy = false;
+    }, 1100);
   }
 }
 
