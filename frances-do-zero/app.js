@@ -222,7 +222,7 @@ const STATE = {
 // dentro de um nível, o desbloqueio continua sequencial unidade por unidade —
 // então só a PRIMEIRA unidade de cada nível já nasce destravada.
 function isFirstOfLevel(u){
-  return !UNITS.some(x => x.level === u.level && x.id < u.id);
+  return UNITS.find(x => x.level === u.level) === u;
 }
 
 UNITS.forEach((u) => {
@@ -503,7 +503,7 @@ const BADGES = [
   { id:'first_step', name:'Primeiro Passo', icon:'🌱', check: s => s.totalReviews >= 1 },
   { id:'streak_3', name:'3 Dias Seguidos', icon:'🔥', check: s => s.streak >= 3 },
   { id:'streak_7', name:'Uma Semana!', icon:'🥐', check: s => s.streak >= 7 },
-  { id:'unit_1', name:'Unidade 1 Completa', icon:'📖', check: s => s.unitProgress[1]?.completed },
+  { id:'unit_1', name:'Unidade 1 Completa', icon:'📖', check: s => s.unitProgress['A1-1']?.completed },
   { id:'unit_half', name:'Metade do Caminho', icon:'🗼', check: s => {
       const a1 = UNITS.filter(u => u.level === 'A1');
       return a1.filter(u => s.unitProgress[u.id]?.completed).length >= Math.ceil(a1.length/2);
@@ -529,7 +529,18 @@ function unitCardCounts(unitId){
 // Unidades de um nível, na ordem — usado tanto pro desbloqueio sequencial
 // quanto pra numeração relativa exibida ("Unidade 2 de 16" dentro do nível).
 function unitsOfLevel(level){
-  return UNITS.filter(u => u.level === level).sort((a,b) => a.id - b.id);
+  return UNITS.filter(u => u.level === level);
+}
+
+// Unidades de gramática têm sua própria numeração, separada da sequência
+// comunicacional — "Unidade 4" (comunicativa) e "Unidade de gramática 1" não
+// competem pelo mesmo número. Retorna a posição de "u" dentro do seu próprio
+// tipo (comunicativa ou gramática) e o total desse tipo no nível.
+function unitOrdinalInfo(u, levelUnits){
+  const isGrammar = u.type === 'grammar';
+  const sameType = levelUnits.filter(x => (x.type === 'grammar') === isGrammar);
+  const num = sameType.findIndex(x => x.id === u.id) + 1;
+  return { num, total: sameType.length };
 }
 
 function recalculateUnlockedUnits(){
@@ -544,9 +555,9 @@ function recalculateUnlockedUnits(){
 }
 
 const UNIT_ICONS = {
-  1: '👋', 2: '🙋', 3: '🔢', 4: '👨‍👩‍👧', 5: '🧠',
-  6: '🥐', 7: '⏰', 8: '🗺️', 9: '🛍️', 10: '⛅',
-  11: '🚇', 12: '🩺', 13: '🎨', 14: '🏠', 15: '🛋️', 16: '🗓️', 17: '🎬'
+  'A1-1': '👋', 'A1-2': '🙋', 'A1-3': '🔢', 'A1-4': '👨‍👩‍👧', 'A1-g1': '🧠',
+  'A1-5': '🥐', 'A1-6': '⏰', 'A1-7': '🗺️', 'A1-8': '🛍️', 'A1-9': '⛅',
+  'A1-10': '🚇', 'A1-11': '🩺', 'A1-12': '🎨', 'A1-13': '🏠', 'A1-14': '🛋️', 'A1-15': '🗓️', 'A1-16': '🎬'
 };
 
 // ---------- Seletor de nível (A1/A2/...) ----------
@@ -586,13 +597,14 @@ function renderUnitsGrid(){
   }
 
   grid.innerHTML = '';
-  levelUnits.forEach((u, i) => {
+  levelUnits.forEach((u) => {
     const prog = STATE.unitProgress[u.id];
     const unlocked = prog.unlocked;
     const { total, learned } = unitCardCounts(u.id);
     const pct = total ? Math.round((learned/total)*100) : 0;
 
     const isGrammar = u.type === 'grammar';
+    const { num: ordinalNum } = unitOrdinalInfo(u, levelUnits);
     const card = document.createElement('button');
     card.className = 'unit-card' + (isGrammar ? ' grammar' : '') + (!unlocked ? ' locked' : '') + (prog.completed ? ' done' : '') + (unlocked && !prog.completed && learned>0 ? ' current' : '');
     const metaHTML = isGrammar
@@ -602,7 +614,7 @@ function renderUnitsGrid(){
     card.innerHTML = `
       <div class="unit-icon-wrap">
         <div class="unit-icon">${UNIT_ICONS[u.id] || '📖'}</div>
-        <div class="unit-badge">${prog.completed ? '✓' : i+1}</div>
+        <div class="unit-badge">${prog.completed ? '✓' : (isGrammar ? `G${ordinalNum}` : ordinalNum)}</div>
       </div>
       <div class="unit-title">${u.title}</div>
       ${metaHTML}
@@ -659,8 +671,9 @@ function openUnitDetail(unitId){
 
   const u = UNITS.find(x => x.id === unitId);
   const levelUnits = unitsOfLevel(u.level);
-  const posInLevel = levelUnits.findIndex(x => x.id === u.id) + 1;
-  document.getElementById('ud-eyebrow').textContent = `Unidade ${posInLevel} de ${levelUnits.length} · ${u.level}`;
+  const { num: ordinalNum, total: ordinalTotal } = unitOrdinalInfo(u, levelUnits);
+  const eyebrowLabel = u.type === 'grammar' ? 'Unidade de gramática' : 'Unidade';
+  document.getElementById('ud-eyebrow').textContent = `${eyebrowLabel} ${ordinalNum} de ${ordinalTotal} · ${u.level}`;
   document.getElementById('ud-title').textContent = u.title;
   document.getElementById('ud-goal').textContent = u.goal;
 
@@ -1711,9 +1724,11 @@ function gradeCurrentCard(grade){
 function markUnitCompleted(unitId){
   if (STATE.unitProgress[unitId].completed) return;
   STATE.unitProgress[unitId].completed = true;
-  const idx = UNITS.findIndex(u => u.id === unitId);
-  if (idx >= 0 && idx+1 < UNITS.length){
-    STATE.unitProgress[UNITS[idx+1].id].unlocked = true;
+  const u = UNITS.find(x => x.id === unitId);
+  const levelUnits = unitsOfLevel(u.level);
+  const idx = levelUnits.findIndex(x => x.id === unitId);
+  if (idx >= 0 && idx+1 < levelUnits.length){
+    STATE.unitProgress[levelUnits[idx+1].id].unlocked = true;
   }
   addXP(25);
   showToast(`Unidade concluída! 🥐`);
@@ -1964,7 +1979,10 @@ document.getElementById('export-modal').addEventListener('click', (e) => {
 function renderExportDeckSelect(){
   const wrap = document.getElementById('export-deck-select');
   const options = [{id:'all', label:'Todas as unidades'}].concat(
-    UNITS.map(u => ({ id: String(u.id), label: `${u.id}. ${u.title}` }))
+    UNITS.filter(u => u.type !== 'grammar').map(u => {
+      const { num } = unitOrdinalInfo(u, unitsOfLevel(u.level));
+      return { id: String(u.id), label: `${u.level} · ${num}. ${u.title}` };
+    })
   );
   wrap.innerHTML = options.map(o => `<button class="deck-chip ${exportSelectedUnit===o.id?'active':''}" data-id="${o.id}">${o.label}</button>`).join('');
   wrap.querySelectorAll('.deck-chip').forEach(chip => {

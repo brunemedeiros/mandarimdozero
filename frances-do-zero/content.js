@@ -10,10 +10,22 @@
 //              ordenar a frase — cada bloco é um trecho clicável)
 //   dialogue: { title: "...", lines: [{ spk: "A", f: "...", t: "..." }, ...] }
 //
-// Progressão completa do nível A1 (17 unidades). Próximos níveis entram como
-// novas unidades com "level" diferente, seguindo este mesmo schema — cada
-// unidade carrega seu próprio campo "level" (ex: "A1", "A2"), usado pelo
-// seletor de nível na Trilha pra filtrar/agrupar.
+// Progressão completa do nível A1 (17 unidades: 16 comunicativas + 1 de
+// gramática). Próximos níveis entram como novas unidades com "level"
+// diferente, seguindo este mesmo schema — cada unidade carrega seu próprio
+// campo "level" (ex: "A1", "A2"), usado pelo seletor de nível na Trilha pra
+// filtrar/agrupar.
+//
+// Esquema de "id": cada nível tem sua própria numeração, independente dos
+// outros níveis — "A1-1", "A1-2"... e "A2-1", "A2-2"... (não é uma sequência
+// global contínua). Dentro de um nível, unidades de gramática têm sua PRÓPRIA
+// contagem separada da sequência comunicacional: "A1-g1", "A1-g2"... A posição
+// numérica mostrada ao aluno ("Unidade 4 de 16", "Unidade de gramática 1 de 2")
+// também é calculada separadamente por tipo — uma unidade de gramática não
+// consome um número da sequência comunicacional, só entra na ordem/desbloqueio
+// sequencial da trilha. Ex.: unidades 1, 2, 3, 4 (comunicativas) + unidade de
+// gramática 1 + unidades 5, 6, 7... (comunicativas, numeração comunicacional
+// segue contando normalmente).
 //
 // Unidades de gramática (type: "grammar"): em vez de vocab/phrases/dialogue,
 // têm um campo "grammar" com { intro, examples, deepDive, table, exercises }.
@@ -27,7 +39,7 @@ const LEVELS = [
 
 const UNITS = [
   {
-    id: 1,
+    id: "A1-1",
     level: "A1",
     title: "Cumprimentar e se despedir",
     goal: "Cumprimentar alguém, se despedir e agradecer numa interação básica.",
@@ -64,7 +76,7 @@ const UNITS = [
     }
   },
   {
-    id: 2,
+    id: "A1-2",
     level: "A1",
     title: "Se apresentar",
     goal: "Dizer o nome, a nacionalidade e perguntar o mesmo para o outro.",
@@ -102,7 +114,7 @@ const UNITS = [
     }
   },
   {
-    id: 3,
+    id: "A1-3",
     level: "A1",
     title: "Números e idade",
     goal: "Contar do zero a cem e dizer/perguntar a idade.",
@@ -139,7 +151,7 @@ const UNITS = [
     }
   },
   {
-    id: 4,
+    id: "A1-4",
     level: "A1",
     title: "Família",
     goal: "Apresentar os membros da família e dizer quantos irmãos você tem.",
@@ -177,7 +189,7 @@ const UNITS = [
     }
   },
   {
-    id: 5,
+    id: "A1-g1",
     level: "A1",
     type: "grammar",
     title: "Verbos avoir e être",
@@ -220,7 +232,7 @@ const UNITS = [
     }
   },
   {
-    id: 6,
+    id: "A1-5",
     level: "A1",
     title: "Comida e bebida",
     goal: "Falar sobre alimentos, bebidas e gostos alimentares (o que você gosta e não gosta de comer).",
@@ -258,7 +270,7 @@ const UNITS = [
     }
   },
   {
-    id: 7,
+    id: "A1-6",
     level: "A1",
     title: "Horas e rotina diária",
     goal: "Dizer as horas e descrever a rotina do dia a dia.",
@@ -295,7 +307,7 @@ const UNITS = [
     }
   },
   {
-    id: 8,
+    id: "A1-7",
     level: "A1",
     title: "Lugares e orientação",
     goal: "Perguntar e indicar como chegar a um lugar na cidade.",
@@ -333,7 +345,7 @@ const UNITS = [
     }
   },
   {
-    id: 9,
+    id: "A1-8",
     level: "A1",
     title: "Compras",
     goal: "Perguntar preços (com números até cem), experimentar roupas e comprar numa loja.",
@@ -375,7 +387,7 @@ const UNITS = [
     }
   },
   {
-    id: 10,
+    id: "A1-9",
     level: "A1",
     title: "Clima e estações",
     goal: "Falar sobre o tempo e as estações do ano.",
@@ -412,7 +424,7 @@ const UNITS = [
     }
   },
   {
-    id: 11,
+    id: "A1-10",
     level: "A1",
     title: "Transporte",
     goal: "Pegar um transporte público e comprar uma passagem.",
@@ -449,7 +461,7 @@ const UNITS = [
     }
   },
   {
-    id: 12,
+    id: "A1-11",
     level: "A1",
     title: "Corpo e saúde",
     goal: "Descrever sintomas simples e ir ao médico.",
@@ -487,7 +499,7 @@ const UNITS = [
     }
   },
   {
-    id: 13,
+    id: "A1-12",
     level: "A1",
     title: "Cores e descrições",
     goal: "Descrever cores, objetos e características de pessoas.",
@@ -524,7 +536,7 @@ const UNITS = [
     }
   },
   {
-    id: 14,
+    id: "A1-13",
     level: "A1",
     title: "A casa e os cômodos",
     goal: "Descrever uma casa, dizer o que tem (e o que não tem) nela.",
@@ -561,7 +573,7 @@ const UNITS = [
     }
   },
   {
-    id: 15,
+    id: "A1-14",
     level: "A1",
     title: "Onde as coisas estão",
     goal: "Descrever a posição de móveis e objetos usando preposições de lugar.",
@@ -598,7 +610,7 @@ const UNITS = [
     }
   },
   {
-    id: 16,
+    id: "A1-15",
     level: "A1",
     title: "Dias e datas",
     goal: "Dizer os dias da semana, meses e marcar um encontro.",
@@ -635,7 +647,7 @@ const UNITS = [
     }
   },
   {
-    id: 17,
+    id: "A1-16",
     level: "A1",
     title: "Lazer e atividades",
     goal: "Falar sobre hobbies e combinar programas de fim de semana.",
