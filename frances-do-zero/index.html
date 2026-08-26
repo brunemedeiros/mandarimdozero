@@ -150,7 +150,15 @@ body{
 .unit-title{ font-weight:800; font-size:14.5px; line-height:1.25; flex:1; }
 .unit-progress-bar{ height:5px; border-radius:3px; background:var(--paper-warm); overflow:hidden; }
 .unit-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:3px; }
-.unit-meta{ font-size:11px; color:var(--ink-soft); display:flex; justify-content:space-between; }
+.unit-meta{ font-size:11px; color:var(--ink-soft); display:flex; justify-content:space-between; align-items:center; }
+
+/* ---------- Unidades de gramática (destaque roxo) ---------- */
+.unit-card.grammar{ border-color: var(--brand-purple); box-shadow: 0 0 0 1px rgba(61,22,123,0.16); }
+.unit-card.grammar .unit-icon{ background: rgba(61,22,123,0.12); }
+.unit-card.grammar.current .unit-icon{ background: rgba(61,22,123,0.2); }
+.unit-card.grammar.done .unit-icon{ background: rgba(58,115,89,0.14); }
+.unit-card.grammar .unit-badge{ background: var(--brand-purple); color: var(--paper); }
+.gram-pill{ background: var(--brand-purple); color: var(--paper); font-weight:800; font-size:10px; text-transform:uppercase; letter-spacing:.04em; padding:3px 8px; border-radius:999px; }
 
 /* ---------- Unit detail ---------- */
 .back-link{ display:inline-flex; align-items:center; gap:6px; background:none; border:none; color:var(--ink-soft); font-weight:700; font-size:13px; cursor:pointer; padding:6px 0; margin-bottom:8px; }
@@ -195,6 +203,40 @@ body{
 .dialogue-spk{ font-weight:800; font-size:12px; color:var(--paper); background:var(--brand-purple); border-radius:6px; padding:3px 7px; height:fit-content; min-width:34px; text-align:center; }
 .dialogue-content .french{ font-size:15.5px; font-weight:700; display:flex; align-items:center; gap:8px; }
 .dialogue-content .trans{ font-size:12.5px; color:var(--ink-soft); }
+
+/* ---------- Passos de unidade de gramática ---------- */
+.gram-intro{ background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:20px; font-size:15px; line-height:1.6; color: var(--ink); }
+
+.gram-examples{ display:flex; flex-direction:column; gap:10px; }
+.gram-example{ background: var(--paper); border-left:3px solid var(--brand-purple); border-radius: 0 var(--radius) var(--radius) 0; padding:12px 16px; }
+.gram-example .french{ font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px; }
+.gram-example .trans{ font-size:13px; color:var(--ink-soft); margin-top:2px; }
+
+.gram-deepdive{ font-size:14.5px; line-height:1.65; color: var(--ink); margin-bottom:18px; }
+.gram-deepdive p{ margin:0 0 12px; }
+.gram-deepdive p:last-child{ margin-bottom:0; }
+
+.gram-tables{ display:flex; gap:14px; flex-wrap:wrap; }
+.gram-table{ flex:1; min-width:160px; background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius); overflow:hidden; }
+.gram-table-title{ background: var(--brand-purple); color: var(--paper); font-weight:800; text-align:center; padding:8px; font-size:14px; }
+.gram-table-row{ display:flex; justify-content:space-between; padding:8px 12px; border-top:1px solid var(--paper-line); font-size:13.5px; }
+.gram-table-pronoun{ color: var(--ink-soft); font-weight:700; }
+.gram-table-form{ font-weight:800; color: var(--seal-red-dark); }
+
+.gram-exercise{ background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:20px; text-align:center; margin-bottom:14px; }
+.gram-exercise-prompt{ font-size:19px; font-weight:700; margin-bottom:6px; }
+.gram-exercise-hint{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); font-weight:800; margin-bottom:14px; }
+.gram-exercise input{
+  width:100%; max-width:260px; text-align:center; font-size:16px; font-weight:700;
+  padding:10px 12px; border-radius:10px; border:2px solid var(--paper-line); background: var(--paper);
+  font-family: var(--font-body); color: var(--ink);
+}
+.gram-exercise input:focus{ outline:none; border-color: var(--imperial-gold); }
+.gram-exercise input:disabled{ opacity:.7; }
+.gram-exercise.ok input{ border-color: var(--jade); background: rgba(58,115,89,0.08); }
+.gram-exercise.almost input{ border-color: var(--imperial-gold); background: rgba(227,107,202,0.1); }
+.gram-exercise.wrong input{ border-color: var(--error-red); background: rgba(214,38,25,0.08); }
+.gram-exercise .expected{ font-size:12.5px; color:var(--seal-red-dark); font-weight:700; min-height:16px; margin-top:8px; }
 
 /* ---------- Audio button (TTS) ---------- */
 .audio-btn{

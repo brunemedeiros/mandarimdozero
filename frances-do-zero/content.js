@@ -10,10 +10,15 @@
 //              ordenar a frase — cada bloco é um trecho clicável)
 //   dialogue: { title: "...", lines: [{ spk: "A", f: "...", t: "..." }, ...] }
 //
-// Progressão completa do nível A1 (16 unidades). Próximos níveis entram como
+// Progressão completa do nível A1 (17 unidades). Próximos níveis entram como
 // novas unidades com "level" diferente, seguindo este mesmo schema — cada
 // unidade carrega seu próprio campo "level" (ex: "A1", "A2"), usado pelo
 // seletor de nível na Trilha pra filtrar/agrupar.
+//
+// Unidades de gramática (type: "grammar"): em vez de vocab/phrases/dialogue,
+// têm um campo "grammar" com { intro, examples, deepDive, table, exercises }.
+// Fluxo próprio na Trilha: Explicação → Na frase → Aprofundando → Exercícios
+// (em vez de Vocabulário → Diálogo → Exercícios das unidades comunicativas).
 
 const LEVELS = [
   { id: "A1", label: "Nível 1 · Débutant" },
@@ -174,6 +179,49 @@ const UNITS = [
   {
     id: 5,
     level: "A1",
+    type: "grammar",
+    title: "Verbos avoir e être",
+    goal: "Conjugar avoir e être no presente e reconhecer seu uso nas frases.",
+    grammar: {
+      intro: "Avoir (ter) e être (ser/estar) são os dois verbos mais usados do francês — e os únicos totalmente irregulares no presente. Você já viu várias formas deles nas últimas unidades (je suis, j'ai, il a...) sem parar pra pensar na conjugação completa. Agora vamos ver a tabela toda e praticar.",
+      examples: [
+        { f: "Je suis brésilienne.", t: "Eu sou brasileira. (être)" },
+        { f: "J'ai vingt ans.", t: "Eu tenho vinte anos. (avoir)" },
+        { f: "Il a dix ans.", t: "Ele tem dez anos. (avoir)" },
+        { f: "Elle est ma sœur.", t: "Ela é minha irmã. (être)" }
+      ],
+      deepDive: "Repare que nenhuma das duas conjugações segue um padrão regular — não tem como \"deduzir\" a forma a partir do infinitivo, então vale a pena memorizar a tabela inteira, não só as formas isoladas que você já viu.\n\nUma pegadinha comum: o francês usa avoir (ter) em várias expressões onde o português usa \"estar\" ou \"ser\" — avoir faim (estar com fome), avoir soif (estar com sede), avoir peur (estar com medo), avoir raison (estar certo). Você vai ver mais dessas expressões nas próximas unidades — por enquanto, só fica de olho: se em português a frase usa \"estar com/ter\", muito provavelmente em francês é avoir.\n\nOutro motivo pra dominar être desde já: ele também funciona como verbo auxiliar de outros tempos verbais que você vai ver no A2 (o passé composé de alguns verbos se forma com être, não com avoir) — a base que você constrói agora facilita bastante lá na frente.",
+      table: {
+        être: [
+          { pronoun: "je", form: "suis" },
+          { pronoun: "tu", form: "es" },
+          { pronoun: "il / elle / on", form: "est" },
+          { pronoun: "nous", form: "sommes" },
+          { pronoun: "vous", form: "êtes" },
+          { pronoun: "ils / elles", form: "sont" }
+        ],
+        avoir: [
+          { pronoun: "je (j')", form: "ai" },
+          { pronoun: "tu", form: "as" },
+          { pronoun: "il / elle / on", form: "a" },
+          { pronoun: "nous", form: "avons" },
+          { pronoun: "vous", form: "avez" },
+          { pronoun: "ils / elles", form: "ont" }
+        ]
+      },
+      exercises: [
+        { prompt: "Je ___ étudiante.", hint: "être", answer: "suis" },
+        { prompt: "Tu ___ vingt ans.", hint: "avoir", answer: "as" },
+        { prompt: "Nous ___ français.", hint: "être", answer: "sommes" },
+        { prompt: "Ils ___ deux enfants.", hint: "avoir", answer: "ont" },
+        { prompt: "Vous ___ de Paris ?", hint: "être", answer: "êtes" },
+        { prompt: "Elle ___ faim.", hint: "avoir", answer: "a" }
+      ]
+    }
+  },
+  {
+    id: 6,
+    level: "A1",
     title: "Comida e bebida",
     goal: "Falar sobre alimentos, bebidas e gostos alimentares (o que você gosta e não gosta de comer).",
     vocab: [
@@ -210,7 +258,7 @@ const UNITS = [
     }
   },
   {
-    id: 6,
+    id: 7,
     level: "A1",
     title: "Horas e rotina diária",
     goal: "Dizer as horas e descrever a rotina do dia a dia.",
@@ -247,7 +295,7 @@ const UNITS = [
     }
   },
   {
-    id: 7,
+    id: 8,
     level: "A1",
     title: "Lugares e orientação",
     goal: "Perguntar e indicar como chegar a um lugar na cidade.",
@@ -285,7 +333,7 @@ const UNITS = [
     }
   },
   {
-    id: 8,
+    id: 9,
     level: "A1",
     title: "Compras",
     goal: "Perguntar preços (com números até cem), experimentar roupas e comprar numa loja.",
@@ -327,7 +375,7 @@ const UNITS = [
     }
   },
   {
-    id: 9,
+    id: 10,
     level: "A1",
     title: "Clima e estações",
     goal: "Falar sobre o tempo e as estações do ano.",
@@ -364,7 +412,7 @@ const UNITS = [
     }
   },
   {
-    id: 10,
+    id: 11,
     level: "A1",
     title: "Transporte",
     goal: "Pegar um transporte público e comprar uma passagem.",
@@ -401,7 +449,7 @@ const UNITS = [
     }
   },
   {
-    id: 11,
+    id: 12,
     level: "A1",
     title: "Corpo e saúde",
     goal: "Descrever sintomas simples e ir ao médico.",
@@ -439,7 +487,7 @@ const UNITS = [
     }
   },
   {
-    id: 12,
+    id: 13,
     level: "A1",
     title: "Cores e descrições",
     goal: "Descrever cores, objetos e características de pessoas.",
@@ -476,7 +524,7 @@ const UNITS = [
     }
   },
   {
-    id: 13,
+    id: 14,
     level: "A1",
     title: "A casa e os cômodos",
     goal: "Descrever uma casa, dizer o que tem (e o que não tem) nela.",
@@ -513,7 +561,7 @@ const UNITS = [
     }
   },
   {
-    id: 14,
+    id: 15,
     level: "A1",
     title: "Onde as coisas estão",
     goal: "Descrever a posição de móveis e objetos usando preposições de lugar.",
@@ -550,7 +598,7 @@ const UNITS = [
     }
   },
   {
-    id: 15,
+    id: 16,
     level: "A1",
     title: "Dias e datas",
     goal: "Dizer os dias da semana, meses e marcar um encontro.",
@@ -587,7 +635,7 @@ const UNITS = [
     }
   },
   {
-    id: 16,
+    id: 17,
     level: "A1",
     title: "Lazer e atividades",
     goal: "Falar sobre hobbies e combinar programas de fim de semana.",

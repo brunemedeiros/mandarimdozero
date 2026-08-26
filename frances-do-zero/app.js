@@ -180,6 +180,7 @@ function wireKnowButtons(container){
 function buildCardsFromUnits(units){
   const cards = [];
   units.forEach(u => {
+    if (u.type === 'grammar') return; // unidades de gramática não têm vocabulário/flashcards
     u.vocab.forEach((v, idx) => {
       cards.push({
         id: `u${u.id}-v${idx}`,
@@ -543,9 +544,9 @@ function recalculateUnlockedUnits(){
 }
 
 const UNIT_ICONS = {
-  1: '👋', 2: '🙋', 3: '🔢', 4: '👨‍👩‍👧', 5: '🥐',
-  6: '⏰', 7: '🗺️', 8: '🛍️', 9: '⛅', 10: '🚇',
-  11: '🩺', 12: '🎨', 13: '🏠', 14: '🛋️', 15: '🗓️', 16: '🎬'
+  1: '👋', 2: '🙋', 3: '🔢', 4: '👨‍👩‍👧', 5: '🧠',
+  6: '🥐', 7: '⏰', 8: '🗺️', 9: '🛍️', 10: '⛅',
+  11: '🚇', 12: '🩺', 13: '🎨', 14: '🏠', 15: '🛋️', 16: '🗓️', 17: '🎬'
 };
 
 // ---------- Seletor de nível (A1/A2/...) ----------
@@ -591,16 +592,20 @@ function renderUnitsGrid(){
     const { total, learned } = unitCardCounts(u.id);
     const pct = total ? Math.round((learned/total)*100) : 0;
 
+    const isGrammar = u.type === 'grammar';
     const card = document.createElement('button');
-    card.className = 'unit-card' + (!unlocked ? ' locked' : '') + (prog.completed ? ' done' : '') + (unlocked && !prog.completed && learned>0 ? ' current' : '');
+    card.className = 'unit-card' + (isGrammar ? ' grammar' : '') + (!unlocked ? ' locked' : '') + (prog.completed ? ' done' : '') + (unlocked && !prog.completed && learned>0 ? ' current' : '');
+    const metaHTML = isGrammar
+      ? `<div class="unit-meta"><span class="gram-pill">Gramática</span><span>${prog.completed ? 'Concluído' : ''}</span></div>`
+      : `<div class="unit-progress-bar"><div class="unit-progress-fill" style="width:${pct}%"></div></div>
+         <div class="unit-meta"><span>${learned}/${total} palavras</span><span>${pct}%</span></div>`;
     card.innerHTML = `
       <div class="unit-icon-wrap">
         <div class="unit-icon">${UNIT_ICONS[u.id] || '📖'}</div>
         <div class="unit-badge">${prog.completed ? '✓' : i+1}</div>
       </div>
       <div class="unit-title">${u.title}</div>
-      <div class="unit-progress-bar"><div class="unit-progress-fill" style="width:${pct}%"></div></div>
-      <div class="unit-meta"><span>${learned}/${total} palavras</span><span>${pct}%</span></div>
+      ${metaHTML}
     `;
     if (unlocked){
       card.addEventListener('click', () => openUnitDetail(u.id));
@@ -618,6 +623,20 @@ const STEP_DEFS = [
   { key: 'exercises', label: 'Exercícios' }
 ];
 
+// Unidades de gramática (type: "grammar") seguem um fluxo próprio: explicação
+// breve → aplicação numa frase → aprofundamento da regra → exercícios de uso.
+const STEP_DEFS_GRAMMAR = [
+  { key: 'intro', label: 'Explicação' },
+  { key: 'apply', label: 'Na frase' },
+  { key: 'deepdive', label: 'Aprofundando' },
+  { key: 'gramExercises', label: 'Exercícios' }
+];
+
+function currentStepDefs(){
+  const u = UNITS.find(x => x.id === STATE.currentUnitId);
+  return (u && u.type === 'grammar') ? STEP_DEFS_GRAMMAR : STEP_DEFS;
+}
+
 const STEP_STATE = {
   currentStep: 0,
   vocabIndex: 0,
@@ -625,7 +644,10 @@ const STEP_STATE = {
   exerciseList: [],
   exerciseIndex: 0,
   exerciseScore: 0,
-  exerciseAnswered: false
+  exerciseAnswered: false,
+  gramExerciseUnitId: null,
+  gramExerciseIndex: 0,
+  gramExerciseScore: 0
 };
 
 function openUnitDetail(unitId){
@@ -658,9 +680,10 @@ document.getElementById('back-to-path').addEventListener('click', () => {
 function renderStepProgress(){
   const fillEl = document.getElementById('step-progress-fill');
   const labelsEl = document.getElementById('step-progress-labels');
-  const pct = (STEP_STATE.currentStep / (STEP_DEFS.length - 1)) * 100;
+  const defs = currentStepDefs();
+  const pct = (STEP_STATE.currentStep / (defs.length - 1)) * 100;
   fillEl.style.width = `${pct}%`;
-  labelsEl.innerHTML = STEP_DEFS.map((s, i) =>
+  labelsEl.innerHTML = defs.map((s, i) =>
     `<span class="${i === STEP_STATE.currentStep ? 'current' : ''}">${s.label}</span>`
   ).join('');
 }
@@ -711,9 +734,128 @@ function renderVocabCardStep(u, contentEl, nextBtn){
   nextBtn.textContent = idx < total - 1 ? 'Próxima palavra →' : 'Continuar →';
 }
 
+// ---------- Unidades de gramática (Explicação → Na frase → Aprofundando → Exercícios) ----------
+function renderGrammarIntroStep(u, contentEl, nextBtn){
+  contentEl.innerHTML = `
+    <div class="section-label">Explicação</div>
+    <div class="gram-intro">${u.grammar.intro}</div>
+  `;
+  nextBtn.textContent = 'Continuar →';
+  nextBtn.style.display = 'flex';
+}
+
+function renderGrammarApplyStep(u, contentEl, nextBtn){
+  contentEl.innerHTML = `
+    <div class="section-label">Na frase</div>
+    <div class="gram-examples">
+      ${u.grammar.examples.map(ex => `
+        <div class="gram-example">
+          <div class="french">${ex.f} ${audioBtnHTML(ex.f)}</div>
+          <div class="trans">${ex.t}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  wireAudioButtons(contentEl);
+  nextBtn.textContent = 'Continuar →';
+  nextBtn.style.display = 'flex';
+}
+
+function renderGrammarDeepDiveStep(u, contentEl, nextBtn){
+  const tableHTML = Object.entries(u.grammar.table || {}).map(([verb, rows]) => `
+    <div class="gram-table">
+      <div class="gram-table-title">${verb}</div>
+      ${rows.map(r => `
+        <div class="gram-table-row">
+          <span class="gram-table-pronoun">${r.pronoun}</span>
+          <span class="gram-table-form">${r.form}</span>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+
+  contentEl.innerHTML = `
+    <div class="section-label">Aprofundando</div>
+    <div class="gram-deepdive">${u.grammar.deepDive.split('\n\n').map(p => `<p>${p}</p>`).join('')}</div>
+    ${tableHTML ? `<div class="gram-tables">${tableHTML}</div>` : ''}
+  `;
+  nextBtn.textContent = 'Ir para os exercícios →';
+  nextBtn.style.display = 'flex';
+}
+
+function renderGrammarExerciseStep(u, contentEl, nextBtn){
+  const list = u.grammar.exercises;
+  const total = list.length;
+
+  if (STEP_STATE.gramExerciseIndex >= total){
+    const pct = Math.round((STEP_STATE.gramExerciseScore / total) * 100);
+    contentEl.innerHTML = `
+      <div class="exercise-result">
+        <div class="big-emoji">${pct >= 70 ? '🎉' : '💪'}</div>
+        <h3>Exercícios concluídos!</h3>
+        <div class="score-num">${STEP_STATE.gramExerciseScore}/${total}</div>
+        <p>${pct >= 70 ? 'Muito bem! Você já domina essa regra.' : 'Vale revisar essa regra de novo mais tarde.'}</p>
+      </div>
+    `;
+    nextBtn.textContent = 'Concluir unidade ✓';
+    nextBtn.style.display = 'flex';
+    return;
+  }
+
+  const ex = list[STEP_STATE.gramExerciseIndex];
+  nextBtn.style.display = 'none';
+
+  contentEl.innerHTML = `
+    <div class="conj-progress">Frase ${STEP_STATE.gramExerciseIndex + 1} de ${total}</div>
+    <div class="gram-exercise">
+      <div class="gram-exercise-prompt">${ex.prompt}</div>
+      ${ex.hint ? `<div class="gram-exercise-hint">${ex.hint}</div>` : ''}
+      <input type="text" id="gram-exercise-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a forma correta">
+      <div class="expected" id="gram-exercise-expected"></div>
+    </div>
+    <button class="btn btn-primary btn-block" id="gram-exercise-verify-btn">Vérifier</button>
+  `;
+
+  const inputEl = document.getElementById('gram-exercise-input');
+  inputEl.focus();
+  inputEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('gram-exercise-verify-btn').click();
+  });
+
+  document.getElementById('gram-exercise-verify-btn').addEventListener('click', () => {
+    const given = inputEl.value;
+    const expected = ex.answer;
+    const wrapEl = contentEl.querySelector('.gram-exercise');
+    const expectedEl = document.getElementById('gram-exercise-expected');
+    inputEl.disabled = true;
+
+    if (given.trim() === expected.trim()){
+      wrapEl.classList.add('ok');
+      STEP_STATE.gramExerciseScore += 1;
+    } else if (normalizeLoose(given) === normalizeLoose(expected)){
+      wrapEl.classList.add('almost');
+      expectedEl.textContent = `Quase! → ${expected}`;
+      STEP_STATE.gramExerciseScore += 0.5;
+    } else {
+      wrapEl.classList.add('wrong');
+      expectedEl.textContent = `→ ${expected}`;
+    }
+
+    document.getElementById('gram-exercise-verify-btn').style.display = 'none';
+    const goNextBtn = document.createElement('button');
+    goNextBtn.className = 'btn btn-secondary btn-block';
+    goNextBtn.textContent = STEP_STATE.gramExerciseIndex < total - 1 ? 'Próxima frase →' : 'Ver resultado →';
+    goNextBtn.addEventListener('click', () => {
+      STEP_STATE.gramExerciseIndex += 1;
+      renderGrammarExerciseStep(u, contentEl, nextBtn);
+    });
+    contentEl.appendChild(goNextBtn);
+  });
+}
+
 function renderStep(){
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
-  const stepKey = STEP_DEFS[STEP_STATE.currentStep].key;
+  const stepKey = currentStepDefs()[STEP_STATE.currentStep].key;
   const contentEl = document.getElementById('step-content');
   const backBtn = document.getElementById('step-back-btn');
   const nextBtn = document.getElementById('step-next-btn');
@@ -721,6 +863,24 @@ function renderStep(){
   renderStepProgress();
   const showBack = STEP_STATE.currentStep > 0 || (stepKey === 'vocab' && STEP_STATE.vocabIndex > 0);
   backBtn.style.display = showBack ? 'inline-flex' : 'none';
+
+  if (u.type === 'grammar'){
+    if (stepKey === 'intro'){
+      renderGrammarIntroStep(u, contentEl, nextBtn);
+    } else if (stepKey === 'apply'){
+      renderGrammarApplyStep(u, contentEl, nextBtn);
+    } else if (stepKey === 'deepdive'){
+      renderGrammarDeepDiveStep(u, contentEl, nextBtn);
+    } else if (stepKey === 'gramExercises'){
+      if (STEP_STATE.gramExerciseUnitId !== u.id){
+        STEP_STATE.gramExerciseUnitId = u.id;
+        STEP_STATE.gramExerciseIndex = 0;
+        STEP_STATE.gramExerciseScore = 0;
+      }
+      renderGrammarExerciseStep(u, contentEl, nextBtn);
+    }
+    return;
+  }
 
   if (stepKey === 'vocab'){
     if (STEP_STATE.vocabUnitId !== u.id){
@@ -762,7 +922,7 @@ function renderStep(){
 }
 
 document.getElementById('step-back-btn').addEventListener('click', () => {
-  const stepKey = STEP_DEFS[STEP_STATE.currentStep].key;
+  const stepKey = currentStepDefs()[STEP_STATE.currentStep].key;
 
   if (stepKey === 'vocab' && STEP_STATE.vocabIndex > 0){
     STEP_STATE.vocabIndex -= 1;
@@ -776,7 +936,7 @@ document.getElementById('step-back-btn').addEventListener('click', () => {
   }
 });
 document.getElementById('step-next-btn').addEventListener('click', () => {
-  const stepKey = STEP_DEFS[STEP_STATE.currentStep].key;
+  const stepKey = currentStepDefs()[STEP_STATE.currentStep].key;
 
   if (stepKey === 'vocab'){
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
@@ -787,7 +947,7 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
     }
   }
 
-  if (STEP_STATE.currentStep < STEP_DEFS.length - 1){
+  if (STEP_STATE.currentStep < currentStepDefs().length - 1){
     STEP_STATE.currentStep += 1;
     renderStep();
   } else {
