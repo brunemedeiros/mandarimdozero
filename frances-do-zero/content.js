@@ -10,7 +10,7 @@
 //              ordenar a frase — cada bloco é um trecho clicável)
 //   dialogue: { title: "...", lines: [{ spk: "A", f: "...", t: "..." }, ...] }
 //
-// Progressão completa do nível A1 (24 unidades: 17 comunicativas + 7 de
+// Progressão completa do nível A1 (29 unidades: 20 comunicativas + 9 de
 // gramática). Próximos níveis entram como novas unidades com "level"
 // diferente, seguindo este mesmo schema — cada unidade carrega seu próprio
 // campo "level" (ex: "A1", "A2"), usado pelo seletor de nível na Trilha pra
@@ -704,6 +704,80 @@ const UNITS = [
   {
     id: "A1-11",
     level: "A1",
+    title: "Comidas",
+    goal: "Ampliar o vocabulário de alimentos: carnes, legumes e outros itens do dia a dia.",
+    vocab: [
+      { f: "la viande", t: "a carne" },
+      { f: "le poulet", t: "o frango" },
+      { f: "les légumes", t: "os legumes / as verduras" },
+      { f: "la salade", t: "a salada" },
+      { f: "le riz", t: "o arroz" },
+      { f: "les pâtes", t: "a massa" },
+      { f: "le sucre", t: "o açúcar" },
+      { f: "le sel", t: "o sal" },
+      { f: "l'œuf", t: "o ovo" },
+      { f: "le dessert", t: "a sobremesa" }
+    ],
+    phrases: [
+      { f: "J'aime la viande.", t: "Eu gosto de carne.",
+        blocks: [{f:"J'aime"},{f:"la viande."}] },
+      { f: "Je mange des légumes tous les jours.", t: "Como legumes todos os dias.",
+        blocks: [{f:"Je mange"},{f:"des légumes"},{f:"tous les jours."}] },
+      { f: "Je ne mange pas de viande.", t: "Eu não como carne.",
+        blocks: [{f:"Je ne mange pas"},{f:"de viande."}] },
+      { f: "Je prends du riz et des pâtes.", t: "Eu levo arroz e massa.",
+        blocks: [{f:"Je prends"},{f:"du riz"},{f:"et des pâtes."}] }
+    ],
+    dialogue: {
+      title: "Fazendo a lista de compras",
+      lines: [
+        { spk: "A", f: "Qu'est-ce qu'on achète ?", t: "O que a gente compra?" },
+        { spk: "B", f: "Du riz, des légumes et du poulet.", t: "Arroz, legumes e frango." },
+        { spk: "A", f: "Tu veux un dessert ?", t: "Você quer uma sobremesa?" },
+        { spk: "B", f: "Oui, avec du sucre, s'il te plaît !", t: "Sim, com açúcar, por favor!" }
+      ]
+    }
+  },
+  {
+    id: "A1-12",
+    level: "A1",
+    title: "Pesos e quantidades",
+    goal: "Pedir quantidades específicas ao fazer compras: kilo, litre, un peu de, beaucoup de...",
+    vocab: [
+      { f: "un kilo (de)", t: "um quilo (de)" },
+      { f: "un demi-kilo", t: "meio quilo" },
+      { f: "un litre", t: "um litro" },
+      { f: "un gramme", t: "uma grama" },
+      { f: "un peu de", t: "um pouco de" },
+      { f: "beaucoup de", t: "muito / bastante" },
+      { f: "assez de", t: "o suficiente de" },
+      { f: "trop de", t: "demais / em excesso" },
+      { f: "une tranche (de)", t: "uma fatia (de)" },
+      { f: "une bouteille (de)", t: "uma garrafa (de)" }
+    ],
+    phrases: [
+      { f: "Je prends un kilo de pommes.", t: "Eu levo um quilo de maçãs.",
+        blocks: [{f:"Je prends"},{f:"un kilo"},{f:"de pommes."}] },
+      { f: "Un litre de lait, s'il vous plaît.", t: "Um litro de leite, por favor.",
+        blocks: [{f:"Un litre"},{f:"de lait,"},{f:"s'il vous plaît."}] },
+      { f: "C'est trop de sucre pour moi.", t: "É açúcar demais pra mim.",
+        blocks: [{f:"C'est trop"},{f:"de sucre"},{f:"pour moi."}] },
+      { f: "Une tranche de pain, s'il te plaît.", t: "Uma fatia de pão, por favor.",
+        blocks: [{f:"Une tranche"},{f:"de pain,"},{f:"s'il te plaît."}] }
+    ],
+    dialogue: {
+      title: "Comprando no mercado",
+      lines: [
+        { spk: "A", f: "Vous voulez combien de pommes ?", t: "Quantas maçãs você quer?" },
+        { spk: "B", f: "Un demi-kilo, s'il vous plaît.", t: "Meio quilo, por favor." },
+        { spk: "A", f: "Et avec ça ?", t: "E mais alguma coisa?" },
+        { spk: "B", f: "Une bouteille d'eau et un peu de fromage.", t: "Uma garrafa de água e um pouco de queijo." }
+      ]
+    }
+  },
+  {
+    id: "A1-13",
+    level: "A1",
     title: "Clima e estações",
     goal: "Falar sobre o tempo e as estações do ano.",
     vocab: [
@@ -739,7 +813,7 @@ const UNITS = [
     }
   },
   {
-    id: "A1-12",
+    id: "A1-14",
     level: "A1",
     title: "Transporte",
     goal: "Pegar um transporte público e comprar uma passagem.",
@@ -843,7 +917,7 @@ const UNITS = [
     }
   },
   {
-    id: "A1-13",
+    id: "A1-15",
     level: "A1",
     title: "Corpo e saúde",
     goal: "Descrever sintomas simples e ir ao médico.",
@@ -881,7 +955,92 @@ const UNITS = [
     }
   },
   {
-    id: "A1-14",
+    id: "A1-g6",
+    level: "A1",
+    type: "grammar",
+    title: "Verbos modais e il faut",
+    goal: "Conjugar vouloir, pouvoir, devoir e savoir, e entender quando usar il faut no lugar de devoir.",
+    grammar: {
+      blocks: [
+        {
+          title: "Vouloir e pouvoir",
+          body: "Vouloir (querer) e pouvoir (poder) são dois dos verbos mais usados do francês, e aparecem em quase toda conversa do dia a dia. Você já viu os dois em unidades anteriores, sem parar pra pensar na conjugação completa.",
+          examples: [
+            { f: "Tu veux un dessert ?", t: "Você quer uma sobremesa?" },
+            { f: "Je peux essayer cette robe ?", t: "Posso experimentar esse vestido?" }
+          ]
+        },
+        {
+          title: "Devoir e savoir",
+          body: "Devoir (dever/precisar) expressa obrigação pessoal, e savoir (saber) expressa conhecimento ou uma habilidade aprendida — diferente de connaître (conhecer um lugar/pessoa), que você vai ver mais adiante.",
+          examples: [
+            { f: "Vous devez vous reposer.", t: "Você precisa descansar." },
+            { f: "Je sais parler français.", t: "Eu sei falar francês." }
+          ]
+        },
+        {
+          title: "Il faut: uma alternativa impessoal a devoir",
+          body: "Il faut + infinitivo expressa uma necessidade ou regra geral — sem dizer QUEM precisa fazer algo. Il faut nunca conjuga, é sempre a mesma forma. Já devoir + infinitivo é pessoal: você conjuga o verbo pra dizer que UMA PESSOA específica precisa fazer algo (je dois, tu dois, il doit...). Compare os dois exemplos: o primeiro é uma regra geral, o segundo é dirigido a alguém específico.",
+          examples: [
+            { f: "Il faut dormir huit heures.", t: "É preciso dormir oito horas. (regra geral, vale pra qualquer um)" },
+            { f: "Tu dois te reposer.", t: "Você precisa descansar. (dirigido a você especificamente)" }
+          ]
+        },
+        {
+          title: "Très bien! 🎉",
+          body: "Quatro verbos essenciais — todos irregulares, então vale a pena memorizar a tabela inteira. Lembre-se: il faut não está na tabela porque não conjuga, é sempre invariável.",
+          examples: [],
+          table: {
+            vouloir: [
+              { pronoun: "je", form: "veux" },
+              { pronoun: "tu", form: "veux" },
+              { pronoun: "il / elle / on", form: "veut" },
+              { pronoun: "nous", form: "voulons" },
+              { pronoun: "vous", form: "voulez" },
+              { pronoun: "ils / elles", form: "veulent" }
+            ],
+            pouvoir: [
+              { pronoun: "je", form: "peux" },
+              { pronoun: "tu", form: "peux" },
+              { pronoun: "il / elle / on", form: "peut" },
+              { pronoun: "nous", form: "pouvons" },
+              { pronoun: "vous", form: "pouvez" },
+              { pronoun: "ils / elles", form: "peuvent" }
+            ],
+            devoir: [
+              { pronoun: "je", form: "dois" },
+              { pronoun: "tu", form: "dois" },
+              { pronoun: "il / elle / on", form: "doit" },
+              { pronoun: "nous", form: "devons" },
+              { pronoun: "vous", form: "devez" },
+              { pronoun: "ils / elles", form: "doivent" }
+            ],
+            savoir: [
+              { pronoun: "je", form: "sais" },
+              { pronoun: "tu", form: "sais" },
+              { pronoun: "il / elle / on", form: "sait" },
+              { pronoun: "nous", form: "savons" },
+              { pronoun: "vous", form: "savez" },
+              { pronoun: "ils / elles", form: "savent" }
+            ]
+          },
+          wrapup: true
+        }
+      ],
+      exercises: [
+        { prompt: "Je ___ un café.", hint: "vouloir", answer: "veux" },
+        { prompt: "Tu ___ essayer cette robe ?", hint: "pouvoir", answer: "peux" },
+        { prompt: "Nous ___ nous reposer.", hint: "devoir", answer: "devons" },
+        { prompt: "Elle ___ parler trois langues.", hint: "savoir", answer: "sait" },
+        { prompt: "Il ___ manger des légumes tous les jours.", hint: "il faut (impessoal)", answer: "faut" },
+        { prompt: "Vous ___ un dessert ?", hint: "vouloir", answer: "voulez" },
+        { prompt: "Ils ___ prendre le bus.", hint: "pouvoir", answer: "peuvent" },
+        { prompt: "Je ___ nager.", hint: "savoir", answer: "sais" }
+      ]
+    }
+  },
+  {
+    id: "A1-16",
     level: "A1",
     title: "Cores e descrições",
     goal: "Descrever cores, objetos e características de pessoas.",
@@ -918,7 +1077,7 @@ const UNITS = [
     }
   },
   {
-    id: "A1-g6",
+    id: "A1-g7",
     level: "A1",
     type: "grammar",
     title: "Comparativos",
@@ -976,7 +1135,7 @@ const UNITS = [
     }
   },
   {
-    id: "A1-15",
+    id: "A1-17",
     level: "A1",
     title: "A casa e os cômodos",
     goal: "Descrever uma casa, dizer o que tem (e o que não tem) nela.",
@@ -1013,7 +1172,7 @@ const UNITS = [
     }
   },
   {
-    id: "A1-16",
+    id: "A1-18",
     level: "A1",
     title: "Onde as coisas estão",
     goal: "Descrever a posição de móveis e objetos usando preposições de lugar.",
@@ -1050,7 +1209,7 @@ const UNITS = [
     }
   },
   {
-    id: "A1-17",
+    id: "A1-19",
     level: "A1",
     title: "Lazer e atividades",
     goal: "Falar sobre hobbies e combinar programas de fim de semana.",
@@ -1087,7 +1246,7 @@ const UNITS = [
     }
   },
   {
-    id: "A1-g7",
+    id: "A1-g8",
     level: "A1",
     type: "grammar",
     title: "Advérbios de frequência",
@@ -1141,6 +1300,106 @@ const UNITS = [
         { prompt: "Elle ne chante ___.", hint: "nunca", answer: "jamais" },
         { prompt: "Tu lis ___ des livres ?", hint: "raramente", answer: "rarement" },
         { prompt: "Vous dansez ___ !", hint: "sempre", answer: "toujours" }
+      ]
+    }
+  },
+  {
+    id: "A1-20",
+    level: "A1",
+    title: "Expressões de tempo passado",
+    goal: "Aprender marcadores de tempo pra falar sobre o passado, como preparação pro passé composé.",
+    vocab: [
+      { f: "hier", t: "ontem" },
+      { f: "avant-hier", t: "anteontem" },
+      { f: "la semaine dernière", t: "a semana passada" },
+      { f: "le week-end dernier", t: "o fim de semana passado" },
+      { f: "le mois dernier", t: "o mês passado" },
+      { f: "l'année dernière", t: "o ano passado" },
+      { f: "il y a deux jours", t: "há dois dias / dois dias atrás" },
+      { f: "ce matin", t: "esta manhã" },
+      { f: "déjà", t: "já" },
+      { f: "récemment", t: "recentemente" }
+    ],
+    phrases: [
+      { f: "Hier, j'ai visité un musée.", t: "Ontem eu visitei um museu.",
+        blocks: [{f:"Hier,"},{f:"j'ai visité"},{f:"un musée."}] },
+      { f: "La semaine dernière, j'ai mangé au restaurant.", t: "Semana passada eu comi num restaurante.",
+        blocks: [{f:"La semaine dernière,"},{f:"j'ai mangé"},{f:"au restaurant."}] },
+      { f: "Le week-end dernier, il a plu.", t: "No fim de semana passado, choveu.",
+        blocks: [{f:"Le week-end dernier,"},{f:"il a plu."}] },
+      { f: "Tu as déjà visité Paris ?", t: "Você já visitou Paris?",
+        blocks: [{f:"Tu as déjà"},{f:"visité Paris ?"}] }
+    ],
+    dialogue: {
+      title: "O que você fez ontem?",
+      lines: [
+        { spk: "A", f: "Qu'est-ce que tu as fait hier ?", t: "O que você fez ontem?" },
+        { spk: "B", f: "J'ai travaillé le matin, et l'après-midi j'ai fait du sport.", t: "Eu trabalhei de manhã, e à tarde eu fiz esporte." },
+        { spk: "A", f: "Et le week-end dernier ?", t: "E no fim de semana passado?" },
+        { spk: "B", f: "On est allés au cinéma avec des amis.", t: "A gente foi ao cinema com amigos." }
+      ]
+    }
+  },
+  {
+    id: "A1-g9",
+    level: "A1",
+    type: "grammar",
+    title: "O passé composé",
+    goal: "Conjugar o passé composé com avoir e com être pra falar sobre ações do passado.",
+    grammar: {
+      blocks: [
+        {
+          title: "Passé composé com avoir",
+          body: "O passé composé é o tempo mais comum pra falar do passado em francês. A maioria dos verbos o forma com o presente de avoir + o particípio passado. Verbos regulares em -er formam o particípio trocando o -er por -é.",
+          examples: [
+            { f: "J'ai mangé au restaurant.", t: "Eu comi no restaurante." },
+            { f: "Elle a travaillé toute la journée.", t: "Ela trabalhou o dia todo." }
+          ]
+        },
+        {
+          title: "Alguns particípios irregulares",
+          body: "Alguns verbos muito comuns têm particípio irregular, que precisa ser memorizado — como faire → fait e prendre → pris, dois verbos que você já conhece.",
+          examples: [
+            { f: "J'ai fait du sport hier.", t: "Eu fiz esporte ontem." },
+            { f: "Il a pris le train.", t: "Ele pegou o trem." }
+          ]
+        },
+        {
+          title: "Passé composé com être",
+          body: "Um grupo pequeno de verbos (principalmente de movimento, como aller) e TODOS os verbos pronominais usam être como auxiliar, não avoir. Quando o auxiliar é être, o particípio concorda em gênero e número com o sujeito — ganha um -e pro feminino e um -s pro plural.",
+          examples: [
+            { f: "Elle est allée au marché.", t: "Ela foi ao mercado. (être + concordância feminina)" },
+            { f: "Je me suis levé tôt.", t: "Eu levantei cedo. (verbo pronominal, sempre com être)" }
+          ]
+        },
+        {
+          title: "Très bien! 🎉",
+          body: "Você concluiu o nível A1! Aqui está um resumo dos dois auxiliares — repare que a maioria dos verbos usa avoir, e être fica reservado pra movimento e verbos pronominais:",
+          examples: [],
+          table: {
+            "Com avoir (maioria dos verbos)": [
+              { pronoun: "manger →", form: "j'ai mangé" },
+              { pronoun: "faire →", form: "j'ai fait" },
+              { pronoun: "prendre →", form: "j'ai pris" }
+            ],
+            "Com être (movimento + pronominais)": [
+              { pronoun: "aller →", form: "je suis allé(e)" },
+              { pronoun: "arriver →", form: "je suis arrivé(e)" },
+              { pronoun: "se lever →", form: "je me suis levé(e)" }
+            ]
+          },
+          wrapup: true
+        }
+      ],
+      exercises: [
+        { prompt: "J'___ mangé une pomme.", hint: "avoir (manger)", answer: "ai" },
+        { prompt: "Tu ___ fait du sport ?", hint: "avoir (faire)", answer: "as" },
+        { prompt: "Il ___ pris le bus.", hint: "avoir (prendre)", answer: "a" },
+        { prompt: "Nous ___ travaillé ensemble.", hint: "avoir (travailler)", answer: "avons" },
+        { prompt: "Elle ___ allée au marché.", hint: "être (aller)", answer: "est" },
+        { prompt: "Je me ___ levé tôt.", hint: "être (se lever)", answer: "suis" },
+        { prompt: "Ils ___ visité Paris.", hint: "avoir (visiter)", answer: "ont" },
+        { prompt: "Vous ___ arrivés à quelle heure ?", hint: "être (arriver)", answer: "êtes" }
       ]
     }
   }
