@@ -1082,17 +1082,13 @@ const MATCH_STATE = {
   tiles: [],       // [{cardId, side:'front'|'back', text}]
   selected: null,  // tile element selecionado aguardando o par
   matchedCount: 0,
-  startTime: 0,
-  timerHandle: null,
+  attempts: 0,     // quantas vezes o aluno tentou um par (acertou ou não)
   busy: false      // trava cliques durante a animação de erro
 };
 
-function stopMatchTimer(){
-  if (MATCH_STATE.timerHandle){
-    clearInterval(MATCH_STATE.timerHandle);
-    MATCH_STATE.timerHandle = null;
-  }
-}
+// Placeholder mantido só pra não quebrar as chamadas já existentes
+// (review-back-to-modes, switchTab) — o jogo não usa mais timer.
+function stopMatchTimer(){}
 
 function startMatchGame(){
   const pool = shuffle(STATE.cards.filter(c => STATE.unitProgress[c.unitId]?.started && c.reps > 0));
@@ -1104,20 +1100,10 @@ function startMatchGame(){
   ]);
   MATCH_STATE.selected = null;
   MATCH_STATE.matchedCount = 0;
+  MATCH_STATE.attempts = 0;
   MATCH_STATE.busy = false;
-  MATCH_STATE.startTime = Date.now();
 
   renderMatchGame();
-  stopMatchTimer();
-  MATCH_STATE.timerHandle = setInterval(() => {
-    const timerEl = document.querySelector('.match-timer');
-    if (timerEl) timerEl.textContent = formatMatchTime(Date.now() - MATCH_STATE.startTime);
-  }, 250);
-}
-
-function formatMatchTime(ms){
-  const s = Math.floor(ms / 1000);
-  return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
 }
 
 function renderMatchGame(){
@@ -1136,24 +1122,20 @@ function renderMatchGame(){
 
   el.innerHTML = `
     <div class="match-header">
-      <span>${MATCH_STATE.matchedCount}/${MATCH_STATE.pairs.length} pares</span>
-      <span class="match-timer">0:00</span>
+      <span class="match-pairs">Pares: ${MATCH_STATE.matchedCount}/${MATCH_STATE.pairs.length}</span>
+      <span class="match-attempts">Tentativas: ${MATCH_STATE.attempts}</span>
     </div>
     <div class="match-grid" id="match-grid"></div>
   `;
   renderMatchTiles();
 }
 
-// Verso da carta (virada pra baixo) — mesmo ícone da marca, sem texto,
-// pra não dar nenhuma pista do conteúdo antes de virar.
-const MATCH_CARD_BACK_SVG = `<svg viewBox="0 0 83.44 94.95" xmlns="http://www.w3.org/2000/svg"><path d="M82.19,54.16c-.25-.82-1.05-3.05-1.06-3.07-2.71-6.58-11.08-1.57-9.93,3.9.31,1.46.68,2.86.68,2.86,3.51,12.91-6.77,26.21-20.18,26.02,0,0-40.62,0-40.62,0L.83,94.12c.51.51,1.22.83,2,.83h48.7c9.66,0,18.32-4.29,24.17-11.08,6.81-7.58,9.57-19.61,6.49-29.71Z" style="fill:#fff;opacity:.85;"/><path d="M45.92,31.12H11.08V11.07h0L.83.82C.32,1.34,0,2.04,0,2.83v36.55c0,1.56,1.27,2.83,2.83,2.83h44.95c2.8,0,10.09.14,12.52,1.15,0,0,2.62-1.92,4.67-9.26-4.14-1.95-14.19-2.97-19.05-2.97Z" style="fill:#fff;opacity:.85;"/><path d="M69.7,11.08C64.22,4.32,55.86,0,46.48,0H2.83c-.78,0-1.49.32-2,.83l10.25,10.25h32.67c12.91,0,24.17,9.85,21.35,22.52-.04.17-.07.33-.11.5,0,0-.01,0-.02,0-4.11,14.7-20.74,14.56-23.25,14.56H2.83c-1.56,0-2.83,1.27-2.83,2.83v40.63c0,.78.32,1.49.83,2l10.25-10.25h0v-24.13h35.4c8.58,0,16.31-3.61,21.73-9.4,2.65-2.76,4.71-6.06,6.1-9.63,3.99-9.68,1.92-21.88-4.61-29.63Z" style="fill:#fff;"/></svg>`;
-
 function renderMatchTiles(){
   const gridEl = document.getElementById('match-grid');
   gridEl.innerHTML = MATCH_STATE.tiles.map((t, i) => `
     <button class="match-tile" data-idx="${i}" data-card-id="${t.cardId}" data-side="${t.side}">
       <div class="match-tile-inner">
-        <div class="match-tile-face match-tile-back">${MATCH_CARD_BACK_SVG}</div>
+        <div class="match-tile-face match-tile-back"><span>?</span></div>
         <div class="match-tile-face match-tile-front">${t.text}</div>
       </div>
     </button>
@@ -1181,12 +1163,14 @@ function onMatchTileClick(btn){
   MATCH_STATE.busy = true;
 
   const isMatch = first.dataset.cardId === second.dataset.cardId && first.dataset.side !== second.dataset.side;
+  MATCH_STATE.attempts += 1;
+  document.querySelector('.match-attempts').textContent = `Tentativas: ${MATCH_STATE.attempts}`;
 
   if (isMatch){
     first.classList.add('match-ok');
     second.classList.add('match-ok');
     MATCH_STATE.matchedCount += 1;
-    document.querySelector('.match-header span').textContent = `${MATCH_STATE.matchedCount}/${MATCH_STATE.pairs.length} pares`;
+    document.querySelector('.match-pairs').textContent = `Pares: ${MATCH_STATE.matchedCount}/${MATCH_STATE.pairs.length}`;
     addXP(2);
 
     setTimeout(() => {
@@ -1195,18 +1179,16 @@ function onMatchTileClick(btn){
       MATCH_STATE.busy = false;
 
       if (MATCH_STATE.matchedCount === MATCH_STATE.pairs.length){
-        stopMatchTimer();
         registerStudyToday();
         STATE.totalReviews += MATCH_STATE.pairs.length;
         saveState();
         renderTopbarStats();
-        const elapsed = formatMatchTime(Date.now() - MATCH_STATE.startTime);
         setTimeout(() => {
           document.getElementById('match-review-content').innerHTML = `
             <div class="match-complete">
               <div class="big-emoji">🎉</div>
               <h3>Todos os pares combinados!</h3>
-              <div class="score-num">${elapsed}</div>
+              <div class="score-num">${MATCH_STATE.attempts} tentativa(s)</div>
               <button class="btn btn-primary" id="match-restart-btn">Jogar de novo</button>
             </div>
           `;
