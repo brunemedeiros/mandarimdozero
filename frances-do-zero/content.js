@@ -273,37 +273,41 @@ const UNITS = [
   {
     id: 8,
     title: "Compras",
-    goal: "Perguntar preços e experimentar roupas numa loja.",
+    goal: "Perguntar preços (com números até cem), experimentar roupas e comprar numa loja.",
     vocab: [
       { f: "le pantalon", t: "a calça" },
       { f: "la robe", t: "o vestido" },
-      { f: "les chaussures", t: "os sapatos" },
-      { f: "le manteau", t: "o casaco" },
       { f: "cher", t: "caro" },
       { f: "pas cher", t: "barato" },
       { f: "la taille", t: "o tamanho" },
-      { f: "essayer", t: "experimentar" },
       { f: "le magasin", t: "a loja" },
-      { f: "payer", t: "pagar" }
+      { f: "trente", t: "trinta" },
+      { f: "quarante", t: "quarenta" },
+      { f: "cinquante", t: "cinquenta" },
+      { f: "soixante", t: "sessenta" },
+      { f: "soixante-dix", t: "setenta" },
+      { f: "quatre-vingts", t: "oitenta" },
+      { f: "quatre-vingt-dix", t: "noventa" },
+      { f: "cent", t: "cem" }
     ],
     phrases: [
       { f: "Combien ça coûte ?", t: "Quanto custa isso?",
         blocks: [{f:"Combien"},{f:"ça coûte ?"}] },
-      { f: "C'est trop cher.", t: "É caro demais.",
-        blocks: [{f:"C'est"},{f:"trop cher."}] },
+      { f: "Ça coûte quarante euros.", t: "Custa quarenta euros.",
+        blocks: [{f:"Ça coûte"},{f:"quarante"},{f:"euros."}] },
       { f: "Je peux essayer ce pantalon ?", t: "Posso experimentar essa calça?",
         blocks: [{f:"Je peux essayer"},{f:"ce pantalon ?"}] },
-      { f: "Je vais payer par carte.", t: "Vou pagar com cartão.",
-        blocks: [{f:"Je vais payer"},{f:"par carte."}] }
+      { f: "Ça fait cent euros, s'il vous plaît.", t: "São cem euros, por favor.",
+        blocks: [{f:"Ça fait"},{f:"cent euros,"},{f:"s'il vous plaît."}] }
     ],
     dialogue: {
       title: "Numa loja",
       lines: [
         { spk: "A", f: "Bonjour, je cherche une robe.", t: "Olá, estou procurando um vestido." },
         { spk: "B", f: "Quelle taille faites-vous ?", t: "Qual é o seu tamanho?" },
-        { spk: "A", f: "Je fais du 38.", t: "Eu uso 38." },
-        { spk: "B", f: "Voici, vous pouvez l'essayer.", t: "Aqui está, você pode experimentar." },
-        { spk: "A", f: "Merci, elle est parfaite !", t: "Obrigada, ele é perfeito!" }
+        { spk: "A", f: "Je fais du 38. Ça coûte combien ?", t: "Eu uso 38. Quanto custa?" },
+        { spk: "B", f: "Elle coûte soixante euros.", t: "Custa sessenta euros." },
+        { spk: "A", f: "Parfait, je la prends !", t: "Perfeito, vou levar!" }
       ]
     }
   },
