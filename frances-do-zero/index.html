@@ -204,19 +204,27 @@ body{
 .dialogue-content .french{ font-size:15.5px; font-weight:700; display:flex; align-items:center; gap:8px; }
 .dialogue-content .trans{ font-size:12.5px; color:var(--ink-soft); }
 
-/* ---------- Passos de unidade de gramática ---------- */
-.gram-intro{ background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:20px; font-size:15px; line-height:1.6; color: var(--ink); }
+/* ---------- Passos de unidade de gramática (blocos, estilo Busuu) ---------- */
+.gram-block-counter{ text-align:center; font-size:12.5px; font-weight:800; color: var(--ink-soft); margin-bottom:14px; }
+.gram-block{
+  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding:24px 22px; text-align:center;
+}
+.gram-block.wrapup{ background: rgba(227,107,202,0.08); border-color: var(--imperial-gold); }
+.gram-block-title{ margin:0 0 10px; font-size:19px; color: var(--brand-purple); }
+.gram-block.wrapup .gram-block-title{ color: var(--seal-red-dark); }
+.gram-block-body{ margin:0; font-size:14.5px; line-height:1.6; color: var(--ink); text-align:left; }
 
-.gram-examples{ display:flex; flex-direction:column; gap:10px; }
-.gram-example{ background: var(--paper); border-left:3px solid var(--brand-purple); border-radius: 0 var(--radius) var(--radius) 0; padding:12px 16px; }
-.gram-example .french{ font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px; }
-.gram-example .trans{ font-size:13px; color:var(--ink-soft); margin-top:2px; }
+.gram-block-examples{
+  margin-top:18px; text-align:left; background: var(--paper); border:1px solid var(--paper-line);
+  border-radius: var(--radius); overflow:hidden;
+}
+.gram-block-example{ padding:14px 16px; }
+.gram-block-example + .gram-block-example{ border-top:1px solid var(--paper-line); }
+.gram-block-example .french{ font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px; }
+.gram-block-example .trans{ font-size:13px; color:var(--ink-soft); margin-top:2px; }
 
-.gram-deepdive{ font-size:14.5px; line-height:1.65; color: var(--ink); margin-bottom:18px; }
-.gram-deepdive p{ margin:0 0 12px; }
-.gram-deepdive p:last-child{ margin-bottom:0; }
-
-.gram-tables{ display:flex; gap:14px; flex-wrap:wrap; }
+.gram-tables{ display:flex; gap:14px; flex-wrap:wrap; margin-top:18px; }
 .gram-table{ flex:1; min-width:160px; background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius); overflow:hidden; }
 .gram-table-title{ background: var(--brand-purple); color: var(--paper); font-weight:800; text-align:center; padding:8px; font-size:14px; }
 .gram-table-row{ display:flex; justify-content:space-between; padding:8px 12px; border-top:1px solid var(--paper-line); font-size:13.5px; }
@@ -299,11 +307,21 @@ body{
 .exercise-option.disabled{ pointer-events:none; opacity:.6; }
 .exercise-option.disabled.correct, .exercise-option.disabled.incorrect{ opacity:1; }
 
-.exercise-result{ text-align:center; padding: 40px 20px; }
-.exercise-result .big-emoji{ font-size:48px; margin-bottom:10px; }
-.exercise-result h3{ margin:0 0 6px; font-size:20px; }
-.exercise-result p{ margin:0; color: var(--ink-soft); font-size:14px; }
-.exercise-result .score-num{ font-size:34px; font-weight:800; color: var(--seal-red-dark); margin: 14px 0; }
+/* ---------- Tela final "Parabéns" (estilo Busuu) ---------- */
+.lesson-complete{ text-align:center; padding: 20px 4px; }
+.lesson-complete-icon{ font-size:52px; margin-bottom:8px; }
+.lesson-complete h2{ margin:0 0 18px; font-size:22px; }
+.lesson-complete-stats{ display:flex; gap:12px; margin-bottom:22px; }
+.lc-stat{ flex:1; background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:14px; }
+.lc-stat-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); font-weight:800; margin-bottom:6px; }
+.lc-stat-value{ font-size:24px; font-weight:800; color: var(--seal-red-dark); }
+
+.lesson-recap{ text-align:left; background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius); overflow:hidden; }
+.lesson-recap-label{ background: var(--brand-purple); color: var(--paper); font-weight:800; font-size:11px; text-transform:uppercase; letter-spacing:.05em; padding:10px 16px; }
+.lesson-recap-item{ padding:12px 16px; }
+.lesson-recap-item + .lesson-recap-item{ border-top:1px solid var(--paper-line); }
+.lesson-recap-french{ font-size:15px; font-weight:700; display:flex; align-items:center; gap:8px; }
+.lesson-recap-trans{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
 
 /* ---------- Exercício de ordenar palavras (reorder) ---------- */
 .reorder-answer-slots{

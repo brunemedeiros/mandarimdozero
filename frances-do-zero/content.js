@@ -28,9 +28,15 @@
 // segue contando normalmente).
 //
 // Unidades de gramática (type: "grammar"): em vez de vocab/phrases/dialogue,
-// têm um campo "grammar" com { intro, examples, deepDive, table, exercises }.
-// Fluxo próprio na Trilha: Explicação → Na frase → Aprofundando → Exercícios
-// (em vez de Vocabulário → Diálogo → Exercícios das unidades comunicativas).
+// têm um campo "grammar" com { blocks, exercises }. Cada item de "blocks" é
+// uma tela de explicação própria — { title, body, examples: [{f,t}], table?,
+// wrapup? } — no estilo Busuu: o aluno avança bloco por bloco (como no
+// vocabulário palavra-por-palavra), cada um com 1-2 frases de exemplo
+// divididas por uma linha quando há mais de uma. O último bloco normalmente
+// tem wrapup:true (mensagem de incentivo) e pode trazer a tabela de
+// conjugação completa antes dos exercícios. Fluxo na Trilha: Explicação
+// (paginada por bloco) → Exercícios — em vez de Vocabulário → Diálogo →
+// Exercícios das unidades comunicativas.
 
 const LEVELS = [
   { id: "A1", label: "Nível 1 · Débutant" },
@@ -195,32 +201,61 @@ const UNITS = [
     title: "Verbos avoir e être",
     goal: "Conjugar avoir e être no presente e reconhecer seu uso nas frases.",
     grammar: {
-      intro: "Avoir (ter) e être (ser/estar) são os dois verbos mais usados do francês — e os únicos totalmente irregulares no presente. Você já viu várias formas deles nas últimas unidades (je suis, j'ai, il a...) sem parar pra pensar na conjugação completa. Agora vamos ver a tabela toda e praticar.",
-      examples: [
-        { f: "Je suis brésilienne.", t: "Eu sou brasileira. (être)" },
-        { f: "J'ai vingt ans.", t: "Eu tenho vinte anos. (avoir)" },
-        { f: "Il a dix ans.", t: "Ele tem dez anos. (avoir)" },
-        { f: "Elle est ma sœur.", t: "Ela é minha irmã. (être)" }
+      // Cada bloco é uma "tela" própria na Trilha (como no Busuu): título curto,
+      // explicação breve e uma caixa com 1-2 frases de exemplo (com áudio),
+      // separadas por uma divisória quando há mais de uma. O último bloco
+      // (wrapup: true) fecha a explicação com uma mensagem de incentivo e a
+      // tabela de conjugação completa, antes de entrar nos exercícios.
+      blocks: [
+        {
+          title: "Avoir e être",
+          body: "Avoir (ter) e être (ser/estar) são os dois verbos mais usados do francês — e os únicos totalmente irregulares no presente. Você já viu várias formas deles nas últimas unidades (je suis, j'ai, il a...) sem parar pra pensar na conjugação completa.",
+          examples: [
+            { f: "Je suis brésilienne.", t: "Eu sou brasileira. (être)" },
+            { f: "J'ai vingt ans.", t: "Eu tenho vinte anos. (avoir)" }
+          ]
+        },
+        {
+          title: "Nenhum padrão pra deduzir",
+          body: "Repare que nenhuma das duas conjugações segue um padrão regular — não tem como \"deduzir\" a forma a partir do infinitivo, então vale a pena memorizar a tabela inteira, não só as formas isoladas que você já viu.",
+          examples: [
+            { f: "Il a dix ans.", t: "Ele tem dez anos. (avoir)" },
+            { f: "Elle est ma sœur.", t: "Ela é minha irmã. (être)" }
+          ]
+        },
+        {
+          title: "Uma pegadinha comum",
+          body: "O francês usa avoir (ter) em várias expressões onde o português usa \"estar\" ou \"ser\" — avoir faim (estar com fome), avoir soif (estar com sede), avoir peur (estar com medo), avoir raison (estar certo). Se em português a frase usa \"estar com/ter\", muito provavelmente em francês é avoir.",
+          examples: [
+            { f: "J'ai faim.", t: "Estou com fome." },
+            { f: "Elle a raison.", t: "Ela está certa." }
+          ]
+        },
+        {
+          title: "Très bien! 🎉",
+          body: "Être também funciona como verbo auxiliar de outros tempos verbais que você vai ver no A2 — a base que você constrói agora facilita bastante lá na frente. Aqui está a conjugação completa dos dois verbos antes de praticar:",
+          examples: [],
+          table: {
+            être: [
+              { pronoun: "je", form: "suis" },
+              { pronoun: "tu", form: "es" },
+              { pronoun: "il / elle / on", form: "est" },
+              { pronoun: "nous", form: "sommes" },
+              { pronoun: "vous", form: "êtes" },
+              { pronoun: "ils / elles", form: "sont" }
+            ],
+            avoir: [
+              { pronoun: "je (j')", form: "ai" },
+              { pronoun: "tu", form: "as" },
+              { pronoun: "il / elle / on", form: "a" },
+              { pronoun: "nous", form: "avons" },
+              { pronoun: "vous", form: "avez" },
+              { pronoun: "ils / elles", form: "ont" }
+            ]
+          },
+          wrapup: true
+        }
       ],
-      deepDive: "Repare que nenhuma das duas conjugações segue um padrão regular — não tem como \"deduzir\" a forma a partir do infinitivo, então vale a pena memorizar a tabela inteira, não só as formas isoladas que você já viu.\n\nUma pegadinha comum: o francês usa avoir (ter) em várias expressões onde o português usa \"estar\" ou \"ser\" — avoir faim (estar com fome), avoir soif (estar com sede), avoir peur (estar com medo), avoir raison (estar certo). Você vai ver mais dessas expressões nas próximas unidades — por enquanto, só fica de olho: se em português a frase usa \"estar com/ter\", muito provavelmente em francês é avoir.\n\nOutro motivo pra dominar être desde já: ele também funciona como verbo auxiliar de outros tempos verbais que você vai ver no A2 (o passé composé de alguns verbos se forma com être, não com avoir) — a base que você constrói agora facilita bastante lá na frente.",
-      table: {
-        être: [
-          { pronoun: "je", form: "suis" },
-          { pronoun: "tu", form: "es" },
-          { pronoun: "il / elle / on", form: "est" },
-          { pronoun: "nous", form: "sommes" },
-          { pronoun: "vous", form: "êtes" },
-          { pronoun: "ils / elles", form: "sont" }
-        ],
-        avoir: [
-          { pronoun: "je (j')", form: "ai" },
-          { pronoun: "tu", form: "as" },
-          { pronoun: "il / elle / on", form: "a" },
-          { pronoun: "nous", form: "avons" },
-          { pronoun: "vous", form: "avez" },
-          { pronoun: "ils / elles", form: "ont" }
-        ]
-      },
       exercises: [
         { prompt: "Je ___ étudiante.", hint: "être", answer: "suis" },
         { prompt: "Tu ___ vingt ans.", hint: "avoir", answer: "as" },

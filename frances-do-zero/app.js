@@ -635,12 +635,11 @@ const STEP_DEFS = [
   { key: 'exercises', label: 'Exercícios' }
 ];
 
-// Unidades de gramática (type: "grammar") seguem um fluxo próprio: explicação
-// breve → aplicação numa frase → aprofundamento da regra → exercícios de uso.
+// Unidades de gramática (type: "grammar") seguem um fluxo próprio, no estilo
+// Busuu: uma sequência de telas de explicação (paginadas bloco por bloco,
+// como o vocabulário palavra-por-palavra) e depois os exercícios de uso.
 const STEP_DEFS_GRAMMAR = [
-  { key: 'intro', label: 'Explicação' },
-  { key: 'apply', label: 'Na frase' },
-  { key: 'deepdive', label: 'Aprofundando' },
+  { key: 'explanation', label: 'Explicação' },
   { key: 'gramExercises', label: 'Exercícios' }
 ];
 
@@ -657,6 +656,8 @@ const STEP_STATE = {
   exerciseIndex: 0,
   exerciseScore: 0,
   exerciseAnswered: false,
+  explanationIndex: 0,
+  explanationUnitId: null,
   gramExerciseUnitId: null,
   gramExerciseIndex: 0,
   gramExerciseScore: 0
@@ -747,35 +748,9 @@ function renderVocabCardStep(u, contentEl, nextBtn){
   nextBtn.textContent = idx < total - 1 ? 'Próxima palavra →' : 'Continuar →';
 }
 
-// ---------- Unidades de gramática (Explicação → Na frase → Aprofundando → Exercícios) ----------
-function renderGrammarIntroStep(u, contentEl, nextBtn){
-  contentEl.innerHTML = `
-    <div class="section-label">Explicação</div>
-    <div class="gram-intro">${u.grammar.intro}</div>
-  `;
-  nextBtn.textContent = 'Continuar →';
-  nextBtn.style.display = 'flex';
-}
-
-function renderGrammarApplyStep(u, contentEl, nextBtn){
-  contentEl.innerHTML = `
-    <div class="section-label">Na frase</div>
-    <div class="gram-examples">
-      ${u.grammar.examples.map(ex => `
-        <div class="gram-example">
-          <div class="french">${ex.f} ${audioBtnHTML(ex.f)}</div>
-          <div class="trans">${ex.t}</div>
-        </div>
-      `).join('')}
-    </div>
-  `;
-  wireAudioButtons(contentEl);
-  nextBtn.textContent = 'Continuar →';
-  nextBtn.style.display = 'flex';
-}
-
-function renderGrammarDeepDiveStep(u, contentEl, nextBtn){
-  const tableHTML = Object.entries(u.grammar.table || {}).map(([verb, rows]) => `
+// ---------- Unidades de gramática (Explicação em blocos, estilo Busuu → Exercícios) ----------
+function renderGramTableHTML(table){
+  return `<div class="gram-tables">${Object.entries(table || {}).map(([verb, rows]) => `
     <div class="gram-table">
       <div class="gram-table-title">${verb}</div>
       ${rows.map(r => `
@@ -785,14 +760,76 @@ function renderGrammarDeepDiveStep(u, contentEl, nextBtn){
         </div>
       `).join('')}
     </div>
-  `).join('');
+  `).join('')}</div>`;
+}
+
+// Cada bloco é sua própria tela (como uma palavra do vocabulário): título,
+// explicação curta e uma caixa de exemplos com divisória entre eles.
+function renderGrammarExplanationStep(u, contentEl, nextBtn){
+  const blocks = u.grammar.blocks;
+  const idx = STEP_STATE.explanationIndex;
+  const block = blocks[idx];
+  const isLast = idx === blocks.length - 1;
+
+  const examplesHTML = (block.examples && block.examples.length) ? `
+    <div class="gram-block-examples">
+      ${block.examples.map(ex => `
+        <div class="gram-block-example">
+          <div class="french">${ex.f} ${audioBtnHTML(ex.f)}</div>
+          <div class="trans">${ex.t}</div>
+        </div>
+      `).join('')}
+    </div>` : '';
 
   contentEl.innerHTML = `
-    <div class="section-label">Aprofundando</div>
-    <div class="gram-deepdive">${u.grammar.deepDive.split('\n\n').map(p => `<p>${p}</p>`).join('')}</div>
-    ${tableHTML ? `<div class="gram-tables">${tableHTML}</div>` : ''}
+    <div class="gram-block-counter">Passo ${idx + 1} de ${blocks.length}</div>
+    <div class="gram-block ${block.wrapup ? 'wrapup' : ''}">
+      <h3 class="gram-block-title">${block.title}</h3>
+      <p class="gram-block-body">${block.body}</p>
+      ${examplesHTML}
+      ${block.table ? renderGramTableHTML(block.table) : ''}
+    </div>
   `;
-  nextBtn.textContent = 'Ir para os exercícios →';
+  wireAudioButtons(contentEl);
+  nextBtn.style.display = 'flex';
+  nextBtn.textContent = isLast ? 'Ir para os exercícios →' : 'Continuar →';
+}
+
+// ---------- Tela final "Parabéns" (estilo Busuu): estrelas, pontuação e
+// recapitulação do vocabulário/frases vistos pela primeira vez na lição ----------
+function currentStudentName(){
+  if (!CURRENT_USER) return 'Convidado';
+  const full = CURRENT_USER.user_metadata?.full_name || CURRENT_USER.email || 'Convidado';
+  return full.split(' ')[0].split('@')[0];
+}
+
+function renderLessonCompleteScreen(contentEl, nextBtn, { correct, total, recapItems, nextLabel }){
+  const pct = total ? Math.round((correct / total) * 100) : 0;
+  const stars = Math.max(1, Math.round((correct / (total || 1)) * 5));
+
+  contentEl.innerHTML = `
+    <div class="lesson-complete">
+      <div class="lesson-complete-icon">👍</div>
+      <h2>Parabéns, ${currentStudentName()}!</h2>
+      <div class="lesson-complete-stats">
+        <div class="lc-stat"><div class="lc-stat-label">Estrelas</div><div class="lc-stat-value">+${stars} ⭐</div></div>
+        <div class="lc-stat"><div class="lc-stat-label">Pontuação</div><div class="lc-stat-value">${pct}%</div></div>
+      </div>
+      ${recapItems.length ? `
+        <div class="lesson-recap">
+          <div class="lesson-recap-label">Vocabulário e frases desta lição</div>
+          ${recapItems.map(item => `
+            <div class="lesson-recap-item">
+              <div class="lesson-recap-french">${audioBtnHTML(item.f)}<span>${item.f}</span></div>
+              <div class="lesson-recap-trans">${item.t}</div>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+    </div>
+  `;
+  wireAudioButtons(contentEl);
+  nextBtn.textContent = nextLabel || 'Concluir unidade ✓';
   nextBtn.style.display = 'flex';
 }
 
@@ -801,17 +838,12 @@ function renderGrammarExerciseStep(u, contentEl, nextBtn){
   const total = list.length;
 
   if (STEP_STATE.gramExerciseIndex >= total){
-    const pct = Math.round((STEP_STATE.gramExerciseScore / total) * 100);
-    contentEl.innerHTML = `
-      <div class="exercise-result">
-        <div class="big-emoji">${pct >= 70 ? '🎉' : '💪'}</div>
-        <h3>Exercícios concluídos!</h3>
-        <div class="score-num">${STEP_STATE.gramExerciseScore}/${total}</div>
-        <p>${pct >= 70 ? 'Muito bem! Você já domina essa regra.' : 'Vale revisar essa regra de novo mais tarde.'}</p>
-      </div>
-    `;
-    nextBtn.textContent = 'Concluir unidade ✓';
-    nextBtn.style.display = 'flex';
+    const seen = new Set();
+    const recapItems = u.grammar.blocks.flatMap(b => b.examples || [])
+      .filter(ex => seen.has(ex.f) ? false : (seen.add(ex.f), true));
+    renderLessonCompleteScreen(contentEl, nextBtn, {
+      correct: STEP_STATE.gramExerciseScore, total, recapItems
+    });
     return;
   }
 
@@ -874,16 +906,18 @@ function renderStep(){
   const nextBtn = document.getElementById('step-next-btn');
 
   renderStepProgress();
-  const showBack = STEP_STATE.currentStep > 0 || (stepKey === 'vocab' && STEP_STATE.vocabIndex > 0);
+  const showBack = STEP_STATE.currentStep > 0
+    || (stepKey === 'vocab' && STEP_STATE.vocabIndex > 0)
+    || (stepKey === 'explanation' && STEP_STATE.explanationIndex > 0);
   backBtn.style.display = showBack ? 'inline-flex' : 'none';
 
   if (u.type === 'grammar'){
-    if (stepKey === 'intro'){
-      renderGrammarIntroStep(u, contentEl, nextBtn);
-    } else if (stepKey === 'apply'){
-      renderGrammarApplyStep(u, contentEl, nextBtn);
-    } else if (stepKey === 'deepdive'){
-      renderGrammarDeepDiveStep(u, contentEl, nextBtn);
+    if (stepKey === 'explanation'){
+      if (STEP_STATE.explanationUnitId !== u.id){
+        STEP_STATE.explanationIndex = 0;
+        STEP_STATE.explanationUnitId = u.id;
+      }
+      renderGrammarExplanationStep(u, contentEl, nextBtn);
     } else if (stepKey === 'gramExercises'){
       if (STEP_STATE.gramExerciseUnitId !== u.id){
         STEP_STATE.gramExerciseUnitId = u.id;
@@ -943,6 +977,12 @@ document.getElementById('step-back-btn').addEventListener('click', () => {
     return;
   }
 
+  if (stepKey === 'explanation' && STEP_STATE.explanationIndex > 0){
+    STEP_STATE.explanationIndex -= 1;
+    renderStep();
+    return;
+  }
+
   if (STEP_STATE.currentStep > 0){
     STEP_STATE.currentStep -= 1;
     renderStep();
@@ -955,6 +995,15 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
     if (STEP_STATE.vocabIndex < u.vocab.length - 1){
       STEP_STATE.vocabIndex += 1;
+      renderStep();
+      return;
+    }
+  }
+
+  if (stepKey === 'explanation'){
+    const u = UNITS.find(x => x.id === STATE.currentUnitId);
+    if (STEP_STATE.explanationIndex < u.grammar.blocks.length - 1){
+      STEP_STATE.explanationIndex += 1;
       renderStep();
       return;
     }
@@ -998,17 +1047,11 @@ function renderExerciseStep(){
   const total = STEP_STATE.exerciseList.length;
 
   if (STEP_STATE.exerciseIndex >= total){
-    const pct = Math.round((STEP_STATE.exerciseScore / total) * 100);
-    contentEl.innerHTML = `
-      <div class="exercise-result">
-        <div class="big-emoji">${pct >= 70 ? '🎉' : '💪'}</div>
-        <h3>Exercícios concluídos!</h3>
-        <div class="score-num">${STEP_STATE.exerciseScore}/${total}</div>
-        <p>${pct >= 70 ? 'Muito bem! Você já domina esse vocabulário.' : 'Vale revisar essas palavras de novo mais tarde na aba Revisão.'}</p>
-      </div>
-    `;
-    nextBtn.textContent = 'Concluir unidade ✓';
-    nextBtn.style.display = 'flex';
+    const u = UNITS.find(x => x.id === STATE.currentUnitId);
+    renderLessonCompleteScreen(contentEl, nextBtn, {
+      correct: STEP_STATE.exerciseScore, total,
+      recapItems: [...u.vocab, ...(u.phrases || [])]
+    });
     return;
   }
 
