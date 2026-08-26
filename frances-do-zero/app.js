@@ -723,14 +723,24 @@ function renderLevelModalList(){
   wrap.innerHTML = LEVELS.map(lvl => {
     const moduleCount = modulesOfLevel(lvl.id).length;
     const sub = moduleCount ? `${moduleCount} módulo${moduleCount === 1 ? '' : 's'}` : 'Em breve';
+    // Se existe um teste de nível que credita ESTE nível ao ser aprovado
+    // (ex: o Teste de Nível A1 libera o A2), mostra um atalho pra quem quer
+    // pular direto pra cá sem passar pelo nível anterior.
+    const skipTest = LEVEL_TESTS.find(t => t.nextLevel === lvl.id);
+    const skipHTML = skipTest ? `
+      <button class="level-skip-btn" data-test="${skipTest.id}">🎓 Pular pro ${lvl.id} com o ${skipTest.title}</button>
+    ` : '';
     return `
-      <button class="level-list-item ${STATE.currentLevel === lvl.id ? 'active' : ''}" data-level="${lvl.id}">
-        <div class="level-list-badge">${lvl.id}</div>
-        <div>
-          <div class="level-list-title">${lvl.label}</div>
-          <div class="level-list-sub">${sub}</div>
-        </div>
-      </button>
+      <div class="level-list-row">
+        <button class="level-list-item ${STATE.currentLevel === lvl.id ? 'active' : ''}" data-level="${lvl.id}">
+          <div class="level-list-badge">${lvl.id}</div>
+          <div>
+            <div class="level-list-title">${lvl.label}</div>
+            <div class="level-list-sub">${sub}</div>
+          </div>
+        </button>
+        ${skipHTML}
+      </div>
     `;
   }).join('');
   wrap.querySelectorAll('.level-list-item').forEach(btn => {
@@ -738,6 +748,13 @@ function renderLevelModalList(){
       STATE.currentLevel = btn.dataset.level;
       document.getElementById('level-modal').style.display = 'none';
       renderUnitsGrid();
+    });
+  });
+  wrap.querySelectorAll('.level-skip-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('level-modal').style.display = 'none';
+      openLevelTest(btn.dataset.test);
     });
   });
 }
@@ -858,9 +875,6 @@ function renderUnitsGrid(){
   }
 
   grid.innerHTML = '';
-  levelTestsOfLevel(STATE.currentLevel).forEach(test => {
-    grid.appendChild(buildLevelTestCard(test));
-  });
 
   levelModules.forEach((module, mIdx) => {
     const unlocked = moduleUnlocked(module);
@@ -882,6 +896,10 @@ function renderUnitsGrid(){
     subGrid.appendChild(buildCheckpointCard(module, unlocked));
 
     grid.appendChild(section);
+  });
+
+  levelTestsOfLevel(STATE.currentLevel).forEach(test => {
+    grid.appendChild(buildLevelTestCard(test));
   });
 }
 
