@@ -245,12 +245,13 @@ LEVEL_TESTS.forEach((t) => {
 });
 
 // ---------- Supabase: conexão, autenticação e persistência na nuvem ----------
-// IMPORTANTE: estas credenciais ainda apontam para o projeto Supabase do
-// Mandarim do Zero — antes de publicar para os alunos, troque por um projeto
-// (ou ao menos uma tabela) dedicado ao Francês do Zero, para não misturar
-// progresso dos dois cursos.
+// Este projeto Supabase é compartilhado com o Mandarim do Zero (mesma tabela
+// `progress`, chaveada por user_id). Para não misturar streak/XP/progresso
+// dos dois cursos, cada app guarda seu estado sob sua própria chave dentro
+// da coluna `data` (ver APP_KEY, saveState() e loadState() abaixo).
 const SUPABASE_URL = 'https://eigjocalzwamisgqilhg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpZ2pvY2FsendhbWlzZ3FpbGhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5MjYzNjksImV4cCI6MjEwMjUwMjM2OX0.EyW4vyQcFL2vrBoo-rpLD5J8LNBT3aSEJREZTSqzHVU';
+const APP_KEY = 'frances';
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -364,9 +365,20 @@ async function saveState(){
 
   try{
     const payload = serializeState();
+    // A linha do usuário é compartilhada com outros apps (mesma tabela `progress`).
+    // Lê o que já está salvo e só substitui o namespace deste app, preservando
+    // o progresso salvo pelos outros apps sob suas próprias chaves.
+    const { data: existing, error: fetchError } = await supabaseClient
+      .from('progress')
+      .select('data')
+      .eq('user_id', CURRENT_USER.id)
+      .maybeSingle();
+    if (fetchError) console.error('Erro ao ler progresso antes de salvar:', fetchError);
+
+    const merged = Object.assign({}, existing && existing.data, { [APP_KEY]: payload });
     const { error } = await supabaseClient
       .from('progress')
-      .upsert({ user_id: CURRENT_USER.id, data: payload }, { onConflict: 'user_id' });
+      .upsert({ user_id: CURRENT_USER.id, data: merged }, { onConflict: 'user_id' });
     if (error) console.error('Erro ao salvar progresso:', error);
   }catch(e){
     console.error('Erro ao salvar progresso:', e);
@@ -386,8 +398,8 @@ async function loadState(){
       .maybeSingle();
 
     if (error){ console.error('Erro ao carregar progresso:', error); return; }
-    if (data && data.data){
-      applySerializedState(data.data);
+    if (data && data.data && data.data[APP_KEY]){
+      applySerializedState(data.data[APP_KEY]);
     }
   }catch(e){
     console.error('Erro ao carregar progresso:', e);
