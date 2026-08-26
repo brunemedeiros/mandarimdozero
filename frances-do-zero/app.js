@@ -215,7 +215,8 @@ const STATE = {
   reviewIndex: 0,
   reviewShowingAnswer: false,
   reviewSessionUnitFilter: null,
-  currentLevel: LEVELS[0].id
+  currentLevel: LEVELS[0].id,
+  daily: { date: null, stars: 0, lessons: 0, highScoreLessons: 0, conjugationSessions: 0 }
 };
 
 // Cada nível é acessível livremente (o aluno escolhe o nível quando quiser);
@@ -387,7 +388,8 @@ function serializeState(){
     streak: STATE.streak,
     lastStudyDay: STATE.lastStudyDay,
     activityLog: STATE.activityLog,
-    totalReviews: STATE.totalReviews
+    totalReviews: STATE.totalReviews,
+    daily: STATE.daily
   };
 }
 
@@ -404,6 +406,7 @@ function applySerializedState(data){
   if (data.lastStudyDay) STATE.lastStudyDay = data.lastStudyDay;
   if (data.activityLog) Object.assign(STATE.activityLog, data.activityLog);
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
+  if (data.daily) Object.assign(STATE.daily, data.daily);
 }
 
 // ---------- SM-2 algorithm (idêntico em espírito ao Anki) ----------
@@ -483,6 +486,85 @@ function registerStudyToday(){
     STATE.streak = 1;
   }
   STATE.lastStudyDay = today;
+}
+
+// ---------- Desafios de hoje (estilo Busuu) ----------
+// Contadores do dia (zeram sozinhos quando a data muda). Dois desafios fixos
+// aparecem todo dia; um terceiro, variável, é sorteado de um pool maior de
+// forma determinística a partir da data — então muda de dia pra dia, mas é
+// sempre o mesmo dentro do mesmo dia (não muda a cada re-render).
+function ensureDailyBucket(){
+  const today = todayStr();
+  if (STATE.daily.date !== today){
+    STATE.daily = { date: today, stars: 0, lessons: 0, highScoreLessons: 0, conjugationSessions: 0 };
+  }
+}
+
+function registerDailyStars(amount){
+  ensureDailyBucket();
+  STATE.daily.stars += amount;
+}
+function registerDailyLessonCompleted(scorePct){
+  ensureDailyBucket();
+  STATE.daily.lessons += 1;
+  if (scorePct >= 80) STATE.daily.highScoreLessons += 1;
+}
+function registerDailyConjugationSession(){
+  ensureDailyBucket();
+  STATE.daily.conjugationSessions += 1;
+}
+
+const FIXED_CHALLENGES = [
+  { id:'stars20', icon:'⭐', color:'gold', label:'Ganhe 20 estrelas', target:20, get: d => d.stars },
+  { id:'lessons3', icon:'🏆', color:'purple', label:'Complete 3 lições', target:3, get: d => d.lessons }
+];
+const VARIABLE_CHALLENGES = [
+  { id:'highscore2', icon:'📈', color:'blue', label:'Pontue mais de 80% em 2 lições', target:2, get: d => d.highScoreLessons },
+  { id:'conj1', icon:'🗣️', color:'blue', label:'Pratique conjugação 1 vez', target:1, get: d => d.conjugationSessions },
+  { id:'lessons5', icon:'📚', color:'blue', label:'Complete 5 lições', target:5, get: d => d.lessons },
+  { id:'stars40', icon:'⭐', color:'blue', label:'Ganhe 40 estrelas', target:40, get: d => d.stars }
+];
+
+function dailySeed(str){
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+function todaysChallenges(){
+  ensureDailyBucket();
+  const variable = VARIABLE_CHALLENGES[dailySeed(STATE.daily.date) % VARIABLE_CHALLENGES.length];
+  return [...FIXED_CHALLENGES, variable];
+}
+
+function renderDailyChallengesScreen(){
+  const contentEl = document.getElementById('step-content');
+  const nextBtn = document.getElementById('step-next-btn');
+  document.getElementById('step-back-btn').style.display = 'none';
+  document.getElementById('step-progress-wrap').style.display = 'none';
+
+  contentEl.innerHTML = `
+    <div class="challenges-screen">
+      <h2>Desafios de hoje</h2>
+      ${todaysChallenges().map(c => {
+        const current = Math.min(c.get(STATE.daily), c.target);
+        const pct = Math.round((current / c.target) * 100);
+        const done = current >= c.target;
+        return `
+          <div class="challenge-card">
+            <div class="challenge-icon ${c.color}">${c.icon}${done ? '<span class="challenge-check">✓</span>' : ''}</div>
+            <div class="challenge-body">
+              <div class="challenge-label">${c.label}</div>
+              <div class="challenge-progress-track"><div class="challenge-progress-fill" style="width:${pct}%"></div></div>
+            </div>
+            ${done ? '' : `<div class="challenge-count">${current}/${c.target}</div>`}
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+  nextBtn.textContent = 'Continuar →';
+  nextBtn.style.display = 'flex';
 }
 
 function addXP(amount){
@@ -660,15 +742,18 @@ const STEP_STATE = {
   explanationUnitId: null,
   gramExerciseUnitId: null,
   gramExerciseIndex: 0,
-  gramExerciseScore: 0
+  gramExerciseScore: 0,
+  onChallengesScreen: false
 };
 
 function openUnitDetail(unitId){
   STATE.currentUnitId = unitId;
   STATE.unitProgress[unitId].started = true;
+  STEP_STATE.onChallengesScreen = false;
 
   document.getElementById('path-list-wrap').style.display = 'none';
   document.getElementById('unit-detail-wrap').style.display = 'block';
+  document.getElementById('step-progress-wrap').style.display = '';
 
   const u = UNITS.find(x => x.id === unitId);
   const levelUnits = unitsOfLevel(u.level);
@@ -686,6 +771,7 @@ function openUnitDetail(unitId){
 }
 
 document.getElementById('back-to-path').addEventListener('click', () => {
+  STEP_STATE.onChallengesScreen = false;
   document.getElementById('path-list-wrap').style.display = 'block';
   document.getElementById('unit-detail-wrap').style.display = 'none';
   renderUnitsGrid();
@@ -803,9 +889,13 @@ function currentStudentName(){
   return full.split(' ')[0].split('@')[0];
 }
 
+function lessonStars(pct){
+  return Math.max(1, Math.round((pct / 100) * 5));
+}
+
 function renderLessonCompleteScreen(contentEl, nextBtn, { correct, total, recapItems, nextLabel }){
   const pct = total ? Math.round((correct / total) * 100) : 0;
-  const stars = Math.max(1, Math.round((correct / (total || 1)) * 5));
+  const stars = lessonStars(pct);
 
   contentEl.innerHTML = `
     <div class="lesson-complete">
@@ -944,7 +1034,6 @@ function renderStep(){
       STEP_STATE.exerciseScore = 0;
     }
     renderExerciseStep();
-    nextBtn.style.display = 'none';
 
   } else if (stepKey === 'dialogue'){
     contentEl.innerHTML = `
@@ -989,6 +1078,14 @@ document.getElementById('step-back-btn').addEventListener('click', () => {
   }
 });
 document.getElementById('step-next-btn').addEventListener('click', () => {
+  if (STEP_STATE.onChallengesScreen){
+    STEP_STATE.onChallengesScreen = false;
+    document.getElementById('path-list-wrap').style.display = 'block';
+    document.getElementById('unit-detail-wrap').style.display = 'none';
+    renderUnitsGrid();
+    return;
+  }
+
   const stepKey = currentStepDefs()[STEP_STATE.currentStep].key;
 
   if (stepKey === 'vocab'){
@@ -1013,10 +1110,14 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
     STEP_STATE.currentStep += 1;
     renderStep();
   } else {
-    markUnitCompleted(STATE.currentUnitId);
-    document.getElementById('path-list-wrap').style.display = 'block';
-    document.getElementById('unit-detail-wrap').style.display = 'none';
-    renderUnitsGrid();
+    const u = UNITS.find(x => x.id === STATE.currentUnitId);
+    const total = u.type === 'grammar' ? u.grammar.exercises.length : STEP_STATE.exerciseList.length;
+    const correct = u.type === 'grammar' ? STEP_STATE.gramExerciseScore : STEP_STATE.exerciseScore;
+    const scorePct = total ? Math.round((correct / total) * 100) : 100;
+
+    markUnitCompleted(STATE.currentUnitId, scorePct);
+    STEP_STATE.onChallengesScreen = true;
+    renderDailyChallengesScreen();
   }
 });
 
@@ -1057,6 +1158,7 @@ function renderExerciseStep(){
 
   const ex = STEP_STATE.exerciseList[STEP_STATE.exerciseIndex];
   STEP_STATE.exerciseAnswered = false;
+  nextBtn.style.display = 'none';
 
   if (ex.format === 'reorder'){
     renderReorderExercise(ex, contentEl, nextBtn, total);
@@ -1764,7 +1866,7 @@ function gradeCurrentCard(grade){
   renderReviewView();
 }
 
-function markUnitCompleted(unitId){
+function markUnitCompleted(unitId, scorePct){
   if (STATE.unitProgress[unitId].completed) return;
   STATE.unitProgress[unitId].completed = true;
   const u = UNITS.find(x => x.id === unitId);
@@ -1774,6 +1876,10 @@ function markUnitCompleted(unitId){
     STATE.unitProgress[levelUnits[idx+1].id].unlocked = true;
   }
   addXP(25);
+  if (typeof scorePct === 'number'){
+    registerDailyStars(lessonStars(scorePct));
+    registerDailyLessonCompleted(scorePct);
+  }
   showToast(`Unidade concluída! 🥐`);
   saveState();
 }
@@ -2324,6 +2430,7 @@ function renderConjPracticeStep(){
 
   if (CONJ_STATE.index >= CONJ_STATE.queue.length){
     const pct = CONJ_STATE.total ? Math.round((CONJ_STATE.score / CONJ_STATE.total) * 100) : 0;
+    registerDailyConjugationSession();
     contentEl.innerHTML = `
       <div class="conj-session-result">
         <div class="big-emoji">${pct >= 70 ? '🎉' : '💪'}</div>
