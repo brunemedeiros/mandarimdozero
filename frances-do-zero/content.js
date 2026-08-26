@@ -10,7 +10,7 @@
 //              ordenar a frase — cada bloco é um trecho clicável)
 //   dialogue: { title: "...", lines: [{ spk: "A", f: "...", t: "..." }, ...] }
 //
-// Progressão completa do nível A1 (17 unidades: 16 comunicativas + 1 de
+// Progressão completa do nível A1 (20 unidades: 16 comunicativas + 4 de
 // gramática). Próximos níveis entram como novas unidades com "level"
 // diferente, seguindo este mesmo schema — cada unidade carrega seu próprio
 // campo "level" (ex: "A1", "A2"), usado pelo seletor de nível na Trilha pra
@@ -342,6 +342,73 @@ const UNITS = [
     }
   },
   {
+    id: "A1-g2",
+    level: "A1",
+    type: "grammar",
+    title: "Verbos do 1º grupo e verbos pronominais",
+    goal: "Conjugar verbos regulares em -er e verbos pronominais (reflexivos) no presente.",
+    grammar: {
+      blocks: [
+        {
+          title: "Verbos do 1º grupo (-er)",
+          body: "A maioria dos verbos franceses termina em -er no infinitivo — é o chamado \"1º grupo\", e é o mais regular de todos. Basta tirar o -er e adicionar as terminações -e, -es, -e, -ons, -ez, -ent.",
+          examples: [
+            { f: "Je travaille le matin.", t: "Eu trabalho de manhã." },
+            { f: "Tu manges à midi.", t: "Você come ao meio-dia." }
+          ]
+        },
+        {
+          title: "Uma pequena exceção: manger",
+          body: "Verbos terminados em -ger (como manger) ganham um \"e\" extra antes de -ons, só pra manter o som suave do \"g\" — é a única mudança, e só acontece com \"nous\".",
+          examples: [
+            { f: "Nous mangeons à sept heures.", t: "Nós comemos às sete horas." },
+            { f: "Vous mangez du pain.", t: "Vocês comem pão." }
+          ]
+        },
+        {
+          title: "Verbos pronominais",
+          body: "Alguns verbos vêm sempre acompanhados de um pronome que \"reflete\" de volta pro sujeito — se réveiller (acordar), se lever (levantar-se). O pronome muda junto com o sujeito: me, te, se, nous, vous, se.",
+          examples: [
+            { f: "Je me lève à six heures.", t: "Eu levanto às seis horas." },
+            { f: "Tu te réveilles tôt ?", t: "Você acorda cedo?" }
+          ]
+        },
+        {
+          title: "Très bien! 🎉",
+          body: "Repare que o verbo pronominal se conjuga exatamente como um verbo comum do 1º grupo — só muda o pronome reflexivo na frente. Aqui está a conjugação completa dos dois modelos:",
+          examples: [],
+          table: {
+            travailler: [
+              { pronoun: "je", form: "travaille" },
+              { pronoun: "tu", form: "travailles" },
+              { pronoun: "il / elle / on", form: "travaille" },
+              { pronoun: "nous", form: "travaillons" },
+              { pronoun: "vous", form: "travaillez" },
+              { pronoun: "ils / elles", form: "travaillent" }
+            ],
+            "se lever": [
+              { pronoun: "je", form: "me lève" },
+              { pronoun: "tu", form: "te lèves" },
+              { pronoun: "il / elle / on", form: "se lève" },
+              { pronoun: "nous", form: "nous levons" },
+              { pronoun: "vous", form: "vous levez" },
+              { pronoun: "ils / elles", form: "se lèvent" }
+            ]
+          },
+          wrapup: true
+        }
+      ],
+      exercises: [
+        { prompt: "Je ___ à sept heures.", hint: "se réveiller", answer: "me réveille" },
+        { prompt: "Tu ___ tôt le matin ?", hint: "se lever", answer: "te lèves" },
+        { prompt: "Nous ___ à midi.", hint: "manger", answer: "mangeons" },
+        { prompt: "Il ___ le matin et l'après-midi.", hint: "travailler", answer: "travaille" },
+        { prompt: "Vous ___ le fromage ?", hint: "aimer", answer: "aimez" },
+        { prompt: "Elles ___ à six heures.", hint: "se lever", answer: "se lèvent" }
+      ]
+    }
+  },
+  {
     id: "A1-7",
     level: "A1",
     title: "Lugares e orientação",
@@ -496,6 +563,81 @@ const UNITS = [
     }
   },
   {
+    id: "A1-g3",
+    level: "A1",
+    type: "grammar",
+    title: "Adjetivos possessivos",
+    goal: "Usar mon/ma/mes, ton/ta/tes, son/sa/ses e os demais adjetivos possessivos corretamente.",
+    grammar: {
+      blocks: [
+        {
+          title: "Meu, minha, meus, minhas...",
+          body: "No francês, o adjetivo possessivo concorda com o gênero e número da coisa possuída — não com quem é o dono! Por isso \"meu\" pode ser mon, ma ou mes dependendo da palavra que vem depois.",
+          examples: [
+            { f: "C'est mon frère.", t: "Este é meu irmão. (frère é masculino)" },
+            { f: "C'est ma sœur.", t: "Esta é minha irmã. (sœur é feminino)" }
+          ]
+        },
+        {
+          title: "Nosso, vosso, deles...",
+          body: "Já notre/votre/leur (nosso, vosso/de vocês, deles) não mudam de acordo com o gênero — só ganham um \"s\" no plural (nos/vos/leurs), sempre que a coisa possuída estiver no plural.",
+          examples: [
+            { f: "Notre maison est grande.", t: "Nossa casa é grande." },
+            { f: "Leurs enfants sont gentils.", t: "Os filhos deles são gentis." }
+          ]
+        },
+        {
+          title: "Uma exceção sonora",
+          body: "Antes de uma palavra feminina que começa com vogal (ou \"h\" mudo), usa-se mon/ton/son no lugar de ma/ta/sa — só pra evitar o encontro estranho de dois sons de vogal seguidos. O gênero da palavra continua feminino, só a forma escrita muda.",
+          examples: [
+            { f: "C'est mon amie Sophie.", t: "Esta é minha amiga Sophie. (amie é feminino, mas começa com vogal)" },
+            { f: "Son école est loin.", t: "A escola dela fica longe." }
+          ]
+        },
+        {
+          title: "Très bien! 🎉",
+          body: "Aqui está a tabela completa dos possessivos — organizada por gênero/número da coisa possuída, não por quem é o dono:",
+          examples: [],
+          table: {
+            "Masculino singular": [
+              { pronoun: "meu", form: "mon" },
+              { pronoun: "teu (informal)", form: "ton" },
+              { pronoun: "seu / dele / dela", form: "son" },
+              { pronoun: "nosso", form: "notre" },
+              { pronoun: "vosso / de vocês", form: "votre" },
+              { pronoun: "deles / delas", form: "leur" }
+            ],
+            "Feminino singular": [
+              { pronoun: "minha", form: "ma" },
+              { pronoun: "tua (informal)", form: "ta" },
+              { pronoun: "sua / dele / dela", form: "sa" },
+              { pronoun: "nossa", form: "notre" },
+              { pronoun: "vossa / de vocês", form: "votre" },
+              { pronoun: "delas / deles", form: "leur" }
+            ],
+            "Plural (m/f)": [
+              { pronoun: "meus / minhas", form: "mes" },
+              { pronoun: "teus / tuas", form: "tes" },
+              { pronoun: "seus / suas", form: "ses" },
+              { pronoun: "nossos / nossas", form: "nos" },
+              { pronoun: "vossos / vossas", form: "vos" },
+              { pronoun: "deles / delas (pl.)", form: "leurs" }
+            ]
+          },
+          wrapup: true
+        }
+      ],
+      exercises: [
+        { prompt: "C'est ___ frère.", hint: "meu (masc.)", answer: "mon" },
+        { prompt: "C'est ___ sœur.", hint: "minha (fem.)", answer: "ma" },
+        { prompt: "Ce sont ___ parents.", hint: "meus (plural)", answer: "mes" },
+        { prompt: "___ maison est grande.", hint: "nossa", answer: "notre" },
+        { prompt: "Ce sont ___ enfants.", hint: "deles / delas (plural)", answer: "leurs" },
+        { prompt: "C'est ___ amie.", hint: "minha — mas amie começa com vogal", answer: "mon" }
+      ]
+    }
+  },
+  {
     id: "A1-11",
     level: "A1",
     title: "Corpo e saúde",
@@ -567,6 +709,64 @@ const UNITS = [
         { spk: "B", f: "Il est grand et il a les cheveux noirs.", t: "Ele é alto e tem cabelo preto." },
         { spk: "A", f: "Il est sympa ?", t: "Ele é legal?" },
         { spk: "B", f: "Oui, il est très gentil !", t: "Sim, ele é muito gentil!" }
+      ]
+    }
+  },
+  {
+    id: "A1-g4",
+    level: "A1",
+    type: "grammar",
+    title: "Comparativos",
+    goal: "Comparar pessoas e coisas usando plus, moins e aussi... que.",
+    grammar: {
+      blocks: [
+        {
+          title: "Plus... que (mais... que)",
+          body: "Pra dizer que algo tem \"mais\" de uma característica que outra coisa, usa-se plus + adjetivo + que. É a estrutura de comparação mais comum do francês.",
+          examples: [
+            { f: "Mon frère est plus grand que moi.", t: "Meu irmão é mais alto que eu." },
+            { f: "Cette robe est plus jolie que l'autre.", t: "Esse vestido é mais bonito que o outro." }
+          ]
+        },
+        {
+          title: "Moins... que / aussi... que",
+          body: "Do outro lado, moins... que expressa inferioridade (\"menos... que\") e aussi... que expressa igualdade (\"tão... quanto\"). A estrutura é sempre a mesma, só troca a palavrinha do meio.",
+          examples: [
+            { f: "Elle est moins grande que lui.", t: "Ela é menos alta que ele." },
+            { f: "Il est aussi gentil que son frère.", t: "Ele é tão gentil quanto o irmão." }
+          ]
+        },
+        {
+          title: "Uma irregularidade: bon → meilleur",
+          body: "Assim como em português \"bom\" não vira \"mais bom\" e sim \"melhor\", em francês bon também foge do padrão: não existe \"plus bon\" — a forma correta é meilleur. O mesmo acontece com o advérbio bien (bem), que vira mieux (melhor) no comparativo.",
+          examples: [
+            { f: "Ce gâteau est meilleur que l'autre.", t: "Esse bolo é melhor que o outro." },
+            { f: "Elle chante mieux que moi.", t: "Ela canta melhor que eu." }
+          ]
+        },
+        {
+          title: "Très bien! 🎉",
+          body: "Recapitulando as três estruturas de comparação e a exceção do bon/bien — vale memorizar essa tabela, porque bon → meilleur é um erro muito comum entre iniciantes:",
+          examples: [],
+          table: {
+            Comparativos: [
+              { pronoun: "superioridade (mais... que)", form: "plus ... que" },
+              { pronoun: "inferioridade (menos... que)", form: "moins ... que" },
+              { pronoun: "igualdade (tão... quanto)", form: "aussi ... que" },
+              { pronoun: "bon (bom) → irregular", form: "meilleur" },
+              { pronoun: "bien (bem) → irregular", form: "mieux" }
+            ]
+          },
+          wrapup: true
+        }
+      ],
+      exercises: [
+        { prompt: "Mon frère est ___ grand que moi.", hint: "superioridade", answer: "plus" },
+        { prompt: "Cette maison est ___ petite que l'autre.", hint: "inferioridade", answer: "moins" },
+        { prompt: "Il est ___ gentil que sa sœur.", hint: "igualdade", answer: "aussi" },
+        { prompt: "Ce livre est ___ que l'autre.", hint: "bon → irregular", answer: "meilleur" },
+        { prompt: "Elle est ___ jolie que moi.", hint: "igualdade", answer: "aussi" },
+        { prompt: "Ton chat est ___ grand que le mien.", hint: "inferioridade", answer: "moins" }
       ]
     }
   },
