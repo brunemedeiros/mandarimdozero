@@ -188,6 +188,25 @@ body{
 .unit-card.checkpoint.done .unit-icon{ background: rgba(58,115,89,0.14); }
 .unit-card.checkpoint .unit-badge{ background: var(--jade); color: white; }
 
+/* ---------- Teste de Nível (prova final, sempre desbloqueado) ---------- */
+.level-test-card{
+  display:flex; align-items:center; gap:16px; width:100%; text-align:left;
+  background: linear-gradient(135deg, rgba(61,22,123,0.06), rgba(227,107,202,0.08));
+  border:2px solid var(--brand-purple); border-radius: var(--radius);
+  padding:18px 20px; margin-bottom:24px; cursor:pointer; font-family: var(--font-body);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.level-test-card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-lift); }
+.level-test-card.done{ border-color: var(--jade); background: linear-gradient(135deg, rgba(58,115,89,0.06), rgba(58,115,89,0.1)); }
+.level-test-icon{ flex-shrink:0; width:52px; height:52px; border-radius:14px; background: var(--brand-purple); display:flex; align-items:center; justify-content:center; font-size:26px; }
+.level-test-card.done .level-test-icon{ background: var(--jade); }
+.level-test-body{ flex:1; min-width:0; }
+.level-test-title{ font-weight:800; font-size:16px; margin-bottom:4px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.level-test-done-pill{ background: var(--jade); color:white; font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; padding:3px 8px; border-radius:999px; }
+.level-test-sub{ font-size:13px; color: var(--ink-soft); line-height:1.4; }
+.level-test-cta{ flex-shrink:0; font-weight:800; font-size:14px; color: var(--brand-purple); white-space:nowrap; }
+.level-test-card.done .level-test-cta{ color: var(--jade); }
+
 /* ---------- Unit detail ---------- */
 .back-link{ display:inline-flex; align-items:center; gap:6px; background:none; border:none; color:var(--ink-soft); font-weight:700; font-size:13px; cursor:pointer; padding:6px 0; margin-bottom:8px; }
 .back-link:hover{ color:var(--seal-red-dark); }

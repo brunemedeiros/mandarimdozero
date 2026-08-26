@@ -1425,3 +1425,14 @@ const MODULES = [
   { id: "A1-m6", level: "A1", title: "Lazer e o passado",
     unitIds: ["A1-19", "A1-g8", "A1-20", "A1-g9"] }
 ];
+
+// ============================================================
+// TESTE DE NÍVEL: uma prova mais ampla que os pontos de verificação de
+// módulo — cobre o nível inteiro (amostra de todos os módulos) em vez de só
+// um bloco temático. Sempre desbloqueado, desde o primeiro acesso: um aluno
+// que já sabe o nível pode fazer a prova e pular direto pro próximo nível,
+// sem precisar abrir nenhuma unidade antes. Se aprovado, credita o nível
+// inteiro (todas as unidades + todos os pontos de verificação de módulo).
+const LEVEL_TESTS = [
+  { id: "A1-final", level: "A1", title: "Teste de Nível A1", nextLevel: "A2" }
+];

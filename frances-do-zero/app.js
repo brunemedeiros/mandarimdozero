@@ -217,6 +217,7 @@ const STATE = {
   reviewSessionUnitFilter: null,
   currentLevel: LEVELS[0].id,
   checkpointProgress: {},
+  levelTestProgress: {},
   daily: {
     date: null, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
     grammarLessons: 0, conjugationSessions: 0, conjugationCorrect: 0,
@@ -237,6 +238,10 @@ UNITS.forEach((u) => {
 
 MODULES.forEach((m) => {
   STATE.checkpointProgress[m.id] = { completed: false, bestScore: 0 };
+});
+
+LEVEL_TESTS.forEach((t) => {
+  STATE.levelTestProgress[t.id] = { completed: false, bestScore: 0 };
 });
 
 // ---------- Supabase: conexão, autenticação e persistência na nuvem ----------
@@ -399,7 +404,8 @@ function serializeState(){
     activityLog: STATE.activityLog,
     totalReviews: STATE.totalReviews,
     daily: STATE.daily,
-    checkpointProgress: STATE.checkpointProgress
+    checkpointProgress: STATE.checkpointProgress,
+    levelTestProgress: STATE.levelTestProgress
   };
 }
 
@@ -418,6 +424,7 @@ function applySerializedState(data){
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
   if (data.daily) Object.assign(STATE.daily, data.daily);
   if (data.checkpointProgress) Object.assign(STATE.checkpointProgress, data.checkpointProgress);
+  if (data.levelTestProgress) Object.assign(STATE.levelTestProgress, data.levelTestProgress);
 }
 
 // ---------- SM-2 algorithm (idêntico em espírito ao Anki) ----------
@@ -760,6 +767,26 @@ function moduleProgressPct(module){
   return Math.round((done / module.unitIds.length) * 100);
 }
 
+function levelTestsOfLevel(level){
+  return LEVEL_TESTS.filter(t => t.level === level);
+}
+
+function buildLevelTestCard(test){
+  const lt = STATE.levelTestProgress[test.id];
+  const card = document.createElement('button');
+  card.className = 'level-test-card' + (lt.completed ? ' done' : '');
+  card.innerHTML = `
+    <div class="level-test-icon">🎓</div>
+    <div class="level-test-body">
+      <div class="level-test-title">${test.title}${lt.completed ? ' <span class="level-test-done-pill">Concluído ✓</span>' : ''}</div>
+      <div class="level-test-sub">Já sabe francês nível ${test.level}? Faça esse teste e avance direto pro ${test.nextLevel} — não precisa completar as unidades antes.</div>
+    </div>
+    <div class="level-test-cta">${lt.completed ? 'Refazer' : 'Começar'} →</div>
+  `;
+  card.addEventListener('click', () => openLevelTest(test.id));
+  return card;
+}
+
 function buildUnitCard(u){
   const levelUnits = unitsOfLevel(u.level);
   const prog = STATE.unitProgress[u.id];
@@ -831,6 +858,10 @@ function renderUnitsGrid(){
   }
 
   grid.innerHTML = '';
+  levelTestsOfLevel(STATE.currentLevel).forEach(test => {
+    grid.appendChild(buildLevelTestCard(test));
+  });
+
   levelModules.forEach((module, mIdx) => {
     const unlocked = moduleUnlocked(module);
     const pct = moduleProgressPct(module);
@@ -890,7 +921,8 @@ const STEP_STATE = {
   gramExerciseIndex: 0,
   gramExerciseScore: 0,
   onChallengesScreen: false,
-  onCheckpoint: null
+  onCheckpoint: null,
+  onLevelTest: null
 };
 
 function openUnitDetail(unitId){
@@ -898,6 +930,7 @@ function openUnitDetail(unitId){
   STATE.unitProgress[unitId].started = true;
   STEP_STATE.onChallengesScreen = false;
   STEP_STATE.onCheckpoint = null;
+  STEP_STATE.onLevelTest = null;
 
   document.getElementById('path-list-wrap').style.display = 'none';
   document.getElementById('unit-detail-wrap').style.display = 'block';
@@ -926,6 +959,7 @@ function openUnitDetail(unitId){
 document.getElementById('back-to-path').addEventListener('click', () => {
   STEP_STATE.onChallengesScreen = false;
   STEP_STATE.onCheckpoint = null;
+  STEP_STATE.onLevelTest = null;
   document.getElementById('path-list-wrap').style.display = 'block';
   document.getElementById('unit-detail-wrap').style.display = 'none';
   renderUnitsGrid();
@@ -1246,6 +1280,18 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
       completeModuleUnits(module, CHECKPOINT_STATE.lastPct);
     }
     STEP_STATE.onCheckpoint = null;
+    document.getElementById('path-list-wrap').style.display = 'block';
+    document.getElementById('unit-detail-wrap').style.display = 'none';
+    renderUnitsGrid();
+    return;
+  }
+
+  if (STEP_STATE.onLevelTest){
+    const test = LEVEL_TESTS.find(t => t.id === STEP_STATE.onLevelTest);
+    if (LEVEL_TEST_STATE.lastPct >= LEVEL_TEST_PASS_THRESHOLD){
+      completeLevelTest(test, LEVEL_TEST_STATE.lastPct);
+    }
+    STEP_STATE.onLevelTest = null;
     document.getElementById('path-list-wrap').style.display = 'block';
     document.getElementById('unit-detail-wrap').style.display = 'none';
     renderUnitsGrid();
@@ -2206,6 +2252,148 @@ function renderCheckpointQuizStep(){
     goNextBtn.addEventListener('click', () => {
       CHECKPOINT_STATE.index += 1;
       renderCheckpointQuizStep();
+    });
+    contentEl.appendChild(goNextBtn);
+  });
+}
+
+// ---------- Teste de Nível (prova final, cobre o nível inteiro) ----------
+// Diferente do checkpoint de módulo (que cobre só um bloco temático), o
+// teste de nível amostra de TODOS os módulos do nível — sempre desbloqueado,
+// desde o primeiro acesso, pra quem já sabe o conteúdo pular direto pro
+// próximo nível sem passar por nenhuma unidade.
+const LEVEL_TEST_PASS_THRESHOLD = 75;
+const LEVEL_TEST_QUESTIONS_PER_MODULE = 5;
+
+const LEVEL_TEST_STATE = {
+  testId: null,
+  queue: [],
+  index: 0,
+  score: 0,
+  lastPct: 0
+};
+
+function buildLevelTestQueue(test){
+  const levelModules = modulesOfLevel(test.level);
+  let queue = [];
+  levelModules.forEach(module => {
+    const modulePool = buildCheckpointQueue(module); // já embaralhado e limitado a 12
+    queue = queue.concat(modulePool.slice(0, LEVEL_TEST_QUESTIONS_PER_MODULE));
+  });
+  return shuffle(queue);
+}
+
+function recordLevelTestAttempt(test, scorePct){
+  const lt = STATE.levelTestProgress[test.id];
+  lt.bestScore = Math.max(lt.bestScore || 0, scorePct);
+  saveState();
+}
+
+function completeLevelTest(test, scorePct){
+  const levelModules = modulesOfLevel(test.level);
+  levelModules.forEach(module => completeModuleUnits(module, scorePct));
+  STATE.levelTestProgress[test.id].completed = true;
+  STATE.levelTestProgress[test.id].bestScore = Math.max(STATE.levelTestProgress[test.id].bestScore || 0, scorePct);
+  addXP(150);
+  showToast(`Nível ${test.level} concluído! 🎓`);
+  saveState();
+}
+
+function openLevelTest(testId){
+  const test = LEVEL_TESTS.find(t => t.id === testId);
+  STEP_STATE.onChallengesScreen = false;
+  STEP_STATE.onCheckpoint = null;
+  STEP_STATE.onLevelTest = testId;
+
+  document.getElementById('path-list-wrap').style.display = 'none';
+  document.getElementById('unit-detail-wrap').style.display = 'block';
+  document.getElementById('step-progress-wrap').style.display = 'none';
+  document.getElementById('step-back-btn').style.display = 'none';
+
+  document.getElementById('ud-eyebrow').textContent = 'Teste de nível';
+  document.getElementById('ud-title').textContent = test.title;
+  document.getElementById('ud-goal').textContent = `Já sabe francês nível ${test.level}? Faça esse teste — se for bem, todo o nível é marcado como concluído e você já pode seguir direto pro ${test.nextLevel}.`;
+
+  LEVEL_TEST_STATE.testId = testId;
+  LEVEL_TEST_STATE.queue = buildLevelTestQueue(test);
+  LEVEL_TEST_STATE.index = 0;
+  LEVEL_TEST_STATE.score = 0;
+  LEVEL_TEST_STATE.lastPct = 0;
+  renderLevelTestQuizStep();
+
+  renderTopbarStats();
+}
+
+function renderLevelTestQuizStep(){
+  const contentEl = document.getElementById('step-content');
+  const nextBtn = document.getElementById('step-next-btn');
+  const test = LEVEL_TESTS.find(t => t.id === LEVEL_TEST_STATE.testId);
+  const total = LEVEL_TEST_STATE.queue.length;
+
+  if (LEVEL_TEST_STATE.index >= total){
+    const pct = total ? Math.round((LEVEL_TEST_STATE.score / total) * 100) : 0;
+    LEVEL_TEST_STATE.lastPct = pct;
+    recordLevelTestAttempt(test, pct);
+    const passed = pct >= LEVEL_TEST_PASS_THRESHOLD;
+    const recapItems = modulesOfLevel(test.level)
+      .flatMap(m => m.unitIds)
+      .map(id => UNITS.find(u => u.id === id))
+      .filter(u => u.type !== 'grammar')
+      .flatMap(u => u.vocab)
+      .slice(0, 12);
+    renderLessonCompleteScreen(contentEl, nextBtn, {
+      correct: LEVEL_TEST_STATE.score, total, recapItems,
+      nextLabel: passed ? `Concluir nível ${test.level} ✓` : 'Voltar à trilha'
+    });
+    return;
+  }
+
+  const ex = LEVEL_TEST_STATE.queue[LEVEL_TEST_STATE.index];
+  nextBtn.style.display = 'none';
+
+  contentEl.innerHTML = `
+    <div class="conj-progress">Pergunta ${LEVEL_TEST_STATE.index + 1} de ${total}</div>
+    <div class="gram-exercise">
+      <div class="gram-exercise-prompt">${ex.prompt}</div>
+      ${ex.hint ? `<div class="gram-exercise-hint">${ex.hint}</div>` : ''}
+      <input type="text" id="leveltest-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a resposta">
+      <div class="expected" id="leveltest-expected"></div>
+    </div>
+    <button class="btn btn-primary btn-block" id="leveltest-verify-btn">Vérifier</button>
+  `;
+
+  const inputEl = document.getElementById('leveltest-input');
+  inputEl.focus();
+  inputEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('leveltest-verify-btn').click();
+  });
+
+  document.getElementById('leveltest-verify-btn').addEventListener('click', () => {
+    const given = inputEl.value;
+    const expected = ex.answer;
+    const wrapEl = contentEl.querySelector('.gram-exercise');
+    const expectedEl = document.getElementById('leveltest-expected');
+    inputEl.disabled = true;
+
+    if (given.trim() === expected.trim()){
+      wrapEl.classList.add('ok');
+      LEVEL_TEST_STATE.score += 1;
+    } else if (normalizeLoose(given) === normalizeLoose(expected)){
+      wrapEl.classList.add('almost');
+      expectedEl.textContent = `Quase! → ${expected}`;
+      LEVEL_TEST_STATE.score += 0.5;
+    } else {
+      wrapEl.classList.add('wrong');
+      expectedEl.textContent = `→ ${expected}`;
+    }
+
+    document.getElementById('leveltest-verify-btn').style.display = 'none';
+    const goNextBtn = document.createElement('button');
+    goNextBtn.className = 'btn btn-secondary btn-block';
+    goNextBtn.textContent = LEVEL_TEST_STATE.index < total - 1 ? 'Próxima →' : 'Ver resultado →';
+    goNextBtn.addEventListener('click', () => {
+      LEVEL_TEST_STATE.index += 1;
+      renderLevelTestQuizStep();
     });
     contentEl.appendChild(goNextBtn);
   });
