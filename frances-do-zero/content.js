@@ -10,12 +10,20 @@
 //              ordenar a frase — cada bloco é um trecho clicável)
 //   dialogue: { title: "...", lines: [{ spk: "A", f: "...", t: "..." }, ...] }
 //
-// Progressão completa do nível A1 (14 unidades). Próximos níveis (A2, B1...)
-// entram depois como novas faixas de id, seguindo este mesmo schema.
+// Progressão completa do nível A1 (16 unidades). Próximos níveis entram como
+// novas unidades com "level" diferente, seguindo este mesmo schema — cada
+// unidade carrega seu próprio campo "level" (ex: "A1", "A2"), usado pelo
+// seletor de nível na Trilha pra filtrar/agrupar.
+
+const LEVELS = [
+  { id: "A1", label: "Nível 1 · Débutant" },
+  { id: "A2", label: "Nível 2 · Élémentaire" }
+];
 
 const UNITS = [
   {
     id: 1,
+    level: "A1",
     title: "Cumprimentar e se despedir",
     goal: "Cumprimentar alguém, se despedir e agradecer numa interação básica.",
     vocab: [
@@ -52,6 +60,7 @@ const UNITS = [
   },
   {
     id: 2,
+    level: "A1",
     title: "Se apresentar",
     goal: "Dizer o nome, a nacionalidade e perguntar o mesmo para o outro.",
     vocab: [
@@ -89,6 +98,7 @@ const UNITS = [
   },
   {
     id: 3,
+    level: "A1",
     title: "Números e idade",
     goal: "Contar do zero a cem e dizer/perguntar a idade.",
     vocab: [
@@ -125,6 +135,7 @@ const UNITS = [
   },
   {
     id: 4,
+    level: "A1",
     title: "Família",
     goal: "Apresentar os membros da família e dizer quantos irmãos você tem.",
     vocab: [
@@ -162,6 +173,7 @@ const UNITS = [
   },
   {
     id: 5,
+    level: "A1",
     title: "Comida e bebida",
     goal: "Falar sobre alimentos, bebidas e gostos alimentares (o que você gosta e não gosta de comer).",
     vocab: [
@@ -199,6 +211,7 @@ const UNITS = [
   },
   {
     id: 6,
+    level: "A1",
     title: "Horas e rotina diária",
     goal: "Dizer as horas e descrever a rotina do dia a dia.",
     vocab: [
@@ -235,6 +248,7 @@ const UNITS = [
   },
   {
     id: 7,
+    level: "A1",
     title: "Lugares e orientação",
     goal: "Perguntar e indicar como chegar a um lugar na cidade.",
     vocab: [
@@ -272,6 +286,7 @@ const UNITS = [
   },
   {
     id: 8,
+    level: "A1",
     title: "Compras",
     goal: "Perguntar preços (com números até cem), experimentar roupas e comprar numa loja.",
     vocab: [
@@ -313,6 +328,7 @@ const UNITS = [
   },
   {
     id: 9,
+    level: "A1",
     title: "Clima e estações",
     goal: "Falar sobre o tempo e as estações do ano.",
     vocab: [
@@ -349,6 +365,7 @@ const UNITS = [
   },
   {
     id: 10,
+    level: "A1",
     title: "Transporte",
     goal: "Pegar um transporte público e comprar uma passagem.",
     vocab: [
@@ -385,6 +402,7 @@ const UNITS = [
   },
   {
     id: 11,
+    level: "A1",
     title: "Corpo e saúde",
     goal: "Descrever sintomas simples e ir ao médico.",
     vocab: [
@@ -422,6 +440,7 @@ const UNITS = [
   },
   {
     id: 12,
+    level: "A1",
     title: "Cores e descrições",
     goal: "Descrever cores, objetos e características de pessoas.",
     vocab: [
@@ -458,6 +477,7 @@ const UNITS = [
   },
   {
     id: 13,
+    level: "A1",
     title: "A casa e os cômodos",
     goal: "Descrever uma casa, dizer o que tem (e o que não tem) nela.",
     vocab: [
@@ -494,6 +514,7 @@ const UNITS = [
   },
   {
     id: 14,
+    level: "A1",
     title: "Onde as coisas estão",
     goal: "Descrever a posição de móveis e objetos usando preposições de lugar.",
     vocab: [
@@ -530,6 +551,7 @@ const UNITS = [
   },
   {
     id: 15,
+    level: "A1",
     title: "Dias e datas",
     goal: "Dizer os dias da semana, meses e marcar um encontro.",
     vocab: [
@@ -566,6 +588,7 @@ const UNITS = [
   },
   {
     id: 16,
+    level: "A1",
     title: "Lazer e atividades",
     goal: "Falar sobre hobbies e combinar programas de fim de semana.",
     vocab: [

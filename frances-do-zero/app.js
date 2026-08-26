@@ -213,11 +213,19 @@ const STATE = {
   reviewQueue: [],
   reviewIndex: 0,
   reviewShowingAnswer: false,
-  reviewSessionUnitFilter: null
+  reviewSessionUnitFilter: null,
+  currentLevel: LEVELS[0].id
 };
 
-UNITS.forEach((u,i) => {
-  STATE.unitProgress[u.id] = { started:false, completed:false, unlocked: i===0 };
+// Cada nível é acessível livremente (o aluno escolhe o nível quando quiser);
+// dentro de um nível, o desbloqueio continua sequencial unidade por unidade —
+// então só a PRIMEIRA unidade de cada nível já nasce destravada.
+function isFirstOfLevel(u){
+  return !UNITS.some(x => x.level === u.level && x.id < u.id);
+}
+
+UNITS.forEach((u) => {
+  STATE.unitProgress[u.id] = { started:false, completed:false, unlocked: isFirstOfLevel(u) };
 });
 
 // ---------- Supabase: conexão, autenticação e persistência na nuvem ----------
@@ -495,8 +503,14 @@ const BADGES = [
   { id:'streak_3', name:'3 Dias Seguidos', icon:'🔥', check: s => s.streak >= 3 },
   { id:'streak_7', name:'Uma Semana!', icon:'🥐', check: s => s.streak >= 7 },
   { id:'unit_1', name:'Unidade 1 Completa', icon:'📖', check: s => s.unitProgress[1]?.completed },
-  { id:'unit_half', name:'Metade do Caminho', icon:'🗼', check: s => Object.values(s.unitProgress).filter(u=>u.completed).length >= Math.ceil(UNITS.length/2) },
-  { id:'unit_all', name:'Nível A1 Completo', icon:'🇫🇷', check: s => Object.values(s.unitProgress).filter(u=>u.completed).length >= UNITS.length },
+  { id:'unit_half', name:'Metade do Caminho', icon:'🗼', check: s => {
+      const a1 = UNITS.filter(u => u.level === 'A1');
+      return a1.filter(u => s.unitProgress[u.id]?.completed).length >= Math.ceil(a1.length/2);
+    } },
+  { id:'unit_all', name:'Nível A1 Completo', icon:'🇫🇷', check: s => {
+      const a1 = UNITS.filter(u => u.level === 'A1');
+      return a1.every(u => s.unitProgress[u.id]?.completed);
+    } },
   { id:'xp_100', name:'100 XP', icon:'⭐', check: s => s.xp >= 100 },
   { id:'xp_500', name:'500 XP', icon:'🌟', check: s => s.xp >= 500 },
   { id:'reviews_100', name:'100 Revisões', icon:'💪', check: s => s.totalReviews >= 100 },
@@ -511,10 +525,20 @@ function unitCardCounts(unitId){
   return { total: pool.length, learned };
 }
 
+// Unidades de um nível, na ordem — usado tanto pro desbloqueio sequencial
+// quanto pra numeração relativa exibida ("Unidade 2 de 16" dentro do nível).
+function unitsOfLevel(level){
+  return UNITS.filter(u => u.level === level).sort((a,b) => a.id - b.id);
+}
+
 function recalculateUnlockedUnits(){
-  UNITS.forEach((u, i) => {
-    const prog = STATE.unitProgress[u.id];
-    prog.unlocked = i === 0 || STATE.unitProgress[UNITS[i-1].id]?.completed || prog.unlocked;
+  LEVELS.forEach(lvl => {
+    unitsOfLevel(lvl.id).forEach((u, i) => {
+      const prog = STATE.unitProgress[u.id];
+      if (i === 0){ prog.unlocked = true; return; }
+      const prevId = unitsOfLevel(lvl.id)[i-1].id;
+      prog.unlocked = STATE.unitProgress[prevId]?.completed || prog.unlocked;
+    });
   });
 }
 
@@ -524,11 +548,44 @@ const UNIT_ICONS = {
   11: '🩺', 12: '🎨', 13: '🏠', 14: '🛋️', 15: '🗓️', 16: '🎬'
 };
 
+// ---------- Seletor de nível (A1/A2/...) ----------
+function renderLevelSelect(){
+  const el = document.getElementById('level-select');
+  el.innerHTML = LEVELS.map(lvl => `
+    <button class="level-chip ${STATE.currentLevel === lvl.id ? 'active' : ''}" data-level="${lvl.id}">${lvl.id}</button>
+  `).join('');
+  el.querySelectorAll('.level-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      STATE.currentLevel = btn.dataset.level;
+      renderUnitsGrid();
+    });
+  });
+
+  const currentLevelInfo = LEVELS.find(l => l.id === STATE.currentLevel);
+  document.getElementById('path-level-title').innerHTML =
+    `${currentLevelInfo.label} <span style="color:var(--ink-soft); font-weight:600; font-size:14px;">(${currentLevelInfo.id})</span>`;
+}
+
 function renderUnitsGrid(){
   recalculateUnlockedUnits();
+  renderLevelSelect();
+
   const grid = document.getElementById('units-grid');
+  const levelUnits = unitsOfLevel(STATE.currentLevel);
+
+  if (!levelUnits.length){
+    grid.innerHTML = `
+      <div class="level-empty" style="grid-column: 1 / -1;">
+        <div class="big-emoji">🚧</div>
+        <h3>Em breve</h3>
+        <p>O conteúdo do nível ${STATE.currentLevel} ainda está sendo preparado.</p>
+      </div>
+    `;
+    return;
+  }
+
   grid.innerHTML = '';
-  UNITS.forEach((u, i) => {
+  levelUnits.forEach((u, i) => {
     const prog = STATE.unitProgress[u.id];
     const unlocked = prog.unlocked;
     const { total, learned } = unitCardCounts(u.id);
@@ -539,7 +596,7 @@ function renderUnitsGrid(){
     card.innerHTML = `
       <div class="unit-icon-wrap">
         <div class="unit-icon">${UNIT_ICONS[u.id] || '📖'}</div>
-        <div class="unit-badge">${prog.completed ? '✓' : u.id}</div>
+        <div class="unit-badge">${prog.completed ? '✓' : i+1}</div>
       </div>
       <div class="unit-title">${u.title}</div>
       <div class="unit-progress-bar"><div class="unit-progress-fill" style="width:${pct}%"></div></div>
@@ -579,7 +636,9 @@ function openUnitDetail(unitId){
   document.getElementById('unit-detail-wrap').style.display = 'block';
 
   const u = UNITS.find(x => x.id === unitId);
-  document.getElementById('ud-eyebrow').textContent = `Unidade ${u.id} de ${UNITS.length}`;
+  const levelUnits = unitsOfLevel(u.level);
+  const posInLevel = levelUnits.findIndex(x => x.id === u.id) + 1;
+  document.getElementById('ud-eyebrow').textContent = `Unidade ${posInLevel} de ${levelUnits.length} · ${u.level}`;
   document.getElementById('ud-title').textContent = u.title;
   document.getElementById('ud-goal').textContent = u.goal;
 

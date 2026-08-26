@@ -109,6 +109,18 @@ body{
 .path-header p{ margin:0; color:var(--ink-soft); font-size:14px; }
 .path-header-btn{ font-size:13px; padding:10px 16px; white-space:nowrap; }
 
+/* ---------- Seletor de nível (A1/A2/...) ---------- */
+.level-select{ display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+.level-chip{
+  padding:8px 16px; border-radius:999px; border:1px solid var(--paper-line); background:var(--paper);
+  font-family: var(--font-body); font-weight:800; font-size:13px; cursor:pointer; color:var(--ink-soft);
+  transition: all .15s ease;
+}
+.level-chip:hover{ border-color: var(--imperial-gold); }
+.level-chip.active{ background: var(--seal-red); border-color: var(--seal-red); color:white; }
+.level-empty{ text-align:center; padding:50px 20px; color: var(--ink-soft); }
+.level-empty .big-emoji{ font-size:40px; margin-bottom:10px; }
+
 .units-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap:12px; }
 .unit-card{
   position:relative;
@@ -653,10 +665,11 @@ footer.app-footer img{ height:56px; opacity:.9; }
   <!-- ===== TRILHA ===== -->
   <div class="view active" id="view-path">
     <div id="path-list-wrap">
+      <div class="level-select" id="level-select"></div>
       <div class="path-header">
         <div class="path-header-top">
           <div>
-            <h2>Nível 1 · Débutant <span style="color:var(--ink-soft); font-weight:600; font-size:14px;">(A1)</span></h2>
+            <h2 id="path-level-title"></h2>
             <p>Unidades organizadas por objetivo comunicacional. Complete uma unidade para desbloquear a próxima.</p>
           </div>
           <button class="btn btn-secondary path-header-btn" id="export-open-btn">📦 Exportar</button>
