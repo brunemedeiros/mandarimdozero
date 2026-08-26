@@ -1667,12 +1667,12 @@ async function generateApkg(){
         tmpls: [
           {
             name: "Cartão 1", ord:0,
-            qfmt: "<div style='text-align:center;font-size:26px;color:#8E1915;font-weight:bold;'>{{Francês}}</div>",
-            afmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:18px;color:#5C4A3F;'>{{Tradução}}</div>",
+            qfmt: "<div style='text-align:center;font-size:26px;color:#1D5A82;font-weight:bold;'>{{Francês}}</div>",
+            afmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:18px;color:#5C4E73;'>{{Tradução}}</div>",
             bqfmt:"", bafmt:"", did: null
           }
         ],
-        css: ".card { font-family: 'Nunito', Arial, sans-serif; text-align: center; background-color: #FBF4E8; color:#211714; }",
+        css: ".card { font-family: 'Nunito', Arial, sans-serif; text-align: center; background-color: #FAF5EA; color:#201335; }",
         latexPre: "", latexPost: "", latexsvg:false, req: [[0,"any",[0]]]
       }
     };
