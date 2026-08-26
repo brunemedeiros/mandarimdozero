@@ -10,7 +10,7 @@
 //              ordenar a frase — cada bloco é um trecho clicável)
 //   dialogue: { title: "...", lines: [{ spk: "A", f: "...", t: "..." }, ...] }
 //
-// Progressão completa do nível A1 (20 unidades: 16 comunicativas + 4 de
+// Progressão completa do nível A1 (24 unidades: 17 comunicativas + 7 de
 // gramática). Próximos níveis entram como novas unidades com "level"
 // diferente, seguindo este mesmo schema — cada unidade carrega seu próprio
 // campo "level" (ex: "A1", "A2"), usado pelo seletor de nível na Trilha pra
@@ -157,44 +157,6 @@ const UNITS = [
     }
   },
   {
-    id: "A1-4",
-    level: "A1",
-    title: "Família",
-    goal: "Apresentar os membros da família e dizer quantos irmãos você tem.",
-    vocab: [
-      { f: "la famille", t: "a família" },
-      { f: "le père", t: "o pai" },
-      { f: "la mère", t: "a mãe" },
-      { f: "le frère", t: "o irmão" },
-      { f: "la sœur", t: "a irmã" },
-      { f: "les parents", t: "os pais" },
-      { f: "le fils", t: "o filho" },
-      { f: "la fille", t: "a filha" },
-      { f: "le mari", t: "o marido" },
-      { f: "la femme", t: "a esposa / a mulher" }
-    ],
-    phrases: [
-      { f: "Voici ma famille.", t: "Aqui está minha família.",
-        blocks: [{f:"Voici"},{f:"ma famille."}] },
-      { f: "J'ai deux frères.", t: "Eu tenho dois irmãos.",
-        blocks: [{f:"J'ai"},{f:"deux"},{f:"frères."}] },
-      { f: "Mon père s'appelle Marc.", t: "Meu pai se chama Marc.",
-        blocks: [{f:"Mon père"},{f:"s'appelle"},{f:"Marc."}] },
-      { f: "Elle est ma sœur.", t: "Ela é minha irmã.",
-        blocks: [{f:"Elle est"},{f:"ma sœur."}] }
-    ],
-    dialogue: {
-      title: "Falando da família",
-      lines: [
-        { spk: "A", f: "Tu as des frères et sœurs ?", t: "Você tem irmãos?" },
-        { spk: "B", f: "Oui, j'ai une sœur. Et toi ?", t: "Sim, eu tenho uma irmã. E você?" },
-        { spk: "A", f: "Moi, j'ai un frère. Il s'appelle Paul.", t: "Eu tenho um irmão. Ele se chama Paul." },
-        { spk: "B", f: "Il a quel âge ?", t: "Quantos anos ele tem?" },
-        { spk: "A", f: "Il a quinze ans.", t: "Ele tem quinze anos." }
-      ]
-    }
-  },
-  {
     id: "A1-g1",
     level: "A1",
     type: "grammar",
@@ -263,6 +225,119 @@ const UNITS = [
         { prompt: "Ils ___ deux enfants.", hint: "avoir", answer: "ont" },
         { prompt: "Vous ___ de Paris ?", hint: "être", answer: "êtes" },
         { prompt: "Elle ___ faim.", hint: "avoir", answer: "a" }
+      ]
+    }
+  },
+  {
+    id: "A1-4",
+    level: "A1",
+    title: "Família",
+    goal: "Apresentar os membros da família e dizer quantos irmãos você tem.",
+    vocab: [
+      { f: "la famille", t: "a família" },
+      { f: "le père", t: "o pai" },
+      { f: "la mère", t: "a mãe" },
+      { f: "le frère", t: "o irmão" },
+      { f: "la sœur", t: "a irmã" },
+      { f: "les parents", t: "os pais" },
+      { f: "le fils", t: "o filho" },
+      { f: "la fille", t: "a filha" },
+      { f: "le mari", t: "o marido" },
+      { f: "la femme", t: "a esposa / a mulher" }
+    ],
+    phrases: [
+      { f: "Voici ma famille.", t: "Aqui está minha família.",
+        blocks: [{f:"Voici"},{f:"ma famille."}] },
+      { f: "J'ai deux frères.", t: "Eu tenho dois irmãos.",
+        blocks: [{f:"J'ai"},{f:"deux"},{f:"frères."}] },
+      { f: "Mon père s'appelle Marc.", t: "Meu pai se chama Marc.",
+        blocks: [{f:"Mon père"},{f:"s'appelle"},{f:"Marc."}] },
+      { f: "Elle est ma sœur.", t: "Ela é minha irmã.",
+        blocks: [{f:"Elle est"},{f:"ma sœur."}] }
+    ],
+    dialogue: {
+      title: "Falando da família",
+      lines: [
+        { spk: "A", f: "Tu as des frères et sœurs ?", t: "Você tem irmãos?" },
+        { spk: "B", f: "Oui, j'ai une sœur. Et toi ?", t: "Sim, eu tenho uma irmã. E você?" },
+        { spk: "A", f: "Moi, j'ai un frère. Il s'appelle Paul.", t: "Eu tenho um irmão. Ele se chama Paul." },
+        { spk: "B", f: "Il a quel âge ?", t: "Quantos anos ele tem?" },
+        { spk: "A", f: "Il a quinze ans.", t: "Ele tem quinze anos." }
+      ]
+    }
+  },
+  {
+    id: "A1-g2",
+    level: "A1",
+    type: "grammar",
+    title: "Adjetivos possessivos",
+    goal: "Usar mon/ma/mes, ton/ta/tes, son/sa/ses e os demais adjetivos possessivos corretamente.",
+    grammar: {
+      blocks: [
+        {
+          title: "Meu, minha, meus, minhas...",
+          body: "No francês, o adjetivo possessivo concorda com o gênero e número da coisa possuída — não com quem é o dono! Por isso \"meu\" pode ser mon, ma ou mes dependendo da palavra que vem depois.",
+          examples: [
+            { f: "C'est mon frère.", t: "Este é meu irmão. (frère é masculino)" },
+            { f: "C'est ma sœur.", t: "Esta é minha irmã. (sœur é feminino)" }
+          ]
+        },
+        {
+          title: "Nosso, vosso, deles...",
+          body: "Já notre/votre/leur (nosso, vosso/de vocês, deles) não mudam de acordo com o gênero — só ganham um \"s\" no plural (nos/vos/leurs), sempre que a coisa possuída estiver no plural.",
+          examples: [
+            { f: "Notre père s'appelle Jean.", t: "Nosso pai se chama Jean." },
+            { f: "Ce sont leurs parents.", t: "Estes são os pais deles." }
+          ]
+        },
+        {
+          title: "Uma exceção sonora",
+          body: "Antes de uma palavra feminina que começa com vogal (ou \"h\" mudo), usa-se mon/ton/son no lugar de ma/ta/sa — só pra evitar o encontro estranho de dois sons de vogal seguidos. O gênero da palavra continua feminino, só a forma escrita muda.",
+          examples: [
+            { f: "C'est mon amie Sophie.", t: "Esta é minha amiga Sophie. (amie é feminino, mas começa com vogal)" },
+            { f: "Son école est loin.", t: "A escola dela fica longe." }
+          ]
+        },
+        {
+          title: "Très bien! 🎉",
+          body: "Aqui está a tabela completa dos possessivos — organizada por gênero/número da coisa possuída, não por quem é o dono:",
+          examples: [],
+          table: {
+            "Masculino singular": [
+              { pronoun: "meu", form: "mon" },
+              { pronoun: "teu (informal)", form: "ton" },
+              { pronoun: "seu / dele / dela", form: "son" },
+              { pronoun: "nosso", form: "notre" },
+              { pronoun: "vosso / de vocês", form: "votre" },
+              { pronoun: "deles / delas", form: "leur" }
+            ],
+            "Feminino singular": [
+              { pronoun: "minha", form: "ma" },
+              { pronoun: "tua (informal)", form: "ta" },
+              { pronoun: "sua / dele / dela", form: "sa" },
+              { pronoun: "nossa", form: "notre" },
+              { pronoun: "vossa / de vocês", form: "votre" },
+              { pronoun: "delas / deles", form: "leur" }
+            ],
+            "Plural (m/f)": [
+              { pronoun: "meus / minhas", form: "mes" },
+              { pronoun: "teus / tuas", form: "tes" },
+              { pronoun: "seus / suas", form: "ses" },
+              { pronoun: "nossos / nossas", form: "nos" },
+              { pronoun: "vossos / vossas", form: "vos" },
+              { pronoun: "deles / delas (pl.)", form: "leurs" }
+            ]
+          },
+          wrapup: true
+        }
+      ],
+      exercises: [
+        { prompt: "C'est ___ frère.", hint: "meu (masc.)", answer: "mon" },
+        { prompt: "C'est ___ sœur.", hint: "minha (fem.)", answer: "ma" },
+        { prompt: "Ce sont ___ parents.", hint: "meus (plural)", answer: "mes" },
+        { prompt: "___ père s'appelle Marc.", hint: "nosso", answer: "notre" },
+        { prompt: "Ce sont ___ fils.", hint: "deles / delas (plural)", answer: "leurs" },
+        { prompt: "C'est ___ amie.", hint: "minha — mas amie começa com vogal", answer: "mon" }
       ]
     }
   },
@@ -342,7 +417,7 @@ const UNITS = [
     }
   },
   {
-    id: "A1-g2",
+    id: "A1-g3",
     level: "A1",
     type: "grammar",
     title: "Verbos do 1º grupo e verbos pronominais",
@@ -411,6 +486,43 @@ const UNITS = [
   {
     id: "A1-7",
     level: "A1",
+    title: "Dias e meses",
+    goal: "Dizer os dias da semana, meses e marcar um encontro.",
+    vocab: [
+      { f: "lundi", t: "segunda-feira" },
+      { f: "mardi", t: "terça-feira" },
+      { f: "aujourd'hui", t: "hoje" },
+      { f: "demain", t: "amanhã" },
+      { f: "hier", t: "ontem" },
+      { f: "la semaine", t: "a semana" },
+      { f: "le mois", t: "o mês" },
+      { f: "janvier", t: "janeiro" },
+      { f: "décembre", t: "dezembro" },
+      { f: "la date", t: "a data" }
+    ],
+    phrases: [
+      { f: "Quel jour sommes-nous ?", t: "Que dia é hoje?",
+        blocks: [{f:"Quel jour"},{f:"sommes-nous ?"}] },
+      { f: "Nous sommes lundi.", t: "Hoje é segunda-feira.",
+        blocks: [{f:"Nous sommes"},{f:"lundi."}] },
+      { f: "Mon anniversaire est en mars.", t: "Meu aniversário é em março.",
+        blocks: [{f:"Mon anniversaire"},{f:"est"},{f:"en mars."}] },
+      { f: "À demain !", t: "Até amanhã!",
+        blocks: [{f:"À"},{f:"demain !"}] }
+    ],
+    dialogue: {
+      title: "Marcando um encontro",
+      lines: [
+        { spk: "A", f: "On se voit quel jour ?", t: "A gente se vê que dia?" },
+        { spk: "B", f: "Mardi, ça te va ?", t: "Terça, tá bom pra você?" },
+        { spk: "A", f: "Non, je travaille mardi. Et mercredi ?", t: "Não, eu trabalho terça. E quarta?" },
+        { spk: "B", f: "Parfait, à mercredi alors !", t: "Perfeito, até quarta então!" }
+      ]
+    }
+  },
+  {
+    id: "A1-8",
+    level: "A1",
     title: "Lugares e orientação",
     goal: "Perguntar e indicar como chegar a um lugar na cidade.",
     vocab: [
@@ -447,7 +559,108 @@ const UNITS = [
     }
   },
   {
-    id: "A1-8",
+    id: "A1-g4",
+    level: "A1",
+    type: "grammar",
+    title: "Preposições com países e cidades",
+    goal: "Usar à, en, au e aux corretamente com nomes de cidades e países.",
+    grammar: {
+      blocks: [
+        {
+          title: "à + cidade",
+          body: "Para dizer que algo acontece numa cidade, usa-se sempre à — sem artigo antes do nome da cidade, e sem se preocupar com gênero.",
+          examples: [
+            { f: "J'habite à Paris.", t: "Eu moro em Paris." },
+            { f: "Elle voyage à Tokyo.", t: "Ela está viajando pra Tóquio." }
+          ]
+        },
+        {
+          title: "en + país feminino / au + país masculino",
+          body: "A maioria dos países cujo nome termina em -e é feminina e usa en. Os demais (masculinos) usam au.",
+          examples: [
+            { f: "Je vais en France.", t: "Eu vou pra França. (la France, feminino)" },
+            { f: "Il travaille au Brésil.", t: "Ele trabalha no Brasil. (le Brésil, masculino)" }
+          ]
+        },
+        {
+          title: "aux + país no plural",
+          body: "Alguns países têm nome no plural — como les États-Unis (os Estados Unidos). Nesse caso, a preposição vira aux.",
+          examples: [
+            { f: "Ils habitent aux États-Unis.", t: "Eles moram nos Estados Unidos." },
+            { f: "Elle est aux Pays-Bas.", t: "Ela está na Holanda." }
+          ]
+        },
+        {
+          title: "Très bien! 🎉",
+          body: "Resumindo: cidade sempre leva à; país depende do gênero (en/au) ou de ser plural (aux). Aqui está a tabela com alguns exemplos:",
+          examples: [],
+          table: {
+            "Preposições": [
+              { pronoun: "cidade", form: "à" },
+              { pronoun: "país feminino (a maioria)", form: "en" },
+              { pronoun: "país masculino", form: "au" },
+              { pronoun: "país no plural", form: "aux" }
+            ],
+            "Exemplos": [
+              { pronoun: "la France (fem.)", form: "en France" },
+              { pronoun: "le Brésil (masc.)", form: "au Brésil" },
+              { pronoun: "le Portugal (masc.)", form: "au Portugal" },
+              { pronoun: "les États-Unis (plural)", form: "aux États-Unis" }
+            ]
+          },
+          wrapup: true
+        }
+      ],
+      exercises: [
+        { prompt: "J'habite ___ Lyon.", hint: "cidade", answer: "à" },
+        { prompt: "Il va ___ Portugal.", hint: "país masculino", answer: "au" },
+        { prompt: "Elle voyage ___ Espagne.", hint: "país feminino", answer: "en" },
+        { prompt: "Ils vivent ___ Pays-Bas.", hint: "país no plural", answer: "aux" },
+        { prompt: "Nous sommes ___ Londres.", hint: "cidade", answer: "à" },
+        { prompt: "Tu habites ___ Canada.", hint: "país masculino", answer: "au" }
+      ]
+    }
+  },
+  {
+    id: "A1-9",
+    level: "A1",
+    title: "Nacionalidades",
+    goal: "Dizer sua nacionalidade e a de outras pessoas, no masculino e no feminino.",
+    vocab: [
+      { f: "français / française", t: "francês / francesa" },
+      { f: "brésilien / brésilienne", t: "brasileiro / brasileira" },
+      { f: "américain / américaine", t: "americano / americana" },
+      { f: "anglais / anglaise", t: "inglês / inglesa" },
+      { f: "espagnol / espagnole", t: "espanhol / espanhola" },
+      { f: "italien / italienne", t: "italiano / italiana" },
+      { f: "allemand / allemande", t: "alemão / alemã" },
+      { f: "portugais / portugaise", t: "português / portuguesa" },
+      { f: "la nationalité", t: "a nacionalidade" },
+      { f: "venir de", t: "vir de (um lugar)" }
+    ],
+    phrases: [
+      { f: "Je suis brésilienne.", t: "Eu sou brasileira.",
+        blocks: [{f:"Je suis"},{f:"brésilienne."}] },
+      { f: "Il est français, elle est espagnole.", t: "Ele é francês, ela é espanhola.",
+        blocks: [{f:"Il est français,"},{f:"elle est"},{f:"espagnole."}] },
+      { f: "D'où viens-tu ?", t: "De onde você vem?",
+        blocks: [{f:"D'où"},{f:"viens-tu ?"}] },
+      { f: "Je viens du Portugal.", t: "Eu venho de Portugal.",
+        blocks: [{f:"Je viens"},{f:"du Portugal."}] }
+    ],
+    dialogue: {
+      title: "De onde você é?",
+      lines: [
+        { spk: "A", f: "Tu es d'où ?", t: "Você é de onde?" },
+        { spk: "B", f: "Je suis italienne, et toi ?", t: "Eu sou italiana, e você?" },
+        { spk: "A", f: "Moi, je suis allemand.", t: "Eu sou alemão." },
+        { spk: "B", f: "Tu habites en Allemagne ?", t: "Você mora na Alemanha?" },
+        { spk: "A", f: "Non, j'habite au Portugal maintenant.", t: "Não, eu moro em Portugal agora." }
+      ]
+    }
+  },
+  {
+    id: "A1-10",
     level: "A1",
     title: "Compras",
     goal: "Perguntar preços (com números até cem), experimentar roupas e comprar numa loja.",
@@ -489,7 +702,7 @@ const UNITS = [
     }
   },
   {
-    id: "A1-9",
+    id: "A1-11",
     level: "A1",
     title: "Clima e estações",
     goal: "Falar sobre o tempo e as estações do ano.",
@@ -526,7 +739,7 @@ const UNITS = [
     }
   },
   {
-    id: "A1-10",
+    id: "A1-12",
     level: "A1",
     title: "Transporte",
     goal: "Pegar um transporte público e comprar uma passagem.",
@@ -563,82 +776,74 @@ const UNITS = [
     }
   },
   {
-    id: "A1-g3",
+    id: "A1-g5",
     level: "A1",
     type: "grammar",
-    title: "Adjetivos possessivos",
-    goal: "Usar mon/ma/mes, ton/ta/tes, son/sa/ses e os demais adjetivos possessivos corretamente.",
+    title: "Verbos faire e prendre",
+    goal: "Conjugar os verbos irregulares faire e prendre no presente.",
     grammar: {
       blocks: [
         {
-          title: "Meu, minha, meus, minhas...",
-          body: "No francês, o adjetivo possessivo concorda com o gênero e número da coisa possuída — não com quem é o dono! Por isso \"meu\" pode ser mon, ma ou mes dependendo da palavra que vem depois.",
+          title: "Faire: um verbo com mil usos",
+          body: "Faire (fazer) é irregular e aparece em muitas expressões fixas — inclusive nas de clima que você já viu, como il fait chaud e il fait froid.",
           examples: [
-            { f: "C'est mon frère.", t: "Este é meu irmão. (frère é masculino)" },
-            { f: "C'est ma sœur.", t: "Esta é minha irmã. (sœur é feminino)" }
+            { f: "Il fait 30 degrés aujourd'hui.", t: "Está fazendo 30 graus hoje." },
+            { f: "Que fais-tu ce soir ?", t: "O que você faz hoje à noite?" }
           ]
         },
         {
-          title: "Nosso, vosso, deles...",
-          body: "Já notre/votre/leur (nosso, vosso/de vocês, deles) não mudam de acordo com o gênero — só ganham um \"s\" no plural (nos/vos/leurs), sempre que a coisa possuída estiver no plural.",
+          title: "Prendre: pegar, tomar, comer",
+          body: "Prendre (pegar/tomar) é usado tanto pra transporte, como você já viu, quanto pra pedir comida ou bebida — é um verbo bem versátil no dia a dia.",
           examples: [
-            { f: "Notre maison est grande.", t: "Nossa casa é grande." },
-            { f: "Leurs enfants sont gentils.", t: "Os filhos deles são gentis." }
+            { f: "Je prends souvent le métro.", t: "Eu pego o metrô frequentemente." },
+            { f: "Tu prends un café ?", t: "Você vai tomar um café?" }
           ]
         },
         {
-          title: "Uma exceção sonora",
-          body: "Antes de uma palavra feminina que começa com vogal (ou \"h\" mudo), usa-se mon/ton/son no lugar de ma/ta/sa — só pra evitar o encontro estranho de dois sons de vogal seguidos. O gênero da palavra continua feminino, só a forma escrita muda.",
+          title: "Um padrão parecido",
+          body: "Repare que os dois verbos mudam de raiz no plural — faire vira fais-/fais-/fait- no singular mas faisons/faites/font no plural, e prendre dobra o \"n\" em ils/elles prennent. Vale prestar atenção nessas irregularidades.",
           examples: [
-            { f: "C'est mon amie Sophie.", t: "Esta é minha amiga Sophie. (amie é feminino, mas começa com vogal)" },
-            { f: "Son école est loin.", t: "A escola dela fica longe." }
+            { f: "Nous prenons le bus ensemble.", t: "Nós pegamos o ônibus juntos." },
+            { f: "Vous faites quoi ce week-end ?", t: "O que vocês fazem esse fim de semana?" }
           ]
         },
         {
           title: "Très bien! 🎉",
-          body: "Aqui está a tabela completa dos possessivos — organizada por gênero/número da coisa possuída, não por quem é o dono:",
+          body: "Aqui está a conjugação completa dos dois verbos — repare nas irregularidades destacadas:",
           examples: [],
           table: {
-            "Masculino singular": [
-              { pronoun: "meu", form: "mon" },
-              { pronoun: "teu (informal)", form: "ton" },
-              { pronoun: "seu / dele / dela", form: "son" },
-              { pronoun: "nosso", form: "notre" },
-              { pronoun: "vosso / de vocês", form: "votre" },
-              { pronoun: "deles / delas", form: "leur" }
+            faire: [
+              { pronoun: "je", form: "fais" },
+              { pronoun: "tu", form: "fais" },
+              { pronoun: "il / elle / on", form: "fait" },
+              { pronoun: "nous", form: "faisons" },
+              { pronoun: "vous", form: "faites" },
+              { pronoun: "ils / elles", form: "font" }
             ],
-            "Feminino singular": [
-              { pronoun: "minha", form: "ma" },
-              { pronoun: "tua (informal)", form: "ta" },
-              { pronoun: "sua / dele / dela", form: "sa" },
-              { pronoun: "nossa", form: "notre" },
-              { pronoun: "vossa / de vocês", form: "votre" },
-              { pronoun: "delas / deles", form: "leur" }
-            ],
-            "Plural (m/f)": [
-              { pronoun: "meus / minhas", form: "mes" },
-              { pronoun: "teus / tuas", form: "tes" },
-              { pronoun: "seus / suas", form: "ses" },
-              { pronoun: "nossos / nossas", form: "nos" },
-              { pronoun: "vossos / vossas", form: "vos" },
-              { pronoun: "deles / delas (pl.)", form: "leurs" }
+            prendre: [
+              { pronoun: "je", form: "prends" },
+              { pronoun: "tu", form: "prends" },
+              { pronoun: "il / elle / on", form: "prend" },
+              { pronoun: "nous", form: "prenons" },
+              { pronoun: "vous", form: "prenez" },
+              { pronoun: "ils / elles", form: "prennent" }
             ]
           },
           wrapup: true
         }
       ],
       exercises: [
-        { prompt: "C'est ___ frère.", hint: "meu (masc.)", answer: "mon" },
-        { prompt: "C'est ___ sœur.", hint: "minha (fem.)", answer: "ma" },
-        { prompt: "Ce sont ___ parents.", hint: "meus (plural)", answer: "mes" },
-        { prompt: "___ maison est grande.", hint: "nossa", answer: "notre" },
-        { prompt: "Ce sont ___ enfants.", hint: "deles / delas (plural)", answer: "leurs" },
-        { prompt: "C'est ___ amie.", hint: "minha — mas amie começa com vogal", answer: "mon" }
+        { prompt: "Il ___ chaud aujourd'hui.", hint: "faire", answer: "fait" },
+        { prompt: "Je ___ le métro tous les jours.", hint: "prendre", answer: "prends" },
+        { prompt: "Nous ___ du sport le week-end.", hint: "faire", answer: "faisons" },
+        { prompt: "Vous ___ un café ?", hint: "prendre", answer: "prenez" },
+        { prompt: "Elles ___ le train ensemble.", hint: "prendre", answer: "prennent" },
+        { prompt: "Tu ___ quoi ce soir ?", hint: "faire", answer: "fais" }
       ]
     }
   },
   {
-    id: "A1-11",
+    id: "A1-13",
     level: "A1",
     title: "Corpo e saúde",
     goal: "Descrever sintomas simples e ir ao médico.",
@@ -676,7 +881,7 @@ const UNITS = [
     }
   },
   {
-    id: "A1-12",
+    id: "A1-14",
     level: "A1",
     title: "Cores e descrições",
     goal: "Descrever cores, objetos e características de pessoas.",
@@ -713,7 +918,7 @@ const UNITS = [
     }
   },
   {
-    id: "A1-g4",
+    id: "A1-g6",
     level: "A1",
     type: "grammar",
     title: "Comparativos",
@@ -771,7 +976,7 @@ const UNITS = [
     }
   },
   {
-    id: "A1-13",
+    id: "A1-15",
     level: "A1",
     title: "A casa e os cômodos",
     goal: "Descrever uma casa, dizer o que tem (e o que não tem) nela.",
@@ -808,7 +1013,7 @@ const UNITS = [
     }
   },
   {
-    id: "A1-14",
+    id: "A1-16",
     level: "A1",
     title: "Onde as coisas estão",
     goal: "Descrever a posição de móveis e objetos usando preposições de lugar.",
@@ -845,44 +1050,7 @@ const UNITS = [
     }
   },
   {
-    id: "A1-15",
-    level: "A1",
-    title: "Dias e datas",
-    goal: "Dizer os dias da semana, meses e marcar um encontro.",
-    vocab: [
-      { f: "lundi", t: "segunda-feira" },
-      { f: "mardi", t: "terça-feira" },
-      { f: "aujourd'hui", t: "hoje" },
-      { f: "demain", t: "amanhã" },
-      { f: "hier", t: "ontem" },
-      { f: "la semaine", t: "a semana" },
-      { f: "le mois", t: "o mês" },
-      { f: "janvier", t: "janeiro" },
-      { f: "décembre", t: "dezembro" },
-      { f: "la date", t: "a data" }
-    ],
-    phrases: [
-      { f: "Quel jour sommes-nous ?", t: "Que dia é hoje?",
-        blocks: [{f:"Quel jour"},{f:"sommes-nous ?"}] },
-      { f: "Nous sommes lundi.", t: "Hoje é segunda-feira.",
-        blocks: [{f:"Nous sommes"},{f:"lundi."}] },
-      { f: "Mon anniversaire est en mars.", t: "Meu aniversário é em março.",
-        blocks: [{f:"Mon anniversaire"},{f:"est"},{f:"en mars."}] },
-      { f: "À demain !", t: "Até amanhã!",
-        blocks: [{f:"À"},{f:"demain !"}] }
-    ],
-    dialogue: {
-      title: "Marcando um encontro",
-      lines: [
-        { spk: "A", f: "On se voit quel jour ?", t: "A gente se vê que dia?" },
-        { spk: "B", f: "Mardi, ça te va ?", t: "Terça, tá bom pra você?" },
-        { spk: "A", f: "Non, je travaille mardi. Et mercredi ?", t: "Não, eu trabalho terça. E quarta?" },
-        { spk: "B", f: "Parfait, à mercredi alors !", t: "Perfeito, até quarta então!" }
-      ]
-    }
-  },
-  {
-    id: "A1-16",
+    id: "A1-17",
     level: "A1",
     title: "Lazer e atividades",
     goal: "Falar sobre hobbies e combinar programas de fim de semana.",
@@ -915,6 +1083,64 @@ const UNITS = [
         { spk: "B", f: "Oui, je vais au cinéma avec des amis.", t: "Sim, eu vou ao cinema com amigos." },
         { spk: "A", f: "Quel film vous allez voir ?", t: "Qual filme vocês vão ver?" },
         { spk: "B", f: "On ne sait pas encore !", t: "A gente ainda não sabe!" }
+      ]
+    }
+  },
+  {
+    id: "A1-g7",
+    level: "A1",
+    type: "grammar",
+    title: "Advérbios de frequência",
+    goal: "Usar toujours, souvent, parfois, rarement e jamais pra dizer com que frequência você faz algo.",
+    grammar: {
+      blocks: [
+        {
+          title: "Advérbios de frequência",
+          body: "Do mais frequente ao menos frequente: toujours (sempre), souvent (frequentemente), parfois (às vezes), rarement (raramente) e jamais (nunca). No francês, o advérbio geralmente vem logo depois do verbo conjugado — não antes, como em inglês.",
+          examples: [
+            { f: "Je lis toujours le soir.", t: "Eu sempre leio à noite." },
+            { f: "Elle joue parfois de la guitare.", t: "Ela às vezes toca guitarra." }
+          ]
+        },
+        {
+          title: "Onde colocar o advérbio",
+          body: "A posição logo após o verbo vale pra qualquer verbo do dia a dia — inclusive os de lazer que você acabou de aprender.",
+          examples: [
+            { f: "Nous sortons souvent le week-end.", t: "Nós saímos frequentemente no fim de semana." },
+            { f: "Il chante rarement.", t: "Ele canta raramente." }
+          ]
+        },
+        {
+          title: "Jamais precisa de ne",
+          body: "Jamais (nunca) funciona como uma negação — por isso precisa do ne antes do verbo, igual em ne...pas. A estrutura completa é ne...jamais.",
+          examples: [
+            { f: "Je ne danse jamais.", t: "Eu nunca danço." },
+            { f: "Il ne sort jamais le lundi.", t: "Ele nunca sai na segunda-feira." }
+          ]
+        },
+        {
+          title: "Très bien! 🎉",
+          body: "Aqui está a escala completa, do mais ao menos frequente — vale revisitar sempre que precisar descrever um hábito:",
+          examples: [],
+          table: {
+            "Advérbios (do mais ao menos frequente)": [
+              { pronoun: "sempre", form: "toujours" },
+              { pronoun: "frequentemente", form: "souvent" },
+              { pronoun: "às vezes", form: "parfois" },
+              { pronoun: "raramente", form: "rarement" },
+              { pronoun: "nunca (+ ne)", form: "ne ... jamais" }
+            ]
+          },
+          wrapup: true
+        }
+      ],
+      exercises: [
+        { prompt: "Je vais ___ au cinéma le week-end.", hint: "sempre", answer: "toujours" },
+        { prompt: "Il joue ___ de la guitare.", hint: "às vezes", answer: "parfois" },
+        { prompt: "Nous sortons ___ le dimanche.", hint: "frequentemente", answer: "souvent" },
+        { prompt: "Elle ne chante ___.", hint: "nunca", answer: "jamais" },
+        { prompt: "Tu lis ___ des livres ?", hint: "raramente", answer: "rarement" },
+        { prompt: "Vous dansez ___ !", hint: "sempre", answer: "toujours" }
       ]
     }
   }
