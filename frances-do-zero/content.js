@@ -63,13 +63,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "Bonjour ! Je m'appelle Brune.", t: "Olá! Eu me chamo Brune.",
-        blocks: [{f:"Bonjour !"},{f:"Je m'appelle"},{f:"Brune."}] },
+        blocks: [{f:"Bonjour !"},{f:"Je m'appelle"},{f:"Brune."}],
+        scenario: "Você encontra alguém novo numa festa e quer se apresentar. O que você diz?", scenarioEmoji: "🎉" },
       { f: "Merci beaucoup !", t: "Muito obrigada!",
-        blocks: [{f:"Merci"},{f:"beaucoup !"}] },
+        blocks: [{f:"Merci"},{f:"beaucoup !"}],
+        scenario: "Um amigo te ajuda a carregar as compras. Como você agradece?", scenarioEmoji: "🛍️" },
       { f: "Pardon, je ne comprends pas.", t: "Desculpe, eu não entendo.",
-        blocks: [{f:"Pardon,"},{f:"je ne"},{f:"comprends pas."}] },
+        blocks: [{f:"Pardon,"},{f:"je ne"},{f:"comprends pas."}],
+        scenario: "Alguém fala muito rápido em francês e você não entendeu nada. O que você diz?", scenarioEmoji: "😕" },
       { f: "Ça va bien, et toi ?", t: "Vou bem, e você?",
-        blocks: [{f:"Ça va"},{f:"bien,"},{f:"et toi ?"}] }
+        blocks: [{f:"Ça va"},{f:"bien,"},{f:"et toi ?"}],
+        scenario: "Uma amiga pergunta \"Ça va?\". Você quer responder que está bem e perguntar de volta. O que você diz?", scenarioEmoji: "☕" }
     ],
     dialogue: {
       title: "Encontro na rua",
@@ -100,13 +104,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "Comment tu t'appelles ?", t: "Qual é o seu nome?",
-        blocks: [{f:"Comment"},{f:"tu"},{f:"t'appelles ?"}] },
+        blocks: [{f:"Comment"},{f:"tu"},{f:"t'appelles ?"}],
+        scenario: "Você conhece alguém novo e quer saber o nome dela. O que você pergunta?", scenarioEmoji: "🤝" },
       { f: "Je suis brésilienne.", t: "Eu sou brasileira.",
-        blocks: [{f:"Je"},{f:"suis"},{f:"brésilienne."}] },
+        blocks: [{f:"Je"},{f:"suis"},{f:"brésilienne."}],
+        scenario: "Alguém pergunta de onde você é. Você quer dizer que é brasileira. O que você diz?", scenarioEmoji: "🇧🇷" },
       { f: "Tu es de quel pays ?", t: "De que país você é?",
-        blocks: [{f:"Tu"},{f:"es de"},{f:"quel pays ?"}] },
+        blocks: [{f:"Tu"},{f:"es de"},{f:"quel pays ?"}],
+        scenario: "Você quer saber de que país uma pessoa nova veio. O que você pergunta?", scenarioEmoji: "🌍" },
       { f: "Moi aussi, je suis française !", t: "Eu também, eu sou francesa!",
-        blocks: [{f:"Moi aussi,"},{f:"je suis"},{f:"française !"}] }
+        blocks: [{f:"Moi aussi,"},{f:"je suis"},{f:"française !"}],
+        scenario: "Alguém diz que é francesa, e você também é! Como você reage?", scenarioEmoji: "🇫🇷" }
     ],
     dialogue: {
       title: "Primeiro encontro",
@@ -138,13 +146,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "Quel âge as-tu ?", t: "Quantos anos você tem?",
-        blocks: [{f:"Quel âge"},{f:"as-tu ?"}] },
+        blocks: [{f:"Quel âge"},{f:"as-tu ?"}],
+        scenario: "Você quer saber a idade de um novo amigo. O que você pergunta?", scenarioEmoji: "🎂" },
       { f: "J'ai vingt ans.", t: "Eu tenho vinte anos.",
-        blocks: [{f:"J'ai"},{f:"vingt"},{f:"ans."}] },
+        blocks: [{f:"J'ai"},{f:"vingt"},{f:"ans."}],
+        scenario: "Alguém pergunta sua idade e você tem vinte anos. O que você responde?", scenarioEmoji: "🎈" },
       { f: "Il a dix ans.", t: "Ele tem dez anos.",
-        blocks: [{f:"Il a"},{f:"dix"},{f:"ans."}] },
+        blocks: [{f:"Il a"},{f:"dix"},{f:"ans."}],
+        scenario: "Você está apresentando seu sobrinho de dez anos. O que você diz sobre a idade dele?", scenarioEmoji: "👦" },
       { f: "Nous sommes dix.", t: "Somos dez (pessoas).",
-        blocks: [{f:"Nous sommes"},{f:"dix."}] }
+        blocks: [{f:"Nous sommes"},{f:"dix."}],
+        scenario: "O garçom pergunta quantas pessoas são no seu grupo, que tem dez pessoas. O que você diz?", scenarioEmoji: "🍽️" }
     ],
     dialogue: {
       title: "No parque",
@@ -247,13 +259,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "Voici ma famille.", t: "Aqui está minha família.",
-        blocks: [{f:"Voici"},{f:"ma famille."}] },
+        blocks: [{f:"Voici"},{f:"ma famille."}],
+        scenario: "Você está mostrando uma foto e quer apresentar sua família. O que você diz?", scenarioEmoji: "👨‍👩‍👧‍👦" },
       { f: "J'ai deux frères.", t: "Eu tenho dois irmãos.",
-        blocks: [{f:"J'ai"},{f:"deux"},{f:"frères."}] },
+        blocks: [{f:"J'ai"},{f:"deux"},{f:"frères."}],
+        scenario: "Alguém pergunta se você tem irmãos, e você tem dois. O que você responde?", scenarioEmoji: "👬" },
       { f: "Mon père s'appelle Marc.", t: "Meu pai se chama Marc.",
-        blocks: [{f:"Mon père"},{f:"s'appelle"},{f:"Marc."}] },
+        blocks: [{f:"Mon père"},{f:"s'appelle"},{f:"Marc."}],
+        scenario: "Você está contando o nome do seu pai, que se chama Marc. O que você diz?", scenarioEmoji: "👨" },
       { f: "Elle est ma sœur.", t: "Ela é minha irmã.",
-        blocks: [{f:"Elle est"},{f:"ma sœur."}] }
+        blocks: [{f:"Elle est"},{f:"ma sœur."}],
+        scenario: "Alguém pergunta quem é aquela garota na foto — é sua irmã. O que você responde?", scenarioEmoji: "👧" }
     ],
     dialogue: {
       title: "Falando da família",
@@ -360,13 +376,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "Je mange du pain le matin.", t: "Eu como pão de manhã.",
-        blocks: [{f:"Je mange"},{f:"du pain"},{f:"le matin."}] },
+        blocks: [{f:"Je mange"},{f:"du pain"},{f:"le matin."}],
+        scenario: "Alguém pergunta o que você come de manhã. O que você responde?", scenarioEmoji: "🥖" },
       { f: "J'aime le fromage, mais je déteste le poisson.", t: "Eu gosto de queijo, mas odeio peixe.",
-        blocks: [{f:"J'aime"},{f:"le fromage,"},{f:"mais je déteste"},{f:"le poisson."}] },
+        blocks: [{f:"J'aime"},{f:"le fromage,"},{f:"mais je déteste"},{f:"le poisson."}],
+        scenario: "Você quer dizer que gosta de queijo mas não gosta nada de peixe. O que você diz?", scenarioEmoji: "🧀" },
       { f: "Tu bois du café ou du lait ?", t: "Você bebe café ou leite?",
-        blocks: [{f:"Tu bois"},{f:"du café"},{f:"ou du lait ?"}] },
+        blocks: [{f:"Tu bois"},{f:"du café"},{f:"ou du lait ?"}],
+        scenario: "Você está servindo o café da manhã para um amigo e quer saber o que ele bebe. O que você pergunta?", scenarioEmoji: "☕" },
       { f: "L'addition, s'il vous plaît.", t: "A conta, por favor.",
-        blocks: [{f:"L'addition,"},{f:"s'il vous plaît."}] }
+        blocks: [{f:"L'addition,"},{f:"s'il vous plaît."}],
+        scenario: "Vocês terminaram de comer no restaurante e querem pedir a conta. O que vocês dizem ao garçom?", scenarioEmoji: "🧾" }
     ],
     dialogue: {
       title: "No café",
@@ -398,13 +418,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "Quelle heure est-il ?", t: "Que horas são?",
-        blocks: [{f:"Quelle heure"},{f:"est-il ?"}] },
+        blocks: [{f:"Quelle heure"},{f:"est-il ?"}],
+        scenario: "Você esqueceu o relógio e quer saber que horas são. O que você pergunta?", scenarioEmoji: "⏰" },
       { f: "Il est huit heures.", t: "São oito horas.",
-        blocks: [{f:"Il est"},{f:"huit heures."}] },
+        blocks: [{f:"Il est"},{f:"huit heures."}],
+        scenario: "Alguém pergunta as horas e são oito horas. O que você responde?", scenarioEmoji: "🕗" },
       { f: "Je me réveille à sept heures.", t: "Eu acordo às sete horas.",
-        blocks: [{f:"Je me réveille"},{f:"à"},{f:"sept heures."}] },
+        blocks: [{f:"Je me réveille"},{f:"à"},{f:"sept heures."}],
+        scenario: "Alguém pergunta a que horas você acorda todo dia. O que você responde?", scenarioEmoji: "⏰" },
       { f: "Le soir, je regarde la télé.", t: "À noite, eu assisto TV.",
-        blocks: [{f:"Le soir,"},{f:"je regarde"},{f:"la télé."}] }
+        blocks: [{f:"Le soir,"},{f:"je regarde"},{f:"la télé."}],
+        scenario: "Alguém pergunta o que você faz à noite. O que você responde?", scenarioEmoji: "📺" }
     ],
     dialogue: {
       title: "Minha rotina",
@@ -502,13 +526,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "Quel jour sommes-nous ?", t: "Que dia é hoje?",
-        blocks: [{f:"Quel jour"},{f:"sommes-nous ?"}] },
+        blocks: [{f:"Quel jour"},{f:"sommes-nous ?"}],
+        scenario: "Você perdeu a noção do dia da semana. O que você pergunta?", scenarioEmoji: "📅" },
       { f: "Nous sommes lundi.", t: "Hoje é segunda-feira.",
-        blocks: [{f:"Nous sommes"},{f:"lundi."}] },
+        blocks: [{f:"Nous sommes"},{f:"lundi."}],
+        scenario: "Alguém pergunta que dia é hoje, e é segunda-feira. O que você responde?", scenarioEmoji: "🗓️" },
       { f: "Mon anniversaire est en mars.", t: "Meu aniversário é em março.",
-        blocks: [{f:"Mon anniversaire"},{f:"est"},{f:"en mars."}] },
+        blocks: [{f:"Mon anniversaire"},{f:"est"},{f:"en mars."}],
+        scenario: "Alguém pergunta em que mês é o seu aniversário — em março. O que você diz?", scenarioEmoji: "🎂" },
       { f: "À demain !", t: "Até amanhã!",
-        blocks: [{f:"À"},{f:"demain !"}] }
+        blocks: [{f:"À"},{f:"demain !"}],
+        scenario: "Você está se despedindo de um colega, e vai vê-lo de novo amanhã. O que você diz?", scenarioEmoji: "👋" }
     ],
     dialogue: {
       title: "Marcando um encontro",
@@ -539,13 +567,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "Où est la gare ?", t: "Onde fica a estação?",
-        blocks: [{f:"Où est"},{f:"la gare ?"}] },
+        blocks: [{f:"Où est"},{f:"la gare ?"}],
+        scenario: "Você está perdido e precisa achar a estação de trem. O que você pergunta a alguém na rua?", scenarioEmoji: "🚉" },
       { f: "Tournez à gauche.", t: "Vire à esquerda.",
-        blocks: [{f:"Tournez"},{f:"à gauche."}] },
+        blocks: [{f:"Tournez"},{f:"à gauche."}],
+        scenario: "Você está dando instruções pra alguém chegar num lugar e precisa dizer para virar à esquerda. O que você diz?", scenarioEmoji: "⬅️" },
       { f: "C'est tout droit.", t: "É sempre em frente.",
-        blocks: [{f:"C'est"},{f:"tout droit."}] },
+        blocks: [{f:"C'est"},{f:"tout droit."}],
+        scenario: "Alguém pergunta como chegar num lugar que fica sempre reto. O que você responde?", scenarioEmoji: "⬆️" },
       { f: "C'est loin d'ici ?", t: "É longe daqui?",
-        blocks: [{f:"C'est loin"},{f:"d'ici ?"}] }
+        blocks: [{f:"C'est loin"},{f:"d'ici ?"}],
+        scenario: "Você quer saber se o lugar que está procurando fica longe de onde você está. O que você pergunta?", scenarioEmoji: "🗺️" }
     ],
     dialogue: {
       title: "Pedindo informação",
@@ -640,13 +672,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "Je suis brésilienne.", t: "Eu sou brasileira.",
-        blocks: [{f:"Je suis"},{f:"brésilienne."}] },
+        blocks: [{f:"Je suis"},{f:"brésilienne."}],
+        scenario: "Alguém te pergunta sua nacionalidade numa entrevista de trabalho. O que você diz?", scenarioEmoji: "🇧🇷" },
       { f: "Il est français, elle est espagnole.", t: "Ele é francês, ela é espanhola.",
-        blocks: [{f:"Il est français,"},{f:"elle est"},{f:"espagnole."}] },
+        blocks: [{f:"Il est français,"},{f:"elle est"},{f:"espagnole."}],
+        scenario: "Você está apresentando dois amigos de nacionalidades diferentes — um francês e uma espanhola. O que você diz sobre eles?", scenarioEmoji: "🌍" },
       { f: "D'où viens-tu ?", t: "De onde você vem?",
-        blocks: [{f:"D'où"},{f:"viens-tu ?"}] },
+        blocks: [{f:"D'où"},{f:"viens-tu ?"}],
+        scenario: "Você conheceu alguém novo numa viagem e quer saber de onde essa pessoa vem. O que você pergunta?", scenarioEmoji: "✈️" },
       { f: "Je viens du Portugal.", t: "Eu venho de Portugal.",
-        blocks: [{f:"Je viens"},{f:"du Portugal."}] }
+        blocks: [{f:"Je viens"},{f:"du Portugal."}],
+        scenario: "Alguém pergunta de onde você vem, e você vem de Portugal. O que você responde?", scenarioEmoji: "🇵🇹" }
     ],
     dialogue: {
       title: "De onde você é?",
@@ -682,13 +718,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "Combien ça coûte ?", t: "Quanto custa isso?",
-        blocks: [{f:"Combien"},{f:"ça coûte ?"}] },
+        blocks: [{f:"Combien"},{f:"ça coûte ?"}],
+        scenario: "Você está numa loja e quer saber o preço de um produto. O que você pergunta?", scenarioEmoji: "🏷️" },
       { f: "Ça coûte quarante euros.", t: "Custa quarenta euros.",
-        blocks: [{f:"Ça coûte"},{f:"quarante"},{f:"euros."}] },
+        blocks: [{f:"Ça coûte"},{f:"quarante"},{f:"euros."}],
+        scenario: "Um cliente pergunta o preço de um produto que custa quarenta euros. O que você responde?", scenarioEmoji: "💶" },
       { f: "Je peux essayer ce pantalon ?", t: "Posso experimentar essa calça?",
-        blocks: [{f:"Je peux essayer"},{f:"ce pantalon ?"}] },
+        blocks: [{f:"Je peux essayer"},{f:"ce pantalon ?"}],
+        scenario: "Você está numa loja de roupas e quer experimentar uma calça antes de comprar. O que você pergunta?", scenarioEmoji: "👖" },
       { f: "Ça fait cent euros, s'il vous plaît.", t: "São cem euros, por favor.",
-        blocks: [{f:"Ça fait"},{f:"cent euros,"},{f:"s'il vous plaît."}] }
+        blocks: [{f:"Ça fait"},{f:"cent euros,"},{f:"s'il vous plaît."}],
+        scenario: "Você é o vendedor e precisa cobrar cem euros do cliente. O que você diz?", scenarioEmoji: "💳" }
     ],
     dialogue: {
       title: "Numa loja",
@@ -720,13 +760,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "J'aime la viande.", t: "Eu gosto de carne.",
-        blocks: [{f:"J'aime"},{f:"la viande."}] },
+        blocks: [{f:"J'aime"},{f:"la viande."}],
+        scenario: "Alguém pergunta se você gosta de carne, e você gosta muito. O que você responde?", scenarioEmoji: "🥩" },
       { f: "Je mange des légumes tous les jours.", t: "Como legumes todos os dias.",
-        blocks: [{f:"Je mange"},{f:"des légumes"},{f:"tous les jours."}] },
+        blocks: [{f:"Je mange"},{f:"des légumes"},{f:"tous les jours."}],
+        scenario: "Alguém pergunta sobre seus hábitos alimentares e você come legumes todo dia. O que você diz?", scenarioEmoji: "🥦" },
       { f: "Je ne mange pas de viande.", t: "Eu não como carne.",
-        blocks: [{f:"Je ne mange pas"},{f:"de viande."}] },
+        blocks: [{f:"Je ne mange pas"},{f:"de viande."}],
+        scenario: "Você é vegetariano e precisa avisar o garçom que não come carne. O que você diz?", scenarioEmoji: "🚫" },
       { f: "Je prends du riz et des pâtes.", t: "Eu levo arroz e massa.",
-        blocks: [{f:"Je prends"},{f:"du riz"},{f:"et des pâtes."}] }
+        blocks: [{f:"Je prends"},{f:"du riz"},{f:"et des pâtes."}],
+        scenario: "No supermercado, alguém pergunta o que você vai levar. O que você responde?", scenarioEmoji: "🍚" }
     ],
     dialogue: {
       title: "Fazendo a lista de compras",
@@ -757,13 +801,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "Je prends un kilo de pommes.", t: "Eu levo um quilo de maçãs.",
-        blocks: [{f:"Je prends"},{f:"un kilo"},{f:"de pommes."}] },
+        blocks: [{f:"Je prends"},{f:"un kilo"},{f:"de pommes."}],
+        scenario: "Você está na feira e quer comprar um quilo de maçãs. O que você diz ao vendedor?", scenarioEmoji: "🍎" },
       { f: "Un litre de lait, s'il vous plaît.", t: "Um litro de leite, por favor.",
-        blocks: [{f:"Un litre"},{f:"de lait,"},{f:"s'il vous plaît."}] },
+        blocks: [{f:"Un litre"},{f:"de lait,"},{f:"s'il vous plaît."}],
+        scenario: "Você está no mercado e quer pedir um litro de leite. O que você diz?", scenarioEmoji: "🥛" },
       { f: "C'est trop de sucre pour moi.", t: "É açúcar demais pra mim.",
-        blocks: [{f:"C'est trop"},{f:"de sucre"},{f:"pour moi."}] },
+        blocks: [{f:"C'est trop"},{f:"de sucre"},{f:"pour moi."}],
+        scenario: "Alguém está te servindo café com muito açúcar e é demais pra você. O que você diz?", scenarioEmoji: "🍬" },
       { f: "Une tranche de pain, s'il te plaît.", t: "Uma fatia de pão, por favor.",
-        blocks: [{f:"Une tranche"},{f:"de pain,"},{f:"s'il te plaît."}] }
+        blocks: [{f:"Une tranche"},{f:"de pain,"},{f:"s'il te plaît."}],
+        scenario: "Na mesa do café da manhã, você quer pedir uma fatia de pão. O que você diz?", scenarioEmoji: "🍞" }
     ],
     dialogue: {
       title: "Comprando no mercado",
@@ -794,13 +842,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "Quel temps fait-il ?", t: "Como está o tempo?",
-        blocks: [{f:"Quel temps"},{f:"fait-il ?"}] },
+        blocks: [{f:"Quel temps"},{f:"fait-il ?"}],
+        scenario: "Você vai sair e quer saber como está o tempo lá fora. O que você pergunta?", scenarioEmoji: "🌦️" },
       { f: "Il fait très chaud aujourd'hui.", t: "Está muito quente hoje.",
-        blocks: [{f:"Il fait"},{f:"très chaud"},{f:"aujourd'hui."}] },
+        blocks: [{f:"Il fait"},{f:"très chaud"},{f:"aujourd'hui."}],
+        scenario: "Alguém pergunta como está o tempo, e está muito quente hoje. O que você responde?", scenarioEmoji: "☀️" },
       { f: "J'aime l'hiver.", t: "Eu gosto do inverno.",
-        blocks: [{f:"J'aime"},{f:"l'hiver."}] },
+        blocks: [{f:"J'aime"},{f:"l'hiver."}],
+        scenario: "Alguém pergunta sua estação preferida, e é o inverno. O que você diz?", scenarioEmoji: "❄️" },
       { f: "Il pleut souvent en automne.", t: "Chove frequentemente no outono.",
-        blocks: [{f:"Il pleut"},{f:"souvent"},{f:"en automne."}] }
+        blocks: [{f:"Il pleut"},{f:"souvent"},{f:"en automne."}],
+        scenario: "Alguém pergunta como é o outono na sua cidade, com chuva frequente. O que você diz?", scenarioEmoji: "🍂" }
     ],
     dialogue: {
       title: "Falando do tempo",
@@ -831,13 +883,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "Je prends le métro tous les jours.", t: "Eu pego o metrô todos os dias.",
-        blocks: [{f:"Je prends"},{f:"le métro"},{f:"tous les jours."}] },
+        blocks: [{f:"Je prends"},{f:"le métro"},{f:"tous les jours."}],
+        scenario: "Alguém pergunta como você vai trabalhar, e é sempre de metrô. O que você responde?", scenarioEmoji: "🚇" },
       { f: "Où est l'arrêt de bus ?", t: "Onde fica o ponto de ônibus?",
-        blocks: [{f:"Où est"},{f:"l'arrêt"},{f:"de bus ?"}] },
+        blocks: [{f:"Où est"},{f:"l'arrêt"},{f:"de bus ?"}],
+        scenario: "Você está perdido e precisa achar o ponto de ônibus. O que você pergunta?", scenarioEmoji: "🚌" },
       { f: "Un billet, s'il vous plaît.", t: "Uma passagem, por favor.",
-        blocks: [{f:"Un billet,"},{f:"s'il vous plaît."}] },
+        blocks: [{f:"Un billet,"},{f:"s'il vous plaît."}],
+        scenario: "Você está na estação e quer comprar uma passagem. O que você diz?", scenarioEmoji: "🎫" },
       { f: "Je vais au travail à pied.", t: "Eu vou ao trabalho a pé.",
-        blocks: [{f:"Je vais"},{f:"au travail"},{f:"à pied."}] }
+        blocks: [{f:"Je vais"},{f:"au travail"},{f:"à pied."}],
+        scenario: "Alguém pergunta como você vai ao trabalho, e você vai andando. O que você responde?", scenarioEmoji: "🚶" }
     ],
     dialogue: {
       title: "Na estação de metrô",
@@ -935,13 +991,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "J'ai mal à la tête.", t: "Estou com dor de cabeça.",
-        blocks: [{f:"J'ai mal"},{f:"à la tête."}] },
+        blocks: [{f:"J'ai mal"},{f:"à la tête."}],
+        scenario: "Você não está se sentindo bem, com dor de cabeça. O que você diz a um amigo?", scenarioEmoji: "🤕" },
       { f: "Je me sens malade.", t: "Eu me sinto doente.",
-        blocks: [{f:"Je me sens"},{f:"malade."}] },
+        blocks: [{f:"Je me sens"},{f:"malade."}],
+        scenario: "Você não está bem e precisa avisar que está doente. O que você diz?", scenarioEmoji: "🤒" },
       { f: "Où est la pharmacie ?", t: "Onde fica a farmácia?",
-        blocks: [{f:"Où est"},{f:"la pharmacie ?"}] },
+        blocks: [{f:"Où est"},{f:"la pharmacie ?"}],
+        scenario: "Você precisa comprar remédio e não sabe onde fica a farmácia. O que você pergunta?", scenarioEmoji: "💊" },
       { f: "Il a de la fièvre.", t: "Ele está com febre.",
-        blocks: [{f:"Il a"},{f:"de la fièvre."}] }
+        blocks: [{f:"Il a"},{f:"de la fièvre."}],
+        scenario: "Seu filho está com febre e você está explicando isso ao médico. O que você diz?", scenarioEmoji: "🌡️" }
     ],
     dialogue: {
       title: "No médico",
@@ -1058,13 +1118,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "J'aime la couleur bleue.", t: "Eu gosto da cor azul.",
-        blocks: [{f:"J'aime"},{f:"la couleur"},{f:"bleue."}] },
+        blocks: [{f:"J'aime"},{f:"la couleur"},{f:"bleue."}],
+        scenario: "Alguém pergunta sua cor preferida, que é o azul. O que você diz?", scenarioEmoji: "🔵" },
       { f: "Elle est très gentille.", t: "Ela é muito gentil.",
-        blocks: [{f:"Elle est"},{f:"très"},{f:"gentille."}] },
+        blocks: [{f:"Elle est"},{f:"très"},{f:"gentille."}],
+        scenario: "Alguém pergunta como é a sua nova colega, que é muito gentil. O que você diz?", scenarioEmoji: "😊" },
       { f: "Mon chat est noir et blanc.", t: "Meu gato é preto e branco.",
-        blocks: [{f:"Mon chat"},{f:"est noir"},{f:"et blanc."}] },
+        blocks: [{f:"Mon chat"},{f:"est noir"},{f:"et blanc."}],
+        scenario: "Alguém pergunta como é o seu gato, que é preto e branco. O que você responde?", scenarioEmoji: "🐱" },
       { f: "C'est une jolie robe rouge.", t: "É um vestido vermelho bonito.",
-        blocks: [{f:"C'est"},{f:"une jolie robe"},{f:"rouge."}] }
+        blocks: [{f:"C'est"},{f:"une jolie robe"},{f:"rouge."}],
+        scenario: "Você está descrevendo um vestido vermelho bonito que viu numa loja. O que você diz?", scenarioEmoji: "👗" }
     ],
     dialogue: {
       title: "Descrevendo alguém",
@@ -1153,13 +1217,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "Il y a une chambre.", t: "Tem um quarto.",
-        blocks: [{f:"Il y a"},{f:"une chambre."}] },
+        blocks: [{f:"Il y a"},{f:"une chambre."}],
+        scenario: "Alguém pergunta quantos quartos tem seu apartamento pequeno, que tem só um. O que você diz?", scenarioEmoji: "🛏️" },
       { f: "Il y a deux salles de bain.", t: "Tem dois banheiros.",
-        blocks: [{f:"Il y a"},{f:"deux"},{f:"salles de bain."}] },
+        blocks: [{f:"Il y a"},{f:"deux"},{f:"salles de bain."}],
+        scenario: "Você está descrevendo sua casa, que tem dois banheiros. O que você diz?", scenarioEmoji: "🚿" },
       { f: "Il n'y a pas de jardin.", t: "Não tem jardim.",
-        blocks: [{f:"Il n'y a pas"},{f:"de jardin."}] },
+        blocks: [{f:"Il n'y a pas"},{f:"de jardin."}],
+        scenario: "Alguém pergunta se seu apartamento tem jardim, e não tem. O que você responde?", scenarioEmoji: "🚫" },
       { f: "C'est une grande maison.", t: "É uma casa grande.",
-        blocks: [{f:"C'est"},{f:"une grande"},{f:"maison."}] }
+        blocks: [{f:"C'est"},{f:"une grande"},{f:"maison."}],
+        scenario: "Você está descrevendo a casa nova dos seus pais, que é bem grande. O que você diz?", scenarioEmoji: "🏠" }
     ],
     dialogue: {
       title: "Visitando um apartamento",
@@ -1190,13 +1258,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "Le lit est à côté de la fenêtre.", t: "A cama fica ao lado da janela.",
-        blocks: [{f:"Le lit"},{f:"est à côté de"},{f:"la fenêtre."}] },
+        blocks: [{f:"Le lit"},{f:"est à côté de"},{f:"la fenêtre."}],
+        scenario: "Você está descrevendo seu quarto e onde fica a cama, ao lado da janela. O que você diz?", scenarioEmoji: "🛏️" },
       { f: "Il y a une lampe sur la table.", t: "Tem uma luminária em cima da mesa.",
-        blocks: [{f:"Il y a"},{f:"une lampe"},{f:"sur la table."}] },
+        blocks: [{f:"Il y a"},{f:"une lampe"},{f:"sur la table."}],
+        scenario: "Alguém pergunta o que tem em cima da mesa — uma luminária. O que você responde?", scenarioEmoji: "💡" },
       { f: "Le chat est sous le canapé.", t: "O gato está embaixo do sofá.",
-        blocks: [{f:"Le chat"},{f:"est sous"},{f:"le canapé."}] },
+        blocks: [{f:"Le chat"},{f:"est sous"},{f:"le canapé."}],
+        scenario: "Você está procurando o gato e o encontra embaixo do sofá. O que você diz?", scenarioEmoji: "🐈" },
       { f: "La chaise bleue est devant la table.", t: "A cadeira azul fica na frente da mesa.",
-        blocks: [{f:"La chaise bleue"},{f:"est devant"},{f:"la table."}] }
+        blocks: [{f:"La chaise bleue"},{f:"est devant"},{f:"la table."}],
+        scenario: "Você está explicando onde fica a cadeira azul, na frente da mesa. O que você diz?", scenarioEmoji: "🪑" }
     ],
     dialogue: {
       title: "Arrumando o quarto",
@@ -1227,13 +1299,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "Qu'est-ce que tu fais le week-end ?", t: "O que você faz no fim de semana?",
-        blocks: [{f:"Qu'est-ce que"},{f:"tu fais"},{f:"le week-end ?"}] },
+        blocks: [{f:"Qu'est-ce que"},{f:"tu fais"},{f:"le week-end ?"}],
+        scenario: "Você quer saber o que um amigo costuma fazer nos fins de semana. O que você pergunta?", scenarioEmoji: "🎨" },
       { f: "J'aime lire des livres.", t: "Eu gosto de ler livros.",
-        blocks: [{f:"J'aime"},{f:"lire"},{f:"des livres."}] },
+        blocks: [{f:"J'aime"},{f:"lire"},{f:"des livres."}],
+        scenario: "Alguém pergunta seu hobby favorito, que é ler livros. O que você diz?", scenarioEmoji: "📚" },
       { f: "On va au cinéma ce soir ?", t: "A gente vai ao cinema hoje à noite?",
-        blocks: [{f:"On va"},{f:"au cinéma"},{f:"ce soir ?"}] },
+        blocks: [{f:"On va"},{f:"au cinéma"},{f:"ce soir ?"}],
+        scenario: "Você quer convidar um amigo para ir ao cinema hoje à noite. O que você pergunta?", scenarioEmoji: "🎬" },
       { f: "Il joue de la guitare.", t: "Ele toca guitarra.",
-        blocks: [{f:"Il joue"},{f:"de la guitare."}] }
+        blocks: [{f:"Il joue"},{f:"de la guitare."}],
+        scenario: "Alguém pergunta o que seu irmão sabe fazer — ele toca guitarra. O que você responde?", scenarioEmoji: "🎸" }
     ],
     dialogue: {
       title: "O fim de semana",
@@ -1322,13 +1398,17 @@ const UNITS = [
     ],
     phrases: [
       { f: "Hier, j'ai visité un musée.", t: "Ontem eu visitei um museu.",
-        blocks: [{f:"Hier,"},{f:"j'ai visité"},{f:"un musée."}] },
+        blocks: [{f:"Hier,"},{f:"j'ai visité"},{f:"un musée."}],
+        scenario: "Alguém pergunta o que você fez ontem, e você visitou um museu. O que você responde?", scenarioEmoji: "🖼️" },
       { f: "La semaine dernière, j'ai mangé au restaurant.", t: "Semana passada eu comi num restaurante.",
-        blocks: [{f:"La semaine dernière,"},{f:"j'ai mangé"},{f:"au restaurant."}] },
+        blocks: [{f:"La semaine dernière,"},{f:"j'ai mangé"},{f:"au restaurant."}],
+        scenario: "Alguém pergunta o que você fez de especial semana passada — comeu num restaurante. O que você diz?", scenarioEmoji: "🍽️" },
       { f: "Le week-end dernier, il a plu.", t: "No fim de semana passado, choveu.",
-        blocks: [{f:"Le week-end dernier,"},{f:"il a plu."}] },
+        blocks: [{f:"Le week-end dernier,"},{f:"il a plu."}],
+        scenario: "Alguém pergunta como foi o tempo no fim de semana passado — choveu bastante. O que você responde?", scenarioEmoji: "🌧️" },
       { f: "Tu as déjà visité Paris ?", t: "Você já visitou Paris?",
-        blocks: [{f:"Tu as déjà"},{f:"visité Paris ?"}] }
+        blocks: [{f:"Tu as déjà"},{f:"visité Paris ?"}],
+        scenario: "Você quer saber se um amigo já foi a Paris alguma vez. O que você pergunta?", scenarioEmoji: "🗼" }
     ],
     dialogue: {
       title: "O que você fez ontem?",

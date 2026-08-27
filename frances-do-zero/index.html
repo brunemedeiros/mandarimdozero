@@ -361,6 +361,30 @@ body{
 .exercise-option.disabled{ pointer-events:none; opacity:.6; }
 .exercise-option.disabled.correct, .exercise-option.disabled.incorrect{ opacity:1; }
 
+/* ---------- Exercício de cenário ("o que você diria...") ---------- */
+.scenario-question{ font-size:16px; font-weight:800; margin-bottom:16px; line-height:1.4; }
+.scenario-scene{
+  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding:26px 20px; margin-bottom:20px; font-size:48px; line-height:1;
+}
+.scenario-options{ display:flex; flex-direction:column; gap:10px; }
+.scenario-option{
+  display:flex; align-items:center; gap:12px; background: var(--paper); border:2px solid var(--paper-line);
+  border-radius:12px; padding:14px 16px; cursor:pointer; font-family: var(--font-body);
+  text-align:left; transition: all .12s ease;
+}
+.scenario-option:hover{ border-color: var(--imperial-gold); transform: translateY(-1px); }
+.scenario-option-num{
+  flex-shrink:0; width:24px; height:24px; border-radius:50%; background: var(--paper-warm);
+  border:1px solid var(--paper-line); display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:800; color: var(--ink-soft);
+}
+.scenario-option-text{ font-size:14.5px; font-weight:700; color: var(--ink); }
+.scenario-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
+.scenario-option.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.10); }
+.scenario-option.disabled{ pointer-events:none; opacity:.6; }
+.scenario-option.disabled.correct, .scenario-option.disabled.incorrect{ opacity:1; }
+
 /* ---------- Tela final "Parabéns" (estilo Busuu) ---------- */
 .lesson-complete{ text-align:center; padding: 20px 4px; }
 .lesson-complete-icon{ font-size:52px; margin-bottom:8px; }

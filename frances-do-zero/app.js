@@ -1395,11 +1395,23 @@ function buildExerciseSet(unit){
     return { format, item, options };
   });
 
-  const reorderExercises = (unit.phrases || [])
-    .filter(p => p.blocks && p.blocks.length >= 2)
-    .map(p => ({ format: 'reorder', phrase: p, shuffledBlocks: shuffle(p.blocks) }));
+  // Frases da unidade viram exercício de "ordenar" ou de "cenário" (index par/ímpar),
+  // pra variar o formato sem dobrar o total de exercícios por lição.
+  const phrasesWithBlocks = (unit.phrases || []).filter(p => p.blocks && p.blocks.length >= 2);
+  const phrasesWithScenario = (unit.phrases || []).filter(p => p.scenario);
 
-  return shuffle([...vocabExercises, ...reorderExercises]);
+  const reorderExercises = [];
+  const scenarioExercises = [];
+  phrasesWithBlocks.forEach((p, i) => {
+    if (p.scenario && i % 2 === 1 && phrasesWithScenario.length >= 3){
+      const distractors = shuffle(phrasesWithScenario.filter(x => x !== p)).slice(0, 2);
+      scenarioExercises.push({ format: 'scenario', phrase: p, options: shuffle([p, ...distractors]) });
+    } else {
+      reorderExercises.push({ format: 'reorder', phrase: p, shuffledBlocks: shuffle(p.blocks) });
+    }
+  });
+
+  return shuffle([...vocabExercises, ...reorderExercises, ...scenarioExercises]);
 }
 
 function renderExerciseStep(){
@@ -1422,6 +1434,8 @@ function renderExerciseStep(){
 
   if (ex.format === 'reorder'){
     renderReorderExercise(ex, contentEl, nextBtn, total);
+  } else if (ex.format === 'scenario'){
+    renderScenarioExercise(ex, contentEl, nextBtn, total);
   } else {
     renderMultipleChoiceExercise(ex, contentEl, nextBtn, total);
   }
@@ -1503,6 +1517,51 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
   document.getElementById('exercise-dontknow-btn').addEventListener('click', () => {
     if (STEP_STATE.exerciseAnswered) return;
     revealAnswer(-1);
+  });
+}
+
+// ---------- Exercício de cenário ("O que você diria...?") ----------
+// Testa uso pragmático de uma frase já ensinada: dado um contexto em
+// português, escolher entre 3 frases em francês (já vistas na unidade)
+// qual é a resposta certa pra situação — não só reconhecer o significado.
+function renderScenarioExercise(ex, contentEl, nextBtn, total){
+  const optionsHTML = ex.options.map((opt, i) => `
+    <button class="scenario-option" data-idx="${i}">
+      <span class="scenario-option-num">${i + 1}</span>
+      <span class="scenario-option-text">${opt.f}</span>
+    </button>
+  `).join('');
+
+  contentEl.innerHTML = `
+    <div class="exercise-wrap">
+      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="scenario-question">${ex.phrase.scenario}</div>
+      <div class="scenario-scene">${ex.phrase.scenarioEmoji}</div>
+      <div class="scenario-options">${optionsHTML}</div>
+    </div>
+  `;
+
+  nextBtn.style.display = 'none';
+
+  contentEl.querySelectorAll('.scenario-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (STEP_STATE.exerciseAnswered) return;
+      STEP_STATE.exerciseAnswered = true;
+      const chosenIdx = parseInt(btn.dataset.idx);
+      const isCorrect = ex.options[chosenIdx] === ex.phrase;
+
+      contentEl.querySelectorAll('.scenario-option').forEach((b, i) => {
+        b.classList.add('disabled');
+        if (ex.options[i] === ex.phrase) b.classList.add('correct');
+        else if (i === chosenIdx) b.classList.add('incorrect');
+      });
+
+      if (isCorrect){
+        STEP_STATE.exerciseScore += 1;
+        addXP(4);
+      }
+      goToNextExercise();
+    });
   });
 }
 
