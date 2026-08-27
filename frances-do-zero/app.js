@@ -594,23 +594,23 @@ function registerDailyMatchGame(){
 }
 
 const EASY_CHALLENGES = [
-  { id:'streak', icon:'🔥', color:'gold', label:'Mantenha sua sequência de dias viva hoje', target:1, get: () => STATE.lastStudyDay === todayStr() ? 1 : 0 },
-  { id:'firstLesson', icon:'🌅', color:'gold', label:'Complete sua primeira lição do dia', target:1, get: d => d.lessons }
+  { id:'streak', icon:'🔥', label:'Mantenha sua sequência de dias viva hoje', target:1, get: () => STATE.lastStudyDay === todayStr() ? 1 : 0 },
+  { id:'firstLesson', icon:'🌅', label:'Complete sua primeira lição do dia', target:1, get: d => d.lessons }
 ];
 const REVISAO_CONJ_CHALLENGES = [
-  { id:'conj1', icon:'🗣️', color:'blue', label:'Pratique conjugação 1 vez', target:1, get: d => d.conjugationSessions },
-  { id:'conjCorrect10', icon:'✅', color:'blue', label:'Acerte 10 formas verbais numa sessão de conjugação', target:10, get: d => d.conjugationCorrect },
-  { id:'conjTenses2', icon:'🔤', color:'blue', label:'Pratique conjugação em 2 tempos verbais diferentes', target:2, get: d => d.conjugationTenses.length },
-  { id:'reviews15', icon:'🔁', color:'blue', label:'Revise 15 cartões', target:15, get: d => d.reviewsDone },
-  { id:'speedReview1', icon:'⚡', color:'blue', label:'Complete uma sessão de Revisão Rápida', target:1, get: d => d.speedReviewSessions },
-  { id:'matchGame1', icon:'🎴', color:'blue', label:'Jogue o jogo da memória 1 vez', target:1, get: d => d.matchGamesPlayed }
+  { id:'conj1', icon:'🗣️', label:'Pratique conjugação 1 vez', target:1, get: d => d.conjugationSessions },
+  { id:'conjCorrect10', icon:'✅', label:'Acerte 10 formas verbais numa sessão de conjugação', target:10, get: d => d.conjugationCorrect },
+  { id:'conjTenses2', icon:'🔤', label:'Pratique conjugação em 2 tempos verbais diferentes', target:2, get: d => d.conjugationTenses.length },
+  { id:'reviews15', icon:'🔁', label:'Revise 15 cartões', target:15, get: d => d.reviewsDone },
+  { id:'speedReview1', icon:'⚡', label:'Complete uma sessão de Revisão Rápida', target:1, get: d => d.speedReviewSessions },
+  { id:'matchGame1', icon:'🎴', label:'Jogue o jogo da memória 1 vez', target:1, get: d => d.matchGamesPlayed }
 ];
 const GENERAL_CHALLENGES = [
-  { id:'stars40', icon:'⭐', color:'purple', label:'Ganhe 40 estrelas', target:40, get: d => d.stars },
-  { id:'highscore2', icon:'📈', color:'purple', label:'Pontue mais de 80% em 2 lições', target:2, get: d => d.highScoreLessons },
-  { id:'perfect1', icon:'🎯', color:'purple', label:'Complete uma lição sem errar', target:1, get: d => d.perfectLessons },
-  { id:'lessons5', icon:'📚', color:'purple', label:'Complete 5 lições', target:5, get: d => d.lessons },
-  { id:'grammar1', icon:'🧠', color:'purple', label:'Complete 1 unidade de gramática', target:1, get: d => d.grammarLessons }
+  { id:'stars40', icon:'⭐', label:'Ganhe 40 estrelas', target:40, get: d => d.stars },
+  { id:'highscore2', icon:'📈', label:'Pontue mais de 80% em 2 lições', target:2, get: d => d.highScoreLessons },
+  { id:'perfect1', icon:'🎯', label:'Complete uma lição sem errar', target:1, get: d => d.perfectLessons },
+  { id:'lessons5', icon:'📚', label:'Complete 5 lições', target:5, get: d => d.lessons },
+  { id:'grammar1', icon:'🧠', label:'Complete 1 unidade de gramática', target:1, get: d => d.grammarLessons }
 ];
 
 function dailySeed(str){
@@ -636,7 +636,7 @@ function renderDailyChallengesScreen(){
   const contentEl = document.getElementById('step-content');
   const nextBtn = document.getElementById('step-next-btn');
   document.getElementById('step-back-btn').style.display = 'none';
-  document.getElementById('step-progress-wrap').style.display = 'none';
+  document.getElementById('step-progress-fill').style.width = '100%';
 
   contentEl.innerHTML = `
     <div class="challenges-screen">
@@ -647,7 +647,7 @@ function renderDailyChallengesScreen(){
         const done = current >= c.target;
         return `
           <div class="challenge-card">
-            <div class="challenge-icon ${c.color}">${c.icon}${done ? '<span class="challenge-check">✓</span>' : ''}</div>
+            <div class="challenge-icon">${c.icon}${done ? '<span class="challenge-check">✓</span>' : ''}</div>
             <div class="challenge-body">
               <div class="challenge-label">${c.label}</div>
               <div class="challenge-progress-track"><div class="challenge-progress-fill" style="width:${pct}%"></div></div>
@@ -700,7 +700,8 @@ const BADGES = [
 function unitCardCounts(unitId){
   const pool = STATE.cards.filter(c => c.unitId === unitId);
   const learned = pool.filter(c => c.reps > 0).length;
-  return { total: pool.length, learned };
+  const dueForReview = cardsDueNow(pool.filter(c => c.reps > 0)).length;
+  return { total: pool.length, learned, dueForReview };
 }
 
 // Unidades de um nível, na ordem — usado tanto pro desbloqueio sequencial
@@ -838,8 +839,9 @@ function buildUnitCard(u){
   const levelUnits = unitsOfLevel(u.level);
   const prog = STATE.unitProgress[u.id];
   const unlocked = prog.unlocked;
-  const { total, learned } = unitCardCounts(u.id);
+  const { total, learned, dueForReview } = unitCardCounts(u.id);
   const pct = total ? Math.round((learned/total)*100) : 0;
+  const reviewLabel = dueForReview > 0 ? `🔁 ${dueForReview} a revisar` : '';
 
   const isGrammar = u.type === 'grammar';
   const card = document.createElement('button');
@@ -847,7 +849,7 @@ function buildUnitCard(u){
   const metaHTML = isGrammar
     ? `<div class="unit-meta"><span class="gram-pill">Gramática</span><span>${prog.completed ? 'Concluído' : ''}</span></div>`
     : `<div class="unit-progress-bar"><div class="unit-progress-fill" style="width:${pct}%"></div></div>
-       <div class="unit-meta"><span>${learned}/${total} palavras</span><span>${pct}%</span></div>`;
+       <div class="unit-meta"><span>${reviewLabel}</span><span>${pct}%</span></div>`;
   // Unidades de gramática não mostram um número visível (fica só internamente,
   // via unitOrdinalInfo, pra cálculos como "Gramática X de Y" no cabeçalho —
   // que também não é mais exibido — e pro rótulo de exportação).
@@ -979,6 +981,7 @@ function openUnitDetail(unitId){
   STEP_STATE.onChallengesScreen = false;
   STEP_STATE.onCheckpoint = null;
   STEP_STATE.onLevelTest = null;
+  setLessonFocusMode(true);
 
   document.getElementById('path-list-wrap').style.display = 'none';
   document.getElementById('unit-detail-wrap').style.display = 'block';
@@ -1008,6 +1011,7 @@ document.getElementById('back-to-path').addEventListener('click', () => {
   STEP_STATE.onChallengesScreen = false;
   STEP_STATE.onCheckpoint = null;
   STEP_STATE.onLevelTest = null;
+  setLessonFocusMode(false);
   document.getElementById('path-list-wrap').style.display = 'block';
   document.getElementById('unit-detail-wrap').style.display = 'none';
   renderUnitsGrid();
@@ -1015,14 +1019,30 @@ document.getElementById('back-to-path').addEventListener('click', () => {
 
 function renderStepProgress(){
   const fillEl = document.getElementById('step-progress-fill');
-  const labelsEl = document.getElementById('step-progress-labels');
   const defs = currentStepDefs();
   const pct = (STEP_STATE.currentStep / (defs.length - 1)) * 100;
   fillEl.style.width = `${pct}%`;
-  labelsEl.innerHTML = defs.map((s, i) =>
-    `<span class="${i === STEP_STATE.currentStep ? 'current' : ''}">${s.label}</span>`
-  ).join('');
 }
+
+// ---------- Modo foco de lição (estilo Busuu) ----------
+// Esconde topbar/tabs enquanto o aluno está numa lição, checkpoint ou teste
+// de nível — só a barra de progresso, o ícone de dicas e o X ficam visíveis
+// por cima do exercício em si.
+function setLessonFocusMode(active){
+  document.getElementById('app').classList.toggle('lesson-focus', active);
+  if (!active){
+    document.getElementById('lesson-hint-panel').style.display = 'none';
+    document.getElementById('lesson-hint-btn').classList.remove('active');
+  }
+}
+
+document.getElementById('lesson-hint-btn').addEventListener('click', () => {
+  const panel = document.getElementById('lesson-hint-panel');
+  const btn = document.getElementById('lesson-hint-btn');
+  const showing = panel.style.display !== 'none';
+  panel.style.display = showing ? 'none' : 'block';
+  btn.classList.toggle('active', !showing);
+});
 
 // ---------- Vocabulário palavra-por-palavra (estilo Memrise) ----------
 function findMatchingPhrase(word, unit){
@@ -1156,6 +1176,52 @@ function renderLessonCompleteScreen(contentEl, nextBtn, { correct, total, recapI
   `;
   wireAudioButtons(contentEl);
   nextBtn.textContent = nextLabel || 'Concluir unidade ✓';
+  nextBtn.style.display = 'flex';
+}
+
+// ---------- Tela de conclusão de módulo/nível (checkpoint e teste de nível) ----------
+// Diferente da tela de fim de lição normal: não repete vocabulário isolado,
+// foca no que o aluno já é capaz de fazer na vida real com o que aprendeu
+// (usa o campo `goal` de cada unidade do módulo/nível).
+function renderModuleCompleteScreen(contentEl, nextBtn, { passed, title, subtitle, units, scorePct, passThreshold, nextLabel }){
+  if (!passed){
+    contentEl.innerHTML = `
+      <div class="lesson-complete">
+        <div class="lesson-complete-icon">💪</div>
+        <h2>Quase lá!</h2>
+        <p class="module-complete-sub">${subtitle}</p>
+        <div class="lesson-complete-stats">
+          <div class="lc-stat"><div class="lc-stat-label">Pontuação</div><div class="lc-stat-value">${scorePct}%</div></div>
+        </div>
+        <p class="module-retry-note">Você precisa de pelo menos ${passThreshold}% pra ser aprovado. Continue estudando as unidades desta seção e tente de novo quando quiser — sem pressa.</p>
+      </div>
+    `;
+    nextBtn.textContent = nextLabel || 'Voltar à trilha';
+    nextBtn.style.display = 'flex';
+    return;
+  }
+
+  const stars = lessonStars(scorePct);
+  const goals = units.map(u => u.goal).filter(Boolean);
+
+  contentEl.innerHTML = `
+    <div class="module-complete">
+      <div class="module-complete-icon">🏆</div>
+      <h2>${title}</h2>
+      <p class="module-complete-sub">${subtitle}</p>
+      <div class="lesson-complete-stats">
+        <div class="lc-stat"><div class="lc-stat-label">Estrelas</div><div class="lc-stat-value">+${stars} ⭐</div></div>
+        <div class="lc-stat"><div class="lc-stat-label">Pontuação</div><div class="lc-stat-value">${scorePct}%</div></div>
+      </div>
+      <div class="module-skills">
+        <div class="module-skills-label">Agora você já sabe, na vida real:</div>
+        ${goals.map(g => `
+          <div class="module-skill-item"><span class="module-skill-check">✓</span><span>${g}</span></div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  nextBtn.textContent = nextLabel || 'Continuar →';
   nextBtn.style.display = 'flex';
 }
 
@@ -1316,6 +1382,7 @@ document.getElementById('step-back-btn').addEventListener('click', () => {
 document.getElementById('step-next-btn').addEventListener('click', () => {
   if (STEP_STATE.onChallengesScreen){
     STEP_STATE.onChallengesScreen = false;
+    setLessonFocusMode(false);
     document.getElementById('path-list-wrap').style.display = 'block';
     document.getElementById('unit-detail-wrap').style.display = 'none';
     renderUnitsGrid();
@@ -1328,6 +1395,7 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
       completeModuleUnits(module, CHECKPOINT_STATE.lastPct);
     }
     STEP_STATE.onCheckpoint = null;
+    setLessonFocusMode(false);
     document.getElementById('path-list-wrap').style.display = 'block';
     document.getElementById('unit-detail-wrap').style.display = 'none';
     renderUnitsGrid();
@@ -1340,6 +1408,7 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
       completeLevelTest(test, LEVEL_TEST_STATE.lastPct);
     }
     STEP_STATE.onLevelTest = null;
+    setLessonFocusMode(false);
     document.getElementById('path-list-wrap').style.display = 'block';
     document.getElementById('unit-detail-wrap').style.display = 'none';
     renderUnitsGrid();
@@ -1395,11 +1464,23 @@ function buildExerciseSet(unit){
     return { format, item, options };
   });
 
-  const reorderExercises = (unit.phrases || [])
-    .filter(p => p.blocks && p.blocks.length >= 2)
-    .map(p => ({ format: 'reorder', phrase: p, shuffledBlocks: shuffle(p.blocks) }));
+  // Frases da unidade viram exercício de "ordenar" ou de "cenário" (index par/ímpar),
+  // pra variar o formato sem dobrar o total de exercícios por lição.
+  const phrasesWithBlocks = (unit.phrases || []).filter(p => p.blocks && p.blocks.length >= 2);
+  const phrasesWithScenario = (unit.phrases || []).filter(p => p.scenario);
 
-  return shuffle([...vocabExercises, ...reorderExercises]);
+  const reorderExercises = [];
+  const scenarioExercises = [];
+  phrasesWithBlocks.forEach((p, i) => {
+    if (p.scenario && i % 2 === 1 && phrasesWithScenario.length >= 3){
+      const distractors = shuffle(phrasesWithScenario.filter(x => x !== p)).slice(0, 2);
+      scenarioExercises.push({ format: 'scenario', phrase: p, options: shuffle([p, ...distractors]) });
+    } else {
+      reorderExercises.push({ format: 'reorder', phrase: p, shuffledBlocks: shuffle(p.blocks) });
+    }
+  });
+
+  return shuffle([...vocabExercises, ...reorderExercises, ...scenarioExercises]);
 }
 
 function renderExerciseStep(){
@@ -1422,6 +1503,8 @@ function renderExerciseStep(){
 
   if (ex.format === 'reorder'){
     renderReorderExercise(ex, contentEl, nextBtn, total);
+  } else if (ex.format === 'scenario'){
+    renderScenarioExercise(ex, contentEl, nextBtn, total);
   } else {
     renderMultipleChoiceExercise(ex, contentEl, nextBtn, total);
   }
@@ -1503,6 +1586,51 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
   document.getElementById('exercise-dontknow-btn').addEventListener('click', () => {
     if (STEP_STATE.exerciseAnswered) return;
     revealAnswer(-1);
+  });
+}
+
+// ---------- Exercício de cenário ("O que você diria...?") ----------
+// Testa uso pragmático de uma frase já ensinada: dado um contexto em
+// português, escolher entre 3 frases em francês (já vistas na unidade)
+// qual é a resposta certa pra situação — não só reconhecer o significado.
+function renderScenarioExercise(ex, contentEl, nextBtn, total){
+  const optionsHTML = ex.options.map((opt, i) => `
+    <button class="scenario-option" data-idx="${i}">
+      <span class="scenario-option-num">${i + 1}</span>
+      <span class="scenario-option-text">${opt.f}</span>
+    </button>
+  `).join('');
+
+  contentEl.innerHTML = `
+    <div class="exercise-wrap">
+      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="scenario-question">${ex.phrase.scenario}</div>
+      <div class="scenario-scene">${ex.phrase.scenarioEmoji}</div>
+      <div class="scenario-options">${optionsHTML}</div>
+    </div>
+  `;
+
+  nextBtn.style.display = 'none';
+
+  contentEl.querySelectorAll('.scenario-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (STEP_STATE.exerciseAnswered) return;
+      STEP_STATE.exerciseAnswered = true;
+      const chosenIdx = parseInt(btn.dataset.idx);
+      const isCorrect = ex.options[chosenIdx] === ex.phrase;
+
+      contentEl.querySelectorAll('.scenario-option').forEach((b, i) => {
+        b.classList.add('disabled');
+        if (ex.options[i] === ex.phrase) b.classList.add('correct');
+        else if (i === chosenIdx) b.classList.add('incorrect');
+      });
+
+      if (isCorrect){
+        STEP_STATE.exerciseScore += 1;
+        addXP(4);
+      }
+      goToNextExercise();
+    });
   });
 }
 
@@ -2196,6 +2324,13 @@ function completeModuleUnits(module, scorePct){
   module.unitIds.forEach(id => {
     STATE.unitProgress[id].started = true;
     STATE.unitProgress[id].completed = true;
+    // Passar no checkpoint/teste de nível é prova de que o aluno já sabe o
+    // vocabulário — sem isso, as unidades ficavam marcadas como concluídas
+    // mas o contador de palavras aprendidas (baseado no SRS) continuava zerado.
+    const u = UNITS.find(x => x.id === id);
+    if (u.type !== 'grammar'){
+      u.vocab.forEach(v => registerExerciseCorrect(u, v));
+    }
   });
   STATE.checkpointProgress[module.id].completed = true;
   STATE.checkpointProgress[module.id].bestScore = Math.max(STATE.checkpointProgress[module.id].bestScore || 0, scorePct);
@@ -2212,10 +2347,10 @@ function openCheckpoint(moduleId){
   const module = MODULES.find(m => m.id === moduleId);
   STEP_STATE.onChallengesScreen = false;
   STEP_STATE.onCheckpoint = moduleId;
+  setLessonFocusMode(true);
 
   document.getElementById('path-list-wrap').style.display = 'none';
   document.getElementById('unit-detail-wrap').style.display = 'block';
-  document.getElementById('step-progress-wrap').style.display = 'none';
   document.getElementById('step-back-btn').style.display = 'none';
 
   document.getElementById('ud-eyebrow').textContent = 'Ponto de verificação';
@@ -2237,19 +2372,21 @@ function renderCheckpointQuizStep(){
   const nextBtn = document.getElementById('step-next-btn');
   const module = MODULES.find(m => m.id === CHECKPOINT_STATE.moduleId);
   const total = CHECKPOINT_STATE.queue.length;
+  document.getElementById('step-progress-fill').style.width = `${total ? Math.round((CHECKPOINT_STATE.index / total) * 100) : 0}%`;
 
   if (CHECKPOINT_STATE.index >= total){
     const pct = total ? Math.round((CHECKPOINT_STATE.score / total) * 100) : 0;
     CHECKPOINT_STATE.lastPct = pct;
     recordCheckpointAttempt(module, pct);
     const passed = pct >= CHECKPOINT_PASS_THRESHOLD;
-    const recapItems = module.unitIds
-      .map(id => UNITS.find(u => u.id === id))
-      .filter(u => u.type !== 'grammar')
-      .flatMap(u => u.vocab)
-      .slice(0, 12);
-    renderLessonCompleteScreen(contentEl, nextBtn, {
-      correct: CHECKPOINT_STATE.score, total, recapItems,
+    const moduleUnits = module.unitIds.map(id => UNITS.find(u => u.id === id));
+    renderModuleCompleteScreen(contentEl, nextBtn, {
+      passed,
+      title: 'Módulo concluído! 🏆',
+      subtitle: module.title,
+      units: moduleUnits,
+      scorePct: pct,
+      passThreshold: CHECKPOINT_PASS_THRESHOLD,
       nextLabel: passed ? 'Concluir seção ✓' : 'Voltar à trilha'
     });
     return;
@@ -2353,10 +2490,10 @@ function openLevelTest(testId){
   STEP_STATE.onChallengesScreen = false;
   STEP_STATE.onCheckpoint = null;
   STEP_STATE.onLevelTest = testId;
+  setLessonFocusMode(true);
 
   document.getElementById('path-list-wrap').style.display = 'none';
   document.getElementById('unit-detail-wrap').style.display = 'block';
-  document.getElementById('step-progress-wrap').style.display = 'none';
   document.getElementById('step-back-btn').style.display = 'none';
 
   document.getElementById('ud-eyebrow').textContent = 'Teste de nível';
@@ -2378,20 +2515,23 @@ function renderLevelTestQuizStep(){
   const nextBtn = document.getElementById('step-next-btn');
   const test = LEVEL_TESTS.find(t => t.id === LEVEL_TEST_STATE.testId);
   const total = LEVEL_TEST_STATE.queue.length;
+  document.getElementById('step-progress-fill').style.width = `${total ? Math.round((LEVEL_TEST_STATE.index / total) * 100) : 0}%`;
 
   if (LEVEL_TEST_STATE.index >= total){
     const pct = total ? Math.round((LEVEL_TEST_STATE.score / total) * 100) : 0;
     LEVEL_TEST_STATE.lastPct = pct;
     recordLevelTestAttempt(test, pct);
     const passed = pct >= LEVEL_TEST_PASS_THRESHOLD;
-    const recapItems = modulesOfLevel(test.level)
+    const levelUnits = modulesOfLevel(test.level)
       .flatMap(m => m.unitIds)
-      .map(id => UNITS.find(u => u.id === id))
-      .filter(u => u.type !== 'grammar')
-      .flatMap(u => u.vocab)
-      .slice(0, 12);
-    renderLessonCompleteScreen(contentEl, nextBtn, {
-      correct: LEVEL_TEST_STATE.score, total, recapItems,
+      .map(id => UNITS.find(u => u.id === id));
+    renderModuleCompleteScreen(contentEl, nextBtn, {
+      passed,
+      title: `Nível ${test.level} concluído! 🎓`,
+      subtitle: `Você já pode seguir direto pro ${test.nextLevel}`,
+      units: levelUnits,
+      scorePct: pct,
+      passThreshold: LEVEL_TEST_PASS_THRESHOLD,
       nextLabel: passed ? `Concluir nível ${test.level} ✓` : 'Voltar à trilha'
     });
     return;
@@ -2886,9 +3026,22 @@ const CONJ_PERSON_LABELS = ['je', 'tu', 'il / elle / on', 'nous', 'vous', 'ils /
 // impératif não tem 1ª/3ª pessoa do singular nem 3ª do plural — só tu/nous/vous
 const CONJ_IMPERATIF_ACTIVE = [false, true, false, true, true, false];
 
+// Ranking de frequência dos verbos: a ordem em que aparecem no dataset
+// (conjugation-data.js) já é do mais comum pro mais raro — usada pelo filtro
+// "Número de verbos" abaixo, sem precisar de uma fonte de frequência separada.
+const CONJ_VERB_RANK = Object.fromEntries(Object.keys(CONJUGATION_VERBS).map((name, i) => [name, i + 1]));
+const CONJ_TOTAL_VERBS = Object.keys(CONJUGATION_VERBS).length;
+const CONJ_TOPN_OPTIONS = [10, 25, 50, 100, 150].filter(n => n < CONJ_TOTAL_VERBS);
+CONJ_TOPN_OPTIONS.push(CONJ_TOTAL_VERBS); // "Todos"
+
+const CONJ_REGULAR_GROUPS = ['g1', 'g2'];
+const CONJ_IRREGULAR_GROUPS = ['core', 'g3ir', 'g3re', 'g3oir'];
+
 const CONJ_STATE = {
   selectedTenses: ['presente'],
   selectedGroups: Object.keys(CONJUGATION_GROUPS),
+  topN: CONJ_TOTAL_VERBS,
+  regularity: null, // null | 'regular' | 'irregular'
   queue: [],
   index: 0,
   score: 0,
@@ -2903,6 +3056,16 @@ function renderConjSelectScreen(){
       <span>${t.label}</span>
     </label>
   `).join('');
+
+  const topnSelectEl = document.getElementById('conj-topn-select');
+  topnSelectEl.innerHTML = CONJ_TOPN_OPTIONS.map(n =>
+    `<option value="${n}" ${CONJ_STATE.topN === n ? 'selected' : ''}>${n === CONJ_TOTAL_VERBS ? `Todos (${n})` : `Top ${n}`}</option>`
+  ).join('');
+
+  const regularToggleEl = document.getElementById('conj-toggle-regular');
+  const irregularToggleEl = document.getElementById('conj-toggle-irregular');
+  regularToggleEl.classList.toggle('active', CONJ_STATE.regularity === 'regular');
+  irregularToggleEl.classList.toggle('active', CONJ_STATE.regularity === 'irregular');
 
   const verbListEl = document.getElementById('conj-verb-list');
   verbListEl.innerHTML = Object.entries(CONJUGATION_GROUPS).map(([key, info]) => `
@@ -2921,6 +3084,20 @@ function renderConjSelectScreen(){
         CONJ_STATE.selectedTenses = CONJ_STATE.selectedTenses.filter(t => t !== key);
       }
     });
+  });
+
+  topnSelectEl.addEventListener('change', () => {
+    CONJ_STATE.topN = parseInt(topnSelectEl.value);
+  });
+
+  regularToggleEl.addEventListener('click', () => {
+    CONJ_STATE.regularity = CONJ_STATE.regularity === 'regular' ? null : 'regular';
+    renderConjSelectScreen();
+  });
+
+  irregularToggleEl.addEventListener('click', () => {
+    CONJ_STATE.regularity = CONJ_STATE.regularity === 'irregular' ? null : 'irregular';
+    renderConjSelectScreen();
   });
 
   verbListEl.querySelectorAll('input[data-group]').forEach(cb => {
@@ -2943,6 +3120,12 @@ document.getElementById('conj-start-btn').addEventListener('click', () => {
 
   const eligibleVerbs = Object.entries(CONJUGATION_VERBS)
     .filter(([name, v]) => CONJ_STATE.selectedGroups.includes(v.g))
+    .filter(([name]) => CONJ_VERB_RANK[name] <= CONJ_STATE.topN)
+    .filter(([name, v]) => {
+      if (CONJ_STATE.regularity === 'regular') return CONJ_REGULAR_GROUPS.includes(v.g);
+      if (CONJ_STATE.regularity === 'irregular') return CONJ_IRREGULAR_GROUPS.includes(v.g);
+      return true;
+    })
     .map(([name]) => name);
 
   if (!eligibleVerbs.length){

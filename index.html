@@ -243,11 +243,26 @@ body{
 .back-link{ display:inline-flex; align-items:center; gap:6px; background:none; border:none; color:var(--ink-soft); font-weight:700; font-size:13px; cursor:pointer; padding:6px 0; margin-bottom:8px; }
 .back-link:hover{ color:var(--seal-red-dark); }
 
-.unit-hero{ background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:20px; margin-bottom:20px; }
-.unit-hero-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; flex-wrap:wrap; }
-.unit-hero-eyebrow{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--seal-red-dark); font-weight:800; margin-bottom:0; }
-.unit-hero h2{ margin:0 0 8px; font-size:22px; }
-.unit-hero-btns{ display:flex; gap:8px; flex-wrap:wrap; }
+/* Modo foco de lição (estilo Busuu): esconde topbar/tabs, deixa só ícone de
+   dicas, barra de progresso e X pra sair — nada mais compete com o exercício. */
+#app.lesson-focus .topbar, #app.lesson-focus .tabs{ display:none; }
+
+.lesson-focus-bar{ display:flex; align-items:center; gap:14px; margin-bottom:20px; }
+.lesson-hint-btn, .lesson-close-btn{
+  flex-shrink:0; width:36px; height:36px; border-radius:50%; border:1px solid var(--paper-line);
+  background: var(--paper); color: var(--ink-soft); font-size:16px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition: all .15s ease; font-family: var(--font-body);
+}
+.lesson-hint-btn:hover, .lesson-close-btn:hover{ border-color: var(--imperial-gold); color: var(--ink); }
+.lesson-hint-btn.active{ background: rgba(212,160,23,0.15); border-color: var(--seal-red); color: var(--seal-red-dark); }
+.lesson-progress-track{ flex:1; height:8px; background: var(--paper-warm); border-radius:4px; overflow:hidden; }
+.lesson-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:4px; transition: width .3s ease; }
+
+.lesson-hint-panel{ background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:18px 20px; margin-bottom:20px; }
+.lesson-hint-eyebrow{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--seal-red-dark); font-weight:800; margin-bottom:4px; }
+.lesson-hint-title{ font-size:19px; font-weight:800; margin-bottom:8px; }
+.lesson-hint-goal{ margin:0 0 12px; color:var(--ink-soft); font-size:14px; line-height:1.5; }
+.lesson-hint-btns{ display:flex; gap:8px; flex-wrap:wrap; }
 .manual-link-btn{
   background: var(--paper); border:1px solid var(--paper-line); border-radius:999px; padding:6px 13px;
   font-family: var(--font-body); font-weight:700; font-size:12.5px; color: var(--seal-red-dark); cursor:pointer;
@@ -315,7 +330,6 @@ body{
 }
 .manual-empty{ text-align:center; padding:50px 20px; color: var(--ink-soft); }
 .manual-empty .big-emoji{ font-size:40px; margin-bottom:10px; }
-.unit-hero .goal{ margin:0; color:var(--ink-soft); font-size:14px; line-height:1.5; }
 
 .section-label{ font-size:12px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft); font-weight:800; margin: 22px 0 10px; }
 
@@ -402,12 +416,6 @@ body{
 
 .unit-actions{ display:flex; gap:10px; margin-top:24px; }
 
-/* ---------- Step navigation (lição em partes) ---------- */
-.step-progress{ margin-bottom:20px; }
-.step-progress-track{ height:6px; background: var(--paper-warm); border-radius:4px; overflow:hidden; margin-bottom:8px; }
-.step-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:4px; transition: width .3s ease; }
-.step-progress-labels{ display:flex; justify-content:space-between; font-size:11px; font-weight:800; color: var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; }
-.step-progress-labels span.current{ color: var(--seal-red-dark); }
 
 /* ---------- Exercícios (mini-testes estilo Memrise) ---------- */
 .exercise-wrap{ text-align:center; padding: 8px 0; }
@@ -448,6 +456,23 @@ body{
 .exercise-result h3{ margin:0 0 6px; font-size:20px; }
 .exercise-result p{ margin:0; color: var(--ink-soft); font-size:14px; }
 .exercise-result .score-num{ font-size:34px; font-weight:800; color: var(--seal-red-dark); margin: 14px 0; }
+
+/* ---------- Tela final "Parabéns" (estilo Busuu) ---------- */
+.lesson-complete{ text-align:center; padding: 20px 4px; }
+.lesson-complete-icon{ font-size:52px; margin-bottom:8px; }
+.lesson-complete h2{ margin:0 0 18px; font-size:22px; }
+.lesson-complete-stats{ display:flex; gap:12px; margin-bottom:22px; }
+.lc-stat{ flex:1; background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:14px; }
+.lc-stat-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); font-weight:800; margin-bottom:6px; }
+.lc-stat-value{ font-size:24px; font-weight:800; color: var(--seal-red-dark); }
+
+.lesson-recap{ text-align:left; background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius); overflow:hidden; }
+.lesson-recap-label{ background: var(--seal-red-dark); color: var(--paper); font-weight:800; font-size:11px; text-transform:uppercase; letter-spacing:.05em; padding:10px 16px; }
+.lesson-recap-item{ padding:12px 16px; }
+.lesson-recap-item + .lesson-recap-item{ border-top:1px solid var(--paper-line); }
+.lesson-recap-french{ font-size:15px; font-weight:700; display:flex; align-items:center; gap:8px; }
+.lesson-recap-pinyin{ font-weight:600; color: var(--ink-soft); font-size:13px; }
+.lesson-recap-trans{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
 
 /* ---------- Exercício de ordenar palavras (reorder) ---------- */
 .reorder-answer-slots{
@@ -789,24 +814,22 @@ body.hide-pinyin .prompt-pinyin{
     </div>
 
     <div id="unit-detail-wrap" style="display:none;">
-      <button class="back-link" id="back-to-path">← Voltar à trilha</button>
-      <div class="unit-hero">
-        <div class="unit-hero-top">
-          <div class="unit-hero-eyebrow" id="ud-eyebrow"></div>
-          <div class="unit-hero-btns">
-            <button class="manual-link-btn" id="unit-notes-btn" style="display:none;">📌 Dicas e Notas</button>
-            <button class="manual-link-btn" id="unit-manual-btn">📖 Manual da unidade</button>
-          </div>
+      <div class="lesson-focus-bar">
+        <button class="lesson-hint-btn" id="lesson-hint-btn" title="Dicas">💡</button>
+        <div class="lesson-progress-track" id="step-progress-wrap">
+          <div class="lesson-progress-fill" id="step-progress-fill"></div>
         </div>
-        <h2 id="ud-title"></h2>
-        <p class="goal" id="ud-goal"></p>
+        <button class="lesson-close-btn" id="back-to-path" title="Sair da lição">✕</button>
       </div>
 
-      <div class="step-progress">
-        <div class="step-progress-track">
-          <div class="step-progress-fill" id="step-progress-fill"></div>
+      <div class="lesson-hint-panel" id="lesson-hint-panel" style="display:none;">
+        <div class="lesson-hint-eyebrow" id="ud-eyebrow"></div>
+        <div class="lesson-hint-title" id="ud-title"></div>
+        <p class="lesson-hint-goal" id="ud-goal"></p>
+        <div class="lesson-hint-btns">
+          <button class="manual-link-btn" id="unit-notes-btn" style="display:none;">📌 Dicas e Notas</button>
+          <button class="manual-link-btn" id="unit-manual-btn">📖 Manual da unidade</button>
         </div>
-        <div class="step-progress-labels" id="step-progress-labels"></div>
       </div>
 
       <div id="step-content"></div>

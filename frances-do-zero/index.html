@@ -218,11 +218,25 @@ body{
 .back-link{ display:inline-flex; align-items:center; gap:6px; background:none; border:none; color:var(--ink-soft); font-weight:700; font-size:13px; cursor:pointer; padding:6px 0; margin-bottom:8px; }
 .back-link:hover{ color:var(--seal-red-dark); }
 
-.unit-hero{ background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:20px; margin-bottom:20px; }
-.unit-hero-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; flex-wrap:wrap; }
-.unit-hero-eyebrow{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--seal-red-dark); font-weight:800; margin-bottom:0; }
-.unit-hero h2{ margin:0 0 8px; font-size:22px; }
-.unit-hero .goal{ margin:0; color:var(--ink-soft); font-size:14px; line-height:1.5; }
+/* Modo foco de lição (estilo Busuu): esconde topbar/tabs, deixa só ícone de
+   dicas, barra de progresso e X pra sair — nada mais compete com o exercício. */
+#app.lesson-focus .topbar, #app.lesson-focus .tabs{ display:none; }
+
+.lesson-focus-bar{ display:flex; align-items:center; gap:14px; margin-bottom:20px; }
+.lesson-hint-btn, .lesson-close-btn{
+  flex-shrink:0; width:36px; height:36px; border-radius:50%; border:1px solid var(--paper-line);
+  background: var(--paper); color: var(--ink-soft); font-size:16px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition: all .15s ease; font-family: var(--font-body);
+}
+.lesson-hint-btn:hover, .lesson-close-btn:hover{ border-color: var(--imperial-gold); color: var(--ink); }
+.lesson-hint-btn.active{ background: rgba(52,152,214,0.12); border-color: var(--seal-red); color: var(--seal-red-dark); }
+.lesson-progress-track{ flex:1; height:8px; background: var(--paper-warm); border-radius:4px; overflow:hidden; }
+.lesson-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:4px; transition: width .3s ease; }
+
+.lesson-hint-panel{ background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:18px 20px; margin-bottom:20px; }
+.lesson-hint-eyebrow{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--seal-red-dark); font-weight:800; margin-bottom:4px; }
+.lesson-hint-title{ font-size:19px; font-weight:800; margin-bottom:8px; }
+.lesson-hint-goal{ margin:0; color:var(--ink-soft); font-size:14px; line-height:1.5; }
 
 .section-label{ font-size:12px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft); font-weight:800; margin: 22px 0 10px; }
 
@@ -323,12 +337,6 @@ body{
 
 .unit-actions{ display:flex; gap:10px; margin-top:24px; }
 
-/* ---------- Step navigation (lição em partes) ---------- */
-.step-progress{ margin-bottom:20px; }
-.step-progress-track{ height:6px; background: var(--paper-warm); border-radius:4px; overflow:hidden; margin-bottom:8px; }
-.step-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:4px; transition: width .3s ease; }
-.step-progress-labels{ display:flex; justify-content:space-between; font-size:11px; font-weight:800; color: var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; }
-.step-progress-labels span.current{ color: var(--seal-red-dark); }
 
 /* ---------- Exercícios (mini-testes estilo Memrise) ---------- */
 .exercise-wrap{ text-align:center; padding: 8px 0; }
@@ -361,6 +369,30 @@ body{
 .exercise-option.disabled{ pointer-events:none; opacity:.6; }
 .exercise-option.disabled.correct, .exercise-option.disabled.incorrect{ opacity:1; }
 
+/* ---------- Exercício de cenário ("o que você diria...") ---------- */
+.scenario-question{ font-size:16px; font-weight:800; margin-bottom:16px; line-height:1.4; }
+.scenario-scene{
+  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding:26px 20px; margin-bottom:20px; font-size:48px; line-height:1;
+}
+.scenario-options{ display:flex; flex-direction:column; gap:10px; }
+.scenario-option{
+  display:flex; align-items:center; gap:12px; background: var(--paper); border:2px solid var(--paper-line);
+  border-radius:12px; padding:14px 16px; cursor:pointer; font-family: var(--font-body);
+  text-align:left; transition: all .12s ease;
+}
+.scenario-option:hover{ border-color: var(--imperial-gold); transform: translateY(-1px); }
+.scenario-option-num{
+  flex-shrink:0; width:24px; height:24px; border-radius:50%; background: var(--paper-warm);
+  border:1px solid var(--paper-line); display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:800; color: var(--ink-soft);
+}
+.scenario-option-text{ font-size:14.5px; font-weight:700; color: var(--ink); }
+.scenario-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
+.scenario-option.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.10); }
+.scenario-option.disabled{ pointer-events:none; opacity:.6; }
+.scenario-option.disabled.correct, .scenario-option.disabled.incorrect{ opacity:1; }
+
 /* ---------- Tela final "Parabéns" (estilo Busuu) ---------- */
 .lesson-complete{ text-align:center; padding: 20px 4px; }
 .lesson-complete-icon{ font-size:52px; margin-bottom:8px; }
@@ -377,6 +409,27 @@ body{
 .lesson-recap-french{ font-size:15px; font-weight:700; display:flex; align-items:center; gap:8px; }
 .lesson-recap-trans{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
 
+/* ---------- Tela de conclusão de módulo/nível (checkpoint / teste de nível) ---------- */
+.module-complete{ text-align:center; padding: 20px 4px; }
+.module-complete-icon{ font-size:52px; margin-bottom:8px; }
+.module-complete h2{ margin:0 0 4px; font-size:22px; }
+.module-complete-sub{ margin:0 0 18px; color: var(--ink-soft); font-size:13.5px; font-weight:700; }
+.module-skills{ text-align:left; background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius); padding:6px 0; }
+.module-skills-label{
+  padding:10px 16px; font-weight:800; font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+  color: var(--seal-red-dark);
+}
+.module-skill-item{
+  display:flex; align-items:flex-start; gap:10px; padding:10px 16px; font-size:14px; font-weight:600;
+  line-height:1.4; color: var(--ink);
+}
+.module-skill-item + .module-skill-item{ border-top:1px solid var(--paper-line); }
+.module-skill-check{
+  flex-shrink:0; width:20px; height:20px; border-radius:50%; background: var(--jade); color:white;
+  font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; margin-top:1px;
+}
+.module-retry-note{ color: var(--ink-soft); font-size:13.5px; line-height:1.5; max-width:340px; margin:0 auto; }
+
 /* ---------- Desafios de hoje (estilo Busuu) ---------- */
 .challenges-screen h2{ text-align:center; margin:0 0 20px; font-size:22px; }
 .challenge-card{
@@ -384,12 +437,9 @@ body{
   border-radius: var(--radius); padding:16px; margin-bottom:12px;
 }
 .challenge-icon{
-  position:relative; flex-shrink:0; width:48px; height:48px; border-radius:12px;
-  display:flex; align-items:center; justify-content:center; font-size:22px;
+  position:relative; flex-shrink:0; width:48px; height:48px;
+  display:flex; align-items:center; justify-content:center; font-size:30px;
 }
-.challenge-icon.gold{ background: var(--imperial-gold); }
-.challenge-icon.purple{ background: var(--brand-purple); }
-.challenge-icon.blue{ background: var(--seal-red); }
 .challenge-check{
   position:absolute; bottom:-4px; right:-4px; width:18px; height:18px; border-radius:50%;
   background: var(--jade); color:white; font-size:11px; font-weight:800;
@@ -727,6 +777,31 @@ footer.app-footer img{ height:56px; opacity:.9; }
 .conj-check-item input{ width:16px; height:16px; accent-color: var(--seal-red); flex-shrink:0; }
 .conj-check-item .desc{ font-weight:600; font-size:11.5px; color:var(--ink-soft); display:block; }
 
+.conj-filter-row{ display:flex; flex-direction:column; gap:5px; margin-bottom:14px; }
+.conj-filter-row label{ font-size:12px; font-weight:800; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; }
+.conj-filter-row select{
+  padding:11px 14px; border-radius:10px; border:2px solid var(--paper-line); background:var(--paper);
+  font-family:var(--font-body); font-size:14.5px; font-weight:700; color:var(--ink); cursor:pointer;
+}
+.conj-filter-row select:focus{ outline:none; border-color: var(--seal-red); }
+.conj-toggle-item{
+  display:flex; align-items:center; justify-content:space-between; gap:10px; background:var(--paper);
+  border:1px solid var(--paper-line); border-radius:10px; padding:10px 12px; cursor:pointer;
+  font-size:13.5px; font-weight:700; margin-bottom:6px;
+}
+.conj-toggle-item:hover{ border-color: var(--imperial-gold); }
+.conj-toggle-item.active{ border-color: var(--seal-red); background: rgba(52,152,214,0.06); }
+.conj-toggle-switch{
+  flex-shrink:0; width:38px; height:22px; border-radius:999px; background:var(--paper-line);
+  position:relative; transition: background .15s ease;
+}
+.conj-toggle-switch::after{
+  content:''; position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%;
+  background:var(--paper); box-shadow: 0 1px 2px rgba(0,0,0,0.25); transition: transform .15s ease;
+}
+.conj-toggle-item.active .conj-toggle-switch{ background: var(--seal-red); }
+.conj-toggle-item.active .conj-toggle-switch::after{ transform: translateX(16px); }
+
 .conj-verb-header{
   background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
   padding:22px 20px; text-align:center; margin-bottom:20px;
@@ -816,20 +891,18 @@ footer.app-footer img{ height:56px; opacity:.9; }
     </div>
 
     <div id="unit-detail-wrap" style="display:none;">
-      <button class="back-link" id="back-to-path">← Voltar à trilha</button>
-      <div class="unit-hero">
-        <div class="unit-hero-top">
-          <div class="unit-hero-eyebrow" id="ud-eyebrow"></div>
+      <div class="lesson-focus-bar">
+        <button class="lesson-hint-btn" id="lesson-hint-btn" title="Dicas">💡</button>
+        <div class="lesson-progress-track" id="step-progress-wrap">
+          <div class="lesson-progress-fill" id="step-progress-fill"></div>
         </div>
-        <h2 id="ud-title"></h2>
-        <p class="goal" id="ud-goal"></p>
+        <button class="lesson-close-btn" id="back-to-path" title="Sair da lição">✕</button>
       </div>
 
-      <div class="step-progress" id="step-progress-wrap">
-        <div class="step-progress-track">
-          <div class="step-progress-fill" id="step-progress-fill"></div>
-        </div>
-        <div class="step-progress-labels" id="step-progress-labels"></div>
+      <div class="lesson-hint-panel" id="lesson-hint-panel" style="display:none;">
+        <div class="lesson-hint-eyebrow" id="ud-eyebrow"></div>
+        <div class="lesson-hint-title" id="ud-title"></div>
+        <p class="lesson-hint-goal" id="ud-goal"></p>
       </div>
 
       <div id="step-content"></div>
@@ -873,6 +946,18 @@ footer.app-footer img{ height:56px; opacity:.9; }
         </div>
         <div class="conj-select-col">
           <h3>Verbos</h3>
+          <div class="conj-filter-row">
+            <label for="conj-topn-select">Número de verbos (mais comuns primeiro)</label>
+            <select id="conj-topn-select"></select>
+          </div>
+          <div class="conj-toggle-item" id="conj-toggle-regular">
+            <span>Somente verbos regulares</span>
+            <div class="conj-toggle-switch"></div>
+          </div>
+          <div class="conj-toggle-item" id="conj-toggle-irregular">
+            <span>Somente verbos irregulares</span>
+            <div class="conj-toggle-switch"></div>
+          </div>
           <div class="conj-check-list" id="conj-verb-list"></div>
         </div>
       </div>
