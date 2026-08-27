@@ -388,6 +388,8 @@ const STATE = {
   lastStudyDay: null, // 'YYYY-MM-DD'
   lastReviewReminderDay: null, // 'YYYY-MM-DD'
   activityLog: {}, // 'YYYY-MM-DD' -> contagem de respostas naquele dia (para o heatmap)
+  studyGoal: { dailyMinutes: 0 }, // sem trilha de níveis no Mandarim — a meta é sempre o curso completo (dailyMinutes 0 = ainda não definida)
+  dailyMinutesLog: {}, // 'YYYY-MM-DD' -> minutos estimados de estudo naquele dia
   hanziLessonProgress: {}, // lessonIndex -> { completed: bool }
   totalReviews: 0,
   currentUnitId: null,
@@ -748,6 +750,8 @@ function serializeState(){
     lastStudyDay: STATE.lastStudyDay,
     lastReviewReminderDay: STATE.lastReviewReminderDay,
     activityLog: STATE.activityLog,
+    studyGoal: STATE.studyGoal,
+    dailyMinutesLog: STATE.dailyMinutesLog,
     hanziLessonProgress: STATE.hanziLessonProgress,
     totalReviews: STATE.totalReviews,
     daily: STATE.daily
@@ -772,6 +776,8 @@ function applySerializedState(data){
   if (typeof data.streak === 'number') STATE.streak = data.streak;
   if (data.lastStudyDay) STATE.lastStudyDay = data.lastStudyDay;
   if (data.lastReviewReminderDay) STATE.lastReviewReminderDay = data.lastReviewReminderDay;
+  if (data.studyGoal) Object.assign(STATE.studyGoal, data.studyGoal);
+  if (data.dailyMinutesLog) Object.assign(STATE.dailyMinutesLog, data.dailyMinutesLog);
   if (data.activityLog) Object.assign(STATE.activityLog, data.activityLog);
   if (data.hanziLessonProgress) Object.assign(STATE.hanziLessonProgress, data.hanziLessonProgress);
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
@@ -911,6 +917,128 @@ function showStreakCelebration(){
 
 document.getElementById('streak-modal-continue-btn').addEventListener('click', () => {
   document.getElementById('streak-modal-overlay').style.display = 'none';
+});
+
+// ---------- Plano de estudo com meta diária (estilo Busuu) ----------
+// Estima quantos exercícios faltam pra terminar o curso e, com a meta de
+// minutos/dia, calcula em quantos dias a pessoa terminaria. Sem trilha de
+// níveis aqui (o Mandarim tem um único curso corrido), então a meta é sempre
+// "terminar tudo" — só o ritmo diário é escolhido.
+const MINUTES_GOAL_OPTIONS = [5, 10, 15, 20, 30];
+
+function estimateUnitExerciseCount(u){
+  const phrasesWithBlocks = (u.phrases || []).filter(p => p.blocks && p.blocks.length >= 2);
+  return (u.vocab?.length || 0) + phrasesWithBlocks.length + Math.min(2, phrasesWithBlocks.length) + (u.trueFalseExercises ? 1 : 0);
+}
+
+function remainingUnitsForGoal(){
+  return UNITS.filter(u => !STATE.unitProgress[u.id]?.completed);
+}
+
+function estimateMinutesRemaining(){
+  const totalExercises = remainingUnitsForGoal().reduce((sum, u) => sum + estimateUnitExerciseCount(u), 0);
+  return Math.round(totalExercises * ESTIMATED_SECONDS_PER_EXERCISE / 60);
+}
+
+function estimateDaysToGoal(){
+  const { dailyMinutes } = STATE.studyGoal;
+  if (!dailyMinutes) return null;
+  const minutesLeft = estimateMinutesRemaining();
+  if (minutesLeft === 0) return 0;
+  return Math.ceil(minutesLeft / dailyMinutes);
+}
+
+function buildMinutesWeekData(){
+  const days = [];
+  for (let i = 6; i >= 0; i--){
+    const d = new Date(Date.now() - i*86400000);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const minutes = STATE.dailyMinutesLog[key] || 0;
+    days.push({ label: STREAK_DAY_LABELS[d.getDay()], minutes, done: minutes >= STATE.studyGoal.dailyMinutes && STATE.studyGoal.dailyMinutes > 0, isToday: i === 0 });
+  }
+  return days;
+}
+
+function renderStudyPlanCard(){
+  const subEl = document.getElementById('study-plan-sub');
+  const bodyEl = document.getElementById('study-plan-body');
+  const { dailyMinutes } = STATE.studyGoal;
+
+  if (!dailyMinutes){
+    subEl.textContent = 'Defina quanto tempo por dia você quer estudar';
+    bodyEl.innerHTML = `
+      <button class="btn btn-primary btn-block" id="study-plan-cta-btn">Definir minha meta</button>
+    `;
+    document.getElementById('study-plan-cta-btn').addEventListener('click', openStudyPlanModal);
+    return;
+  }
+
+  const week = buildMinutesWeekData();
+  const weekTotal = Math.round(week.reduce((sum, d) => sum + d.minutes, 0));
+  const weekGoal = dailyMinutes * 7;
+  const pct = weekGoal ? Math.min(100, Math.round((weekTotal / weekGoal) * 100)) : 0;
+  const todayMinutes = Math.round(week[6].minutes);
+  const days = estimateDaysToGoal();
+
+  subEl.textContent = `Meta: curso completo · ${dailyMinutes} min/dia`;
+  bodyEl.innerHTML = `
+    <div class="study-plan-ring-row">
+      <div class="study-ring" style="--pct:${pct}">
+        <div class="study-ring-inner">
+          <div class="study-ring-num">${weekTotal}/${weekGoal}</div>
+          <div class="study-ring-label">min esta semana</div>
+        </div>
+      </div>
+      <div class="study-plan-today">
+        <div class="study-plan-today-label">Meta diária</div>
+        <div class="study-plan-today-num">${todayMinutes} / ${dailyMinutes} min</div>
+        <div class="study-plan-estimate">${
+          days === null ? '' : days === 0
+            ? 'Você já completou os exercícios estimados pra essa meta! 🎉'
+            : `Nesse ritmo, você termina em aproximadamente <strong>${days} dia${days === 1 ? '' : 's'}</strong>.`
+        }</div>
+      </div>
+    </div>
+    <div class="streak-week-row study-week-row">
+      ${week.map(d => `
+        <div class="streak-day-item ${d.done ? 'done' : ''} ${d.isToday ? 'today' : ''}">
+          <div class="streak-day-circle">${d.done ? '✓' : ''}</div>
+          <div class="streak-day-label">${d.label}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function openStudyPlanModal(){
+  const minutesSelectEl = document.getElementById('study-plan-minutes-select');
+  minutesSelectEl.innerHTML = MINUTES_GOAL_OPTIONS.map(m => `
+    <button class="study-plan-chip" data-minutes="${m}">${m} min</button>
+  `).join('');
+  minutesSelectEl.querySelectorAll('.study-plan-chip').forEach(chip => {
+    chip.classList.toggle('active', STATE.studyGoal.dailyMinutes === parseInt(chip.dataset.minutes));
+    chip.addEventListener('click', () => {
+      minutesSelectEl.querySelectorAll('.study-plan-chip').forEach(b => b.classList.remove('active'));
+      chip.classList.add('active');
+    });
+  });
+
+  document.getElementById('study-plan-modal').style.display = 'flex';
+}
+
+document.getElementById('study-plan-edit-btn').addEventListener('click', openStudyPlanModal);
+document.getElementById('study-plan-modal-close').addEventListener('click', () => {
+  document.getElementById('study-plan-modal').style.display = 'none';
+});
+document.getElementById('study-plan-modal').addEventListener('click', (e) => {
+  if (e.target.id === 'study-plan-modal') document.getElementById('study-plan-modal').style.display = 'none';
+});
+document.getElementById('study-plan-save-btn').addEventListener('click', () => {
+  const minutesChip = document.querySelector('#study-plan-minutes-select .study-plan-chip.active');
+  STATE.studyGoal.dailyMinutes = minutesChip ? parseInt(minutesChip.dataset.minutes) : 0;
+  saveState();
+  document.getElementById('study-plan-modal').style.display = 'none';
+  renderStudyPlanCard();
 });
 
 // ---------- Lembrete de revisão acumulada (estilo Busuu) ----------
@@ -1655,7 +1783,19 @@ function renderExerciseStep(){
   }
 }
 
+// Estimativa de minutos estudados: cada exercício respondido (certo ou errado)
+// conta como ESTIMATED_SECONDS_PER_EXERCISE segundos, acumulado por dia — usado
+// pelo anel de meta diária. Não é cronômetro real, é uma aproximação.
+const ESTIMATED_SECONDS_PER_EXERCISE = 20;
+
+function addStudyMinutes(){
+  const today = todayStr();
+  STATE.dailyMinutesLog[today] = (STATE.dailyMinutesLog[today] || 0) + ESTIMATED_SECONDS_PER_EXERCISE / 60;
+  saveState();
+}
+
 function goToNextExercise(){
+  addStudyMinutes();
   setTimeout(() => {
     STEP_STATE.exerciseIndex += 1;
     renderExerciseStep();
@@ -2557,6 +2697,8 @@ function checkUnitCompletion(explicitUnitId){
 // RENDER: Progresso / gamificação
 // ============================================================
 function renderProgressView(){
+  renderStudyPlanCard();
+
   const completedUnits = Object.values(STATE.unitProgress).filter(u=>u.completed).length;
   const totalCards = STATE.cards.length;
   const learnedCards = STATE.cards.filter(c => c.reps > 0).length;
