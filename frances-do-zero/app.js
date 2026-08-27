@@ -3907,6 +3907,7 @@ function switchTab(tab){
   if (tab === 'conjugaison'){ renderConjSelectScreen(); }
   if (tab === 'progress'){ renderProgressView(); }
   if (tab === 'path'){ renderUnitsGrid(); }
+  if (tab === 'dictation'){ renderDictationList(); }
 }
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -4501,6 +4502,157 @@ function renderConjPracticeStep(){
   // Foca o primeiro campo ativo e vazio, pra já poder digitar direto.
   const firstActive = contentEl.querySelector('.conj-field input:not(:disabled)');
   if (firstActive) firstActive.focus();
+}
+
+// ============================================================
+// DITADOS
+// Um ditado por módulo, ligado à tarefa comunicativa do módulo (ver
+// dictations.js). Áudio pré-gerado em duas velocidades (normal/devagar),
+// scoring por alinhamento palavra-a-palavra (LCS) entre o texto certo e o
+// que o aluno digitou.
+// ============================================================
+function moduleTitleFor(moduleId){
+  const mod = MODULES.find(m => m.id === moduleId);
+  return mod ? mod.title : '';
+}
+
+function dictationAudioPath(d, rate){
+  return `audio/dictation-${d.id}-${rate}.mp3`;
+}
+
+function playDictationAudio(path, btnEl){
+  const audio = new Audio(path);
+  if (btnEl) btnEl.classList.add('speaking');
+  const clear = () => { if (btnEl) btnEl.classList.remove('speaking'); };
+  audio.addEventListener('ended', clear);
+  audio.addEventListener('error', () => { clear(); showToast('Não foi possível reproduzir o áudio'); });
+  audio.play().catch(clear);
+}
+
+function escapeHtmlDictation(str){
+  return str.replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+}
+
+function renderDictationList(){
+  document.getElementById('dictation-list-wrap').style.display = 'block';
+  document.getElementById('dictation-player-wrap').style.display = 'none';
+
+  const cardsWrap = document.getElementById('dictation-cards');
+  cardsWrap.innerHTML = DICTATIONS.map(d => `
+    <button class="dictation-card" data-dict-id="${d.id}">
+      <div class="dictation-card-level">${d.level}</div>
+      <div class="dictation-card-task">${escapeHtmlDictation(d.task)}</div>
+      <div class="dictation-card-module">${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</div>
+    </button>
+  `).join('');
+
+  cardsWrap.querySelectorAll('.dictation-card').forEach(card => {
+    card.addEventListener('click', () => openDictationPlayer(card.dataset.dictId));
+  });
+}
+
+document.getElementById('dictation-explainer-toggle').addEventListener('click', () => {
+  document.getElementById('dictation-explainer-toggle').classList.toggle('collapsed');
+  document.getElementById('dictation-explainer-steps').classList.toggle('collapsed');
+});
+
+document.getElementById('dictation-back-to-list').addEventListener('click', renderDictationList);
+
+function openDictationPlayer(id){
+  const d = DICTATIONS.find(x => x.id === id);
+  if (!d) return;
+
+  document.getElementById('dictation-list-wrap').style.display = 'none';
+  document.getElementById('dictation-player-wrap').style.display = 'block';
+
+  const content = document.getElementById('dictation-player-content');
+  content.innerHTML = `
+    <div class="dictation-player-task">${escapeHtmlDictation(d.task)}</div>
+    <p class="dictation-player-module">${d.level} · ${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</p>
+    <div class="dictation-audio-controls">
+      <button class="dictation-audio-btn" id="dictation-play-normal">🔊 Ouvir</button>
+      <button class="dictation-audio-btn" id="dictation-play-slow">🐢 Ouvir devagar</button>
+    </div>
+    <textarea class="dictation-textarea" id="dictation-input" placeholder="Digite aqui o que você ouviu..."></textarea>
+    <div class="dictation-actions">
+      <button class="btn btn-primary" id="dictation-check-btn">Verificar</button>
+      <button class="btn btn-secondary" id="dictation-retry-btn" style="display:none;">Tentar novamente</button>
+    </div>
+    <div id="dictation-result-wrap"></div>
+  `;
+
+  document.getElementById('dictation-play-normal').addEventListener('click', (e) => {
+    playDictationAudio(dictationAudioPath(d, 'normal'), e.currentTarget);
+  });
+  document.getElementById('dictation-play-slow').addEventListener('click', (e) => {
+    playDictationAudio(dictationAudioPath(d, 'slow'), e.currentTarget);
+  });
+
+  document.getElementById('dictation-check-btn').addEventListener('click', () => {
+    const userText = document.getElementById('dictation-input').value;
+    renderDictationResult(d, userText);
+  });
+
+  document.getElementById('dictation-retry-btn').addEventListener('click', () => {
+    document.getElementById('dictation-input').value = '';
+    document.getElementById('dictation-result-wrap').innerHTML = '';
+    document.getElementById('dictation-retry-btn').style.display = 'none';
+    document.getElementById('dictation-check-btn').style.display = 'inline-flex';
+  });
+}
+
+function normalizeDictationWord(w){
+  return w.toLowerCase().replace(/[.,!?;:'"()«»]/g, '');
+}
+
+// Alinha as palavras do texto certo com as que o aluno digitou via LCS
+// (mesma ideia de um diff de texto), pra marcar acertos/erros mesmo quando
+// o aluno pula ou adianta uma palavra, sem desalinhar o resto da frase.
+function diffDictationWords(correctText, userText){
+  const correctWords = correctText.trim().split(/\s+/);
+  const userWords = userText.trim().split(/\s+/).filter(w => w.length);
+  const cn = correctWords.map(normalizeDictationWord);
+  const un = userWords.map(normalizeDictationWord);
+  const n = cn.length, m = un.length;
+  const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--){
+    for (let j = m - 1; j >= 0; j--){
+      dp[i][j] = cn[i] === un[j] ? dp[i+1][j+1] + 1 : Math.max(dp[i+1][j], dp[i][j+1]);
+    }
+  }
+  let i = 0, j = 0;
+  const result = [];
+  while (i < n && j < m){
+    if (cn[i] === un[j]){ result.push({ type: 'match', word: correctWords[i] }); i++; j++; }
+    else if (dp[i+1][j] >= dp[i][j+1]){ result.push({ type: 'miss', word: correctWords[i] }); i++; }
+    else { result.push({ type: 'extra', word: userWords[j] }); j++; }
+  }
+  while (i < n){ result.push({ type: 'miss', word: correctWords[i] }); i++; }
+  while (j < m){ result.push({ type: 'extra', word: userWords[j] }); j++; }
+  return result;
+}
+
+function renderDictationResult(d, userText){
+  const diff = diffDictationWords(d.text, userText);
+  const totalCorrectWords = d.text.trim().split(/\s+/).length;
+  const matches = diff.filter(x => x.type === 'match').length;
+  const score = Math.round((matches / totalCorrectWords) * 100);
+
+  const wordsHtml = diff.map(x => {
+    if (x.type === 'match') return `<span class="dictation-word match">${escapeHtmlDictation(x.word)}</span>`;
+    if (x.type === 'miss') return `<span class="dictation-word miss">${escapeHtmlDictation(x.word)}</span>`;
+    return `<span class="dictation-word extra">${escapeHtmlDictation(x.word)}</span>`;
+  }).join(' ');
+
+  document.getElementById('dictation-result-wrap').innerHTML = `
+    <div class="dictation-result">
+      <div class="dictation-result-score">${score}% de acerto</div>
+      <div class="dictation-result-text">${wordsHtml}</div>
+    </div>
+  `;
+
+  document.getElementById('dictation-check-btn').style.display = 'none';
+  document.getElementById('dictation-retry-btn').style.display = 'inline-flex';
 }
 
 // ============================================================
