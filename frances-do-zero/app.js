@@ -2886,9 +2886,22 @@ const CONJ_PERSON_LABELS = ['je', 'tu', 'il / elle / on', 'nous', 'vous', 'ils /
 // impératif não tem 1ª/3ª pessoa do singular nem 3ª do plural — só tu/nous/vous
 const CONJ_IMPERATIF_ACTIVE = [false, true, false, true, true, false];
 
+// Ranking de frequência dos verbos: a ordem em que aparecem no dataset
+// (conjugation-data.js) já é do mais comum pro mais raro — usada pelo filtro
+// "Número de verbos" abaixo, sem precisar de uma fonte de frequência separada.
+const CONJ_VERB_RANK = Object.fromEntries(Object.keys(CONJUGATION_VERBS).map((name, i) => [name, i + 1]));
+const CONJ_TOTAL_VERBS = Object.keys(CONJUGATION_VERBS).length;
+const CONJ_TOPN_OPTIONS = [10, 25, 50, 100, 150].filter(n => n < CONJ_TOTAL_VERBS);
+CONJ_TOPN_OPTIONS.push(CONJ_TOTAL_VERBS); // "Todos"
+
+const CONJ_REGULAR_GROUPS = ['g1', 'g2'];
+const CONJ_IRREGULAR_GROUPS = ['core', 'g3ir', 'g3re', 'g3oir'];
+
 const CONJ_STATE = {
   selectedTenses: ['presente'],
   selectedGroups: Object.keys(CONJUGATION_GROUPS),
+  topN: CONJ_TOTAL_VERBS,
+  regularity: null, // null | 'regular' | 'irregular'
   queue: [],
   index: 0,
   score: 0,
@@ -2903,6 +2916,16 @@ function renderConjSelectScreen(){
       <span>${t.label}</span>
     </label>
   `).join('');
+
+  const topnSelectEl = document.getElementById('conj-topn-select');
+  topnSelectEl.innerHTML = CONJ_TOPN_OPTIONS.map(n =>
+    `<option value="${n}" ${CONJ_STATE.topN === n ? 'selected' : ''}>${n === CONJ_TOTAL_VERBS ? `Todos (${n})` : `Top ${n}`}</option>`
+  ).join('');
+
+  const regularToggleEl = document.getElementById('conj-toggle-regular');
+  const irregularToggleEl = document.getElementById('conj-toggle-irregular');
+  regularToggleEl.classList.toggle('active', CONJ_STATE.regularity === 'regular');
+  irregularToggleEl.classList.toggle('active', CONJ_STATE.regularity === 'irregular');
 
   const verbListEl = document.getElementById('conj-verb-list');
   verbListEl.innerHTML = Object.entries(CONJUGATION_GROUPS).map(([key, info]) => `
@@ -2921,6 +2944,20 @@ function renderConjSelectScreen(){
         CONJ_STATE.selectedTenses = CONJ_STATE.selectedTenses.filter(t => t !== key);
       }
     });
+  });
+
+  topnSelectEl.addEventListener('change', () => {
+    CONJ_STATE.topN = parseInt(topnSelectEl.value);
+  });
+
+  regularToggleEl.addEventListener('click', () => {
+    CONJ_STATE.regularity = CONJ_STATE.regularity === 'regular' ? null : 'regular';
+    renderConjSelectScreen();
+  });
+
+  irregularToggleEl.addEventListener('click', () => {
+    CONJ_STATE.regularity = CONJ_STATE.regularity === 'irregular' ? null : 'irregular';
+    renderConjSelectScreen();
   });
 
   verbListEl.querySelectorAll('input[data-group]').forEach(cb => {
@@ -2943,6 +2980,12 @@ document.getElementById('conj-start-btn').addEventListener('click', () => {
 
   const eligibleVerbs = Object.entries(CONJUGATION_VERBS)
     .filter(([name, v]) => CONJ_STATE.selectedGroups.includes(v.g))
+    .filter(([name]) => CONJ_VERB_RANK[name] <= CONJ_STATE.topN)
+    .filter(([name, v]) => {
+      if (CONJ_STATE.regularity === 'regular') return CONJ_REGULAR_GROUPS.includes(v.g);
+      if (CONJ_STATE.regularity === 'irregular') return CONJ_IRREGULAR_GROUPS.includes(v.g);
+      return true;
+    })
     .map(([name]) => name);
 
   if (!eligibleVerbs.length){
