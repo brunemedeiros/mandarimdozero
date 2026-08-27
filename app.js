@@ -572,6 +572,81 @@ document.getElementById('google-login-btn').addEventListener('click', async () =
   }
 });
 
+// ---------- Login com e-mail e senha (alternativa ao Google/Convidado) ----------
+let emailLoginMode = 'signin'; // 'signin' | 'signup'
+
+function updateEmailLoginModeUI(){
+  document.getElementById('email-login-submit-btn').textContent = emailLoginMode === 'signup' ? 'Criar conta' : 'Entrar';
+  document.getElementById('email-login-toggle-mode-btn').textContent = emailLoginMode === 'signup'
+    ? 'Já tem conta? Entrar'
+    : 'Não tem conta? Criar uma';
+}
+
+document.getElementById('email-login-toggle-mode-btn').addEventListener('click', () => {
+  emailLoginMode = emailLoginMode === 'signup' ? 'signin' : 'signup';
+  updateEmailLoginModeUI();
+});
+
+document.getElementById('email-login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const noteEl = document.getElementById('login-note');
+  const email = document.getElementById('email-login-email').value.trim();
+  const password = document.getElementById('email-login-password').value;
+  const submitBtn = document.getElementById('email-login-submit-btn');
+
+  submitBtn.disabled = true;
+  noteEl.className = 'login-note';
+  noteEl.textContent = emailLoginMode === 'signup' ? 'Criando conta...' : 'Entrando...';
+
+  try{
+    if (emailLoginMode === 'signup'){
+      const { data, error } = await supabaseClient.auth.signUp({ email, password });
+      if (error){
+        noteEl.textContent = error.message;
+        noteEl.className = 'login-note err';
+      } else if (!data.session){
+        // confirmação de e-mail exigida pelo projeto Supabase — sem sessão ainda
+        noteEl.textContent = 'Conta criada! Verifique seu e-mail para confirmar e depois entre normalmente.';
+        noteEl.className = 'login-note';
+      }
+      // se já veio sessão (confirmação de e-mail desligada), onAuthStateChange cuida do resto
+    } else {
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error){
+        noteEl.textContent = 'E-mail ou senha incorretos.';
+        noteEl.className = 'login-note err';
+      }
+    }
+  }catch(err){
+    noteEl.textContent = 'Não foi possível conectar. Tente novamente.';
+    noteEl.className = 'login-note err';
+  }finally{
+    submitBtn.disabled = false;
+  }
+});
+
+document.getElementById('email-login-forgot-btn').addEventListener('click', async () => {
+  const noteEl = document.getElementById('login-note');
+  const email = document.getElementById('email-login-email').value.trim();
+  if (!email){
+    noteEl.textContent = 'Digite seu e-mail no campo acima primeiro.';
+    noteEl.className = 'login-note err';
+    return;
+  }
+  noteEl.textContent = 'Enviando e-mail de redefinição...';
+  noteEl.className = 'login-note';
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+  if (error){
+    noteEl.textContent = 'Não foi possível enviar o e-mail. Tente novamente.';
+    noteEl.className = 'login-note err';
+  } else {
+    noteEl.textContent = 'E-mail de redefinição enviado! Confira sua caixa de entrada.';
+    noteEl.className = 'login-note';
+  }
+});
+
+updateEmailLoginModeUI();
+
 document.getElementById('guest-btn').addEventListener('click', () => {
   enterGuestMode();
 });

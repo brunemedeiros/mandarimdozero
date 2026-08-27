@@ -921,6 +921,24 @@ footer.app-footer img{ height:56px; opacity:.9; }
 .login-note{ min-height:16px; font-size:12.5px; color: var(--ink-soft); margin: 14px 0 0; }
 .login-note.err{ color: var(--seal-red-dark); font-weight:700; }
 
+.login-divider{
+  display:flex; align-items:center; gap:12px; margin:18px 0; color: var(--ink-soft);
+  font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:.06em;
+}
+.login-divider::before, .login-divider::after{ content:''; flex:1; height:1px; background: var(--paper-line); }
+.email-login-input{
+  width:100%; padding:12px 14px; border-radius:10px; border:2px solid var(--paper-line);
+  background: var(--paper); font-family: var(--font-body); font-size:14.5px; color: var(--ink);
+  margin-bottom:10px;
+}
+.email-login-input:focus{ outline:none; border-color: var(--imperial-gold); }
+.email-login-links{ display:flex; justify-content:space-between; margin-top:10px; gap:8px; flex-wrap:wrap; }
+.email-login-link{
+  background:none; border:none; padding:0; font-family: var(--font-body); font-size:12px;
+  font-weight:700; color: var(--ink-soft); cursor:pointer; text-decoration:underline;
+}
+.email-login-link:hover{ color: var(--seal-red-dark); }
+
 /* ---------- User pill / dropdown ---------- */
 .pill.user-pill{ cursor:pointer; border:none; font-family:var(--font-body); max-width:120px; }
 .pill.user-pill span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:80px; display:inline-block; vertical-align:bottom; }
@@ -1043,6 +1061,18 @@ footer.app-footer img{ height:56px; opacity:.9; }
       <svg width="18" height="18" viewBox="0 0 18 18" style="flex-shrink:0;"><path fill="#fff" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.09-1.8 2.73v2.27h2.91c1.7-1.57 2.69-3.88 2.69-6.64z"/><path fill="#fff" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.27c-.81.54-1.84.86-3.05.86-2.35 0-4.34-1.58-5.05-3.71H.96v2.34C2.44 15.98 5.48 18 9 18z"/><path fill="#fff" d="M3.95 10.7c-.18-.54-.28-1.11-.28-1.7s.1-1.16.28-1.7V4.96H.96C.35 6.17 0 7.55 0 9s.35 2.83.96 4.04l2.99-2.34z"/><path fill="#fff" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.99 2.34C4.66 5.16 6.65 3.58 9 3.58z"/></svg>
       Entrar com Google
     </button>
+    <div class="login-divider"><span>ou</span></div>
+
+    <form id="email-login-form">
+      <input type="email" id="email-login-email" class="email-login-input" placeholder="E-mail" autocomplete="email" required>
+      <input type="password" id="email-login-password" class="email-login-input" placeholder="Senha" autocomplete="current-password" required minlength="6">
+      <button type="submit" class="btn btn-secondary btn-block" id="email-login-submit-btn">Entrar</button>
+    </form>
+    <div class="email-login-links">
+      <button type="button" class="email-login-link" id="email-login-toggle-mode-btn">Não tem conta? Criar uma</button>
+      <button type="button" class="email-login-link" id="email-login-forgot-btn">Esqueci minha senha</button>
+    </div>
+
     <button class="btn btn-secondary btn-block" id="guest-btn" style="margin-top:10px;">Continuar sem conta</button>
     <p class="login-note" id="login-note"></p>
     <a class="sister-app-link" href="https://mandarimdozero.netlify.app/" target="_blank" rel="noopener">🇨🇳 Também tem o Mandarim do Zero →</a>
