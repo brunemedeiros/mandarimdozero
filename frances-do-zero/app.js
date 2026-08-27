@@ -636,7 +636,7 @@ function renderDailyChallengesScreen(){
   const contentEl = document.getElementById('step-content');
   const nextBtn = document.getElementById('step-next-btn');
   document.getElementById('step-back-btn').style.display = 'none';
-  document.getElementById('step-progress-wrap').style.display = 'none';
+  document.getElementById('step-progress-fill').style.width = '100%';
 
   contentEl.innerHTML = `
     <div class="challenges-screen">
@@ -981,6 +981,7 @@ function openUnitDetail(unitId){
   STEP_STATE.onChallengesScreen = false;
   STEP_STATE.onCheckpoint = null;
   STEP_STATE.onLevelTest = null;
+  setLessonFocusMode(true);
 
   document.getElementById('path-list-wrap').style.display = 'none';
   document.getElementById('unit-detail-wrap').style.display = 'block';
@@ -1010,6 +1011,7 @@ document.getElementById('back-to-path').addEventListener('click', () => {
   STEP_STATE.onChallengesScreen = false;
   STEP_STATE.onCheckpoint = null;
   STEP_STATE.onLevelTest = null;
+  setLessonFocusMode(false);
   document.getElementById('path-list-wrap').style.display = 'block';
   document.getElementById('unit-detail-wrap').style.display = 'none';
   renderUnitsGrid();
@@ -1017,14 +1019,30 @@ document.getElementById('back-to-path').addEventListener('click', () => {
 
 function renderStepProgress(){
   const fillEl = document.getElementById('step-progress-fill');
-  const labelsEl = document.getElementById('step-progress-labels');
   const defs = currentStepDefs();
   const pct = (STEP_STATE.currentStep / (defs.length - 1)) * 100;
   fillEl.style.width = `${pct}%`;
-  labelsEl.innerHTML = defs.map((s, i) =>
-    `<span class="${i === STEP_STATE.currentStep ? 'current' : ''}">${s.label}</span>`
-  ).join('');
 }
+
+// ---------- Modo foco de lição (estilo Busuu) ----------
+// Esconde topbar/tabs enquanto o aluno está numa lição, checkpoint ou teste
+// de nível — só a barra de progresso, o ícone de dicas e o X ficam visíveis
+// por cima do exercício em si.
+function setLessonFocusMode(active){
+  document.getElementById('app').classList.toggle('lesson-focus', active);
+  if (!active){
+    document.getElementById('lesson-hint-panel').style.display = 'none';
+    document.getElementById('lesson-hint-btn').classList.remove('active');
+  }
+}
+
+document.getElementById('lesson-hint-btn').addEventListener('click', () => {
+  const panel = document.getElementById('lesson-hint-panel');
+  const btn = document.getElementById('lesson-hint-btn');
+  const showing = panel.style.display !== 'none';
+  panel.style.display = showing ? 'none' : 'block';
+  btn.classList.toggle('active', !showing);
+});
 
 // ---------- Vocabulário palavra-por-palavra (estilo Memrise) ----------
 function findMatchingPhrase(word, unit){
@@ -1364,6 +1382,7 @@ document.getElementById('step-back-btn').addEventListener('click', () => {
 document.getElementById('step-next-btn').addEventListener('click', () => {
   if (STEP_STATE.onChallengesScreen){
     STEP_STATE.onChallengesScreen = false;
+    setLessonFocusMode(false);
     document.getElementById('path-list-wrap').style.display = 'block';
     document.getElementById('unit-detail-wrap').style.display = 'none';
     renderUnitsGrid();
@@ -1376,6 +1395,7 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
       completeModuleUnits(module, CHECKPOINT_STATE.lastPct);
     }
     STEP_STATE.onCheckpoint = null;
+    setLessonFocusMode(false);
     document.getElementById('path-list-wrap').style.display = 'block';
     document.getElementById('unit-detail-wrap').style.display = 'none';
     renderUnitsGrid();
@@ -1388,6 +1408,7 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
       completeLevelTest(test, LEVEL_TEST_STATE.lastPct);
     }
     STEP_STATE.onLevelTest = null;
+    setLessonFocusMode(false);
     document.getElementById('path-list-wrap').style.display = 'block';
     document.getElementById('unit-detail-wrap').style.display = 'none';
     renderUnitsGrid();
@@ -2326,10 +2347,10 @@ function openCheckpoint(moduleId){
   const module = MODULES.find(m => m.id === moduleId);
   STEP_STATE.onChallengesScreen = false;
   STEP_STATE.onCheckpoint = moduleId;
+  setLessonFocusMode(true);
 
   document.getElementById('path-list-wrap').style.display = 'none';
   document.getElementById('unit-detail-wrap').style.display = 'block';
-  document.getElementById('step-progress-wrap').style.display = 'none';
   document.getElementById('step-back-btn').style.display = 'none';
 
   document.getElementById('ud-eyebrow').textContent = 'Ponto de verificação';
@@ -2351,6 +2372,7 @@ function renderCheckpointQuizStep(){
   const nextBtn = document.getElementById('step-next-btn');
   const module = MODULES.find(m => m.id === CHECKPOINT_STATE.moduleId);
   const total = CHECKPOINT_STATE.queue.length;
+  document.getElementById('step-progress-fill').style.width = `${total ? Math.round((CHECKPOINT_STATE.index / total) * 100) : 0}%`;
 
   if (CHECKPOINT_STATE.index >= total){
     const pct = total ? Math.round((CHECKPOINT_STATE.score / total) * 100) : 0;
@@ -2468,10 +2490,10 @@ function openLevelTest(testId){
   STEP_STATE.onChallengesScreen = false;
   STEP_STATE.onCheckpoint = null;
   STEP_STATE.onLevelTest = testId;
+  setLessonFocusMode(true);
 
   document.getElementById('path-list-wrap').style.display = 'none';
   document.getElementById('unit-detail-wrap').style.display = 'block';
-  document.getElementById('step-progress-wrap').style.display = 'none';
   document.getElementById('step-back-btn').style.display = 'none';
 
   document.getElementById('ud-eyebrow').textContent = 'Teste de nível';
@@ -2493,6 +2515,7 @@ function renderLevelTestQuizStep(){
   const nextBtn = document.getElementById('step-next-btn');
   const test = LEVEL_TESTS.find(t => t.id === LEVEL_TEST_STATE.testId);
   const total = LEVEL_TEST_STATE.queue.length;
+  document.getElementById('step-progress-fill').style.width = `${total ? Math.round((LEVEL_TEST_STATE.index / total) * 100) : 0}%`;
 
   if (LEVEL_TEST_STATE.index >= total){
     const pct = total ? Math.round((LEVEL_TEST_STATE.score / total) * 100) : 0;
