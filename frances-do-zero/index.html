@@ -811,29 +811,44 @@ footer.app-footer img{ height:56px; opacity:.9; }
 .conj-toggle-item.active .conj-toggle-switch{ background: var(--seal-red); }
 .conj-toggle-item.active .conj-toggle-switch::after{ transform: translateX(16px); }
 
+.conj-verb-nav{ display:grid; grid-template-columns: 1.3fr 1fr; gap:12px; margin-bottom:22px; }
+@media (max-width: 560px){ .conj-verb-nav{ grid-template-columns: 1fr; } }
 .conj-verb-header{
   background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
-  padding:22px 20px; text-align:center; margin-bottom:20px;
+  padding:22px 20px; text-align:center;
 }
-.conj-verb-header .infinitif{ font-size:30px; font-weight:800; color: var(--seal-red-dark); }
+.conj-verb-header.next{ opacity:.6; padding-top:16px; padding-bottom:16px; }
+.conj-verb-header .conj-verb-label{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); font-weight:800; margin-bottom:6px; }
+.conj-verb-header .infinitif{ font-size:28px; font-weight:800; color: var(--seal-red-dark); }
 .conj-verb-header .tempo{ font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); font-weight:800; margin-top:6px; }
 
-.conj-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:20px; }
-@media (max-width: 480px){ .conj-grid{ grid-template-columns: 1fr; } }
+.conj-tense-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:20px; }
+@media (max-width: 700px){ .conj-tense-grid{ grid-template-columns: 1fr; } }
+.conj-tense-box{ background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius); padding:16px; }
+.conj-tense-title{ font-weight:800; font-size:14px; text-align:center; margin-bottom:14px; color: var(--seal-red-dark); }
+
+.conj-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
 .conj-field{ display:flex; flex-direction:column; gap:5px; }
 .conj-field label{ font-size:12px; font-weight:800; color:var(--ink-soft); }
 .conj-field input{
-  padding:12px 14px; border-radius:10px; border:2px solid var(--paper-line); background:var(--paper);
-  font-family:var(--font-body); font-size:15px; color:var(--ink);
+  width:100%; box-sizing:border-box; padding:11px 12px; border-radius:10px; border:2px solid var(--paper-line); background:var(--paper);
+  font-family:var(--font-body); font-size:14.5px; color:var(--ink);
 }
 .conj-field input:focus{ outline:none; border-color: var(--imperial-gold); }
-.conj-field input:disabled{ background:var(--paper-warm); opacity:.5; }
+.conj-field input:disabled{ background:var(--paper-warm); opacity:.6; }
 .conj-field.ok input{ border-color: var(--jade); background: rgba(58,115,89,0.08); }
 .conj-field.almost input{ border-color: var(--imperial-gold); background: rgba(227,107,202,0.1); }
 .conj-field.wrong input{ border-color: var(--error-red); background: rgba(214,38,25,0.08); }
-.conj-field .expected{ font-size:11.5px; color:var(--seal-red-dark); font-weight:700; min-height:14px; }
+.conj-field .expected{ font-size:11px; color:var(--seal-red-dark); font-weight:700; min-height:14px; }
 
 .conj-progress{ font-size:12px; font-weight:800; color:var(--ink-soft); text-align:center; margin-bottom:12px; }
+
+.conj-actions{ display:flex; gap:10px; align-items:stretch; margin-bottom:14px; }
+.conj-actions .btn-block{ flex:1; }
+#conj-hint-btn{ flex-shrink:0; white-space:nowrap; }
+.conj-hint-caption{ text-align:center; font-size:11.5px; color:var(--ink-soft); margin:-6px 0 14px; }
+
+.conj-verb-pager{ display:flex; justify-content:space-between; gap:10px; }
 
 .conj-session-result{ text-align:center; padding:40px 20px; }
 .conj-session-result .big-emoji{ font-size:48px; margin-bottom:10px; }
