@@ -594,23 +594,23 @@ function registerDailyMatchGame(){
 }
 
 const EASY_CHALLENGES = [
-  { id:'streak', icon:'🔥', color:'gold', label:'Mantenha sua sequência de dias viva hoje', target:1, get: () => STATE.lastStudyDay === todayStr() ? 1 : 0 },
-  { id:'firstLesson', icon:'🌅', color:'gold', label:'Complete sua primeira lição do dia', target:1, get: d => d.lessons }
+  { id:'streak', icon:'🔥', label:'Mantenha sua sequência de dias viva hoje', target:1, get: () => STATE.lastStudyDay === todayStr() ? 1 : 0 },
+  { id:'firstLesson', icon:'🌅', label:'Complete sua primeira lição do dia', target:1, get: d => d.lessons }
 ];
 const REVISAO_CONJ_CHALLENGES = [
-  { id:'conj1', icon:'🗣️', color:'blue', label:'Pratique conjugação 1 vez', target:1, get: d => d.conjugationSessions },
-  { id:'conjCorrect10', icon:'✅', color:'blue', label:'Acerte 10 formas verbais numa sessão de conjugação', target:10, get: d => d.conjugationCorrect },
-  { id:'conjTenses2', icon:'🔤', color:'blue', label:'Pratique conjugação em 2 tempos verbais diferentes', target:2, get: d => d.conjugationTenses.length },
-  { id:'reviews15', icon:'🔁', color:'blue', label:'Revise 15 cartões', target:15, get: d => d.reviewsDone },
-  { id:'speedReview1', icon:'⚡', color:'blue', label:'Complete uma sessão de Revisão Rápida', target:1, get: d => d.speedReviewSessions },
-  { id:'matchGame1', icon:'🎴', color:'blue', label:'Jogue o jogo da memória 1 vez', target:1, get: d => d.matchGamesPlayed }
+  { id:'conj1', icon:'🗣️', label:'Pratique conjugação 1 vez', target:1, get: d => d.conjugationSessions },
+  { id:'conjCorrect10', icon:'✅', label:'Acerte 10 formas verbais numa sessão de conjugação', target:10, get: d => d.conjugationCorrect },
+  { id:'conjTenses2', icon:'🔤', label:'Pratique conjugação em 2 tempos verbais diferentes', target:2, get: d => d.conjugationTenses.length },
+  { id:'reviews15', icon:'🔁', label:'Revise 15 cartões', target:15, get: d => d.reviewsDone },
+  { id:'speedReview1', icon:'⚡', label:'Complete uma sessão de Revisão Rápida', target:1, get: d => d.speedReviewSessions },
+  { id:'matchGame1', icon:'🎴', label:'Jogue o jogo da memória 1 vez', target:1, get: d => d.matchGamesPlayed }
 ];
 const GENERAL_CHALLENGES = [
-  { id:'stars40', icon:'⭐', color:'purple', label:'Ganhe 40 estrelas', target:40, get: d => d.stars },
-  { id:'highscore2', icon:'📈', color:'purple', label:'Pontue mais de 80% em 2 lições', target:2, get: d => d.highScoreLessons },
-  { id:'perfect1', icon:'🎯', color:'purple', label:'Complete uma lição sem errar', target:1, get: d => d.perfectLessons },
-  { id:'lessons5', icon:'📚', color:'purple', label:'Complete 5 lições', target:5, get: d => d.lessons },
-  { id:'grammar1', icon:'🧠', color:'purple', label:'Complete 1 unidade de gramática', target:1, get: d => d.grammarLessons }
+  { id:'stars40', icon:'⭐', label:'Ganhe 40 estrelas', target:40, get: d => d.stars },
+  { id:'highscore2', icon:'📈', label:'Pontue mais de 80% em 2 lições', target:2, get: d => d.highScoreLessons },
+  { id:'perfect1', icon:'🎯', label:'Complete uma lição sem errar', target:1, get: d => d.perfectLessons },
+  { id:'lessons5', icon:'📚', label:'Complete 5 lições', target:5, get: d => d.lessons },
+  { id:'grammar1', icon:'🧠', label:'Complete 1 unidade de gramática', target:1, get: d => d.grammarLessons }
 ];
 
 function dailySeed(str){
@@ -647,7 +647,7 @@ function renderDailyChallengesScreen(){
         const done = current >= c.target;
         return `
           <div class="challenge-card">
-            <div class="challenge-icon ${c.color}">${c.icon}${done ? '<span class="challenge-check">✓</span>' : ''}</div>
+            <div class="challenge-icon">${c.icon}${done ? '<span class="challenge-check">✓</span>' : ''}</div>
             <div class="challenge-body">
               <div class="challenge-label">${c.label}</div>
               <div class="challenge-progress-track"><div class="challenge-progress-fill" style="width:${pct}%"></div></div>
