@@ -402,6 +402,27 @@ body{
 .scenario-option.disabled{ pointer-events:none; opacity:.6; }
 .scenario-option.disabled.correct, .scenario-option.disabled.incorrect{ opacity:1; }
 
+/* ---------- Exercício de verdadeiro ou falso (uso real) ---------- */
+.tf-scene{
+  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding:24px 20px; margin-bottom:16px; text-align:center; display:flex; flex-direction:column;
+  align-items:center; gap:10px;
+}
+.tf-scene-emoji{ font-size:46px; line-height:1; }
+.tf-subject{ font-size:18px; font-weight:800; color: var(--ink); }
+.tf-claim{ font-size:15.5px; font-weight:700; color: var(--ink); line-height:1.5; margin-bottom:18px; }
+.tf-options{ display:flex; gap:12px; }
+.tf-option{
+  flex:1; background: var(--paper); border:2px solid var(--paper-line); border-radius:12px;
+  padding:16px 12px; cursor:pointer; font-family: var(--font-body); font-size:15px; font-weight:800;
+  color: var(--ink); text-align:center; transition: all .12s ease;
+}
+.tf-option:hover{ border-color: var(--imperial-gold); transform: translateY(-1px); }
+.tf-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
+.tf-option.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.10); }
+.tf-option.disabled{ pointer-events:none; opacity:.6; }
+.tf-option.disabled.correct, .tf-option.disabled.incorrect{ opacity:1; }
+
 /* ---------- Tela final "Parabéns" (estilo Busuu) ---------- */
 .lesson-complete{ text-align:center; padding: 20px 4px; }
 .lesson-complete-icon{ font-size:52px; margin-bottom:8px; }

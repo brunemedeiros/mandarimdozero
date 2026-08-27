@@ -1525,7 +1525,9 @@ function buildExerciseSet(unit){
     }
   });
 
-  return shuffle([...vocabExercises, ...reorderExercises, ...scenarioExercises]);
+  const trueFalseExercises = (unit.trueFalseExercises || []).map(tf => ({ format: 'trueFalse', ...tf }));
+
+  return shuffle([...vocabExercises, ...reorderExercises, ...scenarioExercises, ...trueFalseExercises]);
 }
 
 function renderExerciseStep(){
@@ -1550,6 +1552,8 @@ function renderExerciseStep(){
     renderReorderExercise(ex, contentEl, nextBtn, total);
   } else if (ex.format === 'scenario'){
     renderScenarioExercise(ex, contentEl, nextBtn, total);
+  } else if (ex.format === 'trueFalse'){
+    renderTrueFalseExercise(ex, contentEl, nextBtn, total);
   } else {
     renderMultipleChoiceExercise(ex, contentEl, nextBtn, total);
   }
@@ -1668,6 +1672,52 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
         b.classList.add('disabled');
         if (ex.options[i] === ex.phrase) b.classList.add('correct');
         else if (i === chosenIdx) b.classList.add('incorrect');
+      });
+
+      if (isCorrect){
+        STEP_STATE.exerciseScore += 1;
+        addXP(4);
+      }
+      goToNextExercise();
+    });
+  });
+}
+
+// ---------- Exercício de verdadeiro ou falso (uso real, não tradução) ----------
+// Mostra uma frase/palavra já ensinada e uma afirmação em português sobre
+// QUANDO/COMO ela é usada na vida real; o aluno julga se é verdadeira ou falsa.
+function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
+  contentEl.innerHTML = `
+    <div class="exercise-wrap">
+      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="tf-scene">
+        <div class="tf-scene-emoji">${ex.emoji || '💬'}</div>
+        <div class="tf-subject">${ex.subject}</div>
+        ${audioBtnHTML(ex.subject)}
+      </div>
+      <div class="tf-claim">${ex.claim}</div>
+      <div class="tf-options">
+        <button class="tf-option" data-val="true">✅ Verdadeiro</button>
+        <button class="tf-option" data-val="false">❌ Falso</button>
+      </div>
+    </div>
+  `;
+
+  wireAudioButtons(contentEl);
+  nextBtn.style.display = 'none';
+
+  contentEl.querySelectorAll('.tf-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (STEP_STATE.exerciseAnswered) return;
+      STEP_STATE.exerciseAnswered = true;
+      const chosen = btn.dataset.val === 'true';
+      const isCorrect = chosen === ex.answer;
+
+      contentEl.querySelectorAll('.tf-option').forEach(b => {
+        b.classList.add('disabled');
+        const val = b.dataset.val === 'true';
+        if (val === ex.answer) b.classList.add('correct');
+        else if (b === btn) b.classList.add('incorrect');
       });
 
       if (isCorrect){
