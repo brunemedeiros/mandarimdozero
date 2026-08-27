@@ -2372,7 +2372,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
       <div class="exercise-prompt-label">Complete a frase</div>
       <div class="cloze-sentence">${sentenceHTML}</div>
-      <div class="cloze-audio-row">${audioBtnHTML(ex.phrase.f)}</div>
+      <div class="cloze-audio-row" id="cloze-audio-row"></div>
       <div class="cloze-trans">${ex.phrase.t}</div>
       ${mode === 'type' ? `
         <div class="cloze-type-wrap">
@@ -2392,6 +2392,14 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     STEP_STATE.exerciseAnswered = true;
     document.getElementById('cloze-blank').textContent = ex.correctBlock.f;
     document.getElementById('cloze-blank').classList.add(isCorrect ? 'correct' : 'incorrect');
+
+    // O áudio só aparece (e toca sozinho) depois de responder — antes disso
+    // ele entregaria a resposta de graça, sem precisar completar a frase.
+    const audioRow = document.getElementById('cloze-audio-row');
+    audioRow.innerHTML = audioBtnHTML(ex.phrase.f);
+    wireAudioButtons(audioRow);
+    if (TTS.voice) speakFrench(ex.phrase.f, audioRow.querySelector('.audio-btn'));
+
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
       addXP(4);
@@ -3819,6 +3827,13 @@ const CONJ_TENSES = [
 ];
 
 const CONJ_PERSON_LABELS = ['je', 'tu', 'il / elle / on', 'nous', 'vous', 'ils / elles'];
+
+// "je" vira "j'" antes de forma que começa com vogal ou h mudo (j'ai, j'habite) —
+// depende do tempo/verbo, não é fixo, então é calculado a partir da forma esperada.
+function conjPersonLabel(personIdx, expectedForm){
+  if (personIdx !== 0) return CONJ_PERSON_LABELS[personIdx];
+  return /^[aeiouâàäéèêëîïôöûüh]/i.test(expectedForm || '') ? "j'" : 'je';
+}
 // impératif não tem 1ª/3ª pessoa do singular nem 3ª do plural — só tu/nous/vous
 const CONJ_IMPERATIF_ACTIVE = [false, true, false, true, true, false];
 
@@ -4001,6 +4016,7 @@ function renderConjPracticeStep(){
   if (CONJ_STATE.verbIndex >= CONJ_STATE.verbQueue.length){
     const pct = CONJ_STATE.totalFields ? Math.round((CONJ_STATE.score / CONJ_STATE.totalFields) * 100) : 0;
     registerDailyConjugationSession();
+    registerStudyToday();
     contentEl.innerHTML = `
       <div class="conj-session-result">
         <div class="big-emoji">${pct >= 70 ? '🎉' : '💪'}</div>
@@ -4031,12 +4047,14 @@ function renderConjPracticeStep(){
       <div class="conj-verb-header">
         <div class="conj-verb-label">Verbo atual</div>
         <div class="infinitif">${verb} ${audioBtnHTML(verb)}</div>
+        <div class="conj-verb-translation">${VERB_TRANSLATIONS[verb] || ''}</div>
         <div class="tempo">${CONJ_REGULAR_GROUPS.includes(verbInfo.g) ? 'Regular' : 'Irregular'}</div>
       </div>
       ${nextVerb ? `
         <div class="conj-verb-header next">
           <div class="conj-verb-label">Próximo verbo</div>
           <div class="infinitif">${nextVerb}</div>
+          <div class="conj-verb-translation">${VERB_TRANSLATIONS[nextVerb] || ''}</div>
         </div>
       ` : ''}
     </div>
@@ -4050,7 +4068,8 @@ function renderConjPracticeStep(){
           <div class="conj-tense-box" data-tense="${tenseKey}">
             <div class="conj-tense-title">${tenseInfo.label}</div>
             <div class="conj-grid">
-              ${CONJ_PERSON_LABELS.map((label, i) => {
+              ${CONJ_PERSON_LABELS.map((_, i) => {
+                const label = conjPersonLabel(i, expectedForms[i]);
                 if (!activeMask[i]) return `
                   <div class="conj-field" data-tense="${tenseKey}" data-idx="${i}">
                     <label>${label}</label>
@@ -4163,7 +4182,6 @@ function renderConjPracticeStep(){
     CONJ_STATE.checked.add(verb);
     CONJ_STATE.score += correctCount;
     CONJ_STATE.totalFields += activeCount;
-    registerStudyToday();
 
     document.getElementById('conj-verify-btn').style.display = 'none';
     document.getElementById('conj-hint-btn').style.display = 'none';
