@@ -592,9 +592,8 @@ let emailLoginMode = 'signin'; // 'signin' | 'signup'
 
 function updateEmailLoginModeUI(){
   document.getElementById('email-login-submit-btn').textContent = emailLoginMode === 'signup' ? 'Criar conta' : 'Entrar';
-  document.getElementById('email-login-toggle-mode-btn').textContent = emailLoginMode === 'signup'
-    ? 'Já tem conta? Entrar'
-    : 'Não tem conta? Criar uma';
+  document.getElementById('login-signup-question').textContent = emailLoginMode === 'signup' ? 'Já tem conta?' : 'Não tem conta?';
+  document.getElementById('email-login-toggle-mode-btn').textContent = emailLoginMode === 'signup' ? 'Entrar' : 'Cadastre-se';
 }
 
 document.getElementById('email-login-toggle-mode-btn').addEventListener('click', () => {
