@@ -835,6 +835,57 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .settings-more-note{ font-size:13px; color: var(--ink-soft); text-align:center; }
 .pref-switch[aria-checked="true"] .pref-switch-knob{ left:23px; }
 
+/* ---------- Ditados ---------- */
+.dictation-explainer{
+  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding: 14px 16px; margin-bottom:18px;
+}
+.dictation-explainer-toggle{
+  display:flex; align-items:center; justify-content:space-between; width:100%;
+  background:none; border:none; cursor:pointer; padding:0;
+  font-family: var(--font-body); font-weight:800; font-size:15px; color: var(--ink);
+}
+.dictation-explainer-toggle::after{ content:'▾'; color: var(--ink-soft); transition: transform .15s ease; }
+.dictation-explainer-toggle.collapsed::after{ transform: rotate(-90deg); }
+.dictation-explainer-steps{ margin:12px 0 0; padding-left:20px; font-size:13.5px; color: var(--ink-soft); line-height:1.6; }
+.dictation-explainer-steps li{ margin-bottom:4px; }
+.dictation-explainer-steps.collapsed{ display:none; }
+
+.dictation-cards{ display:grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap:12px; }
+.dictation-card{
+  background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding:16px; cursor:pointer; text-align:left; box-shadow: var(--shadow-card);
+  transition: transform .15s ease, box-shadow .15s ease;
+  display:flex; flex-direction:column; gap:6px;
+}
+.dictation-card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-lift); }
+.dictation-card-level{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; color: var(--seal-red-dark); }
+.dictation-card-task{ font-size:15px; font-weight:800; color: var(--ink); }
+.dictation-card-module{ font-size:12.5px; color: var(--ink-soft); }
+
+.dictation-player-task{ font-size:20px; font-weight:800; margin:0 0 4px; }
+.dictation-player-module{ font-size:13px; color: var(--ink-soft); margin:0 0 18px; }
+.dictation-audio-controls{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+.dictation-audio-btn{
+  display:flex; align-items:center; gap:8px; background: var(--paper-warm); border:1px solid var(--paper-line);
+  border-radius:999px; padding:10px 18px; font-family: var(--font-body); font-weight:700; font-size:14px;
+  cursor:pointer; color: var(--ink);
+}
+.dictation-audio-btn:hover{ border-color: var(--imperial-gold); }
+.dictation-audio-btn.speaking{ background: linear-gradient(120deg, rgba(192,35,31,0.08), var(--paper-warm)); border-color: var(--seal-red); }
+.dictation-textarea{
+  width:100%; min-height:110px; border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding:14px; font-family: var(--font-body); font-size:15px; color: var(--ink); background: var(--paper);
+  resize: vertical;
+}
+.dictation-textarea:focus{ outline:none; border-color: var(--imperial-gold); }
+.dictation-actions{ display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
+.dictation-result{ margin-top:20px; background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:18px; }
+.dictation-result-score{ font-size:16px; font-weight:800; margin-bottom:10px; }
+.dictation-result-text{ font-size:16px; line-height:1.9; }
+.dictation-word.miss{ color: var(--seal-red-dark); font-weight:800; text-decoration: underline wavy; text-decoration-color: var(--seal-red); }
+.dictation-word.extra{ color: var(--ink-soft); text-decoration: line-through; font-size:13px; }
+
 /* ---------- Heatmap de atividade (estilo GitHub) ---------- */
 .heatmap-wrap{
   background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
@@ -1334,6 +1385,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
     <button class="tab-btn active" data-tab="path">Estudo</button>
     <button class="tab-btn" data-tab="review">Revisão</button>
     <button class="tab-btn" data-tab="conjugaison">Conjugação</button>
+    <button class="tab-btn" data-tab="dictation">Ditados</button>
   </div>
 
   <div class="app-content">
@@ -1488,6 +1540,33 @@ footer.app-footer img{ height:56px; opacity:.9; }
     <p class="settings-more-note">Mais opções de conta em breve.</p>
   </div>
 
+  <!-- ===== DITADOS ===== -->
+  <div class="view" id="view-dictation">
+    <div id="dictation-list-wrap">
+      <div class="path-header">
+        <h2>Ditados</h2>
+        <p>Treine sua compreensão auditiva e sua ortografia com ditados baseados em tarefas reais de cada módulo.</p>
+      </div>
+
+      <div class="dictation-explainer" id="dictation-explainer">
+        <button class="dictation-explainer-toggle" id="dictation-explainer-toggle">🎧 Como funciona o ditado?</button>
+        <ol class="dictation-explainer-steps" id="dictation-explainer-steps">
+          <li>Ouça o áudio — na velocidade normal ou devagar, quantas vezes quiser.</li>
+          <li>Digite exatamente o que você ouviu, com acentos e pontuação.</li>
+          <li>Clique em "Verificar" para comparar sua resposta com o texto original.</li>
+          <li>Veja o que acertou e o que precisa revisar, palavra por palavra.</li>
+        </ol>
+      </div>
+
+      <div class="dictation-cards" id="dictation-cards"></div>
+    </div>
+
+    <div id="dictation-player-wrap" style="display:none;">
+      <button class="back-link" id="dictation-back-to-list">← Voltar aos ditados</button>
+      <div id="dictation-player-content"></div>
+    </div>
+  </div>
+
   <footer class="app-footer">
     <img src="logo/ativo1-lockup.svg" alt="@prof.brune">
   </footer>
@@ -1572,6 +1651,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
 
 <script src="content.js"></script>
 <script src="conjugation-data.js"></script>
+<script src="dictations.js"></script>
 <script src="audio-manifest.js"></script>
 <script src="app.js"></script>
 </body>
