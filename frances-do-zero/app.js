@@ -308,11 +308,27 @@ const APP_KEY = 'frances';
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// URL "limpa" (sem #access_token nem outros fragmentos) pra usar como
+// redirectTo do OAuth/reset de senha. Usar window.location.href direto é
+// perigoso: se a URL já tiver um #access_token sobrando de uma tentativa
+// anterior que falhou, o Google devolve um token novo em cima do antigo em
+// vez de substituir, quebrando o parsing — e piora a cada nova tentativa.
+function cleanRedirectURL(){
+  return window.location.origin + window.location.pathname;
+}
+
 let CURRENT_USER = null;
 const GUEST_MODE_FLAG = 'frances_zero_guest_mode';
 
 async function initAuth(){
   const { data: { session } } = await supabaseClient.auth.getSession();
+
+  // Limpa qualquer fragmento de token da URL depois que o Supabase já teve
+  // a chance de processá-lo (getSession acima) — evita que ele contamine um
+  // redirectTo futuro se o usuário tentar entrar de novo.
+  if (window.location.hash){
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
 
   if (session && session.user){
     await onUserLoggedIn(session.user);
@@ -440,7 +456,7 @@ document.getElementById('google-login-btn').addEventListener('click', async () =
   noteEl.className = 'login-note';
   const { error } = await supabaseClient.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: window.location.href }
+    options: { redirectTo: cleanRedirectURL() }
   });
   if (error){
     noteEl.textContent = 'Não foi possível iniciar o login. Tente novamente.';
@@ -510,7 +526,7 @@ document.getElementById('email-login-forgot-btn').addEventListener('click', asyn
   }
   noteEl.textContent = 'Enviando e-mail de redefinição...';
   noteEl.className = 'login-note';
-  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: cleanRedirectURL() });
   if (error){
     noteEl.textContent = 'Não foi possível enviar o e-mail. Tente novamente.';
     noteEl.className = 'login-note err';
@@ -2277,7 +2293,13 @@ function buildExerciseSet(unit){
     return { format: 'cloze', phrase: p, blankIdx, correctBlock, options: shuffle([correctBlock, ...distractors]) };
   });
 
-  return shuffle([...vocabExercises, ...reorderExercises, ...scenarioExercises, ...trueFalseExercises, ...clozeExercises]);
+  // Limita quantas frases viram exercício de "ordenar" — sem isso, toda frase
+  // nova de exemplo (usadas também só pra dar contexto no card de vocabulário)
+  // engordava a lição, chegando a 20-30 exercícios numa unidade "simples".
+  const REORDER_EXERCISE_CAP = 4;
+  const cappedReorderExercises = shuffle(reorderExercises).slice(0, REORDER_EXERCISE_CAP);
+
+  return shuffle([...vocabExercises, ...cappedReorderExercises, ...scenarioExercises, ...trueFalseExercises, ...clozeExercises]);
 }
 
 function renderExerciseStep(){
@@ -2333,10 +2355,16 @@ function goToNextExercise(){
   }, 900);
 }
 
-// Explicação usada no painel "Por que errei?" — reaproveita a mesma dica de
-// uso já escrita pra unidade (a mesma exibida no passo "usage" da lição),
-// já que não temos uma explicação por item/frase individual.
-function wrongAnswerExplanationHTML(){
+// Explicação usada no painel "Por que errei?". Pra exercícios baseados numa
+// frase (ordenar, completar, cenário), a dica de uso genérica da unidade
+// quase nunca explica o erro específico (ex: ordem das palavras) — o mais
+// útil ali é mostrar o significado da própria frase certa. Pros demais
+// formatos (vocabulário, verdadeiro/falso), a dica de uso da unidade ainda
+// serve de contexto gramatical, já que não temos explicação por item.
+function wrongAnswerExplanationHTML(ex){
+  if (ex && ex.phrase){
+    return `<div class="usage-note-title">O que a frase significa</div><p class="usage-note-body"><strong>${ex.phrase.f}</strong><br>${ex.phrase.t}</p>`;
+  }
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
   const note = u && u.usageNote;
   if (!note) return '';
@@ -2346,9 +2374,9 @@ function wrongAnswerExplanationHTML(){
 // Painel de resposta errada (estilo Duolingo): pausa antes de avançar pra
 // mostrar a resposta certa e, se o aluno quiser, o porquê — só aparece
 // quando ela erra; acertando o fluxo continua rápido como antes.
-function showWrongAnswerPanel(contentEl){
+function showWrongAnswerPanel(contentEl, ex){
   const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
-  const explanationHTML = wrongAnswerExplanationHTML();
+  const explanationHTML = wrongAnswerExplanationHTML(ex);
   const panel = document.createElement('div');
   panel.className = 'wrong-feedback';
   panel.innerHTML = `
@@ -2428,7 +2456,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
     if (isCorrect){
       goToNextExercise();
     } else {
-      setTimeout(() => showWrongAnswerPanel(contentEl), 500);
+      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
     }
   }
 
@@ -2497,7 +2525,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
       const answerEl = document.getElementById('vocab-type-answer');
       answerEl.textContent = `Resposta certa: ${ex.item.f}`;
       answerEl.style.display = 'block';
-      setTimeout(() => showWrongAnswerPanel(contentEl), 500);
+      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
     }
   }
 
@@ -2556,7 +2584,7 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
         addXP(4);
         goToNextExercise();
       } else {
-        setTimeout(() => showWrongAnswerPanel(contentEl), 500);
+        setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
       }
     });
   });
@@ -2604,7 +2632,7 @@ function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
         addXP(4);
         goToNextExercise();
       } else {
-        setTimeout(() => showWrongAnswerPanel(contentEl), 500);
+        setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
       }
     });
   });
@@ -2657,7 +2685,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       addXP(4);
       goToNextExercise();
     } else {
-      setTimeout(() => showWrongAnswerPanel(contentEl), 500);
+      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
     }
   }
 
@@ -2768,7 +2796,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
       addXP(4);
       goToNextExercise();
     } else {
-      setTimeout(() => showWrongAnswerPanel(contentEl), 500);
+      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
     }
   }
 
@@ -2784,7 +2812,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
     ).join('');
     blocksEl.querySelectorAll('.reorder-block').forEach(b => b.classList.add('disabled'));
     document.getElementById('exercise-dontknow-btn').classList.add('disabled');
-    setTimeout(() => showWrongAnswerPanel(contentEl), 500);
+    setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
   });
 }
 
