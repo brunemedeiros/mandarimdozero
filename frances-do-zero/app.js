@@ -1284,7 +1284,7 @@ function renderGrammarExerciseStep(u, contentEl, nextBtn){
       <input type="text" id="gram-exercise-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a forma correta">
       <div class="expected" id="gram-exercise-expected"></div>
     </div>
-    <button class="btn btn-primary btn-block" id="gram-exercise-verify-btn">Vérifier</button>
+    <button class="btn btn-primary btn-block" id="gram-exercise-verify-btn">Verificar</button>
   `;
 
   const inputEl = document.getElementById('gram-exercise-input');
@@ -2448,7 +2448,7 @@ function renderCheckpointQuizStep(){
       <input type="text" id="checkpoint-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a resposta">
       <div class="expected" id="checkpoint-expected"></div>
     </div>
-    <button class="btn btn-primary btn-block" id="checkpoint-verify-btn">Vérifier</button>
+    <button class="btn btn-primary btn-block" id="checkpoint-verify-btn">Verificar</button>
   `;
 
   const inputEl = document.getElementById('checkpoint-input');
@@ -2593,7 +2593,7 @@ function renderLevelTestQuizStep(){
       <input type="text" id="leveltest-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a resposta">
       <div class="expected" id="leveltest-expected"></div>
     </div>
-    <button class="btn btn-primary btn-block" id="leveltest-verify-btn">Vérifier</button>
+    <button class="btn btn-primary btn-block" id="leveltest-verify-btn">Verificar</button>
   `;
 
   const inputEl = document.getElementById('leveltest-input');

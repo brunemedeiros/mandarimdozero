@@ -2262,12 +2262,24 @@ function switchTab(tab){
   if (tab === 'hanzi'){ renderHanziLessonsGrid(); }
   if (tab === 'manual'){ renderManualView(); }
   if (tab === 'progress'){ renderProgressView(); }
-  if (tab === 'export'){ renderExportDeckSelect(); }
   if (tab === 'path'){ renderUnitsGrid(); }
 }
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+document.getElementById('export-open-btn').addEventListener('click', () => {
+  renderExportDeckSelect();
+  document.getElementById('export-modal').style.display = 'flex';
+});
+document.getElementById('export-modal-close').addEventListener('click', () => {
+  document.getElementById('export-modal').style.display = 'none';
+});
+document.getElementById('export-modal').addEventListener('click', (e) => {
+  if (e.target.id === 'export-modal'){
+    document.getElementById('export-modal').style.display = 'none';
+  }
 });
 
 // ============================================================
