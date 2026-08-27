@@ -1513,10 +1513,16 @@ const STEP_DEFS = [
   { key: 'exercises', label: 'Exercícios' }
 ];
 
+// A cada 3 palavras novas, intercala uma checagem rápida de reconhecimento
+// das palavras já mostradas — quebra a sequência pura de cards novos, que
+// ficava cansativa com muito vocabulário seguido sem nenhuma interação.
+const VOCAB_QUIZ_INTERVAL = 3;
+
 const STEP_STATE = {
   currentStep: 0,
   vocabIndex: 0,
   vocabUnitId: null,
+  vocabQuizActive: false,
   exerciseList: [],
   exerciseIndex: 0,
   exerciseScore: 0,
@@ -1731,8 +1737,23 @@ document.getElementById('lesson-hint-btn').addEventListener('click', () => {
 // Mostra uma palavra de cada vez, junto da frase-modelo que a usa (quando
 // existe uma correspondência direta no banco de conteúdo) — em vez da lista
 // completa de uma vez, e sem depender de um passo "Frases" separado.
+// Procura um exemplo real de uso da palavra — nas frases da unidade, depois
+// nas falas do diálogo (mesmo formato {p, c, t}) e, se ainda não achar, nas
+// unidades anteriores já vistas. Aumenta bastante a cobertura sem inventar
+// frase nova nenhuma, só reaproveitando conteúdo que já existe no curso, e
+// nunca usa vocabulário que o aluno ainda não viu.
 function findMatchingPhrase(word, unit){
-  return unit.phrases.find(p => p.c.includes(word.c)) || null;
+  const sourcesOf = u2 => [...(u2.phrases || []), ...((u2.dialogue && u2.dialogue.lines) || [])];
+
+  const inUnit = sourcesOf(unit).find(p => p.c.includes(word.c));
+  if (inUnit) return inUnit;
+
+  const unitIdx = UNITS.findIndex(u2 => u2.id === unit.id);
+  for (let i = 0; i < unitIdx; i++){
+    const match = sourcesOf(UNITS[i]).find(p => p.c.includes(word.c));
+    if (match) return match;
+  }
+  return null;
 }
 
 function renderVocabCardStep(u, contentEl, nextBtn){
@@ -1782,6 +1803,62 @@ function renderVocabCardStep(u, contentEl, nextBtn){
   nextBtn.textContent = idx < total - 1 ? 'Próxima palavra →' : 'Continuar →';
 }
 
+// Checagem rápida entre cards de vocabulário: testa o reconhecimento de uma
+// das últimas palavras mostradas (nunca uma ainda não vista) com múltipla
+// escolha, igual ao formato "meaning" dos exercícios normais — só que com
+// seu próprio botão de continuar, já que o step-next-btn global fica
+// escondido enquanto essa tela estiver ativa.
+function renderVocabQuizStep(u, contentEl, nextBtn){
+  const idx = STEP_STATE.vocabIndex;
+  const groupStart = Math.max(0, idx + 1 - VOCAB_QUIZ_INTERVAL);
+  const seenWords = u.vocab.slice(groupStart, idx + 1);
+  const target = seenWords[Math.floor(Math.random() * seenWords.length)];
+  const distractorPool = u.vocab.filter(v => v !== target);
+  const distractors = shuffle(distractorPool).slice(0, 3);
+  const options = shuffle([target, ...distractors]);
+
+  contentEl.innerHTML = `
+    <div class="vocab-quiz-label">🧠 Checagem rápida</div>
+    <div class="exercise-prompt-label">O que significa?</div>
+    <div class="exercise-prompt">
+      <div class="prompt-hanzi">${target.c}</div>
+      <div class="prompt-pinyin">${target.p}</div>
+      ${audioBtnHTML(target.c)}
+    </div>
+    <div class="exercise-options">${options.map((opt, i) => `
+      <button class="exercise-option" data-idx="${i}"><div class="opt-text">${opt.t}</div></button>
+    `).join('')}</div>
+    <button class="btn btn-primary btn-block vocab-quiz-continue" id="vocab-quiz-continue-btn" style="display:none;">Continuar →</button>
+  `;
+
+  wireAudioButtons(contentEl);
+  if (TTS.voice) speakChinese(target.c, contentEl.querySelector('.audio-btn'));
+  nextBtn.style.display = 'none';
+
+  let answered = false;
+  contentEl.querySelectorAll('.exercise-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (answered) return;
+      answered = true;
+      const chosenIdx = parseInt(btn.dataset.idx);
+      contentEl.querySelectorAll('.exercise-option').forEach((b, i) => {
+        b.classList.add('disabled');
+        if (options[i] === target) b.classList.add('correct');
+        else if (i === chosenIdx) b.classList.add('incorrect');
+      });
+      document.getElementById('vocab-quiz-continue-btn').style.display = 'flex';
+    });
+  });
+
+  document.getElementById('vocab-quiz-continue-btn').addEventListener('click', () => {
+    STEP_STATE.vocabQuizActive = false;
+    if (STEP_STATE.vocabIndex < u.vocab.length - 1){
+      STEP_STATE.vocabIndex += 1;
+    }
+    renderStep();
+  });
+}
+
 function renderStep(){
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
   const stepKey = STEP_DEFS[STEP_STATE.currentStep].key;
@@ -1797,8 +1874,13 @@ function renderStep(){
     if (STEP_STATE.vocabUnitId !== u.id){
       STEP_STATE.vocabIndex = 0;
       STEP_STATE.vocabUnitId = u.id;
+      STEP_STATE.vocabQuizActive = false;
     }
-    renderVocabCardStep(u, contentEl, nextBtn);
+    if (STEP_STATE.vocabQuizActive){
+      renderVocabQuizStep(u, contentEl, nextBtn);
+    } else {
+      renderVocabCardStep(u, contentEl, nextBtn);
+    }
 
   } else if (stepKey === 'exercises'){
     if (!STEP_STATE.exerciseList.length || STEP_STATE.exerciseUnitId !== u.id){
@@ -1847,6 +1929,12 @@ function renderStep(){
 document.getElementById('step-back-btn').addEventListener('click', () => {
   const stepKey = STEP_DEFS[STEP_STATE.currentStep].key;
 
+  if (stepKey === 'vocab' && STEP_STATE.vocabQuizActive){
+    STEP_STATE.vocabQuizActive = false;
+    renderStep();
+    return;
+  }
+
   // No passo de vocabulário, "Voltar" recua palavra a palavra antes de sair
   // do passo — só volta para o passo anterior da unidade quando já está na
   // primeira palavra.
@@ -1878,6 +1966,13 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
   // dedicada em vez de pular direto de passo.
   if (stepKey === 'vocab'){
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
+    const isQuizPoint = (STEP_STATE.vocabIndex + 1) % VOCAB_QUIZ_INTERVAL === 0
+      && STEP_STATE.vocabIndex < u.vocab.length - 1;
+    if (isQuizPoint){
+      STEP_STATE.vocabQuizActive = true;
+      renderStep();
+      return;
+    }
     if (STEP_STATE.vocabIndex < u.vocab.length - 1){
       STEP_STATE.vocabIndex += 1;
       renderStep();
