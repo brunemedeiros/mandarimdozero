@@ -127,6 +127,14 @@ body{
 }
 .pill.streak{ background: linear-gradient(120deg, #FBE1F5, var(--paper-warm)); color: var(--ink); }
 .pill.xp{ background: linear-gradient(120deg, rgba(227,107,202,0.14), var(--paper-warm)); color: var(--ink); }
+a.pill{ text-decoration:none; cursor:pointer; }
+a.pill:hover{ border-color: var(--imperial-gold); }
+
+.sister-app-link{
+  display:block; margin-top:16px; text-align:center; font-size:12.5px; font-weight:700;
+  color: var(--ink-soft); text-decoration:none;
+}
+.sister-app-link:hover{ color: var(--seal-red-dark); }
 
 /* ---------- Nav tabs ---------- */
 .tabs{ display:flex; gap:6px; margin-bottom:22px; background:var(--paper-warm); padding:5px; border-radius:12px; border:1px solid var(--paper-line); overflow-x:auto; }
@@ -467,6 +475,40 @@ body{
 .tf-option.disabled{ pointer-events:none; opacity:.6; }
 .tf-option.disabled.correct, .tf-option.disabled.incorrect{ opacity:1; }
 
+/* ---------- Exercício de completar frase (cloze) ---------- */
+.cloze-sentence{
+  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding:22px 20px; margin-bottom:10px; text-align:center; font-size:18px; font-weight:700;
+  color: var(--ink); line-height:1.6;
+}
+.cloze-blank{
+  display:inline-block; min-width:64px; padding:2px 10px; border-bottom:3px solid var(--seal-red);
+  color: var(--seal-red-dark); font-weight:800;
+}
+.cloze-blank.correct{ border-color: var(--jade); color: var(--jade); }
+.cloze-blank.incorrect{ border-color: var(--error-red); color: var(--error-red); }
+.cloze-trans{ text-align:center; font-size:13px; color: var(--ink-soft); margin-bottom:18px; }
+.cloze-audio-row{ display:flex; justify-content:center; margin-bottom:14px; }
+.cloze-options{ display:flex; flex-direction:column; gap:10px; }
+.cloze-option{
+  background: var(--paper); border:2px solid var(--paper-line); border-radius:12px;
+  padding:13px 16px; cursor:pointer; font-family: var(--font-body); font-size:15px; font-weight:700;
+  color: var(--ink); text-align:center; transition: all .12s ease;
+}
+.cloze-option:hover{ border-color: var(--imperial-gold); transform: translateY(-1px); }
+.cloze-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
+.cloze-option.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.10); }
+.cloze-option.disabled{ pointer-events:none; opacity:.6; }
+.cloze-option.disabled.correct, .cloze-option.disabled.incorrect{ opacity:1; }
+.cloze-type-wrap{ text-align:center; }
+.cloze-type-wrap input{
+  width:100%; max-width:260px; text-align:center; font-size:16px; font-weight:700;
+  padding:10px 12px; border-radius:10px; border:2px solid var(--paper-line); background: var(--paper);
+  font-family: var(--font-body); color: var(--ink); margin-bottom:14px;
+}
+.cloze-type-wrap input:focus{ outline:none; border-color: var(--imperial-gold); }
+.cloze-type-wrap input:disabled{ opacity:.7; }
+
 /* ---------- Tela final "Parabéns" (estilo Busuu) ---------- */
 .lesson-complete{ text-align:center; padding: 20px 4px; }
 .lesson-complete-icon{ font-size:52px; margin-bottom:8px; }
@@ -698,6 +740,25 @@ body{
 .stat-card .label{ font-size:12px; color:var(--ink-soft); font-weight:700; }
 
 .badge-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(90px,1fr)); gap:12px; }
+
+/* ---------- Preferências (aba Progresso) ---------- */
+.pref-row{
+  display:flex; align-items:center; gap:16px; background: var(--paper); border:1px solid var(--paper-line);
+  border-radius: var(--radius); padding:14px 16px;
+}
+.pref-row-text{ flex:1; }
+.pref-row-title{ font-size:14px; font-weight:800; color: var(--ink); margin-bottom:3px; }
+.pref-row-sub{ font-size:12.5px; color: var(--ink-soft); line-height:1.4; }
+.pref-switch{
+  flex-shrink:0; width:46px; height:26px; border-radius:999px; border:none; background: var(--paper-line);
+  position:relative; cursor:pointer; transition: background .15s ease;
+}
+.pref-switch[aria-checked="true"]{ background: var(--seal-red); }
+.pref-switch-knob{
+  position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:white;
+  box-shadow: var(--shadow-card); transition: left .15s ease;
+}
+.pref-switch[aria-checked="true"] .pref-switch-knob{ left:23px; }
 
 /* ---------- Heatmap de atividade (estilo GitHub) ---------- */
 .heatmap-wrap{
@@ -984,6 +1045,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
     </button>
     <button class="btn btn-secondary btn-block" id="guest-btn" style="margin-top:10px;">Continuar sem conta</button>
     <p class="login-note" id="login-note"></p>
+    <a class="sister-app-link" href="https://mandarimdozero.netlify.app/" target="_blank" rel="noopener">🇨🇳 Também tem o Mandarim do Zero →</a>
   </div>
 </div>
 
@@ -1000,6 +1062,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
       <div class="pill streak">🔥 <span id="streak-count">0</span></div>
       <div class="pill xp">⭐ <span id="xp-count">0</span> XP</div>
       <button class="pill theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema claro/escuro">🌙</button>
+      <a class="pill sister-app-pill" href="https://mandarimdozero.netlify.app/" target="_blank" rel="noopener" title="Mandarim do Zero">🇨🇳</a>
       <button class="pill user-pill" id="user-menu-btn" title="Conta">👤 <span id="user-label">Convidado</span></button>
     </div>
   </div>
@@ -1122,6 +1185,14 @@ footer.app-footer img{ height:56px; opacity:.9; }
     <div class="progress-line-wrap" id="progress-line-chart-wrap"></div>
     <div class="section-label">Conquistas</div>
     <div class="badge-grid" id="badge-grid"></div>
+    <div class="section-label">Preferências</div>
+    <div class="pref-row">
+      <div class="pref-row-text">
+        <div class="pref-row-title">Sempre digitar no exercício de completar frase</div>
+        <div class="pref-row-sub">Em vez de escolher entre opções, digite a palavra que falta (estilo Clozemaster).</div>
+      </div>
+      <button class="pref-switch" id="cloze-mode-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
+    </div>
   </div>
 
   <footer class="app-footer">
