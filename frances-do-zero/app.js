@@ -1683,13 +1683,16 @@ document.getElementById('lesson-hint-btn').addEventListener('click', () => {
 // nunca usa vocabulário que o aluno ainda não viu.
 function findMatchingPhrase(word, unit){
   const sourcesOf = u2 => [...(u2.phrases || []), ...((u2.dialogue && u2.dialogue.lines) || [])];
+  // Case-insensitive: uma frase que começa com a palavra ("Bonjour !") tem
+  // maiúscula inicial e não batia com o vocabulário ("bonjour") sem isso.
+  const needle = word.f.toLowerCase();
 
-  const inUnit = sourcesOf(unit).find(p => p.f.includes(word.f));
+  const inUnit = sourcesOf(unit).find(p => p.f.toLowerCase().includes(needle));
   if (inUnit) return inUnit;
 
   const unitIdx = UNITS.findIndex(u2 => u2.id === unit.id);
   for (let i = 0; i < unitIdx; i++){
-    const match = sourcesOf(UNITS[i]).find(p => p.f.includes(word.f));
+    const match = sourcesOf(UNITS[i]).find(p => p.f.toLowerCase().includes(needle));
     if (match) return match;
   }
   return null;
