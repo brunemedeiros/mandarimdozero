@@ -2195,7 +2195,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
         <div class="cloze-hanzi">${hanziHTML}</div>
         <div class="cloze-pinyin">${pinyinHTML}</div>
       </div>
-      <div class="cloze-audio-row">${audioBtnHTML(ex.phrase.c)}</div>
+      <div class="cloze-audio-row" id="cloze-audio-row"></div>
       <div class="cloze-trans">${ex.phrase.t}</div>
       ${mode === 'type' ? `
         <div class="cloze-type-wrap">
@@ -2220,6 +2220,14 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     STEP_STATE.exerciseAnswered = true;
     document.getElementById('cloze-blank').textContent = ex.correctBlock.c;
     document.getElementById('cloze-blank').classList.add(isCorrect ? 'correct' : 'incorrect');
+
+    // O áudio só aparece (e toca sozinho) depois de responder — antes disso
+    // ele entregaria a resposta de graça, sem precisar completar a frase.
+    const audioRow = document.getElementById('cloze-audio-row');
+    audioRow.innerHTML = audioBtnHTML(ex.phrase.c);
+    wireAudioButtons(audioRow);
+    if (TTS.voice) speakChinese(ex.phrase.c, audioRow.querySelector('.audio-btn'));
+
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
       addXP(4);
