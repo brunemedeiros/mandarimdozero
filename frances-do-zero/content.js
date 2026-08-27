@@ -136,11 +136,7 @@ const UNITS = [
       { f: "Le Brésil est très grand.", t: "O Brasil é muito grande.",
         blocks: [{f:"Le Brésil"},{f:"est très"},{f:"grand."}] },
       { f: "Le pays est magnifique.", t: "O país é magnífico.",
-        blocks: [{f:"Le pays"},{f:"est magnifique."}] },
-      { f: "Il va venir de Paris demain.", t: "Ele vai vir de Paris amanhã.",
-        blocks: [{f:"Il va venir"},{f:"de Paris"},{f:"demain."}] },
-      { f: "Je voudrais être médecin.", t: "Eu gostaria de ser médico(a).",
-        blocks: [{f:"Je voudrais"},{f:"être médecin."}] }
+        blocks: [{f:"Le pays"},{f:"est magnifique."}] }
     ],
     dialogue: {
       title: "Primeiro encontro",
@@ -191,9 +187,7 @@ const UNITS = [
       { f: "J'ai deux frères et trois sœurs.", t: "Eu tenho dois irmãos e três irmãs.",
         blocks: [{f:"J'ai"},{f:"deux frères"},{f:"et trois sœurs."}] },
       { f: "Quel est l'âge de ton père ?", t: "Qual é a idade do seu pai?",
-        blocks: [{f:"Quel est"},{f:"l'âge"},{f:"de ton père ?"}] },
-      { f: "Je voudrais avoir vingt ans.", t: "Eu gostaria de ter vinte anos.",
-        blocks: [{f:"Je voudrais"},{f:"avoir"},{f:"vingt ans."}] }
+        blocks: [{f:"Quel est"},{f:"l'âge"},{f:"de ton père ?"}] }
     ],
     dialogue: {
       title: "No parque",
@@ -413,7 +407,7 @@ const UNITS = [
     id: "A1-5",
     level: "A1",
     title: "Comida e bebida",
-    goal: "Falar sobre alimentos, bebidas e gostos alimentares (o que você gosta e não gosta de comer).",
+    goal: "Pedir comida e bebida num café ou restaurante, e dizer do que você gosta ou não gosta de comer.",
     usageNote: { title: "\"J'aime LE café\" ou \"je bois DU café\"?", body: "Com verbos de gosto (<strong>aimer</strong>, détester), usa-se o artigo definido pra falar da coisa em geral: <strong>j'aime le café</strong> (gosto de café, em geral). Já quando se fala de uma quantidade — bebendo, comendo, comprando — usa-se o artigo partitivo: <strong>je bois du café</strong> (bebo [uma quantidade de] café). É uma distinção que o português não tem, mas é essencial em francês." },
     trueFalseExercises: [{ subject: "L'addition, s'il vous plaît.", emoji: "🧾", claim: "Dizemos isso pra pedir a conta num restaurante.", answer: true }],
     vocab: [
@@ -623,8 +617,6 @@ const UNITS = [
         scenario: "Você está se despedindo de um colega, e vai vê-lo de novo amanhã. O que você diz?", scenarioEmoji: "👋" },
       { f: "Aujourd'hui, il fait beau.", t: "Hoje está bonito.",
         blocks: [{f:"Aujourd'hui,"},{f:"il fait beau."}] },
-      { f: "Hier, j'étais très occupé.", t: "Ontem eu estava muito ocupado.",
-        blocks: [{f:"Hier,"},{f:"j'étais"},{f:"très occupé."}] },
       { f: "La semaine prochaine, je pars en voyage.", t: "Na próxima semana, eu vou viajar.",
         blocks: [{f:"La semaine"},{f:"prochaine,"},{f:"je pars en voyage."}] },
       { f: "Le mois de janvier est très froid.", t: "O mês de janeiro é muito frio.",
@@ -848,16 +840,16 @@ const UNITS = [
         blocks: [{f:"La taille"},{f:"est trop"},{f:"petite."}] },
       { f: "Le magasin ferme à dix-neuf heures.", t: "A loja fecha às dezenove horas.",
         blocks: [{f:"Le magasin"},{f:"ferme"},{f:"à dix-neuf heures."}] },
-      { f: "Il y a trente personnes ici.", t: "Há trinta pessoas aqui.",
-        blocks: [{f:"Il y a"},{f:"trente personnes"},{f:"ici."}] },
-      { f: "Elle a cinquante ans.", t: "Ela tem cinquenta anos.",
-        blocks: [{f:"Elle a"},{f:"cinquante ans."}] },
-      { f: "Le livre coûte soixante-dix euros.", t: "O livro custa setenta euros.",
-        blocks: [{f:"Le livre coûte"},{f:"soixante-dix"},{f:"euros."}] },
-      { f: "Il y a quatre-vingts étudiants dans la classe.", t: "Há oitenta estudantes na turma.",
-        blocks: [{f:"Il y a"},{f:"quatre-vingts étudiants"},{f:"dans la classe."}] },
-      { f: "Ma grand-mère a quatre-vingt-dix ans.", t: "Minha avó tem noventa anos.",
-        blocks: [{f:"Ma grand-mère"},{f:"a"},{f:"quatre-vingt-dix ans."}] }
+      { f: "Cette veste coûte trente euros.", t: "Esta jaqueta custa trinta euros.",
+        blocks: [{f:"Cette veste"},{f:"coûte"},{f:"trente euros."}] },
+      { f: "Ces chaussures coûtent cinquante euros.", t: "Estes sapatos custam cinquenta euros.",
+        blocks: [{f:"Ces chaussures"},{f:"coûtent"},{f:"cinquante euros."}] },
+      { f: "Le manteau coûte soixante-dix euros.", t: "O casaco custa setenta euros.",
+        blocks: [{f:"Le manteau"},{f:"coûte"},{f:"soixante-dix euros."}] },
+      { f: "Cette robe coûte quatre-vingts euros.", t: "Este vestido custa oitenta euros.",
+        blocks: [{f:"Cette robe"},{f:"coûte"},{f:"quatre-vingts euros."}] },
+      { f: "Ce sac coûte quatre-vingt-dix euros.", t: "Esta bolsa custa noventa euros.",
+        blocks: [{f:"Ce sac"},{f:"coûte"},{f:"quatre-vingt-dix euros."}] }
     ],
     dialogue: {
       title: "Numa loja",
@@ -871,10 +863,78 @@ const UNITS = [
     }
   },
   {
+    id: "A1-g10",
+    level: "A1",
+    type: "grammar",
+    title: "Números de 70 a 99",
+    goal: "Entender e formar corretamente os números de setenta a noventa e nove.",
+    grammar: {
+      blocks: [
+        {
+          title: "Até sessenta, é regular",
+          body: "Trente (30), quarante (40), cinquante (50) e soixante (60) seguem o padrão normal, uma palavra pra cada dezena — igual em português. O problema começa depois de sessenta: o francês simplesmente não tem uma palavra própria pra setenta, oitenta ou noventa.",
+          examples: [
+            { f: "J'ai trente ans.", t: "Eu tenho trinta anos." },
+            { f: "Ça coûte soixante euros.", t: "Custa sessenta euros." }
+          ]
+        },
+        {
+          title: "70 = 60 + 10",
+          body: "Setenta (soixante-dix) é literalmente \"sessenta e dez\". De 71 a 79, continua somando a partir de sessenta: soixante et onze (71), soixante-douze (72)... até soixante-dix-neuf (79).",
+          examples: [
+            { f: "Il a soixante-dix ans.", t: "Ele tem setenta anos. (60+10)" },
+            { f: "Ça fait soixante-quinze euros.", t: "Dá setenta e cinco euros. (60+15)" }
+          ]
+        },
+        {
+          title: "80 = 4 × 20",
+          body: "Oitenta (quatre-vingts) é \"quatro vezes vinte\". De 81 a 89, soma-se sem o \"et\": quatre-vingt-un (81), quatre-vingt-deux (82)... O \"s\" de vingts some assim que vem um número depois.",
+          examples: [
+            { f: "Elle a quatre-vingts ans.", t: "Ela tem oitenta anos. (4×20)" },
+            { f: "Il y a quatre-vingt-trois personnes.", t: "Há oitenta e três pessoas. (4×20+3)" }
+          ]
+        },
+        {
+          title: "90 = 4 × 20 + 10",
+          body: "Noventa (quatre-vingt-dix) junta as duas regras: quatro vezes vinte, mais dez. De 91 a 99, mesma lógica de 80: quatre-vingt-onze (91)... quatre-vingt-dix-neuf (99).",
+          examples: [
+            { f: "Mon grand-père a quatre-vingt-dix ans.", t: "Meu avô tem noventa anos. (4×20+10)" },
+            { f: "Ça coûte quatre-vingt-dix-neuf euros.", t: "Custa noventa e nove euros. (4×20+19)" }
+          ]
+        },
+        {
+          title: "Très bien! 🎉",
+          body: "Resumindo a lógica das dezenas de 70 a 90 — o segredo é lembrar que soixante-dix e quatre-vingt-dix são a base pra somar de novo:",
+          examples: [],
+          table: {
+            "Dezenas": [
+              { pronoun: "70", form: "soixante-dix (60+10)" },
+              { pronoun: "71", form: "soixante et onze (60+11)" },
+              { pronoun: "80", form: "quatre-vingts (4×20)" },
+              { pronoun: "81", form: "quatre-vingt-un (4×20+1)" },
+              { pronoun: "90", form: "quatre-vingt-dix (4×20+10)" },
+              { pronoun: "91", form: "quatre-vingt-onze (4×20+11)" },
+              { pronoun: "99", form: "quatre-vingt-dix-neuf (4×20+19)" }
+            ]
+          },
+          wrapup: true
+        }
+      ],
+      exercises: [
+        { prompt: "70 em francês:", hint: "60 + 10", answer: "soixante-dix" },
+        { prompt: "71 em francês:", hint: "60 + 11 (com et)", answer: "soixante et onze" },
+        { prompt: "80 em francês:", hint: "4 × 20", answer: "quatre-vingts" },
+        { prompt: "81 em francês:", hint: "4×20 + 1 (sem et)", answer: "quatre-vingt-un" },
+        { prompt: "90 em francês:", hint: "4×20 + 10", answer: "quatre-vingt-dix" },
+        { prompt: "99 em francês:", hint: "4×20 + 19", answer: "quatre-vingt-dix-neuf" }
+      ]
+    }
+  },
+  {
     id: "A1-11",
     level: "A1",
-    title: "Comidas",
-    goal: "Ampliar o vocabulário de alimentos: carnes, legumes e outros itens do dia a dia.",
+    title: "Fazendo compras de mercado",
+    goal: "Montar uma lista de compras e dizer o que você come ou não come no dia a dia.",
     usageNote: { title: "\"Je ne mange pas DE viande\" — cadê o \"la\"?", body: "Depois de uma negação com <strong>ne... pas</strong>, os artigos du/de la/des somem e viram só <strong>de</strong> (ou <strong>d'</strong> antes de vogal): je mange <strong>de la</strong> viande → je ne mange <strong>pas de</strong> viande. É uma regra que vale pra quase toda negação de quantidade em francês — vale prestar atenção nela." },
     vocab: [
       { f: "la viande", t: "a carne" },
@@ -1637,8 +1697,8 @@ const UNITS = [
       { f: "Tu as déjà visité Paris ?", t: "Você já visitou Paris?",
         blocks: [{f:"Tu as déjà"},{f:"visité Paris ?"}],
         scenario: "Você quer saber se um amigo já foi a Paris alguma vez. O que você pergunta?", scenarioEmoji: "🗼" },
-      { f: "Avant-hier, j'étais à Paris.", t: "Anteontem, eu estava em Paris.",
-        blocks: [{f:"Avant-hier,"},{f:"j'étais"},{f:"à Paris."}] },
+      { f: "Avant-hier, j'ai visité Paris.", t: "Anteontem, eu visitei Paris.",
+        blocks: [{f:"Avant-hier,"},{f:"j'ai visité"},{f:"Paris."}] },
       { f: "Le mois dernier, j'ai voyagé en France.", t: "No mês passado, eu viajei para a França.",
         blocks: [{f:"Le mois dernier,"},{f:"j'ai voyagé"},{f:"en France."}] },
       { f: "L'année dernière, j'ai appris le français.", t: "No ano passado, eu aprendi francês.",
@@ -1737,7 +1797,7 @@ const MODULES = [
   { id: "A1-m2", level: "A1", title: "Rotina do dia a dia",
     unitIds: ["A1-5", "A1-6", "A1-g3", "A1-7"] },
   { id: "A1-m3", level: "A1", title: "Cidade e identidade",
-    unitIds: ["A1-8", "A1-g4", "A1-9", "A1-10", "A1-11", "A1-12"] },
+    unitIds: ["A1-8", "A1-g4", "A1-9", "A1-10", "A1-g10", "A1-11", "A1-12"] },
   { id: "A1-m4", level: "A1", title: "Deslocando-se e cuidando de si",
     unitIds: ["A1-13", "A1-14", "A1-g5", "A1-15", "A1-g6"] },
   { id: "A1-m5", level: "A1", title: "Descrevendo o mundo ao redor",
