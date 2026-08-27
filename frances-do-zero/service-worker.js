@@ -3,13 +3,14 @@
 // do próprio site (sempre pega a versão mais nova quando há internet), com
 // fallback pro cache quando offline. Nunca intercepta chamadas ao Supabase
 // (essas precisam de rede de verdade; o app já trata erro de rede sozinho).
-const CACHE_NAME = 'frances-avec-prof-brune-v1';
+const CACHE_NAME = 'frances-avec-prof-brune-v2';
 const PRECACHE_URLS = [
   './',
   './index.html',
   './app.js',
   './content.js',
   './conjugation-data.js',
+  './audio-manifest.js',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',

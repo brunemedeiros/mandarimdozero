@@ -82,7 +82,33 @@ function warmUpTTSOnce(){
 document.addEventListener('click', warmUpTTSOnce, { once:true });
 document.addEventListener('touchstart', warmUpTTSOnce, { once:true });
 
+// Verdadeiro se dá pra tocar esse texto — seja por mp3 pré-gerado, seja pela
+// Web Speech API do navegador. Usado nos autoplay antes de chamar
+// speakFrench(), pra não depender só de TTS.voice (agora quase sempre
+// desnecessário, já que a maioria do conteúdo tem áudio pré-gerado).
+function canSpeakFrench(text){
+  return (typeof AUDIO_MANIFEST !== 'undefined' && !!AUDIO_MANIFEST[text]) || !!TTS.voice;
+}
+
+// Toca um mp3 pré-gerado (Google Cloud TTS, voz neural) em vez da Web Speech
+// API do navegador — qualidade consistente pra todo aluno, independente do
+// SO/navegador. Ver audio-manifest.js (texto -> arquivo) e speakFrench().
+function playPregeneratedAudio(file, btnEl){
+  const audio = new Audio('audio/' + file);
+  if (btnEl) btnEl.classList.add('speaking');
+  const clear = () => { if (btnEl) btnEl.classList.remove('speaking'); };
+  audio.addEventListener('ended', clear);
+  audio.addEventListener('error', () => { clear(); showToast('Não foi possível reproduzir o áudio'); });
+  audio.play().catch(clear);
+}
+
 function speakFrench(text, btnEl){
+  const pregenFile = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
+  if (pregenFile){
+    playPregeneratedAudio(pregenFile, btnEl);
+    return;
+  }
+
   if (!TTS.supported){
     showToast('Áudio não suportado neste navegador');
     return;
@@ -1736,7 +1762,7 @@ function renderVocabCardStep(u, contentEl, nextBtn){
   wireAudioButtons(contentEl);
   wireKnowButtons(contentEl);
 
-  if (TTS.voice){
+  if (canSpeakFrench(v.f)){
     const mainAudioBtn = contentEl.querySelector('.vocab-card .audio-btn');
     speakFrench(v.f, mainAudioBtn);
   }
@@ -1773,7 +1799,7 @@ function renderVocabQuizStep(u, contentEl, nextBtn){
   `;
 
   wireAudioButtons(contentEl);
-  if (TTS.voice) speakFrench(target.f, contentEl.querySelector('.audio-btn'));
+  if (canSpeakFrench(target.f)) speakFrench(target.f, contentEl.querySelector('.audio-btn'));
   nextBtn.style.display = 'none';
 
   let answered = false;
@@ -2385,7 +2411,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
   `;
 
   wireAudioButtons(contentEl);
-  if (ex.format === 'listen' && TTS.voice){
+  if (ex.format === 'listen' && canSpeakFrench(ex.item.f)){
     speakFrench(ex.item.f, contentEl.querySelector('.audio-btn-lg'));
   }
 
@@ -2449,7 +2475,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   `;
 
   wireAudioButtons(contentEl);
-  if (TTS.voice) speakFrench(ex.item.f, contentEl.querySelector('.audio-btn-lg'));
+  if (canSpeakFrench(ex.item.f)) speakFrench(ex.item.f, contentEl.querySelector('.audio-btn-lg'));
   nextBtn.style.display = 'none';
 
   const inputEl = document.getElementById('vocab-type-input');
@@ -2624,7 +2650,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     const audioRow = document.getElementById('cloze-audio-row');
     audioRow.innerHTML = audioBtnHTML(ex.phrase.f);
     wireAudioButtons(audioRow);
-    if (TTS.voice) speakFrench(ex.phrase.f, audioRow.querySelector('.audio-btn'));
+    if (canSpeakFrench(ex.phrase.f)) speakFrench(ex.phrase.f, audioRow.querySelector('.audio-btn'));
 
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
@@ -3260,7 +3286,7 @@ function renderReviewView(){
   // Áudio disponível (e tocado automaticamente) em ambos os lados do cartão —
   // frente (francês) e, ao virar, de novo caso o aluno queira reouvir.
   wireAudioButtons(el);
-  if (TTS.voice){
+  if (canSpeakFrench(card.front)){
     speakFrench(card.front, el.querySelector('.audio-btn-lg'));
   }
 
