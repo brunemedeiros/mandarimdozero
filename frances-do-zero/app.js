@@ -441,6 +441,23 @@ function applySerializedState(data){
 
 // ---------- SM-2 algorithm (idêntico em espírito ao Anki) ----------
 // grade: 0=Errei, 1=Difícil, 2=Bom, 3=Fácil
+// Conecta o resultado de um exercício de vocabulário ao mesmo sistema SM-2
+// usado pelo Flashcard — sem isso, "palavras aprendidas" (usado no card da
+// trilha e na conclusão de unidade) só contava revisões feitas no Flashcard,
+// deixando a contagem baixa mesmo depois de completar 100% dos exercícios.
+// Cada acerto em exercício conta como um grade "Bom" (equivalente a acertar
+// no Flashcard) — não tão generoso quanto "Fácil", mas já efetivamente
+// marca a palavra como aprendida (reps > 0).
+function registerExerciseCorrect(unit, vocabItem){
+  const idx = unit.vocab.indexOf(vocabItem);
+  if (idx === -1) return;
+  const cardId = `u${unit.id}-v${idx}`;
+  const card = STATE.cards.find(c => c.id === cardId);
+  if (card && card.reps === 0){
+    applySM2(card, 2); // grade 2 = "Bom"
+  }
+}
+
 function applySM2(card, grade){
   const now = Date.now();
   const DAY = 24*60*60*1000;
@@ -1477,6 +1494,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
       if (isCorrect){
         STEP_STATE.exerciseScore += 1;
         addXP(3);
+        registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
       }
       revealAnswer(chosenIdx);
     });
