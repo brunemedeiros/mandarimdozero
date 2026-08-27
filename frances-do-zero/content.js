@@ -49,6 +49,7 @@ const UNITS = [
     level: "A1",
     title: "Cumprimentar e se despedir",
     goal: "Cumprimentar alguém, se despedir e agradecer numa interação básica.",
+    usageNote: { title: "\"Bonjour\" ou \"Bonsoir\"?", body: "Usamos <strong>bonjour</strong> de manhã até o fim da tarde — é a saudação padrão do dia. À noite, ao chegar num lugar, trocamos para <strong>bonsoir</strong>. Já <strong>salut</strong> funciona a qualquer hora, mas só entre amigos ou pessoas próximas — nunca com desconhecidos ou em contextos formais." },
     vocab: [
       { f: "bonjour", t: "olá / bom dia" },
       { f: "bonsoir", t: "boa noite (saudação)" },
@@ -90,6 +91,7 @@ const UNITS = [
     level: "A1",
     title: "Se apresentar",
     goal: "Dizer o nome, a nacionalidade e perguntar o mesmo para o outro.",
+    usageNote: { title: "\"Tu\" ou \"vous\"?", body: "<strong>Tu</strong> é informal — usado com amigos, família e colegas da mesma idade. <strong>Vous</strong> é formal (usado com desconhecidos, superiores, pessoas mais velhas) e também é a forma de \"vocês\", no plural. Na dúvida, comece sempre com <strong>vous</strong> — é mais seguro do que parecer íntimo demais." },
     vocab: [
       { f: "je", t: "eu" },
       { f: "tu", t: "você (informal)" },
@@ -132,6 +134,7 @@ const UNITS = [
     level: "A1",
     title: "Números e idade",
     goal: "Contar do zero a cem e dizer/perguntar a idade.",
+    usageNote: { title: "\"J'ai vingt ans\" — por que \"ai\" e não \"suis\"?", body: "Em português dizemos \"eu <strong>sou</strong>/<strong>tenho</strong> vinte anos\", mas em francês a idade sempre usa o verbo <strong>avoir</strong> (ter): <strong>j'ai</strong> vingt ans, nunca \"je suis vingt ans\". É um erro comum de quem traduz direto do português — vale gravar essa estrutura de cor." },
     vocab: [
       { f: "zéro", t: "zero" },
       { f: "un / une", t: "um / uma" },
@@ -245,6 +248,7 @@ const UNITS = [
     level: "A1",
     title: "Família",
     goal: "Apresentar os membros da família e dizer quantos irmãos você tem.",
+    usageNote: { title: "\"Mon frère\" ou \"ma sœur\"?", body: "Em francês, o possessivo concorda com o gênero da palavra que vem depois, não com quem é o dono: <strong>mon</strong> père, <strong>mon</strong> frère (masculino), mas <strong>ma</strong> mère, <strong>ma</strong> sœur (feminino) — mesmo que seja você (homem ou mulher) falando. O dono da coisa não importa pra escolher mon/ma, só o gênero da palavra." },
     vocab: [
       { f: "la famille", t: "a família" },
       { f: "le père", t: "o pai" },
@@ -362,6 +366,7 @@ const UNITS = [
     level: "A1",
     title: "Comida e bebida",
     goal: "Falar sobre alimentos, bebidas e gostos alimentares (o que você gosta e não gosta de comer).",
+    usageNote: { title: "\"J'aime LE café\" ou \"je bois DU café\"?", body: "Com verbos de gosto (<strong>aimer</strong>, détester), usa-se o artigo definido pra falar da coisa em geral: <strong>j'aime le café</strong> (gosto de café, em geral). Já quando se fala de uma quantidade — bebendo, comendo, comprando — usa-se o artigo partitivo: <strong>je bois du café</strong> (bebo [uma quantidade de] café). É uma distinção que o português não tem, mas é essencial em francês." },
     vocab: [
       { f: "le pain", t: "o pão" },
       { f: "l'eau", t: "a água" },
@@ -404,6 +409,7 @@ const UNITS = [
     level: "A1",
     title: "Horas e rotina diária",
     goal: "Dizer as horas e descrever a rotina do dia a dia.",
+    usageNote: { title: "\"Il est huit heures\" — de novo, nada de \"être\"... ou melhor, só \"être\"!", body: "Diferente da idade (que usa avoir), as horas em francês usam o verbo <strong>être</strong>: <strong>il est</strong> huit heures (são oito horas). Repare que aqui o \"il\" não se refere a ninguém — é um \"il\" impessoal, só pra montar a frase, igual ao \"está\" de \"está chovendo\" em português." },
     vocab: [
       { f: "l'heure", t: "a hora" },
       { f: "le matin", t: "a manhã" },
@@ -512,6 +518,7 @@ const UNITS = [
     level: "A1",
     title: "Dias e meses",
     goal: "Dizer os dias da semana, meses e marcar um encontro.",
+    usageNote: { title: "\"À demain\" ou \"à bientôt\"?", body: "As despedidas em francês variam conforme o tempo até o próximo encontro: <strong>à demain</strong> quando você sabe que vai rever a pessoa amanhã, e <strong>à bientôt</strong> quando o reencontro é mais incerto, só \"até breve\". Já <strong>au revoir</strong> é neutro e serve pra qualquer despedida, sem indicar quando será o próximo encontro." },
     vocab: [
       { f: "lundi", t: "segunda-feira" },
       { f: "mardi", t: "terça-feira" },
@@ -553,6 +560,7 @@ const UNITS = [
     level: "A1",
     title: "Lugares e orientação",
     goal: "Perguntar e indicar como chegar a um lugar na cidade.",
+    usageNote: { title: "\"Où est...?\" ou \"Il y a...?\"", body: "Use <strong>où est...?</strong> quando você já sabe que o lugar existe e só quer saber onde fica (ex: où est la gare? — onde fica a estação?). Use <strong>il y a...?</strong> quando você não sabe se o lugar existe ali perto (ex: il y a une pharmacie près d'ici? — tem uma farmácia aqui perto?)." },
     vocab: [
       { f: "la rue", t: "a rua" },
       { f: "la place", t: "a praça" },
@@ -658,6 +666,7 @@ const UNITS = [
     level: "A1",
     title: "Nacionalidades",
     goal: "Dizer sua nacionalidade e a de outras pessoas, no masculino e no feminino.",
+    usageNote: { title: "\"Je suis brésilienne\" ou \"je viens du Brésil\"?", body: "<strong>Être + nacionalidade</strong> fala da sua identidade (je suis brésilienne). <strong>Venir de + país</strong> fala da sua origem/procedência (je viens du Brésil). As duas frases dizem quase a mesma coisa, mas repare na preposição: <strong>du</strong> Brésil, <strong>de</strong> France, <strong>d'</strong>Espagne — ela muda conforme o gênero e a primeira letra do nome do país." },
     vocab: [
       { f: "français / française", t: "francês / francesa" },
       { f: "brésilien / brésilienne", t: "brasileiro / brasileira" },
@@ -700,6 +709,7 @@ const UNITS = [
     level: "A1",
     title: "Compras",
     goal: "Perguntar preços (com números até cem), experimentar roupas e comprar numa loja.",
+    usageNote: { title: "\"Je voudrais\" ou \"je peux\"?", body: "<strong>Je voudrais</strong> (eu gostaria) é a forma mais educada de pedir algo numa loja — soa mais gentil que \"je veux\" (eu quero). Já <strong>je peux...?</strong> (posso...?) é usado pra pedir permissão, como experimentar uma roupa: <strong>je peux</strong> essayer ce pantalon? Os dois são educados, mas servem pra momentos diferentes: pedir algo vs. pedir permissão." },
     vocab: [
       { f: "le pantalon", t: "a calça" },
       { f: "la robe", t: "o vestido" },
@@ -746,6 +756,7 @@ const UNITS = [
     level: "A1",
     title: "Comidas",
     goal: "Ampliar o vocabulário de alimentos: carnes, legumes e outros itens do dia a dia.",
+    usageNote: { title: "\"Je ne mange pas DE viande\" — cadê o \"la\"?", body: "Depois de uma negação com <strong>ne... pas</strong>, os artigos du/de la/des somem e viram só <strong>de</strong> (ou <strong>d'</strong> antes de vogal): je mange <strong>de la</strong> viande → je ne mange <strong>pas de</strong> viande. É uma regra que vale pra quase toda negação de quantidade em francês — vale prestar atenção nela." },
     vocab: [
       { f: "la viande", t: "a carne" },
       { f: "le poulet", t: "o frango" },
@@ -787,6 +798,7 @@ const UNITS = [
     level: "A1",
     title: "Pesos e quantidades",
     goal: "Pedir quantidades específicas ao fazer compras: kilo, litre, un peu de, beaucoup de...",
+    usageNote: { title: "\"Un kilo DE pommes\" — a mesma regra do \"de\"", body: "Depois de uma expressão de quantidade (un kilo <strong>de</strong>, un litre <strong>de</strong>, beaucoup <strong>de</strong>, trop <strong>de</strong>), o artigo também some e vira só <strong>de</strong>/<strong>d'</strong> — igual acontece depois de uma negação (unidade anterior). Repare: não se diz \"un kilo des pommes\", e sim <strong>un kilo de pommes</strong>." },
     vocab: [
       { f: "un kilo (de)", t: "um quilo (de)" },
       { f: "un demi-kilo", t: "meio quilo" },
@@ -828,6 +840,7 @@ const UNITS = [
     level: "A1",
     title: "Clima e estações",
     goal: "Falar sobre o tempo e as estações do ano.",
+    usageNote: { title: "\"Il fait chaud\" ou \"j'ai chaud\"?", body: "Pra falar do <strong>tempo/clima</strong>, o francês usa o verbo faire: <strong>il fait chaud</strong> (está calor lá fora). Pra falar de uma <strong>sensação sua</strong>, usa avoir: <strong>j'ai chaud</strong> (estou com calor, eu sinto calor). São frases parecidas mas com sujeitos bem diferentes — \"il\" impessoal pro clima, \"je\" pra você mesmo." },
     vocab: [
       { f: "il fait beau", t: "está bonito (tempo)" },
       { f: "il fait froid", t: "está frio" },
@@ -869,6 +882,7 @@ const UNITS = [
     level: "A1",
     title: "Transporte",
     goal: "Pegar um transporte público e comprar uma passagem.",
+    usageNote: { title: "\"En métro\" ou \"à pied\"?", body: "Meios de transporte \"fechados\" (onde você entra) usam <strong>en</strong>: <strong>en</strong> métro, <strong>en</strong> voiture, <strong>en</strong> bus. Já formas \"abertas\", sem se entrar em nada — como ir a pé ou de bicicleta montada por cima — usam <strong>à</strong>: <strong>à</strong> pied, <strong>à</strong> vélo. É uma regra pequena, mas aparece toda hora no dia a dia." },
     vocab: [
       { f: "le bus", t: "o ônibus" },
       { f: "le train", t: "o trem" },
@@ -977,6 +991,7 @@ const UNITS = [
     level: "A1",
     title: "Corpo e saúde",
     goal: "Descrever sintomas simples e ir ao médico.",
+    usageNote: { title: "\"J'ai mal à la tête\" ou \"je suis malade\"?", body: "Pra dores localizadas numa parte do corpo, usa-se <strong>avoir mal à</strong>: <strong>j'ai mal à la</strong> tête (estou com dor de cabeça). Pra um estado geral de mal-estar, sem apontar uma parte específica, usa-se <strong>être malade</strong>: <strong>je suis malade</strong> (estou doente). A escolha do verbo muda conforme você está descrevendo uma dor específica ou um estado geral." },
     vocab: [
       { f: "la tête", t: "a cabeça" },
       { f: "le ventre", t: "a barriga" },
@@ -1104,6 +1119,7 @@ const UNITS = [
     level: "A1",
     title: "Cores e descrições",
     goal: "Descrever cores, objetos e características de pessoas.",
+    usageNote: { title: "Por que \"une jolie robe rouge\" e não \"une rouge jolie robe\"?", body: "A maioria dos adjetivos em francês vem <strong>depois</strong> do substantivo (une robe <strong>rouge</strong>, un chat <strong>noir</strong>) — diferente do português, mas parecido também. Só um grupo pequeno de adjetivos comuns e curtos (como jolie, grand, petit, bon) vem <strong>antes</strong>: une <strong>jolie</strong> robe. Por isso \"uma roupa vermelha bonita\" fica <strong>une jolie robe rouge</strong> — jolie antes, rouge depois." },
     vocab: [
       { f: "rouge", t: "vermelho" },
       { f: "bleu", t: "azul" },
@@ -1203,6 +1219,7 @@ const UNITS = [
     level: "A1",
     title: "A casa e os cômodos",
     goal: "Descrever uma casa, dizer o que tem (e o que não tem) nela.",
+    usageNote: { title: "\"Il y a\" ou \"il n'y a pas de\"?", body: "<strong>Il y a</strong> (tem/há) apresenta algo que existe: il y a <strong>une</strong> chambre (tem um quarto). Na negação, o artigo vira <strong>de</strong>, igual às unidades de \"comidas\" e \"quantidades\": il n'y a <strong>pas de</strong> jardin (não tem jardim) — nunca \"il n'y a pas un jardin\"." },
     vocab: [
       { f: "la maison", t: "a casa" },
       { f: "l'appartement", t: "o apartamento" },
@@ -1244,6 +1261,7 @@ const UNITS = [
     level: "A1",
     title: "Onde as coisas estão",
     goal: "Descrever a posição de móveis e objetos usando preposições de lugar.",
+    usageNote: { title: "\"Sur\" ou \"dans\"?", body: "<strong>Sur</strong> é \"em cima de\", uma superfície: il y a une lampe <strong>sur</strong> la table. <strong>Dans</strong> é \"dentro de\", um espaço fechado: il y a des vêtements <strong>dans</strong> l'armoire. Os dois costumam ser confundidos por quem fala português, já que às vezes usamos \"em\" pras duas situações." },
     vocab: [
       { f: "le lit", t: "a cama" },
       { f: "la table", t: "a mesa" },
@@ -1285,6 +1303,7 @@ const UNITS = [
     level: "A1",
     title: "Lazer e atividades",
     goal: "Falar sobre hobbies e combinar programas de fim de semana.",
+    usageNote: { title: "\"Jouer DE la guitare\" ou \"jouer AU foot\"?", body: "Pra instrumentos musicais, usa-se <strong>jouer de</strong>: jouer <strong>de la</strong> guitare, jouer <strong>du</strong> piano. Pra esportes e jogos, usa-se <strong>jouer à</strong>: jouer <strong>au</strong> foot, jouer <strong>aux</strong> cartes. É uma regrinha simples, mas sem ela dá pra trocar tudo — vale decorar esse par de preposições." },
     vocab: [
       { f: "le cinéma", t: "o cinema" },
       { f: "la musique", t: "a música" },
@@ -1384,6 +1403,7 @@ const UNITS = [
     level: "A1",
     title: "Expressões de tempo passado",
     goal: "Aprender marcadores de tempo pra falar sobre o passado, como preparação pro passé composé.",
+    usageNote: { title: "\"Hier\" ou \"la semaine dernière\"?", body: "<strong>Hier</strong> aponta um dia específico (ontem). <strong>La semaine/le week-end dernier(-ère)</strong> aponta um período mais largo (semana ou fim de semana passados). Todos combinam bem com o passé composé que você já viu: <strong>hier, j'ai visité</strong> un musée / <strong>la semaine dernière, j'ai mangé</strong> au restaurant." },
     vocab: [
       { f: "hier", t: "ontem" },
       { f: "avant-hier", t: "anteontem" },

@@ -941,6 +941,7 @@ function renderUnitsGrid(){
 const STEP_DEFS = [
   { key: 'vocab', label: 'Vocabulário' },
   { key: 'dialogue', label: 'Diálogo' },
+  { key: 'usage', label: 'Dica de uso' },
   { key: 'exercises', label: 'Exercícios' }
 ];
 
@@ -1354,6 +1355,17 @@ function renderStep(){
         </div>
       `).join('');
     wireAudioButtons(dialogueEl);
+    nextBtn.textContent = 'Continuar →';
+    nextBtn.style.display = 'flex';
+
+  } else if (stepKey === 'usage'){
+    const note = u.usageNote;
+    contentEl.innerHTML = `
+      <div class="usage-note">
+        <div class="usage-note-title">${note.title} 🤔</div>
+        <p class="usage-note-body">${note.body}</p>
+      </div>
+    `;
     nextBtn.textContent = 'Continuar →';
     nextBtn.style.display = 'flex';
   }
@@ -3086,20 +3098,6 @@ function renderConjSelectScreen(){
     });
   });
 
-  topnSelectEl.addEventListener('change', () => {
-    CONJ_STATE.topN = parseInt(topnSelectEl.value);
-  });
-
-  regularToggleEl.addEventListener('click', () => {
-    CONJ_STATE.regularity = CONJ_STATE.regularity === 'regular' ? null : 'regular';
-    renderConjSelectScreen();
-  });
-
-  irregularToggleEl.addEventListener('click', () => {
-    CONJ_STATE.regularity = CONJ_STATE.regularity === 'irregular' ? null : 'irregular';
-    renderConjSelectScreen();
-  });
-
   verbListEl.querySelectorAll('input[data-group]').forEach(cb => {
     cb.addEventListener('change', () => {
       const key = cb.dataset.group;
@@ -3111,6 +3109,26 @@ function renderConjSelectScreen(){
     });
   });
 }
+
+// Estes elementos são fixos no HTML (renderConjSelectScreen só atualiza seu
+// conteúdo/estado visual, nunca os recria) — por isso os listeners são
+// conectados uma única vez aqui fora, e não a cada render. Conectá-los
+// dentro de renderConjSelectScreen() empilhava um listener novo a cada
+// clique, e como cada um deles também chama renderConjSelectScreen(), o
+// número de listeners dobrava a cada clique até travar a aba.
+document.getElementById('conj-topn-select').addEventListener('change', function(){
+  CONJ_STATE.topN = parseInt(this.value);
+});
+
+document.getElementById('conj-toggle-regular').addEventListener('click', () => {
+  CONJ_STATE.regularity = CONJ_STATE.regularity === 'regular' ? null : 'regular';
+  renderConjSelectScreen();
+});
+
+document.getElementById('conj-toggle-irregular').addEventListener('click', () => {
+  CONJ_STATE.regularity = CONJ_STATE.regularity === 'irregular' ? null : 'irregular';
+  renderConjSelectScreen();
+});
 
 document.getElementById('conj-start-btn').addEventListener('click', () => {
   if (!CONJ_STATE.selectedTenses.length || !CONJ_STATE.selectedGroups.length){
