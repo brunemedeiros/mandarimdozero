@@ -2041,6 +2041,63 @@ function goToNextExercise(){
   }, 900);
 }
 
+// Explicação usada no painel "Por que errei?" — reaproveita a primeira nota
+// gramatical da unidade (mesma fonte do modal "Dicas e Notas"), já que não
+// temos uma explicação por item/frase individual.
+function wrongAnswerExplanationHTML(){
+  const notes = GRAMMAR_NOTES[STATE.currentUnitId];
+  if (!notes || !notes.length) return '';
+  const note = notes[0];
+  const tableRows = note.table.map(row => {
+    if (row.label){
+      return `<tr><td class="label-cell">${row.label}</td><td>${row.pt}<br><span style="color:var(--seal-red-dark); font-weight:700;">${row.cn}</span></td></tr>`;
+    }
+    return `<tr><td>${row.pt}</td><td>${row.cn}</td></tr>`;
+  }).join('');
+  const hasLabels = note.table.some(r => r.label);
+  return `
+    <div class="usage-note-title">${note.title}</div>
+    <p class="usage-note-body">${note.explanation}</p>
+    <table class="note-detail-table">
+      <thead><tr>${hasLabels ? '<th></th>' : ''}<th>Português</th><th>Chinês</th></tr></thead>
+      <tbody>${tableRows}</tbody>
+    </table>
+  `;
+}
+
+// Painel de resposta errada (estilo Duolingo): pausa antes de avançar pra
+// mostrar a resposta certa e, se o aluno quiser, o porquê — só aparece
+// quando ela erra; acertando o fluxo continua rápido como antes.
+function showWrongAnswerPanel(contentEl){
+  const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
+  const explanationHTML = wrongAnswerExplanationHTML();
+  const panel = document.createElement('div');
+  panel.className = 'wrong-feedback';
+  panel.innerHTML = `
+    <div class="wrong-feedback-header">❌ Não foi dessa vez</div>
+    ${explanationHTML ? `
+      <button class="wrong-feedback-toggle" id="why-wrong-btn">Por que errei? 🤔</button>
+      <div class="wrong-feedback-explanation" id="wrong-explanation" style="display:none;">${explanationHTML}</div>
+    ` : ''}
+    <button class="btn btn-primary btn-block wrong-feedback-continue" id="wrong-continue-btn">Continuar →</button>
+  `;
+  wrap.appendChild(panel);
+
+  panel.querySelector('#why-wrong-btn')?.addEventListener('click', () => {
+    const exp = panel.querySelector('#wrong-explanation');
+    const btn = panel.querySelector('#why-wrong-btn');
+    const isOpen = exp.style.display !== 'none';
+    exp.style.display = isOpen ? 'none' : 'block';
+    btn.textContent = isOpen ? 'Por que errei? 🤔' : 'Esconder explicação';
+  });
+  panel.querySelector('#wrong-continue-btn').addEventListener('click', () => {
+    addStudyMinutes();
+    STEP_STATE.exerciseIndex += 1;
+    renderExerciseStep();
+  });
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
 // ---------- Exercício de múltipla escolha (meaning / listen) ----------
 function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
   let promptHTML = '';
@@ -2087,7 +2144,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
 
   nextBtn.style.display = 'none';
 
-  function revealAnswer(chosenIdx){
+  function revealAnswer(chosenIdx, isCorrect){
     STEP_STATE.exerciseAnswered = true;
     contentEl.querySelectorAll('.exercise-option').forEach((b, i) => {
       b.classList.add('disabled');
@@ -2095,7 +2152,11 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
       else if (i === chosenIdx) b.classList.add('incorrect');
     });
     document.getElementById('exercise-dontknow-btn')?.classList.add('disabled');
-    goToNextExercise();
+    if (isCorrect){
+      goToNextExercise();
+    } else {
+      setTimeout(() => showWrongAnswerPanel(contentEl), 500);
+    }
   }
 
   contentEl.querySelectorAll('.exercise-option').forEach(btn => {
@@ -2108,7 +2169,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
         addXP(3);
         registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
       }
-      revealAnswer(chosenIdx);
+      revealAnswer(chosenIdx, isCorrect);
     });
   });
 
@@ -2116,7 +2177,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
   // desgaste de marcar uma opção errada — igual ao comportamento do Memrise.
   document.getElementById('exercise-dontknow-btn').addEventListener('click', () => {
     if (STEP_STATE.exerciseAnswered) return;
-    revealAnswer(-1);
+    revealAnswer(-1, false);
   });
 }
 
@@ -2161,8 +2222,10 @@ function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
       if (isCorrect){
         STEP_STATE.exerciseScore += 1;
         addXP(4);
+        goToNextExercise();
+      } else {
+        setTimeout(() => showWrongAnswerPanel(contentEl), 500);
       }
-      goToNextExercise();
     });
   });
 }
@@ -2231,8 +2294,10 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
       addXP(4);
+      goToNextExercise();
+    } else {
+      setTimeout(() => showWrongAnswerPanel(contentEl), 500);
     }
-    goToNextExercise();
   }
 
   if (mode === 'type'){
@@ -2345,8 +2410,10 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
       addXP(4); // ordenar frase vale um pouco mais que múltipla escolha simples
+      goToNextExercise();
+    } else {
+      setTimeout(() => showWrongAnswerPanel(contentEl), 500);
     }
-    goToNextExercise();
   }
 
   renderSlots();
@@ -2362,7 +2429,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
     ).join('');
     blocksEl.querySelectorAll('.reorder-block').forEach(b => b.classList.add('disabled'));
     document.getElementById('exercise-dontknow-btn').classList.add('disabled');
-    goToNextExercise();
+    setTimeout(() => showWrongAnswerPanel(contentEl), 500);
   });
 }
 

@@ -410,6 +410,26 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .usage-note-body{ margin:0; font-size:14.5px; line-height:1.7; color: var(--ink); }
 .usage-note-body strong{ color: var(--seal-red-dark); }
 
+/* ---------- Painel de resposta errada ("Por que errei?", estilo Duolingo) ---------- */
+.wrong-feedback{
+  margin-top:18px; background: rgba(192,35,31,0.06); border:1px solid rgba(192,35,31,0.25);
+  border-radius: var(--radius); padding:16px 18px; animation: wrongFeedbackIn .25s ease;
+}
+@keyframes wrongFeedbackIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
+.wrong-feedback-header{ font-weight:800; font-size:15px; color: var(--seal-red); margin-bottom:12px; }
+.wrong-feedback-toggle{
+  display:block; width:100%; text-align:left; background:none; border:none; padding:8px 0;
+  font-weight:700; font-size:13.5px; color: var(--seal-red-dark); cursor:pointer;
+}
+.wrong-feedback-explanation{
+  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:10px;
+  padding:14px 16px; margin-bottom:12px;
+}
+.wrong-feedback-explanation .usage-note-title{ text-align:left; font-size:14.5px; margin-bottom:8px; }
+.wrong-feedback-explanation .usage-note-body{ font-size:13.5px; }
+.wrong-feedback-explanation .note-detail-table{ margin:8px 0 4px; }
+.wrong-feedback-continue{ margin-top:4px; }
+
 /* ---------- Audio button (TTS) ---------- */
 .audio-btn{
   border:none; background: var(--paper-warm); color: var(--seal-red-dark);
