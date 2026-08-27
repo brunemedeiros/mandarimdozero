@@ -533,7 +533,40 @@ function registerStudyToday(){
     STATE.streak = 1;
   }
   STATE.lastStudyDay = today;
+  showStreakCelebration();
 }
+
+// ---------- Tela de sequência de streak (estilo Duolingo) ----------
+// Aparece uma única vez por dia, na primeira atividade que ativa o streak
+// (lição, checkpoint, revisão, jogo de combinar, conjugação...) — nunca de
+// novo no mesmo dia, já que registerStudyToday() só chega até aqui na
+// primeira chamada depois da virada do dia.
+const STREAK_DAY_LABELS = ['dom','seg','ter','qua','qui','sex','sáb'];
+
+function buildStreakWeekData(){
+  const days = [];
+  for (let i = 6; i >= 0; i--){
+    const d = new Date(Date.now() - i*86400000);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    days.push({ label: STREAK_DAY_LABELS[d.getDay()], done: !!STATE.activityLog[key], isToday: i === 0 });
+  }
+  return days;
+}
+
+function showStreakCelebration(){
+  document.getElementById('streak-days-num').textContent = STATE.streak;
+  document.getElementById('streak-week-row').innerHTML = buildStreakWeekData().map(d => `
+    <div class="streak-day-item ${d.done ? 'done' : ''} ${d.isToday ? 'today' : ''}">
+      <div class="streak-day-circle">${d.done ? '✓' : ''}</div>
+      <div class="streak-day-label">${d.label}</div>
+    </div>
+  `).join('');
+  document.getElementById('streak-modal-overlay').style.display = 'flex';
+}
+
+document.getElementById('streak-modal-continue-btn').addEventListener('click', () => {
+  document.getElementById('streak-modal-overlay').style.display = 'none';
+});
 
 // ---------- Desafios de hoje (estilo Busuu) ----------
 // Contadores do dia (zeram sozinhos quando a data muda). Todo dia mostra
@@ -3049,15 +3082,20 @@ CONJ_TOPN_OPTIONS.push(CONJ_TOTAL_VERBS); // "Todos"
 const CONJ_REGULAR_GROUPS = ['g1', 'g2'];
 const CONJ_IRREGULAR_GROUPS = ['core', 'g3ir', 'g3re', 'g3oir'];
 
+const CONJ_SESSION_SIZE = 8; // verbos por sessão — cada página agora cobre todos os tempos escolhidos de uma vez
+
 const CONJ_STATE = {
   selectedTenses: ['presente'],
   selectedGroups: Object.keys(CONJUGATION_GROUPS),
   topN: CONJ_TOTAL_VERBS,
   regularity: null, // null | 'regular' | 'irregular'
-  queue: [],
-  index: 0,
+  verbQueue: [],
+  verbIndex: 0,
   score: 0,
-  total: 0
+  totalFields: 0,
+  checked: null,       // Set<string> — verbos já verificados nesta sessão
+  answers: null,       // verbo -> { [tenseKey]: string[] } — respostas dadas, pra re-render ao navegar de volta
+  hintLevel: 0          // 0/1/2 — nível de dica na página do verbo atual (não persiste entre verbos)
 };
 
 function renderConjSelectScreen(){
@@ -3151,17 +3189,15 @@ document.getElementById('conj-start-btn').addEventListener('click', () => {
     return;
   }
 
-  // Fila de prática: combinações verbo × tempo, embaralhadas, limitada a 12
-  // por sessão para não ficar cansativo demais numa rodada só.
-  const combos = [];
-  shuffle(eligibleVerbs).forEach(verb => {
-    CONJ_STATE.selectedTenses.forEach(tense => combos.push({ verb, tense }));
-  });
-
-  CONJ_STATE.queue = shuffle(combos).slice(0, 12);
-  CONJ_STATE.index = 0;
+  // Fila de prática: um verbo por página, com todos os tempos escolhidos
+  // juntos (estilo Verbugata) — embaralhada, limitada por sessão.
+  CONJ_STATE.verbQueue = shuffle(eligibleVerbs).slice(0, CONJ_SESSION_SIZE);
+  CONJ_STATE.verbIndex = 0;
   CONJ_STATE.score = 0;
-  CONJ_STATE.total = CONJ_STATE.queue.length;
+  CONJ_STATE.totalFields = 0;
+  CONJ_STATE.checked = new Set();
+  CONJ_STATE.answers = {};
+  CONJ_STATE.hintLevel = 0;
 
   document.getElementById('conj-select-wrap').style.display = 'none';
   document.getElementById('conj-practice-wrap').style.display = 'block';
@@ -3190,17 +3226,35 @@ function normalizeLoose(str){
   return str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 }
 
+function conjActiveMask(tenseKey){
+  return tenseKey === 'imperatif' ? CONJ_IMPERATIF_ACTIVE : [true,true,true,true,true,true];
+}
+
+// Dica progressiva: nível 1 mostra só o tamanho da palavra + a terminação
+// (últimas 2 letras); nível 2 revela a maior parte das letras, escondendo
+// só ~1 em cada 3 posições. Espaços (formas com mais de uma palavra, como
+// o futur proche) ficam sempre visíveis.
+function conjHintPlaceholder(expected, level){
+  if (!expected || !level) return '';
+  const chars = expected.split('');
+  if (level === 1){
+    const revealFrom = Math.max(0, expected.length - 2);
+    return chars.map((c, i) => c === ' ' ? ' ' : (i >= revealFrom ? c : '_')).join('');
+  }
+  return chars.map((c, i) => c === ' ' ? ' ' : (i % 3 === 2 ? '_' : c)).join('');
+}
+
 function renderConjPracticeStep(){
   const contentEl = document.getElementById('conj-practice-content');
 
-  if (CONJ_STATE.index >= CONJ_STATE.queue.length){
-    const pct = CONJ_STATE.total ? Math.round((CONJ_STATE.score / CONJ_STATE.total) * 100) : 0;
+  if (CONJ_STATE.verbIndex >= CONJ_STATE.verbQueue.length){
+    const pct = CONJ_STATE.totalFields ? Math.round((CONJ_STATE.score / CONJ_STATE.totalFields) * 100) : 0;
     registerDailyConjugationSession();
     contentEl.innerHTML = `
       <div class="conj-session-result">
         <div class="big-emoji">${pct >= 70 ? '🎉' : '💪'}</div>
         <h3>Sessão concluída!</h3>
-        <div class="score-num">${CONJ_STATE.score}/${CONJ_STATE.total}</div>
+        <div class="score-num">${Math.round(CONJ_STATE.score)}/${CONJ_STATE.totalFields}</div>
         <p>${pct >= 70 ? 'Muito bem!' : 'Continue praticando essas conjugações.'}</p>
         <button class="btn btn-primary" id="conj-restart-btn">Nova sessão</button>
       </div>
@@ -3213,76 +3267,170 @@ function renderConjPracticeStep(){
     return;
   }
 
-  const combo = CONJ_STATE.queue[CONJ_STATE.index];
-  const tenseInfo = CONJ_TENSES.find(t => t.key === combo.tense);
-  const expectedForms = getConjForms(combo.verb, combo.tense);
-  const isImperatif = combo.tense === 'imperatif';
-  const activeMask = isImperatif ? CONJ_IMPERATIF_ACTIVE : [true,true,true,true,true,true];
+  const verb = CONJ_STATE.verbQueue[CONJ_STATE.verbIndex];
+  const nextVerb = CONJ_STATE.verbQueue[CONJ_STATE.verbIndex + 1];
+  const verbInfo = CONJUGATION_VERBS[verb];
+  const alreadyChecked = CONJ_STATE.checked.has(verb);
+  const savedAnswers = CONJ_STATE.answers[verb] || {};
+  CONJ_STATE.hintLevel = 0;
 
   contentEl.innerHTML = `
-    <div class="conj-progress">Verbo ${CONJ_STATE.index + 1} de ${CONJ_STATE.queue.length}</div>
-    <div class="conj-verb-header">
-      <div class="infinitif">${combo.verb}</div>
-      <div class="tempo">${tenseInfo.label}</div>
-    </div>
-    <div class="conj-grid">
-      ${CONJ_PERSON_LABELS.map((label, i) => `
-        <div class="conj-field" data-idx="${i}">
-          <label>${label}</label>
-          <input type="text" ${activeMask[i] ? '' : 'disabled placeholder="—"'} data-idx="${i}" autocomplete="off" autocapitalize="off" spellcheck="false">
-          <div class="expected" data-idx="${i}"></div>
+    <div class="conj-progress">Verbo ${CONJ_STATE.verbIndex + 1} de ${CONJ_STATE.verbQueue.length}</div>
+    <div class="conj-verb-nav">
+      <div class="conj-verb-header">
+        <div class="conj-verb-label">Verbo atual</div>
+        <div class="infinitif">${verb} ${audioBtnHTML(verb)}</div>
+        <div class="tempo">${CONJ_REGULAR_GROUPS.includes(verbInfo.g) ? 'Regular' : 'Irregular'}</div>
+      </div>
+      ${nextVerb ? `
+        <div class="conj-verb-header next">
+          <div class="conj-verb-label">Próximo verbo</div>
+          <div class="infinitif">${nextVerb}</div>
         </div>
-      `).join('')}
+      ` : ''}
     </div>
-    <button class="btn btn-primary btn-block" id="conj-verify-btn">Vérifier</button>
+    <div class="conj-tense-grid">
+      ${CONJ_STATE.selectedTenses.map(tenseKey => {
+        const tenseInfo = CONJ_TENSES.find(t => t.key === tenseKey);
+        const activeMask = conjActiveMask(tenseKey);
+        const expectedForms = getConjForms(verb, tenseKey);
+        const savedForTense = savedAnswers[tenseKey] || [];
+        return `
+          <div class="conj-tense-box" data-tense="${tenseKey}">
+            <div class="conj-tense-title">${tenseInfo.label}</div>
+            <div class="conj-grid">
+              ${CONJ_PERSON_LABELS.map((label, i) => {
+                if (!activeMask[i]) return `
+                  <div class="conj-field" data-tense="${tenseKey}" data-idx="${i}">
+                    <label>${label}</label>
+                    <input type="text" disabled placeholder="—">
+                    <div class="expected"></div>
+                  </div>
+                `;
+                const given = savedForTense[i] || '';
+                let statusClass = '';
+                let expectedText = '';
+                if (alreadyChecked){
+                  const expected = expectedForms[i] || '';
+                  if (given.trim() === expected.trim()){ statusClass = 'ok'; }
+                  else if (normalizeLoose(given) === normalizeLoose(expected)){ statusClass = 'almost'; expectedText = `Quase! → ${expected}`; }
+                  else { statusClass = 'wrong'; expectedText = `→ ${expected}`; }
+                }
+                return `
+                  <div class="conj-field ${statusClass}" data-tense="${tenseKey}" data-idx="${i}">
+                    <label>${label}</label>
+                    <input type="text" data-tense="${tenseKey}" data-idx="${i}" value="${given.replace(/"/g,'&quot;')}"
+                      ${alreadyChecked ? 'disabled' : ''} autocomplete="off" autocapitalize="off" spellcheck="false">
+                    <div class="expected">${expectedText}</div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+    ${alreadyChecked ? '' : `
+      <div class="conj-actions">
+        <button class="btn btn-primary btn-block" id="conj-verify-btn">Verificar respostas</button>
+        <button class="btn btn-secondary" id="conj-hint-btn" title="Mostrar contagem de letras e terminação">💡 Mostrar dica</button>
+      </div>
+    `}
+    <div class="conj-verb-pager">
+      <button class="btn btn-secondary" id="conj-prev-verb-btn" ${CONJ_STATE.verbIndex === 0 ? 'disabled' : ''}>← Verbo anterior</button>
+      <button class="btn btn-secondary" id="conj-next-verb-btn">${CONJ_STATE.verbIndex < CONJ_STATE.verbQueue.length - 1 ? 'Próximo verbo →' : 'Ver resultado →'}</button>
+    </div>
   `;
 
-  document.getElementById('conj-verify-btn').addEventListener('click', () => {
-    let correctCount = 0;
-    let activeCount = 0;
+  wireAudioButtons(contentEl);
 
-    activeMask.forEach((active, i) => {
-      if (!active) return;
-      activeCount++;
-      const fieldEl = contentEl.querySelector(`.conj-field[data-idx="${i}"]`);
-      const inputEl = fieldEl.querySelector('input');
-      const expectedEl = fieldEl.querySelector('.expected');
-      const expected = expectedForms[i] || '';
-      const given = inputEl.value;
-
-      inputEl.disabled = true;
-      fieldEl.classList.remove('ok','almost','wrong');
-
-      if (given.trim() === expected.trim()){
-        fieldEl.classList.add('ok');
-        correctCount++;
-      } else if (normalizeLoose(given) === normalizeLoose(expected)){
-        fieldEl.classList.add('almost');
-        expectedEl.textContent = `Quase! → ${expected}`;
-        correctCount += 0.5; // conta parcialmente: acentuação/maiúscula, não é erro de fato
-      } else {
-        fieldEl.classList.add('wrong');
-        expectedEl.textContent = `→ ${expected}`;
-      }
+  document.getElementById('conj-hint-btn')?.addEventListener('click', function(){
+    CONJ_STATE.hintLevel = Math.min(2, CONJ_STATE.hintLevel + 1);
+    CONJ_STATE.selectedTenses.forEach(tenseKey => {
+      const expectedForms = getConjForms(verb, tenseKey);
+      conjActiveMask(tenseKey).forEach((active, i) => {
+        if (!active) return;
+        const inputEl = contentEl.querySelector(`input[data-tense="${tenseKey}"][data-idx="${i}"]`);
+        if (inputEl && !inputEl.value){
+          inputEl.placeholder = conjHintPlaceholder(expectedForms[i] || '', CONJ_STATE.hintLevel);
+        }
+      });
     });
-
-    CONJ_STATE.score += activeCount ? correctCount / activeCount : 0;
-    registerDailyConjugationCorrect(Math.round(correctCount));
-    registerDailyConjugationTense(combo.tense);
-    document.getElementById('conj-verify-btn').style.display = 'none';
-
-    const nextBtn = document.createElement('button');
-    nextBtn.className = 'btn btn-secondary btn-block';
-    nextBtn.textContent = CONJ_STATE.index < CONJ_STATE.queue.length - 1 ? 'Próximo verbo →' : 'Ver resultado →';
-    nextBtn.addEventListener('click', () => {
-      CONJ_STATE.index += 1;
-      registerStudyToday();
-      renderConjPracticeStep();
-    });
-    contentEl.appendChild(nextBtn);
+    if (CONJ_STATE.hintLevel === 1){
+      this.textContent = '💡 Mais ajuda';
+      this.title = 'Revelar a maior parte das letras';
+    } else {
+      this.disabled = true;
+      this.textContent = '💡 Dica máxima';
+    }
   });
 
-  // Foca o primeiro campo ativo, pra já poder digitar direto.
+  document.getElementById('conj-verify-btn')?.addEventListener('click', () => {
+    let correctCount = 0;
+    let activeCount = 0;
+    const answersForVerb = {};
+
+    CONJ_STATE.selectedTenses.forEach(tenseKey => {
+      const expectedForms = getConjForms(verb, tenseKey);
+      const tenseGiven = [];
+      let tenseCorrect = 0;
+      let tenseActive = 0;
+
+      conjActiveMask(tenseKey).forEach((active, i) => {
+        if (!active) return;
+        tenseActive++;
+        activeCount++;
+        const fieldEl = contentEl.querySelector(`.conj-field[data-tense="${tenseKey}"][data-idx="${i}"]`);
+        const inputEl = fieldEl.querySelector('input');
+        const expectedEl = fieldEl.querySelector('.expected');
+        const expected = expectedForms[i] || '';
+        const given = inputEl.value;
+        tenseGiven[i] = given;
+
+        inputEl.disabled = true;
+        fieldEl.classList.remove('ok','almost','wrong');
+
+        if (given.trim() === expected.trim()){
+          fieldEl.classList.add('ok');
+          correctCount++; tenseCorrect++;
+        } else if (normalizeLoose(given) === normalizeLoose(expected)){
+          fieldEl.classList.add('almost');
+          expectedEl.textContent = `Quase! → ${expected}`;
+          correctCount += 0.5; tenseCorrect += 0.5;
+        } else {
+          fieldEl.classList.add('wrong');
+          expectedEl.textContent = `→ ${expected}`;
+        }
+      });
+
+      answersForVerb[tenseKey] = tenseGiven;
+      registerDailyConjugationCorrect(Math.round(tenseCorrect));
+      registerDailyConjugationTense(tenseKey);
+    });
+
+    CONJ_STATE.answers[verb] = answersForVerb;
+    CONJ_STATE.checked.add(verb);
+    CONJ_STATE.score += correctCount;
+    CONJ_STATE.totalFields += activeCount;
+    registerStudyToday();
+
+    document.getElementById('conj-verify-btn').style.display = 'none';
+    document.getElementById('conj-hint-btn').style.display = 'none';
+  });
+
+  document.getElementById('conj-prev-verb-btn').addEventListener('click', () => {
+    if (CONJ_STATE.verbIndex > 0){
+      CONJ_STATE.verbIndex -= 1;
+      renderConjPracticeStep();
+    }
+  });
+
+  document.getElementById('conj-next-verb-btn').addEventListener('click', () => {
+    CONJ_STATE.verbIndex += 1;
+    renderConjPracticeStep();
+  });
+
+  // Foca o primeiro campo ativo e vazio, pra já poder digitar direto.
   const firstActive = contentEl.querySelector('.conj-field input:not(:disabled)');
   if (firstActive) firstActive.focus();
 }
