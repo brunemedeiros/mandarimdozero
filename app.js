@@ -89,7 +89,33 @@ function warmUpTTSOnce(){
 document.addEventListener('click', warmUpTTSOnce, { once:true });
 document.addEventListener('touchstart', warmUpTTSOnce, { once:true });
 
+// Verdadeiro se dá pra tocar esse texto — seja por mp3 pré-gerado, seja pela
+// Web Speech API do navegador. Usado nos autoplay antes de chamar
+// speakChinese(), pra não depender só de TTS.voice (agora quase sempre
+// desnecessário, já que a maioria do conteúdo tem áudio pré-gerado).
+function canSpeakChinese(text){
+  return (typeof AUDIO_MANIFEST !== 'undefined' && !!AUDIO_MANIFEST[text]) || !!TTS.voice;
+}
+
+// Toca um mp3 pré-gerado (Google Cloud TTS, voz neural) em vez da Web Speech
+// API do navegador — qualidade consistente pra todo aluno, independente do
+// SO/navegador. Ver audio-manifest.js (texto -> arquivo) e speakChinese().
+function playPregeneratedAudio(file, btnEl){
+  const audio = new Audio('audio/' + file);
+  if (btnEl) btnEl.classList.add('speaking');
+  const clear = () => { if (btnEl) btnEl.classList.remove('speaking'); };
+  audio.addEventListener('ended', clear);
+  audio.addEventListener('error', () => { clear(); showToast('Não foi possível reproduzir o áudio'); });
+  audio.play().catch(clear);
+}
+
 function speakChinese(text, btnEl){
+  const pregenFile = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
+  if (pregenFile){
+    playPregeneratedAudio(pregenFile, btnEl);
+    return;
+  }
+
   if (!TTS.supported){
     showToast('Áudio não suportado neste navegador');
     return;
@@ -1799,7 +1825,7 @@ function renderVocabCardStep(u, contentEl, nextBtn){
   // Áudio automático da palavra principal — toca ao entrar na tela e também
   // toda vez que avança pra próxima palavra (não toca o áudio da frase-exemplo,
   // só o da palavra em foco).
-  if (TTS.voice){
+  if (canSpeakChinese(v.c)){
     const mainAudioBtn = contentEl.querySelector('.vocab-card .audio-btn');
     speakChinese(v.c, mainAudioBtn);
   }
@@ -1837,7 +1863,7 @@ function renderVocabQuizStep(u, contentEl, nextBtn){
   `;
 
   wireAudioButtons(contentEl);
-  if (TTS.voice) speakChinese(target.c, contentEl.querySelector('.audio-btn'));
+  if (canSpeakChinese(target.c)) speakChinese(target.c, contentEl.querySelector('.audio-btn'));
   nextBtn.style.display = 'none';
 
   let answered = false;
@@ -2248,7 +2274,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
 
   // auto-toca o áudio no formato "listen"
   wireAudioButtons(contentEl);
-  if (ex.format === 'listen' && TTS.voice){
+  if (ex.format === 'listen' && canSpeakChinese(ex.item.c)){
     speakChinese(ex.item.c, contentEl.querySelector('.audio-btn-lg'));
   }
 
@@ -2315,7 +2341,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   `;
 
   wireAudioButtons(contentEl);
-  if (TTS.voice) speakChinese(ex.item.c, contentEl.querySelector('.audio-btn-lg'));
+  if (canSpeakChinese(ex.item.c)) speakChinese(ex.item.c, contentEl.querySelector('.audio-btn-lg'));
   nextBtn.style.display = 'none';
 
   const inputEl = document.getElementById('vocab-type-input');
@@ -2463,7 +2489,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     const audioRow = document.getElementById('cloze-audio-row');
     audioRow.innerHTML = audioBtnHTML(ex.phrase.c);
     wireAudioButtons(audioRow);
-    if (TTS.voice) speakChinese(ex.phrase.c, audioRow.querySelector('.audio-btn'));
+    if (canSpeakChinese(ex.phrase.c)) speakChinese(ex.phrase.c, audioRow.querySelector('.audio-btn'));
 
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
@@ -3128,7 +3154,7 @@ function renderReviewView(){
     // Toca automaticamente ao revelar a resposta — reforço auditivo imediato.
     // Só dispara se já houver voz chinesa disponível, pra não repetir o aviso
     // de "instale a voz" a cada cartão de uma sessão inteira.
-    if (TTS.voice){
+    if (canSpeakChinese(card.back_hanzi)){
       speakChinese(card.back_hanzi, el.querySelector('.audio-btn-lg'));
     }
   }
@@ -3716,7 +3742,7 @@ function renderHanziReviewView(){
   // No hanzi, o caractere já está visível na frente (diferente do vocabulário,
   // onde o hanzi só aparece no verso) — então tocamos o áudio desde o início,
   // não só ao revelar a resposta.
-  if (TTS.voice){
+  if (canSpeakChinese(card.char)){
     speakChinese(card.char, el.querySelector('.audio-btn-lg'));
   }
 
@@ -3919,7 +3945,7 @@ function renderHanziViewCard(char, contentEl, nextBtn){
   // Áudio automático do caractere ao entrar na tela — só no passo "Ver",
   // não se repete no passo "Escrever" (decisão explícita: evitar repetição
   // desnecessária durante o desenho, que já tem seu próprio foco).
-  if (TTS.voice){
+  if (canSpeakChinese(char.char)){
     speakChinese(char.char, contentEl.querySelector('.audio-btn'));
   }
 
