@@ -941,6 +941,7 @@ function renderUnitsGrid(){
 const STEP_DEFS = [
   { key: 'vocab', label: 'Vocabulário' },
   { key: 'dialogue', label: 'Diálogo' },
+  { key: 'usage', label: 'Dica de uso' },
   { key: 'exercises', label: 'Exercícios' }
 ];
 
@@ -1354,6 +1355,17 @@ function renderStep(){
         </div>
       `).join('');
     wireAudioButtons(dialogueEl);
+    nextBtn.textContent = 'Continuar →';
+    nextBtn.style.display = 'flex';
+
+  } else if (stepKey === 'usage'){
+    const note = u.usageNote;
+    contentEl.innerHTML = `
+      <div class="usage-note">
+        <div class="usage-note-title">${note.title} 🤔</div>
+        <p class="usage-note-body">${note.body}</p>
+      </div>
+    `;
     nextBtn.textContent = 'Continuar →';
     nextBtn.style.display = 'flex';
   }
