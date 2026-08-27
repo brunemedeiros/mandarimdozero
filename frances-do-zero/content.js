@@ -50,6 +50,7 @@ const UNITS = [
     title: "Cumprimentar e se despedir",
     goal: "Cumprimentar alguém, se despedir e agradecer numa interação básica.",
     usageNote: { title: "\"Bonjour\" ou \"Bonsoir\"?", body: "Usamos <strong>bonjour</strong> de manhã até o fim da tarde — é a saudação padrão do dia. À noite, ao chegar num lugar, trocamos para <strong>bonsoir</strong>. Já <strong>salut</strong> funciona a qualquer hora, mas só entre amigos ou pessoas próximas — nunca com desconhecidos ou em contextos formais." },
+    trueFalseExercises: [{ subject: "Merci beaucoup !", emoji: "🙏", claim: "Isso é o que dizemos quando alguém nos ajuda muito.", answer: true }],
     vocab: [
       { f: "bonjour", t: "olá / bom dia" },
       { f: "bonsoir", t: "boa noite (saudação)" },
@@ -92,6 +93,7 @@ const UNITS = [
     title: "Se apresentar",
     goal: "Dizer o nome, a nacionalidade e perguntar o mesmo para o outro.",
     usageNote: { title: "\"Tu\" ou \"vous\"?", body: "<strong>Tu</strong> é informal — usado com amigos, família e colegas da mesma idade. <strong>Vous</strong> é formal (usado com desconhecidos, superiores, pessoas mais velhas) e também é a forma de \"vocês\", no plural. Na dúvida, comece sempre com <strong>vous</strong> — é mais seguro do que parecer íntimo demais." },
+    trueFalseExercises: [{ subject: "Comment tu t'appelles ?", emoji: "🙋", claim: "Essa pergunta serve pra saber a idade de alguém.", answer: false }],
     vocab: [
       { f: "je", t: "eu" },
       { f: "tu", t: "você (informal)" },
@@ -367,6 +369,7 @@ const UNITS = [
     title: "Comida e bebida",
     goal: "Falar sobre alimentos, bebidas e gostos alimentares (o que você gosta e não gosta de comer).",
     usageNote: { title: "\"J'aime LE café\" ou \"je bois DU café\"?", body: "Com verbos de gosto (<strong>aimer</strong>, détester), usa-se o artigo definido pra falar da coisa em geral: <strong>j'aime le café</strong> (gosto de café, em geral). Já quando se fala de uma quantidade — bebendo, comendo, comprando — usa-se o artigo partitivo: <strong>je bois du café</strong> (bebo [uma quantidade de] café). É uma distinção que o português não tem, mas é essencial em francês." },
+    trueFalseExercises: [{ subject: "L'addition, s'il vous plaît.", emoji: "🧾", claim: "Dizemos isso pra pedir a conta num restaurante.", answer: true }],
     vocab: [
       { f: "le pain", t: "o pão" },
       { f: "l'eau", t: "a água" },
@@ -561,6 +564,7 @@ const UNITS = [
     title: "Lugares e orientação",
     goal: "Perguntar e indicar como chegar a um lugar na cidade.",
     usageNote: { title: "\"Où est...?\" ou \"Il y a...?\"", body: "Use <strong>où est...?</strong> quando você já sabe que o lugar existe e só quer saber onde fica (ex: où est la gare? — onde fica a estação?). Use <strong>il y a...?</strong> quando você não sabe se o lugar existe ali perto (ex: il y a une pharmacie près d'ici? — tem uma farmácia aqui perto?)." },
+    trueFalseExercises: [{ subject: "C'est loin d'ici ?", emoji: "🗺️", claim: "Essa pergunta é sobre o preço de alguma coisa.", answer: false }],
     vocab: [
       { f: "la rue", t: "a rua" },
       { f: "la place", t: "a praça" },
@@ -667,6 +671,7 @@ const UNITS = [
     title: "Nacionalidades",
     goal: "Dizer sua nacionalidade e a de outras pessoas, no masculino e no feminino.",
     usageNote: { title: "\"Je suis brésilienne\" ou \"je viens du Brésil\"?", body: "<strong>Être + nacionalidade</strong> fala da sua identidade (je suis brésilienne). <strong>Venir de + país</strong> fala da sua origem/procedência (je viens du Brésil). As duas frases dizem quase a mesma coisa, mas repare na preposição: <strong>du</strong> Brésil, <strong>de</strong> France, <strong>d'</strong>Espagne — ela muda conforme o gênero e a primeira letra do nome do país." },
+    trueFalseExercises: [{ subject: "D'où viens-tu ?", emoji: "🌍", claim: "Essa pergunta serve pra saber o nome de alguém.", answer: false }],
     vocab: [
       { f: "français / française", t: "francês / francesa" },
       { f: "brésilien / brésilienne", t: "brasileiro / brasileira" },
@@ -841,6 +846,7 @@ const UNITS = [
     title: "Clima e estações",
     goal: "Falar sobre o tempo e as estações do ano.",
     usageNote: { title: "\"Il fait chaud\" ou \"j'ai chaud\"?", body: "Pra falar do <strong>tempo/clima</strong>, o francês usa o verbo faire: <strong>il fait chaud</strong> (está calor lá fora). Pra falar de uma <strong>sensação sua</strong>, usa avoir: <strong>j'ai chaud</strong> (estou com calor, eu sinto calor). São frases parecidas mas com sujeitos bem diferentes — \"il\" impessoal pro clima, \"je\" pra você mesmo." },
+    trueFalseExercises: [{ subject: "Il fait très chaud aujourd'hui.", emoji: "☀️", claim: "Essa frase descreve como uma pessoa está se sentindo.", answer: false }],
     vocab: [
       { f: "il fait beau", t: "está bonito (tempo)" },
       { f: "il fait froid", t: "está frio" },
@@ -992,6 +998,7 @@ const UNITS = [
     title: "Corpo e saúde",
     goal: "Descrever sintomas simples e ir ao médico.",
     usageNote: { title: "\"J'ai mal à la tête\" ou \"je suis malade\"?", body: "Pra dores localizadas numa parte do corpo, usa-se <strong>avoir mal à</strong>: <strong>j'ai mal à la</strong> tête (estou com dor de cabeça). Pra um estado geral de mal-estar, sem apontar uma parte específica, usa-se <strong>être malade</strong>: <strong>je suis malade</strong> (estou doente). A escolha do verbo muda conforme você está descrevendo uma dor específica ou um estado geral." },
+    trueFalseExercises: [{ subject: "J'ai mal à la tête.", emoji: "🤕", claim: "Essa frase é usada quando alguém está com dor de cabeça.", answer: true }],
     vocab: [
       { f: "la tête", t: "a cabeça" },
       { f: "le ventre", t: "a barriga" },
@@ -1304,6 +1311,7 @@ const UNITS = [
     title: "Lazer e atividades",
     goal: "Falar sobre hobbies e combinar programas de fim de semana.",
     usageNote: { title: "\"Jouer DE la guitare\" ou \"jouer AU foot\"?", body: "Pra instrumentos musicais, usa-se <strong>jouer de</strong>: jouer <strong>de la</strong> guitare, jouer <strong>du</strong> piano. Pra esportes e jogos, usa-se <strong>jouer à</strong>: jouer <strong>au</strong> foot, jouer <strong>aux</strong> cartes. É uma regrinha simples, mas sem ela dá pra trocar tudo — vale decorar esse par de preposições." },
+    trueFalseExercises: [{ subject: "On va au cinéma ce soir ?", emoji: "🎬", claim: "Essa é uma forma de convidar alguém pra sair.", answer: true }],
     vocab: [
       { f: "le cinéma", t: "o cinema" },
       { f: "la musique", t: "a música" },

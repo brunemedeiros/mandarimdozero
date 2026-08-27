@@ -7,6 +7,7 @@ const UNITS = [
     title: "Cumprimentar e se despedir",
     goal: "Cumprimentar alguém, se despedir e agradecer numa interação básica.",
     usageNote: { title: "\"Duìbuqǐ\" ou \"méi guānxi\"?", body: "<strong>Duìbuqǐ</strong> (对不起) é quem pede desculpa. <strong>Méi guānxi</strong> (没关系) é a resposta de quem recebe o pedido de desculpa — \"tudo bem, não tem problema\". São as duas metades de uma mesma troca, não sinônimos: nunca se usa méi guānxi pra pedir desculpa, nem duìbuqǐ pra tranquilizar alguém." },
+    trueFalseExercises: [{ subject: "谢谢", pinyin: "xièxiè", emoji: "🎁", claim: "Isto é o que dizemos quando recebemos um presente de outra pessoa.", answer: true }],
     vocab: [
       { p: "nǐ hǎo", c: "你好", t: "olá" },
       { p: "zài jiàn", c: "再见", t: "tchau / até logo" },
@@ -42,6 +43,7 @@ const UNITS = [
     title: "Se apresentar",
     goal: "Dizer o nome, nacionalidade e perguntar o mesmo para o outro.",
     usageNote: { title: "\"Wǒ shì Bāxī rén\" ou \"wǒ jiào Brune\"?", body: "<strong>Shì</strong> (是) liga você a uma categoria — nacionalidade, profissão, identidade: wǒ <strong>shì</strong> Bāxī rén (eu sou brasileira). <strong>Jiào</strong> (叫) é usado só pra dizer o nome: wǒ <strong>jiào</strong> Brune (eu me chamo Brune). Repare que \"eu me chamo\" nunca usa shì em chinês — só jiào." },
+    trueFalseExercises: [{ subject: "你叫什么名字？", pinyin: "nǐ jiào shénme míngzi?", emoji: "🙋", claim: "Essa pergunta serve pra saber a nacionalidade de alguém.", answer: false }],
     vocab: [
       { p: "wǒ", c: "我", t: "eu" },
       { p: "nǐ", c: "你", t: "você" },
@@ -150,6 +152,7 @@ const UNITS = [
     title: "Comida e bebida",
     goal: "Pedir comida/bebida num restaurante e expressar preferências simples.",
     usageNote: { title: "\"Xǐhuan\" ou \"yào\"?", body: "<strong>Xǐhuan</strong> (喜欢) é gostar de algo em geral, uma preferência: wǒ <strong>xǐhuan</strong> hē kāfēi (eu gosto de beber café, como hábito). <strong>Yào</strong> (要) é querer algo específico, agora: wǒ <strong>yào</strong> yì bēi chá (eu quero uma xícara de chá, nesse momento). Um fala de gosto, o outro de pedido." },
+    trueFalseExercises: [{ subject: "我要一杯茶。", pinyin: "wǒ yào yì bēi chá.", emoji: "☕", claim: "Essa frase é usada pra pedir algo num restaurante ou café.", answer: true }],
     vocab: [
       { p: "chī", c: "吃", t: "comer" },
       { p: "hē", c: "喝", t: "beber" },
@@ -220,6 +223,7 @@ const UNITS = [
     title: "Direções e localização",
     goal: "Perguntar e entender direções básicas, localizar lugares.",
     usageNote: { title: "\"Zài\" ou \"lí\"?", body: "<strong>Zài</strong> (在) diz <strong>onde algo está</strong>: cèsuǒ <strong>zài</strong> nǎlǐ? (onde fica o banheiro?). <strong>Lí</strong> (离) diz a <strong>distância entre dois lugares</strong>, sempre comparando um ponto de referência: yīyuàn <strong>lí</strong> zhèlǐ hěn jìn (o hospital fica perto daqui). Zài localiza um lugar sozinho; lí sempre compara dois." },
+    trueFalseExercises: [{ subject: "厕所在哪里？", pinyin: "cèsuǒ zài nǎlǐ?", emoji: "🚻", claim: "Essa pergunta é sobre o preço de um produto.", answer: false }],
     vocab: [
       { p: "zài", c: "在", t: "estar (localização)" },
       { p: "nǎlǐ", c: "哪里", t: "onde" },
@@ -290,6 +294,7 @@ const UNITS = [
     title: "Clima",
     goal: "Descrever o tempo/clima e reagir a ele.",
     usageNote: { title: "Por que \"jīntiān hěn rè\" e não \"jīntiān shì rè\"?", body: "Adjetivos em chinês (rè, lěng, guì, piányi...) funcionam como o próprio verbo da frase — eles não precisam do verbo <strong>shì</strong> (ser/estar) na frente. Por isso se diz <strong>jīntiān hěn rè</strong> (hoje [está] muito quente), nunca \"jīntiān shì rè\". O <strong>hěn</strong> aqui quase não significa \"muito\" — é só uma palavra de ligação obrigatória antes do adjetivo." },
+    trueFalseExercises: [{ subject: "今天很热。", pinyin: "jīntiān hěn rè.", emoji: "☀️", claim: "Essa frase descreve como uma pessoa está se sentindo.", answer: false }],
     vocab: [
       { p: "tiānqì", c: "天气", t: "clima/tempo" },
       { p: "rè", c: "热", t: "quente" },
@@ -360,6 +365,7 @@ const UNITS = [
     title: "Saúde e corpo",
     goal: "Descrever sintomas simples e partes do corpo, pedir ajuda médica básica.",
     usageNote: { title: "\"Tóu téng\" ou \"bù shūfu\"?", body: "<strong>Téng</strong> (疼) descreve uma dor específica, numa parte do corpo: tóu <strong>téng</strong> (dor de cabeça), dùzi <strong>téng</strong> (dor de barriga). <strong>Bù shūfu</strong> (不舒服) é mais geral — um mal-estar sem apontar onde dói. Se você sabe exatamente o que dói, use téng; se é só uma sensação geral de \"estou mal\", use bù shūfu." },
+    trueFalseExercises: [{ subject: "我头疼。", pinyin: "wǒ tóu téng.", emoji: "🤕", claim: "Essa frase é usada quando alguém está com dor de cabeça.", answer: true }],
     vocab: [
       { p: "shēntǐ", c: "身体", t: "corpo" },
       { p: "tóu", c: "头", t: "cabeça" },
@@ -393,6 +399,7 @@ const UNITS = [
     title: "Hobbies e tempo livre",
     goal: "Falar sobre hobbies, gostos e o que faz no tempo livre.",
     usageNote: { title: "\"Kàn\" ou \"tīng\"?", body: "<strong>Kàn</strong> (看) é usado pra atividades visuais: <strong>kàn</strong> shū (ler/\"ver\" livro), <strong>kàn</strong> diànyǐng (assistir filme). <strong>Tīng</strong> (听) é usado pra atividades de ouvir: <strong>tīng</strong> yīnyuè (ouvir música). Trocar os dois é um erro comum — \"ouvir um filme\" ou \"ver música\" soam estranhos em chinês, igual soariam em português." },
+    trueFalseExercises: [{ subject: "周末你有空吗？", pinyin: "zhōumò nǐ yǒu kòng ma?", emoji: "🎬", claim: "Essa é uma forma de convidar alguém pra fazer algo.", answer: true }],
     vocab: [
       { p: "àihào", c: "爱好", t: "hobby" },
       { p: "kàn shū", c: "看书", t: "ler livro" },
@@ -614,6 +621,7 @@ const UNITS = [
     title: "Perguntas do dia a dia",
     goal: "Fazer perguntas abertas variadas: quem, por quê, onde alguém mora ou trabalha, se há algo num lugar.",
     usageNote: { title: "\"Wèishénme\" ou \"yīnwèi\"?", body: "<strong>Wèishénme</strong> (为什么) é a pergunta: \"por quê?\". <strong>Yīnwèi</strong> (因为) é a resposta: \"porque\". Nǐ <strong>wèishénme</strong> bú qù? <strong>Yīnwèi</strong> wǒ hěn máng (Por que você não vai? Porque eu estou muito ocupado). É a pergunta e a resposta andando sempre juntas, como um par." },
+    trueFalseExercises: [{ subject: "你为什么不去？", pinyin: "nǐ wèishénme bú qù?", emoji: "🤔", claim: "Essa pergunta pede pra saber onde alguém mora.", answer: false }],
     vocab: [
       { p: "shéi", c: "谁", t: "quem" },
       { p: "wèishénme", c: "为什么", t: "por quê" },
