@@ -732,6 +732,21 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
   }
 });
 
+// "Meu perfil" reaproveita a mesma tela de Progresso de sempre — só mudou
+// de lugar (estava na barra de abas, agora fica dentro do menu do usuário,
+// igual ao Busuu).
+document.getElementById('user-profile-btn').addEventListener('click', () => {
+  document.getElementById('user-menu-dropdown').classList.remove('open');
+  switchTab('progress');
+});
+
+document.getElementById('user-settings-btn').addEventListener('click', () => {
+  document.getElementById('user-menu-dropdown').classList.remove('open');
+  document.getElementById('settings-email').textContent = CURRENT_USER?.email || 'Modo convidado';
+  document.getElementById('settings-provider').textContent = CURRENT_USER?.app_metadata?.provider === 'google' ? 'Google' : (CURRENT_USER ? 'E-mail e senha' : '—');
+  switchTab('settings');
+});
+
 // ---------- Persistência: Supabase (usuário logado) ou memória local (convidado) ----------
 const STORAGE_KEY = 'mandarim_zero_state_v1';
 // Esta tabela `progress` passou a ser compartilhada com o Francês do Zero (mesmo
@@ -2819,7 +2834,7 @@ function renderMatchGame(){
       <div class="review-empty">
         <div class="big-emoji">🧩</div>
         <h3>Vocabulário insuficiente ainda</h3>
-        <p>O jogo de Combinar precisa de pelo menos algumas palavras já estudadas com sucesso na Trilha.</p>
+        <p>O jogo de Combinar precisa de pelo menos algumas palavras já estudadas com sucesso no Estudo.</p>
       </div>
     `;
     return;
