@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>汉语从零开始 — Mandarim do Zero</title>
+<script>
+// Aplica o tema salvo antes do primeiro paint, pra não piscar claro->escuro.
+try{
+  const savedTheme = localStorage.getItem('mandarim_theme');
+  if (savedTheme === 'dark' || savedTheme === 'light'){
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }
+}catch(e){ /* localStorage indisponível — cai na preferência do sistema */ }
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -29,6 +38,37 @@
   --radius: 14px;
   --shadow-card: 0 2px 8px rgba(33,23,20,0.08), 0 1px 2px rgba(33,23,20,0.06);
   --shadow-lift: 0 8px 24px rgba(33,23,20,0.14);
+}
+
+/* ---------- Modo escuro ---------- */
+/* Segue a preferência do sistema por padrão; um toggle manual (salvo em
+   localStorage) pode forçar claro ou escuro independente do SO, via o
+   atributo data-theme na tag <html>. */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --seal-red: #E1524B;
+    --seal-red-dark: #FF8078;
+    --imperial-gold: #E3B23C;
+    --gold-bright: #F5CE66;
+    --ink: #F1E4D6;
+    --paper: #1B1512;
+    --paper-warm: #251C17;
+    --paper-line: #3C2F27;
+    --jade: #52B487;
+    --ink-soft: #C7B5A5;
+  }
+}
+:root[data-theme="dark"]{
+  --seal-red: #E1524B;
+  --seal-red-dark: #FF8078;
+  --imperial-gold: #E3B23C;
+  --gold-bright: #F5CE66;
+  --ink: #F1E4D6;
+  --paper: #1B1512;
+  --paper-warm: #251C17;
+  --paper-line: #3C2F27;
+  --jade: #52B487;
+  --ink-soft: #C7B5A5;
 }
 
 @font-face{
@@ -97,41 +137,6 @@ body{
 .view{ display:none; }
 .view.active{ display:block; animation: fadeUp .25s ease; }
 @keyframes fadeUp{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
-
-/* ---------- Sub-navegação (dentro da aba Manual) ---------- */
-.subtabs{ display:flex; gap:6px; margin-bottom:18px; background:var(--paper-warm); padding:4px; border-radius:10px; border:1px solid var(--paper-line); max-width:320px; }
-.subtab-btn{
-  flex:1; padding:8px 10px; border:none; background:transparent; cursor:pointer;
-  font-family: var(--font-body); font-weight:700; font-size: 13px; color: var(--ink-soft);
-  border-radius: 7px; transition: all .15s ease;
-}
-.subtab-btn.active{ background: var(--paper); color: var(--seal-red-dark); box-shadow: var(--shadow-card); }
-.subview{ display:none; }
-.subview.active{ display:block; }
-
-.search-input{
-  width:100%; padding:13px 16px; border-radius:12px; border:1px solid var(--paper-line);
-  background: var(--paper); font-family: var(--font-body); font-size:15px; color: var(--ink);
-  margin-bottom:18px;
-}
-.search-input:focus{ outline:none; border-color: var(--imperial-gold); }
-
-.search-result-row{
-  display:grid; grid-template-columns: 1.3fr 1fr 1.4fr auto; gap:10px; align-items:center;
-  background: var(--paper); padding:12px 14px; border-bottom:1px solid var(--paper-line);
-}
-.search-result-row .pinyin{ color: var(--seal-red-dark); font-weight:700; font-size:14px; }
-.search-result-row .hanzi{ font-family: var(--font-hanzi); font-size:18px; }
-.search-result-row .trans{ font-size:13.5px; color: var(--ink-soft); }
-.search-unit-tag{
-  font-size:11px; font-weight:800; padding:4px 9px; border-radius:999px; white-space:nowrap;
-  text-align:center;
-}
-.search-unit-tag.done{ background: rgba(58,115,89,0.15); color: var(--jade); }
-.search-unit-tag.pending{ background: rgba(192,35,31,0.10); color: var(--seal-red-dark); cursor:pointer; }
-.search-unit-tag.pending:hover{ background: rgba(192,35,31,0.18); }
-.search-unit-tag.locked{ background: var(--paper-warm); color: var(--ink-soft); }
-.search-empty{ text-align:center; padding:40px 20px; color: var(--ink-soft); }
 
 /* ---------- Hanzi: trilha de lições ---------- */
 .path-header-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; }
@@ -317,17 +322,6 @@ body{
 .manual-modal-close:hover{ background: var(--paper-line); }
 .manual-modal-body{ padding:8px 20px 20px; }
 
-/* ---------- Manual geral (aba, e conteúdo reaproveitado no modal) ---------- */
-.manual-unit-block{ margin-bottom:28px; }
-.manual-unit-block:last-child{ margin-bottom:0; }
-.manual-unit-heading{
-  display:flex; align-items:center; gap:8px; font-size:15px; font-weight:800; color: var(--seal-red-dark);
-  margin: 0 0 12px; padding-bottom:8px; border-bottom:2px solid var(--paper-line);
-}
-.manual-unit-heading .num-badge{
-  background: var(--jade); color:white; width:22px; height:22px; border-radius:6px; font-size:12px;
-  display:flex; align-items:center; justify-content:center; flex-shrink:0;
-}
 .manual-empty{ text-align:center; padding:50px 20px; color: var(--ink-soft); }
 .manual-empty .big-emoji{ font-size:40px; margin-bottom:10px; }
 
@@ -957,6 +951,7 @@ body.hide-pinyin .prompt-pinyin{
       <div class="pill streak">🔥 <span id="streak-count">0</span></div>
       <div class="pill xp">⭐ <span id="xp-count">0</span> XP</div>
       <button class="pill pinyin-toggle-btn" id="pinyin-toggle-btn" title="Esconder/mostrar pinyin">拼音</button>
+      <button class="pill theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema claro/escuro">🌙</button>
       <button class="pill user-pill" id="user-menu-btn" title="Conta">👤 <span id="user-label">Convidado</span></button>
     </div>
   </div>
@@ -965,7 +960,6 @@ body.hide-pinyin .prompt-pinyin{
     <button class="tab-btn active" data-tab="path">Trilha</button>
     <button class="tab-btn" data-tab="review">Revisão</button>
     <button class="tab-btn" data-tab="hanzi">汉字</button>
-    <button class="tab-btn" data-tab="manual">Manual</button>
     <button class="tab-btn" data-tab="progress">Progresso</button>
   </div>
 
@@ -1080,29 +1074,6 @@ body.hide-pinyin .prompt-pinyin{
       <div id="hanzi-review-content"></div>
     </div>
   </div>
-
-  <!-- ===== MANUAL (unidades concluídas) ===== -->
-  <div class="view" id="view-manual">
-    <div class="path-header">
-      <h2>Manual de apoio</h2>
-      <p>Consulta rápida de tudo que você já estudou, ou busque em todo o vocabulário do curso.</p>
-    </div>
-
-    <div class="subtabs">
-      <button class="subtab-btn active" data-subtab="manual-summary">📖 Manual</button>
-      <button class="subtab-btn" data-subtab="manual-search">🔍 Buscar</button>
-    </div>
-
-    <div class="subview active" id="subview-manual-summary">
-      <div id="manual-content"></div>
-    </div>
-
-    <div class="subview" id="subview-manual-search">
-      <input type="text" id="search-input" class="search-input" placeholder="Buscar por pinyin, hanzi ou tradução...">
-      <div id="search-results"></div>
-    </div>
-  </div>
-
 
   <footer class="app-footer">用心学习，天天向上 · construído para o estudo pessoal de mandarim</footer>
 </div>
