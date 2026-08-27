@@ -759,6 +759,28 @@ body{
   background: var(--paper); display:flex; justify-content:flex-end;
 }
 
+/* ---------- Lembrete de revisão acumulada (pop-up de rodapé) ---------- */
+.review-reminder-banner{
+  position:fixed; left:0; right:0; bottom:0; z-index:800; background: var(--paper);
+  border-top:1px solid var(--paper-line); box-shadow: 0 -8px 24px rgba(33,23,20,0.12);
+  padding:18px 22px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+}
+.review-reminder-icon{ font-size:34px; line-height:1; flex-shrink:0; }
+.review-reminder-text{ flex:1; min-width:200px; }
+.review-reminder-title{ font-size:15.5px; font-weight:800; color: var(--ink); margin-bottom:3px; }
+.review-reminder-sub{ font-size:13px; color: var(--ink-soft); line-height:1.4; }
+.review-reminder-actions{ display:flex; gap:10px; flex-shrink:0; margin-left:auto; }
+.review-reminder-dismiss{
+  background:none; border:none; padding:10px 6px; font-family: var(--font-body); font-size:13.5px;
+  font-weight:700; color: var(--ink-soft); cursor:pointer;
+}
+.review-reminder-dismiss:hover{ color: var(--ink); }
+.review-reminder-cta{ white-space:nowrap; }
+@media (max-width: 560px){
+  .review-reminder-banner{ flex-direction:column; align-items:stretch; text-align:center; }
+  .review-reminder-actions{ margin-left:0; justify-content:center; }
+}
+
 footer.app-footer{ text-align:center; margin-top:50px; }
 footer.app-footer img{ height:56px; opacity:.9; }
 
@@ -1109,6 +1131,18 @@ footer.app-footer img{ height:56px; opacity:.9; }
   </div>
   <div class="streak-modal-footer">
     <button class="btn btn-primary" id="streak-modal-continue-btn">Continuar</button>
+  </div>
+</div>
+
+<div id="review-reminder-banner" class="review-reminder-banner" style="display:none;">
+  <div class="review-reminder-icon">🗂️</div>
+  <div class="review-reminder-text">
+    <div class="review-reminder-title">Vamos fazer uma pequena revisão?</div>
+    <div class="review-reminder-sub"><span id="review-reminder-count">0</span> palavras estão esperando por você — afie sua memória revisando o que já viu.</div>
+  </div>
+  <div class="review-reminder-actions">
+    <button class="review-reminder-dismiss" id="review-reminder-dismiss-btn">Agora não</button>
+    <button class="btn btn-primary review-reminder-cta" id="review-reminder-cta-btn">Revisar agora</button>
   </div>
 </div>
 

@@ -367,6 +367,7 @@ const STATE = {
   xp: 0,
   streak: 0,
   lastStudyDay: null, // 'YYYY-MM-DD'
+  lastReviewReminderDay: null, // 'YYYY-MM-DD'
   activityLog: {}, // 'YYYY-MM-DD' -> contagem de respostas naquele dia (para o heatmap)
   hanziLessonProgress: {}, // lessonIndex -> { completed: bool }
   totalReviews: 0,
@@ -487,6 +488,7 @@ async function loadStateAndRender(){
   renderTopbarStats();
   renderUnitsGrid();
   renderExportDeckSelect();
+  maybeShowReviewReminder();
 }
 
 document.getElementById('google-login-btn').addEventListener('click', async () => {
@@ -595,6 +597,7 @@ function serializeState(){
     xp: STATE.xp,
     streak: STATE.streak,
     lastStudyDay: STATE.lastStudyDay,
+    lastReviewReminderDay: STATE.lastReviewReminderDay,
     activityLog: STATE.activityLog,
     hanziLessonProgress: STATE.hanziLessonProgress,
     totalReviews: STATE.totalReviews,
@@ -619,6 +622,7 @@ function applySerializedState(data){
   if (typeof data.xp === 'number') STATE.xp = data.xp;
   if (typeof data.streak === 'number') STATE.streak = data.streak;
   if (data.lastStudyDay) STATE.lastStudyDay = data.lastStudyDay;
+  if (data.lastReviewReminderDay) STATE.lastReviewReminderDay = data.lastReviewReminderDay;
   if (data.activityLog) Object.assign(STATE.activityLog, data.activityLog);
   if (data.hanziLessonProgress) Object.assign(STATE.hanziLessonProgress, data.hanziLessonProgress);
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
@@ -758,6 +762,37 @@ function showStreakCelebration(){
 
 document.getElementById('streak-modal-continue-btn').addEventListener('click', () => {
   document.getElementById('streak-modal-overlay').style.display = 'none';
+});
+
+// ---------- Lembrete de revisão acumulada (estilo Busuu) ----------
+// Pop-up não bloqueante no rodapé, avisando que há palavras vistas em lições
+// mas nunca revisadas se acumulando. Aparece no máximo uma vez por dia, só
+// quando o total de cartões pendentes passa de um limiar — pra não incomodar
+// quem já revisa em dia.
+const REVIEW_REMINDER_THRESHOLD = 15;
+
+function maybeShowReviewReminder(){
+  const today = todayStr();
+  if (STATE.lastReviewReminderDay === today) return;
+
+  const dueCount = cardsDueNow(eligibleReviewPool()).length;
+  if (dueCount < REVIEW_REMINDER_THRESHOLD) return;
+
+  STATE.lastReviewReminderDay = today;
+  saveState();
+
+  document.getElementById('review-reminder-count').textContent = dueCount;
+  document.getElementById('review-reminder-banner').style.display = 'flex';
+}
+
+document.getElementById('review-reminder-dismiss-btn').addEventListener('click', () => {
+  document.getElementById('review-reminder-banner').style.display = 'none';
+});
+
+document.getElementById('review-reminder-cta-btn').addEventListener('click', () => {
+  document.getElementById('review-reminder-banner').style.display = 'none';
+  switchTab('review');
+  openReviewSession('flashcard');
 });
 
 // ---------- Desafios de hoje (estilo Busuu) ----------
