@@ -124,13 +124,28 @@ body{
 .pill.streak{ background: linear-gradient(120deg, #FFF3D6, var(--paper-warm)); color:#8A5A00; }
 .pill.xp{ background: linear-gradient(120deg, rgba(192,35,31,0.08), var(--paper-warm)); color: var(--seal-red-dark); }
 a.pill{ text-decoration:none; cursor:pointer; }
-.flag-icon-circle{
-  width:20px; height:20px; border-radius:50%; overflow:hidden; display:inline-flex; flex-shrink:0;
-  box-shadow:0 0 0 1px rgba(0,0,0,.15);
-}
-.flag-icon-circle svg{ display:block; width:100%; height:100%; }
-.sister-app-link .flag-icon-circle{ display:inline-flex; vertical-align:middle; margin-right:3px; }
 a.pill:hover{ border-color: var(--imperial-gold); }
+
+/* ---------- Bandeiras (ícones de idioma) — convenção padrão ----------
+   Pra qualquer bandeira nova (outros idiomas no futuro): desenhe o SVG num
+   viewBox QUADRADO (largura = altura) com as faixas/cores já em proporção
+   igual dentro desse quadrado. Nunca recorte a bandeira retangular real
+   (3:2) direto num círculo — o corte deixa a faixa do meio (ex: o branco
+   da França) desproporcionalmente maior que as das pontas.
+   .flag-badge recorta esse quadrado em círculo (border-radius + overflow).
+   Fica solta, sem fundo de "pill", do tamanho de .flag-badge-lg no topbar —
+   igual ao Busuu/Memrise. */
+.flag-badge{
+  width:22px; height:22px; border-radius:50%; overflow:hidden; display:inline-flex; flex-shrink:0;
+  box-shadow:0 0 0 1px rgba(0,0,0,.15), 0 1px 3px rgba(0,0,0,.12);
+}
+.flag-badge svg{ display:block; width:100%; height:100%; }
+.flag-badge-lg{ width:30px; height:30px; }
+.sister-app-link .flag-badge{ vertical-align:middle; margin-right:4px; }
+.topbar-flag-link{
+  display:inline-flex; align-items:center; padding:2px; border-radius:50%; transition: transform .12s ease;
+}
+.topbar-flag-link:hover{ transform: scale(1.08); }
 
 .sister-app-link{
   display:block; margin-top:16px; text-align:center; font-size:12.5px; font-weight:700;
@@ -1146,7 +1161,7 @@ body.hide-pinyin .prompt-pinyin{
 
     <button class="btn btn-secondary btn-block" id="guest-btn" style="margin-top:10px;">Continuar sem conta</button>
     <p class="login-note" id="login-note"></p>
-    <a class="sister-app-link" href="https://brunemedeiros.github.io/francais-avec-prof-brune/" target="_blank" rel="noopener"><span class="flag-icon-circle"><svg viewBox="0 0 3 2" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="2" x="0" fill="#0055A4"/><rect width="1" height="2" x="1" fill="#FFFFFF"/><rect width="1" height="2" x="2" fill="#EF4135"/></svg></span> Também tem o Français avec Prof. Brune →</a>
+    <a class="sister-app-link" href="https://brunemedeiros.github.io/francais-avec-prof-brune/" target="_blank" rel="noopener"><span class="flag-badge"><svg viewBox="0 0 3 3" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="3" x="0" fill="#0055A4"/><rect width="1" height="3" x="1" fill="#FFFFFF"/><rect width="1" height="3" x="2" fill="#EF4135"/></svg></span> Também tem o Français avec Prof. Brune →</a>
   </div>
 </div>
 
@@ -1164,7 +1179,7 @@ body.hide-pinyin .prompt-pinyin{
       <div class="pill xp">⭐ <span id="xp-count">0</span> XP</div>
       <button class="pill pinyin-toggle-btn" id="pinyin-toggle-btn" title="Esconder/mostrar pinyin">拼音</button>
       <button class="pill theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema claro/escuro">🌙</button>
-      <a class="pill sister-app-pill" href="https://brunemedeiros.github.io/francais-avec-prof-brune/" target="_blank" rel="noopener" title="Français avec Prof. Brune"><span class="flag-icon-circle"><svg viewBox="0 0 3 2" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="2" x="0" fill="#0055A4"/><rect width="1" height="2" x="1" fill="#FFFFFF"/><rect width="1" height="2" x="2" fill="#EF4135"/></svg></span></a>
+      <a class="topbar-flag-link" href="https://brunemedeiros.github.io/francais-avec-prof-brune/" target="_blank" rel="noopener" title="Français avec Prof. Brune"><span class="flag-badge flag-badge-lg"><svg viewBox="0 0 3 3" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="3" x="0" fill="#0055A4"/><rect width="1" height="3" x="1" fill="#FFFFFF"/><rect width="1" height="3" x="2" fill="#EF4135"/></svg></span></a>
       <button class="pill user-pill" id="user-menu-btn" title="Conta">👤 <span id="user-label">Convidado</span></button>
     </div>
   </div>
