@@ -333,6 +333,28 @@ function toggleTheme(){
 document.getElementById('theme-toggle-btn').addEventListener('click', toggleTheme);
 updateThemeToggleIcon();
 
+// ---------- Preferência: modo do exercício de completar frase (cloze) ----------
+// 'choice' (múltipla escolha, padrão) ou 'type' (digitar a palavra que falta),
+// estilo o toggle "sempre digitar" do Duolingo — vale pra todos os exercícios
+// de cloze, não é escolhido por exercício.
+const CLOZE_MODE_KEY = 'frances_cloze_mode';
+
+function getClozeMode(){
+  return localStorageSafeGet(CLOZE_MODE_KEY) === 'type' ? 'type' : 'choice';
+}
+
+function updateClozeModeSwitch(){
+  const btn = document.getElementById('cloze-mode-switch');
+  if (btn) btn.setAttribute('aria-checked', getClozeMode() === 'type' ? 'true' : 'false');
+}
+
+document.getElementById('cloze-mode-switch').addEventListener('click', () => {
+  const next = getClozeMode() === 'type' ? 'choice' : 'type';
+  localStorageSafeSet(CLOZE_MODE_KEY, next);
+  updateClozeModeSwitch();
+});
+updateClozeModeSwitch();
+
 function showLoginScreen(){
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
@@ -1608,7 +1630,29 @@ function buildExerciseSet(unit){
 
   const trueFalseExercises = (unit.trueFalseExercises || []).map(tf => ({ format: 'trueFalse', ...tf }));
 
-  return shuffle([...vocabExercises, ...reorderExercises, ...scenarioExercises, ...trueFalseExercises]);
+  // Cloze ("complete a frase"): esconde uma palavra de uma frase já ensinada.
+  // Reaproveita as mesmas frases com blocks do reorder/cenário (uma frase pode
+  // virar mais de um tipo de exercício ao longo da lição, cada uma numa
+  // ocorrência diferente — igual Clozemaster reaproveita frases do corpus).
+  const clozeExercises = shuffle(phrasesWithBlocks).slice(0, 2).map(p => {
+    const blocks = p.blocks;
+    const blankIdx = blocks.length >= 3
+      ? 1 + Math.floor(Math.random() * (blocks.length - 1))
+      : Math.floor(Math.random() * blocks.length);
+    const correctBlock = blocks[blankIdx];
+
+    const unitBlockPool = (unit.phrases || []).flatMap(ph => ph.blocks || []).filter(b => b.f !== correctBlock.f);
+    let distractors = shuffle(unitBlockPool).slice(0, 3);
+    if (distractors.length < 3){
+      const globalPool = UNITS.flatMap(u2 => (u2.phrases || []).flatMap(ph => ph.blocks || []))
+        .filter(b => b.f !== correctBlock.f && !distractors.includes(b));
+      distractors = distractors.concat(shuffle(globalPool).slice(0, 3 - distractors.length));
+    }
+
+    return { format: 'cloze', phrase: p, blankIdx, correctBlock, options: shuffle([correctBlock, ...distractors]) };
+  });
+
+  return shuffle([...vocabExercises, ...reorderExercises, ...scenarioExercises, ...trueFalseExercises, ...clozeExercises]);
 }
 
 function renderExerciseStep(){
@@ -1635,6 +1679,8 @@ function renderExerciseStep(){
     renderScenarioExercise(ex, contentEl, nextBtn, total);
   } else if (ex.format === 'trueFalse'){
     renderTrueFalseExercise(ex, contentEl, nextBtn, total);
+  } else if (ex.format === 'cloze'){
+    renderClozeExercise(ex, contentEl, nextBtn, total);
   } else {
     renderMultipleChoiceExercise(ex, contentEl, nextBtn, total);
   }
@@ -1808,6 +1854,76 @@ function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
       goToNextExercise();
     });
   });
+}
+
+// ---------- Exercício de completar frase (cloze, estilo Clozemaster) ----------
+// Esconde uma palavra de uma frase já ensinada e pede pra completar — múltipla
+// escolha ou digitado, de acordo com a preferência salva em getClozeMode().
+function renderClozeExercise(ex, contentEl, nextBtn, total){
+  const sentenceHTML = ex.phrase.blocks.map((b, i) =>
+    i === ex.blankIdx ? '<span class="cloze-blank" id="cloze-blank">___</span>' : b.f
+  ).join(' ');
+  const mode = getClozeMode();
+
+  contentEl.innerHTML = `
+    <div class="exercise-wrap">
+      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-prompt-label">Complete a frase</div>
+      <div class="cloze-sentence">${sentenceHTML}</div>
+      <div class="cloze-audio-row">${audioBtnHTML(ex.phrase.f)}</div>
+      <div class="cloze-trans">${ex.phrase.t}</div>
+      ${mode === 'type' ? `
+        <div class="cloze-type-wrap">
+          <input type="text" id="cloze-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a palavra que falta">
+          <button class="btn btn-primary btn-block" id="cloze-verify-btn">Verificar</button>
+        </div>
+      ` : `
+        <div class="cloze-options">${ex.options.map((opt, i) => `<button class="cloze-option" data-idx="${i}">${opt.f}</button>`).join('')}</div>
+      `}
+    </div>
+  `;
+
+  wireAudioButtons(contentEl);
+  nextBtn.style.display = 'none';
+
+  function finish(isCorrect){
+    STEP_STATE.exerciseAnswered = true;
+    document.getElementById('cloze-blank').textContent = ex.correctBlock.f;
+    document.getElementById('cloze-blank').classList.add(isCorrect ? 'correct' : 'incorrect');
+    if (isCorrect){
+      STEP_STATE.exerciseScore += 1;
+      addXP(4);
+    }
+    goToNextExercise();
+  }
+
+  if (mode === 'type'){
+    const inputEl = document.getElementById('cloze-input');
+    inputEl.focus();
+    inputEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('cloze-verify-btn').click();
+    });
+    document.getElementById('cloze-verify-btn').addEventListener('click', () => {
+      if (STEP_STATE.exerciseAnswered) return;
+      inputEl.disabled = true;
+      const strip = s => normalizeLoose(s).replace(/[.,!?;:'"]/g, '').trim();
+      finish(strip(inputEl.value) === strip(ex.correctBlock.f));
+    });
+  } else {
+    contentEl.querySelectorAll('.cloze-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (STEP_STATE.exerciseAnswered) return;
+        const chosenIdx = parseInt(btn.dataset.idx);
+        const isCorrect = ex.options[chosenIdx] === ex.correctBlock;
+        contentEl.querySelectorAll('.cloze-option').forEach((b, i) => {
+          b.classList.add('disabled');
+          if (ex.options[i] === ex.correctBlock) b.classList.add('correct');
+          else if (i === chosenIdx) b.classList.add('incorrect');
+        });
+        finish(isCorrect);
+      });
+    });
+  }
 }
 
 // ---------- Exercício de ordenar palavras (reorder) ----------

@@ -503,6 +503,28 @@ function toggleTheme(){
 document.getElementById('theme-toggle-btn').addEventListener('click', toggleTheme);
 updateThemeToggleIcon();
 
+// ---------- Preferência: modo do exercício de completar frase (cloze) ----------
+// 'choice' (múltipla escolha, padrão) ou 'type' (digitar o pinyin que falta),
+// estilo o toggle "sempre digitar" do Duolingo — vale pra todos os exercícios
+// de cloze, não é escolhido por exercício.
+const CLOZE_MODE_KEY = 'mandarim_cloze_mode';
+
+function getClozeMode(){
+  return localStorageSafeGet(CLOZE_MODE_KEY) === 'type' ? 'type' : 'choice';
+}
+
+function updateClozeModeSwitch(){
+  const btn = document.getElementById('cloze-mode-switch');
+  if (btn) btn.setAttribute('aria-checked', getClozeMode() === 'type' ? 'true' : 'false');
+}
+
+document.getElementById('cloze-mode-switch').addEventListener('click', () => {
+  const next = getClozeMode() === 'type' ? 'choice' : 'type';
+  localStorageSafeSet(CLOZE_MODE_KEY, next);
+  updateClozeModeSwitch();
+});
+updateClozeModeSwitch();
+
 function showLoginScreen(){
   document.getElementById('login-screen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
@@ -1451,13 +1473,35 @@ function buildExerciseSet(unit){
 
   // Só frases com blocks definidos entram como exercício de ordenar — proteção
   // defensiva caso alguma frase futura seja adicionada sem essa segmentação.
-  const reorderExercises = (unit.phrases || [])
-    .filter(p => p.blocks && p.blocks.length >= 2)
+  const phrasesWithBlocks = (unit.phrases || []).filter(p => p.blocks && p.blocks.length >= 2);
+  const reorderExercises = phrasesWithBlocks
     .map(p => ({ format: 'reorder', phrase: p, shuffledBlocks: shuffle(p.blocks) }));
 
   const trueFalseExercises = (unit.trueFalseExercises || []).map(tf => ({ format: 'trueFalse', ...tf }));
 
-  return shuffle([...vocabExercises, ...reorderExercises, ...trueFalseExercises]);
+  // Cloze ("complete a frase"): esconde uma palavra de uma frase já ensinada.
+  // Reaproveita as mesmas frases com blocks do reorder — uma frase pode virar
+  // mais de um tipo de exercício ao longo da lição, cada uma numa ocorrência
+  // diferente.
+  const clozeExercises = shuffle(phrasesWithBlocks).slice(0, 2).map(p => {
+    const blocks = p.blocks;
+    const blankIdx = blocks.length >= 3
+      ? 1 + Math.floor(Math.random() * (blocks.length - 1))
+      : Math.floor(Math.random() * blocks.length);
+    const correctBlock = blocks[blankIdx];
+
+    const unitBlockPool = (unit.phrases || []).flatMap(ph => ph.blocks || []).filter(b => b.c !== correctBlock.c);
+    let distractors = shuffle(unitBlockPool).slice(0, 3);
+    if (distractors.length < 3){
+      const globalPool = UNITS.flatMap(u2 => (u2.phrases || []).flatMap(ph => ph.blocks || []))
+        .filter(b => b.c !== correctBlock.c && !distractors.includes(b));
+      distractors = distractors.concat(shuffle(globalPool).slice(0, 3 - distractors.length));
+    }
+
+    return { format: 'cloze', phrase: p, blankIdx, correctBlock, options: shuffle([correctBlock, ...distractors]) };
+  });
+
+  return shuffle([...vocabExercises, ...reorderExercises, ...trueFalseExercises, ...clozeExercises]);
 }
 
 // ---------- Tela final "Parabéns" (estilo Busuu) ----------
@@ -1522,6 +1566,8 @@ function renderExerciseStep(){
     renderReorderExercise(ex, contentEl, nextBtn, total);
   } else if (ex.format === 'trueFalse'){
     renderTrueFalseExercise(ex, contentEl, nextBtn, total);
+  } else if (ex.format === 'cloze'){
+    renderClozeExercise(ex, contentEl, nextBtn, total);
   } else {
     renderMultipleChoiceExercise(ex, contentEl, nextBtn, total);
   }
@@ -1658,6 +1704,95 @@ function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
       goToNextExercise();
     });
   });
+}
+
+// Tolerante a tom (remove os diacríticos do pinyin), caixa e espaços extras —
+// usado só na comparação do modo digitado do cloze (não afeta pinyin exibido).
+function normalizeLoose(str){
+  return str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+}
+
+// ---------- Exercício de completar frase (cloze, estilo Clozemaster) ----------
+// Esconde uma palavra (bloco) de uma frase já ensinada e pede pra completar —
+// múltipla escolha (hanzi+pinyin) ou digitado (pinyin), de acordo com a
+// preferência salva em getClozeMode(). Digitar hanzi não é realista sem IME
+// chinês, então o modo digitado sempre compara contra o pinyin.
+function renderClozeExercise(ex, contentEl, nextBtn, total){
+  const hanziHTML = ex.phrase.blocks.map((b, i) =>
+    i === ex.blankIdx ? '<span class="cloze-blank" id="cloze-blank">___</span>' : b.c
+  ).join('');
+  const pinyinHTML = ex.phrase.blocks.map((b, i) =>
+    i === ex.blankIdx ? '___' : b.p
+  ).join(' ');
+  const mode = getClozeMode();
+
+  contentEl.innerHTML = `
+    <div class="exercise-wrap">
+      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-prompt-label">Complete a frase</div>
+      <div class="cloze-sentence">
+        <div class="cloze-hanzi">${hanziHTML}</div>
+        <div class="cloze-pinyin">${pinyinHTML}</div>
+      </div>
+      <div class="cloze-audio-row">${audioBtnHTML(ex.phrase.c)}</div>
+      <div class="cloze-trans">${ex.phrase.t}</div>
+      ${mode === 'type' ? `
+        <div class="cloze-type-wrap">
+          <input type="text" id="cloze-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite o pinyin que falta">
+          <button class="btn btn-primary btn-block" id="cloze-verify-btn">Verificar</button>
+        </div>
+      ` : `
+        <div class="cloze-options">${ex.options.map((opt, i) => `
+          <button class="cloze-option" data-idx="${i}">
+            <span class="cloze-option-pinyin">${opt.p}</span>
+            <span class="cloze-option-hanzi">${opt.c}</span>
+          </button>
+        `).join('')}</div>
+      `}
+    </div>
+  `;
+
+  wireAudioButtons(contentEl);
+  nextBtn.style.display = 'none';
+
+  function finish(isCorrect){
+    STEP_STATE.exerciseAnswered = true;
+    document.getElementById('cloze-blank').textContent = ex.correctBlock.c;
+    document.getElementById('cloze-blank').classList.add(isCorrect ? 'correct' : 'incorrect');
+    if (isCorrect){
+      STEP_STATE.exerciseScore += 1;
+      addXP(4);
+    }
+    goToNextExercise();
+  }
+
+  if (mode === 'type'){
+    const inputEl = document.getElementById('cloze-input');
+    inputEl.focus();
+    inputEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('cloze-verify-btn').click();
+    });
+    document.getElementById('cloze-verify-btn').addEventListener('click', () => {
+      if (STEP_STATE.exerciseAnswered) return;
+      inputEl.disabled = true;
+      const strip = s => normalizeLoose(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
+      finish(strip(inputEl.value) === strip(ex.correctBlock.p));
+    });
+  } else {
+    contentEl.querySelectorAll('.cloze-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (STEP_STATE.exerciseAnswered) return;
+        const chosenIdx = parseInt(btn.dataset.idx);
+        const isCorrect = ex.options[chosenIdx] === ex.correctBlock;
+        contentEl.querySelectorAll('.cloze-option').forEach((b, i) => {
+          b.classList.add('disabled');
+          if (ex.options[i] === ex.correctBlock) b.classList.add('correct');
+          else if (i === chosenIdx) b.classList.add('incorrect');
+        });
+        finish(isCorrect);
+      });
+    });
+  }
 }
 
 // ---------- Exercício de ordenar palavras (reorder) ----------
