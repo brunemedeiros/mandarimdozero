@@ -700,7 +700,8 @@ const BADGES = [
 function unitCardCounts(unitId){
   const pool = STATE.cards.filter(c => c.unitId === unitId);
   const learned = pool.filter(c => c.reps > 0).length;
-  return { total: pool.length, learned };
+  const dueForReview = cardsDueNow(pool.filter(c => c.reps > 0)).length;
+  return { total: pool.length, learned, dueForReview };
 }
 
 // Unidades de um nível, na ordem — usado tanto pro desbloqueio sequencial
@@ -838,8 +839,9 @@ function buildUnitCard(u){
   const levelUnits = unitsOfLevel(u.level);
   const prog = STATE.unitProgress[u.id];
   const unlocked = prog.unlocked;
-  const { total, learned } = unitCardCounts(u.id);
+  const { total, learned, dueForReview } = unitCardCounts(u.id);
   const pct = total ? Math.round((learned/total)*100) : 0;
+  const reviewLabel = dueForReview > 0 ? `🔁 ${dueForReview} a revisar` : '';
 
   const isGrammar = u.type === 'grammar';
   const card = document.createElement('button');
@@ -847,7 +849,7 @@ function buildUnitCard(u){
   const metaHTML = isGrammar
     ? `<div class="unit-meta"><span class="gram-pill">Gramática</span><span>${prog.completed ? 'Concluído' : ''}</span></div>`
     : `<div class="unit-progress-bar"><div class="unit-progress-fill" style="width:${pct}%"></div></div>
-       <div class="unit-meta"><span>${learned}/${total} palavras</span><span>${pct}%</span></div>`;
+       <div class="unit-meta"><span>${reviewLabel}</span><span>${pct}%</span></div>`;
   // Unidades de gramática não mostram um número visível (fica só internamente,
   // via unitOrdinalInfo, pra cálculos como "Gramática X de Y" no cabeçalho —
   // que também não é mais exibido — e pro rótulo de exportação).
@@ -1156,6 +1158,52 @@ function renderLessonCompleteScreen(contentEl, nextBtn, { correct, total, recapI
   `;
   wireAudioButtons(contentEl);
   nextBtn.textContent = nextLabel || 'Concluir unidade ✓';
+  nextBtn.style.display = 'flex';
+}
+
+// ---------- Tela de conclusão de módulo/nível (checkpoint e teste de nível) ----------
+// Diferente da tela de fim de lição normal: não repete vocabulário isolado,
+// foca no que o aluno já é capaz de fazer na vida real com o que aprendeu
+// (usa o campo `goal` de cada unidade do módulo/nível).
+function renderModuleCompleteScreen(contentEl, nextBtn, { passed, title, subtitle, units, scorePct, passThreshold, nextLabel }){
+  if (!passed){
+    contentEl.innerHTML = `
+      <div class="lesson-complete">
+        <div class="lesson-complete-icon">💪</div>
+        <h2>Quase lá!</h2>
+        <p class="module-complete-sub">${subtitle}</p>
+        <div class="lesson-complete-stats">
+          <div class="lc-stat"><div class="lc-stat-label">Pontuação</div><div class="lc-stat-value">${scorePct}%</div></div>
+        </div>
+        <p class="module-retry-note">Você precisa de pelo menos ${passThreshold}% pra ser aprovado. Continue estudando as unidades desta seção e tente de novo quando quiser — sem pressa.</p>
+      </div>
+    `;
+    nextBtn.textContent = nextLabel || 'Voltar à trilha';
+    nextBtn.style.display = 'flex';
+    return;
+  }
+
+  const stars = lessonStars(scorePct);
+  const goals = units.map(u => u.goal).filter(Boolean);
+
+  contentEl.innerHTML = `
+    <div class="module-complete">
+      <div class="module-complete-icon">🏆</div>
+      <h2>${title}</h2>
+      <p class="module-complete-sub">${subtitle}</p>
+      <div class="lesson-complete-stats">
+        <div class="lc-stat"><div class="lc-stat-label">Estrelas</div><div class="lc-stat-value">+${stars} ⭐</div></div>
+        <div class="lc-stat"><div class="lc-stat-label">Pontuação</div><div class="lc-stat-value">${scorePct}%</div></div>
+      </div>
+      <div class="module-skills">
+        <div class="module-skills-label">Agora você já sabe, na vida real:</div>
+        ${goals.map(g => `
+          <div class="module-skill-item"><span class="module-skill-check">✓</span><span>${g}</span></div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  nextBtn.textContent = nextLabel || 'Continuar →';
   nextBtn.style.display = 'flex';
 }
 
@@ -2255,6 +2303,13 @@ function completeModuleUnits(module, scorePct){
   module.unitIds.forEach(id => {
     STATE.unitProgress[id].started = true;
     STATE.unitProgress[id].completed = true;
+    // Passar no checkpoint/teste de nível é prova de que o aluno já sabe o
+    // vocabulário — sem isso, as unidades ficavam marcadas como concluídas
+    // mas o contador de palavras aprendidas (baseado no SRS) continuava zerado.
+    const u = UNITS.find(x => x.id === id);
+    if (u.type !== 'grammar'){
+      u.vocab.forEach(v => registerExerciseCorrect(u, v));
+    }
   });
   STATE.checkpointProgress[module.id].completed = true;
   STATE.checkpointProgress[module.id].bestScore = Math.max(STATE.checkpointProgress[module.id].bestScore || 0, scorePct);
@@ -2302,13 +2357,14 @@ function renderCheckpointQuizStep(){
     CHECKPOINT_STATE.lastPct = pct;
     recordCheckpointAttempt(module, pct);
     const passed = pct >= CHECKPOINT_PASS_THRESHOLD;
-    const recapItems = module.unitIds
-      .map(id => UNITS.find(u => u.id === id))
-      .filter(u => u.type !== 'grammar')
-      .flatMap(u => u.vocab)
-      .slice(0, 12);
-    renderLessonCompleteScreen(contentEl, nextBtn, {
-      correct: CHECKPOINT_STATE.score, total, recapItems,
+    const moduleUnits = module.unitIds.map(id => UNITS.find(u => u.id === id));
+    renderModuleCompleteScreen(contentEl, nextBtn, {
+      passed,
+      title: 'Módulo concluído! 🏆',
+      subtitle: module.title,
+      units: moduleUnits,
+      scorePct: pct,
+      passThreshold: CHECKPOINT_PASS_THRESHOLD,
       nextLabel: passed ? 'Concluir seção ✓' : 'Voltar à trilha'
     });
     return;
@@ -2443,14 +2499,16 @@ function renderLevelTestQuizStep(){
     LEVEL_TEST_STATE.lastPct = pct;
     recordLevelTestAttempt(test, pct);
     const passed = pct >= LEVEL_TEST_PASS_THRESHOLD;
-    const recapItems = modulesOfLevel(test.level)
+    const levelUnits = modulesOfLevel(test.level)
       .flatMap(m => m.unitIds)
-      .map(id => UNITS.find(u => u.id === id))
-      .filter(u => u.type !== 'grammar')
-      .flatMap(u => u.vocab)
-      .slice(0, 12);
-    renderLessonCompleteScreen(contentEl, nextBtn, {
-      correct: LEVEL_TEST_STATE.score, total, recapItems,
+      .map(id => UNITS.find(u => u.id === id));
+    renderModuleCompleteScreen(contentEl, nextBtn, {
+      passed,
+      title: `Nível ${test.level} concluído! 🎓`,
+      subtitle: `Você já pode seguir direto pro ${test.nextLevel}`,
+      units: levelUnits,
+      scorePct: pct,
+      passThreshold: LEVEL_TEST_PASS_THRESHOLD,
       nextLabel: passed ? `Concluir nível ${test.level} ✓` : 'Voltar à trilha'
     });
     return;
