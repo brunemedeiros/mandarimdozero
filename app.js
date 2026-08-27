@@ -22,14 +22,26 @@ const TTS = {
   pollAttempts: 0
 };
 
+// Nem toda voz do mesmo idioma soa igual: o SO costuma expor tanto vozes
+// "neurais"/online (Google, Microsoft Natural/Online) quanto vozes locais
+// robóticas mais antigas, e a ordem que o navegador retorna é arbitrária.
+// Pontua pelo nome pra preferir a melhor voz disponível, não só a primeira.
+function voiceQualityScore(v){
+  const name = (v.name || '').toLowerCase();
+  if (/natural|neural/.test(name)) return 3;
+  if (/online/.test(name)) return 2;
+  if (/google/.test(name)) return 1;
+  return 0;
+}
+
 function loadChineseVoice(){
   if (!TTS.supported) return;
   const voices = window.speechSynthesis.getVoices();
   if (!voices.length) return false;
-  // Prioriza vozes zh-CN, depois qualquer zh-*
-  TTS.voice = voices.find(v => v.lang === 'zh-CN')
-    || voices.find(v => v.lang && v.lang.toLowerCase().startsWith('zh'))
-    || null;
+  // Prioriza vozes zh-CN, depois qualquer zh-*; dentro de cada grupo, a de melhor qualidade.
+  const exact = voices.filter(v => v.lang === 'zh-CN').sort((a,b) => voiceQualityScore(b) - voiceQualityScore(a));
+  const anyZh = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('zh')).sort((a,b) => voiceQualityScore(b) - voiceQualityScore(a));
+  TTS.voice = exact[0] || anyZh[0] || null;
   TTS.voicesLoaded = true;
   return !!TTS.voice;
 }
@@ -457,6 +469,39 @@ function sessionStorageSafeGet(key){
 function sessionStorageSafeSet(key, val){
   try{ window.sessionStorage.setItem(key, val); }catch(e){ /* ignore */ }
 }
+function localStorageSafeGet(key){
+  try{ return window.localStorage.getItem(key); }catch(e){ return null; }
+}
+function localStorageSafeSet(key, val){
+  try{ window.localStorage.setItem(key, val); }catch(e){ /* ignore */ }
+}
+
+// ---------- Tema claro/escuro ----------
+// data-theme ausente = segue o sistema (ver @media prefers-color-scheme no CSS).
+// 'light'/'dark' explícito no localStorage força o tema independente do SO.
+const THEME_STORAGE_KEY = 'mandarim_theme';
+
+function isDarkThemeActive(){
+  const saved = localStorageSafeGet(THEME_STORAGE_KEY);
+  if (saved === 'dark') return true;
+  if (saved === 'light') return false;
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function updateThemeToggleIcon(){
+  const btn = document.getElementById('theme-toggle-btn');
+  if (btn) btn.textContent = isDarkThemeActive() ? '☀️' : '🌙';
+}
+
+function toggleTheme(){
+  const next = isDarkThemeActive() ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorageSafeSet(THEME_STORAGE_KEY, next);
+  updateThemeToggleIcon();
+}
+
+document.getElementById('theme-toggle-btn').addEventListener('click', toggleTheme);
+updateThemeToggleIcon();
 
 function showLoginScreen(){
   document.getElementById('login-screen').style.display = 'flex';
@@ -1046,8 +1091,8 @@ document.getElementById('back-to-path').addEventListener('click', () => {
 // ============================================================
 
 // Gera o HTML de resumo de uma unidade (vocabulário + frases + diálogo,
-// sem exercícios) — reaproveitado tanto no modal "Manual da unidade"
-// quanto na aba geral "Manual", que lista todas as unidades concluídas.
+// sem exercícios) — usado no modal "Manual da unidade" (📖 dentro do painel
+// de dicas de cada lição).
 function renderUnitSummaryHTML(u){
   const vocabHTML = u.vocab.map(v => `
     <div class="vocab-row vocab-row-readonly">
@@ -1183,123 +1228,6 @@ document.getElementById('notes-modal').addEventListener('click', (e) => {
   if (e.target.id === 'notes-modal'){
     document.getElementById('notes-modal').style.display = 'none';
   }
-});
-
-// ---------- Aba geral: Manual (só unidades concluídas) ----------
-function renderManualView(){
-  const contentEl = document.getElementById('manual-content');
-  const completedUnits = UNITS.filter(u => STATE.unitProgress[u.id]?.completed);
-
-  if (!completedUnits.length){
-    contentEl.innerHTML = `
-      <div class="manual-empty">
-        <div class="big-emoji">📖</div>
-        <h3>Ainda não há nada aqui</h3>
-        <p>Conclua sua primeira unidade na Trilha para começar a preencher seu manual pessoal.</p>
-      </div>
-    `;
-    return;
-  }
-
-  contentEl.innerHTML = completedUnits.map(u => `
-    <div class="manual-unit-block">
-      <div class="manual-unit-heading">
-        <span class="num-badge">${u.id}</span>
-        ${u.title}
-      </div>
-      ${renderUnitSummaryHTML(u)}
-    </div>
-  `).join('');
-
-  wireAudioButtons(contentEl);
-  wireStrokeButtons(contentEl);
-}
-
-// ---------- Sub-navegação dentro da aba Manual (Manual / Buscar) ----------
-document.querySelectorAll('.subtab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const sub = btn.dataset.subtab;
-    document.querySelectorAll('.subtab-btn').forEach(b => b.classList.toggle('active', b === btn));
-    document.querySelectorAll('.subview').forEach(v => v.classList.remove('active'));
-    document.getElementById(`subview-${sub}`).classList.add('active');
-    if (sub === 'manual-search'){
-      document.getElementById('search-input').focus();
-      renderSearchResults('');
-    }
-  });
-});
-
-// ---------- Busca: todo o vocabulário do app, com indicação de unidade concluída ----------
-// Diferente do Manual (que só mostra unidades concluídas), a busca mostra tudo —
-// inclusive vocabulário de unidades ainda não estudadas — com uma tag indicando
-// o status, para você poder ir direto estudar o que falta.
-function buildSearchIndex(){
-  recalculateUnlockedUnits();
-  const index = [];
-  UNITS.forEach(u => {
-    u.vocab.forEach(v => {
-      index.push({
-        pinyin: v.p, hanzi: v.c, trans: v.t,
-        unitId: u.id, unitTitle: u.title,
-        completed: !!STATE.unitProgress[u.id]?.completed
-      });
-    });
-  });
-  return index;
-}
-
-function renderSearchResults(query){
-  const resultsEl = document.getElementById('search-results');
-  const index = buildSearchIndex();
-  const q = query.trim().toLowerCase();
-
-  const filtered = q
-    ? index.filter(item =>
-        item.pinyin.toLowerCase().includes(q) ||
-        item.hanzi.includes(q) ||
-        item.trans.toLowerCase().includes(q)
-      )
-    : index;
-
-  if (!filtered.length){
-    resultsEl.innerHTML = `<div class="search-empty">Nenhum resultado para "${query}".</div>`;
-    return;
-  }
-
-  // Limita a exibição inicial (sem busca) pra não renderizar as 127 palavras de uma vez
-  const toShow = q ? filtered : filtered.slice(0, 30);
-
-  resultsEl.innerHTML = toShow.map(item => {
-    const unlocked = STATE.unitProgress[item.unitId]?.unlocked;
-    let tagHTML;
-    if (item.completed){
-      tagHTML = `<span class="search-unit-tag done">✓ Unidade ${item.unitId}</span>`;
-    } else if (unlocked){
-      tagHTML = `<button class="search-unit-tag pending" data-unit-id="${item.unitId}">Estudar Unidade ${item.unitId}</button>`;
-    } else {
-      tagHTML = `<span class="search-unit-tag locked">🔒 Unidade ${item.unitId}</span>`;
-    }
-    return `
-      <div class="search-result-row">
-        <div class="pinyin">${item.pinyin}</div>
-        <div class="hanzi">${item.hanzi}</div>
-        <div class="trans">${item.trans}</div>
-        ${tagHTML}
-      </div>
-    `;
-  }).join('') + (!q && filtered.length > 30 ? `<div class="search-empty">Mostrando 30 de ${filtered.length} — digite algo para refinar a busca.</div>` : '');
-
-  resultsEl.querySelectorAll('.search-unit-tag.pending').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const unitId = parseInt(btn.dataset.unitId);
-      switchTab('path');
-      openUnitDetail(unitId);
-    });
-  });
-}
-
-document.getElementById('search-input').addEventListener('input', (e) => {
-  renderSearchResults(e.target.value);
 });
 
 
@@ -2628,7 +2556,6 @@ function switchTab(tab){
     }
   }
   if (tab === 'hanzi'){ renderHanziLessonsGrid(); }
-  if (tab === 'manual'){ renderManualView(); }
   if (tab === 'progress'){ renderProgressView(); }
   if (tab === 'path'){ renderUnitsGrid(); }
 }

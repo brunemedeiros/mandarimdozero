@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Français avec Prof. Brune</title>
+<script>
+// Aplica o tema salvo antes do primeiro paint, pra não piscar claro->escuro.
+try{
+  const savedTheme = localStorage.getItem('frances_theme');
+  if (savedTheme === 'dark' || savedTheme === 'light'){
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }
+}catch(e){ /* localStorage indisponível — cai na preferência do sistema */ }
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -33,6 +42,41 @@
   --radius: 14px;
   --shadow-card: 0 2px 8px rgba(33,23,20,0.08), 0 1px 2px rgba(33,23,20,0.06);
   --shadow-lift: 0 8px 24px rgba(33,23,20,0.14);
+}
+
+/* ---------- Modo escuro ---------- */
+/* Segue a preferência do sistema por padrão; um toggle manual (salvo em
+   localStorage) pode forçar claro ou escuro independente do SO, via o
+   atributo data-theme na tag <html>. */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --seal-red: #4DA9E8;
+    --seal-red-dark: #7FC4F5;
+    --imperial-gold: #F08FE0;
+    --gold-bright: #F7C2ED;
+    --brand-purple: #8B6FE0;
+    --error-red: #FF6B5C;
+    --ink: #EDE6F5;
+    --paper: #17121F;
+    --paper-warm: #201A2C;
+    --paper-line: #362C42;
+    --jade: #52B487;
+    --ink-soft: #C5B8D9;
+  }
+}
+:root[data-theme="dark"]{
+  --seal-red: #4DA9E8;
+  --seal-red-dark: #7FC4F5;
+  --imperial-gold: #F08FE0;
+  --gold-bright: #F7C2ED;
+  --brand-purple: #8B6FE0;
+  --error-red: #FF6B5C;
+  --ink: #EDE6F5;
+  --paper: #17121F;
+  --paper-warm: #201A2C;
+  --paper-line: #362C42;
+  --jade: #52B487;
+  --ink-soft: #C5B8D9;
 }
 
 @font-face{
@@ -955,6 +999,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
     <div class="stats-pills">
       <div class="pill streak">🔥 <span id="streak-count">0</span></div>
       <div class="pill xp">⭐ <span id="xp-count">0</span> XP</div>
+      <button class="pill theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema claro/escuro">🌙</button>
       <button class="pill user-pill" id="user-menu-btn" title="Conta">👤 <span id="user-label">Convidado</span></button>
     </div>
   </div>

@@ -22,13 +22,26 @@ const TTS = {
   pollAttempts: 0
 };
 
+// Nem toda voz do mesmo idioma soa igual: o SO costuma expor tanto vozes
+// "neurais"/online (Google, Microsoft Natural/Online) quanto vozes locais
+// robóticas mais antigas, e a ordem que o navegador retorna é arbitrária.
+// Pontua pelo nome pra preferir a melhor voz disponível, não só a primeira.
+function voiceQualityScore(v){
+  const name = (v.name || '').toLowerCase();
+  if (/natural|neural/.test(name)) return 3;
+  if (/online/.test(name)) return 2;
+  if (/google/.test(name)) return 1;
+  return 0;
+}
+
 function loadFrenchVoice(){
   if (!TTS.supported) return;
   const voices = window.speechSynthesis.getVoices();
   if (!voices.length) return false;
-  TTS.voice = voices.find(v => v.lang === 'fr-FR')
-    || voices.find(v => v.lang && v.lang.toLowerCase().startsWith('fr'))
-    || null;
+  // Prioriza vozes fr-FR, depois qualquer fr-*; dentro de cada grupo, a de melhor qualidade.
+  const exact = voices.filter(v => v.lang === 'fr-FR').sort((a,b) => voiceQualityScore(b) - voiceQualityScore(a));
+  const anyFr = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('fr')).sort((a,b) => voiceQualityScore(b) - voiceQualityScore(a));
+  TTS.voice = exact[0] || anyFr[0] || null;
   TTS.voicesLoaded = true;
   return !!TTS.voice;
 }
@@ -286,6 +299,39 @@ function sessionStorageSafeGet(key){
 function sessionStorageSafeSet(key, val){
   try{ window.sessionStorage.setItem(key, val); }catch(e){ /* ignore */ }
 }
+function localStorageSafeGet(key){
+  try{ return window.localStorage.getItem(key); }catch(e){ return null; }
+}
+function localStorageSafeSet(key, val){
+  try{ window.localStorage.setItem(key, val); }catch(e){ /* ignore */ }
+}
+
+// ---------- Tema claro/escuro ----------
+// data-theme ausente = segue o sistema (ver @media prefers-color-scheme no CSS).
+// 'light'/'dark' explícito no localStorage força o tema independente do SO.
+const THEME_STORAGE_KEY = 'frances_theme';
+
+function isDarkThemeActive(){
+  const saved = localStorageSafeGet(THEME_STORAGE_KEY);
+  if (saved === 'dark') return true;
+  if (saved === 'light') return false;
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function updateThemeToggleIcon(){
+  const btn = document.getElementById('theme-toggle-btn');
+  if (btn) btn.textContent = isDarkThemeActive() ? '☀️' : '🌙';
+}
+
+function toggleTheme(){
+  const next = isDarkThemeActive() ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorageSafeSet(THEME_STORAGE_KEY, next);
+  updateThemeToggleIcon();
+}
+
+document.getElementById('theme-toggle-btn').addEventListener('click', toggleTheme);
+updateThemeToggleIcon();
 
 function showLoginScreen(){
   document.getElementById('login-screen').style.display = 'flex';
