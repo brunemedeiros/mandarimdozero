@@ -377,7 +377,11 @@ const STATE = {
   reviewSessionUnitFilter: null, // if set, review only this unit's cards
   hanziReviewQueue: [],
   hanziReviewIndex: 0,
-  hanziReviewShowingAnswer: false
+  hanziReviewShowingAnswer: false,
+  daily: {
+    date: null, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
+    hanziLessons: 0, reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0
+  }
 };
 
 UNITS.forEach((u,i) => {
@@ -593,7 +597,8 @@ function serializeState(){
     lastStudyDay: STATE.lastStudyDay,
     activityLog: STATE.activityLog,
     hanziLessonProgress: STATE.hanziLessonProgress,
-    totalReviews: STATE.totalReviews
+    totalReviews: STATE.totalReviews,
+    daily: STATE.daily
   };
 }
 
@@ -617,6 +622,7 @@ function applySerializedState(data){
   if (data.activityLog) Object.assign(STATE.activityLog, data.activityLog);
   if (data.hanziLessonProgress) Object.assign(STATE.hanziLessonProgress, data.hanziLessonProgress);
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
+  if (data.daily) Object.assign(STATE.daily, data.daily);
 }
 
 // ---------- SM-2 algorithm (idêntico em espírito ao Anki) ----------
@@ -754,6 +760,117 @@ document.getElementById('streak-modal-continue-btn').addEventListener('click', (
   document.getElementById('streak-modal-overlay').style.display = 'none';
 });
 
+// ---------- Desafios de hoje (estilo Busuu) ----------
+// 3 desafios por dia, sorteados de 3 grupos fixos (mesma semente todo dia,
+// pra não trocar sozinho se a tela for recarregada):
+//   1. Fácil (EASY_CHALLENGES) — uma vitória rápida, garantida todo dia.
+//   2. Revisão/Hanzi (REVISAO_HANZI_CHALLENGES) — sempre puxa o aluno pra
+//      uma dessas abas, que ele não necessariamente abriria sozinho.
+//   3. Geral (GENERAL_CHALLENGES) — mais variado, ligado à Trilha em geral.
+function ensureDailyBucket(){
+  const today = todayStr();
+  if (STATE.daily.date !== today){
+    STATE.daily = {
+      date: today, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
+      hanziLessons: 0, reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0
+    };
+  }
+}
+
+function registerDailyStars(amount){
+  ensureDailyBucket();
+  STATE.daily.stars += amount;
+}
+function registerDailyLessonCompleted(scorePct){
+  ensureDailyBucket();
+  STATE.daily.lessons += 1;
+  if (scorePct >= 80) STATE.daily.highScoreLessons += 1;
+  if (scorePct >= 100) STATE.daily.perfectLessons += 1;
+}
+function registerDailyHanziLesson(){
+  ensureDailyBucket();
+  STATE.daily.hanziLessons += 1;
+}
+function registerDailyReviewCard(){
+  ensureDailyBucket();
+  STATE.daily.reviewsDone += 1;
+}
+function registerDailySpeedReview(){
+  ensureDailyBucket();
+  STATE.daily.speedReviewSessions += 1;
+}
+function registerDailyMatchGame(){
+  ensureDailyBucket();
+  STATE.daily.matchGamesPlayed += 1;
+}
+
+const EASY_CHALLENGES = [
+  { id:'streak', icon:'🔥', label:'Mantenha sua sequência de dias viva hoje', target:1, get: () => STATE.lastStudyDay === todayStr() ? 1 : 0 },
+  { id:'firstLesson', icon:'🌅', label:'Complete sua primeira lição do dia', target:1, get: d => d.lessons }
+];
+const REVISAO_HANZI_CHALLENGES = [
+  { id:'hanzi1', icon:'🈺', label:'Estude 1 lição de Hanzi', target:1, get: d => d.hanziLessons },
+  { id:'reviews15', icon:'🔁', label:'Revise 15 cartões', target:15, get: d => d.reviewsDone },
+  { id:'speedReview1', icon:'⚡', label:'Complete uma sessão de Revisão Rápida', target:1, get: d => d.speedReviewSessions },
+  { id:'matchGame1', icon:'🧩', label:'Jogue o jogo de Combinar 1 vez', target:1, get: d => d.matchGamesPlayed }
+];
+const GENERAL_CHALLENGES = [
+  { id:'stars40', icon:'⭐', label:'Ganhe 40 estrelas', target:40, get: d => d.stars },
+  { id:'highscore2', icon:'📈', label:'Pontue mais de 80% em 2 lições', target:2, get: d => d.highScoreLessons },
+  { id:'perfect1', icon:'🎯', label:'Complete uma lição sem errar', target:1, get: d => d.perfectLessons },
+  { id:'lessons5', icon:'📚', label:'Complete 5 lições', target:5, get: d => d.lessons },
+  { id:'hanzi2', icon:'🈺', label:'Estude 2 lições de Hanzi', target:2, get: d => d.hanziLessons }
+];
+
+function dailySeed(str){
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+function pickDailyFromPool(pool, salt){
+  return pool[dailySeed(STATE.daily.date + ':' + salt) % pool.length];
+}
+
+function todaysChallenges(){
+  ensureDailyBucket();
+  return [
+    pickDailyFromPool(EASY_CHALLENGES, 'easy'),
+    pickDailyFromPool(REVISAO_HANZI_CHALLENGES, 'revcon'),
+    pickDailyFromPool(GENERAL_CHALLENGES, 'general')
+  ];
+}
+
+function renderDailyChallengesScreen(){
+  const contentEl = document.getElementById('step-content');
+  const nextBtn = document.getElementById('step-next-btn');
+  document.getElementById('step-back-btn').style.display = 'none';
+  document.getElementById('step-progress-fill').style.width = '100%';
+
+  contentEl.innerHTML = `
+    <div class="challenges-screen">
+      <h2>Desafios de hoje</h2>
+      ${todaysChallenges().map(c => {
+        const current = Math.min(c.get(STATE.daily), c.target);
+        const pct = Math.round((current / c.target) * 100);
+        const done = current >= c.target;
+        return `
+          <div class="challenge-card">
+            <div class="challenge-icon">${c.icon}${done ? '<span class="challenge-check">✓</span>' : ''}</div>
+            <div class="challenge-body">
+              <div class="challenge-label">${c.label}</div>
+              <div class="challenge-progress-track"><div class="challenge-progress-fill" style="width:${pct}%"></div></div>
+            </div>
+            ${done ? '' : `<div class="challenge-count">${current}/${c.target}</div>`}
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+  nextBtn.textContent = 'Continuar →';
+  nextBtn.style.display = 'flex';
+}
+
 function addXP(amount){
   STATE.xp += amount;
   showToast(`+${amount} XP`);
@@ -852,12 +969,14 @@ const STEP_STATE = {
   exerciseList: [],
   exerciseIndex: 0,
   exerciseScore: 0,
-  exerciseAnswered: false
+  exerciseAnswered: false,
+  onChallengesScreen: false
 };
 
 function openUnitDetail(unitId){
   STATE.currentUnitId = unitId;
   STATE.unitProgress[unitId].started = true;
+  STEP_STATE.onChallengesScreen = false;
   setLessonFocusMode(true);
 
   document.getElementById('path-list-wrap').style.display = 'none';
@@ -880,6 +999,7 @@ function openUnitDetail(unitId){
 }
 
 document.getElementById('back-to-path').addEventListener('click', () => {
+  STEP_STATE.onChallengesScreen = false;
   setLessonFocusMode(false);
   document.getElementById('path-list-wrap').style.display = 'block';
   document.getElementById('unit-detail-wrap').style.display = 'none';
@@ -1308,6 +1428,15 @@ document.getElementById('step-back-btn').addEventListener('click', () => {
   }
 });
 document.getElementById('step-next-btn').addEventListener('click', () => {
+  if (STEP_STATE.onChallengesScreen){
+    STEP_STATE.onChallengesScreen = false;
+    setLessonFocusMode(false);
+    document.getElementById('path-list-wrap').style.display = 'block';
+    document.getElementById('unit-detail-wrap').style.display = 'none';
+    renderUnitsGrid();
+    return;
+  }
+
   const stepKey = STEP_DEFS[STEP_STATE.currentStep].key;
 
   // No passo de vocabulário, o botão "Continuar" navega palavra a palavra
@@ -1327,12 +1456,13 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
     STEP_STATE.currentStep += 1;
     renderStep();
   } else {
-    // último passo concluído: marca a unidade e volta pra trilha
-    markUnitCompleted(STATE.currentUnitId);
-    setLessonFocusMode(false);
-    document.getElementById('path-list-wrap').style.display = 'block';
-    document.getElementById('unit-detail-wrap').style.display = 'none';
-    renderUnitsGrid();
+    // último passo concluído: marca a unidade e mostra os desafios de hoje
+    // antes de voltar pra trilha (mesmo fluxo do Francês do Zero).
+    const total = STEP_STATE.exerciseList.length;
+    const scorePct = total ? Math.round((STEP_STATE.exerciseScore / total) * 100) : 100;
+    markUnitCompleted(STATE.currentUnitId, scorePct);
+    STEP_STATE.onChallengesScreen = true;
+    renderDailyChallengesScreen();
   }
 });
 
@@ -1634,7 +1764,8 @@ const SPEED_STATE = {
   streak: 0,
   timerStart: 0,
   timerHandle: null,
-  answered: false
+  answered: false,
+  dailyCounted: false
 };
 
 function buildSpeedQueue(){
@@ -1693,18 +1824,26 @@ function renderReviewModeSelect(){
       <div class="name">Palavras difíceis</div>
       <div class="desc">As que você mais erra</div>
     </button>
+    <button class="review-mode-card" id="mode-card-match" ${pool.filter(c=>c.reps>0).length < 4 ? 'disabled' : ''}>
+      <div class="icon">🧩</div>
+      <div class="count">${pool.filter(c=>c.reps>0).length}</div>
+      <div class="name">Combinar</div>
+      <div class="desc">Jogo de pares</div>
+    </button>
   `;
 
   document.getElementById('mode-card-flashcard').addEventListener('click', () => openReviewSession('flashcard'));
   document.getElementById('mode-card-speed').addEventListener('click', () => openReviewSession('speed'));
   document.getElementById('mode-card-hard').addEventListener('click', () => openReviewSession('hard'));
+  document.getElementById('mode-card-match').addEventListener('click', () => openReviewSession('match'));
 }
 
 function openReviewSession(mode){
   document.getElementById('review-mode-select-wrap').style.display = 'none';
   document.getElementById('review-session-wrap').style.display = 'block';
-  document.getElementById('review-content').style.display = mode === 'speed' ? 'none' : 'block';
+  document.getElementById('review-content').style.display = mode === 'speed' || mode === 'match' ? 'none' : 'block';
   document.getElementById('speed-review-content').style.display = mode === 'speed' ? 'block' : 'none';
+  document.getElementById('match-review-content').style.display = mode === 'match' ? 'block' : 'none';
 
   if (mode === 'flashcard'){
     STATE.reviewSessionUnitFilter = null;
@@ -1715,6 +1854,8 @@ function openReviewSession(mode){
     STATE.reviewIndex = 0;
     STATE.reviewShowingAnswer = false;
     renderReviewView();
+  } else if (mode === 'match'){
+    startMatchGame();
   } else {
     startSpeedReview();
   }
@@ -1728,6 +1869,138 @@ document.getElementById('review-back-to-modes').addEventListener('click', () => 
   renderReviewModeSelect();
 });
 
+// ---------- Combinar: jogo de pares (hanzi <-> tradução) ----------
+// Pool: vocabulário já estudado ao menos uma vez (mesma regra do Speed
+// Review) — não faz sentido pedir pra combinar uma palavra nunca vista.
+const MATCH_STATE = {
+  pairs: [],
+  tiles: [],
+  selected: null,
+  matchedCount: 0,
+  attempts: 0,
+  busy: false
+};
+
+function startMatchGame(){
+  const pool = shuffle(STATE.cards.filter(c => STATE.unitProgress[c.unitId]?.started && c.reps > 0));
+  const pairCount = Math.min(6, pool.length);
+  MATCH_STATE.pairs = pool.slice(0, pairCount);
+  MATCH_STATE.tiles = shuffle([
+    ...MATCH_STATE.pairs.map(c => ({ cardId: c.id, side: 'front', text: c.back_hanzi })),
+    ...MATCH_STATE.pairs.map(c => ({ cardId: c.id, side: 'back', text: c.back_trans }))
+  ]);
+  MATCH_STATE.selected = null;
+  MATCH_STATE.matchedCount = 0;
+  MATCH_STATE.attempts = 0;
+  MATCH_STATE.busy = false;
+
+  renderMatchGame();
+}
+
+function renderMatchGame(){
+  const el = document.getElementById('match-review-content');
+
+  if (MATCH_STATE.pairs.length < 4){
+    el.innerHTML = `
+      <div class="review-empty">
+        <div class="big-emoji">🧩</div>
+        <h3>Vocabulário insuficiente ainda</h3>
+        <p>O jogo de Combinar precisa de pelo menos algumas palavras já estudadas com sucesso na Trilha.</p>
+      </div>
+    `;
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="match-header">
+      <span class="match-pairs">Pares: ${MATCH_STATE.matchedCount}/${MATCH_STATE.pairs.length}</span>
+      <span class="match-attempts">Tentativas: ${MATCH_STATE.attempts}</span>
+    </div>
+    <div class="match-grid" id="match-grid"></div>
+  `;
+  renderMatchTiles();
+}
+
+function renderMatchTiles(){
+  const gridEl = document.getElementById('match-grid');
+  gridEl.innerHTML = MATCH_STATE.tiles.map((t, i) => `
+    <button class="match-tile" data-idx="${i}" data-card-id="${t.cardId}" data-side="${t.side}">
+      <div class="match-tile-inner">
+        <div class="match-tile-face match-tile-back"><span>?</span></div>
+        <div class="match-tile-face match-tile-front">${t.text}</div>
+      </div>
+    </button>
+  `).join('');
+
+  gridEl.querySelectorAll('.match-tile').forEach(btn => {
+    btn.addEventListener('click', () => onMatchTileClick(btn));
+  });
+}
+
+function onMatchTileClick(btn){
+  if (MATCH_STATE.busy) return;
+  if (btn.classList.contains('matched') || btn.classList.contains('flipped')) return;
+
+  btn.classList.add('flipped');
+
+  if (!MATCH_STATE.selected){
+    MATCH_STATE.selected = btn;
+    return;
+  }
+
+  const first = MATCH_STATE.selected;
+  const second = btn;
+  MATCH_STATE.selected = null;
+  MATCH_STATE.busy = true;
+
+  const isMatch = first.dataset.cardId === second.dataset.cardId && first.dataset.side !== second.dataset.side;
+  MATCH_STATE.attempts += 1;
+  document.querySelector('.match-attempts').textContent = `Tentativas: ${MATCH_STATE.attempts}`;
+
+  if (isMatch){
+    first.classList.add('match-ok');
+    second.classList.add('match-ok');
+    MATCH_STATE.matchedCount += 1;
+    document.querySelector('.match-pairs').textContent = `Pares: ${MATCH_STATE.matchedCount}/${MATCH_STATE.pairs.length}`;
+    addXP(2);
+
+    setTimeout(() => {
+      first.classList.add('matched');
+      second.classList.add('matched');
+      MATCH_STATE.busy = false;
+
+      if (MATCH_STATE.matchedCount === MATCH_STATE.pairs.length){
+        registerStudyToday();
+        STATE.totalReviews += MATCH_STATE.pairs.length;
+        registerDailyMatchGame();
+        saveState();
+        renderTopbarStats();
+        setTimeout(() => {
+          document.getElementById('match-review-content').innerHTML = `
+            <div class="match-complete">
+              <div class="big-emoji">🎉</div>
+              <h3>Todos os pares combinados!</h3>
+              <div class="score-num">${MATCH_STATE.attempts} tentativa(s)</div>
+              <button class="btn btn-primary" id="match-restart-btn">Jogar de novo</button>
+            </div>
+          `;
+          document.getElementById('match-restart-btn').addEventListener('click', startMatchGame);
+        }, 300);
+      }
+    }, 550);
+  } else {
+    setTimeout(() => {
+      first.classList.add('wrong');
+      second.classList.add('wrong');
+    }, 400);
+    setTimeout(() => {
+      first.classList.remove('flipped', 'wrong');
+      second.classList.remove('flipped', 'wrong');
+      MATCH_STATE.busy = false;
+    }, 1100);
+  }
+}
+
 function startSpeedReview(){
   SPEED_STATE.queue = buildSpeedQueue();
   SPEED_STATE.index = 0;
@@ -1735,6 +2008,7 @@ function startSpeedReview(){
   SPEED_STATE.score = 0;
   SPEED_STATE.streak = 0;
   SPEED_STATE.active = true;
+  SPEED_STATE.dailyCounted = false;
   renderSpeedReview();
 }
 
@@ -1761,6 +2035,7 @@ function renderSpeedReview(){
 
   if (SPEED_STATE.hearts <= 0){
     stopSpeedTimer();
+    if (!SPEED_STATE.dailyCounted){ SPEED_STATE.dailyCounted = true; registerDailySpeedReview(); }
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">💔</div>
@@ -1776,6 +2051,7 @@ function renderSpeedReview(){
 
   if (SPEED_STATE.index >= SPEED_STATE.queue.length){
     stopSpeedTimer();
+    if (!SPEED_STATE.dailyCounted){ SPEED_STATE.dailyCounted = true; registerDailySpeedReview(); }
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">🏆</div>
@@ -2004,6 +2280,7 @@ function gradeCurrentCard(grade){
   applySM2(card, grade);
   STATE.totalReviews += 1;
   registerStudyToday();
+  registerDailyReviewCard();
   addXP(XP_PER_GRADE[grade]);
 
   if (grade === 0){
@@ -2018,7 +2295,7 @@ function gradeCurrentCard(grade){
   renderReviewView();
 }
 
-function markUnitCompleted(unitId){
+function markUnitCompleted(unitId, scorePct){
   if (STATE.unitProgress[unitId].completed) return;
   STATE.unitProgress[unitId].completed = true;
   const idx = UNITS.findIndex(u => u.id === unitId);
@@ -2026,6 +2303,11 @@ function markUnitCompleted(unitId){
     STATE.unitProgress[UNITS[idx+1].id].unlocked = true;
   }
   addXP(25);
+  registerStudyToday();
+  if (typeof scorePct === 'number'){
+    registerDailyStars(lessonStars(scorePct));
+    registerDailyLessonCompleted(scorePct);
+  }
   showToast(`Unidade concluída! 🏮`);
   saveState();
 }
@@ -2262,12 +2544,24 @@ function switchTab(tab){
   if (tab === 'hanzi'){ renderHanziLessonsGrid(); }
   if (tab === 'manual'){ renderManualView(); }
   if (tab === 'progress'){ renderProgressView(); }
-  if (tab === 'export'){ renderExportDeckSelect(); }
   if (tab === 'path'){ renderUnitsGrid(); }
 }
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+document.getElementById('export-open-btn').addEventListener('click', () => {
+  renderExportDeckSelect();
+  document.getElementById('export-modal').style.display = 'flex';
+});
+document.getElementById('export-modal-close').addEventListener('click', () => {
+  document.getElementById('export-modal').style.display = 'none';
+});
+document.getElementById('export-modal').addEventListener('click', (e) => {
+  if (e.target.id === 'export-modal'){
+    document.getElementById('export-modal').style.display = 'none';
+  }
 });
 
 // ============================================================
@@ -2951,6 +3245,8 @@ function markHanziLessonCompleted(lessonIndex){
     STATE.hanziLessonProgress[lessonIndex + 1].unlocked = true;
   }
   addXP(20);
+  registerStudyToday();
+  registerDailyHanziLesson();
   showToast('Lição de Hanzi concluída! 🈺');
   saveState();
   renderTopbarStats();
