@@ -451,6 +451,15 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// URL "limpa" (sem #access_token nem outros fragmentos) pra usar como
+// redirectTo do OAuth/reset de senha. Usar window.location.href direto é
+// perigoso: se a URL já tiver um #access_token sobrando de uma tentativa
+// anterior que falhou, o Google devolve um token novo em cima do antigo em
+// vez de substituir, quebrando o parsing — e piora a cada nova tentativa.
+function cleanRedirectURL(){
+  return window.location.origin + window.location.pathname;
+}
+
 // Sessão atual: null enquanto não resolvido, false = "sem conta" (modo convidado), objeto = usuário logado
 let CURRENT_USER = null;
 const GUEST_MODE_FLAG = 'mandarim_guest_mode';
@@ -483,6 +492,13 @@ loadPinyinPreference();
 
 async function initAuth(){
   const { data: { session } } = await supabaseClient.auth.getSession();
+
+  // Limpa qualquer fragmento de token da URL depois que o Supabase já teve
+  // a chance de processá-lo (getSession acima) — evita que ele contamine um
+  // redirectTo futuro se o usuário tentar entrar de novo.
+  if (window.location.hash){
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
 
   if (session && session.user){
     await onUserLoggedIn(session.user);
@@ -611,7 +627,7 @@ document.getElementById('google-login-btn').addEventListener('click', async () =
   noteEl.className = 'login-note';
   const { error } = await supabaseClient.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: window.location.href }
+    options: { redirectTo: cleanRedirectURL() }
   });
   if (error){
     noteEl.textContent = 'Não foi possível iniciar o login. Tente novamente.';
@@ -681,7 +697,7 @@ document.getElementById('email-login-forgot-btn').addEventListener('click', asyn
   }
   noteEl.textContent = 'Enviando e-mail de redefinição...';
   noteEl.className = 'login-note';
-  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: cleanRedirectURL() });
   if (error){
     noteEl.textContent = 'Não foi possível enviar o e-mail. Tente novamente.';
     noteEl.className = 'login-note err';
@@ -2084,7 +2100,13 @@ function buildExerciseSet(unit){
     return { format: 'cloze', phrase: p, blankIdx, correctBlock, options: shuffle([correctBlock, ...distractors]) };
   });
 
-  return shuffle([...vocabExercises, ...reorderExercises, ...trueFalseExercises, ...clozeExercises]);
+  // Limita quantas frases viram exercício de "ordenar" — protege contra uma
+  // lição engordar demais se a unidade ganhar muitas frases de exemplo no
+  // futuro (mesmo ajuste já feito no Français).
+  const REORDER_EXERCISE_CAP = 4;
+  const cappedReorderExercises = shuffle(reorderExercises).slice(0, REORDER_EXERCISE_CAP);
+
+  return shuffle([...vocabExercises, ...cappedReorderExercises, ...trueFalseExercises, ...clozeExercises]);
 }
 
 // ---------- Tela final "Parabéns" (estilo Busuu) ----------
@@ -2177,10 +2199,17 @@ function goToNextExercise(){
   }, 900);
 }
 
-// Explicação usada no painel "Por que errei?" — reaproveita a primeira nota
-// gramatical da unidade (mesma fonte do modal "Dicas e Notas"), já que não
-// temos uma explicação por item/frase individual.
-function wrongAnswerExplanationHTML(){
+// Explicação usada no painel "Por que errei?". Pra exercícios baseados numa
+// frase (ordenar, completar), a nota gramatical genérica da unidade quase
+// nunca explica o erro específico (ex: ordem das palavras) — o mais útil
+// ali é mostrar o significado da própria frase certa. Pros demais formatos
+// (vocabulário, verdadeiro/falso), reaproveita a primeira nota gramatical
+// da unidade (mesma fonte do modal "Dicas e Notas"), já que não temos
+// explicação por item individual.
+function wrongAnswerExplanationHTML(ex){
+  if (ex && ex.phrase){
+    return `<div class="usage-note-title">O que a frase significa</div><p class="usage-note-body"><strong>${ex.phrase.c}</strong><br>${ex.phrase.t}</p>`;
+  }
   const notes = GRAMMAR_NOTES[STATE.currentUnitId];
   if (!notes || !notes.length) return '';
   const note = notes[0];
@@ -2204,9 +2233,9 @@ function wrongAnswerExplanationHTML(){
 // Painel de resposta errada (estilo Duolingo): pausa antes de avançar pra
 // mostrar a resposta certa e, se o aluno quiser, o porquê — só aparece
 // quando ela erra; acertando o fluxo continua rápido como antes.
-function showWrongAnswerPanel(contentEl){
+function showWrongAnswerPanel(contentEl, ex){
   const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
-  const explanationHTML = wrongAnswerExplanationHTML();
+  const explanationHTML = wrongAnswerExplanationHTML(ex);
   const panel = document.createElement('div');
   panel.className = 'wrong-feedback';
   panel.innerHTML = `
@@ -2291,7 +2320,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
     if (isCorrect){
       goToNextExercise();
     } else {
-      setTimeout(() => showWrongAnswerPanel(contentEl), 500);
+      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
     }
   }
 
@@ -2363,7 +2392,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
       const answerEl = document.getElementById('vocab-type-answer');
       answerEl.textContent = `Resposta certa: ${ex.item.p}`;
       answerEl.style.display = 'block';
-      setTimeout(() => showWrongAnswerPanel(contentEl), 500);
+      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
     }
   }
 
@@ -2424,7 +2453,7 @@ function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
         addXP(4);
         goToNextExercise();
       } else {
-        setTimeout(() => showWrongAnswerPanel(contentEl), 500);
+        setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
       }
     });
   });
@@ -2496,7 +2525,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       addXP(4);
       goToNextExercise();
     } else {
-      setTimeout(() => showWrongAnswerPanel(contentEl), 500);
+      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
     }
   }
 
@@ -2612,7 +2641,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
       addXP(4); // ordenar frase vale um pouco mais que múltipla escolha simples
       goToNextExercise();
     } else {
-      setTimeout(() => showWrongAnswerPanel(contentEl), 500);
+      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
     }
   }
 
@@ -2629,7 +2658,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
     ).join('');
     blocksEl.querySelectorAll('.reorder-block').forEach(b => b.classList.add('disabled'));
     document.getElementById('exercise-dontknow-btn').classList.add('disabled');
-    setTimeout(() => showWrongAnswerPanel(contentEl), 500);
+    setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
   });
 }
 
