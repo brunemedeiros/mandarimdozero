@@ -754,7 +754,8 @@ const BADGES = [
 function unitCardCounts(unitId){
   const pool = STATE.cards.filter(c => c.unitId === unitId);
   const learned = pool.filter(c => c.reps > 0).length;
-  return { total: pool.length, learned };
+  const dueForReview = cardsDueNow(pool.filter(c => c.reps > 0)).length;
+  return { total: pool.length, learned, dueForReview };
 }
 
 function recalculateUnlockedUnits(){
@@ -780,8 +781,9 @@ function renderUnitsGrid(){
   UNITS.forEach((u, i) => {
     const prog = STATE.unitProgress[u.id];
     const unlocked = prog.unlocked;
-    const { total, learned } = unitCardCounts(u.id);
+    const { total, learned, dueForReview } = unitCardCounts(u.id);
     const pct = total ? Math.round((learned/total)*100) : 0;
+    const reviewLabel = dueForReview > 0 ? `🔁 ${dueForReview} a revisar` : '';
 
     const card = document.createElement('button');
     card.className = 'unit-card' + (!unlocked ? ' locked' : '') + (prog.completed ? ' done' : '') + (unlocked && !prog.completed && learned>0 ? ' current' : '');
@@ -792,7 +794,7 @@ function renderUnitsGrid(){
       </div>
       <div class="unit-title">${u.title}</div>
       <div class="unit-progress-bar"><div class="unit-progress-fill" style="width:${pct}%"></div></div>
-      <div class="unit-meta"><span>${learned}/${total} palavras</span><span>${pct}%</span></div>
+      <div class="unit-meta"><span>${reviewLabel}</span><span>${pct}%</span></div>
     `;
     if (unlocked){
       card.addEventListener('click', () => openUnitDetail(u.id));
@@ -823,6 +825,7 @@ const STEP_STATE = {
 function openUnitDetail(unitId){
   STATE.currentUnitId = unitId;
   STATE.unitProgress[unitId].started = true;
+  setLessonFocusMode(true);
 
   document.getElementById('path-list-wrap').style.display = 'none';
   document.getElementById('unit-detail-wrap').style.display = 'block';
@@ -844,6 +847,7 @@ function openUnitDetail(unitId){
 }
 
 document.getElementById('back-to-path').addEventListener('click', () => {
+  setLessonFocusMode(false);
   document.getElementById('path-list-wrap').style.display = 'block';
   document.getElementById('unit-detail-wrap').style.display = 'none';
   renderUnitsGrid();
@@ -1113,13 +1117,28 @@ document.getElementById('search-input').addEventListener('input', (e) => {
 
 function renderStepProgress(){
   const fillEl = document.getElementById('step-progress-fill');
-  const labelsEl = document.getElementById('step-progress-labels');
   const pct = (STEP_STATE.currentStep / (STEP_DEFS.length - 1)) * 100;
   fillEl.style.width = `${pct}%`;
-  labelsEl.innerHTML = STEP_DEFS.map((s, i) =>
-    `<span class="${i === STEP_STATE.currentStep ? 'current' : ''}">${s.label}</span>`
-  ).join('');
 }
+
+// ---------- Modo foco de lição (estilo Busuu) ----------
+// Esconde topbar/tabs enquanto o aluno está numa lição — só a barra de
+// progresso, o ícone de dicas e o X ficam visíveis por cima do exercício.
+function setLessonFocusMode(active){
+  document.getElementById('app').classList.toggle('lesson-focus', active);
+  if (!active){
+    document.getElementById('lesson-hint-panel').style.display = 'none';
+    document.getElementById('lesson-hint-btn').classList.remove('active');
+  }
+}
+
+document.getElementById('lesson-hint-btn').addEventListener('click', () => {
+  const panel = document.getElementById('lesson-hint-panel');
+  const btn = document.getElementById('lesson-hint-btn');
+  const showing = panel.style.display !== 'none';
+  panel.style.display = showing ? 'none' : 'block';
+  btn.classList.toggle('active', !showing);
+});
 
 // ---------- Vocabulário palavra-por-palavra (estilo Memrise) ----------
 // Mostra uma palavra de cada vez, junto da frase-modelo que a usa (quando
@@ -1266,6 +1285,7 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
   } else {
     // último passo concluído: marca a unidade e volta pra trilha
     markUnitCompleted(STATE.currentUnitId);
+    setLessonFocusMode(false);
     document.getElementById('path-list-wrap').style.display = 'block';
     document.getElementById('unit-detail-wrap').style.display = 'none';
     renderUnitsGrid();
@@ -1301,23 +1321,58 @@ function buildExerciseSet(unit){
   return shuffle([...vocabExercises, ...reorderExercises]);
 }
 
+// ---------- Tela final "Parabéns" (estilo Busuu) ----------
+function currentStudentName(){
+  if (!CURRENT_USER) return 'Convidado';
+  const full = CURRENT_USER.user_metadata?.full_name || CURRENT_USER.email || 'Convidado';
+  return full.split(' ')[0].split('@')[0];
+}
+
+function lessonStars(pct){
+  return Math.max(1, Math.round((pct / 100) * 5));
+}
+
+function renderLessonCompleteScreen(contentEl, nextBtn, { correct, total, recapItems, nextLabel }){
+  const pct = total ? Math.round((correct / total) * 100) : 0;
+  const stars = lessonStars(pct);
+
+  contentEl.innerHTML = `
+    <div class="lesson-complete">
+      <div class="lesson-complete-icon">👍</div>
+      <h2>Parabéns, ${currentStudentName()}!</h2>
+      <div class="lesson-complete-stats">
+        <div class="lc-stat"><div class="lc-stat-label">Estrelas</div><div class="lc-stat-value">+${stars} ⭐</div></div>
+        <div class="lc-stat"><div class="lc-stat-label">Pontuação</div><div class="lc-stat-value">${pct}%</div></div>
+      </div>
+      ${recapItems.length ? `
+        <div class="lesson-recap">
+          <div class="lesson-recap-label">Vocabulário e frases desta lição</div>
+          ${recapItems.map(item => `
+            <div class="lesson-recap-item">
+              <div class="lesson-recap-french">${audioBtnHTML(item.c)}<span>${item.c}</span><span class="lesson-recap-pinyin">${item.p}</span></div>
+              <div class="lesson-recap-trans">${item.t}</div>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+    </div>
+  `;
+  wireAudioButtons(contentEl);
+  nextBtn.textContent = nextLabel || 'Concluir unidade ✓';
+  nextBtn.style.display = 'flex';
+}
+
 function renderExerciseStep(){
   const contentEl = document.getElementById('step-content');
   const nextBtn = document.getElementById('step-next-btn');
   const total = STEP_STATE.exerciseList.length;
 
   if (STEP_STATE.exerciseIndex >= total){
-    const pct = Math.round((STEP_STATE.exerciseScore / total) * 100);
-    contentEl.innerHTML = `
-      <div class="exercise-result">
-        <div class="big-emoji">${pct >= 70 ? '🎉' : '💪'}</div>
-        <h3>Exercícios concluídos!</h3>
-        <div class="score-num">${STEP_STATE.exerciseScore}/${total}</div>
-        <p>${pct >= 70 ? 'Muito bem! Você já domina esse vocabulário.' : 'Vale revisar essas palavras de novo mais tarde na aba Revisão.'}</p>
-      </div>
-    `;
-    nextBtn.textContent = 'Concluir unidade ✓';
-    nextBtn.style.display = 'flex';
+    const u = UNITS.find(x => x.id === STATE.currentUnitId);
+    renderLessonCompleteScreen(contentEl, nextBtn, {
+      correct: STEP_STATE.exerciseScore, total,
+      recapItems: [...u.vocab, ...(u.phrases || [])]
+    });
     return;
   }
 
