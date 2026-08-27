@@ -124,6 +124,8 @@ body{
 .pill.streak{ background: linear-gradient(120deg, #FFF3D6, var(--paper-warm)); color:#8A5A00; }
 .pill.xp{ background: linear-gradient(120deg, rgba(192,35,31,0.08), var(--paper-warm)); color: var(--seal-red-dark); }
 a.pill{ text-decoration:none; cursor:pointer; }
+.flag-icon{ width:20px; height:14px; border-radius:2px; display:block; box-shadow:0 0 0 1px rgba(0,0,0,.12); }
+.sister-app-link .flag-icon{ display:inline-block; vertical-align:middle; margin-right:2px; }
 a.pill:hover{ border-color: var(--imperial-gold); }
 
 .sister-app-link{
@@ -1140,7 +1142,7 @@ body.hide-pinyin .prompt-pinyin{
 
     <button class="btn btn-secondary btn-block" id="guest-btn" style="margin-top:10px;">Continuar sem conta</button>
     <p class="login-note" id="login-note"></p>
-    <a class="sister-app-link" href="https://brunemedeiros.github.io/francais-avec-prof-brune/" target="_blank" rel="noopener">🇫🇷 Também tem o Français avec Prof. Brune →</a>
+    <a class="sister-app-link" href="https://brunemedeiros.github.io/francais-avec-prof-brune/" target="_blank" rel="noopener"><svg class="flag-icon" viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="2" x="0" fill="#0055A4"/><rect width="1" height="2" x="1" fill="#FFFFFF"/><rect width="1" height="2" x="2" fill="#EF4135"/></svg> Também tem o Français avec Prof. Brune →</a>
   </div>
 </div>
 
@@ -1158,7 +1160,7 @@ body.hide-pinyin .prompt-pinyin{
       <div class="pill xp">⭐ <span id="xp-count">0</span> XP</div>
       <button class="pill pinyin-toggle-btn" id="pinyin-toggle-btn" title="Esconder/mostrar pinyin">拼音</button>
       <button class="pill theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema claro/escuro">🌙</button>
-      <a class="pill sister-app-pill" href="https://brunemedeiros.github.io/francais-avec-prof-brune/" target="_blank" rel="noopener" title="Français avec Prof. Brune">🇫🇷</a>
+      <a class="pill sister-app-pill" href="https://brunemedeiros.github.io/francais-avec-prof-brune/" target="_blank" rel="noopener" title="Français avec Prof. Brune"><svg class="flag-icon" viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="2" x="0" fill="#0055A4"/><rect width="1" height="2" x="1" fill="#FFFFFF"/><rect width="1" height="2" x="2" fill="#EF4135"/></svg></a>
       <button class="pill user-pill" id="user-menu-btn" title="Conta">👤 <span id="user-label">Convidado</span></button>
     </div>
   </div>
