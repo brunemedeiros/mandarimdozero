@@ -2185,10 +2185,18 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
 // tradução em português como resposta.
 function buildExerciseSet(unit){
   const vocabFormats = ['meaning', 'meaning', 'listen'];
+  // "Digite o que ouviu" só entra na rotação depois que a palavra já foi
+  // vista pelo menos uma vez em múltipla escolha (reps>0 no card de SRS) —
+  // igual ao Memrise, nunca pede pra digitar uma palavra ainda não exposta.
+  const vocabFormatsExposed = ['meaning', 'type', 'listen'];
   const pool = unit.vocab;
 
   const vocabExercises = pool.map((item, i) => {
-    const format = vocabFormats[i % vocabFormats.length];
+    const cardId = `u${unit.id}-v${i}`;
+    const card = STATE.cards.find(c => c.id === cardId);
+    const alreadyExposed = card && card.reps > 0;
+    const formats = alreadyExposed ? vocabFormatsExposed : vocabFormats;
+    const format = formats[i % formats.length];
     const distractors = shuffle(pool.filter(v => v !== item)).slice(0, 3);
     const options = shuffle([item, ...distractors]);
     return { format, item, options };
@@ -2263,6 +2271,8 @@ function renderExerciseStep(){
     renderTrueFalseExercise(ex, contentEl, nextBtn, total);
   } else if (ex.format === 'cloze'){
     renderClozeExercise(ex, contentEl, nextBtn, total);
+  } else if (ex.format === 'type'){
+    renderVocabTypeExercise(ex, contentEl, nextBtn, total);
   } else {
     renderMultipleChoiceExercise(ex, contentEl, nextBtn, total);
   }
@@ -2404,6 +2414,69 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
   document.getElementById('exercise-dontknow-btn').addEventListener('click', () => {
     if (STEP_STATE.exerciseAnswered) return;
     revealAnswer(-1, false);
+  });
+}
+
+// ---------- Exercício de vocabulário "Digite o que ouviu" (ditado) ----------
+// Só entra na rotação depois que a palavra já foi vista em múltipla escolha
+// pelo menos uma vez (gating em buildExerciseSet) — igual ao Memrise, nunca
+// pede pra digitar de ouvido uma palavra ainda não exposta.
+function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
+  contentEl.innerHTML = `
+    <div class="exercise-wrap">
+      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-prompt-label">Digite o que ouviu</div>
+      <div class="exercise-prompt">
+        ${audioBtnHTML(ex.item.f, 'audio-btn-lg')}
+        <div class="prompt-audio-hint">toque para ouvir de novo</div>
+      </div>
+      <div class="cloze-type-wrap">
+        <input type="text" id="vocab-type-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite em francês">
+        <button class="btn btn-primary btn-block" id="vocab-type-verify-btn">Verificar</button>
+      </div>
+      <div class="vocab-type-answer" id="vocab-type-answer" style="display:none;"></div>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+    </div>
+  `;
+
+  wireAudioButtons(contentEl);
+  if (TTS.voice) speakFrench(ex.item.f, contentEl.querySelector('.audio-btn-lg'));
+  nextBtn.style.display = 'none';
+
+  const inputEl = document.getElementById('vocab-type-input');
+  inputEl.focus();
+  const strip = s => normalizeLoose(s).replace(/[.,!?;:'"’]/g, '').trim();
+
+  function finish(isCorrect){
+    STEP_STATE.exerciseAnswered = true;
+    inputEl.disabled = true;
+    document.getElementById('vocab-type-verify-btn').disabled = true;
+    document.getElementById('exercise-dontknow-btn')?.classList.add('disabled');
+
+    if (isCorrect){
+      STEP_STATE.exerciseScore += 1;
+      addXP(4); // digitar de ouvido vale um pouco mais que só reconhecer em múltipla escolha
+      registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
+      goToNextExercise();
+    } else {
+      const answerEl = document.getElementById('vocab-type-answer');
+      answerEl.textContent = `Resposta certa: ${ex.item.f}`;
+      answerEl.style.display = 'block';
+      setTimeout(() => showWrongAnswerPanel(contentEl), 500);
+    }
+  }
+
+  inputEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('vocab-type-verify-btn').click();
+  });
+  document.getElementById('vocab-type-verify-btn').addEventListener('click', () => {
+    if (STEP_STATE.exerciseAnswered) return;
+    finish(strip(inputEl.value) === strip(ex.item.f));
+  });
+
+  document.getElementById('exercise-dontknow-btn').addEventListener('click', () => {
+    if (STEP_STATE.exerciseAnswered) return;
+    finish(false);
   });
 }
 
