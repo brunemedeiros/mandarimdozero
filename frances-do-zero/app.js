@@ -533,7 +533,40 @@ function registerStudyToday(){
     STATE.streak = 1;
   }
   STATE.lastStudyDay = today;
+  showStreakCelebration();
 }
+
+// ---------- Tela de sequência de streak (estilo Duolingo) ----------
+// Aparece uma única vez por dia, na primeira atividade que ativa o streak
+// (lição, checkpoint, revisão, jogo de combinar, conjugação...) — nunca de
+// novo no mesmo dia, já que registerStudyToday() só chega até aqui na
+// primeira chamada depois da virada do dia.
+const STREAK_DAY_LABELS = ['dom','seg','ter','qua','qui','sex','sáb'];
+
+function buildStreakWeekData(){
+  const days = [];
+  for (let i = 6; i >= 0; i--){
+    const d = new Date(Date.now() - i*86400000);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    days.push({ label: STREAK_DAY_LABELS[d.getDay()], done: !!STATE.activityLog[key], isToday: i === 0 });
+  }
+  return days;
+}
+
+function showStreakCelebration(){
+  document.getElementById('streak-days-num').textContent = STATE.streak;
+  document.getElementById('streak-week-row').innerHTML = buildStreakWeekData().map(d => `
+    <div class="streak-day-item ${d.done ? 'done' : ''} ${d.isToday ? 'today' : ''}">
+      <div class="streak-day-circle">${d.done ? '✓' : ''}</div>
+      <div class="streak-day-label">${d.label}</div>
+    </div>
+  `).join('');
+  document.getElementById('streak-modal-overlay').style.display = 'flex';
+}
+
+document.getElementById('streak-modal-continue-btn').addEventListener('click', () => {
+  document.getElementById('streak-modal-overlay').style.display = 'none';
+});
 
 // ---------- Desafios de hoje (estilo Busuu) ----------
 // Contadores do dia (zeram sozinhos quando a data muda). Todo dia mostra
