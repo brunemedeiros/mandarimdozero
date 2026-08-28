@@ -23,11 +23,30 @@ def split_clauses(text):
             clauses.append((clause, punct))
     return clauses
 
-def word_by_word_ssml(clause, punct, pause_ms=550):
-    words = clause.split()
-    parts = []
+def chunk_words_for_emphasis(words, min_len=3):
+    # Agrupa palavras muito curtas (1-2 letras, tipo "à", "et", "je") com a
+    # próxima palavra em vez de isolá-las sozinhas entre pausas longas — o
+    # TTS neural (Chirp3-HD) às vezes "aluciona" nessas pausas isoladas e lê
+    # o nome do caractere/acento ("accent grave") em vez da palavra em si.
+    chunks = []
+    buffer = []
     for w in words:
-        parts.append(xml_escape(w))
+        buffer.append(w)
+        if len(w) >= min_len:
+            chunks.append(' '.join(buffer))
+            buffer = []
+    if buffer:
+        if chunks:
+            chunks[-1] = chunks[-1] + ' ' + ' '.join(buffer)
+        else:
+            chunks.append(' '.join(buffer))
+    return chunks
+
+def word_by_word_ssml(clause, punct, pause_ms=550):
+    chunks = chunk_words_for_emphasis(clause.split())
+    parts = []
+    for c in chunks:
+        parts.append(xml_escape(c))
         parts.append(f'<break time="{pause_ms}ms"/>')
     parts.append(PUNCT_LABEL[punct] + '.')
     return ' '.join(parts)
