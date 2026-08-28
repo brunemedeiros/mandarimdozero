@@ -2654,7 +2654,8 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
       addXP(4); // ordenar frase vale um pouco mais que múltipla escolha simples
-      goToNextExercise();
+      addStudyMinutes();
+      setTimeout(() => showCorrectReorderPanel(contentEl, ex), 500);
     } else {
       setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
     }
@@ -2674,6 +2675,28 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
     blocksEl.querySelectorAll('.reorder-block').forEach(b => b.classList.add('disabled'));
     document.getElementById('exercise-dontknow-btn').classList.add('disabled');
     setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
+  });
+}
+
+// Painel de acerto do exercício de "ordene a frase" (estilo Duolingo): ao
+// contrário dos outros formatos (que avançam rápido acertando), aqui vale a
+// pena parar um instante pra mostrar a tradução — montar a ordem certa não
+// garante que o aluno entendeu o SENTIDO da frase inteira.
+function showCorrectReorderPanel(contentEl, ex){
+  const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
+  const panel = document.createElement('div');
+  panel.className = 'correct-feedback';
+  panel.innerHTML = `
+    <div class="correct-feedback-header">✅ Muito bem!</div>
+    <p class="correct-feedback-trans">${ex.phrase.t}</p>
+    <button class="btn btn-primary btn-block correct-feedback-continue" id="correct-continue-btn">Continuar →</button>
+  `;
+  wrap.appendChild(panel);
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  document.getElementById('correct-continue-btn').addEventListener('click', () => {
+    STEP_STATE.exerciseIndex += 1;
+    renderExerciseStep();
   });
 }
 
