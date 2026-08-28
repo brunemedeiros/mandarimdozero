@@ -23,6 +23,15 @@ def split_clauses(text):
             clauses.append((clause, punct))
     return clauses
 
+def word_by_word_ssml(clause, punct, pause_ms=550):
+    words = clause.split()
+    parts = []
+    for w in words:
+        parts.append(xml_escape(w))
+        parts.append(f'<break time="{pause_ms}ms"/>')
+    parts.append(PUNCT_LABEL[punct] + '.')
+    return ' '.join(parts)
+
 def build_ssml(dictee_num, text):
     clauses = split_clauses(text)
     parts = []
@@ -38,13 +47,18 @@ def build_ssml(dictee_num, text):
     parts.append('Nous allons commencer la dictée. Écrivez.')
     parts.append('<break time="1500ms"/>')
 
+    # Cada cláusula é lida uma vez em ritmo normal-lento, depois repetida
+    # palavra por palavra com pausas maiores entre elas — pensado pra um
+    # aluno ainda em formação conseguir escrever cada palavra com tempo,
+    # em vez de reouvir a frase inteira no mesmo ritmo.
     clause_ssml = []
     for clause, punct in clauses:
         label = PUNCT_LABEL[punct]
-        unit = f'<prosody rate="80%">{xml_escape(clause)}, {label}.</prosody>'
-        clause_ssml.append(unit)
+        first_read = f'<prosody rate="80%">{xml_escape(clause)}, {label}.</prosody>'
+        second_read = f'<prosody rate="75%">{word_by_word_ssml(clause, punct)}</prosody>'
+        clause_ssml.append(first_read)
         clause_ssml.append('<break time="3000ms"/>')
-        clause_ssml.append(unit)
+        clause_ssml.append(second_read)
         clause_ssml.append('<break time="4000ms"/>')
     parts.extend(clause_ssml)
 
