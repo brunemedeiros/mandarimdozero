@@ -865,14 +865,16 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 
 .dictation-player-task{ font-size:20px; font-weight:800; margin:0 0 4px; }
 .dictation-player-module{ font-size:13px; color: var(--ink-soft); margin:0 0 18px; }
-.dictation-audio-controls{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
-.dictation-audio-btn{
+.dictation-audio-player{ margin-bottom:18px; }
+.dictation-play-btn{
   display:flex; align-items:center; gap:8px; background: var(--paper-warm); border:1px solid var(--paper-line);
   border-radius:999px; padding:10px 18px; font-family: var(--font-body); font-weight:700; font-size:14px;
-  cursor:pointer; color: var(--ink);
+  cursor:pointer; color: var(--ink); margin-bottom:10px;
 }
-.dictation-audio-btn:hover{ border-color: var(--imperial-gold); }
-.dictation-audio-btn.speaking{ background: linear-gradient(120deg, rgba(192,35,31,0.08), var(--paper-warm)); border-color: var(--seal-red); }
+.dictation-play-btn:hover{ border-color: var(--imperial-gold); }
+.dictation-play-btn.speaking{ background: linear-gradient(120deg, rgba(192,35,31,0.08), var(--paper-warm)); border-color: var(--seal-red); }
+.dictation-progress-track{ height:6px; background: var(--paper-warm); border-radius:5px; overflow:hidden; }
+.dictation-progress-fill{ height:100%; width:0%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:5px; transition: width .15s linear; }
 .dictation-textarea{
   width:100%; min-height:110px; border:1px solid var(--paper-line); border-radius: var(--radius);
   padding:14px; font-family: var(--font-body); font-size:15px; color: var(--ink); background: var(--paper);

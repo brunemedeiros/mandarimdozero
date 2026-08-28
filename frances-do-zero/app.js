@@ -3890,6 +3890,9 @@ function switchTab(tab){
     stopSpeedTimer();
     stopMatchTimer();
   }
+  if (tab !== 'dictation'){
+    stopDictationAudio();
+  }
 
   if (tab === 'review'){
     if (STATE.reviewSessionUnitFilter){
@@ -4507,26 +4510,29 @@ function renderConjPracticeStep(){
 // ============================================================
 // DITADOS
 // Um ditado por módulo, ligado à tarefa comunicativa do módulo (ver
-// dictations.js). Áudio pré-gerado em duas velocidades (normal/devagar),
-// scoring por alinhamento palavra-a-palavra (LCS) entre o texto certo e o
-// que o aluno digitou.
+// dictations.js). Cada ditado tem um único áudio guiado pré-gerado
+// (locução de abertura + leitura de reconhecimento + ditado por cláusula
+// com pontuação falada e repetição + releitura final), reproduzindo a
+// estrutura real de um ditado DELF A1. Scoring por alinhamento
+// palavra-a-palavra (LCS) entre o texto certo e o que o aluno digitou.
 // ============================================================
 function moduleTitleFor(moduleId){
   const mod = MODULES.find(m => m.id === moduleId);
   return mod ? mod.title : '';
 }
 
-function dictationAudioPath(d, rate){
-  return `audio/dictation-${d.id}-${rate}.mp3`;
+function dictationAudioPath(d){
+  return `audio/dictation-${d.id}-guided.mp3`;
 }
 
-function playDictationAudio(path, btnEl){
-  const audio = new Audio(path);
-  if (btnEl) btnEl.classList.add('speaking');
-  const clear = () => { if (btnEl) btnEl.classList.remove('speaking'); };
-  audio.addEventListener('ended', clear);
-  audio.addEventListener('error', () => { clear(); showToast('Não foi possível reproduzir o áudio'); });
-  audio.play().catch(clear);
+// Áudio do ditado em reprodução no momento (só um por vez).
+let dictationAudioEl = null;
+
+function stopDictationAudio(){
+  if (dictationAudioEl){
+    dictationAudioEl.pause();
+    dictationAudioEl = null;
+  }
 }
 
 function escapeHtmlDictation(str){
@@ -4534,6 +4540,7 @@ function escapeHtmlDictation(str){
 }
 
 function renderDictationList(){
+  stopDictationAudio();
   document.getElementById('dictation-list-wrap').style.display = 'block';
   document.getElementById('dictation-player-wrap').style.display = 'none';
 
@@ -4562,6 +4569,7 @@ function openDictationPlayer(id){
   const d = DICTATIONS.find(x => x.id === id);
   if (!d) return;
 
+  stopDictationAudio();
   document.getElementById('dictation-list-wrap').style.display = 'none';
   document.getElementById('dictation-player-wrap').style.display = 'block';
 
@@ -4569,9 +4577,11 @@ function openDictationPlayer(id){
   content.innerHTML = `
     <div class="dictation-player-task">${escapeHtmlDictation(d.task)}</div>
     <p class="dictation-player-module">${d.level} · ${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</p>
-    <div class="dictation-audio-controls">
-      <button class="dictation-audio-btn" id="dictation-play-normal">🔊 Ouvir</button>
-      <button class="dictation-audio-btn" id="dictation-play-slow">🐢 Ouvir devagar</button>
+    <div class="dictation-audio-player">
+      <button class="dictation-play-btn" id="dictation-play-btn">▶️ Ouvir o ditado</button>
+      <div class="dictation-progress-track">
+        <div class="dictation-progress-fill" id="dictation-progress-fill"></div>
+      </div>
     </div>
     <textarea class="dictation-textarea" id="dictation-input" placeholder="Digite aqui o que você ouviu..."></textarea>
     <div class="dictation-actions">
@@ -4581,12 +4591,35 @@ function openDictationPlayer(id){
     <div id="dictation-result-wrap"></div>
   `;
 
-  document.getElementById('dictation-play-normal').addEventListener('click', (e) => {
-    playDictationAudio(dictationAudioPath(d, 'normal'), e.currentTarget);
+  dictationAudioEl = new Audio(dictationAudioPath(d));
+  const playBtn = document.getElementById('dictation-play-btn');
+  const progressFill = document.getElementById('dictation-progress-fill');
+
+  playBtn.addEventListener('click', () => {
+    if (dictationAudioEl.paused){
+      dictationAudioEl.play().catch(() => showToast('Não foi possível reproduzir o áudio'));
+    } else {
+      dictationAudioEl.pause();
+    }
   });
-  document.getElementById('dictation-play-slow').addEventListener('click', (e) => {
-    playDictationAudio(dictationAudioPath(d, 'slow'), e.currentTarget);
+  dictationAudioEl.addEventListener('play', () => {
+    playBtn.textContent = '⏸ Pausar';
+    playBtn.classList.add('speaking');
   });
+  dictationAudioEl.addEventListener('pause', () => {
+    playBtn.textContent = '▶️ Ouvir o ditado';
+    playBtn.classList.remove('speaking');
+  });
+  dictationAudioEl.addEventListener('ended', () => {
+    playBtn.textContent = '▶️ Ouvir o ditado';
+    playBtn.classList.remove('speaking');
+  });
+  dictationAudioEl.addEventListener('timeupdate', () => {
+    if (dictationAudioEl.duration){
+      progressFill.style.width = `${(dictationAudioEl.currentTime / dictationAudioEl.duration) * 100}%`;
+    }
+  });
+  dictationAudioEl.addEventListener('error', () => showToast('Não foi possível reproduzir o áudio'));
 
   document.getElementById('dictation-check-btn').addEventListener('click', () => {
     const userText = document.getElementById('dictation-input').value;
