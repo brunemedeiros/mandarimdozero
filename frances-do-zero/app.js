@@ -4533,7 +4533,19 @@ function stopDictationAudio(){
     dictationAudioEl.pause();
     dictationAudioEl = null;
   }
+  isDictationScrubbing = false;
+  dictationScrubHandler = null;
 }
+
+// Estado de "arrastar a barra de progresso" fica em nível de módulo, com um
+// único par de listeners em window (registrado uma vez abaixo) — evita
+// acumular listeners de window a cada vez que o player é reaberto.
+let isDictationScrubbing = false;
+let dictationScrubHandler = null;
+window.addEventListener('pointermove', (e) => {
+  if (isDictationScrubbing && dictationScrubHandler) dictationScrubHandler(e.clientX);
+});
+window.addEventListener('pointerup', () => { isDictationScrubbing = false; });
 
 function escapeHtmlDictation(str){
   return str.replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
@@ -4579,17 +4591,31 @@ function openDictationPlayer(id){
     <p class="dictation-player-module">${d.level} · ${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</p>
     <div class="dictation-audio-player">
       <div class="dictation-transport">
-        <button class="dictation-skip-btn" id="dictation-skip-back" title="Voltar 15s">-15s</button>
         <button class="dictation-play-btn" id="dictation-play-btn">▶️ Ouvir o ditado</button>
-        <button class="dictation-skip-btn" id="dictation-skip-fwd" title="Avançar 15s">+15s</button>
+        <button class="dictation-icon-btn" id="dictation-restart-btn" title="Reiniciar">↺</button>
       </div>
-      <div class="dictation-progress-track">
-        <div class="dictation-progress-fill" id="dictation-progress-fill"></div>
+      <div class="dictation-scrub-row">
+        <span class="dictation-time" id="dictation-time-current">00:00</span>
+        <div class="dictation-progress-track" id="dictation-progress-track">
+          <div class="dictation-progress-fill" id="dictation-progress-fill"></div>
+          <div class="dictation-progress-handle" id="dictation-progress-handle"></div>
+        </div>
+        <span class="dictation-time" id="dictation-time-total">00:00</span>
       </div>
-      <div class="dictation-speed-controls">
-        <button class="dictation-speed-btn" data-speed="0.75">0.75x</button>
-        <button class="dictation-speed-btn active" data-speed="1">1x</button>
-        <button class="dictation-speed-btn" data-speed="1.5">1.5x</button>
+      <div class="dictation-secondary-controls">
+        <div class="dictation-skip-controls">
+          <button class="dictation-skip-btn" id="dictation-skip-back" title="Voltar 15s">-15s</button>
+          <button class="dictation-skip-btn" id="dictation-skip-fwd" title="Avançar 15s">+15s</button>
+        </div>
+        <div class="dictation-volume-control">
+          <button class="dictation-icon-btn" id="dictation-mute-btn" title="Mudo">🔊</button>
+          <input type="range" class="dictation-volume-slider" id="dictation-volume-slider" min="0" max="100" value="100">
+        </div>
+        <div class="dictation-speed-controls">
+          <button class="dictation-speed-btn" data-speed="0.75">0.75x</button>
+          <button class="dictation-speed-btn active" data-speed="1">1x</button>
+          <button class="dictation-speed-btn" data-speed="1.5">1.5x</button>
+        </div>
       </div>
     </div>
     <textarea class="dictation-textarea" id="dictation-input" placeholder="Digite aqui o que você ouviu..."></textarea>
@@ -4603,6 +4629,12 @@ function openDictationPlayer(id){
   dictationAudioEl = new Audio(dictationAudioPath(d));
   const playBtn = document.getElementById('dictation-play-btn');
   const progressFill = document.getElementById('dictation-progress-fill');
+  const progressHandle = document.getElementById('dictation-progress-handle');
+  const progressTrack = document.getElementById('dictation-progress-track');
+  const timeCurrentEl = document.getElementById('dictation-time-current');
+  const timeTotalEl = document.getElementById('dictation-time-total');
+  const muteBtn = document.getElementById('dictation-mute-btn');
+  const volumeSlider = document.getElementById('dictation-volume-slider');
 
   playBtn.addEventListener('click', () => {
     if (dictationAudioEl.paused){
@@ -4610,6 +4642,9 @@ function openDictationPlayer(id){
     } else {
       dictationAudioEl.pause();
     }
+  });
+  document.getElementById('dictation-restart-btn').addEventListener('click', () => {
+    dictationAudioEl.currentTime = 0;
   });
   document.getElementById('dictation-skip-back').addEventListener('click', () => {
     dictationAudioEl.currentTime = Math.max(0, dictationAudioEl.currentTime - 15);
@@ -4624,6 +4659,51 @@ function openDictationPlayer(id){
       dictationAudioEl.playbackRate = parseFloat(btn.dataset.speed);
     });
   });
+
+  // Volume: slider controla o volume; botão de mudo alterna com o volume
+  // anterior salvo, igual ao padrão de qualquer player de áudio.
+  let volumeBeforeMute = 1;
+  volumeSlider.addEventListener('input', () => {
+    const v = parseInt(volumeSlider.value, 10) / 100;
+    dictationAudioEl.volume = v;
+    dictationAudioEl.muted = false;
+    muteBtn.textContent = v === 0 ? '🔇' : '🔊';
+  });
+  muteBtn.addEventListener('click', () => {
+    if (dictationAudioEl.muted || dictationAudioEl.volume === 0){
+      dictationAudioEl.muted = false;
+      dictationAudioEl.volume = volumeBeforeMute || 1;
+      volumeSlider.value = Math.round(dictationAudioEl.volume * 100);
+      muteBtn.textContent = '🔊';
+    } else {
+      volumeBeforeMute = dictationAudioEl.volume;
+      dictationAudioEl.muted = true;
+      volumeSlider.value = 0;
+      muteBtn.textContent = '🔇';
+    }
+  });
+
+  // Barra de progresso arrastável: clique ou arraste em qualquer ponto da
+  // faixa pula o áudio pra aquele instante (igual ao player do lingua.com).
+  function seekToClientX(clientX){
+    if (!dictationAudioEl.duration) return;
+    const rect = progressTrack.getBoundingClientRect();
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    dictationAudioEl.currentTime = ratio * dictationAudioEl.duration;
+  }
+  dictationScrubHandler = seekToClientX;
+  progressTrack.addEventListener('pointerdown', (e) => {
+    isDictationScrubbing = true;
+    seekToClientX(e.clientX);
+  });
+
+  function formatDictationTime(seconds){
+    if (!isFinite(seconds) || seconds < 0) seconds = 0;
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${String(s).padStart(2, '0')}`;
+  }
+
   dictationAudioEl.addEventListener('play', () => {
     playBtn.textContent = '⏸ Pausar';
     playBtn.classList.add('speaking');
@@ -4636,10 +4716,16 @@ function openDictationPlayer(id){
     playBtn.textContent = '▶️ Ouvir o ditado';
     playBtn.classList.remove('speaking');
   });
+  dictationAudioEl.addEventListener('loadedmetadata', () => {
+    timeTotalEl.textContent = formatDictationTime(dictationAudioEl.duration);
+  });
   dictationAudioEl.addEventListener('timeupdate', () => {
     if (dictationAudioEl.duration){
-      progressFill.style.width = `${(dictationAudioEl.currentTime / dictationAudioEl.duration) * 100}%`;
+      const pct = (dictationAudioEl.currentTime / dictationAudioEl.duration) * 100;
+      progressFill.style.width = `${pct}%`;
+      progressHandle.style.left = `${pct}%`;
     }
+    timeCurrentEl.textContent = formatDictationTime(dictationAudioEl.currentTime);
   });
   dictationAudioEl.addEventListener('error', () => showToast('Não foi possível reproduzir o áudio'));
 
@@ -4687,22 +4773,56 @@ function diffDictationWords(correctText, userText){
   return result;
 }
 
+// Junta um "miss" (palavra certa que faltou) adjacente a um "extra" (palavra
+// errada que o aluno digitou) numa única substituição — pra mostrar a
+// palavra errada riscada seguida da palavra certa destacada, como no
+// lingua.com, em vez de duas entradas soltas em ordens variáveis.
+function mergeDictationDiff(diff){
+  const merged = [];
+  let i = 0;
+  while (i < diff.length){
+    const cur = diff[i];
+    const next = diff[i + 1];
+    if (next && ((cur.type === 'miss' && next.type === 'extra') || (cur.type === 'extra' && next.type === 'miss'))){
+      const wrong = cur.type === 'extra' ? cur.word : next.word;
+      const correct = cur.type === 'miss' ? cur.word : next.word;
+      merged.push({ type: 'sub', wrong, correct });
+      i += 2;
+      continue;
+    }
+    merged.push(cur);
+    i++;
+  }
+  return merged;
+}
+
+function dictationScoreColorVar(score){
+  if (score >= 80) return 'var(--jade)';
+  if (score >= 60) return 'var(--imperial-gold)';
+  return 'var(--seal-red-dark)';
+}
+
 function renderDictationResult(d, userText){
   const diff = diffDictationWords(d.text, userText);
+  const merged = mergeDictationDiff(diff);
   const totalCorrectWords = d.text.trim().split(/\s+/).length;
   const matches = diff.filter(x => x.type === 'match').length;
   const score = Math.round((matches / totalCorrectWords) * 100);
 
-  const wordsHtml = diff.map(x => {
-    if (x.type === 'match') return `<span class="dictation-word match">${escapeHtmlDictation(x.word)}</span>`;
-    if (x.type === 'miss') return `<span class="dictation-word miss">${escapeHtmlDictation(x.word)}</span>`;
-    return `<span class="dictation-word extra">${escapeHtmlDictation(x.word)}</span>`;
+  const wordsHtml = merged.map(x => {
+    if (x.type === 'match') return `<span class="dictation-word">${escapeHtmlDictation(x.word)}</span>`;
+    if (x.type === 'sub') return `<span class="dictation-word-wrong">${escapeHtmlDictation(x.wrong)}</span> <span class="dictation-word-correct">${escapeHtmlDictation(x.correct)}</span>`;
+    if (x.type === 'miss') return `<span class="dictation-word-correct">${escapeHtmlDictation(x.word)}</span>`;
+    return `<span class="dictation-word-wrong">${escapeHtmlDictation(x.word)}</span>`;
   }).join(' ');
 
   document.getElementById('dictation-result-wrap').innerHTML = `
     <div class="dictation-result">
-      <div class="dictation-result-score">${score}% de acerto</div>
       <div class="dictation-result-text">${wordsHtml}</div>
+      <div class="dictation-result-summary">
+        <div class="dictation-score-badge" style="background:${dictationScoreColorVar(score)};">${score}</div>
+        <p class="dictation-score-text">Você escreveu <strong>${matches} de ${totalCorrectWords}</strong> palavras corretamente. Você atingiu uma pontuação de ${score} pontos (${score}%).</p>
+      </div>
     </div>
   `;
 
