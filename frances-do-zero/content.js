@@ -107,7 +107,7 @@ const UNITS = [
     vocab: [
       { f: "je", t: "eu" },
       { f: "tu", t: "você (informal)" },
-      { f: "m'appeler", t: "chamar-se" },
+      { f: "s'appeler", t: "chamar-se" },
       { f: "le nom", t: "o nome" },
       { f: "être", t: "ser / estar" },
       { f: "la France", t: "a França" },

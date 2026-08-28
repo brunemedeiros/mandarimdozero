@@ -181,6 +181,22 @@ function audioBtnHTML(text, extraClass){
   return `<button class="audio-btn ${extraClass||''}" data-speak="${safe}" aria-label="Ouvir pronúncia" title="Ouvir pronúncia">🔊</button>`;
 }
 
+// Emoji de bandeira (🇧🇷 🇫🇷 🇵🇹 etc.) não renderiza em todo sistema — no
+// Windows, por exemplo, vira as duas letras do código do país ("BR") em
+// vez do desenho da bandeira. Pros cenários que usam bandeira como ícone,
+// desenhamos um SVG simples em vez de confiar no emoji (mesma razão do
+// flag-badge usado no link cruzado entre os sites).
+const SCENARIO_FLAG_SVG = {
+  '🇫🇷': '<svg viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="2" x="0" fill="#0055A4"/><rect width="1" height="2" x="1" fill="#FFFFFF"/><rect width="1" height="2" x="2" fill="#EF4135"/></svg>',
+  '🇧🇷': '<svg viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg"><rect width="3" height="2" fill="#009739"/><polygon points="1.5,0.15 2.85,1 1.5,1.85 0.15,1" fill="#FEDD00"/><circle cx="1.5" cy="1" r="0.55" fill="#002776"/></svg>',
+  '🇵🇹': '<svg viewBox="0 0 3 2" xmlns="http://www.w3.org/2000/svg"><rect width="1.2" height="2" x="0" fill="#046A38"/><rect width="1.8" height="2" x="1.2" fill="#DA291C"/><circle cx="1.2" cy="1" r="0.4" fill="#FFCC00"/><circle cx="1.2" cy="1" r="0.24" fill="#FFFFFF"/></svg>'
+};
+
+function scenarioSceneHTML(emoji){
+  const svg = SCENARIO_FLAG_SVG[emoji];
+  return svg ? `<span class="scenario-flag">${svg}</span>` : emoji;
+}
+
 function wireAudioButtons(container){
   container.querySelectorAll('.audio-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -2574,7 +2590,7 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
     <div class="exercise-wrap">
       <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
       <div class="scenario-question">${ex.phrase.scenario}</div>
-      <div class="scenario-scene">${ex.phrase.scenarioEmoji}</div>
+      <div class="scenario-scene">${scenarioSceneHTML(ex.phrase.scenarioEmoji)}</div>
       <div class="scenario-options">${optionsHTML}</div>
     </div>
   `;
@@ -2809,7 +2825,8 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
       addXP(4);
-      goToNextExercise();
+      addStudyMinutes();
+      setTimeout(() => showCorrectReorderPanel(contentEl, ex), 500);
     } else {
       setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
     }
@@ -2828,6 +2845,28 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
     blocksEl.querySelectorAll('.reorder-block').forEach(b => b.classList.add('disabled'));
     document.getElementById('exercise-dontknow-btn').classList.add('disabled');
     setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
+  });
+}
+
+// Painel de acerto do exercício de "ordene a frase" (estilo Duolingo): ao
+// contrário dos outros formatos (que avançam rápido acertando), aqui vale a
+// pena parar um instante pra mostrar a tradução — montar a ordem certa não
+// garante que o aluno entendeu o SENTIDO da frase inteira.
+function showCorrectReorderPanel(contentEl, ex){
+  const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
+  const panel = document.createElement('div');
+  panel.className = 'correct-feedback';
+  panel.innerHTML = `
+    <div class="correct-feedback-header">✅ Muito bem!</div>
+    <p class="correct-feedback-trans">${ex.phrase.t}</p>
+    <button class="btn btn-primary btn-block correct-feedback-continue" id="correct-continue-btn">Continuar →</button>
+  `;
+  wrap.appendChild(panel);
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  document.getElementById('correct-continue-btn').addEventListener('click', () => {
+    STEP_STATE.exerciseIndex += 1;
+    renderExerciseStep();
   });
 }
 
