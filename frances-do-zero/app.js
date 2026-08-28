@@ -4578,9 +4578,18 @@ function openDictationPlayer(id){
     <div class="dictation-player-task">${escapeHtmlDictation(d.task)}</div>
     <p class="dictation-player-module">${d.level} · ${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</p>
     <div class="dictation-audio-player">
-      <button class="dictation-play-btn" id="dictation-play-btn">▶️ Ouvir o ditado</button>
+      <div class="dictation-transport">
+        <button class="dictation-skip-btn" id="dictation-skip-back" title="Voltar 15s">-15s</button>
+        <button class="dictation-play-btn" id="dictation-play-btn">▶️ Ouvir o ditado</button>
+        <button class="dictation-skip-btn" id="dictation-skip-fwd" title="Avançar 15s">+15s</button>
+      </div>
       <div class="dictation-progress-track">
         <div class="dictation-progress-fill" id="dictation-progress-fill"></div>
+      </div>
+      <div class="dictation-speed-controls">
+        <button class="dictation-speed-btn" data-speed="0.75">0.75x</button>
+        <button class="dictation-speed-btn active" data-speed="1">1x</button>
+        <button class="dictation-speed-btn" data-speed="1.5">1.5x</button>
       </div>
     </div>
     <textarea class="dictation-textarea" id="dictation-input" placeholder="Digite aqui o que você ouviu..."></textarea>
@@ -4601,6 +4610,19 @@ function openDictationPlayer(id){
     } else {
       dictationAudioEl.pause();
     }
+  });
+  document.getElementById('dictation-skip-back').addEventListener('click', () => {
+    dictationAudioEl.currentTime = Math.max(0, dictationAudioEl.currentTime - 15);
+  });
+  document.getElementById('dictation-skip-fwd').addEventListener('click', () => {
+    dictationAudioEl.currentTime = Math.min(dictationAudioEl.duration || Infinity, dictationAudioEl.currentTime + 15);
+  });
+  content.querySelectorAll('.dictation-speed-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      content.querySelectorAll('.dictation-speed-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      dictationAudioEl.playbackRate = parseFloat(btn.dataset.speed);
+    });
   });
   dictationAudioEl.addEventListener('play', () => {
     playBtn.textContent = '⏸ Pausar';
