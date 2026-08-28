@@ -4752,33 +4752,43 @@ function normalizeDictationWord(w){
     .replace(/[.,!?;:'"()«»]/g, '');
 }
 
-// Junta pontuação "solta" (ex: "!" ou "?" digitados com espaço antes, como
-// manda a tipografia francesa) na palavra anterior, tanto no texto certo
-// quanto no do aluno — sem isso, esses tokens viram "palavras" fantasma que
-// quase nenhum aluno digita como token separado, contam como erro garantido
-// e podem desalinhar a comparação ao redor delas.
+// Separa as palavras reais da pontuação "solta" (ex: "!" ou "?" digitados
+// com espaço antes, como manda a tipografia francesa). A pontuação continua
+// fazendo parte do texto exibido — igual ao original, como palavra própria
+// — mas não entra no alinhamento/pontuação do ditado: quase nenhum aluno
+// digita um "!" sozinho como token separado, e contar isso como erro
+// garantido podia empurrar o resto da comparação pro lugar errado.
 function tokenizeDictationText(text){
   const rawWords = text.trim().split(/\s+/).filter(w => w.length);
-  const words = [];
-  const normWords = [];
+  const words = [];       // só as palavras com conteúdo real, na ordem
+  const normWords = [];   // normalizadas, mesmo índice de `words`
+  const punctAfter = [];  // pontuação solta que vem logo depois de cada palavra (ou '')
   for (const w of rawWords){
     const norm = normalizeDictationWord(w);
     if (norm === ''){
-      if (words.length > 0) words[words.length - 1] += w;
+      if (words.length > 0){
+        punctAfter[words.length - 1] = (punctAfter[words.length - 1] ? punctAfter[words.length - 1] + ' ' : '') + w;
+      }
       continue;
     }
     words.push(w);
     normWords.push(norm);
+    punctAfter.push('');
   }
-  return { words, normWords };
+  return { words, normWords, punctAfter };
 }
 
 // Alinha as palavras do texto certo com as que o aluno digitou via LCS
 // (mesma ideia de um diff de texto), pra marcar acertos/erros mesmo quando
 // o aluno pula ou adianta uma palavra, sem desalinhar o resto da frase.
+// Pontuação solta (ver tokenizeDictationText) não participa do alinhamento,
+// mas é reanexada a cada palavra certa no resultado, pra manter o texto
+// exibido idêntico ao original.
 function diffDictationWords(correctText, userText){
-  const { words: correctWords, normWords: cn } = tokenizeDictationText(correctText);
-  const { words: userWords, normWords: un } = tokenizeDictationText(userText);
+  const correctTok = tokenizeDictationText(correctText);
+  const userTok = tokenizeDictationText(userText);
+  const correctWords = correctTok.words, cn = correctTok.normWords;
+  const userWords = userTok.words, un = userTok.normWords;
   const n = cn.length, m = un.length;
   const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
   for (let i = n - 1; i >= 0; i--){
@@ -4789,11 +4799,11 @@ function diffDictationWords(correctText, userText){
   let i = 0, j = 0;
   const result = [];
   while (i < n && j < m){
-    if (cn[i] === un[j]){ result.push({ type: 'match', word: correctWords[i] }); i++; j++; }
-    else if (dp[i+1][j] >= dp[i][j+1]){ result.push({ type: 'miss', word: correctWords[i] }); i++; }
+    if (cn[i] === un[j]){ result.push({ type: 'match', word: correctWords[i], punctAfter: correctTok.punctAfter[i] }); i++; j++; }
+    else if (dp[i+1][j] >= dp[i][j+1]){ result.push({ type: 'miss', word: correctWords[i], punctAfter: correctTok.punctAfter[i] }); i++; }
     else { result.push({ type: 'extra', word: userWords[j] }); j++; }
   }
-  while (i < n){ result.push({ type: 'miss', word: correctWords[i] }); i++; }
+  while (i < n){ result.push({ type: 'miss', word: correctWords[i], punctAfter: correctTok.punctAfter[i] }); i++; }
   while (j < m){ result.push({ type: 'extra', word: userWords[j] }); j++; }
   return result;
 }
@@ -4811,7 +4821,8 @@ function mergeDictationDiff(diff){
     if (next && ((cur.type === 'miss' && next.type === 'extra') || (cur.type === 'extra' && next.type === 'miss'))){
       const wrong = cur.type === 'extra' ? cur.word : next.word;
       const correct = cur.type === 'miss' ? cur.word : next.word;
-      merged.push({ type: 'sub', wrong, correct });
+      const punctAfter = cur.type === 'miss' ? cur.punctAfter : next.punctAfter;
+      merged.push({ type: 'sub', wrong, correct, punctAfter });
       i += 2;
       continue;
     }
@@ -4835,9 +4846,10 @@ function renderDictationResult(d, userText){
   const score = Math.round((matches / totalCorrectWords) * 100);
 
   const wordsHtml = merged.map(x => {
-    if (x.type === 'match') return `<span class="dictation-word">${escapeHtmlDictation(x.word)}</span>`;
-    if (x.type === 'sub') return `<span class="dictation-word-wrong">${escapeHtmlDictation(x.wrong)}</span> <span class="dictation-word-correct">${escapeHtmlDictation(x.correct)}</span>`;
-    if (x.type === 'miss') return `<span class="dictation-word-correct">${escapeHtmlDictation(x.word)}</span>`;
+    const punct = x.punctAfter ? ` ${escapeHtmlDictation(x.punctAfter)}` : '';
+    if (x.type === 'match') return `<span class="dictation-word">${escapeHtmlDictation(x.word)}</span>${punct}`;
+    if (x.type === 'sub') return `<span class="dictation-word-wrong">${escapeHtmlDictation(x.wrong)}</span> <span class="dictation-word-correct">${escapeHtmlDictation(x.correct)}</span>${punct}`;
+    if (x.type === 'miss') return `<span class="dictation-word-correct">${escapeHtmlDictation(x.word)}</span>${punct}`;
     return `<span class="dictation-word-wrong">${escapeHtmlDictation(x.word)}</span>`;
   }).join(' ');
 
