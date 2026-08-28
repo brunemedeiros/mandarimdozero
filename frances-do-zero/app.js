@@ -4743,17 +4743,42 @@ function openDictationPlayer(id){
 }
 
 function normalizeDictationWord(w){
-  return w.toLowerCase().replace(/[.,!?;:'"()«»]/g, '');
+  return w
+    .toLowerCase()
+    .normalize('NFC') // acentos digitados como sequência decomposta (a + ` )
+                       // via alguns teclados/IMEs viram a mesma forma que os
+                       // do texto original, em vez de "diferentes" por baixo.
+    .replace(/[‘’]/g, "'") // aspas curvas do autocorretor do celular
+    .replace(/[.,!?;:'"()«»]/g, '');
+}
+
+// Junta pontuação "solta" (ex: "!" ou "?" digitados com espaço antes, como
+// manda a tipografia francesa) na palavra anterior, tanto no texto certo
+// quanto no do aluno — sem isso, esses tokens viram "palavras" fantasma que
+// quase nenhum aluno digita como token separado, contam como erro garantido
+// e podem desalinhar a comparação ao redor delas.
+function tokenizeDictationText(text){
+  const rawWords = text.trim().split(/\s+/).filter(w => w.length);
+  const words = [];
+  const normWords = [];
+  for (const w of rawWords){
+    const norm = normalizeDictationWord(w);
+    if (norm === ''){
+      if (words.length > 0) words[words.length - 1] += w;
+      continue;
+    }
+    words.push(w);
+    normWords.push(norm);
+  }
+  return { words, normWords };
 }
 
 // Alinha as palavras do texto certo com as que o aluno digitou via LCS
 // (mesma ideia de um diff de texto), pra marcar acertos/erros mesmo quando
 // o aluno pula ou adianta uma palavra, sem desalinhar o resto da frase.
 function diffDictationWords(correctText, userText){
-  const correctWords = correctText.trim().split(/\s+/);
-  const userWords = userText.trim().split(/\s+/).filter(w => w.length);
-  const cn = correctWords.map(normalizeDictationWord);
-  const un = userWords.map(normalizeDictationWord);
+  const { words: correctWords, normWords: cn } = tokenizeDictationText(correctText);
+  const { words: userWords, normWords: un } = tokenizeDictationText(userText);
   const n = cn.length, m = un.length;
   const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
   for (let i = n - 1; i >= 0; i--){
@@ -4805,7 +4830,7 @@ function dictationScoreColorVar(score){
 function renderDictationResult(d, userText){
   const diff = diffDictationWords(d.text, userText);
   const merged = mergeDictationDiff(diff);
-  const totalCorrectWords = d.text.trim().split(/\s+/).length;
+  const totalCorrectWords = tokenizeDictationText(d.text).words.length;
   const matches = diff.filter(x => x.type === 'match').length;
   const score = Math.round((matches / totalCorrectWords) * 100);
 
