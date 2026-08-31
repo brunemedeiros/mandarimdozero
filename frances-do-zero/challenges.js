@@ -29,8 +29,12 @@ const CHALLENGES = [
       youtubeId: null, // ainda não verificado — ver texto acima
       startTime: null,
       endTime: null,
-      occurrence: null,
-      transcript: null
+      spokenOccurrence: null, // forma efetivamente pronunciada no vídeo (diferente de canonicalExpression)
+      transcript: null,       // só o trecho relevante, nunca a transcrição inteira do vídeo
+      confidence: null,       // 0-1, estimativa do Gemini de que a expressão foi mesmo dita ali
+      audioClarity: null,     // "high" | "medium" | "low"
+      contextQuality: null,   // "high" | "medium" | "low"
+      notes: null             // observação curta do Gemini sobre o trecho
     },
     question: { fr: "À votre avis, que signifie cette expression ?" },
     choices: [
