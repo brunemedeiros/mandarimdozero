@@ -103,8 +103,8 @@ const CHALLENGES = [
     correctAnswer: "Incommoder ou énerver quelqu'un",
     explanation: "Cette expression idiomatique signifie ennuyer ou agacer profondément quelqu'un. On l'utilise quand une personne ou une situation devient très irritante.",
     secondExample: {
-      text: "J'ai essayé de lui expliquer, mais il n'écoute jamais, il me casse vraiment les pieds avec ses idées fixes.",
-      audioFile: "c8afb5a2ce73.mp3"
+      text: "J'ai essayé de lui expliquer la situation calmement, mais il a continué à me poser les mêmes questions, il me cassait les pieds.",
+      audioFile: "0ef77b5de63c.mp3"
     },
     microActivity: {
       prompt: "Mon frère a encore oublié de faire la vaisselle, il __________ !",
