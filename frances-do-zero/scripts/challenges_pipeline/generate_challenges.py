@@ -46,6 +46,15 @@ def build_expression_draft(idx, expression, level):
     except Exception as exc:
         print(f'  [aviso] TTS falhou pra expressão-alvo: {exc}', file=sys.stderr)
 
+    # Os dois exemplos aparecem juntos (Exemple 1 / Exemple 2) na tela de
+    # feedback -- ambos precisam de áudio, senão o botão "Écouter" some de
+    # um dos dois sem motivo aparente pro aluno.
+    example_audio = None
+    try:
+        example_audio = tts.synthesize(content["exampleText"])
+    except Exception as exc:
+        print(f'  [aviso] TTS falhou pro primeiro exemplo: {exc}', file=sys.stderr)
+
     second_example_audio = None
     try:
         second_example_audio = tts.synthesize(content["secondExampleText"])
@@ -61,7 +70,7 @@ def build_expression_draft(idx, expression, level):
         "level": level,
         "expressionAudioFile": expression_audio,
         "meaning": {"fr": content["meaningFr"], "pt": content["meaningPt"]},
-        "example": {"text": content["exampleText"]},
+        "example": {"text": content["exampleText"], "audioFile": example_audio},
         "question": content["question"],
         "options": content["options"],
         "correctAnswer": content["correctAnswer"],
@@ -94,7 +103,8 @@ def run_expression(expressions, level, out_path):
             continue
 
         accepted.append(draft)
-        audio_status = "com áudio" if draft["expressionAudioFile"] and draft["secondExample"]["audioFile"] else "ÁUDIO FALTANDO"
+        has_all_audio = draft["expressionAudioFile"] and draft["example"]["audioFile"] and draft["secondExample"]["audioFile"]
+        audio_status = "com áudio" if has_all_audio else "ÁUDIO FALTANDO"
         resources_status = ", ".join(r["type"] for r in draft["externalResources"]) or "nenhum recurso externo"
         print(f'  -> gerado ({audio_status}, recursos: {resources_status})')
 
