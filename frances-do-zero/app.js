@@ -291,7 +291,8 @@ const STATE = {
     date: null, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
     grammarLessons: 0, conjugationSessions: 0, conjugationCorrect: 0,
     conjugationTenses: [], reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0
-  }
+  },
+  completedChallenges: {} // challengeId -> true -- "Desafios" concluídos, ver challenges_do_aluno
 };
 
 // Cada nível é acessível livremente (o aluno escolhe o nível quando quiser);
@@ -657,7 +658,8 @@ function serializeState(){
     totalReviews: STATE.totalReviews,
     daily: STATE.daily,
     checkpointProgress: STATE.checkpointProgress,
-    levelTestProgress: STATE.levelTestProgress
+    levelTestProgress: STATE.levelTestProgress,
+    completedChallenges: STATE.completedChallenges
   };
 }
 
@@ -680,6 +682,7 @@ function applySerializedState(data){
   if (data.daily) Object.assign(STATE.daily, data.daily);
   if (data.checkpointProgress) Object.assign(STATE.checkpointProgress, data.checkpointProgress);
   if (data.levelTestProgress) Object.assign(STATE.levelTestProgress, data.levelTestProgress);
+  if (data.completedChallenges) Object.assign(STATE.completedChallenges, data.completedChallenges);
 }
 
 // ---------- SM-2 algorithm (idêntico em espírito ao Anki) ----------
@@ -5041,6 +5044,25 @@ function unpublishedButApprovedChallenges(){
   return CHALLENGES.filter(c => c.status === 'approved');
 }
 
+function isChallengeCompleted(id){
+  return !!STATE.completedChallenges[id];
+}
+function markChallengeCompleted(id){
+  STATE.completedChallenges[id] = true;
+  saveState();
+}
+function challengeCompleteButtonHTML(){
+  return `<button class="btn btn-primary challenge-complete-btn" id="challenge-complete-btn" style="margin-top:16px;width:100%;">✅ Concluir</button>`;
+}
+function wireChallengeCompleteButton(c){
+  const btn = document.getElementById('challenge-complete-btn');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    markChallengeCompleted(c.id);
+    renderChallengesList(currentChallengesCategory);
+  });
+}
+
 const CHALLENGE_RESOURCE_ICON = { dictionary: '📖', article: '📰', youtube: '▶', youglish: '🎧' };
 
 function challengeResourceCardHTML(r){
@@ -5107,6 +5129,12 @@ function challengeCardLabelHTML(c){
   return '';
 }
 
+// Só Expressões tem seleção de nível por enquanto (é a única categoria com
+// conteúdo em mais de um nível hoje) -- Ouça e traduza/Acentuação mostram
+// tudo junto, como antes.
+const CHALLENGE_LEVELS_WITH_TABS = ['A1', 'A2', 'B1', 'B2'];
+let currentChallengesLevel = 'A1';
+
 function renderChallengesList(type){
   currentChallengesCategory = type;
   document.getElementById('challenges-categories-wrap').style.display = 'none';
@@ -5117,25 +5145,45 @@ function renderChallengesList(type){
   const cat = CHALLENGE_CATEGORIES.find(c => c.type === type);
   document.getElementById('challenges-list-title').textContent = cat ? cat.title : 'Desafios';
 
+  const levelTabsWrap = document.getElementById('challenges-level-tabs');
+  const showLevelTabs = type === 'expression';
+  levelTabsWrap.style.display = showLevelTabs ? 'flex' : 'none';
+  if (showLevelTabs){
+    levelTabsWrap.innerHTML = CHALLENGE_LEVELS_WITH_TABS.map(lvl => `
+      <button class="challenge-level-tab ${lvl === currentChallengesLevel ? 'active' : ''}" data-level="${lvl}">${lvl}</button>
+    `).join('');
+    levelTabsWrap.querySelectorAll('.challenge-level-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentChallengesLevel = btn.dataset.level;
+        renderChallengesList(type);
+      });
+    });
+  }
+
   const cardsWrap = document.getElementById('challenges-cards');
-  const published = publishedChallenges().filter(c => c.type === type);
+  let published = publishedChallenges().filter(c => c.type === type);
+  if (showLevelTabs) published = published.filter(c => c.level === currentChallengesLevel);
   if (published.length === 0){
     cardsWrap.innerHTML = `
       <div class="challenges-empty">
         <div class="big-emoji">${cat ? cat.emoji : '🧩'}</div>
-        <h3>Nenhum desafio publicado ainda</h3>
+        <h3>Nenhum desafio publicado ainda${showLevelTabs ? ` no nível ${currentChallengesLevel}` : ''}</h3>
         <p>Em breve, novos desafios nesta categoria.</p>
       </div>
     `;
     return;
   }
 
-  cardsWrap.innerHTML = published.map(c => `
-    <button class="challenge-card" data-challenge-id="${c.id}">
+  cardsWrap.innerHTML = published.map(c => {
+    const done = isChallengeCompleted(c.id);
+    return `
+    <button class="challenge-card ${done ? 'completed' : ''}" data-challenge-id="${c.id}">
+      ${done ? '<span class="challenge-card-check">✅</span>' : ''}
       <div class="challenge-card-level">${c.level}</div>
       ${challengeCardLabelHTML(c)}
     </button>
-  `).join('');
+  `;
+  }).join('');
   cardsWrap.querySelectorAll('.challenge-card').forEach(card => {
     card.addEventListener('click', () => openChallengePlayer(card.dataset.challengeId));
   });
@@ -5256,6 +5304,7 @@ function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
       </div>
 
       ${challengeExternalResourcesHTML(c)}
+      ${challengeCompleteButtonHTML()}
     </div>
   `;
 
@@ -5273,6 +5322,7 @@ function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
     document.getElementById('challenge-reveal-answer-btn').style.display = 'none';
     document.getElementById('challenge-microactivity-answer').style.display = 'block';
   });
+  wireChallengeCompleteButton(c);
 }
 
 // ---------- Ouça e traduza ----------
@@ -5462,12 +5512,14 @@ function checkListenTranslateAnswer(c){
       <p class="listen-translate-feedback-row"><strong>Frase original</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
       ${c.explanation ? `<p class="listen-translate-feedback-row"><strong>Explicação</strong>${escapeHtmlChallenge(c.explanation)}</p>` : ''}
       <button class="dictation-play-btn" id="lt-replay-btn">▶ Écouter encore</button>
+      ${challengeCompleteButtonHTML()}
     </div>
   `;
   document.getElementById('lt-verify-btn').style.display = 'none';
   document.getElementById('lt-replay-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
   });
+  wireChallengeCompleteButton(c);
 }
 
 // ---------- Acentuação ----------
@@ -5519,19 +5571,21 @@ function checkAccentAnswer(c){
       <div class="accent-feedback-correct-word">${escapeHtmlChallenge(c.targetText)}</div>
       <button class="dictation-play-btn" id="accent-replay-btn">▶ Écouter</button>
       ${c.explanation ? `<p class="accent-feedback-explanation">${escapeHtmlChallenge(c.explanation)}</p>` : ''}
+      ${challengeCompleteButtonHTML()}
     </div>
   `;
   document.getElementById('accent-verify-btn').style.display = 'none';
   document.getElementById('accent-replay-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
   });
+  wireChallengeCompleteButton(c);
 }
 
 // ---------- Revisão do admin ----------
-// Aprovar/Editar/Rejeitar aqui só muda o estado NESTA sessão do navegador —
-// os desafios vivem num arquivo estático (challenges.js) versionado no
-// código, sem backend de escrita. A publicação/edição de verdade acontece
-// confirmando a decisão com quem gera os desafios, que edita o arquivo.
+// Aprovar/Editar/Rejeitar/Publicar/Despublicar gravam de verdade na
+// tabela `challenges` do Supabase (protegida por RLS) -- ver
+// loadChallengesFromDB()/persistChallenge() no início da seção de
+// Desafios. Não é mais uma simulação de sessão do navegador.
 let challengesAdminEditingId = null;
 
 // MD5 (RFC 1321) puro em JS -- só usado aqui, pra conferir se um áudio já
