@@ -191,5 +191,92 @@ const CHALLENGES = [
       }
     ],
     status: "needs_review"
+  },
+  {
+    id: "lt-auto-001",
+    type: "listen_translate",
+    level: "A2",
+    sentenceFr: "J'ai acheté un nouveau livre hier et je l'ai déjà fini.",
+    audioFile: "849334555ba3.mp3",
+    hintText: "J'ai acheté un nouveau ______ hier et je l'ai déjà ______.",
+    referenceTranslations: ["Comprei um livro novo ontem e já terminei.", "Comprei um livro novo ontem e já o acabei.", "Ontem comprei um livro novo e já o terminei."],
+    explanation: "",
+    status: "needs_review"
+  },
+  {
+    id: "lt-auto-002",
+    type: "listen_translate",
+    level: "A2",
+    sentenceFr: "Ce week-end, nous allons visiter un musée dans le centre-ville.",
+    audioFile: "5f0f7f8e7744.mp3",
+    hintText: "Ce week-end, nous allons ______ un musée dans le ______.",
+    referenceTranslations: ["Neste fim de semana, vamos visitar um museu no centro da cidade.", "Vamos visitar um museu no centro da cidade neste fim de semana.", "O plano para este fim de semana é visitar um museu no centro."],
+    explanation: "",
+    status: "needs_review"
+  },
+  {
+    id: "lt-auto-003",
+    type: "listen_translate",
+    level: "A2",
+    sentenceFr: "Elle est un peu fatiguée parce qu'elle a beaucoup travaillé aujourd'hui.",
+    audioFile: "62e1501f76e8.mp3",
+    hintText: "Elle est un peu ______ parce qu'elle a beaucoup ______ aujourd'hui.",
+    referenceTranslations: ["Ela está um pouco cansada porque trabalhou muito hoje.", "Ela está um pouco exausta, pois trabalhou bastante hoje.", "Como trabalhou muito hoje, ela está um pouco cansada."],
+    explanation: "",
+    status: "needs_review"
+  },
+  {
+    id: "accent-auto-001",
+    type: "accent",
+    level: "B1",
+    targetText: "fréquent",
+    audioFile: "fcbc4b1eaaf6.mp3",
+    explanation: "\"e\" tem acento agudo.",
+    status: "needs_review"
+  },
+  {
+    id: "accent-auto-002",
+    type: "accent",
+    level: "B1",
+    targetText: "même",
+    audioFile: "cd8c5826c750.mp3",
+    explanation: "\"e\" tem acento circunflexo.",
+    status: "needs_review"
+  },
+  {
+    id: "accent-auto-003",
+    type: "accent",
+    level: "B1",
+    targetText: "voilà",
+    audioFile: "957c44c4238f.mp3",
+    explanation: "\"a\" tem acento grave.",
+    status: "needs_review"
+  },
+  {
+    id: "accent-auto-004",
+    type: "accent",
+    level: "B1",
+    targetText: "déjà",
+    audioFile: "eb49cf71b9ac.mp3",
+    explanation: "\"e\" tem acento agudo, \"a\" tem acento grave.",
+    status: "needs_review"
+  },
+  {
+    id: "accent-auto-005",
+    type: "accent",
+    level: "B1",
+    targetText: "après",
+    audioFile: "1b4815ffd3e4.mp3",
+    explanation: "\"e\" tem acento grave.",
+    status: "needs_review"
+  },
+  {
+    id: "accent-auto-006",
+    type: "accent",
+    level: "B1",
+    targetText: "français",
+    audioFile: "616e89b4d5aa.mp3",
+    explanation: "\"c\" tem acento cedilha.",
+    status: "needs_review"
   }
 ];
