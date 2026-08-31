@@ -20,7 +20,7 @@ TTS_VOICE = "fr-FR-Chirp3-HD-Achernar"
 # ---------- YouTube Data API v3 (só pra "pour aller plus loin", opcional) ----------
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY")
 EXTERNAL_RESOURCES_MAX_RESULTS = 3
-EXTERNAL_RESOURCES_KEEP = 1  # quantos links aprovados guardar por desafio
+EXTERNAL_RESOURCES_KEEP = 2  # ex: 1 dicionário/artigo/vídeo + 1 YouGlish -- diversidade de função, não redundância
 
 # ---------- Cache / custos ----------
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))

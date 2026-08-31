@@ -13,7 +13,7 @@ from . import config, cost_log
 _creds = None
 
 
-def _access_token():
+def access_token():
     global _creds
     if _creds is None:
         _creds, _ = google.auth.load_credentials_from_file(
@@ -45,7 +45,7 @@ def generate_json(prompt, schema, log_label, log_detail="", temperature=0.4, mod
     }
     resp = requests.post(
         url,
-        headers={"Authorization": f"Bearer {_access_token()}", "Content-Type": "application/json"},
+        headers={"Authorization": f"Bearer {access_token()}", "Content-Type": "application/json"},
         json=body,
         timeout=60,
     )
