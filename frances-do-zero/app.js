@@ -3950,7 +3950,7 @@ function switchTab(tab){
   if (tab === 'progress'){ renderProgressView(); }
   if (tab === 'path'){ renderUnitsGrid(); }
   if (tab === 'dictation'){ renderDictationList(); }
-  if (tab === 'challenges'){ renderChallengesList(); }
+  if (tab === 'challenges'){ renderChallengeCategories(); }
 }
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -4908,15 +4908,32 @@ function renderDictationResult(d, userText){
 }
 
 // ============================================================
-// DESAFIOS: expressões francesas com contexto e áudio
-// Ver challenges.js — expressão -> exemplo em contexto (TTS) -> hipótese ->
-// alternativas (reveladas só depois de um clique) -> feedback -> segundo
-// exemplo (flexionado, com TTS) -> microatividade -> "pour aller plus loin"
-// (links externos opcionais, nunca necessários pra completar o desafio).
-// Curadoria e geração dos desafios feita fora do site; aqui só a
-// experiência do aluno e a tela de revisão do admin.
+// DESAFIOS: três categorias compartilhando a mesma infraestrutura
+// (níveis, geração automática, TTS, fila de revisão, aprovação,
+// publicação) — só a lógica específica de cada tipo muda:
+//
+//   expression        — expressão -> exemplo em contexto (TTS) -> hipótese
+//                        -> alternativas -> feedback -> segundo exemplo
+//                        (TTS) -> microatividade -> "pour aller plus loin"
+//   listen_translate  — frase em francês (só áudio) -> tradução do aluno
+//                        -> avaliação semântica (não exige match literal)
+//                        -> feedback com frase original revelada
+//   accent            — palavra/expressão curta (só áudio) -> grafia do
+//                        aluno -> correção sensível a acentos
+//
+// Curadoria e geração dos desafios feita fora do site (scripts/
+// challenges_pipeline/); aqui só a experiência do aluno e a tela de
+// revisão do admin. Ver challenges.js pro shape de cada tipo.
 // ============================================================
 const CHALLENGES_ADMIN_EMAIL = 'brunemed1310@gmail.com';
+
+const CHALLENGE_CATEGORIES = [
+  { type: 'expression', emoji: '🧩', title: 'Expressões', subtitle: 'Descubra o sentido' },
+  { type: 'listen_translate', emoji: '🎧', title: 'Ouça e traduza', subtitle: 'Escute e traduza' },
+  { type: 'accent', emoji: '✍️', title: 'Acentuação', subtitle: 'Escreva corretamente' },
+];
+
+let currentChallengesCategory = 'expression';
 
 function isChallengesAdmin(){
   return !!(CURRENT_USER && CURRENT_USER.email === CHALLENGES_ADMIN_EMAIL);
@@ -4959,8 +4976,9 @@ function challengeExternalResourcesHTML(c){
   `;
 }
 
-function renderChallengesList(){
-  document.getElementById('challenges-list-wrap').style.display = 'block';
+function renderChallengeCategories(){
+  document.getElementById('challenges-categories-wrap').style.display = 'block';
+  document.getElementById('challenges-list-wrap').style.display = 'none';
   document.getElementById('challenge-player-wrap').style.display = 'none';
   document.getElementById('challenges-admin-wrap').style.display = 'none';
 
@@ -4970,14 +4988,44 @@ function renderChallengesList(){
     document.getElementById('challenges-pending-count').textContent = pendingChallenges().length;
   }
 
+  const wrap = document.getElementById('challenges-categories');
+  wrap.innerHTML = CHALLENGE_CATEGORIES.map(cat => `
+    <button class="challenge-category-card" data-category="${cat.type}">
+      <div class="challenge-category-emoji">${cat.emoji}</div>
+      <div class="challenge-category-title">${cat.title}</div>
+      <div class="challenge-category-subtitle">${cat.subtitle}</div>
+    </button>
+  `).join('');
+  wrap.querySelectorAll('.challenge-category-card').forEach(card => {
+    card.addEventListener('click', () => renderChallengesList(card.dataset.category));
+  });
+}
+
+function challengeCardLabelHTML(c){
+  if (c.type === 'expression') return `<div class="challenge-card-expr">${escapeHtmlChallenge(c.canonicalExpression)}</div>`;
+  if (c.type === 'listen_translate') return `<div class="challenge-card-expr">🎧 Ouça e traduza</div>`;
+  if (c.type === 'accent') return `<div class="challenge-card-expr">✍️ Acentuação</div>`;
+  return '';
+}
+
+function renderChallengesList(type){
+  currentChallengesCategory = type;
+  document.getElementById('challenges-categories-wrap').style.display = 'none';
+  document.getElementById('challenges-list-wrap').style.display = 'block';
+  document.getElementById('challenge-player-wrap').style.display = 'none';
+  document.getElementById('challenges-admin-wrap').style.display = 'none';
+
+  const cat = CHALLENGE_CATEGORIES.find(c => c.type === type);
+  document.getElementById('challenges-list-title').textContent = cat ? cat.title : 'Desafios';
+
   const cardsWrap = document.getElementById('challenges-cards');
-  const published = publishedChallenges();
+  const published = publishedChallenges().filter(c => c.type === type);
   if (published.length === 0){
     cardsWrap.innerHTML = `
       <div class="challenges-empty">
-        <div class="big-emoji">🧩</div>
+        <div class="big-emoji">${cat ? cat.emoji : '🧩'}</div>
         <h3>Nenhum desafio publicado ainda</h3>
-        <p>Em breve, novos desafios de expressões francesas com contexto e áudio.</p>
+        <p>Em breve, novos desafios nesta categoria.</p>
       </div>
     `;
     return;
@@ -4986,7 +5034,7 @@ function renderChallengesList(){
   cardsWrap.innerHTML = published.map(c => `
     <button class="challenge-card" data-challenge-id="${c.id}">
       <div class="challenge-card-level">${c.level}</div>
-      <div class="challenge-card-expr">${escapeHtmlChallenge(c.canonicalExpression)}</div>
+      ${challengeCardLabelHTML(c)}
     </button>
   `).join('');
   cardsWrap.querySelectorAll('.challenge-card').forEach(card => {
@@ -4994,8 +5042,9 @@ function renderChallengesList(){
   });
 }
 
-document.getElementById('challenge-back-to-list').addEventListener('click', renderChallengesList);
-document.getElementById('challenges-admin-back-btn').addEventListener('click', renderChallengesList);
+document.getElementById('challenges-list-back-btn').addEventListener('click', renderChallengeCategories);
+document.getElementById('challenge-back-to-list').addEventListener('click', () => renderChallengesList(currentChallengesCategory));
+document.getElementById('challenges-admin-back-btn').addEventListener('click', renderChallengeCategories);
 document.getElementById('challenges-admin-review-btn').addEventListener('click', () => renderChallengesAdmin());
 
 function openChallengePlayer(id){
@@ -5005,6 +5054,12 @@ function openChallengePlayer(id){
   document.getElementById('challenges-list-wrap').style.display = 'none';
   document.getElementById('challenge-player-wrap').style.display = 'block';
 
+  if (c.type === 'listen_translate') return openListenTranslatePlayer(c);
+  if (c.type === 'accent') return openAccentPlayer(c);
+  return openExpressionPlayer(c);
+}
+
+function openExpressionPlayer(c){
   const content = document.getElementById('challenge-player-content');
   content.innerHTML = `
     <div class="challenge-expression">
@@ -5094,6 +5149,156 @@ function answerChallenge(c, chosenIdx, choicesEl){
   });
 }
 
+// ---------- Ouça e traduza ----------
+// Correção não exige match literal com a tradução de referência: compara
+// por sobreposição de palavras de conteúdo (ignorando artigos/preposições
+// comuns em português) contra qualquer uma das traduções aceitas geradas
+// na curadoria. É uma aproximação, não uma avaliação semântica de verdade
+// (não há chamada de IA em tempo de execução do aluno) — por isso o
+// feedback sempre mostra a resposta do aluno ao lado da esperada, pra ele
+// mesmo julgar nuances que o comparador não capta.
+function normalizeForTranslationCompare(s){
+  return String(s || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[.,!?;:'"()]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+const TRANSLATION_STOPWORDS_PT = new Set([
+  'o','a','os','as','um','uma','uns','umas','de','do','da','dos','das','em','no','na','nos','nas',
+  'que','e','é','ele','ela','eles','elas','eu','tu','voce','você','nos','nós','voces','vocês',
+  'para','por','com','se','ao','aos','a','as','à','às','sao','são','esta','está','isso','isto'
+]);
+
+function translationTokenSet(s){
+  return normalizeForTranslationCompare(s).split(' ').filter(w => w && !TRANSLATION_STOPWORDS_PT.has(w));
+}
+
+function translationSimilarity(a, b){
+  const ta = translationTokenSet(a);
+  const tb = translationTokenSet(b);
+  if (!ta.length || !tb.length) return 0;
+  const setB = new Set(tb);
+  const overlap = ta.filter(w => setB.has(w)).length;
+  return overlap / Math.max(ta.length, tb.length);
+}
+
+function isTranslationAcceptable(studentAnswer, referenceTranslations){
+  if (!studentAnswer || !studentAnswer.trim()) return false;
+  return (referenceTranslations || []).some(ref => translationSimilarity(studentAnswer, ref) >= 0.55);
+}
+
+function openListenTranslatePlayer(c){
+  const content = document.getElementById('challenge-player-content');
+  content.innerHTML = `
+    <div class="challenge-expression">🎧 Ouça e traduza</div>
+    <div class="listen-translate-audio-wrap">
+      <button class="dictation-play-btn" id="lt-play-btn">▶ Écouter</button>
+    </div>
+    <div class="listen-translate-hint-wrap">
+      <button class="btn btn-secondary" id="lt-hint-btn">Montrer un indice</button>
+      <p class="listen-translate-hint-text" id="lt-hint-text" style="display:none;"></p>
+    </div>
+    <label class="listen-translate-answer-label" for="lt-answer-input">Digite sua tradução:</label>
+    <textarea class="listen-translate-answer-input" id="lt-answer-input" rows="2" placeholder="Sua tradução em português..."></textarea>
+    <div class="listen-translate-actions">
+      <button class="btn btn-primary" id="lt-verify-btn">Vérifier</button>
+    </div>
+    <div id="lt-feedback-wrap"></div>
+  `;
+
+  document.getElementById('lt-play-btn').addEventListener('click', (e) => {
+    if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
+  });
+  document.getElementById('lt-hint-btn').addEventListener('click', (e) => {
+    document.getElementById('lt-hint-text').textContent = c.hintText;
+    document.getElementById('lt-hint-text').style.display = 'block';
+    e.currentTarget.style.display = 'none';
+  });
+  document.getElementById('lt-verify-btn').addEventListener('click', () => checkListenTranslateAnswer(c));
+}
+
+function checkListenTranslateAnswer(c){
+  const input = document.getElementById('lt-answer-input');
+  const studentAnswer = input.value.trim();
+  const isCorrect = isTranslationAcceptable(studentAnswer, c.referenceTranslations);
+  if (isCorrect) addXP(5);
+
+  document.getElementById('lt-feedback-wrap').innerHTML = `
+    <div class="listen-translate-feedback ${isCorrect ? 'correct' : 'incorrect'}">
+      <div class="listen-translate-feedback-header">${isCorrect ? '✅ Bonne traduction.' : '❌ Pas tout à fait.'}</div>
+      <p class="listen-translate-feedback-row"><strong>Sua resposta</strong>${escapeHtmlChallenge(studentAnswer || '—')}</p>
+      <p class="listen-translate-feedback-row"><strong>Resposta esperada</strong>${escapeHtmlChallenge(c.referenceTranslations[0])}</p>
+      <p class="listen-translate-feedback-row"><strong>Frase original</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
+      ${c.explanation ? `<p class="listen-translate-feedback-row"><strong>Explicação</strong>${escapeHtmlChallenge(c.explanation)}</p>` : ''}
+      <button class="dictation-play-btn" id="lt-replay-btn">▶ Écouter encore</button>
+    </div>
+  `;
+  document.getElementById('lt-verify-btn').style.display = 'none';
+  document.getElementById('lt-replay-btn').addEventListener('click', (e) => {
+    if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
+  });
+}
+
+// ---------- Acentuação ----------
+// Correção sensível a acentos/cedilha/trema -- nunca remove diacríticos
+// antes de comparar (só normaliza espaço/maiúsculas, que não são o alvo
+// da atividade).
+function normalizeForAccentCompare(s){
+  return String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function isAccentAnswerCorrect(studentAnswer, targetText){
+  return normalizeForAccentCompare(studentAnswer) === normalizeForAccentCompare(targetText);
+}
+
+function openAccentPlayer(c){
+  const content = document.getElementById('challenge-player-content');
+  content.innerHTML = `
+    <div class="challenge-expression">✍️ Acentuação</div>
+    <div class="accent-audio-wrap">
+      <button class="dictation-play-btn" id="accent-play-btn">▶ Écouter</button>
+    </div>
+    <label class="listen-translate-answer-label" for="accent-answer-input">Digite o que você ouviu:</label>
+    <input type="text" class="accent-answer-input" id="accent-answer-input" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div class="listen-translate-actions">
+      <button class="btn btn-primary" id="accent-verify-btn">Vérifier</button>
+    </div>
+    <div id="accent-feedback-wrap"></div>
+  `;
+
+  document.getElementById('accent-play-btn').addEventListener('click', (e) => {
+    if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
+  });
+  document.getElementById('accent-answer-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') checkAccentAnswer(c);
+  });
+  document.getElementById('accent-verify-btn').addEventListener('click', () => checkAccentAnswer(c));
+}
+
+function checkAccentAnswer(c){
+  const input = document.getElementById('accent-answer-input');
+  const studentAnswer = input.value.trim();
+  const isCorrect = isAccentAnswerCorrect(studentAnswer, c.targetText);
+  if (isCorrect) addXP(5);
+
+  document.getElementById('accent-feedback-wrap').innerHTML = `
+    <div class="accent-feedback ${isCorrect ? 'correct' : 'incorrect'}">
+      <div class="accent-feedback-header">${isCorrect ? '✅ Correct.' : '❌ Incorrect.'}</div>
+      ${!isCorrect ? `<p class="accent-feedback-answer">Sua resposta: <strong>${escapeHtmlChallenge(studentAnswer || '—')}</strong></p>` : ''}
+      <div class="accent-feedback-correct-word">${escapeHtmlChallenge(c.targetText)}</div>
+      <button class="dictation-play-btn" id="accent-replay-btn">▶ Écouter</button>
+      ${c.explanation ? `<p class="accent-feedback-explanation">${escapeHtmlChallenge(c.explanation)}</p>` : ''}
+    </div>
+  `;
+  document.getElementById('accent-verify-btn').style.display = 'none';
+  document.getElementById('accent-replay-btn').addEventListener('click', (e) => {
+    if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
+  });
+}
+
 // ---------- Revisão do admin ----------
 // Aprovar/Editar/Rejeitar aqui só muda o estado NESTA sessão do navegador —
 // os desafios vivem num arquivo estático (challenges.js) versionado no
@@ -5124,7 +5329,7 @@ function challengeAdminResourceHTML(r, idx){
   `;
 }
 
-function challengeAdminReadView(c){
+function challengeAdminReadViewExpression(c){
   const resourcesHTML = (c.externalResources && c.externalResources.length)
     ? c.externalResources.map((r, idx) => challengeAdminResourceHTML(r, idx)).join('')
     : `<p class="challenges-admin-hint">Nenhum recurso externo encontrado</p>`;
@@ -5144,7 +5349,7 @@ function challengeAdminReadView(c){
   `;
 }
 
-function challengeAdminEditView(c){
+function challengeAdminEditViewExpression(c){
   const optionsText = c.options.map(o => (o === c.correctAnswer ? '*' : '') + o).join('\n');
   return `
     <label class="challenges-admin-edit-label">Exemplo
@@ -5172,6 +5377,76 @@ function challengeAdminEditView(c){
   `;
 }
 
+function challengeAdminReadViewListenTranslate(c){
+  return `
+    <p class="challenges-admin-field"><strong>Áudio:</strong> ${c.audioFile ? '🔊 disponível' : '<span class="challenges-admin-hint">ausente</span>'}</p>
+    <p class="challenges-admin-field"><strong>Frase (francês):</strong> ${escapeHtmlChallenge(c.sentenceFr)}</p>
+    <p class="challenges-admin-field"><strong>Dica (cloze):</strong> ${escapeHtmlChallenge(c.hintText)}</p>
+    <p class="challenges-admin-field"><strong>Traduções aceitas:</strong></p>
+    <ul class="challenges-admin-choices">
+      ${(c.referenceTranslations || []).map(t => `<li>${escapeHtmlChallenge(t)}</li>`).join('')}
+    </ul>
+    <p class="challenges-admin-field"><strong>Explicação:</strong> ${escapeHtmlChallenge(c.explanation || '—')}</p>
+  `;
+}
+
+function challengeAdminEditViewListenTranslate(c){
+  return `
+    <label class="challenges-admin-edit-label">Frase (francês)
+      <textarea class="challenges-admin-edit-input" data-field="sentenceFr" rows="2">${escapeHtmlChallenge(c.sentenceFr)}</textarea>
+    </label>
+    <label class="challenges-admin-edit-label">Dica (cloze, com ______ pra parte oculta)
+      <input class="challenges-admin-edit-input" data-field="hintText" value="${escapeHtmlChallenge(c.hintText)}">
+    </label>
+    <label class="challenges-admin-edit-label">Traduções aceitas (uma por linha, a primeira é a "resposta esperada" mostrada no feedback)
+      <textarea class="challenges-admin-edit-input" data-field="referenceTranslations" rows="4">${escapeHtmlChallenge((c.referenceTranslations || []).join('\n'))}</textarea>
+    </label>
+    <label class="challenges-admin-edit-label">Explicação
+      <input class="challenges-admin-edit-input" data-field="explanation" value="${escapeHtmlChallenge(c.explanation || '')}">
+    </label>
+    <p class="challenges-admin-hint">Editar a frase não regenera o áudio automaticamente — me avise se precisar ser refeito.</p>
+  `;
+}
+
+function challengeAdminReadViewAccent(c){
+  return `
+    <p class="challenges-admin-field"><strong>Áudio:</strong> ${c.audioFile ? '🔊 disponível' : '<span class="challenges-admin-hint">ausente</span>'}</p>
+    <p class="challenges-admin-field"><strong>Palavra/expressão:</strong> ${escapeHtmlChallenge(c.targetText)}</p>
+    <p class="challenges-admin-field"><strong>Explicação:</strong> ${escapeHtmlChallenge(c.explanation || '—')}</p>
+  `;
+}
+
+function challengeAdminEditViewAccent(c){
+  return `
+    <label class="challenges-admin-edit-label">Palavra/expressão (com acentos corretos)
+      <input class="challenges-admin-edit-input" data-field="targetText" value="${escapeHtmlChallenge(c.targetText)}">
+    </label>
+    <label class="challenges-admin-edit-label">Explicação
+      <input class="challenges-admin-edit-input" data-field="explanation" value="${escapeHtmlChallenge(c.explanation || '')}">
+    </label>
+    <p class="challenges-admin-hint">Editar a palavra não regenera o áudio automaticamente — me avise se precisar ser refeito.</p>
+  `;
+}
+
+function challengeAdminReadView(c){
+  if (c.type === 'listen_translate') return challengeAdminReadViewListenTranslate(c);
+  if (c.type === 'accent') return challengeAdminReadViewAccent(c);
+  return challengeAdminReadViewExpression(c);
+}
+
+function challengeAdminEditView(c){
+  if (c.type === 'listen_translate') return challengeAdminEditViewListenTranslate(c);
+  if (c.type === 'accent') return challengeAdminEditViewAccent(c);
+  return challengeAdminEditViewExpression(c);
+}
+
+function challengeAdminCardTitle(c){
+  if (c.type === 'expression') return escapeHtmlChallenge(c.canonicalExpression);
+  if (c.type === 'listen_translate') return '🎧 Ouça e traduza';
+  if (c.type === 'accent') return `✍️ Acentuação — ${escapeHtmlChallenge(c.targetText)}`;
+  return '';
+}
+
 function renderChallengesAdmin(){
   if (!isChallengesAdmin()) return;
   document.getElementById('challenges-list-wrap').style.display = 'none';
@@ -5192,7 +5467,7 @@ function renderChallengesAdmin(){
     <div class="challenges-admin-card" data-challenge-id="${c.id}">
       <div class="challenges-admin-card-header">
         <span class="challenge-card-level">${c.level}</span>
-        <strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong>
+        <strong>${challengeAdminCardTitle(c)}</strong>
       </div>
       <div class="challenges-admin-card-body">
         ${editing ? challengeAdminEditView(c) : challengeAdminReadView(c)}
@@ -5258,6 +5533,8 @@ function renderChallengesAdmin(){
           c.options = lines.map(l => l.replace(/^\*/, '').trim());
           const starred = lines.find(l => l.startsWith('*'));
           if (starred) c.correctAnswer = starred.replace(/^\*/, '').trim();
+        } else if (field === 'referenceTranslations'){
+          c.referenceTranslations = value.split('\n').map(l => l.trim()).filter(Boolean);
         } else if (field.includes('.')){
           const [obj, key] = field.split('.');
           c[obj][key] = value;
