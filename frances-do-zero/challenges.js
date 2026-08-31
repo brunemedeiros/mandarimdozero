@@ -35,7 +35,8 @@ const CHALLENGES = [
       pt: "Sentir-se mal, ter dor de cabeça após ter bebido muito álcool."
     },
     example: {
-      text: "Hier soir, j'ai trop bu et ce matin, j'ai vraiment la gueule de bois."
+      text: "Hier soir, j'ai trop bu et ce matin, j'ai vraiment la gueule de bois.",
+      audioFile: "762913bfed75.mp3"
     },
     question: "Que signifie cette expression ?",
     options: [
@@ -91,7 +92,8 @@ const CHALLENGES = [
       pt: "Significa incomodar ou irritar muito alguém."
     },
     example: {
-      text: "Arrête de faire ce bruit, tu me casses les pieds depuis ce matin !"
+      text: "Arrête de faire ce bruit, tu me casses les pieds depuis ce matin !",
+      audioFile: "28f231d74669.mp3"
     },
     question: "Que signifie l'expression \"casser les pieds\" ?",
     options: [
@@ -147,7 +149,8 @@ const CHALLENGES = [
       pt: "Dar um bolo, não comparecer a um compromisso."
     },
     example: {
-      text: "J'étais très en colère parce que mon ami m'a posé un lapin pour notre rendez-vous hier soir."
+      text: "J'étais très en colère parce que mon ami m'a posé un lapin pour notre rendez-vous hier soir.",
+      audioFile: "7cce197a5106.mp3"
     },
     question: "Que signifie cette expression ?",
     options: [
