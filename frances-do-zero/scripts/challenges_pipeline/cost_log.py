@@ -4,9 +4,11 @@ import time
 from . import config
 
 
-def log_call(model, video_id, expression, usage, cache_hit=False):
-    """Registra uma chamada ao Gemini pra observabilidade de custo.
-    Nunca bloqueia o pipeline se o log falhar — é só telemetria local."""
+def log_call(model, label, detail, usage, cache_hit=False):
+    """Registra uma chamada ao Gemini pra observabilidade de custo. `label`
+    identifica o tipo de chamada (ex: 'content', 'external-resource-judge')
+    e `detail` um identificador legível (ex: a expressão). Nunca bloqueia o
+    pipeline se o log falhar — é só telemetria local."""
     prices = config.APPROX_PRICE_PER_1M_TOKENS.get(model, {})
     input_tokens = usage.get("promptTokenCount", 0) if usage else 0
     output_tokens = usage.get("candidatesTokenCount", 0) if usage else 0
@@ -21,8 +23,8 @@ def log_call(model, video_id, expression, usage, cache_hit=False):
     entry = {
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "model": model,
-        "videoId": video_id,
-        "expression": expression,
+        "label": label,
+        "detail": detail,
         "cacheHit": cache_hit,
         "inputTokens": input_tokens,
         "outputTokens": output_tokens,

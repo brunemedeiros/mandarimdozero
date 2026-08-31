@@ -4908,11 +4908,13 @@ function renderDictationResult(d, userText){
 }
 
 // ============================================================
-// DESAFIOS: expressões francesas com contexto em vídeo
-// Ver challenges.js — expressão -> vídeo autêntico -> hipótese ->
-// alternativas -> feedback -> segundo exemplo (flexionado, com TTS) ->
-// microatividade. Curadoria e geração dos desafios feita fora do site;
-// aqui só a experiência do aluno e a tela de revisão do admin.
+// DESAFIOS: expressões francesas com contexto e áudio
+// Ver challenges.js — expressão -> exemplo em contexto (TTS) -> hipótese ->
+// alternativas (reveladas só depois de um clique) -> feedback -> segundo
+// exemplo (flexionado, com TTS) -> microatividade -> "pour aller plus loin"
+// (links externos opcionais, nunca necessários pra completar o desafio).
+// Curadoria e geração dos desafios feita fora do site; aqui só a
+// experiência do aluno e a tela de revisão do admin.
 // ============================================================
 const CHALLENGES_ADMIN_EMAIL = 'brunemed1310@gmail.com';
 
@@ -4931,22 +4933,14 @@ function pendingChallenges(){
   return CHALLENGES.filter(c => c.status === 'needs_review');
 }
 
-function formatChallengeTimestamp(seconds){
-  if (seconds == null) return '—';
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${String(s).padStart(2, '0')}`;
-}
-
-function challengeQualityLabel(level){
-  return { high: 'Alta', medium: 'Média', low: 'Baixa' }[level] || '—';
-}
-
-function youtubeEmbedURL(video){
-  const params = new URLSearchParams({ rel: '0', modestbranding: '1' });
-  if (video.startTime != null) params.set('start', Math.floor(video.startTime));
-  if (video.endTime != null) params.set('end', Math.ceil(video.endTime));
-  return `https://www.youtube.com/embed/${video.youtubeId}?${params.toString()}`;
+function challengeExternalResourcesHTML(c){
+  if (!c.externalResources || !c.externalResources.length) return '';
+  return `
+    <div class="challenge-external-resources">
+      <div class="challenge-external-resources-label">Pour aller plus loin</div>
+      ${c.externalResources.map(r => `<a class="challenge-external-link" href="${escapeHtmlChallenge(r.url)}" target="_blank" rel="noopener">${r.type === 'youtube' ? '▶' : '🔗'} ${escapeHtmlChallenge(r.title)}</a>`).join('')}
+    </div>
+  `;
 }
 
 function renderChallengesList(){
@@ -4996,29 +4990,37 @@ function openChallengePlayer(id){
   document.getElementById('challenge-player-wrap').style.display = 'block';
 
   const content = document.getElementById('challenge-player-content');
-  const videoHTML = c.video.youtubeId
-    ? `<div class="challenge-video-wrap"><iframe src="${youtubeEmbedURL(c.video)}" title="Vídeo de contexto" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
-    : `<div class="challenge-video-missing">🎬 Vídeo em curadoria</div>`;
-
   content.innerHTML = `
     <div class="challenge-expression">${escapeHtmlChallenge(c.canonicalExpression)}</div>
-    ${videoHTML}
+    <div class="challenge-example">
+      <p class="challenge-example-text">${escapeHtmlChallenge(c.example.text)}</p>
+      <button class="dictation-play-btn" id="challenge-example-play-btn">▶ Écouter</button>
+    </div>
     <div class="challenge-hypothesis">
-      <p class="challenge-question">${escapeHtmlChallenge(c.question.fr)}</p>
-      <button class="btn btn-secondary" id="challenge-reveal-btn">Voir les réponses</button>
-      <div class="challenge-choices" id="challenge-choices" style="display:none;"></div>
+      <p class="challenge-question">${escapeHtmlChallenge(c.question)}</p>
+      <div class="challenge-choices-wrap">
+        <div class="challenge-choices blurred" id="challenge-choices"></div>
+        <button class="btn btn-secondary challenge-reveal-overlay-btn" id="challenge-reveal-btn">Voir les réponses</button>
+      </div>
     </div>
     <div id="challenge-feedback-wrap"></div>
   `;
 
-  document.getElementById('challenge-reveal-btn').addEventListener('click', () => {
-    document.getElementById('challenge-reveal-btn').style.display = 'none';
-    const choicesEl = document.getElementById('challenge-choices');
-    choicesEl.style.display = 'flex';
-    const shuffled = shuffle(c.choices.map((ch, i) => ({ ...ch, origIdx: i })));
-    choicesEl.innerHTML = shuffled.map(ch =>
-      `<button class="challenge-choice-btn" data-orig-idx="${ch.origIdx}">${escapeHtmlChallenge(ch.text)}</button>`
-    ).join('');
+  if (c.example.audioFile){
+    document.getElementById('challenge-example-play-btn').addEventListener('click', (e) => {
+      playPregeneratedAudio(`challenges/${c.example.audioFile}`, e.currentTarget);
+    });
+  }
+
+  const choicesEl = document.getElementById('challenge-choices');
+  const shuffled = shuffle(c.options.map((text, i) => ({ text, origIdx: i })));
+  choicesEl.innerHTML = shuffled.map(o =>
+    `<button class="challenge-choice-btn" data-orig-idx="${o.origIdx}">${escapeHtmlChallenge(o.text)}</button>`
+  ).join('');
+
+  document.getElementById('challenge-reveal-btn').addEventListener('click', (e) => {
+    choicesEl.classList.remove('blurred');
+    e.currentTarget.style.display = 'none';
     choicesEl.querySelectorAll('.challenge-choice-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         answerChallenge(c, parseInt(btn.dataset.origIdx, 10), choicesEl);
@@ -5028,11 +5030,11 @@ function openChallengePlayer(id){
 }
 
 function answerChallenge(c, chosenIdx, choicesEl){
-  const isCorrect = c.choices[chosenIdx].correct;
+  const isCorrect = c.options[chosenIdx] === c.correctAnswer;
   choicesEl.querySelectorAll('.challenge-choice-btn').forEach(btn => {
     btn.classList.add('disabled');
     const idx = parseInt(btn.dataset.origIdx, 10);
-    if (c.choices[idx].correct) btn.classList.add('correct');
+    if (c.options[idx] === c.correctAnswer) btn.classList.add('correct');
     else if (idx === chosenIdx) btn.classList.add('incorrect');
   });
 
@@ -5045,16 +5047,11 @@ function answerChallenge(c, chosenIdx, choicesEl){
       signifie <strong>${escapeHtmlChallenge(c.meaning.fr)}</strong>.<br>
       Em português: <strong>${escapeHtmlChallenge(c.meaning.pt)}</strong>.</p>
       <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation)}</p>
-      ${c.video.spokenOccurrence ? `
-      <div class="challenge-heard">
-        <div class="challenge-heard-label">Ce que vous avez entendu</div>
-        <p class="challenge-heard-text">${escapeHtmlChallenge(c.video.transcript || c.video.spokenOccurrence)}</p>
-      </div>` : ''}
 
       <div class="challenge-second-example">
         <div class="challenge-second-example-label">Exemple</div>
         <p class="challenge-second-example-text">${escapeHtmlChallenge(c.secondExample.text)}</p>
-        <button class="dictation-play-btn" id="challenge-example-play-btn">▶ Écouter</button>
+        <button class="dictation-play-btn" id="challenge-second-example-play-btn">▶ Écouter</button>
       </div>
 
       <div class="challenge-microactivity">
@@ -5063,11 +5060,13 @@ function answerChallenge(c, chosenIdx, choicesEl){
         <button class="btn btn-secondary" id="challenge-reveal-answer-btn">Voir la réponse</button>
         <p class="challenge-microactivity-answer" id="challenge-microactivity-answer" style="display:none;">${escapeHtmlChallenge(c.microActivity.answer)}</p>
       </div>
+
+      ${challengeExternalResourcesHTML(c)}
     </div>
   `;
 
   if (c.secondExample.audioFile){
-    document.getElementById('challenge-example-play-btn').addEventListener('click', (e) => {
+    document.getElementById('challenge-second-example-play-btn').addEventListener('click', (e) => {
       playPregeneratedAudio(`challenges/${c.secondExample.audioFile}`, e.currentTarget);
     });
   }
@@ -5078,10 +5077,59 @@ function answerChallenge(c, chosenIdx, choicesEl){
 }
 
 // ---------- Revisão do admin ----------
-// Aprovar/Rejeitar aqui só muda o estado NESTA sessão do navegador — os
-// desafios vivem num arquivo estático (challenges.js) versionado no
-// código, sem backend de escrita. A publicação de verdade acontece
+// Aprovar/Editar/Rejeitar aqui só muda o estado NESTA sessão do navegador —
+// os desafios vivem num arquivo estático (challenges.js) versionado no
+// código, sem backend de escrita. A publicação/edição de verdade acontece
 // confirmando a decisão com quem gera os desafios, que edita o arquivo.
+let challengesAdminEditingId = null;
+
+function challengeAdminReadView(c){
+  const resourcesHTML = (c.externalResources && c.externalResources.length)
+    ? c.externalResources.map(r => `<li><a href="${escapeHtmlChallenge(r.url)}" target="_blank" rel="noopener">${escapeHtmlChallenge(r.title)}</a></li>`).join('')
+    : `<li class="challenges-admin-hint">Nenhum recurso externo encontrado</li>`;
+
+  return `
+    <p class="challenges-admin-field"><strong>Exemplo:</strong> ${escapeHtmlChallenge(c.example.text)} ${c.example.audioFile ? '🔊' : '<span class="challenges-admin-hint">(sem áudio)</span>'}</p>
+    <p class="challenges-admin-field"><strong>Pergunta:</strong> ${escapeHtmlChallenge(c.question)}</p>
+    <ul class="challenges-admin-choices">
+      ${c.options.map(opt => `<li class="${opt === c.correctAnswer ? 'correct' : ''}">${escapeHtmlChallenge(opt)}</li>`).join('')}
+    </ul>
+    <p class="challenges-admin-field"><strong>Explicação:</strong> ${escapeHtmlChallenge(c.explanation)}</p>
+    <p class="challenges-admin-field"><strong>2º exemplo:</strong> ${escapeHtmlChallenge(c.secondExample.text)} ${c.secondExample.audioFile ? '🔊' : '<span class="challenges-admin-hint">(sem áudio)</span>'}</p>
+    <p class="challenges-admin-field"><strong>Microatividade:</strong> ${escapeHtmlChallenge(c.microActivity.prompt)} → ${escapeHtmlChallenge(c.microActivity.answer)}</p>
+    <p class="challenges-admin-field"><strong>Pour aller plus loin:</strong></p>
+    <ul class="challenges-admin-resources">${resourcesHTML}</ul>
+  `;
+}
+
+function challengeAdminEditView(c){
+  const optionsText = c.options.map(o => (o === c.correctAnswer ? '*' : '') + o).join('\n');
+  return `
+    <label class="challenges-admin-edit-label">Exemplo
+      <textarea class="challenges-admin-edit-input" data-field="example.text" rows="2">${escapeHtmlChallenge(c.example.text)}</textarea>
+    </label>
+    <label class="challenges-admin-edit-label">Pergunta
+      <input class="challenges-admin-edit-input" data-field="question" value="${escapeHtmlChallenge(c.question)}">
+    </label>
+    <label class="challenges-admin-edit-label">Alternativas (uma por linha — marque a correta com * no início)
+      <textarea class="challenges-admin-edit-input" data-field="options" rows="4">${escapeHtmlChallenge(optionsText)}</textarea>
+    </label>
+    <label class="challenges-admin-edit-label">Explicação
+      <textarea class="challenges-admin-edit-input" data-field="explanation" rows="2">${escapeHtmlChallenge(c.explanation)}</textarea>
+    </label>
+    <label class="challenges-admin-edit-label">2º exemplo
+      <textarea class="challenges-admin-edit-input" data-field="secondExample.text" rows="2">${escapeHtmlChallenge(c.secondExample.text)}</textarea>
+    </label>
+    <label class="challenges-admin-edit-label">Microatividade — frase
+      <input class="challenges-admin-edit-input" data-field="microActivity.prompt" value="${escapeHtmlChallenge(c.microActivity.prompt)}">
+    </label>
+    <label class="challenges-admin-edit-label">Microatividade — resposta
+      <input class="challenges-admin-edit-input" data-field="microActivity.answer" value="${escapeHtmlChallenge(c.microActivity.answer)}">
+    </label>
+    <p class="challenges-admin-hint">Editar o texto de um exemplo não regenera o áudio automaticamente — me avise se algum áudio precisar ser refeito.</p>
+  `;
+}
+
 function renderChallengesAdmin(){
   if (!isChallengesAdmin()) return;
   document.getElementById('challenges-list-wrap').style.display = 'none';
@@ -5096,51 +5144,77 @@ function renderChallengesAdmin(){
     return;
   }
 
-  content.innerHTML = pending.map(c => `
+  content.innerHTML = pending.map(c => {
+    const editing = challengesAdminEditingId === c.id;
+    return `
     <div class="challenges-admin-card" data-challenge-id="${c.id}">
       <div class="challenges-admin-card-header">
         <span class="challenge-card-level">${c.level}</span>
         <strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong>
       </div>
-      ${c.video.youtubeId
-        ? `<div class="challenge-video-wrap"><iframe src="${youtubeEmbedURL(c.video)}" title="Vídeo" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>
-           <p class="challenges-admin-field"><strong>Abrir aproximadamente em:</strong> ${formatChallengeTimestamp(c.video.startTime)} <span class="challenges-admin-hint">(estimativa — confira de ouvido)</span></p>
-           <p class="challenges-admin-field"><strong>Ocorrência identificada:</strong> ${escapeHtmlChallenge(c.video.spokenOccurrence || '—')}</p>
-           <p class="challenges-admin-field"><strong>Confiança:</strong> ${c.video.confidence != null ? Math.round(c.video.confidence * 100) + '%' : '—'}</p>
-           <p class="challenges-admin-field"><strong>Qualidade do áudio:</strong> ${challengeQualityLabel(c.video.audioClarity)}</p>
-           <p class="challenges-admin-field"><strong>Qualidade do contexto:</strong> ${challengeQualityLabel(c.video.contextQuality)}</p>
-           ${c.video.notes ? `<p class="challenges-admin-field"><strong>Observação automática:</strong> ${escapeHtmlChallenge(c.video.notes)}</p>` : ''}
-           ${c.video.transcript ? `<p class="challenges-admin-field"><strong>Trecho transcrito:</strong> ${escapeHtmlChallenge(c.video.transcript)}</p>` : ''}`
-        : `<p class="challenge-video-missing">🎬 Vídeo ainda não definido — não dá pra aprovar sem confirmar a ocorrência.</p>`
-      }
-      <p class="challenges-admin-field"><strong>Pergunta:</strong> ${escapeHtmlChallenge(c.question.fr)}</p>
-      <ul class="challenges-admin-choices">
-        ${c.choices.map(ch => `<li class="${ch.correct ? 'correct' : ''}">${escapeHtmlChallenge(ch.text)}</li>`).join('')}
-      </ul>
-      <p class="challenges-admin-field"><strong>Explicação:</strong> ${escapeHtmlChallenge(c.explanation)}</p>
-      <p class="challenges-admin-field"><strong>2º exemplo:</strong> ${escapeHtmlChallenge(c.secondExample.text)}</p>
-      <p class="challenges-admin-field"><strong>Microatividade:</strong> ${escapeHtmlChallenge(c.microActivity.prompt)} → ${escapeHtmlChallenge(c.microActivity.answer)}</p>
+      <div class="challenges-admin-card-body">
+        ${editing ? challengeAdminEditView(c) : challengeAdminReadView(c)}
+      </div>
       <div class="challenges-admin-actions">
-        <button class="btn btn-primary" data-action="approve" ${c.video.youtubeId ? '' : 'disabled'}>✅ Aprovar e publicar</button>
-        <button class="btn btn-secondary" data-action="reject">❌ Rejeitar</button>
+        ${editing
+          ? `<button class="btn btn-primary" data-action="save">💾 Salvar</button>
+             <button class="btn btn-secondary" data-action="cancel-edit">Cancelar</button>`
+          : `<button class="btn btn-primary" data-action="approve">✅ Aprovar e publicar</button>
+             <button class="btn btn-secondary" data-action="edit">✏️ Editar</button>
+             <button class="btn btn-secondary" data-action="reject">❌ Rejeitar</button>`
+        }
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 
   content.querySelectorAll('.challenges-admin-card').forEach(card => {
     const id = card.dataset.challengeId;
     const approveBtn = card.querySelector('[data-action="approve"]');
     const rejectBtn = card.querySelector('[data-action="reject"]');
-    approveBtn.addEventListener('click', () => {
+    const editBtn = card.querySelector('[data-action="edit"]');
+    const saveBtn = card.querySelector('[data-action="save"]');
+    const cancelBtn = card.querySelector('[data-action="cancel-edit"]');
+
+    if (approveBtn) approveBtn.addEventListener('click', () => {
       const c = CHALLENGES.find(x => x.id === id);
       c.status = 'published';
       showToast('Marcado como publicado nesta sessão — confirme comigo pra aplicar no código de verdade');
       renderChallengesAdmin();
     });
-    rejectBtn.addEventListener('click', () => {
+    if (rejectBtn) rejectBtn.addEventListener('click', () => {
       const c = CHALLENGES.find(x => x.id === id);
       c.status = 'rejected';
       showToast('Marcado como rejeitado nesta sessão — confirme comigo pra aplicar no código de verdade');
+      renderChallengesAdmin();
+    });
+    if (editBtn) editBtn.addEventListener('click', () => {
+      challengesAdminEditingId = id;
+      renderChallengesAdmin();
+    });
+    if (cancelBtn) cancelBtn.addEventListener('click', () => {
+      challengesAdminEditingId = null;
+      renderChallengesAdmin();
+    });
+    if (saveBtn) saveBtn.addEventListener('click', () => {
+      const c = CHALLENGES.find(x => x.id === id);
+      card.querySelectorAll('[data-field]').forEach(input => {
+        const field = input.dataset.field;
+        const value = input.value;
+        if (field === 'options'){
+          const lines = value.split('\n').map(l => l.trim()).filter(Boolean);
+          c.options = lines.map(l => l.replace(/^\*/, '').trim());
+          const starred = lines.find(l => l.startsWith('*'));
+          if (starred) c.correctAnswer = starred.replace(/^\*/, '').trim();
+        } else if (field.includes('.')){
+          const [obj, key] = field.split('.');
+          c[obj][key] = value;
+        } else {
+          c[field] = value;
+        }
+      });
+      challengesAdminEditingId = null;
+      showToast('Edição salva nesta sessão — confirme comigo pra aplicar no código de verdade');
       renderChallengesAdmin();
     });
   });
