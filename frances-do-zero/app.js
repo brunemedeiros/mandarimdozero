@@ -4933,12 +4933,28 @@ function pendingChallenges(){
   return CHALLENGES.filter(c => c.status === 'needs_review');
 }
 
+const CHALLENGE_RESOURCE_ICON = { dictionary: '📖', article: '📰', youtube: '▶', youglish: '🎧' };
+
+function challengeResourceCardHTML(r){
+  const icon = CHALLENGE_RESOURCE_ICON[r.type] || '🔗';
+  return `
+    <a class="challenge-external-link" href="${escapeHtmlChallenge(r.url)}" target="_blank" rel="noopener">
+      <span class="challenge-external-link-icon">${icon}</span>
+      <span class="challenge-external-link-text">
+        <span class="challenge-external-link-label">${escapeHtmlChallenge(r.buttonLabel || 'En savoir plus')}</span>
+        <span class="challenge-external-link-source">${escapeHtmlChallenge(r.sourceName || r.title)}</span>
+      </span>
+    </a>
+  `;
+}
+
 function challengeExternalResourcesHTML(c){
-  if (!c.externalResources || !c.externalResources.length) return '';
+  const shown = (c.externalResources || []).filter(r => r.approved !== false);
+  if (!shown.length) return '';
   return `
     <div class="challenge-external-resources">
       <div class="challenge-external-resources-label">Pour aller plus loin</div>
-      ${c.externalResources.map(r => `<a class="challenge-external-link" href="${escapeHtmlChallenge(r.url)}" target="_blank" rel="noopener">${r.type === 'youtube' ? '▶' : '🔗'} ${escapeHtmlChallenge(r.title)}</a>`).join('')}
+      ${shown.map(challengeResourceCardHTML).join('')}
     </div>
   `;
 }
@@ -4961,7 +4977,7 @@ function renderChallengesList(){
       <div class="challenges-empty">
         <div class="big-emoji">🧩</div>
         <h3>Nenhum desafio publicado ainda</h3>
-        <p>Em breve, novos desafios de expressões francesas com contexto em vídeo.</p>
+        <p>Em breve, novos desafios de expressões francesas com contexto e áudio.</p>
       </div>
     `;
     return;
@@ -4991,10 +5007,12 @@ function openChallengePlayer(id){
 
   const content = document.getElementById('challenge-player-content');
   content.innerHTML = `
-    <div class="challenge-expression">${escapeHtmlChallenge(c.canonicalExpression)}</div>
+    <div class="challenge-expression">
+      ${escapeHtmlChallenge(c.canonicalExpression)}
+      <button class="audio-btn audio-btn-lg" id="challenge-expression-play-btn" aria-label="Ouvir pronúncia" title="Ouvir pronúncia">🔊</button>
+    </div>
     <div class="challenge-example">
       <p class="challenge-example-text">${escapeHtmlChallenge(c.example.text)}</p>
-      <button class="dictation-play-btn" id="challenge-example-play-btn">▶ Écouter</button>
     </div>
     <div class="challenge-hypothesis">
       <p class="challenge-question">${escapeHtmlChallenge(c.question)}</p>
@@ -5006,9 +5024,9 @@ function openChallengePlayer(id){
     <div id="challenge-feedback-wrap"></div>
   `;
 
-  if (c.example.audioFile){
-    document.getElementById('challenge-example-play-btn').addEventListener('click', (e) => {
-      playPregeneratedAudio(`challenges/${c.example.audioFile}`, e.currentTarget);
+  if (c.expressionAudioFile){
+    document.getElementById('challenge-expression-play-btn').addEventListener('click', (e) => {
+      playPregeneratedAudio(`challenges/${c.expressionAudioFile}`, e.currentTarget);
     });
   }
 
@@ -5083,13 +5101,37 @@ function answerChallenge(c, chosenIdx, choicesEl){
 // confirmando a decisão com quem gera os desafios, que edita o arquivo.
 let challengesAdminEditingId = null;
 
+const CHALLENGE_RESOURCE_TYPE_LABEL = {
+  dictionary: 'Dicionário', article: 'Artigo linguístico', youtube: 'Vídeo', youglish: 'Exemplos autênticos'
+};
+const CHALLENGE_RESOURCE_QUALITY_LABEL = { high: 'Alta', medium: 'Média', low: 'Baixa' };
+
+function challengeAdminResourceHTML(r, idx){
+  return `
+    <div class="challenges-admin-resource ${r.approved === false ? 'rejected' : ''}" data-resource-idx="${idx}">
+      <div class="challenges-admin-resource-info">
+        <strong>${escapeHtmlChallenge(r.sourceName || r.title)}</strong>
+        <span class="challenges-admin-hint">Tipo: ${escapeHtmlChallenge(CHALLENGE_RESOURCE_TYPE_LABEL[r.type] || r.type)}${r.quality ? ` · Qualidade: ${CHALLENGE_RESOURCE_QUALITY_LABEL[r.quality] || r.quality}` : ''}</span>
+        <span class="challenges-admin-hint">${escapeHtmlChallenge(r.description || '')}</span>
+        <span class="challenges-admin-hint">${r.lastChecked ? `Link verificado em ${escapeHtmlChallenge(r.lastChecked)}` : 'Link não verificado automaticamente — confira antes de aprovar'}</span>
+      </div>
+      <div class="challenges-admin-resource-actions">
+        <a class="btn btn-secondary btn-sm" href="${escapeHtmlChallenge(r.url)}" target="_blank" rel="noopener">Abrir</a>
+        <button class="btn btn-sm ${r.approved !== false ? 'btn-primary' : 'btn-secondary'}" data-resource-action="approve">✅ Aprovar</button>
+        <button class="btn btn-sm ${r.approved === false ? 'btn-primary' : 'btn-secondary'}" data-resource-action="reject">❌ Rejeitar</button>
+      </div>
+    </div>
+  `;
+}
+
 function challengeAdminReadView(c){
   const resourcesHTML = (c.externalResources && c.externalResources.length)
-    ? c.externalResources.map(r => `<li><a href="${escapeHtmlChallenge(r.url)}" target="_blank" rel="noopener">${escapeHtmlChallenge(r.title)}</a></li>`).join('')
-    : `<li class="challenges-admin-hint">Nenhum recurso externo encontrado</li>`;
+    ? c.externalResources.map((r, idx) => challengeAdminResourceHTML(r, idx)).join('')
+    : `<p class="challenges-admin-hint">Nenhum recurso externo encontrado</p>`;
 
   return `
-    <p class="challenges-admin-field"><strong>Exemplo:</strong> ${escapeHtmlChallenge(c.example.text)} ${c.example.audioFile ? '🔊' : '<span class="challenges-admin-hint">(sem áudio)</span>'}</p>
+    <p class="challenges-admin-field"><strong>Áudio da expressão-alvo:</strong> ${c.expressionAudioFile ? `🔊 disponível — <span class="challenges-admin-hint">este é o áudio tocado no início do desafio, não o exemplo contextual</span>` : '<span class="challenges-admin-hint">ausente</span>'}</p>
+    <p class="challenges-admin-field"><strong>Exemplo (contexto escrito, sem áudio automático):</strong> ${escapeHtmlChallenge(c.example.text)}</p>
     <p class="challenges-admin-field"><strong>Pergunta:</strong> ${escapeHtmlChallenge(c.question)}</p>
     <ul class="challenges-admin-choices">
       ${c.options.map(opt => `<li class="${opt === c.correctAnswer ? 'correct' : ''}">${escapeHtmlChallenge(opt)}</li>`).join('')}
@@ -5097,8 +5139,8 @@ function challengeAdminReadView(c){
     <p class="challenges-admin-field"><strong>Explicação:</strong> ${escapeHtmlChallenge(c.explanation)}</p>
     <p class="challenges-admin-field"><strong>2º exemplo:</strong> ${escapeHtmlChallenge(c.secondExample.text)} ${c.secondExample.audioFile ? '🔊' : '<span class="challenges-admin-hint">(sem áudio)</span>'}</p>
     <p class="challenges-admin-field"><strong>Microatividade:</strong> ${escapeHtmlChallenge(c.microActivity.prompt)} → ${escapeHtmlChallenge(c.microActivity.answer)}</p>
-    <p class="challenges-admin-field"><strong>Pour aller plus loin:</strong></p>
-    <ul class="challenges-admin-resources">${resourcesHTML}</ul>
+    <p class="challenges-admin-field"><strong>Recursos encontrados (Pour aller plus loin):</strong></p>
+    <div class="challenges-admin-resources">${resourcesHTML}</div>
   `;
 }
 
@@ -5191,6 +5233,16 @@ function renderChallengesAdmin(){
     if (editBtn) editBtn.addEventListener('click', () => {
       challengesAdminEditingId = id;
       renderChallengesAdmin();
+    });
+    card.querySelectorAll('.challenges-admin-resource').forEach(resEl => {
+      const idx = parseInt(resEl.dataset.resourceIdx, 10);
+      resEl.querySelectorAll('[data-resource-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const c = CHALLENGES.find(x => x.id === id);
+          c.externalResources[idx].approved = btn.dataset.resourceAction === 'approve';
+          renderChallengesAdmin();
+        });
+      });
     });
     if (cancelBtn) cancelBtn.addEventListener('click', () => {
       challengesAdminEditingId = null;

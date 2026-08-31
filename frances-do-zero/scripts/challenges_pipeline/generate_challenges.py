@@ -6,9 +6,10 @@ Uso:
 
 Pra cada expressão: gera um exemplo em contexto + segundo exemplo (uma
 chamada de texto ao Gemini/Vertex AI, controlada por nível CEFR), sintetiza
-o áudio dos dois exemplos (Google Cloud TTS) e busca, opcionalmente, um
-recurso externo de aprofundamento (YouTube) pra seção "Pour aller plus
-loin" -- que nunca é necessária pra completar o desafio.
+o áudio da EXPRESSÃO-ALVO (não do exemplo inteiro) e do segundo exemplo
+(Google Cloud TTS), e busca recursos externos de aprofundamento
+(dicionário/artigo > vídeo de qualidade > YouGlish) pra seção "Pour aller
+plus loin" -- que nunca é necessária pra completar o desafio.
 
 O desafio NÃO depende mais de encontrar/analisar um vídeo do YouTube pra
 funcionar -- essa foi uma decisão de produto deliberada (ver discussão da
@@ -30,11 +31,13 @@ from . import content_generator, cost_log, external_resources, tts
 def build_challenge_draft(idx, expression, level):
     content = content_generator.generate(expression, level)
 
-    example_audio = None
+    # O TTS da etapa inicial pronuncia só a expressão-alvo (não a frase de
+    # exemplo inteira) -- decisão de produto explícita, ver README.
+    expression_audio = None
     try:
-        example_audio = tts.synthesize(content["exampleText"])
+        expression_audio = tts.synthesize(expression)
     except Exception as exc:
-        print(f'  [aviso] TTS falhou pro exemplo principal: {exc}', file=sys.stderr)
+        print(f'  [aviso] TTS falhou pra expressão-alvo: {exc}', file=sys.stderr)
 
     second_example_audio = None
     try:
@@ -49,8 +52,9 @@ def build_challenge_draft(idx, expression, level):
         "type": "expression",
         "canonicalExpression": expression,
         "level": level,
+        "expressionAudioFile": expression_audio,
         "meaning": {"fr": content["meaningFr"], "pt": content["meaningPt"]},
-        "example": {"text": content["exampleText"], "audioFile": example_audio},
+        "example": {"text": content["exampleText"]},
         "question": content["question"],
         "options": content["options"],
         "correctAnswer": content["correctAnswer"],
@@ -86,9 +90,9 @@ def run(expressions, level, out_path):
             continue
 
         accepted.append(draft)
-        audio_status = "com áudio" if draft["example"]["audioFile"] and draft["secondExample"]["audioFile"] else "ÁUDIO FALTANDO"
-        resources_status = f'{len(draft["externalResources"])} recurso(s) externo(s)'
-        print(f'  -> gerado ({audio_status}, {resources_status})')
+        audio_status = "com áudio" if draft["expressionAudioFile"] and draft["secondExample"]["audioFile"] else "ÁUDIO FALTANDO"
+        resources_status = ", ".join(r["type"] for r in draft["externalResources"]) or "nenhum recurso externo"
+        print(f'  -> gerado ({audio_status}, recursos: {resources_status})')
 
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump({"accepted": accepted, "rejected": rejected}, f, ensure_ascii=False, indent=2)
