@@ -3950,6 +3950,7 @@ function switchTab(tab){
   if (tab === 'progress'){ renderProgressView(); }
   if (tab === 'path'){ renderUnitsGrid(); }
   if (tab === 'dictation'){ renderDictationList(); }
+  if (tab === 'challenges'){ renderChallengesList(); }
 }
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -4904,6 +4905,224 @@ function renderDictationResult(d, userText){
 
   document.getElementById('dictation-check-btn').style.display = 'none';
   document.getElementById('dictation-retry-btn').style.display = 'inline-flex';
+}
+
+// ============================================================
+// DESAFIOS: expressões francesas com contexto em vídeo
+// Ver challenges.js — expressão -> vídeo autêntico -> hipótese ->
+// alternativas -> feedback -> segundo exemplo (flexionado, com TTS) ->
+// microatividade. Curadoria e geração dos desafios feita fora do site;
+// aqui só a experiência do aluno e a tela de revisão do admin.
+// ============================================================
+const CHALLENGES_ADMIN_EMAIL = 'brunemed1310@gmail.com';
+
+function isChallengesAdmin(){
+  return !!(CURRENT_USER && CURRENT_USER.email === CHALLENGES_ADMIN_EMAIL);
+}
+
+function escapeHtmlChallenge(str){
+  return String(str).replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+}
+
+function publishedChallenges(){
+  return CHALLENGES.filter(c => c.status === 'published');
+}
+function pendingChallenges(){
+  return CHALLENGES.filter(c => c.status === 'needs_review');
+}
+
+function youtubeEmbedURL(video){
+  const params = new URLSearchParams({ rel: '0', modestbranding: '1' });
+  if (video.startTime != null) params.set('start', Math.floor(video.startTime));
+  if (video.endTime != null) params.set('end', Math.ceil(video.endTime));
+  return `https://www.youtube.com/embed/${video.youtubeId}?${params.toString()}`;
+}
+
+function renderChallengesList(){
+  document.getElementById('challenges-list-wrap').style.display = 'block';
+  document.getElementById('challenge-player-wrap').style.display = 'none';
+  document.getElementById('challenges-admin-wrap').style.display = 'none';
+
+  const adminBar = document.getElementById('challenges-admin-bar');
+  adminBar.style.display = isChallengesAdmin() ? 'flex' : 'none';
+  if (isChallengesAdmin()){
+    document.getElementById('challenges-pending-count').textContent = pendingChallenges().length;
+  }
+
+  const cardsWrap = document.getElementById('challenges-cards');
+  const published = publishedChallenges();
+  if (published.length === 0){
+    cardsWrap.innerHTML = `
+      <div class="challenges-empty">
+        <div class="big-emoji">🧩</div>
+        <h3>Nenhum desafio publicado ainda</h3>
+        <p>Em breve, novos desafios de expressões francesas com contexto em vídeo.</p>
+      </div>
+    `;
+    return;
+  }
+
+  cardsWrap.innerHTML = published.map(c => `
+    <button class="challenge-card" data-challenge-id="${c.id}">
+      <div class="challenge-card-level">${c.level}</div>
+      <div class="challenge-card-expr">${escapeHtmlChallenge(c.canonicalExpression)}</div>
+    </button>
+  `).join('');
+  cardsWrap.querySelectorAll('.challenge-card').forEach(card => {
+    card.addEventListener('click', () => openChallengePlayer(card.dataset.challengeId));
+  });
+}
+
+document.getElementById('challenge-back-to-list').addEventListener('click', renderChallengesList);
+document.getElementById('challenges-admin-back-btn').addEventListener('click', renderChallengesList);
+document.getElementById('challenges-admin-review-btn').addEventListener('click', () => renderChallengesAdmin());
+
+function openChallengePlayer(id){
+  const c = CHALLENGES.find(x => x.id === id);
+  if (!c) return;
+
+  document.getElementById('challenges-list-wrap').style.display = 'none';
+  document.getElementById('challenge-player-wrap').style.display = 'block';
+
+  const content = document.getElementById('challenge-player-content');
+  const videoHTML = c.video.youtubeId
+    ? `<div class="challenge-video-wrap"><iframe src="${youtubeEmbedURL(c.video)}" title="Vídeo de contexto" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`
+    : `<div class="challenge-video-missing">🎬 Vídeo em curadoria</div>`;
+
+  content.innerHTML = `
+    <div class="challenge-expression">${escapeHtmlChallenge(c.canonicalExpression)}</div>
+    ${videoHTML}
+    <div class="challenge-hypothesis">
+      <p class="challenge-question">${escapeHtmlChallenge(c.question.fr)}</p>
+      <button class="btn btn-secondary" id="challenge-reveal-btn">Voir les réponses</button>
+      <div class="challenge-choices" id="challenge-choices" style="display:none;"></div>
+    </div>
+    <div id="challenge-feedback-wrap"></div>
+  `;
+
+  document.getElementById('challenge-reveal-btn').addEventListener('click', () => {
+    document.getElementById('challenge-reveal-btn').style.display = 'none';
+    const choicesEl = document.getElementById('challenge-choices');
+    choicesEl.style.display = 'flex';
+    const shuffled = shuffle(c.choices.map((ch, i) => ({ ...ch, origIdx: i })));
+    choicesEl.innerHTML = shuffled.map(ch =>
+      `<button class="challenge-choice-btn" data-orig-idx="${ch.origIdx}">${escapeHtmlChallenge(ch.text)}</button>`
+    ).join('');
+    choicesEl.querySelectorAll('.challenge-choice-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        answerChallenge(c, parseInt(btn.dataset.origIdx, 10), choicesEl);
+      });
+    });
+  });
+}
+
+function answerChallenge(c, chosenIdx, choicesEl){
+  const isCorrect = c.choices[chosenIdx].correct;
+  choicesEl.querySelectorAll('.challenge-choice-btn').forEach(btn => {
+    btn.classList.add('disabled');
+    const idx = parseInt(btn.dataset.origIdx, 10);
+    if (c.choices[idx].correct) btn.classList.add('correct');
+    else if (idx === chosenIdx) btn.classList.add('incorrect');
+  });
+
+  if (isCorrect) addXP(5);
+
+  document.getElementById('challenge-feedback-wrap').innerHTML = `
+    <div class="challenge-feedback ${isCorrect ? 'correct' : 'incorrect'}">
+      <div class="challenge-feedback-header">${isCorrect ? '✅ Bonne réponse.' : '❌ Pas tout à fait.'}</div>
+      <p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong><br>
+      signifie <strong>${escapeHtmlChallenge(c.meaning.fr)}</strong>.<br>
+      Em português: <strong>${escapeHtmlChallenge(c.meaning.pt)}</strong>.</p>
+      <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation)}</p>
+
+      <div class="challenge-second-example">
+        <div class="challenge-second-example-label">Exemple</div>
+        <p class="challenge-second-example-text">${escapeHtmlChallenge(c.secondExample.text)}</p>
+        <button class="dictation-play-btn" id="challenge-example-play-btn">▶ Écouter</button>
+      </div>
+
+      <div class="challenge-microactivity">
+        <div class="challenge-microactivity-label">À vous de jouer</div>
+        <p class="challenge-microactivity-prompt">${escapeHtmlChallenge(c.microActivity.prompt)}</p>
+        <button class="btn btn-secondary" id="challenge-reveal-answer-btn">Voir la réponse</button>
+        <p class="challenge-microactivity-answer" id="challenge-microactivity-answer" style="display:none;">${escapeHtmlChallenge(c.microActivity.answer)}</p>
+      </div>
+    </div>
+  `;
+
+  if (c.secondExample.audioFile){
+    document.getElementById('challenge-example-play-btn').addEventListener('click', (e) => {
+      playPregeneratedAudio(`challenges/${c.secondExample.audioFile}`, e.currentTarget);
+    });
+  }
+  document.getElementById('challenge-reveal-answer-btn').addEventListener('click', () => {
+    document.getElementById('challenge-reveal-answer-btn').style.display = 'none';
+    document.getElementById('challenge-microactivity-answer').style.display = 'block';
+  });
+}
+
+// ---------- Revisão do admin ----------
+// Aprovar/Rejeitar aqui só muda o estado NESTA sessão do navegador — os
+// desafios vivem num arquivo estático (challenges.js) versionado no
+// código, sem backend de escrita. A publicação de verdade acontece
+// confirmando a decisão com quem gera os desafios, que edita o arquivo.
+function renderChallengesAdmin(){
+  if (!isChallengesAdmin()) return;
+  document.getElementById('challenges-list-wrap').style.display = 'none';
+  document.getElementById('challenge-player-wrap').style.display = 'none';
+  document.getElementById('challenges-admin-wrap').style.display = 'block';
+
+  const pending = pendingChallenges();
+  const content = document.getElementById('challenges-admin-content');
+
+  if (pending.length === 0){
+    content.innerHTML = `<p class="challenges-admin-empty">Nenhum desafio pendente de revisão.</p>`;
+    return;
+  }
+
+  content.innerHTML = pending.map(c => `
+    <div class="challenges-admin-card" data-challenge-id="${c.id}">
+      <div class="challenges-admin-card-header">
+        <span class="challenge-card-level">${c.level}</span>
+        <strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong>
+      </div>
+      ${c.video.youtubeId
+        ? `<div class="challenge-video-wrap"><iframe src="${youtubeEmbedURL(c.video)}" title="Vídeo" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>
+           <p class="challenges-admin-field"><strong>Ocorrência no vídeo:</strong> ${escapeHtmlChallenge(c.video.occurrence || '—')}</p>
+           <p class="challenges-admin-field"><strong>Transcrição:</strong> ${escapeHtmlChallenge(c.video.transcript || '—')}</p>`
+        : `<p class="challenge-video-missing">🎬 Vídeo ainda não definido — não dá pra aprovar sem confirmar a ocorrência.</p>`
+      }
+      <p class="challenges-admin-field"><strong>Pergunta:</strong> ${escapeHtmlChallenge(c.question.fr)}</p>
+      <ul class="challenges-admin-choices">
+        ${c.choices.map(ch => `<li class="${ch.correct ? 'correct' : ''}">${escapeHtmlChallenge(ch.text)}</li>`).join('')}
+      </ul>
+      <p class="challenges-admin-field"><strong>Explicação:</strong> ${escapeHtmlChallenge(c.explanation)}</p>
+      <p class="challenges-admin-field"><strong>2º exemplo:</strong> ${escapeHtmlChallenge(c.secondExample.text)}</p>
+      <p class="challenges-admin-field"><strong>Microatividade:</strong> ${escapeHtmlChallenge(c.microActivity.prompt)} → ${escapeHtmlChallenge(c.microActivity.answer)}</p>
+      <div class="challenges-admin-actions">
+        <button class="btn btn-primary" data-action="approve" ${c.video.youtubeId ? '' : 'disabled'}>✅ Aprovar e publicar</button>
+        <button class="btn btn-secondary" data-action="reject">❌ Rejeitar</button>
+      </div>
+    </div>
+  `).join('');
+
+  content.querySelectorAll('.challenges-admin-card').forEach(card => {
+    const id = card.dataset.challengeId;
+    const approveBtn = card.querySelector('[data-action="approve"]');
+    const rejectBtn = card.querySelector('[data-action="reject"]');
+    approveBtn.addEventListener('click', () => {
+      const c = CHALLENGES.find(x => x.id === id);
+      c.status = 'published';
+      showToast('Marcado como publicado nesta sessão — confirme comigo pra aplicar no código de verdade');
+      renderChallengesAdmin();
+    });
+    rejectBtn.addEventListener('click', () => {
+      const c = CHALLENGES.find(x => x.id === id);
+      c.status = 'rejected';
+      showToast('Marcado como rejeitado nesta sessão — confirme comigo pra aplicar no código de verdade');
+      renderChallengesAdmin();
+    });
+  });
 }
 
 // ============================================================

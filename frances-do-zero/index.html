@@ -944,6 +944,63 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 }
 .dictation-score-text{ margin:0; font-size:13.5px; color: var(--ink-soft); line-height:1.5; }
 
+/* ---------- Desafios (expressões com contexto em vídeo) ---------- */
+.challenges-admin-bar{ display:flex; justify-content:flex-end; margin-bottom:16px; }
+.challenges-cards{ display:grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap:12px; }
+.challenge-card{
+  background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding:18px 16px; cursor:pointer; text-align:left; box-shadow: var(--shadow-card);
+  transition: transform .15s ease, box-shadow .15s ease; display:flex; flex-direction:column; gap:6px;
+}
+.challenge-card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-lift); }
+.challenge-card-level{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; color: var(--seal-red-dark); }
+.challenge-card-expr{ font-size:16px; font-weight:800; color: var(--ink); }
+
+.challenges-empty{ text-align:center; padding:40px 20px; color: var(--ink-soft); }
+.challenges-empty .big-emoji{ font-size:40px; margin-bottom:10px; }
+
+.challenge-expression{ font-size:24px; font-weight:800; text-align:center; margin-bottom:16px; color: var(--ink); }
+.challenge-video-wrap{ position:relative; width:100%; padding-top:56.25%; border-radius: var(--radius); overflow:hidden; margin-bottom:18px; background:#000; }
+.challenge-video-wrap iframe{ position:absolute; inset:0; width:100%; height:100%; border:none; }
+.challenge-video-missing{ background: var(--paper-warm); border:1px dashed var(--paper-line); border-radius: var(--radius); padding:30px; text-align:center; color: var(--ink-soft); margin-bottom:18px; }
+
+.challenge-hypothesis{ text-align:center; margin-bottom:18px; }
+.challenge-question{ font-size:16px; font-weight:700; margin:0 0 14px; }
+.challenge-choices{ display:flex; flex-direction:column; gap:8px; margin-top:14px; text-align:left; }
+.challenge-choice-btn{
+  background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding:12px 16px; text-align:left; font-family: var(--font-body); font-size:14.5px; font-weight:600;
+  cursor:pointer; color: var(--ink);
+}
+.challenge-choice-btn:hover{ border-color: var(--imperial-gold); }
+.challenge-choice-btn.disabled{ pointer-events:none; }
+.challenge-choice-btn.correct{ border-color: var(--jade); background: rgba(58,115,89,0.08); }
+.challenge-choice-btn.incorrect{ border-color: var(--seal-red); background: rgba(192,35,31,0.08); }
+
+.challenge-feedback{ margin-top:10px; border-radius: var(--radius); padding:18px 20px; border:1px solid; }
+.challenge-feedback.correct{ background: rgba(58,115,89,0.06); border-color: rgba(58,115,89,0.25); }
+.challenge-feedback.incorrect{ background: rgba(192,35,31,0.06); border-color: rgba(192,35,31,0.25); }
+.challenge-feedback-header{ font-weight:800; font-size:15px; margin-bottom:10px; }
+.challenge-feedback-meaning{ font-size:14.5px; margin:0 0 10px; line-height:1.6; }
+.challenge-explanation{ font-size:13.5px; color: var(--ink-soft); margin:0 0 16px; line-height:1.5; }
+
+.challenge-second-example{ background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:10px; padding:14px 16px; margin-bottom:16px; }
+.challenge-second-example-label{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color: var(--ink-soft); margin-bottom:6px; }
+.challenge-second-example-text{ font-size:14.5px; margin:0 0 10px; font-style:italic; }
+
+.challenge-microactivity{ background: var(--paper); border:1px solid var(--paper-line); border-radius:10px; padding:14px 16px; }
+.challenge-microactivity-label{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color: var(--ink-soft); margin-bottom:6px; }
+.challenge-microactivity-prompt{ font-size:14.5px; margin:0 0 10px; }
+.challenge-microactivity-answer{ font-weight:800; color: var(--seal-red-dark); margin:10px 0 0; }
+
+.challenges-admin-card{ background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius); padding:18px; margin-bottom:16px; }
+.challenges-admin-card-header{ display:flex; align-items:center; gap:10px; margin-bottom:12px; font-size:16px; }
+.challenges-admin-field{ font-size:13.5px; margin:8px 0; line-height:1.5; }
+.challenges-admin-choices{ margin:6px 0 10px; padding-left:20px; font-size:13.5px; }
+.challenges-admin-choices li.correct{ color: var(--jade); font-weight:700; }
+.challenges-admin-actions{ display:flex; gap:10px; margin-top:14px; }
+.challenges-admin-empty{ text-align:center; color: var(--ink-soft); padding:30px; }
+
 /* ---------- Heatmap de atividade (estilo GitHub) ---------- */
 .heatmap-wrap{
   background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
@@ -1444,6 +1501,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
     <button class="tab-btn" data-tab="review">Revisão</button>
     <button class="tab-btn" data-tab="conjugaison">Conjugação</button>
     <button class="tab-btn" data-tab="dictation">Ditados</button>
+    <button class="tab-btn" data-tab="challenges">Desafios</button>
   </div>
 
   <div class="app-content">
@@ -1625,6 +1683,30 @@ footer.app-footer img{ height:56px; opacity:.9; }
     </div>
   </div>
 
+  <!-- ===== DESAFIOS ===== -->
+  <div class="view" id="view-challenges">
+    <div id="challenges-list-wrap">
+      <div class="path-header">
+        <h2>Desafios</h2>
+        <p>Aprenda expressões francesas de verdade, a partir de exemplos autênticos do YouTube.</p>
+      </div>
+      <div class="challenges-admin-bar" id="challenges-admin-bar" style="display:none;">
+        <button class="btn btn-secondary" id="challenges-admin-review-btn">🛠️ Revisar pendentes (<span id="challenges-pending-count">0</span>)</button>
+      </div>
+      <div class="challenges-cards" id="challenges-cards"></div>
+    </div>
+
+    <div id="challenge-player-wrap" style="display:none;">
+      <button class="back-link" id="challenge-back-to-list">← Voltar aos desafios</button>
+      <div id="challenge-player-content"></div>
+    </div>
+
+    <div id="challenges-admin-wrap" style="display:none;">
+      <button class="back-link" id="challenges-admin-back-btn">← Voltar aos desafios</button>
+      <div id="challenges-admin-content"></div>
+    </div>
+  </div>
+
   <footer class="app-footer">
     <img src="logo/ativo1-lockup.svg" alt="@prof.brune">
   </footer>
@@ -1710,6 +1792,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
 <script src="content.js"></script>
 <script src="conjugation-data.js"></script>
 <script src="dictations.js"></script>
+<script src="challenges.js"></script>
 <script src="audio-manifest.js"></script>
 <script src="app.js"></script>
 </body>
