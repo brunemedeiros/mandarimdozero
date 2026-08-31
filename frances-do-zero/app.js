@@ -5129,11 +5129,25 @@ function challengeCardLabelHTML(c){
   return '';
 }
 
-// Só Expressões tem seleção de nível por enquanto (é a única categoria com
-// conteúdo em mais de um nível hoje) -- Ouça e traduza/Acentuação mostram
-// tudo junto, como antes.
-const CHALLENGE_LEVELS_WITH_TABS = ['A1', 'A2', 'B1', 'B2'];
-let currentChallengesLevel = 'A1';
+// Só Expressões tem conteúdo em mais de um nível hoje -- Ouça e
+// traduza/Acentuação mostram tudo junto, como antes.
+const CHALLENGE_LEVELS_ORDER = ['A1', 'A2', 'B1', 'B2'];
+
+// Níveis recolhidos (estilo lingua.com: todos os níveis numa página só,
+// cada um com um cabeçalho clicável pra esconder/mostrar) -- guarda só os
+// que o aluno já fechou, tudo aberto por padrão.
+const collapsedChallengeLevels = new Set();
+
+function challengeCardHTML(c){
+  const done = isChallengeCompleted(c.id);
+  return `
+    <button class="challenge-card ${done ? 'completed' : ''}" data-challenge-id="${c.id}">
+      ${done ? '<span class="challenge-card-check">✅</span>' : ''}
+      <div class="challenge-card-level">${c.level}</div>
+      ${challengeCardLabelHTML(c)}
+    </button>
+  `;
+}
 
 function renderChallengesList(type){
   currentChallengesCategory = type;
@@ -5144,48 +5158,64 @@ function renderChallengesList(type){
 
   const cat = CHALLENGE_CATEGORIES.find(c => c.type === type);
   document.getElementById('challenges-list-title').textContent = cat ? cat.title : 'Desafios';
-
-  const levelTabsWrap = document.getElementById('challenges-level-tabs');
-  const showLevelTabs = type === 'expression';
-  levelTabsWrap.style.display = showLevelTabs ? 'flex' : 'none';
-  if (showLevelTabs){
-    levelTabsWrap.innerHTML = CHALLENGE_LEVELS_WITH_TABS.map(lvl => `
-      <button class="challenge-level-tab ${lvl === currentChallengesLevel ? 'active' : ''}" data-level="${lvl}">${lvl}</button>
-    `).join('');
-    levelTabsWrap.querySelectorAll('.challenge-level-tab').forEach(btn => {
-      btn.addEventListener('click', () => {
-        currentChallengesLevel = btn.dataset.level;
-        renderChallengesList(type);
-      });
-    });
-  }
+  document.getElementById('challenges-level-tabs').style.display = 'none';
 
   const cardsWrap = document.getElementById('challenges-cards');
-  let published = publishedChallenges().filter(c => c.type === type);
-  if (showLevelTabs) published = published.filter(c => c.level === currentChallengesLevel);
+  const published = publishedChallenges().filter(c => c.type === type);
+  const groupByLevel = type === 'expression';
+
   if (published.length === 0){
+    cardsWrap.className = 'challenges-cards';
     cardsWrap.innerHTML = `
       <div class="challenges-empty">
         <div class="big-emoji">${cat ? cat.emoji : '🧩'}</div>
-        <h3>Nenhum desafio publicado ainda${showLevelTabs ? ` no nível ${currentChallengesLevel}` : ''}</h3>
+        <h3>Nenhum desafio publicado ainda</h3>
         <p>Em breve, novos desafios nesta categoria.</p>
       </div>
     `;
     return;
   }
 
-  cardsWrap.innerHTML = published.map(c => {
-    const done = isChallengeCompleted(c.id);
+  if (!groupByLevel){
+    cardsWrap.className = 'challenges-cards';
+    cardsWrap.innerHTML = published.map(challengeCardHTML).join('');
+    cardsWrap.querySelectorAll('.challenge-card').forEach(card => {
+      card.addEventListener('click', () => openChallengePlayer(card.dataset.challengeId));
+    });
+    return;
+  }
+
+  // Todos os níveis numa página só (estilo lingua.com), cada um com seus
+  // próprios cards -- em vez de abas que escondem os outros níveis.
+  cardsWrap.className = 'challenges-level-sections';
+  const levelsPresent = CHALLENGE_LEVELS_ORDER.filter(lvl => published.some(c => c.level === lvl));
+  cardsWrap.innerHTML = levelsPresent.map(level => {
+    const levelCards = published.filter(c => c.level === level);
+    const collapsed = collapsedChallengeLevels.has(level);
     return `
-    <button class="challenge-card ${done ? 'completed' : ''}" data-challenge-id="${c.id}">
-      ${done ? '<span class="challenge-card-check">✅</span>' : ''}
-      <div class="challenge-card-level">${c.level}</div>
-      ${challengeCardLabelHTML(c)}
-    </button>
-  `;
+      <div class="challenges-level-section">
+        <button class="challenges-level-heading" data-level="${level}">
+          <span class="challenges-level-chevron ${collapsed ? 'collapsed' : ''}">▾</span>
+          Nível ${level}
+          <span class="challenges-level-count">${levelCards.length}</span>
+        </button>
+        <div class="challenges-cards" ${collapsed ? 'style="display:none;"' : ''}>
+          ${levelCards.map(challengeCardHTML).join('')}
+        </div>
+      </div>
+    `;
   }).join('');
+
   cardsWrap.querySelectorAll('.challenge-card').forEach(card => {
     card.addEventListener('click', () => openChallengePlayer(card.dataset.challengeId));
+  });
+  cardsWrap.querySelectorAll('.challenges-level-heading').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const level = btn.dataset.level;
+      if (collapsedChallengeLevels.has(level)) collapsedChallengeLevels.delete(level);
+      else collapsedChallengeLevels.add(level);
+      renderChallengesList(type);
+    });
   });
 }
 
