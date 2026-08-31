@@ -5316,6 +5316,106 @@ function isTranslationAcceptable(studentAnswer, referenceTranslations){
   return (referenceTranslations || []).some(ref => translationSimilarity(studentAnswer, ref) >= 0.55);
 }
 
+// A sobreposição de palavras acima não pega troca de sujeito ("eu comprou"
+// em vez de "eu comprei") -- "comprou" e "comprei" contam como palavras
+// completamente diferentes pro comparador, então em geral esse erro já
+// reduz a sobreposição sozinho, mas quando o resto da frase é longo o
+// score ainda passa do limiar. Esta checagem olha só o par PRONOME +
+// VERBO SEGUINTE dentro da própria resposta do aluno (não compara com a
+// referência) -- não é um parser gramatical completo (não cobre sujeito
+// oculto, verbos compostos, oração relativa etc.), só pega o par mais
+// comum de erro: um pronome-sujeito explícito seguido de um verbo
+// conjugado numa pessoa incompatível.
+const PT_SUBJECT_PRONOUN_PERSON = {
+  'eu': '1s', 'tu': '2s', 'voce': '3s', 'ele': '3s', 'ela': '3s',
+  'nos': '1p', 'a gente': '1s', 'voces': '3p', 'eles': '3p', 'elas': '3p'
+};
+
+// Formas dos verbos irregulares mais comuns -- chaves já sem acento
+// (mesma normalização usada pra comparar a resposta, ver
+// normalizeForTranslationCompare) nos tempos presente/pretérito perfeito/
+// imperfeito. Onde a forma sem acento colide entre pessoas diferentes
+// (ex: "tem"/"têm", "vimos" de ver/vir), listamos as duas -- e onde colide
+// com outra palavra comum não-verbal (ex: "da" de "dá" vs. a contração
+// "da"), preferimos omitir a forma a arriscar falso positivo.
+const PT_IRREGULAR_VERB_FORMS = {
+  sou:'1s', es:'2s', e:'3s', somos:'1p', sao:'3p',
+  era:['1s','3s'], eras:'2s', eramos:'1p', eram:'3p',
+  fui:'1s', foi:'3s', fomos:'1p', foram:'3p',
+  estou:'1s', estas:'2s', esta:'3s', estamos:'1p', estao:'3p',
+  estava:['1s','3s'], estavas:'2s', estavamos:'1p', estavam:'3p',
+  estive:'1s', esteve:'3s', estivemos:'1p', estiveram:'3p',
+  tenho:'1s', tens:'2s', tem:['3s','3p'], temos:'1p',
+  tinha:['1s','3s'], tinhas:'2s', tinhamos:'1p', tinham:'3p',
+  tive:'1s', teve:'3s', tivemos:'1p', tiveram:'3p',
+  vou:'1s', vais:'2s', vai:'3s', vamos:'1p', vao:'3p',
+  faco:'1s', fazes:'2s', faz:'3s', fazemos:'1p', fazem:'3p',
+  fiz:'1s', fez:'3s', fizemos:'1p', fizeram:'3p',
+  posso:'1s', podes:'2s', pode:'3s', podemos:'1p', podem:'3p',
+  pude:'1s', pudemos:'1p', puderam:'3p',
+  quero:'1s', queres:'2s', quer:'3s', queremos:'1p', querem:'3p',
+  quis:['1s','3s'], quisemos:'1p', quiseram:'3p',
+  digo:'1s', dizes:'2s', diz:'3s', dizemos:'1p', dizem:'3p',
+  disse:['1s','3s'], dissemos:'1p', disseram:'3p',
+  vejo:'1s', ves:'2s', ve:'3s', vemos:'1p', veem:'3p',
+  vi:'1s', viu:'3s', vimos:'1p', viram:'3p',
+  dou:'1s', damos:'1p',
+  dei:'1s', deu:'3s', demos:'1p', deram:'3p',
+  venho:'1s', vens:'2s', vem:'3s', vim:'1s', veio:'3s', viemos:'1p', vieram:'3p',
+  sei:'1s', sabes:'2s', sabe:'3s', sabemos:'1p', sabem:'3p',
+  soube:['1s','3s'], soubemos:'1p', souberam:'3p',
+  ponho:'1s', poes:'2s', poe:'3s', pomos:'1p', poem:'3p',
+  pus:'1s', pos:'3s', pusemos:'1p', puseram:'3p',
+};
+
+function ptVerbPersonTags(word){
+  if (PT_IRREGULAR_VERB_FORMS[word]){
+    const v = PT_IRREGULAR_VERB_FORMS[word];
+    return Array.isArray(v) ? v : [v];
+  }
+  const rules = [
+    [/amos$|emos$|imos$/, '1p'],
+    [/astes$|estes$|istes$/, '2p'],
+    [/aram$|eram$|iram$/, '3p'],
+    [/am$|em$/, '3p'],
+    [/ou$|eu$|iu$/, '3s'],
+    [/aste$|este$|iste$/, '2s'],
+    [/ei$/, '1s'],
+    [/as$|es$/, '2s'],
+    [/o$/, '1s'],
+    [/a$|e$/, '3s'],
+  ];
+  for (const [re, tag] of rules){
+    if (re.test(word)) return [tag];
+  }
+  return [];
+}
+
+// Procura pronome-sujeito seguido (até 2 palavras de distância, pra
+// tolerar advérbios como "já"/"não" no meio) de um verbo conjugado numa
+// pessoa incompatível. Para de procurar ao encontrar outro pronome antes
+// de achar um verbo reconhecível (não atribui o erro à oração seguinte).
+function translationHasPersonMismatch(text){
+  const words = normalizeForTranslationCompare(text).split(' ').filter(Boolean);
+  for (let i = 0; i < words.length; i++){
+    let pronoun = words[i];
+    let j = i + 1;
+    if (pronoun === 'a' && words[i + 1] === 'gente'){ pronoun = 'a gente'; j = i + 2; }
+    const expected = PT_SUBJECT_PRONOUN_PERSON[pronoun];
+    if (!expected) continue;
+    for (let lookahead = 0; lookahead < 3 && j + lookahead < words.length; lookahead++){
+      const candidate = words[j + lookahead];
+      if (PT_SUBJECT_PRONOUN_PERSON[candidate]) break;
+      const tags = ptVerbPersonTags(candidate);
+      if (tags.length){
+        if (!tags.includes(expected)) return { pronoun, verb: candidate, expected, got: tags };
+        break;
+      }
+    }
+  }
+  return null;
+}
+
 function openListenTranslatePlayer(c){
   const content = document.getElementById('challenge-player-content');
   content.innerHTML = `
@@ -5349,12 +5449,14 @@ function openListenTranslatePlayer(c){
 function checkListenTranslateAnswer(c){
   const input = document.getElementById('lt-answer-input');
   const studentAnswer = input.value.trim();
-  const isCorrect = isTranslationAcceptable(studentAnswer, c.referenceTranslations);
+  const personMismatch = translationHasPersonMismatch(studentAnswer);
+  const isCorrect = !personMismatch && isTranslationAcceptable(studentAnswer, c.referenceTranslations);
   if (isCorrect) addXP(5);
 
   document.getElementById('lt-feedback-wrap').innerHTML = `
     <div class="listen-translate-feedback ${isCorrect ? 'correct' : 'incorrect'}">
       <div class="listen-translate-feedback-header">${isCorrect ? '✅ Bonne traduction.' : '❌ Pas tout à fait.'}</div>
+      ${personMismatch ? `<p class="listen-translate-feedback-warning">⚠ Repare na concordância: depois de "${escapeHtmlChallenge(personMismatch.pronoun)}", "${escapeHtmlChallenge(personMismatch.verb)}" não é a conjugação certa.</p>` : ''}
       <p class="listen-translate-feedback-row"><strong>Sua resposta</strong>${escapeHtmlChallenge(studentAnswer || '—')}</p>
       <p class="listen-translate-feedback-row"><strong>Resposta esperada</strong>${escapeHtmlChallenge(c.referenceTranslations[0])}</p>
       <p class="listen-translate-feedback-row"><strong>Frase original</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
