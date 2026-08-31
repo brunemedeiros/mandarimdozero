@@ -4335,6 +4335,13 @@ function normalizeLoose(str){
   return str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 }
 
+// Algumas formas têm mais de uma grafia aceita, armazenadas juntas separadas
+// por "/" (ex: "paie/paye") -- dar só UMA das formas é uma resposta completa,
+// não deve ser tratado como diferente da string inteira "paie/paye".
+function conjAcceptedForms(expected){
+  return (expected || '').split('/').map(s => s.trim()).filter(Boolean);
+}
+
 function conjActiveMask(tenseKey){
   return tenseKey === 'imperatif' ? CONJ_IMPERATIF_ACTIVE : [true,true,true,true,true,true];
 }
@@ -4425,8 +4432,9 @@ function renderConjPracticeStep(){
                 let expectedText = '';
                 if (alreadyChecked){
                   const expected = expectedForms[i] || '';
-                  if (given.trim() === expected.trim()){ statusClass = 'ok'; }
-                  else if (normalizeLoose(given) === normalizeLoose(expected)){ statusClass = 'almost'; expectedText = `Quase! → ${expected}`; }
+                  const accepted = conjAcceptedForms(expected);
+                  if (accepted.includes(given.trim())){ statusClass = 'ok'; }
+                  else if (accepted.some(f => normalizeLoose(given) === normalizeLoose(f))){ statusClass = 'almost'; expectedText = `Quase! → ${expected}`; }
                   else { statusClass = 'wrong'; expectedText = `→ ${expected}`; }
                 }
                 return `
@@ -4497,16 +4505,17 @@ function renderConjPracticeStep(){
         const inputEl = fieldEl.querySelector('input');
         const expectedEl = fieldEl.querySelector('.expected');
         const expected = expectedForms[i] || '';
+        const accepted = conjAcceptedForms(expected);
         const given = inputEl.value;
         tenseGiven[i] = given;
 
         inputEl.disabled = true;
         fieldEl.classList.remove('ok','almost','wrong');
 
-        if (given.trim() === expected.trim()){
+        if (accepted.includes(given.trim())){
           fieldEl.classList.add('ok');
           correctCount++; tenseCorrect++;
-        } else if (normalizeLoose(given) === normalizeLoose(expected)){
+        } else if (accepted.some(f => normalizeLoose(given) === normalizeLoose(f))){
           fieldEl.classList.add('almost');
           expectedEl.textContent = `Quase! → ${expected}`;
           correctCount += 0.5; tenseCorrect += 0.5;
@@ -5161,15 +5170,22 @@ function openChallengePlayer(id){
   return openExpressionPlayer(c);
 }
 
+// A pergunta e o feedback (Bonne réponse / exemplos / à vous de jouer) são
+// duas telas distintas dentro do mesmo #challenge-player-content -- a
+// segunda SUBSTITUI a primeira (innerHTML novo), não empilha por baixo.
+// A frase de exemplo (c.example) não aparece mais na tela da pergunta --
+// ela já entregava a resposta antes mesmo da hipótese -- só depois de
+// responder, junto com o segundo exemplo (Exemplo 1 / Exemplo 2).
 function openExpressionPlayer(c){
+  renderExpressionQuestionScreen(c);
+}
+
+function renderExpressionQuestionScreen(c){
   const content = document.getElementById('challenge-player-content');
   content.innerHTML = `
     <div class="challenge-expression">
       ${escapeHtmlChallenge(c.canonicalExpression)}
       <button class="audio-btn audio-btn-lg" id="challenge-expression-play-btn" aria-label="Ouvir pronúncia" title="Ouvir pronúncia">🔊</button>
-    </div>
-    <div class="challenge-example">
-      <p class="challenge-example-text">${escapeHtmlChallenge(c.example.text)}</p>
     </div>
     <div class="challenge-hypothesis">
       <p class="challenge-question">${escapeHtmlChallenge(c.question)}</p>
@@ -5178,7 +5194,6 @@ function openExpressionPlayer(c){
         <button class="btn btn-secondary challenge-reveal-overlay-btn" id="challenge-reveal-btn">Voir les réponses</button>
       </div>
     </div>
-    <div id="challenge-feedback-wrap"></div>
   `;
 
   if (c.expressionAudioFile){
@@ -5198,35 +5213,39 @@ function openExpressionPlayer(c){
     e.currentTarget.style.display = 'none';
     choicesEl.querySelectorAll('.challenge-choice-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        answerChallenge(c, parseInt(btn.dataset.origIdx, 10), choicesEl);
+        answerChallenge(c, parseInt(btn.dataset.origIdx, 10));
       });
     });
   });
 }
 
-function answerChallenge(c, chosenIdx, choicesEl){
+function answerChallenge(c, chosenIdx){
   const isCorrect = c.options[chosenIdx] === c.correctAnswer;
-  choicesEl.querySelectorAll('.challenge-choice-btn').forEach(btn => {
-    btn.classList.add('disabled');
-    const idx = parseInt(btn.dataset.origIdx, 10);
-    if (c.options[idx] === c.correctAnswer) btn.classList.add('correct');
-    else if (idx === chosenIdx) btn.classList.add('incorrect');
-  });
-
   if (isCorrect) addXP(5);
+  renderExpressionFeedbackScreen(c, chosenIdx, isCorrect);
+}
 
-  document.getElementById('challenge-feedback-wrap').innerHTML = `
+function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
+  const content = document.getElementById('challenge-player-content');
+  content.innerHTML = `
     <div class="challenge-feedback ${isCorrect ? 'correct' : 'incorrect'}">
       <div class="challenge-feedback-header">${isCorrect ? '✅ Bonne réponse.' : '❌ Pas tout à fait.'}</div>
+      ${isCorrect ? '' : `<p class="challenge-feedback-chosen">Sua resposta: ${escapeHtmlChallenge(c.options[chosenIdx])}<br>Resposta certa: <strong>${escapeHtmlChallenge(c.correctAnswer)}</strong></p>`}
       <p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong><br>
       signifie <strong>${escapeHtmlChallenge(c.meaning.fr)}</strong>.<br>
       Em português: <strong>${escapeHtmlChallenge(c.meaning.pt)}</strong>.</p>
       <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation)}</p>
 
       <div class="challenge-second-example">
-        <div class="challenge-second-example-label">Exemple</div>
+        <div class="challenge-second-example-label">Exemple 1</div>
+        <p class="challenge-second-example-text">${escapeHtmlChallenge(c.example.text)}</p>
+        ${c.example.audioFile ? '<button class="dictation-play-btn" id="challenge-example-play-btn">▶ Écouter</button>' : ''}
+      </div>
+
+      <div class="challenge-second-example">
+        <div class="challenge-second-example-label">Exemple 2</div>
         <p class="challenge-second-example-text">${escapeHtmlChallenge(c.secondExample.text)}</p>
-        <button class="dictation-play-btn" id="challenge-second-example-play-btn">▶ Écouter</button>
+        ${c.secondExample.audioFile ? '<button class="dictation-play-btn" id="challenge-second-example-play-btn">▶ Écouter</button>' : ''}
       </div>
 
       <div class="challenge-microactivity">
@@ -5240,6 +5259,11 @@ function answerChallenge(c, chosenIdx, choicesEl){
     </div>
   `;
 
+  if (c.example.audioFile){
+    document.getElementById('challenge-example-play-btn').addEventListener('click', (e) => {
+      playPregeneratedAudio(`challenges/${c.example.audioFile}`, e.currentTarget);
+    });
+  }
   if (c.secondExample.audioFile){
     document.getElementById('challenge-second-example-play-btn').addEventListener('click', (e) => {
       playPregeneratedAudio(`challenges/${c.secondExample.audioFile}`, e.currentTarget);
