@@ -5059,6 +5059,12 @@ function wireChallengeCompleteButton(c){
   if (!btn) return;
   btn.addEventListener('click', () => {
     markChallengeCompleted(c.id);
+    if (challengeQueueContext && challengeQueueContext.type === c.type && challengeQueueContext.level === c.level){
+      const next = nextQueueChallenge(c.type, c.level);
+      if (next) renderChallengeQueueContinueScreen(c, next);
+      else renderChallengeQueueLevelDoneScreen(c);
+      return;
+    }
     renderChallengesList(currentChallengesCategory);
   });
 }
@@ -5177,10 +5183,31 @@ function renderChallengesList(type){
   }
 
   if (!groupByLevel){
-    cardsWrap.className = 'challenges-cards';
-    cardsWrap.innerHTML = published.map(challengeCardHTML).join('');
-    cardsWrap.querySelectorAll('.challenge-card').forEach(card => {
-      card.addEventListener('click', () => openChallengePlayer(card.dataset.challengeId));
+    // Ouça e traduza/Acentuação: sem título próprio pra cada exercício (ao
+    // contrário de Expressões, que mostra a expressão em si) -- uma grade
+    // de cards ficava toda igual, impossível de distinguir um exercício do
+    // outro. Em vez de listar, mostra o progresso por nível e entra direto
+    // no próximo exercício não concluído (fila, "Continuar" pro próximo).
+    cardsWrap.className = 'challenges-queue-levels';
+    const levelsPresent = CHALLENGE_LEVELS_ORDER.filter(lvl => published.some(c => c.level === lvl));
+    cardsWrap.innerHTML = levelsPresent.map(level => {
+      const levelChallenges = published.filter(c => c.level === level);
+      const doneCount = levelChallenges.filter(c => isChallengeCompleted(c.id)).length;
+      const allDone = doneCount === levelChallenges.length;
+      return `
+        <div class="challenge-queue-level-card">
+          <div class="challenge-queue-level-info">
+            <div class="challenge-queue-level-name">Nível ${level}</div>
+            <div class="challenge-queue-level-progress">${doneCount}/${levelChallenges.length} concluído${levelChallenges.length === 1 ? '' : 's'}</div>
+          </div>
+          <button class="btn ${allDone ? 'btn-secondary' : 'btn-primary'}" data-level="${level}">
+            ${allDone ? '🎉 Revisar' : (doneCount > 0 ? 'Continuar' : 'Começar')}
+          </button>
+        </div>
+      `;
+    }).join('');
+    cardsWrap.querySelectorAll('[data-level]').forEach(btn => {
+      btn.addEventListener('click', () => openChallengeQueueLevel(type, btn.dataset.level));
     });
     return;
   }
@@ -5219,9 +5246,64 @@ function renderChallengesList(type){
   });
 }
 
+// ---------- Fila de exercícios (Ouça e traduza / Acentuação) ----------
+// Só ativa enquanto o aluno está dentro de um nível acessado pela tela de
+// progresso (openChallengeQueueLevel) -- concluir um exercício encadeia
+// direto pro próximo não concluído do mesmo nível, em vez de voltar pra
+// uma lista. null fora desse fluxo (Expressões, preview do admin etc.).
+let challengeQueueContext = null;
+
+function nextQueueChallenge(type, level){
+  return publishedChallenges().find(c => c.type === type && c.level === level && !isChallengeCompleted(c.id)) || null;
+}
+
+function openChallengeQueueLevel(type, level){
+  challengeQueueContext = { type, level };
+  const next = nextQueueChallenge(type, level) || publishedChallenges().find(c => c.type === type && c.level === level);
+  if (next) openChallengePlayer(next.id);
+}
+
+function queueLevelProgressLabel(type, level){
+  const all = publishedChallenges().filter(c => c.type === type && c.level === level);
+  const done = all.filter(c => isChallengeCompleted(c.id)).length;
+  return `${done}/${all.length} concluído${all.length === 1 ? '' : 's'}`;
+}
+
+function renderChallengeQueueContinueScreen(c, next){
+  const content = document.getElementById('challenge-player-content');
+  content.innerHTML = `
+    <div class="challenge-queue-interstitial">
+      <div class="big-emoji">✅</div>
+      <h3>Exercício concluído!</h3>
+      <p>Nível ${escapeHtmlChallenge(c.level)} — ${queueLevelProgressLabel(c.type, c.level)}</p>
+      <button class="btn btn-primary btn-block" id="queue-continue-btn">Continuar →</button>
+    </div>
+  `;
+  document.getElementById('queue-continue-btn').addEventListener('click', () => openChallengePlayer(next.id));
+}
+
+function renderChallengeQueueLevelDoneScreen(c){
+  const content = document.getElementById('challenge-player-content');
+  content.innerHTML = `
+    <div class="challenge-queue-interstitial">
+      <div class="big-emoji">🎉</div>
+      <h3>Nível ${escapeHtmlChallenge(c.level)} concluído!</h3>
+      <p>Você terminou todos os exercícios desse nível.</p>
+      <button class="btn btn-primary btn-block" id="queue-back-btn">Voltar aos níveis</button>
+    </div>
+  `;
+  document.getElementById('queue-back-btn').addEventListener('click', () => {
+    challengeQueueContext = null;
+    renderChallengesList(currentChallengesCategory);
+  });
+}
+
 let challengePreviewMode = false;
 
-document.getElementById('challenges-list-back-btn').addEventListener('click', renderChallengeCategories);
+document.getElementById('challenges-list-back-btn').addEventListener('click', () => {
+  challengeQueueContext = null;
+  renderChallengeCategories();
+});
 document.getElementById('challenge-back-to-list').addEventListener('click', () => {
   if (challengePreviewMode){
     challengePreviewMode = false;
@@ -5229,6 +5311,7 @@ document.getElementById('challenge-back-to-list').addEventListener('click', () =
     removePreviewWarningEl();
     renderChallengesAdmin();
   } else {
+    challengeQueueContext = null;
     renderChallengesList(currentChallengesCategory);
   }
 });
@@ -5966,6 +6049,7 @@ async function unpublishChallenge(c){
 // de aviso "modo administrador" com os controles de aprovar/voltar.
 function openChallengePreview(c){
   challengePreviewMode = true;
+  challengeQueueContext = null;
   document.getElementById('challenges-admin-wrap').style.display = 'none';
   document.getElementById('challenges-categories-wrap').style.display = 'none';
   document.getElementById('challenges-list-wrap').style.display = 'none';
