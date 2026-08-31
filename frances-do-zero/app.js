@@ -4931,6 +4931,17 @@ function pendingChallenges(){
   return CHALLENGES.filter(c => c.status === 'needs_review');
 }
 
+function formatChallengeTimestamp(seconds){
+  if (seconds == null) return '—';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+function challengeQualityLabel(level){
+  return { high: 'Alta', medium: 'Média', low: 'Baixa' }[level] || '—';
+}
+
 function youtubeEmbedURL(video){
   const params = new URLSearchParams({ rel: '0', modestbranding: '1' });
   if (video.startTime != null) params.set('start', Math.floor(video.startTime));
@@ -5034,6 +5045,11 @@ function answerChallenge(c, chosenIdx, choicesEl){
       signifie <strong>${escapeHtmlChallenge(c.meaning.fr)}</strong>.<br>
       Em português: <strong>${escapeHtmlChallenge(c.meaning.pt)}</strong>.</p>
       <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation)}</p>
+      ${c.video.spokenOccurrence ? `
+      <div class="challenge-heard">
+        <div class="challenge-heard-label">Ce que vous avez entendu</div>
+        <p class="challenge-heard-text">${escapeHtmlChallenge(c.video.transcript || c.video.spokenOccurrence)}</p>
+      </div>` : ''}
 
       <div class="challenge-second-example">
         <div class="challenge-second-example-label">Exemple</div>
@@ -5088,8 +5104,13 @@ function renderChallengesAdmin(){
       </div>
       ${c.video.youtubeId
         ? `<div class="challenge-video-wrap"><iframe src="${youtubeEmbedURL(c.video)}" title="Vídeo" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>
-           <p class="challenges-admin-field"><strong>Ocorrência no vídeo:</strong> ${escapeHtmlChallenge(c.video.occurrence || '—')}</p>
-           <p class="challenges-admin-field"><strong>Transcrição:</strong> ${escapeHtmlChallenge(c.video.transcript || '—')}</p>`
+           <p class="challenges-admin-field"><strong>Abrir aproximadamente em:</strong> ${formatChallengeTimestamp(c.video.startTime)} <span class="challenges-admin-hint">(estimativa — confira de ouvido)</span></p>
+           <p class="challenges-admin-field"><strong>Ocorrência identificada:</strong> ${escapeHtmlChallenge(c.video.spokenOccurrence || '—')}</p>
+           <p class="challenges-admin-field"><strong>Confiança:</strong> ${c.video.confidence != null ? Math.round(c.video.confidence * 100) + '%' : '—'}</p>
+           <p class="challenges-admin-field"><strong>Qualidade do áudio:</strong> ${challengeQualityLabel(c.video.audioClarity)}</p>
+           <p class="challenges-admin-field"><strong>Qualidade do contexto:</strong> ${challengeQualityLabel(c.video.contextQuality)}</p>
+           ${c.video.notes ? `<p class="challenges-admin-field"><strong>Observação automática:</strong> ${escapeHtmlChallenge(c.video.notes)}</p>` : ''}
+           ${c.video.transcript ? `<p class="challenges-admin-field"><strong>Trecho transcrito:</strong> ${escapeHtmlChallenge(c.video.transcript)}</p>` : ''}`
         : `<p class="challenge-video-missing">🎬 Vídeo ainda não definido — não dá pra aprovar sem confirmar a ocorrência.</p>`
       }
       <p class="challenges-admin-field"><strong>Pergunta:</strong> ${escapeHtmlChallenge(c.question.fr)}</p>
