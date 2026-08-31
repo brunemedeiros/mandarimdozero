@@ -5042,8 +5042,19 @@ function renderChallengesList(type){
   });
 }
 
+let challengePreviewMode = false;
+
 document.getElementById('challenges-list-back-btn').addEventListener('click', renderChallengeCategories);
-document.getElementById('challenge-back-to-list').addEventListener('click', () => renderChallengesList(currentChallengesCategory));
+document.getElementById('challenge-back-to-list').addEventListener('click', () => {
+  if (challengePreviewMode){
+    challengePreviewMode = false;
+    document.getElementById('challenge-preview-banner').style.display = 'none';
+    removePreviewWarningEl();
+    renderChallengesAdmin();
+  } else {
+    renderChallengesList(currentChallengesCategory);
+  }
+});
 document.getElementById('challenges-admin-back-btn').addEventListener('click', renderChallengeCategories);
 document.getElementById('challenges-admin-review-btn').addEventListener('click', () => renderChallengesAdmin());
 
@@ -5053,6 +5064,7 @@ function openChallengePlayer(id){
 
   document.getElementById('challenges-list-wrap').style.display = 'none';
   document.getElementById('challenge-player-wrap').style.display = 'block';
+  document.getElementById('challenge-preview-banner').style.display = 'none';
 
   if (c.type === 'listen_translate') return openListenTranslatePlayer(c);
   if (c.type === 'accent') return openAccentPlayer(c);
@@ -5306,6 +5318,152 @@ function checkAccentAnswer(c){
 // confirmando a decisão com quem gera os desafios, que edita o arquivo.
 let challengesAdminEditingId = null;
 
+// MD5 (RFC 1321) puro em JS -- só usado aqui, pra conferir se um áudio já
+// gerado ainda corresponde ao texto atual. O pipeline Python nomeia cada
+// arquivo de áudio como md5(texto)[:12] + '.mp3' (ver scripts/
+// challenges_pipeline/tts.py) -- então basta recalcular o mesmo hash no
+// texto salvo agora e comparar com o nome do arquivo: se bater, o áudio
+// é da versão atual do texto; se não bater, o texto foi editado depois
+// que o áudio foi gerado ("áudio desatualizado").
+function md5Hex(str){
+  function rotl(x, c){ return (x << c) | (x >>> (32 - c)); }
+  const K = new Uint32Array([
+    0xd76aa478,0xe8c7b756,0x242070db,0xc1bdceee,0xf57c0faf,0x4787c62a,0xa8304613,0xfd469501,
+    0x698098d8,0x8b44f7af,0xffff5bb1,0x895cd7be,0x6b901122,0xfd987193,0xa679438e,0x49b40821,
+    0xf61e2562,0xc040b340,0x265e5a51,0xe9b6c7aa,0xd62f105d,0x02441453,0xd8a1e681,0xe7d3fbc8,
+    0x21e1cde6,0xc33707d6,0xf4d50d87,0x455a14ed,0xa9e3e905,0xfcefa3f8,0x676f02d9,0x8d2a4c8a,
+    0xfffa3942,0x8771f681,0x6d9d6122,0xfde5380c,0xa4beea44,0x4bdecfa9,0xf6bb4b60,0xbebfbc70,
+    0x289b7ec6,0xeaa127fa,0xd4ef3085,0x04881d05,0xd9d4d039,0xe6db99e5,0x1fa27cf8,0xc4ac5665,
+    0xf4292244,0x432aff97,0xab9423a7,0xfc93a039,0x655b59c3,0x8f0ccc92,0xffeff47d,0x85845dd1,
+    0x6fa87e4f,0xfe2ce6e0,0xa3014314,0x4e0811a1,0xf7537e82,0xbd3af235,0x2ad7d2bb,0xeb86d391
+  ]);
+  const S = [7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,
+             5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,
+             4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,
+             6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21];
+
+  const msg = new TextEncoder().encode(str);
+  const origLenBits = msg.length * 8;
+  const withOne = new Uint8Array(((msg.length + 8) >> 6 << 6) + 64);
+  withOne.set(msg);
+  withOne[msg.length] = 0x80;
+  const dv = new DataView(withOne.buffer);
+  dv.setUint32(withOne.length - 8, origLenBits >>> 0, true);
+  dv.setUint32(withOne.length - 4, Math.floor(origLenBits / 4294967296), true);
+
+  let a0 = 0x67452301, b0 = 0xefcdab89, c0 = 0x98badcfe, d0 = 0x10325476;
+
+  for (let chunkStart = 0; chunkStart < withOne.length; chunkStart += 64){
+    const M = new Uint32Array(16);
+    for (let j = 0; j < 16; j++) M[j] = dv.getUint32(chunkStart + j * 4, true);
+    let A = a0, B = b0, C = c0, D = d0;
+    for (let i = 0; i < 64; i++){
+      let F, g;
+      if (i < 16){ F = (B & C) | (~B & D); g = i; }
+      else if (i < 32){ F = (D & B) | (~D & C); g = (5 * i + 1) % 16; }
+      else if (i < 48){ F = B ^ C ^ D; g = (3 * i + 5) % 16; }
+      else { F = C ^ (B | ~D); g = (7 * i) % 16; }
+      F = (F + A + K[i] + M[g]) >>> 0;
+      A = D; D = C; C = B;
+      B = (B + rotl(F, S[i])) >>> 0;
+    }
+    a0 = (a0 + A) >>> 0; b0 = (b0 + B) >>> 0; c0 = (c0 + C) >>> 0; d0 = (d0 + D) >>> 0;
+  }
+
+  function toHexLE(n){
+    let bytes = [];
+    for (let i = 0; i < 4; i++){ bytes.push((n & 0xff).toString(16).padStart(2, '0')); n >>>= 8; }
+    return bytes.join('');
+  }
+  return toHexLE(a0) + toHexLE(b0) + toHexLE(c0) + toHexLE(d0);
+}
+
+function challengeAudioIsFresh(text, audioFile){
+  if (!audioFile) return null; // sem áudio nenhum -- não é "desatualizado", é "ausente"
+  return md5Hex(text).slice(0, 12) + '.mp3' === audioFile;
+}
+
+// Lista os campos de áudio de um desafio (texto de origem + arquivo),
+// independente do tipo -- usado tanto pro checklist quanto pra prévia.
+function challengeAudioFields(c){
+  if (c.type === 'expression'){
+    return [
+      { label: 'Áudio da expressão-alvo', text: c.canonicalExpression, audioFile: c.expressionAudioFile },
+      { label: 'Áudio do 2º exemplo', text: c.secondExample.text, audioFile: c.secondExample.audioFile },
+    ];
+  }
+  if (c.type === 'listen_translate'){
+    return [{ label: 'Áudio da frase', text: c.sentenceFr, audioFile: c.audioFile }];
+  }
+  if (c.type === 'accent'){
+    return [{ label: 'Áudio da palavra', text: c.targetText, audioFile: c.audioFile }];
+  }
+  return [];
+}
+
+// Checklist de qualidade -- cada item tem { label, ok, blocking }.
+// `blocking` = true significa que o desafio realmente não funciona sem
+// isso (nunca deve ser publicado assim); os outros são avisos.
+function challengeQualityChecklist(c){
+  const items = [];
+
+  challengeAudioFields(c).forEach(f => {
+    if (!f.audioFile){
+      items.push({ label: `${f.label}: ausente`, ok: false, blocking: true });
+    } else if (challengeAudioIsFresh(f.text, f.audioFile) === false){
+      items.push({ label: `${f.label}: desatualizado (texto mudou depois do áudio ser gerado)`, ok: false, blocking: false, audioFile: f.audioFile });
+    } else {
+      items.push({ label: `${f.label}: disponível e atualizado`, ok: true, blocking: false, audioFile: f.audioFile });
+    }
+  });
+
+  if (c.type === 'expression'){
+    items.push({ label: 'Resposta correta definida', ok: !!c.correctAnswer && c.options.includes(c.correctAnswer), blocking: true });
+    items.push({ label: '4 alternativas', ok: c.options.length === 4, blocking: true });
+    items.push({ label: 'Explicação preenchida', ok: !!c.explanation, blocking: false });
+    items.push({ label: 'Microatividade válida', ok: !!(c.microActivity.prompt && c.microActivity.answer), blocking: false });
+  } else if (c.type === 'listen_translate'){
+    items.push({ label: 'Frase preenchida', ok: !!c.sentenceFr, blocking: true });
+    items.push({ label: 'Dica preenchida', ok: !!c.hintText, blocking: false });
+    items.push({ label: 'Ao menos 1 tradução aceita', ok: (c.referenceTranslations || []).length > 0, blocking: true });
+  } else if (c.type === 'accent'){
+    items.push({ label: 'Palavra/expressão preenchida', ok: !!c.targetText, blocking: true });
+    items.push({ label: 'Explicação preenchida', ok: !!c.explanation, blocking: false });
+  }
+
+  return items;
+}
+
+function challengeQualityChecklistHTML(c){
+  const items = challengeQualityChecklist(c);
+  return `
+    <div class="challenges-admin-checklist">
+      <strong style="font-size:12px;">Controle de qualidade</strong>
+      ${items.map(it => `
+        <div class="challenges-admin-checklist-item ${it.ok ? 'ok' : 'warn'}">
+          ${it.ok ? '✓' : '⚠'} ${escapeHtmlChallenge(it.label)}
+          ${it.audioFile ? `<span class="challenges-admin-audio-duration" data-audio-file="${escapeHtmlChallenge(it.audioFile)}">carregando duração…</span>` : ''}
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// Preenche a duração real de cada áudio referenciado no checklist (só
+// carrega os metadados, não baixa o arquivo inteiro).
+function wireChallengeAudioDurations(container){
+  container.querySelectorAll('[data-audio-file]').forEach(el => {
+    const audio = new Audio(`audio/challenges/${el.dataset.audioFile}`);
+    audio.preload = 'metadata';
+    audio.addEventListener('loadedmetadata', () => {
+      el.textContent = `· ${audio.duration.toFixed(1).replace('.', ',')} s`;
+    });
+    audio.addEventListener('error', () => {
+      el.textContent = '· não foi possível carregar';
+    });
+  });
+}
+
 const CHALLENGE_RESOURCE_TYPE_LABEL = {
   dictionary: 'Dicionário', article: 'Artigo linguístico', youtube: 'Vídeo', youglish: 'Exemplos autênticos'
 };
@@ -5346,6 +5504,7 @@ function challengeAdminReadViewExpression(c){
     <p class="challenges-admin-field"><strong>Microatividade:</strong> ${escapeHtmlChallenge(c.microActivity.prompt)} → ${escapeHtmlChallenge(c.microActivity.answer)}</p>
     <p class="challenges-admin-field"><strong>Recursos encontrados (Pour aller plus loin):</strong></p>
     <div class="challenges-admin-resources">${resourcesHTML}</div>
+    ${challengeQualityChecklistHTML(c)}
   `;
 }
 
@@ -5387,6 +5546,7 @@ function challengeAdminReadViewListenTranslate(c){
       ${(c.referenceTranslations || []).map(t => `<li>${escapeHtmlChallenge(t)}</li>`).join('')}
     </ul>
     <p class="challenges-admin-field"><strong>Explicação:</strong> ${escapeHtmlChallenge(c.explanation || '—')}</p>
+    ${challengeQualityChecklistHTML(c)}
   `;
 }
 
@@ -5413,6 +5573,7 @@ function challengeAdminReadViewAccent(c){
     <p class="challenges-admin-field"><strong>Áudio:</strong> ${c.audioFile ? '🔊 disponível' : '<span class="challenges-admin-hint">ausente</span>'}</p>
     <p class="challenges-admin-field"><strong>Palavra/expressão:</strong> ${escapeHtmlChallenge(c.targetText)}</p>
     <p class="challenges-admin-field"><strong>Explicação:</strong> ${escapeHtmlChallenge(c.explanation || '—')}</p>
+    ${challengeQualityChecklistHTML(c)}
   `;
 }
 
@@ -5447,6 +5608,95 @@ function challengeAdminCardTitle(c){
   return '';
 }
 
+// Aprova só se não houver problema bloqueante (áudio ausente, resposta
+// correta não definida, etc.) -- com problema não-bloqueante (ex: áudio
+// desatualizado), pede confirmação explícita em vez de aprovar direto.
+function approveChallengeWithGate(c){
+  const items = challengeQualityChecklist(c);
+  const blocking = items.filter(it => !it.ok && it.blocking);
+  const warnings = items.filter(it => !it.ok && !it.blocking);
+  if (blocking.length){
+    alert('Não é possível aprovar — corrija antes:\n\n' + blocking.map(b => '• ' + b.label).join('\n'));
+    return false;
+  }
+  if (warnings.length){
+    const proceed = confirm('Atenção, encontrei possíveis problemas:\n\n' + warnings.map(w => '• ' + w.label).join('\n') + '\n\nAprovar mesmo assim?');
+    if (!proceed) return false;
+  }
+  c.status = 'published';
+  showToast('Marcado como publicado nesta sessão — confirme comigo pra aplicar no código de verdade');
+  return true;
+}
+
+// ---------- Ver versão do aluno (prévia administrativa) ----------
+// Reaproveita o MESMO player que o aluno usa (openChallengePlayer /
+// openExpressionPlayer / openListenTranslatePlayer / openAccentPlayer) --
+// nunca uma versão separada só pra exibição. O único acréscimo é a faixa
+// de aviso "modo administrador" com os controles de aprovar/voltar.
+function openChallengePreview(c){
+  challengePreviewMode = true;
+  document.getElementById('challenges-admin-wrap').style.display = 'none';
+  document.getElementById('challenges-categories-wrap').style.display = 'none';
+  document.getElementById('challenges-list-wrap').style.display = 'none';
+
+  openChallengePlayer(c.id);
+  renderChallengePreviewBanner(c);
+}
+
+function renderChallengePreviewBanner(c){
+  const banner = document.getElementById('challenge-preview-banner');
+  const items = challengeQualityChecklist(c);
+  const blocking = items.filter(it => !it.ok && it.blocking);
+
+  banner.className = 'challenge-preview-banner';
+  banner.style.display = 'flex';
+  banner.innerHTML = `
+    <div class="challenge-preview-banner-label">🔍 Pré-visualização — versão do aluno</div>
+    <div class="challenge-preview-banner-actions">
+      ${c.type !== 'expression' ? '<button class="btn btn-secondary btn-sm" id="preview-show-answer-btn">Mostrar resposta esperada</button>' : ''}
+      <button class="btn btn-secondary" id="preview-back-to-edit-btn">← Voltar para edição</button>
+      <button class="btn btn-primary" id="preview-approve-btn"${blocking.length ? ' disabled' : ''}>✅ Aprovar desafio</button>
+    </div>
+  `;
+  if (blocking.length){
+    const warn = document.createElement('div');
+    warn.className = 'challenge-preview-warning';
+    warn.textContent = '⚠ ' + blocking.map(b => b.label).join(' · ');
+    banner.after(warn);
+    banner.dataset.hasWarningEl = '1';
+  }
+
+  document.getElementById('preview-back-to-edit-btn').addEventListener('click', () => {
+    challengePreviewMode = false;
+    challengesAdminEditingId = c.id;
+    removePreviewWarningEl();
+    renderChallengesAdmin();
+  });
+  document.getElementById('preview-approve-btn').addEventListener('click', () => {
+    if (approveChallengeWithGate(c)){
+      challengePreviewMode = false;
+      removePreviewWarningEl();
+      renderChallengesAdmin();
+    }
+  });
+  const showAnswerBtn = document.getElementById('preview-show-answer-btn');
+  if (showAnswerBtn){
+    showAnswerBtn.addEventListener('click', () => {
+      const answer = c.type === 'listen_translate' ? (c.referenceTranslations || [])[0] : c.targetText;
+      alert('Resposta esperada: ' + answer);
+    });
+  }
+}
+
+function removePreviewWarningEl(){
+  const banner = document.getElementById('challenge-preview-banner');
+  if (banner && banner.dataset.hasWarningEl){
+    const next = banner.nextElementSibling;
+    if (next && next.classList.contains('challenge-preview-warning')) next.remove();
+    delete banner.dataset.hasWarningEl;
+  }
+}
+
 function renderChallengesAdmin(){
   if (!isChallengesAdmin()) return;
   document.getElementById('challenges-list-wrap').style.display = 'none';
@@ -5477,6 +5727,7 @@ function renderChallengesAdmin(){
           ? `<button class="btn btn-primary" data-action="save">💾 Salvar</button>
              <button class="btn btn-secondary" data-action="cancel-edit">Cancelar</button>`
           : `<button class="btn btn-primary" data-action="approve">✅ Aprovar e publicar</button>
+             <button class="btn btn-secondary" data-action="preview">👁️ Ver versão do aluno</button>
              <button class="btn btn-secondary" data-action="edit">✏️ Editar</button>
              <button class="btn btn-secondary" data-action="reject">❌ Rejeitar</button>`
         }
@@ -5485,9 +5736,12 @@ function renderChallengesAdmin(){
   `;
   }).join('');
 
+  wireChallengeAudioDurations(content);
+
   content.querySelectorAll('.challenges-admin-card').forEach(card => {
     const id = card.dataset.challengeId;
     const approveBtn = card.querySelector('[data-action="approve"]');
+    const previewBtn = card.querySelector('[data-action="preview"]');
     const rejectBtn = card.querySelector('[data-action="reject"]');
     const editBtn = card.querySelector('[data-action="edit"]');
     const saveBtn = card.querySelector('[data-action="save"]');
@@ -5495,9 +5749,11 @@ function renderChallengesAdmin(){
 
     if (approveBtn) approveBtn.addEventListener('click', () => {
       const c = CHALLENGES.find(x => x.id === id);
-      c.status = 'published';
-      showToast('Marcado como publicado nesta sessão — confirme comigo pra aplicar no código de verdade');
-      renderChallengesAdmin();
+      if (approveChallengeWithGate(c)) renderChallengesAdmin();
+    });
+    if (previewBtn) previewBtn.addEventListener('click', () => {
+      const c = CHALLENGES.find(x => x.id === id);
+      openChallengePreview(c);
     });
     if (rejectBtn) rejectBtn.addEventListener('click', () => {
       const c = CHALLENGES.find(x => x.id === id);
