@@ -4927,6 +4927,81 @@ function renderDictationResult(d, userText){
 // ============================================================
 const CHALLENGES_ADMIN_EMAIL = 'brunemed1310@gmail.com';
 
+// Os desafios são persistidos na tabela "challenges" do Supabase (não mais
+// num array estático carregado de challenges.js) -- ver
+// scripts/supabase_migrations/001_create_challenges_table.sql. A RLS da
+// tabela já faz o trabalho de só devolver desafios publicados pra
+// aluno/anônimo e devolver tudo pra admin (auth.jwt() email), então o
+// front não precisa filtrar por permissão -- só usa o que voltou.
+let CHALLENGES = [];
+
+// Colunas "de verdade" da tabela (fora da coluna jsonb `data`). Tudo que
+// não está nesta lista quando um objeto de desafio é montado no front
+// (canonicalExpression, example, sentenceFr, targetText,
+// externalResources, etc.) é o conteúdo específico do tipo e vai inteiro
+// dentro de `data` ao persistir -- ver challengeDataPayload().
+const CHALLENGE_DB_COLUMNS = [
+  'id', 'type', 'level', 'status',
+  'created_at', 'updated_at',
+  'published_at', 'published_by',
+  'rejected_at', 'rejected_by',
+  'unpublished_at', 'unpublished_by',
+];
+
+function challengeDataPayload(c){
+  const data = {};
+  Object.keys(c).forEach(k => {
+    if (!CHALLENGE_DB_COLUMNS.includes(k)) data[k] = c[k];
+  });
+  return data;
+}
+
+// Busca os desafios do banco de dados e repõe CHALLENGES. Chamado sempre
+// que a aba Desafios é aberta (e de novo dentro do painel admin), pra
+// nunca depender de cache/estado de sessão -- uma publicação feita em
+// outra aba/navegador aparece assim que o site é reaberto ou a lista é
+// recarregada, sem precisar de nenhuma ação do Claude Code.
+async function loadChallengesFromDB(){
+  try {
+    const { data, error } = await supabaseClient.from('challenges').select('*');
+    if (error) throw error;
+    CHALLENGES = (data || []).map(row => ({
+      id: row.id,
+      type: row.type,
+      level: row.level,
+      status: row.status,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      published_at: row.published_at,
+      published_by: row.published_by,
+      rejected_at: row.rejected_at,
+      rejected_by: row.rejected_by,
+      unpublished_at: row.unpublished_at,
+      unpublished_by: row.unpublished_by,
+      ...(row.data || {}),
+    }));
+    return true;
+  } catch (err){
+    console.error('Falha ao carregar desafios do Supabase:', err);
+    return false;
+  }
+}
+
+// Grava status + todo o conteúdo específico do tipo (colunas extras via
+// `extraColumns`, ex: published_at/published_by) numa única chamada.
+// `c` já deve estar atualizado localmente (otimista) antes de chamar --
+// em caso de erro, quem chamou é responsável por reverter `c`.
+async function persistChallenge(c, extraColumns = {}){
+  const payload = { status: c.status, data: challengeDataPayload(c), ...extraColumns };
+  const { error } = await supabaseClient.from('challenges').update(payload).eq('id', c.id);
+  if (error){
+    console.error('Falha ao salvar desafio no Supabase:', error);
+    alert('Não foi possível salvar no banco de dados: ' + error.message);
+    return false;
+  }
+  return true;
+}
+
 const CHALLENGE_CATEGORIES = [
   { type: 'expression', emoji: '🧩', title: 'Expressões', subtitle: 'Descubra o sentido' },
   { type: 'listen_translate', emoji: '🎧', title: 'Ouça e traduza', subtitle: 'Escute e traduza' },
@@ -4948,6 +5023,13 @@ function publishedChallenges(){
 }
 function pendingChallenges(){
   return CHALLENGES.filter(c => c.status === 'needs_review');
+}
+// "Prontos, mas fora do ar" -- desafios que já foram aprovados/publicados
+// alguma vez mas não estão visíveis pro aluno agora (despublicados). Só a
+// admin enxerga essas linhas (a RLS de leitura pública só devolve
+// status = 'published').
+function unpublishedButApprovedChallenges(){
+  return CHALLENGES.filter(c => c.status === 'approved');
 }
 
 const CHALLENGE_RESOURCE_ICON = { dictionary: '📖', article: '📰', youtube: '▶', youglish: '🎧' };
@@ -4976,11 +5058,20 @@ function challengeExternalResourcesHTML(c){
   `;
 }
 
-function renderChallengeCategories(){
+async function renderChallengeCategories(){
   document.getElementById('challenges-categories-wrap').style.display = 'block';
   document.getElementById('challenges-list-wrap').style.display = 'none';
   document.getElementById('challenge-player-wrap').style.display = 'none';
   document.getElementById('challenges-admin-wrap').style.display = 'none';
+
+  const wrap = document.getElementById('challenges-categories');
+  wrap.innerHTML = `<p class="challenges-empty">Carregando desafios…</p>`;
+
+  const ok = await loadChallengesFromDB();
+  if (!ok){
+    wrap.innerHTML = `<p class="challenges-empty">Não foi possível carregar os desafios agora. Verifique sua conexão e tente novamente.</p>`;
+    return;
+  }
 
   const adminBar = document.getElementById('challenges-admin-bar');
   adminBar.style.display = isChallengesAdmin() ? 'flex' : 'none';
@@ -4988,7 +5079,6 @@ function renderChallengeCategories(){
     document.getElementById('challenges-pending-count').textContent = pendingChallenges().length;
   }
 
-  const wrap = document.getElementById('challenges-categories');
   wrap.innerHTML = CHALLENGE_CATEGORIES.map(cat => `
     <button class="challenge-category-card" data-category="${cat.type}">
       <div class="challenge-category-emoji">${cat.emoji}</div>
@@ -5611,7 +5701,10 @@ function challengeAdminCardTitle(c){
 // Aprova só se não houver problema bloqueante (áudio ausente, resposta
 // correta não definida, etc.) -- com problema não-bloqueante (ex: áudio
 // desatualizado), pede confirmação explícita em vez de aprovar direto.
-function approveChallengeWithGate(c){
+// Grava a publicação de verdade no Supabase (status/published_at/
+// published_by) -- não é mais uma simulação de sessão, então continua
+// publicado depois de fechar/reabrir o navegador.
+async function approveChallengeWithGate(c){
   const items = challengeQualityChecklist(c);
   const blocking = items.filter(it => !it.ok && it.blocking);
   const warnings = items.filter(it => !it.ok && !it.blocking);
@@ -5623,8 +5716,35 @@ function approveChallengeWithGate(c){
     const proceed = confirm('Atenção, encontrei possíveis problemas:\n\n' + warnings.map(w => '• ' + w.label).join('\n') + '\n\nAprovar mesmo assim?');
     if (!proceed) return false;
   }
+  const previousStatus = c.status;
   c.status = 'published';
-  showToast('Marcado como publicado nesta sessão — confirme comigo pra aplicar no código de verdade');
+  const ok = await persistChallenge(c, {
+    published_at: new Date().toISOString(),
+    published_by: CURRENT_USER.email,
+  });
+  if (!ok){
+    c.status = previousStatus;
+    return false;
+  }
+  showToast('Desafio publicado — já está visível pro aluno.');
+  return true;
+}
+
+// Tira um desafio publicado do ar sem descartar o conteúdo (volta pra
+// "approved": pronto, mas não visível pro aluno até ser publicado de
+// novo). Persistido de verdade, mesma lógica de approveChallengeWithGate.
+async function unpublishChallenge(c){
+  const previousStatus = c.status;
+  c.status = 'approved';
+  const ok = await persistChallenge(c, {
+    unpublished_at: new Date().toISOString(),
+    unpublished_by: CURRENT_USER.email,
+  });
+  if (!ok){
+    c.status = previousStatus;
+    return false;
+  }
+  showToast('Desafio despublicado — não aparece mais pro aluno.');
   return true;
 }
 
@@ -5672,8 +5792,8 @@ function renderChallengePreviewBanner(c){
     removePreviewWarningEl();
     renderChallengesAdmin();
   });
-  document.getElementById('preview-approve-btn').addEventListener('click', () => {
-    if (approveChallengeWithGate(c)){
+  document.getElementById('preview-approve-btn').addEventListener('click', async () => {
+    if (await approveChallengeWithGate(c)){
       challengePreviewMode = false;
       removePreviewWarningEl();
       renderChallengesAdmin();
@@ -5697,44 +5817,77 @@ function removePreviewWarningEl(){
   }
 }
 
-function renderChallengesAdmin(){
-  if (!isChallengesAdmin()) return;
-  document.getElementById('challenges-list-wrap').style.display = 'none';
-  document.getElementById('challenge-player-wrap').style.display = 'none';
-  document.getElementById('challenges-admin-wrap').style.display = 'block';
-
-  const pending = pendingChallenges();
-  const content = document.getElementById('challenges-admin-content');
-
-  if (pending.length === 0){
-    content.innerHTML = `<p class="challenges-admin-empty">Nenhum desafio pendente de revisão.</p>`;
-    return;
-  }
-
-  content.innerHTML = pending.map(c => {
-    const editing = challengesAdminEditingId === c.id;
-    return `
+function challengeAdminPublishedCardHTML(c){
+  return `
     <div class="challenges-admin-card" data-challenge-id="${c.id}">
       <div class="challenges-admin-card-header">
         <span class="challenge-card-level">${c.level}</span>
         <strong>${challengeAdminCardTitle(c)}</strong>
       </div>
-      <div class="challenges-admin-card-body">
-        ${editing ? challengeAdminEditView(c) : challengeAdminReadView(c)}
-      </div>
       <div class="challenges-admin-actions">
-        ${editing
-          ? `<button class="btn btn-primary" data-action="save">💾 Salvar</button>
-             <button class="btn btn-secondary" data-action="cancel-edit">Cancelar</button>`
-          : `<button class="btn btn-primary" data-action="approve">✅ Aprovar e publicar</button>
-             <button class="btn btn-secondary" data-action="preview">👁️ Ver versão do aluno</button>
-             <button class="btn btn-secondary" data-action="edit">✏️ Editar</button>
-             <button class="btn btn-secondary" data-action="reject">❌ Rejeitar</button>`
-        }
+        <button class="btn btn-secondary" data-action="preview">👁️ Ver versão do aluno</button>
+        <button class="btn btn-secondary" data-action="edit">✏️ Editar</button>
+        <button class="btn btn-secondary" data-action="unpublish">🚫 Despublicar</button>
       </div>
     </div>
   `;
-  }).join('');
+}
+
+// Recarrega do Supabase antes de renderizar -- garante que a fila de
+// revisão e a lista de publicados refletem o estado real do banco (ex:
+// uma publicação feita em outra sessão/navegador), não um cache antigo.
+async function renderChallengesAdmin(){
+  if (!isChallengesAdmin()) return;
+  document.getElementById('challenges-list-wrap').style.display = 'none';
+  document.getElementById('challenge-player-wrap').style.display = 'none';
+  document.getElementById('challenges-admin-wrap').style.display = 'block';
+
+  const content = document.getElementById('challenges-admin-content');
+  content.innerHTML = `<p class="challenges-admin-empty">Carregando…</p>`;
+  await loadChallengesFromDB();
+
+  const pending = pendingChallenges();
+  const published = publishedChallenges();
+  const unpublished = unpublishedButApprovedChallenges();
+
+  const pendingHTML = pending.length === 0
+    ? `<p class="challenges-admin-empty">Nenhum desafio pendente de revisão.</p>`
+    : pending.map(c => {
+      const editing = challengesAdminEditingId === c.id;
+      return `
+      <div class="challenges-admin-card" data-challenge-id="${c.id}">
+        <div class="challenges-admin-card-header">
+          <span class="challenge-card-level">${c.level}</span>
+          <strong>${challengeAdminCardTitle(c)}</strong>
+        </div>
+        <div class="challenges-admin-card-body">
+          ${editing ? challengeAdminEditView(c) : challengeAdminReadView(c)}
+        </div>
+        <div class="challenges-admin-actions">
+          ${editing
+            ? `<button class="btn btn-primary" data-action="save">💾 Salvar</button>
+               <button class="btn btn-secondary" data-action="cancel-edit">Cancelar</button>`
+            : `<button class="btn btn-primary" data-action="approve">✅ Aprovar e publicar</button>
+               <button class="btn btn-secondary" data-action="preview">👁️ Ver versão do aluno</button>
+               <button class="btn btn-secondary" data-action="edit">✏️ Editar</button>
+               <button class="btn btn-secondary" data-action="reject">❌ Rejeitar</button>`
+          }
+        </div>
+      </div>
+    `;
+    }).join('');
+
+  const publishedHTML = published.length === 0
+    ? ''
+    : `<h3 class="challenges-admin-section-title">Publicados (${published.length})</h3>`
+      + published.map(challengeAdminPublishedCardHTML).join('');
+
+  const unpublishedHTML = unpublished.length === 0
+    ? ''
+    : `<h3 class="challenges-admin-section-title">Despublicados (${unpublished.length})</h3>`
+      + unpublished.map(challengeAdminPublishedCardHTML).join('');
+
+  content.innerHTML = `<h3 class="challenges-admin-section-title">Pendentes de revisão (${pending.length})</h3>` + pendingHTML + publishedHTML + unpublishedHTML;
 
   wireChallengeAudioDurations(content);
 
@@ -5746,19 +5899,31 @@ function renderChallengesAdmin(){
     const editBtn = card.querySelector('[data-action="edit"]');
     const saveBtn = card.querySelector('[data-action="save"]');
     const cancelBtn = card.querySelector('[data-action="cancel-edit"]');
+    const unpublishBtn = card.querySelector('[data-action="unpublish"]');
 
-    if (approveBtn) approveBtn.addEventListener('click', () => {
+    if (approveBtn) approveBtn.addEventListener('click', async () => {
       const c = CHALLENGES.find(x => x.id === id);
-      if (approveChallengeWithGate(c)) renderChallengesAdmin();
+      if (await approveChallengeWithGate(c)) renderChallengesAdmin();
     });
     if (previewBtn) previewBtn.addEventListener('click', () => {
       const c = CHALLENGES.find(x => x.id === id);
       openChallengePreview(c);
     });
-    if (rejectBtn) rejectBtn.addEventListener('click', () => {
+    if (unpublishBtn) unpublishBtn.addEventListener('click', async () => {
       const c = CHALLENGES.find(x => x.id === id);
+      if (!confirm('Despublicar este desafio? Ele deixa de aparecer pro aluno imediatamente.')) return;
+      if (await unpublishChallenge(c)) renderChallengesAdmin();
+    });
+    if (rejectBtn) rejectBtn.addEventListener('click', async () => {
+      const c = CHALLENGES.find(x => x.id === id);
+      const previousStatus = c.status;
       c.status = 'rejected';
-      showToast('Marcado como rejeitado nesta sessão — confirme comigo pra aplicar no código de verdade');
+      const ok = await persistChallenge(c, {
+        rejected_at: new Date().toISOString(),
+        rejected_by: CURRENT_USER.email,
+      });
+      if (!ok){ c.status = previousStatus; return; }
+      showToast('Desafio rejeitado.');
       renderChallengesAdmin();
     });
     if (editBtn) editBtn.addEventListener('click', () => {
@@ -5768,9 +5933,12 @@ function renderChallengesAdmin(){
     card.querySelectorAll('.challenges-admin-resource').forEach(resEl => {
       const idx = parseInt(resEl.dataset.resourceIdx, 10);
       resEl.querySelectorAll('[data-resource-action]').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', async () => {
           const c = CHALLENGES.find(x => x.id === id);
+          const previousApproved = c.externalResources[idx].approved;
           c.externalResources[idx].approved = btn.dataset.resourceAction === 'approve';
+          const ok = await persistChallenge(c);
+          if (!ok){ c.externalResources[idx].approved = previousApproved; return; }
           renderChallengesAdmin();
         });
       });
@@ -5779,7 +5947,7 @@ function renderChallengesAdmin(){
       challengesAdminEditingId = null;
       renderChallengesAdmin();
     });
-    if (saveBtn) saveBtn.addEventListener('click', () => {
+    if (saveBtn) saveBtn.addEventListener('click', async () => {
       const c = CHALLENGES.find(x => x.id === id);
       card.querySelectorAll('[data-field]').forEach(input => {
         const field = input.dataset.field;
@@ -5798,8 +5966,18 @@ function renderChallengesAdmin(){
           c[field] = value;
         }
       });
+      // Editar um desafio já publicado/aprovado não deve deixar uma edição
+      // incompleta no ar imediatamente -- volta pra needs_review até ser
+      // revisado e aprovado de novo (mesmo padrão da opção de fallback
+      // combinada: reverter status em vez de manter uma versão "shadow").
+      const wasLive = c.status === 'published' || c.status === 'approved';
+      if (wasLive) c.status = 'needs_review';
+      const ok = await persistChallenge(c);
+      if (!ok) return;
       challengesAdminEditingId = null;
-      showToast('Edição salva nesta sessão — confirme comigo pra aplicar no código de verdade');
+      showToast(wasLive
+        ? 'Edição salva — desafio voltou para revisão (estava publicado/aprovado, precisa ser aprovado de novo).'
+        : 'Edição salva.');
       renderChallengesAdmin();
     });
   });
