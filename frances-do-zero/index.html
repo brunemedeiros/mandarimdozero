@@ -966,6 +966,18 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .challenge-card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-lift); }
 .challenge-card-level{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; color: var(--seal-red-dark); }
 .challenge-card-expr{ font-size:16px; font-weight:800; color: var(--ink); }
+.challenge-card.completed{ opacity:.55; }
+.challenge-card-check{ position:absolute; top:12px; right:12px; font-size:16px; color: var(--jade); }
+.challenge-card{ position:relative; }
+
+.challenges-level-tabs{ display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
+.challenge-level-tab{
+  padding:8px 16px; border-radius:999px; border:1px solid var(--paper-line);
+  background: var(--paper); color: var(--ink-soft); font-family: var(--font-body);
+  font-weight:700; font-size:13px; cursor:pointer; transition: all .15s ease;
+}
+.challenge-level-tab:hover{ border-color: var(--seal-red); }
+.challenge-level-tab.active{ background: var(--seal-red); border-color: var(--seal-red); color:#fff; }
 
 .challenges-empty{ text-align:center; padding:40px 20px; color: var(--ink-soft); }
 .challenges-empty .big-emoji{ font-size:40px; margin-bottom:10px; }
@@ -1799,6 +1811,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
       <div class="path-header">
         <h2 id="challenges-list-title">Desafios</h2>
       </div>
+      <div class="challenges-level-tabs" id="challenges-level-tabs" style="display:none;"></div>
       <div class="challenges-cards" id="challenges-cards"></div>
     </div>
 
