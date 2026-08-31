@@ -1069,6 +1069,8 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .challenges-admin-resource-actions{ display:flex; gap:6px; flex-wrap:wrap; }
 .challenges-admin-actions{ display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
 .challenges-admin-empty{ text-align:center; color: var(--ink-soft); padding:30px; }
+.challenges-admin-section-title{ font-size:14px; font-weight:800; color: var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; margin:24px 0 10px; }
+.challenges-admin-section-title:first-child{ margin-top:0; }
 .challenges-admin-edit-label{ display:block; font-size:12px; font-weight:700; color: var(--ink-soft); margin:12px 0 4px; }
 .challenges-admin-edit-input{
   width:100%; box-sizing:border-box; font-family: var(--font-body); font-size:13.5px; color: var(--ink);
@@ -1895,7 +1897,10 @@ footer.app-footer img{ height:56px; opacity:.9; }
 <script src="content.js"></script>
 <script src="conjugation-data.js"></script>
 <script src="dictations.js"></script>
-<script src="challenges.js"></script>
+<!-- challenges.js não é mais carregado: os desafios agora vêm da tabela
+     "challenges" do Supabase (persistência real, ver
+     scripts/supabase_migrations/). O arquivo é mantido no repositório só
+     como referência histórica do conteúdo já migrado. -->
 <script src="audio-manifest.js"></script>
 <script src="app.js"></script>
 </body>
