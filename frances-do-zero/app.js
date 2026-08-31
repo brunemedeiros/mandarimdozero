@@ -5605,7 +5605,8 @@ function challengeAudioFields(c){
   if (c.type === 'expression'){
     return [
       { label: 'Áudio da expressão-alvo', text: c.canonicalExpression, audioFile: c.expressionAudioFile },
-      { label: 'Áudio do 2º exemplo', text: c.secondExample.text, audioFile: c.secondExample.audioFile },
+      { label: 'Áudio do Exemple 1', text: c.example.text, audioFile: c.example.audioFile },
+      { label: 'Áudio do Exemple 2', text: c.secondExample.text, audioFile: c.secondExample.audioFile },
     ];
   }
   if (c.type === 'listen_translate'){
