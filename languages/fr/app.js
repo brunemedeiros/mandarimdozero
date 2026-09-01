@@ -1180,6 +1180,11 @@ function wireDontKnowButton(contentEl, ex, onRevealAnswer){
     block.querySelector('#exercise-reveal-btn').addEventListener('click', () => {
       if (STEP_STATE.exerciseAnswered) return;
       ex.revealed = true;
+      // O painel "Resposta revelada" (via onRevealAnswer) já cumpre a função
+      // de "tentar de novo" ou "ver resposta" -- remove as duas ações daqui
+      // pra não deixar "Tentar novamente" como um controle sem sentido
+      // depois que a resposta já foi revelada.
+      block.querySelector('.inline-hint-actions')?.remove();
       onRevealAnswer();
     });
   });
