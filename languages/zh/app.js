@@ -440,24 +440,13 @@ HANZI_LESSONS.forEach((lesson, i) => {
   STATE.hanziLessonProgress[i] = { completed:false, unlocked: i===0 };
 });
 
-// ---------- Supabase: conexão, autenticação e persistência na nuvem ----------
-const SUPABASE_URL = 'https://eigjocalzwamisgqilhg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpZ2pvY2FsendhbWlzZ3FpbGhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5MjYzNjksImV4cCI6MjEwMjUwMjM2OX0.EyW4vyQcFL2vrBoo-rpLD5J8LNBT3aSEJREZTSqzHVU';
+// Conexão com o Supabase (supabaseClient, cleanRedirectURL) agora vem de
+// shared/supabase-client.js -- mesmo projeto/tabela `progress` de sempre,
+// compartilhado com os outros idiomas da plataforma.
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// URL "limpa" (sem #access_token nem outros fragmentos) pra usar como
-// redirectTo do OAuth/reset de senha. Usar window.location.href direto é
-// perigoso: se a URL já tiver um #access_token sobrando de uma tentativa
-// anterior que falhou, o Google devolve um token novo em cima do antigo em
-// vez de substituir, quebrando o parsing — e piora a cada nova tentativa.
-function cleanRedirectURL(){
-  return window.location.origin + window.location.pathname;
-}
-
-// Sessão atual: null enquanto não resolvido, false = "sem conta" (modo convidado), objeto = usuário logado
-let CURRENT_USER = null;
-const GUEST_MODE_FLAG = 'mandarim_guest_mode';
+// CURRENT_USER, GUEST_MODE_FLAG, initAuth/showLoginScreen/enterGuestMode/
+// onUserLoggedIn e toda a autenticação (Google/e-mail/convidado) agora vêm
+// de shared/auth.js, junto com saveState/loadState/notifySaveFailure.
 
 // ---------- Toggle global de pinyin (forçar leitura só em hanzi) ----------
 const PINYIN_TOGGLE_KEY = 'mandarim_hide_pinyin';
@@ -484,34 +473,6 @@ document.getElementById('pinyin-toggle-btn').addEventListener('click', () => {
 });
 
 loadPinyinPreference();
-
-async function initAuth(){
-  const { data: { session } } = await supabaseClient.auth.getSession();
-
-  // Limpa qualquer fragmento de token da URL depois que o Supabase já teve
-  // a chance de processá-lo (getSession acima) — evita que ele contamine um
-  // redirectTo futuro se o usuário tentar entrar de novo.
-  if (window.location.hash){
-    history.replaceState(null, '', window.location.pathname + window.location.search);
-  }
-
-  if (session && session.user){
-    await onUserLoggedIn(session.user);
-  } else if (sessionStorageSafeGet(GUEST_MODE_FLAG) === '1'){
-    enterGuestMode();
-  } else {
-    showLoginScreen();
-  }
-
-  supabaseClient.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session?.user){
-      await onUserLoggedIn(session.user);
-    } else if (event === 'SIGNED_OUT'){
-      CURRENT_USER = null;
-      showLoginScreen();
-    }
-  });
-}
 
 // sessionStorageSafeGet/Set, localStorageSafeGet/Set e o tema claro/escuro
 // (isDarkThemeActive, toggleTheme etc.) agora vêm de shared/utils.js e
@@ -540,31 +501,6 @@ document.getElementById('cloze-mode-switch').addEventListener('click', () => {
 });
 updateClozeModeSwitch();
 
-function showLoginScreen(){
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app').style.display = 'none';
-}
-
-function enterGuestMode(){
-  sessionStorageSafeSet(GUEST_MODE_FLAG, '1');
-  CURRENT_USER = false;
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  document.getElementById('user-label').textContent = 'Convidado';
-  loadStateAndRender();
-}
-
-async function onUserLoggedIn(user){
-  CURRENT_USER = user;
-  sessionStorageSafeSet(GUEST_MODE_FLAG, '0');
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  const label = user.user_metadata?.full_name || user.email || 'Minha conta';
-  document.getElementById('user-label').textContent = label;
-  document.getElementById('user-dropdown-email').textContent = user.email || '';
-  await loadStateAndRender();
-}
-
 async function loadStateAndRender(){
   await loadState();
   renderTopbarStats();
@@ -574,116 +510,9 @@ async function loadStateAndRender(){
   maybeSendStudyReminder();
 }
 
-document.getElementById('google-login-btn').addEventListener('click', async () => {
-  const noteEl = document.getElementById('login-note');
-  noteEl.textContent = 'Redirecionando para o Google...';
-  noteEl.className = 'login-note';
-  const { error } = await supabaseClient.auth.signInWithOAuth({
-    provider: 'google',
-    options: { redirectTo: cleanRedirectURL() }
-  });
-  if (error){
-    noteEl.textContent = 'Não foi possível iniciar o login. Tente novamente.';
-    noteEl.className = 'login-note err';
-  }
-});
-
-// ---------- Login com e-mail e senha (alternativa ao Google/Convidado) ----------
-let emailLoginMode = 'signin'; // 'signin' | 'signup'
-
-function updateEmailLoginModeUI(){
-  document.getElementById('email-login-submit-btn').textContent = emailLoginMode === 'signup' ? 'Criar conta' : 'Entrar';
-  document.getElementById('login-signup-question').textContent = emailLoginMode === 'signup' ? 'Já tem conta?' : 'Não tem conta?';
-  document.getElementById('email-login-toggle-mode-btn').textContent = emailLoginMode === 'signup' ? 'Entrar' : 'Cadastre-se';
-}
-
-document.getElementById('email-login-toggle-mode-btn').addEventListener('click', () => {
-  emailLoginMode = emailLoginMode === 'signup' ? 'signin' : 'signup';
-  updateEmailLoginModeUI();
-});
-
-document.getElementById('email-login-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const noteEl = document.getElementById('login-note');
-  const email = document.getElementById('email-login-email').value.trim();
-  const password = document.getElementById('email-login-password').value;
-  const submitBtn = document.getElementById('email-login-submit-btn');
-
-  submitBtn.disabled = true;
-  noteEl.className = 'login-note';
-  noteEl.textContent = emailLoginMode === 'signup' ? 'Criando conta...' : 'Entrando...';
-
-  try{
-    if (emailLoginMode === 'signup'){
-      const { data, error } = await supabaseClient.auth.signUp({ email, password });
-      if (error){
-        noteEl.textContent = error.message;
-        noteEl.className = 'login-note err';
-      } else if (!data.session){
-        // confirmação de e-mail exigida pelo projeto Supabase — sem sessão ainda
-        noteEl.textContent = 'Conta criada! Verifique seu e-mail para confirmar e depois entre normalmente.';
-        noteEl.className = 'login-note';
-      }
-      // se já veio sessão (confirmação de e-mail desligada), onAuthStateChange cuida do resto
-    } else {
-      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if (error){
-        noteEl.textContent = 'E-mail ou senha incorretos.';
-        noteEl.className = 'login-note err';
-      }
-    }
-  }catch(err){
-    noteEl.textContent = 'Não foi possível conectar. Tente novamente.';
-    noteEl.className = 'login-note err';
-  }finally{
-    submitBtn.disabled = false;
-  }
-});
-
-document.getElementById('email-login-forgot-btn').addEventListener('click', async () => {
-  const noteEl = document.getElementById('login-note');
-  const email = document.getElementById('email-login-email').value.trim();
-  if (!email){
-    noteEl.textContent = 'Digite seu e-mail no campo acima primeiro.';
-    noteEl.className = 'login-note err';
-    return;
-  }
-  noteEl.textContent = 'Enviando e-mail de redefinição...';
-  noteEl.className = 'login-note';
-  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: cleanRedirectURL() });
-  if (error){
-    noteEl.textContent = 'Não foi possível enviar o e-mail. Tente novamente.';
-    noteEl.className = 'login-note err';
-  } else {
-    noteEl.textContent = 'E-mail de redefinição enviado! Confira sua caixa de entrada.';
-    noteEl.className = 'login-note';
-  }
-});
-
-updateEmailLoginModeUI();
-
-document.getElementById('guest-btn').addEventListener('click', () => {
-  enterGuestMode();
-});
-
-document.getElementById('user-menu-btn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  document.getElementById('user-menu-dropdown').classList.toggle('open');
-});
-document.addEventListener('click', () => {
-  document.getElementById('user-menu-dropdown').classList.remove('open');
-});
-
-document.getElementById('logout-btn').addEventListener('click', async () => {
-  if (CURRENT_USER){
-    await supabaseClient.auth.signOut();
-  } else {
-    // modo convidado: só volta pra tela de login
-    sessionStorageSafeSet(GUEST_MODE_FLAG, '0');
-    CURRENT_USER = null;
-    showLoginScreen();
-  }
-});
+// Login (Google/e-mail/convidado), menu do usuário e logout agora vêm de
+// shared/auth.js -- os botões/formulários abaixo continuam no HTML de cada
+// idioma, só a lógica de wiring foi extraída.
 
 // "Meu perfil" reaproveita a mesma tela de Progresso de sempre — só mudou
 // de lugar (estava na barra de abas, agora fica dentro do menu do usuário,
@@ -700,65 +529,19 @@ document.getElementById('user-settings-btn').addEventListener('click', () => {
   switchTab('settings');
 });
 
-// ---------- Persistência: Supabase (usuário logado) ou memória local (convidado) ----------
-const STORAGE_KEY = 'mandarim_zero_state_v1';
-// Esta tabela `progress` passou a ser compartilhada com o Francês do Zero (mesmo
-// Supabase, mesma linha por user_id). Cada app guarda seu estado sob sua própria
-// chave dentro da coluna `data` para não sobrescrever o progresso do outro app.
+// Esta tabela `progress` é compartilhada com os outros idiomas da
+// plataforma (mesmo Supabase, mesma linha por user_id). Cada idioma guarda
+// seu estado sob sua própria chave dentro da coluna `data` para não
+// sobrescrever o progresso dos outros. saveState/loadState agora vêm de
+// shared/auth.js.
 const APP_KEY = 'mandarim';
-let saveInFlight = false;
-let savePending = false;
 
-async function saveState(){
-  // Modo convidado: não há onde persistir além da memória da aba atual (avisado na UI).
-  if (!CURRENT_USER) return;
-
-  if (saveInFlight){ savePending = true; return; }
-  saveInFlight = true;
-
-  try{
-    const payload = serializeState();
-    const { data: existing, error: fetchError } = await supabaseClient
-      .from('progress')
-      .select('data')
-      .eq('user_id', CURRENT_USER.id)
-      .maybeSingle();
-    if (fetchError) console.error('Erro ao ler progresso antes de salvar:', fetchError);
-
-    const merged = Object.assign({}, existing && existing.data, { [APP_KEY]: payload });
-    const { error } = await supabaseClient
-      .from('progress')
-      .upsert({ user_id: CURRENT_USER.id, data: merged }, { onConflict: 'user_id' });
-    if (error) console.error('Erro ao salvar progresso:', error);
-  }catch(e){
-    console.error('Erro ao salvar progresso:', e);
-  }finally{
-    saveInFlight = false;
-    if (savePending){ savePending = false; saveState(); }
-  }
-}
-
-async function loadState(){
-  if (!CURRENT_USER) return; // convidado: fica só com o estado inicial em memória
-
-  try{
-    const { data, error } = await supabaseClient
-      .from('progress')
-      .select('data')
-      .eq('user_id', CURRENT_USER.id)
-      .maybeSingle();
-
-    if (error){ console.error('Erro ao carregar progresso:', error); return; }
-    if (data && data.data && data.data[APP_KEY]){
-      applySerializedState(data.data[APP_KEY]);
-    }else if (data && data.data && (data.data.hanziCards || data.data.cards)){
-      // Formato antigo (salvo antes de existir o namespacing por app): é o
-      // próprio estado do Mandarim do Zero, salvo direto na raiz do JSON.
-      applySerializedState(data.data);
-    }
-  }catch(e){
-    console.error('Erro ao carregar progresso:', e);
-  }
+// Hook chamado por loadState() (shared/auth.js) quando não encontra
+// data.data[APP_KEY] -- reconhece o formato salvo ANTES do namespacing por
+// idioma existir (estado do Mandarim do Zero direto na raiz do JSON), pra
+// quem já tinha conta antes disso não perder o progresso.
+function loadLegacyState(data){
+  if (data.hanziCards || data.cards) applySerializedState(data);
 }
 
 function serializeState(){

@@ -7,11 +7,11 @@ funcionando nos dois, não quando o código só "parece certo".
 
 ## Compartilhado (hoje duplicado entre os dois `app.js`, alvo de `shared/`)
 
-- [ ] Autenticação: Google OAuth
-- [ ] Autenticação: e-mail/senha (login + cadastro + esqueci a senha)
-- [ ] Modo convidado
-- [ ] Logout
-- [ ] Persistência de progresso (tabela `progress`, isolada por idioma)
+- [x] Autenticação: Google OAuth — extraído pra `shared/auth.js` (2025-09-01)
+- [x] Autenticação: e-mail/senha (login + cadastro + esqueci a senha) — idem
+- [x] Modo convidado — idem
+- [x] Logout — idem
+- [x] Persistência de progresso (tabela `progress`, isolada por idioma) — `shared/auth.js` (saveState/loadState) + `shared/supabase-client.js`. Achado no caminho: o chinês tinha um fallback pra formato de dado salvo ANTES do namespacing por idioma existir (progresso de contas antigas) que o francês nunca teve — preservado via hook opcional `loadLegacyState()`, testado explicitamente pra não regredir.
 - [x] Tema claro/escuro (persistido, sem piscar no load) — extraído pra `shared/theme.js`, testado nos dois idiomas (2025-09-01)
 - [x] PWA: registro do service worker — extraído pra `shared/pwa.js` (2025-09-01). Manifest e o service worker em si continuam por idioma (cache list diferente), como esperado.
 - [ ] Wizard de plano de estudo (meta diária)
