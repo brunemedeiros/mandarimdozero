@@ -10,12 +10,20 @@ Dois modos de uso:
 
        python3 -m challenges_pipeline.audit_tts battery
 
-2. Auditoria do conteúdo já publicado/pendente em challenges.js: lê cada
-   par (texto, audioFile) do arquivo e confere via Speech-to-Text se o
-   áudio já gerado ainda bate com o texto (não gera áudio novo, só audita
-   o que já existe).
+2. Auditoria do conteúdo já publicado/pendente: lê cada par (texto,
+   audioFile) e confere via Speech-to-Text se o áudio já gerado ainda bate
+   com o texto (não gera áudio novo, só audita o que já existe).
 
-       python3 -m challenges_pipeline.audit_tts existing [caminho/challenges.js]
+   Por padrão lê direto da tabela public.challenges no Supabase (fonte real
+   desde que a publicação deixou de ser um array estático em challenges.js
+   -- ver migração 001_create_challenges_table.sql). Com a anon key
+   (pública, mesma do front) só enxerga desafios já publicados; pra
+   auditar TAMBÉM needs_review/approved/rejected, defina
+   SUPABASE_ADMIN_EMAIL/SUPABASE_ADMIN_PASSWORD (mesmo login usado no
+   painel admin do site) -- nunca uma service-role key.
+
+       python3 -m challenges_pipeline.audit_tts existing
+       python3 -m challenges_pipeline.audit_tts existing --file ../challenges.js  # modo legado, offline
 
 Em ambos os casos, nunca decide sozinho que um áudio está "ruim" com base
 só numa transcrição vazia do STT (isso é uma limitação conhecida do STT em
@@ -27,6 +35,8 @@ import json
 import os
 import subprocess
 import sys
+
+import requests
 
 from . import config, tts
 
@@ -96,8 +106,69 @@ console.log(JSON.stringify(pairs));
     return json.loads(result.stdout)
 
 
-def run_existing_audit(challenges_js_path):
-    pairs = _load_challenges_js(challenges_js_path)
+def _pairs_from_challenge_row(row):
+    """Mesma extração de (texto, audioFile) de sempre, só que a partir de
+    uma linha { id, type, ...data } do Supabase em vez de um objeto plano
+    de challenges.js -- o formato de `data` é idêntico ao que challenges.js
+    guardava por design (ver migração 001), então a lógica não muda."""
+    cid = row["id"]
+    data = row.get("data") or {}
+    pairs = []
+    if data.get("expressionAudioFile"):
+        pairs.append({"text": data.get("canonicalExpression"), "audioFile": data["expressionAudioFile"], "ctx": f"{cid}.expressionAudioFile"})
+    example = data.get("example") or {}
+    if example.get("audioFile"):
+        pairs.append({"text": example.get("text"), "audioFile": example["audioFile"], "ctx": f"{cid}.example"})
+    second_example = data.get("secondExample") or {}
+    if second_example.get("audioFile"):
+        pairs.append({"text": second_example.get("text"), "audioFile": second_example["audioFile"], "ctx": f"{cid}.secondExample"})
+    if data.get("audioFile") and row["type"] != "expression":
+        pairs.append({"text": data.get("sentenceFr") or data.get("targetText"), "audioFile": data["audioFile"], "ctx": f"{cid}.audioFile"})
+    return pairs
+
+
+def _supabase_admin_access_token():
+    """Autentica com e-mail/senha (mesmo login do painel admin do site) pra
+    habilitar a policy RLS que também enxerga needs_review/approved/rejected,
+    não só published. Sem as credenciais, devolve None e o caller cai pro
+    escopo público (só published) -- nunca usa uma service-role key."""
+    if not (config.SUPABASE_ADMIN_EMAIL and config.SUPABASE_ADMIN_PASSWORD):
+        return None
+    resp = requests.post(
+        f"{config.SUPABASE_URL}/auth/v1/token?grant_type=password",
+        headers={"apikey": config.SUPABASE_ANON_KEY, "Content-Type": "application/json"},
+        json={"email": config.SUPABASE_ADMIN_EMAIL, "password": config.SUPABASE_ADMIN_PASSWORD},
+        timeout=30,
+    )
+    resp.raise_for_status()
+    return resp.json()["access_token"]
+
+
+def _load_challenges_supabase():
+    access_token = _supabase_admin_access_token()
+    scope = "todos os status (autenticado como admin)" if access_token else "só published (sem credenciais de admin -- defina SUPABASE_ADMIN_EMAIL/SUPABASE_ADMIN_PASSWORD pra ver a fila inteira)"
+    print(f"Lendo public.challenges do Supabase -- escopo: {scope}\n")
+
+    resp = requests.get(
+        f"{config.SUPABASE_URL}/rest/v1/challenges",
+        params={"select": "id,type,data"},
+        headers={
+            "apikey": config.SUPABASE_ANON_KEY,
+            "Authorization": f"Bearer {access_token or config.SUPABASE_ANON_KEY}",
+        },
+        timeout=30,
+    )
+    resp.raise_for_status()
+    rows = resp.json()
+
+    pairs = []
+    for row in rows:
+        pairs.extend(_pairs_from_challenge_row(row))
+    return pairs
+
+
+def run_existing_audit(challenges_js_path=None):
+    pairs = _load_challenges_js(challenges_js_path) if challenges_js_path else _load_challenges_supabase()
     print(f"Auditando {len(pairs)} arquivo(s) de áudio já gerado(s)...\n")
 
     suspicious, missing, inconclusive, ok_count = [], [], 0, 0
@@ -130,15 +201,18 @@ def main():
     parser = argparse.ArgumentParser(description="Auditoria/regressão do TTS em francês")
     sub = parser.add_subparsers(dest="mode", required=True)
     sub.add_parser("battery", help="Roda a bateria fixa de regressão (gera áudio novo, validado)")
-    p_existing = sub.add_parser("existing", help="Audita o áudio já gerado em challenges.js")
-    p_existing.add_argument("path", nargs="?", default="../challenges.js")
+    p_existing = sub.add_parser("existing", help="Audita o áudio já gerado (por padrão, lendo do Supabase)")
+    p_existing.add_argument(
+        "--file", dest="challenges_js_path", default=None,
+        help="Modo legado/offline: audita a partir de um challenges.js local em vez do Supabase"
+    )
 
     args = parser.parse_args()
     if args.mode == "battery":
         success = run_battery()
         sys.exit(0 if success else 1)
     elif args.mode == "existing":
-        suspicious, missing = run_existing_audit(args.path)
+        suspicious, missing = run_existing_audit(args.challenges_js_path)
         sys.exit(0 if not suspicious and not missing else 1)
 
 

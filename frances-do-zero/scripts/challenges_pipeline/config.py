@@ -17,6 +17,23 @@ MODEL_PRIMARY = "gemini-2.5-flash-lite"
 GCP_TTS_KEY = os.environ.get("GCP_TTS_KEY")
 TTS_VOICE = "fr-FR-Chirp3-HD-Achernar"
 
+# ---------- Supabase (leitura da tabela public.challenges) ----------
+# URL e anon key são os mesmos já embutidos no front (app.js) -- não são
+# segredo, a anon key só habilita a RLS "challenges_public_read_published"
+# (só linhas status='published'). Pra auditar TAMBÉM o que ainda está em
+# needs_review/approved/rejected, é preciso autenticar como a admin (mesmo
+# login de e-mail/senha usado no site) via as duas variáveis abaixo -- sem
+# isso, cai de volta pro escopo público (só published), nunca usa uma
+# service-role key (essa nunca deve existir neste repo, é a fronteira de
+# segurança real, garantida só por RLS).
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://eigjocalzwamisgqilhg.supabase.co")
+SUPABASE_ANON_KEY = os.environ.get(
+    "SUPABASE_ANON_KEY",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpZ2pvY2FsendhbWlzZ3FpbGhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5MjYzNjksImV4cCI6MjEwMjUwMjM2OX0.EyW4vyQcFL2vrBoo-rpLD5J8LNBT3aSEJREZTSqzHVU",
+)
+SUPABASE_ADMIN_EMAIL = os.environ.get("SUPABASE_ADMIN_EMAIL")
+SUPABASE_ADMIN_PASSWORD = os.environ.get("SUPABASE_ADMIN_PASSWORD")
+
 # ---------- YouTube Data API v3 (só pra "pour aller plus loin", opcional) ----------
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY")
 EXTERNAL_RESOURCES_MAX_RESULTS = 3
