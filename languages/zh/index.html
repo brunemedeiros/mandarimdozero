@@ -646,6 +646,13 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .exercise-option.disabled{ pointer-events:none; opacity:.6; }
 .exercise-option.disabled.correct, .exercise-option.disabled.incorrect{ opacity:1; }
 
+/* ---------- Exercício "frase completa" (PT -> escolher entre 4 frases) ---------- */
+.prompt-trans-sentence{ font-size:18px; color: var(--ink); line-height:1.4; }
+.exercise-options-sentence{ grid-template-columns: 1fr; gap:10px; }
+.exercise-option-sentence{ padding:16px 18px; text-align:left; }
+.opt-pinyin-sentence{ font-size:13px; color: var(--seal-red-dark); font-weight:700; margin-bottom:4px; }
+.opt-hanzi-sentence{ font-family: var(--font-hanzi); font-size:19px; line-height:1.5; }
+
 /* ---------- Exercício de verdadeiro ou falso (uso real) ---------- */
 .tf-scene{
   background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);

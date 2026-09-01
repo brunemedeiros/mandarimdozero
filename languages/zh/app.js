@@ -1776,7 +1776,138 @@ function buildExerciseSet(unit){
   const REORDER_EXERCISE_CAP = 4;
   const cappedReorderExercises = shuffle(reorderExercises).slice(0, REORDER_EXERCISE_CAP);
 
-  return shuffle([...vocabExercises, ...cappedReorderExercises, ...trueFalseExercises, ...clozeExercises]);
+  const fullSentenceExercises = buildFullSentenceExercises(unit);
+
+  return shuffle([...vocabExercises, ...cappedReorderExercises, ...trueFalseExercises, ...clozeExercises, ...fullSentenceExercises]);
+}
+
+// ---------- Exercício "Frase completa" — PT → escolher entre 4 frases em hanzi ----------
+// Gera distratores de duas formas: (1) trocando uma palavra de conteúdo por
+// outra do vocabulário cumulativo (unidade atual + todas anteriores já
+// desbloqueadas), e (2) invertendo a posição de uma negação (不/没), um erro
+// gramatical plausível e comum de iniciante. Usa os `blocks` que as frases já
+// têm, evitando qualquer manipulação frágil de string solta.
+function buildCumulativeVocabPool(unit){
+  const idx = UNITS.findIndex(u => u.id === unit.id);
+  const priorUnits = UNITS.slice(0, idx + 1); // unidade atual + todas anteriores
+  const pool = [];
+  priorUnits.forEach(u => u.vocab.forEach(v => pool.push(v)));
+  return pool;
+}
+
+function buildFullSentenceExercises(unit){
+  const cumulativeVocab = buildCumulativeVocabPool(unit);
+
+  const candidates = (unit.phrases || []).filter(p => p.blocks && p.blocks.length >= 2);
+  // Limita a 2 por unidade pra não sobrecarregar a sessão de exercícios com
+  // um formato mais denso de ler do que os outros.
+  const selected = shuffle(candidates).slice(0, 2);
+
+  return selected.map(phrase => {
+    const distractors = [];
+
+    // Blocos "de conteúdo": uma palavra isolada, sem pontuação misturada
+    // (blocos com pontuação, como "什么名字？", costumam ser a cauda de toda
+    // a frase -- trocar ou remover esses gera um distrator sem sentido
+    // gramatical, fácil demais de descartar).
+    const contentBlockIndices = phrase.blocks
+      .map((b, i) => ({ b, i }))
+      .filter(({ b }) => {
+        const clean = b.c.replace(/[，。！？]/g, '');
+        return clean.length >= 2 && clean === b.c;
+      });
+
+    function pickReplacement(targetBlock){
+      const sameLength = cumulativeVocab.filter(v =>
+        v.c !== targetBlock.c && Math.abs(v.c.length - targetBlock.c.length) <= 1
+      );
+      return shuffle(sameLength.length ? sameLength : cumulativeVocab.filter(v => v.c !== targetBlock.c))[0];
+    }
+
+    // Estratégia 1: troca de palavra -- substitui um bloco de conteúdo por
+    // outra palavra do vocabulário cumulativo, priorizando tamanho parecido
+    // pra manter o mesmo "papel" gramatical.
+    let swapTargetIdx = -1;
+    if (contentBlockIndices.length){
+      swapTargetIdx = contentBlockIndices[Math.floor(Math.random() * contentBlockIndices.length)].i;
+      const replacement = pickReplacement(phrase.blocks[swapTargetIdx]);
+      if (replacement){
+        const newBlocks = phrase.blocks.map((b, i) => i === swapTargetIdx ? { p: replacement.p, c: replacement.c } : b);
+        distractors.push(newBlocks);
+      }
+    }
+
+    // Estratégia 2: erro de posição gramatical -- se a frase tem negação
+    // (不/没) em algum bloco, gera uma variante trocando a posição dela com
+    // o bloco seguinte (erro comum: "是不" em vez de "不是").
+    const negIdx = phrase.blocks.findIndex(b => b.c.includes('不') || b.c.includes('没'));
+    const hasNegationSwap = negIdx >= 0 && negIdx < phrase.blocks.length - 1;
+    if (hasNegationSwap){
+      const swapped = phrase.blocks.slice();
+      [swapped[negIdx], swapped[negIdx + 1]] = [swapped[negIdx + 1], swapped[negIdx]];
+      distractors.push(swapped);
+    }
+
+    // Estratégia 3: combinação -- troca de palavra E inversão de posição na
+    // MESMA opção (uma das 4 alternativas junta os dois erros, ficando ainda
+    // mais parecida com a correta e mais desafiadora de descartar).
+    if (swapTargetIdx >= 0 && hasNegationSwap){
+      const replacement2 = pickReplacement(phrase.blocks[swapTargetIdx]);
+      if (replacement2){
+        const combined = phrase.blocks.map((b, i) => i === swapTargetIdx ? { p: replacement2.p, c: replacement2.c } : b);
+        [combined[negIdx], combined[negIdx + 1]] = [combined[negIdx + 1], combined[negIdx]];
+        distractors.push(combined);
+      }
+    }
+
+    // Estratégia 4: omissão de palavra-chave -- remove um bloco de conteúdo
+    // inteiro, gerando uma frase incompleta/agramatical.
+    if (contentBlockIndices.length > 1){
+      const omitCandidates = contentBlockIndices.filter(({ i }) => i !== swapTargetIdx);
+      const pool = omitCandidates.length ? omitCandidates : contentBlockIndices;
+      const omitIdx = pool[Math.floor(Math.random() * pool.length)].i;
+      const withOmission = phrase.blocks.filter((b, i) => i !== omitIdx);
+      if (withOmission.length >= 2){
+        distractors.push(withOmission);
+      }
+    }
+
+    // Fallback: embaralha os próprios blocos da frase -- sempre gramaticalmente
+    // "errado" o bastante pra servir de distrator, sem nunca coincidir por
+    // acaso com a ordem correta. Tentativas limitadas: frases muito curtas
+    // (2-3 blocos) têm poucas permutações possíveis.
+    let fallbackAttempts = 0;
+    while (distractors.length < 3 && phrase.blocks.length >= 2 && fallbackAttempts < 20){
+      fallbackAttempts++;
+      const shuffledBlocks = shuffle(phrase.blocks);
+      const isSameOrder = shuffledBlocks.every((b, i) => b === phrase.blocks[i]);
+      const isDuplicate = distractors.some(d => JSON.stringify(d) === JSON.stringify(shuffledBlocks));
+      if (!isSameOrder && !isDuplicate){
+        distractors.push(shuffledBlocks);
+      }
+    }
+
+    const distractorSentences = distractors
+      .filter(blocks => blocks.map(b => b.c).join('') !== phrase.c) // nunca deixa um distrator coincidir com a frase correta
+      .reduce((unique, blocks) => { // deduplica por texto final (hanzi), não por referência de array
+        const text = blocks.map(b => b.c).join('');
+        if (!unique.some(u => u.text === text)) unique.push({ text, blocks });
+        return unique;
+      }, [])
+      .slice(0, 3)
+      .map(({ blocks }) => ({
+        p: blocks.map(b => b.p).join(' '),
+        c: blocks.map(b => b.c).join('')
+      }));
+
+    const correctSentence = { p: phrase.p, c: phrase.c };
+    const options = shuffle([correctSentence, ...distractorSentences]);
+
+    // phrase (com .t) reaproveita o mesmo painel de acerto/erro já usado
+    // pelo reorder e pelo cloze (showCorrectReorderPanel/wrongAnswerExplanationHTML
+    // leem ex.phrase, não um campo próprio deste formato).
+    return { format: 'fullsentence', phrase: { c: phrase.c, t: phrase.t }, correct: correctSentence, options };
+  });
 }
 
 // ---------- Tela final "Parabéns" (estilo Busuu) ----------
@@ -1839,6 +1970,8 @@ function renderExerciseStep(){
 
   if (ex.format === 'reorder'){
     renderReorderExercise(ex, contentEl, nextBtn, total);
+  } else if (ex.format === 'fullsentence'){
+    renderFullSentenceExercise(ex, contentEl, nextBtn, total);
   } else if (ex.format === 'trueFalse'){
     renderTrueFalseExercise(ex, contentEl, nextBtn, total);
   } else if (ex.format === 'cloze'){
@@ -2232,6 +2365,66 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
 // A frase-modelo aparece embaralhada em blocos de pinyin (com hanzi como apoio
 // visual abaixo de cada bloco). Toca nos blocos na ordem certa para reconstruir
 // a frase. Foco na ordem gramatical, não em reconhecer hanzi isolado.
+// ---------- Exercício de frase completa (PT -> escolher entre 4 frases) ----------
+function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
+  const optionsHTML = ex.options.map((opt, i) => `
+    <button class="exercise-option exercise-option-sentence" data-idx="${i}">
+      <div class="pinyin opt-pinyin-sentence">${opt.p}</div>
+      <div class="opt-hanzi-sentence">${opt.c}</div>
+    </button>
+  `).join('');
+
+  contentEl.innerHTML = `
+    <div class="exercise-wrap">
+      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-prompt-label">Selecione a frase correta</div>
+      <div class="exercise-prompt">
+        <div class="prompt-trans-sentence">${ex.phrase.t}</div>
+      </div>
+      <div class="exercise-options exercise-options-sentence">${optionsHTML}</div>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+    </div>
+  `;
+
+  nextBtn.style.display = 'none';
+
+  function revealAnswer(chosenIdx){
+    STEP_STATE.exerciseAnswered = true;
+    const isCorrect = ex.options[chosenIdx] === ex.correct;
+    contentEl.querySelectorAll('.exercise-option-sentence').forEach((b, i) => {
+      b.classList.add('disabled');
+      if (ex.options[i] === ex.correct) b.classList.add('correct');
+      else if (i === chosenIdx) b.classList.add('incorrect');
+    });
+    document.getElementById('exercise-dontknow-btn')?.classList.add('disabled');
+
+    addStudyMinutes();
+    if (isCorrect){
+      setTimeout(() => showCorrectReorderPanel(contentEl, ex), 500);
+    } else {
+      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
+    }
+  }
+
+  contentEl.querySelectorAll('.exercise-option-sentence').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (STEP_STATE.exerciseAnswered) return;
+      const chosenIdx = parseInt(btn.dataset.idx);
+      const isCorrect = ex.options[chosenIdx] === ex.correct;
+      if (isCorrect){
+        STEP_STATE.exerciseScore += 1;
+        addXP(4); // vale um pouco mais que múltipla escolha simples, mesmo critério do reorder
+      }
+      revealAnswer(chosenIdx);
+    });
+  });
+
+  document.getElementById('exercise-dontknow-btn').addEventListener('click', () => {
+    if (STEP_STATE.exerciseAnswered) return;
+    revealAnswer(-1);
+  });
+}
+
 function renderReorderExercise(ex, contentEl, nextBtn, total){
   const correctOrder = ex.phrase.blocks;
   const chosenSequence = []; // índices (no array shuffledBlocks) já escolhidos, em ordem
