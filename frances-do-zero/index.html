@@ -992,7 +992,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .dictation-score-text{ margin:0; font-size:13.5px; color: var(--ink-soft); line-height:1.5; }
 
 /* ---------- Desafios ---------- */
-.challenges-admin-bar{ display:flex; justify-content:flex-end; margin-bottom:16px; }
+.challenges-admin-bar{ display:flex; justify-content:flex-end; gap:10px; margin-bottom:16px; }
 .challenges-categories{ display:grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap:14px; }
 .challenge-category-card{
   background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
@@ -1175,6 +1175,13 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   font-family: var(--font-body); font-size:13px; background: var(--paper-warm); color: var(--ink);
 }
 .challenges-admin-load-more{ display:block; width:100%; margin:8px 0 24px; }
+.challenges-admin-bulk-toolbar{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:10px;
+  padding:10px 14px; margin-bottom:14px;
+}
+.challenges-admin-select-all{ display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:700; color: var(--ink-soft); cursor:pointer; }
+.challenges-admin-select-checkbox{ width:18px; height:18px; flex-shrink:0; cursor:pointer; }
 @media (max-width:560px){
   .challenges-admin-filters{ flex-direction:column; }
   .challenges-admin-filters input[type="text"], .challenges-admin-filters select{ width:100%; }
@@ -1258,6 +1265,15 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
 .export-status.err{ color: var(--seal-red-dark); }
 
 .deck-select{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:18px; }
+
+.challenges-import-textarea{
+  width:100%; font-family: ui-monospace, 'SF Mono', Consolas, monospace; font-size:12.5px;
+  padding:12px; border-radius:10px; border:1px solid var(--paper-line); background: var(--paper-warm);
+  color: var(--ink); resize:vertical;
+}
+.challenges-import-status{ margin-top:14px; font-size:13px; font-weight:700; white-space:pre-wrap; }
+.challenges-import-status.ok{ color: var(--jade); }
+.challenges-import-status.err{ color: var(--seal-red-dark); }
 .deck-chip{ padding:7px 13px; border-radius:999px; border:1px solid var(--paper-line); background:var(--paper); font-size:12.5px; font-weight:700; cursor:pointer; color:var(--ink-soft); }
 .deck-chip.active{ background: var(--seal-red); border-color: var(--seal-red); color: var(--on-seal-red); }
 
@@ -1899,6 +1915,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
         <p>Pratique francês de verdade: expressões, compreensão auditiva e ortografia.</p>
       </div>
       <div class="challenges-admin-bar" id="challenges-admin-bar" style="display:none;">
+        <button class="btn btn-secondary" id="challenges-admin-import-btn">📥 Importar JSON</button>
         <button class="btn btn-secondary" id="challenges-admin-review-btn">🛠️ Revisar pendentes (<span id="challenges-pending-count">0</span>)</button>
       </div>
       <div class="challenges-categories" id="challenges-categories"></div>
@@ -1956,6 +1973,22 @@ footer.app-footer img{ height:56px; opacity:.9; }
         <button class="btn btn-gold btn-block" id="export-btn" style="max-width:320px; margin:0 auto;">Gerar arquivo .apkg</button>
         <div class="export-status" id="export-status"></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: IMPORTAR DESAFIOS VIA JSON (admin) ===== -->
+<div id="challenges-import-modal" class="app-modal-overlay" style="display:none;">
+  <div class="app-modal">
+    <div class="app-modal-header">
+      <h3>Importar desafios via JSON</h3>
+      <button class="app-modal-close" id="challenges-import-modal-close">✕</button>
+    </div>
+    <div class="app-modal-body">
+      <p>Cole aqui a saída do pipeline de geração (<code>challenges_pipeline_output.json</code>, ou só o array de <code>accepted</code>) -- vai direto pro banco, sem precisar rodar SQL manualmente no Supabase.</p>
+      <textarea id="challenges-import-textarea" class="challenges-import-textarea" placeholder='[{"id": "expr-auto-001", "type": "expression", "level": "B1", ...}, ...]' rows="12"></textarea>
+      <button class="btn btn-primary btn-block" id="challenges-import-submit-btn" style="max-width:320px; margin:12px auto 0;">Importar</button>
+      <div class="challenges-import-status" id="challenges-import-status"></div>
     </div>
   </div>
 </div>
