@@ -1054,48 +1054,51 @@ document.getElementById('back-to-path').addEventListener('click', () => {
   renderUnitsGrid();
 });
 
+// Progresso real dentro da lição: cada etapa (vocabulário/diálogo/dica de
+// uso/exercícios, ou explicação/exercícios na gramática) vale uma fatia
+// igual da barra -- mas dentro da etapa atual soma a fração já percorrida
+// (carta de vocabulário atual, exercício atual), em vez de pular direto pra
+// o fim da fatia assim que a etapa começa. Sem isso, a barra aparecia quase
+// toda preenchida logo no 1º exercício, só porque "Exercícios" é a última
+// das 4 etapas -- media a POSIÇÃO da etapa, não o que já foi de fato feito
+// dentro dela.
 function renderStepProgress(){
   const fillEl = document.getElementById('step-progress-fill');
   const defs = currentStepDefs();
-  const pct = (STEP_STATE.currentStep / (defs.length - 1)) * 100;
-  fillEl.style.width = `${pct}%`;
+  const stepCount = defs.length;
+  const stepKey = defs[STEP_STATE.currentStep].key;
+  const u = UNITS.find(x => x.id === STATE.currentUnitId);
+
+  let intraStepFraction = 0;
+  if (stepKey === 'vocab' && u){
+    intraStepFraction = u.vocab.length ? STEP_STATE.vocabIndex / u.vocab.length : 0;
+  } else if (stepKey === 'exercises'){
+    intraStepFraction = STEP_STATE.exerciseList.length ? STEP_STATE.exerciseIndex / STEP_STATE.exerciseList.length : 0;
+  } else if (stepKey === 'explanation' && u && u.grammar){
+    intraStepFraction = u.grammar.blocks.length ? STEP_STATE.explanationIndex / u.grammar.blocks.length : 0;
+  } else if (stepKey === 'gramExercises' && u && u.grammar){
+    intraStepFraction = u.grammar.exercises.length ? STEP_STATE.gramExerciseIndex / u.grammar.exercises.length : 0;
+  }
+
+  const pct = ((STEP_STATE.currentStep + intraStepFraction) / stepCount) * 100;
+  fillEl.style.width = `${Math.min(100, Math.max(0, pct))}%`;
 }
 
 // ---------- Modo foco de lição (estilo Busuu) ----------
 // Esconde topbar/tabs enquanto o aluno está numa lição, checkpoint ou teste
-// de nível — só a barra de progresso, o ícone de dicas e o X ficam visíveis
-// por cima do exercício em si.
+// de nível — só a barra de progresso e o X ficam visíveis por cima do
+// exercício em si.
 function setLessonFocusMode(active){
   document.getElementById('app').classList.toggle('lesson-focus', active);
-  if (!active){
-    document.getElementById('lesson-hint-panel').style.display = 'none';
-    document.getElementById('lesson-hint-btn').classList.remove('active');
-    document.getElementById('lesson-hint-btn').style.display = 'none';
-  }
 }
 
-document.getElementById('lesson-hint-btn').addEventListener('click', () => {
-  const panel = document.getElementById('lesson-hint-panel');
-  const btn = document.getElementById('lesson-hint-btn');
-  const showing = panel.style.display !== 'none';
-  panel.style.display = showing ? 'none' : 'block';
-  btn.classList.toggle('active', !showing);
-  if (!showing){
-    const ex = STEP_STATE.exerciseList[STEP_STATE.exerciseIndex];
-    if (ex) ex.hintUsed = true;
-  }
-});
-
 // ---------- Dica pedagógica por exercício ----------
-// O botão "Dica" no topo do exercício mostra uma pista construída a partir
-// do CONTEÚDO do próprio exercício (a frase de exemplo já usada no card de
-// vocabulário via findMatchingPhrase, o tema da unidade, o primeiro bloco de
-// uma frase de ordenar...) -- nunca a resposta pronta, e nunca um texto
-// genérico igual pra tudo. Só faz sentido na etapa "Exercícios": nas outras
-// etapas (vocabulário, diálogo, dica de uso) e nos exercícios de gramática
-// (que já têm sua própria dica inline, ex.hint em .gram-exercise-hint) não
-// há uma pergunta isolada com resposta certa pra dar dica sobre, então o
-// botão fica escondido.
+// A dica NÃO é mais uma ação independente no topo da tela -- ela pertence
+// ao estado de "Não sei" (ver wireDontKnowButton). buildExerciseHint só
+// gera o TEXTO, a partir do CONTEÚDO do próprio exercício (a frase de
+// exemplo já usada no card de vocabulário via findMatchingPhrase, o tema da
+// unidade, o primeiro bloco de uma frase de ordenar...) -- nunca a resposta
+// pronta, e nunca um texto genérico igual pra tudo.
 function maskWordInText(text, word){
   const idx = text.toLowerCase().indexOf(word.toLowerCase());
   if (idx === -1) return null;
@@ -1137,39 +1140,17 @@ function buildExerciseHint(ex, unit){
   return null;
 }
 
-// Atualiza o botão/painel de dica pro exercício atual -- chamado sempre que
-// um exercício é renderizado (inclusive avançando pro próximo), garantindo
-// que a dica volte fechada e o conteúdo mude junto com o exercício.
-function setExerciseHint(hintText){
-  const btn = document.getElementById('lesson-hint-btn');
-  const panel = document.getElementById('lesson-hint-panel');
-  panel.style.display = 'none';
-  btn.classList.remove('active');
-  if (hintText){
-    btn.style.display = 'flex';
-    document.getElementById('lesson-hint-text').textContent = hintText;
-  } else {
-    btn.style.display = 'none';
-  }
-}
-
 // ---------- "Não sei" / dica / ver resposta (mecânica compartilhada) ----------
 // "Não sei" preserva o esforço de recuperação: existe desde o início do
 // exercício (não só depois de um erro), mas NUNCA é tratado como resposta
-// errada -- não conta erro, não conta acerto, só abre a dica (a mesma do
-// botão do topo) e troca o próprio botão por "Ver resposta", deixando a
-// pergunta disponível pra uma nova tentativa. Só "Ver resposta" finaliza o
-// exercício (sem XP, sem contar como acerto), com a mesma explicação/retomada
-// de conteúdo usada quando o aluno erra de verdade.
-function markCurrentExerciseHintUsed(){
-  const btn = document.getElementById('lesson-hint-btn');
-  if (btn.style.display === 'none') return; // formato sem dica configurada
-  document.getElementById('lesson-hint-panel').style.display = 'block';
-  btn.classList.add('active');
-  const ex = STEP_STATE.exerciseList[STEP_STATE.exerciseIndex];
-  if (ex) ex.hintUsed = true;
-}
-
+// errada -- não conta erro, não conta acerto. Ao clicar, o próprio botão
+// "Não sei" é SUBSTITUÍDO (não fica ao lado de outro controle) pelo bloco da
+// dica, no mesmo lugar em que o aluno pediu ajuda -- sem pular pro topo da
+// tela, sem exigir que ele procure a dica em outro lugar. Desse bloco saem
+// duas ações: "Tentar novamente" (fecha a dica, a pergunta continua ali,
+// intacta) ou "Ver resposta" (única forma de finalizar sem ter acertado
+// sozinho -- sem XP, sem contar como acerto, com a mesma explicação/retomada
+// de conteúdo usada quando o aluno erra de verdade).
 function wireDontKnowButton(contentEl, ex, onRevealAnswer){
   const btn = contentEl.querySelector('#exercise-dontknow-btn');
   if (!btn) return;
@@ -1177,14 +1158,26 @@ function wireDontKnowButton(contentEl, ex, onRevealAnswer){
   btn.addEventListener('click', () => {
     if (STEP_STATE.exerciseAnswered || ex.askedDontKnow) return;
     ex.askedDontKnow = true;
-    markCurrentExerciseHintUsed();
+    const unit = UNITS.find(u => u.id === STATE.currentUnitId);
+    const hintText = buildExerciseHint(ex, unit);
     btn.outerHTML = `
-      <div class="exercise-help-followup">
-        <span class="exercise-help-note">Veja a dica acima e tente de novo, ou:</span>
-        <button class="exercise-reveal-btn" id="exercise-reveal-btn">Ver resposta</button>
+      <div class="inline-hint-block" id="inline-hint-block">
+        ${hintText ? `
+          <div class="inline-hint-label">💡 Dica</div>
+          <p class="inline-hint-text">${hintText}</p>
+        ` : ''}
+        <div class="inline-hint-actions">
+          <button class="btn btn-secondary inline-hint-retry-btn" id="inline-hint-retry-btn">Tentar novamente</button>
+          <button class="exercise-reveal-btn" id="exercise-reveal-btn">Ver resposta</button>
+        </div>
       </div>
     `;
-    row.querySelector('#exercise-reveal-btn').addEventListener('click', () => {
+    const block = row.querySelector('#inline-hint-block');
+    block.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    block.querySelector('#inline-hint-retry-btn').addEventListener('click', () => {
+      block.remove();
+    });
+    block.querySelector('#exercise-reveal-btn').addEventListener('click', () => {
       if (STEP_STATE.exerciseAnswered) return;
       ex.revealed = true;
       onRevealAnswer();
@@ -1192,11 +1185,12 @@ function wireDontKnowButton(contentEl, ex, onRevealAnswer){
   });
 }
 
-// XP de um acerto: um pouco menor quando o aluno pediu ajuda (dica ou "não
-// sei") nesse exercício -- preserva a distinção acerto independente > acerto
-// com ajuda sem criar um sistema de pontuação complexo.
+// XP de um acerto: um pouco menor quando o aluno pediu "Não sei" (e por
+// tabela recebeu a dica) nesse exercício -- preserva a distinção acerto
+// independente > acerto com ajuda sem criar um sistema de pontuação
+// complexo.
 function exerciseXP(ex, fullXP){
-  return (ex.hintUsed || ex.askedDontKnow) ? Math.max(1, fullXP - 1) : fullXP;
+  return ex.askedDontKnow ? Math.max(1, fullXP - 1) : fullXP;
 }
 
 // ---------- Vocabulário palavra-por-palavra (estilo Memrise) ----------
@@ -1458,6 +1452,7 @@ function renderModuleCompleteScreen(contentEl, nextBtn, { passed, title, subtitl
 function renderGrammarExerciseStep(u, contentEl, nextBtn){
   const list = u.grammar.exercises;
   const total = list.length;
+  renderStepProgress();
 
   if (STEP_STATE.gramExerciseIndex >= total){
     const seen = new Set();
@@ -1532,10 +1527,6 @@ function renderStep(){
     || (stepKey === 'vocab' && STEP_STATE.vocabIndex > 0)
     || (stepKey === 'explanation' && STEP_STATE.explanationIndex > 0);
   backBtn.style.display = showBack ? 'inline-flex' : 'none';
-
-  // Por padrão a dica fica escondida -- só a etapa "Exercícios" (chave
-  // 'exercises', via renderExerciseStep) liga o botão com uma dica real.
-  setExerciseHint(null);
 
   if (u.type === 'grammar'){
     if (stepKey === 'explanation'){
@@ -1790,9 +1781,9 @@ function renderExerciseStep(){
   const total = STEP_STATE.exerciseList.length;
 
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
+  renderStepProgress();
 
   if (STEP_STATE.exerciseIndex >= total){
-    setExerciseHint(null);
     renderLessonCompleteScreen(contentEl, nextBtn, {
       correct: STEP_STATE.exerciseScore, total,
       recapItems: [...u.vocab, ...(u.phrases || [])]
@@ -1803,7 +1794,6 @@ function renderExerciseStep(){
   const ex = STEP_STATE.exerciseList[STEP_STATE.exerciseIndex];
   STEP_STATE.exerciseAnswered = false;
   nextBtn.style.display = 'none';
-  setExerciseHint(buildExerciseHint(ex, u));
 
   if (ex.format === 'reorder'){
     renderReorderExercise(ex, contentEl, nextBtn, total);
@@ -1840,58 +1830,77 @@ function goToNextExercise(){
   }, 900);
 }
 
-// Explicação/retomada de conteúdo usada no painel de erro/revelação. Pra
-// exercícios baseados numa frase (ordenar, completar, cenário), mostra o
-// significado da própria frase certa. Pros de vocabulário (meaning/listen/
-// type), busca a frase de origem onde a palavra foi ensinada (mesma busca
-// do card de vocabulário, findMatchingPhrase) -- retomada específica daquele
-// conhecimento, não só o tema geral da unidade. Só cai no usageNote genérico
-// quando não há frase de exemplo pra reaproveitar.
-function wrongAnswerExplanationHTML(ex){
+// Feedback do painel de erro/revelação, dividido em duas partes bem
+// diferentes (ver seção 14 do pedido: "Por que errei?" != "Rever
+// conteúdo"):
+//   short  -- explica O ERRO ESPECÍFICO desta questão (a resposta certa em
+//             si) -- sempre curto, sempre mostrado automaticamente, sem
+//             exigir clique.
+//   review -- RECONECTA o aluno ao conteúdo de origem daquele conhecimento
+//             (a frase onde a palavra foi ensinada, ou a explicação da
+//             unidade) -- mais longo, só some se de fato não houver nada
+//             pra reaproveitar, fica atrás do botão "Rever conteúdo".
+function answerExplanationParts(ex){
   if (ex && ex.phrase){
-    return `<div class="usage-note-title">O que a frase significa</div><p class="usage-note-body"><strong>${ex.phrase.f}</strong><br>${ex.phrase.t}</p>`;
+    const short = `<p class="usage-note-body"><strong>${ex.phrase.f}</strong><br>${ex.phrase.t}</p>`;
+    const u = UNITS.find(x => x.id === STATE.currentUnitId);
+    const review = u && u.usageNote
+      ? `<div class="usage-note-title">${u.usageNote.title}</div><p class="usage-note-body">${u.usageNote.body}</p>`
+      : null;
+    return { short, review };
+  }
+  if (ex && ex.item){
+    const short = `<p class="usage-note-body"><strong>${ex.item.f}</strong> = ${ex.item.t}</p>`;
+    const u = UNITS.find(x => x.id === STATE.currentUnitId);
+    const origin = findMatchingPhrase(ex.item, u);
+    const review = origin
+      ? `<div class="usage-note-title">Onde você já viu isso</div><p class="usage-note-body"><strong>${origin.f}</strong><br>${origin.t}</p>`
+      : null;
+    return { short, review };
   }
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
-  if (ex && ex.item){
-    const origin = findMatchingPhrase(ex.item, u);
-    if (origin){
-      return `<div class="usage-note-title">Onde você já viu isso</div><p class="usage-note-body"><strong>${origin.f}</strong><br>${origin.t}</p><p class="usage-note-body"><strong>${ex.item.f}</strong> = ${ex.item.t}</p>`;
-    }
-    return `<div class="usage-note-title">Resposta certa</div><p class="usage-note-body"><strong>${ex.item.f}</strong> = ${ex.item.t}</p>`;
-  }
   const note = u && u.usageNote;
-  if (!note) return '';
-  return `<div class="usage-note-title">${note.title}</div><p class="usage-note-body">${note.body}</p>`;
+  return note
+    ? { short: null, review: `<div class="usage-note-title">${note.title}</div><p class="usage-note-body">${note.body}</p>` }
+    : { short: null, review: null };
 }
 
-// Painel de resposta errada/revelada (estilo Duolingo): pausa antes de
-// avançar pra mostrar a resposta certa e, se o aluno quiser, retomar o
-// conteúdo relacionado. `revealed` distingue "errei tentando" de "pedi pra
-// ver a resposta" (via Não sei) -- nenhum dos dois conta como acerto normal,
-// mas o rótulo comunica ao aluno qual foi o caso.
+// Painel de resposta errada/revelada (estilo Duolingo): a explicação curta
+// ("por que não foi essa") aparece AUTOMATICAMENTE -- não depende do aluno
+// clicar em nada pra ver o porquê. "Rever conteúdo" (quando existe algo pra
+// reaproveitar) fica ao lado de "Continuar", com peso visual equivalente,
+// nunca como nota pequena e secundária. `revealed` distingue "errei
+// tentando" de "pedi pra ver a resposta" (via Não sei) -- nenhum dos dois
+// conta como acerto normal, mas o rótulo comunica ao aluno qual foi o caso.
 function showAnswerPanel(contentEl, ex, opts = {}){
   const revealed = !!opts.revealed;
   const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
-  const explanationHTML = wrongAnswerExplanationHTML(ex);
-  const toggleLabel = revealed ? 'Rever conteúdo 📖' : 'Por que errei? 🤔';
+  const { short, review } = answerExplanationParts(ex);
   const panel = document.createElement('div');
   panel.className = 'wrong-feedback';
   panel.innerHTML = `
     <div class="wrong-feedback-header">${revealed ? '👀 Resposta revelada' : '❌ Não foi dessa vez'}</div>
-    ${explanationHTML ? `
-      <button class="wrong-feedback-toggle" id="why-wrong-btn">${toggleLabel}</button>
-      <div class="wrong-feedback-explanation" id="wrong-explanation" style="display:none;">${explanationHTML}</div>
+    ${short ? `
+      <div class="wrong-feedback-why">
+        <div class="wrong-feedback-why-label">${revealed ? 'Resposta' : 'Por que não foi essa'}</div>
+        ${short}
+      </div>
     ` : ''}
-    <button class="btn btn-primary btn-block wrong-feedback-continue" id="wrong-continue-btn">Continuar →</button>
+    <div class="wrong-feedback-actions">
+      ${review ? `<button class="btn btn-secondary wrong-feedback-review-btn" id="review-content-btn">Rever conteúdo 📖</button>` : ''}
+      <button class="btn btn-primary wrong-feedback-continue" id="wrong-continue-btn">Continuar →</button>
+    </div>
+    ${review ? `<div class="wrong-feedback-review" id="wrong-review" style="display:none;">${review}</div>` : ''}
   `;
   wrap.appendChild(panel);
 
-  panel.querySelector('#why-wrong-btn')?.addEventListener('click', () => {
-    const exp = panel.querySelector('#wrong-explanation');
-    const btn = panel.querySelector('#why-wrong-btn');
-    const isOpen = exp.style.display !== 'none';
-    exp.style.display = isOpen ? 'none' : 'block';
-    btn.textContent = isOpen ? 'Esconder' : toggleLabel;
+  panel.querySelector('#review-content-btn')?.addEventListener('click', () => {
+    const box = panel.querySelector('#wrong-review');
+    const btn = panel.querySelector('#review-content-btn');
+    const isOpen = box.style.display !== 'none';
+    box.style.display = isOpen ? 'none' : 'block';
+    btn.textContent = isOpen ? 'Esconder ⌃' : 'Rever conteúdo 📖';
+    if (!isOpen) box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   });
   panel.querySelector('#wrong-continue-btn').addEventListener('click', () => {
     addStudyMinutes();
@@ -3048,7 +3057,6 @@ function openCheckpoint(moduleId){
   document.getElementById('ud-eyebrow').textContent = 'Ponto de verificação';
   document.getElementById('ud-title').textContent = module.title;
   document.getElementById('ud-goal').textContent = 'Teste o que você já sabe desta seção. Se for bem, todas as unidades dela são marcadas como concluídas — não precisa fazer uma por uma.';
-  setExerciseHint(null); // checkpoint testa o que já foi ensinado -- sem dica
 
   CHECKPOINT_STATE.moduleId = moduleId;
   CHECKPOINT_STATE.queue = buildCheckpointQueue(module);
@@ -3192,7 +3200,6 @@ function openLevelTest(testId){
   document.getElementById('ud-eyebrow').textContent = 'Teste de nível';
   document.getElementById('ud-title').textContent = test.title;
   document.getElementById('ud-goal').textContent = `Já sabe francês nível ${test.level}? Faça esse teste — se for bem, todo o nível é marcado como concluído e você já pode seguir direto pro ${test.nextLevel}.`;
-  setExerciseHint(null); // teste de nível avalia o que já foi ensinado -- sem dica
 
   LEVEL_TEST_STATE.testId = testId;
   LEVEL_TEST_STATE.queue = buildLevelTestQueue(test);

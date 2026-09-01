@@ -348,8 +348,8 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .back-link{ display:inline-flex; align-items:center; gap:6px; background:none; border:none; color:var(--ink-soft); font-weight:700; font-size:13px; cursor:pointer; padding:6px 0; margin-bottom:8px; }
 .back-link:hover{ color:var(--seal-red-dark); }
 
-/* Modo foco de lição (estilo Busuu): esconde topbar/tabs, deixa só ícone de
-   dicas, barra de progresso e X pra sair — nada mais compete com o exercício. */
+/* Modo foco de lição (estilo Busuu): esconde topbar/tabs, deixa só a barra
+   de progresso e o X pra sair — nada mais compete com o exercício. */
 #app.lesson-focus .topbar, #app.lesson-focus .tabs{ display:none; }
 
 /* Contexto curricular (unidade/nível/objetivo): informação discreta e
@@ -360,27 +360,18 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .lesson-unit-title{ font-size:15px; font-weight:700; margin-bottom:2px; }
 .lesson-unit-goal{ margin:0; color:var(--ink-soft); font-size:12.5px; line-height:1.4; }
 
+/* Topo da lição: só progresso + X -- nada mais compete visualmente com o
+   exercício em si (a dica, quando existe, vive dentro do próprio fluxo do
+   exercício, ver .inline-hint-block abaixo). */
 .lesson-focus-bar{ display:flex; align-items:center; gap:14px; margin-bottom:20px; }
-.lesson-hint-btn{
-  flex-shrink:0; height:36px; padding:0 14px; border-radius:18px; border:1px solid var(--paper-line);
-  background: var(--paper); color: var(--ink-soft); font-size:13px; font-weight:700; cursor:pointer;
-  display:flex; align-items:center; gap:6px; white-space:nowrap; transition: all .15s ease; font-family: var(--font-body);
-}
 .lesson-close-btn{
   flex-shrink:0; width:36px; height:36px; border-radius:50%; border:1px solid var(--paper-line);
   background: var(--paper); color: var(--ink-soft); font-size:16px; cursor:pointer;
   display:flex; align-items:center; justify-content:center; transition: all .15s ease; font-family: var(--font-body);
 }
-.lesson-hint-btn:hover, .lesson-close-btn:hover{ border-color: var(--imperial-gold); color: var(--ink); }
-.lesson-hint-btn.active{ background: rgba(52,152,214,0.12); border-color: var(--seal-red); color: var(--seal-red-dark); }
+.lesson-close-btn:hover{ border-color: var(--imperial-gold); color: var(--ink); }
 .lesson-progress-track{ flex:1; height:8px; background: var(--paper-warm); border-radius:4px; overflow:hidden; }
 .lesson-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:4px; transition: width .3s ease; }
-
-/* Pista pedagógica do exercício atual (conteúdo trocado a cada exercício
-   por setExerciseHint/buildExerciseHint em app.js) -- visualmente distinta
-   do contexto curricular acima, pra não misturar os dois tipos de info. */
-.lesson-hint-panel{ background: rgba(52,152,214,0.08); border:1px solid rgba(52,152,214,0.25); border-radius: var(--radius); padding:14px 16px; margin-bottom:20px; }
-.lesson-hint-text{ margin:0; color: var(--ink); font-size:14px; line-height:1.5; }
 
 .section-label{ font-size:12px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft); font-weight:800; margin: 22px 0 10px; }
 
@@ -444,21 +435,35 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .correct-feedback-header{ font-weight:800; font-size:15px; color: var(--jade); margin-bottom:8px; }
 .correct-feedback-trans{ font-size:14px; color: var(--ink); margin:0 0 14px; }
 .wrong-feedback-header{ font-weight:800; font-size:15px; color: var(--error-red); margin-bottom:12px; }
-.wrong-feedback-toggle{
-  display:block; width:100%; text-align:left; background:none; border:none; padding:8px 0;
-  font-weight:700; font-size:13.5px; color: var(--seal-red-dark); cursor:pointer;
-}
-.wrong-feedback-explanation{
+
+/* Explicação curta ("por que não foi essa" / a resposta) -- SEMPRE visível,
+   automática, sem depender de o aluno clicar em nada. */
+.wrong-feedback-why{
   background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:10px;
-  padding:14px 16px; margin-bottom:12px;
+  padding:14px 16px; margin-bottom:14px;
 }
-.wrong-feedback-explanation .usage-note-title{ text-align:left; font-size:14.5px; margin-bottom:8px; }
-.wrong-feedback-explanation .usage-note-body{ font-size:13.5px; }
-.wrong-feedback-explanation .grammar-note-table{ width:100%; border-collapse:collapse; margin:8px 0; font-size:13px; }
-.wrong-feedback-explanation .grammar-note-table td{ padding:5px 8px; border-bottom:1px solid var(--paper-line); }
-.wrong-feedback-explanation .grammar-note-example{ font-size:13px; color: var(--ink-soft); margin-top:6px; }
-.wrong-feedback-explanation .grammar-note-sep{ border:none; border-top:1px solid var(--paper-line); margin:12px 0; }
-.wrong-feedback-continue{ margin-top:4px; }
+.wrong-feedback-why-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--seal-red-dark); font-weight:800; margin-bottom:6px; }
+.wrong-feedback-why .usage-note-body{ font-size:14px; margin:0; }
+
+/* "Rever conteúdo" e "Continuar" com peso visual equivalente -- nenhum dos
+   dois deve parecer uma nota pequena e o outro a ação "de verdade". */
+.wrong-feedback-actions{ display:flex; gap:10px; }
+.wrong-feedback-actions .btn{ flex:1; }
+.wrong-feedback-review-btn{ white-space:nowrap; }
+
+/* Retomada de conteúdo (a frase/explicação de origem) -- mais longa, por
+   isso fica atrás do botão, mas nunca escondida atrás de uma "por que
+   errei" genérica -- é conteúdo de revisão, não a explicação do erro. */
+.wrong-feedback-review{
+  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:10px;
+  padding:14px 16px; margin-top:12px;
+}
+.wrong-feedback-review .usage-note-title{ text-align:left; font-size:14.5px; margin-bottom:8px; }
+.wrong-feedback-review .usage-note-body{ font-size:13.5px; }
+.wrong-feedback-review .grammar-note-table{ width:100%; border-collapse:collapse; margin:8px 0; font-size:13px; }
+.wrong-feedback-review .grammar-note-table td{ padding:5px 8px; border-bottom:1px solid var(--paper-line); }
+.wrong-feedback-review .grammar-note-example{ font-size:13px; color: var(--ink-soft); margin-top:6px; }
+.wrong-feedback-review .grammar-note-sep{ border:none; border-top:1px solid var(--paper-line); margin:12px 0; }
 
 /* ---------- Passos de unidade de gramática (blocos, estilo Busuu) ---------- */
 .gram-block-counter{ text-align:center; font-size:12.5px; font-weight:800; color: var(--ink-soft); margin-bottom:14px; }
@@ -544,17 +549,24 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .exercise-dontknow:hover{ color: var(--seal-red-dark); text-decoration-color: var(--seal-red-dark); }
 .exercise-dontknow.disabled{ pointer-events:none; opacity:.4; }
 
-/* Depois de "Não sei": a dica já foi mostrada (no painel do topo) e o
-   exercício continua disponível pra uma nova tentativa -- "Ver resposta"
-   é a saída de segurança pra quem ainda não conseguir. */
-.exercise-help-followup{ margin-top:16px; display:flex; flex-direction:column; align-items:center; gap:8px; }
-.exercise-help-note{ font-size:12.5px; color: var(--ink-soft); }
-.exercise-reveal-btn{
-  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:999px;
+/* Bloco da dica: substitui o próprio botão "Não sei" (não fica ao lado
+   dele) e aparece no MESMO lugar em que o aluno pediu ajuda -- relação
+   espacial direta entre "Não sei" e a dica, sem pular pro topo da tela nem
+   duplicar controle nenhum. */
+.inline-hint-block{
+  margin-top:16px; text-align:left; background: rgba(52,152,214,0.08);
+  border:1px solid rgba(52,152,214,0.25); border-radius: var(--radius); padding:14px 16px;
+  animation: wrongFeedbackIn .25s ease;
+}
+.inline-hint-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--seal-red-dark); font-weight:800; margin-bottom:6px; }
+.inline-hint-text{ margin:0 0 14px; color: var(--ink); font-size:14px; line-height:1.5; }
+.inline-hint-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+.inline-hint-retry-btn, .exercise-reveal-btn{
+  background: var(--paper); border:1px solid var(--paper-line); border-radius:999px;
   padding:8px 16px; font-family: var(--font-body); font-weight:700; font-size:13px;
   color: var(--seal-red-dark); cursor:pointer; transition: all .15s ease;
 }
-.exercise-reveal-btn:hover{ border-color: var(--imperial-gold); background: var(--paper-line); }
+.inline-hint-retry-btn:hover, .exercise-reveal-btn:hover{ border-color: var(--imperial-gold); background: var(--paper-warm); }
 .exercise-reveal-btn.disabled{ pointer-events:none; opacity:.4; }
 
 .exercise-options{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
@@ -1809,15 +1821,10 @@ footer.app-footer img{ height:56px; opacity:.9; }
       </div>
 
       <div class="lesson-focus-bar">
-        <button class="lesson-hint-btn" id="lesson-hint-btn" title="Dica" style="display:none;">💡 Dica</button>
         <div class="lesson-progress-track" id="step-progress-wrap">
           <div class="lesson-progress-fill" id="step-progress-fill"></div>
         </div>
         <button class="lesson-close-btn" id="back-to-path" title="Sair da lição">✕</button>
-      </div>
-
-      <div class="lesson-hint-panel" id="lesson-hint-panel" style="display:none;">
-        <p class="lesson-hint-text" id="lesson-hint-text"></p>
       </div>
 
       <div id="step-content"></div>
