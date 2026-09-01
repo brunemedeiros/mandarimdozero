@@ -4992,6 +4992,66 @@ function challengeDataPayload(c){
   return data;
 }
 
+const CHALLENGE_VALID_TYPES = ['expression', 'listen_translate', 'accent'];
+const CHALLENGE_VALID_STATUSES = ['needs_review', 'approved', 'published', 'rejected'];
+
+// Aceita tanto um array de desafios quanto a saída direta do pipeline
+// (`{accepted: [...], rejected: [...]}`, ver generate_challenges.py) --
+// assim o JSON gerado localmente pode ser colado sem edição nenhuma.
+function parseChallengesImportInput(rawText){
+  let parsed;
+  try {
+    parsed = JSON.parse(rawText);
+  } catch (err) {
+    throw new Error('JSON inválido: ' + err.message);
+  }
+  const items = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.accepted) ? parsed.accepted : null);
+  if (!items) throw new Error('Esperava um array de desafios, ou um objeto com "accepted" (saída direta do pipeline).');
+  return items;
+}
+
+// Importa desafios direto pro Supabase via a mesma sessão autenticada de
+// admin já usada pro resto do painel (sujeita à mesma RLS de escrita) --
+// substitui o passo manual de rodar SQL no SQL Editor do Supabase.
+// Sempre entra como needs_review (a menos que o item já traga um status
+// válido) -- nunca pula a fila de revisão.
+async function importChallengesFromJSON(rawText){
+  const items = parseChallengesImportInput(rawText);
+  const existingIds = new Set(CHALLENGES.map(c => c.id));
+  const seenInBatch = new Set();
+  const rows = [];
+  const skipped = [];
+
+  items.forEach((item, idx) => {
+    const label = (item && item.id) ? item.id : `item #${idx + 1}`;
+    if (!item || !item.id || !item.type || !item.level){
+      skipped.push(`${label}: faltando id/type/level`);
+      return;
+    }
+    if (!CHALLENGE_VALID_TYPES.includes(item.type)){
+      skipped.push(`${item.id}: type inválido ("${item.type}")`);
+      return;
+    }
+    if (!CHALLENGE_LEVELS_ORDER.includes(item.level)){
+      skipped.push(`${item.id}: level inválido ("${item.level}")`);
+      return;
+    }
+    if (existingIds.has(item.id) || seenInBatch.has(item.id)){
+      skipped.push(`${item.id}: id já existe (duplicado)`);
+      return;
+    }
+    seenInBatch.add(item.id);
+    const status = CHALLENGE_VALID_STATUSES.includes(item.status) ? item.status : 'needs_review';
+    rows.push({ id: item.id, type: item.type, level: item.level, status, data: challengeDataPayload({ ...item, status }) });
+  });
+
+  if (rows.length === 0) return { insertedCount: 0, skipped, error: null };
+
+  const { error } = await supabaseClient.from('challenges').insert(rows);
+  if (error) return { insertedCount: 0, skipped, error: error.message };
+  return { insertedCount: rows.length, skipped, error: null };
+}
+
 // Busca os desafios do banco de dados e repõe CHALLENGES. Chamado sempre
 // que a aba Desafios é aberta (e de novo dentro do painel admin), pra
 // nunca depender de cache/estado de sessão -- uma publicação feita em
@@ -5354,6 +5414,57 @@ document.getElementById('challenge-back-to-list').addEventListener('click', () =
 });
 document.getElementById('challenges-admin-back-btn').addEventListener('click', renderChallengeCategories);
 document.getElementById('challenges-admin-review-btn').addEventListener('click', () => renderChallengesAdmin());
+
+document.getElementById('challenges-admin-import-btn').addEventListener('click', () => {
+  document.getElementById('challenges-import-textarea').value = '';
+  const statusEl = document.getElementById('challenges-import-status');
+  statusEl.className = 'challenges-import-status';
+  statusEl.textContent = '';
+  document.getElementById('challenges-import-modal').style.display = 'flex';
+});
+document.getElementById('challenges-import-modal-close').addEventListener('click', () => {
+  document.getElementById('challenges-import-modal').style.display = 'none';
+});
+document.getElementById('challenges-import-modal').addEventListener('click', (e) => {
+  if (e.target.id === 'challenges-import-modal') document.getElementById('challenges-import-modal').style.display = 'none';
+});
+document.getElementById('challenges-import-submit-btn').addEventListener('click', async () => {
+  const textarea = document.getElementById('challenges-import-textarea');
+  const statusEl = document.getElementById('challenges-import-status');
+  const btn = document.getElementById('challenges-import-submit-btn');
+  statusEl.className = 'challenges-import-status';
+  statusEl.textContent = '';
+
+  let result;
+  try {
+    btn.disabled = true;
+    btn.textContent = 'Importando…';
+    result = await importChallengesFromJSON(textarea.value);
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Importar';
+    statusEl.className = 'challenges-import-status err';
+    statusEl.textContent = '❌ ' + err.message;
+    return;
+  }
+  btn.disabled = false;
+  btn.textContent = 'Importar';
+
+  if (result.error){
+    statusEl.className = 'challenges-import-status err';
+    statusEl.textContent = `❌ Falha ao gravar no banco: ${result.error}`;
+    return;
+  }
+  const lines = [];
+  if (result.insertedCount > 0) lines.push(`✅ ${result.insertedCount} desafio(s) importado(s) como pendente(s) de revisão.`);
+  if (result.skipped.length > 0) lines.push(`⚠ ${result.skipped.length} pulado(s):\n` + result.skipped.map(s => '  • ' + s).join('\n'));
+  statusEl.className = result.insertedCount > 0 ? 'challenges-import-status ok' : 'challenges-import-status err';
+  statusEl.textContent = lines.join('\n\n');
+  if (result.insertedCount > 0){
+    textarea.value = '';
+    renderChallengesAdmin();
+  }
+});
 
 function openChallengePlayer(id){
   const c = CHALLENGES.find(x => x.id === id);
@@ -5728,6 +5839,10 @@ function checkAccentAnswer(c){
 // loadChallengesFromDB()/persistChallenge() no início da seção de
 // Desafios. Não é mais uma simulação de sessão do navegador.
 let challengesAdminEditingId = null;
+// Seleção pra aprovação em lote (só usada na seção Pendentes) -- guarda
+// os ids marcados, sobrevive a um re-render normal (busca/paginação),
+// mas é limpa depois de aprovar o lote ou ao trocar de aba admin.
+const challengesAdminSelectedIds = new Set();
 
 // MD5 (RFC 1321) puro em JS -- só usado aqui, pra conferir se um áudio já
 // gerado ainda corresponde ao texto atual. O pipeline Python nomeia cada
@@ -6058,6 +6173,25 @@ async function approveChallengeWithGate(c){
   return true;
 }
 
+// Aprovação em lote: só publica automaticamente quem não tem NENHUM item
+// pendente no checklist de qualidade (nem bloqueante, nem aviso) -- ao
+// contrário de approveChallengeWithGate (que pergunta um por um via
+// confirm()), aqui isso viraria uma sequência de alertas irritante pra
+// várias dezenas de itens. Quem tem qualquer problema fica de fora do
+// lote e continua pendente, listado no resumo pra revisão individual.
+async function approveChallengeSilent(c){
+  const items = challengeQualityChecklist(c);
+  if (items.some(it => !it.ok)) return { ok: false, skipped: true };
+  const previousStatus = c.status;
+  c.status = 'published';
+  const ok = await persistChallenge(c, {
+    published_at: new Date().toISOString(),
+    published_by: CURRENT_USER.email,
+  });
+  if (!ok){ c.status = previousStatus; return { ok: false, skipped: false }; }
+  return { ok: true, skipped: false };
+}
+
 // Tira um desafio publicado do ar sem descartar o conteúdo (volta pra
 // "approved": pronto, mas não visível pro aluno até ser publicado de
 // novo). Persistido de verdade, mesma lógica de approveChallengeWithGate.
@@ -6245,7 +6379,7 @@ function wireChallengesAdminFilterBar(content){
 // Uma seção (pendentes/publicados/despublicados) com paginação por
 // "Carregar mais" -- mostra só challengesAdminVisibleCount[sectionKey]
 // itens do total já filtrado, sem limitar o que existe no banco.
-function challengesAdminSectionHTML(sectionKey, title, filteredList, cardHTMLFn, emptyMsg){
+function challengesAdminSectionHTML(sectionKey, title, filteredList, cardHTMLFn, emptyMsg, toolbarHTML = ''){
   if (filteredList.length === 0){
     return emptyMsg ? `<h3 class="challenges-admin-section-title">${title} (0)</h3><p class="challenges-admin-empty">${emptyMsg}</p>` : '';
   }
@@ -6254,8 +6388,33 @@ function challengesAdminSectionHTML(sectionKey, title, filteredList, cardHTMLFn,
   const remaining = filteredList.length - visible.length;
   return `
     <h3 class="challenges-admin-section-title">${title} (${filteredList.length})</h3>
+    ${toolbarHTML}
     ${visible.map(cardHTMLFn).join('')}
     ${remaining > 0 ? `<button class="btn btn-secondary challenges-admin-load-more" data-section="${sectionKey}">Carregar mais ${Math.min(remaining, CHALLENGES_ADMIN_PAGE_SIZE)} (${remaining} restantes)</button>` : ''}
+  `;
+}
+
+// Barra de aprovação em lote na seção Pendentes -- ação de sempre continua
+// sendo aprovar um por um; o lote é um atalho pra vários itens "óbvios"
+// acumulados. `filteredPending` é a lista inteira já filtrada (não só a
+// página visível), pra "selecionar todos" e a contagem baterem mesmo com
+// "Carregar mais" ainda não clicado, e pra descartar seleção de itens que
+// saíram da fila (aprovados/rejeitados em outra aba) num refresh.
+function challengesAdminBulkToolbarHTML(filteredPending){
+  const filteredIds = new Set(filteredPending.map(c => c.id));
+  [...challengesAdminSelectedIds].forEach(id => { if (!filteredIds.has(id)) challengesAdminSelectedIds.delete(id); });
+  const selectedCount = challengesAdminSelectedIds.size;
+  const allSelected = filteredPending.length > 0 && selectedCount === filteredPending.length;
+  return `
+    <div class="challenges-admin-bulk-toolbar">
+      <label class="challenges-admin-select-all">
+        <input type="checkbox" id="challenges-admin-select-all" ${allSelected ? 'checked' : ''}>
+        Selecionar todos (${filteredPending.length})
+      </label>
+      <button class="btn btn-primary btn-sm" id="challenges-admin-bulk-approve-btn" ${selectedCount === 0 ? 'disabled' : ''}>
+        ✅ Aprovar selecionados (${selectedCount})
+      </button>
+    </div>
   `;
 }
 
@@ -6264,6 +6423,7 @@ function challengeAdminPendingCardHTML(c){
   return `
     <div class="challenges-admin-card" data-challenge-id="${c.id}">
       <div class="challenges-admin-card-header">
+        ${editing ? '' : `<input type="checkbox" class="challenges-admin-select-checkbox" data-id="${c.id}" ${challengesAdminSelectedIds.has(c.id) ? 'checked' : ''} aria-label="Selecionar pra aprovação em lote">`}
         <span class="challenge-card-level">${c.level}</span>
         <strong>${challengeAdminCardTitle(c)}</strong>
       </div>
@@ -6322,7 +6482,8 @@ function renderChallengesAdminList(){
     filtered.length === 0 && unfiltered.length > 0 ? 'Nenhum resultado nesta seção com o filtro atual.' : genuineMsg;
 
   const pendingHTML = challengesAdminSectionHTML('pending', 'Pendentes de revisão', pending, challengeAdminPendingCardHTML,
-    sectionEmptyMsg(pending, pendingUnfiltered, 'Nenhum desafio pendente de revisão.'));
+    sectionEmptyMsg(pending, pendingUnfiltered, 'Nenhum desafio pendente de revisão.'),
+    pending.length > 0 ? challengesAdminBulkToolbarHTML(pending) : '');
   const publishedHTML = challengesAdminSectionHTML('published', 'Publicados', published, challengeAdminPublishedCardHTML,
     sectionEmptyMsg(published, publishedUnfiltered, 'Nenhum desafio publicado ainda.'));
   const unpublishedHTML = challengesAdminSectionHTML('unpublished', 'Despublicados', unpublished, challengeAdminPublishedCardHTML,
@@ -6340,6 +6501,39 @@ function renderChallengesAdminList(){
       challengesAdminVisibleCount[section] += CHALLENGES_ADMIN_PAGE_SIZE;
       renderChallengesAdminList();
     });
+  });
+
+  content.querySelectorAll('.challenges-admin-select-checkbox').forEach(cb => {
+    cb.addEventListener('change', () => {
+      if (cb.checked) challengesAdminSelectedIds.add(cb.dataset.id);
+      else challengesAdminSelectedIds.delete(cb.dataset.id);
+      renderChallengesAdminList();
+    });
+  });
+  const selectAllCb = content.querySelector('#challenges-admin-select-all');
+  if (selectAllCb) selectAllCb.addEventListener('change', () => {
+    if (selectAllCb.checked) pending.forEach(c => challengesAdminSelectedIds.add(c.id));
+    else pending.forEach(c => challengesAdminSelectedIds.delete(c.id));
+    renderChallengesAdminList();
+  });
+  const bulkApproveBtn = content.querySelector('#challenges-admin-bulk-approve-btn');
+  if (bulkApproveBtn) bulkApproveBtn.addEventListener('click', async () => {
+    const targets = pending.filter(c => challengesAdminSelectedIds.has(c.id));
+    if (targets.length === 0) return;
+    if (!confirm(`Aprovar e publicar ${targets.length} desafio(s) selecionado(s)? Só quem não tiver nenhum problema no checklist de qualidade é publicado automaticamente -- o resto continua pendente pra revisão individual.`)) return;
+    bulkApproveBtn.disabled = true;
+    bulkApproveBtn.textContent = 'Aprovando…';
+    let published = 0;
+    const skipped = [];
+    for (const c of targets){
+      const result = await approveChallengeSilent(c);
+      if (result.ok){ published++; challengesAdminSelectedIds.delete(c.id); }
+      else if (result.skipped) skipped.push(challengeAdminCardTitle(c));
+    }
+    showToast(skipped.length === 0
+      ? `${published} desafio(s) publicado(s).`
+      : `${published} publicado(s). ${skipped.length} pulado(s) por ter algum problema no checklist -- revise um por um: ${skipped.join(', ')}`);
+    renderChallengesAdmin();
   });
 
   wireChallengeAudioDurations(content);
