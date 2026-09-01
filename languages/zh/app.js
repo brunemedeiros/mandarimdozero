@@ -2164,38 +2164,31 @@ function goToNextExercise(){
   }, 900);
 }
 
-// Explicação usada no painel "Por que errei?". Pra exercícios baseados numa
-// frase (ordenar, completar), a nota gramatical genérica da unidade quase
-// nunca explica o erro específico (ex: ordem das palavras) — o mais útil
-// ali é mostrar o significado da própria frase certa. Pros demais formatos
-// (vocabulário, verdadeiro/falso), reaproveita a primeira nota gramatical
-// da unidade (mesma fonte do modal "Dicas e Notas"), já que não temos
-// explicação por item individual.
-// Feedback do painel de erro/revelação, dividido em duas partes bem
-// diferentes (ver seção 14 do pedido: "Por que errei?" != "Rever
-// conteúdo"):
-//   short  -- explica O ERRO ESPECÍFICO desta questão (a resposta certa em
-//             si) -- sempre curto, sempre mostrado automaticamente, sem
-//             exigir clique.
-//   review -- RECONECTA o aluno ao conteúdo de origem daquele conhecimento
-//             (a frase onde a palavra foi ensinada, ou a nota gramatical da
-//             unidade) -- mais longo, só some se de fato não houver nada
-//             pra reaproveitar, fica atrás do botão "Rever conteúdo".
-function answerExplanationParts(ex){
+// Explicação usada no painel de erro/revelação, sempre mostrada
+// AUTOMATICAMENTE junto da resposta -- pra exercícios baseados numa frase
+// (ordenar, completar), mostra o significado da própria frase certa. Pros
+// de vocabulário, mostra a tradução + a frase de origem quando existir
+// (findMatchingPhrase, mesma busca do card de vocabulário). Pros demais
+// (verdadeiro/falso), reaproveita a primeira nota gramatical da unidade
+// (mesma fonte do modal "Dicas e Notas"). A retomada de conteúdo vem junto
+// da explicação, não atrás de um botão "Rever conteúdo" separado -- "Por
+// que não foi essa" já cumpre sozinho o papel de reconectar o aluno ao
+// conteúdo.
+function answerExplanationHTML(ex){
   if (ex && ex.phrase){
-    const short = `<p class="usage-note-body"><strong>${ex.phrase.c}</strong><br>${ex.phrase.t}</p>`;
-    return { short, review: grammarNoteReviewHTML() };
+    const phraseHTML = `<p class="usage-note-body"><strong>${ex.phrase.c}</strong><br>${ex.phrase.t}</p>`;
+    return phraseHTML + (grammarNoteReviewHTML() || '');
   }
   if (ex && ex.item){
-    const short = `<p class="usage-note-body"><strong>${ex.item.c}</strong> (${ex.item.p}) = ${ex.item.t}</p>`;
+    const itemHTML = `<p class="usage-note-body"><strong>${ex.item.c}</strong> (${ex.item.p}) = ${ex.item.t}</p>`;
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
     const origin = findMatchingPhrase(ex.item, u);
-    const review = origin
+    const originHTML = origin
       ? `<div class="usage-note-title">Onde você já viu isso</div><p class="usage-note-body"><strong>${origin.c}</strong><br>${origin.t}</p>`
-      : grammarNoteReviewHTML();
-    return { short, review };
+      : (grammarNoteReviewHTML() || '');
+    return itemHTML + originHTML;
   }
-  return { short: null, review: grammarNoteReviewHTML() };
+  return grammarNoteReviewHTML() || '';
 }
 
 function grammarNoteReviewHTML(){
@@ -2219,43 +2212,29 @@ function grammarNoteReviewHTML(){
   `;
 }
 
-// Painel de resposta errada/revelada (estilo Duolingo): a explicação curta
+// Painel de resposta errada/revelada (estilo Duolingo): a explicação
 // ("por que não foi essa") aparece AUTOMATICAMENTE -- não depende do aluno
-// clicar em nada pra ver o porquê. "Rever conteúdo" (quando existe algo pra
-// reaproveitar) fica ao lado de "Continuar", com peso visual equivalente,
-// nunca como nota pequena e secundária. `revealed` distingue "errei
-// tentando" de "pedi pra ver a resposta" (via Não sei) -- nenhum dos dois
-// conta como acerto normal, mas o rótulo comunica ao aluno qual foi o caso.
+// clicar em nada pra ver o porquê. `revealed` distingue "errei tentando"
+// de "pedi pra ver a resposta" (via Não sei) -- nenhum dos dois conta como
+// acerto normal, mas o rótulo comunica ao aluno qual foi o caso.
 function showAnswerPanel(contentEl, ex, opts = {}){
   const revealed = !!opts.revealed;
   const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
-  const { short, review } = answerExplanationParts(ex);
+  const explanation = answerExplanationHTML(ex);
   const panel = document.createElement('div');
   panel.className = 'wrong-feedback';
   panel.innerHTML = `
     <div class="wrong-feedback-header">${revealed ? '👀 Resposta revelada' : '❌ Não foi dessa vez'}</div>
-    ${short ? `
+    ${explanation ? `
       <div class="wrong-feedback-why">
         <div class="wrong-feedback-why-label">${revealed ? 'Resposta' : 'Por que não foi essa'}</div>
-        ${short}
+        ${explanation}
       </div>
     ` : ''}
-    <div class="wrong-feedback-actions">
-      ${review ? `<button class="btn btn-secondary wrong-feedback-review-btn" id="review-content-btn">Rever conteúdo 📖</button>` : ''}
-      <button class="btn btn-primary wrong-feedback-continue" id="wrong-continue-btn">Continuar →</button>
-    </div>
-    ${review ? `<div class="wrong-feedback-review" id="wrong-review" style="display:none;">${review}</div>` : ''}
+    <button class="btn btn-primary btn-block wrong-feedback-continue" id="wrong-continue-btn">Continuar →</button>
   `;
   wrap.appendChild(panel);
 
-  panel.querySelector('#review-content-btn')?.addEventListener('click', () => {
-    const box = panel.querySelector('#wrong-review');
-    const btn = panel.querySelector('#review-content-btn');
-    const isOpen = box.style.display !== 'none';
-    box.style.display = isOpen ? 'none' : 'block';
-    btn.textContent = isOpen ? 'Esconder ⌃' : 'Rever conteúdo 📖';
-    if (!isOpen) box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  });
   panel.querySelector('#wrong-continue-btn').addEventListener('click', () => {
     addStudyMinutes();
     STEP_STATE.exerciseIndex += 1;

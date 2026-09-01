@@ -444,34 +444,22 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .correct-feedback-trans{ font-size:14px; color: var(--ink); margin:0 0 14px; }
 .wrong-feedback-header{ font-weight:800; font-size:15px; color: var(--error-red); margin-bottom:12px; }
 
-/* Explicação curta ("por que não foi essa" / a resposta) -- SEMPRE visível,
-   automática, sem depender de o aluno clicar em nada. */
+/* Explicação ("por que não foi essa" / a resposta) -- SEMPRE visível,
+   automática, sem depender de o aluno clicar em nada. Inclui tanto o erro
+   específico da questão quanto a retomada de conteúdo (frase de origem,
+   nota da unidade), num único bloco -- sem um "Rever conteúdo" à parte. */
 .wrong-feedback-why{
   background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:10px;
   padding:14px 16px; margin-bottom:14px;
 }
 .wrong-feedback-why-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--seal-red-dark); font-weight:800; margin-bottom:6px; }
 .wrong-feedback-why .usage-note-body{ font-size:14px; margin:0; }
-
-/* "Rever conteúdo" e "Continuar" com peso visual equivalente -- nenhum dos
-   dois deve parecer uma nota pequena e o outro a ação "de verdade". */
-.wrong-feedback-actions{ display:flex; gap:10px; }
-.wrong-feedback-actions .btn{ flex:1; }
-.wrong-feedback-review-btn{ white-space:nowrap; }
-
-/* Retomada de conteúdo (a frase/explicação de origem) -- mais longa, por
-   isso fica atrás do botão, mas nunca escondida atrás de uma "por que
-   errei" genérica -- é conteúdo de revisão, não a explicação do erro. */
-.wrong-feedback-review{
-  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:10px;
-  padding:14px 16px; margin-top:12px;
-}
-.wrong-feedback-review .usage-note-title{ text-align:left; font-size:14.5px; margin-bottom:8px; }
-.wrong-feedback-review .usage-note-body{ font-size:13.5px; }
-.wrong-feedback-review .grammar-note-table{ width:100%; border-collapse:collapse; margin:8px 0; font-size:13px; }
-.wrong-feedback-review .grammar-note-table td{ padding:5px 8px; border-bottom:1px solid var(--paper-line); }
-.wrong-feedback-review .grammar-note-example{ font-size:13px; color: var(--ink-soft); margin-top:6px; }
-.wrong-feedback-review .grammar-note-sep{ border:none; border-top:1px solid var(--paper-line); margin:12px 0; }
+.wrong-feedback-why .usage-note-title{ text-align:left; font-size:13.5px; margin:10px 0 6px; }
+.wrong-feedback-why .usage-note-title:first-child{ margin-top:0; }
+.wrong-feedback-why .grammar-note-table{ width:100%; border-collapse:collapse; margin:8px 0; font-size:13px; }
+.wrong-feedback-why .grammar-note-table td{ padding:5px 8px; border-bottom:1px solid var(--paper-line); }
+.wrong-feedback-why .grammar-note-example{ font-size:13px; color: var(--ink-soft); margin-top:6px; }
+.wrong-feedback-why .grammar-note-sep{ border:none; border-top:1px solid var(--paper-line); margin:12px 0; }
 
 /* ---------- Passos de unidade de gramática (blocos, estilo Busuu) ---------- */
 .gram-block-counter{ text-align:center; font-size:12.5px; font-weight:800; color: var(--ink-soft); margin-bottom:14px; }
