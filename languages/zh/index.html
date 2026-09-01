@@ -1410,7 +1410,10 @@ body.hide-pinyin .prompt-pinyin{
       <div class="pill streak">🔥 <span id="streak-count">0</span></div>
       <div class="pill xp">⭐ <span id="xp-count">0</span> XP</div>
       <button class="pill pinyin-toggle-btn" id="pinyin-toggle-btn" title="Esconder/mostrar pinyin">拼音</button>
-      <button class="pill search-open-btn" id="search-open-btn" title="Buscar por pinyin, hanzi ou tradução">🔍</button>
+      <!-- Busca implementada e testada (shared/../app.js: buildSearchIndex/renderSearchResults),
+           só escondida do topbar por enquanto -- pedido da professora pra revisar o
+           posicionamento/visual antes de reativar. Remova o style="display:none" pra voltar. -->
+      <button class="pill search-open-btn" id="search-open-btn" title="Buscar por pinyin, hanzi ou tradução" style="display:none;">🔍</button>
       <button class="pill theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema claro/escuro">🌙</button>
       <div class="lang-switcher">
         <button class="lang-switcher-btn" id="lang-switcher-btn" type="button" title="Trocar idioma"></button>
