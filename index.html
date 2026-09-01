@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plataforma de Idiomas</title>
+<meta name="description" content="Escolha um idioma para continuar aprendendo.">
+<link rel="icon" href="languages/fr/icons/icon-192.png">
+<script>
+// Aplica o tema salvo antes do primeiro paint, pra não piscar claro->escuro.
+// Mesma chave usada dentro de cada idioma (ver shared/theme.js).
+try{
+  const savedTheme = localStorage.getItem('app_theme');
+  if (savedTheme === 'dark' || savedTheme === 'light'){
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }
+}catch(e){ /* localStorage indisponível — cai na preferência do sistema */ }
+</script>
+<style>
+@font-face{
+  font-family:'Nunito';
+  src: local('Nunito');
+}
+:root{
+  --ink: #201A2C;
+  --ink-soft: #6B6478;
+  --paper: #FAF7F2;
+  --paper-warm: #F1ECE2;
+  --paper-line: #E3DCCE;
+  --shadow-card: 0 2px 10px rgba(32,26,44,0.07), 0 1px 3px rgba(32,26,44,0.06);
+  --shadow-lift: 0 14px 34px rgba(32,26,44,0.14);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink: #EEE9F5; --ink-soft: #ADA5BE; --paper: #17141F; --paper-warm: #201C2B;
+    --paper-line: #362F44; --shadow-card: 0 2px 10px rgba(0,0,0,0.35); --shadow-lift: 0 14px 34px rgba(0,0,0,0.45);
+  }
+}
+:root[data-theme="dark"]{
+  --ink: #EEE9F5; --ink-soft: #ADA5BE; --paper: #17141F; --paper-warm: #201C2B;
+  --paper-line: #362F44; --shadow-card: 0 2px 10px rgba(0,0,0,0.35); --shadow-lift: 0 14px 34px rgba(0,0,0,0.45);
+}
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+body{
+  min-height:100vh; background:var(--paper); color:var(--ink);
+  font-family:'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-image:
+    radial-gradient(circle at 10% 8%, rgba(52,152,214,0.08) 0%, transparent 40%),
+    radial-gradient(circle at 90% 92%, rgba(192,35,31,0.07) 0%, transparent 42%);
+  display:flex; flex-direction:column; align-items:center;
+  -webkit-font-smoothing:antialiased;
+}
+.theme-toggle-btn{
+  position:absolute; top:20px; right:20px; background:var(--paper-warm); border:1px solid var(--paper-line);
+  border-radius:100px; width:38px; height:38px; display:flex; align-items:center; justify-content:center;
+  color:var(--ink-soft); cursor:pointer;
+}
+.theme-toggle-btn:hover{ color:var(--ink); }
+.wrap{ max-width:640px; width:100%; padding:72px 24px 48px; text-align:center; }
+h1{
+  font-family:'Nunito', sans-serif; font-weight:800; font-size:clamp(26px,5vw,34px); margin:0 0 10px;
+  letter-spacing:-0.01em;
+}
+.sub{ color:var(--ink-soft); font-size:15.5px; margin:0 0 40px; }
+.lang-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media (max-width:520px){ .lang-grid{ grid-template-columns:1fr; } }
+.lang-card{
+  display:flex; flex-direction:column; align-items:center; gap:10px; padding:28px 20px;
+  border-radius:20px; background:var(--paper-warm); border:1px solid var(--paper-line);
+  text-decoration:none; color:var(--ink); box-shadow:var(--shadow-card);
+  transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  position:relative;
+}
+.lang-card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-lift); }
+.lang-card img{ width:56px; height:56px; border-radius:14px; }
+.lang-card .flag{ font-size:26px; line-height:1; }
+.lang-card .native{ font-family:'Nunito', sans-serif; font-weight:800; font-size:19px; }
+.lang-card .tagline{ font-size:12.5px; color:var(--ink-soft); }
+.lang-card .last-badge{
+  position:absolute; top:-9px; right:14px; background:var(--accent, #3498D6); color:#fff;
+  font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:100px; letter-spacing:.02em;
+}
+.lang-card:nth-child(1){ --accent:#3498D6; }
+.lang-card:nth-child(2){ --accent:#C0231F; }
+.lang-card::before{
+  content:''; position:absolute; inset:0; border-radius:20px; border:2px solid transparent;
+  pointer-events:none; transition:border-color .15s ease;
+}
+.lang-card:hover::before{ border-color:var(--accent, #3498D6); }
+.more-note{ margin-top:34px; font-size:13px; color:var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema claro/escuro">🌙</button>
+
+<div class="wrap">
+  <h1>Qual idioma você quer estudar hoje?</h1>
+  <p class="sub">Sua conta e seu progresso são os mesmos em qualquer idioma — só o conteúdo muda.</p>
+  <div class="lang-grid" id="lang-grid"></div>
+  <p class="more-note" id="more-note"></p>
+</div>
+
+<script src="languages/index.js"></script>
+<script src="shared/utils.js"></script>
+<script src="shared/theme.js"></script>
+<script>
+function renderLanguageGrid(){
+  const grid = document.getElementById('lang-grid');
+  const lastLang = localStorageSafeGet(LAST_LANGUAGE_KEY);
+  grid.innerHTML = AVAILABLE_LANGUAGES.filter(l => l.enabled).map(l => `
+    <a class="lang-card" href="${l.path}" data-lang="${l.id}">
+      ${l.id === lastLang ? '<span class="last-badge">Continuar</span>' : ''}
+      <img src="${l.icon}" alt="">
+      <span class="native">${l.nativeName}</span>
+      <span class="tagline">${l.tagline}</span>
+    </a>
+  `).join('');
+  grid.querySelectorAll('.lang-card').forEach(card => {
+    card.addEventListener('click', () => {
+      localStorageSafeSet(LAST_LANGUAGE_KEY, card.dataset.lang);
+    });
+  });
+
+  const enabledCount = AVAILABLE_LANGUAGES.filter(l => l.enabled).length;
+  const totalCount = AVAILABLE_LANGUAGES.length;
+  document.getElementById('more-note').textContent = totalCount > enabledCount
+    ? `+ ${totalCount - enabledCount} idioma(s) a caminho`
+    : '';
+}
+renderLanguageGrid();
+</script>
+</body>
+</html>

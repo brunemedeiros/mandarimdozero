@@ -49,10 +49,11 @@ funcionando nos dois, não quando o código só "parece certo".
 - [ ] Exercício "digite o que ouviu" embutido
 - [ ] TTS ao vivo via Web Speech API do navegador
 
-## Troca de idioma (teste específico da unificação, não existe hoje)
+## Troca de idioma (teste específico da unificação)
 
-- [ ] Trocar Français → 中文 → Français sem recarregar a sessão
-- [ ] Conteúdo do idioma errado nunca aparece durante/depois da troca
-- [ ] Áudio de um idioma nunca toca associado a um exercício do outro
-- [ ] Progresso/streak/XP de cada idioma permanece isolado
-- [ ] URL reflete o idioma ativo e é compartilhável
+- [x] Página de seleção de idioma na raiz (`index.html` + `languages/index.js`, config central) — dois cards (Français / 中文), lembra o último idioma visitado (badge "Continuar"), tema compartilhado funcionando ali também. Testado com Playwright: renderização dos cards, navegação real pro app do idioma, gravação da preferência. **Ainda é uma troca por navegação de página** (cada idioma continua sendo seu próprio `index.html`/`app.js`), não uma troca em runtime dentro de um único shell — isso é a etapa 5b, maior, pendente.
+- [ ] Trocar Français → 中文 → Français sem recarregar a sessão (depende da etapa 5b: shell único)
+- [x] Conteúdo do idioma errado nunca aparece durante/depois da troca — garantido estruturalmente hoje (apps continuam fisicamente separados)
+- [x] Áudio de um idioma nunca toca associado a um exercício do outro — idem, `languages/fr/audio/` e `languages/zh/audio/` continuam isolados
+- [x] Progresso/streak/XP de cada idioma permanece isolado — `STATE.studyGoal`/`STATE.dailyMinutesLog`/etc. nunca compartilhados entre idiomas, confirmado no wizard
+- [ ] URL reflete o idioma ativo e é compartilhável (`?lang=`) — pendente da etapa 5b
