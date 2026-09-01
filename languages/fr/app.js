@@ -266,6 +266,7 @@ const STATE = {
   streak: 0,
   lastStudyDay: null,
   lastReviewReminderDay: null,
+  pendingStreakCelebration: false, // true = streak de hoje já contou, falta mostrar a tela (só ao fim da atividade atual). Nunca persistido -- é sempre por sessão.
   activityLog: {},
   studyGoal: {
     objective: null, levels: [],
@@ -440,6 +441,17 @@ function registerStudyToday(){
     STATE.streak = 1;
   }
   STATE.lastStudyDay = today;
+  // Não mostra a tela de sequência AGORA -- isso interromperia no meio de
+  // uma atividade (ex: no meio de uma sessão de revisão, competindo até com
+  // o áudio automático da próxima carta). Só marca que tem uma comemoração
+  // pendente; maybeShowStreakCelebration() é quem decide o momento certo
+  // (fim da atividade), chamada nas telas de "sessão concluída".
+  STATE.pendingStreakCelebration = true;
+}
+
+function maybeShowStreakCelebration(){
+  if (!STATE.pendingStreakCelebration) return;
+  STATE.pendingStreakCelebration = false;
   showStreakCelebration();
 }
 
@@ -1248,6 +1260,7 @@ function lessonStars(pct){
 }
 
 function renderLessonCompleteScreen(contentEl, nextBtn, { correct, total, recapItems, nextLabel }){
+  maybeShowStreakCelebration();
   const pct = total ? Math.round((correct / total) * 100) : 0;
   const stars = lessonStars(pct);
 
@@ -1282,6 +1295,7 @@ function renderLessonCompleteScreen(contentEl, nextBtn, { correct, total, recapI
 // foca no que o aluno já é capaz de fazer na vida real com o que aprendeu
 // (usa o campo `goal` de cada unidade do módulo/nível).
 function renderModuleCompleteScreen(contentEl, nextBtn, { passed, title, subtitle, units, scorePct, passThreshold, nextLabel }){
+  maybeShowStreakCelebration();
   if (!passed){
     contentEl.innerHTML = `
       <div class="lesson-complete">
@@ -2407,6 +2421,7 @@ function onMatchTileClick(btn){
         saveState();
         renderTopbarStats();
         setTimeout(() => {
+          maybeShowStreakCelebration();
           document.getElementById('match-review-content').innerHTML = `
             <div class="match-complete">
               <div class="big-emoji">🎉</div>
@@ -2467,6 +2482,7 @@ function renderSpeedReview(){
   if (SPEED_STATE.hearts <= 0){
     stopSpeedTimer();
     if (!SPEED_STATE.dailyCounted){ SPEED_STATE.dailyCounted = true; registerDailySpeedReview(); }
+    maybeShowStreakCelebration();
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">💔</div>
@@ -2483,6 +2499,7 @@ function renderSpeedReview(){
   if (SPEED_STATE.index >= SPEED_STATE.queue.length){
     stopSpeedTimer();
     if (!SPEED_STATE.dailyCounted){ SPEED_STATE.dailyCounted = true; registerDailySpeedReview(); }
+    maybeShowStreakCelebration();
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">🏆</div>
@@ -2635,6 +2652,7 @@ function renderReviewView(){
   }
 
   if (STATE.reviewIndex >= STATE.reviewQueue.length){
+    maybeShowStreakCelebration();
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🎉</div>
@@ -3704,6 +3722,7 @@ function renderConjPracticeStep(){
     const pct = CONJ_STATE.totalFields ? Math.round((CONJ_STATE.score / CONJ_STATE.totalFields) * 100) : 0;
     registerDailyConjugationSession();
     registerStudyToday();
+    maybeShowStreakCelebration();
     contentEl.innerHTML = `
       <div class="conj-session-result">
         <div class="big-emoji">${pct >= 70 ? '🎉' : '💪'}</div>

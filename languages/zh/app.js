@@ -408,6 +408,7 @@ const STATE = {
   streak: 0,
   lastStudyDay: null, // 'YYYY-MM-DD'
   lastReviewReminderDay: null, // 'YYYY-MM-DD'
+  pendingStreakCelebration: false, // true = streak de hoje já contou, falta mostrar a tela (só ao fim da atividade atual). Nunca persistido -- é sempre por sessão.
   activityLog: {}, // 'YYYY-MM-DD' -> contagem de respostas naquele dia (para o heatmap)
   // sem trilha de níveis no Mandarim — a meta é sempre o curso completo (dailyMinutes 0 = ainda não definida)
   studyGoal: {
@@ -617,6 +618,17 @@ function registerStudyToday(){
     STATE.streak = 1;
   }
   STATE.lastStudyDay = today;
+  // Não mostra a tela de sequência AGORA -- isso interromperia no meio de
+  // uma atividade (ex: no meio de uma sessão de revisão, competindo até com
+  // o áudio automático da próxima carta). Só marca que tem uma comemoração
+  // pendente; maybeShowStreakCelebration() é quem decide o momento certo
+  // (fim da atividade), chamada nas telas de "sessão concluída".
+  STATE.pendingStreakCelebration = true;
+}
+
+function maybeShowStreakCelebration(){
+  if (!STATE.pendingStreakCelebration) return;
+  STATE.pendingStreakCelebration = false;
   showStreakCelebration();
 }
 
@@ -1120,6 +1132,7 @@ function renderNextStoryBeat(){
   renderStoryProgress();
 
   if (STORY_STATE.beatIndex >= story.beats.length){
+    maybeShowStreakCelebration();
     contentEl.insertAdjacentHTML('beforeend', `
       <div class="story-complete">
         <div class="big-emoji">🎉</div>
@@ -1922,6 +1935,7 @@ function lessonStars(pct){
 }
 
 function renderLessonCompleteScreen(contentEl, nextBtn, { correct, total, recapItems, nextLabel }){
+  maybeShowStreakCelebration();
   const pct = total ? Math.round((correct / total) * 100) : 0;
   const stars = lessonStars(pct);
 
@@ -2776,6 +2790,7 @@ function onMatchTileClick(btn){
         saveState();
         renderTopbarStats();
         setTimeout(() => {
+          maybeShowStreakCelebration();
           document.getElementById('match-review-content').innerHTML = `
             <div class="match-complete">
               <div class="big-emoji">🎉</div>
@@ -2836,6 +2851,7 @@ function renderSpeedReview(){
   if (SPEED_STATE.hearts <= 0){
     stopSpeedTimer();
     if (!SPEED_STATE.dailyCounted){ SPEED_STATE.dailyCounted = true; registerDailySpeedReview(); }
+    maybeShowStreakCelebration();
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">💔</div>
@@ -2852,6 +2868,7 @@ function renderSpeedReview(){
   if (SPEED_STATE.index >= SPEED_STATE.queue.length){
     stopSpeedTimer();
     if (!SPEED_STATE.dailyCounted){ SPEED_STATE.dailyCounted = true; registerDailySpeedReview(); }
+    maybeShowStreakCelebration();
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">🏆</div>
@@ -3012,6 +3029,7 @@ function renderReviewView(){
   }
 
   if (STATE.reviewIndex >= STATE.reviewQueue.length){
+    maybeShowStreakCelebration();
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🎉</div>
@@ -3631,6 +3649,7 @@ function renderHanziReviewView(){
   }
 
   if (STATE.hanziReviewIndex >= STATE.hanziReviewQueue.length){
+    maybeShowStreakCelebration();
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🎉</div>
@@ -4085,6 +4104,7 @@ function renderHanziTestStep(contentEl, nextBtn){
   const total = HANZI_STUDY_STATE.testQueue.length;
 
   if (HANZI_STUDY_STATE.testIndex >= total){
+    maybeShowStreakCelebration();
     const pct = Math.round((HANZI_STUDY_STATE.testScore / total) * 100);
     contentEl.innerHTML = `
       <div class="exercise-result">
