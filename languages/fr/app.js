@@ -10,12 +10,7 @@
    - Exportar deixou de ser aba e virou botão/modal dentro da Trilha.
    ============================================================ */
 
-// ---------- PWA: registra o service worker (cache offline) ----------
-if ('serviceWorker' in navigator){
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js').catch(() => { /* offline não crítico */ });
-  });
-}
+// Registro do service worker agora vem de shared/pwa.js.
 
 // ---------- Text-to-Speech (francês) ----------
 // Mesmas cautelas de navegador do app original (Chromium/Opera: getVoices()
@@ -314,102 +309,25 @@ LEVEL_TESTS.forEach((t) => {
   STATE.levelTestProgress[t.id] = { completed: false, bestScore: 0 };
 });
 
-// ---------- Supabase: conexão, autenticação e persistência na nuvem ----------
-// Este projeto Supabase é compartilhado com o Mandarim do Zero (mesma tabela
-// `progress`, chaveada por user_id). Para não misturar streak/XP/progresso
-// dos dois cursos, cada app guarda seu estado sob sua própria chave dentro
-// da coluna `data` (ver APP_KEY, saveState() e loadState() abaixo).
-const SUPABASE_URL = 'https://eigjocalzwamisgqilhg.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpZ2pvY2FsendhbWlzZ3FpbGhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5MjYzNjksImV4cCI6MjEwMjUwMjM2OX0.EyW4vyQcFL2vrBoo-rpLD5J8LNBT3aSEJREZTSqzHVU';
+// Conexão com o Supabase (supabaseClient, cleanRedirectURL) agora vem de
+// shared/supabase-client.js -- mesmo projeto/tabela `progress` de sempre,
+// compartilhado com os outros idiomas da plataforma.
 const APP_KEY = 'frances';
+// Usado por shared/wizard.js na pergunta do objetivo ("aprender ${...}?").
+const LANGUAGE_STUDY_NAME = 'francês';
+// Id deste idioma em languages/index.js (AVAILABLE_LANGUAGES) -- usado pelo
+// seletor de idioma no topbar (shared/language-switcher.js) pra saber qual
+// card marcar como ativo e qual chave gravar em currentLearningLanguage.
+const LANG_ID = 'fr';
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// CURRENT_USER, GUEST_MODE_FLAG, initAuth/showLoginScreen/enterGuestMode/
+// onUserLoggedIn e toda a autenticação (Google/e-mail/convidado) agora vêm
+// de shared/auth.js, junto com saveState/loadState/notifySaveFailure.
 
-// URL "limpa" (sem #access_token nem outros fragmentos) pra usar como
-// redirectTo do OAuth/reset de senha. Usar window.location.href direto é
-// perigoso: se a URL já tiver um #access_token sobrando de uma tentativa
-// anterior que falhou, o Google devolve um token novo em cima do antigo em
-// vez de substituir, quebrando o parsing — e piora a cada nova tentativa.
-function cleanRedirectURL(){
-  return window.location.origin + window.location.pathname;
-}
-
-let CURRENT_USER = null;
-const GUEST_MODE_FLAG = 'frances_zero_guest_mode';
-
-async function initAuth(){
-  const { data: { session } } = await supabaseClient.auth.getSession();
-
-  // Limpa qualquer fragmento de token da URL depois que o Supabase já teve
-  // a chance de processá-lo (getSession acima) — evita que ele contamine um
-  // redirectTo futuro se o usuário tentar entrar de novo.
-  if (window.location.hash){
-    history.replaceState(null, '', window.location.pathname + window.location.search);
-  }
-
-  if (session && session.user){
-    await onUserLoggedIn(session.user);
-  } else if (sessionStorageSafeGet(GUEST_MODE_FLAG) === '1'){
-    enterGuestMode();
-  } else {
-    showLoginScreen();
-  }
-
-  supabaseClient.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session?.user){
-      await onUserLoggedIn(session.user);
-    } else if (event === 'SIGNED_OUT'){
-      CURRENT_USER = null;
-      showLoginScreen();
-    }
-  });
-}
-
-function sessionStorageSafeGet(key){
-  try{ return window.sessionStorage.getItem(key); }catch(e){ return null; }
-}
-function sessionStorageSafeSet(key, val){
-  try{ window.sessionStorage.setItem(key, val); }catch(e){ /* ignore */ }
-}
-function localStorageSafeGet(key){
-  try{ return window.localStorage.getItem(key); }catch(e){ return null; }
-}
-function localStorageSafeSet(key, val){
-  try{ window.localStorage.setItem(key, val); }catch(e){ /* ignore */ }
-}
-
-// ---------- Tema claro/escuro ----------
-// data-theme ausente = segue o sistema (ver @media prefers-color-scheme no CSS).
-// 'light'/'dark' explícito no localStorage força o tema independente do SO.
-const THEME_STORAGE_KEY = 'frances_theme';
-
-function isDarkThemeActive(){
-  const saved = localStorageSafeGet(THEME_STORAGE_KEY);
-  if (saved === 'dark') return true;
-  if (saved === 'light') return false;
-  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-}
-
-// Ícones em SVG (fill: currentColor) em vez de emoji ☀️/🌙 — o emoji da lua
-// rendeva quase invisível (é só um risco fino) em cima do fundo claro do
-// pill, mesmo problema de contraste que já resolvemos nas bandeiras.
-const THEME_ICON_SUN = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="4.2" fill="currentColor" stroke="none"/><path d="M12 2.5v3M12 18.5v3M4.5 4.5l2.1 2.1M17.4 17.4l2.1 2.1M2.5 12h3M18.5 12h3M6.6 17.4l-2.1 2.1M19.5 4.5l-2.1 2.1"/></svg>';
-const THEME_ICON_MOON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.35 15.35A9 9 0 0 1 8.65 3.65 9.003 9.003 0 1 0 20.35 15.35Z"/></svg>';
-
-function updateThemeToggleIcon(){
-  const btn = document.getElementById('theme-toggle-btn');
-  if (btn) btn.innerHTML = isDarkThemeActive() ? THEME_ICON_SUN : THEME_ICON_MOON;
-}
-
-function toggleTheme(){
-  const next = isDarkThemeActive() ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorageSafeSet(THEME_STORAGE_KEY, next);
-  updateThemeToggleIcon();
-}
-
-document.getElementById('theme-toggle-btn').addEventListener('click', toggleTheme);
-updateThemeToggleIcon();
+// sessionStorageSafeGet/Set, localStorageSafeGet/Set e o tema claro/escuro
+// (isDarkThemeActive, toggleTheme etc.) agora vêm de shared/utils.js e
+// shared/theme.js, carregados antes deste arquivo (ver index.html) --
+// compartilhados entre todos os idiomas, não duplicados por app.
 
 // ---------- Preferência: modo do exercício de completar frase (cloze) ----------
 // 'choice' (múltipla escolha, padrão) ou 'type' (digitar a palavra que falta),
@@ -433,31 +351,6 @@ document.getElementById('cloze-mode-switch').addEventListener('click', () => {
 });
 updateClozeModeSwitch();
 
-function showLoginScreen(){
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app').style.display = 'none';
-}
-
-function enterGuestMode(){
-  sessionStorageSafeSet(GUEST_MODE_FLAG, '1');
-  CURRENT_USER = false;
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  document.getElementById('user-label').textContent = 'Convidado';
-  loadStateAndRender();
-}
-
-async function onUserLoggedIn(user){
-  CURRENT_USER = user;
-  sessionStorageSafeSet(GUEST_MODE_FLAG, '0');
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  const label = user.user_metadata?.full_name || user.email || 'Minha conta';
-  document.getElementById('user-label').textContent = label;
-  document.getElementById('user-dropdown-email').textContent = user.email || '';
-  await loadStateAndRender();
-}
-
 async function loadStateAndRender(){
   await loadState();
   renderTopbarStats();
@@ -467,115 +360,9 @@ async function loadStateAndRender(){
   maybeSendStudyReminder();
 }
 
-document.getElementById('google-login-btn').addEventListener('click', async () => {
-  const noteEl = document.getElementById('login-note');
-  noteEl.textContent = 'Redirecionando para o Google...';
-  noteEl.className = 'login-note';
-  const { error } = await supabaseClient.auth.signInWithOAuth({
-    provider: 'google',
-    options: { redirectTo: cleanRedirectURL() }
-  });
-  if (error){
-    noteEl.textContent = 'Não foi possível iniciar o login. Tente novamente.';
-    noteEl.className = 'login-note err';
-  }
-});
-
-// ---------- Login com e-mail e senha (alternativa ao Google/Convidado) ----------
-let emailLoginMode = 'signin'; // 'signin' | 'signup'
-
-function updateEmailLoginModeUI(){
-  document.getElementById('email-login-submit-btn').textContent = emailLoginMode === 'signup' ? 'Criar conta' : 'Entrar';
-  document.getElementById('login-signup-question').textContent = emailLoginMode === 'signup' ? 'Já tem conta?' : 'Não tem conta?';
-  document.getElementById('email-login-toggle-mode-btn').textContent = emailLoginMode === 'signup' ? 'Entrar' : 'Cadastre-se';
-}
-
-document.getElementById('email-login-toggle-mode-btn').addEventListener('click', () => {
-  emailLoginMode = emailLoginMode === 'signup' ? 'signin' : 'signup';
-  updateEmailLoginModeUI();
-});
-
-document.getElementById('email-login-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const noteEl = document.getElementById('login-note');
-  const email = document.getElementById('email-login-email').value.trim();
-  const password = document.getElementById('email-login-password').value;
-  const submitBtn = document.getElementById('email-login-submit-btn');
-
-  submitBtn.disabled = true;
-  noteEl.className = 'login-note';
-  noteEl.textContent = emailLoginMode === 'signup' ? 'Criando conta...' : 'Entrando...';
-
-  try{
-    if (emailLoginMode === 'signup'){
-      const { data, error } = await supabaseClient.auth.signUp({ email, password });
-      if (error){
-        noteEl.textContent = error.message;
-        noteEl.className = 'login-note err';
-      } else if (!data.session){
-        // confirmação de e-mail exigida pelo projeto Supabase — sem sessão ainda
-        noteEl.textContent = 'Conta criada! Verifique seu e-mail para confirmar e depois entre normalmente.';
-        noteEl.className = 'login-note';
-      }
-      // se já veio sessão (confirmação de e-mail desligada), onAuthStateChange cuida do resto
-    } else {
-      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if (error){
-        noteEl.textContent = 'E-mail ou senha incorretos.';
-        noteEl.className = 'login-note err';
-      }
-    }
-  }catch(err){
-    noteEl.textContent = 'Não foi possível conectar. Tente novamente.';
-    noteEl.className = 'login-note err';
-  }finally{
-    submitBtn.disabled = false;
-  }
-});
-
-document.getElementById('email-login-forgot-btn').addEventListener('click', async () => {
-  const noteEl = document.getElementById('login-note');
-  const email = document.getElementById('email-login-email').value.trim();
-  if (!email){
-    noteEl.textContent = 'Digite seu e-mail no campo acima primeiro.';
-    noteEl.className = 'login-note err';
-    return;
-  }
-  noteEl.textContent = 'Enviando e-mail de redefinição...';
-  noteEl.className = 'login-note';
-  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: cleanRedirectURL() });
-  if (error){
-    noteEl.textContent = 'Não foi possível enviar o e-mail. Tente novamente.';
-    noteEl.className = 'login-note err';
-  } else {
-    noteEl.textContent = 'E-mail de redefinição enviado! Confira sua caixa de entrada.';
-    noteEl.className = 'login-note';
-  }
-});
-
-updateEmailLoginModeUI();
-
-document.getElementById('guest-btn').addEventListener('click', () => {
-  enterGuestMode();
-});
-
-document.getElementById('user-menu-btn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  document.getElementById('user-menu-dropdown').classList.toggle('open');
-});
-document.addEventListener('click', () => {
-  document.getElementById('user-menu-dropdown').classList.remove('open');
-});
-
-document.getElementById('logout-btn').addEventListener('click', async () => {
-  if (CURRENT_USER){
-    await supabaseClient.auth.signOut();
-  } else {
-    sessionStorageSafeSet(GUEST_MODE_FLAG, '0');
-    CURRENT_USER = null;
-    showLoginScreen();
-  }
-});
+// Login (Google/e-mail/convidado), menu do usuário e logout agora vêm de
+// shared/auth.js -- os botões/formulários abaixo continuam no HTML de cada
+// idioma, só a lógica de wiring foi extraída.
 
 // "Meu perfil" reaproveita a mesma tela de Progresso de sempre — só mudou
 // de lugar (estava na barra de abas, agora fica dentro do menu do usuário,
@@ -592,81 +379,9 @@ document.getElementById('user-settings-btn').addEventListener('click', () => {
   switchTab('settings');
 });
 
-// ---------- Persistência: Supabase (usuário logado) ou memória local (convidado) ----------
-let saveInFlight = false;
-let savePending = false;
-
-// Se uma tentativa de salvar falhar (rede caiu, Supabase fora do ar), o
-// aluno precisa saber -- antes disso era só um console.error, e quem
-// estivesse jogando não tinha nenhum jeito de perceber que o progresso
-// não estava sendo salvo. Um cooldown evita alertar de novo a cada
-// chamada de saveState() enquanto o problema persiste (ela é chamada com
-// bastante frequência -- XP, conclusão de unidade etc.).
-let lastSaveErrorToastAt = 0;
-const SAVE_ERROR_TOAST_COOLDOWN_MS = 30000;
-
-function notifySaveFailure(){
-  const now = Date.now();
-  if (now - lastSaveErrorToastAt < SAVE_ERROR_TOAST_COOLDOWN_MS) return;
-  lastSaveErrorToastAt = now;
-  showToast('⚠ Não foi possível salvar seu progresso agora. Verifique sua conexão.');
-}
-
-async function saveState(){
-  if (!CURRENT_USER) return;
-  if (saveInFlight){ savePending = true; return; }
-  saveInFlight = true;
-
-  try{
-    const payload = serializeState();
-    // A linha do usuário é compartilhada com outros apps (mesma tabela `progress`).
-    // Lê o que já está salvo e só substitui o namespace deste app, preservando
-    // o progresso salvo pelos outros apps sob suas próprias chaves.
-    const { data: existing, error: fetchError } = await supabaseClient
-      .from('progress')
-      .select('data')
-      .eq('user_id', CURRENT_USER.id)
-      .maybeSingle();
-    if (fetchError){
-      console.error('Erro ao ler progresso antes de salvar:', fetchError);
-      notifySaveFailure();
-      return;
-    }
-
-    const merged = Object.assign({}, existing && existing.data, { [APP_KEY]: payload });
-    const { error } = await supabaseClient
-      .from('progress')
-      .upsert({ user_id: CURRENT_USER.id, data: merged }, { onConflict: 'user_id' });
-    if (error){
-      console.error('Erro ao salvar progresso:', error);
-      notifySaveFailure();
-    }
-  }catch(e){
-    console.error('Erro ao salvar progresso:', e);
-    notifySaveFailure();
-  }finally{
-    saveInFlight = false;
-    if (savePending){ savePending = false; saveState(); }
-  }
-}
-
-async function loadState(){
-  if (!CURRENT_USER) return;
-  try{
-    const { data, error } = await supabaseClient
-      .from('progress')
-      .select('data')
-      .eq('user_id', CURRENT_USER.id)
-      .maybeSingle();
-
-    if (error){ console.error('Erro ao carregar progresso:', error); return; }
-    if (data && data.data && data.data[APP_KEY]){
-      applySerializedState(data.data[APP_KEY]);
-    }
-  }catch(e){
-    console.error('Erro ao carregar progresso:', e);
-  }
-}
+// saveState/loadState/notifySaveFailure (Supabase, tabela progress) agora
+// vêm de shared/auth.js -- dependem de APP_KEY (acima) e das duas funções
+// abaixo, específicas do formato de STATE deste idioma.
 
 function serializeState(){
   return {
@@ -709,87 +424,9 @@ function applySerializedState(data){
   if (data.completedChallenges) Object.assign(STATE.completedChallenges, data.completedChallenges);
 }
 
-// ---------- SM-2 algorithm (idêntico em espírito ao Anki) ----------
-// grade: 0=Errei, 1=Difícil, 2=Bom, 3=Fácil
-// Conecta o resultado de um exercício de vocabulário ao mesmo sistema SM-2
-// usado pelo Flashcard — sem isso, "palavras aprendidas" (usado no card da
-// trilha e na conclusão de unidade) só contava revisões feitas no Flashcard,
-// deixando a contagem baixa mesmo depois de completar 100% dos exercícios.
-// Cada acerto em exercício conta como um grade "Bom" (equivalente a acertar
-// no Flashcard) — não tão generoso quanto "Fácil", mas já efetivamente
-// marca a palavra como aprendida (reps > 0).
-function registerExerciseCorrect(unit, vocabItem){
-  const idx = unit.vocab.indexOf(vocabItem);
-  if (idx === -1) return;
-  const cardId = `u${unit.id}-v${idx}`;
-  const card = STATE.cards.find(c => c.id === cardId);
-  if (card && card.reps === 0){
-    applySM2(card, 2); // grade 2 = "Bom"
-  }
-}
-
-function applySM2(card, grade){
-  const now = Date.now();
-  const DAY = 24*60*60*1000;
-
-  if (grade === 0){
-    card.reps = 0;
-    card.interval = 0;
-    card.lapses += 1;
-    card.ef = Math.max(1.3, card.ef - 0.2);
-    card.due = now + (10*60*1000);
-    return;
-  }
-
-  const qMap = { 1: 3, 2: 4, 3: 5 };
-  const q = qMap[grade];
-  card.ef = Math.max(1.3, card.ef + (0.1 - (5-q)*(0.08 + (5-q)*0.02)));
-
-  card.reps += 1;
-
-  if (card.reps === 1 && !card.firstLearnedDate){
-    card.firstLearnedDate = todayStr();
-  }
-
-  if (card.reps === 1){
-    card.interval = grade === 1 ? 1 : (grade === 2 ? 1 : 3);
-  } else if (card.reps === 2){
-    card.interval = grade === 1 ? 3 : (grade === 2 ? 6 : 8);
-  } else {
-    let base = card.interval * card.ef;
-    if (grade === 1) base = card.interval * 1.2;
-    if (grade === 3) base = card.interval * card.ef * 1.3;
-    card.interval = Math.round(base);
-  }
-
-  card.due = now + card.interval * DAY;
-}
-
-function cardsDueNow(pool){
-  const now = Date.now();
-  return pool.filter(c => c.due <= now);
-}
-
-function newCards(pool){
-  return pool.filter(c => c.reps === 0 && c.due === 0);
-}
-
-// ---------- Gamificação ----------
-const XP_PER_GRADE = { 0: 1, 1: 4, 2: 8, 3: 10 };
-
-function todayStr(){
-  const d = new Date();
-  const mm = String(d.getMonth()+1).padStart(2,'0');
-  const dd = String(d.getDate()).padStart(2,'0');
-  return `${d.getFullYear()}-${mm}-${dd}`;
-}
-
-function dateStrDaysAgo(days){
-  const d = new Date(Date.now() - days*86400000);
-  const mm = String(d.getMonth()+1).padStart(2,'0');
-  const dd = String(d.getDate()).padStart(2,'0');
-  return `${d.getFullYear()}-${mm}-${dd}`;
-}
+// SM-2 (registerExerciseCorrect, applySM2, cardsDueNow, newCards),
+// XP_PER_GRADE, todayStr e dateStrDaysAgo agora vêm de shared/srs.js --
+// mesmo algoritmo, mesmo formato de STATE.cards nos dois idiomas.
 
 function registerStudyToday(){
   const today = todayStr();
@@ -811,8 +448,8 @@ function registerStudyToday(){
 // (lição, checkpoint, revisão, jogo de combinar, conjugação...) — nunca de
 // novo no mesmo dia, já que registerStudyToday() só chega até aqui na
 // primeira chamada depois da virada do dia.
-const STREAK_DAY_LABELS = ['dom','seg','ter','qua','qui','sex','sáb'];
-
+// STREAK_DAY_LABELS agora vem de shared/wizard.js (também usada por
+// buildMinutesWeekData lá).
 function buildStreakWeekData(){
   const days = [];
   for (let i = 6; i >= 0; i--){
@@ -843,29 +480,15 @@ document.getElementById('streak-modal-continue-btn').addEventListener('click', (
 // e os dias da semana escolhidos, calcula uma DATA estimada de conclusão —
 // tudo em cima do mesmo modelo de estimativa por exercício usado em
 // addStudyMinutes() (não é cronômetro real).
-const OBJECTIVE_OPTIONS = [
-  { id: 'fun', icon: '🎭', label: 'Diversão e cultura' },
-  { id: 'travel', icon: '🌍', label: 'Viagem' },
-  { id: 'friends', icon: '💬', label: 'Amigos e familiares' },
-  { id: 'work', icon: '💼', label: 'Trabalho' },
-  { id: 'education', icon: '🎓', label: 'Educação' }
-];
-
+// OBJECTIVE_OPTIONS, DAY_DEFS, DAY_KEY_BY_JS_INDEX, PT_MONTHS, formatDatePt e
+// todo o wizard agora vêm de shared/wizard.js. LEVEL_DESCRIPTIONS e
+// estimateUnitExerciseCount continuam aqui -- são dados/regras específicas
+// deste idioma (LEVELS igual, ver content.js), exigidos como hook por
+// shared/wizard.js.
 const LEVEL_DESCRIPTIONS = {
   A1: { tier: 'Iniciante', text: 'Fazer e responder a perguntas simples e se apresentar a outras pessoas' },
   A2: { tier: 'Básico', text: 'Participar de conversas simples do dia a dia e falar sobre seus estudos' }
 };
-
-const DAY_DEFS = [
-  { key: 'mon', label: 'seg' }, { key: 'tue', label: 'ter' }, { key: 'wed', label: 'qua' },
-  { key: 'thu', label: 'qui' }, { key: 'fri', label: 'sex' }, { key: 'sat', label: 'sáb' }, { key: 'sun', label: 'dom' }
-];
-const DAY_KEY_BY_JS_INDEX = ['sun','mon','tue','wed','thu','fri','sat'];
-const PT_MONTHS = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-
-function formatDatePt(date){
-  return `${date.getDate()} ${PT_MONTHS[date.getMonth()]}, ${date.getFullYear()}`;
-}
 
 function estimateUnitExerciseCount(u){
   if (u.type === 'grammar'){
@@ -875,339 +498,11 @@ function estimateUnitExerciseCount(u){
   return (u.vocab?.length || 0) + phrasesWithBlocks.length + Math.min(2, phrasesWithBlocks.length) + (u.trueFalseExercises ? 1 : 0);
 }
 
-function remainingUnitsForLevels(levels){
-  if (!levels || !levels.length) return [];
-  return UNITS.filter(u => levels.includes(u.level) && !STATE.unitProgress[u.id]?.completed);
-}
+// estimateCompletionDate, buildMinutesWeekData e remainingUnitsForLevels/
+// estimateMinutesRemainingForLevels agora vêm de shared/wizard.js.
 
-function estimateMinutesRemainingForLevels(levels){
-  const totalExercises = remainingUnitsForLevels(levels).reduce((sum, u) => sum + estimateUnitExerciseCount(u), 0);
-  return Math.round(totalExercises * ESTIMATED_SECONDS_PER_EXERCISE / 60);
-}
-
-// Conta pra frente a partir de amanhã, só nos dias da semana marcados, até
-// acumular minutos suficientes — devolve a data (não só "em X dias"), igual
-// o resumo final do Busuu.
-function estimateCompletionDate(minutesRemaining, days, dailyMinutes){
-  if (!dailyMinutes) return null;
-  if (minutesRemaining === 0) return new Date();
-  const sessionsNeeded = Math.ceil(minutesRemaining / dailyMinutes);
-  let count = 0;
-  for (let i = 0; i < 3650; i++){
-    const d = new Date(Date.now() + (i + 1) * 86400000);
-    if (days[DAY_KEY_BY_JS_INDEX[d.getDay()]]){
-      count++;
-      if (count >= sessionsNeeded) return d;
-    }
-  }
-  return null; // nenhum dia da semana selecionado — nunca chega lá
-}
-
-function buildMinutesWeekData(){
-  const days = [];
-  for (let i = 6; i >= 0; i--){
-    const d = new Date(Date.now() - i*86400000);
-    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const minutes = STATE.dailyMinutesLog[key] || 0;
-    days.push({ label: STREAK_DAY_LABELS[d.getDay()], minutes, done: minutes >= STATE.studyGoal.dailyMinutes && STATE.studyGoal.dailyMinutes > 0, isToday: i === 0 });
-  }
-  return days;
-}
-
-function renderStudyPlanCard(){
-  const subEl = document.getElementById('study-plan-sub');
-  const bodyEl = document.getElementById('study-plan-body');
-  const goal = STATE.studyGoal;
-
-  if (!goal.dailyMinutes || !goal.objective){
-    subEl.textContent = 'Defina quanto tempo por dia você quer estudar';
-    bodyEl.innerHTML = `<button class="btn btn-primary btn-block" id="study-plan-cta-btn">Definir minha meta</button>`;
-    document.getElementById('study-plan-cta-btn').addEventListener('click', openStudyPlanModal);
-    return;
-  }
-
-  const minutesRemaining = estimateMinutesRemainingForLevels(goal.levels);
-  const completionDate = estimateCompletionDate(minutesRemaining, goal.days, goal.dailyMinutes);
-  const dateLabel = completionDate ? formatDatePt(completionDate) : null;
-  const objLabel = OBJECTIVE_OPTIONS.find(o => o.id === goal.objective)?.label || '';
-  const goalText = LEVEL_DESCRIPTIONS[goal.levels[goal.levels.length - 1]]?.text || objLabel;
-
-  const week = buildMinutesWeekData();
-  const weekTotal = Math.round(week.reduce((sum, d) => sum + d.minutes, 0));
-  const weekGoal = goal.dailyMinutes * 7;
-  const pct = weekGoal ? Math.min(100, Math.round((weekTotal / weekGoal) * 100)) : 0;
-  const todayMinutes = Math.round(week[6].minutes);
-
-  subEl.textContent = dateLabel ? `Meta até ${dateLabel}` : 'Meta definida';
-  bodyEl.innerHTML = `
-    <div class="wizard-summary-goal-box">
-      <span class="wizard-summary-goal-icon">⏱️</span>
-      <div>
-        <div class="wizard-summary-goal-label">Sua meta</div>
-        <div class="wizard-summary-goal-text">${goalText}</div>
-      </div>
-    </div>
-    <div class="study-plan-ring-row">
-      <div class="study-ring" style="--pct:${pct}">
-        <div class="study-ring-inner">
-          <div class="study-ring-num">${weekTotal}/${weekGoal}</div>
-          <div class="study-ring-label">min esta semana</div>
-        </div>
-      </div>
-      <div class="study-plan-today">
-        <div class="study-plan-today-label">Meta diária</div>
-        <div class="study-plan-today-num">${todayMinutes} / ${goal.dailyMinutes} min</div>
-        <div class="study-plan-estimate">${
-          dateLabel ? `Nesse ritmo, você alcança sua meta até <strong>${dateLabel}</strong>.` : 'Selecione ao menos um dia da semana pra calcularmos sua meta.'
-        }</div>
-      </div>
-    </div>
-    <div class="streak-week-row study-week-row">
-      ${week.map(d => `
-        <div class="streak-day-item ${d.done ? 'done' : ''} ${d.isToday ? 'today' : ''}">
-          <div class="streak-day-circle">${d.done ? '✓' : ''}</div>
-          <div class="streak-day-label">${d.label}</div>
-        </div>
-      `).join('')}
-    </div>
-  `;
-}
-
-// ---------- Assistente (wizard) de configuração da meta ----------
-const STUDY_WIZARD_STEPS = ['objective', 'level', 'schedule', 'minutes', 'summary'];
-let STUDY_WIZARD = null;
-
-function openStudyPlanModal(){
-  const goal = STATE.studyGoal;
-  STUDY_WIZARD = {
-    step: 0,
-    objective: goal.objective,
-    targetLevel: goal.levels?.length ? goal.levels[goal.levels.length - 1] : LEVELS[0].id,
-    days: { ...goal.days },
-    hour: goal.hour, minute: goal.minute,
-    notifications: goal.notifications,
-    dailyMinutes: goal.dailyMinutes || 10
-  };
-  document.getElementById('study-plan-modal').style.display = 'flex';
-  renderStudyWizardStep();
-}
-
-function renderStudyWizardStep(){
-  const stepName = STUDY_WIZARD_STEPS[STUDY_WIZARD.step];
-  if (stepName === 'objective') renderWizardObjectiveStep();
-  else if (stepName === 'level') renderWizardLevelStep();
-  else if (stepName === 'schedule') renderWizardScheduleStep();
-  else if (stepName === 'minutes') renderWizardMinutesStep();
-  else if (stepName === 'summary') renderWizardSummaryStep();
-}
-
-function advanceWizard(){
-  STUDY_WIZARD.step += 1;
-  renderStudyWizardStep();
-}
-
-function renderWizardObjectiveStep(){
-  const bodyEl = document.getElementById('study-plan-wizard-body');
-  bodyEl.innerHTML = `
-    <div class="wizard-question">Qual é o seu principal objetivo ao aprender francês?</div>
-    <div class="wizard-option-list">
-      ${OBJECTIVE_OPTIONS.map(o => `
-        <button class="wizard-option-row ${STUDY_WIZARD.objective === o.id ? 'active' : ''}" data-objective="${o.id}">
-          <span class="wizard-option-icon">${o.icon}</span>
-          <span class="wizard-option-label">${o.label}</span>
-        </button>
-      `).join('')}
-    </div>
-  `;
-  bodyEl.querySelectorAll('.wizard-option-row').forEach(btn => {
-    btn.addEventListener('click', () => {
-      STUDY_WIZARD.objective = btn.dataset.objective;
-      advanceWizard();
-    });
-  });
-}
-
-function renderWizardLevelStep(){
-  const bodyEl = document.getElementById('study-plan-wizard-body');
-  bodyEl.innerHTML = `
-    <div class="wizard-question">Que nível você quer alcançar?</div>
-    <div class="wizard-level-list">
-      ${LEVELS.map(l => {
-        const desc = LEVEL_DESCRIPTIONS[l.id] || {};
-        const active = STUDY_WIZARD.targetLevel === l.id;
-        return `
-          <button class="wizard-level-row ${active ? 'active' : ''}" data-level="${l.id}">
-            <span class="wizard-level-circle">${l.id}</span>
-            <span class="wizard-level-text">
-              <span class="wizard-level-tier">${desc.tier || ''}</span>
-              <span class="wizard-level-desc">${desc.text || ''}</span>
-            </span>
-          </button>
-        `;
-      }).join('')}
-    </div>
-  `;
-  bodyEl.querySelectorAll('.wizard-level-row').forEach(btn => {
-    btn.addEventListener('click', () => {
-      STUDY_WIZARD.targetLevel = btn.dataset.level;
-      advanceWizard();
-    });
-  });
-}
-
-function renderWizardScheduleStep(){
-  const bodyEl = document.getElementById('study-plan-wizard-body');
-  bodyEl.innerHTML = `
-    <div class="wizard-question">Em quais dias da semana você deseja estudar?</div>
-    <div class="wizard-day-row">
-      ${DAY_DEFS.map(d => `
-        <button class="wizard-day-chip ${STUDY_WIZARD.days[d.key] ? 'active' : ''}" data-day="${d.key}">
-          <span class="wizard-day-check">${STUDY_WIZARD.days[d.key] ? '✓' : ''}</span>
-          <span class="wizard-day-label">${d.label}</span>
-        </button>
-      `).join('')}
-    </div>
-    <div class="wizard-question" style="margin-top:26px;">Que hora do dia você deseja estudar?</div>
-    <div class="wizard-time-row">
-      <input type="number" min="0" max="23" id="wizard-hour-input" value="${STUDY_WIZARD.hour}">
-      <span class="wizard-time-sep">:</span>
-      <input type="number" min="0" max="59" step="5" id="wizard-minute-input" value="${String(STUDY_WIZARD.minute).padStart(2,'0')}">
-    </div>
-    <div class="wizard-notif-row">
-      <div class="wizard-notif-text">
-        <div class="wizard-notif-title">Notificações</div>
-        <div class="wizard-notif-sub">Receber lembretes de quando você deve estudar — só funciona com o navegador aberto (não temos servidor de notificação push).</div>
-      </div>
-      <button class="pref-switch" id="wizard-notif-switch" role="switch" aria-checked="${STUDY_WIZARD.notifications}"><span class="pref-switch-knob"></span></button>
-    </div>
-    <button class="btn btn-primary btn-block wizard-continue-btn" id="wizard-continue-btn">Continuar</button>
-  `;
-
-  bodyEl.querySelectorAll('.wizard-day-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const key = chip.dataset.day;
-      STUDY_WIZARD.days[key] = !STUDY_WIZARD.days[key];
-      chip.classList.toggle('active', STUDY_WIZARD.days[key]);
-      chip.querySelector('.wizard-day-check').textContent = STUDY_WIZARD.days[key] ? '✓' : '';
-    });
-  });
-
-  document.getElementById('wizard-hour-input').addEventListener('change', (e) => {
-    STUDY_WIZARD.hour = Math.max(0, Math.min(23, parseInt(e.target.value) || 0));
-  });
-  document.getElementById('wizard-minute-input').addEventListener('change', (e) => {
-    STUDY_WIZARD.minute = Math.max(0, Math.min(59, parseInt(e.target.value) || 0));
-  });
-
-  const notifSwitch = document.getElementById('wizard-notif-switch');
-  notifSwitch.addEventListener('click', () => {
-    STUDY_WIZARD.notifications = !STUDY_WIZARD.notifications;
-    notifSwitch.setAttribute('aria-checked', STUDY_WIZARD.notifications);
-    if (STUDY_WIZARD.notifications && 'Notification' in window && Notification.permission === 'default'){
-      Notification.requestPermission();
-    }
-  });
-
-  document.getElementById('wizard-continue-btn').addEventListener('click', advanceWizard);
-}
-
-function renderWizardMinutesStep(){
-  const bodyEl = document.getElementById('study-plan-wizard-body');
-  bodyEl.innerHTML = `
-    <div class="wizard-question">Por quanto tempo você deseja estudar?</div>
-    <div class="wizard-minutes-sub">Recomendamos 10 minutos por dia.</div>
-    <div class="wizard-stepper">
-      <button class="wizard-stepper-btn" id="wizard-minutes-minus">−</button>
-      <div class="wizard-stepper-value">
-        <div class="wizard-stepper-num" id="wizard-minutes-num">${STUDY_WIZARD.dailyMinutes}</div>
-        <div class="wizard-stepper-label">minutos por dia</div>
-      </div>
-      <button class="wizard-stepper-btn" id="wizard-minutes-plus">+</button>
-    </div>
-    <button class="btn btn-primary btn-block wizard-continue-btn" id="wizard-continue-btn">Continuar</button>
-  `;
-
-  document.getElementById('wizard-minutes-minus').addEventListener('click', () => {
-    STUDY_WIZARD.dailyMinutes = Math.max(5, STUDY_WIZARD.dailyMinutes - 5);
-    document.getElementById('wizard-minutes-num').textContent = STUDY_WIZARD.dailyMinutes;
-  });
-  document.getElementById('wizard-minutes-plus').addEventListener('click', () => {
-    STUDY_WIZARD.dailyMinutes = Math.min(60, STUDY_WIZARD.dailyMinutes + 5);
-    document.getElementById('wizard-minutes-num').textContent = STUDY_WIZARD.dailyMinutes;
-  });
-  document.getElementById('wizard-continue-btn').addEventListener('click', advanceWizard);
-}
-
-function renderWizardSummaryStep(){
-  const bodyEl = document.getElementById('study-plan-wizard-body');
-  const levels = LEVELS.filter((l, i) => i <= LEVELS.findIndex(x => x.id === STUDY_WIZARD.targetLevel)).map(l => l.id);
-  const minutesRemaining = estimateMinutesRemainingForLevels(levels);
-  const completionDate = estimateCompletionDate(minutesRemaining, STUDY_WIZARD.days, STUDY_WIZARD.dailyMinutes);
-  const dateLabel = completionDate ? formatDatePt(completionDate) : 'defina ao menos 1 dia da semana';
-  const goalText = LEVEL_DESCRIPTIONS[STUDY_WIZARD.targetLevel]?.text || '';
-
-  bodyEl.innerHTML = `
-    <div class="wizard-summary-title">Você alcançará sua meta até <strong>${dateLabel}</strong></div>
-    <div class="wizard-summary-goal-box">
-      <span class="wizard-summary-goal-icon">⏱️</span>
-      <div>
-        <div class="wizard-summary-goal-label">Sua meta</div>
-        <div class="wizard-summary-goal-text">${goalText}</div>
-      </div>
-    </div>
-    <div class="wizard-summary-plan-header">
-      <div class="wizard-summary-plan-title">Seu Plano de Estudo personalizado</div>
-      <button class="wizard-summary-edit-btn" id="wizard-edit-btn">Editar</button>
-    </div>
-    <div class="wizard-day-row wizard-summary-days">
-      ${DAY_DEFS.map(d => `
-        <div class="wizard-day-chip ${STUDY_WIZARD.days[d.key] ? 'active' : ''}" style="pointer-events:none;">
-          <span class="wizard-day-check">${STUDY_WIZARD.days[d.key] ? '✓' : ''}</span>
-          <span class="wizard-day-label">${d.label}</span>
-        </div>
-      `).join('')}
-    </div>
-    <div class="wizard-summary-stats">
-      <div>
-        <div class="wizard-summary-stat-label">Duração</div>
-        <div class="wizard-summary-stat-value">🕐 ${STUDY_WIZARD.dailyMinutes} minutos por dia</div>
-      </div>
-      <div>
-        <div class="wizard-summary-stat-label">Horário</div>
-        <div class="wizard-summary-stat-value">🌅 ${String(STUDY_WIZARD.hour).padStart(2,'0')}:${String(STUDY_WIZARD.minute).padStart(2,'0')}</div>
-      </div>
-    </div>
-    <button class="btn btn-primary btn-block wizard-continue-btn" id="wizard-save-btn">Salvar Plano de Estudo</button>
-  `;
-
-  document.getElementById('wizard-edit-btn').addEventListener('click', () => {
-    STUDY_WIZARD.step = 0;
-    renderStudyWizardStep();
-  });
-  document.getElementById('wizard-save-btn').addEventListener('click', saveStudyWizard);
-}
-
-function saveStudyWizard(){
-  const goal = STATE.studyGoal;
-  goal.objective = STUDY_WIZARD.objective;
-  goal.levels = LEVELS.filter((l, i) => i <= LEVELS.findIndex(x => x.id === STUDY_WIZARD.targetLevel)).map(l => l.id);
-  goal.days = { ...STUDY_WIZARD.days };
-  goal.hour = STUDY_WIZARD.hour;
-  goal.minute = STUDY_WIZARD.minute;
-  goal.notifications = STUDY_WIZARD.notifications;
-  goal.dailyMinutes = STUDY_WIZARD.dailyMinutes;
-  saveState();
-  document.getElementById('study-plan-modal').style.display = 'none';
-  renderStudyPlanCard();
-}
-
-document.getElementById('study-plan-edit-btn').addEventListener('click', openStudyPlanModal);
-document.getElementById('study-plan-modal-close').addEventListener('click', () => {
-  document.getElementById('study-plan-modal').style.display = 'none';
-});
-document.getElementById('study-plan-modal').addEventListener('click', (e) => {
-  if (e.target.id === 'study-plan-modal') document.getElementById('study-plan-modal').style.display = 'none';
-});
+// renderStudyPlanCard, o wizard inteiro (STUDY_WIZARD_STEPS ate
+// saveStudyWizard) e o wiring do modal agora vem de shared/wizard.js.
 
 // Lembrete local best-effort: só dispara se a pessoa tiver o app aberto numa
 // janela de ~30min depois do horário escolhido, com permissão já concedida —
@@ -1397,14 +692,7 @@ function addXP(amount){
   showToast(`+${amount} XP`);
 }
 
-function showToast(msg){
-  const layer = document.getElementById('toast-layer');
-  const el = document.createElement('div');
-  el.className = 'toast';
-  el.textContent = msg;
-  layer.appendChild(el);
-  setTimeout(() => el.remove(), 2000);
-}
+// showToast agora vem de shared/toast.js.
 
 const BADGES = [
   { id:'first_step', name:'Primeiro Passo', icon:'🌱', check: s => s.totalReviews >= 1 },

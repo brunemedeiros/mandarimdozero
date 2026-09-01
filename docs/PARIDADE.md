@@ -1,0 +1,72 @@
+# Checklist de paridade — migração pra plataforma multilíngue
+
+Congelado antes de qualquer refatoração (etapa 1 da migração). Cada item marcado
+`[ ]` precisa ser reverificado manualmente nos dois idiomas depois que a
+funcionalidade for extraída pra `shared/` — só marca `[x]` quando confirmado
+funcionando nos dois, não quando o código só "parece certo".
+
+## Compartilhado (hoje duplicado entre os dois `app.js`, alvo de `shared/`)
+
+- [x] Autenticação: Google OAuth — extraído pra `shared/auth.js` (2025-09-01)
+- [x] Autenticação: e-mail/senha (login + cadastro + esqueci a senha) — idem
+- [x] Modo convidado — idem
+- [x] Logout — idem
+- [x] Persistência de progresso (tabela `progress`, isolada por idioma) — `shared/auth.js` (saveState/loadState) + `shared/supabase-client.js`. Achado no caminho: o chinês tinha um fallback pra formato de dado salvo ANTES do namespacing por idioma existir (progresso de contas antigas) que o francês nunca teve — preservado via hook opcional `loadLegacyState()`, testado explicitamente pra não regredir.
+- [x] Tema claro/escuro (persistido, sem piscar no load) — extraído pra `shared/theme.js`, testado nos dois idiomas (2025-09-01)
+- [x] PWA: registro do service worker — extraído pra `shared/pwa.js` (2025-09-01). Manifest e o service worker em si continuam por idioma (cache list diferente), como esperado.
+- [x] Wizard de plano de estudo (meta diária) — extraído pra `shared/wizard.js`. O chinês ganhou a etapa de nível que só o francês tinha (pedido explícito, 2025-09-01): `LEVELS`/`LEVEL_DESCRIPTIONS` novos em `content.js`/`app.js` do chinês, hoje com 1 único nível (HSK1 · "Nível 1 · Iniciante"), pronto pra crescer quando os próximos níveis do HSK forem adicionados -- sem tocar em `shared/wizard.js`. Meta/minutos continuam 100% por idioma (cada um com seu `STATE.studyGoal` isolado, nunca somado entre idiomas). Testado nos dois com o fluxo completo do wizard (5 etapas) até salvar e ver o card de progresso.
+- [x] Motor de repetição espaçada (Revisão: Errei/Difícil/Bom/Fácil) — extraído pra `shared/srs.js` (SM-2, XP_PER_GRADE, todayStr/dateStrDaysAgo), testado nos dois idiomas com progressão determinística (2025-09-01)
+- [ ] Export pra Anki (.apkg via JSZip + sql.js)
+- [x] Toast (erros e confirmações, ex: falha ao salvar progresso, +XP) — extraído pra `shared/toast.js`, testado nos dois idiomas (2025-09-01)
+- [x] Bandeira de link cruzado pro outro idioma (topbar) — as duas bandeiras (tela de login e topbar do app) ainda apontavam pros endereços antigos e separados (Netlify do chinês, repositório `francais-avec-prof-brune` do francês), sobra de antes da unificação. Trocadas nos dois idiomas pra apontar pra página de seleção de idioma unificada (`../../index.html`), testado com Playwright (2026-09-01).
+- [ ] Pills de estatística (streak, XP)
+- [ ] Navegação por abas
+
+## Específico do francês (fica em `languages/fr/`)
+
+- [ ] Aba Conjugação (motor de conjugação verbal)
+- [ ] Aba Ditados
+- [ ] Desafios: Expressões (pergunta/feedback, 2 exemplos com áudio, microatividade)
+- [ ] Desafios: Ouça e traduza (heurística de concordância de pessoa gramatical)
+- [ ] Desafios: Acentuação
+- [ ] Fila de exercício único por nível (Ouça e traduza / Acentuação)
+- [ ] Seções colapsáveis por nível A1/A2/B1/B2 (Expressões)
+- [ ] Painel admin: revisão, edição, aprovação, publicação, despublicação
+- [ ] Painel admin: pré-visualização "versão do aluno"
+- [ ] Painel admin: busca, filtros (categoria/nível), paginação
+- [ ] Painel admin: aprovação em lote
+- [ ] Painel admin: importação via JSON
+- [ ] Checklist de qualidade antes de aprovar
+- [ ] Curadoria de recursos externos (artigo/YouGlish/dicionário)
+- [ ] TTS offline (pipeline Python: Vertex AI + Google TTS + STT de validação)
+- [ ] Skip link + labels de acessibilidade + contraste AA
+
+## Específico do chinês (fica em `languages/zh/`)
+
+- [ ] Aba 汉字 (Hanzi) com `hanzi-writer` (ordem de traços)
+- [ ] Pinyin e tons
+- [ ] Pool de metas diárias (fácil / revisão de hanzi / geral)
+- [ ] Exercício "digite o que ouviu" embutido
+- [ ] TTS ao vivo via Web Speech API do navegador
+
+## Troca de idioma (teste específico da unificação)
+
+**Reformulado em 2026-09-01** (pedido explícito da professora, modelo Busuu): o
+idioma deixou de ser uma escolha de entrada pré-login e virou uma propriedade
+da conta (`currentLearningLanguage`), trocável de dentro da plataforma. A
+versão anterior deste item (página `/` como seletor de idioma antes do login)
+foi substituída — ver decisões abaixo.
+
+- [x] `/index.html` virou portão de autenticação, não seletor de idioma — mostra tela de login (Google/e-mail/convidado) pra quem não tem sessão; nunca mostra escolha de idioma antes do login.
+- [x] `currentLearningLanguage` gravado no Supabase (`progress.data._meta.currentLearningLanguage`), mesma linha/tabela de sempre — não é só localStorage, fonte de verdade é a conta. `shared/language-pref.js` (`getCurrentLearningLanguage`/`setCurrentLearningLanguage`).
+- [x] Primeiro login (sem `currentLearningLanguage` e sem progresso em nenhum idioma) → mostra "Qual idioma você quer aprender?" uma única vez, salva a escolha, entra no app.
+- [x] Contas que já existiam antes desta feature (progresso salvo, mas sem `_meta`) → idioma é **inferido** a partir de qual progresso já existe, não pede escolha de novo (migração sem perda de dado, item 23 do pedido).
+- [x] Retorno (já tem `currentLearningLanguage`) → login abre direto no último idioma estudado, sem tela de escolha.
+- [x] Seletor de idioma dentro do app (bandeira no topbar, `shared/language-switcher.js`) — mostra o idioma atual, menu com os outros idiomas disponíveis, aria-label/aria-expanded/Escape pra acessibilidade.
+- [x] Trocar de idioma pelo seletor NÃO faz logout, não pede login de novo — sessão do Supabase é a mesma origem/navegador, sobrevive à navegação entre `languages/fr/` e `languages/zh/`. Testado com Playwright interceptando a navegação real entre os três arquivos.
+- [x] Convidado (sem conta) também troca de idioma sem precisar re-selecionar "continuar sem conta" — usa a mesma `sessionStorage` (sobrevive à navegação na mesma aba).
+- [x] Idioma ativo permanece após F5 — trivial hoje, cada idioma é seu próprio `index.html` (a URL já é o estado).
+- [x] Progresso/streak/XP de cada idioma permanece isolado — inalterado desta migração, `data[APP_KEY]` por idioma como já era.
+- [x] Conteúdo/áudio do idioma errado nunca aparece — inalterado, apps continuam fisicamente separados em `languages/fr/` e `languages/zh/`.
+- [x] Painel admin do francês, TTS, exercícios — nada tocado nesta mudança (só topbar + raiz + 2 arquivos novos em `shared/`), regressão testada com Playwright navegando pelas abas Estudo/Revisão/Conjugação/Ditados/Desafios.
+- **Decisão consciente, não pendência:** a troca continua sendo por navegação de página real (`languages/<lang>/index.html`), não um shell único em runtime sem reload. Os dois apps têm conteúdo/exercícios genuinamente diferentes e uma reescrita pra SPA sem reload teria risco alto de regressão sem ganho perceptível pro usuário — a sessão já não se perde na troca, que era o problema real relatado. `URL reflete o idioma ativo` já é verdade (o path *é* o idioma), então `?lang=` não é necessário.
