@@ -40,11 +40,40 @@ def describe_accents(text):
     parts = [f'"{base}" tem acento {name}' for base, name in marks]
     return ", ".join(parts) + "."
 
+# Duas escalas independentes, e é isso que precisa progredir com o nível --
+# não só uma delas. Vocabulário (frequência/familiaridade da palavra) e
+# complexidade ortográfica (quantos acentos, quão previsíveis) não andam
+# juntos por natureza: dá pra ter uma palavra rara com um acento trivial, ou
+# uma palavra do dia a dia com uma combinação de acentos difícil. Um B2 só
+# com "palavra mais sofisticada" pode sair mais fácil de acentuar que um A2,
+# o que quebra a progressão que o aluno espera. Por isso o nível aqui fixa
+# as duas coisas: que tipo de vocabulário E que tipo de desafio ortográfico.
 LEVEL_GUIDANCE = {
-    "A1": "Palavras muito frequentes do dia a dia (saudações, números, objetos comuns, verbos básicos).",
-    "A2": "Vocabulário cotidiano um pouco mais amplo (rotina, família, comida, lugares).",
-    "B1": "Vocabulário mais variado, incluindo palavras menos óbvias mas ainda de uso comum.",
-    "B2": "Palavras mais sofisticadas/formais, com maior chance de múltiplos acentos ou combinações menos intuitivas.",
+    "A1": (
+        "Vocabulário: palavras muito frequentes do dia a dia (saudações, números, objetos "
+        "comuns, verbos básicos).\n"
+        "Complexidade ortográfica: exatamente UM acento, de um tipo isolado e óbvio (agudo ou "
+        "grave), numa posição clara -- o tipo de acento mais fácil de perceber e lembrar."
+    ),
+    "A2": (
+        "Vocabulário: cotidiano um pouco mais amplo (rotina, família, comida, lugares).\n"
+        "Complexidade ortográfica: um acento só, mas de um tipo que brasileiros tendem a "
+        "esquecer por não ter equivalente intuitivo em português (circunflexo, ex: 'fenêtre', "
+        "'hôtel') -- ou o mesmo acento agudo/grave repetido mais de uma vez na mesma palavra."
+    ),
+    "B1": (
+        "Vocabulário: mais variado, incluindo palavras menos óbvias mas ainda de uso comum.\n"
+        "Complexidade ortográfica: combinação de DOIS tipos diferentes de acento na mesma "
+        "palavra (ex: agudo + circunflexo), ou um caso onde o acento muda o sentido da palavra "
+        "e por isso é fácil de confundir (ex: 'a' vs 'à', 'ou' vs 'où')."
+    ),
+    "B2": (
+        "Vocabulário: mais sofisticado/formal, mas SEM abrir mão da complexidade ortográfica "
+        "abaixo -- uma palavra formal com um acento trivial não serve pra B2.\n"
+        "Complexidade ortográfica: combinações raras e pouco intuitivas -- trema junto de outro "
+        "acento, cedilha combinada com acento, ou múltiplos acentos de tipos diferentes na "
+        "mesma palavra (3+ sinais, ou 2 tipos distintos + posição não óbvia)."
+    ),
 }
 
 SCHEMA = {
@@ -69,15 +98,19 @@ PROMPT_TEMPLATE = (
     "palavras, quando fizer sentido pedagógico) em francês pra um "
     "exercício de acentuação ortográfica, nível {level}, pra um aluno "
     "brasileiro.\n\n"
-    "Nível {level}: {level_guidance}\n\n"
-    "Priorize palavras onde:\n"
-    "- o acento é frequentemente esquecido/confundido por brasileiros;\n"
-    "- existe uma diferença notável entre a ortografia em português e "
-    "francês (ex: palavras parecidas mas sem o mesmo acento);\n"
-    "- há múltiplos acentos na mesma palavra;\n"
-    "- o acento muda a aparência da palavra de forma perceptível;\n"
-    "- a palavra é frequente e pedagogicamente relevante (nunca escolha "
-    "uma palavra rara só pra 'ter mais um acento diferente').\n"
+    "Este nível define DUAS coisas obrigatórias, e a escolha só serve se "
+    "atender as duas ao mesmo tempo -- não vale compensar uma exigência "
+    "com a outra (ex: uma palavra formal/rara não substitui o requisito de "
+    "complexidade ortográfica do nível, e vice-versa):\n\n"
+    "{level_guidance}\n\n"
+    "Critérios gerais, além do que o nível já define acima:\n"
+    "- o(s) acento(s) precisa(m) ser algo que brasileiros de fato "
+    "esquecem/confundem, não um detalhe irrelevante;\n"
+    "- prefira quando há diferença notável com a ortografia em português "
+    "(palavras parecidas mas sem o mesmo acento);\n"
+    "- a palavra é pedagogicamente relevante (nunca escolha uma palavra "
+    "rara só pra 'ter mais um acento diferente' -- a complexidade "
+    "ortográfica pedida no nível já cuida disso).\n"
     "NÃO escolha palavras aleatórias só pra preencher quantidade -- cada "
     "escolha precisa ter uma razão pedagógica real (explique essa razão "
     "em explanation).\n\n"
