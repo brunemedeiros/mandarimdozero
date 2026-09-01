@@ -6303,20 +6303,31 @@ async function renderChallengesAdmin(){
 function renderChallengesAdminList(){
   const content = document.getElementById('challenges-admin-content');
 
-  const pending = applyChallengesAdminFilters(pendingChallenges());
-  const published = applyChallengesAdminFilters(publishedChallenges());
-  const unpublished = applyChallengesAdminFilters(unpublishedButApprovedChallenges());
+  const pendingUnfiltered = pendingChallenges();
+  const publishedUnfiltered = publishedChallenges();
+  const unpublishedUnfiltered = unpublishedButApprovedChallenges();
+  const pending = applyChallengesAdminFilters(pendingUnfiltered);
+  const published = applyChallengesAdminFilters(publishedUnfiltered);
+  const unpublished = applyChallengesAdminFilters(unpublishedUnfiltered);
 
-  const pendingHTML = challengesAdminSectionHTML('pending', 'Pendentes de revisão', pending, challengeAdminPendingCardHTML, 'Nenhum desafio pendente de revisão.');
-  const publishedHTML = challengesAdminSectionHTML('published', 'Publicados', published, challengeAdminPublishedCardHTML, null);
-  const unpublishedHTML = challengesAdminSectionHTML('unpublished', 'Despublicados', unpublished, challengeAdminPublishedCardHTML, null);
+  // Uma seção vazia por causa do filtro atual não é a mesma coisa que uma
+  // seção genuinamente vazia -- a mensagem diz qual é qual, em vez de
+  // sempre "nenhum desafio [status]" mesmo quando na verdade existem,
+  // só não bateram com a busca/filtro.
+  const sectionEmptyMsg = (filtered, unfiltered, genuineMsg) =>
+    filtered.length === 0 && unfiltered.length > 0 ? 'Nenhum resultado nesta seção com o filtro atual.' : genuineMsg;
 
-  const totalUnfiltered = pendingChallenges().length + publishedChallenges().length + unpublishedButApprovedChallenges().length;
-  const totalFiltered = pending.length + published.length + unpublished.length;
-  const noResultsMsg = totalUnfiltered > 0 && totalFiltered === 0
-    ? `<p class="challenges-admin-empty">Nenhum desafio bate com a busca/filtro atual.</p>` : '';
+  const pendingHTML = challengesAdminSectionHTML('pending', 'Pendentes de revisão', pending, challengeAdminPendingCardHTML,
+    sectionEmptyMsg(pending, pendingUnfiltered, 'Nenhum desafio pendente de revisão.'));
+  const publishedHTML = challengesAdminSectionHTML('published', 'Publicados', published, challengeAdminPublishedCardHTML,
+    sectionEmptyMsg(published, publishedUnfiltered, 'Nenhum desafio publicado ainda.'));
+  const unpublishedHTML = challengesAdminSectionHTML('unpublished', 'Despublicados', unpublished, challengeAdminPublishedCardHTML,
+    sectionEmptyMsg(unpublished, unpublishedUnfiltered, 'Nenhum desafio despublicado.'));
 
-  content.innerHTML = challengesAdminFilterBarHTML() + noResultsMsg + pendingHTML + publishedHTML + unpublishedHTML;
+  // Cada seção já mostra sua própria mensagem contextual quando vazia
+  // (genuinamente vazia vs. vazia só por causa do filtro atual) --
+  // nenhuma mensagem redundante no topo.
+  content.innerHTML = challengesAdminFilterBarHTML() + pendingHTML + publishedHTML + unpublishedHTML;
   wireChallengesAdminFilterBar(content);
 
   content.querySelectorAll('.challenges-admin-load-more').forEach(btn => {
