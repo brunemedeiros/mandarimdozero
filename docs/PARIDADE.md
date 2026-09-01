@@ -15,7 +15,7 @@ funcionando nos dois, não quando o código só "parece certo".
 - [x] Tema claro/escuro (persistido, sem piscar no load) — extraído pra `shared/theme.js`, testado nos dois idiomas (2025-09-01)
 - [x] PWA: registro do service worker — extraído pra `shared/pwa.js` (2025-09-01). Manifest e o service worker em si continuam por idioma (cache list diferente), como esperado.
 - [ ] Wizard de plano de estudo (meta diária)
-- [ ] Motor de repetição espaçada (Revisão: Errei/Difícil/Bom/Fácil)
+- [x] Motor de repetição espaçada (Revisão: Errei/Difícil/Bom/Fácil) — extraído pra `shared/srs.js` (SM-2, XP_PER_GRADE, todayStr/dateStrDaysAgo), testado nos dois idiomas com progressão determinística (2025-09-01)
 - [ ] Export pra Anki (.apkg via JSZip + sql.js)
 - [x] Toast (erros e confirmações, ex: falha ao salvar progresso, +XP) — extraído pra `shared/toast.js`, testado nos dois idiomas (2025-09-01)
 - [ ] Bandeira de link cruzado pro outro idioma (topbar)
