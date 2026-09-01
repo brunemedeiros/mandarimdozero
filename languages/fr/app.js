@@ -1879,6 +1879,10 @@ function answerExplanationHTML(ex){
     // tradução completa já aparece no prompt e na frase preenchida — repeti-la aqui é redundante
     return '';
   }
+  if (ex && ex.format === 'scenario' && ex.phrase){
+    // a frase em francês já aparece destacada entre as opções — só a tradução é informação nova
+    return `<p class="usage-note-body">${ex.phrase.t}</p>`;
+  }
   if (ex && ex.phrase){
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
     const usage = u && u.usageNote
@@ -1893,6 +1897,9 @@ function answerExplanationHTML(ex){
       ? `<div class="usage-note-title">Onde você já viu isso</div><p class="usage-note-body"><strong>${origin.f}</strong><br>${origin.t}</p>`
       : '';
     return `<p class="usage-note-body"><strong>${ex.item.f}</strong> = ${ex.item.t}</p>${originHTML}`;
+  }
+  if (ex && ex.format === 'trueFalse' && ex.whyNote){
+    return `<p class="usage-note-body">${ex.whyNote}</p>`;
   }
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
   const note = u && u.usageNote;
