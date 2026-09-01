@@ -2192,6 +2192,9 @@ function answerExplanationHTML(ex){
       : (grammarNoteReviewHTML() || '');
     return itemHTML + originHTML;
   }
+  if (ex && ex.format === 'trueFalse' && ex.whyNote){
+    return `<p class="usage-note-body">${ex.whyNote}</p>`;
+  }
   return grammarNoteReviewHTML() || '';
 }
 
