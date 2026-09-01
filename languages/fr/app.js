@@ -1870,76 +1870,54 @@ function goToNextExercise(){
 
 // Feedback do painel de erro/revelação, dividido em duas partes bem
 // diferentes (ver seção 14 do pedido: "Por que errei?" != "Rever
-// conteúdo"):
-//   short  -- explica O ERRO ESPECÍFICO desta questão (a resposta certa em
-//             si) -- sempre curto, sempre mostrado automaticamente, sem
-//             exigir clique.
-//   review -- RECONECTA o aluno ao conteúdo de origem daquele conhecimento
-//             (a frase onde a palavra foi ensinada, ou a explicação da
-//             unidade) -- mais longo, só some se de fato não houver nada
-//             pra reaproveitar, fica atrás do botão "Rever conteúdo".
-function answerExplanationParts(ex){
+// conteúdo"). A retomada de conteúdo (frase de origem/explicação da
+// unidade) vem JUNTO da explicação, não atrás de um botão separado --
+// "Por que não foi essa" já cumpre sozinho o papel de reconectar o aluno
+// ao conteúdo, então um "Rever conteúdo" à parte só duplicava a função.
+function answerExplanationHTML(ex){
   if (ex && ex.phrase){
-    const short = `<p class="usage-note-body"><strong>${ex.phrase.f}</strong><br>${ex.phrase.t}</p>`;
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
-    const review = u && u.usageNote
+    const usage = u && u.usageNote
       ? `<div class="usage-note-title">${u.usageNote.title}</div><p class="usage-note-body">${u.usageNote.body}</p>`
-      : null;
-    return { short, review };
+      : '';
+    return `<p class="usage-note-body"><strong>${ex.phrase.f}</strong><br>${ex.phrase.t}</p>${usage}`;
   }
   if (ex && ex.item){
-    const short = `<p class="usage-note-body"><strong>${ex.item.f}</strong> = ${ex.item.t}</p>`;
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
     const origin = findMatchingPhrase(ex.item, u);
-    const review = origin
+    const originHTML = origin
       ? `<div class="usage-note-title">Onde você já viu isso</div><p class="usage-note-body"><strong>${origin.f}</strong><br>${origin.t}</p>`
-      : null;
-    return { short, review };
+      : '';
+    return `<p class="usage-note-body"><strong>${ex.item.f}</strong> = ${ex.item.t}</p>${originHTML}`;
   }
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
   const note = u && u.usageNote;
-  return note
-    ? { short: null, review: `<div class="usage-note-title">${note.title}</div><p class="usage-note-body">${note.body}</p>` }
-    : { short: null, review: null };
+  return note ? `<div class="usage-note-title">${note.title}</div><p class="usage-note-body">${note.body}</p>` : '';
 }
 
-// Painel de resposta errada/revelada (estilo Duolingo): a explicação curta
+// Painel de resposta errada/revelada (estilo Duolingo): a explicação
 // ("por que não foi essa") aparece AUTOMATICAMENTE -- não depende do aluno
-// clicar em nada pra ver o porquê. "Rever conteúdo" (quando existe algo pra
-// reaproveitar) fica ao lado de "Continuar", com peso visual equivalente,
-// nunca como nota pequena e secundária. `revealed` distingue "errei
-// tentando" de "pedi pra ver a resposta" (via Não sei) -- nenhum dos dois
-// conta como acerto normal, mas o rótulo comunica ao aluno qual foi o caso.
+// clicar em nada pra ver o porquê. `revealed` distingue "errei tentando"
+// de "pedi pra ver a resposta" (via Não sei) -- nenhum dos dois conta como
+// acerto normal, mas o rótulo comunica ao aluno qual foi o caso.
 function showAnswerPanel(contentEl, ex, opts = {}){
   const revealed = !!opts.revealed;
   const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
-  const { short, review } = answerExplanationParts(ex);
+  const explanation = answerExplanationHTML(ex);
   const panel = document.createElement('div');
   panel.className = 'wrong-feedback';
   panel.innerHTML = `
     <div class="wrong-feedback-header">${revealed ? '👀 Resposta revelada' : '❌ Não foi dessa vez'}</div>
-    ${short ? `
+    ${explanation ? `
       <div class="wrong-feedback-why">
         <div class="wrong-feedback-why-label">${revealed ? 'Resposta' : 'Por que não foi essa'}</div>
-        ${short}
+        ${explanation}
       </div>
     ` : ''}
-    <div class="wrong-feedback-actions">
-      ${review ? `<button class="btn btn-secondary wrong-feedback-review-btn" id="review-content-btn">Rever conteúdo 📖</button>` : ''}
-      <button class="btn btn-primary wrong-feedback-continue" id="wrong-continue-btn">Continuar →</button>
-    </div>
-    ${review ? `<div class="wrong-feedback-review" id="wrong-review" style="display:none;">${review}</div>` : ''}
+    <button class="btn btn-primary btn-block wrong-feedback-continue" id="wrong-continue-btn">Continuar →</button>
   `;
   wrap.appendChild(panel);
 
-  panel.querySelector('#review-content-btn')?.addEventListener('click', () => {
-    const box = panel.querySelector('#wrong-review');
-    const btn = panel.querySelector('#review-content-btn');
-    const isOpen = box.style.display !== 'none';
-    box.style.display = isOpen ? 'none' : 'block';
-    btn.textContent = isOpen ? 'Esconder ⌃' : 'Rever conteúdo 📖';
-    if (!isOpen) box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  });
   panel.querySelector('#wrong-continue-btn').addEventListener('click', () => {
     addStudyMinutes();
     STEP_STATE.exerciseIndex += 1;
