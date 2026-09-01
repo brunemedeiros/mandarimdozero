@@ -1102,37 +1102,37 @@ function maskWordInText(text, word){
   return text.slice(0, idx) + '_____' + text.slice(idx + word.length);
 }
 
+// Regra pedagógica: a dica ajuda a PENSAR (contexto, estratégia, função
+// comunicativa), nunca entrega uma característica formal da resposta (letra
+// inicial, número de letras/palavras, posição, terminação...) que permita
+// deduzi-la mecanicamente -- por isso nenhum ramo abaixo usa .length, index
+// de letra ou "começa com".
 function buildExerciseHint(ex, unit){
   if (ex.format === 'meaning' || ex.format === 'listen' || ex.format === 'type'){
     const item = ex.item;
     const phrase = findMatchingPhrase(item, unit);
     if (phrase){
       const masked = maskWordInText(phrase.f, item.f) || phrase.f;
-      return `Essa palavra aparece nesta frase: "${masked}"`;
+      return `Pense em quando você usaria essa expressão. Ela aparece nesta frase que você já estudou: "${masked}"`;
     }
     if (ex.format === 'type'){
-      return `Preste atenção aos sons — é uma palavra do tema "${unit.title}".`;
+      return 'Ouça de novo com atenção aos sons -- é uma expressão do tema desta unidade.';
     }
-    const translationHead = item.t.split(/[/(]/)[0].trim();
-    return `Faz parte do tema "${unit.title}". A tradução tem ${translationHead.length} letras.`;
+    return `Pense no contexto do tema desta unidade ("${unit.title}"): em que situação você usaria essa palavra?`;
   }
   if (ex.format === 'reorder'){
-    return `A frase começa com: "${ex.phrase.blocks[0].f}"`;
+    return 'Identifique primeiro quem realiza a ação e depois a ação em si -- monte a frase seguindo essa ordem de raciocínio.';
   }
   if (ex.format === 'scenario'){
-    return `A resposta certa começa com "${ex.phrase.f.split(' ')[0]}"`;
+    return 'Releia a situação com atenção: pense no que você diria nesse momento, não apenas no significado de cada frase.';
   }
   if (ex.format === 'cloze'){
-    const w = ex.correctBlock.f.replace(/[.,!?]/g, '');
-    if (w.length <= 2){
-      return 'É uma palavra curta (artigo, preposição ou pronome) — observe a estrutura da frase.';
-    }
-    return `A palavra que falta tem ${w.length} letras e começa com "${w[0]}"`;
+    return 'Releia a frase inteira, junto da tradução, e pense em qual palavra dá sentido gramatical e comunicativo ao espaço.';
   }
   if (ex.format === 'trueFalse'){
     return unit.usageNote
       ? `Pense na explicação: "${unit.usageNote.title}"`
-      : 'Releia a afirmação com atenção antes de decidir.';
+      : 'Releia a afirmação com atenção: ela descreve exatamente a situação em que essa expressão é usada?';
   }
   return null;
 }
@@ -1151,6 +1151,52 @@ function setExerciseHint(hintText){
   } else {
     btn.style.display = 'none';
   }
+}
+
+// ---------- "Não sei" / dica / ver resposta (mecânica compartilhada) ----------
+// "Não sei" preserva o esforço de recuperação: existe desde o início do
+// exercício (não só depois de um erro), mas NUNCA é tratado como resposta
+// errada -- não conta erro, não conta acerto, só abre a dica (a mesma do
+// botão do topo) e troca o próprio botão por "Ver resposta", deixando a
+// pergunta disponível pra uma nova tentativa. Só "Ver resposta" finaliza o
+// exercício (sem XP, sem contar como acerto), com a mesma explicação/retomada
+// de conteúdo usada quando o aluno erra de verdade.
+function markCurrentExerciseHintUsed(){
+  const btn = document.getElementById('lesson-hint-btn');
+  if (btn.style.display === 'none') return; // formato sem dica configurada
+  document.getElementById('lesson-hint-panel').style.display = 'block';
+  btn.classList.add('active');
+  const ex = STEP_STATE.exerciseList[STEP_STATE.exerciseIndex];
+  if (ex) ex.hintUsed = true;
+}
+
+function wireDontKnowButton(contentEl, ex, onRevealAnswer){
+  const btn = contentEl.querySelector('#exercise-dontknow-btn');
+  if (!btn) return;
+  const row = btn.parentElement;
+  btn.addEventListener('click', () => {
+    if (STEP_STATE.exerciseAnswered || ex.askedDontKnow) return;
+    ex.askedDontKnow = true;
+    markCurrentExerciseHintUsed();
+    btn.outerHTML = `
+      <div class="exercise-help-followup">
+        <span class="exercise-help-note">Veja a dica acima e tente de novo, ou:</span>
+        <button class="exercise-reveal-btn" id="exercise-reveal-btn">Ver resposta</button>
+      </div>
+    `;
+    row.querySelector('#exercise-reveal-btn').addEventListener('click', () => {
+      if (STEP_STATE.exerciseAnswered) return;
+      ex.revealed = true;
+      onRevealAnswer();
+    });
+  });
+}
+
+// XP de um acerto: um pouco menor quando o aluno pediu ajuda (dica ou "não
+// sei") nesse exercício -- preserva a distinção acerto independente > acerto
+// com ajuda sem criar um sistema de pontuação complexo.
+function exerciseXP(ex, fullXP){
+  return (ex.hintUsed || ex.askedDontKnow) ? Math.max(1, fullXP - 1) : fullXP;
 }
 
 // ---------- Vocabulário palavra-por-palavra (estilo Memrise) ----------
@@ -1794,34 +1840,46 @@ function goToNextExercise(){
   }, 900);
 }
 
-// Explicação usada no painel "Por que errei?". Pra exercícios baseados numa
-// frase (ordenar, completar, cenário), a dica de uso genérica da unidade
-// quase nunca explica o erro específico (ex: ordem das palavras) — o mais
-// útil ali é mostrar o significado da própria frase certa. Pros demais
-// formatos (vocabulário, verdadeiro/falso), a dica de uso da unidade ainda
-// serve de contexto gramatical, já que não temos explicação por item.
+// Explicação/retomada de conteúdo usada no painel de erro/revelação. Pra
+// exercícios baseados numa frase (ordenar, completar, cenário), mostra o
+// significado da própria frase certa. Pros de vocabulário (meaning/listen/
+// type), busca a frase de origem onde a palavra foi ensinada (mesma busca
+// do card de vocabulário, findMatchingPhrase) -- retomada específica daquele
+// conhecimento, não só o tema geral da unidade. Só cai no usageNote genérico
+// quando não há frase de exemplo pra reaproveitar.
 function wrongAnswerExplanationHTML(ex){
   if (ex && ex.phrase){
     return `<div class="usage-note-title">O que a frase significa</div><p class="usage-note-body"><strong>${ex.phrase.f}</strong><br>${ex.phrase.t}</p>`;
   }
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
+  if (ex && ex.item){
+    const origin = findMatchingPhrase(ex.item, u);
+    if (origin){
+      return `<div class="usage-note-title">Onde você já viu isso</div><p class="usage-note-body"><strong>${origin.f}</strong><br>${origin.t}</p><p class="usage-note-body"><strong>${ex.item.f}</strong> = ${ex.item.t}</p>`;
+    }
+    return `<div class="usage-note-title">Resposta certa</div><p class="usage-note-body"><strong>${ex.item.f}</strong> = ${ex.item.t}</p>`;
+  }
   const note = u && u.usageNote;
   if (!note) return '';
   return `<div class="usage-note-title">${note.title}</div><p class="usage-note-body">${note.body}</p>`;
 }
 
-// Painel de resposta errada (estilo Duolingo): pausa antes de avançar pra
-// mostrar a resposta certa e, se o aluno quiser, o porquê — só aparece
-// quando ela erra; acertando o fluxo continua rápido como antes.
-function showWrongAnswerPanel(contentEl, ex){
+// Painel de resposta errada/revelada (estilo Duolingo): pausa antes de
+// avançar pra mostrar a resposta certa e, se o aluno quiser, retomar o
+// conteúdo relacionado. `revealed` distingue "errei tentando" de "pedi pra
+// ver a resposta" (via Não sei) -- nenhum dos dois conta como acerto normal,
+// mas o rótulo comunica ao aluno qual foi o caso.
+function showAnswerPanel(contentEl, ex, opts = {}){
+  const revealed = !!opts.revealed;
   const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
   const explanationHTML = wrongAnswerExplanationHTML(ex);
+  const toggleLabel = revealed ? 'Rever conteúdo 📖' : 'Por que errei? 🤔';
   const panel = document.createElement('div');
   panel.className = 'wrong-feedback';
   panel.innerHTML = `
-    <div class="wrong-feedback-header">❌ Não foi dessa vez</div>
+    <div class="wrong-feedback-header">${revealed ? '👀 Resposta revelada' : '❌ Não foi dessa vez'}</div>
     ${explanationHTML ? `
-      <button class="wrong-feedback-toggle" id="why-wrong-btn">Por que errei? 🤔</button>
+      <button class="wrong-feedback-toggle" id="why-wrong-btn">${toggleLabel}</button>
       <div class="wrong-feedback-explanation" id="wrong-explanation" style="display:none;">${explanationHTML}</div>
     ` : ''}
     <button class="btn btn-primary btn-block wrong-feedback-continue" id="wrong-continue-btn">Continuar →</button>
@@ -1833,7 +1891,7 @@ function showWrongAnswerPanel(contentEl, ex){
     const btn = panel.querySelector('#why-wrong-btn');
     const isOpen = exp.style.display !== 'none';
     exp.style.display = isOpen ? 'none' : 'block';
-    btn.textContent = isOpen ? 'Por que errei? 🤔' : 'Esconder explicação';
+    btn.textContent = isOpen ? 'Esconder' : toggleLabel;
   });
   panel.querySelector('#wrong-continue-btn').addEventListener('click', () => {
     addStudyMinutes();
@@ -1841,6 +1899,10 @@ function showWrongAnswerPanel(contentEl, ex){
     renderExerciseStep();
   });
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function showWrongAnswerPanel(contentEl, ex){
+  showAnswerPanel(contentEl, ex, { revealed: false });
 }
 
 // ---------- Exercício de múltipla escolha (meaning / listen) ----------
@@ -1884,19 +1946,14 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
 
   nextBtn.style.display = 'none';
 
-  function revealAnswer(chosenIdx, isCorrect){
-    STEP_STATE.exerciseAnswered = true;
+  function revealCorrectVisual(chosenIdx){
     contentEl.querySelectorAll('.exercise-option').forEach((b, i) => {
       b.classList.add('disabled');
       if (ex.options[i] === ex.item) b.classList.add('correct');
       else if (i === chosenIdx) b.classList.add('incorrect');
     });
     document.getElementById('exercise-dontknow-btn')?.classList.add('disabled');
-    if (isCorrect){
-      goToNextExercise();
-    } else {
-      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
-    }
+    contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
   }
 
   contentEl.querySelectorAll('.exercise-option').forEach(btn => {
@@ -1904,18 +1961,23 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
       if (STEP_STATE.exerciseAnswered) return;
       const chosenIdx = parseInt(btn.dataset.idx);
       const isCorrect = ex.options[chosenIdx] === ex.item;
+      STEP_STATE.exerciseAnswered = true;
+      revealCorrectVisual(chosenIdx);
       if (isCorrect){
         STEP_STATE.exerciseScore += 1;
-        addXP(3);
+        addXP(exerciseXP(ex, 3));
         registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
+        goToNextExercise();
+      } else {
+        setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
       }
-      revealAnswer(chosenIdx, isCorrect);
     });
   });
 
-  document.getElementById('exercise-dontknow-btn').addEventListener('click', () => {
-    if (STEP_STATE.exerciseAnswered) return;
-    revealAnswer(-1, false);
+  wireDontKnowButton(contentEl, ex, () => {
+    STEP_STATE.exerciseAnswered = true;
+    revealCorrectVisual(-1);
+    setTimeout(() => showAnswerPanel(contentEl, ex, { revealed: true }), 300);
   });
 }
 
@@ -1949,15 +2011,20 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   inputEl.focus();
   const strip = s => normalizeLoose(s).replace(/[.,!?;:'"’]/g, '').trim();
 
-  function finish(isCorrect){
-    STEP_STATE.exerciseAnswered = true;
+  function lockInputs(){
     inputEl.disabled = true;
     document.getElementById('vocab-type-verify-btn').disabled = true;
     document.getElementById('exercise-dontknow-btn')?.classList.add('disabled');
+    contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
+  }
+
+  function finish(isCorrect){
+    STEP_STATE.exerciseAnswered = true;
+    lockInputs();
 
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
-      addXP(4); // digitar de ouvido vale um pouco mais que só reconhecer em múltipla escolha
+      addXP(exerciseXP(ex, 4)); // digitar de ouvido vale um pouco mais que só reconhecer em múltipla escolha
       registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
       goToNextExercise();
     } else {
@@ -1976,9 +2043,13 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     finish(strip(inputEl.value) === strip(ex.item.f));
   });
 
-  document.getElementById('exercise-dontknow-btn').addEventListener('click', () => {
-    if (STEP_STATE.exerciseAnswered) return;
-    finish(false);
+  wireDontKnowButton(contentEl, ex, () => {
+    STEP_STATE.exerciseAnswered = true;
+    lockInputs();
+    const answerEl = document.getElementById('vocab-type-answer');
+    answerEl.textContent = `Resposta certa: ${ex.item.f}`;
+    answerEl.style.display = 'block';
+    setTimeout(() => showAnswerPanel(contentEl, ex, { revealed: true }), 300);
   });
 }
 
@@ -2000,10 +2071,27 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
       <div class="scenario-question">${ex.phrase.scenario}</div>
       <div class="scenario-scene">${scenarioSceneHTML(ex.phrase.scenarioEmoji)}</div>
       <div class="scenario-options">${optionsHTML}</div>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
     </div>
   `;
 
   nextBtn.style.display = 'none';
+
+  function revealCorrectVisual(chosenIdx){
+    contentEl.querySelectorAll('.scenario-option').forEach((b, i) => {
+      b.classList.add('disabled');
+      if (ex.options[i] === ex.phrase) b.classList.add('correct');
+      else if (i === chosenIdx) b.classList.add('incorrect');
+    });
+    document.getElementById('exercise-dontknow-btn')?.classList.add('disabled');
+    contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
+  }
+
+  wireDontKnowButton(contentEl, ex, () => {
+    STEP_STATE.exerciseAnswered = true;
+    revealCorrectVisual(-1);
+    setTimeout(() => showAnswerPanel(contentEl, ex, { revealed: true }), 300);
+  });
 
   contentEl.querySelectorAll('.scenario-option').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -2012,15 +2100,11 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
       const chosenIdx = parseInt(btn.dataset.idx);
       const isCorrect = ex.options[chosenIdx] === ex.phrase;
 
-      contentEl.querySelectorAll('.scenario-option').forEach((b, i) => {
-        b.classList.add('disabled');
-        if (ex.options[i] === ex.phrase) b.classList.add('correct');
-        else if (i === chosenIdx) b.classList.add('incorrect');
-      });
+      revealCorrectVisual(chosenIdx);
 
       if (isCorrect){
         STEP_STATE.exerciseScore += 1;
-        addXP(4);
+        addXP(exerciseXP(ex, 4));
         goToNextExercise();
       } else {
         setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
@@ -2046,11 +2130,29 @@ function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
         <button class="tf-option" data-val="true">✅ Verdadeiro</button>
         <button class="tf-option" data-val="false">❌ Falso</button>
       </div>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
     </div>
   `;
 
   wireAudioButtons(contentEl);
   nextBtn.style.display = 'none';
+
+  function revealCorrectVisual(chosenBtn){
+    contentEl.querySelectorAll('.tf-option').forEach(b => {
+      b.classList.add('disabled');
+      const val = b.dataset.val === 'true';
+      if (val === ex.answer) b.classList.add('correct');
+      else if (b === chosenBtn) b.classList.add('incorrect');
+    });
+    document.getElementById('exercise-dontknow-btn')?.classList.add('disabled');
+    contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
+  }
+
+  wireDontKnowButton(contentEl, ex, () => {
+    STEP_STATE.exerciseAnswered = true;
+    revealCorrectVisual(null);
+    setTimeout(() => showAnswerPanel(contentEl, ex, { revealed: true }), 300);
+  });
 
   contentEl.querySelectorAll('.tf-option').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -2059,16 +2161,11 @@ function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
       const chosen = btn.dataset.val === 'true';
       const isCorrect = chosen === ex.answer;
 
-      contentEl.querySelectorAll('.tf-option').forEach(b => {
-        b.classList.add('disabled');
-        const val = b.dataset.val === 'true';
-        if (val === ex.answer) b.classList.add('correct');
-        else if (b === btn) b.classList.add('incorrect');
-      });
+      revealCorrectVisual(btn);
 
       if (isCorrect){
         STEP_STATE.exerciseScore += 1;
-        addXP(4);
+        addXP(exerciseXP(ex, 4));
         goToNextExercise();
       } else {
         setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
@@ -2101,16 +2198,16 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       ` : `
         <div class="cloze-options">${ex.options.map((opt, i) => `<button class="cloze-option" data-idx="${i}">${opt.f}</button>`).join('')}</div>
       `}
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
     </div>
   `;
 
   wireAudioButtons(contentEl);
   nextBtn.style.display = 'none';
 
-  function finish(isCorrect){
-    STEP_STATE.exerciseAnswered = true;
+  function revealBlank(state){
     document.getElementById('cloze-blank').textContent = ex.correctBlock.f;
-    document.getElementById('cloze-blank').classList.add(isCorrect ? 'correct' : 'incorrect');
+    document.getElementById('cloze-blank').classList.add(state === 'wrong' ? 'incorrect' : 'correct');
 
     // O áudio só aparece (e toca sozinho) depois de responder — antes disso
     // ele entregaria a resposta de graça, sem precisar completar a frase.
@@ -2118,10 +2215,17 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     audioRow.innerHTML = audioBtnHTML(ex.phrase.f);
     wireAudioButtons(audioRow);
     if (canSpeakFrench(ex.phrase.f)) speakFrench(ex.phrase.f, audioRow.querySelector('.audio-btn'));
+    document.getElementById('exercise-dontknow-btn')?.classList.add('disabled');
+    contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
+  }
+
+  function finish(isCorrect){
+    STEP_STATE.exerciseAnswered = true;
+    revealBlank(isCorrect ? 'ok' : 'wrong');
 
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
-      addXP(4);
+      addXP(exerciseXP(ex, 4));
       goToNextExercise();
     } else {
       setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
@@ -2155,6 +2259,21 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       });
     });
   }
+
+  wireDontKnowButton(contentEl, ex, () => {
+    STEP_STATE.exerciseAnswered = true;
+    if (mode === 'type'){
+      document.getElementById('cloze-input').disabled = true;
+      document.getElementById('cloze-verify-btn').disabled = true;
+    } else {
+      contentEl.querySelectorAll('.cloze-option').forEach((b, i) => {
+        b.classList.add('disabled');
+        if (ex.options[i] === ex.correctBlock) b.classList.add('correct');
+      });
+    }
+    revealBlank('revealed');
+    setTimeout(() => showAnswerPanel(contentEl, ex, { revealed: true }), 300);
+  });
 }
 
 // ---------- Exercício de ordenar palavras (reorder) ----------
@@ -2229,10 +2348,11 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
       slot.classList.add(isCorrect ? 'correct' : 'incorrect');
     });
     document.getElementById('exercise-dontknow-btn')?.classList.add('disabled');
+    contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
 
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
-      addXP(4);
+      addXP(exerciseXP(ex, 4));
       addStudyMinutes();
       setTimeout(() => showCorrectReorderPanel(contentEl, ex), 500);
     } else {
@@ -2244,15 +2364,13 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
   renderBlocks();
   nextBtn.style.display = 'none';
 
-  document.getElementById('exercise-dontknow-btn').addEventListener('click', () => {
-    if (STEP_STATE.exerciseAnswered) return;
+  wireDontKnowButton(contentEl, ex, () => {
     STEP_STATE.exerciseAnswered = true;
     slotsEl.innerHTML = correctOrder.map(block =>
       `<div class="reorder-slot filled correct"><div class="french">${block.f}</div></div>`
     ).join('');
     blocksEl.querySelectorAll('.reorder-block').forEach(b => b.classList.add('disabled'));
-    document.getElementById('exercise-dontknow-btn').classList.add('disabled');
-    setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
+    setTimeout(() => showAnswerPanel(contentEl, ex, { revealed: true }), 300);
   });
 }
 
