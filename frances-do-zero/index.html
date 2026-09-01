@@ -90,6 +90,12 @@ try{
 
 *{ box-sizing: border-box; }
 html,body{ margin:0; padding:0; }
+/* Rótulo presente pro leitor de tela (associado via for/id a um campo que
+   já se explica visualmente pelo placeholder) sem ocupar espaço no layout. */
+.sr-only{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
 body{
   background: var(--paper);
   background-image:
@@ -1631,7 +1637,9 @@ footer.app-footer img{ height:56px; opacity:.9; }
     <div class="login-block">
       <div class="login-divider"><span>ou entrar com</span></div>
       <form id="email-login-form">
+        <label class="sr-only" for="email-login-email">Seu e-mail</label>
         <input type="email" id="email-login-email" class="email-login-input" placeholder="Seu e-mail" autocomplete="email" required>
+        <label class="sr-only" for="email-login-password">Sua senha</label>
         <input type="password" id="email-login-password" class="email-login-input" placeholder="Sua senha" autocomplete="current-password" required minlength="6">
         <div class="login-forgot-row">
           <button type="button" class="email-login-link" id="email-login-forgot-btn">Esqueceu sua senha?</button>
@@ -1881,7 +1889,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
     <div id="challenge-player-wrap" style="display:none;">
       <button class="back-link" id="challenge-back-to-list">← Voltar aos desafios</button>
       <div id="challenge-preview-banner" style="display:none;"></div>
-      <div id="challenge-player-content"></div>
+      <div id="challenge-player-content" aria-live="polite" aria-atomic="true"></div>
     </div>
 
     <div id="challenges-admin-wrap" style="display:none;">

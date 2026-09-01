@@ -5629,7 +5629,7 @@ function openListenTranslatePlayer(c){
     <div class="listen-translate-actions">
       <button class="btn btn-primary" id="lt-verify-btn">Vérifier</button>
     </div>
-    <div id="lt-feedback-wrap"></div>
+    <div id="lt-feedback-wrap" aria-live="polite" aria-atomic="true"></div>
   `;
 
   document.getElementById('lt-play-btn').addEventListener('click', (e) => {
@@ -5690,7 +5690,7 @@ function openAccentPlayer(c){
     <div class="listen-translate-actions">
       <button class="btn btn-primary" id="accent-verify-btn">Vérifier</button>
     </div>
-    <div id="accent-feedback-wrap"></div>
+    <div id="accent-feedback-wrap" aria-live="polite" aria-atomic="true"></div>
   `;
 
   document.getElementById('accent-play-btn').addEventListener('click', (e) => {
