@@ -12,8 +12,8 @@ funcionando nos dois, não quando o código só "parece certo".
 - [ ] Modo convidado
 - [ ] Logout
 - [ ] Persistência de progresso (tabela `progress`, isolada por idioma)
-- [ ] Tema claro/escuro (persistido, sem piscar no load)
-- [ ] PWA: manifest + service worker + instalação
+- [x] Tema claro/escuro (persistido, sem piscar no load) — extraído pra `shared/theme.js`, testado nos dois idiomas (2025-09-01)
+- [x] PWA: registro do service worker — extraído pra `shared/pwa.js` (2025-09-01). Manifest e o service worker em si continuam por idioma (cache list diferente), como esperado.
 - [ ] Wizard de plano de estudo (meta diária)
 - [ ] Motor de repetição espaçada (Revisão: Errei/Difícil/Bom/Fácil)
 - [ ] Export pra Anki (.apkg via JSZip + sql.js)

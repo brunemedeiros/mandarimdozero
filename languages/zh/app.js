@@ -8,12 +8,7 @@
    - Áudio: Text-to-Speech via Web Speech API (voz zh-CN do navegador)
    ============================================================ */
 
-// ---------- PWA: registra o service worker (cache offline) ----------
-if ('serviceWorker' in navigator){
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js').catch(() => { /* offline não crítico */ });
-  });
-}
+// Registro do service worker agora vem de shared/pwa.js.
 
 // ---------- Text-to-Speech (mandarim) ----------
 // Navegadores baseados em Chromium (incluindo Opera) têm alguns bugs conhecidos
