@@ -2168,11 +2168,12 @@ function goToNextExercise(){
 // AUTOMATICAMENTE junto da resposta -- pra exercícios baseados numa frase
 // (ordenar, completar), mostra o significado da própria frase certa. Pros
 // de vocabulário, mostra a tradução + a frase de origem quando existir
-// (findMatchingPhrase, mesma busca do card de vocabulário). Pros demais
-// (verdadeiro/falso), reaproveita a primeira nota gramatical da unidade
-// (mesma fonte do modal "Dicas e Notas"). A retomada de conteúdo vem junto
-// da explicação, não atrás de um botão "Rever conteúdo" separado -- "Por
-// que não foi essa" já cumpre sozinho o papel de reconectar o aluno ao
+// (findMatchingPhrase, mesma busca do card de vocabulário). Pro
+// verdadeiro/falso, usa o `whyNote` autorado por item (explica especificamente
+// a afirmação testada -- ver PRs #74/#75); só cai na nota gramatical genérica
+// da unidade se algum item antigo não tiver `whyNote`. A retomada de conteúdo
+// vem junto da explicação, não atrás de um botão "Rever conteúdo" separado --
+// "Por que não foi essa" já cumpre sozinho o papel de reconectar o aluno ao
 // conteúdo.
 function answerExplanationHTML(ex){
   if (ex && (ex.format === 'cloze' || ex.format === 'fullsentence')){

@@ -6,7 +6,8 @@
    - Sem par pinyin/hanzi: cada item de conteúdo é só { f: francês, t: português }.
    - Sem trilha de caracteres (não existe no francês) — no lugar, aba de
      Conjugação (seleção livre de tempos + categoria de verbo, sempre as 6 pessoas).
-   - Aba Manual removida por enquanto (pendente, ver task do projeto).
+   - Aba Manual removida. Não consta em docs/PARIDADE.md como pendência --
+     se for pra voltar, é uma feature nova, não uma restauração.
    - Exportar deixou de ser aba e virou botão/modal dentro da Trilha.
    ============================================================ */
 
