@@ -537,6 +537,10 @@ document.getElementById('user-settings-btn').addEventListener('click', () => {
 const APP_KEY = 'mandarim';
 // Usado por shared/wizard.js na pergunta do objetivo ("aprender ${...}?").
 const LANGUAGE_STUDY_NAME = 'mandarim';
+// Id deste idioma em languages/index.js (AVAILABLE_LANGUAGES) -- usado pelo
+// seletor de idioma no topbar (shared/language-switcher.js) pra saber qual
+// card marcar como ativo e qual chave gravar em currentLearningLanguage.
+const LANG_ID = 'zh';
 
 // Hook chamado por loadState() (shared/auth.js) quando não encontra
 // data.data[APP_KEY] -- reconhece o formato salvo ANTES do namespacing por

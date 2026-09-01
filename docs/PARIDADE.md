@@ -51,9 +51,22 @@ funcionando nos dois, não quando o código só "parece certo".
 
 ## Troca de idioma (teste específico da unificação)
 
-- [x] Página de seleção de idioma na raiz (`index.html` + `languages/index.js`, config central) — dois cards (Français / 中文), lembra o último idioma visitado (badge "Continuar"), tema compartilhado funcionando ali também. Testado com Playwright: renderização dos cards, navegação real pro app do idioma, gravação da preferência. **Ainda é uma troca por navegação de página** (cada idioma continua sendo seu próprio `index.html`/`app.js`), não uma troca em runtime dentro de um único shell — isso é a etapa 5b, maior, pendente.
-- [ ] Trocar Français → 中文 → Français sem recarregar a sessão (depende da etapa 5b: shell único)
-- [x] Conteúdo do idioma errado nunca aparece durante/depois da troca — garantido estruturalmente hoje (apps continuam fisicamente separados)
-- [x] Áudio de um idioma nunca toca associado a um exercício do outro — idem, `languages/fr/audio/` e `languages/zh/audio/` continuam isolados
-- [x] Progresso/streak/XP de cada idioma permanece isolado — `STATE.studyGoal`/`STATE.dailyMinutesLog`/etc. nunca compartilhados entre idiomas, confirmado no wizard
-- [ ] URL reflete o idioma ativo e é compartilhável (`?lang=`) — pendente da etapa 5b
+**Reformulado em 2026-09-01** (pedido explícito da professora, modelo Busuu): o
+idioma deixou de ser uma escolha de entrada pré-login e virou uma propriedade
+da conta (`currentLearningLanguage`), trocável de dentro da plataforma. A
+versão anterior deste item (página `/` como seletor de idioma antes do login)
+foi substituída — ver decisões abaixo.
+
+- [x] `/index.html` virou portão de autenticação, não seletor de idioma — mostra tela de login (Google/e-mail/convidado) pra quem não tem sessão; nunca mostra escolha de idioma antes do login.
+- [x] `currentLearningLanguage` gravado no Supabase (`progress.data._meta.currentLearningLanguage`), mesma linha/tabela de sempre — não é só localStorage, fonte de verdade é a conta. `shared/language-pref.js` (`getCurrentLearningLanguage`/`setCurrentLearningLanguage`).
+- [x] Primeiro login (sem `currentLearningLanguage` e sem progresso em nenhum idioma) → mostra "Qual idioma você quer aprender?" uma única vez, salva a escolha, entra no app.
+- [x] Contas que já existiam antes desta feature (progresso salvo, mas sem `_meta`) → idioma é **inferido** a partir de qual progresso já existe, não pede escolha de novo (migração sem perda de dado, item 23 do pedido).
+- [x] Retorno (já tem `currentLearningLanguage`) → login abre direto no último idioma estudado, sem tela de escolha.
+- [x] Seletor de idioma dentro do app (bandeira no topbar, `shared/language-switcher.js`) — mostra o idioma atual, menu com os outros idiomas disponíveis, aria-label/aria-expanded/Escape pra acessibilidade.
+- [x] Trocar de idioma pelo seletor NÃO faz logout, não pede login de novo — sessão do Supabase é a mesma origem/navegador, sobrevive à navegação entre `languages/fr/` e `languages/zh/`. Testado com Playwright interceptando a navegação real entre os três arquivos.
+- [x] Convidado (sem conta) também troca de idioma sem precisar re-selecionar "continuar sem conta" — usa a mesma `sessionStorage` (sobrevive à navegação na mesma aba).
+- [x] Idioma ativo permanece após F5 — trivial hoje, cada idioma é seu próprio `index.html` (a URL já é o estado).
+- [x] Progresso/streak/XP de cada idioma permanece isolado — inalterado desta migração, `data[APP_KEY]` por idioma como já era.
+- [x] Conteúdo/áudio do idioma errado nunca aparece — inalterado, apps continuam fisicamente separados em `languages/fr/` e `languages/zh/`.
+- [x] Painel admin do francês, TTS, exercícios — nada tocado nesta mudança (só topbar + raiz + 2 arquivos novos em `shared/`), regressão testada com Playwright navegando pelas abas Estudo/Revisão/Conjugação/Ditados/Desafios.
+- **Decisão consciente, não pendência:** a troca continua sendo por navegação de página real (`languages/<lang>/index.html`), não um shell único em runtime sem reload. Os dois apps têm conteúdo/exercícios genuinamente diferentes e uma reescrita pra SPA sem reload teria risco alto de regressão sem ganho perceptível pro usuário — a sessão já não se perde na troca, que era o problema real relatado. `URL reflete o idioma ativo` já é verdade (o path *é* o idioma), então `?lang=` não é necessário.

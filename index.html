@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Plataforma de Idiomas</title>
-<meta name="description" content="Escolha um idioma para continuar aprendendo.">
+<meta name="description" content="Entre para continuar aprendendo.">
 <link rel="icon" href="languages/fr/icons/icon-192.png">
 <script>
 // Aplica o tema salvo antes do primeiro paint, pra não piscar claro->escuro.
@@ -16,6 +16,7 @@ try{
   }
 }catch(e){ /* localStorage indisponível — cai na preferência do sistema */ }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 @font-face{
   font-family:'Nunito';
@@ -27,6 +28,9 @@ try{
   --paper: #FAF7F2;
   --paper-warm: #F1ECE2;
   --paper-line: #E3DCCE;
+  --accent: #3498D6;
+  --accent-dark: #2678AC;
+  --danger: #C0231F;
   --shadow-card: 0 2px 10px rgba(32,26,44,0.07), 0 1px 3px rgba(32,26,44,0.06);
   --shadow-lift: 0 14px 34px rgba(32,26,44,0.14);
 }
@@ -57,80 +61,268 @@ body{
   color:var(--ink-soft); cursor:pointer;
 }
 .theme-toggle-btn:hover{ color:var(--ink); }
-.wrap{ max-width:640px; width:100%; padding:72px 24px 48px; text-align:center; }
+.wrap{ max-width:420px; width:100%; padding:72px 24px 48px; text-align:center; }
 h1{
-  font-family:'Nunito', sans-serif; font-weight:800; font-size:clamp(26px,5vw,34px); margin:0 0 10px;
+  font-family:'Nunito', sans-serif; font-weight:800; font-size:clamp(24px,5vw,30px); margin:0 0 10px;
   letter-spacing:-0.01em;
 }
-.sub{ color:var(--ink-soft); font-size:15.5px; margin:0 0 40px; }
+.sub{ color:var(--ink-soft); font-size:15px; margin:0 0 32px; line-height:1.5; }
+
+/* ---------- Tela de login ---------- */
+.gate-card{
+  max-width:380px; width:100%; background:var(--paper); border:1px solid var(--paper-line);
+  border-radius:20px; padding:32px 26px; box-shadow:var(--shadow-lift); text-align:center;
+}
+.gate-note{ min-height:16px; font-size:12.5px; color:var(--ink-soft); margin:14px 0 0; }
+.gate-note.err{ color:var(--danger); font-weight:700; }
+.btn{
+  border:none; border-radius:11px; padding:13px 20px; font-family:'Nunito', sans-serif; font-weight:800;
+  font-size:14px; cursor:pointer; transition:transform .1s ease, filter .15s ease, background .15s ease;
+}
+.btn:active{ transform:scale(.97); }
+.btn-block{ width:100%; }
+.btn-primary{ background:var(--accent); color:#fff; }
+.btn-primary:hover{ filter:brightness(1.06); }
+.btn-secondary{ background:var(--paper-warm); color:var(--ink); border:1px solid var(--paper-line); }
+.btn-secondary:hover{ background:var(--paper-line); }
+.gate-oauth-btn{
+  width:100%; display:flex; align-items:center; justify-content:center; gap:10px;
+  background:var(--paper); border:1.5px solid var(--paper-line); border-radius:11px;
+  padding:13px 20px; font-family:'Nunito', sans-serif; font-weight:800; font-size:14px; color:var(--ink);
+  cursor:pointer; transition:background .15s ease, transform .1s ease;
+}
+.gate-oauth-btn:hover{ background:var(--paper-warm); }
+.gate-block{ background:var(--paper-warm); border-radius:14px; padding:18px 18px 20px; margin:18px 0 16px; }
+.gate-divider{
+  display:flex; align-items:center; gap:12px; margin:0 0 16px; color:var(--ink-soft);
+  font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:.06em;
+}
+.gate-divider::before, .gate-divider::after{ content:''; flex:1; height:1px; background:var(--paper-line); }
+.gate-input{
+  width:100%; padding:12px 14px; border-radius:10px; border:2px solid var(--paper-line);
+  background:var(--paper); font-family:'Nunito', sans-serif; font-size:14.5px; color:var(--ink);
+  margin-bottom:10px; box-sizing:border-box;
+}
+.gate-input:focus{ outline:none; border-color:var(--accent); }
+.gate-link-btn{
+  background:none; border:none; padding:0; font-family:'Nunito', sans-serif; font-size:12px;
+  font-weight:700; color:var(--ink-soft); cursor:pointer; text-decoration:underline;
+}
+.gate-link-btn:hover{ color:var(--danger); }
+.gate-forgot-row{ display:flex; justify-content:flex-end; margin:-2px 0 14px; }
+.gate-signup-row{ font-size:13px; color:var(--ink-soft); margin:16px 0 0; }
+.gate-signup-link{
+  background:none; border:none; padding:0; font-family:'Nunito', sans-serif; font-size:13px;
+  font-weight:800; color:var(--accent-dark); cursor:pointer; margin-left:4px;
+}
+.gate-signup-link:hover{ text-decoration:underline; }
+.gate-guest-btn{ margin-top:14px; }
+
+/* ---------- Escolha de idioma (primeiro login / convidado) ---------- */
 .lang-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-@media (max-width:520px){ .lang-grid{ grid-template-columns:1fr; } }
+@media (max-width:420px){ .lang-grid{ grid-template-columns:1fr; } }
 .lang-card{
-  display:flex; flex-direction:column; align-items:center; gap:10px; padding:28px 20px;
-  border-radius:20px; background:var(--paper-warm); border:1px solid var(--paper-line);
-  text-decoration:none; color:var(--ink); box-shadow:var(--shadow-card);
+  display:flex; flex-direction:column; align-items:center; gap:10px; padding:26px 18px;
+  border-radius:20px; background:var(--paper-warm); border:2px solid var(--paper-line);
+  cursor:pointer; color:var(--ink); box-shadow:var(--shadow-card); font-family:'Nunito', sans-serif;
   transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-  position:relative;
 }
-.lang-card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-lift); }
-.lang-card .flag{ font-size:48px; line-height:1; }
-.lang-card .lang-name{ font-family:'Nunito', sans-serif; font-weight:800; font-size:19px; }
-.lang-card .native{ font-size:14px; color:var(--ink-soft); }
-.lang-card .last-badge{
-  position:absolute; top:-9px; right:14px; background:var(--accent, #3498D6); color:#fff;
-  font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:100px; letter-spacing:.02em;
-}
-.lang-card:nth-child(1){ --accent:#3498D6; }
-.lang-card:nth-child(2){ --accent:#C0231F; }
-.lang-card::before{
-  content:''; position:absolute; inset:0; border-radius:20px; border:2px solid transparent;
-  pointer-events:none; transition:border-color .15s ease;
-}
-.lang-card:hover::before{ border-color:var(--accent, #3498D6); }
-.more-note{ margin-top:34px; font-size:13px; color:var(--ink-soft); }
-.credit{ margin-top:10px; font-size:12.5px; color:var(--ink-soft); }
+.lang-card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-lift); border-color:var(--accent); }
+.lang-card .flag{ font-size:44px; line-height:1; }
+.lang-card .lang-name{ font-weight:800; font-size:18px; }
+.lang-card .native{ font-size:13.5px; color:var(--ink-soft); }
+.gate-loading-spinner{ color:var(--ink-soft); font-size:14px; padding-top:40px; }
 </style>
 </head>
 <body>
 
 <button class="theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema claro/escuro">🌙</button>
 
-<div class="wrap">
-  <h1>Qual idioma você quer estudar hoje?</h1>
-  <p class="sub">Sua conta e seu progresso são os mesmos em qualquer idioma — só o conteúdo muda.</p>
+<div class="wrap" id="gate-loading">
+  <p class="gate-loading-spinner">Carregando...</p>
+</div>
+
+<div class="wrap" id="gate-login" style="display:none;">
+  <h1>Sua plataforma de idiomas</h1>
+  <p class="sub">Entre para continuar de onde parou — ou criar sua conta e escolher o que quer aprender.</p>
+  <div class="gate-card">
+    <button class="gate-oauth-btn" id="gate-google-btn">
+      <svg width="18" height="18" viewBox="0 0 18 18" style="flex-shrink:0;"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.09-1.8 2.73v2.27h2.91c1.7-1.57 2.69-3.88 2.69-6.64z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.91-2.27c-.81.54-1.84.86-3.05.86-2.35 0-4.34-1.58-5.05-3.71H.96v2.34C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.95 10.7c-.18-.54-.28-1.11-.28-1.7s.1-1.16.28-1.7V4.96H.96C.35 6.17 0 7.55 0 9s.35 2.83.96 4.04l2.99-2.34z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.99 2.34C4.66 5.16 6.65 3.58 9 3.58z"/></svg>
+      Continuar com Google
+    </button>
+    <div class="gate-block">
+      <div class="gate-divider"><span>ou entrar com</span></div>
+      <form id="gate-email-form">
+        <label class="sr-only" for="gate-email" style="position:absolute;left:-9999px;">Seu e-mail</label>
+        <input type="email" id="gate-email" class="gate-input" placeholder="Seu e-mail" autocomplete="email" required>
+        <label class="sr-only" for="gate-password" style="position:absolute;left:-9999px;">Sua senha</label>
+        <input type="password" id="gate-password" class="gate-input" placeholder="Sua senha" autocomplete="current-password" required minlength="6">
+        <div class="gate-forgot-row">
+          <button type="button" class="gate-link-btn" id="gate-forgot-btn">Esqueceu sua senha?</button>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="gate-submit-btn">Entrar</button>
+      </form>
+    </div>
+    <p class="gate-signup-row">
+      <span id="gate-signup-question">Não tem conta?</span>
+      <button type="button" class="gate-signup-link" id="gate-toggle-mode-btn">Cadastre-se</button>
+    </p>
+    <button class="btn btn-secondary btn-block gate-guest-btn" id="gate-guest-btn">Continuar sem conta</button>
+    <p class="gate-note" id="gate-login-note"></p>
+  </div>
+</div>
+
+<div class="wrap" id="gate-choose-language" style="display:none;">
+  <h1>Qual idioma você quer aprender?</h1>
+  <p class="sub" id="gate-choose-sub">Você poderá trocar de idioma a qualquer momento dentro da plataforma.</p>
   <div class="lang-grid" id="lang-grid"></div>
-  <p class="more-note" id="more-note"></p>
-  <p class="credit">Criado por @prof.brune</p>
 </div>
 
 <script src="languages/index.js"></script>
 <script src="shared/utils.js"></script>
 <script src="shared/theme.js"></script>
+<script src="shared/supabase-client.js"></script>
+<script src="shared/language-pref.js"></script>
 <script>
-function renderLanguageGrid(){
+// ---------- Portão de entrada da plataforma ----------
+// Idioma da interface (português, aqui, sempre) é diferente de idioma
+// estudado (currentLearningLanguage) -- ver shared/language-pref.js. Esta
+// página só decide: (a) se tem sessão, (b) se sim, qual idioma abrir --
+// nunca é ela quem guarda o progresso ou o conteúdo de nenhum idioma.
+const GUEST_MODE_FLAG = 'guest_mode'; // mesma chave usada por shared/auth.js dentro de cada idioma
+
+function showOnly(id){
+  ['gate-loading', 'gate-login', 'gate-choose-language'].forEach(x => {
+    document.getElementById(x).style.display = (x === id) ? '' : 'none';
+  });
+}
+
+function renderLanguageChoices(onPick){
   const grid = document.getElementById('lang-grid');
-  const lastLang = localStorageSafeGet(LAST_LANGUAGE_KEY);
   grid.innerHTML = AVAILABLE_LANGUAGES.filter(l => l.enabled).map(l => `
-    <a class="lang-card" href="${l.path}" data-lang="${l.id}">
-      ${l.id === lastLang ? '<span class="last-badge">Continuar</span>' : ''}
+    <button type="button" class="lang-card" data-lang="${l.id}">
       <span class="flag">${l.flagEmoji}</span>
       <span class="lang-name">${l.name}</span>
       <span class="native">${l.nativeName}</span>
-    </a>
+    </button>
   `).join('');
   grid.querySelectorAll('.lang-card').forEach(card => {
-    card.addEventListener('click', () => {
-      localStorageSafeSet(LAST_LANGUAGE_KEY, card.dataset.lang);
-    });
+    card.addEventListener('click', () => onPick(card.dataset.lang));
   });
-
-  const enabledCount = AVAILABLE_LANGUAGES.filter(l => l.enabled).length;
-  const totalCount = AVAILABLE_LANGUAGES.length;
-  document.getElementById('more-note').textContent = totalCount > enabledCount
-    ? `+ ${totalCount - enabledCount} idioma(s) a caminho`
-    : '';
 }
-renderLanguageGrid();
+
+function goToLanguageApp(langId){
+  const target = AVAILABLE_LANGUAGES.find(l => l.id === langId);
+  if (!target) return;
+  localStorageSafeSet(LAST_LANGUAGE_KEY, langId);
+  window.location.href = target.path;
+}
+
+async function afterAuthResolved(user){
+  const lang = await getCurrentLearningLanguage(user.id);
+  if (lang){
+    goToLanguageApp(lang);
+    return;
+  }
+  document.getElementById('gate-choose-sub').textContent = 'Você poderá trocar de idioma a qualquer momento dentro da plataforma.';
+  showOnly('gate-choose-language');
+  renderLanguageChoices(async (langId) => {
+    try{
+      await setCurrentLearningLanguage(user.id, langId);
+    }catch(e){
+      console.error('Erro ao salvar idioma inicial:', e);
+    }
+    goToLanguageApp(langId);
+  });
+}
+
+function enterGuestFlow(){
+  document.getElementById('gate-choose-sub').textContent = 'Como convidado(a), seu progresso fica salvo só neste navegador.';
+  showOnly('gate-choose-language');
+  renderLanguageChoices((langId) => {
+    sessionStorageSafeSet(GUEST_MODE_FLAG, '1');
+    goToLanguageApp(langId);
+  });
+}
+
+// ---------- Wiring da tela de login ----------
+document.getElementById('gate-google-btn').addEventListener('click', async () => {
+  const note = document.getElementById('gate-login-note');
+  note.textContent = 'Redirecionando para o Google...';
+  note.className = 'gate-note';
+  const { error } = await supabaseClient.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: cleanRedirectURL() },
+  });
+  if (error){ note.textContent = 'Não foi possível conectar com o Google. Tente novamente.'; note.className = 'gate-note err'; }
+});
+
+let gateSignupMode = false;
+document.getElementById('gate-toggle-mode-btn').addEventListener('click', () => {
+  gateSignupMode = !gateSignupMode;
+  document.getElementById('gate-submit-btn').textContent = gateSignupMode ? 'Criar conta' : 'Entrar';
+  document.getElementById('gate-toggle-mode-btn').textContent = gateSignupMode ? 'Já tenho conta' : 'Cadastre-se';
+  document.getElementById('gate-signup-question').textContent = gateSignupMode ? 'Já tem conta?' : 'Não tem conta?';
+});
+
+document.getElementById('gate-email-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('gate-email').value.trim();
+  const password = document.getElementById('gate-password').value;
+  const note = document.getElementById('gate-login-note');
+  note.textContent = ''; note.className = 'gate-note';
+
+  if (gateSignupMode){
+    const { data, error } = await supabaseClient.auth.signUp({ email, password });
+    if (error){
+      note.textContent = error.message === 'User already registered' ? 'Este e-mail já tem conta. Tente entrar.' : 'Não foi possível criar sua conta agora.';
+      note.className = 'gate-note err';
+      return;
+    }
+    if (data.user && !data.session){
+      note.textContent = 'Conta criada! Confira seu e-mail pra confirmar antes de entrar.';
+      return;
+    }
+    if (data.session){ await afterAuthResolved(data.user); }
+  } else {
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    if (error){
+      note.textContent = 'E-mail ou senha incorretos.';
+      note.className = 'gate-note err';
+      return;
+    }
+    await afterAuthResolved(data.user);
+  }
+});
+
+document.getElementById('gate-forgot-btn').addEventListener('click', async () => {
+  const email = document.getElementById('gate-email').value.trim();
+  const note = document.getElementById('gate-login-note');
+  if (!email){ note.textContent = 'Digite seu e-mail no campo acima primeiro.'; note.className = 'gate-note'; return; }
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: cleanRedirectURL() });
+  note.textContent = error ? 'Não foi possível enviar o e-mail agora.' : 'Enviamos um link pra redefinir sua senha.';
+  note.className = error ? 'gate-note err' : 'gate-note';
+});
+
+document.getElementById('gate-guest-btn').addEventListener('click', enterGuestFlow);
+
+// ---------- Resolução inicial ----------
+(async () => {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (window.location.hash){
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
+  if (session && session.user){
+    await afterAuthResolved(session.user);
+  } else {
+    showOnly('gate-login');
+  }
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session && session.user){
+      await afterAuthResolved(session.user);
+    }
+  });
+})();
 </script>
 </body>
 </html>
