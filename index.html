@@ -73,10 +73,9 @@ h1{
   position:relative;
 }
 .lang-card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-lift); }
-.lang-card img{ width:56px; height:56px; border-radius:14px; }
-.lang-card .flag{ font-size:26px; line-height:1; }
-.lang-card .native{ font-family:'Nunito', sans-serif; font-weight:800; font-size:19px; }
-.lang-card .tagline{ font-size:12.5px; color:var(--ink-soft); }
+.lang-card .flag{ font-size:48px; line-height:1; }
+.lang-card .lang-name{ font-family:'Nunito', sans-serif; font-weight:800; font-size:19px; }
+.lang-card .native{ font-size:14px; color:var(--ink-soft); }
 .lang-card .last-badge{
   position:absolute; top:-9px; right:14px; background:var(--accent, #3498D6); color:#fff;
   font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:100px; letter-spacing:.02em;
@@ -89,6 +88,7 @@ h1{
 }
 .lang-card:hover::before{ border-color:var(--accent, #3498D6); }
 .more-note{ margin-top:34px; font-size:13px; color:var(--ink-soft); }
+.credit{ margin-top:10px; font-size:12.5px; color:var(--ink-soft); }
 </style>
 </head>
 <body>
@@ -100,6 +100,7 @@ h1{
   <p class="sub">Sua conta e seu progresso são os mesmos em qualquer idioma — só o conteúdo muda.</p>
   <div class="lang-grid" id="lang-grid"></div>
   <p class="more-note" id="more-note"></p>
+  <p class="credit">Criado por @prof.brune</p>
 </div>
 
 <script src="languages/index.js"></script>
@@ -112,9 +113,9 @@ function renderLanguageGrid(){
   grid.innerHTML = AVAILABLE_LANGUAGES.filter(l => l.enabled).map(l => `
     <a class="lang-card" href="${l.path}" data-lang="${l.id}">
       ${l.id === lastLang ? '<span class="last-badge">Continuar</span>' : ''}
-      <img src="${l.icon}" alt="">
+      <span class="flag">${l.flagEmoji}</span>
+      <span class="lang-name">${l.name}</span>
       <span class="native">${l.nativeName}</span>
-      <span class="tagline">${l.tagline}</span>
     </a>
   `).join('');
   grid.querySelectorAll('.lang-card').forEach(card => {
