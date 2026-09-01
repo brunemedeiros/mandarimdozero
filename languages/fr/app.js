@@ -1070,6 +1070,7 @@ function setLessonFocusMode(active){
   if (!active){
     document.getElementById('lesson-hint-panel').style.display = 'none';
     document.getElementById('lesson-hint-btn').classList.remove('active');
+    document.getElementById('lesson-hint-btn').style.display = 'none';
   }
 }
 
@@ -1079,7 +1080,78 @@ document.getElementById('lesson-hint-btn').addEventListener('click', () => {
   const showing = panel.style.display !== 'none';
   panel.style.display = showing ? 'none' : 'block';
   btn.classList.toggle('active', !showing);
+  if (!showing){
+    const ex = STEP_STATE.exerciseList[STEP_STATE.exerciseIndex];
+    if (ex) ex.hintUsed = true;
+  }
 });
+
+// ---------- Dica pedagógica por exercício ----------
+// O botão "Dica" no topo do exercício mostra uma pista construída a partir
+// do CONTEÚDO do próprio exercício (a frase de exemplo já usada no card de
+// vocabulário via findMatchingPhrase, o tema da unidade, o primeiro bloco de
+// uma frase de ordenar...) -- nunca a resposta pronta, e nunca um texto
+// genérico igual pra tudo. Só faz sentido na etapa "Exercícios": nas outras
+// etapas (vocabulário, diálogo, dica de uso) e nos exercícios de gramática
+// (que já têm sua própria dica inline, ex.hint em .gram-exercise-hint) não
+// há uma pergunta isolada com resposta certa pra dar dica sobre, então o
+// botão fica escondido.
+function maskWordInText(text, word){
+  const idx = text.toLowerCase().indexOf(word.toLowerCase());
+  if (idx === -1) return null;
+  return text.slice(0, idx) + '_____' + text.slice(idx + word.length);
+}
+
+function buildExerciseHint(ex, unit){
+  if (ex.format === 'meaning' || ex.format === 'listen' || ex.format === 'type'){
+    const item = ex.item;
+    const phrase = findMatchingPhrase(item, unit);
+    if (phrase){
+      const masked = maskWordInText(phrase.f, item.f) || phrase.f;
+      return `Essa palavra aparece nesta frase: "${masked}"`;
+    }
+    if (ex.format === 'type'){
+      return `Preste atenção aos sons — é uma palavra do tema "${unit.title}".`;
+    }
+    const translationHead = item.t.split(/[/(]/)[0].trim();
+    return `Faz parte do tema "${unit.title}". A tradução tem ${translationHead.length} letras.`;
+  }
+  if (ex.format === 'reorder'){
+    return `A frase começa com: "${ex.phrase.blocks[0].f}"`;
+  }
+  if (ex.format === 'scenario'){
+    return `A resposta certa começa com "${ex.phrase.f.split(' ')[0]}"`;
+  }
+  if (ex.format === 'cloze'){
+    const w = ex.correctBlock.f.replace(/[.,!?]/g, '');
+    if (w.length <= 2){
+      return 'É uma palavra curta (artigo, preposição ou pronome) — observe a estrutura da frase.';
+    }
+    return `A palavra que falta tem ${w.length} letras e começa com "${w[0]}"`;
+  }
+  if (ex.format === 'trueFalse'){
+    return unit.usageNote
+      ? `Pense na explicação: "${unit.usageNote.title}"`
+      : 'Releia a afirmação com atenção antes de decidir.';
+  }
+  return null;
+}
+
+// Atualiza o botão/painel de dica pro exercício atual -- chamado sempre que
+// um exercício é renderizado (inclusive avançando pro próximo), garantindo
+// que a dica volte fechada e o conteúdo mude junto com o exercício.
+function setExerciseHint(hintText){
+  const btn = document.getElementById('lesson-hint-btn');
+  const panel = document.getElementById('lesson-hint-panel');
+  panel.style.display = 'none';
+  btn.classList.remove('active');
+  if (hintText){
+    btn.style.display = 'flex';
+    document.getElementById('lesson-hint-text').textContent = hintText;
+  } else {
+    btn.style.display = 'none';
+  }
+}
 
 // ---------- Vocabulário palavra-por-palavra (estilo Memrise) ----------
 // Procura um exemplo real de uso da palavra — nas frases da unidade, depois
@@ -1415,6 +1487,10 @@ function renderStep(){
     || (stepKey === 'explanation' && STEP_STATE.explanationIndex > 0);
   backBtn.style.display = showBack ? 'inline-flex' : 'none';
 
+  // Por padrão a dica fica escondida -- só a etapa "Exercícios" (chave
+  // 'exercises', via renderExerciseStep) liga o botão com uma dica real.
+  setExerciseHint(null);
+
   if (u.type === 'grammar'){
     if (stepKey === 'explanation'){
       if (STEP_STATE.explanationUnitId !== u.id){
@@ -1667,8 +1743,10 @@ function renderExerciseStep(){
   const nextBtn = document.getElementById('step-next-btn');
   const total = STEP_STATE.exerciseList.length;
 
+  const u = UNITS.find(x => x.id === STATE.currentUnitId);
+
   if (STEP_STATE.exerciseIndex >= total){
-    const u = UNITS.find(x => x.id === STATE.currentUnitId);
+    setExerciseHint(null);
     renderLessonCompleteScreen(contentEl, nextBtn, {
       correct: STEP_STATE.exerciseScore, total,
       recapItems: [...u.vocab, ...(u.phrases || [])]
@@ -1679,6 +1757,7 @@ function renderExerciseStep(){
   const ex = STEP_STATE.exerciseList[STEP_STATE.exerciseIndex];
   STEP_STATE.exerciseAnswered = false;
   nextBtn.style.display = 'none';
+  setExerciseHint(buildExerciseHint(ex, u));
 
   if (ex.format === 'reorder'){
     renderReorderExercise(ex, contentEl, nextBtn, total);
@@ -2851,6 +2930,7 @@ function openCheckpoint(moduleId){
   document.getElementById('ud-eyebrow').textContent = 'Ponto de verificação';
   document.getElementById('ud-title').textContent = module.title;
   document.getElementById('ud-goal').textContent = 'Teste o que você já sabe desta seção. Se for bem, todas as unidades dela são marcadas como concluídas — não precisa fazer uma por uma.';
+  setExerciseHint(null); // checkpoint testa o que já foi ensinado -- sem dica
 
   CHECKPOINT_STATE.moduleId = moduleId;
   CHECKPOINT_STATE.queue = buildCheckpointQueue(module);
@@ -2994,6 +3074,7 @@ function openLevelTest(testId){
   document.getElementById('ud-eyebrow').textContent = 'Teste de nível';
   document.getElementById('ud-title').textContent = test.title;
   document.getElementById('ud-goal').textContent = `Já sabe francês nível ${test.level}? Faça esse teste — se for bem, todo o nível é marcado como concluído e você já pode seguir direto pro ${test.nextLevel}.`;
+  setExerciseHint(null); // teste de nível avalia o que já foi ensinado -- sem dica
 
   LEVEL_TEST_STATE.testId = testId;
   LEVEL_TEST_STATE.queue = buildLevelTestQueue(test);

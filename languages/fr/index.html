@@ -352,8 +352,21 @@ a.pill:hover{ border-color: var(--imperial-gold); }
    dicas, barra de progresso e X pra sair — nada mais compete com o exercício. */
 #app.lesson-focus .topbar, #app.lesson-focus .tabs{ display:none; }
 
+/* Contexto curricular (unidade/nível/objetivo): informação discreta e
+   sempre visível no topo da lição -- não é mais uma "dica", é só o
+   breadcrumb de onde o aluno está na trilha. */
+.lesson-unit-context{ margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--paper-line); }
+.lesson-hint-eyebrow{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--seal-red-dark); font-weight:800; margin-bottom:2px; }
+.lesson-unit-title{ font-size:15px; font-weight:700; margin-bottom:2px; }
+.lesson-unit-goal{ margin:0; color:var(--ink-soft); font-size:12.5px; line-height:1.4; }
+
 .lesson-focus-bar{ display:flex; align-items:center; gap:14px; margin-bottom:20px; }
-.lesson-hint-btn, .lesson-close-btn{
+.lesson-hint-btn{
+  flex-shrink:0; height:36px; padding:0 14px; border-radius:18px; border:1px solid var(--paper-line);
+  background: var(--paper); color: var(--ink-soft); font-size:13px; font-weight:700; cursor:pointer;
+  display:flex; align-items:center; gap:6px; white-space:nowrap; transition: all .15s ease; font-family: var(--font-body);
+}
+.lesson-close-btn{
   flex-shrink:0; width:36px; height:36px; border-radius:50%; border:1px solid var(--paper-line);
   background: var(--paper); color: var(--ink-soft); font-size:16px; cursor:pointer;
   display:flex; align-items:center; justify-content:center; transition: all .15s ease; font-family: var(--font-body);
@@ -363,10 +376,11 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .lesson-progress-track{ flex:1; height:8px; background: var(--paper-warm); border-radius:4px; overflow:hidden; }
 .lesson-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:4px; transition: width .3s ease; }
 
-.lesson-hint-panel{ background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:18px 20px; margin-bottom:20px; }
-.lesson-hint-eyebrow{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--seal-red-dark); font-weight:800; margin-bottom:4px; }
-.lesson-hint-title{ font-size:19px; font-weight:800; margin-bottom:8px; }
-.lesson-hint-goal{ margin:0; color:var(--ink-soft); font-size:14px; line-height:1.5; }
+/* Pista pedagógica do exercício atual (conteúdo trocado a cada exercício
+   por setExerciseHint/buildExerciseHint em app.js) -- visualmente distinta
+   do contexto curricular acima, pra não misturar os dois tipos de info. */
+.lesson-hint-panel{ background: rgba(52,152,214,0.08); border:1px solid rgba(52,152,214,0.25); border-radius: var(--radius); padding:14px 16px; margin-bottom:20px; }
+.lesson-hint-text{ margin:0; color: var(--ink); font-size:14px; line-height:1.5; }
 
 .section-label{ font-size:12px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft); font-weight:800; margin: 22px 0 10px; }
 
@@ -1775,8 +1789,14 @@ footer.app-footer img{ height:56px; opacity:.9; }
     </div>
 
     <div id="unit-detail-wrap" style="display:none;">
+      <div class="lesson-unit-context" id="lesson-unit-context">
+        <div class="lesson-hint-eyebrow" id="ud-eyebrow"></div>
+        <div class="lesson-unit-title" id="ud-title"></div>
+        <p class="lesson-unit-goal" id="ud-goal"></p>
+      </div>
+
       <div class="lesson-focus-bar">
-        <button class="lesson-hint-btn" id="lesson-hint-btn" title="Dicas">💡</button>
+        <button class="lesson-hint-btn" id="lesson-hint-btn" title="Dica" style="display:none;">💡 Dica</button>
         <div class="lesson-progress-track" id="step-progress-wrap">
           <div class="lesson-progress-fill" id="step-progress-fill"></div>
         </div>
@@ -1784,9 +1804,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
       </div>
 
       <div class="lesson-hint-panel" id="lesson-hint-panel" style="display:none;">
-        <div class="lesson-hint-eyebrow" id="ud-eyebrow"></div>
-        <div class="lesson-hint-title" id="ud-title"></div>
-        <p class="lesson-hint-goal" id="ud-goal"></p>
+        <p class="lesson-hint-text" id="lesson-hint-text"></p>
       </div>
 
       <div id="step-content"></div>
