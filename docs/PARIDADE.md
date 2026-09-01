@@ -43,11 +43,28 @@ funcionando nos dois, não quando o código só "parece certo".
 
 ## Específico do chinês (fica em `languages/zh/`)
 
-- [ ] Aba 汉字 (Hanzi) com `hanzi-writer` (ordem de traços)
-- [ ] Pinyin e tons
-- [ ] Pool de metas diárias (fácil / revisão de hanzi / geral)
-- [ ] Exercício "digite o que ouviu" embutido
-- [ ] TTS ao vivo via Web Speech API do navegador
+- [x] Aba 汉字 (Hanzi) com `hanzi-writer` (ordem de traços)
+- [x] Pinyin e tons
+- [x] Pool de metas diárias / desafios diários (fácil / revisão de hanzi / geral)
+- [x] Exercício "digite o que ouviu" embutido (modo `type` do cloze)
+- [x] TTS ao vivo via Web Speech API do navegador
+
+### Migração do site chinês antigo (zip 26/08, dev paralelo fora do Claude Code) — 2026-09-01
+
+Auditoria de paridade completa entre o `main` e um zip do dia 26/08 enviado pela
+professora (o site chinês antigo/Netlify era mantido numa conversa separada do
+Claude, não Claude Code, com deploy manual — sem git, então essa era a única
+forma de auditar o que existia lá). Resultado: quase tudo já estava presente
+(pinyin, TTS, painel admin, "Por que errei?", etc. — só chegaram ao `main` por
+um histórico de commits diferente do zip). 4 gaps reais confirmados e migrados:
+
+- [x] Histórias-checkpoint (revisão narrativa a cada 5 unidades, `stories.js`, 4 histórias)
+- [x] Índice de radicais (navegação por radical dos caracteres já estudados, dados já existiam em `hanzi-data.js`)
+- [x] Busca (pinyin sem tom / hanzi / tradução) — adaptada pra modal no topbar em vez de reviver a aba "Manual" (removida deliberadamente antes)
+- [x] Exercício "frase completa" (PT → escolher entre 4 frases em hanzi, geração de distratores gramaticais)
+
+Todas testadas com Playwright e integradas na arquitetura atual (sem duplicar
+código, reaproveitando `showCorrectReorderPanel`/`showWrongAnswerPanel`/`HANZI_ALL`/etc. já existentes).
 
 ## Troca de idioma (teste específico da unificação)
 

@@ -10,7 +10,7 @@ const HANZI_LESSONS = [
   // Lição 1
   [
     { char: "你", pinyin: "nǐ", meaning: "você", radicals: [{r:"亻",m:"pessoa"},{r:"尔",m:"tu (fonético)"}] },
-    { char: "好", pinyin: "hǎo", meaning: "bom, bem", radicals: [{r:"女",m:"mulher"},{r:"子",m:"filho"}] },
+    { char: "好", pinyin: "hǎo", meaning: "bom, bem", radicals: [{r:"女",m:"mulher"},{r:"子",m:"filho"}], mnemonic: "Uma mulher (女) ao lado de um filho (子) — a imagem tradicional de uma família reunida, algo bom e completo." },
     { char: "再", pinyin: "zài", meaning: "de novo, outra vez", radicals: [] },
     { char: "见", pinyin: "jiàn", meaning: "ver, encontrar", radicals: [] },
     { char: "谢", pinyin: "xiè", meaning: "agradecer", radicals: [{r:"讠",m:"fala"},{r:"射",m:"atirar (fonético)"}] }
@@ -28,7 +28,7 @@ const HANZI_LESSONS = [
     { char: "没", pinyin: "méi", meaning: "não ter, não há", radicals: [{r:"氵",m:"água"},{r:"殳",m:"instrumento (fonético)"}] },
     { char: "关", pinyin: "guān", meaning: "fechar; relação", radicals: [] },
     { char: "系", pinyin: "xì", meaning: "sistema, ligação", radicals: [] },
-    { char: "早", pinyin: "zǎo", meaning: "cedo, manhã", radicals: [{r:"日",m:"sol"},{r:"十",m:"dez"}] },
+    { char: "早", pinyin: "zǎo", meaning: "cedo, manhã", radicals: [{r:"日",m:"sol"},{r:"十",m:"dez"}], mnemonic: "O sol (日) nascendo bem acima da linha do horizonte (十, como as primeiras raias de luz) — a imagem do início da manhã." },
     { char: "上", pinyin: "shàng", meaning: "em cima, subir", radicals: [] }
   ],
   // Lição 4
@@ -74,7 +74,7 @@ const HANZI_LESSONS = [
   // Lição 9
   [
     { char: "大", pinyin: "dà", meaning: "grande", radicals: [] },
-    { char: "家", pinyin: "jiā", meaning: "família, casa", radicals: [{r:"宀",m:"teto/casa"},{r:"豕",m:"porco"}] },
+    { char: "家", pinyin: "jiā", meaning: "família, casa", radicals: [{r:"宀",m:"teto/casa"},{r:"豕",m:"porco"}], mnemonic: "Um porco (豕) sob um teto (宀) — na China antiga, ter um porco dentro de casa era sinal de que a família tinha se estabelecido e tinha fartura." },
     { char: "爸", pinyin: "bà", meaning: "pai", radicals: [{r:"父",m:"pai"},{r:"巴",m:"(fonético)"}] },
     { char: "妈", pinyin: "mā", meaning: "mãe", radicals: [{r:"女",m:"mulher"},{r:"马",m:"cavalo (fonético)"}] },
     { char: "哥", pinyin: "gē", meaning: "irmão mais velho", radicals: [{r:"可",m:"poder (fonético)"},{r:"可",m:"poder (repetido)"}] }
@@ -220,7 +220,7 @@ const HANZI_LESSONS = [
     { char: "院", pinyin: "yuàn", meaning: "pátio, instituição (em yīyuàn, hospital)", radicals: [{r:"阝",m:"colina/lugar"},{r:"完",m:"completo (fonético)"}] },
     { char: "舒", pinyin: "shū", meaning: "confortável (em bù shūfu)", radicals: [] },
     { char: "爱", pinyin: "ài", meaning: "amor, gostar muito", radicals: [] },
-    { char: "看", pinyin: "kàn", meaning: "ver, assistir", radicals: [{r:"手",m:"mão"},{r:"目",m:"olho"}] },
+    { char: "看", pinyin: "kàn", meaning: "ver, assistir", radicals: [{r:"手",m:"mão"},{r:"目",m:"olho"}], mnemonic: "Uma mão (手) protegendo o olho (目) do sol — o gesto de fazer uma pala com a mão para enxergar melhor algo à distância." },
     { char: "书", pinyin: "shū", meaning: "livro", radicals: [] }
   ],
   // Lição 28
@@ -245,7 +245,7 @@ const HANZI_LESSONS = [
     { char: "空", pinyin: "kòng", meaning: "vazio, tempo livre (em yǒu kòng)", radicals: [{r:"穴",m:"caverna/buraco"},{r:"工",m:"trabalho (fonético)"}] },
     { char: "打", pinyin: "dǎ", meaning: "bater, fazer (em dǎsuàn, planejar)", radicals: [{r:"扌",m:"mão"},{r:"丁",m:"prego (fonético)"}] },
     { char: "算", pinyin: "suàn", meaning: "calcular, planejar (em dǎsuàn)", radicals: [] },
-    { char: "明", pinyin: "míng", meaning: "claro, amanhã (em míngtiān)", radicals: [{r:"日",m:"sol"},{r:"月",m:"lua"}] }
+    { char: "明", pinyin: "míng", meaning: "claro, amanhã (em míngtiān)", radicals: [{r:"日",m:"sol"},{r:"月",m:"lua"}], mnemonic: "O sol (日) e a lua (月) lado a lado — juntos, os dois maiores astros do céu, iluminando tudo: daí o sentido de \"claro\" e \"brilhante\"." }
   ],
   // Lição 31
   [
@@ -280,7 +280,7 @@ const HANZI_LESSONS = [
   // Lição 35
   [
     { char: "请", pinyin: "qǐng", meaning: "por favor, convidar", radicals: [{r:"讠",m:"fala"},{r:"青",m:"verde-azulado (fonético)"}] },
-    { char: "坐", pinyin: "zuò", meaning: "sentar", radicals: [{r:"人",m:"pessoa"},{r:"土",m:"terra"}] },
+    { char: "坐", pinyin: "zuò", meaning: "sentar", radicals: [{r:"人",m:"pessoa"},{r:"土",m:"terra"}], mnemonic: "Duas pessoas (人, duplicado no traço) sentadas diretamente no chão (土) — a imagem mais simples possível de sentar-se." },
     { char: "都", pinyin: "dōu", meaning: "todos, ambos", radicals: [] },
     { char: "也", pinyin: "yě", meaning: "também", radicals: [] },
     { char: "说", pinyin: "shuō", meaning: "falar", radicals: [{r:"讠",m:"fala"},{r:"兑",m:"trocar (fonético)"}] }
@@ -322,7 +322,7 @@ const HANZI_LESSONS = [
     { char: "女", pinyin: "nǚ", meaning: "mulher (em nǚpéngyou, namorada)", radicals: [] },
     { char: "朋", pinyin: "péng", meaning: "amigo (em péngyou)", radicals: [] },
     { char: "友", pinyin: "yǒu", meaning: "amigo (em péngyou)", radicals: [] },
-    { char: "男", pinyin: "nán", meaning: "homem (em nánpéngyou, namorado)", radicals: [{r:"田",m:"campo"},{r:"力",m:"força"}] },
+    { char: "男", pinyin: "nán", meaning: "homem (em nánpéngyou, namorado)", radicals: [{r:"田",m:"campo"},{r:"力",m:"força"}], mnemonic: "Um campo de cultivo (田) sobre força/vigor físico (力) — na sociedade agrícola tradicional, o homem era quem trabalhava a terra com sua força." },
     { char: "些", pinyin: "xiē", meaning: "alguns, um pouco (em yìxiē)", radicals: [] }
   ]
 ];

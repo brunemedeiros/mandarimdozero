@@ -426,6 +426,7 @@ const STATE = {
   hanziReviewQueue: [],
   hanziReviewIndex: 0,
   hanziReviewShowingAnswer: false,
+  storyProgress: {}, // storyId -> { completed: bool }
   daily: {
     date: null, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
     hanziLessons: 0, reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0
@@ -564,7 +565,8 @@ function serializeState(){
     dailyMinutesLog: STATE.dailyMinutesLog,
     hanziLessonProgress: STATE.hanziLessonProgress,
     totalReviews: STATE.totalReviews,
-    daily: STATE.daily
+    daily: STATE.daily,
+    storyProgress: STATE.storyProgress
   };
 }
 
@@ -592,6 +594,7 @@ function applySerializedState(data){
   if (data.hanziLessonProgress) Object.assign(STATE.hanziLessonProgress, data.hanziLessonProgress);
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
   if (data.daily) Object.assign(STATE.daily, data.daily);
+  if (data.storyProgress) Object.assign(STATE.storyProgress, data.storyProgress);
 }
 
 // SM-2 (registerExerciseCorrect, applySM2, cardsDueNow, newCards),
@@ -877,6 +880,143 @@ const UNIT_ICONS = {
   16: '📅', 17: '✅', 18: '❓'
 };
 
+// ---------- Busca: todo o vocabulário do app, com indicação de unidade concluída ----------
+// Mostra tudo -- inclusive vocabulário de unidades ainda não estudadas --
+// com uma tag indicando o status, pra poder ir direto estudar o que falta.
+function buildSearchIndex(){
+  recalculateUnlockedUnits();
+  const index = [];
+  UNITS.forEach(u => {
+    u.vocab.forEach(v => {
+      index.push({
+        pinyin: v.p, hanzi: v.c, trans: v.t,
+        unitId: u.id, unitTitle: u.title, source: 'vocab',
+        completed: !!STATE.unitProgress[u.id]?.completed
+      });
+    });
+    // Frases-modelo e diálogo também entram no índice -- algumas palavras
+    // (principalmente gramaticais, como 很/吗/了) só aparecem em frases,
+    // nunca como entrada isolada de vocabulário.
+    u.phrases.forEach(p => {
+      index.push({
+        pinyin: p.p, hanzi: p.c, trans: p.t,
+        unitId: u.id, unitTitle: u.title, source: 'phrase',
+        completed: !!STATE.unitProgress[u.id]?.completed
+      });
+      (p.blocks || []).forEach(b => {
+        const cleanHanzi = b.c.replace(/[，。！？]/g, '').trim();
+        const cleanPinyin = b.p.replace(/[,.!?]/g, '').trim();
+        if (cleanHanzi && cleanHanzi.length <= 2){
+          index.push({
+            pinyin: cleanPinyin, hanzi: cleanHanzi, trans: `(na frase: "${p.t}")`,
+            unitId: u.id, unitTitle: u.title, source: 'block',
+            completed: !!STATE.unitProgress[u.id]?.completed
+          });
+        }
+      });
+    });
+    u.dialogue.lines.forEach(l => {
+      index.push({
+        pinyin: l.p, hanzi: l.c, trans: l.t,
+        unitId: u.id, unitTitle: u.title, source: 'dialogue',
+        completed: !!STATE.unitProgress[u.id]?.completed
+      });
+    });
+  });
+  return index;
+}
+
+// Remove marcações de tom (acentos) pra permitir buscar "hen" e encontrar
+// "hěn" -- sem isso, a busca por pinyin sem tom nunca bateria com o pinyin
+// real do banco, que sempre tem tom marcado.
+function stripTones(str){
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+const SEARCH_PAGE_SIZE = 40;
+let searchVisibleCount = SEARCH_PAGE_SIZE;
+let lastSearchQuery = null;
+
+function renderSearchResults(query){
+  const resultsEl = document.getElementById('search-results');
+  const index = buildSearchIndex();
+  const q = stripTones(query.trim().toLowerCase());
+
+  if (query !== lastSearchQuery){
+    searchVisibleCount = SEARCH_PAGE_SIZE;
+    lastSearchQuery = query;
+  }
+
+  const filtered = q
+    ? index.filter(item =>
+        stripTones(item.pinyin.toLowerCase()).includes(q) ||
+        item.hanzi.includes(query.trim()) ||
+        item.trans.toLowerCase().includes(q)
+      )
+    : index;
+
+  if (!filtered.length){
+    resultsEl.innerHTML = `<div class="search-empty">Nenhum resultado para "${query}".</div>`;
+    return;
+  }
+
+  const toShow = filtered.slice(0, searchVisibleCount);
+  const hasMore = filtered.length > toShow.length;
+
+  resultsEl.innerHTML = toShow.map(item => {
+    const unlocked = STATE.unitProgress[item.unitId]?.unlocked;
+    let tagHTML;
+    if (item.completed){
+      tagHTML = `<span class="search-unit-tag done">✓ Unidade ${item.unitId}</span>`;
+    } else if (unlocked){
+      tagHTML = `<button class="search-unit-tag pending" data-unit-id="${item.unitId}">Estudar Unidade ${item.unitId}</button>`;
+    } else {
+      tagHTML = `<span class="search-unit-tag locked">🔒 Unidade ${item.unitId}: ${item.unitTitle}</span>`;
+    }
+    return `
+      <div class="search-result-row">
+        <div class="pinyin">${item.pinyin}</div>
+        <div class="hanzi">${item.hanzi}</div>
+        <div class="trans">${item.trans}</div>
+        ${tagHTML}
+      </div>
+    `;
+  }).join('') + (hasMore ? `
+    <button class="search-load-more-btn" id="search-load-more-btn">
+      Carregar mais (${toShow.length} de ${filtered.length})
+    </button>
+  ` : '');
+
+  resultsEl.querySelectorAll('.search-unit-tag.pending').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const unitId = parseInt(btn.dataset.unitId);
+      document.getElementById('search-modal').style.display = 'none';
+      switchTab('path');
+      openUnitDetail(unitId);
+    });
+  });
+
+  document.getElementById('search-load-more-btn')?.addEventListener('click', () => {
+    searchVisibleCount += SEARCH_PAGE_SIZE;
+    renderSearchResults(query);
+  });
+}
+
+document.getElementById('search-open-btn').addEventListener('click', () => {
+  document.getElementById('search-modal').style.display = 'flex';
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-input').focus();
+  renderSearchResults('');
+});
+
+document.getElementById('search-modal-close').addEventListener('click', () => {
+  document.getElementById('search-modal').style.display = 'none';
+});
+
+document.getElementById('search-input').addEventListener('input', (e) => {
+  renderSearchResults(e.target.value);
+});
+
 function renderUnitsGrid(){
   recalculateUnlockedUnits();
   const grid = document.getElementById('units-grid');
@@ -903,8 +1043,182 @@ function renderUnitsGrid(){
       card.addEventListener('click', () => openUnitDetail(u.id));
     }
     grid.appendChild(card);
+
+    // Checkpoint de história: aparece logo após a unidade que a desbloqueia,
+    // ocupando a linha inteira do grid pra se destacar como um marco na
+    // trilha, não mais uma unidade comum.
+    const story = STORIES.find(s => s.afterUnit === u.id);
+    if (story){
+      const storyUnlocked = prog.completed;
+      const storyDone = STATE.storyProgress?.[story.id]?.completed;
+      const storyCard = document.createElement('button');
+      storyCard.className = 'story-checkpoint-card' + (!storyUnlocked ? ' locked' : '') + (storyDone ? ' done' : '');
+      storyCard.innerHTML = `
+        <div class="story-checkpoint-icon">${story.icon}</div>
+        <div class="story-checkpoint-text">
+          <div class="story-checkpoint-label">${storyDone ? '✓ Concluída' : (storyUnlocked ? 'Checkpoint desbloqueado' : '🔒 Complete a unidade acima')}</div>
+          <div class="story-checkpoint-title">${story.title}</div>
+          <div class="story-checkpoint-subtitle">${story.subtitle}</div>
+        </div>
+      `;
+      if (storyUnlocked){
+        storyCard.addEventListener('click', () => openStory(story.id));
+      }
+      grid.appendChild(storyCard);
+    }
   });
 }
+
+// ============================================================
+// HISTÓRIAS-CHECKPOINT — recombinam vocabulário de várias unidades já
+// concluídas numa situação nova, com pergunta de compreensão intercalada
+// ao longo da leitura (não só no final). Dados em stories.js.
+// ============================================================
+const STORY_STATE = {
+  storyId: null,
+  beatIndex: 0,
+  questionAnswered: false
+};
+
+function openStory(storyId){
+  const story = STORIES.find(s => s.id === storyId);
+  if (!story) return;
+
+  STORY_STATE.storyId = storyId;
+  STORY_STATE.beatIndex = 0;
+  STORY_STATE.questionAnswered = false;
+
+  document.getElementById('path-list-wrap').style.display = 'none';
+  document.getElementById('unit-detail-wrap').style.display = 'none';
+  document.getElementById('story-wrap').style.display = 'block';
+
+  document.getElementById('story-header-icon').textContent = story.icon;
+  document.getElementById('story-header-title').textContent = story.title;
+  document.getElementById('story-header-subtitle').textContent = story.subtitle;
+
+  document.getElementById('story-content').innerHTML = '';
+  renderNextStoryBeat();
+}
+
+function currentStory(){
+  return STORIES.find(s => s.id === STORY_STATE.storyId);
+}
+
+function renderStoryProgress(){
+  const story = currentStory();
+  const pct = Math.round((STORY_STATE.beatIndex / story.beats.length) * 100);
+  document.getElementById('story-progress-fill').style.width = `${pct}%`;
+}
+
+// Renderiza o próximo "beat" (grupo de falas + pergunta opcional), sempre
+// ANEXANDO ao conteúdo já lido (não substituindo) -- assim a história cresce
+// na tela como uma conversa real acontecendo, e dá pra rolar pra rever
+// falas anteriores a qualquer momento.
+function renderNextStoryBeat(){
+  const story = currentStory();
+  const contentEl = document.getElementById('story-content');
+  renderStoryProgress();
+
+  if (STORY_STATE.beatIndex >= story.beats.length){
+    contentEl.insertAdjacentHTML('beforeend', `
+      <div class="story-complete">
+        <div class="big-emoji">🎉</div>
+        <h3>História concluída!</h3>
+        <p>Você revisou o vocabulário das Unidades ${story.coversUnits[0]}–${story.coversUnits[story.coversUnits.length-1]} numa situação nova.</p>
+        <button class="btn btn-primary" id="story-finish-btn">Voltar à trilha</button>
+      </div>
+    `);
+    document.getElementById('story-finish-btn').addEventListener('click', () => {
+      finishStory();
+    });
+    return;
+  }
+
+  const beat = story.beats[STORY_STATE.beatIndex];
+  const beatEl = document.createElement('div');
+  beatEl.className = 'story-beat';
+  beatEl.innerHTML = beat.lines.map(line => `
+    <div class="story-line">
+      <div class="story-line-speaker">${line.spk}</div>
+      <div class="story-line-pinyin pinyin">${line.p}</div>
+      <div class="story-line-hanzi">${line.c} ${audioBtnHTML(line.c)}</div>
+      <div class="story-line-trans">${line.t}</div>
+    </div>
+  `).join('');
+  contentEl.appendChild(beatEl);
+  wireAudioButtons(beatEl);
+
+  if (beat.question){
+    STORY_STATE.questionAnswered = false;
+    const q = beat.question;
+    const qEl = document.createElement('div');
+    qEl.className = 'story-question';
+    qEl.innerHTML = `
+      <div class="story-question-prompt">${q.prompt}</div>
+      <div class="story-question-options">
+        ${q.options.map((opt, i) => `<button class="story-question-option" data-idx="${i}">${opt}</button>`).join('')}
+      </div>
+    `;
+    contentEl.appendChild(qEl);
+
+    qEl.querySelectorAll('.story-question-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (STORY_STATE.questionAnswered) return;
+        STORY_STATE.questionAnswered = true;
+        const chosenIdx = parseInt(btn.dataset.idx);
+        const isCorrect = chosenIdx === q.correctIndex;
+        qEl.querySelectorAll('.story-question-option').forEach((b, i) => {
+          b.classList.add('disabled');
+          if (i === q.correctIndex) b.classList.add('correct');
+          else if (i === chosenIdx) b.classList.add('incorrect');
+        });
+        if (isCorrect) addXP(5);
+        registerStudyToday();
+
+        const continueBtn = document.createElement('button');
+        continueBtn.className = 'story-continue-btn';
+        continueBtn.textContent = 'Continuar história →';
+        continueBtn.addEventListener('click', () => {
+          STORY_STATE.beatIndex += 1;
+          renderNextStoryBeat();
+        }, { once: true });
+        qEl.appendChild(continueBtn);
+        continueBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    });
+  } else {
+    // Beat sem pergunta: botão simples pra continuar lendo
+    const continueBtn = document.createElement('button');
+    continueBtn.className = 'story-continue-btn';
+    continueBtn.textContent = 'Continuar →';
+    continueBtn.addEventListener('click', () => {
+      STORY_STATE.beatIndex += 1;
+      renderNextStoryBeat();
+    }, { once: true });
+    contentEl.appendChild(continueBtn);
+    continueBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function finishStory(){
+  const storyId = STORY_STATE.storyId;
+  if (!STATE.storyProgress[storyId]?.completed){
+    STATE.storyProgress[storyId] = { completed: true };
+    addXP(20);
+    showToast('História concluída! 🎉');
+  }
+  saveState();
+  renderTopbarStats();
+  document.getElementById('story-wrap').style.display = 'none';
+  document.getElementById('path-list-wrap').style.display = 'block';
+  renderUnitsGrid();
+}
+
+document.getElementById('story-back-to-path').addEventListener('click', () => {
+  document.getElementById('story-wrap').style.display = 'none';
+  document.getElementById('path-list-wrap').style.display = 'block';
+  renderUnitsGrid();
+});
 
 // ============================================================
 // LIÇÃO EM PASSOS (Vocabulário → Exercícios → Frases → Diálogo)
@@ -1462,7 +1776,138 @@ function buildExerciseSet(unit){
   const REORDER_EXERCISE_CAP = 4;
   const cappedReorderExercises = shuffle(reorderExercises).slice(0, REORDER_EXERCISE_CAP);
 
-  return shuffle([...vocabExercises, ...cappedReorderExercises, ...trueFalseExercises, ...clozeExercises]);
+  const fullSentenceExercises = buildFullSentenceExercises(unit);
+
+  return shuffle([...vocabExercises, ...cappedReorderExercises, ...trueFalseExercises, ...clozeExercises, ...fullSentenceExercises]);
+}
+
+// ---------- Exercício "Frase completa" — PT → escolher entre 4 frases em hanzi ----------
+// Gera distratores de duas formas: (1) trocando uma palavra de conteúdo por
+// outra do vocabulário cumulativo (unidade atual + todas anteriores já
+// desbloqueadas), e (2) invertendo a posição de uma negação (不/没), um erro
+// gramatical plausível e comum de iniciante. Usa os `blocks` que as frases já
+// têm, evitando qualquer manipulação frágil de string solta.
+function buildCumulativeVocabPool(unit){
+  const idx = UNITS.findIndex(u => u.id === unit.id);
+  const priorUnits = UNITS.slice(0, idx + 1); // unidade atual + todas anteriores
+  const pool = [];
+  priorUnits.forEach(u => u.vocab.forEach(v => pool.push(v)));
+  return pool;
+}
+
+function buildFullSentenceExercises(unit){
+  const cumulativeVocab = buildCumulativeVocabPool(unit);
+
+  const candidates = (unit.phrases || []).filter(p => p.blocks && p.blocks.length >= 2);
+  // Limita a 2 por unidade pra não sobrecarregar a sessão de exercícios com
+  // um formato mais denso de ler do que os outros.
+  const selected = shuffle(candidates).slice(0, 2);
+
+  return selected.map(phrase => {
+    const distractors = [];
+
+    // Blocos "de conteúdo": uma palavra isolada, sem pontuação misturada
+    // (blocos com pontuação, como "什么名字？", costumam ser a cauda de toda
+    // a frase -- trocar ou remover esses gera um distrator sem sentido
+    // gramatical, fácil demais de descartar).
+    const contentBlockIndices = phrase.blocks
+      .map((b, i) => ({ b, i }))
+      .filter(({ b }) => {
+        const clean = b.c.replace(/[，。！？]/g, '');
+        return clean.length >= 2 && clean === b.c;
+      });
+
+    function pickReplacement(targetBlock){
+      const sameLength = cumulativeVocab.filter(v =>
+        v.c !== targetBlock.c && Math.abs(v.c.length - targetBlock.c.length) <= 1
+      );
+      return shuffle(sameLength.length ? sameLength : cumulativeVocab.filter(v => v.c !== targetBlock.c))[0];
+    }
+
+    // Estratégia 1: troca de palavra -- substitui um bloco de conteúdo por
+    // outra palavra do vocabulário cumulativo, priorizando tamanho parecido
+    // pra manter o mesmo "papel" gramatical.
+    let swapTargetIdx = -1;
+    if (contentBlockIndices.length){
+      swapTargetIdx = contentBlockIndices[Math.floor(Math.random() * contentBlockIndices.length)].i;
+      const replacement = pickReplacement(phrase.blocks[swapTargetIdx]);
+      if (replacement){
+        const newBlocks = phrase.blocks.map((b, i) => i === swapTargetIdx ? { p: replacement.p, c: replacement.c } : b);
+        distractors.push(newBlocks);
+      }
+    }
+
+    // Estratégia 2: erro de posição gramatical -- se a frase tem negação
+    // (不/没) em algum bloco, gera uma variante trocando a posição dela com
+    // o bloco seguinte (erro comum: "是不" em vez de "不是").
+    const negIdx = phrase.blocks.findIndex(b => b.c.includes('不') || b.c.includes('没'));
+    const hasNegationSwap = negIdx >= 0 && negIdx < phrase.blocks.length - 1;
+    if (hasNegationSwap){
+      const swapped = phrase.blocks.slice();
+      [swapped[negIdx], swapped[negIdx + 1]] = [swapped[negIdx + 1], swapped[negIdx]];
+      distractors.push(swapped);
+    }
+
+    // Estratégia 3: combinação -- troca de palavra E inversão de posição na
+    // MESMA opção (uma das 4 alternativas junta os dois erros, ficando ainda
+    // mais parecida com a correta e mais desafiadora de descartar).
+    if (swapTargetIdx >= 0 && hasNegationSwap){
+      const replacement2 = pickReplacement(phrase.blocks[swapTargetIdx]);
+      if (replacement2){
+        const combined = phrase.blocks.map((b, i) => i === swapTargetIdx ? { p: replacement2.p, c: replacement2.c } : b);
+        [combined[negIdx], combined[negIdx + 1]] = [combined[negIdx + 1], combined[negIdx]];
+        distractors.push(combined);
+      }
+    }
+
+    // Estratégia 4: omissão de palavra-chave -- remove um bloco de conteúdo
+    // inteiro, gerando uma frase incompleta/agramatical.
+    if (contentBlockIndices.length > 1){
+      const omitCandidates = contentBlockIndices.filter(({ i }) => i !== swapTargetIdx);
+      const pool = omitCandidates.length ? omitCandidates : contentBlockIndices;
+      const omitIdx = pool[Math.floor(Math.random() * pool.length)].i;
+      const withOmission = phrase.blocks.filter((b, i) => i !== omitIdx);
+      if (withOmission.length >= 2){
+        distractors.push(withOmission);
+      }
+    }
+
+    // Fallback: embaralha os próprios blocos da frase -- sempre gramaticalmente
+    // "errado" o bastante pra servir de distrator, sem nunca coincidir por
+    // acaso com a ordem correta. Tentativas limitadas: frases muito curtas
+    // (2-3 blocos) têm poucas permutações possíveis.
+    let fallbackAttempts = 0;
+    while (distractors.length < 3 && phrase.blocks.length >= 2 && fallbackAttempts < 20){
+      fallbackAttempts++;
+      const shuffledBlocks = shuffle(phrase.blocks);
+      const isSameOrder = shuffledBlocks.every((b, i) => b === phrase.blocks[i]);
+      const isDuplicate = distractors.some(d => JSON.stringify(d) === JSON.stringify(shuffledBlocks));
+      if (!isSameOrder && !isDuplicate){
+        distractors.push(shuffledBlocks);
+      }
+    }
+
+    const distractorSentences = distractors
+      .filter(blocks => blocks.map(b => b.c).join('') !== phrase.c) // nunca deixa um distrator coincidir com a frase correta
+      .reduce((unique, blocks) => { // deduplica por texto final (hanzi), não por referência de array
+        const text = blocks.map(b => b.c).join('');
+        if (!unique.some(u => u.text === text)) unique.push({ text, blocks });
+        return unique;
+      }, [])
+      .slice(0, 3)
+      .map(({ blocks }) => ({
+        p: blocks.map(b => b.p).join(' '),
+        c: blocks.map(b => b.c).join('')
+      }));
+
+    const correctSentence = { p: phrase.p, c: phrase.c };
+    const options = shuffle([correctSentence, ...distractorSentences]);
+
+    // phrase (com .t) reaproveita o mesmo painel de acerto/erro já usado
+    // pelo reorder e pelo cloze (showCorrectReorderPanel/wrongAnswerExplanationHTML
+    // leem ex.phrase, não um campo próprio deste formato).
+    return { format: 'fullsentence', phrase: { c: phrase.c, t: phrase.t }, correct: correctSentence, options };
+  });
 }
 
 // ---------- Tela final "Parabéns" (estilo Busuu) ----------
@@ -1525,6 +1970,8 @@ function renderExerciseStep(){
 
   if (ex.format === 'reorder'){
     renderReorderExercise(ex, contentEl, nextBtn, total);
+  } else if (ex.format === 'fullsentence'){
+    renderFullSentenceExercise(ex, contentEl, nextBtn, total);
   } else if (ex.format === 'trueFalse'){
     renderTrueFalseExercise(ex, contentEl, nextBtn, total);
   } else if (ex.format === 'cloze'){
@@ -1918,6 +2365,66 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
 // A frase-modelo aparece embaralhada em blocos de pinyin (com hanzi como apoio
 // visual abaixo de cada bloco). Toca nos blocos na ordem certa para reconstruir
 // a frase. Foco na ordem gramatical, não em reconhecer hanzi isolado.
+// ---------- Exercício de frase completa (PT -> escolher entre 4 frases) ----------
+function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
+  const optionsHTML = ex.options.map((opt, i) => `
+    <button class="exercise-option exercise-option-sentence" data-idx="${i}">
+      <div class="pinyin opt-pinyin-sentence">${opt.p}</div>
+      <div class="opt-hanzi-sentence">${opt.c}</div>
+    </button>
+  `).join('');
+
+  contentEl.innerHTML = `
+    <div class="exercise-wrap">
+      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-prompt-label">Selecione a frase correta</div>
+      <div class="exercise-prompt">
+        <div class="prompt-trans-sentence">${ex.phrase.t}</div>
+      </div>
+      <div class="exercise-options exercise-options-sentence">${optionsHTML}</div>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+    </div>
+  `;
+
+  nextBtn.style.display = 'none';
+
+  function revealAnswer(chosenIdx){
+    STEP_STATE.exerciseAnswered = true;
+    const isCorrect = ex.options[chosenIdx] === ex.correct;
+    contentEl.querySelectorAll('.exercise-option-sentence').forEach((b, i) => {
+      b.classList.add('disabled');
+      if (ex.options[i] === ex.correct) b.classList.add('correct');
+      else if (i === chosenIdx) b.classList.add('incorrect');
+    });
+    document.getElementById('exercise-dontknow-btn')?.classList.add('disabled');
+
+    addStudyMinutes();
+    if (isCorrect){
+      setTimeout(() => showCorrectReorderPanel(contentEl, ex), 500);
+    } else {
+      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
+    }
+  }
+
+  contentEl.querySelectorAll('.exercise-option-sentence').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (STEP_STATE.exerciseAnswered) return;
+      const chosenIdx = parseInt(btn.dataset.idx);
+      const isCorrect = ex.options[chosenIdx] === ex.correct;
+      if (isCorrect){
+        STEP_STATE.exerciseScore += 1;
+        addXP(4); // vale um pouco mais que múltipla escolha simples, mesmo critério do reorder
+      }
+      revealAnswer(chosenIdx);
+    });
+  });
+
+  document.getElementById('exercise-dontknow-btn').addEventListener('click', () => {
+    if (STEP_STATE.exerciseAnswered) return;
+    revealAnswer(-1);
+  });
+}
+
 function renderReorderExercise(ex, contentEl, nextBtn, total){
   const correctOrder = ex.phrase.blocks;
   const chosenSequence = []; // índices (no array shuffledBlocks) já escolhidos, em ordem
@@ -3207,6 +3714,82 @@ function recalculateHanziLocks(){
     prog.unlocked = i === 0 || STATE.hanziLessonProgress[i-1]?.completed || prog.unlocked;
   });
 }
+
+// ---------- Radicais (tela dedicada, consolidando dados já existentes) ----------
+// Não é conteúdo novo -- reaproveita os radicais já catalogados em cada
+// caractere do hanzi-data.js, só reorganiza numa visão própria por radical,
+// ordenada por quantos caracteres já estudados usam cada um.
+function buildRadicalsIndex(){
+  const radicalMap = {};
+  HANZI_ALL.forEach(h => {
+    (h.radicals || []).forEach(r => {
+      if (!radicalMap[r.r]){
+        radicalMap[r.r] = { radical: r.r, meaning: r.m, chars: [] };
+      }
+      radicalMap[r.r].chars.push(h);
+    });
+  });
+  return Object.values(radicalMap).sort((a, b) => b.chars.length - a.chars.length);
+}
+
+function renderRadicalsGrid(){
+  const radicals = buildRadicalsIndex();
+  const contentEl = document.getElementById('hanzi-radicals-content');
+
+  contentEl.innerHTML = `
+    <div class="radicals-grid">
+      ${radicals.map((r, i) => `
+        <button class="radical-card" data-radical-idx="${i}">
+          <div class="r">${r.radical}</div>
+          <div class="m">${r.meaning}</div>
+          <div class="count-badge">${r.chars.length}</div>
+        </button>
+      `).join('')}
+    </div>
+  `;
+
+  contentEl.querySelectorAll('.radical-card').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.radicalIdx);
+      openRadicalDetail(radicals[idx]);
+    });
+  });
+}
+
+function openRadicalDetail(radicalData){
+  const contentEl = document.getElementById('hanzi-radicals-content');
+  contentEl.innerHTML = `
+    <button class="back-link" id="radical-detail-back-btn">← Voltar aos radicais</button>
+    <div class="radical-detail-header">
+      <div class="r">${radicalData.radical}</div>
+      <div class="m">${radicalData.meaning}</div>
+    </div>
+    <div class="section-label">Aparece em ${radicalData.chars.length} caractere(s) que você já estudou</div>
+    <div class="radical-chars-grid">
+      ${radicalData.chars.map(h => `
+        <div class="radical-char-item">
+          <div class="char">${h.char}</div>
+          <div class="pinyin">${h.pinyin}</div>
+          <div class="meaning">${h.meaning}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  document.getElementById('radical-detail-back-btn').addEventListener('click', renderRadicalsGrid);
+}
+
+document.getElementById('hanzi-radicals-btn').addEventListener('click', () => {
+  document.getElementById('hanzi-lessons-wrap').style.display = 'none';
+  document.getElementById('hanzi-lesson-study-wrap').style.display = 'none';
+  document.getElementById('hanzi-review-wrap').style.display = 'none';
+  document.getElementById('hanzi-radicals-wrap').style.display = 'block';
+  renderRadicalsGrid();
+});
+
+document.getElementById('hanzi-radicals-back-btn').addEventListener('click', () => {
+  document.getElementById('hanzi-radicals-wrap').style.display = 'none';
+  renderHanziLessonsGrid();
+});
 
 function renderHanziLessonsGrid(){
   recalculateHanziLocks();
