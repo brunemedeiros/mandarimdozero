@@ -2594,6 +2594,11 @@ function startReviewSession(){
     queue = queue.concat(rest);
   }
 
+  // Decide a direção de cada carta ANTES de embaralhar/mostrar -- alterna a
+  // partir da última vez que essa carta foi revisada (ver nextCardDirection
+  // em shared/srs.js). Calculado 1x aqui, não a cada render.
+  queue.forEach(c => { c.reviewDirection = nextCardDirection(c); });
+
   STATE.reviewQueue = shuffle(queue);
   STATE.reviewIndex = 0;
   STATE.reviewShowingAnswer = false;
@@ -2650,6 +2655,20 @@ function renderReviewView(){
   const card = STATE.reviewQueue[STATE.reviewIndex];
   const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
 
+  // Direção estilo Anki: frente->verso (padrão, reconhecimento: vê a
+  // palavra em francês, lembra o significado) ou verso->frente (mais
+  // difícil, produção ativa: vê a tradução, precisa lembrar o francês).
+  // Decidido 1x por sessão em startReviewSession, não a cada render.
+  const isReverse = card.reviewDirection === 'back-to-front';
+  const frenchSideHTML = `<div class="flashcard-french">${card.front} ${audioBtnHTML(card.front, 'audio-btn-lg')}</div>`;
+  const transSideHTML = `<div class="flashcard-trans">${card.back_trans}</div>`;
+  const frontHTML = isReverse ? transSideHTML : frenchSideHTML;
+  const backHTML = isReverse ? frenchSideHTML : transSideHTML;
+  // Áudio automático só quando o francês está do lado JÁ visível -- no modo
+  // padrão isso é o front (toca ao entrar no cartão), no modo invertido é
+  // o back (toca só ao revelar a resposta).
+  const frenchVisibleNow = isReverse ? STATE.reviewShowingAnswer : true;
+
   el.innerHTML = `
     <div class="review-progress">
       <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
@@ -2657,10 +2676,10 @@ function renderReviewView(){
     </div>
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${card.unitTitle}</div>
-      <div class="flashcard-french">${card.front} ${audioBtnHTML(card.front, 'audio-btn-lg')}</div>
+      ${frontHTML}
       ${STATE.reviewShowingAnswer ? `
         <div class="divider-line"></div>
-        <div class="flashcard-trans">${card.back_trans}</div>
+        ${backHTML}
       ` : `<div class="flashcard-hint">toque para ver a resposta</div>`}
     </div>
     ${STATE.reviewShowingAnswer ? `
@@ -2680,10 +2699,10 @@ function renderReviewView(){
     }
   });
 
-  // Áudio disponível (e tocado automaticamente) em ambos os lados do cartão —
-  // frente (francês) e, ao virar, de novo caso o aluno queira reouvir.
+  // Áudio disponível (e tocado automaticamente) sempre que o francês está
+  // visível no cartão.
   wireAudioButtons(el);
-  if (canSpeakFrench(card.front)){
+  if (frenchVisibleNow && canSpeakFrench(card.front)){
     speakFrench(card.front, el.querySelector('.audio-btn-lg'));
   }
 
@@ -2699,6 +2718,9 @@ function renderReviewView(){
 
 function gradeCurrentCard(grade){
   const card = STATE.reviewQueue[STATE.reviewIndex];
+  // Grava a direção mostrada nesta revisão -- da próxima vez que essa carta
+  // ficar due, nextCardDirection() (shared/srs.js) alterna pra outra.
+  card.lastDirection = card.reviewDirection;
   applySM2(card, grade);
   STATE.totalReviews += 1;
   registerStudyToday();

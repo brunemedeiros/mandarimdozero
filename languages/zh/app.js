@@ -2971,6 +2971,11 @@ function startReviewSession(){
     queue = queue.concat(rest);
   }
 
+  // Decide a direção de cada carta ANTES de embaralhar/mostrar -- alterna a
+  // partir da última vez que essa carta foi revisada (ver nextCardDirection
+  // em shared/srs.js). Calculado 1x aqui, não a cada render.
+  queue.forEach(c => { c.reviewDirection = nextCardDirection(c); });
+
   STATE.reviewQueue = shuffle(queue);
   STATE.reviewIndex = 0;
   STATE.reviewShowingAnswer = false;
@@ -3027,6 +3032,25 @@ function renderReviewView(){
   const card = STATE.reviewQueue[STATE.reviewIndex];
   const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
 
+  // Direção estilo Anki: frente->verso (padrão, reconhecimento: vê hanzi,
+  // lembra o significado) ou verso->frente (mais difícil, produção ativa:
+  // vê a tradução, precisa lembrar o hanzi). O pinyin sempre acompanha o
+  // hanzi, nunca aparece sozinho -- então o toggle de pinyin nunca deixa
+  // um lado do cartão vazio. Decidido 1x por sessão em startReviewSession,
+  // não recalculado a cada render (senão viraria a cada re-render).
+  const isReverse = card.reviewDirection === 'back-to-front';
+  const hanziSideHTML = `
+    <div class="flashcard-hanzi">${card.back_hanzi} ${audioBtnHTML(card.back_hanzi, 'audio-btn-lg')}</div>
+    <div class="flashcard-pinyin pinyin">${card.front_pinyin}</div>
+  `;
+  const transSideHTML = `<div class="flashcard-trans">${card.back_trans}</div>`;
+  const frontHTML = isReverse ? transSideHTML : hanziSideHTML;
+  const backHTML = isReverse ? hanziSideHTML : transSideHTML;
+  // Áudio automático só quando o hanzi está do lado JÁ visível nesse
+  // instante -- no modo padrão isso é o front (toca ao entrar no cartão),
+  // no modo invertido é o back (toca só ao revelar a resposta).
+  const hanziVisibleNow = isReverse ? STATE.reviewShowingAnswer : true;
+
   el.innerHTML = `
     <div class="review-progress">
       <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
@@ -3034,11 +3058,10 @@ function renderReviewView(){
     </div>
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${card.unitTitle}</div>
-      <div class="flashcard-pinyin">${card.front_pinyin}</div>
+      ${frontHTML}
       ${STATE.reviewShowingAnswer ? `
         <div class="divider-line"></div>
-        <div class="flashcard-hanzi">${card.back_hanzi} ${audioBtnHTML(card.back_hanzi, 'audio-btn-lg')}</div>
-        <div class="flashcard-trans">${card.back_trans}</div>
+        ${backHTML}
       ` : `<div class="flashcard-hint">toque para ver a resposta</div>`}
     </div>
     ${STATE.reviewShowingAnswer ? `
@@ -3058,6 +3081,14 @@ function renderReviewView(){
     }
   });
 
+  wireAudioButtons(el);
+  // Toca automaticamente quando o hanzi aparece -- reforço auditivo
+  // imediato. Só dispara se já houver voz chinesa disponível, pra não
+  // repetir o aviso de "instale a voz" a cada cartão de uma sessão inteira.
+  if (hanziVisibleNow && canSpeakChinese(card.back_hanzi)){
+    speakChinese(card.back_hanzi, el.querySelector('.audio-btn-lg'));
+  }
+
   if (STATE.reviewShowingAnswer){
     el.querySelectorAll('.grade-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -3065,18 +3096,14 @@ function renderReviewView(){
         gradeCurrentCard(parseInt(btn.dataset.grade));
       });
     });
-    wireAudioButtons(el);
-    // Toca automaticamente ao revelar a resposta — reforço auditivo imediato.
-    // Só dispara se já houver voz chinesa disponível, pra não repetir o aviso
-    // de "instale a voz" a cada cartão de uma sessão inteira.
-    if (canSpeakChinese(card.back_hanzi)){
-      speakChinese(card.back_hanzi, el.querySelector('.audio-btn-lg'));
-    }
   }
 }
 
 function gradeCurrentCard(grade){
   const card = STATE.reviewQueue[STATE.reviewIndex];
+  // Grava a direção mostrada nesta revisão -- da próxima vez que essa carta
+  // ficar due, nextCardDirection() (shared/srs.js) alterna pra outra.
+  card.lastDirection = card.reviewDirection;
   applySM2(card, grade);
   STATE.totalReviews += 1;
   registerStudyToday();
