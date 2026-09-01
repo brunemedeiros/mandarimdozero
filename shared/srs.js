@@ -64,6 +64,18 @@ function applySM2(card, grade){
   card.due = now + card.interval * DAY;
 }
 
+// Direção do flashcard (estilo Anki: frente->verso e verso->frente), igual
+// pros dois idiomas -- só o CONTEÚDO de cada lado é específico de idioma
+// (hanzi só existe no chinês), a alternância em si não. Cada card guarda
+// `lastDirection` (persistido junto do resto de STATE.cards) e alterna a
+// cada revisão -- por construção, uma carta só aparece 1x por sessão (a
+// fila de revisão é montada 1x no início da sessão), então mostrar
+// frente->verso nesta sessão automaticamente deixa verso->frente pra
+// próxima vez que essa carta ficar due, nunca as duas juntas.
+function nextCardDirection(card){
+  return card.lastDirection === 'front-to-back' ? 'back-to-front' : 'front-to-back';
+}
+
 function cardsDueNow(pool){
   const now = Date.now();
   return pool.filter(c => c.due <= now);
