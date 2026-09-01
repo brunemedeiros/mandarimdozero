@@ -162,15 +162,21 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .tabs{ display:flex; gap:6px; margin:0 32px 22px; background:var(--paper-warm); padding:5px; border-radius:12px; border:1px solid var(--paper-line); overflow-x:auto; }
 @media (max-width: 600px){ .tabs{ margin-left:16px; margin-right:16px; } }
 .tab-btn{
-  flex:1; padding:10px 8px; border:none; background:transparent; cursor:pointer;
+  flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
+  padding:10px 8px; border:none; background:transparent; cursor:pointer;
   font-family: var(--font-body); font-weight:700; font-size: 14px; color: var(--ink-soft);
   border-radius: 9px; transition: all .15s ease; white-space:nowrap; min-width:fit-content;
 }
 .tab-btn.active{ background: var(--paper); color: var(--seal-red-dark); box-shadow: var(--shadow-card); }
 .tab-btn:hover:not(.active){ color: var(--ink); }
+/* Ícone monocromático (herda a mesma cor do texto via currentColor) --
+   fica cinza no estado inativo e acompanha a cor de destaque quando a aba
+   fica ativa, sem precisar de uma segunda versão colorida da imagem. */
+.tab-icon{ width:18px; height:18px; flex-shrink:0; }
 
 @media (max-width: 520px){
-  .tab-btn{ font-size:12.5px; padding:9px 10px; }
+  .tab-btn{ font-size:12.5px; padding:9px 10px; gap:4px; }
+  .tab-icon{ width:16px; height:16px; }
 }
 
 .view{ display:none; }
@@ -1464,9 +1470,18 @@ body.hide-pinyin .prompt-pinyin{
   </div>
 
   <div class="tabs">
-    <button class="tab-btn active" data-tab="path">Estudo</button>
-    <button class="tab-btn" data-tab="review">Revisão</button>
-    <button class="tab-btn" data-tab="hanzi">汉字</button>
+    <button class="tab-btn active" data-tab="path">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5c-1.6-1.2-3.6-1.7-6-1.7v13c2.4 0 4.4.5 6 1.7 1.6-1.2 3.6-1.7 6-1.7v-13c-2.4 0-4.4.5-6 1.7z"/><path d="M12 6.5v13"/></svg>
+      <span>Estudo</span>
+    </button>
+    <button class="tab-btn" data-tab="review">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 13.3-6"/><path d="M17.3 3v4h-4"/><path d="M20 12a8 8 0 0 1-13.3 6"/><path d="M6.7 21v-4h4"/></svg>
+      <span>Revisão</span>
+    </button>
+    <button class="tab-btn" data-tab="hanzi">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M12 4v16M4 12h16"/></svg>
+      <span>汉字</span>
+    </button>
   </div>
 
   <div class="app-content">
