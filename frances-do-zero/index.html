@@ -115,7 +115,7 @@ body{
   border-bottom: 1px solid var(--paper-line);
   margin-bottom: 24px;
 }
-.brand{ display:flex; align-items:center; gap:10px; }
+.brand{ display:flex; align-items:center; gap:10px; min-width:0; }
 .brand-seal{
   width:40px; height:40px; border-radius:10px;
   background: var(--paper);
@@ -124,10 +124,11 @@ body{
   flex-shrink:0; padding:6px;
 }
 .brand-seal svg{ width:100%; height:100%; display:block; }
-.brand-text h1{ margin:0; font-size:17px; font-weight:800; letter-spacing:-0.01em; }
-.brand-text p{ margin:0; font-size:12px; color:var(--ink-soft); }
+.brand-text{ min-width:0; }
+.brand-text h1{ margin:0; font-size:17px; font-weight:800; letter-spacing:-0.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.brand-text p{ margin:0; font-size:12px; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-.stats-pills{ display:flex; gap:8px; }
+.stats-pills{ display:flex; gap:8px; flex-shrink:0; }
 .pill{
   display:flex; align-items:center; gap:5px;
   background: var(--paper-warm); border:1px solid var(--paper-line);
@@ -182,6 +183,20 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 
 @media (max-width: 520px){
   .tab-btn{ font-size:12.5px; padding:9px 10px; }
+}
+/* Em telas bem estreitas, as 5 abas não cabiam numa linha só --
+   overflow-x:auto "resolvia" tecnicamente, mas o navegador rola
+   automaticamente a aba clicada pra dentro da área visível, escondendo
+   as abas antes dela (ex: clicar em "Desafios" escondia "Estudo"). Reduz
+   ainda mais fonte/padding pra caber as 5 sem precisar rolar. */
+@media (max-width: 400px){
+  .tabs{ gap:2px; padding:4px; }
+  .tab-btn{ font-size:10.5px; padding:8px 3px; }
+  .brand-text p{ display:none; }
+  .brand-text h1{ font-size:14.5px; }
+  .stats-pills{ gap:4px; }
+  .stats-pills .pill{ padding:5px 7px; }
+  .xp-suffix, #user-label{ display:none; }
 }
 
 .view{ display:none; }
@@ -1629,7 +1644,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
     </div>
     <div class="stats-pills">
       <div class="pill streak">🔥 <span id="streak-count">0</span></div>
-      <div class="pill xp">⭐ <span id="xp-count">0</span> XP</div>
+      <div class="pill xp">⭐ <span id="xp-count">0</span><span class="xp-suffix"> XP</span></div>
       <button class="pill theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema claro/escuro">🌙</button>
       <a class="topbar-flag-link" href="https://mandarimdozero.netlify.app/" target="_blank" rel="noopener" title="Mandarim do Zero"><span class="flag-badge flag-badge-lg"><svg viewBox="0 0 20 20" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="20" fill="#DE2910"/><g fill="#FFDE00"><path transform="translate(4.3,4.3) scale(0.21)" d="M12 2 L14.6 8.6 L21.5 9 L16 13.6 L17.8 20.5 L12 16.7 L6.2 20.5 L8 13.6 L2.5 9 L9.4 8.6 Z"/><path transform="translate(10.5,2.8) scale(0.065)" d="M12 2 L14.6 8.6 L21.5 9 L16 13.6 L17.8 20.5 L12 16.7 L6.2 20.5 L8 13.6 L2.5 9 L9.4 8.6 Z"/><path transform="translate(12.8,5.3) scale(0.065)" d="M12 2 L14.6 8.6 L21.5 9 L16 13.6 L17.8 20.5 L12 16.7 L6.2 20.5 L8 13.6 L2.5 9 L9.4 8.6 Z"/><path transform="translate(12.8,9.3) scale(0.065)" d="M12 2 L14.6 8.6 L21.5 9 L16 13.6 L17.8 20.5 L12 16.7 L6.2 20.5 L8 13.6 L2.5 9 L9.4 8.6 Z"/><path transform="translate(10.5,11.8) scale(0.065)" d="M12 2 L14.6 8.6 L21.5 9 L16 13.6 L17.8 20.5 L12 16.7 L6.2 20.5 L8 13.6 L2.5 9 L9.4 8.6 Z"/></g></svg></span></a>
       <button class="pill user-pill" id="user-menu-btn" title="Conta">👤 <span id="user-label">Convidado</span></button>
