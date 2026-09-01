@@ -6161,6 +6161,125 @@ function challengeAdminPublishedCardHTML(c){
 // Recarrega do Supabase antes de renderizar -- garante que a fila de
 // revisão e a lista de publicados refletem o estado real do banco (ex:
 // uma publicação feita em outra sessão/navegador), não um cache antigo.
+// ---------- Busca/filtro/paginação do painel admin ----------
+// Com dezenas de desafios, uma lista única sem busca vira inviável. Busca
+// e filtros re-renderizam só a lista (renderChallengesAdminList, sem
+// buscar do banco de novo -- senão cada tecla digitada dispararia uma
+// consulta); só ações que mudam dado de verdade (aprovar/editar/etc.)
+// chamam renderChallengesAdmin(), que recarrega.
+const challengesAdminFilterState = { search: '', type: 'all', level: 'all' };
+const CHALLENGES_ADMIN_PAGE_SIZE = 15;
+const challengesAdminVisibleCount = { pending: CHALLENGES_ADMIN_PAGE_SIZE, published: CHALLENGES_ADMIN_PAGE_SIZE, unpublished: CHALLENGES_ADMIN_PAGE_SIZE };
+const CHALLENGE_TYPE_LABELS = { expression: 'Expressões', listen_translate: 'Ouça e traduza', accent: 'Acentuação' };
+
+function challengeSearchableText(c){
+  return [c.canonicalExpression, c.sentenceFr, c.targetText, c.question, c.explanation]
+    .filter(Boolean).join(' ').toLowerCase();
+}
+
+function applyChallengesAdminFilters(list){
+  const { search, type, level } = challengesAdminFilterState;
+  return list.filter(c => {
+    if (type !== 'all' && c.type !== type) return false;
+    if (level !== 'all' && c.level !== level) return false;
+    if (search && !challengeSearchableText(c).includes(search)) return false;
+    return true;
+  });
+}
+
+function challengesAdminFilterBarHTML(){
+  const levelOptions = CHALLENGE_LEVELS_ORDER.map(l => `<option value="${l}" ${challengesAdminFilterState.level === l ? 'selected' : ''}>${l}</option>`).join('');
+  const typeOptions = Object.entries(CHALLENGE_TYPE_LABELS).map(([val, label]) =>
+    `<option value="${val}" ${challengesAdminFilterState.type === val ? 'selected' : ''}>${label}</option>`).join('');
+  return `
+    <div class="challenges-admin-filters">
+      <input type="text" id="challenges-admin-search" placeholder="Buscar por expressão, frase, palavra..." value="${escapeHtmlChallenge(challengesAdminFilterState.search)}">
+      <select id="challenges-admin-filter-type">
+        <option value="all" ${challengesAdminFilterState.type === 'all' ? 'selected' : ''}>Todas as categorias</option>
+        ${typeOptions}
+      </select>
+      <select id="challenges-admin-filter-level">
+        <option value="all" ${challengesAdminFilterState.level === 'all' ? 'selected' : ''}>Todos os níveis</option>
+        ${levelOptions}
+      </select>
+    </div>
+  `;
+}
+
+function wireChallengesAdminFilterBar(content){
+  const searchInput = content.querySelector('#challenges-admin-search');
+  const typeSelect = content.querySelector('#challenges-admin-filter-type');
+  const levelSelect = content.querySelector('#challenges-admin-filter-level');
+  searchInput.addEventListener('input', () => {
+    challengesAdminFilterState.search = searchInput.value.trim().toLowerCase();
+    challengesAdminVisibleCount.pending = CHALLENGES_ADMIN_PAGE_SIZE;
+    challengesAdminVisibleCount.published = CHALLENGES_ADMIN_PAGE_SIZE;
+    challengesAdminVisibleCount.unpublished = CHALLENGES_ADMIN_PAGE_SIZE;
+    renderChallengesAdminList();
+  });
+  typeSelect.addEventListener('change', () => {
+    challengesAdminFilterState.type = typeSelect.value;
+    challengesAdminVisibleCount.pending = CHALLENGES_ADMIN_PAGE_SIZE;
+    challengesAdminVisibleCount.published = CHALLENGES_ADMIN_PAGE_SIZE;
+    challengesAdminVisibleCount.unpublished = CHALLENGES_ADMIN_PAGE_SIZE;
+    renderChallengesAdminList();
+  });
+  levelSelect.addEventListener('change', () => {
+    challengesAdminFilterState.level = levelSelect.value;
+    challengesAdminVisibleCount.pending = CHALLENGES_ADMIN_PAGE_SIZE;
+    challengesAdminVisibleCount.published = CHALLENGES_ADMIN_PAGE_SIZE;
+    challengesAdminVisibleCount.unpublished = CHALLENGES_ADMIN_PAGE_SIZE;
+    renderChallengesAdminList();
+  });
+  // Foca de novo depois de re-renderizar (o innerHTML novo perde o foco).
+  searchInput.focus();
+  const val = searchInput.value;
+  searchInput.value = '';
+  searchInput.value = val;
+}
+
+// Uma seção (pendentes/publicados/despublicados) com paginação por
+// "Carregar mais" -- mostra só challengesAdminVisibleCount[sectionKey]
+// itens do total já filtrado, sem limitar o que existe no banco.
+function challengesAdminSectionHTML(sectionKey, title, filteredList, cardHTMLFn, emptyMsg){
+  if (filteredList.length === 0){
+    return emptyMsg ? `<h3 class="challenges-admin-section-title">${title} (0)</h3><p class="challenges-admin-empty">${emptyMsg}</p>` : '';
+  }
+  const visibleCount = challengesAdminVisibleCount[sectionKey];
+  const visible = filteredList.slice(0, visibleCount);
+  const remaining = filteredList.length - visible.length;
+  return `
+    <h3 class="challenges-admin-section-title">${title} (${filteredList.length})</h3>
+    ${visible.map(cardHTMLFn).join('')}
+    ${remaining > 0 ? `<button class="btn btn-secondary challenges-admin-load-more" data-section="${sectionKey}">Carregar mais ${Math.min(remaining, CHALLENGES_ADMIN_PAGE_SIZE)} (${remaining} restantes)</button>` : ''}
+  `;
+}
+
+function challengeAdminPendingCardHTML(c){
+  const editing = challengesAdminEditingId === c.id;
+  return `
+    <div class="challenges-admin-card" data-challenge-id="${c.id}">
+      <div class="challenges-admin-card-header">
+        <span class="challenge-card-level">${c.level}</span>
+        <strong>${challengeAdminCardTitle(c)}</strong>
+      </div>
+      <div class="challenges-admin-card-body">
+        ${editing ? challengeAdminEditView(c) : challengeAdminReadView(c)}
+      </div>
+      <div class="challenges-admin-actions">
+        ${editing
+          ? `<button class="btn btn-primary" data-action="save">💾 Salvar</button>
+             <button class="btn btn-secondary" data-action="cancel-edit">Cancelar</button>`
+          : `<button class="btn btn-primary" data-action="approve">✅ Aprovar e publicar</button>
+             <button class="btn btn-secondary" data-action="preview">👁️ Ver versão do aluno</button>
+             <button class="btn btn-secondary" data-action="edit">✏️ Editar</button>
+             <button class="btn btn-secondary" data-action="reject">❌ Rejeitar</button>`
+        }
+      </div>
+    </div>
+  `;
+}
+
 async function renderChallengesAdmin(){
   if (!isChallengesAdmin()) return;
   document.getElementById('challenges-list-wrap').style.display = 'none';
@@ -6175,48 +6294,38 @@ async function renderChallengesAdmin(){
     return;
   }
 
-  const pending = pendingChallenges();
-  const published = publishedChallenges();
-  const unpublished = unpublishedButApprovedChallenges();
+  renderChallengesAdminList();
+}
 
-  const pendingHTML = pending.length === 0
-    ? `<p class="challenges-admin-empty">Nenhum desafio pendente de revisão.</p>`
-    : pending.map(c => {
-      const editing = challengesAdminEditingId === c.id;
-      return `
-      <div class="challenges-admin-card" data-challenge-id="${c.id}">
-        <div class="challenges-admin-card-header">
-          <span class="challenge-card-level">${c.level}</span>
-          <strong>${challengeAdminCardTitle(c)}</strong>
-        </div>
-        <div class="challenges-admin-card-body">
-          ${editing ? challengeAdminEditView(c) : challengeAdminReadView(c)}
-        </div>
-        <div class="challenges-admin-actions">
-          ${editing
-            ? `<button class="btn btn-primary" data-action="save">💾 Salvar</button>
-               <button class="btn btn-secondary" data-action="cancel-edit">Cancelar</button>`
-            : `<button class="btn btn-primary" data-action="approve">✅ Aprovar e publicar</button>
-               <button class="btn btn-secondary" data-action="preview">👁️ Ver versão do aluno</button>
-               <button class="btn btn-secondary" data-action="edit">✏️ Editar</button>
-               <button class="btn btn-secondary" data-action="reject">❌ Rejeitar</button>`
-          }
-        </div>
-      </div>
-    `;
-    }).join('');
+// Renderiza a partir do que já está em CHALLENGES, sem consultar o banco
+// de novo -- usada pela busca/filtros/paginação (renderChallengesAdmin
+// chama esta depois de carregar).
+function renderChallengesAdminList(){
+  const content = document.getElementById('challenges-admin-content');
 
-  const publishedHTML = published.length === 0
-    ? ''
-    : `<h3 class="challenges-admin-section-title">Publicados (${published.length})</h3>`
-      + published.map(challengeAdminPublishedCardHTML).join('');
+  const pending = applyChallengesAdminFilters(pendingChallenges());
+  const published = applyChallengesAdminFilters(publishedChallenges());
+  const unpublished = applyChallengesAdminFilters(unpublishedButApprovedChallenges());
 
-  const unpublishedHTML = unpublished.length === 0
-    ? ''
-    : `<h3 class="challenges-admin-section-title">Despublicados (${unpublished.length})</h3>`
-      + unpublished.map(challengeAdminPublishedCardHTML).join('');
+  const pendingHTML = challengesAdminSectionHTML('pending', 'Pendentes de revisão', pending, challengeAdminPendingCardHTML, 'Nenhum desafio pendente de revisão.');
+  const publishedHTML = challengesAdminSectionHTML('published', 'Publicados', published, challengeAdminPublishedCardHTML, null);
+  const unpublishedHTML = challengesAdminSectionHTML('unpublished', 'Despublicados', unpublished, challengeAdminPublishedCardHTML, null);
 
-  content.innerHTML = `<h3 class="challenges-admin-section-title">Pendentes de revisão (${pending.length})</h3>` + pendingHTML + publishedHTML + unpublishedHTML;
+  const totalUnfiltered = pendingChallenges().length + publishedChallenges().length + unpublishedButApprovedChallenges().length;
+  const totalFiltered = pending.length + published.length + unpublished.length;
+  const noResultsMsg = totalUnfiltered > 0 && totalFiltered === 0
+    ? `<p class="challenges-admin-empty">Nenhum desafio bate com a busca/filtro atual.</p>` : '';
+
+  content.innerHTML = challengesAdminFilterBarHTML() + noResultsMsg + pendingHTML + publishedHTML + unpublishedHTML;
+  wireChallengesAdminFilterBar(content);
+
+  content.querySelectorAll('.challenges-admin-load-more').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const section = btn.dataset.section;
+      challengesAdminVisibleCount[section] += CHALLENGES_ADMIN_PAGE_SIZE;
+      renderChallengesAdminList();
+    });
+  });
 
   wireChallengeAudioDurations(content);
 
@@ -6257,7 +6366,7 @@ async function renderChallengesAdmin(){
     });
     if (editBtn) editBtn.addEventListener('click', () => {
       challengesAdminEditingId = id;
-      renderChallengesAdmin();
+      renderChallengesAdminList();
     });
     card.querySelectorAll('.challenges-admin-resource').forEach(resEl => {
       const idx = parseInt(resEl.dataset.resourceIdx, 10);
@@ -6274,7 +6383,7 @@ async function renderChallengesAdmin(){
     });
     if (cancelBtn) cancelBtn.addEventListener('click', () => {
       challengesAdminEditingId = null;
-      renderChallengesAdmin();
+      renderChallengesAdminList();
     });
     if (saveBtn) saveBtn.addEventListener('click', async () => {
       const c = CHALLENGES.find(x => x.id === id);
