@@ -3,7 +3,7 @@
 // do próprio site (sempre pega a versão mais nova quando há internet), com
 // fallback pro cache quando offline. Nunca intercepta chamadas ao Supabase
 // (essas precisam de rede de verdade; o app já trata erro de rede sozinho).
-const CACHE_NAME = 'frances-avec-prof-brune-v6';
+const CACHE_NAME = 'frances-avec-prof-brune-v7';
 const PRECACHE_URLS = [
   './',
   './index.html',
@@ -41,8 +41,11 @@ self.addEventListener('fetch', (event) => {
   // seguem direto pra rede, sem passar pelo cache.
   if (event.request.method !== 'GET' || url.origin !== self.location.origin) return;
 
+  // cache: 'no-store' força ignorar o cache HTTP do próprio navegador nesse
+  // fetch -- sem isso, "network-first" podia devolver uma resposta antiga
+  // que o navegador já tinha em cache, mesmo com internet disponível.
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: 'no-store' })
       .then((response) => {
         const copy = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
