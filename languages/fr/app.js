@@ -85,13 +85,43 @@ function canSpeakFrench(text){
   return (typeof AUDIO_MANIFEST !== 'undefined' && !!AUDIO_MANIFEST[text]) || !!TTS.voice;
 }
 
+// ---------- Ciclo de vida do áudio de exercício ----------
+// Cada chamada de playPregeneratedAudio/speakFrench criava um novo player
+// (Audio ou SpeechSynthesisUtterance) sem nunca parar o anterior -- ao
+// avançar de exercício rápido, o áudio antigo continuava tocando em
+// segundo plano ao mesmo tempo que o novo, sobrepondo os dois. Rastreia o
+// player de áudio pré-gerado atualmente ativo (mesmo padrão já usado nos
+// ditados, ver dictationAudioEl/stopDictationAudio) e para ele -- e
+// qualquer fala em andamento via Web Speech API -- sempre que um novo
+// áudio de exercício vai começar OU o exercício/tela que o iniciou deixa
+// de estar ativo (trocar de exercício, responder, avançar, sair da lição,
+// trocar de aba etc.).
+let exerciseAudioEl = null;
+
+function stopExerciseAudio(){
+  if (exerciseAudioEl){
+    exerciseAudioEl.pause();
+    exerciseAudioEl.currentTime = 0;
+    exerciseAudioEl = null;
+  }
+  if (TTS.supported && window.speechSynthesis.speaking){
+    window.speechSynthesis.cancel();
+  }
+  document.querySelectorAll('.audio-btn.speaking').forEach(b => b.classList.remove('speaking'));
+}
+
 // Toca um mp3 pré-gerado (Google Cloud TTS, voz neural) em vez da Web Speech
 // API do navegador — qualidade consistente pra todo aluno, independente do
 // SO/navegador. Ver audio-manifest.js (texto -> arquivo) e speakFrench().
 function playPregeneratedAudio(file, btnEl){
+  stopExerciseAudio();
   const audio = new Audio('audio/' + file);
+  exerciseAudioEl = audio;
   if (btnEl) btnEl.classList.add('speaking');
-  const clear = () => { if (btnEl) btnEl.classList.remove('speaking'); };
+  const clear = () => {
+    if (btnEl) btnEl.classList.remove('speaking');
+    if (exerciseAudioEl === audio) exerciseAudioEl = null;
+  };
   audio.addEventListener('ended', clear);
   audio.addEventListener('error', () => { clear(); showToast('Não foi possível reproduzir o áudio'); });
   audio.play().catch(clear);
@@ -117,7 +147,7 @@ function speakFrench(text, btnEl){
     return;
   }
 
-  window.speechSynthesis.cancel();
+  stopExerciseAudio();
   window.speechSynthesis.resume();
 
   const buildUtterance = () => {
@@ -145,7 +175,7 @@ function speakFrench(text, btnEl){
 
   setTimeout(() => {
     if (!didStart){
-      window.speechSynthesis.cancel();
+      stopExerciseAudio();
       window.speechSynthesis.resume();
       const retryUtter = buildUtterance();
       let retryStarted = false;
@@ -1045,6 +1075,7 @@ function openUnitDetail(unitId){
 }
 
 document.getElementById('back-to-path').addEventListener('click', () => {
+  stopExerciseAudio();
   STEP_STATE.onChallengesScreen = false;
   STEP_STATE.onCheckpoint = null;
   STEP_STATE.onLevelTest = null;
@@ -1521,6 +1552,7 @@ function renderGrammarExerciseStep(u, contentEl, nextBtn){
 }
 
 function renderStep(){
+  stopExerciseAudio();
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
   const stepKey = currentStepDefs()[STEP_STATE.currentStep].key;
   const contentEl = document.getElementById('step-content');
@@ -1781,6 +1813,7 @@ function buildExerciseSet(unit){
 }
 
 function renderExerciseStep(){
+  stopExerciseAudio();
   const contentEl = document.getElementById('step-content');
   const nextBtn = document.getElementById('step-next-btn');
   const total = STEP_STATE.exerciseList.length;
@@ -2843,6 +2876,7 @@ function shuffle(arr){
 }
 
 function renderReviewView(){
+  stopExerciseAudio();
   const el = document.getElementById('review-content');
 
   if (!STATE.reviewQueue.length){
@@ -3074,6 +3108,7 @@ function openCheckpoint(moduleId){
 }
 
 function renderCheckpointQuizStep(){
+  stopExerciseAudio();
   const contentEl = document.getElementById('step-content');
   const nextBtn = document.getElementById('step-next-btn');
   const module = MODULES.find(m => m.id === CHECKPOINT_STATE.moduleId);
@@ -3217,6 +3252,7 @@ function openLevelTest(testId){
 }
 
 function renderLevelTestQuizStep(){
+  stopExerciseAudio();
   const contentEl = document.getElementById('step-content');
   const nextBtn = document.getElementById('step-next-btn');
   const test = LEVEL_TESTS.find(t => t.id === LEVEL_TEST_STATE.testId);
@@ -3487,6 +3523,7 @@ function renderTopbarStats(){
 // TABS / navegação
 // ============================================================
 function switchTab(tab){
+  stopExerciseAudio();
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById(`view-${tab}`).classList.add('active');
@@ -5030,6 +5067,7 @@ function openExpressionPlayer(c){
 }
 
 function renderExpressionQuestionScreen(c){
+  stopExerciseAudio();
   const content = document.getElementById('challenge-player-content');
   content.innerHTML = `
     <div class="challenge-expression">

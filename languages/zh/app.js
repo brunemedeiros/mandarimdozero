@@ -92,13 +92,42 @@ function canSpeakChinese(text){
   return (typeof AUDIO_MANIFEST !== 'undefined' && !!AUDIO_MANIFEST[text]) || !!TTS.voice;
 }
 
+// ---------- Ciclo de vida do áudio de exercício ----------
+// Cada chamada de playPregeneratedAudio/speakChinese criava um novo player
+// (Audio ou SpeechSynthesisUtterance) sem nunca parar o anterior -- ao
+// avançar de exercício rápido, o áudio antigo continuava tocando em
+// segundo plano ao mesmo tempo que o novo, sobrepondo os dois. Rastreia o
+// player de áudio pré-gerado atualmente ativo (mesmo padrão já usado nos
+// ditados do francês) e para ele -- e qualquer fala em andamento via Web
+// Speech API -- sempre que um novo áudio de exercício vai começar OU o
+// exercício/tela que o iniciou deixa de estar ativo (trocar de exercício,
+// responder, avançar, sair da lição, trocar de aba etc.).
+let exerciseAudioEl = null;
+
+function stopExerciseAudio(){
+  if (exerciseAudioEl){
+    exerciseAudioEl.pause();
+    exerciseAudioEl.currentTime = 0;
+    exerciseAudioEl = null;
+  }
+  if (TTS.supported && window.speechSynthesis.speaking){
+    window.speechSynthesis.cancel();
+  }
+  document.querySelectorAll('.audio-btn.speaking').forEach(b => b.classList.remove('speaking'));
+}
+
 // Toca um mp3 pré-gerado (Google Cloud TTS, voz neural) em vez da Web Speech
 // API do navegador — qualidade consistente pra todo aluno, independente do
 // SO/navegador. Ver audio-manifest.js (texto -> arquivo) e speakChinese().
 function playPregeneratedAudio(file, btnEl){
+  stopExerciseAudio();
   const audio = new Audio('audio/' + file);
+  exerciseAudioEl = audio;
   if (btnEl) btnEl.classList.add('speaking');
-  const clear = () => { if (btnEl) btnEl.classList.remove('speaking'); };
+  const clear = () => {
+    if (btnEl) btnEl.classList.remove('speaking');
+    if (exerciseAudioEl === audio) exerciseAudioEl = null;
+  };
   audio.addEventListener('ended', clear);
   audio.addEventListener('error', () => { clear(); showToast('Não foi possível reproduzir o áudio'); });
   audio.play().catch(clear);
@@ -130,7 +159,7 @@ function speakChinese(text, btnEl){
   // Bug conhecido em navegadores Chromium: o synthesis engine às vezes fica
   // "pausado" internamente sem motivo aparente. Forçar resume() antes de
   // falar evita boa parte dos casos de "clica mas não sai som".
-  window.speechSynthesis.cancel();
+  stopExerciseAudio();
   window.speechSynthesis.resume();
 
   const buildUtterance = () => {
@@ -163,7 +192,7 @@ function speakChinese(text, btnEl){
   // mesmo objeto numa nova chamada de speak() é ignorado por alguns engines.
   setTimeout(() => {
     if (!didStart){
-      window.speechSynthesis.cancel();
+      stopExerciseAudio();
       window.speechSynthesis.resume();
 
       const retryUtter = buildUtterance();
@@ -1127,6 +1156,7 @@ function renderStoryProgress(){
 // na tela como uma conversa real acontecendo, e dá pra rolar pra rever
 // falas anteriores a qualquer momento.
 function renderNextStoryBeat(){
+  stopExerciseAudio();
   const story = currentStory();
   const contentEl = document.getElementById('story-content');
   renderStoryProgress();
@@ -1228,6 +1258,7 @@ function finishStory(){
 }
 
 document.getElementById('story-back-to-path').addEventListener('click', () => {
+  stopExerciseAudio();
   document.getElementById('story-wrap').style.display = 'none';
   document.getElementById('path-list-wrap').style.display = 'block';
   renderUnitsGrid();
@@ -1286,6 +1317,7 @@ function openUnitDetail(unitId){
 }
 
 document.getElementById('back-to-path').addEventListener('click', () => {
+  stopExerciseAudio();
   STEP_STATE.onChallengesScreen = false;
   setLessonFocusMode(false);
   document.getElementById('path-list-wrap').style.display = 'block';
@@ -1702,6 +1734,7 @@ function renderVocabQuizStep(u, contentEl, nextBtn){
 }
 
 function renderStep(){
+  stopExerciseAudio();
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
   const stepKey = STEP_DEFS[STEP_STATE.currentStep].key;
   const contentEl = document.getElementById('step-content');
@@ -2078,6 +2111,7 @@ function renderLessonCompleteScreen(contentEl, nextBtn, { correct, total, recapI
 }
 
 function renderExerciseStep(){
+  stopExerciseAudio();
   const contentEl = document.getElementById('step-content');
   const nextBtn = document.getElementById('step-next-btn');
   const total = STEP_STATE.exerciseList.length;
@@ -3206,6 +3240,7 @@ function shuffle(arr){
 }
 
 function renderReviewView(){
+  stopExerciseAudio();
   const el = document.getElementById('review-content');
 
   if (!STATE.reviewQueue.length){
@@ -3562,6 +3597,7 @@ function renderTopbarStats(){
 // TABS / navegação
 // ============================================================
 function switchTab(tab){
+  stopExerciseAudio();
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById(`view-${tab}`).classList.add('active');
@@ -4065,6 +4101,7 @@ function renderHanziLessonsGrid(){
 }
 
 document.getElementById('hanzi-back-to-lessons').addEventListener('click', () => {
+  stopExerciseAudio();
   renderHanziLessonsGrid();
 });
 
@@ -4124,6 +4161,7 @@ function renderHanziProgress(){
 }
 
 function renderHanziStudyStep(){
+  stopExerciseAudio();
   const lesson = currentHanziLesson();
   const contentEl = document.getElementById('hanzi-study-content');
   const nextBtn = document.getElementById('hanzi-next-btn');
