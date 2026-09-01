@@ -880,6 +880,143 @@ const UNIT_ICONS = {
   16: '📅', 17: '✅', 18: '❓'
 };
 
+// ---------- Busca: todo o vocabulário do app, com indicação de unidade concluída ----------
+// Mostra tudo -- inclusive vocabulário de unidades ainda não estudadas --
+// com uma tag indicando o status, pra poder ir direto estudar o que falta.
+function buildSearchIndex(){
+  recalculateUnlockedUnits();
+  const index = [];
+  UNITS.forEach(u => {
+    u.vocab.forEach(v => {
+      index.push({
+        pinyin: v.p, hanzi: v.c, trans: v.t,
+        unitId: u.id, unitTitle: u.title, source: 'vocab',
+        completed: !!STATE.unitProgress[u.id]?.completed
+      });
+    });
+    // Frases-modelo e diálogo também entram no índice -- algumas palavras
+    // (principalmente gramaticais, como 很/吗/了) só aparecem em frases,
+    // nunca como entrada isolada de vocabulário.
+    u.phrases.forEach(p => {
+      index.push({
+        pinyin: p.p, hanzi: p.c, trans: p.t,
+        unitId: u.id, unitTitle: u.title, source: 'phrase',
+        completed: !!STATE.unitProgress[u.id]?.completed
+      });
+      (p.blocks || []).forEach(b => {
+        const cleanHanzi = b.c.replace(/[，。！？]/g, '').trim();
+        const cleanPinyin = b.p.replace(/[,.!?]/g, '').trim();
+        if (cleanHanzi && cleanHanzi.length <= 2){
+          index.push({
+            pinyin: cleanPinyin, hanzi: cleanHanzi, trans: `(na frase: "${p.t}")`,
+            unitId: u.id, unitTitle: u.title, source: 'block',
+            completed: !!STATE.unitProgress[u.id]?.completed
+          });
+        }
+      });
+    });
+    u.dialogue.lines.forEach(l => {
+      index.push({
+        pinyin: l.p, hanzi: l.c, trans: l.t,
+        unitId: u.id, unitTitle: u.title, source: 'dialogue',
+        completed: !!STATE.unitProgress[u.id]?.completed
+      });
+    });
+  });
+  return index;
+}
+
+// Remove marcações de tom (acentos) pra permitir buscar "hen" e encontrar
+// "hěn" -- sem isso, a busca por pinyin sem tom nunca bateria com o pinyin
+// real do banco, que sempre tem tom marcado.
+function stripTones(str){
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+const SEARCH_PAGE_SIZE = 40;
+let searchVisibleCount = SEARCH_PAGE_SIZE;
+let lastSearchQuery = null;
+
+function renderSearchResults(query){
+  const resultsEl = document.getElementById('search-results');
+  const index = buildSearchIndex();
+  const q = stripTones(query.trim().toLowerCase());
+
+  if (query !== lastSearchQuery){
+    searchVisibleCount = SEARCH_PAGE_SIZE;
+    lastSearchQuery = query;
+  }
+
+  const filtered = q
+    ? index.filter(item =>
+        stripTones(item.pinyin.toLowerCase()).includes(q) ||
+        item.hanzi.includes(query.trim()) ||
+        item.trans.toLowerCase().includes(q)
+      )
+    : index;
+
+  if (!filtered.length){
+    resultsEl.innerHTML = `<div class="search-empty">Nenhum resultado para "${query}".</div>`;
+    return;
+  }
+
+  const toShow = filtered.slice(0, searchVisibleCount);
+  const hasMore = filtered.length > toShow.length;
+
+  resultsEl.innerHTML = toShow.map(item => {
+    const unlocked = STATE.unitProgress[item.unitId]?.unlocked;
+    let tagHTML;
+    if (item.completed){
+      tagHTML = `<span class="search-unit-tag done">✓ Unidade ${item.unitId}</span>`;
+    } else if (unlocked){
+      tagHTML = `<button class="search-unit-tag pending" data-unit-id="${item.unitId}">Estudar Unidade ${item.unitId}</button>`;
+    } else {
+      tagHTML = `<span class="search-unit-tag locked">🔒 Unidade ${item.unitId}: ${item.unitTitle}</span>`;
+    }
+    return `
+      <div class="search-result-row">
+        <div class="pinyin">${item.pinyin}</div>
+        <div class="hanzi">${item.hanzi}</div>
+        <div class="trans">${item.trans}</div>
+        ${tagHTML}
+      </div>
+    `;
+  }).join('') + (hasMore ? `
+    <button class="search-load-more-btn" id="search-load-more-btn">
+      Carregar mais (${toShow.length} de ${filtered.length})
+    </button>
+  ` : '');
+
+  resultsEl.querySelectorAll('.search-unit-tag.pending').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const unitId = parseInt(btn.dataset.unitId);
+      document.getElementById('search-modal').style.display = 'none';
+      switchTab('path');
+      openUnitDetail(unitId);
+    });
+  });
+
+  document.getElementById('search-load-more-btn')?.addEventListener('click', () => {
+    searchVisibleCount += SEARCH_PAGE_SIZE;
+    renderSearchResults(query);
+  });
+}
+
+document.getElementById('search-open-btn').addEventListener('click', () => {
+  document.getElementById('search-modal').style.display = 'flex';
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-input').focus();
+  renderSearchResults('');
+});
+
+document.getElementById('search-modal-close').addEventListener('click', () => {
+  document.getElementById('search-modal').style.display = 'none';
+});
+
+document.getElementById('search-input').addEventListener('input', (e) => {
+  renderSearchResults(e.target.value);
+});
+
 function renderUnitsGrid(){
   recalculateUnlockedUnits();
   const grid = document.getElementById('units-grid');
