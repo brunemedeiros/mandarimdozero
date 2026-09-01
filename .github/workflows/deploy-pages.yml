@@ -1,0 +1,44 @@
+name: Deploy to GitHub Pages
+
+# Publica o repositório inteiro (index.html da raiz + languages/fr +
+# languages/zh + shared/) direto no GitHub Pages, sem passo de build --
+# os dois apps e a página de seleção de idioma são HTML/JS puro. Roda a
+# cada push em main, ou manualmente pela aba Actions do GitHub.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Nunca dois deploys em paralelo -- um push novo espera o anterior
+# terminar em vez de cancelar no meio (evita publicar metade de cada).
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configura o GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Empacota o site (sem build -- HTML/JS estático)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Publica no GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
