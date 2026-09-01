@@ -1875,6 +1875,10 @@ function goToNextExercise(){
 // "Por que não foi essa" já cumpre sozinho o papel de reconectar o aluno
 // ao conteúdo, então um "Rever conteúdo" à parte só duplicava a função.
 function answerExplanationHTML(ex){
+  if (ex && (ex.format === 'cloze' || ex.format === 'fullsentence')){
+    // tradução completa já aparece no prompt e na frase preenchida — repeti-la aqui é redundante
+    return '';
+  }
   if (ex && ex.phrase){
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
     const usage = u && u.usageNote

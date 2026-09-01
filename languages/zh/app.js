@@ -2175,6 +2175,10 @@ function goToNextExercise(){
 // que não foi essa" já cumpre sozinho o papel de reconectar o aluno ao
 // conteúdo.
 function answerExplanationHTML(ex){
+  if (ex && (ex.format === 'cloze' || ex.format === 'fullsentence')){
+    // tradução completa já aparece no prompt e na frase preenchida — repeti-la aqui é redundante
+    return '';
+  }
   if (ex && ex.phrase){
     const phraseHTML = `<p class="usage-note-body"><strong>${ex.phrase.c}</strong><br>${ex.phrase.t}</p>`;
     return phraseHTML + (grammarNoteReviewHTML() || '');
