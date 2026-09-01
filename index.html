@@ -237,6 +237,16 @@ async function afterAuthResolved(user){
 }
 
 function enterGuestFlow(){
+  // Convidado não tem conta pra guardar currentLearningLanguage no Supabase,
+  // mas se este navegador já tem um idioma salvo de uma visita anterior
+  // (mesmo sem conta), não faz sentido perguntar de novo -- entra direto,
+  // igual um usuário que já não é novo.
+  const lastLang = localStorageSafeGet(LAST_LANGUAGE_KEY);
+  if (lastLang && AVAILABLE_LANGUAGES.some(l => l.id === lastLang && l.enabled)){
+    sessionStorageSafeSet(GUEST_MODE_FLAG, '1');
+    goToLanguageApp(lastLang);
+    return;
+  }
   document.getElementById('gate-choose-sub').textContent = 'Como convidado(a), seu progresso fica salvo só neste navegador.';
   showOnly('gate-choose-language');
   renderLanguageChoices((langId) => {
