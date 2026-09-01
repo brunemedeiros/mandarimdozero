@@ -10,8 +10,9 @@
 <link rel="icon" href="icons/icon-192.png">
 <script>
 // Aplica o tema salvo antes do primeiro paint, pra não piscar claro->escuro.
+// Chave compartilhada com todos os idiomas -- ver shared/theme.js.
 try{
-  const savedTheme = localStorage.getItem('mandarim_theme');
+  const savedTheme = localStorage.getItem('app_theme');
   if (savedTheme === 'dark' || savedTheme === 'light'){
     document.documentElement.setAttribute('data-theme', savedTheme);
   }
@@ -1522,6 +1523,8 @@ body.hide-pinyin .prompt-pinyin{
 <script src="hanzi-data.js"></script>
 <script src="grammar-notes.js"></script>
 <script src="audio-manifest.js"></script>
+<script src="../../shared/utils.js"></script>
+<script src="../../shared/theme.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

@@ -10,8 +10,9 @@
 <link rel="icon" href="icons/icon-192.png">
 <script>
 // Aplica o tema salvo antes do primeiro paint, pra não piscar claro->escuro.
+// Chave compartilhada com todos os idiomas -- ver shared/theme.js.
 try{
-  const savedTheme = localStorage.getItem('frances_theme');
+  const savedTheme = localStorage.getItem('app_theme');
   if (savedTheme === 'dark' || savedTheme === 'light'){
     document.documentElement.setAttribute('data-theme', savedTheme);
   }
@@ -2048,6 +2049,8 @@ footer.app-footer img{ height:56px; opacity:.9; }
      scripts/supabase_migrations/). O arquivo é mantido no repositório só
      como referência histórica do conteúdo já migrado. -->
 <script src="audio-manifest.js"></script>
+<script src="../../shared/utils.js"></script>
+<script src="../../shared/theme.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
