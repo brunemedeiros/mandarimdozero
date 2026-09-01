@@ -3385,6 +3385,82 @@ function recalculateHanziLocks(){
   });
 }
 
+// ---------- Radicais (tela dedicada, consolidando dados já existentes) ----------
+// Não é conteúdo novo -- reaproveita os radicais já catalogados em cada
+// caractere do hanzi-data.js, só reorganiza numa visão própria por radical,
+// ordenada por quantos caracteres já estudados usam cada um.
+function buildRadicalsIndex(){
+  const radicalMap = {};
+  HANZI_ALL.forEach(h => {
+    (h.radicals || []).forEach(r => {
+      if (!radicalMap[r.r]){
+        radicalMap[r.r] = { radical: r.r, meaning: r.m, chars: [] };
+      }
+      radicalMap[r.r].chars.push(h);
+    });
+  });
+  return Object.values(radicalMap).sort((a, b) => b.chars.length - a.chars.length);
+}
+
+function renderRadicalsGrid(){
+  const radicals = buildRadicalsIndex();
+  const contentEl = document.getElementById('hanzi-radicals-content');
+
+  contentEl.innerHTML = `
+    <div class="radicals-grid">
+      ${radicals.map((r, i) => `
+        <button class="radical-card" data-radical-idx="${i}">
+          <div class="r">${r.radical}</div>
+          <div class="m">${r.meaning}</div>
+          <div class="count-badge">${r.chars.length}</div>
+        </button>
+      `).join('')}
+    </div>
+  `;
+
+  contentEl.querySelectorAll('.radical-card').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.radicalIdx);
+      openRadicalDetail(radicals[idx]);
+    });
+  });
+}
+
+function openRadicalDetail(radicalData){
+  const contentEl = document.getElementById('hanzi-radicals-content');
+  contentEl.innerHTML = `
+    <button class="back-link" id="radical-detail-back-btn">← Voltar aos radicais</button>
+    <div class="radical-detail-header">
+      <div class="r">${radicalData.radical}</div>
+      <div class="m">${radicalData.meaning}</div>
+    </div>
+    <div class="section-label">Aparece em ${radicalData.chars.length} caractere(s) que você já estudou</div>
+    <div class="radical-chars-grid">
+      ${radicalData.chars.map(h => `
+        <div class="radical-char-item">
+          <div class="char">${h.char}</div>
+          <div class="pinyin">${h.pinyin}</div>
+          <div class="meaning">${h.meaning}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  document.getElementById('radical-detail-back-btn').addEventListener('click', renderRadicalsGrid);
+}
+
+document.getElementById('hanzi-radicals-btn').addEventListener('click', () => {
+  document.getElementById('hanzi-lessons-wrap').style.display = 'none';
+  document.getElementById('hanzi-lesson-study-wrap').style.display = 'none';
+  document.getElementById('hanzi-review-wrap').style.display = 'none';
+  document.getElementById('hanzi-radicals-wrap').style.display = 'block';
+  renderRadicalsGrid();
+});
+
+document.getElementById('hanzi-radicals-back-btn').addEventListener('click', () => {
+  document.getElementById('hanzi-radicals-wrap').style.display = 'none';
+  renderHanziLessonsGrid();
+});
+
 function renderHanziLessonsGrid(){
   recalculateHanziLocks();
   document.getElementById('hanzi-lessons-wrap').style.display = 'block';

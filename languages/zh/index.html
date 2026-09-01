@@ -180,6 +180,33 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 /* ---------- Hanzi: trilha de lições ---------- */
 .path-header-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; }
 .hanzi-review-btn, .path-header-btn{ font-size:13px; padding:10px 16px; white-space:nowrap; }
+.hanzi-header-btns{ display:flex; gap:8px; flex-wrap:wrap; }
+
+/* ---------- Radicais ---------- */
+.radicals-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(88px,1fr)); gap:10px; }
+.radical-card{
+  background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding:14px 8px; text-align:center; cursor:pointer; box-shadow: var(--shadow-card);
+  transition: transform .15s ease, box-shadow .15s ease; display:flex; flex-direction:column; gap:4px; align-items:center;
+}
+.radical-card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-lift); }
+.radical-card .r{ font-family: var(--font-hanzi); font-size:26px; font-weight:700; color: var(--seal-red-dark); }
+.radical-card .m{ font-size:10.5px; color: var(--ink-soft); line-height:1.2; }
+.radical-card .count-badge{
+  background: var(--imperial-gold); color: var(--ink); font-size:10px; font-weight:800;
+  border-radius:999px; padding:2px 7px; margin-top:2px;
+}
+.radical-detail-header{ text-align:center; margin-bottom:20px; }
+.radical-detail-header .r{ font-family: var(--font-hanzi); font-size:56px; font-weight:700; color: var(--seal-red-dark); }
+.radical-detail-header .m{ font-size:16px; color: var(--ink-soft); margin-top:4px; }
+.radical-chars-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(90px,1fr)); gap:10px; }
+.radical-char-item{
+  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding:12px 8px; text-align:center; display:flex; flex-direction:column; gap:3px; align-items:center;
+}
+.radical-char-item .char{ font-family: var(--font-hanzi); font-size:22px; font-weight:700; }
+.radical-char-item .pinyin{ color: var(--seal-red-dark); font-weight:700; font-size:11px; }
+.radical-char-item .meaning{ font-size:10px; color: var(--ink-soft); line-height:1.2; }
 
 .hanzi-lessons-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(110px,1fr)); gap:10px; }
 .hanzi-lesson-card{
@@ -1499,7 +1526,10 @@ body.hide-pinyin .prompt-pinyin{
             <h2>汉字 · Hanzi</h2>
             <p id="hanzi-count-label">163 caracteres em 33 lições. Veja, escreva e teste sua memória.</p>
           </div>
-          <button class="btn btn-secondary hanzi-review-btn" id="hanzi-review-all-btn">🔁 Revisar caracteres</button>
+          <div class="hanzi-header-btns">
+            <button class="btn btn-secondary hanzi-review-btn" id="hanzi-radicals-btn">🧬 Radicais</button>
+            <button class="btn btn-secondary hanzi-review-btn" id="hanzi-review-all-btn">🔁 Revisar caracteres</button>
+          </div>
         </div>
       </div>
       <div class="hanzi-lessons-grid" id="hanzi-lessons-grid"></div>
@@ -1523,6 +1553,15 @@ body.hide-pinyin .prompt-pinyin{
     <div id="hanzi-review-wrap" style="display:none;">
       <button class="back-link" id="hanzi-review-back-btn">← Voltar às lições</button>
       <div id="hanzi-review-content"></div>
+    </div>
+
+    <div id="hanzi-radicals-wrap" style="display:none;">
+      <button class="back-link" id="hanzi-radicals-back-btn">← Voltar às lições</button>
+      <div class="path-header">
+        <h2>🧬 Radicais</h2>
+        <p>Os blocos de construção dos caracteres que você já estudou, organizados por frequência.</p>
+      </div>
+      <div id="hanzi-radicals-content"></div>
     </div>
   </div>
 
