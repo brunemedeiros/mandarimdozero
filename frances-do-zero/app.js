@@ -596,6 +596,22 @@ document.getElementById('user-settings-btn').addEventListener('click', () => {
 let saveInFlight = false;
 let savePending = false;
 
+// Se uma tentativa de salvar falhar (rede caiu, Supabase fora do ar), o
+// aluno precisa saber -- antes disso era só um console.error, e quem
+// estivesse jogando não tinha nenhum jeito de perceber que o progresso
+// não estava sendo salvo. Um cooldown evita alertar de novo a cada
+// chamada de saveState() enquanto o problema persiste (ela é chamada com
+// bastante frequência -- XP, conclusão de unidade etc.).
+let lastSaveErrorToastAt = 0;
+const SAVE_ERROR_TOAST_COOLDOWN_MS = 30000;
+
+function notifySaveFailure(){
+  const now = Date.now();
+  if (now - lastSaveErrorToastAt < SAVE_ERROR_TOAST_COOLDOWN_MS) return;
+  lastSaveErrorToastAt = now;
+  showToast('⚠ Não foi possível salvar seu progresso agora. Verifique sua conexão.');
+}
+
 async function saveState(){
   if (!CURRENT_USER) return;
   if (saveInFlight){ savePending = true; return; }
@@ -611,15 +627,23 @@ async function saveState(){
       .select('data')
       .eq('user_id', CURRENT_USER.id)
       .maybeSingle();
-    if (fetchError) console.error('Erro ao ler progresso antes de salvar:', fetchError);
+    if (fetchError){
+      console.error('Erro ao ler progresso antes de salvar:', fetchError);
+      notifySaveFailure();
+      return;
+    }
 
     const merged = Object.assign({}, existing && existing.data, { [APP_KEY]: payload });
     const { error } = await supabaseClient
       .from('progress')
       .upsert({ user_id: CURRENT_USER.id, data: merged }, { onConflict: 'user_id' });
-    if (error) console.error('Erro ao salvar progresso:', error);
+    if (error){
+      console.error('Erro ao salvar progresso:', error);
+      notifySaveFailure();
+    }
   }catch(e){
     console.error('Erro ao salvar progresso:', e);
+    notifySaveFailure();
   }finally{
     saveInFlight = false;
     if (savePending){ savePending = false; saveState(); }
@@ -5985,9 +6009,15 @@ function challengeAdminEditView(c){
   return challengeAdminEditViewExpression(c);
 }
 
+// Mostra um trecho do conteúdo de verdade, não só o rótulo genérico da
+// categoria -- com vários "Ouça e traduza" pendentes ao mesmo tempo, o
+// admin não tinha como distinguir um card do outro sem abrir cada um.
 function challengeAdminCardTitle(c){
   if (c.type === 'expression') return escapeHtmlChallenge(c.canonicalExpression);
-  if (c.type === 'listen_translate') return '🎧 Ouça e traduza';
+  if (c.type === 'listen_translate'){
+    const snippet = (c.sentenceFr || '').length > 60 ? c.sentenceFr.slice(0, 57) + '…' : (c.sentenceFr || '');
+    return `🎧 ${escapeHtmlChallenge(snippet)}`;
+  }
   if (c.type === 'accent') return `✍️ Acentuação — ${escapeHtmlChallenge(c.targetText)}`;
   return '';
 }
@@ -6139,7 +6169,11 @@ async function renderChallengesAdmin(){
 
   const content = document.getElementById('challenges-admin-content');
   content.innerHTML = `<p class="challenges-admin-empty">Carregando…</p>`;
-  await loadChallengesFromDB();
+  const ok = await loadChallengesFromDB();
+  if (!ok){
+    content.innerHTML = `<p class="challenges-admin-empty">⚠ Não foi possível carregar os desafios agora. Verifique sua conexão e tente novamente -- isto NÃO significa que a fila está vazia.</p>`;
+    return;
+  }
 
   const pending = pendingChallenges();
   const published = publishedChallenges();
