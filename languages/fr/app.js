@@ -315,6 +315,10 @@ LEVEL_TESTS.forEach((t) => {
 const APP_KEY = 'frances';
 // Usado por shared/wizard.js na pergunta do objetivo ("aprender ${...}?").
 const LANGUAGE_STUDY_NAME = 'francês';
+// Id deste idioma em languages/index.js (AVAILABLE_LANGUAGES) -- usado pelo
+// seletor de idioma no topbar (shared/language-switcher.js) pra saber qual
+// card marcar como ativo e qual chave gravar em currentLearningLanguage.
+const LANG_ID = 'fr';
 
 // CURRENT_USER, GUEST_MODE_FLAG, initAuth/showLoginScreen/enterGuestMode/
 // onUserLoggedIn e toda a autenticação (Google/e-mail/convidado) agora vêm
