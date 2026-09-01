@@ -1,9 +1,17 @@
 // Banco de conteúdo — Mandarim do Zero (Nível Iniciante / HSK 1)
 // 14 unidades, cada uma com objetivo comunicacional, vocabulário, frases-modelo e diálogo.
 
+// Hoje só existe o Nível 1 -- preparado pra crescer quando os próximos
+// níveis do HSK forem adicionados (mesmo padrão de LEVELS do francês, ver
+// shared/wizard.js).
+const LEVELS = [
+  { id: "HSK1", label: "Nível 1 · Iniciante" }
+];
+
 const UNITS = [
   {
     id: 1,
+    level: "HSK1",
     title: "Cumprimentar e se despedir",
     goal: "Cumprimentar alguém, se despedir e agradecer numa interação básica.",
     usageNote: { title: "\"Duìbuqǐ\" ou \"méi guānxi\"?", body: "<strong>Duìbuqǐ</strong> (对不起) é quem pede desculpa. <strong>Méi guānxi</strong> (没关系) é a resposta de quem recebe o pedido de desculpa — \"tudo bem, não tem problema\". São as duas metades de uma mesma troca, não sinônimos: nunca se usa méi guānxi pra pedir desculpa, nem duìbuqǐ pra tranquilizar alguém." },
@@ -40,6 +48,7 @@ const UNITS = [
   },
   {
     id: 2,
+    level: "HSK1",
     title: "Se apresentar",
     goal: "Dizer o nome, nacionalidade e perguntar o mesmo para o outro.",
     usageNote: { title: "\"Wǒ shì Bāxī rén\" ou \"wǒ jiào Brune\"?", body: "<strong>Shì</strong> (是) liga você a uma categoria — nacionalidade, profissão, identidade: wǒ <strong>shì</strong> Bāxī rén (eu sou brasileira). <strong>Jiào</strong> (叫) é usado só pra dizer o nome: wǒ <strong>jiào</strong> Brune (eu me chamo Brune). Repare que \"eu me chamo\" nunca usa shì em chinês — só jiào." },
@@ -76,6 +85,7 @@ const UNITS = [
   },
   {
     id: 3,
+    level: "HSK1",
     title: "Números e idade",
     goal: "Contar de 0 a 100 e dizer/perguntar a idade.",
     usageNote: { title: "\"Nǐ jǐ suì\" ou \"nǐ duō dà\"?", body: "<strong>Jǐ suì</strong> (几岁) é usado pra perguntar a idade de <strong>crianças</strong>, já que 几 espera um número pequeno. Pra adultos, a forma neutra e mais comum é <strong>duō dà</strong> (多大) — perguntar \"jǐ suì\" pra um adulto pode soar estranho, como se você esperasse um número de um dígito só." },
@@ -114,6 +124,7 @@ const UNITS = [
   },
   {
     id: 4,
+    level: "HSK1",
     title: "Família",
     goal: "Apresentar membros da família e falar quantas pessoas há na família.",
     usageNote: { title: "Por que \"yí gè jiějie\" mas \"jǐ kǒu rén\"?", body: "Em chinês, todo substantivo contável precisa de uma \"classificador\" (medida) entre o número e a palavra. <strong>Gè</strong> (个) é o classificador genérico, usado pra quase tudo — inclusive pessoas em geral: yí <strong>gè</strong> jiějie (uma irmã mais velha). Mas pra contar quantas pessoas moram numa mesma casa, o chinês usa um classificador específico, <strong>kǒu</strong> (口, literalmente \"boca\"): jǐ <strong>kǒu</strong> rén — só nesse contexto de família." },
@@ -149,6 +160,7 @@ const UNITS = [
   },
   {
     id: 5,
+    level: "HSK1",
     title: "Comida e bebida",
     goal: "Pedir comida/bebida num restaurante e expressar preferências simples.",
     usageNote: { title: "\"Xǐhuan\" ou \"yào\"?", body: "<strong>Xǐhuan</strong> (喜欢) é gostar de algo em geral, uma preferência: wǒ <strong>xǐhuan</strong> hē kāfēi (eu gosto de beber café, como hábito). <strong>Yào</strong> (要) é querer algo específico, agora: wǒ <strong>yào</strong> yì bēi chá (eu quero uma xícara de chá, nesse momento). Um fala de gosto, o outro de pedido." },
@@ -186,6 +198,7 @@ const UNITS = [
   },
   {
     id: 6,
+    level: "HSK1",
     title: "Rotina diária",
     goal: "Descrever atividades do dia a dia e dizer as horas.",
     usageNote: { title: "\"Měitiān\" ou \"xiànzài\"?", body: "<strong>Měitiān</strong> (每天, todos os dias) marca um hábito, algo que se repete. <strong>Xiànzài</strong> (现在, agora) marca o momento presente, muitas vezes usado com <strong>zài</strong> antes do verbo pra dizer que a ação está acontecendo neste instante: wǒ <strong>zài</strong> chīfàn (estou comendo agora). Repare que esse \"zài\" de \"estar fazendo algo\" é diferente do \"zài\" de localização (você vai ver isso na próxima unidade)." },
@@ -220,6 +233,7 @@ const UNITS = [
   },
   {
     id: 7,
+    level: "HSK1",
     title: "Direções e localização",
     goal: "Perguntar e entender direções básicas, localizar lugares.",
     usageNote: { title: "\"Zài\" ou \"lí\"?", body: "<strong>Zài</strong> (在) diz <strong>onde algo está</strong>: cèsuǒ <strong>zài</strong> nǎlǐ? (onde fica o banheiro?). <strong>Lí</strong> (离) diz a <strong>distância entre dois lugares</strong>, sempre comparando um ponto de referência: yīyuàn <strong>lí</strong> zhèlǐ hěn jìn (o hospital fica perto daqui). Zài localiza um lugar sozinho; lí sempre compara dois." },
@@ -253,6 +267,7 @@ const UNITS = [
   },
   {
     id: 8,
+    level: "HSK1",
     title: "Compras",
     goal: "Perguntar preços, negociar valores e fazer uma compra simples.",
     usageNote: { title: "\"Kuài\" ou \"máo\"?", body: "No dinheiro chinês falado, <strong>kuài</strong> (块) é a unidade principal (equivalente a \"um real\"), e <strong>máo</strong> (毛) é um décimo de um kuài (equivalente a \"dez centavos\"). Wǔ kuài sān máo (五块三毛) é \"5 yuans e 30 centavos\" — não \"5 e 3\", os dois números têm pesos diferentes." },
@@ -291,6 +306,7 @@ const UNITS = [
   },
   {
     id: 9,
+    level: "HSK1",
     title: "Clima",
     goal: "Descrever o tempo/clima e reagir a ele.",
     usageNote: { title: "Por que \"jīntiān hěn rè\" e não \"jīntiān shì rè\"?", body: "Adjetivos em chinês (rè, lěng, guì, piányi...) funcionam como o próprio verbo da frase — eles não precisam do verbo <strong>shì</strong> (ser/estar) na frente. Por isso se diz <strong>jīntiān hěn rè</strong> (hoje [está] muito quente), nunca \"jīntiān shì rè\". O <strong>hěn</strong> aqui quase não significa \"muito\" — é só uma palavra de ligação obrigatória antes do adjetivo." },
@@ -327,6 +343,7 @@ const UNITS = [
   },
   {
     id: 10,
+    level: "HSK1",
     title: "Transporte",
     goal: "Perguntar como chegar a um lugar usando transporte público ou táxi.",
     usageNote: { title: "\"Zǒu lù\" ou \"zuò dìtiě\"?", body: "Pra ir a pé, usa-se só <strong>zǒu lù</strong> (走路, andar), sem nenhum outro verbo. Pra qualquer veículo em que você entra e senta, usa-se <strong>zuò</strong> (坐, literalmente \"sentar\") antes do meio de transporte: <strong>zuò</strong> dìtiě, <strong>zuò</strong> gōngjiāochē, <strong>zuò</strong> chūzūchē. É o mesmo \"zuò\" de sentar numa cadeira — pense nele como \"ir sentado em\"." },
@@ -362,6 +379,7 @@ const UNITS = [
   },
   {
     id: 11,
+    level: "HSK1",
     title: "Saúde e corpo",
     goal: "Descrever sintomas simples e partes do corpo, pedir ajuda médica básica.",
     usageNote: { title: "\"Tóu téng\" ou \"bù shūfu\"?", body: "<strong>Téng</strong> (疼) descreve uma dor específica, numa parte do corpo: tóu <strong>téng</strong> (dor de cabeça), dùzi <strong>téng</strong> (dor de barriga). <strong>Bù shūfu</strong> (不舒服) é mais geral — um mal-estar sem apontar onde dói. Se você sabe exatamente o que dói, use téng; se é só uma sensação geral de \"estou mal\", use bù shūfu." },
@@ -396,6 +414,7 @@ const UNITS = [
   },
   {
     id: 12,
+    level: "HSK1",
     title: "Hobbies e tempo livre",
     goal: "Falar sobre hobbies, gostos e o que faz no tempo livre.",
     usageNote: { title: "\"Kàn\" ou \"tīng\"?", body: "<strong>Kàn</strong> (看) é usado pra atividades visuais: <strong>kàn</strong> shū (ler/\"ver\" livro), <strong>kàn</strong> diànyǐng (assistir filme). <strong>Tīng</strong> (听) é usado pra atividades de ouvir: <strong>tīng</strong> yīnyuè (ouvir música). Trocar os dois é um erro comum — \"ouvir um filme\" ou \"ver música\" soam estranhos em chinês, igual soariam em português." },
@@ -430,6 +449,7 @@ const UNITS = [
   },
   {
     id: 13,
+    level: "HSK1",
     title: "Planos futuros",
     goal: "Expressar planos e intenções usando 要 e 打算.",
     usageNote: { title: "\"Dǎsuàn\" ou \"yào\"?", body: "<strong>Dǎsuàn</strong> (打算) é um plano mais pensado, com alguma organização: wǒ <strong>dǎsuàn</strong> xuéxí Zhōngwén (eu pretendo estudar chinês). <strong>Yào</strong> (要) pode expressar uma intenção mais imediata ou simples, \"vou fazer isso\": wǒ yǐhòu <strong>yào</strong> qù Zhōngguó lǚyóu (no futuro eu vou/quero viajar pra China). Dǎsuàn soa um pouco mais formal e deliberado que yào." },
@@ -462,6 +482,7 @@ const UNITS = [
   },
   {
     id: 14,
+    level: "HSK1",
     title: "Comparações simples",
     goal: "Fazer comparações básicas entre pessoas, objetos e situações.",
     usageNote: { title: "\"Bǐ\" ou \"yíyàng\"?", body: "<strong>Bǐ</strong> (比) compara uma <strong>diferença</strong> entre duas coisas: Zhōngwén <strong>bǐ</strong> Fǎwén nán (chinês é mais difícil que francês). <strong>Yíyàng</strong> (一样) diz que duas coisas são <strong>iguais</strong>: zhège hé nàge <strong>yíyàng</strong> (este e aquele são iguais). Repare que \"bù yíyàng\" (não são iguais) não usa bǐ — são duas estruturas de comparação separadas, não se misturam." },
@@ -494,6 +515,7 @@ const UNITS = [
 ,
 {
     id: 15,
+    level: "HSK1",
     title: "Convites e capacidades",
     goal: "Convidar alguém para algo, dizer o que sabe ou consegue fazer, fazer pedidos educados.",
     usageNote: { title: "\"Huì\" ou \"néng\"?", body: "<strong>Huì</strong> (会) é uma habilidade aprendida: nǐ <strong>huì</strong> shuō Zhōngwén ma? (você sabe falar chinês? — algo que se aprende). <strong>Néng</strong> (能) é capacidade ou permissão numa situação específica: nǐ míngtiān <strong>néng</strong> lái ma? (você consegue vir amanhã? — depende da sua agenda, não de habilidade). Uma pergunta sobre saber fazer algo usa huì; uma pergunta sobre poder fazer algo agora usa néng." },
@@ -536,6 +558,7 @@ const UNITS = [
 
   {
     id: 16,
+    level: "HSK1",
     title: "Calendário e datas",
     goal: "Falar sobre dias da semana, datas completas e horários, e marcar um encontro.",
     usageNote: { title: "\"Yǐqián\" ou \"yǐhòu\"?", body: "<strong>Yǐqián</strong> (以前) é \"antes de\": shí diǎn <strong>yǐqián</strong> wǒ zài jiā (antes das 10h eu estou em casa). <strong>Yǐhòu</strong> (以后) é \"depois de\": shí diǎn <strong>yǐhòu</strong> wǒ bú zài jiā (depois das 10h eu não estou em casa). Os dois vêm sempre <strong>depois</strong> da referência de tempo ou evento — nunca antes dela, diferente do português." },
@@ -578,6 +601,7 @@ const UNITS = [
 
   {
     id: 17,
+    level: "HSK1",
     title: "O que já aconteceu",
     goal: "Falar sobre ações já concluídas, mudanças de estado, e o que ainda não aconteceu.",
     usageNote: { title: "Por que \"wǒ hái méi chī\" nunca leva \"le\"?", body: "<strong>Le</strong> (了) marca uma ação concluída: wǒ chī <strong>le</strong> liǎng gè píngguǒ (eu comi duas maçãs). Mas na negação com <strong>hái méi</strong> (还没, ainda não), o le <strong>desaparece</strong>: wǒ <strong>hái méi</strong> chī (eu ainda não comi) — nunca \"wǒ hái méi chī le\". Faz sentido: se a ação ainda não aconteceu, não tem como marcar ela como concluída." },
@@ -618,6 +642,7 @@ const UNITS = [
 
   {
     id: 18,
+    level: "HSK1",
     title: "Perguntas do dia a dia",
     goal: "Fazer perguntas abertas variadas: quem, por quê, onde alguém mora ou trabalha, se há algo num lugar.",
     usageNote: { title: "\"Wèishénme\" ou \"yīnwèi\"?", body: "<strong>Wèishénme</strong> (为什么) é a pergunta: \"por quê?\". <strong>Yīnwèi</strong> (因为) é a resposta: \"porque\". Nǐ <strong>wèishénme</strong> bú qù? <strong>Yīnwèi</strong> wǒ hěn máng (Por que você não vai? Porque eu estou muito ocupado). É a pergunta e a resposta andando sempre juntas, como um par." },
