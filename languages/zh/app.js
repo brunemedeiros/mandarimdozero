@@ -426,6 +426,7 @@ const STATE = {
   hanziReviewQueue: [],
   hanziReviewIndex: 0,
   hanziReviewShowingAnswer: false,
+  storyProgress: {}, // storyId -> { completed: bool }
   daily: {
     date: null, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
     hanziLessons: 0, reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0
@@ -564,7 +565,8 @@ function serializeState(){
     dailyMinutesLog: STATE.dailyMinutesLog,
     hanziLessonProgress: STATE.hanziLessonProgress,
     totalReviews: STATE.totalReviews,
-    daily: STATE.daily
+    daily: STATE.daily,
+    storyProgress: STATE.storyProgress
   };
 }
 
@@ -592,6 +594,7 @@ function applySerializedState(data){
   if (data.hanziLessonProgress) Object.assign(STATE.hanziLessonProgress, data.hanziLessonProgress);
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
   if (data.daily) Object.assign(STATE.daily, data.daily);
+  if (data.storyProgress) Object.assign(STATE.storyProgress, data.storyProgress);
 }
 
 // SM-2 (registerExerciseCorrect, applySM2, cardsDueNow, newCards),
@@ -903,8 +906,182 @@ function renderUnitsGrid(){
       card.addEventListener('click', () => openUnitDetail(u.id));
     }
     grid.appendChild(card);
+
+    // Checkpoint de história: aparece logo após a unidade que a desbloqueia,
+    // ocupando a linha inteira do grid pra se destacar como um marco na
+    // trilha, não mais uma unidade comum.
+    const story = STORIES.find(s => s.afterUnit === u.id);
+    if (story){
+      const storyUnlocked = prog.completed;
+      const storyDone = STATE.storyProgress?.[story.id]?.completed;
+      const storyCard = document.createElement('button');
+      storyCard.className = 'story-checkpoint-card' + (!storyUnlocked ? ' locked' : '') + (storyDone ? ' done' : '');
+      storyCard.innerHTML = `
+        <div class="story-checkpoint-icon">${story.icon}</div>
+        <div class="story-checkpoint-text">
+          <div class="story-checkpoint-label">${storyDone ? '✓ Concluída' : (storyUnlocked ? 'Checkpoint desbloqueado' : '🔒 Complete a unidade acima')}</div>
+          <div class="story-checkpoint-title">${story.title}</div>
+          <div class="story-checkpoint-subtitle">${story.subtitle}</div>
+        </div>
+      `;
+      if (storyUnlocked){
+        storyCard.addEventListener('click', () => openStory(story.id));
+      }
+      grid.appendChild(storyCard);
+    }
   });
 }
+
+// ============================================================
+// HISTÓRIAS-CHECKPOINT — recombinam vocabulário de várias unidades já
+// concluídas numa situação nova, com pergunta de compreensão intercalada
+// ao longo da leitura (não só no final). Dados em stories.js.
+// ============================================================
+const STORY_STATE = {
+  storyId: null,
+  beatIndex: 0,
+  questionAnswered: false
+};
+
+function openStory(storyId){
+  const story = STORIES.find(s => s.id === storyId);
+  if (!story) return;
+
+  STORY_STATE.storyId = storyId;
+  STORY_STATE.beatIndex = 0;
+  STORY_STATE.questionAnswered = false;
+
+  document.getElementById('path-list-wrap').style.display = 'none';
+  document.getElementById('unit-detail-wrap').style.display = 'none';
+  document.getElementById('story-wrap').style.display = 'block';
+
+  document.getElementById('story-header-icon').textContent = story.icon;
+  document.getElementById('story-header-title').textContent = story.title;
+  document.getElementById('story-header-subtitle').textContent = story.subtitle;
+
+  document.getElementById('story-content').innerHTML = '';
+  renderNextStoryBeat();
+}
+
+function currentStory(){
+  return STORIES.find(s => s.id === STORY_STATE.storyId);
+}
+
+function renderStoryProgress(){
+  const story = currentStory();
+  const pct = Math.round((STORY_STATE.beatIndex / story.beats.length) * 100);
+  document.getElementById('story-progress-fill').style.width = `${pct}%`;
+}
+
+// Renderiza o próximo "beat" (grupo de falas + pergunta opcional), sempre
+// ANEXANDO ao conteúdo já lido (não substituindo) -- assim a história cresce
+// na tela como uma conversa real acontecendo, e dá pra rolar pra rever
+// falas anteriores a qualquer momento.
+function renderNextStoryBeat(){
+  const story = currentStory();
+  const contentEl = document.getElementById('story-content');
+  renderStoryProgress();
+
+  if (STORY_STATE.beatIndex >= story.beats.length){
+    contentEl.insertAdjacentHTML('beforeend', `
+      <div class="story-complete">
+        <div class="big-emoji">🎉</div>
+        <h3>História concluída!</h3>
+        <p>Você revisou o vocabulário das Unidades ${story.coversUnits[0]}–${story.coversUnits[story.coversUnits.length-1]} numa situação nova.</p>
+        <button class="btn btn-primary" id="story-finish-btn">Voltar à trilha</button>
+      </div>
+    `);
+    document.getElementById('story-finish-btn').addEventListener('click', () => {
+      finishStory();
+    });
+    return;
+  }
+
+  const beat = story.beats[STORY_STATE.beatIndex];
+  const beatEl = document.createElement('div');
+  beatEl.className = 'story-beat';
+  beatEl.innerHTML = beat.lines.map(line => `
+    <div class="story-line">
+      <div class="story-line-speaker">${line.spk}</div>
+      <div class="story-line-pinyin pinyin">${line.p}</div>
+      <div class="story-line-hanzi">${line.c} ${audioBtnHTML(line.c)}</div>
+      <div class="story-line-trans">${line.t}</div>
+    </div>
+  `).join('');
+  contentEl.appendChild(beatEl);
+  wireAudioButtons(beatEl);
+
+  if (beat.question){
+    STORY_STATE.questionAnswered = false;
+    const q = beat.question;
+    const qEl = document.createElement('div');
+    qEl.className = 'story-question';
+    qEl.innerHTML = `
+      <div class="story-question-prompt">${q.prompt}</div>
+      <div class="story-question-options">
+        ${q.options.map((opt, i) => `<button class="story-question-option" data-idx="${i}">${opt}</button>`).join('')}
+      </div>
+    `;
+    contentEl.appendChild(qEl);
+
+    qEl.querySelectorAll('.story-question-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (STORY_STATE.questionAnswered) return;
+        STORY_STATE.questionAnswered = true;
+        const chosenIdx = parseInt(btn.dataset.idx);
+        const isCorrect = chosenIdx === q.correctIndex;
+        qEl.querySelectorAll('.story-question-option').forEach((b, i) => {
+          b.classList.add('disabled');
+          if (i === q.correctIndex) b.classList.add('correct');
+          else if (i === chosenIdx) b.classList.add('incorrect');
+        });
+        if (isCorrect) addXP(5);
+        registerStudyToday();
+
+        const continueBtn = document.createElement('button');
+        continueBtn.className = 'story-continue-btn';
+        continueBtn.textContent = 'Continuar história →';
+        continueBtn.addEventListener('click', () => {
+          STORY_STATE.beatIndex += 1;
+          renderNextStoryBeat();
+        }, { once: true });
+        qEl.appendChild(continueBtn);
+        continueBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    });
+  } else {
+    // Beat sem pergunta: botão simples pra continuar lendo
+    const continueBtn = document.createElement('button');
+    continueBtn.className = 'story-continue-btn';
+    continueBtn.textContent = 'Continuar →';
+    continueBtn.addEventListener('click', () => {
+      STORY_STATE.beatIndex += 1;
+      renderNextStoryBeat();
+    }, { once: true });
+    contentEl.appendChild(continueBtn);
+    continueBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function finishStory(){
+  const storyId = STORY_STATE.storyId;
+  if (!STATE.storyProgress[storyId]?.completed){
+    STATE.storyProgress[storyId] = { completed: true };
+    addXP(20);
+    showToast('História concluída! 🎉');
+  }
+  saveState();
+  renderTopbarStats();
+  document.getElementById('story-wrap').style.display = 'none';
+  document.getElementById('path-list-wrap').style.display = 'block';
+  renderUnitsGrid();
+}
+
+document.getElementById('story-back-to-path').addEventListener('click', () => {
+  document.getElementById('story-wrap').style.display = 'none';
+  document.getElementById('path-list-wrap').style.display = 'block';
+  renderUnitsGrid();
+});
 
 // ============================================================
 // LIÇÃO EM PASSOS (Vocabulário → Exercícios → Frases → Diálogo)

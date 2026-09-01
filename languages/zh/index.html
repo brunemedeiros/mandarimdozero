@@ -253,6 +253,69 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .path-header p{ margin:0; color:var(--ink-soft); font-size:14px; }
 
 .units-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap:12px; }
+
+/* ---------- Checkpoint de história (revisão narrativa entre unidades) ---------- */
+.story-checkpoint-card{
+  grid-column: 1 / -1; display:flex; align-items:center; gap:16px;
+  background: linear-gradient(120deg, rgba(212,160,23,0.14), var(--paper-warm));
+  border:1.5px dashed var(--imperial-gold); border-radius: var(--radius); padding:16px 20px;
+  cursor:pointer; text-align:left; transition: transform .15s ease;
+}
+.story-checkpoint-card:hover{ transform: translateY(-1px); }
+.story-checkpoint-card.locked{ opacity:.5; cursor:not-allowed; border-style:solid; border-color: var(--paper-line); background: var(--paper-warm); }
+.story-checkpoint-card.locked:hover{ transform:none; }
+.story-checkpoint-card.done{ border-style:solid; border-color: var(--jade); }
+.story-checkpoint-icon{ font-size:34px; flex-shrink:0; }
+.story-checkpoint-label{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; font-weight:800; color: var(--seal-red-dark); margin-bottom:2px; }
+.story-checkpoint-card.done .story-checkpoint-label{ color: var(--jade); }
+.story-checkpoint-title{ font-weight:800; font-size:15px; color: var(--ink); }
+.story-checkpoint-subtitle{ font-size:12.5px; color: var(--ink-soft); }
+
+/* ---------- Tela de leitura da história ---------- */
+.story-header{ display:flex; align-items:center; gap:14px; margin-bottom:18px; }
+.story-header-icon{ font-size:38px; }
+.story-header h2{ margin:0 0 2px; font-size:20px; }
+.story-header p{ margin:0; color: var(--ink-soft); font-size:13px; }
+
+.story-progress{ margin-bottom:20px; }
+.story-progress-track{ height:7px; background: var(--paper-warm); border-radius:5px; overflow:hidden; }
+.story-progress-fill{ height:100%; background: linear-gradient(90deg, var(--imperial-gold), var(--seal-red)); border-radius:5px; transition: width .3s ease; }
+
+.story-line{
+  display:flex; flex-direction:column; gap:2px; margin-bottom:16px; padding:14px 16px;
+  background: var(--paper); border-radius: var(--radius); border:1px solid var(--paper-line);
+  animation: storyLineIn .3s ease;
+}
+@keyframes storyLineIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
+.story-line-speaker{ font-size:11px; font-weight:800; color: var(--seal-red-dark); text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+.story-line-pinyin{ font-size:13px; color: var(--ink-soft); margin-bottom:2px; }
+.story-line-hanzi{ font-family: var(--font-hanzi); font-size:19px; display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+.story-line-trans{ font-size:13px; color: var(--ink-soft); }
+
+.story-question{
+  background: var(--paper-warm); border:1px solid var(--imperial-gold); border-radius: var(--radius);
+  padding:18px 20px; margin-top:8px;
+}
+.story-question-prompt{ font-weight:800; font-size:15px; margin-bottom:14px; color: var(--ink); }
+.story-question-options{ display:flex; flex-direction:column; gap:8px; }
+.story-question-option{
+  background: var(--paper); border:1px solid var(--paper-line); border-radius:12px; padding:12px 14px;
+  text-align:left; cursor:pointer; font-family: var(--font-body); font-size:14px;
+}
+.story-question-option:hover:not(.disabled){ border-color: var(--imperial-gold); }
+.story-question-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
+.story-question-option.incorrect{ border-color: var(--seal-red); background: rgba(192,35,31,0.10); }
+.story-question-option.disabled{ pointer-events:none; }
+
+.story-continue-btn{
+  display:block; width:100%; margin-top:14px; padding:15px; border:none; border-radius:999px;
+  background: var(--seal-red); color:white; font-family: var(--font-body); font-weight:800;
+  font-size:15px; cursor:pointer;
+}
+
+.story-complete{ text-align:center; padding:40px 20px; }
+.story-complete .big-emoji{ font-size:52px; margin-bottom:12px; }
+
 .unit-card{
   position:relative;
   background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
@@ -1340,6 +1403,21 @@ body.hide-pinyin .prompt-pinyin{
         <button class="btn btn-primary btn-block" id="step-next-btn">Continuar →</button>
       </div>
     </div>
+
+    <div id="story-wrap" style="display:none;">
+      <button class="back-link" id="story-back-to-path">← Voltar à trilha</button>
+      <div class="story-header">
+        <div class="story-header-icon" id="story-header-icon"></div>
+        <div>
+          <h2 id="story-header-title"></h2>
+          <p id="story-header-subtitle"></p>
+        </div>
+      </div>
+      <div class="story-progress">
+        <div class="story-progress-track"><div class="story-progress-fill" id="story-progress-fill"></div></div>
+      </div>
+      <div id="story-content"></div>
+    </div>
   </div>
 
   <!-- ===== REVISÃO (SRS) ===== -->
@@ -1545,6 +1623,7 @@ body.hide-pinyin .prompt-pinyin{
 </div>
 
 <script src="content.js"></script>
+<script src="stories.js"></script>
 <script src="hanzi-data.js"></script>
 <script src="grammar-notes.js"></script>
 <script src="audio-manifest.js"></script>
