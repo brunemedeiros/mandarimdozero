@@ -5075,6 +5075,19 @@ function markChallengeCompleted(id){
   STATE.completedChallenges[id] = true;
   saveState();
 }
+// Wrapper compartilhado pelas 3 telas de feedback (Expressões, Ouça e
+// traduza, Acentuação): mesmo invólucro (classe correct/incorrect + header)
+// e mesmo botão de concluir ao final -- só o corpo (bodyHTML) muda por tipo.
+function challengeFeedbackWrapperHTML(typeClass, isCorrect, headerText, bodyHTML){
+  return `
+    <div class="${typeClass}-feedback ${isCorrect ? 'correct' : 'incorrect'}">
+      <div class="${typeClass}-feedback-header">${headerText}</div>
+      ${bodyHTML}
+      ${challengeCompleteButtonHTML()}
+    </div>
+  `;
+}
+
 function challengeCompleteButtonHTML(){
   return `<button class="btn btn-primary challenge-complete-btn" id="challenge-complete-btn" style="margin-top:16px;width:100%;">✅ Concluir</button>`;
 }
@@ -5412,9 +5425,7 @@ function answerChallenge(c, chosenIdx){
 
 function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
   const content = document.getElementById('challenge-player-content');
-  content.innerHTML = `
-    <div class="challenge-feedback ${isCorrect ? 'correct' : 'incorrect'}">
-      <div class="challenge-feedback-header">${isCorrect ? '✅ Bonne réponse.' : '❌ Pas tout à fait.'}</div>
+  const bodyHTML = `
       ${isCorrect ? '' : `<p class="challenge-feedback-chosen">Sua resposta: ${escapeHtmlChallenge(c.options[chosenIdx])}<br>Resposta certa: <strong>${escapeHtmlChallenge(c.correctAnswer)}</strong></p>`}
       <p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong><br>
       signifie <strong>${escapeHtmlChallenge(c.meaning.fr)}</strong>.<br>
@@ -5441,9 +5452,8 @@ function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
       </div>
 
       ${challengeExternalResourcesHTML(c)}
-      ${challengeCompleteButtonHTML()}
-    </div>
   `;
+  content.innerHTML = challengeFeedbackWrapperHTML('challenge', isCorrect, isCorrect ? '✅ Bonne réponse.' : '❌ Pas tout à fait.', bodyHTML);
 
   if (c.example.audioFile){
     document.getElementById('challenge-example-play-btn').addEventListener('click', (e) => {
@@ -5640,18 +5650,15 @@ function checkListenTranslateAnswer(c){
   const isCorrect = !personMismatch && isTranslationAcceptable(studentAnswer, c.referenceTranslations);
   if (isCorrect) addXP(5);
 
-  document.getElementById('lt-feedback-wrap').innerHTML = `
-    <div class="listen-translate-feedback ${isCorrect ? 'correct' : 'incorrect'}">
-      <div class="listen-translate-feedback-header">${isCorrect ? '✅ Bonne traduction.' : '❌ Pas tout à fait.'}</div>
+  const ltBodyHTML = `
       ${personMismatch ? `<p class="listen-translate-feedback-warning">⚠ Repare na concordância: depois de "${escapeHtmlChallenge(personMismatch.pronoun)}", "${escapeHtmlChallenge(personMismatch.verb)}" não é a conjugação certa.</p>` : ''}
       <p class="listen-translate-feedback-row"><strong>Sua resposta</strong>${escapeHtmlChallenge(studentAnswer || '—')}</p>
       <p class="listen-translate-feedback-row"><strong>Resposta esperada</strong>${escapeHtmlChallenge(c.referenceTranslations[0])}</p>
       <p class="listen-translate-feedback-row"><strong>Frase original</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
       ${c.explanation ? `<p class="listen-translate-feedback-row"><strong>Explicação</strong>${escapeHtmlChallenge(c.explanation)}</p>` : ''}
       <button class="dictation-play-btn" id="lt-replay-btn">▶ Écouter encore</button>
-      ${challengeCompleteButtonHTML()}
-    </div>
   `;
+  document.getElementById('lt-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('listen-translate', isCorrect, isCorrect ? '✅ Bonne traduction.' : '❌ Pas tout à fait.', ltBodyHTML);
   document.getElementById('lt-verify-btn').style.display = 'none';
   document.getElementById('lt-replay-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
@@ -5701,16 +5708,13 @@ function checkAccentAnswer(c){
   const isCorrect = isAccentAnswerCorrect(studentAnswer, c.targetText);
   if (isCorrect) addXP(5);
 
-  document.getElementById('accent-feedback-wrap').innerHTML = `
-    <div class="accent-feedback ${isCorrect ? 'correct' : 'incorrect'}">
-      <div class="accent-feedback-header">${isCorrect ? '✅ Correct.' : '❌ Incorrect.'}</div>
+  const accentBodyHTML = `
       ${!isCorrect ? `<p class="accent-feedback-answer">Sua resposta: <strong>${escapeHtmlChallenge(studentAnswer || '—')}</strong></p>` : ''}
       <div class="accent-feedback-correct-word">${escapeHtmlChallenge(c.targetText)}</div>
       <button class="dictation-play-btn" id="accent-replay-btn">▶ Écouter</button>
       ${c.explanation ? `<p class="accent-feedback-explanation">${escapeHtmlChallenge(c.explanation)}</p>` : ''}
-      ${challengeCompleteButtonHTML()}
-    </div>
   `;
+  document.getElementById('accent-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('accent', isCorrect, isCorrect ? '✅ Correct.' : '❌ Incorrect.', accentBodyHTML);
   document.getElementById('accent-verify-btn').style.display = 'none';
   document.getElementById('accent-replay-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
