@@ -18,7 +18,7 @@ funcionando nos dois, não quando o código só "parece certo".
 - [x] Motor de repetição espaçada (Revisão: Errei/Difícil/Bom/Fácil) — extraído pra `shared/srs.js` (SM-2, XP_PER_GRADE, todayStr/dateStrDaysAgo), testado nos dois idiomas com progressão determinística (2025-09-01)
 - [ ] Export pra Anki (.apkg via JSZip + sql.js)
 - [x] Toast (erros e confirmações, ex: falha ao salvar progresso, +XP) — extraído pra `shared/toast.js`, testado nos dois idiomas (2025-09-01)
-- [ ] Bandeira de link cruzado pro outro idioma (topbar)
+- [x] Bandeira de link cruzado pro outro idioma (topbar) — as duas bandeiras (tela de login e topbar do app) ainda apontavam pros endereços antigos e separados (Netlify do chinês, repositório `francais-avec-prof-brune` do francês), sobra de antes da unificação. Trocadas nos dois idiomas pra apontar pra página de seleção de idioma unificada (`../../index.html`), testado com Playwright (2026-09-01).
 - [ ] Pills de estatística (streak, XP)
 - [ ] Navegação por abas
 
