@@ -1130,6 +1130,24 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .challenges-admin-empty{ text-align:center; color: var(--ink-soft); padding:30px; }
 .challenges-admin-section-title{ font-size:14px; font-weight:800; color: var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; margin:24px 0 10px; }
 .challenges-admin-section-title:first-child{ margin-top:0; }
+
+.challenges-admin-filters{
+  display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; position:sticky; top:0;
+  background: var(--paper); padding:10px 0; z-index:2; border-bottom:1px solid var(--paper-line);
+}
+.challenges-admin-filters input[type="text"]{
+  flex:1; min-width:200px; padding:9px 12px; border-radius:8px; border:1px solid var(--paper-line);
+  font-family: var(--font-body); font-size:13.5px; background: var(--paper-warm); color: var(--ink);
+}
+.challenges-admin-filters select{
+  padding:9px 10px; border-radius:8px; border:1px solid var(--paper-line);
+  font-family: var(--font-body); font-size:13px; background: var(--paper-warm); color: var(--ink);
+}
+.challenges-admin-load-more{ display:block; width:100%; margin:8px 0 24px; }
+@media (max-width:560px){
+  .challenges-admin-filters{ flex-direction:column; }
+  .challenges-admin-filters input[type="text"], .challenges-admin-filters select{ width:100%; }
+}
 .challenges-admin-edit-label{ display:block; font-size:12px; font-weight:700; color: var(--ink-soft); margin:12px 0 4px; }
 .challenges-admin-edit-input{
   width:100%; box-sizing:border-box; font-family: var(--font-body); font-size:13.5px; color: var(--ink);
