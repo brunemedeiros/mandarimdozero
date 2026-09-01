@@ -39,6 +39,11 @@ try{
   --paper-line: #E1D6C0;     /* linhas/bordas sutis */
   --jade: #3A7359;           /* verde — sucesso/acerto (funcional, fora da paleta de marca) */
   --ink-soft: #5C4E73;       /* texto secundário */
+  /* Texto legível sobre fundo vívido/claro (error-red, jade) -- branco
+     funciona no tema claro mas fica abaixo do mínimo de contraste AA no
+     escuro (essas cores ficam mais claras no escuro pra se destacar do
+     fundo escuro, então precisam de texto escuro em cima). */
+  --on-vivid: #FFFFFF;
 
   --font-display: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-body: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -66,6 +71,7 @@ try{
     --paper-line: #362C42;
     --jade: #52B487;
     --ink-soft: #C5B8D9;
+    --on-vivid: #201335;
   }
 }
 :root[data-theme="dark"]{
@@ -81,6 +87,7 @@ try{
   --paper-line: #362C42;
   --jade: #52B487;
   --ink-soft: #C5B8D9;
+  --on-vivid: #201335;
 }
 
 @font-face{
@@ -832,15 +839,18 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .grade-buttons{ display:grid; grid-template-columns: repeat(4,1fr); gap:8px; margin-top:18px; }
 .grade-btn{
   padding: 12px 6px; border-radius:12px; border:none; cursor:pointer; font-family:var(--font-body);
-  font-weight:800; font-size:13px; color:white; display:flex; flex-direction:column; gap:3px; align-items:center;
+  font-weight:800; font-size:13px; display:flex; flex-direction:column; gap:3px; align-items:center;
   transition: transform .1s ease, filter .15s;
 }
 .grade-btn:active{ transform: scale(.96); }
 .grade-btn small{ font-weight:600; font-size:10.5px; opacity:.85; }
-.grade-again{ background: var(--error-red); }
-.grade-hard{ background: #E0A526; }
-.grade-good{ background: var(--seal-red); }
-.grade-easy{ background: var(--jade); }
+/* Cor de texto escolhida por fundo (não dá pra usar uma única cor pros 4 --
+   error-red/jade têm contraste bom com branco só no tema claro, enquanto
+   hard/seal-red precisam de texto escuro nos dois temas). */
+.grade-again{ background: var(--error-red); color: var(--on-vivid); }
+.grade-hard{ background: #E0A526; color: var(--on-seal-red); }
+.grade-good{ background: var(--seal-red); color: var(--on-seal-red); }
+.grade-easy{ background: var(--jade); color: var(--on-vivid); }
 
 /* ---------- Progress / gamification view ---------- */
 .stat-cards{ display:grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:26px; }
