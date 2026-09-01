@@ -646,6 +646,19 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .exercise-dontknow:hover{ color: var(--seal-red-dark); text-decoration-color: var(--seal-red-dark); }
 .exercise-dontknow.disabled{ pointer-events:none; opacity:.4; }
 
+/* Depois de "Não sei": a dica já foi mostrada (no painel do topo) e o
+   exercício continua disponível pra uma nova tentativa -- "Ver resposta"
+   é a saída de segurança pra quem ainda não conseguir. */
+.exercise-help-followup{ margin-top:16px; display:flex; flex-direction:column; align-items:center; gap:8px; }
+.exercise-help-note{ font-size:12.5px; color: var(--ink-soft); }
+.exercise-reveal-btn{
+  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:999px;
+  padding:8px 16px; font-family: var(--font-body); font-weight:700; font-size:13px;
+  color: var(--seal-red-dark); cursor:pointer; transition: all .15s ease;
+}
+.exercise-reveal-btn:hover{ border-color: var(--imperial-gold); background: var(--paper-line); }
+.exercise-reveal-btn.disabled{ pointer-events:none; opacity:.4; }
+
 .exercise-options{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
 .exercise-option{
   background: var(--paper); border:2px solid var(--paper-line); border-radius:12px; padding:16px 12px;
