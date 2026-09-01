@@ -5259,6 +5259,15 @@ function ptVerbPersonTags(word){
     const v = PT_IRREGULAR_VERB_FORMS[word];
     return Array.isArray(v) ? v : [v];
   }
+  // Só terminações que são um sinal razoavelmente seguro de VERBO conjugado
+  // -- de propósito SEM as terminações genéricas -o (1ª pess. sing. do
+  // presente) e -a/-e (3ª pess. sing. do presente), que colidem com a
+  // imensa maioria dos substantivos/adjetivos/advérbios do português
+  // (livro, filme, já, noite...) e geravam falsos positivos constantes:
+  // qualquer palavra comum terminada em -a/-e/-o virava "erro de
+  // concordância" mesmo quando a resposta do aluno estava certa. Mesmo
+  // princípio já usado no dicionário de irregulares acima (comentário
+  // "preferimos omitir a forma a arriscar falso positivo").
   const rules = [
     [/amos$|emos$|imos$/, '1p'],
     [/astes$|estes$|istes$/, '2p'],
@@ -5268,8 +5277,6 @@ function ptVerbPersonTags(word){
     [/aste$|este$|iste$/, '2s'],
     [/ei$/, '1s'],
     [/as$|es$/, '2s'],
-    [/o$/, '1s'],
-    [/a$|e$/, '3s'],
   ];
   for (const [re, tag] of rules){
     if (re.test(word)) return [tag];
