@@ -17,7 +17,7 @@ funcionando nos dois, não quando o código só "parece certo".
 - [ ] Wizard de plano de estudo (meta diária)
 - [ ] Motor de repetição espaçada (Revisão: Errei/Difícil/Bom/Fácil)
 - [ ] Export pra Anki (.apkg via JSZip + sql.js)
-- [ ] Toast de erro (ex: falha ao salvar progresso)
+- [x] Toast (erros e confirmações, ex: falha ao salvar progresso, +XP) — extraído pra `shared/toast.js`, testado nos dois idiomas (2025-09-01)
 - [ ] Bandeira de link cruzado pro outro idioma (topbar)
 - [ ] Pills de estatística (streak, XP)
 - [ ] Navegação por abas

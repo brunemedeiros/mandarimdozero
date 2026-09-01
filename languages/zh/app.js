@@ -1442,14 +1442,7 @@ function addXP(amount){
   showToast(`+${amount} XP`);
 }
 
-function showToast(msg){
-  const layer = document.getElementById('toast-layer');
-  const el = document.createElement('div');
-  el.className = 'toast';
-  el.textContent = msg;
-  layer.appendChild(el);
-  setTimeout(() => el.remove(), 2000);
-}
+// showToast agora vem de shared/toast.js.
 
 const BADGES = [
   { id:'first_step', name:'Primeiro Passo', icon:'🌱', check: s => s.totalReviews >= 1 },
