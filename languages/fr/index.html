@@ -97,6 +97,22 @@ try{
 }
 
 *{ box-sizing: border-box; }
+/* Foco de teclado: sem isto, cada navegador desenha um anel default
+   diferente (ou nenhum, em alguns casos) -- inconsistente entre
+   botões/cards/links e sem relação visual com o resto do app. Reaproveita
+   a mesma cor já usada em todo hover (imperial-gold), então navegar por
+   Tab dá a mesma pista visual que passar o mouse -- só aparece pra quem
+   usa teclado (:focus-visible), nunca ao clicar/tocar (auditoria de
+   UX/UI, 2026-09, P3). */
+:focus-visible{ outline: 2px solid var(--imperial-gold); outline-offset: 2px; border-radius: 4px; }
+/* Reset padrão -- button/input/textarea/select NÃO herdam color/font-family
+   do body por padrão no navegador (usam a cor/fonte do sistema). Sem isso,
+   qualquer botão que não define sua própria cor (ex: .unit-card, que é um
+   elemento button puro) cai no preto do sistema -- ilegível no fundo escuro do
+   tema noturno, mesmo com --ink corretamente clareado pro modo escuro.
+   Regras que já definem sua própria cor (.btn-primary/-secondary/-gold
+   etc.) continuam intactas -- isso só corrige quem dependia do default. */
+button, input, textarea, select{ font: inherit; color: inherit; }
 html,body{ margin:0; padding:0; }
 /* Rótulo presente pro leitor de tela (associado via for/id a um campo que
    já se explica visualmente pelo placeholder) sem ocupar espaço no layout. */
@@ -319,13 +335,23 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .unit-card.grammar .unit-badge{ background: var(--brand-purple); color: var(--paper); }
 .gram-pill{ background: var(--brand-purple); color: var(--paper); font-weight:800; font-size:10px; text-transform:uppercase; letter-spacing:.04em; padding:3px 8px; border-radius:999px; }
 
-/* ---------- Módulos (estilo Busuu) ---------- */
+/* ---------- Módulos (estilo Busuu) ----------
+   Altura (8px), raio (4px) e gradiente (seal-red -> imperial-gold) unificados
+   entre TODAS as barras de progresso "quanto falta" do app (módulo, lição,
+   desafio, revisão -- auditoria de UX/UI, 2026-09): antes cada uma tinha
+   valores ligeiramente diferentes, incluindo duas com uma cor sólida (jade)
+   sem relação com o resto da paleta de progresso, por terem sido
+   implementadas em momentos separados. .unit-progress-bar e
+   .dictation-progress-track ficam de fora de propósito: a primeira é um
+   indicador compacto dentro de um card de lista, a segunda é uma barra de
+   busca de áudio arrastável -- contextos diferentes de uma barra de
+   progresso de conclusão em destaque. */
 .module-section{ margin-bottom: 28px; }
 .module-section.locked{ opacity: .55; }
 .module-header{ margin-bottom: 14px; }
 .module-header h3{ margin: 0 0 8px; font-size: 16px; }
-.module-progress-track{ height: 7px; border-radius: 4px; background: var(--paper-warm); overflow: hidden; }
-.module-progress-fill{ height: 100%; border-radius: 4px; background: var(--jade); transition: width .3s ease; }
+.module-progress-track{ height: 8px; border-radius: 4px; background: var(--paper-warm); overflow: hidden; }
+.module-progress-fill{ height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); transition: width .3s ease; }
 .module-units-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap:12px; }
 
 .unit-card.checkpoint{ border-color: var(--imperial-gold); background: rgba(227,107,202,0.06); }
@@ -385,14 +411,16 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 
 .vocab-table, .phrase-list{ display:flex; flex-direction:column; gap:1px; background:var(--paper-line); border-radius:10px; overflow:hidden; border:1px solid var(--paper-line); }
 
-/* ---------- Vocabulário palavra-por-palavra (estilo Memrise) ---------- */
+/* ---------- Sessão de aquisição por blocos (introdução + prática intercalada) ---------- */
 .vocab-card-counter{ text-align:center; font-size:12.5px; font-weight:800; color: var(--ink-soft); margin-bottom:14px; }
-.vocab-quiz-label{
+/* Comunica em que fase da sessão o aluno está agora (checagem/prática/
+   mistura/consolidação) -- sem isso a experiência lida como "uma sequência
+   de telas soltas" em vez de uma sessão de aprendizagem contínua. */
+.acq-phase-banner{
   text-align:center; font-size:12px; text-transform:uppercase; letter-spacing:.06em; font-weight:800;
   color: var(--brand-purple); background: rgba(124,77,201,0.10); border-radius:20px;
   padding:6px 14px; margin: 0 auto 16px; width:fit-content;
 }
-.vocab-quiz-continue{ margin-top:16px; }
 .vocab-card{
   background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
   padding: 32px 20px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:8px;
@@ -401,8 +429,14 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .vocab-card-word{ font-size:30px; font-weight:800; color: var(--seal-red-dark); display:flex; align-items:center; gap:10px; justify-content:center; }
 .vocab-card-trans{ font-size:17px; color: var(--ink); margin-bottom:8px; }
 
+/* Mesma caixa de "exemplo de uso" que .hanzi-appears-in/.tf-scene do zh e
+   as caixas equivalentes deste app (fundo paper-warm, borda sólida) --
+   antes era fundo=paper (igual ao da página) com borda tracejada, a única
+   caixa do app usando tracejado pra dizer "aqui tem um exemplo", enquanto
+   em todo outro lugar tracejado significa "encaixe vazio, ainda sem
+   conteúdo" (auditoria de UX/UI, 2026-09). */
 .vocab-phrase-example{
-  background: var(--paper); border:1px dashed var(--paper-line); border-radius: var(--radius);
+  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
   padding:16px; text-align:center;
 }
 .vocab-phrase-label{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; color: var(--ink-soft); font-weight:800; margin-bottom:8px; }
@@ -430,31 +464,37 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .usage-note-body{ margin:0; font-size:14.5px; line-height:1.7; color: var(--ink); }
 .usage-note-body strong{ color: var(--seal-red-dark); }
 
-/* ---------- Painel de resposta errada ("Por que errei?", estilo Duolingo) ---------- */
-.wrong-feedback{
-  margin-top:18px; background: rgba(214,38,25,0.06); border:1px solid rgba(214,38,25,0.25);
-  border-radius: var(--radius); padding:16px 18px; animation: wrongFeedbackIn .25s ease;
+/* ---------- Painel de resultado ("Por que errei?", estilo Duolingo) ----------
+   Reformulado (auditoria de UX/UI mobile-first, 2026-09): antes era uma caixa
+   com fundo+borda própria contendo OUTRA caixa com fundo+borda própria (a
+   "why") -- lia como dois widgets empilhados, não como uma continuação da
+   pergunta. Agora é UM bloco só: sem fundo tintado, sem raio de borda, só
+   uma linha divisória no topo (mesmo tom neutro nos dois estados -- a cor
+   mora só no cabeçalho, não no bloco inteiro) marcando "aqui começa o
+   resultado", com texto sempre alinhado à esquerda (a inconsistência de
+   "Onde você já viu isso" ficar centralizado enquanto o resto fica à
+   esquerda era um bug de herança da .usage-note-title, corrigido aqui). */
+.wrong-feedback, .correct-feedback{
+  margin-top:22px; padding-top:18px; border-top:1px solid var(--paper-line);
+  text-align:left; animation: wrongFeedbackIn .25s ease;
 }
 @keyframes wrongFeedbackIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
-.correct-feedback{
-  margin-top:18px; background: rgba(58,115,89,0.08); border:1px solid rgba(58,115,89,0.3);
-  border-radius: var(--radius); padding:16px 18px; animation: wrongFeedbackIn .25s ease;
+.wrong-feedback-header, .correct-feedback-header{
+  display:flex; align-items:center; gap:8px; font-weight:800; font-size:16px; margin-bottom:14px;
 }
-.correct-feedback-header{ font-weight:800; font-size:15px; color: var(--jade); margin-bottom:8px; }
-.correct-feedback-trans{ font-size:14px; color: var(--ink); margin:0 0 14px; }
-.wrong-feedback-header{ font-weight:800; font-size:15px; color: var(--error-red); margin-bottom:12px; }
+.correct-feedback-header{ color: var(--jade); }
+.correct-feedback-trans{ font-size:14.5px; color: var(--ink); line-height:1.6; margin:0 0 4px; }
+.wrong-feedback-header{ color: var(--error-red); }
 
 /* Explicação ("por que não foi essa" / a resposta) -- SEMPRE visível,
    automática, sem depender de o aluno clicar em nada. Inclui tanto o erro
    específico da questão quanto a retomada de conteúdo (frase de origem,
-   nota da unidade), num único bloco -- sem um "Rever conteúdo" à parte. */
-.wrong-feedback-why{
-  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:10px;
-  padding:14px 16px; margin-bottom:14px;
-}
-.wrong-feedback-why-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--seal-red-dark); font-weight:800; margin-bottom:6px; }
-.wrong-feedback-why .usage-note-body{ font-size:14px; margin:0; }
-.wrong-feedback-why .usage-note-title{ text-align:left; font-size:13.5px; margin:10px 0 6px; }
+   nota da unidade), num único bloco -- sem um "Rever conteúdo" à parte, e
+   sem uma segunda caixa dentro da primeira: mesma superfície do painel pai. */
+.wrong-feedback-why{ margin-bottom:16px; }
+.wrong-feedback-why-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--seal-red-dark); font-weight:800; margin-bottom:8px; }
+.wrong-feedback-why .usage-note-body{ font-size:14.5px; margin:0; text-align:left; }
+.wrong-feedback-why .usage-note-title{ text-align:left; font-size:13.5px; font-weight:800; margin:12px 0 6px; }
 .wrong-feedback-why .usage-note-title:first-child{ margin-top:0; }
 .wrong-feedback-why .grammar-note-table{ width:100%; border-collapse:collapse; margin:8px 0; font-size:13px; }
 .wrong-feedback-why .grammar-note-table td{ padding:5px 8px; border-bottom:1px solid var(--paper-line); }
@@ -533,7 +573,8 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .exercise-prompt-label{ font-size:12px; text-transform:uppercase; letter-spacing:.06em; color: var(--seal-red-dark); font-weight:800; margin-bottom:10px; }
 .exercise-prompt{
   background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
-  padding: 28px 20px; margin-bottom:20px; display:flex; flex-direction:column; align-items:center; gap:8px;
+  padding: 20px 20px; margin-bottom:20px; display:flex; flex-direction:column; align-items:center; gap:6px;
+  min-height:64px; justify-content:center;
 }
 .exercise-prompt .prompt-french{ font-size:28px; font-weight:800; }
 .exercise-prompt .prompt-audio-hint{ font-size:12.5px; color: var(--ink-soft); margin-top:4px; }
@@ -543,26 +584,28 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   text-decoration-color: var(--paper-line); text-underline-offset:3px;
 }
 .exercise-dontknow:hover{ color: var(--seal-red-dark); text-decoration-color: var(--seal-red-dark); }
-.exercise-dontknow.disabled{ pointer-events:none; opacity:.4; }
+.exercise-dontknow.disabled{ display:none; }
 
 /* Bloco da dica: substitui o próprio botão "Não sei" (não fica ao lado
    dele) e aparece no MESMO lugar em que o aluno pediu ajuda -- relação
    espacial direta entre "Não sei" e a dica, sem pular pro topo da tela nem
-   duplicar controle nenhum. */
+   duplicar controle nenhum.
+   Reformulado junto com o painel de resultado (auditoria de UX/UI
+   mobile-first, 2026-09): usava uma caixa com fundo/borda numa cor azul
+   que não existe em nenhum outro lugar da paleta do app (nem
+   seal-red/imperial-gold), com dois botões num terceiro estilo -- exatamente
+   a caixa "flutuante, desconectada da página" mostrada no print de
+   referência do estado de Dica. Agora usa a MESMA gramática visual do
+   painel de resultado (divisor no topo, sem fundo/borda própria) e os
+   botões reais do sistema (.btn-secondary), lado a lado com peso igual. */
 .inline-hint-block{
-  margin-top:16px; text-align:left; background: rgba(52,152,214,0.08);
-  border:1px solid rgba(52,152,214,0.25); border-radius: var(--radius); padding:14px 16px;
-  animation: wrongFeedbackIn .25s ease;
+  margin-top:22px; padding-top:18px; border-top:1px solid var(--paper-line);
+  text-align:left; animation: wrongFeedbackIn .25s ease;
 }
-.inline-hint-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--seal-red-dark); font-weight:800; margin-bottom:6px; }
-.inline-hint-text{ margin:0 0 14px; color: var(--ink); font-size:14px; line-height:1.5; }
-.inline-hint-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
-.inline-hint-retry-btn, .exercise-reveal-btn{
-  background: var(--paper); border:1px solid var(--paper-line); border-radius:999px;
-  padding:8px 16px; font-family: var(--font-body); font-weight:700; font-size:13px;
-  color: var(--seal-red-dark); cursor:pointer; transition: all .15s ease;
-}
-.inline-hint-retry-btn:hover, .exercise-reveal-btn:hover{ border-color: var(--imperial-gold); background: var(--paper-warm); }
+.inline-hint-label{ display:flex; align-items:center; gap:8px; font-weight:800; font-size:16px; color: var(--seal-red-dark); margin-bottom:14px; }
+.inline-hint-text{ margin:0 0 16px; color: var(--ink); font-size:14.5px; line-height:1.6; }
+.inline-hint-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+.inline-hint-actions .btn{ flex:1; min-width:140px; }
 .exercise-reveal-btn.disabled{ pointer-events:none; opacity:.4; }
 
 .exercise-options{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
@@ -658,7 +701,10 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 }
 .cloze-type-wrap input:focus{ outline:none; border-color: var(--imperial-gold); }
 .cloze-type-wrap input:disabled{ opacity:.7; }
-.vocab-type-answer{ text-align:center; font-weight:800; color: var(--seal-red-dark); margin: -6px 0 14px; }
+/* Depois de responder, o botão Verificar não tem mais função (nem "clicável
+   de novo", nem informação nova) -- some, em vez de ficar meio-apagado
+   competindo com o painel de resultado logo abaixo. */
+.cloze-type-wrap button:disabled{ display:none; }
 
 /* ---------- Tela final "Parabéns" (estilo Busuu) ---------- */
 .lesson-complete{ text-align:center; padding: 20px 4px; }
@@ -715,7 +761,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .challenge-body{ flex:1; min-width:0; }
 .challenge-label{ font-weight:700; font-size:14px; margin-bottom:8px; }
 .challenge-progress-track{ height:8px; border-radius:4px; background: var(--paper-warm); overflow:hidden; }
-.challenge-progress-fill{ height:100%; border-radius:4px; background: var(--jade); transition: width .3s ease; }
+.challenge-progress-fill{ height:100%; border-radius:4px; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); transition: width .3s ease; }
 .challenge-count{ flex-shrink:0; font-size:12.5px; font-weight:700; color: var(--ink-soft); }
 
 /* ---------- Exercício de ordenar palavras (reorder) ---------- */
@@ -738,7 +784,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 
 .reorder-blocks{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
 .reorder-block{
-  background: var(--paper); border:2px solid var(--paper-line); border-radius:10px; padding:10px 14px;
+  background: var(--paper); border:2px solid var(--paper-line); border-radius:12px; padding:10px 14px;
   cursor:pointer; font-family: var(--font-body); transition: all .12s ease; display:flex; flex-direction:column; gap:2px; align-items:center;
   font-weight:700; font-size:14px;
 }
@@ -812,8 +858,8 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .speed-gameover{ text-align:center; padding: 50px 20px; }
 .speed-gameover .big-emoji{ font-size:56px; margin-bottom:12px; }
 .speed-gameover .score-num{ font-size:38px; font-weight:800; color: var(--seal-red-dark); margin:14px 0; }
-.review-progress-bar{ flex:1; height:8px; background:var(--paper-warm); border-radius:5px; overflow:hidden; }
-.review-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:5px; transition: width .3s ease; }
+.review-progress-bar{ flex:1; height:8px; background:var(--paper-warm); border-radius:4px; overflow:hidden; }
+.review-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:4px; transition: width .3s ease; }
 .review-progress-count{ font-size:13px; font-weight:800; color:var(--ink-soft); white-space:nowrap; }
 
 /* ---------- Combinar (jogo da memória: cartas viradas, revela em pares) ---------- */
@@ -1512,6 +1558,12 @@ footer.app-footer{ text-align:center; margin-top:50px; }
 footer.app-footer img{ height:56px; opacity:.9; }
 
 /* toast for XP gain */
+/* top:18px fixo (via CSS) ficava por cima do próprio título da unidade
+   durante a lição -- nenhum número fixo cobre topbar normal e breadcrumb
+   do modo foco (que varia de altura por conteúdo) nos dois apps ao mesmo
+   tempo. shared/toast.js agora mede o header visível e ajusta este `top`
+   por JS antes de cada toast; o valor abaixo só vale antes do primeiro
+   toast (auditoria de UX/UI, 2026-09, P3). */
 #toast-layer{ position:fixed; top:18px; left:50%; transform:translateX(-50%); z-index:999; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
 .toast{ background: var(--ink); color: var(--gold-bright); font-weight:800; font-size:13px; padding:9px 16px; border-radius:999px; box-shadow: var(--shadow-lift); animation: toastIn .25s ease, toastOut .3s ease 1.7s forwards; }
 @keyframes toastIn{ from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} }
@@ -1772,12 +1824,12 @@ footer.app-footer img{ height:56px; opacity:.9; }
     <div class="stats-pills">
       <div class="pill streak">🔥 <span id="streak-count">0</span></div>
       <div class="pill xp">⭐ <span id="xp-count">0</span><span class="xp-suffix"> XP</span></div>
-      <button class="pill theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema claro/escuro">🌙</button>
+      <button class="pill theme-toggle-btn" id="theme-toggle-btn" aria-label="Alternar tema claro/escuro" title="Alternar tema claro/escuro">🌙</button>
       <div class="lang-switcher">
-        <button class="lang-switcher-btn" id="lang-switcher-btn" type="button" title="Trocar idioma"></button>
+        <button class="lang-switcher-btn" id="lang-switcher-btn" type="button" aria-label="Trocar idioma" title="Trocar idioma"></button>
         <div class="lang-switcher-dropdown" id="lang-switcher-dropdown"></div>
       </div>
-      <button class="pill user-pill" id="user-menu-btn" title="Conta">👤 <span id="user-label">Convidado</span></button>
+      <button class="pill user-pill" id="user-menu-btn" aria-label="Conta" title="Conta">👤 <span id="user-label">Convidado</span></button>
     </div>
   </div>
 
@@ -1835,9 +1887,10 @@ footer.app-footer img{ height:56px; opacity:.9; }
         <div class="lesson-progress-track" id="step-progress-wrap">
           <div class="lesson-progress-fill" id="step-progress-fill"></div>
         </div>
-        <button class="lesson-close-btn" id="back-to-path" title="Sair da lição">✕</button>
+        <button class="lesson-close-btn" id="back-to-path" aria-label="Sair da lição" title="Sair da lição">✕</button>
       </div>
 
+      <div class="acq-phase-banner" id="acq-phase-banner" style="display:none;"></div>
       <div id="step-content"></div>
 
       <div class="unit-actions">
@@ -1915,7 +1968,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
           <div class="study-plan-title">Minha meta de estudo</div>
           <div class="study-plan-sub" id="study-plan-sub"></div>
         </div>
-        <button class="study-plan-edit-btn" id="study-plan-edit-btn" title="Editar meta">✏️</button>
+        <button class="study-plan-edit-btn" id="study-plan-edit-btn" aria-label="Editar meta" title="Editar meta">✏️</button>
       </div>
       <div class="study-plan-body" id="study-plan-body"></div>
     </div>
@@ -2037,7 +2090,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
   <div class="app-modal">
     <div class="app-modal-header">
       <h3>Exportar para Anki</h3>
-      <button class="app-modal-close" id="export-modal-close">✕</button>
+      <button class="app-modal-close" id="export-modal-close" aria-label="Fechar">✕</button>
     </div>
     <div class="app-modal-body">
       <div class="export-box">
@@ -2057,7 +2110,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
   <div class="app-modal">
     <div class="app-modal-header">
       <h3>Importar desafios via JSON</h3>
-      <button class="app-modal-close" id="challenges-import-modal-close">✕</button>
+      <button class="app-modal-close" id="challenges-import-modal-close" aria-label="Fechar">✕</button>
     </div>
     <div class="app-modal-body">
       <p>Cole aqui a saída do pipeline de geração (<code>challenges_pipeline_output.json</code>, ou só o array de <code>accepted</code>) -- vai direto pro banco, sem precisar rodar SQL manualmente no Supabase.</p>
@@ -2073,7 +2126,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
   <div class="app-modal">
     <div class="app-modal-header">
       <h3>Français complet</h3>
-      <button class="app-modal-close" id="level-modal-close">✕</button>
+      <button class="app-modal-close" id="level-modal-close" aria-label="Fechar">✕</button>
     </div>
     <div class="app-modal-body">
       <div class="level-list" id="level-modal-list"></div>
@@ -2085,7 +2138,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
   <div class="app-modal study-wizard-modal">
     <div class="app-modal-header">
       <h3>Minha meta de estudo</h3>
-      <button class="app-modal-close" id="study-plan-modal-close">✕</button>
+      <button class="app-modal-close" id="study-plan-modal-close" aria-label="Fechar">✕</button>
     </div>
     <div class="app-modal-body" id="study-plan-wizard-body"></div>
   </div>
@@ -2128,6 +2181,9 @@ footer.app-footer img{ height:56px; opacity:.9; }
 <script src="../../shared/theme.js"></script>
 <script src="../../shared/srs.js"></script>
 <script src="../../shared/wizard.js"></script>
+<script src="../../shared/topbar-stats.js"></script>
+<script src="../../shared/tabs.js"></script>
+<script src="../../shared/anki-export.js"></script>
 <script src="../../shared/pwa.js"></script>
 <script src="../../shared/toast.js"></script>
 <script src="../../shared/supabase-client.js"></script>

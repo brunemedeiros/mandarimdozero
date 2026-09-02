@@ -6,7 +6,8 @@
    - Sem par pinyin/hanzi: cada item de conteúdo é só { f: francês, t: português }.
    - Sem trilha de caracteres (não existe no francês) — no lugar, aba de
      Conjugação (seleção livre de tempos + categoria de verbo, sempre as 6 pessoas).
-   - Aba Manual removida por enquanto (pendente, ver task do projeto).
+   - Aba Manual removida. Não consta em docs/PARIDADE.md como pendência --
+     se for pra voltar, é uma feature nova, não uma restauração.
    - Exportar deixou de ser aba e virou botão/modal dentro da Trilha.
    ============================================================ */
 
@@ -386,7 +387,7 @@ async function loadStateAndRender(){
   await loadState();
   renderTopbarStats();
   renderUnitsGrid();
-  renderExportDeckSelect();
+  renderExportDeckSelect(ANKI_EXPORT_CONFIG);
   maybeShowReviewReminder();
   maybeSendStudyReminder();
 }
@@ -1018,16 +1019,50 @@ function currentStepDefs(){
   return (u && u.type === 'grammar') ? STEP_DEFS_GRAMMAR : STEP_DEFS;
 }
 
-// A cada 3 palavras novas, intercala uma checagem rápida de reconhecimento
-// das palavras já mostradas — quebra a sequência pura de cards novos, que
-// ficava cansativa com muito vocabulário seguido sem nenhuma interação.
-const VOCAB_QUIZ_INTERVAL = 3;
+// ---------- Sessão de aquisição de vocabulário (introdução + prática intercalada) ----------
+// Substitui o antigo fluxo linear "Palavra 1 de N ... Palavra N de N" seguido
+// de um bag único de exercícios no final. Em vez disso, a unidade é dividida
+// em pequenos blocos de palavras novas; cada bloco passa por
+// introdução -> checagem imediata -> prática, e a partir do segundo bloco
+// os exercícios de prática misturam o bloco atual com todos os anteriores
+// (recuperação ativa, não repetição na ordem em que acabou de ver). O passo
+// final da unidade ("exercises") vira uma consolidação curta, priorizando
+// as palavras que o aluno errou mais durante a sessão em vez de repetir a
+// unidade inteira de novo -- ver buildExerciseSet(). Só se aplica a
+// unidades de vocabulário (u.type !== 'grammar' já sai mais cedo em
+// renderStep, antes de qualquer código daqui). Referência conceitual: a
+// separação do Memrise entre "aquisição" e "prática/revisão intercalada"
+// dentro da mesma sessão -- não uma cópia de interface, só do princípio.
+const ACQ_BLOCK_SIZE = 3;
+
+function buildAcquisitionBlocks(unit){
+  const n = unit.vocab.length;
+  const blocks = [];
+  let i = 0;
+  while (i < n){
+    let size = Math.min(ACQ_BLOCK_SIZE, n - i);
+    if (n - (i + size) === 1) size += 1;
+    blocks.push(Array.from({ length: size }, (_, k) => i + k));
+    i += size;
+  }
+  return blocks;
+}
+
+function freshAcquisitionState(unitId, unit){
+  return {
+    unitId,
+    blocks: buildAcquisitionBlocks(unit),
+    blockIdx: 0,
+    phase: 'intro', // 'intro' | 'checkpoint' | 'practice' | 'mixed'
+    introIdx: 0,
+    wordMisses: {},
+    introduced: {}
+  };
+}
 
 const STEP_STATE = {
   currentStep: 0,
-  vocabIndex: 0,
-  vocabUnitId: null,
-  vocabQuizActive: false,
+  acq: { unitId: null, blocks: [], blockIdx: 0, phase: 'intro', introIdx: 0, wordMisses: {}, introduced: {} },
   exerciseList: [],
   exerciseIndex: 0,
   exerciseScore: 0,
@@ -1101,8 +1136,20 @@ function renderStepProgress(){
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
 
   let intraStepFraction = 0;
-  if (stepKey === 'vocab' && u){
-    intraStepFraction = u.vocab.length ? STEP_STATE.vocabIndex / u.vocab.length : 0;
+  if (stepKey === 'vocab' && u && STEP_STATE.acq.unitId === u.id){
+    // Progresso pelo NÚMERO DE PALAVRAS já cobertas (blocos inteiros já
+    // concluídos + posição dentro do bloco/fase atual), não pela quantidade
+    // de telas percorridas -- uma checagem ou prática conta mais que só ter
+    // visto a palavra uma vez.
+    const acq = STEP_STATE.acq;
+    const totalWords = u.vocab.length || 1;
+    const wordsBeforeBlock = acq.blocks.slice(0, acq.blockIdx).flat().length;
+    const curBlockSize = (acq.blocks[acq.blockIdx] || []).length;
+    const phaseWeight = { intro: 0, checkpoint: 0.4, practice: 0.75, mixed: 0.95 }[acq.phase] || 0;
+    const withinBlock = acq.phase === 'intro'
+      ? (curBlockSize ? acq.introIdx / curBlockSize : 0)
+      : phaseWeight;
+    intraStepFraction = Math.min(1, (wordsBeforeBlock + curBlockSize * withinBlock) / totalWords);
   } else if (stepKey === 'exercises'){
     intraStepFraction = STEP_STATE.exerciseList.length ? STEP_STATE.exerciseIndex / STEP_STATE.exerciseList.length : 0;
   } else if (stepKey === 'explanation' && u && u.grammar){
@@ -1199,7 +1246,7 @@ function wireDontKnowButton(contentEl, ex, onRevealAnswer){
         ` : ''}
         <div class="inline-hint-actions">
           <button class="btn btn-secondary inline-hint-retry-btn" id="inline-hint-retry-btn">Tentar novamente</button>
-          <button class="exercise-reveal-btn" id="exercise-reveal-btn">Ver resposta</button>
+          <button class="btn btn-secondary exercise-reveal-btn" id="exercise-reveal-btn">Ver resposta</button>
         </div>
       </div>
     `;
@@ -1252,14 +1299,21 @@ function findMatchingPhrase(word, unit){
   return null;
 }
 
-function renderVocabCardStep(u, contentEl, nextBtn){
-  const total = u.vocab.length;
-  const idx = STEP_STATE.vocabIndex;
+// Cartão de introdução de UMA palavra do bloco atual (ETAPA 1). Mesmo
+// conteúdo/recursos de antes (palavra, áudio, tradução, "Já sei?", frase de
+// exemplo) -- só a posição mudou: em vez de "Palavra X de N" (a unidade
+// inteira), mostra a posição dentro do pequeno bloco atual.
+function renderBlockIntroCard(u, contentEl, nextBtn){
+  const acq = STEP_STATE.acq;
+  const block = acq.blocks[acq.blockIdx];
+  const posInBlock = acq.introIdx;
+  const idx = block[posInBlock];
   const v = u.vocab[idx];
   const cardId = `u${u.id}-v${idx}`;
   const card = STATE.cards.find(c => c.id === cardId);
   const alreadyKnown = card && card.reps > 0;
   const matchingPhrase = findMatchingPhrase(v, u);
+  acq.introduced[idx] = true;
 
   const phraseHTML = matchingPhrase ? `
     <div class="vocab-phrase-example">
@@ -1270,7 +1324,7 @@ function renderVocabCardStep(u, contentEl, nextBtn){
   ` : '';
 
   contentEl.innerHTML = `
-    <div class="vocab-card-counter">Palavra ${idx + 1} de ${total}</div>
+    <div class="vocab-card-counter">Bloco ${acq.blockIdx + 1} de ${acq.blocks.length} · Palavra ${posInBlock + 1} de ${block.length}</div>
     <div class="vocab-card">
       <div class="vocab-card-word">${v.f} ${audioBtnHTML(v.f)}</div>
       <div class="vocab-card-trans">${v.t}</div>
@@ -1290,62 +1344,112 @@ function renderVocabCardStep(u, contentEl, nextBtn){
   }
 
   nextBtn.style.display = 'flex';
-  nextBtn.textContent = idx < total - 1 ? 'Próxima palavra →' : 'Continuar →';
+  nextBtn.textContent = posInBlock < block.length - 1 ? 'Próxima palavra →' : 'Ver o que você aprendeu →';
 }
 
-// Checagem rápida entre cards de vocabulário: testa o reconhecimento de uma
-// das últimas palavras mostradas (nunca uma ainda não vista) com múltipla
-// escolha, igual ao formato "meaning" dos exercícios normais — só que com
-// seu próprio botão de continuar, já que o step-next-btn global fica
-// escondido enquanto essa tela estiver ativa.
-function renderVocabQuizStep(u, contentEl, nextBtn){
-  const idx = STEP_STATE.vocabIndex;
-  const groupStart = Math.max(0, idx + 1 - VOCAB_QUIZ_INTERVAL);
-  const seenWords = u.vocab.slice(groupStart, idx + 1);
-  const target = seenWords[Math.floor(Math.random() * seenWords.length)];
-  const distractorPool = u.vocab.filter(v => v !== target);
-  const distractors = shuffle(distractorPool).slice(0, 3);
-  const options = shuffle([target, ...distractors]);
+// ---------- Construção das filas de exercício da sessão de aquisição ----------
+function buildVocabWordExercise(unit, idx){
+  const item = unit.vocab[idx];
+  const cardId = `u${unit.id}-v${idx}`;
+  const card = STATE.cards.find(c => c.id === cardId);
+  const alreadyExposed = card && card.reps > 0;
+  const vocabFormats = ['meaning', 'meaning', 'listen'];
+  const vocabFormatsExposed = ['meaning', 'type', 'listen'];
+  const formats = alreadyExposed ? vocabFormatsExposed : vocabFormats;
+  const format = formats[idx % formats.length];
+  const pool = unit.vocab;
+  const distractors = shuffle(pool.filter(v => v !== item)).slice(0, 3);
+  const options = shuffle([item, ...distractors]);
+  return { format, item, options, vocabIdx: idx };
+}
 
-  contentEl.innerHTML = `
-    <div class="vocab-quiz-label">🧠 Checagem rápida</div>
-    <div class="exercise-prompt-label">O que significa?</div>
-    <div class="exercise-prompt">
-      <div class="prompt-french">${target.f}</div>
-      ${audioBtnHTML(target.f)}
-    </div>
-    <div class="exercise-options">${options.map((opt, i) => `
-      <button class="exercise-option" data-idx="${i}"><div class="opt-text">${opt.t}</div></button>
-    `).join('')}</div>
-    <button class="btn btn-primary btn-block vocab-quiz-continue" id="vocab-quiz-continue-btn" style="display:none;">Continuar →</button>
-  `;
-
-  wireAudioButtons(contentEl);
-  if (canSpeakFrench(target.f)) speakFrench(target.f, contentEl.querySelector('.audio-btn'));
-  nextBtn.style.display = 'none';
-
-  let answered = false;
-  contentEl.querySelectorAll('.exercise-option').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (answered) return;
-      answered = true;
-      const chosenIdx = parseInt(btn.dataset.idx);
-      contentEl.querySelectorAll('.exercise-option').forEach((b, i) => {
-        b.classList.add('disabled');
-        if (options[i] === target) b.classList.add('correct');
-        else if (i === chosenIdx) b.classList.add('incorrect');
-      });
-      document.getElementById('vocab-quiz-continue-btn').style.display = 'flex';
-    });
+// Checagem imediata do bloco (ETAPA 2): recuperação ativa de reconhecimento
+// (formato "meaning") pra CADA palavra recém-introduzida no bloco.
+function buildBlockCheckpointQueue(unit, blockIndices){
+  return blockIndices.map(idx => {
+    const item = unit.vocab[idx];
+    const distractors = shuffle(unit.vocab.filter(v => v !== item)).slice(0, 3);
+    return { format: 'meaning', item, options: shuffle([item, ...distractors]), vocabIdx: idx };
   });
+}
 
-  document.getElementById('vocab-quiz-continue-btn').addEventListener('click', () => {
-    STEP_STATE.vocabQuizActive = false;
-    if (STEP_STATE.vocabIndex < u.vocab.length - 1){
-      STEP_STATE.vocabIndex += 1;
+// Prática mista (ETAPA 5): uma rodada por palavra já introduzida (bloco atual
+// + todos os anteriores), embaralhada. Palavras com erro nesta sessão ganham
+// uma repetição extra.
+function buildMixedQueue(unit, introducedIndices){
+  const acq = STEP_STATE.acq;
+  const base = introducedIndices.map(idx => buildVocabWordExercise(unit, idx));
+  const extra = introducedIndices
+    .filter(idx => (acq.wordMisses[idx] || 0) >= 1)
+    .map(idx => buildVocabWordExercise(unit, idx));
+  return shuffle([...base, ...extra]);
+}
+
+function buildPracticeQueue(unit, blockIndices){
+  return blockIndices.map(idx => buildVocabWordExercise(unit, idx));
+}
+
+// Fim da introdução do bloco atual -> começa a checagem imediata (ETAPA 2).
+function finishBlockIntro(){
+  const acq = STEP_STATE.acq;
+  const u = UNITS.find(x => x.id === STATE.currentUnitId);
+  acq.phase = 'checkpoint';
+  STEP_STATE.exerciseList = buildBlockCheckpointQueue(u, acq.blocks[acq.blockIdx]);
+  STEP_STATE.exerciseIndex = 0;
+  STEP_STATE.exerciseScore = 0;
+  setAcqPhaseBanner(acqPhaseBannerText('checkpoint'));
+  renderExerciseStep();
+}
+
+// Chamado quando a fila de exercícios da fase atual (checkpoint/practice/
+// mixed) se esgota -- decide a PRÓXIMA fase da sessão de aquisição.
+function advanceAcquisitionPhase(){
+  const acq = STEP_STATE.acq;
+  const u = UNITS.find(x => x.id === STATE.currentUnitId);
+
+  if (acq.phase === 'checkpoint'){
+    acq.phase = 'practice';
+    STEP_STATE.exerciseList = buildPracticeQueue(u, acq.blocks[acq.blockIdx]);
+    STEP_STATE.exerciseIndex = 0;
+    STEP_STATE.exerciseScore = 0;
+    setAcqPhaseBanner(acqPhaseBannerText('practice'));
+    renderExerciseStep();
+    return;
+  }
+
+  if (acq.phase === 'practice'){
+    if (acq.blockIdx > 0){
+      acq.phase = 'mixed';
+      const introducedIdx = acq.blocks.slice(0, acq.blockIdx + 1).flat();
+      STEP_STATE.exerciseList = buildMixedQueue(u, introducedIdx);
+      STEP_STATE.exerciseIndex = 0;
+      STEP_STATE.exerciseScore = 0;
+      setAcqPhaseBanner(acqPhaseBannerText('mixed'));
+      renderExerciseStep();
+      return;
     }
+    advanceToNextBlockOrConsolidation();
+    return;
+  }
+
+  if (acq.phase === 'mixed'){
+    advanceToNextBlockOrConsolidation();
+  }
+}
+
+// Acabou o ciclo do bloco atual: introduz o próximo bloco (ETAPA 4/6), ou,
+// se não houver mais blocos, segue o fluxo normal da unidade.
+function advanceToNextBlockOrConsolidation(){
+  const acq = STEP_STATE.acq;
+  if (acq.blockIdx < acq.blocks.length - 1){
+    acq.blockIdx += 1;
+    acq.phase = 'intro';
+    acq.introIdx = 0;
     renderStep();
-  });
+  } else {
+    STEP_STATE.currentStep += 1;
+    renderStep();
+  }
 }
 
 // ---------- Unidades de gramática (Explicação em blocos, estilo Busuu → Exercícios) ----------
@@ -1407,7 +1511,38 @@ function lessonStars(pct){
   return Math.max(1, Math.round((pct / 100) * 5));
 }
 
+// Comunica em que fase da sessão de aquisição o aluno está agora -- pra que
+// a experiência pareça uma sessão contínua ("estou aprendendo -> agora
+// consigo usar -> agora misturando") em vez de uma sequência de telas soltas
+// sem relação entre si. Escondido por padrão a cada renderStep(); cada fase
+// que precisa dele liga explicitamente.
+// Some fases (checkpoint/practice/mixed/consolidação) são iniciadas por
+// funções que chamam renderExerciseStep() diretamente (não renderStep()),
+// pra não reconstruir a fila à toa -- então também escondem aqui o botão
+// "Voltar" global, que só tem sentido na introdução do bloco.
+function setAcqPhaseBanner(text){
+  const el = document.getElementById('acq-phase-banner');
+  if (el){
+    el.textContent = text;
+    el.style.display = 'block';
+  }
+  const backBtn = document.getElementById('step-back-btn');
+  if (backBtn) backBtn.style.display = 'none';
+}
+function hideAcqPhaseBanner(){
+  const el = document.getElementById('acq-phase-banner');
+  if (el) el.style.display = 'none';
+}
+function acqPhaseBannerText(phase){
+  return {
+    checkpoint: '🧠 Checagem rápida',
+    practice: '✏️ Praticando o que você acabou de ver',
+    mixed: '🔀 Misturando com o que você já viu'
+  }[phase] || null;
+}
+
 function renderLessonCompleteScreen(contentEl, nextBtn, { correct, total, recapItems, nextLabel }){
+  hideAcqPhaseBanner();
   maybeShowStreakCelebration();
   const pct = total ? Math.round((correct / total) * 100) : 0;
   const stars = lessonStars(pct);
@@ -1558,10 +1693,14 @@ function renderStep(){
   const contentEl = document.getElementById('step-content');
   const backBtn = document.getElementById('step-back-btn');
   const nextBtn = document.getElementById('step-next-btn');
+  hideAcqPhaseBanner();
 
   renderStepProgress();
+  // Durante checkpoint/practice/mixed, o "Voltar" não faz sentido (a
+  // navegação é do próprio motor de exercícios, sem histórico pra desfazer)
+  // -- só aparece na introdução do bloco.
   const showBack = STEP_STATE.currentStep > 0
-    || (stepKey === 'vocab' && STEP_STATE.vocabIndex > 0)
+    || (stepKey === 'vocab' && STEP_STATE.acq.phase === 'intro' && (STEP_STATE.acq.blockIdx > 0 || STEP_STATE.acq.introIdx > 0))
     || (stepKey === 'explanation' && STEP_STATE.explanationIndex > 0);
   backBtn.style.display = showBack ? 'inline-flex' : 'none';
 
@@ -1584,15 +1723,19 @@ function renderStep(){
   }
 
   if (stepKey === 'vocab'){
-    if (STEP_STATE.vocabUnitId !== u.id){
-      STEP_STATE.vocabIndex = 0;
-      STEP_STATE.vocabUnitId = u.id;
-      STEP_STATE.vocabQuizActive = false;
+    if (STEP_STATE.acq.unitId !== u.id){
+      STEP_STATE.acq = freshAcquisitionState(u.id, u);
     }
-    if (STEP_STATE.vocabQuizActive){
-      renderVocabQuizStep(u, contentEl, nextBtn);
+    if (STEP_STATE.acq.phase === 'intro'){
+      renderBlockIntroCard(u, contentEl, nextBtn);
     } else {
-      renderVocabCardStep(u, contentEl, nextBtn);
+      // checkpoint / practice / mixed reaproveitam o motor de exercícios
+      // (STEP_STATE.exerciseList/exerciseIndex) -- a navegação própria dele
+      // controla o avanço, sem o botão global "Continuar".
+      const bannerText = acqPhaseBannerText(STEP_STATE.acq.phase);
+      if (bannerText) setAcqPhaseBanner(bannerText);
+      renderExerciseStep();
+      nextBtn.style.display = 'none';
     }
 
   } else if (stepKey === 'exercises'){
@@ -1602,6 +1745,7 @@ function renderStep(){
       STEP_STATE.exerciseIndex = 0;
       STEP_STATE.exerciseScore = 0;
     }
+    setAcqPhaseBanner('🧩 Consolidação da unidade');
     renderExerciseStep();
 
   } else if (stepKey === 'dialogue'){
@@ -1640,16 +1784,23 @@ function renderStep(){
 document.getElementById('step-back-btn').addEventListener('click', () => {
   const stepKey = currentStepDefs()[STEP_STATE.currentStep].key;
 
-  if (stepKey === 'vocab' && STEP_STATE.vocabQuizActive){
-    STEP_STATE.vocabQuizActive = false;
-    renderStep();
-    return;
-  }
-
-  if (stepKey === 'vocab' && STEP_STATE.vocabIndex > 0){
-    STEP_STATE.vocabIndex -= 1;
-    renderStep();
-    return;
+  // No passo de vocabulário, "Voltar" recua palavra a palavra dentro do
+  // bloco atual (e entre blocos) antes de sair do passo -- não existe
+  // "voltar" dentro de checkpoint/practice/mixed (o botão fica escondido
+  // nessas fases, ver renderStep).
+  if (stepKey === 'vocab' && STEP_STATE.acq.phase === 'intro'){
+    const acq = STEP_STATE.acq;
+    if (acq.introIdx > 0){
+      acq.introIdx -= 1;
+      renderStep();
+      return;
+    }
+    if (acq.blockIdx > 0){
+      acq.blockIdx -= 1;
+      acq.introIdx = acq.blocks[acq.blockIdx].length - 1;
+      renderStep();
+      return;
+    }
   }
 
   if (stepKey === 'explanation' && STEP_STATE.explanationIndex > 0){
@@ -1701,20 +1852,21 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
 
   const stepKey = currentStepDefs()[STEP_STATE.currentStep].key;
 
+  // No passo de vocabulário, o botão "Continuar" só existe na fase de
+  // introdução (checkpoint/practice/mixed escondem o botão global e avançam
+  // pela navegação própria dos exercícios).
   if (stepKey === 'vocab'){
-    const u = UNITS.find(x => x.id === STATE.currentUnitId);
-    const isQuizPoint = (STEP_STATE.vocabIndex + 1) % VOCAB_QUIZ_INTERVAL === 0
-      && STEP_STATE.vocabIndex < u.vocab.length - 1;
-    if (isQuizPoint){
-      STEP_STATE.vocabQuizActive = true;
-      renderStep();
-      return;
+    const acq = STEP_STATE.acq;
+    if (acq.phase === 'intro'){
+      const block = acq.blocks[acq.blockIdx];
+      if (acq.introIdx < block.length - 1){
+        acq.introIdx += 1;
+        renderStep();
+      } else {
+        finishBlockIntro();
+      }
     }
-    if (STEP_STATE.vocabIndex < u.vocab.length - 1){
-      STEP_STATE.vocabIndex += 1;
-      renderStep();
-      return;
-    }
+    return;
   }
 
   if (stepKey === 'explanation'){
@@ -1744,24 +1896,42 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
 // ---------- Geração dos exercícios (múltipla escolha + ordenar, estilo Memrise) ----------
 // A pergunta sempre mostra a palavra/frase em francês (com áudio) e pede a
 // tradução em português como resposta.
-function buildExerciseSet(unit){
-  const vocabFormats = ['meaning', 'meaning', 'listen'];
-  // "Digite o que ouviu" só entra na rotação depois que a palavra já foi
-  // vista pelo menos uma vez em múltipla escolha (reps>0 no card de SRS) —
-  // igual ao Memrise, nunca pede pra digitar uma palavra ainda não exposta.
-  const vocabFormatsExposed = ['meaning', 'type', 'listen'];
-  const pool = unit.vocab;
+// ---------- Consolidação final da unidade (ETAPA 7) ----------
+// Depois que a aquisição por blocos já deu a cada palavra checagem + prática
+// (+ mistura, a partir do 2º bloco), repetir a unidade inteira de novo aqui
+// seria só reexpor conteúdo já praticado à toa. Em vez disso, prioriza quem
+// errou durante a sessão e pega só uma amostra do resto -- consolidação como
+// recuperação e aplicação, não como "mostrar tudo de novo". Se o estado de
+// aquisição não corresponder a esta unidade (estado inconsistente), cai de
+// volta pra cobrir todas as palavras.
+// CONSOLIDATION_CAP existe pra a consolidação continuar CURTA mesmo numa
+// sessão onde o aluno errou muitas palavras -- sem teto, "priorizar quem
+// errou" vira o oposto do pedido (uma sessão que só cresce quanto mais o
+// aluno erra). Cobre cada palavra errada 1x primeiro; só dá uma 2ª rodada
+// pra elas se ainda sobrar espaço dentro do teto.
+const CONSOLIDATION_CAP = 10;
+function buildConsolidationVocabExercises(unit){
+  const acq = STEP_STATE.acq;
+  const total = unit.vocab.length;
+  if (!acq || acq.unitId !== unit.id || !acq.blocks.length){
+    return unit.vocab.map((_, i) => buildVocabWordExercise(unit, i));
+  }
 
-  const vocabExercises = pool.map((item, i) => {
-    const cardId = `u${unit.id}-v${i}`;
-    const card = STATE.cards.find(c => c.id === cardId);
-    const alreadyExposed = card && card.reps > 0;
-    const formats = alreadyExposed ? vocabFormatsExposed : vocabFormats;
-    const format = formats[i % formats.length];
-    const distractors = shuffle(pool.filter(v => v !== item)).slice(0, 3);
-    const options = shuffle([item, ...distractors]);
-    return { format, item, options };
-  });
+  const cap = Math.min(total, CONSOLIDATION_CAP);
+  const allIdx = Array.from({ length: total }, (_, i) => i);
+  const missedIdx = shuffle(allIdx.filter(i => (acq.wordMisses[i] || 0) >= 1));
+  const otherIdx = shuffle(allIdx.filter(i => !missedIdx.includes(i)));
+
+  const picks = [];
+  missedIdx.forEach(i => { if (picks.length < cap) picks.push(i); });
+  otherIdx.forEach(i => { if (picks.length < cap) picks.push(i); });
+  missedIdx.forEach(i => { if (picks.length < cap) picks.push(i); }); // reforço extra, só se sobrar espaço
+
+  return picks.map(i => buildVocabWordExercise(unit, i));
+}
+
+function buildExerciseSet(unit){
+  const vocabExercises = buildConsolidationVocabExercises(unit);
 
   // Frases da unidade viram exercício de "ordenar" ou de "cenário" (index par/ímpar),
   // pra variar o formato sem dobrar o total de exercícios por lição.
@@ -1822,6 +1992,15 @@ function renderExerciseStep(){
   renderStepProgress();
 
   if (STEP_STATE.exerciseIndex >= total){
+    // Dentro do passo "vocab", este motor de exercícios também roda as
+    // fases de checkpoint/practice/mixed da sessão de aquisição -- esgotar
+    // a fila aqui significa "avance de fase", não "termine a unidade". Só
+    // vira tela de conclusão de verdade na consolidação final (passo
+    // "exercises").
+    if (currentStepDefs()[STEP_STATE.currentStep].key === 'vocab'){
+      advanceAcquisitionPhase();
+      return;
+    }
     renderLessonCompleteScreen(contentEl, nextBtn, {
       correct: STEP_STATE.exerciseScore, total,
       recapItems: [...u.vocab, ...(u.phrases || [])]
@@ -1913,6 +2092,13 @@ function answerExplanationHTML(ex){
 // acerto normal, mas o rótulo comunica ao aluno qual foi o caso.
 function showAnswerPanel(contentEl, ex, opts = {}){
   const revealed = !!opts.revealed;
+  // Erro de verdade (não "Não sei", que não conta como erro) numa palavra
+  // com vocabIdx marcado: soma na contagem LOCAL DESTA SESSÃO, usada pra
+  // decidir reforço extra na prática mista e prioridade na consolidação
+  // final (ETAPA 7) -- não mexe no lapses/SM-2 persistente.
+  if (!revealed && ex && typeof ex.vocabIdx === 'number' && STEP_STATE.acq.unitId === STATE.currentUnitId){
+    STEP_STATE.acq.wordMisses[ex.vocabIdx] = (STEP_STATE.acq.wordMisses[ex.vocabIdx] || 0) + 1;
+  }
   const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
   const explanation = answerExplanationHTML(ex);
   const panel = document.createElement('div');
@@ -2034,7 +2220,6 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
         <input type="text" id="vocab-type-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite em francês">
         <button class="btn btn-primary btn-block" id="vocab-type-verify-btn">Verificar</button>
       </div>
-      <div class="vocab-type-answer" id="vocab-type-answer" style="display:none;"></div>
       <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
     </div>
   `;
@@ -2064,10 +2249,10 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
       registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
       goToNextExercise();
     } else {
-      const answerEl = document.getElementById('vocab-type-answer');
-      answerEl.textContent = `Resposta certa: ${ex.item.f}`;
-      answerEl.style.display = 'block';
-      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
+      // A resposta certa já aparece dentro do próprio painel de resultado
+      // (answerExplanationHTML mostra ex.item.f) -- sem repetir aqui como um
+      // texto solto antes do painel, num estilo diferente.
+      showWrongAnswerPanel(contentEl, ex);
     }
   }
 
@@ -2082,10 +2267,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   wireDontKnowButton(contentEl, ex, () => {
     STEP_STATE.exerciseAnswered = true;
     lockInputs();
-    const answerEl = document.getElementById('vocab-type-answer');
-    answerEl.textContent = `Resposta certa: ${ex.item.f}`;
-    answerEl.style.display = 'block';
-    setTimeout(() => showAnswerPanel(contentEl, ex, { revealed: true }), 300);
+    showAnswerPanel(contentEl, ex, { revealed: true });
   });
 }
 
@@ -2225,7 +2407,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       <div class="exercise-prompt-label">Complete a frase</div>
       <div class="cloze-sentence">${sentenceHTML}</div>
       <div class="cloze-audio-row" id="cloze-audio-row"></div>
-      <div class="cloze-trans">${ex.phrase.t}</div>
+      <div class="cloze-trans" id="cloze-trans"></div>
       ${mode === 'type' ? `
         <div class="cloze-type-wrap">
           <input type="text" id="cloze-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a palavra que falta">
@@ -2244,6 +2426,11 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
   function revealBlank(state){
     document.getElementById('cloze-blank').textContent = ex.correctBlock.f;
     document.getElementById('cloze-blank').classList.add(state === 'wrong' ? 'incorrect' : 'correct');
+
+    // A tradução da frase só aparece depois de responder -- do mesmo jeito
+    // que o áudio abaixo, ela entregaria a resposta de graça se aparecesse
+    // antes (a palavra que falta costuma estar literalmente na tradução).
+    document.getElementById('cloze-trans').textContent = ex.phrase.t;
 
     // O áudio só aparece (e toca sozinho) depois de responder — antes disso
     // ele entregaria a resposta de graça, sem precisar completar a frase.
@@ -2383,6 +2570,12 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
     slotsEl.querySelectorAll('.reorder-slot').forEach(slot => {
       slot.classList.add(isCorrect ? 'correct' : 'incorrect');
     });
+    // Com a frase completa, todo bloco já foi usado (visibility:hidden --
+    // preserva a posição pra "desfazer" clicando num slot) -- mas essa
+    // desfeita não existe mais depois de respondido, então a fileira de
+    // blocos invisíveis só reservava um vão vazio até o painel de
+    // resultado. Some com a fileira inteira.
+    blocksEl.style.display = 'none';
     document.getElementById('exercise-dontknow-btn')?.classList.add('disabled');
     contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
 
@@ -3503,244 +3696,79 @@ function renderActivityHeatmap(){
   `;
 }
 
-function renderTopbarStats(){
-  document.getElementById('streak-count').textContent = STATE.streak;
-  document.getElementById('xp-count').textContent = STATE.xp;
-}
+// renderTopbarStats() agora vem de shared/topbar-stats.js (idêntico nos dois idiomas).
 
 // ============================================================
 // TABS / navegação
 // ============================================================
-function switchTab(tab){
-  stopExerciseAudio();
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById(`view-${tab}`).classList.add('active');
-
-  if (tab !== 'review'){
-    stopSpeedTimer();
-    stopMatchTimer();
-  }
-  if (tab !== 'dictation'){
-    stopDictationAudio();
-  }
-
-  if (tab === 'review'){
-    if (STATE.reviewSessionUnitFilter){
-      document.getElementById('review-mode-select-wrap').style.display = 'none';
-      document.getElementById('review-session-wrap').style.display = 'block';
-      document.getElementById('review-content').style.display = 'block';
-      document.getElementById('speed-review-content').style.display = 'none';
-      startReviewSession();
-    } else {
-      document.getElementById('review-mode-select-wrap').style.display = 'block';
-      document.getElementById('review-session-wrap').style.display = 'none';
-      renderReviewModeSelect();
+// switchTab() vem de shared/tabs.js -- só as partes específicas do francês
+// (parar áudio/timers, o que renderizar em cada aba própria) ficam aqui.
+const switchTab = createTabSwitcher({
+  onBeforeSwitch(tab){
+    stopExerciseAudio();
+    if (tab !== 'review'){
+      stopSpeedTimer();
+      stopMatchTimer();
     }
+    if (tab !== 'dictation'){
+      stopDictationAudio();
+    }
+  },
+  tabHandlers: {
+    conjugaison: renderConjSelectScreen,
+    progress: renderProgressView,
+    path: renderUnitsGrid,
+    dictation: renderDictationList,
+    challenges: renderChallengeCategories,
   }
-  if (tab === 'conjugaison'){ renderConjSelectScreen(); }
-  if (tab === 'progress'){ renderProgressView(); }
-  if (tab === 'path'){ renderUnitsGrid(); }
-  if (tab === 'dictation'){ renderDictationList(); }
-  if (tab === 'challenges'){ renderChallengeCategories(); }
-}
+});
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => switchTab(btn.dataset.tab));
 });
 
 // ============================================================
-// EXPORTAÇÃO .apkg (formato real do Anki via sql.js + JSZip)
-// Acessível por um botão na Trilha (não é mais aba própria).
+// EXPORTAÇÃO .apkg (motor comum em shared/anki-export.js) — só o que é
+// específico do francês (campos, template, nome do baralho/arquivo, filtro
+// de unidades) fica aqui. Acessível por um botão na Trilha (não é mais aba própria).
 // ============================================================
-let exportSelectedUnit = 'all';
-
-document.getElementById('export-open-btn').addEventListener('click', () => {
-  renderExportDeckSelect();
-  document.getElementById('export-modal').style.display = 'flex';
-});
-document.getElementById('export-modal-close').addEventListener('click', () => {
-  document.getElementById('export-modal').style.display = 'none';
-});
-document.getElementById('export-modal').addEventListener('click', (e) => {
-  if (e.target.id === 'export-modal'){
-    document.getElementById('export-modal').style.display = 'none';
-  }
-});
-
-function renderExportDeckSelect(){
-  const wrap = document.getElementById('export-deck-select');
-  const options = [{id:'all', label:'Todas as unidades'}].concat(
-    UNITS.filter(u => u.type !== 'grammar').map(u => {
+const ANKI_EXPORT_CONFIG = {
+  modelName: "Francês do Zero",
+  fields: [
+    { name:"Francês", ord:0, font:"Arial", size:22 },
+    { name:"Tradução", ord:1, font:"Arial", size:18 }
+  ],
+  qfmt: "<div style='text-align:center;font-size:26px;color:#1D5A82;font-weight:bold;'>{{Francês}}</div>",
+  afmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:18px;color:#5C4E73;'>{{Tradução}}</div>",
+  css: ".card { font-family: 'Nunito', Arial, sans-serif; text-align: center; background-color: #FAF5EA; color:#201335; }",
+  deckDesc: "Exportado do app Francês do Zero",
+  guidPrefix: "fzc_",
+  unitOptions(){
+    return UNITS.filter(u => u.type !== 'grammar').map(u => {
       const { num } = unitOrdinalInfo(u, unitsOfLevel(u.level));
       return { id: String(u.id), label: `${u.level} · ${num}. ${u.title}` };
-    })
-  );
-  wrap.innerHTML = options.map(o => `<button class="deck-chip ${exportSelectedUnit===o.id?'active':''}" data-id="${o.id}">${o.label}</button>`).join('');
-  wrap.querySelectorAll('.deck-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      exportSelectedUnit = chip.dataset.id;
-      renderExportDeckSelect();
     });
-  });
-}
-
-function randId(){
-  return Date.now() + Math.floor(Math.random()*100000);
-}
-
-async function generateApkg(){
-  const statusEl = document.getElementById('export-status');
-  statusEl.textContent = 'Gerando arquivo...';
-  statusEl.className = 'export-status';
-
-  try{
-    const SQL = await initSqlJs({ locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}` });
-    const db = new SQL.Database();
-
-    db.run(`
-      CREATE TABLE col (
-        id integer primary key, crt integer, mod integer, scm integer, ver integer,
-        dty integer, usn integer, ls integer, conf text, models text, decks text,
-        dconf text, tags text
-      );
-      CREATE TABLE notes (
-        id integer primary key, guid text, mid integer, mod integer, usn integer,
-        tags text, flds text, sfld text, csum integer, flags integer, data text
-      );
-      CREATE TABLE cards (
-        id integer primary key, nid integer, did integer, ord integer, mod integer,
-        usn integer, type integer, queue integer, due integer, ivl integer,
-        factor integer, reps integer, lapses integer, left integer, odue integer,
-        odid integer, flags integer, data text
-      );
-      CREATE TABLE revlog (
-        id integer primary key, cid integer, usn integer, ease integer, ivl integer,
-        lastIvl integer, factor integer, time integer, type integer
-      );
-      CREATE TABLE graves (usn integer, oid integer, type integer);
-      CREATE INDEX ix_notes_usn ON notes (usn);
-      CREATE INDEX ix_cards_usn ON cards (usn);
-      CREATE INDEX ix_revlog_usn ON revlog (usn);
-      CREATE INDEX ix_cards_nid ON cards (nid);
-      CREATE INDEX ix_cards_sched ON cards (did, queue, due);
-      CREATE INDEX ix_notes_csum ON notes (csum);
-    `);
-
-    const now = Math.floor(Date.now()/1000);
-    const modelId = randId();
-    const deckId = randId();
-
-    const deckName = exportSelectedUnit === 'all'
+  },
+  deckName(sel){
+    return sel === 'all'
       ? 'Francês do Zero - A1'
-      : `Francês do Zero - ${UNITS.find(u=>String(u.id)===exportSelectedUnit).title}`;
+      : `Francês do Zero - ${UNITS.find(u=>String(u.id)===sel).title}`;
+  },
+  cards(sel){
+    return sel === 'all' ? STATE.cards : STATE.cards.filter(c => String(c.unitId) === sel);
+  },
+  noteFields(card){
+    return [card.front, card.back_trans];
+  },
+  sortField(card){
+    return card.front;
+  },
+  filename(sel){
+    return `frances-do-zero-${sel === 'all' ? 'completo' : 'unidade-'+sel}.apkg`;
+  },
+};
 
-    const model = {
-      [modelId]: {
-        id: modelId, name: "Francês do Zero", type: 0, mod: now, usn: -1,
-        sortf: 0, did: deckId,
-        flds: [
-          { name:"Francês", ord:0, font:"Arial", size:22 },
-          { name:"Tradução", ord:1, font:"Arial", size:18 }
-        ],
-        tmpls: [
-          {
-            name: "Cartão 1", ord:0,
-            qfmt: "<div style='text-align:center;font-size:26px;color:#1D5A82;font-weight:bold;'>{{Francês}}</div>",
-            afmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:18px;color:#5C4E73;'>{{Tradução}}</div>",
-            bqfmt:"", bafmt:"", did: null
-          }
-        ],
-        css: ".card { font-family: 'Nunito', Arial, sans-serif; text-align: center; background-color: #FAF5EA; color:#201335; }",
-        latexPre: "", latexPost: "", latexsvg:false, req: [[0,"any",[0]]]
-      }
-    };
-
-    const decks = {
-      "1": { id:1, name:"Default", extendRev:50, usn:0, collapsed:false, newToday:[0,0], revToday:[0,0], lrnToday:[0,0], timeToday:[0,0], conf:1, desc:"", dyn:0 },
-      [deckId]: { id:deckId, name: deckName, extendRev:50, usn:-1, collapsed:false, newToday:[0,0], revToday:[0,0], lrnToday:[0,0], timeToday:[0,0], conf:1, desc:"Exportado do app Francês do Zero", dyn:0 }
-    };
-
-    const dconf = {
-      "1": { id:1, name:"Default", new:{delays:[1,10],ints:[1,4,7],initialFactor:2500,perDay:20,order:1}, rev:{perDay:200,ease4:1.3,fuzz:0.05,ivlFct:1,maxIvl:36500}, lapse:{delays:[10],mult:0,minInt:1,leechFails:8,leechAction:0}, timer:0, misc:{} }
-    };
-
-    const conf = { curDeck: deckId, curModel: String(modelId), nextPos:1, sortType:"noteFld", sortBackwards:false, activeDecks:[deckId] };
-
-    db.run(`INSERT INTO col VALUES (1, ?, ?, ?, 11, 0, 0, 0, ?, ?, ?, ?, ?)`, [
-      now, now*1000, now*1000,
-      JSON.stringify(conf), JSON.stringify(model), JSON.stringify(decks),
-      JSON.stringify(dconf), JSON.stringify({})
-    ]);
-
-    const exportCards = exportSelectedUnit === 'all'
-      ? STATE.cards
-      : STATE.cards.filter(c => String(c.unitId) === exportSelectedUnit);
-
-    if (!exportCards.length){
-      statusEl.textContent = 'Nenhum cartão para exportar nessa seleção.';
-      statusEl.className = 'export-status err';
-      return;
-    }
-
-    let usnCounter = -1;
-    const baseId = Date.now();
-    exportCards.forEach((card, i) => {
-      const noteId = baseId + (i * 2);
-      const cardId = baseId + (i * 2) + 1;
-      const flds = [card.front, card.back_trans].join('\x1f');
-      const sfld = card.front;
-      const csum = simpleChecksum(sfld);
-      const guid = `fzc_${card.id}`;
-
-      db.run(`INSERT INTO notes VALUES (?,?,?,?,?,?,?,?,?,?,?)`, [
-        noteId, guid, modelId, now, usnCounter, `unidade${card.unitId} `, flds, sfld, csum, 0, ""
-      ]);
-
-      db.run(`INSERT INTO cards VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
-        cardId, noteId, deckId, 0, now, usnCounter,
-        0, 0, i, 0, 2500, 0, 0, 0, 0, 0, 0, ""
-      ]);
-    });
-
-    db.run(`INSERT INTO graves SELECT -1, 0, 0 WHERE 0`);
-
-    const dbBytes = db.export();
-
-    const zip = new JSZip();
-    zip.file("collection.anki2", dbBytes);
-    zip.file("media", JSON.stringify({}));
-
-    const blob = await zip.generateAsync({ type:"blob" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `frances-do-zero-${exportSelectedUnit === 'all' ? 'completo' : 'unidade-'+exportSelectedUnit}.apkg`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 4000);
-
-    statusEl.textContent = `Exportado! ${exportCards.length} cartão(ões) no arquivo .apkg — importe direto no Anki.`;
-    statusEl.className = 'export-status ok';
-
-  }catch(err){
-    console.error(err);
-    statusEl.textContent = 'Não foi possível gerar o arquivo agora. Tente novamente.';
-    statusEl.className = 'export-status err';
-  }
-}
-
-function simpleChecksum(str){
-  let hash = 0;
-  for (let i=0;i<str.length;i++){
-    hash = ((hash << 5) - hash) + str.charCodeAt(i);
-    hash |= 0;
-  }
-  return Math.abs(hash) % 100000000;
-}
-
-document.getElementById('export-btn').addEventListener('click', generateApkg);
+wireAnkiExportModal(ANKI_EXPORT_CONFIG);
 
 // ============================================================
 // CONJUGAÇÃO — seleção livre de tempos + categoria de verbo, sempre as 6 pessoas
@@ -4234,7 +4262,7 @@ function openDictationPlayer(id){
     <div class="dictation-audio-player">
       <div class="dictation-transport">
         <button class="dictation-play-btn" id="dictation-play-btn">▶️ Ouvir o ditado</button>
-        <button class="dictation-icon-btn" id="dictation-restart-btn" title="Reiniciar">↺</button>
+        <button class="dictation-icon-btn" id="dictation-restart-btn" aria-label="Reiniciar" title="Reiniciar">↺</button>
       </div>
       <div class="dictation-scrub-row">
         <span class="dictation-time" id="dictation-time-current">00:00</span>
@@ -4250,7 +4278,7 @@ function openDictationPlayer(id){
           <button class="dictation-skip-btn" id="dictation-skip-fwd" title="Avançar 15s">+15s</button>
         </div>
         <div class="dictation-volume-control">
-          <button class="dictation-icon-btn" id="dictation-mute-btn" title="Mudo">🔊</button>
+          <button class="dictation-icon-btn" id="dictation-mute-btn" aria-label="Mudo" title="Mudo">🔊</button>
           <input type="range" class="dictation-volume-slider" id="dictation-volume-slider" min="0" max="100" value="100">
         </div>
         <div class="dictation-speed-controls">
@@ -4310,6 +4338,8 @@ function openDictationPlayer(id){
     dictationAudioEl.volume = v;
     dictationAudioEl.muted = false;
     muteBtn.textContent = v === 0 ? '🔇' : '🔊';
+    muteBtn.setAttribute('aria-label', v === 0 ? 'Ativar som' : 'Mudo');
+    muteBtn.title = v === 0 ? 'Ativar som' : 'Mudo';
   });
   muteBtn.addEventListener('click', () => {
     if (dictationAudioEl.muted || dictationAudioEl.volume === 0){
@@ -4317,11 +4347,15 @@ function openDictationPlayer(id){
       dictationAudioEl.volume = volumeBeforeMute || 1;
       volumeSlider.value = Math.round(dictationAudioEl.volume * 100);
       muteBtn.textContent = '🔊';
+      muteBtn.setAttribute('aria-label', 'Mudo');
+      muteBtn.title = 'Mudo';
     } else {
       volumeBeforeMute = dictationAudioEl.volume;
       dictationAudioEl.muted = true;
       volumeSlider.value = 0;
       muteBtn.textContent = '🔇';
+      muteBtn.setAttribute('aria-label', 'Ativar som');
+      muteBtn.title = 'Ativar som';
     }
   });
 
@@ -5855,16 +5889,26 @@ function removePreviewWarningEl(){
 }
 
 function challengeAdminPublishedCardHTML(c){
+  // Mesmo padrão de estado de edição do card de pendentes
+  // (challengeAdminPendingCardHTML) -- "Editar" só troca challengesAdminEditingId,
+  // então o card precisa reagir a isso pra realmente mostrar o formulário
+  // (senão o botão fica sem efeito visível nenhum, como ficava antes).
+  const editing = challengesAdminEditingId === c.id;
   return `
     <div class="challenges-admin-card" data-challenge-id="${c.id}">
       <div class="challenges-admin-card-header">
         <span class="challenge-card-level">${c.level}</span>
         <strong>${challengeAdminCardTitle(c)}</strong>
       </div>
+      ${editing ? `<div class="challenges-admin-card-body">${challengeAdminEditView(c)}</div>` : ''}
       <div class="challenges-admin-actions">
-        <button class="btn btn-secondary" data-action="preview">👁️ Ver versão do aluno</button>
-        <button class="btn btn-secondary" data-action="edit">✏️ Editar</button>
-        <button class="btn btn-secondary" data-action="unpublish">🚫 Despublicar</button>
+        ${editing
+          ? `<button class="btn btn-primary" data-action="save">💾 Salvar</button>
+             <button class="btn btn-secondary" data-action="cancel-edit">Cancelar</button>`
+          : `<button class="btn btn-secondary" data-action="preview">👁️ Ver versão do aluno</button>
+             <button class="btn btn-secondary" data-action="edit">✏️ Editar</button>
+             <button class="btn btn-secondary" data-action="unpublish">🚫 Despublicar</button>`
+        }
       </div>
     </div>
   `;
