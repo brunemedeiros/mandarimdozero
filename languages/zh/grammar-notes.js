@@ -76,44 +76,10 @@ const GRAMMAR_NOTES = {
     }
   ],
 
-  4: [
-    {
-      title: "几 + palavra-medida — perguntando quantidade",
-      explanation: "Para perguntar \"quantos\" de algo em chinês, sempre se usa 几 (jǐ) seguido de uma palavra-medida (como 口 para pessoas da família, ou 个 no caso geral) antes do substantivo — nunca só \"几 + substantivo\" diretamente.",
-      table: [
-        { pt: "Quantas pessoas há na família?", cn: "家里有几口人？(jiā lǐ yǒu jǐ kǒu rén?)" },
-        { pt: "Quantos irmãos você tem?", cn: "你有几个兄弟？(nǐ yǒu jǐ gè xiōngdì?)" }
-      ],
-      courseExample: { p: "Nǐ jiā yǒu jǐ kǒu rén?", c: "你家有几口人？", t: "Quantas pessoas há na sua família?" }
-    },
-    {
-      title: "和 (hé) — juntando substantivos",
-      explanation: "和 (hé) equivale a \"e\" em português, mas com um uso mais restrito: só junta substantivos entre si (\"pai e mãe\"), nunca frases inteiras. Para conectar duas frases completas, o chinês normalmente nem usa uma palavra de ligação — só coloca uma depois da outra.",
-      table: [
-        { pt: "pai e mãe", cn: "爸爸和妈妈 (bàba hé māma)" },
-        { pt: "eu e ele", cn: "我和他 (wǒ hé tā)" }
-      ],
-      courseExample: { p: "Wǒ jiā yǒu sì kǒu rén: bàba, māma, gēge hé wǒ.", c: "我家有四口人：爸爸，妈妈，哥哥和我。", t: "Minha família tem 4 pessoas: pai, mãe, irmão mais velho e eu." }
-    },
-    {
-      title: "有 (yǒu) — expressando posse",
-      explanation: "有 (yǒu) significa \"ter\" ou \"haver\" — é o verbo usado tanto para dizer que alguém possui algo quanto para dizer que algo existe. A estrutura é: Sujeito + 有 + Objeto.",
-      table: [
-        { pt: "Eu tenho uma irmã mais velha", cn: "我有一个姐姐 (wǒ yǒu yí gè jiějie)" },
-        { pt: "Você tem dinheiro?", cn: "你有钱吗？(nǐ yǒu qián ma?)" }
-      ],
-      courseExample: { p: "Wǒ yǒu yí gè jiějie.", c: "我有一个姐姐。", t: "Eu tenho uma irmã mais velha." }
-    },
-    {
-      title: "没(有) (méiyǒu) — negando \"ter\"",
-      explanation: "Para negar 有 (ter), o chinês não usa 不 — usa 没 ou 没有 (méiyǒu) especialmente para isso. É uma das poucas exceções à regra geral de negação com 不.",
-      table: [
-        { pt: "Eu não tenho irmã mais nova", cn: "我没有妹妹 (wǒ méiyǒu mèimei)" },
-        { pt: "Não tem problema", cn: "没关系 (méi guānxi)" }
-      ],
-      courseExample: { p: "Méiyǒu, wǒ méiyǒu mèimei.", c: "没有，我没有妹妹。", t: "Não, eu não tenho irmã mais nova." }
-    }
-  ],
+  // Unidade 4 migrada pra explicação contextual (ver `concepts` em
+  // content.js, unidade "Família") — as 4 notas que estavam aqui agora
+  // disparam dentro da própria lição, no momento em que o conceito se torna
+  // relevante, em vez de viverem só neste banco avulso ("Dicas e Notas").
 
   5: [
     {

@@ -1274,6 +1274,16 @@ const STEP_DEFS = [
   { key: 'exercises', label: 'Exercícios' }
 ];
 
+// Unidades migradas pra explicação contextual (`unit.concepts`, ver
+// content.js) não têm mais `usageNote` -- a teoria dele já foi incorporada
+// como cartões de conceito dentro do próprio ciclo de aquisição/diálogo, não
+// como um passo à parte no fim. Sem esse filtro, essas unidades mostrariam
+// um passo "Dica de uso" vazio. Unidades ainda não migradas continuam com o
+// passo normalmente (mesmo comportamento de antes).
+function currentStepDefs(u){
+  return STEP_DEFS.filter(s => s.key !== 'usage' || (u && u.usageNote));
+}
+
 // ---------- Sessão de aquisição de vocabulário (introdução + prática intercalada) ----------
 // Substitui o antigo fluxo linear "Palavra 1 de N ... Palavra N de N" seguido
 // de um bag único de exercícios no final. Em vez disso, a unidade é dividida
@@ -1330,13 +1340,25 @@ const STEP_STATE = {
   exerciseIndex: 0,
   exerciseScore: 0,
   exerciseAnswered: false,
-  onChallengesScreen: false
+  onChallengesScreen: false,
+  // Fila de cartões de conceito (explicação contextual) tocando AGORA, por
+  // cima do passo normal (vocab/diálogo) -- ver runConceptQueueThen. Vazia
+  // na maior parte do tempo; só existe entre o momento em que um conceito é
+  // disparado e o aluno terminar de ler todos os cartões pendentes daquele
+  // ponto da lição.
+  conceptQueue: [],
+  conceptIdx: 0,
+  conceptBlockIdx: 0,
+  conceptAfterFn: null,
+  conceptsShown: new Set()
 };
 
 function openUnitDetail(unitId){
   STATE.currentUnitId = unitId;
   STATE.unitProgress[unitId].started = true;
   STEP_STATE.onChallengesScreen = false;
+  STEP_STATE.conceptQueue = [];
+  STEP_STATE.conceptsShown = new Set();
   setLessonFocusMode(true);
 
   document.getElementById('path-list-wrap').style.display = 'none';
@@ -1521,9 +1543,10 @@ document.getElementById('notes-modal').addEventListener('click', (e) => {
 // não o que já foi de fato feito dentro dela.
 function renderStepProgress(){
   const fillEl = document.getElementById('step-progress-fill');
-  const stepCount = STEP_DEFS.length;
-  const stepKey = STEP_DEFS[STEP_STATE.currentStep].key;
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
+  const stepDefs = currentStepDefs(u);
+  const stepCount = stepDefs.length;
+  const stepKey = stepDefs[STEP_STATE.currentStep].key;
 
   let intraStepFraction = 0;
   if (stepKey === 'vocab' && u && STEP_STATE.acq.unitId === u.id){
@@ -1808,10 +1831,116 @@ function buildMixedQueue(unit, introducedIndices){
   return shuffle([...base, ...extra]);
 }
 
-// Fim da introdução do bloco atual -> começa a checagem imediata (ETAPA 2).
+// ---------- Explicação contextual (cartões de conceito) ----------
+// Substitui a lógica de "Dicas e Notas"/"Manual da unidade" como mecanismo
+// PRINCIPAL de ensino de gramática: em vez de um banco à parte que o aluno
+// precisa abrir por conta própria, cada conceito de `unit.concepts` dispara
+// no ponto exato da lição em que passa a ser relevante -- contato (o aluno
+// acabou de ver/usar a palavra) -> percepção -> explicação curta -> volta
+// direto pra prática, sem sair da lição. Reaproveita o mesmo formato
+// title/body/examples/wrapup que as unidades de gramática do Français do
+// Zero já usam (u.grammar.blocks) -- não é um segundo sistema paralelo, só
+// uma forma de disparar o mesmo tipo de cartão NO MEIO de uma lição de
+// vocabulário, em vez de só numa unidade de gramática inteira.
+
+// Conceitos cujo gatilho é "depois deste bloco de vocabulário" (o mais comum
+// -- a palavra que motiva a explicação acabou de ser apresentada).
+function pendingConceptsForBlock(u, blockIdx){
+  if (!u.concepts || !u.concepts.length) return [];
+  const idxInBlock = new Set(STEP_STATE.acq.blocks[blockIdx]);
+  return u.concepts.filter(c =>
+    typeof c.trigger.afterVocabIdx === 'number' &&
+    idxInBlock.has(c.trigger.afterVocabIdx) &&
+    !STEP_STATE.conceptsShown.has(c.id)
+  );
+}
+
+// Conceitos cujo gatilho só existe em contexto (diálogo) -- a palavra em si
+// não é vocabulário novo da unidade, só aparece dentro da fala.
+function pendingConceptsAfterDialogue(u){
+  if (!u.concepts || !u.concepts.length) return [];
+  return u.concepts.filter(c => c.trigger.after === 'dialogue' && !STEP_STATE.conceptsShown.has(c.id));
+}
+
+// Mostra `list` (pode ser vazia) um cartão de cada vez e só chama `afterFn`
+// quando o aluno tiver passado por todos -- se `list` já vier vazia, chama
+// `afterFn` na hora, então quem chama isso não precisa checar antes.
+function runConceptQueueThen(list, afterFn){
+  if (!list.length){ afterFn(); return; }
+  STEP_STATE.conceptQueue = list;
+  STEP_STATE.conceptIdx = 0;
+  STEP_STATE.conceptBlockIdx = 0;
+  STEP_STATE.conceptAfterFn = afterFn;
+  renderConceptStep();
+}
+
+function renderConceptStep(){
+  const contentEl = document.getElementById('step-content');
+  const nextBtn = document.getElementById('step-next-btn');
+  const backBtn = document.getElementById('step-back-btn');
+  backBtn.style.display = 'none'; // sem "voltar" no meio de uma explicação, igual ao checkpoint/prática
+  setAcqPhaseBanner('💡 Vale entender isso');
+
+  const concept = STEP_STATE.conceptQueue[STEP_STATE.conceptIdx];
+  const block = concept.blocks[STEP_STATE.conceptBlockIdx];
+  const isLastBlockOfConcept = STEP_STATE.conceptBlockIdx === concept.blocks.length - 1;
+  const isLastConcept = STEP_STATE.conceptIdx === STEP_STATE.conceptQueue.length - 1;
+
+  const examplesHTML = (block.examples && block.examples.length) ? `
+    <div class="gram-block-examples">
+      ${block.examples.map(ex => `
+        <div class="gram-block-example">
+          <div class="hanzi">${ex.c} ${audioBtnHTML(ex.c)}</div>
+          <div class="pinyin">${ex.p}</div>
+          <div class="trans">${ex.t}</div>
+        </div>
+      `).join('')}
+    </div>` : '';
+
+  contentEl.innerHTML = `
+    <div class="gram-block-counter">${concept.blocks.length > 1 ? `${STEP_STATE.conceptBlockIdx + 1} de ${concept.blocks.length}` : 'Vale entender'}</div>
+    <div class="gram-block ${block.wrapup ? 'wrapup' : ''}">
+      <h3 class="gram-block-title">${block.title}</h3>
+      <p class="gram-block-body">${block.body}</p>
+      ${examplesHTML}
+    </div>
+  `;
+  wireAudioButtons(contentEl);
+  nextBtn.style.display = 'flex';
+  nextBtn.textContent = (isLastBlockOfConcept && isLastConcept) ? 'Continuar →' : 'Entendi →';
+}
+
+function advanceConceptStep(){
+  const concept = STEP_STATE.conceptQueue[STEP_STATE.conceptIdx];
+  if (STEP_STATE.conceptBlockIdx < concept.blocks.length - 1){
+    STEP_STATE.conceptBlockIdx += 1;
+    renderConceptStep();
+    return;
+  }
+  STEP_STATE.conceptsShown.add(concept.id);
+  if (STEP_STATE.conceptIdx < STEP_STATE.conceptQueue.length - 1){
+    STEP_STATE.conceptIdx += 1;
+    STEP_STATE.conceptBlockIdx = 0;
+    renderConceptStep();
+    return;
+  }
+  hideAcqPhaseBanner();
+  const afterFn = STEP_STATE.conceptAfterFn;
+  STEP_STATE.conceptQueue = [];
+  STEP_STATE.conceptAfterFn = null;
+  afterFn();
+}
+
+// Fim da introdução do bloco atual -> mostra os conceitos que esse bloco
+// libera (se houver) e só DEPOIS começa a checagem imediata (ETAPA 2). Sem
+// conceito pendente, comporta-se exatamente como antes (checagem na hora).
 function finishBlockIntro(){
   const acq = STEP_STATE.acq;
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
+  runConceptQueueThen(pendingConceptsForBlock(u, acq.blockIdx), () => startBlockCheckpoint(u, acq));
+}
+
+function startBlockCheckpoint(u, acq){
   acq.phase = 'checkpoint';
   STEP_STATE.exerciseList = buildBlockCheckpointQueue(u, acq.blocks[acq.blockIdx]);
   STEP_STATE.exerciseIndex = 0;
@@ -1917,7 +2046,7 @@ function acqPhaseBannerText(phase){
 function renderStep(){
   stopExerciseAudio();
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
-  const stepKey = STEP_DEFS[STEP_STATE.currentStep].key;
+  const stepKey = currentStepDefs(u)[STEP_STATE.currentStep].key;
   const contentEl = document.getElementById('step-content');
   const backBtn = document.getElementById('step-back-btn');
   const nextBtn = document.getElementById('step-next-btn');
@@ -1994,7 +2123,8 @@ function renderStep(){
 }
 
 document.getElementById('step-back-btn').addEventListener('click', () => {
-  const stepKey = STEP_DEFS[STEP_STATE.currentStep].key;
+  const u = UNITS.find(x => x.id === STATE.currentUnitId);
+  const stepKey = currentStepDefs(u)[STEP_STATE.currentStep].key;
 
   // No passo de vocabulário, "Voltar" recua palavra a palavra dentro do
   // bloco atual (e entre blocos) antes de sair do passo -- só volta para o
@@ -2031,7 +2161,18 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
     return;
   }
 
-  const stepKey = STEP_DEFS[STEP_STATE.currentStep].key;
+  // Um cartão de explicação contextual está tocando por cima do passo normal
+  // -- "Continuar"/"Entendi" aqui avança DENTRO da fila de conceitos, não do
+  // passo da unidade (ver runConceptQueueThen). Tem prioridade sobre tudo
+  // abaixo, igual checkpoint/practice/mixed já tinham sobre o vocab normal.
+  if (STEP_STATE.conceptQueue.length){
+    advanceConceptStep();
+    return;
+  }
+
+  const u = UNITS.find(x => x.id === STATE.currentUnitId);
+  const stepDefs = currentStepDefs(u);
+  const stepKey = stepDefs[STEP_STATE.currentStep].key;
 
   // No passo de vocabulário, o botão "Continuar" só existe na fase de
   // introdução (checkpoint/practice/mixed escondem o botão global e avançam
@@ -2051,7 +2192,18 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
     return;
   }
 
-  if (STEP_STATE.currentStep < STEP_DEFS.length - 1){
+  // Saindo do diálogo: mostra os conceitos cujo gatilho só existe em
+  // contexto (a palavra em si não é vocabulário novo, só aparece na fala)
+  // antes de seguir pro próximo passo da unidade.
+  if (stepKey === 'dialogue'){
+    runConceptQueueThen(pendingConceptsAfterDialogue(u), () => {
+      STEP_STATE.currentStep += 1;
+      renderStep();
+    });
+    return;
+  }
+
+  if (STEP_STATE.currentStep < stepDefs.length - 1){
     STEP_STATE.currentStep += 1;
     renderStep();
   } else {
@@ -2341,7 +2493,7 @@ function renderExerciseStep(){
     // a fila aqui significa "avance de fase", não "termine a unidade". Só
     // vira tela de conclusão de verdade na consolidação final (passo
     // "exercises", ver advanceToNextBlockOrConsolidation).
-    if (STEP_DEFS[STEP_STATE.currentStep].key === 'vocab'){
+    if (currentStepDefs(u)[STEP_STATE.currentStep].key === 'vocab'){
       advanceAcquisitionPhase();
       return;
     }
@@ -2407,7 +2559,7 @@ function answerExplanationHTML(ex){
   }
   if (ex && ex.phrase){
     const phraseHTML = `<p class="usage-note-body"><strong>${ex.phrase.c}</strong><br>${ex.phrase.t}</p>`;
-    return phraseHTML + (grammarNoteReviewHTML() || '');
+    return phraseHTML + (noteOrConceptReviewHTML() || '');
   }
   if (ex && ex.item){
     const itemHTML = `<p class="usage-note-body"><strong>${ex.item.c}</strong> (${ex.item.p}) = ${ex.item.t}</p>`;
@@ -2415,13 +2567,33 @@ function answerExplanationHTML(ex){
     const origin = findMatchingPhrase(ex.item, u);
     const originHTML = origin
       ? `<div class="usage-note-title">Onde você já viu isso</div><p class="usage-note-body"><strong>${origin.c}</strong><br>${origin.t}</p>`
-      : (grammarNoteReviewHTML() || '');
+      : (noteOrConceptReviewHTML(ex.vocabIdx) || '');
     return itemHTML + originHTML;
   }
   if (ex && ex.format === 'trueFalse' && ex.whyNote){
     return `<p class="usage-note-body">${ex.whyNote}</p>`;
   }
-  return grammarNoteReviewHTML() || '';
+  return noteOrConceptReviewHTML(ex && ex.vocabIdx) || '';
+}
+
+// Painel "por que não foi essa" caindo de volta pra uma explicação da
+// unidade quando não há frase de origem específica pra mostrar (ex.: erro
+// de reconhecimento puro, sem frase-exemplo). Unidades já migradas pra
+// explicação contextual (`u.concepts`, ver content.js) usam só os conceitos
+// que o aluno JÁ VIU nesta sessão -- nunca antecipa um conceito que ainda
+// não apareceu na lição -- e prioriza o que combina com a palavra errada
+// (`vocabIdx`), quando dá pra saber qual foi. Unidades ainda não migradas
+// continuam com o banco antigo (GRAMMAR_NOTES), sem mudança de comportamento.
+function noteOrConceptReviewHTML(vocabIdx){
+  const u = UNITS.find(x => x.id === STATE.currentUnitId);
+  if (u && u.concepts && u.concepts.length){
+    const shown = u.concepts.filter(c => STEP_STATE.conceptsShown.has(c.id));
+    if (!shown.length) return null;
+    const match = (typeof vocabIdx === 'number' && shown.find(c => c.trigger.afterVocabIdx === vocabIdx)) || shown[0];
+    const block = match.blocks[match.blocks.length - 1]; // versão mais completa (wrapup) do conceito, se houver mais de um cartão
+    return `<div class="usage-note-title">${block.title}</div><p class="usage-note-body">${block.body}</p>`;
+  }
+  return grammarNoteReviewHTML();
 }
 
 function grammarNoteReviewHTML(){

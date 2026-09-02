@@ -632,6 +632,33 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .usage-note-body{ margin:0; font-size:14.5px; line-height:1.7; color: var(--ink); }
 .usage-note-body strong{ color: var(--seal-red-dark); }
 
+/* ---------- Cartão de conceito (explicação contextual dentro da lição) ----------
+   Substitui "Dicas e Notas"/"Manual da unidade" como mecanismo principal de
+   ensino de gramática: dispara no meio da própria lição, no bloco em que o
+   conceito passa a ser relevante (ver `concepts` em content.js e
+   `runConceptQueueThen`/`renderConceptStep` em app.js), não num banco à
+   parte que o aluno precisa abrir por conta própria. Reaproveita o mesmo
+   formato progressivo (title/body/examples/wrapup) que o Français do Zero já
+   usa nas unidades de gramática dele. */
+.gram-block-counter{ text-align:center; font-size:12.5px; font-weight:800; color: var(--ink-soft); margin-bottom:14px; }
+.gram-block{
+  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding:24px 22px; text-align:center;
+}
+.gram-block.wrapup{ background: rgba(212,160,23,0.10); border-color: var(--imperial-gold); }
+.gram-block-title{ margin:0 0 10px; font-size:19px; color: var(--seal-red-dark); }
+.gram-block-body{ margin:0; font-size:14.5px; line-height:1.6; color: var(--ink); text-align:left; }
+.gram-block-body strong{ color: var(--seal-red-dark); }
+.gram-block-examples{
+  margin-top:18px; text-align:left; background: var(--paper); border:1px solid var(--paper-line);
+  border-radius: var(--radius); overflow:hidden;
+}
+.gram-block-example{ padding:14px 16px; }
+.gram-block-example + .gram-block-example{ border-top:1px solid var(--paper-line); }
+.gram-block-example .hanzi{ font-family:var(--font-hanzi); font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px; }
+.gram-block-example .pinyin{ font-size:13px; color:var(--seal-red-dark); font-weight:700; margin-top:2px; }
+.gram-block-example .trans{ font-size:13px; color:var(--ink-soft); margin-top:2px; }
+
 /* ---------- Painel de resultado ("Por que errei?", estilo Duolingo) ----------
    Reformulado (auditoria de UX/UI mobile-first, 2026-09): antes era uma caixa
    com fundo+borda própria contendo OUTRA caixa com fundo+borda própria (a
