@@ -2356,7 +2356,6 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
         <input type="text" id="vocab-type-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite o pinyin">
         <button class="btn btn-primary btn-block" id="vocab-type-verify-btn">Verificar</button>
       </div>
-      <div class="vocab-type-answer" id="vocab-type-answer" style="display:none;"></div>
       <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
     </div>
   `;
@@ -2386,10 +2385,10 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
       registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
       goToNextExercise();
     } else {
-      const answerEl = document.getElementById('vocab-type-answer');
-      answerEl.textContent = `Resposta certa: ${ex.item.p}`;
-      answerEl.style.display = 'block';
-      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
+      // A resposta certa já aparece dentro do próprio painel de resultado
+      // (answerExplanationHTML mostra ex.item.p) -- sem repetir aqui como um
+      // texto solto antes do painel, num estilo diferente.
+      showWrongAnswerPanel(contentEl, ex);
     }
   }
 
@@ -2404,10 +2403,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   wireDontKnowButton(contentEl, ex, () => {
     STEP_STATE.exerciseAnswered = true;
     lockInputs();
-    const answerEl = document.getElementById('vocab-type-answer');
-    answerEl.textContent = `Resposta certa: ${ex.item.p}`;
-    answerEl.style.display = 'block';
-    setTimeout(() => showAnswerPanel(contentEl, ex, { revealed: true }), 300);
+    showAnswerPanel(contentEl, ex, { revealed: true });
   });
 }
 

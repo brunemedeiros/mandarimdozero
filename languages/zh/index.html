@@ -583,31 +583,37 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .usage-note-body{ margin:0; font-size:14.5px; line-height:1.7; color: var(--ink); }
 .usage-note-body strong{ color: var(--seal-red-dark); }
 
-/* ---------- Painel de resposta errada ("Por que errei?", estilo Duolingo) ---------- */
-.wrong-feedback{
-  margin-top:18px; background: rgba(192,35,31,0.06); border:1px solid rgba(192,35,31,0.25);
-  border-radius: var(--radius); padding:16px 18px; animation: wrongFeedbackIn .25s ease;
+/* ---------- Painel de resultado ("Por que errei?", estilo Duolingo) ----------
+   Reformulado (auditoria de UX/UI mobile-first, 2026-09): antes era uma caixa
+   com fundo+borda própria contendo OUTRA caixa com fundo+borda própria (a
+   "why") -- lia como dois widgets empilhados, não como uma continuação da
+   pergunta. Agora é UM bloco só: sem fundo tintado, sem raio de borda, só
+   uma linha divisória no topo (mesmo tom neutro nos dois estados -- a cor
+   mora só no cabeçalho, não no bloco inteiro) marcando "aqui começa o
+   resultado", com texto sempre alinhado à esquerda (a inconsistência de
+   "Onde você já viu isso" ficar centralizado enquanto o resto fica à
+   esquerda era um bug de herança da .usage-note-title, corrigido aqui). */
+.wrong-feedback, .correct-feedback{
+  margin-top:22px; padding-top:18px; border-top:1px solid var(--paper-line);
+  text-align:left; animation: wrongFeedbackIn .25s ease;
 }
 @keyframes wrongFeedbackIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
-.correct-feedback{
-  margin-top:18px; background: rgba(58,115,89,0.08); border:1px solid rgba(58,115,89,0.3);
-  border-radius: var(--radius); padding:16px 18px; animation: wrongFeedbackIn .25s ease;
+.wrong-feedback-header, .correct-feedback-header{
+  display:flex; align-items:center; gap:8px; font-weight:800; font-size:16px; margin-bottom:14px;
 }
-.correct-feedback-header{ font-weight:800; font-size:15px; color: var(--jade); margin-bottom:8px; }
-.correct-feedback-trans{ font-size:14px; color: var(--ink); margin:0 0 14px; }
-.wrong-feedback-header{ font-weight:800; font-size:15px; color: var(--seal-red); margin-bottom:12px; }
+.correct-feedback-header{ color: var(--jade); }
+.correct-feedback-trans{ font-size:14.5px; color: var(--ink); line-height:1.6; margin:0 0 4px; }
+.wrong-feedback-header{ color: var(--seal-red); }
 
 /* Explicação ("por que não foi essa" / a resposta) -- SEMPRE visível,
    automática, sem depender de o aluno clicar em nada. Inclui tanto o erro
    específico da questão quanto a retomada de conteúdo (frase de origem,
-   nota gramatical), num único bloco -- sem um "Rever conteúdo" à parte. */
-.wrong-feedback-why{
-  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:10px;
-  padding:14px 16px; margin-bottom:14px;
-}
-.wrong-feedback-why-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--seal-red-dark); font-weight:800; margin-bottom:6px; }
-.wrong-feedback-why .usage-note-body{ font-size:14px; margin:0; }
-.wrong-feedback-why .usage-note-title{ text-align:left; font-size:13.5px; margin:10px 0 6px; }
+   nota gramatical), num único bloco -- sem um "Rever conteúdo" à parte, e
+   sem uma segunda caixa dentro da primeira: mesma superfície do painel pai. */
+.wrong-feedback-why{ margin-bottom:16px; }
+.wrong-feedback-why-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--seal-red-dark); font-weight:800; margin-bottom:8px; }
+.wrong-feedback-why .usage-note-body{ font-size:14.5px; margin:0; text-align:left; }
+.wrong-feedback-why .usage-note-title{ text-align:left; font-size:13.5px; font-weight:800; margin:12px 0 6px; }
 .wrong-feedback-why .usage-note-title:first-child{ margin-top:0; }
 .wrong-feedback-why .note-detail-table{ margin:8px 0 4px; }
 
@@ -660,7 +666,8 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .exercise-prompt-label{ font-size:12px; text-transform:uppercase; letter-spacing:.06em; color: var(--seal-red-dark); font-weight:800; margin-bottom:10px; }
 .exercise-prompt{
   background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
-  padding: 28px 20px; margin-bottom:20px; display:flex; flex-direction:column; align-items:center; gap:8px;
+  padding: 20px 20px; margin-bottom:20px; display:flex; flex-direction:column; align-items:center; gap:6px;
+  min-height:64px; justify-content:center;
 }
 .exercise-prompt .prompt-hanzi{ font-family: var(--font-hanzi); font-size:38px; font-weight:700; }
 .exercise-prompt .prompt-pinyin{ font-size:20px; color: var(--seal-red-dark); font-weight:800; }
@@ -672,7 +679,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   text-decoration-color: var(--paper-line); text-underline-offset:3px;
 }
 .exercise-dontknow:hover{ color: var(--seal-red-dark); text-decoration-color: var(--seal-red-dark); }
-.exercise-dontknow.disabled{ pointer-events:none; opacity:.4; }
+.exercise-dontknow.disabled{ display:none; }
 
 /* Bloco da dica: substitui o próprio botão "Não sei" (não fica ao lado
    dele) e aparece no MESMO lugar em que o aluno pediu ajuda -- relação
@@ -775,7 +782,10 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 }
 .cloze-type-wrap input:focus{ outline:none; border-color: var(--imperial-gold); }
 .cloze-type-wrap input:disabled{ opacity:.7; }
-.vocab-type-answer{ text-align:center; font-weight:800; color: var(--seal-red-dark); margin: -6px 0 14px; }
+/* Depois de responder, o botão Verificar não tem mais função (nem "clicável
+   de novo", nem informação nova) -- some, em vez de ficar meio-apagado
+   competindo com o painel de resultado logo abaixo. */
+.cloze-type-wrap button:disabled{ display:none; }
 
 .exercise-result{ text-align:center; padding: 40px 20px; }
 .exercise-result .big-emoji{ font-size:48px; margin-bottom:10px; }
