@@ -1577,7 +1577,7 @@ function wireDontKnowButton(contentEl, ex, onRevealAnswer){
         ` : ''}
         <div class="inline-hint-actions">
           <button class="btn btn-secondary inline-hint-retry-btn" id="inline-hint-retry-btn">Tentar novamente</button>
-          <button class="exercise-reveal-btn" id="exercise-reveal-btn">Ver resposta</button>
+          <button class="btn btn-secondary exercise-reveal-btn" id="exercise-reveal-btn">Ver resposta</button>
         </div>
       </div>
     `;

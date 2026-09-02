@@ -563,21 +563,23 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 /* Bloco da dica: substitui o próprio botão "Não sei" (não fica ao lado
    dele) e aparece no MESMO lugar em que o aluno pediu ajuda -- relação
    espacial direta entre "Não sei" e a dica, sem pular pro topo da tela nem
-   duplicar controle nenhum. */
+   duplicar controle nenhum.
+   Reformulado junto com o painel de resultado (auditoria de UX/UI
+   mobile-first, 2026-09): usava uma caixa com fundo/borda numa cor azul
+   que não existe em nenhum outro lugar da paleta do app (nem
+   seal-red/imperial-gold), com dois botões num terceiro estilo -- exatamente
+   a caixa "flutuante, desconectada da página" mostrada no print de
+   referência do estado de Dica. Agora usa a MESMA gramática visual do
+   painel de resultado (divisor no topo, sem fundo/borda própria) e os
+   botões reais do sistema (.btn-secondary), lado a lado com peso igual. */
 .inline-hint-block{
-  margin-top:16px; text-align:left; background: rgba(52,152,214,0.08);
-  border:1px solid rgba(52,152,214,0.25); border-radius: var(--radius); padding:14px 16px;
-  animation: wrongFeedbackIn .25s ease;
+  margin-top:22px; padding-top:18px; border-top:1px solid var(--paper-line);
+  text-align:left; animation: wrongFeedbackIn .25s ease;
 }
-.inline-hint-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--seal-red-dark); font-weight:800; margin-bottom:6px; }
-.inline-hint-text{ margin:0 0 14px; color: var(--ink); font-size:14px; line-height:1.5; }
-.inline-hint-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
-.inline-hint-retry-btn, .exercise-reveal-btn{
-  background: var(--paper); border:1px solid var(--paper-line); border-radius:999px;
-  padding:8px 16px; font-family: var(--font-body); font-weight:700; font-size:13px;
-  color: var(--seal-red-dark); cursor:pointer; transition: all .15s ease;
-}
-.inline-hint-retry-btn:hover, .exercise-reveal-btn:hover{ border-color: var(--imperial-gold); background: var(--paper-warm); }
+.inline-hint-label{ display:flex; align-items:center; gap:8px; font-weight:800; font-size:16px; color: var(--seal-red-dark); margin-bottom:14px; }
+.inline-hint-text{ margin:0 0 16px; color: var(--ink); font-size:14.5px; line-height:1.6; }
+.inline-hint-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+.inline-hint-actions .btn{ flex:1; min-width:140px; }
 .exercise-reveal-btn.disabled{ pointer-events:none; opacity:.4; }
 
 .exercise-options{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
@@ -756,7 +758,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 
 .reorder-blocks{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
 .reorder-block{
-  background: var(--paper); border:2px solid var(--paper-line); border-radius:10px; padding:10px 14px;
+  background: var(--paper); border:2px solid var(--paper-line); border-radius:12px; padding:10px 14px;
   cursor:pointer; font-family: var(--font-body); transition: all .12s ease; display:flex; flex-direction:column; gap:2px; align-items:center;
   font-weight:700; font-size:14px;
 }
