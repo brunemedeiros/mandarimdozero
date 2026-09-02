@@ -14,7 +14,38 @@ const UNITS = [
     level: "HSK1",
     title: "Cumprimentar e se despedir",
     goal: "Cumprimentar alguém, se despedir e agradecer numa interação básica.",
-    usageNote: { title: "\"Duìbuqǐ\" ou \"méi guānxi\"?", body: "<strong>Duìbuqǐ</strong> (对不起) é quem pede desculpa. <strong>Méi guānxi</strong> (没关系) é a resposta de quem recebe o pedido de desculpa — \"tudo bem, não tem problema\". São as duas metades de uma mesma troca, não sinônimos: nunca se usa méi guānxi pra pedir desculpa, nem duìbuqǐ pra tranquilizar alguém." },
+    concepts: [
+      {
+        id: "duibuqi-vs-meiguanxi",
+        trigger: { afterVocabIdx: 5 },
+        blocks: [
+          {
+            title: "\"Duìbuqǐ\" ou \"méi guānxi\"?",
+            body: "<strong>Duìbuqǐ</strong> (对不起) é quem pede desculpa. <strong>Méi guānxi</strong> (没关系) é a resposta de quem recebe o pedido — \"tudo bem, não tem problema\". São as duas metades de uma mesma troca, não sinônimos: nunca se usa méi guānxi pra pedir desculpa, nem duìbuqǐ pra tranquilizar alguém.",
+            examples: [
+              { c: "对不起", p: "duìbuqǐ", t: "desculpe (quem pede)" },
+              { c: "没关系", p: "méi guānxi", t: "tudo bem (quem responde)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "bu-negation",
+        trigger: { afterVocabIdx: 5 },
+        blocks: [
+          {
+            title: "不 (bù) — negação padrão",
+            body: "不 (bù) é a negação mais comum do chinês — vem sempre antes do verbo ou adjetivo que se quer negar. Diferente do português, não muda de forma dependendo de quem fala ou de quando algo acontece.",
+            examples: [
+              { c: "我不懂", p: "wǒ bù dǒng", t: "eu não entendo" },
+              { c: "不贵", p: "bú guì", t: "não é caro" }
+            ],
+            wrapup: true
+          }
+        ]
+      }
+    ],
     trueFalseExercises: [{ subject: "谢谢", pinyin: "xièxiè", emoji: "🎁", claim: "Isto é o que dizemos quando recebemos um presente de outra pessoa.", answer: true,
       whyNote: "Correto — <strong>谢谢 (xièxiè)</strong> é \"obrigado(a)\", usado sempre que alguém faz algo por você, incluindo dar um presente." }],
     vocab: [
@@ -52,7 +83,44 @@ const UNITS = [
     level: "HSK1",
     title: "Se apresentar",
     goal: "Dizer o nome, nacionalidade e perguntar o mesmo para o outro.",
-    usageNote: { title: "\"Wǒ shì Bāxī rén\" ou \"wǒ jiào Brune\"?", body: "<strong>Shì</strong> (是) liga você a uma categoria — nacionalidade, profissão, identidade: wǒ <strong>shì</strong> Bāxī rén (eu sou brasileira). <strong>Jiào</strong> (叫) é usado só pra dizer o nome: wǒ <strong>jiào</strong> Brune (eu me chamo Brune). Repare que \"eu me chamo\" nunca usa shì em chinês — só jiào." },
+    concepts: [
+      {
+        id: "shi",
+        trigger: { afterVocabIdx: 5 },
+        blocks: [
+          {
+            title: "是 (shì) — o verbo \"ser\"",
+            body: "是 (shì) equivale ao verbo \"ser\", mas com uma diferença importante: só liga substantivos entre si, nunca um substantivo a um adjetivo. E os verbos em chinês nunca são conjugados — a forma de 是 não muda no presente, passado ou futuro.",
+            examples: [
+              { c: "我是巴西人", p: "wǒ shì Bāxī rén", t: "eu sou brasileira" }
+            ]
+          },
+          {
+            title: "\"Wǒ shì Bāxī rén\" ou \"wǒ jiào Brune\"?",
+            body: "<strong>Shì</strong> liga você a uma categoria — nacionalidade, profissão, identidade. <strong>Jiào</strong> (叫) é usado só pra dizer o nome. Repare que \"eu me chamo\" nunca usa shì em chinês — só jiào.",
+            examples: [
+              { c: "我叫Brune", p: "wǒ jiào Brune", t: "eu me chamo Brune" },
+              { c: "我是巴西人", p: "wǒ shì Bāxī rén", t: "eu sou brasileira" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "svo-order",
+        trigger: { afterVocabIdx: 9 },
+        blocks: [
+          {
+            title: "Ordem básica da frase: Sujeito + Verbo + Objeto",
+            body: "A estrutura mais comum de uma frase em chinês segue a mesma ordem do português: sujeito, depois verbo, depois objeto. Diferente do português, o chinês tem pouca flexibilidade nessa ordem — mudar a posição das palavras muda o significado da frase.",
+            examples: [
+              { c: "你是哪国人？", p: "nǐ shì nǎ guó rén?", t: "de que país você é?" }
+            ],
+            wrapup: true
+          }
+        ]
+      }
+    ],
     trueFalseExercises: [{ subject: "你叫什么名字？", pinyin: "nǐ jiào shénme míngzi?", emoji: "🙋", claim: "Essa pergunta serve pra saber a nacionalidade de alguém.", answer: false,
       whyNote: "Errado — <strong>你叫什么名字？</strong> pergunta o NOME (叫 = chamar-se, 名字 = nome), não a nacionalidade. Nacionalidade seria \"你是哪国人？\"." }],
     vocab: [
@@ -90,7 +158,52 @@ const UNITS = [
     level: "HSK1",
     title: "Números e idade",
     goal: "Contar de 0 a 100 e dizer/perguntar a idade.",
-    usageNote: { title: "\"Nǐ jǐ suì\" ou \"nǐ duō dà\"?", body: "<strong>Jǐ suì</strong> (几岁) é usado pra perguntar a idade de <strong>crianças</strong>, já que 几 espera um número pequeno. Pra adultos, a forma neutra e mais comum é <strong>duō dà</strong> (多大) — perguntar \"jǐ suì\" pra um adulto pode soar estranho, como se você esperasse um número de um dígito só." },
+    concepts: [
+      {
+        id: "number-structure",
+        trigger: { afterVocabIdx: 10 },
+        blocks: [
+          {
+            title: "Estrutura dos números em chinês",
+            body: "Os números de 0 a 10 têm palavras próprias. A partir daí, o chinês constrói números maiores combinando essas palavras de forma bem lógica: 十一 (shí yī) é literalmente \"dez-um\" (11), 二十 (èr shí) é \"dois-dez\" (20). É mais regular que o português nesse sentido.",
+            examples: [
+              { c: "十一", p: "shí yī", t: "11 = dez + um" },
+              { c: "二十五", p: "èr shí wǔ", t: "25 = dois + dez + cinco" }
+            ]
+          },
+          {
+            title: "岁 (suì) — contando idade",
+            body: "Pra dizer a idade, o número vem seguido de 岁 (suì), que funciona como a unidade \"anos\" — mas sem usar o verbo \"ter\" como em português. A estrutura é: Sujeito + Número + 岁.",
+            examples: [
+              { c: "我二十八岁", p: "wǒ èr shí bā suì", t: "eu tenho 28 anos" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "ji-vs-duo",
+        trigger: { afterVocabIdx: 12 },
+        blocks: [
+          {
+            title: "几 vs. 多 — duas formas de perguntar \"quanto\"",
+            body: "几 (jǐ) é usado pra perguntar sobre números pequenos e esperados, geralmente até 10. 多 (duō) antes de um adjetivo pergunta sobre grau ou quantidade maior, sem esperar um número pequeno específico.",
+            examples: [
+              { c: "他多高？", p: "tā duō gāo?", t: "quão alto ele é?" }
+            ]
+          },
+          {
+            title: "\"Nǐ jǐ suì\" ou \"nǐ duō dà\"?",
+            body: "<strong>Jǐ suì</strong> (几岁) é usado pra perguntar a idade de <strong>crianças</strong>, já que 几 espera um número pequeno. Pra adultos, a forma neutra e mais comum é <strong>duō dà</strong> (多大) — perguntar \"jǐ suì\" pra um adulto pode soar estranho.",
+            examples: [
+              { c: "你几岁？", p: "nǐ jǐ suì?", t: "quantos anos (criança)?" },
+              { c: "你多大？", p: "nǐ duō dà?", t: "quantos anos (adulto)?" }
+            ],
+            wrapup: true
+          }
+        ]
+      }
+    ],
     vocab: [
       { p: "líng", c: "零", t: "zero" },
       { p: "yī", c: "一", t: "um" },
@@ -236,7 +349,44 @@ const UNITS = [
     level: "HSK1",
     title: "Comida e bebida",
     goal: "Pedir comida/bebida num restaurante e expressar preferências simples.",
-    usageNote: { title: "\"Xǐhuan\" ou \"yào\"?", body: "<strong>Xǐhuan</strong> (喜欢) é gostar de algo em geral, uma preferência: wǒ <strong>xǐhuan</strong> hē kāfēi (eu gosto de beber café, como hábito). <strong>Yào</strong> (要) é querer algo específico, agora: wǒ <strong>yào</strong> yì bēi chá (eu quero uma xícara de chá, nesse momento). Um fala de gosto, o outro de pedido." },
+    concepts: [
+      {
+        id: "hen-adjective",
+        trigger: { afterVocabIdx: 7 },
+        blocks: [
+          {
+            title: "很 (hěn) antes de adjetivo",
+            body: "Em chinês, frases simples com adjetivo quase sempre levam 很 (hěn) antes dele — mesmo quando não se quer dizer \"muito\". Sem 很, a frase soa como uma comparação implícita ou fica gramaticalmente estranha.",
+            examples: [
+              { c: "这个很好吃", p: "zhège hěn hǎochī", t: "isso está gostoso" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "yao-xihuan",
+        trigger: { afterVocabIdx: 10 },
+        blocks: [
+          {
+            title: "要 (yào) — \"querer\"",
+            body: "要 (yào) expressa vontade ou necessidade, tanto antes de um substantivo (\"eu quero chá\") quanto antes de um verbo (\"eu quero ir\"). É uma das palavras mais usadas do chinês cotidiano, especialmente pra pedidos.",
+            examples: [
+              { c: "我要一杯茶", p: "wǒ yào yì bēi chá", t: "eu quero uma xícara de chá" }
+            ]
+          },
+          {
+            title: "\"Xǐhuan\" ou \"yào\"?",
+            body: "<strong>Xǐhuan</strong> (喜欢) é gostar de algo em geral, uma preferência — vem seguido diretamente do que se gosta (substantivo ou outro verbo), sem precisar de uma preposição como o \"de\" do português. <strong>Yào</strong> (要) é querer algo específico, agora. Um fala de gosto, o outro de pedido.",
+            examples: [
+              { c: "我喜欢喝咖啡", p: "wǒ xǐhuan hē kāfēi", t: "eu gosto de beber café (hábito)" },
+              { c: "我要一杯茶", p: "wǒ yào yì bēi chá", t: "eu quero uma xícara de chá (agora)" }
+            ],
+            wrapup: true
+          }
+        ]
+      }
+    ],
     trueFalseExercises: [{ subject: "我要一杯茶。", pinyin: "wǒ yào yì bēi chá.", emoji: "☕", claim: "Essa frase é usada pra pedir algo num restaurante ou café.", answer: true,
       whyNote: "Correto — <strong>我要...(wǒ yào)</strong> significa \"eu quero\", usado pra pedir algo num restaurante ou café; aqui, \"uma xícara de chá\"." }],
     vocab: [
@@ -275,7 +425,59 @@ const UNITS = [
     level: "HSK1",
     title: "Rotina diária",
     goal: "Descrever atividades do dia a dia e dizer as horas.",
-    usageNote: { title: "\"Měitiān\" ou \"xiànzài\"?", body: "<strong>Měitiān</strong> (每天, todos os dias) marca um hábito, algo que se repete. <strong>Xiànzài</strong> (现在, agora) marca o momento presente, muitas vezes usado com <strong>zài</strong> antes do verbo pra dizer que a ação está acontecendo neste instante: wǒ <strong>zài</strong> chīfàn (estou comendo agora). Repare que esse \"zài\" de \"estar fazendo algo\" é diferente do \"zài\" de localização (você vai ver isso na próxima unidade)." },
+    concepts: [
+      {
+        id: "dian-hours",
+        trigger: { afterVocabIdx: 0 },
+        blocks: [
+          {
+            title: "Estrutura das horas com 点",
+            body: "Pra dizer as horas em chinês, o número vem seguido de 点 (diǎn), que funciona como \"hora(s)\". É uma estrutura simples e direta: Número + 点.",
+            examples: [
+              { c: "七点", p: "qī diǎn", t: "7 horas" },
+              { c: "现在几点？", p: "xiànzài jǐ diǎn?", t: "que horas são agora?" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "time-before-verb",
+        trigger: { afterVocabIdx: 5 },
+        blocks: [
+          {
+            title: "Palavras de tempo antes do verbo",
+            body: "Diferente do português, onde \"todos os dias\" pode vir no fim da frase, em chinês as expressões de tempo vêm sempre antes do verbo, geralmente logo depois do sujeito.",
+            examples: [
+              { c: "我每天七点起床", p: "wǒ měitiān qī diǎn qǐchuáng", t: "eu levanto às 7h todos os dias" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "zai-progressive",
+        trigger: { afterVocabIdx: 6 },
+        blocks: [
+          {
+            title: "(正)在 + verbo — ação em progresso",
+            body: "Pra dizer que uma ação está acontecendo agora, o chinês usa 在 (zài) ou 正在 (zhèngzài) antes do verbo — funciona como o \"estar + gerúndio\" do português.",
+            examples: [
+              { c: "我正在吃饭", p: "wǒ zhèngzài chī fàn", t: "eu estou comendo agora" }
+            ]
+          },
+          {
+            title: "\"Měitiān\" ou \"xiànzài\"?",
+            body: "<strong>Měitiān</strong> (每天, todos os dias) marca um hábito. <strong>Xiànzài</strong> (现在, agora) marca o momento presente, muitas vezes usado com esse <strong>zài</strong> de ação em progresso — diferente do \"zài\" de localização que você vai ver na próxima unidade.",
+            examples: [
+              { c: "我每天七点起床", p: "wǒ měitiān qī diǎn qǐchuáng", t: "eu levanto às 7h todos os dias (hábito)" },
+              { c: "现在几点？", p: "xiànzài jǐ diǎn?", t: "que horas são agora? (momento presente)" }
+            ],
+            wrapup: true
+          }
+        ]
+      }
+    ],
     vocab: [
       { p: "diǎn", c: "点", t: "hora(s)" },
       { p: "qǐchuáng", c: "起床", t: "levantar (da cama)" },
@@ -310,7 +512,37 @@ const UNITS = [
     level: "HSK1",
     title: "Direções e localização",
     goal: "Perguntar e entender direções básicas, localizar lugares.",
-    usageNote: { title: "\"Zài\" ou \"lí\"?", body: "<strong>Zài</strong> (在) diz <strong>onde algo está</strong>: cèsuǒ <strong>zài</strong> nǎlǐ? (onde fica o banheiro?). <strong>Lí</strong> (离) diz a <strong>distância entre dois lugares</strong>, sempre comparando um ponto de referência: yīyuàn <strong>lí</strong> zhèlǐ hěn jìn (o hospital fica perto daqui). Zài localiza um lugar sozinho; lí sempre compara dois." },
+    concepts: [
+      {
+        id: "zai-location",
+        trigger: { afterVocabIdx: 1 },
+        blocks: [
+          {
+            title: "在 (zài) — localização",
+            body: "在 (zài) indica onde algo ou alguém está — funciona como o verbo \"ficar\" ou \"estar\" quando se fala de localização. A estrutura é: Algo/Alguém + 在 + Lugar.",
+            examples: [
+              { c: "厕所在哪里？", p: "cèsuǒ zài nǎlǐ?", t: "onde fica o banheiro?" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "zai-vs-li",
+        trigger: { afterVocabIdx: 8 },
+        blocks: [
+          {
+            title: "\"Zài\" ou \"lí\"?",
+            body: "<strong>Zài</strong> (在) diz <strong>onde algo está</strong>. <strong>Lí</strong> (离) diz a <strong>distância entre dois lugares</strong>, sempre comparando um ponto de referência. Zài localiza um lugar sozinho; lí sempre compara dois.",
+            examples: [
+              { c: "厕所在哪里？", p: "cèsuǒ zài nǎlǐ?", t: "onde fica o banheiro? (localização)" },
+              { c: "医院离这里很近", p: "yīyuàn lí zhèlǐ hěn jìn", t: "o hospital fica perto daqui (distância)" }
+            ],
+            wrapup: true
+          }
+        ]
+      }
+    ],
     trueFalseExercises: [{ subject: "厕所在哪里？", pinyin: "cèsuǒ zài nǎlǐ?", emoji: "🚻", claim: "Essa pergunta é sobre o preço de um produto.", answer: false,
       whyNote: "Errado — <strong>厕所在哪里？</strong> pergunta ONDE fica o banheiro (在哪里 = onde fica), não o preço. Preço seria \"多少钱？\"." }],
     vocab: [
@@ -345,7 +577,50 @@ const UNITS = [
     level: "HSK1",
     title: "Compras",
     goal: "Perguntar preços, negociar valores e fazer uma compra simples.",
-    usageNote: { title: "\"Kuài\" ou \"máo\"?", body: "No dinheiro chinês falado, <strong>kuài</strong> (块) é a unidade principal (equivalente a \"um real\"), e <strong>máo</strong> (毛) é um décimo de um kuài (equivalente a \"dez centavos\"). Wǔ kuài sān máo (五块三毛) é \"5 yuans e 30 centavos\" — não \"5 e 3\", os dois números têm pesos diferentes." },
+    concepts: [
+      {
+        id: "kuai-mao",
+        trigger: { afterVocabIdx: 4 },
+        blocks: [
+          {
+            title: "\"Kuài\" ou \"máo\"?",
+            body: "No dinheiro chinês falado, <strong>kuài</strong> (块) é a unidade principal (equivalente a \"um real\"), e <strong>máo</strong> (毛) é um décimo de um kuài (equivalente a \"dez centavos\"). A estrutura simplesmente junta os dois números em sequência.",
+            examples: [
+              { c: "五块三毛", p: "wǔ kuài sān máo", t: "5 yuans e 30 centavos" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "ba-particle",
+        trigger: { afterVocabIdx: 6 },
+        blocks: [
+          {
+            title: "吧 (ba) — suavizando um pedido ou sugestão",
+            body: "吧 (ba) no final de uma frase transforma uma ordem direta em algo mais suave, como uma sugestão ou pedido educado — parecido com adicionar \"né\" ou \"tá\" no final de uma frase em português.",
+            examples: [
+              { c: "便宜一点吧", p: "piányi yìdiǎn ba", t: "faz mais barato, vai" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "classifiers-more",
+        trigger: { afterVocabIdx: 9 },
+        blocks: [
+          {
+            title: "Mais classificadores",
+            body: "Você já viu que todo número precisa de um classificador antes do substantivo (个/口, lá na Unidade 4). Assim como 口 é específico pra contar pessoas da família, outras categorias de coisas têm seu próprio classificador — como 件 pra roupas.",
+            examples: [
+              { c: "一件衣服", p: "yí jiàn yīfu", t: "uma peça de roupa" }
+            ],
+            wrapup: true
+          }
+        ]
+      }
+    ],
     vocab: [
       { p: "mǎi", c: "买", t: "comprar" },
       { p: "mài", c: "卖", t: "vender" },
@@ -384,7 +659,50 @@ const UNITS = [
     level: "HSK1",
     title: "Clima",
     goal: "Descrever o tempo/clima e reagir a ele.",
-    usageNote: { title: "Por que \"jīntiān hěn rè\" e não \"jīntiān shì rè\"?", body: "Adjetivos em chinês (rè, lěng, guì, piányi...) funcionam como o próprio verbo da frase — eles não precisam do verbo <strong>shì</strong> (ser/estar) na frente. Por isso se diz <strong>jīntiān hěn rè</strong> (hoje [está] muito quente), nunca \"jīntiān shì rè\". O <strong>hěn</strong> aqui quase não significa \"muito\" — é só uma palavra de ligação obrigatória antes do adjetivo." },
+    concepts: [
+      {
+        id: "adjective-predicate",
+        trigger: { afterVocabIdx: 1 },
+        blocks: [
+          {
+            title: "Por que \"jīntiān hěn rè\" e não \"jīntiān shì rè\"?",
+            body: "Adjetivos em chinês (rè, lěng, guì, piányi...) funcionam como o próprio verbo da frase — eles não precisam do verbo <strong>shì</strong> (ser/estar) na frente. O <strong>hěn</strong> aqui quase não significa \"muito\" — é só uma palavra de ligação obrigatória antes do adjetivo.",
+            examples: [
+              { c: "今天很热", p: "jīntiān hěn rè", t: "hoje está muito quente" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "buta-not-very",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "不太 (bú tài) — \"não muito\"",
+            body: "不太 (bú tài) suaviza uma negação, funcionando como \"não muito\" em português — em vez de negar totalmente algo, diz que não é bem assim, mas sem ser absoluto.",
+            examples: [
+              { c: "今天不太冷", p: "jīntiān bú tài lěng", t: "hoje não está muito frio" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "hui-future-prediction",
+        trigger: { afterVocabIdx: 3 },
+        blocks: [
+          {
+            title: "会 (huì) — previsão sobre o futuro",
+            body: "Além de significar \"saber fazer\" (uma habilidade aprendida, que você vai ver na Unidade 15), 会 (huì) também é usado pra fazer previsões sobre o que vai acontecer — parecido com \"vai\" no futuro do português.",
+            examples: [
+              { c: "明天会下雨", p: "míngtiān huì xià yǔ", t: "amanhã vai chover" }
+            ],
+            wrapup: true
+          }
+        ]
+      }
+    ],
     trueFalseExercises: [{ subject: "今天很热。", pinyin: "jīntiān hěn rè.", emoji: "☀️", claim: "Essa frase descreve como uma pessoa está se sentindo.", answer: false,
       whyNote: "Errado — <strong>今天很热</strong> descreve o CLIMA (hoje está quente), não como uma pessoa se sente. \"Estou com calor\" seria \"我很热\"." }],
     vocab: [
@@ -394,8 +712,7 @@ const UNITS = [
       { p: "xià yǔ", c: "下雨", t: "chover" },
       { p: "qíngtiān", c: "晴天", t: "dia ensolarado" },
       { p: "yīntiān", c: "阴天", t: "dia nublado" },
-      { p: "fēng", c: "风", t: "vento" },
-      { p: "jīntiān tiānqì zěnmeyàng", c: "今天天气怎么样", t: "como está o tempo hoje" }
+      { p: "fēng", c: "风", t: "vento" }
     ],
     phrases: [
       { p: "Jīntiān tiānqì zěnmeyàng?", c: "今天天气怎么样？", t: "Como está o tempo hoje?",
@@ -422,7 +739,50 @@ const UNITS = [
     level: "HSK1",
     title: "Transporte",
     goal: "Perguntar como chegar a um lugar usando transporte público ou táxi.",
-    usageNote: { title: "\"Zǒu lù\" ou \"zuò dìtiě\"?", body: "Pra ir a pé, usa-se só <strong>zǒu lù</strong> (走路, andar), sem nenhum outro verbo. Pra qualquer veículo em que você entra e senta, usa-se <strong>zuò</strong> (坐, literalmente \"sentar\") antes do meio de transporte: <strong>zuò</strong> dìtiě, <strong>zuò</strong> gōngjiāochē, <strong>zuò</strong> chūzūchē. É o mesmo \"zuò\" de sentar numa cadeira — pense nele como \"ir sentado em\"." },
+    concepts: [
+      {
+        id: "zenme",
+        trigger: { afterVocabIdx: 4 },
+        blocks: [
+          {
+            title: "怎么 (zěnme) — perguntando \"como\"",
+            body: "怎么 (zěnme) pergunta sobre o modo como algo é feito, geralmente vindo antes do verbo — equivale a \"como\" em português quando se pergunta sobre método ou jeito de fazer algo.",
+            examples: [
+              { c: "去机场怎么去？", p: "qù jīchǎng zěnme qù?", t: "como se vai para o aeroporto?" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "qu-lai",
+        trigger: { afterVocabIdx: 4 },
+        blocks: [
+          {
+            title: "去 (qù) e 来 (lái) — \"ir\" e \"vir\"",
+            body: "去 (qù) significa \"ir\" e é seguido diretamente pelo lugar de destino, sem preposição. 来 (lái) significa \"vir\" — juntos, são os dois verbos direcionais básicos do chinês, indicando movimento em direção ou para longe de quem fala.",
+            examples: [
+              { c: "我去机场", p: "wǒ qù jīchǎng", t: "eu vou ao aeroporto" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "zoulu-vs-zuo",
+        trigger: { afterVocabIdx: 4 },
+        blocks: [
+          {
+            title: "\"Zǒu lù\" ou \"zuò dìtiě\"?",
+            body: "Pra ir a pé, usa-se só <strong>zǒu lù</strong> (走路, andar), sem nenhum outro verbo. Pra qualquer veículo em que você entra e senta, usa-se <strong>zuò</strong> (坐, literalmente \"sentar\") antes do meio de transporte — o mesmo \"zuò\" de sentar numa cadeira, pense nele como \"ir sentado em\".",
+            examples: [
+              { c: "我坐地铁去", p: "wǒ zuò dìtiě qù", t: "eu vou de metrô" }
+            ],
+            wrapup: true
+          }
+        ]
+      }
+    ],
     vocab: [
       { p: "gōngjiāochē", c: "公共汽车", t: "ônibus" },
       { p: "dìtiě", c: "地铁", t: "metrô" },
@@ -458,7 +818,55 @@ const UNITS = [
     level: "HSK1",
     title: "Saúde e corpo",
     goal: "Descrever sintomas simples e partes do corpo, pedir ajuda médica básica.",
-    usageNote: { title: "\"Tóu téng\" ou \"bù shūfu\"?", body: "<strong>Téng</strong> (疼) descreve uma dor específica, numa parte do corpo: tóu <strong>téng</strong> (dor de cabeça), dùzi <strong>téng</strong> (dor de barriga). <strong>Bù shūfu</strong> (不舒服) é mais geral — um mal-estar sem apontar onde dói. Se você sabe exatamente o que dói, use téng; se é só uma sensação geral de \"estou mal\", use bù shūfu." },
+    concepts: [
+      {
+        id: "teng",
+        trigger: { afterVocabIdx: 3 },
+        blocks: [
+          {
+            title: "疼 (téng) — descrevendo dor",
+            body: "Pra dizer que alguma parte do corpo dói, a estrutura em chinês é bem direta: Parte do corpo + 疼 (téng) — sem precisar de um verbo equivalente a \"doer\" com sujeito separado como em português.",
+            examples: [
+              { c: "我头疼", p: "wǒ tóu téng", t: "minha cabeça está doendo" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "teng-vs-bushufu",
+        trigger: { afterVocabIdx: 7 },
+        blocks: [
+          {
+            title: "\"Tóu téng\" ou \"bù shūfu\"?",
+            body: "<strong>Téng</strong> (疼) descreve uma dor específica, numa parte do corpo. <strong>Bù shūfu</strong> (不舒服) é mais geral — um mal-estar sem apontar onde dói. Se você sabe exatamente o que dói, use téng; se é só uma sensação geral de \"estou mal\", use bù shūfu.",
+            examples: [
+              { c: "我头疼", p: "wǒ tóu téng", t: "minha cabeça dói (dor específica)" },
+              { c: "我不舒服", p: "wǒ bù shūfu", t: "eu não estou bem (mal-estar geral)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        // Primeiro contato de 了 no papel de "mudança de estado" -- o outro
+        // papel dele (marcar ação concluída) só aparece na Unidade 17, que
+        // faz a ponte de volta pra cá (ver concept "le-bridge" em U17) --
+        // sem isso, o aluno nunca saberia que é a mesma partícula.
+        id: "le-change-of-state",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "了 (le) marcando mudança de estado",
+            body: "了 no final da frase (não logo após o verbo) indica que uma situação nova começou ou mudou — como \"o que houve com você?\", uma mudança percebida agora, que antes não era assim.",
+            examples: [
+              { c: "你怎么了？", p: "nǐ zěnme le?", t: "o que houve com você?" }
+            ],
+            wrapup: true
+          }
+        ]
+      }
+    ],
     trueFalseExercises: [{ subject: "我头疼。", pinyin: "wǒ tóu téng.", emoji: "🤕", claim: "Essa frase é usada quando alguém está com dor de cabeça.", answer: true,
       whyNote: "Correto — <strong>我头疼 (wǒ tóu téng)</strong> significa literalmente \"minha cabeça dói\", ou seja, dor de cabeça." }],
     vocab: [
@@ -494,7 +902,37 @@ const UNITS = [
     level: "HSK1",
     title: "Hobbies e tempo livre",
     goal: "Falar sobre hobbies, gostos e o que faz no tempo livre.",
-    usageNote: { title: "\"Kàn\" ou \"tīng\"?", body: "<strong>Kàn</strong> (看) é usado pra atividades visuais: <strong>kàn</strong> shū (ler/\"ver\" livro), <strong>kàn</strong> diànyǐng (assistir filme). <strong>Tīng</strong> (听) é usado pra atividades de ouvir: <strong>tīng</strong> yīnyuè (ouvir música). Trocar os dois é um erro comum — \"ouvir um filme\" ou \"ver música\" soam estranhos em chinês, igual soariam em português." },
+    concepts: [
+      {
+        id: "de-posse",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "的 (de) — mostrando posse",
+            body: "的 (de) é usado pra indicar posse, como \"meu\", \"seu\", \"do fulano\" — parecido com o \"'s\" do inglês, mas mais simples: sempre fica entre o dono e a coisa possuída. A estrutura é: Dono + 的 + Coisa.",
+            examples: [
+              { c: "你的爱好是什么？", p: "nǐ de àihào shì shénme?", t: "qual é o seu hobby?" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "kan-vs-ting",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "\"Kàn\" ou \"tīng\"?",
+            body: "<strong>Kàn</strong> (看) é usado pra atividades visuais: ler, assistir filme. <strong>Tīng</strong> (听) é usado pra atividades de ouvir. Trocar os dois é um erro comum — \"ouvir um filme\" ou \"ver música\" soam estranhos em chinês, igual soariam em português.",
+            examples: [
+              { c: "看书", p: "kàn shū", t: "ler livro (atividade visual)" },
+              { c: "听音乐", p: "tīng yīnyuè", t: "ouvir música (atividade auditiva)" }
+            ],
+            wrapup: true
+          }
+        ]
+      }
+    ],
     trueFalseExercises: [{ subject: "周末你有空吗？", pinyin: "zhōumò nǐ yǒu kòng ma?", emoji: "🎬", claim: "Essa é uma forma de convidar alguém pra fazer algo.", answer: true,
       whyNote: "Correto — <strong>你有空吗？</strong> pergunta se a pessoa está livre/disponível, um jeito comum de convidar alguém pra fazer algo no fim de semana." }],
     vocab: [
@@ -530,7 +968,44 @@ const UNITS = [
     level: "HSK1",
     title: "Planos futuros",
     goal: "Expressar planos e intenções usando 要 e 打算.",
-    usageNote: { title: "\"Dǎsuàn\" ou \"yào\"?", body: "<strong>Dǎsuàn</strong> (打算) é um plano mais pensado, com alguma organização: wǒ <strong>dǎsuàn</strong> xuéxí Zhōngwén (eu pretendo estudar chinês). <strong>Yào</strong> (要) pode expressar uma intenção mais imediata ou simples, \"vou fazer isso\": wǒ yǐhòu <strong>yào</strong> qù Zhōngguó lǚyóu (no futuro eu vou/quero viajar pra China). Dǎsuàn soa um pouco mais formal e deliberado que yào." },
+    concepts: [
+      {
+        id: "dasuan",
+        trigger: { afterVocabIdx: 0 },
+        blocks: [
+          {
+            title: "打算 (dǎsuàn) — planos futuros",
+            body: "打算 (dǎsuàn) significa \"planejar\" ou \"pretender\", e vem seguido diretamente de um verbo — é uma das formas mais comuns de falar sobre planos futuros em chinês.",
+            examples: [
+              { c: "我打算学中文", p: "wǒ dǎsuàn xué Zhōngwén", t: "eu pretendo estudar chinês" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "yihou",
+        trigger: { afterVocabIdx: 6 },
+        blocks: [
+          {
+            title: "以后 (yǐhòu) — \"depois de\"",
+            body: "以后 (yǐhòu) significa \"depois\" ou \"no futuro\", e vem depois da referência de tempo à qual se refere — a estrutura inteira (tempo + 以后) funciona como uma unidade que indica \"depois desse momento\".",
+            examples: [
+              { c: "我以后要去中国旅游", p: "wǒ yǐhòu yào qù Zhōngguó lǚyóu", t: "no futuro eu quero viajar para a China" }
+            ]
+          },
+          {
+            title: "\"Dǎsuàn\" ou \"yào\"?",
+            body: "<strong>Dǎsuàn</strong> (打算) é um plano mais pensado, com alguma organização. <strong>Yào</strong> (要, que você já viu lá na Unidade 5) pode expressar uma intenção mais imediata ou simples, \"vou fazer isso\". Dǎsuàn soa um pouco mais formal e deliberado que yào.",
+            examples: [
+              { c: "我打算学中文", p: "wǒ dǎsuàn xué Zhōngwén", t: "eu pretendo estudar chinês (plano)" },
+              { c: "我以后要去中国旅游", p: "wǒ yǐhòu yào qù Zhōngguó lǚyóu", t: "eu quero viajar pra China (intenção)" }
+            ],
+            wrapup: true
+          }
+        ]
+      }
+    ],
     vocab: [
       { p: "dǎsuàn", c: "打算", t: "planejar/pretender" },
       { p: "míngtiān", c: "明天", t: "amanhã" },
@@ -563,7 +1038,43 @@ const UNITS = [
     level: "HSK1",
     title: "Comparações simples",
     goal: "Fazer comparações básicas entre pessoas, objetos e situações.",
-    usageNote: { title: "\"Bǐ\" ou \"yíyàng\"?", body: "<strong>Bǐ</strong> (比) compara uma <strong>diferença</strong> entre duas coisas: Zhōngwén <strong>bǐ</strong> Fǎwén nán (chinês é mais difícil que francês). <strong>Yíyàng</strong> (一样) diz que duas coisas são <strong>iguais</strong>: zhège hé nàge <strong>yíyàng</strong> (este e aquele são iguais). Repare que \"bù yíyàng\" (não são iguais) não usa bǐ — são duas estruturas de comparação separadas, não se misturam." },
+    concepts: [
+      {
+        id: "bi-comparison",
+        trigger: { afterVocabIdx: 0 },
+        blocks: [
+          {
+            title: "比 (bǐ) — fazendo comparações",
+            body: "比 (bǐ) é usado pra comparar duas coisas, funcionando como \"mais... que\" em português. A estrutura é: A + 比 + B + Adjetivo — bem mais direta que a construção em português.",
+            examples: [
+              { c: "中文比法文难", p: "Zhōngwén bǐ Fǎwén nán", t: "chinês é mais difícil que francês" }
+            ]
+          },
+          {
+            title: "\"Bǐ\" ou \"yíyàng\"?",
+            body: "<strong>Bǐ</strong> compara uma <strong>diferença</strong> entre duas coisas. <strong>Yíyàng</strong> (一样) diz que duas coisas são <strong>iguais</strong>. Repare que \"bù yíyàng\" (não são iguais) não usa bǐ — são duas estruturas separadas, não se misturam.",
+            examples: [
+              { c: "这个和那个一样", p: "zhège hé nàge yíyàng", t: "este e aquele são iguais" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "haishi",
+        trigger: { afterVocabIdx: 5 },
+        blocks: [
+          {
+            title: "还是 (háishi) — \"ou\" em perguntas de escolha",
+            body: "还是 (háishi) é usado pra oferecer duas opções numa pergunta, equivalendo a \"ou\" quando se espera que a pessoa escolha entre uma coisa e outra — diferente de 或者, que é usado fora de perguntas.",
+            examples: [
+              { c: "你要茶还是咖啡？", p: "nǐ yào chá háishi kāfēi?", t: "você quer chá ou café?" }
+            ],
+            wrapup: true
+          }
+        ]
+      }
+    ],
     vocab: [
       { p: "bǐ", c: "比", t: "comparado a / mais que" },
       { p: "gèng", c: "更", t: "ainda mais" },
@@ -596,7 +1107,84 @@ const UNITS = [
     level: "HSK1",
     title: "Convites e capacidades",
     goal: "Convidar alguém para algo, dizer o que sabe ou consegue fazer, fazer pedidos educados.",
-    usageNote: { title: "\"Huì\" ou \"néng\"?", body: "<strong>Huì</strong> (会) é uma habilidade aprendida: nǐ <strong>huì</strong> shuō Zhōngwén ma? (você sabe falar chinês? — algo que se aprende). <strong>Néng</strong> (能) é capacidade ou permissão numa situação específica: nǐ míngtiān <strong>néng</strong> lái ma? (você consegue vir amanhã? — depende da sua agenda, não de habilidade). Uma pergunta sobre saber fazer algo usa huì; uma pergunta sobre poder fazer algo agora usa néng." },
+    // Unidade com mais pontos gramaticais do curso (想/会/能/请/都/也) --
+    // deliberadamente ESPALHADOS pelos blocos em vez de empilhados todos no
+    // bloco 0 (onde xiǎng/huì/néng são introduzidos juntos), pra não virar
+    // uma aula teórica no meio da lição.
+    concepts: [
+      {
+        id: "hui-vs-neng",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "\"Huì\" ou \"néng\"?",
+            body: "<strong>Huì</strong> (会) é uma habilidade aprendida — algo que se sabe fazer porque aprendeu. <strong>Néng</strong> (能) é capacidade ou permissão numa situação específica — depende da sua agenda ou circunstância, não de habilidade.",
+            examples: [
+              { c: "你会说中文吗？", p: "nǐ huì shuō Zhōngwén ma?", t: "você sabe falar chinês? (habilidade)" },
+              { c: "你明天能来吗？", p: "nǐ míngtiān néng lái ma?", t: "você consegue vir amanhã? (situação)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "xiang-vs-yao",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "\"Xiǎng\" ou \"yào\"?",
+            body: "想 (xiǎng) expressa vontade de fazer algo de forma mais suave — mais parecido com \"gostaria de\" ou \"estou pensando em\". 要 (que você já viu na Unidade 5) soa mais direto, como \"quero\", especialmente pra pedidos.",
+            examples: [
+              { c: "我想去看电影", p: "wǒ xiǎng qù kàn diànyǐng", t: "eu quero ir ver um filme (mais suave)" },
+              { c: "我要一杯茶", p: "wǒ yào yì bēi chá", t: "eu quero uma xícara de chá (pedido direto)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "qing-please",
+        trigger: { afterVocabIdx: 3 },
+        blocks: [
+          {
+            title: "请 (qǐng) — pedidos educados",
+            body: "请 (qǐng) equivale a \"por favor\" quando vem antes de um pedido ou convite — é uma forma simples e educada de suavizar uma instrução direta.",
+            examples: [
+              { c: "请坐", p: "qǐng zuò", t: "por favor, sente-se" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "dou-all",
+        trigger: { afterVocabIdx: 5 },
+        blocks: [
+          {
+            title: "都 (dōu) — \"todos\"",
+            body: "都 (dōu) significa \"todos\" ou \"ambos\", mas sempre vem antes do verbo, nunca depois do substantivo como em português.",
+            examples: [
+              { c: "我们都想去", p: "wǒmen dōu xiǎng qù", t: "nós todos queremos ir" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "ye-also",
+        trigger: { afterVocabIdx: 6 },
+        blocks: [
+          {
+            title: "也 (yě) — \"também\"",
+            body: "也 (yě) equivale a \"também\", e assim como 都, sempre vem antes do verbo, nunca no final da frase como costuma ficar em português.",
+            examples: [
+              { c: "我也想去", p: "wǒ yě xiǎng qù", t: "eu também quero ir" }
+            ],
+            wrapup: true
+          }
+        ]
+      }
+    ],
     vocab: [
       { p: "xiǎng", c: "想", t: "querer / pensar em fazer algo" },
       { p: "huì", c: "会", t: "saber fazer (habilidade aprendida)" },
@@ -639,7 +1227,66 @@ const UNITS = [
     level: "HSK1",
     title: "Calendário e datas",
     goal: "Falar sobre dias da semana, datas completas e horários, e marcar um encontro.",
-    usageNote: { title: "\"Yǐqián\" ou \"yǐhòu\"?", body: "<strong>Yǐqián</strong> (以前) é \"antes de\": shí diǎn <strong>yǐqián</strong> wǒ zài jiā (antes das 10h eu estou em casa). <strong>Yǐhòu</strong> (以后) é \"depois de\": shí diǎn <strong>yǐhòu</strong> wǒ bú zài jiā (depois das 10h eu não estou em casa). Os dois vêm sempre <strong>depois</strong> da referência de tempo ou evento — nunca antes dela, diferente do português." },
+    concepts: [
+      {
+        id: "weekdays",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "Estrutura dos dias da semana",
+            body: "Os dias da semana em chinês seguem um padrão bem lógico: 星期 (xīngqī, \"semana\") seguido de um número de 1 a 6 para segunda a sábado. Domingo é a exceção, usando 星期天 ou 星期日 em vez de um número.",
+            examples: [
+              { c: "星期一", p: "xīngqīyī", t: "segunda-feira" },
+              { c: "星期天", p: "xīngqītiān", t: "domingo (exceção)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "dates",
+        trigger: { afterVocabIdx: 4 },
+        blocks: [
+          {
+            title: "Estrutura de datas completas",
+            body: "Uma data completa em chinês segue a ordem do maior para o menor: Ano + 年 + Mês + 月 + Dia + 号 — o oposto da ordem mais comum em português (dia/mês/ano).",
+            examples: [
+              { c: "八月二十号", p: "bā yuè èrshí hào", t: "20 de agosto" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "hours-minutes",
+        trigger: { afterVocabIdx: 6 },
+        blocks: [
+          {
+            title: "Horas com minutos",
+            body: "Pra dizer um horário com minutos, basta juntar Número + 点 (hora) + Número + 分 (minuto) em sequência — bem direto, sem preposições como \"e\" entre eles.",
+            examples: [
+              { c: "十一点十八分", p: "shí yī diǎn shí bā fēn", t: "11h18" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "yiqian-vs-yihou",
+        trigger: { afterVocabIdx: 8 },
+        blocks: [
+          {
+            title: "\"Yǐqián\" ou \"yǐhòu\"?",
+            body: "<strong>Yǐqián</strong> (以前) é \"antes de\". <strong>Yǐhòu</strong> (以后) é \"depois de\". Os dois vêm sempre <strong>depois</strong> da referência de tempo ou evento — nunca antes dela, diferente do português.",
+            examples: [
+              { c: "十点以前我在家", p: "shí diǎn yǐqián wǒ zài jiā", t: "antes das 10h eu estou em casa" },
+              { c: "十点以后我不在家", p: "shí diǎn yǐhòu wǒ bú zài jiā", t: "depois das 10h eu não estou em casa" }
+            ],
+            wrapup: true
+          }
+        ]
+      }
+    ],
     vocab: [
       { p: "xīngqī", c: "星期", t: "semana" },
       { p: "xīngqīyī", c: "星期一", t: "segunda-feira" },
@@ -682,7 +1329,130 @@ const UNITS = [
     level: "HSK1",
     title: "O que já aconteceu",
     goal: "Falar sobre ações já concluídas, mudanças de estado, e o que ainda não aconteceu.",
-    usageNote: { title: "Por que \"wǒ hái méi chī\" nunca leva \"le\"?", body: "<strong>Le</strong> (了) marca uma ação concluída: wǒ chī <strong>le</strong> liǎng gè píngguǒ (eu comi duas maçãs). Mas na negação com <strong>hái méi</strong> (还没, ainda não), o le <strong>desaparece</strong>: wǒ <strong>hái méi</strong> chī (eu ainda não comi) — nunca \"wǒ hái méi chī le\". Faz sentido: se a ação ainda não aconteceu, não tem como marcar ela como concluída." },
+    // Capítulo integrador do sistema de aspecto -- deliberadamente mais denso
+    // que as outras unidades porque os pontos abaixo dependem uns dos
+    // outros (não dá pra ensinar negação do passado sem primeiro ter
+    // ensinado que existe conclusão de ação). Inclui a ponte de volta pro
+    // outro uso de 了 (Unidade 11, mudança de estado) e a explicação
+    // formal de 是...的 (adiada da Unidade 10, que ainda não tinha o
+    // conceito de ação concluída pra sustentar aquela explicação).
+    concepts: [
+      {
+        id: "le-completion",
+        trigger: { afterVocabIdx: 0 },
+        blocks: [
+          {
+            title: "了 (le) — marcando conclusão",
+            body: "了 (le) depois de um verbo indica que a ação foi concluída — funciona parecido com o passado simples em português (\"comi\"). A estrutura é: Verbo + 了 + Objeto.",
+            examples: [
+              { c: "我吃了两个苹果", p: "wǒ chī le liǎng gè píngguǒ", t: "eu comi duas maçãs" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "buxiang-le",
+        trigger: { afterVocabIdx: 0 },
+        blocks: [
+          {
+            title: "不想...了 — \"não querer mais\"",
+            body: "Quando 不 (ou 没) se combina com 了 no final da frase, o sentido vira \"não mais\" — indicando que algo que estava acontecendo ou era verdade parou de ser.",
+            examples: [
+              { c: "我不想吃了", p: "wǒ bù xiǎng chī le", t: "eu não quero mais comer" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "le-question",
+        trigger: { afterVocabIdx: 0 },
+        blocks: [
+          {
+            title: "了...吗 — perguntando se algo já aconteceu",
+            body: "Pra perguntar se uma ação já foi concluída, junta-se 了 (marcando conclusão) com 吗 (marcando pergunta) no final da frase — a combinação pergunta \"isso já aconteceu?\".",
+            examples: [
+              { c: "你吃饭了吗？", p: "nǐ chī fàn le ma?", t: "você já comeu?" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "haimei",
+        trigger: { afterVocabIdx: 3 },
+        blocks: [
+          {
+            title: "Por que \"wǒ hái méi chī\" nunca leva \"le\"?",
+            body: "了 marca uma ação concluída. Mas na negação com <strong>hái méi</strong> (还没, ainda não), o le <strong>desaparece</strong> — nunca \"wǒ hái méi chī le\". Faz sentido: se a ação ainda não aconteceu, não tem como marcar ela como concluída.",
+            examples: [
+              { c: "我还没吃", p: "wǒ hái méi chī", t: "eu ainda não comi" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "meiyou-past",
+        trigger: { afterVocabIdx: 6 },
+        blocks: [
+          {
+            title: "没有 + verbo — negando o passado",
+            body: "Pra dizer que algo não aconteceu no passado, o chinês usa 没有 (ou só 没) antes do verbo — nunca 不, que é reservado pra negar o presente ou o futuro.",
+            examples: [
+              { c: "我昨天没有去工作", p: "wǒ zuótiān méiyǒu qù gōngzuò", t: "ontem eu não fui trabalhar" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "bu-vs-mei",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "不 vs. 没 — duas negações, dois tempos",
+            body: "不 (bù) nega o presente e o futuro — o que não é ou não vai ser. 没 (méi) nega o passado — o que não aconteceu. Uma exceção importante: o verbo 是 nunca é negado com 没, sempre com 不, mesmo falando do passado.",
+            examples: [
+              { c: "今天晚上我不喝酒", p: "jīntiān wǎnshang wǒ bù hē jiǔ", t: "hoje à noite eu não vou beber (presente/futuro)" },
+              { c: "昨天我没有去工作", p: "zuótiān wǒ méiyǒu qù gōngzuò", t: "ontem eu não fui trabalhar (passado)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "le-bridge",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "O mesmo 了 de novo, com outro papel",
+            body: "Lembra do \"你怎么了？\" (o que houve com você?) lá na Unidade 11? Ali, 了 marcava uma <strong>mudança de estado</strong>. Aqui, 了 depois do verbo marca uma <strong>ação concluída</strong>. É a mesma partícula, dois papéis diferentes — o contexto (fim da frase vs. logo após o verbo) diz qual é qual.",
+            examples: [
+              { c: "你怎么了？", p: "nǐ zěnme le?", t: "o que houve com você? (mudança de estado)" },
+              { c: "我吃了两个苹果", p: "wǒ chī le liǎng gè píngguǒ", t: "eu comi duas maçãs (ação concluída)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "shide-deferred",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "是...的 — dando ênfase a como algo aconteceu",
+            body: "Lembra de \"Nǐ shì zěnme lái de?\" (como você veio?) lá na Unidade 10? Agora que você já sabe que o chinês marca ações concluídas, essa construção faz mais sentido: 是...的 dá ênfase a um detalhe específico (modo, lugar ou tempo) de uma ação <strong>já concluída</strong> — é por isso que a pergunta usa essa estrutura, e não uma pergunta comum.",
+            examples: [
+              { c: "你是怎么来的？", p: "nǐ shì zěnme lái de?", t: "como você veio? (ênfase no modo)" },
+              { c: "我是坐地铁来的", p: "wǒ shì zuò dìtiě lái de", t: "eu vim de metrô" }
+            ],
+            wrapup: true
+          }
+        ]
+      }
+    ],
     vocab: [
       { p: "le", c: "了", t: "partícula de conclusão/mudança" },
       { p: "chī fàn", c: "吃饭", t: "comer (uma refeição)" },
@@ -723,7 +1493,86 @@ const UNITS = [
     level: "HSK1",
     title: "Perguntas do dia a dia",
     goal: "Fazer perguntas abertas variadas: quem, por quê, onde alguém mora ou trabalha, se há algo num lugar.",
-    usageNote: { title: "\"Wèishénme\" ou \"yīnwèi\"?", body: "<strong>Wèishénme</strong> (为什么) é a pergunta: \"por quê?\". <strong>Yīnwèi</strong> (因为) é a resposta: \"porque\". Nǐ <strong>wèishénme</strong> bú qù? <strong>Yīnwèi</strong> wǒ hěn máng (Por que você não vai? Porque eu estou muito ocupado). É a pergunta e a resposta andando sempre juntas, como um par." },
+    concepts: [
+      {
+        id: "shei",
+        trigger: { afterVocabIdx: 0 },
+        blocks: [
+          {
+            title: "谁 (shéi) — perguntando \"quem\"",
+            body: "谁 (shéi) pergunta sobre uma pessoa, ocupando o mesmo lugar na frase que a resposta ocuparia — se a resposta é \"eu\" no início da frase, 谁 também vai no início.",
+            examples: [
+              { c: "你是谁？", p: "nǐ shì shéi?", t: "quem é você?" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "weishenme-yinwei",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "\"Wèishénme\" ou \"yīnwèi\"?",
+            body: "<strong>Wèishénme</strong> (为什么) é a pergunta: \"por quê?\". <strong>Yīnwèi</strong> (因为) é a resposta: \"porque\". É a pergunta e a resposta andando sempre juntas, como um par.",
+            examples: [
+              { c: "你为什么不去？", p: "nǐ wèishénme bú qù?", t: "por que você não vai?" },
+              { c: "因为我很忙", p: "yīnwèi wǒ hěn máng", t: "porque eu estou muito ocupado" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "meiyou-de",
+        trigger: { afterVocabIdx: 6 },
+        blocks: [
+          {
+            title: "Posse próxima sem 的",
+            body: "Pra relações pessoais muito próximas (família, namorado(a)), o chinês às vezes omite o 的 que normalmente marcaria posse.",
+            examples: [
+              { c: "我女朋友", p: "wǒ nǚpéngyou", t: "minha namorada" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "difang-you",
+        trigger: { afterVocabIdx: 8 },
+        blocks: [
+          {
+            title: "Lugar + 有 + Objeto — dizendo o que existe num lugar",
+            body: "Pra dizer que algo existe em determinado lugar (\"aqui tem café\"), a estrutura é: Lugar + 有 + Objeto — bem diferente da ordem em português, onde o lugar viria depois.",
+            examples: [
+              { c: "这里有一些咖啡", p: "zhèlǐ yǒu yìxiē kāfēi", t: "aqui tem um pouco de café" }
+            ]
+          },
+          {
+            title: "一些 (yìxiē) — \"alguns\" ou \"um pouco de\"",
+            body: "一些 (yìxiē) indica uma quantidade pequena e não específica de algo — equivale a \"alguns\" (coisas contáveis) ou \"um pouco de\" (coisas não-contáveis, como líquidos).",
+            examples: [
+              { c: "一些书", p: "yìxiē shū", t: "alguns livros" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "zai-difang-verb",
+        trigger: { afterVocabIdx: 9 },
+        blocks: [
+          {
+            title: "在 + Lugar + Verbo — localização da ação",
+            body: "Quando se quer dizer onde uma ação acontece (não só onde algo está parado), 在 + Lugar vem antes do verbo — diferente de quando 在 sozinho indica só a posição de algo.",
+            examples: [
+              { c: "我在上海工作", p: "wǒ zài Shànghǎi gōngzuò", t: "eu trabalho em Xangai" }
+            ],
+            wrapup: true
+          }
+        ]
+      }
+    ],
     trueFalseExercises: [{ subject: "你为什么不去？", pinyin: "nǐ wèishénme bú qù?", emoji: "🤔", claim: "Essa pergunta pede pra saber onde alguém mora.", answer: false,
       whyNote: "Errado — <strong>你为什么不去？</strong> pergunta o MOTIVO (为什么 = por quê) de não ir, não onde a pessoa mora. Onde mora seria \"你住在哪里？\"." }],
     vocab: [
