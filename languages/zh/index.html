@@ -557,8 +557,14 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .vocab-card-hanzi{ font-family: var(--font-hanzi); font-size:44px; font-weight:700; display:flex; align-items:center; gap:10px; justify-content:center; }
 .vocab-card-trans{ font-size:17px; color: var(--ink); margin-bottom:8px; }
 
+/* Mesma caixa de "exemplo de uso" que .hanzi-appears-in e .tf-scene
+   (fundo paper-warm, borda sólida) -- antes era fundo=paper (igual ao da
+   página) com borda tracejada, a única caixa do app usando tracejado pra
+   dizer "aqui tem um exemplo", enquanto em todo outro lugar tracejado
+   significa "encaixe vazio, ainda sem conteúdo" (auditoria de UX/UI,
+   2026-09). */
 .vocab-phrase-example{
-  background: var(--paper); border:1px dashed var(--paper-line); border-radius: var(--radius);
+  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
   padding:16px; text-align:center;
 }
 .vocab-phrase-label{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; color: var(--ink-soft); font-weight:800; margin-bottom:8px; }
