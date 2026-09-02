@@ -5691,16 +5691,26 @@ function removePreviewWarningEl(){
 }
 
 function challengeAdminPublishedCardHTML(c){
+  // Mesmo padrão de estado de edição do card de pendentes
+  // (challengeAdminPendingCardHTML) -- "Editar" só troca challengesAdminEditingId,
+  // então o card precisa reagir a isso pra realmente mostrar o formulário
+  // (senão o botão fica sem efeito visível nenhum, como ficava antes).
+  const editing = challengesAdminEditingId === c.id;
   return `
     <div class="challenges-admin-card" data-challenge-id="${c.id}">
       <div class="challenges-admin-card-header">
         <span class="challenge-card-level">${c.level}</span>
         <strong>${challengeAdminCardTitle(c)}</strong>
       </div>
+      ${editing ? `<div class="challenges-admin-card-body">${challengeAdminEditView(c)}</div>` : ''}
       <div class="challenges-admin-actions">
-        <button class="btn btn-secondary" data-action="preview">👁️ Ver versão do aluno</button>
-        <button class="btn btn-secondary" data-action="edit">✏️ Editar</button>
-        <button class="btn btn-secondary" data-action="unpublish">🚫 Despublicar</button>
+        ${editing
+          ? `<button class="btn btn-primary" data-action="save">💾 Salvar</button>
+             <button class="btn btn-secondary" data-action="cancel-edit">Cancelar</button>`
+          : `<button class="btn btn-secondary" data-action="preview">👁️ Ver versão do aluno</button>
+             <button class="btn btn-secondary" data-action="edit">✏️ Editar</button>
+             <button class="btn btn-secondary" data-action="unpublish">🚫 Despublicar</button>`
+        }
       </div>
     </div>
   `;
