@@ -2498,7 +2498,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
         <div class="cloze-pinyin">${pinyinHTML}</div>
       </div>
       <div class="cloze-audio-row" id="cloze-audio-row"></div>
-      <div class="cloze-trans">${ex.phrase.t}</div>
+      <div class="cloze-trans" id="cloze-trans"></div>
       ${mode === 'type' ? `
         <div class="cloze-type-wrap">
           <input type="text" id="cloze-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite o pinyin que falta">
@@ -2522,6 +2522,11 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
   function revealBlank(state){
     document.getElementById('cloze-blank').textContent = ex.correctBlock.c;
     document.getElementById('cloze-blank').classList.add(state === 'wrong' ? 'incorrect' : 'correct');
+
+    // A tradução da frase só aparece depois de responder -- do mesmo jeito
+    // que o áudio abaixo, ela entregaria a resposta de graça se aparecesse
+    // antes (a palavra que falta costuma estar literalmente na tradução).
+    document.getElementById('cloze-trans').textContent = ex.phrase.t;
 
     // O áudio só aparece (e toca sozinho) depois de responder — antes disso
     // ele entregaria a resposta de graça, sem precisar completar a frase.
