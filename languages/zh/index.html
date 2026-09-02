@@ -1321,6 +1321,12 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 footer.app-footer{ text-align:center; margin-top:50px; font-size:12px; color: var(--ink-soft); opacity:.7; }
 
 /* toast for XP gain */
+/* top:18px fixo (via CSS) ficava por cima do próprio título da unidade
+   durante a lição -- nenhum número fixo cobre topbar normal e breadcrumb
+   do modo foco (que varia de altura por conteúdo) nos dois apps ao mesmo
+   tempo. shared/toast.js agora mede o header visível e ajusta este `top`
+   por JS antes de cada toast; o valor abaixo só vale antes do primeiro
+   toast (auditoria de UX/UI, 2026-09, P3). */
 #toast-layer{ position:fixed; top:18px; left:50%; transform:translateX(-50%); z-index:999; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
 .toast{ background: var(--ink); color: var(--gold-bright); font-weight:800; font-size:13px; padding:9px 16px; border-radius:999px; box-shadow: var(--shadow-lift); animation: toastIn .25s ease, toastOut .3s ease 1.7s forwards; }
 @keyframes toastIn{ from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} }
