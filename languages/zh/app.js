@@ -2725,6 +2725,13 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
     slotsEl.querySelectorAll('.reorder-slot').forEach(slot => {
       slot.classList.add(isCorrect ? 'correct' : 'incorrect');
     });
+    // Com a frase completa, todo bloco já foi usado (visibility:hidden --
+    // preserva a posição pra "desfazer" clicando num slot, ver renderSlots
+    // acima) -- mas essa desfeita não existe mais depois de respondido, então
+    // a fileira de blocos invisíveis só reservava um vão vazio até o painel
+    // de resultado. Some com a fileira inteira, igual ao tratamento já dado
+    // a outros controles que perdem a função ao responder.
+    blocksEl.style.display = 'none';
     document.getElementById('exercise-dontknow-btn')?.classList.add('disabled');
     contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
 
