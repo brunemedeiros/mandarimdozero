@@ -24,7 +24,7 @@ funcionando nos dois, não quando o código só "parece certo".
 
 ## Específico do francês (fica em `languages/fr/`)
 
-- [ ] Aba Conjugação (motor de conjugação verbal)
+- [x] Aba Conjugação (motor de conjugação verbal) — 241 verbos (`conjugation-data.js`, dataset Verbiste), 9 tempos, seleção livre de tempos + categoria (6 grupos) + filtro regular/irregular + Top N por frequência. Testado via Playwright: tela de seleção lista os 9 tempos/6 grupos/opções de Top N corretas; filtro "só regulares"+Top10 e "só irregulares" retornam exatamente os verbos esperados; sessão de prática mostra o verbo+próximo verbo, verificação classifica cada campo certo/quase(sem acento-maiúscula)/errado e soma a pontuação corretamente; Impératif desativa girar je/il-elle-on/ils-elles (só tu/nous/vous) como esperado; dica progressiva (nível 1 = últimas 2 letras, nível 2 = ~2/3 das letras) confere; navegar pro verbo anterior/próximo preserva o verbo já verificado e mantém não-verificado vazio (comportamento intencional, não bug); tela de resultado mostra a pontuação certa e "Nova sessão" volta pra seleção (2026-09-02).
 - [ ] Aba Ditados
 - [ ] Desafios: Expressões (pergunta/feedback, 2 exemplos com áudio, microatividade)
 - [ ] Desafios: Ouça e traduza (heurística de concordância de pessoa gramatical)
