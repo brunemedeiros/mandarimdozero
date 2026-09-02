@@ -4070,7 +4070,7 @@ function openDictationPlayer(id){
     <div class="dictation-audio-player">
       <div class="dictation-transport">
         <button class="dictation-play-btn" id="dictation-play-btn">▶️ Ouvir o ditado</button>
-        <button class="dictation-icon-btn" id="dictation-restart-btn" title="Reiniciar">↺</button>
+        <button class="dictation-icon-btn" id="dictation-restart-btn" aria-label="Reiniciar" title="Reiniciar">↺</button>
       </div>
       <div class="dictation-scrub-row">
         <span class="dictation-time" id="dictation-time-current">00:00</span>
@@ -4086,7 +4086,7 @@ function openDictationPlayer(id){
           <button class="dictation-skip-btn" id="dictation-skip-fwd" title="Avançar 15s">+15s</button>
         </div>
         <div class="dictation-volume-control">
-          <button class="dictation-icon-btn" id="dictation-mute-btn" title="Mudo">🔊</button>
+          <button class="dictation-icon-btn" id="dictation-mute-btn" aria-label="Mudo" title="Mudo">🔊</button>
           <input type="range" class="dictation-volume-slider" id="dictation-volume-slider" min="0" max="100" value="100">
         </div>
         <div class="dictation-speed-controls">
@@ -4146,6 +4146,8 @@ function openDictationPlayer(id){
     dictationAudioEl.volume = v;
     dictationAudioEl.muted = false;
     muteBtn.textContent = v === 0 ? '🔇' : '🔊';
+    muteBtn.setAttribute('aria-label', v === 0 ? 'Ativar som' : 'Mudo');
+    muteBtn.title = v === 0 ? 'Ativar som' : 'Mudo';
   });
   muteBtn.addEventListener('click', () => {
     if (dictationAudioEl.muted || dictationAudioEl.volume === 0){
@@ -4153,11 +4155,15 @@ function openDictationPlayer(id){
       dictationAudioEl.volume = volumeBeforeMute || 1;
       volumeSlider.value = Math.round(dictationAudioEl.volume * 100);
       muteBtn.textContent = '🔊';
+      muteBtn.setAttribute('aria-label', 'Mudo');
+      muteBtn.title = 'Mudo';
     } else {
       volumeBeforeMute = dictationAudioEl.volume;
       dictationAudioEl.muted = true;
       volumeSlider.value = 0;
       muteBtn.textContent = '🔇';
+      muteBtn.setAttribute('aria-label', 'Ativar som');
+      muteBtn.title = 'Ativar som';
     }
   });
 

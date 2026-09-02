@@ -97,6 +97,14 @@ try{
 }
 
 *{ box-sizing: border-box; }
+/* Reset padrão -- button/input/textarea/select NÃO herdam color/font-family
+   do body por padrão no navegador (usam a cor/fonte do sistema). Sem isso,
+   qualquer botão que não define sua própria cor (ex: .unit-card, que é um
+   elemento button puro) cai no preto do sistema -- ilegível no fundo escuro do
+   tema noturno, mesmo com --ink corretamente clareado pro modo escuro.
+   Regras que já definem sua própria cor (.btn-primary/-secondary/-gold
+   etc.) continuam intactas -- isso só corrige quem dependia do default. */
+button, input, textarea, select{ font: inherit; color: inherit; }
 html,body{ margin:0; padding:0; }
 /* Rótulo presente pro leitor de tela (associado via for/id a um campo que
    já se explica visualmente pelo placeholder) sem ocupar espaço no layout. */
@@ -1772,12 +1780,12 @@ footer.app-footer img{ height:56px; opacity:.9; }
     <div class="stats-pills">
       <div class="pill streak">🔥 <span id="streak-count">0</span></div>
       <div class="pill xp">⭐ <span id="xp-count">0</span><span class="xp-suffix"> XP</span></div>
-      <button class="pill theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema claro/escuro">🌙</button>
+      <button class="pill theme-toggle-btn" id="theme-toggle-btn" aria-label="Alternar tema claro/escuro" title="Alternar tema claro/escuro">🌙</button>
       <div class="lang-switcher">
-        <button class="lang-switcher-btn" id="lang-switcher-btn" type="button" title="Trocar idioma"></button>
+        <button class="lang-switcher-btn" id="lang-switcher-btn" type="button" aria-label="Trocar idioma" title="Trocar idioma"></button>
         <div class="lang-switcher-dropdown" id="lang-switcher-dropdown"></div>
       </div>
-      <button class="pill user-pill" id="user-menu-btn" title="Conta">👤 <span id="user-label">Convidado</span></button>
+      <button class="pill user-pill" id="user-menu-btn" aria-label="Conta" title="Conta">👤 <span id="user-label">Convidado</span></button>
     </div>
   </div>
 
@@ -1835,7 +1843,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
         <div class="lesson-progress-track" id="step-progress-wrap">
           <div class="lesson-progress-fill" id="step-progress-fill"></div>
         </div>
-        <button class="lesson-close-btn" id="back-to-path" title="Sair da lição">✕</button>
+        <button class="lesson-close-btn" id="back-to-path" aria-label="Sair da lição" title="Sair da lição">✕</button>
       </div>
 
       <div id="step-content"></div>
@@ -1915,7 +1923,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
           <div class="study-plan-title">Minha meta de estudo</div>
           <div class="study-plan-sub" id="study-plan-sub"></div>
         </div>
-        <button class="study-plan-edit-btn" id="study-plan-edit-btn" title="Editar meta">✏️</button>
+        <button class="study-plan-edit-btn" id="study-plan-edit-btn" aria-label="Editar meta" title="Editar meta">✏️</button>
       </div>
       <div class="study-plan-body" id="study-plan-body"></div>
     </div>
@@ -2037,7 +2045,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
   <div class="app-modal">
     <div class="app-modal-header">
       <h3>Exportar para Anki</h3>
-      <button class="app-modal-close" id="export-modal-close">✕</button>
+      <button class="app-modal-close" id="export-modal-close" aria-label="Fechar">✕</button>
     </div>
     <div class="app-modal-body">
       <div class="export-box">
@@ -2057,7 +2065,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
   <div class="app-modal">
     <div class="app-modal-header">
       <h3>Importar desafios via JSON</h3>
-      <button class="app-modal-close" id="challenges-import-modal-close">✕</button>
+      <button class="app-modal-close" id="challenges-import-modal-close" aria-label="Fechar">✕</button>
     </div>
     <div class="app-modal-body">
       <p>Cole aqui a saída do pipeline de geração (<code>challenges_pipeline_output.json</code>, ou só o array de <code>accepted</code>) -- vai direto pro banco, sem precisar rodar SQL manualmente no Supabase.</p>
@@ -2073,7 +2081,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
   <div class="app-modal">
     <div class="app-modal-header">
       <h3>Français complet</h3>
-      <button class="app-modal-close" id="level-modal-close">✕</button>
+      <button class="app-modal-close" id="level-modal-close" aria-label="Fechar">✕</button>
     </div>
     <div class="app-modal-body">
       <div class="level-list" id="level-modal-list"></div>
@@ -2085,7 +2093,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
   <div class="app-modal study-wizard-modal">
     <div class="app-modal-header">
       <h3>Minha meta de estudo</h3>
-      <button class="app-modal-close" id="study-plan-modal-close">✕</button>
+      <button class="app-modal-close" id="study-plan-modal-close" aria-label="Fechar">✕</button>
     </div>
     <div class="app-modal-body" id="study-plan-wizard-body"></div>
   </div>
