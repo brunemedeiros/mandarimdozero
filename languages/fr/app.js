@@ -1019,16 +1019,50 @@ function currentStepDefs(){
   return (u && u.type === 'grammar') ? STEP_DEFS_GRAMMAR : STEP_DEFS;
 }
 
-// A cada 3 palavras novas, intercala uma checagem rápida de reconhecimento
-// das palavras já mostradas — quebra a sequência pura de cards novos, que
-// ficava cansativa com muito vocabulário seguido sem nenhuma interação.
-const VOCAB_QUIZ_INTERVAL = 3;
+// ---------- Sessão de aquisição de vocabulário (introdução + prática intercalada) ----------
+// Substitui o antigo fluxo linear "Palavra 1 de N ... Palavra N de N" seguido
+// de um bag único de exercícios no final. Em vez disso, a unidade é dividida
+// em pequenos blocos de palavras novas; cada bloco passa por
+// introdução -> checagem imediata -> prática, e a partir do segundo bloco
+// os exercícios de prática misturam o bloco atual com todos os anteriores
+// (recuperação ativa, não repetição na ordem em que acabou de ver). O passo
+// final da unidade ("exercises") vira uma consolidação curta, priorizando
+// as palavras que o aluno errou mais durante a sessão em vez de repetir a
+// unidade inteira de novo -- ver buildExerciseSet(). Só se aplica a
+// unidades de vocabulário (u.type !== 'grammar' já sai mais cedo em
+// renderStep, antes de qualquer código daqui). Referência conceitual: a
+// separação do Memrise entre "aquisição" e "prática/revisão intercalada"
+// dentro da mesma sessão -- não uma cópia de interface, só do princípio.
+const ACQ_BLOCK_SIZE = 3;
+
+function buildAcquisitionBlocks(unit){
+  const n = unit.vocab.length;
+  const blocks = [];
+  let i = 0;
+  while (i < n){
+    let size = Math.min(ACQ_BLOCK_SIZE, n - i);
+    if (n - (i + size) === 1) size += 1;
+    blocks.push(Array.from({ length: size }, (_, k) => i + k));
+    i += size;
+  }
+  return blocks;
+}
+
+function freshAcquisitionState(unitId, unit){
+  return {
+    unitId,
+    blocks: buildAcquisitionBlocks(unit),
+    blockIdx: 0,
+    phase: 'intro', // 'intro' | 'checkpoint' | 'practice' | 'mixed'
+    introIdx: 0,
+    wordMisses: {},
+    introduced: {}
+  };
+}
 
 const STEP_STATE = {
   currentStep: 0,
-  vocabIndex: 0,
-  vocabUnitId: null,
-  vocabQuizActive: false,
+  acq: { unitId: null, blocks: [], blockIdx: 0, phase: 'intro', introIdx: 0, wordMisses: {}, introduced: {} },
   exerciseList: [],
   exerciseIndex: 0,
   exerciseScore: 0,
@@ -1102,8 +1136,20 @@ function renderStepProgress(){
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
 
   let intraStepFraction = 0;
-  if (stepKey === 'vocab' && u){
-    intraStepFraction = u.vocab.length ? STEP_STATE.vocabIndex / u.vocab.length : 0;
+  if (stepKey === 'vocab' && u && STEP_STATE.acq.unitId === u.id){
+    // Progresso pelo NÚMERO DE PALAVRAS já cobertas (blocos inteiros já
+    // concluídos + posição dentro do bloco/fase atual), não pela quantidade
+    // de telas percorridas -- uma checagem ou prática conta mais que só ter
+    // visto a palavra uma vez.
+    const acq = STEP_STATE.acq;
+    const totalWords = u.vocab.length || 1;
+    const wordsBeforeBlock = acq.blocks.slice(0, acq.blockIdx).flat().length;
+    const curBlockSize = (acq.blocks[acq.blockIdx] || []).length;
+    const phaseWeight = { intro: 0, checkpoint: 0.4, practice: 0.75, mixed: 0.95 }[acq.phase] || 0;
+    const withinBlock = acq.phase === 'intro'
+      ? (curBlockSize ? acq.introIdx / curBlockSize : 0)
+      : phaseWeight;
+    intraStepFraction = Math.min(1, (wordsBeforeBlock + curBlockSize * withinBlock) / totalWords);
   } else if (stepKey === 'exercises'){
     intraStepFraction = STEP_STATE.exerciseList.length ? STEP_STATE.exerciseIndex / STEP_STATE.exerciseList.length : 0;
   } else if (stepKey === 'explanation' && u && u.grammar){
@@ -1253,14 +1299,21 @@ function findMatchingPhrase(word, unit){
   return null;
 }
 
-function renderVocabCardStep(u, contentEl, nextBtn){
-  const total = u.vocab.length;
-  const idx = STEP_STATE.vocabIndex;
+// Cartão de introdução de UMA palavra do bloco atual (ETAPA 1). Mesmo
+// conteúdo/recursos de antes (palavra, áudio, tradução, "Já sei?", frase de
+// exemplo) -- só a posição mudou: em vez de "Palavra X de N" (a unidade
+// inteira), mostra a posição dentro do pequeno bloco atual.
+function renderBlockIntroCard(u, contentEl, nextBtn){
+  const acq = STEP_STATE.acq;
+  const block = acq.blocks[acq.blockIdx];
+  const posInBlock = acq.introIdx;
+  const idx = block[posInBlock];
   const v = u.vocab[idx];
   const cardId = `u${u.id}-v${idx}`;
   const card = STATE.cards.find(c => c.id === cardId);
   const alreadyKnown = card && card.reps > 0;
   const matchingPhrase = findMatchingPhrase(v, u);
+  acq.introduced[idx] = true;
 
   const phraseHTML = matchingPhrase ? `
     <div class="vocab-phrase-example">
@@ -1271,7 +1324,7 @@ function renderVocabCardStep(u, contentEl, nextBtn){
   ` : '';
 
   contentEl.innerHTML = `
-    <div class="vocab-card-counter">Palavra ${idx + 1} de ${total}</div>
+    <div class="vocab-card-counter">Bloco ${acq.blockIdx + 1} de ${acq.blocks.length} · Palavra ${posInBlock + 1} de ${block.length}</div>
     <div class="vocab-card">
       <div class="vocab-card-word">${v.f} ${audioBtnHTML(v.f)}</div>
       <div class="vocab-card-trans">${v.t}</div>
@@ -1291,62 +1344,112 @@ function renderVocabCardStep(u, contentEl, nextBtn){
   }
 
   nextBtn.style.display = 'flex';
-  nextBtn.textContent = idx < total - 1 ? 'Próxima palavra →' : 'Continuar →';
+  nextBtn.textContent = posInBlock < block.length - 1 ? 'Próxima palavra →' : 'Ver o que você aprendeu →';
 }
 
-// Checagem rápida entre cards de vocabulário: testa o reconhecimento de uma
-// das últimas palavras mostradas (nunca uma ainda não vista) com múltipla
-// escolha, igual ao formato "meaning" dos exercícios normais — só que com
-// seu próprio botão de continuar, já que o step-next-btn global fica
-// escondido enquanto essa tela estiver ativa.
-function renderVocabQuizStep(u, contentEl, nextBtn){
-  const idx = STEP_STATE.vocabIndex;
-  const groupStart = Math.max(0, idx + 1 - VOCAB_QUIZ_INTERVAL);
-  const seenWords = u.vocab.slice(groupStart, idx + 1);
-  const target = seenWords[Math.floor(Math.random() * seenWords.length)];
-  const distractorPool = u.vocab.filter(v => v !== target);
-  const distractors = shuffle(distractorPool).slice(0, 3);
-  const options = shuffle([target, ...distractors]);
+// ---------- Construção das filas de exercício da sessão de aquisição ----------
+function buildVocabWordExercise(unit, idx){
+  const item = unit.vocab[idx];
+  const cardId = `u${unit.id}-v${idx}`;
+  const card = STATE.cards.find(c => c.id === cardId);
+  const alreadyExposed = card && card.reps > 0;
+  const vocabFormats = ['meaning', 'meaning', 'listen'];
+  const vocabFormatsExposed = ['meaning', 'type', 'listen'];
+  const formats = alreadyExposed ? vocabFormatsExposed : vocabFormats;
+  const format = formats[idx % formats.length];
+  const pool = unit.vocab;
+  const distractors = shuffle(pool.filter(v => v !== item)).slice(0, 3);
+  const options = shuffle([item, ...distractors]);
+  return { format, item, options, vocabIdx: idx };
+}
 
-  contentEl.innerHTML = `
-    <div class="vocab-quiz-label">🧠 Checagem rápida</div>
-    <div class="exercise-prompt-label">O que significa?</div>
-    <div class="exercise-prompt">
-      <div class="prompt-french">${target.f}</div>
-      ${audioBtnHTML(target.f)}
-    </div>
-    <div class="exercise-options">${options.map((opt, i) => `
-      <button class="exercise-option" data-idx="${i}"><div class="opt-text">${opt.t}</div></button>
-    `).join('')}</div>
-    <button class="btn btn-primary btn-block vocab-quiz-continue" id="vocab-quiz-continue-btn" style="display:none;">Continuar →</button>
-  `;
-
-  wireAudioButtons(contentEl);
-  if (canSpeakFrench(target.f)) speakFrench(target.f, contentEl.querySelector('.audio-btn'));
-  nextBtn.style.display = 'none';
-
-  let answered = false;
-  contentEl.querySelectorAll('.exercise-option').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (answered) return;
-      answered = true;
-      const chosenIdx = parseInt(btn.dataset.idx);
-      contentEl.querySelectorAll('.exercise-option').forEach((b, i) => {
-        b.classList.add('disabled');
-        if (options[i] === target) b.classList.add('correct');
-        else if (i === chosenIdx) b.classList.add('incorrect');
-      });
-      document.getElementById('vocab-quiz-continue-btn').style.display = 'flex';
-    });
+// Checagem imediata do bloco (ETAPA 2): recuperação ativa de reconhecimento
+// (formato "meaning") pra CADA palavra recém-introduzida no bloco.
+function buildBlockCheckpointQueue(unit, blockIndices){
+  return blockIndices.map(idx => {
+    const item = unit.vocab[idx];
+    const distractors = shuffle(unit.vocab.filter(v => v !== item)).slice(0, 3);
+    return { format: 'meaning', item, options: shuffle([item, ...distractors]), vocabIdx: idx };
   });
+}
 
-  document.getElementById('vocab-quiz-continue-btn').addEventListener('click', () => {
-    STEP_STATE.vocabQuizActive = false;
-    if (STEP_STATE.vocabIndex < u.vocab.length - 1){
-      STEP_STATE.vocabIndex += 1;
+// Prática mista (ETAPA 5): uma rodada por palavra já introduzida (bloco atual
+// + todos os anteriores), embaralhada. Palavras com erro nesta sessão ganham
+// uma repetição extra.
+function buildMixedQueue(unit, introducedIndices){
+  const acq = STEP_STATE.acq;
+  const base = introducedIndices.map(idx => buildVocabWordExercise(unit, idx));
+  const extra = introducedIndices
+    .filter(idx => (acq.wordMisses[idx] || 0) >= 1)
+    .map(idx => buildVocabWordExercise(unit, idx));
+  return shuffle([...base, ...extra]);
+}
+
+function buildPracticeQueue(unit, blockIndices){
+  return blockIndices.map(idx => buildVocabWordExercise(unit, idx));
+}
+
+// Fim da introdução do bloco atual -> começa a checagem imediata (ETAPA 2).
+function finishBlockIntro(){
+  const acq = STEP_STATE.acq;
+  const u = UNITS.find(x => x.id === STATE.currentUnitId);
+  acq.phase = 'checkpoint';
+  STEP_STATE.exerciseList = buildBlockCheckpointQueue(u, acq.blocks[acq.blockIdx]);
+  STEP_STATE.exerciseIndex = 0;
+  STEP_STATE.exerciseScore = 0;
+  setAcqPhaseBanner(acqPhaseBannerText('checkpoint'));
+  renderExerciseStep();
+}
+
+// Chamado quando a fila de exercícios da fase atual (checkpoint/practice/
+// mixed) se esgota -- decide a PRÓXIMA fase da sessão de aquisição.
+function advanceAcquisitionPhase(){
+  const acq = STEP_STATE.acq;
+  const u = UNITS.find(x => x.id === STATE.currentUnitId);
+
+  if (acq.phase === 'checkpoint'){
+    acq.phase = 'practice';
+    STEP_STATE.exerciseList = buildPracticeQueue(u, acq.blocks[acq.blockIdx]);
+    STEP_STATE.exerciseIndex = 0;
+    STEP_STATE.exerciseScore = 0;
+    setAcqPhaseBanner(acqPhaseBannerText('practice'));
+    renderExerciseStep();
+    return;
+  }
+
+  if (acq.phase === 'practice'){
+    if (acq.blockIdx > 0){
+      acq.phase = 'mixed';
+      const introducedIdx = acq.blocks.slice(0, acq.blockIdx + 1).flat();
+      STEP_STATE.exerciseList = buildMixedQueue(u, introducedIdx);
+      STEP_STATE.exerciseIndex = 0;
+      STEP_STATE.exerciseScore = 0;
+      setAcqPhaseBanner(acqPhaseBannerText('mixed'));
+      renderExerciseStep();
+      return;
     }
+    advanceToNextBlockOrConsolidation();
+    return;
+  }
+
+  if (acq.phase === 'mixed'){
+    advanceToNextBlockOrConsolidation();
+  }
+}
+
+// Acabou o ciclo do bloco atual: introduz o próximo bloco (ETAPA 4/6), ou,
+// se não houver mais blocos, segue o fluxo normal da unidade.
+function advanceToNextBlockOrConsolidation(){
+  const acq = STEP_STATE.acq;
+  if (acq.blockIdx < acq.blocks.length - 1){
+    acq.blockIdx += 1;
+    acq.phase = 'intro';
+    acq.introIdx = 0;
     renderStep();
-  });
+  } else {
+    STEP_STATE.currentStep += 1;
+    renderStep();
+  }
 }
 
 // ---------- Unidades de gramática (Explicação em blocos, estilo Busuu → Exercícios) ----------
@@ -1408,7 +1511,38 @@ function lessonStars(pct){
   return Math.max(1, Math.round((pct / 100) * 5));
 }
 
+// Comunica em que fase da sessão de aquisição o aluno está agora -- pra que
+// a experiência pareça uma sessão contínua ("estou aprendendo -> agora
+// consigo usar -> agora misturando") em vez de uma sequência de telas soltas
+// sem relação entre si. Escondido por padrão a cada renderStep(); cada fase
+// que precisa dele liga explicitamente.
+// Some fases (checkpoint/practice/mixed/consolidação) são iniciadas por
+// funções que chamam renderExerciseStep() diretamente (não renderStep()),
+// pra não reconstruir a fila à toa -- então também escondem aqui o botão
+// "Voltar" global, que só tem sentido na introdução do bloco.
+function setAcqPhaseBanner(text){
+  const el = document.getElementById('acq-phase-banner');
+  if (el){
+    el.textContent = text;
+    el.style.display = 'block';
+  }
+  const backBtn = document.getElementById('step-back-btn');
+  if (backBtn) backBtn.style.display = 'none';
+}
+function hideAcqPhaseBanner(){
+  const el = document.getElementById('acq-phase-banner');
+  if (el) el.style.display = 'none';
+}
+function acqPhaseBannerText(phase){
+  return {
+    checkpoint: '🧠 Checagem rápida',
+    practice: '✏️ Praticando o que você acabou de ver',
+    mixed: '🔀 Misturando com o que você já viu'
+  }[phase] || null;
+}
+
 function renderLessonCompleteScreen(contentEl, nextBtn, { correct, total, recapItems, nextLabel }){
+  hideAcqPhaseBanner();
   maybeShowStreakCelebration();
   const pct = total ? Math.round((correct / total) * 100) : 0;
   const stars = lessonStars(pct);
@@ -1559,10 +1693,14 @@ function renderStep(){
   const contentEl = document.getElementById('step-content');
   const backBtn = document.getElementById('step-back-btn');
   const nextBtn = document.getElementById('step-next-btn');
+  hideAcqPhaseBanner();
 
   renderStepProgress();
+  // Durante checkpoint/practice/mixed, o "Voltar" não faz sentido (a
+  // navegação é do próprio motor de exercícios, sem histórico pra desfazer)
+  // -- só aparece na introdução do bloco.
   const showBack = STEP_STATE.currentStep > 0
-    || (stepKey === 'vocab' && STEP_STATE.vocabIndex > 0)
+    || (stepKey === 'vocab' && STEP_STATE.acq.phase === 'intro' && (STEP_STATE.acq.blockIdx > 0 || STEP_STATE.acq.introIdx > 0))
     || (stepKey === 'explanation' && STEP_STATE.explanationIndex > 0);
   backBtn.style.display = showBack ? 'inline-flex' : 'none';
 
@@ -1585,15 +1723,19 @@ function renderStep(){
   }
 
   if (stepKey === 'vocab'){
-    if (STEP_STATE.vocabUnitId !== u.id){
-      STEP_STATE.vocabIndex = 0;
-      STEP_STATE.vocabUnitId = u.id;
-      STEP_STATE.vocabQuizActive = false;
+    if (STEP_STATE.acq.unitId !== u.id){
+      STEP_STATE.acq = freshAcquisitionState(u.id, u);
     }
-    if (STEP_STATE.vocabQuizActive){
-      renderVocabQuizStep(u, contentEl, nextBtn);
+    if (STEP_STATE.acq.phase === 'intro'){
+      renderBlockIntroCard(u, contentEl, nextBtn);
     } else {
-      renderVocabCardStep(u, contentEl, nextBtn);
+      // checkpoint / practice / mixed reaproveitam o motor de exercícios
+      // (STEP_STATE.exerciseList/exerciseIndex) -- a navegação própria dele
+      // controla o avanço, sem o botão global "Continuar".
+      const bannerText = acqPhaseBannerText(STEP_STATE.acq.phase);
+      if (bannerText) setAcqPhaseBanner(bannerText);
+      renderExerciseStep();
+      nextBtn.style.display = 'none';
     }
 
   } else if (stepKey === 'exercises'){
@@ -1603,6 +1745,7 @@ function renderStep(){
       STEP_STATE.exerciseIndex = 0;
       STEP_STATE.exerciseScore = 0;
     }
+    setAcqPhaseBanner('🧩 Consolidação da unidade');
     renderExerciseStep();
 
   } else if (stepKey === 'dialogue'){
@@ -1641,16 +1784,23 @@ function renderStep(){
 document.getElementById('step-back-btn').addEventListener('click', () => {
   const stepKey = currentStepDefs()[STEP_STATE.currentStep].key;
 
-  if (stepKey === 'vocab' && STEP_STATE.vocabQuizActive){
-    STEP_STATE.vocabQuizActive = false;
-    renderStep();
-    return;
-  }
-
-  if (stepKey === 'vocab' && STEP_STATE.vocabIndex > 0){
-    STEP_STATE.vocabIndex -= 1;
-    renderStep();
-    return;
+  // No passo de vocabulário, "Voltar" recua palavra a palavra dentro do
+  // bloco atual (e entre blocos) antes de sair do passo -- não existe
+  // "voltar" dentro de checkpoint/practice/mixed (o botão fica escondido
+  // nessas fases, ver renderStep).
+  if (stepKey === 'vocab' && STEP_STATE.acq.phase === 'intro'){
+    const acq = STEP_STATE.acq;
+    if (acq.introIdx > 0){
+      acq.introIdx -= 1;
+      renderStep();
+      return;
+    }
+    if (acq.blockIdx > 0){
+      acq.blockIdx -= 1;
+      acq.introIdx = acq.blocks[acq.blockIdx].length - 1;
+      renderStep();
+      return;
+    }
   }
 
   if (stepKey === 'explanation' && STEP_STATE.explanationIndex > 0){
@@ -1702,20 +1852,21 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
 
   const stepKey = currentStepDefs()[STEP_STATE.currentStep].key;
 
+  // No passo de vocabulário, o botão "Continuar" só existe na fase de
+  // introdução (checkpoint/practice/mixed escondem o botão global e avançam
+  // pela navegação própria dos exercícios).
   if (stepKey === 'vocab'){
-    const u = UNITS.find(x => x.id === STATE.currentUnitId);
-    const isQuizPoint = (STEP_STATE.vocabIndex + 1) % VOCAB_QUIZ_INTERVAL === 0
-      && STEP_STATE.vocabIndex < u.vocab.length - 1;
-    if (isQuizPoint){
-      STEP_STATE.vocabQuizActive = true;
-      renderStep();
-      return;
+    const acq = STEP_STATE.acq;
+    if (acq.phase === 'intro'){
+      const block = acq.blocks[acq.blockIdx];
+      if (acq.introIdx < block.length - 1){
+        acq.introIdx += 1;
+        renderStep();
+      } else {
+        finishBlockIntro();
+      }
     }
-    if (STEP_STATE.vocabIndex < u.vocab.length - 1){
-      STEP_STATE.vocabIndex += 1;
-      renderStep();
-      return;
-    }
+    return;
   }
 
   if (stepKey === 'explanation'){
@@ -1745,24 +1896,42 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
 // ---------- Geração dos exercícios (múltipla escolha + ordenar, estilo Memrise) ----------
 // A pergunta sempre mostra a palavra/frase em francês (com áudio) e pede a
 // tradução em português como resposta.
-function buildExerciseSet(unit){
-  const vocabFormats = ['meaning', 'meaning', 'listen'];
-  // "Digite o que ouviu" só entra na rotação depois que a palavra já foi
-  // vista pelo menos uma vez em múltipla escolha (reps>0 no card de SRS) —
-  // igual ao Memrise, nunca pede pra digitar uma palavra ainda não exposta.
-  const vocabFormatsExposed = ['meaning', 'type', 'listen'];
-  const pool = unit.vocab;
+// ---------- Consolidação final da unidade (ETAPA 7) ----------
+// Depois que a aquisição por blocos já deu a cada palavra checagem + prática
+// (+ mistura, a partir do 2º bloco), repetir a unidade inteira de novo aqui
+// seria só reexpor conteúdo já praticado à toa. Em vez disso, prioriza quem
+// errou durante a sessão e pega só uma amostra do resto -- consolidação como
+// recuperação e aplicação, não como "mostrar tudo de novo". Se o estado de
+// aquisição não corresponder a esta unidade (estado inconsistente), cai de
+// volta pra cobrir todas as palavras.
+// CONSOLIDATION_CAP existe pra a consolidação continuar CURTA mesmo numa
+// sessão onde o aluno errou muitas palavras -- sem teto, "priorizar quem
+// errou" vira o oposto do pedido (uma sessão que só cresce quanto mais o
+// aluno erra). Cobre cada palavra errada 1x primeiro; só dá uma 2ª rodada
+// pra elas se ainda sobrar espaço dentro do teto.
+const CONSOLIDATION_CAP = 10;
+function buildConsolidationVocabExercises(unit){
+  const acq = STEP_STATE.acq;
+  const total = unit.vocab.length;
+  if (!acq || acq.unitId !== unit.id || !acq.blocks.length){
+    return unit.vocab.map((_, i) => buildVocabWordExercise(unit, i));
+  }
 
-  const vocabExercises = pool.map((item, i) => {
-    const cardId = `u${unit.id}-v${i}`;
-    const card = STATE.cards.find(c => c.id === cardId);
-    const alreadyExposed = card && card.reps > 0;
-    const formats = alreadyExposed ? vocabFormatsExposed : vocabFormats;
-    const format = formats[i % formats.length];
-    const distractors = shuffle(pool.filter(v => v !== item)).slice(0, 3);
-    const options = shuffle([item, ...distractors]);
-    return { format, item, options };
-  });
+  const cap = Math.min(total, CONSOLIDATION_CAP);
+  const allIdx = Array.from({ length: total }, (_, i) => i);
+  const missedIdx = shuffle(allIdx.filter(i => (acq.wordMisses[i] || 0) >= 1));
+  const otherIdx = shuffle(allIdx.filter(i => !missedIdx.includes(i)));
+
+  const picks = [];
+  missedIdx.forEach(i => { if (picks.length < cap) picks.push(i); });
+  otherIdx.forEach(i => { if (picks.length < cap) picks.push(i); });
+  missedIdx.forEach(i => { if (picks.length < cap) picks.push(i); }); // reforço extra, só se sobrar espaço
+
+  return picks.map(i => buildVocabWordExercise(unit, i));
+}
+
+function buildExerciseSet(unit){
+  const vocabExercises = buildConsolidationVocabExercises(unit);
 
   // Frases da unidade viram exercício de "ordenar" ou de "cenário" (index par/ímpar),
   // pra variar o formato sem dobrar o total de exercícios por lição.
@@ -1823,6 +1992,15 @@ function renderExerciseStep(){
   renderStepProgress();
 
   if (STEP_STATE.exerciseIndex >= total){
+    // Dentro do passo "vocab", este motor de exercícios também roda as
+    // fases de checkpoint/practice/mixed da sessão de aquisição -- esgotar
+    // a fila aqui significa "avance de fase", não "termine a unidade". Só
+    // vira tela de conclusão de verdade na consolidação final (passo
+    // "exercises").
+    if (currentStepDefs()[STEP_STATE.currentStep].key === 'vocab'){
+      advanceAcquisitionPhase();
+      return;
+    }
     renderLessonCompleteScreen(contentEl, nextBtn, {
       correct: STEP_STATE.exerciseScore, total,
       recapItems: [...u.vocab, ...(u.phrases || [])]
@@ -1914,6 +2092,13 @@ function answerExplanationHTML(ex){
 // acerto normal, mas o rótulo comunica ao aluno qual foi o caso.
 function showAnswerPanel(contentEl, ex, opts = {}){
   const revealed = !!opts.revealed;
+  // Erro de verdade (não "Não sei", que não conta como erro) numa palavra
+  // com vocabIdx marcado: soma na contagem LOCAL DESTA SESSÃO, usada pra
+  // decidir reforço extra na prática mista e prioridade na consolidação
+  // final (ETAPA 7) -- não mexe no lapses/SM-2 persistente.
+  if (!revealed && ex && typeof ex.vocabIdx === 'number' && STEP_STATE.acq.unitId === STATE.currentUnitId){
+    STEP_STATE.acq.wordMisses[ex.vocabIdx] = (STEP_STATE.acq.wordMisses[ex.vocabIdx] || 0) + 1;
+  }
   const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
   const explanation = answerExplanationHTML(ex);
   const panel = document.createElement('div');
