@@ -291,10 +291,20 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .hanzi-lesson-preview{ font-family: var(--font-hanzi); font-size:16px; line-height:1.3; color: var(--ink); }
 .hanzi-lesson-status{ font-size:10.5px; font-weight:700; color: var(--ink-soft); }
 
-/* ---------- Hanzi: barra de progresso da lição (dupla: caracteres / teste) ---------- */
+/* ---------- Hanzi: barra de progresso da lição (dupla: caracteres / teste) ----------
+   Altura (8px), raio (4px) e gradiente (seal-red -> imperial-gold) unificados
+   entre TODAS as barras de progresso do app (hanzi, história, lição, desafio,
+   revisão -- auditoria de UX/UI, 2026-09): antes cada uma tinha valores
+   ligeiramente diferentes (7 vs 8px de altura, raio de 3 a 5px, uma até com o
+   gradiente invertido e outra com cor sólida sem relação com as demais) por
+   terem sido implementadas em momentos separados, não por terem alguma razão
+   pedagógica pra parecer diferente -- é sempre o mesmo "quanto falta". A barra
+   compacta do card de unidade (.unit-progress-bar) fica de fora de propósito:
+   é um indicador menor dentro de um card de lista, contexto diferente de uma
+   barra de progresso em destaque no topo da tela. */
 .hanzi-progress{ display:flex; align-items:center; gap:10px; margin-bottom:18px; }
-.hanzi-progress-track{ flex:1; height:7px; background:var(--paper-warm); border-radius:5px; overflow:hidden; }
-.hanzi-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:5px; transition: width .3s ease; }
+.hanzi-progress-track{ flex:1; height:8px; background:var(--paper-warm); border-radius:4px; overflow:hidden; }
+.hanzi-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:4px; transition: width .3s ease; }
 .hanzi-progress-label{ font-size:12.5px; font-weight:800; color: var(--ink-soft); white-space:nowrap; }
 
 /* ---------- Hanzi: card de estudo (ver) ---------- */
@@ -370,8 +380,8 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .story-header p{ margin:0; color: var(--ink-soft); font-size:13px; }
 
 .story-progress{ margin-bottom:20px; }
-.story-progress-track{ height:7px; background: var(--paper-warm); border-radius:5px; overflow:hidden; }
-.story-progress-fill{ height:100%; background: linear-gradient(90deg, var(--imperial-gold), var(--seal-red)); border-radius:5px; transition: width .3s ease; }
+.story-progress-track{ height:8px; background: var(--paper-warm); border-radius:4px; overflow:hidden; }
+.story-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:4px; transition: width .3s ease; }
 
 .story-line{
   display:flex; flex-direction:column; gap:2px; margin-bottom:16px; padding:14px 16px;
@@ -886,7 +896,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .challenge-body{ flex:1; min-width:0; }
 .challenge-label{ font-weight:700; font-size:14px; margin-bottom:8px; }
 .challenge-progress-track{ height:8px; border-radius:4px; background: var(--paper-warm); overflow:hidden; }
-.challenge-progress-fill{ height:100%; border-radius:4px; background: var(--jade); transition: width .3s ease; }
+.challenge-progress-fill{ height:100%; border-radius:4px; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); transition: width .3s ease; }
 .challenge-count{ flex-shrink:0; font-size:12.5px; font-weight:700; color: var(--ink-soft); }
 
 /* ---------- Combinar: jogo de pares ---------- */
@@ -976,8 +986,8 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .speed-gameover .big-emoji{ font-size:56px; margin-bottom:12px; }
 .speed-gameover .score-num{ font-size:38px; font-weight:800; color: var(--seal-red-dark); margin:14px 0; }
 .speed-streak-note{ font-size:13px; color: var(--ink-soft); margin-top:6px; }
-.review-progress-bar{ flex:1; height:8px; background:var(--paper-warm); border-radius:5px; overflow:hidden; }
-.review-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:5px; transition: width .3s ease; }
+.review-progress-bar{ flex:1; height:8px; background:var(--paper-warm); border-radius:4px; overflow:hidden; }
+.review-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:4px; transition: width .3s ease; }
 .review-progress-count{ font-size:13px; font-weight:800; color:var(--ink-soft); white-space:nowrap; }
 
 .flashcard{

@@ -327,13 +327,23 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .unit-card.grammar .unit-badge{ background: var(--brand-purple); color: var(--paper); }
 .gram-pill{ background: var(--brand-purple); color: var(--paper); font-weight:800; font-size:10px; text-transform:uppercase; letter-spacing:.04em; padding:3px 8px; border-radius:999px; }
 
-/* ---------- Módulos (estilo Busuu) ---------- */
+/* ---------- Módulos (estilo Busuu) ----------
+   Altura (8px), raio (4px) e gradiente (seal-red -> imperial-gold) unificados
+   entre TODAS as barras de progresso "quanto falta" do app (módulo, lição,
+   desafio, revisão -- auditoria de UX/UI, 2026-09): antes cada uma tinha
+   valores ligeiramente diferentes, incluindo duas com uma cor sólida (jade)
+   sem relação com o resto da paleta de progresso, por terem sido
+   implementadas em momentos separados. .unit-progress-bar e
+   .dictation-progress-track ficam de fora de propósito: a primeira é um
+   indicador compacto dentro de um card de lista, a segunda é uma barra de
+   busca de áudio arrastável -- contextos diferentes de uma barra de
+   progresso de conclusão em destaque. */
 .module-section{ margin-bottom: 28px; }
 .module-section.locked{ opacity: .55; }
 .module-header{ margin-bottom: 14px; }
 .module-header h3{ margin: 0 0 8px; font-size: 16px; }
-.module-progress-track{ height: 7px; border-radius: 4px; background: var(--paper-warm); overflow: hidden; }
-.module-progress-fill{ height: 100%; border-radius: 4px; background: var(--jade); transition: width .3s ease; }
+.module-progress-track{ height: 8px; border-radius: 4px; background: var(--paper-warm); overflow: hidden; }
+.module-progress-fill{ height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); transition: width .3s ease; }
 .module-units-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap:12px; }
 
 .unit-card.checkpoint{ border-color: var(--imperial-gold); background: rgba(227,107,202,0.06); }
@@ -735,7 +745,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .challenge-body{ flex:1; min-width:0; }
 .challenge-label{ font-weight:700; font-size:14px; margin-bottom:8px; }
 .challenge-progress-track{ height:8px; border-radius:4px; background: var(--paper-warm); overflow:hidden; }
-.challenge-progress-fill{ height:100%; border-radius:4px; background: var(--jade); transition: width .3s ease; }
+.challenge-progress-fill{ height:100%; border-radius:4px; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); transition: width .3s ease; }
 .challenge-count{ flex-shrink:0; font-size:12.5px; font-weight:700; color: var(--ink-soft); }
 
 /* ---------- Exercício de ordenar palavras (reorder) ---------- */
@@ -832,8 +842,8 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .speed-gameover{ text-align:center; padding: 50px 20px; }
 .speed-gameover .big-emoji{ font-size:56px; margin-bottom:12px; }
 .speed-gameover .score-num{ font-size:38px; font-weight:800; color: var(--seal-red-dark); margin:14px 0; }
-.review-progress-bar{ flex:1; height:8px; background:var(--paper-warm); border-radius:5px; overflow:hidden; }
-.review-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:5px; transition: width .3s ease; }
+.review-progress-bar{ flex:1; height:8px; background:var(--paper-warm); border-radius:4px; overflow:hidden; }
+.review-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:4px; transition: width .3s ease; }
 .review-progress-count{ font-size:13px; font-weight:800; color:var(--ink-soft); white-space:nowrap; }
 
 /* ---------- Combinar (jogo da memória: cartas viradas, revela em pares) ---------- */
