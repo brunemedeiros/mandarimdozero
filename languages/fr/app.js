@@ -1348,15 +1348,37 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
 }
 
 // ---------- Construção das filas de exercício da sessão de aquisição ----------
-function buildVocabWordExercise(unit, idx){
-  const item = unit.vocab[idx];
+// Escolhe o formato do exercício pelo OBJETIVO PEDAGÓGICO do momento e pelo
+// estado real da palavra (exposição no SRS + erros nesta sessão) -- não mais
+// por posição no array (round-robin arbitrário, `idx % formats.length`, não
+// tinha nenhuma relação com o que a palavra precisava agora).
+//   - 'practice' (primeira prática, logo após a checagem do bloco): ainda é
+//     cedo pra cobrar produção de uma palavra genuinamente nova -- só entra
+//     "type" (digitar de ouvido) se a palavra já vinha exposta de fora desta
+//     sessão (SRS prévio ou "Já sei?").
+//   - 'mixed'/'consolidation' (a palavra já passou por checagem + prática
+//     nesta sessão): quem foi bem (sem erro na sessão) e já tem alguma
+//     exposição sobe pra produção; quem errou continua em reconhecimento --
+//     não empurra produção pra cima de quem ainda está com dificuldade.
+// Sem `intent` (chamada avulsa), mantém o comportamento mais conservador de
+// reconhecimento, igual ao de 'practice'.
+function pickVocabFormat(unit, idx, intent){
   const cardId = `u${unit.id}-v${idx}`;
   const card = STATE.cards.find(c => c.id === cardId);
-  const alreadyExposed = card && card.reps > 0;
-  const vocabFormats = ['meaning', 'meaning', 'listen'];
-  const vocabFormatsExposed = ['meaning', 'type', 'listen'];
-  const formats = alreadyExposed ? vocabFormatsExposed : vocabFormats;
-  const format = formats[idx % formats.length];
+  const exposed = card && card.reps > 0;
+  const misses = (STEP_STATE.acq && STEP_STATE.acq.wordMisses[idx]) || 0;
+
+  if (intent === 'mixed' || intent === 'consolidation'){
+    if (exposed && misses === 0) return shuffle(['type', 'listen', 'meaning'])[0];
+    return shuffle(['meaning', 'listen'])[0];
+  }
+  if (exposed) return shuffle(['meaning', 'type', 'listen'])[0];
+  return shuffle(['meaning', 'listen'])[0];
+}
+
+function buildVocabWordExercise(unit, idx, intent){
+  const item = unit.vocab[idx];
+  const format = pickVocabFormat(unit, idx, intent);
   const pool = unit.vocab;
   const distractors = shuffle(pool.filter(v => v !== item)).slice(0, 3);
   const options = shuffle([item, ...distractors]);
@@ -1378,15 +1400,15 @@ function buildBlockCheckpointQueue(unit, blockIndices){
 // uma repetição extra.
 function buildMixedQueue(unit, introducedIndices){
   const acq = STEP_STATE.acq;
-  const base = introducedIndices.map(idx => buildVocabWordExercise(unit, idx));
+  const base = introducedIndices.map(idx => buildVocabWordExercise(unit, idx, 'mixed'));
   const extra = introducedIndices
     .filter(idx => (acq.wordMisses[idx] || 0) >= 1)
-    .map(idx => buildVocabWordExercise(unit, idx));
+    .map(idx => buildVocabWordExercise(unit, idx, 'mixed'));
   return shuffle([...base, ...extra]);
 }
 
 function buildPracticeQueue(unit, blockIndices){
-  return blockIndices.map(idx => buildVocabWordExercise(unit, idx));
+  return blockIndices.map(idx => buildVocabWordExercise(unit, idx, 'practice'));
 }
 
 // Fim da introdução do bloco atual -> começa a checagem imediata (ETAPA 2).
@@ -1914,7 +1936,7 @@ function buildConsolidationVocabExercises(unit){
   const acq = STEP_STATE.acq;
   const total = unit.vocab.length;
   if (!acq || acq.unitId !== unit.id || !acq.blocks.length){
-    return unit.vocab.map((_, i) => buildVocabWordExercise(unit, i));
+    return unit.vocab.map((_, i) => buildVocabWordExercise(unit, i, 'consolidation'));
   }
 
   const cap = Math.min(total, CONSOLIDATION_CAP);
@@ -1927,7 +1949,7 @@ function buildConsolidationVocabExercises(unit){
   otherIdx.forEach(i => { if (picks.length < cap) picks.push(i); });
   missedIdx.forEach(i => { if (picks.length < cap) picks.push(i); }); // reforço extra, só se sobrar espaço
 
-  return picks.map(i => buildVocabWordExercise(unit, i));
+  return picks.map(i => buildVocabWordExercise(unit, i, 'consolidation'));
 }
 
 function buildExerciseSet(unit){
