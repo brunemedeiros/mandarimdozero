@@ -169,7 +169,7 @@ body{
    2026-09). .stats-pills-fade cobre a borda direita com um degradê até a
    cor de fundo, sinalizando "tem mais aqui" sem precisar de JS pra medir
    scroll -- some sozinho em telas largas o bastante pra caber tudo. */
-.stats-pills-wrap{ position:relative; flex:1; min-width:0; }
+.stats-pills-wrap{ position:relative; flex:1; min-width:0; display:flex; justify-content:flex-end; }
 .stats-pills{ display:flex; gap:8px; min-width:0; overflow-x:auto; }
 .stats-pills-fade{
   position:absolute; top:0; right:0; bottom:0; width:28px; pointer-events:none;
