@@ -97,6 +97,14 @@ try{
 }
 
 *{ box-sizing: border-box; }
+/* Foco de teclado: sem isto, cada navegador desenha um anel default
+   diferente (ou nenhum, em alguns casos) -- inconsistente entre
+   botões/cards/links e sem relação visual com o resto do app. Reaproveita
+   a mesma cor já usada em todo hover (imperial-gold), então navegar por
+   Tab dá a mesma pista visual que passar o mouse -- só aparece pra quem
+   usa teclado (:focus-visible), nunca ao clicar/tocar (auditoria de
+   UX/UI, 2026-09, P3). */
+:focus-visible{ outline: 2px solid var(--imperial-gold); outline-offset: 2px; border-radius: 4px; }
 /* Reset padrão -- button/input/textarea/select NÃO herdam color/font-family
    do body por padrão no navegador (usam a cor/fonte do sistema). Sem isso,
    qualquer botão que não define sua própria cor (ex: .unit-card, que é um
