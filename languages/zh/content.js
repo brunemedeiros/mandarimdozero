@@ -129,7 +129,78 @@ const UNITS = [
     level: "HSK1",
     title: "Família",
     goal: "Apresentar membros da família e falar quantas pessoas há na família.",
-    usageNote: { title: "Por que \"yí gè jiějie\" mas \"jǐ kǒu rén\"?", body: "Em chinês, todo substantivo contável precisa de uma \"classificador\" (medida) entre o número e a palavra. <strong>Gè</strong> (个) é o classificador genérico, usado pra quase tudo — inclusive pessoas em geral: yí <strong>gè</strong> jiějie (uma irmã mais velha). Mas pra contar quantas pessoas moram numa mesma casa, o chinês usa um classificador específico, <strong>kǒu</strong> (口, literalmente \"boca\"): jǐ <strong>kǒu</strong> rén — só nesse contexto de família." },
+    // Explicação contextual (não mais "Dicas e Notas" avulso): cada conceito
+    // dispara no momento em que se torna relevante, não num manual à parte.
+    // `trigger.afterVocabIdx` dispara ao fim do BLOCO de aquisição que contém
+    // aquele índice de vocab (antes da checagem do bloco); `trigger.after:
+    // 'dialogue'` dispara ao concluir o passo de diálogo, antes do próximo
+    // passo. Ver `runConceptQueueThen`/`pendingConceptsForBlock` no app.js.
+    concepts: [
+      {
+        id: "classifiers",
+        trigger: { afterVocabIdx: 11 },
+        blocks: [
+          {
+            title: "一个人, não só \"um rén\"",
+            body: "Em chinês, um número quase nunca fica colado direto num substantivo — entre os dois entra um <strong>classificador</strong> (uma espécie de \"medida\"). 个 (gè) é o classificador mais genérico, usado pra pessoas e muita coisa em geral.",
+            examples: [
+              { c: "一个人", p: "yí gè rén", t: "uma pessoa" },
+              { c: "一个姐姐", p: "yí gè jiějie", t: "uma irmã mais velha" }
+            ]
+          },
+          {
+            title: "个 (gè) ou 口 (kǒu)?",
+            body: "Pra contar pessoas em geral, 个 já resolve. Mas pra contar quantas pessoas moram numa mesma casa, o chinês tem um classificador específico: <strong>kǒu</strong> (口, literalmente \"boca\") — só nesse contexto de família.",
+            examples: [
+              { c: "几口人？", p: "jǐ kǒu rén?", t: "quantas pessoas? (contexto família)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "you",
+        trigger: { afterVocabIdx: 8 },
+        blocks: [
+          {
+            title: "有 (yǒu) — \"ter\" / \"haver\"",
+            body: "有 (yǒu) é o verbo usado tanto pra dizer que alguém possui algo quanto pra dizer que algo existe. Estrutura simples: Sujeito + 有 + Objeto.",
+            examples: [
+              { c: "我有一个姐姐。", p: "Wǒ yǒu yí gè jiějie.", t: "Eu tenho uma irmã mais velha." }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "he",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "和 (hé) — juntando substantivos",
+            body: "和 (hé) equivale a \"e\", mas só junta substantivos entre si — nunca frases inteiras. Pra ligar duas frases completas, o chinês normalmente nem usa palavra de ligação nenhuma.",
+            examples: [
+              { c: "爸爸和妈妈", p: "bàba hé māma", t: "pai e mãe" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      {
+        id: "meiyou",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "没(有) — negando \"ter\"",
+            body: "Pra negar 有 (ter), o chinês não usa 不 — usa 没 ou 没有, especialmente pra isso. É uma das poucas exceções à regra geral de negação com 不.",
+            examples: [
+              { c: "我没有妹妹。", p: "Wǒ méiyǒu mèimei.", t: "Eu não tenho irmã mais nova." }
+            ],
+            wrapup: true
+          }
+        ]
+      }
+    ],
     vocab: [
       { p: "jiā", c: "家", t: "família / casa" },
       { p: "bàba", c: "爸爸", t: "pai" },
