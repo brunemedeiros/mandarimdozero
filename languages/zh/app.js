@@ -1369,10 +1369,6 @@ function openUnitDetail(unitId){
   document.getElementById('ud-title').textContent = u.title;
   document.getElementById('ud-goal').textContent = u.goal;
 
-  const notesBtn = document.getElementById('unit-notes-btn');
-  const hasNotes = GRAMMAR_NOTES[unitId] && GRAMMAR_NOTES[unitId].length > 0;
-  notesBtn.style.display = hasNotes ? 'inline-flex' : 'none';
-
   STEP_STATE.currentStep = 0;
   renderStep();
 
@@ -1454,85 +1450,6 @@ document.getElementById('unit-manual-modal').addEventListener('click', (e) => {
     document.getElementById('unit-manual-modal').style.display = 'none';
   }
 });
-
-// ---------- Modal: Dicas e Notas (explicações gramaticais) ----------
-function renderNotesListHTML(unitId){
-  const notes = GRAMMAR_NOTES[unitId] || [];
-  return `
-    <div class="notes-list">
-      ${notes.map((note, i) => `
-        <button class="notes-list-item" data-note-idx="${i}">
-          <span class="note-title">${note.title}</span>
-          <span class="note-arrow">→</span>
-        </button>
-      `).join('')}
-    </div>
-  `;
-}
-
-function renderNoteDetailHTML(note){
-  const tableRows = note.table.map(row => {
-    if (row.label){
-      // Linha de tabela de contraste (com rótulo extra, ex: "Presente/futuro (不)")
-      return `<tr><td class="label-cell">${row.label}</td><td>${row.pt}<br><span style="color:var(--seal-red-dark); font-weight:700;">${row.cn}</span></td></tr>`;
-    }
-    return `<tr><td>${row.pt}</td><td>${row.cn}</td></tr>`;
-  }).join('');
-
-  const hasLabels = note.table.some(r => r.label);
-
-  return `
-    <button class="back-link" id="notes-back-to-list">← Voltar às notas</button>
-    <h3 style="margin:12px 0 14px; font-size:19px;">${note.title}</h3>
-    <div class="note-detail-explanation">${note.explanation}</div>
-    <table class="note-detail-table">
-      <thead><tr>${hasLabels ? '<th></th>' : ''}<th>Português</th><th>Chinês</th></tr></thead>
-      <tbody>${tableRows}</tbody>
-    </table>
-    <div class="note-detail-example">
-      <div class="note-detail-example-label">Exemplo do seu curso</div>
-      <div class="hanzi">${note.courseExample.c} ${audioBtnHTML(note.courseExample.c)}</div>
-      <div class="pinyin">${note.courseExample.p}</div>
-      <div class="trans">${note.courseExample.t}</div>
-    </div>
-  `;
-}
-
-function openNotesModal(){
-  const u = UNITS.find(x => x.id === STATE.currentUnitId);
-  document.getElementById('notes-modal-title').textContent = `Dicas e Notas — Unidade ${u.id}`;
-  const bodyEl = document.getElementById('notes-modal-body');
-  bodyEl.innerHTML = renderNotesListHTML(u.id);
-  wireNotesListItems(bodyEl, u.id);
-  document.getElementById('notes-modal').style.display = 'flex';
-}
-
-function wireNotesListItems(bodyEl, unitId){
-  bodyEl.querySelectorAll('.notes-list-item').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.noteIdx);
-      const note = GRAMMAR_NOTES[unitId][idx];
-      bodyEl.innerHTML = renderNoteDetailHTML(note);
-      wireAudioButtons(bodyEl);
-      document.getElementById('notes-back-to-list').addEventListener('click', () => {
-        bodyEl.innerHTML = renderNotesListHTML(unitId);
-        wireNotesListItems(bodyEl, unitId);
-      });
-    });
-  });
-}
-
-document.getElementById('unit-notes-btn').addEventListener('click', openNotesModal);
-
-document.getElementById('notes-modal-close').addEventListener('click', () => {
-  document.getElementById('notes-modal').style.display = 'none';
-});
-document.getElementById('notes-modal').addEventListener('click', (e) => {
-  if (e.target.id === 'notes-modal'){
-    document.getElementById('notes-modal').style.display = 'none';
-  }
-});
-
 
 // Progresso real dentro da lição: cada etapa (vocabulário/diálogo/dica de
 // uso/exercícios) vale uma fatia igual da barra -- mas dentro da etapa
@@ -2578,43 +2495,17 @@ function answerExplanationHTML(ex){
 
 // Painel "por que não foi essa" caindo de volta pra uma explicação da
 // unidade quando não há frase de origem específica pra mostrar (ex.: erro
-// de reconhecimento puro, sem frase-exemplo). Unidades já migradas pra
-// explicação contextual (`u.concepts`, ver content.js) usam só os conceitos
-// que o aluno JÁ VIU nesta sessão -- nunca antecipa um conceito que ainda
-// não apareceu na lição -- e prioriza o que combina com a palavra errada
-// (`vocabIdx`), quando dá pra saber qual foi. Unidades ainda não migradas
-// continuam com o banco antigo (GRAMMAR_NOTES), sem mudança de comportamento.
+// de reconhecimento puro, sem frase-exemplo). Usa só os conceitos que o
+// aluno JÁ VIU nesta sessão (`STEP_STATE.conceptsShown`) -- nunca antecipa
+// um conceito que ainda não apareceu na lição -- e prioriza o que combina
+// com a palavra errada (`vocabIdx`), quando dá pra saber qual foi.
 function noteOrConceptReviewHTML(vocabIdx){
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
-  if (u && u.concepts && u.concepts.length){
-    const shown = u.concepts.filter(c => STEP_STATE.conceptsShown.has(c.id));
-    if (!shown.length) return null;
-    const match = (typeof vocabIdx === 'number' && shown.find(c => c.trigger.afterVocabIdx === vocabIdx)) || shown[0];
-    const block = match.blocks[match.blocks.length - 1]; // versão mais completa (wrapup) do conceito, se houver mais de um cartão
-    return `<div class="usage-note-title">${block.title}</div><p class="usage-note-body">${block.body}</p>`;
-  }
-  return grammarNoteReviewHTML();
-}
-
-function grammarNoteReviewHTML(){
-  const notes = GRAMMAR_NOTES[STATE.currentUnitId];
-  if (!notes || !notes.length) return null;
-  const note = notes[0];
-  const tableRows = note.table.map(row => {
-    if (row.label){
-      return `<tr><td class="label-cell">${row.label}</td><td>${row.pt}<br><span style="color:var(--seal-red-dark); font-weight:700;">${row.cn}</span></td></tr>`;
-    }
-    return `<tr><td>${row.pt}</td><td>${row.cn}</td></tr>`;
-  }).join('');
-  const hasLabels = note.table.some(r => r.label);
-  return `
-    <div class="usage-note-title">${note.title}</div>
-    <p class="usage-note-body">${note.explanation}</p>
-    <table class="note-detail-table">
-      <thead><tr>${hasLabels ? '<th></th>' : ''}<th>Português</th><th>Chinês</th></tr></thead>
-      <tbody>${tableRows}</tbody>
-    </table>
-  `;
+  const shown = u.concepts.filter(c => STEP_STATE.conceptsShown.has(c.id));
+  if (!shown.length) return null;
+  const match = (typeof vocabIdx === 'number' && shown.find(c => c.trigger.afterVocabIdx === vocabIdx)) || shown[0];
+  const block = match.blocks[match.blocks.length - 1]; // versão mais completa (wrapup) do conceito, se houver mais de um cartão
+  return `<div class="usage-note-title">${block.title}</div><p class="usage-note-body">${block.body}</p>`;
 }
 
 // Painel de resposta errada/revelada (estilo Duolingo): a explicação
