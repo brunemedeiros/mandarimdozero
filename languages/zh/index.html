@@ -143,8 +143,31 @@ body{
 }
 .brand-text h1{ margin:0; font-size:17px; font-weight:800; letter-spacing:-0.01em; }
 .brand-text p{ margin:0; font-size:12px; color:var(--ink-soft); }
+/* Em celular, o subtítulo (puramente decorativo -- o nome do app já está
+   no h1) tomava sozinho mais largura do que o resto do topbar inteiro,
+   sobrando menos de 30px por pill pros controles de verdade (busca, tema,
+   idioma, conta). Some abaixo de 480px pra devolver esse espaço ao que
+   tem função (auditoria de UX/UI, 2026-09). */
+@media (max-width: 480px){ .brand-text p{ display:none; } }
 
+/* Em telas estreitas os pills não cabem todos, e a fileira rola
+   horizontalmente -- mas antes o último pill visível (a busca) ficava
+   cortado bem na borda da tela, sem nenhum sinal visual de que dava pra
+   arrastar pra ver o resto (o toggle de tema, o troca-idioma e a conta
+   ficavam escondidos ali, sem nenhuma pista). Um "aparelho eletrônico
+   cortado ao meio" no primeiro instante de uso não parece "role pra ver
+   mais", parece quebrado -- exatamente o tipo de coisa que o critério
+   mobile "sem elemento cortado" pede pra evitar (auditoria de UX/UI,
+   2026-09). .stats-pills-fade cobre a borda direita com um degradê até a
+   cor de fundo, sinalizando "tem mais aqui" sem precisar de JS pra medir
+   scroll -- some sozinho em telas largas o bastante pra caber tudo. */
+.stats-pills-wrap{ position:relative; flex:1; min-width:0; }
 .stats-pills{ display:flex; gap:8px; min-width:0; overflow-x:auto; }
+.stats-pills-fade{
+  position:absolute; top:0; right:0; bottom:0; width:28px; pointer-events:none;
+  background: linear-gradient(to right, transparent, var(--paper) 70%);
+}
+@media (min-width: 640px){ .stats-pills-fade{ display:none; } }
 .pill{
   display:flex; align-items:center; gap:5px; flex-shrink:0;
   background: var(--paper-warm); border:1px solid var(--paper-line);
@@ -1502,17 +1525,20 @@ body.hide-pinyin .prompt-pinyin{
         <p>Mandarim do Zero — estudo pessoal</p>
       </div>
     </div>
-    <div class="stats-pills">
-      <div class="pill streak">🔥 <span id="streak-count">0</span></div>
-      <div class="pill xp">⭐ <span id="xp-count">0</span> XP</div>
-      <button class="pill pinyin-toggle-btn" id="pinyin-toggle-btn" aria-label="Esconder/mostrar pinyin" title="Esconder/mostrar pinyin">拼音</button>
-      <button class="pill search-open-btn" id="search-open-btn" aria-label="Buscar por pinyin, hanzi ou tradução" title="Buscar por pinyin, hanzi ou tradução">🔍</button>
-      <button class="pill theme-toggle-btn" id="theme-toggle-btn" aria-label="Alternar tema claro/escuro" title="Alternar tema claro/escuro">🌙</button>
-      <div class="lang-switcher">
-        <button class="lang-switcher-btn" id="lang-switcher-btn" type="button" aria-label="Trocar idioma" title="Trocar idioma"></button>
-        <div class="lang-switcher-dropdown" id="lang-switcher-dropdown"></div>
+    <div class="stats-pills-wrap">
+      <div class="stats-pills">
+        <div class="pill streak">🔥 <span id="streak-count">0</span></div>
+        <div class="pill xp">⭐ <span id="xp-count">0</span> XP</div>
+        <button class="pill pinyin-toggle-btn" id="pinyin-toggle-btn" aria-label="Esconder/mostrar pinyin" title="Esconder/mostrar pinyin">拼音</button>
+        <button class="pill search-open-btn" id="search-open-btn" aria-label="Buscar por pinyin, hanzi ou tradução" title="Buscar por pinyin, hanzi ou tradução">🔍</button>
+        <button class="pill theme-toggle-btn" id="theme-toggle-btn" aria-label="Alternar tema claro/escuro" title="Alternar tema claro/escuro">🌙</button>
+        <div class="lang-switcher">
+          <button class="lang-switcher-btn" id="lang-switcher-btn" type="button" aria-label="Trocar idioma" title="Trocar idioma"></button>
+          <div class="lang-switcher-dropdown" id="lang-switcher-dropdown"></div>
+        </div>
+        <button class="pill user-pill" id="user-menu-btn" aria-label="Conta" title="Conta">👤 <span id="user-label">Convidado</span></button>
       </div>
-      <button class="pill user-pill" id="user-menu-btn" aria-label="Conta" title="Conta">👤 <span id="user-label">Convidado</span></button>
+      <div class="stats-pills-fade" aria-hidden="true"></div>
     </div>
   </div>
 
