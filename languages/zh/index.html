@@ -1402,6 +1402,29 @@ footer.app-footer{ text-align:center; margin-top:50px; font-size:12px; color: va
 @keyframes toastIn{ from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} }
 @keyframes toastOut{ to{opacity:0; transform:translateY(-8px);} }
 
+/* Celebração de badge recém-desbloqueado -- cartão flutuante, NUNCA modal
+   full-screen: pode aparecer no meio de qualquer fluxo (um exercício, uma
+   revisão), então precisa ficar por cima sem bloquear o que está por baixo.
+   Fila em JS (processBadgeCelebrationQueue) garante só 1 por vez. */
+#badge-unlock-layer{ position:fixed; top:70px; left:50%; transform:translateX(-50%); z-index:1000; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
+.badge-unlock-toast{
+  pointer-events:auto; cursor:pointer; display:flex; align-items:center; gap:12px;
+  background: var(--paper); border:2px solid var(--imperial-gold); border-radius:16px;
+  padding:12px 18px; box-shadow: var(--shadow-lift); max-width:320px;
+  animation: badgeUnlockIn .4s cubic-bezier(.34,1.56,.64,1), badgeUnlockOut .3s ease 3.7s forwards;
+}
+.badge-unlock-icon{ font-size:32px; flex-shrink:0; animation: badgeUnlockSpin .5s ease; }
+.badge-unlock-label{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color: var(--seal-red-dark); }
+.badge-unlock-name{ font-size:14px; font-weight:800; color: var(--ink); }
+.badge-unlock-desc{ font-size:12px; color: var(--ink-soft); }
+@keyframes badgeUnlockIn{ from{opacity:0; transform:scale(.7) translateY(-14px);} to{opacity:1; transform:scale(1) translateY(0);} }
+@keyframes badgeUnlockOut{ to{opacity:0; transform:translateY(-10px);} }
+@keyframes badgeUnlockSpin{ from{transform:rotate(-25deg) scale(.5);} to{transform:rotate(0) scale(1);} }
+@media (prefers-reduced-motion: reduce){
+  .badge-unlock-toast{ animation: badgeUnlockOut .3s ease 3.7s forwards; }
+  .badge-unlock-icon{ animation:none; }
+}
+
 @media (max-width: 560px){
   .vocab-row{ grid-template-columns: 1.3fr .9fr 1.3fr; padding:10px; }
   .flashcard-hanzi{ font-size:42px; }
@@ -1552,6 +1575,7 @@ body.hide-pinyin .prompt-pinyin{
 <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
 
 <div id="toast-layer"></div>
+<div id="badge-unlock-layer" aria-live="polite"></div>
 
 <!-- ===== TELA DE LOGIN ===== -->
 <div id="login-screen">
@@ -1741,6 +1765,13 @@ body.hide-pinyin .prompt-pinyin{
         <div class="pref-row-sub">Em vez de escolher entre opções, digite o pinyin que falta (estilo Clozemaster).</div>
       </div>
       <button class="pref-switch" id="cloze-mode-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
+    </div>
+    <div class="pref-row">
+      <div class="pref-row-text">
+        <div class="pref-row-title">Som de acerto/erro nos exercícios</div>
+        <div class="pref-row-sub">Toca um som curto ao responder cada exercício, além da cor de certo/errado.</div>
+      </div>
+      <button class="pref-switch" id="feedback-sound-switch" role="switch" aria-checked="true"><span class="pref-switch-knob"></span></button>
     </div>
   </div>
 
