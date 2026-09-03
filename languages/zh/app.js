@@ -1205,6 +1205,11 @@ function buildUnitBlock(u){
 
 function renderUnitsGrid(){
   recalculateUnlockedUnits();
+  // "Tratamento de honra" (Opção D): nível concluído reaproveita o mesmo
+  // selo de check, só que dourado -- ZH não tem seletor de nível (só existe
+  // HSK1 hoje), então o selo mora fixo no <h2> estático da trilha.
+  const levelBadge = document.getElementById('level-done-badge');
+  if (levelBadge) levelBadge.style.display = UNITS.every(u => STATE.unitProgress[u.id]?.completed) ? '' : 'none';
   const grid = document.getElementById('units-grid');
   grid.innerHTML = '';
   UNITS.forEach((u) => {
