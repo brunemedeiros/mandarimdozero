@@ -123,6 +123,55 @@ function stopExerciseAudio(){
   document.querySelectorAll('.audio-btn.speaking').forEach(b => b.classList.remove('speaking'));
 }
 
+// ---------- Som curto de acerto/erro (feedback por exercício) ----------
+// Sintetizado via Web Audio API -- sem arquivo de áudio externo pra baixar/
+// hospedar, e sem disputar com o player de pronúncia acima (Audio/Speech
+// Synthesis são players diferentes; um "ding" de ~200ms não precisa de
+// stopExerciseAudio()). Silenciável em Preferências (Seu progresso).
+const FEEDBACK_SOUND_KEY = 'mandarim_feedback_sound';
+function isFeedbackSoundEnabled(){
+  return localStorageSafeGet(FEEDBACK_SOUND_KEY) !== '0';
+}
+
+let feedbackAudioCtx = null;
+function getFeedbackAudioCtx(){
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return null;
+  if (!feedbackAudioCtx) feedbackAudioCtx = new Ctx();
+  if (feedbackAudioCtx.state === 'suspended') feedbackAudioCtx.resume();
+  return feedbackAudioCtx;
+}
+
+function playFeedbackTone(ctx, freq, startTime, duration, peakGain){
+  const osc = ctx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(freq, startTime);
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, startTime);
+  g.gain.exponentialRampToValueAtTime(peakGain, startTime + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+  osc.connect(g);
+  g.connect(ctx.destination);
+  osc.start(startTime);
+  osc.stop(startTime + duration + 0.02);
+}
+
+// isCorrect === true: "ding" ascendente curto (2 notas). false: um tom só,
+// mais grave e mais curto -- neutro, não punitivo (a explicação do erro já
+// fica a cargo do painel de texto, o som só confirma o resultado).
+function playFeedbackSound(isCorrect){
+  if (!isFeedbackSoundEnabled()) return;
+  const ctx = getFeedbackAudioCtx();
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  if (isCorrect){
+    playFeedbackTone(ctx, 587.33, now, 0.09, 0.16);
+    playFeedbackTone(ctx, 880.00, now + 0.08, 0.16, 0.16);
+  } else {
+    playFeedbackTone(ctx, 233.08, now, 0.18, 0.13);
+  }
+}
+
 // Toca um mp3 pré-gerado (Google Cloud TTS, voz neural) em vez da Web Speech
 // API do navegador — qualidade consistente pra todo aluno, independente do
 // SO/navegador. Ver audio-manifest.js (texto -> arquivo) e speakChinese().
@@ -549,8 +598,19 @@ document.getElementById('cloze-mode-switch').addEventListener('click', () => {
 });
 updateClozeModeSwitch();
 
+function updateFeedbackSoundSwitch(){
+  const btn = document.getElementById('feedback-sound-switch');
+  if (btn) btn.setAttribute('aria-checked', isFeedbackSoundEnabled() ? 'true' : 'false');
+}
+document.getElementById('feedback-sound-switch').addEventListener('click', () => {
+  localStorageSafeSet(FEEDBACK_SOUND_KEY, isFeedbackSoundEnabled() ? '0' : '1');
+  updateFeedbackSoundSwitch();
+});
+updateFeedbackSoundSwitch();
+
 async function loadStateAndRender(){
   await loadState();
+  seedEarnedBadges();
   renderTopbarStats();
   renderUnitsGrid();
   renderExportDeckSelect(ANKI_EXPORT_CONFIG);
@@ -905,21 +965,100 @@ function renderDailyChallengesScreen(){
 function addXP(amount){
   STATE.xp += amount;
   showToast(`+${amount} XP`);
+  // Todo badge hoje depende de streak, unidade, XP ou revisões -- e todos
+  // esses caminhos já chamam addXP() em algum ponto (mesmo os de streak, via
+  // registerStudyToday() logo antes/depois). Centralizar a checagem aqui
+  // evita espalhar "será que ganhei um badge?" em cada função separada.
+  checkAndCelebrateBadges();
 }
 
 // showToast agora vem de shared/toast.js.
 
 const BADGES = [
-  { id:'first_step', name:'Primeiro Passo', icon:'🌱', check: s => s.totalReviews >= 1 },
-  { id:'streak_3', name:'3 Dias Seguidos', icon:'🔥', check: s => s.streak >= 3 },
-  { id:'streak_7', name:'Uma Semana!', icon:'⛩️', check: s => s.streak >= 7 },
-  { id:'unit_1', name:'Unidade 1 Completa', icon:'📖', check: s => s.unitProgress[1]?.completed },
-  { id:'unit_7', name:'Metade do Caminho', icon:'🏮', check: s => Object.values(s.unitProgress).filter(u=>u.completed).length >= Math.ceil(UNITS.length/2) },
-  { id:'unit_14', name:'HSK 1 Completo', icon:'🐉', check: s => Object.values(s.unitProgress).filter(u=>u.completed).length >= UNITS.length },
-  { id:'xp_100', name:'100 XP', icon:'⭐', check: s => s.xp >= 100 },
-  { id:'xp_500', name:'500 XP', icon:'🌟', check: s => s.xp >= 500 },
-  { id:'reviews_100', name:'100 Revisões', icon:'💪', check: s => s.totalReviews >= 100 },
+  { id:'first_step', name:'Primeiro Passo', icon:'🌱', desc:'Fez sua primeira revisão', check: s => s.totalReviews >= 1 },
+  { id:'streak_3', name:'3 Dias Seguidos', icon:'🔥', desc:'Estudou 3 dias seguidos', check: s => s.streak >= 3 },
+  { id:'streak_7', name:'Uma Semana!', icon:'⛩️', desc:'Estudou 7 dias seguidos', check: s => s.streak >= 7 },
+  { id:'unit_1', name:'Unidade 1 Completa', icon:'📖', desc:'Completou a primeira unidade', check: s => s.unitProgress[1]?.completed },
+  { id:'unit_7', name:'Metade do Caminho', icon:'🏮', desc:'Completou metade do HSK1', check: s => Object.values(s.unitProgress).filter(u=>u.completed).length >= Math.ceil(UNITS.length/2) },
+  { id:'unit_14', name:'HSK 1 Completo', icon:'🐉', desc:'Completou o HSK1 inteiro', check: s => Object.values(s.unitProgress).filter(u=>u.completed).length >= UNITS.length },
+  { id:'xp_100', name:'100 XP', icon:'⭐', desc:'Acumulou 100 XP', check: s => s.xp >= 100 },
+  { id:'xp_500', name:'500 XP', icon:'🌟', desc:'Acumulou 500 XP', check: s => s.xp >= 500 },
+  { id:'reviews_100', name:'100 Revisões', icon:'💪', desc:'Fez 100 revisões', check: s => s.totalReviews >= 100 },
 ];
+
+// ---------- Detecção + celebração de nova conquista ----------
+// earnedBadgeIds é semeado uma vez, logo depois do estado carregar
+// (seedEarnedBadges, chamada em loadStateAndRender) -- reflete os badges já
+// ganhos em sessões anteriores, pra só celebrar o que for GENUÍNO desta
+// sessão em diante. checkAndCelebrateBadges roda dentro de addXP(): todo
+// badge hoje depende de streak/unidade/XP/revisões, e todos esses caminhos
+// já passam por addXP -- não precisa espalhar a checagem por unit/streak/
+// revisão separadamente.
+let earnedBadgeIds = new Set();
+function seedEarnedBadges(){
+  earnedBadgeIds = new Set(BADGES.filter(b => b.check(STATE)).map(b => b.id));
+}
+
+let badgeCelebrationQueue = [];
+let badgeCelebrationShowing = false;
+
+function checkAndCelebrateBadges(){
+  const newlyEarned = [];
+  BADGES.forEach(b => {
+    if (earnedBadgeIds.has(b.id)) return;
+    if (b.check(STATE)){
+      earnedBadgeIds.add(b.id);
+      newlyEarned.push(b);
+    }
+  });
+  if (newlyEarned.length){
+    badgeCelebrationQueue.push(...newlyEarned);
+    processBadgeCelebrationQueue();
+  }
+}
+
+// Fila (não pilha): se dois badges forem ganhos no mesmo instante (ex.: XP
+// cruza 500 no mesmo golpe que termina o nível), mostra um de cada vez --
+// nunca dois cartões sobrepostos brigando pela mesma área da tela.
+function processBadgeCelebrationQueue(){
+  if (badgeCelebrationShowing || !badgeCelebrationQueue.length) return;
+  badgeCelebrationShowing = true;
+  const badge = badgeCelebrationQueue.shift();
+  showBadgeUnlockCelebration(badge, () => {
+    badgeCelebrationShowing = false;
+    processBadgeCelebrationQueue();
+  });
+}
+
+function showBadgeUnlockCelebration(badge, onDone){
+  const layer = document.getElementById('badge-unlock-layer');
+  if (!layer){ onDone?.(); return; }
+  const el = document.createElement('div');
+  el.className = 'badge-unlock-toast';
+  el.setAttribute('role', 'status');
+  el.setAttribute('aria-live', 'polite');
+  el.innerHTML = `
+    <div class="badge-unlock-icon">${badge.icon}</div>
+    <div class="badge-unlock-text">
+      <div class="badge-unlock-label">🏅 Nova conquista!</div>
+      <div class="badge-unlock-name">${badge.name}</div>
+      <div class="badge-unlock-desc">${badge.desc}</div>
+    </div>
+  `;
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    el.remove();
+    onDone?.();
+  };
+  el.addEventListener('click', () => {
+    finish();
+    switchTab('progress');
+  });
+  layer.appendChild(el);
+  setTimeout(finish, 4000);
+}
 
 // ============================================================
 // RENDER: Trilha (path)
@@ -2217,6 +2356,13 @@ function finishCurrentLesson(u){
     const finished = currentLesson(u);
     STATE.unitProgress[u.id].lessonIdx = currentLessonIdx(u.id) + 1;
     addXP(8);
+    // Sem pontuação própria pra avaliar aqui (a lição intermediária não é um
+    // exame com nota) -- passa scorePct indefinido de propósito, pra contar
+    // pra "Complete N lições"/streak sem inflar highScoreLessons/perfectLessons
+    // (esses ficam reservados pra lições que de fato têm uma nota, como o
+    // Ponto de verificação). Antes disso, os desafios do dia só avançavam ao
+    // fim da UNIDADE inteira -- a rotina diária real é por lição.
+    registerDailyLessonCompleted(undefined, false);
     saveState();
     renderTopbarStats();
     renderLessonBoundaryScreen(u, finished);
@@ -3171,6 +3317,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
       const chosenIdx = parseInt(btn.dataset.idx);
       const isCorrect = ex.options[chosenIdx] === ex.item;
       STEP_STATE.exerciseAnswered = true;
+      playFeedbackSound(isCorrect);
       revealCorrectVisual(chosenIdx);
       if (isCorrect){
         STEP_STATE.exerciseScore += 1;
@@ -3231,6 +3378,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
 
   function finish(isCorrect){
     STEP_STATE.exerciseAnswered = true;
+    playFeedbackSound(isCorrect);
     lockInputs();
 
     if (isCorrect){
@@ -3309,6 +3457,7 @@ function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
       STEP_STATE.exerciseAnswered = true;
       const chosen = btn.dataset.val === 'true';
       const isCorrect = chosen === ex.answer;
+      playFeedbackSound(isCorrect);
 
       revealCorrectVisual(btn);
 
@@ -3394,6 +3543,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
 
   function finish(isCorrect){
     STEP_STATE.exerciseAnswered = true;
+    playFeedbackSound(isCorrect);
     revealBlank(isCorrect ? 'ok' : 'wrong');
 
     if (isCorrect){
@@ -3496,6 +3646,7 @@ function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
       const chosenIdx = parseInt(btn.dataset.idx);
       const isCorrect = ex.options[chosenIdx] === ex.correct;
       STEP_STATE.exerciseAnswered = true;
+      playFeedbackSound(isCorrect);
       revealCorrectVisual(chosenIdx);
       addStudyMinutes();
       if (isCorrect){
@@ -3584,6 +3735,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
     const isCorrect = chosenSequence.every((blockIdx, pos) =>
       ex.shuffledBlocks[blockIdx] === correctOrder[pos]
     );
+    playFeedbackSound(isCorrect);
 
     slotsEl.querySelectorAll('.reorder-slot').forEach(slot => {
       slot.classList.add(isCorrect ? 'correct' : 'incorrect');
@@ -4238,7 +4390,9 @@ function markUnitCompleted(unitId, scorePct){
     registerDailyStars(lessonStars(scorePct));
     registerDailyLessonCompleted(scorePct);
   }
-  showToast(`Unidade concluída! 🏮`);
+  // Pequeno atraso pra ler como sequência ("+25 XP" ... "Unidade concluída!")
+  // em vez de dois toasts aparecendo ao mesmo tempo, empilhados sem ordem.
+  setTimeout(() => showToast(`Unidade concluída! 🏮`), 450);
   saveState();
 }
 
