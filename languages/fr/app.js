@@ -1323,6 +1323,21 @@ document.getElementById('back-to-path').addEventListener('click', () => {
 // toda preenchida logo no 1º exercício, só porque "Exercícios" é a última
 // das 4 etapas -- media a POSIÇÃO da etapa, não o que já foi de fato feito
 // dentro dela.
+// Fases que a sessão de aquisição do bloco ATUAL vai percorrer, na ordem --
+// determinístico a partir do estado (não precisa adivinhar o futuro):
+// "bridge" só existe pra unidades com lições, a partir da 2ª; "mixed" só
+// entra quando este não é o primeiro bloco da unidade (mesma condição de
+// advanceAcquisitionPhase). Cada fase recebe uma fatia igual da barra --
+// simples e previsível, sem precisar conhecer de antemão quantos exercícios
+// cada fase vai ter.
+function acqPhaseSequence(u, acq){
+  const seq = [];
+  if (isLessonUnit(u) && currentLessonIdx(u.id) > 0) seq.push('bridge');
+  seq.push('intro', 'checkpoint', 'practice');
+  if (acq.blockIdx > 0) seq.push('mixed');
+  return seq;
+}
+
 function renderStepProgress(){
   const fillEl = document.getElementById('step-progress-fill');
   const defs = currentStepDefs();
@@ -1333,17 +1348,22 @@ function renderStepProgress(){
   let intraStepFraction = 0;
   if (stepKey === 'vocab' && u && STEP_STATE.acq.unitId === u.id){
     // Progresso pelo NÚMERO DE PALAVRAS já cobertas (blocos inteiros já
-    // concluídos + posição dentro do bloco/fase atual), não pela quantidade
-    // de telas percorridas -- uma checagem ou prática conta mais que só ter
-    // visto a palavra uma vez.
+    // concluídos + posição dentro do bloco/fase atual) -- mas, dentro da
+    // fase atual, evolui exercício a exercício (mesmo dado do contador
+    // "Exercício X de Y"), não pula direto pro fim da fase ao entrar nela.
     const acq = STEP_STATE.acq;
     const totalWords = (isLessonUnit(u) ? (acq.blocks[0] || []).length : u.vocab.length) || 1;
     const wordsBeforeBlock = acq.blocks.slice(0, acq.blockIdx).flat().length;
     const curBlockSize = (acq.blocks[acq.blockIdx] || []).length;
-    const phaseWeight = { bridge: 0, intro: 0, checkpoint: 0.4, practice: 0.75, mixed: 0.95 }[acq.phase] || 0;
-    const withinBlock = acq.phase === 'intro'
+
+    const seq = acqPhaseSequence(u, acq);
+    const phaseIdx = seq.indexOf(acq.phase);
+    const [rangeStart, rangeEnd] = phaseIdx >= 0 ? [phaseIdx / seq.length, (phaseIdx + 1) / seq.length] : [0, 1];
+    const phaseFraction = acq.phase === 'intro'
       ? (curBlockSize ? acq.introIdx / curBlockSize : 0)
-      : phaseWeight;
+      : (STEP_STATE.exerciseList.length ? STEP_STATE.exerciseIndex / STEP_STATE.exerciseList.length : 0);
+    const withinBlock = rangeStart + (rangeEnd - rangeStart) * phaseFraction;
+
     intraStepFraction = Math.min(1, (wordsBeforeBlock + curBlockSize * withinBlock) / totalWords);
   } else if (stepKey === 'exercises' || stepKey === 'checkpointExercises'){
     intraStepFraction = STEP_STATE.exerciseList.length ? STEP_STATE.exerciseIndex / STEP_STATE.exerciseList.length : 0;
@@ -2441,8 +2461,76 @@ function buildExerciseSet(unit){
   return shuffle([...vocabExercises, ...cappedReorderExercises, ...scenarioExercises, ...trueFalseExercises, ...clozeExercises]);
 }
 
+// ---------- Atalho de teclado 1-4 pras alternativas selecionáveis ----------
+// Um ÚNICO listener global (registrado uma vez, no fim deste arquivo -- ver
+// abaixo), nunca um novo por exercício renderizado. Cada tela de exercício
+// só chama wireKeyboardOptions (que atualiza KEYBOARD_OPTION_MAP) ou deixa
+// de chamar (digitação, ordenar frase) -- o mapa fica null nesses casos e o
+// listener não faz nada.
+let KEYBOARD_OPTION_MAP = null;
+
+function clearKeyboardOptions(){ KEYBOARD_OPTION_MAP = null; }
+
+// buttons: os elementos já renderizados na tela.
+// mode 'grid2x2': só ativa com exatamente 4 opções E confirma, pela posição
+//   REAL na tela (getBoundingClientRect, não a ordem do array), que formam
+//   duas linhas de duas colunas -- se o layout não bater com isso (ex.: uma
+//   coluna só), desativa em vez de forçar uma correspondência errada.
+// mode 'sequential': 1 = primeira opção na ordem de leitura, 2 = segunda...
+// badgeSelector: elemento QUE JÁ EXISTE dentro do botão pra escrever o
+//   número (ex. ".scenario-option-num", que já aparece na tela) -- evita
+//   duplicar um indicador onde a interface já mostra a posição.
+function wireKeyboardOptions(buttons, { mode = 'sequential', badgeSelector = null } = {}){
+  const list = Array.from(buttons);
+  if (!list.length || list.length > 4){ clearKeyboardOptions(); return; }
+
+  let ordered;
+  if (mode === 'grid2x2' && list.length === 4){
+    const withRect = list.map(el => ({ el, r: el.getBoundingClientRect() }));
+    withRect.sort((a, b) => (a.r.top - b.r.top) || (a.r.left - b.r.left));
+    const sameRow = (a, b) => Math.abs(a.r.top - b.r.top) < 4;
+    const isTwoByTwo = sameRow(withRect[0], withRect[1]) && sameRow(withRect[2], withRect[3])
+      && !sameRow(withRect[0], withRect[2])
+      && withRect[0].r.left < withRect[1].r.left && withRect[2].r.left < withRect[3].r.left;
+    if (!isTwoByTwo){ clearKeyboardOptions(); return; } // layout reorganizado (ex. mobile) -- não força
+    const [topLeft, topRight, bottomLeft, bottomRight] = withRect.map(x => x.el);
+    ordered = [
+      { key: '1', el: topRight }, { key: '2', el: topLeft },
+      { key: '3', el: bottomLeft }, { key: '4', el: bottomRight },
+    ];
+  } else {
+    ordered = list.map((el, i) => ({ key: String(i + 1), el }));
+  }
+
+  KEYBOARD_OPTION_MAP = ordered;
+  ordered.forEach(({ key, el }) => {
+    const existingBadge = badgeSelector ? el.querySelector(badgeSelector) : null;
+    if (existingBadge){
+      existingBadge.textContent = key;
+    } else if (!el.querySelector('.kbd-hint')){
+      const hint = document.createElement('span');
+      hint.className = 'kbd-hint';
+      hint.textContent = key;
+      el.appendChild(hint);
+    }
+  });
+}
+
+// Registrado uma única vez, no carregamento do script -- nunca por render.
+document.addEventListener('keydown', (e) => {
+  if (!KEYBOARD_OPTION_MAP) return;
+  const tag = document.activeElement?.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement?.isContentEditable) return;
+  const entry = KEYBOARD_OPTION_MAP.find(x => x.key === e.key);
+  if (!entry) return;
+  if (!entry.el.isConnected || entry.el.disabled || entry.el.classList.contains('disabled')) return;
+  e.preventDefault();
+  entry.el.click();
+});
+
 function renderExerciseStep(){
   stopExerciseAudio();
+  clearKeyboardOptions();
   const contentEl = document.getElementById('step-content');
   const nextBtn = document.getElementById('step-next-btn');
   const total = STEP_STATE.exerciseList.length;
@@ -2642,9 +2730,15 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
   `;
 
   wireAudioButtons(contentEl);
-  if (ex.format === 'listen' && canSpeakFrench(ex.item.f)){
-    speakFrench(ex.item.f, contentEl.querySelector('.audio-btn-lg'));
+  // "meaning" também toca sozinho agora: ouvir a pronúncia aqui não entrega
+  // a resposta (as opções são traduções, não a grafia/leitura), então só
+  // reforça positivamente -- ao contrário do cloze, onde tocar cedo demais
+  // entregaria a palavra que falta.
+  if ((ex.format === 'listen' || ex.format === 'meaning') && canSpeakFrench(ex.item.f)){
+    const audioEl = contentEl.querySelector(ex.format === 'listen' ? '.audio-btn-lg' : '.audio-btn');
+    speakFrench(ex.item.f, audioEl);
   }
+  wireKeyboardOptions(contentEl.querySelectorAll('.exercise-option'), { mode: 'grid2x2' });
 
   nextBtn.style.display = 'none';
 
@@ -2774,6 +2868,9 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
   `;
 
   nextBtn.style.display = 'none';
+  // A numeração já aparece na tela (.scenario-option-num) -- só liga o
+  // atalho a ela, sem duplicar indicador.
+  wireKeyboardOptions(contentEl.querySelectorAll('.scenario-option'), { badgeSelector: '.scenario-option-num' });
 
   function revealCorrectVisual(chosenIdx){
     contentEl.querySelectorAll('.scenario-option').forEach((b, i) => {
@@ -2933,6 +3030,10 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     } else {
       setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
     }
+  }
+
+  if (mode !== 'type'){
+    wireKeyboardOptions(contentEl.querySelectorAll('.cloze-option'));
   }
 
   if (mode === 'type'){

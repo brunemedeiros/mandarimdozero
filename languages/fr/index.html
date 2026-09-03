@@ -646,9 +646,20 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 
 .exercise-options{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
 .exercise-option{
+  position:relative;
   background: var(--paper); border:2px solid var(--paper-line); border-radius:12px; padding:16px 12px;
   cursor:pointer; font-family: var(--font-body); text-align:center; transition: all .12s ease;
   display:flex; flex-direction:column; gap:4px; align-items:center;
+}
+/* Atalho de teclado 1-4 -- discreto, canto superior esquerdo, só aparece
+   quando a correspondência tecla<->opção é inequívoca (ver wireKeyboardOptions
+   em app.js). Nunca no caminho de quem usa toque -- só mais uma pista pra
+   quem já está de mãos no teclado. */
+.kbd-hint{
+  position:absolute; top:8px; left:8px; width:18px; height:18px; border-radius:5px;
+  background:var(--ink); color:var(--paper);
+  font-size:10px; font-weight:800; font-family: var(--font-body);
+  display:flex; align-items:center; justify-content:center; pointer-events:none;
 }
 .exercise-option:hover{ border-color: var(--imperial-gold); transform: translateY(-1px); }
 .exercise-option .opt-text{ font-size:14px; font-weight:700; color: var(--ink); }
@@ -720,6 +731,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .cloze-audio-row{ display:flex; justify-content:center; margin-bottom:14px; }
 .cloze-options{ display:flex; flex-direction:column; gap:10px; }
 .cloze-option{
+  position:relative;
   background: var(--paper); border:2px solid var(--paper-line); border-radius:12px;
   padding:13px 16px; cursor:pointer; font-family: var(--font-body); font-size:15px; font-weight:700;
   color: var(--ink); text-align:center; transition: all .12s ease;
