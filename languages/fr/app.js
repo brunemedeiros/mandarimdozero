@@ -388,6 +388,9 @@ updateClozeModeSwitch();
 
 async function loadStateAndRender(){
   await loadState();
+  // TEMP — desbloqueio manual pra verificação da prova de conceito do
+  // Modelo B (PR #83). Remover depois que a unidade for conferida.
+  if (STATE.unitProgress['A1-4']) STATE.unitProgress['A1-4'].unlocked = true;
   renderTopbarStats();
   renderUnitsGrid();
   renderExportDeckSelect(ANKI_EXPORT_CONFIG);
@@ -1181,12 +1184,35 @@ function openUnitDetail(unitId){
   document.getElementById('ud-eyebrow').textContent = `${eyebrowLabel} · ${u.level}`;
   document.getElementById('ud-title').textContent = u.title;
   document.getElementById('ud-goal').textContent = u.goal;
+  renderLessonJumpRowTEMP(u); // TEMP -- ver PR #83
 
   STEP_STATE.currentStep = 0;
   renderStep();
 
   saveState();
   renderTopbarStats();
+}
+
+// TEMP -- pular pra qualquer lição de uma unidade migrada (Modelo B), só
+// pra verificação manual da prova de conceito (PR #83). Remover esta
+// função, a chamada em openUnitDetail, e o <div id="lesson-jump-row"> do
+// HTML quando a unidade for conferida.
+function renderLessonJumpRowTEMP(u){
+  const row = document.getElementById('lesson-jump-row');
+  if (!row) return;
+  if (!isLessonUnit(u)){ row.style.display = 'none'; row.innerHTML = ''; return; }
+  const curIdx = currentLessonIdx(u.id);
+  row.style.display = 'flex';
+  row.innerHTML = u.lessons.map((l, i) => `
+    <button class="manual-link-btn" data-lesson-jump="${i}" style="${i === curIdx ? 'font-weight:800;' : ''}">${i + 1}. ${l.title}</button>
+  `).join('');
+  row.querySelectorAll('[data-lesson-jump]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      STATE.unitProgress[u.id].lessonIdx = parseInt(btn.dataset.lessonJump, 10);
+      saveState();
+      openUnitDetail(u.id);
+    });
+  });
 }
 
 document.getElementById('back-to-path').addEventListener('click', () => {
