@@ -2597,8 +2597,55 @@ function wireKeyboardOptions(buttons, { mode = 'sequential', badgeSelector = nul
   });
 }
 
+// Enter = avançar (estilo Memrise): sempre tenta clicar o botão de
+// continuar que estiver na tela agora, em ordem de prioridade -- painel de
+// erro/resposta revelada > painel de acerto do "ordenar frase" > fila de
+// desafios > botão global "Continuar"/"Próxima palavra" (reaproveitado em
+// vocabulário, diálogo, checkpoint etc.). Roda ANTES do guard de
+// INPUT/TEXTAREA (abaixo) porque precisa funcionar mesmo com o campo de
+// digitação ainda focado: o próprio input já tem seu handler de Enter
+// (submete a resposta, ver ex. #cloze-input) que roda primeiro; se a
+// resposta for CERTA o exercício já avança sozinho antes deste handler
+// chegar a rodar (nada fica visível pra clicar); se for ERRADA, o painel só
+// aparece depois de 500ms, então este Enter (o mesmo que respondeu) não
+// acha nada ainda -- só um 2º Enter, já com o campo desabilitado (perdeu o
+// foco sozinho), cai aqui e avança de verdade. Em múltipla escolha/cloze/
+// cenário/V-ou-F ainda não respondidos, nenhum desses botões existe --
+// Enter não faz nada, de propósito (não existe "resposta padrão" pra
+// confirmar só com Enter).
+function findEnterAdvanceTarget(){
+  const wrongContinueBtn = document.getElementById('wrong-continue-btn');
+  if (wrongContinueBtn) return wrongContinueBtn;
+  const correctContinueBtn = document.getElementById('correct-continue-btn');
+  if (correctContinueBtn) return correctContinueBtn;
+  const queueContinueBtn = document.getElementById('queue-continue-btn');
+  if (queueContinueBtn) return queueContinueBtn;
+  const stepNextBtn = document.getElementById('step-next-btn');
+  if (stepNextBtn && stepNextBtn.offsetParent !== null) return stepNextBtn;
+  return null;
+}
+
+// Nenhum atalho (1-4, "r", Enter) deve agir se um modal (ex.: "Atalhos do
+// teclado", seletor de nível) estiver aberto por cima do exercício -- sem
+// isso, um Enter ou número pressionado ali clicaria/selecionaria algo na
+// tela de trás, escondida atrás do modal, sem o aluno perceber.
+function anyAppModalOpen(){
+  return Array.from(document.querySelectorAll('.app-modal-overlay')).some(m => m.style.display === 'flex');
+}
+
 // Registrado uma única vez, no carregamento do script -- nunca por render.
 document.addEventListener('keydown', (e) => {
+  if (anyAppModalOpen()) return;
+
+  if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey){
+    const target = findEnterAdvanceTarget();
+    if (target){
+      e.preventDefault();
+      target.click();
+    }
+    return;
+  }
+
   const tag = document.activeElement?.tagName;
   if (tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement?.isContentEditable) return;
 
