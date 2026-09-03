@@ -1315,6 +1315,18 @@ document.getElementById('back-to-path').addEventListener('click', () => {
   renderUnitsGrid();
 });
 
+document.getElementById('lesson-kbd-btn').addEventListener('click', () => {
+  document.getElementById('kbd-shortcuts-modal').style.display = 'flex';
+});
+document.getElementById('kbd-shortcuts-modal-close').addEventListener('click', () => {
+  document.getElementById('kbd-shortcuts-modal').style.display = 'none';
+});
+document.getElementById('kbd-shortcuts-modal').addEventListener('click', (e) => {
+  if (e.target.id === 'kbd-shortcuts-modal'){
+    document.getElementById('kbd-shortcuts-modal').style.display = 'none';
+  }
+});
+
 // Progresso real dentro da lição: cada etapa (vocabulário/diálogo/dica de
 // uso/exercícios, ou explicação/exercícios na gramática) vale uma fatia
 // igual da barra -- mas dentro da etapa atual soma a fração já percorrida
