@@ -99,6 +99,13 @@ function canSpeakFrench(text){
 // trocar de aba etc.).
 let exerciseAudioEl = null;
 
+// Último botão de áudio que de fato tocou algo (clique manual OU autoplay --
+// ambos passam por playPregeneratedAudio/speakFrench com btnEl) -- é o que o
+// atalho "r" repete. Não precisa de lógica própria de "expiração": ao trocar
+// de tela, o botão antigo é removido do DOM (innerHTML novo), então
+// LAST_AUDIO_BTN.isConnected já vira false sozinho.
+let LAST_AUDIO_BTN = null;
+
 function stopExerciseAudio(){
   if (exerciseAudioEl){
     exerciseAudioEl.pause();
@@ -118,7 +125,7 @@ function playPregeneratedAudio(file, btnEl){
   stopExerciseAudio();
   const audio = new Audio('audio/' + file);
   exerciseAudioEl = audio;
-  if (btnEl) btnEl.classList.add('speaking');
+  if (btnEl){ btnEl.classList.add('speaking'); LAST_AUDIO_BTN = btnEl; }
   const clear = () => {
     if (btnEl) btnEl.classList.remove('speaking');
     if (exerciseAudioEl === audio) exerciseAudioEl = null;
@@ -162,7 +169,7 @@ function speakFrench(text, btnEl){
   };
 
   const utter = buildUtterance();
-  if (btnEl) btnEl.classList.add('speaking');
+  if (btnEl){ btnEl.classList.add('speaking'); LAST_AUDIO_BTN = btnEl; }
 
   let didStart = false;
   utter.onstart = () => { didStart = true; };
@@ -2487,7 +2494,9 @@ function clearKeyboardOptions(){ KEYBOARD_OPTION_MAP = null; }
 // mode 'grid2x2': só ativa com exatamente 4 opções E confirma, pela posição
 //   REAL na tela (getBoundingClientRect, não a ordem do array), que formam
 //   duas linhas de duas colunas -- se o layout não bater com isso (ex.: uma
-//   coluna só), desativa em vez de forçar uma correspondência errada.
+//   coluna só), desativa em vez de forçar uma correspondência errada. A
+//   numeração segue a ordem de leitura (1=superior esquerda, 2=superior
+//   direita, 3=inferior esquerda, 4=inferior direita).
 // mode 'sequential': 1 = primeira opção na ordem de leitura, 2 = segunda...
 // badgeSelector: elemento QUE JÁ EXISTE dentro do botão pra escrever o
 //   número (ex. ".scenario-option-num", que já aparece na tela) -- evita
@@ -2505,11 +2514,10 @@ function wireKeyboardOptions(buttons, { mode = 'sequential', badgeSelector = nul
       && !sameRow(withRect[0], withRect[2])
       && withRect[0].r.left < withRect[1].r.left && withRect[2].r.left < withRect[3].r.left;
     if (!isTwoByTwo){ clearKeyboardOptions(); return; } // layout reorganizado (ex. mobile) -- não força
-    const [topLeft, topRight, bottomLeft, bottomRight] = withRect.map(x => x.el);
-    ordered = [
-      { key: '1', el: topRight }, { key: '2', el: topLeft },
-      { key: '3', el: bottomLeft }, { key: '4', el: bottomRight },
-    ];
+    // withRect já está ordenado por posição real (linha, depois coluna) --
+    // é exatamente a ordem de leitura que queremos: 1=sup.esq, 2=sup.dir,
+    // 3=inf.esq, 4=inf.dir.
+    ordered = withRect.map((x, i) => ({ key: String(i + 1), el: x.el }));
   } else {
     ordered = list.map((el, i) => ({ key: String(i + 1), el }));
   }
@@ -2530,9 +2538,21 @@ function wireKeyboardOptions(buttons, { mode = 'sequential', badgeSelector = nul
 
 // Registrado uma única vez, no carregamento do script -- nunca por render.
 document.addEventListener('keydown', (e) => {
-  if (!KEYBOARD_OPTION_MAP) return;
   const tag = document.activeElement?.tagName;
   if (tag === 'INPUT' || tag === 'TEXTAREA' || document.activeElement?.isContentEditable) return;
+
+  // "r" repete o último áudio que de fato tocou (clique manual ou autoplay)
+  // -- reaproveita o mesmo botão/clique de sempre, não uma lógica própria.
+  // Sem modificador: Ctrl/Cmd+R continua sendo "recarregar página" do navegador.
+  if (e.key === 'r' && !e.ctrlKey && !e.metaKey && !e.altKey){
+    if (LAST_AUDIO_BTN && LAST_AUDIO_BTN.isConnected && !LAST_AUDIO_BTN.disabled && !LAST_AUDIO_BTN.classList.contains('disabled')){
+      e.preventDefault();
+      LAST_AUDIO_BTN.click();
+    }
+    return;
+  }
+
+  if (!KEYBOARD_OPTION_MAP) return;
   const entry = KEYBOARD_OPTION_MAP.find(x => x.key === e.key);
   if (!entry) return;
   if (!entry.el.isConnected || entry.el.disabled || entry.el.classList.contains('disabled')) return;
