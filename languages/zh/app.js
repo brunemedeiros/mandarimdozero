@@ -464,7 +464,17 @@ const STATE = {
 };
 
 UNITS.forEach((u,i) => {
-  STATE.unitProgress[u.id] = { started:false, completed:false, unlocked: i===0 };
+  STATE.unitProgress[u.id] = {
+    started:false, completed:false, unlocked: i===0,
+    // Lições (Modelo B): em que lição da unidade o aluno está agora (só
+    // avança quando uma lição é concluída de verdade -- sair no meio via
+    // "Sair da lição" mantém o índice, então reabrir retoma a MESMA lição
+    // do zero, nunca a unidade inteira). lessonMisses acumula erros ao
+    // longo de todas as lições da unidade, pra alimentar a Revisão dos
+    // Erros dimensionada no Ponto de verificação -- resetado só quando a
+    // unidade é concluída.
+    lessonIdx: 0, lessonMisses: {}
+  };
 });
 
 HANZI_LESSONS.forEach((lesson, i) => {
@@ -613,7 +623,16 @@ function applySerializedState(data){
     data.hanziCards.forEach(c => byId[c.id] = c);
     STATE.hanziCards.forEach(c => { if (byId[c.id]) Object.assign(c, byId[c.id]); });
   }
-  if (data.unitProgress) Object.assign(STATE.unitProgress, data.unitProgress);
+  if (data.unitProgress) {
+    Object.assign(STATE.unitProgress, data.unitProgress);
+    // Saves de antes das lições (Modelo B) não têm lessonIdx/lessonMisses --
+    // sem isso, um progresso salvo antigo sobrescreveria os defaults com
+    // `undefined`, quebrando freshAcquisitionState pra quem já tinha conta.
+    Object.values(STATE.unitProgress).forEach(p => {
+      if (typeof p.lessonIdx !== 'number') p.lessonIdx = 0;
+      if (!p.lessonMisses) p.lessonMisses = {};
+    });
+  }
   if (typeof data.xp === 'number') STATE.xp = data.xp;
   if (typeof data.streak === 'number') STATE.streak = data.streak;
   if (data.lastStudyDay) STATE.lastStudyDay = data.lastStudyDay;
@@ -1281,6 +1300,14 @@ const STEP_DEFS = [
 // um passo "Dica de uso" vazio. Unidades ainda não migradas continuam com o
 // passo normalmente (mesmo comportamento de antes).
 function currentStepDefs(u){
+  if (isLessonUnit(u)){
+    const lesson = currentLesson(u);
+    if (lesson.isCheckpoint) return [{ key: 'checkpointExercises', label: 'Ponto de verificação' }];
+    const steps = [];
+    if (lesson.vocabIdx && lesson.vocabIdx.length) steps.push({ key: 'vocab', label: 'Vocabulário' });
+    if (lesson.includesDialogue) steps.push({ key: 'dialogue', label: 'Diálogo' });
+    return steps;
+  }
   return STEP_DEFS.filter(s => s.key !== 'usage' || (u && u.usageNote));
 }
 
@@ -1314,7 +1341,48 @@ function buildAcquisitionBlocks(unit){
   return blocks;
 }
 
+// ---------- Lições (Modelo B) ----------
+// Unidades migradas (ver "Redesenho da Granularidade") têm `unit.lessons`:
+// cada lição é autocontida (intro -> checagem -> prática, SEM misturar com
+// lições anteriores dentro da mesma sessão -- causa-raiz nº1 do redesenho).
+// Unidades ainda não migradas continuam com o motor antigo de blocos
+// mecânicos (buildAcquisitionBlocks), inalterado.
+function isLessonUnit(u){
+  return !!(u && Array.isArray(u.lessons) && u.lessons.length);
+}
+
+function currentLessonIdx(unitId){
+  return STATE.unitProgress[unitId]?.lessonIdx || 0;
+}
+
+function currentLesson(u){
+  const idx = Math.min(currentLessonIdx(u.id), u.lessons.length - 1);
+  return u.lessons[idx];
+}
+
 function freshAcquisitionState(unitId, unit){
+  if (isLessonUnit(unit)){
+    const lesson = currentLesson(unit);
+    if (!STATE.unitProgress[unitId].lessonMisses) STATE.unitProgress[unitId].lessonMisses = {};
+    return {
+      unitId,
+      lessonIdx: currentLessonIdx(unitId),
+      blocks: (lesson.vocabIdx && lesson.vocabIdx.length) ? [lesson.vocabIdx] : [],
+      blockIdx: 0,
+      // Lição 1 da unidade começa direto em 'intro'; a partir da 2ª, uma
+      // "ponte" curta (reconhecer 1-2 itens da lição anterior) roda antes --
+      // ver startBridgeQueue. Nunca mistura TODAS as lições anteriores
+      // (isso é papel do SRS agora, não da sessão de aquisição).
+      phase: currentLessonIdx(unitId) > 0 ? 'bridge' : 'intro',
+      introIdx: 0,
+      // Acumula por UNIDADE (persistido em unitProgress.lessonMisses,
+      // mesma referência -- não uma cópia), não só pela sessão local, pra
+      // alimentar a Revisão dos Erros dimensionada no Ponto de verificação
+      // no fim da unidade. Resetado só quando a unidade é concluída.
+      wordMisses: STATE.unitProgress[unitId].lessonMisses,
+      introduced: {}
+    };
+  }
   return {
     unitId,
     blocks: buildAcquisitionBlocks(unit),
@@ -1350,15 +1418,28 @@ const STEP_STATE = {
   conceptIdx: 0,
   conceptBlockIdx: 0,
   conceptAfterFn: null,
-  conceptsShown: new Set()
+  conceptsShown: new Set(),
+  // Tela de "lição concluída" (Modelo B, entre lições da mesma unidade,
+  // nunca no fim da unidade inteira -- essa continua usando
+  // onChallengesScreen). Guarda quantos cartões estão devidos AGORA pra
+  // decidir, no clique de "Continuar", se leva direto pro Flashcard.
+  onLessonBoundaryScreen: null
 };
 
 function openUnitDetail(unitId){
   STATE.currentUnitId = unitId;
   STATE.unitProgress[unitId].started = true;
   STEP_STATE.onChallengesScreen = false;
+  STEP_STATE.onLessonBoundaryScreen = null;
   STEP_STATE.conceptQueue = [];
   STEP_STATE.conceptsShown = new Set();
+  // Invalida o estado de aquisição antigo -- sem isso, reabrir a MESMA
+  // unidade numa lição diferente da última vez reaproveitaria os blocos da
+  // lição errada (a checagem em renderStep só recalcula quando unitId ou
+  // lessonIdx mudam; abrir de novo do zero é o gatilho mais simples e seguro).
+  STEP_STATE.acq = { unitId: null, blocks: [], blockIdx: 0, phase: 'intro', introIdx: 0, wordMisses: {}, introduced: {} };
+  STEP_STATE.exerciseUnitId = null;
+  STEP_STATE.checkpointUnitId = null;
   setLessonFocusMode(true);
 
   document.getElementById('path-list-wrap').style.display = 'none';
@@ -1472,15 +1553,19 @@ function renderStepProgress(){
     // de telas percorridas -- uma checagem ou prática conta mais que só ter
     // visto a palavra uma vez (ver freshAcquisitionState/ETAPA pedagógica).
     const acq = STEP_STATE.acq;
-    const totalWords = u.vocab.length || 1;
+    // Em unidades com lições (Modelo B), a barra reflete o progresso DENTRO
+    // da lição atual (cada lição já é sua própria mini-sessão, com sua
+    // própria tela de conclusão) -- não da unidade inteira, que é como o
+    // motor antigo de blocos calculava.
+    const totalWords = (isLessonUnit(u) ? (acq.blocks[0] || []).length : u.vocab.length) || 1;
     const wordsBeforeBlock = acq.blocks.slice(0, acq.blockIdx).flat().length;
     const curBlockSize = (acq.blocks[acq.blockIdx] || []).length;
-    const phaseWeight = { intro: 0, checkpoint: 0.4, practice: 0.75, mixed: 0.95 }[acq.phase] || 0;
+    const phaseWeight = { bridge: 0, intro: 0, checkpoint: 0.4, practice: 0.75, mixed: 0.95 }[acq.phase] || 0;
     const withinBlock = acq.phase === 'intro'
       ? (curBlockSize ? acq.introIdx / curBlockSize : 0)
       : phaseWeight;
     intraStepFraction = Math.min(1, (wordsBeforeBlock + curBlockSize * withinBlock) / totalWords);
-  } else if (stepKey === 'exercises'){
+  } else if (stepKey === 'exercises' || stepKey === 'checkpointExercises'){
     intraStepFraction = STEP_STATE.exerciseList.length ? STEP_STATE.exerciseIndex / STEP_STATE.exerciseList.length : 0;
   }
 
@@ -1857,6 +1942,27 @@ function finishBlockIntro(){
   runConceptQueueThen(pendingConceptsForBlock(u, acq.blockIdx), () => startBlockCheckpoint(u, acq));
 }
 
+// Ponte com a lição anterior (†, Modelo B): reconhece rapidamente 1-2
+// itens da lição imediatamente anterior antes de entrar na introdução da
+// lição atual -- gancho comunicativo curto, NUNCA a mistura cumulativa de
+// todas as lições que existia antes (essa função é o substituto direto
+// dela, com escopo muito menor e só entre lições consecutivas).
+function startBridgeQueue(u){
+  const idx = currentLessonIdx(u.id);
+  const prevLesson = idx > 0 ? u.lessons[idx - 1] : null;
+  const bridgeVocab = (prevLesson && prevLesson.vocabIdx || []).slice(0, 2);
+  if (!bridgeVocab.length){
+    STEP_STATE.acq.phase = 'intro';
+    renderStep();
+    return;
+  }
+  STEP_STATE.exerciseList = buildBlockCheckpointQueue(u, bridgeVocab);
+  STEP_STATE.exerciseIndex = 0;
+  STEP_STATE.exerciseScore = 0;
+  setAcqPhaseBanner('👋 Lembrando da lição anterior');
+  renderExerciseStep();
+}
+
 function startBlockCheckpoint(u, acq){
   acq.phase = 'checkpoint';
   STEP_STATE.exerciseList = buildBlockCheckpointQueue(u, acq.blocks[acq.blockIdx]);
@@ -1873,6 +1979,13 @@ function startBlockCheckpoint(u, acq){
 function advanceAcquisitionPhase(){
   const acq = STEP_STATE.acq;
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
+
+  if (acq.phase === 'bridge'){
+    // Ponte concluída -> introdução normal da lição atual.
+    acq.phase = 'intro';
+    renderStep();
+    return;
+  }
 
   if (acq.phase === 'checkpoint'){
     // Checagem feita -> prática do próprio bloco (ETAPA 3).
@@ -1922,9 +2035,81 @@ function advanceToNextBlockOrConsolidation(){
     acq.introIdx = 0;
     renderStep();
   } else {
+    const u = UNITS.find(x => x.id === STATE.currentUnitId);
+    advanceUnitStep(u);
+  }
+}
+
+// Avança pro próximo passo da unidade (currentStepDefs), ou -- se já era o
+// último -- fecha a LIÇÃO atual (não necessariamente a unidade inteira,
+// ver finishCurrentLesson). Centraliza os 3 pontos que antes incrementavam
+// STEP_STATE.currentStep "cegamente": em unidades de lições (Modelo B) uma
+// lição pode ter só 1-2 passos, então incrementar sem checar limite
+// estourava o array (currentStepDefs(u)[N] undefined).
+function advanceUnitStep(u){
+  const stepDefs = currentStepDefs(u);
+  if (STEP_STATE.currentStep < stepDefs.length - 1){
     STEP_STATE.currentStep += 1;
     renderStep();
+  } else {
+    finishCurrentLesson(u);
   }
+}
+
+// Fecha a lição/unidade atual. Unidades sem `lessons` (motor antigo) e a
+// última lição (isCheckpoint) de uma unidade migrada caem no fluxo de
+// SEMPRE: marca a unidade concluída e mostra os desafios de hoje. Uma
+// lição intermediária de uma unidade migrada, em vez disso, só avança
+// lessonIdx, persiste, e mostra a tela leve de "Lição concluída" (que
+// decide, com base em cardsDueNow, se leva direto pro Flashcard).
+function finishCurrentLesson(u){
+  if (isLessonUnit(u) && !currentLesson(u).isCheckpoint){
+    const finished = currentLesson(u);
+    STATE.unitProgress[u.id].lessonIdx = currentLessonIdx(u.id) + 1;
+    addXP(8);
+    saveState();
+    renderTopbarStats();
+    renderLessonBoundaryScreen(u, finished);
+    return;
+  }
+
+  const total = STEP_STATE.exerciseList.length;
+  const scorePct = total ? Math.round((STEP_STATE.exerciseScore / total) * 100) : 100;
+  markUnitCompleted(STATE.currentUnitId, scorePct);
+  if (isLessonUnit(u)){
+    STATE.unitProgress[u.id].lessonIdx = 0;
+    STATE.unitProgress[u.id].lessonMisses = {};
+  }
+  STEP_STATE.onChallengesScreen = true;
+  renderDailyChallengesScreen();
+}
+
+// Tela leve entre lições da mesma unidade (Modelo B) -- mais enxuta que
+// renderLessonCompleteScreen (essa é reservada pro fim da unidade inteira,
+// no Ponto de verificação). Mostra quantos cartões já estão devidos pra
+// revisão AGORA; se houver algum, o botão "Continuar" leva direto pro
+// Flashcard (opção (a) do redesenho) em vez de só voltar pra trilha.
+function renderLessonBoundaryScreen(u, lesson){
+  const contentEl = document.getElementById('step-content');
+  const nextBtn = document.getElementById('step-next-btn');
+  const backBtn = document.getElementById('step-back-btn');
+  hideAcqPhaseBanner();
+  backBtn.style.display = 'none';
+  document.getElementById('step-progress-fill').style.width = '100%';
+  maybeShowStreakCelebration();
+
+  const dueCount = cardsDueNow(eligibleReviewPool()).length;
+  contentEl.innerHTML = `
+    <div class="lesson-complete">
+      <div class="lesson-complete-icon">✅</div>
+      <h2>Lição concluída!</h2>
+      <p class="lesson-boundary-title">${lesson.title}</p>
+      ${dueCount > 0 ? `<p class="lesson-boundary-due">📇 ${dueCount} cartão${dueCount > 1 ? 'ões' : ''} esperando por revisão</p>` : ''}
+    </div>
+  `;
+  STEP_STATE.onLessonBoundaryScreen = { dueCount };
+  nextBtn.textContent = dueCount > 0 ? `Revisar agora (${dueCount}) →` : 'Continuar →';
+  nextBtn.style.display = 'flex';
 }
 
 // Comunica em que fase da sessão de aquisição o aluno está agora -- pra que
@@ -1979,10 +2164,12 @@ function renderStep(){
   backBtn.style.display = showBack ? 'inline-flex' : 'none';
 
   if (stepKey === 'vocab'){
-    if (STEP_STATE.acq.unitId !== u.id){
+    if (STEP_STATE.acq.unitId !== u.id || (isLessonUnit(u) && STEP_STATE.acq.lessonIdx !== currentLessonIdx(u.id))){
       STEP_STATE.acq = freshAcquisitionState(u.id, u);
     }
-    if (STEP_STATE.acq.phase === 'intro'){
+    if (STEP_STATE.acq.phase === 'bridge'){
+      startBridgeQueue(u);
+    } else if (STEP_STATE.acq.phase === 'intro'){
       renderBlockIntroCard(u, contentEl, nextBtn);
     } else {
       // checkpoint / practice / mixed reaproveitam o motor de exercícios
@@ -2004,6 +2191,31 @@ function renderStep(){
     setAcqPhaseBanner('🧩 Consolidação da unidade');
     renderExerciseStep();
     nextBtn.style.display = 'none'; // navegação própria do exercício controla o avanço
+
+  } else if (stepKey === 'checkpointExercises'){
+    // Lição final de uma unidade migrada (Modelo B) -- "Ponto de
+    // verificação". Se o aluno acumulou 3+ palavras erradas ao longo das
+    // lições anteriores DESTA unidade, roda primeiro uma "Revisão dos
+    // Erros" isolada (✱, ver Redesenho da Granularidade); só depois entra
+    // na consolidação normal (que já prioriza quem errou, mas cobre a
+    // unidade inteira) -- reaproveita buildExerciseSet sem alteração.
+    if (STEP_STATE.checkpointUnitId !== u.id){
+      STEP_STATE.checkpointUnitId = u.id;
+      const misses = STATE.unitProgress[u.id].lessonMisses || {};
+      const missedIdx = Object.keys(misses).map(Number).filter(i => misses[i] >= 1);
+      if (missedIdx.length >= 3){
+        STEP_STATE.checkpointPhase = 'errors';
+        STEP_STATE.exerciseList = buildBlockCheckpointQueue(u, missedIdx);
+      } else {
+        STEP_STATE.checkpointPhase = 'main';
+        STEP_STATE.exerciseList = buildExerciseSet(u);
+      }
+      STEP_STATE.exerciseIndex = 0;
+      STEP_STATE.exerciseScore = 0;
+    }
+    setAcqPhaseBanner(STEP_STATE.checkpointPhase === 'errors' ? '🔁 Revisão dos erros' : '🧩 Ponto de verificação');
+    renderExerciseStep();
+    nextBtn.style.display = 'none';
 
   } else if (stepKey === 'dialogue'){
     contentEl.innerHTML = `
@@ -2078,6 +2290,25 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
     return;
   }
 
+  // Tela de "Lição concluída" (Modelo B, entre lições da mesma unidade) --
+  // se havia cartões devidos no momento em que a lição terminou, leva
+  // direto pro Flashcard em vez de voltar pra trilha (opção (a) do
+  // redesenho: mostra quantos cartões estão pendentes e já entra na
+  // revisão, sem depender do aluno abrir a aba por conta própria).
+  if (STEP_STATE.onLessonBoundaryScreen){
+    const { dueCount } = STEP_STATE.onLessonBoundaryScreen;
+    STEP_STATE.onLessonBoundaryScreen = null;
+    setLessonFocusMode(false);
+    document.getElementById('unit-detail-wrap').style.display = 'none';
+    document.getElementById('path-list-wrap').style.display = 'block';
+    renderUnitsGrid();
+    if (dueCount > 0){
+      switchTab('review');
+      openReviewSession('flashcard');
+    }
+    return;
+  }
+
   // Um cartão de explicação contextual está tocando por cima do passo normal
   // -- "Continuar"/"Entendi" aqui avança DENTRO da fila de conceitos, não do
   // passo da unidade (ver runConceptQueueThen). Tem prioridade sobre tudo
@@ -2113,25 +2344,11 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
   // contexto (a palavra em si não é vocabulário novo, só aparece na fala)
   // antes de seguir pro próximo passo da unidade.
   if (stepKey === 'dialogue'){
-    runConceptQueueThen(pendingConceptsAfterDialogue(u), () => {
-      STEP_STATE.currentStep += 1;
-      renderStep();
-    });
+    runConceptQueueThen(pendingConceptsAfterDialogue(u), () => advanceUnitStep(u));
     return;
   }
 
-  if (STEP_STATE.currentStep < stepDefs.length - 1){
-    STEP_STATE.currentStep += 1;
-    renderStep();
-  } else {
-    // último passo concluído: marca a unidade e mostra os desafios de hoje
-    // antes de voltar pra trilha (mesmo fluxo do Francês do Zero).
-    const total = STEP_STATE.exerciseList.length;
-    const scorePct = total ? Math.round((STEP_STATE.exerciseScore / total) * 100) : 100;
-    markUnitCompleted(STATE.currentUnitId, scorePct);
-    STEP_STATE.onChallengesScreen = true;
-    renderDailyChallengesScreen();
-  }
+  advanceUnitStep(u);
 });
 
 // ---------- Geração dos exercícios (múltipla escolha + ordenar, estilo Memrise) ----------
@@ -2410,8 +2627,20 @@ function renderExerciseStep(){
     // a fila aqui significa "avance de fase", não "termine a unidade". Só
     // vira tela de conclusão de verdade na consolidação final (passo
     // "exercises", ver advanceToNextBlockOrConsolidation).
-    if (currentStepDefs(u)[STEP_STATE.currentStep].key === 'vocab'){
+    const exhaustedKey = currentStepDefs(u)[STEP_STATE.currentStep].key;
+    if (exhaustedKey === 'vocab'){
       advanceAcquisitionPhase();
+      return;
+    }
+    if (exhaustedKey === 'checkpointExercises' && STEP_STATE.checkpointPhase === 'errors'){
+      // Revisão dos Erros (✱) terminada -> entra na consolidação normal da
+      // unidade (que já prioriza quem errou, mas cobre tudo).
+      STEP_STATE.checkpointPhase = 'main';
+      STEP_STATE.exerciseList = buildExerciseSet(u);
+      STEP_STATE.exerciseIndex = 0;
+      STEP_STATE.exerciseScore = 0;
+      setAcqPhaseBanner('🧩 Ponto de verificação');
+      renderExerciseStep();
       return;
     }
     renderLessonCompleteScreen(contentEl, nextBtn, {

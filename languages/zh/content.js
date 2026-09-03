@@ -425,6 +425,16 @@ const UNITS = [
     level: "HSK1",
     title: "Rotina diária",
     goal: "Descrever atividades do dia a dia e dizer as horas.",
+    // Lições (Modelo B, ver relatório "Redesenho da Granularidade"): cada
+    // lição é autocontida (intro -> checagem -> prática), sem misturar com
+    // as anteriores dentro da mesma sessão -- a repetição de longo prazo
+    // fica a cargo da revisão espaçada (aba Revisão), não desta lista.
+    lessons: [
+      { id: "horas", title: "Dizer que horas são", vocabIdx: [0, 1, 2] },
+      { id: "rotina", title: "Contar sua rotina", vocabIdx: [3, 4, 5] },
+      { id: "presente", title: "O que está acontecendo agora", vocabIdx: [6, 7, 8], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "dian-hours",

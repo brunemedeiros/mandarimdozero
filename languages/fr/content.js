@@ -330,6 +330,14 @@ const UNITS = [
     level: "A1",
     title: "Família",
     goal: "Apresentar os membros da família e dizer quantos irmãos você tem.",
+    // Lições (Modelo B, ver "Redesenho da Granularidade"): cada lição é
+    // autocontida, sem misturar com as anteriores dentro da mesma sessão.
+    lessons: [
+      { id: "nuclear", title: "Família nuclear", vocabIdx: [0, 1, 2] },
+      { id: "irmaos", title: "Falar de irmãos", vocabIdx: [3, 4, 5] },
+      { id: "completa", title: "Família completa", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "mon-vs-ma",
