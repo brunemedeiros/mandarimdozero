@@ -325,6 +325,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 }
 .module-label .ml-track{ flex:1; height:4px; border-radius:2px; background:var(--paper-warm); overflow:hidden; }
 .module-label .ml-fill{ height:100%; border-radius:2px; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); transition: width .3s ease; }
+.module-label .ml-badge{ font-size:12px; color: var(--jade); flex-shrink:0; }
 .module-units-list{ display:flex; flex-direction:column; gap:10px; }
 .module-units-list.locked{ opacity:.55; }
 
@@ -338,6 +339,10 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   display:flex; align-items:center; gap:12px; padding:13px 14px; cursor:pointer;
 }
 .unit-block.locked .ub-header{ cursor:default; }
+/* Opção D (ver "A Linguagem do Concluído"): o mesmo tom que já tingia só o
+   ícone passa a cobrir a linha/cabeçalho inteiro -- mais área de leitura
+   periférica, mesma cor de sempre, nada novo na paleta. */
+.unit-block.done .ub-header{ background: rgba(58,115,89,0.14); }
 .ub-icon{
   width:44px; height:44px; border-radius:12px; background:var(--paper-warm); flex-shrink:0;
   display:flex; align-items:center; justify-content:center; font-size:22px;
@@ -363,6 +368,12 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .ub-lessons{ border-top:1px solid var(--paper-line); }
 .ub-lesson-row{ display:flex; align-items:center; gap:10px; padding:10px 14px 10px 18px; }
 .ub-lesson-row + .ub-lesson-row{ border-top:1px solid var(--paper-line); }
+/* Mesma lógica do cabeçalho da Unidade: concluída e atual ganham um tom de
+   fundo próprio (nunca a mesma cor), pra ler o estado da lição sem precisar
+   focar o olho na bolinha -- "quantas já venci" e "onde clico a seguir"
+   nunca competem porque nunca dividem cor. */
+.ub-lesson-row.done{ background: rgba(58,115,89,0.14); }
+.ub-lesson-row.current{ background: rgba(52,152,214,0.10); }
 .ub-lesson-dot{
   width:22px; height:22px; border-radius:50%; flex-shrink:0; font-size:11px; font-weight:800;
   display:flex; align-items:center; justify-content:center;

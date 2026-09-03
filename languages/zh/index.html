@@ -458,6 +458,10 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   display:flex; align-items:center; gap:12px; padding:13px 14px; cursor:pointer;
 }
 .unit-block.locked .ub-header{ cursor:default; }
+/* Opção D (ver "A Linguagem do Concluído"): o mesmo tom que já tingia só o
+   ícone passa a cobrir a linha/cabeçalho inteiro -- mais área de leitura
+   periférica, mesma cor de sempre, nada novo na paleta. */
+.unit-block.done .ub-header{ background: rgba(58,115,89,0.14); }
 .ub-icon{
   width:44px; height:44px; border-radius:12px; background:var(--paper-warm); flex-shrink:0;
   display:flex; align-items:center; justify-content:center; font-size:22px;
@@ -483,6 +487,12 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .ub-lessons{ border-top:1px solid var(--paper-line); }
 .ub-lesson-row{ display:flex; align-items:center; gap:10px; padding:10px 14px 10px 18px; }
 .ub-lesson-row + .ub-lesson-row{ border-top:1px solid var(--paper-line); }
+/* Mesma lógica do cabeçalho da Unidade: concluída e atual ganham um tom de
+   fundo próprio (nunca a mesma cor), pra ler o estado da lição sem precisar
+   focar o olho na bolinha -- "quantas já venci" e "onde clico a seguir"
+   nunca competem porque nunca dividem cor. */
+.ub-lesson-row.done{ background: rgba(58,115,89,0.14); }
+.ub-lesson-row.current{ background: rgba(192,35,31,0.08); }
 .ub-lesson-dot{
   width:22px; height:22px; border-radius:50%; flex-shrink:0; font-size:11px; font-weight:800;
   display:flex; align-items:center; justify-content:center;
@@ -1603,7 +1613,7 @@ body.hide-pinyin .prompt-pinyin{
       <div class="path-header">
         <div class="path-header-top">
           <div>
-            <h2>Nível 1 · Iniciante <span style="color:var(--ink-soft); font-weight:600; font-size:14px;">(HSK 1)</span></h2>
+            <h2>Nível 1 · Iniciante <span style="color:var(--ink-soft); font-weight:600; font-size:14px;">(HSK 1)</span><span id="level-done-badge" style="display:none; color:var(--imperial-gold);"> ✓</span></h2>
             <p>14 unidades organizadas por objetivo comunicacional. Complete uma unidade para desbloquear a próxima.</p>
           </div>
           <button class="btn btn-secondary path-header-btn" id="export-open-btn">📦 Exportar</button>

@@ -815,8 +815,13 @@ const UNIT_ICONS = {
 // ---------- Seletor de nível (toggle + modal, estilo Busuu) ----------
 function renderLevelSelect(){
   const currentLevelInfo = LEVELS.find(l => l.id === STATE.currentLevel);
+  // "Tratamento de honra" (Opção D): nível concluído reaproveita o mesmo
+  // selo de check, só que dourado -- é a camada mais rara, não precisa de
+  // um símbolo novo, só de um sinal de que é excepcional.
+  const doneBadge = levelCompleted(STATE.currentLevel)
+    ? ` <span style="color:var(--imperial-gold);">✓</span>` : '';
   document.getElementById('path-level-title').innerHTML =
-    `${currentLevelInfo.label} <span style="color:var(--ink-soft); font-weight:600; font-size:14px;">(${currentLevelInfo.id})</span>`;
+    `${currentLevelInfo.label} <span style="color:var(--ink-soft); font-weight:600; font-size:14px;">(${currentLevelInfo.id})</span>${doneBadge}`;
 }
 
 function renderLevelModalList(){
@@ -898,6 +903,13 @@ function unitProgressFraction(u){
 function moduleProgressPct(module){
   const sum = module.unitIds.reduce((acc, id) => acc + unitProgressFraction(UNITS.find(u => u.id === id)), 0);
   return Math.round((sum / module.unitIds.length) * 100);
+}
+function moduleCompleted(module){
+  return module.unitIds.every(id => STATE.unitProgress[id]?.completed);
+}
+function levelCompleted(levelId){
+  const mods = modulesOfLevel(levelId);
+  return mods.length > 0 && mods.every(moduleCompleted);
 }
 
 function levelTestsOfLevel(level){
@@ -1081,11 +1093,16 @@ function renderUnitsGrid(){
 
     // O Módulo vira um rótulo fino de seção -- organiza a trilha em
     // capítulos sem competir visualmente com a Unidade, que é quem carrega
-    // o peso real da decisão do aluno ("Hierarquia da Trilha", seção 6).
+    // o peso real da decisão do aluno ("Hierarquia da Trilha", seção 6). O
+    // check quando concluído (Opção D) é só isso -- um selo, sem tom de
+    // fundo: o rótulo é fino demais pra um "wash" parecer uma linha, não um
+    // banner colorido brigando com o resto da trilha.
+    const doneBadge = moduleCompleted(module) ? `<span class="ml-badge">✓</span>` : '';
     const label = document.createElement('div');
     label.className = 'module-label';
     label.innerHTML = `
       <span class="ml-text">Módulo ${mIdx + 1} · ${module.title}</span>
+      ${doneBadge}
       <div class="ml-track"><div class="ml-fill" style="width:${pct}%"></div></div>
     `;
     grid.appendChild(label);
