@@ -14,6 +14,12 @@ const UNITS = [
     level: "HSK1",
     title: "Cumprimentar e se despedir",
     goal: "Cumprimentar alguém, se despedir e agradecer numa interação básica.",
+    lessons: [
+      { id: "cumprimentar", title: "Cumprimentar e agradecer", vocabIdx: [0, 1, 2] },
+      { id: "desculpas", title: "Pedir desculpa e responder", vocabIdx: [3, 4, 5] },
+      { id: "saudacoes", title: "Saudar de manhã e à noite", vocabIdx: [6, 7], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "duibuqi-vs-meiguanxi",
@@ -83,6 +89,12 @@ const UNITS = [
     level: "HSK1",
     title: "Se apresentar",
     goal: "Dizer o nome, nacionalidade e perguntar o mesmo para o outro.",
+    lessons: [
+      { id: "nome", title: "Eu, você e como se chamar", vocabIdx: [0, 1, 2] },
+      { id: "ser-pessoa", title: "Nome e o verbo ser", vocabIdx: [3, 4, 5] },
+      { id: "nacionalidade", title: "Dizer de que país você é", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "shi",
@@ -158,6 +170,14 @@ const UNITS = [
     level: "HSK1",
     title: "Números e idade",
     goal: "Contar de 0 a 100 e dizer/perguntar a idade.",
+    lessons: [
+      { id: "numeros-1", title: "Contar até dois", vocabIdx: [0, 1, 2] },
+      { id: "numeros-2", title: "Contar até cinco", vocabIdx: [3, 4, 5] },
+      { id: "numeros-3", title: "Contar até oito", vocabIdx: [6, 7, 8] },
+      { id: "numeros-idade", title: "Contar até dez e dizer a idade", vocabIdx: [9, 10, 11] },
+      { id: "idade-altura", title: "Perguntar idade e altura", vocabIdx: [12, 13], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "number-structure",
@@ -242,6 +262,13 @@ const UNITS = [
     level: "HSK1",
     title: "Família",
     goal: "Apresentar membros da família e falar quantas pessoas há na família.",
+    lessons: [
+      { id: "pais", title: "Apresentar a família: pai e mãe", vocabIdx: [0, 1, 2] },
+      { id: "irmaos", title: "Falar dos irmãos", vocabIdx: [3, 4, 5] },
+      { id: "ter-familia", title: "Dizer quem você tem na família", vocabIdx: [6, 7, 8] },
+      { id: "quantas-pessoas", title: "Perguntar quantas pessoas há na família", vocabIdx: [9, 10, 11], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     // Explicação contextual (não mais "Dicas e Notas" avulso): cada conceito
     // dispara no momento em que se torna relevante, não num manual à parte.
     // `trigger.afterVocabIdx` dispara ao fim do BLOCO de aquisição que contém
@@ -349,6 +376,13 @@ const UNITS = [
     level: "HSK1",
     title: "Comida e bebida",
     goal: "Pedir comida/bebida num restaurante e expressar preferências simples.",
+    lessons: [
+      { id: "comer-beber", title: "Comer e beber", vocabIdx: [0, 1, 2] },
+      { id: "pedir-comida", title: "Pedir macarrão, água e chá", vocabIdx: [3, 4, 5] },
+      { id: "gostoso", title: "Dizer que algo está gostoso", vocabIdx: [6, 7, 8] },
+      { id: "pedir-o-que-quer", title: "Pedir o que você quer", vocabIdx: [9, 10], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "hen-adjective",
@@ -522,6 +556,12 @@ const UNITS = [
     level: "HSK1",
     title: "Direções e localização",
     goal: "Perguntar e entender direções básicas, localizar lugares.",
+    lessons: [
+      { id: "onde-fica", title: "Perguntar onde fica algo", vocabIdx: [0, 1, 2] },
+      { id: "direcoes", title: "Dar direções: direita, frente e atrás", vocabIdx: [3, 4, 5] },
+      { id: "perto-longe", title: "Dizer se fica perto ou longe", vocabIdx: [6, 7, 8], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "zai-location",
@@ -587,6 +627,13 @@ const UNITS = [
     level: "HSK1",
     title: "Compras",
     goal: "Perguntar preços, negociar valores e fazer uma compra simples.",
+    lessons: [
+      { id: "comprar-vender", title: "Comprar, vender e perguntar o preço", vocabIdx: [0, 1, 2] },
+      { id: "dinheiro", title: "Falar de dinheiro: kuài e máo", vocabIdx: [3, 4, 5] },
+      { id: "caro-desconto", title: "Dizer que está caro e pedir desconto", vocabIdx: [6, 7, 8] },
+      { id: "roupas-sapatos", title: "Comprar roupas e sapatos", vocabIdx: [9, 10], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "kuai-mao",
@@ -669,6 +716,11 @@ const UNITS = [
     level: "HSK1",
     title: "Clima",
     goal: "Descrever o tempo/clima e reagir a ele.",
+    lessons: [
+      { id: "quente-frio", title: "Descrever se está quente ou frio", vocabIdx: [0, 1, 2] },
+      { id: "clima-geral", title: "Falar sobre chuva, sol e vento", vocabIdx: [3, 4, 5, 6], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "adjective-predicate",
@@ -749,6 +801,12 @@ const UNITS = [
     level: "HSK1",
     title: "Transporte",
     goal: "Perguntar como chegar a um lugar usando transporte público ou táxi.",
+    lessons: [
+      { id: "meios-transporte", title: "Nomear os meios de transporte", vocabIdx: [0, 1, 2] },
+      { id: "como-chegar", title: "Perguntar como chegar a um lugar", vocabIdx: [3, 4, 5] },
+      { id: "passagem", title: "Comprar uma passagem", vocabIdx: [6, 7], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "zenme",
@@ -828,6 +886,12 @@ const UNITS = [
     level: "HSK1",
     title: "Saúde e corpo",
     goal: "Descrever sintomas simples e partes do corpo, pedir ajuda médica básica.",
+    lessons: [
+      { id: "partes-corpo", title: "Nomear partes do corpo", vocabIdx: [0, 1, 2] },
+      { id: "dor", title: "Dizer que algo dói", vocabIdx: [3, 4, 5] },
+      { id: "ajuda-medica", title: "Pedir ajuda médica", vocabIdx: [6, 7], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "teng",
@@ -912,6 +976,12 @@ const UNITS = [
     level: "HSK1",
     title: "Hobbies e tempo livre",
     goal: "Falar sobre hobbies, gostos e o que faz no tempo livre.",
+    lessons: [
+      { id: "hobbies-leitura", title: "Falar de hobbies: ler e ouvir música", vocabIdx: [0, 1, 2] },
+      { id: "atividades", title: "Assistir filme, se exercitar e cantar", vocabIdx: [3, 4, 5] },
+      { id: "dancar-tempo-livre", title: "Convidar alguém pra dançar", vocabIdx: [6, 7], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "de-posse",
@@ -978,6 +1048,11 @@ const UNITS = [
     level: "HSK1",
     title: "Planos futuros",
     goal: "Expressar planos e intenções usando 要 e 打算.",
+    lessons: [
+      { id: "planos", title: "Dizer o que você planeja fazer", vocabIdx: [0, 1, 2] },
+      { id: "viagem-estudo", title: "Falar de planos de viagem e estudo", vocabIdx: [3, 4, 5, 6], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "dasuan",
@@ -1048,6 +1123,11 @@ const UNITS = [
     level: "HSK1",
     title: "Comparações simples",
     goal: "Fazer comparações básicas entre pessoas, objetos e situações.",
+    lessons: [
+      { id: "comparar", title: "Comparar duas coisas", vocabIdx: [0, 1, 2] },
+      { id: "diferente-melhor", title: "Dizer o que é diferente ou o melhor", vocabIdx: [3, 4, 5], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "bi-comparison",
@@ -1117,6 +1197,12 @@ const UNITS = [
     level: "HSK1",
     title: "Convites e capacidades",
     goal: "Convidar alguém para algo, dizer o que sabe ou consegue fazer, fazer pedidos educados.",
+    lessons: [
+      { id: "saber-conseguir", title: "Dizer o que você sabe ou consegue fazer", vocabIdx: [0, 1, 2] },
+      { id: "pedidos", title: "Fazer pedidos educados", vocabIdx: [3, 4, 5] },
+      { id: "convite-cinema", title: "Convidar alguém para o cinema", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     // Unidade com mais pontos gramaticais do curso (想/会/能/请/都/也) --
     // deliberadamente ESPALHADOS pelos blocos em vez de empilhados todos no
     // bloco 0 (onde xiǎng/huì/néng são introduzidos juntos), pra não virar
@@ -1237,6 +1323,12 @@ const UNITS = [
     level: "HSK1",
     title: "Calendário e datas",
     goal: "Falar sobre dias da semana, datas completas e horários, e marcar um encontro.",
+    lessons: [
+      { id: "dias-semana", title: "Dizer os dias da semana", vocabIdx: [0, 1, 2] },
+      { id: "data-completa", title: "Dizer uma data completa", vocabIdx: [3, 4, 5] },
+      { id: "hora-encontro", title: "Dizer a hora exata e marcar um encontro", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "weekdays",
@@ -1339,6 +1431,12 @@ const UNITS = [
     level: "HSK1",
     title: "O que já aconteceu",
     goal: "Falar sobre ações já concluídas, mudanças de estado, e o que ainda não aconteceu.",
+    lessons: [
+      { id: "ja-comeu", title: "Dizer o que você já comeu", vocabIdx: [0, 1, 2] },
+      { id: "ainda-nao", title: "Dizer o que ainda não aconteceu", vocabIdx: [3, 4, 5] },
+      { id: "nao-aconteceu", title: "Falar do que não aconteceu ontem", vocabIdx: [6, 7], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     // Capítulo integrador do sistema de aspecto -- deliberadamente mais denso
     // que as outras unidades porque os pontos abaixo dependem uns dos
     // outros (não dá pra ensinar negação do passado sem primeiro ter
@@ -1503,6 +1601,12 @@ const UNITS = [
     level: "HSK1",
     title: "Perguntas do dia a dia",
     goal: "Fazer perguntas abertas variadas: quem, por quê, onde alguém mora ou trabalha, se há algo num lugar.",
+    lessons: [
+      { id: "quem-porque", title: "Perguntar quem e por quê", vocabIdx: [0, 1, 2] },
+      { id: "escola", title: "Falar de escola e estudantes", vocabIdx: [3, 4, 5] },
+      { id: "apresentar-trabalho", title: "Apresentar alguém e dizer onde trabalha", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "shei",
