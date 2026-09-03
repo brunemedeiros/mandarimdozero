@@ -912,6 +912,17 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
   display:inline-block; margin: 0 0 8px; padding:8px 16px; border-radius:999px;
   background: rgba(192,35,31,0.08); color: var(--seal-red-dark); font-weight:700; font-size:13.5px;
 }
+/* Chip contextual dos Desafios de hoje -- só aparece quando a lição que
+   acabou de terminar fez algum desafio avançar (ver renderChallengeChipHTML). */
+.lesson-boundary-challenge-chip{
+  display:inline-flex; align-items:center; gap:8px; margin: 4px 0 0; padding:8px 14px;
+  border-radius:999px; background: rgba(52,152,110,0.12); color: var(--jade); font-weight:700; font-size:13px;
+  max-width: 100%;
+}
+.lesson-boundary-challenge-chip .lbc-chip-label{ text-align:left; }
+.lesson-boundary-challenge-chip.done{ background: rgba(227,179,65,0.18); color: var(--seal-red-dark); }
+.lbc-chip-count{ font-weight:800; opacity:.75; flex-shrink:0; }
+.lbc-chip-check{ font-weight:800; flex-shrink:0; }
 .lesson-complete-stats{ display:flex; gap:12px; margin-bottom:22px; }
 .lc-stat{ flex:1; background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:14px; }
 .lc-stat-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); font-weight:800; margin-bottom:6px; }
@@ -997,6 +1008,30 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .challenge-progress-track{ height:8px; border-radius:4px; background: var(--paper-warm); overflow:hidden; }
 .challenge-progress-fill{ height:100%; border-radius:4px; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); transition: width .3s ease; }
 .challenge-count{ flex-shrink:0; font-size:12.5px; font-weight:700; color: var(--ink-soft); }
+
+/* Faixa compacta e sempre visível na Trilha (opção que NÃO exige terminar
+   uma lição pra ver o progresso do dia -- ver artefato "A Gramática da
+   Recompensa", tier 2.4/2.5): os mesmos 3 desafios de todaysChallenges(),
+   só que num resumo minúsculo. Sem clique/expansão própria -- pra ver o
+   texto completo de cada desafio o aluno ainda usa a aba/tela "Desafios de
+   hoje" (renderDailyChallengesScreen), que já existe; a faixa é só o
+   lembrete ambiente. */
+.daily-challenges-strip{ display:flex; gap:8px; margin: 2px 0 18px; }
+.dcs-chip{
+  flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:5px;
+  background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding:10px 6px; text-align:center;
+}
+.dcs-chip.done{ border-color: var(--jade); background: rgba(58,115,89,0.07); }
+.dcs-chip-icon{ position:relative; font-size:20px; line-height:1; }
+.dcs-chip-check{
+  position:absolute; top:-5px; right:-9px; width:14px; height:14px; border-radius:50%;
+  background: var(--jade); color:#fff; font-size:8.5px; font-weight:800;
+  display:flex; align-items:center; justify-content:center; border:1.5px solid var(--paper);
+}
+.dcs-chip-label{ font-size:9.5px; color: var(--ink-soft); font-weight:700; line-height:1.25; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dcs-chip-track{ width:100%; height:4px; border-radius:999px; background: var(--paper-warm); overflow:hidden; }
+.dcs-chip-fill{ height:100%; border-radius:999px; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); transition: width .3s ease; }
 
 /* ---------- Combinar: jogo de pares ---------- */
 .match-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; font-size:13px; font-weight:800; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; }
@@ -1420,9 +1455,38 @@ footer.app-footer{ text-align:center; margin-top:50px; font-size:12px; color: va
 @keyframes badgeUnlockIn{ from{opacity:0; transform:scale(.7) translateY(-14px);} to{opacity:1; transform:scale(1) translateY(0);} }
 @keyframes badgeUnlockOut{ to{opacity:0; transform:translateY(-10px);} }
 @keyframes badgeUnlockSpin{ from{transform:rotate(-25deg) scale(.5);} to{transform:rotate(0) scale(1);} }
+/* Confete (tiers 3/4/6) -- peças de papel caindo em CSS puro, sem
+   biblioteca externa. spawnConfetti() (app.js) cria as peças aqui dentro e
+   as remove sozinho depois da animação; se prefers-reduced-motion estiver
+   ativo, spawnConfetti() nem chega a criar nada. */
+#confetti-layer{ position:fixed; inset:0; z-index:998; pointer-events:none; overflow:hidden; }
+.confetti-piece{
+  position:absolute; top:-14px; width:8px; height:14px; opacity:0; border-radius:2px;
+  animation-name: confettiFall; animation-timing-function: ease-in; animation-fill-mode: forwards;
+}
+@keyframes confettiFall{
+  0%{ opacity:0; transform: translateY(0) rotate(0deg); }
+  8%{ opacity:1; }
+  85%{ opacity:1; }
+  100%{ opacity:0; transform: translateY(105vh) rotate(var(--rot, 360deg)); }
+}
+
+/* Escada visual de celebração (tiers 2/3) -- ver artefato "A Gramática da
+   Recompensa": intensidade cresce com a raridade do marco. Tier 2 (lição)
+   só o ícone salta; tier 3 (unidade) o cartão inteiro entra com leve
+   quique + confete curto. (Tier 4/módulo não existe no site de chinês --
+   só um nível único, sem módulos/testes de nível.) */
+.lesson-complete-icon.tier-pop{ animation: iconPopIn .45s cubic-bezier(.34,1.56,.64,1); }
+@keyframes iconPopIn{ 0%{ transform: scale(0); opacity:0; } 60%{ transform: scale(1.25); opacity:1; } 100%{ transform: scale(1); } }
+
+.lesson-complete.tier-bounce{ animation: lessonCompleteBounce .5s cubic-bezier(.34,1.56,.64,1); }
+@keyframes lessonCompleteBounce{ 0%{ transform: scale(.85) translateY(10px); opacity:0; } 60%{ transform: scale(1.03) translateY(-2px); opacity:1; } 100%{ transform: scale(1) translateY(0); } }
+
 @media (prefers-reduced-motion: reduce){
   .badge-unlock-toast{ animation: badgeUnlockOut .3s ease 3.7s forwards; }
   .badge-unlock-icon{ animation:none; }
+  .confetti-piece{ display:none; }
+  .lesson-complete-icon.tier-pop, .lesson-complete.tier-bounce{ animation:none; }
 }
 
 @media (max-width: 560px){
@@ -1576,6 +1640,7 @@ body.hide-pinyin .prompt-pinyin{
 
 <div id="toast-layer"></div>
 <div id="badge-unlock-layer" aria-live="polite"></div>
+<div id="confetti-layer"></div>
 
 <!-- ===== TELA DE LOGIN ===== -->
 <div id="login-screen">
@@ -1671,6 +1736,7 @@ body.hide-pinyin .prompt-pinyin{
           <button class="btn btn-secondary path-header-btn" id="export-open-btn">📦 Exportar</button>
         </div>
       </div>
+      <div class="daily-challenges-strip" id="daily-challenges-strip"></div>
       <div class="units-grid" id="units-grid"></div>
     </div>
 

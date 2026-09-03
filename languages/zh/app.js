@@ -1349,8 +1349,32 @@ function buildUnitBlock(u){
   return block;
 }
 
+// Faixa compacta e SEMPRE visível na Trilha com os 3 Desafios de hoje --
+// diferente de renderDailyChallengesScreen (tela cheia, só aparece ao
+// terminar uma unidade), essa dá visibilidade contínua sem exigir terminar
+// nada primeiro. Reaproveita a mesma fonte de dados (todaysChallenges()) --
+// não duplica lógica, só um resumo visual mais compacto dela.
+function renderDailyChallengesStrip(){
+  const strip = document.getElementById('daily-challenges-strip');
+  if (!strip) return;
+  ensureDailyBucket();
+  strip.innerHTML = todaysChallenges().map(c => {
+    const current = Math.min(c.get(STATE.daily), c.target);
+    const pct = Math.round((current / c.target) * 100);
+    const done = current >= c.target;
+    return `
+      <div class="dcs-chip ${done ? 'done' : ''}" title="${c.label}">
+        <div class="dcs-chip-icon">${c.icon}${done ? '<span class="dcs-chip-check">✓</span>' : ''}</div>
+        <div class="dcs-chip-label">${c.label}</div>
+        <div class="dcs-chip-track"><div class="dcs-chip-fill" style="width:${pct}%"></div></div>
+      </div>
+    `;
+  }).join('');
+}
+
 function renderUnitsGrid(){
   recalculateUnlockedUnits();
+  renderDailyChallengesStrip();
   // "Tratamento de honra" (Opção D): nível concluído reaproveita o mesmo
   // selo de check, só que dourado -- ZH não tem seletor de nível (só existe
   // HSK1 hoje), então o selo mora fixo no <h2> estático da trilha.
@@ -2354,6 +2378,12 @@ function advanceUnitStep(u){
 function finishCurrentLesson(u){
   if (isLessonUnit(u) && !currentLesson(u).isCheckpoint){
     const finished = currentLesson(u);
+    // Congela o progresso dos desafios de hoje ANTES das atualizações abaixo,
+    // pra depois (renderLessonBoundaryScreen) conseguir mostrar um chip
+    // contextual só quando ESSA lição específica fez algum desafio avançar
+    // -- não uma lista genérica dos 3 desafios do dia (essa já tem tela
+    // própria, acessível pela aba "Desafios").
+    const challengesBefore = todaysChallenges().map(c => Math.min(c.get(STATE.daily), c.target));
     STATE.unitProgress[u.id].lessonIdx = currentLessonIdx(u.id) + 1;
     addXP(8);
     // Sem pontuação própria pra avaliar aqui (a lição intermediária não é um
@@ -2365,7 +2395,7 @@ function finishCurrentLesson(u){
     registerDailyLessonCompleted(undefined, false);
     saveState();
     renderTopbarStats();
-    renderLessonBoundaryScreen(u, finished);
+    renderLessonBoundaryScreen(u, finished, challengesBefore);
     return;
   }
 
@@ -2380,12 +2410,88 @@ function finishCurrentLesson(u){
   renderDailyChallengesScreen();
 }
 
+// ---------- Celebração visual (confete + contador animado) ----------
+// Sistema compartilhado pelos tiers 2/3 da hierarquia de celebração (ver
+// artefato "A Gramática da Recompensa"; tiers 4/6 não existem no site de
+// chinês, que não tem módulos/testes de nível): peças de papel coloridas
+// caindo em CSS puro (sem biblioteca externa), com intensidade
+// (quantidade/duração) parametrizável, e um contador que sobe de 0 até o
+// valor final em vez de aparecer pronto -- dá peso ao número sem precisar
+// de confete. Ambos respeitam prefers-reduced-motion: o confete nem chega
+// a ser criado e o contador mostra o valor final direto, sem pular quadros.
+function prefersReducedMotion(){
+  return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+const CONFETTI_COLORS = ['#d64545', '#e3b341', '#2f8f6e', '#3498d6', '#a15fc9'];
+
+function spawnConfetti(count, durationMs){
+  if (prefersReducedMotion() || !count) return;
+  const layer = document.getElementById('confetti-layer');
+  if (!layer) return;
+  layer.innerHTML = '';
+  for (let i = 0; i < count; i++){
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.background = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+    piece.style.animationDuration = `${durationMs + Math.random() * 400}ms`;
+    piece.style.animationDelay = `${Math.random() * 200}ms`;
+    piece.style.setProperty('--rot', `${Math.random() * 360}deg`);
+    layer.appendChild(piece);
+  }
+  setTimeout(() => { layer.innerHTML = ''; }, durationMs + 700);
+}
+
+// Conta de 0 até `to` dentro de `el`, com easing de desaceleração.
+function animateCount(el, to, { duration = 650, suffix = '', prefix = '' } = {}){
+  if (!el) return;
+  if (prefersReducedMotion() || !to){
+    el.textContent = `${prefix}${to}${suffix}`;
+    return;
+  }
+  const start = performance.now();
+  function tick(now){
+    const p = Math.min(1, (now - start) / duration);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = `${prefix}${Math.round(to * eased)}${suffix}`;
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// Chip contextual dos Desafios de hoje (tier 2) -- só aparece quando ESSA
+// lição fez de fato algum desafio avançar (comparando com `before`, tirado
+// antes das atualizações em finishCurrentLesson). Mostra só o primeiro que
+// avançou, nunca os 3: isso é um lembrete pontual e ligado ao que acabou de
+// acontecer, não um resumo genérico -- esse já existe na tela/aba própria
+// "Desafios de hoje".
+function renderChallengeChipHTML(before){
+  if (!before) return '';
+  const challenges = todaysChallenges();
+  for (let i = 0; i < challenges.length; i++){
+    const c = challenges[i];
+    const beforeVal = before[i] || 0;
+    const afterVal = Math.min(c.get(STATE.daily), c.target);
+    if (afterVal <= beforeVal) continue;
+    const justCompleted = afterVal >= c.target && beforeVal < c.target;
+    return `
+      <div class="lesson-boundary-challenge-chip ${justCompleted ? 'done' : ''}">
+        <span class="lbc-chip-icon">${c.icon}</span>
+        <span class="lbc-chip-label">${justCompleted ? 'Desafio concluído: ' : 'Desafio de hoje: '}${c.label}</span>
+        ${justCompleted ? '<span class="lbc-chip-check">✓</span>' : `<span class="lbc-chip-count">${afterVal}/${c.target}</span>`}
+      </div>
+    `;
+  }
+  return '';
+}
+
 // Tela leve entre lições da mesma unidade (Modelo B) -- mais enxuta que
 // renderLessonCompleteScreen (essa é reservada pro fim da unidade inteira,
 // no Ponto de verificação). Mostra quantos cartões já estão devidos pra
 // revisão AGORA; se houver algum, o botão "Continuar" leva direto pro
 // Flashcard (opção (a) do redesenho) em vez de só voltar pra trilha.
-function renderLessonBoundaryScreen(u, lesson){
+function renderLessonBoundaryScreen(u, lesson, challengesBefore){
   const contentEl = document.getElementById('step-content');
   const nextBtn = document.getElementById('step-next-btn');
   const backBtn = document.getElementById('step-back-btn');
@@ -2397,10 +2503,11 @@ function renderLessonBoundaryScreen(u, lesson){
   const dueCount = cardsDueNow(eligibleReviewPool()).length;
   contentEl.innerHTML = `
     <div class="lesson-complete">
-      <div class="lesson-complete-icon">✅</div>
+      <div class="lesson-complete-icon tier-pop">✅</div>
       <h2>Lição concluída!</h2>
       <p class="lesson-boundary-title">${lesson.title}</p>
       ${dueCount > 0 ? `<p class="lesson-boundary-due">📇 ${dueCount} cartão${dueCount > 1 ? 'ões' : ''} esperando por revisão</p>` : ''}
+      ${renderChallengeChipHTML(challengesBefore)}
     </div>
   `;
   STEP_STATE.onLessonBoundaryScreen = { dueCount };
@@ -2934,12 +3041,12 @@ function renderLessonCompleteScreen(contentEl, nextBtn, { correct, total, recapI
   const stars = lessonStars(pct);
 
   contentEl.innerHTML = `
-    <div class="lesson-complete">
+    <div class="lesson-complete tier-bounce">
       <div class="lesson-complete-icon">👍</div>
       <h2>Parabéns, ${currentStudentName()}!</h2>
       <div class="lesson-complete-stats">
-        <div class="lc-stat"><div class="lc-stat-label">Estrelas</div><div class="lc-stat-value">+${stars} ⭐</div></div>
-        <div class="lc-stat"><div class="lc-stat-label">Pontuação</div><div class="lc-stat-value">${pct}%</div></div>
+        <div class="lc-stat"><div class="lc-stat-label">Estrelas</div><div class="lc-stat-value" id="lc-stat-stars">0 ⭐</div></div>
+        <div class="lc-stat"><div class="lc-stat-label">Pontuação</div><div class="lc-stat-value" id="lc-stat-pct">0%</div></div>
       </div>
       ${recapItems.length ? `
         <div class="lesson-recap">
@@ -2955,6 +3062,12 @@ function renderLessonCompleteScreen(contentEl, nextBtn, { correct, total, recapI
     </div>
   `;
   wireAudioButtons(contentEl);
+  // Marco de fim de UNIDADE (tier 3 da hierarquia de celebração) -- confete
+  // curto + contador subindo em vez de aparecer pronto, mais peso que a
+  // simples transição de lição pra lição (tier 2, só o ícone salta).
+  spawnConfetti(16, 1400);
+  animateCount(document.getElementById('lc-stat-stars'), stars, { prefix: '+', suffix: ' ⭐' });
+  animateCount(document.getElementById('lc-stat-pct'), pct, { suffix: '%' });
   nextBtn.textContent = nextLabel || 'Concluir unidade ✓';
   nextBtn.style.display = 'flex';
 }
