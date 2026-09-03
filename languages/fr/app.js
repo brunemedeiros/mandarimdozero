@@ -2284,6 +2284,9 @@ function renderGrammarExerciseStep(u, contentEl, nextBtn){
       wrapEl.classList.add('wrong');
       expectedEl.textContent = `→ ${expected}`;
     }
+    // "almost" (grafia quase certa, sem acento etc.) já dá 0.5 ponto -- toca
+    // o mesmo som de acerto do "ok", só "wrong" de verdade toca o de erro.
+    playFeedbackSound(!wrapEl.classList.contains('wrong'));
 
     document.getElementById('gram-exercise-verify-btn').style.display = 'none';
     const goNextBtn = document.createElement('button');
@@ -4242,6 +4245,9 @@ function renderCheckpointQuizStep(){
       wrapEl.classList.add('wrong');
       expectedEl.textContent = `→ ${expected}`;
     }
+    // "almost" (grafia quase certa, sem acento etc.) já dá 0.5 ponto -- toca
+    // o mesmo som de acerto do "ok", só "wrong" de verdade toca o de erro.
+    playFeedbackSound(!wrapEl.classList.contains('wrong'));
 
     document.getElementById('checkpoint-verify-btn').style.display = 'none';
     const goNextBtn = document.createElement('button');
@@ -4388,6 +4394,9 @@ function renderLevelTestQuizStep(){
       wrapEl.classList.add('wrong');
       expectedEl.textContent = `→ ${expected}`;
     }
+    // "almost" (grafia quase certa, sem acento etc.) já dá 0.5 ponto -- toca
+    // o mesmo som de acerto do "ok", só "wrong" de verdade toca o de erro.
+    playFeedbackSound(!wrapEl.classList.contains('wrong'));
 
     document.getElementById('leveltest-verify-btn').style.display = 'none';
     const goNextBtn = document.createElement('button');
