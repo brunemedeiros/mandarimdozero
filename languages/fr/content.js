@@ -49,6 +49,12 @@ const UNITS = [
     level: "A1",
     title: "Cumprimentar e se despedir",
     goal: "Cumprimentar alguém, se despedir e agradecer numa interação básica.",
+    lessons: [
+      { id: "ola-e-tchau", title: "Dizer olá e até logo", vocabIdx: [0, 1, 2] },
+      { id: "informal-agradecer", title: "Cumprimentar informalmente e agradecer", vocabIdx: [3, 4, 5] },
+      { id: "cortesia-e-como-vai", title: "Pedir por favor e perguntar como vai", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     // Explicação contextual (não mais "usageNote" só no fim, depois de todo
     // o vocabulário+diálogo): dispara no ponto exato da lição em que o
     // conceito se torna relevante. Ver runConceptQueueThen/renderConceptStep
@@ -123,6 +129,12 @@ const UNITS = [
     level: "A1",
     title: "Se apresentar",
     goal: "Dizer o nome, a nacionalidade e perguntar o mesmo para o outro.",
+    lessons: [
+      { id: "pronomes-e-nome", title: "Eu, você e dizer seu nome", vocabIdx: [0, 1, 2] },
+      { id: "nome-e-ser", title: "O nome e o verbo être", vocabIdx: [3, 4, 5] },
+      { id: "nacionalidades", title: "Falar da nacionalidade e do país", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "tu-vs-vous",
@@ -192,6 +204,12 @@ const UNITS = [
     level: "A1",
     title: "Números e idade",
     goal: "Contar do zero a cem e dizer/perguntar a idade.",
+    lessons: [
+      { id: "primeiros-numeros", title: "Primeiros números", vocabIdx: [0, 1, 2] },
+      { id: "contar-ate-vinte", title: "Contar até vinte", vocabIdx: [3, 4, 5] },
+      { id: "idade", title: "Perguntar e dizer a idade", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "avoir-age",
@@ -486,6 +504,12 @@ const UNITS = [
     level: "A1",
     title: "Comida e bebida",
     goal: "Pedir comida e bebida num café ou restaurante, e dizer do que você gosta ou não gosta de comer.",
+    lessons: [
+      { id: "pao-agua-cafe", title: "Pedir pão, água e café", vocabIdx: [0, 1, 2] },
+      { id: "leite-queijo-maca", title: "Falar de leite, queijo e maçã", vocabIdx: [3, 4, 5] },
+      { id: "comer-beber-detestar", title: "Comer, beber e dizer o que odeia", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "aime-le-vs-bois-du",
@@ -563,6 +587,12 @@ const UNITS = [
     level: "A1",
     title: "Horas e rotina diária",
     goal: "Dizer as horas e descrever a rotina do dia a dia.",
+    lessons: [
+      { id: "horas-e-periodos", title: "Dizer as horas e os períodos do dia", vocabIdx: [0, 1, 2] },
+      { id: "noite-acordar-levantar", title: "A noite, acordar e levantar", vocabIdx: [3, 4, 5] },
+      { id: "rotina-diaria", title: "Comer, trabalhar, dormir e a meia-noite", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "etre-heures",
@@ -699,6 +729,12 @@ const UNITS = [
     level: "A1",
     title: "Dias e meses",
     goal: "Dizer os dias da semana, meses e marcar um encontro.",
+    lessons: [
+      { id: "dias-da-semana", title: "Dias da semana e hoje", vocabIdx: [0, 1, 2] },
+      { id: "ontem-amanha-semana", title: "Amanhã, ontem e a semana", vocabIdx: [3, 4, 5] },
+      { id: "meses-e-data", title: "Meses e a data", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "a-demain-vs-a-bientot",
@@ -767,6 +803,12 @@ const UNITS = [
     level: "A1",
     title: "Lugares e orientação",
     goal: "Perguntar e indicar como chegar a um lugar na cidade.",
+    lessons: [
+      { id: "lugares-na-cidade", title: "Lugares na cidade", vocabIdx: [0, 1, 2] },
+      { id: "hospital-estacao-em-frente", title: "Hospital, estação e seguir em frente", vocabIdx: [3, 4, 5] },
+      { id: "direcoes", title: "Dar direções: esquerda, direita, perto e longe", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "ou-est-vs-il-y-a",
@@ -893,6 +935,12 @@ const UNITS = [
     level: "A1",
     title: "Nacionalidades",
     goal: "Dizer sua nacionalidade e a de outras pessoas, no masculino e no feminino.",
+    lessons: [
+      { id: "nacionalidades-1", title: "Francês, brasileiro e americano", vocabIdx: [0, 1, 2] },
+      { id: "nacionalidades-2", title: "Inglês, espanhol e italiano", vocabIdx: [3, 4, 5] },
+      { id: "nacionalidade-e-origem", title: "Alemão, português e perguntar de onde vem", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "etre-nationalite-vs-venir-de",
@@ -956,6 +1004,14 @@ const UNITS = [
     level: "A1",
     title: "Compras",
     goal: "Perguntar preços (com números até cem), experimentar roupas e comprar numa loja.",
+    lessons: [
+      { id: "roupas-e-preco", title: "Calça, vestido e caro", vocabIdx: [0, 1, 2] },
+      { id: "tamanho-e-loja", title: "Barato, tamanho e loja", vocabIdx: [3, 4, 5] },
+      { id: "numeros-30-50", title: "Números: trinta a cinquenta", vocabIdx: [6, 7, 8] },
+      { id: "numeros-60-80", title: "Números: sessenta a oitenta", vocabIdx: [9, 10, 11] },
+      { id: "numeros-90-100", title: "Números: noventa e cem", vocabIdx: [12, 13], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "voudrais-vs-peux",
@@ -1103,6 +1159,12 @@ const UNITS = [
     level: "A1",
     title: "Fazendo compras de mercado",
     goal: "Montar uma lista de compras e dizer o que você come ou não come no dia a dia.",
+    lessons: [
+      { id: "carne-frango-legumes", title: "Carne, frango e legumes", vocabIdx: [0, 1, 2] },
+      { id: "salada-arroz-massa", title: "Salada, arroz e massa", vocabIdx: [3, 4, 5] },
+      { id: "acucar-sal-ovo-sobremesa", title: "Açúcar, sal, ovo e sobremesa", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "negation-partitif",
@@ -1174,6 +1236,12 @@ const UNITS = [
     level: "A1",
     title: "Pesos e quantidades",
     goal: "Pedir quantidades específicas ao fazer compras: kilo, litre, un peu de, beaucoup de...",
+    lessons: [
+      { id: "quilo-meio-quilo-litro", title: "Quilo, meio quilo e litro", vocabIdx: [0, 1, 2] },
+      { id: "grama-pouco-muito", title: "Grama, um pouco e muito", vocabIdx: [3, 4, 5] },
+      { id: "suficiente-demais-fatia-garrafa", title: "O suficiente, demais, fatia e garrafa", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "de-quantite",
@@ -1237,6 +1305,12 @@ const UNITS = [
     level: "A1",
     title: "Clima e estações",
     goal: "Falar sobre o tempo e as estações do ano.",
+    lessons: [
+      { id: "tempo-bonito-frio-quente", title: "Descrever o tempo: bonito, frio e quente", vocabIdx: [0, 1, 2] },
+      { id: "chuva-neve-sol", title: "Chuva, neve e sol", vocabIdx: [3, 4, 5] },
+      { id: "estacoes-do-ano", title: "As quatro estações do ano", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "il-fait-vs-jai",
@@ -1304,6 +1378,12 @@ const UNITS = [
     level: "A1",
     title: "Transporte",
     goal: "Pegar um transporte público e comprar uma passagem.",
+    lessons: [
+      { id: "onibus-trem-metro", title: "Ônibus, trem e metrô", vocabIdx: [0, 1, 2] },
+      { id: "carro-bicicleta-pe", title: "Carro, bicicleta e a pé", vocabIdx: [3, 4, 5] },
+      { id: "pegar-transporte-passagem", title: "Pegar transporte, ponto, passagem e estação", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "en-vs-a-transport",
@@ -1439,6 +1519,12 @@ const UNITS = [
     level: "A1",
     title: "Corpo e saúde",
     goal: "Descrever sintomas simples e ir ao médico.",
+    lessons: [
+      { id: "cabeca-barriga-mao", title: "Cabeça, barriga e mão", vocabIdx: [0, 1, 2] },
+      { id: "pe-doente-medico", title: "Pé, estar doente e o médico", vocabIdx: [3, 4, 5] },
+      { id: "farmacia-dor-febre", title: "Farmácia, dor, febre e se sentir", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "avoir-mal-vs-etre-malade",
@@ -1597,6 +1683,12 @@ const UNITS = [
     level: "A1",
     title: "Cores e descrições",
     goal: "Descrever cores, objetos e características de pessoas.",
+    lessons: [
+      { id: "vermelho-azul-verde", title: "Vermelho, azul e verde", vocabIdx: [0, 1, 2] },
+      { id: "amarelo-preto-branco", title: "Amarelo, preto e branco", vocabIdx: [3, 4, 5] },
+      { id: "tamanho-e-personalidade", title: "Descrever tamanho e personalidade", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "adjective-placement",
@@ -1717,6 +1809,12 @@ const UNITS = [
     level: "A1",
     title: "A casa e os cômodos",
     goal: "Descrever uma casa, dizer o que tem (e o que não tem) nela.",
+    lessons: [
+      { id: "casa-apartamento-quarto", title: "Casa, apartamento e quarto", vocabIdx: [0, 1, 2] },
+      { id: "cozinha-banheiro-sala", title: "Cozinha, banheiro e sala", vocabIdx: [3, 4, 5] },
+      { id: "porta-janela-tem-nao-tem", title: "Porta, janela e dizer o que tem ou não tem", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "il-y-a-vs-negation",
@@ -1791,6 +1889,12 @@ const UNITS = [
     level: "A1",
     title: "Onde as coisas estão",
     goal: "Descrever a posição de móveis e objetos usando preposições de lugar.",
+    lessons: [
+      { id: "cama-mesa-cadeira", title: "Cama, mesa e cadeira", vocabIdx: [0, 1, 2] },
+      { id: "sofa-luminaria-em-cima", title: "Sofá, luminária e em cima de", vocabIdx: [3, 4, 5] },
+      { id: "embaixo-frente-atras-lado", title: "Embaixo, na frente, atrás e ao lado", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "sur-vs-dans",
@@ -1850,6 +1954,12 @@ const UNITS = [
     level: "A1",
     title: "Lazer e atividades",
     goal: "Falar sobre hobbies e combinar programas de fim de semana.",
+    lessons: [
+      { id: "cinema-musica-esporte", title: "Cinema, música e esporte", vocabIdx: [0, 1, 2] },
+      { id: "ler-jogar-dancar", title: "Ler, jogar/tocar e dançar", vocabIdx: [3, 4, 5] },
+      { id: "cantar-fim-de-semana-sair-filme", title: "Cantar, o fim de semana, sair e o filme", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "jouer-de-vs-jouer-a",
@@ -1981,6 +2091,12 @@ const UNITS = [
     level: "A1",
     title: "Expressões de tempo passado",
     goal: "Aprender marcadores de tempo pra falar sobre o passado, como preparação pro passé composé.",
+    lessons: [
+      { id: "ontem-anteontem-semana-passada", title: "Ontem, anteontem e a semana passada", vocabIdx: [0, 1, 2] },
+      { id: "fim-de-semana-mes-ano-passados", title: "Fim de semana, mês e ano passados", vocabIdx: [3, 4, 5] },
+      { id: "dois-dias-atras-ja-recentemente", title: "Há dois dias, hoje de manhã, já e recentemente", vocabIdx: [6, 7, 8, 9], includesDialogue: true },
+      { id: "checkpoint", title: "Ponto de verificação", vocabIdx: [], isCheckpoint: true }
+    ],
     concepts: [
       {
         id: "hier-vs-semaine-derniere",
