@@ -520,9 +520,9 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .lesson-unit-goal{ margin:0 0 8px; color:var(--ink-soft); font-size:12.5px; line-height:1.4; }
 .lesson-hint-btns{ display:flex; gap:8px; flex-wrap:wrap; }
 
-/* Topo da lição: só progresso + X -- nada mais compete visualmente com o
-   exercício em si (a dica, quando existe, vive dentro do próprio fluxo do
-   exercício, ver .inline-hint-block abaixo). */
+/* Topo da lição: progresso + ícone de atalhos + X -- nada além disso compete
+   visualmente com o exercício em si (a dica, quando existe, vive dentro do
+   próprio fluxo do exercício, ver .inline-hint-block abaixo). */
 .lesson-focus-bar{ display:flex; align-items:center; gap:14px; margin-bottom:20px; }
 .lesson-close-btn{
   flex-shrink:0; width:36px; height:36px; border-radius:50%; border:1px solid var(--paper-line);
@@ -532,6 +532,22 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .lesson-close-btn:hover{ border-color: var(--imperial-gold); color: var(--ink); }
 .lesson-progress-track{ flex:1; height:8px; background: var(--paper-warm); border-radius:4px; overflow:hidden; }
 .lesson-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:4px; transition: width .3s ease; }
+
+/* Painel "Atalhos do teclado" -- reaproveita o .app-modal já usado em
+   outros lugares (nível, meta de estudo) em vez de criar um sistema de
+   modal novo. */
+.kbd-shortcuts-row{
+  display:flex; align-items:center; gap:14px; padding:12px 0; border-bottom:1px solid var(--paper-line);
+}
+.kbd-shortcuts-row:last-of-type{ border-bottom:none; }
+.kbd-shortcuts-keys{ display:flex; gap:4px; flex-shrink:0; width:100px; }
+.kbd-key{
+  display:inline-flex; align-items:center; justify-content:center; min-width:26px; height:26px; padding:0 6px;
+  border-radius:6px; background: var(--paper-warm); border:1px solid var(--paper-line);
+  font-size:12px; font-weight:800; color: var(--ink); font-family: var(--font-body);
+}
+.kbd-shortcuts-desc{ font-size:13.5px; color: var(--ink-soft); line-height:1.4; }
+.kbd-shortcuts-note{ margin:14px 0 0; font-size:12px; color: var(--ink-soft); line-height:1.5; }
 
 .manual-link-btn{
   background: var(--paper); border:1px solid var(--paper-line); border-radius:999px; padding:6px 13px;
@@ -1648,6 +1664,7 @@ body.hide-pinyin .prompt-pinyin{
         <div class="lesson-progress-track" id="step-progress-wrap">
           <div class="lesson-progress-fill" id="step-progress-fill"></div>
         </div>
+        <button class="lesson-close-btn" id="lesson-kbd-btn" aria-label="Atalhos do teclado" title="Atalhos do teclado">⌨️</button>
         <button class="lesson-close-btn" id="back-to-path" aria-label="Sair da lição" title="Sair da lição">✕</button>
       </div>
 
@@ -1847,6 +1864,28 @@ body.hide-pinyin .prompt-pinyin{
       <button class="app-modal-close" id="study-plan-modal-close" aria-label="Fechar">✕</button>
     </div>
     <div class="app-modal-body" id="study-plan-wizard-body"></div>
+  </div>
+</div>
+
+<div id="kbd-shortcuts-modal" class="app-modal-overlay" style="display:none;">
+  <div class="app-modal">
+    <div class="app-modal-header">
+      <h3>⌨️ Atalhos do teclado</h3>
+      <button class="app-modal-close" id="kbd-shortcuts-modal-close" aria-label="Fechar">✕</button>
+    </div>
+    <div class="app-modal-body">
+      <div class="kbd-shortcuts-row">
+        <div class="kbd-shortcuts-keys">
+          <span class="kbd-key">1</span><span class="kbd-key">2</span><span class="kbd-key">3</span><span class="kbd-key">4</span>
+        </div>
+        <div class="kbd-shortcuts-desc">Escolher uma alternativa, pela posição dela na tela</div>
+      </div>
+      <div class="kbd-shortcuts-row">
+        <div class="kbd-shortcuts-keys"><span class="kbd-key">Enter</span></div>
+        <div class="kbd-shortcuts-desc">Confirmar uma resposta digitada</div>
+      </div>
+      <p class="kbd-shortcuts-note">Os números só aparecem quando um exercício tem alternativas pra escolher -- nunca durante digitação ou o exercício de ordenar frase.</p>
+    </div>
   </div>
 </div>
 
