@@ -330,7 +330,10 @@ function isFirstOfLevel(u){
 }
 
 UNITS.forEach((u) => {
-  STATE.unitProgress[u.id] = { started:false, completed:false, unlocked: isFirstOfLevel(u) };
+  STATE.unitProgress[u.id] = {
+    started:false, completed:false, unlocked: isFirstOfLevel(u),
+    lessonIdx: 0, lessonMisses: {}
+  };
 });
 
 MODULES.forEach((m) => {
@@ -441,7 +444,14 @@ function applySerializedState(data){
     data.cards.forEach(c => byId[c.id] = c);
     STATE.cards.forEach(c => { if (byId[c.id]) Object.assign(c, byId[c.id]); });
   }
-  if (data.unitProgress) Object.assign(STATE.unitProgress, data.unitProgress);
+  if (data.unitProgress) {
+    Object.assign(STATE.unitProgress, data.unitProgress);
+    // Saves de antes das lições (Modelo B) não têm lessonIdx/lessonMisses.
+    Object.values(STATE.unitProgress).forEach(p => {
+      if (typeof p.lessonIdx !== 'number') p.lessonIdx = 0;
+      if (!p.lessonMisses) p.lessonMisses = {};
+    });
+  }
   if (typeof data.xp === 'number') STATE.xp = data.xp;
   if (typeof data.streak === 'number') STATE.streak = data.streak;
   if (data.lastStudyDay) STATE.lastStudyDay = data.lastStudyDay;
@@ -1022,7 +1032,33 @@ const STEP_DEFS_GRAMMAR = [
 function currentStepDefs(){
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
   if (u && u.type === 'grammar') return STEP_DEFS_GRAMMAR;
+  if (isLessonUnit(u)){
+    const lesson = currentLesson(u);
+    if (lesson.isCheckpoint) return [{ key: 'checkpointExercises', label: 'Ponto de verificação' }];
+    const steps = [];
+    if (lesson.vocabIdx && lesson.vocabIdx.length) steps.push({ key: 'vocab', label: 'Vocabulário' });
+    if (lesson.includesDialogue) steps.push({ key: 'dialogue', label: 'Diálogo' });
+    return steps;
+  }
   return STEP_DEFS.filter(s => s.key !== 'usage' || (u && u.usageNote));
+}
+
+// ---------- Lições (Modelo B) ----------
+// Ver zh/app.js pro mesmo motor, comentado em detalhe -- idêntico em
+// espírito, só adaptado à assinatura sem parâmetro de currentStepDefs()
+// que o francês já usava (lê STATE.currentUnitId internamente) e ao fato
+// de que unidades de gramática (u.type==='grammar') nunca são lesson-mode.
+function isLessonUnit(u){
+  return !!(u && Array.isArray(u.lessons) && u.lessons.length);
+}
+
+function currentLessonIdx(unitId){
+  return STATE.unitProgress[unitId]?.lessonIdx || 0;
+}
+
+function currentLesson(u){
+  const idx = Math.min(currentLessonIdx(u.id), u.lessons.length - 1);
+  return u.lessons[idx];
 }
 
 // ---------- Sessão de aquisição de vocabulário (introdução + prática intercalada) ----------
@@ -1055,6 +1091,20 @@ function buildAcquisitionBlocks(unit){
 }
 
 function freshAcquisitionState(unitId, unit){
+  if (isLessonUnit(unit)){
+    const lesson = currentLesson(unit);
+    if (!STATE.unitProgress[unitId].lessonMisses) STATE.unitProgress[unitId].lessonMisses = {};
+    return {
+      unitId,
+      lessonIdx: currentLessonIdx(unitId),
+      blocks: (lesson.vocabIdx && lesson.vocabIdx.length) ? [lesson.vocabIdx] : [],
+      blockIdx: 0,
+      phase: currentLessonIdx(unitId) > 0 ? 'bridge' : 'intro',
+      introIdx: 0,
+      wordMisses: STATE.unitProgress[unitId].lessonMisses,
+      introduced: {}
+    };
+  }
   return {
     unitId,
     blocks: buildAcquisitionBlocks(unit),
@@ -1090,7 +1140,12 @@ const STEP_STATE = {
   conceptIdx: 0,
   conceptBlockIdx: 0,
   conceptAfterFn: null,
-  conceptsShown: new Set()
+  conceptsShown: new Set(),
+  // Tela de "lição concluída" (Modelo B, entre lições da mesma unidade,
+  // nunca no fim da unidade inteira -- essa continua usando
+  // onChallengesScreen). Guarda quantos cartões estão devidos AGORA pra
+  // decidir, no clique de "Continuar", se leva direto pro Flashcard.
+  onLessonBoundaryScreen: null
 };
 
 function openUnitDetail(unitId){
@@ -1099,8 +1154,15 @@ function openUnitDetail(unitId){
   STEP_STATE.onChallengesScreen = false;
   STEP_STATE.onCheckpoint = null;
   STEP_STATE.onLevelTest = null;
+  STEP_STATE.onLessonBoundaryScreen = null;
   STEP_STATE.conceptQueue = [];
   STEP_STATE.conceptsShown = new Set();
+  // Invalida o estado de aquisição antigo -- sem isso, reabrir a MESMA
+  // unidade numa lição diferente da última vez reaproveitaria os blocos da
+  // lição errada.
+  STEP_STATE.acq = { unitId: null, blocks: [], blockIdx: 0, phase: 'intro', introIdx: 0, wordMisses: {}, introduced: {} };
+  STEP_STATE.exerciseUnitId = null;
+  STEP_STATE.checkpointUnitId = null;
   setLessonFocusMode(true);
 
   document.getElementById('path-list-wrap').style.display = 'none';
@@ -1160,15 +1222,15 @@ function renderStepProgress(){
     // de telas percorridas -- uma checagem ou prática conta mais que só ter
     // visto a palavra uma vez.
     const acq = STEP_STATE.acq;
-    const totalWords = u.vocab.length || 1;
+    const totalWords = (isLessonUnit(u) ? (acq.blocks[0] || []).length : u.vocab.length) || 1;
     const wordsBeforeBlock = acq.blocks.slice(0, acq.blockIdx).flat().length;
     const curBlockSize = (acq.blocks[acq.blockIdx] || []).length;
-    const phaseWeight = { intro: 0, checkpoint: 0.4, practice: 0.75, mixed: 0.95 }[acq.phase] || 0;
+    const phaseWeight = { bridge: 0, intro: 0, checkpoint: 0.4, practice: 0.75, mixed: 0.95 }[acq.phase] || 0;
     const withinBlock = acq.phase === 'intro'
       ? (curBlockSize ? acq.introIdx / curBlockSize : 0)
       : phaseWeight;
     intraStepFraction = Math.min(1, (wordsBeforeBlock + curBlockSize * withinBlock) / totalWords);
-  } else if (stepKey === 'exercises'){
+  } else if (stepKey === 'exercises' || stepKey === 'checkpointExercises'){
     intraStepFraction = STEP_STATE.exerciseList.length ? STEP_STATE.exerciseIndex / STEP_STATE.exerciseList.length : 0;
   } else if (stepKey === 'explanation' && u && u.grammar){
     intraStepFraction = u.grammar.blocks.length ? STEP_STATE.explanationIndex / u.grammar.blocks.length : 0;
@@ -1537,6 +1599,26 @@ function finishBlockIntro(){
   runConceptQueueThen(pendingConceptsForBlock(u, acq.blockIdx), () => startBlockCheckpoint(u, acq));
 }
 
+// Ponte com a lição anterior (†, Modelo B): reconhece rapidamente 1-2
+// itens da lição imediatamente anterior antes de entrar na introdução da
+// lição atual -- substitui a mistura cumulativa antiga, com escopo bem
+// menor (só entre lições consecutivas).
+function startBridgeQueue(u){
+  const idx = currentLessonIdx(u.id);
+  const prevLesson = idx > 0 ? u.lessons[idx - 1] : null;
+  const bridgeVocab = (prevLesson && prevLesson.vocabIdx || []).slice(0, 2);
+  if (!bridgeVocab.length){
+    STEP_STATE.acq.phase = 'intro';
+    renderStep();
+    return;
+  }
+  STEP_STATE.exerciseList = buildBlockCheckpointQueue(u, bridgeVocab);
+  STEP_STATE.exerciseIndex = 0;
+  STEP_STATE.exerciseScore = 0;
+  setAcqPhaseBanner('👋 Lembrando da lição anterior');
+  renderExerciseStep();
+}
+
 function startBlockCheckpoint(u, acq){
   acq.phase = 'checkpoint';
   STEP_STATE.exerciseList = buildBlockCheckpointQueue(u, acq.blocks[acq.blockIdx]);
@@ -1551,6 +1633,12 @@ function startBlockCheckpoint(u, acq){
 function advanceAcquisitionPhase(){
   const acq = STEP_STATE.acq;
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
+
+  if (acq.phase === 'bridge'){
+    acq.phase = 'intro';
+    renderStep();
+    return;
+  }
 
   if (acq.phase === 'checkpoint'){
     acq.phase = 'practice';
@@ -1592,9 +1680,81 @@ function advanceToNextBlockOrConsolidation(){
     acq.introIdx = 0;
     renderStep();
   } else {
+    const u = UNITS.find(x => x.id === STATE.currentUnitId);
+    advanceUnitStep(u);
+  }
+}
+
+// Avança pro próximo passo da unidade (currentStepDefs), ou -- se já era o
+// último -- fecha a LIÇÃO atual (não necessariamente a unidade inteira,
+// ver finishCurrentLesson). Só entra em jogo pra unidades de vocabulário
+// (grammar continua no fluxo antigo, que nunca chama isto).
+function advanceUnitStep(u){
+  const stepDefs = currentStepDefs();
+  if (STEP_STATE.currentStep < stepDefs.length - 1){
     STEP_STATE.currentStep += 1;
     renderStep();
+  } else {
+    finishCurrentLesson(u);
   }
+}
+
+// Fecha a lição/unidade atual. Unidades sem `lessons` (gramática, ou
+// vocabulário ainda não migrado) e a última lição (isCheckpoint) de uma
+// unidade migrada caem no fluxo de SEMPRE: marca a unidade concluída e
+// mostra os desafios de hoje. Uma lição intermediária, em vez disso, só
+// avança lessonIdx, persiste, e mostra a tela leve de "Lição concluída".
+function finishCurrentLesson(u){
+  if (isLessonUnit(u) && !currentLesson(u).isCheckpoint){
+    const finished = currentLesson(u);
+    STATE.unitProgress[u.id].lessonIdx = currentLessonIdx(u.id) + 1;
+    addXP(8);
+    saveState();
+    renderTopbarStats();
+    renderLessonBoundaryScreen(u, finished);
+    return;
+  }
+
+  // Unidades de gramática pontuam por u.grammar.exercises/gramExerciseScore
+  // (lista fixa, não gerada por buildExerciseSet) -- mesma distinção que já
+  // existia no fluxo antigo, só centralizada aqui agora.
+  const total = u.type === 'grammar' ? u.grammar.exercises.length : STEP_STATE.exerciseList.length;
+  const correct = u.type === 'grammar' ? STEP_STATE.gramExerciseScore : STEP_STATE.exerciseScore;
+  const scorePct = total ? Math.round((correct / total) * 100) : 100;
+  markUnitCompleted(STATE.currentUnitId, scorePct);
+  if (isLessonUnit(u)){
+    STATE.unitProgress[u.id].lessonIdx = 0;
+    STATE.unitProgress[u.id].lessonMisses = {};
+  }
+  STEP_STATE.onChallengesScreen = true;
+  renderDailyChallengesScreen();
+}
+
+// Tela leve entre lições da mesma unidade (Modelo B) -- mais enxuta que
+// renderLessonCompleteScreen (reservada pro fim da unidade inteira). Mostra
+// quantos cartões já estão devidos pra revisão AGORA; se houver algum, o
+// botão "Continuar" leva direto pro Flashcard em vez de só voltar à trilha.
+function renderLessonBoundaryScreen(u, lesson){
+  const contentEl = document.getElementById('step-content');
+  const nextBtn = document.getElementById('step-next-btn');
+  const backBtn = document.getElementById('step-back-btn');
+  hideAcqPhaseBanner();
+  backBtn.style.display = 'none';
+  document.getElementById('step-progress-fill').style.width = '100%';
+  maybeShowStreakCelebration();
+
+  const dueCount = cardsDueNow(eligibleReviewPool()).length;
+  contentEl.innerHTML = `
+    <div class="lesson-complete">
+      <div class="lesson-complete-icon">✅</div>
+      <h2>Lição concluída!</h2>
+      <p class="lesson-boundary-title">${lesson.title}</p>
+      ${dueCount > 0 ? `<p class="lesson-boundary-due">📇 ${dueCount} carte${dueCount > 1 ? 's' : ''} esperando por revisão</p>` : ''}
+    </div>
+  `;
+  STEP_STATE.onLessonBoundaryScreen = { dueCount };
+  nextBtn.textContent = dueCount > 0 ? `Revisar agora (${dueCount}) →` : 'Continuar →';
+  nextBtn.style.display = 'flex';
 }
 
 // ---------- Unidades de gramática (Explicação em blocos, estilo Busuu → Exercícios) ----------
@@ -1868,10 +2028,12 @@ function renderStep(){
   }
 
   if (stepKey === 'vocab'){
-    if (STEP_STATE.acq.unitId !== u.id){
+    if (STEP_STATE.acq.unitId !== u.id || (isLessonUnit(u) && STEP_STATE.acq.lessonIdx !== currentLessonIdx(u.id))){
       STEP_STATE.acq = freshAcquisitionState(u.id, u);
     }
-    if (STEP_STATE.acq.phase === 'intro'){
+    if (STEP_STATE.acq.phase === 'bridge'){
+      startBridgeQueue(u);
+    } else if (STEP_STATE.acq.phase === 'intro'){
       renderBlockIntroCard(u, contentEl, nextBtn);
     } else {
       // checkpoint / practice / mixed reaproveitam o motor de exercícios
@@ -1891,6 +2053,30 @@ function renderStep(){
       STEP_STATE.exerciseScore = 0;
     }
     setAcqPhaseBanner('🧩 Consolidação da unidade');
+    renderExerciseStep();
+
+  } else if (stepKey === 'checkpointExercises'){
+    // Lição final de uma unidade migrada (Modelo B) -- "Ponto de
+    // verificação". Se o aluno acumulou 3+ palavras erradas ao longo das
+    // lições anteriores DESTA unidade, roda primeiro uma "Revisão dos
+    // Erros" isolada (✱); só depois entra na consolidação normal
+    // (buildExerciseSet, já prioriza quem errou, mas cobre a unidade
+    // inteira).
+    if (STEP_STATE.checkpointUnitId !== u.id){
+      STEP_STATE.checkpointUnitId = u.id;
+      const misses = STATE.unitProgress[u.id].lessonMisses || {};
+      const missedIdx = Object.keys(misses).map(Number).filter(i => misses[i] >= 1);
+      if (missedIdx.length >= 3){
+        STEP_STATE.checkpointPhase = 'errors';
+        STEP_STATE.exerciseList = buildBlockCheckpointQueue(u, missedIdx);
+      } else {
+        STEP_STATE.checkpointPhase = 'main';
+        STEP_STATE.exerciseList = buildExerciseSet(u);
+      }
+      STEP_STATE.exerciseIndex = 0;
+      STEP_STATE.exerciseScore = 0;
+    }
+    setAcqPhaseBanner(STEP_STATE.checkpointPhase === 'errors' ? '🔁 Revisão dos erros' : '🧩 Ponto de verificação');
     renderExerciseStep();
 
   } else if (stepKey === 'dialogue'){
@@ -1956,6 +2142,23 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
     document.getElementById('path-list-wrap').style.display = 'block';
     document.getElementById('unit-detail-wrap').style.display = 'none';
     renderUnitsGrid();
+    return;
+  }
+
+  // Tela de "Lição concluída" (Modelo B, entre lições da mesma unidade) --
+  // se havia cartões devidos no momento em que a lição terminou, leva
+  // direto pro Flashcard em vez de voltar pra trilha.
+  if (STEP_STATE.onLessonBoundaryScreen){
+    const { dueCount } = STEP_STATE.onLessonBoundaryScreen;
+    STEP_STATE.onLessonBoundaryScreen = null;
+    setLessonFocusMode(false);
+    document.getElementById('unit-detail-wrap').style.display = 'none';
+    document.getElementById('path-list-wrap').style.display = 'block';
+    renderUnitsGrid();
+    if (dueCount > 0){
+      switchTab('review');
+      openReviewSession('flashcard');
+    }
     return;
   }
 
@@ -2027,26 +2230,11 @@ document.getElementById('step-next-btn').addEventListener('click', () => {
   // antes de seguir pro próximo passo da unidade.
   if (stepKey === 'dialogue'){
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
-    runConceptQueueThen(pendingConceptsAfterDialogue(u), () => {
-      STEP_STATE.currentStep += 1;
-      renderStep();
-    });
+    runConceptQueueThen(pendingConceptsAfterDialogue(u), () => advanceUnitStep(u));
     return;
   }
 
-  if (STEP_STATE.currentStep < currentStepDefs().length - 1){
-    STEP_STATE.currentStep += 1;
-    renderStep();
-  } else {
-    const u = UNITS.find(x => x.id === STATE.currentUnitId);
-    const total = u.type === 'grammar' ? u.grammar.exercises.length : STEP_STATE.exerciseList.length;
-    const correct = u.type === 'grammar' ? STEP_STATE.gramExerciseScore : STEP_STATE.exerciseScore;
-    const scorePct = total ? Math.round((correct / total) * 100) : 100;
-
-    markUnitCompleted(STATE.currentUnitId, scorePct);
-    STEP_STATE.onChallengesScreen = true;
-    renderDailyChallengesScreen();
-  }
+  advanceUnitStep(UNITS.find(x => x.id === STATE.currentUnitId));
 });
 
 // ---------- Geração dos exercícios (múltipla escolha + ordenar, estilo Memrise) ----------
@@ -2153,8 +2341,19 @@ function renderExerciseStep(){
     // a fila aqui significa "avance de fase", não "termine a unidade". Só
     // vira tela de conclusão de verdade na consolidação final (passo
     // "exercises").
-    if (currentStepDefs()[STEP_STATE.currentStep].key === 'vocab'){
+    const exhaustedKey = currentStepDefs()[STEP_STATE.currentStep].key;
+    if (exhaustedKey === 'vocab'){
       advanceAcquisitionPhase();
+      return;
+    }
+    if (exhaustedKey === 'checkpointExercises' && STEP_STATE.checkpointPhase === 'errors'){
+      // Revisão dos Erros (✱) terminada -> consolidação normal da unidade.
+      STEP_STATE.checkpointPhase = 'main';
+      STEP_STATE.exerciseList = buildExerciseSet(u);
+      STEP_STATE.exerciseIndex = 0;
+      STEP_STATE.exerciseScore = 0;
+      setAcqPhaseBanner('🧩 Ponto de verificação');
+      renderExerciseStep();
       return;
     }
     renderLessonCompleteScreen(contentEl, nextBtn, {

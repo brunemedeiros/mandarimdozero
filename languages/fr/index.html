@@ -710,6 +710,14 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .lesson-complete{ text-align:center; padding: 20px 4px; }
 .lesson-complete-icon{ font-size:52px; margin-bottom:8px; }
 .lesson-complete h2{ margin:0 0 18px; font-size:22px; }
+/* Tela leve entre lições da mesma unidade (Modelo B) -- reaproveita
+   .lesson-complete/.lesson-complete-icon acima, só acrescenta o nome da
+   lição e, quando há cartões devidos, um aviso que puxa pro Flashcard. */
+.lesson-boundary-title{ font-size:15px; color: var(--ink-soft); margin: -8px 0 18px; }
+.lesson-boundary-due{
+  display:inline-block; margin: 0 0 8px; padding:8px 16px; border-radius:999px;
+  background: rgba(29,90,130,0.08); color: var(--seal-red-dark); font-weight:700; font-size:13.5px;
+}
 .lesson-complete-stats{ display:flex; gap:12px; margin-bottom:22px; }
 .lc-stat{ flex:1; background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius); padding:14px; }
 .lc-stat-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); font-weight:800; margin-bottom:6px; }
