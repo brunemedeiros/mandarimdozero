@@ -107,8 +107,8 @@ try{
 :focus-visible{ outline: 2px solid var(--imperial-gold); outline-offset: 2px; border-radius: 4px; }
 /* Reset padrão -- button/input/textarea/select NÃO herdam color/font-family
    do body por padrão no navegador (usam a cor/fonte do sistema). Sem isso,
-   qualquer botão que não define sua própria cor (ex: .unit-card, que é um
-   elemento button puro) cai no preto do sistema -- ilegível no fundo escuro do
+   qualquer botão que não define sua própria cor (ex: .ub-chevron) cai no
+   preto do sistema -- ilegível no fundo escuro do
    tema noturno, mesmo com --ink corretamente clareado pro modo escuro.
    Regras que já definem sua própria cor (.btn-primary/-secondary/-gold
    etc.) continuam intactas -- isso só corrige quem dependia do default. */
@@ -296,68 +296,82 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .level-list-title{ font-weight:800; font-size:15px; }
 .level-list-sub{ font-size:12.5px; color: var(--ink-soft); margin-top:2px; }
 
-.units-grid{ display:block; }
-.unit-card{
-  position:relative;
-  background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
-  padding: 16px 14px; cursor:pointer; text-align:left; box-shadow: var(--shadow-card);
-  transition: transform .15s ease, box-shadow .15s ease;
-  display:flex; flex-direction:column; gap:8px; min-height:132px;
+.units-grid{ display:block; max-width: 640px; margin: 0 auto; }
+
+/* ---------- Módulo: rótulo fino de seção, sem cartão próprio ----------
+   A Unidade é quem carrega o peso visual principal da trilha agora -- o
+   Módulo só organiza em capítulos ("Hierarquia da Trilha", seções 3 e 6).
+   Altura (4px) e gradiente (seal-red -> imperial-gold) da barrinha seguem a
+   mesma paleta de progresso usada em todo o resto do app. */
+.module-label{
+  display:flex; align-items:center; gap:10px;
+  margin: 26px 0 10px; padding-top: 14px; border-top: 1px dashed var(--paper-line);
 }
-.unit-card:hover{ transform: translateY(-2px); box-shadow: var(--shadow-lift); }
-.unit-card.locked{ opacity:.5; cursor:not-allowed; }
-.unit-card.locked:hover{ transform:none; box-shadow:var(--shadow-card); }
-.unit-icon-wrap{ position:relative; width:52px; height:52px; margin:0 auto; }
-.unit-icon{
-  width:52px; height:52px; border-radius:14px; background:var(--paper-warm);
-  display:flex; align-items:center; justify-content:center; font-size:28px;
+.module-label:first-child{ margin-top:0; padding-top:0; border-top:none; }
+.module-label .ml-text{
+  font-weight:800; font-size:11.5px; text-transform:uppercase; letter-spacing:.05em;
+  color:var(--ink-soft); white-space:nowrap;
+}
+.module-label .ml-track{ flex:1; height:4px; border-radius:2px; background:var(--paper-warm); overflow:hidden; }
+.module-label .ml-fill{ height:100%; border-radius:2px; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); transition: width .3s ease; }
+.module-units-list{ display:flex; flex-direction:column; gap:10px; }
+.module-units-list.locked{ opacity:.55; }
+
+/* ---------- Bloco de Unidade: lista vertical, peso próprio ---------- */
+.unit-block{
+  background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
+  box-shadow: var(--shadow-card); overflow:hidden;
+}
+.unit-block.locked{ opacity:.5; }
+.ub-header{
+  display:flex; align-items:center; gap:12px; padding:13px 14px; cursor:pointer;
+}
+.unit-block.locked .ub-header{ cursor:default; }
+.ub-icon{
+  width:44px; height:44px; border-radius:12px; background:var(--paper-warm); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:22px;
   transition: background .15s ease;
 }
-.unit-card.done .unit-icon{ background: rgba(58,115,89,0.14); }
-.unit-card.current .unit-icon{ background: rgba(52,152,214,0.10); }
-.unit-badge{
-  position:absolute; bottom:-4px; right:-4px; width:20px; height:20px; border-radius:6px;
-  background: var(--paper-warm); border:2px solid var(--paper); display:flex; align-items:center; justify-content:center;
-  font-weight:800; font-size:10px; color:var(--ink-soft);
+.unit-block.done .ub-icon{ background: rgba(58,115,89,0.14); }
+.unit-block.current .ub-icon{ background: rgba(52,152,214,0.10); }
+.ub-info{ flex:1; min-width:0; }
+.ub-title-row{ display:flex; align-items:center; gap:7px; }
+.ub-title{ font-weight:800; font-size:14.5px; line-height:1.25; }
+.ub-badge{ font-size:13px; color: var(--jade); flex-shrink:0; }
+.ub-goal{
+  color:var(--ink-soft); font-size:12px; margin-top:2px; line-height:1.35;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
-.unit-card.done .unit-badge{ background: var(--jade); color:white; }
-.unit-card.current .unit-badge{ background: var(--seal-red); color: var(--gold-bright); }
-.unit-title{ font-weight:800; font-size:14.5px; line-height:1.25; flex:1; }
-.unit-progress-bar{ height:5px; border-radius:3px; background:var(--paper-warm); overflow:hidden; }
-.unit-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:3px; }
-.unit-meta{ font-size:11px; color:var(--ink-soft); display:flex; justify-content:space-between; align-items:center; }
+.ub-frac{ font-weight:700; font-size:11.5px; color:var(--ink-soft); white-space:nowrap; flex-shrink:0; }
+.ub-chevron{
+  flex-shrink:0; width:26px; height:26px; border-radius:50%; border:none; background:var(--paper-warm);
+  display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--ink-soft);
+  cursor:pointer; transition: transform .15s ease;
+}
+.unit-block.expanded .ub-chevron{ transform: rotate(180deg); }
+.ub-lessons{ border-top:1px solid var(--paper-line); }
+.ub-lesson-row{ display:flex; align-items:center; gap:10px; padding:10px 14px 10px 18px; }
+.ub-lesson-row + .ub-lesson-row{ border-top:1px solid var(--paper-line); }
+.ub-lesson-dot{
+  width:22px; height:22px; border-radius:50%; flex-shrink:0; font-size:11px; font-weight:800;
+  display:flex; align-items:center; justify-content:center;
+}
+.ub-lesson-dot.done{ background:var(--jade); color:white; }
+.ub-lesson-dot.current{ border:2px solid var(--seal-red); color:var(--seal-red-dark); background: rgba(52,152,214,0.08); }
+.ub-lesson-dot.locked{ border:1.5px dashed var(--paper-line); color: var(--ink-soft); }
+.ub-lesson-title{ font-size:13px; font-weight:600; }
+.ub-lesson-row.locked .ub-lesson-title{ color:var(--ink-soft); font-weight:500; }
 
 /* ---------- Unidades de gramática (destaque roxo) ---------- */
-.unit-card.grammar{ border-color: var(--brand-purple); box-shadow: 0 0 0 1px rgba(61,22,123,0.16); }
-.unit-card.grammar .unit-icon{ background: rgba(61,22,123,0.12); }
-.unit-card.grammar.current .unit-icon{ background: rgba(61,22,123,0.2); }
-.unit-card.grammar.done .unit-icon{ background: rgba(58,115,89,0.14); }
-.unit-card.grammar .unit-badge{ background: var(--brand-purple); color: var(--paper); }
-.gram-pill{ background: var(--brand-purple); color: var(--paper); font-weight:800; font-size:10px; text-transform:uppercase; letter-spacing:.04em; padding:3px 8px; border-radius:999px; }
+.unit-block.grammar{ border-color: var(--brand-purple); box-shadow: 0 0 0 1px rgba(61,22,123,0.16); }
+.unit-block.grammar .ub-icon{ background: rgba(61,22,123,0.12); }
+.unit-block.grammar.current .ub-icon{ background: rgba(61,22,123,0.2); }
+.unit-block.grammar.done .ub-icon{ background: rgba(58,115,89,0.14); }
 
-/* ---------- Módulos (estilo Busuu) ----------
-   Altura (8px), raio (4px) e gradiente (seal-red -> imperial-gold) unificados
-   entre TODAS as barras de progresso "quanto falta" do app (módulo, lição,
-   desafio, revisão -- auditoria de UX/UI, 2026-09): antes cada uma tinha
-   valores ligeiramente diferentes, incluindo duas com uma cor sólida (jade)
-   sem relação com o resto da paleta de progresso, por terem sido
-   implementadas em momentos separados. .unit-progress-bar e
-   .dictation-progress-track ficam de fora de propósito: a primeira é um
-   indicador compacto dentro de um card de lista, a segunda é uma barra de
-   busca de áudio arrastável -- contextos diferentes de uma barra de
-   progresso de conclusão em destaque. */
-.module-section{ margin-bottom: 28px; }
-.module-section.locked{ opacity: .55; }
-.module-header{ margin-bottom: 14px; }
-.module-header h3{ margin: 0 0 8px; font-size: 16px; }
-.module-progress-track{ height: 8px; border-radius: 4px; background: var(--paper-warm); overflow: hidden; }
-.module-progress-fill{ height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); transition: width .3s ease; }
-.module-units-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap:12px; }
-
-.unit-card.checkpoint{ border-color: var(--imperial-gold); background: rgba(227,107,202,0.06); }
-.unit-card.checkpoint .unit-icon{ background: rgba(227,107,202,0.14); }
-.unit-card.checkpoint.done .unit-icon{ background: rgba(58,115,89,0.14); }
-.unit-card.checkpoint .unit-badge{ background: var(--jade); color: white; }
+/* ---------- Ponto de verificação do módulo ---------- */
+.unit-block.checkpoint{ border-color: var(--imperial-gold); background: rgba(227,107,202,0.06); }
+.unit-block.checkpoint .ub-icon{ background: rgba(227,107,202,0.14); }
+.unit-block.checkpoint.done .ub-icon{ background: rgba(58,115,89,0.14); }
 
 /* ---------- Teste de Nível (prova final, sempre desbloqueado) ---------- */
 .level-test-card{
@@ -398,13 +412,6 @@ a.pill:hover{ border-color: var(--imperial-gold); }
    exercício em si (a dica, quando existe, vive dentro do próprio fluxo do
    exercício, ver .inline-hint-block abaixo). */
 .lesson-focus-bar{ display:flex; align-items:center; gap:14px; margin-bottom:20px; }
-/* TEMP -- ver PR #83 */
-.lesson-hint-btns{ display:flex; gap:8px; flex-wrap:wrap; }
-.manual-link-btn{
-  background: var(--paper); border:1px solid var(--paper-line); border-radius:999px; padding:6px 13px;
-  font-family: var(--font-body); font-weight:700; font-size:12.5px; color: var(--seal-red-dark); cursor:pointer;
-  white-space:nowrap; flex-shrink:0;
-}
 .lesson-close-btn{
   flex-shrink:0; width:36px; height:36px; border-radius:50%; border:1px solid var(--paper-line);
   background: var(--paper); color: var(--ink-soft); font-size:16px; cursor:pointer;
@@ -1896,9 +1903,6 @@ footer.app-footer img{ height:56px; opacity:.9; }
         <div class="lesson-hint-eyebrow" id="ud-eyebrow"></div>
         <div class="lesson-unit-title" id="ud-title"></div>
         <p class="lesson-unit-goal" id="ud-goal"></p>
-        <!-- TEMP -- pular pra qualquer lição, só pra verificação da prova de
-             conceito do Modelo B (PR #83). Remover junto do desbloqueio manual. -->
-        <div class="lesson-hint-btns" id="lesson-jump-row" style="display:none;"></div>
       </div>
 
       <div class="lesson-focus-bar">

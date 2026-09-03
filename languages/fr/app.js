@@ -388,9 +388,6 @@ updateClozeModeSwitch();
 
 async function loadStateAndRender(){
   await loadState();
-  // TEMP — desbloqueio manual pra verificação da prova de conceito do
-  // Modelo B (PR #83). Remover depois que a unidade for conferida.
-  if (STATE.unitProgress['A1-4']) STATE.unitProgress['A1-4'].unlocked = true;
   renderTopbarStats();
   renderUnitsGrid();
   renderExportDeckSelect(ANKI_EXPORT_CONFIG);
@@ -884,9 +881,23 @@ function modulesOfLevel(level){
 function moduleUnlocked(module){
   return !!STATE.unitProgress[module.unitIds[0]]?.unlocked;
 }
+// Progresso fracionário de 0 a 1: concluída conta 1 mesmo depois do reset de
+// lessonIdx no fim da unidade (ver finishCurrentLesson); unidades com lições
+// usam lessonIdx/lessons.length; as demais (motor antigo) usam a fração de
+// palavras já aprendidas no SRS, como sempre foi.
+function unitProgressFraction(u){
+  const prog = STATE.unitProgress[u.id];
+  if (prog.completed) return 1;
+  if (isLessonUnit(u)){
+    return u.lessons.length ? currentLessonIdx(u.id) / u.lessons.length : 0;
+  }
+  const { total, learned } = unitCardCounts(u.id);
+  return total ? learned / total : 0;
+}
+
 function moduleProgressPct(module){
-  const done = module.unitIds.filter(id => STATE.unitProgress[id]?.completed).length;
-  return Math.round((done / module.unitIds.length) * 100);
+  const sum = module.unitIds.reduce((acc, id) => acc + unitProgressFraction(UNITS.find(u => u.id === id)), 0);
+  return Math.round((sum / module.unitIds.length) * 100);
 }
 
 function levelTestsOfLevel(level){
@@ -909,57 +920,139 @@ function buildLevelTestCard(test){
   return card;
 }
 
-function buildUnitCard(u){
-  const levelUnits = unitsOfLevel(u.level);
+// Estado da Unidade na trilha: "done" (concluída), "current" (desbloqueada,
+// a próxima da fila) ou "locked". Note que precisa checar completed ANTES de
+// olhar lessonIdx -- finishCurrentLesson zera lessonIdx ao fechar a unidade
+// (pra permitir reabrir do início como revisão), então lessonIdx sozinho
+// mentiria "0 de 4" numa unidade que na verdade já terminou.
+function unitBlockState(u){
   const prog = STATE.unitProgress[u.id];
-  const unlocked = prog.unlocked;
-  const { total, learned, dueForReview } = unitCardCounts(u.id);
-  const pct = total ? Math.round((learned/total)*100) : 0;
-  const reviewLabel = dueForReview > 0 ? `🔁 ${dueForReview} a revisar` : '';
-
-  const isGrammar = u.type === 'grammar';
-  const card = document.createElement('button');
-  card.className = 'unit-card' + (isGrammar ? ' grammar' : '') + (!unlocked ? ' locked' : '') + (prog.completed ? ' done' : '') + (unlocked && !prog.completed && learned>0 ? ' current' : '');
-  const metaHTML = isGrammar
-    ? `<div class="unit-meta"><span class="gram-pill">Gramática</span><span>${prog.completed ? 'Concluído' : ''}</span></div>`
-    : `<div class="unit-progress-bar"><div class="unit-progress-fill" style="width:${pct}%"></div></div>
-       <div class="unit-meta"><span>${reviewLabel}</span><span>${pct}%</span></div>`;
-  // Unidades de gramática não mostram um número visível (fica só internamente,
-  // via unitOrdinalInfo, pra cálculos como "Gramática X de Y" no cabeçalho —
-  // que também não é mais exibido — e pro rótulo de exportação).
-  const badgeHTML = prog.completed
-    ? `<div class="unit-badge">✓</div>`
-    : (isGrammar ? '' : `<div class="unit-badge">${unitOrdinalInfo(u, levelUnits).num}</div>`);
-  card.innerHTML = `
-    <div class="unit-icon-wrap">
-      <div class="unit-icon">${UNIT_ICONS[u.id] || '📖'}</div>
-      ${badgeHTML}
-    </div>
-    <div class="unit-title">${u.title}</div>
-    ${metaHTML}
-  `;
-  if (unlocked){
-    card.addEventListener('click', () => openUnitDetail(u.id));
-  }
-  return card;
+  if (prog.completed) return 'done';
+  if (prog.unlocked) return 'current';
+  return 'locked';
 }
 
-function buildCheckpointCard(module, unlocked){
-  const cp = STATE.checkpointProgress[module.id];
-  const card = document.createElement('button');
-  card.className = 'unit-card checkpoint' + (!unlocked ? ' locked' : '') + (cp.completed ? ' done' : '');
-  card.innerHTML = `
-    <div class="unit-icon-wrap">
-      <div class="unit-icon">🏆</div>
-      ${cp.completed ? `<div class="unit-badge">✓</div>` : ''}
+// Estado de UMA lição dentro do bloco expandido da unidade.
+function lessonRowState(u, idx){
+  if (STATE.unitProgress[u.id].completed) return 'done';
+  const cur = currentLessonIdx(u.id);
+  if (idx < cur) return 'done';
+  if (idx === cur) return 'current';
+  return 'locked';
+}
+
+// Lembra se o aluno abriu/fechou manualmente o bloco de uma unidade nesta
+// sessão (não é salvo -- é só estado de UI). Sem entrada aqui, o bloco usa o
+// padrão: concluída/bloqueada começam compactas, a unidade atual começa
+// expandida.
+const UNIT_BLOCK_EXPAND_OVERRIDE = {};
+
+// .ub-header é uma div (não um <button>, porque contém a seta que é seu
+// próprio botão -- button dentro de button é inválido) -- isto devolve a
+// ela a ativação por teclado que um <button> teria de graça.
+function wireHeaderActivation(el, handler){
+  el.setAttribute('role', 'button');
+  el.setAttribute('tabindex', '0');
+  el.addEventListener('click', handler);
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); handler(e); }
+  });
+}
+
+function buildUnitBlock(u){
+  const state = unitBlockState(u);
+  const unlocked = state !== 'locked';
+  const isGrammar = u.type === 'grammar';
+  // Só unidades com 2+ lições (Modelo B) ganham a lista expansível -- uma
+  // unidade do motor antigo não tem lições reais pra mostrar (ver "Hierarquia
+  // da Trilha", seção 11), então vira uma linha só, sem seta.
+  const hasLessons = isLessonUnit(u) && u.lessons.length > 1;
+  const { dueForReview } = unitCardCounts(u.id);
+
+  const defaultExpanded = state === 'current';
+  const expanded = hasLessons && (
+    UNIT_BLOCK_EXPAND_OVERRIDE[u.id] !== undefined ? UNIT_BLOCK_EXPAND_OVERRIDE[u.id] : defaultExpanded
+  );
+
+  const pct = Math.round(unitProgressFraction(u) * 100);
+  let fracLabel;
+  if (isGrammar) fracLabel = state === 'done' ? 'Concluído' : '';
+  else if (hasLessons){
+    const doneLessons = state === 'done' ? u.lessons.length : currentLessonIdx(u.id);
+    fracLabel = `${doneLessons} de ${u.lessons.length} lições`;
+  }
+  else fracLabel = `${pct}%`;
+  if (dueForReview > 0) fracLabel += ` · 🔁 ${dueForReview}`;
+
+  const block = document.createElement('div');
+  block.className = 'unit-block'
+    + (isGrammar ? ' grammar' : '')
+    + (state === 'locked' ? ' locked' : '')
+    + (state === 'done' ? ' done' : '')
+    + (state === 'current' ? ' current' : '')
+    + (expanded ? ' expanded' : '');
+
+  const badgeHTML = state === 'done' ? `<span class="ub-badge">✓</span>` : '';
+  const chevronHTML = hasLessons ? `<button class="ub-chevron" type="button" aria-label="Expandir lições">▾</button>` : '';
+  const lessonsHTML = hasLessons ? `
+    <div class="ub-lessons" style="${expanded ? '' : 'display:none;'}">
+      ${u.lessons.map((l, i) => {
+        const st = lessonRowState(u, i);
+        return `
+          <div class="ub-lesson-row ${st}">
+            <div class="ub-lesson-dot ${st}">${st === 'done' ? '✓' : i + 1}</div>
+            <div class="ub-lesson-title">${l.title}</div>
+          </div>
+        `;
+      }).join('')}
     </div>
-    <div class="unit-title">Ponto de verificação</div>
-    <div class="unit-meta"><span>${cp.completed ? 'Concluído' : 'Teste seus conhecimentos'}</span></div>
+  ` : '';
+
+  block.innerHTML = `
+    <div class="ub-header">
+      <div class="ub-icon">${UNIT_ICONS[u.id] || '📖'}</div>
+      <div class="ub-info">
+        <div class="ub-title-row"><span class="ub-title">${u.title}</span>${badgeHTML}</div>
+        ${u.goal ? `<div class="ub-goal">${u.goal}</div>` : ''}
+      </div>
+      <div class="ub-frac">${fracLabel}</div>
+      ${chevronHTML}
+    </div>
+    ${lessonsHTML}
+  `;
+
+  wireHeaderActivation(block.querySelector('.ub-header'), (e) => {
+    if (e.target.closest('.ub-chevron')) return;
+    if (unlocked) openUnitDetail(u.id);
+  });
+  const chevron = block.querySelector('.ub-chevron');
+  if (chevron){
+    chevron.addEventListener('click', (e) => {
+      e.stopPropagation();
+      UNIT_BLOCK_EXPAND_OVERRIDE[u.id] = !expanded;
+      renderUnitsGrid();
+    });
+  }
+  return block;
+}
+
+function buildCheckpointRow(module, unlocked){
+  const cp = STATE.checkpointProgress[module.id];
+  const block = document.createElement('div');
+  block.className = 'unit-block checkpoint' + (!unlocked ? ' locked' : '') + (cp.completed ? ' done' : '');
+  block.innerHTML = `
+    <div class="ub-header">
+      <div class="ub-icon">🏆</div>
+      <div class="ub-info">
+        <div class="ub-title-row"><span class="ub-title">Ponto de verificação</span>${cp.completed ? `<span class="ub-badge">✓</span>` : ''}</div>
+        <div class="ub-goal">Teste o módulo inteiro de uma vez e pule as unidades que já souber.</div>
+      </div>
+    </div>
   `;
   if (unlocked){
-    card.addEventListener('click', () => openCheckpoint(module.id));
+    wireHeaderActivation(block.querySelector('.ub-header'), () => openCheckpoint(module.id));
   }
-  return card;
+  return block;
 }
 
 function renderUnitsGrid(){
@@ -986,22 +1079,24 @@ function renderUnitsGrid(){
     const unlocked = moduleUnlocked(module);
     const pct = moduleProgressPct(module);
 
-    const section = document.createElement('div');
-    section.className = 'module-section' + (unlocked ? '' : ' locked');
-    section.innerHTML = `
-      <div class="module-header">
-        <h3>Módulo ${mIdx + 1}: ${module.title}</h3>
-        <div class="module-progress-track"><div class="module-progress-fill" style="width:${pct}%"></div></div>
-      </div>
-      <div class="module-units-grid"></div>
+    // O Módulo vira um rótulo fino de seção -- organiza a trilha em
+    // capítulos sem competir visualmente com a Unidade, que é quem carrega
+    // o peso real da decisão do aluno ("Hierarquia da Trilha", seção 6).
+    const label = document.createElement('div');
+    label.className = 'module-label';
+    label.innerHTML = `
+      <span class="ml-text">Módulo ${mIdx + 1} · ${module.title}</span>
+      <div class="ml-track"><div class="ml-fill" style="width:${pct}%"></div></div>
     `;
-    const subGrid = section.querySelector('.module-units-grid');
-    module.unitIds.forEach(id => {
-      subGrid.appendChild(buildUnitCard(UNITS.find(u => u.id === id)));
-    });
-    subGrid.appendChild(buildCheckpointCard(module, unlocked));
+    grid.appendChild(label);
 
-    grid.appendChild(section);
+    const list = document.createElement('div');
+    list.className = 'module-units-list' + (unlocked ? '' : ' locked');
+    module.unitIds.forEach(id => {
+      list.appendChild(buildUnitBlock(UNITS.find(u => u.id === id)));
+    });
+    list.appendChild(buildCheckpointRow(module, unlocked));
+    grid.appendChild(list);
   });
 
   levelTestsOfLevel(STATE.currentLevel).forEach(test => {
@@ -1184,35 +1279,12 @@ function openUnitDetail(unitId){
   document.getElementById('ud-eyebrow').textContent = `${eyebrowLabel} · ${u.level}`;
   document.getElementById('ud-title').textContent = u.title;
   document.getElementById('ud-goal').textContent = u.goal;
-  renderLessonJumpRowTEMP(u); // TEMP -- ver PR #83
 
   STEP_STATE.currentStep = 0;
   renderStep();
 
   saveState();
   renderTopbarStats();
-}
-
-// TEMP -- pular pra qualquer lição de uma unidade migrada (Modelo B), só
-// pra verificação manual da prova de conceito (PR #83). Remover esta
-// função, a chamada em openUnitDetail, e o <div id="lesson-jump-row"> do
-// HTML quando a unidade for conferida.
-function renderLessonJumpRowTEMP(u){
-  const row = document.getElementById('lesson-jump-row');
-  if (!row) return;
-  if (!isLessonUnit(u)){ row.style.display = 'none'; row.innerHTML = ''; return; }
-  const curIdx = currentLessonIdx(u.id);
-  row.style.display = 'flex';
-  row.innerHTML = u.lessons.map((l, i) => `
-    <button class="manual-link-btn" data-lesson-jump="${i}" style="${i === curIdx ? 'font-weight:800;' : ''}">${i + 1}. ${l.title}</button>
-  `).join('');
-  row.querySelectorAll('[data-lesson-jump]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      STATE.unitProgress[u.id].lessonIdx = parseInt(btn.dataset.lessonJump, 10);
-      saveState();
-      openUnitDetail(u.id);
-    });
-  });
 }
 
 document.getElementById('back-to-path').addEventListener('click', () => {
