@@ -1762,7 +1762,7 @@ function buildExerciseHint(ex, unit){
     return `Pense no contexto do tema desta unidade ("${unit.title}"): em que situação você usaria essa palavra?`;
   }
   if (ex.format === 'reorder'){
-    return 'Identifique primeiro quem realiza a ação e depois a ação em si -- monte a frase seguindo essa ordem de raciocínio.';
+    return 'Identifique primeiro quem realiza a ação e depois a ação em si -- monte a frase seguindo essa ordem de raciocínio, ignorando os blocos que não pertencem a ela.';
   }
   if (ex.format === 'fullsentence'){
     return 'Releia a frase em português e pense em como cada parte dela normalmente é dita em chinês, antes de comparar as opções.';
@@ -2546,14 +2546,65 @@ function buildConsolidationVocabExercises(unit){
   return picks.map(i => buildVocabWordExercise(unit, i, 'consolidation'));
 }
 
+// ---------- Distratores do exercício "Ordene a frase" ----------
+// Quantos blocos-isca entram: cresce com a complexidade da frase (mais
+// blocos na frase certa = mais espaço pra isca sem virar uma sopa de
+// botões) e com o nível da unidade no currículo -- capado em 4. O chinês só
+// tem o nível HSK1 hoje (LEVELS.length === 1), então levelIdx fica sempre 0
+// -- a fórmula já fica pronta pra quando houver mais níveis, sem precisar
+// mexer aqui de novo.
+function reorderDistractorCount(unit, correctBlocks){
+  const levelIdx = Math.max(0, LEVELS.findIndex(l => l.id === unit.level));
+  const base = Math.max(1, Math.floor((correctBlocks.length - 1) / 2));
+  return Math.min(4, base + levelIdx);
+}
+
+// Duas camadas de "confundibilidade": blocos da MESMA unidade (tema já
+// visto nesta lição -- mais parecidos, mais difíceis de descartar de cara)
+// e blocos de QUALQUER unidade (podem ser de um assunto totalmente
+// diferente -- mais fáceis de eliminar por eliminação). Mesmo padrão de
+// pool em duas camadas já usado nos distratores do cloze (ver
+// clozeExercises abaixo) e no "Frase completa" (buildCumulativeVocabPool);
+// aqui a PROPORÇÃO entre as duas camadas varia pelo nível.
+function buildReorderDistractors(unit, correctBlocks, count){
+  if (count <= 0) return [];
+  const correctTexts = new Set(correctBlocks.map(b => b.c));
+  const dedupeAndExclude = (blocks, excludeTexts) => {
+    const seen = new Set(excludeTexts);
+    return blocks.filter(b => {
+      if (correctTexts.has(b.c) || seen.has(b.c)) return false;
+      seen.add(b.c);
+      return true;
+    });
+  };
+
+  const unitPool = shuffle(dedupeAndExclude((unit.phrases || []).flatMap(ph => ph.blocks || []), []));
+  const levelIdx = Math.max(0, LEVELS.findIndex(l => l.id === unit.level));
+  const hardFraction = Math.min(0.75, 0.25 + levelIdx * 0.25);
+  const hardCount = Math.min(unitPool.length, Math.round(count * hardFraction));
+
+  const picked = unitPool.slice(0, hardCount);
+  if (picked.length < count){
+    const globalPool = shuffle(dedupeAndExclude(
+      UNITS.flatMap(u2 => (u2.phrases || []).flatMap(ph => ph.blocks || [])),
+      picked.map(b => b.c)
+    ));
+    picked.push(...globalPool.slice(0, count - picked.length));
+  }
+  return picked;
+}
+
 function buildExerciseSet(unit){
   const vocabExercises = buildConsolidationVocabExercises(unit);
 
   // Só frases com blocks definidos entram como exercício de ordenar — proteção
   // defensiva caso alguma frase futura seja adicionada sem essa segmentação.
   const phrasesWithBlocks = (unit.phrases || []).filter(p => p.blocks && p.blocks.length >= 2);
-  const reorderExercises = phrasesWithBlocks
-    .map(p => ({ format: 'reorder', phrase: p, shuffledBlocks: shuffle(p.blocks) }));
+  const reorderExercises = phrasesWithBlocks.map(p => {
+    const distractorCount = reorderDistractorCount(unit, p.blocks);
+    const distractorBlocks = buildReorderDistractors(unit, p.blocks, distractorCount);
+    return { format: 'reorder', phrase: p, shuffledBlocks: shuffle([...p.blocks, ...distractorBlocks]) };
+  });
 
   const trueFalseExercises = (unit.trueFalseExercises || []).map(tf => ({ format: 'trueFalse', ...tf }));
 

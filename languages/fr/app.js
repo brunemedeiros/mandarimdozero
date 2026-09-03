@@ -1436,7 +1436,13 @@ function buildExerciseHint(ex, unit){
     return `Pense no contexto do tema desta unidade ("${unit.title}"): em que situação você usaria essa palavra?`;
   }
   if (ex.format === 'reorder'){
-    return 'Identifique primeiro quem realiza a ação e depois a ação em si -- monte a frase seguindo essa ordem de raciocínio.';
+    // "traduzir": o desafio principal é lembrar o vocabulário certo em meio
+    // aos blocos-isca -- a dica de ordem das palavras (útil no modo
+    // "ordenar", que já mostra a frase certa embaralhada) viria em segundo
+    // lugar aqui.
+    return ex.mode === 'translate'
+      ? 'Primeiro descarte os blocos que não pertencem a esta frase -- só depois pense na ordem das palavras que sobraram.'
+      : 'Identifique primeiro quem realiza a ação e depois a ação em si -- monte a frase seguindo essa ordem de raciocínio, ignorando os blocos que não pertencem a ela.';
   }
   if (ex.format === 'scenario'){
     return 'Releia a situação com atenção: pense no que você diria nesse momento, não apenas no significado de cada frase.';
@@ -2428,11 +2434,63 @@ function buildConsolidationVocabExercises(unit){
   return picks.map(i => buildVocabWordExercise(unit, i, 'consolidation'));
 }
 
+// ---------- Distratores dos exercícios de blocos ("ordenar"/"traduzir") ----------
+// Quantos blocos-isca entram no exercício: cresce com a complexidade da
+// frase (mais blocos na frase certa = "espaço" pra mais isca sem virar uma
+// sopa de botões) e com o nível da unidade no currículo (A1 mais raso, B2
+// mais denso) -- capado em 4 pra nunca sobrecarregar a grade visualmente.
+function reorderDistractorCount(unit, correctBlocks){
+  const levelIdx = Math.max(0, LEVELS.findIndex(l => l.id === unit.level));
+  const base = Math.max(1, Math.floor((correctBlocks.length - 1) / 2));
+  return Math.min(4, base + levelIdx);
+}
+
+// Escolhe os blocos-isca em duas camadas de "confundibilidade": blocos da
+// MESMA unidade (tema/vocabulário já visto nesta lição -- mais parecidos,
+// mais difíceis de descartar de cara) e blocos de QUALQUER unidade (podem
+// ser de um assunto totalmente diferente -- mais fáceis de eliminar por
+// eliminação). Reaproveita o mesmo padrão de pool em duas camadas já usado
+// nos distratores do cloze (ver clozeExercises abaixo), só decidindo a
+// PROPORÇÃO entre elas pelo nível: quanto mais avançado, maior a fatia
+// "difícil" (mesma unidade) em vez da fatia "fácil" (qualquer unidade).
+function buildReorderDistractors(unit, correctBlocks, count){
+  if (count <= 0) return [];
+  const correctTexts = new Set(correctBlocks.map(b => b.f));
+  const dedupeAndExclude = (blocks, excludeTexts) => {
+    const seen = new Set(excludeTexts);
+    return blocks.filter(b => {
+      if (correctTexts.has(b.f) || seen.has(b.f)) return false;
+      seen.add(b.f);
+      return true;
+    });
+  };
+
+  const unitPool = shuffle(dedupeAndExclude((unit.phrases || []).flatMap(ph => ph.blocks || []), []));
+  const levelIdx = Math.max(0, LEVELS.findIndex(l => l.id === unit.level));
+  const hardFraction = Math.min(0.75, 0.25 + levelIdx * 0.25);
+  const hardCount = Math.min(unitPool.length, Math.round(count * hardFraction));
+
+  const picked = unitPool.slice(0, hardCount);
+  if (picked.length < count){
+    const globalPool = shuffle(dedupeAndExclude(
+      UNITS.flatMap(u2 => (u2.phrases || []).flatMap(ph => ph.blocks || [])),
+      picked.map(b => b.f)
+    ));
+    picked.push(...globalPool.slice(0, count - picked.length));
+  }
+  return picked;
+}
+
 function buildExerciseSet(unit){
   const vocabExercises = buildConsolidationVocabExercises(unit);
 
-  // Frases da unidade viram exercício de "ordenar" ou de "cenário" (index par/ímpar),
-  // pra variar o formato sem dobrar o total de exercícios por lição.
+  // Frases da unidade viram exercício de "ordenar"/"traduzir" ou de "cenário"
+  // (index par/ímpar), pra variar o formato sem dobrar o total de
+  // exercícios por lição. Entre as que viram exercício de blocos, metade
+  // pede só reordenar (frase já em francês, sem tradução exibida) e metade
+  // pede traduzir (parte do português, monta o francês do zero) -- os dois
+  // reaproveitam o MESMO motor de blocos/slots, só o prompt muda (ver
+  // renderReorderExercise). Ambos agora incluem blocos-isca.
   const phrasesWithBlocks = (unit.phrases || []).filter(p => p.blocks && p.blocks.length >= 2);
   const phrasesWithScenario = (unit.phrases || []).filter(p => p.scenario);
 
@@ -2443,7 +2501,10 @@ function buildExerciseSet(unit){
       const distractors = shuffle(phrasesWithScenario.filter(x => x !== p)).slice(0, 2);
       scenarioExercises.push({ format: 'scenario', phrase: p, options: shuffle([p, ...distractors]) });
     } else {
-      reorderExercises.push({ format: 'reorder', phrase: p, shuffledBlocks: shuffle(p.blocks) });
+      const mode = reorderExercises.length % 2 === 0 ? 'translate' : 'order';
+      const distractorCount = reorderDistractorCount(unit, p.blocks);
+      const distractorBlocks = buildReorderDistractors(unit, p.blocks, distractorCount);
+      reorderExercises.push({ format: 'reorder', phrase: p, mode, shuffledBlocks: shuffle([...p.blocks, ...distractorBlocks]) });
     }
   });
 
@@ -3116,11 +3177,21 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
 function renderReorderExercise(ex, contentEl, nextBtn, total){
   const correctOrder = ex.phrase.blocks;
   const chosenSequence = [];
+  // mode 'translate': parte do português (nunca mostra a frase em francês
+  // antes de responder) e monta o francês do zero, com blocos-isca no meio.
+  // mode 'order' (default, retrocompatível com exercícios antigos sem
+  // "mode"): a frase já em francês, só embaralhada -- sem tradução exibida.
+  const isTranslate = ex.mode === 'translate';
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
       <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
-      <div class="exercise-prompt-label">Ordene a frase</div>
+      <div class="exercise-prompt-label">${isTranslate ? 'Traduza para o francês' : 'Ordene a frase'}</div>
+      ${isTranslate ? `
+        <div class="exercise-prompt">
+          <div class="prompt-translation">${ex.phrase.t}</div>
+        </div>
+      ` : ''}
       <div class="reorder-answer-slots" id="reorder-answer-slots"></div>
       <div class="reorder-blocks" id="reorder-blocks"></div>
       <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
@@ -3224,9 +3295,13 @@ function showCorrectReorderPanel(contentEl, ex){
   const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
   const panel = document.createElement('div');
   panel.className = 'correct-feedback';
+  // No modo "traduzir", o português já apareceu como pergunta -- repeti-lo
+  // aqui seria redundante; mostra a frase francesa completa (o aluno só viu
+  // ela em pedaços separados até agora) como confirmação nova de verdade.
+  const secondaryLine = ex.mode === 'translate' ? ex.phrase.f : ex.phrase.t;
   panel.innerHTML = `
     <div class="correct-feedback-header">✅ Muito bem!</div>
-    <p class="correct-feedback-trans">${ex.phrase.t}</p>
+    <p class="correct-feedback-trans">${secondaryLine}</p>
     <button class="btn btn-primary btn-block correct-feedback-continue" id="correct-continue-btn">Continuar →</button>
   `;
   wrap.appendChild(panel);
