@@ -20,18 +20,21 @@ function renderLanguageSwitcher(){
   const dropdown = document.getElementById('lang-switcher-dropdown');
   if (!btn || !dropdown) return;
 
+  // SVG inline em vez do emoji de bandeira -- ver comentário sobre flagSvg
+  // em languages/index.js (o emoji não renderiza como bandeira fora do
+  // Chrome em vários SOs/navegadores, só como texto "FR"/"CN").
   const current = AVAILABLE_LANGUAGES.find(l => l.id === LANG_ID);
-  btn.textContent = current ? current.flagEmoji : '🌐';
+  btn.innerHTML = current ? current.flagSvg : '🌐';
   btn.setAttribute('aria-label', current ? `Idioma atual: ${current.name}. Clique para trocar de idioma.` : 'Trocar idioma');
 
   const others = AVAILABLE_LANGUAGES.filter(l => l.enabled && l.id !== LANG_ID);
   dropdown.innerHTML = `
     <div class="lang-switcher-label">Você está estudando</div>
-    <div class="lang-switcher-current">${current ? current.flagEmoji : ''} ${current ? current.name : ''}</div>
+    <div class="lang-switcher-current">${current ? current.flagSvg : ''} ${current ? current.name : ''}</div>
     ${others.length ? `
       <div class="lang-switcher-sep"></div>
       <div class="lang-switcher-label">Aprender outro idioma</div>
-      ${others.map(l => `<button type="button" class="lang-switcher-item" data-lang="${l.id}" aria-label="Trocar para ${l.name}">${l.flagEmoji} ${l.name}</button>`).join('')}
+      ${others.map(l => `<button type="button" class="lang-switcher-item" data-lang="${l.id}" aria-label="Trocar para ${l.name}">${l.flagSvg} ${l.name}</button>`).join('')}
     ` : ''}
   `;
 

@@ -128,7 +128,8 @@ h1{
   transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
 }
 .lang-card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-lift); border-color:var(--accent); }
-.lang-card .flag{ font-size:44px; line-height:1; }
+.lang-card .flag{ display:block; line-height:1; }
+.lang-card .flag svg{ width:56px; height:auto; display:block; border-radius:4px; box-shadow:0 0 0 1px rgba(0,0,0,0.08); }
 .lang-card .lang-name{ font-weight:800; font-size:18px; }
 .lang-card .native{ font-size:13.5px; color:var(--ink-soft); }
 .gate-loading-spinner{ color:var(--ink-soft); font-size:14px; padding-top:40px; }
@@ -201,7 +202,7 @@ function renderLanguageChoices(onPick){
   const grid = document.getElementById('lang-grid');
   grid.innerHTML = AVAILABLE_LANGUAGES.filter(l => l.enabled).map(l => `
     <button type="button" class="lang-card" data-lang="${l.id}">
-      <span class="flag">${l.flagEmoji}</span>
+      <span class="flag">${l.flagSvg}</span>
       <span class="lang-name">${l.name}</span>
       <span class="native">${l.nativeName}</span>
     </button>
