@@ -671,6 +671,11 @@ document.getElementById('user-settings-btn').addEventListener('click', () => {
   switchTab('settings');
 });
 
+document.getElementById('admin-badges-btn').addEventListener('click', () => {
+  document.getElementById('user-menu-dropdown').classList.remove('open');
+  switchTab('admin-badges');
+});
+
 // Esta tabela `progress` é compartilhada com os outros idiomas da
 // plataforma (mesmo Supabase, mesma linha por user_id). Cada idioma guarda
 // seu estado sob sua própria chave dentro da coluna `data` para não
@@ -5020,6 +5025,7 @@ const switchTab = createTabSwitcher({
     hanzi: renderHanziLessonsGrid,
     progress: renderProgressView,
     profile: renderProfileView,
+    'admin-badges': renderAdminBadgesView,
     path: renderUnitsGrid,
   }
 });

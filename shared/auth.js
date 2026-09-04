@@ -70,6 +70,12 @@ async function onUserLoggedIn(user){
   const label = user.user_metadata?.full_name || user.email || 'Minha conta';
   document.getElementById('user-label').textContent = label;
   document.getElementById('user-dropdown-email').textContent = user.email || '';
+  // isAdminUser() vem de languages/<lang>/app.js -- só existe função pra
+  // essa checagem depois que app.js já rodou, o que sempre já aconteceu
+  // quando um login de verdade dispara este fluxo (onAuthStateChange só
+  // é registrado no fim de initAuth, chamada depois de app.js inteiro).
+  const adminBtn = document.getElementById('admin-badges-btn');
+  if (adminBtn) adminBtn.style.display = (typeof isAdminUser === 'function' && isAdminUser()) ? '' : 'none';
   await loadStateAndRender();
 }
 
