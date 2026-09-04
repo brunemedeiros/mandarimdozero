@@ -197,9 +197,8 @@ body{
 .pill.streak{ background: linear-gradient(120deg, #FFF3D6, var(--paper-warm)); color:#8A5A00; }
 .pill.xp{ background: linear-gradient(120deg, rgba(192,35,31,0.08), var(--paper-warm)); color: var(--seal-red-dark); }
 a.pill{ text-decoration:none; cursor:pointer; }
-.theme-toggle-btn{ color: var(--ink-soft); cursor:pointer; border:none; padding:7px; }
-.theme-toggle-btn svg{ display:block; }
-.theme-toggle-btn:hover{ color: var(--ink); }
+.leaderboard-pill{ color: var(--ink-soft); cursor:pointer; border:none; font-size:15px; padding:6px 10px; }
+.leaderboard-pill:hover{ color: var(--ink); border-color: var(--imperial-gold); }
 a.pill:hover{ border-color: var(--imperial-gold); }
 
 /* ---------- Bandeiras (ícones de idioma) — convenção padrão ----------
@@ -1944,7 +1943,7 @@ body.hide-pinyin .prompt-pinyin{
         <div class="pill xp">⭐ <span id="xp-count">0</span> XP</div>
         <button class="pill pinyin-toggle-btn" id="pinyin-toggle-btn" aria-label="Esconder/mostrar pinyin" title="Esconder/mostrar pinyin">🔤 Pinyin: <span id="pinyin-state-label">ON</span></button>
         <button class="pill search-open-btn" id="search-open-btn" aria-label="Buscar por pinyin, hanzi ou tradução" title="Buscar por pinyin, hanzi ou tradução">🔍</button>
-        <button class="pill theme-toggle-btn" id="theme-toggle-btn" aria-label="Alternar tema claro/escuro" title="Alternar tema claro/escuro">🌙</button>
+        <button class="pill leaderboard-pill" id="leaderboard-topbar-btn" aria-label="Ranking" title="Ranking">🏆</button>
         <div class="lang-switcher">
           <button class="lang-switcher-btn" id="lang-switcher-btn" type="button" aria-label="Trocar idioma" title="Trocar idioma"></button>
           <div class="lang-switcher-dropdown" id="lang-switcher-dropdown"></div>
@@ -2109,6 +2108,13 @@ body.hide-pinyin .prompt-pinyin{
     </div>
     <p class="settings-more-note">Mais opções de conta em breve.</p>
     <div class="section-label">Preferências</div>
+    <div class="pref-row">
+      <div class="pref-row-text">
+        <div class="pref-row-title">Modo escuro</div>
+        <div class="pref-row-sub">Usa o tema escuro em vez do claro, independente do sistema.</div>
+      </div>
+      <button class="pref-switch" id="theme-pref-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
+    </div>
     <div class="pref-row">
       <div class="pref-row-text">
         <div class="pref-row-title">Sempre digitar no exercício de completar frase</div>

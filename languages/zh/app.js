@@ -669,6 +669,8 @@ document.getElementById('leaderboard-btn').addEventListener('click', () => {
   switchTab('leaderboard');
 });
 
+document.getElementById('leaderboard-topbar-btn').addEventListener('click', () => switchTab('leaderboard'));
+
 document.getElementById('user-settings-btn').addEventListener('click', () => {
   document.getElementById('user-menu-dropdown').classList.remove('open');
   document.getElementById('settings-email').textContent = CURRENT_USER?.email || 'Modo convidado';
