@@ -392,7 +392,11 @@ function renderDailyGoalChip(){
   const goal = STATE.studyGoal.dailyLessonsGoal;
   if (!goal){ chip.style.display = 'none'; chip.innerHTML = ''; return; }
   ensureDailyBucket();
-  const done = STATE.daily.lessonsForGoal;
+  // Number(...) || 0: nunca deixa um campo ausente virar NaN silencioso (ver
+  // auditoria "O problema dos 100%" -- ensureDailyBucket() já reconcilia
+  // isso na maioria dos casos, mas este piso garante que nunca mais apareça
+  // "undefined" no texto nem uma barra cheia sem ter concluído).
+  const done = Number(STATE.daily.lessonsForGoal) || 0;
   const pct = Math.min(100, Math.round((done / goal) * 100));
   const reached = done >= goal;
   chip.style.display = 'flex';
