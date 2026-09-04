@@ -26,6 +26,20 @@ async function resolveProfileByUsername(username){
   return data;
 }
 
+// Lista completa de perfis -- alimenta tanto o autocomplete de @username
+// (campo "Conceder badge") quanto a lista de membros do modal "Gerenciar
+// badge". Não pagina: o público desta plataforma ainda é pequeno o
+// suficiente pra uma lista só; se crescer muito, isso é o primeiro lugar
+// a revisitar (busca no servidor em vez de trazer tudo).
+async function fetchAllProfiles(){
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .select('user_id, username, display_name')
+    .order('username', { ascending: true });
+  if (error){ console.error('Erro ao carregar lista de usuários:', error); return []; }
+  return data || [];
+}
+
 async function createCatalogBadge({ id, name, icon, description }){
   const cleanId = String(id || '').toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 32);
   if (cleanId.length < 2) return { ok: false, error: 'ID do badge precisa ter pelo menos 2 caracteres (letras minúsculas, números ou _).' };
@@ -78,6 +92,20 @@ async function revokeBadgeGrant(userId, badgeId){
   return { ok: !error };
 }
 
+// Aplica de uma vez as mudanças feitas no modal "Gerenciar badge": concede
+// pra quem ficou marcado e não tinha, revoga de quem ficou desmarcado e
+// tinha. Sequencial (não Promise.all) de propósito -- lista de membros
+// tende a ser curta, e sequencial deixa mais fácil saber exatamente onde
+// parou se algo falhar no meio.
+async function applyBadgeMembership(badgeId, adds, removes){
+  for (const userId of adds){
+    await supabaseClient.from('badge_grants').insert({ user_id: userId, badge_id: badgeId, granted_by: CURRENT_USER?.email || null });
+  }
+  for (const userId of removes){
+    await supabaseClient.from('badge_grants').delete().eq('user_id', userId).eq('badge_id', badgeId);
+  }
+}
+
 // Junta badge_grants com profiles num só JS (as duas tabelas referenciam
 // auth.users de forma independente, sem FK direta entre si -- não dá pra
 // pedir ao PostgREST pra embutir profiles.username automaticamente aqui).
@@ -105,9 +133,13 @@ async function renderAdminBadgesView(){
   }
   wrap.innerHTML = `<p class="profile-loading">Carregando...</p>`;
 
-  const [catalog, grants] = await Promise.all([fetchBadgeCatalog(), fetchAllGrantsWithUsernames()]);
+  const [catalog, grants, profiles] = await Promise.all([fetchBadgeCatalog(), fetchAllGrantsWithUsernames(), fetchAllProfiles()]);
 
   const catalogOptionsHTML = catalog.map(b => `<option value="${b.id}">${b.icon} ${b.name}</option>`).join('');
+  // <datalist> nativo -- some idiomas/navegadores mostram como uma lista
+  // "toggle" ao clicar no campo, filtrando conforme digita, sem precisar
+  // de nenhum JS de dropdown customizado.
+  const usernameDatalistHTML = profiles.map(p => `<option value="${p.username}">${p.display_name ? escapeHTML(p.display_name) : ''}</option>`).join('');
 
   const builtInHTML = SPECIAL_BADGES.map(b => `
     <div class="admin-badge-row">
@@ -119,16 +151,19 @@ async function renderAdminBadgesView(){
     </div>
   `).join('');
 
-  const catalogHTML = catalog.length ? catalog.map(b => `
-    <div class="admin-badge-row">
+  const catalogHTML = catalog.length ? catalog.map(b => {
+    const memberCount = grants.filter(g => g.badge_id === b.id).length;
+    return `
+    <div class="admin-badge-row clickable" data-manage-badge-id="${b.id}">
       <span class="admin-badge-icon">${b.icon}</span>
       <div class="admin-badge-info">
         <div class="admin-badge-name">${b.name}</div>
-        <div class="admin-badge-desc">${b.description || ''}</div>
+        <div class="admin-badge-desc">${b.description ? b.description + ' · ' : ''}${memberCount} ${memberCount === 1 ? 'pessoa' : 'pessoas'} · clique pra gerenciar</div>
       </div>
       <button class="admin-badge-delete-btn" data-badge-id="${b.id}" title="Excluir badge (e todas as concessões dele)">🗑️</button>
     </div>
-  `).join('') : `<p class="profile-empty-note">Nenhum badge criado ainda.</p>`;
+  `;
+  }).join('') : `<p class="profile-empty-note">Nenhum badge criado ainda.</p>`;
 
   const grantsHTML = grants.length ? grants.map(g => {
     const badge = catalog.find(b => b.id === g.badge_id) || SPECIAL_BADGES.find(b => b.id === g.badge_id);
@@ -169,8 +204,9 @@ async function renderAdminBadgesView(){
         <label class="profile-edit-label" for="admin-grant-username">@username de quem vai receber</label>
         <div class="profile-edit-username-wrap">
           <span class="profile-edit-at">@</span>
-          <input type="text" id="admin-grant-username" class="profile-edit-input" maxlength="24" placeholder="username">
+          <input type="text" id="admin-grant-username" class="profile-edit-input" maxlength="24" placeholder="username" list="admin-username-datalist" autocomplete="off">
         </div>
+        <datalist id="admin-username-datalist">${usernameDatalistHTML}</datalist>
         <label class="profile-edit-label" for="admin-grant-note">Nota (opcional, só pra você)</label>
         <input type="text" id="admin-grant-note" class="profile-edit-input" maxlength="120" placeholder="ex: reportou o bug do streak">
         <p class="profile-edit-error" id="admin-grant-badge-error"></p>
@@ -232,7 +268,8 @@ async function renderAdminBadgesView(){
   });
 
   wrap.querySelectorAll('[data-badge-id]').forEach(btn => {
-    btn.addEventListener('click', async () => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation(); // não deixa o clique "vazar" pro data-manage-badge-id da linha por baixo
       if (!confirm('Excluir este badge e todas as concessões dele?')) return;
       await deleteCatalogBadge(btn.dataset.badgeId);
       renderAdminBadgesView();
@@ -245,4 +282,61 @@ async function renderAdminBadgesView(){
       renderAdminBadgesView();
     });
   });
+
+  wrap.querySelectorAll('[data-manage-badge-id]').forEach(row => {
+    row.addEventListener('click', () => openManageBadgeMembersModal(row.dataset.manageBadgeId, catalog, profiles, grants));
+  });
 }
+
+// Modal "Gerenciar badge": lista todo mundo que já tem @username criado,
+// pré-marcado quem já tem o badge. Salvar concede pra quem passou a
+// marcar e revoga de quem passou a desmarcar -- é o "clicar no badge e
+// desselecionar o nome" pedido, sem precisar sair da lista de badges.
+function openManageBadgeMembersModal(badgeId, catalog, profiles, grants){
+  const badge = catalog.find(b => b.id === badgeId);
+  if (!badge) return;
+  const holderIds = new Set(grants.filter(g => g.badge_id === badgeId).map(g => g.user_id));
+
+  const modal = document.getElementById('admin-manage-badge-modal');
+  document.getElementById('admin-manage-badge-title').textContent = `${badge.icon} ${badge.name}`;
+  document.getElementById('admin-manage-badge-list').innerHTML = profiles.length ? profiles.map(p => `
+    <label class="admin-member-row">
+      <input type="checkbox" data-user-id="${p.user_id}" ${holderIds.has(p.user_id) ? 'checked data-was-checked="1"' : ''}>
+      <span>@${p.username}${p.display_name ? ` <span class="admin-member-name">${escapeHTML(p.display_name)}</span>` : ''}</span>
+    </label>
+  `).join('') : `<p class="profile-empty-note">Ninguém criou um perfil ainda.</p>`;
+  modal.dataset.badgeId = badgeId;
+  modal.style.display = 'flex';
+}
+
+function closeManageBadgeMembersModal(){
+  document.getElementById('admin-manage-badge-modal').style.display = 'none';
+}
+
+function wireManageBadgeMembersModal(){
+  const modal = document.getElementById('admin-manage-badge-modal');
+  if (!modal) return;
+
+  document.getElementById('admin-manage-badge-modal-close').addEventListener('click', closeManageBadgeMembersModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeManageBadgeMembersModal(); });
+
+  document.getElementById('admin-manage-badge-save-btn').addEventListener('click', async () => {
+    const badgeId = modal.dataset.badgeId;
+    const checkboxes = modal.querySelectorAll('input[type="checkbox"]');
+    const adds = [], removes = [];
+    checkboxes.forEach(cb => {
+      const wasChecked = cb.dataset.wasChecked === '1';
+      if (cb.checked && !wasChecked) adds.push(cb.dataset.userId);
+      if (!cb.checked && wasChecked) removes.push(cb.dataset.userId);
+    });
+    const btn = document.getElementById('admin-manage-badge-save-btn');
+    btn.disabled = true;
+    await applyBadgeMembership(badgeId, adds, removes);
+    btn.disabled = false;
+    closeManageBadgeMembersModal();
+    showToast('✓ Membros do badge atualizados.');
+    renderAdminBadgesView();
+  });
+}
+
+wireManageBadgeMembersModal();
