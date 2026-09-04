@@ -654,12 +654,14 @@ async function loadStateAndRender(){
 // shared/auth.js -- os botões/formulários abaixo continuam no HTML de cada
 // idioma, só a lógica de wiring foi extraída.
 
-// "Meu perfil" reaproveita a mesma tela de Progresso de sempre — só mudou
-// de lugar (estava na barra de abas, agora fica dentro do menu do usuário,
-// igual ao Busuu).
+// "Meu perfil" abre a tela de identidade própria (shared/profile.js) --
+// deixou de ser um alias de "Seu progresso" (ver arquitetura aprovada:
+// Perfil != painel de estatísticas). "Seu progresso" continua existindo,
+// só passou a ser alcançado a partir de dentro do Perfil ("Ver
+// estatísticas completas").
 document.getElementById('user-profile-btn').addEventListener('click', () => {
   document.getElementById('user-menu-dropdown').classList.remove('open');
-  switchTab('progress');
+  switchTab('profile');
 });
 
 document.getElementById('user-settings-btn').addEventListener('click', () => {
@@ -690,6 +692,21 @@ function loadLegacyState(data){
   if (data.hanziCards || data.cards) applySerializedState(data);
 }
 
+// Resumo de progresso pro Perfil (shared/profile.js). Diferente do
+// francês, o chinês ainda não tem levelCompleted/unitsOfLevel (só existe 1
+// nível, HSK1, então nunca precisou de seletor de nível) -- calcula direto
+// contra UNITS filtrado por level. Mesmo formato de retorno em ambos os
+// idiomas ({ levelId, levelLabel, pct }), só a implementação muda. Também
+// é gravado dentro de serializeState() pra o Perfil mostrar este idioma
+// enquanto a pessoa está no site do francês, sem carregar este content.js.
+function computeProgressSummary(){
+  const level = LEVELS[0];
+  const units = UNITS.filter(u => u.level === level.id);
+  const done = units.filter(u => STATE.unitProgress[u.id]?.completed).length;
+  const pct = units.length ? Math.round((done / units.length) * 100) : 0;
+  return { levelId: level.id, levelLabel: level.label, pct };
+}
+
 function serializeState(){
   return {
     cards: STATE.cards,
@@ -711,7 +728,10 @@ function serializeState(){
     everUsedMatchGame: STATE.everUsedMatchGame,
     periodXp: STATE.periodXp,
     daily: STATE.daily,
-    storyProgress: STATE.storyProgress
+    storyProgress: STATE.storyProgress,
+    // Só leitura pro Perfil (ver computeProgressSummary) -- nunca restaurado
+    // de volta em applySerializedState, é recalculado a cada save.
+    progressSummary: computeProgressSummary()
   };
 }
 
@@ -4999,6 +5019,7 @@ const switchTab = createTabSwitcher({
   tabHandlers: {
     hanzi: renderHanziLessonsGrid,
     progress: renderProgressView,
+    profile: renderProfileView,
     path: renderUnitsGrid,
   }
 });
