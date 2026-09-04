@@ -211,6 +211,102 @@ async function saveProfileEdits({ displayName, username, bio }){
   return { ok: true, profile: data };
 }
 
+// ---------- Avatar (upload de foto) ----------
+// "Crop simples" (ver "Priorização" na arquitetura aprovada): corta pro
+// quadrado central automaticamente, sem UI de arrastar/ajustar -- e
+// redimensiona no CLIENTE antes de subir, então uma foto de câmera de
+// vários MB nunca vai inteira pro Storage.
+const AVATAR_MAX_DIMENSION = 480;
+const AVATAR_MAX_UPLOAD_BYTES = 8 * 1024 * 1024; // limite do arquivo ORIGINAL, antes do resize
+
+function resizeImageToSquareBlob(file){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const side = Math.min(img.naturalWidth, img.naturalHeight);
+      const sx = (img.naturalWidth - side) / 2;
+      const sy = (img.naturalHeight - side) / 2;
+      const canvas = document.createElement('canvas');
+      canvas.width = AVATAR_MAX_DIMENSION;
+      canvas.height = AVATAR_MAX_DIMENSION;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, sx, sy, side, side, 0, 0, AVATAR_MAX_DIMENSION, AVATAR_MAX_DIMENSION);
+      canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Falha ao processar imagem.')), 'image/jpeg', 0.86);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Não foi possível ler essa imagem.')); };
+    img.src = url;
+  });
+}
+
+// Path fixo por conta (não por upload) -- upsert:true sempre sobrescreve o
+// mesmo arquivo, então não acumula lixo no bucket a cada troca de foto.
+function avatarStoragePath(){
+  return `${CURRENT_USER.id}/avatar.jpg`;
+}
+
+async function uploadAvatar(file){
+  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta pra salvar uma foto.' };
+  if (!file.type.startsWith('image/')) return { ok: false, error: 'Escolha um arquivo de imagem (JPG, PNG...).' };
+  if (file.size > AVATAR_MAX_UPLOAD_BYTES) return { ok: false, error: 'Imagem muito grande (máx. 8MB).' };
+
+  let blob;
+  try{
+    blob = await resizeImageToSquareBlob(file);
+  }catch(e){
+    console.error('Erro ao processar imagem:', e);
+    return { ok: false, error: 'Não foi possível processar essa imagem. Tente outra.' };
+  }
+
+  const path = avatarStoragePath();
+  const { error: uploadError } = await supabaseClient.storage
+    .from('avatars')
+    .upload(path, blob, { upsert: true, contentType: 'image/jpeg', cacheControl: '3600' });
+  if (uploadError){
+    console.error('Erro ao subir avatar:', uploadError);
+    return { ok: false, error: 'Não foi possível enviar a foto agora. Tente de novo.' };
+  }
+
+  const { data: pub } = supabaseClient.storage.from('avatars').getPublicUrl(path);
+  // Cache-busting: o path é sempre o mesmo (upsert), então sem isso o
+  // navegador continuaria mostrando a foto antiga em cache depois de trocar.
+  const avatarUrl = `${pub.publicUrl}?t=${Date.now()}`;
+
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .update({ avatar_url: avatarUrl })
+    .eq('user_id', CURRENT_USER.id)
+    .select()
+    .single();
+  if (error){
+    console.error('Erro ao salvar avatar no perfil:', error);
+    return { ok: false, error: 'Foto enviada, mas não foi possível salvar no perfil. Tente de novo.' };
+  }
+  PROFILE_CACHE = data;
+  return { ok: true, profile: data };
+}
+
+async function removeAvatar(){
+  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  // Best-effort: mesmo se o arquivo já não existir no Storage (ou a
+  // remoção falhar por algum motivo), ainda limpamos avatar_url no
+  // perfil -- o dado que a UI realmente lê é a coluna, não o arquivo.
+  await supabaseClient.storage.from('avatars').remove([avatarStoragePath()]);
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .update({ avatar_url: null })
+    .eq('user_id', CURRENT_USER.id)
+    .select()
+    .single();
+  if (error){
+    console.error('Erro ao remover avatar:', error);
+    return { ok: false, error: 'Não foi possível remover a foto agora.' };
+  }
+  PROFILE_CACHE = data;
+  return { ok: true, profile: data };
+}
+
 // Lê a linha inteira de `progress` (todos os idiomas, não só o deste site)
 // -- é o que permite mostrar "Francês · A1 · 42%" enquanto a pessoa está
 // dentro do site de chinês, sem carregar o content.js do francês.
@@ -339,10 +435,14 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, speci
     </div>
   ` : '';
 
+  const avatarHTML = profile?.avatar_url
+    ? `<img class="profile-avatar" src="${profile.avatar_url}" alt="Foto de perfil">`
+    : `<div class="profile-avatar" style="background:${color};">${initials}</div>`;
+
   wrap.innerHTML = `
     ${guestNote}
     <div class="profile-identity">
-      <div class="profile-avatar" style="background:${color};">${initials}</div>
+      ${avatarHTML}
       <div class="profile-name">${name}</div>
       ${profile ? `<div class="profile-username">@${profile.username}</div>` : ''}
       ${bio ? `<p class="profile-bio">${escapeHTML(bio)}</p>` : ''}
@@ -385,6 +485,26 @@ function escapeHTML(str){
   return div.innerHTML;
 }
 
+// Preview do avatar dentro do modal de edição -- mesma regra de fallback
+// pra iniciais/cor do avatar principal (avatarInitials/avatarColor),
+// chamada tanto ao abrir o modal quanto depois de um upload/remoção bem-
+// sucedidos (sem precisar fechar e reabrir o modal pra ver o resultado).
+function renderAvatarPreview(profile){
+  const preview = document.getElementById('profile-edit-avatar-preview');
+  const removeBtn = document.getElementById('profile-edit-avatar-remove-btn');
+  if (!preview) return;
+  if (profile?.avatar_url){
+    preview.innerHTML = `<img src="${profile.avatar_url}" alt="Foto de perfil">`;
+    if (removeBtn) removeBtn.style.display = '';
+  } else {
+    const name = profileDisplayName(profile);
+    const initials = avatarInitials(name);
+    const color = avatarColor(profile?.user_id || CURRENT_USER?.email || 'convidado');
+    preview.innerHTML = `<div class="profile-edit-avatar-initials" style="background:${color};">${initials}</div>`;
+    if (removeBtn) removeBtn.style.display = 'none';
+  }
+}
+
 function openEditProfileModal(){
   const modal = document.getElementById('profile-edit-modal');
   const p = PROFILE_CACHE;
@@ -393,6 +513,8 @@ function openEditProfileModal(){
   document.getElementById('profile-edit-bio').value = p?.bio || '';
   document.getElementById('profile-edit-bio-count').textContent = `${(p?.bio || '').length}/160`;
   document.getElementById('profile-edit-error').textContent = '';
+  document.getElementById('profile-edit-avatar-error').textContent = '';
+  renderAvatarPreview(p);
   modal.style.display = 'flex';
 }
 
@@ -406,6 +528,49 @@ function wireProfileEditModal(){
 
   document.getElementById('profile-edit-modal-close').addEventListener('click', closeEditProfileModal);
   modal.addEventListener('click', (e) => { if (e.target === modal) closeEditProfileModal(); });
+
+  // Avatar sobe/remove NA HORA (não espera o "Salvar" do form, que só cobre
+  // nome/username/bio) -- mesmo padrão de "clicar já aplica" que o resto do
+  // app usa pra ações de um clique só (ex. troca de tema, toggle de pinyin).
+  const avatarInput = document.getElementById('profile-edit-avatar-input');
+  const avatarError = document.getElementById('profile-edit-avatar-error');
+  const changeBtn = document.getElementById('profile-edit-avatar-change-btn');
+  const removeBtn = document.getElementById('profile-edit-avatar-remove-btn');
+
+  changeBtn.addEventListener('click', () => avatarInput.click());
+
+  avatarInput.addEventListener('change', async () => {
+    const file = avatarInput.files[0];
+    avatarInput.value = ''; // permite escolher o mesmo arquivo de novo depois
+    if (!file) return;
+    avatarError.textContent = '';
+    changeBtn.disabled = true;
+    changeBtn.textContent = 'Enviando...';
+    const result = await uploadAvatar(file);
+    changeBtn.disabled = false;
+    changeBtn.textContent = 'Alterar foto';
+    if (!result.ok){
+      avatarError.textContent = result.error;
+      return;
+    }
+    renderAvatarPreview(result.profile);
+    renderProfileView();
+    showToast('✓ Foto atualizada.');
+  });
+
+  removeBtn.addEventListener('click', async () => {
+    avatarError.textContent = '';
+    removeBtn.disabled = true;
+    const result = await removeAvatar();
+    removeBtn.disabled = false;
+    if (!result.ok){
+      avatarError.textContent = result.error;
+      return;
+    }
+    renderAvatarPreview(result.profile);
+    renderProfileView();
+    showToast('✓ Foto removida.');
+  });
 
   const bioInput = document.getElementById('profile-edit-bio');
   bioInput.addEventListener('input', () => {
