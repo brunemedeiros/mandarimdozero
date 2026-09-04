@@ -1447,12 +1447,18 @@ function buildUnitBlock(u){
 
   const badgeHTML = state === 'done' ? `<span class="ub-badge">✓</span>` : '';
   const chevronHTML = hasLessons ? `<button class="ub-chevron" type="button" aria-label="Expandir lições">▾</button>` : '';
+  // Só lições JÁ concluídas (e que não são o Ponto de verificação, cujo
+  // reteste tem efeitos colaterais bem mais pesados -- desbloqueio de
+  // módulo/nível -- fora do escopo desta revisão leve) ficam clicáveis pra
+  // reabrir em modo revisão (ver openLessonReview). "current" já abre
+  // normal pelo cabeçalho da unidade; "locked" fica inerte.
   const lessonsHTML = hasLessons ? `
     <div class="ub-lessons" style="${expanded ? '' : 'display:none;'}">
       ${u.lessons.map((l, i) => {
         const st = lessonRowState(u, i);
+        const clickable = unlocked && st === 'done' && !l.isCheckpoint;
         return `
-          <div class="ub-lesson-row ${st}">
+          <div class="ub-lesson-row ${st}${clickable ? ' clickable' : ''}" ${clickable ? `data-lesson-idx="${i}"` : ''}>
             <div class="ub-lesson-dot ${st}">${st === 'done' ? '✓' : i + 1}</div>
             <div class="ub-lesson-title">${l.title}</div>
           </div>
@@ -1486,18 +1492,36 @@ function buildUnitBlock(u){
       renderUnitsGrid();
     });
   }
+  block.querySelectorAll('.ub-lesson-row.clickable').forEach(row => {
+    row.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(row.dataset.lessonIdx, 10);
+      openLessonReview(u.id, idx);
+    });
+  });
   return block;
+}
+
+// Estado (recolhida/expandida) da faixa de Desafios de hoje -- lembrado
+// entre sessões, mesmo padrão de STATE.dailyMinutesLog etc: preferência de
+// interface, não progresso, então localStorage puro (nunca precisa
+// sincronizar entre dispositivos).
+const CHALLENGES_STRIP_COLLAPSE_KEY = 'mandarim_challenges_collapsed';
+function isDailyChallengesStripCollapsed(){
+  return localStorageSafeGet(CHALLENGES_STRIP_COLLAPSE_KEY) === '1';
 }
 
 // Faixa compacta e SEMPRE visível na Trilha com os 3 Desafios de hoje --
 // diferente de renderDailyChallengesScreen (tela cheia, só aparece ao
 // terminar uma unidade), essa dá visibilidade contínua sem exigir terminar
 // nada primeiro. Reaproveita a mesma fonte de dados (todaysChallenges()) --
-// não duplica lógica, só um resumo visual mais compacto dela.
+// não duplica lógica, só um resumo visual mais compacto dela. O título
+// funciona como botão de recolher/expandir.
 function renderDailyChallengesStrip(){
   const strip = document.getElementById('daily-challenges-strip');
   if (!strip) return;
   ensureDailyBucket();
+  const collapsed = isDailyChallengesStripCollapsed();
   const cardsHTML = todaysChallenges().map((c, i) => {
     // Number(...)||0: um campo ausente nunca mais vira NaN silencioso (ver
     // auditoria "O problema dos 100%") -- current fica sempre um número
@@ -1518,7 +1542,17 @@ function renderDailyChallengesStrip(){
       </div>
     `;
   }).join('');
-  strip.innerHTML = `<div class="dcs-caption">Desafios de hoje</div>${cardsHTML}`;
+  strip.innerHTML = `
+    <button class="dcs-caption-btn" type="button" aria-expanded="${collapsed ? 'false' : 'true'}">
+      <span class="dcs-caption">Desafios de hoje</span>
+      <span class="dcs-caption-chevron">▾</span>
+    </button>
+    <div class="dcs-cards" ${collapsed ? 'style="display:none;"' : ''}>${cardsHTML}</div>
+  `;
+  strip.querySelector('.dcs-caption-btn').addEventListener('click', () => {
+    localStorageSafeSet(CHALLENGES_STRIP_COLLAPSE_KEY, isDailyChallengesStripCollapsed() ? '0' : '1');
+    renderDailyChallengesStrip();
+  });
 }
 
 function renderUnitsGrid(){
@@ -1783,6 +1817,9 @@ function isLessonUnit(u){
 }
 
 function currentLessonIdx(unitId){
+  if (STEP_STATE.lessonReview && STEP_STATE.lessonReview.unitId === unitId){
+    return STEP_STATE.lessonReview.reviewIdx;
+  }
   return STATE.unitProgress[unitId]?.lessonIdx || 0;
 }
 
@@ -1854,7 +1891,17 @@ const STEP_STATE = {
   // nunca no fim da unidade inteira -- essa continua usando
   // onChallengesScreen). Guarda quantos cartões estão devidos AGORA pra
   // decidir, no clique de "Continuar", se leva direto pro Flashcard.
-  onLessonBoundaryScreen: null
+  onLessonBoundaryScreen: null,
+  // Revisão de uma lição JÁ CONCLUÍDA, clicada direto na lista expandida da
+  // Trilha (ver buildUnitBlock) -- { unitId, reviewIdx }, null fora de
+  // revisão. NUNCA mexe em STATE.unitProgress[unitId].lessonIdx (o ponteiro
+  // de progresso real fica intocado o tempo todo) -- currentLessonIdx()
+  // devolve reviewIdx no lugar dele enquanto isto existe, só pra essa
+  // unidade. Por construção não há nada pra "corromper" mesmo se o aluno
+  // fechar a aba no meio da revisão. exitToPath() (único jeito de sair
+  // durante o modo foco) e finishCurrentLesson() zeram isto de volta pra
+  // null antes de voltar pra Trilha.
+  lessonReview: null
 };
 
 function openUnitDetail(unitId){
@@ -1888,14 +1935,28 @@ function openUnitDetail(unitId){
   renderTopbarStats();
 }
 
-document.getElementById('back-to-path').addEventListener('click', () => {
+// Abre uma lição JÁ CONCLUÍDA em modo revisão, sem mexer no ponteiro de
+// progresso real da unidade (ver comentário de STEP_STATE.lessonReview).
+function openLessonReview(unitId, lessonIdx){
+  STEP_STATE.lessonReview = { unitId, reviewIdx: lessonIdx };
+  openUnitDetail(unitId);
+}
+
+// Único jeito de sair de dentro de uma unidade -- topbar/tabs ficam
+// escondidas em modo foco (ver .lesson-focus), então isto SEMPRE roda antes
+// de voltar pra Trilha, o que garante que uma revisão de lição em
+// andamento nunca sobrevive de volta pra lá.
+function exitToPath(){
   stopExerciseAudio();
   STEP_STATE.onChallengesScreen = false;
+  STEP_STATE.lessonReview = null;
   setLessonFocusMode(false);
   document.getElementById('path-list-wrap').style.display = 'block';
   document.getElementById('unit-detail-wrap').style.display = 'none';
   renderUnitsGrid();
-});
+}
+
+document.getElementById('back-to-path').addEventListener('click', exitToPath);
 
 document.getElementById('lesson-kbd-btn').addEventListener('click', () => {
   document.getElementById('kbd-shortcuts-modal').style.display = 'flex';
@@ -2531,6 +2592,14 @@ function advanceUnitStep(u){
 // lessonIdx, persiste, e mostra a tela leve de "Lição concluída" (que
 // decide, com base em cardsDueNow, se leva direto pro Flashcard).
 function finishCurrentLesson(u){
+  // Revisão de uma lição já concluída: nenhum XP de lição/desafio/meta
+  // diária deve contar de novo -- só sai de volta pra Trilha, limpando a
+  // flag de revisão (ver STEP_STATE.lessonReview).
+  if (STEP_STATE.lessonReview && STEP_STATE.lessonReview.unitId === u.id){
+    STEP_STATE.lessonReview = null;
+    exitToPath();
+    return;
+  }
   if (isLessonUnit(u) && !currentLesson(u).isCheckpoint){
     const finished = currentLesson(u);
     // Congela o progresso dos desafios de hoje ANTES das atualizações abaixo,
