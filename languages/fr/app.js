@@ -490,12 +490,14 @@ async function loadStateAndRender(){
 // shared/auth.js -- os botões/formulários abaixo continuam no HTML de cada
 // idioma, só a lógica de wiring foi extraída.
 
-// "Meu perfil" reaproveita a mesma tela de Progresso de sempre — só mudou
-// de lugar (estava na barra de abas, agora fica dentro do menu do usuário,
-// igual ao Busuu).
+// "Meu perfil" abre a tela de identidade própria (shared/profile.js) --
+// deixou de ser um alias de "Seu progresso" (ver arquitetura aprovada:
+// Perfil != painel de estatísticas). "Seu progresso" continua existindo,
+// só passou a ser alcançado a partir de dentro do Perfil ("Ver
+// estatísticas completas").
 document.getElementById('user-profile-btn').addEventListener('click', () => {
   document.getElementById('user-menu-dropdown').classList.remove('open');
-  switchTab('progress');
+  switchTab('profile');
 });
 
 document.getElementById('user-settings-btn').addEventListener('click', () => {
@@ -530,7 +532,10 @@ function serializeState(){
     daily: STATE.daily,
     checkpointProgress: STATE.checkpointProgress,
     levelTestProgress: STATE.levelTestProgress,
-    completedChallenges: STATE.completedChallenges
+    completedChallenges: STATE.completedChallenges,
+    // Só leitura pro Perfil (ver computeProgressSummary) -- nunca restaurado
+    // de volta em applySerializedState, é recalculado a cada save.
+    progressSummary: computeProgressSummary()
   };
 }
 
@@ -1189,6 +1194,22 @@ function moduleCompleted(module){
 function levelCompleted(levelId){
   const mods = modulesOfLevel(levelId);
   return mods.length > 0 && mods.every(moduleCompleted);
+}
+
+// Resumo de progresso pro Perfil (shared/profile.js) -- NÃO usa
+// STATE.currentLevel, que é só o ponteiro manual de qual nível a Trilha
+// está mostrando (nem é persistido entre sessões). "Nível atual" pro
+// Perfil é o primeiro nível ainda não 100% completo, derivado só de
+// unitProgress -- cai no último nível da lista se tudo já tiver sido
+// concluído. Também é gravado dentro de serializeState() pra o Perfil
+// conseguir mostrar ESTE idioma enquanto a pessoa está no site do OUTRO,
+// sem precisar carregar este content.js.
+function computeProgressSummary(){
+  const level = LEVELS.find(l => !levelCompleted(l.id)) || LEVELS[LEVELS.length - 1];
+  const units = unitsOfLevel(level.id);
+  const done = units.filter(u => STATE.unitProgress[u.id]?.completed).length;
+  const pct = units.length ? Math.round((done / units.length) * 100) : 0;
+  return { levelId: level.id, levelLabel: level.label, pct };
 }
 
 function levelTestsOfLevel(level){
@@ -4995,6 +5016,7 @@ const switchTab = createTabSwitcher({
   tabHandlers: {
     conjugaison: renderConjSelectScreen,
     progress: renderProgressView,
+    profile: renderProfileView,
     path: renderUnitsGrid,
     dictation: renderDictationList,
     challenges: renderChallengeCategories,
