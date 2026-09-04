@@ -358,9 +358,12 @@ const STATE = {
   studyGoal: {
     objective: null, levels: [],
     days: { mon:true, tue:true, wed:true, thu:true, fri:true, sat:true, sun:true },
-    hour: 8, minute: 0, notifications: false, dailyMinutes: 0 // dailyMinutes 0 = meta ainda não definida
+    hour: 8, minute: 0, notifications: false,
+    dailyMinutes: 0, // legado (era a unidade da meta antes da Fase 3 -- não lido mais pra nada, só preservado se já existir salvo)
+    dailyLessonsGoal: 0 // 0 = meta ainda não definida; 1/2/3 = Casual/Regular/Intenso
   },
-  dailyMinutesLog: {}, // 'YYYY-MM-DD' -> minutos estimados de estudo naquele dia
+  dailyMinutesLog: {}, // legado -- não lido mais pra nada, só continua sendo escrito (addStudyMinutes) pra não perder histórico já salvo
+  dailyLessonsLog: {}, // 'YYYY-MM-DD' -> lições (que contam pra meta) concluídas naquele dia
   totalReviews: 0,
   currentUnitId: null,
   reviewQueue: [],
@@ -496,6 +499,7 @@ function serializeState(){
     activityLog: STATE.activityLog,
     studyGoal: STATE.studyGoal,
     dailyMinutesLog: STATE.dailyMinutesLog,
+    dailyLessonsLog: STATE.dailyLessonsLog,
     totalReviews: STATE.totalReviews,
     daily: STATE.daily,
     checkpointProgress: STATE.checkpointProgress,
@@ -525,6 +529,7 @@ function applySerializedState(data){
   if (data.lastReviewReminderDay) STATE.lastReviewReminderDay = data.lastReviewReminderDay;
   if (data.studyGoal) Object.assign(STATE.studyGoal, data.studyGoal);
   if (data.dailyMinutesLog) Object.assign(STATE.dailyMinutesLog, data.dailyMinutesLog);
+  if (data.dailyLessonsLog) Object.assign(STATE.dailyLessonsLog, data.dailyLessonsLog);
   if (data.activityLog) Object.assign(STATE.activityLog, data.activityLog);
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
   if (data.daily) Object.assign(STATE.daily, data.daily);
@@ -596,33 +601,21 @@ document.getElementById('streak-modal-continue-btn').addEventListener('click', (
 });
 
 // ---------- Plano de estudo com meta diária (assistente estilo Busuu) ----------
-// Estima quantos exercícios faltam pro nível-alvo e, com a meta de minutos/dia
-// e os dias da semana escolhidos, calcula uma DATA estimada de conclusão —
-// tudo em cima do mesmo modelo de estimativa por exercício usado em
-// addStudyMinutes() (não é cronômetro real).
+// Meta diária em LIÇÕES (ver "A Gramática da Recompensa", §4): com os dias
+// da semana escolhidos, calcula uma DATA estimada de conclusão do nível-alvo.
 // OBJECTIVE_OPTIONS, DAY_DEFS, DAY_KEY_BY_JS_INDEX, PT_MONTHS, formatDatePt e
-// todo o wizard agora vêm de shared/wizard.js. LEVEL_DESCRIPTIONS e
-// estimateUnitExerciseCount continuam aqui -- são dados/regras específicas
-// deste idioma (LEVELS igual, ver content.js), exigidos como hook por
-// shared/wizard.js.
+// todo o wizard agora vêm de shared/wizard.js. LEVEL_DESCRIPTIONS continua
+// aqui -- é dado específico deste idioma (LEVELS igual, ver content.js),
+// exigido como hook por shared/wizard.js.
 const LEVEL_DESCRIPTIONS = {
   A1: { tier: 'Iniciante', text: 'Fazer e responder a perguntas simples e se apresentar a outras pessoas' },
   A2: { tier: 'Básico', text: 'Participar de conversas simples do dia a dia e falar sobre seus estudos' }
 };
 
-function estimateUnitExerciseCount(u){
-  if (u.type === 'grammar'){
-    return u.grammar?.exercises?.length || 0;
-  }
-  const phrasesWithBlocks = (u.phrases || []).filter(p => p.blocks && p.blocks.length >= 2);
-  return (u.vocab?.length || 0) + phrasesWithBlocks.length + Math.min(2, phrasesWithBlocks.length) + (u.trueFalseExercises ? 1 : 0);
-}
-
-// estimateCompletionDate, buildMinutesWeekData e remainingUnitsForLevels/
-// estimateMinutesRemainingForLevels agora vêm de shared/wizard.js.
-
-// renderStudyPlanCard, o wizard inteiro (STUDY_WIZARD_STEPS ate
-// saveStudyWizard) e o wiring do modal agora vem de shared/wizard.js.
+// estimateCompletionDate, buildLessonsWeekData, remainingUnitsForLevels/
+// estimateLessonsRemainingForLevels, renderStudyPlanCard e o wizard inteiro
+// (STUDY_WIZARD_STEPS até saveStudyWizard) e o wiring do modal vêm de
+// shared/wizard.js.
 
 // Lembrete local best-effort: só dispara se a pessoa tiver o app aberto numa
 // janela de ~30min depois do horário escolhido, com permissão já concedida —
@@ -630,7 +623,7 @@ function estimateUnitExerciseCount(u){
 // fechado ou o navegador nem está aberto.
 function maybeSendStudyReminder(){
   const goal = STATE.studyGoal;
-  if (!goal.notifications || !goal.dailyMinutes) return;
+  if (!goal.notifications || !goal.dailyLessonsGoal) return;
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
 
   const now = new Date();
@@ -643,7 +636,7 @@ function maybeSendStudyReminder(){
 
   if (localStorageSafeGet('frances_last_study_notif') === todayStr()) return;
   new Notification('Hora de estudar francês! 🇫🇷', {
-    body: `Sua meta de hoje: ${goal.dailyMinutes} minutos.`,
+    body: `Sua meta de hoje: ${goal.dailyLessonsGoal} lição${goal.dailyLessonsGoal > 1 ? 'ões' : ''}.`,
     icon: 'icons/icon-192.png'
   });
   localStorageSafeSet('frances_last_study_notif', todayStr());
@@ -695,7 +688,8 @@ function ensureDailyBucket(){
     STATE.daily = {
       date: today, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
       grammarLessons: 0, conjugationSessions: 0, conjugationCorrect: 0,
-      conjugationTenses: [], reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0
+      conjugationTenses: [], reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0,
+      lessonsForGoal: 0, goalCountedLessonKeys: []
     };
   }
 }
@@ -710,6 +704,19 @@ function registerDailyLessonCompleted(scorePct, isGrammar){
   if (scorePct >= 80) STATE.daily.highScoreLessons += 1;
   if (scorePct >= 100) STATE.daily.perfectLessons += 1;
   if (isGrammar) STATE.daily.grammarLessons += 1;
+}
+
+// Meta diária (plano de estudo) conta separado dos Desafios de hoje -- é uma
+// régua mais exigente (ver artefato, §4): só lições com conteúdo real
+// (`qualifies` filtra atalho degenerado, ex. lição minúscula demais) e nunca
+// a mesma lição 2x no mesmo dia (replay não soma -- `key` identifica a lição
+// de forma estável, ex. "A1-1:2" ou "A1-1:checkpoint").
+function registerDailyLessonForGoal(key, qualifies){
+  ensureDailyBucket();
+  if (!qualifies || STATE.daily.goalCountedLessonKeys.includes(key)) return;
+  STATE.daily.goalCountedLessonKeys.push(key);
+  STATE.daily.lessonsForGoal += 1;
+  STATE.dailyLessonsLog[todayStr()] = STATE.daily.lessonsForGoal;
 }
 function registerDailyConjugationSession(){
   ensureDailyBucket();
@@ -750,11 +757,14 @@ const REVISAO_CONJ_CHALLENGES = [
   { id:'speedReview1', icon:'⚡', label:'Complete uma sessão de Revisão Rápida', target:1, get: d => d.speedReviewSessions },
   { id:'matchGame1', icon:'🎴', label:'Jogue o jogo da memória 1 vez', target:1, get: d => d.matchGamesPlayed }
 ];
+// "Complete N lições" saiu daqui na Fase 3 -- virou redundante depois que a
+// meta diária (plano de estudo) passou a ser medida em lições também: as
+// duas telas mostrando a mesma contagem como se fossem coisas diferentes é
+// exatamente o "progresso duplicado" que o artefato pediu pra evitar (§4).
 const GENERAL_CHALLENGES = [
   { id:'stars40', icon:'⭐', label:'Ganhe 40 estrelas', target:40, get: d => d.stars },
   { id:'highscore2', icon:'📈', label:'Pontue mais de 80% em 2 lições', target:2, get: d => d.highScoreLessons },
   { id:'perfect1', icon:'🎯', label:'Complete uma lição sem errar', target:1, get: d => d.perfectLessons },
-  { id:'lessons5', icon:'📚', label:'Complete 5 lições', target:5, get: d => d.lessons },
   { id:'grammar1', icon:'🧠', label:'Complete 1 unidade de gramática', target:1, get: d => d.grammarLessons }
 ];
 
@@ -1239,6 +1249,7 @@ function renderDailyChallengesStrip(){
 function renderUnitsGrid(){
   recalculateUnlockedUnits();
   renderLevelSelect();
+  renderDailyGoalChip();
   renderDailyChallengesStrip();
 
   const grid = document.getElementById('units-grid');
@@ -2036,6 +2047,7 @@ function finishCurrentLesson(u){
     // -- não uma lista genérica dos 3 desafios do dia (essa já tem tela
     // própria, acessível pela aba "Desafios").
     const challengesBefore = todaysChallenges().map(c => Math.min(c.get(STATE.daily), c.target));
+    const lessonKey = `${u.id}:${currentLessonIdx(u.id)}`;
     STATE.unitProgress[u.id].lessonIdx = currentLessonIdx(u.id) + 1;
     addXP(8);
     // Sem pontuação própria pra avaliar aqui (a lição intermediária não é um
@@ -2045,6 +2057,10 @@ function finishCurrentLesson(u){
     // Ponto de verificação). Antes disso, os desafios do dia só avançavam ao
     // fim da UNIDADE inteira -- a rotina diária real é por lição.
     registerDailyLessonCompleted(undefined, false);
+    // Meta diária (§4 do artefato): só conta se a lição tinha conteúdo real
+    // (>=3 palavras ou incluía diálogo) -- filtra o atalho degenerado de uma
+    // lição minúscula "sobrando" no fim de uma unidade.
+    registerDailyLessonForGoal(lessonKey, (finished.vocabIdx?.length || 0) >= 3 || !!finished.includesDialogue);
     saveState();
     renderTopbarStats();
     renderLessonBoundaryScreen(u, finished, challengesBefore);
@@ -2058,6 +2074,11 @@ function finishCurrentLesson(u){
   const correct = u.type === 'grammar' ? STEP_STATE.gramExerciseScore : STEP_STATE.exerciseScore;
   const scorePct = total ? Math.round((correct / total) * 100) : 100;
   markUnitCompleted(STATE.currentUnitId, scorePct);
+  // Meta diária (§4 do artefato): mesma régua de "conteúdo real" (>=3 itens)
+  // usada na lição intermediária -- o Ponto de verificação/consolidação da
+  // unidade sempre qualifica na prática, mas o filtro evita contar uma
+  // unidade de gramática ou legado com uma lista de exercícios minúscula.
+  registerDailyLessonForGoal(`${u.id}:checkpoint`, total >= 3);
   if (isLessonUnit(u)){
     STATE.unitProgress[u.id].lessonIdx = 0;
     STATE.unitProgress[u.id].lessonMisses = {};
@@ -4579,6 +4600,8 @@ function renderProgressView(){
   renderActivityHeatmap();
   renderProgressLineChart();
 
+  const earnedCount = BADGES.filter(b => b.check(STATE)).length;
+  document.getElementById('badge-grid-count').textContent = `${earnedCount}/${BADGES.length}`;
   document.getElementById('badge-grid').innerHTML = BADGES.map(b => {
     const earned = b.check(STATE);
     return `<div class="badge ${earned?'earned':''}"><div class="icon">${b.icon}</div><div class="name">${b.name}</div></div>`;

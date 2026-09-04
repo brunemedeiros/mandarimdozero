@@ -848,6 +848,23 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .challenge-progress-fill{ height:100%; border-radius:4px; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); transition: width .3s ease; }
 .challenge-count{ flex-shrink:0; font-size:12.5px; font-weight:700; color: var(--ink-soft); }
 
+/* Chip de meta diária (plano de estudo) na Trilha -- ver artefato "A
+   Gramática da Recompensa", §6: "hábito" precisa aparecer na Home, hoje só
+   vive escondido na aba "Seu progresso". Clique leva pro card completo, sem
+   duplicar a lógica do wizard (renderDailyGoalChip, shared/wizard.js). */
+.daily-goal-chip{
+  display:flex; align-items:center; gap:12px; background: var(--paper); border:1px solid var(--paper-line);
+  border-radius: var(--radius); padding:12px 16px; margin: 2px 0 12px; cursor:pointer;
+}
+.daily-goal-chip:hover{ border-color: var(--imperial-gold); }
+.daily-goal-chip.done{ border-color: var(--jade); background: rgba(58,115,89,0.06); }
+.daily-goal-chip-icon{ font-size:20px; flex-shrink:0; }
+.daily-goal-chip-body{ flex:1; min-width:0; }
+.daily-goal-chip-label{ font-size:12.5px; font-weight:800; color: var(--ink); }
+.daily-goal-chip-track{ height:5px; border-radius:999px; background: var(--paper-warm); overflow:hidden; margin-top:6px; }
+.daily-goal-chip-fill{ height:100%; border-radius:999px; background: var(--jade); transition: width .3s ease; }
+.daily-goal-chip-check{ font-size:16px; color: var(--jade); flex-shrink:0; font-weight:800; }
+
 /* Faixa compacta e sempre visível na Trilha (opção que NÃO exige terminar
    uma lição pra ver o progresso do dia -- ver artefato "A Gramática da
    Recompensa", tier 2.4/2.5): os mesmos 3 desafios de todaysChallenges(),
@@ -1049,6 +1066,15 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .stat-card .label{ font-size:12px; color:var(--ink-soft); font-weight:700; }
 
 .badge-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(90px,1fr)); gap:12px; }
+
+/* Conquistas ganham mais destaque na Fase 3 (artefato §8): sobem pra logo
+   abaixo do anel de meta, em vez de ficar depois de dois gráficos -- e o
+   rótulo carrega a contagem já desbloqueada (badgeGrid + this count são
+   preenchidos juntos por renderProgressView). */
+.conquests-label{ display:flex; align-items:baseline; gap:8px; margin-top:26px; }
+.conquests-count{ font-family: var(--font-body); text-transform:none; letter-spacing:0; color: var(--seal-red-dark); font-weight:800; }
+.conquests-grid{ margin-bottom:26px; }
+.conquests-grid .badge .icon{ font-size:30px; }
 
 /* ---------- Preferências (aba Progresso) ---------- */
 .pref-row{
@@ -2037,6 +2063,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
           <button class="btn btn-secondary path-header-btn" id="export-open-btn">📦 Exportar</button>
         </div>
       </div>
+      <div class="daily-goal-chip" id="daily-goal-chip" style="display:none;"></div>
       <div class="daily-challenges-strip" id="daily-challenges-strip"></div>
       <div class="units-grid" id="units-grid"></div>
     </div>
@@ -2138,13 +2165,13 @@ footer.app-footer img{ height:56px; opacity:.9; }
       </div>
       <div class="study-plan-body" id="study-plan-body"></div>
     </div>
+    <div class="section-label conquests-label">Conquistas <span class="conquests-count" id="badge-grid-count"></span></div>
+    <div class="badge-grid conquests-grid" id="badge-grid"></div>
     <div class="stat-cards" id="stat-cards"></div>
     <div class="section-label">Atividade diária</div>
     <div class="heatmap-wrap" id="heatmap-wrap"></div>
     <div class="section-label">Palavras aprendidas ao longo do tempo</div>
     <div class="progress-line-wrap" id="progress-line-chart-wrap"></div>
-    <div class="section-label">Conquistas</div>
-    <div class="badge-grid" id="badge-grid"></div>
     <div class="section-label">Preferências</div>
     <div class="pref-row">
       <div class="pref-row-text">
