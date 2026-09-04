@@ -1397,6 +1397,17 @@ function unitBlockState(u){
   return 'locked';
 }
 
+// Modo admin: só a conta da autora do curso -- deixa REVISAR qualquer lição
+// de qualquer unidade (mesmo travada pros demais usuários), sem nunca
+// desbloquear nada de verdade nem mexer no progresso real. Reaproveita o
+// mesmo modo revisão não-destrutivo de openLessonReview (ver
+// STEP_STATE.lessonReview): a lição abre pra estudo/conferência, mas
+// terminar ela não avança lessonIdx nem concede XP/desafio.
+const ADMIN_EMAIL = 'brunemed1310@gmail.com';
+function isAdminUser(){
+  return !!(typeof CURRENT_USER !== 'undefined' && CURRENT_USER && CURRENT_USER.email === ADMIN_EMAIL);
+}
+
 // Estado de UMA lição dentro do bloco expandido da unidade.
 function lessonRowState(u, idx){
   if (STATE.unitProgress[u.id].completed) return 'done';
@@ -1464,7 +1475,7 @@ function buildUnitBlock(u){
     <div class="ub-lessons" style="${expanded ? '' : 'display:none;'}">
       ${u.lessons.map((l, i) => {
         const st = lessonRowState(u, i);
-        const clickable = unlocked && st === 'done' && !l.isCheckpoint;
+        const clickable = isAdminUser() || (unlocked && st === 'done' && !l.isCheckpoint);
         return `
           <div class="ub-lesson-row ${st}${clickable ? ' clickable' : ''}" ${clickable ? `data-lesson-idx="${i}"` : ''}>
             <div class="ub-lesson-dot ${st}">${st === 'done' ? '✓' : i + 1}</div>
@@ -1900,13 +1911,14 @@ const STEP_STATE = {
   // onChallengesScreen). Guarda quantos cartões estão devidos AGORA pra
   // decidir, no clique de "Continuar", se leva direto pro Flashcard.
   onLessonBoundaryScreen: null,
-  // Revisão de uma lição JÁ CONCLUÍDA, clicada direto na lista expandida da
-  // Trilha (ver buildUnitBlock) -- { unitId, reviewIdx }, null fora de
-  // revisão. NUNCA mexe em STATE.unitProgress[unitId].lessonIdx (o ponteiro
-  // de progresso real fica intocado o tempo todo) -- currentLessonIdx()
-  // devolve reviewIdx no lugar dele enquanto isto existe, só pra essa
-  // unidade. Por construção não há nada pra "corromper" mesmo se o aluno
-  // fechar a aba no meio da revisão. exitToPath() (único jeito de sair
+  // Revisão de uma lição JÁ CONCLUÍDA (ou, pra conta admin, QUALQUER lição
+  // de QUALQUER unidade -- ver isAdminUser), clicada direto na lista
+  // expandida da Trilha (ver buildUnitBlock) -- { unitId, reviewIdx }, null
+  // fora de revisão. NUNCA mexe em STATE.unitProgress[unitId].lessonIdx (o
+  // ponteiro de progresso real fica intocado o tempo todo) --
+  // currentLessonIdx() devolve reviewIdx no lugar dele enquanto isto existe,
+  // só pra essa unidade. Por construção não há nada pra "corromper" mesmo se
+  // o aluno fechar a aba no meio da revisão. exitToPath() (único jeito de sair
   // durante o modo foco) e finishCurrentLesson() zeram isto de volta pra
   // null antes de voltar pra Trilha.
   lessonReview: null
