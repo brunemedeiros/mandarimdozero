@@ -153,10 +153,33 @@ async function buildLanguagesSummary(){
       const s = computeProgressSummary();
       return { id: l.id, name: l.name, flagSvg: l.flagSvg, levelLabel: s.levelLabel, pct: s.pct, isCurrent: true };
     }
-    const summary = raw[l.appKey]?.progressSummary;
-    if (!summary) return null;
-    return { id: l.id, name: l.name, flagSvg: l.flagSvg, levelLabel: summary.levelLabel, pct: summary.pct, isCurrent: false };
+    const other = raw[l.appKey];
+    if (!other) return null;
+    if (other.progressSummary){
+      const s = other.progressSummary;
+      return { id: l.id, name: l.name, flagSvg: l.flagSvg, levelLabel: s.levelLabel, pct: s.pct, isCurrent: false };
+    }
+    // Progresso salvo ANTES de progressSummary existir (contas com
+    // histórico anterior a este recurso) -- sem isto, o card do outro
+    // idioma simplesmente nunca aparecia até a pessoa reabrir aquele site
+    // pelo menos uma vez (o próximo saveState() de lá já grava o campo de
+    // verdade). Calcula um resumo aproximado só com o que SEMPRE existiu em
+    // unitProgress -- todo id de unidade já vem pré-populado desde a
+    // inicialização do STATE daquele idioma -- sem precisar carregar o
+    // content.js do outro site.
+    const fallback = fallbackSummaryFromUnitProgress(other.unitProgress);
+    if (!fallback) return null;
+    return { id: l.id, name: l.name, flagSvg: l.flagSvg, levelLabel: null, pct: fallback.pct, isCurrent: false };
   }).filter(Boolean);
+}
+
+function fallbackSummaryFromUnitProgress(unitProgress){
+  if (!unitProgress) return null;
+  const ids = Object.keys(unitProgress);
+  if (!ids.length) return null;
+  const done = ids.filter(id => unitProgress[id]?.completed).length;
+  if (done === 0) return null;
+  return { pct: Math.round((done / ids.length) * 100) };
 }
 
 function profileDisplayName(profile){
@@ -199,7 +222,7 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, isGue
       <div class="profile-lang-flag">${l.flagSvg}</div>
       <div class="profile-lang-info">
         <div class="profile-lang-name">${l.name}</div>
-        <div class="profile-lang-level">${l.levelLabel} · ${l.pct}%</div>
+        <div class="profile-lang-level">${l.levelLabel ? `${l.levelLabel} · ` : ''}${l.pct}%</div>
         <div class="profile-lang-bar"><div style="width:${l.pct}%;"></div></div>
       </div>
     </div>
