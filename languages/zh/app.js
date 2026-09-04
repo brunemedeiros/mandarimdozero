@@ -664,6 +664,11 @@ document.getElementById('user-profile-btn').addEventListener('click', () => {
   switchTab('profile');
 });
 
+document.getElementById('leaderboard-btn').addEventListener('click', () => {
+  document.getElementById('user-menu-dropdown').classList.remove('open');
+  switchTab('leaderboard');
+});
+
 document.getElementById('user-settings-btn').addEventListener('click', () => {
   document.getElementById('user-menu-dropdown').classList.remove('open');
   document.getElementById('settings-email').textContent = CURRENT_USER?.email || 'Modo convidado';
@@ -5026,6 +5031,7 @@ const switchTab = createTabSwitcher({
     progress: renderProgressView,
     profile: renderProfileView,
     'admin-badges': renderAdminBadgesView,
+    leaderboard: renderLeaderboardView,
     path: renderUnitsGrid,
   }
 });

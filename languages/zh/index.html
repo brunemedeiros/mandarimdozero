@@ -1255,6 +1255,31 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .profile-special-badge-icon{ display:flex; align-items:center; font-size:14px; line-height:1; }
 .profile-special-badge-icon svg{ width:16px; height:16px; display:block; }
 
+/* ---------- Ranking (Leaderboard) ---------- */
+.leaderboard-week-label{ font-size:12.5px; color:var(--ink-soft); font-weight:700; text-align:center; margin-bottom:10px; }
+.leaderboard-tabs{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-bottom:16px; }
+.leaderboard-tab{
+  font-size:12.5px; font-weight:700; color:var(--ink-soft); background:var(--paper); border:1px solid var(--paper-line);
+  border-radius:99px; padding:6px 14px; cursor:pointer; font-family:var(--font-body);
+}
+.leaderboard-tab.active{ background:var(--seal-red); border-color:var(--seal-red); color:#fff; }
+.leaderboard-list{ display:flex; flex-direction:column; gap:8px; }
+.leaderboard-row{
+  display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--paper-line);
+  border-radius:12px; background:var(--paper);
+}
+.leaderboard-row.me{ border-color:var(--seal-red); background:var(--paper-warm); }
+.leaderboard-rank{ width:26px; flex-shrink:0; text-align:center; font-size:15px; font-weight:800; color:var(--ink-soft); }
+.leaderboard-avatar{
+  width:36px; height:36px; border-radius:50%; flex-shrink:0; object-fit:cover;
+  display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:14px; font-family:var(--font-body);
+}
+.leaderboard-info{ flex:1; min-width:0; }
+.leaderboard-name{ font-size:13.5px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.leaderboard-username{ font-size:11.5px; color:var(--ink-soft); }
+.leaderboard-xp{ font-size:13px; font-weight:800; color:var(--seal-red-dark); flex-shrink:0; }
+.leaderboard-footnote{ font-size:11.5px; color:var(--ink-soft); text-align:center; margin-top:14px; }
+
 /* ---------- Badges (admin) ---------- */
 .admin-badge-row, .admin-grant-row{
   display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--paper-line);
@@ -2004,6 +2029,15 @@ body.hide-pinyin .prompt-pinyin{
     <div id="profile-content"></div>
   </div>
 
+  <!-- ===== RANKING (Leaderboard) ===== -->
+  <div class="view" id="view-leaderboard">
+    <div class="path-header">
+      <h2>Ranking semanal</h2>
+      <p>Quem ganhou mais XP essa semana, no geral e por idioma.</p>
+    </div>
+    <div id="leaderboard-content"></div>
+  </div>
+
   <!-- ===== PROGRESSO ===== -->
   <div class="view" id="view-progress">
     <div class="path-header">
@@ -2129,6 +2163,7 @@ body.hide-pinyin .prompt-pinyin{
 <div id="user-menu-dropdown" class="user-dropdown">
   <div class="user-dropdown-email" id="user-dropdown-email"></div>
   <button class="user-dropdown-item" id="user-profile-btn">👤 Meu perfil</button>
+  <button class="user-dropdown-item" id="leaderboard-btn">🏆 Ranking</button>
   <button class="user-dropdown-item" id="user-settings-btn">⚙️ Configurações</button>
   <button class="user-dropdown-item" id="admin-badges-btn" style="display:none;">🎖️ Badges (admin)</button>
   <div class="user-dropdown-sep"></div>
@@ -2332,6 +2367,7 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../../shared/wizard.js"></script>
 <script src="../../shared/profile.js"></script>
 <script src="../../shared/admin-badges.js"></script>
+<script src="../../shared/leaderboard.js"></script>
 <script src="../../shared/topbar-stats.js"></script>
 <script src="../../shared/tabs.js"></script>
 <script src="../../shared/anki-export.js"></script>
