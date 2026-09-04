@@ -136,8 +136,14 @@ async function fetchOtherLanguagesRaw(){
     .select('data')
     .eq('user_id', CURRENT_USER.id)
     .maybeSingle();
-  if (error || !data || !data.data){ OTHER_LANGUAGES_RAW_CACHE = {}; return {}; }
-  OTHER_LANGUAGES_RAW_CACHE = data.data;
+  // Um ERRO (rede, RLS etc.) nunca fica em cache -- só "de fato não há
+  // linha salva" (data ausente, sem erro) é um resultado estável o
+  // suficiente pra cachear como {}. Sem essa distinção, uma falha
+  // transitória na primeira chamada "envenenava" o cache com {} pro resto
+  // da sessão, escondendo o progresso do outro idioma mesmo que ele
+  // existisse de verdade no Supabase.
+  if (error){ console.error('Erro ao carregar progresso de outros idiomas:', error); return {}; }
+  OTHER_LANGUAGES_RAW_CACHE = (data && data.data) || {};
   return OTHER_LANGUAGES_RAW_CACHE;
 }
 
