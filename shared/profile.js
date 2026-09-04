@@ -62,12 +62,11 @@ function isBetaTester(){
 }
 
 // badge_grants é o "espaço" pra conceder um badge especial a uma conta
-// específica quando não existe regra automática possível (ex: reconhecer
-// alguém que ajudou a sugerir uma mudança pontual) -- ver
-// shared/supabase_migrations/002_create_badge_grants_table.sql. Nenhum
-// badge do catálogo usa esse caminho ainda (founder/beta_tester são
-// 100% por regra), mas a leitura já funciona pronta pra quando a autora
-// conceder o primeiro.
+// específica quando não existe regra automática possível -- ver
+// shared/supabase_migrations/002_create_badge_grants_table.sql. Os badges
+// concedidos por esse caminho são definidos (nome/ícone/descrição) na
+// tabela badge_catalog (ver 003), criada pela admin na tela "Badges
+// (admin)" -- shared/admin-badges.js.
 async function fetchGrantedBadgeIds(){
   if (!CURRENT_USER) return new Set();
   const { data, error } = await supabaseClient
@@ -78,14 +77,35 @@ async function fetchGrantedBadgeIds(){
   return new Set((data || []).map(r => r.badge_id));
 }
 
+async function fetchBadgeCatalog(){
+  const { data, error } = await supabaseClient
+    .from('badge_catalog')
+    .select('*')
+    .order('created_at', { ascending: true });
+  if (error){ console.error('Erro ao carregar catálogo de badges:', error); return []; }
+  return data || [];
+}
+
 async function computeEarnedSpecialBadges(){
   if (!CURRENT_USER) return [];
   const granted = await fetchGrantedBadgeIds();
-  return SPECIAL_BADGES.filter(b => {
+  const earned = SPECIAL_BADGES.filter(b => {
     if (b.id === 'founder') return isFounder();
     if (b.id === 'beta_tester') return isBetaTester();
     return granted.has(b.id);
   });
+  // Badges manuais (criados por admin no catálogo, concedidos via
+  // badge_grants) -- só busca o catálogo inteiro se há algo concedido,
+  // pra não gastar uma consulta à toa pra quem não tem nenhum.
+  if (granted.size){
+    const catalog = await fetchBadgeCatalog();
+    catalog.forEach(cb => {
+      if (granted.has(cb.id) && !earned.some(e => e.id === cb.id)){
+        earned.push({ id: cb.id, name: cb.name, icon: cb.icon, desc: cb.description });
+      }
+    });
+  }
+  return earned;
 }
 
 // Só minúsculas/números/ponto/traço/underscore -- mesmo padrão do check

@@ -507,6 +507,11 @@ document.getElementById('user-settings-btn').addEventListener('click', () => {
   switchTab('settings');
 });
 
+document.getElementById('admin-badges-btn').addEventListener('click', () => {
+  document.getElementById('user-menu-dropdown').classList.remove('open');
+  switchTab('admin-badges');
+});
+
 // saveState/loadState/notifySaveFailure (Supabase, tabela progress) agora
 // vêm de shared/auth.js -- dependem de APP_KEY (acima) e das duas funções
 // abaixo, específicas do formato de STATE deste idioma.
@@ -5017,6 +5022,7 @@ const switchTab = createTabSwitcher({
     conjugaison: renderConjSelectScreen,
     progress: renderProgressView,
     profile: renderProfileView,
+    'admin-badges': renderAdminBadgesView,
     path: renderUnitsGrid,
     dictation: renderDictationList,
     challenges: renderChallengeCategories,

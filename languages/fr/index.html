@@ -1138,6 +1138,22 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .profile-special-badge-icon{ display:flex; align-items:center; font-size:14px; line-height:1; }
 .profile-special-badge-icon svg{ width:16px; height:16px; display:block; }
 
+/* ---------- Badges (admin) ---------- */
+.admin-badge-row, .admin-grant-row{
+  display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--paper-line);
+  border-radius:10px; background:var(--paper); margin-bottom:8px;
+}
+.admin-badge-icon{ font-size:20px; flex-shrink:0; width:28px; text-align:center; }
+.admin-badge-info{ flex:1; min-width:0; }
+.admin-badge-name{ font-size:13.5px; font-weight:700; color:var(--ink); }
+.admin-grant-badge-name{ font-weight:600; color:var(--ink-soft); }
+.admin-badge-desc{ font-size:11.5px; color:var(--ink-soft); margin-top:1px; }
+.admin-badge-delete-btn{
+  background:none; border:none; cursor:pointer; font-size:15px; padding:4px 6px; border-radius:6px; flex-shrink:0;
+  color:var(--ink-soft);
+}
+.admin-badge-delete-btn:hover{ background:var(--paper-warm); color:var(--seal-red-dark); }
+
 .profile-section{ margin-top:22px; }
 
 .profile-langs-row{ display:flex; gap:10px; flex-wrap:wrap; }
@@ -2331,6 +2347,15 @@ footer.app-footer img{ height:56px; opacity:.9; }
     </div>
   </div>
 
+  <!-- ===== BADGES (ADMIN) ===== -->
+  <div class="view" id="view-admin-badges">
+    <div class="path-header">
+      <h2>Badges (admin)</h2>
+      <p>Crie badges especiais e conceda a contas específicas.</p>
+    </div>
+    <div id="admin-badges-content"></div>
+  </div>
+
   <!-- ===== DITADOS ===== -->
   <div class="view" id="view-dictation">
     <div id="dictation-list-wrap">
@@ -2404,6 +2429,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
   <div class="user-dropdown-email" id="user-dropdown-email"></div>
   <button class="user-dropdown-item" id="user-profile-btn">👤 Meu perfil</button>
   <button class="user-dropdown-item" id="user-settings-btn">⚙️ Configurações</button>
+  <button class="user-dropdown-item" id="admin-badges-btn" style="display:none;">🎖️ Badges (admin)</button>
   <div class="user-dropdown-sep"></div>
   <button class="user-dropdown-item danger" id="logout-btn">Sair da conta</button>
 </div>
@@ -2559,6 +2585,7 @@ footer.app-footer img{ height:56px; opacity:.9; }
 <script src="../../shared/srs.js"></script>
 <script src="../../shared/wizard.js"></script>
 <script src="../../shared/profile.js"></script>
+<script src="../../shared/admin-badges.js"></script>
 <script src="../../shared/topbar-stats.js"></script>
 <script src="../../shared/tabs.js"></script>
 <script src="../../shared/anki-export.js"></script>
