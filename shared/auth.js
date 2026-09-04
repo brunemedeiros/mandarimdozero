@@ -238,6 +238,26 @@ async function saveState(){
       console.error('Erro ao salvar progresso:', error);
       notifySaveFailure();
     }
+
+    // Ranking semanal (Leaderboard, ver shared/leaderboard.js) -- acessório,
+    // não crítico como o progresso em si: um erro aqui não bloqueia nem
+    // reporta falha de save pra quem está estudando. ensurePeriodXp()
+    // garante que STATE.periodXp reflete a semana ATUAL antes de gravar --
+    // sem isso, um STATE.periodXp restaurado de uma sessão anterior podia
+    // ficar preso na semana passada até a próxima vez que addXP() rodasse.
+    if (typeof ensurePeriodXp === 'function') ensurePeriodXp();
+    if (STATE.periodXp?.weekStart){
+      const { error: weeklyError } = await supabaseClient
+        .from('weekly_xp')
+        .upsert({
+          user_id: CURRENT_USER.id,
+          week_start: STATE.periodXp.weekStart,
+          language_app_key: APP_KEY,
+          amount: STATE.periodXp.amount,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id,week_start,language_app_key' });
+      if (weeklyError) console.error('Erro ao atualizar XP semanal (ranking):', weeklyError);
+    }
   }catch(e){
     console.error('Erro ao salvar progresso:', e);
     notifySaveFailure();
