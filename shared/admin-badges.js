@@ -64,6 +64,64 @@ async function createCatalogBadge({ id, name, icon, description }){
   return { ok: true, badge: data };
 }
 
+// Edita um badge já existente. Se o id mudou, não existe "renomear a
+// chave primária" automático -- badge_grants.badge_id não tem FK pro
+// catálogo (é só texto comparado por igualdade, ver 002/003) -- então a
+// troca é feita manualmente NESSA ordem (cria a linha nova → migra as
+// concessões → só então apaga a linha antiga) pra uma concessão nunca
+// ficar órfã mesmo se algo falhar no meio.
+async function updateCatalogBadge({ oldId, newId, name, icon, description }){
+  const cleanId = String(newId || '').toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 32);
+  if (cleanId.length < 2) return { ok: false, error: 'ID do badge precisa ter pelo menos 2 caracteres (letras minúsculas, números ou _).' };
+  if (!name?.trim()) return { ok: false, error: 'Dê um nome pro badge.' };
+  if (!icon?.trim()) return { ok: false, error: 'Escolha um emoji pro badge.' };
+
+  const payload = {
+    name: name.trim().slice(0, 40),
+    icon: icon.trim().slice(0, 8),
+    description: (description || '').trim().slice(0, 120) || null,
+  };
+
+  if (cleanId === oldId){
+    const { data, error } = await supabaseClient
+      .from('badge_catalog')
+      .update(payload)
+      .eq('id', oldId)
+      .select()
+      .single();
+    if (error){ console.error('Erro ao editar badge:', error); return { ok: false, error: 'Não foi possível salvar agora.' }; }
+    return { ok: true, badge: data };
+  }
+
+  const { data: clash } = await supabaseClient.from('badge_catalog').select('id').eq('id', cleanId).maybeSingle();
+  if (clash) return { ok: false, error: `Já existe um badge com o id "${cleanId}".` };
+
+  const { data: created, error: insertError } = await supabaseClient
+    .from('badge_catalog')
+    .insert({ id: cleanId, ...payload, created_by: CURRENT_USER?.email || null })
+    .select()
+    .single();
+  if (insertError){ console.error('Erro ao trocar id do badge:', insertError); return { ok: false, error: 'Não foi possível trocar o id agora.' }; }
+
+  const { error: migrateError } = await supabaseClient.from('badge_grants').update({ badge_id: cleanId }).eq('badge_id', oldId);
+  if (migrateError){
+    console.error('Erro ao migrar concessões pro novo id:', migrateError);
+    return { ok: false, error: 'O badge novo foi criado, mas as concessões antigas não puderam ser migradas. Tente de novo.' };
+  }
+
+  await supabaseClient.from('badge_catalog').delete().eq('id', oldId);
+  return { ok: true, badge: created };
+}
+
+async function updateGrantNote(userId, badgeId, note){
+  const { error } = await supabaseClient
+    .from('badge_grants')
+    .update({ note: note?.trim() || null })
+    .eq('user_id', userId)
+    .eq('badge_id', badgeId);
+  return { ok: !error };
+}
+
 async function deleteCatalogBadge(badgeId){
   // Apaga o badge do catálogo E todas as concessões dele -- sem isso, uma
   // concessão "órfã" (apontando pra um badge que não existe mais)
@@ -93,16 +151,21 @@ async function revokeBadgeGrant(userId, badgeId){
 }
 
 // Aplica de uma vez as mudanças feitas no modal "Gerenciar badge": concede
-// pra quem ficou marcado e não tinha, revoga de quem ficou desmarcado e
-// tinha. Sequencial (não Promise.all) de propósito -- lista de membros
-// tende a ser curta, e sequencial deixa mais fácil saber exatamente onde
-// parou se algo falhar no meio.
-async function applyBadgeMembership(badgeId, adds, removes){
-  for (const userId of adds){
-    await supabaseClient.from('badge_grants').insert({ user_id: userId, badge_id: badgeId, granted_by: CURRENT_USER?.email || null });
+// pra quem ficou marcado e não tinha (com a nota que a autora já digitou
+// pra essa pessoa), revoga de quem ficou desmarcado e tinha, e atualiza a
+// nota de quem continuou marcado mas mudou o texto. Sequencial (não
+// Promise.all) de propósito -- lista de membros tende a ser curta, e
+// sequencial deixa mais fácil saber exatamente onde parou se algo falhar
+// no meio.
+async function applyBadgeMembership(badgeId, adds, removes, noteChanges){
+  for (const add of adds){
+    await supabaseClient.from('badge_grants').insert({ user_id: add.userId, badge_id: badgeId, granted_by: CURRENT_USER?.email || null, note: add.note?.trim() || null });
   }
   for (const userId of removes){
     await supabaseClient.from('badge_grants').delete().eq('user_id', userId).eq('badge_id', badgeId);
+  }
+  for (const change of (noteChanges || [])){
+    await updateGrantNote(change.userId, badgeId, change.note);
   }
 }
 
@@ -160,6 +223,7 @@ async function renderAdminBadgesView(){
         <div class="admin-badge-name">${b.name}</div>
         <div class="admin-badge-desc">${b.description ? b.description + ' · ' : ''}${memberCount} ${memberCount === 1 ? 'pessoa' : 'pessoas'} · clique pra gerenciar</div>
       </div>
+      <button class="admin-badge-edit-btn" data-edit-badge-id="${b.id}" title="Editar badge">✏️</button>
       <button class="admin-badge-delete-btn" data-badge-id="${b.id}" title="Excluir badge (e todas as concessões dele)">🗑️</button>
     </div>
   `;
@@ -267,6 +331,14 @@ async function renderAdminBadgesView(){
     renderAdminBadgesView();
   });
 
+  wrap.querySelectorAll('[data-edit-badge-id]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation(); // não deixa o clique "vazar" pro data-manage-badge-id da linha por baixo
+      const badge = catalog.find(b => b.id === btn.dataset.editBadgeId);
+      if (badge) openEditBadgeModal(badge);
+    });
+  });
+
   wrap.querySelectorAll('[data-badge-id]').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation(); // não deixa o clique "vazar" pro data-manage-badge-id da linha por baixo
@@ -295,16 +367,28 @@ async function renderAdminBadgesView(){
 function openManageBadgeMembersModal(badgeId, catalog, profiles, grants){
   const badge = catalog.find(b => b.id === badgeId);
   if (!badge) return;
-  const holderIds = new Set(grants.filter(g => g.badge_id === badgeId).map(g => g.user_id));
+  const holders = new Map(grants.filter(g => g.badge_id === badgeId).map(g => [g.user_id, g]));
 
   const modal = document.getElementById('admin-manage-badge-modal');
   document.getElementById('admin-manage-badge-title').textContent = `${badge.icon} ${badge.name}`;
-  document.getElementById('admin-manage-badge-list').innerHTML = profiles.length ? profiles.map(p => `
-    <label class="admin-member-row">
-      <input type="checkbox" data-user-id="${p.user_id}" ${holderIds.has(p.user_id) ? 'checked data-was-checked="1"' : ''}>
-      <span>@${p.username}${p.display_name ? ` <span class="admin-member-name">${escapeHTML(p.display_name)}</span>` : ''}</span>
-    </label>
+  const listEl = document.getElementById('admin-manage-badge-list');
+  listEl.innerHTML = profiles.length ? profiles.map(p => `
+    <div class="admin-member-row">
+      <label class="admin-member-check">
+        <input type="checkbox" data-user-id="${p.user_id}" ${holders.has(p.user_id) ? 'checked data-was-checked="1"' : ''}>
+        <span>@${p.username}${p.display_name ? ` <span class="admin-member-name">${escapeHTML(p.display_name)}</span>` : ''}</span>
+      </label>
+      <input type="text" class="admin-member-note-input" data-user-id="${p.user_id}" maxlength="120" placeholder="nota">
+    </div>
   `).join('') : `<p class="profile-empty-note">Ninguém criou um perfil ainda.</p>`;
+  // Valor da nota preenchido via JS (.value), não interpolado num atributo
+  // HTML -- é texto livre digitado pela autora, e um "aspas dentro da nota"
+  // quebraria o atributo se fosse por template string.
+  listEl.querySelectorAll('.admin-member-note-input').forEach(input => {
+    const note = holders.get(input.dataset.userId)?.note || '';
+    input.value = note;
+    input.dataset.originalNote = note;
+  });
   modal.dataset.badgeId = badgeId;
   modal.style.display = 'flex';
 }
@@ -323,15 +407,23 @@ function wireManageBadgeMembersModal(){
   document.getElementById('admin-manage-badge-save-btn').addEventListener('click', async () => {
     const badgeId = modal.dataset.badgeId;
     const checkboxes = modal.querySelectorAll('input[type="checkbox"]');
-    const adds = [], removes = [];
+    const adds = [], removes = [], noteChanges = [];
     checkboxes.forEach(cb => {
+      const userId = cb.dataset.userId;
       const wasChecked = cb.dataset.wasChecked === '1';
-      if (cb.checked && !wasChecked) adds.push(cb.dataset.userId);
-      if (!cb.checked && wasChecked) removes.push(cb.dataset.userId);
+      const noteInput = modal.querySelector(`.admin-member-note-input[data-user-id="${userId}"]`);
+      const note = noteInput ? noteInput.value : '';
+      if (cb.checked && !wasChecked){
+        adds.push({ userId, note });
+      } else if (!cb.checked && wasChecked){
+        removes.push(userId);
+      } else if (cb.checked && wasChecked && noteInput && note !== noteInput.dataset.originalNote){
+        noteChanges.push({ userId, note });
+      }
     });
     const btn = document.getElementById('admin-manage-badge-save-btn');
     btn.disabled = true;
-    await applyBadgeMembership(badgeId, adds, removes);
+    await applyBadgeMembership(badgeId, adds, removes, noteChanges);
     btn.disabled = false;
     closeManageBadgeMembersModal();
     showToast('✓ Membros do badge atualizados.');
@@ -339,4 +431,51 @@ function wireManageBadgeMembersModal(){
   });
 }
 
+// Modal "Editar badge": mesmos campos da criação (id/nome/emoji/descrição),
+// pré-preenchidos -- salvar chama updateCatalogBadge, que trata id mudado
+// como um caso especial (migra as concessões, ver updateCatalogBadge).
+function openEditBadgeModal(badge){
+  const modal = document.getElementById('admin-edit-badge-modal');
+  modal.dataset.originalId = badge.id;
+  document.getElementById('admin-edit-badge-id').value = badge.id;
+  document.getElementById('admin-edit-badge-name').value = badge.name;
+  document.getElementById('admin-edit-badge-icon').value = badge.icon;
+  document.getElementById('admin-edit-badge-desc').value = badge.description || '';
+  document.getElementById('admin-edit-badge-error').textContent = '';
+  modal.style.display = 'flex';
+}
+
+function closeEditBadgeModal(){
+  document.getElementById('admin-edit-badge-modal').style.display = 'none';
+}
+
+function wireEditBadgeModal(){
+  const modal = document.getElementById('admin-edit-badge-modal');
+  if (!modal) return;
+
+  document.getElementById('admin-edit-badge-modal-close').addEventListener('click', closeEditBadgeModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeEditBadgeModal(); });
+
+  document.getElementById('admin-edit-badge-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('admin-edit-badge-save-btn');
+    const errorEl = document.getElementById('admin-edit-badge-error');
+    errorEl.textContent = '';
+    btn.disabled = true;
+    const result = await updateCatalogBadge({
+      oldId: modal.dataset.originalId,
+      newId: document.getElementById('admin-edit-badge-id').value,
+      name: document.getElementById('admin-edit-badge-name').value,
+      icon: document.getElementById('admin-edit-badge-icon').value,
+      description: document.getElementById('admin-edit-badge-desc').value,
+    });
+    btn.disabled = false;
+    if (!result.ok){ errorEl.textContent = result.error; return; }
+    closeEditBadgeModal();
+    showToast(`✓ Badge "${result.badge.name}" atualizado.`);
+    renderAdminBadgesView();
+  });
+}
+
 wireManageBadgeMembersModal();
+wireEditBadgeModal();
