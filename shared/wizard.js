@@ -9,8 +9,6 @@
 //   - LEVEL_DESCRIPTIONS    (objeto { [levelId]: {tier, text} })
 //   - LANGUAGE_STUDY_NAME   (string, ex: "francês" -- usado na pergunta do
 //                            objetivo: "aprender ${LANGUAGE_STUDY_NAME}?")
-//   - estimateUnitExerciseCount(unit)  (específico: cada idioma tem seus
-//                            próprios tipos de unidade/exercício)
 // Só chamados dentro de funções, nunca no top-level deste arquivo -- a
 // ordem de carregamento dos <script> não importa (hoisting normal).
 
@@ -35,14 +33,35 @@ const OBJECTIVE_OPTIONS = [
   { id: 'education', icon: '🎓', label: 'Educação' }
 ];
 
+// Meta diária em LIÇÕES, não minutos (ver artefato "A Gramática da
+// Recompensa", §4) -- 3 faixas nomeadas em vez de um stepper contínuo,
+// porque "2 de 3 lições" é uma unidade literal que o aluno já vê na trilha,
+// diferente de uma estimativa de minutos que ele não controla diretamente.
+const DAILY_LESSON_TIERS = [
+  { id: 1, icon: '🌱', label: 'Casual', desc: '1 lição por dia' },
+  { id: 2, icon: '🎯', label: 'Regular', desc: '2 lições por dia' },
+  { id: 3, icon: '🔥', label: 'Intenso', desc: '3+ lições por dia' }
+];
+
 function remainingUnitsForLevels(levels){
   if (!levels || !levels.length) return [];
   return UNITS.filter(u => levels.includes(u.level) && !STATE.unitProgress[u.id]?.completed);
 }
 
-function estimateMinutesRemainingForLevels(levels){
-  const totalExercises = remainingUnitsForLevels(levels).reduce((sum, u) => sum + estimateUnitExerciseCount(u), 0);
-  return Math.round(totalExercises * ESTIMATED_SECONDS_PER_EXERCISE / 60);
+// Lições restantes (não exercícios/minutos): unidades em Modelo B contam as
+// lições que faltam de fato (considerando o progresso já feito dentro da
+// unidade); unidades sem `lessons` (gramática, ou ainda não migradas) contam
+// como 1 lição-equivalente, já que são concluídas de uma vez só.
+function remainingLessonCountForUnit(u){
+  if (Array.isArray(u.lessons) && u.lessons.length){
+    const done = STATE.unitProgress[u.id]?.lessonIdx || 0;
+    return Math.max(1, u.lessons.length - done);
+  }
+  return 1;
+}
+
+function estimateLessonsRemainingForLevels(levels){
+  return remainingUnitsForLevels(levels).reduce((sum, u) => sum + remainingLessonCountForUnit(u), 0);
 }
 
 // Conta pra frente a partir de amanhã, só nos dias da semana marcados, até
@@ -63,19 +82,19 @@ function estimateCompletionDate(minutesRemaining, days, dailyMinutes){
   return null; // nenhum dia da semana selecionado — nunca chega lá
 }
 
-function buildMinutesWeekData(){
+function buildLessonsWeekData(){
   const days = [];
   for (let i = 6; i >= 0; i--){
     const d = new Date(Date.now() - i*86400000);
     const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const minutes = STATE.dailyMinutesLog[key] || 0;
-    days.push({ label: STREAK_DAY_LABELS[d.getDay()], minutes, done: minutes >= STATE.studyGoal.dailyMinutes && STATE.studyGoal.dailyMinutes > 0, isToday: i === 0 });
+    const lessons = STATE.dailyLessonsLog[key] || 0;
+    days.push({ label: STREAK_DAY_LABELS[d.getDay()], lessons, done: lessons >= STATE.studyGoal.dailyLessonsGoal && STATE.studyGoal.dailyLessonsGoal > 0, isToday: i === 0 });
   }
   return days;
 }
 
 // ---------- Assistente (wizard) de configuração da meta ----------
-const STUDY_WIZARD_STEPS = ['objective', 'level', 'schedule', 'minutes', 'summary'];
+const STUDY_WIZARD_STEPS = ['objective', 'level', 'schedule', 'lessons', 'summary'];
 let STUDY_WIZARD = null;
 
 function openStudyPlanModal(){
@@ -87,7 +106,7 @@ function openStudyPlanModal(){
     days: { ...goal.days },
     hour: goal.hour, minute: goal.minute,
     notifications: goal.notifications,
-    dailyMinutes: goal.dailyMinutes || 10
+    dailyLessonsGoal: goal.dailyLessonsGoal || 2
   };
   document.getElementById('study-plan-modal').style.display = 'flex';
   renderStudyWizardStep();
@@ -98,7 +117,7 @@ function renderStudyWizardStep(){
   if (stepName === 'objective') renderWizardObjectiveStep();
   else if (stepName === 'level') renderWizardLevelStep();
   else if (stepName === 'schedule') renderWizardScheduleStep();
-  else if (stepName === 'minutes') renderWizardMinutesStep();
+  else if (stepName === 'lessons') renderWizardLessonsStep();
   else if (stepName === 'summary') renderWizardSummaryStep();
 }
 
@@ -212,29 +231,29 @@ function renderWizardScheduleStep(){
   document.getElementById('wizard-continue-btn').addEventListener('click', advanceWizard);
 }
 
-function renderWizardMinutesStep(){
+function renderWizardLessonsStep(){
   const bodyEl = document.getElementById('study-plan-wizard-body');
   bodyEl.innerHTML = `
-    <div class="wizard-question">Por quanto tempo você deseja estudar?</div>
-    <div class="wizard-minutes-sub">Recomendamos 10 minutos por dia.</div>
-    <div class="wizard-stepper">
-      <button class="wizard-stepper-btn" id="wizard-minutes-minus">−</button>
-      <div class="wizard-stepper-value">
-        <div class="wizard-stepper-num" id="wizard-minutes-num">${STUDY_WIZARD.dailyMinutes}</div>
-        <div class="wizard-stepper-label">minutos por dia</div>
-      </div>
-      <button class="wizard-stepper-btn" id="wizard-minutes-plus">+</button>
+    <div class="wizard-question">Quantas lições por dia você quer fazer?</div>
+    <div class="wizard-level-list">
+      ${DAILY_LESSON_TIERS.map(t => `
+        <button class="wizard-level-row ${STUDY_WIZARD.dailyLessonsGoal === t.id ? 'active' : ''}" data-tier="${t.id}">
+          <span class="wizard-level-circle">${t.icon}</span>
+          <span class="wizard-level-text">
+            <span class="wizard-level-tier">${t.label}</span>
+            <span class="wizard-level-desc">${t.desc}</span>
+          </span>
+        </button>
+      `).join('')}
     </div>
     <button class="btn btn-primary btn-block wizard-continue-btn" id="wizard-continue-btn">Continuar</button>
   `;
 
-  document.getElementById('wizard-minutes-minus').addEventListener('click', () => {
-    STUDY_WIZARD.dailyMinutes = Math.max(5, STUDY_WIZARD.dailyMinutes - 5);
-    document.getElementById('wizard-minutes-num').textContent = STUDY_WIZARD.dailyMinutes;
-  });
-  document.getElementById('wizard-minutes-plus').addEventListener('click', () => {
-    STUDY_WIZARD.dailyMinutes = Math.min(60, STUDY_WIZARD.dailyMinutes + 5);
-    document.getElementById('wizard-minutes-num').textContent = STUDY_WIZARD.dailyMinutes;
+  bodyEl.querySelectorAll('.wizard-level-row').forEach(btn => {
+    btn.addEventListener('click', () => {
+      STUDY_WIZARD.dailyLessonsGoal = parseInt(btn.dataset.tier, 10);
+      bodyEl.querySelectorAll('.wizard-level-row').forEach(b => b.classList.toggle('active', b === btn));
+    });
   });
   document.getElementById('wizard-continue-btn').addEventListener('click', advanceWizard);
 }
@@ -242,15 +261,16 @@ function renderWizardMinutesStep(){
 function renderWizardSummaryStep(){
   const bodyEl = document.getElementById('study-plan-wizard-body');
   const levels = LEVELS.filter((l, i) => i <= LEVELS.findIndex(x => x.id === STUDY_WIZARD.targetLevel)).map(l => l.id);
-  const minutesRemaining = estimateMinutesRemainingForLevels(levels);
-  const completionDate = estimateCompletionDate(minutesRemaining, STUDY_WIZARD.days, STUDY_WIZARD.dailyMinutes);
+  const lessonsRemaining = estimateLessonsRemainingForLevels(levels);
+  const completionDate = estimateCompletionDate(lessonsRemaining, STUDY_WIZARD.days, STUDY_WIZARD.dailyLessonsGoal);
   const dateLabel = completionDate ? formatDatePt(completionDate) : 'defina ao menos 1 dia da semana';
   const goalText = LEVEL_DESCRIPTIONS[STUDY_WIZARD.targetLevel]?.text || '';
+  const tier = DAILY_LESSON_TIERS.find(t => t.id === STUDY_WIZARD.dailyLessonsGoal);
 
   bodyEl.innerHTML = `
     <div class="wizard-summary-title">Você alcançará sua meta até <strong>${dateLabel}</strong></div>
     <div class="wizard-summary-goal-box">
-      <span class="wizard-summary-goal-icon">⏱️</span>
+      <span class="wizard-summary-goal-icon">🎯</span>
       <div>
         <div class="wizard-summary-goal-label">Sua meta</div>
         <div class="wizard-summary-goal-text">${goalText}</div>
@@ -270,8 +290,8 @@ function renderWizardSummaryStep(){
     </div>
     <div class="wizard-summary-stats">
       <div>
-        <div class="wizard-summary-stat-label">Duração</div>
-        <div class="wizard-summary-stat-value">🕐 ${STUDY_WIZARD.dailyMinutes} minutos por dia</div>
+        <div class="wizard-summary-stat-label">Ritmo</div>
+        <div class="wizard-summary-stat-value">${tier.icon} ${tier.label} · ${tier.desc}</div>
       </div>
       <div>
         <div class="wizard-summary-stat-label">Horário</div>
@@ -296,7 +316,7 @@ function saveStudyWizard(){
   goal.hour = STUDY_WIZARD.hour;
   goal.minute = STUDY_WIZARD.minute;
   goal.notifications = STUDY_WIZARD.notifications;
-  goal.dailyMinutes = STUDY_WIZARD.dailyMinutes;
+  goal.dailyLessonsGoal = STUDY_WIZARD.dailyLessonsGoal;
   saveState();
   document.getElementById('study-plan-modal').style.display = 'none';
   renderStudyPlanCard();
@@ -308,29 +328,29 @@ function renderStudyPlanCard(){
   const bodyEl = document.getElementById('study-plan-body');
   const goal = STATE.studyGoal;
 
-  if (!goal.dailyMinutes || !goal.objective){
-    subEl.textContent = 'Defina quanto tempo por dia você quer estudar';
+  if (!goal.dailyLessonsGoal || !goal.objective){
+    subEl.textContent = 'Defina quantas lições por dia você quer fazer';
     bodyEl.innerHTML = `<button class="btn btn-primary btn-block" id="study-plan-cta-btn">Definir minha meta</button>`;
     document.getElementById('study-plan-cta-btn').addEventListener('click', openStudyPlanModal);
     return;
   }
 
-  const minutesRemaining = estimateMinutesRemainingForLevels(goal.levels);
-  const completionDate = estimateCompletionDate(minutesRemaining, goal.days, goal.dailyMinutes);
+  const lessonsRemaining = estimateLessonsRemainingForLevels(goal.levels);
+  const completionDate = estimateCompletionDate(lessonsRemaining, goal.days, goal.dailyLessonsGoal);
   const dateLabel = completionDate ? formatDatePt(completionDate) : null;
   const objLabel = OBJECTIVE_OPTIONS.find(o => o.id === goal.objective)?.label || '';
   const goalText = LEVEL_DESCRIPTIONS[goal.levels[goal.levels.length - 1]]?.text || objLabel;
 
-  const week = buildMinutesWeekData();
-  const weekTotal = Math.round(week.reduce((sum, d) => sum + d.minutes, 0));
-  const weekGoal = goal.dailyMinutes * 7;
+  const week = buildLessonsWeekData();
+  const weekTotal = week.reduce((sum, d) => sum + d.lessons, 0);
+  const weekGoal = goal.dailyLessonsGoal * 7;
   const pct = weekGoal ? Math.min(100, Math.round((weekTotal / weekGoal) * 100)) : 0;
-  const todayMinutes = Math.round(week[6].minutes);
+  const todayLessons = week[6].lessons;
 
   subEl.textContent = dateLabel ? `Meta até ${dateLabel}` : 'Meta definida';
   bodyEl.innerHTML = `
     <div class="wizard-summary-goal-box">
-      <span class="wizard-summary-goal-icon">⏱️</span>
+      <span class="wizard-summary-goal-icon">🎯</span>
       <div>
         <div class="wizard-summary-goal-label">Sua meta</div>
         <div class="wizard-summary-goal-text">${goalText}</div>
@@ -340,12 +360,12 @@ function renderStudyPlanCard(){
       <div class="study-ring" style="--pct:${pct}">
         <div class="study-ring-inner">
           <div class="study-ring-num">${weekTotal}/${weekGoal}</div>
-          <div class="study-ring-label">min esta semana</div>
+          <div class="study-ring-label">lições esta semana</div>
         </div>
       </div>
       <div class="study-plan-today">
         <div class="study-plan-today-label">Meta diária</div>
-        <div class="study-plan-today-num">${todayMinutes} / ${goal.dailyMinutes} min</div>
+        <div class="study-plan-today-num">${todayLessons} / ${goal.dailyLessonsGoal} lições</div>
         <div class="study-plan-estimate">${
           dateLabel ? `Nesse ritmo, você alcança sua meta até <strong>${dateLabel}</strong>.` : 'Selecione ao menos um dia da semana pra calcularmos sua meta.'
         }</div>
@@ -361,6 +381,32 @@ function renderStudyPlanCard(){
     </div>
   `;
 }
+
+// ---------- Chip de meta diária persistente (Home/Trilha) ----------
+// A meta hoje só vive escondida na aba "Seu progresso" (ver artefato, §1/§6:
+// "hábito" precisa aparecer na Home). Clique leva direto pro card completo
+// -- não duplica nenhuma lógica do wizard/card, só resume o essencial.
+function renderDailyGoalChip(){
+  const chip = document.getElementById('daily-goal-chip');
+  if (!chip) return;
+  const goal = STATE.studyGoal.dailyLessonsGoal;
+  if (!goal){ chip.style.display = 'none'; chip.innerHTML = ''; return; }
+  ensureDailyBucket();
+  const done = STATE.daily.lessonsForGoal;
+  const pct = Math.min(100, Math.round((done / goal) * 100));
+  const reached = done >= goal;
+  chip.style.display = 'flex';
+  chip.classList.toggle('done', reached);
+  chip.innerHTML = `
+    <span class="daily-goal-chip-icon">🎯</span>
+    <div class="daily-goal-chip-body">
+      <div class="daily-goal-chip-label">Meta diária · ${done}/${goal} lições</div>
+      <div class="daily-goal-chip-track"><div class="daily-goal-chip-fill" style="width:${pct}%"></div></div>
+    </div>
+    ${reached ? '<span class="daily-goal-chip-check">✓</span>' : ''}
+  `;
+}
+document.getElementById('daily-goal-chip')?.addEventListener('click', () => switchTab('progress'));
 
 document.getElementById('study-plan-edit-btn').addEventListener('click', openStudyPlanModal);
 document.getElementById('study-plan-modal-close').addEventListener('click', () => {

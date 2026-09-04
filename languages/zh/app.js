@@ -499,9 +499,12 @@ const STATE = {
   studyGoal: {
     objective: null,
     days: { mon:true, tue:true, wed:true, thu:true, fri:true, sat:true, sun:true },
-    hour: 8, minute: 0, notifications: false, dailyMinutes: 0
+    hour: 8, minute: 0, notifications: false,
+    dailyMinutes: 0, // legado (era a unidade da meta antes da Fase 3 -- não lido mais pra nada, só preservado se já existir salvo)
+    dailyLessonsGoal: 0 // 0 = meta ainda não definida; 1/2/3 = Casual/Regular/Intenso
   },
-  dailyMinutesLog: {}, // 'YYYY-MM-DD' -> minutos estimados de estudo naquele dia
+  dailyMinutesLog: {}, // legado -- não lido mais pra nada, só continua sendo escrito (addStudyMinutes) pra não perder histórico já salvo
+  dailyLessonsLog: {}, // 'YYYY-MM-DD' -> lições (que contam pra meta) concluídas naquele dia
   hanziLessonProgress: {}, // lessonIndex -> { completed: bool }
   totalReviews: 0,
   currentUnitId: null,
@@ -670,6 +673,7 @@ function serializeState(){
     activityLog: STATE.activityLog,
     studyGoal: STATE.studyGoal,
     dailyMinutesLog: STATE.dailyMinutesLog,
+    dailyLessonsLog: STATE.dailyLessonsLog,
     hanziLessonProgress: STATE.hanziLessonProgress,
     totalReviews: STATE.totalReviews,
     daily: STATE.daily,
@@ -706,6 +710,7 @@ function applySerializedState(data){
   if (data.lastReviewReminderDay) STATE.lastReviewReminderDay = data.lastReviewReminderDay;
   if (data.studyGoal) Object.assign(STATE.studyGoal, data.studyGoal);
   if (data.dailyMinutesLog) Object.assign(STATE.dailyMinutesLog, data.dailyMinutesLog);
+  if (data.dailyLessonsLog) Object.assign(STATE.dailyLessonsLog, data.dailyLessonsLog);
   if (data.activityLog) Object.assign(STATE.activityLog, data.activityLog);
   if (data.hanziLessonProgress) Object.assign(STATE.hanziLessonProgress, data.hanziLessonProgress);
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
@@ -778,22 +783,17 @@ document.getElementById('streak-modal-continue-btn').addEventListener('click', (
 });
 
 // ---------- Plano de estudo com meta diária (assistente estilo Busuu) ----------
-// OBJECTIVE_OPTIONS, DAY_DEFS, DAY_KEY_BY_JS_INDEX, PT_MONTHS, formatDatePt,
-// estimateCompletionDate, buildMinutesWeekData, renderStudyPlanCard e todo o
-// wizard agora vêm de shared/wizard.js -- inclusive a etapa de nível, que
-// este idioma ganhou agora (LEVELS em content.js, hoje só com HSK1, mas já
-// preparado pra quando os outros níveis do HSK forem adicionados).
-// LEVEL_DESCRIPTIONS e estimateUnitExerciseCount continuam aqui (dados/regra
-// específicos deste idioma, exigidos como hook por shared/wizard.js).
+// Meta diária em LIÇÕES (ver "A Gramática da Recompensa", §4). OBJECTIVE_OPTIONS,
+// DAY_DEFS, DAY_KEY_BY_JS_INDEX, PT_MONTHS, formatDatePt, estimateCompletionDate,
+// buildLessonsWeekData, renderStudyPlanCard e todo o wizard vêm de
+// shared/wizard.js -- inclusive a etapa de nível, que este idioma ganhou
+// agora (LEVELS em content.js, hoje só com HSK1, mas já preparado pra quando
+// os outros níveis do HSK forem adicionados).
+// LEVEL_DESCRIPTIONS continua aqui (dado específico deste idioma, exigido
+// como hook por shared/wizard.js).
 const LEVEL_DESCRIPTIONS = {
   HSK1: { tier: 'Iniciante', text: 'Cumprimentar, apresentar-se e ter conversas básicas do dia a dia em mandarim' }
 };
-
-function estimateUnitExerciseCount(u){
-  const phrasesWithBlocks = (u.phrases || []).filter(p => p.blocks && p.blocks.length >= 2);
-  return (u.vocab?.length || 0) + phrasesWithBlocks.length + Math.min(2, phrasesWithBlocks.length) + (u.trueFalseExercises ? 1 : 0);
-}
-
 
 // Lembrete local best-effort: só dispara se a pessoa tiver o app aberto numa
 // janela de ~30min depois do horário escolhido, com permissão já concedida —
@@ -801,7 +801,7 @@ function estimateUnitExerciseCount(u){
 // fechado ou o navegador nem está aberto.
 function maybeSendStudyReminder(){
   const goal = STATE.studyGoal;
-  if (!goal.notifications || !goal.dailyMinutes) return;
+  if (!goal.notifications || !goal.dailyLessonsGoal) return;
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
 
   const now = new Date();
@@ -814,7 +814,7 @@ function maybeSendStudyReminder(){
 
   if (localStorageSafeGet('mandarim_last_study_notif') === todayStr()) return;
   new Notification('Hora de estudar mandarim! 🇨🇳', {
-    body: `Sua meta de hoje: ${goal.dailyMinutes} minutos.`,
+    body: `Sua meta de hoje: ${goal.dailyLessonsGoal} lição${goal.dailyLessonsGoal > 1 ? 'ões' : ''}.`,
     icon: 'icons/icon-192.png'
   });
   localStorageSafeSet('mandarim_last_study_notif', todayStr());
@@ -863,7 +863,8 @@ function ensureDailyBucket(){
   if (STATE.daily.date !== today){
     STATE.daily = {
       date: today, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
-      hanziLessons: 0, reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0
+      hanziLessons: 0, reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0,
+      lessonsForGoal: 0, goalCountedLessonKeys: []
     };
   }
 }
@@ -877,6 +878,19 @@ function registerDailyLessonCompleted(scorePct){
   STATE.daily.lessons += 1;
   if (scorePct >= 80) STATE.daily.highScoreLessons += 1;
   if (scorePct >= 100) STATE.daily.perfectLessons += 1;
+}
+
+// Meta diária (plano de estudo) conta separado dos Desafios de hoje -- é uma
+// régua mais exigente (ver artefato, §4): só lições com conteúdo real
+// (`qualifies` filtra atalho degenerado, ex. lição minúscula demais) e nunca
+// a mesma lição 2x no mesmo dia (replay não soma -- `key` identifica a lição
+// de forma estável, ex. "u6:2" ou "u6:checkpoint").
+function registerDailyLessonForGoal(key, qualifies){
+  ensureDailyBucket();
+  if (!qualifies || STATE.daily.goalCountedLessonKeys.includes(key)) return;
+  STATE.daily.goalCountedLessonKeys.push(key);
+  STATE.daily.lessonsForGoal += 1;
+  STATE.dailyLessonsLog[todayStr()] = STATE.daily.lessonsForGoal;
 }
 function registerDailyHanziLesson(){
   ensureDailyBucket();
@@ -905,11 +919,14 @@ const REVISAO_HANZI_CHALLENGES = [
   { id:'speedReview1', icon:'⚡', label:'Complete uma sessão de Revisão Rápida', target:1, get: d => d.speedReviewSessions },
   { id:'matchGame1', icon:'🧩', label:'Jogue o jogo de Combinar 1 vez', target:1, get: d => d.matchGamesPlayed }
 ];
+// "Complete N lições" saiu daqui na Fase 3 -- virou redundante depois que a
+// meta diária (plano de estudo) passou a ser medida em lições também: as
+// duas telas mostrando a mesma contagem como se fossem coisas diferentes é
+// exatamente o "progresso duplicado" que o artefato pediu pra evitar (§4).
 const GENERAL_CHALLENGES = [
   { id:'stars40', icon:'⭐', label:'Ganhe 40 estrelas', target:40, get: d => d.stars },
   { id:'highscore2', icon:'📈', label:'Pontue mais de 80% em 2 lições', target:2, get: d => d.highScoreLessons },
   { id:'perfect1', icon:'🎯', label:'Complete uma lição sem errar', target:1, get: d => d.perfectLessons },
-  { id:'lessons5', icon:'📚', label:'Complete 5 lições', target:5, get: d => d.lessons },
   { id:'hanzi2', icon:'🈺', label:'Estude 2 lições de Hanzi', target:2, get: d => d.hanziLessons }
 ];
 
@@ -1374,6 +1391,7 @@ function renderDailyChallengesStrip(){
 
 function renderUnitsGrid(){
   recalculateUnlockedUnits();
+  renderDailyGoalChip();
   renderDailyChallengesStrip();
   // "Tratamento de honra" (Opção D): nível concluído reaproveita o mesmo
   // selo de check, só que dourado -- ZH não tem seletor de nível (só existe
@@ -2384,6 +2402,7 @@ function finishCurrentLesson(u){
     // -- não uma lista genérica dos 3 desafios do dia (essa já tem tela
     // própria, acessível pela aba "Desafios").
     const challengesBefore = todaysChallenges().map(c => Math.min(c.get(STATE.daily), c.target));
+    const lessonKey = `${u.id}:${currentLessonIdx(u.id)}`;
     STATE.unitProgress[u.id].lessonIdx = currentLessonIdx(u.id) + 1;
     addXP(8);
     // Sem pontuação própria pra avaliar aqui (a lição intermediária não é um
@@ -2393,6 +2412,10 @@ function finishCurrentLesson(u){
     // Ponto de verificação). Antes disso, os desafios do dia só avançavam ao
     // fim da UNIDADE inteira -- a rotina diária real é por lição.
     registerDailyLessonCompleted(undefined, false);
+    // Meta diária (§4 do artefato): só conta se a lição tinha conteúdo real
+    // (>=3 palavras ou incluía diálogo) -- filtra o atalho degenerado de uma
+    // lição minúscula "sobrando" no fim de uma unidade.
+    registerDailyLessonForGoal(lessonKey, (finished.vocabIdx?.length || 0) >= 3 || !!finished.includesDialogue);
     saveState();
     renderTopbarStats();
     renderLessonBoundaryScreen(u, finished, challengesBefore);
@@ -2402,6 +2425,11 @@ function finishCurrentLesson(u){
   const total = STEP_STATE.exerciseList.length;
   const scorePct = total ? Math.round((STEP_STATE.exerciseScore / total) * 100) : 100;
   markUnitCompleted(STATE.currentUnitId, scorePct);
+  // Meta diária (§4 do artefato): mesma régua de "conteúdo real" (>=3 itens)
+  // usada na lição intermediária -- o Ponto de verificação/consolidação da
+  // unidade sempre qualifica na prática, mas o filtro evita contar uma
+  // unidade legado com uma lista de exercícios minúscula.
+  registerDailyLessonForGoal(`${u.id}:checkpoint`, total >= 3);
   if (isLessonUnit(u)){
     STATE.unitProgress[u.id].lessonIdx = 0;
     STATE.unitProgress[u.id].lessonMisses = {};
@@ -4557,6 +4585,8 @@ function renderProgressView(){
   renderActivityHeatmap();
   renderProgressLineChart();
 
+  const earnedCount = BADGES.filter(b => b.check(STATE)).length;
+  document.getElementById('badge-grid-count').textContent = `${earnedCount}/${BADGES.length}`;
   document.getElementById('badge-grid').innerHTML = BADGES.map(b => {
     const earned = b.check(STATE);
     return `<div class="badge ${earned?'earned':''}"><div class="icon">${b.icon}</div><div class="name">${b.name}</div></div>`;
