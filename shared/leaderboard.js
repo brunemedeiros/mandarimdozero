@@ -104,10 +104,13 @@ async function renderLeaderboardView(){
   // -- fetchLeaderboard() já roda em paralelo com isso.
   const [rows, catalog] = await Promise.all([fetchLeaderboard(scope, weekStart), fetchBadgeCatalog()]);
 
+  // role="tablist"/"tab": são páginas alternativas do mesmo painel (Geral /
+  // um idioma por vez), não botões soltos -- deixa um leitor de tela
+  // anunciar "aba X de Y, selecionada" em vez de só "botão".
   const scopeTabsHTML = [
     { key: 'all', label: 'Geral' },
     ...AVAILABLE_LANGUAGES.filter(l => l.enabled).map(l => ({ key: l.appKey, label: l.name })),
-  ].map(t => `<button class="leaderboard-tab ${t.key === scope ? 'active' : ''}" data-scope="${t.key}">${t.label}</button>`).join('');
+  ].map(t => `<button class="leaderboard-tab ${t.key === scope ? 'active' : ''}" role="tab" aria-selected="${t.key === scope}" data-scope="${t.key}">${t.label}</button>`).join('');
 
   const rowsHTML = rows.length ? rows.map(r => {
     const isMe = !!(CURRENT_USER && r.user_id === CURRENT_USER.id);
@@ -123,26 +126,37 @@ async function renderLeaderboardView(){
       : `<div class="leaderboard-avatar" style="background:${color};">${initials}</div>`;
     const featured = resolveFeaturedBadge(r.profile?.featured_badge_id, catalog);
     const badgeHTML = featured
-      ? `<span class="leaderboard-featured-badge" title="${escapeHTML(featured.name)}">${featured.icon}</span>`
+      ? `<span class="leaderboard-featured-badge" aria-hidden="true" title="${escapeHTML(featured.name)}">${featured.icon}</span>`
       : '';
+    // Uma única linha vira vários elementos visuais (rank/avatar/nome/badge/
+    // XP) -- pra quem usa leitor de tela isso soaria como fragmentos soltos
+    // sem essa descrição resumida na própria linha (role="listitem" +
+    // aria-label), então os pedaços visuais internos ficam aria-hidden.
+    const rowLabel = [
+      `Posição ${r.rank}`,
+      name,
+      isMe ? 'você' : null,
+      featured ? `badge ${featured.name}` : null,
+      `${r.amount} XP`,
+    ].filter(Boolean).join(', ');
     return `
-      <div class="leaderboard-row ${isMe ? 'me' : ''}">
-        <div class="leaderboard-rank">${leaderboardRankBadge(r.rank)}</div>
+      <div class="leaderboard-row ${isMe ? 'me' : ''}" role="listitem" aria-label="${escapeHTML(rowLabel)}">
+        <div class="leaderboard-rank" aria-hidden="true">${leaderboardRankBadge(r.rank)}</div>
         ${avatarHTML}
         <div class="leaderboard-info">
-          <div class="leaderboard-name">
+          <div class="leaderboard-name" aria-hidden="true">
             <span class="leaderboard-name-text">${escapeHTML(name)}</span>${badgeHTML}${isMe ? ' <span class="leaderboard-you-tag">(você)</span>' : ''}
           </div>
         </div>
-        <div class="leaderboard-xp">⭐ ${r.amount}</div>
+        <div class="leaderboard-xp" aria-hidden="true">⭐ ${r.amount}</div>
       </div>
     `;
   }).join('') : `<p class="profile-empty-note">Ninguém pontuou nessa categoria ainda essa semana. Seja a primeira pessoa no ranking!</p>`;
 
   wrap.innerHTML = `
     <div class="leaderboard-week-label">${leaderboardWeekLabel(weekStart)}</div>
-    <div class="leaderboard-tabs">${scopeTabsHTML}</div>
-    <div class="leaderboard-list">${rowsHTML}</div>
+    <div class="leaderboard-tabs" role="tablist" aria-label="Escopo do ranking">${scopeTabsHTML}</div>
+    <div class="leaderboard-list" role="list">${rowsHTML}</div>
     <p class="leaderboard-footnote">O ranking reinicia toda segunda-feira. Só aparece quem já ganhou XP essa semana.</p>
   `;
 
