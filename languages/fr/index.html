@@ -40,6 +40,12 @@ try{
   --paper-line: #E1D6C0;     /* linhas/bordas sutis */
   --jade: #3A7359;           /* verde — sucesso/acerto (funcional, fora da paleta de marca) */
   --ink-soft: #5C4E73;       /* texto secundário */
+  /* Selo colorido atrás do ícone de cada desafio diário -- 3 cores fixas
+     por posição no card (não por desafio específico), pra manter a mesma
+     assinatura visual todo dia mesmo quando o desafio sorteado muda. */
+  --dc-slot-0: #F5A623;
+  --dc-slot-1: #7C5CFA;
+  --dc-slot-2: #3B82F6;
   /* Texto legível sobre fundo vívido/claro (error-red, jade) -- branco
      funciona no tema claro mas fica abaixo do mínimo de contraste AA no
      escuro (essas cores ficam mais claras no escuro pra se destacar do
@@ -73,6 +79,9 @@ try{
     --jade: #52B487;
     --ink-soft: #C5B8D9;
     --on-vivid: #201335;
+    --dc-slot-0: #F7B84A;
+    --dc-slot-1: #9A85FF;
+    --dc-slot-2: #5B9DFF;
   }
 }
 :root[data-theme="dark"]{
@@ -89,6 +98,9 @@ try{
   --jade: #52B487;
   --ink-soft: #C5B8D9;
   --on-vivid: #201335;
+  --dc-slot-0: #F7B84A;
+  --dc-slot-1: #9A85FF;
+  --dc-slot-2: #5B9DFF;
 }
 
 @font-face{
@@ -827,26 +839,30 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 }
 .module-retry-note{ color: var(--ink-soft); font-size:13.5px; line-height:1.5; max-width:340px; margin:0 auto; }
 
-/* ---------- Desafios de hoje (estilo Busuu) ---------- */
+/* ---------- Desafios de hoje (estilo Busuu/Duolingo) ---------- */
+/* Nome próprio (.daily-challenge-*, não .challenge-*) de propósito -- a aba
+   "Desafios" (challenge-category-card/.challenge-card mais abaixo) é uma
+   funcionalidade DIFERENTE (frases de prática por nível), que só coincide
+   no nome. Compartilhar a classe faria uma mudança aqui vazar pra lá sem
+   nenhuma relação pedagógica real entre as duas (ver CLAUDE.md). */
 .challenges-screen h2{ text-align:center; margin:0 0 20px; font-size:22px; }
-.challenge-card{
+.daily-challenge-card{
   display:flex; align-items:center; gap:14px; background: var(--paper); border:1px solid var(--paper-line);
-  border-radius: var(--radius); padding:16px; margin-bottom:12px;
+  border-radius: var(--radius); padding:16px; margin-bottom:12px; box-shadow: var(--shadow-card);
 }
-.challenge-icon{
-  position:relative; flex-shrink:0; width:48px; height:48px;
-  display:flex; align-items:center; justify-content:center; font-size:30px;
+.daily-challenge-icon-sq{
+  flex-shrink:0; width:52px; height:52px; border-radius:15px;
+  display:flex; align-items:center; justify-content:center; font-size:26px;
 }
-.challenge-check{
-  position:absolute; bottom:-4px; right:-4px; width:18px; height:18px; border-radius:50%;
-  background: var(--jade); color:white; font-size:11px; font-weight:800;
-  display:flex; align-items:center; justify-content:center; border:2px solid var(--paper);
-}
-.challenge-body{ flex:1; min-width:0; }
-.challenge-label{ font-weight:700; font-size:14px; margin-bottom:8px; }
-.challenge-progress-track{ height:8px; border-radius:4px; background: var(--paper-warm); overflow:hidden; }
-.challenge-progress-fill{ height:100%; border-radius:4px; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); transition: width .3s ease; }
-.challenge-count{ flex-shrink:0; font-size:12.5px; font-weight:700; color: var(--ink-soft); }
+.daily-challenge-icon-sq.slot-0{ background: var(--dc-slot-0); }
+.daily-challenge-icon-sq.slot-1{ background: var(--dc-slot-1); }
+.daily-challenge-icon-sq.slot-2{ background: var(--dc-slot-2); }
+.daily-challenge-body{ flex:1; min-width:0; }
+.daily-challenge-label{ font-weight:800; font-size:15px; color: var(--ink); margin-bottom:9px; }
+.daily-challenge-progress-row{ display:flex; align-items:center; gap:10px; }
+.daily-challenge-progress-track{ flex:1; height:8px; border-radius:4px; background: var(--paper-warm); overflow:hidden; }
+.daily-challenge-progress-fill{ height:100%; border-radius:4px; background: var(--jade); transition: width .3s ease; }
+.daily-challenge-fraction{ flex-shrink:0; font-size:14px; font-weight:800; color: var(--ink); font-variant-numeric: tabular-nums; }
 
 /* Chip de meta diária (plano de estudo) na Trilha -- ver artefato "A
    Gramática da Recompensa", §6: "hábito" precisa aparecer na Home, hoje só
@@ -868,26 +884,33 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 /* Faixa compacta e sempre visível na Trilha (opção que NÃO exige terminar
    uma lição pra ver o progresso do dia -- ver artefato "A Gramática da
    Recompensa", tier 2.4/2.5): os mesmos 3 desafios de todaysChallenges(),
-   só que num resumo minúsculo. Sem clique/expansão própria -- pra ver o
-   texto completo de cada desafio o aluno ainda usa a aba/tela "Desafios de
-   hoje" (renderDailyChallengesScreen), que já existe; a faixa é só o
-   lembrete ambiente. */
-.daily-challenges-strip{ display:flex; gap:8px; margin: 2px 0 18px; }
-.dcs-chip{
-  flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; gap:5px;
-  background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
-  padding:10px 6px; text-align:center;
+   com a MESMA linguagem visual da tela cheia "Desafios de hoje" (selo
+   colorido + barra + fração) só que em escala reduzida -- fica
+   deliberadamente mais discreta que o chip de Meta diária logo acima
+   (auditoria "O problema dos 100%", §6: hierarquia clara, não elementos do
+   mesmo peso competindo pela mesma atenção). Sem clique/expansão própria --
+   pra ver o texto completo de cada desafio o aluno ainda usa a aba/tela
+   "Desafios de hoje" (renderDailyChallengesScreen), que já existe.  */
+.daily-challenges-strip{ display:flex; flex-direction:column; gap:7px; margin: 2px 0 18px; }
+.dcs-caption{ font-size:10.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color: var(--ink-soft); margin: 2px 0 1px 2px; }
+.dcs-card{
+  display:flex; align-items:center; gap:11px; background: var(--paper); border:1px solid var(--paper-line);
+  border-radius: 12px; padding:10px 12px;
 }
-.dcs-chip.done{ border-color: var(--jade); background: rgba(58,115,89,0.07); }
-.dcs-chip-icon{ position:relative; font-size:20px; line-height:1; }
-.dcs-chip-check{
-  position:absolute; top:-5px; right:-9px; width:14px; height:14px; border-radius:50%;
-  background: var(--jade); color:#fff; font-size:8.5px; font-weight:800;
-  display:flex; align-items:center; justify-content:center; border:1.5px solid var(--paper);
+.dcs-card.done{ border-color: var(--jade); background: rgba(58,115,89,0.06); }
+.dcs-icon-sq{
+  flex-shrink:0; width:34px; height:34px; border-radius:10px; font-size:17px;
+  display:flex; align-items:center; justify-content:center;
 }
-.dcs-chip-label{ font-size:9.5px; color: var(--ink-soft); font-weight:700; line-height:1.25; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.dcs-chip-track{ width:100%; height:4px; border-radius:999px; background: var(--paper-warm); overflow:hidden; }
-.dcs-chip-fill{ height:100%; border-radius:999px; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); transition: width .3s ease; }
+.dcs-icon-sq.slot-0{ background: var(--dc-slot-0); }
+.dcs-icon-sq.slot-1{ background: var(--dc-slot-1); }
+.dcs-icon-sq.slot-2{ background: var(--dc-slot-2); }
+.dcs-body{ flex:1; min-width:0; }
+.dcs-card-label{ font-size:12px; font-weight:700; color: var(--ink); margin-bottom:5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dcs-progress-row{ display:flex; align-items:center; gap:7px; }
+.dcs-track{ flex:1; height:6px; border-radius:999px; background: var(--paper-warm); overflow:hidden; }
+.dcs-fill{ height:100%; border-radius:999px; background: var(--jade); transition: width .3s ease; }
+.dcs-fraction{ flex-shrink:0; font-size:11px; font-weight:800; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 
 /* ---------- Exercício de ordenar palavras (reorder) ---------- */
 .reorder-answer-slots{

@@ -897,15 +897,31 @@ document.getElementById('review-reminder-cta-btn').addEventListener('click', () 
 //   2. Revisão/Hanzi (REVISAO_HANZI_CHALLENGES) — sempre puxa o aluno pra
 //      uma dessas abas, que ele não necessariamente abriria sozinho.
 //   3. Geral (GENERAL_CHALLENGES) — mais variado, ligado à Trilha em geral.
+// Balde-padrão construído do zero a cada chamada -- nunca reaproveita
+// arrays/objetos entre chamadas (um array compartilhado entre dois "dias"
+// diferentes viraria um vazamento de estado sutil).
+function freshDailyBucket(today){
+  return {
+    date: today, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
+    hanziLessons: 0, reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0,
+    lessonsForGoal: 0, goalCountedLessonKeys: [], exerciseFormatsSeen: [],
+    exerciseFormatCounts: {}, audioPlaysToday: 0, overdueReviewsDone: 0
+  };
+}
+
 function ensureDailyBucket(){
   const today = todayStr();
   if (STATE.daily.date !== today){
-    STATE.daily = {
-      date: today, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
-      hanziLessons: 0, reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0,
-      lessonsForGoal: 0, goalCountedLessonKeys: [], exerciseFormatsSeen: [],
-      exerciseFormatCounts: {}, audioPlaysToday: 0, overdueReviewsDone: 0
-    };
+    STATE.daily = freshDailyBucket(today);
+  } else {
+    // Reconcilia: preenche só os campos que ainda NÃO existem no balde de
+    // hoje -- cobre a conta que já tinha usado o app hoje antes de um
+    // deploy adicionar um campo novo (ver auditoria "O problema dos 100%").
+    // Nunca sobrescreve um campo que já tem valor real.
+    const fresh = freshDailyBucket(today);
+    Object.keys(fresh).forEach(key => {
+      if (!(key in STATE.daily)) STATE.daily[key] = fresh[key];
+    });
   }
 }
 
@@ -1027,18 +1043,22 @@ function renderDailyChallengesScreen(){
   contentEl.innerHTML = `
     <div class="challenges-screen">
       <h2>Desafios de hoje</h2>
-      ${todaysChallenges().map(c => {
-        const current = Math.min(c.get(STATE.daily), c.target);
+      ${todaysChallenges().map((c, i) => {
+        // Number(...)||0: um campo ausente nunca mais vira NaN silencioso
+        // (ver auditoria "O problema dos 100%") -- current fica sempre um
+        // número válido entre 0 e c.target.
+        const current = Math.min(Number(c.get(STATE.daily)) || 0, c.target);
         const pct = Math.round((current / c.target) * 100);
-        const done = current >= c.target;
         return `
-          <div class="challenge-card">
-            <div class="challenge-icon">${c.icon}${done ? '<span class="challenge-check">✓</span>' : ''}</div>
-            <div class="challenge-body">
-              <div class="challenge-label">${c.label}</div>
-              <div class="challenge-progress-track"><div class="challenge-progress-fill" style="width:${pct}%"></div></div>
+          <div class="daily-challenge-card">
+            <div class="daily-challenge-icon-sq slot-${i}">${c.icon}</div>
+            <div class="daily-challenge-body">
+              <div class="daily-challenge-label">${c.label}</div>
+              <div class="daily-challenge-progress-row">
+                <div class="daily-challenge-progress-track"><div class="daily-challenge-progress-fill" style="width:${pct}%"></div></div>
+                <div class="daily-challenge-fraction">${current}/${c.target}</div>
+              </div>
             </div>
-            ${done ? '' : `<div class="challenge-count">${current}/${c.target}</div>`}
           </div>
         `;
       }).join('')}
@@ -1478,18 +1498,27 @@ function renderDailyChallengesStrip(){
   const strip = document.getElementById('daily-challenges-strip');
   if (!strip) return;
   ensureDailyBucket();
-  strip.innerHTML = todaysChallenges().map(c => {
-    const current = Math.min(c.get(STATE.daily), c.target);
+  const cardsHTML = todaysChallenges().map((c, i) => {
+    // Number(...)||0: um campo ausente nunca mais vira NaN silencioso (ver
+    // auditoria "O problema dos 100%") -- current fica sempre um número
+    // válido entre 0 e c.target.
+    const current = Math.min(Number(c.get(STATE.daily)) || 0, c.target);
     const pct = Math.round((current / c.target) * 100);
     const done = current >= c.target;
     return `
-      <div class="dcs-chip ${done ? 'done' : ''}" title="${c.label}">
-        <div class="dcs-chip-icon">${c.icon}${done ? '<span class="dcs-chip-check">✓</span>' : ''}</div>
-        <div class="dcs-chip-label">${c.label}</div>
-        <div class="dcs-chip-track"><div class="dcs-chip-fill" style="width:${pct}%"></div></div>
+      <div class="dcs-card ${done ? 'done' : ''}">
+        <div class="dcs-icon-sq slot-${i}">${c.icon}</div>
+        <div class="dcs-body">
+          <div class="dcs-card-label">${c.label}</div>
+          <div class="dcs-progress-row">
+            <div class="dcs-track"><div class="dcs-fill" style="width:${pct}%"></div></div>
+            <div class="dcs-fraction">${current}/${c.target}</div>
+          </div>
+        </div>
       </div>
     `;
   }).join('');
+  strip.innerHTML = `<div class="dcs-caption">Desafios de hoje</div>${cardsHTML}`;
 }
 
 function renderUnitsGrid(){
