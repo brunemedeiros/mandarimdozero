@@ -1233,6 +1233,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .profile-avatar{
   width:76px; height:76px; border-radius:50%; display:flex; align-items:center; justify-content:center;
   color:#fff; font-family:var(--font-body); font-weight:800; font-size:28px; margin-bottom:6px;
+  object-fit:cover;
 }
 .profile-name{ font-size:19px; font-weight:800; color:var(--ink); }
 .profile-username{ font-size:13px; color:var(--ink-soft); font-weight:600; margin-top:-2px; }
@@ -1311,6 +1312,24 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .profile-empty-note{ font-size:13px; color:var(--ink-soft); }
 
 /* ---------- Modal: editar perfil ---------- */
+.profile-edit-avatar-row{ display:flex; align-items:center; gap:14px; margin-bottom:16px; }
+.profile-edit-avatar-preview{
+  width:64px; height:64px; border-radius:50%; overflow:hidden; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; background:var(--paper-warm);
+}
+.profile-edit-avatar-preview img{ width:100%; height:100%; object-fit:cover; display:block; }
+.profile-edit-avatar-initials{
+  width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+  color:#fff; font-weight:800; font-size:22px; font-family:var(--font-body);
+}
+.profile-edit-avatar-actions{ display:flex; flex-direction:column; gap:6px; }
+.profile-edit-avatar-btn{
+  font-size:12.5px; font-weight:700; color:var(--ink-soft); background:var(--paper); border:1px solid var(--paper-line);
+  border-radius:99px; padding:6px 14px; cursor:pointer; font-family:var(--font-body); text-align:center;
+}
+.profile-edit-avatar-btn:hover{ border-color:var(--seal-red); color:var(--ink); }
+.profile-edit-avatar-btn.remove{ color:var(--seal-red-dark); }
+.profile-edit-avatar-error{ color:var(--seal-red-dark); font-size:12.5px; min-height:14px; margin:0 0 8px; }
 .profile-edit-form{ display:flex; flex-direction:column; gap:4px; }
 .profile-edit-label{ font-size:12px; font-weight:700; color:var(--ink-soft); margin:12px 0 2px; }
 .profile-edit-label:first-child{ margin-top:0; }
@@ -2165,6 +2184,16 @@ body.hide-pinyin .prompt-pinyin{
     </div>
     <div class="app-modal-body">
       <form id="profile-edit-form" class="profile-edit-form">
+        <div class="profile-edit-avatar-row">
+          <div class="profile-edit-avatar-preview" id="profile-edit-avatar-preview"></div>
+          <div class="profile-edit-avatar-actions">
+            <button type="button" class="profile-edit-avatar-btn" id="profile-edit-avatar-change-btn">Alterar foto</button>
+            <button type="button" class="profile-edit-avatar-btn remove" id="profile-edit-avatar-remove-btn" style="display:none;">Remover foto</button>
+          </div>
+          <input type="file" id="profile-edit-avatar-input" accept="image/*" style="display:none;">
+        </div>
+        <p class="profile-edit-avatar-error" id="profile-edit-avatar-error"></p>
+
         <label class="profile-edit-label" for="profile-edit-display-name">Nome exibido</label>
         <input type="text" id="profile-edit-display-name" class="profile-edit-input" maxlength="60" placeholder="Como você quer ser chamada(o)">
 
