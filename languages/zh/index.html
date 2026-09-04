@@ -492,7 +492,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .ub-frac{ font-weight:700; font-size:11.5px; color:var(--ink-soft); white-space:nowrap; flex-shrink:0; }
 .ub-chevron{
   flex-shrink:0; width:26px; height:26px; border-radius:50%; border:none; background:var(--paper-warm);
-  display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--ink-soft);
+  display:flex; align-items:center; justify-content:center; font-size:15px; color:var(--ink-soft);
   cursor:pointer; transition: transform .15s ease;
 }
 .unit-block.expanded .ub-chevron{ transform: rotate(180deg); }
@@ -505,6 +505,11 @@ a.pill:hover{ border-color: var(--imperial-gold); }
    nunca competem porque nunca dividem cor. */
 .ub-lesson-row.done{ background: rgba(58,115,89,0.14); }
 .ub-lesson-row.current{ background: rgba(192,35,31,0.08); }
+/* Lições concluídas (exceto Ponto de verificação) reabrem em modo revisão
+   -- ver openLessonReview em app.js. */
+.ub-lesson-row.clickable{ cursor:pointer; }
+.ub-lesson-row.clickable:hover{ background: rgba(58,115,89,0.22); }
+.ub-lesson-row.clickable:active{ background: rgba(58,115,89,0.28); }
 .ub-lesson-dot{
   width:22px; height:22px; border-radius:50%; flex-shrink:0; font-size:11px; font-weight:800;
   display:flex; align-items:center; justify-content:center;
@@ -1048,11 +1053,20 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
    colorido + barra + fração) só que em escala reduzida -- fica
    deliberadamente mais discreta que o chip de Meta diária logo acima
    (auditoria "O problema dos 100%", §6: hierarquia clara, não elementos do
-   mesmo peso competindo pela mesma atenção). Sem clique/expansão própria --
+   mesmo peso competindo pela mesma atenção). Título funciona como toggle --
+   clicar nele recolhe/expande os cards (estado lembrado em localStorage);
    pra ver o texto completo de cada desafio o aluno ainda usa a aba/tela
    "Desafios de hoje" (renderDailyChallengesScreen), que já existe. */
-.daily-challenges-strip{ display:flex; flex-direction:column; gap:7px; margin: 2px 0 18px; }
-.dcs-caption{ font-size:10.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color: var(--ink-soft); margin: 2px 0 1px 2px; }
+.daily-challenges-strip{ margin: 2px 0 18px; }
+.dcs-caption-btn{
+  display:flex; align-items:center; justify-content:space-between; width:100%;
+  background:none; border:none; padding:2px 2px 8px; margin:0; cursor:pointer; font-family: var(--font-body);
+}
+.dcs-caption-btn:hover .dcs-caption{ color: var(--ink); }
+.dcs-caption{ font-size:10.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color: var(--ink-soft); }
+.dcs-caption-chevron{ font-size:14px; color: var(--ink-soft); transition: transform .15s ease; }
+.dcs-caption-btn[aria-expanded="false"] .dcs-caption-chevron{ transform: rotate(-90deg); }
+.dcs-cards{ display:flex; flex-direction:column; gap:7px; }
 .dcs-card{
   display:flex; align-items:center; gap:11px; background: var(--paper); border:1px solid var(--paper-line);
   border-radius: 12px; padding:10px 12px;
@@ -1873,6 +1887,26 @@ body.hide-pinyin .prompt-pinyin{
     <div class="heatmap-wrap" id="heatmap-wrap"></div>
     <div class="section-label">Palavras aprendidas ao longo do tempo</div>
     <div class="progress-line-wrap" id="progress-line-chart-wrap"></div>
+  </div>
+
+  <!-- ===== CONFIGURAÇÕES ===== -->
+  <div class="view" id="view-settings">
+    <div class="path-header">
+      <h2>Configurações</h2>
+      <p>Sua conta e preferências do app.</p>
+    </div>
+    <div class="section-label">Conta</div>
+    <div class="settings-card">
+      <div class="settings-row">
+        <div class="settings-row-label">E-mail</div>
+        <div class="settings-row-value" id="settings-email">—</div>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-label">Conectado com</div>
+        <div class="settings-row-value" id="settings-provider">—</div>
+      </div>
+    </div>
+    <p class="settings-more-note">Mais opções de conta em breve.</p>
     <div class="section-label">Preferências</div>
     <div class="pref-row">
       <div class="pref-row-text">
@@ -1888,25 +1922,6 @@ body.hide-pinyin .prompt-pinyin{
       </div>
       <button class="pref-switch" id="feedback-sound-switch" role="switch" aria-checked="true"><span class="pref-switch-knob"></span></button>
     </div>
-  </div>
-
-  <!-- ===== CONFIGURAÇÕES ===== -->
-  <div class="view" id="view-settings">
-    <div class="path-header">
-      <h2>Configurações</h2>
-      <p>Informações da sua conta.</p>
-    </div>
-    <div class="settings-card">
-      <div class="settings-row">
-        <div class="settings-row-label">E-mail</div>
-        <div class="settings-row-value" id="settings-email">—</div>
-      </div>
-      <div class="settings-row">
-        <div class="settings-row-label">Conectado com</div>
-        <div class="settings-row-value" id="settings-provider">—</div>
-      </div>
-    </div>
-    <p class="settings-more-note">Mais opções de conta em breve.</p>
   </div>
 
   <!-- ===== HANZI (trilha de caracteres) ===== -->
