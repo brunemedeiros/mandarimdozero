@@ -575,6 +575,10 @@ const PINYIN_TOGGLE_KEY = 'mandarim_hide_pinyin';
 function applyPinyinVisibility(hidden){
   document.body.classList.toggle('hide-pinyin', hidden);
   document.getElementById('pinyin-toggle-btn').classList.toggle('active', hidden);
+  // Duplicata dentro da barra de foco da lição (ver .lesson-focus-bar) --
+  // mesma preferência global, só precisa de um segundo botão porque a
+  // topbar inteira some durante a lição.
+  document.getElementById('pinyin-toggle-btn-lesson').classList.toggle('active', hidden);
 }
 
 function loadPinyinPreference(){
@@ -585,13 +589,16 @@ function loadPinyinPreference(){
   applyPinyinVisibility(hidden);
 }
 
-document.getElementById('pinyin-toggle-btn').addEventListener('click', () => {
+function togglePinyinVisibility(){
   const nowHidden = !document.body.classList.contains('hide-pinyin');
   applyPinyinVisibility(nowHidden);
   try{
     window.localStorage.setItem(PINYIN_TOGGLE_KEY, nowHidden ? '1' : '0');
   }catch(e){ /* silencioso: preferência só não persiste entre sessões */ }
-});
+}
+
+document.getElementById('pinyin-toggle-btn').addEventListener('click', togglePinyinVisibility);
+document.getElementById('pinyin-toggle-btn-lesson').addEventListener('click', togglePinyinVisibility);
 
 loadPinyinPreference();
 

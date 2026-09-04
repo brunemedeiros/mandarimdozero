@@ -547,6 +547,12 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   display:flex; align-items:center; justify-content:center; transition: all .15s ease; font-family: var(--font-body);
 }
 .lesson-close-btn:hover{ border-color: var(--imperial-gold); color: var(--ink); }
+/* Mesmo toggle de pinyin da topbar (ver .pinyin-toggle-btn), só que redesenhado
+   como um dos ícones redondos da barra de foco -- a topbar inteira fica
+   escondida durante a lição (ver #app.lesson-focus .topbar), então sem isto
+   não haveria como ligar/desligar o pinyin no meio de um exercício. */
+.pinyin-toggle-btn-lesson{ font-family: var(--font-hanzi); font-weight:700; }
+.pinyin-toggle-btn-lesson.active{ background: var(--seal-red); border-color: var(--seal-red); color: var(--gold-bright); }
 .lesson-progress-track{ flex:1; height:8px; background: var(--paper-warm); border-radius:4px; overflow:hidden; }
 .lesson-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:4px; transition: width .3s ease; }
 
@@ -1817,6 +1823,7 @@ body.hide-pinyin .prompt-pinyin{
         <div class="lesson-progress-track" id="step-progress-wrap">
           <div class="lesson-progress-fill" id="step-progress-fill"></div>
         </div>
+        <button class="lesson-close-btn pinyin-toggle-btn-lesson" id="pinyin-toggle-btn-lesson" aria-label="Esconder/mostrar pinyin" title="Esconder/mostrar pinyin">拼</button>
         <button class="lesson-close-btn" id="lesson-kbd-btn" aria-label="Atalhos do teclado" title="Atalhos do teclado">⌨️</button>
         <button class="lesson-close-btn" id="back-to-path" aria-label="Sair da lição" title="Sair da lição">✕</button>
       </div>
