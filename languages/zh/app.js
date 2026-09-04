@@ -575,6 +575,7 @@ const PINYIN_TOGGLE_KEY = 'mandarim_hide_pinyin';
 function applyPinyinVisibility(hidden){
   document.body.classList.toggle('hide-pinyin', hidden);
   document.getElementById('pinyin-toggle-btn').classList.toggle('active', hidden);
+  document.getElementById('pinyin-state-label').textContent = hidden ? 'OFF' : 'ON';
   // Duplicata dentro da barra de foco da lição (ver .lesson-focus-bar) --
   // mesma preferência global, só precisa de um segundo botão porque a
   // topbar inteira some durante a lição.

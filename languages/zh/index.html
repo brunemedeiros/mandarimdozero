@@ -551,7 +551,6 @@ a.pill:hover{ border-color: var(--imperial-gold); }
    como um dos ícones redondos da barra de foco -- a topbar inteira fica
    escondida durante a lição (ver #app.lesson-focus .topbar), então sem isto
    não haveria como ligar/desligar o pinyin no meio de um exercício. */
-.pinyin-toggle-btn-lesson{ font-family: var(--font-hanzi); font-weight:700; }
 .pinyin-toggle-btn-lesson.active{ background: var(--seal-red); border-color: var(--seal-red); color: var(--gold-bright); }
 .lesson-progress-track{ flex:1; height:8px; background: var(--paper-warm); border-radius:4px; overflow:hidden; }
 .lesson-progress-fill{ height:100%; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); border-radius:4px; transition: width .3s ease; }
@@ -1634,7 +1633,7 @@ footer.app-footer{ text-align:center; margin-top:50px; font-size:12px; color: va
 
 .pinyin-toggle-btn{
   cursor:pointer; border:1px solid var(--paper-line); background: var(--paper-warm);
-  font-family: var(--font-hanzi); font-weight:700; color: var(--ink-soft); font-size:13px;
+  font-weight:700; color: var(--ink-soft); font-size:13px;
 }
 .pinyin-toggle-btn.active{ background: var(--seal-red); border-color: var(--seal-red); color: var(--gold-bright); }
 
@@ -1762,7 +1761,7 @@ body.hide-pinyin .prompt-pinyin{
       <div class="stats-pills">
         <div class="pill streak">🔥 <span id="streak-count">0</span></div>
         <div class="pill xp">⭐ <span id="xp-count">0</span> XP</div>
-        <button class="pill pinyin-toggle-btn" id="pinyin-toggle-btn" aria-label="Esconder/mostrar pinyin" title="Esconder/mostrar pinyin">拼音</button>
+        <button class="pill pinyin-toggle-btn" id="pinyin-toggle-btn" aria-label="Esconder/mostrar pinyin" title="Esconder/mostrar pinyin">🔤 Pinyin: <span id="pinyin-state-label">ON</span></button>
         <button class="pill search-open-btn" id="search-open-btn" aria-label="Buscar por pinyin, hanzi ou tradução" title="Buscar por pinyin, hanzi ou tradução">🔍</button>
         <button class="pill theme-toggle-btn" id="theme-toggle-btn" aria-label="Alternar tema claro/escuro" title="Alternar tema claro/escuro">🌙</button>
         <div class="lang-switcher">
@@ -1823,7 +1822,7 @@ body.hide-pinyin .prompt-pinyin{
         <div class="lesson-progress-track" id="step-progress-wrap">
           <div class="lesson-progress-fill" id="step-progress-fill"></div>
         </div>
-        <button class="lesson-close-btn pinyin-toggle-btn-lesson" id="pinyin-toggle-btn-lesson" aria-label="Esconder/mostrar pinyin" title="Esconder/mostrar pinyin">拼</button>
+        <button class="lesson-close-btn pinyin-toggle-btn-lesson" id="pinyin-toggle-btn-lesson" aria-label="Esconder/mostrar pinyin" title="Esconder/mostrar pinyin">🔤</button>
         <button class="lesson-close-btn" id="lesson-kbd-btn" aria-label="Atalhos do teclado" title="Atalhos do teclado">⌨️</button>
         <button class="lesson-close-btn" id="back-to-path" aria-label="Sair da lição" title="Sair da lição">✕</button>
       </div>
