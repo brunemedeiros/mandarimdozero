@@ -1873,8 +1873,17 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
   .review-reminder-actions{ margin-left:0; justify-content:center; }
 }
 
-footer.app-footer{ text-align:center; margin-top:50px; }
-footer.app-footer img{ height:56px; opacity:.9; }
+/* position:fixed (não mais em fluxo normal) -- em fluxo normal, a altura
+   variava com o conteúdo da view ativa (uma tela curta como o Ranking sem
+   ninguém pontuando ainda deixava o rodapé "subir" logo abaixo do texto,
+   uma view longa empurrava ele lá embaixo) -- o logo ficava pulando de
+   posição ao trocar de aba. Fixo no canto inferior direito, sempre no
+   mesmo lugar; pointer-events:none pra nunca bloquear um toque em algo
+   por baixo dele. */
+footer.app-footer{
+  position:fixed; right:14px; bottom:14px; margin:0; z-index:50; pointer-events:none;
+}
+footer.app-footer img{ height:40px; opacity:.85; }
 
 /* toast for XP gain */
 /* top:18px fixo (via CSS) ficava por cima do próprio título da unidade

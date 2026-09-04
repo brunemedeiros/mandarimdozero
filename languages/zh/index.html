@@ -1638,7 +1638,17 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .app-modal-close:hover{ background: var(--paper-line); }
 .app-modal-body{ padding:8px 20px 20px; }
 
-footer.app-footer{ text-align:center; margin-top:50px; font-size:12px; color: var(--ink-soft); opacity:.7; }
+/* position:fixed (não mais em fluxo normal) -- em fluxo normal, a altura
+   variava com o conteúdo da view ativa (uma tela curta como o Ranking sem
+   ninguém pontuando ainda deixava o rodapé "subir" logo abaixo do texto,
+   uma view longa empurrava ele lá embaixo) -- o texto ficava pulando de
+   posição ao trocar de aba. Fixo no canto inferior direito, sempre no
+   mesmo lugar; pointer-events:none pra nunca bloquear um toque em algo
+   por baixo dele. */
+footer.app-footer{
+  position:fixed; right:14px; bottom:10px; margin:0; z-index:50; pointer-events:none;
+  max-width:180px; text-align:right; font-size:10.5px; line-height:1.3; color: var(--ink-soft); opacity:.6;
+}
 
 /* toast for XP gain */
 /* top:18px fixo (via CSS) ficava por cima do próprio título da unidade
