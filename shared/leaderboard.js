@@ -13,7 +13,8 @@
 //   - languages/index.js        (AVAILABLE_LANGUAGES)
 //   - shared/supabase-client.js (supabaseClient)
 //   - shared/auth.js            (CURRENT_USER)
-//   - shared/profile.js         (avatarInitials, avatarColor, escapeHTML)
+//   - shared/profile.js         (avatarInitials, avatarColor, escapeHTML,
+//                                 SPECIAL_BADGES, fetchBadgeCatalog)
 
 const LEADERBOARD_TOP_N = 50;
 let LEADERBOARD_SCOPE = 'all'; // 'all' ou o appKey de um idioma específico
@@ -60,9 +61,12 @@ async function fetchLeaderboard(scope, weekStart){
     .slice(0, LEADERBOARD_TOP_N);
   if (!ranked.length) return [];
 
+  // featured_badge_id junto com o resto do perfil -- é o badge que a
+  // própria pessoa escolheu destacar (ver "Badge em destaque" no modal de
+  // editar perfil), não precisa de consulta separada.
   const { data: profiles } = await supabaseClient
     .from('profiles')
-    .select('user_id, username, display_name, avatar_url')
+    .select('user_id, username, display_name, avatar_url, featured_badge_id')
     .in('user_id', ranked.map(r => r.user_id));
   const byId = Object.fromEntries((profiles || []).map(p => [p.user_id, p]));
   return ranked.map((r, i) => ({ ...r, rank: i + 1, profile: byId[r.user_id] || null }));
@@ -75,6 +79,20 @@ function leaderboardRankBadge(rank){
   return rank;
 }
 
+// Resolve um featured_badge_id pro ícone+nome certos -- só procura em
+// SPECIAL_BADGES (Fundadora/Beta Tester) e no catálogo criado pela admin
+// (badge_catalog), NUNCA em BADGES (gameplay): esse conjunto é diferente
+// por idioma, e featured_badge_id é um campo só, compartilhado entre fr/zh
+// (ver o comentário de saveProfileEdits em shared/profile.js).
+function resolveFeaturedBadge(badgeId, catalog){
+  if (!badgeId) return null;
+  const special = SPECIAL_BADGES.find(b => b.id === badgeId);
+  if (special) return { icon: special.icon, name: special.name };
+  const custom = (catalog || []).find(b => b.id === badgeId);
+  if (custom) return { icon: custom.icon, name: custom.name };
+  return null;
+}
+
 async function renderLeaderboardView(){
   const wrap = document.getElementById('leaderboard-content');
   if (!wrap) return;
@@ -82,7 +100,9 @@ async function renderLeaderboardView(){
 
   const weekStart = leaderboardCurrentWeekStart();
   const scope = LEADERBOARD_SCOPE;
-  const rows = await fetchLeaderboard(scope, weekStart);
+  // Catálogo só é buscado se algum badge em destaque de fato precisar dele
+  // -- fetchLeaderboard() já roda em paralelo com isso.
+  const [rows, catalog] = await Promise.all([fetchLeaderboard(scope, weekStart), fetchBadgeCatalog()]);
 
   const scopeTabsHTML = [
     { key: 'all', label: 'Geral' },
@@ -91,21 +111,30 @@ async function renderLeaderboardView(){
 
   const rowsHTML = rows.length ? rows.map(r => {
     const isMe = !!(CURRENT_USER && r.user_id === CURRENT_USER.id);
-    const name = r.profile?.display_name || (r.profile ? `@${r.profile.username}` : 'Aluno(a)');
+    // Sem @username na linha -- o username é gerado a partir do e-mail
+    // (ver createInitialProfile) e não é o que a pessoa reconhece de si
+    // mesma; o nome exibido (ou o próprio username como texto simples, se
+    // ela nunca tiver escolhido um nome) já é suficiente.
+    const name = r.profile?.display_name || r.profile?.username || 'Aluno(a)';
     const initials = avatarInitials(name);
     const color = avatarColor(r.user_id);
     const avatarHTML = r.profile?.avatar_url
       ? `<img class="leaderboard-avatar" src="${r.profile.avatar_url}" alt="">`
       : `<div class="leaderboard-avatar" style="background:${color};">${initials}</div>`;
+    const featured = resolveFeaturedBadge(r.profile?.featured_badge_id, catalog);
+    const badgeHTML = featured
+      ? `<span class="leaderboard-featured-badge" title="${escapeHTML(featured.name)}">${featured.icon}</span>`
+      : '';
     return `
       <div class="leaderboard-row ${isMe ? 'me' : ''}">
         <div class="leaderboard-rank">${leaderboardRankBadge(r.rank)}</div>
         ${avatarHTML}
         <div class="leaderboard-info">
-          <div class="leaderboard-name">${escapeHTML(name)}${isMe ? ' (você)' : ''}</div>
-          ${r.profile?.username ? `<div class="leaderboard-username">@${r.profile.username}</div>` : ''}
+          <div class="leaderboard-name">
+            <span class="leaderboard-name-text">${escapeHTML(name)}</span>${badgeHTML}${isMe ? ' <span class="leaderboard-you-tag">(você)</span>' : ''}
+          </div>
         </div>
-        <div class="leaderboard-xp">⚡ ${r.amount}</div>
+        <div class="leaderboard-xp">⭐ ${r.amount}</div>
       </div>
     `;
   }).join('') : `<p class="profile-empty-note">Ninguém pontuou nessa categoria ainda essa semana. Seja a primeira pessoa no ranking!</p>`;
@@ -123,4 +152,11 @@ async function renderLeaderboardView(){
       renderLeaderboardView();
     });
   });
+
+  // Leva direto pra posição da pessoa ao abrir a tela -- "onde eu estou?"
+  // sem precisar rolar manualmente uma lista que pode ter dezenas de
+  // pessoas. Sem animação de entrada aqui de propósito: é só localização,
+  // não a animação de subida/queda de posição (essa fica pra uma fase
+  // futura, que depende de guardar a posição anterior da pessoa).
+  wrap.querySelector('.leaderboard-row.me')?.scrollIntoView({ block: 'center' });
 }

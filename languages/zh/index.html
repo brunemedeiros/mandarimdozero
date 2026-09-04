@@ -1257,26 +1257,43 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 
 /* ---------- Ranking (Leaderboard) ---------- */
 .leaderboard-week-label{ font-size:12.5px; color:var(--ink-soft); font-weight:700; text-align:center; margin-bottom:10px; }
-.leaderboard-tabs{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-bottom:16px; }
+.leaderboard-tabs{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-bottom:14px; }
 .leaderboard-tab{
   font-size:12.5px; font-weight:700; color:var(--ink-soft); background:var(--paper); border:1px solid var(--paper-line);
   border-radius:99px; padding:6px 14px; cursor:pointer; font-family:var(--font-body);
 }
 .leaderboard-tab.active{ background:var(--seal-red); border-color:var(--seal-red); color:#fff; }
-.leaderboard-list{ display:flex; flex-direction:column; gap:8px; }
+/* Lista contínua (não cards por linha) -- linha divisória fina em vez de
+   borda+raio+gap por item, densidade mais parecida com um ranking de
+   verdade do que com uma pilha de cartões administrativos. */
+.leaderboard-list{ display:flex; flex-direction:column; background:var(--paper); border-radius:var(--radius); overflow:hidden; }
 .leaderboard-row{
-  display:flex; align-items:center; gap:12px; padding:10px 12px; border:1px solid var(--paper-line);
-  border-radius:12px; background:var(--paper);
+  display:flex; align-items:center; gap:12px; padding:10px 14px; border-bottom:1px solid var(--paper-line);
 }
-.leaderboard-row.me{ border-color:var(--seal-red); background:var(--paper-warm); }
+.leaderboard-row:last-child{ border-bottom:none; }
+/* Destaque do próprio usuário: preenchimento sólido (não só borda/tint) --
+   precisa se achar na lista de relance. */
+.leaderboard-row.me{
+  background:var(--seal-red); border-radius:10px; margin:3px; padding:10px 11px; border-bottom-color:transparent;
+}
+.leaderboard-row.me .leaderboard-rank,
+.leaderboard-row.me .leaderboard-name,
+.leaderboard-row.me .leaderboard-xp,
+.leaderboard-row.me .leaderboard-you-tag{ color:#fff; }
 .leaderboard-rank{ width:26px; flex-shrink:0; text-align:center; font-size:15px; font-weight:800; color:var(--ink-soft); }
 .leaderboard-avatar{
   width:36px; height:36px; border-radius:50%; flex-shrink:0; object-fit:cover;
   display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:14px; font-family:var(--font-body);
 }
 .leaderboard-info{ flex:1; min-width:0; }
-.leaderboard-name{ font-size:13.5px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.leaderboard-username{ font-size:11.5px; color:var(--ink-soft); }
+.leaderboard-name{ font-size:13.5px; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:5px; min-width:0; }
+.leaderboard-name-text{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.leaderboard-you-tag{ font-weight:600; color:var(--ink-soft); flex-shrink:0; }
+/* Badge em destaque escolhido pela própria pessoa no Meu Perfil -- ícone
+   pequeno junto do nome, nome do badge só no hover (title nativo), sem
+   poluir a linha com texto extra. */
+.leaderboard-featured-badge{ display:inline-flex; align-items:center; font-size:12px; flex-shrink:0; cursor:default; }
+.leaderboard-featured-badge svg{ width:13px; height:13px; display:block; }
 .leaderboard-xp{ font-size:13px; font-weight:800; color:var(--seal-red-dark); flex-shrink:0; }
 .leaderboard-footnote{ font-size:11.5px; color:var(--ink-soft); text-align:center; margin-top:14px; }
 
@@ -2282,6 +2299,11 @@ body.hide-pinyin .prompt-pinyin{
         <label class="profile-edit-label" for="profile-edit-bio">Sobre mim</label>
         <textarea id="profile-edit-bio" class="profile-edit-textarea" maxlength="160" placeholder="Conte um pouco sobre você e por que está aprendendo mandarim"></textarea>
         <div class="profile-edit-bio-count" id="profile-edit-bio-count">0/160</div>
+
+        <div id="profile-edit-featured-badge-row" style="display:none;">
+          <label class="profile-edit-label" for="profile-edit-featured-badge">Badge em destaque (aparece no Ranking)</label>
+          <select id="profile-edit-featured-badge" class="profile-edit-input"></select>
+        </div>
 
         <p class="profile-edit-error" id="profile-edit-error"></p>
         <button type="submit" class="btn btn-primary btn-block" id="profile-edit-save-btn">Salvar</button>
