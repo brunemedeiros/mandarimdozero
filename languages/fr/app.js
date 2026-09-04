@@ -2387,7 +2387,7 @@ function renderLessonBoundaryScreen(u, lesson, challengesBefore){
       <div class="lesson-complete-icon tier-pop">✅</div>
       <h2>Lição concluída!</h2>
       <p class="lesson-boundary-title">${lesson.title}</p>
-      ${dueCount > 0 ? `<p class="lesson-boundary-due">📇 ${dueCount} carte${dueCount > 1 ? 's' : ''} esperando por revisão</p>` : ''}
+      ${dueCount > 0 ? `<p class="lesson-boundary-due">📇 ${dueCount} ${dueCount > 1 ? 'cartões' : 'cartão'} esperando por revisão</p>` : ''}
       ${renderChallengeChipHTML(challengesBefore)}
     </div>
   `;
