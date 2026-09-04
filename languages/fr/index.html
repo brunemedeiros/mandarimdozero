@@ -1126,6 +1126,17 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   border:1px solid var(--paper-line); border-radius:99px; padding:6px 16px; cursor:pointer; font-family:var(--font-body);
 }
 .profile-edit-btn:hover{ border-color:var(--seal-red); color:var(--ink); }
+/* Badges especiais (Fundadora, Beta Tester) -- cor dourada fixa, não os
+   tokens de accent do site (--imperial-gold é rosa no francês) -- é uma
+   coroa/medalha de verdade, não decoração temática do app. */
+.profile-special-badges{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:10px; }
+.profile-special-badge{
+  display:flex; align-items:center; gap:5px; padding:5px 11px 5px 8px; border-radius:99px;
+  background: rgba(212,160,23,0.16); border:1px solid rgba(184,134,11,0.6);
+  font-size:11.5px; font-weight:800; color:var(--ink);
+}
+.profile-special-badge-icon{ display:flex; align-items:center; font-size:14px; line-height:1; }
+.profile-special-badge-icon svg{ width:16px; height:16px; display:block; }
 
 .profile-section{ margin-top:22px; }
 

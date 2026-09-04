@@ -9,18 +9,84 @@
 //   - shared/supabase-client.js (supabaseClient)
 //   - shared/auth.js            (CURRENT_USER)
 //   - shared/toast.js           (showToast)
+// E de (referenciados só dentro de função, nunca no top-level deste
+// arquivo -- por isso pode vir ANTES de app.js no <body>, igual
+// shared/wizard.js -- ver comentário lá):
 //   - languages/<lang>/app.js   (LANG_ID, STATE, BADGES, earnedBadgeIds,
-//                                 computeProgressSummary, switchTab) -- por
-//     isso vem depois de app.js no <body>, igual language-switcher.js.
+//                                 ADMIN_EMAIL, computeProgressSummary,
+//                                 switchTab)
 //
 // A identidade (username/display_name/bio/avatar) mora numa tabela própria
 // -- `profiles`, uma linha por CONTA -- e não dentro do jsonb por-idioma da
 // tabela `progress` (ver shared/supabase_migrations/001_create_profiles_table.sql
 // pro porquê: um campo compartilhado entre fr/zh não pode viver num
 // namespace que cada site sobrescreve independentemente).
+//
+// SPECIAL_BADGES (Fundadora, Beta Tester...) é um catálogo à parte do
+// BADGES por gameplay de cada app.js -- são badges de IDENTIDADE (contam
+// quem a pessoa é pra plataforma, não o que ela jogou), calculados por
+// regra (e-mail, data de criação da conta) ou concedidos manualmente via
+// a tabela `badge_grants` (ver 002_create_badge_grants_table.sql), nunca
+// por STATE/progresso.
 
 let PROFILE_CACHE = null;
 let OTHER_LANGUAGES_RAW_CACHE = null;
+
+// ---------- Badges especiais (identidade, não gameplay) ----------
+// Coroa desenhada em SVG, não emoji -- mesma razão das bandeiras (ver
+// shared/language-switcher.js): renderização consistente em qualquer
+// navegador/SO, sem depender da fonte de emoji do sistema ter um glifo
+// de coroa "bonito o suficiente".
+const FOUNDER_CROWN_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Coroa de fundadora"><path d="M3,18 L5.5,7 L9,13 L12,5 L15,13 L18.5,7 L21,18 Z" fill="#F0BF3A" stroke="#B8860B" stroke-width="0.6" stroke-linejoin="round"/><rect x="2.5" y="17" width="19" height="3" rx="1.2" fill="#E0A825" stroke="#B8860B" stroke-width="0.4"/><circle cx="5.5" cy="7.2" r="1.15" fill="#D6483A"/><circle cx="12" cy="5.2" r="1.3" fill="#3D6FBF"/><circle cx="18.5" cy="7.2" r="1.15" fill="#3F8F5C"/><circle cx="12" cy="18.5" r="1" fill="#D6483A"/></svg>';
+
+// "Beta tester" = qualquer conta criada antes do lançamento deste sistema
+// de badges -- ou seja, todo mundo que já estava usando o app e ajudando a
+// testar/reportar erros/sugerir mudanças antes de existir uma recompensa
+// formal por isso. Comparado contra CURRENT_USER.created_at (data real de
+// criação da conta no Supabase Auth), não profile.created_at (que só
+// marca quando a pessoa abriu o Perfil pela primeira vez -- datas
+// diferentes).
+const BETA_TESTER_CUTOFF = '2026-09-05T00:00:00Z';
+
+const SPECIAL_BADGES = [
+  { id: 'founder', name: 'Fundadora', icon: FOUNDER_CROWN_SVG, desc: 'Criadora da plataforma' },
+  { id: 'beta_tester', name: 'Beta Tester', icon: '🧪', desc: 'Ajudou a testar o app antes do lançamento oficial' },
+];
+
+function isFounder(){
+  return !!(CURRENT_USER && typeof ADMIN_EMAIL !== 'undefined' && CURRENT_USER.email === ADMIN_EMAIL);
+}
+
+function isBetaTester(){
+  return !!(CURRENT_USER?.created_at && new Date(CURRENT_USER.created_at) < new Date(BETA_TESTER_CUTOFF));
+}
+
+// badge_grants é o "espaço" pra conceder um badge especial a uma conta
+// específica quando não existe regra automática possível (ex: reconhecer
+// alguém que ajudou a sugerir uma mudança pontual) -- ver
+// shared/supabase_migrations/002_create_badge_grants_table.sql. Nenhum
+// badge do catálogo usa esse caminho ainda (founder/beta_tester são
+// 100% por regra), mas a leitura já funciona pronta pra quando a autora
+// conceder o primeiro.
+async function fetchGrantedBadgeIds(){
+  if (!CURRENT_USER) return new Set();
+  const { data, error } = await supabaseClient
+    .from('badge_grants')
+    .select('badge_id')
+    .eq('user_id', CURRENT_USER.id);
+  if (error){ console.error('Erro ao carregar badges concedidos:', error); return new Set(); }
+  return new Set((data || []).map(r => r.badge_id));
+}
+
+async function computeEarnedSpecialBadges(){
+  if (!CURRENT_USER) return [];
+  const granted = await fetchGrantedBadgeIds();
+  return SPECIAL_BADGES.filter(b => {
+    if (b.id === 'founder') return isFounder();
+    if (b.id === 'beta_tester') return isBetaTester();
+    return granted.has(b.id);
+  });
+}
 
 // Só minúsculas/números/ponto/traço/underscore -- mesmo padrão do check
 // constraint da tabela (esta função é a validação de verdade; o check no
@@ -200,17 +266,18 @@ async function renderProfileView(){
   const langs = await buildLanguagesSummary();
   const earnedBadges = BADGES.filter(b => earnedBadgeIds.has(b.id));
   const featured = earnedBadges.slice(-4).reverse();
+  const specialBadges = await computeEarnedSpecialBadges();
 
   if (!CURRENT_USER){
-    renderProfileBody(wrap, { profile: null, langs, earnedBadges, featured, isGuest: true });
+    renderProfileBody(wrap, { profile: null, langs, earnedBadges, featured, specialBadges, isGuest: true });
     return;
   }
 
   const profile = await ensureProfileLoaded();
-  renderProfileBody(wrap, { profile, langs, earnedBadges, featured, isGuest: false });
+  renderProfileBody(wrap, { profile, langs, earnedBadges, featured, specialBadges, isGuest: false });
 }
 
-function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, isGuest }){
+function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, specialBadges, isGuest }){
   const name = profileDisplayName(profile);
   const initials = avatarInitials(name);
   const color = avatarColor(profile?.user_id || CURRENT_USER?.email || 'convidado');
@@ -238,6 +305,20 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, isGue
     <div class="profile-badge" title="${b.name}">${b.icon}</div>
   `).join('') : `<p class="profile-empty-note">Nenhuma conquista ainda — sua primeira lição já desbloqueia uma.</p>`;
 
+  // Badges especiais (Fundadora, Beta Tester...) ficam junto da identidade,
+  // não misturados com a grade de conquistas por gameplay -- são sobre
+  // QUEM a pessoa é pra plataforma, não o que ela jogou (ver SPECIAL_BADGES).
+  const specialBadgesHTML = specialBadges?.length ? `
+    <div class="profile-special-badges">
+      ${specialBadges.map(b => `
+        <div class="profile-special-badge" title="${b.desc}">
+          <span class="profile-special-badge-icon">${b.icon}</span>
+          <span class="profile-special-badge-name">${b.name}</span>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+
   wrap.innerHTML = `
     ${guestNote}
     <div class="profile-identity">
@@ -245,6 +326,7 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, isGue
       <div class="profile-name">${name}</div>
       ${profile ? `<div class="profile-username">@${profile.username}</div>` : ''}
       ${bio ? `<p class="profile-bio">${escapeHTML(bio)}</p>` : ''}
+      ${specialBadgesHTML}
       ${profile ? `<button class="profile-edit-btn" id="profile-edit-btn">Editar perfil</button>` : ''}
     </div>
 
