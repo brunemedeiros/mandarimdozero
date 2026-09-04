@@ -106,6 +106,17 @@ let exerciseAudioEl = null;
 // LAST_AUDIO_BTN.isConnected já vira false sozinho.
 let LAST_AUDIO_BTN = null;
 
+// Contagem vitalícia de reproduções de áudio (clique manual ou atalho "r")
+// -- só pro badge "Ouvido Treinado" (artefato §8). Tocar áudio nunca passa
+// perto de nenhum addXP() sozinho, então dispara a checagem de badge aqui
+// mesmo em vez de confiar no próximo XP ganho (que pode demorar).
+function registerAudioPlay(){
+  STATE.totalAudioPlays = (STATE.totalAudioPlays || 0) + 1;
+  ensureDailyBucket();
+  STATE.daily.audioPlaysToday += 1;
+  checkAndCelebrateBadges();
+}
+
 function stopExerciseAudio(){
   if (exerciseAudioEl){
     exerciseAudioEl.pause();
@@ -185,6 +196,7 @@ function playPregeneratedAudio(file, btnEl){
 }
 
 function speakFrench(text, btnEl){
+  registerAudioPlay();
   const pregenFile = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
   if (pregenFile){
     playPregeneratedAudio(pregenFile, btnEl);
@@ -354,6 +366,15 @@ const STATE = {
   lastStudyDay: null,
   lastReviewReminderDay: null,
   pendingStreakCelebration: false, // true = streak de hoje já contou, falta mostrar a tela (só ao fim da atividade atual). Nunca persistido -- é sempre por sessão.
+  hadStreakComeback: false, // true = já retomou o streak em até 3 dias após perdê-lo (badge "De volta ao jogo") -- uma vez true, fica true pra sempre
+  totalAudioPlays: 0, // vitalício, nunca zera (badge "Ouvido treinado")
+  everUsedSpeedReview: false, // vitalício (badge "Exploradora")
+  everUsedMatchGame: false, // vitalício (badge "Exploradora")
+  // XP da semana corrente -- preparação pra leaderboard futura (artefato
+  // §9), NÃO implementa leaderboard nenhuma. Separado do XP vitalício
+  // (acima) porque uma leaderboard semanal precisa de um número que reseta;
+  // resetado por leitura (ensurePeriodXp), sem job/cron.
+  periodXp: { weekStart: null, amount: 0 },
   activityLog: {},
   studyGoal: {
     objective: null, levels: [],
@@ -501,6 +522,11 @@ function serializeState(){
     dailyMinutesLog: STATE.dailyMinutesLog,
     dailyLessonsLog: STATE.dailyLessonsLog,
     totalReviews: STATE.totalReviews,
+    hadStreakComeback: STATE.hadStreakComeback,
+    totalAudioPlays: STATE.totalAudioPlays,
+    everUsedSpeedReview: STATE.everUsedSpeedReview,
+    everUsedMatchGame: STATE.everUsedMatchGame,
+    periodXp: STATE.periodXp,
     daily: STATE.daily,
     checkpointProgress: STATE.checkpointProgress,
     levelTestProgress: STATE.levelTestProgress,
@@ -532,6 +558,11 @@ function applySerializedState(data){
   if (data.dailyLessonsLog) Object.assign(STATE.dailyLessonsLog, data.dailyLessonsLog);
   if (data.activityLog) Object.assign(STATE.activityLog, data.activityLog);
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
+  if (data.hadStreakComeback) STATE.hadStreakComeback = true;
+  if (typeof data.totalAudioPlays === 'number') STATE.totalAudioPlays = data.totalAudioPlays;
+  if (data.everUsedSpeedReview) STATE.everUsedSpeedReview = true;
+  if (data.everUsedMatchGame) STATE.everUsedMatchGame = true;
+  if (data.periodXp) Object.assign(STATE.periodXp, data.periodXp);
   if (data.daily) Object.assign(STATE.daily, data.daily);
   if (data.checkpointProgress) Object.assign(STATE.checkpointProgress, data.checkpointProgress);
   if (data.levelTestProgress) Object.assign(STATE.levelTestProgress, data.levelTestProgress);
@@ -551,6 +582,14 @@ function registerStudyToday(){
   if (STATE.lastStudyDay === yStr){
     STATE.streak += 1;
   } else {
+    // Perdeu o streak (não é a primeira vez estudando nem um dia normal de
+    // continuação) -- se voltou depois de um hiato curto (perdeu 1 a 3 dias),
+    // registra pro badge "De volta ao jogo" (artefato §8): recompensa
+    // retomada rápida em vez de só punir a quebra.
+    if (STATE.lastStudyDay){
+      const gapDays = Math.round((new Date(today) - new Date(STATE.lastStudyDay)) / 86400000);
+      if (gapDays >= 2 && gapDays <= 4) STATE.hadStreakComeback = true;
+    }
     STATE.streak = 1;
   }
   STATE.lastStudyDay = today;
@@ -689,7 +728,8 @@ function ensureDailyBucket(){
       date: today, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
       grammarLessons: 0, conjugationSessions: 0, conjugationCorrect: 0,
       conjugationTenses: [], reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0,
-      lessonsForGoal: 0, goalCountedLessonKeys: []
+      lessonsForGoal: 0, goalCountedLessonKeys: [], exerciseFormatsSeen: [],
+      exerciseFormatCounts: {}, audioPlaysToday: 0, overdueReviewsDone: 0
     };
   }
 }
@@ -736,13 +776,35 @@ function registerDailyReviewCard(){
   ensureDailyBucket();
   STATE.daily.reviewsDone += 1;
 }
+// Cartas que já estavam atrasadas (venceram antes de hoje, não só "due
+// agora") -- desafio "Revise cartas em atraso" (artefato §3), prioriza SRS
+// vencido de verdade em vez de qualquer revisão dentro do prazo normal.
+function registerDailyOverdueReviewCard(){
+  ensureDailyBucket();
+  STATE.daily.overdueReviewsDone += 1;
+}
 function registerDailySpeedReview(){
   ensureDailyBucket();
   STATE.daily.speedReviewSessions += 1;
+  STATE.everUsedSpeedReview = true;
 }
 function registerDailyMatchGame(){
   ensureDailyBucket();
   STATE.daily.matchGamesPlayed += 1;
+  STATE.everUsedMatchGame = true;
+}
+// Formatos de exercício distintos respondidos corretamente hoje -- só pro
+// badge "Multitarefa" (artefato §8: engajamento com a variedade do motor,
+// não só o formato mais fácil). Chamado de dentro de exerciseXP(), que já é
+// o único ponto por onde passam TODOS os formatos de exercício ao acertar.
+function registerDailyExerciseFormat(format){
+  ensureDailyBucket();
+  if (!format) return;
+  if (!STATE.daily.exerciseFormatsSeen.includes(format)) STATE.daily.exerciseFormatsSeen.push(format);
+  // Contagem por formato -- alimenta desafios ligados a um formato
+  // específico (ex. "Traduza a frase" = reorder), não só a checagem de
+  // diversidade do badge "Multitarefa".
+  STATE.daily.exerciseFormatCounts[format] = (STATE.daily.exerciseFormatCounts[format] || 0) + 1;
 }
 
 const EASY_CHALLENGES = [
@@ -755,7 +817,10 @@ const REVISAO_CONJ_CHALLENGES = [
   { id:'conjTenses2', icon:'🔤', label:'Pratique conjugação em 2 tempos verbais diferentes', target:2, get: d => d.conjugationTenses.length },
   { id:'reviews15', icon:'🔁', label:'Revise 15 cartões', target:15, get: d => d.reviewsDone },
   { id:'speedReview1', icon:'⚡', label:'Complete uma sessão de Revisão Rápida', target:1, get: d => d.speedReviewSessions },
-  { id:'matchGame1', icon:'🎴', label:'Jogue o jogo da memória 1 vez', target:1, get: d => d.matchGamesPlayed }
+  { id:'matchGame1', icon:'🎴', label:'Jogue o jogo da memória 1 vez', target:1, get: d => d.matchGamesPlayed },
+  // Fase 4 (artefato §3): prioriza SRS de verdade atrasado, não qualquer
+  // revisão dentro do prazo normal -- puxa quem tem cartas acumuladas.
+  { id:'overdue3', icon:'⏰', label:'Revise 3 cartas em atraso', target:3, get: d => d.overdueReviewsDone }
 ];
 // "Complete N lições" saiu daqui na Fase 3 -- virou redundante depois que a
 // meta diária (plano de estudo) passou a ser medida em lições também: as
@@ -765,7 +830,11 @@ const GENERAL_CHALLENGES = [
   { id:'stars40', icon:'⭐', label:'Ganhe 40 estrelas', target:40, get: d => d.stars },
   { id:'highscore2', icon:'📈', label:'Pontue mais de 80% em 2 lições', target:2, get: d => d.highScoreLessons },
   { id:'perfect1', icon:'🎯', label:'Complete uma lição sem errar', target:1, get: d => d.perfectLessons },
-  { id:'grammar1', icon:'🧠', label:'Complete 1 unidade de gramática', target:1, get: d => d.grammarLessons }
+  { id:'grammar1', icon:'🧠', label:'Complete 1 unidade de gramática', target:1, get: d => d.grammarLessons },
+  // Fase 4 (artefato §3): ligados a recursos reais do produto (ouvir,
+  // traduzir por blocos), não só contadores genéricos de progresso.
+  { id:'listen10', icon:'🎧', label:'Toque o áudio 10 vezes', target:10, get: d => d.audioPlaysToday },
+  { id:'translateBlocks2', icon:'🧱', label:'Complete 2 exercícios de "Traduza a frase"', target:2, get: d => d.exerciseFormatCounts?.reorder || 0 }
 ];
 
 function dailySeed(str){
@@ -817,13 +886,32 @@ function renderDailyChallengesScreen(){
   nextBtn.style.display = 'flex';
 }
 
+// Segunda-feira da semana corrente, formato 'YYYY-MM-DD' -- mesmo padrão de
+// chave usado no resto do app (activityLog, dailyLessonsLog etc.).
+function currentWeekStart(){
+  const d = new Date();
+  const diffToMonday = d.getDay() === 0 ? -6 : 1 - d.getDay();
+  const monday = new Date(d);
+  monday.setDate(d.getDate() + diffToMonday);
+  return `${monday.getFullYear()}-${String(monday.getMonth()+1).padStart(2,'0')}-${String(monday.getDate()).padStart(2,'0')}`;
+}
+function ensurePeriodXp(){
+  const weekStart = currentWeekStart();
+  if (STATE.periodXp.weekStart !== weekStart) STATE.periodXp = { weekStart, amount: 0 };
+}
+
 function addXP(amount){
   STATE.xp += amount;
+  ensurePeriodXp();
+  STATE.periodXp.amount += amount;
   showToast(`+${amount} XP`);
-  // Todo badge hoje depende de streak, unidade, XP ou revisões -- e todos
+  // Quase todo badge depende de streak, unidade, XP ou revisões -- e todos
   // esses caminhos já chamam addXP() em algum ponto (mesmo os de streak, via
   // registerStudyToday() logo antes/depois). Centralizar a checagem aqui
   // evita espalhar "será que ganhei um badge?" em cada função separada.
+  // Exceção: "Ouvido Treinado" depende só de tocar áudio, que nunca passa
+  // perto de addXP() sozinho -- registerAudioPlay() dispara a checagem
+  // direto, sem esperar o próximo XP ganho.
   checkAndCelebrateBadges();
 }
 
@@ -845,6 +933,21 @@ const BADGES = [
   { id:'xp_100', name:'100 XP', icon:'⭐', desc:'Acumulou 100 XP', check: s => s.xp >= 100 },
   { id:'xp_500', name:'500 XP', icon:'🌟', desc:'Acumulou 500 XP', check: s => s.xp >= 500 },
   { id:'reviews_100', name:'100 Revisões', icon:'💪', desc:'Fez 100 revisões', check: s => s.totalReviews >= 100 },
+  // ---- Fase 4 (artefato §8): badges novos, cada um ligado a um
+  // comportamento específico -- não "badge por badge" genérico. ----
+  { id:'explorer', name:'Exploradora', icon:'🧭', desc:'Usou revisão, revisão rápida e jogo da memória', check: s => s.totalReviews >= 1 && s.everUsedSpeedReview && s.everUsedMatchGame },
+  { id:'trained_ear', name:'Ouvido Treinado', icon:'🎧', desc:'Tocou o áudio 100 vezes', check: s => (s.totalAudioPlays || 0) >= 100 },
+  { id:'comeback', name:'De Volta ao Jogo', icon:'🔄', desc:'Retomou a sequência em até 3 dias', check: s => !!s.hadStreakComeback },
+  { id:'multitasker', name:'Multitarefa', icon:'🧩', desc:'Praticou 5 formatos de exercício diferentes no mesmo dia', check: s => (s.daily?.exerciseFormatsSeen?.length || 0) >= 5 },
+  { id:'weekend', name:'Fim de Semana', icon:'🌙', desc:'Estudou sábado e domingo na mesma semana', check: s => {
+      for (let i = 0; i < 14; i++){
+        const d = new Date(Date.now() - i*86400000);
+        if (d.getDay() !== 6) continue;
+        const key = dt => `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+        if (s.activityLog[key(d)] && s.activityLog[key(new Date(d.getTime() + 86400000))]) return true;
+      }
+      return false;
+    } },
 ];
 
 // ---------- Detecção + celebração de nova conquista ----------
@@ -1688,6 +1791,11 @@ function wireDontKnowButton(contentEl, ex, onRevealAnswer){
 // independente > acerto com ajuda sem criar um sistema de pontuação
 // complexo.
 function exerciseXP(ex, fullXP){
+  // Único ponto por onde passam TODOS os formatos de exercício ao acertar
+  // (ver os 6 chamadores de addXP(exerciseXP(...))) -- aproveita pra
+  // registrar o formato pro badge "Multitarefa", sem precisar duplicar essa
+  // chamada em cada um dos 6 lugares.
+  registerDailyExerciseFormat(ex.format);
   return ex.askedDontKnow ? Math.max(1, fullXP - 1) : fullXP;
 }
 
@@ -4191,8 +4299,25 @@ function renderReviewView(){
   }
 }
 
+// Rendimento decrescente de XP pra cartas maduras (artefato §5): uma carta
+// já dominada (intervalo alto) avaliada repetidamente não deve valer o
+// mesmo XP que uma carta ainda instável -- sem tirar XP de revisão nenhuma
+// (piso de 1), só reduzir o ganho marginal. `intervalBefore` é o intervalo
+// ANTES desta revisão (maturidade já acumulada), não o recalculado por ela.
+function reviewXP(intervalBefore, grade){
+  const base = XP_PER_GRADE[grade];
+  if (intervalBefore >= 60) return Math.max(1, Math.round(base * 0.4));
+  if (intervalBefore >= 21) return Math.max(1, Math.round(base * 0.7));
+  return base;
+}
+
 function gradeCurrentCard(grade){
   const card = STATE.reviewQueue[STATE.reviewIndex];
+  // Atrasada de verdade = venceu ANTES de hoje, não só "due agora" (toda
+  // carta na fila já é due por definição -- ver eligibleReviewPool). Precisa
+  // ser lido antes de applySM2 mutar card.due pra reavaliação.
+  const wasOverdue = card.due > 0 && card.due < new Date().setHours(0, 0, 0, 0);
+  const intervalBefore = card.interval;
   // Grava a direção mostrada nesta revisão -- da próxima vez que essa carta
   // ficar due, nextCardDirection() (shared/srs.js) alterna pra outra.
   card.lastDirection = card.reviewDirection;
@@ -4200,7 +4325,8 @@ function gradeCurrentCard(grade){
   STATE.totalReviews += 1;
   registerStudyToday();
   registerDailyReviewCard();
-  addXP(XP_PER_GRADE[grade]);
+  if (wasOverdue) registerDailyOverdueReviewCard();
+  addXP(reviewXP(intervalBefore, grade));
 
   if (grade === 0){
     STATE.reviewQueue.push(card);
