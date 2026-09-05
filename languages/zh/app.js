@@ -3589,9 +3589,13 @@ function answerExplanationHTML(ex){
     const itemHTML = `<p class="usage-note-body"><strong>${ex.item.c}</strong> (${ex.item.p}) = ${ex.item.t}</p>`;
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
     const origin = findMatchingPhrase(ex.item, u);
+    // Sem frase de origem: só cai pra nota de conceito quando ela REALMENTE
+    // foi desenhada pra essa palavra específica (afterVocabIdx bate com
+    // ex.vocabIdx) -- nunca reaproveita qualquer conceito já visto só
+    // porque está na mesma unidade. Ver CLAUDE.md, coerência pedagógica.
     const originHTML = origin
       ? `<div class="usage-note-title">Onde você já viu isso</div><p class="usage-note-body"><strong>${origin.c}</strong><br>${origin.t}</p>`
-      : (noteOrConceptReviewHTML(ex.vocabIdx) || '');
+      : (noteOrConceptReviewHTML(ex.vocabIdx, true) || '');
     return itemHTML + originHTML;
   }
   if (ex && ex.format === 'trueFalse' && ex.whyNote){
@@ -3606,11 +3610,19 @@ function answerExplanationHTML(ex){
 // aluno JÁ VIU nesta sessão (`STEP_STATE.conceptsShown`) -- nunca antecipa
 // um conceito que ainda não apareceu na lição -- e prioriza o que combina
 // com a palavra errada (`vocabIdx`), quando dá pra saber qual foi.
-function noteOrConceptReviewHTML(vocabIdx){
+// `requireVocabMatch`: quando true, só retorna algo se o conceito realmente
+// bater com `vocabIdx` -- sem isso, cai pra "qualquer conceito já visto"
+// (shown[0]), que é aceitável quando não há uma palavra específica em jogo
+// (frase/fallback genérico), mas não quando o painel afirma explicar o erro
+// de UMA palavra puntual (ver caso motivador em CLAUDE.md).
+function noteOrConceptReviewHTML(vocabIdx, requireVocabMatch){
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
+  if (!u.concepts || !u.concepts.length) return null;
   const shown = u.concepts.filter(c => STEP_STATE.conceptsShown.has(c.id));
   if (!shown.length) return null;
-  const match = (typeof vocabIdx === 'number' && shown.find(c => c.trigger.afterVocabIdx === vocabIdx)) || shown[0];
+  const vocabMatch = typeof vocabIdx === 'number' && shown.find(c => c.trigger.afterVocabIdx === vocabIdx);
+  if (requireVocabMatch && !vocabMatch) return null;
+  const match = vocabMatch || shown[0];
   const block = match.blocks[match.blocks.length - 1]; // versão mais completa (wrapup) do conceito, se houver mais de um cartão
   return `<div class="usage-note-title">${block.title}</div><p class="usage-note-body">${block.body}</p>`;
 }
