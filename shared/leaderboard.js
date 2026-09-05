@@ -15,9 +15,19 @@
 //   - shared/auth.js            (CURRENT_USER)
 //   - shared/profile.js         (avatarInitials, avatarColor, escapeHTML,
 //                                 SPECIAL_BADGES, fetchBadgeCatalog)
+//   - shared/utils.js           (localStorageSafeGet, localStorageSafeSet)
 
 const LEADERBOARD_TOP_N = 50;
 let LEADERBOARD_SCOPE = 'all'; // 'all' ou o appKey de um idioma específico
+
+// Última posição vista pela PRÓPRIA pessoa, guardada localmente -- é o que
+// permite animar "subiu/desceu" ao reabrir o Ranking (ver o final de
+// renderLeaderboardView()). De propósito só local (localStorage, não uma
+// coluna no banco): é sobre o que ESTE dispositivo viu da última vez,
+// mesmo padrão de estado efêmero de UI já usado em CLOZE_MODE_KEY/
+// THEME_STORAGE_KEY -- não precisa sincronizar entre aparelhos nem
+// sobreviver a nada além da próxima visita.
+const LEADERBOARD_LAST_RANK_KEY = 'leaderboard_last_rank';
 
 // Mesma lógica de currentWeekStart() em cada app.js (segunda-feira da
 // semana corrente, formato 'YYYY-MM-DD') -- duplicada aqui de propósito:
@@ -32,12 +42,22 @@ function leaderboardCurrentWeekStart(){
   return `${monday.getFullYear()}-${String(monday.getMonth()+1).padStart(2,'0')}-${String(monday.getDate()).padStart(2,'0')}`;
 }
 
-function leaderboardWeekLabel(weekStart){
+// "N dias restantes" até a semana reiniciar (segunda-feira que vem), como
+// na referência original (Busuu/Duolingo) -- prioriza a sensação de prazo/
+// competição em vez de uma data que a pessoa precisa fazer conta pra
+// entender. Segunda-feira = 7 dias restantes (a semana inteira ainda pela
+// frente), domingo = 1 (último dia antes do reset).
+function leaderboardDaysRemaining(weekStart){
   const start = new Date(`${weekStart}T00:00:00`);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-  const fmt = (d) => d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' });
-  return `Semana de ${fmt(start)} a ${fmt(end)}`;
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const dayIndex = Math.floor((Date.now() - start.getTime()) / msPerDay);
+  const clamped = Math.min(Math.max(dayIndex, 0), 6);
+  return 7 - clamped;
+}
+
+function leaderboardDaysRemainingLabel(weekStart){
+  const days = leaderboardDaysRemaining(weekStart);
+  return days === 1 ? '1 dia restante' : `${days} dias restantes`;
 }
 
 // Soma o XP de todas as linhas da semana (todos os idiomas, se scope
@@ -154,7 +174,7 @@ async function renderLeaderboardView(){
   }).join('') : `<p class="profile-empty-note">Ninguém pontuou nessa categoria ainda essa semana. Seja a primeira pessoa no ranking!</p>`;
 
   wrap.innerHTML = `
-    <div class="leaderboard-week-label">${leaderboardWeekLabel(weekStart)}</div>
+    <div class="leaderboard-week-label">${leaderboardDaysRemainingLabel(weekStart)}</div>
     <div class="leaderboard-tabs" role="tablist" aria-label="Escopo do ranking">${scopeTabsHTML}</div>
     <div class="leaderboard-list" role="list">${rowsHTML}</div>
     <p class="leaderboard-footnote">O ranking reinicia toda segunda-feira. Só aparece quem já ganhou XP essa semana.</p>
@@ -169,8 +189,45 @@ async function renderLeaderboardView(){
 
   // Leva direto pra posição da pessoa ao abrir a tela -- "onde eu estou?"
   // sem precisar rolar manualmente uma lista que pode ter dezenas de
-  // pessoas. Sem animação de entrada aqui de propósito: é só localização,
-  // não a animação de subida/queda de posição (essa fica pra uma fase
-  // futura, que depende de guardar a posição anterior da pessoa).
-  wrap.querySelector('.leaderboard-row.me')?.scrollIntoView({ block: 'center' });
+  // pessoas. Roda ANTES de qualquer transform de animação (abaixo) --
+  // scrollIntoView usa a posição real renderizada, então precisa medir a
+  // linha ainda no lugar final, não deslocada pelo início da animação.
+  const meRow = wrap.querySelector('.leaderboard-row.me');
+  meRow?.scrollIntoView({ block: 'center' });
+
+  animateOwnRowRankChange(meRow, scope, weekStart, rows);
+}
+
+// "Bloco desliza ultrapassando quem estava acima/abaixo", como na
+// referência -- compara a posição desta visita com a última vista NESTE
+// dispositivo (mesma semana/escopo) e, se mudou, desloca a linha pra onde
+// ela estava antes e anima de volta pro lugar (translateY), dando a
+// sensação de ter subido ou caído. Sem posição anterior pra comparar
+// (primeira vez vendo essa semana/escopo, ou pessoa fora do ranking) não
+// tem o que animar -- só atualiza o valor guardado pra próxima vez.
+function animateOwnRowRankChange(meRow, scope, weekStart, rows){
+  if (!CURRENT_USER) return;
+  const meRank = rows.find(r => r.user_id === CURRENT_USER.id)?.rank;
+  if (!meRank) return;
+
+  let prev = null;
+  try{ prev = JSON.parse(localStorageSafeGet(LEADERBOARD_LAST_RANK_KEY) || 'null'); }catch(e){ prev = null; }
+
+  const sameContext = prev && prev.scope === scope && prev.weekStart === weekStart;
+  const rankChanged = sameContext && prev.rank !== meRank;
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (meRow && rankChanged && !reduceMotion){
+    const rowHeight = meRow.getBoundingClientRect().height;
+    const offset = (prev.rank - meRank) * rowHeight; // positivo = subiu (linha começa deslocada pra baixo, desliza pra cima)
+    meRow.style.transition = 'none';
+    meRow.style.transform = `translateY(${offset}px)`;
+    meRow.getBoundingClientRect(); // força reflow antes de religar a transição
+    requestAnimationFrame(() => {
+      meRow.style.transition = '';
+      meRow.style.transform = 'translateY(0)';
+    });
+  }
+
+  localStorageSafeSet(LEADERBOARD_LAST_RANK_KEY, JSON.stringify({ scope, weekStart, rank: meRank }));
 }

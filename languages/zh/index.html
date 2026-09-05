@@ -1274,7 +1274,9 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
    precisa se achar na lista de relance. */
 .leaderboard-row.me{
   background:var(--seal-red); border-radius:10px; margin:3px; padding:10px 11px; border-bottom-color:transparent;
+  position:relative; z-index:2; transition: transform .6s cubic-bezier(.22,.68,0,1);
 }
+@media (prefers-reduced-motion: reduce){ .leaderboard-row.me{ transition:none; } }
 .leaderboard-row.me .leaderboard-rank,
 .leaderboard-row.me .leaderboard-name,
 .leaderboard-row.me .leaderboard-xp,
