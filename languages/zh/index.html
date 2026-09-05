@@ -820,14 +820,21 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .exercise-options{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
 .exercise-option{
   position:relative;
-  background: var(--paper); border:2px solid var(--paper-line); border-radius:12px; padding:16px 12px;
+  background: var(--paper); border:2px solid var(--paper-line); border-radius:12px; padding:32px 12px 16px;
   cursor:pointer; font-family: var(--font-body); text-align:center; transition: all .12s ease;
   display:flex; flex-direction:column; gap:4px; align-items:center;
 }
 /* Atalho de teclado 1-4 -- discreto, canto superior esquerdo, só aparece
    quando a correspondência tecla<->opção é inequívoca (ver wireKeyboardOptions
    em app.js). Nunca no caminho de quem usa toque -- só mais uma pista pra
-   quem já está de mãos no teclado. */
+   quem já está de mãos no teclado.
+   padding-top:32px acima (em vez de 16px) reserva espaço de verdade pra ele
+   -- antes o texto centralizado começava logo depois do padding antigo
+   (16px), entrando bem na faixa vertical do badge (8-26px) sempre que o
+   texto era largo o bastante pra ficar com a borda esquerda perto da
+   borda esquerda da opção (texto curto escapava por coincidência, um texto
+   mais largo ficava embaixo do número -- reproduzido e confirmado via
+   Playwright antes deste fix). */
 .kbd-hint{
   position:absolute; top:8px; left:8px; width:18px; height:18px; border-radius:5px;
   background:var(--ink); color:var(--paper);
