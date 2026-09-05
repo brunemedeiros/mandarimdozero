@@ -3754,6 +3754,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
       </div>
       <div class="cloze-type-wrap">
         <input type="text" id="vocab-type-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite o pinyin">
+        ${pinyinTonePickerHTML()}
         <button class="btn btn-primary btn-block" id="vocab-type-verify-btn">Verificar</button>
       </div>
       <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
@@ -3766,6 +3767,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
 
   const inputEl = document.getElementById('vocab-type-input');
   inputEl.focus();
+  wirePinyinTonePicker(contentEl.querySelector('.pinyin-tone-picker'), inputEl);
   const strip = s => normalizeLoose(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
 
   function lockInputs(){
@@ -3877,6 +3879,43 @@ function normalizeLoose(str){
   return str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 }
 
+// ---------- Teclinha de tons do pinyin (exercícios digitados) ----------
+// Ninguém tem um teclado chinês pra digitar vogais com tom -- isso dá um
+// jeito de inserir o caractere certo sem precisar de IME. Importante: o
+// tom NÃO é exigido pra acertar (normalizeLoose acima remove os
+// diacríticos dos dois lados antes de comparar) -- isso é só pra quem
+// quer treinar digitando o tom certo mesmo, não um requisito escondido.
+const PINYIN_TONE_GROUPS = [
+  ['ā', 'á', 'ǎ', 'à'],
+  ['ē', 'é', 'ě', 'è'],
+  ['ī', 'í', 'ǐ', 'ì'],
+  ['ō', 'ó', 'ǒ', 'ò'],
+  ['ū', 'ú', 'ǔ', 'ù'],
+  ['ü', 'ǖ', 'ǘ', 'ǚ', 'ǜ'],
+];
+
+function pinyinTonePickerHTML(){
+  return `<div class="pinyin-tone-picker">${PINYIN_TONE_GROUPS.map(group => `
+    <div class="pinyin-tone-group">${group.map(ch => `<button type="button" class="pinyin-tone-key">${ch}</button>`).join('')}</div>
+  `).join('')}</div>`;
+}
+
+// Insere no CURSOR (não sempre no final) -- dá pra corrigir só a vogal que
+// falta o tom no meio da palavra sem apagar o resto e redigitar.
+function wirePinyinTonePicker(pickerEl, inputEl){
+  if (!pickerEl || !inputEl) return;
+  pickerEl.querySelectorAll('.pinyin-tone-key').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const start = inputEl.selectionStart ?? inputEl.value.length;
+      const end = inputEl.selectionEnd ?? inputEl.value.length;
+      const ch = btn.textContent;
+      inputEl.value = inputEl.value.slice(0, start) + ch + inputEl.value.slice(end);
+      inputEl.focus();
+      inputEl.setSelectionRange(start + ch.length, start + ch.length);
+    });
+  });
+}
+
 // ---------- Exercício de completar frase (cloze, estilo Clozemaster) ----------
 // Esconde uma palavra (bloco) de uma frase já ensinada e pede pra completar —
 // múltipla escolha (hanzi+pinyin) ou digitado (pinyin), de acordo com a
@@ -3904,6 +3943,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       ${mode === 'type' ? `
         <div class="cloze-type-wrap">
           <input type="text" id="cloze-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite o pinyin que falta">
+          ${pinyinTonePickerHTML()}
           <button class="btn btn-primary btn-block" id="cloze-verify-btn">Verificar</button>
         </div>
       ` : `
@@ -3961,6 +4001,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
   if (mode === 'type'){
     const inputEl = document.getElementById('cloze-input');
     inputEl.focus();
+    wirePinyinTonePicker(contentEl.querySelector('.pinyin-tone-picker'), inputEl);
     inputEl.addEventListener('keydown', e => {
       if (e.key === 'Enter') document.getElementById('cloze-verify-btn').click();
     });
