@@ -910,6 +910,24 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 }
 .cloze-type-wrap input:focus{ outline:none; border-color: var(--imperial-gold); }
 .cloze-type-wrap input:disabled{ opacity:.7; }
+/* Teclinha de tons -- ninguém tem teclado chinês pra digitar vogal com
+   acento de tom, então isso insere o caractere certo no cursor do campo
+   acima. Fileira horizontal com rolagem (25 botões não cabem numa tela de
+   celular de uma vez), agrupada por vogal com um respiro maior entre
+   grupos pra não virar uma parede de botões idênticos. */
+.pinyin-tone-picker{
+  display:flex; gap:10px; overflow-x:auto; justify-content:flex-start;
+  padding:2px 2px 6px; margin:-6px 0 14px; -webkit-overflow-scrolling:touch;
+}
+.pinyin-tone-group{ display:flex; gap:4px; flex-shrink:0; }
+.pinyin-tone-key{
+  flex-shrink:0; min-width:32px; height:34px; padding:0 6px; border-radius:8px;
+  border:1px solid var(--paper-line); background: var(--paper); color: var(--ink);
+  font-size:16px; font-weight:700; font-family: var(--font-body); cursor:pointer;
+}
+.pinyin-tone-key:hover{ border-color: var(--imperial-gold); }
+.pinyin-tone-key:active{ background: var(--paper-warm); }
+.cloze-type-wrap input:disabled ~ .pinyin-tone-picker .pinyin-tone-key{ pointer-events:none; opacity:.5; }
 /* Depois de responder, o botão Verificar não tem mais função (nem "clicável
    de novo", nem informação nova) -- some, em vez de ficar meio-apagado
    competindo com o painel de resultado logo abaixo. */
