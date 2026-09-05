@@ -3,7 +3,7 @@
 // próprio site (sempre pega a versão mais nova quando há internet), com
 // fallback pro cache quando offline. Nunca intercepta chamadas ao Supabase
 // (essas precisam de rede de verdade; o app já trata erro de rede sozinho).
-const CACHE_NAME = 'mandarim-do-zero-v3';
+const CACHE_NAME = 'mandarim-do-zero-v4';
 const PRECACHE_URLS = [
   './',
   './index.html',

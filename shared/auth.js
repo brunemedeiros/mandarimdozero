@@ -76,6 +76,12 @@ async function onUserLoggedIn(user){
   // é registrado no fim de initAuth, chamada depois de app.js inteiro).
   const adminBtn = document.getElementById('admin-badges-btn');
   if (adminBtn) adminBtn.style.display = (typeof isAdminUser === 'function' && isAdminUser()) ? '' : 'none';
+  // Garante que já exista uma linha em `profiles` assim que a pessoa loga --
+  // antes, só era criada na primeira vez que ela abria "Meu perfil" (lazy),
+  // então quem nunca tinha visitado a aba aparecia como "Aluno(a)" genérico
+  // no Ranking. Best-effort: nunca atrasa nem quebra o carregamento do app
+  // por causa disso (mesmo padrão do upsert de weekly_xp em saveState()).
+  if (typeof ensureProfileLoaded === 'function') ensureProfileLoaded().catch(() => {});
   await loadStateAndRender();
 }
 
