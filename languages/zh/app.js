@@ -186,7 +186,7 @@ function playFeedbackSound(isCorrect){
 // Toca um mp3 pré-gerado (Google Cloud TTS, voz neural) em vez da Web Speech
 // API do navegador — qualidade consistente pra todo aluno, independente do
 // SO/navegador. Ver audio-manifest.js (texto -> arquivo) e speakChinese().
-function playPregeneratedAudio(file, btnEl){
+function playPregeneratedAudio(file, btnEl, isAutoplay){
   stopExerciseAudio();
   const audio = new Audio('audio/' + file);
   exerciseAudioEl = audio;
@@ -197,14 +197,22 @@ function playPregeneratedAudio(file, btnEl){
   };
   audio.addEventListener('ended', clear);
   audio.addEventListener('error', () => { clear(); showToast('Não foi possível reproduzir o áudio'); });
-  audio.play().catch(clear);
+  audio.play().catch(() => {
+    clear();
+    // Autoplay bloqueado pelo navegador (comum em mobile -- o setTimeout de
+    // goToNextExercise quebra a "janela" de gesto do usuário que o play()
+    // automático depende) -- diferente de um erro real de arquivo/rede, por
+    // isso um aviso mais brando em vez do toast de erro acima: basta tocar
+    // manualmente no botão pra funcionar.
+    if (isAutoplay) showToast('🔇 Toque no alto-falante pra ouvir');
+  });
 }
 
-function speakChinese(text, btnEl){
+function speakChinese(text, btnEl, isAutoplay){
   registerAudioPlay();
   const pregenFile = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
   if (pregenFile){
-    playPregeneratedAudio(pregenFile, btnEl);
+    playPregeneratedAudio(pregenFile, btnEl, isAutoplay);
     return;
   }
 
@@ -2339,7 +2347,7 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
   // só o da palavra em foco).
   if (canSpeakChinese(v.c)){
     const mainAudioBtn = contentEl.querySelector('.vocab-card .audio-btn');
-    speakChinese(v.c, mainAudioBtn);
+    speakChinese(v.c, mainAudioBtn, true);
   }
 
   nextBtn.style.display = 'flex';
@@ -3694,7 +3702,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
   wireAudioButtons(contentEl);
   if ((ex.format === 'listen' || ex.format === 'meaning') && canSpeakChinese(ex.item.c)){
     const audioEl = contentEl.querySelector(ex.format === 'listen' ? '.audio-btn-lg' : '.audio-btn');
-    speakChinese(ex.item.c, audioEl);
+    speakChinese(ex.item.c, audioEl, true);
   }
   wireKeyboardOptions(contentEl.querySelectorAll('.exercise-option'), { mode: 'grid2x2' });
 
@@ -3762,7 +3770,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   `;
 
   wireAudioButtons(contentEl);
-  if (canSpeakChinese(ex.item.c)) speakChinese(ex.item.c, contentEl.querySelector('.audio-btn-lg'));
+  if (canSpeakChinese(ex.item.c)) speakChinese(ex.item.c, contentEl.querySelector('.audio-btn-lg'), true);
   nextBtn.style.display = 'none';
 
   const inputEl = document.getElementById('vocab-type-input');
@@ -3800,7 +3808,10 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   });
   document.getElementById('vocab-type-verify-btn').addEventListener('click', () => {
     if (STEP_STATE.exerciseAnswered) return;
-    finish(strip(inputEl.value) === strip(ex.item.p));
+    // Vocabulário/pinyin com forma dupla (ex: "X / Y") -- qualquer uma das
+    // duas conta como resposta completa, não só a string inteira com a barra.
+    const typed = strip(inputEl.value);
+    finish(acceptedForms(ex.item.p).some(form => strip(form) === typed));
   });
 
   wireDontKnowButton(contentEl, ex, () => {
@@ -3877,6 +3888,15 @@ function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
 // usado só na comparação do modo digitado do cloze (não afeta pinyin exibido).
 function normalizeLoose(str){
   return str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+}
+
+// Algumas respostas têm mais de uma forma aceita, armazenadas juntas
+// separadas por "/" -- dar só UMA das formas é uma resposta completa, não
+// deve ser tratado como diferente da string inteira. Usado nos exercícios
+// de digitar de ouvido (vocab-type/cloze) quando o pinyin/hanzi guardado
+// tem variantes (espelha o mesmo helper do app.js em francês).
+function acceptedForms(expected){
+  return (expected || '').split('/').map(s => s.trim()).filter(Boolean);
 }
 
 // ---------- Teclinha de tons do pinyin (exercícios digitados) ----------
@@ -3975,7 +3995,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     const audioRow = document.getElementById('cloze-audio-row');
     audioRow.innerHTML = audioBtnHTML(ex.phrase.c);
     wireAudioButtons(audioRow);
-    if (canSpeakChinese(ex.phrase.c)) speakChinese(ex.phrase.c, audioRow.querySelector('.audio-btn'));
+    if (canSpeakChinese(ex.phrase.c)) speakChinese(ex.phrase.c, audioRow.querySelector('.audio-btn'), true);
     document.getElementById('exercise-dontknow-btn')?.classList.add('disabled');
     contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
   }
@@ -4009,7 +4029,8 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       if (STEP_STATE.exerciseAnswered) return;
       inputEl.disabled = true;
       const strip = s => normalizeLoose(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
-      finish(strip(inputEl.value) === strip(ex.correctBlock.p));
+      const typed = strip(inputEl.value);
+      finish(acceptedForms(ex.correctBlock.p).some(form => strip(form) === typed));
     });
   } else {
     contentEl.querySelectorAll('.cloze-option').forEach(btn => {
@@ -4781,7 +4802,7 @@ function renderReviewView(){
   // imediato. Só dispara se já houver voz chinesa disponível, pra não
   // repetir o aviso de "instale a voz" a cada cartão de uma sessão inteira.
   if (hanziVisibleNow && canSpeakChinese(card.back_hanzi)){
-    speakChinese(card.back_hanzi, el.querySelector('.audio-btn-lg'));
+    speakChinese(card.back_hanzi, el.querySelector('.audio-btn-lg'), true);
   }
 
   if (STATE.reviewShowingAnswer){
@@ -5232,7 +5253,7 @@ function renderHanziReviewView(){
   // onde o hanzi só aparece no verso) — então tocamos o áudio desde o início,
   // não só ao revelar a resposta.
   if (canSpeakChinese(card.char)){
-    speakChinese(card.char, el.querySelector('.audio-btn-lg'));
+    speakChinese(card.char, el.querySelector('.audio-btn-lg'), true);
   }
 
   document.getElementById('hanzi-flashcard').addEventListener('click', () => {
@@ -5516,7 +5537,7 @@ function renderHanziViewCard(char, contentEl, nextBtn){
   // não se repete no passo "Escrever" (decisão explícita: evitar repetição
   // desnecessária durante o desenho, que já tem seu próprio foco).
   if (canSpeakChinese(char.char)){
-    speakChinese(char.char, contentEl.querySelector('.audio-btn'));
+    speakChinese(char.char, contentEl.querySelector('.audio-btn'), true);
   }
 
   nextBtn.textContent = 'Agora escreva →';

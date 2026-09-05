@@ -181,7 +181,7 @@ function playFeedbackSound(isCorrect){
 // Toca um mp3 pré-gerado (Google Cloud TTS, voz neural) em vez da Web Speech
 // API do navegador — qualidade consistente pra todo aluno, independente do
 // SO/navegador. Ver audio-manifest.js (texto -> arquivo) e speakFrench().
-function playPregeneratedAudio(file, btnEl){
+function playPregeneratedAudio(file, btnEl, isAutoplay){
   stopExerciseAudio();
   const audio = new Audio('audio/' + file);
   exerciseAudioEl = audio;
@@ -192,14 +192,22 @@ function playPregeneratedAudio(file, btnEl){
   };
   audio.addEventListener('ended', clear);
   audio.addEventListener('error', () => { clear(); showToast('Não foi possível reproduzir o áudio'); });
-  audio.play().catch(clear);
+  audio.play().catch(() => {
+    clear();
+    // Autoplay bloqueado pelo navegador (comum em mobile -- o setTimeout de
+    // goToNextExercise quebra a "janela" de gesto do usuário que o play()
+    // automático depende) -- diferente de um erro real de arquivo/rede, por
+    // isso um aviso mais brando em vez do toast de erro acima: basta tocar
+    // manualmente no botão pra funcionar.
+    if (isAutoplay) showToast('🔇 Toque no alto-falante pra ouvir');
+  });
 }
 
-function speakFrench(text, btnEl){
+function speakFrench(text, btnEl, isAutoplay){
   registerAudioPlay();
   const pregenFile = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
   if (pregenFile){
-    playPregeneratedAudio(pregenFile, btnEl);
+    playPregeneratedAudio(pregenFile, btnEl, isAutoplay);
     return;
   }
 
@@ -1998,7 +2006,7 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
 
   if (canSpeakFrench(v.f)){
     const mainAudioBtn = contentEl.querySelector('.vocab-card .audio-btn');
-    speakFrench(v.f, mainAudioBtn);
+    speakFrench(v.f, mainAudioBtn, true);
   }
 
   nextBtn.style.display = 'flex';
@@ -3416,7 +3424,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
   // entregaria a palavra que falta.
   if ((ex.format === 'listen' || ex.format === 'meaning') && canSpeakFrench(ex.item.f)){
     const audioEl = contentEl.querySelector(ex.format === 'listen' ? '.audio-btn-lg' : '.audio-btn');
-    speakFrench(ex.item.f, audioEl);
+    speakFrench(ex.item.f, audioEl, true);
   }
   wireKeyboardOptions(contentEl.querySelectorAll('.exercise-option'), { mode: 'grid2x2' });
 
@@ -3480,7 +3488,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   `;
 
   wireAudioButtons(contentEl);
-  if (canSpeakFrench(ex.item.f)) speakFrench(ex.item.f, contentEl.querySelector('.audio-btn-lg'));
+  if (canSpeakFrench(ex.item.f)) speakFrench(ex.item.f, contentEl.querySelector('.audio-btn-lg'), true);
   nextBtn.style.display = 'none';
 
   const inputEl = document.getElementById('vocab-type-input');
@@ -3517,7 +3525,10 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   });
   document.getElementById('vocab-type-verify-btn').addEventListener('click', () => {
     if (STEP_STATE.exerciseAnswered) return;
-    finish(strip(inputEl.value) === strip(ex.item.f));
+    // Vocabulário com forma dupla (ex: "un / une") -- qualquer uma das duas
+    // conta como resposta completa, não só a string inteira com a barra.
+    const typed = strip(inputEl.value);
+    finish(acceptedForms(ex.item.f).some(form => strip(form) === typed));
   });
 
   wireDontKnowButton(contentEl, ex, () => {
@@ -3698,7 +3709,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     const audioRow = document.getElementById('cloze-audio-row');
     audioRow.innerHTML = audioBtnHTML(ex.phrase.f);
     wireAudioButtons(audioRow);
-    if (canSpeakFrench(ex.phrase.f)) speakFrench(ex.phrase.f, audioRow.querySelector('.audio-btn'));
+    if (canSpeakFrench(ex.phrase.f)) speakFrench(ex.phrase.f, audioRow.querySelector('.audio-btn'), true);
     document.getElementById('exercise-dontknow-btn')?.classList.add('disabled');
     contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
   }
@@ -3731,7 +3742,8 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       if (STEP_STATE.exerciseAnswered) return;
       inputEl.disabled = true;
       const strip = s => normalizeLoose(s).replace(/[.,!?;:'"]/g, '').trim();
-      finish(strip(inputEl.value) === strip(ex.correctBlock.f));
+      const typed = strip(inputEl.value);
+      finish(acceptedForms(ex.correctBlock.f).some(form => strip(form) === typed));
     });
   } else {
     contentEl.querySelectorAll('.cloze-option').forEach(btn => {
@@ -4429,7 +4441,7 @@ function renderReviewView(){
   // visível no cartão.
   wireAudioButtons(el);
   if (frenchVisibleNow && canSpeakFrench(card.front)){
-    speakFrench(card.front, el.querySelector('.audio-btn-lg'));
+    speakFrench(card.front, el.querySelector('.audio-btn-lg'), true);
   }
 
   if (STATE.reviewShowingAnswer){
@@ -5269,10 +5281,12 @@ function normalizeLoose(str){
   return str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 }
 
-// Algumas formas têm mais de uma grafia aceita, armazenadas juntas separadas
-// por "/" (ex: "paie/paye") -- dar só UMA das formas é uma resposta completa,
-// não deve ser tratado como diferente da string inteira "paie/paye".
-function conjAcceptedForms(expected){
+// Algumas respostas têm mais de uma forma aceita, armazenadas juntas
+// separadas por "/" (conjugação "paie/paye", vocabulário "un / une" etc.) --
+// dar só UMA das formas é uma resposta completa, não deve ser tratado como
+// diferente da string inteira "un / une". Usado tanto na conjugação quanto
+// nos exercícios de digitar de ouvido (vocab-type/cloze).
+function acceptedForms(expected){
   return (expected || '').split('/').map(s => s.trim()).filter(Boolean);
 }
 
@@ -5367,7 +5381,7 @@ function renderConjPracticeStep(){
                 let expectedText = '';
                 if (alreadyChecked){
                   const expected = expectedForms[i] || '';
-                  const accepted = conjAcceptedForms(expected);
+                  const accepted = acceptedForms(expected);
                   if (accepted.includes(given.trim())){ statusClass = 'ok'; }
                   else if (accepted.some(f => normalizeLoose(given) === normalizeLoose(f))){ statusClass = 'almost'; expectedText = `Quase! → ${expected}`; }
                   else { statusClass = 'wrong'; expectedText = `→ ${expected}`; }
@@ -5440,7 +5454,7 @@ function renderConjPracticeStep(){
         const inputEl = fieldEl.querySelector('input');
         const expectedEl = fieldEl.querySelector('.expected');
         const expected = expectedForms[i] || '';
-        const accepted = conjAcceptedForms(expected);
+        const accepted = acceptedForms(expected);
         const given = inputEl.value;
         tenseGiven[i] = given;
 
