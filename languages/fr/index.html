@@ -438,6 +438,17 @@ a.pill:hover{ border-color: var(--imperial-gold); }
    de progresso e o X pra sair — nada mais compete com o exercício. */
 #app.lesson-focus .topbar, #app.lesson-focus .tabs{ display:none; }
 
+/* #review-reminder-banner é fixed e vive FORA de #app (irmão dele no
+   documento, não descendente) -- por isso a classe vai no <body> também
+   (ver setLessonFocusMode), não dá pra usar #app.lesson-focus aqui. Sem
+   esta regra, o banner ficava flutuando por cima do exercício se já
+   tivesse aparecido antes de abrir a lição, já que nada mais o escondia em
+   modo foco. !important porque o JS às vezes seta style.display inline
+   nesse elemento (mostrar/esconder o próprio lembrete); ao sair do modo
+   foco, ele volta a mostrar o que já estava configurado, sem precisar
+   mexer nesse estado aqui. */
+body.lesson-focus #review-reminder-banner{ display:none !important; }
+
 /* Contexto curricular (unidade/nível/objetivo): informação discreta e
    sempre visível no topo da lição -- não é mais uma "dica", é só o
    breadcrumb de onde o aluno está na trilha. */

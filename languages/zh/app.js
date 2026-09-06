@@ -2163,6 +2163,11 @@ function renderStepProgress(){
 // progresso e o X ficam visíveis por cima do exercício.
 function setLessonFocusMode(active){
   document.getElementById('app').classList.toggle('lesson-focus', active);
+  // #review-reminder-banner é fixed e vive FORA de #app (irmão dele no
+  // documento, não descendente) -- a classe no <body> é o que dá pra essa
+  // regra de CSS (ver index.html) esconder o banner sem também precisar
+  // mover o elemento de lugar no HTML.
+  document.body.classList.toggle('lesson-focus', active);
 }
 
 // ---------- Dica pedagógica por exercício ----------
@@ -3583,7 +3588,7 @@ function answerExplanationHTML(ex){
     return '';
   }
   if (ex && ex.phrase){
-    const phraseHTML = `<p class="usage-note-body"><strong>${ex.phrase.c}</strong><br>${ex.phrase.t}</p>`;
+    const phraseHTML = `<p class="usage-note-body"><strong>${ex.phrase.c}</strong><br><span class="pinyin">${ex.phrase.p}</span><br>${ex.phrase.t}</p>`;
     return phraseHTML + (noteOrConceptReviewHTML() || '');
   }
   if (ex && ex.item){
@@ -3594,8 +3599,11 @@ function answerExplanationHTML(ex){
     // foi desenhada pra essa palavra específica (afterVocabIdx bate com
     // ex.vocabIdx) -- nunca reaproveita qualquer conceito já visto só
     // porque está na mesma unidade. Ver CLAUDE.md, coerência pedagógica.
+    // .pinyin já está na lista de classes escondidas por body.hide-pinyin
+    // (index.html) -- a preferência de esconder pinyin continua respeitada
+    // aqui sem precisar de nenhuma regra de CSS nova.
     const originHTML = origin
-      ? `<div class="usage-note-title">Onde você já viu isso</div><p class="usage-note-body"><strong>${origin.c}</strong><br>${origin.t}</p>`
+      ? `<div class="usage-note-title">Onde você já viu isso</div><p class="usage-note-body"><strong>${origin.c}</strong><br><span class="pinyin">${origin.p}</span><br>${origin.t}</p>`
       : (noteOrConceptReviewHTML(ex.vocabIdx, true) || '');
     return itemHTML + originHTML;
   }
