@@ -1823,6 +1823,11 @@ function renderStepProgress(){
 // exercício em si.
 function setLessonFocusMode(active){
   document.getElementById('app').classList.toggle('lesson-focus', active);
+  // #review-reminder-banner é fixed e vive FORA de #app (irmão dele no
+  // documento, não descendente) -- a classe no <body> é o que dá pra essa
+  // regra de CSS (ver index.html) esconder o banner sem também precisar
+  // mover o elemento de lugar no HTML.
+  document.body.classList.toggle('lesson-focus', active);
 }
 
 // ---------- Dica pedagógica por exercício ----------
