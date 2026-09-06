@@ -1620,7 +1620,16 @@ function freshAcquisitionState(unitId, unit){
       phase: currentLessonIdx(unitId) > 0 ? 'bridge' : 'intro',
       introIdx: 0,
       wordMisses: STATE.unitProgress[unitId].lessonMisses,
-      introduced: {}
+      introduced: {},
+      // Acerto/total acumulado das fases realmente avaliadas desta lição
+      // (checkpoint + practice/mixed -- NUNCA a ponte com a lição anterior,
+      // que testa recall de conteúdo já ensinado antes, não desta lição).
+      // Usado em finishCurrentLesson pra dar uma nota de verdade a uma
+      // lição intermediária, que antes nunca contava pra desafios de nota
+      // (ex: "Pontue mais de 80% em N lições") -- só o Ponto de verificação
+      // do fim da unidade contava, o que na prática deixava esses desafios
+      // quase impossíveis de bater num dia normal de estudo por lições.
+      lessonScore: { correct: 0, total: 0 }
     };
   }
   return {
@@ -1636,7 +1645,7 @@ function freshAcquisitionState(unitId, unit){
 
 const STEP_STATE = {
   currentStep: 0,
-  acq: { unitId: null, blocks: [], blockIdx: 0, phase: 'intro', introIdx: 0, wordMisses: {}, introduced: {} },
+  acq: { unitId: null, blocks: [], blockIdx: 0, phase: 'intro', introIdx: 0, wordMisses: {}, introduced: {}, lessonScore: { correct: 0, total: 0 } },
   exerciseList: [],
   exerciseIndex: 0,
   exerciseScore: 0,
@@ -1689,7 +1698,7 @@ function openUnitDetail(unitId){
   // Invalida o estado de aquisição antigo -- sem isso, reabrir a MESMA
   // unidade numa lição diferente da última vez reaproveitaria os blocos da
   // lição errada.
-  STEP_STATE.acq = { unitId: null, blocks: [], blockIdx: 0, phase: 'intro', introIdx: 0, wordMisses: {}, introduced: {} };
+  STEP_STATE.acq = { unitId: null, blocks: [], blockIdx: 0, phase: 'intro', introIdx: 0, wordMisses: {}, introduced: {}, lessonScore: { correct: 0, total: 0 } };
   STEP_STATE.exerciseUnitId = null;
   STEP_STATE.checkpointUnitId = null;
   setLessonFocusMode(true);
@@ -2232,6 +2241,11 @@ function advanceAcquisitionPhase(){
   }
 
   if (acq.phase === 'checkpoint'){
+    // Conta pra nota da lição (ver lessonScore em freshAcquisitionState) --
+    // a ponte com a lição anterior, acima, nunca conta, só as fases que
+    // testam o conteúdo desta lição de verdade.
+    acq.lessonScore.correct += STEP_STATE.exerciseScore;
+    acq.lessonScore.total += STEP_STATE.exerciseList.length;
     acq.phase = 'practice';
     STEP_STATE.exerciseList = buildPracticeQueue(u, acq.blocks[acq.blockIdx]);
     STEP_STATE.exerciseIndex = 0;
@@ -2242,6 +2256,8 @@ function advanceAcquisitionPhase(){
   }
 
   if (acq.phase === 'practice'){
+    acq.lessonScore.correct += STEP_STATE.exerciseScore;
+    acq.lessonScore.total += STEP_STATE.exerciseList.length;
     if (acq.blockIdx > 0){
       acq.phase = 'mixed';
       const introducedIdx = acq.blocks.slice(0, acq.blockIdx + 1).flat();
@@ -2257,6 +2273,8 @@ function advanceAcquisitionPhase(){
   }
 
   if (acq.phase === 'mixed'){
+    acq.lessonScore.correct += STEP_STATE.exerciseScore;
+    acq.lessonScore.total += STEP_STATE.exerciseList.length;
     advanceToNextBlockOrConsolidation();
   }
 }
@@ -2315,13 +2333,17 @@ function finishCurrentLesson(u){
     const lessonKey = `${u.id}:${currentLessonIdx(u.id)}`;
     STATE.unitProgress[u.id].lessonIdx = currentLessonIdx(u.id) + 1;
     addXP(8);
-    // Sem pontuação própria pra avaliar aqui (a lição intermediária não é um
-    // exame com nota) -- passa scorePct indefinido de propósito, pra contar
-    // pra "Complete N lições"/streak sem inflar highScoreLessons/perfectLessons
-    // (esses ficam reservados pra lições que de fato têm uma nota, como o
-    // Ponto de verificação). Antes disso, os desafios do dia só avançavam ao
-    // fim da UNIDADE inteira -- a rotina diária real é por lição.
-    registerDailyLessonCompleted(undefined, false);
+    // Nota real da lição: acerto/total acumulado das fases avaliadas
+    // (checkpoint + practice/mixed, ver advanceAcquisitionPhase) -- antes
+    // isso vinha sempre undefined ("lição intermediária não tem nota"), o
+    // que deixava desafios como "Pontue mais de 80% em N lições" quase
+    // impossíveis de bater num dia normal (só um Ponto de verificação de
+    // fim de unidade contava). Sem exercício avaliado nesta lição
+    // (raríssimo, mas por garantia) cai pra undefined, mesmo comportamento
+    // de antes.
+    const ls = STEP_STATE.acq.lessonScore;
+    const lessonScorePct = ls && ls.total ? Math.round((ls.correct / ls.total) * 100) : undefined;
+    registerDailyLessonCompleted(lessonScorePct);
     // Meta diária (§4 do artefato): só conta se a lição tinha conteúdo real
     // (>=3 palavras ou incluía diálogo) -- filtra o atalho degenerado de uma
     // lição minúscula "sobrando" no fim de uma unidade.
