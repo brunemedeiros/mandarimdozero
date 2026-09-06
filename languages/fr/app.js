@@ -350,6 +350,7 @@ function buildCardsFromUnits(units){
         id: `u${u.id}-v${idx}`,
         unitId: u.id,
         unitTitle: u.title,
+        vocabIdx: idx,
         type: 'vocab',
         front: v.f,
         back_trans: v.t,
@@ -4327,10 +4328,35 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
   setTimeout(() => renderSpeedReview(), 700);
 }
 
+// Em que lição da unidade (posição em u.lessons) um vocabIdx foi ensinado --
+// -1 se nenhuma lição declarar esse índice (unidades de gramática, que não
+// têm lessons, nunca chegam aqui -- buildCardsFromUnits já pula esse tipo
+// de unidade inteiramente; serve só de guarda defensiva).
+function lessonIndexForVocabIdx(unit, vocabIdx){
+  return (unit.lessons || []).findIndex(l => (l.vocabIdx || []).includes(vocabIdx));
+}
+
+// Um cartão só entra na revisão depois que a LIÇÃO que ensina aquela
+// palavra foi realmente concluída -- "unidade começada" sozinho não basta:
+// abrir a unidade e terminar só a lição 1 já marcava started=true pra
+// unidade inteira, e como todo cartão novo nasce com due=0 (sempre "vencido"
+// pra cardsDueNow), o vocabulário de lições 2+ nunca vistas entrava na fila
+// de revisão junto.
+function isCardLessonCompleted(card){
+  const prog = STATE.unitProgress[card.unitId];
+  if (!prog?.started) return false;
+  const unit = UNITS.find(u => u.id === card.unitId);
+  const lessonIdx = unit ? lessonIndexForVocabIdx(unit, card.vocabIdx) : -1;
+  // Sem lição conhecida pra esse vocabIdx: só libera se a unidade inteira
+  // já foi concluída (mais seguro que arriscar mostrar algo nunca ensinado).
+  if (lessonIdx === -1) return !!prog.completed;
+  return lessonIdx < prog.lessonIdx;
+}
+
 function startReviewSession(){
   const pool = STATE.reviewSessionUnitFilter
-    ? STATE.cards.filter(c => c.unitId === STATE.reviewSessionUnitFilter)
-    : STATE.cards.filter(c => STATE.unitProgress[c.unitId]?.started);
+    ? STATE.cards.filter(c => c.unitId === STATE.reviewSessionUnitFilter && isCardLessonCompleted(c))
+    : STATE.cards.filter(isCardLessonCompleted);
 
   const due = cardsDueNow(pool);
   let queue = due.slice();

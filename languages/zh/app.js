@@ -461,6 +461,7 @@ function buildCardsFromUnits(units){
         id: `u${u.id}-v${idx}`,
         unitId: u.id,
         unitTitle: u.title,
+        vocabIdx: idx,
         type: 'vocab',
         front_pinyin: v.p,
         back_hanzi: v.c,
@@ -4676,14 +4677,36 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
   setTimeout(() => renderSpeedReview(), 700);
 }
 
+// Em que lição da unidade (posição em u.lessons) um vocabIdx foi ensinado --
+// -1 se nenhuma lição declarar esse índice (não deveria acontecer com o
+// conteúdo atual, mas serve de guarda pro fallback abaixo).
+function lessonIndexForVocabIdx(unit, vocabIdx){
+  return (unit.lessons || []).findIndex(l => (l.vocabIdx || []).includes(vocabIdx));
+}
+
+// Um cartão só entra na revisão depois que a LIÇÃO que ensina aquela
+// palavra foi realmente concluída -- "unidade começada" sozinho não basta:
+// abrir a unidade e terminar só a lição 1 já marcava started=true pra
+// unidade inteira, e como todo cartão novo nasce com due=0 (sempre "vencido"
+// pra cardsDueNow), o vocabulário de lições 2+ nunca vistas entrava na fila
+// de revisão junto (bug relatado: "七" aparecendo antes da lição que
+// ensina até 8, com a unidade só na lição "até cinco").
+function isCardLessonCompleted(card){
+  const prog = STATE.unitProgress[card.unitId];
+  if (!prog?.started) return false;
+  const unit = UNITS.find(u => u.id === card.unitId);
+  const lessonIdx = unit ? lessonIndexForVocabIdx(unit, card.vocabIdx) : -1;
+  // Sem lição conhecida pra esse vocabIdx: só libera se a unidade inteira
+  // já foi concluída (mais seguro que arriscar mostrar algo nunca ensinado).
+  if (lessonIdx === -1) return !!prog.completed;
+  return lessonIdx < prog.lessonIdx;
+}
+
 function startReviewSession(){
   const pool = STATE.reviewSessionUnitFilter
-    ? STATE.cards.filter(c => c.unitId === STATE.reviewSessionUnitFilter)
-    // Revisão geral: só cartões de unidades que você já começou a estudar.
-    // Sem esse filtro, cartões de unidades nunca vistas entravam na fila
-    // (todo cartão novo tem due=0, que sempre conta como "vencido"), fazendo
-    // você errar por nunca ter visto a palavra, não por dificuldade real.
-    : STATE.cards.filter(c => STATE.unitProgress[c.unitId]?.started);
+    ? STATE.cards.filter(c => c.unitId === STATE.reviewSessionUnitFilter && isCardLessonCompleted(c))
+    // Revisão geral: só cartões de lições que você já concluiu de verdade.
+    : STATE.cards.filter(isCardLessonCompleted);
 
   const due = cardsDueNow(pool);
   // Prioriza: due for review first, then new cards (limited batch of 10 new to avoid overload)
