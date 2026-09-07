@@ -1231,6 +1231,17 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
   background:var(--paper); color:var(--ink); font-family:var(--font-body);
 }
 
+/* ---------- Analytics (admin) ---------- */
+.analytics-stat-row{ display:flex; align-items:baseline; gap:8px; margin-bottom:6px; }
+.analytics-stat-num{ font-size:20px; font-weight:800; color:var(--seal-red-dark); }
+.analytics-stat-label{ font-size:12.5px; color:var(--ink-soft); }
+.analytics-bar-row{ margin-bottom:12px; }
+.analytics-bar-top{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:4px; }
+.analytics-bar-label{ font-size:13px; font-weight:700; color:var(--ink); }
+.analytics-bar-count{ font-size:12px; font-weight:700; color:var(--ink-soft); flex-shrink:0; }
+.analytics-bar-track{ height:8px; border-radius:99px; background:var(--paper-warm); overflow:hidden; }
+.analytics-bar-fill{ height:100%; border-radius:99px; background:var(--seal-red); }
+
 .profile-section{ margin-top:22px; }
 
 .profile-langs-row{ display:flex; gap:10px; flex-wrap:wrap; }
@@ -2467,13 +2478,18 @@ footer.app-footer img{ height:40px; opacity:.85; }
     </div>
   </div>
 
-  <!-- ===== BADGES (ADMIN) ===== -->
+  <!-- ===== PAINEL DE ADMIN ===== -->
   <div class="view" id="view-admin-badges">
     <div class="path-header">
-      <h2>Badges (admin)</h2>
-      <p>Crie badges especiais e conceda a contas específicas.</p>
+      <h2>Painel de Admin</h2>
+      <p>Badges especiais e métricas de uso da plataforma.</p>
+    </div>
+    <div class="leaderboard-tabs" role="tablist" aria-label="Seção do painel de admin">
+      <button class="leaderboard-tab active" role="tab" aria-selected="true" data-admin-section="badges">🎖️ Badges</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="analytics">📊 Analytics</button>
     </div>
     <div id="admin-badges-content"></div>
+    <div id="admin-analytics-content" style="display:none;"></div>
   </div>
 
   <!-- ===== DITADOS ===== -->
@@ -2550,7 +2566,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <button class="user-dropdown-item" id="user-profile-btn">👤 Meu perfil</button>
   <button class="user-dropdown-item" id="leaderboard-btn">🏆 Ranking</button>
   <button class="user-dropdown-item" id="user-settings-btn">⚙️ Configurações</button>
-  <button class="user-dropdown-item" id="admin-badges-btn" style="display:none;">🎖️ Badges (admin)</button>
+  <button class="user-dropdown-item" id="admin-badges-btn" style="display:none;">🛠️ Painel de Admin</button>
   <div class="user-dropdown-sep"></div>
   <button class="user-dropdown-item danger" id="logout-btn">Sair da conta</button>
 </div>
@@ -2759,6 +2775,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <script src="../../shared/wizard.js"></script>
 <script src="../../shared/profile.js"></script>
 <script src="../../shared/admin-badges.js"></script>
+<script src="../../shared/admin-analytics.js"></script>
 <script src="../../shared/leaderboard.js"></script>
 <script src="../../shared/topbar-stats.js"></script>
 <script src="../../shared/analytics.js"></script>

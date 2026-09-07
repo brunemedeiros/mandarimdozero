@@ -5111,7 +5111,7 @@ const switchTab = createTabSwitcher({
     conjugaison: renderConjSelectScreen,
     progress: renderProgressView,
     profile: renderProfileView,
-    'admin-badges': renderAdminBadgesView,
+    'admin-badges': renderAdminPanelView,
     leaderboard: renderLeaderboardView,
     path: renderUnitsGrid,
     dictation: renderDictationList,

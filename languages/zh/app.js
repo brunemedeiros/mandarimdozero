@@ -5164,7 +5164,7 @@ const switchTab = createTabSwitcher({
     hanzi: renderHanziLessonsGrid,
     progress: renderProgressView,
     profile: renderProfileView,
-    'admin-badges': renderAdminBadgesView,
+    'admin-badges': renderAdminPanelView,
     leaderboard: renderLeaderboardView,
     path: renderUnitsGrid,
   }
