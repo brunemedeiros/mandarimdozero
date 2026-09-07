@@ -1376,14 +1376,28 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .analytics-bar-fill{ height:100%; border-radius:99px; background:var(--seal-red); }
 .analytics-kpi-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap:10px; margin-bottom:8px; }
 .analytics-kpi-tile{ background:var(--paper); border:1px solid var(--paper-line); border-radius:10px; padding:10px 12px; }
-.analytics-kpi-num{ font-size:19px; font-weight:800; color:var(--seal-red-dark); line-height:1.2; }
+.analytics-kpi-num{ font-size:19px; font-weight:800; color:var(--seal-red-dark); line-height:1.2; display:flex; align-items:baseline; gap:5px; flex-wrap:wrap; }
 .analytics-kpi-label{ font-size:11px; color:var(--ink-soft); font-weight:700; margin-top:2px; }
 .analytics-kpi-note{ font-size:10px; color:var(--ink-soft); opacity:.75; margin-top:2px; }
 .analytics-table-wrap{ overflow-x:auto; }
 .analytics-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
 .analytics-table th, .analytics-table td{ padding:7px 10px; text-align:left; border-bottom:1px solid var(--paper-line); white-space:nowrap; }
+.analytics-table th:first-child, .analytics-table td:first-child{ white-space:normal; min-width:120px; }
 .analytics-table th{ color:var(--ink-soft); font-weight:800; font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; }
 .analytics-table td{ color:var(--ink); }
+@media (max-width: 480px){
+  .analytics-table th, .analytics-table td{ padding:6px 6px; font-size:11.5px; }
+  .analytics-table th:first-child, .analytics-table td:first-child{ min-width:100px; }
+}
+.analytics-filters-row{ display:flex; gap:10px; flex-wrap:wrap; }
+.analytics-filter-item{ flex:1; min-width:150px; }
+.analytics-custom-range{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.analytics-custom-range input{ flex:1; min-width:130px; }
+.analytics-compare-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:14px; }
+.analytics-delta{ font-size:10px; font-weight:800; padding:1px 6px; border-radius:99px; white-space:nowrap; }
+.analytics-delta-up{ color:var(--jade); background:rgba(58,115,89,0.13); }
+.analytics-delta-down{ color:var(--seal-red-dark); background:rgba(166,64,46,0.13); }
+.analytics-delta-new, .analytics-delta-flat{ color:var(--ink-soft); background:var(--paper-warm); }
 
 .profile-section{ margin-top:22px; }
 
