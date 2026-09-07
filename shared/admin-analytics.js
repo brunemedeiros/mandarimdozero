@@ -884,22 +884,23 @@ function wireAnalyticsControls(){
 function renderResumoSectionHTML(stats, prev){
   const d = (key) => prev ? analyticsDelta(stats[key], prev[key]) : null;
   const rateNote = stats.overallCompletionRate === null
-    ? '<p class="admin-badge-desc">Taxa de conclusão indisponível: nenhum dos tipos com evento de início teve atividade no período.</p>'
-    : `<p class="admin-badge-desc">Calculada só sobre os tipos com evento de início (flashcards, revisão rápida, jogo da memória, hanzi, ditado, conjugação) -- ver aba Exercícios.</p>`;
+    ? '<p class="admin-badge-desc">Taxa de conclusão indisponível: ninguém começou um exercício dos tipos contados aqui (flashcards, revisão rápida, jogo da memória, hanzi, ditado, conjugação) neste período.</p>'
+    : `<p class="admin-badge-desc">A taxa de conclusão só usa os exercícios que têm um "começo" registrado (flashcards, revisão rápida, jogo da memória, hanzi, ditado, conjugação). Lições de vocabulário e checkpoints de unidade não entram nessa conta porque só sabemos quando terminam, não quando começam -- por isso "Exercícios concluídos" (acima) é maior que "Exercícios iniciados": ele soma TODOS os tipos, os com início e os sem. Pra ver cada tipo separado, veja a aba Exercícios.</p>`;
   return `
     <div class="profile-section">
       <div class="section-label">Resumo</div>
       <div class="analytics-kpi-grid">
-        ${analyticsKpiTileHTML(stats.activeStudents, 'Alunos ativos', null, d('activeStudents'))}
-        ${analyticsKpiTileHTML(stats.newStudents, 'Novos alunos', null, d('newStudents'))}
-        ${analyticsKpiTileHTML(stats.sessions, 'Sessões', null, d('sessions'))}
-        ${analyticsKpiTileHTML(stats.exercisesStarted, 'Exercícios iniciados', 'só tipos com evento de início', d('exercisesStarted'))}
-        ${analyticsKpiTileHTML(stats.exercisesCompleted, 'Exercícios concluídos', null, d('exercisesCompleted'))}
-        ${analyticsKpiTileHTML(stats.overallCompletionRate === null ? '—' : `${stats.overallCompletionRate}%`, 'Taxa de conclusão', null, stats.overallCompletionRate === null ? null : d('overallCompletionRate'))}
-        ${analyticsKpiTileHTML(analyticsFormatMinutes(stats.estimatedStudyMinutes), 'Tempo de estudo (estimado)', 'intervalo entre 1º e último evento de cada sessão')}
+        ${analyticsKpiTileHTML(stats.activeStudents, 'Alunos ativos', 'alunos diferentes que usaram o app no período', d('activeStudents'))}
+        ${analyticsKpiTileHTML(stats.newStudents, 'Novos alunos', 'contas criadas dentro do período', d('newStudents'))}
+        ${analyticsKpiTileHTML(stats.sessions, 'Sessões', 'cada visita ao app conta como 1 sessão (o mesmo aluno abrindo 3x no dia = 3 sessões)', d('sessions'))}
+        ${analyticsKpiTileHTML(stats.exercisesStarted, 'Exercícios iniciados', 'só os tipos que registram quando o aluno começa (ver nota abaixo)', d('exercisesStarted'))}
+        ${analyticsKpiTileHTML(stats.exercisesCompleted, 'Exercícios concluídos', 'qualquer tipo de exercício ou lição terminado', d('exercisesCompleted'))}
+        ${analyticsKpiTileHTML(stats.overallCompletionRate === null ? '—' : `${stats.overallCompletionRate}%`, 'Taxa de conclusão', 'de quem começou um exercício, quantos % terminaram', stats.overallCompletionRate === null ? null : d('overallCompletionRate'))}
+        ${analyticsKpiTileHTML(analyticsFormatMinutes(stats.estimatedStudyMinutes), 'Tempo de estudo (estimado)', 'estimativa aproximada, não o tempo real gasto -- ver nota abaixo')}
       </div>
       ${rateNote}
-      <p class="admin-badge-desc">XP não é mostrado aqui ainda -- nenhum evento registra o XP ganho por ação (ver limitações no relatório da Fase 2).</p>
+      <p class="admin-badge-desc">"Tempo de estudo" é uma aproximação: para cada sessão, medimos do primeiro ao último evento registrado e somamos tudo. Se um aluno ficar parado no meio (ex: sai pra fazer outra coisa e volta), esse tempo parado também entra na conta -- não é um cronômetro de uso ativo.</p>
+      <p class="admin-badge-desc">Quer ver XP total e sequência de dias (streak)? Isso está na aba Engajamento, não aqui no Resumo.</p>
     </div>
   `;
 }
