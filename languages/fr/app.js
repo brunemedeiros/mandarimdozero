@@ -4087,6 +4087,7 @@ const MATCH_STATE = {
 function stopMatchTimer(){}
 
 function startMatchGame(){
+  trackEvent('lesson_start', 'match_game', null);
   const pool = shuffle(STATE.cards.filter(c => STATE.unitProgress[c.unitId]?.started && c.reps > 0));
   const pairCount = Math.min(6, pool.length);
   MATCH_STATE.pairs = pool.slice(0, pairCount);
@@ -4209,6 +4210,7 @@ function onMatchTileClick(btn){
 }
 
 function startSpeedReview(){
+  trackEvent('lesson_start', 'speed_review', null);
   SPEED_STATE.queue = buildSpeedQueue();
   SPEED_STATE.index = 0;
   SPEED_STATE.hearts = 3;
@@ -4384,6 +4386,7 @@ function isCardLessonCompleted(card){
 }
 
 function startReviewSession(){
+  trackEvent('lesson_start', 'flashcard_review', null);
   const pool = STATE.reviewSessionUnitFilter
     ? STATE.cards.filter(c => c.unitId === STATE.reviewSessionUnitFilter && isCardLessonCompleted(c))
     : STATE.cards.filter(isCardLessonCompleted);
@@ -5314,6 +5317,8 @@ document.getElementById('conj-start-btn').addEventListener('click', () => {
     return;
   }
 
+  trackEvent('lesson_start', 'conjugation_session', null);
+
   // Fila de prática: um verbo por página, com todos os tempos escolhidos
   // juntos (estilo Verbugata) — embaralhada, limitada por sessão.
   CONJ_STATE.verbQueue = shuffle(eligibleVerbs).slice(0, CONJ_SESSION_SIZE);
@@ -5650,6 +5655,7 @@ function openDictationPlayer(id){
   const d = DICTATIONS.find(x => x.id === id);
   if (!d) return;
 
+  trackEvent('lesson_start', 'dictation', { dictationId: d.id });
   stopDictationAudio();
   document.getElementById('dictation-list-wrap').style.display = 'none';
   document.getElementById('dictation-player-wrap').style.display = 'block';
