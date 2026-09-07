@@ -4437,6 +4437,7 @@ const MATCH_STATE = {
 };
 
 function startMatchGame(){
+  trackEvent('lesson_start', 'match_game', null);
   const pool = shuffle(STATE.cards.filter(c => STATE.unitProgress[c.unitId]?.started && c.reps > 0));
   const pairCount = Math.min(6, pool.length);
   MATCH_STATE.pairs = pool.slice(0, pairCount);
@@ -4559,6 +4560,7 @@ function onMatchTileClick(btn){
 }
 
 function startSpeedReview(){
+  trackEvent('lesson_start', 'speed_review', null);
   SPEED_STATE.queue = buildSpeedQueue();
   SPEED_STATE.index = 0;
   SPEED_STATE.hearts = 3;
@@ -4736,6 +4738,7 @@ function isCardLessonCompleted(card){
 }
 
 function startReviewSession(){
+  trackEvent('lesson_start', 'flashcard_review', null);
   const pool = STATE.reviewSessionUnitFilter
     ? STATE.cards.filter(c => c.unitId === STATE.reviewSessionUnitFilter && isCardLessonCompleted(c))
     // Revisão geral: só cartões de lições que você já concluiu de verdade.
@@ -5232,6 +5235,7 @@ const HANZI_STUDY_STATE = {
 // Só considera caracteres de lições já iniciadas (mesma regra usada para
 // vocabulário: não traz caracteres de lições nunca abertas).
 function startHanziReviewSession(){
+  trackEvent('lesson_start', 'hanzi_review', null);
   const pool = STATE.hanziCards.filter(c => {
     const lp = STATE.hanziLessonProgress[c.lessonIndex];
     return lp && (lp.unlocked || lp.completed);
@@ -5496,6 +5500,7 @@ document.getElementById('hanzi-back-to-lessons').addEventListener('click', () =>
 });
 
 function openHanziLesson(lessonIndex){
+  trackEvent('lesson_start', 'hanzi_lesson', { lessonIndex });
   HANZI_STUDY_STATE.lessonIndex = lessonIndex;
   HANZI_STUDY_STATE.phase = 'char';
   HANZI_STUDY_STATE.charIndex = 0;
