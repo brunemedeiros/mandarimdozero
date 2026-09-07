@@ -1,18 +1,25 @@
 // ---------- Painel de Admin: Analytics (métricas de uso) ----------
 // Segunda seção do Painel de Admin (a primeira é Badges, em
 // shared/admin-badges.js -- este arquivo cuida só da troca entre as duas
-// seções e do dashboard de Analytics). Lê `usage_events` (migration 007),
-// alimentada por shared/analytics.js:trackEvent() a cada troca de aba e
-// conclusão de exercício. Tela só visível/alcançável pra conta da autora
-// (isAdminUser) -- e mesmo que alguém force a navegação até aqui, a
+// seções e do dashboard de Analytics). Lê `usage_events` (migration
+// 007+008), alimentada por shared/analytics.js:trackEvent() a cada troca
+// de aba e conclusão de exercício. Tela só visível/alcançável pra conta da
+// autora (isAdminUser) -- e mesmo que alguém force a navegação até aqui, a
 // política de SELECT de usage_events já restringe a leitura ao e-mail da
 // autora (ver 007_create_usage_events_table.sql), então o pior que
 // acontece é a tela ficar vazia.
+//
+// SEMPRE filtra actor_type='student' (ver migration 008 e trackEvent()):
+// atividade da própria autora nunca aparece nestas métricas, por padrão
+// nem chega a ser gravada -- ver o toggle "Excluir minha atividade dos
+// Analytics" logo abaixo, que é o único jeito de mudar isso.
 //
 // Depende de (mesma posição de shared/admin-badges.js -- antes de app.js):
 //   - shared/supabase-client.js (supabaseClient)
 //   - languages/index.js        (AVAILABLE_LANGUAGES, pra nomear os idiomas)
 //   - languages/<lang>/app.js   (isAdminUser)
+//   - shared/profile.js         (PROFILE_CACHE, ensureProfileLoaded, setExcludeOwnActivity)
+//   - shared/toast.js           (showToast)
 
 const ADMIN_PANEL_STATE = { section: 'badges' };
 
@@ -51,6 +58,7 @@ async function fetchUsageEvents(){
   const { data, error } = await supabaseClient
     .from('usage_events')
     .select('user_id, language_app_key, event_type, event_name, meta, created_at')
+    .eq('actor_type', 'student')
     .order('created_at', { ascending: false })
     .limit(5000);
   if (error){ console.error('Erro ao carregar métricas de uso:', error); return []; }
@@ -111,6 +119,38 @@ function analyticsBarRowsHTML(entries, labels, extraNote){
   }).join('');
 }
 
+// Toggle "Excluir minha atividade dos Analytics" -- ver comentário de
+// trackEvent() em shared/analytics.js. Renderizado SEMPRE (mesmo sem
+// nenhum evento ainda), porque é uma preferência de conta, não parte do
+// relatório.
+function analyticsExcludeOwnTogglesHTML(excludeOwn){
+  return `
+    <div class="profile-section">
+      <div class="pref-row">
+        <div class="pref-row-text">
+          <div class="pref-row-title">Excluir minha atividade dos Analytics</div>
+          <div class="pref-row-sub">Sua navegação e lições como admin não entram nas métricas dos alunos. Desligue só se quiser gerar dados de teste de propósito, usando sua própria conta.</div>
+        </div>
+        <button class="pref-switch" id="analytics-exclude-own-switch" role="switch" aria-checked="${excludeOwn ? 'true' : 'false'}"><span class="pref-switch-knob"></span></button>
+      </div>
+    </div>
+  `;
+}
+
+function wireAnalyticsExcludeOwnToggle(){
+  const btn = document.getElementById('analytics-exclude-own-switch');
+  if (!btn) return;
+  btn.addEventListener('click', async () => {
+    const next = btn.getAttribute('aria-checked') !== 'true';
+    btn.setAttribute('aria-checked', next ? 'true' : 'false');
+    const ok = await setExcludeOwnActivity(next);
+    if (!ok){ btn.setAttribute('aria-checked', next ? 'false' : 'true'); return; }
+    showToast(next
+      ? '✓ Sua atividade não vai mais ser registrada no Analytics.'
+      : '✓ Sua atividade passa a ser registrada no Analytics (marcada como admin).');
+  });
+}
+
 async function renderAdminAnalyticsView(){
   const wrap = document.getElementById('admin-analytics-content');
   if (!wrap) return;
@@ -120,9 +160,14 @@ async function renderAdminAnalyticsView(){
   }
   wrap.innerHTML = `<p class="profile-loading">Carregando...</p>`;
 
+  const profile = await ensureProfileLoaded();
+  const excludeOwn = profile ? profile.exclude_own_activity !== false : true;
+  const toggleHTML = analyticsExcludeOwnTogglesHTML(excludeOwn);
+
   const events = await fetchUsageEvents();
   if (!events.length){
-    wrap.innerHTML = `<p class="profile-empty-note">Nenhum evento de uso registrado ainda.</p>`;
+    wrap.innerHTML = toggleHTML + `<p class="profile-empty-note">Nenhum evento de uso registrado ainda.</p>`;
+    wireAnalyticsExcludeOwnToggle();
     return;
   }
 
@@ -139,7 +184,7 @@ async function renderAdminAnalyticsView(){
     </div>
   `).join('');
 
-  wrap.innerHTML = `
+  wrap.innerHTML = toggleHTML + `
     <div class="profile-section">
       <div class="section-label">Resumo</div>
       <div class="analytics-stat-row"><span class="analytics-stat-num">${stats.totalEvents}</span><span class="analytics-stat-label">eventos registrados${events.length === 5000 ? ' (últimos 5000)' : ''}</span></div>
@@ -162,6 +207,7 @@ async function renderAdminAnalyticsView(){
       ${langRowsHTML}
     </div>
   `;
+  wireAnalyticsExcludeOwnToggle();
 }
 
 // Alterna entre as duas seções do Painel de Admin (Badges/Analytics) --
