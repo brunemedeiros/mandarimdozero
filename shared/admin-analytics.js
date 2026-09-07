@@ -645,7 +645,11 @@ function computeAnalytics(events, newProfiles, activeProfiles, sinceIso){
     (levelUsers[level] ||= new Set()).add(e.user_id);
   });
   const levelRows = Object.entries(levelUsers)
-    .map(([level, users]) => ({ level, count: users.size }))
+    // {name, count} -- mesmo formato que todo outro *Rows daqui (deviceRows,
+    // browserRows, areaRows...), porque analyticsBarRowsHTML() lê row.name.
+    // Chave "level" aqui fazia row.name vir undefined e renderizar a
+    // string literal "undefined" no rótulo da barra.
+    .map(([level, users]) => ({ name: level, count: users.size }))
     .sort((a, b) => b.count - a.count);
 
   // ---- Progressão: unidades/lições concluídas por aluno ----
@@ -1029,6 +1033,7 @@ function renderProgressaoSectionHTML(stats){
     <div class="profile-section">
       <div class="section-label">Unidades concluídas por aluno (checkpoints)</div>
       ${stats.unitsCompletedBuckets.some(b => b.count) ? analyticsBarRowsHTML(stats.unitsCompletedBuckets.map(b => ({ name: b.label, count: b.count })), {}) : analyticsEmptyNoteHTML()}
+      <p class="admin-badge-desc">Nem toda unidade tem lições internas (ex: unidades de gramática no francês) -- essas pontuam como um bloco único de exercícios, e concluí-las gera um checkpoint sem nenhuma "lição concluída" correspondente. Já unidades com lições só geram o checkpoint depois de passar por todas elas. Por isso um aluno pode aparecer aqui com mais unidades concluídas do que lições concluídas.</p>
     </div>
 
     <div class="profile-section">
