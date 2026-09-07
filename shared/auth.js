@@ -209,6 +209,7 @@ let lastSaveErrorToastAt = 0;
 const SAVE_ERROR_TOAST_COOLDOWN_MS = 30000;
 
 function notifySaveFailure(){
+  if (typeof trackTechnicalError === 'function') trackTechnicalError('save_failed', null);
   const now = Date.now();
   if (now - lastSaveErrorToastAt < SAVE_ERROR_TOAST_COOLDOWN_MS) return;
   lastSaveErrorToastAt = now;
