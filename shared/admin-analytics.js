@@ -774,7 +774,13 @@ function analyticsKpiTileHTML(num, label, note, delta){
 }
 
 function analyticsBarRowsHTML(rows, labels, extraNote){
-  const max = rows.length ? rows[0].count : 0;
+  // Não pode assumir rows[0] como o maior -- vale pra *Rows já ordenados
+  // por contagem (área, dispositivo, etc.), mas as distribuições de
+  // unidades/lições concluídas mantêm ordem fixa (0, 1-3, 4-9, 10+) de
+  // propósito, pra ler como progressão. Se o primeiro bucket for 0 e outro
+  // não for, "rows[0].count" zerava "max" e TODAS as barras saíam com
+  // largura 0%, mesmo as com contagem real.
+  const max = rows.reduce((m, r) => Math.max(m, r.count), 0);
   return rows.map(row => {
     const pct = max ? Math.round((row.count / max) * 100) : 0;
     const label = labels[row.name] || row.name;
