@@ -191,15 +191,24 @@ function playPregeneratedAudio(file, btnEl, isAutoplay){
     if (exerciseAudioEl === audio) exerciseAudioEl = null;
   };
   audio.addEventListener('ended', clear);
-  audio.addEventListener('error', () => { clear(); showToast('Não foi possível reproduzir o áudio'); });
+  audio.addEventListener('error', () => {
+    clear();
+    showToast('Não foi possível reproduzir o áudio');
+    trackTechnicalError('audio_load_failed', { file });
+  });
   audio.play().catch(() => {
     clear();
     // Autoplay bloqueado pelo navegador (comum em mobile -- o setTimeout de
     // goToNextExercise quebra a "janela" de gesto do usuário que o play()
     // automático depende) -- diferente de um erro real de arquivo/rede, por
     // isso um aviso mais brando em vez do toast de erro acima: basta tocar
-    // manualmente no botão pra funcionar.
+    // manualmente no botão pra funcionar. Só conta como falha TÉCNICA
+    // quando NÃO é autoplay -- um clique manual que falha é sempre
+    // inesperado; autoplay bloqueado é comportamento normal do navegador,
+    // não um bug, e contá-lo inflaria "erros" com algo que acontece toda
+    // sessão em boa parte dos celulares.
     if (isAutoplay) showToast('🔇 Toque no alto-falante pra ouvir');
+    else trackTechnicalError('audio_play_failed', { file });
   });
 }
 

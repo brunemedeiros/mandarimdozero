@@ -17,10 +17,21 @@
 // Fase 3 (interface): filtro de período com 7 predefinições + período
 // personalizado, comparação com o período anterior (mesma duração,
 // deslocada pra trás -- vale pra qualquer preset, inclusive
-// personalizado), e navegação interna por abas (Resumo/Atividade/
-// Navegação/Exercícios/Idioma/Progressão) que só alterna visibilidade dos
-// blocos já renderizados, sem refazer a consulta. Cada troca de período/
-// idioma/comparação refaz a consulta; trocar de aba interna não.
+// personalizado), e navegação interna por abas que só alterna visibilidade
+// dos blocos já renderizados, sem refazer a consulta. Cada troca de
+// período/idioma/dispositivo/comparação refaz a consulta principal;
+// trocar de aba interna não (exceto as 3 abas "lazy" -- ver
+// ANALYTICS_LAZY_TABS -- que buscam dados extra só na primeira vez que
+// são abertas).
+//
+// Fase 4 (camadas avançadas): Retenção (coortes semanais, Dia 1/7/14/30),
+// Funil (dentro de Exercícios: iniciou -> concluiu -> acertou bem),
+// Progressão expandida (unidades/lições concluídas por aluno),
+// Engajamento+Gamificação (uma aba só -- o prompt-mestre lista XP/streak
+// nos dois grupos, juntar evita mostrar o mesmo número duas vezes),
+// Dispositivos (mobile/tablet/desktop, navegador, SO -- migration 009) e
+// Tecnologia (erros/performance, deliberadamente separada do Learning
+// Analytics -- ver shared/analytics.js:trackTechnicalError()).
 //
 // Nenhuma agregação daqui muda a SEMÂNTICA dos eventos gravados nas fases
 // anteriores -- são só leituras/somas diferentes sobre os mesmos
@@ -36,12 +47,18 @@
 const ADMIN_PANEL_STATE = { section: 'badges' };
 const ANALYTICS_STATE = {
   languageFilter: 'all',
+  deviceFilter: 'all',    // 'mobile' | 'tablet' | 'desktop' | 'all'
   period: 'last30',       // uma chave de ANALYTICS_PERIOD_PRESETS, ou 'custom'
   customSince: '',        // "YYYY-MM-DD", só usado quando period === 'custom'
   customUntil: '',
   compare: false,
   tab: 'resumo',
 };
+// Guarda o resultado da consulta principal (período atual) pra abas que
+// carregam sob demanda (ver ANALYTICS_LAZY_TABS) reaproveitarem sem
+// refazer a mesma busca. Limpo a cada renderAdminAnalyticsView() novo.
+const ANALYTICS_CURRENT = { stats: null, activeUserIds: [], sinceIso: null, untilIso: null };
+const ANALYTICS_LAZY_CACHE = {};
 
 // ---------- Taxonomia de eventos (rótulos amigáveis + o que cada um é) ----------
 // Áreas = abas de topo (tab_switch) -- a "casa" de cada funcionalidade.
@@ -103,6 +120,29 @@ const ANALYTICS_SCORE_FIELD_BY_EVENT_NAME = {
   dictation: 'score',
   conjugation_session: 'pct',
 };
+
+const ANALYTICS_DEVICE_LABELS = { mobile: '📱 Celular', tablet: '📟 Tablet', desktop: '🖥️ Desktop' };
+
+// Erros técnicos (ver shared/analytics.js:trackTechnicalError() e os
+// pontos que chamam -- window.onerror/unhandledrejection globais,
+// notifySaveFailure() em shared/auth.js, falhas de áudio em cada
+// languages/<lang>/app.js:playPregeneratedAudio()). Não existe categoria
+// de vídeo -- o app não tem conteúdo em vídeo, então "falhas de vídeo" do
+// prompt-mestre não se aplica aqui (documentado, não fabricado).
+const ANALYTICS_TECHNICAL_ERROR_LABELS = {
+  js_error: '🐞 Erro de JavaScript',
+  unhandled_rejection: '🐞 Promise rejeitada sem tratamento',
+  audio_load_failed: '🔇 Falha ao carregar áudio',
+  audio_play_failed: '🔇 Falha ao tocar áudio (clique manual)',
+  save_failed: '💾 Falha ao salvar progresso',
+};
+
+// Abas que fazem uma consulta EXTRA (além da já feita pra Resumo/
+// Atividade/etc.) só quando abertas pela primeira vez -- evita pagar o
+// custo de Retenção/Engajamento/Tecnologia em toda troca de filtro se a
+// autora nunca chega a olhar essas abas. Cache limpo a cada novo período/
+// idioma/dispositivo/comparação (início de renderAdminAnalyticsView()).
+const ANALYTICS_LAZY_TABS = new Set(['retencao', 'engajamento', 'tecnologia']);
 
 // ---------- Período ----------
 function analyticsStartOfDay(d){ const x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
@@ -176,14 +216,26 @@ function analyticsDayKey(iso){
 async function fetchUsageEventsForWindow(sinceIso, untilIso){
   let q = supabaseClient
     .from('usage_events')
-    .select('user_id, language_app_key, event_type, event_name, meta, created_at, session_id')
+    .select('user_id, language_app_key, event_type, event_name, meta, created_at, session_id, device_type, browser, os')
     .eq('actor_type', 'student')
+    // technical_error/technical_perf são Technical Analytics, não Product/
+    // Learning Analytics -- ficam de fora daqui pra não contaminar "Alunos
+    // ativos", "Sessões", exercisesPerSession, etc. com eventos que não são
+    // atividade de aprendizagem de verdade (ex: um page_load automático
+    // não deveria contar como uma sessão de estudo). A própria aba
+    // Tecnologia busca esses event_types separadamente, com sua própria
+    // consulta (ver fetchTechnicalEventsForWindow).
+    .neq('event_type', 'technical_error')
+    .neq('event_type', 'technical_perf')
     .gte('created_at', sinceIso)
     .lte('created_at', untilIso)
     .order('created_at', { ascending: false })
     .limit(5000);
   if (ANALYTICS_STATE.languageFilter !== 'all'){
     q = q.eq('language_app_key', ANALYTICS_STATE.languageFilter);
+  }
+  if (ANALYTICS_STATE.deviceFilter !== 'all'){
+    q = q.eq('device_type', ANALYTICS_STATE.deviceFilter);
   }
   const { data, error } = await q;
   if (error){ console.error('Erro ao carregar métricas de uso:', error); return []; }
@@ -216,7 +268,10 @@ async function fetchProfilesByUserIds(userIds){
 }
 
 // Busca tudo que uma "rodada" de estatísticas precisa (eventos + perfis)
-// pra um intervalo [since, until] já resolvido.
+// pra um intervalo [since, until] já resolvido. Devolve activeUserIds
+// junto (não só as stats agregadas) pra quem chamar poder reaproveitar a
+// lista de alunos ativos sem precisar refazer a mesma consulta (ver
+// ANALYTICS_CURRENT em renderAdminAnalyticsView).
 async function analyticsFetchStatsInput(since, until){
   const sinceIso = since.toISOString();
   const untilIso = until.toISOString();
@@ -226,7 +281,186 @@ async function analyticsFetchStatsInput(since, until){
     fetchNewProfilesInWindow(sinceIso, untilIso),
     fetchProfilesByUserIds(activeUserIds),
   ]);
-  return computeAnalytics(events, newProfiles, activeProfiles, sinceIso);
+  const stats = computeAnalytics(events, newProfiles, activeProfiles, sinceIso);
+  return { stats, activeUserIds };
+}
+
+// ---------- Retenção (Fase 4, item 1) ----------
+// Coorte = alunos cuja conta (profiles.created_at) foi criada na mesma
+// semana (segunda a domingo -- mesma fronteira de currentWeekStart() em
+// cada app.js, replicada aqui pra não depender de um símbolo que só
+// existe depois de app.js carregar). "Retornou no Dia N" = tem pelo menos
+// um evento cujo dia civil é exatamente N dias corridos após a criação da
+// conta. Só entra no denominador quem já tem N dias de conta -- uma
+// coorte de 3 dias atrás não tem "Dia 30" ainda, e isso aparece como "—",
+// nunca como 0%.
+//
+// Não respeita o filtro de PERÍODO (retenção é uma pergunta sobre todo o
+// histórico, não uma janela) -- mas respeita idioma/dispositivo, e usa o
+// mesmo teto de 5000 eventos das outras consultas. Documentado na própria
+// aba: contas/atividade fora desse teto podem não aparecer certas nos
+// números de Dia N mais distantes se a plataforma crescer muito.
+const ANALYTICS_COHORT_OFFSETS = [1, 7, 14, 30];
+
+function analyticsWeekStartKey(dateInput){
+  const d = new Date(dateInput);
+  const diffToMonday = d.getDay() === 0 ? -6 : 1 - d.getDay();
+  const monday = new Date(d);
+  monday.setDate(d.getDate() + diffToMonday);
+  monday.setHours(0, 0, 0, 0);
+  return monday.toISOString().slice(0, 10);
+}
+
+async function fetchAllStudentProfilesForRetention(){
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .select('user_id, created_at')
+    .neq('user_id', CURRENT_USER.id)
+    .order('created_at', { ascending: true });
+  if (error){ console.error('Erro ao carregar perfis para retenção:', error); return []; }
+  return data || [];
+}
+
+async function fetchAllStudentEventsForRetention(){
+  let q = supabaseClient
+    .from('usage_events')
+    .select('user_id, created_at')
+    .eq('actor_type', 'student')
+    // Mesma exclusão de fetchUsageEventsForWindow: "retornou" precisa
+    // significar atividade de aprendizagem de verdade, não só um
+    // page_load automático ou um erro técnico -- senão a definição de
+    // retenção fica inconsistente com a de "Alunos ativos" no Resumo.
+    .neq('event_type', 'technical_error')
+    .neq('event_type', 'technical_perf')
+    .order('created_at', { ascending: false })
+    .limit(5000);
+  if (ANALYTICS_STATE.languageFilter !== 'all') q = q.eq('language_app_key', ANALYTICS_STATE.languageFilter);
+  if (ANALYTICS_STATE.deviceFilter !== 'all') q = q.eq('device_type', ANALYTICS_STATE.deviceFilter);
+  const { data, error } = await q;
+  if (error){ console.error('Erro ao carregar eventos para retenção:', error); return []; }
+  return data || [];
+}
+
+function computeRetentionCohorts(profiles, events){
+  const daysActiveByUser = {};
+  events.forEach(e => {
+    const day = analyticsDayKey(e.created_at);
+    if (!day) return;
+    (daysActiveByUser[e.user_id] ||= new Set()).add(day);
+  });
+
+  const cohortMembers = {};
+  profiles.forEach(p => { (cohortMembers[analyticsWeekStartKey(p.created_at)] ||= []).push(p); });
+
+  const now = Date.now();
+  return Object.entries(cohortMembers)
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([week, members]) => {
+      const retention = {};
+      ANALYTICS_COHORT_OFFSETS.forEach(offset => {
+        let eligible = 0, returned = 0;
+        members.forEach(p => {
+          const signupTime = new Date(p.created_at).getTime();
+          const targetTime = signupTime + offset * 86400000;
+          if (targetTime > now) return; // coorte ainda não "completou" esse dia
+          eligible += 1;
+          const targetDay = analyticsDayKey(new Date(targetTime).toISOString());
+          if (daysActiveByUser[p.user_id]?.has(targetDay)) returned += 1;
+        });
+        retention[offset] = eligible > 0 ? { pct: Math.round((returned / eligible) * 100), eligible, returned } : null;
+      });
+      return { week, size: members.length, retention };
+    });
+}
+
+// ---------- Engajamento + Gamificação: XP/streak/conquistas ----------
+// XP usa a MESMA definição já mostrada no Ranking (weekly_xp da semana
+// corrente, ver shared/leaderboard.js e Fase "Leaderboard 9.x") -- não
+// inventa uma segunda noção de "XP" divergente. weekly_xp já é de leitura
+// pública (ver 006_create_weekly_xp_table.sql), nenhuma policy nova
+// necessária. Streak "oficial" (com freeze days etc.) mora dentro de
+// `progress`, que este painel não lê -- ver analyticsLongestStreak() pro
+// proxy usado aqui.
+function analyticsCurrentWeekStart(){
+  const d = new Date();
+  const diffToMonday = d.getDay() === 0 ? -6 : 1 - d.getDay();
+  const monday = new Date(d);
+  monday.setDate(d.getDate() + diffToMonday);
+  return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
+}
+
+async function fetchWeeklyXpForUsers(userIds){
+  if (!userIds.length) return [];
+  let q = supabaseClient
+    .from('weekly_xp')
+    .select('user_id, amount, language_app_key')
+    .eq('week_start', analyticsCurrentWeekStart())
+    .in('user_id', userIds);
+  if (ANALYTICS_STATE.languageFilter !== 'all') q = q.eq('language_app_key', ANALYTICS_STATE.languageFilter);
+  const { data, error } = await q;
+  if (error){ console.error('Erro ao carregar XP semanal:', error); return []; }
+  return data || [];
+}
+
+// badge_grants também é de leitura pública (ver 002_create_badge_grants_table.sql)
+async function fetchBadgeGrantsInWindow(sinceIso, untilIso){
+  const { data, error } = await supabaseClient
+    .from('badge_grants')
+    .select('user_id, badge_id, granted_at')
+    .gte('granted_at', sinceIso)
+    .lte('granted_at', untilIso);
+  if (error){ console.error('Erro ao carregar badges concedidos:', error); return []; }
+  return data || [];
+}
+
+// ---------- Technical Analytics (Fase 4, item 7) ----------
+// Conceitualmente separado do Learning/Product Analytics: consulta
+// PRÓPRIA, filtrando só event_type IN ('technical_error','technical_perf')
+// -- nunca misturada com lesson_complete/tab_switch na mesma agregação.
+// Mesmo actor_type='student' (a atividade de teste da autora tampouco
+// deve contar como "alunos tendo problemas técnicos").
+async function fetchTechnicalEventsForWindow(sinceIso, untilIso){
+  let q = supabaseClient
+    .from('usage_events')
+    .select('user_id, event_type, event_name, meta, created_at')
+    .eq('actor_type', 'student')
+    .in('event_type', ['technical_error', 'technical_perf'])
+    .gte('created_at', sinceIso)
+    .lte('created_at', untilIso)
+    .order('created_at', { ascending: false })
+    .limit(2000);
+  if (ANALYTICS_STATE.languageFilter !== 'all') q = q.eq('language_app_key', ANALYTICS_STATE.languageFilter);
+  if (ANALYTICS_STATE.deviceFilter !== 'all') q = q.eq('device_type', ANALYTICS_STATE.deviceFilter);
+  const { data, error } = await q;
+  if (error){ console.error('Erro ao carregar eventos técnicos:', error); return []; }
+  return data || [];
+}
+
+function computeTechnicalStats(events){
+  const errorCounts = {}, errorUsers = {};
+  const perfSamples = [];
+  events.forEach(e => {
+    if (e.event_type === 'technical_error'){
+      errorCounts[e.event_name] = (errorCounts[e.event_name] || 0) + 1;
+      (errorUsers[e.event_name] ||= new Set()).add(e.user_id);
+    } else if (e.event_type === 'technical_perf' && e.event_name === 'page_load' && typeof e.meta?.loadMs === 'number'){
+      perfSamples.push(e.meta.loadMs);
+    }
+  });
+  const errorRows = Object.entries(errorCounts)
+    .map(([name, count]) => ({ name, count, uniqueStudents: errorUsers[name].size }))
+    .sort((a, b) => b.count - a.count);
+  perfSamples.sort((a, b) => a - b);
+  const avgLoadMs = perfSamples.length ? Math.round(perfSamples.reduce((a, b) => a + b, 0) / perfSamples.length) : null;
+  const medianLoadMs = perfSamples.length ? perfSamples[Math.floor(perfSamples.length / 2)] : null;
+  return {
+    errorRows,
+    totalErrors: events.filter(e => e.event_type === 'technical_error').length,
+    affectedStudents: new Set(events.filter(e => e.event_type === 'technical_error').map(e => e.user_id)).size,
+    avgLoadMs,
+    medianLoadMs,
+    perfSampleCount: perfSamples.length,
+  };
 }
 
 // ---------- Agregação ----------
@@ -246,6 +480,41 @@ function analyticsUnitLevel(ev){
   const unitId = ev.meta?.unitId;
   if (!unitId || typeof UNITS === 'undefined') return null;
   return UNITS.find(u => u.id === unitId)?.level || null;
+}
+
+// Histograma genérico: pra cada userId em `userIds`, chama getValue(userId)
+// e conta em qual balde cai. Reaproveitado por frequência de estudo,
+// unidades concluídas e lições concluídas -- a MESMA função de
+// "distribuir usuários em faixas", em vez de reescrever o loop 3 vezes
+// (evita a duplicação que a revisão arquitetural da Fase 4 pediu pra
+// caçar).
+function analyticsBucketizeByUsers(userIds, bucketDefs, getValue){
+  const buckets = bucketDefs.map(b => ({ ...b, count: 0 }));
+  userIds.forEach(uid => {
+    const n = getValue(uid);
+    const bucket = buckets.find(b => n >= b.min && n <= b.max);
+    if (bucket) bucket.count += 1;
+  });
+  return buckets;
+}
+
+// Maior sequência de dias consecutivos com atividade, a partir do próprio
+// conjunto de dias já calculado em daysByUser -- é uma APROXIMAÇÃO do
+// streak que o app mostra (que tem regras próprias: freeze days, fuso
+// específico etc., vivem em STATE.streak dentro de `progress`, que este
+// painel não lê -- ver limitações). Serve como proxy honesto de
+// engajamento sem duplicar a lógica de streak do app nem arriscar um
+// número que pareça o streak "oficial" sem ser.
+function analyticsLongestStreak(daySet){
+  const days = [...daySet].sort();
+  let longest = 0, current = 0, prevTime = null;
+  days.forEach(d => {
+    const t = new Date(d + 'T00:00:00Z').getTime();
+    current = (prevTime !== null && t - prevTime === 86400000) ? current + 1 : 1;
+    longest = Math.max(longest, current);
+    prevTime = t;
+  });
+  return longest;
 }
 
 function computeAnalytics(events, newProfiles, activeProfiles, sinceIso){
@@ -343,17 +612,13 @@ function computeAnalytics(events, newProfiles, activeProfiles, sinceIso){
   // dentro do período selecionado -- balde por contagem de dias, não uma
   // cadência "por semana" fabricada a partir de um período que pode não
   // ser uma semana exata.
-  const freqBuckets = [
-    { label: '1 dia', min: 1, max: 1, count: 0 },
-    { label: '2–4 dias', min: 2, max: 4, count: 0 },
-    { label: '5–9 dias', min: 5, max: 9, count: 0 },
-    { label: '10+ dias', min: 10, max: Infinity, count: 0 },
-  ];
-  Object.values(daysByUser).forEach(daysSet => {
-    const n = daysSet.size;
-    const bucket = freqBuckets.find(b => n >= b.min && n <= b.max);
-    if (bucket) bucket.count += 1;
-  });
+  const activeUserIdsList = [...activeUserIds];
+  const freqBuckets = analyticsBucketizeByUsers(activeUserIdsList, [
+    { label: '1 dia', min: 1, max: 1 },
+    { label: '2–4 dias', min: 2, max: 4 },
+    { label: '5–9 dias', min: 5, max: 9 },
+    { label: '10+ dias', min: 10, max: Infinity },
+  ], uid => daysByUser[uid]?.size || 0);
 
   // ---- Sessões / tempo estimado ----
   const sessionSpans = {};
@@ -383,6 +648,61 @@ function computeAnalytics(events, newProfiles, activeProfiles, sinceIso){
     .map(([level, users]) => ({ level, count: users.size }))
     .sort((a, b) => b.count - a.count);
 
+  // ---- Progressão: unidades/lições concluídas por aluno ----
+  // unit_checkpoint = concluiu o checkpoint da unidade inteira;
+  // vocab_lesson = concluiu uma lição individual dentro dela (identificada
+  // por unitId+lessonIdx, já que lessonIdx sozinho se repete entre
+  // unidades). Contagem por aluno DISTINTA (um checkpoint refeito não
+  // conta duas vezes), igual à filosofia de completeUsersByName acima.
+  const unitsByUser = {}, lessonsByUser = {};
+  events.forEach(e => {
+    if (e.event_type !== 'lesson_complete') return;
+    if (e.event_name === 'unit_checkpoint' && e.meta?.unitId != null){
+      (unitsByUser[e.user_id] ||= new Set()).add(e.meta.unitId);
+    }
+    if (e.event_name === 'vocab_lesson' && e.meta?.unitId != null && e.meta?.lessonIdx != null){
+      (lessonsByUser[e.user_id] ||= new Set()).add(`${e.meta.unitId}:${e.meta.lessonIdx}`);
+    }
+  });
+  const unitsCompletedBuckets = analyticsBucketizeByUsers(activeUserIdsList, [
+    { label: '0', min: 0, max: 0 },
+    { label: '1–2', min: 1, max: 2 },
+    { label: '3–5', min: 3, max: 5 },
+    { label: '6+', min: 6, max: Infinity },
+  ], uid => unitsByUser[uid]?.size || 0);
+  const lessonsCompletedBuckets = analyticsBucketizeByUsers(activeUserIdsList, [
+    { label: '0', min: 0, max: 0 },
+    { label: '1–3', min: 1, max: 3 },
+    { label: '4–9', min: 4, max: 9 },
+    { label: '10+', min: 10, max: Infinity },
+  ], uid => lessonsByUser[uid]?.size || 0);
+
+  // ---- Dispositivos (Fase 4, item 6) ----
+  // Colunas só existem pra eventos gravados depois da migration 009 --
+  // eventos mais antigos ficam null, tratados como "desconhecido" abaixo
+  // (nunca inventado).
+  function analyticsGroupBy(field, fallback){
+    const counts = {}, users = {};
+    events.forEach(e => {
+      const key = e[field] || fallback;
+      counts[key] = (counts[key] || 0) + 1;
+      (users[key] ||= new Set()).add(e.user_id);
+    });
+    return Object.entries(counts)
+      .map(([name, count]) => ({ name, count, uniqueStudents: users[name].size }))
+      .sort((a, b) => b.count - a.count);
+  }
+  const deviceRows = analyticsGroupBy('device_type', 'desconhecido');
+  const browserRows = analyticsGroupBy('browser', 'desconhecido');
+  const osRows = analyticsGroupBy('os', 'desconhecido');
+
+  // ---- Engajamento: exercícios por sessão, streak (proxy) ----
+  const totalCompleted = Object.values(completeCounts).reduce((a, b) => a + b, 0);
+  const exercisesPerSession = sessionIds.size ? Math.round((totalCompleted / sessionIds.size) * 10) / 10 : null;
+  const streaks = activeUserIdsList.map(uid => analyticsLongestStreak(daysByUser[uid] || new Set()));
+  const avgLongestStreak = streaks.length ? Math.round((streaks.reduce((a, b) => a + b, 0) / streaks.length) * 10) / 10 : 0;
+  const maxLongestStreak = streaks.length ? Math.max(...streaks) : 0;
+
   return {
     activeStudents: activeUserIds.size,
     newStudents: newProfiles.length,
@@ -401,6 +721,14 @@ function computeAnalytics(events, newProfiles, activeProfiles, sinceIso){
     freqBuckets,
     byLanguageCounts,
     levelRows,
+    unitsCompletedBuckets,
+    lessonsCompletedBuckets,
+    deviceRows,
+    browserRows,
+    osRows,
+    exercisesPerSession,
+    avgLongestStreak,
+    maxLongestStreak,
     totalEvents: events.length,
   };
 }
@@ -490,6 +818,10 @@ function analyticsControlsHTML(since, until){
   const rangeLabel = `${analyticsFormatDate(since)} – ${analyticsFormatDate(until)}`;
   const compareLabel = ANALYTICS_STATE.compare ? ` · comparando com ${analyticsFormatDate(previous.since)} – ${analyticsFormatDate(previous.until)}` : '';
 
+  const deviceOptions = Object.entries(ANALYTICS_DEVICE_LABELS).map(([key, label]) =>
+    `<option value="${key}" ${ANALYTICS_STATE.deviceFilter === key ? 'selected' : ''}>${label}</option>`
+  ).join('');
+
   return `
     <div class="profile-section">
       <div class="analytics-filters-row">
@@ -502,6 +834,13 @@ function analyticsControlsHTML(since, until){
           <select id="analytics-language-select" class="profile-edit-input">
             <option value="all" ${ANALYTICS_STATE.languageFilter === 'all' ? 'selected' : ''}>Todos os idiomas</option>
             ${langOptions}
+          </select>
+        </div>
+        <div class="analytics-filter-item">
+          <label class="profile-edit-label" for="analytics-device-select">Dispositivo</label>
+          <select id="analytics-device-select" class="profile-edit-input">
+            <option value="all" ${ANALYTICS_STATE.deviceFilter === 'all' ? 'selected' : ''}>Todos os dispositivos</option>
+            ${deviceOptions}
           </select>
         </div>
       </div>
@@ -521,6 +860,9 @@ function wireAnalyticsControls(){
 
   const langSel = document.getElementById('analytics-language-select');
   if (langSel) langSel.addEventListener('change', () => { ANALYTICS_STATE.languageFilter = langSel.value; renderAdminAnalyticsView(); });
+
+  const deviceSel = document.getElementById('analytics-device-select');
+  if (deviceSel) deviceSel.addEventListener('change', () => { ANALYTICS_STATE.deviceFilter = deviceSel.value; renderAdminAnalyticsView(); });
 
   const sinceInput = document.getElementById('analytics-custom-since');
   const untilInput = document.getElementById('analytics-custom-until');
@@ -615,6 +957,31 @@ function renderExerciciosSectionHTML(stats){
       </tr>
     `;
   }).join('');
+
+  // Funil (Fase 4, item 2): reaproveita exerciseRows -- mesma consulta,
+  // outra leitura. Só entram os tipos com evento de início (sem isso, o
+  // funil "iniciou -> concluiu" não existe de verdade). "Acertou bem" =
+  // nota média >= 80%, mesmo corte já usado no desafio "Pontue mais de
+  // 80%" do app -- reaproveita um limiar que já existe em vez de inventar
+  // um novo.
+  const funnelRows = stats.exerciseRows.filter(r => r.started !== null && r.started > 0);
+  const funnelHTML = funnelRows.map(r => {
+    const label = ANALYTICS_LESSON_EVENT_LABELS[r.name] || r.name;
+    const highScore = r.avgScore !== null && r.avgScore >= 80;
+    return `
+      <div class="analytics-funnel-row">
+        <div class="analytics-funnel-label">${label}</div>
+        <div class="analytics-funnel-stages">
+          <div class="analytics-funnel-stage"><span class="analytics-funnel-num">${r.started}</span><span class="analytics-funnel-stage-label">Iniciou</span></div>
+          <div class="analytics-funnel-arrow">→</div>
+          <div class="analytics-funnel-stage"><span class="analytics-funnel-num">${r.completed}</span><span class="analytics-funnel-stage-label">Concluiu${r.completionRate !== null ? ` (${r.completionRate}%)` : ''}</span></div>
+          <div class="analytics-funnel-arrow">→</div>
+          <div class="analytics-funnel-stage"><span class="analytics-funnel-num">${r.avgScore === null ? '—' : r.avgScore + '%'}</span><span class="analytics-funnel-stage-label">${highScore ? 'Acertou bem ✓' : 'Nota média'}</span></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
   return `
     <div class="profile-section">
       <div class="section-label">Exercícios por tipo</div>
@@ -627,6 +994,11 @@ function renderExerciciosSectionHTML(stats){
         </div>
         <p class="admin-badge-desc">"—" = sem evento de início (vocab_lesson/unit_checkpoint/challenge) ou sem conceito de nota pra esse tipo. Popularidade (concluídos) e desempenho (nota média) são colunas separadas de propósito -- um exercício muito feito não é necessariamente um exercício com nota alta.</p>
       ` : analyticsEmptyNoteHTML()}
+    </div>
+
+    <div class="profile-section">
+      <div class="section-label">Funil: iniciou → concluiu → acertou bem</div>
+      ${funnelRows.length ? funnelHTML + `<p class="admin-badge-desc">Só os tipos com evento de início entram no funil (mesma limitação da taxa de conclusão geral). "Respondeu" (por pergunta individual) não existe como evento -- o funil vai direto de "iniciou" pra "concluiu". "Acertou bem" = nota média ≥ 80%, mesmo corte do desafio "Pontue mais de 80%".</p>` : analyticsEmptyNoteHTML('Nenhum tipo com evento de início teve atividade no período.')}
     </div>
   `;
 }
@@ -641,12 +1013,142 @@ function renderIdiomaSectionHTML(stats){
       <div class="section-label">Eventos por idioma</div>
       ${rows.length ? analyticsBarRowsHTML(rows, Object.fromEntries(AVAILABLE_LANGUAGES.map(l => [l.appKey, l.name]))) : analyticsEmptyNoteHTML()}
       ${ANALYTICS_STATE.languageFilter !== 'all' ? `<p class="admin-badge-desc">Filtro de idioma ativo (${langName(ANALYTICS_STATE.languageFilter)}) -- pra comparar idiomas lado a lado, selecione "Todos os idiomas" no filtro acima.</p>` : ''}
+      <p class="admin-badge-desc">Segmentação por nível/funcionalidade/exercício/coorte/tipo de usuário já existe nas abas Progressão, Exercícios, Retenção e no toggle "Excluir minha atividade" -- não repetidas aqui como filtros globais pra não criar combinações sem sentido (ex: nível não se aplica a um "tab_switch").</p>
+    </div>
+  `;
+}
+
+function renderProgressaoSectionHTML(stats){
+  return `
+    <div class="profile-section">
+      <div class="section-label">Alunos por nível</div>
+      ${stats.levelRows.length ? analyticsBarRowsHTML(stats.levelRows, {}) : analyticsEmptyNoteHTML()}
+      <p class="admin-badge-desc">Só cobre unidades do idioma do app em que este Painel está aberto agora -- eventos do outro idioma caem em "Nível desconhecido" (cada site só carrega o conteúdo do próprio idioma).</p>
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Progressão · alunos por nível</div>
-      ${stats.levelRows.length ? analyticsBarRowsHTML(stats.levelRows, {}) : analyticsEmptyNoteHTML()}
-      <p class="admin-badge-desc">Só cobre unidades do idioma do app em que este Painel está aberto agora -- eventos do outro idioma caem em "Nível desconhecido" (cada site só carrega o conteúdo do próprio idioma). Streak/XP/avanço de nível ficam pra uma etapa futura.</p>
+      <div class="section-label">Unidades concluídas por aluno (checkpoints)</div>
+      ${stats.unitsCompletedBuckets.some(b => b.count) ? analyticsBarRowsHTML(stats.unitsCompletedBuckets.map(b => ({ name: b.label, count: b.count })), {}) : analyticsEmptyNoteHTML()}
+    </div>
+
+    <div class="profile-section">
+      <div class="section-label">Lições concluídas por aluno</div>
+      ${stats.lessonsCompletedBuckets.some(b => b.count) ? analyticsBarRowsHTML(stats.lessonsCompletedBuckets.map(b => ({ name: b.label, count: b.count })), {}) : analyticsEmptyNoteHTML()}
+      <p class="admin-badge-desc">"Avanço de nível" (velocidade de progressão entre níveis ao longo do tempo) fica pra uma etapa futura -- exigiria acompanhar a mesma conta em vários períodos, não só um recorte.</p>
+    </div>
+  `;
+}
+
+function renderDispositivosSectionHTML(stats){
+  const hasData = stats.deviceRows.some(r => r.name !== 'desconhecido');
+  return `
+    <div class="profile-section">
+      <div class="section-label">Tipo de dispositivo</div>
+      ${stats.deviceRows.length ? analyticsBarRowsHTML(stats.deviceRows, ANALYTICS_DEVICE_LABELS) : analyticsEmptyNoteHTML()}
+      ${!hasData ? '<p class="admin-badge-desc">Todos os eventos no período são de antes da coleta de dispositivo existir (migration 009) -- por isso caem em "desconhecido". Dados novos já vêm classificados.</p>' : ''}
+    </div>
+
+    <div class="profile-section">
+      <div class="section-label">Navegador</div>
+      ${stats.browserRows.length ? analyticsBarRowsHTML(stats.browserRows, {}) : analyticsEmptyNoteHTML()}
+    </div>
+
+    <div class="profile-section">
+      <div class="section-label">Sistema operacional</div>
+      ${stats.osRows.length ? analyticsBarRowsHTML(stats.osRows, {}) : analyticsEmptyNoteHTML()}
+      <p class="admin-badge-desc">Classificação por navigator.userAgent (heurística simples, sem biblioteca) -- não é 100% precisa, mas é o padrão aceitável sem telemetria de terceiros.</p>
+    </div>
+  `;
+}
+
+// Engajamento + Gamificação (Fase 4, itens 4 e 5) -- unidos numa aba só:
+// o próprio prompt-mestre lista XP/streak nos dois grupos, e mostrar as
+// mesmas duas métricas em duas abas diferentes seria exatamente a
+// duplicação que a revisão arquitetural desta fase pediu pra evitar.
+function renderEngajamentoSectionHTML(stats, weeklyXp, badgeGrants){
+  const totalXpThisWeek = weeklyXp.reduce((sum, r) => sum + (r.amount || 0), 0);
+  const avgXpThisWeek = weeklyXp.length ? Math.round(totalXpThisWeek / weeklyXp.length) : 0;
+  const badgeCount = badgeGrants.length;
+  const badgedStudents = new Set(badgeGrants.map(g => g.user_id)).size;
+  const leaderboardViews = stats.areaRows.find(r => r.name === 'leaderboard')?.count || 0;
+
+  const revisoesTypes = ['flashcard_review', 'speed_review', 'hanzi_review'];
+  const revisoesTotal = stats.exerciseRows.filter(r => revisoesTypes.includes(r.name)).reduce((sum, r) => sum + r.completed, 0);
+  const desafiosTotal = stats.exerciseRows.find(r => r.name === 'challenge')?.completed || 0;
+
+  return `
+    <div class="profile-section">
+      <div class="section-label">Engajamento</div>
+      <div class="analytics-kpi-grid">
+        ${analyticsKpiTileHTML(stats.sessions, 'Sessões')}
+        ${analyticsKpiTileHTML(stats.exercisesPerSession === null ? '—' : stats.exercisesPerSession, 'Exercícios/sessão')}
+        ${analyticsKpiTileHTML(revisoesTotal, 'Revisões concluídas')}
+        ${analyticsKpiTileHTML(desafiosTotal, 'Desafios concluídos')}
+      </div>
+      <p class="admin-badge-desc">Frequência de estudo (dias ativos por aluno) já está na aba Atividade -- não repetida aqui.</p>
+    </div>
+
+    <div class="profile-section">
+      <div class="section-label">Gamificação</div>
+      <div class="analytics-kpi-grid">
+        ${analyticsKpiTileHTML(totalXpThisWeek, 'XP total (semana atual)')}
+        ${analyticsKpiTileHTML(avgXpThisWeek, 'XP médio/aluno (semana atual)')}
+        ${analyticsKpiTileHTML(stats.avgLongestStreak, 'Sequência média (dias)', 'proxy calculado a partir dos eventos')}
+        ${analyticsKpiTileHTML(stats.maxLongestStreak, 'Maior sequência (dias)')}
+        ${analyticsKpiTileHTML(badgeCount, 'Conquistas concedidas')}
+        ${analyticsKpiTileHTML(leaderboardViews, 'Visualizações do Ranking')}
+      </div>
+      <p class="admin-badge-desc">XP usa a mesma semana (segunda a domingo) já mostrada no Ranking -- não é "XP gerado no período selecionado acima", é sempre a semana corrente. Sequência é uma aproximação calculada a partir dos dias com atividade registrada, não o streak "oficial" do app (que tem regras próprias como dias de folga e mora fora do alcance deste painel). ${badgedStudents ? `${badgedStudents} ${badgedStudents === 1 ? 'aluno(a) recebeu' : 'alunos(as) receberam'} pelo menos uma conquista no período.` : ''}</p>
+    </div>
+  `;
+}
+
+function renderTecnologiaSectionHTML(tech){
+  return `
+    <div class="profile-section">
+      <div class="section-label">Erros e falhas</div>
+      <div class="analytics-kpi-grid">
+        ${analyticsKpiTileHTML(tech.totalErrors, 'Erros registrados')}
+        ${analyticsKpiTileHTML(tech.affectedStudents, 'Alunos(as) afetados(as)')}
+      </div>
+      ${tech.errorRows.length ? analyticsBarRowsHTML(tech.errorRows, ANALYTICS_TECHNICAL_ERROR_LABELS) : analyticsEmptyNoteHTML('Nenhum erro técnico registrado no período.')}
+      <p class="admin-badge-desc">Cobre erro de JavaScript, promise rejeitada, falha ao carregar/tocar áudio e falha ao salvar progresso -- todos com deduplicação por sessão (um erro que se repete não infla a contagem). Não há categoria de vídeo: o app não tem conteúdo em vídeo.</p>
+    </div>
+
+    <div class="profile-section">
+      <div class="section-label">Performance</div>
+      ${tech.perfSampleCount ? `
+        <div class="analytics-kpi-grid">
+          ${analyticsKpiTileHTML(`${tech.avgLoadMs}ms`, 'Carregamento médio')}
+          ${analyticsKpiTileHTML(`${tech.medianLoadMs}ms`, 'Carregamento mediano')}
+        </div>
+        <p class="admin-badge-desc">${tech.perfSampleCount} ${tech.perfSampleCount === 1 ? 'sessão medida' : 'sessões medidas'} (Navigation Timing API, um registro por carregamento de página).</p>
+      ` : analyticsEmptyNoteHTML('Nenhuma medição de performance no período.')}
+    </div>
+
+    <p class="admin-badge-desc">Esta aba é conceitualmente separada de Aprendizagem/Produto -- nunca soma erros técnicos junto com taxa de conclusão, nota média etc. Uma nota TÉCNICA baixa aqui não significa que o conteúdo é difícil, e o contrário também vale.</p>
+  `;
+}
+
+function renderRetencaoSectionHTML(cohorts){
+  if (!cohorts.length) return analyticsEmptyNoteHTML('Nenhuma conta encontrada pra montar coortes.');
+  const rows = cohorts.map(c => {
+    const cells = ANALYTICS_COHORT_OFFSETS.map(offset => {
+      const r = c.retention[offset];
+      return `<td>${r === null ? '—' : `${r.pct}% <span class="admin-badge-desc" style="display:inline">(${r.returned}/${r.eligible})</span>`}</td>`;
+    }).join('');
+    return `<tr><td>${analyticsFormatDate(new Date(c.week + 'T00:00:00'))}</td><td>${c.size}</td>${cells}</tr>`;
+  }).join('');
+  return `
+    <div class="profile-section">
+      <div class="section-label">Retenção por coorte (semana de cadastro)</div>
+      <div class="analytics-table-wrap">
+        <table class="analytics-table">
+          <thead><tr><th>Coorte</th><th>Alunos</th><th>Dia 1</th><th>Dia 7</th><th>Dia 14</th><th>Dia 30</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <p class="admin-badge-desc">Coorte = alunos cuja conta foi criada na mesma semana (segunda a domingo). "Dia N" = teve pelo menos uma atividade registrada no dia civil que cai exatamente N dias após a criação da conta -- "—" quando a coorte ainda não completou esse número de dias (nunca mostrado como 0%). Usa todo o histórico disponível (até 5000 eventos mais recentes), não o filtro de período dos controles acima -- retenção é uma pergunta sobre o tempo todo, não uma janela.</p>
     </div>
   `;
 }
@@ -658,9 +1160,14 @@ function renderIdiomaSectionHTML(stats){
 const ANALYTICS_TABS = [
   { key: 'resumo', label: 'Resumo' },
   { key: 'atividade', label: 'Atividade' },
+  { key: 'retencao', label: 'Retenção' },
   { key: 'navegacao', label: 'Navegação' },
   { key: 'exercicios', label: 'Exercícios' },
+  { key: 'progressao', label: 'Progressão' },
+  { key: 'engajamento', label: 'Engajamento' },
   { key: 'idioma', label: 'Idioma' },
+  { key: 'dispositivos', label: 'Dispositivos' },
+  { key: 'tecnologia', label: 'Tecnologia' },
 ];
 
 function analyticsSubnavHTML(){
@@ -670,7 +1177,11 @@ function analyticsSubnavHTML(){
   return `<div class="leaderboard-tabs" role="tablist" aria-label="Seção do Analytics">${tabsHTML}</div>`;
 }
 
-function switchAnalyticsTab(tab){
+// Abas em ANALYTICS_LAZY_TABS (Retenção/Engajamento/Tecnologia) só buscam
+// dados na primeira vez que são abertas -- ver comentário de
+// ANALYTICS_LAZY_CACHE. As demais só alternam visibilidade do que já foi
+// renderizado, sem nenhuma consulta nova.
+async function switchAnalyticsTab(tab){
   ANALYTICS_STATE.tab = tab;
   document.querySelectorAll('[data-analytics-tab]').forEach(btn => {
     const active = btn.dataset.analyticsTab === tab;
@@ -680,6 +1191,28 @@ function switchAnalyticsTab(tab){
   document.querySelectorAll('[data-analytics-panel]').forEach(panel => {
     panel.style.display = panel.dataset.analyticsPanel === tab ? '' : 'none';
   });
+
+  if (!ANALYTICS_LAZY_TABS.has(tab) || ANALYTICS_LAZY_CACHE[tab]) return;
+  const panel = document.querySelector(`[data-analytics-panel="${tab}"]`);
+  if (!panel) return;
+  panel.innerHTML = `<p class="profile-loading">Carregando...</p>`;
+
+  if (tab === 'retencao'){
+    const [profiles, events] = await Promise.all([fetchAllStudentProfilesForRetention(), fetchAllStudentEventsForRetention()]);
+    ANALYTICS_LAZY_CACHE.retencao = computeRetentionCohorts(profiles, events);
+    panel.innerHTML = renderRetencaoSectionHTML(ANALYTICS_LAZY_CACHE.retencao);
+  } else if (tab === 'engajamento'){
+    const [weeklyXp, badgeGrants] = await Promise.all([
+      fetchWeeklyXpForUsers(ANALYTICS_CURRENT.activeUserIds),
+      fetchBadgeGrantsInWindow(ANALYTICS_CURRENT.sinceIso, ANALYTICS_CURRENT.untilIso),
+    ]);
+    ANALYTICS_LAZY_CACHE.engajamento = { weeklyXp, badgeGrants };
+    panel.innerHTML = renderEngajamentoSectionHTML(ANALYTICS_CURRENT.stats, weeklyXp, badgeGrants);
+  } else if (tab === 'tecnologia'){
+    const events = await fetchTechnicalEventsForWindow(ANALYTICS_CURRENT.sinceIso, ANALYTICS_CURRENT.untilIso);
+    ANALYTICS_LAZY_CACHE.tecnologia = computeTechnicalStats(events);
+    panel.innerHTML = renderTecnologiaSectionHTML(ANALYTICS_LAZY_CACHE.tecnologia);
+  }
 }
 
 function wireAnalyticsSubnav(){
@@ -736,12 +1269,22 @@ async function renderAdminAnalyticsView(){
   const { since, until } = analyticsResolvePeriod();
   const controlsHTML = analyticsControlsHTML(since, until);
 
-  const stats = await analyticsFetchStatsInput(since, until);
+  const { stats, activeUserIds } = await analyticsFetchStatsInput(since, until);
   let prevStats = null;
   if (ANALYTICS_STATE.compare){
     const prev = analyticsPreviousPeriod(since, until);
-    prevStats = await analyticsFetchStatsInput(prev.since, prev.until);
+    prevStats = (await analyticsFetchStatsInput(prev.since, prev.until)).stats;
   }
+
+  // Guardado pras abas de carregamento sob demanda (Retenção/Engajamento/
+  // Tecnologia) reaproveitarem sem refazer a consulta principal. Cache de
+  // aba limpo aqui -- período/idioma/dispositivo/comparação mudaram,
+  // então qualquer coisa guardada de antes não vale mais.
+  ANALYTICS_CURRENT.stats = stats;
+  ANALYTICS_CURRENT.activeUserIds = activeUserIds;
+  ANALYTICS_CURRENT.sinceIso = since.toISOString();
+  ANALYTICS_CURRENT.untilIso = until.toISOString();
+  Object.keys(ANALYTICS_LAZY_CACHE).forEach(k => delete ANALYTICS_LAZY_CACHE[k]);
 
   const emptyNote = stats.totalEvents === 0
     ? `<p class="profile-empty-note">Nenhum evento de aluno registrado no período selecionado.</p>`
@@ -750,14 +1293,19 @@ async function renderAdminAnalyticsView(){
   wrap.innerHTML = toggleHTML + controlsHTML + emptyNote + analyticsSubnavHTML()
     + `<div data-analytics-panel="resumo">${renderResumoSectionHTML(stats, prevStats)}</div>`
     + `<div data-analytics-panel="atividade">${renderAtividadeSectionHTML(stats)}</div>`
+    + `<div data-analytics-panel="retencao"></div>`
     + `<div data-analytics-panel="navegacao">${renderNavegacaoSectionHTML(stats)}</div>`
     + `<div data-analytics-panel="exercicios">${renderExerciciosSectionHTML(stats)}</div>`
-    + `<div data-analytics-panel="idioma">${renderIdiomaSectionHTML(stats)}</div>`;
+    + `<div data-analytics-panel="progressao">${renderProgressaoSectionHTML(stats)}</div>`
+    + `<div data-analytics-panel="engajamento"></div>`
+    + `<div data-analytics-panel="idioma">${renderIdiomaSectionHTML(stats)}</div>`
+    + `<div data-analytics-panel="dispositivos">${renderDispositivosSectionHTML(stats)}</div>`
+    + `<div data-analytics-panel="tecnologia"></div>`;
 
   wireAnalyticsExcludeOwnToggle();
   wireAnalyticsControls();
   wireAnalyticsSubnav();
-  switchAnalyticsTab(ANALYTICS_STATE.tab);
+  await switchAnalyticsTab(ANALYTICS_STATE.tab);
 }
 
 // Alterna entre as duas seções do Painel de Admin (Badges/Analytics) --
