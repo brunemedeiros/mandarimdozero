@@ -14,12 +14,17 @@
 // nem chega a ser gravada -- ver o toggle "Excluir minha atividade dos
 // Analytics" logo no topo da seção.
 //
-// Fase 2 (Product + Learning Analytics, V1): Resumo, Atividade, Navegação
-// (áreas x funcionalidades), Exercícios (iniciados/concluídos/conclusão/
-// nota) e segmentação por idioma -- tudo sobre uma janela fixa de 30 dias
-// (ainda sem seletor de período -- isso é uma etapa futura). Cada consulta
-// é refeita quando o filtro de idioma muda; não há paginação/cache além do
-// teto de linhas por consulta.
+// Fase 3 (interface): filtro de período com 7 predefinições + período
+// personalizado, comparação com o período anterior (mesma duração,
+// deslocada pra trás -- vale pra qualquer preset, inclusive
+// personalizado), e navegação interna por abas (Resumo/Atividade/
+// Navegação/Exercícios/Idioma/Progressão) que só alterna visibilidade dos
+// blocos já renderizados, sem refazer a consulta. Cada troca de período/
+// idioma/comparação refaz a consulta; trocar de aba interna não.
+//
+// Nenhuma agregação daqui muda a SEMÂNTICA dos eventos gravados nas fases
+// anteriores -- são só leituras/somas diferentes sobre os mesmos
+// event_type/event_name/meta já existentes.
 //
 // Depende de (mesma posição de shared/admin-badges.js -- antes de app.js):
 //   - shared/supabase-client.js (supabaseClient)
@@ -29,8 +34,14 @@
 //   - shared/toast.js           (showToast)
 
 const ADMIN_PANEL_STATE = { section: 'badges' };
-const ANALYTICS_STATE = { languageFilter: 'all' };
-const ANALYTICS_WINDOW_DAYS = 30;
+const ANALYTICS_STATE = {
+  languageFilter: 'all',
+  period: 'last30',       // uma chave de ANALYTICS_PERIOD_PRESETS, ou 'custom'
+  customSince: '',        // "YYYY-MM-DD", só usado quando period === 'custom'
+  customUntil: '',
+  compare: false,
+  tab: 'resumo',
+};
 
 // ---------- Taxonomia de eventos (rótulos amigáveis + o que cada um é) ----------
 // Áreas = abas de topo (tab_switch) -- a "casa" de cada funcionalidade.
@@ -93,8 +104,63 @@ const ANALYTICS_SCORE_FIELD_BY_EVENT_NAME = {
   conjugation_session: 'pct',
 };
 
-function analyticsWindowSinceIso(){
-  return new Date(Date.now() - ANALYTICS_WINDOW_DAYS * 86400000).toISOString();
+// ---------- Período ----------
+function analyticsStartOfDay(d){ const x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
+function analyticsEndOfDay(d){ const x = new Date(d); x.setHours(23, 59, 59, 999); return x; }
+function analyticsDaysAgo(n){ return new Date(Date.now() - n * 86400000); }
+
+const ANALYTICS_PERIOD_LABELS = {
+  today: 'Hoje',
+  yesterday: 'Ontem',
+  last7: 'Últimos 7 dias',
+  last30: 'Últimos 30 dias',
+  thisMonth: 'Este mês',
+  lastMonth: 'Mês passado',
+  last90: 'Últimos 90 dias',
+  custom: 'Personalizado',
+};
+
+const ANALYTICS_PERIOD_PRESETS = {
+  today: () => ({ since: analyticsStartOfDay(new Date()), until: analyticsEndOfDay(new Date()) }),
+  yesterday: () => { const y = analyticsDaysAgo(1); return { since: analyticsStartOfDay(y), until: analyticsEndOfDay(y) }; },
+  last7: () => ({ since: analyticsStartOfDay(analyticsDaysAgo(6)), until: analyticsEndOfDay(new Date()) }),
+  last30: () => ({ since: analyticsStartOfDay(analyticsDaysAgo(29)), until: analyticsEndOfDay(new Date()) }),
+  thisMonth: () => { const n = new Date(); return { since: analyticsStartOfDay(new Date(n.getFullYear(), n.getMonth(), 1)), until: analyticsEndOfDay(n) }; },
+  lastMonth: () => {
+    const n = new Date();
+    const since = new Date(n.getFullYear(), n.getMonth() - 1, 1);
+    const until = new Date(n.getFullYear(), n.getMonth(), 0); // dia 0 do mês atual = último dia do mês anterior
+    return { since: analyticsStartOfDay(since), until: analyticsEndOfDay(until) };
+  },
+  last90: () => ({ since: analyticsStartOfDay(analyticsDaysAgo(89)), until: analyticsEndOfDay(new Date()) }),
+};
+
+// Resolve o período selecionado (preset ou personalizado) em datas de
+// verdade. Período personalizado sem as duas datas preenchidas cai de
+// volta pro dia de hoje -- nunca manda uma consulta com bound inválido.
+function analyticsResolvePeriod(){
+  if (ANALYTICS_STATE.period === 'custom'){
+    const since = ANALYTICS_STATE.customSince ? analyticsStartOfDay(new Date(ANALYTICS_STATE.customSince + 'T00:00:00')) : analyticsStartOfDay(new Date());
+    const until = ANALYTICS_STATE.customUntil ? analyticsEndOfDay(new Date(ANALYTICS_STATE.customUntil + 'T00:00:00')) : analyticsEndOfDay(new Date());
+    return until >= since ? { since, until } : { since: until, until: since };
+  }
+  const preset = ANALYTICS_PERIOD_PRESETS[ANALYTICS_STATE.period] || ANALYTICS_PERIOD_PRESETS.last30;
+  return preset();
+}
+
+// Período anterior = mesma duração, imediatamente antes do período atual
+// -- mesma regra pra todo preset (inclusive personalizado), consistente e
+// previsível (ver Fase 3, item 2: "quando aplicável" -- aqui sempre é,
+// dado que todo período tem uma duração bem definida).
+function analyticsPreviousPeriod(since, until){
+  const durationMs = until.getTime() - since.getTime();
+  const prevUntil = new Date(since.getTime() - 1);
+  const prevSince = new Date(prevUntil.getTime() - durationMs);
+  return { since: prevSince, until: prevUntil };
+}
+
+function analyticsFormatDate(d){
+  return d.toLocaleDateString('pt-BR');
 }
 
 function analyticsDayKey(iso){
@@ -104,15 +170,16 @@ function analyticsDayKey(iso){
 // ---------- Consultas ----------
 // Sem paginação por enquanto (mesma lógica de fetchAllGrantsWithUsernames
 // em admin-badges.js), com um teto de segurança -- mas o limite real do
-// "quanto tempo olhamos" é a janela de 30 dias (gte created_at), não o
-// teto de linhas: assim todo dia dentro da janela fica completo, em vez
+// "quanto tempo olhamos" é o período selecionado (gte/lte created_at), não
+// o teto de linhas: assim todo dia dentro do período fica completo, em vez
 // de truncar no meio de um dia se o teto de linhas fosse o único corte.
-async function fetchUsageEventsForWindow(){
+async function fetchUsageEventsForWindow(sinceIso, untilIso){
   let q = supabaseClient
     .from('usage_events')
     .select('user_id, language_app_key, event_type, event_name, meta, created_at, session_id')
     .eq('actor_type', 'student')
-    .gte('created_at', analyticsWindowSinceIso())
+    .gte('created_at', sinceIso)
+    .lte('created_at', untilIso)
     .order('created_at', { ascending: false })
     .limit(5000);
   if (ANALYTICS_STATE.languageFilter !== 'all'){
@@ -125,13 +192,14 @@ async function fetchUsageEventsForWindow(){
 
 // profiles tem leitura pública (ver 001_create_profiles_table.sql) -- não
 // precisa de nenhuma policy nova pra isto. Usado tanto pra "novos alunos"
-// (todo mundo criado na janela) quanto pra separar, dentro de quem esteve
+// (todo mundo criado no período) quanto pra separar, dentro de quem esteve
 // ativo, quem é novo de quem é recorrente.
-async function fetchNewProfilesInWindow(){
+async function fetchNewProfilesInWindow(sinceIso, untilIso){
   const { data, error } = await supabaseClient
     .from('profiles')
     .select('user_id, created_at')
-    .gte('created_at', analyticsWindowSinceIso())
+    .gte('created_at', sinceIso)
+    .lte('created_at', untilIso)
     .neq('user_id', CURRENT_USER.id); // nunca conta a própria conta admin
   if (error){ console.error('Erro ao carregar novos perfis:', error); return []; }
   return data || [];
@@ -145,6 +213,20 @@ async function fetchProfilesByUserIds(userIds){
     .in('user_id', userIds);
   if (error){ console.error('Erro ao carregar perfis:', error); return []; }
   return data || [];
+}
+
+// Busca tudo que uma "rodada" de estatísticas precisa (eventos + perfis)
+// pra um intervalo [since, until] já resolvido.
+async function analyticsFetchStatsInput(since, until){
+  const sinceIso = since.toISOString();
+  const untilIso = until.toISOString();
+  const events = await fetchUsageEventsForWindow(sinceIso, untilIso);
+  const activeUserIds = [...new Set(events.map(e => e.user_id))];
+  const [newProfiles, activeProfiles] = await Promise.all([
+    fetchNewProfilesInWindow(sinceIso, untilIso),
+    fetchProfilesByUserIds(activeUserIds),
+  ]);
+  return computeAnalytics(events, newProfiles, activeProfiles, sinceIso);
 }
 
 // ---------- Agregação ----------
@@ -166,9 +248,8 @@ function analyticsUnitLevel(ev){
   return UNITS.find(u => u.id === unitId)?.level || null;
 }
 
-function computeAnalytics(events, newProfiles, activeProfiles){
+function computeAnalytics(events, newProfiles, activeProfiles, sinceIso){
   const byId = Object.fromEntries(activeProfiles.map(p => [p.user_id, p]));
-  const sinceIso = analyticsWindowSinceIso();
 
   const activeUserIds = new Set(events.map(e => e.user_id));
   const sessionIds = new Set(events.filter(e => e.session_id).map(e => e.session_id));
@@ -259,9 +340,9 @@ function computeAnalytics(events, newProfiles, activeProfiles){
     .sort((a, b) => a.day.localeCompare(b.day));
 
   // Frequência de estudo: quantos DIAS distintos cada aluno esteve ativo
-  // dentro da janela de 30 dias -- balde por contagem de dias, não uma
-  // cadência "por semana" fabricada a partir de uma janela que não é uma
-  // semana exata.
+  // dentro do período selecionado -- balde por contagem de dias, não uma
+  // cadência "por semana" fabricada a partir de um período que pode não
+  // ser uma semana exata.
   const freqBuckets = [
     { label: '1 dia', min: 1, max: 1, count: 0 },
     { label: '2–4 dias', min: 2, max: 4, count: 0 },
@@ -324,11 +405,36 @@ function computeAnalytics(events, newProfiles, activeProfiles){
   };
 }
 
-// ---------- Render ----------
-function analyticsKpiTileHTML(num, label, note){
+// ---------- Comparação (delta período atual x anterior) ----------
+// previous === 0 é tratado à parte -- uma % de variação não faz sentido
+// saindo de zero (seria sempre "infinito"), e mostrar "+100%" ali seria
+// inventar uma leitura que os dados não sustentam. "novo" comunica a
+// mesma ideia sem fingir precisão. current/previous nulos (ex: taxa de
+// conclusão sem nenhum tipo rastreável no período) também não geram
+// delta nenhum -- sem isso, `null` vira 0 em aritmética JS e a divisão
+// produz um "▲ Infinity%" que pareceria um dado real sem ser.
+function analyticsDelta(current, previous){
+  if (typeof current !== 'number' || typeof previous !== 'number') return null;
+  if (previous === 0) return current === 0 ? null : { kind: 'new' };
+  const pct = Math.round(((current - previous) / previous) * 100);
+  if (pct === 0) return { kind: 'flat' };
+  return { kind: pct > 0 ? 'up' : 'down', pct: Math.abs(pct) };
+}
+
+function analyticsDeltaBadgeHTML(delta){
+  if (!delta) return '';
+  if (delta.kind === 'new') return `<span class="analytics-delta analytics-delta-new">novo</span>`;
+  if (delta.kind === 'flat') return `<span class="analytics-delta analytics-delta-flat">= </span>`;
+  const arrow = delta.kind === 'up' ? '▲' : '▼';
+  const cls = delta.kind === 'up' ? 'analytics-delta-up' : 'analytics-delta-down';
+  return `<span class="analytics-delta ${cls}">${arrow} ${delta.pct}%</span>`;
+}
+
+// ---------- Render: componentes reutilizáveis ----------
+function analyticsKpiTileHTML(num, label, note, delta){
   return `
     <div class="analytics-kpi-tile">
-      <div class="analytics-kpi-num">${num}</div>
+      <div class="analytics-kpi-num">${num}${analyticsDeltaBadgeHTML(delta)}</div>
       <div class="analytics-kpi-label">${label}</div>
       ${note ? `<div class="analytics-kpi-note">${note}</div>` : ''}
     </div>
@@ -353,6 +459,10 @@ function analyticsBarRowsHTML(rows, labels, extraNote){
   }).join('');
 }
 
+function analyticsEmptyNoteHTML(msg){
+  return `<p class="profile-empty-note">${msg || 'Sem dados no período selecionado.'}</p>`;
+}
+
 function analyticsFormatMinutes(mins){
   if (!mins) return '0min';
   const h = Math.floor(mins / 60);
@@ -360,35 +470,86 @@ function analyticsFormatMinutes(mins){
   return h ? `${h}h ${m}min` : `${m}min`;
 }
 
-function analyticsLanguageSelectHTML(){
-  const options = AVAILABLE_LANGUAGES.map(l =>
+// ---------- Render: controles (período, comparação, idioma) ----------
+function analyticsControlsHTML(since, until){
+  const periodOptions = Object.entries(ANALYTICS_PERIOD_LABELS).map(([key, label]) =>
+    `<option value="${key}" ${ANALYTICS_STATE.period === key ? 'selected' : ''}>${label}</option>`
+  ).join('');
+  const langOptions = AVAILABLE_LANGUAGES.map(l =>
     `<option value="${l.appKey}" ${ANALYTICS_STATE.languageFilter === l.appKey ? 'selected' : ''}>${l.name}</option>`
   ).join('');
+
+  const customRangeHTML = ANALYTICS_STATE.period === 'custom' ? `
+    <div class="analytics-custom-range">
+      <input type="date" id="analytics-custom-since" class="profile-edit-input" value="${ANALYTICS_STATE.customSince}">
+      <input type="date" id="analytics-custom-until" class="profile-edit-input" value="${ANALYTICS_STATE.customUntil}">
+    </div>
+  ` : '';
+
+  const previous = analyticsPreviousPeriod(since, until);
+  const rangeLabel = `${analyticsFormatDate(since)} – ${analyticsFormatDate(until)}`;
+  const compareLabel = ANALYTICS_STATE.compare ? ` · comparando com ${analyticsFormatDate(previous.since)} – ${analyticsFormatDate(previous.until)}` : '';
+
   return `
     <div class="profile-section">
-      <label class="profile-edit-label" for="analytics-language-select">Idioma</label>
-      <select id="analytics-language-select" class="profile-edit-input">
-        <option value="all" ${ANALYTICS_STATE.languageFilter === 'all' ? 'selected' : ''}>Todos os idiomas</option>
-        ${options}
-      </select>
+      <div class="analytics-filters-row">
+        <div class="analytics-filter-item">
+          <label class="profile-edit-label" for="analytics-period-select">Período</label>
+          <select id="analytics-period-select" class="profile-edit-input">${periodOptions}</select>
+        </div>
+        <div class="analytics-filter-item">
+          <label class="profile-edit-label" for="analytics-language-select">Idioma</label>
+          <select id="analytics-language-select" class="profile-edit-input">
+            <option value="all" ${ANALYTICS_STATE.languageFilter === 'all' ? 'selected' : ''}>Todos os idiomas</option>
+            ${langOptions}
+          </select>
+        </div>
+      </div>
+      ${customRangeHTML}
+      <div class="analytics-compare-row">
+        <span class="pref-row-title">Comparar com período anterior</span>
+        <button class="pref-switch" id="analytics-compare-switch" role="switch" aria-checked="${ANALYTICS_STATE.compare ? 'true' : 'false'}"><span class="pref-switch-knob"></span></button>
+      </div>
+      <p class="admin-badge-desc">Período: ${rangeLabel}${compareLabel}</p>
     </div>
   `;
 }
 
-function renderResumoSectionHTML(stats){
+function wireAnalyticsControls(){
+  const periodSel = document.getElementById('analytics-period-select');
+  if (periodSel) periodSel.addEventListener('change', () => { ANALYTICS_STATE.period = periodSel.value; renderAdminAnalyticsView(); });
+
+  const langSel = document.getElementById('analytics-language-select');
+  if (langSel) langSel.addEventListener('change', () => { ANALYTICS_STATE.languageFilter = langSel.value; renderAdminAnalyticsView(); });
+
+  const sinceInput = document.getElementById('analytics-custom-since');
+  const untilInput = document.getElementById('analytics-custom-until');
+  if (sinceInput) sinceInput.addEventListener('change', () => { ANALYTICS_STATE.customSince = sinceInput.value; renderAdminAnalyticsView(); });
+  if (untilInput) untilInput.addEventListener('change', () => { ANALYTICS_STATE.customUntil = untilInput.value; renderAdminAnalyticsView(); });
+
+  const compareBtn = document.getElementById('analytics-compare-switch');
+  if (compareBtn) compareBtn.addEventListener('click', () => {
+    ANALYTICS_STATE.compare = compareBtn.getAttribute('aria-checked') !== 'true';
+    renderAdminAnalyticsView();
+  });
+}
+
+// ---------- Render: seções ----------
+function renderResumoSectionHTML(stats, prev){
+  const d = (key) => prev ? analyticsDelta(stats[key], prev[key]) : null;
   const rateNote = stats.overallCompletionRate === null
-    ? '<p class="admin-badge-desc">Taxa de conclusão indisponível: nenhum dos tipos com evento de início teve atividade na janela.</p>'
-    : `<p class="admin-badge-desc">Calculada só sobre os tipos com evento de início (flashcards, revisão rápida, jogo da memória, hanzi, ditado, conjugação) -- ver seção Exercícios.</p>`;
+    ? '<p class="admin-badge-desc">Taxa de conclusão indisponível: nenhum dos tipos com evento de início teve atividade no período.</p>'
+    : `<p class="admin-badge-desc">Calculada só sobre os tipos com evento de início (flashcards, revisão rápida, jogo da memória, hanzi, ditado, conjugação) -- ver aba Exercícios.</p>`;
   return `
     <div class="profile-section">
-      <div class="section-label">Resumo · últimos ${ANALYTICS_WINDOW_DAYS} dias</div>
+      <div class="section-label">Resumo</div>
       <div class="analytics-kpi-grid">
-        ${analyticsKpiTileHTML(stats.activeStudents, 'Alunos ativos')}
-        ${analyticsKpiTileHTML(stats.newStudents, 'Novos alunos')}
-        ${analyticsKpiTileHTML(stats.sessions, 'Sessões')}
-        ${analyticsKpiTileHTML(stats.exercisesStarted, 'Exercícios iniciados', 'só tipos com evento de início')}
-        ${analyticsKpiTileHTML(stats.exercisesCompleted, 'Exercícios concluídos')}
-        ${analyticsKpiTileHTML(stats.overallCompletionRate === null ? '—' : `${stats.overallCompletionRate}%`, 'Taxa de conclusão')}
+        ${analyticsKpiTileHTML(stats.activeStudents, 'Alunos ativos', null, d('activeStudents'))}
+        ${analyticsKpiTileHTML(stats.newStudents, 'Novos alunos', null, d('newStudents'))}
+        ${analyticsKpiTileHTML(stats.sessions, 'Sessões', null, d('sessions'))}
+        ${analyticsKpiTileHTML(stats.exercisesStarted, 'Exercícios iniciados', 'só tipos com evento de início', d('exercisesStarted'))}
+        ${analyticsKpiTileHTML(stats.exercisesCompleted, 'Exercícios concluídos', null, d('exercisesCompleted'))}
+        ${analyticsKpiTileHTML(stats.overallCompletionRate === null ? '—' : `${stats.overallCompletionRate}%`, 'Taxa de conclusão', null, stats.overallCompletionRate === null ? null : d('overallCompletionRate'))}
         ${analyticsKpiTileHTML(analyticsFormatMinutes(stats.estimatedStudyMinutes), 'Tempo de estudo (estimado)', 'intervalo entre 1º e último evento de cada sessão')}
       </div>
       ${rateNote}
@@ -403,25 +564,25 @@ function renderAtividadeSectionHTML(stats){
     <div class="profile-section">
       <div class="section-label">Atividade</div>
       <div class="analytics-kpi-grid">
-        ${analyticsKpiTileHTML(stats.newActiveCount, 'Novos (ativos na janela)')}
+        ${analyticsKpiTileHTML(stats.newActiveCount, 'Novos (ativos no período)')}
         ${analyticsKpiTileHTML(stats.returningActiveCount, 'Recorrentes')}
       </div>
-      <p class="admin-badge-desc">"Novo" = conta criada dentro dos últimos ${ANALYTICS_WINDOW_DAYS} dias (via profiles.created_at); "recorrente" = já existia antes disso. Ver limitações sobre contas anteriores à criação automática de perfil.</p>
+      <p class="admin-badge-desc">"Novo" = conta criada dentro do período selecionado (via profiles.created_at); "recorrente" = já existia antes disso. Ver limitações sobre contas anteriores à criação automática de perfil.</p>
     </div>
 
     <div class="profile-section">
       <div class="section-label">Alunos ativos por dia</div>
-      ${stats.activeByDayRows.length ? analyticsBarRowsHTML(stats.activeByDayRows.map(r => ({ name: r.day, count: r.count })), {}) : '<p class="profile-empty-note">Sem dados na janela.</p>'}
+      ${stats.activeByDayRows.length ? analyticsBarRowsHTML(stats.activeByDayRows.map(r => ({ name: r.day, count: r.count })), {}) : analyticsEmptyNoteHTML()}
     </div>
 
     <div class="profile-section">
       <div class="section-label">Sessões por dia</div>
-      ${stats.sessionsByDayRows.length ? analyticsBarRowsHTML(stats.sessionsByDayRows.map(r => ({ name: r.day, count: r.count })), {}) : '<p class="profile-empty-note">Sem dados na janela.</p>'}
+      ${stats.sessionsByDayRows.length ? analyticsBarRowsHTML(stats.sessionsByDayRows.map(r => ({ name: r.day, count: r.count })), {}) : analyticsEmptyNoteHTML()}
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Frequência de estudo (dias ativos em ${ANALYTICS_WINDOW_DAYS} dias)</div>
-      ${freqRows.some(r => r.count) ? analyticsBarRowsHTML(freqRows, {}) : '<p class="profile-empty-note">Sem dados na janela.</p>'}
+      <div class="section-label">Frequência de estudo (dias ativos no período)</div>
+      ${freqRows.some(r => r.count) ? analyticsBarRowsHTML(freqRows, {}) : analyticsEmptyNoteHTML()}
     </div>
   `;
 }
@@ -430,12 +591,12 @@ function renderNavegacaoSectionHTML(stats){
   return `
     <div class="profile-section">
       <div class="section-label">Áreas (abas)</div>
-      ${stats.areaRows.length ? analyticsBarRowsHTML(stats.areaRows, ANALYTICS_TAB_LABELS) : '<p class="profile-empty-note">Sem dados na janela.</p>'}
+      ${stats.areaRows.length ? analyticsBarRowsHTML(stats.areaRows, ANALYTICS_TAB_LABELS) : analyticsEmptyNoteHTML()}
     </div>
 
     <div class="profile-section">
       <div class="section-label">Funcionalidades (tipos de exercício)</div>
-      ${stats.featureRows.length ? analyticsBarRowsHTML(stats.featureRows, ANALYTICS_LESSON_EVENT_LABELS) : '<p class="profile-empty-note">Sem dados na janela.</p>'}
+      ${stats.featureRows.length ? analyticsBarRowsHTML(stats.featureRows, ANALYTICS_LESSON_EVENT_LABELS) : analyticsEmptyNoteHTML()}
       <p class="admin-badge-desc">Conta início + conclusão somados (uso total), não só conclusões.</p>
     </div>
   `;
@@ -460,12 +621,12 @@ function renderExerciciosSectionHTML(stats){
       ${stats.exerciseRows.length ? `
         <div class="analytics-table-wrap">
           <table class="analytics-table">
-            <thead><tr><th>Exercício</th><th>Iniciados</th><th>Concluídos</th><th>Conclusão</th><th>Nota média</th></tr></thead>
+            <thead><tr><th>Exercício</th><th>Iníc.</th><th>Feitos</th><th>Taxa</th><th>Nota</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
         </div>
         <p class="admin-badge-desc">"—" = sem evento de início (vocab_lesson/unit_checkpoint/challenge) ou sem conceito de nota pra esse tipo. Popularidade (concluídos) e desempenho (nota média) são colunas separadas de propósito -- um exercício muito feito não é necessariamente um exercício com nota alta.</p>
-      ` : '<p class="profile-empty-note">Sem dados na janela.</p>'}
+      ` : analyticsEmptyNoteHTML()}
     </div>
   `;
 }
@@ -475,23 +636,56 @@ function renderIdiomaSectionHTML(stats){
   const rows = Object.entries(stats.byLanguageCounts)
     .map(([appKey, count]) => ({ name: appKey, count }))
     .sort((a, b) => b.count - a.count);
-  if (!rows.length) return '';
   return `
     <div class="profile-section">
       <div class="section-label">Eventos por idioma</div>
-      ${analyticsBarRowsHTML(rows, Object.fromEntries(AVAILABLE_LANGUAGES.map(l => [l.appKey, l.name])))}
+      ${rows.length ? analyticsBarRowsHTML(rows, Object.fromEntries(AVAILABLE_LANGUAGES.map(l => [l.appKey, l.name]))) : analyticsEmptyNoteHTML()}
+      ${ANALYTICS_STATE.languageFilter !== 'all' ? `<p class="admin-badge-desc">Filtro de idioma ativo (${langName(ANALYTICS_STATE.languageFilter)}) -- pra comparar idiomas lado a lado, selecione "Todos os idiomas" no filtro acima.</p>` : ''}
+    </div>
+
+    <div class="profile-section">
+      <div class="section-label">Progressão · alunos por nível</div>
+      ${stats.levelRows.length ? analyticsBarRowsHTML(stats.levelRows, {}) : analyticsEmptyNoteHTML()}
+      <p class="admin-badge-desc">Só cobre unidades do idioma do app em que este Painel está aberto agora -- eventos do outro idioma caem em "Nível desconhecido" (cada site só carrega o conteúdo do próprio idioma). Streak/XP/avanço de nível ficam pra uma etapa futura.</p>
     </div>
   `;
 }
 
-function renderProgressaoSectionHTML(stats){
-  return `
-    <div class="profile-section">
-      <div class="section-label">Progressão · alunos por nível (estrutura inicial)</div>
-      ${stats.levelRows.length ? analyticsBarRowsHTML(stats.levelRows, {}) : '<p class="profile-empty-note">Sem dados na janela.</p>'}
-      <p class="admin-badge-desc">Só cobre unidades do idioma do app em que este Painel está aberto agora -- eventos do outro idioma caem em "Nível desconhecido" (cada site só carrega o conteúdo do próprio idioma). Streak/XP/avanço de nível ficam pra uma etapa futura.</p>
-    </div>
-  `;
+// ---------- Render: navegação interna (abas) ----------
+// Escalável de propósito: uma aba nova é só mais uma entrada aqui e mais
+// um botão no HTML gerado -- nenhuma outra parte do arquivo precisa saber
+// quantas abas existem.
+const ANALYTICS_TABS = [
+  { key: 'resumo', label: 'Resumo' },
+  { key: 'atividade', label: 'Atividade' },
+  { key: 'navegacao', label: 'Navegação' },
+  { key: 'exercicios', label: 'Exercícios' },
+  { key: 'idioma', label: 'Idioma' },
+];
+
+function analyticsSubnavHTML(){
+  const tabsHTML = ANALYTICS_TABS.map(t =>
+    `<button class="leaderboard-tab ${ANALYTICS_STATE.tab === t.key ? 'active' : ''}" role="tab" aria-selected="${ANALYTICS_STATE.tab === t.key}" data-analytics-tab="${t.key}">${t.label}</button>`
+  ).join('');
+  return `<div class="leaderboard-tabs" role="tablist" aria-label="Seção do Analytics">${tabsHTML}</div>`;
+}
+
+function switchAnalyticsTab(tab){
+  ANALYTICS_STATE.tab = tab;
+  document.querySelectorAll('[data-analytics-tab]').forEach(btn => {
+    const active = btn.dataset.analyticsTab === tab;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-selected', active);
+  });
+  document.querySelectorAll('[data-analytics-panel]').forEach(panel => {
+    panel.style.display = panel.dataset.analyticsPanel === tab ? '' : 'none';
+  });
+}
+
+function wireAnalyticsSubnav(){
+  document.querySelectorAll('[data-analytics-tab]').forEach(btn => {
+    btn.addEventListener('click', () => switchAnalyticsTab(btn.dataset.analyticsTab));
+  });
 }
 
 // Toggle "Excluir minha atividade dos Analytics" -- ver comentário de
@@ -526,15 +720,6 @@ function wireAnalyticsExcludeOwnToggle(){
   });
 }
 
-function wireAnalyticsLanguageSelect(){
-  const sel = document.getElementById('analytics-language-select');
-  if (!sel) return;
-  sel.addEventListener('change', () => {
-    ANALYTICS_STATE.languageFilter = sel.value;
-    renderAdminAnalyticsView();
-  });
-}
-
 async function renderAdminAnalyticsView(){
   const wrap = document.getElementById('admin-analytics-content');
   if (!wrap) return;
@@ -547,33 +732,32 @@ async function renderAdminAnalyticsView(){
   const profile = await ensureProfileLoaded();
   const excludeOwn = profile ? profile.exclude_own_activity !== false : true;
   const toggleHTML = analyticsExcludeOwnToggleHTML(excludeOwn);
-  const langSelectHTML = analyticsLanguageSelectHTML();
 
-  const events = await fetchUsageEventsForWindow();
-  if (!events.length){
-    wrap.innerHTML = toggleHTML + langSelectHTML + `<p class="profile-empty-note">Nenhum evento de aluno registrado nos últimos ${ANALYTICS_WINDOW_DAYS} dias.</p>`;
-    wireAnalyticsExcludeOwnToggle();
-    wireAnalyticsLanguageSelect();
-    return;
+  const { since, until } = analyticsResolvePeriod();
+  const controlsHTML = analyticsControlsHTML(since, until);
+
+  const stats = await analyticsFetchStatsInput(since, until);
+  let prevStats = null;
+  if (ANALYTICS_STATE.compare){
+    const prev = analyticsPreviousPeriod(since, until);
+    prevStats = await analyticsFetchStatsInput(prev.since, prev.until);
   }
 
-  const activeUserIds = [...new Set(events.map(e => e.user_id))];
-  const [newProfiles, activeProfiles] = await Promise.all([
-    fetchNewProfilesInWindow(),
-    fetchProfilesByUserIds(activeUserIds),
-  ]);
-  const stats = computeAnalytics(events, newProfiles, activeProfiles);
+  const emptyNote = stats.totalEvents === 0
+    ? `<p class="profile-empty-note">Nenhum evento de aluno registrado no período selecionado.</p>`
+    : '';
 
-  wrap.innerHTML = toggleHTML + langSelectHTML
-    + renderResumoSectionHTML(stats)
-    + renderAtividadeSectionHTML(stats)
-    + renderNavegacaoSectionHTML(stats)
-    + renderExerciciosSectionHTML(stats)
-    + (ANALYTICS_STATE.languageFilter === 'all' ? renderIdiomaSectionHTML(stats) : '')
-    + renderProgressaoSectionHTML(stats);
+  wrap.innerHTML = toggleHTML + controlsHTML + emptyNote + analyticsSubnavHTML()
+    + `<div data-analytics-panel="resumo">${renderResumoSectionHTML(stats, prevStats)}</div>`
+    + `<div data-analytics-panel="atividade">${renderAtividadeSectionHTML(stats)}</div>`
+    + `<div data-analytics-panel="navegacao">${renderNavegacaoSectionHTML(stats)}</div>`
+    + `<div data-analytics-panel="exercicios">${renderExerciciosSectionHTML(stats)}</div>`
+    + `<div data-analytics-panel="idioma">${renderIdiomaSectionHTML(stats)}</div>`;
 
   wireAnalyticsExcludeOwnToggle();
-  wireAnalyticsLanguageSelect();
+  wireAnalyticsControls();
+  wireAnalyticsSubnav();
+  switchAnalyticsTab(ANALYTICS_STATE.tab);
 }
 
 // Alterna entre as duas seções do Painel de Admin (Badges/Analytics) --
