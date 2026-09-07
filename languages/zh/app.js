@@ -2706,6 +2706,7 @@ function finishCurrentLesson(u){
     const ls = STEP_STATE.acq.lessonScore;
     const lessonScorePct = ls && ls.total ? Math.round((ls.correct / ls.total) * 100) : undefined;
     registerDailyLessonCompleted(lessonScorePct);
+    trackEvent('lesson_complete', 'vocab_lesson', { unitId: u.id, lessonIdx: currentLessonIdx(u.id) - 1, scorePct: lessonScorePct });
     // Meta diária (§4 do artefato): só conta se a lição tinha conteúdo real
     // (>=3 palavras ou incluía diálogo) -- filtra o atalho degenerado de uma
     // lição minúscula "sobrando" no fim de uma unidade.
@@ -4527,6 +4528,7 @@ function onMatchTileClick(btn){
         registerStudyToday();
         STATE.totalReviews += MATCH_STATE.pairs.length;
         registerDailyMatchGame();
+        trackEvent('lesson_complete', 'match_game', { pairs: MATCH_STATE.pairs.length });
         saveState();
         renderTopbarStats();
         setTimeout(() => {
@@ -4592,6 +4594,7 @@ function renderSpeedReview(){
     stopSpeedTimer();
     if (!SPEED_STATE.dailyCounted){ SPEED_STATE.dailyCounted = true; registerDailySpeedReview(); }
     maybeShowStreakCelebration();
+    trackEvent('lesson_complete', 'speed_review', { score: SPEED_STATE.score });
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">💔</div>
@@ -4793,6 +4796,7 @@ function renderReviewView(){
 
   if (STATE.reviewIndex >= STATE.reviewQueue.length){
     maybeShowStreakCelebration();
+    trackEvent('lesson_complete', 'flashcard_review', { count: STATE.reviewQueue.length });
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🎉</div>
@@ -4934,6 +4938,7 @@ function markUnitCompleted(unitId, scorePct){
     registerDailyStars(lessonStars(scorePct));
     registerDailyLessonCompleted(scorePct);
   }
+  trackEvent('lesson_complete', 'unit_checkpoint', { unitId, scorePct });
   // Pequeno atraso pra ler como sequência ("+25 XP" ... "Unidade concluída!")
   // em vez de dois toasts aparecendo ao mesmo tempo, empilhados sem ordem.
   setTimeout(() => showToast(`Unidade concluída! 🏮`), 450);
@@ -5264,6 +5269,7 @@ function renderHanziReviewView(){
 
   if (STATE.hanziReviewIndex >= STATE.hanziReviewQueue.length){
     maybeShowStreakCelebration();
+    trackEvent('lesson_complete', 'hanzi_review', { count: STATE.hanziReviewQueue.length });
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🎉</div>
@@ -5784,6 +5790,7 @@ function renderHanziTestStep(contentEl, nextBtn){
 function markHanziLessonCompleted(lessonIndex){
   if (STATE.hanziLessonProgress[lessonIndex].completed) return;
   STATE.hanziLessonProgress[lessonIndex].completed = true;
+  trackEvent('lesson_complete', 'hanzi_lesson', { lessonIndex });
   if (lessonIndex + 1 < HANZI_LESSONS.length){
     STATE.hanziLessonProgress[lessonIndex + 1].unlocked = true;
   }

@@ -11,6 +11,7 @@
 function createTabSwitcher({ onBeforeSwitch, tabHandlers }){
   return function switchTab(tab){
     if (onBeforeSwitch) onBeforeSwitch(tab);
+    trackEvent('tab_switch', tab);
 
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));

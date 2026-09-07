@@ -2344,6 +2344,7 @@ function finishCurrentLesson(u){
     const ls = STEP_STATE.acq.lessonScore;
     const lessonScorePct = ls && ls.total ? Math.round((ls.correct / ls.total) * 100) : undefined;
     registerDailyLessonCompleted(lessonScorePct);
+    trackEvent('lesson_complete', 'vocab_lesson', { unitId: u.id, lessonIdx: currentLessonIdx(u.id) - 1, scorePct: lessonScorePct });
     // Meta diária (§4 do artefato): só conta se a lição tinha conteúdo real
     // (>=3 palavras ou incluía diálogo) -- filtra o atalho degenerado de uma
     // lição minúscula "sobrando" no fim de uma unidade.
@@ -4177,6 +4178,7 @@ function onMatchTileClick(btn){
         registerStudyToday();
         STATE.totalReviews += MATCH_STATE.pairs.length;
         registerDailyMatchGame();
+        trackEvent('lesson_complete', 'match_game', { pairs: MATCH_STATE.pairs.length });
         saveState();
         renderTopbarStats();
         setTimeout(() => {
@@ -4242,6 +4244,7 @@ function renderSpeedReview(){
     stopSpeedTimer();
     if (!SPEED_STATE.dailyCounted){ SPEED_STATE.dailyCounted = true; registerDailySpeedReview(); }
     maybeShowStreakCelebration();
+    trackEvent('lesson_complete', 'speed_review', { score: SPEED_STATE.score });
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">💔</div>
@@ -4438,6 +4441,7 @@ function renderReviewView(){
 
   if (STATE.reviewIndex >= STATE.reviewQueue.length){
     maybeShowStreakCelebration();
+    trackEvent('lesson_complete', 'flashcard_review', { count: STATE.reviewQueue.length });
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🎉</div>
@@ -4574,6 +4578,7 @@ function markUnitCompleted(unitId, scorePct){
     registerDailyStars(lessonStars(scorePct));
     registerDailyLessonCompleted(scorePct, u.type === 'grammar');
   }
+  trackEvent('lesson_complete', 'unit_checkpoint', { unitId, scorePct });
   // Pequeno atraso pra ler como sequência ("+25 XP" ... "Unidade concluída!")
   // em vez de dois toasts aparecendo ao mesmo tempo, empilhados sem ordem.
   setTimeout(() => showToast(`Unidade concluída! 🥐`), 450);
@@ -5381,6 +5386,7 @@ function renderConjPracticeStep(){
     registerDailyConjugationSession();
     registerStudyToday();
     maybeShowStreakCelebration();
+    trackEvent('lesson_complete', 'conjugation_session', { score: CONJ_STATE.score, total: CONJ_STATE.totalFields, pct });
     contentEl.innerHTML = `
       <div class="conj-session-result">
         <div class="big-emoji">${pct >= 70 ? '🎉' : '💪'}</div>
@@ -5913,6 +5919,7 @@ function renderDictationResult(d, userText){
   const totalCorrectWords = tokenizeDictationText(d.text).words.length;
   const matches = diff.filter(x => x.type === 'match').length;
   const score = Math.round((matches / totalCorrectWords) * 100);
+  trackEvent('lesson_complete', 'dictation', { dictationId: d.id, score });
 
   const wordsHtml = merged.map(x => {
     const punct = x.punctAfter ? ` ${escapeHtmlDictation(x.punctAfter)}` : '';
@@ -6126,6 +6133,7 @@ function isChallengeCompleted(id){
 }
 function markChallengeCompleted(id){
   STATE.completedChallenges[id] = true;
+  trackEvent('lesson_complete', 'challenge', { challengeId: id });
   saveState();
 }
 // Wrapper compartilhado pelas 3 telas de feedback (Expressões, Ouça e
