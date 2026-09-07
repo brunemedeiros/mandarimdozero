@@ -218,6 +218,25 @@ async function saveProfileEdits({ displayName, username, bio, featuredBadgeId })
   return { ok: true, profile: data };
 }
 
+// ---------- Preferência de Analytics (Painel de Admin) ----------
+// "Excluir minha atividade dos Analytics" -- controla se esta conta
+// aparece nas métricas de uso (ver migration 008 e trackEvent() em
+// shared/analytics.js, que é quem de fato aplica isto na hora de gravar
+// cada evento). Vive em profiles/PROFILE_CACHE por ser mais uma
+// preferência de conta, mesmo padrão de leitura/escrita de
+// saveProfileEdits() acima -- só que aqui é um campo só, sem formulário.
+async function setExcludeOwnActivity(value){
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .update({ exclude_own_activity: !!value })
+    .eq('user_id', CURRENT_USER.id)
+    .select()
+    .single();
+  if (error){ console.error('Erro ao salvar preferência de Analytics:', error); return false; }
+  PROFILE_CACHE = data;
+  return true;
+}
+
 // ---------- Avatar (upload de foto) ----------
 // "Crop simples" (ver "Priorização" na arquitetura aprovada): corta pro
 // quadrado central automaticamente, sem UI de arrastar/ajustar -- e
