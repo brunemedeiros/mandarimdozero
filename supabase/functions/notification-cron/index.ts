@@ -53,6 +53,18 @@
 //     tico portados de languages/<lang>/app.js (MISSION_POOLS abaixo),
 //     mesmo dailySeed()/pickDailyFromPool()
 //
+// Fase 5 (agora): primeiro canal 'email' de verdade, via Resend (API HTTP
+// simples, sem SDK -- mesma filosofia do fetch cru já usado no resto do
+// arquivo). Completa o calendário de reengajamento: os dias 15/20/30, que
+// ficaram de fora até aqui de propósito (só 1-9 rodavam, ver comentário
+// antigo removido), agora disparam -- e o dia 9 ganha um e-mail além do
+// in_app que já tinha desde a Fase 2. Diferente de push (que reaproveita o
+// texto do in_app, "pendura" nele), e-mail tem POOL DE TEXTO PRÓPRIO
+// (channel='email' em notification_templates, seed na migration 015) --
+// título vira assunto, corpo vira a mensagem; só dispara se essa variante
+// existir pro evento, senão não faz nada (não força um in_app genérico
+// virar e-mail sozinho).
+//
 // Deploy + agendamento são passos manuais (ver PR).
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
@@ -66,6 +78,14 @@ const vapidPublicKey = Deno.env.get('VAPID_PUBLIC_KEY')!;
 const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')!;
 const vapidSubject = Deno.env.get('VAPID_SUBJECT') || 'mailto:brunemed1310@gmail.com';
 webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
+
+// Secrets da Fase 5 (Resend, https://resend.com) -- RESEND_FROM_EMAIL
+// precisa ser um remetente de um domínio VERIFICADO na conta Resend (ver
+// PR); sem isso a API recusa o envio. Ausência de qualquer um dos dois só
+// desliga o envio de e-mail (log + return cedo em sendEmailToUser), nunca
+// derruba o resto do cron -- mesmo espírito de robustez do push.
+const resendApiKey = Deno.env.get('RESEND_API_KEY');
+const resendFromEmail = Deno.env.get('RESEND_FROM_EMAIL');
 
 // Mesmos appKey de languages/index.js -- duplicado aqui de propósito (este
 // arquivo roda em runtime Deno separado, não importa módulos do site).
@@ -249,6 +269,54 @@ async function sendPushToUser(supabase: any, userId: string, title: string, body
   }
 }
 
+function categoryAllowsEmail(prefs: any, category: string): boolean {
+  const channels = prefs?.channels?.[category];
+  if (!Array.isArray(channels)) return false; // mesmo critério de push -- e-mail exige opt-in explícito
+  return channels.includes('email');
+}
+
+// Busca o e-mail da conta via Admin API (supabase.auth.admin.getUserById) --
+// não dá pra ler auth.users direto pelo query builder (schema separado, sem
+// view pública), e profiles NUNCA guarda e-mail de propósito (ver comentário
+// na migration 001). Só a service role (este arquivo) tem acesso a essa API;
+// cacheado por invocação, já que review_overdue/streak_at_risk/etc podem
+// rodar pra frances E mandarim da mesma conta no mesmo dia.
+async function getUserEmail(supabase: any, cache: Map<string, string | null>, userId: string): Promise<string | null> {
+  if (cache.has(userId)) return cache.get(userId)!;
+  const { data, error } = await supabase.auth.admin.getUserById(userId);
+  const email = error ? null : (data?.user?.email || null);
+  if (error) console.error('notification-cron: falha ao buscar e-mail da conta', userId, error.message);
+  cache.set(userId, email);
+  return email;
+}
+
+// Envia via a API HTTP do Resend (https://resend.com/docs/api-reference/emails/send-email)
+// -- fetch cru, sem SDK (Resend não precisa de um pacote como o web-push
+// precisa pra assinatura VAPID). Sem RESEND_API_KEY/RESEND_FROM_EMAIL
+// configurados (secrets manuais, ver PR), só loga e sai -- nunca derruba o
+// resto da varredura por falta de um secret opcional.
+async function sendEmailToUser(supabase: any, cache: Map<string, string | null>, userId: string, subject: string, body: string): Promise<void> {
+  if (!resendApiKey || !resendFromEmail) return;
+  const to = await getUserEmail(supabase, cache, userId);
+  if (!to) return;
+
+  const html = `<div style="font-family:-apple-system,sans-serif;max-width:480px;margin:0 auto;padding:24px;">
+    <p style="font-size:15px;line-height:1.6;color:#241A15;">${body}</p>
+    <p style="font-size:12px;color:#93856F;margin-top:32px;">Você pode ajustar quais e-mails recebe em Configurações &gt; Notificações, dentro do app.</p>
+  </div>`;
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${resendApiKey}` },
+      body: JSON.stringify({ from: resendFromEmail, to, subject, html, text: body }),
+    });
+    if (!res.ok) console.error('notification-cron: falha ao enviar e-mail', userId, res.status, await res.text());
+  } catch (e: any) {
+    console.error('notification-cron: erro ao chamar Resend', userId, String(e?.message || e));
+  }
+}
+
 // Horário silencioso só vale pra eventos calculados automaticamente (este
 // arquivo) -- os imediatos (XP, badge...) continuam em shared/notifications.js,
 // sem checar isto (ver copy da tela de preferências). Números tratados
@@ -305,12 +373,26 @@ async function pickTemplate(supabase: any, eventType: string, languageAppKey: st
   return data[Math.floor(Math.random() * data.length)];
 }
 
+// Igual a pickTemplate, mas no pool PRÓPRIO do canal 'email' (ver cabeçalho
+// do arquivo -- diferente de push, e-mail não reaproveita o texto do
+// in_app). Retorna null quando não há variante de e-mail pro evento --
+// maybeNotify trata isso como "sem e-mail pra esse evento", nunca cai de
+// volta pro texto do in_app.
+async function pickEmailTemplate(supabase: any, eventType: string, languageAppKey: string): Promise<any> {
+  const { data, error } = await supabase
+    .from('notification_templates')
+    .select('*')
+    .eq('event_type', eventType).eq('channel', 'email').eq('language_app_key', languageAppKey).eq('active', true);
+  if (error || !data?.length) return null;
+  return data[Math.floor(Math.random() * data.length)];
+}
+
 // Ponto único de disparo -- espelha fireNotificationEvent() do cliente
 // (shared/notifications.js), com source:'cron' em vez de 'client'. Sempre
 // grava o evento bruto em notification_events, mesmo quando descartado
 // depois (preferência, silêncio ou anti-spam) -- é o log de auditoria.
 async function maybeNotify(
-  supabase: any, rules: Map<string, any>, prefsCache: Map<string, any>,
+  supabase: any, rules: Map<string, any>, prefsCache: Map<string, any>, emailCache: Map<string, string | null>,
   userId: string, languageAppKey: string, eventType: string, category: string,
   payload: Record<string, unknown>, actionTab: string,
 ): Promise<boolean> {
@@ -346,11 +428,24 @@ async function maybeNotify(
   // dentro de sendPushToUser, não derruba o resto da varredura.
   if (categoryAllowsPush(prefs, category)) await sendPushToUser(supabase, userId, title || 'Notificação', body, actionTab);
 
+  // E-mail (Fase 5) -- só dispara se existir uma variante PRÓPRIA pra esse
+  // evento (ver pickEmailTemplate); a maioria dos eventos não tem uma ainda
+  // (só o calendário de reengajamento, migration 015), então isto é um
+  // no-op silencioso pra eles, não um erro.
+  if (categoryAllowsEmail(prefs, category)) {
+    const emailTemplate = await pickEmailTemplate(supabase, eventType, languageAppKey);
+    if (emailTemplate) {
+      const emailSubject = fillPlaceholders(emailTemplate.title, payload) || title || 'Notificação';
+      const emailBody = fillPlaceholders(emailTemplate.body, payload);
+      if (emailBody) await sendEmailToUser(supabase, emailCache, userId, emailSubject, emailBody);
+    }
+  }
+
   return true;
 }
 
 async function processUserLanguage(
-  supabase: any, rules: Map<string, any>, prefsCache: Map<string, any>,
+  supabase: any, rules: Map<string, any>, prefsCache: Map<string, any>, emailCache: Map<string, string | null>,
   userId: string, languageAppKey: string, state: any,
 ): Promise<number> {
   let created = 0;
@@ -359,13 +454,13 @@ async function processUserLanguage(
   // 1) Revisão atrasada
   const dueCount = computeReviewOverdueCount(state.cards);
   if (dueCount >= REVIEW_OVERDUE_MIN_COUNT) {
-    if (await maybeNotify(supabase, rules, prefsCache, userId, languageAppKey, 'review_overdue', 'revisao', { dueCount }, 'review')) created++;
+    if (await maybeNotify(supabase, rules, prefsCache, emailCache, userId, languageAppKey, 'review_overdue', 'revisao', { dueCount }, 'review')) created++;
   }
 
   // 2) Sequência em risco -- tem sequência (algo a perder) e ainda não
   // estudou "hoje" (ver limitação de fuso no topo do arquivo).
   if ((state.streak || 0) > 0 && state.lastStudyDay !== today) {
-    if (await maybeNotify(supabase, rules, prefsCache, userId, languageAppKey, 'streak_at_risk', 'streak', { days: state.streak }, 'path')) created++;
+    if (await maybeNotify(supabase, rules, prefsCache, emailCache, userId, languageAppKey, 'streak_at_risk', 'streak', { days: state.streak }, 'path')) created++;
   }
 
   // 3) Meta do dia não batida -- só nos dias que a própria pessoa escolheu
@@ -377,19 +472,20 @@ async function processUserLanguage(
     const done = state.dailyLessonsLog?.[today] || 0;
     if (done < goal) {
       const lessonsRemaining = goal - done;
-      if (await maybeNotify(supabase, rules, prefsCache, userId, languageAppKey, 'study_goal_remaining', 'estudo', { lessonsRemaining, goal }, 'path')) created++;
+      if (await maybeNotify(supabase, rules, prefsCache, emailCache, userId, languageAppKey, 'study_goal_remaining', 'estudo', { lessonsRemaining, goal }, 'path')) created++;
     }
   }
 
-  // 4) Reengajamento -- só dias 1-9 nesta fase (15/20/30 são canal e-mail,
-  // Fase 5). daysSince(null) é null pra quem nunca estudou -- de propósito
+  // 4) Reengajamento -- calendário completo desde a Fase 5 (antes só os
+  // dias 1-9 rodavam; 15/20/30 ficavam de fora até e-mail existir de
+  // verdade). daysSince(null) é null pra quem nunca estudou -- de propósito
   // fora do calendário: reengajamento é sobre quem sumiu, não quem nunca
   // começou.
   const inactiveDays = daysSince(state.lastStudyDay);
   const reengRule = rules.get('reengajamento');
-  const scheduleDays: number[] = (reengRule?.schedule_days || []).filter((d: number) => d <= 9);
+  const scheduleDays: number[] = reengRule?.schedule_days || [];
   if (inactiveDays !== null && scheduleDays.includes(inactiveDays)) {
-    if (await maybeNotify(supabase, rules, prefsCache, userId, languageAppKey, `user_inactive_${inactiveDays}`, 'reengajamento', {}, 'path')) created++;
+    if (await maybeNotify(supabase, rules, prefsCache, emailCache, userId, languageAppKey, `user_inactive_${inactiveDays}`, 'reengajamento', {}, 'path')) created++;
   }
 
   // 5) Missões do dia começadas, não terminadas (Fase 4) -- "começou"
@@ -401,7 +497,7 @@ async function processUserLanguage(
     const anyStarted = missions.some((m) => m.current > 0);
     const missing = missions.filter((m) => m.current < m.target).length;
     if (anyStarted && missing > 0) {
-      if (await maybeNotify(supabase, rules, prefsCache, userId, languageAppKey, 'daily_missions_reminder', 'desafios', { missing }, 'path')) created++;
+      if (await maybeNotify(supabase, rules, prefsCache, emailCache, userId, languageAppKey, 'daily_missions_reminder', 'desafios', { missing }, 'path')) created++;
     }
   }
 
@@ -413,7 +509,7 @@ async function processUserLanguage(
 // de todos os idiomas por conta), mesmo cálculo de
 // shared/leaderboard.js:fetchLeaderboard('all', weekStart) -- só que sobre
 // a semana que TERMINOU ontem, não a atual.
-async function processWeeklyRankingResults(supabase: any, rules: Map<string, any>, prefsCache: Map<string, any>): Promise<number> {
+async function processWeeklyRankingResults(supabase: any, rules: Map<string, any>, prefsCache: Map<string, any>, emailCache: Map<string, string | null>): Promise<number> {
   if (new Date().getUTCDay() !== 1) return 0;
 
   const endedWeekStart = mondayUTCDateKey(new Date(Date.now() - 7 * 86400000));
@@ -442,7 +538,7 @@ async function processWeeklyRankingResults(supabase: any, rules: Map<string, any
     // é idêntico nos dois, ver migration 014), não afeta o cálculo do rank.
     const langMap = langTotalsByUser.get(userId);
     const dominantLang = langMap ? [...langMap.entries()].sort((a, b) => b[1] - a[1])[0][0] : 'frances';
-    if (await maybeNotify(supabase, rules, prefsCache, userId, dominantLang, 'ranking_weekly_result', 'ranking', { rank, totalParticipants: ranked.length }, 'leaderboard')) created++;
+    if (await maybeNotify(supabase, rules, prefsCache, emailCache, userId, dominantLang, 'ranking_weekly_result', 'ranking', { rank, totalParticipants: ranked.length }, 'leaderboard')) created++;
   }
   return created;
 }
@@ -466,6 +562,7 @@ Deno.serve(async (_req: Request) => {
   }
 
   const prefsCache = new Map<string, any>();
+  const emailCache = new Map<string, string | null>();
   let usersScanned = 0;
   let notificationsCreated = 0;
   const errors: string[] = [];
@@ -476,7 +573,7 @@ Deno.serve(async (_req: Request) => {
       if (!state) continue; // conta nunca usou este idioma
       usersScanned++;
       try {
-        notificationsCreated += await processUserLanguage(supabase, rules, prefsCache, row.user_id, lang.appKey, state);
+        notificationsCreated += await processUserLanguage(supabase, rules, prefsCache, emailCache, row.user_id, lang.appKey, state);
       } catch (e) {
         errors.push(`${row.user_id}/${lang.appKey}: ${String(e)}`);
       }
@@ -484,7 +581,7 @@ Deno.serve(async (_req: Request) => {
   }
 
   try {
-    notificationsCreated += await processWeeklyRankingResults(supabase, rules, prefsCache);
+    notificationsCreated += await processWeeklyRankingResults(supabase, rules, prefsCache, emailCache);
   } catch (e) {
     errors.push(`ranking semanal: ${String(e)}`);
   }
@@ -492,7 +589,7 @@ Deno.serve(async (_req: Request) => {
   const summary = {
     ok: true,
     ranAt: new Date().toISOString(),
-    phase: 'Fase 4 -- review_overdue, streak_at_risk, study_goal_remaining, reengajamento (1-9), daily_missions_reminder, ranking_weekly_result',
+    phase: 'Fase 5 -- review_overdue, streak_at_risk, study_goal_remaining, reengajamento (calendário completo 1-30, 9/15/20/30 também por e-mail), daily_missions_reminder, ranking_weekly_result',
     usersScanned,
     notificationsCreated,
     errorCount: errors.length,

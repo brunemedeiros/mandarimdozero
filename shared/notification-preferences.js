@@ -6,9 +6,13 @@
 // desligam um canal em todas as categorias de uma vez.
 //
 // Fase 3: o toggle de push virou de verdade -- liga a inscrição deste
-// NAVEGADOR (shared/push.js) além de marcar a preferência da conta. E-mail
-// continua desabilitado na matriz (nenhum provedor configurado ainda,
-// Fase 5) -- deixar editável sem nenhum efeito seria enganoso.
+// NAVEGADOR (shared/push.js) além de marcar a preferência da conta.
+//
+// Fase 5: o toggle de e-mail também virou de verdade. Mais simples que
+// push -- e-mail não depende de permissão de navegador nem de inscrição
+// local, é só a preferência da conta mesmo (mesmo tipo de toggle que
+// in_app). Vai pro endereço já cadastrado na conta (Supabase Auth), sem
+// campo novo pra digitar aqui.
 //
 // Depende de (mesma posição de shared/notifications.js -- antes de app.js):
 //   - shared/supabase-client.js (supabaseClient)
@@ -65,16 +69,18 @@ async function renderNotificationPreferencesView(){
   const pushSubscribedHere = !!localPushSubscription;
 
   const anyInAppOn = NOTIFICATION_PREF_CATEGORIES.some(c => (prefs.channels?.[c.id] || []).includes('in_app'));
+  const anyEmailOn = NOTIFICATION_PREF_CATEGORIES.some(c => (prefs.channels?.[c.id] || []).includes('email'));
 
   const matrixRowsHTML = NOTIFICATION_PREF_CATEGORIES.map(c => {
     const inAppChecked = (prefs.channels?.[c.id] || []).includes('in_app') ? 'checked' : '';
     const pushChecked = (prefs.channels?.[c.id] || []).includes('push') ? 'checked' : '';
+    const emailChecked = (prefs.channels?.[c.id] || []).includes('email') ? 'checked' : '';
     return `
       <div class="notif-pref-matrix-row">
         <span class="notif-pref-matrix-label">${c.label}</span>
         <label class="notif-pref-matrix-cell" title="No app"><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="in_app" ${inAppChecked}></label>
         <label class="notif-pref-matrix-cell" title="Push"><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="push" ${pushChecked}></label>
-        <span class="notif-pref-matrix-cell disabled" title="Em breve (Fase 5)">--</span>
+        <label class="notif-pref-matrix-cell" title="E-mail"><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="email" ${emailChecked}></label>
       </div>
     `;
   }).join('');
@@ -98,9 +104,9 @@ async function renderNotificationPreferencesView(){
     <div class="pref-row">
       <div class="pref-row-text">
         <div class="pref-row-title">E-mails</div>
-        <div class="pref-row-sub">Ainda não existe esse canal na plataforma -- chega numa fase futura.</div>
+        <div class="pref-row-sub">Manda pro e-mail da sua conta em alguns casos (ex: quando você some por um tempo). Liga por categoria em "Personalizar" abaixo -- este interruptor liga tudo de uma vez.</div>
       </div>
-      <button class="pref-switch" role="switch" aria-checked="false" disabled title="Em breve"><span class="pref-switch-knob"></span></button>
+      <button class="pref-switch" id="notif-pref-email-switch" role="switch" aria-checked="${anyEmailOn}"><span class="pref-switch-knob"></span></button>
     </div>
 
     <div class="section-label">Horário silencioso</div>
@@ -123,7 +129,7 @@ async function renderNotificationPreferencesView(){
           <span class="notif-pref-matrix-label"></span>
           <span class="notif-pref-matrix-cell">App</span>
           <span class="notif-pref-matrix-cell">Push</span>
-          <span class="notif-pref-matrix-cell disabled">E-mail</span>
+          <span class="notif-pref-matrix-cell">E-mail</span>
         </div>
         ${matrixRowsHTML}
       </div>
@@ -156,6 +162,14 @@ async function renderNotificationPreferencesView(){
       await setAllCategoriesChannel('push', false);
       showToast('Alertas do navegador desativados.');
     }
+    renderNotificationPreferencesView();
+  });
+
+  document.getElementById('notif-pref-email-switch').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    const turningOn = btn.getAttribute('aria-checked') !== 'true';
+    btn.setAttribute('aria-checked', String(turningOn));
+    await setAllCategoriesChannel('email', turningOn);
     renderNotificationPreferencesView();
   });
 
