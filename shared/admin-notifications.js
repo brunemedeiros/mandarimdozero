@@ -16,10 +16,11 @@
 // também -- a tela não hardcoda uma lista fixa de eventos, lista o que
 // existir na tabela.
 //
-// Canal fixo em 'in_app' nesta fase -- push/e-mail (Fases 3/5) ainda não
-// têm quem entregue (sem push subscription, sem provedor de e-mail
-// configurado), então criar um template desses canais aqui só criaria uma
-// variante morta, sem nenhum jeito de a autora saber se está funcionando.
+// 'push' não aparece aqui como opção de canal -- ele não tem pool de texto
+// próprio, "pendura" no texto do in_app do mesmo evento (ver
+// shared/notifications.js:fireNotificationEvent e o comentário equivalente
+// no cron). 'email' (Fase 5) já tem provedor configurado e pool próprio --
+// aparece como opção normal, ao lado de 'in_app'.
 //
 // Depende de (mesma posição de shared/admin-badges.js -- antes de app.js):
 //   - shared/supabase-client.js (supabaseClient)
@@ -64,15 +65,16 @@ async function fetchAllNotificationTemplates(){
   return data || [];
 }
 
-async function createNotificationTemplate({ eventType, languageAppKey, title, body, icon }){
+async function createNotificationTemplate({ eventType, languageAppKey, channel, title, body, icon }){
   const cleanEventType = String(eventType || '').trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
   if (cleanEventType.length < 3) return { ok: false, error: 'Dê um identificador de evento válido (ex: xp_earned).' };
   if (!body?.trim()) return { ok: false, error: 'Escreva o texto da notificação.' };
+  const cleanChannel = channel === 'email' ? 'email' : 'in_app';
   const { data, error } = await supabaseClient
     .from('notification_templates')
     .insert({
       event_type: cleanEventType,
-      channel: 'in_app',
+      channel: cleanChannel,
       language_app_key: languageAppKey,
       title: title?.trim() || null,
       body: body.trim().slice(0, 300),
@@ -142,8 +144,8 @@ async function renderAdminNotificationsView(){
       <div class="admin-badge-row" data-template-id="${t.id}">
         <span class="admin-badge-icon">${t.icon || '🔔'}</span>
         <div class="admin-badge-info">
-          <div class="admin-badge-name">${t.language_app_key === 'frances' ? '🇫🇷' : '🇨🇳'} ${t.title ? escapeHTML(t.title) + ' -- ' : ''}${escapeHTML(t.body)}</div>
-          <div class="admin-badge-desc">${t.active ? 'ativa' : 'desativada'}</div>
+          <div class="admin-badge-name">${t.channel === 'email' ? '📧' : '📱'} ${t.language_app_key === 'frances' ? '🇫🇷' : '🇨🇳'} ${t.title ? escapeHTML(t.title) + ' -- ' : ''}${escapeHTML(t.body)}</div>
+          <div class="admin-badge-desc">${t.channel === 'email' ? 'e-mail' : 'no app'} · ${t.active ? 'ativa' : 'desativada'}</div>
         </div>
         <button class="admin-badge-edit-btn" data-template-toggle="${t.id}" data-template-active="${t.active}" title="${t.active ? 'Desativar' : 'Ativar'}">${t.active ? '👁️' : '🚫'}</button>
         <button class="admin-badge-edit-btn" data-template-edit="${t.id}" title="Editar">✏️</button>
@@ -171,7 +173,12 @@ async function renderAdminNotificationsView(){
           <option value="frances">🇫🇷 Francês</option>
           <option value="mandarim">🇨🇳 Mandarim</option>
         </select>
-        <p class="profile-edit-hint">Canal: 📱 no app (push e e-mail chegam nas próximas fases). Placeholders tipo {{amount}}/{{days}} são substituídos pelo dado real do evento -- veja a dica de cada evento acima.</p>
+        <label class="profile-edit-label" for="admin-template-channel">Canal</label>
+        <select id="admin-template-channel" class="profile-edit-input">
+          <option value="in_app">📱 No app</option>
+          <option value="email">📧 E-mail</option>
+        </select>
+        <p class="profile-edit-hint">Push não aparece aqui -- ele reaproveita o texto da variante "No app" do mesmo evento, sem pool próprio. No e-mail, o título vira o assunto. Placeholders tipo {{amount}}/{{days}} são substituídos pelo dado real do evento -- veja a dica de cada evento acima.</p>
         <label class="profile-edit-label" for="admin-template-title">Título (opcional)</label>
         <input type="text" id="admin-template-title" class="profile-edit-input" maxlength="60" placeholder="ex: Nova conquista!">
         <label class="profile-edit-label" for="admin-template-icon">Emoji (opcional)</label>
@@ -194,6 +201,7 @@ async function renderAdminNotificationsView(){
     const result = await createNotificationTemplate({
       eventType: document.getElementById('admin-template-event').value,
       languageAppKey: document.getElementById('admin-template-lang').value,
+      channel: document.getElementById('admin-template-channel').value,
       title: document.getElementById('admin-template-title').value,
       body: document.getElementById('admin-template-body').value,
       icon: document.getElementById('admin-template-icon').value,
