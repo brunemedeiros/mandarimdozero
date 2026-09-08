@@ -156,6 +156,7 @@ body{
   padding: 10px 32px 22px;
   border-bottom: 1px solid var(--paper-line);
   margin-bottom: 24px;
+  position:sticky; top:0; z-index:100; background:var(--paper);
 }
 .brand{ display:flex; align-items:center; gap:10px; }
 .brand-seal{
@@ -202,17 +203,17 @@ body{
 .pill.streak{ background: linear-gradient(120deg, #FFF3D6, var(--paper-warm)); color:#8A5A00; }
 .pill.xp{ background: linear-gradient(120deg, rgba(192,35,31,0.08), var(--paper-warm)); color: var(--seal-red-dark); }
 a.pill{ text-decoration:none; cursor:pointer; }
-.leaderboard-pill{ color: var(--ink-soft); cursor:pointer; border:none; font-size:15px; padding:6px 10px; }
-.leaderboard-pill:hover{ color: var(--ink); border-color: var(--imperial-gold); }
 a.pill:hover{ border-color: var(--imperial-gold); }
 
 /* Fase 6 (shell mobile): no celular a topbar fica só Logo/sequência/XP/
    bandeira -- Ranking e Conta viraram itens do menu "Mais" da barra
    inferior (reaproveitam o mesmo #user-menu-dropdown, ver .bottom-nav e
-   #mais-btn mais abaixo). No desktop os dois pills continuam como
-   sempre estiveram (a sidebar já existe, mas esses atalhos na topbar não
-   atrapalham lá). */
-#leaderboard-topbar-btn, #user-menu-btn{ display:none; }
+   #mais-btn mais abaixo). No desktop o pill de Conta continua como
+   sempre esteve (a sidebar já existe, mas esse atalho na topbar não
+   atrapalha lá). O pill de Ranking foi removido da topbar no desktop --
+   virou redundante com o card de Ranking na sidebar direita e o item
+   "Ranking" da sidebar esquerda (pedido explícito). */
+#user-menu-btn{ display:none; }
 
 /* ---------- Bandeiras (ícones de idioma) — convenção padrão ----------
    Pra qualquer bandeira nova (outros idiomas no futuro): desenhe o SVG num
@@ -316,12 +317,20 @@ a.pill:hover{ border-color: var(--imperial-gold); }
     grid-template-areas: "topbar topbar topbar" "sidebar content cards";
     column-gap:28px;
     align-items:start;
+    /* Respiro nas bordas esquerda/direita -- antes #app não tinha padding
+       horizontal nenhum, então a sidebar e os cards da direita ficavam
+       colados na borda da janela (visualmente "esticado"), enquanto a
+       topbar (que já tinha seu próprio padding de 32px) parecia deslocada
+       em relação a eles. Agora os dois alinham no mesmo respiro. */
+    padding-left:32px; padding-right:32px;
   }
-  .topbar{ grid-area:topbar; }
+  /* A topbar já ganha o respiro lateral do #app acima -- zera o padding
+     próprio dela pra não somar os dois (senão ficaria 64px). */
+  .topbar{ grid-area:topbar; padding-left:0; padding-right:0; }
   /* .tabs já fica escondida sempre agora (ver regra global acima) --
-     e os pills de Ranking/Conta na topbar voltam aqui (só mobile os
-     esconde, ver regra global também). */
-  #leaderboard-topbar-btn, #user-menu-btn{ display:flex; }
+     e o pill de Conta na topbar volta aqui (só mobile ele some, ver
+     regra global também). */
+  #user-menu-btn{ display:flex; }
   /* XP some do topbar aqui -- fica só no card de Status à direita, sem
      repetição (decisão #1). No mobile (fora desta media query) continua
      no topbar, como já decidido pra lá (decisão #4). */
@@ -335,6 +344,8 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   .sidebar{
     grid-area:sidebar; display:flex; flex-direction:column; gap:2px;
     position:sticky; top:20px;
+    /* Linha de separação da sidebar, estilo Duolingo. */
+    border-right:1px solid var(--paper-line); padding-right:20px;
   }
   .sidebar-toggle-btn{
     align-self:flex-end; width:32px; height:32px; border-radius:8px; flex-shrink:0;
@@ -378,6 +389,11 @@ a.pill:hover{ border-color: var(--imperial-gold); }
      lá; aqui, no desktop, também esconde sidebar/cards e vira 1 coluna). */
   #app.lesson-focus{ grid-template-columns:1fr; grid-template-areas:"content"; }
   #app.lesson-focus .sidebar, #app.lesson-focus .right-cards{ display:none; }
+  /* Sem sidebar/cards, a coluna de conteúdo vira a largura toda do #app --
+     sem um teto o exercício ficava esticado de ponta a ponta em telas
+     largas (mesmo problema estrutural da Trilha, ver .units-grid). Trava
+     numa coluna de leitura confortável e centraliza, como o resto do app. */
+  #unit-detail-wrap{ max-width:760px; margin:0 auto; }
 }
 
 /* ---------- Hanzi: trilha de lições ---------- */
@@ -520,7 +536,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .path-header h2{ font-size: 20px; margin:0 0 4px; }
 .path-header p{ margin:0; color:var(--ink-soft); font-size:14px; }
 
-.units-grid{ display:flex; flex-direction:column; gap:10px; max-width: 640px; margin: 0 auto; }
+.units-grid{ display:flex; flex-direction:column; gap:10px; max-width: 760px; margin: 0 auto; }
 
 /* ---------- Checkpoint de história (revisão narrativa entre unidades) ---------- */
 .story-checkpoint-card{
@@ -2248,7 +2264,6 @@ body.hide-pinyin .prompt-pinyin{
              app.js), só sem ponto de entrada visível por ora. -->
         <button class="pill search-open-btn" id="search-open-btn" aria-label="Buscar por pinyin, hanzi ou tradução" title="Buscar por pinyin, hanzi ou tradução" style="display:none;">🔍</button>
         <button class="pill notifications-pill" id="notifications-topbar-btn" aria-label="Notificações" title="Notificações">🔔<span class="notifications-badge" id="notifications-badge" style="display:none;"></span></button>
-        <button class="pill leaderboard-pill" id="leaderboard-topbar-btn" aria-label="Ranking" title="Ranking">🏆</button>
         <div class="lang-switcher">
           <button class="lang-switcher-btn" id="lang-switcher-btn" type="button" aria-label="Trocar idioma" title="Trocar idioma"></button>
           <div class="lang-switcher-dropdown" id="lang-switcher-dropdown"></div>
