@@ -92,23 +92,33 @@ async function fetchLeaderboard(scope, weekStart){
   return ranked.map((r, i) => ({ ...r, rank: i + 1, profile: byId[r.user_id] || null }));
 }
 
-// Card "Ranking" da sidebar desktop (Fase 3) -- teaser dos 3 primeiros do
-// ranking Geral da semana + a posição da própria pessoa se ela não estiver
-// entre eles, reaproveitando fetchLeaderboard() (mesma fonte de dados do
-// Ranking completo, sem duplicar a consulta/lógica de soma por usuário).
+// Card "Ranking" -- teaser dos 3 primeiros do ranking Geral da semana + a
+// posição da própria pessoa se ela não estiver entre eles, reaproveitando
+// fetchLeaderboard() (mesma fonte de dados do Ranking completo, sem
+// duplicar a consulta/lógica de soma por usuário). Renderiza em múltiplos
+// alvos (sidebar desktop + Perfil, decisão #6: no mobile o card resumido e
+// a página expandida vivem dentro de Perfil), igual ao padrão já usado em
+// renderDailyChallengesStrip() -- por isso o botão "Ver ranking completo"
+// nunca tem id fixo (evita colisão de id quando os dois alvos existem).
 async function renderSideRankingCard(){
-  const body = document.getElementById('side-ranking-body');
-  if (!body) return;
-  // O elemento sempre existe no DOM (escondido por CSS abaixo de 900px) --
-  // não vale gastar uma consulta ao Supabase pra um card que o aluno no
-  // celular nunca vê (maioria do público hoje). Único lugar que sabe o
-  // breakpoint de verdade é o CSS, então pergunta a ele em vez de duplicar
-  // o número aqui.
-  if (getComputedStyle(document.querySelector('.right-cards')).display === 'none') return;
-  body.innerHTML = `<p class="profile-loading">Carregando...</p>`;
+  const targets = ['side-ranking-body', 'profile-ranking-body']
+    .map(id => document.getElementById(id))
+    .filter(el => {
+      if (!el) return false;
+      // O card da sidebar sempre existe no DOM (escondido por CSS abaixo de
+      // 900px) -- não vale gastar uma consulta ao Supabase pra um card que
+      // o aluno no celular nunca vê. Único lugar que sabe o breakpoint de
+      // verdade é o CSS, então pergunta a ele em vez de duplicar o número
+      // aqui. O card do Perfil não tem esse ancestral, então passa direto.
+      const cards = el.closest('.right-cards');
+      return !cards || getComputedStyle(cards).display !== 'none';
+    });
+  if (!targets.length) return;
+  targets.forEach(body => { body.innerHTML = `<p class="profile-loading">Carregando...</p>`; });
   const rows = await fetchLeaderboard('all', leaderboardCurrentWeekStart());
+  let html;
   if (!rows.length){
-    body.innerHTML = `<p class="profile-empty-note">Ninguém pontuou essa semana ainda.</p>`;
+    html = `<p class="profile-empty-note">Ninguém pontuou essa semana ainda.</p>`;
   } else {
     const top3 = rows.slice(0, 3);
     const me = CURRENT_USER ? rows.find(r => r.user_id === CURRENT_USER.id) : null;
@@ -123,10 +133,13 @@ async function renderSideRankingCard(){
         </div>
       `;
     };
-    body.innerHTML = top3.map(rowHTML).join('') + (me && me.rank > 3 ? rowHTML(me) : '');
+    html = top3.map(rowHTML).join('') + (me && me.rank > 3 ? rowHTML(me) : '');
   }
-  body.innerHTML += `<button class="side-card-link" id="side-ranking-link">Ver ranking completo →</button>`;
-  document.getElementById('side-ranking-link').addEventListener('click', () => switchTab('leaderboard'));
+  html += `<button class="side-card-link">Ver ranking completo →</button>`;
+  targets.forEach(body => {
+    body.innerHTML = html;
+    body.querySelector('.side-card-link').addEventListener('click', () => switchTab('leaderboard'));
+  });
 }
 
 function leaderboardRankBadge(rank){

@@ -284,6 +284,16 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .sidebar{ display:none; }
 .right-cards{ display:none; }
 
+/* Linhas do teaser de Ranking (top 3 + eu) e o link "Ver ranking completo" --
+   globais (fora da media query) porque decisão #6 reaproveita esse mesmo
+   card dentro de Perfil no mobile, não só na sidebar desktop. */
+.side-ranking-row{ display:flex; align-items:center; gap:8px; font-size:13.5px; padding:5px 0; }
+.side-ranking-row.me{ font-weight:800; color:var(--seal-red-dark); }
+.side-ranking-rank{ flex-shrink:0; width:20px; text-align:center; }
+.side-ranking-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.side-card-link{ display:block; margin-top:10px; font-size:12.5px; font-weight:700; color:var(--seal-red-dark); background:none; border:none; padding:0; cursor:pointer; text-align:left; }
+.side-card-link:hover{ text-decoration:underline; }
+
 @media (min-width: 900px){
   #app{
     display:grid;
@@ -330,12 +340,6 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   .side-card-title{ font-size:12.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin:0 0 12px; display:flex; align-items:center; gap:6px; }
   .side-status-row{ display:flex; align-items:center; gap:8px; font-size:14.5px; font-weight:700; padding:4px 0; }
   .side-status-row + .side-status-row{ border-top:1px solid var(--paper-line); }
-  .side-ranking-row{ display:flex; align-items:center; gap:8px; font-size:13.5px; padding:5px 0; }
-  .side-ranking-row.me{ font-weight:800; color:var(--seal-red-dark); }
-  .side-ranking-rank{ flex-shrink:0; width:20px; text-align:center; }
-  .side-ranking-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .side-card-link{ display:block; margin-top:10px; font-size:12.5px; font-weight:700; color:var(--seal-red-dark); background:none; border:none; padding:0; cursor:pointer; text-align:left; }
-  .side-card-link:hover{ text-decoration:underline; }
   /* Card de Missões do dia usa o mesmo .dcs-card/.dcs-caption-btn da faixa
      da Trilha (renderDailyChallengesStrip renderiza nos dois lugares) --
      sem padding extra do .side-card aqui em cima, o botão de recolher já

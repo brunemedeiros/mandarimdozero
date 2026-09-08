@@ -412,11 +412,13 @@ async function renderProfileView(){
 
   if (!CURRENT_USER){
     renderProfileBody(wrap, { profile: null, langs, earnedBadges, featured, specialBadges, isGuest: true });
+    renderSideRankingCard();
     return;
   }
 
   const profile = await ensureProfileLoaded();
   renderProfileBody(wrap, { profile, langs, earnedBadges, featured, specialBadges, isGuest: false });
+  renderSideRankingCard();
 }
 
 function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, specialBadges, isGuest }){
@@ -489,6 +491,11 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, speci
         <div class="profile-num"><div class="v">${STATE.xp}</div><div class="l">XP acumulado</div></div>
       </div>
       <button class="profile-stats-link" id="profile-stats-link">Ver estatísticas completas →</button>
+    </div>
+
+    <div class="profile-section">
+      <div class="section-label">🏆 Ranking da semana</div>
+      <div id="profile-ranking-body"><p class="profile-loading">Carregando...</p></div>
     </div>
 
     <div class="profile-section">
