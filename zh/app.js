@@ -203,9 +203,10 @@ function playPregeneratedAudio(file, btnEl, isAutoplay){
   });
   audio.play().catch(() => {
     clear();
-    // Autoplay bloqueado pelo navegador (comum em mobile -- o setTimeout de
-    // goToNextExercise quebra a "janela" de gesto do usuário que o play()
-    // automático depende) -- diferente de um erro real de arquivo/rede, por
+    // Autoplay bloqueado pelo navegador (comum em mobile -- o clique em
+    // "Continuar" que dispara o próximo exercício quebra a "janela" de
+    // gesto do usuário que o play() automático depende) -- diferente de um
+    // erro real de arquivo/rede, por
     // isso um aviso mais brando em vez do toast de erro acima: basta tocar
     // manualmente no botão pra funcionar. Só conta como falha TÉCNICA
     // quando NÃO é autoplay -- um clique manual que falha é sempre
@@ -2408,7 +2409,7 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
 // tanto na prática de bloco quanto na mistura -- extraído do antigo
 // buildExerciseSet pra poder gerar UM item de cada vez, não só a unidade
 // inteira de uma tacada. `vocabIdx` fica anexado ao próprio exercício pra
-// permitir rastrear erro por palavra (ver goToNextExercise/showAnswerPanel).
+// permitir rastrear erro por palavra (ver showCorrectFeedbackPanel/showAnswerPanel).
 // Escolhe o formato do exercício pelo OBJETIVO PEDAGÓGICO do momento e pelo
 // estado real da palavra (exposição no SRS + erros nesta sessão) -- não mais
 // por posição no array (round-robin arbitrário, `idx % formats.length`, não
@@ -3620,14 +3621,6 @@ function addStudyMinutes(){
   saveState();
 }
 
-function goToNextExercise(){
-  addStudyMinutes();
-  setTimeout(() => {
-    STEP_STATE.exerciseIndex += 1;
-    renderExerciseStep();
-  }, 900);
-}
-
 // Explicação usada no painel de erro/revelação, sempre mostrada
 // AUTOMATICAMENTE junto da resposta -- pra exercícios baseados numa frase
 // (ordenar, completar), mostra o significado da própria frase certa. Pros
@@ -3808,7 +3801,8 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
         STEP_STATE.exerciseScore += 1;
         addXP(exerciseXP(ex, 3));
         registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
-        goToNextExercise();
+        addStudyMinutes();
+        setTimeout(() => showCorrectFeedbackPanel(contentEl, null), 500);
       } else {
         setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
       }
@@ -3872,7 +3866,11 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
       STEP_STATE.exerciseScore += 1;
       addXP(exerciseXP(ex, 4)); // digitar de ouvido vale um pouco mais que só reconhecer em múltipla escolha
       registerExerciseCorrect(UNITS.find(u => u.id === STATE.currentUnitId), ex.item);
-      goToNextExercise();
+      addStudyMinutes();
+      // Detalhe extra vale a pena aqui (diferente da múltipla escolha): o
+      // exercício testou só o pinyin de ouvido, o hanzi nunca apareceu na
+      // tela antes de responder.
+      setTimeout(() => showCorrectFeedbackPanel(contentEl, ex.item.c), 500);
     } else {
       // A resposta certa já aparece dentro do próprio painel de resultado
       // (answerExplanationHTML mostra ex.item.p) -- sem repetir aqui como um
@@ -3954,7 +3952,8 @@ function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
       if (isCorrect){
         STEP_STATE.exerciseScore += 1;
         addXP(exerciseXP(ex, 4));
-        goToNextExercise();
+        addStudyMinutes();
+        setTimeout(() => showCorrectFeedbackPanel(contentEl, null), 500);
       } else {
         setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
       }
@@ -4086,7 +4085,11 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     if (isCorrect){
       STEP_STATE.exerciseScore += 1;
       addXP(exerciseXP(ex, 4));
-      goToNextExercise();
+      addStudyMinutes();
+      // Sem detalhe extra no painel -- a tradução já apareceu na tela ao
+      // revelar o espaço em branco (revealBlank), logo acima, não precisa
+      // repetir dentro do painel de novo.
+      setTimeout(() => showCorrectFeedbackPanel(contentEl, null), 500);
     } else {
       setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
     }
@@ -4191,7 +4194,7 @@ function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
       if (isCorrect){
         STEP_STATE.exerciseScore += 1;
         addXP(exerciseXP(ex, 4)); // vale um pouco mais que múltipla escolha simples, mesmo critério do reorder
-        setTimeout(() => showCorrectReorderPanel(contentEl, ex), 500);
+        setTimeout(() => showCorrectFeedbackPanel(contentEl, ex.phrase.t), 500);
       } else {
         setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
       }
@@ -4293,7 +4296,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
       STEP_STATE.exerciseScore += 1;
       addXP(exerciseXP(ex, 4)); // ordenar frase vale um pouco mais que múltipla escolha simples
       addStudyMinutes();
-      setTimeout(() => showCorrectReorderPanel(contentEl, ex), 500);
+      setTimeout(() => showCorrectFeedbackPanel(contentEl, ex.phrase.t), 500);
     } else {
       setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
     }
@@ -4315,17 +4318,40 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
   });
 }
 
-// Painel de acerto do exercício de "ordene a frase" (estilo Duolingo): ao
-// contrário dos outros formatos (que avançam rápido acertando), aqui vale a
-// pena parar um instante pra mostrar a tradução — montar a ordem certa não
-// garante que o aluno entendeu o SENTIDO da frase inteira.
-function showCorrectReorderPanel(contentEl, ex){
+// Painel de acerto (estilo Duolingo): toda resposta certa PÁRA aqui em vez
+// de avançar sozinha -- só segue pro próximo exercício quando o aluno toca
+// "Continuar". A frase de elogio varia a cada vez (nunca repete a mesma
+// duas vezes seguidas dentro da mesma lição, ver nextCorrectFeedbackPhrase).
+// `detail`, quando informado, é o HTML extra que vale a pena reforçar mesmo
+// já tendo acertado -- ex: a tradução da frase inteira num "ordene a frase"
+// (montar a ordem certa não garante que o aluno entendeu o SENTIDO). Pra
+// formatos onde a resposta certa já fica visível na própria tela do
+// exercício antes do painel abrir (múltipla escolha destaca a opção certa,
+// cloze já revela a tradução, digitar de ouvido nunca mostrou o hanzi antes
+// então esse sim ganha detail), repetir a mesma informação de novo dentro
+// do painel não ajuda em nada -- passa null.
+const CORRECT_FEEDBACK_PHRASES = [
+  'Na mosca!', 'Mandou bem!', 'Isso aí!', 'Perfeito!', 'Muito bem!',
+  'Você arrasou!', 'Exato!', 'Boa!', 'Certeza absoluta!', 'Aí sim!',
+  'Continua assim!', 'Show de bola!'
+];
+let correctFeedbackQueue = [];
+function nextCorrectFeedbackPhrase(){
+  if (!correctFeedbackQueue.length) correctFeedbackQueue = shuffle([...CORRECT_FEEDBACK_PHRASES]);
+  return correctFeedbackQueue.pop();
+}
+
+// addStudyMinutes() é responsabilidade de quem chama (cada formato já
+// registra o próprio minuto de estudo no momento em que marca a resposta
+// como certa -- ver os pontos que chamam esta função), não desta função:
+// ela só cuida da tela, pra não contar o minuto duas vezes.
+function showCorrectFeedbackPanel(contentEl, detail){
   const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
   const panel = document.createElement('div');
   panel.className = 'correct-feedback';
   panel.innerHTML = `
-    <div class="correct-feedback-header">✅ Muito bem!</div>
-    <p class="correct-feedback-trans">${ex.phrase.t}</p>
+    <div class="correct-feedback-header">✅ ${nextCorrectFeedbackPhrase()}</div>
+    ${detail ? `<p class="correct-feedback-trans">${detail}</p>` : ''}
     <button class="btn btn-primary btn-block correct-feedback-continue" id="correct-continue-btn">Continuar →</button>
   `;
   wrap.appendChild(panel);
