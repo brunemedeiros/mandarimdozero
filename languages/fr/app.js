@@ -670,6 +670,8 @@ function buildStreakWeekData(){
 }
 
 function showStreakCelebration(){
+  // Fase 1 do sistema de notificações.
+  fireNotificationEvent('streak_completed', 'streak', { days: STATE.streak });
   document.getElementById('streak-days-num').textContent = STATE.streak;
   document.getElementById('streak-week-row').innerHTML = buildStreakWeekData().map(d => `
     <div class="streak-day-item ${d.done ? 'done' : ''} ${d.isToday ? 'today' : ''}">
@@ -970,6 +972,11 @@ function addXP(amount){
   ensurePeriodXp();
   STATE.periodXp.amount += amount;
   showToast(`+${amount} XP`);
+  // Fase 1 do sistema de notificações (evento "Cliente" -- ver
+  // shared/notifications.js): fire-and-forget, o anti-spam (cooldown/
+  // daily_cap da categoria "gamificacao") já evita virar spam a cada
+  // exercício respondido.
+  fireNotificationEvent('xp_earned', 'gamificacao', { amount });
   // Quase todo badge depende de streak, unidade, XP ou revisões -- e todos
   // esses caminhos já chamam addXP() em algum ponto (mesmo os de streak, via
   // registerStudyToday() logo antes/depois). Centralizar a checagem aqui
@@ -1043,6 +1050,11 @@ function checkAndCelebrateBadges(){
   if (newlyEarned.length){
     badgeCelebrationQueue.push(...newlyEarned);
     processBadgeCelebrationQueue();
+    // Fase 1 do sistema de notificações -- um evento por badge (não um só
+    // pro lote), mesma granularidade da celebração visual acima.
+    newlyEarned.forEach(b => {
+      fireNotificationEvent('achievement_unlocked', 'gamificacao', { badge_name: b.name, badge_icon: b.icon }, 'profile');
+    });
   }
 }
 
@@ -6213,6 +6225,8 @@ function markChallengeCompleted(id){
   STATE.completedChallenges[id] = true;
   trackEvent('lesson_complete', 'challenge', { challengeId: id });
   saveState();
+  // Fase 1 do sistema de notificações.
+  fireNotificationEvent('challenge_completed', 'desafios', {}, 'challenges');
 }
 // Wrapper compartilhado pelas 3 telas de feedback (Expressões, Ouça e
 // traduza, Acentuação): mesmo invólucro (classe correct/incorrect + header)

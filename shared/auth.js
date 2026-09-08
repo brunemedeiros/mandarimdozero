@@ -93,6 +93,7 @@ async function onUserLoggedIn(user){
   // no Ranking. Best-effort: nunca atrasa nem quebra o carregamento do app
   // por causa disso (mesmo padrão do upsert de weekly_xp em saveState()).
   if (typeof ensureProfileLoaded === 'function') ensureProfileLoaded().catch(() => {});
+  if (typeof refreshNotificationUnreadCount === 'function') refreshNotificationUnreadCount();
   await loadStateAndRender();
 }
 

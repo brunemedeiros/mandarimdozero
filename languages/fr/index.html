@@ -1472,6 +1472,7 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
 .profile-edit-textarea{ resize:vertical; min-height:64px; }
 .profile-edit-bio-count{ font-size:11px; color:var(--ink-soft); text-align:right; margin-top:2px; }
 .profile-edit-error{ color:var(--seal-red-dark); font-size:12.5px; min-height:16px; margin:8px 0 4px; }
+.profile-edit-hint{ font-size:12px; color:var(--ink-soft); margin:4px 0 2px; line-height:1.5; }
 .conquests-grid{ margin-bottom:26px; }
 .conquests-grid .badge .icon{ font-size:30px; }
 
@@ -2251,6 +2252,38 @@ footer.app-footer img{ height:40px; opacity:.85; }
 .user-dropdown-item.danger{ color: var(--seal-red-dark); }
 .user-dropdown-sep{ height:1px; background:var(--paper-line); margin:6px 4px; }
 
+/* ---------- Sino de notificações (Fase 1) ----------
+   Pill igual streak/xp -- fica visível na topbar em QUALQUER largura de
+   tela (diferente de Ranking/Conta, que somem pro menu "Mais" no mobile,
+   ver regra logo abaixo): é o tipo de aviso que faz sentido continuar
+   alcançável de um toque só, mesmo no celular. */
+.notifications-pill{ position:relative; cursor:pointer; border:none; font-size:15px; padding:6px 10px; color:var(--ink-soft); }
+.notifications-pill:hover{ color:var(--ink); border-color:var(--imperial-gold); }
+.notifications-badge{
+  position:absolute; top:-3px; right:-3px; min-width:16px; height:16px; padding:0 4px;
+  border-radius:999px; background:var(--seal-red-dark); color:#fff; font-size:10px; font-weight:800;
+  align-items:center; justify-content:center; line-height:1; border:2px solid var(--paper);
+}
+.notifications-dropdown{ min-width:320px; max-width:360px; max-height:70vh; overflow-y:auto; }
+.notifications-dropdown-header{
+  display:flex; align-items:center; justify-content:space-between; padding:4px 6px 10px;
+  border-bottom:1px solid var(--paper-line); margin-bottom:6px; font-weight:800; font-size:14px; color:var(--ink);
+}
+.notifications-mark-all-btn{ background:none; border:none; color:var(--seal-red-dark); font-weight:700; font-size:12.5px; cursor:pointer; padding:2px 4px; }
+.notifications-mark-all-btn:hover{ text-decoration:underline; }
+.notifications-empty{ padding:24px 10px; text-align:center; color:var(--ink-soft); font-size:13.5px; }
+.notification-item{
+  display:flex; align-items:flex-start; gap:10px; width:100%; text-align:left;
+  background:none; border:none; padding:10px 8px; border-radius:8px; cursor:pointer;
+}
+.notification-item:hover{ background:var(--paper-warm); }
+.notification-item.unread{ background:rgba(227,107,202,0.08); }
+.notification-item-icon{ font-size:18px; flex-shrink:0; line-height:1.3; }
+.notification-item-body{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.notification-item-title{ font-weight:800; font-size:13px; color:var(--ink); }
+.notification-item-text{ font-size:13px; color:var(--ink-soft); line-height:1.4; }
+.notification-item-time{ font-size:11px; color:var(--ink-soft); opacity:.75; margin-top:2px; }
+
 /* Fase 6 (shell mobile): no celular o #user-menu-dropdown vira o menu
    "Mais" (aberto pelo #mais-btn da barra inferior, ver .bottom-nav) --
    mesma lista, só que como bottom sheet full-width em vez de popover
@@ -2456,6 +2489,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <div class="stats-pills">
       <div class="pill streak">🔥 <span id="streak-count">0</span></div>
       <div class="pill xp">⭐ <span id="xp-count">0</span><span class="xp-suffix"> XP</span></div>
+      <button class="pill notifications-pill" id="notifications-topbar-btn" aria-label="Notificações" title="Notificações">🔔<span class="notifications-badge" id="notifications-badge" style="display:none;"></span></button>
       <button class="pill leaderboard-pill" id="leaderboard-topbar-btn" aria-label="Ranking" title="Ranking">🏆</button>
       <div class="lang-switcher">
         <button class="lang-switcher-btn" id="lang-switcher-btn" type="button" aria-label="Trocar idioma" title="Trocar idioma"></button>
@@ -2786,9 +2820,11 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <div class="leaderboard-tabs" role="tablist" aria-label="Seção do painel de admin">
       <button class="leaderboard-tab active" role="tab" aria-selected="true" data-admin-section="badges">🎖️ Badges</button>
       <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="analytics">📊 Analytics</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="notifications">🔔 Notificações</button>
     </div>
     <div id="admin-badges-content"></div>
     <div id="admin-analytics-content" style="display:none;"></div>
+    <div id="admin-notifications-content" style="display:none;"></div>
   </div>
 
   <!-- ===== DITADOS ===== -->
@@ -2879,6 +2915,14 @@ footer.app-footer img{ height:40px; opacity:.85; }
 
 <div id="mais-backdrop" class="mais-backdrop"></div>
 
+<div id="notifications-dropdown" class="user-dropdown notifications-dropdown">
+  <div class="notifications-dropdown-header">
+    <span>Notificações</span>
+    <button class="notifications-mark-all-btn" id="notifications-mark-all-btn">Ler todas</button>
+  </div>
+  <div id="notifications-list"></div>
+</div>
+
 <div id="user-menu-dropdown" class="user-dropdown">
   <div class="user-dropdown-email" id="user-dropdown-email"></div>
   <button class="user-dropdown-item" id="user-profile-btn">👤 Meu perfil</button>
@@ -2954,6 +2998,27 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <input type="text" id="admin-edit-badge-desc" class="profile-edit-input" maxlength="120">
         <p class="profile-edit-error" id="admin-edit-badge-error"></p>
         <button type="submit" class="btn btn-primary btn-block" id="admin-edit-badge-save-btn">Salvar alterações</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="admin-edit-template-modal" class="app-modal-overlay" style="display:none;">
+  <div class="app-modal">
+    <div class="app-modal-header">
+      <h3>Editar variante</h3>
+      <button class="app-modal-close" id="admin-edit-template-modal-close" aria-label="Fechar">✕</button>
+    </div>
+    <div class="app-modal-body">
+      <form id="admin-edit-template-form" class="profile-edit-form">
+        <label class="profile-edit-label" for="admin-edit-template-title">Título (opcional)</label>
+        <input type="text" id="admin-edit-template-title" class="profile-edit-input" maxlength="60">
+        <label class="profile-edit-label" for="admin-edit-template-icon">Emoji (opcional)</label>
+        <input type="text" id="admin-edit-template-icon" class="profile-edit-input" maxlength="8">
+        <label class="profile-edit-label" for="admin-edit-template-body">Texto</label>
+        <textarea id="admin-edit-template-body" class="profile-edit-textarea" maxlength="300" rows="2"></textarea>
+        <p class="profile-edit-error" id="admin-edit-template-error"></p>
+        <button type="submit" class="btn btn-primary btn-block" id="admin-edit-template-save-btn">Salvar alterações</button>
       </form>
     </div>
   </div>
@@ -3076,8 +3141,10 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <script src="../../shared/srs.js"></script>
 <script src="../../shared/wizard.js"></script>
 <script src="../../shared/profile.js"></script>
+<script src="../../shared/notifications.js"></script>
 <script src="../../shared/admin-badges.js"></script>
 <script src="../../shared/admin-analytics.js"></script>
+<script src="../../shared/admin-notifications.js"></script>
 <script src="../../shared/leaderboard.js"></script>
 <script src="../../shared/topbar-stats.js"></script>
 <script src="../../shared/analytics.js"></script>
