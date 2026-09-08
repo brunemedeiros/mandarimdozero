@@ -57,7 +57,11 @@ function enterGuestMode(){
   sessionStorageSafeSet(GUEST_MODE_FLAG, '1');
   CURRENT_USER = false;
   document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
+  // removeProperty (não = 'block'): um valor inline sempre vence a cascata,
+  // e a partir de 900px o #app precisa virar display:grid (shell com
+  // sidebar/cards, Fase 3) -- setar 'block' aqui travaria isso pra sempre,
+  // em qualquer largura de tela.
+  document.getElementById('app').style.removeProperty('display');
   document.getElementById('user-label').textContent = 'Convidado';
   loadStateAndRender();
 }
@@ -66,7 +70,11 @@ async function onUserLoggedIn(user){
   CURRENT_USER = user;
   sessionStorageSafeSet(GUEST_MODE_FLAG, '0');
   document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
+  // removeProperty (não = 'block'): um valor inline sempre vence a cascata,
+  // e a partir de 900px o #app precisa virar display:grid (shell com
+  // sidebar/cards, Fase 3) -- setar 'block' aqui travaria isso pra sempre,
+  // em qualquer largura de tela.
+  document.getElementById('app').style.removeProperty('display');
   const label = user.user_metadata?.full_name || user.email || 'Minha conta';
   document.getElementById('user-label').textContent = label;
   document.getElementById('user-dropdown-email').textContent = user.email || '';
@@ -74,8 +82,11 @@ async function onUserLoggedIn(user){
   // essa checagem depois que app.js já rodou, o que sempre já aconteceu
   // quando um login de verdade dispara este fluxo (onAuthStateChange só
   // é registrado no fim de initAuth, chamada depois de app.js inteiro).
-  const adminBtn = document.getElementById('admin-badges-btn');
-  if (adminBtn) adminBtn.style.display = (typeof isAdminUser === 'function' && isAdminUser()) ? '' : 'none';
+  // .admin-only-nav cobre o item do menu do avatar E o da sidebar desktop
+  // (Fase 3 da reestruturação de navegação) -- os dois só existem/aparecem
+  // pra quem é admin, sem duplicar essa checagem em dois lugares.
+  const isAdmin = typeof isAdminUser === 'function' && isAdminUser();
+  document.querySelectorAll('.admin-only-nav').forEach(btn => { btn.style.display = isAdmin ? '' : 'none'; });
   // Garante que já exista uma linha em `profiles` assim que a pessoa loga --
   // antes, só era criada na primeira vez que ela abria "Meu perfil" (lazy),
   // então quem nunca tinha visitado a aba aparecia como "Aluno(a)" genérico
@@ -177,12 +188,22 @@ document.getElementById('guest-btn').addEventListener('click', () => {
   enterGuestMode();
 });
 
-document.getElementById('user-menu-btn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  document.getElementById('user-menu-dropdown').classList.toggle('open');
-});
+// #mais-btn é o botão "Mais" da barra inferior mobile (Fase 6) -- abre o
+// mesmo dropdown do pill de conta (que no mobile vira bottom sheet via
+// CSS, ver .user-dropdown dentro de @media(max-width:899px) em cada
+// index.html), só que também precisa acender/apagar o backdrop atrás
+// dela. #mais-btn não existe em toda página antiga, daí o ?. -- nada
+// quebra se faltar.
+function toggleUserMenuDropdown(e){
+  if (e) e.stopPropagation();
+  const isOpen = document.getElementById('user-menu-dropdown').classList.toggle('open');
+  document.getElementById('mais-backdrop')?.classList.toggle('open', isOpen);
+}
+document.getElementById('user-menu-btn').addEventListener('click', toggleUserMenuDropdown);
+document.getElementById('mais-btn')?.addEventListener('click', toggleUserMenuDropdown);
 document.addEventListener('click', () => {
   document.getElementById('user-menu-dropdown').classList.remove('open');
+  document.getElementById('mais-backdrop')?.classList.remove('open');
 });
 
 document.getElementById('logout-btn').addEventListener('click', async () => {

@@ -8,7 +8,8 @@
      Conjugação (seleção livre de tempos + categoria de verbo, sempre as 6 pessoas).
    - Aba Manual removida. Não consta em docs/PARIDADE.md como pendência --
      se for pra voltar, é uma feature nova, não uma restauração.
-   - Exportar deixou de ser aba e virou botão/modal dentro da Trilha.
+   - Exportar deixou de ser aba própria, virou botão/modal na Trilha e agora
+     mora numa aba interna de Configurações ("📦 Exportar").
    ============================================================ */
 
 // Registro do service worker agora vem de shared/pwa.js.
@@ -523,12 +524,21 @@ document.getElementById('leaderboard-btn').addEventListener('click', () => {
   switchTab('leaderboard');
 });
 
+// Itens extras do menu "Mais" (só mobile, ver .mais-extra-tab) -- Conjugação/
+// Ditados/Desafios não cabem nos 4 botões fixos da barra inferior, então
+// vivem aqui.
+['mais-conjugaison-btn', 'mais-dictation-btn', 'mais-challenges-btn'].forEach(id => {
+  const btn = document.getElementById(id);
+  btn.addEventListener('click', () => {
+    document.getElementById('user-menu-dropdown').classList.remove('open');
+    switchTab(btn.dataset.tab);
+  });
+});
+
 document.getElementById('leaderboard-topbar-btn').addEventListener('click', () => switchTab('leaderboard'));
 
 document.getElementById('user-settings-btn').addEventListener('click', () => {
   document.getElementById('user-menu-dropdown').classList.remove('open');
-  document.getElementById('settings-email').textContent = CURRENT_USER?.email || 'Modo convidado';
-  document.getElementById('settings-provider').textContent = CURRENT_USER?.app_metadata?.provider === 'google' ? 'Google' : (CURRENT_USER ? 'E-mail e senha' : '—');
   switchTab('settings');
 });
 
@@ -915,7 +925,7 @@ function renderDailyChallengesScreen(){
 
   contentEl.innerHTML = `
     <div class="challenges-screen">
-      <h2>Desafios de hoje</h2>
+      <h2>🎯 Missões do dia</h2>
       ${todaysChallenges().map((c, i) => {
         // Number(...)||0: um campo ausente nunca mais vira NaN silencioso
         // (ver auditoria "O problema dos 100%") -- current fica sempre um
@@ -1430,15 +1440,20 @@ function isDailyChallengesStripCollapsed(){
   return localStorageSafeGet(CHALLENGES_STRIP_COLLAPSE_KEY) === '1';
 }
 
-// Faixa compacta e SEMPRE visível na Trilha com os 3 Desafios de hoje --
-// diferente de renderDailyChallengesScreen (tela cheia, só aparece ao
-// terminar uma unidade), essa dá visibilidade contínua sem exigir terminar
-// nada primeiro. Reaproveita a mesma fonte de dados (todaysChallenges()) --
-// não duplica lógica, só um resumo visual mais compacto dela. O título
-// funciona como botão de recolher/expandir.
+// Faixa compacta e SEMPRE visível com as 3 Missões do dia (ex-"Desafios de
+// hoje" -- ver artefato de navegação, rastreador) -- diferente de
+// renderDailyChallengesScreen (tela cheia, só aparece ao terminar uma
+// unidade), essa dá visibilidade contínua sem exigir terminar nada primeiro.
+// Reaproveita a mesma fonte de dados (todaysChallenges()) -- não duplica
+// lógica, só um resumo visual mais compacto dela. O título funciona como
+// botão de recolher/expandir. Renderiza no MESMO markup em dois lugares
+// (Trilha no mobile + card da sidebar no desktop, Fase 3): CSS decide qual
+// dos dois fica visível conforme a largura da tela, nunca os dois juntos.
 function renderDailyChallengesStrip(){
-  const strip = document.getElementById('daily-challenges-strip');
-  if (!strip) return;
+  const targets = ['daily-challenges-strip', 'side-missions-body']
+    .map(id => document.getElementById(id))
+    .filter(Boolean);
+  if (!targets.length) return;
   ensureDailyBucket();
   const collapsed = isDailyChallengesStripCollapsed();
   const cardsHTML = todaysChallenges().map((c, i) => {
@@ -1461,16 +1476,19 @@ function renderDailyChallengesStrip(){
       </div>
     `;
   }).join('');
-  strip.innerHTML = `
+  const html = `
     <button class="dcs-caption-btn" type="button" aria-expanded="${collapsed ? 'false' : 'true'}">
-      <span class="dcs-caption">Desafios de hoje</span>
+      <span class="dcs-caption">🎯 Missões do dia</span>
       <span class="dcs-caption-chevron">▾</span>
     </button>
     <div class="dcs-cards" ${collapsed ? 'style="display:none;"' : ''}>${cardsHTML}</div>
   `;
-  strip.querySelector('.dcs-caption-btn').addEventListener('click', () => {
-    localStorageSafeSet(CHALLENGES_STRIP_COLLAPSE_KEY, isDailyChallengesStripCollapsed() ? '0' : '1');
-    renderDailyChallengesStrip();
+  targets.forEach(strip => {
+    strip.innerHTML = html;
+    strip.querySelector('.dcs-caption-btn').addEventListener('click', () => {
+      localStorageSafeSet(CHALLENGES_STRIP_COLLAPSE_KEY, isDailyChallengesStripCollapsed() ? '0' : '1');
+      renderDailyChallengesStrip();
+    });
   });
 }
 
@@ -1479,6 +1497,7 @@ function renderUnitsGrid(){
   renderLevelSelect();
   renderDailyGoalChip();
   renderDailyChallengesStrip();
+  renderSideRankingCard();
 
   const grid = document.getElementById('units-grid');
   const levelModules = modulesOfLevel(STATE.currentLevel);
@@ -4928,9 +4947,11 @@ function checkUnitCompletion(explicitUnitId){
 // ============================================================
 // RENDER: Progresso / gamificação
 // ============================================================
-function renderProgressView(){
+function renderGoalsView(){
   renderStudyPlanCard();
+}
 
+function renderProgressView(){
   const completedUnits = Object.values(STATE.unitProgress).filter(u=>u.completed).length;
   const totalCards = STATE.cards.length;
   const learnedCards = STATE.cards.filter(c => c.reps > 0).length;
@@ -5122,7 +5143,9 @@ const switchTab = createTabSwitcher({
   tabHandlers: {
     conjugaison: renderConjSelectScreen,
     progress: renderProgressView,
+    goals: renderGoalsView,
     profile: renderProfileView,
+    settings: renderSettingsView,
     'admin-badges': renderAdminPanelView,
     leaderboard: renderLeaderboardView,
     path: renderUnitsGrid,
@@ -5131,14 +5154,54 @@ const switchTab = createTabSwitcher({
   }
 });
 
-document.querySelectorAll('.tab-btn').forEach(btn => {
+// [data-tab] exclui #mais-btn (barra inferior, Fase 6) -- ele reaproveita a
+// classe .tab-btn só pelo visual, mas não é uma aba de verdade (abre o
+// menu "Mais" via listener próprio em shared/auth.js, não troca de view).
+document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
   btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+// Toggle manual da sidebar (desktop, ≥900px) -- "Mostrar/Ocultar barra
+// lateral", inspirado no do Claude. Independe do modo foco automático da
+// lição (.lesson-focus), que sempre esconde tudo de qualquer jeito. Estado
+// persistido por dispositivo, mesmo padrão de CHALLENGES_STRIP_COLLAPSE_KEY.
+const SIDEBAR_COLLAPSE_KEY = 'sidebar_collapsed';
+if (localStorageSafeGet(SIDEBAR_COLLAPSE_KEY) === '1'){
+  document.getElementById('app').classList.add('sidebar-collapsed');
+}
+document.getElementById('sidebar-toggle-btn').addEventListener('click', () => {
+  const collapsed = document.getElementById('app').classList.toggle('sidebar-collapsed');
+  localStorageSafeSet(SIDEBAR_COLLAPSE_KEY, collapsed ? '1' : '0');
+});
+
+// Popula os campos de Configurações -- roda em QUALQUER entrada na aba
+// (sidebar desktop ou o item "Configurações" do menu do avatar), não só
+// quando o menu era o único caminho até aqui.
+function renderSettingsView(){
+  document.getElementById('settings-email').textContent = CURRENT_USER?.email || 'Modo convidado';
+  document.getElementById('settings-provider').textContent = CURRENT_USER?.app_metadata?.provider === 'google' ? 'Google' : (CURRENT_USER ? 'E-mail e senha' : '—');
+  switchSettingsSection(SETTINGS_SECTION);
+}
+
+// Alterna entre as duas seções internas de Configurações (Geral/Exportar) --
+// mesmo padrão de switchAdminPanelSection (shared/admin-analytics.js).
+// Lembra a última seção aberta (SETTINGS_SECTION), mesmo espírito de
+// ADMIN_PANEL_STATE.section: reabrir sempre na mesma aba entre visitas.
+let SETTINGS_SECTION = 'geral';
+function switchSettingsSection(section){
+  SETTINGS_SECTION = section;
+  document.querySelectorAll('[data-settings-section]').forEach(btn => btn.classList.toggle('active', btn.dataset.settingsSection === section));
+  document.getElementById('settings-geral-content').style.display = section === 'geral' ? '' : 'none';
+  document.getElementById('settings-export-content').style.display = section === 'export' ? '' : 'none';
+}
+document.querySelectorAll('[data-settings-section]').forEach(btn => {
+  btn.addEventListener('click', () => switchSettingsSection(btn.dataset.settingsSection));
 });
 
 // ============================================================
 // EXPORTAÇÃO .apkg (motor comum em shared/anki-export.js) — só o que é
 // específico do francês (campos, template, nome do baralho/arquivo, filtro
-// de unidades) fica aqui. Acessível por um botão na Trilha (não é mais aba própria).
+// de unidades) fica aqui. Vive na aba "📦 Exportar" de Configurações.
 // ============================================================
 const ANKI_EXPORT_CONFIG = {
   modelName: "Francês do Zero",
@@ -5176,7 +5239,7 @@ const ANKI_EXPORT_CONFIG = {
   },
 };
 
-wireAnkiExportModal(ANKI_EXPORT_CONFIG);
+wireAnkiExport(ANKI_EXPORT_CONFIG);
 
 // ============================================================
 // CONJUGAÇÃO — seleção livre de tempos + categoria de verbo, sempre as 6 pessoas

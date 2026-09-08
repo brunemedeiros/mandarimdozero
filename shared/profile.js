@@ -412,11 +412,13 @@ async function renderProfileView(){
 
   if (!CURRENT_USER){
     renderProfileBody(wrap, { profile: null, langs, earnedBadges, featured, specialBadges, isGuest: true });
+    renderSideRankingCard();
     return;
   }
 
   const profile = await ensureProfileLoaded();
   renderProfileBody(wrap, { profile, langs, earnedBadges, featured, specialBadges, isGuest: false });
+  renderSideRankingCard();
 }
 
 function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, specialBadges, isGuest }){
@@ -466,6 +468,11 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, speci
     : `<div class="profile-avatar" style="background:${color};">${initials}</div>`;
 
   wrap.innerHTML = `
+    <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil">
+      <button class="leaderboard-tab active" data-tab="profile">Visão geral</button>
+      <button class="leaderboard-tab" data-tab="goals">Metas</button>
+      <button class="leaderboard-tab" data-tab="progress">Progresso</button>
+    </div>
     ${guestNote}
     <div class="profile-identity">
       ${avatarHTML}
@@ -484,6 +491,11 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, speci
         <div class="profile-num"><div class="v">${STATE.xp}</div><div class="l">XP acumulado</div></div>
       </div>
       <button class="profile-stats-link" id="profile-stats-link">Ver estatísticas completas →</button>
+    </div>
+
+    <div class="profile-section">
+      <div class="section-label">🏆 Ranking da semana</div>
+      <div id="profile-ranking-body"><p class="profile-loading">Carregando...</p></div>
     </div>
 
     <div class="profile-section">
@@ -658,3 +670,13 @@ function wireProfileEditModal(){
 }
 
 wireProfileEditModal();
+
+// Subnav "Visão geral / Metas / Progresso" (ver artefato de navegação,
+// decisão #11) aparece nos 3 views (view-profile, view-goals, view-progress)
+// -- os dois últimos têm a marcação estática em cada languages/<lang>/index.html,
+// o de Perfil é reinjetado a cada renderProfileBody(). Um único listener
+// delegado no document cobre as três cópias sem precisar rewire a cada render.
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.profile-subnav [data-tab]');
+  if (btn) switchTab(btn.dataset.tab);
+});

@@ -143,7 +143,12 @@ body{
 }
 
 #app{ padding-top: 20px; }
-.app-content{ max-width: 920px; margin: 0 auto; padding: 0 16px 80px; }
+/* padding-bottom maior que o "respiro" padrão (80px) pra sobrar espaço
+   acima da .bottom-nav fixa no rodapé (Fase 6) -- sem isso o fim do
+   conteúdo ficava embaixo da barra em telas pequenas. No desktop a regra
+   dentro do media query (min-width:900px) sobrescreve pra 80px de novo,
+   já que lá não existe .bottom-nav. */
+.app-content{ max-width: 920px; margin: 0 auto; padding: 0 16px calc(96px + env(safe-area-inset-bottom)); }
 
 /* ---------- Header / topbar ---------- */
 .topbar{
@@ -155,12 +160,12 @@ body{
 .brand{ display:flex; align-items:center; gap:10px; }
 .brand-seal{
   width:40px; height:40px; border-radius:10px;
-  background: linear-gradient(155deg, var(--seal-red), var(--seal-red-dark));
+  background: var(--paper);
   display:flex; align-items:center; justify-content:center;
-  color: var(--gold-bright); font-family: var(--font-hanzi); font-weight:700; font-size:20px;
-  box-shadow: var(--shadow-card);
-  flex-shrink:0;
+  box-shadow: var(--shadow-card); border:1px solid var(--paper-line);
+  flex-shrink:0; padding:6px;
 }
+.brand-seal svg{ width:100%; height:100%; display:block; }
 .brand-text h1{ margin:0; font-size:17px; font-weight:800; letter-spacing:-0.01em; }
 .brand-text p{ margin:0; font-size:12px; color:var(--ink-soft); }
 /* Em celular, o subtítulo (puramente decorativo -- o nome do app já está
@@ -168,7 +173,7 @@ body{
    sobrando menos de 30px por pill pros controles de verdade (busca, tema,
    idioma, conta). Some abaixo de 480px pra devolver esse espaço ao que
    tem função (auditoria de UX/UI, 2026-09). */
-@media (max-width: 480px){ .brand-text p{ display:none; } }
+@media (max-width: 480px){ .brand-text p{ display:none; } .brand-seal{ width:34px; height:34px; } }
 
 /* Em telas estreitas os pills não cabem todos, e a fileira rola
    horizontalmente -- mas antes o último pill visível (a busca) ficava
@@ -201,6 +206,14 @@ a.pill{ text-decoration:none; cursor:pointer; }
 .leaderboard-pill:hover{ color: var(--ink); border-color: var(--imperial-gold); }
 a.pill:hover{ border-color: var(--imperial-gold); }
 
+/* Fase 6 (shell mobile): no celular a topbar fica só Logo/sequência/XP/
+   bandeira -- Ranking e Conta viraram itens do menu "Mais" da barra
+   inferior (reaproveitam o mesmo #user-menu-dropdown, ver .bottom-nav e
+   #mais-btn mais abaixo). No desktop os dois pills continuam como
+   sempre estiveram (a sidebar já existe, mas esses atalhos na topbar não
+   atrapalham lá). */
+#leaderboard-topbar-btn, #user-menu-btn{ display:none; }
+
 /* ---------- Bandeiras (ícones de idioma) — convenção padrão ----------
    Pra qualquer bandeira nova (outros idiomas no futuro): desenhe o SVG num
    viewBox QUADRADO (largura = altura) com as faixas/cores já em proporção
@@ -231,6 +244,11 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 /* ---------- Nav tabs ---------- */
 .tabs{ display:flex; gap:6px; margin:0 32px 22px; background:var(--paper-warm); padding:5px; border-radius:12px; border:1px solid var(--paper-line); overflow-x:auto; }
 @media (max-width: 600px){ .tabs{ margin-left:16px; margin-right:16px; } }
+/* Fase 6 (shell mobile): a faixa de abas horizontal deixou de ser a
+   navegação principal do celular -- substituída pela barra inferior
+   (.bottom-nav, só Estudo/Revisão/Perfil/Mais). Já era escondida no
+   desktop (a sidebar cobre o mesmo papel); agora fica escondida sempre. */
+.tabs{ display:none; }
 .tab-btn{
   flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
   padding:10px 8px; border:none; background:transparent; cursor:pointer;
@@ -249,13 +267,122 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   .tab-icon{ width:16px; height:16px; }
 }
 
+/* ---------- Barra de navegação inferior (mobile, Fase 6) ----------
+   Substitui a .tabs como navegação principal do celular: só 4 itens fixos
+   (Estudo/Revisão/Perfil/Mais), fixos no rodapé, ao alcance do polegar
+   (mesmo padrão Duolingo/Instagram). Reaproveita .tab-btn/data-tab -- o
+   switchTab() (shared/tabs.js) já existente sincroniza clique e estado
+   ativo aqui com o resto (sidebar/.tabs) sem nenhum JS novo. "Mais" não é
+   uma aba/view de verdade: abre o mesmo #user-menu-dropdown do pill de
+   conta (ver #mais-btn em shared/auth.js), reunindo Ranking/Configurações/
+   Admin/Conta + as abas extras do idioma (汉字) que não cabem aqui embaixo. */
+.bottom-nav{
+  display:flex; position:fixed; left:0; right:0; bottom:0; z-index:300;
+  background:var(--paper-warm); border-top:1px solid var(--paper-line);
+  padding:6px 6px calc(6px + env(safe-area-inset-bottom));
+  box-shadow: 0 -2px 10px rgba(33,23,20,.06);
+}
+.bottom-nav .tab-btn{ flex-direction:column; gap:2px; padding:6px 2px; font-size:11px; }
+.bottom-nav-icon{ width:22px; height:22px; }
+
+@media (min-width: 900px){
+  .bottom-nav{ display:none; }
+}
+
 .view{ display:none; }
 .view.active{ display:block; animation: fadeUp .25s ease; }
 @keyframes fadeUp{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
 
+/* ---------- Shell desktop: sidebar + cards (decisão #1/#5, ver artefato de
+   navegação) — só entra a partir de 900px; abaixo disso o app continua
+   exatamente como era (barra de abas horizontal, sem colunas laterais). */
+.sidebar{ display:none; }
+.right-cards{ display:none; }
+
+/* Linhas do teaser de Ranking (top 3 + eu) e o link "Ver ranking completo" --
+   globais (fora da media query) porque decisão #6 reaproveita esse mesmo
+   card dentro de Perfil no mobile, não só na sidebar desktop. */
+.side-ranking-row{ display:flex; align-items:center; gap:8px; font-size:13.5px; padding:5px 0; }
+.side-ranking-row.me{ font-weight:800; color:var(--seal-red-dark); }
+.side-ranking-rank{ flex-shrink:0; width:20px; text-align:center; }
+.side-ranking-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.side-card-link{ display:block; margin-top:10px; font-size:12.5px; font-weight:700; color:var(--seal-red-dark); background:none; border:none; padding:0; cursor:pointer; text-align:left; }
+.side-card-link:hover{ text-decoration:underline; }
+
+@media (min-width: 900px){
+  #app{
+    display:grid;
+    grid-template-columns: 220px minmax(0,1fr) 280px;
+    grid-template-areas: "topbar topbar topbar" "sidebar content cards";
+    column-gap:28px;
+    align-items:start;
+  }
+  .topbar{ grid-area:topbar; }
+  /* .tabs já fica escondida sempre agora (ver regra global acima) --
+     e os pills de Ranking/Conta na topbar voltam aqui (só mobile os
+     esconde, ver regra global também). */
+  #leaderboard-topbar-btn, #user-menu-btn{ display:flex; }
+  /* XP some do topbar aqui -- fica só no card de Status à direita, sem
+     repetição (decisão #1). No mobile (fora desta media query) continua
+     no topbar, como já decidido pra lá (decisão #4). */
+  .stats-pills .pill.xp{ display:none; }
+  /* A faixa de Missões do dia na Trilha vira redundante aqui -- o mesmo
+     conteúdo já mora no card fixo da sidebar direita (renderDailyChallengesStrip
+     renderiza nos dois; CSS decide qual aparece). Some só a partir daqui;
+     no mobile (sem sidebar) continua sendo o único lugar que mostra isso. */
+  .daily-challenges-strip{ display:none; }
+
+  .sidebar{
+    grid-area:sidebar; display:flex; flex-direction:column; gap:2px;
+    position:sticky; top:20px;
+  }
+  .sidebar-toggle-btn{
+    align-self:flex-end; width:32px; height:32px; border-radius:8px; flex-shrink:0;
+    border:1px solid var(--paper-line); background:var(--paper); color:var(--ink-soft);
+    cursor:pointer; display:flex; align-items:center; justify-content:center; margin-bottom:10px;
+  }
+  .sidebar-toggle-btn:hover{ color:var(--ink); border-color:var(--imperial-gold); }
+  .sidebar-nav{ display:flex; flex-direction:column; gap:2px; }
+  .sidebar .tab-btn{ flex:none; width:100%; justify-content:flex-start; padding:10px 12px; }
+  /* Ícones da sidebar são coloridos (flat, 2-3 tons), não monocromáticos
+     como os da .tabs no mobile -- por isso um pouco maiores aqui, pra ter
+     presença visual como referência (Duolingo etc.), pedido explícito. */
+  .sidebar-icon{ width:21px; height:21px; }
+  .sidebar-divider{ height:1px; background:var(--paper-line); margin:12px 6px; }
+  .sidebar-nav-secondary{ margin-top:auto; padding-top:12px; }
+
+  .app-content{ grid-area:content; max-width:none; margin:0; padding:0 0 80px; }
+
+  .right-cards{ grid-area:cards; display:flex; flex-direction:column; gap:16px; position:sticky; top:20px; }
+  .side-card{ background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow-card); }
+  .side-card-title{ font-size:12.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin:0 0 12px; display:flex; align-items:center; gap:6px; }
+  .side-status-row{ display:flex; align-items:center; gap:8px; font-size:14.5px; font-weight:700; padding:4px 0; }
+  .side-status-row + .side-status-row{ border-top:1px solid var(--paper-line); }
+  /* Card de Missões do dia usa o mesmo .dcs-card/.dcs-caption-btn da faixa
+     da Trilha (renderDailyChallengesStrip renderiza nos dois lugares) --
+     sem padding extra do .side-card aqui em cima, o botão de recolher já
+     tem o próprio respiro. */
+  #side-card-missions{ padding-top:10px; }
+  #side-missions-body .dcs-caption-btn{ padding-top:0; }
+
+  /* Sidebar recolhida manualmente ("Mostrar/Ocultar barra lateral", inspirado
+     no do Claude) -- independe do modo foco automático abaixo. */
+  #app.sidebar-collapsed{ grid-template-columns:64px minmax(0,1fr) 280px; }
+  #app.sidebar-collapsed .sidebar-label{ display:none; }
+  #app.sidebar-collapsed .sidebar .tab-btn{ justify-content:center; padding:10px; }
+  #app.sidebar-collapsed .sidebar-toggle-btn{ align-self:center; }
+
+  /* Modo foco de lição estendido pro desktop: sidebar e cards somem, o
+     conteúdo (o exercício em si) ocupa a largura toda -- reaproveita a
+     mesma .lesson-focus que já existia só pro mobile (esconde topbar/tabs
+     lá; aqui, no desktop, também esconde sidebar/cards e vira 1 coluna). */
+  #app.lesson-focus{ grid-template-columns:1fr; grid-template-areas:"content"; }
+  #app.lesson-focus .sidebar, #app.lesson-focus .right-cards{ display:none; }
+}
+
 /* ---------- Hanzi: trilha de lições ---------- */
 .path-header-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-.hanzi-review-btn, .path-header-btn{ font-size:13px; padding:10px 16px; white-space:nowrap; }
+.hanzi-review-btn{ font-size:13px; padding:10px 16px; white-space:nowrap; }
 .hanzi-header-btns{ display:flex; gap:8px; flex-wrap:wrap; }
 
 /* ---------- Busca (pinyin, hanzi ou tradução) ---------- */
@@ -525,7 +652,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 
 /* Modo foco de lição (estilo Busuu): esconde topbar/tabs, deixa só a barra
    de progresso e o X pra sair — nada mais compete com o exercício. */
-#app.lesson-focus .topbar, #app.lesson-focus .tabs{ display:none; }
+#app.lesson-focus .topbar, #app.lesson-focus .tabs, #app.lesson-focus .bottom-nav{ display:none; }
 
 /* #review-reminder-banner é fixed e vive FORA de #app (irmão dele no
    documento, não descendente) -- por isso a classe vai no <body> também
@@ -1714,7 +1841,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
   .review-reminder-actions{ margin-left:0; justify-content:center; }
 }
 
-/* ---------- Modal genérico (reaproveitado por Exportar) ---------- */
+/* ---------- Modal genérico (perfil, meta de estudo, atalhos...) ---------- */
 .app-modal-overlay{
   position:fixed; inset:0; z-index:700; background: rgba(33,23,20,0.55);
   display:flex; align-items:center; justify-content:center; padding:16px;
@@ -1917,6 +2044,34 @@ body.hide-pinyin .prompt-pinyin{
 .user-dropdown-item.danger{ color: var(--seal-red-dark); }
 .user-dropdown-sep{ height:1px; background:var(--paper-line); margin:6px 4px; }
 
+/* Fase 6 (shell mobile): no celular o #user-menu-dropdown vira o menu
+   "Mais" (aberto pelo #mais-btn da barra inferior, ver .bottom-nav) --
+   mesma lista, só que como bottom sheet full-width em vez de popover
+   ancorado no canto (mais fácil de alcançar com o polegar). No desktop
+   continua exatamente como sempre foi (popover perto do pill de conta). */
+.mais-backdrop{ display:none; }
+@media (max-width: 899px){
+  .user-dropdown{
+    top:auto; bottom:0; left:0; right:0; border-radius:16px 16px 0 0;
+    min-width:0; width:auto; max-height:70vh; overflow-y:auto;
+    padding:10px 10px calc(10px + env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 20px rgba(33,23,20,.18);
+  }
+  .user-dropdown-item{ font-size:15px; padding:12px 12px; }
+  /* "Meu perfil" fica redundante aqui -- Perfil já é uma das 4 abas fixas
+     da barra inferior. */
+  #user-profile-btn{ display:none; }
+  .mais-backdrop.open{
+    display:block; position:fixed; inset:0; z-index:590; background: rgba(33,23,20,.45);
+  }
+}
+/* Abas extras do idioma (aqui: 汉字) só cabem na barra inferior via "Mais"
+   -- no desktop a sidebar já tem essas abas, então some do dropdown lá
+   pra não duplicar. */
+@media (min-width: 900px){
+  .mais-extra-tab{ display:none; }
+}
+
 /* ---------- Seletor de idioma (topbar) ---------- */
 .lang-switcher{ position:relative; display:inline-flex; flex-shrink:0; }
 .lang-switcher-btn{
@@ -2012,18 +2167,27 @@ body.hide-pinyin .prompt-pinyin{
 <div id="app" style="display:none;">
   <div class="topbar">
     <div class="brand">
-      <div class="brand-seal">汉</div>
+      <div class="brand-seal"><svg viewBox="0 0 83.44 94.95" xmlns="http://www.w3.org/2000/svg"><path d="M82.19,54.16c-.25-.82-1.05-3.05-1.06-3.07-2.71-6.58-11.08-1.57-9.93,3.9.31,1.46.68,2.86.68,2.86,3.51,12.91-6.77,26.21-20.18,26.02,0,0-40.62,0-40.62,0L.83,94.12c.51.51,1.22.83,2,.83h48.7c9.66,0,18.32-4.29,24.17-11.08,6.81-7.58,9.57-19.61,6.49-29.71Z" style="fill:#e36bca;"/><path d="M45.92,31.12H11.08V11.07h0L.83.82C.32,1.34,0,2.04,0,2.83v36.55c0,1.56,1.27,2.83,2.83,2.83h44.95c2.8,0,10.09.14,12.52,1.15,0,0,2.62-1.92,4.67-9.26-4.14-1.95-14.19-2.97-19.05-2.97Z" style="fill:#e36bca;"/><path d="M69.7,11.08C64.22,4.32,55.86,0,46.48,0H2.83c-.78,0-1.49.32-2,.83l10.25,10.25h32.67c12.91,0,24.17,9.85,21.35,22.52-.04.17-.07.33-.11.5,0,0-.01,0-.02,0-4.11,14.7-20.74,14.56-23.25,14.56H2.83c-1.56,0-2.83,1.27-2.83,2.83v40.63c0,.78.32,1.49.83,2l10.25-10.25h0v-24.13h35.4c8.58,0,16.31-3.61,21.73-9.4,2.65-2.76,4.71-6.06,6.1-9.63,3.99-9.68,1.92-21.88-4.61-29.63Z" style="fill:#3498d6;"/></svg></div>
       <div class="brand-text">
-        <h1>汉语从零开始</h1>
-        <p>Mandarim do Zero — estudo pessoal</p>
+        <h1>Chinês</h1>
+        <p>com Prof. Brune</p>
       </div>
     </div>
     <div class="stats-pills-wrap">
       <div class="stats-pills">
         <div class="pill streak">🔥 <span id="streak-count">0</span></div>
         <div class="pill xp">⭐ <span id="xp-count">0</span> XP</div>
-        <button class="pill pinyin-toggle-btn" id="pinyin-toggle-btn" aria-label="Esconder/mostrar pinyin" title="Esconder/mostrar pinyin">🔤 Pinyin: <span id="pinyin-state-label">ON</span></button>
-        <button class="pill search-open-btn" id="search-open-btn" aria-label="Buscar por pinyin, hanzi ou tradução" title="Buscar por pinyin, hanzi ou tradução">🔍</button>
+        <!-- Pinyin: só na topbar principal era redundante e ocupava espaço --
+             o toggle continua acessível dentro da lição (#pinyin-toggle-btn-lesson,
+             ver .lesson-focus-bar), que é onde realmente se decide ler em hanzi puro.
+             Elemento continua existindo (só escondido) porque togglePinyinVisibility()
+             ainda referencia o id direto -- ver languages/zh/app.js. -->
+        <button class="pill pinyin-toggle-btn" id="pinyin-toggle-btn" aria-label="Esconder/mostrar pinyin" title="Esconder/mostrar pinyin" style="display:none;">🔤 Pinyin: <span id="pinyin-state-label">ON</span></button>
+        <!-- Busca: escondida da topbar (pedido explícito) -- sem versão dentro da
+             lição, já que buscar vocabulário não faz sentido no meio de um exercício.
+             Feature em si continua funcional (buildSearchIndex/renderSearchResults em
+             app.js), só sem ponto de entrada visível por ora. -->
+        <button class="pill search-open-btn" id="search-open-btn" aria-label="Buscar por pinyin, hanzi ou tradução" title="Buscar por pinyin, hanzi ou tradução" style="display:none;">🔍</button>
         <button class="pill leaderboard-pill" id="leaderboard-topbar-btn" aria-label="Ranking" title="Ranking">🏆</button>
         <div class="lang-switcher">
           <button class="lang-switcher-btn" id="lang-switcher-btn" type="button" aria-label="Trocar idioma" title="Trocar idioma"></button>
@@ -2050,19 +2214,81 @@ body.hide-pinyin .prompt-pinyin{
     </button>
   </div>
 
+  <!-- Barra de navegação inferior (só mobile, <900px — Fase 6). Substitui a
+       .tabs acima como navegação principal do celular: 4 itens fixos, e
+       "Mais" abre o mesmo #user-menu-dropdown do pill de conta (agora como
+       bottom sheet, ver #mais-btn em shared/auth.js) com Ranking/
+       Configurações/Admin/Conta + as abas extras do idioma (汉字). -->
+  <nav class="bottom-nav" id="app-bottom-nav">
+    <button class="tab-btn active" data-tab="path">
+      <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><path d="M12 5c-1.8-1.3-4-2-6.5-2A1.5 1.5 0 0 0 4 4.5v13A1.5 1.5 0 0 0 5.5 19c2.5 0 4.7.7 6.5 2" fill="#60A5FA"/><path d="M12 5c1.8-1.3 4-2 6.5-2A1.5 1.5 0 0 1 20 4.5v13a1.5 1.5 0 0 1-1.5 1.5c-2.5 0-4.7.7-6.5 2" fill="#3B82F6"/></svg>
+      <span>Estudo</span>
+    </button>
+    <button class="tab-btn" data-tab="review">
+      <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><rect x="3" y="7" width="14" height="10" rx="2.5" fill="#A78BFA" transform="rotate(-8 10 12)"/><rect x="7" y="7" width="14" height="10" rx="2.5" fill="#7C3AED"/></svg>
+      <span>Revisão</span>
+    </button>
+    <button class="tab-btn" data-tab="profile">
+      <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="#FBBF24"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6" fill="#7C3AED"/></svg>
+      <span>Perfil</span>
+    </button>
+    <button class="tab-btn" id="mais-btn" type="button" aria-haspopup="true" aria-controls="user-menu-dropdown" aria-label="Mais opções" title="Mais">
+      <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.3" fill="#94A3B8"/><circle cx="12" cy="12" r="2.3" fill="#64748B"/><circle cx="19" cy="12" r="2.3" fill="#475569"/></svg>
+      <span>Mais</span>
+    </button>
+  </nav>
+
+  <!-- Sidebar (só desktop, ≥900px — ver §7 do artefato de navegação). Reaproveita
+       a classe .tab-btn dos mesmos data-tab da .tabs acima: o switchTab() já
+       existente (shared/tabs.js) sincroniza clique e estado ativo dos dois
+       conjuntos de botões sem nenhum JS novo. -->
+  <div class="sidebar" id="app-sidebar">
+    <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" aria-label="Mostrar/ocultar barra lateral" title="Mostrar/ocultar barra lateral">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/></svg>
+    </button>
+    <nav class="sidebar-nav">
+      <button class="tab-btn" data-tab="path">
+        <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><path d="M12 5c-1.8-1.3-4-2-6.5-2A1.5 1.5 0 0 0 4 4.5v13A1.5 1.5 0 0 0 5.5 19c2.5 0 4.7.7 6.5 2" fill="#60A5FA"/><path d="M12 5c1.8-1.3 4-2 6.5-2A1.5 1.5 0 0 1 20 4.5v13a1.5 1.5 0 0 1-1.5 1.5c-2.5 0-4.7.7-6.5 2" fill="#3B82F6"/></svg>
+        <span class="sidebar-label">Estudo</span>
+      </button>
+      <button class="tab-btn" data-tab="review">
+        <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><rect x="3" y="7" width="14" height="10" rx="2.5" fill="#A78BFA" transform="rotate(-8 10 12)"/><rect x="7" y="7" width="14" height="10" rx="2.5" fill="#7C3AED"/></svg>
+        <span class="sidebar-label">Revisão</span>
+      </button>
+      <button class="tab-btn" data-tab="hanzi">
+        <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4" fill="#DC2626"/><path d="M8 8h8M12 8v9M8 13h8" stroke="#FBBF24" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span class="sidebar-label">汉字</span>
+      </button>
+    </nav>
+    <div class="sidebar-divider"></div>
+    <nav class="sidebar-nav sidebar-nav-secondary">
+      <button class="tab-btn" data-tab="profile">
+        <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="#FBBF24"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6" fill="#7C3AED"/></svg>
+        <span class="sidebar-label">Perfil</span>
+      </button>
+      <button class="tab-btn" data-tab="leaderboard">
+        <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><path d="M7 4h10v6a5 5 0 0 1-10 0V4z" fill="#FBBF24"/><path d="M7 6H4a2 2 0 0 0 2 4" fill="#F59E0B"/><path d="M17 6h3a2 2 0 0 1-2 4" fill="#F59E0B"/><path d="M8 21h8" stroke="#B45309" stroke-width="2" stroke-linecap="round"/><path d="M12 17v4" stroke="#B45309" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="sidebar-label">Ranking</span>
+      </button>
+      <button class="tab-btn" data-tab="settings">
+        <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.36a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.26.42.7.7 1.55 1H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z" fill="#14B8A6"/><circle cx="12" cy="12" r="3" fill="#0F766E"/></svg>
+        <span class="sidebar-label">Configurações</span>
+      </button>
+      <button class="tab-btn admin-only-nav" data-tab="admin-badges" style="display:none;">
+        <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3z" fill="#7C3AED"/><path d="M9 12l2 2 4-4" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        <span class="sidebar-label">Admin</span>
+      </button>
+    </nav>
+  </div>
+
   <div class="app-content" id="main-content" tabindex="-1">
 
   <!-- ===== TRILHA ===== -->
   <div class="view active" id="view-path">
     <div id="path-list-wrap">
       <div class="path-header">
-        <div class="path-header-top">
-          <div>
-            <h2>Nível 1 · Iniciante <span style="color:var(--ink-soft); font-weight:600; font-size:14px;">(HSK 1)</span><span id="level-done-badge" style="display:none; color:var(--imperial-gold);"> ✓</span></h2>
-            <p>14 unidades organizadas por objetivo comunicacional. Complete uma unidade para desbloquear a próxima.</p>
-          </div>
-          <button class="btn btn-secondary path-header-btn" id="export-open-btn">📦 Exportar</button>
-        </div>
+        <h2>Nível 1 · Iniciante <span style="color:var(--ink-soft); font-weight:600; font-size:14px;">(HSK 1)</span><span id="level-done-badge" style="display:none; color:var(--imperial-gold);"> ✓</span></h2>
+        <p>14 unidades organizadas por objetivo comunicacional. Complete uma unidade para desbloquear a próxima.</p>
       </div>
       <div class="daily-goal-chip" id="daily-goal-chip" style="display:none;"></div>
       <div class="daily-challenges-strip" id="daily-challenges-strip"></div>
@@ -2147,9 +2373,34 @@ body.hide-pinyin .prompt-pinyin{
 
   <!-- ===== PROGRESSO ===== -->
   <div class="view" id="view-progress">
+    <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil">
+      <button class="leaderboard-tab" data-tab="profile">Visão geral</button>
+      <button class="leaderboard-tab" data-tab="goals">Metas</button>
+      <button class="leaderboard-tab active" data-tab="progress">Progresso</button>
+    </div>
     <div class="path-header">
       <h2>Seu progresso</h2>
       <p>Acompanhe sua consistência e conquistas.</p>
+    </div>
+    <div class="section-label conquests-label">Conquistas <span class="conquests-count" id="badge-grid-count"></span></div>
+    <div class="badge-grid conquests-grid" id="badge-grid"></div>
+    <div class="stat-cards" id="stat-cards"></div>
+    <div class="section-label">Atividade diária</div>
+    <div class="heatmap-wrap" id="heatmap-wrap"></div>
+    <div class="section-label">Palavras aprendidas ao longo do tempo</div>
+    <div class="progress-line-wrap" id="progress-line-chart-wrap"></div>
+  </div>
+
+  <!-- ===== METAS ===== -->
+  <div class="view" id="view-goals">
+    <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil">
+      <button class="leaderboard-tab" data-tab="profile">Visão geral</button>
+      <button class="leaderboard-tab active" data-tab="goals">Metas</button>
+      <button class="leaderboard-tab" data-tab="progress">Progresso</button>
+    </div>
+    <div class="path-header">
+      <h2>Minhas metas</h2>
+      <p>Defina quantas lições por dia você quer estudar.</p>
     </div>
     <div class="study-plan-card" id="study-plan-card">
       <div class="study-plan-header">
@@ -2161,54 +2412,63 @@ body.hide-pinyin .prompt-pinyin{
       </div>
       <div class="study-plan-body" id="study-plan-body"></div>
     </div>
-    <div class="section-label conquests-label">Conquistas <span class="conquests-count" id="badge-grid-count"></span></div>
-    <div class="badge-grid conquests-grid" id="badge-grid"></div>
-    <div class="stat-cards" id="stat-cards"></div>
-    <div class="section-label">Atividade diária</div>
-    <div class="heatmap-wrap" id="heatmap-wrap"></div>
-    <div class="section-label">Palavras aprendidas ao longo do tempo</div>
-    <div class="progress-line-wrap" id="progress-line-chart-wrap"></div>
   </div>
 
   <!-- ===== CONFIGURAÇÕES ===== -->
   <div class="view" id="view-settings">
     <div class="path-header">
       <h2>Configurações</h2>
-      <p>Sua conta e preferências do app.</p>
+      <p>Sua conta, preferências e exportação de dados.</p>
     </div>
-    <div class="section-label">Conta</div>
-    <div class="settings-card">
-      <div class="settings-row">
-        <div class="settings-row-label">E-mail</div>
-        <div class="settings-row-value" id="settings-email">—</div>
+    <div class="leaderboard-tabs" role="tablist" aria-label="Seção de Configurações">
+      <button class="leaderboard-tab active" role="tab" aria-selected="true" data-settings-section="geral">Geral</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="export">📦 Exportar</button>
+    </div>
+    <div id="settings-geral-content">
+      <div class="section-label">Conta</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-row-label">E-mail</div>
+          <div class="settings-row-value" id="settings-email">—</div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-label">Conectado com</div>
+          <div class="settings-row-value" id="settings-provider">—</div>
+        </div>
       </div>
-      <div class="settings-row">
-        <div class="settings-row-label">Conectado com</div>
-        <div class="settings-row-value" id="settings-provider">—</div>
+      <p class="settings-more-note">Mais opções de conta em breve.</p>
+      <div class="section-label">Preferências</div>
+      <div class="pref-row">
+        <div class="pref-row-text">
+          <div class="pref-row-title">Modo escuro</div>
+          <div class="pref-row-sub">Usa o tema escuro em vez do claro, independente do sistema.</div>
+        </div>
+        <button class="pref-switch" id="theme-pref-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
+      </div>
+      <div class="pref-row">
+        <div class="pref-row-text">
+          <div class="pref-row-title">Sempre digitar no exercício de completar frase</div>
+          <div class="pref-row-sub">Em vez de escolher entre opções, digite o pinyin que falta (estilo Clozemaster).</div>
+        </div>
+        <button class="pref-switch" id="cloze-mode-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
+      </div>
+      <div class="pref-row">
+        <div class="pref-row-text">
+          <div class="pref-row-title">Som de acerto/erro nos exercícios</div>
+          <div class="pref-row-sub">Toca um som curto ao responder cada exercício, além da cor de certo/errado.</div>
+        </div>
+        <button class="pref-switch" id="feedback-sound-switch" role="switch" aria-checked="true"><span class="pref-switch-knob"></span></button>
       </div>
     </div>
-    <p class="settings-more-note">Mais opções de conta em breve.</p>
-    <div class="section-label">Preferências</div>
-    <div class="pref-row">
-      <div class="pref-row-text">
-        <div class="pref-row-title">Modo escuro</div>
-        <div class="pref-row-sub">Usa o tema escuro em vez do claro, independente do sistema.</div>
+    <div id="settings-export-content" style="display:none;">
+      <div class="export-box">
+        <div class="icon">📦</div>
+        <h3>Escolha o que exportar</h3>
+        <div class="deck-select" id="export-deck-select"></div>
+        <p>O baralho exportado inclui pinyin, caractere e tradução em cada cartão, com o mesmo par pergunta/resposta usado aqui no app.</p>
+        <button class="btn btn-gold btn-block" id="export-btn" style="max-width:320px; margin:0 auto;">Gerar arquivo .apkg</button>
+        <div class="export-status" id="export-status"></div>
       </div>
-      <button class="pref-switch" id="theme-pref-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
-    </div>
-    <div class="pref-row">
-      <div class="pref-row-text">
-        <div class="pref-row-title">Sempre digitar no exercício de completar frase</div>
-        <div class="pref-row-sub">Em vez de escolher entre opções, digite o pinyin que falta (estilo Clozemaster).</div>
-      </div>
-      <button class="pref-switch" id="cloze-mode-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
-    </div>
-    <div class="pref-row">
-      <div class="pref-row-text">
-        <div class="pref-row-title">Som de acerto/erro nos exercícios</div>
-        <div class="pref-row-sub">Toca um som curto ao responder cada exercício, além da cor de certo/errado.</div>
-      </div>
-      <button class="pref-switch" id="feedback-sound-switch" role="switch" aria-checked="true"><span class="pref-switch-knob"></span></button>
     </div>
   </div>
 
@@ -2279,14 +2539,35 @@ body.hide-pinyin .prompt-pinyin{
   </footer>
 
   </div>
+
+  <!-- Cards da direita (só desktop, ≥900px) -- 3 blocos independentes, não
+       um painel único (decisão #1/#5): cada um aparece/some sozinho. -->
+  <div class="right-cards">
+    <div class="side-card" id="side-card-ranking">
+      <div class="side-card-title">🏆 Ranking</div>
+      <div id="side-ranking-body"></div>
+    </div>
+    <div class="side-card" id="side-card-status">
+      <div class="side-card-title">Status</div>
+      <div class="side-status-row"><span>⭐</span><span id="side-xp-count">0</span><span>XP</span></div>
+      <div class="side-status-row"><span>🔥</span><span id="side-streak-count">0</span><span>dias seguidos</span></div>
+    </div>
+    <div class="side-card" id="side-card-missions">
+      <div id="side-missions-body"></div>
+    </div>
+  </div>
 </div>
+
+<div id="mais-backdrop" class="mais-backdrop"></div>
 
 <div id="user-menu-dropdown" class="user-dropdown">
   <div class="user-dropdown-email" id="user-dropdown-email"></div>
   <button class="user-dropdown-item" id="user-profile-btn">👤 Meu perfil</button>
+  <!-- Só mobile (menu "Mais") -- no desktop essa aba já mora na sidebar. -->
+  <button class="user-dropdown-item mais-extra-tab" id="mais-hanzi-btn" data-tab="hanzi">汉字</button>
   <button class="user-dropdown-item" id="leaderboard-btn">🏆 Ranking</button>
   <button class="user-dropdown-item" id="user-settings-btn">⚙️ Configurações</button>
-  <button class="user-dropdown-item" id="admin-badges-btn" style="display:none;">🛠️ Painel de Admin</button>
+  <button class="user-dropdown-item admin-only-nav" id="admin-badges-btn" style="display:none;">🛠️ Painel de Admin</button>
   <div class="user-dropdown-sep"></div>
   <button class="user-dropdown-item danger" id="logout-btn">Sair da conta</button>
 </div>
@@ -2461,25 +2742,6 @@ body.hide-pinyin .prompt-pinyin{
   <div class="review-reminder-actions">
     <button class="review-reminder-dismiss" id="review-reminder-dismiss-btn">Agora não</button>
     <button class="btn btn-primary review-reminder-cta" id="review-reminder-cta-btn">Revisar agora</button>
-  </div>
-</div>
-
-<div id="export-modal" class="app-modal-overlay" style="display:none;">
-  <div class="app-modal">
-    <div class="app-modal-header">
-      <h3>Exportar para Anki</h3>
-      <button class="app-modal-close" id="export-modal-close" aria-label="Fechar">✕</button>
-    </div>
-    <div class="app-modal-body">
-      <div class="export-box">
-        <div class="icon">📦</div>
-        <h3>Escolha o que exportar</h3>
-        <div class="deck-select" id="export-deck-select"></div>
-        <p>O baralho exportado inclui pinyin, caractere e tradução em cada cartão, com o mesmo par pergunta/resposta usado aqui no app.</p>
-        <button class="btn btn-gold btn-block" id="export-btn" style="max-width:320px; margin:0 auto;">Gerar arquivo .apkg</button>
-        <div class="export-status" id="export-status"></div>
-      </div>
-    </div>
   </div>
 </div>
 
