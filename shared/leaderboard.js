@@ -92,6 +92,43 @@ async function fetchLeaderboard(scope, weekStart){
   return ranked.map((r, i) => ({ ...r, rank: i + 1, profile: byId[r.user_id] || null }));
 }
 
+// Card "Ranking" da sidebar desktop (Fase 3) -- teaser dos 3 primeiros do
+// ranking Geral da semana + a posição da própria pessoa se ela não estiver
+// entre eles, reaproveitando fetchLeaderboard() (mesma fonte de dados do
+// Ranking completo, sem duplicar a consulta/lógica de soma por usuário).
+async function renderSideRankingCard(){
+  const body = document.getElementById('side-ranking-body');
+  if (!body) return;
+  // O elemento sempre existe no DOM (escondido por CSS abaixo de 900px) --
+  // não vale gastar uma consulta ao Supabase pra um card que o aluno no
+  // celular nunca vê (maioria do público hoje). Único lugar que sabe o
+  // breakpoint de verdade é o CSS, então pergunta a ele em vez de duplicar
+  // o número aqui.
+  if (getComputedStyle(document.querySelector('.right-cards')).display === 'none') return;
+  body.innerHTML = `<p class="profile-loading">Carregando...</p>`;
+  const rows = await fetchLeaderboard('all', leaderboardCurrentWeekStart());
+  if (!rows.length){
+    body.innerHTML = `<p class="profile-empty-note">Ninguém pontuou essa semana ainda.</p>`;
+  } else {
+    const top3 = rows.slice(0, 3);
+    const me = CURRENT_USER ? rows.find(r => r.user_id === CURRENT_USER.id) : null;
+    const rowHTML = (r) => {
+      const name = r.profile?.display_name || r.profile?.username || 'Aluno(a)';
+      const isMe = !!(CURRENT_USER && r.user_id === CURRENT_USER.id);
+      return `
+        <div class="side-ranking-row ${isMe ? 'me' : ''}">
+          <span class="side-ranking-rank">${leaderboardRankBadge(r.rank)}</span>
+          <span class="side-ranking-name">${escapeHTML(name)}</span>
+          <span>${r.amount}</span>
+        </div>
+      `;
+    };
+    body.innerHTML = top3.map(rowHTML).join('') + (me && me.rank > 3 ? rowHTML(me) : '');
+  }
+  body.innerHTML += `<button class="side-card-link" id="side-ranking-link">Ver ranking completo →</button>`;
+  document.getElementById('side-ranking-link').addEventListener('click', () => switchTab('leaderboard'));
+}
+
 function leaderboardRankBadge(rank){
   if (rank === 1) return '🥇';
   if (rank === 2) return '🥈';

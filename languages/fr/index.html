@@ -278,6 +278,75 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .view.active{ display:block; animation: fadeUp .25s ease; }
 @keyframes fadeUp{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
 
+/* ---------- Shell desktop: sidebar + cards (decisão #1/#5, ver artefato de
+   navegação) — só entra a partir de 900px; abaixo disso o app continua
+   exatamente como era (barra de abas horizontal, sem colunas laterais). */
+.sidebar{ display:none; }
+.right-cards{ display:none; }
+
+@media (min-width: 900px){
+  #app{
+    display:grid;
+    grid-template-columns: 220px minmax(0,1fr) 280px;
+    grid-template-areas: "topbar topbar topbar" "sidebar content cards";
+    column-gap:28px;
+    align-items:start;
+  }
+  .topbar{ grid-area:topbar; }
+  .tabs{ display:none; }
+  /* XP some do topbar aqui -- fica só no card de Status à direita, sem
+     repetição (decisão #1). No mobile (fora desta media query) continua
+     no topbar, como já decidido pra lá (decisão #4). */
+  .stats-pills .pill.xp{ display:none; }
+
+  .sidebar{
+    grid-area:sidebar; display:flex; flex-direction:column; gap:2px;
+    position:sticky; top:20px;
+  }
+  .sidebar-toggle-btn{
+    align-self:flex-end; width:32px; height:32px; border-radius:8px; flex-shrink:0;
+    border:1px solid var(--paper-line); background:var(--paper); color:var(--ink-soft);
+    cursor:pointer; display:flex; align-items:center; justify-content:center; margin-bottom:10px;
+  }
+  .sidebar-toggle-btn:hover{ color:var(--ink); border-color:var(--imperial-gold); }
+  .sidebar-nav{ display:flex; flex-direction:column; gap:2px; }
+  .sidebar .tab-btn{ flex:none; width:100%; justify-content:flex-start; padding:10px 12px; }
+  .sidebar-divider{ height:1px; background:var(--paper-line); margin:12px 6px; }
+  .sidebar-nav-secondary{ margin-top:auto; padding-top:12px; }
+
+  .app-content{ grid-area:content; max-width:none; margin:0; padding:0 0 80px; }
+
+  .right-cards{ grid-area:cards; display:flex; flex-direction:column; gap:16px; position:sticky; top:20px; }
+  .side-card{ background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow-card); }
+  .side-card-title{ font-size:12.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin:0 0 12px; display:flex; align-items:center; gap:6px; }
+  .side-status-row{ display:flex; align-items:center; gap:8px; font-size:14.5px; font-weight:700; padding:4px 0; }
+  .side-status-row + .side-status-row{ border-top:1px solid var(--paper-line); }
+  .side-ranking-row{ display:flex; align-items:center; gap:8px; font-size:13.5px; padding:5px 0; }
+  .side-ranking-row.me{ font-weight:800; color:var(--seal-red-dark); }
+  .side-ranking-rank{ flex-shrink:0; width:20px; text-align:center; }
+  .side-ranking-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .side-card-link{ display:block; margin-top:10px; font-size:12.5px; font-weight:700; color:var(--seal-red-dark); background:none; border:none; padding:0; cursor:pointer; text-align:left; }
+  .side-card-link:hover{ text-decoration:underline; }
+  .side-missions-track{ flex:1; height:7px; background:var(--paper-warm); border-radius:4px; overflow:hidden; }
+  .side-missions-fill{ height:100%; border-radius:4px; background:var(--jade); }
+  .side-missions-row{ display:flex; align-items:center; gap:8px; }
+  .side-missions-fraction{ flex-shrink:0; font-size:12.5px; font-weight:800; color:var(--ink-soft); }
+
+  /* Sidebar recolhida manualmente ("Mostrar/Ocultar barra lateral", inspirado
+     no do Claude) -- independe do modo foco automático abaixo. */
+  #app.sidebar-collapsed{ grid-template-columns:64px minmax(0,1fr) 280px; }
+  #app.sidebar-collapsed .sidebar-label{ display:none; }
+  #app.sidebar-collapsed .sidebar .tab-btn{ justify-content:center; padding:10px; }
+  #app.sidebar-collapsed .sidebar-toggle-btn{ align-self:center; }
+
+  /* Modo foco de lição estendido pro desktop: sidebar e cards somem, o
+     conteúdo (o exercício em si) ocupa a largura toda -- reaproveita a
+     mesma .lesson-focus que já existia só pro mobile (esconde topbar/tabs
+     lá; aqui, no desktop, também esconde sidebar/cards e vira 1 coluna). */
+  #app.lesson-focus{ grid-template-columns:1fr; grid-template-areas:"content"; }
+  #app.lesson-focus .sidebar, #app.lesson-focus .right-cards{ display:none; }
+}
+
 /* ---------- Path / units grid ---------- */
 .path-header-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; }
 .path-header{ margin-bottom:18px; }
@@ -2326,6 +2395,57 @@ footer.app-footer img{ height:40px; opacity:.85; }
     </button>
   </div>
 
+  <!-- Sidebar (só desktop, ≥900px — ver §7 do artefato de navegação). Reaproveita
+       a classe .tab-btn dos mesmos data-tab da .tabs acima: o switchTab() já
+       existente (shared/tabs.js) sincroniza clique e estado ativo dos dois
+       conjuntos de botões sem nenhum JS novo. -->
+  <div class="sidebar" id="app-sidebar">
+    <button class="sidebar-toggle-btn" id="sidebar-toggle-btn" aria-label="Mostrar/ocultar barra lateral" title="Mostrar/ocultar barra lateral">
+      <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="4" x2="9" y2="20"/></svg>
+    </button>
+    <nav class="sidebar-nav">
+      <button class="tab-btn" data-tab="path">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5c-1.6-1.2-3.6-1.7-6-1.7v13c2.4 0 4.4.5 6 1.7 1.6-1.2 3.6-1.7 6-1.7v-13c-2.4 0-4.4.5-6 1.7z"/><path d="M12 6.5v13"/></svg>
+        <span class="sidebar-label">Estudo</span>
+      </button>
+      <button class="tab-btn" data-tab="review">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 13.3-6"/><path d="M17.3 3v4h-4"/><path d="M20 12a8 8 0 0 1-13.3 6"/><path d="M6.7 21v-4h4"/></svg>
+        <span class="sidebar-label">Revisão</span>
+      </button>
+      <button class="tab-btn" data-tab="conjugaison">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4.2L15.8 5c.8-.8 2-.8 2.8 0l.4.4c.8.8.8 2 0 2.8L8.2 19l-4.2 1z"/><path d="M13.5 6.5l4 4"/></svg>
+        <span class="sidebar-label">Conjugação</span>
+      </button>
+      <button class="tab-btn" data-tab="dictation">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></svg>
+        <span class="sidebar-label">Ditados</span>
+      </button>
+      <button class="tab-btn" data-tab="challenges">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg>
+        <span class="sidebar-label">Desafios</span>
+      </button>
+    </nav>
+    <div class="sidebar-divider"></div>
+    <nav class="sidebar-nav sidebar-nav-secondary">
+      <button class="tab-btn" data-tab="profile">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg>
+        <span class="sidebar-label">Perfil</span>
+      </button>
+      <button class="tab-btn" data-tab="leaderboard">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v6a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a2 2 0 0 0 2 4"/><path d="M17 6h3a2 2 0 0 1-2 4"/></svg>
+        <span class="sidebar-label">Ranking</span>
+      </button>
+      <button class="tab-btn" data-tab="settings">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.36a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.26.42.7.7 1.55 1H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z"/></svg>
+        <span class="sidebar-label">Configurações</span>
+      </button>
+      <button class="tab-btn admin-only-nav" data-tab="admin-badges" style="display:none;">
+        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 1.4 0l1.6-1.6a1 1 0 0 0 0-1.4l-1.4-1.4a1 1 0 0 0-1.4 0l-1.6 1.6a1 1 0 0 0 0 1.4z"/><path d="M17.5 8.5L21 12l-9 9-6-6z"/><path d="M3 21l4-1 10-10-3-3-10 10z"/></svg>
+        <span class="sidebar-label">Admin</span>
+      </button>
+    </nav>
+  </div>
+
   <div class="app-content" id="main-content" tabindex="-1">
 
   <!-- ===== TRILHA ===== -->
@@ -2609,6 +2729,24 @@ footer.app-footer img{ height:40px; opacity:.85; }
   </footer>
 
   </div>
+
+  <!-- Cards da direita (só desktop, ≥900px) -- 3 blocos independentes, não
+       um painel único (decisão #1/#5): cada um aparece/some sozinho. -->
+  <div class="right-cards">
+    <div class="side-card" id="side-card-ranking">
+      <div class="side-card-title">🏆 Ranking</div>
+      <div id="side-ranking-body"></div>
+    </div>
+    <div class="side-card" id="side-card-status">
+      <div class="side-card-title">Status</div>
+      <div class="side-status-row"><span>⭐</span><span id="side-xp-count">0</span><span>XP</span></div>
+      <div class="side-status-row"><span>🔥</span><span id="side-streak-count">0</span><span>dias seguidos</span></div>
+    </div>
+    <div class="side-card" id="side-card-missions">
+      <div class="side-card-title">🎯 Missões do dia</div>
+      <div id="side-missions-body"></div>
+    </div>
+  </div>
 </div>
 
 <div id="user-menu-dropdown" class="user-dropdown">
@@ -2616,7 +2754,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <button class="user-dropdown-item" id="user-profile-btn">👤 Meu perfil</button>
   <button class="user-dropdown-item" id="leaderboard-btn">🏆 Ranking</button>
   <button class="user-dropdown-item" id="user-settings-btn">⚙️ Configurações</button>
-  <button class="user-dropdown-item" id="admin-badges-btn" style="display:none;">🛠️ Painel de Admin</button>
+  <button class="user-dropdown-item admin-only-nav" id="admin-badges-btn" style="display:none;">🛠️ Painel de Admin</button>
   <div class="user-dropdown-sep"></div>
   <button class="user-dropdown-item danger" id="logout-btn">Sair da conta</button>
 </div>

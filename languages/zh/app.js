@@ -691,8 +691,6 @@ document.getElementById('leaderboard-topbar-btn').addEventListener('click', () =
 
 document.getElementById('user-settings-btn').addEventListener('click', () => {
   document.getElementById('user-menu-dropdown').classList.remove('open');
-  document.getElementById('settings-email').textContent = CURRENT_USER?.email || 'Modo convidado';
-  document.getElementById('settings-provider').textContent = CURRENT_USER?.app_metadata?.provider === 'google' ? 'Google' : (CURRENT_USER ? 'E-mail e senha' : '—');
   switchTab('settings');
 });
 
@@ -1624,10 +1622,33 @@ function renderDailyChallengesStrip(){
   });
 }
 
+// Card "Missões do dia" da sidebar desktop (Fase 3) -- resumo agregado (não
+// desafio por desafio, que já vive na Trilha via renderDailyChallengesStrip)
+// dos mesmos dados de STATE.daily/todaysChallenges(), pra não duplicar a
+// lógica de progresso em dois formatos.
+function renderSideMissionsCard(){
+  const body = document.getElementById('side-missions-body');
+  if (!body) return;
+  ensureDailyBucket();
+  const challenges = todaysChallenges();
+  const doneCount = challenges.filter(c => (Number(c.get(STATE.daily)) || 0) >= c.target).length;
+  const pct = challenges.length ? Math.round((doneCount / challenges.length) * 100) : 0;
+  body.innerHTML = `
+    <div class="side-missions-row">
+      <div class="side-missions-track"><div class="side-missions-fill" style="width:${pct}%"></div></div>
+      <div class="side-missions-fraction">${doneCount}/${challenges.length}</div>
+    </div>
+    <button class="side-card-link" id="side-missions-link">Ver desafios de hoje →</button>
+  `;
+  document.getElementById('side-missions-link').addEventListener('click', () => switchTab('path'));
+}
+
 function renderUnitsGrid(){
   recalculateUnlockedUnits();
   renderDailyGoalChip();
   renderDailyChallengesStrip();
+  renderSideMissionsCard();
+  renderSideRankingCard();
   // "Tratamento de honra" (Opção D): nível concluído reaproveita o mesmo
   // selo de check, só que dourado -- ZH não tem seletor de nível (só existe
   // HSK1 hoje), então o selo mora fixo no <h2> estático da trilha.
@@ -5179,6 +5200,7 @@ const switchTab = createTabSwitcher({
     progress: renderProgressView,
     goals: renderGoalsView,
     profile: renderProfileView,
+    settings: renderSettingsView,
     'admin-badges': renderAdminPanelView,
     leaderboard: renderLeaderboardView,
     path: renderUnitsGrid,
@@ -5188,6 +5210,27 @@ const switchTab = createTabSwitcher({
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => switchTab(btn.dataset.tab));
 });
+
+// Toggle manual da sidebar (desktop, ≥900px) -- "Mostrar/Ocultar barra
+// lateral", inspirado no do Claude. Independe do modo foco automático da
+// lição (.lesson-focus), que sempre esconde tudo de qualquer jeito. Estado
+// persistido por dispositivo, mesmo padrão de CHALLENGES_STRIP_COLLAPSE_KEY.
+const SIDEBAR_COLLAPSE_KEY = 'sidebar_collapsed';
+if (localStorageSafeGet(SIDEBAR_COLLAPSE_KEY) === '1'){
+  document.getElementById('app').classList.add('sidebar-collapsed');
+}
+document.getElementById('sidebar-toggle-btn').addEventListener('click', () => {
+  const collapsed = document.getElementById('app').classList.toggle('sidebar-collapsed');
+  localStorageSafeSet(SIDEBAR_COLLAPSE_KEY, collapsed ? '1' : '0');
+});
+
+// Popula os campos de Configurações -- roda em QUALQUER entrada na aba
+// (sidebar desktop ou o item "Configurações" do menu do avatar), não só
+// quando o menu era o único caminho até aqui.
+function renderSettingsView(){
+  document.getElementById('settings-email').textContent = CURRENT_USER?.email || 'Modo convidado';
+  document.getElementById('settings-provider').textContent = CURRENT_USER?.app_metadata?.provider === 'google' ? 'Google' : (CURRENT_USER ? 'E-mail e senha' : '—');
+}
 
 // ============================================================
 // EXPORTAÇÃO .apkg (motor comum em shared/anki-export.js) — só o que é
