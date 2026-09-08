@@ -466,6 +466,11 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, speci
     : `<div class="profile-avatar" style="background:${color};">${initials}</div>`;
 
   wrap.innerHTML = `
+    <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil">
+      <button class="leaderboard-tab active" data-tab="profile">Visão geral</button>
+      <button class="leaderboard-tab" data-tab="goals">Metas</button>
+      <button class="leaderboard-tab" data-tab="progress">Progresso</button>
+    </div>
     ${guestNote}
     <div class="profile-identity">
       ${avatarHTML}
@@ -658,3 +663,13 @@ function wireProfileEditModal(){
 }
 
 wireProfileEditModal();
+
+// Subnav "Visão geral / Metas / Progresso" (ver artefato de navegação,
+// decisão #11) aparece nos 3 views (view-profile, view-goals, view-progress)
+// -- os dois últimos têm a marcação estática em cada languages/<lang>/index.html,
+// o de Perfil é reinjetado a cada renderProfileBody(). Um único listener
+// delegado no document cobre as três cópias sem precisar rewire a cada render.
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.profile-subnav [data-tab]');
+  if (btn) switchTab(btn.dataset.tab);
+});

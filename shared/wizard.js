@@ -383,9 +383,10 @@ function renderStudyPlanCard(){
 }
 
 // ---------- Chip de meta diária persistente (Home/Trilha) ----------
-// A meta hoje só vive escondida na aba "Seu progresso" (ver artefato, §1/§6:
-// "hábito" precisa aparecer na Home). Clique leva direto pro card completo
-// -- não duplica nenhuma lógica do wizard/card, só resume o essencial.
+// A meta mora na seção "Metas" de Perfil (ver artefato de navegação,
+// decisão #11 -- separada de "Progresso", que é só histórico/conquistas).
+// Clique leva direto pro card completo -- não duplica nenhuma lógica do
+// wizard/card, só resume o essencial.
 function renderDailyGoalChip(){
   const chip = document.getElementById('daily-goal-chip');
   if (!chip) return;
@@ -410,7 +411,7 @@ function renderDailyGoalChip(){
     ${reached ? '<span class="daily-goal-chip-check">✓</span>' : ''}
   `;
 }
-document.getElementById('daily-goal-chip')?.addEventListener('click', () => switchTab('progress'));
+document.getElementById('daily-goal-chip')?.addEventListener('click', () => switchTab('goals'));
 
 document.getElementById('study-plan-edit-btn').addEventListener('click', openStudyPlanModal);
 document.getElementById('study-plan-modal-close').addEventListener('click', () => {

@@ -2147,9 +2147,34 @@ body.hide-pinyin .prompt-pinyin{
 
   <!-- ===== PROGRESSO ===== -->
   <div class="view" id="view-progress">
+    <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil">
+      <button class="leaderboard-tab" data-tab="profile">Visão geral</button>
+      <button class="leaderboard-tab" data-tab="goals">Metas</button>
+      <button class="leaderboard-tab active" data-tab="progress">Progresso</button>
+    </div>
     <div class="path-header">
       <h2>Seu progresso</h2>
       <p>Acompanhe sua consistência e conquistas.</p>
+    </div>
+    <div class="section-label conquests-label">Conquistas <span class="conquests-count" id="badge-grid-count"></span></div>
+    <div class="badge-grid conquests-grid" id="badge-grid"></div>
+    <div class="stat-cards" id="stat-cards"></div>
+    <div class="section-label">Atividade diária</div>
+    <div class="heatmap-wrap" id="heatmap-wrap"></div>
+    <div class="section-label">Palavras aprendidas ao longo do tempo</div>
+    <div class="progress-line-wrap" id="progress-line-chart-wrap"></div>
+  </div>
+
+  <!-- ===== METAS ===== -->
+  <div class="view" id="view-goals">
+    <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil">
+      <button class="leaderboard-tab" data-tab="profile">Visão geral</button>
+      <button class="leaderboard-tab active" data-tab="goals">Metas</button>
+      <button class="leaderboard-tab" data-tab="progress">Progresso</button>
+    </div>
+    <div class="path-header">
+      <h2>Minhas metas</h2>
+      <p>Defina quantas lições por dia você quer estudar.</p>
     </div>
     <div class="study-plan-card" id="study-plan-card">
       <div class="study-plan-header">
@@ -2161,13 +2186,6 @@ body.hide-pinyin .prompt-pinyin{
       </div>
       <div class="study-plan-body" id="study-plan-body"></div>
     </div>
-    <div class="section-label conquests-label">Conquistas <span class="conquests-count" id="badge-grid-count"></span></div>
-    <div class="badge-grid conquests-grid" id="badge-grid"></div>
-    <div class="stat-cards" id="stat-cards"></div>
-    <div class="section-label">Atividade diária</div>
-    <div class="heatmap-wrap" id="heatmap-wrap"></div>
-    <div class="section-label">Palavras aprendidas ao longo do tempo</div>
-    <div class="progress-line-wrap" id="progress-line-chart-wrap"></div>
   </div>
 
   <!-- ===== CONFIGURAÇÕES ===== -->

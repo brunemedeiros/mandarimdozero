@@ -4970,9 +4970,11 @@ function checkUnitCompletion(explicitUnitId){
 // ============================================================
 // RENDER: Progresso / gamificação
 // ============================================================
-function renderProgressView(){
+function renderGoalsView(){
   renderStudyPlanCard();
+}
 
+function renderProgressView(){
   const completedUnits = Object.values(STATE.unitProgress).filter(u=>u.completed).length;
   const totalCards = STATE.cards.length;
   const learnedCards = STATE.cards.filter(c => c.reps > 0).length;
@@ -5175,6 +5177,7 @@ const switchTab = createTabSwitcher({
   tabHandlers: {
     hanzi: renderHanziLessonsGrid,
     progress: renderProgressView,
+    goals: renderGoalsView,
     profile: renderProfileView,
     'admin-badges': renderAdminPanelView,
     leaderboard: renderLeaderboardView,
