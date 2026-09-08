@@ -302,23 +302,18 @@ async function markAllNotificationsRead(){
   renderNotificationDropdown();
 }
 
-// No desktop, ancora o dropdown embaixo do PRÓPRIO sino (não no canto fixo
-// que .user-dropdown/.lang-switcher-dropdown usam) -- o sino não é o pill
-// mais à direita da topbar, então o canto fixo deixava a lista flutuando
-// longe do ícone que abriu ela. No mobile a folha inferior (.user-dropdown
-// dentro de @media max-width:899px) já cuida da posição sozinha -- setar
-// estilo inline ali venceria a media query (inline sempre tem prioridade
-// maior), por isso limpa os inline styles nesse caso em vez de calcular.
+// Ancora o dropdown embaixo do PRÓPRIO sino (não no canto fixo que
+// .user-dropdown/.lang-switcher-dropdown usam) -- o sino não é o pill mais
+// à direita da topbar, então o canto fixo deixava a lista flutuando longe
+// do ícone que abriu ela. Mesmo tratamento em qualquer largura de tela --
+// diferente do menu "Mais" (que vira folha inferior no mobile, ver
+// .user-dropdown:not(.notifications-dropdown) dentro do media query),
+// notificações sempre foram um popover compacto ancorado no sino, desktop
+// ou mobile.
 function positionNotificationsDropdown(){
   const dropdown = document.getElementById('notifications-dropdown');
   const btn = document.getElementById('notifications-topbar-btn');
   if (!dropdown || !btn) return;
-  if (window.innerWidth < 900){
-    dropdown.style.removeProperty('top');
-    dropdown.style.removeProperty('right');
-    dropdown.style.removeProperty('left');
-    return;
-  }
   const rect = btn.getBoundingClientRect();
   // Largura REAL renderizada (não uma estimativa) -- só dá pra medir depois
   // que .open já foi aplicada (senão é display:none, largura 0). Chamada
@@ -339,16 +334,12 @@ async function toggleNotificationDropdown(){
   if (!dropdown) return;
   const opening = !dropdown.classList.contains('open');
   document.querySelectorAll('.user-dropdown.open').forEach(d => d.classList.remove('open'));
-  // #mais-backdrop é o mesmo fundo escurecido que o menu "Mais" usa quando
-  // vira folha inferior no mobile (ver toggleUserMenuDropdown em auth.js) --
-  // reaproveitado aqui pelo mesmo motivo: sem ele, a folha de notificações
-  // não lia como uma camada por cima do resto da tela. No desktop a classe
-  // .mais-backdrop.open não faz nada visível (só existe dentro do media
-  // query mobile), então não precisa checar largura de tela aqui.
-  document.getElementById('mais-backdrop')?.classList.remove('open');
+  // Sem fundo escurecido aqui de propósito -- diferente do menu "Mais"
+  // (folha inferior em tela cheia no mobile), notificações são sempre um
+  // popover compacto ancorado no sino (ver positionNotificationsDropdown),
+  // então não faz sentido escurecer o resto da tela por trás.
   if (opening){
     dropdown.classList.add('open'); // precisa estar visível ANTES de medir a largura real
-    document.getElementById('mais-backdrop')?.classList.add('open');
     positionNotificationsDropdown();
     // A lista começa vazia ("Carregando...") -- mede mais estreita que o
     // conteúdo final (ver fetchRecentNotifications, assíncrono). Reposiciona
@@ -371,7 +362,6 @@ function wireNotificationBell(){
     const dropdown = document.getElementById('notifications-dropdown');
     if (dropdown?.classList.contains('open') && !dropdown.contains(e.target) && e.target !== btn && !btn.contains(e.target)){
       dropdown.classList.remove('open');
-      document.getElementById('mais-backdrop')?.classList.remove('open');
     }
   });
 }
