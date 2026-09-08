@@ -687,6 +687,13 @@ document.getElementById('leaderboard-btn').addEventListener('click', () => {
   switchTab('leaderboard');
 });
 
+// Item extra do menu "Mais" (só mobile, ver .mais-extra-tab) -- 汉字 não
+// cabe nos 4 botões fixos da barra inferior, então vive aqui.
+document.getElementById('mais-hanzi-btn').addEventListener('click', () => {
+  document.getElementById('user-menu-dropdown').classList.remove('open');
+  switchTab('hanzi');
+});
+
 document.getElementById('leaderboard-topbar-btn').addEventListener('click', () => switchTab('leaderboard'));
 
 document.getElementById('user-settings-btn').addEventListener('click', () => {
@@ -5193,7 +5200,10 @@ const switchTab = createTabSwitcher({
   }
 });
 
-document.querySelectorAll('.tab-btn').forEach(btn => {
+// [data-tab] exclui #mais-btn (barra inferior, Fase 6) -- ele reaproveita a
+// classe .tab-btn só pelo visual, mas não é uma aba de verdade (abre o
+// menu "Mais" via listener próprio em shared/auth.js, não troca de view).
+document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
   btn.addEventListener('click', () => switchTab(btn.dataset.tab));
 });
 

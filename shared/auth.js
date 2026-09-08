@@ -188,12 +188,22 @@ document.getElementById('guest-btn').addEventListener('click', () => {
   enterGuestMode();
 });
 
-document.getElementById('user-menu-btn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  document.getElementById('user-menu-dropdown').classList.toggle('open');
-});
+// #mais-btn é o botão "Mais" da barra inferior mobile (Fase 6) -- abre o
+// mesmo dropdown do pill de conta (que no mobile vira bottom sheet via
+// CSS, ver .user-dropdown dentro de @media(max-width:899px) em cada
+// index.html), só que também precisa acender/apagar o backdrop atrás
+// dela. #mais-btn não existe em toda página antiga, daí o ?. -- nada
+// quebra se faltar.
+function toggleUserMenuDropdown(e){
+  if (e) e.stopPropagation();
+  const isOpen = document.getElementById('user-menu-dropdown').classList.toggle('open');
+  document.getElementById('mais-backdrop')?.classList.toggle('open', isOpen);
+}
+document.getElementById('user-menu-btn').addEventListener('click', toggleUserMenuDropdown);
+document.getElementById('mais-btn')?.addEventListener('click', toggleUserMenuDropdown);
 document.addEventListener('click', () => {
   document.getElementById('user-menu-dropdown').classList.remove('open');
+  document.getElementById('mais-backdrop')?.classList.remove('open');
 });
 
 document.getElementById('logout-btn').addEventListener('click', async () => {

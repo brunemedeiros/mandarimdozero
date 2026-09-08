@@ -524,6 +524,17 @@ document.getElementById('leaderboard-btn').addEventListener('click', () => {
   switchTab('leaderboard');
 });
 
+// Itens extras do menu "Mais" (só mobile, ver .mais-extra-tab) -- Conjugação/
+// Ditados/Desafios não cabem nos 4 botões fixos da barra inferior, então
+// vivem aqui.
+['mais-conjugaison-btn', 'mais-dictation-btn', 'mais-challenges-btn'].forEach(id => {
+  const btn = document.getElementById(id);
+  btn.addEventListener('click', () => {
+    document.getElementById('user-menu-dropdown').classList.remove('open');
+    switchTab(btn.dataset.tab);
+  });
+});
+
 document.getElementById('leaderboard-topbar-btn').addEventListener('click', () => switchTab('leaderboard'));
 
 document.getElementById('user-settings-btn').addEventListener('click', () => {
@@ -5143,7 +5154,10 @@ const switchTab = createTabSwitcher({
   }
 });
 
-document.querySelectorAll('.tab-btn').forEach(btn => {
+// [data-tab] exclui #mais-btn (barra inferior, Fase 6) -- ele reaproveita a
+// classe .tab-btn só pelo visual, mas não é uma aba de verdade (abre o
+// menu "Mais" via listener próprio em shared/auth.js, não troca de view).
+document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
   btn.addEventListener('click', () => switchTab(btn.dataset.tab));
 });
 
