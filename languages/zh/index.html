@@ -342,7 +342,12 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 
   .sidebar{
     grid-area:sidebar; display:flex; flex-direction:column; gap:2px;
-    position:sticky; top:20px;
+    /* top precisa ser >= altura da topbar (73px) + sua margin-bottom
+       (24px), senão a sidebar gruda em top:20 só que POR TRÁS da topbar
+       (que também é sticky agora, ver .topbar) -- o topo dela ficava
+       coberto/cortado ao rolar. 97px = 73 + 24, mesmo respiro visual de
+       antes de rolar. */
+    position:sticky; top:97px;
     /* Linha de separação da sidebar, estilo Duolingo. */
     border-right:1px solid var(--paper-line); padding-right:20px;
   }
@@ -363,7 +368,8 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 
   .app-content{ grid-area:content; max-width:none; margin:0; padding:0 0 80px; }
 
-  .right-cards{ grid-area:cards; display:flex; flex-direction:column; gap:16px; position:sticky; top:20px; }
+  /* Mesmo motivo do top:97px da sidebar acima -- ver comentário lá. */
+  .right-cards{ grid-area:cards; display:flex; flex-direction:column; gap:16px; position:sticky; top:97px; }
   .side-card{ background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow-card); }
   .side-card-title{ font-size:12.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin:0 0 12px; display:flex; align-items:center; gap:6px; }
   .side-status-row{ display:flex; align-items:center; gap:8px; font-size:14.5px; font-weight:700; padding:4px 0; }
