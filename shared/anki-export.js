@@ -176,23 +176,11 @@ async function generateApkg(config){
   }
 }
 
-// Liga o botão que abre o modal (📦 Exportar, na Trilha), fechar pelo X ou
-// clicando fora, e o botão "Gerar arquivo .apkg" -- mesmos ids/estrutura de
-// modal nos dois idiomas (#export-open-btn/#export-modal/#export-modal-close/
-// #export-deck-select/#export-status/#export-btn). Chamado uma vez por
-// app.js, passando o `config` daquele idioma.
-function wireAnkiExportModal(config){
-  document.getElementById('export-open-btn').addEventListener('click', () => {
-    renderExportDeckSelect(config);
-    document.getElementById('export-modal').style.display = 'flex';
-  });
-  document.getElementById('export-modal-close').addEventListener('click', () => {
-    document.getElementById('export-modal').style.display = 'none';
-  });
-  document.getElementById('export-modal').addEventListener('click', (e) => {
-    if (e.target.id === 'export-modal'){
-      document.getElementById('export-modal').style.display = 'none';
-    }
-  });
+// Liga o botão "Gerar arquivo .apkg" -- mesmos ids nos dois idiomas
+// (#export-deck-select/#export-status/#export-btn). Vive dentro da aba
+// "📦 Exportar" de Configurações (ver switchSettingsSection em cada
+// app.js), não é mais modal aberto por um botão solto na Trilha. Chamado
+// uma vez por app.js, passando o `config` daquele idioma.
+function wireAnkiExport(config){
   document.getElementById('export-btn').addEventListener('click', () => generateApkg(config));
 }

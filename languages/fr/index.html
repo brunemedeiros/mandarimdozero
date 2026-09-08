@@ -359,11 +359,9 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 }
 
 /* ---------- Path / units grid ---------- */
-.path-header-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; }
 .path-header{ margin-bottom:18px; }
 .path-header h2{ font-size: 20px; margin:0 0 4px; }
 .path-header p{ margin:0; color:var(--ink-soft); font-size:14px; }
-.path-header-btn{ font-size:13px; padding:10px 16px; white-space:nowrap; }
 
 /* ---------- Seletor de nível (toggle + modal, estilo Busuu) ---------- */
 .level-toggle-btn{
@@ -1838,7 +1836,7 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
 .deck-chip{ padding:7px 13px; border-radius:999px; border:1px solid var(--paper-line); background:var(--paper); font-size:12.5px; font-weight:700; cursor:pointer; color:var(--ink-soft); }
 .deck-chip.active{ background: var(--seal-red); border-color: var(--seal-red); color: var(--on-seal-red); }
 
-/* ---------- Modal genérico (reaproveitado por Exportar) ---------- */
+/* ---------- Modal genérico (perfil, meta de estudo, atalhos...) ---------- */
 .app-modal-overlay{
   position:fixed; inset:0; z-index:700; background: rgba(33,23,20,0.55);
   display:flex; align-items:center; justify-content:center; padding:16px;
@@ -2467,12 +2465,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <span class="level-toggle-chevron">⌄</span>
       </button>
       <div class="path-header">
-        <div class="path-header-top">
-          <div>
-            <p>Unidades organizadas por objetivo comunicacional. Complete uma unidade para desbloquear a próxima.</p>
-          </div>
-          <button class="btn btn-secondary path-header-btn" id="export-open-btn">📦 Exportar</button>
-        </div>
+        <p>Unidades organizadas por objetivo comunicacional. Complete uma unidade para desbloquear a próxima.</p>
       </div>
       <div class="daily-goal-chip" id="daily-goal-chip" style="display:none;"></div>
       <div class="daily-challenges-strip" id="daily-challenges-strip"></div>
@@ -2621,41 +2614,57 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <div class="view" id="view-settings">
     <div class="path-header">
       <h2>Configurações</h2>
-      <p>Sua conta e preferências do app.</p>
+      <p>Sua conta, preferências e exportação de dados.</p>
     </div>
-    <div class="section-label">Conta</div>
-    <div class="settings-card">
-      <div class="settings-row">
-        <div class="settings-row-label">E-mail</div>
-        <div class="settings-row-value" id="settings-email">—</div>
+    <div class="leaderboard-tabs" role="tablist" aria-label="Seção de Configurações">
+      <button class="leaderboard-tab active" role="tab" aria-selected="true" data-settings-section="geral">Geral</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="export">📦 Exportar</button>
+    </div>
+    <div id="settings-geral-content">
+      <div class="section-label">Conta</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-row-label">E-mail</div>
+          <div class="settings-row-value" id="settings-email">—</div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-label">Conectado com</div>
+          <div class="settings-row-value" id="settings-provider">—</div>
+        </div>
       </div>
-      <div class="settings-row">
-        <div class="settings-row-label">Conectado com</div>
-        <div class="settings-row-value" id="settings-provider">—</div>
+      <p class="settings-more-note">Mais opções de conta em breve.</p>
+      <div class="section-label">Preferências</div>
+      <div class="pref-row">
+        <div class="pref-row-text">
+          <div class="pref-row-title">Modo escuro</div>
+          <div class="pref-row-sub">Usa o tema escuro em vez do claro, independente do sistema.</div>
+        </div>
+        <button class="pref-switch" id="theme-pref-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
+      </div>
+      <div class="pref-row">
+        <div class="pref-row-text">
+          <div class="pref-row-title">Sempre digitar no exercício de completar frase</div>
+          <div class="pref-row-sub">Em vez de escolher entre opções, digite a palavra que falta (estilo Clozemaster).</div>
+        </div>
+        <button class="pref-switch" id="cloze-mode-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
+      </div>
+      <div class="pref-row">
+        <div class="pref-row-text">
+          <div class="pref-row-title">Som de acerto/erro nos exercícios</div>
+          <div class="pref-row-sub">Toca um som curto ao responder cada exercício, além da cor de certo/errado.</div>
+        </div>
+        <button class="pref-switch" id="feedback-sound-switch" role="switch" aria-checked="true"><span class="pref-switch-knob"></span></button>
       </div>
     </div>
-    <p class="settings-more-note">Mais opções de conta em breve.</p>
-    <div class="section-label">Preferências</div>
-    <div class="pref-row">
-      <div class="pref-row-text">
-        <div class="pref-row-title">Modo escuro</div>
-        <div class="pref-row-sub">Usa o tema escuro em vez do claro, independente do sistema.</div>
+    <div id="settings-export-content" style="display:none;">
+      <div class="export-box">
+        <div class="icon">📦</div>
+        <h3>Escolha o que exportar</h3>
+        <div class="deck-select" id="export-deck-select"></div>
+        <p>O baralho exportado inclui a palavra/frase em francês (com áudio configurável no Anki) e a tradução em português, com o mesmo par pergunta/resposta usado aqui no app.</p>
+        <button class="btn btn-gold btn-block" id="export-btn" style="max-width:320px; margin:0 auto;">Gerar arquivo .apkg</button>
+        <div class="export-status" id="export-status"></div>
       </div>
-      <button class="pref-switch" id="theme-pref-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
-    </div>
-    <div class="pref-row">
-      <div class="pref-row-text">
-        <div class="pref-row-title">Sempre digitar no exercício de completar frase</div>
-        <div class="pref-row-sub">Em vez de escolher entre opções, digite a palavra que falta (estilo Clozemaster).</div>
-      </div>
-      <button class="pref-switch" id="cloze-mode-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
-    </div>
-    <div class="pref-row">
-      <div class="pref-row-text">
-        <div class="pref-row-title">Som de acerto/erro nos exercícios</div>
-        <div class="pref-row-sub">Toca um som curto ao responder cada exercício, além da cor de certo/errado.</div>
-      </div>
-      <button class="pref-switch" id="feedback-sound-switch" role="switch" aria-checked="true"><span class="pref-switch-knob"></span></button>
     </div>
   </div>
 
@@ -2767,26 +2776,6 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <button class="user-dropdown-item admin-only-nav" id="admin-badges-btn" style="display:none;">🛠️ Painel de Admin</button>
   <div class="user-dropdown-sep"></div>
   <button class="user-dropdown-item danger" id="logout-btn">Sair da conta</button>
-</div>
-
-<!-- ===== MODAL: EXPORTAR ===== -->
-<div id="export-modal" class="app-modal-overlay" style="display:none;">
-  <div class="app-modal">
-    <div class="app-modal-header">
-      <h3>Exportar para Anki</h3>
-      <button class="app-modal-close" id="export-modal-close" aria-label="Fechar">✕</button>
-    </div>
-    <div class="app-modal-body">
-      <div class="export-box">
-        <div class="icon">📦</div>
-        <h3>Escolha o que exportar</h3>
-        <div class="deck-select" id="export-deck-select"></div>
-        <p>O baralho exportado inclui a palavra/frase em francês (com áudio configurável no Anki) e a tradução em português, com o mesmo par pergunta/resposta usado aqui no app.</p>
-        <button class="btn btn-gold btn-block" id="export-btn" style="max-width:320px; margin:0 auto;">Gerar arquivo .apkg</button>
-        <div class="export-status" id="export-status"></div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- ===== MODAL: IMPORTAR DESAFIOS VIA JSON (admin) ===== -->

@@ -8,7 +8,8 @@
      Conjugação (seleção livre de tempos + categoria de verbo, sempre as 6 pessoas).
    - Aba Manual removida. Não consta em docs/PARIDADE.md como pendência --
      se for pra voltar, é uma feature nova, não uma restauração.
-   - Exportar deixou de ser aba e virou botão/modal dentro da Trilha.
+   - Exportar deixou de ser aba própria, virou botão/modal na Trilha e agora
+     mora numa aba interna de Configurações ("📦 Exportar").
    ============================================================ */
 
 // Registro do service worker agora vem de shared/pwa.js.
@@ -5165,12 +5166,28 @@ document.getElementById('sidebar-toggle-btn').addEventListener('click', () => {
 function renderSettingsView(){
   document.getElementById('settings-email').textContent = CURRENT_USER?.email || 'Modo convidado';
   document.getElementById('settings-provider').textContent = CURRENT_USER?.app_metadata?.provider === 'google' ? 'Google' : (CURRENT_USER ? 'E-mail e senha' : '—');
+  switchSettingsSection(SETTINGS_SECTION);
 }
+
+// Alterna entre as duas seções internas de Configurações (Geral/Exportar) --
+// mesmo padrão de switchAdminPanelSection (shared/admin-analytics.js).
+// Lembra a última seção aberta (SETTINGS_SECTION), mesmo espírito de
+// ADMIN_PANEL_STATE.section: reabrir sempre na mesma aba entre visitas.
+let SETTINGS_SECTION = 'geral';
+function switchSettingsSection(section){
+  SETTINGS_SECTION = section;
+  document.querySelectorAll('[data-settings-section]').forEach(btn => btn.classList.toggle('active', btn.dataset.settingsSection === section));
+  document.getElementById('settings-geral-content').style.display = section === 'geral' ? '' : 'none';
+  document.getElementById('settings-export-content').style.display = section === 'export' ? '' : 'none';
+}
+document.querySelectorAll('[data-settings-section]').forEach(btn => {
+  btn.addEventListener('click', () => switchSettingsSection(btn.dataset.settingsSection));
+});
 
 // ============================================================
 // EXPORTAÇÃO .apkg (motor comum em shared/anki-export.js) — só o que é
 // específico do francês (campos, template, nome do baralho/arquivo, filtro
-// de unidades) fica aqui. Acessível por um botão na Trilha (não é mais aba própria).
+// de unidades) fica aqui. Vive na aba "📦 Exportar" de Configurações.
 // ============================================================
 const ANKI_EXPORT_CONFIG = {
   modelName: "Francês do Zero",
@@ -5208,7 +5225,7 @@ const ANKI_EXPORT_CONFIG = {
   },
 };
 
-wireAnkiExportModal(ANKI_EXPORT_CONFIG);
+wireAnkiExport(ANKI_EXPORT_CONFIG);
 
 // ============================================================
 // CONJUGAÇÃO — seleção livre de tempos + categoria de verbo, sempre as 6 pessoas
