@@ -913,7 +913,7 @@ function renderDailyChallengesScreen(){
 
   contentEl.innerHTML = `
     <div class="challenges-screen">
-      <h2>Desafios de hoje</h2>
+      <h2>🎯 Missões do dia</h2>
       ${todaysChallenges().map((c, i) => {
         // Number(...)||0: um campo ausente nunca mais vira NaN silencioso
         // (ver auditoria "O problema dos 100%") -- current fica sempre um
@@ -1428,15 +1428,20 @@ function isDailyChallengesStripCollapsed(){
   return localStorageSafeGet(CHALLENGES_STRIP_COLLAPSE_KEY) === '1';
 }
 
-// Faixa compacta e SEMPRE visível na Trilha com os 3 Desafios de hoje --
-// diferente de renderDailyChallengesScreen (tela cheia, só aparece ao
-// terminar uma unidade), essa dá visibilidade contínua sem exigir terminar
-// nada primeiro. Reaproveita a mesma fonte de dados (todaysChallenges()) --
-// não duplica lógica, só um resumo visual mais compacto dela. O título
-// funciona como botão de recolher/expandir.
+// Faixa compacta e SEMPRE visível com as 3 Missões do dia (ex-"Desafios de
+// hoje" -- ver artefato de navegação, rastreador) -- diferente de
+// renderDailyChallengesScreen (tela cheia, só aparece ao terminar uma
+// unidade), essa dá visibilidade contínua sem exigir terminar nada primeiro.
+// Reaproveita a mesma fonte de dados (todaysChallenges()) -- não duplica
+// lógica, só um resumo visual mais compacto dela. O título funciona como
+// botão de recolher/expandir. Renderiza no MESMO markup em dois lugares
+// (Trilha no mobile + card da sidebar no desktop, Fase 3): CSS decide qual
+// dos dois fica visível conforme a largura da tela, nunca os dois juntos.
 function renderDailyChallengesStrip(){
-  const strip = document.getElementById('daily-challenges-strip');
-  if (!strip) return;
+  const targets = ['daily-challenges-strip', 'side-missions-body']
+    .map(id => document.getElementById(id))
+    .filter(Boolean);
+  if (!targets.length) return;
   ensureDailyBucket();
   const collapsed = isDailyChallengesStripCollapsed();
   const cardsHTML = todaysChallenges().map((c, i) => {
@@ -1459,38 +1464,20 @@ function renderDailyChallengesStrip(){
       </div>
     `;
   }).join('');
-  strip.innerHTML = `
+  const html = `
     <button class="dcs-caption-btn" type="button" aria-expanded="${collapsed ? 'false' : 'true'}">
-      <span class="dcs-caption">Desafios de hoje</span>
+      <span class="dcs-caption">🎯 Missões do dia</span>
       <span class="dcs-caption-chevron">▾</span>
     </button>
     <div class="dcs-cards" ${collapsed ? 'style="display:none;"' : ''}>${cardsHTML}</div>
   `;
-  strip.querySelector('.dcs-caption-btn').addEventListener('click', () => {
-    localStorageSafeSet(CHALLENGES_STRIP_COLLAPSE_KEY, isDailyChallengesStripCollapsed() ? '0' : '1');
-    renderDailyChallengesStrip();
+  targets.forEach(strip => {
+    strip.innerHTML = html;
+    strip.querySelector('.dcs-caption-btn').addEventListener('click', () => {
+      localStorageSafeSet(CHALLENGES_STRIP_COLLAPSE_KEY, isDailyChallengesStripCollapsed() ? '0' : '1');
+      renderDailyChallengesStrip();
+    });
   });
-}
-
-// Card "Missões do dia" da sidebar desktop (Fase 3) -- resumo agregado (não
-// desafio por desafio, que já vive na Trilha via renderDailyChallengesStrip)
-// dos mesmos dados de STATE.daily/todaysChallenges(), pra não duplicar a
-// lógica de progresso em dois formatos.
-function renderSideMissionsCard(){
-  const body = document.getElementById('side-missions-body');
-  if (!body) return;
-  ensureDailyBucket();
-  const challenges = todaysChallenges();
-  const doneCount = challenges.filter(c => (Number(c.get(STATE.daily)) || 0) >= c.target).length;
-  const pct = challenges.length ? Math.round((doneCount / challenges.length) * 100) : 0;
-  body.innerHTML = `
-    <div class="side-missions-row">
-      <div class="side-missions-track"><div class="side-missions-fill" style="width:${pct}%"></div></div>
-      <div class="side-missions-fraction">${doneCount}/${challenges.length}</div>
-    </div>
-    <button class="side-card-link" id="side-missions-link">Ver desafios de hoje →</button>
-  `;
-  document.getElementById('side-missions-link').addEventListener('click', () => switchTab('path'));
 }
 
 function renderUnitsGrid(){
@@ -1498,7 +1485,6 @@ function renderUnitsGrid(){
   renderLevelSelect();
   renderDailyGoalChip();
   renderDailyChallengesStrip();
-  renderSideMissionsCard();
   renderSideRankingCard();
 
   const grid = document.getElementById('units-grid');

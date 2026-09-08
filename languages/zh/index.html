@@ -273,6 +273,11 @@ a.pill:hover{ border-color: var(--imperial-gold); }
      repetição (decisão #1). No mobile (fora desta media query) continua
      no topbar, como já decidido pra lá (decisão #4). */
   .stats-pills .pill.xp{ display:none; }
+  /* A faixa de Missões do dia na Trilha vira redundante aqui -- o mesmo
+     conteúdo já mora no card fixo da sidebar direita (renderDailyChallengesStrip
+     renderiza nos dois; CSS decide qual aparece). Some só a partir daqui;
+     no mobile (sem sidebar) continua sendo o único lugar que mostra isso. */
+  .daily-challenges-strip{ display:none; }
 
   .sidebar{
     grid-area:sidebar; display:flex; flex-direction:column; gap:2px;
@@ -306,10 +311,12 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   .side-ranking-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .side-card-link{ display:block; margin-top:10px; font-size:12.5px; font-weight:700; color:var(--seal-red-dark); background:none; border:none; padding:0; cursor:pointer; text-align:left; }
   .side-card-link:hover{ text-decoration:underline; }
-  .side-missions-track{ flex:1; height:7px; background:var(--paper-warm); border-radius:4px; overflow:hidden; }
-  .side-missions-fill{ height:100%; border-radius:4px; background:var(--jade); }
-  .side-missions-row{ display:flex; align-items:center; gap:8px; }
-  .side-missions-fraction{ flex-shrink:0; font-size:12.5px; font-weight:800; color:var(--ink-soft); }
+  /* Card de Missões do dia usa o mesmo .dcs-card/.dcs-caption-btn da faixa
+     da Trilha (renderDailyChallengesStrip renderiza nos dois lugares) --
+     sem padding extra do .side-card aqui em cima, o botão de recolher já
+     tem o próprio respiro. */
+  #side-card-missions{ padding-top:10px; }
+  #side-missions-body .dcs-caption-btn{ padding-top:0; }
 
   /* Sidebar recolhida manualmente ("Mostrar/Ocultar barra lateral", inspirado
      no do Claude) -- independe do modo foco automático abaixo. */
@@ -2427,7 +2434,6 @@ body.hide-pinyin .prompt-pinyin{
       <div class="side-status-row"><span>🔥</span><span id="side-streak-count">0</span><span>dias seguidos</span></div>
     </div>
     <div class="side-card" id="side-card-missions">
-      <div class="side-card-title">🎯 Missões do dia</div>
       <div id="side-missions-body"></div>
     </div>
   </div>
