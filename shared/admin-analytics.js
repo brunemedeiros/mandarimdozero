@@ -1079,7 +1079,14 @@ function renderDispositivosSectionHTML(stats){
 // duplicação que a revisão arquitetural desta fase pediu pra evitar.
 function renderEngajamentoSectionHTML(stats, weeklyXp, badgeGrants){
   const totalXpThisWeek = weeklyXp.reduce((sum, r) => sum + (r.amount || 0), 0);
-  const avgXpThisWeek = weeklyXp.length ? Math.round(totalXpThisWeek / weeklyXp.length) : 0;
+  // Divide por TODOS os alunos ativos no período (stats.activeStudents), não
+  // só por weeklyXp.length (só quem tem linha em weekly_xp essa semana --
+  // um aluno ativo no período que ainda não ganhou XP nesta semana
+  // específica não tem linha nenhuma). Dividir só pelos "sobreviventes"
+  // infla a média silenciosamente -- ex: 3 ativos, só 2 com XP essa
+  // semana, dividir por 2 mostra uma média mais alta do que a real entre
+  // todos os ativos.
+  const avgXpThisWeek = stats.activeStudents ? Math.round(totalXpThisWeek / stats.activeStudents) : 0;
   const badgeCount = badgeGrants.length;
   const badgedStudents = new Set(badgeGrants.map(g => g.user_id)).size;
   const leaderboardViews = stats.areaRows.find(r => r.name === 'leaderboard')?.count || 0;
@@ -1110,7 +1117,7 @@ function renderEngajamentoSectionHTML(stats, weeklyXp, badgeGrants){
         ${analyticsKpiTileHTML(badgeCount, 'Conquistas concedidas')}
         ${analyticsKpiTileHTML(leaderboardViews, 'Visualizações do Ranking')}
       </div>
-      <p class="admin-badge-desc">XP usa a mesma semana (segunda a domingo) já mostrada no Ranking -- não é "XP gerado no período selecionado acima", é sempre a semana corrente. Sequência é uma aproximação calculada a partir dos dias com atividade registrada, não o streak "oficial" do app (que tem regras próprias como dias de folga e mora fora do alcance deste painel). ${badgedStudents ? `${badgedStudents} ${badgedStudents === 1 ? 'aluno(a) recebeu' : 'alunos(as) receberam'} pelo menos uma conquista no período.` : ''}</p>
+      <p class="admin-badge-desc">XP usa a mesma semana (segunda a domingo) já mostrada no Ranking -- não é "XP gerado no período selecionado acima", é sempre a semana corrente. "XP médio/aluno" divide pelo total de alunos ativos no período (não só por quem já ganhou XP essa semana específica) -- um aluno ativo sem XP essa semana ainda entra na conta, com 0. Sequência é uma aproximação calculada a partir dos dias com atividade registrada, não o streak "oficial" do app (que tem regras próprias como dias de folga e mora fora do alcance deste painel). ${badgedStudents ? `${badgedStudents} ${badgedStudents === 1 ? 'aluno(a) recebeu' : 'alunos(as) receberam'} pelo menos uma conquista no período.` : ''}</p>
     </div>
   `;
 }
