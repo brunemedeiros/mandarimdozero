@@ -8,6 +8,9 @@ function localStorageSafeGet(key){
 function localStorageSafeSet(key, val){
   try{ window.localStorage.setItem(key, val); }catch(e){ /* ignore */ }
 }
+function localStorageSafeRemove(key){
+  try{ window.localStorage.removeItem(key); }catch(e){ /* ignore */ }
+}
 function sessionStorageSafeGet(key){
   try{ return window.sessionStorage.getItem(key); }catch(e){ return null; }
 }

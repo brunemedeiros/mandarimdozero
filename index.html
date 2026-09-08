@@ -326,7 +326,18 @@ document.getElementById('gate-guest-btn').addEventListener('click', enterGuestFl
   if (session && session.user){
     await afterAuthResolved(session.user);
   } else {
-    showOnly('gate-login');
+    // Sem sessão: se este navegador já estudou aqui antes (tem idioma
+    // salvo do modo convidado ou de uma sessão anterior), entra direto
+    // nesse idioma em vez de mostrar o portão de login de novo -- só quem
+    // nunca usou este navegador vê a tela de login. enterGuestFlow() já
+    // faz exatamente essa checagem (ver função acima).
+    const lastLang = localStorageSafeGet(LAST_LANGUAGE_KEY);
+    const hasReturningLang = lastLang && AVAILABLE_LANGUAGES.some(l => l.id === lastLang && l.enabled);
+    if (hasReturningLang){
+      enterGuestFlow();
+    } else {
+      showOnly('gate-login');
+    }
   }
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session && session.user){

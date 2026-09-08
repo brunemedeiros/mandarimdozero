@@ -220,6 +220,11 @@ document.addEventListener('click', () => {
 
 document.getElementById('logout-btn').addEventListener('click', async () => {
   if (CURRENT_USER){
+    // Logout explícito (de verdade, com conta) limpa o idioma lembrado --
+    // sem isso, a próxima visita ao portão (index.html da raiz) reconhecia
+    // este navegador como "já estudou aqui antes" e entrava direto em modo
+    // convidado, pulando a tela de login mesmo pra quem saiu de propósito.
+    localStorageSafeRemove(LAST_LANGUAGE_KEY);
     await supabaseClient.auth.signOut();
   } else {
     sessionStorageSafeSet(GUEST_MODE_FLAG, '0');
