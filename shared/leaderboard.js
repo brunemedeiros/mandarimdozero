@@ -280,4 +280,15 @@ function animateOwnRowRankChange(meRow, scope, weekStart, rows){
   }
 
   localStorageSafeSet(LEADERBOARD_LAST_RANK_KEY, JSON.stringify({ scope, weekStart, rank: meRank }));
+
+  // Fase 4 do sistema de notificações (seção 18: "Ranking -- mudança de
+  // posição"). Só no escopo Geral -- é o que a maioria das pessoas
+  // acompanha; mudanças por idioma ficariam barulhentas demais (cada
+  // troca de posição em cada idioma vira um evento). typeof guard porque
+  // este arquivo roda em toda visita ao Ranking, inclusive antes de
+  // shared/notifications.js existir em algum contexto de teste isolado.
+  if (rankChanged && scope === 'all' && typeof fireNotificationEvent === 'function'){
+    const eventType = meRank < prev.rank ? 'ranking_rank_up' : 'ranking_rank_down';
+    fireNotificationEvent(eventType, 'ranking', { newRank: meRank }, 'leaderboard');
+  }
 }

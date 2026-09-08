@@ -42,6 +42,17 @@
 // content.js (estático, por idioma, sem acesso do lado do servidor hoje).
 // As notificações desta fase são por CONTAGEM.
 //
+// Fase 4: Ranking/Desafios (seção 18 -- "menor prioridade pedagógica, mas
+// dado já existe"). Mudança de posição no ranking é evento CLIENTE (ver
+// shared/leaderboard.js:animateOwnRowRankChange -- dispara ao abrir a
+// tela, não precisa de cron). Este arquivo ganha os outros dois:
+//   - ranking_weekly_result   -- toda segunda (UTC), soma weekly_xp da
+//     semana que terminou e avisa a posição final de cada participante
+//   - daily_missions_reminder -- a pessoa começou pelo menos 1 das 3
+//     "Missões do dia" mas não terminou todas -- pools/sorteio determinís-
+//     tico portados de languages/<lang>/app.js (MISSION_POOLS abaixo),
+//     mesmo dailySeed()/pickDailyFromPool()
+//
 // Deploy + agendamento são passos manuais (ver PR).
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
@@ -67,6 +78,110 @@ const LANGUAGES = [
 // shared/wizard.js -- aqui aplicada sobre getUTCDay() (ver limitação de
 // fuso acima).
 const DAY_KEY_BY_UTC_INDEX = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+
+// Portado de EASY_CHALLENGES/REVISAO_CONJ_CHALLENGES/REVISAO_HANZI_CHALLENGES/
+// GENERAL_CHALLENGES em languages/<lang>/app.js -- só id/target/campo (o
+// texto do label não importa aqui, a notificação não nomeia a missão em
+// si, só conta quantas faltam). "special: 'lastStudyDay'" é a única
+// missão que não lê um campo de STATE.daily.
+type MissionDef = { id: string; target: number; field?: string; special?: 'lastStudyDay' };
+const MISSION_POOLS: Record<string, { easy: MissionDef[]; secondary: MissionDef[]; general: MissionDef[] }> = {
+  frances: {
+    easy: [
+      { id: 'streak', target: 1, special: 'lastStudyDay' },
+      { id: 'firstLesson', target: 1, field: 'lessons' },
+    ],
+    secondary: [
+      { id: 'conj1', target: 1, field: 'conjugationSessions' },
+      { id: 'conjCorrect10', target: 10, field: 'conjugationCorrect' },
+      { id: 'conjTenses2', target: 2, field: 'conjugationTenses.length' },
+      { id: 'reviews15', target: 15, field: 'reviewsDone' },
+      { id: 'speedReview1', target: 1, field: 'speedReviewSessions' },
+      { id: 'matchGame1', target: 1, field: 'matchGamesPlayed' },
+      { id: 'overdue3', target: 3, field: 'overdueReviewsDone' },
+    ],
+    general: [
+      { id: 'stars40', target: 40, field: 'stars' },
+      { id: 'highscore2', target: 2, field: 'highScoreLessons' },
+      { id: 'perfect1', target: 1, field: 'perfectLessons' },
+      { id: 'grammar1', target: 1, field: 'grammarLessons' },
+      { id: 'listen10', target: 10, field: 'audioPlaysToday' },
+      { id: 'translateBlocks2', target: 2, field: 'exerciseFormatCounts.reorder' },
+    ],
+  },
+  mandarim: {
+    easy: [
+      { id: 'streak', target: 1, special: 'lastStudyDay' },
+      { id: 'firstLesson', target: 1, field: 'lessons' },
+    ],
+    secondary: [
+      { id: 'hanzi1', target: 1, field: 'hanziLessons' },
+      { id: 'reviews15', target: 15, field: 'reviewsDone' },
+      { id: 'speedReview1', target: 1, field: 'speedReviewSessions' },
+      { id: 'matchGame1', target: 1, field: 'matchGamesPlayed' },
+      { id: 'overdue3', target: 3, field: 'overdueReviewsDone' },
+    ],
+    general: [
+      { id: 'stars40', target: 40, field: 'stars' },
+      { id: 'highscore2', target: 2, field: 'highScoreLessons' },
+      { id: 'perfect1', target: 1, field: 'perfectLessons' },
+      { id: 'hanzi2', target: 2, field: 'hanziLessons' },
+      { id: 'listen10', target: 10, field: 'audioPlaysToday' },
+      { id: 'translateBlocks2', target: 2, field: 'exerciseFormatCounts.reorder' },
+    ],
+  },
+};
+
+// Idêntico a dailySeed()/pickDailyFromPool() em languages/<lang>/app.js --
+// mesma fórmula, senão sortearia missões DIFERENTES das que a pessoa vê
+// na tela dela.
+function dailySeed(str: string): number {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+  return h;
+}
+function pickDailyFromPool<T>(pool: T[], dateKey: string, salt: string): T {
+  return pool[dailySeed(`${dateKey}:${salt}`) % pool.length];
+}
+
+function getFieldValue(daily: any, field: string): number {
+  const raw = field.split('.').reduce((acc: any, key: string) => (acc == null ? undefined : acc[key]), daily);
+  return Number(raw) || 0;
+}
+
+// state.lastStudyDay/state.daily.date são gravados no fuso LOCAL do
+// navegador (ver limitação de fuso no topo do arquivo) -- comparar os dois
+// ENTRE SI (em vez de contra o "hoje" em UTC deste cron) mede exatamente a
+// mesma coisa que o cliente mediria, sem herdar o descasamento de fuso.
+function missionCurrent(mission: MissionDef, state: any): number {
+  if (mission.special === 'lastStudyDay') return state.lastStudyDay === state.daily?.date ? 1 : 0;
+  return getFieldValue(state.daily, mission.field!);
+}
+
+// null = sem bucket de hoje pra este idioma (state.daily.date ausente) --
+// nada a avaliar, bem diferente de "começou e não terminou".
+function computeMissionProgress(languageAppKey: string, state: any): { current: number; target: number }[] | null {
+  const pools = MISSION_POOLS[languageAppKey];
+  const dateKey = state.daily?.date;
+  if (!pools || !dateKey) return null;
+  const missions = [
+    pickDailyFromPool(pools.easy, dateKey, 'easy'),
+    pickDailyFromPool(pools.secondary, dateKey, 'revcon'),
+    pickDailyFromPool(pools.general, dateKey, 'general'),
+  ];
+  return missions.map((m) => ({ current: Math.min(missionCurrent(m, state), m.target), target: m.target }));
+}
+
+// Segunda-feira (UTC) da semana que contém `date` -- mesma regra de
+// leaderboardCurrentWeekStart() (shared/leaderboard.js), só que sobre
+// getUTCDay() em vez do fuso local do navegador.
+function mondayUTCDateKey(date: Date): string {
+  const d = new Date(date);
+  const day = d.getUTCDay();
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+  d.setUTCDate(d.getUTCDate() + diffToMonday);
+  return d.toISOString().slice(0, 10);
+}
 
 // "Devida" (due <= agora) já é coberta pelo banner in-app existente
 // (maybeShowReviewReminder, 15+ cartas) quando alguém abre o app --
@@ -277,6 +392,58 @@ async function processUserLanguage(
     if (await maybeNotify(supabase, rules, prefsCache, userId, languageAppKey, `user_inactive_${inactiveDays}`, 'reengajamento', {}, 'path')) created++;
   }
 
+  // 5) Missões do dia começadas, não terminadas (Fase 4) -- "começou"
+  // exige progresso > 0 em pelo menos uma; sem isso, alguém que nem abriu
+  // o app hoje receberia isto JUNTO com streak_at_risk/study_goal_remaining
+  // (redundante -- essas duas já cobrem "não estudou hoje").
+  const missions = computeMissionProgress(languageAppKey, state);
+  if (missions) {
+    const anyStarted = missions.some((m) => m.current > 0);
+    const missing = missions.filter((m) => m.current < m.target).length;
+    if (anyStarted && missing > 0) {
+      if (await maybeNotify(supabase, rules, prefsCache, userId, languageAppKey, 'daily_missions_reminder', 'desafios', { missing }, 'path')) created++;
+    }
+  }
+
+  return created;
+}
+
+// Roda 1x por invocação (não por usuário/idioma) -- só faz sentido às
+// segundas (UTC), quando uma semana acabou de virar. Ranking "Geral" (soma
+// de todos os idiomas por conta), mesmo cálculo de
+// shared/leaderboard.js:fetchLeaderboard('all', weekStart) -- só que sobre
+// a semana que TERMINOU ontem, não a atual.
+async function processWeeklyRankingResults(supabase: any, rules: Map<string, any>, prefsCache: Map<string, any>): Promise<number> {
+  if (new Date().getUTCDay() !== 1) return 0;
+
+  const endedWeekStart = mondayUTCDateKey(new Date(Date.now() - 7 * 86400000));
+  const { data: rows, error } = await supabase.from('weekly_xp').select('user_id, language_app_key, amount').eq('week_start', endedWeekStart);
+  if (error || !rows?.length) return 0;
+
+  const totals = new Map<string, number>();
+  const langTotalsByUser = new Map<string, Map<string, number>>();
+  for (const row of rows) {
+    totals.set(row.user_id, (totals.get(row.user_id) || 0) + row.amount);
+    const langMap = langTotalsByUser.get(row.user_id) || new Map<string, number>();
+    langMap.set(row.language_app_key, (langMap.get(row.language_app_key) || 0) + row.amount);
+    langTotalsByUser.set(row.user_id, langMap);
+  }
+
+  const ranked = [...totals.entries()]
+    .filter(([, amount]) => amount > 0)
+    .sort((a, b) => b[1] - a[1]);
+
+  let created = 0;
+  for (let i = 0; i < ranked.length; i++) {
+    const [userId] = ranked[i];
+    const rank = i + 1;
+    // Idioma "dominante" da conta na semana -- só decide em qual
+    // language_app_key a notificação fica registrada (o texto do template
+    // é idêntico nos dois, ver migration 014), não afeta o cálculo do rank.
+    const langMap = langTotalsByUser.get(userId);
+    const dominantLang = langMap ? [...langMap.entries()].sort((a, b) => b[1] - a[1])[0][0] : 'frances';
+    if (await maybeNotify(supabase, rules, prefsCache, userId, dominantLang, 'ranking_weekly_result', 'ranking', { rank, totalParticipants: ranked.length }, 'leaderboard')) created++;
+  }
   return created;
 }
 
@@ -316,10 +483,16 @@ Deno.serve(async (_req: Request) => {
     }
   }
 
+  try {
+    notificationsCreated += await processWeeklyRankingResults(supabase, rules, prefsCache);
+  } catch (e) {
+    errors.push(`ranking semanal: ${String(e)}`);
+  }
+
   const summary = {
     ok: true,
     ranAt: new Date().toISOString(),
-    phase: 'Fase 2 -- review_overdue, streak_at_risk, study_goal_remaining, reengajamento (dias 1-9)',
+    phase: 'Fase 4 -- review_overdue, streak_at_risk, study_goal_remaining, reengajamento (1-9), daily_missions_reminder, ranking_weekly_result',
     usersScanned,
     notificationsCreated,
     errorCount: errors.length,
