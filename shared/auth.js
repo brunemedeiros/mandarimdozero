@@ -94,6 +94,7 @@ async function onUserLoggedIn(user){
   // por causa disso (mesmo padrão do upsert de weekly_xp em saveState()).
   if (typeof ensureProfileLoaded === 'function') ensureProfileLoaded().catch(() => {});
   if (typeof refreshNotificationUnreadCount === 'function') refreshNotificationUnreadCount();
+  if (typeof ensureNotificationPreferencesLoaded === 'function') ensureNotificationPreferencesLoaded();
   await loadStateAndRender();
 }
 

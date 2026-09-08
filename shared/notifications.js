@@ -20,6 +20,7 @@
 
 let NOTIFICATION_RULES_CACHE = null; // Map<category, rule> -- carregado 1x por sessão (leitura pública, ver 010)
 let NOTIFICATION_UNREAD_COUNT = 0;
+let NOTIFICATION_PREFERENCES_CACHE = null; // { channels, quiet_hours_start, quiet_hours_end } | null
 
 async function ensureNotificationRulesLoaded(){
   if (NOTIFICATION_RULES_CACHE) return NOTIFICATION_RULES_CACHE;
@@ -27,6 +28,46 @@ async function ensureNotificationRulesLoaded(){
   if (error){ console.error('Erro ao carregar regras de notificação:', error); return new Map(); }
   NOTIFICATION_RULES_CACHE = new Map((data || []).map(r => [r.category, r]));
   return NOTIFICATION_RULES_CACHE;
+}
+
+// Fase 2: preferências por conta (Configurações > Notificações, ver
+// shared/notification-preferences.js). Carregada 1x por sessão/login e
+// mantida em cache -- as próprias telas de preferência atualizam este
+// cache direto ao salvar, sem precisar recarregar do banco.
+async function ensureNotificationPreferencesLoaded(forceReload){
+  if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER){ NOTIFICATION_PREFERENCES_CACHE = null; return null; }
+  if (NOTIFICATION_PREFERENCES_CACHE && !forceReload) return NOTIFICATION_PREFERENCES_CACHE;
+
+  const { data, error } = await supabaseClient.from('notification_preferences').select('*').eq('user_id', CURRENT_USER.id).maybeSingle();
+  if (error){ console.error('Erro ao carregar preferências de notificação:', error); return null; }
+
+  if (data){
+    NOTIFICATION_PREFERENCES_CACHE = data;
+    return NOTIFICATION_PREFERENCES_CACHE;
+  }
+
+  // Primeira vez desta conta: garante que a linha exista, usando os
+  // defaults da própria coluna (upsert só com user_id -- nunca sobrescreve
+  // um valor já salvo, mesmo truque usado em shared/auth.js:onUserLoggedIn
+  // pra profiles).
+  const { error: upsertError } = await supabaseClient
+    .from('notification_preferences')
+    .upsert({ user_id: CURRENT_USER.id }, { onConflict: 'user_id' });
+  if (upsertError){ console.error('Erro ao criar preferências de notificação:', upsertError); return null; }
+
+  const { data: created, error: reloadError } = await supabaseClient.from('notification_preferences').select('*').eq('user_id', CURRENT_USER.id).maybeSingle();
+  if (reloadError){ console.error('Erro ao recarregar preferências de notificação:', reloadError); return null; }
+  NOTIFICATION_PREFERENCES_CACHE = created;
+  return NOTIFICATION_PREFERENCES_CACHE;
+}
+
+// Categoria sem preferência salva ainda (cache não carregado, ou chave
+// ausente do jsonb) conta como PERMITIDA -- mesmo default "tudo ligado" da
+// coluna channels (ver migration 010), nunca bloqueia por falta de dado.
+function notificationCategoryAllowsInApp(category){
+  const channels = NOTIFICATION_PREFERENCES_CACHE?.channels?.[category];
+  if (!Array.isArray(channels)) return true;
+  return channels.includes('in_app');
 }
 
 // Placeholders tipo {{amount}}/{{badge_name}}/{{days}} -- substituídos a
@@ -93,6 +134,9 @@ async function fireNotificationEvent(eventType, category, payload, actionTab){
     payload: payload || null,
     source: 'client',
   }).then(({ error }) => { if (error) console.error('Erro ao registrar evento de notificação:', error); });
+
+  await ensureNotificationPreferencesLoaded();
+  if (!notificationCategoryAllowsInApp(category)) return;
 
   const ok = await passesAntiSpam(category);
   if (!ok) return;

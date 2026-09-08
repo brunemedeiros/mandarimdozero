@@ -5250,7 +5250,9 @@ function switchSettingsSection(section){
   SETTINGS_SECTION = section;
   document.querySelectorAll('[data-settings-section]').forEach(btn => btn.classList.toggle('active', btn.dataset.settingsSection === section));
   document.getElementById('settings-geral-content').style.display = section === 'geral' ? '' : 'none';
+  document.getElementById('settings-notifications-content').style.display = section === 'notifications' ? '' : 'none';
   document.getElementById('settings-export-content').style.display = section === 'export' ? '' : 'none';
+  if (section === 'notifications' && typeof renderNotificationPreferencesView === 'function') renderNotificationPreferencesView();
 }
 document.querySelectorAll('[data-settings-section]').forEach(btn => {
   btn.addEventListener('click', () => switchSettingsSection(btn.dataset.settingsSection));
