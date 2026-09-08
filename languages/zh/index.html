@@ -317,15 +317,14 @@ a.pill:hover{ border-color: var(--imperial-gold); }
     grid-template-areas: "topbar topbar topbar" "sidebar content cards";
     column-gap:28px;
     align-items:start;
-    /* Respiro nas bordas esquerda/direita -- antes #app não tinha padding
-       horizontal nenhum, então a sidebar e os cards da direita ficavam
-       colados na borda da janela (visualmente "esticado"), enquanto a
-       topbar (que já tinha seu próprio padding de 32px) parecia deslocada
-       em relação a eles. Agora os dois alinham no mesmo respiro. */
-    padding-left:32px; padding-right:32px;
+    /* Respiro só na borda direita -- a sidebar esquerda faz sentido ficar
+       colada na borda da janela (pedido explícito), mas os cards da
+       direita ganham 32px de respiro pra não ficar colados lá. */
+    padding-right:32px;
   }
-  /* A topbar já ganha o respiro lateral do #app acima -- zera o padding
-     próprio dela pra não somar os dois (senão ficaria 64px). */
+  /* A topbar já ganha o respiro da borda direita do #app acima -- zera o
+     padding próprio dela pra não somar os dois (senão ficaria 64px). Do
+     lado esquerdo os dois já ficam em 0, sem precisar de nada aqui. */
   .topbar{ grid-area:topbar; padding-left:0; padding-right:0; }
   /* .tabs já fica escondida sempre agora (ver regra global acima) --
      e o pill de Conta na topbar volta aqui (só mobile ele some, ver
