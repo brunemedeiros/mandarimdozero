@@ -241,24 +241,34 @@ function positionNotificationsDropdown(){
     return;
   }
   const rect = btn.getBoundingClientRect();
-  const dropdownWidth = 340; // aprox. (CSS: min-width 320px / max-width 360px)
+  // Largura REAL renderizada (não uma estimativa) -- só dá pra medir depois
+  // que .open já foi aplicada (senão é display:none, largura 0). Chamada
+  // depois de dropdown.classList.add('open') em toggleNotificationDropdown,
+  // ainda no mesmo turno síncrono -- o navegador só pinta depois que o JS
+  // termina, então não há flash na posição errada.
+  const dropdownWidth = dropdown.getBoundingClientRect().width || 340;
   const margin = 12;
-  let left = rect.right - dropdownWidth; // alinha a borda direita da lista com a do sino
+  let left = rect.right - dropdownWidth; // borda direita da lista exatamente sob a borda direita do sino
   left = Math.max(margin, Math.min(left, window.innerWidth - margin - dropdownWidth));
   dropdown.style.top = `${Math.round(rect.bottom + 8)}px`;
   dropdown.style.left = `${Math.round(left)}px`;
   dropdown.style.right = 'auto';
 }
 
-function toggleNotificationDropdown(){
+async function toggleNotificationDropdown(){
   const dropdown = document.getElementById('notifications-dropdown');
   if (!dropdown) return;
   const opening = !dropdown.classList.contains('open');
   document.querySelectorAll('.user-dropdown.open').forEach(d => d.classList.remove('open'));
   if (opening){
+    dropdown.classList.add('open'); // precisa estar visível ANTES de medir a largura real
     positionNotificationsDropdown();
-    dropdown.classList.add('open');
-    renderNotificationDropdown();
+    // A lista começa vazia ("Carregando...") -- mede mais estreita que o
+    // conteúdo final (ver fetchRecentNotifications, assíncrono). Reposiciona
+    // de novo depois que o conteúdo real já ocupou a largura definitiva --
+    // senão a borda direita fica alguns px deslocada da borda do sino.
+    await renderNotificationDropdown();
+    positionNotificationsDropdown();
   }
 }
 
