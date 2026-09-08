@@ -72,6 +72,13 @@ try{
     --dc-slot-0: #F7B84A;
     --dc-slot-1: #9A85FF;
     --dc-slot-2: #5B9DFF;
+    /* --shadow-lift (definida no :root claro) usa uma sombra escura --
+       some sobre um fundo que já é escuro. Painéis flutuantes (dropdowns)
+       também trocam de --paper pra --paper-warm como fundo (ver
+       .user-dropdown/.lang-switcher-dropdown) -- juntos, sombra mais opaca
+       + um fundo perceptivelmente mais claro que a página é o que separa
+       visualmente o painel do conteúdo atrás dele no escuro. */
+    --shadow-lift: 0 8px 24px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.05);
   }
 }
 :root[data-theme="dark"]{
@@ -89,6 +96,7 @@ try{
   --dc-slot-0: #F7B84A;
   --dc-slot-1: #9A85FF;
   --dc-slot-2: #5B9DFF;
+  --shadow-lift: 0 8px 24px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.05);
 }
 
 @font-face{
@@ -2080,7 +2088,7 @@ body.hide-pinyin .prompt-pinyin{
   display: none !important;
 }
 .user-dropdown{
-  position:fixed; top:64px; right:16px; z-index:600; background:var(--paper); border:1px solid var(--paper-line);
+  position:fixed; top:64px; right:16px; z-index:600; background:var(--paper-warm); border:1px solid var(--paper-line);
   border-radius:12px; box-shadow: var(--shadow-lift); padding:8px; display:none; min-width:200px;
 }
 .user-dropdown.open{ display:block; }
@@ -2171,7 +2179,7 @@ body.hide-pinyin .prompt-pinyin{
    vários SOs, só como texto "FR"/"CN"). */
 .lang-switcher-btn svg{ width:22px; height:auto; display:block; border-radius:3px; }
 .lang-switcher-dropdown{
-  position:fixed; top:64px; right:16px; z-index:600; background:var(--paper); border:1px solid var(--paper-line);
+  position:fixed; top:64px; right:16px; z-index:600; background:var(--paper-warm); border:1px solid var(--paper-line);
   border-radius:12px; box-shadow: var(--shadow-lift); padding:8px; display:none; min-width:200px;
 }
 .lang-switcher-dropdown.open{ display:block; }
