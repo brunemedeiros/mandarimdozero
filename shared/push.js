@@ -89,6 +89,53 @@ async function subscribeToPush(){
   }
 }
 
+// ---------- Navegação direta ao clicar na notificação do sistema ----------
+// O service worker não pode chamar switchTab() sozinho (roda num contexto
+// isolado, sem acesso ao DOM/JS da página) -- por isso o clique chega até
+// aqui de dois jeitos possíveis, dependendo se já havia uma aba aberta:
+//   1. Aba já aberta: o SW manda postMessage() direto -- pega no listener
+//      abaixo e troca de aba na hora.
+//   2. Nenhuma aba aberta: o SW abre uma nova com ?notif_tab=<aba> na URL
+//      (postMessage não teria ninguém escutando ainda) -- guardamos esse
+//      valor aqui embaixo e aplicamos assim que o app terminar de carregar
+//      (ver applyPendingNotificationTab(), chamada em shared/auth.js logo
+//      depois de loadStateAndRender(), pra não ser sobrescrita pela aba
+//      padrão que o carregamento normal já abre).
+let PENDING_NOTIFICATION_TAB = null;
+(function capturePendingNotificationTabFromURL(){
+  const params = new URLSearchParams(window.location.search);
+  const tab = params.get('notif_tab');
+  if (!tab) return;
+  PENDING_NOTIFICATION_TAB = tab;
+  // NÃO limpa a URL aqui ainda -- de propósito. shared/pwa.js recarrega a
+  // página sozinho sempre que um service worker novo assume o controle
+  // (controllerchange), o que acontece também numa primeira visita (o SW
+  // recém-instalado já nasce no controle via clients.claim()) -- ou seja,
+  // ESTE carregamento pode não ser o que sobrevive. Se limpássemos a URL
+  // aqui e o recarregamento acontecesse em seguida, ?notif_tab= já teria
+  // sumido e a navegação da notificação se perderia. Só remove depois de
+  // efetivamente aplicar (ver applyPendingNotificationTab()).
+})();
+
+function applyPendingNotificationTab(){
+  if (!PENDING_NOTIFICATION_TAB) return;
+  const tab = PENDING_NOTIFICATION_TAB;
+  PENDING_NOTIFICATION_TAB = null;
+  // Só limpa a URL aqui, depois de já ter sobrevivido a qualquer
+  // recarregamento do service worker (ver comentário acima) -- sem isso,
+  // um refresh ou link compartilhado repetiria a navegação forçada.
+  window.history.replaceState(null, '', window.location.pathname);
+  if (typeof switchTab === 'function') switchTab(tab);
+}
+
+if ('serviceWorker' in navigator){
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data?.type === 'notification-click' && event.data.actionTab && typeof switchTab === 'function'){
+      switchTab(event.data.actionTab);
+    }
+  });
+}
+
 // Desliga push NESTE navegador: apaga a linha em push_subscriptions (se a
 // conta tiver assinado em outro aparelho, aquela linha continua intacta --
 // só desliga o aparelho atual) e cancela a inscrição do navegador em si.

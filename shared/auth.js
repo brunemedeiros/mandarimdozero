@@ -63,7 +63,13 @@ function enterGuestMode(){
   // em qualquer largura de tela.
   document.getElementById('app').style.removeProperty('display');
   document.getElementById('user-label').textContent = 'Convidado';
-  loadStateAndRender();
+  // .then() (não await -- enterGuestMode não é async) garante que o
+  // redirecionamento de notificação (se houver) só rode DEPOIS do
+  // render padrão terminar, senão a aba padrão do carregamento sobrescreve
+  // a aba que a notificação pediu.
+  loadStateAndRender().then(() => {
+    if (typeof applyPendingNotificationTab === 'function') applyPendingNotificationTab();
+  });
 }
 
 async function onUserLoggedIn(user){
@@ -96,6 +102,10 @@ async function onUserLoggedIn(user){
   if (typeof refreshNotificationUnreadCount === 'function') refreshNotificationUnreadCount();
   if (typeof ensureNotificationPreferencesLoaded === 'function') ensureNotificationPreferencesLoaded();
   await loadStateAndRender();
+  // Depois do render padrão (ver comentário equivalente em enterGuestMode)
+  // -- só assim a navegação forçada por uma notificação clicada vence a
+  // aba default do carregamento normal.
+  if (typeof applyPendingNotificationTab === 'function') applyPendingNotificationTab();
 }
 
 document.getElementById('google-login-btn').addEventListener('click', async () => {

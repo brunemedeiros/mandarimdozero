@@ -3,7 +3,7 @@
 // do próprio site (sempre pega a versão mais nova quando há internet), com
 // fallback pro cache quando offline. Nunca intercepta chamadas ao Supabase
 // (essas precisam de rede de verdade; o app já trata erro de rede sozinho).
-const CACHE_NAME = 'frances-avec-prof-brune-v9';
+const CACHE_NAME = 'frances-avec-prof-brune-v10';
 const PRECACHE_URLS = [
   './',
   './index.html',
@@ -76,18 +76,24 @@ self.addEventListener('push', (event) => {
 });
 
 // Clique na notificação do sistema: foca uma aba já aberta do app se
-// existir, senão abre uma nova. Não navega direto pra `actionTab` ainda
-// (exigiria um canal de mensagem com a página já carregada, tratando a
-// corrida de "clicou antes da página processar" -- fica como refinamento
-// futuro); abrir o app já é o valor essencial de "avisar com o app
-// fechado", que é o problema real que a Fase 3 resolve.
+// existir (e manda a aba certa por postMessage -- ver listener em
+// shared/push.js), senão abre uma nova já com ?notif_tab= na URL (não dá
+// pra usar postMessage aqui: não existe ninguém escutando ainda numa aba
+// que nem carregou -- shared/push.js lê esse parâmetro no carregamento e
+// shared/auth.js aplica depois que o app termina de renderizar, ver
+// applyPendingNotificationTab()).
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  const actionTab = event.notification.data?.actionTab || null;
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
       const existing = clients.find((c) => c.url.includes(self.location.pathname.replace('service-worker.js', 'index.html')));
-      if (existing) return existing.focus();
-      return self.clients.openWindow('./index.html');
+      if (existing){
+        if (actionTab) existing.postMessage({ type: 'notification-click', actionTab });
+        return existing.focus();
+      }
+      const url = actionTab ? `./index.html?notif_tab=${encodeURIComponent(actionTab)}` : './index.html';
+      return self.clients.openWindow(url);
     })
   );
 });
