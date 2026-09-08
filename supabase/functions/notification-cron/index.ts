@@ -11,13 +11,20 @@
 // invocação, leitura das tabelas novas com service role. Nenhuma lógica
 // de negócio.
 //
-// Fase 2 (este arquivo, agora): liga a lógica real dos 3 eventos "Cron" de
-// maior valor pedagógico (seção 14) + o início do calendário de
-// reengajamento (seção 13, só os dias 1-9 -- 15/20/30 são e-mail, Fase 5):
+// Fase 2: ligou a lógica real dos 3 eventos "Cron" de maior valor
+// pedagógico (seção 14) + o início do calendário de reengajamento (seção
+// 13, só os dias 1-9 -- 15/20/30 são e-mail, Fase 5):
 //   - review_overdue        -- revisão parada há dias, ninguém abriu o app
 //   - streak_at_risk        -- não estudou hoje, tem sequência a perder
 //   - study_goal_remaining  -- hoje é dia de meta e ela não foi batida
 //   - user_inactive_N       -- sumiu há N dias (N ∈ {1,3,5,7,9})
+//
+// Fase 3 (agora): quando a conta tiver push habilitado pra categoria E
+// pelo menos uma inscrição de navegador salva (push_subscriptions,
+// migration 013), este arquivo TAMBÉM envia push direto -- diferente do
+// motor client-side (shared/notifications.js), que precisa chamar a Edge
+// Function push-send à parte, este já roda no servidor, então envia sem
+// intermediário.
 //
 // LIMITAÇÃO CONHECIDA (fuso horário): a plataforma não guarda o fuso de
 // ninguém. O cliente grava `lastStudyDay`/`dailyLessonsLog` no fuso LOCAL
@@ -38,9 +45,16 @@
 // Deploy + agendamento são passos manuais (ver PR).
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import webpush from 'npm:web-push@3';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+// Mesmos 3 secrets manuais de supabase/functions/push-send (ver comentário
+// lá) -- os dois arquivos enviam push, cada um do seu próprio contexto.
+const vapidPublicKey = Deno.env.get('VAPID_PUBLIC_KEY')!;
+const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY')!;
+const vapidSubject = Deno.env.get('VAPID_SUBJECT') || 'mailto:brunemed1310@gmail.com';
+webpush.setVapidDetails(vapidSubject, vapidPublicKey, vapidPrivateKey);
 
 // Mesmos appKey de languages/index.js -- duplicado aqui de propósito (este
 // arquivo roda em runtime Deno separado, não importa módulos do site).
@@ -86,6 +100,38 @@ function categoryAllowsInApp(prefs: any, category: string): boolean {
   const channels = prefs?.channels?.[category];
   if (!Array.isArray(channels)) return true; // sem preferência salva ainda -- não bloqueia (mesmo default da coluna)
   return channels.includes('in_app');
+}
+
+function categoryAllowsPush(prefs: any, category: string): boolean {
+  const channels = prefs?.channels?.[category];
+  if (!Array.isArray(channels)) return false; // push exige opt-in explícito, mesmo critério de shared/notifications.js
+  return channels.includes('push');
+}
+
+// Envia push pra TODAS as inscrições de navegador da conta (pode ter mais
+// de uma -- celular + notebook). Poda inscrição morta (404/410) igual
+// supabase/functions/push-send -- os dois arquivos têm essa lógica
+// duplicada de propósito (contextos de execução diferentes: um usa
+// service role sobre TODAS as contas, o outro roda como o próprio
+// usuário) -- extrair um módulo compartilhado exigiria um terceiro
+// arquivo importado pelos dois, mais complexidade do que a duplicação de
+// ~15 linhas justifica aqui.
+async function sendPushToUser(supabase: any, userId: string, title: string, body: string, actionTab: string): Promise<void> {
+  const { data: subs, error } = await supabase.from('push_subscriptions').select('*').eq('user_id', userId);
+  if (error || !subs?.length) return;
+
+  const messagePayload = JSON.stringify({ title, body, actionTab: actionTab || null });
+  for (const sub of subs) {
+    try {
+      await webpush.sendNotification({ endpoint: sub.endpoint, keys: sub.keys }, messagePayload);
+    } catch (e: any) {
+      if (e?.statusCode === 404 || e?.statusCode === 410) {
+        await supabase.from('push_subscriptions').delete().eq('id', sub.id);
+      } else {
+        console.error('notification-cron: falha ao enviar push', userId, String(e?.message || e));
+      }
+    }
+  }
 }
 
 // Horário silencioso só vale pra eventos calculados automaticamente (este
@@ -173,7 +219,19 @@ async function maybeNotify(
     user_id: userId, language_app_key: languageAppKey, category, event_type: eventType,
     title: title || null, body, action_tab: actionTab || null,
   });
-  return !error;
+  if (error) return false;
+
+  // Push "pendura" no in-app aqui também -- mesma simplificação documentada
+  // em shared/notifications.js:fireNotificationEvent (anti-spam só existe
+  // sobre `notifications`, então desligar in_app desliga push junto nesta
+  // fase). AWAIT de propósito (diferente do client, que dispara e segue
+  // sem esperar): esta function roda até o fim antes de responder, sem
+  // nenhum "waitUntil" que garanta uma promise solta terminar depois da
+  // resposta -- e uma falha de push aqui já está isolada em try/catch
+  // dentro de sendPushToUser, não derruba o resto da varredura.
+  if (categoryAllowsPush(prefs, category)) await sendPushToUser(supabase, userId, title || 'Notificação', body, actionTab);
+
+  return true;
 }
 
 async function processUserLanguage(

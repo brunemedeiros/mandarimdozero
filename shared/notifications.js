@@ -70,6 +70,32 @@ function notificationCategoryAllowsInApp(category){
   return channels.includes('in_app');
 }
 
+function notificationCategoryAllowsPush(category){
+  const channels = NOTIFICATION_PREFERENCES_CACHE?.channels?.[category];
+  if (!Array.isArray(channels)) return false; // sem preferência salva ainda -- push nunca liga sozinho (diferente do in_app)
+  return channels.includes('push');
+}
+
+// Fase 3: entrega via Web Push, chamando a Edge Function push-send no
+// contexto do PRÓPRIO usuário (repassa o token da sessão -- a function
+// nunca usa service role, só enxerga as inscrições de quem chamou, ver
+// supabase/functions/push-send). Fire-and-forget de propósito (mesmo
+// padrão do insert em notification_events): um push que falha não deve
+// travar nem atrasar a experiência de quem está com o app aberto.
+async function sendPushNotification(title, body, actionTab){
+  try{
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session?.access_token) return;
+    await fetch(`${SUPABASE_URL}/functions/v1/push-send`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ title, body, actionTab: actionTab || null }),
+    });
+  }catch(e){
+    console.error('Erro ao enviar push:', e);
+  }
+}
+
 // Placeholders tipo {{amount}}/{{badge_name}}/{{days}} -- substituídos a
 // partir do payload do evento (ver seção 8/9 da arquitetura). Chave sem
 // correspondência no payload vira string vazia, nunca "undefined" na tela.
@@ -136,6 +162,13 @@ async function fireNotificationEvent(eventType, category, payload, actionTab){
   }).then(({ error }) => { if (error) console.error('Erro ao registrar evento de notificação:', error); });
 
   await ensureNotificationPreferencesLoaded();
+  // Fase 3: push "pendura" no in-app -- as duas checagens abaixo (anti-spam
+  // e limite diário) contam linhas de `notifications`, então desligar
+  // in_app pra uma categoria também desliga push nela nesta fase (evita
+  // duplicar o controle de anti-spam numa tabela separada só pra push).
+  // Simplificação documentada -- não é o desenho "3 canais 100%
+  // independentes" do wireframe original, mas cobre bem o caso real (quem
+  // quer push quase sempre quer o histórico no sino também).
   if (!notificationCategoryAllowsInApp(category)) return;
 
   const ok = await passesAntiSpam(category);
@@ -161,6 +194,8 @@ async function fireNotificationEvent(eventType, category, payload, actionTab){
 
   NOTIFICATION_UNREAD_COUNT++;
   renderNotificationBellBadge();
+
+  if (notificationCategoryAllowsPush(category)) sendPushNotification(title, body, actionTab);
 }
 
 // ---------- Sino + dropdown ----------

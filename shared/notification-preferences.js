@@ -1,22 +1,21 @@
 // ---------- Preferências de notificação (Configurações > Notificações) ----------
-// Fase 2 do sistema de notificações. Modo simples (um interruptor mestre +
-// horário silencioso) por cima de uma matriz avançada por categoria
-// (seção 10 da arquitetura aprovada) -- a matriz é o dado real
-// (notification_preferences.channels, ver migration 010), o interruptor
-// mestre é só um atalho que liga/desliga o canal in_app em todas as
-// categorias de uma vez.
+// Fase 2: modo simples (interruptores mestre + horário silencioso) por
+// cima de uma matriz avançada por categoria (seção 10 da arquitetura
+// aprovada) -- a matriz é o dado real (notification_preferences.channels,
+// ver migration 010), os interruptores mestre são atalhos que ligam/
+// desligam um canal em todas as categorias de uma vez.
 //
-// Push e e-mail aparecem na matriz (a coluna já existe no dado, pensada
-// desde a Fase 0 pras Fases 3/5) mas ficam desabilitados aqui: não existe
-// NENHUM jeito de entregar por esses canais ainda (sem VAPID/push
-// subscription, sem provedor de e-mail) -- deixar editável sem nenhum
-// efeito seria enganoso.
+// Fase 3: o toggle de push virou de verdade -- liga a inscrição deste
+// NAVEGADOR (shared/push.js) além de marcar a preferência da conta. E-mail
+// continua desabilitado na matriz (nenhum provedor configurado ainda,
+// Fase 5) -- deixar editável sem nenhum efeito seria enganoso.
 //
 // Depende de (mesma posição de shared/notifications.js -- antes de app.js):
 //   - shared/supabase-client.js (supabaseClient)
 //   - shared/auth.js            (CURRENT_USER)
 //   - shared/toast.js           (showToast)
 //   - shared/notifications.js   (ensureNotificationPreferencesLoaded)
+//   - shared/push.js            (subscribeToPush, unsubscribeFromPush, getLocalPushSubscription)
 
 // Omite "sistema" da lista? Não -- mantido, é uma categoria real (ver
 // notification_rules, seed da 010) e a pessoa pode preferir não receber
@@ -57,15 +56,24 @@ async function renderNotificationPreferencesView(){
     return;
   }
 
+  // Push é por NAVEGADOR (ver shared/push.js), não por conta -- o estado do
+  // toggle mestre reflete se ESTE navegador está inscrito de verdade, não
+  // só se a categoria "permite" push (que pode estar assim de fábrica sem
+  // nunca ter sido ativado aqui, ver notification_preferences default na
+  // migration 010).
+  const localPushSubscription = typeof getLocalPushSubscription === 'function' ? await getLocalPushSubscription() : null;
+  const pushSubscribedHere = !!localPushSubscription;
+
   const anyInAppOn = NOTIFICATION_PREF_CATEGORIES.some(c => (prefs.channels?.[c.id] || []).includes('in_app'));
 
   const matrixRowsHTML = NOTIFICATION_PREF_CATEGORIES.map(c => {
-    const checked = (prefs.channels?.[c.id] || []).includes('in_app') ? 'checked' : '';
+    const inAppChecked = (prefs.channels?.[c.id] || []).includes('in_app') ? 'checked' : '';
+    const pushChecked = (prefs.channels?.[c.id] || []).includes('push') ? 'checked' : '';
     return `
       <div class="notif-pref-matrix-row">
         <span class="notif-pref-matrix-label">${c.label}</span>
-        <label class="notif-pref-matrix-cell" title="No app"><input type="checkbox" data-pref-category="${c.id}" ${checked}></label>
-        <span class="notif-pref-matrix-cell disabled" title="Em breve (Fase 3)">--</span>
+        <label class="notif-pref-matrix-cell" title="No app"><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="in_app" ${inAppChecked}></label>
+        <label class="notif-pref-matrix-cell" title="Push"><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="push" ${pushChecked}></label>
         <span class="notif-pref-matrix-cell disabled" title="Em breve (Fase 5)">--</span>
       </div>
     `;
@@ -83,9 +91,9 @@ async function renderNotificationPreferencesView(){
     <div class="pref-row">
       <div class="pref-row-text">
         <div class="pref-row-title">Alertas no navegador (push)</div>
-        <div class="pref-row-sub">Ainda não existe esse canal na plataforma -- chega numa fase futura.</div>
+        <div class="pref-row-sub">Avisa mesmo com o app fechado. Liga por categoria em "Personalizar" abaixo -- este interruptor cuida da permissão do navegador e liga tudo de uma vez.</div>
       </div>
-      <button class="pref-switch" role="switch" aria-checked="false" disabled title="Em breve"><span class="pref-switch-knob"></span></button>
+      <button class="pref-switch" id="notif-pref-push-switch" role="switch" aria-checked="${pushSubscribedHere}"><span class="pref-switch-knob"></span></button>
     </div>
     <div class="pref-row">
       <div class="pref-row-text">
@@ -114,7 +122,7 @@ async function renderNotificationPreferencesView(){
         <div class="notif-pref-matrix-row notif-pref-matrix-head">
           <span class="notif-pref-matrix-label"></span>
           <span class="notif-pref-matrix-cell">App</span>
-          <span class="notif-pref-matrix-cell disabled">Push</span>
+          <span class="notif-pref-matrix-cell">Push</span>
           <span class="notif-pref-matrix-cell disabled">E-mail</span>
         </div>
         ${matrixRowsHTML}
@@ -126,17 +134,47 @@ async function renderNotificationPreferencesView(){
     const btn = e.currentTarget;
     const turningOn = btn.getAttribute('aria-checked') !== 'true';
     btn.setAttribute('aria-checked', String(turningOn));
-    await setAllCategoriesInApp(turningOn);
+    await setAllCategoriesChannel('in_app', turningOn);
+    renderNotificationPreferencesView();
+  });
+
+  document.getElementById('notif-pref-push-switch').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    const turningOn = btn.getAttribute('aria-checked') !== 'true';
+    btn.disabled = true;
+    if (turningOn){
+      const result = await subscribeToPush();
+      if (!result.ok){
+        showToast(notificationPushErrorMessage(result.reason));
+        btn.disabled = false;
+        return;
+      }
+      await setAllCategoriesChannel('push', true);
+      showToast('✓ Alertas do navegador ativados.');
+    } else {
+      await unsubscribeFromPush();
+      await setAllCategoriesChannel('push', false);
+      showToast('Alertas do navegador desativados.');
+    }
     renderNotificationPreferencesView();
   });
 
   wrap.querySelectorAll('[data-pref-category]').forEach(input => {
-    input.addEventListener('change', () => setCategoryInApp(input.dataset.prefCategory, input.checked));
+    input.addEventListener('change', () => setCategoryChannel(input.dataset.prefCategory, input.dataset.prefChannel, input.checked));
   });
 
   ['notif-pref-quiet-start', 'notif-pref-quiet-end'].forEach(id => {
     document.getElementById(id).addEventListener('change', saveNotificationQuietHours);
   });
+}
+
+function notificationPushErrorMessage(reason){
+  switch (reason){
+    case 'unsupported': return 'Seu navegador não suporta notificações push.';
+    case 'blocked': return 'As notificações estão bloqueadas nas configurações do seu navegador -- libere por lá e tente de novo.';
+    case 'denied': return 'Você não permitiu as notificações. Pode tentar de novo quando quiser.';
+    default: return 'Não foi possível ativar agora. Tente de novo.';
+  }
 }
 
 async function saveNotificationPreferenceChannels(channels){
@@ -146,23 +184,23 @@ async function saveNotificationPreferenceChannels(channels){
   return true;
 }
 
-async function setCategoryInApp(category, enabled){
+async function setCategoryChannel(category, channel, enabled){
   const prefs = await ensureNotificationPreferencesLoaded();
   if (!prefs) return;
   const channels = { ...(prefs.channels || {}) };
   const current = new Set(channels[category] || []);
-  if (enabled) current.add('in_app'); else current.delete('in_app');
+  if (enabled) current.add(channel); else current.delete(channel);
   channels[category] = [...current];
   await saveNotificationPreferenceChannels(channels);
 }
 
-async function setAllCategoriesInApp(enabled){
+async function setAllCategoriesChannel(channel, enabled){
   const prefs = await ensureNotificationPreferencesLoaded();
   if (!prefs) return;
   const channels = { ...(prefs.channels || {}) };
   NOTIFICATION_PREF_CATEGORIES.forEach(c => {
     const current = new Set(channels[c.id] || []);
-    if (enabled) current.add('in_app'); else current.delete('in_app');
+    if (enabled) current.add(channel); else current.delete(channel);
     channels[c.id] = [...current];
   });
   await saveNotificationPreferenceChannels(channels);
