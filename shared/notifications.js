@@ -223,12 +223,40 @@ async function markAllNotificationsRead(){
   renderNotificationDropdown();
 }
 
+// No desktop, ancora o dropdown embaixo do PRÓPRIO sino (não no canto fixo
+// que .user-dropdown/.lang-switcher-dropdown usam) -- o sino não é o pill
+// mais à direita da topbar, então o canto fixo deixava a lista flutuando
+// longe do ícone que abriu ela. No mobile a folha inferior (.user-dropdown
+// dentro de @media max-width:899px) já cuida da posição sozinha -- setar
+// estilo inline ali venceria a media query (inline sempre tem prioridade
+// maior), por isso limpa os inline styles nesse caso em vez de calcular.
+function positionNotificationsDropdown(){
+  const dropdown = document.getElementById('notifications-dropdown');
+  const btn = document.getElementById('notifications-topbar-btn');
+  if (!dropdown || !btn) return;
+  if (window.innerWidth < 900){
+    dropdown.style.removeProperty('top');
+    dropdown.style.removeProperty('right');
+    dropdown.style.removeProperty('left');
+    return;
+  }
+  const rect = btn.getBoundingClientRect();
+  const dropdownWidth = 340; // aprox. (CSS: min-width 320px / max-width 360px)
+  const margin = 12;
+  let left = rect.right - dropdownWidth; // alinha a borda direita da lista com a do sino
+  left = Math.max(margin, Math.min(left, window.innerWidth - margin - dropdownWidth));
+  dropdown.style.top = `${Math.round(rect.bottom + 8)}px`;
+  dropdown.style.left = `${Math.round(left)}px`;
+  dropdown.style.right = 'auto';
+}
+
 function toggleNotificationDropdown(){
   const dropdown = document.getElementById('notifications-dropdown');
   if (!dropdown) return;
   const opening = !dropdown.classList.contains('open');
   document.querySelectorAll('.user-dropdown.open').forEach(d => d.classList.remove('open'));
   if (opening){
+    positionNotificationsDropdown();
     dropdown.classList.add('open');
     renderNotificationDropdown();
   }
