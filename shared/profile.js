@@ -509,9 +509,10 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, speci
   document.getElementById('profile-badges-link')?.addEventListener('click', () => switchTab('progress'));
   document.getElementById('profile-edit-btn')?.addEventListener('click', () => openEditProfileModal(specialBadges));
   document.getElementById('profile-guest-login-prompt')?.addEventListener('click', () => {
+    localStorageSafeRemove(LAST_LANGUAGE_KEY);
     sessionStorageSafeSet(GUEST_MODE_FLAG, '0');
     CURRENT_USER = null;
-    showLoginScreen();
+    goToNeutralGate();
   });
 }
 

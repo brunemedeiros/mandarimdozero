@@ -35,7 +35,7 @@ async function initAuth(){
   } else if (sessionStorageSafeGet(GUEST_MODE_FLAG) === '1'){
     enterGuestMode();
   } else {
-    showLoginScreen();
+    goToNeutralGate();
   }
 
   supabaseClient.auth.onAuthStateChange(async (event, session) => {
@@ -43,14 +43,17 @@ async function initAuth(){
       await onUserLoggedIn(session.user);
     } else if (event === 'SIGNED_OUT'){
       CURRENT_USER = null;
-      showLoginScreen();
+      goToNeutralGate();
     }
   });
 }
 
-function showLoginScreen(){
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app').style.display = 'none';
+// Sem sessão nem modo convidado ativo: este app (fr/zh) não tem sua própria
+// tela de login -- a única tela de login da plataforma é o portão neutro na
+// raiz (index.html), sem marca de idioma. #login-screen aqui é só um overlay
+// de "carregando/redirecionando" (ver markup), nunca um formulário de verdade.
+function goToNeutralGate(){
+  window.location.href = '../index.html';
 }
 
 function enterGuestMode(){
@@ -108,98 +111,6 @@ async function onUserLoggedIn(user){
   if (typeof applyPendingNotificationTab === 'function') applyPendingNotificationTab();
 }
 
-document.getElementById('google-login-btn').addEventListener('click', async () => {
-  const noteEl = document.getElementById('login-note');
-  noteEl.textContent = 'Redirecionando para o Google...';
-  noteEl.className = 'login-note';
-  const { error } = await supabaseClient.auth.signInWithOAuth({
-    provider: 'google',
-    options: { redirectTo: cleanRedirectURL() }
-  });
-  if (error){
-    noteEl.textContent = 'Não foi possível iniciar o login. Tente novamente.';
-    noteEl.className = 'login-note err';
-  }
-});
-
-// ---------- Login com e-mail e senha (alternativa ao Google/Convidado) ----------
-let emailLoginMode = 'signin'; // 'signin' | 'signup'
-
-function updateEmailLoginModeUI(){
-  document.getElementById('email-login-submit-btn').textContent = emailLoginMode === 'signup' ? 'Criar conta' : 'Entrar';
-  document.getElementById('login-signup-question').textContent = emailLoginMode === 'signup' ? 'Já tem conta?' : 'Não tem conta?';
-  document.getElementById('email-login-toggle-mode-btn').textContent = emailLoginMode === 'signup' ? 'Entrar' : 'Cadastre-se';
-}
-
-document.getElementById('email-login-toggle-mode-btn').addEventListener('click', () => {
-  emailLoginMode = emailLoginMode === 'signup' ? 'signin' : 'signup';
-  updateEmailLoginModeUI();
-});
-
-document.getElementById('email-login-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const noteEl = document.getElementById('login-note');
-  const email = document.getElementById('email-login-email').value.trim();
-  const password = document.getElementById('email-login-password').value;
-  const submitBtn = document.getElementById('email-login-submit-btn');
-
-  submitBtn.disabled = true;
-  noteEl.className = 'login-note';
-  noteEl.textContent = emailLoginMode === 'signup' ? 'Criando conta...' : 'Entrando...';
-
-  try{
-    if (emailLoginMode === 'signup'){
-      const { data, error } = await supabaseClient.auth.signUp({ email, password });
-      if (error){
-        noteEl.textContent = error.message;
-        noteEl.className = 'login-note err';
-      } else if (!data.session){
-        // confirmação de e-mail exigida pelo projeto Supabase — sem sessão ainda
-        noteEl.textContent = 'Conta criada! Verifique seu e-mail para confirmar e depois entre normalmente.';
-        noteEl.className = 'login-note';
-      }
-      // se já veio sessão (confirmação de e-mail desligada), onAuthStateChange cuida do resto
-    } else {
-      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-      if (error){
-        noteEl.textContent = 'E-mail ou senha incorretos.';
-        noteEl.className = 'login-note err';
-      }
-    }
-  }catch(err){
-    noteEl.textContent = 'Não foi possível conectar. Tente novamente.';
-    noteEl.className = 'login-note err';
-  }finally{
-    submitBtn.disabled = false;
-  }
-});
-
-document.getElementById('email-login-forgot-btn').addEventListener('click', async () => {
-  const noteEl = document.getElementById('login-note');
-  const email = document.getElementById('email-login-email').value.trim();
-  if (!email){
-    noteEl.textContent = 'Digite seu e-mail no campo acima primeiro.';
-    noteEl.className = 'login-note err';
-    return;
-  }
-  noteEl.textContent = 'Enviando e-mail de redefinição...';
-  noteEl.className = 'login-note';
-  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: cleanRedirectURL() });
-  if (error){
-    noteEl.textContent = 'Não foi possível enviar o e-mail. Tente novamente.';
-    noteEl.className = 'login-note err';
-  } else {
-    noteEl.textContent = 'E-mail de redefinição enviado! Confira sua caixa de entrada.';
-    noteEl.className = 'login-note';
-  }
-});
-
-updateEmailLoginModeUI();
-
-document.getElementById('guest-btn').addEventListener('click', () => {
-  enterGuestMode();
-});
-
 // #mais-btn é o botão "Mais" da barra inferior mobile (Fase 6) -- abre o
 // mesmo dropdown do pill de conta (que no mobile vira bottom sheet via
 // CSS, ver .user-dropdown dentro de @media(max-width:899px) em cada
@@ -227,9 +138,13 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
     localStorageSafeRemove(LAST_LANGUAGE_KEY);
     await supabaseClient.auth.signOut();
   } else {
+    // Mesma lógica do logout com conta acima: sair de propósito do modo
+    // convidado também limpa o idioma lembrado, pra voltar ao portão neutro
+    // em vez de reentrar direto como convidado na próxima visita.
+    localStorageSafeRemove(LAST_LANGUAGE_KEY);
     sessionStorageSafeSet(GUEST_MODE_FLAG, '0');
     CURRENT_USER = null;
-    showLoginScreen();
+    goToNeutralGate();
   }
 });
 

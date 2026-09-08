@@ -36,5 +36,5 @@ function toggleTheme(){
   updateThemePrefSwitch();
 }
 
-document.getElementById('theme-pref-switch').addEventListener('click', toggleTheme);
+document.getElementById('theme-pref-switch')?.addEventListener('click', toggleTheme);
 updateThemePrefSwitch();

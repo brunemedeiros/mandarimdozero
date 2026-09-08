@@ -583,9 +583,10 @@ HANZI_LESSONS.forEach((lesson, i) => {
 // shared/supabase-client.js -- mesmo projeto/tabela `progress` de sempre,
 // compartilhado com os outros idiomas da plataforma.
 
-// CURRENT_USER, GUEST_MODE_FLAG, initAuth/showLoginScreen/enterGuestMode/
-// onUserLoggedIn e toda a autenticação (Google/e-mail/convidado) agora vêm
-// de shared/auth.js, junto com saveState/loadState/notifySaveFailure.
+// CURRENT_USER, GUEST_MODE_FLAG, initAuth/goToNeutralGate/enterGuestMode/
+// onUserLoggedIn (login de verdade vive só no portão neutro, index.html da
+// raiz -- este app só decide sessão/convidado/redirecionar) agora vêm de
+// shared/auth.js, junto com saveState/loadState/notifySaveFailure.
 
 // ---------- Toggle global de pinyin (forçar leitura só em hanzi) ----------
 const PINYIN_TOGGLE_KEY = 'mandarim_hide_pinyin';
@@ -5022,9 +5023,10 @@ function renderProgressView(){
 
   if (!CURRENT_USER){
     document.getElementById('guest-login-prompt')?.addEventListener('click', () => {
+      localStorageSafeRemove(LAST_LANGUAGE_KEY);
       sessionStorageSafeSet(GUEST_MODE_FLAG, '0');
       CURRENT_USER = null;
-      showLoginScreen();
+      goToNeutralGate();
     });
   }
 
