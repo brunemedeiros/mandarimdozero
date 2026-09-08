@@ -356,10 +356,12 @@ a.pill:hover{ border-color: var(--imperial-gold); }
        direita ganham 32px de respiro pra não ficar colados lá. */
     padding-right:32px;
   }
-  /* A topbar já ganha o respiro da borda direita do #app acima -- zera o
-     padding próprio dela pra não somar os dois (senão ficaria 64px). Do
-     lado esquerdo os dois já ficam em 0, sem precisar de nada aqui. */
-  .topbar{ grid-area:topbar; padding-left:0; padding-right:0; }
+  /* A topbar já ganha o respiro da borda direita do #app acima -- zera só
+     o padding-right próprio dela pra não somar os dois (senão ficaria
+     64px). O padding-left da regra base (32px) continua valendo aqui de
+     propósito: a logo precisa de um respiro da borda mesmo com a sidebar
+     colada nela logo abaixo (jogar a logo pro canto extremo ficou ruim). */
+  .topbar{ grid-area:topbar; padding-right:0; }
   /* .tabs já fica escondida sempre agora (ver regra global acima) --
      e os pills de Ranking/Conta na topbar voltam aqui (só mobile os
      esconde, ver regra global também). */
