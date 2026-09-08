@@ -339,8 +339,16 @@ async function toggleNotificationDropdown(){
   if (!dropdown) return;
   const opening = !dropdown.classList.contains('open');
   document.querySelectorAll('.user-dropdown.open').forEach(d => d.classList.remove('open'));
+  // #mais-backdrop é o mesmo fundo escurecido que o menu "Mais" usa quando
+  // vira folha inferior no mobile (ver toggleUserMenuDropdown em auth.js) --
+  // reaproveitado aqui pelo mesmo motivo: sem ele, a folha de notificações
+  // não lia como uma camada por cima do resto da tela. No desktop a classe
+  // .mais-backdrop.open não faz nada visível (só existe dentro do media
+  // query mobile), então não precisa checar largura de tela aqui.
+  document.getElementById('mais-backdrop')?.classList.remove('open');
   if (opening){
     dropdown.classList.add('open'); // precisa estar visível ANTES de medir a largura real
+    document.getElementById('mais-backdrop')?.classList.add('open');
     positionNotificationsDropdown();
     // A lista começa vazia ("Carregando...") -- mede mais estreita que o
     // conteúdo final (ver fetchRecentNotifications, assíncrono). Reposiciona
@@ -363,6 +371,7 @@ function wireNotificationBell(){
     const dropdown = document.getElementById('notifications-dropdown');
     if (dropdown?.classList.contains('open') && !dropdown.contains(e.target) && e.target !== btn && !btn.contains(e.target)){
       dropdown.classList.remove('open');
+      document.getElementById('mais-backdrop')?.classList.remove('open');
     }
   });
 }
