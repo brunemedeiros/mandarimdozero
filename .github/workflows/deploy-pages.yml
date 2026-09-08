@@ -1,7 +1,7 @@
 name: Deploy to GitHub Pages
 
-# Publica o repositório inteiro (index.html da raiz + languages/fr +
-# languages/zh + shared/) direto no GitHub Pages, sem passo de build --
+# Publica o repositório inteiro (index.html da raiz + fr/ + zh/ +
+# shared/) direto no GitHub Pages, sem passo de build --
 # os dois apps e a página de seleção de idioma são HTML/JS puro. Roda a
 # cada push em main, ou manualmente pela aba Actions do GitHub.
 
