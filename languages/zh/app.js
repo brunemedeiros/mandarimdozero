@@ -694,8 +694,6 @@ document.getElementById('mais-hanzi-btn').addEventListener('click', () => {
   switchTab('hanzi');
 });
 
-document.getElementById('leaderboard-topbar-btn').addEventListener('click', () => switchTab('leaderboard'));
-
 document.getElementById('user-settings-btn').addEventListener('click', () => {
   document.getElementById('user-menu-dropdown').classList.remove('open');
   switchTab('settings');

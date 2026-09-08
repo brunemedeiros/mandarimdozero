@@ -525,17 +525,15 @@ document.getElementById('leaderboard-btn').addEventListener('click', () => {
 });
 
 // Itens extras do menu "Mais" (só mobile, ver .mais-extra-tab) -- Conjugação/
-// Ditados/Desafios não cabem nos 4 botões fixos da barra inferior, então
-// vivem aqui.
-['mais-conjugaison-btn', 'mais-dictation-btn', 'mais-challenges-btn'].forEach(id => {
+// Desafios não cabem nos 4 botões fixos da barra inferior, então vivem
+// aqui (Ditados não tem mais entrada própria, vive dentro de Desafios).
+['mais-conjugaison-btn', 'mais-challenges-btn'].forEach(id => {
   const btn = document.getElementById(id);
   btn.addEventListener('click', () => {
     document.getElementById('user-menu-dropdown').classList.remove('open');
     switchTab(btn.dataset.tab);
   });
 });
-
-document.getElementById('leaderboard-topbar-btn').addEventListener('click', () => switchTab('leaderboard'));
 
 document.getElementById('user-settings-btn').addEventListener('click', () => {
   document.getElementById('user-menu-dropdown').classList.remove('open');
@@ -5736,6 +5734,7 @@ document.getElementById('dictation-explainer-toggle').addEventListener('click', 
 });
 
 document.getElementById('dictation-back-to-list').addEventListener('click', renderDictationList);
+document.getElementById('dictation-back-to-challenges').addEventListener('click', () => switchTab('challenges'));
 
 function openDictationPlayer(id){
   const d = DICTATIONS.find(x => x.id === id);
@@ -6308,16 +6307,27 @@ async function renderChallengeCategories(){
     document.getElementById('challenges-pending-count').textContent = pendingChallenges().length;
   }
 
+  // Ditados não é um tipo de CHALLENGE_CATEGORIES (é uma tela/motor próprio,
+  // view-dictation) -- entra como um card à parte que leva pra lá em vez de
+  // renderChallengesList(). Passou a viver dentro de Desafios porque não
+  // fazia sentido como aba própria no menu principal (pedido explícito).
   wrap.innerHTML = CHALLENGE_CATEGORIES.map(cat => `
     <button class="challenge-category-card" data-category="${cat.type}">
       <div class="challenge-category-emoji">${cat.emoji}</div>
       <div class="challenge-category-title">${cat.title}</div>
       <div class="challenge-category-subtitle">${cat.subtitle}</div>
     </button>
-  `).join('');
-  wrap.querySelectorAll('.challenge-category-card').forEach(card => {
+  `).join('') + `
+    <button class="challenge-category-card" id="challenges-dictation-card">
+      <div class="challenge-category-emoji">🎧</div>
+      <div class="challenge-category-title">Ditados</div>
+      <div class="challenge-category-subtitle">Ouça e escreva</div>
+    </button>
+  `;
+  wrap.querySelectorAll('.challenge-category-card[data-category]').forEach(card => {
     card.addEventListener('click', () => renderChallengesList(card.dataset.category));
   });
+  document.getElementById('challenges-dictation-card').addEventListener('click', () => switchTab('dictation'));
 }
 
 function challengeCardLabelHTML(c){
