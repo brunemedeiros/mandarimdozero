@@ -56,6 +56,41 @@ function goToNeutralGate(){
   window.location.href = '../index.html';
 }
 
+// ---------- Oferta do Teste de Nível na primeira entrada ----------
+// Portão (index.html da raiz) manda ?level_test_offer=1 na URL quando a
+// pessoa respondeu "já sei o básico" na pergunta de primeira entrada (ver
+// askExperienceThenProceed lá). Mesmo padrão de "capturar da URL, só aplicar
+// depois que o carregamento normal terminar" que PENDING_NOTIFICATION_TAB já
+// usa em shared/push.js, pelo mesmo motivo -- sobreviver a um reload de
+// service worker antes de conseguir aplicar.
+let PENDING_LEVEL_TEST_OFFER = new URLSearchParams(window.location.search).get('level_test_offer') === '1';
+
+function applyPendingLevelTestOffer(){
+  if (!PENDING_LEVEL_TEST_OFFER) return;
+  PENDING_LEVEL_TEST_OFFER = false;
+  window.history.replaceState(null, '', window.location.pathname);
+  // Idioma sem Teste de Nível ainda (Mandarim, só HSK1 por enquanto): não
+  // tem o que oferecer -- ignora silenciosamente (ver hasLevelTest em
+  // languages/index.js, é o que impede o portão de nem oferecer essa opção
+  // pra esse idioma).
+  if (typeof LEVEL_TESTS === 'undefined' || !LEVEL_TESTS.length) return;
+  if (typeof switchTab === 'function') switchTab('path');
+  const test = LEVEL_TESTS[0];
+  // Espera o próximo frame -- a troca de aba acima acabou de rerenderizar a
+  // Trilha, o card do teste só existe no DOM depois disso.
+  requestAnimationFrame(() => {
+    const card = document.querySelector('.level-test-card');
+    if (card){
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.add('level-test-highlight');
+      setTimeout(() => card.classList.remove('level-test-highlight'), 3000);
+    }
+    if (typeof showToast === 'function' && test){
+      showToast(`🎓 Você disse que já sabe o básico — dá uma olhada no "${test.title}" aqui embaixo pra pular pro próximo nível.`);
+    }
+  });
+}
+
 function enterGuestMode(){
   sessionStorageSafeSet(GUEST_MODE_FLAG, '1');
   CURRENT_USER = false;
@@ -71,6 +106,7 @@ function enterGuestMode(){
   // render padrão terminar, senão a aba padrão do carregamento sobrescreve
   // a aba que a notificação pediu.
   loadStateAndRender().then(() => {
+    applyPendingLevelTestOffer();
     if (typeof applyPendingNotificationTab === 'function') applyPendingNotificationTab();
   });
 }
@@ -108,6 +144,7 @@ async function onUserLoggedIn(user){
   // Depois do render padrão (ver comentário equivalente em enterGuestMode)
   // -- só assim a navegação forçada por uma notificação clicada vence a
   // aba default do carregamento normal.
+  applyPendingLevelTestOffer();
   if (typeof applyPendingNotificationTab === 'function') applyPendingNotificationTab();
 }
 

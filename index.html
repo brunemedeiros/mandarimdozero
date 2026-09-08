@@ -179,6 +179,15 @@ h1{
   <div class="lang-grid" id="lang-grid"></div>
 </div>
 
+<div class="wrap" id="gate-choose-experience" style="display:none;">
+  <h1>Você já sabe algo de <span id="gate-exp-lang-name"></span>?</h1>
+  <p class="sub">Isso só ajusta como você começa — dá pra mudar depois, a qualquer momento.</p>
+  <div class="gate-card" style="display:flex; flex-direction:column; gap:12px;">
+    <button type="button" class="btn btn-secondary btn-block" id="gate-exp-beginner-btn">Sou iniciante</button>
+    <button type="button" class="btn btn-primary btn-block" id="gate-exp-knows-btn">Já sei o básico</button>
+  </div>
+</div>
+
 <script src="languages/index.js"></script>
 <script src="shared/utils.js"></script>
 <script src="shared/theme.js"></script>
@@ -193,7 +202,7 @@ h1{
 const GUEST_MODE_FLAG = 'guest_mode'; // mesma chave usada por shared/auth.js dentro de cada idioma
 
 function showOnly(id){
-  ['gate-loading', 'gate-login', 'gate-choose-language'].forEach(x => {
+  ['gate-loading', 'gate-login', 'gate-choose-language', 'gate-choose-experience'].forEach(x => {
     document.getElementById(x).style.display = (x === id) ? '' : 'none';
   });
 }
@@ -212,11 +221,35 @@ function renderLanguageChoices(onPick){
   });
 }
 
-function goToLanguageApp(langId){
+// Pergunta rápida entre "escolher idioma" e "entrar no app" -- só existe pra
+// ajustar a primeira experiência (ver goToLanguageApp abaixo): quem já sabe
+// o básico é avisado, ao entrar, do Teste de Nível que já existe dentro da
+// Trilha (pra quem quer pular unidades sem precisar refazer o que já sabe).
+// Não é uma pergunta de conta/perfil -- nada é salvo no Supabase aqui, só
+// afeta esta primeira entrada.
+function askExperienceThenProceed(langId, finalCallback){
+  const target = AVAILABLE_LANGUAGES.find(l => l.id === langId);
+  if (!target){ finalCallback(langId, false); return; }
+  document.getElementById('gate-exp-lang-name').textContent = target.name;
+  const knowsBtn = document.getElementById('gate-exp-knows-btn');
+  knowsBtn.style.display = target.hasLevelTest ? '' : 'none';
+  showOnly('gate-choose-experience');
+
+  function pick(alreadyKnows){
+    document.getElementById('gate-exp-beginner-btn').replaceWith(document.getElementById('gate-exp-beginner-btn').cloneNode(true));
+    document.getElementById('gate-exp-knows-btn').replaceWith(document.getElementById('gate-exp-knows-btn').cloneNode(true));
+    finalCallback(langId, alreadyKnows);
+  }
+  document.getElementById('gate-exp-beginner-btn').addEventListener('click', () => pick(false));
+  document.getElementById('gate-exp-knows-btn').addEventListener('click', () => pick(true));
+}
+
+function goToLanguageApp(langId, alreadyKnows){
   const target = AVAILABLE_LANGUAGES.find(l => l.id === langId);
   if (!target) return;
   localStorageSafeSet(LAST_LANGUAGE_KEY, langId);
-  window.location.href = target.path;
+  const offerLevelTest = alreadyKnows && target.hasLevelTest;
+  window.location.href = offerLevelTest ? `${target.path}?level_test_offer=1` : target.path;
 }
 
 async function afterAuthResolved(user){
@@ -227,13 +260,15 @@ async function afterAuthResolved(user){
   }
   document.getElementById('gate-choose-sub').textContent = 'Você poderá trocar de idioma a qualquer momento dentro da plataforma.';
   showOnly('gate-choose-language');
-  renderLanguageChoices(async (langId) => {
-    try{
-      await setCurrentLearningLanguage(user.id, langId);
-    }catch(e){
-      console.error('Erro ao salvar idioma inicial:', e);
-    }
-    goToLanguageApp(langId);
+  renderLanguageChoices((langId) => {
+    askExperienceThenProceed(langId, async (langId, alreadyKnows) => {
+      try{
+        await setCurrentLearningLanguage(user.id, langId);
+      }catch(e){
+        console.error('Erro ao salvar idioma inicial:', e);
+      }
+      goToLanguageApp(langId, alreadyKnows);
+    });
   });
 }
 
@@ -251,8 +286,10 @@ function enterGuestFlow(){
   document.getElementById('gate-choose-sub').textContent = 'Como convidado(a), seu progresso fica salvo só neste navegador.';
   showOnly('gate-choose-language');
   renderLanguageChoices((langId) => {
-    sessionStorageSafeSet(GUEST_MODE_FLAG, '1');
-    goToLanguageApp(langId);
+    askExperienceThenProceed(langId, (langId, alreadyKnows) => {
+      sessionStorageSafeSet(GUEST_MODE_FLAG, '1');
+      goToLanguageApp(langId, alreadyKnows);
+    });
   });
 }
 

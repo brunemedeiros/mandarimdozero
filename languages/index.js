@@ -26,6 +26,12 @@ const AVAILABLE_LANGUAGES = [
     accent: '#3498D6',
     icon: 'fr/icons/icon-192.png',
     enabled: true,
+    // Existe Teste de Nível (LEVEL_TESTS em content.js) pra quem já sabe o
+    // básico pular direto pro próximo nível -- controla se o portão oferece
+    // essa opção na pergunta "já sabe algo?" antes de entrar (ver index.html
+    // da raiz, gate-choose-experience). Francês tem A1->A2; Mandarim ainda é
+    // só HSK1, sem nível seguinte pra pular.
+    hasLevelTest: true,
   },
   {
     id: 'zh',
@@ -37,6 +43,7 @@ const AVAILABLE_LANGUAGES = [
     accent: '#C0231F',
     icon: 'zh/icons/icon-192.png',
     enabled: true,
+    hasLevelTest: false,
   },
 ];
 
