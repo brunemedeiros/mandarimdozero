@@ -2106,8 +2106,17 @@ body.hide-pinyin .prompt-pinyin{
       <div class="stats-pills">
         <div class="pill streak">🔥 <span id="streak-count">0</span></div>
         <div class="pill xp">⭐ <span id="xp-count">0</span> XP</div>
-        <button class="pill pinyin-toggle-btn" id="pinyin-toggle-btn" aria-label="Esconder/mostrar pinyin" title="Esconder/mostrar pinyin">🔤 Pinyin: <span id="pinyin-state-label">ON</span></button>
-        <button class="pill search-open-btn" id="search-open-btn" aria-label="Buscar por pinyin, hanzi ou tradução" title="Buscar por pinyin, hanzi ou tradução">🔍</button>
+        <!-- Pinyin: só na topbar principal era redundante e ocupava espaço --
+             o toggle continua acessível dentro da lição (#pinyin-toggle-btn-lesson,
+             ver .lesson-focus-bar), que é onde realmente se decide ler em hanzi puro.
+             Elemento continua existindo (só escondido) porque togglePinyinVisibility()
+             ainda referencia o id direto -- ver languages/zh/app.js. -->
+        <button class="pill pinyin-toggle-btn" id="pinyin-toggle-btn" aria-label="Esconder/mostrar pinyin" title="Esconder/mostrar pinyin" style="display:none;">🔤 Pinyin: <span id="pinyin-state-label">ON</span></button>
+        <!-- Busca: escondida da topbar (pedido explícito) -- sem versão dentro da
+             lição, já que buscar vocabulário não faz sentido no meio de um exercício.
+             Feature em si continua funcional (buildSearchIndex/renderSearchResults em
+             app.js), só sem ponto de entrada visível por ora. -->
+        <button class="pill search-open-btn" id="search-open-btn" aria-label="Buscar por pinyin, hanzi ou tradução" title="Buscar por pinyin, hanzi ou tradução" style="display:none;">🔍</button>
         <button class="pill leaderboard-pill" id="leaderboard-topbar-btn" aria-label="Ranking" title="Ranking">🏆</button>
         <div class="lang-switcher">
           <button class="lang-switcher-btn" id="lang-switcher-btn" type="button" aria-label="Trocar idioma" title="Trocar idioma"></button>
