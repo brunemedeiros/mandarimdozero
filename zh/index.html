@@ -883,6 +883,15 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
 }
 .correct-feedback-header{ color: var(--jade); }
 .correct-feedback-trans{ font-size:14.5px; color: var(--ink); line-height:1.6; margin:0 0 4px; }
+/* Badge de combo (respostas certas seguidas, ver STEP_STATE.comboCount em
+   app.js) -- pisca/entra com um popzinho pra chamar atenção sem depender
+   de confete de tela cheia (reservado pra fim de lição/unidade). */
+.correct-feedback-combo-badge{
+  display:inline-flex; align-items:center; gap:3px; background: var(--dc-slot-0);
+  color:#fff; font-weight:800; font-size:13.5px; padding:2px 9px;
+  border-radius:999px; margin-right:7px; animation: comboBadgeIn .35s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes comboBadgeIn{ 0%{ transform:scale(0) rotate(-8deg); opacity:0; } 60%{ transform:scale(1.18) rotate(3deg); opacity:1; } 100%{ transform:scale(1) rotate(0); } }
 .wrong-feedback-header{ color: var(--seal-red); }
 
 /* Explicação ("por que não foi essa" / a resposta) -- SEMPRE visível,

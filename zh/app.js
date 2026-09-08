@@ -1979,6 +1979,10 @@ const STEP_STATE = {
   exerciseList: [],
   exerciseIndex: 0,
   exerciseScore: 0,
+  // Respostas CERTAS seguidas na lição atual (zera em qualquer erro ou
+  // "Não sei" -- ver showAnswerPanel) -- alimenta o modo combo do painel de
+  // acerto (ver showCorrectFeedbackPanel).
+  comboCount: 0,
   exerciseAnswered: false,
   onChallengesScreen: false,
   // Fila de cartões de conceito (explicação contextual) tocando AGORA, por
@@ -2016,6 +2020,7 @@ function openUnitDetail(unitId){
   STEP_STATE.onLessonBoundaryScreen = null;
   STEP_STATE.conceptQueue = [];
   STEP_STATE.conceptsShown = new Set();
+  STEP_STATE.comboCount = 0;
   // Invalida o estado de aquisição antigo -- sem isso, reabrir a MESMA
   // unidade numa lição diferente da última vez reaproveitaria os blocos da
   // lição errada (a checagem em renderStep só recalcula quando unitId ou
@@ -3693,6 +3698,10 @@ function noteOrConceptReviewHTML(vocabIdx, requireVocabMatch){
 // acerto normal, mas o rótulo comunica ao aluno qual foi o caso.
 function showAnswerPanel(contentEl, ex, opts = {}){
   const revealed = !!opts.revealed;
+  // Único funil compartilhado por TODO erro de verdade e todo "Não sei" de
+  // TODO tipo de exercício -- ponto certo pra zerar o combo de acertos
+  // seguidos (ver STEP_STATE.comboCount / showCorrectFeedbackPanel).
+  STEP_STATE.comboCount = 0;
   // Erro de verdade (não "Não sei", que não conta como erro) numa palavra
   // com vocabIdx marcado: soma na contagem LOCAL DESTA SESSÃO, usada pra
   // decidir reforço extra na prática mista e prioridade na consolidação
@@ -4322,6 +4331,8 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
 // de avançar sozinha -- só segue pro próximo exercício quando o aluno toca
 // "Continuar". A frase de elogio varia a cada vez (nunca repete a mesma
 // duas vezes seguidas dentro da mesma lição, ver nextCorrectFeedbackPhrase).
+// A partir de COMBO_MIN acertos seguidos entra em "modo combo" (badge ⚡ +
+// frase de incentivo própria, ver COMBO_PHRASES/nextComboPhrase abaixo).
 // `detail`, quando informado, é o HTML extra que vale a pena reforçar mesmo
 // já tendo acertado -- ex: a tradução da frase inteira num "ordene a frase"
 // (montar a ordem certa não garante que o aluno entendeu o SENTIDO). Pra
@@ -4333,7 +4344,8 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
 const CORRECT_FEEDBACK_PHRASES = [
   'Na mosca!', 'Mandou bem!', 'Isso aí!', 'Perfeito!', 'Muito bem!',
   'Você arrasou!', 'Exato!', 'Boa!', 'Certeza absoluta!', 'Aí sim!',
-  'Continua assim!', 'Show de bola!'
+  'Continua assim!', 'Show de bola!', 'Isso mesmo!', 'Excelente!',
+  'Ótimo trabalho!', 'Maravilha!'
 ];
 let correctFeedbackQueue = [];
 function nextCorrectFeedbackPhrase(){
@@ -4341,16 +4353,41 @@ function nextCorrectFeedbackPhrase(){
   return correctFeedbackQueue.pop();
 }
 
+// ---------- Combo de acertos seguidos (estilo Duolingo) ----------
+// A partir de COMBO_MIN acertos seguidos (ver STEP_STATE.comboCount, zerado
+// em showAnswerPanel a cada erro/"Não sei"), o painel troca a frase de
+// elogio genérica por uma de incentivo de combo -- e a cada múltiplo de
+// COMBO_MILESTONE_STEP mostra o número explícito ("Uau, 5 seguidas!") em
+// vez de uma frase genérica, pra marcar só os marcos redondos, não toda
+// resposta certa da sequência.
+const COMBO_PHRASES = [
+  'Você está indo muito bem!', 'Que orgulho!', 'Maravilha, continue assim!'
+];
+let comboPhraseQueue = [];
+function nextComboPhrase(){
+  if (!comboPhraseQueue.length) comboPhraseQueue = shuffle([...COMBO_PHRASES]);
+  return comboPhraseQueue.pop();
+}
+const COMBO_MIN = 3;
+const COMBO_MILESTONE_STEP = 5;
+
 // addStudyMinutes() é responsabilidade de quem chama (cada formato já
 // registra o próprio minuto de estudo no momento em que marca a resposta
 // como certa -- ver os pontos que chamam esta função), não desta função:
 // ela só cuida da tela, pra não contar o minuto duas vezes.
 function showCorrectFeedbackPanel(contentEl, detail){
+  STEP_STATE.comboCount = (STEP_STATE.comboCount || 0) + 1;
+  const combo = STEP_STATE.comboCount;
+  const isMilestone = combo >= COMBO_MILESTONE_STEP && combo % COMBO_MILESTONE_STEP === 0;
+  const inCombo = combo >= COMBO_MIN;
+  const headerText = isMilestone ? `Uau, ${combo} seguidas!` : (inCombo ? nextComboPhrase() : nextCorrectFeedbackPhrase());
+  const comboBadgeHTML = inCombo ? `<span class="correct-feedback-combo-badge">⚡ ${combo}</span>` : '';
+
   const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
   const panel = document.createElement('div');
   panel.className = 'correct-feedback';
   panel.innerHTML = `
-    <div class="correct-feedback-header">✅ ${nextCorrectFeedbackPhrase()}</div>
+    <div class="correct-feedback-header">${comboBadgeHTML}${inCombo ? ' ' : '✅ '}${headerText}</div>
     ${detail ? `<p class="correct-feedback-trans">${detail}</p>` : ''}
     <button class="btn btn-primary btn-block correct-feedback-continue" id="correct-continue-btn">Continuar →</button>
   `;
