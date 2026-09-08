@@ -1335,7 +1335,9 @@ function switchAdminPanelSection(section){
   document.querySelectorAll('[data-admin-section]').forEach(btn => btn.classList.toggle('active', btn.dataset.adminSection === section));
   document.getElementById('admin-badges-content').style.display = section === 'badges' ? '' : 'none';
   document.getElementById('admin-analytics-content').style.display = section === 'analytics' ? '' : 'none';
+  document.getElementById('admin-notifications-content').style.display = section === 'notifications' ? '' : 'none';
   if (section === 'badges') renderAdminBadgesView();
+  else if (section === 'notifications') renderAdminNotificationsView();
   else renderAdminAnalyticsView();
 }
 
