@@ -752,9 +752,11 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
 .correct-feedback-trans{ font-size:14.5px; color: var(--ink); line-height:1.6; margin:0 0 4px; }
 /* Badge de combo (respostas certas seguidas, ver STEP_STATE.comboCount em
    app.js) -- pisca/entra com um popzinho pra chamar atenção sem depender
-   de confete de tela cheia (reservado pra fim de lição/unidade). */
+   de confete de tela cheia (reservado pra fim de lição/unidade). Fundo
+   roxo (--dc-slot-1), não âmbar (--dc-slot-0) -- o ⚡ já é amarelo, num
+   fundo também amarelado ele ficava apagado/sem contraste. */
 .correct-feedback-combo-badge{
-  display:inline-flex; align-items:center; gap:3px; background: var(--dc-slot-0);
+  display:inline-flex; align-items:center; gap:3px; background: var(--dc-slot-1);
   color: var(--on-vivid); font-weight:800; font-size:13.5px; padding:2px 9px;
   border-radius:999px; margin-right:7px; animation: comboBadgeIn .35s cubic-bezier(.34,1.56,.64,1);
 }
