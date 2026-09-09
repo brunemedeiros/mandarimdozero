@@ -1388,8 +1388,10 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
    app.js). Pote que enche de baixo pra cima, proporcional à MAIOR das 3
    categorias -- dá pra ver de relance qual predomina na coleção. */
 #vocab-strength-widget:empty{ display:none; }
-.vocab-strength-row{ display:flex; gap:20px; }
-.vs-item{ display:flex; align-items:flex-end; gap:9px; flex:1; min-width:0; }
+#vocab-strength-widget{ text-align:center; margin-bottom:22px; }
+#vocab-strength-widget .section-label{ margin-top:0; }
+.vocab-strength-row{ display:flex; justify-content:center; gap:28px; }
+.vs-item{ display:flex; align-items:flex-end; gap:9px; flex:0 0 auto; }
 .vs-jar{
   position:relative; width:34px; height:88px; flex-shrink:0; border-radius:8px;
   background: var(--paper-warm); border:1px solid var(--paper-line); overflow:hidden;
@@ -2544,8 +2546,8 @@ body.hide-pinyin .prompt-pinyin{
         <h2>Revisão</h2>
         <p>Escolha como quer revisar hoje.</p>
       </div>
-      <div class="review-mode-cards" id="review-mode-cards"></div>
       <div id="vocab-strength-widget"></div>
+      <div class="review-mode-cards" id="review-mode-cards"></div>
     </div>
 
     <div id="review-session-wrap" style="display:none;">
