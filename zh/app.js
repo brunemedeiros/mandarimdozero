@@ -5152,10 +5152,18 @@ function renderProgressView(){
 
   const earnedCount = BADGES.filter(b => b.check(STATE)).length;
   document.getElementById('badge-grid-count').textContent = `${earnedCount}/${BADGES.length}`;
-  document.getElementById('badge-grid').innerHTML = BADGES.map(b => {
+  const badgeGridEl = document.getElementById('badge-grid');
+  badgeGridEl.innerHTML = BADGES.map(b => {
     const earned = b.check(STATE);
-    return `<div class="badge ${earned?'earned':''}"><div class="icon">${b.icon}</div><div class="name">${b.name}</div></div>`;
+    return `<div class="badge ${earned?'earned':''}" data-badge-id="${b.id}"><div class="icon">${b.icon}</div><div class="name">${b.name}</div></div>`;
   }).join('');
+  badgeGridEl.querySelectorAll('.badge[data-badge-id]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const b = BADGES.find(x => x.id === el.dataset.badgeId);
+      if (b) showBadgeInfo(el, `${b.icon} ${b.name}`, b.desc);
+    });
+  });
 }
 
 // ---------- Gráfico de linha: palavras aprendidas ao longo do tempo ----------

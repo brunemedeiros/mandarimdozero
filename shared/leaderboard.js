@@ -95,21 +95,20 @@ async function fetchLeaderboard(scope, weekStart){
 // Card "Ranking" -- teaser dos 3 primeiros do ranking Geral da semana + a
 // posição da própria pessoa se ela não estiver entre eles, reaproveitando
 // fetchLeaderboard() (mesma fonte de dados do Ranking completo, sem
-// duplicar a consulta/lógica de soma por usuário). Renderiza em múltiplos
-// alvos (sidebar desktop + Perfil, decisão #6: no mobile o card resumido e
-// a página expandida vivem dentro de Perfil), igual ao padrão já usado em
-// renderDailyChallengesStrip() -- por isso o botão "Ver ranking completo"
-// nunca tem id fixo (evita colisão de id quando os dois alvos existem).
+// duplicar a consulta/lógica de soma por usuário). Só existe na sidebar
+// desktop -- a versão que vivia embutida dentro de Perfil foi removida por
+// ser redundante (Ranking já tem aba própria, alcançável no celular pelo
+// menu "Mais"). O alvo continua sendo resolvido por id (em vez de um único
+// elemento fixo) só por simetria com renderDailyChallengesStrip(), caso um
+// segundo alvo volte a existir no futuro.
 async function renderSideRankingCard(){
-  const targets = ['side-ranking-body', 'profile-ranking-body']
+  const targets = ['side-ranking-body']
     .map(id => document.getElementById(id))
     .filter(el => {
       if (!el) return false;
       // O card da sidebar sempre existe no DOM (escondido por CSS abaixo de
       // 900px) -- não vale gastar uma consulta ao Supabase pra um card que
-      // o aluno no celular nunca vê. Único lugar que sabe o breakpoint de
-      // verdade é o CSS, então pergunta a ele em vez de duplicar o número
-      // aqui. O card do Perfil não tem esse ancestral, então passa direto.
+      // o aluno no celular nunca vê.
       const cards = el.closest('.right-cards');
       return !cards || getComputedStyle(cards).display !== 'none';
     });
@@ -210,7 +209,7 @@ async function renderLeaderboardView(){
       `${r.amount} XP`,
     ].filter(Boolean).join(', ');
     return `
-      <div class="leaderboard-row ${isMe ? 'me' : ''}" role="listitem" aria-label="${escapeHTML(rowLabel)}">
+      <div class="leaderboard-row ${isMe ? 'me' : ''}" role="listitem" aria-label="${escapeHTML(rowLabel)}" data-user-id="${r.user_id}">
         <div class="leaderboard-rank" aria-hidden="true">${leaderboardRankBadge(r.rank)}</div>
         ${avatarHTML}
         <div class="leaderboard-info">
@@ -234,6 +233,16 @@ async function renderLeaderboardView(){
     btn.addEventListener('click', () => {
       LEADERBOARD_SCOPE = btn.dataset.scope;
       renderLeaderboardView();
+    });
+  });
+
+  // Clicar em qualquer linha (a própria incluída) abre o preview do
+  // perfil -- "isso deve ser possível para todos". Reaproveita os dados já
+  // buscados pra essa linha (row/catalog), sem consulta nova ao Supabase.
+  wrap.querySelectorAll('.leaderboard-row[data-user-id]').forEach(el => {
+    el.addEventListener('click', () => {
+      const row = rows.find(r => r.user_id === el.dataset.userId);
+      if (row) openPublicProfileModal(row, catalog);
     });
   });
 
@@ -292,3 +301,57 @@ function animateOwnRowRankChange(meRow, scope, weekStart, rows){
     fireNotificationEvent(eventType, 'ranking', { newRank: meRank }, 'leaderboard');
   }
 }
+
+// ---------- Modal: perfil público (a partir de uma linha do Ranking) ----------
+// Preview somente-leitura -- não é a tela de Meu Perfil completa, só o que
+// já é confirmadamente público (profiles/badge_grants têm RLS de leitura
+// pública desde a criação, ver 001/002_create_*_table.sql, pensando
+// exatamente nesse cenário) mais o que a própria linha do ranking já trouxe
+// (amount/rank da semana corrente). Sem consulta nova ao Supabase.
+function openPublicProfileModal(row, catalog){
+  const modal = document.getElementById('public-profile-modal');
+  const body = document.getElementById('public-profile-modal-body');
+  if (!modal || !body) return;
+
+  const name = row.profile?.display_name || row.profile?.username || 'Aluno(a)';
+  const username = row.profile?.username;
+  const initials = avatarInitials(name);
+  const color = avatarColor(row.user_id);
+  const avatarHTML = row.profile?.avatar_url
+    ? `<img class="public-profile-avatar" src="${row.profile.avatar_url}" alt="">`
+    : `<div class="public-profile-avatar" style="background:${color};">${initials}</div>`;
+  const bio = row.profile?.bio;
+  const featured = resolveFeaturedBadge(row.profile?.featured_badge_id, catalog);
+
+  body.innerHTML = `
+    <div class="public-profile-header">
+      ${avatarHTML}
+      <div class="public-profile-name">${escapeHTML(name)}</div>
+      ${username ? `<div class="public-profile-username">@${escapeHTML(username)}</div>` : ''}
+    </div>
+    ${bio ? `<p class="public-profile-bio">${escapeHTML(bio)}</p>` : ''}
+    ${featured ? `
+      <div class="public-profile-featured-badge">
+        <span class="icon">${featured.icon}</span><span>${escapeHTML(featured.name)}</span>
+      </div>
+    ` : ''}
+    <div class="public-profile-stats">
+      <div class="public-profile-stat"><div class="value">${leaderboardRankBadge(row.rank)}</div><div class="label">Posição</div></div>
+      <div class="public-profile-stat"><div class="value">⭐ ${row.amount}</div><div class="label">XP essa semana</div></div>
+    </div>
+  `;
+  modal.style.display = 'flex';
+}
+
+function closePublicProfileModal(){
+  const modal = document.getElementById('public-profile-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function wirePublicProfileModal(){
+  const modal = document.getElementById('public-profile-modal');
+  if (!modal) return;
+  document.getElementById('public-profile-modal-close').addEventListener('click', closePublicProfileModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closePublicProfileModal(); });
+}
+wirePublicProfileModal();
