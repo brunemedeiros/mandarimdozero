@@ -407,21 +407,20 @@ async function renderProfileView(){
 
   const langs = await buildLanguagesSummary();
   const earnedBadges = BADGES.filter(b => earnedBadgeIds.has(b.id));
-  const featured = earnedBadges.slice(-4).reverse();
   const specialBadges = await computeEarnedSpecialBadges();
 
   if (!CURRENT_USER){
-    renderProfileBody(wrap, { profile: null, langs, earnedBadges, featured, specialBadges, isGuest: true });
+    renderProfileBody(wrap, { profile: null, langs, earnedBadges, specialBadges, isGuest: true });
     renderSideRankingCard();
     return;
   }
 
   const profile = await ensureProfileLoaded();
-  renderProfileBody(wrap, { profile, langs, earnedBadges, featured, specialBadges, isGuest: false });
+  renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, isGuest: false });
   renderSideRankingCard();
 }
 
-function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, specialBadges, isGuest }){
+function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, isGuest }){
   const name = profileDisplayName(profile);
   const initials = avatarInitials(name);
   const color = avatarColor(profile?.user_id || CURRENT_USER?.email || 'convidado');
@@ -445,9 +444,23 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, speci
     </div>
   `).join('');
 
-  const badgesHTML = featured.length ? featured.map(b => `
-    <div class="profile-badge" data-badge-id="${b.id}">${b.icon}</div>
-  `).join('') : `<p class="profile-empty-note">Nenhuma conquista ainda — sua primeira lição já desbloqueia uma.</p>`;
+  // Vitrine de badges: mostra TODAS as conquistas já ganhas (não só as
+  // últimas 4) com ícone+nome, igual ao card do grid completo de
+  // Progresso (mesma classe .badge, ver renderProgressView) -- a Visão
+  // geral do Perfil é onde outras pessoas mais provavelmente olham
+  // primeiro, então é aqui que a "vitrine" precisa ser generosa. O grid
+  // completo em Progresso continua existindo à parte (com os badges ainda
+  // NÃO conquistados também, pra dar meta) -- "Ver todas →" leva pra lá.
+  const badgesHTML = earnedBadges.length ? `
+    <div class="profile-badge-showcase">
+      ${earnedBadges.slice().reverse().map(b => `
+        <div class="badge earned profile-badge" data-badge-id="${b.id}">
+          <div class="icon">${b.icon}</div>
+          <div class="name">${b.name}</div>
+        </div>
+      `).join('')}
+    </div>
+  ` : `<p class="profile-empty-note">Nenhuma conquista ainda — sua primeira lição já desbloqueia uma.</p>`;
 
   // Badges especiais (Fundadora, Beta Tester...) ficam junto da identidade,
   // não misturados com a grade de conquistas por gameplay -- são sobre
@@ -495,7 +508,7 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, speci
 
     <div class="profile-section">
       <div class="section-label">Conquistas <span class="conquests-count">${earnedBadges.length}/${BADGES.length}</span></div>
-      <div class="profile-badges-row">${badgesHTML}</div>
+      ${badgesHTML}
       <button class="profile-stats-link" id="profile-badges-link">Ver todas →</button>
     </div>
   `;
