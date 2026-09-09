@@ -1148,6 +1148,10 @@ function ensurePeriodXp(){
 }
 
 function addXP(amount){
+  // amount 0 (ex: exerciseXP() em modo de revisão de lição, ver comentário
+  // lá) nunca deve gerar toast/notificação/checagem de badge -- não é XP
+  // de verdade, é só o funil compartilhado sendo chamado com nada a somar.
+  if (!amount) return;
   STATE.xp += amount;
   ensurePeriodXp();
   STATE.periodXp.amount += amount;
@@ -2325,10 +2329,17 @@ function wireDontKnowButton(contentEl, ex, onRevealAnswer){
 // independente > acerto com ajuda sem criar um sistema de pontuação
 // complexo.
 function exerciseXP(ex, fullXP){
+  // Revisão de uma lição JÁ CONCLUÍDA (ver STEP_STATE.lessonReview, aberta
+  // clicando numa lição "done" na Trilha -- qualquer aluno pode, não só
+  // admin): o comentário original em finishCurrentLesson já dizia que
+  // "nenhum XP de lição/desafio/meta diária deve contar de novo" nesse
+  // modo, mas só o fechamento da lição (finishCurrentLesson) checava isso
+  // -- cada exercício respondido DENTRO da revisão continuava pagando XP
+  // normalmente (achado de auditoria: fonte de XP infinita, sem limite).
   // Único ponto por onde passam TODOS os formatos de exercício ao acertar
-  // (ver os chamadores de addXP(exerciseXP(...))) -- aproveita pra
-  // registrar o formato pro badge "Multitarefa", sem precisar duplicar essa
-  // chamada em cada lugar.
+  // (ver os chamadores de addXP(exerciseXP(...))) -- aproveita pra fechar
+  // a brecha aqui, de uma vez, em vez de repetir a checagem em cada lugar.
+  if (STEP_STATE.lessonReview && STEP_STATE.lessonReview.unitId === STATE.currentUnitId) return 0;
   registerDailyExerciseFormat(ex.format);
   return ex.askedDontKnow ? Math.max(1, fullXP - 1) : fullXP;
 }
