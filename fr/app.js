@@ -967,6 +967,10 @@ function ensurePeriodXp(){
 }
 
 function addXP(amount){
+  // amount 0 (ex: exerciseXP() em modo de revisão de lição, ver comentário
+  // lá) nunca deve gerar toast/notificação/checagem de badge -- não é XP
+  // de verdade, é só o funil compartilhado sendo chamado com nada a somar.
+  if (!amount) return;
   STATE.xp += amount;
   ensurePeriodXp();
   STATE.periodXp.amount += amount;
@@ -1993,10 +1997,18 @@ function wireDontKnowButton(contentEl, ex, onRevealAnswer){
 // independente > acerto com ajuda sem criar um sistema de pontuação
 // complexo.
 function exerciseXP(ex, fullXP){
+  // Revisão de uma lição JÁ CONCLUÍDA (ver STEP_STATE.lessonReview, aberta
+  // clicando numa lição "done" na Trilha -- qualquer aluno pode, não só
+  // admin): o comentário original em finishCurrentLesson já dizia que
+  // "nenhum XP de lição/desafio/meta diária deve contar de novo" nesse
+  // modo, mas só o fechamento da lição (finishCurrentLesson) checava isso
+  // -- cada exercício respondido DENTRO da revisão continuava pagando XP
+  // normalmente (achado de auditoria: fonte de XP infinita, sem limite).
   // Único ponto por onde passam TODOS os formatos de exercício ao acertar
   // (ver os 6 chamadores de addXP(exerciseXP(...))) -- aproveita pra
-  // registrar o formato pro badge "Multitarefa", sem precisar duplicar essa
-  // chamada em cada um dos 6 lugares.
+  // fechar a brecha aqui, de uma vez, em vez de repetir a checagem em cada
+  // um dos 6 lugares.
+  if (STEP_STATE.lessonReview && STEP_STATE.lessonReview.unitId === STATE.currentUnitId) return 0;
   registerDailyExerciseFormat(ex.format);
   return ex.askedDontKnow ? Math.max(1, fullXP - 1) : fullXP;
 }
@@ -4850,6 +4862,11 @@ function recordCheckpointAttempt(module, scorePct){
 }
 
 function completeModuleUnits(module, scorePct){
+  // O card do checkpoint nunca fica desabilitado depois de aprovado (só
+  // ganha um ✓ visual, ver buildCheckpointRow) -- sem esta checagem, um
+  // módulo já concluído podia ser refeito e pagar +50 XP de novo a cada
+  // aprovação, sem limite (achado de auditoria).
+  const alreadyCompleted = STATE.checkpointProgress[module.id].completed;
   module.unitIds.forEach(id => {
     STATE.unitProgress[id].started = true;
     STATE.unitProgress[id].completed = true;
@@ -4863,10 +4880,12 @@ function completeModuleUnits(module, scorePct){
   });
   STATE.checkpointProgress[module.id].completed = true;
   STATE.checkpointProgress[module.id].bestScore = Math.max(STATE.checkpointProgress[module.id].bestScore || 0, scorePct);
-  addXP(50);
-  registerStudyToday();
-  registerDailyStars(lessonStars(scorePct));
-  registerDailyLessonCompleted(scorePct, false);
+  if (!alreadyCompleted){
+    addXP(50);
+    registerStudyToday();
+    registerDailyStars(lessonStars(scorePct));
+    registerDailyLessonCompleted(scorePct, false);
+  }
   recalculateUnlockedUnits();
   showToast('Ponto de verificação aprovado! 🏆');
   saveState();
@@ -5010,11 +5029,16 @@ function recordLevelTestAttempt(test, scorePct){
 }
 
 function completeLevelTest(test, scorePct){
+  // O card do teste de nível oferece "Refazer →" mesmo já concluído (ver
+  // buildLevelTestCard) -- sem esta checagem, cada aprovação repetida
+  // pagava +150 XP de novo, além do XP de cada módulo por baixo (esse já
+  // protegido por completeModuleUnits, ver acima). Achado de auditoria.
+  const alreadyCompleted = STATE.levelTestProgress[test.id].completed;
   const levelModules = modulesOfLevel(test.level);
   levelModules.forEach(module => completeModuleUnits(module, scorePct));
   STATE.levelTestProgress[test.id].completed = true;
   STATE.levelTestProgress[test.id].bestScore = Math.max(STATE.levelTestProgress[test.id].bestScore || 0, scorePct);
-  addXP(150);
+  if (!alreadyCompleted) addXP(150);
   showToast(`Nível ${test.level} concluído! 🎓`);
   saveState();
 }
