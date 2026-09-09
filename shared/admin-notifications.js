@@ -117,6 +117,36 @@ async function deleteNotificationTemplate(id){
   return { ok: !error };
 }
 
+// ---------- Regra da categoria "gamificacao" (XP ganho) ----------
+// notification_rules (ver shared/supabase_migrations/010 e 016) guarda
+// cooldown/limite diário/piso de XP por categoria, mas até aqui só dava
+// pra editar por SQL direto. Esta seção cobre só "gamificacao" -- é a
+// categoria por trás do evento "XP ganho" e a única com um piso de valor
+// (min_xp_amount) fazendo sentido hoje; as outras 8 categorias continuam
+// editáveis só por SQL, sem motivo concreto ainda pra dar UI a elas.
+async function fetchGamificacaoRule(){
+  const { data, error } = await supabaseClient
+    .from('notification_rules')
+    .select('*')
+    .eq('category', 'gamificacao')
+    .maybeSingle();
+  if (error){ console.error('Erro ao carregar regra de notificação:', error); return null; }
+  return data;
+}
+
+async function updateGamificacaoRule({ cooldownMinutes, dailyCap, minXpAmount }){
+  const { error } = await supabaseClient
+    .from('notification_rules')
+    .update({ cooldown_minutes: cooldownMinutes, daily_cap: dailyCap, min_xp_amount: minXpAmount })
+    .eq('category', 'gamificacao');
+  if (error){ console.error('Erro ao salvar regra de notificação:', error); return { ok: false }; }
+  // Derruba o cache do motor (shared/notifications.js, carrega antes deste
+  // arquivo) -- sem isso, a PRÓPRIA conta admin só veria a mudança valer
+  // numa sessão nova, mesmo já tendo salvo.
+  NOTIFICATION_RULES_CACHE = null;
+  return { ok: true };
+}
+
 async function renderAdminNotificationsView(){
   const wrap = document.getElementById('admin-notifications-content');
   if (!wrap) return;
@@ -126,7 +156,7 @@ async function renderAdminNotificationsView(){
   }
   wrap.innerHTML = loadingHTML();
 
-  const templates = await fetchAllNotificationTemplates();
+  const [templates, gamificacaoRule] = await Promise.all([fetchAllNotificationTemplates(), fetchGamificacaoRule()]);
 
   const eventOptionsHTML = Object.keys(NOTIFICATION_TEMPLATE_EVENT_LABELS).map(ev => `<option value="${ev}">${notificationTemplateEventLabel(ev)}</option>`).join('');
 
@@ -163,6 +193,20 @@ async function renderAdminNotificationsView(){
 
   wrap.innerHTML = `
     <div class="profile-section">
+      <div class="section-label">⭐ Regra de "XP ganho"</div>
+      <p class="profile-edit-hint">Controla quando a notificação de XP dispara -- não o texto dela (isso fica nas variantes abaixo). Revisões de palavras já bem sabidas dão XP bem baixo de propósito; abaixo do mínimo, a notificação nem é criada.</p>
+      <form id="admin-gamificacao-rule-form" class="profile-edit-form">
+        <label class="profile-edit-label" for="admin-rule-min-xp">XP mínimo pra notificar</label>
+        <input type="number" id="admin-rule-min-xp" class="profile-edit-input" min="0" max="999" value="${gamificacaoRule?.min_xp_amount ?? ''}" placeholder="ex: 5 (0 ou vazio = sem piso)">
+        <label class="profile-edit-label" for="admin-rule-cooldown">Intervalo mínimo entre notificações (minutos)</label>
+        <input type="number" id="admin-rule-cooldown" class="profile-edit-input" min="0" max="1440" value="${gamificacaoRule?.cooldown_minutes ?? 15}">
+        <label class="profile-edit-label" for="admin-rule-daily-cap">Máximo por dia</label>
+        <input type="number" id="admin-rule-daily-cap" class="profile-edit-input" min="0" max="99" value="${gamificacaoRule?.daily_cap ?? 5}">
+        <p class="profile-edit-error" id="admin-gamificacao-rule-error"></p>
+        <button type="submit" class="btn btn-primary btn-block" id="admin-gamificacao-rule-save-btn">Salvar regra</button>
+      </form>
+    </div>
+    <div class="profile-section">
       <div class="section-label">Nova variante</div>
       <form id="admin-create-template-form" class="profile-edit-form">
         <label class="profile-edit-label" for="admin-template-event">Evento</label>
@@ -191,6 +235,23 @@ async function renderAdminNotificationsView(){
     </div>
     ${groupsHTML}
   `;
+
+  document.getElementById('admin-gamificacao-rule-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('admin-gamificacao-rule-save-btn');
+    const errorEl = document.getElementById('admin-gamificacao-rule-error');
+    errorEl.textContent = '';
+    const minXpRaw = document.getElementById('admin-rule-min-xp').value;
+    btn.disabled = true;
+    const result = await updateGamificacaoRule({
+      minXpAmount: minXpRaw === '' ? null : parseInt(minXpRaw, 10),
+      cooldownMinutes: parseInt(document.getElementById('admin-rule-cooldown').value, 10) || 0,
+      dailyCap: parseInt(document.getElementById('admin-rule-daily-cap').value, 10) || 0,
+    });
+    btn.disabled = false;
+    if (!result.ok){ errorEl.textContent = 'Não foi possível salvar agora.'; return; }
+    showToast('✓ Regra salva.');
+  });
 
   document.getElementById('admin-create-template-form').addEventListener('submit', async (e) => {
     e.preventDefault();
