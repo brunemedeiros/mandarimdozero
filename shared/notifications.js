@@ -117,12 +117,17 @@ async function pickNotificationTemplate(eventType){
 
 // Anti-spam básico da Fase 1 (seção 5/16): cooldown por categoria (minutos
 // desde a última notificação DESSA categoria pra essa conta) + limite
-// diário. Regras vêm de notification_rules -- ajustáveis por SQL por
-// enquanto (o editor desta fase mexe em templates, não nas regras).
-async function passesAntiSpam(category){
+// diário + (Fase 1b) um piso de XP mínimo pro evento xp_earned -- cooldown/
+// limite diário controlam FREQUÊNCIA, não o TAMANHO do ganho, então uma
+// sequência de revisões maduras (XP bem baixo de propósito, ver reviewXP())
+// ainda enchia o sino de notificações de "+1/+2/+3 XP" mesmo respeitando o
+// cooldown. min_xp_amount é editável no Painel de Admin > Notificações.
+async function passesAntiSpam(category, eventType, payload){
   const rules = await ensureNotificationRulesLoaded();
   const rule = rules.get(category);
   if (!rule || !rule.active) return false;
+
+  if (eventType === 'xp_earned' && rule.min_xp_amount != null && (payload?.amount ?? 0) < rule.min_xp_amount) return false;
 
   const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
   const queries = [
@@ -171,7 +176,7 @@ async function fireNotificationEvent(eventType, category, payload, actionTab){
   // quer push quase sempre quer o histórico no sino também).
   if (!notificationCategoryAllowsInApp(category)) return;
 
-  const ok = await passesAntiSpam(category);
+  const ok = await passesAntiSpam(category, eventType, payload);
   if (!ok) return;
 
   const template = await pickNotificationTemplate(eventType);
