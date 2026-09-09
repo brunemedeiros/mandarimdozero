@@ -1436,12 +1436,16 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
 .public-profile-name{ font-size:17px; font-weight:800; color:var(--ink); }
 .public-profile-username{ font-size:13px; color:var(--ink-soft); }
 .public-profile-bio{ font-size:13.5px; color:var(--ink); text-align:center; line-height:1.5; margin:0 0 14px; }
-.public-profile-featured-badge{
-  display:flex; align-items:center; justify-content:center; gap:6px; font-size:13px; font-weight:700; color:var(--ink);
-  background:var(--paper-warm); border-radius:999px; padding:6px 14px; margin:0 auto 14px; width:fit-content;
+/* Lista de badges do popup (TODOS os concedidos, não só o "em destaque" da
+   linha do Ranking) -- cada chip é clicável, mesmo popover de nome+descrição
+   usado no resto do app (showBadgeInfo, ver shared/utils.js). */
+.public-profile-badges{ display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:8px; margin-bottom:14px; }
+.public-profile-badge-chip{
+  display:flex; align-items:center; gap:6px; font-size:13px; font-weight:700; color:var(--ink);
+  background:var(--paper-warm); border:none; border-radius:999px; padding:6px 14px; cursor:pointer; font-family:var(--font-body);
 }
-.public-profile-featured-badge .icon{ font-size:15px; display:flex; }
-.public-profile-featured-badge .icon svg{ width:16px; height:16px; display:block; }
+.public-profile-badge-chip .icon{ font-size:15px; display:flex; }
+.public-profile-badge-chip .icon svg{ width:16px; height:16px; display:block; }
 .public-profile-stats{ display:flex; gap:10px; }
 .public-profile-stat{ flex:1; text-align:center; background:var(--paper-warm); border-radius:12px; padding:12px 8px; }
 .public-profile-stat .value{ font-size:17px; font-weight:800; color:var(--ink); }

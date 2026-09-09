@@ -156,10 +156,25 @@ function leaderboardRankBadge(rank){
 function resolveFeaturedBadge(badgeId, catalog){
   if (!badgeId) return null;
   const special = SPECIAL_BADGES.find(b => b.id === badgeId);
-  if (special) return { icon: special.icon, name: special.name };
+  if (special) return { icon: special.icon, name: special.name, desc: special.desc };
   const custom = (catalog || []).find(b => b.id === badgeId);
-  if (custom) return { icon: custom.icon, name: custom.name };
+  if (custom) return { icon: custom.icon, name: custom.name, desc: custom.description };
   return null;
+}
+
+// Todos os badges de identidade concedidos a um user_id QUALQUER (não só
+// CURRENT_USER, ao contrário de fetchGrantedBadgeIds() em shared/profile.js,
+// que só serve pro próprio perfil) -- usado no popup de perfil público do
+// Ranking pra listar TUDO que a pessoa já ganhou, não só o único badge "em
+// destaque" que aparece na linha da lista. badge_grants tem RLS de leitura
+// pública desde a criação (ver 002_create_badge_grants_table.sql).
+async function fetchUserBadgeGrants(userId){
+  const { data, error } = await supabaseClient
+    .from('badge_grants')
+    .select('badge_id')
+    .eq('user_id', userId);
+  if (error){ console.error('Erro ao carregar badges do perfil:', error); return []; }
+  return (data || []).map(r => r.badge_id);
 }
 
 async function renderLeaderboardView(){
@@ -302,16 +317,31 @@ function animateOwnRowRankChange(meRow, scope, weekStart, rows){
   }
 }
 
+// Incrementado a cada abertura do modal -- guarda contra a resposta
+// assíncrona de fetchUserBadgeGrants() de um clique ANTERIOR chegar depois
+// que a pessoa já fechou o modal ou clicou em outra linha, e escrever os
+// badges de alguém errado no popup que está na tela agora.
+let PUBLIC_PROFILE_MODAL_TOKEN = 0;
+
 // ---------- Modal: perfil público (a partir de uma linha do Ranking) ----------
 // Preview somente-leitura -- não é a tela de Meu Perfil completa, só o que
 // já é confirmadamente público (profiles/badge_grants têm RLS de leitura
 // pública desde a criação, ver 001/002_create_*_table.sql, pensando
 // exatamente nesse cenário) mais o que a própria linha do ranking já trouxe
-// (amount/rank da semana corrente). Sem consulta nova ao Supabase.
-function openPublicProfileModal(row, catalog){
+// (amount/rank da semana corrente). A lista de badges é a única parte que
+// pede uma consulta nova (fetchUserBadgeGrants) -- o resto renderiza na
+// hora com o que a linha já tinha.
+//
+// Mostra TODOS os badges de identidade da pessoa aqui (diferente da linha
+// do Ranking, que mostra só o "em destaque" escolhido por ela) -- pensado
+// pra quando existir um badge de usuário premium: a linha continua
+// enxuta com o badge mais relevante, mas o popup do perfil deixa claro
+// tudo que a pessoa já conquistou.
+async function openPublicProfileModal(row, catalog){
   const modal = document.getElementById('public-profile-modal');
   const body = document.getElementById('public-profile-modal-body');
   if (!modal || !body) return;
+  const token = ++PUBLIC_PROFILE_MODAL_TOKEN;
 
   const name = row.profile?.display_name || row.profile?.username || 'Aluno(a)';
   const username = row.profile?.username;
@@ -321,7 +351,6 @@ function openPublicProfileModal(row, catalog){
     ? `<img class="public-profile-avatar" src="${row.profile.avatar_url}" alt="">`
     : `<div class="public-profile-avatar" style="background:${color};">${initials}</div>`;
   const bio = row.profile?.bio;
-  const featured = resolveFeaturedBadge(row.profile?.featured_badge_id, catalog);
 
   body.innerHTML = `
     <div class="public-profile-header">
@@ -330,17 +359,44 @@ function openPublicProfileModal(row, catalog){
       ${username ? `<div class="public-profile-username">@${escapeHTML(username)}</div>` : ''}
     </div>
     ${bio ? `<p class="public-profile-bio">${escapeHTML(bio)}</p>` : ''}
-    ${featured ? `
-      <div class="public-profile-featured-badge">
-        <span class="icon">${featured.icon}</span><span>${escapeHTML(featured.name)}</span>
-      </div>
-    ` : ''}
+    <div class="public-profile-badges" id="public-profile-badges">${loadingHTML()}</div>
     <div class="public-profile-stats">
       <div class="public-profile-stat"><div class="value">${leaderboardRankBadge(row.rank)}</div><div class="label">Posição</div></div>
       <div class="public-profile-stat"><div class="value">⭐ ${row.amount}</div><div class="label">XP essa semana</div></div>
     </div>
   `;
   modal.style.display = 'flex';
+
+  const grantedIds = await fetchUserBadgeGrants(row.user_id);
+  if (token !== PUBLIC_PROFILE_MODAL_TOKEN) return; // modal já fechado/trocado -- descarta
+
+  // Une o que foi concedido via badge_grants com o badge em destaque
+  // escolhido pela pessoa -- necessário porque "em destaque" pode ser um
+  // badge por REGRA (Fundadora/Beta Tester, calculado, nunca gravado em
+  // badge_grants), não só um concedido manualmente.
+  const allIds = new Set(grantedIds);
+  if (row.profile?.featured_badge_id) allIds.add(row.profile.featured_badge_id);
+  const badges = [...allIds]
+    .map(id => ({ id, ...resolveFeaturedBadge(id, catalog) }))
+    .filter(b => b.icon);
+
+  const badgesEl = document.getElementById('public-profile-badges');
+  if (!badgesEl) return;
+  if (!badges.length){
+    badgesEl.remove();
+    return;
+  }
+  badgesEl.innerHTML = badges.map(b => `
+    <button type="button" class="public-profile-badge-chip" data-badge-id="${b.id}">
+      <span class="icon">${b.icon}</span><span>${escapeHTML(b.name)}</span>
+    </button>
+  `).join('');
+  badgesEl.querySelectorAll('.public-profile-badge-chip').forEach(el => {
+    el.addEventListener('click', () => {
+      const b = badges.find(x => x.id === el.dataset.badgeId);
+      if (b) showBadgeInfo(el, `${b.icon} ${b.name}`, b.desc || '');
+    });
+  });
 }
 
 function closePublicProfileModal(){
