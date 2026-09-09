@@ -1214,7 +1214,7 @@ async function switchAnalyticsTab(tab){
   if (!ANALYTICS_LAZY_TABS.has(tab) || ANALYTICS_LAZY_CACHE[tab]) return;
   const panel = document.querySelector(`[data-analytics-panel="${tab}"]`);
   if (!panel) return;
-  panel.innerHTML = `<p class="profile-loading">Carregando...</p>`;
+  panel.innerHTML = loadingHTML();
 
   if (tab === 'retencao'){
     const [profiles, events] = await Promise.all([fetchAllStudentProfilesForRetention(), fetchAllStudentEventsForRetention()]);
@@ -1279,7 +1279,7 @@ async function renderAdminAnalyticsView(){
     wrap.innerHTML = `<p class="profile-empty-note">Esta tela é só pra administração da plataforma.</p>`;
     return;
   }
-  wrap.innerHTML = `<p class="profile-loading">Carregando...</p>`;
+  wrap.innerHTML = loadingHTML();
 
   const profile = await ensureProfileLoaded();
   const excludeOwn = profile ? profile.exclude_own_activity !== false : true;

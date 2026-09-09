@@ -4218,6 +4218,40 @@ function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
   });
 }
 
+// Anima um clone do bloco escolhido "voando" da posição de origem
+// (sourceRect, medido ANTES do slot existir) até o slot de destino recém
+// criado -- estilo Duolingo. Sem isso o bloco só sumia do banco e o
+// pinyin/hanzi apareciam prontos no slot, sem nenhuma transição visual
+// entre os dois. html preserva a estrutura pinyin+hanzi em duas linhas
+// (não dá pra usar textContent aqui como no francês -- ver .reorder-block
+// acima, cada bloco tem dois <div> internos).
+function flyBlockToSlot(sourceRect, html, targetSlotEl){
+  if (!targetSlotEl || prefersReducedMotion()) return;
+  const endRect = targetSlotEl.getBoundingClientRect();
+  const clone = document.createElement('div');
+  clone.className = 'reorder-fly-clone';
+  clone.innerHTML = html;
+  clone.style.left = `${sourceRect.left}px`;
+  clone.style.top = `${sourceRect.top}px`;
+  clone.style.width = `${sourceRect.width}px`;
+  clone.style.height = `${sourceRect.height}px`;
+  document.body.appendChild(clone);
+  // Esconde o slot real enquanto o clone "voa" por cima -- revelado de novo
+  // logo abaixo, cross-fade com o clone sumindo, não um corte seco.
+  targetSlotEl.style.visibility = 'hidden';
+
+  requestAnimationFrame(() => {
+    clone.style.transform = `translate(${endRect.left - sourceRect.left}px, ${endRect.top - sourceRect.top}px)`;
+    clone.style.width = `${endRect.width}px`;
+    clone.style.height = `${endRect.height}px`;
+  });
+  setTimeout(() => {
+    targetSlotEl.style.visibility = '';
+    clone.style.opacity = '0';
+  }, 200);
+  setTimeout(() => clone.remove(), 350);
+}
+
 function renderReorderExercise(ex, contentEl, nextBtn, total){
   const correctOrder = ex.phrase.blocks;
   const chosenSequence = []; // índices (no array shuffledBlocks) já escolhidos, em ordem
@@ -4268,10 +4302,20 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
     blocksEl.querySelectorAll('.reorder-block:not(.used)').forEach(btn => {
       btn.addEventListener('click', () => {
         if (STEP_STATE.exerciseAnswered) return;
+        // Captura a posição/conteúdo do bloco ANTES do rebuild (renderSlots/
+        // renderBlocks substituem o innerHTML inteiro -- depois disso não dá
+        // mais pra medir de onde ele "partiu"), pra animar um clone voando
+        // até o slot certo em vez do bloco só sumir e o texto aparecer pronto.
+        const sourceRect = btn.getBoundingClientRect();
+        const sourceHTML = btn.innerHTML;
         const blockIdx = parseInt(btn.dataset.blockIdx);
+        const seqPos = chosenSequence.length;
         chosenSequence.push(blockIdx);
         renderSlots();
         renderBlocks();
+
+        const targetSlot = slotsEl.querySelector(`.reorder-slot[data-seq-pos="${seqPos}"]`);
+        flyBlockToSlot(sourceRect, sourceHTML, targetSlot);
 
         // Frase completa: verifica automaticamente
         if (chosenSequence.length === correctOrder.length){

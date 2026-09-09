@@ -3872,6 +3872,37 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
   });
 }
 
+// Anima um clone do bloco escolhido "voando" da posição de origem
+// (sourceRect, medido ANTES do slot existir) até o slot de destino recém
+// criado -- estilo Duolingo. Sem isso o bloco só sumia do banco e o texto
+// aparecia pronto no slot, sem nenhuma transição visual entre os dois.
+function flyBlockToSlot(sourceRect, text, targetSlotEl){
+  if (!targetSlotEl || prefersReducedMotion()) return;
+  const endRect = targetSlotEl.getBoundingClientRect();
+  const clone = document.createElement('div');
+  clone.className = 'reorder-fly-clone';
+  clone.textContent = text;
+  clone.style.left = `${sourceRect.left}px`;
+  clone.style.top = `${sourceRect.top}px`;
+  clone.style.width = `${sourceRect.width}px`;
+  clone.style.height = `${sourceRect.height}px`;
+  document.body.appendChild(clone);
+  // Esconde o slot real enquanto o clone "voa" por cima -- revelado de novo
+  // logo abaixo, cross-fade com o clone sumindo, não um corte seco.
+  targetSlotEl.style.visibility = 'hidden';
+
+  requestAnimationFrame(() => {
+    clone.style.transform = `translate(${endRect.left - sourceRect.left}px, ${endRect.top - sourceRect.top}px)`;
+    clone.style.width = `${endRect.width}px`;
+    clone.style.height = `${endRect.height}px`;
+  });
+  setTimeout(() => {
+    targetSlotEl.style.visibility = '';
+    clone.style.opacity = '0';
+  }, 200);
+  setTimeout(() => clone.remove(), 350);
+}
+
 // ---------- Exercício de ordenar palavras (reorder) ----------
 function renderReorderExercise(ex, contentEl, nextBtn, total){
   const correctOrder = ex.phrase.blocks;
@@ -3932,10 +3963,20 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
     blocksEl.querySelectorAll('.reorder-block:not(.used)').forEach(btn => {
       btn.addEventListener('click', () => {
         if (STEP_STATE.exerciseAnswered) return;
+        // Captura a posição do bloco ANTES do rebuild (renderSlots/renderBlocks
+        // substituem o innerHTML inteiro -- depois disso não dá mais pra medir
+        // de onde ele "partiu"), pra animar um clone voando até o slot certo
+        // em vez do bloco só sumir e o texto aparecer pronto no slot.
+        const sourceRect = btn.getBoundingClientRect();
+        const sourceText = btn.textContent.trim();
         const blockIdx = parseInt(btn.dataset.blockIdx);
+        const seqPos = chosenSequence.length;
         chosenSequence.push(blockIdx);
         renderSlots();
         renderBlocks();
+
+        const targetSlot = slotsEl.querySelector(`.reorder-slot[data-seq-pos="${seqPos}"]`);
+        flyBlockToSlot(sourceRect, sourceText, targetSlot);
 
         if (chosenSequence.length === correctOrder.length){
           checkReorderAnswer();
@@ -6361,7 +6402,7 @@ async function renderChallengeCategories(){
   document.getElementById('challenges-admin-wrap').style.display = 'none';
 
   const wrap = document.getElementById('challenges-categories');
-  wrap.innerHTML = `<p class="challenges-empty">Carregando desafios…</p>`;
+  wrap.innerHTML = loadingHTML('Carregando desafios...');
 
   const ok = await loadChallengesFromDB();
   if (!ok){
@@ -7642,7 +7683,7 @@ async function renderChallengesAdmin(){
   document.getElementById('challenges-admin-wrap').style.display = 'block';
 
   const content = document.getElementById('challenges-admin-content');
-  content.innerHTML = `<p class="challenges-admin-empty">Carregando…</p>`;
+  content.innerHTML = loadingHTML();
   const ok = await loadChallengesFromDB();
   if (!ok){
     content.innerHTML = `<p class="challenges-admin-empty">⚠ Não foi possível carregar os desafios agora. Verifique sua conexão e tente novamente -- isto NÃO significa que a fila está vazia.</p>`;

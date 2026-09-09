@@ -114,7 +114,7 @@ async function renderSideRankingCard(){
       return !cards || getComputedStyle(cards).display !== 'none';
     });
   if (!targets.length) return;
-  targets.forEach(body => { body.innerHTML = `<p class="profile-loading">Carregando...</p>`; });
+  targets.forEach(body => { body.innerHTML = loadingHTML(); });
   const rows = await fetchLeaderboard('all', leaderboardCurrentWeekStart());
   let html;
   if (!rows.length){
@@ -166,7 +166,7 @@ function resolveFeaturedBadge(badgeId, catalog){
 async function renderLeaderboardView(){
   const wrap = document.getElementById('leaderboard-content');
   if (!wrap) return;
-  wrap.innerHTML = `<p class="profile-loading">Carregando ranking...</p>`;
+  wrap.innerHTML = loadingHTML('Carregando ranking...');
 
   const weekStart = leaderboardCurrentWeekStart();
   const scope = LEADERBOARD_SCOPE;

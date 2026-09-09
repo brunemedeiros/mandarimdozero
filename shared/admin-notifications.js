@@ -124,7 +124,7 @@ async function renderAdminNotificationsView(){
     wrap.innerHTML = `<p class="profile-empty-note">Esta tela é só pra administração da plataforma.</p>`;
     return;
   }
-  wrap.innerHTML = `<p class="profile-loading">Carregando...</p>`;
+  wrap.innerHTML = loadingHTML();
 
   const templates = await fetchAllNotificationTemplates();
 
