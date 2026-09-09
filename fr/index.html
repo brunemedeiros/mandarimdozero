@@ -1286,6 +1286,18 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
 .review-progress-count{ font-size:13px; font-weight:800; color:var(--ink-soft); white-space:nowrap; }
 
 /* ---------- Combinar (jogo da memória: cartas viradas, revela em pares) ---------- */
+.match-size-picker{ text-align:center; padding:8px 0; }
+.match-size-picker h3{ margin:8px 0 18px; }
+.match-size-options{ display:flex; gap:10px; justify-content:center; margin-bottom:20px; flex-wrap:wrap; }
+.match-size-btn{
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  min-width:84px; padding:12px 10px; border-radius:12px; border:2px solid var(--paper-line);
+  background: var(--paper-warm); cursor:pointer; font-family:inherit;
+}
+.match-size-btn:disabled{ opacity:.4; cursor:not-allowed; }
+.match-size-btn.selected{ border-color: var(--seal-red); background: color-mix(in srgb, var(--seal-red) 10%, var(--paper-warm)); }
+.match-size-num{ font-size:22px; font-weight:800; color:var(--ink); }
+.match-size-label{ font-size:11.5px; color:var(--ink-soft); line-height:1.3; }
 .match-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; font-size:13px; font-weight:800; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.04em; }
 .match-header .match-attempts{ color: var(--seal-red-dark); }
 .match-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; }
@@ -1577,14 +1589,13 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
 }
 .profile-stats-link:hover{ text-decoration:underline; }
 
-.profile-badges-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-.profile-badge{
-  width:42px; height:42px; border-radius:50%; background: linear-gradient(160deg, var(--paper-warm), var(--paper));
-  border:1px solid var(--imperial-gold); display:flex; align-items:center; justify-content:center; font-size:19px;
-  box-shadow: var(--shadow-card);
-}
+/* Vitrine de badges na Visão geral do Perfil -- mostra TODAS as conquistas
+   já ganhas (não só as últimas 4), reaproveitando o mesmo cartão .badge do
+   grid completo de Progresso (ver renderProgressView) só que num grid mais
+   compacto, pra "brag" ser visível de cara sem precisar clicar em nada. */
+.profile-badge-showcase{ display:grid; grid-template-columns: repeat(auto-fill, minmax(84px,1fr)); gap:10px; margin-top:4px; }
 .profile-empty-note{ font-size:13px; color:var(--ink-soft); }
-.profile-badge, .badge{ cursor:pointer; }
+.badge{ cursor:pointer; }
 
 /* Mini popover de nome+descrição de badge (ver showBadgeInfo em
    shared/utils.js) -- funciona igual no toque (mobile) e no clique

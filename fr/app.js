@@ -776,7 +776,8 @@ function freshDailyBucket(today){
     grammarLessons: 0, conjugationSessions: 0, conjugationCorrect: 0,
     conjugationTenses: [], reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0,
     lessonsForGoal: 0, goalCountedLessonKeys: [], exerciseFormatsSeen: [],
-    exerciseFormatCounts: {}, audioPlaysToday: 0, overdueReviewsDone: 0
+    exerciseFormatCounts: {}, audioPlaysToday: 0, overdueReviewsDone: 0,
+    missionsBonusAwarded: false
   };
 }
 
@@ -918,6 +919,21 @@ function todaysChallenges(){
   ];
 }
 
+// Bônus por completar as 3 Missões do dia (não por missão individual --
+// cada ação que alimenta uma missão já dá XP por si só em outro lugar; o
+// bônus aqui é só pelo conjunto das 3). Chamado de dentro de addXP() (ver
+// comentário lá) pra ser checado depois de QUALQUER ganho de XP, já que
+// qualquer um deles pode ser o que fecha a última missão do dia.
+function checkDailyMissionsBonus(){
+  ensureDailyBucket();
+  if (STATE.daily.missionsBonusAwarded) return;
+  const allDone = todaysChallenges().every(c => (Number(c.get(STATE.daily)) || 0) >= c.target);
+  if (!allDone) return;
+  STATE.daily.missionsBonusAwarded = true;
+  addXP(30);
+  showToast('🎯 Todas as missões do dia concluídas! +30 XP');
+}
+
 function renderDailyChallengesScreen(){
   const contentEl = document.getElementById('step-content');
   const nextBtn = document.getElementById('step-next-btn');
@@ -988,6 +1004,12 @@ function addXP(amount){
   // perto de addXP() sozinho -- registerAudioPlay() dispara a checagem
   // direto, sem esperar o próximo XP ganho.
   checkAndCelebrateBadges();
+  // Checa a cada ganho de XP -- qualquer ação pode ser a que fecha a
+  // última das 3 Missões do dia (ver checkDailyMissionsBonus). A função já
+  // se protege contra rodar duas vezes no mesmo dia; addXP(30) chamando
+  // addXP() de novo aqui dentro é seguro (não reentra infinitamente porque
+  // missionsBonusAwarded já fica true ANTES desse addXP(30)).
+  checkDailyMissionsBonus();
 }
 
 // showToast agora vem de shared/toast.js.
@@ -4146,8 +4168,12 @@ const SPEED_STATE = {
 // alcançadas -- eram só essas duas condições aqui antes, sem checar a lição
 // específica de cada carta.
 function buildSpeedQueue(){
-  const pool = eligibleReviewPool().filter(c => c.reps > 0);
-  return shuffle(pool);
+  // Speed Review é jogo, não ferramenta de revisão espaçada -- usa TODAS
+  // as palavras de lições já concluídas, sem exigir reps>0 nem respeitar
+  // data de vencimento do SM2 (decisão da autora, ver auditoria do sistema
+  // de XP). Contraste com Flashcard/Palavras difíceis, que continuam
+  // presas ao SM2.
+  return shuffle(eligibleReviewPool());
 }
 
 function buildSpeedOptions(card){
@@ -4218,7 +4244,11 @@ function renderVocabStrengthWidget(){
 function renderReviewModeSelect(){
   const pool = eligibleReviewPool();
   const dueCount = cardsDueNow(pool).length;
-  const hardCount = hardWordsPool().length;
+  // Palavras difíceis agora respeita a data de vencimento do SM2, igual ao
+  // Flashcard normal -- é ferramenta de revisão espaçada (SM-2), não jogo
+  // sempre disponível (ver Combinar/Speed Review, que são jogos de
+  // propósito). Ver auditoria do sistema de XP + decisão da autora.
+  const hardCount = cardsDueNow(hardWordsPool()).length;
 
   renderVocabStrengthWidget();
 
@@ -4230,11 +4260,11 @@ function renderReviewModeSelect(){
       <div class="name">Flashcard</div>
       <div class="desc">Revisão espaçada clássica</div>
     </button>
-    <button class="review-mode-card" id="mode-card-speed" ${pool.filter(c=>c.reps>0).length < 4 ? 'disabled' : ''}>
+    <button class="review-mode-card" id="mode-card-speed" ${pool.length < 4 ? 'disabled' : ''}>
       <div class="icon">⚡</div>
-      <div class="count">${pool.filter(c=>c.reps>0).length}</div>
+      <div class="count">${pool.length}</div>
       <div class="name">Speed Review</div>
-      <div class="desc">Contra o relógio</div>
+      <div class="desc">Jogo contra o relógio</div>
     </button>
     <button class="review-mode-card" id="mode-card-hard" ${hardCount === 0 ? 'disabled' : ''}>
       <div class="icon">🔥</div>
@@ -4242,9 +4272,9 @@ function renderReviewModeSelect(){
       <div class="name">Palavras difíceis</div>
       <div class="desc">As que você mais erra</div>
     </button>
-    <button class="review-mode-card" id="mode-card-match" ${pool.filter(c=>c.reps>0).length < 4 ? 'disabled' : ''}>
+    <button class="review-mode-card" id="mode-card-match" ${pool.length < 10 ? 'disabled' : ''}>
       <div class="icon">🧩</div>
-      <div class="count">${pool.filter(c=>c.reps>0).length}</div>
+      <div class="count">${pool.length}</div>
       <div class="name">Combinar</div>
       <div class="desc">Jogo de pares</div>
     </button>
@@ -4268,12 +4298,12 @@ function openReviewSession(mode){
     startReviewSession();
   } else if (mode === 'hard'){
     STATE.reviewSessionUnitFilter = null;
-    STATE.reviewQueue = shuffle(hardWordsPool());
+    STATE.reviewQueue = shuffle(cardsDueNow(hardWordsPool()));
     STATE.reviewIndex = 0;
     STATE.reviewShowingAnswer = false;
     renderReviewView();
   } else if (mode === 'match'){
-    startMatchGame();
+    renderMatchSizePicker();
   } else {
     startSpeedReview();
   }
@@ -4289,9 +4319,14 @@ document.getElementById('review-back-to-modes').addEventListener('click', () => 
 });
 
 // ---------- Combinar: jogo de pares (francês <-> tradução) ----------
-// Pool: vocabulário já estudado ao menos uma vez (mesma regra do Speed
-// Review) — não faz sentido pedir pra combinar uma palavra nunca vista.
+// Pool: TODA palavra de uma lição já concluída (eligibleReviewPool), sem
+// exigir reps>0 nem respeitar data de vencimento do SM2 -- é jogo, não
+// ferramenta de revisão espaçada (decisão da autora, ver auditoria do
+// sistema de XP). Tamanho da sessão é escolha do aluno (ver
+// renderMatchSizePicker/MATCH_SIZE_OPTIONS), não fixo.
+const MATCH_SIZE_OPTIONS = [5, 8, 10]; // pares -- 10/16/20 cartas
 const MATCH_STATE = {
+  pairSize: 8,     // pares por sessão, escolhido em renderMatchSizePicker
   pairs: [],       // [{cardId, front, back}]
   tiles: [],       // [{cardId, side:'front'|'back', text}]
   selected: null,  // tile element selecionado aguardando o par
@@ -4304,10 +4339,51 @@ const MATCH_STATE = {
 // (review-back-to-modes, switchTab) — o jogo não usa mais timer.
 function stopMatchTimer(){}
 
+// Tela de escolha do tamanho da sessão -- aparece ao entrar no Combinar
+// (não ao clicar "Jogar de novo", que reaproveita o último tamanho
+// escolhido direto via startMatchGame).
+function renderMatchSizePicker(){
+  const el = document.getElementById('match-review-content');
+  const poolLen = eligibleReviewPool().length;
+  const minPairs = Math.min(...MATCH_SIZE_OPTIONS);
+  if (poolLen < minPairs * 2){
+    el.innerHTML = `
+      <div class="review-empty">
+        <div class="big-emoji">🧩</div>
+        <h3>Vocabulário insuficiente ainda</h3>
+        <p>O jogo de Combinar precisa de pelo menos ${minPairs * 2} palavras já vistas em lições concluídas.</p>
+      </div>
+    `;
+    return;
+  }
+  el.innerHTML = `
+    <div class="match-size-picker">
+      <div class="big-emoji">🧩</div>
+      <h3>Quantos pares você quer jogar?</h3>
+      <div class="match-size-options">
+        ${MATCH_SIZE_OPTIONS.map(n => `
+          <button class="match-size-btn ${MATCH_STATE.pairSize === n ? 'selected' : ''}" data-pairs="${n}" ${poolLen < n * 2 ? 'disabled' : ''}>
+            <div class="match-size-num">${n}</div>
+            <div class="match-size-label">pares<br>(${n * 2} cartas)</div>
+          </button>
+        `).join('')}
+      </div>
+      <button class="btn btn-primary" id="match-size-start-btn">Começar →</button>
+    </div>
+  `;
+  el.querySelectorAll('.match-size-btn:not([disabled])').forEach(btn => {
+    btn.addEventListener('click', () => {
+      MATCH_STATE.pairSize = parseInt(btn.dataset.pairs, 10);
+      renderMatchSizePicker();
+    });
+  });
+  document.getElementById('match-size-start-btn').addEventListener('click', startMatchGame);
+}
+
 function startMatchGame(){
   trackEvent('lesson_start', 'match_game', null);
-  const pool = shuffle(eligibleReviewPool().filter(c => c.reps > 0));
-  const pairCount = Math.min(6, pool.length);
+  const pool = shuffle(eligibleReviewPool());
+  const pairCount = Math.min(MATCH_STATE.pairSize, pool.length);
   MATCH_STATE.pairs = pool.slice(0, pairCount);
   MATCH_STATE.tiles = shuffle([
     ...MATCH_STATE.pairs.map(c => ({ cardId: c.id, side: 'front', text: c.front })),
@@ -5815,6 +5891,11 @@ function renderConjPracticeStep(){
     let correctCount = 0;
     let activeCount = 0;
     const answersForVerb = {};
+    // XP por forma verbal certa: irregulares valem o dobro (mais difícil
+    // de decorar do que aplicar uma regra) -- "quase" (erro de acento/
+    // grafia solto) não conta pra XP, só pro score exibido.
+    const isIrregular = !CONJ_REGULAR_GROUPS.includes(verbInfo.g);
+    let earnedXP = 0;
 
     CONJ_STATE.selectedTenses.forEach(tenseKey => {
       const expectedForms = getConjForms(verb, tenseKey);
@@ -5840,6 +5921,7 @@ function renderConjPracticeStep(){
         if (accepted.includes(given.trim())){
           fieldEl.classList.add('ok');
           correctCount++; tenseCorrect++;
+          earnedXP += isIrregular ? 2 : 1;
         } else if (accepted.some(f => normalizeLoose(given) === normalizeLoose(f))){
           fieldEl.classList.add('almost');
           expectedEl.textContent = `Quase! → ${expected}`;
@@ -5859,6 +5941,7 @@ function renderConjPracticeStep(){
     CONJ_STATE.checked.add(verb);
     CONJ_STATE.score += correctCount;
     CONJ_STATE.totalFields += activeCount;
+    if (earnedXP > 0) addXP(earnedXP);
 
     document.getElementById('conj-verify-btn').style.display = 'none';
     document.getElementById('conj-hint-btn').style.display = 'none';
@@ -6852,7 +6935,9 @@ function renderExpressionQuestionScreen(c){
 
 function answerChallenge(c, chosenIdx){
   const isCorrect = c.options[chosenIdx] === c.correctAnswer;
-  if (isCorrect) addXP(5);
+  // Desafios de conteúdo (Expressões/Ouça e traduza/Acentuação) continuam
+  // clicáveis mesmo já concluídos (não há como "gastar" o desafio), então
+  // não dão XP -- decisão de produto, ver auditoria do sistema de XP.
   renderExpressionFeedbackScreen(c, chosenIdx, isCorrect);
 }
 
@@ -7088,7 +7173,8 @@ function checkListenTranslateAnswer(c){
   const studentAnswer = input.value.trim();
   const personMismatch = translationHasPersonMismatch(studentAnswer);
   const isCorrect = !personMismatch && isTranslationAcceptable(studentAnswer, c.referenceTranslations);
-  if (isCorrect) addXP(5);
+  // Desafio de conteúdo continua clicável mesmo já concluído -- não dá XP
+  // (mesma decisão de answerChallenge, ver auditoria do sistema de XP).
 
   const ltBodyHTML = `
       ${personMismatch ? `<p class="listen-translate-feedback-warning">⚠ Repare na concordância: depois de "${escapeHtmlChallenge(personMismatch.pronoun)}", "${escapeHtmlChallenge(personMismatch.verb)}" não é a conjugação certa.</p>` : ''}
@@ -7146,7 +7232,8 @@ function checkAccentAnswer(c){
   const input = document.getElementById('accent-answer-input');
   const studentAnswer = input.value.trim();
   const isCorrect = isAccentAnswerCorrect(studentAnswer, c.targetText);
-  if (isCorrect) addXP(5);
+  // Desafio de conteúdo continua clicável mesmo já concluído -- não dá XP
+  // (mesma decisão de answerChallenge, ver auditoria do sistema de XP).
 
   const accentBodyHTML = `
       ${!isCorrect ? `<p class="accent-feedback-answer">Sua resposta: <strong>${escapeHtmlChallenge(studentAnswer || '—')}</strong></p>` : ''}
