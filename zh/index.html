@@ -211,6 +211,14 @@ body{
 .pill.streak{ background: linear-gradient(120deg, #FFF3D6, var(--paper-warm)); color:#8A5A00; }
 .pill.xp{ background: linear-gradient(120deg, rgba(192,35,31,0.08), var(--paper-warm)); color: var(--seal-red-dark); }
 a.pill{ text-decoration:none; cursor:pointer; }
+/* Número dos pills de XP/streak (topbar + card "Status" da sidebar) --
+   display:inline-block é permanente pra caber o scale() do "pop" sem
+   pulo de layout quando o número muda (ver animateStatPill em
+   shared/topbar-stats.js, que também conta subindo do valor antigo até
+   o novo em vez de trocar na cara). */
+.stat-count{ display:inline-block; }
+.stat-count.pop{ animation: statPillPop .4s ease; }
+@keyframes statPillPop{ 0%{ transform:scale(1); } 40%{ transform:scale(1.35); } 100%{ transform:scale(1); } }
 a.pill:hover{ border-color: var(--imperial-gold); }
 
 /* Fase 6 (shell mobile): no celular a topbar fica só Logo/sequência/XP/
@@ -878,6 +886,11 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
   text-align:left; animation: wrongFeedbackIn .25s ease;
 }
 @keyframes wrongFeedbackIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
+/* Shake nas opções erradas (múltipla escolha, V/F, cloze, slots de
+   ordenar) -- estilo Duolingo. Anexado direto na classe .incorrect de cada
+   tipo (ver abaixo), então dispara sozinho sempre que o JS marca a resposta
+   errada, sem precisar de nenhuma chamada extra por exercício. */
+@keyframes shakeWrong{ 0%,100%{ transform:translateX(0); } 20%{ transform:translateX(-6px); } 40%{ transform:translateX(6px); } 60%{ transform:translateX(-4px); } 80%{ transform:translateX(4px); } }
 .wrong-feedback-header, .correct-feedback-header{
   display:flex; align-items:center; gap:8px; font-weight:800; font-size:16px; margin-bottom:14px;
 }
@@ -949,7 +962,11 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
 
 
 /* ---------- Exercícios (mini-testes estilo Memrise) ---------- */
-.exercise-wrap{ text-align:center; padding: 8px 0; }
+/* Reaproveita o mesmo fadeUp já usado na troca de aba (.view.active) --
+   antes a troca de exercício pra exercício era um corte seco (innerHTML
+   trocado na cara); como o elemento é recriado do zero a cada exercício,
+   a animação dispara sozinha sem precisar de nenhuma chamada extra. */
+.exercise-wrap{ text-align:center; padding: 8px 0; animation: fadeUp .2s ease; }
 .exercise-counter{ font-size:12px; font-weight:800; color: var(--ink-soft); margin-bottom:14px; }
 .exercise-prompt-label{ font-size:12px; text-transform:uppercase; letter-spacing:.06em; color: var(--seal-red-dark); font-weight:800; margin-bottom:10px; }
 .exercise-prompt{
@@ -1023,7 +1040,7 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
 .exercise-option .opt-hanzi{ font-family: var(--font-hanzi); font-size:22px; font-weight:700; }
 .exercise-option .opt-text{ font-size:14px; font-weight:700; color: var(--ink); }
 .exercise-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
-.exercise-option.incorrect{ border-color: var(--seal-red); background: rgba(192,35,31,0.10); }
+.exercise-option.incorrect{ border-color: var(--seal-red); background: rgba(192,35,31,0.10); animation: shakeWrong .4s ease; }
 .exercise-option.disabled{ pointer-events:none; opacity:.6; }
 .exercise-option.disabled.correct, .exercise-option.disabled.incorrect{ opacity:1; }
 
@@ -1052,7 +1069,7 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
 }
 .tf-option:hover{ border-color: var(--imperial-gold); transform: translateY(-1px); }
 .tf-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
-.tf-option.incorrect{ border-color: var(--seal-red); background: rgba(192,35,31,0.10); }
+.tf-option.incorrect{ border-color: var(--seal-red); background: rgba(192,35,31,0.10); animation: shakeWrong .4s ease; }
 .tf-option.disabled{ pointer-events:none; opacity:.6; }
 .tf-option.disabled.correct, .tf-option.disabled.incorrect{ opacity:1; }
 
@@ -1069,7 +1086,7 @@ body.hide-pinyin .cloze-pinyin{ display:none; }
   color: var(--seal-red-dark); font-weight:800;
 }
 .cloze-blank.correct{ border-color: var(--jade); color: var(--jade); }
-.cloze-blank.incorrect{ border-color: var(--seal-red); color: var(--seal-red); }
+.cloze-blank.incorrect{ border-color: var(--seal-red); color: var(--seal-red); animation: shakeWrong .4s ease; }
 .cloze-trans{ text-align:center; font-size:13px; color: var(--ink-soft); margin-bottom:18px; }
 .cloze-audio-row{ display:flex; justify-content:center; margin-bottom:14px; }
 .cloze-options{ display:flex; flex-direction:column; gap:10px; }
@@ -1084,7 +1101,7 @@ body.hide-pinyin .cloze-pinyin{ display:none; }
 body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .cloze-option-hanzi{ font-family: var(--font-hanzi); font-size:16px; }
 .cloze-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
-.cloze-option.incorrect{ border-color: var(--seal-red); background: rgba(192,35,31,0.10); }
+.cloze-option.incorrect{ border-color: var(--seal-red); background: rgba(192,35,31,0.10); animation: shakeWrong .4s ease; }
 .cloze-option.disabled{ pointer-events:none; opacity:.6; }
 .cloze-option.disabled.correct, .cloze-option.disabled.incorrect{ opacity:1; }
 .cloze-type-wrap{ text-align:center; }
@@ -1177,7 +1194,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .reorder-slot.filled .pinyin{ font-size:12px; font-weight:700; color: var(--seal-red-dark); }
 .reorder-slot.filled .hanzi{ font-family: var(--font-hanzi); font-size:15px; }
 .reorder-slot.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
-.reorder-slot.incorrect{ border-color: var(--seal-red); background: rgba(192,35,31,0.10); }
+.reorder-slot.incorrect{ border-color: var(--seal-red); background: rgba(192,35,31,0.10); animation: shakeWrong .4s ease; }
 
 .reorder-blocks{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
 .reorder-block{
@@ -1187,6 +1204,20 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .reorder-block:hover:not(.used):not(.disabled){ border-color: var(--imperial-gold); transform: translateY(-1px); }
 .reorder-block .pinyin{ font-size:12.5px; font-weight:700; color: var(--seal-red-dark); }
 .reorder-block .hanzi{ font-family: var(--font-hanzi); font-size:16px; }
+/* Clone que "voa" do banco de blocos até o slot escolhido (ver
+   flyBlockToSlot em app.js) -- position:fixed porque getBoundingClientRect()
+   é relativo à viewport, igual fixed (não se mexe com o scroll no meio do
+   voo). Mesma estrutura pinyin+hanzi em coluna do bloco original, pra
+   parecer o mesmo elemento se movendo, não um efeito genérico por cima. */
+.reorder-fly-clone{
+  position:fixed; z-index:999; pointer-events:none; box-sizing:border-box;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+  background: var(--paper); border:2px solid var(--imperial-gold); border-radius:12px;
+  font-family: var(--font-body);
+  transition: transform .25s cubic-bezier(.2,.7,.3,1), width .25s ease, height .25s ease, opacity .15s ease;
+}
+.reorder-fly-clone .pinyin{ font-size:12.5px; font-weight:700; color: var(--seal-red-dark); }
+.reorder-fly-clone .hanzi{ font-family: var(--font-hanzi); font-size:16px; }
 .reorder-block.used{ visibility:hidden; pointer-events:none; }
 .reorder-block.disabled{ opacity:.4; pointer-events:none; }
 
@@ -1430,7 +1461,15 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .conquests-count{ font-family: var(--font-body); text-transform:none; letter-spacing:0; color: var(--seal-red-dark); font-weight:800; }
 
 /* ---------- Meu Perfil ---------- */
-.profile-loading{ color:var(--ink-soft); padding:40px 0; text-align:center; }
+.profile-loading{ display:flex; flex-direction:column; align-items:center; gap:12px; color:var(--ink-soft); padding:40px 0; text-align:center; }
+.profile-loading p{ margin:0; font-size:13.5px; }
+.loading-spinner{
+  width:28px; height:28px; border-radius:50%;
+  border:3px solid var(--paper-line); border-top-color: var(--seal-red);
+  animation: loadingSpin .7s linear infinite;
+}
+@keyframes loadingSpin{ to{ transform:rotate(360deg); } }
+@media (prefers-reduced-motion: reduce){ .loading-spinner{ animation:none; } }
 .profile-identity{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:6px; padding:12px 0 8px; }
 .profile-avatar{
   width:76px; height:76px; border-radius:50%; display:flex; align-items:center; justify-content:center;
@@ -1759,7 +1798,6 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
   display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px 24px 90px;
 }
 .streak-modal-body{ text-align:center; max-width:420px; width:100%; }
-.streak-flame{ font-size:64px; margin-bottom:20px; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.15)); }
 .streak-week-row{
   display:flex; justify-content:space-between; gap:6px; background: var(--paper-warm);
   border:1px solid var(--paper-line); border-radius: var(--radius); padding:16px 10px; margin-bottom:26px;
@@ -1997,11 +2035,25 @@ footer.app-footer img{ height:40px; opacity:.85; }
 .lesson-complete.tier-bounce{ animation: lessonCompleteBounce .5s cubic-bezier(.34,1.56,.64,1); }
 @keyframes lessonCompleteBounce{ 0%{ transform: scale(.85) translateY(10px); opacity:0; } 60%{ transform: scale(1.03) translateY(-2px); opacity:1; } 100%{ transform: scale(1) translateY(0); } }
 
+/* Chama do streak: entra com quique (mesma linguagem dos tiers acima) e,
+   depois de assentar, mantém um brilho pulsando bem sutil -- antes era
+   100% estática, só o drop-shadow fixo. */
+.streak-flame{
+  font-size:64px; margin-bottom:20px;
+  animation: streakFlameIn .5s cubic-bezier(.34,1.56,.64,1), streakFlameGlow 1.8s ease-in-out .5s infinite;
+}
+@keyframes streakFlameIn{ 0%{ transform: scale(0) rotate(-8deg); opacity:0; } 60%{ transform: scale(1.15) rotate(4deg); opacity:1; } 100%{ transform: scale(1) rotate(0); } }
+@keyframes streakFlameGlow{
+  0%,100%{ filter: drop-shadow(0 4px 10px rgba(0,0,0,0.15)); }
+  50%{ filter: drop-shadow(0 4px 16px rgba(227,107,45,0.5)); }
+}
+
 @media (prefers-reduced-motion: reduce){
   .badge-unlock-toast{ animation: badgeUnlockOut .3s ease 3.7s forwards; }
   .badge-unlock-icon{ animation:none; }
   .confetti-piece{ display:none; }
   .lesson-complete-icon.tier-pop, .lesson-complete.tier-bounce{ animation:none; }
+  .streak-flame{ animation:none; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.15)); }
 }
 
 @media (max-width: 560px){
@@ -2250,8 +2302,8 @@ body.hide-pinyin .prompt-pinyin{
     </div>
     <div class="stats-pills-wrap">
       <div class="stats-pills">
-        <div class="pill streak">🔥 <span id="streak-count">0</span></div>
-        <div class="pill xp">⭐ <span id="xp-count">0</span> XP</div>
+        <div class="pill streak">🔥 <span id="streak-count" class="stat-count">0</span></div>
+        <div class="pill xp">⭐ <span id="xp-count" class="stat-count">0</span> XP</div>
         <!-- Pinyin: só na topbar principal era redundante e ocupava espaço --
              o toggle continua acessível dentro da lição (#pinyin-toggle-btn-lesson,
              ver .lesson-focus-bar), que é onde realmente se decide ler em hanzi puro.
@@ -2628,8 +2680,8 @@ body.hide-pinyin .prompt-pinyin{
     </div>
     <div class="side-card" id="side-card-status">
       <div class="side-card-title">Status</div>
-      <div class="side-status-row"><span>⭐</span><span id="side-xp-count">0</span><span>XP</span></div>
-      <div class="side-status-row"><span>🔥</span><span id="side-streak-count">0</span><span>dias seguidos</span></div>
+      <div class="side-status-row"><span>⭐</span><span id="side-xp-count" class="stat-count">0</span><span>XP</span></div>
+      <div class="side-status-row"><span>🔥</span><span id="side-streak-count" class="stat-count">0</span><span>dias seguidos</span></div>
     </div>
     <div class="side-card" id="side-card-missions">
       <div id="side-missions-body"></div>

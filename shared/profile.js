@@ -403,7 +403,7 @@ function profileDisplayName(profile){
 async function renderProfileView(){
   const wrap = document.getElementById('profile-content');
   if (!wrap) return;
-  wrap.innerHTML = `<p class="profile-loading">Carregando perfil...</p>`;
+  wrap.innerHTML = loadingHTML('Carregando perfil...');
 
   const langs = await buildLanguagesSummary();
   const earnedBadges = BADGES.filter(b => earnedBadgeIds.has(b.id));
@@ -495,7 +495,7 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, speci
 
     <div class="profile-section">
       <div class="section-label">🏆 Ranking da semana</div>
-      <div id="profile-ranking-body"><p class="profile-loading">Carregando...</p></div>
+      <div id="profile-ranking-body">${loadingHTML()}</div>
     </div>
 
     <div class="profile-section">

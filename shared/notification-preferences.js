@@ -53,7 +53,7 @@ async function renderNotificationPreferencesView(){
     wrap.innerHTML = `<p class="profile-empty-note">Crie uma conta pra configurar notificações -- o modo convidado não guarda preferências.</p>`;
     return;
   }
-  wrap.innerHTML = `<p class="profile-loading">Carregando...</p>`;
+  wrap.innerHTML = loadingHTML();
   const prefs = await ensureNotificationPreferencesLoaded(true);
   if (!prefs){
     wrap.innerHTML = `<p class="profile-empty-note">Não foi possível carregar suas preferências agora.</p>`;

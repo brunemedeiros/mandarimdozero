@@ -261,7 +261,7 @@ function notificationTimeAgoLabel(iso){
 async function renderNotificationDropdown(){
   const list = document.getElementById('notifications-list');
   if (!list) return;
-  list.innerHTML = `<p class="profile-loading">Carregando...</p>`;
+  list.innerHTML = loadingHTML();
   const items = await fetchRecentNotifications();
   if (!items.length){
     list.innerHTML = `<p class="notifications-empty">Nenhuma notificação ainda. Continue estudando! 📚</p>`;
