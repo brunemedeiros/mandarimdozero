@@ -4122,8 +4122,14 @@ const SPEED_STATE = {
   dailyCounted: false
 };
 
+// isCardLessonCompleted (não só "unidade começada") -- mesmo critério que
+// startReviewSession() usa pro Flashcard (ver PR #161). unitProgress.started
+// vira true assim que a PRIMEIRA lição da unidade é aberta, então um pool
+// baseado só nisso deixa passar palavras de lições seguintes ainda não
+// alcançadas -- eram só essas duas condições aqui antes, sem checar a lição
+// específica de cada carta.
 function buildSpeedQueue(){
-  const pool = STATE.cards.filter(c => STATE.unitProgress[c.unitId]?.started && c.reps > 0);
+  const pool = eligibleReviewPool().filter(c => c.reps > 0);
   return shuffle(pool);
 }
 
@@ -4131,14 +4137,17 @@ function buildSpeedOptions(card){
   const pool = STATE.cards.filter(c => c !== card && c.unitId === card.unitId);
   let distractors = shuffle(pool).slice(0, 3);
   if (distractors.length < 3){
-    const extra = shuffle(STATE.cards.filter(c => c !== card && !distractors.includes(c))).slice(0, 3 - distractors.length);
+    // Fallback só quando a unidade não tem 3 outras cartas -- puxa de
+    // eligibleReviewPool() (não STATE.cards puro) pra não arriscar mostrar,
+    // mesmo como alternativa errada, uma palavra de uma unidade nunca aberta.
+    const extra = shuffle(eligibleReviewPool().filter(c => c !== card && !distractors.includes(c))).slice(0, 3 - distractors.length);
     distractors = distractors.concat(extra);
   }
   return shuffle([card, ...distractors]);
 }
 
 function eligibleReviewPool(){
-  return STATE.cards.filter(c => STATE.unitProgress[c.unitId]?.started);
+  return STATE.cards.filter(isCardLessonCompleted);
 }
 
 function hardWordsPool(){
@@ -4147,10 +4156,7 @@ function hardWordsPool(){
 
 function renderReviewModeSelect(){
   const pool = eligibleReviewPool();
-  // isCardLessonCompleted (não só "unidade começada") -- mesmo critério que
-  // startReviewSession() usa de verdade pra montar a fila, senão o número
-  // aqui mostra mais cartões do que o botão realmente vai conseguir puxar.
-  const dueCount = cardsDueNow(STATE.cards.filter(isCardLessonCompleted)).length;
+  const dueCount = cardsDueNow(pool).length;
   const hardCount = hardWordsPool().length;
 
   const cardsEl = document.getElementById('review-mode-cards');
@@ -4237,7 +4243,7 @@ function stopMatchTimer(){}
 
 function startMatchGame(){
   trackEvent('lesson_start', 'match_game', null);
-  const pool = shuffle(STATE.cards.filter(c => STATE.unitProgress[c.unitId]?.started && c.reps > 0));
+  const pool = shuffle(eligibleReviewPool().filter(c => c.reps > 0));
   const pairCount = Math.min(6, pool.length);
   MATCH_STATE.pairs = pool.slice(0, pairCount);
   MATCH_STATE.tiles = shuffle([
