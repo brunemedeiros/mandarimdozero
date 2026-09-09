@@ -4497,7 +4497,10 @@ function hardWordsPool(){
 
 function renderReviewModeSelect(){
   const pool = eligibleReviewPool();
-  const dueCount = cardsDueNow(pool).length;
+  // isCardLessonCompleted (não só "unidade começada") -- mesmo critério que
+  // startReviewSession() usa de verdade pra montar a fila, senão o número
+  // aqui mostra mais cartões do que o botão realmente vai conseguir puxar.
+  const dueCount = cardsDueNow(STATE.cards.filter(isCardLessonCompleted)).length;
   const hardCount = hardWordsPool().length;
 
   const cardsEl = document.getElementById('review-mode-cards');
@@ -4922,19 +4925,26 @@ function renderReviewView(){
   const el = document.getElementById('review-content');
 
   if (!STATE.reviewQueue.length){
-    const allDue = cardsDueNow(STATE.cards).length;
+    // Mesmo critério de startReviewSession() (isCardLessonCompleted, não só
+    // "unidade começada" nem STATE.cards sem filtro nenhum) -- senão esse
+    // número conta cartões de lições nunca ensinadas, ficando muito maior
+    // do que o que "Revisar tudo disponível" realmente consegue puxar (o
+    // botão clicava e caía de volta nesta mesma tela vazia).
+    const allDue = cardsDueNow(STATE.cards.filter(isCardLessonCompleted)).length;
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🍵</div>
         <h3>${STATE.reviewSessionUnitFilter ? 'Nenhum cartão nesta unidade ainda' : 'Tudo em dia!'}</h3>
         <p>${allDue > 0 ? `Você ainda tem ${allDue} cartão(s) pendente(s) no geral.` : 'Volte mais tarde para sua próxima revisão, ou comece uma nova unidade na trilha.'}</p>
-        <button class="btn btn-primary" id="review-start-all">Revisar tudo disponível</button>
+        ${allDue > 0 ? `<button class="btn btn-primary" id="review-start-all">Revisar tudo disponível</button>` : ''}
       </div>
     `;
-    document.getElementById('review-start-all').addEventListener('click', () => {
-      STATE.reviewSessionUnitFilter = null;
-      startReviewSession();
-    });
+    if (allDue > 0){
+      document.getElementById('review-start-all').addEventListener('click', () => {
+        STATE.reviewSessionUnitFilter = null;
+        startReviewSession();
+      });
+    }
     return;
   }
 
