@@ -4500,10 +4500,56 @@ function hardWordsPool(){
   return eligibleReviewPool().filter(c => c.reps > 0 && c.lapses >= 2);
 }
 
+// ---------- Resumo "Suas palavras" (fracas/medianas/fortes) ----------
+// SOMENTE uma contagem visual do vocabulário já revisável (eligibleReviewPool,
+// a mesma base do Flashcard/Speed Review/Combinar/Palavras difíceis) -- não é
+// um SRS novo, não abre carta nenhuma, não é modo de revisão. Critérios
+// reaproveitados do que já existe:
+//   Fracas  = reps === 0 (nunca lembrada com sucesso) OU lapses >= 2 (mesma
+//             regra que já define "Palavras difíceis", hardWordsPool()).
+//   Fortes  = reps > 0 && lapses < 2 && interval >= 60 -- o mesmo corte de
+//             "revisão madura" que reviewXP() já usa pra dar menos XP.
+//   Medianas = o resto do pool.
+function vocabStrengthBuckets(){
+  const pool = eligibleReviewPool();
+  const weak = pool.filter(c => c.reps === 0 || c.lapses >= 2).length;
+  const strong = pool.filter(c => c.reps > 0 && c.lapses < 2 && c.interval >= 60).length;
+  const medium = pool.length - weak - strong;
+  return { weak, medium, strong };
+}
+
+// Altura do "pote" proporcional à maior das 3 categorias (não à contagem
+// absoluta) -- é isso que deixa claro de relance qual predomina, com um piso
+// de 10% pra uma categoria pequena continuar visível em vez de sumir.
+function renderVocabStrengthWidget(){
+  const wrap = document.getElementById('vocab-strength-widget');
+  if (!wrap) return;
+  const { weak, medium, strong } = vocabStrengthBuckets();
+  if (weak + medium + strong === 0){ wrap.innerHTML = ''; return; }
+  const max = Math.max(weak, medium, strong, 1);
+  const h = n => Math.max(10, Math.round(n / max * 100));
+  const item = (tier, count, label) => `
+    <div class="vs-item">
+      <div class="vs-jar"><div class="vs-fill" data-tier="${tier}" style="height:${h(count)}%;"></div></div>
+      <div class="vs-text"><div class="vs-count">${count}</div><div class="vs-label">${label}</div></div>
+    </div>
+  `;
+  wrap.innerHTML = `
+    <div class="section-label">Suas palavras</div>
+    <div class="vocab-strength-row">
+      ${item('weak', weak, 'Fracas')}
+      ${item('mid', medium, 'Medianas')}
+      ${item('strong', strong, 'Fortes')}
+    </div>
+  `;
+}
+
 function renderReviewModeSelect(){
   const pool = eligibleReviewPool();
   const dueCount = cardsDueNow(pool).length;
   const hardCount = hardWordsPool().length;
+
+  renderVocabStrengthWidget();
 
   const cardsEl = document.getElementById('review-mode-cards');
   cardsEl.innerHTML = `

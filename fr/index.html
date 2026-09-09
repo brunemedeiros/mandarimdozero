@@ -1223,6 +1223,33 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
 .review-mode-card .name{ font-size:14px; font-weight:700; color: var(--ink); }
 .review-mode-card .desc{ font-size:11.5px; color: var(--ink-soft); }
 
+/* ---------- "Suas palavras" (resumo fracas/medianas/fortes) ----------
+   SÓ uma contagem visual do vocabulário já revisável -- não é SRS novo, não
+   abre carta nenhuma, não é modo de revisão (ver vocabStrengthBuckets() em
+   app.js). Pote que enche de baixo pra cima, proporcional à MAIOR das 3
+   categorias -- dá pra ver de relance qual predomina na coleção. */
+#vocab-strength-widget:empty{ display:none; }
+.vocab-strength-row{ display:flex; gap:20px; }
+.vs-item{ display:flex; align-items:flex-end; gap:9px; flex:1; min-width:0; }
+.vs-jar{
+  position:relative; width:34px; height:88px; flex-shrink:0; border-radius:8px;
+  background: var(--paper-warm); border:1px solid var(--paper-line); overflow:hidden;
+}
+.vs-fill{ position:absolute; left:0; right:0; bottom:0; }
+.vs-fill[data-tier="weak"]{ background: var(--error-red); }
+.vs-fill[data-tier="mid"]{ background: var(--dc-slot-0); }
+.vs-fill[data-tier="strong"]{ background: var(--jade); }
+.vs-text{ padding-bottom:1px; min-width:0; }
+.vs-count{ font-size:22px; font-weight:800; line-height:1; color:var(--ink); font-variant-numeric:tabular-nums; }
+.vs-label{ font-size:11.5px; color:var(--ink-soft); margin-top:3px; }
+@media (max-width:480px){
+  .vocab-strength-row{ gap:10px; }
+  .vs-item{ gap:6px; }
+  .vs-jar{ width:26px; height:70px; }
+  .vs-count{ font-size:18px; }
+  .vs-label{ font-size:10.5px; }
+}
+
 .speed-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
 .speed-hearts{ display:flex; gap:4px; font-size:22px; }
 .speed-hearts .heart-lost{ opacity:.25; filter:grayscale(1); }
@@ -2789,6 +2816,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <p>Escolha como quer revisar hoje.</p>
       </div>
       <div class="review-mode-cards" id="review-mode-cards"></div>
+      <div id="vocab-strength-widget"></div>
     </div>
 
     <div id="review-session-wrap" style="display:none;">
