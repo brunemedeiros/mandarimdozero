@@ -2377,6 +2377,11 @@ function finishCurrentLesson(u){
     const lessonKey = `${u.id}:${currentLessonIdx(u.id)}`;
     STATE.unitProgress[u.id].lessonIdx = currentLessonIdx(u.id) + 1;
     addXP(8);
+    // Terminar esta lição intermediária já conta como "estudei hoje" pro
+    // streak -- antes só o Ponto de verificação (fim da unidade inteira)
+    // contava, deixando quem completa 1-2 lições de uma unidade grande sem
+    // crédito nenhum no dia.
+    registerStudyToday();
     // Nota real da lição: acerto/total acumulado das fases avaliadas
     // (checkpoint + practice/mixed, ver advanceAcquisitionPhase) -- antes
     // isso vinha sempre undefined ("lição intermediária não tem nota"), o
@@ -4445,7 +4450,7 @@ function renderSpeedReview(){
 
   if (SPEED_STATE.hearts <= 0){
     stopSpeedTimer();
-    if (!SPEED_STATE.dailyCounted){ SPEED_STATE.dailyCounted = true; registerDailySpeedReview(); }
+    if (!SPEED_STATE.dailyCounted){ SPEED_STATE.dailyCounted = true; registerDailySpeedReview(); registerStudyToday(); }
     maybeShowStreakCelebration();
     trackEvent('lesson_complete', 'speed_review', { score: SPEED_STATE.score });
     el.innerHTML = `
@@ -4463,7 +4468,7 @@ function renderSpeedReview(){
 
   if (SPEED_STATE.index >= SPEED_STATE.queue.length){
     stopSpeedTimer();
-    if (!SPEED_STATE.dailyCounted){ SPEED_STATE.dailyCounted = true; registerDailySpeedReview(); }
+    if (!SPEED_STATE.dailyCounted){ SPEED_STATE.dailyCounted = true; registerDailySpeedReview(); registerStudyToday(); }
     maybeShowStreakCelebration();
     el.innerHTML = `
       <div class="speed-gameover">
@@ -4555,7 +4560,8 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
     SPEED_STATE.streak = 0;
   }
 
-  registerStudyToday();
+  // Streak só conta no fim da SESSÃO (ver renderSpeedReview), não a cada
+  // resposta isolada -- mesmo raciocínio do Flashcard (ver gradeCurrentCard).
   SPEED_STATE.index += 1;
 
   setTimeout(() => renderSpeedReview(), 700);
@@ -4651,6 +4657,10 @@ function renderReviewView(){
   }
 
   if (STATE.reviewIndex >= STATE.reviewQueue.length){
+    // Streak conta aqui -- fim da SESSÃO inteira de Flashcard/Palavras
+    // difíceis (os dois usam esta mesma tela, ver openReviewSession) -- não
+    // a cada cartão avaliado (ver gradeCurrentCard).
+    registerStudyToday();
     maybeShowStreakCelebration();
     trackEvent('lesson_complete', 'flashcard_review', { count: STATE.reviewQueue.length });
     el.innerHTML = `
@@ -4758,7 +4768,10 @@ function gradeCurrentCard(grade){
   card.lastDirection = card.reviewDirection;
   applySM2(card, grade);
   STATE.totalReviews += 1;
-  registerStudyToday();
+  // Streak só conta quando a SESSÃO inteira termina (ver renderReviewView),
+  // não a cada cartão avaliado -- senão avaliar 1 carta isolada já bastava
+  // pra "estudar hoje", regra boa demais até pra quem só está conferindo o
+  // app sem de fato revisar nada.
   registerDailyReviewCard();
   if (wasOverdue) registerDailyOverdueReviewCard();
   addXP(reviewXP(intervalBefore, grade));
