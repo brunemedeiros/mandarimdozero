@@ -1,7 +1,7 @@
 {
-  "name": "Mandarim do Zero",
-  "short_name": "Mandarim",
-  "description": "汉语从零开始 — estudo pessoal de mandarim",
+  "name": "Chinês com Prof. Brune",
+  "short_name": "Chinês",
+  "description": "Estudo pessoal de chinês (mandarim) com a Prof. Brune",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
