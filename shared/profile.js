@@ -446,7 +446,7 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, speci
   `).join('');
 
   const badgesHTML = featured.length ? featured.map(b => `
-    <div class="profile-badge" title="${b.name}">${b.icon}</div>
+    <div class="profile-badge" data-badge-id="${b.id}">${b.icon}</div>
   `).join('') : `<p class="profile-empty-note">Nenhuma conquista ainda — sua primeira lição já desbloqueia uma.</p>`;
 
   // Badges especiais (Fundadora, Beta Tester...) ficam junto da identidade,
@@ -455,7 +455,7 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, speci
   const specialBadgesHTML = specialBadges?.length ? `
     <div class="profile-special-badges">
       ${specialBadges.map(b => `
-        <div class="profile-special-badge" title="${b.desc}">
+        <div class="profile-special-badge" data-special-badge-id="${b.id}">
           <span class="profile-special-badge-icon">${b.icon}</span>
           <span class="profile-special-badge-name">${b.name}</span>
         </div>
@@ -494,11 +494,6 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, speci
     </div>
 
     <div class="profile-section">
-      <div class="section-label">🏆 Ranking da semana</div>
-      <div id="profile-ranking-body">${loadingHTML()}</div>
-    </div>
-
-    <div class="profile-section">
       <div class="section-label">Conquistas <span class="conquests-count">${earnedBadges.length}/${BADGES.length}</span></div>
       <div class="profile-badges-row">${badgesHTML}</div>
       <button class="profile-stats-link" id="profile-badges-link">Ver todas →</button>
@@ -508,6 +503,20 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, featured, speci
   document.getElementById('profile-stats-link')?.addEventListener('click', () => switchTab('progress'));
   document.getElementById('profile-badges-link')?.addEventListener('click', () => switchTab('progress'));
   document.getElementById('profile-edit-btn')?.addEventListener('click', () => openEditProfileModal(specialBadges));
+  wrap.querySelectorAll('.profile-badge[data-badge-id]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const b = BADGES.find(x => x.id === el.dataset.badgeId);
+      if (b) showBadgeInfo(el, `${b.icon} ${b.name}`, b.desc);
+    });
+  });
+  wrap.querySelectorAll('.profile-special-badge[data-special-badge-id]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const b = specialBadges.find(x => x.id === el.dataset.specialBadgeId);
+      if (b) showBadgeInfo(el, b.name, b.desc);
+    });
+  });
   document.getElementById('profile-guest-login-prompt')?.addEventListener('click', () => {
     localStorageSafeRemove(LAST_LANGUAGE_KEY);
     sessionStorageSafeSet(GUEST_MODE_FLAG, '0');

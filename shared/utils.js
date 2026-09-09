@@ -33,3 +33,27 @@ function loadingHTML(label){
   const text = label || LOADING_PHRASES[Math.floor(Math.random() * LOADING_PHRASES.length)];
   return `<div class="profile-loading"><span class="loading-spinner"></span><p>${text}</p></div>`;
 }
+
+// ---------- Mini popover de descrição de badge ----------
+// Reaproveitado por toda grade/fileira de badges (mini-linha do Perfil,
+// grade completa de Conquistas) -- antes o `title` só repetia o NOME do
+// badge (o hover nativo do navegador, que também não existe de verdade no
+// celular). Isso mostra nome + descrição de verdade, funciona igual no
+// toque (mobile) e no clique (desktop), sem depender de hover.
+function showBadgeInfo(anchorEl, name, desc){
+  document.querySelectorAll('.badge-info-popover').forEach(p => p.remove());
+  const pop = document.createElement('div');
+  pop.className = 'badge-info-popover';
+  pop.innerHTML = `<strong>${name}</strong><span>${desc}</span>`;
+  document.body.appendChild(pop);
+
+  const rect = anchorEl.getBoundingClientRect();
+  pop.style.left = `${rect.left + rect.width / 2}px`;
+  pop.style.top = `${rect.top}px`;
+  requestAnimationFrame(() => pop.classList.add('show'));
+
+  const remove = () => { pop.remove(); document.removeEventListener('click', onOutsideClick, true); };
+  const onOutsideClick = (e) => { if (e.target !== anchorEl) remove(); };
+  setTimeout(() => document.addEventListener('click', onOutsideClick, true), 0);
+  setTimeout(remove, 4000);
+}
