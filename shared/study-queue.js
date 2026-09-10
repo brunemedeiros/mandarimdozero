@@ -31,7 +31,19 @@ function getStudyQueue(pool, options){
   const scope = options.scope || 'due';
 
   if (scope === 'hard'){
-    return cardsDueNow(pool.filter(c => c.reps > 0 && c.lapses >= 2));
+    // Fase 7: "precisa revisar agora" (due) e "é difícil" (desempenho/
+    // histórico) são dimensões INDEPENDENTES -- uma palavra pode ser
+    // difícil sem estar vencida. Por isso NÃO filtra por due aqui
+    // (diferente de como este scope funcionava nas Fases 3-6).
+    // Critério: usa `difficulty` do motor FSRS (Fase 2/3) em vez da regra
+    // arbitrária antiga (lapses>=2 sozinho) -- reps>0 garante que o
+    // cartão já foi estudado (senão difficulty ainda é 0, sem significado
+    // real). "Difícil" = o motor considera acima da média (difficulty>=6
+    // na escala 1-10) OU já foi esquecido ao menos uma vez (lapses>0) --
+    // dois sinais reais e independentes do desempenho, não um número
+    // mágico isolado. Ordenado por quem merece mais atenção primeiro.
+    return pool.filter(c => c.reps > 0 && (c.lapses > 0 || c.difficulty >= 6))
+      .sort((a, b) => (b.difficulty - a.difficulty) || (b.lapses - a.lapses));
   }
 
   if (scope === 'all'){
