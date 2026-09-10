@@ -148,15 +148,23 @@ function leaderboardRankBadge(rank){
   return rank;
 }
 
-// Resolve um featured_badge_id pro ícone+nome certos -- só procura em
-// SPECIAL_BADGES (Fundadora/Beta Tester) e no catálogo criado pela admin
-// (badge_catalog), NUNCA em BADGES (gameplay): esse conjunto é diferente
-// por idioma, e featured_badge_id é um campo só, compartilhado entre fr/zh
-// (ver o comentário de saveProfileEdits em shared/profile.js).
+// Resolve um featured_badge_id pro ícone+nome certos -- procura em
+// SPECIAL_BADGES (Fundadora/Beta Tester), no catálogo criado pela admin
+// (badge_catalog) e em BADGES (gameplay, catálogo do idioma atualmente
+// carregado nesta página). featured_badge_id é um campo só, compartilhado
+// entre fr/zh (ver 001_create_profiles_table.sql) -- mas BADGES é
+// DIFERENTE por idioma (ver o comentário de saveProfileEdits em
+// shared/profile.js), então um id de badge de gameplay ganho num idioma
+// pode simplesmente não resolver quando visto a partir do site do OUTRO
+// idioma (a pessoa não vê o badge em destaque naquele contexto, mas nada
+// quebra -- mesmo fallback gracioso de "não achou, não mostra" que já
+// existia pra qualquer id desconhecido).
 function resolveFeaturedBadge(badgeId, catalog){
   if (!badgeId) return null;
   const special = SPECIAL_BADGES.find(b => b.id === badgeId);
   if (special) return { icon: special.icon, name: special.name, desc: special.desc };
+  const gameplay = (typeof BADGES !== 'undefined' ? BADGES : []).find(b => b.id === badgeId);
+  if (gameplay) return { icon: gameplay.icon, name: gameplay.name, desc: gameplay.desc };
   const custom = (catalog || []).find(b => b.id === badgeId);
   if (custom) return { icon: custom.icon, name: custom.name, desc: custom.description };
   return null;
@@ -175,6 +183,22 @@ async function fetchUserBadgeGrants(userId){
     .eq('user_id', userId);
   if (error){ console.error('Erro ao carregar badges do perfil:', error); return []; }
   return (data || []).map(r => r.badge_id);
+}
+
+// Badges de GAMEPLAY (BADGES, catálogo do idioma atualmente carregado) já
+// ganhos por um user_id QUALQUER -- ver shared/supabase_migrations/017 pro
+// porquê de existir uma tabela pública separada de `progress` (privada).
+// Só resolve contra o BADGES do idioma em que este site está rodando: ver
+// resolveFeaturedBadge() pro mesmo raciocínio aplicado ao badge em destaque.
+async function fetchUserEarnedBadges(userId){
+  const { data, error } = await supabaseClient
+    .from('earned_badges')
+    .select('badge_id')
+    .eq('user_id', userId)
+    .eq('language_app_key', APP_KEY);
+  if (error){ console.error('Erro ao carregar conquistas do perfil:', error); return []; }
+  const ids = new Set((data || []).map(r => r.badge_id));
+  return BADGES.filter(b => ids.has(b.id));
 }
 
 async function renderLeaderboardView(){
@@ -337,6 +361,14 @@ let PUBLIC_PROFILE_MODAL_TOKEN = 0;
 // pra quando existir um badge de usuário premium: a linha continua
 // enxuta com o badge mais relevante, mas o popup do perfil deixa claro
 // tudo que a pessoa já conquistou.
+//
+// Além disso, mostra a vitrine de CONQUISTAS de gameplay (BADGES) dessa
+// pessoa, igual à seção "Conquistas" da própria Visão geral do Perfil
+// (mesmo .profile-badge-showcase/.badge.earned) -- é justamente o pedido
+// de "esse perfil com os badges seja visto por todos ao clicar no nome no
+// Ranking": antes só os badges de IDENTIDADE apareciam aqui, os de
+// gameplay ficavam de fora. Fonte: earned_badges (pública, ver
+// fetchUserEarnedBadges), não a `progress` privada da outra pessoa.
 async function openPublicProfileModal(row, catalog){
   const modal = document.getElementById('public-profile-modal');
   const body = document.getElementById('public-profile-modal-body');
@@ -364,10 +396,17 @@ async function openPublicProfileModal(row, catalog){
       <div class="public-profile-stat"><div class="value">${leaderboardRankBadge(row.rank)}</div><div class="label">Posição</div></div>
       <div class="public-profile-stat"><div class="value">⭐ ${row.amount}</div><div class="label">XP essa semana</div></div>
     </div>
+    <div class="public-profile-conquests-section">
+      <div class="section-label">Conquistas</div>
+      <div class="public-profile-conquests" id="public-profile-conquests">${loadingHTML()}</div>
+    </div>
   `;
   modal.style.display = 'flex';
 
-  const grantedIds = await fetchUserBadgeGrants(row.user_id);
+  const [grantedIds, earnedBadges] = await Promise.all([
+    fetchUserBadgeGrants(row.user_id),
+    fetchUserEarnedBadges(row.user_id),
+  ]);
   if (token !== PUBLIC_PROFILE_MODAL_TOKEN) return; // modal já fechado/trocado -- descarta
 
   // Une o que foi concedido via badge_grants com o badge em destaque
@@ -381,22 +420,45 @@ async function openPublicProfileModal(row, catalog){
     .filter(b => b.icon);
 
   const badgesEl = document.getElementById('public-profile-badges');
-  if (!badgesEl) return;
-  if (!badges.length){
-    badgesEl.remove();
-    return;
+  if (badgesEl){
+    if (!badges.length){
+      badgesEl.remove();
+    } else {
+      badgesEl.innerHTML = badges.map(b => `
+        <button type="button" class="public-profile-badge-chip" data-badge-id="${b.id}">
+          <span class="icon">${b.icon}</span><span>${escapeHTML(b.name)}</span>
+        </button>
+      `).join('');
+      badgesEl.querySelectorAll('.public-profile-badge-chip').forEach(el => {
+        el.addEventListener('click', () => {
+          const b = badges.find(x => x.id === el.dataset.badgeId);
+          if (b) showBadgeInfo(el, `${b.icon} ${b.name}`, b.desc || '');
+        });
+      });
+    }
   }
-  badgesEl.innerHTML = badges.map(b => `
-    <button type="button" class="public-profile-badge-chip" data-badge-id="${b.id}">
-      <span class="icon">${b.icon}</span><span>${escapeHTML(b.name)}</span>
-    </button>
-  `).join('');
-  badgesEl.querySelectorAll('.public-profile-badge-chip').forEach(el => {
-    el.addEventListener('click', () => {
-      const b = badges.find(x => x.id === el.dataset.badgeId);
-      if (b) showBadgeInfo(el, `${b.icon} ${b.name}`, b.desc || '');
-    });
-  });
+
+  const conquestsEl = document.getElementById('public-profile-conquests');
+  if (conquestsEl){
+    const section = conquestsEl.closest('.public-profile-conquests-section');
+    if (!earnedBadges.length){
+      if (section) section.remove(); else conquestsEl.remove();
+    } else {
+      conquestsEl.innerHTML = earnedBadges.slice().reverse().map(b => `
+        <div class="badge earned profile-badge" data-badge-id="${b.id}">
+          <div class="icon">${b.icon}</div>
+          <div class="name">${b.name}</div>
+        </div>
+      `).join('');
+      conquestsEl.classList.add('profile-badge-showcase');
+      conquestsEl.querySelectorAll('.profile-badge[data-badge-id]').forEach(el => {
+        el.addEventListener('click', () => {
+          const b = earnedBadges.find(x => x.id === el.dataset.badgeId);
+          if (b) showBadgeInfo(el, `${b.icon} ${b.name}`, b.desc || '');
+        });
+      });
+    }
+  }
 }
 
 function closePublicProfileModal(){
