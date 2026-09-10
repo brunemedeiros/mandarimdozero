@@ -4636,12 +4636,21 @@ function renderSpeedReview(){
     stopSpeedTimer();
     if (!SPEED_STATE.dailyCounted){
       SPEED_STATE.dailyCounted = true;
+      // Só a 1a sessão de Speed Review do dia rende XP real -- sem isso,
+      // "Jogar de novo" (mesmo pool de palavras, sem gasto nenhum) virava
+      // fonte infinita de XP depois que o modo passou a dar XP de verdade
+      // (achado da autora: "logo após fazer o exercício ele já ficou
+      // disponível de novo com as mesmas palavras"). Sessões seguintes no
+      // mesmo dia continuam funcionando normalmente como prática (hearts,
+      // pts, streak do minijogo) -- só não empilham XP de novo.
+      ensureDailyBucket();
+      const firstSpeedSessionToday = !STATE.daily.speedReviewSessions;
       registerDailySpeedReview();
       registerStudyToday();
       // 1x por sessão (não por resposta) -- evita um toast "+2 XP" a cada
       // pergunta num jogo rápido, e usa o mesmo guard de dailyCounted pra
       // nunca dobrar em caso de re-render desta tela.
-      if (SPEED_STATE.correctCount > 0) addXP(SPEED_STATE.correctCount * SPEED_REVIEW_XP_PER_CORRECT);
+      if (firstSpeedSessionToday && SPEED_STATE.correctCount > 0) addXP(SPEED_STATE.correctCount * SPEED_REVIEW_XP_PER_CORRECT);
     }
     maybeShowStreakCelebration();
     trackEvent('lesson_complete', 'speed_review', { score: SPEED_STATE.score });
@@ -4662,12 +4671,21 @@ function renderSpeedReview(){
     stopSpeedTimer();
     if (!SPEED_STATE.dailyCounted){
       SPEED_STATE.dailyCounted = true;
+      // Só a 1a sessão de Speed Review do dia rende XP real -- sem isso,
+      // "Jogar de novo" (mesmo pool de palavras, sem gasto nenhum) virava
+      // fonte infinita de XP depois que o modo passou a dar XP de verdade
+      // (achado da autora: "logo após fazer o exercício ele já ficou
+      // disponível de novo com as mesmas palavras"). Sessões seguintes no
+      // mesmo dia continuam funcionando normalmente como prática (hearts,
+      // pts, streak do minijogo) -- só não empilham XP de novo.
+      ensureDailyBucket();
+      const firstSpeedSessionToday = !STATE.daily.speedReviewSessions;
       registerDailySpeedReview();
       registerStudyToday();
       // 1x por sessão (não por resposta) -- evita um toast "+2 XP" a cada
       // pergunta num jogo rápido, e usa o mesmo guard de dailyCounted pra
       // nunca dobrar em caso de re-render desta tela.
-      if (SPEED_STATE.correctCount > 0) addXP(SPEED_STATE.correctCount * SPEED_REVIEW_XP_PER_CORRECT);
+      if (firstSpeedSessionToday && SPEED_STATE.correctCount > 0) addXP(SPEED_STATE.correctCount * SPEED_REVIEW_XP_PER_CORRECT);
     }
     maybeShowStreakCelebration();
     el.innerHTML = `
