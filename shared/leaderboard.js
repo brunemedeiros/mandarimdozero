@@ -148,23 +148,20 @@ function leaderboardRankBadge(rank){
   return rank;
 }
 
-// Resolve um featured_badge_id pro ícone+nome certos -- procura em
-// SPECIAL_BADGES (Fundadora/Beta Tester), no catálogo criado pela admin
-// (badge_catalog) e em BADGES (gameplay, catálogo do idioma atualmente
-// carregado nesta página). featured_badge_id é um campo só, compartilhado
-// entre fr/zh (ver 001_create_profiles_table.sql) -- mas BADGES é
-// DIFERENTE por idioma (ver o comentário de saveProfileEdits em
-// shared/profile.js), então um id de badge de gameplay ganho num idioma
-// pode simplesmente não resolver quando visto a partir do site do OUTRO
-// idioma (a pessoa não vê o badge em destaque naquele contexto, mas nada
-// quebra -- mesmo fallback gracioso de "não achou, não mostra" que já
-// existia pra qualquer id desconhecido).
+// Resolve um featured_badge_id pro ícone+nome certos -- só procura em
+// SPECIAL_BADGES (Fundadora/Beta Tester/premium, quando existir) e no
+// catálogo criado pela admin (badge_catalog), NUNCA em BADGES (gameplay):
+// Badge (identidade -- favor especial, assinatura premium, concedido pela
+// admin ou requisito automático como Beta Tester) e Conquista (gameplay --
+// Primeiro Passo, 100 XP...) são coisas DIFERENTES por design, não só uma
+// questão técnica de esse conjunto ser diferente por idioma -- só Badges
+// entram na vitrine "em destaque" do Ranking, Conquistas ficam só na seção
+// própria do Perfil (ver o comentário de saveProfileEdits em
+// shared/profile.js).
 function resolveFeaturedBadge(badgeId, catalog){
   if (!badgeId) return null;
   const special = SPECIAL_BADGES.find(b => b.id === badgeId);
   if (special) return { icon: special.icon, name: special.name, desc: special.desc };
-  const gameplay = (typeof BADGES !== 'undefined' ? BADGES : []).find(b => b.id === badgeId);
-  if (gameplay) return { icon: gameplay.icon, name: gameplay.name, desc: gameplay.desc };
   const custom = (catalog || []).find(b => b.id === badgeId);
   if (custom) return { icon: custom.icon, name: custom.name, desc: custom.description };
   return null;

@@ -197,14 +197,14 @@ async function saveProfileEdits({ displayName, username, bio, featuredBadgeId })
     username: cleanUsername,
     bio: (bio || '').trim().slice(0, 160) || null,
     // Badge que aparece junto do nome no Ranking (ver shared/leaderboard.js).
-    // Pode ser um badge especial (Fundadora/Beta Tester/concedido por admin)
-    // OU um badge de gameplay (BADGES do idioma atual) -- featured_badge_id é
-    // um campo só, compartilhado entre fr/zh (ver 001), mas BADGES é
-    // DIFERENTE por idioma: se a pessoa destacar um badge de gameplay que só
-    // existe no vocabulário de um idioma, resolveFeaturedBadge() em
-    // shared/leaderboard.js simplesmente não acha o id ao renderizar a partir
-    // do OUTRO idioma (não mostra nada ali, não quebra nada -- ver o
-    // comentário dessa função).
+    // Só badges especiais (Fundadora/Beta Tester/premium quando existir/
+    // concedidos por admin) podem ser destacados aqui -- nunca um badge de
+    // gameplay/Conquista (BADGES em cada app.js). Não é só uma questão
+    // técnica de esse conjunto ser DIFERENTE por idioma (e featured_badge_id
+    // ser um campo só, compartilhado entre fr/zh, ver 001): Badge e
+    // Conquista são conceitos DIFERENTES por design -- só o que marca quem a
+    // pessoa É pra plataforma entra no "em destaque" do Ranking, não o que
+    // ela jogou.
     featured_badge_id: featuredBadgeId || null,
   };
   const { data, error } = await supabaseClient
@@ -518,7 +518,7 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
 
   document.getElementById('profile-stats-link')?.addEventListener('click', () => switchTab('progress'));
   document.getElementById('profile-badges-link')?.addEventListener('click', () => switchTab('progress'));
-  document.getElementById('profile-edit-btn')?.addEventListener('click', () => openEditProfileModal(specialBadges, earnedBadges));
+  document.getElementById('profile-edit-btn')?.addEventListener('click', () => openEditProfileModal(specialBadges));
   wrap.querySelectorAll('.profile-badge[data-badge-id]').forEach(el => {
     el.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -570,38 +570,31 @@ function renderAvatarPreview(profile){
 }
 
 // Popula o seletor de "badge em destaque" (aparece no Ranking, ver
-// shared/leaderboard.js) com TODOS os badges que a pessoa já ganhou --
-// especiais (Fundadora/Beta Tester/concedidos por admin) E de gameplay
-// (BADGES do idioma atual), agrupados em <optgroup> pra deixar claro que
-// são coisas diferentes. Um badge de gameplay destacado aqui pode não
-// resolver quando a mesma pessoa for vista a partir do OUTRO idioma (ver o
-// comentário de saveProfileEdits()) -- aceito, não impede a escolha. Só
-// mostra a seção se houver pelo menos 1 badge de qualquer tipo: sem isso,
-// quem ainda não ganhou nenhum veria um seletor vazio sem função nenhuma.
-function renderFeaturedBadgeSelect(specialBadges, earnedBadges, currentId){
+// shared/leaderboard.js) com os badges ESPECIAIS que a pessoa já ganhou --
+// nunca um badge de gameplay/Conquista (BADGES), ver o porquê no comentário
+// de saveProfileEdits(). Só mostra a seção se houver pelo menos 1 badge
+// especial: sem isso, quem ainda não ganhou nenhum veria um seletor vazio
+// sem função nenhuma.
+function renderFeaturedBadgeSelect(specialBadges, currentId){
   const row = document.getElementById('profile-edit-featured-badge-row');
   const select = document.getElementById('profile-edit-featured-badge');
   if (!row || !select) return;
-  if (!specialBadges?.length && !earnedBadges?.length){
+  if (!specialBadges?.length){
     row.style.display = 'none';
     return;
   }
   row.style.display = '';
-  // <option> só renderiza texto puro -- o ícone da Fundadora é um SVG
-  // inline (não dá pra colocar dentro de <option>), então só prefixa com o
-  // emoji quando o ícone realmente for um emoji simples.
-  const optionHTML = b => {
+  const options = specialBadges.map(b => {
+    // <option> só renderiza texto puro -- o ícone da Fundadora é um SVG
+    // inline (não dá pra colocar dentro de <option>), então só prefixa com
+    // o emoji quando o ícone realmente for um emoji simples.
     const iconText = (b.icon && !b.icon.startsWith('<')) ? `${b.icon} ` : '';
     return `<option value="${b.id}" ${b.id === currentId ? 'selected' : ''}>${iconText}${b.name}</option>`;
-  };
-  const specialHTML = specialBadges?.length
-    ? `<optgroup label="Especiais">${specialBadges.map(optionHTML).join('')}</optgroup>` : '';
-  const earnedHTML = earnedBadges?.length
-    ? `<optgroup label="Conquistas">${earnedBadges.map(optionHTML).join('')}</optgroup>` : '';
-  select.innerHTML = `<option value="">Nenhum</option>${specialHTML}${earnedHTML}`;
+  }).join('');
+  select.innerHTML = `<option value="">Nenhum</option>${options}`;
 }
 
-function openEditProfileModal(specialBadges, earnedBadges){
+function openEditProfileModal(specialBadges){
   const modal = document.getElementById('profile-edit-modal');
   const p = PROFILE_CACHE;
   document.getElementById('profile-edit-display-name').value = p?.display_name || '';
@@ -610,7 +603,7 @@ function openEditProfileModal(specialBadges, earnedBadges){
   document.getElementById('profile-edit-bio-count').textContent = `${(p?.bio || '').length}/160`;
   document.getElementById('profile-edit-error').textContent = '';
   document.getElementById('profile-edit-avatar-error').textContent = '';
-  renderFeaturedBadgeSelect(specialBadges, earnedBadges, p?.featured_badge_id || '');
+  renderFeaturedBadgeSelect(specialBadges, p?.featured_badge_id || '');
   renderAvatarPreview(p);
   modal.style.display = 'flex';
 }
