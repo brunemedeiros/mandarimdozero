@@ -2613,7 +2613,14 @@ function renderLessonBoundaryScreen(u, lesson, challengesBefore){
   document.getElementById('step-progress-fill').style.width = '100%';
   maybeShowStreakCelebration();
 
-  const dueCount = cardsDueNow(eligibleReviewPool()).length;
+  // reps > 0 exclui as palavras que a PRÓPRIA lição acabou de ensinar --
+  // todo cartão nasce com due=0, então cardsDueNow() sozinho as contaria
+  // como "devidas" (0 <= agora é sempre verdade) no exato instante em que
+  // isCardLessonCompleted() passa a liberá-las, fazendo esta tela dizer que
+  // há cartões pra revisar (e mandar direto pro Flashcard) depois de toda
+  // lição com vocabulário novo -- mesmo critério já usado em
+  // unitCardCounts() pra "dueForReview".
+  const dueCount = cardsDueNow(eligibleReviewPool().filter(c => c.reps > 0)).length;
   contentEl.innerHTML = `
     <div class="lesson-complete">
       <div class="lesson-complete-icon tier-pop">✅</div>
