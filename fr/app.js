@@ -4230,12 +4230,24 @@ function showCorrectFeedbackPanel(contentEl, detail){
 // RENDER: Revisão (SRS)
 // ============================================================
 const SPEED_TIME_LIMIT = 6000;
+// XP real por resposta certa no Speed Review -- mesmo patamar do Combinar
+// (addXP(2) por par, ver startMatchGame) já que os dois são jogos de
+// reconhecimento rápido, não revisão espaçada de verdade (não mexem no
+// SM2 -- ver comentário de renderReviewModeSelect). O "score" em pts
+// mostrado na tela É SEPARADO disso: é só a pontuação do minijogo
+// (velocidade de resposta), nunca foi XP de verdade nem contava pro
+// Ranking -- daí o relato "ganhei pontos demais mas não foram pro
+// Ranking". Mantido propositalmente bem menor que o score em pts pra não
+// inflar XP artificialmente num modo sem o "custo" de uma revisão SM2 real.
+const SPEED_REVIEW_XP_PER_CORRECT = 2;
+
 const SPEED_STATE = {
   active: false,
   queue: [],
   index: 0,
   hearts: 3,
   score: 0,
+  correctCount: 0,
   streak: 0,
   timerStart: 0,
   timerHandle: null,
@@ -4320,6 +4332,7 @@ function renderVocabStrengthWidget(){
       ${item('mid', medium, 'Medianas')}
       ${item('strong', strong, 'Fortes')}
     </div>
+    <p class="profile-edit-hint">Fraca = ainda não lembrou ou costuma errar; Forte = já lembra bem há tempos; Mediana = entre os dois. Isso mostra o quão bem você sabe cada palavra HOJE, não se ela já está pronta pra ser revisada -- por isso o número aqui pode ser maior que o do Flashcard/Palavras difíceis abaixo: aqueles só liberam quando a revisão espaçada (SM2) calcula que já é hora de rever, enquanto Speed Review e Combinar são jogos de prática sempre disponíveis com todo o vocabulário já aprendido.</p>
   `;
 }
 
@@ -4591,6 +4604,7 @@ function startSpeedReview(){
   SPEED_STATE.index = 0;
   SPEED_STATE.hearts = 3;
   SPEED_STATE.score = 0;
+  SPEED_STATE.correctCount = 0;
   SPEED_STATE.streak = 0;
   SPEED_STATE.active = true;
   SPEED_STATE.dailyCounted = false;
@@ -4620,7 +4634,15 @@ function renderSpeedReview(){
 
   if (SPEED_STATE.hearts <= 0){
     stopSpeedTimer();
-    if (!SPEED_STATE.dailyCounted){ SPEED_STATE.dailyCounted = true; registerDailySpeedReview(); registerStudyToday(); }
+    if (!SPEED_STATE.dailyCounted){
+      SPEED_STATE.dailyCounted = true;
+      registerDailySpeedReview();
+      registerStudyToday();
+      // 1x por sessão (não por resposta) -- evita um toast "+2 XP" a cada
+      // pergunta num jogo rápido, e usa o mesmo guard de dailyCounted pra
+      // nunca dobrar em caso de re-render desta tela.
+      if (SPEED_STATE.correctCount > 0) addXP(SPEED_STATE.correctCount * SPEED_REVIEW_XP_PER_CORRECT);
+    }
     maybeShowStreakCelebration();
     trackEvent('lesson_complete', 'speed_review', { score: SPEED_STATE.score });
     el.innerHTML = `
@@ -4638,7 +4660,15 @@ function renderSpeedReview(){
 
   if (SPEED_STATE.index >= SPEED_STATE.queue.length){
     stopSpeedTimer();
-    if (!SPEED_STATE.dailyCounted){ SPEED_STATE.dailyCounted = true; registerDailySpeedReview(); registerStudyToday(); }
+    if (!SPEED_STATE.dailyCounted){
+      SPEED_STATE.dailyCounted = true;
+      registerDailySpeedReview();
+      registerStudyToday();
+      // 1x por sessão (não por resposta) -- evita um toast "+2 XP" a cada
+      // pergunta num jogo rápido, e usa o mesmo guard de dailyCounted pra
+      // nunca dobrar em caso de re-render desta tela.
+      if (SPEED_STATE.correctCount > 0) addXP(SPEED_STATE.correctCount * SPEED_REVIEW_XP_PER_CORRECT);
+    }
     maybeShowStreakCelebration();
     el.innerHTML = `
       <div class="speed-gameover">
@@ -4719,6 +4749,7 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
   if (isCorrect){
     const speedBonus = Math.max(10, Math.round(100 * (1 - elapsed / SPEED_TIME_LIMIT)));
     SPEED_STATE.score += speedBonus;
+    SPEED_STATE.correctCount += 1;
     SPEED_STATE.streak += 1;
     if (SPEED_STATE.streak > 0 && SPEED_STATE.streak % 15 === 0 && SPEED_STATE.hearts < 3){
       SPEED_STATE.hearts += 1;
