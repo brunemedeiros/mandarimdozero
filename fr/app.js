@@ -681,7 +681,15 @@ function maybeShowStreakCelebration(){
   // Centralizar a atualização do pill aqui garante que ele nunca fique
   // mostrando um número velho enquanto a tela de sequência já mostra o novo.
   renderTopbarStats();
-  showStreakCelebration();
+  // showStreakCelebration() é sempre chamada ANTES do innerHTML da tela de
+  // conclusão (lição/unidade/sessão) ser escrito, no mesmo call site -- como
+  // as duas coisas rodam na mesma volta síncrona, o navegador só pinta UM
+  // quadro final, com o overlay de sequência já por cima, escondendo a tela
+  // de conclusão atrás dele até a pessoa fechar o modal. Resultado relatado:
+  // a tela de sequência parecia aparecer ANTES da tela de "Lição concluída",
+  // quando devia ser o contrário. Um pequeno atraso garante que o quadro da
+  // tela de conclusão pinte primeiro, e só depois o modal aparece por cima.
+  setTimeout(showStreakCelebration, 500);
 }
 
 // ---------- Tela de sequência de streak (estilo Duolingo) ----------
