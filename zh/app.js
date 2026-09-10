@@ -4689,12 +4689,28 @@ function vocabStrengthBuckets(){
 // sem ter nenhuma revisão devida hoje, e isso não é um erro do app. Por
 // isso ficam em blocos visualmente separados, cada um com sua própria
 // legenda curta, em vez de um único número ambíguo.
+//
+// Fase 14 (teste de experiência real): "Revisões de hoje" precisa ser
+// exatamente o que uma sessão de Flashcard vai de fato entregar -- usar
+// cardsDueNow() aqui (sem teto) mostrava, por exemplo, "47 prontas" pra um
+// aluno com 47 palavras nunca estudadas, mas startReviewSession() só serve
+// até STATE.studySettings.newCardsPerDay novas por vez. O número que o
+// aluno vê ANTES de entrar precisa bater com o que ele recebe ao entrar
+// (mesmas opções de getStudyQueue que startReviewSession() usa).
+function todaysReviewCount(pool){
+  return getStudyQueue(pool, {
+    scope: 'due',
+    newCardsLimit: STATE.studySettings.newCardsPerDay,
+    limit: sessionIntensityToLimit(STATE.studySettings.sessionIntensity)
+  }).length;
+}
+
 function renderReviewTodayWidget(){
   const wrap = document.getElementById('review-today-widget');
   if (!wrap) return;
   const pool = eligibleReviewPool();
   if (pool.length === 0){ wrap.innerHTML = ''; return; }
-  const dueCount = cardsDueNow(pool).length;
+  const dueCount = todaysReviewCount(pool);
   const caption = dueCount === 0
     ? 'Nenhuma revisão pendente agora -- o motor avisa quando for a hora.'
     : dueCount === 1
@@ -4736,7 +4752,10 @@ function renderVocabStrengthWidget(){
 
 function renderReviewModeSelect(){
   const pool = eligibleReviewPool();
-  const dueCount = cardsDueNow(pool).length;
+  // Fase 14: mesma contagem (getStudyQueue com os tetos de "novas por dia"
+  // / "intensidade da sessão") que o tile do Flashcard mostra e que
+  // startReviewSession() de fato entrega -- ver todaysReviewCount().
+  const dueCount = todaysReviewCount(pool);
   // Fase 7: Palavras Difíceis NÃO depende mais de estar due -- "precisa
   // revisar agora" (Flashcard) e "é uma palavra difícil" (aqui) são coisas
   // diferentes. getStudyQueue(scope:'hard') usa o difficulty do FSRS.
