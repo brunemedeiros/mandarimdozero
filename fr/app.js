@@ -3591,10 +3591,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter-row">
-        <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
-        <button type="button" class="report-flag-btn" data-report-flag>⚑ Reportar</button>
-      </div>
+      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
       ${promptHTML}
       <div class="exercise-options">${optionsHTML}</div>
       <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
@@ -3658,10 +3655,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
 function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter-row">
-        <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
-        <button type="button" class="report-flag-btn" data-report-flag>⚑ Reportar</button>
-      </div>
+      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
       <div class="exercise-prompt-label">Digite o que ouviu</div>
       <div class="exercise-prompt">
         ${audioBtnHTML(ex.item.f, 'audio-btn-lg')}
@@ -3743,10 +3737,7 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter-row">
-        <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
-        <button type="button" class="report-flag-btn" data-report-flag>⚑ Reportar</button>
-      </div>
+      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
       <div class="scenario-question">${ex.phrase.scenario}</div>
       <div class="scenario-scene">${scenarioSceneHTML(ex.phrase.scenarioEmoji)}</div>
       <div class="scenario-options">${optionsHTML}</div>
@@ -3805,10 +3796,7 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
 function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter-row">
-        <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
-        <button type="button" class="report-flag-btn" data-report-flag>⚑ Reportar</button>
-      </div>
+      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
       <div class="tf-scene">
         <div class="tf-scene-emoji">${ex.emoji || '💬'}</div>
         <div class="tf-subject">${ex.subject}</div>
@@ -3878,10 +3866,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter-row">
-        <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
-        <button type="button" class="report-flag-btn" data-report-flag>⚑ Reportar</button>
-      </div>
+      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
       <div class="exercise-prompt-label">Complete a frase</div>
       <div class="cloze-sentence">${sentenceHTML}</div>
       <div class="cloze-audio-row" id="cloze-audio-row"></div>
@@ -4030,10 +4015,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter-row">
-        <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
-        <button type="button" class="report-flag-btn" data-report-flag>⚑ Reportar</button>
-      </div>
+      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
       <div class="exercise-prompt-label">${isTranslate ? 'Traduza para o francês' : 'Ordene a frase'}</div>
       ${isTranslate ? `
         <div class="exercise-prompt">
