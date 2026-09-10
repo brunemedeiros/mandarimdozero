@@ -4303,7 +4303,10 @@ function eligibleReviewPool(){
 }
 
 function hardWordsPool(){
-  return eligibleReviewPool().filter(c => c.reps > 0 && c.lapses >= 2);
+  // Fase 7: delega pra getStudyQueue(scope:'hard') -- fonte única do
+  // critério de "Palavras difíceis" (difficulty do FSRS + lapses, não
+  // filtra por due). Mantido como wrapper só por compatibilidade de nome.
+  return getStudyQueue(eligibleReviewPool(), { scope: 'hard' });
 }
 
 // ---------- Resumo "Suas palavras" (fracas/medianas/fortes) ----------
@@ -4311,8 +4314,10 @@ function hardWordsPool(){
 // a mesma base do Flashcard/Speed Review/Combinar/Palavras difíceis) -- não é
 // um SRS novo, não abre carta nenhuma, não é modo de revisão. Critérios
 // reaproveitados do que já existe:
-//   Fracas  = reps === 0 (nunca lembrada com sucesso) OU lapses >= 2 (mesma
-//             regra que já define "Palavras difíceis", hardWordsPool()).
+//   Fracas  = reps === 0 (nunca lembrada com sucesso) OU lapses >= 2 (regra
+//             independente da que define "Palavras difíceis" desde a Fase
+//             7 -- hardWordsPool() passou a usar difficulty do FSRS, sem
+//             filtro de due; este widget é escopo da Fase 12, não mudou).
 //   Fortes  = reps > 0 && lapses < 2 && interval >= 60 -- o mesmo corte de
 //             "revisão madura" que reviewXP() já usa pra dar menos XP.
 //   Medianas = o resto do pool.
@@ -4347,18 +4352,17 @@ function renderVocabStrengthWidget(){
       ${item('mid', medium, 'Medianas')}
       ${item('strong', strong, 'Fortes')}
     </div>
-    <p class="profile-edit-hint">Fraca = ainda não lembrou ou costuma errar; Forte = já lembra bem há tempos; Mediana = entre os dois. Isso mostra o quão bem você sabe cada palavra HOJE, não se ela já está pronta pra ser revisada -- por isso o número aqui pode ser maior que o do Flashcard/Palavras difíceis abaixo: aqueles só liberam quando a revisão espaçada (SM2) calcula que já é hora de rever, enquanto Speed Review e Combinar são jogos de prática sempre disponíveis com todo o vocabulário já aprendido.</p>
+    <p class="profile-edit-hint">Fraca = ainda não lembrou ou costuma errar; Forte = já lembra bem há tempos; Mediana = entre os dois. Isso mostra o quão bem você sabe cada palavra HOJE, não se ela já está pronta pra ser revisada -- por isso o número aqui pode ser maior que o do Flashcard abaixo: só ele libera quando o motor de memória calcula que já é hora de rever. Palavras Difíceis mostra as que você mais erra, a qualquer momento (não depende de estar devida); Speed Review e Combinar são jogos de prática sempre disponíveis com todo o vocabulário já aprendido.</p>
   `;
 }
 
 function renderReviewModeSelect(){
   const pool = eligibleReviewPool();
   const dueCount = cardsDueNow(pool).length;
-  // Palavras difíceis agora respeita a data de vencimento do SM2, igual ao
-  // Flashcard normal -- é ferramenta de revisão espaçada (SM-2), não jogo
-  // sempre disponível (ver Combinar/Speed Review, que são jogos de
-  // propósito). Ver auditoria do sistema de XP + decisão da autora.
-  const hardCount = cardsDueNow(hardWordsPool()).length;
+  // Fase 7: Palavras Difíceis NÃO depende mais de estar due -- "precisa
+  // revisar agora" (Flashcard) e "é uma palavra difícil" (aqui) são coisas
+  // diferentes. getStudyQueue(scope:'hard') usa o difficulty do FSRS.
+  const hardCount = getStudyQueue(pool, { scope: 'hard' }).length;
 
   renderVocabStrengthWidget();
 
