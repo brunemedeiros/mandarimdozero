@@ -138,6 +138,46 @@ function scheduleReview(card, grade, now){
   return card;
 }
 
+// ---------- Funil único de mutação de memória, escala SM-2 (Fase 5) ----------
+// Ponto de entrada real usado por Flashcard, revisão de hanzi, "Já sei?" e
+// exercícios de lição a partir da Fase 5 -- recebe a nota na escala antiga
+// (0=Errei, 1=Difícil, 2=Bom, 3=Fácil, a mesma que os botões da UI sempre
+// usaram) e traduz internamente pra escala do FSRS (1=Again..4=Easy) antes
+// de chamar scheduleReview(). Nenhuma tela precisa saber que a escala
+// mudou por baixo -- Regra 9 (não expor parâmetros do FSRS na interface).
+//
+// due/stability/difficulty/state passam a ser escritos SÓ pelo motor novo
+// a partir daqui (applySM2 nunca mais roda nestes 4 pontos de entrada) --
+// um único "due" de verdade, como a Regra 6 do projeto exige.
+//
+// reps/lapses/interval continuam sendo atualizados aqui como uma PONTE DE
+// COMPATIBILIDADE explícita (Regra 8) -- ainda são lidos por
+// hardWordsPool()/vocabStrengthBuckets()/reviewXP() (Palavras Difíceis,
+// "Suas palavras", XP decrescente por maturidade), que só serão
+// redesenhados pra ler o modelo FSRS nativo nas Fases 7 e 9. `interval` é
+// espelhado a partir de `stability` (mesmo papel conceitual: "força"/dias
+// até a próxima revisão prevista). `ef` deixa de ser atualizado -- nada
+// além do próprio applySM2 (retirado deste caminho) o lia.
+//
+// Diferença deliberada em relação ao applySM2 antigo: um erro (grade 0)
+// NÃO zera mais `reps` -- SM-2 fazia isso, e é exatamente o comportamento
+// que o Princípio 7 do projeto pede pra corrigir ("um erro não volta a
+// palavra pro estado de nunca aprendida"). `lapses` continua incrementando
+// normalmente em qualquer erro.
+function applyMemoryGrade(card, sm2Grade, now){
+  now = now || Date.now();
+  const fsrsGrade = sm2Grade + 1; // 0..3 (Errei..Fácil) -> 1..4 (Again..Easy)
+  scheduleReview(card, fsrsGrade, now);
+
+  card.reps = (card.reps || 0) + 1;
+  if (sm2Grade === 0) card.lapses = (card.lapses || 0) + 1;
+  card.interval = Math.max(0, Math.round(card.stability));
+  if (card.reps === 1 && !card.firstLearnedDate){
+    card.firstLearnedDate = todayStr();
+  }
+  return card;
+}
+
 // ---------- Migração SM2 -> FSRS (Fase 3) ----------
 // SM2 CARD -> migrateCardToFSRS() -> MEMORY CARD (campos FSRS adicionados,
 // campos SM-2 preservados intactos). Idempotente por construção: só roda se

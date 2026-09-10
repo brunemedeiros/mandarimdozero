@@ -19,7 +19,9 @@ function registerExerciseCorrect(unit, vocabItem){
   const cardId = `u${unit.id}-v${idx}`;
   const card = STATE.cards.find(c => c.id === cardId);
   if (card && card.reps === 0){
-    applySM2(card, 2); // grade 2 = "Bom"
+    // Fase 5: exercícios de lição também alimentam o motor novo (via
+    // applyMemoryGrade, shared/fsrs.js) -- não passam mais por applySM2.
+    applyMemoryGrade(card, 2); // grade 2 = "Bom"
   }
 }
 

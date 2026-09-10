@@ -370,7 +370,7 @@ function wireKnowButtons(container){
         btn.classList.remove('known');
         btn.textContent = 'Já sei?';
       } else {
-        applySM2(card, 3); // grade 3 = "Fácil"
+        applyMemoryGrade(card, 3); // grade 3 = "Fácil" -- Fase 5: motor novo
         btn.classList.add('known');
         btn.textContent = '✓ Já sei';
         showToast('Marcado como já sabido ⭐');
@@ -5349,7 +5349,9 @@ function gradeCurrentCard(grade){
   // Grava a direção mostrada nesta revisão -- da próxima vez que essa carta
   // ficar due, nextCardDirection() (shared/srs.js) alterna pra outra.
   card.lastDirection = card.reviewDirection;
-  applySM2(card, grade);
+  // Fase 5: Flashcard agora usa o motor FSRS (shared/fsrs.js) -- due deixa
+  // de ser calculado por regras SM-2 fixas.
+  applyMemoryGrade(card, grade);
   STATE.totalReviews += 1;
   // Streak só conta quando a SESSÃO inteira termina (ver renderReviewView),
   // não a cada cartão avaliado -- senão avaliar 1 carta isolada já bastava
@@ -5857,7 +5859,8 @@ function gradeHanziCard(grade){
   const card = STATE.hanziReviewQueue[STATE.hanziReviewIndex];
   const wasOverdue = card.due > 0 && card.due < new Date().setHours(0, 0, 0, 0);
   const intervalBefore = card.interval;
-  applySM2(card, grade);
+  // Fase 5: mesmo motor novo do Flashcard de vocabulário.
+  applyMemoryGrade(card, grade);
   STATE.totalReviews += 1;
   // Streak só conta no fim da SESSÃO inteira (ver renderHanziReviewView),
   // mesmo raciocínio do Flashcard de vocabulário.
