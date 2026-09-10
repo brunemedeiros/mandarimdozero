@@ -4343,6 +4343,30 @@ function vocabStrengthBuckets(){
   return { weak, medium, strong };
 }
 
+// Fase 12: REVISÕES DE HOJE (o que o motor decidiu que é hora de revisar
+// agora) e SUAS PALAVRAS (estado geral do vocabulário, widget abaixo) são
+// duas perguntas diferentes -- um aluno pode ter várias palavras "medianas"
+// sem ter nenhuma revisão devida hoje, e isso não é um erro do app. Por
+// isso ficam em blocos visualmente separados, cada um com sua própria
+// legenda curta, em vez de um único número ambíguo.
+function renderReviewTodayWidget(){
+  const wrap = document.getElementById('review-today-widget');
+  if (!wrap) return;
+  const pool = eligibleReviewPool();
+  if (pool.length === 0){ wrap.innerHTML = ''; return; }
+  const dueCount = cardsDueNow(pool).length;
+  const caption = dueCount === 0
+    ? 'Nenhuma revisão pendente agora -- o motor avisa quando for a hora.'
+    : dueCount === 1
+      ? '1 palavra pronta pra revisar.'
+      : `${dueCount} palavras prontas pra revisar.`;
+  wrap.innerHTML = `
+    <div class="section-label">Revisões de hoje</div>
+    <div class="review-today-count">${dueCount}</div>
+    <p class="review-today-caption">${caption}</p>
+  `;
+}
+
 // Altura do "pote" proporcional à maior das 3 categorias (não à contagem
 // absoluta) -- é isso que deixa claro de relance qual predomina, com um piso
 // de 10% pra uma categoria pequena continuar visível em vez de sumir.
@@ -4366,7 +4390,7 @@ function renderVocabStrengthWidget(){
       ${item('mid', medium, 'Medianas')}
       ${item('strong', strong, 'Fortes')}
     </div>
-    <p class="profile-edit-hint">Fraca = ainda não lembrou ou costuma errar; Forte = já lembra bem há tempos; Mediana = entre os dois. Isso mostra o quão bem você sabe cada palavra HOJE, não se ela já está pronta pra ser revisada -- por isso o número aqui pode ser maior que o do Flashcard abaixo: só ele libera quando o motor de memória calcula que já é hora de rever. Palavras Difíceis mostra as que você mais erra, a qualquer momento (não depende de estar devida); Speed Review e Combinar são jogos de prática sempre disponíveis com todo o vocabulário já aprendido.</p>
+    <p class="profile-edit-hint">Fraca = ainda não firmou; Forte = já sabe bem há tempos; Mediana = no meio do caminho. Isso é o vocabulário TODO, não as revisões de hoje (acima) -- por isso pode ter palavras medianas aqui mesmo sem nenhuma revisão pendente agora.</p>
   `;
 }
 
@@ -4378,6 +4402,7 @@ function renderReviewModeSelect(){
   // diferentes. getStudyQueue(scope:'hard') usa o difficulty do FSRS.
   const hardCount = getStudyQueue(pool, { scope: 'hard' }).length;
 
+  renderReviewTodayWidget();
   renderVocabStrengthWidget();
 
   const cardsEl = document.getElementById('review-mode-cards');
