@@ -41,6 +41,11 @@ const REPORT_SEVERITY_LABELS_BY_ID = Object.fromEntries(REPORT_SEVERITIES.map(s 
 
 const ADMIN_REPORTS_STATE = { statusFilter: 'all', kindFilter: 'all' };
 let ADMIN_REPORTS_CACHE = [];
+// user_id -> { username, display_name }. `profiles` é publicamente legível
+// (ver profiles_public_read, migration 001 -- não guarda nada sensível), só
+// pra mostrar QUEM enviou cada report na lista/detalhe -- nunca o e-mail em
+// si, que continua só resolvido sob demanda pela Edge Function ao responder.
+let ADMIN_REPORTS_PROFILES = {};
 
 async function fetchAdminReports(){
   let query = supabaseClient.from('reports').select('*').order('created_at', { ascending: false }).limit(200);
@@ -49,6 +54,26 @@ async function fetchAdminReports(){
   const { data, error } = await query;
   if (error){ console.error('Erro ao carregar reports:', error); return []; }
   return data || [];
+}
+
+async function fetchReporterProfiles(reports){
+  const ids = [...new Set(reports.filter(r => r.user_id).map(r => r.user_id))];
+  if (!ids.length) return;
+  const { data, error } = await supabaseClient.from('profiles').select('user_id, username, display_name').in('user_id', ids);
+  if (error){ console.error('Erro ao carregar perfis dos reports:', error); return; }
+  ADMIN_REPORTS_PROFILES = Object.fromEntries((data || []).map(p => [p.user_id, p]));
+}
+
+// Rótulo de "quem enviou" -- nome/username pra conta logada (via profiles,
+// nunca o e-mail em si, que só a Edge Function resolve), e-mail se o
+// convidado informou um, ou só "convidada" se não informou nada.
+function reporterLabel(report){
+  if (report.user_id){
+    const p = ADMIN_REPORTS_PROFILES[report.user_id];
+    if (p) return p.display_name || p.username;
+    return 'conta logada (perfil não encontrado)';
+  }
+  return report.reporter_email || 'convidada';
 }
 
 async function updateReportAdminFields(id, fields){
@@ -77,6 +102,7 @@ async function renderAdminReportsView(){
   wrap.innerHTML = loadingHTML();
 
   ADMIN_REPORTS_CACHE = await fetchAdminReports();
+  await fetchReporterProfiles(ADMIN_REPORTS_CACHE);
 
   const statusOptionsHTML = ['all', ...Object.keys(REPORT_STATUS_LABELS)].map(s =>
     `<option value="${s}" ${ADMIN_REPORTS_STATE.statusFilter === s ? 'selected' : ''}>${s === 'all' ? 'Todos os status' : REPORT_STATUS_LABELS[s]}</option>`
@@ -88,7 +114,7 @@ async function renderAdminReportsView(){
   const rowsHTML = ADMIN_REPORTS_CACHE.length ? ADMIN_REPORTS_CACHE.map(r => {
     const catLabel = REPORT_CATEGORY_LABELS_BY_ID[r.category] || r.category;
     const dateLabel = new Date(r.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
-    const who = r.user_id ? 'conta logada' : 'convidada';
+    const who = escapeHTML(reporterLabel(r));
     const snippet = (r.description || '').slice(0, 90) + ((r.description || '').length > 90 ? '…' : '');
     return `
       <div class="admin-badge-row" data-report-row="${r.id}">
@@ -105,7 +131,7 @@ async function renderAdminReportsView(){
   wrap.innerHTML = `
     <div class="profile-section">
       <div class="section-label">⚑ Reports de bugs e sugestões</div>
-      <p class="profile-edit-hint">Enviados pela bandeira ⚑ (menu do usuário ou dentro dos exercícios). Convidados também podem reportar -- reports sem conta aparecem como "convidada", sem e-mail associado.</p>
+      <p class="profile-edit-hint">Enviados pela bandeira ⚑ (menu do usuário ou dentro dos exercícios). Convidados também podem reportar -- reports sem conta e sem e-mail informado aparecem como "convidada".</p>
       <div class="admin-report-filters">
         <select id="admin-report-status-filter" class="profile-edit-input">${statusOptionsHTML}</select>
         <select id="admin-report-kind-filter" class="profile-edit-input">${kindOptionsHTML}</select>
@@ -135,6 +161,7 @@ function openAdminReportDetail(reportId){
   if (!report || !modal) return;
 
   document.getElementById('admin-report-detail-category').textContent = `${report.kind === 'sugestao' ? '💡 Sugestão' : '⚑ Problema'} -- ${REPORT_CATEGORY_LABELS_BY_ID[report.category] || report.category}`;
+  document.getElementById('admin-report-detail-reporter').textContent = reporterLabel(report);
   document.getElementById('admin-report-detail-description').textContent = report.description || '';
   document.getElementById('admin-report-detail-expected').textContent = report.expected_behavior || '(não informado)';
   document.getElementById('admin-report-detail-severity').textContent = REPORT_SEVERITY_LABELS_BY_ID[report.severity_reported] || '(não informado)';
