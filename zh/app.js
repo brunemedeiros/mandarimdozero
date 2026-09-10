@@ -566,6 +566,15 @@ const STATE = {
     dailyMinutes: 0, // legado (era a unidade da meta antes da Fase 3 -- não lido mais pra nada, só preservado se já existir salvo)
     dailyLessonsGoal: 0 // 0 = meta ainda não definida; 1/2/3 = Casual/Regular/Intenso
   },
+  // Fase 10 (configurações simplificadas do motor de memória) -- só 3
+  // controles simples, nenhum parâmetro do FSRS exposto diretamente. Ver
+  // reviewFrequencyToRetention/sessionIntensityToLimit mais abaixo, que
+  // traduzem essas 3 opções pra valores reais do motor.
+  studySettings: {
+    reviewFrequency: 'balanced', // 'frequent' | 'balanced' (padrão) | 'spaced'
+    newCardsPerDay: 10,
+    sessionIntensity: 'normal' // 'light' | 'normal' (padrão) | 'intense'
+  },
   dailyMinutesLog: {}, // legado -- não lido mais pra nada, só continua sendo escrito (addStudyMinutes) pra não perder histórico já salvo
   dailyLessonsLog: {}, // 'YYYY-MM-DD' -> lições (que contam pra meta) concluídas naquele dia
   hanziLessonProgress: {}, // lessonIndex -> { completed: bool }
@@ -685,6 +694,9 @@ updateFeedbackSoundSwitch();
 
 async function loadStateAndRender(){
   await loadState();
+  // Fase 10: aplica a preferência de frequência de revisão (padrão ou
+  // salva) no motor FSRS -- precisa rodar antes de qualquer grading real.
+  setDesiredRetention(reviewFrequencyToRetention(STATE.studySettings.reviewFrequency));
   seedEarnedBadges();
   renderTopbarStats();
   renderUnitsGrid();
@@ -784,6 +796,7 @@ function serializeState(){
     lastReviewReminderDay: STATE.lastReviewReminderDay,
     activityLog: STATE.activityLog,
     studyGoal: STATE.studyGoal,
+    studySettings: STATE.studySettings,
     dailyMinutesLog: STATE.dailyMinutesLog,
     dailyLessonsLog: STATE.dailyLessonsLog,
     hanziLessonProgress: STATE.hanziLessonProgress,
@@ -835,6 +848,7 @@ function applySerializedState(data){
   if (data.lastStudyDay) STATE.lastStudyDay = data.lastStudyDay;
   if (data.lastReviewReminderDay) STATE.lastReviewReminderDay = data.lastReviewReminderDay;
   if (data.studyGoal) Object.assign(STATE.studyGoal, data.studyGoal);
+  if (data.studySettings) Object.assign(STATE.studySettings, data.studySettings);
   if (data.dailyMinutesLog) Object.assign(STATE.dailyMinutesLog, data.dailyMinutesLog);
   if (data.dailyLessonsLog) Object.assign(STATE.dailyLessonsLog, data.dailyLessonsLog);
   if (data.activityLog) Object.assign(STATE.activityLog, data.activityLog);
@@ -5201,9 +5215,13 @@ function startReviewSession(){
   // -- due primeiro, mais um lote limitado de cartões novos (scope 'due'),
   // ou due primeiro seguido do resto do pool ao estudar uma unidade
   // específica (scope 'unit'). Mesmo critério de antes, só consolidado.
+  // Fase 10: "novas palavras por dia" e "intensidade da sessão" (Configurações
+  // > Revisões) -- intensidade só se aplica à revisão geral (scope 'due');
+  // estudar uma unidade específica mostra ela inteira, sem corte artificial.
   const queue = getStudyQueue(pool, {
     scope: STATE.reviewSessionUnitFilter ? 'unit' : 'due',
-    newCardsLimit: 10
+    newCardsLimit: STATE.studySettings.newCardsPerDay,
+    limit: STATE.reviewSessionUnitFilter ? undefined : sessionIntensityToLimit(STATE.studySettings.sessionIntensity)
   });
 
   // Decide a direção de cada carta ANTES de embaralhar/mostrar -- alterna a
@@ -5695,10 +5713,51 @@ function switchSettingsSection(section){
   SETTINGS_SECTION = section;
   document.querySelectorAll('[data-settings-section]').forEach(btn => btn.classList.toggle('active', btn.dataset.settingsSection === section));
   document.getElementById('settings-geral-content').style.display = section === 'geral' ? '' : 'none';
+  document.getElementById('settings-revisao-content').style.display = section === 'revisao' ? '' : 'none';
   document.getElementById('settings-notifications-content').style.display = section === 'notifications' ? '' : 'none';
   document.getElementById('settings-export-content').style.display = section === 'export' ? '' : 'none';
+  if (section === 'revisao') renderReviewSettingsView();
   if (section === 'notifications' && typeof renderNotificationPreferencesView === 'function') renderNotificationPreferencesView();
 }
+
+// Fase 10: sincroniza a tela de Configurações > Revisões com STATE.studySettings
+// -- roda toda vez que a seção é aberta (mesmo padrão de renderNotificationPreferencesView).
+function renderReviewSettingsView(){
+  const s = STATE.studySettings;
+  document.querySelectorAll('#review-frequency-options .study-freq-option').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.freq === s.reviewFrequency);
+  });
+  document.querySelectorAll('#session-intensity-options .study-freq-option').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.intensity === s.sessionIntensity);
+  });
+  document.getElementById('new-cards-value').textContent = s.newCardsPerDay;
+  document.getElementById('new-cards-decr').disabled = s.newCardsPerDay <= 0;
+  document.getElementById('new-cards-incr').disabled = s.newCardsPerDay >= 50;
+}
+
+// Persiste + reaplica ao motor imediatamente -- não precisa de botão "Salvar"
+// (mesmo padrão dos outros pref-switch/toggle desta tela).
+function updateStudySetting(patch){
+  Object.assign(STATE.studySettings, patch);
+  if (patch.reviewFrequency){
+    setDesiredRetention(reviewFrequencyToRetention(patch.reviewFrequency));
+  }
+  renderReviewSettingsView();
+  saveState();
+}
+
+document.querySelectorAll('#review-frequency-options .study-freq-option').forEach(btn => {
+  btn.addEventListener('click', () => updateStudySetting({ reviewFrequency: btn.dataset.freq }));
+});
+document.querySelectorAll('#session-intensity-options .study-freq-option').forEach(btn => {
+  btn.addEventListener('click', () => updateStudySetting({ sessionIntensity: btn.dataset.intensity }));
+});
+document.getElementById('new-cards-decr').addEventListener('click', () => {
+  updateStudySetting({ newCardsPerDay: Math.max(0, STATE.studySettings.newCardsPerDay - 1) });
+});
+document.getElementById('new-cards-incr').addEventListener('click', () => {
+  updateStudySetting({ newCardsPerDay: Math.min(50, STATE.studySettings.newCardsPerDay + 1) });
+});
 document.querySelectorAll('[data-settings-section]').forEach(btn => {
   btn.addEventListener('click', () => switchSettingsSection(btn.dataset.settingsSection));
 });

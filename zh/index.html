@@ -1843,6 +1843,31 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .pref-switch[aria-checked="true"] .pref-switch-knob{ left:23px; }
 .pref-switch:disabled{ opacity:.45; cursor:not-allowed; }
 
+/* ---------- Revisões (Fase 10 -- configurações simplificadas) ----------
+   3 controles simples só: frequência de revisão, novas palavras/dia,
+   intensidade da sessão. Nenhum parâmetro do motor (FSRS) é exposto --
+   cada opção aqui mapeia internamente pra um valor real (ver
+   reviewFrequencyToRetention/sessionIntensityToLimit em app.js). */
+.study-freq-options{ display:flex; flex-direction:column; }
+.study-freq-option{
+  display:flex; flex-direction:column; align-items:flex-start; text-align:left; gap:2px;
+  padding:14px 16px; border:none; background:var(--paper); cursor:pointer; font-family:var(--font-body);
+  border-radius:0;
+}
+.study-freq-option + .study-freq-option{ border-top:1px solid var(--paper-line); }
+.study-freq-option-title{ font-size:14px; font-weight:800; color:var(--ink); }
+.study-freq-option-sub{ font-size:12.5px; color:var(--ink-soft); }
+.study-freq-option.active{ background:var(--seal-red); }
+.study-freq-option.active .study-freq-option-title,
+.study-freq-option.active .study-freq-option-sub{ color:#fff; }
+.study-stepper{ display:flex; align-items:center; gap:12px; }
+.study-stepper-btn{
+  width:32px; height:32px; border-radius:50%; border:1px solid var(--paper-line); background:var(--paper);
+  font-size:18px; font-weight:700; color:var(--ink); cursor:pointer; line-height:1;
+}
+.study-stepper-btn:disabled{ opacity:.35; cursor:not-allowed; }
+.study-stepper-value{ font-size:16px; font-weight:800; color:var(--ink); min-width:24px; text-align:center; }
+
 /* ---------- Preferências de notificação (Fase 2) ---------- */
 .notif-pref-advanced{ margin-top:14px; }
 .notif-pref-advanced summary{
@@ -2682,6 +2707,7 @@ body.hide-pinyin .prompt-pinyin{
     </div>
     <div class="leaderboard-tabs" role="tablist" aria-label="Seção de Configurações">
       <button class="leaderboard-tab active" role="tab" aria-selected="true" data-settings-section="geral">Geral</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="revisao">🧠 Revisões</button>
       <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="notifications">🔔 Notificações</button>
       <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="export">📦 Exportar</button>
     </div>
@@ -2720,6 +2746,54 @@ body.hide-pinyin .prompt-pinyin{
         </div>
         <button class="pref-switch" id="feedback-sound-switch" role="switch" aria-checked="true"><span class="pref-switch-knob"></span></button>
       </div>
+    </div>
+    <div id="settings-revisao-content" style="display:none;">
+      <div class="section-label">Frequência de revisão</div>
+      <div class="settings-card">
+        <div class="study-freq-options" id="review-frequency-options">
+          <button class="study-freq-option" data-freq="frequent">
+            <div class="study-freq-option-title">Mais frequente</div>
+            <div class="study-freq-option-sub">Revisa mais cedo e mais vezes</div>
+          </button>
+          <button class="study-freq-option" data-freq="balanced">
+            <div class="study-freq-option-title">Equilibrada</div>
+            <div class="study-freq-option-sub">Recomendado</div>
+          </button>
+          <button class="study-freq-option" data-freq="spaced">
+            <div class="study-freq-option-title">Mais espaçada</div>
+            <div class="study-freq-option-sub">Intervalos mais longos entre revisões</div>
+          </button>
+        </div>
+      </div>
+      <div class="section-label">Novas palavras por dia</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-row-label">Quantas palavras novas entram por sessão de Flashcard</div>
+          <div class="study-stepper">
+            <button class="study-stepper-btn" id="new-cards-decr" aria-label="Diminuir">−</button>
+            <span class="study-stepper-value" id="new-cards-value">10</span>
+            <button class="study-stepper-btn" id="new-cards-incr" aria-label="Aumentar">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="section-label">Intensidade da sessão</div>
+      <div class="settings-card">
+        <div class="study-freq-options" id="session-intensity-options">
+          <button class="study-freq-option" data-intensity="light">
+            <div class="study-freq-option-title">Leve</div>
+            <div class="study-freq-option-sub">Sessões mais curtas</div>
+          </button>
+          <button class="study-freq-option" data-intensity="normal">
+            <div class="study-freq-option-title">Normal</div>
+            <div class="study-freq-option-sub">Recomendado</div>
+          </button>
+          <button class="study-freq-option" data-intensity="intense">
+            <div class="study-freq-option-title">Intensa</div>
+            <div class="study-freq-option-sub">Sessões mais longas</div>
+          </button>
+        </div>
+      </div>
+      <p class="settings-more-note">Essas opções ajustam o motor de revisão por trás dos panos -- você não precisa entender os detalhes técnicos.</p>
     </div>
     <div id="settings-notifications-content" style="display:none;"></div>
     <div id="settings-export-content" style="display:none;">

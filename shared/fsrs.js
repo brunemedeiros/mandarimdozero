@@ -30,28 +30,63 @@ const FSRS_W = [
 ];
 
 // Retenção desejada: probabilidade-alvo de lembrar no dia do vencimento.
-// Fixo por enquanto (Fase 2/10 prevêem 3 presets simples -- Leve/Equilibrada/
-// Intensa -- mapeando pra este número internamente; UI ainda não existe).
-const FSRS_DESIRED_RETENTION = 0.9;
+// Fase 10: configurável via setDesiredRetention() -- a tela de
+// Configurações > Revisões traduz "Mais frequente/Equilibrada/Mais
+// espaçada" pra este número (ver reviewFrequencyToRetention() em app.js).
+// shared/fsrs.js continua sem saber de STATE/UI -- só recebe o valor já
+// traduzido, mantendo o motor puro/parametrizado.
+let FSRS_DESIRED_RETENTION = 0.9;
+function setDesiredRetention(value){
+  if (typeof value === 'number' && value > 0 && value < 1) FSRS_DESIRED_RETENTION = value;
+}
+
+// Fase 10: traduz as 3 opções simples de "Frequência de revisão" (tela de
+// Configurações) pra um valor real de retenção desejada -- nenhuma tela do
+// app expõe esse número.
+function reviewFrequencyToRetention(freq){
+  if (freq === 'frequent') return 0.95;
+  if (freq === 'spaced') return 0.85;
+  return 0.9; // 'balanced' (padrão)
+}
+
+// Fase 10: traduz "Intensidade da sessão" pro teto de cartões numa sessão
+// de Flashcard (getStudyQueue options.limit, shared/study-queue.js).
+function sessionIntensityToLimit(intensity){
+  if (intensity === 'light') return 15;
+  if (intensity === 'intense') return 60;
+  return 30; // 'normal' (padrão)
+}
 
 function fsrsClampDifficulty(d){
   return Math.min(10, Math.max(1, d));
 }
 
+// Retenção de REFERÊNCIA, fixa em 0.9 -- é a própria definição de
+// "stability" no FSRS ("dias até a retenção cair a 90%"), não a preferência
+// do usuário. Usada só dentro do `factor` de fsrsRetrievability/
+// fsrsIntervalFromStability -- NUNCA trocar por FSRS_DESIRED_RETENTION aqui
+// (bug já cometido uma vez: se as duas usarem o mesmo valor, o termo se
+// cancela algebricamente e a fila do intervalo vira sempre === stability,
+// tornando "Frequência de revisão" um no-op silencioso).
+const FSRS_REFERENCE_RETENTION = 0.9;
+
 // R(t,S) = (1 + factor * t/S) ^ (-w20), factor = 0.9^(-1/w20) - 1
-// (garante R(S,S) = 0.9, i.e. estabilidade = dias até a retenção cair a 90%)
+// (garante R(S,S) = 0.9, i.e. estabilidade = dias até a retenção cair a 90%
+// -- sempre relativo à retenção de REFERÊNCIA, não à preferência do usuário)
 function fsrsRetrievability(elapsedDays, stability){
   if (stability <= 0) return 0;
   const w20 = FSRS_W[20];
-  const factor = Math.pow(FSRS_DESIRED_RETENTION, -1/w20) - 1;
+  const factor = Math.pow(FSRS_REFERENCE_RETENTION, -1/w20) - 1;
   return Math.pow(1 + factor * elapsedDays / stability, -w20);
 }
 
-// Intervalo (em dias) tal que R(intervalo, stability) = retenção desejada --
-// inverso de fsrsRetrievability, usado pra decidir o próximo `due`.
+// Intervalo (em dias) tal que R(intervalo, stability) = FSRS_DESIRED_RETENTION
+// (a preferência do usuário) -- inverso de fsrsRetrievability, usado pra
+// decidir o próximo `due`. O `factor` no denominador fica fixo na retenção
+// de REFERÊNCIA (0.9); só o numerador varia com a preferência do usuário.
 function fsrsIntervalFromStability(stability){
   const w20 = FSRS_W[20];
-  const factor = Math.pow(FSRS_DESIRED_RETENTION, -1/w20) - 1;
+  const factor = Math.pow(FSRS_REFERENCE_RETENTION, -1/w20) - 1;
   const interval = (stability / factor) * (Math.pow(FSRS_DESIRED_RETENTION, -1/w20) - 1);
   return Math.max(1, Math.round(interval));
 }

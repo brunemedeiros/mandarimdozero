@@ -26,6 +26,11 @@
 //   'all'  -- o pool inteiro, sem filtro de due (Speed Review, Combinar --
 //             não são revisão SRS, são prática de reconhecimento; due só
 //             importa pras duas primeiras)
+//
+// options.newCardsLimit -- teto de cartões novos (scope 'due'). Fase 10:
+// "novas palavras por dia", controlável pelo aluno.
+// options.limit -- teto do TAMANHO TOTAL da fila (todos os scopes, opt-in).
+// Fase 10: "intensidade da sessão".
 function getStudyQueue(pool, options){
   options = options || {};
   const scope = options.scope || 'due';
@@ -46,21 +51,32 @@ function getStudyQueue(pool, options){
       .sort((a, b) => (b.difficulty - a.difficulty) || (b.lapses - a.lapses));
   }
 
+  let selected;
+
   if (scope === 'all'){
-    return pool.slice();
+    selected = pool.slice();
+  } else if (scope === 'unit'){
+    const due = cardsDueNow(pool);
+    const rest = pool.filter(c => !due.includes(c));
+    selected = due.concat(rest);
+  } else {
+    // scope === 'due'. Fase 10: "novas palavras por dia" só é um controle
+    // de verdade se cartões novos (reps===0, due:0) não entrarem já pelo
+    // filtro de due<=now -- due=0 SEMPRE satisfaz due<=now, então
+    // cardsDueNow(pool) sozinho já continha 100% dos cartões novos antes
+    // de qualquer corte (achado documentado desde a Fase 4, nunca
+    // corrigido até agora porque nada dependia disso de verdade). Corrigido
+    // aqui: "devido" passa a significar só cartões JÁ estudados que
+    // venceram (reps>0); cartões novos entram exclusivamente pela via
+    // limitada por newCardsLimit.
+    const dueReviewed = pool.filter(c => c.reps > 0 && c.due <= Date.now());
+    const newLimit = options.newCardsLimit != null ? options.newCardsLimit : 10;
+    const fresh = newCards(pool).slice(0, newLimit);
+    selected = dueReviewed.concat(fresh);
   }
 
-  const due = cardsDueNow(pool);
-  const queue = due.slice();
-
-  if (scope === 'unit'){
-    const rest = pool.filter(c => !queue.includes(c));
-    return queue.concat(rest);
-  }
-
-  // scope === 'due'
-  const newLimit = options.newCardsLimit != null ? options.newCardsLimit : 10;
-  const fresh = newCards(pool).slice(0, newLimit);
-  fresh.forEach(c => { if (!queue.includes(c)) queue.push(c); });
-  return queue;
+  // Fase 10: "intensidade da sessão" -- teto opcional do tamanho total da
+  // fila, independente de quantos devidos/novos existirem.
+  if (options.limit) selected = selected.slice(0, options.limit);
+  return selected;
 }
