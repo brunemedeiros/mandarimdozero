@@ -5122,6 +5122,16 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
   });
 
   if (isCorrect){
+    // Fase 6: uma resposta certa em cartão NUNCA estudado é evidência
+    // suficiente pra promovê-lo pro motor de memória (mesmo critério já
+    // usado por registerExerciseCorrect() nos exercícios de lição) --
+    // reconhecimento rápido não tem o mesmo peso de uma recuperação ativa
+    // via Flashcard (Princípio 4), por isso só afeta cartões em reps===0;
+    // nunca reagenda um cartão que já está em ciclo de revisão (isso
+    // continuaria sendo um 2º sistema de memória, proibido pela Regra 6).
+    if (card.reps === 0){
+      applyMemoryGrade(card, 2); // grade 2 = "Bom"
+    }
     // Pontuação recompensa velocidade: quanto menos tempo passou, mais pontos.
     const speedBonus = Math.max(10, Math.round(100 * (1 - elapsed / SPEED_TIME_LIMIT)));
     SPEED_STATE.score += speedBonus;
