@@ -11,6 +11,12 @@
 // sobrescrita por aqui (ver a distinção na auditoria que motivou o
 // sistema: usuário nunca escolhe a prioridade técnica final).
 //
+// Responder por e-mail (migration 022 + Edge Function report-reply-send):
+// motivado pelo pedido "quero poder agradecer/explicar o que foi feito com
+// o report, mesmo sem ter o e-mail à mão" -- a Edge Function resolve o
+// e-mail (reporter_email de convidado, ou via Admin API pra conta logada)
+// e envia via Resend, a mesma infra já usada nos e-mails de notificação.
+//
 // Depende de (mesma posição de shared/admin-badges.js -- antes de app.js):
 //   - shared/supabase-client.js (supabaseClient)
 //   - shared/toast.js           (showToast)
@@ -145,12 +151,68 @@ function openAdminReportDetail(reportId){
   document.getElementById('admin-report-detail-error').textContent = '';
   document.getElementById('admin-report-detail-save-btn').dataset.reportId = report.id;
 
+  renderAdminReportReplySection(report);
+
   modal.style.display = 'flex';
+}
+
+// "Sem e-mail" só quando é convidado (sem user_id) que não deixou
+// reporter_email -- conta logada SEMPRE pode ser respondida, mesmo que
+// reporter_email ainda esteja null aqui: a Edge Function resolve o e-mail
+// na hora via auth.admin.getUserById() (ver report-reply-send) e só
+// grava de volta como cache depois do primeiro envio.
+function renderAdminReportReplySection(report){
+  const canReply = !!report.reporter_email || !!report.user_id;
+  document.getElementById('admin-report-reply-composer').style.display = canReply ? '' : 'none';
+  document.getElementById('admin-report-reply-noemail').style.display = canReply ? 'none' : '';
+
+  const historyEl = document.getElementById('admin-report-reply-history');
+  if (report.admin_reply_sent_at){
+    const dateLabel = new Date(report.admin_reply_sent_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+    historyEl.innerHTML = `<em>Última resposta enviada em ${dateLabel}${report.reporter_email ? ` para ${escapeHTML(report.reporter_email)}` : ''}:</em><br>"${escapeHTML(report.admin_reply_subject || '')}" -- ${escapeHTML(report.admin_reply || '')}`;
+    historyEl.style.display = '';
+  } else {
+    historyEl.innerHTML = '';
+    historyEl.style.display = 'none';
+  }
+
+  document.getElementById('admin-report-reply-subject').value = '';
+  document.getElementById('admin-report-reply-body').value = '';
+  document.getElementById('admin-report-reply-error').textContent = '';
+  document.getElementById('admin-report-reply-send-btn').dataset.reportId = report.id;
 }
 
 function closeAdminReportDetail(){
   const modal = document.getElementById('admin-report-detail-modal');
   if (modal) modal.style.display = 'none';
+}
+
+// Mensagens amigáveis pros erros que a Edge Function report-reply-send
+// pode devolver (ver supabase/functions/report-reply-send/index.ts) --
+// nunca mostra o código cru pra admin.
+const REPORT_REPLY_ERROR_LABELS = {
+  forbidden: 'Sessão sem permissão de admin -- faça login de novo.',
+  report_not_found: 'Este report não foi encontrado.',
+  no_email: 'Sem e-mail associado a este report.',
+  email_not_configured: 'Envio de e-mail ainda não configurado no servidor (RESEND_API_KEY/RESEND_FROM_EMAIL).',
+  resend_failed: 'Não foi possível enviar o e-mail agora. Tente de novo em instantes.',
+  missing_fields: 'Preencha assunto e mensagem.',
+};
+
+// Chama a Edge Function report-reply-send (ver comentário no topo do
+// arquivo) -- ela resolve o e-mail (reporter_email ou, pra conta logada,
+// via auth.admin.getUserById(), service role) e envia via Resend. O front
+// nunca sabe o e-mail de antemão pra uma conta logada -- só depois que a
+// function confirma o envio (ver retorno `to`).
+async function sendAdminReportReply(reportId, subject, body){
+  const { data, error } = await supabaseClient.functions.invoke('report-reply-send', {
+    body: { report_id: reportId, subject, body },
+  });
+  if (error || !data?.ok){
+    const code = data?.error || error?.context?.error || null;
+    return { ok: false, error: REPORT_REPLY_ERROR_LABELS[code] || 'Não foi possível enviar a resposta agora.' };
+  }
+  return { ok: true, to: data.to };
 }
 
 function wireAdminReportDetailModal(){
@@ -173,6 +235,28 @@ function wireAdminReportDetailModal(){
     btn.disabled = false;
     if (!result.ok){ errorEl.textContent = 'Não foi possível salvar agora.'; return; }
     showToast('✓ Report atualizado.');
+    closeAdminReportDetail();
+    renderAdminReportsView();
+  });
+
+  document.getElementById('admin-report-reply-send-btn')?.addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    const id = btn.dataset.reportId;
+    const errorEl = document.getElementById('admin-report-reply-error');
+    errorEl.textContent = '';
+    const subject = document.getElementById('admin-report-reply-subject').value.trim();
+    const body = document.getElementById('admin-report-reply-body').value.trim();
+    if (!subject || !body){
+      errorEl.textContent = 'Preencha assunto e mensagem.';
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    const result = await sendAdminReportReply(id, subject, body);
+    btn.disabled = false;
+    btn.textContent = 'Enviar resposta';
+    if (!result.ok){ errorEl.textContent = result.error; return; }
+    showToast(`✓ Resposta enviada para ${result.to}.`);
     closeAdminReportDetail();
     renderAdminReportsView();
   });

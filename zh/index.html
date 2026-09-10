@@ -1644,6 +1644,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .admin-report-detail-label{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; color:var(--ink-soft); margin-bottom:4px; }
 .admin-report-detail-text{ font-size:13.5px; color:var(--ink); white-space:pre-wrap; line-height:1.5; }
 .admin-report-detail-context{ font-size:12px; color:var(--ink-soft); background:var(--paper-warm); border-radius:8px; padding:10px 12px; line-height:1.6; }
+.admin-report-reply-block{ margin-top:20px; padding-top:16px; border-top:1px solid var(--paper-line); }
 .admin-member-row{ display:flex; align-items:center; gap:8px; padding:6px; border-radius:8px; }
 .admin-member-row:hover{ background:var(--paper-warm); }
 .admin-member-check{ display:flex; align-items:center; gap:10px; cursor:pointer; font-size:13.5px; flex:1; min-width:0; }
@@ -2988,6 +2989,20 @@ body.hide-pinyin .prompt-pinyin{
 
       <p class="profile-edit-error" id="admin-report-detail-error"></p>
       <button type="button" class="btn btn-primary btn-block" id="admin-report-detail-save-btn">Salvar</button>
+
+      <div class="admin-report-detail-block admin-report-reply-block">
+        <div class="admin-report-detail-label">Responder por e-mail</div>
+        <div id="admin-report-reply-history" class="admin-report-detail-text"></div>
+        <div id="admin-report-reply-composer">
+          <label class="profile-edit-label" for="admin-report-reply-subject">Assunto</label>
+          <input type="text" id="admin-report-reply-subject" class="profile-edit-input" maxlength="150">
+          <label class="profile-edit-label" for="admin-report-reply-body">Mensagem</label>
+          <textarea id="admin-report-reply-body" class="profile-edit-textarea" rows="5" placeholder="Obrigada por avisar! ..."></textarea>
+          <p class="profile-edit-error" id="admin-report-reply-error"></p>
+          <button type="button" class="btn btn-primary btn-block" id="admin-report-reply-send-btn">Enviar resposta</button>
+        </div>
+        <p id="admin-report-reply-noemail" class="profile-edit-hint" style="display:none;">Sem e-mail associado a este report (convidado que não informou e-mail) -- não é possível responder.</p>
+      </div>
     </div>
   </div>
 </div>
@@ -3101,6 +3116,11 @@ body.hide-pinyin .prompt-pinyin{
 
         <label class="profile-edit-label" for="report-expected">O que você esperava que acontecesse? <span class="report-modal-optional">(opcional)</span></label>
         <textarea id="report-expected" class="profile-edit-textarea" maxlength="300" rows="2"></textarea>
+
+        <div id="report-guest-email-wrap">
+          <label class="profile-edit-label" for="report-guest-email">Seu e-mail <span class="report-modal-optional">(opcional, só se quiser receber uma resposta)</span></label>
+          <input type="email" id="report-guest-email" class="profile-edit-input" maxlength="200" placeholder="seuemail@exemplo.com">
+        </div>
 
         <div class="report-screenshot-row">
           <button type="button" class="report-screenshot-btn" id="report-screenshot-btn">📎 Anexar captura de tela (opcional)</button>
