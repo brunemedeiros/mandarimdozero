@@ -387,7 +387,19 @@ function buildCardsFromUnits(units){
         interval: 0,
         reps: 0,
         due: 0,
-        lapses: 0
+        lapses: 0,
+        // Estado FSRS (Fase 3) -- cartão novo nasce direto no novo modelo,
+        // sem precisar passar por migrateCardToFSRS().
+        stability: 0,
+        difficulty: 0,
+        state: 'new',
+        lastReview: null,
+        fsrsReps: 0,
+        fsrsLapses: 0
+        // (sem fsrsMigrated aqui de propósito -- ver comentário em
+        // migrateCardToFSRS() no shared/fsrs.js: setar isso já no
+        // nascimento do cartão faria o merge de um save antigo, que roda
+        // DEPOIS deste construtor, ser ignorado pelo guard da migração.)
       });
     });
   });
@@ -612,6 +624,9 @@ function applySerializedState(data){
     data.cards.forEach(c => byId[c.id] = c);
     STATE.cards.forEach(c => { if (byId[c.id]) Object.assign(c, byId[c.id]); });
   }
+  // Fase 3 (reestruturação do motor de memória): migração SM2->FSRS,
+  // idempotente (migrateCardToFSRS só age se `stability` ainda não existe).
+  STATE.cards.forEach(migrateCardToFSRS);
   if (data.unitProgress) {
     Object.assign(STATE.unitProgress, data.unitProgress);
     // Saves de antes das lições (Modelo B) não têm lessonIdx/lessonMisses.

@@ -481,7 +481,19 @@ function buildCardsFromUnits(units){
         interval: 0,
         reps: 0,
         due: 0, // timestamp; 0 = never studied, due immediately
-        lapses: 0
+        lapses: 0,
+        // Estado FSRS (Fase 3) -- cartão novo nasce direto no novo modelo,
+        // sem precisar passar por migrateCardToFSRS().
+        stability: 0,
+        difficulty: 0,
+        state: 'new',
+        lastReview: null,
+        fsrsReps: 0,
+        fsrsLapses: 0
+        // (sem fsrsMigrated aqui de propósito -- ver comentário em
+        // migrateCardToFSRS() no shared/fsrs.js: setar isso já no
+        // nascimento do cartão faria o merge de um save antigo, que roda
+        // DEPOIS deste construtor, ser ignorado pelo guard da migração.)
       });
     });
   });
@@ -507,7 +519,18 @@ function buildHanziCards(lessons){
         interval: 0,
         reps: 0,
         due: 0,
-        lapses: 0
+        lapses: 0,
+        // Estado FSRS (Fase 3) -- ver buildCardsFromUnits()
+        stability: 0,
+        difficulty: 0,
+        state: 'new',
+        lastReview: null,
+        fsrsReps: 0,
+        fsrsLapses: 0
+        // (sem fsrsMigrated aqui de propósito -- ver comentário em
+        // migrateCardToFSRS() no shared/fsrs.js: setar isso já no
+        // nascimento do cartão faria o merge de um save antigo, que roda
+        // DEPOIS deste construtor, ser ignorado pelo guard da migração.)
       });
     });
   });
@@ -791,6 +814,12 @@ function applySerializedState(data){
     data.hanziCards.forEach(c => byId[c.id] = c);
     STATE.hanziCards.forEach(c => { if (byId[c.id]) Object.assign(c, byId[c.id]); });
   }
+  // Fase 3 (reestruturação do motor de memória): migração SM2->FSRS,
+  // idempotente (migrateCardToFSRS só age se `stability` ainda não existe).
+  // Roda pra TODO cartão, vindo de save antigo ou recém-criado, garantindo
+  // que os campos FSRS sempre existam a partir daqui.
+  STATE.cards.forEach(migrateCardToFSRS);
+  STATE.hanziCards.forEach(migrateCardToFSRS);
   if (data.unitProgress) {
     Object.assign(STATE.unitProgress, data.unitProgress);
     // Saves de antes das lições (Modelo B) não têm lessonIdx/lessonMisses --
