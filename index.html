@@ -249,7 +249,14 @@ function goToLanguageApp(langId, alreadyKnows){
   if (!target) return;
   localStorageSafeSet(LAST_LANGUAGE_KEY, langId);
   const offerLevelTest = alreadyKnows && target.hasLevelTest;
-  window.location.href = offerLevelTest ? `${target.path}?level_test_offer=1` : target.path;
+  // replace() (não href=) -- este portão só existe pra decidir pra onde
+  // mandar a pessoa; se ele empilhar uma entrada no histórico, apertar
+  // Voltar traz de volta ESTA página, que releria o LAST_LANGUAGE_KEY que
+  // acabou de gravar acima e mandaria pra cá de novo sozinha (loop de
+  // redirecionamento -- foi isso que deixou a tela travada/sem resposta
+  // num relato real). replace() tira o portão do histórico: Voltar sai da
+  // plataforma de vez, como já se espera de uma tela de redirecionamento.
+  window.location.replace(offerLevelTest ? `${target.path}?level_test_offer=1` : target.path);
 }
 
 async function afterAuthResolved(user){
