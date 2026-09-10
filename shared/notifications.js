@@ -1,6 +1,6 @@
 // ---------- Motor de notificações (Fase 1) ----------
 // Cobre só os eventos "Cliente" da arquitetura aprovada (seção 7/18): XP
-// ganho, badge desbloqueado, desafio concluído, streak batida -- disparados
+// ganho, badge desbloqueado, missão do dia concluída, streak batida -- disparados
 // na hora, por quem está com o app aberto, sem depender do cron (Edge
 // Function supabase/functions/notification-cron, ainda sem lógica de
 // negócio -- isso é Fase 2 em diante: revisão atrasada, streak em risco,
@@ -208,6 +208,7 @@ async function fireNotificationEvent(eventType, category, payload, actionTab){
 const NOTIFICATION_CATEGORY_ICON = {
   sistema: '⚙️', estudo: '📘', revisao: '🔄', streak: '🔥', gamificacao: '⭐',
   ranking: '🏆', desafios: '🎯', social: '👥', conteudo: '📚', reengajamento: '👋',
+  perfil: '🏅',
 };
 
 const NOTIFICATIONS_FETCH_LIMIT = 30;
@@ -289,7 +290,20 @@ async function renderNotificationDropdown(){
       el.classList.remove('unread');
       const tab = el.dataset.actionTab;
       document.getElementById('notifications-dropdown')?.classList.remove('open');
-      if (tab) switchTab(tab);
+      if (tab === 'profile-edit'){
+        // Lembrete de "badge em destaque" (ver checkFeaturedBadgeReminder no
+        // cron) -- não é só trocar de aba, precisa abrir o modal de Editar
+        // Perfil direto. switchTab('profile') dispara renderProfileView()
+        // sem esperar (é async, tabHandlers não aguarda promise nenhuma) --
+        // chama ela de novo aqui e espera, pra garantir que #profile-edit-btn
+        // já existe no DOM antes do clique programático (idempotente, o
+        // segundo render só substitui o mesmo conteúdo).
+        switchTab('profile');
+        if (typeof renderProfileView === 'function') await renderProfileView();
+        document.getElementById('profile-edit-btn')?.click();
+      } else if (tab){
+        switchTab(tab);
+      }
     });
   });
 }

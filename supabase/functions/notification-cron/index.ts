@@ -94,6 +94,15 @@ const LANGUAGES = [
   { appKey: 'mandarim' },
 ];
 
+// Mesmos valores de ADMIN_EMAIL (languages/<lang>/app.js) e
+// BETA_TESTER_CUTOFF (shared/profile.js) -- duplicados aqui pelo mesmo
+// motivo de LANGUAGES acima. Usados só pra decidir quem é ELEGÍVEL pro
+// lembrete de badge em destaque (ver processFeaturedBadgeReminders):
+// destacar um badge só faz sentido pra quem já tem pelo menos um badge
+// ESPECIAL (Fundadora/Beta Tester/concedido por admin) pra escolher.
+const FOUNDER_EMAIL = 'brunemed1310@gmail.com';
+const BETA_TESTER_CUTOFF = '2026-09-05T00:00:00Z';
+
 // domingo=0 .. sábado=6, mesma convenção de DAY_KEY_BY_JS_INDEX em
 // shared/wizard.js -- aqui aplicada sobre getUTCDay() (ver limitação de
 // fuso acima).
@@ -543,6 +552,51 @@ async function processWeeklyRankingResults(supabase: any, rules: Map<string, any
   return created;
 }
 
+// Roda 1x por invocação (não por usuário/idioma -- featured_badge_id é um
+// campo só em `profiles`, compartilhado entre fr/zh, ver 001). Elegível =
+// featured_badge_id ainda vazio E a conta já tem pelo menos um badge
+// ESPECIAL disponível pra escolher (concedido via badge_grants, OU
+// Fundadora/Beta Tester por regra -- nunca uma Conquista de gameplay, ver
+// 019_featured_badge_reminder.sql). progressByUserId só decide em qual
+// language_app_key a notificação fica registrada (mesma simplificação de
+// dominantLang em processWeeklyRankingResults) -- 'frances' como fallback
+// pra quem nunca estudou em nenhum idioma ainda (raro: quem chegou até
+// criar um badge_grant/ser Fundadora já teria alguma linha em progress).
+async function processFeaturedBadgeReminders(
+  supabase: any, rules: Map<string, any>, prefsCache: Map<string, any>, emailCache: Map<string, string | null>,
+  progressByUserId: Map<string, any>,
+): Promise<number> {
+  const { data: candidates, error } = await supabase
+    .from('profiles')
+    .select('user_id')
+    .is('featured_badge_id', null);
+  if (error || !candidates?.length) return 0;
+
+  const ids = candidates.map((p: any) => p.user_id);
+  const { data: grants } = await supabase.from('badge_grants').select('user_id').in('user_id', ids);
+  const grantedSet = new Set((grants || []).map((g: any) => g.user_id));
+
+  let created = 0;
+  for (const p of candidates) {
+    const userId = p.user_id as string;
+    let eligible = grantedSet.has(userId);
+    if (!eligible) {
+      const { data: authData, error: authError } = await supabase.auth.admin.getUserById(userId);
+      if (!authError && authData?.user) {
+        const email = authData.user.email;
+        const createdAt = authData.user.created_at;
+        eligible = email === FOUNDER_EMAIL || (!!createdAt && new Date(createdAt) < new Date(BETA_TESTER_CUTOFF));
+      }
+    }
+    if (!eligible) continue;
+
+    const state = progressByUserId.get(userId);
+    const languageAppKey = state?.frances ? 'frances' : (state?.mandarim ? 'mandarim' : 'frances');
+    if (await maybeNotify(supabase, rules, prefsCache, emailCache, userId, languageAppKey, 'featured_badge_reminder', 'perfil', {}, 'profile-edit')) created++;
+  }
+  return created;
+}
+
 Deno.serve(async (_req: Request) => {
   const supabase = createClient(supabaseUrl, serviceRoleKey);
 
@@ -567,6 +621,8 @@ Deno.serve(async (_req: Request) => {
   let notificationsCreated = 0;
   const errors: string[] = [];
 
+  const progressByUserId = new Map<string, any>((progressResult.data ?? []).map((row: any) => [row.user_id, row.data]));
+
   for (const row of progressResult.data ?? []) {
     for (const lang of LANGUAGES) {
       const state = row.data?.[lang.appKey];
@@ -586,10 +642,16 @@ Deno.serve(async (_req: Request) => {
     errors.push(`ranking semanal: ${String(e)}`);
   }
 
+  try {
+    notificationsCreated += await processFeaturedBadgeReminders(supabase, rules, prefsCache, emailCache, progressByUserId);
+  } catch (e) {
+    errors.push(`lembrete de badge em destaque: ${String(e)}`);
+  }
+
   const summary = {
     ok: true,
     ranAt: new Date().toISOString(),
-    phase: 'Fase 5 -- review_overdue, streak_at_risk, study_goal_remaining, reengajamento (calendário completo 1-30, 9/15/20/30 também por e-mail), daily_missions_reminder, ranking_weekly_result',
+    phase: 'Fase 5 -- review_overdue, streak_at_risk, study_goal_remaining, reengajamento (calendário completo 1-30, 9/15/20/30 também por e-mail), daily_missions_reminder, ranking_weekly_result, featured_badge_reminder',
     usersScanned,
     notificationsCreated,
     errorCount: errors.length,

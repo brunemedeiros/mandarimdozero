@@ -751,14 +751,13 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
 .correct-feedback-header{ color: var(--jade); }
 .correct-feedback-trans{ font-size:14.5px; color: var(--ink); line-height:1.6; margin:0 0 4px; }
 /* Badge de combo (respostas certas seguidas, ver STEP_STATE.comboCount em
-   app.js) -- pisca/entra com um popzinho pra chamar atenção sem depender
-   de confete de tela cheia (reservado pra fim de lição/unidade). Fundo
-   roxo (--dc-slot-1), não âmbar (--dc-slot-0) -- o ⚡ já é amarelo, num
-   fundo também amarelado ele ficava apagado/sem contraste. */
+   app.js) -- só o raio amarelo + "Combo xN", sem caixa/pílula de fundo
+   (decisão explícita da autora -- versão anterior tinha um fundo roxo que
+   ela pediu pra tirar). Ainda entra com um popzinho pra chamar atenção sem
+   depender de confete de tela cheia (reservado pra fim de lição/unidade). */
 .correct-feedback-combo-badge{
-  display:inline-flex; align-items:center; gap:3px; background: var(--dc-slot-1);
-  color: var(--on-vivid); font-weight:800; font-size:13.5px; padding:2px 9px;
-  border-radius:999px; margin-right:7px; animation: comboBadgeIn .35s cubic-bezier(.34,1.56,.64,1);
+  display:inline-flex; align-items:center; gap:3px;
+  font-weight:800; font-size:13.5px; margin-right:7px; animation: comboBadgeIn .35s cubic-bezier(.34,1.56,.64,1);
 }
 @keyframes comboBadgeIn{ 0%{ transform:scale(0) rotate(-8deg); opacity:0; } 60%{ transform:scale(1.18) rotate(3deg); opacity:1; } 100%{ transform:scale(1) rotate(0); } }
 .wrong-feedback-header{ color: var(--error-red); }
@@ -1745,6 +1744,14 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
 }
 .dictation-play-btn:hover{ border-color: var(--imperial-gold); }
 .dictation-play-btn.speaking{ background: linear-gradient(120deg, rgba(192,35,31,0.08), var(--paper-warm)); border-color: var(--seal-red); }
+/* Botão de áudio devagar -- companheiro secundário de qualquer "Écouter"
+   manual (ver slowAudioBtnHTML/slowAudioIconBtnHTML em app.js), sempre ao
+   lado do botão principal, nunca competindo com ele em destaque. */
+.audio-btn-row{ display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; }
+.dictation-play-btn-slow{ opacity:.8; }
+.dictation-play-btn-slow:hover{ opacity:1; }
+.audio-btn-slow{ opacity:.7; }
+.audio-btn-slow:hover{ opacity:1; }
 .dictation-skip-btn{
   background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:999px;
   padding:8px 12px; font-family: var(--font-body); font-weight:700; font-size:12.5px;
@@ -1926,6 +1933,7 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
 /* ---------- Ouça e traduza ---------- */
 .listen-translate-audio-wrap{ text-align:center; margin-bottom:20px; }
 .listen-translate-audio-wrap .dictation-play-btn{ font-size:16px; padding:14px 28px; }
+.listen-translate-audio-wrap .dictation-play-btn-slow{ font-size:13px; padding:10px 18px; }
 .listen-translate-hint-wrap{ text-align:center; margin-bottom:14px; }
 .listen-translate-hint-text{ font-size:15px; font-style:italic; color: var(--ink-soft); margin:10px 0 0; }
 .listen-translate-answer-label{ font-size:13px; font-weight:700; color: var(--ink-soft); margin-bottom:6px; display:block; }
@@ -1946,6 +1954,7 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
 /* ---------- Acentuação ---------- */
 .accent-audio-wrap{ text-align:center; margin-bottom:20px; }
 .accent-audio-wrap .dictation-play-btn{ font-size:16px; padding:14px 28px; }
+.accent-audio-wrap .dictation-play-btn-slow{ font-size:13px; padding:10px 18px; }
 .accent-answer-input{
   display:block; width:100%; box-sizing:border-box; font-family: var(--font-body); font-size:20px; text-align:center;
   color: var(--ink); background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);

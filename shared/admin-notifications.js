@@ -32,8 +32,9 @@
 const NOTIFICATION_TEMPLATE_EVENT_LABELS = {
   xp_earned: '⭐ XP ganho',
   achievement_unlocked: '🏅 Badge desbloqueado',
-  challenge_completed: '🎯 Desafio concluído',
+  mission_completed: '🎯 Missão concluída',
   streak_completed: '🔥 Sequência mantida',
+  featured_badge_reminder: '🏅 Lembrete de badge em destaque',
   user_inactive_1: '👋 Reengajamento -- 1 dia sumida',
   user_inactive_3: '👋 Reengajamento -- 3 dias sumida',
   user_inactive_5: '👋 Reengajamento -- 5 dias sumida',
@@ -47,8 +48,9 @@ const NOTIFICATION_TEMPLATE_EVENT_LABELS = {
 const NOTIFICATION_TEMPLATE_PLACEHOLDER_HINTS = {
   xp_earned: '{{amount}} -- quantidade de XP ganho',
   achievement_unlocked: '{{badge_name}} / {{badge_icon}} -- nome e emoji do badge',
-  challenge_completed: '(sem placeholders -- desafios não têm um título único e estável)',
+  mission_completed: '{{mission_label}} / {{mission_icon}} -- texto e ícone da Missão do dia concluída',
   streak_completed: '{{days}} -- dias de sequência',
+  featured_badge_reminder: '(sem placeholders)',
 };
 
 function notificationTemplateEventLabel(eventType){

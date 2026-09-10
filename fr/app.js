@@ -182,9 +182,13 @@ function playFeedbackSound(isCorrect){
 // Toca um mp3 pré-gerado (Google Cloud TTS, voz neural) em vez da Web Speech
 // API do navegador — qualidade consistente pra todo aluno, independente do
 // SO/navegador. Ver audio-manifest.js (texto -> arquivo) e speakFrench().
-function playPregeneratedAudio(file, btnEl, isAutoplay){
+// rate (opcional): playbackRate do <audio> -- usado pelo botão "🐢 devagar"
+// (ver SLOW_AUDIO_RATE) em qualquer tela de Écouter manual (o Ditado já tem
+// seu próprio seletor 0.75x/1x/1.5x, não precisa deste botão extra).
+function playPregeneratedAudio(file, btnEl, isAutoplay, rate){
   stopExerciseAudio();
   const audio = new Audio('audio/' + file);
+  if (rate) audio.playbackRate = rate;
   exerciseAudioEl = audio;
   if (btnEl){ btnEl.classList.add('speaking'); LAST_AUDIO_BTN = btnEl; }
   const clear = () => {
@@ -291,6 +295,21 @@ if (TTS.supported){
 function audioBtnHTML(text, extraClass){
   const safe = text.replace(/"/g, '&quot;');
   return `<button class="audio-btn ${extraClass||''}" data-speak="${safe}" aria-label="Ouvir pronúncia" title="Ouvir pronúncia">🔊</button>`;
+}
+
+// Botão de áudio devagar -- companheiro de qualquer "Écouter" manual
+// (desafios/exemplos onde o áudio NÃO toca sozinho, decisão explícita da
+// autora), exceto a frase de exemplo de vocabulário ("Na frase", ver
+// renderBlockIntroCard) -- ali o áudio já é automático, e é a própria
+// palavra do audio-btn genérico que já cobre repetição. O Ditado já tem seu
+// próprio seletor de velocidade (0.75x/1x/1.5x, ver openDictationPlayer),
+// então não ganha este botão extra.
+const SLOW_AUDIO_RATE = 0.65;
+function slowAudioBtnHTML(id){
+  return `<button class="dictation-play-btn dictation-play-btn-slow" id="${id}" title="Ouvir mais devagar">🐢 Lentement</button>`;
+}
+function slowAudioIconBtnHTML(id){
+  return `<button class="audio-btn audio-btn-slow" id="${id}" aria-label="Ouvir devagar" title="Ouvir devagar">🐢</button>`;
 }
 
 // Emoji de bandeira (🇧🇷 🇫🇷 🇵🇹 etc.) não renderiza em todo sistema — no
@@ -777,7 +796,7 @@ function freshDailyBucket(today){
     conjugationTenses: [], reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0,
     lessonsForGoal: 0, goalCountedLessonKeys: [], exerciseFormatsSeen: [],
     exerciseFormatCounts: {}, audioPlaysToday: 0, overdueReviewsDone: 0,
-    missionsBonusAwarded: false
+    missionsBonusAwarded: false, missionsNotified: {}
   };
 }
 
@@ -934,6 +953,24 @@ function checkDailyMissionsBonus(){
   showToast('🎯 Todas as missões do dia concluídas! +30 XP');
 }
 
+// Notificação "Missão concluída" -- uma por Missão do dia individual (não
+// pelo conjunto das 3, isso já é o bônus acima). Guarda em
+// STATE.daily.missionsNotified pra disparar exatamente uma vez por missão
+// por dia, mesmo que addXP() rode várias vezes depois dela já ter batido a
+// meta (ex.: XP de exercícios seguintes na mesma sessão). Chamada do mesmo
+// lugar que checkDailyMissionsBonus() (dentro de addXP()), pelo mesmo
+// motivo: qualquer ganho de XP pode ser o que fecha uma missão.
+function checkDailyMissionCompletions(){
+  ensureDailyBucket();
+  todaysChallenges().forEach(c => {
+    if (STATE.daily.missionsNotified[c.id]) return;
+    const current = Number(c.get(STATE.daily)) || 0;
+    if (current < c.target) return;
+    STATE.daily.missionsNotified[c.id] = true;
+    fireNotificationEvent('mission_completed', 'desafios', { mission_label: c.label, mission_icon: c.icon }, 'path');
+  });
+}
+
 function renderDailyChallengesScreen(){
   const contentEl = document.getElementById('step-content');
   const nextBtn = document.getElementById('step-next-btn');
@@ -1004,6 +1041,10 @@ function addXP(amount){
   // perto de addXP() sozinho -- registerAudioPlay() dispara a checagem
   // direto, sem esperar o próximo XP ganho.
   checkAndCelebrateBadges();
+  // Checa cada Missão do dia individualmente ANTES do bônus do conjunto --
+  // "Missão concluída" de cada uma, depois (se for o caso) o toast de +30XP
+  // por ter fechado as 3.
+  checkDailyMissionCompletions();
   // Checa a cada ganho de XP -- qualquer ação pode ser a que fecha a
   // última das 3 Missões do dia (ver checkDailyMissionsBonus). A função já
   // se protege contra rodar duas vezes no mesmo dia; addXP(30) chamando
@@ -2531,7 +2572,7 @@ function renderChallengeChipHTML(before){
     return `
       <div class="lesson-boundary-challenge-chip ${justCompleted ? 'done' : ''}">
         <span class="lbc-chip-icon">${c.icon}</span>
-        <span class="lbc-chip-label">${justCompleted ? 'Desafio concluído: ' : 'Desafio de hoje: '}${c.label}</span>
+        <span class="lbc-chip-label">${justCompleted ? 'Missão concluída: ' : 'Missão do dia: '}${c.label}</span>
         ${justCompleted ? '<span class="lbc-chip-check">✓</span>' : `<span class="lbc-chip-count">${afterVal}/${c.target}</span>`}
       </div>
     `;
@@ -4131,7 +4172,7 @@ function showCorrectFeedbackPanel(contentEl, detail){
   const isMilestone = combo >= COMBO_MILESTONE_STEP && combo % COMBO_MILESTONE_STEP === 0;
   const inCombo = combo >= COMBO_MIN;
   const headerText = isMilestone ? `Uau, ${combo} seguidas!` : (inCombo ? nextComboPhrase() : nextCorrectFeedbackPhrase());
-  const comboBadgeHTML = inCombo ? `<span class="correct-feedback-combo-badge">⚡ ${combo}</span>` : '';
+  const comboBadgeHTML = inCombo ? `<span class="correct-feedback-combo-badge">⚡ Combo x${combo}</span>` : '';
 
   const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
   const panel = document.createElement('div');
@@ -6531,8 +6572,10 @@ function markChallengeCompleted(id){
   STATE.completedChallenges[id] = true;
   trackEvent('lesson_complete', 'challenge', { challengeId: id });
   saveState();
-  // Fase 1 do sistema de notificações.
-  fireNotificationEvent('challenge_completed', 'desafios', {}, 'challenges');
+  // Sem notificação aqui de propósito: "Missão concluída" é só pras 3
+  // Missões do dia (ver checkDailyMissionCompletions em addXP()) -- estes
+  // são os desafios de conteúdo (Expressões/Ouça e traduza/Acentuação, sem
+  // XP desde a auditoria de XP), categoria diferente.
 }
 // Wrapper compartilhado pelas 3 telas de feedback (Expressões, Ouça e
 // traduza, Acentuação): mesmo invólucro (classe correct/incorrect + header)
@@ -6906,6 +6949,7 @@ function renderExpressionQuestionScreen(c){
     <div class="challenge-expression">
       ${escapeHtmlChallenge(c.canonicalExpression)}
       <button class="audio-btn audio-btn-lg" id="challenge-expression-play-btn" aria-label="Ouvir pronúncia" title="Ouvir pronúncia">🔊</button>
+      ${c.expressionAudioFile ? slowAudioIconBtnHTML('challenge-expression-play-slow-btn') : ''}
     </div>
     <div class="challenge-hypothesis">
       <p class="challenge-question">${escapeHtmlChallenge(c.question)}</p>
@@ -6919,6 +6963,9 @@ function renderExpressionQuestionScreen(c){
   if (c.expressionAudioFile){
     document.getElementById('challenge-expression-play-btn').addEventListener('click', (e) => {
       playPregeneratedAudio(`challenges/${c.expressionAudioFile}`, e.currentTarget);
+    });
+    document.getElementById('challenge-expression-play-slow-btn').addEventListener('click', (e) => {
+      playPregeneratedAudio(`challenges/${c.expressionAudioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
     });
   }
 
@@ -6959,13 +7006,13 @@ function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
       <div class="challenge-second-example">
         <div class="challenge-second-example-label">Exemple 1</div>
         <p class="challenge-second-example-text">${escapeHtmlChallenge(c.example.text)}</p>
-        ${c.example.audioFile ? '<button class="dictation-play-btn" id="challenge-example-play-btn">▶ Écouter</button>' : ''}
+        ${c.example.audioFile ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="challenge-example-play-btn">▶ Écouter</button>${slowAudioBtnHTML('challenge-example-play-slow-btn')}</div>` : ''}
       </div>
 
       <div class="challenge-second-example">
         <div class="challenge-second-example-label">Exemple 2</div>
         <p class="challenge-second-example-text">${escapeHtmlChallenge(c.secondExample.text)}</p>
-        ${c.secondExample.audioFile ? '<button class="dictation-play-btn" id="challenge-second-example-play-btn">▶ Écouter</button>' : ''}
+        ${c.secondExample.audioFile ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="challenge-second-example-play-btn">▶ Écouter</button>${slowAudioBtnHTML('challenge-second-example-play-slow-btn')}</div>` : ''}
       </div>
 
       <div class="challenge-microactivity">
@@ -6983,10 +7030,16 @@ function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
     document.getElementById('challenge-example-play-btn').addEventListener('click', (e) => {
       playPregeneratedAudio(`challenges/${c.example.audioFile}`, e.currentTarget);
     });
+    document.getElementById('challenge-example-play-slow-btn').addEventListener('click', (e) => {
+      playPregeneratedAudio(`challenges/${c.example.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
+    });
   }
   if (c.secondExample.audioFile){
     document.getElementById('challenge-second-example-play-btn').addEventListener('click', (e) => {
       playPregeneratedAudio(`challenges/${c.secondExample.audioFile}`, e.currentTarget);
+    });
+    document.getElementById('challenge-second-example-play-slow-btn').addEventListener('click', (e) => {
+      playPregeneratedAudio(`challenges/${c.secondExample.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
     });
   }
   document.getElementById('challenge-reveal-answer-btn').addEventListener('click', () => {
@@ -7148,8 +7201,9 @@ function openListenTranslatePlayer(c){
   const content = document.getElementById('challenge-player-content');
   content.innerHTML = `
     <div class="challenge-expression">🎧 Ouça e traduza</div>
-    <div class="listen-translate-audio-wrap">
+    <div class="listen-translate-audio-wrap audio-btn-row">
       <button class="dictation-play-btn" id="lt-play-btn">▶ Écouter</button>
+      ${slowAudioBtnHTML('lt-play-slow-btn')}
     </div>
     <div class="listen-translate-hint-wrap">
       <button class="btn btn-secondary" id="lt-hint-btn">Montrer un indice</button>
@@ -7165,6 +7219,9 @@ function openListenTranslatePlayer(c){
 
   document.getElementById('lt-play-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
+  });
+  document.getElementById('lt-play-slow-btn').addEventListener('click', (e) => {
+    if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
   });
   document.getElementById('lt-hint-btn').addEventListener('click', (e) => {
     document.getElementById('lt-hint-text').textContent = c.hintText;
@@ -7188,12 +7245,18 @@ function checkListenTranslateAnswer(c){
       <p class="listen-translate-feedback-row"><strong>Resposta esperada</strong>${escapeHtmlChallenge(c.referenceTranslations[0])}</p>
       <p class="listen-translate-feedback-row"><strong>Frase original</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
       ${c.explanation ? `<p class="listen-translate-feedback-row"><strong>Explicação</strong>${escapeHtmlChallenge(c.explanation)}</p>` : ''}
-      <button class="dictation-play-btn" id="lt-replay-btn">▶ Écouter encore</button>
+      <div class="audio-btn-row">
+        <button class="dictation-play-btn" id="lt-replay-btn">▶ Écouter encore</button>
+        ${slowAudioBtnHTML('lt-replay-slow-btn')}
+      </div>
   `;
   document.getElementById('lt-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('listen-translate', isCorrect, isCorrect ? '✅ Bonne traduction.' : '❌ Pas tout à fait.', ltBodyHTML);
   document.getElementById('lt-verify-btn').style.display = 'none';
   document.getElementById('lt-replay-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
+  });
+  document.getElementById('lt-replay-slow-btn').addEventListener('click', (e) => {
+    if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
   });
   wireChallengeCompleteButton(c);
 }
@@ -7214,8 +7277,9 @@ function openAccentPlayer(c){
   const content = document.getElementById('challenge-player-content');
   content.innerHTML = `
     <div class="challenge-expression">✍️ Acentuação</div>
-    <div class="accent-audio-wrap">
+    <div class="accent-audio-wrap audio-btn-row">
       <button class="dictation-play-btn" id="accent-play-btn">▶ Écouter</button>
+      ${slowAudioBtnHTML('accent-play-slow-btn')}
     </div>
     <label class="listen-translate-answer-label" for="accent-answer-input">Digite o que você ouviu:</label>
     <input type="text" class="accent-answer-input" id="accent-answer-input" autocomplete="off" autocapitalize="off" spellcheck="false">
@@ -7227,6 +7291,9 @@ function openAccentPlayer(c){
 
   document.getElementById('accent-play-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
+  });
+  document.getElementById('accent-play-slow-btn').addEventListener('click', (e) => {
+    if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
   });
   document.getElementById('accent-answer-input').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') checkAccentAnswer(c);
@@ -7244,13 +7311,19 @@ function checkAccentAnswer(c){
   const accentBodyHTML = `
       ${!isCorrect ? `<p class="accent-feedback-answer">Sua resposta: <strong>${escapeHtmlChallenge(studentAnswer || '—')}</strong></p>` : ''}
       <div class="accent-feedback-correct-word">${escapeHtmlChallenge(c.targetText)}</div>
-      <button class="dictation-play-btn" id="accent-replay-btn">▶ Écouter</button>
+      <div class="audio-btn-row">
+        <button class="dictation-play-btn" id="accent-replay-btn">▶ Écouter</button>
+        ${slowAudioBtnHTML('accent-replay-slow-btn')}
+      </div>
       ${c.explanation ? `<p class="accent-feedback-explanation">${escapeHtmlChallenge(c.explanation)}</p>` : ''}
   `;
   document.getElementById('accent-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('accent', isCorrect, isCorrect ? '✅ Correct.' : '❌ Incorrect.', accentBodyHTML);
   document.getElementById('accent-verify-btn').style.display = 'none';
   document.getElementById('accent-replay-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
+  });
+  document.getElementById('accent-replay-slow-btn').addEventListener('click', (e) => {
+    if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
   });
   wireChallengeCompleteButton(c);
 }

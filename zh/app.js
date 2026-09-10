@@ -971,7 +971,7 @@ function freshDailyBucket(today){
     hanziLessons: 0, reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0,
     lessonsForGoal: 0, goalCountedLessonKeys: [], exerciseFormatsSeen: [],
     exerciseFormatCounts: {}, audioPlaysToday: 0, overdueReviewsDone: 0,
-    missionsBonusAwarded: false
+    missionsBonusAwarded: false, missionsNotified: {}
   };
 }
 
@@ -1115,6 +1115,24 @@ function checkDailyMissionsBonus(){
   showToast('🎯 Todas as missões do dia concluídas! +30 XP');
 }
 
+// Notificação "Missão concluída" -- uma por Missão do dia individual (não
+// pelo conjunto das 3, isso já é o bônus acima). Guarda em
+// STATE.daily.missionsNotified pra disparar exatamente uma vez por missão
+// por dia, mesmo que addXP() rode várias vezes depois dela já ter batido a
+// meta (ex.: XP de exercícios seguintes na mesma sessão). Chamada do mesmo
+// lugar que checkDailyMissionsBonus() (dentro de addXP()), pelo mesmo
+// motivo: qualquer ganho de XP pode ser o que fecha uma missão.
+function checkDailyMissionCompletions(){
+  ensureDailyBucket();
+  todaysChallenges().forEach(c => {
+    if (STATE.daily.missionsNotified[c.id]) return;
+    const current = Number(c.get(STATE.daily)) || 0;
+    if (current < c.target) return;
+    STATE.daily.missionsNotified[c.id] = true;
+    fireNotificationEvent('mission_completed', 'desafios', { mission_label: c.label, mission_icon: c.icon }, 'path');
+  });
+}
+
 function renderDailyChallengesScreen(){
   const contentEl = document.getElementById('step-content');
   const nextBtn = document.getElementById('step-next-btn');
@@ -1185,6 +1203,10 @@ function addXP(amount){
   // perto de addXP() sozinho -- registerAudioPlay() dispara a checagem
   // direto, sem esperar o próximo XP ganho.
   checkAndCelebrateBadges();
+  // Checa cada Missão do dia individualmente ANTES do bônus do conjunto --
+  // "Missão concluída" de cada uma, depois (se for o caso) o toast de +30XP
+  // por ter fechado as 3.
+  checkDailyMissionCompletions();
   // Checa a cada ganho de XP -- qualquer ação pode ser a que fecha a
   // última das 3 Missões do dia (ver checkDailyMissionsBonus). A função já
   // se protege contra rodar duas vezes no mesmo dia; addXP(30) chamando
@@ -2888,7 +2910,7 @@ function renderChallengeChipHTML(before){
     return `
       <div class="lesson-boundary-challenge-chip ${justCompleted ? 'done' : ''}">
         <span class="lbc-chip-icon">${c.icon}</span>
-        <span class="lbc-chip-label">${justCompleted ? 'Desafio concluído: ' : 'Desafio de hoje: '}${c.label}</span>
+        <span class="lbc-chip-label">${justCompleted ? 'Missão concluída: ' : 'Missão do dia: '}${c.label}</span>
         ${justCompleted ? '<span class="lbc-chip-check">✓</span>' : `<span class="lbc-chip-count">${afterVal}/${c.target}</span>`}
       </div>
     `;
@@ -4472,7 +4494,7 @@ function showCorrectFeedbackPanel(contentEl, detail){
   const isMilestone = combo >= COMBO_MILESTONE_STEP && combo % COMBO_MILESTONE_STEP === 0;
   const inCombo = combo >= COMBO_MIN;
   const headerText = isMilestone ? `Uau, ${combo} seguidas!` : (inCombo ? nextComboPhrase() : nextCorrectFeedbackPhrase());
-  const comboBadgeHTML = inCombo ? `<span class="correct-feedback-combo-badge">⚡ ${combo}</span>` : '';
+  const comboBadgeHTML = inCombo ? `<span class="correct-feedback-combo-badge">⚡ Combo x${combo}</span>` : '';
 
   const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
   const panel = document.createElement('div');
