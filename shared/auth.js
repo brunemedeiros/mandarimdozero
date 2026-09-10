@@ -264,6 +264,26 @@ async function saveState(){
   }
 }
 
+// Sincroniza badges de GAMEPLAY (BADGES em cada app.js) já ganhos com a
+// tabela pública earned_badges (ver shared/supabase_migrations/017) -- é o
+// que permite o perfil público de OUTRA pessoa (a partir de um clique no
+// Ranking) mostrar a vitrine de conquistas dela, sem abrir leitura pública
+// de `progress` inteira (que tem dados demais pra ser um risco aceitável,
+// ver o comentário da migration). Chamada de dois lugares em cada app.js:
+// seedEarnedBadges() (sincroniza/faz backfill de tudo que já era verdade
+// ao carregar a sessão) e checkAndCelebrateBadges() (grava só o que acabou
+// de ser conquistado). Upsert é idempotente (onConflict na chave composta),
+// então repetir o backfill a cada load não duplica nem tem custo de leitura
+// -- só grava.
+async function upsertEarnedBadges(badgeIds){
+  if (!CURRENT_USER || !badgeIds || !badgeIds.length) return;
+  const rows = badgeIds.map(id => ({ user_id: CURRENT_USER.id, language_app_key: APP_KEY, badge_id: id }));
+  const { error } = await supabaseClient
+    .from('earned_badges')
+    .upsert(rows, { onConflict: 'user_id,language_app_key,badge_id' });
+  if (error) console.error('Erro ao sincronizar badges públicos:', error);
+}
+
 async function loadState(){
   if (!CURRENT_USER) return;
   try{

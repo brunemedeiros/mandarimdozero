@@ -1233,6 +1233,11 @@ const BADGES = [
 let earnedBadgeIds = new Set();
 function seedEarnedBadges(){
   earnedBadgeIds = new Set(BADGES.filter(b => b.check(STATE)).map(b => b.id));
+  // Backfill/sincronização: garante que a tabela pública earned_badges
+  // reflita tudo que já era verdade antes desta feature existir, ou que
+  // uma sessão anterior não tenha conseguido gravar -- upsert idempotente,
+  // sem custo de duplicar (ver shared/auth.js).
+  upsertEarnedBadges([...earnedBadgeIds]);
 }
 
 let badgeCelebrationQueue = [];
@@ -1255,6 +1260,7 @@ function checkAndCelebrateBadges(){
     newlyEarned.forEach(b => {
       fireNotificationEvent('achievement_unlocked', 'gamificacao', { badge_name: b.name, badge_icon: b.icon }, 'profile');
     });
+    upsertEarnedBadges(newlyEarned.map(b => b.id));
   }
 }
 
