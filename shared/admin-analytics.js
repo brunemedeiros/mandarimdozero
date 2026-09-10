@@ -1336,8 +1336,10 @@ function switchAdminPanelSection(section){
   document.getElementById('admin-badges-content').style.display = section === 'badges' ? '' : 'none';
   document.getElementById('admin-analytics-content').style.display = section === 'analytics' ? '' : 'none';
   document.getElementById('admin-notifications-content').style.display = section === 'notifications' ? '' : 'none';
+  document.getElementById('admin-reports-content').style.display = section === 'reports' ? '' : 'none';
   if (section === 'badges') renderAdminBadgesView();
   else if (section === 'notifications') renderAdminNotificationsView();
+  else if (section === 'reports') renderAdminReportsView();
   else renderAdminAnalyticsView();
 }
 

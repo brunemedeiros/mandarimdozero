@@ -565,6 +565,14 @@ document.getElementById('admin-badges-btn').addEventListener('click', () => {
   switchTab('admin-badges');
 });
 
+// Entrada geral da bandeira ⚑ (menu "Mais"/usuário) -- sem contexto de
+// exercício específico, captureReportContext() ainda pega unidade/lição
+// atual se o clique acontecer em modo foco.
+document.getElementById('report-menu-btn').addEventListener('click', () => {
+  document.getElementById('user-menu-dropdown').classList.remove('open');
+  openReportModal({ source: 'menu' });
+});
+
 // saveState/loadState/notifySaveFailure (Supabase, tabela progress) agora
 // vêm de shared/auth.js -- dependem de APP_KEY (acima) e das duas funções
 // abaixo, específicas do formato de STATE deste idioma.
@@ -3577,7 +3585,10 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-counter-row">
+        <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+        <button type="button" class="report-flag-btn" data-report-flag>⚑ Reportar</button>
+      </div>
       ${promptHTML}
       <div class="exercise-options">${optionsHTML}</div>
       <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
@@ -3641,7 +3652,10 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
 function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-counter-row">
+        <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+        <button type="button" class="report-flag-btn" data-report-flag>⚑ Reportar</button>
+      </div>
       <div class="exercise-prompt-label">Digite o que ouviu</div>
       <div class="exercise-prompt">
         ${audioBtnHTML(ex.item.f, 'audio-btn-lg')}
@@ -3723,7 +3737,10 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-counter-row">
+        <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+        <button type="button" class="report-flag-btn" data-report-flag>⚑ Reportar</button>
+      </div>
       <div class="scenario-question">${ex.phrase.scenario}</div>
       <div class="scenario-scene">${scenarioSceneHTML(ex.phrase.scenarioEmoji)}</div>
       <div class="scenario-options">${optionsHTML}</div>
@@ -3782,7 +3799,10 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
 function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-counter-row">
+        <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+        <button type="button" class="report-flag-btn" data-report-flag>⚑ Reportar</button>
+      </div>
       <div class="tf-scene">
         <div class="tf-scene-emoji">${ex.emoji || '💬'}</div>
         <div class="tf-subject">${ex.subject}</div>
@@ -3852,7 +3872,10 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-counter-row">
+        <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+        <button type="button" class="report-flag-btn" data-report-flag>⚑ Reportar</button>
+      </div>
       <div class="exercise-prompt-label">Complete a frase</div>
       <div class="cloze-sentence">${sentenceHTML}</div>
       <div class="cloze-audio-row" id="cloze-audio-row"></div>
@@ -4001,7 +4024,10 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-counter-row">
+        <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+        <button type="button" class="report-flag-btn" data-report-flag>⚑ Reportar</button>
+      </div>
       <div class="exercise-prompt-label">${isTranslate ? 'Traduza para o francês' : 'Ordene a frase'}</div>
       ${isTranslate ? `
         <div class="exercise-prompt">
