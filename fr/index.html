@@ -1222,6 +1222,18 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
 .review-mode-card .name{ font-size:14px; font-weight:700; color: var(--ink); }
 .review-mode-card .desc{ font-size:11.5px; color: var(--ink-soft); }
 
+/* ---------- "Revisões de hoje" (Fase 12) ----------
+   Número que o motor de memória decidiu que é hora de revisar AGORA --
+   visualmente separado de "Suas palavras" logo abaixo (estado geral do
+   vocabulário) pra não parecer a mesma pergunta: dá pra ter palavras
+   medianas sem ter nenhuma revisão pendente hoje, e isso é normal num
+   sistema de repetição espaçada. */
+#review-today-widget:empty{ display:none; }
+#review-today-widget{ text-align:center; margin-bottom:14px; }
+#review-today-widget .section-label{ margin-top:0; }
+.review-today-count{ font-size:38px; font-weight:800; line-height:1; color:var(--seal-red-dark); font-variant-numeric:tabular-nums; }
+.review-today-caption{ font-size:12.5px; color:var(--ink-soft); margin-top:4px; }
+
 /* ---------- "Suas palavras" (resumo fracas/medianas/fortes) ----------
    SÓ uma contagem visual do vocabulário já revisável -- não é SRS novo, não
    abre carta nenhuma, não é modo de revisão (ver vocabStrengthBuckets() em
@@ -2918,6 +2930,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <h2>Revisão</h2>
         <p>Escolha como quer revisar hoje.</p>
       </div>
+      <div id="review-today-widget"></div>
       <div id="vocab-strength-widget"></div>
       <div class="review-mode-cards" id="review-mode-cards"></div>
     </div>
