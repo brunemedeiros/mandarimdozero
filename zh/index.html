@@ -968,7 +968,8 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
    trocado na cara); como o elemento é recriado do zero a cada exercício,
    a animação dispara sozinha sem precisar de nenhuma chamada extra. */
 .exercise-wrap{ text-align:center; padding: 8px 0; animation: fadeUp .2s ease; }
-.exercise-counter{ font-size:12px; font-weight:800; color: var(--ink-soft); margin-bottom:14px; }
+.exercise-counter{ font-size:12px; font-weight:800; color: var(--ink-soft); }
+.exercise-counter-row{ display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:14px; }
 .exercise-prompt-label{ font-size:12px; text-transform:uppercase; letter-spacing:.06em; color: var(--seal-red-dark); font-weight:800; margin-bottom:10px; }
 .exercise-prompt{
   background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
@@ -1635,6 +1636,15 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .admin-badge-row.clickable:hover{ border-color:var(--seal-red); }
 .admin-manage-badge-hint{ font-size:12.5px; color:var(--ink-soft); margin:0 0 10px; }
 .admin-member-list{ max-height:340px; overflow-y:auto; display:flex; flex-direction:column; gap:2px; }
+
+/* ---------- Reports (admin) ---------- */
+.admin-report-filters{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+.admin-report-filters select{ flex:1; min-width:160px; }
+.admin-report-status-pill{ font-weight:800; color:var(--ink); }
+.admin-report-detail-block{ margin-bottom:14px; }
+.admin-report-detail-label{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; color:var(--ink-soft); margin-bottom:4px; }
+.admin-report-detail-text{ font-size:13.5px; color:var(--ink); white-space:pre-wrap; line-height:1.5; }
+.admin-report-detail-context{ font-size:12px; color:var(--ink-soft); background:var(--paper-warm); border-radius:8px; padding:10px 12px; line-height:1.6; }
 .admin-member-row{ display:flex; align-items:center; gap:8px; padding:6px; border-radius:8px; }
 .admin-member-row:hover{ background:var(--paper-warm); }
 .admin-member-check{ display:flex; align-items:center; gap:10px; cursor:pointer; font-size:13.5px; flex:1; min-width:0; }
@@ -1766,6 +1776,49 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .profile-edit-bio-count{ font-size:11px; color:var(--ink-soft); text-align:right; margin-top:2px; }
 .profile-edit-error{ color:var(--seal-red-dark); font-size:12.5px; min-height:16px; margin:8px 0 4px; }
 .profile-edit-hint{ font-size:12px; color:var(--ink-soft); margin:4px 0 2px; line-height:1.5; }
+
+/* ---------- Modal: reportar problema/sugestão (bandeira ⚑) ---------- */
+.report-modal-label{ font-size:12px; font-weight:700; color:var(--ink-soft); margin:14px 0 6px; }
+.report-modal-label:first-child{ margin-top:0; }
+.report-modal-optional{ font-weight:500; color:var(--ink-faint); }
+.report-option-grid{ display:flex; flex-direction:column; gap:6px; }
+.report-option-btn{
+  text-align:left; background:var(--paper); border:1px solid var(--paper-line); border-radius:10px;
+  padding:9px 12px; font-size:13.5px; font-family:var(--font-body); color:var(--ink); cursor:pointer;
+}
+.report-option-btn:hover{ border-color:var(--imperial-gold); }
+.report-option-btn.selected{ border-color:var(--seal-red); background:rgba(192,35,31,0.06); font-weight:700; }
+.report-severity-row{ display:flex; flex-wrap:wrap; gap:6px; }
+.report-severity-btn{
+  background:var(--paper-warm); border:1px solid var(--paper-line); border-radius:999px;
+  padding:6px 12px; font-size:12.5px; font-weight:700; font-family:var(--font-body); color:var(--ink-soft); cursor:pointer;
+}
+.report-severity-btn:hover{ border-color:var(--imperial-gold); color:var(--ink); }
+.report-severity-btn.selected{ border-color:var(--seal-red); background:rgba(192,35,31,0.08); color:var(--seal-red-dark); }
+.report-screenshot-row{ display:flex; align-items:center; gap:10px; margin-top:14px; flex-wrap:wrap; }
+.report-screenshot-btn{
+  background:var(--paper); border:1px solid var(--paper-line); border-radius:999px; padding:7px 14px;
+  font-size:12.5px; font-weight:700; font-family:var(--font-body); color:var(--ink-soft); cursor:pointer;
+}
+.report-screenshot-btn:hover{ border-color:var(--imperial-gold); color:var(--ink); }
+.report-screenshot-name{ font-size:12px; color:var(--ink-soft); word-break:break-all; }
+.report-modal-privacy-note{ font-size:11.5px; color:var(--ink-faint); margin:8px 0 0; line-height:1.4; }
+.report-success-check{
+  width:56px; height:56px; border-radius:50%; background:var(--seal-red); color:#fff;
+  display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:800; margin:6px auto 14px;
+}
+.report-success-text{ text-align:center; font-size:14px; color:var(--ink); margin:0 0 18px; line-height:1.5; }
+
+/* Bandeira discreta de report, contextual -- nunca compete visualmente com
+   a ação principal da tela (mesmo tratamento de baixa ênfase do
+   .audio-btn-slow: opacidade reduzida, força total só no hover/toque). */
+.report-flag-btn{
+  background:none; border:none; cursor:pointer; font-size:12.5px; font-weight:700;
+  color:var(--ink-faint); opacity:.6; padding:4px 6px; font-family:var(--font-body);
+  display:inline-flex; align-items:center; gap:4px;
+}
+.report-flag-btn:hover{ opacity:1; color:var(--ink-soft); }
+
 .conquests-grid{ margin-bottom:26px; }
 .conquests-grid .badge .icon{ font-size:30px; }
 
@@ -2700,10 +2753,12 @@ body.hide-pinyin .prompt-pinyin{
       <button class="leaderboard-tab active" role="tab" aria-selected="true" data-admin-section="badges">🎖️ Badges</button>
       <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="analytics">📊 Analytics</button>
       <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="notifications">🔔 Notificações</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="reports">⚑ Reports</button>
     </div>
     <div id="admin-badges-content"></div>
     <div id="admin-analytics-content" style="display:none;"></div>
     <div id="admin-notifications-content" style="display:none;"></div>
+    <div id="admin-reports-content" style="display:none;"></div>
   </div>
 
   <!-- ===== HANZI (trilha de caracteres) ===== -->
@@ -2796,6 +2851,7 @@ body.hide-pinyin .prompt-pinyin{
   <button class="user-dropdown-item" id="leaderboard-btn">🏆 Ranking</button>
   <button class="user-dropdown-item" id="user-settings-btn">⚙️ Configurações</button>
   <button class="user-dropdown-item admin-only-nav" id="admin-badges-btn" style="display:none;">🛠️ Painel de Admin</button>
+  <button class="user-dropdown-item" id="report-menu-btn">⚑ Reportar problema</button>
   <div class="user-dropdown-sep"></div>
   <button class="user-dropdown-item danger" id="logout-btn">Sair da conta</button>
 </div>
@@ -2891,6 +2947,61 @@ body.hide-pinyin .prompt-pinyin{
   </div>
 </div>
 
+<div id="admin-report-detail-modal" class="app-modal-overlay" style="display:none;">
+  <div class="app-modal">
+    <div class="app-modal-header">
+      <h3 id="admin-report-detail-category">Report</h3>
+      <button class="app-modal-close" id="admin-report-detail-modal-close" aria-label="Fechar">✕</button>
+    </div>
+    <div class="app-modal-body">
+      <div class="admin-report-detail-block">
+        <div class="admin-report-detail-label">Descrição</div>
+        <div id="admin-report-detail-description" class="admin-report-detail-text"></div>
+      </div>
+      <div class="admin-report-detail-block">
+        <div class="admin-report-detail-label">O que a pessoa esperava</div>
+        <div id="admin-report-detail-expected" class="admin-report-detail-text"></div>
+      </div>
+      <div class="admin-report-detail-block">
+        <div class="admin-report-detail-label">Gravidade percebida</div>
+        <div id="admin-report-detail-severity" class="admin-report-detail-text"></div>
+      </div>
+      <div class="admin-report-detail-block">
+        <div class="admin-report-detail-label">Contexto capturado automaticamente</div>
+        <div id="admin-report-detail-context" class="admin-report-detail-context"></div>
+      </div>
+      <div class="admin-report-detail-block admin-report-detail-text" id="admin-report-detail-screenshot"></div>
+
+      <label class="profile-edit-label" for="admin-report-detail-status">Status</label>
+      <select id="admin-report-detail-status" class="profile-edit-input">
+        <option value="novo">Novo</option>
+        <option value="em_analise">Em análise</option>
+        <option value="confirmado">Confirmado</option>
+        <option value="em_desenvolvimento">Em desenvolvimento</option>
+        <option value="resolvido">Resolvido</option>
+        <option value="nao_reproduzido">Não reproduzido</option>
+        <option value="recusado">Recusado</option>
+        <option value="duplicado">Duplicado</option>
+      </select>
+
+      <label class="profile-edit-label" for="admin-report-detail-priority">Prioridade técnica</label>
+      <select id="admin-report-detail-priority" class="profile-edit-input">
+        <option value="">(não definida)</option>
+        <option value="baixa">Baixa</option>
+        <option value="media">Média</option>
+        <option value="alta">Alta</option>
+        <option value="critica">Crítica</option>
+      </select>
+
+      <label class="profile-edit-label" for="admin-report-detail-note">Nota interna</label>
+      <textarea id="admin-report-detail-note" class="profile-edit-textarea" rows="3" placeholder="Só a equipe vê isso"></textarea>
+
+      <p class="profile-edit-error" id="admin-report-detail-error"></p>
+      <button type="button" class="btn btn-primary btn-block" id="admin-report-detail-save-btn">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <div id="profile-edit-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
@@ -2980,6 +3091,46 @@ body.hide-pinyin .prompt-pinyin{
   </div>
 </div>
 
+<!-- ===== MODAL: REPORTAR PROBLEMA/SUGESTÃO (bandeira ⚑) ===== -->
+<div id="report-modal" class="app-modal-overlay" style="display:none;">
+  <div class="app-modal">
+    <div class="app-modal-header">
+      <h3>⚑ Reportar problema ou sugestão</h3>
+      <button class="app-modal-close" id="report-modal-close" aria-label="Fechar">✕</button>
+    </div>
+    <div class="app-modal-body">
+      <div id="report-form-view">
+        <p class="report-modal-label">O que aconteceu?</p>
+        <div class="report-option-grid" id="report-category-options"></div>
+
+        <p class="report-modal-label">Quanto isso atrapalhou? <span class="report-modal-optional">(opcional)</span></p>
+        <div class="report-severity-row" id="report-severity-options"></div>
+
+        <label class="profile-edit-label" for="report-description">Descreva o que você viu</label>
+        <textarea id="report-description" class="profile-edit-textarea" maxlength="600" rows="3" placeholder="O que aconteceu, exatamente?"></textarea>
+
+        <label class="profile-edit-label" for="report-expected">O que você esperava que acontecesse? <span class="report-modal-optional">(opcional)</span></label>
+        <textarea id="report-expected" class="profile-edit-textarea" maxlength="300" rows="2"></textarea>
+
+        <div class="report-screenshot-row">
+          <button type="button" class="report-screenshot-btn" id="report-screenshot-btn">📎 Anexar captura de tela (opcional)</button>
+          <input type="file" id="report-screenshot-input" accept="image/*" style="display:none;">
+          <span class="report-screenshot-name" id="report-screenshot-name"></span>
+        </div>
+        <p class="report-modal-privacy-note">A captura, se anexada, fica visível só para a equipe -- nada é enviado automaticamente.</p>
+
+        <p class="profile-edit-error" id="report-error"></p>
+        <button type="button" class="btn btn-primary btn-block" id="report-submit-btn">Enviar</button>
+      </div>
+      <div id="report-success-view" style="display:none;">
+        <div class="report-success-check">✓</div>
+        <p class="report-success-text">Report enviado. Obrigada por ajudar a melhorar o app!</p>
+        <button type="button" class="btn btn-primary btn-block" id="report-success-close-btn">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="streak-modal-overlay" class="streak-modal-overlay" style="display:none;">
   <div class="streak-modal-body">
     <div class="streak-flame">🔥</div>
@@ -3013,12 +3164,14 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../shared/srs.js"></script>
 <script src="../shared/wizard.js"></script>
 <script src="../shared/profile.js"></script>
+<script src="../shared/reports.js"></script>
 <script src="../shared/notifications.js"></script>
 <script src="../shared/push.js"></script>
 <script src="../shared/notification-preferences.js"></script>
 <script src="../shared/admin-badges.js"></script>
 <script src="../shared/admin-analytics.js"></script>
 <script src="../shared/admin-notifications.js"></script>
+<script src="../shared/admin-reports.js"></script>
 <script src="../shared/leaderboard.js"></script>
 <script src="../shared/topbar-stats.js"></script>
 <script src="../shared/analytics.js"></script>
