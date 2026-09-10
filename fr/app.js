@@ -675,6 +675,12 @@ function registerStudyToday(){
 function maybeShowStreakCelebration(){
   if (!STATE.pendingStreakCelebration) return;
   STATE.pendingStreakCelebration = false;
+  // Nem todo lugar que chama registerStudyToday() (que muda STATE.streak)
+  // também chama renderTopbarStats() logo em seguida -- vários caminhos só
+  // chegam até aqui, no momento em que a comemoração de fato aparece.
+  // Centralizar a atualização do pill aqui garante que ele nunca fique
+  // mostrando um número velho enquanto a tela de sequência já mostra o novo.
+  renderTopbarStats();
   showStreakCelebration();
 }
 
@@ -4947,6 +4953,11 @@ function markUnitCompleted(unitId, scorePct){
   }
   addXP(25);
   registerStudyToday();
+  // Faltava aqui: quem completa um Ponto de verificação como a primeira
+  // atividade do dia nunca via nem a tela de sequência nem o pill do
+  // topbar atualizado -- o fluxo seguinte (Missões do dia -> Trilha) não
+  // chamava maybeShowStreakCelebration() em nenhum ponto.
+  maybeShowStreakCelebration();
   if (typeof scorePct === 'number'){
     registerDailyStars(lessonStars(scorePct));
     registerDailyLessonCompleted(scorePct, u.type === 'grammar');
