@@ -284,6 +284,11 @@ function resetReportForm(){
   if (desc) desc.value = '';
   const exp = document.getElementById('report-expected');
   if (exp) exp.value = '';
+  // Só convidado vê/preenche este campo -- conta logada já tem e-mail
+  // associado via auth.users, perguntar de novo seria redundante (ver
+  // openReportModal, que decide a visibilidade a cada abertura).
+  const guestEmail = document.getElementById('report-guest-email');
+  if (guestEmail) guestEmail.value = '';
   const screenshotInput = document.getElementById('report-screenshot-input');
   if (screenshotInput) screenshotInput.value = '';
   const nameEl = document.getElementById('report-screenshot-name');
@@ -308,6 +313,14 @@ function openReportModal(extraContext){
   if (!modal) return;
   REPORT_MODAL_CONTEXT = captureReportContext(extraContext || null);
   resetReportForm();
+  // Campo de e-mail só faz sentido pra convidado -- é a ÚNICA forma da
+  // admin conseguir responder um report de quem não tem conta (ver Painel
+  // de Admin > Reports, shared/admin-reports.js). Conta logada já tem
+  // e-mail associado via auth.users, resolvido sob demanda quando a admin
+  // responde -- perguntar de novo aqui seria redundante.
+  const isLoggedIn = typeof CURRENT_USER !== 'undefined' && !!CURRENT_USER;
+  const guestEmailWrap = document.getElementById('report-guest-email-wrap');
+  if (guestEmailWrap) guestEmailWrap.style.display = isLoggedIn ? 'none' : '';
   modal.style.display = 'flex';
 }
 
@@ -381,9 +394,16 @@ async function submitReport(){
 
   const expEl = document.getElementById('report-expected');
   const isLoggedIn = typeof CURRENT_USER !== 'undefined' && !!CURRENT_USER;
+  const guestEmailEl = document.getElementById('report-guest-email');
+  const guestEmail = (!isLoggedIn && guestEmailEl?.value || '').trim() || null;
   const row = {
     user_id: isLoggedIn ? CURRENT_USER.id : null,
     guest_id: isLoggedIn ? null : getReportGuestId(),
+    // Conta logada: fica null aqui -- resolvido sob demanda pela Edge
+    // Function report-reply-send via auth.admin.getUserById() quando a
+    // admin responder (ver migration 022). Convidado: só o que a própria
+    // pessoa digitou, opcionalmente, pra poder ser contatada de volta.
+    reporter_email: isLoggedIn ? null : guestEmail,
     language_app_key: (typeof APP_KEY !== 'undefined') ? APP_KEY : null,
     category: REPORT_SELECTED_CATEGORY,
     kind: categoryDef ? categoryDef.kind : 'problema',
