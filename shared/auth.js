@@ -53,7 +53,11 @@ async function initAuth(){
 // raiz (index.html), sem marca de idioma. #login-screen aqui é só um overlay
 // de "carregando/redirecionando" (ver markup), nunca um formulário de verdade.
 function goToNeutralGate(){
-  window.location.href = '../index.html';
+  // replace() (não href=) -- mesmo raciocínio de goToLanguageApp() em
+  // index.html: esta tela nunca tem nada útil pra mostrar por si só (é só
+  // "sem sessão, redirecionando pro portão"), então não deveria ficar
+  // empilhada no histórico pra criar um loop de Voltar com o portão.
+  window.location.replace('../index.html');
 }
 
 // ---------- Oferta do Teste de Nível na primeira entrada ----------
