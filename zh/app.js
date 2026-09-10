@@ -4915,6 +4915,16 @@ function onMatchTileClick(btn){
     MATCH_STATE.matchedCount += 1;
     document.querySelector('.match-pairs').textContent = `Pares: ${MATCH_STATE.matchedCount}/${MATCH_STATE.pairs.length}`;
     addXP(2);
+    // Fase 8: mesma regra explícita da Fase 6 (Speed Review) -- um par
+    // certo num cartão NUNCA estudado é evidência suficiente pra promovê-lo
+    // pro motor de memória (mesmo critério de registerExerciseCorrect()).
+    // Um cartão já em ciclo de revisão continua intocado -- combinar pares
+    // é reconhecimento, não recuperação ativa (Princípio 4), e reagendar
+    // due aqui recriaria o 2º sistema de memória que a Regra 6 proíbe.
+    const matchedCard = MATCH_STATE.pairs.find(c => c.id === first.dataset.cardId);
+    if (matchedCard && matchedCard.reps === 0){
+      applyMemoryGrade(matchedCard, 2); // grade 2 = "Bom"
+    }
 
     setTimeout(() => {
       first.classList.add('matched');
