@@ -423,11 +423,10 @@ async function submitReport(){
 
 wireReportModal();
 
-// Delegado: a bandeira contextual (.report-flag-btn[data-report-flag]) é
-// criada dinamicamente dentro dos templates de exercício (renderXExercise em
-// cada <lang>/app.js, Fase 1: só os formatos vindos de buildExerciseSet()) --
-// um único listener no document cobre qualquer uma delas, sem precisar
-// re-wire a cada render de exercício.
+// Delegado: a bandeira contextual [data-report-flag] fica fixa na barra de
+// foco da lição (#report-flag-lesson-btn, ao lado dos outros pills --
+// atalhos/fechar), ao invés de reaparecer em cada exercício individual --
+// um único listener no document cobre o clique sem precisar re-wire nada.
 document.addEventListener('click', (e) => {
   if (e.target.closest('[data-report-flag]')) openReportModal({ source: 'exercise' });
 });

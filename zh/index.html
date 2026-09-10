@@ -968,8 +968,7 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
    trocado na cara); como o elemento é recriado do zero a cada exercício,
    a animação dispara sozinha sem precisar de nenhuma chamada extra. */
 .exercise-wrap{ text-align:center; padding: 8px 0; animation: fadeUp .2s ease; }
-.exercise-counter{ font-size:12px; font-weight:800; color: var(--ink-soft); }
-.exercise-counter-row{ display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:14px; }
+.exercise-counter{ font-size:12px; font-weight:800; color: var(--ink-soft); margin-bottom:14px; }
 .exercise-prompt-label{ font-size:12px; text-transform:uppercase; letter-spacing:.06em; color: var(--seal-red-dark); font-weight:800; margin-bottom:10px; }
 .exercise-prompt{
   background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
@@ -1809,16 +1808,6 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 }
 .report-success-text{ text-align:center; font-size:14px; color:var(--ink); margin:0 0 18px; line-height:1.5; }
 
-/* Bandeira discreta de report, contextual -- nunca compete visualmente com
-   a ação principal da tela (mesmo tratamento de baixa ênfase do
-   .audio-btn-slow: opacidade reduzida, força total só no hover/toque). */
-.report-flag-btn{
-  background:none; border:none; cursor:pointer; font-size:12.5px; font-weight:700;
-  color:var(--ink-faint); opacity:.6; padding:4px 6px; font-family:var(--font-body);
-  display:inline-flex; align-items:center; gap:4px;
-}
-.report-flag-btn:hover{ opacity:1; color:var(--ink-soft); }
-
 .conquests-grid{ margin-bottom:26px; }
 .conquests-grid .badge .icon{ font-size:30px; }
 
@@ -2578,6 +2567,7 @@ body.hide-pinyin .prompt-pinyin{
           <div class="lesson-progress-fill" id="step-progress-fill"></div>
         </div>
         <button class="lesson-close-btn pinyin-toggle-btn-lesson" id="pinyin-toggle-btn-lesson" aria-label="Esconder/mostrar pinyin" title="Esconder/mostrar pinyin">🔤</button>
+        <button class="lesson-close-btn" id="report-flag-lesson-btn" data-report-flag aria-label="Reportar problema" title="Reportar problema">⚑</button>
         <button class="lesson-close-btn" id="lesson-kbd-btn" aria-label="Atalhos do teclado" title="Atalhos do teclado">⌨️</button>
         <button class="lesson-close-btn" id="back-to-path" aria-label="Sair da lição" title="Sair da lição">✕</button>
       </div>
