@@ -1175,6 +1175,12 @@ function showBadgeUnlockCelebration(badge, onDone){
   };
   el.addEventListener('click', () => {
     finish();
+    // Em modo foco de lição (ver setLessonFocusMode), switchTab() sozinho
+    // não desfaz o .lesson-focus no #app/body -- a Trilha some, a tela de
+    // Progresso renderiza sem o shell normal (topbar/sidebar) por baixo e
+    // fica esticada. Fora de uma lição não tem esse estado pra limpar, e o
+    // clique continua levando pra Progresso normalmente.
+    if (document.body.classList.contains('lesson-focus')) return;
     switchTab('progress');
   });
   layer.appendChild(el);
