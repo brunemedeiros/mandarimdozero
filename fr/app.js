@@ -4995,6 +4995,7 @@ function renderReviewView(){
         <button class="grade-btn grade-good" data-grade="2">Bom<small>6-8d</small></button>
         <button class="grade-btn grade-easy" data-grade="3">Fácil<small>8d+</small></button>
       </div>
+      <button class="review-more-link" id="review-more-btn">🔁 Rever mais (não conta como resposta)</button>
     ` : ''}
   `;
 
@@ -5013,6 +5014,15 @@ function renderReviewView(){
   }
 
   if (STATE.reviewShowingAnswer){
+    // Fase 11: PRATICAR != REVISAR -- "Rever mais" só reinsere o cartão
+    // mais à frente na fila DESTA sessão (efêmero, nunca persistido). Não
+    // chama applyMemoryGrade nem addXP -- só ser mostrada de novo não é
+    // evidência de recuperação, então não pode alterar o agendamento
+    // (devido/stability) sem uma resposta real que justifique isso.
+    document.getElementById('review-more-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      reviewMoreCurrentCard();
+    });
     el.querySelectorAll('.grade-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -5032,6 +5042,22 @@ function reviewXP(intervalBefore, grade){
   if (intervalBefore >= 60) return Math.max(1, Math.round(base * 0.4));
   if (intervalBefore >= 21) return Math.max(1, Math.round(base * 0.7));
   return base;
+}
+
+// Fase 11 -- PRATICAR fora do agendamento: reinsere o cartão atual alguns
+// lugares à frente na fila DESTA sessão, sem tocar em due/stability/reps
+// nem conceder XP. Diferente de "Errei" (grade 0), que É uma resposta real
+// e reagenda de verdade -- "Rever mais" nunca é resposta, só pedido de
+// mais exposição. STATE.reviewQueue nunca é persistido (é sempre
+// reconstruído do zero por startReviewSession), então crescer a fila aqui
+// não vaza pra próxima sessão nem pro banco.
+function reviewMoreCurrentCard(){
+  const card = STATE.reviewQueue[STATE.reviewIndex];
+  const reinsertAt = Math.min(STATE.reviewQueue.length, STATE.reviewIndex + 4);
+  STATE.reviewQueue.splice(reinsertAt, 0, card);
+  STATE.reviewIndex += 1;
+  STATE.reviewShowingAnswer = false;
+  renderReviewView();
 }
 
 function gradeCurrentCard(grade){
