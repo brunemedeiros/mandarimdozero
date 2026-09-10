@@ -4192,7 +4192,7 @@ function showCorrectFeedbackPanel(contentEl, detail){
   const panel = document.createElement('div');
   panel.className = 'correct-feedback';
   panel.innerHTML = `
-    <div class="correct-feedback-header">${comboBadgeHTML}${inCombo ? ' ' : '✅ '}${headerText}</div>
+    <div class="correct-feedback-header">${comboBadgeHTML}✅ ${headerText}</div>
     ${detail ? `<p class="correct-feedback-trans">${detail}</p>` : ''}
     <button class="btn btn-primary btn-block correct-feedback-continue" id="correct-continue-btn">Continuar →</button>
   `;
