@@ -63,3 +63,33 @@ pergunta. Hoje **não existe nenhuma infraestrutura de assinatura/pagamento no
 código** (sem Stripe, sem tabela de planos, sem checagem de tier em lugar
 nenhum) — não presumir que algo disso já existe; auditar antes de propor,
 mesmo princípio já usado na auditoria do sistema de notificações.
+
+## Código pronto no repositório não prova que a infraestrutura está ativa em produção
+
+O histórico de tarefas registra "Fase5.4: cron ganha envio de e-mail (via
+Resend)" e "Fase5.7: validar e entregar" como concluídas, mas isso descreve
+só o CÓDIGO ter sido escrito/mergeado — não que o envio de e-mail estivesse
+de fato configurado e funcionando no projeto Supabase real. **O envio de
+e-mail via Resend nunca chegou a ser implementado/ativado de verdade**: sem
+conta Resend configurada, sem domínio de envio verificado, sem as secrets
+`RESEND_API_KEY`/`RESEND_FROM_EMAIL` definidas em Edge Functions > Secrets.
+
+Regra motivadora, verbatim: "A função do email foi pausada e nós não
+adicionamos ainda no documento, como você não percebeu isso?" — motivado por
+eu ter presumido (ao construir a Edge Function report-reply-send, PR #183)
+que o Resend já estava ativo em produção só porque o código do
+notification-cron existia e o histórico de tarefas marcava a fase como
+concluída.
+
+Na prática: nenhuma sessão de trabalho aqui tem visibilidade do estado ao
+vivo do projeto Supabase (secrets configuradas, functions pausadas/ativas,
+crons agendados, contas de serviços externos como Resend) — só o que está
+no repositório Git. **Nunca presumir que uma peça de infraestrutura externa
+(envio de e-mail, push, pagamento etc.) está ativa em produção só porque o
+código dela existe e uma tarefa anterior foi marcada como concluída** — isso
+prova só que o código foi escrito, nunca que o serviço externo por trás dele
+foi de fato configurado/testado ao vivo. Qualquer feature nova que dependa
+de envio de e-mail (como report-reply-send) deve deixar claro que também
+depende dessa ativação nunca ter sido feita, e que configurar o Resend
+(conta, domínio verificado, as duas secrets) é um passo manual pendente
+adicional, entregue junto (ver regra acima de "Passos manuais").
