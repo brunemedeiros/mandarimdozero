@@ -4620,8 +4620,8 @@ function buildSpeedQueue(){
   // as palavras de lições já concluídas, sem exigir reps>0 nem respeitar
   // data de vencimento do SM2 (decisão da autora, ver auditoria do sistema
   // de XP). Contraste com Flashcard/Palavras difíceis, que continuam
-  // presas ao SM2.
-  return shuffle(eligibleReviewPool());
+  // presas ao SM2. Fase 4: seleção via getStudyQueue(scope:'all').
+  return shuffle(getStudyQueue(eligibleReviewPool(), { scope: 'all' }));
 }
 
 function buildSpeedOptions(card){
@@ -4751,7 +4751,8 @@ function openReviewSession(mode){
     startReviewSession();
   } else if (mode === 'hard'){
     STATE.reviewSessionUnitFilter = null;
-    STATE.reviewQueue = shuffle(cardsDueNow(hardWordsPool()));
+    // Fase 4: getStudyQueue(scope:'hard') -- mesmo critério de hardWordsPool()
+    STATE.reviewQueue = shuffle(getStudyQueue(eligibleReviewPool(), { scope: 'hard' }));
     STATE.reviewIndex = 0;
     STATE.reviewShowingAnswer = false;
     renderReviewView();
@@ -4830,7 +4831,9 @@ function renderMatchSizePicker(){
 
 function startMatchGame(){
   trackEvent('lesson_start', 'match_game', null);
-  const pool = shuffle(eligibleReviewPool());
+  // Fase 4: seleção via getStudyQueue(scope:'all') -- mesmo pool de antes,
+  // Combinar é prática de reconhecimento, não revisão SRS.
+  const pool = shuffle(getStudyQueue(eligibleReviewPool(), { scope: 'all' }));
   const pairCount = Math.min(MATCH_STATE.pairSize, pool.length);
   MATCH_STATE.pairs = pool.slice(0, pairCount);
   MATCH_STATE.tiles = shuffle([
@@ -5173,17 +5176,14 @@ function startReviewSession(){
     // Revisão geral: só cartões de lições que você já concluiu de verdade.
     : STATE.cards.filter(isCardLessonCompleted);
 
-  const due = cardsDueNow(pool);
-  // Prioriza: due for review first, then new cards (limited batch of 10 new to avoid overload)
-  let queue = due.slice();
-  if (!STATE.reviewSessionUnitFilter){
-    const fresh = newCards(pool).slice(0, 10);
-    fresh.forEach(c => { if (!queue.includes(c)) queue.push(c); });
-  } else {
-    // studying a specific unit: include all its cards not yet due-separated
-    const rest = pool.filter(c => !queue.includes(c));
-    queue = queue.concat(rest);
-  }
+  // Fase 4: seleção centralizada em getStudyQueue() (shared/study-queue.js)
+  // -- due primeiro, mais um lote limitado de cartões novos (scope 'due'),
+  // ou due primeiro seguido do resto do pool ao estudar uma unidade
+  // específica (scope 'unit'). Mesmo critério de antes, só consolidado.
+  const queue = getStudyQueue(pool, {
+    scope: STATE.reviewSessionUnitFilter ? 'unit' : 'due',
+    newCardsLimit: 10
+  });
 
   // Decide a direção de cada carta ANTES de embaralhar/mostrar -- alterna a
   // partir da última vez que essa carta foi revisada (ver nextCardDirection
