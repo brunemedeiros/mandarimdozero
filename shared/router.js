@@ -30,6 +30,22 @@ const ROUTER = {
   restoring: false,
 };
 
+// Normaliza /fr/index.html (ou /zh/index.html) -> /fr/ na primeira carga --
+// cobre favoritos, autocomplete do navegador e atalhos salvos ANTES desta
+// tarefa trocar os redirecionamentos internos (portão de idioma, seletor de
+// idioma) pra já saírem sem o /index.html. Sem isto, uma aba que chegou
+// aqui por um desses jeitos antigos continuaria arrastando o /index.html
+// em toda rota (#/unit/3 etc.) que o router monta a partir do pathname
+// atual -- o router nunca inventa caminho novo, só o hash. replaceState
+// (não um redirect de verdade) -- não gera reload nem pedido novo ao
+// servidor, só limpa a barra de endereço.
+(function normalizeIndexHtmlFromURL(){
+  if (/\/index\.html$/.test(window.location.pathname)){
+    const cleanPath = window.location.pathname.replace(/index\.html$/, '');
+    history.replaceState(history.state, '', cleanPath + window.location.search + window.location.hash);
+  }
+})();
+
 function routeToHash(route){
   if (!route) return '';
   switch (route.type){
