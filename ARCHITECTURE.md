@@ -82,8 +82,10 @@ sessão". Nenhuma tela tem lógica de seleção própria.
   ("precisa revisar agora") e difícil ("é uma palavra difícil") são
   dimensões independentes (Fase 7). Critério: `reps>0 && (lapses>0 ||
   difficulty>=6)`, ordenado por difficulty/lapses decrescente.
-- `scope:'all'` (Speed Review, Combinar) — pool inteiro, sem filtro de due
-  (são atividades de prática sempre disponíveis).
+- `scope:'all'` (Combinar) — pool inteiro, sem filtro de due (atividade de
+  prática sempre disponível, independente do que está devido). Speed
+  Review **não** usa mais `scope:'all'` desde o projeto "Reorganização da
+  experiência de revisão e prática" -- ver seção dedicada abaixo.
 - `options.limit` — teto genérico de tamanho de sessão (Fase 10,
   "Intensidade da sessão": leve/normal/intensa).
 
@@ -93,7 +95,7 @@ sessão". Nenhuma tela tem lógica de seleção própria.
 |---|---|---|
 | Flashcard / revisão de hanzi | Sim, sempre | Toda resposta (`gradeCurrentCard`/`gradeHanziCard` → `applyMemoryGrade`) — é recuperação ativa (Princípio 4), sempre reagenda. |
 | Exercícios de lição | Sim, só na 1ª vez | `registerExerciseCorrect` → `applyMemoryGrade(card, 2)` só se `reps===0` (promove cartão novo; não reagenda um já aprendido). |
-| Speed Review | Sim, só cartão novo | `answerSpeedQuestion`: se `card.reps===0` e acertou, `applyMemoryGrade(card, 2)`. Cartão já aprendido responde certo/errado no jogo sem tocar due/stability — reconhecimento não é recuperação ativa completa (Princípio 4). |
+| Speed Review | **Sim, sempre** (mudou no projeto "Reorganização") | `answerSpeedQuestion`: toda resposta chama `applyMemoryGrade(card, isCorrect ? 2 : 0)`, incondicional. Deixou de ser "só promove cartão novo" porque a fila deixou de ser `scope:'all'` e passou a ser a fila DEVIDA (`buildDueReviewQueue`, idêntica à do Flashcard) — ver seção dedicada abaixo. |
 | Combinar | Sim, só cartão novo | Mesma regra do Speed Review, em `onMatchTileClick`. |
 | "Já sei?" | Sim, ao marcar | `applyMemoryGrade(card, 3)`. Ao desmarcar, reseta memória por completo (`state:'new'`, `stability:0` etc. — Fase 15) pra não deixar o cartão num estado inconsistente. |
 | "Rever mais" | **Não** | `reviewMoreCurrentCard()` só reinsere o cartão mais à frente na fila da SESSÃO atual — nunca chama `applyMemoryGrade`/`addXP`. Praticar não é o mesmo que revisar (Fase 11). |
@@ -173,18 +175,82 @@ pelo Flashcard de vocabulário quanto pela revisão de hanzi (zh).
 
 ## HOME / WIDGET DE VOCABULÁRIO (Fase 12)
 
-Dois blocos visualmente separados em `renderReviewModeSelect()`:
+- **Revisões de hoje** (`renderReviewTodayWidget`, dentro de
+  `renderReviewModeSelect()`) — o mesmo número usado pelo tile do
+  Flashcard (via `todaysReviewCount`, que chama `getStudyQueue` com as
+  mesmas opções de `startReviewSession` — Fase 14, corrige uma
+  inconsistência real onde o widget usava `cardsDueNow` sem teto e a
+  sessão de fato usava o teto configurado).
+- **Suas palavras** (`renderVocabStrengthWidget` / `vocabStrengthBuckets()`)
+  — estado geral do vocabulário (fraca/mediana/forte), independente de
+  due. Desde o projeto "Reorganização da experiência de revisão e
+  prática" (ver seção abaixo) não vive mais na aba Revisão — mora em
+  Progresso (`renderProgressView()`), porque responde "como está meu
+  vocabulário", não "o que eu devo fazer agora".
 
-- **Revisões de hoje** (`renderReviewTodayWidget`) — o mesmo número usado
-  pelo tile do Flashcard (via `todaysReviewCount`, que chama
-  `getStudyQueue` com as mesmas opções de `startReviewSession` — Fase 14,
-  corrige uma inconsistência real onde o widget usava `cardsDueNow` sem
-  teto e a sessão de fato usava o teto configurado).
-- **Suas palavras** (`renderVocabStrengthWidget` /
-  `vocabStrengthBuckets()`) — estado geral do vocabulário (fraca/mediana/
-  forte), independente de due. As duas legendas deixam explícito que são
-  perguntas diferentes: pode haver palavras medianas mesmo com 0 revisões
-  pendentes hoje, e isso não é erro.
+## REVISAR / PRATICAR / PROGRESSO — projeto "Reorganização da experiência de revisão e prática"
+
+Projeto de UX/arquitetura que reorganizou a experiência em torno do motor
+de memória já existente (Fases 1-15 + "Aprimoramento do Flashcard"), sem
+alterar o motor em si. Problema de origem: Flashcard, Speed Review,
+Palavras Difíceis e Combinar pareciam ferramentas independentes — o aluno
+não conseguia responder "o que eu devo estudar agora?" de relance, e Speed
+Review podia mostrar uma bateria de palavras diferente da fila real de
+revisão (porque usava `scope:'all'`, não a fila devida).
+
+Novo modelo mental, aplicado em `renderReviewModeSelect()` (zh/app.js,
+fr/app.js) e no markup de `#review-mode-select-wrap` (zh/index.html,
+fr/index.html):
+
+- **REVISAR** — o que o motor de memória diz que está devido agora. A
+  ÚNICA fonte de verdade é `buildDueReviewQueue(pool)` (wrapper de
+  `getStudyQueue(pool, {scope:'due', newCardsLimit, limit})`). Flashcard e
+  Speed Review são duas APRESENTAÇÕES da mesma fila, nunca duas fontes de
+  dados diferentes:
+  - Flashcard (`startReviewSession`) chama `buildDueReviewQueue(pool)`.
+  - Speed Review (`buildSpeedQueue`) chama exatamente a mesma função.
+  - Isso obrigou uma mudança de contrato do Speed Review: antes só
+    promovia cartão nunca estudado (`reps===0`) que acertasse; agora, como
+    a fila é a fila devida (pode conter cartões já aprendidos mas
+    atrasados), toda resposta grada de verdade
+    (`applyMemoryGrade(card, isCorrect ? 2 : 0)`), senão seria impossível
+    "zerar" a fila devida jogando Speed Review.
+  - `dueReviewQueueOptions()`/`trueDueReviewCount(pool)`/
+    `todaysReviewCount(pool)` são as únicas funções que decidem "quantas
+    revisões existem hoje" — `trueDueReviewCount` é o total real (sem o
+    teto de intensidade de sessão), `todaysReviewCount` é o que cabe nesta
+    sessão; a UI mostra os dois quando divergem, nunca esconde a diferença
+    (Fase 8: "contagem honesta").
+  - Quando `dueCount===0`, a seção Revisar vira um único card
+    `.review-mode-empty` ("Você está em dia!") — nunca dois tiles
+    desabilitados fingindo que ainda há uma decisão a tomar.
+- **PRATICAR** — atividades adicionais, disponíveis independente de due:
+  Palavras Difíceis (`getStudyQueue(scope:'hard')`, critério de
+  dificuldade/histórico, não de agendamento) e Combinar
+  (`getStudyQueue(scope:'all')`, reconhecimento livre). Nenhuma das duas
+  cria um scheduler paralelo nem altera due/stability de cartão já
+  aprendido (só promovem cartão nunca estudado, mesma regra de antes).
+- **PROGRESSO** (`renderProgressView()`) — só estatísticas, nunca um
+  comando de estudo: XP, streak, heatmap, gráfico de evolução e agora
+  também "Suas palavras" (fracas/medianas/fortes), que saiu da aba Revisão
+  porque não respondia "o que eu faço agora" (Fase 3).
+
+Outras mudanças de UX decorrentes:
+
+- **Fim do "Jogar de novo" pós-revisão** (Fase 6) — terminar uma sessão de
+  Flashcard ou Speed Review nunca mais oferece repetir a mesma bateria.
+  Tela de conclusão vira sempre o par `.review-complete-actions`: "Voltar"
+  (→ `switchTab('path')`) e "Praticar mais" (→ `backToReviewModeSelect()`,
+  que leva pra PRATICAR — Combinar/Palavras difíceis — nunca reabre a
+  revisão que acabou de terminar). `backToReviewModeSelect()` é a função
+  central reaproveitada por todo botão "Praticar mais"/back-link da tela
+  de Revisão. Combinar continua tendo seu próprio "Jogar de novo"
+  (`match-restart-btn`) — ele é PRÁTICA, não revisão, então repetir a
+  mesma atividade não viola a regra (que vale só pra telas de conclusão de
+  REVISÃO).
+- **"Rever mais" continua distinto de revisão agendada** (Fase 7,
+  inalterado) — `reviewMoreCurrentCard()` só reinsere o cartão na fila da
+  sessão atual, nunca chama `applyMemoryGrade`.
 
 ## Free vs. Premium
 
@@ -208,3 +274,15 @@ padrão.
   cartão; reprodução do problema original relatado (Bom numa palavra nova);
   Difícil <= Bom <= Fácil; as 3 opções de Frequência produzem intervalos
   reais diferentes.
+- `validate_fase6_speed_review_memory.js`, `validate_fase12_review_today_widget.js`
+  — reescritos pro projeto "Reorganização da experiência de revisão e
+  prática" (o contrato antigo que testavam foi intencionalmente
+  substituído; ver seção REVISAR/PRATICAR/PROGRESSO acima).
+  `validate_fase14_consistency_checklist.js` — cobre os itens da checklist
+  de consistência do mesmo projeto que não tinham teste dedicado (palavra
+  difícil-mas-não-devida fica fora da fila de revisão; palavra
+  forte-mas-devida continua na fila; "Praticar mais" não mexe em
+  due/stability; Speed Review não depende de "palavras medianas").
+  `smoke_revisao_zh.js`/`smoke_revisao_fr.js` (scratchpad da sessão, não
+  versionados) — fluxo visual completo Revisão→Speed Review→conclusão→
+  Praticar mais, com screenshots.

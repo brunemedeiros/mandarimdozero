@@ -4637,19 +4637,15 @@ const SPEED_STATE = {
   dailyCounted: false
 };
 
-// isCardLessonCompleted (não só "unidade começada") -- mesmo critério que
-// startReviewSession() usa pro Flashcard (ver PR #161). unitProgress.started
-// vira true assim que a PRIMEIRA lição da unidade é aberta, então um pool
-// baseado só nisso deixa passar palavras de lições seguintes ainda não
-// alcançadas -- eram só essas duas condições aqui antes, sem checar a lição
-// específica de cada carta.
+// Projeto "Reorganização da experiência de revisão e prática": Speed
+// Review deixou de ser jogo de reconhecimento livre e virou REVISÃO de
+// verdade -- "revisão rápida", a mesma fila devida do Flashcard
+// (buildDueReviewQueue), nunca mais getStudyQueue(scope:'all'). Isso
+// resolve a inconsistência relatada ("cartas para revisão hoje: 12" mas
+// "Speed Review: 32 palavras") -- os dois números eram fontes diferentes;
+// agora são a mesma função, o mesmo número.
 function buildSpeedQueue(){
-  // Speed Review é jogo, não ferramenta de revisão espaçada -- usa TODAS
-  // as palavras de lições já concluídas, sem exigir reps>0 nem respeitar
-  // data de vencimento do SM2 (decisão da autora, ver auditoria do sistema
-  // de XP). Contraste com Flashcard/Palavras difíceis, que continuam
-  // presas ao SM2. Fase 4: seleção via getStudyQueue(scope:'all').
-  return shuffle(getStudyQueue(eligibleReviewPool(), { scope: 'all' }));
+  return shuffle(buildDueReviewQueue(eligibleReviewPool()));
 }
 
 function buildSpeedOptions(card){
@@ -4711,12 +4707,35 @@ function vocabStrengthBuckets(){
 // até STATE.studySettings.newCardsPerDay novas por vez. O número que o
 // aluno vê ANTES de entrar precisa bater com o que ele recebe ao entrar
 // (mesmas opções de getStudyQueue que startReviewSession() usa).
-function todaysReviewCount(pool){
-  return getStudyQueue(pool, {
+// Projeto "Reorganização da experiência de revisão e prática": fonte ÚNICA
+// da fila "devida agora" -- Flashcard (startReviewSession) e Speed Review
+// (buildSpeedQueue) chamam a MESMA função, com as MESMAS opções. Nenhuma
+// tela decide sozinha quem entra numa sessão de revisão (Fase 8 do
+// projeto: "não pode haver getDueCards() e outra função independente como
+// getMediumWords() pra determinar o Speed Review").
+function dueReviewQueueOptions(){
+  return {
     scope: 'due',
     newCardsLimit: STATE.studySettings.newCardsPerDay,
     limit: sessionIntensityToLimit(STATE.studySettings.sessionIntensity)
-  }).length;
+  };
+}
+
+function buildDueReviewQueue(pool){
+  return getStudyQueue(pool, dueReviewQueueOptions());
+}
+
+// Contagem HONESTA (Fase 8 do projeto): quantas revisões existem de
+// verdade (sem o teto de "Intensidade da sessão") vs quantas cabem nesta
+// sessão. Quando os dois números divergem, a interface precisa mostrar os
+// dois -- nunca esconder revisões reais atrás do teto de sessão como se
+// elas não existissem (ver renderReviewTodayWidget).
+function trueDueReviewCount(pool){
+  return getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay }).length;
+}
+
+function todaysReviewCount(pool){
+  return buildDueReviewQueue(pool).length;
 }
 
 function renderReviewTodayWidget(){
@@ -4725,11 +4744,19 @@ function renderReviewTodayWidget(){
   const pool = eligibleReviewPool();
   if (pool.length === 0){ wrap.innerHTML = ''; return; }
   const dueCount = todaysReviewCount(pool);
-  const caption = dueCount === 0
-    ? 'Nenhuma revisão pendente agora -- o motor avisa quando for a hora.'
-    : dueCount === 1
-      ? '1 palavra pronta pra revisar.'
-      : `${dueCount} palavras prontas pra revisar.`;
+  const trueCount = trueDueReviewCount(pool);
+  let caption;
+  if (dueCount === 0){
+    caption = 'Nenhuma revisão pendente agora -- o motor avisa quando for a hora.';
+  } else if (trueCount > dueCount){
+    // Fase 8 do projeto: o teto de "Intensidade da sessão" pode deixar
+    // revisões reais de fora da sessão atual -- nunca mostrar só o número
+    // cortado como se fosse o total. "35 pendentes, 20 nesta sessão" (o
+    // próprio exemplo do prompt), nunca só "20 pendentes".
+    caption = `${trueCount} revisões pendentes -- ${dueCount} nesta sessão.`;
+  } else {
+    caption = dueCount === 1 ? '1 palavra pronta pra revisar.' : `${dueCount} palavras prontas pra revisar.`;
+  }
   wrap.innerHTML = `
     <div class="section-label">Revisões de hoje</div>
     <div class="review-today-count">${dueCount}</div>
@@ -4764,34 +4791,61 @@ function renderVocabStrengthWidget(){
   `;
 }
 
+// Projeto "Reorganização da experiência de revisão e prática": a tela de
+// Revisão deixou de ser 4 blocos equivalentes. Agora responde só 2
+// perguntas: "o que eu preciso revisar agora?" (REVISAR -- Flashcard e
+// Speed Review, a MESMA fila devida, só apresentações diferentes) e "o que
+// eu posso praticar quando quiser, vencido ou não?" (PRATICAR -- Palavras
+// difíceis e Combinar, sempre disponíveis, nunca criam um 2º agendamento).
 function renderReviewModeSelect(){
   const pool = eligibleReviewPool();
-  // Fase 14: mesma contagem (getStudyQueue com os tetos de "novas por dia"
-  // / "intensidade da sessão") que o tile do Flashcard mostra e que
-  // startReviewSession() de fato entrega -- ver todaysReviewCount().
+  // Mesma contagem que o Flashcard e o Speed Review de fato usam pra
+  // montar a sessão -- ver dueReviewQueueOptions()/buildDueReviewQueue().
   const dueCount = todaysReviewCount(pool);
-  // Fase 7: Palavras Difíceis NÃO depende mais de estar due -- "precisa
-  // revisar agora" (Flashcard) e "é uma palavra difícil" (aqui) são coisas
-  // diferentes. getStudyQueue(scope:'hard') usa o difficulty do FSRS.
+  // Fase 7 (projeto anterior): Palavras Difíceis NÃO depende de estar due
+  // -- "precisa revisar agora" (REVISAR) e "é uma palavra difícil"
+  // (PRATICAR) são perguntas diferentes. getStudyQueue(scope:'hard') usa
+  // o difficulty do FSRS, nunca due.
   const hardCount = getStudyQueue(pool, { scope: 'hard' }).length;
 
   renderReviewTodayWidget();
-  renderVocabStrengthWidget();
 
-  const cardsEl = document.getElementById('review-mode-cards');
-  cardsEl.innerHTML = `
-    <button class="review-mode-card" id="mode-card-flashcard" ${dueCount === 0 ? 'disabled' : ''}>
-      <div class="icon">📇</div>
-      <div class="count">${dueCount}</div>
-      <div class="name">Flashcard</div>
-      <div class="desc">Revisão espaçada clássica</div>
-    </button>
-    <button class="review-mode-card" id="mode-card-speed" ${pool.length < 4 ? 'disabled' : ''}>
-      <div class="icon">⚡</div>
-      <div class="count">${pool.length}</div>
-      <div class="name">Speed Review</div>
-      <div class="desc">Jogo contra o relógio</div>
-    </button>
+  const revisarEl = document.getElementById('review-mode-cards-revisar');
+  if (dueCount === 0){
+    const emptyTitle = pool.length === 0 ? 'Ainda não há revisões' : 'Você está em dia!';
+    const emptyDesc = pool.length === 0
+      ? 'Complete uma lição no Estudo pra começar a ter palavras pra revisar.'
+      : 'Nenhuma revisão pendente agora. Praticar continua disponível logo abaixo, quando quiser.';
+    revisarEl.innerHTML = `
+      <div class="review-mode-empty">
+        <div class="icon">🍵</div>
+        <div class="review-mode-empty-title">${emptyTitle}</div>
+        <div class="review-mode-empty-desc">${emptyDesc}</div>
+      </div>
+    `;
+  } else {
+    // Flashcard e Speed Review mostram o MESMO número -- são a mesma fila,
+    // só a apresentação muda (completa x rápida). Nunca podem divergir.
+    revisarEl.innerHTML = `
+      <button class="review-mode-card" id="mode-card-flashcard">
+        <div class="icon">📇</div>
+        <div class="count">${dueCount}</div>
+        <div class="name">Flashcard</div>
+        <div class="desc">Revisão completa</div>
+      </button>
+      <button class="review-mode-card" id="mode-card-speed">
+        <div class="icon">⚡</div>
+        <div class="count">${dueCount}</div>
+        <div class="name">Speed Review</div>
+        <div class="desc">Revisão rápida</div>
+      </button>
+    `;
+    document.getElementById('mode-card-flashcard').addEventListener('click', () => openReviewSession('flashcard'));
+    document.getElementById('mode-card-speed').addEventListener('click', () => openReviewSession('speed'));
+  }
+
+  const praticarEl = document.getElementById('review-mode-cards-praticar');
+  praticarEl.innerHTML = `
     <button class="review-mode-card" id="mode-card-hard" ${hardCount === 0 ? 'disabled' : ''}>
       <div class="icon">🔥</div>
       <div class="count">${hardCount}</div>
@@ -4805,9 +4859,6 @@ function renderReviewModeSelect(){
       <div class="desc">Jogo de pares</div>
     </button>
   `;
-
-  document.getElementById('mode-card-flashcard').addEventListener('click', () => openReviewSession('flashcard'));
-  document.getElementById('mode-card-speed').addEventListener('click', () => openReviewSession('speed'));
   document.getElementById('mode-card-hard').addEventListener('click', () => openReviewSession('hard'));
   document.getElementById('mode-card-match').addEventListener('click', () => openReviewSession('match'));
 }
@@ -4836,13 +4887,19 @@ function openReviewSession(mode){
   }
 }
 
-document.getElementById('review-back-to-modes').addEventListener('click', () => {
+// Volta da sessão (Flashcard/Speed Review/Palavras difíceis/Combinar) pra
+// tela de escolha -- usada pelo link "← Voltar aos modos" e pelos botões
+// "Praticar mais" das telas de conclusão (Fase 6 do projeto: terminar uma
+// revisão leva pra PRATICAR, nunca repete a mesma bateria sozinha).
+function backToReviewModeSelect(){
   stopSpeedTimer();
   SPEED_STATE.active = false;
   document.getElementById('review-mode-select-wrap').style.display = 'block';
   document.getElementById('review-session-wrap').style.display = 'none';
   renderReviewModeSelect();
-});
+}
+
+document.getElementById('review-back-to-modes').addEventListener('click', backToReviewModeSelect);
 
 // ---------- Combinar: jogo de pares (hanzi <-> tradução) ----------
 // Pool: TODA palavra de uma lição já concluída (eligibleReviewPool), sem
@@ -5060,14 +5117,28 @@ function stopSpeedTimer(){
 function renderSpeedReview(){
   const el = document.getElementById('speed-review-content');
 
-  if (SPEED_STATE.queue.length < 4){
-    el.innerHTML = `
+  // Projeto "Reorganização da experiência de revisão e prática": Speed
+  // Review agora usa a fila DEVIDA (ver buildSpeedQueue), então fila vazia
+  // é o caso normal e esperado de "você está em dia" -- bem diferente de
+  // "ainda não tem vocabulário suficiente" (conta muito pouca palavra
+  // aprendida no total). As duas mensagens não podem ser a mesma.
+  if (SPEED_STATE.queue.length === 0){
+    const pool = eligibleReviewPool();
+    el.innerHTML = pool.length < 4 ? `
       <div class="review-empty">
         <div class="big-emoji">⚡</div>
         <h3>Vocabulário insuficiente ainda</h3>
-        <p>O Speed Review precisa de pelo menos algumas palavras já estudadas com sucesso pelo menos uma vez. Continue estudando unidades e revisando no modo Flashcard.</p>
+        <p>O Speed Review precisa de palavras já estudadas com sucesso pelo menos uma vez. Continue estudando unidades no Estudo.</p>
+      </div>
+    ` : `
+      <div class="review-empty">
+        <div class="big-emoji">🍵</div>
+        <h3>Você está em dia!</h3>
+        <p>Nenhuma revisão pendente agora. Praticar continua disponível quando quiser.</p>
+        <button class="btn btn-primary" id="speed-go-practice">Praticar</button>
       </div>
     `;
+    document.getElementById('speed-go-practice')?.addEventListener('click', backToReviewModeSelect);
     return;
   }
 
@@ -5093,16 +5164,23 @@ function renderSpeedReview(){
     }
     maybeShowStreakCelebration();
     trackEvent('lesson_complete', 'speed_review', { score: SPEED_STATE.score });
+    // Fase 6 do projeto: nunca oferecer "Jogar de novo" repetindo a mesma
+    // bateria de revisão -- Voltar/Praticar mais, igual à conclusão do
+    // Flashcard (ver renderReviewView).
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">💔</div>
         <h3>Fim de jogo!</h3>
         <div class="score-num">${SPEED_STATE.score} pts</div>
         <p>Você respondeu ${SPEED_STATE.index} palavra(s) nesta rodada.</p>
-        <button class="btn btn-primary" id="speed-restart-btn">Jogar de novo</button>
+        <div class="review-complete-actions">
+          <button class="btn btn-secondary" id="speed-back-btn">Voltar</button>
+          <button class="btn btn-primary" id="speed-practice-btn">Praticar mais</button>
+        </div>
       </div>
     `;
-    document.getElementById('speed-restart-btn').addEventListener('click', startSpeedReview);
+    document.getElementById('speed-back-btn').addEventListener('click', () => switchTab('path'));
+    document.getElementById('speed-practice-btn').addEventListener('click', backToReviewModeSelect);
     return;
   }
 
@@ -5127,15 +5205,22 @@ function renderSpeedReview(){
       if (firstSpeedSessionToday && SPEED_STATE.correctCount > 0) addXP(SPEED_STATE.correctCount * SPEED_REVIEW_XP_PER_CORRECT);
     }
     maybeShowStreakCelebration();
+    // Fase 6 do projeto: idem -- sem "Jogar de novo" (a fila devida já foi
+    // zerada de verdade nesta sessão; "de novo" mostraria vazio ou
+    // reaproveitaria cartões que acabaram de ser respondidos).
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">🏆</div>
-        <h3>Você revisou tudo disponível!</h3>
+        <h3>Revisão concluída!</h3>
         <div class="score-num">${SPEED_STATE.score} pts</div>
-        <button class="btn btn-primary" id="speed-restart-btn">Jogar de novo</button>
+        <div class="review-complete-actions">
+          <button class="btn btn-secondary" id="speed-back-btn">Voltar</button>
+          <button class="btn btn-primary" id="speed-practice-btn">Praticar mais</button>
+        </div>
       </div>
     `;
-    document.getElementById('speed-restart-btn').addEventListener('click', startSpeedReview);
+    document.getElementById('speed-back-btn').addEventListener('click', () => switchTab('path'));
+    document.getElementById('speed-practice-btn').addEventListener('click', backToReviewModeSelect);
     return;
   }
 
@@ -5204,17 +5289,17 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
     else if (i === chosenIdx) btn.classList.add('incorrect');
   });
 
+  // Projeto "Reorganização da experiência de revisão e prática": Speed
+  // Review agora É revisão (a mesma fila devida do Flashcard, ver
+  // buildSpeedQueue) -- toda resposta grada o cartão de verdade, não só as
+  // de cartões nunca estudados. Escala simplificada (a UI de múltipla
+  // escolha não tem como distinguir "Difícil" de "Fácil"): certo = Bom(2),
+  // errado/tempo esgotado = Errei(0). Regra explícita, só pra Speed Review
+  // -- Combinar continua NÃO fazendo isso (reconhecimento, não revisão;
+  // só promove cartão nunca estudado, ver onMatchTileClick).
+  applyMemoryGrade(card, isCorrect ? 2 : 0);
+
   if (isCorrect){
-    // Fase 6: uma resposta certa em cartão NUNCA estudado é evidência
-    // suficiente pra promovê-lo pro motor de memória (mesmo critério já
-    // usado por registerExerciseCorrect() nos exercícios de lição) --
-    // reconhecimento rápido não tem o mesmo peso de uma recuperação ativa
-    // via Flashcard (Princípio 4), por isso só afeta cartões em reps===0;
-    // nunca reagenda um cartão que já está em ciclo de revisão (isso
-    // continuaria sendo um 2º sistema de memória, proibido pela Regra 6).
-    if (card.reps === 0){
-      applyMemoryGrade(card, 2); // grade 2 = "Bom"
-    }
     // Pontuação recompensa velocidade: quanto menos tempo passou, mais pontos.
     const speedBonus = Math.max(10, Math.round(100 * (1 - elapsed / SPEED_TIME_LIMIT)));
     SPEED_STATE.score += speedBonus;
@@ -5269,18 +5354,17 @@ function startReviewSession(){
     // Revisão geral: só cartões de lições que você já concluiu de verdade.
     : STATE.cards.filter(isCardLessonCompleted);
 
-  // Fase 4: seleção centralizada em getStudyQueue() (shared/study-queue.js)
-  // -- due primeiro, mais um lote limitado de cartões novos (scope 'due'),
-  // ou due primeiro seguido do resto do pool ao estudar uma unidade
-  // específica (scope 'unit'). Mesmo critério de antes, só consolidado.
-  // Fase 10: "novas palavras por dia" e "intensidade da sessão" (Configurações
-  // > Revisões) -- intensidade só se aplica à revisão geral (scope 'due');
-  // estudar uma unidade específica mostra ela inteira, sem corte artificial.
-  const queue = getStudyQueue(pool, {
-    scope: STATE.reviewSessionUnitFilter ? 'unit' : 'due',
-    newCardsLimit: STATE.studySettings.newCardsPerDay,
-    limit: STATE.reviewSessionUnitFilter ? undefined : sessionIntensityToLimit(STATE.studySettings.sessionIntensity)
-  });
+  // Fase 4 (projeto anterior): seleção centralizada em getStudyQueue()
+  // (shared/study-queue.js) -- due primeiro, mais um lote limitado de
+  // cartões novos (scope 'due'), ou due primeiro seguido do resto do pool
+  // ao estudar uma unidade específica (scope 'unit'). Estudar uma unidade
+  // específica mostra ela inteira, sem corte artificial de intensidade.
+  // Revisão geral (scope 'due') usa buildDueReviewQueue() -- a MESMA
+  // função que Speed Review chama (ver buildSpeedQueue) -- fonte única da
+  // fila REVISAR.
+  const queue = STATE.reviewSessionUnitFilter
+    ? getStudyQueue(pool, { scope: 'unit', newCardsLimit: STATE.studySettings.newCardsPerDay })
+    : buildDueReviewQueue(pool);
 
   // Decide a direção de cada carta ANTES de embaralhar/mostrar -- alterna a
   // partir da última vez que essa carta foi revisada (ver nextCardDirection
@@ -5327,12 +5411,12 @@ function renderReviewView(){
   const el = document.getElementById('review-content');
 
   if (!STATE.reviewQueue.length){
-    // Mesmo critério de startReviewSession() (isCardLessonCompleted, não só
-    // "unidade começada" nem STATE.cards sem filtro nenhum) -- senão esse
-    // número conta cartões de lições nunca ensinadas, ficando muito maior
-    // do que o que "Revisar tudo disponível" realmente consegue puxar (o
-    // botão clicava e caía de volta nesta mesma tela vazia).
-    const allDue = cardsDueNow(STATE.cards.filter(isCardLessonCompleted)).length;
+    // Mesma fonte que startReviewSession()/Speed Review usam de verdade
+    // (todaysReviewCount, com os mesmos tetos de novas/dia e intensidade)
+    // -- senão esse número prometeria mais do que "Revisar tudo disponível"
+    // realmente consegue puxar (o botão clicava e caía de volta nesta
+    // mesma tela vazia).
+    const allDue = todaysReviewCount(STATE.cards.filter(isCardLessonCompleted));
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🍵</div>
@@ -5357,18 +5441,29 @@ function renderReviewView(){
     registerStudyToday();
     maybeShowStreakCelebration();
     trackEvent('lesson_complete', 'flashcard_review', { count: STATE.reviewQueue.length });
+    // Fase 6 do projeto de reorganização: terminar a revisão nunca deve
+    // convidar a repetir a mesma bateria -- "Voltar" leva pra trilha,
+    // "Praticar mais" leva pra PRATICAR (Combinar/Palavras difíceis), não
+    // reinicia esta mesma sessão de revisão.
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🎉</div>
-        <h3>Sessão concluída!</h3>
+        <h3>Revisão concluída!</h3>
         <p>Você revisou ${STATE.reviewQueue.length} cartão(s) nesta sessão.</p>
-        <button class="btn btn-primary" id="review-again">Voltar à trilha</button>
+        <div class="review-complete-actions">
+          <button class="btn btn-secondary" id="review-again">Voltar</button>
+          <button class="btn btn-primary" id="review-go-practice">Praticar mais</button>
+        </div>
       </div>
     `;
     checkUnitCompletion();
     document.getElementById('review-again').addEventListener('click', () => {
       STATE.reviewSessionUnitFilter = null;
       switchTab('path');
+    });
+    document.getElementById('review-go-practice').addEventListener('click', () => {
+      STATE.reviewSessionUnitFilter = null;
+      backToReviewModeSelect();
     });
     renderProgressView();
     return;
@@ -5584,6 +5679,11 @@ function renderProgressView(){
     });
   }
 
+  // Projeto "Reorganização da experiência de revisão e prática", Fase 3:
+  // "Suas palavras" (fracas/medianas/fortes) responde "como está meu
+  // vocabulário", não "o que eu devo estudar agora" -- mora em Progresso,
+  // não mais na tela de Revisão (ver renderReviewModeSelect).
+  renderVocabStrengthWidget();
   renderActivityHeatmap();
   renderProgressLineChart();
 
