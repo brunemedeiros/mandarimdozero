@@ -1,0 +1,24 @@
+{
+  "_comment": "Fonte única da identidade do produto (PWA hoje, apps de loja no futuro). Editar SÓ este arquivo e rodar `python3 scripts/generate_pwa_assets.py` -- ele regenera fr/manifest.json, zh/manifest.json, shared/app-identity.js e os ícones maskable a partir daqui. Nunca editar os manifests ou o app-identity.js à mão -- são gerados.",
+  "brand": {
+    "productName": "Idiomas com Prof. Brune",
+    "author": "Prof. Brune",
+    "lang": "pt-BR"
+  },
+  "apps": {
+    "fr": {
+      "name": "Francês com Prof. Brune",
+      "shortName": "Francês",
+      "description": "Estudo pessoal de francês com a Prof. Brune",
+      "themeColor": "#3498D6",
+      "backgroundColor": "#FAF5EA"
+    },
+    "zh": {
+      "name": "Chinês com Prof. Brune",
+      "shortName": "Chinês",
+      "description": "Estudo pessoal de chinês (mandarim) com a Prof. Brune",
+      "themeColor": "#C0231F",
+      "backgroundColor": "#FBF4E8"
+    }
+  }
+}
