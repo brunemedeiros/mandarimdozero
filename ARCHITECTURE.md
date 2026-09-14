@@ -139,6 +139,38 @@ Três controles simples (Fase 10), sem nenhum parâmetro técnico exposto:
 - `sessionIntensity` (`'light'|'normal'|'intense'`) →
   `sessionIntensityToLimit()` → `getStudyQueue`'s `limit`.
 
+### Política de retenção (projeto "Aprimoramento do Flashcard")
+
+Auditoria dedicada (rastreando `resposta → applyMemoryGrade → scheduleReview
+→ due`, com simulação antes de mexer em qualquer número) confirmou que o
+mapeamento `frequent→0.95 / balanced→0.90 / spaced→0.85` já é adequado —
+não foi alterado. Intervalos reais produzidos por "Bom" numa palavra nova,
+por nível:
+
+| Frequência | Retenção | Bom (palavra nova) | Bom→Bom→Bom |
+|---|---|---|---|
+| Mais frequente | 0.95 | 1 dia | 1→3→8 dias |
+| Equilibrada (padrão) | 0.90 | 2 dias | 2→11→46 dias |
+| Mais espaçada | 0.85 | 4 dias | 4→31→173 dias |
+
+Simulação em escala (10/50/100 palavras novas/dia, sempre "Bom", 60 dias)
+confirma que a carga diária de revisões converge pra um patamar estável
+(~3x o número de palavras novas/dia) em vez de crescer sem limite — sem
+avalanche de revisões sob a política padrão.
+
+**O sintoma relatado ("Bom parece agendar 6-8 dias") não era um problema
+do motor.** Os 4 botões de resposta tinham o `<small>` com texto ESTÁTICO
+(`"Bom<small>6-8d</small>"`), sobrado de antes da migração pro FSRS — nunca
+ligado ao cálculo real. Corrigido: `previewNextIntervalDays(card, sm2Grade,
+now)` (shared/fsrs.js) reaproveita a MESMA função de estabilidade que
+`scheduleReview()` usa de verdade (`fsrsNextStability`, extraída uma vez pra
+eliminar cálculo duplicado), então o marcador nunca pode divergir do due
+real que seria salvo. `formatReviewInterval(days)` traduz pra texto humano
+(`min/h/dia(s)/sem./mês(es)/ano(s)`, com 1 casa decimal em anos pra não
+esconder diferenças entre cartões muito maduros). `gradeButtonsHTML(card)`
+(zh/app.js, fr/app.js) é o único lugar que monta os 4 botões — usado tanto
+pelo Flashcard de vocabulário quanto pela revisão de hanzi (zh).
+
 ## HOME / WIDGET DE VOCABULÁRIO (Fase 12)
 
 Dois blocos visualmente separados em `renderReviewModeSelect()`:
@@ -171,3 +203,8 @@ padrão.
 - `validate_vocab_strength.js`, `validate_speed_review_xp.js`,
   `validate_speed_review_leak.js` — regressão de features adjacentes que o
   projeto tocou indiretamente.
+- `validate_flashcard_dynamic_intervals.js` — projeto "Aprimoramento do
+  Flashcard": marcador dos 4 botões == due real, em qualquer estado de
+  cartão; reprodução do problema original relatado (Bom numa palavra nova);
+  Difícil <= Bom <= Fácil; as 3 opções de Frequência produzem intervalos
+  reais diferentes.

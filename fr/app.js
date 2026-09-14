@@ -4965,6 +4965,25 @@ function shuffle(arr){
   return a;
 }
 
+// Projeto "Aprimoramento do Flashcard": os 4 botões de resposta mostram o
+// intervalo REAL que o motor agendaria (previewNextIntervalDays, mesma
+// função que scheduleReview usa de verdade -- shared/fsrs.js), nunca texto
+// estático.
+function gradeButtonsHTML(card){
+  const now = Date.now();
+  const GRADES = [
+    { grade: 0, label: 'Errei', cls: 'grade-again' },
+    { grade: 1, label: 'Difícil', cls: 'grade-hard' },
+    { grade: 2, label: 'Bom', cls: 'grade-good' },
+    { grade: 3, label: 'Fácil', cls: 'grade-easy' },
+  ];
+  return `
+    <div class="grade-buttons">
+      ${GRADES.map(g => `<button class="grade-btn ${g.cls}" data-grade="${g.grade}">${g.label}<small>${formatReviewInterval(previewNextIntervalDays(card, g.grade, now))}</small></button>`).join('')}
+    </div>
+  `;
+}
+
 function renderReviewView(){
   stopExerciseAudio();
   const el = document.getElementById('review-content');
@@ -5048,12 +5067,7 @@ function renderReviewView(){
       ` : `<div class="flashcard-hint">toque para ver a resposta</div>`}
     </div>
     ${STATE.reviewShowingAnswer ? `
-      <div class="grade-buttons">
-        <button class="grade-btn grade-again" data-grade="0">Errei<small>&lt;10min</small></button>
-        <button class="grade-btn grade-hard" data-grade="1">Difícil<small>1-3d</small></button>
-        <button class="grade-btn grade-good" data-grade="2">Bom<small>6-8d</small></button>
-        <button class="grade-btn grade-easy" data-grade="3">Fácil<small>8d+</small></button>
-      </div>
+      ${gradeButtonsHTML(card)}
       <button class="review-more-link" id="review-more-btn">🔁 Rever mais (não conta como resposta)</button>
     ` : ''}
   `;

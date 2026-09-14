@@ -135,34 +135,50 @@ function fsrsNextStabilityAfterLapse(difficulty, stability, retrievability){
     * Math.exp(FSRS_W[14] * (1 - retrievability));
 }
 
+const FSRS_DAY_MS = 24*60*60*1000;
+
+// Estabilidade que uma resposta REAL (grade) produziria pra este cartão,
+// dado o estado atual -- extraído de scheduleReview() pra ser a ÚNICA
+// implementação do "o que o motor calcularia" (Regra: centralizar
+// agendamento, eliminar cálculo duplicado -- projeto de aprimoramento do
+// Flashcard, Fase 22). scheduleReview() usa isto pra MUTAR o cartão de
+// verdade; previewNextIntervalDays() usa a mesma função só pra prever, sem
+// tocar no cartão -- garantindo por construção que o marcador do botão
+// nunca diverge do due real que seria salvo (critério de sucesso #2 do
+// projeto "Aprimoramento do Flashcard").
+function fsrsNextStability(card, grade, now){
+  now = now || Date.now();
+  const elapsedDays = card.lastReview ? Math.max(0, (now - card.lastReview) / FSRS_DAY_MS) : 0;
+  const isNew = !card.state || card.state === 'new';
+  const R = isNew ? 1 : fsrsRetrievability(elapsedDays, card.stability);
+  if (isNew) return fsrsInitialStability(grade);
+  if (grade === 1) return fsrsNextStabilityAfterLapse(card.difficulty, card.stability, R);
+  return fsrsNextStabilityAfterRecall(card.difficulty, card.stability, R, grade);
+}
+
 // ---------- Funil único de mutação de memória (equivalente a applySM2) ----------
 // Função pura: não lê/escreve Supabase, não sabe de XP, não sabe de UI.
 // grade: 1=Errei 2=Difícil 3=Bom 4=Fácil.
 function scheduleReview(card, grade, now){
   now = now || Date.now();
-  const DAY = 24*60*60*1000;
-  const elapsedDays = card.lastReview ? Math.max(0, (now - card.lastReview) / DAY) : 0;
   const isNew = !card.state || card.state === 'new';
-  const R = isNew ? 1 : fsrsRetrievability(elapsedDays, card.stability);
 
+  card.stability = fsrsNextStability(card, grade, now);
   if (isNew){
-    card.stability = fsrsInitialStability(grade);
     card.difficulty = fsrsInitialDifficulty(grade);
     card.state = grade === 1 ? 'learning' : 'review';
     if (grade === 1) card.fsrsLapses = (card.fsrsLapses || 0) + 1;
   } else if (grade === 1){
-    card.stability = fsrsNextStabilityAfterLapse(card.difficulty, card.stability, R);
     card.difficulty = fsrsNextDifficulty(card.difficulty, grade);
     card.state = 'relearning';
     card.fsrsLapses = (card.fsrsLapses || 0) + 1;
   } else {
-    card.stability = fsrsNextStabilityAfterRecall(card.difficulty, card.stability, R, grade);
     card.difficulty = fsrsNextDifficulty(card.difficulty, grade);
     card.state = 'review';
   }
 
   card.lastReview = now;
-  card.due = now + fsrsIntervalFromStability(card.stability) * DAY;
+  card.due = now + fsrsIntervalFromStability(card.stability) * FSRS_DAY_MS;
   card.fsrsReps = (card.fsrsReps || 0) + 1;
   // Um cartão avaliado de verdade pelo motor novo já é, por definição,
   // FSRS-nativo -- marca aqui também (não só em migrateCardToFSRS) pra que
@@ -171,6 +187,59 @@ function scheduleReview(card, grade, now){
   // atualizados, dependendo de quando a Fase 4/5 mudar quem grava devido).
   card.fsrsMigrated = true;
   return card;
+}
+
+// ---------- Preview do próximo intervalo (projeto "Aprimoramento do
+// Flashcard", Fase 8) ----------
+// Calcula, SEM mutar o cartão, quantos dias o motor agendaria se o aluno
+// desse esta nota agora -- usado pelos marcadores dos 4 botões de resposta.
+// Reaproveita fsrsNextStability()/fsrsIntervalFromStability() (as MESMAS
+// funções que scheduleReview() usa de verdade), então o número mostrado no
+// botão é garantidamente igual ao due que seria salvo se o aluno clicasse
+// -- nunca um cálculo paralelo que pode divergir.
+//
+// sm2Grade: 0=Errei 1=Difícil 2=Bom 3=Fácil (escala da UI, mesma de
+// applyMemoryGrade). Retorna dias (pode ser fracionário, ex: 0.007 = 10min).
+function previewNextIntervalDays(card, sm2Grade, now){
+  now = now || Date.now();
+  const fsrsGrade = sm2Grade + 1;
+  const stability = fsrsNextStability(card, fsrsGrade, now);
+  return fsrsIntervalFromStability(stability);
+}
+
+// ---------- Formatação humana de um intervalo em dias (Fase 8) ----------
+// fsrsIntervalFromStability() sempre arredonda pra um número inteiro de
+// dias >= 1 (ver comentário lá) -- então esta função nunca precisa lidar
+// com minutos/horas na prática hoje. Mantida em unidades humanas mesmo
+// assim (min/h/dia/dias/sem.) por robustez, caso o piso mínimo mude no
+// futuro, e porque é o formato que a Fase 8 do projeto pede.
+function formatReviewInterval(days){
+  if (days < 1/24) return `${Math.max(1, Math.round(days*24*60))} min`;
+  if (days < 1) return `${Math.round(days*24)} h`;
+  if (days < 7) return days === 1 ? '1 dia' : `${Math.round(days)} dias`;
+  if (days < 30){
+    const weeks = Math.round(days/7);
+    return weeks <= 1 ? '1 sem.' : `${weeks} sem.`;
+  }
+  if (days < 365){
+    const months = Math.round(days/30);
+    return months <= 1 ? '1 mês' : `${months} meses`;
+  }
+  // Cartões muito maduros (stability de anos) podem ter Difícil/Bom/Fácil
+  // razoavelmente próximos em dias mas ainda claramente diferentes em
+  // proporção (ex: 1,85 vs 2,45 anos) -- arredondar pra ano inteiro faria
+  // os 3 botões mostrarem o mesmo número, escondendo que são intervalos
+  // diferentes (violaria "marcador = intervalo real", Fase 8). 1 casa
+  // decimal deixa isso visível sem fingir uma precisão que não existe;
+  // além de ~10 anos a diferença deixa de importar pro aluno.
+  const years = days / 365;
+  if (years < 10){
+    const rounded = Math.round(years * 10) / 10;
+    if (Number.isInteger(rounded)) return rounded <= 1 ? '1 ano' : `${rounded} anos`;
+    return `${String(rounded).replace('.', ',')} anos`;
+  }
+  const roundedYears = Math.round(years);
+  return `${roundedYears} anos`;
 }
 
 // ---------- Funil único de mutação de memória, escala SM-2 (Fase 5) ----------
