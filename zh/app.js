@@ -646,19 +646,13 @@ function applyPinyinVisibility(hidden){
 }
 
 function loadPinyinPreference(){
-  let hidden = false;
-  try{
-    hidden = window.localStorage.getItem(PINYIN_TOGGLE_KEY) === '1';
-  }catch(e){ /* localStorage indisponível: mantém padrão visível */ }
-  applyPinyinVisibility(hidden);
+  applyPinyinVisibility(localStorageSafeGet(PINYIN_TOGGLE_KEY) === '1');
 }
 
 function togglePinyinVisibility(){
   const nowHidden = !document.body.classList.contains('hide-pinyin');
   applyPinyinVisibility(nowHidden);
-  try{
-    window.localStorage.setItem(PINYIN_TOGGLE_KEY, nowHidden ? '1' : '0');
-  }catch(e){ /* silencioso: preferência só não persiste entre sessões */ }
+  localStorageSafeSet(PINYIN_TOGGLE_KEY, nowHidden ? '1' : '0');
 }
 
 document.getElementById('pinyin-toggle-btn').addEventListener('click', togglePinyinVisibility);
