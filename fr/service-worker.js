@@ -3,7 +3,14 @@
 // do próprio site (sempre pega a versão mais nova quando há internet), com
 // fallback pro cache quando offline. Nunca intercepta chamadas ao Supabase
 // (essas precisam de rede de verdade; o app já trata erro de rede sozinho).
-const CACHE_NAME = 'frances-avec-prof-brune-v11';
+// __BUILD_ID__ é substituído pelo commit SHA em todo deploy (ver
+// .github/workflows/deploy-pages.yml) -- versionamento automático em vez de
+// incremento manual (v7, v11...): garante que todo push em main muda o nome
+// do cache e força o navegador a buscar os arquivos novos, sem depender de
+// alguém lembrar de bumpar um número (ver Fase 4 da tarefa PWA/mobile).
+// Localmente (sem passar pelo Actions) o placeholder fica intacto -- ainda
+// funciona, só não muda de versão entre testes locais.
+const CACHE_NAME = 'frances-avec-prof-brune-__BUILD_ID__';
 const PRECACHE_URLS = [
   './',
   './index.html',
@@ -16,6 +23,10 @@ const PRECACHE_URLS = [
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './icons/icon-192-maskable.png',
+  './icons/icon-512-maskable.png',
+  './icons/favicon-32.png',
+  './icons/favicon-16.png',
   './logo/ativo1-lockup.svg',
   './logo/ativo3-icone.svg'
 ];

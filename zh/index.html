@@ -713,6 +713,10 @@ a.pill:hover{ border-color: var(--imperial-gold); }
    foco, ele volta a mostrar o que já estava configurado, sem precisar
    mexer nesse estado aqui. */
 body.lesson-focus #review-reminder-banner{ display:none !important; }
+/* Mesmo raciocínio pro banner de "nova versão disponível" (Fase 4/5 do PWA,
+   ver shared/pwa.js) -- também fixed fora de #app, também não pode competir
+   visualmente com um exercício em andamento. */
+body.lesson-focus #pwa-update-banner{ display:none !important; }
 
 /* Contexto curricular (unidade/nível/objetivo + links de manual/notas):
    informação discreta e sempre visível no topo da lição -- não é mais uma
@@ -2152,6 +2156,35 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
   .review-reminder-actions{ margin-left:0; justify-content:center; }
 }
 
+/* ---------- Aviso de nova versão disponível (PWA, Fase 4/5) ---------- */
+/* Mesmo padrão visual/estrutural de .review-reminder-banner de propósito --
+   já é um componente testado (fixed no rodapé, dispensável, some em
+   lesson-focus) e reaproveitar em vez de inventar outro reduz a chance de
+   um dos dois ficar inconsistente depois. Nunca aparece sozinho: só quando
+   shared/pwa.js detecta uma troca de controller de verdade (não na
+   primeira visita) -- nunca recarrega a página sozinho, só no clique em
+   "Atualizar". */
+.pwa-update-banner{
+  position:fixed; left:0; right:0; bottom:0; z-index:800; background: var(--paper);
+  border-top:1px solid var(--paper-line); box-shadow: 0 -8px 24px rgba(33,23,20,0.12);
+  padding:18px 22px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+}
+.pwa-update-icon{ font-size:34px; line-height:1; flex-shrink:0; }
+.pwa-update-text{ flex:1; min-width:200px; }
+.pwa-update-title{ font-size:15.5px; font-weight:800; color: var(--ink); margin-bottom:3px; }
+.pwa-update-sub{ font-size:13px; color: var(--ink-soft); line-height:1.4; }
+.pwa-update-actions{ display:flex; gap:10px; flex-shrink:0; margin-left:auto; }
+.pwa-update-dismiss{
+  background:none; border:none; padding:10px 6px; font-family: var(--font-body); font-size:13.5px;
+  font-weight:700; color: var(--ink-soft); cursor:pointer;
+}
+.pwa-update-dismiss:hover{ color: var(--ink); }
+.pwa-update-cta{ white-space:nowrap; }
+@media (max-width: 560px){
+  .pwa-update-banner{ flex-direction:column; align-items:stretch; text-align:center; }
+  .pwa-update-actions{ margin-left:0; justify-content:center; }
+}
+
 /* ---------- Modal genérico (perfil, meta de estudo, atalhos...) ---------- */
 .app-modal-overlay{
   position:fixed; inset:0; z-index:700; background: rgba(33,23,20,0.55);
@@ -3326,6 +3359,18 @@ body.hide-pinyin .prompt-pinyin{
   <div class="review-reminder-actions">
     <button class="review-reminder-dismiss" id="review-reminder-dismiss-btn">Agora não</button>
     <button class="btn btn-primary review-reminder-cta" id="review-reminder-cta-btn">Revisar agora</button>
+  </div>
+</div>
+
+<div id="pwa-update-banner" class="pwa-update-banner" style="display:none;">
+  <div class="pwa-update-icon">🔄</div>
+  <div class="pwa-update-text">
+    <div class="pwa-update-title">Nova versão disponível</div>
+    <div class="pwa-update-sub">Atualizamos o app. Recarregue quando for conveniente para ver as novidades.</div>
+  </div>
+  <div class="pwa-update-actions">
+    <button class="pwa-update-dismiss" id="pwa-update-dismiss-btn">Agora não</button>
+    <button class="btn btn-primary pwa-update-cta" id="pwa-update-reload-btn">Atualizar</button>
   </div>
 </div>
 
