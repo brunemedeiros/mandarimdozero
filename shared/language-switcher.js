@@ -78,7 +78,7 @@ async function switchLanguage(newLangId){
     sessionStorageSafeSet(GUEST_MODE_FLAG, '1');
   }
 
-  window.location.href = `../${newLangId}/index.html`;
+  window.location.href = `../${newLangId}/`;
 }
 
 renderLanguageSwitcher();
