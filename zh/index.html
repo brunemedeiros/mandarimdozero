@@ -8,6 +8,14 @@
 <meta name="theme-color" content="#C0231F">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="icon" href="icons/icon-192.png">
+<!-- iOS não lê manifest.json pra "Adicionar à Tela de Início" -- precisa
+     destas 3 tags próprias (ver Fase 2 da tarefa PWA: instalável também em
+     dispositivos Apple). apple-mobile-web-app-title usa o nome curto
+     (mesmo short_name do manifest) porque a tela inicial trunca rótulos
+     longos. -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Chinês">
 <script>
 // Aplica o tema salvo antes do primeiro paint, pra não piscar claro->escuro.
 // Chave compartilhada com todos os idiomas -- ver shared/theme.js.
@@ -3322,6 +3330,7 @@ body.hide-pinyin .prompt-pinyin{
 <script src="content.js"></script>
 <script src="stories.js"></script>
 <script src="hanzi-data.js"></script><script src="audio-manifest.js"></script>
+<script src="../shared/app-identity.js"></script>
 <script src="../languages/index.js"></script>
 <script src="../shared/utils.js"></script>
 <script src="../shared/theme.js"></script>
