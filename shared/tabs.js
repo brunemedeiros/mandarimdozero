@@ -34,5 +34,15 @@ function createTabSwitcher({ onBeforeSwitch, tabHandlers }){
     }
 
     if (tabHandlers && tabHandlers[tab]) tabHandlers[tab]();
+
+    // Marca esta troca de aba como uma tela de navegação real (ver
+    // shared/router.js) -- ponto único: todo clique de aba (sidebar, barra
+    // inferior, menu "Mais", notificação, teste de nível) já passa por
+    // switchTab(), então não precisa repetir isto em cada chamador.
+    if (typeof routerNavigate === 'function'){
+      routerNavigate(tab === 'review' && STATE.reviewSessionUnitFilter
+        ? { type: 'tab', tab: 'review', unitFilter: STATE.reviewSessionUnitFilter }
+        : { type: 'tab', tab });
+    }
   };
 }

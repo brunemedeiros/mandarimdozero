@@ -124,7 +124,8 @@ function applyPendingNotificationTab(){
   // Só limpa a URL aqui, depois de já ter sobrevivido a qualquer
   // recarregamento do service worker (ver comentário acima) -- sem isso,
   // um refresh ou link compartilhado repetiria a navegação forçada.
-  window.history.replaceState(null, '', window.location.pathname);
+  // Preserva o hash (ver shared/router.js) -- só o ?notif_tab= some.
+  window.history.replaceState(null, '', window.location.pathname + window.location.hash);
   if (typeof switchTab === 'function') switchTab(tab);
 }
 

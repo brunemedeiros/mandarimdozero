@@ -1069,6 +1069,8 @@ function renderDailyChallengesScreen(){
   `;
   nextBtn.textContent = 'Continuar →';
   nextBtn.style.display = 'flex';
+
+  if (typeof routerNavigate === 'function') routerNavigate({ type: 'unitComplete', unitId: STATE.currentUnitId });
 }
 
 // Segunda-feira da semana corrente, formato 'YYYY-MM-DD' -- mesmo padrão de
@@ -1925,6 +1927,8 @@ function openUnitDetail(unitId){
 
   saveState();
   renderTopbarStats();
+
+  if (typeof routerNavigate === 'function') routerNavigate({ type: 'unit', unitId });
 }
 
 // Abre uma lição JÁ CONCLUÍDA em modo revisão, sem mexer no ponteiro de
@@ -1948,6 +1952,8 @@ function exitToPath(){
   document.getElementById('path-list-wrap').style.display = 'block';
   document.getElementById('unit-detail-wrap').style.display = 'none';
   renderUnitsGrid();
+
+  if (typeof routerNavigate === 'function') routerNavigate({ type: 'tab', tab: 'path' });
 }
 
 document.getElementById('back-to-path').addEventListener('click', exitToPath);
@@ -2694,8 +2700,18 @@ function renderLessonBoundaryScreen(u, lesson, challengesBefore){
     </div>
   `;
   STEP_STATE.onLessonBoundaryScreen = { dueCount };
+  // Cache SEPARADO (não onLessonBoundaryScreen, que openUnitDetail() zera
+  // toda vez que a unidade é reaberta -- inclusive quando é o PRÓPRIO
+  // router reabrindo pra restaurar um Voltar) -- ver shared/router.js:
+  // Voltar até "Lição" e depois Avançar até "Resultado" de novo precisa
+  // reconstruir a MESMA tela (mesmo chip de desafio), sem recalcular nada
+  // (nunca reexecuta finishCurrentLesson nem mexe em XP/progresso -- só
+  // repete este render com os mesmos insumos).
+  STEP_STATE.lastUnitResultCache = { unitId: u.id, lesson, challengesBefore };
   nextBtn.textContent = dueCount > 0 ? `Revisar agora (${dueCount}) →` : 'Continuar →';
   nextBtn.style.display = 'flex';
+
+  if (typeof routerNavigate === 'function') routerNavigate({ type: 'unitResult', unitId: u.id });
 }
 
 // ---------- Unidades de gramática (Explicação em blocos, estilo Busuu → Exercícios) ----------
@@ -4564,6 +4580,8 @@ function openReviewSession(mode){
   } else {
     startSpeedReview();
   }
+
+  if (typeof routerNavigate === 'function') routerNavigate({ type: 'reviewSession', mode });
 }
 
 // Volta da sessão (Flashcard/Speed Review/Palavras difíceis/Combinar) pra
@@ -4577,6 +4595,8 @@ function backToReviewModeSelect(){
   document.getElementById('review-mode-select-wrap').style.display = 'block';
   document.getElementById('review-session-wrap').style.display = 'none';
   renderReviewModeSelect();
+
+  if (typeof routerNavigate === 'function') routerNavigate({ type: 'tab', tab: 'review' });
 }
 
 document.getElementById('review-back-to-modes').addEventListener('click', backToReviewModeSelect);

@@ -23,10 +23,15 @@ const GUEST_MODE_FLAG = 'guest_mode';
 async function initAuth(){
   const { data: { session } } = await supabaseClient.auth.getSession();
 
-  // Limpa qualquer fragmento de token da URL depois que o Supabase já teve
-  // a chance de processá-lo (getSession acima) — evita que ele contamine um
-  // redirectTo futuro se o usuário tentar entrar de novo.
-  if (window.location.hash){
+  // Limpa o fragmento de TOKEN do OAuth da URL depois que o Supabase já
+  // teve a chance de processá-lo (getSession acima) — evita que ele
+  // contamine um redirectTo futuro se o usuário tentar entrar de novo.
+  // Restrito ao formato real desse fragmento (#access_token=.../#error=...)
+  // -- não QUALQUER hash: shared/router.js (rotas internas de navegação,
+  // ver tarefa "Voltar/Avançar do navegador") também usa # pra telas como
+  // #/unit/3, que precisa sobreviver até applyInitialRoute() conseguir
+  // restaurar a tela certa depois do login/modo convidado resolver.
+  if (/^#(access_token|error)=/.test(window.location.hash)){
     history.replaceState(null, '', window.location.pathname + window.location.search);
   }
 
@@ -57,7 +62,7 @@ function goToNeutralGate(){
   // index.html: esta tela nunca tem nada útil pra mostrar por si só (é só
   // "sem sessão, redirecionando pro portão"), então não deveria ficar
   // empilhada no histórico pra criar um loop de Voltar com o portão.
-  window.location.replace('../index.html');
+  window.location.replace('../');
 }
 
 // ---------- Oferta do Teste de Nível na primeira entrada ----------
@@ -72,7 +77,8 @@ let PENDING_LEVEL_TEST_OFFER = new URLSearchParams(window.location.search).get('
 function applyPendingLevelTestOffer(){
   if (!PENDING_LEVEL_TEST_OFFER) return;
   PENDING_LEVEL_TEST_OFFER = false;
-  window.history.replaceState(null, '', window.location.pathname);
+  // Preserva o hash (ver shared/router.js) -- só o ?level_test_offer=1 some.
+  window.history.replaceState(null, '', window.location.pathname + window.location.hash);
   // Idioma sem Teste de Nível ainda (Mandarim, só HSK1 por enquanto): não
   // tem o que oferecer -- ignora silenciosamente (ver hasLevelTest em
   // languages/index.js, é o que impede o portão de nem oferecer essa opção
@@ -112,6 +118,11 @@ function enterGuestMode(){
   loadStateAndRender().then(() => {
     applyPendingLevelTestOffer();
     if (typeof applyPendingNotificationTab === 'function') applyPendingNotificationTab();
+    // Restaura a tela certa se a página carregou direto numa rota interna
+    // (F5, link salvo/compartilhado) -- ver shared/router.js. Depois dos
+    // dois de cima de propósito: se a notificação/teste de nível pediu uma
+    // aba específica, isso vence; senão, a rota da URL manda.
+    if (typeof applyInitialRoute === 'function') applyInitialRoute();
   });
 }
 
@@ -150,6 +161,7 @@ async function onUserLoggedIn(user){
   // aba default do carregamento normal.
   applyPendingLevelTestOffer();
   if (typeof applyPendingNotificationTab === 'function') applyPendingNotificationTab();
+  if (typeof applyInitialRoute === 'function') applyInitialRoute();
 }
 
 // ---------- Admin Mode ON/OFF (topbar) ----------
