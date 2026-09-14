@@ -2366,6 +2366,16 @@ body.hide-pinyin .prompt-pinyin{
    alcançável de um toque só, mesmo no celular. */
 .notifications-pill{ position:relative; cursor:pointer; border:none; font-size:15px; padding:6px 10px; color:var(--ink-soft); }
 .notifications-pill:hover{ color:var(--ink); border-color:var(--imperial-gold); }
+
+/* ---------- Reportar (Fase 2 -- projeto "Report global") ----------
+   Mesmo padrão do sino: pill sempre visível em QUALQUER largura de tela
+   (nunca vai pro menu "Mais" no mobile) -- é exatamente o tipo de atalho
+   que precisa continuar a um toque só de qualquer tela, ver auditoria.
+   Reaproveita a bandeira ⚑ já usada em todo o resto do sistema de report
+   (item do menu, botão contextual da lição) -- não é a bandeira de idioma
+   do .lang-switcher ao lado. */
+.report-topbar-pill{ cursor:pointer; border:none; font-size:15px; padding:6px 10px; color:var(--ink-soft); }
+.report-topbar-pill:hover{ color:var(--ink); border-color:var(--imperial-gold); }
 .notifications-badge{
   position:absolute; top:-3px; right:-3px; min-width:16px; height:16px; padding:0 4px;
   border-radius:999px; background:var(--seal-red-dark); color:#fff; font-size:10px; font-weight:800;
@@ -2513,6 +2523,7 @@ body.hide-pinyin .prompt-pinyin{
              app.js), só sem ponto de entrada visível por ora. -->
         <button class="pill search-open-btn" id="search-open-btn" aria-label="Buscar por pinyin, hanzi ou tradução" title="Buscar por pinyin, hanzi ou tradução" style="display:none;">🔍</button>
         <button class="pill notifications-pill" id="notifications-topbar-btn" aria-label="Notificações" title="Notificações">🔔<span class="notifications-badge" id="notifications-badge" style="display:none;"></span></button>
+        <button class="pill report-topbar-pill" id="report-topbar-btn" aria-label="Reportar problema" title="Reportar problema">⚑</button>
         <div class="lang-switcher">
           <button class="lang-switcher-btn" id="lang-switcher-btn" type="button" aria-label="Trocar idioma" title="Trocar idioma"></button>
           <div class="lang-switcher-dropdown" id="lang-switcher-dropdown"></div>

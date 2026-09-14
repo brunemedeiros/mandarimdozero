@@ -333,6 +333,12 @@ function wireReportModal(){
   const modal = document.getElementById('report-modal');
   if (!modal) return;
   populateReportOptionButtons();
+  // Fase 2 do projeto "Report global": pill ⚑ fixo na topbar, visível em
+  // qualquer tela/rota (a topbar nunca é escondida por nenhuma view, ver
+  // auditoria) -- entrada global de verdade, sem precisar abrir o dropdown
+  // de conta primeiro. O item `report-menu-btn` do dropdown continua
+  // existindo como caminho alternativo, não foi removido.
+  document.getElementById('report-topbar-btn')?.addEventListener('click', () => openReportModal({ source: 'topbar' }));
   document.getElementById('report-modal-close')?.addEventListener('click', closeReportModal);
   modal.addEventListener('click', (e) => { if (e.target === modal) closeReportModal(); });
   document.getElementById('report-success-close-btn')?.addEventListener('click', closeReportModal);
