@@ -78,6 +78,28 @@ testado". Se uma sessão futura encontrar erro `email_not_configured` ou
 e-mails não chegando, é uma REGRESSÃO (secret removido/expirado, domínio
 perdeu verificação, etc.), não o estado original "nunca configurado".
 
+**Achado adicional na mesma data, mesmo princípio em outra camada:** infra
+(Resend) e código (`notification-cron`) prontos NÃO significam que os
+DADOS que o código depende também estavam lá. `select channel, count(*)
+from notification_templates group by channel` no banco real mostrou
+**zero linhas `channel='email'`** -- a migration `015_seed_reengagement_
+email_templates.sql` (dias 9/15/20/30 de inatividade) nunca tinha sido
+aplicada de fato (`list_migrations` também vinha vazio). Sem essas linhas,
+`pickEmailTemplate()` nunca encontrava nada, `sendEmailToUser()` nunca era
+chamada -- o cron rodava todo dia (`cron.job` confirma agendado, ativo, às
+22h UTC) sem jamais mandar um e-mail, silenciosamente. Aplicada agora
+(2026-09-14) e testada com o conteúdo REAL do template `user_inactive_9`
+(não texto genérico), entregue em `brunemed1310@gmail.com`.
+
+**IMPORTANTE -- o que continua sem e-mail:** `streak_at_risk`,
+`streak_completed`, `achievement_unlocked`, `xp_earned` e todos os outros
+event_types (ranking, missões do dia etc.) só têm `channel='in_app'` --
+**nunca existiu conteúdo de e-mail escrito pra eles**, nem no repositório.
+Só a faixa de reengajamento (`user_inactive_9/15/20/30`) tem e-mail hoje.
+Se pedirem pra "testar o e-mail de streak/badge", isso não é reativação --
+é uma feature nova (escrever o texto, inserir na tabela), não presumir que
+já existe só porque o canal 'email' existe no schema.
+
 O histórico de tarefas registrava "Fase5.4: cron ganha envio de e-mail (via
 Resend)" e "Fase5.7: validar e entregar" como concluídas, mas isso descrevia
 só o CÓDIGO ter sido escrito/mergeado — não que o envio de e-mail estivesse
