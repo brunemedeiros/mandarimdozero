@@ -66,13 +66,26 @@ mesmo princípio já usado na auditoria do sistema de notificações.
 
 ## Código pronto no repositório não prova que a infraestrutura está ativa em produção
 
-O histórico de tarefas registra "Fase5.4: cron ganha envio de e-mail (via
-Resend)" e "Fase5.7: validar e entregar" como concluídas, mas isso descreve
+**Atualização (2026-09-14): o Resend FOI ativado.** Confirmado ao vivo nesta
+data — domínio `profbrune.com.br` verificado no Resend (DKIM/SPF ok), API key
+`supabase-producao` criada e colada pela autora nos Secrets do Supabase
+(`RESEND_API_KEY`), `RESEND_FROM_EMAIL` definido como
+`notificacoes@profbrune.com.br`, e um e-mail de teste enviado de verdade
+(via `mcp__Resend__send-email`) chegou em `brunemed1310@gmail.com`. A partir
+de agora, `notification-cron` e `report-reply-send` podem ser tratados como
+realmente ativos em produção — não mais como "código escrito, nunca
+testado". Se uma sessão futura encontrar erro `email_not_configured` ou
+e-mails não chegando, é uma REGRESSÃO (secret removido/expirado, domínio
+perdeu verificação, etc.), não o estado original "nunca configurado".
+
+O histórico de tarefas registrava "Fase5.4: cron ganha envio de e-mail (via
+Resend)" e "Fase5.7: validar e entregar" como concluídas, mas isso descrevia
 só o CÓDIGO ter sido escrito/mergeado — não que o envio de e-mail estivesse
-de fato configurado e funcionando no projeto Supabase real. **O envio de
-e-mail via Resend nunca chegou a ser implementado/ativado de verdade**: sem
-conta Resend configurada, sem domínio de envio verificado, sem as secrets
-`RESEND_API_KEY`/`RESEND_FROM_EMAIL` definidas em Edge Functions > Secrets.
+de fato configurado e funcionando no projeto Supabase real. Por um bom
+tempo, **o envio de e-mail via Resend não chegou a ser implementado/ativado
+de verdade**: sem conta Resend configurada, sem domínio de envio verificado,
+sem as secrets `RESEND_API_KEY`/`RESEND_FROM_EMAIL` definidas em Edge
+Functions > Secrets. Isso só mudou na data acima.
 
 Regra motivadora, verbatim: "A função do email foi pausada e nós não
 adicionamos ainda no documento, como você não percebeu isso?" — motivado por
@@ -83,13 +96,18 @@ concluída.
 
 Na prática: nenhuma sessão de trabalho aqui tem visibilidade do estado ao
 vivo do projeto Supabase (secrets configuradas, functions pausadas/ativas,
-crons agendados, contas de serviços externos como Resend) — só o que está
-no repositório Git. **Nunca presumir que uma peça de infraestrutura externa
-(envio de e-mail, push, pagamento etc.) está ativa em produção só porque o
-código dela existe e uma tarefa anterior foi marcada como concluída** — isso
-prova só que o código foi escrito, nunca que o serviço externo por trás dele
-foi de fato configurado/testado ao vivo. Qualquer feature nova que dependa
-de envio de e-mail (como report-reply-send) deve deixar claro que também
-depende dessa ativação nunca ter sido feita, e que configurar o Resend
-(conta, domínio verificado, as duas secrets) é um passo manual pendente
-adicional, entregue junto (ver regra acima de "Passos manuais").
+crons agendados, contas de serviços externos) — só o que está no
+repositório Git, a menos que ferramentas MCP com acesso direto (Resend,
+Supabase) estejam disponíveis na sessão e sejam usadas pra checar o estado
+ao vivo antes de presumir qualquer coisa (foi assim que a ativação do
+Resend acima foi confirmada, não por dedução). **Nunca presumir que uma
+peça de infraestrutura externa (push, pagamento, um serviço externo novo
+etc.) está ativa em produção só porque o código dela existe e uma tarefa
+anterior foi marcada como concluída** — isso prova só que o código foi
+escrito, nunca que o serviço externo por trás dele foi de fato
+configurado/testado ao vivo, exceto quando (como o Resend agora) uma sessão
+já verificou isso ao vivo e registrou aqui. Qualquer feature nova que
+dependa de um serviço externo ainda não confirmado ao vivo deve deixar
+claro que essa confirmação está pendente, e que configurar/ativar esse
+serviço é um passo manual pendente adicional, entregue junto (ver regra
+acima de "Passos manuais").
