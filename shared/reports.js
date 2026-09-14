@@ -120,6 +120,107 @@ function captureReportContext(extra){
       }
     }
   } catch (e) {}
+
+  // Fase 3-4 do projeto "Report global": tela atual (aba ativa) -- funciona
+  // em QUALQUER view, mesmo as sem nenhum estado pedagógico específico
+  // (Perfil, Progresso, Ranking...). Complementa, nunca substitui, os
+  // blocos mais específicos abaixo.
+  try {
+    const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
+    if (activeTab) ctx.screen = activeTab;
+  } catch (e) {}
+
+  // Os blocos abaixo (Revisão/Conjugação/Desafios) só escrevem em ctx
+  // quando `ctx.screen` já confirma que a pessoa está mesmo naquela aba --
+  // STATE.reviewQueue/SPEED_STATE/MATCH_STATE/CONJ_STATE/
+  // CURRENT_CHALLENGE_PLAYER não são limpos ao trocar de aba (continuam
+  // com o último valor até a próxima sessão começar), então sem essa
+  // guarda um report aberto em Perfil logo depois de sair do Combinar, por
+  // exemplo, vazaria contexto de uma tela que a pessoa nem está vendo mais.
+
+  // Revisão -- Flashcard e Palavras difíceis usam a MESMA tela
+  // (#review-content/STATE.reviewQueue), distinguidos só por
+  // STATE.reviewActiveMode (ver openReviewSession). Front/verso variam por
+  // idioma (fr: front/back_trans; zh: back_hanzi/front_pinyin) -- por isso
+  // os dois fallbacks. Só conta quando #review-content está mesmo visível
+  // (não quando Speed Review/Combinar estão ativos na mesma aba).
+  try {
+    const reviewSessionOpen = document.getElementById('review-session-wrap')?.style.display !== 'none';
+    const reviewContentVisible = reviewSessionOpen && document.getElementById('review-content')?.style.display === 'block';
+    if (ctx.screen === 'review' && reviewContentVisible &&
+        typeof STATE !== 'undefined' && STATE && Array.isArray(STATE.reviewQueue) && STATE.reviewQueue.length){
+      const card = STATE.reviewQueue[STATE.reviewIndex];
+      if (card){
+        ctx.review_mode = STATE.reviewActiveMode || null;
+        ctx.review_position = `${STATE.reviewIndex + 1}/${STATE.reviewQueue.length}`;
+        ctx.review_card_front = card.front || card.back_hanzi || null;
+        const snippet = card.back_trans;
+        if (snippet) ctx.review_card_snippet = String(snippet).slice(0, 140);
+      }
+    }
+  } catch (e) {}
+
+  // Revisão -- Speed Review (SPEED_STATE, ver startSpeedReview/
+  // answerSpeedQuestion). `active` só fica true enquanto a sessão roda de
+  // verdade -- mas como só é desligado em backToReviewModeSelect() (não ao
+  // trocar de aba direto), a guarda de screen continua necessária.
+  try {
+    if (ctx.screen === 'review' &&
+        typeof SPEED_STATE !== 'undefined' && SPEED_STATE && SPEED_STATE.active && Array.isArray(SPEED_STATE.queue)){
+      const card = SPEED_STATE.queue[SPEED_STATE.index];
+      ctx.review_mode = 'speed';
+      ctx.review_position = `${SPEED_STATE.index + 1}/${SPEED_STATE.queue.length}`;
+      ctx.speed_review_score = SPEED_STATE.score;
+      if (card){
+        ctx.review_card_front = card.front || card.back_hanzi || null;
+        const snippet = card.back_trans;
+        if (snippet) ctx.review_card_snippet = String(snippet).slice(0, 140);
+      }
+    }
+  } catch (e) {}
+
+  // Praticar -- Combinar (MATCH_STATE, jogo de pares em andamento). Só
+  // conta com a tela de Combinar mesmo visível (MATCH_STATE.pairs não é
+  // esvaziado ao sair -- ficaria "vazando" pra qualquer report depois).
+  try {
+    const matchVisible = document.getElementById('match-review-content')?.style.display === 'block';
+    if (ctx.screen === 'review' && matchVisible &&
+        typeof MATCH_STATE !== 'undefined' && MATCH_STATE && Array.isArray(MATCH_STATE.pairs) && MATCH_STATE.pairs.length){
+      ctx.review_mode = 'combinar';
+      ctx.combinar_pairs = MATCH_STATE.pairs.length;
+      ctx.combinar_matched = MATCH_STATE.matchedCount;
+      ctx.combinar_attempts = MATCH_STATE.attempts;
+    }
+  } catch (e) {}
+
+  // Conjugação (só fr) -- verbo/tempo(s) atual, ver CONJ_STATE em fr/app.js.
+  try {
+    if (ctx.screen === 'conjugaison' &&
+        typeof CONJ_STATE !== 'undefined' && CONJ_STATE && Array.isArray(CONJ_STATE.verbQueue) && CONJ_STATE.verbQueue.length){
+      const verb = CONJ_STATE.verbQueue[CONJ_STATE.verbIndex];
+      if (verb){
+        ctx.conjugation_verb = verb;
+        ctx.conjugation_tenses = CONJ_STATE.selectedTenses;
+      }
+    }
+  } catch (e) {}
+
+  // Desafios (só fr) -- desafio específico aberto (CURRENT_CHALLENGE_PLAYER,
+  // ver openChallengePlayer/renderChallengesList em fr/app.js); se nenhum
+  // estiver aberto mas a pessoa estiver navegando a lista, ao menos a
+  // categoria (currentChallengesCategory).
+  try {
+    if (ctx.screen === 'challenges'){
+      if (typeof CURRENT_CHALLENGE_PLAYER !== 'undefined' && CURRENT_CHALLENGE_PLAYER){
+        ctx.challenge_id = CURRENT_CHALLENGE_PLAYER.id;
+        ctx.challenge_type = CURRENT_CHALLENGE_PLAYER.type;
+        ctx.challenge_level = CURRENT_CHALLENGE_PLAYER.level || null;
+      } else if (typeof currentChallengesCategory !== 'undefined' && currentChallengesCategory){
+        ctx.challenge_category = currentChallengesCategory;
+      }
+    }
+  } catch (e) {}
+
   if (extra && typeof extra === 'object') Object.assign(ctx, extra);
   return ctx;
 }

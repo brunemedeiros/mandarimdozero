@@ -4532,6 +4532,11 @@ function openReviewSession(mode){
   document.getElementById('review-content').style.display = mode === 'speed' || mode === 'match' ? 'none' : 'block';
   document.getElementById('speed-review-content').style.display = mode === 'speed' ? 'block' : 'none';
   document.getElementById('match-review-content').style.display = mode === 'match' ? 'block' : 'none';
+  // Só pra diagnóstico de report (ver captureReportContext em
+  // shared/reports.js) -- Flashcard e Palavras difíceis usam a mesma tela
+  // #review-content, sem isso não dava pra distinguir qual delas gerou o
+  // report. Não afeta nenhuma lógica de revisão/memória.
+  STATE.reviewActiveMode = mode;
 
   if (mode === 'flashcard'){
     STATE.reviewSessionUnitFilter = null;
@@ -6934,6 +6939,10 @@ const CHALLENGE_CATEGORIES = [
 ];
 
 let currentChallengesCategory = 'expression';
+// Desafio aberto no momento (ver openChallengePlayer/renderChallengesList)
+// -- só pra contexto automático de report (shared/reports.js), sem
+// nenhuma outra leitura no resto do app.
+let CURRENT_CHALLENGE_PLAYER = null;
 
 function isChallengesAdmin(){
   return !!(CURRENT_USER && CURRENT_USER.email === CHALLENGES_ADMIN_EMAIL);
@@ -7103,6 +7112,7 @@ function renderChallengesList(type){
   document.getElementById('challenges-list-wrap').style.display = 'block';
   document.getElementById('challenge-player-wrap').style.display = 'none';
   document.getElementById('challenges-admin-wrap').style.display = 'none';
+  CURRENT_CHALLENGE_PLAYER = null;
 
   const cat = CHALLENGE_CATEGORIES.find(c => c.type === type);
   document.getElementById('challenges-list-title').textContent = cat ? cat.title : 'Desafios';
@@ -7318,6 +7328,10 @@ function openChallengePlayer(id){
   document.getElementById('challenges-list-wrap').style.display = 'none';
   document.getElementById('challenge-player-wrap').style.display = 'block';
   document.getElementById('challenge-preview-banner').style.display = 'none';
+  // Só pra diagnóstico de report (ver captureReportContext em
+  // shared/reports.js) -- não existia nenhuma referência global ao desafio
+  // aberto no momento (`c` era só uma variável local desta função).
+  CURRENT_CHALLENGE_PLAYER = { id: c.id, type: c.type, level: c.level };
 
   if (c.type === 'listen_translate') return openListenTranslatePlayer(c);
   if (c.type === 'accent') return openAccentPlayer(c);

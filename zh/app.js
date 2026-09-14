@@ -4871,6 +4871,11 @@ function openReviewSession(mode){
   document.getElementById('review-content').style.display = mode === 'speed' || mode === 'match' ? 'none' : 'block';
   document.getElementById('speed-review-content').style.display = mode === 'speed' ? 'block' : 'none';
   document.getElementById('match-review-content').style.display = mode === 'match' ? 'block' : 'none';
+  // Só pra diagnóstico de report (ver captureReportContext em
+  // shared/reports.js) -- Flashcard e Palavras difíceis usam a mesma tela
+  // #review-content, sem isso não dava pra distinguir qual delas gerou o
+  // report. Não afeta nenhuma lógica de revisão/memória.
+  STATE.reviewActiveMode = mode;
 
   if (mode === 'flashcard'){
     STATE.reviewSessionUnitFilter = null;
