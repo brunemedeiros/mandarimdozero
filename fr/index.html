@@ -1205,10 +1205,29 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
 .review-empty .big-emoji{ font-size:52px; margin-bottom:12px; }
 .review-empty h3{ margin:0 0 6px; font-size:19px; }
 .review-empty p{ color:var(--ink-soft); margin:0 0 20px; font-size:14px; }
+.review-complete-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+.review-complete-actions .btn{ min-width:140px; }
+
+/* "Você está em dia" / "Ainda não há revisões" -- substitui os tiles de
+   Flashcard/Speed Review quando não há nada devido (projeto "Reorganização
+   da experiência de revisão e prática"), no mesmo espaço, sem parecer 2
+   botões desabilitados. */
+.review-mode-empty{
+  text-align:center; padding:28px 20px; background: var(--paper); border:1px solid var(--paper-line);
+  border-radius: var(--radius); box-shadow: var(--shadow-card);
+}
+.review-mode-empty .icon{ font-size:38px; margin-bottom:8px; }
+.review-mode-empty-title{ font-size:16px; font-weight:800; color:var(--ink); margin-bottom:4px; }
+.review-mode-empty-desc{ font-size:13px; color:var(--ink-soft); }
 
 .review-progress{ display:flex; align-items:center; gap:10px; margin-bottom:18px; }
 
-.review-mode-cards{ display:grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap:12px; }
+/* Projeto "Reorganização da experiência de revisão e prática": a tela de
+   Revisão separa REVISAR (Flashcard/Speed Review, mesma fila devida) de
+   PRATICAR (Combinar/Palavras difíceis, sempre disponíveis) -- dois grids
+   .review-mode-cards distintos, cada um sob sua própria .section-label. */
+.review-section-hint{ font-size:12px; color:var(--ink-soft); margin:0 0 12px; line-height:1.5; }
+.review-mode-cards{ display:grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap:12px; margin-bottom:22px; }
 .review-mode-card{
   background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
   padding: 20px 16px; text-align:center; cursor:pointer; box-shadow: var(--shadow-card);
@@ -1238,10 +1257,13 @@ body.lesson-focus #review-reminder-banner{ display:none !important; }
    SÓ uma contagem visual do vocabulário já revisável -- não é SRS novo, não
    abre carta nenhuma, não é modo de revisão (ver vocabStrengthBuckets() em
    app.js). Pote que enche de baixo pra cima, proporcional à MAIOR das 3
-   categorias -- dá pra ver de relance qual predomina na coleção. */
+   categorias -- dá pra ver de relance qual predomina na coleção. Mora em
+   Progresso (view-progress), não mais na tela de Revisão -- projeto
+   "Reorganização da experiência de revisão e prática": esse dado responde
+   "como está meu vocabulário", não "o que eu devo estudar agora", então
+   não deve competir por atenção com REVISAR/PRATICAR. */
 #vocab-strength-widget:empty{ display:none; }
 #vocab-strength-widget{ text-align:center; margin-bottom:22px; }
-#vocab-strength-widget .section-label{ margin-top:0; }
 .vocab-strength-row{ display:flex; justify-content:center; gap:28px; }
 .vs-item{ display:flex; align-items:flex-end; gap:9px; flex:0 0 auto; }
 .vs-jar{
@@ -2928,11 +2950,16 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <div id="review-mode-select-wrap">
       <div class="path-header">
         <h2>Revisão</h2>
-        <p>Escolha como quer revisar hoje.</p>
+        <p>O que você deve fazer agora?</p>
       </div>
       <div id="review-today-widget"></div>
-      <div id="vocab-strength-widget"></div>
-      <div class="review-mode-cards" id="review-mode-cards"></div>
+
+      <div class="section-label">Revisar</div>
+      <div class="review-mode-cards" id="review-mode-cards-revisar"></div>
+
+      <div class="section-label">Praticar</div>
+      <p class="review-section-hint">Continue treinando quando quiser, mesmo sem revisões pendentes.</p>
+      <div class="review-mode-cards" id="review-mode-cards-praticar"></div>
     </div>
 
     <div id="review-session-wrap" style="display:none;">
@@ -3009,6 +3036,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <div class="section-label conquests-label">Conquistas <span class="conquests-count" id="badge-grid-count"></span></div>
     <div class="badge-grid conquests-grid" id="badge-grid"></div>
     <div class="stat-cards" id="stat-cards"></div>
+    <div id="vocab-strength-widget"></div>
     <div class="section-label">Atividade diária</div>
     <div class="heatmap-wrap" id="heatmap-wrap"></div>
     <div class="section-label">Palavras aprendidas ao longo do tempo</div>
