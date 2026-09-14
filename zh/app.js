@@ -1609,6 +1609,13 @@ function unitBlockState(u){
 // mesmo modo revisão não-destrutivo de openLessonReview (ver
 // STEP_STATE.lessonReview): a lição abre pra estudo/conferência, mas
 // terminar ela não avança lessonIdx nem concede XP/desafio.
+//
+// Isto é sempre a IDENTIDADE (isAdminUser -- calculada por e-mail, nunca
+// muda) -- o bypass de navegação abaixo em buildUnitBlock() só se aplica
+// quando isAdminModeOn() (shared/profile.js) também for true. Com Admin
+// Mode OFF, a conta continua sendo reconhecida como admin (Painel de
+// Admin, ferramentas etc. -- ver Fase 10), só a navegação/conclusão de
+// lição passa a seguir exatamente a mesma regra de um aluno comum.
 const ADMIN_EMAIL = 'brunemed1310@gmail.com';
 function isAdminUser(){
   return !!(typeof CURRENT_USER !== 'undefined' && CURRENT_USER && CURRENT_USER.email === ADMIN_EMAIL);
@@ -1681,7 +1688,11 @@ function buildUnitBlock(u){
     <div class="ub-lessons" style="${expanded ? '' : 'display:none;'}">
       ${u.lessons.map((l, i) => {
         const st = lessonRowState(u, i);
-        const clickable = isAdminUser() || (unlocked && st === 'done' && !l.isCheckpoint);
+        // Bypass de admin (ver comentário de isAdminUser acima) só se
+        // aplica com Admin Mode ON -- OFF cai exatamente na mesma regra
+        // usada por qualquer aluno (unlocked && já concluída), sem
+        // segunda implementação (Fase 11 da spec de Admin Mode).
+        const clickable = (isAdminUser() && isAdminModeOn()) || (unlocked && st === 'done' && !l.isCheckpoint);
         return `
           <div class="ub-lesson-row ${st}${clickable ? ' clickable' : ''}" ${clickable ? `data-lesson-idx="${i}"` : ''}>
             <div class="ub-lesson-dot ${st}">${st === 'done' ? '✓' : i + 1}</div>

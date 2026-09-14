@@ -127,15 +127,15 @@ async function onUserLoggedIn(user){
   const label = user.user_metadata?.full_name || user.email || 'Minha conta';
   document.getElementById('user-label').textContent = label;
   document.getElementById('user-dropdown-email').textContent = user.email || '';
-  // isAdminUser() vem de languages/<lang>/app.js -- só existe função pra
-  // essa checagem depois que app.js já rodou, o que sempre já aconteceu
-  // quando um login de verdade dispara este fluxo (onAuthStateChange só
-  // é registrado no fim de initAuth, chamada depois de app.js inteiro).
-  // .admin-only-nav cobre o item do menu do avatar E o da sidebar desktop
-  // (Fase 3 da reestruturação de navegação) -- os dois só existem/aparecem
-  // pra quem é admin, sem duplicar essa checagem em dois lugares.
-  const isAdmin = typeof isAdminUser === 'function' && isAdminUser();
-  document.querySelectorAll('.admin-only-nav').forEach(btn => { btn.style.display = isAdmin ? '' : 'none'; });
+  // isAdminUser()/isAdminModeOn() vêm de languages/<lang>/app.js e
+  // shared/profile.js -- só existem depois que os dois já rodaram, o que
+  // sempre já aconteceu quando um login de verdade dispara este fluxo
+  // (onAuthStateChange só é registrado no fim de initAuth, chamada depois
+  // de app.js inteiro). applyAdminModeUI() cuida de .admin-only-nav (menu
+  // do avatar + sidebar desktop) E do pill de Admin Mode na topbar --
+  // única função, pra não duplicar a checagem em vários lugares (ver
+  // Fase 2/9 da spec de Admin Mode).
+  await applyAdminModeUI();
   // Garante que já exista uma linha em `profiles` assim que a pessoa loga --
   // antes, só era criada na primeira vez que ela abria "Meu perfil" (lazy),
   // então quem nunca tinha visitado a aba aparecia como "Aluno(a)" genérico
@@ -151,6 +151,56 @@ async function onUserLoggedIn(user){
   applyPendingLevelTestOffer();
   if (typeof applyPendingNotificationTab === 'function') applyPendingNotificationTab();
 }
+
+// ---------- Admin Mode ON/OFF (topbar) ----------
+// Única função que decide a visibilidade de tudo que depende do Admin
+// Mode: .admin-only-nav (Painel de Admin no menu do avatar + sidebar
+// desktop) e o pill #admin-mode-toggle-btn. Chamada no login (acima) e no
+// clique do próprio pill -- nunca duas implementações da mesma checagem
+// (ver Fase 2/9/12 da spec de Admin Mode). isAdminUser() é a IDENTIDADE
+// (nunca muda) -- só controla se o pill/menu aparecem pra essa conta.
+// isAdminModeOn() é o MODO (ON/OFF) -- só controla, pra quem já é admin,
+// se a navegação atual está em "admin de verdade" ou "simulando aluna".
+// Com Admin Mode OFF, .admin-only-nav some da navegação normal, mas a
+// conta continua sendo admin de fato (Painel de Admin continua acessível
+// por quem souber chegar lá por fora do menu -- Fase 10: nenhuma
+// revogação real de privilégio, só da navegação visível).
+async function applyAdminModeUI(){
+  const admin = typeof isAdminUser === 'function' && isAdminUser();
+  const pill = document.getElementById('admin-mode-toggle-btn');
+  if (!admin){
+    document.querySelectorAll('.admin-only-nav').forEach(el => { el.style.display = 'none'; });
+    if (pill) pill.style.display = 'none';
+    return;
+  }
+  // ensureProfileLoaded() é idempotente (devolve PROFILE_CACHE se já
+  // carregado) -- garante que isAdminModeOn() nunca leia um cache vazio
+  // só porque este fluxo rodou antes do profile ainda ter chegado.
+  if (typeof ensureProfileLoaded === 'function') await ensureProfileLoaded();
+  const on = typeof isAdminModeOn === 'function' && isAdminModeOn();
+  document.querySelectorAll('.admin-only-nav').forEach(el => { el.style.display = on ? '' : 'none'; });
+  if (pill){
+    pill.style.display = '';
+    pill.classList.toggle('active', !on);
+    const label = document.getElementById('admin-mode-state-label');
+    if (label) label.textContent = on ? 'ON' : 'OFF';
+  }
+}
+
+document.getElementById('admin-mode-toggle-btn')?.addEventListener('click', async () => {
+  const wasOn = typeof isAdminModeOn === 'function' && isAdminModeOn();
+  const ok = typeof setAdminMode === 'function' && await setAdminMode(!wasOn);
+  if (!ok) return;
+  await applyAdminModeUI();
+  // Reflete na hora na Trilha -- sem isto, a linha de uma lição já
+  // clicável (ou já não-clicável) continuaria mostrando o estado antigo
+  // até a próxima renderização natural (Fase 3: a troca precisa ser
+  // imediata, não só na próxima navegação).
+  if (typeof renderUnitsGrid === 'function') renderUnitsGrid();
+  showToast(wasOn
+    ? '🔒 Admin Mode desligado — navegando como uma aluna comum.'
+    : '🔒 Admin Mode ligado — privilégios de admin restaurados.');
+});
 
 // #mais-btn é o botão "Mais" da barra inferior mobile (Fase 6) -- abre o
 // mesmo dropdown do pill de conta (que no mobile vira bottom sheet via

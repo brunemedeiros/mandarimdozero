@@ -240,6 +240,35 @@ async function setExcludeOwnActivity(value){
   return true;
 }
 
+// ---------- Admin Mode ON/OFF ----------
+// Fonte única de verdade do "simular experiência de estudante" -- ver
+// migration 023_add_admin_mode_to_profiles.sql. Sempre SEPARADO de
+// isAdminUser() (identidade, calculada por e-mail em languages/<lang>/
+// app.js, nunca muda): isAdminModeOn() só decide como a NAVEGAÇÃO/
+// EXPERIÊNCIA se comporta pra quem já É admin. Pra quem não é admin isto
+// nunca é consultado (a conta comum sempre segue a regra normal de
+// estudante, sem passar por aqui) -- por segurança devolve false mesmo
+// assim se for chamado.
+// Default true (ON) enquanto o profile ainda não carregou (mesmo motivo
+// do default do banco): nunca restringe a própria autora achando que ela
+// desligou algo que na verdade só ainda não chegou do Supabase.
+function isAdminModeOn(){
+  if (typeof isAdminUser !== 'function' || !isAdminUser()) return false;
+  return PROFILE_CACHE ? PROFILE_CACHE.admin_mode !== false : true;
+}
+
+async function setAdminMode(value){
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .update({ admin_mode: !!value })
+    .eq('user_id', CURRENT_USER.id)
+    .select()
+    .single();
+  if (error){ console.error('Erro ao salvar Admin Mode:', error); return false; }
+  PROFILE_CACHE = data;
+  return true;
+}
+
 // ---------- Avatar (upload de foto) ----------
 // "Crop simples" (ver "Priorização" na arquitetura aprovada): corta pro
 // quadrado central automaticamente, sem UI de arrastar/ajustar -- e
