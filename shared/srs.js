@@ -1,12 +1,18 @@
-// ---------- Motor de repetição espaçada: SM-2 (idêntico em espírito ao Anki) ----------
-// Puro algoritmo + utilitários de data -- não depende de nenhum conteúdo
-// pedagógico específico de idioma, só do formato genérico de STATE.cards
-// (cada card com reps/interval/ef/lapses/due/firstLearnedDate) e de
-// unit.vocab (array de itens de vocabulário por unidade), formato usado
-// pelos dois idiomas.
-// grade: 0=Errei, 1=Difícil, 2=Bom, 3=Fácil
+// ---------- Utilitários de fila/data + ponte pra exercícios de lição ----------
+// O motor de memória de verdade (FSRS-6: scheduleReview/applyMemoryGrade/
+// migrateCardToFSRS) mora em shared/fsrs.js desde a Fase 3 da
+// reestruturação; a seleção de quem entra numa sessão vem de
+// shared/study-queue.js. Este arquivo ficou só com utilitários que não
+// dependem do algoritmo em si -- filtro de due/novos, datas, XP por grade
+// -- e a ponte que conecta exercícios de lição ao motor de memória. Não
+// depende de nenhum conteúdo pedagógico específico de idioma, só do
+// formato genérico de STATE.cards e de unit.vocab (array de itens de
+// vocabulário por unidade), formato usado pelos dois idiomas.
+// grade (escala SM2 usada nos 4 pontos de entrada -- Flashcard/Speed
+// Review/Combinar/exercícios): 0=Errei, 1=Difícil, 2=Bom, 3=Fácil.
+// Ver ARCHITECTURE.md na raiz do repo pra a arquitetura completa.
 
-// Conecta o resultado de um exercício de vocabulário ao mesmo sistema SM-2
+// Conecta o resultado de um exercício de vocabulário ao motor de memória
 // usado pelo Flashcard — sem isso, "palavras aprendidas" (usado no card da
 // trilha e na conclusão de unidade) só contava revisões feitas no Flashcard,
 // deixando a contagem baixa mesmo depois de completar 100% dos exercícios.
@@ -25,46 +31,12 @@ function registerExerciseCorrect(unit, vocabItem){
   }
 }
 
-function applySM2(card, grade){
-  const now = Date.now();
-  const DAY = 24*60*60*1000;
-
-  if (grade === 0){
-    // Errou: reseta repetições, intervalo curto, aumenta lapses
-    card.reps = 0;
-    card.interval = 0;
-    card.lapses += 1;
-    card.ef = Math.max(1.3, card.ef - 0.2);
-    card.due = now + (10*60*1000); // reaparece em 10 min (mesma sessão)
-    return;
-  }
-
-  // Ajuste do EF conforme qualidade da resposta (mapeando 1/2/3 -> escala 0-5 do SM-2 original)
-  const qMap = { 1: 3, 2: 4, 3: 5 }; // difícil~3, bom~4, fácil~5
-  const q = qMap[grade];
-  card.ef = Math.max(1.3, card.ef + (0.1 - (5-q)*(0.08 + (5-q)*0.02)));
-
-  card.reps += 1;
-
-  // Registra a data da primeira vez que essa palavra foi efetivamente
-  // aprendida (reps saindo de 0) — usado no gráfico de progresso acumulado.
-  if (card.reps === 1 && !card.firstLearnedDate){
-    card.firstLearnedDate = todayStr();
-  }
-
-  if (card.reps === 1){
-    card.interval = grade === 1 ? 1 : (grade === 2 ? 1 : 3);
-  } else if (card.reps === 2){
-    card.interval = grade === 1 ? 3 : (grade === 2 ? 6 : 8);
-  } else {
-    let base = card.interval * card.ef;
-    if (grade === 1) base = card.interval * 1.2; // difícil: cresce pouco
-    if (grade === 3) base = card.interval * card.ef * 1.3; // fácil: bônus
-    card.interval = Math.round(base);
-  }
-
-  card.due = now + card.interval * DAY;
-}
+// applySM2() (o motor SM-2 original) foi removido na Fase 15 da
+// reestruturação de memória -- substituído por scheduleReview()/
+// applyMemoryGrade() em shared/fsrs.js desde a Fase 3/5, sem nenhum call
+// site restante. card.ef continua existindo em STATE.cards só como dado
+// legado lido por migrateCardToFSRS() (bridge de migração, shared/fsrs.js)
+// -- nenhum código novo escreve nele.
 
 // Direção do flashcard (estilo Anki: frente->verso e verso->frente), igual
 // pros dois idiomas -- só o CONTEÚDO de cada lado é específico de idioma
