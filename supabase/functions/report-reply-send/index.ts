@@ -42,6 +42,18 @@ const resendFromEmail = Deno.env.get('RESEND_FROM_EMAIL');
 // confiar só em o front-end esconder o botão de responder.
 const ADMIN_EMAIL = 'brunemed1310@gmail.com';
 
+// Nome de exibição do curso por idioma, pro rodapé do e-mail de resposta --
+// mesmo mapeamento key->rótulo já usado em shared/admin-reports.js
+// (REPORT_LANGUAGE_LABELS) e mesmo texto gerado por course_name() em
+// scripts/generate_pwa_assets.py, mas repetido aqui porque Edge Functions
+// rodam isoladas (Deno, sem bundler) e não importam os arquivos JS do
+// front-end (ver Bloco 6/Fase B6 da tarefa de rebranding -- antes o texto
+// era fixo "Francês/Mandarim do Zero" pros dois idiomas ao mesmo tempo).
+const LANGUAGE_APP_KEY_TO_COURSE_NAME: Record<string, string> = {
+  frances: 'Francês com Prof. Brune',
+  mandarim: 'Chinês com Prof. Brune',
+};
+
 function jsonResponse(body: Record<string, unknown>, status: number): Response {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 }
@@ -77,7 +89,7 @@ Deno.serve(async (req: Request) => {
 
   const { data: report, error: reportError } = await asCaller
     .from('reports')
-    .select('id, user_id, reporter_email')
+    .select('id, user_id, reporter_email, language_app_key')
     .eq('id', reportId)
     .single();
   if (reportError || !report) {
@@ -99,11 +111,13 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ ok: false, error: 'email_not_configured' }, 500);
   }
 
+  const courseName = LANGUAGE_APP_KEY_TO_COURSE_NAME[report.language_app_key] || 'Idiomas com Prof. Brune';
+
   // white-space:pre-wrap preserva as quebras de linha que a admin digitou
   // no textarea, sem precisar converter \n em <br> manualmente.
   const html = `<div style="font-family:-apple-system,sans-serif;max-width:480px;margin:0 auto;padding:24px;">
     <p style="font-size:15px;line-height:1.6;color:#241A15;white-space:pre-wrap;">${body.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</p>
-    <p style="font-size:12px;color:#93856F;margin-top:32px;">Resposta ao report que você enviou no Francês/Mandarim do Zero.</p>
+    <p style="font-size:12px;color:#93856F;margin-top:32px;">Resposta ao report que você enviou no ${courseName}.</p>
   </div>`;
 
   try {
