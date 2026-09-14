@@ -217,7 +217,7 @@ async function renderAdminNotificationsView(){
         <label class="profile-edit-label" for="admin-template-lang">Idioma do app</label>
         <select id="admin-template-lang" class="profile-edit-input">
           <option value="frances">🇫🇷 Francês</option>
-          <option value="mandarim">🇨🇳 Mandarim</option>
+          <option value="mandarim">🇨🇳 Chinês</option>
         </select>
         <label class="profile-edit-label" for="admin-template-channel">Canal</label>
         <select id="admin-template-channel" class="profile-edit-input">
