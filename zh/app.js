@@ -4813,9 +4813,11 @@ function renderReviewModeSelect(){
   const revisarEl = document.getElementById('review-mode-cards-revisar');
   if (dueCount === 0){
     const emptyTitle = pool.length === 0 ? 'Ainda não há revisões' : 'Você está em dia!';
+    // Descrição não repete "nenhuma revisão pendente agora" -- o widget
+    // "Revisões de hoje" logo acima já diz isso; aqui só o próximo passo.
     const emptyDesc = pool.length === 0
       ? 'Complete uma lição no Estudo pra começar a ter palavras pra revisar.'
-      : 'Nenhuma revisão pendente agora. Praticar continua disponível logo abaixo, quando quiser.';
+      : 'Praticar continua disponível logo abaixo, quando quiser.';
     revisarEl.innerHTML = `
       <div class="review-mode-empty">
         <div class="icon">🍵</div>
