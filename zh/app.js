@@ -361,12 +361,23 @@ function wireKnowButtons(container){
       if (!card) return;
 
       if (card.reps > 0){
-        // já estava marcado — permite desmarcar caso tenha sido engano
+        // já estava marcado — permite desmarcar caso tenha sido engano.
+        // Fase 15: precisa resetar TAMBÉM os campos do motor FSRS (não só
+        // os legados de compatibilidade) -- senão o cartão ficava num
+        // estado inconsistente (reps=0/due=0 mas state='review' e
+        // stability>0), e desmarcar+remarcar de novo reaproveitava a
+        // stability antiga em vez de tratar como aprendizagem nova.
         card.reps = 0;
         card.interval = 0;
         card.due = 0;
         card.ef = 2.5;
         card.firstLearnedDate = null;
+        card.stability = 0;
+        card.difficulty = 0;
+        card.state = 'new';
+        card.lastReview = null;
+        card.fsrsReps = 0;
+        card.fsrsLapses = 0;
         btn.classList.remove('known');
         btn.textContent = 'Já sei?';
       } else {
@@ -863,9 +874,12 @@ function applySerializedState(data){
   if (data.storyProgress) Object.assign(STATE.storyProgress, data.storyProgress);
 }
 
-// SM-2 (registerExerciseCorrect, applySM2, cardsDueNow, newCards),
-// XP_PER_GRADE, todayStr e dateStrDaysAgo agora vêm de shared/srs.js --
-// mesmo algoritmo, mesmo formato de STATE.cards nos dois idiomas.
+// registerExerciseCorrect, cardsDueNow, newCards, XP_PER_GRADE, todayStr e
+// dateStrDaysAgo vêm de shared/srs.js; scheduleReview/applyMemoryGrade/
+// migrateCardToFSRS (o motor de memória de verdade, desde a Fase 3 da
+// reestruturação) vêm de shared/fsrs.js; getStudyQueue de
+// shared/study-queue.js -- mesmo motor, mesmo formato de STATE.cards nos
+// dois idiomas. Ver ARCHITECTURE.md na raiz do repo.
 
 
 function registerStudyToday(){
@@ -5452,7 +5466,7 @@ function gradeCurrentCard(grade){
   const card = STATE.reviewQueue[STATE.reviewIndex];
   // Atrasada de verdade = venceu ANTES de hoje, não só "due agora" (toda
   // carta na fila já é due por definição -- ver eligibleReviewPool). Precisa
-  // ser lido antes de applySM2 mutar card.due pra reavaliação.
+  // ser lido antes de applyMemoryGrade/scheduleReview mutar card.due pra reavaliação.
   const wasOverdue = card.due > 0 && card.due < new Date().setHours(0, 0, 0, 0);
   const intervalBefore = card.interval;
   // Grava a direção mostrada nesta revisão -- da próxima vez que essa carta
