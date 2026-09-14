@@ -39,7 +39,23 @@ const REPORT_PRIORITY_LABELS = { baixa: 'Baixa', media: 'Média', alta: 'Alta', 
 const REPORT_CATEGORY_LABELS_BY_ID = Object.fromEntries(REPORT_CATEGORIES.map(c => [c.id, c.label]));
 const REPORT_SEVERITY_LABELS_BY_ID = Object.fromEntries(REPORT_SEVERITIES.map(s => [s.id, s.label]));
 
-const ADMIN_REPORTS_STATE = { statusFilter: 'all', kindFilter: 'all' };
+// Fase 7 do projeto "Report global": idioma vem de `language_app_key`
+// (o APP_KEY de cada languages/<lang>/app.js) -- valores fixos hoje, mas
+// um idioma novo no futuro só cai no fallback abaixo (mostra a key crua),
+// nunca quebra a lista.
+const REPORT_LANGUAGE_LABELS = { frances: 'Francês', mandarim: 'Chinês' };
+
+// Fase 7: rótulo amigável pra `context.screen` (a aba ativa no momento do
+// report, ver captureReportContext em shared/reports.js) -- cobre as abas
+// dos dois idiomas; uma tela nova cai no fallback (mostra o id cru) sem
+// quebrar a lista.
+const REPORT_SCREEN_LABELS = {
+  path: 'Estudo', review: 'Revisão', hanzi: '汉字', conjugaison: 'Conjugação',
+  challenges: 'Desafios', dictation: 'Ditado', profile: 'Perfil', progress: 'Progresso',
+  goals: 'Metas', leaderboard: 'Ranking', settings: 'Configurações', 'admin-badges': 'Painel de Admin',
+};
+
+const ADMIN_REPORTS_STATE = { statusFilter: 'all', kindFilter: 'all', languageFilter: 'all' };
 let ADMIN_REPORTS_CACHE = [];
 // user_id -> { username, display_name }. `profiles` é publicamente legível
 // (ver profiles_public_read, migration 001 -- não guarda nada sensível), só
@@ -51,6 +67,7 @@ async function fetchAdminReports(){
   let query = supabaseClient.from('reports').select('*').order('created_at', { ascending: false }).limit(200);
   if (ADMIN_REPORTS_STATE.statusFilter !== 'all') query = query.eq('status', ADMIN_REPORTS_STATE.statusFilter);
   if (ADMIN_REPORTS_STATE.kindFilter !== 'all') query = query.eq('kind', ADMIN_REPORTS_STATE.kindFilter);
+  if (ADMIN_REPORTS_STATE.languageFilter !== 'all') query = query.eq('language_app_key', ADMIN_REPORTS_STATE.languageFilter);
   const { data, error } = await query;
   if (error){ console.error('Erro ao carregar reports:', error); return []; }
   return data || [];
@@ -110,18 +127,31 @@ async function renderAdminReportsView(){
   const kindOptionsHTML = [
     ['all', 'Problemas e sugestões'], ['problema', 'Só problemas'], ['sugestao', 'Só sugestões'],
   ].map(([k, label]) => `<option value="${k}" ${ADMIN_REPORTS_STATE.kindFilter === k ? 'selected' : ''}>${label}</option>`).join('');
+  // Fase 7: filtro de idioma -- a lista de opções vem do próprio mapa de
+  // rótulos (nunca hardcoded em outro lugar), então um idioma novo só
+  // precisa ser adicionado em REPORT_LANGUAGE_LABELS pra aparecer aqui.
+  const languageOptionsHTML = ['all', ...Object.keys(REPORT_LANGUAGE_LABELS)].map(l =>
+    `<option value="${l}" ${ADMIN_REPORTS_STATE.languageFilter === l ? 'selected' : ''}>${l === 'all' ? 'Todos os idiomas' : REPORT_LANGUAGE_LABELS[l]}</option>`
+  ).join('');
 
   const rowsHTML = ADMIN_REPORTS_CACHE.length ? ADMIN_REPORTS_CACHE.map(r => {
     const catLabel = REPORT_CATEGORY_LABELS_BY_ID[r.category] || r.category;
     const dateLabel = new Date(r.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
     const who = escapeHTML(reporterLabel(r));
     const snippet = (r.description || '').slice(0, 90) + ((r.description || '').length > 90 ? '…' : '');
+    // Fase 7: idioma e origem/tela direto na linha da lista -- antes só
+    // apareciam abrindo o detalhe (idioma nem aparecia lá, "screen" só
+    // existe no context desde a Fase 3-4). Reports antigos sem
+    // language_app_key/context.screen caem no fallback, nunca quebram.
+    const langLabel = REPORT_LANGUAGE_LABELS[r.language_app_key] || r.language_app_key || '?';
+    const screenKey = r.context?.screen;
+    const screenLabel = screenKey ? (REPORT_SCREEN_LABELS[screenKey] || screenKey) : null;
     return `
       <div class="admin-badge-row" data-report-row="${r.id}">
         <span class="admin-badge-icon">${r.kind === 'sugestao' ? '💡' : '⚑'}</span>
         <div class="admin-badge-info">
           <div class="admin-badge-name">${escapeHTML(catLabel)} -- ${escapeHTML(snippet)}</div>
-          <div class="admin-badge-desc">${dateLabel} · ${who} · <span class="admin-report-status-pill" data-status="${r.status}">${REPORT_STATUS_LABELS[r.status] || r.status}</span></div>
+          <div class="admin-badge-desc">${dateLabel} · ${who} · ${escapeHTML(langLabel)}${screenLabel ? ` · ${escapeHTML(screenLabel)}` : ''} · <span class="admin-report-status-pill" data-status="${r.status}">${REPORT_STATUS_LABELS[r.status] || r.status}</span></div>
         </div>
         <button class="admin-badge-edit-btn" data-report-detail="${r.id}" title="Ver detalhes">✏️</button>
       </div>
@@ -131,10 +161,11 @@ async function renderAdminReportsView(){
   wrap.innerHTML = `
     <div class="profile-section">
       <div class="section-label">⚑ Reports de bugs e sugestões</div>
-      <p class="profile-edit-hint">Enviados pela bandeira ⚑ (menu do usuário ou dentro dos exercícios). Convidados também podem reportar -- reports sem conta e sem e-mail informado aparecem como "convidada".</p>
+      <p class="profile-edit-hint">Enviados pela bandeira ⚑ (topbar, menu do usuário ou dentro dos exercícios). Convidados também podem reportar -- reports sem conta e sem e-mail informado aparecem como "convidada".</p>
       <div class="admin-report-filters">
         <select id="admin-report-status-filter" class="profile-edit-input">${statusOptionsHTML}</select>
         <select id="admin-report-kind-filter" class="profile-edit-input">${kindOptionsHTML}</select>
+        <select id="admin-report-language-filter" class="profile-edit-input">${languageOptionsHTML}</select>
       </div>
     </div>
     <div class="profile-section">
@@ -148,6 +179,10 @@ async function renderAdminReportsView(){
   });
   document.getElementById('admin-report-kind-filter').addEventListener('change', (e) => {
     ADMIN_REPORTS_STATE.kindFilter = e.target.value;
+    renderAdminReportsView();
+  });
+  document.getElementById('admin-report-language-filter').addEventListener('change', (e) => {
+    ADMIN_REPORTS_STATE.languageFilter = e.target.value;
     renderAdminReportsView();
   });
   wrap.querySelectorAll('[data-report-detail]').forEach(btn => {
