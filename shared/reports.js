@@ -14,6 +14,25 @@
 // comentários em shared/supabase_migrations/020_create_reports_table.sql /
 // 021_create_report_screenshots_bucket.sql pro desenho de schema/RLS que
 // este arquivo grava.
+//
+// ---------- Report GLOBAL vs. Report CONTEXTUAL (projeto "Report global") ----------
+// UM SÓ sistema/backend (openReportModal/submitReport/captureReportContext
+// abaixo) -- nunca dois. O que muda é só de ONDE o clique parte:
+//   - GLOBAL: pill ⚑ fixo na topbar (#report-topbar-btn, wireReportModal
+//     abaixo) -- alcançável de qualquer tela onde a topbar existe (todas,
+//     exceto o Focus Mode -- ver próximo item). Também o item "Reportar
+//     problema" do dropdown de conta (#report-menu-btn, wired em cada
+//     <lang>/app.js), caminho alternativo mais antigo, mantido.
+//   - CONTEXTUAL: bandeira ⚑ dentro do Focus Mode (#report-flag-lesson-btn,
+//     em .lesson-focus-bar). Existe porque a topbar INTEIRA (incluindo o
+//     pill global) fica escondida durante o Focus Mode por design
+//     (#app.lesson-focus .topbar{display:none} -- distração mínima durante
+//     a lição, ver <lang>/index.html) -- sem essa bandeira própria, reportar
+//     durante um exercício seria impossível.
+// Os dois chamam openReportModal(extraContext) só com um `source` diferente
+// ({source:'topbar'} vs {source:'exercise'}) -- captureReportContext()
+// pega o resto (unidade/lição/exercício atual) automaticamente dos dois,
+// sem o chamador precisar saber nada sobre isso.
 
 const REPORT_CATEGORIES = [
   { id: 'bug_tecnico', label: 'Bug / erro técnico', kind: 'problema' },
