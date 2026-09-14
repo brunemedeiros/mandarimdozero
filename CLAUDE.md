@@ -38,6 +38,16 @@ mensagem final, não só a menção de que "uma migração é necessária". Se v
 migrações pendentes se acumularem (ainda não confirmadas como rodadas),
 relistar todas com seus links a cada entrega nova, não só a mais recente.
 
+**Migrações já aplicadas ao vivo por uma sessão (via MCP Supabase), não
+"pendentes":** `023_add_admin_mode_to_profiles.sql` (Admin Mode ON/OFF,
+2026-09-14) -- coluna `profiles.admin_mode boolean not null default true`,
+aditiva/sem risco, aplicada diretamente via `mcp__Supabase__apply_migration`
+no projeto `eigjocalzwamisgqilhg` na mesma sessão que a criou. Nenhuma ação
+manual da autora é necessária pra essa. Sempre que uma sessão futura tiver
+acesso ao MCP do Supabase e a migration for aditiva/de baixo risco (nova
+coluna com default, nova tabela), preferir aplicar direto e registrar aqui
+como feito, em vez de deixar como pendência pra autora rodar manualmente.
+
 ## Considerar plano gratuito x premium em toda funcionalidade nova
 
 O objetivo do produto deixou de ser só estudo pessoal: a direção agora é

@@ -209,6 +209,15 @@ body{
 .pill.streak{ background: linear-gradient(120deg, #FBE1F5, var(--paper-warm)); color: var(--ink); }
 .pill.xp{ background: linear-gradient(120deg, rgba(227,107,202,0.14), var(--paper-warm)); color: var(--ink); }
 a.pill{ text-decoration:none; cursor:pointer; }
+/* Admin Mode ON/OFF (topbar) -- só renderizado quando isAdminUser()===true
+   (ver applyAdminModeUI em shared/auth.js). .active marca o estado OFF --
+   destaca o estado "fora do normal", pra autora nunca esquecer que está
+   simulando a experiência de uma aluna comum. */
+.admin-mode-toggle-btn{
+  cursor:pointer; border:1px solid var(--paper-line); background: var(--paper-warm);
+  font-weight:700; color: var(--ink-soft); font-size:13px;
+}
+.admin-mode-toggle-btn.active{ background: #7C3AED; border-color: #7C3AED; color: #fff; }
 /* Número dos pills de XP/streak (topbar + card "Status" da sidebar) --
    display:inline-block é permanente pra caber o scale() do "pop" sem
    pulo de layout quando o número muda (ver animateStatPill em
@@ -2811,6 +2820,12 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <div class="stats-pills">
       <div class="pill streak">🔥 <span id="streak-count" class="stat-count">0</span></div>
       <div class="pill xp">⭐ <span id="xp-count" class="stat-count">0</span><span class="xp-suffix"> XP</span></div>
+      <!-- Admin Mode ON/OFF: só a conta admin vê isto (ver applyAdminModeUI
+           em shared/auth.js) -- OFF simula a experiência de uma aluna
+           comum na navegação/conclusão de lição, sem revogar privilégios
+           administrativos reais (Painel de Admin etc. continuam
+           acessíveis pela conta, só saem da navegação normal). -->
+      <button class="pill admin-mode-toggle-btn" id="admin-mode-toggle-btn" aria-label="Ativar/desativar Admin Mode" title="Admin Mode: OFF simula a experiência de uma aluna comum" style="display:none;">🔒 Admin: <span id="admin-mode-state-label">ON</span></button>
       <button class="pill notifications-pill" id="notifications-topbar-btn" aria-label="Notificações" title="Notificações">🔔<span class="notifications-badge" id="notifications-badge" style="display:none;"></span></button>
       <button class="pill report-topbar-pill" id="report-topbar-btn" aria-label="Reportar problema" title="Reportar problema">⚑</button>
       <div class="lang-switcher">

@@ -2334,6 +2334,17 @@ footer.app-footer img{ height:40px; opacity:.85; }
 }
 .pinyin-toggle-btn.active{ background: var(--seal-red); border-color: var(--seal-red); color: var(--gold-bright); }
 
+/* Admin Mode ON/OFF (topbar, mesmo padrão visual do pill de Pinyin) --
+   só renderizado quando isAdminUser()===true (ver applyAdminModeUI em
+   shared/auth.js). .active marca o estado OFF -- é o estado "fora do
+   normal" que vale destacar, pra autora nunca esquecer que está
+   simulando a experiência de uma aluna comum. */
+.admin-mode-toggle-btn{
+  cursor:pointer; border:1px solid var(--paper-line); background: var(--paper-warm);
+  font-weight:700; color: var(--ink-soft); font-size:13px;
+}
+.admin-mode-toggle-btn.active{ background: #7C3AED; border-color: #7C3AED; color: #fff; }
+
 /* Modo "sem pinyin": esconde globalmente qualquer elemento com classe .pinyin
    em qualquer tela do app (vocabulário, frases, diálogo, exercícios, flashcards,
    manual, hanzi) — força a leitura só em caracteres chineses. */
@@ -2517,6 +2528,12 @@ body.hide-pinyin .prompt-pinyin{
              Elemento continua existindo (só escondido) porque togglePinyinVisibility()
              ainda referencia o id direto -- ver languages/zh/app.js. -->
         <button class="pill pinyin-toggle-btn" id="pinyin-toggle-btn" aria-label="Esconder/mostrar pinyin" title="Esconder/mostrar pinyin" style="display:none;">🔤 Pinyin: <span id="pinyin-state-label">ON</span></button>
+        <!-- Admin Mode ON/OFF: só a conta admin vê isto (ver applyAdminModeUI
+             em shared/auth.js) -- OFF simula a experiência de uma aluna
+             comum na navegação/conclusão de lição, sem revogar privilégios
+             administrativos reais (Painel de Admin etc. continuam
+             acessíveis pela conta, só saem da navegação normal). -->
+        <button class="pill admin-mode-toggle-btn" id="admin-mode-toggle-btn" aria-label="Ativar/desativar Admin Mode" title="Admin Mode: OFF simula a experiência de uma aluna comum" style="display:none;">🔒 Admin: <span id="admin-mode-state-label">ON</span></button>
         <!-- Busca: escondida da topbar (pedido explícito) -- sem versão dentro da
              lição, já que buscar vocabulário não faz sentido no meio de um exercício.
              Feature em si continua funcional (buildSearchIndex/renderSearchResults em
