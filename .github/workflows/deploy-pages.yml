@@ -34,6 +34,16 @@ jobs:
       - name: Configura o GitHub Pages
         uses: actions/configure-pages@v5
 
+      # Versionamento automático do cache do Service Worker (Fase 4 da tarefa
+      # PWA/mobile): troca o placeholder __BUILD_ID__ (ver fr/service-worker.js
+      # e zh/service-worker.js) pelo SHA curto deste commit. Isso muda
+      # CACHE_NAME em TODO deploy sem depender de ninguém lembrar de bumpar um
+      # número à mão -- elimina o risco de "GitHub Pages atualizou, PWA
+      # continua preso na versão antiga" por esquecimento.
+      - name: Injeta versão do build no Service Worker
+        run: |
+          sed -i "s/__BUILD_ID__/${GITHUB_SHA::7}/" fr/service-worker.js zh/service-worker.js
+
       - name: Empacota o site (sem build -- HTML/JS estático)
         uses: actions/upload-pages-artifact@v3
         with:
