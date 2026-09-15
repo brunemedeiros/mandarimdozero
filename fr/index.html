@@ -85,6 +85,28 @@ try{
   --radius: 14px;
   --shadow-card: 0 2px 8px rgba(33,23,20,0.08), 0 1px 2px rgba(33,23,20,0.06);
   --shadow-lift: 0 8px 24px rgba(33,23,20,0.14);
+
+  /* Escala de camadas (z-index) -- nomeia os valores que já estavam
+     espalhados pelo CSS como números soltos (100, 999, 1000...). A ORDEM
+     numérica de cada um é a mesma de antes (nenhum comportamento de
+     empilhamento muda); só ganhou nome pra não depender de decorar "700 é
+     modal, 800 é bottom sheet" toda vez que alguém for adicionar uma nova
+     camada flutuante. Números locais pequenos (z-index:2 dentro de um
+     cabeçalho sticky de modal, por exemplo) continuam soltos de propósito
+     -- são contexto de empilhamento interno do próprio componente, não
+     fazem parte desta escala global. */
+  --z-footer-credit: 50;
+  --z-topbar: 100;
+  --z-bottom-nav: 300;
+  --z-fullscreen-screen: 500;
+  --z-dropdown-backdrop: 590;
+  --z-dropdown: 600;
+  --z-modal-backdrop: 700;
+  --z-bottom-sheet: 800;
+  --z-fullscreen-celebration: 900;
+  --z-confetti: 998;
+  --z-toast: 999;
+  --z-top: 1000;
 }
 
 /* ---------- Modo escuro ---------- */
@@ -171,7 +193,7 @@ html,body{ margin:0; padding:0; }
    na página), daí some a barra de navegação repetida em cada troca de
    aba pra quem usa teclado/leitor de tela. */
 .skip-link{
-  position:absolute; top:-48px; left:8px; z-index:1000;
+  position:absolute; top:-48px; left:8px; z-index:var(--z-top);
   background: var(--seal-red); color: var(--on-seal-red);
   font-family: var(--font-body); font-weight:800; font-size:14px;
   padding:12px 18px; border-radius:0 0 10px 10px; text-decoration:none;
@@ -211,7 +233,7 @@ body{
   padding: 10px 32px 22px;
   border-bottom: 1px solid var(--paper-line);
   margin-bottom: 24px;
-  position:sticky; top:0; z-index:100; background:var(--paper);
+  position:sticky; top:0; z-index:var(--z-topbar); background:var(--paper);
 }
 .brand{ display:flex; align-items:center; gap:10px; min-width:0; }
 .brand-seal{
@@ -364,7 +386,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
    Admin/Conta + as abas extras do idioma (Conjugação/Desafios) que não
    cabem aqui embaixo. */
 .bottom-nav{
-  display:flex; position:fixed; left:0; right:0; bottom:0; z-index:300;
+  display:flex; position:fixed; left:0; right:0; bottom:0; z-index:var(--z-bottom-nav);
   background:var(--paper-warm); border-top:1px solid var(--paper-line);
   padding:6px 6px calc(6px + env(safe-area-inset-bottom));
   box-shadow: 0 -2px 10px rgba(33,23,20,.06);
@@ -468,6 +490,10 @@ a.pill:hover{ border-color: var(--imperial-gold); }
      tem o próprio respiro. */
   #side-card-missions{ padding-top:10px; }
   #side-missions-body .dcs-caption-btn{ padding-top:0; }
+  /* Configurações não tem nenhuma relação com desafios/missões do dia --
+     esconde só esse card ali (Ranking e Status continuam fazendo sentido
+     em qualquer aba). */
+  #app[data-active-tab="settings"] #side-card-missions{ display:none; }
 
   /* Sidebar recolhida manualmente ("Mostrar/Ocultar barra lateral", inspirado
      no do Claude) -- independe do modo foco automático abaixo. */
@@ -482,6 +508,12 @@ a.pill:hover{ border-color: var(--imperial-gold); }
      lá; aqui, no desktop, também esconde sidebar/cards e vira 1 coluna). */
   #app.lesson-focus{ grid-template-columns:1fr; grid-template-areas:"content"; }
   #app.lesson-focus .sidebar, #app.lesson-focus .right-cards{ display:none; }
+  /* Sem right-cards, o padding-right:32px do #app (pensado pra dar respiro
+     à coluna de cards) sobra como uma folga assimétrica só do lado direito
+     -- a coluna de conteúdo (#unit-detail-wrap, já centralizada por
+     margin:0 auto) ficava ~32px mais perto da borda esquerda que da
+     direita. Zera aqui pra não competir com a centralização real. */
+  #app.lesson-focus{ padding-right:0; }
   /* Sem sidebar/cards, a coluna de conteúdo vira a largura toda do #app --
      sem um teto o exercício ficava esticado de ponta a ponta em telas
      largas (mesmo problema estrutural da Trilha, ver .units-grid). Trava
@@ -577,6 +609,15 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .ub-goal{
   color:var(--ink-soft); font-size:12px; margin-top:2px; line-height:1.35;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+/* No mobile a linha de meta/subtítulo da unidade cortava no meio de uma
+   palavra (nowrap+ellipsis numa coluna estreita) -- aqui há espaço vertical
+   sobrando, então libera pra 2 linhas em vez de truncar tão cedo. */
+@media (max-width: 899px){
+  .ub-goal{
+    white-space:normal; display:-webkit-box; -webkit-line-clamp:2;
+    -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis;
+  }
 }
 .ub-frac{ font-weight:700; font-size:11.5px; color:var(--ink-soft); white-space:nowrap; flex-shrink:0; }
 .ub-chevron{
@@ -766,18 +807,35 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .usage-note-body strong{ color: var(--seal-red-dark); }
 
 /* ---------- Painel de resultado ("Por que errei?", estilo Duolingo) ----------
-   Reformulado (auditoria de UX/UI mobile-first, 2026-09): antes era uma caixa
-   com fundo+borda própria contendo OUTRA caixa com fundo+borda própria (a
-   "why") -- lia como dois widgets empilhados, não como uma continuação da
-   pergunta. Agora é UM bloco só: sem fundo tintado, sem raio de borda, só
-   uma linha divisória no topo (mesmo tom neutro nos dois estados -- a cor
-   mora só no cabeçalho, não no bloco inteiro) marcando "aqui começa o
-   resultado", com texto sempre alinhado à esquerda (a inconsistência de
-   "Onde você já viu isso" ficar centralizado enquanto o resto fica à
-   esquerda era um bug de herança da .usage-note-title, corrigido aqui). */
+   Cartão único colorido (verde acerto / vermelho erro), igual ao print de
+   referência de quando o site era hospedado na Netlify (pedido explícito
+   da autora, várias rodadas de feedback direto comparando com o print,
+   até a autora apontar o ponto final: o botão "Continuar" fica DENTRO da
+   área de padding do cartão, com a mesma margem que sobra pros lados da
+   caixa de conteúdo acima dele -- nunca "sangrando" até a borda externa
+   (uma tentativa anterior deixava o botão colado nas 4 bordas do cartão,
+   o que a autora rejeitou: "claramente tem um espaçamento dentro do card
+   ao invés de estar nas margens"). Por isso o botão é só mais um filho de
+   .feedback-card-body, herdando o mesmo padding do resto do conteúdo --
+   não existe mais nenhum truque de overflow:hidden/border-radius:0 pra
+   "colar" ele na borda. Isso NÃO é o mesmo problema que uma auditoria
+   anterior (2026-09) tinha corrigido -- lá a "why" virava um segundo
+   painel com margem/divisor PRÓPRIOS, solto e desconectado do cabeçalho
+   acima. Aqui só existe UM cartão com padding único (moldura colorida +
+   uma caixa neutra por dentro pro conteúdo + o botão, todos dividindo o
+   mesmo respiro) -- ver .feedback-inner-box abaixo.
+   Usa --error-red aqui (não --seal-red -- em fr esse token é o AZUL da
+   marca, reaproveitado do chinês só por nome; a cor de erro de verdade em
+   fr sempre foi --error-red, já usada em .wrong-feedback-header). */
 .wrong-feedback, .correct-feedback{
-  margin-top:22px; padding-top:18px; border-top:1px solid var(--paper-line);
-  text-align:left; animation: wrongFeedbackIn .25s ease;
+  margin-top:22px; border-radius: var(--radius); text-align:left; animation: wrongFeedbackIn .25s ease;
+}
+.correct-feedback{ background: rgba(58,115,89,0.12); }
+.wrong-feedback{ background: rgba(214,38,25,0.10); }
+.feedback-card-body{ padding: 18px 20px 20px; }
+.feedback-inner-box{
+  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding: 14px 16px;
 }
 @keyframes wrongFeedbackIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
 /* Shake nas opções erradas (múltipla escolha, cenário, V/F, cloze, slots de
@@ -789,7 +847,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
   display:flex; align-items:center; gap:8px; font-weight:800; font-size:16px; margin-bottom:14px;
 }
 .correct-feedback-header{ color: var(--jade); }
-.correct-feedback-trans{ font-size:14.5px; color: var(--ink); line-height:1.6; margin:0 0 4px; }
+.correct-feedback-trans{ font-size:14.5px; color: var(--ink); line-height:1.6; margin:0; }
 /* Badge de combo (respostas certas seguidas, ver STEP_STATE.comboCount em
    app.js) -- só o raio amarelo + "Combo xN", sem caixa/pílula de fundo
    (decisão explícita da autora -- versão anterior tinha um fundo roxo que
@@ -807,8 +865,8 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
    específico da questão quanto a retomada de conteúdo (frase de origem,
    nota da unidade), num único bloco -- sem um "Rever conteúdo" à parte, e
    sem uma segunda caixa dentro da primeira: mesma superfície do painel pai. */
-.wrong-feedback-why{ margin-bottom:16px; }
-.wrong-feedback-why-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--seal-red-dark); font-weight:800; margin-bottom:8px; }
+.wrong-feedback-why{ margin-bottom:0; }
+.wrong-feedback-why-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--error-red); font-weight:800; margin-bottom:8px; }
 .wrong-feedback-why .usage-note-body{ font-size:14.5px; margin:0; text-align:left; }
 .wrong-feedback-why .usage-note-title{ text-align:left; font-size:13.5px; font-weight:800; margin:12px 0 6px; }
 .wrong-feedback-why .usage-note-title:first-child{ margin-top:0; }
@@ -816,6 +874,20 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .wrong-feedback-why .grammar-note-table td{ padding:5px 8px; border-bottom:1px solid var(--paper-line); }
 .wrong-feedback-why .grammar-note-example{ font-size:13px; color: var(--ink-soft); margin-top:6px; }
 .wrong-feedback-why .grammar-note-sep{ border:none; border-top:1px solid var(--paper-line); margin:12px 0; }
+
+/* Botão "Continuar" é só mais um filho de .feedback-card-body -- herda o
+   padding do cartão nos 4 lados (mesma margem que a caixa de conteúdo acima
+   dele em relação à borda), em vez de esticar até a borda externa. Correção
+   pedida pela autora, verbatim, comparando com a imagem de referência:
+   "Claramente o botão continuar tem um espaçamento DENTRO do card ao invés
+   de estar nas margens". .btn-primary aqui é AZUL (cor de marca em fr, não
+   de erro) -- os dois precisam de cor própria: vermelho de verdade
+   (--error-red) no erro, verde (--jade) no acerto. */
+.wrong-feedback-continue, .correct-feedback-continue{
+  display:block; width:100%; margin-top:18px;
+}
+button.wrong-feedback-continue{ background: var(--error-red); color: var(--on-vivid); }
+button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid); }
 
 /* ---------- Passos de unidade de gramática (blocos, estilo Busuu) ---------- */
 .gram-block-counter{ text-align:center; font-size:12.5px; font-weight:800; color: var(--ink-soft); margin-bottom:14px; }
@@ -1235,7 +1307,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
    voo). Mesmo visual do bloco original, pra parecer o mesmo elemento se
    movendo, não um efeito genérico por cima. */
 .reorder-fly-clone{
-  position:fixed; z-index:999; pointer-events:none; box-sizing:border-box;
+  position:fixed; z-index:var(--z-toast); pointer-events:none; box-sizing:border-box;
   display:flex; align-items:center; justify-content:center;
   background: var(--paper); border:2px solid var(--imperial-gold); border-radius:12px;
   font-family: var(--font-body); font-weight:700; font-size:14px; color: var(--ink);
@@ -1714,7 +1786,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
    shared/utils.js) -- funciona igual no toque (mobile) e no clique
    (desktop), sem depender de :hover, que o celular não tem de verdade. */
 .badge-info-popover{
-  position:fixed; z-index:1000; transform:translate(-50%, calc(-100% - 10px));
+  position:fixed; z-index:var(--z-top); transform:translate(-50%, calc(-100% - 10px));
   background: var(--ink); color: var(--paper); padding:8px 12px; border-radius:10px;
   max-width:220px; text-align:center; font-size:12.5px; line-height:1.4;
   box-shadow: var(--shadow-lift); pointer-events:none;
@@ -2271,7 +2343,7 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
 
 /* ---------- Modal genérico (perfil, meta de estudo, atalhos...) ---------- */
 .app-modal-overlay{
-  position:fixed; inset:0; z-index:700; background: rgba(33,23,20,0.55);
+  position:fixed; inset:0; z-index:var(--z-modal-backdrop); background: rgba(33,23,20,0.55);
   display:flex; align-items:center; justify-content:center; padding:16px;
 }
 .app-modal{
@@ -2292,7 +2364,7 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
 
 /* ---------- Tela de sequência de streak (estilo Duolingo) ---------- */
 .streak-modal-overlay{
-  position:fixed; inset:0; z-index:900; background: var(--paper);
+  position:fixed; inset:0; z-index:var(--z-fullscreen-celebration); background: var(--paper);
   display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px 24px 90px;
 }
 .streak-modal-body{ text-align:center; max-width:420px; width:100%; }
@@ -2443,7 +2515,7 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
 
 /* ---------- Lembrete de revisão acumulada (pop-up de rodapé) ---------- */
 .review-reminder-banner{
-  position:fixed; left:0; right:0; bottom:0; z-index:800; background: var(--paper);
+  position:fixed; left:0; right:0; bottom:0; z-index:var(--z-bottom-sheet); background: var(--paper);
   border-top:1px solid var(--paper-line); box-shadow: 0 -8px 24px rgba(33,23,20,0.12);
   padding:18px 22px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;
 }
@@ -2472,7 +2544,7 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
    primeira visita) -- nunca recarrega a página sozinho, só no clique em
    "Atualizar". */
 .pwa-update-banner{
-  position:fixed; left:0; right:0; bottom:0; z-index:800; background: var(--paper);
+  position:fixed; left:0; right:0; bottom:0; z-index:var(--z-bottom-sheet); background: var(--paper);
   border-top:1px solid var(--paper-line); box-shadow: 0 -8px 24px rgba(33,23,20,0.12);
   padding:18px 22px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;
 }
@@ -2500,7 +2572,7 @@ textarea.challenges-admin-edit-input{ resize:vertical; }
    mesmo lugar; pointer-events:none pra nunca bloquear um toque em algo
    por baixo dele. */
 footer.app-footer{
-  position:fixed; right:14px; bottom:14px; margin:0; z-index:50; pointer-events:none;
+  position:fixed; right:14px; bottom:14px; margin:0; z-index:var(--z-footer-credit); pointer-events:none;
 }
 footer.app-footer img{ height:40px; opacity:.85; }
 
@@ -2511,7 +2583,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
    tempo. shared/toast.js agora mede o header visível e ajusta este `top`
    por JS antes de cada toast; o valor abaixo só vale antes do primeiro
    toast (auditoria de UX/UI, 2026-09, P3). */
-#toast-layer{ position:fixed; top:18px; left:50%; transform:translateX(-50%); z-index:999; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
+#toast-layer{ position:fixed; top:18px; left:50%; transform:translateX(-50%); z-index:var(--z-toast); display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
 .toast{ background: var(--ink); color: var(--gold-bright); font-weight:800; font-size:13px; padding:9px 16px; border-radius:999px; box-shadow: var(--shadow-lift); animation: toastIn .25s ease, toastOut .3s ease 1.7s forwards; }
 @keyframes toastIn{ from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} }
 @keyframes toastOut{ to{opacity:0; transform:translateY(-8px);} }
@@ -2520,7 +2592,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
    full-screen: pode aparecer no meio de qualquer fluxo (um exercício, uma
    revisão), então precisa ficar por cima sem bloquear o que está por baixo.
    Fila em JS (processBadgeCelebrationQueue) garante só 1 por vez. */
-#badge-unlock-layer{ position:fixed; top:70px; left:50%; transform:translateX(-50%); z-index:1000; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
+#badge-unlock-layer{ position:fixed; top:70px; left:50%; transform:translateX(-50%); z-index:var(--z-top); display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
 .badge-unlock-toast{
   pointer-events:auto; cursor:pointer; display:flex; align-items:center; gap:12px;
   background: var(--paper); border:2px solid var(--imperial-gold); border-radius:16px;
@@ -2538,7 +2610,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
    biblioteca externa. spawnConfetti() (app.js) cria as peças aqui dentro e
    as remove sozinho depois da animação; se prefers-reduced-motion estiver
    ativo, spawnConfetti() nem chega a criar nada. */
-#confetti-layer{ position:fixed; inset:0; z-index:998; pointer-events:none; overflow:hidden; }
+#confetti-layer{ position:fixed; inset:0; z-index:var(--z-confetti); pointer-events:none; overflow:hidden; }
 .confetti-piece{
   position:absolute; top:-14px; width:8px; height:14px; opacity:0; border-radius:2px;
   animation-name: confettiFall; animation-timing-function: ease-in; animation-fill-mode: forwards;
@@ -2594,7 +2666,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 
 /* ---------- Login screen ---------- */
 #login-screen{
-  position:fixed; inset:0; z-index:500; display:flex; align-items:center; justify-content:center;
+  position:fixed; inset:0; z-index:var(--z-fullscreen-screen); display:flex; align-items:center; justify-content:center;
   background: var(--paper);
   background-image:
     radial-gradient(circle at 15% 15%, rgba(227,107,202,0.11) 0%, transparent 40%),
@@ -2657,7 +2729,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 .pill.user-pill span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:80px; display:inline-block; vertical-align:bottom; }
 
 .user-dropdown{
-  position:fixed; top:64px; right:16px; z-index:600; background:var(--paper-warm); border:1px solid var(--paper-line);
+  position:fixed; top:64px; right:16px; z-index:var(--z-dropdown); background:var(--paper-warm); border:1px solid var(--paper-line);
   border-radius:12px; box-shadow: var(--shadow-lift); padding:8px; display:none; min-width:200px;
 }
 .user-dropdown.open{ display:block; }
@@ -2735,7 +2807,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
      da barra inferior. */
   #user-profile-btn{ display:none; }
   .mais-backdrop.open{
-    display:block; position:fixed; inset:0; z-index:590; background: rgba(33,23,20,.45);
+    display:block; position:fixed; inset:0; z-index:var(--z-dropdown-backdrop); background: rgba(33,23,20,.45);
   }
 }
 /* Abas extras do idioma (aqui: Conjugação/Desafios) só cabem na
@@ -2758,7 +2830,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
    vários SOs, só como texto "FR"/"CN"). */
 .lang-switcher-btn svg{ width:22px; height:auto; display:block; border-radius:3px; }
 .lang-switcher-dropdown{
-  position:fixed; top:64px; right:16px; z-index:600; background:var(--paper-warm); border:1px solid var(--paper-line);
+  position:fixed; top:64px; right:16px; z-index:var(--z-dropdown); background:var(--paper-warm); border:1px solid var(--paper-line);
   border-radius:12px; box-shadow: var(--shadow-lift); padding:8px; display:none; min-width:200px;
 }
 .lang-switcher-dropdown.open{ display:block; }

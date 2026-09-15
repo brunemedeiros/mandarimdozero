@@ -4049,14 +4049,16 @@ function showAnswerPanel(contentEl, ex, opts = {}){
   const panel = document.createElement('div');
   panel.className = 'wrong-feedback';
   panel.innerHTML = `
-    <div class="wrong-feedback-header">${revealed ? '👀 Resposta revelada' : '❌ Não foi dessa vez'}</div>
-    ${explanation ? `
-      <div class="wrong-feedback-why">
-        <div class="wrong-feedback-why-label">${revealed ? 'Resposta' : 'Por que não foi essa'}</div>
-        ${explanation}
-      </div>
-    ` : ''}
-    <button class="btn btn-primary btn-block wrong-feedback-continue" id="wrong-continue-btn">Continuar →</button>
+    <div class="feedback-card-body">
+      <div class="wrong-feedback-header">${revealed ? '👀 Resposta revelada' : '❌ Não foi dessa vez'}</div>
+      ${explanation ? `
+        <div class="wrong-feedback-why">
+          <div class="wrong-feedback-why-label">${revealed ? 'Resposta' : 'Por que não foi essa'}</div>
+          <div class="feedback-inner-box">${explanation}</div>
+        </div>
+      ` : ''}
+      <button class="btn btn-primary btn-block wrong-feedback-continue" id="wrong-continue-btn">Continuar →</button>
+    </div>
   `;
   wrap.appendChild(panel);
 
@@ -4766,9 +4768,11 @@ function showCorrectFeedbackPanel(contentEl, detail){
   const panel = document.createElement('div');
   panel.className = 'correct-feedback';
   panel.innerHTML = `
-    <div class="correct-feedback-header">${comboBadgeHTML}✅ ${headerText}</div>
-    ${detail ? `<p class="correct-feedback-trans">${detail}</p>` : ''}
-    <button class="btn btn-primary btn-block correct-feedback-continue" id="correct-continue-btn">Continuar →</button>
+    <div class="feedback-card-body">
+      <div class="correct-feedback-header">${comboBadgeHTML}✅ ${headerText}</div>
+      ${detail ? `<p class="correct-feedback-trans feedback-inner-box">${detail}</p>` : ''}
+      <button class="btn btn-primary btn-block correct-feedback-continue" id="correct-continue-btn">Continuar →</button>
+    </div>
   `;
   wrap.appendChild(panel);
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

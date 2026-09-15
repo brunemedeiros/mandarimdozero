@@ -227,7 +227,7 @@ async function renderLeaderboardView(){
     const initials = avatarInitials(name);
     const color = avatarColor(r.user_id);
     const avatarHTML = r.profile?.avatar_url
-      ? `<img class="leaderboard-avatar" src="${r.profile.avatar_url}" alt="">`
+      ? `<img class="leaderboard-avatar" src="${r.profile.avatar_url}" alt="Foto de perfil">`
       : `<div class="leaderboard-avatar" style="background:${color};">${initials}</div>`;
     const featured = resolveFeaturedBadge(r.profile?.featured_badge_id, catalog);
     const badgeHTML = featured
@@ -256,7 +256,13 @@ async function renderLeaderboardView(){
         <div class="leaderboard-xp" aria-hidden="true">⭐ ${r.amount}</div>
       </div>
     `;
-  }).join('') : `<p class="profile-empty-note">Ninguém pontuou nessa categoria ainda essa semana. Seja a primeira pessoa no ranking!</p>`;
+  }).join('') : `
+    <div class="review-empty">
+      <div class="big-emoji">🏆</div>
+      <h3>Seja a primeira pessoa no ranking</h3>
+      <p>Ninguém pontuou nessa categoria ainda essa semana.</p>
+    </div>
+  `;
 
   wrap.innerHTML = `
     <div class="leaderboard-week-label">${leaderboardDaysRemainingLabel(weekStart)}</div>
@@ -377,7 +383,7 @@ async function openPublicProfileModal(row, catalog){
   const initials = avatarInitials(name);
   const color = avatarColor(row.user_id);
   const avatarHTML = row.profile?.avatar_url
-    ? `<img class="public-profile-avatar" src="${row.profile.avatar_url}" alt="">`
+    ? `<img class="public-profile-avatar" src="${row.profile.avatar_url}" alt="Foto de perfil">`
     : `<div class="public-profile-avatar" style="background:${color};">${initials}</div>`;
   const bio = row.profile?.bio;
 
