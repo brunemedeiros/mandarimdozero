@@ -1531,17 +1531,19 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .review-mode-card .name{ font-size:14px; font-weight:700; color: var(--ink); }
 .review-mode-card .desc{ font-size:11.5px; color: var(--ink-soft); }
 
-/* ---------- "Revisões de hoje" (Fase 12) ----------
-   Número que o motor de memória decidiu que é hora de revisar AGORA --
-   visualmente separado de "Suas palavras" logo abaixo (estado geral do
-   vocabulário) pra não parecer a mesma pergunta: dá pra ter palavras
-   medianas sem ter nenhuma revisão pendente hoje, e isso é normal num
-   sistema de repetição espaçada. */
+/* ---------- Nota de teto de sessão (Fase 12, reformulado após queixa da
+   autora de repetição: o número de revisões devidas aparecia 4x na tela --
+   número grande, legenda, card Flashcard, card Speed Review, ver sessão de
+   grilling). Deixou de ser um "hero number" -- os cards de REVISAR (abaixo)
+   já mostram o número que de fato importa (quantas cabem nesta sessão), e
+   o rótulo "Revisar" já leva esse mesmo número embutido (renderReviewModeSelect).
+   Isto aqui só volta a aparecer, como nota pequena, na ÚNICA situação que os
+   cards sozinhos escondem: quando o teto de "Intensidade da sessão" corta
+   revisões reais da sessão atual (trueCount > dueCount) -- nunca deixar isso
+   silenciosamente invisível. Vazio (:empty) no caso comum. */
 #review-today-widget:empty{ display:none; }
 #review-today-widget{ text-align:center; margin-bottom:14px; }
-#review-today-widget .section-label{ margin-top:0; }
-.review-today-count{ font-size:38px; font-weight:800; line-height:1; color:var(--seal-red-dark); font-variant-numeric:tabular-nums; }
-.review-today-caption{ font-size:12.5px; color:var(--ink-soft); margin-top:4px; }
+.review-cap-note{ font-size:12.5px; color:var(--ink-soft); line-height:1.5; }
 
 /* ---------- "Suas palavras" (resumo fracas/medianas/fortes) ----------
    SÓ uma contagem visual do vocabulário já revisável -- não é SRS novo, não
@@ -2849,7 +2851,7 @@ body.hide-pinyin .prompt-pinyin{
       </div>
       <div id="review-today-widget"></div>
 
-      <div class="section-label">Revisar</div>
+      <div class="section-label" id="review-mode-revisar-label">Revisar</div>
       <div class="review-mode-cards" id="review-mode-cards-revisar"></div>
 
       <div class="section-label">Praticar</div>

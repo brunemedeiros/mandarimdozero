@@ -4667,6 +4667,14 @@ function todaysReviewCount(pool){
   return buildDueReviewQueue(pool).length;
 }
 
+// Reformulado após queixa da autora (sessão de grilling): o número de
+// revisões devidas aparecia 4x na mesma tela (número grande + legenda +
+// card Flashcard + card Speed Review, sempre idêntico). Os cards de
+// REVISAR e o rótulo "Revisar" (ver renderReviewModeSelect) já cobrem o
+// caso comum -- isto só volta a renderizar algo quando o teto de
+// "Intensidade da sessão" corta revisões reais da sessão atual (única
+// informação que os cards sozinhos não mostram, Fase 8 do projeto
+// anterior: nunca esconder revisões reais atrás do teto de sessão).
 function renderReviewTodayWidget(){
   const wrap = document.getElementById('review-today-widget');
   if (!wrap) return;
@@ -4674,23 +4682,11 @@ function renderReviewTodayWidget(){
   if (pool.length === 0){ wrap.innerHTML = ''; return; }
   const dueCount = todaysReviewCount(pool);
   const trueCount = trueDueReviewCount(pool);
-  let caption;
-  if (dueCount === 0){
-    caption = 'Nenhuma revisão pendente agora -- o motor avisa quando for a hora.';
-  } else if (trueCount > dueCount){
-    // Fase 8 do projeto: o teto de "Intensidade da sessão" pode deixar
-    // revisões reais de fora da sessão atual -- nunca mostrar só o número
-    // cortado como se fosse o total. "35 pendentes, 20 nesta sessão" (o
-    // próprio exemplo do prompt), nunca só "20 pendentes".
-    caption = `${trueCount} revisões pendentes -- ${dueCount} nesta sessão.`;
+  if (trueCount > dueCount){
+    wrap.innerHTML = `<p class="review-cap-note">${trueCount} revisões pendentes no total -- só ${dueCount} cabem nesta sessão (intensidade configurada).</p>`;
   } else {
-    caption = dueCount === 1 ? '1 palavra pronta pra revisar.' : `${dueCount} palavras prontas pra revisar.`;
+    wrap.innerHTML = '';
   }
-  wrap.innerHTML = `
-    <div class="section-label">Revisões de hoje</div>
-    <div class="review-today-count">${dueCount}</div>
-    <p class="review-today-caption">${caption}</p>
-  `;
 }
 
 // Altura do "pote" proporcional à maior das 3 categorias (não à contagem
@@ -4739,11 +4735,18 @@ function renderReviewModeSelect(){
 
   renderReviewTodayWidget();
 
+  // Rótulo "Revisar" leva o número embutido (ex: "Revisar · 10 hoje") --
+  // única fonte do número nesta seção agora (sessão de grilling: eliminar a
+  // repetição do mesmo valor no widget + nos 2 cards abaixo, que sempre
+  // mostravam o mesmo dueCount duplicado por serem a mesma fila).
+  const revisarLabel = document.getElementById('review-mode-revisar-label');
+  if (revisarLabel){
+    revisarLabel.textContent = dueCount > 0 ? `Revisar · ${dueCount} hoje` : 'Revisar';
+  }
+
   const revisarEl = document.getElementById('review-mode-cards-revisar');
   if (dueCount === 0){
     const emptyTitle = pool.length === 0 ? 'Ainda não há revisões' : 'Você está em dia!';
-    // Descrição não repete "nenhuma revisão pendente agora" -- o widget
-    // "Revisões de hoje" logo acima já diz isso; aqui só o próximo passo.
     const emptyDesc = pool.length === 0
       ? 'Complete uma lição no Estudo pra começar a ter palavras pra revisar.'
       : 'Praticar continua disponível logo abaixo, quando quiser.';
@@ -4755,18 +4758,17 @@ function renderReviewModeSelect(){
       </div>
     `;
   } else {
-    // Flashcard e Speed Review mostram o MESMO número -- são a mesma fila,
-    // só a apresentação muda (completa x rápida). Nunca podem divergir.
+    // Sem .count aqui de propósito -- o número já está no rótulo "Revisar"
+    // acima (Flashcard e Speed Review são a mesma fila, mostrar o mesmo
+    // valor duas vezes a mais era puramente decorativo).
     revisarEl.innerHTML = `
       <button class="review-mode-card" id="mode-card-flashcard">
         <div class="icon">📇</div>
-        <div class="count">${dueCount}</div>
         <div class="name">Flashcard</div>
         <div class="desc">Revisão completa</div>
       </button>
       <button class="review-mode-card" id="mode-card-speed">
         <div class="icon">⚡</div>
-        <div class="count">${dueCount}</div>
         <div class="name">Speed Review</div>
         <div class="desc">Revisão rápida</div>
       </button>
