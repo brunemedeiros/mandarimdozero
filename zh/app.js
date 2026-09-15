@@ -1239,7 +1239,23 @@ function renderDailyChallengesScreen(){
   nextBtn.textContent = 'Continuar →';
   nextBtn.style.display = 'flex';
 
-  if (typeof routerNavigate === 'function') routerNavigate({ type: 'unitComplete', unitId: STATE.currentUnitId });
+  // BUG real corrigido aqui (relatado pela autora, 2026-09-15): esta tela é
+  // SEMPRE a próxima depois de "Unidade concluída!" (renderUnitCompleteScreen,
+  // que já empurrou a rota 'unitComplete'). Empurrar a MESMA rota
+  // 'unitComplete' de novo aqui é um no-op silencioso (routerNavigate só
+  // ignora rotas iguais à atual) -- o hash da URL nunca avançava, ficando
+  // travado em #/unit/X/complete pelo resto da sessão (Desafios -> Trilha
+  // -> qualquer coisa), até a próxima navegação que de fato mude de rota.
+  // Resultado: qualquer reload/restauração de aba nesse meio-tempo (aba em
+  // segundo plano descartada e recarregada, ou um popstate espúrio com o
+  // heap de JS ainda vivo) reexecutava a rota 'unitComplete' -- com o cache
+  // ainda válido, isso literalmente reabria a tela "Parabéns" do zero, sem
+  // nenhum clique do aluno. "Continuar" aqui sempre leva pra Trilha (ver
+  // onChallengesScreen no listener de #step-next-btn), então a rota certa
+  // pra esta tela é 'tab'/'path' (mesmo destino, hash vazio) -- se um reload
+  // acontecer enquanto esta tela ainda está aberta, cai direto na Trilha,
+  // nunca replay da celebração.
+  if (typeof routerNavigate === 'function') routerNavigate({ type: 'tab', tab: 'path' });
 }
 
 // Segunda-feira da semana corrente, formato 'YYYY-MM-DD' -- mesmo padrão de
