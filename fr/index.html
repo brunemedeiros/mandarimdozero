@@ -807,19 +807,31 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .usage-note-body strong{ color: var(--seal-red-dark); }
 
 /* ---------- Painel de resultado ("Por que errei?", estilo Duolingo) ----------
-   Reformulado (auditoria de UX/UI mobile-first, 2026-09): antes era uma caixa
-   com fundo+borda própria contendo OUTRA caixa com fundo+borda própria (a
-   "why") -- lia como dois widgets empilhados, não como uma continuação da
-   pergunta. Agora é UM bloco só: sem fundo tintado, sem raio de borda, só
-   uma linha divisória no topo (mesmo tom neutro nos dois estados -- a cor
-   mora só no cabeçalho, não no bloco inteiro) marcando "aqui começa o
-   resultado", com texto sempre alinhado à esquerda (a inconsistência de
-   "Onde você já viu isso" ficar centralizado enquanto o resto fica à
-   esquerda era um bug de herança da .usage-note-title, corrigido aqui). */
+   Cartão único colorido (verde acerto / vermelho erro), voltando ao design
+   original do app (pedido explícito da autora, comparando com o print de
+   quando o site era hospedado na Netlify) -- cabeçalho, explicação ("por
+   que não foi essa"/"onde você já viu isso") e botão "Continuar" moram
+   todos dentro da MESMA superfície. Uma reformulação anterior (auditoria
+   de UX/UI mobile-first, 2026-09) tinha removido fundo/borda do painel
+   inteiro porque a "why" ganhava uma SEGUNDA caixa com fundo/borda
+   própria dentro da primeira ("dois widgets empilhados") -- mas essa
+   "why" nunca precisou da caixa própria pra existir (ver .wrong-feedback-why
+   abaixo, sempre sem fundo/borda) -- o problema era só a caixa dupla, não
+   o cartão externo. Aqui o cartão externo volta, a "why" continua sem
+   nenhuma superfície própria, e o botão fica encostado nas bordas do
+   mesmo cartão (sem raio de borda próprio -- .overflow:hidden do pai
+   recorta os cantos dele igual ao raio do cartão), pra ler como uma
+   continuação do mesmo bloco, não um controle solto abaixo dele.
+   Usa --error-red aqui (não --seal-red -- em fr esse token é o AZUL da
+   marca, reaproveitado do chinês só por nome; a cor de erro de verdade em
+   fr sempre foi --error-red, já usada em .wrong-feedback-header). */
 .wrong-feedback, .correct-feedback{
-  margin-top:22px; padding-top:18px; border-top:1px solid var(--paper-line);
-  text-align:left; animation: wrongFeedbackIn .25s ease;
+  margin-top:22px; border-radius: var(--radius); border:1.5px solid var(--paper-line);
+  overflow:hidden; text-align:left; animation: wrongFeedbackIn .25s ease;
 }
+.correct-feedback{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
+.wrong-feedback{ border-color: var(--error-red); background: rgba(214,38,25,0.10); }
+.feedback-card-body{ padding: 18px 20px 20px; }
 @keyframes wrongFeedbackIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
 /* Shake nas opções erradas (múltipla escolha, cenário, V/F, cloze, slots de
    ordenar) -- estilo Duolingo. Anexado direto na classe .incorrect de cada
@@ -848,8 +860,8 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
    específico da questão quanto a retomada de conteúdo (frase de origem,
    nota da unidade), num único bloco -- sem um "Rever conteúdo" à parte, e
    sem uma segunda caixa dentro da primeira: mesma superfície do painel pai. */
-.wrong-feedback-why{ margin-bottom:16px; }
-.wrong-feedback-why-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--seal-red-dark); font-weight:800; margin-bottom:8px; }
+.wrong-feedback-why{ margin-bottom:0; }
+.wrong-feedback-why-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--error-red); font-weight:800; margin-bottom:8px; }
 .wrong-feedback-why .usage-note-body{ font-size:14.5px; margin:0; text-align:left; }
 .wrong-feedback-why .usage-note-title{ text-align:left; font-size:13.5px; font-weight:800; margin:12px 0 6px; }
 .wrong-feedback-why .usage-note-title:first-child{ margin-top:0; }
@@ -857,6 +869,19 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .wrong-feedback-why .grammar-note-table td{ padding:5px 8px; border-bottom:1px solid var(--paper-line); }
 .wrong-feedback-why .grammar-note-example{ font-size:13px; color: var(--ink-soft); margin-top:6px; }
 .wrong-feedback-why .grammar-note-sep{ border:none; border-top:1px solid var(--paper-line); margin:12px 0; }
+
+/* Botão "Continuar" encostado nas bordas do próprio cartão (sem raio de
+   borda próprio -- o overflow:hidden do cartão pai já recorta os cantos
+   dele igual ao raio do cartão) e sem a sombra "flutuante" padrão do
+   .btn-primary, pra ler como o rodapé do mesmo bloco, não um controle
+   solto abaixo dele. .btn-primary aqui é AZUL (cor de marca em fr, não
+   de erro) -- os dois precisam de cor própria: vermelho de verdade
+   (--error-red) no erro, verde (--jade) no acerto. */
+button.wrong-feedback-continue, button.correct-feedback-continue{
+  display:block; width:100%; margin:0; border-radius:0; box-shadow:none;
+}
+button.wrong-feedback-continue{ background: var(--error-red); }
+button.correct-feedback-continue{ background: var(--jade); }
 
 /* ---------- Passos de unidade de gramática (blocos, estilo Busuu) ---------- */
 .gram-block-counter{ text-align:center; font-size:12.5px; font-weight:800; color: var(--ink-soft); margin-bottom:14px; }
