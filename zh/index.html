@@ -946,22 +946,33 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 /* ---------- Painel de resultado ("Por que errei?", estilo Duolingo) ----------
    Cartão único colorido (verde acerto / vermelho erro), igual ao print de
    referência de quando o site era hospedado na Netlify (pedido explícito
-   da autora, incl. feedback direto rejeitando uma primeira tentativa
-   "tudo achatado numa cor só" -- o print de referência tem DOIS níveis: a
-   moldura colorida (borda + fundo tingido, cabeçalho e botão) E uma caixa
-   neutra (fundo --paper-warm) por dentro dela pro conteúdo (a frase/
-   palavra). Isso NÃO é o mesmo problema que uma auditoria anterior
+   da autora, incl. duas rodadas de feedback direto comparando com o
+   print: primeiro rejeitando "tudo achatado numa cor só" -- o print tem
+   DOIS níveis, moldura colorida + uma caixa neutra por dentro pro
+   conteúdo -- depois apontando que o botão precisa ser parte DA PRÓPRIA
+   moldura, não um controle dentro dela com a borda contornando por
+   fora/embaixo dele também. Por isso a borda colorida mora só em
+   .feedback-card-body (topo+laterais, SEM base) -- pra quando o botão
+   começa logo abaixo, não sobrar nenhuma linha de borda separando o
+   preenchimento sólido dele da borda externa do cartão: o próprio botão
+   passa a SER a base/laterais inferiores do cartão, cor contínua, sem
+   costura. Isso NÃO é o mesmo problema que uma auditoria anterior
    (2026-09) tinha corrigido -- lá a "why" virava um segundo painel com
    margem/divisor PRÓPRIOS, solto e desconectado do cabeçalho acima.
    Aqui só existem dois níveis (moldura + uma caixa), nunca dois painéis
    soltos um embaixo do outro -- ver .feedback-inner-box abaixo. */
 .wrong-feedback, .correct-feedback{
-  margin-top:22px; border-radius: var(--radius); border:1.5px solid var(--paper-line);
+  margin-top:22px; border-radius: var(--radius);
   overflow:hidden; text-align:left; animation: wrongFeedbackIn .25s ease;
 }
-.correct-feedback{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
-.wrong-feedback{ border-color: var(--seal-red); background: rgba(192,35,31,0.10); }
-.feedback-card-body{ padding: 18px 20px 20px; }
+.correct-feedback{ background: rgba(58,115,89,0.12); }
+.wrong-feedback{ background: rgba(192,35,31,0.10); }
+.feedback-card-body{
+  padding: 18px 20px 20px; border: 1.5px solid var(--paper-line); border-bottom: none;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.correct-feedback .feedback-card-body{ border-color: var(--jade); }
+.wrong-feedback .feedback-card-body{ border-color: var(--seal-red); }
 /* A caixa neutra (fundo --paper-warm) pro conteúdo em si -- mesmo padrão
    já usado em outras caixas de exemplo do app (.vocab-phrase-example,
    .hanzi-appears-in, .dialogue-box). Só existe UMA por painel, mesmo
