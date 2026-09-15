@@ -4057,8 +4057,8 @@ function showAnswerPanel(contentEl, ex, opts = {}){
           <div class="feedback-inner-box">${explanation}</div>
         </div>
       ` : ''}
+      <button class="btn btn-primary btn-block wrong-feedback-continue" id="wrong-continue-btn">Continuar →</button>
     </div>
-    <button class="btn btn-primary btn-block wrong-feedback-continue" id="wrong-continue-btn">Continuar →</button>
   `;
   wrap.appendChild(panel);
 
@@ -4771,8 +4771,8 @@ function showCorrectFeedbackPanel(contentEl, detail){
     <div class="feedback-card-body">
       <div class="correct-feedback-header">${comboBadgeHTML}✅ ${headerText}</div>
       ${detail ? `<p class="correct-feedback-trans feedback-inner-box">${detail}</p>` : ''}
+      <button class="btn btn-primary btn-block correct-feedback-continue" id="correct-continue-btn">Continuar →</button>
     </div>
-    <button class="btn btn-primary btn-block correct-feedback-continue" id="correct-continue-btn">Continuar →</button>
   `;
   wrap.appendChild(panel);
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

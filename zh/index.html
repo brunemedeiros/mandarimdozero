@@ -946,24 +946,23 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 /* ---------- Painel de resultado ("Por que errei?", estilo Duolingo) ----------
    Cartão único colorido (verde acerto / vermelho erro), igual ao print de
    referência de quando o site era hospedado na Netlify (pedido explícito
-   da autora, incl. duas rodadas de feedback direto comparando com o
-   print: primeiro rejeitando "tudo achatado numa cor só" -- o print tem
-   DOIS níveis, moldura colorida + uma caixa neutra por dentro pro
-   conteúdo -- depois apontando que o botão precisa ser parte DA PRÓPRIA
-   moldura, não um controle dentro dela com a borda contornando por
-   fora/embaixo dele também. Por isso a borda colorida mora só em
-   .feedback-card-body (topo+laterais, SEM base) -- pra quando o botão
-   começa logo abaixo, não sobrar nenhuma linha de borda separando o
-   preenchimento sólido dele da borda externa do cartão: o próprio botão
-   passa a SER a base/laterais inferiores do cartão, cor contínua, sem
-   costura. Isso NÃO é o mesmo problema que uma auditoria anterior
-   (2026-09) tinha corrigido -- lá a "why" virava um segundo painel com
-   margem/divisor PRÓPRIOS, solto e desconectado do cabeçalho acima.
-   Aqui só existem dois níveis (moldura + uma caixa), nunca dois painéis
-   soltos um embaixo do outro -- ver .feedback-inner-box abaixo. */
+   da autora, várias rodadas de feedback direto comparando com o print,
+   até a autora apontar o ponto final: o botão "Continuar" fica DENTRO da
+   área de padding do cartão, com a mesma margem que sobra pros lados da
+   caixa de conteúdo acima dele -- nunca "sangrando" até a borda externa
+   (uma tentativa anterior deixava o botão colado nas 4 bordas do cartão,
+   o que a autora rejeitou: "claramente tem um espaçamento dentro do card
+   ao invés de estar nas margens"). Por isso o botão é só mais um filho de
+   .feedback-card-body, herdando o mesmo padding do resto do conteúdo --
+   não existe mais nenhum truque de overflow:hidden/border-radius:0 pra
+   "colar" ele na borda. Isso NÃO é o mesmo problema que uma auditoria
+   anterior (2026-09) tinha corrigido -- lá a "why" virava um segundo
+   painel com margem/divisor PRÓPRIOS, solto e desconectado do cabeçalho
+   acima. Aqui só existe UM cartão com padding único (moldura colorida +
+   uma caixa neutra por dentro pro conteúdo + o botão, todos dividindo o
+   mesmo respiro) -- ver .feedback-inner-box abaixo. */
 .wrong-feedback, .correct-feedback{
-  margin-top:22px; border-radius: var(--radius);
-  overflow:hidden; text-align:left; animation: wrongFeedbackIn .25s ease;
+  margin-top:22px; border-radius: var(--radius); text-align:left; animation: wrongFeedbackIn .25s ease;
 }
 .correct-feedback{ background: rgba(58,115,89,0.12); }
 .wrong-feedback{ background: rgba(192,35,31,0.10); }
@@ -1011,14 +1010,13 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .wrong-feedback-why .usage-note-title{ text-align:left; font-size:13.5px; font-weight:800; margin:12px 0 6px; }
 .wrong-feedback-why .usage-note-title:first-child{ margin-top:0; }
 
-/* Botão "Continuar" encostado nas bordas do próprio cartão (sem raio de
-   borda próprio -- o overflow:hidden do cartão pai já recorta os cantos
-   dele igual ao raio do cartão) e sem a sombra "flutuante" padrão do
-   .btn-primary, pra ler como o rodapé do mesmo bloco, não um controle
-   solto abaixo dele. Cor acompanha o estado: vermelho (herda o gradiente
-   padrão de .btn-primary) no erro, verde sólido no acerto. */
-button.wrong-feedback-continue, button.correct-feedback-continue{
-  display:block; width:100%; margin:0; border-radius:0; box-shadow:none;
+/* Botão "Continuar" é só mais um filho de .feedback-card-body -- herda o
+   padding do cartão nos 4 lados (mesma margem que a caixa de conteúdo
+   acima dele em relação à borda), em vez de esticar até a borda externa.
+   Cor acompanha o estado: vermelho (herda o gradiente padrão de
+   .btn-primary) no erro, verde sólido no acerto. */
+.wrong-feedback-continue, .correct-feedback-continue{
+  display:block; width:100%; margin-top:18px;
 }
 button.correct-feedback-continue{ background: var(--jade); }
 
