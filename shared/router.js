@@ -170,11 +170,22 @@ function renderRoute(route){
         break;
       }
       case 'unitComplete': {
+        // Mesmo princípio de 'unitResult' (Fase 2): só reconstrói a tela
+        // própria de "Unidade concluída!" (Fase 4) se o cache ainda for
+        // desta mesma unidade -- nunca reexecuta markUnitCompleted (XP,
+        // desbloqueio etc. já aconteceram de verdade, uma vez só). Sem
+        // cache batendo, cai pra Desafios de hoje (era o único destino
+        // possível antes da Fase 4 existir), mantendo o placeholder antigo
+        // como fallback em vez de uma tela vazia.
+        const cache = (typeof STEP_STATE !== 'undefined') ? STEP_STATE.lastUnitCompleteCache : null;
         STATE.currentUnitId = route.unitId;
         if (typeof setLessonFocusMode === 'function') setLessonFocusMode(true);
         document.getElementById('path-list-wrap').style.display = 'none';
         document.getElementById('unit-detail-wrap').style.display = 'block';
-        if (typeof renderDailyChallengesScreen === 'function'){
+        if (cache && cache.unitId === route.unitId && typeof renderUnitCompleteScreen === 'function'){
+          const u = UNITS.find(x => x.id === route.unitId);
+          renderUnitCompleteScreen(u, cache.xpEarned);
+        } else if (typeof renderDailyChallengesScreen === 'function'){
           renderDailyChallengesScreen();
           STEP_STATE.onChallengesScreen = true;
         }

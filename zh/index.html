@@ -1201,6 +1201,24 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .lc-stat-label{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); font-weight:800; margin-bottom:6px; }
 .lc-stat-value{ font-size:24px; font-weight:800; color: var(--seal-red-dark); }
 
+/* Tela "Unidade concluída!" (Fase 4) -- lista de competências/objetivo
+   comunicacional, mesmo padrão visual de .module-skills (Tier 4/6, FR-only)
+   mas em classe própria porque esta tela roda pros dois idiomas. */
+.unit-skills{ text-align:left; background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius); padding:6px 0; margin-bottom:14px; }
+.unit-skills-label{
+  padding:10px 16px; font-weight:800; font-size:11px; text-transform:uppercase; letter-spacing:.05em;
+  color: var(--seal-red-dark);
+}
+.unit-skill-item{
+  display:flex; align-items:flex-start; gap:10px; padding:10px 16px; font-size:14px; font-weight:600;
+  line-height:1.4; color: var(--ink);
+}
+.unit-skill-item + .unit-skill-item{ border-top:1px solid var(--paper-line); }
+.unit-skill-check{
+  flex-shrink:0; width:20px; height:20px; border-radius:50%; background: var(--jade); color:white;
+  font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; margin-top:1px;
+}
+
 .lesson-recap{ text-align:left; background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius); overflow:hidden; }
 .lesson-recap-label{ background: var(--seal-red-dark); color: var(--paper); font-weight:800; font-size:11px; text-transform:uppercase; letter-spacing:.05em; padding:10px 16px; }
 .lesson-recap-item{ padding:12px 16px; }

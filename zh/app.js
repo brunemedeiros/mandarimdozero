@@ -2162,6 +2162,16 @@ const STEP_STATE = {
   // onChallengesScreen). Guarda quantos cartões estão devidos AGORA pra
   // decidir, no clique de "Continuar", se leva direto pro Flashcard.
   onLessonBoundaryScreen: null,
+  // Tela "Unidade concluída!" (Fase 4 da tarefa de conclusão de
+  // lição/unidade) -- true só enquanto ela está na tela, entre o fim do
+  // Ponto de verificação e a tela de Desafios de hoje. "Continuar" aqui
+  // NUNCA revisita lógica de conclusão (markUnitCompleted já rodou) -- só
+  // avança pra renderDailyChallengesScreen, exatamente o que já acontecia
+  // antes desta tela existir.
+  onUnitCompleteScreen: false,
+  // Cache pra restaurar esta tela via Voltar/Avançar do navegador (mesmo
+  // padrão de lastUnitResultCache) -- nunca reexecuta markUnitCompleted.
+  lastUnitCompleteCache: null,
   // Revisão de uma lição JÁ CONCLUÍDA (ou, pra conta admin, QUALQUER lição
   // de QUALQUER unidade -- ver isAdminUser), clicada direto na lista
   // expandida da Trilha (ver buildUnitBlock) -- { unitId, reviewIdx }, null
@@ -2180,6 +2190,7 @@ function openUnitDetail(unitId){
   STATE.unitProgress[unitId].started = true;
   STEP_STATE.onChallengesScreen = false;
   STEP_STATE.onLessonBoundaryScreen = null;
+  STEP_STATE.onUnitCompleteScreen = false;
   STEP_STATE.conceptQueue = [];
   STEP_STATE.conceptsShown = new Set();
   STEP_STATE.comboCount = 0;
@@ -2944,7 +2955,14 @@ function finishCurrentLesson(u){
 
   const total = STEP_STATE.exerciseList.length;
   const scorePct = total ? Math.round((STEP_STATE.exerciseScore / total) * 100) : 100;
-  markUnitCompleted(STATE.currentUnitId, scorePct);
+  // XP real da UNIDADE (Fase 4): snapshot ANTES de markUnitCompleted (que
+  // concede os +25 de bônus) -- skipToast:true porque quem chega aqui vai
+  // ver a tela própria de "Unidade concluída!" logo abaixo, não o toast
+  // genérico (esse continua existindo pra outros caminhos de conclusão que
+  // não passam por uma tela, ex. checkUnitCompletion via Flashcard/"Já sei").
+  const xpBeforeUnitBonus = STATE.xp;
+  markUnitCompleted(STATE.currentUnitId, scorePct, { skipToast: true });
+  const unitXpEarned = STATE.xp - xpBeforeUnitBonus;
   // Meta diária (§4 do artefato): mesma régua de "conteúdo real" (>=3 itens)
   // usada na lição intermediária -- o Ponto de verificação/consolidação da
   // unidade sempre qualifica na prática, mas o filtro evita contar uma
@@ -2954,8 +2972,7 @@ function finishCurrentLesson(u){
     STATE.unitProgress[u.id].lessonIdx = 0;
     STATE.unitProgress[u.id].lessonMisses = {};
   }
-  STEP_STATE.onChallengesScreen = true;
-  renderDailyChallengesScreen();
+  renderUnitCompleteScreen(u, unitXpEarned);
 }
 
 // ---------- Celebração visual (confete + contador animado) ----------
@@ -3145,6 +3162,69 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'unitResult', unitId: u.id });
 }
 
+// Tela "Unidade concluída!" (Fase 4 da tarefa de conclusão de lição/unidade;
+// Tier 3 da hierarquia de celebração) -- SEMPRE aparece ao concluir uma
+// unidade (decisão explícita, ver Q6 da grilagem), substituindo o toast
+// "Unidade concluída! 🏮" que markUnitCompleted mostrava antes (Q5). Roda
+// DEPOIS da tela de "Lição concluída" do checkpoint (que já mostrou
+// vocabulário/nota daquela lição) -- por isso NUNCA repete vocabulário aqui,
+// só o que a unidade como um todo desenvolveu: competências (títulos das
+// lições não-checkpoint desta unidade) e o objetivo comunicacional
+// (unit.goal), ambos já autorados em content.js, nunca inventados (ver
+// CLAUDE.md, "Coerência pedagógica entre funcionalidades").
+// XP sempre real: delta contra o snapshot tirado ANTES de markUnitCompleted
+// rodar (ver finishCurrentLesson) -- mesmo mecanismo de delta usado desde a
+// Fase 1, nunca hardcoded. Se por algum motivo o delta for 0, a tela ainda
+// aparece com "+0 XP" (Q4) -- nunca é pulada silenciosamente.
+function renderUnitCompleteScreen(u, xpEarned){
+  const contentEl = document.getElementById('step-content');
+  const nextBtn = document.getElementById('step-next-btn');
+  const backBtn = document.getElementById('step-back-btn');
+  hideAcqPhaseBanner();
+  backBtn.style.display = 'none';
+  document.getElementById('step-progress-fill').style.width = '100%';
+  maybeShowStreakCelebration();
+
+  const competencies = (u.lessons || []).filter(l => !l.isCheckpoint).map(l => l.title).filter(Boolean);
+
+  contentEl.innerHTML = `
+    <div class="lesson-complete tier-bounce">
+      <div class="lesson-complete-icon">🎉</div>
+      <h2>Parabéns, ${currentStudentName()}!</h2>
+      <p class="lesson-boundary-title">${u.title}</p>
+      <div class="lesson-complete-stats">
+        <div class="lc-stat"><div class="lc-stat-label">XP ganho</div><div class="lc-stat-value" id="uc-stat-xp">+0 ⚡</div></div>
+      </div>
+      ${competencies.length ? `
+        <div class="unit-skills">
+          <div class="unit-skills-label">Competências desenvolvidas</div>
+          ${competencies.map(c => `<div class="unit-skill-item"><span class="unit-skill-check">✓</span><span>${c}</span></div>`).join('')}
+        </div>
+      ` : ''}
+      ${u.goal ? `
+        <div class="unit-skills">
+          <div class="unit-skills-label">Objetivo comunicacional atingido</div>
+          <div class="unit-skill-item"><span class="unit-skill-check">✓</span><span>${u.goal}</span></div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+  // Marco de fim de UNIDADE (tier 3) -- confete + contador subindo, o peso
+  // que antes (por engano) a tela de "Lição concluída" do checkpoint levava
+  // pra si mesma (ver comentário histórico removido de renderLessonCompleteScreen).
+  spawnConfetti(20, 1800);
+  animateCount(document.getElementById('uc-stat-xp'), xpEarned, { prefix: '+', suffix: ' ⚡' });
+
+  STEP_STATE.onUnitCompleteScreen = true;
+  // Cache pra restaurar via Voltar/Avançar (mesmo padrão de lastUnitResultCache)
+  // -- nunca reexecuta markUnitCompleted nem recalcula XP.
+  STEP_STATE.lastUnitCompleteCache = { unitId: u.id, xpEarned };
+  nextBtn.textContent = 'Continuar →';
+  nextBtn.style.display = 'flex';
+
+  if (typeof routerNavigate === 'function') routerNavigate({ type: 'unitComplete', unitId: u.id });
+}
+
 // Comunica em que fase da sessão de aquisição o aluno está agora -- pra que
 // a experiência pareça uma sessão contínua ("estou aprendendo -> agora
 // consigo usar -> agora misturando") em vez de uma sequência de telas soltas
@@ -3323,6 +3403,16 @@ document.getElementById('step-back-btn').addEventListener('click', () => {
   }
 });
 document.getElementById('step-next-btn').addEventListener('click', () => {
+  // Tela "Unidade concluída!" (Fase 4) -- markUnitCompleted já rodou
+  // (concedeu XP, desbloqueou a próxima unidade etc.) antes desta tela
+  // aparecer; "Continuar" aqui só avança pra Desafios de hoje, nunca
+  // reexecuta lógica de conclusão.
+  if (STEP_STATE.onUnitCompleteScreen){
+    STEP_STATE.onUnitCompleteScreen = false;
+    STEP_STATE.onChallengesScreen = true;
+    renderDailyChallengesScreen();
+    return;
+  }
   if (STEP_STATE.onChallengesScreen){
     STEP_STATE.onChallengesScreen = false;
     setLessonFocusMode(false);
@@ -5706,7 +5796,7 @@ function gradeCurrentCard(grade){
   renderReviewView();
 }
 
-function markUnitCompleted(unitId, scorePct){
+function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
   if (STATE.unitProgress[unitId].completed) return;
   STATE.unitProgress[unitId].completed = true;
   const idx = UNITS.findIndex(u => u.id === unitId);
@@ -5725,9 +5815,15 @@ function markUnitCompleted(unitId, scorePct){
     registerDailyLessonCompleted(scorePct);
   }
   trackEvent('lesson_complete', 'unit_checkpoint', { unitId, scorePct });
-  // Pequeno atraso pra ler como sequência ("+25 XP" ... "Unidade concluída!")
-  // em vez de dois toasts aparecendo ao mesmo tempo, empilhados sem ordem.
-  setTimeout(() => showToast(`Unidade concluída! 🏮`), 450);
+  // skipToast: quem conclui pelo fluxo normal do checkpoint (finishCurrentLesson)
+  // já vê a tela própria de "Unidade concluída!" (Fase 4) -- o toast aqui é
+  // só o fallback genérico pros outros caminhos que chegam a completar uma
+  // unidade sem essa tela (checkUnitCompletion via Flashcard/"Já sei?").
+  if (!skipToast){
+    // Pequeno atraso pra ler como sequência ("+25 XP" ... "Unidade concluída!")
+    // em vez de dois toasts aparecendo ao mesmo tempo, empilhados sem ordem.
+    setTimeout(() => showToast(`Unidade concluída! 🏮`), 450);
+  }
   saveState();
 }
 
