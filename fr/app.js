@@ -452,7 +452,8 @@ const STATE = {
   studySettings: {
     reviewFrequency: 'balanced', // 'frequent' | 'balanced' (padrão) | 'spaced'
     newCardsPerDay: 10,
-    sessionIntensity: 'normal' // 'light' | 'normal' (padrão) | 'intense'
+    sessionIntensity: 'normal', // 'light' | 'normal' (padrão) | 'intense'
+    reviewFilter: 'oldest' // 'all' | 'hard' | 'oldest' (padrão) -- ver reviewFilterQueue()
   },
   dailyMinutesLog: {}, // legado -- não lido mais pra nada, só continua sendo escrito (addStudyMinutes) pra não perder histórico já salvo
   dailyLessonsLog: {}, // 'YYYY-MM-DD' -> lições (que contam pra meta) concluídas naquele dia
@@ -4569,13 +4570,18 @@ const SPEED_STATE = {
 
 // Projeto "Reorganização da experiência de revisão e prática": Speed
 // Review deixou de ser jogo de reconhecimento livre e virou REVISÃO de
-// verdade -- "revisão rápida", a mesma fila devida do Flashcard
-// (buildDueReviewQueue), nunca mais getStudyQueue(scope:'all'). Isso
+// verdade -- "revisão rápida", a MESMA fila que o filtro de Revisão
+// selecionou (reviewFilterQueue -- 2ª sessão de grilling), nunca mais
+// getStudyQueue(scope:'all') nem uma seleção paralela própria. Isso
 // resolve a inconsistência relatada ("cartas para revisão hoje: 12" mas
 // "Speed Review: 32 palavras") -- os dois números eram fontes diferentes;
 // agora são a mesma função, o mesmo número.
+//
+// Embaralhar destruiria a ordem que "Mais antigas primeiro" promete --
+// só embaralha pros outros 2 filtros (mesmo princípio de startReviewSession).
 function buildSpeedQueue(){
-  return shuffle(buildDueReviewQueue(eligibleReviewPool()));
+  const queue = reviewFilterQueue(STATE.studySettings.reviewFilter, eligibleReviewPool());
+  return STATE.studySettings.reviewFilter === 'oldest' ? queue : shuffle(queue);
 }
 
 function buildSpeedOptions(card){
@@ -4667,26 +4673,73 @@ function todaysReviewCount(pool){
   return buildDueReviewQueue(pool).length;
 }
 
-// Reformulado após queixa da autora (sessão de grilling): o número de
-// revisões devidas aparecia 4x na mesma tela (número grande + legenda +
-// card Flashcard + card Speed Review, sempre idêntico). Os cards de
-// REVISAR e o rótulo "Revisar" (ver renderReviewModeSelect) já cobrem o
-// caso comum -- isto só volta a renderizar algo quando o teto de
-// "Intensidade da sessão" corta revisões reais da sessão atual (única
-// informação que os cards sozinhos não mostram, Fase 8 do projeto
-// anterior: nunca esconder revisões reais atrás do teto de sessão).
+// ---------- Filtro de fila (2ª sessão de grilling) ----------
+// A primeira reformulação (acima: dueCount escondido atrás do teto de
+// sessão) resolveu a repetição mas escondeu demais -- a autora achou o
+// número "muito escondido" e pediu pra sempre mostrar o total REAL
+// (trueCount) em destaque, com um jeito explícito de escolher COMO
+// consumir essa fila, em vez de aceitar o corte da Intensidade da sessão
+// em silêncio.
+//
+// 'all'    -- ignora o teto de Intensidade da sessão (scope:'due' sem
+//             `limit`) -- ainda respeita newCardsPerDay, que é ritmo de
+//             aprendizado de palavra NOVA, não tamanho de sessão de
+//             revisão (não faz sentido "Todas" empurrar 50 palavras nunca
+//             vistas de uma vez só).
+// 'hard'   -- alias direto de getStudyQueue(scope:'hard') -- MESMA fila
+//             que "Palavras difíceis" em PRATICAR usa (Regra 6: nunca dois
+//             critérios diferentes disputando o nome "difícil"). Sem teto
+//             de sessão de propósito, igual ao modo dedicado já era.
+// 'oldest' (padrão) -- exatamente a seleção de sempre (devida + novas,
+//             capada pela Intensidade da sessão), só REORDENADA: entre as
+//             já estudadas, due mais antigo primeiro (novas, due
+//             irrelevante pra "atraso", continuam depois, na ordem que já
+//             tinham). Ver startReviewSession/buildSpeedQueue -- shuffle
+//             precisa ser pulado só pra este filtro, senão a ordem não
+//             sobrevive até a tela.
+function reviewFilterQueue(filter, pool){
+  filter = filter || STATE.studySettings.reviewFilter || 'oldest';
+  if (filter === 'hard') return getStudyQueue(pool, { scope: 'hard' });
+  if (filter === 'all') return getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
+  const queue = getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
+  queue.sort((a, b) => (a.reps > 0 ? a.due : Infinity) - (b.reps > 0 ? b.due : Infinity));
+  return queue.slice(0, sessionIntensityToLimit(STATE.studySettings.sessionIntensity));
+}
+
+// Bloco hero (topo da Revisão): número grande = trueCount, sempre o total
+// real pendente, nunca o cortado pela sessão -- fixo, não muda com o
+// filtro selecionado (só os números entre parênteses no seletor mudam).
+// Junto vem o <select> de filtro e o botão que abre "Configurar sessão"
+// (Frequência/Palavras novas por dia/Intensidade -- movidos de
+// Configurações > Revisões pra cá, nunca duplicados nos dois lugares).
 function renderReviewTodayWidget(){
   const wrap = document.getElementById('review-today-widget');
   if (!wrap) return;
   const pool = eligibleReviewPool();
-  if (pool.length === 0){ wrap.innerHTML = ''; return; }
-  const dueCount = todaysReviewCount(pool);
   const trueCount = trueDueReviewCount(pool);
-  if (trueCount > dueCount){
-    wrap.innerHTML = `<p class="review-cap-note">${trueCount} revisões pendentes no total -- só ${dueCount} cabem nesta sessão (intensidade configurada).</p>`;
-  } else {
-    wrap.innerHTML = '';
-  }
+  if (pool.length === 0 || trueCount === 0){ wrap.innerHTML = ''; return; }
+
+  const counts = {
+    all: trueCount,
+    hard: getStudyQueue(pool, { scope: 'hard' }).length,
+    oldest: reviewFilterQueue('oldest', pool).length
+  };
+  const current = STATE.studySettings.reviewFilter || 'oldest';
+
+  wrap.innerHTML = `
+    <div class="review-today-count">${trueCount}</div>
+    <p class="review-today-caption">${trueCount === 1 ? '1 palavra pronta pra revisar.' : `${trueCount} palavras prontas pra revisar.`}</p>
+    <select class="review-filter-select" id="review-filter-select">
+      <option value="all" ${current === 'all' ? 'selected' : ''}>Todas (${counts.all})</option>
+      <option value="hard" ${current === 'hard' ? 'selected' : ''}>Mais difíceis primeiro (${counts.hard})</option>
+      <option value="oldest" ${current === 'oldest' ? 'selected' : ''}>Mais antigas primeiro (${counts.oldest})</option>
+    </select>
+  `;
+  document.getElementById('review-filter-select').addEventListener('change', (e) => {
+    STATE.studySettings.reviewFilter = e.target.value;
+    saveState();
+    renderReviewModeSelect();
+  });
 }
 
 // Altura do "pote" proporcional à maior das 3 categorias (não à contagem
@@ -4724,9 +4777,10 @@ function renderVocabStrengthWidget(){
 // difíceis e Combinar, sempre disponíveis, nunca criam um 2º agendamento).
 function renderReviewModeSelect(){
   const pool = eligibleReviewPool();
-  // Mesma contagem que o Flashcard e o Speed Review de fato usam pra
-  // montar a sessão -- ver dueReviewQueueOptions()/buildDueReviewQueue().
-  const dueCount = todaysReviewCount(pool);
+  // trueCount (total real, sem teto de sessão) decide se há revisão --
+  // dueCount é só um subconjunto capado dele (2ª sessão de grilling: nunca
+  // usar o número cortado pra decidir "tem ou não tem revisão").
+  const trueCount = trueDueReviewCount(pool);
   // Fase 7 (projeto anterior): Palavras Difíceis NÃO depende de estar due
   // -- "precisa revisar agora" (REVISAR) e "é uma palavra difícil"
   // (PRATICAR) são perguntas diferentes. getStudyQueue(scope:'hard') usa
@@ -4735,17 +4789,11 @@ function renderReviewModeSelect(){
 
   renderReviewTodayWidget();
 
-  // Rótulo "Revisar" leva o número embutido (ex: "Revisar · 10 hoje") --
-  // única fonte do número nesta seção agora (sessão de grilling: eliminar a
-  // repetição do mesmo valor no widget + nos 2 cards abaixo, que sempre
-  // mostravam o mesmo dueCount duplicado por serem a mesma fila).
   const revisarLabel = document.getElementById('review-mode-revisar-label');
-  if (revisarLabel){
-    revisarLabel.textContent = dueCount > 0 ? `Revisar · ${dueCount} hoje` : 'Revisar';
-  }
+  if (revisarLabel) revisarLabel.textContent = 'Revisar';
 
   const revisarEl = document.getElementById('review-mode-cards-revisar');
-  if (dueCount === 0){
+  if (trueCount === 0){
     const emptyTitle = pool.length === 0 ? 'Ainda não há revisões' : 'Você está em dia!';
     const emptyDesc = pool.length === 0
       ? 'Complete uma lição no Estudo pra começar a ter palavras pra revisar.'
@@ -4758,8 +4806,8 @@ function renderReviewModeSelect(){
       </div>
     `;
   } else {
-    // Sem .count aqui de propósito -- o número já está no rótulo "Revisar"
-    // acima (Flashcard e Speed Review são a mesma fila, mostrar o mesmo
+    // Sem .count aqui de propósito -- o número já está no bloco hero acima
+    // (Flashcard e Speed Review são a mesma fila filtrada, mostrar o mesmo
     // valor duas vezes a mais era puramente decorativo).
     revisarEl.innerHTML = `
       <button class="review-mode-card" id="mode-card-flashcard">
@@ -5303,19 +5351,25 @@ function startReviewSession(){
   // cartões novos (scope 'due'), ou due primeiro seguido do resto do pool
   // ao estudar uma unidade específica (scope 'unit'). Estudar uma unidade
   // específica mostra ela inteira, sem corte artificial de intensidade.
-  // Revisão geral (scope 'due') usa buildDueReviewQueue() -- a MESMA
-  // função que Speed Review chama (ver buildSpeedQueue) -- fonte única da
-  // fila REVISAR.
+  // Revisão geral usa reviewFilterQueue() (2ª sessão de grilling) -- a
+  // MESMA função que Speed Review chama (ver buildSpeedQueue) -- fonte
+  // única da fila REVISAR, agora sensível ao filtro escolhido na tela
+  // (Todas/Mais difíceis primeiro/Mais antigas primeiro).
   const queue = STATE.reviewSessionUnitFilter
     ? getStudyQueue(pool, { scope: 'unit', newCardsLimit: STATE.studySettings.newCardsPerDay })
-    : buildDueReviewQueue(pool);
+    : reviewFilterQueue(STATE.studySettings.reviewFilter, pool);
 
   // Decide a direção de cada carta ANTES de embaralhar/mostrar -- alterna a
   // partir da última vez que essa carta foi revisada (ver nextCardDirection
   // em shared/srs.js). Calculado 1x aqui, não a cada render.
   queue.forEach(c => { c.reviewDirection = nextCardDirection(c); });
 
-  STATE.reviewQueue = shuffle(queue);
+  // "Mais antigas primeiro" só cumpre o que promete se a ordem sobreviver
+  // até a tela -- embaralhar (como sempre foi) destruiria exatamente essa
+  // ordem. Unidade específica e os outros 2 filtros continuam embaralhados,
+  // como sempre.
+  const shouldShuffle = !!STATE.reviewSessionUnitFilter || STATE.studySettings.reviewFilter !== 'oldest';
+  STATE.reviewQueue = shouldShuffle ? shuffle(queue) : queue;
   STATE.reviewIndex = 0;
   STATE.reviewShowingAnswer = false;
   renderReviewView();
@@ -6189,15 +6243,15 @@ function switchSettingsSection(section){
   SETTINGS_SECTION = section;
   document.querySelectorAll('[data-settings-section]').forEach(btn => btn.classList.toggle('active', btn.dataset.settingsSection === section));
   document.getElementById('settings-geral-content').style.display = section === 'geral' ? '' : 'none';
-  document.getElementById('settings-revisao-content').style.display = section === 'revisao' ? '' : 'none';
   document.getElementById('settings-notifications-content').style.display = section === 'notifications' ? '' : 'none';
   document.getElementById('settings-export-content').style.display = section === 'export' ? '' : 'none';
-  if (section === 'revisao') renderReviewSettingsView();
   if (section === 'notifications' && typeof renderNotificationPreferencesView === 'function') renderNotificationPreferencesView();
 }
 
-// Fase 10: sincroniza a tela de Configurações > Revisões com STATE.studySettings
-// -- roda toda vez que a seção é aberta (mesmo padrão de renderNotificationPreferencesView).
+// Fase 10, movido pra Revisão na 2ª sessão de grilling (ver
+// #review-settings-toggle/#review-settings-panel): sincroniza os 3
+// controles de sessão com STATE.studySettings -- roda toda vez que o
+// painel "⚙️ Configurar sessão" é aberto.
 function renderReviewSettingsView(){
   const s = STATE.studySettings;
   document.querySelectorAll('#review-frequency-options .study-freq-option').forEach(btn => {
@@ -6234,6 +6288,21 @@ document.getElementById('new-cards-decr').addEventListener('click', () => {
 document.getElementById('new-cards-incr').addEventListener('click', () => {
   updateStudySetting({ newCardsPerDay: Math.min(50, STATE.studySettings.newCardsPerDay + 1) });
 });
+// Painel "⚙️ Configurar sessão" na própria tela de Revisão (2ª sessão de
+// grilling) -- recolhido por padrão, sincroniza ao abrir (mesmos 3
+// controles de sempre, só de endereço novo).
+const reviewSettingsToggle = document.getElementById('review-settings-toggle');
+if (reviewSettingsToggle){
+  reviewSettingsToggle.addEventListener('click', () => {
+    const panel = document.getElementById('review-settings-panel');
+    if (panel.hasAttribute('hidden')){
+      panel.removeAttribute('hidden');
+      renderReviewSettingsView();
+    } else {
+      panel.setAttribute('hidden', '');
+    }
+  });
+}
 document.querySelectorAll('[data-settings-section]').forEach(btn => {
   btn.addEventListener('click', () => switchSettingsSection(btn.dataset.settingsSection));
 });

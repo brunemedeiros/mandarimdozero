@@ -1531,19 +1531,33 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .review-mode-card .name{ font-size:14px; font-weight:700; color: var(--ink); }
 .review-mode-card .desc{ font-size:11.5px; color: var(--ink-soft); }
 
-/* ---------- Nota de teto de sessão (Fase 12, reformulado após queixa da
-   autora de repetição: o número de revisões devidas aparecia 4x na tela --
-   número grande, legenda, card Flashcard, card Speed Review, ver sessão de
-   grilling). Deixou de ser um "hero number" -- os cards de REVISAR (abaixo)
-   já mostram o número que de fato importa (quantas cabem nesta sessão), e
-   o rótulo "Revisar" já leva esse mesmo número embutido (renderReviewModeSelect).
-   Isto aqui só volta a aparecer, como nota pequena, na ÚNICA situação que os
-   cards sozinhos escondem: quando o teto de "Intensidade da sessão" corta
-   revisões reais da sessão atual (trueCount > dueCount) -- nunca deixar isso
-   silenciosamente invisível. Vazio (:empty) no caso comum. */
+/* ---------- Bloco hero + filtro de fila (Fase 12, reformulado 2x após
+   feedback da autora -- ver sessões de grilling registradas em app.js):
+   1ª rodada trocou o número grande por texto escondido no rótulo "Revisar"
+   pra cortar a repetição 4x (número + legenda + 2 cards idênticos). Ficou
+   discreto demais -- 2ª rodada trouxe o número grande de volta como
+   trueCount (total real, nunca cortado pela sessão), agora ÚNICO em vez de
+   repetido, mais um <select> explícito pra escolher COMO consumir a fila
+   (Todas/Mais difíceis primeiro/Mais antigas primeiro), cada opção já com
+   seu número real entre parênteses. */
 #review-today-widget:empty{ display:none; }
 #review-today-widget{ text-align:center; margin-bottom:14px; }
-.review-cap-note{ font-size:12.5px; color:var(--ink-soft); line-height:1.5; }
+.review-today-count{ font-size:38px; font-weight:800; line-height:1; color:var(--seal-red-dark); font-variant-numeric:tabular-nums; }
+.review-today-caption{ font-size:12.5px; color:var(--ink-soft); margin-top:4px; }
+.review-filter-select{
+  margin-top:10px; font-size:13px; font-weight:700; color:var(--ink); background:var(--paper);
+  border:1px solid var(--paper-line); border-radius:10px; padding:8px 12px; cursor:pointer; max-width:280px;
+}
+
+/* ---------- Painel "Configurar sessão" (movido de Configurações >
+   Revisões nesta mesma 2ª rodada -- nunca duplicado nos dois lugares).
+   Recolhido por padrão: [hidden] nativo, sem JS extra pra esconder. */
+.review-settings-toggle{
+  display:block; margin:0 auto 18px; background:none; border:none; color:var(--ink-soft);
+  font-size:12.5px; font-weight:700; cursor:pointer; padding:4px;
+}
+.review-settings-toggle:hover{ color:var(--ink); }
+.review-settings-panel{ margin-bottom:22px; }
 
 /* ---------- "Suas palavras" (resumo fracas/medianas/fortes) ----------
    SÓ uma contagem visual do vocabulário já revisável -- não é SRS novo, não
@@ -2851,6 +2865,56 @@ body.hide-pinyin .prompt-pinyin{
       </div>
       <div id="review-today-widget"></div>
 
+      <button class="review-settings-toggle" id="review-settings-toggle" type="button">⚙️ Configurar sessão</button>
+      <div class="review-settings-panel" id="review-settings-panel" hidden>
+        <div class="section-label">Frequência de revisão</div>
+        <div class="settings-card">
+          <div class="study-freq-options" id="review-frequency-options">
+            <button class="study-freq-option" data-freq="frequent">
+              <div class="study-freq-option-title">Mais frequente</div>
+              <div class="study-freq-option-sub">Revisa mais cedo e mais vezes</div>
+            </button>
+            <button class="study-freq-option" data-freq="balanced">
+              <div class="study-freq-option-title">Equilibrada</div>
+              <div class="study-freq-option-sub">Recomendado</div>
+            </button>
+            <button class="study-freq-option" data-freq="spaced">
+              <div class="study-freq-option-title">Mais espaçada</div>
+              <div class="study-freq-option-sub">Intervalos mais longos entre revisões</div>
+            </button>
+          </div>
+        </div>
+        <div class="section-label">Novas palavras por dia</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div class="settings-row-label">Quantas palavras novas entram por sessão de Flashcard</div>
+            <div class="study-stepper">
+              <button class="study-stepper-btn" id="new-cards-decr" aria-label="Diminuir">−</button>
+              <span class="study-stepper-value" id="new-cards-value">10</span>
+              <button class="study-stepper-btn" id="new-cards-incr" aria-label="Aumentar">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="section-label">Intensidade da sessão</div>
+        <div class="settings-card">
+          <div class="study-freq-options" id="session-intensity-options">
+            <button class="study-freq-option" data-intensity="light">
+              <div class="study-freq-option-title">Leve</div>
+              <div class="study-freq-option-sub">Sessões mais curtas</div>
+            </button>
+            <button class="study-freq-option" data-intensity="normal">
+              <div class="study-freq-option-title">Normal</div>
+              <div class="study-freq-option-sub">Recomendado</div>
+            </button>
+            <button class="study-freq-option" data-intensity="intense">
+              <div class="study-freq-option-title">Intensa</div>
+              <div class="study-freq-option-sub">Sessões mais longas</div>
+            </button>
+          </div>
+        </div>
+        <p class="settings-more-note">Essas opções ajustam o motor de revisão por trás dos panos -- você não precisa entender os detalhes técnicos.</p>
+      </div>
+
       <div class="section-label" id="review-mode-revisar-label">Revisar</div>
       <div class="review-mode-cards" id="review-mode-cards-revisar"></div>
 
@@ -2933,7 +2997,6 @@ body.hide-pinyin .prompt-pinyin{
     </div>
     <div class="leaderboard-tabs" role="tablist" aria-label="Seção de Configurações">
       <button class="leaderboard-tab active" role="tab" aria-selected="true" data-settings-section="geral">Geral</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="revisao">🧠 Revisões</button>
       <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="notifications">🔔 Notificações</button>
       <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="export">📦 Exportar</button>
     </div>
@@ -2972,54 +3035,6 @@ body.hide-pinyin .prompt-pinyin{
         </div>
         <button class="pref-switch" id="feedback-sound-switch" role="switch" aria-checked="true"><span class="pref-switch-knob"></span></button>
       </div>
-    </div>
-    <div id="settings-revisao-content" style="display:none;">
-      <div class="section-label">Frequência de revisão</div>
-      <div class="settings-card">
-        <div class="study-freq-options" id="review-frequency-options">
-          <button class="study-freq-option" data-freq="frequent">
-            <div class="study-freq-option-title">Mais frequente</div>
-            <div class="study-freq-option-sub">Revisa mais cedo e mais vezes</div>
-          </button>
-          <button class="study-freq-option" data-freq="balanced">
-            <div class="study-freq-option-title">Equilibrada</div>
-            <div class="study-freq-option-sub">Recomendado</div>
-          </button>
-          <button class="study-freq-option" data-freq="spaced">
-            <div class="study-freq-option-title">Mais espaçada</div>
-            <div class="study-freq-option-sub">Intervalos mais longos entre revisões</div>
-          </button>
-        </div>
-      </div>
-      <div class="section-label">Novas palavras por dia</div>
-      <div class="settings-card">
-        <div class="settings-row">
-          <div class="settings-row-label">Quantas palavras novas entram por sessão de Flashcard</div>
-          <div class="study-stepper">
-            <button class="study-stepper-btn" id="new-cards-decr" aria-label="Diminuir">−</button>
-            <span class="study-stepper-value" id="new-cards-value">10</span>
-            <button class="study-stepper-btn" id="new-cards-incr" aria-label="Aumentar">+</button>
-          </div>
-        </div>
-      </div>
-      <div class="section-label">Intensidade da sessão</div>
-      <div class="settings-card">
-        <div class="study-freq-options" id="session-intensity-options">
-          <button class="study-freq-option" data-intensity="light">
-            <div class="study-freq-option-title">Leve</div>
-            <div class="study-freq-option-sub">Sessões mais curtas</div>
-          </button>
-          <button class="study-freq-option" data-intensity="normal">
-            <div class="study-freq-option-title">Normal</div>
-            <div class="study-freq-option-sub">Recomendado</div>
-          </button>
-          <button class="study-freq-option" data-intensity="intense">
-            <div class="study-freq-option-title">Intensa</div>
-            <div class="study-freq-option-sub">Sessões mais longas</div>
-          </button>
-        </div>
-      </div>
-      <p class="settings-more-note">Essas opções ajustam o motor de revisão por trás dos panos -- você não precisa entender os detalhes técnicos.</p>
     </div>
     <div id="settings-notifications-content" style="display:none;"></div>
     <div id="settings-export-content" style="display:none;">
