@@ -227,7 +227,7 @@ async function renderLeaderboardView(){
     const initials = avatarInitials(name);
     const color = avatarColor(r.user_id);
     const avatarHTML = r.profile?.avatar_url
-      ? `<img class="leaderboard-avatar" src="${r.profile.avatar_url}" alt="">`
+      ? `<img class="leaderboard-avatar" src="${r.profile.avatar_url}" alt="Foto de perfil">`
       : `<div class="leaderboard-avatar" style="background:${color};">${initials}</div>`;
     const featured = resolveFeaturedBadge(r.profile?.featured_badge_id, catalog);
     const badgeHTML = featured
@@ -383,7 +383,7 @@ async function openPublicProfileModal(row, catalog){
   const initials = avatarInitials(name);
   const color = avatarColor(row.user_id);
   const avatarHTML = row.profile?.avatar_url
-    ? `<img class="public-profile-avatar" src="${row.profile.avatar_url}" alt="">`
+    ? `<img class="public-profile-avatar" src="${row.profile.avatar_url}" alt="Foto de perfil">`
     : `<div class="public-profile-avatar" style="background:${color};">${initials}</div>`;
   const bio = row.profile?.bio;
 
