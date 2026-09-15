@@ -15,7 +15,7 @@
 //   Voltar/Avançar -> popstate -> renderRoute(route)  [NUNCA chama routerNavigate de novo]
 //
 // Cada função de tela (switchTab, openUnitDetail, exitToPath,
-// openReviewSession, backToReviewModeSelect, renderLessonBoundaryScreen,
+// openReviewSession, backToReviewModeSelect, renderLessonCompleteScreen,
 // renderDailyChallengesScreen) ganhou UMA linha no fim chamando
 // routerNavigate(...) -- nenhuma lógica de progresso/XP/conclusão foi
 // tocada, só a marcação de "isto é uma tela nova". Questão a questão dentro
@@ -114,7 +114,7 @@ function routerNavigate(route){
 
 // Único ponto que de fato chama as funções de tela existentes pra
 // reconstruir a UI a partir de uma rota -- nunca reexecuta lógica de
-// conclusão/XP (ver comentário de finishCurrentLesson/renderLessonBoundaryScreen).
+// conclusão/XP (ver comentário de finishCurrentLesson/renderLessonCompleteScreen).
 function renderRoute(route){
   ROUTER.restoring = true;
   try {
@@ -151,19 +151,19 @@ function renderRoute(route){
         // PRÓPRIO router reabrindo pra restaurar um "Voltar" até a Lição),
         // então não sobreviveria a um Voltar seguido de Avançar. O cache
         // usado aqui nunca é limpo por openUnitDetail -- só sobrescrito na
-        // próxima conclusão real (ver renderLessonBoundaryScreen). Se ainda
+        // próxima conclusão real (ver renderLessonCompleteScreen). Se ainda
         // assim não bater (unidade diferente da esperada -- ex: várias idas
         // e vindas de histórico entre unidades diferentes), cai pra reabrir
         // a unidade em vez de mostrar uma tela vazia -- limitação conhecida,
         // documentada na entrega (Fase 10), não um crash.
         const cache = (typeof STEP_STATE !== 'undefined') ? STEP_STATE.lastUnitResultCache : null;
-        if (cache && cache.unitId === route.unitId && typeof renderLessonBoundaryScreen === 'function'){
+        if (cache && cache.unitId === route.unitId && typeof renderLessonCompleteScreen === 'function'){
           const u = UNITS.find(x => x.id === route.unitId);
           STATE.currentUnitId = route.unitId;
           if (typeof setLessonFocusMode === 'function') setLessonFocusMode(true);
           document.getElementById('path-list-wrap').style.display = 'none';
           document.getElementById('unit-detail-wrap').style.display = 'block';
-          renderLessonBoundaryScreen(u, cache.lesson, cache.challengesBefore);
+          renderLessonCompleteScreen(u, cache.lesson, cache);
         } else if (typeof openUnitDetail === 'function'){
           openUnitDetail(route.unitId);
         }

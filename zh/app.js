@@ -2901,7 +2901,7 @@ function finishCurrentLesson(u){
   if (isLessonUnit(u) && !currentLesson(u).isCheckpoint){
     const finished = currentLesson(u);
     // Congela o progresso dos desafios de hoje ANTES das atualizações abaixo,
-    // pra depois (renderLessonBoundaryScreen) conseguir mostrar um chip
+    // pra depois (renderLessonCompleteScreen) conseguir mostrar um chip
     // contextual só quando ESSA lição específica fez algum desafio avançar
     // -- não uma lista genérica dos 3 desafios do dia (essa já tem tela
     // própria, acessível pela aba "Desafios").
@@ -2932,7 +2932,13 @@ function finishCurrentLesson(u){
     registerDailyLessonForGoal(lessonKey, (finished.vocabIdx?.length || 0) >= 3 || !!finished.includesDialogue);
     saveState();
     renderTopbarStats();
-    renderLessonBoundaryScreen(u, finished, challengesBefore);
+    // XP real da lição (não hardcoded, não estrelas): delta entre o XP
+    // atual e o snapshot tirado quando a lição começou (xpAtLessonStart),
+    // cobrindo tanto o XP dos exercícios respondidos quanto o +8 de
+    // conclusão logo acima -- STATE.xp só muda dentro de addXP() (ver
+    // Fase 1), então esse delta é exatamente o que esta lição concedeu.
+    const xpEarned = STATE.xp - STEP_STATE.acq.xpAtLessonStart;
+    renderLessonCompleteScreen(u, finished, { challengesBefore, xpEarned, scorePct: lessonScorePct });
     return;
   }
 
@@ -3028,12 +3034,49 @@ function renderChallengeChipHTML(before){
   return '';
 }
 
-// Tela leve entre lições da mesma unidade (Modelo B) -- mais enxuta que
-// renderLessonCompleteScreen (essa é reservada pro fim da unidade inteira,
-// no Ponto de verificação). Mostra quantos cartões já estão devidos pra
-// revisão AGORA; se houver algum, o botão "Continuar" leva direto pro
-// Flashcard (opção (a) do redesenho) em vez de só voltar pra trilha.
-function renderLessonBoundaryScreen(u, lesson, challengesBefore){
+// Vocabulário/frases da tela "Lição concluída!" -- SÓ o que ESTA lição
+// especificamente ensinou (lesson.vocabIdx), nunca a unidade inteira (ver
+// CLAUDE.md, "Coerência pedagógica entre funcionalidades": reaproveitar
+// conteúdo só porque está "por perto" no código, sem responder à pergunta
+// certa, é exatamente o erro que gerou aquela regra). O Ponto de
+// verificação não ensina vocabulário próprio (vocabIdx sempre []) -- em vez
+// de forjar uma lista ou reaproveitar a unidade toda, mostra as palavras
+// que mais erraram ao longo da unidade (STATE.unitProgress[u.id].lessonMisses,
+// contagem real por palavra, ver freshAcquisitionState), que é o que de
+// fato importa revisar nesse momento. Sem vocabIdx e sem erro nenhum
+// registrado (sessão perfeita), devolve lista vazia -- honesto, não inventa.
+function lessonRecapItems(u, lesson){
+  if (lesson && lesson.vocabIdx && lesson.vocabIdx.length){
+    return lesson.vocabIdx.map(i => u.vocab[i]).filter(Boolean);
+  }
+  const misses = STATE.unitProgress[u.id]?.lessonMisses || {};
+  return Object.keys(misses)
+    .map(Number)
+    .filter(i => misses[i] >= 1)
+    .sort((a, b) => misses[b] - misses[a])
+    .slice(0, 8)
+    .map(i => u.vocab[i])
+    .filter(Boolean);
+}
+
+// Tela "Lição concluída!" -- ÚNICA, usada tanto no fim de uma lição
+// intermediária quanto no fim do Ponto de verificação (checkpoint) de uma
+// unidade Modelo B. Antes existiam duas telas distintas aqui: uma leve e
+// corretamente escopada (esta, chamada renderLessonBoundaryScreen) pras
+// lições intermediárias, e outra (renderLessonCompleteScreen, removida)
+// que na verdade mostrava conteúdo de UNIDADE (estrelas, vocabulário
+// inteiro) atrás de um nome de lição -- exatamente a confusão que motivou
+// esta tarefa. XP e nota são sempre reais (delta contra o snapshot tirado
+// no início da lição/checkpoint, ver xpAtLessonStart/checkpointXpAtStart em
+// freshAcquisitionState/renderStep; nunca hardcoded). Sem estrelas -- eram
+// um sistema paralelo de pontuação, não uma representação do XP real (ver
+// lessonStars, ainda usado só em registerDailyStars/markUnitCompleted até a
+// fase de retirada). trackHistory=false (usado pelo checkpoint) pula o
+// cache de navegação/roteamento de Voltar-Avançar e a rota pro Flashcard --
+// concluir o Ponto de verificação já tem seu próprio fluxo em
+// finishCurrentLesson (markUnitCompleted + Desafios de hoje), que não deve
+// ser desviado por aqui.
+function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, scorePct, trackHistory = true }){
   const contentEl = document.getElementById('step-content');
   const nextBtn = document.getElementById('step-next-btn');
   const backBtn = document.getElementById('step-back-btn');
@@ -3041,6 +3084,11 @@ function renderLessonBoundaryScreen(u, lesson, challengesBefore){
   backBtn.style.display = 'none';
   document.getElementById('step-progress-fill').style.width = '100%';
   maybeShowStreakCelebration();
+
+  const recapItems = lessonRecapItems(u, lesson);
+  const recapLabel = (lesson && lesson.vocabIdx && lesson.vocabIdx.length)
+    ? 'Vocabulário desta lição'
+    : 'Palavras que você mais errou nesta unidade';
 
   // reps > 0 exclui as palavras que a PRÓPRIA lição acabou de ensinar --
   // todo cartão nasce com due=0, então cardsDueNow() sozinho as contaria
@@ -3054,11 +3102,34 @@ function renderLessonBoundaryScreen(u, lesson, challengesBefore){
     <div class="lesson-complete">
       <div class="lesson-complete-icon tier-pop">✅</div>
       <h2>Lição concluída!</h2>
-      <p class="lesson-boundary-title">${lesson.title}</p>
+      <p class="lesson-boundary-title">${lesson ? lesson.title : ''}</p>
+      <div class="lesson-complete-stats">
+        <div class="lc-stat"><div class="lc-stat-label">XP ganho</div><div class="lc-stat-value">+${xpEarned} ⚡</div></div>
+        ${scorePct !== undefined && scorePct !== null ? `<div class="lc-stat"><div class="lc-stat-label">Pontuação</div><div class="lc-stat-value">${scorePct}%</div></div>` : ''}
+      </div>
       ${dueCount > 0 ? `<p class="lesson-boundary-due">📇 ${dueCount} cartão${dueCount > 1 ? 'ões' : ''} esperando por revisão</p>` : ''}
-      ${renderChallengeChipHTML(challengesBefore)}
+      ${challengesBefore ? renderChallengeChipHTML(challengesBefore) : ''}
+      ${recapItems.length ? `
+        <div class="lesson-recap">
+          <div class="lesson-recap-label">${recapLabel}</div>
+          ${recapItems.map(item => `
+            <div class="lesson-recap-item">
+              <div class="lesson-recap-french">${audioBtnHTML(item.c)}<span>${item.c}</span><span class="lesson-recap-pinyin">${item.p}</span></div>
+              <div class="lesson-recap-trans">${item.t}</div>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
     </div>
   `;
+  wireAudioButtons(contentEl);
+
+  if (!trackHistory){
+    nextBtn.textContent = 'Continuar →';
+    nextBtn.style.display = 'flex';
+    return;
+  }
+
   STEP_STATE.onLessonBoundaryScreen = { dueCount };
   // Cache SEPARADO (não onLessonBoundaryScreen, que openUnitDetail() zera
   // toda vez que a unidade é reaberta -- inclusive quando é o PRÓPRIO
@@ -3067,7 +3138,7 @@ function renderLessonBoundaryScreen(u, lesson, challengesBefore){
   // reconstruir a MESMA tela (mesmo chip de desafio), sem recalcular nada
   // (nunca reexecuta finishCurrentLesson nem mexe em XP/progresso -- só
   // repete este render com os mesmos insumos).
-  STEP_STATE.lastUnitResultCache = { unitId: u.id, lesson, challengesBefore };
+  STEP_STATE.lastUnitResultCache = { unitId: u.id, lesson, challengesBefore, xpEarned, scorePct, trackHistory };
   nextBtn.textContent = dueCount > 0 ? `Revisar agora (${dueCount}) →` : 'Continuar →';
   nextBtn.style.display = 'flex';
 
@@ -3598,46 +3669,13 @@ function currentStudentName(){
   return full.split(' ')[0].split('@')[0];
 }
 
+// Ainda usada por markUnitCompleted (registerDailyStars) -- retirar o
+// sistema de estrelas por completo é uma fase à parte (não autorizada
+// ainda), esta função em si não é o problema; o problema era ela alimentar
+// a tela de "Lição concluída" como se estrelas fossem o XP real (corrigido
+// -- ver renderLessonCompleteScreen).
 function lessonStars(pct){
   return Math.max(1, Math.round((pct / 100) * 5));
-}
-
-function renderLessonCompleteScreen(contentEl, nextBtn, { correct, total, recapItems, nextLabel }){
-  hideAcqPhaseBanner();
-  maybeShowStreakCelebration();
-  const pct = total ? Math.round((correct / total) * 100) : 0;
-  const stars = lessonStars(pct);
-
-  contentEl.innerHTML = `
-    <div class="lesson-complete tier-bounce">
-      <div class="lesson-complete-icon">👍</div>
-      <h2>Parabéns, ${currentStudentName()}!</h2>
-      <div class="lesson-complete-stats">
-        <div class="lc-stat"><div class="lc-stat-label">Estrelas</div><div class="lc-stat-value" id="lc-stat-stars">0 ⭐</div></div>
-        <div class="lc-stat"><div class="lc-stat-label">Pontuação</div><div class="lc-stat-value" id="lc-stat-pct">0%</div></div>
-      </div>
-      ${recapItems.length ? `
-        <div class="lesson-recap">
-          <div class="lesson-recap-label">Vocabulário e frases desta lição</div>
-          ${recapItems.map(item => `
-            <div class="lesson-recap-item">
-              <div class="lesson-recap-french">${audioBtnHTML(item.c)}<span>${item.c}</span><span class="lesson-recap-pinyin">${item.p}</span></div>
-              <div class="lesson-recap-trans">${item.t}</div>
-            </div>
-          `).join('')}
-        </div>
-      ` : ''}
-    </div>
-  `;
-  wireAudioButtons(contentEl);
-  // Marco de fim de UNIDADE (tier 3 da hierarquia de celebração) -- confete
-  // curto + contador subindo em vez de aparecer pronto, mais peso que a
-  // simples transição de lição pra lição (tier 2, só o ícone salta).
-  spawnConfetti(16, 1400);
-  animateCount(document.getElementById('lc-stat-stars'), stars, { prefix: '+', suffix: ' ⭐' });
-  animateCount(document.getElementById('lc-stat-pct'), pct, { suffix: '%' });
-  nextBtn.textContent = nextLabel || 'Concluir unidade ✓';
-  nextBtn.style.display = 'flex';
 }
 
 // ---------- Atalho de teclado 1-4 pras alternativas selecionáveis ----------
@@ -3795,9 +3833,16 @@ function renderExerciseStep(){
       renderExerciseStep();
       return;
     }
-    renderLessonCompleteScreen(contentEl, nextBtn, {
-      correct: STEP_STATE.exerciseScore, total,
-      recapItems: [...u.vocab, ...(u.phrases || [])]
+    // XP real do checkpoint: delta contra o snapshot tirado ao entrar em
+    // 'exercises'/'checkpointExercises' (ver Fase 1) -- cobre tanto a
+    // eventual Revisão dos Erros quanto a consolidação principal, as duas
+    // juntas compõem esta "lição". O +25 de markUnitCompleted (bônus por
+    // concluir a UNIDADE) só é concedido depois, quando "Continuar" for
+    // clicado (ver finishCurrentLesson) -- não pertence a este XP.
+    const xpEarned = STATE.xp - STEP_STATE.checkpointXpAtStart;
+    const scorePct = total ? Math.round((STEP_STATE.exerciseScore / total) * 100) : 0;
+    renderLessonCompleteScreen(u, isLessonUnit(u) ? currentLesson(u) : null, {
+      challengesBefore: null, xpEarned, scorePct, trackHistory: false
     });
     return;
   }
