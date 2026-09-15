@@ -193,3 +193,37 @@ componente (botão, badge, chip etc.) deve, antes de ser dado como pronto,
 ser validado visualmente (screenshot Playwright é suficiente) nos 4
 cenários: fr claro, fr escuro, zh claro, zh escuro — não só um idioma ou
 só um tema, mesmo que a mudança "pareça" só visual/de posição.
+
+## Edge Functions: um fix no código só vale em produção depois de um novo deploy
+
+Diferente de front-end (fr/zh, `shared/*.js` — servidos estático, refletem
+o commit assim que o GitHub Pages publica), uma Edge Function do Supabase
+só passa a rodar com o código novo depois de um `deploy_edge_function`
+(ou `supabase functions deploy` manual) — commitar/mergear sozinho não
+basta, a versão antiga continua ativa e sendo invocada pelo cron/trigger
+normalmente. Mesmo princípio da regra "código pronto não prova
+infraestrutura ativa" acima, aplicado a uma correção, não só a uma
+feature nova.
+
+Caso concreto: `notification-cron` estava contando revisão atrasada
+(`computeReviewOverdueCount`) sem respeitar o mesmo gate de "lição
+concluída" que a tela Revisão já aplica (`isCardLessonCompleted`,
+fr/zh `app.js`) — um cartão praticado dentro da própria lição em
+andamento (reps>0, due vencido) gerava a notificação "N palavras prontas
+pra revisar" mesmo com a tela mostrando 0. Relatado pela autora
+(2026-09-15, print da tela real). Corrigido replicando o gate no servidor
+via `LESSON_VOCAB_MAP`/`isCardLessonCompletedServer` (mesmo espírito de
+duplicação do `MISSION_POOLS` já existente no arquivo — `content.js` não
+é importável no runtime da function). **Deploy feito ao vivo nesta
+mesma sessão** via `mcp__Supabase__deploy_edge_function` no projeto
+`eigjocalzwamisgqilhg` (`notification-cron` v13→v14, mesmo `verify_jwt`) —
+não é um passo manual pendente pra essa correção específica.
+
+Na prática: sempre que uma sessão futura corrigir um bug de LÓGICA (não
+só de schema) numa Edge Function já ativa em produção, o commit sozinho
+não é o fim da tarefa — ou faz o deploy direto (se tiver acesso MCP ao
+Supabase, como neste caso, e a mudança for um fix comportamental
+razoavelmente contido, não uma mudança arquitetural grande) e registra
+aqui como feito, ou deixa claríssimo pra autora que o deploy ainda está
+pendente e é o que falta pra corrigir isso em produção — nunca deixar
+implícito que "meu código corrige, então já era".
