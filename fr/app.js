@@ -4706,12 +4706,20 @@ function reviewFilterQueue(filter, pool){
   return queue.slice(0, sessionIntensityToLimit(STATE.studySettings.sessionIntensity));
 }
 
+// Rótulos curtos reaproveitados em 2 lugares: as opções do <select> no
+// painel ⚙️ (com contagem entre parênteses) e o indicador discreto no
+// hero (sem contagem, só o nome do filtro ativo) -- texto-fonte único
+// pra nunca dessincronizar entre os dois.
+const REVIEW_FILTER_LABELS = { all: 'Todas', hard: 'Mais difíceis primeiro', oldest: 'Mais antigas primeiro' };
+
 // Bloco hero (topo da Revisão): número grande = trueCount, sempre o total
 // real pendente, nunca o cortado pela sessão -- fixo, não muda com o
-// filtro selecionado (só os números entre parênteses no seletor mudam).
-// Junto vem o <select> de filtro e o botão que abre "Configurar sessão"
-// (Frequência/Palavras novas por dia/Intensidade -- movidos de
-// Configurações > Revisões pra cá, nunca duplicados nos dois lugares).
+// filtro selecionado. 4ª rodada de grilling: o <select> de filtro saiu
+// daqui e foi pro painel ⚙️ (junto de Frequência/Palavras novas/
+// Intensidade -- autora achou estranho ter 2 lugares de config na mesma
+// tela). Pra não perder visibilidade do filtro ativo (painel fica
+// fechado por padrão), sobra um indicador discreto de texto abaixo do
+// número -- não é clicável, só informa qual critério está em uso agora.
 function renderReviewTodayWidget(){
   const wrap = document.getElementById('review-today-widget');
   if (!wrap) return;
@@ -4719,27 +4727,14 @@ function renderReviewTodayWidget(){
   const trueCount = trueDueReviewCount(pool);
   if (pool.length === 0 || trueCount === 0){ wrap.innerHTML = ''; return; }
 
-  const counts = {
-    all: trueCount,
-    hard: getStudyQueue(pool, { scope: 'hard' }).length,
-    oldest: reviewFilterQueue('oldest', pool).length
-  };
   const current = STATE.studySettings.reviewFilter || 'oldest';
+  const filterLabel = REVIEW_FILTER_LABELS[current] || REVIEW_FILTER_LABELS.oldest;
 
   wrap.innerHTML = `
     <div class="review-today-label">Revisões pendentes</div>
     <div class="review-today-count">${trueCount}</div>
-    <select class="review-filter-select" id="review-filter-select">
-      <option value="all" ${current === 'all' ? 'selected' : ''}>Todas (${counts.all})</option>
-      <option value="hard" ${current === 'hard' ? 'selected' : ''}>Mais difíceis primeiro (${counts.hard})</option>
-      <option value="oldest" ${current === 'oldest' ? 'selected' : ''}>Mais antigas primeiro (${counts.oldest})</option>
-    </select>
+    <p class="review-active-filter">Filtro: ${filterLabel}</p>
   `;
-  document.getElementById('review-filter-select').addEventListener('change', (e) => {
-    STATE.studySettings.reviewFilter = e.target.value;
-    saveState();
-    renderReviewModeSelect();
-  });
 }
 
 // Altura do "pote" proporcional à maior das 3 categorias (não à contagem
@@ -6252,44 +6247,87 @@ function switchSettingsSection(section){
 // trocado na 3ª (ver #review-header-settings-btn/#review-settings-panel):
 // sincroniza os 3 controles de sessão com STATE.studySettings -- roda toda vez que o
 // painel "⚙️ Configurar sessão" é aberto.
+// Lista fixa de opções de "Novas palavras por dia" (4ª rodada de
+// grilling -- era um stepper -/+ livre de 0 a 50). 9999 é o sentinela de
+// "sem limite": não existe pool de conteúdo remotamente perto desse
+// tamanho (fr/content.js ~940 blocos, zh/content.js ~608), então
+// slice(0, 9999) em getStudyQueue já devolve a lista inteira sem precisar
+// de nenhum caso especial no motor -- e ao contrário de usar Infinity,
+// sobrevive normalmente a JSON.stringify (Supabase/localStorage).
+const NEW_CARDS_PER_DAY_OPTIONS = [0, 5, 10, 15, 20, 9999];
+
+// Valor herdado do antigo stepper (0-50 livre) pode não bater com
+// nenhuma das 6 opções fixas -- aproxima pro mais próximo só pra exibição
+// no <select> (não reescreve STATE, getStudyQueue aceita qualquer número
+// como newCardsLimit normalmente).
+function normalizeNewCardsPerDay(n){
+  return NEW_CARDS_PER_DAY_OPTIONS.reduce((best, opt) =>
+    Math.abs(opt - n) < Math.abs(best - n) ? opt : best, NEW_CARDS_PER_DAY_OPTIONS[0]);
+}
+
+// Fase 10, movido pra Revisão na 2ª sessão de grilling, ícone de acesso
+// trocado na 3ª, filtro de fila entrou aqui na 4ª (ver
+// #review-header-settings-btn/#review-settings-panel): sincroniza os 4
+// controles de sessão com STATE.studySettings -- roda toda vez que o
+// painel "⚙️ Configurar sessão" é aberto ou qualquer um dos 4 muda.
 function renderReviewSettingsView(){
   const s = STATE.studySettings;
+
+  const filterSelect = document.getElementById('review-filter-select');
+  if (filterSelect){
+    const pool = eligibleReviewPool();
+    const trueCount = trueDueReviewCount(pool);
+    const counts = {
+      all: trueCount,
+      hard: getStudyQueue(pool, { scope: 'hard' }).length,
+      oldest: reviewFilterQueue('oldest', pool).length
+    };
+    const current = s.reviewFilter || 'oldest';
+    filterSelect.innerHTML = `
+      <option value="all" ${current === 'all' ? 'selected' : ''}>${REVIEW_FILTER_LABELS.all} (${counts.all})</option>
+      <option value="hard" ${current === 'hard' ? 'selected' : ''}>${REVIEW_FILTER_LABELS.hard} (${counts.hard})</option>
+      <option value="oldest" ${current === 'oldest' ? 'selected' : ''}>${REVIEW_FILTER_LABELS.oldest} (${counts.oldest})</option>
+    `;
+  }
   const freqSelect = document.getElementById('review-frequency-select');
   if (freqSelect) freqSelect.value = s.reviewFrequency;
+  const newCardsSelect = document.getElementById('review-newcards-select');
+  if (newCardsSelect) newCardsSelect.value = String(normalizeNewCardsPerDay(s.newCardsPerDay));
   const intensitySelect = document.getElementById('review-intensity-select');
   if (intensitySelect) intensitySelect.value = s.sessionIntensity;
-  document.getElementById('new-cards-value').textContent = s.newCardsPerDay;
-  document.getElementById('new-cards-decr').disabled = s.newCardsPerDay <= 0;
-  document.getElementById('new-cards-incr').disabled = s.newCardsPerDay >= 50;
 }
 
 // Persiste + reaplica ao motor imediatamente -- não precisa de botão "Salvar"
-// (mesmo padrão dos outros pref-switch/toggle desta tela).
+// (mesmo padrão dos outros pref-switch/toggle desta tela). renderReviewTodayWidget()
+// também roda aqui porque newCardsPerDay entra direto no cálculo de trueCount
+// (achado da 4ª rodada: o stepper antigo não atualizava o hero até o próximo
+// render de tab -- número passava a hora sem refletir a mudança).
 function updateStudySetting(patch){
   Object.assign(STATE.studySettings, patch);
   if (patch.reviewFrequency){
     setDesiredRetention(reviewFrequencyToRetention(patch.reviewFrequency));
   }
   renderReviewSettingsView();
+  renderReviewTodayWidget();
   saveState();
 }
 
+document.getElementById('review-filter-select').addEventListener('change', (e) => {
+  updateStudySetting({ reviewFilter: e.target.value });
+});
 document.getElementById('review-frequency-select').addEventListener('change', (e) => {
   updateStudySetting({ reviewFrequency: e.target.value });
+});
+document.getElementById('review-newcards-select').addEventListener('change', (e) => {
+  updateStudySetting({ newCardsPerDay: Number(e.target.value) });
 });
 document.getElementById('review-intensity-select').addEventListener('change', (e) => {
   updateStudySetting({ sessionIntensity: e.target.value });
 });
-document.getElementById('new-cards-decr').addEventListener('click', () => {
-  updateStudySetting({ newCardsPerDay: Math.max(0, STATE.studySettings.newCardsPerDay - 1) });
-});
-document.getElementById('new-cards-incr').addEventListener('click', () => {
-  updateStudySetting({ newCardsPerDay: Math.min(50, STATE.studySettings.newCardsPerDay + 1) });
-});
 // Ícone "⚙️" no cabeçalho da tela de Revisão (3ª sessão de grilling --
 // antes era um botão de texto solto entre o dropdown e REVISAR, a autora
-// não gostou) -- recolhido por padrão, sincroniza ao abrir (mesmos 3
-// controles de sempre, só de endereço/estilo novo).
+// não gostou) -- recolhido por padrão, sincroniza ao abrir (4 controles
+// de sessão, ver renderReviewSettingsView).
 const reviewHeaderSettingsBtn = document.getElementById('review-header-settings-btn');
 if (reviewHeaderSettingsBtn){
   reviewHeaderSettingsBtn.addEventListener('click', () => {

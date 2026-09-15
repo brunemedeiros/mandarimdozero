@@ -1371,7 +1371,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .review-mode-card .name{ font-size:14px; font-weight:700; color: var(--ink); }
 .review-mode-card .desc{ font-size:11.5px; color: var(--ink-soft); }
 
-/* ---------- Bloco hero + filtro de fila (Fase 12, reformulado 3x após
+/* ---------- Bloco hero + filtro de fila (Fase 12, reformulado 4x após
    feedback da autora -- ver sessões de grilling registradas em app.js):
    1ª rodada trocou o número grande por texto escondido no rótulo "Revisar"
    pra cortar a repetição 4x (número + legenda + 2 cards idênticos). Ficou
@@ -1380,14 +1380,20 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
    repetido, mais um <select> explícito pra escolher COMO consumir a fila.
    3ª rodada: a legenda "N palavras prontas pra revisar" ainda repetia o
    mesmo trueCount em forma de frase -- vira um rótulo estático (sem
-   número) acima do número, mesmo estilo de .section-label. */
+   número) acima do número, mesmo estilo de .section-label.
+   4ª rodada: o <select> de filtro saiu daqui e foi pro painel ⚙️ (autora
+   achou estranho ter 2 lugares de config na mesma tela) -- no lugar dele
+   sobra .review-active-filter, um indicador discreto (não clicável) do
+   filtro ativo, pra não perder visibilidade total com o painel fechado
+   por padrão. */
 #review-today-widget:empty{ display:none; }
 #review-today-widget{ text-align:center; margin-bottom:14px; }
 .review-today-label{ font-size:12px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft); font-weight:800; margin-bottom:4px; }
 .review-today-count{ font-size:38px; font-weight:800; line-height:1; color:var(--seal-red-dark); font-variant-numeric:tabular-nums; }
-.review-filter-select{
-  margin-top:10px; font-size:13px; font-weight:700; color:var(--ink); background:var(--paper);
-  border:1px solid var(--paper-line); border-radius:10px; padding:8px 12px; cursor:pointer; max-width:280px;
+.review-active-filter{ margin-top:6px; font-size:13px; color:var(--ink-soft); }
+.review-settings-select{
+  font-size:13px; font-weight:700; color:var(--ink); background:var(--paper);
+  border:1px solid var(--paper-line); border-radius:10px; padding:8px 12px; cursor:pointer; max-width:280px; width:100%;
 }
 
 /* ---------- Acesso a "Configurar sessão" (3ª rodada de grilling): a
@@ -1407,7 +1413,10 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .review-header-settings-btn:hover{ background: color-mix(in srgb, var(--seal-red-dark) 22%, var(--paper)); }
 
 /* Painel movido de Configurações > Revisões (2ª rodada) -- recolhido por
-   padrão, [hidden] nativo, sem JS extra pra esconder. */
+   padrão, [hidden] nativo, sem JS extra pra esconder. 4ª rodada: o filtro
+   de fila entrou como 1º controle do painel (antes vivia solto no hero),
+   por ser a decisão mais "de conteúdo" (o que entra na sessão) das 4,
+   ficando à frente das 3 que ajustam o motor por trás dos panos. */
 .review-settings-panel{ margin-bottom:22px; }
 
 /* ---------- "Suas palavras" (resumo fracas/medianas/fortes) ----------
@@ -1923,29 +1932,12 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .pref-switch:disabled{ opacity:.45; cursor:not-allowed; }
 
 /* ---------- Revisões (Fase 10 -- configurações simplificadas) ----------
-   3 controles simples só: frequência de revisão, novas palavras/dia,
-   intensidade da sessão. Nenhum parâmetro do motor (FSRS) é exposto --
-   cada opção aqui mapeia internamente pra um valor real (ver
-   reviewFrequencyToRetention/sessionIntensityToLimit em app.js). */
-.study-freq-options{ display:flex; flex-direction:column; }
-.study-freq-option{
-  display:flex; flex-direction:column; align-items:flex-start; text-align:left; gap:2px;
-  padding:14px 16px; border:none; background:var(--paper); cursor:pointer; font-family:var(--font-body);
-  border-radius:0;
-}
-.study-freq-option + .study-freq-option{ border-top:1px solid var(--paper-line); }
-.study-freq-option-title{ font-size:14px; font-weight:800; color:var(--ink); }
-.study-freq-option-sub{ font-size:12.5px; color:var(--ink-soft); }
-.study-freq-option.active{ background:var(--seal-red); }
-.study-freq-option.active .study-freq-option-title,
-.study-freq-option.active .study-freq-option-sub{ color:#fff; }
-.study-stepper{ display:flex; align-items:center; gap:12px; }
-.study-stepper-btn{
-  width:32px; height:32px; border-radius:50%; border:1px solid var(--paper-line); background:var(--paper);
-  font-size:18px; font-weight:700; color:var(--ink); cursor:pointer; line-height:1;
-}
-.study-stepper-btn:disabled{ opacity:.35; cursor:not-allowed; }
-.study-stepper-value{ font-size:16px; font-weight:800; color:var(--ink); min-width:24px; text-align:center; }
+   4 controles: filtro de fila, frequência de revisão, novas palavras/dia,
+   intensidade da sessão -- todos <select> desde a 4ª rodada de grilling
+   (ver .review-settings-select acima). Nenhum parâmetro do motor (FSRS) é
+   exposto -- cada opção aqui mapeia internamente pra um valor real (ver
+   reviewFrequencyToRetention/sessionIntensityToLimit/NEW_CARDS_PER_DAY_OPTIONS
+   em app.js). */
 
 /* ---------- Preferências de notificação (Fase 2) ---------- */
 .notif-pref-advanced{ margin-top:14px; }
@@ -3161,30 +3153,30 @@ footer.app-footer img{ height:40px; opacity:.85; }
       <div id="review-today-widget"></div>
 
       <div class="review-settings-panel" id="review-settings-panel" hidden>
+        <div class="section-label">Filtro de fila</div>
+        <select class="review-settings-select" id="review-filter-select"></select>
         <div class="section-label">Frequência de revisão</div>
-        <select class="review-filter-select" id="review-frequency-select">
+        <select class="review-settings-select" id="review-frequency-select">
           <option value="frequent">Mais frequente (revisa mais cedo e mais vezes)</option>
           <option value="balanced">Equilibrada (recomendado)</option>
           <option value="spaced">Mais espaçada (intervalos mais longos entre revisões)</option>
         </select>
         <div class="section-label">Novas palavras por dia</div>
-        <div class="settings-card">
-          <div class="settings-row">
-            <div class="settings-row-label">Quantas palavras novas entram por sessão de Flashcard</div>
-            <div class="study-stepper">
-              <button class="study-stepper-btn" id="new-cards-decr" aria-label="Diminuir">−</button>
-              <span class="study-stepper-value" id="new-cards-value">10</span>
-              <button class="study-stepper-btn" id="new-cards-incr" aria-label="Aumentar">+</button>
-            </div>
-          </div>
-        </div>
+        <select class="review-settings-select" id="review-newcards-select">
+          <option value="0">0 (nenhuma, só revisar o que já viu)</option>
+          <option value="5">5 (ritmo mais lento)</option>
+          <option value="10">10 (recomendado)</option>
+          <option value="15">15 (ritmo mais rápido)</option>
+          <option value="20">20 (ritmo bem rápido)</option>
+          <option value="9999">Sem limite (todas as pendentes de uma vez)</option>
+        </select>
         <div class="section-label">Intensidade da sessão</div>
-        <select class="review-filter-select" id="review-intensity-select">
+        <select class="review-settings-select" id="review-intensity-select">
           <option value="light">Leve (sessões mais curtas)</option>
           <option value="normal">Normal (recomendado)</option>
           <option value="intense">Intensa (sessões mais longas)</option>
         </select>
-        <p class="settings-more-note">Essas opções ajustam o motor de revisão por trás dos panos -- você não precisa entender os detalhes técnicos.</p>
+        <p class="settings-more-note">O filtro decide quais cartões entram na sessão agora; os outros 3 ajustam o motor de revisão nos bastidores -- você não precisa entender os detalhes técnicos.</p>
       </div>
 
       <div class="section-label" id="review-mode-revisar-label">Revisar</div>
