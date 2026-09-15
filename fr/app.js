@@ -857,7 +857,7 @@ document.getElementById('review-reminder-cta-btn').addEventListener('click', () 
 // diferentes viraria um vazamento de estado sutil).
 function freshDailyBucket(today){
   return {
-    date: today, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
+    date: today, xp: 0, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
     grammarLessons: 0, conjugationSessions: 0, conjugationCorrect: 0,
     conjugationTenses: [], reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0,
     lessonsForGoal: 0, goalCountedLessonKeys: [], exerciseFormatsSeen: [],
@@ -882,6 +882,15 @@ function ensureDailyBucket(){
   }
 }
 
+// Fase 6 da tarefa de conclusão de lição/unidade: retirada do desafio
+// diário 'stars40' (GENERAL_CHALLENGES) removeu o ÚNICO chamador desta
+// função que vinha de markUnitCompleted (unidade Modelo B). Esta função em
+// si NÃO foi removida porque completeModuleUnits (Ponto de verificação de
+// MÓDULO, sistema fr-only, ver "---------- Ponto de verificação (checkpoint)
+// de cada módulo ----------") ainda a chama de verdade, e
+// renderModuleCompleteScreen (Tier 4/6) ainda mostra esse número na própria
+// tela -- feature separada, fora do escopo desta tarefa, nunca mencionada
+// pela autora como confusa. Não remover sem essa mesma auditoria.
 function registerDailyStars(amount){
   ensureDailyBucket();
   STATE.daily.stars += amount;
@@ -975,7 +984,11 @@ const REVISAO_CONJ_CHALLENGES = [
 // duas telas mostrando a mesma contagem como se fossem coisas diferentes é
 // exatamente o "progresso duplicado" que o artefato pediu pra evitar (§4).
 const GENERAL_CHALLENGES = [
-  { id:'stars40', icon:'⭐', label:'Ganhe 40 estrelas', target:40, get: d => d.stars },
+  // Fase 6 da tarefa de conclusão de lição/unidade: substitui 'stars40'
+  // (estrelas -- sistema paralelo de pontuação retirado do fluxo de unidade,
+  // ver registerDailyStars) por um desafio ligado ao XP real, a única
+  // moeda que o app de fato usa em todo o resto da interface.
+  { id:'xp50', icon:'⚡', label:'Ganhe 50 XP hoje', target:50, get: d => d.xp },
   { id:'highscore2', icon:'📈', label:'Pontue mais de 80% em 2 lições', target:2, get: d => d.highScoreLessons },
   { id:'perfect1', icon:'🎯', label:'Complete uma lição sem errar', target:1, get: d => d.perfectLessons },
   { id:'grammar1', icon:'🧠', label:'Complete 1 unidade de gramática', target:1, get: d => d.grammarLessons },
@@ -1095,6 +1108,10 @@ function addXP(amount){
   STATE.xp += amount;
   ensurePeriodXp();
   STATE.periodXp.amount += amount;
+  // Fase 6 da tarefa de conclusão de lição/unidade: alimenta o desafio
+  // diário 'xp50' (GENERAL_CHALLENGES), que substituiu 'stars40'.
+  ensureDailyBucket();
+  STATE.daily.xp += amount;
   showToast(`+${amount} XP`);
   // Fase 1 do sistema de notificações (evento "Cliente" -- ver
   // shared/notifications.js): fire-and-forget, o anti-spam (cooldown/
@@ -2741,9 +2758,11 @@ function lessonRecapItems(u, lesson){
 // esta tarefa. XP e nota são sempre reais (delta contra o snapshot tirado
 // no início da lição/checkpoint, ver xpAtLessonStart/checkpointXpAtStart em
 // freshAcquisitionState/renderStep; nunca hardcoded). Sem estrelas -- eram
-// um sistema paralelo de pontuação, não uma representação do XP real (ver
-// lessonStars, ainda usado só em registerDailyStars/markUnitCompleted até a
-// fase de retirada). trackHistory=false (usado pelo checkpoint) pula o
+// um sistema paralelo de pontuação, não uma representação do XP real
+// (retirado do fluxo de UNIDADE na Fase 6 -- ver GENERAL_CHALLENGES/addXP;
+// lessonStars/registerDailyStars continuam existindo só pro Ponto de
+// verificação de MÓDULO, sistema fr-only separado). trackHistory=false
+// (usado pelo checkpoint) pula o
 // cache de navegação/roteamento de Voltar-Avançar e a rota pro Flashcard --
 // concluir o Ponto de verificação já tem seu próprio fluxo em
 // finishCurrentLesson (markUnitCompleted + Desafios de hoje), que não deve
@@ -5477,7 +5496,10 @@ function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
   // chamava maybeShowStreakCelebration() em nenhum ponto.
   maybeShowStreakCelebration();
   if (typeof scorePct === 'number'){
-    registerDailyStars(lessonStars(scorePct));
+    // Fase 6: estrelas retiradas do fluxo de UNIDADE -- STATE.daily.xp
+    // (alimentado dentro de addXP()) já cobre o desafio diário equivalente
+    // ('xp50'). registerDailyStars continua existindo pro Ponto de
+    // verificação de MÓDULO (completeModuleUnits), sistema separado.
     registerDailyLessonCompleted(scorePct, u.type === 'grammar');
   }
   trackEvent('lesson_complete', 'unit_checkpoint', { unitId, scorePct });
