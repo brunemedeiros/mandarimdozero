@@ -231,9 +231,96 @@ function daysSince(dateStr: string | undefined | null): number | null {
   return Math.floor((Date.now() - then) / 86400000);
 }
 
-function computeReviewOverdueCount(cards: any[] | undefined): number {
+// Portado de UNITS[].lessons[].vocabIdx em fr/content.js e zh/content.js --
+// unitId -> lista de vocabIdx por lição, na mesma ordem do conteúdo. Só o
+// suficiente pra replicar isCardLessonCompleted() (fr/app.js, zh/app.js)
+// aqui (mesmo espírito de duplicação do MISSION_POOLS acima -- content.js
+// não é importável neste runtime, ver comentário no topo do arquivo).
+//
+// Bug real que isto corrige (relatado pela autora, 2026-09-15): um cartão
+// ganha reps>0 e due<=now assim que é praticado dentro da PRÓPRIA lição que
+// ensina a palavra -- antes de "lição concluída" avançar. computeReviewOverdueCount
+// contava esse cartão como atrasado (due há >48h) mesmo que a tela Revisão
+// (getStudyQueue/eligibleReviewPool, que JÁ respeita esse gate) mostrasse 0
+// -- notificação "N palavras prontas pra revisar" batendo numa tela vazia.
+// Unidade sem lições de vocabulário (só gramática, ex: "A1-g1" em fr) mapeia
+// pra [] de propósito -- lessonIdx nunca é encontrado, cai no mesmo
+// fallback do cliente (!!prog.completed).
+//
+// Precisa ser regerado manualmente se a estrutura de lições de alguma
+// unidade mudar (mesmo cuidado de sincronia do MISSION_POOLS acima).
+const LESSON_VOCAB_MAP: Record<string, Record<string, number[][]>> = {
+  frances: {
+    "A1-1": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "A1-2": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "A1-3": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "A1-g1": [],
+    "A1-4": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "A1-g2": [],
+    "A1-5": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "A1-6": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "A1-g3": [],
+    "A1-7": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "A1-8": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "A1-g4": [],
+    "A1-9": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "A1-10": [[0,1,2], [3,4,5], [6,7,8], [9,10,11], [12,13], []],
+    "A1-g10": [],
+    "A1-11": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "A1-12": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "A1-13": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "A1-14": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "A1-g5": [],
+    "A1-15": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "A1-g6": [],
+    "A1-16": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "A1-g7": [],
+    "A1-17": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "A1-18": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "A1-19": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "A1-g8": [],
+    "A1-20": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "A1-g9": []
+  },
+  mandarim: {
+    "1": [[0,1,2], [3,4,5], [6,7], []],
+    "2": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "3": [[0,1,2], [3,4,5], [6,7,8], [9,10,11], [12,13], []],
+    "4": [[0,1,2], [3,4,5], [6,7,8], [9,10,11], []],
+    "5": [[0,1,2], [3,4,5], [6,7,8], [9,10], []],
+    "6": [[0,1,2], [3,4,5], [6,7,8], []],
+    "7": [[0,1,2], [3,4,5], [6,7,8], []],
+    "8": [[0,1,2], [3,4,5], [6,7,8], [9,10], []],
+    "9": [[0,1,2], [3,4,5,6], []],
+    "10": [[0,1,2], [3,4,5], [6,7], []],
+    "11": [[0,1,2], [3,4,5], [6,7], []],
+    "12": [[0,1,2], [3,4,5], [6,7], []],
+    "13": [[0,1,2], [3,4,5,6], []],
+    "14": [[0,1,2], [3,4,5], []],
+    "15": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "16": [[0,1,2], [3,4,5], [6,7,8,9], []],
+    "17": [[0,1,2], [3,4,5], [6,7], []],
+    "18": [[0,1,2], [3,4,5], [6,7,8,9], []]
+  },
+};
+
+// Espelha isCardLessonCompleted() (fr/app.js, zh/app.js) usando
+// LESSON_VOCAB_MAP em vez de UNITS (indisponível aqui).
+function isCardLessonCompletedServer(card: any, unitProgress: any, languageAppKey: string): boolean {
+  const prog = unitProgress?.[card?.unitId];
+  if (!prog?.started) return false;
+  const lessons = LESSON_VOCAB_MAP[languageAppKey]?.[String(card.unitId)];
+  const lessonIdx = lessons ? lessons.findIndex((vocabIdxList) => vocabIdxList.includes(card.vocabIdx)) : -1;
+  if (lessonIdx === -1) return !!prog.completed;
+  return lessonIdx < prog.lessonIdx;
+}
+
+function computeReviewOverdueCount(cards: any[] | undefined, unitProgress: any, languageAppKey: string): number {
   const now = Date.now();
-  return (cards || []).filter((c) => c && c.reps > 0 && c.due && (now - c.due) > REVIEW_OVERDUE_STALE_MS).length;
+  return (cards || []).filter((c) =>
+    c && c.reps > 0 && c.due && (now - c.due) > REVIEW_OVERDUE_STALE_MS &&
+    isCardLessonCompletedServer(c, unitProgress, languageAppKey)
+  ).length;
 }
 
 function fillPlaceholders(text: string | null | undefined, payload: Record<string, unknown>): string {
@@ -461,7 +548,7 @@ async function processUserLanguage(
   const today = todayDateKeyUTC();
 
   // 1) Revisão atrasada
-  const dueCount = computeReviewOverdueCount(state.cards);
+  const dueCount = computeReviewOverdueCount(state.cards, state.unitProgress, languageAppKey);
   if (dueCount >= REVIEW_OVERDUE_MIN_COUNT) {
     if (await maybeNotify(supabase, rules, prefsCache, emailCache, userId, languageAppKey, 'review_overdue', 'revisao', { dueCount }, 'review')) created++;
   }
