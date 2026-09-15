@@ -807,21 +807,17 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .usage-note-body strong{ color: var(--seal-red-dark); }
 
 /* ---------- Painel de resultado ("Por que errei?", estilo Duolingo) ----------
-   Cartão único colorido (verde acerto / vermelho erro), voltando ao design
-   original do app (pedido explícito da autora, comparando com o print de
-   quando o site era hospedado na Netlify) -- cabeçalho, explicação ("por
-   que não foi essa"/"onde você já viu isso") e botão "Continuar" moram
-   todos dentro da MESMA superfície. Uma reformulação anterior (auditoria
-   de UX/UI mobile-first, 2026-09) tinha removido fundo/borda do painel
-   inteiro porque a "why" ganhava uma SEGUNDA caixa com fundo/borda
-   própria dentro da primeira ("dois widgets empilhados") -- mas essa
-   "why" nunca precisou da caixa própria pra existir (ver .wrong-feedback-why
-   abaixo, sempre sem fundo/borda) -- o problema era só a caixa dupla, não
-   o cartão externo. Aqui o cartão externo volta, a "why" continua sem
-   nenhuma superfície própria, e o botão fica encostado nas bordas do
-   mesmo cartão (sem raio de borda próprio -- .overflow:hidden do pai
-   recorta os cantos dele igual ao raio do cartão), pra ler como uma
-   continuação do mesmo bloco, não um controle solto abaixo dele.
+   Cartão único colorido (verde acerto / vermelho erro), igual ao print de
+   referência de quando o site era hospedado na Netlify (pedido explícito
+   da autora, incl. feedback direto rejeitando uma primeira tentativa
+   "tudo achatado numa cor só" -- o print de referência tem DOIS níveis: a
+   moldura colorida (borda + fundo tingido, cabeçalho e botão) E uma caixa
+   neutra (fundo --paper-warm) por dentro dela pro conteúdo (a frase/
+   palavra). Isso NÃO é o mesmo problema que uma auditoria anterior
+   (2026-09) tinha corrigido -- lá a "why" virava um segundo painel com
+   margem/divisor PRÓPRIOS, solto e desconectado do cabeçalho acima.
+   Aqui só existem dois níveis (moldura + uma caixa), nunca dois painéis
+   soltos um embaixo do outro -- ver .feedback-inner-box abaixo.
    Usa --error-red aqui (não --seal-red -- em fr esse token é o AZUL da
    marca, reaproveitado do chinês só por nome; a cor de erro de verdade em
    fr sempre foi --error-red, já usada em .wrong-feedback-header). */
@@ -832,6 +828,10 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .correct-feedback{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
 .wrong-feedback{ border-color: var(--error-red); background: rgba(214,38,25,0.10); }
 .feedback-card-body{ padding: 18px 20px 20px; }
+.feedback-inner-box{
+  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding: 14px 16px;
+}
 @keyframes wrongFeedbackIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
 /* Shake nas opções erradas (múltipla escolha, cenário, V/F, cloze, slots de
    ordenar) -- estilo Duolingo. Anexado direto na classe .incorrect de cada
@@ -842,7 +842,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
   display:flex; align-items:center; gap:8px; font-weight:800; font-size:16px; margin-bottom:14px;
 }
 .correct-feedback-header{ color: var(--jade); }
-.correct-feedback-trans{ font-size:14.5px; color: var(--ink); line-height:1.6; margin:0 0 4px; }
+.correct-feedback-trans{ font-size:14.5px; color: var(--ink); line-height:1.6; margin:0; }
 /* Badge de combo (respostas certas seguidas, ver STEP_STATE.comboCount em
    app.js) -- só o raio amarelo + "Combo xN", sem caixa/pílula de fundo
    (decisão explícita da autora -- versão anterior tinha um fundo roxo que

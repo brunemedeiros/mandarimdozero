@@ -3818,7 +3818,7 @@ function showAnswerPanel(contentEl, ex, opts = {}){
       ${explanation ? `
         <div class="wrong-feedback-why">
           <div class="wrong-feedback-why-label">${revealed ? 'Resposta' : 'Por que não foi essa'}</div>
-          ${explanation}
+          <div class="feedback-inner-box">${explanation}</div>
         </div>
       ` : ''}
     </div>
@@ -4468,7 +4468,7 @@ function showCorrectFeedbackPanel(contentEl, detail){
   panel.innerHTML = `
     <div class="feedback-card-body">
       <div class="correct-feedback-header">${comboBadgeHTML}✅ ${headerText}</div>
-      ${detail ? `<p class="correct-feedback-trans">${detail}</p>` : ''}
+      ${detail ? `<p class="correct-feedback-trans feedback-inner-box">${detail}</p>` : ''}
     </div>
     <button class="btn btn-primary btn-block correct-feedback-continue" id="correct-continue-btn">Continuar →</button>
   `;
