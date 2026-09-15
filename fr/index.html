@@ -228,12 +228,37 @@ body{
 .app-content{ max-width: 920px; margin: 0 auto; padding: 0 16px calc(96px + env(safe-area-inset-bottom)); }
 
 /* ---------- Header / topbar ---------- */
+/* position:sticky com height:auto (nosso caso -- altura vem do padding +
+   conteúdo, nunca fixada) tem um bug documentado no WebKit/Safari (iOS 14+
+   e Safari 15 desktop): o conteúdo que deveria rolar POR TRÁS do elemento
+   sticky às vezes rola por CIMA dele e só "estala" de volta pro lugar
+   certo depois -- exatamente o sintoma relatado (header "não colado",
+   texto da tela por trás aparecendo por cima dele durante o scroll).
+   will-change:transform força o navegador a promover a topbar pra sua
+   própria camada de composição, contornando esse bug (mesma recomendação
+   usada em discussões da própria Apple sobre esse caso). -webkit-sticky
+   é só reforço pra Safari muito antigo (≤13); navegadores que entendem
+   "sticky" puro ignoram a linha anterior por cascata normal.
+   2º achado relatado (mesma sessão): um "espaço estranho com distinção de
+   cor" entre a topbar e o topo real da tela. Causa: #app tem
+   padding-top:20px (usado pro respiro do modo lesson-focus, que não tem
+   topbar) -- antes desse fix a topbar (fundo liso var(--paper)) só
+   começava DEPOIS desses 20px, deixando o fundo decorativo do body (os
+   radial-gradient logo abaixo, com um leve tom de cor por cima do
+   var(--paper) liso) visível nessa faixa, criando um "degrau" de cor bem
+   na quina onde o círculo da marca fica. margin-top:-20px "puxa" a
+   topbar pra cobrir esse respiro com o próprio fundo sólido dela (sem
+   mexer no padding-top do #app, que o lesson-focus ainda precisa);
+   padding-top sobe de 10px pra 30px (10+20) só pra manter a logo na
+   MESMA posição visual de antes -- é reposicionamento de onde o respiro
+   "mora" (de fora da topbar pra dentro dela), não uma mudança de layout. */
 .topbar{
   display:flex; align-items:center; justify-content:space-between;
-  padding: 10px 32px 22px;
+  padding: 30px 32px 22px;
   border-bottom: 1px solid var(--paper-line);
-  margin-bottom: 24px;
-  position:sticky; top:0; z-index:var(--z-topbar); background:var(--paper);
+  margin-top:-20px; margin-bottom: 24px;
+  position:-webkit-sticky; position:sticky; top:0; z-index:var(--z-topbar); background:var(--paper);
+  will-change:transform;
 }
 .brand{ display:flex; align-items:center; gap:10px; min-width:0; }
 .brand-seal{
