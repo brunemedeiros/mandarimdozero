@@ -1876,6 +1876,23 @@ const STEP_STATE = {
   // consolidação do checkpoint (ver renderStep, stepKey 'exercises'/
   // 'checkpointExercises'); null fora dessa sessão.
   checkpointXpAtStart: null,
+  // Erros DESTE Ponto de verificação (Revisão dos erros + consolidação
+  // principal juntas) -- vocabIdx -> contagem. Independente de
+  // STEP_STATE.acq.wordMisses/STATE.unitProgress[u.id].lessonMisses (que
+  // acumulam por LIÇÃO/UNIDADE ao longo do tempo, resetam só quando a
+  // unidade termina): aquele objeto só é inicializado quando o passo
+  // 'vocab' roda (ver freshAcquisitionState em renderStep), e o Ponto de
+  // verificação nunca tem passo 'vocab' (currentStepDefs devolve só
+  // 'checkpointExercises') -- reabrir a unidade direto na última lição e ir
+  // pro checkpoint sem passar pela introdução de nenhuma lição nesta sessão
+  // deixava STEP_STATE.acq.unitId nulo, e o card do resultado do checkpoint
+  // ("Palavras que você errou no Ponto de verificação") caía pra um
+  // lessonMisses desatualizado/vazio -- uma lista que não correspondia ao
+  // erro real que o aluno acabou de cometer (bug relatado, 2026-09-15).
+  // Resetado só ao entrar no checkpoint (ver renderStep, stepKey
+  // 'checkpointExercises'), nunca em openUnitDetail (mesmo padrão de
+  // checkpointXpAtStart).
+  checkpointMisses: {},
   // Respostas CERTAS seguidas na lição atual (zera em qualquer erro ou
   // "Não sei" -- ver showAnswerPanel) -- alimenta o modo combo do painel de
   // acerto (ver showCorrectFeedbackPanel).
@@ -2729,16 +2746,21 @@ function renderChallengeChipHTML(before){
 // conteúdo só porque está "por perto" no código, sem responder à pergunta
 // certa, é exatamente o erro que gerou aquela regra). O Ponto de
 // verificação não ensina vocabulário próprio (vocabIdx sempre []) -- em vez
-// de forjar uma lista ou reaproveitar a unidade toda, mostra as palavras
-// que mais erraram ao longo da unidade (STATE.unitProgress[u.id].lessonMisses,
-// contagem real por palavra, ver freshAcquisitionState), que é o que de
-// fato importa revisar nesse momento. Sem vocabIdx e sem erro nenhum
-// registrado (sessão perfeita), devolve lista vazia -- honesto, não inventa.
+// de forjar uma lista ou reaproveitar a unidade toda, mostra as palavras que
+// o aluno ERROU NESTE PRÓPRIO Ponto de verificação (STEP_STATE.checkpointMisses,
+// contagem real por palavra desta sessão -- ver comentário em
+// STEP_STATE.checkpointMisses sobre por que NÃO é lessonMisses/lessonIdx:
+// aquele acumula por lição/unidade ao longo do tempo e ficava desatualizado
+// quando o checkpoint era aberto sem passar pelo passo 'vocab' antes na
+// mesma sessão, mostrando uma lista que não correspondia ao erro que o
+// aluno acabou de cometer -- bug relatado, 2026-09-15). Sem vocabIdx e sem
+// erro nenhum registrado nesta sessão (sessão perfeita), devolve lista
+// vazia -- honesto, não inventa.
 function lessonRecapItems(u, lesson){
   if (lesson && lesson.vocabIdx && lesson.vocabIdx.length){
     return lesson.vocabIdx.map(i => u.vocab[i]).filter(Boolean);
   }
-  const misses = STATE.unitProgress[u.id]?.lessonMisses || {};
+  const misses = STEP_STATE.checkpointMisses || {};
   return Object.keys(misses)
     .map(Number)
     .filter(i => misses[i] >= 1)
@@ -2748,38 +2770,46 @@ function lessonRecapItems(u, lesson){
     .filter(Boolean);
 }
 
-// Tela "Lição concluída!" -- ÚNICA, usada tanto no fim de uma lição
-// intermediária quanto no fim do Ponto de verificação (checkpoint) de uma
-// unidade Modelo B. Antes existiam duas telas distintas aqui: uma leve e
-// corretamente escopada (esta, chamada renderLessonBoundaryScreen) pras
-// lições intermediárias, e outra (renderLessonCompleteScreen, removida)
-// que na verdade mostrava conteúdo de UNIDADE (estrelas, vocabulário
-// inteiro) atrás de um nome de lição -- exatamente a confusão que motivou
-// esta tarefa. XP e nota são sempre reais (delta contra o snapshot tirado
-// no início da lição/checkpoint, ver xpAtLessonStart/checkpointXpAtStart em
-// freshAcquisitionState/renderStep; nunca hardcoded). Sem estrelas -- eram
-// um sistema paralelo de pontuação, não uma representação do XP real
-// (retirado do fluxo de UNIDADE na Fase 6 -- ver GENERAL_CHALLENGES/addXP;
-// lessonStars/registerDailyStars continuam existindo só pro Ponto de
-// verificação de MÓDULO, sistema fr-only separado). trackHistory=false
-// (usado pelo checkpoint) pula o
-// cache de navegação/roteamento de Voltar-Avançar e a rota pro Flashcard --
-// concluir o Ponto de verificação já tem seu próprio fluxo em
-// finishCurrentLesson (markUnitCompleted + Desafios de hoje), que não deve
-// ser desviado por aqui.
+// Tela "Lição concluída!" / "Ponto de verificação concluído!" -- ÚNICA
+// função, usada tanto no fim de uma lição intermediária quanto no fim do
+// Ponto de verificação (checkpoint) de uma unidade Modelo B, mas com
+// título/recap DIFERENTES pra cada caso (ver isCheckpoint abaixo) -- antes
+// os dois casos mostravam o mesmo título "Lição concluída!", o que é
+// literalmente errado pro checkpoint (ele conclui a unidade inteira, não
+// uma lição) e confundia quem via essa tela logo antes da tela de "Unidade
+// concluída/Parabéns" (renderUnitCompleteScreen) com um título quase
+// idêntico ao dela (bug relatado, 2026-09-15). XP e nota são sempre reais
+// (delta contra o snapshot tirado no início da lição/checkpoint, ver
+// xpAtLessonStart/checkpointXpAtStart em freshAcquisitionState/renderStep;
+// nunca hardcoded). Sem estrelas -- eram um sistema paralelo de pontuação,
+// não uma representação do XP real (retirado do fluxo de UNIDADE na Fase 6
+// -- ver GENERAL_CHALLENGES/addXP; lessonStars/registerDailyStars continuam
+// existindo só pro Ponto de verificação de MÓDULO, sistema fr-only
+// separado). trackHistory=false (usado pelo checkpoint, == isCheckpoint
+// aqui) pula o cache de navegação/roteamento de Voltar-Avançar e a rota pro
+// Flashcard -- concluir o Ponto de verificação já tem seu próprio fluxo em
+// finishCurrentLesson (markUnitCompleted + renderUnitCompleteScreen +
+// Desafios de hoje), que não deve ser desviado por aqui. Streak (maybeShow-
+// StreakCelebration) só dispara aqui quando NÃO é checkpoint -- o caso
+// checkpoint é sempre seguido por renderUnitCompleteScreen (que já chama a
+// mesma função), e mostrar a comemoração de sequência entre o resultado do
+// checkpoint e a tela de Unidade concluída/objetivos comunicacionais estava
+// fora de ordem (mesmo bug relatado): a sequência deve aparecer só DEPOIS
+// da tela de Unidade concluída, nunca entre ela e o resultado do checkpoint.
 function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, scorePct, trackHistory = true }){
   const contentEl = document.getElementById('step-content');
   const nextBtn = document.getElementById('step-next-btn');
   const backBtn = document.getElementById('step-back-btn');
+  const isCheckpoint = !trackHistory;
   hideAcqPhaseBanner();
   backBtn.style.display = 'none';
   document.getElementById('step-progress-fill').style.width = '100%';
-  maybeShowStreakCelebration();
+  if (!isCheckpoint) maybeShowStreakCelebration();
 
   const recapItems = lessonRecapItems(u, lesson);
   const recapLabel = (lesson && lesson.vocabIdx && lesson.vocabIdx.length)
     ? 'Vocabulário desta lição'
-    : 'Palavras que você mais errou nesta unidade';
+    : 'Palavras que você errou no Ponto de verificação';
 
   // reps > 0 exclui as palavras que a PRÓPRIA lição acabou de ensinar --
   // todo cartão nasce com due=0, então cardsDueNow() sozinho as contaria
@@ -2792,8 +2822,8 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
   contentEl.innerHTML = `
     <div class="lesson-complete">
       <div class="lesson-complete-icon tier-pop">✅</div>
-      <h2>Lição concluída!</h2>
-      <p class="lesson-boundary-title">${lesson ? lesson.title : ''}</p>
+      <h2>${isCheckpoint ? 'Ponto de verificação concluído!' : 'Lição concluída!'}</h2>
+      <p class="lesson-boundary-title">${(!isCheckpoint && lesson) ? lesson.title : ''}</p>
       <div class="lesson-complete-stats">
         <div class="lc-stat"><div class="lc-stat-label">XP ganho</div><div class="lc-stat-value">+${xpEarned} ⚡</div></div>
         ${scorePct !== undefined && scorePct !== null ? `<div class="lc-stat"><div class="lc-stat-label">Pontuação</div><div class="lc-stat-value">${scorePct}%</div></div>` : ''}
@@ -3195,6 +3225,7 @@ function renderStep(){
     // inteira).
     if (STEP_STATE.checkpointUnitId !== u.id){
       STEP_STATE.checkpointUnitId = u.id;
+      STEP_STATE.checkpointMisses = {};
       // XP real da tela de conclusão do checkpoint (mesmo raciocínio de
       // xpAtLessonStart em freshAcquisitionState) -- captura antes da
       // eventual Revisão dos Erros e da consolidação principal, já que as
@@ -3807,6 +3838,16 @@ function showAnswerPanel(contentEl, ex, opts = {}){
   // final (ETAPA 7) -- não mexe no lapses/SM-2 persistente.
   if (!revealed && ex && typeof ex.vocabIdx === 'number' && STEP_STATE.acq.unitId === STATE.currentUnitId){
     STEP_STATE.acq.wordMisses[ex.vocabIdx] = (STEP_STATE.acq.wordMisses[ex.vocabIdx] || 0) + 1;
+  }
+  // Erro no Ponto de verificação: contagem PRÓPRIA (checkpointMisses), não
+  // a de cima -- ver comentário em STEP_STATE.checkpointMisses sobre por
+  // que reaproveitar acq.wordMisses aqui gerava a lista errada no card de
+  // resultado do checkpoint. checkpointUnitId (diferente de acq.unitId) é
+  // setado de forma confiável sempre que o checkpoint está em andamento
+  // (ver renderStep, stepKey 'checkpointExercises'), então este sinal não
+  // depende de o passo 'vocab' ter rodado antes na mesma sessão.
+  if (!revealed && ex && typeof ex.vocabIdx === 'number' && STEP_STATE.checkpointUnitId === STATE.currentUnitId){
+    STEP_STATE.checkpointMisses[ex.vocabIdx] = (STEP_STATE.checkpointMisses[ex.vocabIdx] || 0) + 1;
   }
   const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
   const explanation = answerExplanationHTML(ex);
