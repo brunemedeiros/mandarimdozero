@@ -1531,32 +1531,43 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .review-mode-card .name{ font-size:14px; font-weight:700; color: var(--ink); }
 .review-mode-card .desc{ font-size:11.5px; color: var(--ink-soft); }
 
-/* ---------- Bloco hero + filtro de fila (Fase 12, reformulado 2x após
+/* ---------- Bloco hero + filtro de fila (Fase 12, reformulado 3x após
    feedback da autora -- ver sessões de grilling registradas em app.js):
    1ª rodada trocou o número grande por texto escondido no rótulo "Revisar"
    pra cortar a repetição 4x (número + legenda + 2 cards idênticos). Ficou
    discreto demais -- 2ª rodada trouxe o número grande de volta como
    trueCount (total real, nunca cortado pela sessão), agora ÚNICO em vez de
-   repetido, mais um <select> explícito pra escolher COMO consumir a fila
-   (Todas/Mais difíceis primeiro/Mais antigas primeiro), cada opção já com
-   seu número real entre parênteses. */
+   repetido, mais um <select> explícito pra escolher COMO consumir a fila.
+   3ª rodada: a legenda "N palavras prontas pra revisar" ainda repetia o
+   mesmo trueCount em forma de frase -- vira um rótulo estático (sem
+   número) acima do número, mesmo estilo de .section-label. */
 #review-today-widget:empty{ display:none; }
 #review-today-widget{ text-align:center; margin-bottom:14px; }
+.review-today-label{ font-size:12px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft); font-weight:800; margin-bottom:4px; }
 .review-today-count{ font-size:38px; font-weight:800; line-height:1; color:var(--seal-red-dark); font-variant-numeric:tabular-nums; }
-.review-today-caption{ font-size:12.5px; color:var(--ink-soft); margin-top:4px; }
 .review-filter-select{
   margin-top:10px; font-size:13px; font-weight:700; color:var(--ink); background:var(--paper);
   border:1px solid var(--paper-line); border-radius:10px; padding:8px 12px; cursor:pointer; max-width:280px;
 }
 
-/* ---------- Painel "Configurar sessão" (movido de Configurações >
-   Revisões nesta mesma 2ª rodada -- nunca duplicado nos dois lugares).
-   Recolhido por padrão: [hidden] nativo, sem JS extra pra esconder. */
-.review-settings-toggle{
-  display:block; margin:0 auto 18px; background:none; border:none; color:var(--ink-soft);
-  font-size:12.5px; font-weight:700; cursor:pointer; padding:4px;
+/* ---------- Acesso a "Configurar sessão" (3ª rodada de grilling): a
+   autora não gostou do botão de texto solto entre o dropdown e REVISAR --
+   vira um ícone no cabeçalho, ao lado do título "Revisão". Reaproveita o
+   formato circular já usado em botões-ícone do app (ex: "Reportar
+   problema", .lesson-close-btn), mas com cor própria (seal-red-dark, a
+   mesma do número grande) pra não parecer a mesma ação que o botão de
+   report -- pedido explícito da autora. */
+.review-path-header-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.review-path-header-row h2{ margin:0 0 4px; }
+.review-header-settings-btn{
+  flex-shrink:0; width:36px; height:36px; border-radius:50%; border:1px solid var(--seal-red-dark);
+  background: color-mix(in srgb, var(--seal-red-dark) 12%, var(--paper)); color: var(--seal-red-dark);
+  font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition: all .15s ease;
 }
-.review-settings-toggle:hover{ color:var(--ink); }
+.review-header-settings-btn:hover{ background: color-mix(in srgb, var(--seal-red-dark) 22%, var(--paper)); }
+
+/* Painel movido de Configurações > Revisões (2ª rodada) -- recolhido por
+   padrão, [hidden] nativo, sem JS extra pra esconder. */
 .review-settings-panel{ margin-bottom:22px; }
 
 /* ---------- "Suas palavras" (resumo fracas/medianas/fortes) ----------
@@ -2860,30 +2871,21 @@ body.hide-pinyin .prompt-pinyin{
   <div class="view" id="view-review">
     <div id="review-mode-select-wrap">
       <div class="path-header">
-        <h2>Revisão</h2>
+        <div class="review-path-header-row">
+          <h2>Revisão</h2>
+          <button class="review-header-settings-btn" id="review-header-settings-btn" type="button" aria-label="Configurar sessão" title="Configurar sessão">⚙️</button>
+        </div>
         <p>O que você deve fazer agora?</p>
       </div>
       <div id="review-today-widget"></div>
 
-      <button class="review-settings-toggle" id="review-settings-toggle" type="button">⚙️ Configurar sessão</button>
       <div class="review-settings-panel" id="review-settings-panel" hidden>
         <div class="section-label">Frequência de revisão</div>
-        <div class="settings-card">
-          <div class="study-freq-options" id="review-frequency-options">
-            <button class="study-freq-option" data-freq="frequent">
-              <div class="study-freq-option-title">Mais frequente</div>
-              <div class="study-freq-option-sub">Revisa mais cedo e mais vezes</div>
-            </button>
-            <button class="study-freq-option" data-freq="balanced">
-              <div class="study-freq-option-title">Equilibrada</div>
-              <div class="study-freq-option-sub">Recomendado</div>
-            </button>
-            <button class="study-freq-option" data-freq="spaced">
-              <div class="study-freq-option-title">Mais espaçada</div>
-              <div class="study-freq-option-sub">Intervalos mais longos entre revisões</div>
-            </button>
-          </div>
-        </div>
+        <select class="review-filter-select" id="review-frequency-select">
+          <option value="frequent">Mais frequente (revisa mais cedo e mais vezes)</option>
+          <option value="balanced">Equilibrada (recomendado)</option>
+          <option value="spaced">Mais espaçada (intervalos mais longos entre revisões)</option>
+        </select>
         <div class="section-label">Novas palavras por dia</div>
         <div class="settings-card">
           <div class="settings-row">
@@ -2896,22 +2898,11 @@ body.hide-pinyin .prompt-pinyin{
           </div>
         </div>
         <div class="section-label">Intensidade da sessão</div>
-        <div class="settings-card">
-          <div class="study-freq-options" id="session-intensity-options">
-            <button class="study-freq-option" data-intensity="light">
-              <div class="study-freq-option-title">Leve</div>
-              <div class="study-freq-option-sub">Sessões mais curtas</div>
-            </button>
-            <button class="study-freq-option" data-intensity="normal">
-              <div class="study-freq-option-title">Normal</div>
-              <div class="study-freq-option-sub">Recomendado</div>
-            </button>
-            <button class="study-freq-option" data-intensity="intense">
-              <div class="study-freq-option-title">Intensa</div>
-              <div class="study-freq-option-sub">Sessões mais longas</div>
-            </button>
-          </div>
-        </div>
+        <select class="review-filter-select" id="review-intensity-select">
+          <option value="light">Leve (sessões mais curtas)</option>
+          <option value="normal">Normal (recomendado)</option>
+          <option value="intense">Intensa (sessões mais longas)</option>
+        </select>
         <p class="settings-more-note">Essas opções ajustam o motor de revisão por trás dos panos -- você não precisa entender os detalhes técnicos.</p>
       </div>
 

@@ -5034,8 +5034,8 @@ function renderReviewTodayWidget(){
   const current = STATE.studySettings.reviewFilter || 'oldest';
 
   wrap.innerHTML = `
+    <div class="review-today-label">Revisões pendentes</div>
     <div class="review-today-count">${trueCount}</div>
-    <p class="review-today-caption">${trueCount === 1 ? '1 palavra pronta pra revisar.' : `${trueCount} palavras prontas pra revisar.`}</p>
     <select class="review-filter-select" id="review-filter-select">
       <option value="all" ${current === 'all' ? 'selected' : ''}>Todas (${counts.all})</option>
       <option value="hard" ${current === 'hard' ? 'selected' : ''}>Mais difíceis primeiro (${counts.hard})</option>
@@ -6235,18 +6235,16 @@ function switchSettingsSection(section){
   if (section === 'notifications' && typeof renderNotificationPreferencesView === 'function') renderNotificationPreferencesView();
 }
 
-// Fase 10, movido pra Revisão na 2ª sessão de grilling (ver
-// #review-settings-toggle/#review-settings-panel): sincroniza os 3
-// controles de sessão com STATE.studySettings -- roda toda vez que o
+// Fase 10, movido pra Revisão na 2ª sessão de grilling, ícone de acesso
+// trocado na 3ª (ver #review-header-settings-btn/#review-settings-panel):
+// sincroniza os 3 controles de sessão com STATE.studySettings -- roda toda vez que o
 // painel "⚙️ Configurar sessão" é aberto.
 function renderReviewSettingsView(){
   const s = STATE.studySettings;
-  document.querySelectorAll('#review-frequency-options .study-freq-option').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.freq === s.reviewFrequency);
-  });
-  document.querySelectorAll('#session-intensity-options .study-freq-option').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.intensity === s.sessionIntensity);
-  });
+  const freqSelect = document.getElementById('review-frequency-select');
+  if (freqSelect) freqSelect.value = s.reviewFrequency;
+  const intensitySelect = document.getElementById('review-intensity-select');
+  if (intensitySelect) intensitySelect.value = s.sessionIntensity;
   document.getElementById('new-cards-value').textContent = s.newCardsPerDay;
   document.getElementById('new-cards-decr').disabled = s.newCardsPerDay <= 0;
   document.getElementById('new-cards-incr').disabled = s.newCardsPerDay >= 50;
@@ -6263,11 +6261,11 @@ function updateStudySetting(patch){
   saveState();
 }
 
-document.querySelectorAll('#review-frequency-options .study-freq-option').forEach(btn => {
-  btn.addEventListener('click', () => updateStudySetting({ reviewFrequency: btn.dataset.freq }));
+document.getElementById('review-frequency-select').addEventListener('change', (e) => {
+  updateStudySetting({ reviewFrequency: e.target.value });
 });
-document.querySelectorAll('#session-intensity-options .study-freq-option').forEach(btn => {
-  btn.addEventListener('click', () => updateStudySetting({ sessionIntensity: btn.dataset.intensity }));
+document.getElementById('review-intensity-select').addEventListener('change', (e) => {
+  updateStudySetting({ sessionIntensity: e.target.value });
 });
 document.getElementById('new-cards-decr').addEventListener('click', () => {
   updateStudySetting({ newCardsPerDay: Math.max(0, STATE.studySettings.newCardsPerDay - 1) });
@@ -6275,12 +6273,13 @@ document.getElementById('new-cards-decr').addEventListener('click', () => {
 document.getElementById('new-cards-incr').addEventListener('click', () => {
   updateStudySetting({ newCardsPerDay: Math.min(50, STATE.studySettings.newCardsPerDay + 1) });
 });
-// Painel "⚙️ Configurar sessão" na própria tela de Revisão (2ª sessão de
-// grilling) -- recolhido por padrão, sincroniza ao abrir (mesmos 3
-// controles de sempre, só de endereço novo).
-const reviewSettingsToggle = document.getElementById('review-settings-toggle');
-if (reviewSettingsToggle){
-  reviewSettingsToggle.addEventListener('click', () => {
+// Ícone "⚙️" no cabeçalho da tela de Revisão (3ª sessão de grilling --
+// antes era um botão de texto solto entre o dropdown e REVISAR, a autora
+// não gostou) -- recolhido por padrão, sincroniza ao abrir (mesmos 3
+// controles de sempre, só de endereço/estilo novo).
+const reviewHeaderSettingsBtn = document.getElementById('review-header-settings-btn');
+if (reviewHeaderSettingsBtn){
+  reviewHeaderSettingsBtn.addEventListener('click', () => {
     const panel = document.getElementById('review-settings-panel');
     if (panel.hasAttribute('hidden')){
       panel.removeAttribute('hidden');
