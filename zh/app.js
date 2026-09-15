@@ -2101,7 +2101,14 @@ function freshAcquisitionState(unitId, unit){
       // (ex: "Pontue mais de 80% em N lições") -- só o Ponto de verificação
       // do fim da unidade contava, o que na prática deixava esses desafios
       // quase impossíveis de bater num dia normal de estudo por lições.
-      lessonScore: { correct: 0, total: 0 }
+      lessonScore: { correct: 0, total: 0 },
+      // XP real da tela "Lição concluída" (Fase 1/3 da tarefa de conclusão
+      // de lição/unidade): STATE.xp só cresce dentro de addXP() (nenhum
+      // outro lugar escreve nele durante uma sessão, conferido), então o
+      // delta contra este valor no momento em que a lição termina é
+      // exatamente o XP concedido NESTA lição -- sem duplicar nenhum
+      // cálculo paralelo, só lendo o que o motor já concedeu de verdade.
+      xpAtLessonStart: STATE.xp
     };
   }
   return {
@@ -2110,6 +2117,7 @@ function freshAcquisitionState(unitId, unit){
     blockIdx: 0,
     phase: 'intro', // 'intro' | 'checkpoint' | 'practice' | 'mixed'
     introIdx: 0,
+    xpAtLessonStart: STATE.xp,
     // Contagem de erro LOCAL à sessão (não é o mesmo que card.lapses do SM-2,
     // que é histórico entre sessões) -- usada só pra decidir, dentro desta
     // sessão, que palavra merece reaparecer mais e entrar priorizada na
@@ -2124,10 +2132,15 @@ function freshAcquisitionState(unitId, unit){
 
 const STEP_STATE = {
   currentStep: 0,
-  acq: { unitId: null, blocks: [], blockIdx: 0, phase: 'intro', introIdx: 0, wordMisses: {}, introduced: {}, lessonScore: { correct: 0, total: 0 } },
+  acq: { unitId: null, blocks: [], blockIdx: 0, phase: 'intro', introIdx: 0, wordMisses: {}, introduced: {}, lessonScore: { correct: 0, total: 0 }, xpAtLessonStart: 0 },
   exerciseList: [],
   exerciseIndex: 0,
   exerciseScore: 0,
+  // XP real desta lição/checkpoint (Fase 1/3 da tarefa de conclusão de
+  // lição/unidade) -- snapshot de STATE.xp tirado no início da sessão de
+  // consolidação do checkpoint (ver renderStep, stepKey 'exercises'/
+  // 'checkpointExercises'); null fora dessa sessão.
+  checkpointXpAtStart: null,
   // Respostas CERTAS seguidas na lição atual (zera em qualquer erro ou
   // "Não sei" -- ver showAnswerPanel) -- alimenta o modo combo do painel de
   // acerto (ver showCorrectFeedbackPanel).
@@ -2174,9 +2187,10 @@ function openUnitDetail(unitId){
   // unidade numa lição diferente da última vez reaproveitaria os blocos da
   // lição errada (a checagem em renderStep só recalcula quando unitId ou
   // lessonIdx mudam; abrir de novo do zero é o gatilho mais simples e seguro).
-  STEP_STATE.acq = { unitId: null, blocks: [], blockIdx: 0, phase: 'intro', introIdx: 0, wordMisses: {}, introduced: {}, lessonScore: { correct: 0, total: 0 } };
+  STEP_STATE.acq = { unitId: null, blocks: [], blockIdx: 0, phase: 'intro', introIdx: 0, wordMisses: {}, introduced: {}, lessonScore: { correct: 0, total: 0 }, xpAtLessonStart: STATE.xp };
   STEP_STATE.exerciseUnitId = null;
   STEP_STATE.checkpointUnitId = null;
+  STEP_STATE.checkpointXpAtStart = null;
   setLessonFocusMode(true);
 
   document.getElementById('path-list-wrap').style.display = 'none';
@@ -3135,6 +3149,10 @@ function renderStep(){
       STEP_STATE.exerciseUnitId = u.id;
       STEP_STATE.exerciseIndex = 0;
       STEP_STATE.exerciseScore = 0;
+      // XP real da tela de conclusão (mesmo raciocínio de xpAtLessonStart
+      // em freshAcquisitionState) -- captura antes de qualquer addXP() desta
+      // sessão de consolidação.
+      STEP_STATE.checkpointXpAtStart = STATE.xp;
     }
     setAcqPhaseBanner('🧩 Consolidação da unidade');
     renderExerciseStep();
@@ -3149,6 +3167,11 @@ function renderStep(){
     // unidade inteira) -- reaproveita buildExerciseSet sem alteração.
     if (STEP_STATE.checkpointUnitId !== u.id){
       STEP_STATE.checkpointUnitId = u.id;
+      // XP real da tela de conclusão do checkpoint (mesmo raciocínio de
+      // xpAtLessonStart em freshAcquisitionState) -- captura antes da
+      // eventual Revisão dos Erros e da consolidação principal, já que as
+      // duas juntas compõem a sessão desta "lição" (o Ponto de verificação).
+      STEP_STATE.checkpointXpAtStart = STATE.xp;
       const misses = STATE.unitProgress[u.id].lessonMisses || {};
       const missedIdx = Object.keys(misses).map(Number).filter(i => misses[i] >= 1);
       if (missedIdx.length >= 3){
