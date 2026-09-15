@@ -256,7 +256,13 @@ async function renderLeaderboardView(){
         <div class="leaderboard-xp" aria-hidden="true">⭐ ${r.amount}</div>
       </div>
     `;
-  }).join('') : `<p class="profile-empty-note">Ninguém pontuou nessa categoria ainda essa semana. Seja a primeira pessoa no ranking!</p>`;
+  }).join('') : `
+    <div class="review-empty">
+      <div class="big-emoji">🏆</div>
+      <h3>Seja a primeira pessoa no ranking</h3>
+      <p>Ninguém pontuou nessa categoria ainda essa semana.</p>
+    </div>
+  `;
 
   wrap.innerHTML = `
     <div class="leaderboard-week-label">${leaderboardDaysRemainingLabel(weekStart)}</div>

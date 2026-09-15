@@ -16,6 +16,13 @@ function createTabSwitcher({ onBeforeSwitch, tabHandlers }){
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById(`view-${tab}`).classList.add('active');
+    // .right-cards (Ranking/Status/Missões do dia) é um bloco fixo fora das
+    // .view, nunca re-renderizado por aba -- por isso alguns dos cards só
+    // fazem sentido em certas abas (ex: "Missões do dia" na aba
+    // Configurações, que não tem nada a ver com desafios). Marca a aba
+    // ativa no próprio #app pra CSS decidir o que esconder, sem duplicar
+    // o bloco por aba.
+    document.getElementById('app').dataset.activeTab = tab;
 
     if (tab === 'review'){
       if (STATE.reviewSessionUnitFilter){

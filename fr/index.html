@@ -468,6 +468,10 @@ a.pill:hover{ border-color: var(--imperial-gold); }
      tem o próprio respiro. */
   #side-card-missions{ padding-top:10px; }
   #side-missions-body .dcs-caption-btn{ padding-top:0; }
+  /* Configurações não tem nenhuma relação com desafios/missões do dia --
+     esconde só esse card ali (Ranking e Status continuam fazendo sentido
+     em qualquer aba). */
+  #app[data-active-tab="settings"] #side-card-missions{ display:none; }
 
   /* Sidebar recolhida manualmente ("Mostrar/Ocultar barra lateral", inspirado
      no do Claude) -- independe do modo foco automático abaixo. */
@@ -482,6 +486,12 @@ a.pill:hover{ border-color: var(--imperial-gold); }
      lá; aqui, no desktop, também esconde sidebar/cards e vira 1 coluna). */
   #app.lesson-focus{ grid-template-columns:1fr; grid-template-areas:"content"; }
   #app.lesson-focus .sidebar, #app.lesson-focus .right-cards{ display:none; }
+  /* Sem right-cards, o padding-right:32px do #app (pensado pra dar respiro
+     à coluna de cards) sobra como uma folga assimétrica só do lado direito
+     -- a coluna de conteúdo (#unit-detail-wrap, já centralizada por
+     margin:0 auto) ficava ~32px mais perto da borda esquerda que da
+     direita. Zera aqui pra não competir com a centralização real. */
+  #app.lesson-focus{ padding-right:0; }
   /* Sem sidebar/cards, a coluna de conteúdo vira a largura toda do #app --
      sem um teto o exercício ficava esticado de ponta a ponta em telas
      largas (mesmo problema estrutural da Trilha, ver .units-grid). Trava
@@ -577,6 +587,15 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .ub-goal{
   color:var(--ink-soft); font-size:12px; margin-top:2px; line-height:1.35;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+/* No mobile a linha de meta/subtítulo da unidade cortava no meio de uma
+   palavra (nowrap+ellipsis numa coluna estreita) -- aqui há espaço vertical
+   sobrando, então libera pra 2 linhas em vez de truncar tão cedo. */
+@media (max-width: 899px){
+  .ub-goal{
+    white-space:normal; display:-webkit-box; -webkit-line-clamp:2;
+    -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis;
+  }
 }
 .ub-frac{ font-weight:700; font-size:11.5px; color:var(--ink-soft); white-space:nowrap; flex-shrink:0; }
 .ub-chevron{
