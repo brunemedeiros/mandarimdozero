@@ -7,7 +7,13 @@ GOOGLE_APPLICATION_CREDENTIALS = os.environ.get(
     "GOOGLE_APPLICATION_CREDENTIALS", "/home/user/.gcp/prof-brune-vertex-ai.json"
 )
 
-MODEL_PRIMARY = "gemini-2.5-flash-lite"
+# Gemini 2.5 entra em retirement no Gemini Enterprise Agent Platform a partir
+# de 20/out/2026 (aviso da Google recebido por e-mail em 15/09/2026, projeto
+# prof-brune listado como afetado) -- migrado pra 3.1 Flash Lite antes disso.
+# GA, substituto recomendado direto pro 2.5 Flash Lite, mesmo formato de
+# request (responseMimeType/responseSchema inalterados) e thinking level
+# padrão "minimal" (não muda o comportamento não-"thinking" de antes).
+MODEL_PRIMARY = "gemini-3.1-flash-lite"
 
 # ---------- Text-to-Speech (frases de exemplo) ----------
 # Chave de API simples (mesma reutilizada pro resto do TTS do site) -- a
@@ -48,5 +54,5 @@ AUDIO_OUTPUT_DIR = os.path.join(_THIS_DIR, "..", "..", "audio", "challenges")
 # Preços aproximados (USD por 1M tokens) só pra estimativa de custo no log —
 # NÃO é fonte de cobrança oficial, é so pra visibilidade humana no console.
 APPROX_PRICE_PER_1M_TOKENS = {
-    "gemini-2.5-flash-lite": {"input": 0.10, "output": 0.40},
+    "gemini-3.1-flash-lite": {"input": 0.25, "output": 1.50},
 }
