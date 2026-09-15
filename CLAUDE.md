@@ -143,3 +143,53 @@ dependa de um serviço externo ainda não confirmado ao vivo deve deixar
 claro que essa confirmação está pendente, e que configurar/ativar esse
 serviço é um passo manual pendente adicional, entregue junto (ver regra
 acima de "Passos manuais").
+
+## Tokens de cor de marca vs. semânticos: `color` some junto com `background`
+
+Ao sobrescrever a cor de um botão (ou qualquer elemento) que herda estilo
+de uma classe base como `.btn-primary`, **sempre revise/sobrescreva a cor
+do TEXTO junto com a do fundo, nunca só uma das duas** — e valide o
+contraste resultante nos dois temas (claro e escuro), não só num deles.
+
+Caso concreto que motivou esta regra: ao dar cor própria (vermelho/verde)
+para os botões "Continuar" dos painéis de acerto/erro de exercício, só o
+`background` foi sobrescrito (`background: var(--error-red)` /
+`background: var(--jade)`). A cor do texto continuou herdada de
+`.btn-primary{ color: var(--on-seal-red) }`. Em `zh/index.html`,
+`--seal-red` é vermelho de verdade e `--on-seal-red` é branco no tema
+claro — por coincidência funcionava bem em cima do vermelho/verde. Mas em
+`fr/index.html`, `--seal-red` é a cor de marca AZUL (`#3498D6`, não
+vermelha — reaproveita o nome da variável zh só por conveniência de código
+compartilhado) e `--on-seal-red` no claro é `#201335` (quase preto,
+calibrado pra ler bem sobre azul claro) — texto quase ilegível sobre o
+vermelho/verde escuros do painel. Bug real de contraste, não intencional,
+só notado porque a autora testou visualmente e perguntou "isso é
+intencional?" (ver commit `fea1d62`).
+
+**Token certo pra esse caso, já existente no código:** `--on-vivid`. Ele é
+definido especificamente pra texto sobre `--error-red`/`--jade` (as duas
+cores "vívidas"/semânticas do app, que existem idênticas em fr e zh) e já
+inverte corretamente entre os temas: branco no claro (porque error-red/jade
+são escuros no claro) e escuro no escuro (porque ficam mais claros/pastel
+no tema escuro) — ao contrário de `--on-seal-red`, que acompanha a
+luminosidade da cor de MARCA (`--seal-red`), não a de erro/sucesso. Já
+usado em `.grade-again`/`.grade-easy` nos dois idiomas.
+
+**Regra geral de tokens de cor neste repo** (vale além deste caso
+específico): variáveis com nomes que soam "genéricos" ou "de marca"
+(`--seal-red`, `--imperial-gold` etc.) podem ter valores **diferentes e
+semanticamente distintos entre fr e zh** — fr reaproveita nomes de
+variável do zh por conveniência de código compartilhado, não porque o
+significado é o mesmo. Antes de usar uma variável de cor num idioma,
+**leia a definição dela no `:root` daquele arquivo específico**, não
+assuma que o nome descreve a cor. Ao adicionar cor customizada a um
+elemento que herda de uma classe base, trate `background` e `color` como
+um par que precisa ser revisado junto, e prefira reaproveitar um token
+"on-*" que já existe no arquivo (ex: `--on-vivid`, `--on-seal-red`) em vez
+de cravar `white`/`black`/hex fixo, que quebra em um dos dois temas.
+
+Na prática: qualquer PR que adicione uma cor de fundo customizada a um
+componente (botão, badge, chip etc.) deve, antes de ser dado como pronto,
+ser validado visualmente (screenshot Playwright é suficiente) nos 4
+cenários: fr claro, fr escuro, zh claro, zh escuro — não só um idioma ou
+só um tema, mesmo que a mudança "pareça" só visual/de posição.
