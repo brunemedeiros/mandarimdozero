@@ -41,14 +41,23 @@ conhece idioma) — recebe um `card` e uma nota, devolve o `card` atualizado.
   em `zh/app.js`/`fr/app.js`).
 - `applyMemoryGrade(card, sm2Grade, now)` — o funil único de entrada usado
   por todas as atividades. Traduz a escala antiga da UI (0=Errei..3=Fácil,
-  a mesma dos 4 botões do Flashcard) para a escala FSRS (1-4) e chama
-  `scheduleReview`. Depois disso, mantém como **ponte de compatibilidade**
-  os campos legados `reps/lapses/interval` (ainda lidos por
+  a mesma dos 4 botões do Flashcard) para a escala FSRS (1-4). Grades 1-3
+  (Difícil/Bom/Fácil) chamam `scheduleReview` normalmente. Grade 0 (Errei)
+  **não** passa por `scheduleReview` -- decisão revertida de propósito do
+  antigo "Princípio 7" (que preservava parte da estabilidade num erro,
+  virando `state:'relearning'`; uma carta muito madura podia continuar
+  agendada vários dias à frente mesmo depois de errada). A pedido explícito
+  da autora (sessão de grilling, PR #219): "Errei" agora sempre reinicia o
+  agendamento por completo (`stability`/`difficulty`/`state` voltam ao
+  estado de carta nunca estudada) e agenda sempre pra meia-noite do dia
+  seguinte (`nextMidnight`), nunca mais longe nem no mesmo dia, qualquer
+  que fosse a maturidade anterior. `reps`/`lapses` continuam reais em
+  qualquer grade (nunca zerados) — só o AGENDAMENTO reseta em grade 0.
+  Mantém como **ponte de compatibilidade** os campos legados
+  `reps/lapses/interval` (ainda lidos por
   `hardWordsPool()`/`vocabStrengthBuckets()`/`reviewXP()`) — `interval` é
   só um espelho de `stability` arredondada, não uma segunda fonte de
-  verdade. Um erro (grade 0) NUNCA zera `reps` (Princípio 7: uma palavra
-  aprendida que teve um lapso não volta a "nunca aprendida" — vira
-  `state:'relearning'`).
+  verdade.
 - `migrateCardToFSRS(card)` — bridge SM-2 → FSRS, chamada uma vez por
   cartão no load (`loadStateAndRender`). Idempotente via `card.fsrsMigrated`
   (nunca inferido de `stability !== undefined`, porque um cartão novo de
