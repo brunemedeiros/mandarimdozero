@@ -5982,8 +5982,14 @@ document.querySelectorAll('[data-settings-section]').forEach(btn => {
 // específico do francês (campos, template, nome do baralho/arquivo, filtro
 // de unidades) fica aqui. Vive na aba "📦 Exportar" de Configurações.
 // ============================================================
+// modelName/deckDesc/deckName vêm de APP_IDENTITY.apps.fr.name (shared/app-identity.js,
+// carregado antes deste arquivo -- ver script tag em index.html) em vez de string fixa,
+// pra nunca ficar pra trás se a marca mudar (ver Bloco 6/Fase B6 da tarefa de rebranding).
+// guidPrefix NÃO muda: é o identificador de GUID que o Anki usa pra casar notas num
+// reimport -- trocar agora faria o Anki tratar decks já exportados por usuários
+// existentes como notas novas/duplicadas em vez de atualizar as existentes.
 const ANKI_EXPORT_CONFIG = {
-  modelName: "Francês do Zero",
+  modelName: APP_IDENTITY.apps.fr.name,
   fields: [
     { name:"Francês", ord:0, font:"Arial", size:22 },
     { name:"Tradução", ord:1, font:"Arial", size:18 }
@@ -5991,7 +5997,7 @@ const ANKI_EXPORT_CONFIG = {
   qfmt: "<div style='text-align:center;font-size:26px;color:#1D5A82;font-weight:bold;'>{{Francês}}</div>",
   afmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:18px;color:#5C4E73;'>{{Tradução}}</div>",
   css: ".card { font-family: 'Nunito', Arial, sans-serif; text-align: center; background-color: #FAF5EA; color:#201335; }",
-  deckDesc: "Exportado do app Francês do Zero",
+  deckDesc: `Exportado do app ${APP_IDENTITY.apps.fr.name}`,
   guidPrefix: "fzc_",
   unitOptions(){
     return UNITS.filter(u => u.type !== 'grammar').map(u => {
@@ -6001,8 +6007,8 @@ const ANKI_EXPORT_CONFIG = {
   },
   deckName(sel){
     return sel === 'all'
-      ? 'Francês do Zero - A1'
-      : `Francês do Zero - ${UNITS.find(u=>String(u.id)===sel).title}`;
+      ? `${APP_IDENTITY.apps.fr.name} - A1`
+      : `${APP_IDENTITY.apps.fr.name} - ${UNITS.find(u=>String(u.id)===sel).title}`;
   },
   cards(sel){
     return sel === 'all' ? STATE.cards : STATE.cards.filter(c => String(c.unitId) === sel);
@@ -6014,7 +6020,7 @@ const ANKI_EXPORT_CONFIG = {
     return card.front;
   },
   filename(sel){
-    return `frances-do-zero-${sel === 'all' ? 'completo' : 'unidade-'+sel}.apkg`;
+    return `frances-com-prof-brune-${sel === 'all' ? 'completo' : 'unidade-'+sel}.apkg`;
   },
 };
 

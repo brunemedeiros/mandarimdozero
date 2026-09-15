@@ -3,8 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Plataforma de Idiomas</title>
-<meta name="description" content="Entre para continuar aprendendo.">
+<title>Idiomas com Prof. Brune</title>
+<meta name="description" content="Plataforma de idiomas da Prof. Brune. Entre para continuar aprendendo.">
+<!-- Open Graph / Twitter Card -- precisam ser HTML estático (crawlers de
+     redes sociais não executam JS), por isso os valores são digitados aqui
+     em vez de vir de shared/app-identity.js como o <title> (ver Fase B4 da
+     tarefa de rebranding). Mesmos textos do <title>/description acima. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Idiomas com Prof. Brune">
+<meta property="og:title" content="Idiomas com Prof. Brune">
+<meta property="og:description" content="Plataforma de idiomas da Prof. Brune. Entre para continuar aprendendo.">
+<meta property="og:url" content="https://app.profbrune.com.br/">
+<meta property="og:image" content="https://app.profbrune.com.br/shared/brand/icon-512.png">
+<meta property="og:locale" content="pt_BR">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Idiomas com Prof. Brune">
+<meta name="twitter:description" content="Plataforma de idiomas da Prof. Brune. Entre para continuar aprendendo.">
+<meta name="twitter:image" content="https://app.profbrune.com.br/shared/brand/icon-512.png">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32">
 <link rel="icon" href="icons/favicon-16.png" sizes="16x16">
 <script>
@@ -145,7 +160,7 @@ h1{
 </div>
 
 <div class="wrap" id="gate-login" style="display:none;">
-  <h1>Sua plataforma de idiomas</h1>
+  <h1 id="gate-login-title">Sua plataforma de idiomas</h1>
   <p class="sub">Entre para continuar de onde parou — ou criar sua conta e escolher o que quer aprender.</p>
   <div class="gate-card">
     <button class="gate-oauth-btn" id="gate-google-btn">
@@ -190,6 +205,7 @@ h1{
 </div>
 
 <script src="languages/index.js"></script>
+<script src="shared/app-identity.js"></script>
 <script src="shared/utils.js"></script>
 <script src="shared/theme.js"></script>
 <script src="shared/supabase-client.js"></script>
@@ -200,6 +216,14 @@ h1{
 // estudado (currentLearningLanguage) -- ver shared/language-pref.js. Esta
 // página só decide: (a) se tem sessão, (b) se sim, qual idioma abrir --
 // nunca é ela quem guarda o progresso ou o conteúdo de nenhum idioma.
+
+// Nome da plataforma vem de shared/app-identity.js (mesma fonte única que
+// fr/zh já usam) -- nunca digitado aqui à mão, pra nunca ficar pra trás se
+// a marca mudar (ver Fase B2 da tarefa de rebranding).
+if (typeof APP_IDENTITY !== 'undefined'){
+  document.getElementById('gate-login-title').textContent = APP_IDENTITY.brand.productName;
+}
+
 const GUEST_MODE_FLAG = 'guest_mode'; // mesma chave usada por shared/auth.js dentro de cada idioma
 
 function showOnly(id){

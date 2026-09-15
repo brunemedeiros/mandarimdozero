@@ -5998,8 +5998,14 @@ document.querySelectorAll('[data-settings-section]').forEach(btn => {
 // específico do chinês (campos, template, nome do baralho/arquivo) fica aqui.
 // Vive na aba "📦 Exportar" de Configurações.
 // ============================================================
+// modelName/deckDesc/deckName vêm de APP_IDENTITY.apps.zh.name (shared/app-identity.js,
+// carregado antes deste arquivo -- ver script tag em index.html) em vez de string fixa,
+// pra nunca ficar pra trás se a marca mudar (ver Bloco 6/Fase B6 da tarefa de rebranding).
+// guidPrefix NÃO muda: é o identificador de GUID que o Anki usa pra casar notas num
+// reimport -- trocar agora faria o Anki tratar decks já exportados por usuários
+// existentes como notas novas/duplicadas em vez de atualizar as existentes.
 const ANKI_EXPORT_CONFIG = {
-  modelName: "Mandarim do Zero",
+  modelName: APP_IDENTITY.apps.zh.name,
   fields: [
     { name:"Pinyin", ord:0, font:"Arial", size:20 },
     { name:"Caractere", ord:1, font:"Arial", size:20 },
@@ -6008,15 +6014,15 @@ const ANKI_EXPORT_CONFIG = {
   qfmt: "<div style='text-align:center;font-size:22px;color:#8E1915;font-weight:bold;'>{{Pinyin}}</div>",
   afmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:36px;'>{{Caractere}}</div><div style='text-align:center;font-size:18px;color:#5C4A3F;'>{{Tradução}}</div>",
   css: ".card { font-family: 'Nunito', Arial, sans-serif; text-align: center; background-color: #FBF4E8; color:#211714; }",
-  deckDesc: "Exportado do app Mandarim do Zero",
+  deckDesc: `Exportado do app ${APP_IDENTITY.apps.zh.name}`,
   guidPrefix: "mzc_",
   unitOptions(){
     return UNITS.map(u => ({ id: String(u.id), label: `${u.id}. ${u.title}` }));
   },
   deckName(sel){
     return sel === 'all'
-      ? 'Mandarim do Zero - HSK 1'
-      : `Mandarim do Zero - ${UNITS.find(u=>String(u.id)===sel).title}`;
+      ? `${APP_IDENTITY.apps.zh.name} - HSK 1`
+      : `${APP_IDENTITY.apps.zh.name} - ${UNITS.find(u=>String(u.id)===sel).title}`;
   },
   cards(sel){
     return sel === 'all' ? STATE.cards : STATE.cards.filter(c => String(c.unitId) === sel);
@@ -6028,7 +6034,7 @@ const ANKI_EXPORT_CONFIG = {
     return card.front_pinyin;
   },
   filename(sel){
-    return `mandarim-do-zero-${sel === 'all' ? 'completo' : 'unidade-'+sel}.apkg`;
+    return `chines-com-prof-brune-${sel === 'all' ? 'completo' : 'unidade-'+sel}.apkg`;
   },
 };
 

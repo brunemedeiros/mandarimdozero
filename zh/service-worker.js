@@ -1,4 +1,4 @@
-// Service worker do Mandarim do Zero — cache básico pra funcionar offline
+// Service worker do Chinês com Prof. Brune — cache básico pra funcionar offline
 // depois da primeira visita. Estratégia: network-first pros arquivos do
 // próprio site (sempre pega a versão mais nova quando há internet), com
 // fallback pro cache quando offline. Nunca intercepta chamadas ao Supabase
@@ -10,7 +10,7 @@
 // alguém lembrar de bumpar um número (ver Fase 4 da tarefa PWA/mobile).
 // Localmente (sem passar pelo Actions) o placeholder fica intacto -- ainda
 // funciona, só não muda de versão entre testes locais.
-const CACHE_NAME = 'mandarim-do-zero-__BUILD_ID__';
+const CACHE_NAME = 'chines-com-prof-brune-__BUILD_ID__';
 const PRECACHE_URLS = [
   './',
   './index.html',
