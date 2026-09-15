@@ -200,8 +200,14 @@ function scheduleReview(card, grade, now){
 //
 // sm2Grade: 0=Errei 1=Difícil 2=Bom 3=Fácil (escala da UI, mesma de
 // applyMemoryGrade). Retorna dias (pode ser fracionário, ex: 0.007 = 10min).
+//
+// grade 0 (Errei) tem preview PRÓPRIO -- desde que applyMemoryGrade passou a
+// tratar "Errei" como reinício total (due sempre = meia-noite do dia
+// seguinte, nunca calculado via stability/fsrsNextStability), reaproveitar
+// o caminho normal aqui voltaria a divergir do due real que seria salvo.
 function previewNextIntervalDays(card, sm2Grade, now){
   now = now || Date.now();
+  if (sm2Grade === 0) return (nextMidnight(now) - now) / FSRS_DAY_MS;
   const fsrsGrade = sm2Grade + 1;
   const stability = fsrsNextStability(card, fsrsGrade, now);
   return fsrsIntervalFromStability(stability);
@@ -263,23 +269,59 @@ function formatReviewInterval(days){
 // até a próxima revisão prevista). `ef` deixa de ser atualizado -- nada
 // além do próprio applySM2 (retirado deste caminho) o lia.
 //
-// Diferença deliberada em relação ao applySM2 antigo: um erro (grade 0)
-// NÃO zera mais `reps` -- SM-2 fazia isso, e é exatamente o comportamento
-// que o Princípio 7 do projeto pede pra corrigir ("um erro não volta a
-// palavra pro estado de nunca aprendida"). `lapses` continua incrementando
-// normalmente em qualquer erro.
+// Decisão revertida de propósito em relação ao antigo "Princípio 7" (Fase
+// 5.3: um erro virava reaprendizagem suave, preservando parte da
+// estabilidade -- por isso uma carta muito madura podia continuar sendo
+// agendada vários dias à frente mesmo depois de "Errei", o motor assumindo
+// memória residual). A autora pediu explicitamente o oposto (sessão de
+// grilling, ver PR #219): "Errei" (grade 0) agora é sempre um reinício
+// total do agendamento -- stability/difficulty/state voltam a exatamente
+// o mesmo estado de uma carta nunca estudada, e due vai sempre pra meia-
+// noite do dia seguinte (nunca mais longe, nunca no mesmo dia), qualquer
+// que fosse a maturidade da carta antes do erro. reps/lapses continuam
+// reais (histórico de tentativas nunca é apagado -- alimentam Palavras
+// Difíceis/Suas palavras); só o AGENDAMENTO reseta. "Difícil"/"Bom"/"Fácil"
+// (grades 1-3) continuam pelo caminho normal do FSRS, inalterados.
 function applyMemoryGrade(card, sm2Grade, now){
   now = now || Date.now();
-  const fsrsGrade = sm2Grade + 1; // 0..3 (Errei..Fácil) -> 1..4 (Again..Easy)
+
+  if (sm2Grade === 0){
+    card.stability = 0;
+    card.difficulty = 0;
+    card.state = 'new';
+    card.fsrsReps = 0;
+    card.fsrsLapses = 0;
+    card.fsrsMigrated = true;
+    card.lastReview = now;
+    card.due = nextMidnight(now);
+    card.interval = 0;
+    card.reps = (card.reps || 0) + 1;
+    card.lapses = (card.lapses || 0) + 1;
+    if (card.reps === 1 && !card.firstLearnedDate){
+      card.firstLearnedDate = todayStr();
+    }
+    return card;
+  }
+
+  const fsrsGrade = sm2Grade + 1; // 1..3 (Difícil..Fácil) -> 2..4 (Hard..Easy)
   scheduleReview(card, fsrsGrade, now);
 
   card.reps = (card.reps || 0) + 1;
-  if (sm2Grade === 0) card.lapses = (card.lapses || 0) + 1;
   card.interval = Math.max(0, Math.round(card.stability));
   if (card.reps === 1 && !card.firstLearnedDate){
     card.firstLearnedDate = todayStr();
   }
   return card;
+}
+
+// Meia-noite do dia SEGUINTE a `now` -- independe da hora exata em que o
+// erro aconteceu (errar às 23h ou à 0h05 dá o mesmo due de amanhã, nunca
+// quase-2-dias nem ainda-hoje). Mesmo corte de "hoje" que o resto do app já
+// usa pra due/atrasada (setHours(0,0,0,0)).
+function nextMidnight(now){
+  const d = new Date(now);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime() + FSRS_DAY_MS;
 }
 
 // ---------- Migração SM2 -> FSRS (Fase 3) ----------

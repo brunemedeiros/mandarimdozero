@@ -5842,8 +5842,16 @@ function gradeCurrentCard(grade){
   addXP(reviewXP(intervalBefore, grade));
 
   if (grade === 0){
-    // "Errei" volta pro fim da fila da sessão atual em vez de sumir
-    STATE.reviewQueue.push(card);
+    // "Errei" só volta nesta MESMA sessão se sobrar separação real até o
+    // fim da fila -- empurrar pro fim sempre (comportamento antigo) fazia a
+    // carta reaparecer como a carta SEGUINTE (ou quase) sempre que o erro
+    // acontecia perto do fim da fila, sem nenhum valor pedagógico repetir
+    // uma palavra que acabou de ser errada segundos atrás. due (acima, via
+    // applyMemoryGrade) já agenda a revisão real pra pelo menos amanhã
+    // (fsrsIntervalFromStability nunca agenda em horas) -- este requeue é só
+    // reforço extra quando ainda cabe hoje com distância de verdade.
+    const remaining = STATE.reviewQueue.length - STATE.reviewIndex - 1;
+    if (remaining >= 3) STATE.reviewQueue.push(card);
   }
 
   STATE.reviewIndex += 1;
