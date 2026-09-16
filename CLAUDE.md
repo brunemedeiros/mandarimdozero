@@ -227,3 +227,14 @@ razoavelmente contido, não uma mudança arquitetural grande) e registra
 aqui como feito, ou deixa claríssimo pra autora que o deploy ainda está
 pendente e é o que falta pra corrigir isso em produção — nunca deixar
 implícito que "meu código corrige, então já era".
+
+**Segundo caso registrado (2026-09-16), mesmo princípio:** grilling
+"missões do dia" (reviews15/overdue3/matchGame1/speedReview1 podiam
+sortear metas impossíveis de cumprir contra o estoque real de revisão,
+ex. "Revise 15 cartões" com só 10 disponíveis) mudou `notification-cron`
+pra parar de resortear as missões com sua própria cópia de
+MISSION_POOLS/dailySeed/pickDailyFromPool e passar a ler a atribuição já
+congelada pelo cliente em `state.daily.missions`. **Deploy feito ao vivo
+nesta mesma sessão** via `mcp__Supabase__deploy_edge_function`
+(`notification-cron` v14→v15, mesmo `verify_jwt:true`) — não é um passo
+manual pendente pra essa correção.
