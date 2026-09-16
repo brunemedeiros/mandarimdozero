@@ -4076,6 +4076,45 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
 // Só entra na rotação depois que a palavra já foi vista em múltipla escolha
 // pelo menos uma vez (gating em buildExerciseSet) — igual ao Memrise, nunca
 // pede pra digitar de ouvido uma palavra ainda não exposta.
+// Ninguém tem acento fácil de digitar num teclado físico/mobile padrão --
+// isso dá um jeito de inserir a letra certa sem precisar trocar de layout
+// de teclado. Importante: o acento NÃO é exigido pra acertar (normalizeLoose
+// já remove diacríticos dos dois lados antes de comparar, ver strip() nos
+// dois exercícios abaixo) -- isso é só pra quem quer treinar digitando com o
+// acento certo mesmo, não um requisito escondido. Minúsculas só (a
+// comparação já ignora maiúscula/minúscula) -- mesmo espírito do
+// PINYIN_TONE_GROUPS em zh/app.js, adaptado pro alfabeto francês.
+const FR_ACCENT_GROUPS = [
+  ['à', 'â'],
+  ['ç'],
+  ['é', 'è', 'ê', 'ë'],
+  ['î', 'ï'],
+  ['ô', 'œ'],
+  ['ù', 'û', 'ü'],
+];
+
+function frAccentPickerHTML(){
+  return `<div class="fr-accent-picker">${FR_ACCENT_GROUPS.map(group => `
+    <div class="fr-accent-group">${group.map(ch => `<button type="button" class="fr-accent-key">${ch}</button>`).join('')}</div>
+  `).join('')}</div>`;
+}
+
+// Insere no CURSOR (não sempre no final) -- dá pra corrigir só a letra que
+// falta o acento no meio da palavra sem apagar o resto e redigitar.
+function wireFrAccentPicker(pickerEl, inputEl){
+  if (!pickerEl || !inputEl) return;
+  pickerEl.querySelectorAll('.fr-accent-key').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const start = inputEl.selectionStart ?? inputEl.value.length;
+      const end = inputEl.selectionEnd ?? inputEl.value.length;
+      const ch = btn.textContent;
+      inputEl.value = inputEl.value.slice(0, start) + ch + inputEl.value.slice(end);
+      inputEl.focus();
+      inputEl.setSelectionRange(start + ch.length, start + ch.length);
+    });
+  });
+}
+
 function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   contentEl.innerHTML = `
     <div class="exercise-wrap">
@@ -4087,6 +4126,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
       </div>
       <div class="cloze-type-wrap">
         <input type="text" id="vocab-type-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite em francês">
+        ${frAccentPickerHTML()}
         <button class="btn btn-primary btn-block" id="vocab-type-verify-btn">Verificar</button>
       </div>
       <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
@@ -4099,6 +4139,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
 
   const inputEl = document.getElementById('vocab-type-input');
   inputEl.focus();
+  wireFrAccentPicker(contentEl.querySelector('.fr-accent-picker'), inputEl);
   const strip = s => normalizeLoose(s).replace(/[.,!?;:'"’]/g, '').trim();
 
   function lockInputs(){
@@ -4298,6 +4339,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       ${mode === 'type' ? `
         <div class="cloze-type-wrap">
           <input type="text" id="cloze-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a palavra que falta">
+          ${frAccentPickerHTML()}
           <button class="btn btn-primary btn-block" id="cloze-verify-btn">Verificar</button>
         </div>
       ` : `
@@ -4354,6 +4396,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
   if (mode === 'type'){
     const inputEl = document.getElementById('cloze-input');
     inputEl.focus();
+    wireFrAccentPicker(contentEl.querySelector('.fr-accent-picker'), inputEl);
     inputEl.addEventListener('keydown', e => {
       if (e.key === 'Enter') document.getElementById('cloze-verify-btn').click();
     });
