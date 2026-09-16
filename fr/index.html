@@ -1144,6 +1144,23 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
    competindo com o painel de resultado logo abaixo. */
 .cloze-type-wrap button:disabled{ display:none; }
 
+/* Teclas de acento pros exercícios digitados (vocab-type/cloze-type) --
+   mesmo espírito do .pinyin-tone-picker em zh/index.html, adaptado pro
+   alfabeto francês (ver FR_ACCENT_GROUPS em fr/app.js). */
+.fr-accent-picker{
+  display:flex; gap:10px; overflow-x:auto; justify-content:flex-start;
+  padding:2px 2px 6px; margin:-6px 0 14px; -webkit-overflow-scrolling:touch;
+}
+.fr-accent-group{ display:flex; gap:4px; flex-shrink:0; }
+.fr-accent-key{
+  flex-shrink:0; min-width:32px; height:34px; padding:0 6px; border-radius:8px;
+  border:1px solid var(--paper-line); background: var(--paper); color: var(--ink);
+  font-size:16px; font-weight:700; font-family: var(--font-body); cursor:pointer;
+}
+.fr-accent-key:hover{ border-color: var(--imperial-gold); }
+.fr-accent-key:active{ background: var(--paper-warm); }
+.cloze-type-wrap input:disabled ~ .fr-accent-picker .fr-accent-key{ pointer-events:none; opacity:.5; }
+
 /* ---------- Tela final "Parabéns" (estilo Busuu) ---------- */
 .lesson-complete{ text-align:center; padding: 20px 4px; }
 .lesson-complete-icon{ font-size:52px; margin-bottom:8px; }
