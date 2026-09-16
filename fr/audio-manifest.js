@@ -1,21 +1,15 @@
 // Mapa texto -> arquivo mp3 pré-gerado (Google Cloud TTS, voz fr-FR-Chirp3-HD-Achernar).
 // Gerado automaticamente — não editar manualmente. Ver app.js: speakFrench().
 //
-// Exceção manual (2026-09-16): 6 entradas foram removidas daqui de propósito --
-// "ans", "je", "cher", "près", "dire", "tu" -- porque os mp3 pré-gerados
-// correspondentes (fr/audio/1298cbdc3eac.mp3, 79563e90630a.mp3,
-// 96927817c762.mp3, 1e318a4f060d.mp3, 2fca68e97d66.mp3, b6b4ce6df035.mp3)
-// saíram quase silenciosos da geração original -- pico de amplitude ~70-680x
-// mais baixo que qualquer outro clipe do manifesto (confirmado decodificando
-// os 750 arquivos fr + 424 zh via Web Audio API/decodeAudioData; só estes 6
-// tinham esse defeito, e só em fr -- zh veio limpo). Motivado por reports reais
-// de alunos ("não está saindo audio" em "je"/"cher", "apenas um pequeno
-// barulho no início"). Sem acesso à API do Google Cloud TTS nesta sessão pra
-// regerar os arquivos com o pipeline de verdade -- em vez de silenciar o
-// sintoma, essas 6 palavras foram removidas do manifesto pra cair no fallback
-// já existente (Web Speech API do navegador, ver canSpeakFrench()/
-// speakFrench() em app.js) até que uma sessão com acesso à API regenere os 6
-// mp3s de verdade e devolva as entradas aqui.
+// Nota (2026-09-16, resolvida): "ans", "je", "cher", "près", "dire" e "tu"
+// tinham saído quase mudos da geração original (removidos temporariamente
+// daqui, ver histórico do commit) -- regeradas com sucesso via
+// fr/scripts/regenerate_broken_audio.py, que agora valida o pico de
+// amplitude do áudio (não só a transcrição do Speech-to-Text, que se
+// mostrou insuficiente pra pegar esse defeito -- ver docstring do script).
+// "tu" precisou de mais tentativas que o normal (a síntese é estocástica;
+// essa palavra em especial saiu muda com frequência bem maior que as
+// outras) -- se o problema reaparecer nela no futuro, não é surpresa.
 const AUDIO_MANIFEST = {
  "Au revoir, à demain !": "eb078a6c9de2.mp3",
  "Aujourd'hui, il fait beau.": "2d63c931f39d.mp3",
@@ -341,6 +335,7 @@ const AUDIO_MANIFEST = {
  "américain / américaine": "7540fa8ec55a.mp3",
  "anglais / anglaise": "fb4eddd46b05.mp3",
  "annuler": "81d1139fcfca.mp3",
+ "ans": "1298cbdc3eac.mp3",
  "apercevoir": "ea7ac341c637.mp3",
  "apparaître": "752cc29be589.mp3",
  "appartenir": "28c6d6e43a33.mp3",
@@ -377,6 +372,7 @@ const AUDIO_MANIFEST = {
  "cent": "2d95b19b24f7.mp3",
  "changer": "dae54c5a184e.mp3",
  "chanter": "ef884f6136a0.mp3",
+ "cher": "96927817c762.mp3",
  "chercher": "afbe9760c8fd.mp3",
  "choisir": "1ed9803ac57f.mp3",
  "cinquante": "f580593fd9e0.mp3",
@@ -412,6 +408,7 @@ const AUDIO_MANIFEST = {
  "devant": "ff42a8a10776.mp3",
  "devenir": "ea7cb28a0173.mp3",
  "devoir": "4d4bcb1f3d22.mp3",
+ "dire": "2fca68e97d66.mp3",
  "discuter": "e8a4ef5d45fa.mp3",
  "disparaître": "ca9427ca5734.mp3",
  "dix": "569c818b1e5d.mp3",
@@ -482,6 +479,7 @@ const AUDIO_MANIFEST = {
  "italien / italienne": "19cb29505c29.mp3",
  "janvier": "76951ecb731b.mp3",
  "jaune": "892b2d84220f.mp3",
+ "je": "79563e90630a.mp3",
  "jeter": "27743a8ff838.mp3",
  "joindre": "fe95d326527e.mp3",
  "joli": "65b8c5f5d1c4.mp3",
@@ -636,6 +634,7 @@ const AUDIO_MANIFEST = {
  "pouvoir": "a7675d549637.mp3",
  "prendre": "3798c8e57003.mp3",
  "promettre": "8d047e091cb5.mp3",
+ "près": "1e318a4f060d.mp3",
  "préférer": "cb5fd48070e3.mp3",
  "préparer": "0609cf5dc567.mp3",
  "présenter": "cefbcfc21561.mp3",
@@ -716,6 +715,7 @@ const AUDIO_MANIFEST = {
  "trois": "df8091771467.mp3",
  "trop de": "f4c85c589373.mp3",
  "trouver": "2be91e7f1241.mp3",
+ "tu": "b6b4ce6df035.mp3",
  "téléphoner": "079b87de2781.mp3",
  "un / une": "0674272bac07.mp3",
  "un demi-kilo": "66487eb18cb9.mp3",
