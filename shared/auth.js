@@ -15,6 +15,24 @@
 let CURRENT_USER = null;
 // Sessão atual: null enquanto não resolvido, false = "sem conta" (modo
 // convidado), objeto = usuário logado.
+
+// Bug real de perda de dados (relatado pela autora, 2026-09-15 -- print de
+// "meu progresso de francês foi resetado e zerado"): confirmado no banco
+// real que aconteceu de verdade (weekly_xp mostrava 867 XP numa semana
+// anterior, progress.data.frances zerado por completo -- xp:0,
+// totalReviews:0, nenhum cartão com reps>0). Causa raiz: onUserLoggedIn()
+// marca CURRENT_USER e deixa a tela interativa ANTES de loadStateAndRender()
+// terminar de buscar o progresso real do servidor (await só vem depois);
+// se QUALQUER coisa disparar saveState() nesse intervalo -- ou se o fetch
+// dentro de loadState() falhar/atrasar de forma transitória e alguém
+// simplesmente continuar jogando -- serializeState() lê o STATE ainda nos
+// valores de fábrica (tudo zerado) e escreve isso por cima do progresso
+// real no Supabase. progressLoadedOk vira o cadeado: nasce false a cada
+// login, só vira true depois que loadState() confirma ter LIDO com sucesso
+// o que já existia lá -- saveState() se recusa a gravar antes disso, custe
+// o que custar (um save adiado é infinitamente mais barato que um
+// progresso apagado).
+let progressLoadedOk = false;
 const GUEST_MODE_FLAG = 'guest_mode';
 // (antes cada site tinha sua própria chave -- 'frances_zero_guest_mode' /
 // 'mandarim_guest_mode'; sessionStorage é por aba E por origem, então
@@ -128,6 +146,11 @@ function enterGuestMode(){
 
 async function onUserLoggedIn(user){
   CURRENT_USER = user;
+  // Recomeça travado a cada login -- mesmo numa troca de conta dentro da
+  // mesma aba (SIGNED_OUT nunca limpa isto sozinho), nenhum saveState()
+  // pode escrever com o progresso da conta ANTERIOR (ou com os valores de
+  // fábrica) até loadState() confirmar o que existe pra ESTA conta.
+  progressLoadedOk = false;
   sessionStorageSafeSet(GUEST_MODE_FLAG, '0');
   document.getElementById('login-screen').style.display = 'none';
   // removeProperty (não = 'block'): um valor inline sempre vence a cascata,
@@ -272,8 +295,37 @@ function notifySaveFailure(){
   showToast('⚠ Não foi possível salvar seu progresso agora. Verifique sua conexão.');
 }
 
+// Mesmo cooldown do aviso acima, contador PRÓPRIO -- este dispara num
+// momento bem mais cedo do fluxo (antes de qualquer tentativa de rede) e
+// por um motivo diferente (guarda de segurança, não falha de conexão), não
+// deve competir pelo mesmo cooldown nem ser confundido com ele nos logs.
+let lastLoadGuardToastAt = 0;
+function notifyProgressNotLoadedYet(){
+  if (typeof trackTechnicalError === 'function') trackTechnicalError('save_blocked_not_loaded', null);
+  const now = Date.now();
+  if (now - lastLoadGuardToastAt < SAVE_ERROR_TOAST_COOLDOWN_MS) return;
+  lastLoadGuardToastAt = now;
+  showToast('⏳ Ainda confirmando seu progresso salvo -- espere um instante antes de continuar.');
+}
+
 async function saveState(){
   if (!CURRENT_USER) return;
+  if (!progressLoadedOk){
+    // Nunca escreve por cima do progresso remoto sem antes ter CONFIRMADO
+    // que conseguimos ler o que já existia lá -- ver bug real (autora,
+    // 2026-09-15, "meu progresso de francês foi resetado e zerado";
+    // confirmado no banco: weekly_xp tinha 867 XP numa semana anterior,
+    // progress.data.frances zerado por completo). Historicamente
+    // loadState() podia falhar/atrasar em silêncio e QUALQUER saveState()
+    // seguinte (mesmo um clique inocente, mesmo minutos/horas depois)
+    // gravava o STATE ainda nos valores de fábrica por cima do progresso
+    // real. Este guard é estritamente mais seguro que arriscar -- o save
+    // simplesmente não acontece agora; a próxima ação que chamar
+    // saveState() depois de loadState() confirmar tenta de novo.
+    console.error('saveState: recusado -- progresso ainda não confirmado como carregado do servidor.');
+    notifyProgressNotLoadedYet();
+    return;
+  }
   if (saveInFlight){ savePending = true; return; }
   saveInFlight = true;
 
@@ -350,28 +402,51 @@ async function upsertEarnedBadges(badgeIds){
   if (error) console.error('Erro ao sincronizar badges públicos:', error);
 }
 
+// Tenta de novo (rede instável é comum logo no carregamento da página,
+// ainda competindo por banda com o resto dos assets) antes de desistir --
+// cada tentativa falha deixa progressLoadedOk em false, então desistir
+// cedo demais só trocaria "perde dado" por "nunca mais salva nada nesta
+// sessão". 3 tentativas, backoff curto (não é um retry indefinido -- se a
+// rede está mesmo fora do ar, a pessoa vai perceber por outros sinais).
+const LOAD_STATE_MAX_ATTEMPTS = 3;
+function sleepMs(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
+
 async function loadState(){
   if (!CURRENT_USER) return;
-  try{
-    const { data, error } = await supabaseClient
-      .from('progress')
-      .select('data')
-      .eq('user_id', CURRENT_USER.id)
-      .maybeSingle();
+  for (let attempt = 1; attempt <= LOAD_STATE_MAX_ATTEMPTS; attempt++){
+    try{
+      const { data, error } = await supabaseClient
+        .from('progress')
+        .select('data')
+        .eq('user_id', CURRENT_USER.id)
+        .maybeSingle();
 
-    if (error){ console.error('Erro ao carregar progresso:', error); return; }
-    if (data && data.data && data.data[APP_KEY]){
-      applySerializedState(data.data[APP_KEY]);
-    } else if (typeof loadLegacyState === 'function' && data && data.data){
-      // Hook opcional: um idioma que já persistia progresso ANTES do
-      // namespacing por APP_KEY existir pode definir loadLegacyState(data)
-      // pra reconhecer o formato antigo (salvo direto na raiz do JSON) e
-      // não perder o progresso de quem já tinha conta. Sem essa função
-      // definida, este ramo simplesmente não faz nada (caso comum: idioma
-      // novo, nunca teve formato antigo pra migrar).
-      loadLegacyState(data.data);
+      if (error){
+        console.error('Erro ao carregar progresso:', error, `(tentativa ${attempt}/${LOAD_STATE_MAX_ATTEMPTS})`);
+        if (attempt < LOAD_STATE_MAX_ATTEMPTS){ await sleepMs(attempt * 800); continue; }
+        return; // progressLoadedOk continua false -- saveState() se recusa a gravar até a próxima tentativa de load
+      }
+
+      if (data && data.data && data.data[APP_KEY]){
+        applySerializedState(data.data[APP_KEY]);
+      } else if (typeof loadLegacyState === 'function' && data && data.data){
+        // Hook opcional: um idioma que já persistia progresso ANTES do
+        // namespacing por APP_KEY existir pode definir loadLegacyState(data)
+        // pra reconhecer o formato antigo (salvo direto na raiz do JSON) e
+        // não perder o progresso de quem já tinha conta. Sem essa função
+        // definida, este ramo simplesmente não faz nada (caso comum: idioma
+        // novo, nunca teve formato antigo pra migrar).
+        loadLegacyState(data.data);
+      }
+      // Só chega aqui depois de uma leitura bem-sucedida (com ou sem dado
+      // pra essa conta -- as duas são um resultado válido, "conta nova"
+      // não é diferente de "falha" pra este guard). Ver comentário de
+      // progressLoadedOk no topo do arquivo.
+      progressLoadedOk = true;
+      return;
+    }catch(e){
+      console.error('Erro ao carregar progresso:', e, `(tentativa ${attempt}/${LOAD_STATE_MAX_ATTEMPTS})`);
+      if (attempt < LOAD_STATE_MAX_ATTEMPTS){ await sleepMs(attempt * 800); continue; }
     }
-  }catch(e){
-    console.error('Erro ao carregar progresso:', e);
   }
 }
