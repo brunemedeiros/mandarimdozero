@@ -33,6 +33,23 @@ let CURRENT_USER = null;
 // o que custar (um save adiado é infinitamente mais barato que um
 // progresso apagado).
 let progressLoadedOk = false;
+
+// Segunda camada de proteção (grilling pós-incidente, 2026-09-16): o guard
+// acima fecha a causa raiz específica encontrada, mas não cobre QUALQUER
+// outro motivo que faça uma sessão local gravar um progresso menor do que
+// o que já está salvo -- inclusive a corrida entre duas abas/dispositivos
+// da MESMA conta abertos ao mesmo tempo (saveState() faz um read-merge-
+// -write que não é atômico; ver PR #224 e a discussão que motivou este
+// bloco). Campos vitalícios (nunca diminuem numa sessão legítima -- não
+// existe hoje nenhuma feature, de aluna ou de admin, que reduza XP,
+// revisões ou reproduções de áudio de propósito) funcionam como um
+// invariante barato de checar bem no momento do save, contra a leitura
+// MAIS FRESCA possível do servidor (a mesma que já é buscada logo abaixo
+// pra fazer o merge por idioma) -- reduz a janela da corrida ao tempo
+// entre essa leitura e o upsert, em vez do tempo desde o carregamento da
+// página inteira.
+const MONOTONIC_PROGRESS_FIELDS = ['xp', 'totalReviews', 'totalAudioPlays'];
+
 const GUEST_MODE_FLAG = 'guest_mode';
 // (antes cada site tinha sua própria chave -- 'frances_zero_guest_mode' /
 // 'mandarim_guest_mode'; sessionStorage é por aba E por origem, então
@@ -308,6 +325,21 @@ function notifyProgressNotLoadedYet(){
   showToast('⏳ Ainda confirmando seu progresso salvo -- espere um instante antes de continuar.');
 }
 
+// Cooldown/contador PRÓPRIO de novo -- mensagem diferente de propósito das
+// duas acima: ali "espere um pouco" é literalmente a solução (o carrega-
+// mento só está atrasado); aqui a sessão local está genuinamente pra trás
+// do que já está salvo -- esperar sozinho não resolve nada, só recarregar
+// (ou, na prática, o loadState() em segundo plano disparado logo abaixo)
+// resolve.
+let lastStaleLocalToastAt = 0;
+function notifyStaleLocalProgress(){
+  if (typeof trackTechnicalError === 'function') trackTechnicalError('save_blocked_stale_local', null);
+  const now = Date.now();
+  if (now - lastStaleLocalToastAt < SAVE_ERROR_TOAST_COOLDOWN_MS) return;
+  lastStaleLocalToastAt = now;
+  showToast('⚠ Seu progresso aqui parece desatualizado em relação ao que já foi salvo -- recarregue a página se isto persistir.');
+}
+
 async function saveState(){
   if (!CURRENT_USER) return;
   if (!progressLoadedOk){
@@ -343,6 +375,31 @@ async function saveState(){
       console.error('Erro ao ler progresso antes de salvar:', fetchError);
       notifySaveFailure();
       return;
+    }
+
+    // Guard-rail contra QUALQUER escrita que reduziria um campo vitalício
+    // (ver MONOTONIC_PROGRESS_FIELDS acima) -- comparado contra a leitura
+    // que acabou de vir do servidor, não contra um cache antigo, então a
+    // janela de corrida vira só "entre esta leitura e o upsert logo
+    // abaixo". Cobre tanto uma sessão local que nasceu nos valores de
+    // fábrica (defesa em profundidade -- a causa raiz específica já tem
+    // progressLoadedOk acima) quanto duas abas/dispositivos da mesma conta
+    // salvando ao mesmo tempo (a mais antiga tende a ter um valor
+    // vitalício menor que o que a mais nova já gravou).
+    const existingPayload = existing && existing.data && existing.data[APP_KEY];
+    if (existingPayload){
+      const regressed = MONOTONIC_PROGRESS_FIELDS.find(field => Number(payload[field]) < Number(existingPayload[field] || 0));
+      if (regressed){
+        console.error(`saveState: recusado -- campo vitalício "${regressed}" do STATE local (${payload[regressed]}) é menor que o já salvo no servidor (${existingPayload[regressed]}). Sessão local desatualizada.`);
+        notifyStaleLocalProgress();
+        // Best-effort, não aguardado -- tenta resincronizar o STATE local
+        // sozinho em segundo plano. Se der certo, a PRÓXIMA chamada de
+        // saveState() já vai com dado atualizado, sem a pessoa precisar
+        // fazer nada; se não der (rede genuinamente fora do ar), a mensagem
+        // acima já disse o que fazer.
+        loadState();
+        return;
+      }
     }
 
     const merged = Object.assign({}, existing && existing.data, { [APP_KEY]: payload });
