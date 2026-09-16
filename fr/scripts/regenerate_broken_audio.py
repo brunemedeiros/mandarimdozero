@@ -7,6 +7,21 @@ validação via Speech-to-Text, mesmo esquema de nome de arquivo por hash MD5
 do texto) -- só aponta a saída pra fr/audio/ em vez de fr/audio/challenges/,
 que é onde o manifesto principal (AUDIO_MANIFEST) espera os arquivos.
 
+IMPORTANTE (descoberto rodando isto pela primeira vez, 2026-09-16): a
+validação por Speech-to-Text de tts.py trata transcrição vazia como
+"inconclusivo, aceita do jeito que está" -- documentado como limitação
+conhecida do STT em áudio de uma palavra só. Na prática, pra 5 das 6
+palavras daqui, transcrição vazia veio *correlacionada* com áudio
+realmente quase mudo (mesmo padrão do bug original -- "ans"/"je" saíram
+com o pico de amplitude idêntico ao arquivo quebrado original). Ou seja,
+a suposição de "vazio não prova erro" não segura pra este caso específico.
+Por isso este script adiciona uma segunda validação, de volume de
+verdade (via miniaudio, decodifica o MP3 direto sem precisar de ffmpeg;
+`pip install miniaudio` se não estiver instalado) -- só aceita um áudio
+cujo pico de amplitude passe de PEAK_THRESHOLD, tentando de novo (a
+síntese é estocástica, ver docstring de tts.py) até um número máximo de
+tentativas.
+
 Não escreve em audio-manifest.js sozinho -- só gera os mp3s e imprime as
 linhas prontas pra colar de volta no manifesto, pelo mesmo motivo que o
 resto do pipeline nunca publica sozinho (ver challenges_pipeline/README.md):
@@ -14,6 +29,7 @@ mais seguro revisar antes de um arquivo versionado mudar.
 
 Uso:
     export GCP_TTS_KEY="..."
+    pip install miniaudio   # se ainda não estiver instalado
     cd frances-do-zero/scripts   # (ou fr/scripts, dependendo do clone)
     python3 regenerate_broken_audio.py
 """
@@ -24,6 +40,8 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+import miniaudio
+
 from challenges_pipeline import config
 from challenges_pipeline.tts import (
     _synthesize_raw,
@@ -31,6 +49,23 @@ from challenges_pipeline.tts import (
     _words_missing_from_transcript,
     prepare_text_for_tts,
 )
+
+# Média de pico de amplitude no resto do manifesto: ~0.79 (áudio normal fica
+# tipicamente entre 0.55 e 0.99). Os 6 arquivos quebrados originais tinham
+# pico entre 0.003 e 0.011 -- 0.15 dá uma margem de sobra dos dois lados.
+PEAK_THRESHOLD = 0.15
+
+
+def audio_peak(audio_bytes):
+    """Decodifica o MP3 (bytes, sem precisar salvar em disco antes) e
+    devolve o pico de amplitude absoluta (0.0 a 1.0) -- mesma métrica usada
+    pra achar os 6 arquivos quebrados originais (decodeAudioData via Web
+    Audio API/Chromium, na investigação que motivou este script)."""
+    decoded = miniaudio.decode(audio_bytes, output_format=miniaudio.SampleFormat.FLOAT32)
+    samples = decoded.samples
+    if not len(samples):
+        return 0.0
+    return max(abs(min(samples)), abs(max(samples)))
 
 # As 6 palavras cujo mp3 original saiu quase mudo (pico de amplitude ~70-680x
 # mais baixo que a média do resto do manifesto) -- ver commit que as removeu
@@ -40,7 +75,7 @@ WORDS_TO_REGENERATE = ["ans", "je", "cher", "près", "dire", "tu"]
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 AUDIO_OUTPUT_DIR = os.path.join(_THIS_DIR, "..", "audio")
 
-MAX_ATTEMPTS = 4
+MAX_ATTEMPTS = 6
 
 
 def regenerate_one(text, max_attempts=MAX_ATTEMPTS):
@@ -52,25 +87,31 @@ def regenerate_one(text, max_attempts=MAX_ATTEMPTS):
     out_path = os.path.join(AUDIO_OUTPUT_DIR, filename)
     tts_input = prepare_text_for_tts(text)
 
-    last_missing = None
+    last_reason = None
     for attempt in range(max_attempts):
         print(f'  tentativa {attempt + 1}/{max_attempts} para "{text}"...')
         audio_bytes = _synthesize_raw(tts_input, retries=3)
 
+        peak = audio_peak(audio_bytes)
+        if peak < PEAK_THRESHOLD:
+            last_reason = f"áudio quase mudo (pico de amplitude {peak:.5f}, abaixo do limite {PEAK_THRESHOLD})"
+            print(f"  [aviso] {last_reason} -- tentando de novo.")
+            continue
+
         transcript = _transcribe(audio_bytes)
         if transcript is None:
-            print("  [aviso] Speech-to-Text indisponível -- aceitando áudio sem validar.")
+            print(f"  [aviso] Speech-to-Text indisponível -- aceitando (pico de amplitude {peak:.5f} ok).")
             break
         missing = _words_missing_from_transcript(tts_input, transcript)
         if missing is None or not missing:
-            print(f'  OK -- STT ouviu: "{transcript}"')
+            print(f'  OK -- pico de amplitude {peak:.5f}, STT ouviu: "{transcript}"')
             break
-        last_missing = missing
-        print(f'  [aviso] STT não reconheceu tudo (faltou {missing}, ouvido: "{transcript}") -- tentando de novo.')
+        last_reason = f'STT não reconheceu tudo (faltou {missing}, ouvido: "{transcript}")'
+        print(f"  [aviso] {last_reason} -- tentando de novo.")
     else:
         raise RuntimeError(
             f'Não deu pra gerar um áudio válido para {text!r} em {max_attempts} tentativas '
-            f'-- palavras nunca reconhecidas: {last_missing}. Rode de novo mais tarde '
+            f'-- último motivo: {last_reason}. Rode de novo mais tarde '
             f'(a síntese é estocástica) ou aumente max_attempts.'
         )
 
