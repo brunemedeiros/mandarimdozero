@@ -217,11 +217,22 @@ function playPregeneratedAudio(file, btnEl, isAutoplay, rate){
   });
 }
 
+// Reports reais de alunos ("o audio está muito rápido") em cima do áudio
+// pré-gerado (voz neural fr-FR-Chirp3-HD-Achernar), que toca na velocidade
+// nativa (playbackRate 1.0, sem ajuste nenhum) diferente do fallback de
+// Web Speech API logo abaixo, que já usa u.rate = 0.9 há muito tempo --
+// aparentemente por essa mesma razão de compreensão pro aluno. Reaproveita
+// o mesmo valor 0.9 já calibrado nesta função pro pregenerated também, em
+// vez de inventar um número novo. Não mexe no botão "🐢 Lentement"
+// (SLOW_AUDIO_RATE = 0.65) -- esse continua sendo o modo "bem mais devagar"
+// à parte, isto aqui só normaliza o ritmo padrão.
+const PREGEN_AUDIO_RATE = 0.9;
+
 function speakFrench(text, btnEl, isAutoplay){
   registerAudioPlay();
   const pregenFile = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
   if (pregenFile){
-    playPregeneratedAudio(pregenFile, btnEl, isAutoplay);
+    playPregeneratedAudio(pregenFile, btnEl, isAutoplay, PREGEN_AUDIO_RATE);
     return;
   }
 
