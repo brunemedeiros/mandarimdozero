@@ -1045,7 +1045,7 @@ function freshDailyBucket(today){
     hanziLessons: 0, reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0,
     lessonsForGoal: 0, goalCountedLessonKeys: [], exerciseFormatsSeen: [],
     exerciseFormatCounts: {}, audioPlaysToday: 0, overdueReviewsDone: 0,
-    missionsBonusAwarded: false, missionsNotified: {}
+    missionsBonusAwarded: false, missionsNotified: {}, missions: null
   };
 }
 
@@ -1129,12 +1129,16 @@ const EASY_CHALLENGES = [
 ];
 const REVISAO_HANZI_CHALLENGES = [
   { id:'hanzi1', icon:'🈺', label:'Estude 1 lição de Hanzi', target:1, get: d => d.hanziLessons },
-  { id:'reviews15', icon:'🔁', label:'Revise 15 cartões', target:15, get: d => d.reviewsDone },
+  // labelForTarget: usado só quando resolveRevisaoMission() escala a meta
+  // pra baixo (estoque real menor que o alvo original) -- sem isso o texto
+  // continuaria dizendo "15"/"3" enquanto a barra de progresso mostra um
+  // teto diferente (ver grilling "missões do dia").
+  { id:'reviews15', icon:'🔁', label:'Revise 15 cartões', labelForTarget: n => `Revise ${n} cartões`, target:15, get: d => d.reviewsDone },
   { id:'speedReview1', icon:'⚡', label:'Complete uma sessão de Revisão Rápida', target:1, get: d => d.speedReviewSessions },
   { id:'matchGame1', icon:'🧩', label:'Jogue o jogo de Combinar 1 vez', target:1, get: d => d.matchGamesPlayed },
   // Fase 4 (artefato §3): prioriza SRS de verdade atrasado, não qualquer
   // revisão dentro do prazo normal -- puxa quem tem cartas acumuladas.
-  { id:'overdue3', icon:'⏰', label:'Revise 3 cartas em atraso', target:3, get: d => d.overdueReviewsDone }
+  { id:'overdue3', icon:'⏰', label:'Revise 3 cartas em atraso', labelForTarget: n => `Revise ${n} cartas em atraso`, target:3, get: d => d.overdueReviewsDone }
 ];
 // "Complete N lições" saiu daqui na Fase 3 -- virou redundante depois que a
 // meta diária (plano de estudo) passou a ser medida em lições também: as
@@ -1165,13 +1169,100 @@ function pickDailyFromPool(pool, salt){
   return pool[dailySeed(STATE.daily.date + ':' + salt) % pool.length];
 }
 
+// ---------- Feasibility das missões de estoque limitado (grilling "missões
+// do dia") ----------
+// Só reviews15/overdue3/matchGame1/speedReview1 dependem de um estoque real
+// (cartas pra revisar) que pode não existir -- as demais (lições, XP,
+// hanzi...) não têm teto real no dia de hoje, ficam de fora desta checagem.
+const MISSION_QUANTITY_FLOOR = 3; // abaixo disso, trata como inviável (rodada 2)
+
+function missionReviewSupply(){
+  // Mesmo teto que gradeCurrentCard() consegue de fato tocar via
+  // Flashcard/Palavras Difíceis -- Speed Review grada os mesmos cartões
+  // (applyMemoryGrade), então não é um estoque à parte.
+  return trueDueReviewCount(eligibleReviewPool());
+}
+function missionOverdueSupply(){
+  // Mesmo critério de wasOverdue em gradeCurrentCard() (due < hoje 00:00).
+  const todayMidnight = new Date().setHours(0, 0, 0, 0);
+  return eligibleReviewPool().filter(c => c.due > 0 && c.due < todayMidnight).length;
+}
+function missionMatchGameFeasible(){
+  // Mesmo teto que desabilita o card "Combinar" na tela de Revisão.
+  return eligibleReviewPool().length >= 10;
+}
+function missionSpeedReviewFeasible(){
+  // Mesmo teto que esconde o card "Speed Review" na tela de Revisão.
+  return missionReviewSupply() >= 1;
+}
+
+// Resolve o item sorteado do pool revisão/hanzi contra o estoque real do
+// dia: devolve o item original (cabe), uma cópia com meta reduzida (tipo
+// quantidade, ainda acima do piso) ou o item seguro do pool (hanzi1 -- nunca
+// depende de estoque de revisão). Chamado uma única vez por dia dentro de
+// assignTodaysMissions() -- nunca recalculado depois, senão a meta ficaria
+// se movendo ao longo do dia conforme o estoque muda.
+function resolveRevisaoMission(picked, pool, safeFallbackId){
+  const fallback = () => pool.find(m => m.id === safeFallbackId) || picked;
+  if (picked.id === 'reviews15'){
+    const supply = missionReviewSupply();
+    if (supply >= picked.target) return picked;
+    if (supply >= MISSION_QUANTITY_FLOOR) return Object.assign({}, picked, { target: supply });
+    return fallback();
+  }
+  if (picked.id === 'overdue3'){
+    return missionOverdueSupply() >= picked.target ? picked : fallback();
+  }
+  if (picked.id === 'matchGame1'){
+    return missionMatchGameFeasible() ? picked : fallback();
+  }
+  if (picked.id === 'speedReview1'){
+    return missionSpeedReviewFeasible() ? picked : fallback();
+  }
+  return picked;
+}
+
+const ALL_CHALLENGE_POOLS = [EASY_CHALLENGES, REVISAO_HANZI_CHALLENGES, GENERAL_CHALLENGES];
+function challengeById(id){
+  for (const pool of ALL_CHALLENGE_POOLS){
+    const found = pool.find(c => c.id === id);
+    if (found) return found;
+  }
+  return null;
+}
+// Reconstrói o objeto completo (icon/label/get) do desafio a partir do
+// registro persistido ({id, target}) -- state.daily.missions só guarda dados
+// serializáveis (sincroniza com o Supabase), nunca funções.
+function materializeMission(assigned){
+  const base = challengeById(assigned.id);
+  if (!base) return null; // pool mudou entre deploys -- atribuição órfã, ignora
+  if (assigned.target === base.target) return base;
+  const scaled = Object.assign({}, base, { target: assigned.target });
+  if (base.labelForTarget) scaled.label = base.labelForTarget(assigned.target);
+  return scaled;
+}
+
+function assignTodaysMissions(){
+  const easy = pickDailyFromPool(EASY_CHALLENGES, 'easy');
+  const pickedRevisao = pickDailyFromPool(REVISAO_HANZI_CHALLENGES, 'revcon');
+  const revisao = resolveRevisaoMission(pickedRevisao, REVISAO_HANZI_CHALLENGES, 'hanzi1');
+  const general = pickDailyFromPool(GENERAL_CHALLENGES, 'general');
+  return [easy, revisao, general].map(c => ({ id: c.id, target: c.target }));
+}
+
+// As 3 missões do dia são sorteadas e a feasibility da secundária resolvida
+// UMA VEZ (no primeiro acesso do dia), depois congeladas em
+// STATE.daily.missions -- nunca recalculadas de novo no mesmo dia (rodada 1
+// de grilling: "freeze feasibility once at day-start"). Isso também é o que
+// o notification-cron passa a ler direto (state.daily.missions), em vez de
+// resortear sozinho com sua própria cópia de dailySeed()/pickDailyFromPool().
 function todaysChallenges(){
   ensureDailyBucket();
-  return [
-    pickDailyFromPool(EASY_CHALLENGES, 'easy'),
-    pickDailyFromPool(REVISAO_HANZI_CHALLENGES, 'revcon'),
-    pickDailyFromPool(GENERAL_CHALLENGES, 'general')
-  ];
+  if (!STATE.daily.missions){
+    STATE.daily.missions = assignTodaysMissions();
+    saveState();
+  }
+  return STATE.daily.missions.map(materializeMission).filter(Boolean);
 }
 
 // Bônus por completar as 3 Missões do dia (não por missão individual --

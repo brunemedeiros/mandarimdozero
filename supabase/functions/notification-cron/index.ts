@@ -49,9 +49,10 @@
 //   - ranking_weekly_result   -- toda segunda (UTC), soma weekly_xp da
 //     semana que terminou e avisa a posição final de cada participante
 //   - daily_missions_reminder -- a pessoa começou pelo menos 1 das 3
-//     "Missões do dia" mas não terminou todas -- pools/sorteio determinís-
-//     tico portados de languages/<lang>/app.js (MISSION_POOLS abaixo),
-//     mesmo dailySeed()/pickDailyFromPool()
+//     "Missões do dia" mas não terminou todas -- lê a atribuição já
+//     congelada pelo cliente em state.daily.missions (ver
+//     MISSION_FIELD_BY_ID/computeMissionProgress abaixo; desde o grilling
+//     "missões do dia" este arquivo não sorteia mais nada sozinho)
 //
 // Fase 5 (agora): primeiro canal 'email' de verdade, via Resend (API HTTP
 // simples, sem SDK -- mesma filosofia do fetch cru já usado no resto do
@@ -108,70 +109,39 @@ const BETA_TESTER_CUTOFF = '2026-09-05T00:00:00Z';
 // fuso acima).
 const DAY_KEY_BY_UTC_INDEX = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
-// Portado de EASY_CHALLENGES/REVISAO_CONJ_CHALLENGES/REVISAO_HANZI_CHALLENGES/
-// GENERAL_CHALLENGES em languages/<lang>/app.js -- só id/target/campo (o
-// texto do label não importa aqui, a notificação não nomeia a missão em
-// si, só conta quantas faltam). "special: 'lastStudyDay'" é a única
-// missão que não lê um campo de STATE.daily.
-type MissionDef = { id: string; target: number; field?: string; special?: 'lastStudyDay' };
-const MISSION_POOLS: Record<string, { easy: MissionDef[]; secondary: MissionDef[]; general: MissionDef[] }> = {
-  frances: {
-    easy: [
-      { id: 'streak', target: 1, special: 'lastStudyDay' },
-      { id: 'firstLesson', target: 1, field: 'lessons' },
-    ],
-    secondary: [
-      { id: 'conj1', target: 1, field: 'conjugationSessions' },
-      { id: 'conjCorrect10', target: 10, field: 'conjugationCorrect' },
-      { id: 'conjTenses2', target: 2, field: 'conjugationTenses.length' },
-      { id: 'reviews15', target: 15, field: 'reviewsDone' },
-      { id: 'speedReview1', target: 1, field: 'speedReviewSessions' },
-      { id: 'matchGame1', target: 1, field: 'matchGamesPlayed' },
-      { id: 'overdue3', target: 3, field: 'overdueReviewsDone' },
-    ],
-    general: [
-      { id: 'stars40', target: 40, field: 'stars' },
-      { id: 'highscore2', target: 2, field: 'highScoreLessons' },
-      { id: 'perfect1', target: 1, field: 'perfectLessons' },
-      { id: 'grammar1', target: 1, field: 'grammarLessons' },
-      { id: 'listen10', target: 10, field: 'audioPlaysToday' },
-      { id: 'translateBlocks2', target: 2, field: 'exerciseFormatCounts.reorder' },
-    ],
-  },
-  mandarim: {
-    easy: [
-      { id: 'streak', target: 1, special: 'lastStudyDay' },
-      { id: 'firstLesson', target: 1, field: 'lessons' },
-    ],
-    secondary: [
-      { id: 'hanzi1', target: 1, field: 'hanziLessons' },
-      { id: 'reviews15', target: 15, field: 'reviewsDone' },
-      { id: 'speedReview1', target: 1, field: 'speedReviewSessions' },
-      { id: 'matchGame1', target: 1, field: 'matchGamesPlayed' },
-      { id: 'overdue3', target: 3, field: 'overdueReviewsDone' },
-    ],
-    general: [
-      { id: 'stars40', target: 40, field: 'stars' },
-      { id: 'highscore2', target: 2, field: 'highScoreLessons' },
-      { id: 'perfect1', target: 1, field: 'perfectLessons' },
-      { id: 'hanzi2', target: 2, field: 'hanziLessons' },
-      { id: 'listen10', target: 10, field: 'audioPlaysToday' },
-      { id: 'translateBlocks2', target: 2, field: 'exerciseFormatCounts.reorder' },
-    ],
-  },
+// Grilling "missões do dia" (ver CLAUDE.md): o cliente (languages/<lang>/
+// app.js, assignTodaysMissions()) agora congela as 3 missões do dia --
+// incluindo a resolução de feasibility de reviews15/overdue3/matchGame1/
+// speedReview1 contra o estoque real de cartas pra revisar -- e persiste
+// em state.daily.missions ([{id, target}, ...]). Este arquivo NÃO sorteia
+// mais nada sozinho: fazer isso de novo aqui exigiria replicar a mesma
+// lógica de feasibility (que já não é um simples dailySeed()/pickDaily
+// FromPool() determinístico) e arriscaria divergir do que a pessoa vê na
+// tela dela. Só falta mapear id -> campo de STATE.daily (ou 'special')
+// pra calcular o PROGRESSO de cada missão já escolhida -- isso sim precisa
+// ficar duplicado (content/campos não são importáveis neste runtime, ver
+// comentário no topo do arquivo), mas ids/targets são só metadata estável,
+// nunca a lógica de sorteio/feasibility em si.
+type MissionFieldDef = { field?: string; special?: 'lastStudyDay' };
+const MISSION_FIELD_BY_ID: Record<string, MissionFieldDef> = {
+  streak: { special: 'lastStudyDay' },
+  firstLesson: { field: 'lessons' },
+  conj1: { field: 'conjugationSessions' },
+  conjCorrect10: { field: 'conjugationCorrect' },
+  conjTenses2: { field: 'conjugationTenses.length' },
+  hanzi1: { field: 'hanziLessons' },
+  hanzi2: { field: 'hanziLessons' },
+  reviews15: { field: 'reviewsDone' },
+  speedReview1: { field: 'speedReviewSessions' },
+  matchGame1: { field: 'matchGamesPlayed' },
+  overdue3: { field: 'overdueReviewsDone' },
+  stars40: { field: 'stars' },
+  highscore2: { field: 'highScoreLessons' },
+  perfect1: { field: 'perfectLessons' },
+  grammar1: { field: 'grammarLessons' },
+  listen10: { field: 'audioPlaysToday' },
+  translateBlocks2: { field: 'exerciseFormatCounts.reorder' },
 };
-
-// Idêntico a dailySeed()/pickDailyFromPool() em languages/<lang>/app.js --
-// mesma fórmula, senão sortearia missões DIFERENTES das que a pessoa vê
-// na tela dela.
-function dailySeed(str: string): number {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
-  return h;
-}
-function pickDailyFromPool<T>(pool: T[], dateKey: string, salt: string): T {
-  return pool[dailySeed(`${dateKey}:${salt}`) % pool.length];
-}
 
 function getFieldValue(daily: any, field: string): number {
   const raw = field.split('.').reduce((acc: any, key: string) => (acc == null ? undefined : acc[key]), daily);
@@ -182,23 +152,21 @@ function getFieldValue(daily: any, field: string): number {
 // navegador (ver limitação de fuso no topo do arquivo) -- comparar os dois
 // ENTRE SI (em vez de contra o "hoje" em UTC deste cron) mede exatamente a
 // mesma coisa que o cliente mediria, sem herdar o descasamento de fuso.
-function missionCurrent(mission: MissionDef, state: any): number {
-  if (mission.special === 'lastStudyDay') return state.lastStudyDay === state.daily?.date ? 1 : 0;
-  return getFieldValue(state.daily, mission.field!);
+function missionCurrent(def: MissionFieldDef, state: any): number {
+  if (def.special === 'lastStudyDay') return state.lastStudyDay === state.daily?.date ? 1 : 0;
+  return getFieldValue(state.daily, def.field!);
 }
 
-// null = sem bucket de hoje pra este idioma (state.daily.date ausente) --
-// nada a avaliar, bem diferente de "começou e não terminou".
-function computeMissionProgress(languageAppKey: string, state: any): { current: number; target: number }[] | null {
-  const pools = MISSION_POOLS[languageAppKey];
-  const dateKey = state.daily?.date;
-  if (!pools || !dateKey) return null;
-  const missions = [
-    pickDailyFromPool(pools.easy, dateKey, 'easy'),
-    pickDailyFromPool(pools.secondary, dateKey, 'revcon'),
-    pickDailyFromPool(pools.general, dateKey, 'general'),
-  ];
-  return missions.map((m) => ({ current: Math.min(missionCurrent(m, state), m.target), target: m.target }));
+// null = sem atribuição congelada pra hoje ainda (state.daily.missions
+// ausente/vazio, ex.: quem não abriu o app hoje) -- nada a avaliar, bem
+// diferente de "começou e não terminou".
+function computeMissionProgress(state: any): { current: number; target: number }[] | null {
+  const missions = state.daily?.missions;
+  if (!Array.isArray(missions) || missions.length === 0 || !state.daily?.date) return null;
+  return missions.map((m: { id: string; target: number }) => {
+    const def = MISSION_FIELD_BY_ID[m.id] || {};
+    return { current: Math.min(missionCurrent(def, state), m.target), target: m.target };
+  });
 }
 
 // Segunda-feira (UTC) da semana que contém `date` -- mesma regra de
@@ -234,8 +202,9 @@ function daysSince(dateStr: string | undefined | null): number | null {
 // Portado de UNITS[].lessons[].vocabIdx em fr/content.js e zh/content.js --
 // unitId -> lista de vocabIdx por lição, na mesma ordem do conteúdo. Só o
 // suficiente pra replicar isCardLessonCompleted() (fr/app.js, zh/app.js)
-// aqui (mesmo espírito de duplicação do MISSION_POOLS acima -- content.js
-// não é importável neste runtime, ver comentário no topo do arquivo).
+// aqui (mesmo espírito de duplicação do MISSION_FIELD_BY_ID acima --
+// content.js não é importável neste runtime, ver comentário no topo do
+// arquivo).
 //
 // Bug real que isto corrige (relatado pela autora, 2026-09-15): um cartão
 // ganha reps>0 e due<=now assim que é praticado dentro da PRÓPRIA lição que
@@ -248,7 +217,7 @@ function daysSince(dateStr: string | undefined | null): number | null {
 // fallback do cliente (!!prog.completed).
 //
 // Precisa ser regerado manualmente se a estrutura de lições de alguma
-// unidade mudar (mesmo cuidado de sincronia do MISSION_POOLS acima).
+// unidade mudar (mesmo cuidado de sincronia do MISSION_FIELD_BY_ID acima).
 const LESSON_VOCAB_MAP: Record<string, Record<string, number[][]>> = {
   frances: {
     "A1-1": [[0,1,2], [3,4,5], [6,7,8,9], []],
@@ -588,7 +557,7 @@ async function processUserLanguage(
   // exige progresso > 0 em pelo menos uma; sem isso, alguém que nem abriu
   // o app hoje receberia isto JUNTO com streak_at_risk/study_goal_remaining
   // (redundante -- essas duas já cobrem "não estudou hoje").
-  const missions = computeMissionProgress(languageAppKey, state);
+  const missions = computeMissionProgress(state);
   if (missions) {
     const anyStarted = missions.some((m) => m.current > 0);
     const missing = missions.filter((m) => m.current < m.target).length;
