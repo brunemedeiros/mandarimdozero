@@ -4344,7 +4344,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   const inputEl = document.getElementById('vocab-type-input');
   inputEl.focus();
   wirePinyinTonePicker(contentEl.querySelector('.pinyin-tone-picker'), inputEl);
-  const strip = s => normalizeLoose(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
+  const strip = s => normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
 
   function lockInputs(){
     inputEl.disabled = true;
@@ -4457,10 +4457,86 @@ function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
   });
 }
 
-// Tolerante a tom (remove os diacríticos do pinyin), caixa e espaços extras —
-// usado só na comparação do modo digitado do cloze (não afeta pinyin exibido).
-function normalizeLoose(str){
-  return str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+// BEGIN pinyin-answer-logic (extraído literalmente por zh/scripts/test_answer_validation.js -- não mover/renomear estes marcadores sem atualizar o teste)
+// ---------- Comparação de pinyin digitado (preserva tom) ----------
+// Auditoria 2026-09-16 (grilling): esta função ERA uma cópia quase literal
+// da normalizeLoose() do francês (fr/app.js) -- removia diacríticos antes de
+// comparar, o que faz sentido pro francês (acento é opcional/decorativo pra
+// efeito de correção lá) mas é ERRADO pro pinyin: o tom é parte da
+// identidade fonológica da sílaba, não decoração. mā/má/mǎ/mà/ma são
+// palavras DIFERENTES, não variações toleráveis da mesma resposta -- essa
+// versão antiga tratava as 5 como equivalentes, o que apagava o propósito
+// da teclinha de tom (wirePinyinTonePicker/PINYIN_TONE_GROUPS logo abaixo):
+// o esforço de digitar o tom certo nunca era premiado nem cobrado.
+// NÃO reaproveitar a lógica de acento do francês aqui de novo -- são
+// fenômenos linguísticos diferentes, mesmo que o código pareça "parecido".
+//
+// Ainda tolera maiúscula/minúscula e espaço (como sempre tolerou) e agora
+// também aceita pinyin NUMERADO (ma1-ma5, convenção universal de IME sem
+// tecla de acento -- ver convertNumberedPinyin) como forma alternativa do
+// MESMO tom que o diacrítico correspondente: "ma3" e "mǎ" comparam iguais,
+// "ma3" e "má" não. Ver testes em zh/scripts/test_answer_validation.js.
+function normalizePinyinAnswer(str){
+  return convertNumberedPinyin(String(str || ''))
+    .normalize('NFC')
+    .toLowerCase()
+    .trim();
+}
+
+// ---------- Conversão de pinyin numerado (ma1-ma5) -> diacrítico ----------
+// "v" é aceito no lugar de "ü" -- convenção universal de todo IME de pinyin
+// (teclado padrão não tem tecla ü). Tom 5 (ou pinyin sem número no final)
+// é tom neutro -- corretamente SEM marca, não "tom não informado".
+const PINYIN_TONE_MARKS = {
+  a: ['a', 'ā', 'á', 'ǎ', 'à'],
+  e: ['e', 'ē', 'é', 'ě', 'è'],
+  i: ['i', 'ī', 'í', 'ǐ', 'ì'],
+  o: ['o', 'ō', 'ó', 'ǒ', 'ò'],
+  u: ['u', 'ū', 'ú', 'ǔ', 'ù'],
+  'ü': ['ü', 'ǖ', 'ǘ', 'ǚ', 'ǜ'],
+};
+
+// Acha o índice da vogal que recebe a marca de tom numa sílaba, seguindo a
+// regra oficial de pinyin: "a"/"e" tem prioridade sobre qualquer outra
+// vogal; senão, em "ou" a marca vai no "o"; senão vai na última vogal da
+// sequência (cobre "i"/"u"/"ü" isolados ou em ditongo tipo "ui"/"iu").
+function pinyinToneVowelIndex(letters){
+  const lower = letters.toLowerCase();
+  if (lower.includes('a')) return lower.indexOf('a');
+  if (lower.includes('e')) return lower.indexOf('e');
+  if (lower.includes('ou')) return lower.indexOf('o');
+  for (let i = lower.length - 1; i >= 0; i--){
+    if ('iuü'.includes(lower[i])) return i;
+  }
+  return -1;
+}
+
+// Converte UMA sílaba numerada ("ma3", "nv3", "xian1", "ma5"/"ma") pra
+// forma diacrítica ("mǎ", "nǚ", "xiān", "ma"). Uma sílaba que não termina
+// em dígito 1-5 (já diacrítica, ou não é pinyin) volta inalterada.
+function convertNumberedPinyinSyllable(syllable){
+  const m = syllable.match(/^([a-zA-Zü]+)([1-5])$/);
+  if (!m) return syllable;
+  let [, letters] = m;
+  const tone = parseInt(m[2], 10);
+  letters = letters.replace(/v/g, 'ü').replace(/V/g, 'Ü');
+  if (tone === 5) return letters; // tom neutro -- sem marca, de propósito
+  const idx = pinyinToneVowelIndex(letters);
+  if (idx === -1) return letters; // sem vogal reconhecida -- devolve sem marcar em vez de travar
+  const vowelLower = letters[idx].toLowerCase();
+  const marks = PINYIN_TONE_MARKS[vowelLower];
+  if (!marks) return letters;
+  const isUpper = letters[idx] !== letters[idx].toLowerCase();
+  const mark = isUpper ? marks[tone].toUpperCase() : marks[tone];
+  return letters.slice(0, idx) + mark + letters.slice(idx + 1);
+}
+
+// Converte uma resposta inteira (pode ter várias sílabas, separadas por
+// espaço e/ou apóstrofo de separação silábica tipo "xi1'an1") de pinyin
+// numerado pra diacrítico. Texto que já não tem sílabas numeradas passa
+// direto sem alteração -- seguro de chamar em qualquer string.
+function convertNumberedPinyin(str){
+  return str.replace(/[a-zA-Zü]+[1-5]\b/g, convertNumberedPinyinSyllable);
 }
 
 // Algumas respostas têm mais de uma forma aceita, armazenadas juntas
@@ -4471,6 +4547,7 @@ function normalizeLoose(str){
 function acceptedForms(expected){
   return (expected || '').split('/').map(s => s.trim()).filter(Boolean);
 }
+// END pinyin-answer-logic
 
 // ---------- Teclinha de tons do pinyin (exercícios digitados) ----------
 // Ninguém tem um teclado chinês pra digitar vogais com tom -- isso dá um
@@ -4605,7 +4682,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     document.getElementById('cloze-verify-btn').addEventListener('click', () => {
       if (STEP_STATE.exerciseAnswered) return;
       inputEl.disabled = true;
-      const strip = s => normalizeLoose(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
+      const strip = s => normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
       const typed = strip(inputEl.value);
       finish(acceptedForms(ex.correctBlock.p).some(form => strip(form) === typed));
     });

@@ -6720,8 +6720,14 @@ function getConjForms(verb, tense){
   return CONJUGATION_VERBS[verb].f[tense];
 }
 
+// BEGIN accent-answer-logic (extraído literalmente por fr/scripts/test_answer_validation.js -- não mover/renomear estes marcadores sem atualizar o teste)
 // Normaliza pra comparação "quase certo": remove acentos e ignora maiúsculas.
 // Erro de terminal (ex: "prennons" por "prenons") continua contando como errado.
+// Auditoria 2026-09-16 (grilling): comportamento tolerante a acento
+// CONFIRMADO como intencional pro francês (acento não muda a nota nos
+// exercícios digitados de vocabulário/cloze/conjugação) -- preservado sem
+// alteração. Só o pinyin do chinês (zh/app.js) tinha esse mesmo padrão
+// aplicado errado -- ver normalizePinyinAnswer lá, tom não é decoração.
 function normalizeLoose(str){
   return str.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 }
@@ -6734,6 +6740,7 @@ function normalizeLoose(str){
 function acceptedForms(expected){
   return (expected || '').split('/').map(s => s.trim()).filter(Boolean);
 }
+// END accent-answer-logic
 
 function conjActiveMask(tenseKey){
   return tenseKey === 'imperatif' ? CONJ_IMPERATIF_ACTIVE : [true,true,true,true,true,true];
@@ -7072,6 +7079,7 @@ function openDictationPlayer(id){
       </div>
     </div>
     <textarea class="dictation-textarea" id="dictation-input" placeholder="Digite aqui o que você ouviu..."></textarea>
+    ${frAccentPickerHTML()}
     <div class="dictation-actions">
       <button class="btn btn-primary" id="dictation-check-btn">Verificar</button>
       <button class="btn btn-secondary" id="dictation-retry-btn" style="display:none;">Tentar novamente</button>
@@ -7080,6 +7088,7 @@ function openDictationPlayer(id){
   `;
 
   dictationAudioEl = new Audio(dictationAudioPath(d));
+  wireFrAccentPicker(content.querySelector('.fr-accent-picker'), document.getElementById('dictation-input'));
   const playBtn = document.getElementById('dictation-play-btn');
   const progressFill = document.getElementById('dictation-progress-fill');
   const progressHandle = document.getElementById('dictation-progress-handle');
@@ -7201,6 +7210,7 @@ function openDictationPlayer(id){
   });
 }
 
+// BEGIN dictation-answer-logic (extraído literalmente por fr/scripts/test_answer_validation.js -- não mover/renomear estes marcadores sem atualizar o teste)
 function normalizeDictationWord(w){
   return w
     .toLowerCase()
@@ -7210,6 +7220,7 @@ function normalizeDictationWord(w){
     .replace(/[‘’]/g, "'") // aspas curvas do autocorretor do celular
     .replace(/[.,!?;:'"()«»]/g, '');
 }
+// END dictation-answer-logic
 
 // Separa as palavras reais da pontuação "solta" (ex: "!" ou "?" digitados
 // com espaço antes, como manda a tipografia francesa). A pontuação continua
@@ -8218,6 +8229,7 @@ function checkListenTranslateAnswer(c){
 }
 
 // ---------- Acentuação ----------
+// BEGIN accent-challenge-logic (extraído literalmente por fr/scripts/test_answer_validation.js -- não mover/renomear estes marcadores sem atualizar o teste)
 // Correção sensível a acentos/cedilha/trema -- nunca remove diacríticos
 // antes de comparar (só normaliza espaço/maiúsculas, que não são o alvo
 // da atividade).
@@ -8228,6 +8240,7 @@ function normalizeForAccentCompare(s){
 function isAccentAnswerCorrect(studentAnswer, targetText){
   return normalizeForAccentCompare(studentAnswer) === normalizeForAccentCompare(targetText);
 }
+// END accent-challenge-logic
 
 function openAccentPlayer(c){
   const content = document.getElementById('challenge-player-content');
@@ -8239,12 +8252,14 @@ function openAccentPlayer(c){
     </div>
     <label class="listen-translate-answer-label" for="accent-answer-input">Digite o que você ouviu:</label>
     <input type="text" class="accent-answer-input" id="accent-answer-input" autocomplete="off" autocapitalize="off" spellcheck="false">
+    ${frAccentPickerHTML()}
     <div class="listen-translate-actions">
       <button class="btn btn-primary" id="accent-verify-btn">Vérifier</button>
     </div>
     <div id="accent-feedback-wrap" aria-live="polite" aria-atomic="true"></div>
   `;
 
+  wireFrAccentPicker(content.querySelector('.fr-accent-picker'), document.getElementById('accent-answer-input'));
   document.getElementById('accent-play-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
   });
