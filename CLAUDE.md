@@ -389,3 +389,51 @@ mostrar a forma padrão ao lado, no espírito do "Quase!" que já existe na
 correção de conjugação). As duas notas `gramatica-coloquial` escritas acima
 já avisam o aluno, no próprio texto, que os exercícios de hoje ainda
 exigem a forma padrão — não prometem um comportamento que o código não tem.
+
+**Grilling sobre a integração acima (2026-09-17): adiada de propósito,
+não esquecida.** Antes de perguntar, mapeei os exercícios digitados que
+existem hoje (`renderVocabTypeExercise`, `renderClozeExercise`, o campo
+de conjugação onde `'almost'`/"Quase!" já vive) e achei um fato que muda a
+pergunta: **nenhum deles consegue testar uma frase inteira digitada
+livremente hoje**. `renderVocabTypeExercise` é "digite o que ouviu"
+(transcrição literal de UM item de `vocab[]`, não de frase). O cloze
+(`renderClozeExercise`) esconde só um `block` de uma `phrase.blocks[]] já
+existente, e o gerador (`fr/app.js` por volta da linha 3782) nunca deixa o
+blank cair no bloco 0 quando há 3+ blocos — pra "Tu es de quel pays ?"
+(`blocks: ["Tu","es de","quel pays ?"]`), "Tu" fica sempre fixo, nunca
+digitável. Ou seja: a contração "t'es" (que funde "Tu"+"es") **não tem
+como ser representada** no cloze de hoje — não existe um blank cujo
+preenchimento algum dia seria igual a "t'es". Mesma conclusão pro par
+我是巴西人/我巴西人 do zh. As 2 notas `gramatica-coloquial` escritas no
+piloto acima não têm, hoje, NENHUM exercício digitado que algum dia as
+teste.
+
+Decisões do grilling, dado esse achado:
+
+- **Não construir a integração agora.** Só 2 itens existem no app
+  inteiro; forçar isso agora significa (a) inventar um tipo de exercício
+  novo do zero pra 2 pontos de dado, ou (b) reestruturar `phrase.blocks`
+  pra encaixar o bloco 0, o que também muda o exercício de reorder (que
+  reaproveita os mesmos `blocks`) como efeito colateral. **Quando o
+  próximo item `gramatica-coloquial` for autorado**, desenhar o exercício
+  JUNTO com o item (escolher/ajustar os `blocks` da frase pra que a forma
+  coloquial caiba como um blank isolado), em vez de tentar encaixar
+  retroativamente. Até lá, as notas continuam card passivo + aviso no
+  texto ("continue escrevendo a forma padrão") — comportamento real, não
+  promessa vazia.
+- **Quando construída, o aceite deve ser global, não só na lição em que
+  a nota apareceu.** O dado mora anexado à própria frase/resposta (não ao
+  `trigger` da nota, que é efêmero) — o valor real está na revisão
+  espaçada dias depois, quando o aluno já esqueceu a nota; escopar só à
+  lição imediata joga fora a maior parte do valor.
+- **Quando construída, usar um `statusClass` novo (ex. `'colloquial-ok'`),
+  não reaproveitar `'almost'`.** `'almost'` hoje significa "grafia quase
+  certa" — semanticamente incompleto/próximo do erro. Um acerto coloquial
+  é semanticamente diferente (certo, só que num registro diferente) e o
+  tom já travado acima ("correto, isto é a forma padrão", não "quase
+  errado") depende de não herdar a conotação de `'almost'`.
+
+Nenhuma dessas três decisões virou código nesta sessão — de propósito,
+mesmo espírito do restante desta seção: são parâmetros de design pra
+quando o próximo item existir, não trabalho pra fazer hoje sem um
+call site real pra testar contra.
