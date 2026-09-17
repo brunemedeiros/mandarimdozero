@@ -602,39 +602,43 @@ const REALITY_NOTE_CATEGORY = {
   GRAMATICA_COLOQUIAL: 'gramatica-coloquial',
 };
 
-// Os 4 eixos de "profundidade" aprovados no grilling, por nível -- só o
+// 3 eixos de "profundidade" aprovados no grilling, por nível -- só o
 // eixo 1 (explanationDepth) está de fato em uso hoje, porque só o nível
-// inicial existe. Os outros 3 eixos (testableInExercise, categoriesAllowed,
-// densityPerUnit) ficam aqui como parâmetros PRONTOS pra quando os níveis
-// seguintes existirem -- não aplicados por nenhum código ainda (não há
-// nenhuma nota de realidade escrita), só a decisão travada de o que cada
+// inicial existe. Os outros 2 (testableInExercise, categoriesAllowed)
+// ficam aqui como parâmetros PRONTOS pra quando os níveis seguintes
+// existirem -- não aplicados por nenhum código ainda (não há nenhuma nota
+// de realidade escrita nesses níveis), só a decisão travada de o que cada
 // nível vai permitir. HSK2/HSK3/HSK4 são hipotéticos -- ajustar se o
 // currículo real desviar disso. Mesma lógica exata do francês (fr/app.js),
 // só as chaves são HSK1-4 em vez de A1/A2/B1/B2 (ver nota acima).
+//
+// Um 4º eixo, `densityPerUnit`, existiu aqui até 2026-09-17 e foi
+// REMOVIDO por decisão explícita da autora (mesmo grilling espelhado em
+// fr/app.js -- ver o comentário lá pra a justificativa completa e o
+// CLAUDE.md pra a decisão registrada). Sem limite numérico min/max por
+// unidade ou nível; a regra agora é só qualitativa (relação pedagógica
+// real com a palavra/expressão ensinada naquele momento), e o controle de
+// qualidade/volume passou a ser a revisão manual da autora, não um teto.
 const REALITY_NOTE_LEVEL_GUIDANCE = {
   HSK1: {
     explanationDepth: 'curta',       // 1 frase, sem contexto social extra
     testableInExercise: false,       // card passivo é o MVP, exercício de reconhecimento é fase 2 adiada
     categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial'],
-    densityPerUnit: { min: 0, max: 1 },
   },
   HSK2: {
     explanationDepth: 'media',       // pode incluir contexto social (quem usa, quando)
     testableInExercise: false,
     categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial', 'familiar-giria'],
-    densityPerUnit: { min: 0, max: 2 },
   },
   HSK3: {
     explanationDepth: 'media',
     testableInExercise: true,        // "usar adequadamente" -- primeiro nível onde testar faz sentido
     categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial', 'familiar-giria'],
-    densityPerUnit: { min: 1, max: 3 },
   },
   HSK4: {
     explanationDepth: 'alta',        // pragmática/ironia/marcadores sociais -- ainda sem categoria própria
     testableInExercise: true,
     categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial', 'familiar-giria'],
-    densityPerUnit: { min: 1, max: 4 },
   },
 };
 

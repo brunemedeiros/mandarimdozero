@@ -98,6 +98,28 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // 2ª nota de realidade desta unidade (grilling 2026-09-17, densidade
+      // sem teto -- ver comentário de REALITY_NOTE_LEVEL_GUIDANCE em
+      // app.js). Confiança ALTA: "à plus"/"A+" é abreviação de despedida
+      // extremamente comum em francês informal/texto, ligada especificamente
+      // ao "à bientôt" desta lição.
+      {
+        id: "a-bientot-informal",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 9 },
+        blocks: [
+          {
+            title: "\"À bientôt\" entre amigos vira \"à plus\"",
+            body: "Com amigos, <strong>à bientôt</strong> é comum, mas no dia a dia (e quase sempre em mensagem de texto) a despedida mais usada é <strong>à plus</strong> — e por escrito costuma virar só <strong>A+</strong>. Com desconhecidos ou em contexto formal, \"à bientôt\" continua sendo a escolha certa.",
+            examples: [
+              { f: "à plus", t: "até mais (informal, entre amigos)" },
+              { f: "A+", t: "abreviação de texto pra \"à plus\"" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     trueFalseExercises: [{ subject: "Merci beaucoup !", emoji: "🙏", claim: "Isso é o que dizemos quando alguém nos ajuda muito.", answer: true,
@@ -197,6 +219,28 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // 2ª nota de realidade desta unidade (grilling 2026-09-17, densidade
+      // sem teto). Confiança ALTA: o francês falado prefere manter a ordem
+      // sujeito-verbo e jogar a palavra interrogativa pro fim da frase
+      // ("wh-in-situ") -- fenômeno muito documentado, não é uma
+      // generalização frágil. Ligada especificamente à pergunta
+      // "Comment tu t'appelles ?" desta lição (vocab "s'appeler").
+      {
+        id: "comment-tappelles-wh-in-situ",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "\"Comment tu t'appelles ?\" também vira \"Tu t'appelles comment ?\"",
+            body: "Na fala cotidiana, é tão ou mais comum deixar a palavra de pergunta (\"comment\") no FIM da frase, mantendo a ordem normal sujeito-verbo — <strong>tu t'appelles comment ?</strong> em vez de \"comment tu t'appelles ?\". Nos exercícios daqui, continue usando a ordem com \"comment\" no início — é a forma que os dois exercícios daqui pedem.",
+            examples: [
+              { f: "tu t'appelles comment ?", t: "qual é o seu nome? (fala cotidiana)" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     trueFalseExercises: [{ subject: "Comment tu t'appelles ?", emoji: "🙋", claim: "Essa pergunta serve pra saber a idade de alguém.", answer: false,
@@ -290,6 +334,33 @@ const UNITS = [
               { region: "França", form: "soixante-dix (70), quatre-vingts (80), quatre-vingt-dix (90)" },
               { region: "Bélgica e Suíça", form: "septante (70) e nonante (90) — mais parecido com contar de 10 em 10" },
               { region: "Suíça (só lá)", form: "huitante (80) — a Bélgica continua usando quatre-vingts" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // 3ª nota de realidade desta unidade (grilling 2026-09-17, densidade
+      // sem teto). Confiança ALTA: mesmo fenômeno wh-in-situ da nota já
+      // escrita em A1-2 (ver comment-tappelles-wh-in-situ), aplicado à
+      // pergunta específica desta lição -- "quel âge as-tu ?" combina o
+      // wh-in-situ com a elisão "tu as" → "t'as", também extremamente
+      // comum. Repetir o mecanismo pra uma frase diferente e genuinamente
+      // ensinada aqui não é redundante (cada nota responde à pergunta
+      // exata que a lição faz), mas um 3º exemplo do MESMO mecanismo
+      // dentro da mesma unidade ("combien ça coûte ?" → "ça coûte
+      // combien ?") foi deliberadamente deixado de fora por soar repetitivo
+      // — ver relatório desta sessão.
+      {
+        id: "quel-age-wh-in-situ",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { afterVocabIdx: 8 },
+        blocks: [
+          {
+            title: "\"Quel âge as-tu ?\" também vira \"T'as quel âge ?\"",
+            body: "Na fala cotidiana, \"tu as\" costuma encolher pra <strong>t'as</strong>, e a palavra de pergunta (\"quel âge\") pode ir pro fim da frase — <strong>t'as quel âge ?</strong> em vez de \"quel âge as-tu ?\". Nos exercícios daqui, continue usando a forma \"quel âge as-tu ?\" — é a forma que os exercícios pedem.",
+            examples: [
+              { f: "t'as quel âge ?", t: "quantos anos você tem? (fala cotidiana)" }
             ],
             wrapup: true
           }

@@ -474,13 +474,28 @@ const REALITY_NOTE_CATEGORY = {
   GRAMATICA_COLOQUIAL: 'gramatica-coloquial',
 };
 
-// Os 4 eixos de "profundidade" aprovados no grilling, por nível -- só o
+// 3 eixos de "profundidade" aprovados no grilling, por nível -- só o
 // eixo 1 (explanationDepth) está de fato em uso hoje, porque só A1 existe.
-// Os outros 3 eixos (testableInExercise, categoriesAllowed, densityPerUnit)
-// ficam aqui como parâmetros PRONTOS pra quando A2+ existir -- não
-// aplicados por nenhum código ainda (não há nenhuma nota de realidade
-// escrita), só a decisão travada de o que cada nível vai permitir.
-// A2/B1/B2 são hipotéticos -- ajustar se o currículo real desviar disso.
+// Os outros 2 (testableInExercise, categoriesAllowed) ficam aqui como
+// parâmetros PRONTOS pra quando A2+ existir -- não aplicados por nenhum
+// código ainda (não há nenhuma nota de realidade escrita), só a decisão
+// travada de o que cada nível vai permitir. A2/B1/B2 são hipotéticos --
+// ajustar se o currículo real desviar disso.
+//
+// Um 4º eixo, `densityPerUnit` (faixa numérica min/max de notas por
+// unidade), existiu aqui até 2026-09-17 e foi REMOVIDO por decisão
+// explícita da autora num 2º grilling: ela não quer nenhum limite -- nem
+// mínimo nem máximo -- por unidade ou nível. A regra que vale agora é
+// só qualitativa: uma nota entra se e somente se houver uma relação
+// pedagógica real com uma palavra/expressão que a lição está ensinando
+// naquele momento (mesmo princípio de "Coerência pedagógica entre
+// funcionalidades" no topo do CLAUDE.md), podendo haver mais de uma nota
+// na mesma lição quando cada uma responder a um ponto genuinamente
+// diferente. Motivação dela, verbatim: "o aluno A1 quer aprender o
+// conteúdo REAL das situações simples do dia a dia, e não apenas o
+// conteúdo mais fácil" -- ver CLAUDE.md pra o resto da decisão (inclusive
+// o fluxo de revisão manual que substitui o limite numérico como o
+// verdadeiro controle de qualidade/volume).
 const REALITY_NOTE_LEVEL_GUIDANCE = {
   A1: {
     // Eixo 1 -- guia de quanto escrever por nota (decisão editorial, não
@@ -492,28 +507,21 @@ const REALITY_NOTE_LEVEL_GUIDANCE = {
     testableInExercise: false,
     // Eixo 3 -- quais categorias este nível já pode usar.
     categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial'],
-    // Eixo 4 -- faixa de notas por unidade (números, não string, pra dar
-    // pra um script de auditoria de conteúdo checar isso no futuro sem
-    // precisar mudar o shape de novo).
-    densityPerUnit: { min: 0, max: 1 },
   },
   A2: {
     explanationDepth: 'media',       // pode incluir contexto social (quem usa, quando)
     testableInExercise: false,
     categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial', 'familiar-giria'],
-    densityPerUnit: { min: 0, max: 2 },
   },
   B1: {
     explanationDepth: 'media',
     testableInExercise: true,        // "usar adequadamente" -- primeiro nível onde testar faz sentido
     categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial', 'familiar-giria'],
-    densityPerUnit: { min: 1, max: 3 },
   },
   B2: {
     explanationDepth: 'alta',        // pragmática/ironia/marcadores sociais -- ainda sem categoria própria
     testableInExercise: true,
     categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial', 'familiar-giria'],
-    densityPerUnit: { min: 1, max: 4 },
   },
 };
 

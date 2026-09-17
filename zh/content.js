@@ -53,6 +53,48 @@ const UNITS = [
       },
       // Piloto da camada de "notas de realidade" (ver CLAUDE.md) --
       // categoria 'informal', permitida em HSK1. Ligada especificamente ao
+      // vocabulário 再见 desta lição. Confiança ALTA: 拜拜 (do inglês
+      // "bye-bye") é extremamente comum no chinês falado/escrito informal
+      // hoje em dia, sobretudo entre falantes mais jovens/urbanos.
+      {
+        id: "zaijian-baibai",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 1 },
+        blocks: [
+          {
+            title: "\"再见\" no dia a dia costuma virar \"拜拜\"",
+            body: "<strong>再见 (zàijiàn)</strong> é a despedida padrão e sempre correta. No dia a dia, principalmente entre pessoas mais jovens, é muito comum ouvir <strong>拜拜 (bàibài)</strong> — emprestado do inglês \"bye-bye\" — em vez de 再见, especialmente ao telefone ou em mensagens.",
+            examples: [
+              { c: "拜拜", p: "bàibài", t: "tchau (informal, do inglês \"bye-bye\")" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Categoria 'informal', ligada ao vocabulário 对不起 desta lição.
+      // Confiança ALTA: 不好意思 como pedido de desculpa mais leve/social
+      // (em vez do mais "pesado" 对不起) pra situações do dia a dia é um
+      // uso real bem documentado no ensino de chinês, não uma generalização
+      // frágil.
+      {
+        id: "duibuqi-buhaoyisi",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 4 },
+        blocks: [
+          {
+            title: "Pra coisas pequenas, \"对不起\" costuma virar \"不好意思\"",
+            body: "<strong>对不起 (duìbuqǐ)</strong> é a forma padrão de pedir desculpa, mas no dia a dia costuma soar pesada demais pra coisas pequenas — esbarrar em alguém, chegar um pouco atrasado, interromper. Pra essas situações, é muito mais comum ouvir <strong>不好意思 (bù hǎoyìsi)</strong>, um pedido de desculpa mais leve, quase como \"foi mal\" ou \"com licença\".",
+            examples: [
+              { c: "不好意思", p: "bù hǎoyìsi", t: "foi mal / com licença (desculpa leve, coisas pequenas)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Piloto original da camada de "notas de realidade" (ver CLAUDE.md) --
+      // categoria 'informal', permitida em HSK1. Ligada especificamente ao
       // vocabulário 早上好 desta lição -- é literalmente o caso concreto
       // citado na proposta original da feature, agora virando conteúdo de
       // verdade. Categoria em string literal, não REALITY_NOTE_CATEGORY.

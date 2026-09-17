@@ -437,3 +437,77 @@ Nenhuma dessas três decisões virou código nesta sessão — de propósito,
 mesmo espírito do restante desta seção: são parâmetros de design pra
 quando o próximo item existir, não trabalho pra fazer hoje sem um
 call site real pra testar contra.
+
+**Atualização (2026-09-17, mesmo dia): densidade revista via novo
+grilling — sem teto/mínimo, revisão manual da autora é o controle de
+qualidade daqui pra frente.** A autora leu o resumo do piloto de 5 notas
+e achou pouco: a intenção dela não é "aumentar aos poucos por nível", é
+"notas de realidade serem uma feature MUITO presente desde já" — o
+objetivo do produto passou a ser ensinar o conteúdo REAL do idioma, não
+só o mais fácil, e isso vale desde o A1/HSK1, não só em níveis avançados.
+
+Decisões do 2º grilling (Q1-Q4), já aplicadas:
+
+- **`densityPerUnit` (eixo 4 da taxonomia) foi REMOVIDO do código.**
+  Existia como `{min,max}` em `REALITY_NOTE_LEVEL_GUIDANCE` (fr/app.js e
+  zh/app.js, ambos atualizados). Não há mais nenhum limite numérico, nem
+  piso nem teto, por unidade ou por nível — pode haver 0, 1, 2 ou mais
+  notas na mesma lição, o único critério é a mesma regra de sempre
+  ("Coerência pedagógica entre funcionalidades", topo deste arquivo): a
+  nota só entra se responder a uma palavra/expressão que a lição está
+  ensinando NAQUELE momento. "Não force notas desnecessárias ou irreais"
+  — verbatim da autora — continua valendo tanto quanto antes; o que mudou
+  é que agora também não se pode limitar/segurar uma nota genuína só
+  porque "já teve uma nessa lição".
+- **Sem progressão de densidade por nível também** (Q2, opção "não
+  aumentar por nível" da autora) — os outros 2 eixos que ainda existem
+  (`explanationDepth`, `testableInExercise`, `categoriesAllowed`)
+  continuam progredindo como já estava travado (A1/HSK1 mais raso, B1+
+  testável, familiar-giria só A2+) — só a QUANTIDADE de notas deixou de
+  escalar por nível, não a profundidade/testabilidade.
+- **Retroagiu nas 5 unidades já pilotadas** — completadas nesta mesma
+  sessão pra 2-3 notas cada (ver lista completa abaixo), em vez de deixar
+  as primeiras unidades que o aluno vê com menos notas que as futuras.
+- **Novo processo de revisão obrigatório pra TODA sessão futura que
+  escrever nota de realidade, em qualquer idioma**: nenhum gate de
+  aprovação dentro do app (a autora não quer isso), mas toda nota
+  adicionada — nova ou já existente — deve ser reportada a ela NO CHAT
+  com um nível de confiança explícito (alta/média/baixa), pra ela
+  verificar em outras fontes antes de confiar. Regra motivadora,
+  verbatim: "Para todos os idiomas, indique o nível de confiança naquela
+  nota quando estiver me enviando pois irei verificar em outras fontes e
+  tomarei uma 'confiança alta' com menos tensão na hora da revisão." Na
+  prática: qualquer sessão que adicionar/editar uma nota de realidade
+  precisa terminar a entrega com uma lista de TODAS as notas do app
+  (não só as novas) e o nível de confiança de cada uma — não é opcional,
+  nem só pras novas.
+
+**Lista completa das 10 notas de realidade existentes depois desta
+atualização** (nível de confiança de cada uma, pra revisão da autora):
+
+fr:
+1. A1-1 `svp-informal` — "s'il vous plaît" → "s'il te plaît"/STP — **alta**
+2. A1-1 `a-bientot-informal` — "à bientôt" → "à plus"/A+ — **alta**
+3. A1-2 `tu-es-contraction` — "tu es" → "t'es" — **alta**
+4. A1-2 `comment-tappelles-wh-in-situ` — "comment tu t'appelles ?" → "tu t'appelles comment ?" (wh-in-situ) — **alta**
+5. A1-3 `vingt-to-quatrevingts` — base de quatre-vingts (regional: França vs. Bélgica/Suíça) — **alta**
+6. A1-3 `quel-age-wh-in-situ` — "quel âge as-tu ?" → "t'as quel âge ?" (wh-in-situ + elisão) — **alta**
+
+zh:
+7. Unit 1 `zaijian-baibai` — 再见 → 拜拜 — **alta**
+8. Unit 1 `duibuqi-buhaoyisi` — 对不起 → 不好意思 (desculpa leve) — **alta**
+9. Unit 2 `shi-drop-casual` — 我是巴西人 → 我巴西人 (queda do 是) — **alta**
+10. Unit 1 `zaoshang-hao-zao` — 早上好 → 早 — **alta**
+
+Nenhuma nota nova entrou em confiança média/baixa nesta rodada — os
+candidatos que ficaram abaixo da barra de confiança (ex: "你叫什么名字？" →
+"你叫什么？" no zh Unit 2, cortando 名字) foram deliberadamente DEIXADOS DE
+FORA do código em vez de shipados com aviso de baixa confiança, pra não
+arriscar conteúdo sociolinguístico errado indo ao ar antes da revisão.
+Se uma sessão futura tiver confiança alta o bastante pra completar esses
+candidatos, adicionar seguindo a mesma regra de report acima.
+
+**Ainda sem nenhuma nota `regional` no zh** — mesma razão já registrada
+acima (nenhum vocabulário concreto com variação regional bem documentada
+foi ensinado ainda nas unidades revisadas). Continua sendo o lugar certo
+pra completar quando uma unidade de comida/objetos concretos aparecer.
