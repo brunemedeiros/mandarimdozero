@@ -238,3 +238,100 @@ congelada pelo cliente em `state.daily.missions`. **Deploy feito ao vivo
 nesta mesma sessão** via `mcp__Supabase__deploy_edge_function`
 (`notification-cron` v14→v15, mesmo `verify_jwt:true`) — não é um passo
 manual pendente pra essa correção.
+
+## Camada de "notas de realidade" (sociolinguística) -- proposta grillada, taxonomia travada em código, conteúdo ainda não escrito
+
+Grilling completo (2026-09-17) sobre uma proposta de mostrar ao aluno o
+contraste "forma ensinada vs. forma real" (registro cotidiano, gíria,
+variação regional, desvio gramatical coloquial aceito na fala) — ex:
+"Comment allez-vous ?" ensinado vs. "Ça va ?" no dia a dia; "早上好"
+ensinado vs. "早" sozinho entre conhecidos; "pain au chocolat" no norte
+da França vs. "chocolatine" no sudoeste/Canadá francófono; "Je ne sais
+pas" (padrão) vs. "Je sais pas" (queda do "ne" na fala informal).
+
+**Decisões do grilling, já travadas em código** (`REALITY_NOTE_CATEGORY`/
+`REALITY_NOTE_LEVEL_GUIDANCE`/`isRealityNoteCategoryAllowedAtLevel` em
+`fr/app.js` e `zh/app.js`, logo antes de `// ---------- Estado global`):
+
+- **Onde mora o conteúdo**: dentro de `concepts` (já existe, já funciona,
+  já tem gatilho de inserção mid-lição — `trigger: {afterVocabIdx}` ou
+  `{after:'dialogue'}`), com um discriminador `kind`, não um sistema novo
+  com fluxo de revisão tipo `challenges` (que hoje só existe em francês —
+  construir a contraparte em chinês do zero seria caro demais pro MVP).
+  **Sem gate de revisão editorial hoje** — risco de qualidade conhecido e
+  aceito conscientemente, não esquecido: conteúdo sociolinguístico é
+  fácil de generalizar/exagerar errado (registro varia por região/geração/
+  contexto) e ninguém revisa antes de publicar, diferente do fluxo
+  `needs_review→approved` do `challenges`.
+- **MVP = card passivo, não exercício interativo.** A seção "exercício de
+  reconhecimento" (`testableInExercise`) fica adiada pra uma fase 2
+  explícita — é engenharia real e separada (novo formato de exercício,
+  `trueFalseExercises`/`whyNote` confirmado NÃO reaproveitável pra isso,
+  é binário verdadeiro/falso, não escolha entre opções).
+- **Gratuito x Premium**: tudo grátis por enquanto (conteúdo sem custo
+  marginal). Se o exercício interativo da fase 2 sair do papel, reavaliar
+  se ELE vira premium (é uma modalidade de prática nova, diferente do card
+  informativo) — não travado em código, só registrado aqui como pergunta
+  em aberto quando chegar a hora.
+- **Piloto, não currículo inteiro**: começar em poucas unidades antes de
+  espalhar — autoria de nota sociolinguística de qualidade por item é
+  trabalho real, ainda mais sem revisão formal.
+- **4 categorias fechadas** (não string livre — precisa de badge/cor
+  consistente na UI quando isso for implementado):
+  - `informal` — registro cotidiano ainda reconhecível como a mesma forma,
+    só mais casual.
+  - `familiar-giria` — registro marcado (meuf/mec), exige mais cuidado
+    social que `informal`, badge/cor OBRIGATORIAMENTE diferente (mesmo
+    princípio já registrado acima sobre `--on-vivid` vs `--on-seal-red`:
+    reaproveitar o badge de `informal` pra isto seria o mesmo tipo de erro).
+  - `regional` — variação lexical por lugar, **sem forma "oficial"**
+    (`variants: [{region, form}, ...]`, nunca um par `learned`/`everyday`
+    — pode ter 2+ opções, todas igualmente corretas, cada uma com o lugar
+    onde é ouvida; não se limita a um par).
+  - `gramatica-coloquial` — desvio GRAMATICAL real (não só léxico) já
+    aceito na fala, ex. queda do "ne". Diferente das outras 3: esta é a
+    única categoria com um caminho pensado pra ATRAVESSAR pra dentro da
+    correção de exercícios comuns — se o aluno digitar a forma coloquial
+    num exercício normal de digitar, a ideia é aceitar como correta MAS
+    mostrar a forma padrão ao lado (mesmo espírito do status "quase"/
+    "almost" que já existe na correção de conjugação — só que o tom aqui é
+    "correto, isto é a forma padrão", não "quase errado"). **Isso NÃO foi
+    implementado** — decidir onde a nota mora por item e alterar
+    `finish()`/painéis de feedback dos exercícios digitados é o próximo
+    passo explícito antes de tocar em correção de verdade, não decidir
+    de improviso numa sessão futura.
+- **4 eixos de "profundidade" por nível, travados em código como
+  parâmetros prontos, só o eixo 1 realmente em uso hoje**: hoje só existe
+  conteúdo no nível inicial (`A1` no francês, 20 unidades/6 módulos;
+  `HSK1` no chinês — **chaves diferentes entre os dois arquivos, de
+  propósito, porque são os valores reais que `content.js` usa** — copiar
+  a chave "A1" pro chinês sem checar seria exatamente o tipo de erro que
+  motivou a sessão de grilling anterior sobre o tom do pinyin, ver seção
+  acima). Os 3 eixos abaixo além do primeiro são hipotéticos até A2/HSK2+
+  existir de verdade:
+  1. `explanationDepth` (curta/média/alta) — quanto escrever por nota. Só
+     eixo aplicado hoje (A1/HSK1 = curta). Decisão editorial, não
+     enforçada em código (não há linter de tamanho de texto neste repo).
+  2. `testableInExercise` (bool) — se a categoria pode virar exercício de
+     reconhecimento (fase 2 acima). `false` em A1/HSK1 e A2/HSK2, `true` a
+     partir de B1/HSK3.
+  3. `categoriesAllowed` — quais das 4 categorias cada nível já usa.
+     `familiar-giria` só a partir de A2/HSK2 (não A1/HSK1) — é a categoria
+     de registro mais marcado, faz sentido só depois que o aluno já
+     entende a distinção básica padrão/informal.
+  4. `densityPerUnit` ({min,max} numérico, não string — pensado pra um
+     futuro script de auditoria de conteúdo poder checar isso sem precisar
+     mudar o shape de novo).
+- Função `isRealityNoteCategoryAllowedAtLevel(category, level)` é o único
+  ponto de checagem pretendido pra "esta categoria pode aparecer neste
+  nível" — qualquer código futuro que filtre por nível deve chamar isto,
+  não reimplementar a lógica solta em outro lugar.
+
+**Nada disso está wireado em nenhum render/exercício ainda** — é
+taxonomia + parâmetros de nível travados, zero nota de realidade
+escrita, zero mudança de comportamento visível pro aluno. O próximo passo
+de uma sessão futura que retomar isto é: (1) escrever o piloto de
+conteúdo pra algumas unidades A1/HSK1 usando essa taxonomia, (2) decidir
+o shape exato de onde a nota mora dentro de `concepts` (novo `kind` no
+item existente, ver acima), (3) só depois disso considerar a fase 2
+(exercício testável) e a integração de `gramatica-coloquial` na correção.
