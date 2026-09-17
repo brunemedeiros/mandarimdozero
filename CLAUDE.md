@@ -511,3 +511,99 @@ candidatos, adicionar seguindo a mesma regra de report acima.
 acima (nenhum vocabulário concreto com variação regional bem documentada
 foi ensinado ainda nas unidades revisadas). Continua sendo o lugar certo
 pra completar quando uma unidade de comida/objetos concretos aparecer.
+
+**Atualização (2026-09-17, mesmo dia): varredura completa do currículo
+A1/HSK1.** A autora perguntou se as 5 unidades do piloto eram todo o
+conteúdo pretendido — não eram. Ela pediu pra continuar por todas as
+unidades restantes agora, na mesma sessão: fr tem 20 unidades A1
+(A1-1..A1-20, mais 10 unidades `type:"grammar"` intercaladas que **não**
+recebem nota de realidade — não têm `concepts`/vocabulário próprio, só
+`grammar.blocks`), zh tem 18 unidades HSK1 (Unit 1..18, sem unidades
+"grammar" separadas). Passei por TODAS as unidades restantes, não só uma
+amostra, seguindo a mesma regra da atualização anterior: sem teto, sem
+forçar, só onde a relação pedagógica é genuína.
+
+**Achado ao revisar o currículo inteiro do zh**: a densidade natural é
+bem mais baixa que a do fr. Muitos dos `concepts` de GRAMÁTICA do zh já
+fazem o trabalho de uma nota de realidade em si (ex: jǐ suì vs. duō dà
+pra idade de criança/adulto, tóu téng vs. bù shūfu pra dor específica vs.
+mal-estar geral, dǎsuàn vs. yào pra plano pensado vs. intenção imediata) —
+são nuances de REGISTRO/USO real, só que já vêm integradas ao ensino de
+gramática em vez de separadas como "nota de realidade". Adicionar uma
+segunda nota cobrindo a mesma distinção seria redundante, não aditivo —
+por isso várias unidades do zh (3, 4, 5, 6, 7, 9, 11, 12, 13, 14, 15, 18)
+não ganharam nota nova: não por preguiça, mas porque não achei uma
+relação genuína e NÃO REDUNDANTE além do que a gramática já cobre.
+
+**Achado recorrente no fr, vale registrar pra não parecer coincidência**:
+várias unidades já tinham a frase coloquial "escondida" no próprio
+diálogo, contrastando com a forma ensinada nas frases — não precisei
+inventar nada, só tornar explícito o que já estava lá (A1-9 "Tu es d'où ?"
+vs. "D'où viens-tu ?"; A1-10 "Ça coûte combien ?" vs. "Combien ça coûte ?";
+A1-16 "Il est sympa ?" vs. "gentil"; A1-19 "On ne sait pas encore !",
+perfeito pra mostrar a queda do "ne" — o próprio exemplo motivador da
+categoria `gramatica-coloquial`). Essas notas têm confiança mais alta
+ainda por causa disso: o diálogo real do app já demonstrava o fenômeno.
+
+**Mecanismo "wh-in-situ" (manter a ordem sujeito-verbo e jogar a palavra
+de pergunta pro fim) aparece 5 vezes no fr** (A1-2, A1-3, A1-9, A1-10,
+A1-20) — registrado aqui pra não parecer duplicação acidental: é
+deliberado, cada uma ligada a uma pergunta REALMENTE ensinada naquela
+unidade especificamente, não a mesma nota copiada. É genuinamente um dos
+fenômenos mais centrais do francês falado, por isso aparece tantas vezes.
+
+**Novo padrão descoberto no zh: par "falado" vs. "escrito"** (block/毛 vs.
+元/角 na Unidade 8; 号 vs. 日 na Unidade 16) — diferente do padrão
+"informal vs. ensinado" do resto das notas, aqui é o oposto: a forma
+ensinada NO APP já é a coloquial/falada (porque é isso que o aluno vai
+usar), e a nota de realidade revela a forma ESCRITA/formal que ele vai
+encontrar em preços impressos, recibos, documentos. Mesma categoria
+`informal` (ainda reconhecível como a mesma forma), só que a direção do
+contraste é invertida — vale ter isso em mente ao ler a lista abaixo.
+
+**Lista COMPLETA e final de todas as 23 notas de realidade no app**
+(nível de confiança de cada uma, por idioma/unidade, pra revisão manual
+da autora — regra travada nesta seção):
+
+fr (15 notas, unidades A1-1 a A1-20):
+1. A1-1 `svp-informal` — s'il vous plaît → s'il te plaît/STP — **alta**
+2. A1-1 `a-bientot-informal` — à bientôt → à plus/A+ — **alta**
+3. A1-2 `tu-es-contraction` — tu es → t'es — **alta**
+4. A1-2 `comment-tappelles-wh-in-situ` — comment tu t'appelles ? → tu t'appelles comment ? — **alta**
+5. A1-3 `vingt-to-quatrevingts` — base de quatre-vingts (regional: França vs. Bélgica/Suíça) — **alta**
+6. A1-3 `quel-age-wh-in-situ` — quel âge as-tu ? → t'as quel âge ? — **alta**
+7. A1-4 `pere-mere-papa-maman` — le père/la mère → papa/maman — **alta**
+8. A1-7 `nous-sommes-on-est` — nous sommes → on est (nous → on) — **alta**
+9. A1-9 `dou-viens-tu-wh-in-situ` — d'où viens-tu ? → tu es d'où ? (já no diálogo) — **alta**
+10. A1-10 `combien-ca-coute-wh-in-situ` — combien ça coûte ? → ça coûte combien ? (já no diálogo) — **alta**
+11. A1-15 `quest-ce-qui-ne-va-pas-ca-va-pas` — qu'est-ce qui ne va pas ? → ça va pas ? — **alta**
+12. A1-16 `gentil-sympa` — gentil → sympa (já no diálogo) — **alta**
+13. A1-17 `il-y-a-ya` — il y a → y'a — **alta**
+14. A1-19 `ne-drop-on-sait-pas` — on ne sait pas → on sait pas (queda do "ne", já no diálogo) — **alta**
+15. A1-20 `quest-ce-que-tu-as-fait-wh-in-situ` — qu'est-ce que tu as fait ? → t'as fait quoi ? (já no diálogo) — **alta**
+
+zh (8 notas, Unit 1 a Unit 17):
+16. Unit 1 `zaijian-baibai` — 再见 → 拜拜 — **alta**
+17. Unit 1 `duibuqi-buhaoyisi` — 对不起 → 不好意思 (desculpa leve) — **alta**
+18. Unit 1 `zaoshang-hao-zao` — 早上好 → 早 — **alta**
+19. Unit 2 `shi-drop-casual` — 我是巴西人 → 我巴西人 (queda do 是) — **alta**
+20. Unit 8 `kuai-mao-yuan-jiao` — 块/毛 (falado) vs. 元/角 (escrito/formal) — **alta**
+21. Unit 10 `zuo-chuzuche-dache` — 坐出租车 → 打车 (verbo cotidiano) — **alta**
+22. Unit 16 `hao-vs-ri` — 号 (falado) vs. 日 (escrito/formal) — **alta**
+23. Unit 17 `chifanle-greeting` — 你吃了吗？ como cumprimento tradicional, não pergunta literal — **alta**
+
+Nenhuma nota nova entrou em confiança média/baixa nesta varredura
+também — candidatos onde a confiança não era alta (ex: "你叫什么名字？" →
+"你叫什么？" cortando 名字, no zh Unit 2) continuam de fora do código,
+mesmo critério da atualização anterior.
+
+**Cobertura**: das 20 unidades A1 do fr (excluindo as 10 `type:"grammar"`
+sem `concepts`), 9 têm nota de realidade — as outras 11 (A1-1 parcial,
+A1-5, A1-6, A1-8, A1-11, A1-12, A1-13, A1-14, A1-18) não tinham candidato
+com confiança alta o bastante quando revisadas. Das 18 unidades HSK1 do
+zh, 6 têm nota de realidade (Unit 1, 2, 8, 10, 16, 17) — as outras 12 não
+tinham candidato genuíno e não-redundante com a gramática já ensinada.
+Isso não significa que essas unidades nunca vão ter uma nota — significa
+que, nesta revisão, não achei nada que passasse na barra de "relação
+pedagógica real" sem forçar. Uma sessão futura pode achar algo que eu não
+vi.

@@ -737,6 +737,28 @@ const UNITS = [
           }
         ]
       },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: 块/毛 são
+      // as formas FALADAS (o próprio vocabulário desta lição já diz isso),
+      // 元/角 são as formas ESCRITAS/formais (preços impressos, recibos,
+      // notícias) -- fato bem documentado sobre o mandarim, mesmo padrão do
+      // 号/日 que aparece na Unidade 16.
+      {
+        id: "kuai-mao-yuan-jiao",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 4 },
+        blocks: [
+          {
+            title: "\"Kuài\"/\"máo\" são o que se FALA — \"yuán\"/\"jiǎo\" é o que se ESCREVE",
+            body: "<strong>Kuài</strong> e <strong>máo</strong> são as formas que você vai OUVIR o tempo todo, no dia a dia. Mas em preços impressos, recibos e notícias, é comum ver as formas formais/escritas: <strong>yuán</strong> (元, equivalente a kuài) e <strong>jiǎo</strong> (角, equivalente a máo). Ninguém fala \"yuán\" numa conversa casual, mas vale reconhecer por escrito.",
+            examples: [
+              { c: "元", p: "yuán", t: "unidade monetária (forma escrita/formal de 块)" },
+              { c: "角", p: "jiǎo", t: "um décimo de yuán (forma escrita/formal de 毛)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
       {
         id: "ba-particle",
         trigger: { afterVocabIdx: 6 },
@@ -933,6 +955,26 @@ const UNITS = [
             body: "Pra ir a pé, usa-se só <strong>zǒu lù</strong> (走路, andar), sem nenhum outro verbo. Pra qualquer veículo em que você entra e senta, usa-se <strong>zuò</strong> (坐, literalmente \"sentar\") antes do meio de transporte — o mesmo \"zuò\" de sentar numa cadeira, pense nele como \"ir sentado em\".",
             examples: [
               { c: "我坐地铁去", p: "wǒ zuò dìtiě qù", t: "eu vou de metrô" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: 打车
+      // (literalmente "bater carro") é o verbo cotidiano pra "pegar um
+      // táxi/app de carro", usado o tempo todo no lugar da estrutura
+      // 坐 + 出租车, ligado ao vocabulário desta lição.
+      {
+        id: "zuo-chuzuche-dache",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "\"Zuò chūzūchē\" no dia a dia vira \"dǎchē\"",
+            body: "Em vez da estrutura completa <strong>zuò chūzūchē</strong> (ir de táxi), o verbo cotidiano pra \"pegar um táxi\" (ou um app de carro) é <strong>dǎchē</strong> (打车, literalmente \"bater carro\") — usado o tempo todo em vez da frase mais longa.",
+            examples: [
+              { c: "打车", p: "dǎchē", t: "pegar um táxi/carro (fala cotidiana)" }
             ],
             wrapup: true
           }
@@ -1447,6 +1489,26 @@ const UNITS = [
           }
         ]
       },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: mesmo
+      // padrão do 块/毛 vs 元/角 (Unidade 8) -- o próprio vocabulário desta
+      // lição já marca 号 como "uso falado", então 日 é a forma
+      // escrita/formal equivalente. Fato bem documentado sobre o mandarim.
+      {
+        id: "hao-vs-ri",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 3 },
+        blocks: [
+          {
+            title: "\"Hào\" é o que se FALA — \"rì\" é o que se ESCREVE",
+            body: "<strong>Hào</strong> (号) é a forma que você vai ouvir no dia a dia pra dizer o dia do mês. Em textos formais, documentos e datas escritas, é comum ver <strong>rì</strong> (日) no lugar — mesmo caractere que aparece em 星期日 (domingo) e em 今天/明天.",
+            examples: [
+              { c: "八月二十日", p: "bā yuè èrshí rì", t: "20 de agosto (forma escrita/formal)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
       {
         id: "hours-minutes",
         trigger: { afterVocabIdx: 6 },
@@ -1570,6 +1632,27 @@ const UNITS = [
             body: "Pra perguntar se uma ação já foi concluída, junta-se 了 (marcando conclusão) com 吗 (marcando pergunta) no final da frase — a combinação pergunta \"isso já aconteceu?\".",
             examples: [
               { c: "你吃饭了吗？", p: "nǐ chī fàn le ma?", t: "você já comeu?" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: "你吃了吗"
+      // como cumprimento (não pergunta literal sobre comida) é um fato
+      // cultural/linguístico bem documentado sobre o chinês, tradicionalmente
+      // usado como equivalente a "tudo bem?" -- ligado exatamente à frase
+      // que esta lição ensina.
+      {
+        id: "chifanle-greeting",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "\"你吃饭了吗？\" às vezes não é uma pergunta de verdade",
+            body: "Além de perguntar literalmente se alguém já comeu, <strong>你吃了吗？</strong> (versão curta, sem 饭) é tradicionalmente usado como um cumprimento — parecido com \"tudo bem?\" em português, sem esperar uma resposta detalhada sobre comida. É um uso mais cultural/tradicional do que universal hoje em dia, mas vale reconhecer quando ouvir.",
+            examples: [
+              { c: "你吃了吗？", p: "nǐ chī le ma?", t: "tudo bem? (cumprimento tradicional, não pergunta literal)" }
             ],
             wrapup: true
           }

@@ -511,6 +511,27 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: papa/maman
+      // são as formas realmente usadas em família no dia a dia -- père/mère
+      // soam mais neutras/formais (documentos, frases gerais sobre "o pai
+      // de alguém"), ligado ao vocabulário desta lição.
+      {
+        id: "pere-mere-papa-maman",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "\"Le père\"/\"la mère\" no dia a dia viram \"papa\"/\"maman\"",
+            body: "Pra falar SOBRE pai/mãe em geral, ou de forma mais neutra, usa-se <strong>le père</strong>/<strong>la mère</strong>. Mas ao falar diretamente COM o próprio pai/mãe, ou sobre a própria família no dia a dia, o normal é <strong>papa</strong>/<strong>maman</strong> — mesmo entre adultos.",
+            examples: [
+              { f: "papa", t: "pai / papai (uso familiar)" },
+              { f: "maman", t: "mãe / mamãe (uso familiar)" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     vocab: [
@@ -890,6 +911,26 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: "on" no
+      // lugar de "nous" é um dos fatos mais documentados sobre o francês
+      // falado -- praticamente substituiu "nous" na fala cotidiana. Ligado
+      // à frase "Nous sommes lundi" desta própria lição.
+      {
+        id: "nous-sommes-on-est",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "\"Nous sommes lundi\" no dia a dia vira \"On est lundi\"",
+            body: "Na fala cotidiana, <strong>on</strong> praticamente substituiu <strong>nous</strong> como \"a gente\"/\"nós\" — <strong>on est</strong> lundi em vez de \"nous sommes lundi\". O verbo conjuga como \"il/elle\" (on est, on a, on va), não como \"nous\". Nos exercícios daqui, continue usando \"nous\" — é a forma que os exercícios pedem.",
+            examples: [
+              { f: "on est lundi", t: "hoje é segunda (fala cotidiana)" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     vocab: [
@@ -1096,6 +1137,26 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: wh-in-situ
+      // -- e esta nota nem precisa "inventar" o exemplo, o diálogo desta
+      // própria unidade já usa "Tu es d'où ?" (linha do personagem A),
+      // contrastando com "D'où viens-tu ?" ensinado nas frases.
+      {
+        id: "dou-viens-tu-wh-in-situ",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "\"D'où viens-tu ?\" também vira \"Tu es d'où ?\"",
+            body: "Repare que o diálogo que você acabou de ler já usa a forma cotidiana: <strong>Tu es d'où ?</strong> em vez de \"D'où viens-tu ?\". Na fala cotidiana, é comum manter a ordem sujeito-verbo normal e jogar a palavra de pergunta pro fim. Nos exercícios daqui, continue usando \"D'où viens-tu ?\" — é a forma que os exercícios pedem.",
+            examples: [
+              { f: "tu es d'où ?", t: "de onde você é? (fala cotidiana)" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     trueFalseExercises: [{ subject: "D'où viens-tu ?", emoji: "🌍", claim: "Essa pergunta serve pra saber o nome de alguém.", answer: false,
@@ -1160,6 +1221,26 @@ const UNITS = [
           {
             title: "\"Je voudrais\" ou \"je peux\"?",
             body: "<strong>Je voudrais</strong> (eu gostaria) é a forma mais educada de pedir algo numa loja — soa mais gentil que \"je veux\" (eu quero). Já <strong>je peux...?</strong> (posso...?) é usado pra pedir permissão, como experimentar uma roupa: <strong>je peux</strong> essayer ce pantalon? Os dois são educados, mas servem pra momentos diferentes: pedir algo vs. pedir permissão.",
+            wrapup: true
+          }
+        ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: mesma
+      // nota de wh-in-situ, e de novo o diálogo já usa a forma cotidiana
+      // ("Ça coûte combien ?", linha do personagem A) em contraste com
+      // "Combien ça coûte ?" ensinado nas frases.
+      {
+        id: "combien-ca-coute-wh-in-situ",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "\"Combien ça coûte ?\" também vira \"Ça coûte combien ?\"",
+            body: "Repare que o diálogo que você acabou de ler já usa a forma cotidiana: <strong>Ça coûte combien ?</strong> em vez de \"Combien ça coûte ?\". Na fala cotidiana, é comum jogar a palavra de pergunta pro fim da frase. Nos exercícios daqui, continue usando \"Combien ça coûte ?\" — é a forma que os exercícios pedem.",
+            examples: [
+              { f: "ça coûte combien ?", t: "quanto custa? (fala cotidiana)" }
+            ],
             wrapup: true
           }
         ]
@@ -1680,6 +1761,26 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: "Ça va
+      // pas ?" é uma redução extremamente comum de "Qu'est-ce qui ne va
+      // pas ?", que é literalmente a pergunta de abertura do diálogo desta
+      // unidade.
+      {
+        id: "quest-ce-qui-ne-va-pas-ca-va-pas",
+        kind: "reality",
+        category: "informal",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "\"Qu'est-ce qui ne va pas ?\" no dia a dia vira \"Ça va pas ?\"",
+            body: "A pergunta completa que abre o diálogo, <strong>Qu'est-ce qui ne va pas ?</strong>, costuma encolher bastante na fala cotidiana: <strong>Ça va pas ?</strong> (literalmente \"não vai bem?\") pergunta a mesma coisa, de um jeito bem mais curto e casual — parecido com \"tá tudo bem?\" em português.",
+            examples: [
+              { f: "ça va pas ?", t: "o que foi? / tá tudo bem? (fala cotidiana)" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     trueFalseExercises: [{ subject: "J'ai mal à la tête.", emoji: "🤕", claim: "Essa frase é usada quando alguém está com dor de cabeça.", answer: true,
@@ -1844,6 +1945,26 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: "sympa"
+      // (clipping de "sympathique") é usado o tempo todo no lugar de
+      // "gentil" -- e o diálogo desta unidade já usa "sympa" ("Il est
+      // sympa ?"), contrastando com "gentil" ensinado no vocabulário.
+      {
+        id: "gentil-sympa",
+        kind: "reality",
+        category: "informal",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "\"Gentil\" no dia a dia costuma virar \"sympa\"",
+            body: "Repare que o diálogo que você acabou de ler já usa <strong>sympa</strong> (\"Il est sympa ?\") — abreviação super comum de <strong>sympathique</strong>, usada o tempo todo no lugar de <strong>gentil</strong> pra dizer que alguém é legal/gente boa.",
+            examples: [
+              { f: "sympa", t: "legal / gente boa (informal)" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     vocab: [
@@ -1966,6 +2087,25 @@ const UNITS = [
             examples: [
               { f: "il y a", t: "tem / há" },
               { f: "il n'y a pas de", t: "não tem / não há" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: a queda
+      // do "il" em "il y a" -> "y'a" é uma das contrações mais comuns do
+      // francês falado, ligada diretamente ao vocabulário desta lição.
+      {
+        id: "il-y-a-ya",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { afterVocabIdx: 8 },
+        blocks: [
+          {
+            title: "\"Il y a\" no dia a dia vira \"y'a\"",
+            body: "Na fala corrida, o \"il\" de <strong>il y a</strong> quase desaparece — sobra só <strong>y'a</strong>: \"y'a une chambre\", \"y'a pas de jardin\". É tão comum que aparece até em mensagens escritas informais. Nos exercícios daqui, continue escrevendo \"il y a\" completo — é a forma que os exercícios pedem.",
+            examples: [
+              { f: "y'a une chambre", t: "tem um quarto (fala cotidiana)" }
             ],
             wrapup: true
           }
@@ -2114,6 +2254,27 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA (é o
+      // exemplo mais citado de gramática coloquial do francês -- "je (ne)
+      // sais pas" -- que motivou esta feature inteira, ver CLAUDE.md). O
+      // diálogo desta unidade já tem a frase completa "On ne sait pas
+      // encore !", perfeita pra mostrar a queda do "ne".
+      {
+        id: "ne-drop-on-sait-pas",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "\"On ne sait pas encore !\" no dia a dia perde o \"ne\"",
+            body: "Na fala cotidiana, o <strong>ne</strong> da negação quase sempre desaparece — <strong>on sait pas encore</strong> em vez de \"on ne sait pas encore\". É provavelmente a simplificação mais comum de todo o francês falado, e vale pra qualquer negação com \"ne... pas\". Nos exercícios daqui, continue escrevendo o \"ne\" — é a forma que os exercícios pedem.",
+            examples: [
+              { f: "on sait pas encore", t: "a gente ainda não sabe (fala cotidiana)" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     trueFalseExercises: [{ subject: "On va au cinéma ce soir ?", emoji: "🎬", claim: "Essa é uma forma de convidar alguém pra sair.", answer: true,
@@ -2248,6 +2409,25 @@ const UNITS = [
             examples: [
               { f: "hier", t: "ontem" },
               { f: "la semaine dernière", t: "a semana passada" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: mesma
+      // nota de wh-in-situ, ligada à pergunta de abertura do diálogo desta
+      // unidade ("Qu'est-ce que tu as fait hier ?").
+      {
+        id: "quest-ce-que-tu-as-fait-wh-in-situ",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "\"Qu'est-ce que tu as fait hier ?\" também vira \"T'as fait quoi hier ?\"",
+            body: "Na fala bem cotidiana, essa pergunta costuma ficar assim: <strong>t'as fait quoi hier ?</strong> — \"qu'est-ce que\" some, \"quoi\" vai pro fim, e \"tu as\" contrai pra \"t'as\". Três simplificações ao mesmo tempo, todas muito comuns juntas. Nos exercícios daqui, continue usando a forma completa — é a que os exercícios pedem.",
+            examples: [
+              { f: "t'as fait quoi hier ?", t: "o que você fez ontem? (fala bem cotidiana)" }
             ],
             wrapup: true
           }
