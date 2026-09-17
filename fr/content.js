@@ -686,6 +686,27 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Piloto da camada de "notas culturais" (grilling 2026-09-17) --
+      // categoria 'costume', diferente de 'reality' porque não há nenhum
+      // contraste de forma aqui, só um fato isolado. Ligada ao "croissant"
+      // que aparece no diálogo desta lição ("Un café et un croissant").
+      // Confiança ALTA: é um mito cultural bem documentado sobre a França.
+      {
+        id: "croissant-nao-e-diario",
+        kind: "culture",
+        category: "costume",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "Croissant todo dia? Não pra maioria dos franceses",
+            body: "Existe a ideia de que os franceses comem croissant no café da manhã todos os dias — mas, na prática, é mais comum reservar o croissant pra fins de semana ou ocasiões especiais. No dia a dia, o café da manhã francês costuma ser mais simples: pão com manteiga/geleia (tartine), ou só café.",
+            examples: [
+              { f: "la tartine", t: "pão com manteiga/geleia — o café da manhã mais comum" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     trueFalseExercises: [{ subject: "L'addition, s'il vous plaît.", emoji: "🧾", claim: "Dizemos isso pra pedir a conta num restaurante.", answer: true,
@@ -907,6 +928,27 @@ const UNITS = [
             examples: [
               { f: "demain", t: "amanhã" },
               { f: "hier", t: "ontem" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Piloto da camada de "notas culturais" (grilling 2026-09-17) --
+      // categoria 'historia'. Confiança ALTA: a origem romana/planetária
+      // dos dias da semana é um fato de etimologia bem documentado e
+      // direto, ligado exatamente a "lundi"/"mardi" desta lição.
+      {
+        id: "dias-semana-deuses-romanos",
+        kind: "culture",
+        category: "historia",
+        trigger: { afterVocabIdx: 1 },
+        blocks: [
+          {
+            title: "De onde vêm os nomes dos dias da semana?",
+            body: "Os dias da semana em francês vêm dos deuses/planetas romanos: <strong>lundi</strong> é o dia da Lua (Lune), <strong>mardi</strong> é o dia de Marte (Mars). O padrão continua: mercredi (Mercúrio), jeudi (Júpiter), vendredi (Vênus), samedi (Saturno) — só dimanche foge da regra, vindo do latim \"dia do Senhor\".",
+            examples: [
+              { f: "lundi", t: "segunda-feira — dia da Lua" },
+              { f: "mardi", t: "terça-feira — dia de Marte" }
             ],
             wrapup: true
           }
@@ -1961,6 +2003,27 @@ const UNITS = [
             body: "Repare que o diálogo que você acabou de ler já usa <strong>sympa</strong> (\"Il est sympa ?\") — abreviação super comum de <strong>sympathique</strong>, usada o tempo todo no lugar de <strong>gentil</strong> pra dizer que alguém é legal/gente boa.",
             examples: [
               { f: "sympa", t: "legal / gente boa (informal)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Piloto da camada de "notas culturais" (grilling 2026-09-17) --
+      // categoria 'historia'. Confiança ALTA: a origem das cores da
+      // bandeira francesa (Revolução Francesa) é um fato histórico bem
+      // documentado, ligado exatamente às 3 cores já ensinadas nesta
+      // lição (rouge, bleu, blanc).
+      {
+        id: "bandeira-tricolor-historia",
+        kind: "culture",
+        category: "historia",
+        trigger: { afterVocabIdx: 5 },
+        blocks: [
+          {
+            title: "Bleu, blanc, rouge — a origem da bandeira francesa",
+            body: "As 3 cores que você acabou de aprender são as da bandeira francesa: <strong>bleu</strong> e <strong>rouge</strong> eram as cores de Paris, e <strong>blanc</strong> era a cor tradicional da monarquia — a bandeira, criada durante a Revolução Francesa, junta as duas.",
+            examples: [
+              { f: "le drapeau", t: "a bandeira" }
             ],
             wrapup: true
           }

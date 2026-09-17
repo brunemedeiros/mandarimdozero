@@ -310,6 +310,27 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Piloto da camada de "notas culturais" (grilling 2026-09-17) --
+      // categoria 'festividade', diferente de 'reality' porque não há
+      // contraste de forma, só um fato isolado. Ligada ao 岁 (suì) desta
+      // lição. Confiança ALTA: o sistema de idade nominal (虚岁) é um fato
+      // cultural bem documentado sobre a China.
+      {
+        id: "xusui-ano-novo",
+        kind: "culture",
+        category: "festividade",
+        trigger: { afterVocabIdx: 11 },
+        blocks: [
+          {
+            title: "Na China tradicional, a idade muda no Ano Novo — não no aniversário",
+            body: "No sistema tradicional chinês (<strong>虚岁, xūsuì</strong>, \"idade nominal\"), um bebê já nasce com 1 ano, e todo mundo ganha mais um ano junto no Ano Novo Chinês — não no próprio aniversário. Hoje o sistema ocidental (idade real, 周岁) é o mais usado no dia a dia, mas o 虚岁 ainda aparece em contextos tradicionais.",
+            examples: [
+              { c: "虚岁", p: "xūsuì", t: "idade nominal (sistema tradicional)" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     vocab: [
@@ -503,6 +524,26 @@ const UNITS = [
             examples: [
               { c: "我喜欢喝咖啡", p: "wǒ xǐhuan hē kāfēi", t: "eu gosto de beber café (hábito)" },
               { c: "我要一杯茶", p: "wǒ yào yì bēi chá", t: "eu quero uma xícara de chá (agora)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Piloto da camada de "notas culturais" (grilling 2026-09-17) --
+      // categoria 'historia'. Confiança ALTA: a China como berço do chá é
+      // um fato histórico amplamente documentado, ligado ao vocabulário 茶
+      // desta lição.
+      {
+        id: "cha-origem-china",
+        kind: "culture",
+        category: "historia",
+        trigger: { afterVocabIdx: 5 },
+        blocks: [
+          {
+            title: "A China é o berço do chá",
+            body: "O chá tem origem na China — é consumido no país há milhares de anos, e a própria palavra \"chá\"/\"tea\" em várias línguas do mundo vem de palavras chinesas (chá 茶, dependendo da rota comercial). O costume de servir chá pra convidados é parte importante da hospitalidade chinesa até hoje.",
+            examples: [
+              { c: "茶", p: "chá", t: "chá" }
             ],
             wrapup: true
           }

@@ -668,6 +668,37 @@ const REALITY_NOTE_BANNER_TEXT = {
   [REALITY_NOTE_CATEGORY.GRAMATICA_COLOQUIAL]: '✍️ Assim também se fala',
 };
 
+// ---------- Taxonomia de "notas culturais" (grilling 2026-09-17) ----------
+// Camada IRMÃ das notas de realidade acima, não a mesma coisa: `reality` é
+// especificamente um CONTRASTE DE FORMA (ensinado vs. real, mesma ideia dita
+// diferente). `culture` é um FATO ISOLADO -- história de palavra, costume,
+// festividade -- sem nenhum contraste de forma envolvido. As duas usam o
+// mesmo mecanismo de `concepts`/trigger (kind diferente), nunca a mesma nota
+// tentando fazer as duas coisas. Mesmas regras de densidade/revisão já
+// travadas pras notas de realidade (ver CLAUDE.md): sem teto numérico, só
+// entra se a relação pedagógica com a palavra/frase ensinada for genuína,
+// toda nota reportada no chat com nível de confiança pra revisão manual.
+const CULTURE_NOTE_CATEGORY = {
+  // Origem/etimologia de uma palavra ou expressão -- ex: os dias da semana
+  // vêm dos deuses/planetas romanos.
+  HISTORIA: 'historia',
+  // Etiqueta ou tradição social do dia a dia -- ex: como funciona uma
+  // saudação, um hábito à mesa, uma regra social não escrita.
+  COSTUME: 'costume',
+  // Feriado, celebração, data especial -- ex: como funciona o Ano Novo
+  // Chinês, uma tradição de Natal específica da França.
+  FESTIVIDADE: 'festividade',
+};
+
+// Texto do banner quando concept.kind === 'culture' -- tom mais leve/
+// "curiosidade" que o de `reality` (que soa mais "cuidado, isso pode te
+// confundir"), já que aqui não há nenhum contraste de forma pra alertar.
+const CULTURE_NOTE_BANNER_TEXT = {
+  [CULTURE_NOTE_CATEGORY.HISTORIA]: '📜 Você sabia?',
+  [CULTURE_NOTE_CATEGORY.COSTUME]: '🎭 Costume real',
+  [CULTURE_NOTE_CATEGORY.FESTIVIDADE]: '🎉 Data especial',
+};
+
 // ---------- Estado global ----------
 const STATE = {
   units: UNITS,
@@ -2963,7 +2994,12 @@ function renderConceptStep(){
   const concept = STEP_STATE.conceptQueue[STEP_STATE.conceptIdx];
   const block = concept.blocks[STEP_STATE.conceptBlockIdx];
   const isReality = concept.kind === 'reality';
-  setAcqPhaseBanner(isReality ? (REALITY_NOTE_BANNER_TEXT[concept.category] || '🌍 Nota de realidade') : '💡 Vale entender isso');
+  const isCulture = concept.kind === 'culture';
+  setAcqPhaseBanner(
+    isReality ? (REALITY_NOTE_BANNER_TEXT[concept.category] || '🌍 Nota de realidade') :
+    isCulture ? (CULTURE_NOTE_BANNER_TEXT[concept.category] || '📜 Nota cultural') :
+    '💡 Vale entender isso'
+  );
   const isLastBlockOfConcept = STEP_STATE.conceptBlockIdx === concept.blocks.length - 1;
   const isLastConcept = STEP_STATE.conceptIdx === STEP_STATE.conceptQueue.length - 1;
 
@@ -2992,7 +3028,7 @@ function renderConceptStep(){
     </ul>` : '';
 
   contentEl.innerHTML = `
-    <div class="gram-block-counter">${concept.blocks.length > 1 ? `${STEP_STATE.conceptBlockIdx + 1} de ${concept.blocks.length}` : (isReality ? 'Nota de realidade' : 'Vale entender')}</div>
+    <div class="gram-block-counter">${concept.blocks.length > 1 ? `${STEP_STATE.conceptBlockIdx + 1} de ${concept.blocks.length}` : (isReality ? 'Nota de realidade' : isCulture ? 'Nota cultural' : 'Vale entender')}</div>
     <div class="gram-block ${block.wrapup ? 'wrapup' : ''}">
       <h3 class="gram-block-title">${block.title}</h3>
       <p class="gram-block-body">${block.body}</p>

@@ -607,3 +607,82 @@ Isso não significa que essas unidades nunca vão ter uma nota — significa
 que, nesta revisão, não achei nada que passasse na barra de "relação
 pedagógica real" sem forçar. Uma sessão futura pode achar algo que eu não
 vi.
+
+## Camada de "notas culturais" -- irmã das notas de realidade, fato isolado sem contraste de forma
+
+Proposta da autora (2026-09-17, mesmo dia da varredura completa acima):
+"eu adoraria uma camada de notas culturais também — curiosidades/fatos
+divertidos sobre a cultura e a língua, sem nenhum exercício". Grillada
+antes de implementar (5 perguntas, todas aprovadas).
+
+**Diferença fundamental em relação a `reality`** (não é a mesma coisa com
+nome diferente): `reality` é especificamente um CONTRASTE DE FORMA
+(ensinado vs. real, mesma ideia dita diferente — "s'il vous plaît" vs.
+"s'il te plaît"). `culture` é um FATO ISOLADO — história de uma palavra,
+costume, festividade — sem nenhum contraste de forma envolvido. As duas
+camadas são irmãs, usam o mesmo mecanismo de `concepts`/`trigger`
+(`kind` diferente: `'reality'` vs. `'culture'`), mas nunca a mesma nota
+tentando fazer as duas coisas — se uma nota tem um contraste "ensinado
+vs. real", ela é `reality`; se é só um fato, ela é `culture`.
+
+**Decisões do grilling, já travadas em código** (`CULTURE_NOTE_CATEGORY`/
+`CULTURE_NOTE_BANNER_TEXT` em `fr/app.js` e `zh/app.js`, logo depois de
+`REALITY_NOTE_BANNER_TEXT`; `renderConceptStep()` nos dois arquivos
+estendido com um terceiro ramo `isCulture` ao lado de `isReality`):
+
+- **3 categorias** (mais simples que as 4 de `reality`, porque "cultura" é
+  um balde mais amplo que "registro linguístico" — 4 categorias fechadas
+  não caberiam bem):
+  - `historia` — origem/etimologia de uma palavra ou expressão (ex: dias
+    da semana vêm dos deuses romanos).
+  - `costume` — etiqueta ou tradição social do dia a dia (ex: hábito à
+    mesa, regra social não escrita).
+  - `festividade` — feriado, celebração, data especial (ex: como funciona
+    o Ano Novo Chinês).
+- **Banner por categoria, tom leve/"curiosidade"** (diferente do tom de
+  `reality`, que soa mais "cuidado, isso pode te confundir" — aqui não há
+  contraste nenhum pra alertar): `historia` → "📜 Você sabia?", `costume`
+  → "🎭 Costume real", `festividade` → "🎉 Data especial".
+- **Gratuito por enquanto** — mesmo raciocínio de `reality` (conteúdo
+  estático, sem custo marginal de servir). Reavaliar só se cada nota um
+  dia ganhar mídia própria (imagem/ilustração), aí o cálculo muda.
+- **Herda as regras de densidade/revisão de `reality`** (já travadas
+  acima, não reinventadas aqui): sem teto numérico, só entra se a relação
+  pedagógica com a palavra/frase ensinada for genuína, toda nota nova
+  reportada no chat com nível de confiança pra revisão manual da autora.
+  Mesma regra de "não force, mas não limite".
+- **Sem exercício, ponto final** — diferente de `reality` (que tem uma
+  categoria, `gramatica-coloquial`, com um caminho pensado pra virar
+  testável dentro da correção), `culture` não tem nenhuma ambição de virar
+  interativo. É card passivo por definição do próprio conceito, não um
+  MVP que pode crescer depois.
+
+**Piloto escrito, 5 notas** (mesma lógica de "escrever antes de varrer o
+currículo inteiro" usada em `reality`):
+
+fr:
+1. A1-5 `croissant-nao-e-diario` (`costume`) — croissant não é hábito
+   diário pra maioria dos franceses (mito comum) — ligado ao "croissant"
+   que aparece no diálogo desta lição — **confiança alta**
+2. A1-7 `dias-semana-deuses-romanos` (`historia`) — lundi/mardi vêm da
+   Lua/Marte romanos — ligado ao vocabulário desta lição — **confiança
+   alta**
+3. A1-16 `bandeira-tricolor-historia` (`historia`) — origem das 3 cores
+   da bandeira francesa (Revolução Francesa) — ligado às 3 cores
+   ensinadas nesta lição (rouge/bleu/blanc) — **confiança alta**
+
+zh:
+4. Unit 3 `xusui-ano-novo` (`festividade`) — sistema tradicional de idade
+   nominal (虚岁), muda no Ano Novo Chinês, não no aniversário — ligado ao
+   岁 (suì) desta lição — **confiança alta**
+5. Unit 5 `cha-origem-china` (`historia`) — China é o berço do chá — ligado
+   ao 茶 (chá) desta lição — **confiança alta**
+
+Todas as 5 validadas via `renderConceptStep()` contra o app real (banner
+certo por categoria, título/corpo renderizando). Nenhuma entrou em
+confiança média/baixa nesta rodada.
+
+**Ainda não varrido o currículo inteiro** — mesmo padrão de `reality`:
+piloto pequeno primeiro (5 notas, 2 categorias já cobertas em cada
+idioma), currículo completo só se/quando a autora pedir, do mesmo jeito
+que pediu pra `reality` depois de ver o piloto dela.
