@@ -548,6 +548,106 @@ function buildHanziCards(lessons){
   return cards;
 }
 
+// ---------- Taxonomia de "notas de realidade" (sociolinguística) ----------
+// Grilling 2026-09-17 (mesma decisão espelhada de fr/app.js): proposta de
+// mostrar contraste "forma ensinada vs forma real" (registro, gíria,
+// variação regional, desvio gramatical coloquial). NENHUMA nota de
+// realidade foi escrita ainda e este bloco não está wireado em lugar
+// nenhum do motor -- é só a taxonomia + as regras de nível travadas em
+// código agora, pra não precisar redescobrir esse raciocínio quando o
+// conteúdo além de HSK1 existir. Hoje só o nível inicial (HSK1) tem
+// conteúdo real (`level: "HSK1"` é o valor de verdade usado em
+// zh/content.js, confirmado antes de escrever isto -- as chaves abaixo
+// usam a MESMA nomenclatura HSK, não A1/A2/B1/B2 do francês, porque
+// copiar a chave "A1" aqui sem checar seria exatamente o tipo de erro que
+// motivou esta sessão de grilling no primeiro lugar, ver bug de tom do
+// pinyin corrigido mais cedo). HSK2/HSK3/HSK4 abaixo são propositalmente
+// hipotéticos, sem nenhuma unidade pra validar contra.
+//
+// Quatro categorias fechadas (não usar string livre -- consistência de
+// badge/cor na UI quando isso for implementado). Mesmas 4 categorias do
+// francês -- a taxonomia é a mesma nos dois idiomas, só os exemplos mudam:
+const REALITY_NOTE_CATEGORY = {
+  // Registro cotidiano "ainda reconhecível como a mesma forma, só mais
+  // casual" -- ex: 早上好 (zǎoshang hǎo) ensinado, 早 (zǎo) sozinho no dia a
+  // dia entre pessoas que já se conhecem.
+  INFORMAL: 'informal',
+  // Registro marcado/familiar -- termos de tratamento afetivos/de gíria
+  // entre amigos próximos, mais marcados socialmente que "informal" simples.
+  // Exige mais cuidado que a categoria acima (CLAUDE.md: badge/cor
+  // DIFERENTE de "informal", nunca a mesma).
+  FAMILIAR_GIRIA: 'familiar-giria',
+  // Variação lexical por lugar/comunidade, SEM forma "oficial" -- China
+  // continental vs. Taiwan vs. Singapura têm vocabulário cotidiano
+  // diferente pra vários conceitos comuns. Shape de dado diferente das
+  // outras 3 categorias: usa `variants: [{region, form, pinyin}, ...]`
+  // (2+ opções igualmente corretas, cada uma com o lugar onde é ouvida),
+  // nunca um par learned/everyday -- nenhuma forma é "a ensinada" e a
+  // outra "a real".
+  REGIONAL: 'regional',
+  // Desvio GRAMATICAL real (não só léxico/registro) que já é aceito como
+  // correto na fala. Mesmo espírito do francês ("Je sais pas" por "Je ne
+  // sais pas") -- ainda sem um exemplo confirmado em mandarim padrão
+  // levantado nesta sessão (não inventar um sem confirmar antes de usar
+  // em conteúdo de verdade). Diferença importante das outras 3: esta
+  // categoria pode eventualmente ATRAVESSAR pra dentro da correção de
+  // exercícios comuns (não só um card passivo) -- se o aluno digitar a
+  // forma coloquial num exercício normal de digitar, o ideal é aceitar
+  // como correta MAS mostrar a forma padrão ao lado (mesmo espírito do
+  // status "quase"/"almost" já usado na correção do francês). NÃO
+  // IMPLEMENTADO AINDA -- exige decidir onde a nota mora por item e
+  // alterar as funções de finish()/painel de feedback dos exercícios
+  // digitados. Fica registrado aqui como o próximo ponto de decisão
+  // explícito antes de tocar em qualquer lógica de correção de verdade.
+  GRAMATICA_COLOQUIAL: 'gramatica-coloquial',
+};
+
+// Os 4 eixos de "profundidade" aprovados no grilling, por nível -- só o
+// eixo 1 (explanationDepth) está de fato em uso hoje, porque só o nível
+// inicial existe. Os outros 3 eixos (testableInExercise, categoriesAllowed,
+// densityPerUnit) ficam aqui como parâmetros PRONTOS pra quando os níveis
+// seguintes existirem -- não aplicados por nenhum código ainda (não há
+// nenhuma nota de realidade escrita), só a decisão travada de o que cada
+// nível vai permitir. HSK2/HSK3/HSK4 são hipotéticos -- ajustar se o
+// currículo real desviar disso. Mesma lógica exata do francês (fr/app.js),
+// só as chaves são HSK1-4 em vez de A1/A2/B1/B2 (ver nota acima).
+const REALITY_NOTE_LEVEL_GUIDANCE = {
+  HSK1: {
+    explanationDepth: 'curta',       // 1 frase, sem contexto social extra
+    testableInExercise: false,       // card passivo é o MVP, exercício de reconhecimento é fase 2 adiada
+    categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial'],
+    densityPerUnit: { min: 0, max: 1 },
+  },
+  HSK2: {
+    explanationDepth: 'media',       // pode incluir contexto social (quem usa, quando)
+    testableInExercise: false,
+    categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial', 'familiar-giria'],
+    densityPerUnit: { min: 0, max: 2 },
+  },
+  HSK3: {
+    explanationDepth: 'media',
+    testableInExercise: true,        // "usar adequadamente" -- primeiro nível onde testar faz sentido
+    categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial', 'familiar-giria'],
+    densityPerUnit: { min: 1, max: 3 },
+  },
+  HSK4: {
+    explanationDepth: 'alta',        // pragmática/ironia/marcadores sociais -- ainda sem categoria própria
+    testableInExercise: true,
+    categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial', 'familiar-giria'],
+    densityPerUnit: { min: 1, max: 4 },
+  },
+};
+
+// Único ponto de checagem "esta categoria pode aparecer neste nível" --
+// qualquer código futuro que filtre notas de realidade por nível deve
+// chamar isto em vez de reimplementar a lógica. Hoje só é chamável com
+// level='HSK1' de verdade (os outros níveis não têm unidade nenhuma), mas
+// já existe pronta pra quando isso deixar de ser verdade.
+function isRealityNoteCategoryAllowedAtLevel(category, level){
+  const guidance = REALITY_NOTE_LEVEL_GUIDANCE[level];
+  return !!guidance && guidance.categoriesAllowed.includes(category);
+}
+
 // ---------- Estado global ----------
 const STATE = {
   units: UNITS,

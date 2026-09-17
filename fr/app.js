@@ -429,6 +429,104 @@ function buildCardsFromUnits(units){
   return cards;
 }
 
+// ---------- Taxonomia de "notas de realidade" (sociolinguística) ----------
+// Grilling 2026-09-17: proposta de mostrar contraste "forma ensinada vs
+// forma real" (registro, gíria, variação regional, desvio gramatical
+// coloquial). NENHUMA nota de realidade foi escrita ainda e este bloco não
+// está wireado em lugar nenhum do motor -- é só a taxonomia + as regras de
+// nível travadas em código agora, pra não precisar redescobrir esse
+// raciocínio quando o conteúdo A2/B1/B2 existir. Hoje só A1 tem conteúdo
+// real (20 unidades, 6 módulos) -- os níveis A2/B1/B2 abaixo são
+// propositalmente hipotéticos, sem nenhuma unidade pra validar contra.
+//
+// Quatro categorias fechadas (não usar string livre -- consistência de
+// badge/cor na UI quando isso for implementado):
+const REALITY_NOTE_CATEGORY = {
+  // Registro cotidiano "ainda reconhecível como a mesma forma, só mais casual"
+  // -- ex: "Comment allez-vous ?" ensinado, "Ça va ?" no dia a dia.
+  INFORMAL: 'informal',
+  // Registro marcado/familiar -- ex: meuf/mec no lugar de femme/homme. Exige
+  // mais cuidado social que "informal" simples (CLAUDE.md: par cor/fundo é
+  // o tipo de coisa que precisa de token certo -- aqui o equivalente é
+  // badge/cor DIFERENTE de "informal", nunca a mesma).
+  FAMILIAR_GIRIA: 'familiar-giria',
+  // Variação lexical por lugar, SEM forma "oficial" -- ex: pain au
+  // chocolat/chocolatine. Shape de dado diferente das outras 3 categorias:
+  // usa `variants: [{region, form}, ...]` (2+ opções igualmente corretas,
+  // cada uma com o lugar onde é ouvida), nunca um par learned/everyday --
+  // nenhuma das formas é "a ensinada" e a outra "a real".
+  REGIONAL: 'regional',
+  // Desvio GRAMATICAL real (não só léxico/registro) que já é aceito como
+  // correto na fala -- ex: queda do "ne" ("Je sais pas" por "Je ne sais
+  // pas"). Diferença importante das outras 3: esta categoria pode
+  // eventualmente ATRAVESSAR pra dentro da correção de exercícios comuns
+  // (não só um card passivo) -- se o aluno digitar a forma coloquial num
+  // exercício normal de digitar, o ideal é aceitar como correta MAS
+  // mostrar a forma padrão ao lado (mesmo espírito do statusClass
+  // 'almost'/"Quase!" que já existe na correção de conjugação, ver
+  // normalizeLoose() acima -- só que aqui o tom é "correto, mas isto é a
+  // forma padrão", não "quase errado"). NÃO IMPLEMENTADO AINDA -- exige
+  // decidir onde a nota mora por item (provavelmente um campo novo tipo
+  // `colloquialGrammarNote` no próprio item de conjugação/frase) e alterar
+  // as funções de finish()/painel de feedback dos exercícios digitados.
+  // Fica registrado aqui como o próximo ponto de decisão explícito antes
+  // de tocar em qualquer lógica de correção de verdade.
+  GRAMATICA_COLOQUIAL: 'gramatica-coloquial',
+};
+
+// Os 4 eixos de "profundidade" aprovados no grilling, por nível -- só o
+// eixo 1 (explanationDepth) está de fato em uso hoje, porque só A1 existe.
+// Os outros 3 eixos (testableInExercise, categoriesAllowed, densityPerUnit)
+// ficam aqui como parâmetros PRONTOS pra quando A2+ existir -- não
+// aplicados por nenhum código ainda (não há nenhuma nota de realidade
+// escrita), só a decisão travada de o que cada nível vai permitir.
+// A2/B1/B2 são hipotéticos -- ajustar se o currículo real desviar disso.
+const REALITY_NOTE_LEVEL_GUIDANCE = {
+  A1: {
+    // Eixo 1 -- guia de quanto escrever por nota (decisão editorial, não
+    // enforçada em código: não há linter de tamanho de texto neste repo).
+    explanationDepth: 'curta',       // 1 frase, sem contexto social extra
+    // Eixo 2 -- se a nota pode virar pergunta de exercício (feature ainda
+    // não construída, ver Q2 do grilling: card passivo é o MVP, exercício
+    // de reconhecimento é fase 2 explicitamente adiada).
+    testableInExercise: false,
+    // Eixo 3 -- quais categorias este nível já pode usar.
+    categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial'],
+    // Eixo 4 -- faixa de notas por unidade (números, não string, pra dar
+    // pra um script de auditoria de conteúdo checar isso no futuro sem
+    // precisar mudar o shape de novo).
+    densityPerUnit: { min: 0, max: 1 },
+  },
+  A2: {
+    explanationDepth: 'media',       // pode incluir contexto social (quem usa, quando)
+    testableInExercise: false,
+    categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial', 'familiar-giria'],
+    densityPerUnit: { min: 0, max: 2 },
+  },
+  B1: {
+    explanationDepth: 'media',
+    testableInExercise: true,        // "usar adequadamente" -- primeiro nível onde testar faz sentido
+    categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial', 'familiar-giria'],
+    densityPerUnit: { min: 1, max: 3 },
+  },
+  B2: {
+    explanationDepth: 'alta',        // pragmática/ironia/marcadores sociais -- ainda sem categoria própria
+    testableInExercise: true,
+    categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial', 'familiar-giria'],
+    densityPerUnit: { min: 1, max: 4 },
+  },
+};
+
+// Único ponto de checagem "esta categoria pode aparecer neste nível" --
+// qualquer código futuro que filtre notas de realidade por nível deve
+// chamar isto em vez de reimplementar a lógica. Hoje só é chamável com
+// level='A1' de verdade (os outros níveis não têm unidade nenhuma), mas já
+// existe pronta pra quando isso deixar de ser verdade.
+function isRealityNoteCategoryAllowedAtLevel(category, level){
+  const guidance = REALITY_NOTE_LEVEL_GUIDANCE[level];
+  return !!guidance && guidance.categoriesAllowed.includes(category);
+}
+
 // ---------- Estado global ----------
 const STATE = {
   units: UNITS,
