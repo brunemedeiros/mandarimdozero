@@ -74,6 +74,30 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Piloto da camada de "notas de realidade" (ver CLAUDE.md) --
+      // categoria 'informal', permitida em A1. Ligada especificamente ao
+      // vocabulário "s'il vous plaît" desta lição (não é uma dica genérica
+      // sobre cortesia solta em qualquer lugar). Categoria em string literal,
+      // não REALITY_NOTE_CATEGORY.INFORMAL -- content.js carrega ANTES de
+      // app.js (ver <script> em index.html), a constante ainda não existe
+      // neste ponto. O valor precisa continuar igual ao de app.js.
+      {
+        id: "svp-informal",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 6 },
+        blocks: [
+          {
+            title: "\"S'il vous plaît\" no dia a dia",
+            body: "Na fala informal ou em mensagens de texto, <strong>s'il vous plaît</strong> quase sempre encolhe: com amigos vira <strong>s'il te plaît</strong> (a forma \"tu\", não \"vous\"), e por escrito é comum ver só <strong>STP</strong>. A forma completa com \"vous\" continua sendo a mais segura com desconhecidos.",
+            examples: [
+              { f: "s'il te plaît", t: "por favor (informal, entre amigos)" },
+              { f: "STP", t: "abreviação de texto pra \"s'il te plaît\"" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     trueFalseExercises: [{ subject: "Merci beaucoup !", emoji: "🙏", claim: "Isso é o que dizemos quando alguém nos ajuda muito.", answer: true,
@@ -150,6 +174,29 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Piloto da camada de "notas de realidade" -- categoria
+      // 'gramatica-coloquial'. Disparada depois do diálogo, onde a frase
+      // real "Tu es français ?" acabou de aparecer, não como regra solta.
+      // A integração com a correção de exercícios digitados (aceitar "t'es"
+      // como certo e mostrar a forma padrão ao lado) é trabalho futuro --
+      // ver CLAUDE.md, seção da camada de notas de realidade -- por isso o
+      // texto já avisa pra continuar escrevendo a forma padrão por enquanto.
+      {
+        id: "tu-es-contraction",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "\"Tu es\" vira \"t'es\" na fala",
+            body: "Seria \"Tu es français ?\", mas na fala corrida quase ninguém pronuncia as duas palavras separadas — <strong>tu es</strong> vira <strong>t'es</strong>. É tão comum que aparece até em mensagens escritas informais: \"T'es français ?\". Nos exercícios daqui, continue escrevendo a forma padrão <strong>tu es</strong> — a contração é só pra reconhecer quando ouvir ou ler.",
+            examples: [
+              { f: "t'es français ?", t: "você é francês? (fala corrida)" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     trueFalseExercises: [{ subject: "Comment tu t'appelles ?", emoji: "🙋", claim: "Essa pergunta serve pra saber a idade de alguém.", answer: false,
@@ -221,6 +268,28 @@ const UNITS = [
             examples: [
               { f: "avoir", t: "ter" },
               { f: "l'âge", t: "a idade" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Piloto da camada de "notas de realidade" -- categoria 'regional',
+      // única com `variants` em vez de `examples` (sem forma "oficial" —
+      // ver CLAUDE.md). Ligada ao "vingt" desta lição: é exatamente o
+      // número que a França multiplica pra formar 80 (quatre-VINGTS).
+      {
+        id: "vingt-to-quatrevingts",
+        kind: "reality",
+        category: "regional",
+        trigger: { afterVocabIdx: 5 },
+        blocks: [
+          {
+            title: "\"Vingt\" é a base de um sistema esquisito",
+            body: "Na França, depois de 69 os números saltam pra base 20: 70 é <strong>soixante-dix</strong> (\"sessenta-dez\"), 80 é <strong>quatre-vingts</strong> (\"quatro-vintes\") — o \"vingt\" que você acabou de aprender, multiplicado! Mas isso não é assim em todo lugar onde se fala francês.",
+            variants: [
+              { region: "França", form: "soixante-dix (70), quatre-vingts (80), quatre-vingt-dix (90)" },
+              { region: "Bélgica e Suíça", form: "septante (70) e nonante (90) — mais parecido com contar de 10 em 10" },
+              { region: "Suíça (só lá)", form: "huitante (80) — a Bélgica continua usando quatre-vingts" }
             ],
             wrapup: true
           }

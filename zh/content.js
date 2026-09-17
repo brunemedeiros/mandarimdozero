@@ -50,6 +50,29 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Piloto da camada de "notas de realidade" (ver CLAUDE.md) --
+      // categoria 'informal', permitida em HSK1. Ligada especificamente ao
+      // vocabulário 早上好 desta lição -- é literalmente o caso concreto
+      // citado na proposta original da feature, agora virando conteúdo de
+      // verdade. Categoria em string literal, não REALITY_NOTE_CATEGORY.
+      // INFORMAL -- content.js carrega ANTES de app.js (ver <script> em
+      // index.html), a constante ainda não existe neste ponto.
+      {
+        id: "zaoshang-hao-zao",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 6 },
+        blocks: [
+          {
+            title: "\"早上好\" no dia a dia vira só \"早\"",
+            body: "<strong>早上好 (zǎoshang hǎo)</strong> é a forma completa e educada de \"bom dia\". No dia a dia, entre pessoas que já se conhecem — colegas, vizinhos, amigos — é muito mais comum ouvir só <strong>早 (zǎo)</strong>, literalmente \"cedo\". Usar a forma completa com alguém próximo pode até soar um pouco formal demais.",
+            examples: [
+              { c: "早", p: "zǎo", t: "bom dia (informal, curto)" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     trueFalseExercises: [{ subject: "谢谢", pinyin: "xièxiè", emoji: "🎁", claim: "Isto é o que dizemos quando recebemos um presente de outra pessoa.", answer: true,
@@ -127,6 +150,29 @@ const UNITS = [
             body: "A estrutura mais comum de uma frase em chinês segue a mesma ordem do português: sujeito, depois verbo, depois objeto. Diferente do português, o chinês tem pouca flexibilidade nessa ordem — mudar a posição das palavras muda o significado da frase.",
             examples: [
               { c: "你是哪国人？", p: "nǐ shì nǎ guó rén?", t: "de que país você é?" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Piloto da camada de "notas de realidade" -- categoria
+      // 'gramatica-coloquial'. Disparada depois do diálogo, onde a frase
+      // real "Wǒ shì Bāxī rén" acabou de aparecer. A integração com a
+      // correção de exercícios digitados (aceitar "我巴西人" como certo e
+      // mostrar a forma padrão ao lado) é trabalho futuro -- ver CLAUDE.md
+      // -- por isso o texto já avisa pra continuar escrevendo a forma
+      // padrão por enquanto.
+      {
+        id: "shi-drop-casual",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "\"Wǒ shì Bāxī rén\" às vezes perde o \"shì\"",
+            body: "Na fala rápida e bem casual, é possível ouvir <strong>我巴西人 (wǒ Bāxī rén)</strong> sem o 是 — o significado continua claro pelo contexto. Isso é bem informal e só funciona em frases curtas assim. Nos exercícios daqui, continue escrevendo a forma padrão com <strong>是</strong>, que é a que sempre soa correta.",
+            examples: [
+              { c: "我巴西人", p: "wǒ Bāxī rén", t: "eu (sou) brasileira (fala muito casual)" }
             ],
             wrapup: true
           }

@@ -648,6 +648,22 @@ function isRealityNoteCategoryAllowedAtLevel(category, level){
   return !!guidance && guidance.categoriesAllowed.includes(category);
 }
 
+// Texto do banner (topo do cartão) quando um concept é uma nota de
+// realidade (concept.kind === 'reality') em vez de gramática comum --
+// renderConceptStep() escolhe entre isto e o banner padrão de gramática.
+// Sem cor/badge própria por categoria ainda (piloto usa só texto+emoji pra
+// diferenciar -- ver CLAUDE.md, seção da camada de notas de realidade, "MVP
+// = card passivo"); se familiar-giria vira conteúdo de verdade algum dia,
+// dar a ela uma cor própria vira obrigatório (mesma regra já registrada
+// sobre --on-vivid vs --on-seal-red -- não reaproveitar o badge de
+// 'informal' pra um registro mais marcado).
+const REALITY_NOTE_BANNER_TEXT = {
+  [REALITY_NOTE_CATEGORY.INFORMAL]: '🗣️ Na vida real',
+  [REALITY_NOTE_CATEGORY.FAMILIAR_GIRIA]: '🗣️ Registro informal',
+  [REALITY_NOTE_CATEGORY.REGIONAL]: '📍 Variação regional',
+  [REALITY_NOTE_CATEGORY.GRAMATICA_COLOQUIAL]: '✍️ Assim também se fala',
+};
+
 // ---------- Estado global ----------
 const STATE = {
   units: UNITS,
@@ -2939,10 +2955,11 @@ function renderConceptStep(){
   const nextBtn = document.getElementById('step-next-btn');
   const backBtn = document.getElementById('step-back-btn');
   backBtn.style.display = 'none'; // sem "voltar" no meio de uma explicação, igual ao checkpoint/prática
-  setAcqPhaseBanner('💡 Vale entender isso');
 
   const concept = STEP_STATE.conceptQueue[STEP_STATE.conceptIdx];
   const block = concept.blocks[STEP_STATE.conceptBlockIdx];
+  const isReality = concept.kind === 'reality';
+  setAcqPhaseBanner(isReality ? (REALITY_NOTE_BANNER_TEXT[concept.category] || '🌍 Nota de realidade') : '💡 Vale entender isso');
   const isLastBlockOfConcept = STEP_STATE.conceptBlockIdx === concept.blocks.length - 1;
   const isLastConcept = STEP_STATE.conceptIdx === STEP_STATE.conceptQueue.length - 1;
 
@@ -2957,12 +2974,26 @@ function renderConceptStep(){
       `).join('')}
     </div>` : '';
 
+  // `variants` é exclusivo da categoria 'regional' -- ao contrário de
+  // `examples` (hanzi/pinyin/tradução), aqui não há forma "oficial": cada
+  // item é só {region, form}, uma das variações igualmente válidas.
+  // Reaproveita a lista comum em vez de um componente de badge/cor novo
+  // (ver CLAUDE.md, "MVP = card passivo"). Nenhum dos pilotos zh usa
+  // 'regional' ainda (ver commit) -- código pronto pra quando um exemplo
+  // bem grounded aparecer (comida/objetos concretos, ainda não ensinados
+  // nas 3 primeiras unidades).
+  const variantsHTML = (block.variants && block.variants.length) ? `
+    <ul class="gram-block-variants">
+      ${block.variants.map(v => `<li><strong>${v.region}:</strong> ${v.form}</li>`).join('')}
+    </ul>` : '';
+
   contentEl.innerHTML = `
-    <div class="gram-block-counter">${concept.blocks.length > 1 ? `${STEP_STATE.conceptBlockIdx + 1} de ${concept.blocks.length}` : 'Vale entender'}</div>
+    <div class="gram-block-counter">${concept.blocks.length > 1 ? `${STEP_STATE.conceptBlockIdx + 1} de ${concept.blocks.length}` : (isReality ? 'Nota de realidade' : 'Vale entender')}</div>
     <div class="gram-block ${block.wrapup ? 'wrapup' : ''}">
       <h3 class="gram-block-title">${block.title}</h3>
       <p class="gram-block-body">${block.body}</p>
       ${examplesHTML}
+      ${variantsHTML}
     </div>
   `;
   wireAudioButtons(contentEl);

@@ -335,3 +335,57 @@ conteúdo pra algumas unidades A1/HSK1 usando essa taxonomia, (2) decidir
 o shape exato de onde a nota mora dentro de `concepts` (novo `kind` no
 item existente, ver acima), (3) só depois disso considerar a fase 2
 (exercício testável) e a integração de `gramatica-coloquial` na correção.
+
+**Atualização (2026-09-17): piloto de conteúdo escrito, itens (1) e (2)
+acima resolvidos.** Item de `concepts` ganhou `kind: 'reality'` +
+`category` (uma das 4 da taxonomia) + `variants: [{region, form}]` opcional
+(só pra `regional`, alternativa a `examples` já que essa categoria não tem
+forma "oficial"). `renderConceptStep()` (fr/app.js e zh/app.js) passou a
+trocar o texto do `.acq-phase-banner` conforme a categoria
+(`REALITY_NOTE_BANNER_TEXT`, logo depois de `isRealityNoteCategoryAllowedAtLevel`
+nos dois arquivos) e a renderizar `variants` como lista simples
+(`.gram-block-variants`, nova regra CSS nos dois `index.html`, reaproveita
+`var(--ink)` — mesmo token já usado por `.gram-block-body`, então não há
+risco de contraste novo por tema/idioma, ao contrário do caso do botão
+Continuar registrado na seção de tokens de cor acima). Sem badge/cor por
+categoria ainda (MVP = só texto+emoji no banner, ver decisão travada
+acima) — só vira obrigatório quando `familiar-giria` ganhar conteúdo de
+verdade (ainda não tem, ver abaixo).
+
+Conteúdo escrito, 5 notas ao todo:
+- **fr** (3 unidades, as 3 categorias não-`familiar-giria` usadas, uma vez
+  cada): A1-1 `informal` ("s'il vous plaît" → "s'il te plaît"/STP, ligado
+  ao vocabulário da própria lição); A1-2 `gramatica-coloquial` ("tu es" →
+  "t'es", disparado depois do diálogo que tem exatamente essa frase); A1-3
+  `regional` (o "vingt" recém-ensinado é a base de quatre-vingts/80 na
+  França — variantes: septante/huitante/nonante na Bélgica e Suíça).
+- **zh** (2 unidades, só `informal` e `gramatica-coloquial` — ver abaixo
+  por que `regional` ficou de fora): Unit 1 `informal` (早上好 → 早, o
+  próprio caso concreto citado na proposta original da feature); Unit 2
+  `gramatica-coloquial` (我是巴西人 → 我巴西人 sem o 是 na fala casual,
+  disparado depois do diálogo).
+
+**Por que zh não tem uma nota `regional` no piloto:** procurei um exemplo
+genuíno (variação lexical por região, tipo pain au chocolat/chocolatine)
+ligado ao vocabulário de fato ensinado nas Units 1-3 (saudações,
+nome/nacionalidade, números/idade) e não achei nada em que eu tivesse
+confiança alta — o candidato mais próximo (perguntar 你是哪国人 vs 你是哪里人)
+não é uma variação regional da MESMA forma, é uma pergunta diferente. Forçar
+um exemplo fraco só pra ter as 3 categorias representadas nos dois idiomas
+teria sido exatamente o erro que esta seção inteira existe pra evitar (ver
+"coerência pedagógica" no topo deste arquivo). O candidato mais forte que
+encontrei (variação de nome de comida, ex. 土豆/马铃薯 pra "batata" ou
+西红柿/番茄 pra "tomate") precisa de uma unidade que ensine vocabulário de
+comida — Unit 5 ("Comida e bebida") existe mas nenhuma palavra ensinada lá
+(吃/喝/米饭/面/水/茶/咖啡) tem uma variante regional bem documentada. Quando uma
+unidade futura ensinar um substantivo concreto com variação regional
+conhecida, esse é o lugar certo pra a primeira nota `regional` do zh — o
+código (`variants`, render) já está pronto, só falta o exemplo.
+
+**Ainda não implementado** (é o próximo passo explicitamente pedido em
+seguida, ainda não iniciado): a integração de `gramatica-coloquial` na
+correção de exercícios digitados (aceitar "t'es"/"我巴西人" como certo e
+mostrar a forma padrão ao lado, no espírito do "Quase!" que já existe na
+correção de conjugação). As duas notas `gramatica-coloquial` escritas acima
+já avisam o aluno, no próprio texto, que os exercícios de hoje ainda
+exigem a forma padrão — não prometem um comportamento que o código não tem.
