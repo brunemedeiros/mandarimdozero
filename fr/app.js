@@ -6315,7 +6315,7 @@ function renderProgressView(){
   document.getElementById('stat-cards').innerHTML = guestWarning + `
     <div class="stat-card"><div class="num">${completedUnits}/${UNITS.length}</div><div class="label">Unidades completas</div></div>
     <div class="stat-card"><div class="num">${learnedCards}/${totalCards}</div><div class="label">Palavras aprendidas</div></div>
-    <div class="stat-card"><div class="num">${STATE.streak}</div><div class="label">Dias seguidos</div></div>
+    <div class="stat-card"><div class="num">${effectiveStreak()}</div><div class="label">Dias seguidos</div></div>
     <div class="stat-card"><div class="num">${STATE.totalReviews}</div><div class="label">Revisões totais</div></div>
     <div class="stat-card"><div class="num">${dueCount}</div><div class="label">Pendentes agora</div></div>
     <div class="stat-card"><div class="num">${STATE.xp}</div><div class="label">XP acumulado</div></div>

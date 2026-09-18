@@ -792,3 +792,54 @@ o que um brasileiro diria no dia a dia, não só se a tradução está
 gramaticalmente correta — o mesmo padrão de cuidado já aplicado à
 "coerência pedagógica" (ver topo deste arquivo), agora estendido ao
 REGISTRO da própria língua de interface.
+
+## Streak (🔥) no topbar/perfil ficava CONGELADO em vez de zerar quando a sequência quebra
+
+Bug relatado pela autora (2026-09-18, print da tela real): notificação
+`user_inactive_3` ("3 dias sem aparecer") batendo, ao mesmo tempo, com o
+flame do topbar mostrando "3" — parecendo contradição (como sumir 3 dias
+E estar com sequência de 3 dias ativa?). Não é contradição no dado, é bug
+de exibição: a notificação estava CERTA (calculada no
+`notification-cron`, servidor, a partir de `daysSince(lastStudyDay)`); o
+flame do topbar é que estava mostrando um valor ERRADO.
+
+**Causa raiz**: `STATE.streak` só é recalculado dentro de
+`registerStudyToday()` (fr/zh `app.js`) — ou seja, só muda quando a
+pessoa efetivamente estuda. Se ela some por alguns dias, nada zera o
+valor nesse meio tempo: o número fica CONGELADO no último streak
+alcançado (ex: "3", de 3 dias atrás) em vez de refletir que a sequência
+já quebrou. `renderTopbarStats()` (`shared/topbar-stats.js`) e outros 3
+pontos de exibição liam `STATE.streak` direto, sem checar se ele ainda
+estava "vivo".
+
+**Fix**: nova função `effectiveStreak()` em `shared/srs.js` (perto de
+`todayStr()`/`dateStrDaysAgo()`, que ela usa) — mesma regra de gap que
+`registerStudyToday()` já aplica pra decidir se incrementa ou zera a
+sequência (`lastStudyDay` é hoje ou ontem → sequência viva, retorna
+`STATE.streak`; qualquer coisa mais antiga → sequência quebrada, retorna
+`0`). Substituído `STATE.streak` por `effectiveStreak()` nos 4 pontos que
+exibem o streak como "status atual" pro aluno:
+`shared/topbar-stats.js` (pill principal + card da sidebar desktop),
+`shared/profile.js` (card "dias seguidos" da tela de Perfil), e
+`fr/app.js`/`zh/app.js` (stat-card "Dias seguidos" da tela de
+estatísticas completas).
+
+**O que NÃO foi tocado, de propósito** (não é o mesmo tipo de exibição):
+- `streak-days-num` (tela de comemoração de sequência, que aparece logo
+  depois de `registerStudyToday()` completar) — nesse call site
+  `STATE.streak` está sempre correto no momento em que é lido, porque
+  acabou de ser recalculado.
+- Checks de badge (`streak_3`/`streak_7` em `BADGES`, `check: s =>
+  s.streak >= 3`) — são conquistas "já alcançou alguma vez", não status
+  atual; usar o valor bruto no momento do check (logo após estudar) é o
+  comportamento certo, uma vez desbloqueado o badge fica permanente.
+- `notification-cron` (server-side) — já fazia a conta certa
+  (`daysSince(state.lastStudyDay)`/`state.lastStudyDay !== today`) desde
+  antes; não precisou de mudança.
+- `analyticsLongestStreak()` (`shared/admin-analytics.js`) — já documentado
+  no próprio código como aproximação separada, não lê `STATE.streak`.
+
+Validado via Playwright: `effectiveStreak()` retorna `0` quando
+`lastStudyDay` tem 3+ dias, retorna o streak normal quando é hoje ou
+ontem; `renderTopbarStats()` reflete isso no DOM (`#streak-count`) nos 3
+cenários. Regressão completa (11+31 testes) sem quebras.
