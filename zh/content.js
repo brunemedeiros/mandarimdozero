@@ -910,22 +910,24 @@ const UNITS = [
           }
         ]
       },
-      // Nota cultural (varredura 2026-09-18) -- categoria 'costume'. Ligada
-      // ao próprio diálogo desta lição, que já mostra o preço caindo de 30
-      // para 25 kuài. Confiança ALTA: o regatear em mercados/feiras
-      // (não em lojas de preço fixo/shopping) é um costume amplamente
-      // documentado na China.
+      // Nota cultural (varredura 2026-09-18, corrigida 2026-09-18 -- ver
+      // CLAUDE.md, "regatear" não é registro coloquial em português do
+      // Brasil, "pechinchar" é a palavra realmente usada no dia a dia).
+      // Categoria 'costume'. Ligada ao próprio diálogo desta lição, que já
+      // mostra o preço caindo de 30 para 25 kuài. Confiança ALTA: o
+      // pechinche em mercados/feiras (não em lojas de preço fixo/shopping)
+      // é um costume amplamente documentado na China.
       {
-        id: "regatear-mercado",
+        id: "pechinchar-mercado",
         kind: "culture",
         category: "costume",
         trigger: { after: "dialogue" },
         blocks: [
           {
-            title: "Regatear é normal — mas só em certos lugares",
-            body: "Repare como o preço caiu de 30 para 25 kuài no diálogo: em mercados de rua, feiras e pequenas lojas de bairro, regatear o preço é normal e até esperado. Mas em shoppings, supermercados e lojas de marca, o preço é fixo e regatear soa fora de lugar — o segredo é reconhecer o tipo de estabelecimento antes de tentar.",
+            title: "Pechinchar é normal — mas só em certos lugares",
+            body: "Repare como o preço caiu de 30 para 25 kuài no diálogo: em mercados de rua, feiras e pequenas lojas de bairro, pechinchar o preço é normal e até esperado. Mas em shoppings, supermercados e lojas de marca, o preço é fixo e pechinchar soa fora de lugar — o segredo é reconhecer o tipo de estabelecimento antes de tentar.",
             examples: [
-              { c: "便宜一点吧", p: "piányi yìdiǎn ba", t: "faz mais barato (frase típica de regateio)" }
+              { c: "便宜一点吧", p: "piányi yìdiǎn ba", t: "faz mais barato (frase típica de quem está pechinchando)" }
             ],
             wrapup: true
           }
