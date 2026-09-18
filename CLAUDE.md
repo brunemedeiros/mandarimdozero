@@ -335,3 +335,432 @@ conteúdo pra algumas unidades A1/HSK1 usando essa taxonomia, (2) decidir
 o shape exato de onde a nota mora dentro de `concepts` (novo `kind` no
 item existente, ver acima), (3) só depois disso considerar a fase 2
 (exercício testável) e a integração de `gramatica-coloquial` na correção.
+
+**Atualização (2026-09-17): piloto de conteúdo escrito, itens (1) e (2)
+acima resolvidos.** Item de `concepts` ganhou `kind: 'reality'` +
+`category` (uma das 4 da taxonomia) + `variants: [{region, form}]` opcional
+(só pra `regional`, alternativa a `examples` já que essa categoria não tem
+forma "oficial"). `renderConceptStep()` (fr/app.js e zh/app.js) passou a
+trocar o texto do `.acq-phase-banner` conforme a categoria
+(`REALITY_NOTE_BANNER_TEXT`, logo depois de `isRealityNoteCategoryAllowedAtLevel`
+nos dois arquivos) e a renderizar `variants` como lista simples
+(`.gram-block-variants`, nova regra CSS nos dois `index.html`, reaproveita
+`var(--ink)` — mesmo token já usado por `.gram-block-body`, então não há
+risco de contraste novo por tema/idioma, ao contrário do caso do botão
+Continuar registrado na seção de tokens de cor acima). Sem badge/cor por
+categoria ainda (MVP = só texto+emoji no banner, ver decisão travada
+acima) — só vira obrigatório quando `familiar-giria` ganhar conteúdo de
+verdade (ainda não tem, ver abaixo).
+
+Conteúdo escrito, 5 notas ao todo:
+- **fr** (3 unidades, as 3 categorias não-`familiar-giria` usadas, uma vez
+  cada): A1-1 `informal` ("s'il vous plaît" → "s'il te plaît"/STP, ligado
+  ao vocabulário da própria lição); A1-2 `gramatica-coloquial` ("tu es" →
+  "t'es", disparado depois do diálogo que tem exatamente essa frase); A1-3
+  `regional` (o "vingt" recém-ensinado é a base de quatre-vingts/80 na
+  França — variantes: septante/huitante/nonante na Bélgica e Suíça).
+- **zh** (2 unidades, só `informal` e `gramatica-coloquial` — ver abaixo
+  por que `regional` ficou de fora): Unit 1 `informal` (早上好 → 早, o
+  próprio caso concreto citado na proposta original da feature); Unit 2
+  `gramatica-coloquial` (我是巴西人 → 我巴西人 sem o 是 na fala casual,
+  disparado depois do diálogo).
+
+**Por que zh não tem uma nota `regional` no piloto:** procurei um exemplo
+genuíno (variação lexical por região, tipo pain au chocolat/chocolatine)
+ligado ao vocabulário de fato ensinado nas Units 1-3 (saudações,
+nome/nacionalidade, números/idade) e não achei nada em que eu tivesse
+confiança alta — o candidato mais próximo (perguntar 你是哪国人 vs 你是哪里人)
+não é uma variação regional da MESMA forma, é uma pergunta diferente. Forçar
+um exemplo fraco só pra ter as 3 categorias representadas nos dois idiomas
+teria sido exatamente o erro que esta seção inteira existe pra evitar (ver
+"coerência pedagógica" no topo deste arquivo). O candidato mais forte que
+encontrei (variação de nome de comida, ex. 土豆/马铃薯 pra "batata" ou
+西红柿/番茄 pra "tomate") precisa de uma unidade que ensine vocabulário de
+comida — Unit 5 ("Comida e bebida") existe mas nenhuma palavra ensinada lá
+(吃/喝/米饭/面/水/茶/咖啡) tem uma variante regional bem documentada. Quando uma
+unidade futura ensinar um substantivo concreto com variação regional
+conhecida, esse é o lugar certo pra a primeira nota `regional` do zh — o
+código (`variants`, render) já está pronto, só falta o exemplo.
+
+**Ainda não implementado** (é o próximo passo explicitamente pedido em
+seguida, ainda não iniciado): a integração de `gramatica-coloquial` na
+correção de exercícios digitados (aceitar "t'es"/"我巴西人" como certo e
+mostrar a forma padrão ao lado, no espírito do "Quase!" que já existe na
+correção de conjugação). As duas notas `gramatica-coloquial` escritas acima
+já avisam o aluno, no próprio texto, que os exercícios de hoje ainda
+exigem a forma padrão — não prometem um comportamento que o código não tem.
+
+**Grilling sobre a integração acima (2026-09-17): adiada de propósito,
+não esquecida.** Antes de perguntar, mapeei os exercícios digitados que
+existem hoje (`renderVocabTypeExercise`, `renderClozeExercise`, o campo
+de conjugação onde `'almost'`/"Quase!" já vive) e achei um fato que muda a
+pergunta: **nenhum deles consegue testar uma frase inteira digitada
+livremente hoje**. `renderVocabTypeExercise` é "digite o que ouviu"
+(transcrição literal de UM item de `vocab[]`, não de frase). O cloze
+(`renderClozeExercise`) esconde só um `block` de uma `phrase.blocks[]] já
+existente, e o gerador (`fr/app.js` por volta da linha 3782) nunca deixa o
+blank cair no bloco 0 quando há 3+ blocos — pra "Tu es de quel pays ?"
+(`blocks: ["Tu","es de","quel pays ?"]`), "Tu" fica sempre fixo, nunca
+digitável. Ou seja: a contração "t'es" (que funde "Tu"+"es") **não tem
+como ser representada** no cloze de hoje — não existe um blank cujo
+preenchimento algum dia seria igual a "t'es". Mesma conclusão pro par
+我是巴西人/我巴西人 do zh. As 2 notas `gramatica-coloquial` escritas no
+piloto acima não têm, hoje, NENHUM exercício digitado que algum dia as
+teste.
+
+Decisões do grilling, dado esse achado:
+
+- **Não construir a integração agora.** Só 2 itens existem no app
+  inteiro; forçar isso agora significa (a) inventar um tipo de exercício
+  novo do zero pra 2 pontos de dado, ou (b) reestruturar `phrase.blocks`
+  pra encaixar o bloco 0, o que também muda o exercício de reorder (que
+  reaproveita os mesmos `blocks`) como efeito colateral. **Quando o
+  próximo item `gramatica-coloquial` for autorado**, desenhar o exercício
+  JUNTO com o item (escolher/ajustar os `blocks` da frase pra que a forma
+  coloquial caiba como um blank isolado), em vez de tentar encaixar
+  retroativamente. Até lá, as notas continuam card passivo + aviso no
+  texto ("continue escrevendo a forma padrão") — comportamento real, não
+  promessa vazia.
+- **Quando construída, o aceite deve ser global, não só na lição em que
+  a nota apareceu.** O dado mora anexado à própria frase/resposta (não ao
+  `trigger` da nota, que é efêmero) — o valor real está na revisão
+  espaçada dias depois, quando o aluno já esqueceu a nota; escopar só à
+  lição imediata joga fora a maior parte do valor.
+- **Quando construída, usar um `statusClass` novo (ex. `'colloquial-ok'`),
+  não reaproveitar `'almost'`.** `'almost'` hoje significa "grafia quase
+  certa" — semanticamente incompleto/próximo do erro. Um acerto coloquial
+  é semanticamente diferente (certo, só que num registro diferente) e o
+  tom já travado acima ("correto, isto é a forma padrão", não "quase
+  errado") depende de não herdar a conotação de `'almost'`.
+
+Nenhuma dessas três decisões virou código nesta sessão — de propósito,
+mesmo espírito do restante desta seção: são parâmetros de design pra
+quando o próximo item existir, não trabalho pra fazer hoje sem um
+call site real pra testar contra.
+
+**Atualização (2026-09-17, mesmo dia): densidade revista via novo
+grilling — sem teto/mínimo, revisão manual da autora é o controle de
+qualidade daqui pra frente.** A autora leu o resumo do piloto de 5 notas
+e achou pouco: a intenção dela não é "aumentar aos poucos por nível", é
+"notas de realidade serem uma feature MUITO presente desde já" — o
+objetivo do produto passou a ser ensinar o conteúdo REAL do idioma, não
+só o mais fácil, e isso vale desde o A1/HSK1, não só em níveis avançados.
+
+Decisões do 2º grilling (Q1-Q4), já aplicadas:
+
+- **`densityPerUnit` (eixo 4 da taxonomia) foi REMOVIDO do código.**
+  Existia como `{min,max}` em `REALITY_NOTE_LEVEL_GUIDANCE` (fr/app.js e
+  zh/app.js, ambos atualizados). Não há mais nenhum limite numérico, nem
+  piso nem teto, por unidade ou por nível — pode haver 0, 1, 2 ou mais
+  notas na mesma lição, o único critério é a mesma regra de sempre
+  ("Coerência pedagógica entre funcionalidades", topo deste arquivo): a
+  nota só entra se responder a uma palavra/expressão que a lição está
+  ensinando NAQUELE momento. "Não force notas desnecessárias ou irreais"
+  — verbatim da autora — continua valendo tanto quanto antes; o que mudou
+  é que agora também não se pode limitar/segurar uma nota genuína só
+  porque "já teve uma nessa lição".
+- **Sem progressão de densidade por nível também** (Q2, opção "não
+  aumentar por nível" da autora) — os outros 2 eixos que ainda existem
+  (`explanationDepth`, `testableInExercise`, `categoriesAllowed`)
+  continuam progredindo como já estava travado (A1/HSK1 mais raso, B1+
+  testável, familiar-giria só A2+) — só a QUANTIDADE de notas deixou de
+  escalar por nível, não a profundidade/testabilidade.
+- **Retroagiu nas 5 unidades já pilotadas** — completadas nesta mesma
+  sessão pra 2-3 notas cada (ver lista completa abaixo), em vez de deixar
+  as primeiras unidades que o aluno vê com menos notas que as futuras.
+- **Novo processo de revisão obrigatório pra TODA sessão futura que
+  escrever nota de realidade, em qualquer idioma**: nenhum gate de
+  aprovação dentro do app (a autora não quer isso), mas toda nota
+  adicionada — nova ou já existente — deve ser reportada a ela NO CHAT
+  com um nível de confiança explícito (alta/média/baixa), pra ela
+  verificar em outras fontes antes de confiar. Regra motivadora,
+  verbatim: "Para todos os idiomas, indique o nível de confiança naquela
+  nota quando estiver me enviando pois irei verificar em outras fontes e
+  tomarei uma 'confiança alta' com menos tensão na hora da revisão." Na
+  prática: qualquer sessão que adicionar/editar uma nota de realidade
+  precisa terminar a entrega com uma lista de TODAS as notas do app
+  (não só as novas) e o nível de confiança de cada uma — não é opcional,
+  nem só pras novas.
+
+**Lista completa das 10 notas de realidade existentes depois desta
+atualização** (nível de confiança de cada uma, pra revisão da autora):
+
+fr:
+1. A1-1 `svp-informal` — "s'il vous plaît" → "s'il te plaît"/STP — **alta**
+2. A1-1 `a-bientot-informal` — "à bientôt" → "à plus"/A+ — **alta**
+3. A1-2 `tu-es-contraction` — "tu es" → "t'es" — **alta**
+4. A1-2 `comment-tappelles-wh-in-situ` — "comment tu t'appelles ?" → "tu t'appelles comment ?" (wh-in-situ) — **alta**
+5. A1-3 `vingt-to-quatrevingts` — base de quatre-vingts (regional: França vs. Bélgica/Suíça) — **alta**
+6. A1-3 `quel-age-wh-in-situ` — "quel âge as-tu ?" → "t'as quel âge ?" (wh-in-situ + elisão) — **alta**
+
+zh:
+7. Unit 1 `zaijian-baibai` — 再见 → 拜拜 — **alta**
+8. Unit 1 `duibuqi-buhaoyisi` — 对不起 → 不好意思 (desculpa leve) — **alta**
+9. Unit 2 `shi-drop-casual` — 我是巴西人 → 我巴西人 (queda do 是) — **alta**
+10. Unit 1 `zaoshang-hao-zao` — 早上好 → 早 — **alta**
+
+Nenhuma nota nova entrou em confiança média/baixa nesta rodada — os
+candidatos que ficaram abaixo da barra de confiança (ex: "你叫什么名字？" →
+"你叫什么？" no zh Unit 2, cortando 名字) foram deliberadamente DEIXADOS DE
+FORA do código em vez de shipados com aviso de baixa confiança, pra não
+arriscar conteúdo sociolinguístico errado indo ao ar antes da revisão.
+Se uma sessão futura tiver confiança alta o bastante pra completar esses
+candidatos, adicionar seguindo a mesma regra de report acima.
+
+**Ainda sem nenhuma nota `regional` no zh** — mesma razão já registrada
+acima (nenhum vocabulário concreto com variação regional bem documentada
+foi ensinado ainda nas unidades revisadas). Continua sendo o lugar certo
+pra completar quando uma unidade de comida/objetos concretos aparecer.
+
+**Atualização (2026-09-17, mesmo dia): varredura completa do currículo
+A1/HSK1.** A autora perguntou se as 5 unidades do piloto eram todo o
+conteúdo pretendido — não eram. Ela pediu pra continuar por todas as
+unidades restantes agora, na mesma sessão: fr tem 20 unidades A1
+(A1-1..A1-20, mais 10 unidades `type:"grammar"` intercaladas que **não**
+recebem nota de realidade — não têm `concepts`/vocabulário próprio, só
+`grammar.blocks`), zh tem 18 unidades HSK1 (Unit 1..18, sem unidades
+"grammar" separadas). Passei por TODAS as unidades restantes, não só uma
+amostra, seguindo a mesma regra da atualização anterior: sem teto, sem
+forçar, só onde a relação pedagógica é genuína.
+
+**Achado ao revisar o currículo inteiro do zh**: a densidade natural é
+bem mais baixa que a do fr. Muitos dos `concepts` de GRAMÁTICA do zh já
+fazem o trabalho de uma nota de realidade em si (ex: jǐ suì vs. duō dà
+pra idade de criança/adulto, tóu téng vs. bù shūfu pra dor específica vs.
+mal-estar geral, dǎsuàn vs. yào pra plano pensado vs. intenção imediata) —
+são nuances de REGISTRO/USO real, só que já vêm integradas ao ensino de
+gramática em vez de separadas como "nota de realidade". Adicionar uma
+segunda nota cobrindo a mesma distinção seria redundante, não aditivo —
+por isso várias unidades do zh (3, 4, 5, 6, 7, 9, 11, 12, 13, 14, 15, 18)
+não ganharam nota nova: não por preguiça, mas porque não achei uma
+relação genuína e NÃO REDUNDANTE além do que a gramática já cobre.
+
+**Achado recorrente no fr, vale registrar pra não parecer coincidência**:
+várias unidades já tinham a frase coloquial "escondida" no próprio
+diálogo, contrastando com a forma ensinada nas frases — não precisei
+inventar nada, só tornar explícito o que já estava lá (A1-9 "Tu es d'où ?"
+vs. "D'où viens-tu ?"; A1-10 "Ça coûte combien ?" vs. "Combien ça coûte ?";
+A1-16 "Il est sympa ?" vs. "gentil"; A1-19 "On ne sait pas encore !",
+perfeito pra mostrar a queda do "ne" — o próprio exemplo motivador da
+categoria `gramatica-coloquial`). Essas notas têm confiança mais alta
+ainda por causa disso: o diálogo real do app já demonstrava o fenômeno.
+
+**Mecanismo "wh-in-situ" (manter a ordem sujeito-verbo e jogar a palavra
+de pergunta pro fim) aparece 5 vezes no fr** (A1-2, A1-3, A1-9, A1-10,
+A1-20) — registrado aqui pra não parecer duplicação acidental: é
+deliberado, cada uma ligada a uma pergunta REALMENTE ensinada naquela
+unidade especificamente, não a mesma nota copiada. É genuinamente um dos
+fenômenos mais centrais do francês falado, por isso aparece tantas vezes.
+
+**Novo padrão descoberto no zh: par "falado" vs. "escrito"** (block/毛 vs.
+元/角 na Unidade 8; 号 vs. 日 na Unidade 16) — diferente do padrão
+"informal vs. ensinado" do resto das notas, aqui é o oposto: a forma
+ensinada NO APP já é a coloquial/falada (porque é isso que o aluno vai
+usar), e a nota de realidade revela a forma ESCRITA/formal que ele vai
+encontrar em preços impressos, recibos, documentos. Mesma categoria
+`informal` (ainda reconhecível como a mesma forma), só que a direção do
+contraste é invertida — vale ter isso em mente ao ler a lista abaixo.
+
+**Lista COMPLETA e final de todas as 23 notas de realidade no app**
+(nível de confiança de cada uma, por idioma/unidade, pra revisão manual
+da autora — regra travada nesta seção):
+
+fr (15 notas, unidades A1-1 a A1-20):
+1. A1-1 `svp-informal` — s'il vous plaît → s'il te plaît/STP — **alta**
+2. A1-1 `a-bientot-informal` — à bientôt → à plus/A+ — **alta**
+3. A1-2 `tu-es-contraction` — tu es → t'es — **alta**
+4. A1-2 `comment-tappelles-wh-in-situ` — comment tu t'appelles ? → tu t'appelles comment ? — **alta**
+5. A1-3 `vingt-to-quatrevingts` — base de quatre-vingts (regional: França vs. Bélgica/Suíça) — **alta**
+6. A1-3 `quel-age-wh-in-situ` — quel âge as-tu ? → t'as quel âge ? — **alta**
+7. A1-4 `pere-mere-papa-maman` — le père/la mère → papa/maman — **alta**
+8. A1-7 `nous-sommes-on-est` — nous sommes → on est (nous → on) — **alta**
+9. A1-9 `dou-viens-tu-wh-in-situ` — d'où viens-tu ? → tu es d'où ? (já no diálogo) — **alta**
+10. A1-10 `combien-ca-coute-wh-in-situ` — combien ça coûte ? → ça coûte combien ? (já no diálogo) — **alta**
+11. A1-15 `quest-ce-qui-ne-va-pas-ca-va-pas` — qu'est-ce qui ne va pas ? → ça va pas ? — **alta**
+12. A1-16 `gentil-sympa` — gentil → sympa (já no diálogo) — **alta**
+13. A1-17 `il-y-a-ya` — il y a → y'a — **alta**
+14. A1-19 `ne-drop-on-sait-pas` — on ne sait pas → on sait pas (queda do "ne", já no diálogo) — **alta**
+15. A1-20 `quest-ce-que-tu-as-fait-wh-in-situ` — qu'est-ce que tu as fait ? → t'as fait quoi ? (já no diálogo) — **alta**
+
+zh (8 notas, Unit 1 a Unit 17):
+16. Unit 1 `zaijian-baibai` — 再见 → 拜拜 — **alta**
+17. Unit 1 `duibuqi-buhaoyisi` — 对不起 → 不好意思 (desculpa leve) — **alta**
+18. Unit 1 `zaoshang-hao-zao` — 早上好 → 早 — **alta**
+19. Unit 2 `shi-drop-casual` — 我是巴西人 → 我巴西人 (queda do 是) — **alta**
+20. Unit 8 `kuai-mao-yuan-jiao` — 块/毛 (falado) vs. 元/角 (escrito/formal) — **alta**
+21. Unit 10 `zuo-chuzuche-dache` — 坐出租车 → 打车 (verbo cotidiano) — **alta**
+22. Unit 16 `hao-vs-ri` — 号 (falado) vs. 日 (escrito/formal) — **alta**
+23. Unit 17 `chifanle-greeting` — 你吃了吗？ como cumprimento tradicional, não pergunta literal — **alta**
+
+Nenhuma nota nova entrou em confiança média/baixa nesta varredura
+também — candidatos onde a confiança não era alta (ex: "你叫什么名字？" →
+"你叫什么？" cortando 名字, no zh Unit 2) continuam de fora do código,
+mesmo critério da atualização anterior.
+
+**Cobertura**: das 20 unidades A1 do fr (excluindo as 10 `type:"grammar"`
+sem `concepts`), 9 têm nota de realidade — as outras 11 (A1-1 parcial,
+A1-5, A1-6, A1-8, A1-11, A1-12, A1-13, A1-14, A1-18) não tinham candidato
+com confiança alta o bastante quando revisadas. Das 18 unidades HSK1 do
+zh, 6 têm nota de realidade (Unit 1, 2, 8, 10, 16, 17) — as outras 12 não
+tinham candidato genuíno e não-redundante com a gramática já ensinada.
+Isso não significa que essas unidades nunca vão ter uma nota — significa
+que, nesta revisão, não achei nada que passasse na barra de "relação
+pedagógica real" sem forçar. Uma sessão futura pode achar algo que eu não
+vi.
+
+## Camada de "notas culturais" -- irmã das notas de realidade, fato isolado sem contraste de forma
+
+Proposta da autora (2026-09-17, mesmo dia da varredura completa acima):
+"eu adoraria uma camada de notas culturais também — curiosidades/fatos
+divertidos sobre a cultura e a língua, sem nenhum exercício". Grillada
+antes de implementar (5 perguntas, todas aprovadas).
+
+**Diferença fundamental em relação a `reality`** (não é a mesma coisa com
+nome diferente): `reality` é especificamente um CONTRASTE DE FORMA
+(ensinado vs. real, mesma ideia dita diferente — "s'il vous plaît" vs.
+"s'il te plaît"). `culture` é um FATO ISOLADO — história de uma palavra,
+costume, festividade — sem nenhum contraste de forma envolvido. As duas
+camadas são irmãs, usam o mesmo mecanismo de `concepts`/`trigger`
+(`kind` diferente: `'reality'` vs. `'culture'`), mas nunca a mesma nota
+tentando fazer as duas coisas — se uma nota tem um contraste "ensinado
+vs. real", ela é `reality`; se é só um fato, ela é `culture`.
+
+**Decisões do grilling, já travadas em código** (`CULTURE_NOTE_CATEGORY`/
+`CULTURE_NOTE_BANNER_TEXT` em `fr/app.js` e `zh/app.js`, logo depois de
+`REALITY_NOTE_BANNER_TEXT`; `renderConceptStep()` nos dois arquivos
+estendido com um terceiro ramo `isCulture` ao lado de `isReality`):
+
+- **3 categorias** (mais simples que as 4 de `reality`, porque "cultura" é
+  um balde mais amplo que "registro linguístico" — 4 categorias fechadas
+  não caberiam bem):
+  - `historia` — origem/etimologia de uma palavra ou expressão (ex: dias
+    da semana vêm dos deuses romanos).
+  - `costume` — etiqueta ou tradição social do dia a dia (ex: hábito à
+    mesa, regra social não escrita).
+  - `festividade` — feriado, celebração, data especial (ex: como funciona
+    o Ano Novo Chinês).
+- **Banner por categoria, tom leve/"curiosidade"** (diferente do tom de
+  `reality`, que soa mais "cuidado, isso pode te confundir" — aqui não há
+  contraste nenhum pra alertar): `historia` → "📜 Você sabia?", `costume`
+  → "🎭 Costume real", `festividade` → "🎉 Data especial".
+- **Gratuito por enquanto** — mesmo raciocínio de `reality` (conteúdo
+  estático, sem custo marginal de servir). Reavaliar só se cada nota um
+  dia ganhar mídia própria (imagem/ilustração), aí o cálculo muda.
+- **Herda as regras de densidade/revisão de `reality`** (já travadas
+  acima, não reinventadas aqui): sem teto numérico, só entra se a relação
+  pedagógica com a palavra/frase ensinada for genuína, toda nota nova
+  reportada no chat com nível de confiança pra revisão manual da autora.
+  Mesma regra de "não force, mas não limite".
+- **Sem exercício, ponto final** — diferente de `reality` (que tem uma
+  categoria, `gramatica-coloquial`, com um caminho pensado pra virar
+  testável dentro da correção), `culture` não tem nenhuma ambição de virar
+  interativo. É card passivo por definição do próprio conceito, não um
+  MVP que pode crescer depois.
+
+**Piloto escrito, 5 notas** (mesma lógica de "escrever antes de varrer o
+currículo inteiro" usada em `reality`):
+
+fr:
+1. A1-5 `croissant-nao-e-diario` (`costume`) — croissant não é hábito
+   diário pra maioria dos franceses (mito comum) — ligado ao "croissant"
+   que aparece no diálogo desta lição — **confiança alta**
+2. A1-7 `dias-semana-deuses-romanos` (`historia`) — lundi/mardi vêm da
+   Lua/Marte romanos — ligado ao vocabulário desta lição — **confiança
+   alta**
+3. A1-16 `bandeira-tricolor-historia` (`historia`) — origem das 3 cores
+   da bandeira francesa (Revolução Francesa) — ligado às 3 cores
+   ensinadas nesta lição (rouge/bleu/blanc) — **confiança alta**
+
+zh:
+4. Unit 3 `xusui-ano-novo` (`festividade`) — sistema tradicional de idade
+   nominal (虚岁), muda no Ano Novo Chinês, não no aniversário — ligado ao
+   岁 (suì) desta lição — **confiança alta**
+5. Unit 5 `cha-origem-china` (`historia`) — China é o berço do chá — ligado
+   ao 茶 (chá) desta lição — **confiança alta**
+
+Todas as 5 validadas via `renderConceptStep()` contra o app real (banner
+certo por categoria, título/corpo renderizando). Nenhuma entrou em
+confiança média/baixa nesta rodada.
+
+**Atualização (2026-09-18): varredura completa do currículo, mesmo dia da
+varredura completa de `reality`.** A autora pediu "implemente tudo" depois
+de ver o piloto de 5 notas — mesma dinâmica já usada em `reality` (piloto
+pequeno primeiro, currículo inteiro só depois de aprovação). Passei pelas
+20 unidades A1 do fr (excluindo as 10 `type:"grammar"`) e pelas 18 unidades
+HSK1 do zh procurando fatos culturais genuinamente ligados ao vocabulário
+de cada lição, sem forçar. 13 notas novas entraram (7 fr + 6 zh), todas
+confiança alta — nenhum candidato de confiança média/baixa foi shipado
+(mesmo critério usado em `reality`: fora do código até virar alta
+confiança).
+
+**Lista COMPLETA e final das 18 notas culturais no app** (nível de
+confiança de cada uma, por idioma/unidade, pra revisão manual da autora —
+mesma regra de report travada na seção de `reality` acima):
+
+fr (10 notas, unidades A1-1 a A1-19):
+1. A1-1 `la-bise-cumprimento` (`costume`) — cumprimento com beijinhos no
+   rosto (número varia por região) — ligado ao diálogo de cumprimento
+   desta lição — **alta**
+2. A1-4 `repas-dominical` (`costume`) — o almoço de domingo em família,
+   longo e em várias etapas — ligado ao vocabulário de família desta
+   lição — **alta**
+3. A1-5 `croissant-nao-e-diario` (`costume`) — croissant não é hábito
+   diário pra maioria dos franceses (mito comum) — **alta**
+4. A1-6 `le-midi-almoco-longo` (`costume`) — o almoço francês como pausa
+   de verdade (45min-1h, refeição completa) — ligado a "le midi" desta
+   lição — **alta**
+5. A1-7 `dias-semana-deuses-romanos` (`historia`) — lundi/mardi vêm da
+   Lua/Marte romanos — **alta**
+6. A1-11 `le-marche-tradicao` (`costume`) — a feira ao ar livre (marché)
+   além do supermercado — ligado ao tema de compras de mercado desta
+   lição — **alta**
+7. A1-14 `metro-paris-historia` (`historia`) — o metrô de Paris abriu em
+   1900 pra Exposição Universal — ligado a "le métro" desta lição —
+   **alta**
+8. A1-16 `bandeira-tricolor-historia` (`historia`) — origem das 3 cores
+   da bandeira francesa (Revolução Francesa) — **alta**
+9. A1-17 `andar-terreo-premier-etage` (`costume`) — rez-de-chaussée
+   (térreo) é separado de "1er étage" (o que seria "2º andar" no Brasil)
+   — ligado ao vocabulário de cômodos/andares desta lição, inclusive à
+   frase "La chambre est au premier étage" já usada nas phrases —
+   **alta**
+10. A1-19 `cinema-nasceu-na-franca` (`historia`) — 1ª exibição pública
+    paga de cinema, irmãos Lumière, Paris 1895 — ligado a "le cinéma"
+    desta lição — **alta**
+
+zh (8 notas, Unit 2 a Unit 12):
+11. Unit 2 `ordem-nomes-sobrenome-primeiro` (`costume`) — sobrenome vem
+    antes do nome próprio — ligado ao "小李" (Xiǎo Lǐ) que já aparece no
+    diálogo desta lição — **alta**
+12. Unit 3 `xusui-ano-novo` (`festividade`) — sistema tradicional de
+    idade nominal (虚岁) — **alta**
+13. Unit 3 `si-numero-azarado` (`costume`) — 四 (sì, "quatro") soa como
+    死 (sǐ, "morte"), número evitado — ligado ao 四 desta lição — **alta**
+14. Unit 4 `politica-filho-unico-historia` (`historia`) — política do
+    filho único (1979-2015/16) — ligado a 孩子 (háizi) desta lição —
+    **alta**
+15. Unit 5 `cha-origem-china` (`historia`) — China é o berço do chá —
+    **alta**
+16. Unit 6 `fuso-horario-unico` (`historia`) — China inteira usa o
+    horário de Pequim, apesar da extensão geográfica — ligado a 点 (diǎn)
+    desta lição — **alta**
+17. Unit 8 `regatear-mercado` (`costume`) — regatear é normal em
+    mercados/feiras, não em lojas de preço fixo — ligado ao próprio
+    diálogo desta lição, que já mostra o preço caindo de 30 pra 25 kuài —
+    **alta**
+18. Unit 12 `guangchangwu-danca-praca` (`costume`) — dança de praça
+    (广场舞), tradição social chinesa — ligado a 跳舞 (tiàowǔ) desta lição —
+    **alta**
+
+Todas as 13 notas novas validadas via `renderConceptStep()` contra o app
+real (banner certo por categoria, título renderizando). Nenhuma entrou em
+confiança média/baixa nesta varredura.
+
+**Cobertura**: das 20 unidades A1 do fr (excluindo as 10 `type:"grammar"`),
+10 têm nota cultural — as outras 10 não tinham candidato com confiança
+alta o bastante quando revisadas (mesmo critério de `reality`: não força).
+Das 18 unidades HSK1 do zh, 7 têm nota cultural (Unit 2, 3, 4, 5, 6, 8, 12
+— Unit 3 tem 2) — as outras 11 não tinham candidato genuíno. Isso não
+significa que essas unidades nunca vão ter uma nota — uma sessão futura
+pode achar algo que eu não vi, mesmo texto de fechamento já usado na
+varredura de `reality`.

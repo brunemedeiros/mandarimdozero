@@ -50,6 +50,71 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Piloto da camada de "notas de realidade" (ver CLAUDE.md) --
+      // categoria 'informal', permitida em HSK1. Ligada especificamente ao
+      // vocabulário 再见 desta lição. Confiança ALTA: 拜拜 (do inglês
+      // "bye-bye") é extremamente comum no chinês falado/escrito informal
+      // hoje em dia, sobretudo entre falantes mais jovens/urbanos.
+      {
+        id: "zaijian-baibai",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 1 },
+        blocks: [
+          {
+            title: "\"再见\" no dia a dia costuma virar \"拜拜\"",
+            body: "<strong>再见 (zàijiàn)</strong> é a despedida padrão e sempre correta. No dia a dia, principalmente entre pessoas mais jovens, é muito comum ouvir <strong>拜拜 (bàibài)</strong> — emprestado do inglês \"bye-bye\" — em vez de 再见, especialmente ao telefone ou em mensagens.",
+            examples: [
+              { c: "拜拜", p: "bàibài", t: "tchau (informal, do inglês \"bye-bye\")" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Categoria 'informal', ligada ao vocabulário 对不起 desta lição.
+      // Confiança ALTA: 不好意思 como pedido de desculpa mais leve/social
+      // (em vez do mais "pesado" 对不起) pra situações do dia a dia é um
+      // uso real bem documentado no ensino de chinês, não uma generalização
+      // frágil.
+      {
+        id: "duibuqi-buhaoyisi",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 4 },
+        blocks: [
+          {
+            title: "Pra coisas pequenas, \"对不起\" costuma virar \"不好意思\"",
+            body: "<strong>对不起 (duìbuqǐ)</strong> é a forma padrão de pedir desculpa, mas no dia a dia costuma soar pesada demais pra coisas pequenas — esbarrar em alguém, chegar um pouco atrasado, interromper. Pra essas situações, é muito mais comum ouvir <strong>不好意思 (bù hǎoyìsi)</strong>, um pedido de desculpa mais leve, quase como \"foi mal\" ou \"com licença\".",
+            examples: [
+              { c: "不好意思", p: "bù hǎoyìsi", t: "foi mal / com licença (desculpa leve, coisas pequenas)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Piloto original da camada de "notas de realidade" (ver CLAUDE.md) --
+      // categoria 'informal', permitida em HSK1. Ligada especificamente ao
+      // vocabulário 早上好 desta lição -- é literalmente o caso concreto
+      // citado na proposta original da feature, agora virando conteúdo de
+      // verdade. Categoria em string literal, não REALITY_NOTE_CATEGORY.
+      // INFORMAL -- content.js carrega ANTES de app.js (ver <script> em
+      // index.html), a constante ainda não existe neste ponto.
+      {
+        id: "zaoshang-hao-zao",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 6 },
+        blocks: [
+          {
+            title: "\"早上好\" no dia a dia vira só \"早\"",
+            body: "<strong>早上好 (zǎoshang hǎo)</strong> é a forma completa e educada de \"bom dia\". No dia a dia, entre pessoas que já se conhecem — colegas, vizinhos, amigos — é muito mais comum ouvir só <strong>早 (zǎo)</strong>, literalmente \"cedo\". Usar a forma completa com alguém próximo pode até soar um pouco formal demais.",
+            examples: [
+              { c: "早", p: "zǎo", t: "bom dia (informal, curto)" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     trueFalseExercises: [{ subject: "谢谢", pinyin: "xièxiè", emoji: "🎁", claim: "Isto é o que dizemos quando recebemos um presente de outra pessoa.", answer: true,
@@ -127,6 +192,50 @@ const UNITS = [
             body: "A estrutura mais comum de uma frase em chinês segue a mesma ordem do português: sujeito, depois verbo, depois objeto. Diferente do português, o chinês tem pouca flexibilidade nessa ordem — mudar a posição das palavras muda o significado da frase.",
             examples: [
               { c: "你是哪国人？", p: "nǐ shì nǎ guó rén?", t: "de que país você é?" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Piloto da camada de "notas de realidade" -- categoria
+      // 'gramatica-coloquial'. Disparada depois do diálogo, onde a frase
+      // real "Wǒ shì Bāxī rén" acabou de aparecer. A integração com a
+      // correção de exercícios digitados (aceitar "我巴西人" como certo e
+      // mostrar a forma padrão ao lado) é trabalho futuro -- ver CLAUDE.md
+      // -- por isso o texto já avisa pra continuar escrevendo a forma
+      // padrão por enquanto.
+      {
+        id: "shi-drop-casual",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "\"Wǒ shì Bāxī rén\" às vezes perde o \"shì\"",
+            body: "Na fala rápida e bem casual, é possível ouvir <strong>我巴西人 (wǒ Bāxī rén)</strong> sem o 是 — o significado continua claro pelo contexto. Isso é bem informal e só funciona em frases curtas assim. Nos exercícios daqui, continue escrevendo a forma padrão com <strong>是</strong>, que é a que sempre soa correta.",
+            examples: [
+              { c: "我巴西人", p: "wǒ Bāxī rén", t: "eu (sou) brasileira (fala muito casual)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'costume'. Ligada
+      // ao próprio diálogo desta lição, que já mostra "小李" (Xiǎo Lǐ) --
+      // sobrenome Lǐ com o prefixo carinhoso 小 na frente, demonstrando a
+      // ordem sobrenome+nome. Confiança ALTA: a ordem de nomes chineses é
+      // um fato amplamente documentado.
+      {
+        id: "ordem-nomes-sobrenome-primeiro",
+        kind: "culture",
+        category: "costume",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "Em chinês, o sobrenome vem primeiro",
+            body: "Repare em \"小李\" (Xiǎo Lǐ) no diálogo: <strong>Lǐ</strong> é o sobrenome, e vem ANTES do nome próprio — o oposto da ordem em português. 小 (xiǎo, \"pequeno\") é um prefixo carinhoso e informal, comum entre colegas e amigos mais próximos, usado com o sobrenome de alguém mais jovem ou da mesma idade.",
+            examples: [
+              { c: "小李", p: "Xiǎo Lǐ", t: "(apelido carinhoso) \"Li\" — sobrenome Lǐ + prefixo 小" }
             ],
             wrapup: true
           }
@@ -218,6 +327,49 @@ const UNITS = [
             examples: [
               { c: "你几岁？", p: "nǐ jǐ suì?", t: "quantos anos (criança)?" },
               { c: "你多大？", p: "nǐ duō dà?", t: "quantos anos (adulto)?" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Piloto da camada de "notas culturais" (grilling 2026-09-17) --
+      // categoria 'festividade', diferente de 'reality' porque não há
+      // contraste de forma, só um fato isolado. Ligada ao 岁 (suì) desta
+      // lição. Confiança ALTA: o sistema de idade nominal (虚岁) é um fato
+      // cultural bem documentado sobre a China.
+      {
+        id: "xusui-ano-novo",
+        kind: "culture",
+        category: "festividade",
+        trigger: { afterVocabIdx: 11 },
+        blocks: [
+          {
+            title: "Na China tradicional, a idade muda no Ano Novo — não no aniversário",
+            body: "No sistema tradicional chinês (<strong>虚岁, xūsuì</strong>, \"idade nominal\"), um bebê já nasce com 1 ano, e todo mundo ganha mais um ano junto no Ano Novo Chinês — não no próprio aniversário. Hoje o sistema ocidental (idade real, 周岁) é o mais usado no dia a dia, mas o 虚岁 ainda aparece em contextos tradicionais.",
+            examples: [
+              { c: "虚岁", p: "xūsuì", t: "idade nominal (sistema tradicional)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // 2ª nota cultural desta unidade (varredura 2026-09-18) -- categoria
+      // 'costume'. Ligada ao 四 (sì) desta lição. Confiança ALTA: a
+      // associação 四/死 (homófonos quase idênticos) e a superstição
+      // resultante são um fato cultural amplamente documentado sobre a
+      // China (e outros países de língua chinesa).
+      {
+        id: "si-numero-azarado",
+        kind: "culture",
+        category: "costume",
+        trigger: { afterVocabIdx: 4 },
+        blocks: [
+          {
+            title: "Por que o número 4 é evitado na China",
+            body: "四 (sì, \"quatro\") soa muito parecido com 死 (sǐ, \"morte\") — por causa dessa semelhança de som, muita gente evita o número 4 em situações do dia a dia: é comum prédios pularem o 4º andar (ou o número do apartamento), e números de telefone ou placas de carro com 4 podem ser considerados menos desejáveis. É o mesmo tipo de superstição que o número 13 tem em vários países ocidentais.",
+            examples: [
+              { c: "四", p: "sì", t: "quatro" },
+              { c: "死", p: "sǐ", t: "morte / morrer" }
             ],
             wrapup: true
           }
@@ -339,6 +491,25 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'historia'. Ligada
+      // ao 孩子 (háizi) desta lição. Confiança ALTA: a política do filho
+      // único (1979-2015/16) é um fato histórico amplamente documentado.
+      {
+        id: "politica-filho-unico-historia",
+        kind: "culture",
+        category: "historia",
+        trigger: { afterVocabIdx: 7 },
+        blocks: [
+          {
+            title: "Por que muita gente da geração dos pais só tem um irmão (ou nenhum)",
+            body: "De 1979 até o fim de 2015, a China teve a <strong>política do filho único</strong> (一孩政策), que limitava a maioria das famílias urbanas a ter apenas um filho, como forma de conter o crescimento populacional. A política foi encerrada oficialmente em 2016, substituída primeiro pela permissão de dois filhos e depois de três — mas seu efeito ainda aparece hoje na estrutura de muitas famílias chinesas.",
+            examples: [
+              { c: "孩子", p: "háizi", t: "filho(a) / criança" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     vocab: [
@@ -419,6 +590,26 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Piloto da camada de "notas culturais" (grilling 2026-09-17) --
+      // categoria 'historia'. Confiança ALTA: a China como berço do chá é
+      // um fato histórico amplamente documentado, ligado ao vocabulário 茶
+      // desta lição.
+      {
+        id: "cha-origem-china",
+        kind: "culture",
+        category: "historia",
+        trigger: { afterVocabIdx: 5 },
+        blocks: [
+          {
+            title: "A China é o berço do chá",
+            body: "O chá tem origem na China — é consumido no país há milhares de anos, e a própria palavra \"chá\"/\"tea\" em várias línguas do mundo vem de palavras chinesas (chá 茶, dependendo da rota comercial). O costume de servir chá pra convidados é parte importante da hospitalidade chinesa até hoje.",
+            examples: [
+              { c: "茶", p: "chá", t: "chá" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     trueFalseExercises: [{ subject: "我要一杯茶。", pinyin: "wǒ yào yì bēi chá.", emoji: "☕", claim: "Essa frase é usada pra pedir algo num restaurante ou café.", answer: true,
@@ -480,6 +671,26 @@ const UNITS = [
             examples: [
               { c: "七点", p: "qī diǎn", t: "7 horas" },
               { c: "现在几点？", p: "xiànzài jǐ diǎn?", t: "que horas são agora?" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'historia'. Ligada
+      // ao 点 (diǎn, "hora(s)") desta lição. Confiança ALTA: a China usar
+      // um único fuso horário nacional (apesar da extensão geográfica) é
+      // um fato amplamente documentado.
+      {
+        id: "fuso-horario-unico",
+        kind: "culture",
+        category: "historia",
+        trigger: { afterVocabIdx: 0 },
+        blocks: [
+          {
+            title: "A China inteira usa o mesmo horário",
+            body: "Apesar de o território da China cobrir uma faixa larga o bastante pra caber 5 fusos horários geográficos, o país inteiro usa um único horário oficial: o <strong>horário de Pequim</strong> (北京时间). Isso significa que, no extremo oeste do país, o sol pode nascer bem mais tarde no relógio do que no leste — mas todo mundo diz as horas do mesmo jeito.",
+            examples: [
+              { c: "北京时间", p: "Běijīng shíjiān", t: "horário de Pequim (horário oficial do país todo)" }
             ],
             wrapup: true
           }
@@ -649,6 +860,28 @@ const UNITS = [
           }
         ]
       },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: 块/毛 são
+      // as formas FALADAS (o próprio vocabulário desta lição já diz isso),
+      // 元/角 são as formas ESCRITAS/formais (preços impressos, recibos,
+      // notícias) -- fato bem documentado sobre o mandarim, mesmo padrão do
+      // 号/日 que aparece na Unidade 16.
+      {
+        id: "kuai-mao-yuan-jiao",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 4 },
+        blocks: [
+          {
+            title: "\"Kuài\"/\"máo\" são o que se FALA — \"yuán\"/\"jiǎo\" é o que se ESCREVE",
+            body: "<strong>Kuài</strong> e <strong>máo</strong> são as formas que você vai OUVIR o tempo todo, no dia a dia. Mas em preços impressos, recibos e notícias, é comum ver as formas formais/escritas: <strong>yuán</strong> (元, equivalente a kuài) e <strong>jiǎo</strong> (角, equivalente a máo). Ninguém fala \"yuán\" numa conversa casual, mas vale reconhecer por escrito.",
+            examples: [
+              { c: "元", p: "yuán", t: "unidade monetária (forma escrita/formal de 块)" },
+              { c: "角", p: "jiǎo", t: "um décimo de yuán (forma escrita/formal de 毛)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
       {
         id: "ba-particle",
         trigger: { afterVocabIdx: 6 },
@@ -672,6 +905,27 @@ const UNITS = [
             body: "Você já viu que todo número precisa de um classificador antes do substantivo (个/口, lá na Unidade 4). Assim como 口 é específico pra contar pessoas da família, outras categorias de coisas têm seu próprio classificador — como 件 pra roupas.",
             examples: [
               { c: "一件衣服", p: "yí jiàn yīfu", t: "uma peça de roupa" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'costume'. Ligada
+      // ao próprio diálogo desta lição, que já mostra o preço caindo de 30
+      // para 25 kuài. Confiança ALTA: o regatear em mercados/feiras
+      // (não em lojas de preço fixo/shopping) é um costume amplamente
+      // documentado na China.
+      {
+        id: "regatear-mercado",
+        kind: "culture",
+        category: "costume",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "Regatear é normal — mas só em certos lugares",
+            body: "Repare como o preço caiu de 30 para 25 kuài no diálogo: em mercados de rua, feiras e pequenas lojas de bairro, regatear o preço é normal e até esperado. Mas em shoppings, supermercados e lojas de marca, o preço é fixo e regatear soa fora de lugar — o segredo é reconhecer o tipo de estabelecimento antes de tentar.",
+            examples: [
+              { c: "便宜一点吧", p: "piányi yìdiǎn ba", t: "faz mais barato (frase típica de regateio)" }
             ],
             wrapup: true
           }
@@ -849,6 +1103,26 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: 打车
+      // (literalmente "bater carro") é o verbo cotidiano pra "pegar um
+      // táxi/app de carro", usado o tempo todo no lugar da estrutura
+      // 坐 + 出租车, ligado ao vocabulário desta lição.
+      {
+        id: "zuo-chuzuche-dache",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "\"Zuò chūzūchē\" no dia a dia vira \"dǎchē\"",
+            body: "Em vez da estrutura completa <strong>zuò chūzūchē</strong> (ir de táxi), o verbo cotidiano pra \"pegar um táxi\" (ou um app de carro) é <strong>dǎchē</strong> (打车, literalmente \"bater carro\") — usado o tempo todo em vez da frase mais longa.",
+            examples: [
+              { c: "打车", p: "dǎchē", t: "pegar um táxi/carro (fala cotidiana)" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     vocab: [
@@ -1007,6 +1281,25 @@ const UNITS = [
             examples: [
               { c: "看书", p: "kàn shū", t: "ler livro (atividade visual)" },
               { c: "听音乐", p: "tīng yīnyuè", t: "ouvir música (atividade auditiva)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'costume'. Ligada
+      // ao 跳舞 (tiàowǔ) desta lição. Confiança ALTA: a dança de praça
+      // (广场舞) é um fenômeno social chinês amplamente documentado.
+      {
+        id: "guangchangwu-danca-praca",
+        kind: "culture",
+        category: "costume",
+        trigger: { afterVocabIdx: 6 },
+        blocks: [
+          {
+            title: "A dança de praça: um hobby muito chinês",
+            body: "Em praças e parques por toda a China, é comum ver grupos — geralmente de senhoras de meia-idade e idosas — se reunindo todo fim de tarde pra dançar em conjunto ao som de música, numa tradição conhecida como <strong>guǎngchǎng wǔ</strong> (广场舞, \"dança de praça\"). É ao mesmo tempo exercício físico e um momento social importante para essa geração.",
+            examples: [
+              { c: "广场舞", p: "guǎngchǎng wǔ", t: "dança de praça" }
             ],
             wrapup: true
           }
@@ -1359,6 +1652,26 @@ const UNITS = [
           }
         ]
       },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: mesmo
+      // padrão do 块/毛 vs 元/角 (Unidade 8) -- o próprio vocabulário desta
+      // lição já marca 号 como "uso falado", então 日 é a forma
+      // escrita/formal equivalente. Fato bem documentado sobre o mandarim.
+      {
+        id: "hao-vs-ri",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 3 },
+        blocks: [
+          {
+            title: "\"Hào\" é o que se FALA — \"rì\" é o que se ESCREVE",
+            body: "<strong>Hào</strong> (号) é a forma que você vai ouvir no dia a dia pra dizer o dia do mês. Em textos formais, documentos e datas escritas, é comum ver <strong>rì</strong> (日) no lugar — mesmo caractere que aparece em 星期日 (domingo) e em 今天/明天.",
+            examples: [
+              { c: "八月二十日", p: "bā yuè èrshí rì", t: "20 de agosto (forma escrita/formal)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
       {
         id: "hours-minutes",
         trigger: { afterVocabIdx: 6 },
@@ -1482,6 +1795,27 @@ const UNITS = [
             body: "Pra perguntar se uma ação já foi concluída, junta-se 了 (marcando conclusão) com 吗 (marcando pergunta) no final da frase — a combinação pergunta \"isso já aconteceu?\".",
             examples: [
               { c: "你吃饭了吗？", p: "nǐ chī fàn le ma?", t: "você já comeu?" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: "你吃了吗"
+      // como cumprimento (não pergunta literal sobre comida) é um fato
+      // cultural/linguístico bem documentado sobre o chinês, tradicionalmente
+      // usado como equivalente a "tudo bem?" -- ligado exatamente à frase
+      // que esta lição ensina.
+      {
+        id: "chifanle-greeting",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "\"你吃饭了吗？\" às vezes não é uma pergunta de verdade",
+            body: "Além de perguntar literalmente se alguém já comeu, <strong>你吃了吗？</strong> (versão curta, sem 饭) é tradicionalmente usado como um cumprimento — parecido com \"tudo bem?\" em português, sem esperar uma resposta detalhada sobre comida. É um uso mais cultural/tradicional do que universal hoje em dia, mas vale reconhecer quando ouvir.",
+            examples: [
+              { c: "你吃了吗？", p: "nǐ chī le ma?", t: "tudo bem? (cumprimento tradicional, não pergunta literal)" }
             ],
             wrapup: true
           }

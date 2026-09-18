@@ -74,6 +74,73 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Piloto da camada de "notas de realidade" (ver CLAUDE.md) --
+      // categoria 'informal', permitida em A1. Ligada especificamente ao
+      // vocabulário "s'il vous plaît" desta lição (não é uma dica genérica
+      // sobre cortesia solta em qualquer lugar). Categoria em string literal,
+      // não REALITY_NOTE_CATEGORY.INFORMAL -- content.js carrega ANTES de
+      // app.js (ver <script> em index.html), a constante ainda não existe
+      // neste ponto. O valor precisa continuar igual ao de app.js.
+      {
+        id: "svp-informal",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 6 },
+        blocks: [
+          {
+            title: "\"S'il vous plaît\" no dia a dia",
+            body: "Na fala informal ou em mensagens de texto, <strong>s'il vous plaît</strong> quase sempre encolhe: com amigos vira <strong>s'il te plaît</strong> (a forma \"tu\", não \"vous\"), e por escrito é comum ver só <strong>STP</strong>. A forma completa com \"vous\" continua sendo a mais segura com desconhecidos.",
+            examples: [
+              { f: "s'il te plaît", t: "por favor (informal, entre amigos)" },
+              { f: "STP", t: "abreviação de texto pra \"s'il te plaît\"" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // 2ª nota de realidade desta unidade (grilling 2026-09-17, densidade
+      // sem teto -- ver comentário de REALITY_NOTE_LEVEL_GUIDANCE em
+      // app.js). Confiança ALTA: "à plus"/"A+" é abreviação de despedida
+      // extremamente comum em francês informal/texto, ligada especificamente
+      // ao "à bientôt" desta lição.
+      {
+        id: "a-bientot-informal",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 9 },
+        blocks: [
+          {
+            title: "\"À bientôt\" entre amigos vira \"à plus\"",
+            body: "Com amigos, <strong>à bientôt</strong> é comum, mas no dia a dia (e quase sempre em mensagem de texto) a despedida mais usada é <strong>à plus</strong> — e por escrito costuma virar só <strong>A+</strong>. Com desconhecidos ou em contexto formal, \"à bientôt\" continua sendo a escolha certa.",
+            examples: [
+              { f: "à plus", t: "até mais (informal, entre amigos)" },
+              { f: "A+", t: "abreviação de texto pra \"à plus\"" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Nota cultural (varredura completa 2026-09-18, ver CLAUDE.md) --
+      // categoria 'costume', fato isolado sem contraste de forma. Ligada ao
+      // próprio cumprimento praticado nesta lição/diálogo ("Encontro na
+      // rua"). Confiança ALTA: "la bise" é um costume social francês
+      // amplamente documentado, não uma generalização arriscada.
+      {
+        id: "la-bise-cumprimento",
+        kind: "culture",
+        category: "costume",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "Por que os franceses se cumprimentam com beijinhos no rosto?",
+            body: "Além de dizer \"bonjour\", é muito comum cumprimentar amigos e familiares com <strong>la bise</strong> — um ou mais beijinhos leves no rosto (o número varia por região: 2 é o mais comum, mas em algumas regiões são 3 ou até 4!). Entre desconhecidos ou em contexto formal/profissional, aperta-se a mão em vez disso.",
+            examples: [
+              { f: "faire la bise", t: "cumprimentar com beijinho(s) no rosto" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     trueFalseExercises: [{ subject: "Merci beaucoup !", emoji: "🙏", claim: "Isso é o que dizemos quando alguém nos ajuda muito.", answer: true,
@@ -150,6 +217,51 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Piloto da camada de "notas de realidade" -- categoria
+      // 'gramatica-coloquial'. Disparada depois do diálogo, onde a frase
+      // real "Tu es français ?" acabou de aparecer, não como regra solta.
+      // A integração com a correção de exercícios digitados (aceitar "t'es"
+      // como certo e mostrar a forma padrão ao lado) é trabalho futuro --
+      // ver CLAUDE.md, seção da camada de notas de realidade -- por isso o
+      // texto já avisa pra continuar escrevendo a forma padrão por enquanto.
+      {
+        id: "tu-es-contraction",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "\"Tu es\" vira \"t'es\" na fala",
+            body: "Seria \"Tu es français ?\", mas na fala corrida quase ninguém pronuncia as duas palavras separadas — <strong>tu es</strong> vira <strong>t'es</strong>. É tão comum que aparece até em mensagens escritas informais: \"T'es français ?\". Nos exercícios daqui, continue escrevendo a forma padrão <strong>tu es</strong> — a contração é só pra reconhecer quando ouvir ou ler.",
+            examples: [
+              { f: "t'es français ?", t: "você é francês? (fala corrida)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // 2ª nota de realidade desta unidade (grilling 2026-09-17, densidade
+      // sem teto). Confiança ALTA: o francês falado prefere manter a ordem
+      // sujeito-verbo e jogar a palavra interrogativa pro fim da frase
+      // ("wh-in-situ") -- fenômeno muito documentado, não é uma
+      // generalização frágil. Ligada especificamente à pergunta
+      // "Comment tu t'appelles ?" desta lição (vocab "s'appeler").
+      {
+        id: "comment-tappelles-wh-in-situ",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "\"Comment tu t'appelles ?\" também vira \"Tu t'appelles comment ?\"",
+            body: "Na fala cotidiana, é tão ou mais comum deixar a palavra de pergunta (\"comment\") no FIM da frase, mantendo a ordem normal sujeito-verbo — <strong>tu t'appelles comment ?</strong> em vez de \"comment tu t'appelles ?\". Nos exercícios daqui, continue usando a ordem com \"comment\" no início — é a forma que os dois exercícios daqui pedem.",
+            examples: [
+              { f: "tu t'appelles comment ?", t: "qual é o seu nome? (fala cotidiana)" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     trueFalseExercises: [{ subject: "Comment tu t'appelles ?", emoji: "🙋", claim: "Essa pergunta serve pra saber a idade de alguém.", answer: false,
@@ -221,6 +333,55 @@ const UNITS = [
             examples: [
               { f: "avoir", t: "ter" },
               { f: "l'âge", t: "a idade" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Piloto da camada de "notas de realidade" -- categoria 'regional',
+      // única com `variants` em vez de `examples` (sem forma "oficial" —
+      // ver CLAUDE.md). Ligada ao "vingt" desta lição: é exatamente o
+      // número que a França multiplica pra formar 80 (quatre-VINGTS).
+      {
+        id: "vingt-to-quatrevingts",
+        kind: "reality",
+        category: "regional",
+        trigger: { afterVocabIdx: 5 },
+        blocks: [
+          {
+            title: "\"Vingt\" é a base de um sistema esquisito",
+            body: "Na França, depois de 69 os números saltam pra base 20: 70 é <strong>soixante-dix</strong> (\"sessenta-dez\"), 80 é <strong>quatre-vingts</strong> (\"quatro-vintes\") — o \"vingt\" que você acabou de aprender, multiplicado! Mas isso não é assim em todo lugar onde se fala francês.",
+            variants: [
+              { region: "França", form: "soixante-dix (70), quatre-vingts (80), quatre-vingt-dix (90)" },
+              { region: "Bélgica e Suíça", form: "septante (70) e nonante (90) — mais parecido com contar de 10 em 10" },
+              { region: "Suíça (só lá)", form: "huitante (80) — a Bélgica continua usando quatre-vingts" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // 3ª nota de realidade desta unidade (grilling 2026-09-17, densidade
+      // sem teto). Confiança ALTA: mesmo fenômeno wh-in-situ da nota já
+      // escrita em A1-2 (ver comment-tappelles-wh-in-situ), aplicado à
+      // pergunta específica desta lição -- "quel âge as-tu ?" combina o
+      // wh-in-situ com a elisão "tu as" → "t'as", também extremamente
+      // comum. Repetir o mecanismo pra uma frase diferente e genuinamente
+      // ensinada aqui não é redundante (cada nota responde à pergunta
+      // exata que a lição faz), mas um 3º exemplo do MESMO mecanismo
+      // dentro da mesma unidade ("combien ça coûte ?" → "ça coûte
+      // combien ?") foi deliberadamente deixado de fora por soar repetitivo
+      // — ver relatório desta sessão.
+      {
+        id: "quel-age-wh-in-situ",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { afterVocabIdx: 8 },
+        blocks: [
+          {
+            title: "\"Quel âge as-tu ?\" também vira \"T'as quel âge ?\"",
+            body: "Na fala cotidiana, \"tu as\" costuma encolher pra <strong>t'as</strong>, e a palavra de pergunta (\"quel âge\") pode ir pro fim da frase — <strong>t'as quel âge ?</strong> em vez de \"quel âge as-tu ?\". Nos exercícios daqui, continue usando a forma \"quel âge as-tu ?\" — é a forma que os exercícios pedem.",
+            examples: [
+              { f: "t'as quel âge ?", t: "quantos anos você tem? (fala cotidiana)" }
             ],
             wrapup: true
           }
@@ -367,6 +528,47 @@ const UNITS = [
             examples: [
               { f: "mon frère", t: "meu irmão" },
               { f: "ma sœur", t: "minha irmã" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: papa/maman
+      // são as formas realmente usadas em família no dia a dia -- père/mère
+      // soam mais neutras/formais (documentos, frases gerais sobre "o pai
+      // de alguém"), ligado ao vocabulário desta lição.
+      {
+        id: "pere-mere-papa-maman",
+        kind: "reality",
+        category: "informal",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "\"Le père\"/\"la mère\" no dia a dia viram \"papa\"/\"maman\"",
+            body: "Pra falar SOBRE pai/mãe em geral, ou de forma mais neutra, usa-se <strong>le père</strong>/<strong>la mère</strong>. Mas ao falar diretamente COM o próprio pai/mãe, ou sobre a própria família no dia a dia, o normal é <strong>papa</strong>/<strong>maman</strong> — mesmo entre adultos.",
+            examples: [
+              { f: "papa", t: "pai / papai (uso familiar)" },
+              { f: "maman", t: "mãe / mamãe (uso familiar)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'costume'. Ligada
+      // ao vocabulário de família desta lição. Confiança ALTA: o "repas
+      // dominical" (almoço de domingo em família, longo e à mesa) é um
+      // costume francês amplamente documentado, distinto do dia a dia.
+      {
+        id: "repas-dominical",
+        kind: "culture",
+        category: "costume",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "O almoço de domingo em família",
+            body: "Na França, é tradicional que a família se reúna pra um <strong>repas dominical</strong> — o almoço de domingo — que costuma ser mais longo e elaborado que as refeições do resto da semana, com várias etapas (entrada, prato principal, queijo, sobremesa). É um dos momentos em que várias gerações da família se encontram.",
+            examples: [
+              { f: "le repas dominical", t: "o almoço de domingo em família" }
             ],
             wrapup: true
           }
@@ -525,6 +727,27 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Piloto da camada de "notas culturais" (grilling 2026-09-17) --
+      // categoria 'costume', diferente de 'reality' porque não há nenhum
+      // contraste de forma aqui, só um fato isolado. Ligada ao "croissant"
+      // que aparece no diálogo desta lição ("Un café et un croissant").
+      // Confiança ALTA: é um mito cultural bem documentado sobre a França.
+      {
+        id: "croissant-nao-e-diario",
+        kind: "culture",
+        category: "costume",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "Croissant todo dia? Não pra maioria dos franceses",
+            body: "Existe a ideia de que os franceses comem croissant no café da manhã todos os dias — mas, na prática, é mais comum reservar o croissant pra fins de semana ou ocasiões especiais. No dia a dia, o café da manhã francês costuma ser mais simples: pão com manteiga/geleia (tartine), ou só café.",
+            examples: [
+              { f: "la tartine", t: "pão com manteiga/geleia — o café da manhã mais comum" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     trueFalseExercises: [{ subject: "L'addition, s'il vous plaît.", emoji: "🧾", claim: "Dizemos isso pra pedir a conta num restaurante.", answer: true,
@@ -603,6 +826,27 @@ const UNITS = [
             body: "Diferente da idade (que usa avoir), as horas em francês usam o verbo <strong>être</strong>: <strong>il est</strong> huit heures (são oito horas). Repare que aqui o \"il\" não se refere a ninguém — é um \"il\" impessoal, só pra montar a frase, igual ao \"está\" de \"está chovendo\" em português.",
             examples: [
               { f: "l'heure", t: "a hora" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'costume'. Ligada
+      // ao "le midi" desta lição. Confiança ALTA: o almoço longo/sentado à
+      // mesa por volta de meio-dia-treze horas é um costume francês bem
+      // documentado, culturalmente diferente do almoço rápido em muitos
+      // outros países.
+      {
+        id: "le-midi-almoco-longo",
+        kind: "culture",
+        category: "costume",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "\"Le midi\" na França é hora de sentar pra comer de verdade",
+            body: "Na França, o almoço (<strong>le déjeuner</strong>, por volta de meio-dia às treze horas) costuma ser uma pausa de verdade — muitos restaurantes e cantinas de trabalho servem uma refeição completa (entrada, prato principal, às vezes sobremesa), e é comum reservar 45 minutos a uma hora só pra isso, em vez de comer rápido na mesa de trabalho.",
+            examples: [
+              { f: "le déjeuner", t: "o almoço" }
             ],
             wrapup: true
           }
@@ -746,6 +990,47 @@ const UNITS = [
             examples: [
               { f: "demain", t: "amanhã" },
               { f: "hier", t: "ontem" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Piloto da camada de "notas culturais" (grilling 2026-09-17) --
+      // categoria 'historia'. Confiança ALTA: a origem romana/planetária
+      // dos dias da semana é um fato de etimologia bem documentado e
+      // direto, ligado exatamente a "lundi"/"mardi" desta lição.
+      {
+        id: "dias-semana-deuses-romanos",
+        kind: "culture",
+        category: "historia",
+        trigger: { afterVocabIdx: 1 },
+        blocks: [
+          {
+            title: "De onde vêm os nomes dos dias da semana?",
+            body: "Os dias da semana em francês vêm dos deuses/planetas romanos: <strong>lundi</strong> é o dia da Lua (Lune), <strong>mardi</strong> é o dia de Marte (Mars). O padrão continua: mercredi (Mercúrio), jeudi (Júpiter), vendredi (Vênus), samedi (Saturno) — só dimanche foge da regra, vindo do latim \"dia do Senhor\".",
+            examples: [
+              { f: "lundi", t: "segunda-feira — dia da Lua" },
+              { f: "mardi", t: "terça-feira — dia de Marte" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: "on" no
+      // lugar de "nous" é um dos fatos mais documentados sobre o francês
+      // falado -- praticamente substituiu "nous" na fala cotidiana. Ligado
+      // à frase "Nous sommes lundi" desta própria lição.
+      {
+        id: "nous-sommes-on-est",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "\"Nous sommes lundi\" no dia a dia vira \"On est lundi\"",
+            body: "Na fala cotidiana, <strong>on</strong> praticamente substituiu <strong>nous</strong> como \"a gente\"/\"nós\" — <strong>on est</strong> lundi em vez de \"nous sommes lundi\". O verbo conjuga como \"il/elle\" (on est, on a, on va), não como \"nous\". Nos exercícios daqui, continue usando \"nous\" — é a forma que os exercícios pedem.",
+            examples: [
+              { f: "on est lundi", t: "hoje é segunda (fala cotidiana)" }
             ],
             wrapup: true
           }
@@ -956,6 +1241,26 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: wh-in-situ
+      // -- e esta nota nem precisa "inventar" o exemplo, o diálogo desta
+      // própria unidade já usa "Tu es d'où ?" (linha do personagem A),
+      // contrastando com "D'où viens-tu ?" ensinado nas frases.
+      {
+        id: "dou-viens-tu-wh-in-situ",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "\"D'où viens-tu ?\" também vira \"Tu es d'où ?\"",
+            body: "Repare que o diálogo que você acabou de ler já usa a forma cotidiana: <strong>Tu es d'où ?</strong> em vez de \"D'où viens-tu ?\". Na fala cotidiana, é comum manter a ordem sujeito-verbo normal e jogar a palavra de pergunta pro fim. Nos exercícios daqui, continue usando \"D'où viens-tu ?\" — é a forma que os exercícios pedem.",
+            examples: [
+              { f: "tu es d'où ?", t: "de onde você é? (fala cotidiana)" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     trueFalseExercises: [{ subject: "D'où viens-tu ?", emoji: "🌍", claim: "Essa pergunta serve pra saber o nome de alguém.", answer: false,
@@ -1020,6 +1325,26 @@ const UNITS = [
           {
             title: "\"Je voudrais\" ou \"je peux\"?",
             body: "<strong>Je voudrais</strong> (eu gostaria) é a forma mais educada de pedir algo numa loja — soa mais gentil que \"je veux\" (eu quero). Já <strong>je peux...?</strong> (posso...?) é usado pra pedir permissão, como experimentar uma roupa: <strong>je peux</strong> essayer ce pantalon? Os dois são educados, mas servem pra momentos diferentes: pedir algo vs. pedir permissão.",
+            wrapup: true
+          }
+        ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: mesma
+      // nota de wh-in-situ, e de novo o diálogo já usa a forma cotidiana
+      // ("Ça coûte combien ?", linha do personagem A) em contraste com
+      // "Combien ça coûte ?" ensinado nas frases.
+      {
+        id: "combien-ca-coute-wh-in-situ",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "\"Combien ça coûte ?\" também vira \"Ça coûte combien ?\"",
+            body: "Repare que o diálogo que você acabou de ler já usa a forma cotidiana: <strong>Ça coûte combien ?</strong> em vez de \"Combien ça coûte ?\". Na fala cotidiana, é comum jogar a palavra de pergunta pro fim da frase. Nos exercícios daqui, continue usando \"Combien ça coûte ?\" — é a forma que os exercícios pedem.",
+            examples: [
+              { f: "ça coûte combien ?", t: "quanto custa? (fala cotidiana)" }
+            ],
             wrapup: true
           }
         ]
@@ -1175,6 +1500,27 @@ const UNITS = [
             body: "Depois de uma negação com <strong>ne... pas</strong>, os artigos du/de la/des somem e viram só <strong>de</strong> (ou <strong>d'</strong> antes de vogal): je mange <strong>de la</strong> viande → je ne mange <strong>pas de</strong> viande. É uma regra que vale pra quase toda negação de quantidade em francês — vale prestar atenção nela.",
             examples: [
               { f: "la viande", t: "a carne" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'costume'. Ligada
+      // ao tema de "fazer compras de mercado" desta lição. Confiança ALTA:
+      // o marché aberto (feira ao ar livre, geralmente 1-2x por semana) é
+      // um costume francês bem documentado, distinto de ir só ao
+      // supermercado.
+      {
+        id: "le-marche-tradicao",
+        kind: "culture",
+        category: "costume",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "Além do supermercado: o marché",
+            body: "Em muitas cidades e vilarejos franceses, além do supermercado, é tradição fazer compras no <strong>marché</strong> — uma feira ao ar livre que costuma acontecer 1 ou 2 vezes por semana, com bancas de produtores locais vendendo frutas, legumes, queijos, carnes e pães frescos. É também um momento social: muita gente encontra vizinhos e conhecidos por lá.",
+            examples: [
+              { f: "le marché", t: "a feira / o mercado ao ar livre" }
             ],
             wrapup: true
           }
@@ -1399,6 +1745,26 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'historia'. Ligada
+      // ao "le métro" desta lição. Confiança ALTA: a data de inauguração
+      // (1900, Exposição Universal de Paris) é um fato histórico bem
+      // documentado.
+      {
+        id: "metro-paris-historia",
+        kind: "culture",
+        category: "historia",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "O metrô de Paris nasceu numa feira mundial",
+            body: "O metrô de Paris abriu em <strong>1900</strong>, bem a tempo da Exposição Universal daquele ano — um evento gigante que trouxe milhões de visitantes à cidade. É um dos metrôs mais antigos do mundo, e ainda hoje várias estações preservam a entrada original em ferro fundido no estilo Art Nouveau, desenhada por Hector Guimard.",
+            examples: [
+              { f: "le métro", t: "o metrô" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     vocab: [
@@ -1536,6 +1902,26 @@ const UNITS = [
             examples: [
               { f: "la tête", t: "a cabeça" },
               { f: "malade", t: "doente" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: "Ça va
+      // pas ?" é uma redução extremamente comum de "Qu'est-ce qui ne va
+      // pas ?", que é literalmente a pergunta de abertura do diálogo desta
+      // unidade.
+      {
+        id: "quest-ce-qui-ne-va-pas-ca-va-pas",
+        kind: "reality",
+        category: "informal",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "\"Qu'est-ce qui ne va pas ?\" no dia a dia vira \"Ça va pas ?\"",
+            body: "A pergunta completa que abre o diálogo, <strong>Qu'est-ce qui ne va pas ?</strong>, costuma encolher bastante na fala cotidiana: <strong>Ça va pas ?</strong> (literalmente \"não vai bem?\") pergunta a mesma coisa, de um jeito bem mais curto e casual — parecido com \"tá tudo bem?\" em português.",
+            examples: [
+              { f: "ça va pas ?", t: "o que foi? / tá tudo bem? (fala cotidiana)" }
             ],
             wrapup: true
           }
@@ -1704,6 +2090,47 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: "sympa"
+      // (clipping de "sympathique") é usado o tempo todo no lugar de
+      // "gentil" -- e o diálogo desta unidade já usa "sympa" ("Il est
+      // sympa ?"), contrastando com "gentil" ensinado no vocabulário.
+      {
+        id: "gentil-sympa",
+        kind: "reality",
+        category: "informal",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "\"Gentil\" no dia a dia costuma virar \"sympa\"",
+            body: "Repare que o diálogo que você acabou de ler já usa <strong>sympa</strong> (\"Il est sympa ?\") — abreviação super comum de <strong>sympathique</strong>, usada o tempo todo no lugar de <strong>gentil</strong> pra dizer que alguém é legal/gente boa.",
+            examples: [
+              { f: "sympa", t: "legal / gente boa (informal)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Piloto da camada de "notas culturais" (grilling 2026-09-17) --
+      // categoria 'historia'. Confiança ALTA: a origem das cores da
+      // bandeira francesa (Revolução Francesa) é um fato histórico bem
+      // documentado, ligado exatamente às 3 cores já ensinadas nesta
+      // lição (rouge, bleu, blanc).
+      {
+        id: "bandeira-tricolor-historia",
+        kind: "culture",
+        category: "historia",
+        trigger: { afterVocabIdx: 5 },
+        blocks: [
+          {
+            title: "Bleu, blanc, rouge — a origem da bandeira francesa",
+            body: "As 3 cores que você acabou de aprender são as da bandeira francesa: <strong>bleu</strong> e <strong>rouge</strong> eram as cores de Paris, e <strong>blanc</strong> era a cor tradicional da monarquia — a bandeira, criada durante a Revolução Francesa, junta as duas.",
+            examples: [
+              { f: "le drapeau", t: "a bandeira" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     vocab: [
@@ -1826,6 +2253,48 @@ const UNITS = [
             examples: [
               { f: "il y a", t: "tem / há" },
               { f: "il n'y a pas de", t: "não tem / não há" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: a queda
+      // do "il" em "il y a" -> "y'a" é uma das contrações mais comuns do
+      // francês falado, ligada diretamente ao vocabulário desta lição.
+      {
+        id: "il-y-a-ya",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { afterVocabIdx: 8 },
+        blocks: [
+          {
+            title: "\"Il y a\" no dia a dia vira \"y'a\"",
+            body: "Na fala corrida, o \"il\" de <strong>il y a</strong> quase desaparece — sobra só <strong>y'a</strong>: \"y'a une chambre\", \"y'a pas de jardin\". É tão comum que aparece até em mensagens escritas informais. Nos exercícios daqui, continue escrevendo \"il y a\" completo — é a forma que os exercícios pedem.",
+            examples: [
+              { f: "y'a une chambre", t: "tem um quarto (fala cotidiana)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'costume'. Ligada
+      // ao vocabulário de cômodos desta lição -- inclusive à própria frase
+      // "La chambre est au premier étage" já usada nas phrases desta
+      // unidade, que é exatamente onde essa contagem confunde. Confiança
+      // ALTA: a diferença rez-de-chaussée/1er étage é uma convenção bem
+      // documentada na França (e em boa parte da Europa).
+      {
+        id: "andar-terreo-premier-etage",
+        kind: "culture",
+        category: "costume",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "\"1er étage\" não é o térreo",
+            body: "Na França, o andar térreo tem nome próprio: <strong>le rez-de-chaussée</strong>. A contagem só começa depois dele — <strong>le premier étage</strong> é o que, no Brasil, chamaríamos de \"segundo andar\" (um andar acima do térreo). Vale prestar atenção nisso ao procurar um endereço ou pegar o elevador.",
+            examples: [
+              { f: "le rez-de-chaussée", t: "o térreo" },
+              { f: "le premier étage", t: "o 1º andar (acima do térreo)" }
             ],
             wrapup: true
           }
@@ -1974,6 +2443,47 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'historia'. Ligada
+      // ao "le cinéma" desta lição. Confiança ALTA: a primeira exibição
+      // pública paga de cinema pelos irmãos Lumière (Paris, 1895) é um
+      // fato histórico amplamente documentado.
+      {
+        id: "cinema-nasceu-na-franca",
+        kind: "culture",
+        category: "historia",
+        trigger: { afterVocabIdx: 0 },
+        blocks: [
+          {
+            title: "O cinema nasceu na França",
+            body: "Em 1895, os irmãos <strong>Auguste e Louis Lumière</strong> fizeram em Paris a primeira exibição pública e paga de filmes da história, usando o cinematógrafo que eles mesmos inventaram. É por isso que a França é considerada o berço do cinema — e até hoje tem uma cena cinematográfica muito valorizada, com o Festival de Cannes entre os mais importantes do mundo.",
+            examples: [
+              { f: "le cinéma", t: "o cinema" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA (é o
+      // exemplo mais citado de gramática coloquial do francês -- "je (ne)
+      // sais pas" -- que motivou esta feature inteira, ver CLAUDE.md). O
+      // diálogo desta unidade já tem a frase completa "On ne sait pas
+      // encore !", perfeita pra mostrar a queda do "ne".
+      {
+        id: "ne-drop-on-sait-pas",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "\"On ne sait pas encore !\" no dia a dia perde o \"ne\"",
+            body: "Na fala cotidiana, o <strong>ne</strong> da negação quase sempre desaparece — <strong>on sait pas encore</strong> em vez de \"on ne sait pas encore\". É provavelmente a simplificação mais comum de todo o francês falado, e vale pra qualquer negação com \"ne... pas\". Nos exercícios daqui, continue escrevendo o \"ne\" — é a forma que os exercícios pedem.",
+            examples: [
+              { f: "on sait pas encore", t: "a gente ainda não sabe (fala cotidiana)" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     trueFalseExercises: [{ subject: "On va au cinéma ce soir ?", emoji: "🎬", claim: "Essa é uma forma de convidar alguém pra sair.", answer: true,
@@ -2108,6 +2618,25 @@ const UNITS = [
             examples: [
               { f: "hier", t: "ontem" },
               { f: "la semaine dernière", t: "a semana passada" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Densidade sem teto (grilling 2026-09-17). Confiança ALTA: mesma
+      // nota de wh-in-situ, ligada à pergunta de abertura do diálogo desta
+      // unidade ("Qu'est-ce que tu as fait hier ?").
+      {
+        id: "quest-ce-que-tu-as-fait-wh-in-situ",
+        kind: "reality",
+        category: "gramatica-coloquial",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "\"Qu'est-ce que tu as fait hier ?\" também vira \"T'as fait quoi hier ?\"",
+            body: "Na fala bem cotidiana, essa pergunta costuma ficar assim: <strong>t'as fait quoi hier ?</strong> — \"qu'est-ce que\" some, \"quoi\" vai pro fim, e \"tu as\" contrai pra \"t'as\". Três simplificações ao mesmo tempo, todas muito comuns juntas. Nos exercícios daqui, continue usando a forma completa — é a que os exercícios pedem.",
+            examples: [
+              { f: "t'as fait quoi hier ?", t: "o que você fez ontem? (fala bem cotidiana)" }
             ],
             wrapup: true
           }

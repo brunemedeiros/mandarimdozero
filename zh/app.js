@@ -602,39 +602,43 @@ const REALITY_NOTE_CATEGORY = {
   GRAMATICA_COLOQUIAL: 'gramatica-coloquial',
 };
 
-// Os 4 eixos de "profundidade" aprovados no grilling, por nível -- só o
+// 3 eixos de "profundidade" aprovados no grilling, por nível -- só o
 // eixo 1 (explanationDepth) está de fato em uso hoje, porque só o nível
-// inicial existe. Os outros 3 eixos (testableInExercise, categoriesAllowed,
-// densityPerUnit) ficam aqui como parâmetros PRONTOS pra quando os níveis
-// seguintes existirem -- não aplicados por nenhum código ainda (não há
-// nenhuma nota de realidade escrita), só a decisão travada de o que cada
+// inicial existe. Os outros 2 (testableInExercise, categoriesAllowed)
+// ficam aqui como parâmetros PRONTOS pra quando os níveis seguintes
+// existirem -- não aplicados por nenhum código ainda (não há nenhuma nota
+// de realidade escrita nesses níveis), só a decisão travada de o que cada
 // nível vai permitir. HSK2/HSK3/HSK4 são hipotéticos -- ajustar se o
 // currículo real desviar disso. Mesma lógica exata do francês (fr/app.js),
 // só as chaves são HSK1-4 em vez de A1/A2/B1/B2 (ver nota acima).
+//
+// Um 4º eixo, `densityPerUnit`, existiu aqui até 2026-09-17 e foi
+// REMOVIDO por decisão explícita da autora (mesmo grilling espelhado em
+// fr/app.js -- ver o comentário lá pra a justificativa completa e o
+// CLAUDE.md pra a decisão registrada). Sem limite numérico min/max por
+// unidade ou nível; a regra agora é só qualitativa (relação pedagógica
+// real com a palavra/expressão ensinada naquele momento), e o controle de
+// qualidade/volume passou a ser a revisão manual da autora, não um teto.
 const REALITY_NOTE_LEVEL_GUIDANCE = {
   HSK1: {
     explanationDepth: 'curta',       // 1 frase, sem contexto social extra
     testableInExercise: false,       // card passivo é o MVP, exercício de reconhecimento é fase 2 adiada
     categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial'],
-    densityPerUnit: { min: 0, max: 1 },
   },
   HSK2: {
     explanationDepth: 'media',       // pode incluir contexto social (quem usa, quando)
     testableInExercise: false,
     categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial', 'familiar-giria'],
-    densityPerUnit: { min: 0, max: 2 },
   },
   HSK3: {
     explanationDepth: 'media',
     testableInExercise: true,        // "usar adequadamente" -- primeiro nível onde testar faz sentido
     categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial', 'familiar-giria'],
-    densityPerUnit: { min: 1, max: 3 },
   },
   HSK4: {
     explanationDepth: 'alta',        // pragmática/ironia/marcadores sociais -- ainda sem categoria própria
     testableInExercise: true,
     categoriesAllowed: ['informal', 'regional', 'gramatica-coloquial', 'familiar-giria'],
-    densityPerUnit: { min: 1, max: 4 },
   },
 };
 
@@ -647,6 +651,53 @@ function isRealityNoteCategoryAllowedAtLevel(category, level){
   const guidance = REALITY_NOTE_LEVEL_GUIDANCE[level];
   return !!guidance && guidance.categoriesAllowed.includes(category);
 }
+
+// Texto do banner (topo do cartão) quando um concept é uma nota de
+// realidade (concept.kind === 'reality') em vez de gramática comum --
+// renderConceptStep() escolhe entre isto e o banner padrão de gramática.
+// Sem cor/badge própria por categoria ainda (piloto usa só texto+emoji pra
+// diferenciar -- ver CLAUDE.md, seção da camada de notas de realidade, "MVP
+// = card passivo"); se familiar-giria vira conteúdo de verdade algum dia,
+// dar a ela uma cor própria vira obrigatório (mesma regra já registrada
+// sobre --on-vivid vs --on-seal-red -- não reaproveitar o badge de
+// 'informal' pra um registro mais marcado).
+const REALITY_NOTE_BANNER_TEXT = {
+  [REALITY_NOTE_CATEGORY.INFORMAL]: '🗣️ Na vida real',
+  [REALITY_NOTE_CATEGORY.FAMILIAR_GIRIA]: '🗣️ Registro informal',
+  [REALITY_NOTE_CATEGORY.REGIONAL]: '📍 Variação regional',
+  [REALITY_NOTE_CATEGORY.GRAMATICA_COLOQUIAL]: '✍️ Assim também se fala',
+};
+
+// ---------- Taxonomia de "notas culturais" (grilling 2026-09-17) ----------
+// Camada IRMÃ das notas de realidade acima, não a mesma coisa: `reality` é
+// especificamente um CONTRASTE DE FORMA (ensinado vs. real, mesma ideia dita
+// diferente). `culture` é um FATO ISOLADO -- história de palavra, costume,
+// festividade -- sem nenhum contraste de forma envolvido. As duas usam o
+// mesmo mecanismo de `concepts`/trigger (kind diferente), nunca a mesma nota
+// tentando fazer as duas coisas. Mesmas regras de densidade/revisão já
+// travadas pras notas de realidade (ver CLAUDE.md): sem teto numérico, só
+// entra se a relação pedagógica com a palavra/frase ensinada for genuína,
+// toda nota reportada no chat com nível de confiança pra revisão manual.
+const CULTURE_NOTE_CATEGORY = {
+  // Origem/etimologia de uma palavra ou expressão -- ex: os dias da semana
+  // vêm dos deuses/planetas romanos.
+  HISTORIA: 'historia',
+  // Etiqueta ou tradição social do dia a dia -- ex: como funciona uma
+  // saudação, um hábito à mesa, uma regra social não escrita.
+  COSTUME: 'costume',
+  // Feriado, celebração, data especial -- ex: como funciona o Ano Novo
+  // Chinês, uma tradição de Natal específica da França.
+  FESTIVIDADE: 'festividade',
+};
+
+// Texto do banner quando concept.kind === 'culture' -- tom mais leve/
+// "curiosidade" que o de `reality` (que soa mais "cuidado, isso pode te
+// confundir"), já que aqui não há nenhum contraste de forma pra alertar.
+const CULTURE_NOTE_BANNER_TEXT = {
+  [CULTURE_NOTE_CATEGORY.HISTORIA]: '📜 Você sabia?',
+  [CULTURE_NOTE_CATEGORY.COSTUME]: '🎭 Costume real',
+  [CULTURE_NOTE_CATEGORY.FESTIVIDADE]: '🎉 Data especial',
+};
 
 // ---------- Estado global ----------
 const STATE = {
@@ -2939,10 +2990,16 @@ function renderConceptStep(){
   const nextBtn = document.getElementById('step-next-btn');
   const backBtn = document.getElementById('step-back-btn');
   backBtn.style.display = 'none'; // sem "voltar" no meio de uma explicação, igual ao checkpoint/prática
-  setAcqPhaseBanner('💡 Vale entender isso');
 
   const concept = STEP_STATE.conceptQueue[STEP_STATE.conceptIdx];
   const block = concept.blocks[STEP_STATE.conceptBlockIdx];
+  const isReality = concept.kind === 'reality';
+  const isCulture = concept.kind === 'culture';
+  setAcqPhaseBanner(
+    isReality ? (REALITY_NOTE_BANNER_TEXT[concept.category] || '🌍 Nota de realidade') :
+    isCulture ? (CULTURE_NOTE_BANNER_TEXT[concept.category] || '📜 Nota cultural') :
+    '💡 Vale entender isso'
+  );
   const isLastBlockOfConcept = STEP_STATE.conceptBlockIdx === concept.blocks.length - 1;
   const isLastConcept = STEP_STATE.conceptIdx === STEP_STATE.conceptQueue.length - 1;
 
@@ -2957,12 +3014,26 @@ function renderConceptStep(){
       `).join('')}
     </div>` : '';
 
+  // `variants` é exclusivo da categoria 'regional' -- ao contrário de
+  // `examples` (hanzi/pinyin/tradução), aqui não há forma "oficial": cada
+  // item é só {region, form}, uma das variações igualmente válidas.
+  // Reaproveita a lista comum em vez de um componente de badge/cor novo
+  // (ver CLAUDE.md, "MVP = card passivo"). Nenhum dos pilotos zh usa
+  // 'regional' ainda (ver commit) -- código pronto pra quando um exemplo
+  // bem grounded aparecer (comida/objetos concretos, ainda não ensinados
+  // nas 3 primeiras unidades).
+  const variantsHTML = (block.variants && block.variants.length) ? `
+    <ul class="gram-block-variants">
+      ${block.variants.map(v => `<li><strong>${v.region}:</strong> ${v.form}</li>`).join('')}
+    </ul>` : '';
+
   contentEl.innerHTML = `
-    <div class="gram-block-counter">${concept.blocks.length > 1 ? `${STEP_STATE.conceptBlockIdx + 1} de ${concept.blocks.length}` : 'Vale entender'}</div>
+    <div class="gram-block-counter">${concept.blocks.length > 1 ? `${STEP_STATE.conceptBlockIdx + 1} de ${concept.blocks.length}` : (isReality ? 'Nota de realidade' : isCulture ? 'Nota cultural' : 'Vale entender')}</div>
     <div class="gram-block ${block.wrapup ? 'wrapup' : ''}">
       <h3 class="gram-block-title">${block.title}</h3>
       <p class="gram-block-body">${block.body}</p>
       ${examplesHTML}
+      ${variantsHTML}
     </div>
   `;
   wireAudioButtons(contentEl);
