@@ -744,7 +744,7 @@ zh (8 notas, Unit 2 a Unit 12):
 16. Unit 6 `fuso-horario-unico` (`historia`) — China inteira usa o
     horário de Pequim, apesar da extensão geográfica — ligado a 点 (diǎn)
     desta lição — **alta**
-17. Unit 8 `regatear-mercado` (`costume`) — regatear é normal em
+17. Unit 8 `pechinchar-mercado` (`costume`) — pechinchar é normal em
     mercados/feiras, não em lojas de preço fixo — ligado ao próprio
     diálogo desta lição, que já mostra o preço caindo de 30 pra 25 kuài —
     **alta**
@@ -764,3 +764,31 @@ Das 18 unidades HSK1 do zh, 7 têm nota cultural (Unit 2, 3, 4, 5, 6, 8, 12
 significa que essas unidades nunca vão ter uma nota — uma sessão futura
 pode achar algo que eu não vi, mesmo texto de fechamento já usado na
 varredura de `reality`.
+
+**Correção de registro pós-entrega (2026-09-18, mesmo dia): "regatear" não
+é português coloquial do Brasil.** A autora apontou que a nota `zh` da
+Unit 8 (item 17 acima) usava "regatear"/"regateio" — verbo comum em
+espanhol e em português europeu, mas não uma palavra do dia a dia do
+português brasileiro. A palavra realmente usada no Brasil é
+**"pechinchar"**. Corrigido: `id` do concept renomeado de
+`regatear-mercado` para `pechinchar-mercado` em `zh/content.js`, título e
+corpo reescritos trocando "regatear"/"regateio" por "pechinchar"/"quem
+está pechinchando". Nenhum outro arquivo referenciava o `id` antigo
+(checado via grep antes de renomear), então a mudança foi segura sem
+quebrar nada.
+
+**Por que isso importa mais que um simples erro de palavra**: o objetivo
+do produto (registrado em outras seções deste arquivo — camada de notas
+de realidade, ver acima) é ensinar aos alunos o idioma estrangeiro
+REALMENTE falado no dia a dia, com o português brasileiro como idioma de
+interface/tradução. Um erro desse tipo é uma inconsistência de registro
+na própria camada de tradução (PT-BR), não no conteúdo do idioma
+estrangeiro ensinado — mas mina a mesma promessa do produto (linguagem
+autêntica e coloquial) se o texto de apoio em português soar
+"traduzido"/estrangeiro em vez de natural. Ao escrever ou revisar
+qualquer nota de `reality`/`culture` (ou qualquer texto de interface),
+uma sessão futura deve considerar explicitamente se o português usado é
+o que um brasileiro diria no dia a dia, não só se a tradução está
+gramaticalmente correta — o mesmo padrão de cuidado já aplicado à
+"coerência pedagógica" (ver topo deste arquivo), agora estendido ao
+REGISTRO da própria língua de interface.
