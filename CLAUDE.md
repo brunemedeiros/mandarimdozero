@@ -682,7 +682,85 @@ Todas as 5 validadas via `renderConceptStep()` contra o app real (banner
 certo por categoria, título/corpo renderizando). Nenhuma entrou em
 confiança média/baixa nesta rodada.
 
-**Ainda não varrido o currículo inteiro** — mesmo padrão de `reality`:
-piloto pequeno primeiro (5 notas, 2 categorias já cobertas em cada
-idioma), currículo completo só se/quando a autora pedir, do mesmo jeito
-que pediu pra `reality` depois de ver o piloto dela.
+**Atualização (2026-09-18): varredura completa do currículo, mesmo dia da
+varredura completa de `reality`.** A autora pediu "implemente tudo" depois
+de ver o piloto de 5 notas — mesma dinâmica já usada em `reality` (piloto
+pequeno primeiro, currículo inteiro só depois de aprovação). Passei pelas
+20 unidades A1 do fr (excluindo as 10 `type:"grammar"`) e pelas 18 unidades
+HSK1 do zh procurando fatos culturais genuinamente ligados ao vocabulário
+de cada lição, sem forçar. 13 notas novas entraram (7 fr + 6 zh), todas
+confiança alta — nenhum candidato de confiança média/baixa foi shipado
+(mesmo critério usado em `reality`: fora do código até virar alta
+confiança).
+
+**Lista COMPLETA e final das 18 notas culturais no app** (nível de
+confiança de cada uma, por idioma/unidade, pra revisão manual da autora —
+mesma regra de report travada na seção de `reality` acima):
+
+fr (10 notas, unidades A1-1 a A1-19):
+1. A1-1 `la-bise-cumprimento` (`costume`) — cumprimento com beijinhos no
+   rosto (número varia por região) — ligado ao diálogo de cumprimento
+   desta lição — **alta**
+2. A1-4 `repas-dominical` (`costume`) — o almoço de domingo em família,
+   longo e em várias etapas — ligado ao vocabulário de família desta
+   lição — **alta**
+3. A1-5 `croissant-nao-e-diario` (`costume`) — croissant não é hábito
+   diário pra maioria dos franceses (mito comum) — **alta**
+4. A1-6 `le-midi-almoco-longo` (`costume`) — o almoço francês como pausa
+   de verdade (45min-1h, refeição completa) — ligado a "le midi" desta
+   lição — **alta**
+5. A1-7 `dias-semana-deuses-romanos` (`historia`) — lundi/mardi vêm da
+   Lua/Marte romanos — **alta**
+6. A1-11 `le-marche-tradicao` (`costume`) — a feira ao ar livre (marché)
+   além do supermercado — ligado ao tema de compras de mercado desta
+   lição — **alta**
+7. A1-14 `metro-paris-historia` (`historia`) — o metrô de Paris abriu em
+   1900 pra Exposição Universal — ligado a "le métro" desta lição —
+   **alta**
+8. A1-16 `bandeira-tricolor-historia` (`historia`) — origem das 3 cores
+   da bandeira francesa (Revolução Francesa) — **alta**
+9. A1-17 `andar-terreo-premier-etage` (`costume`) — rez-de-chaussée
+   (térreo) é separado de "1er étage" (o que seria "2º andar" no Brasil)
+   — ligado ao vocabulário de cômodos/andares desta lição, inclusive à
+   frase "La chambre est au premier étage" já usada nas phrases —
+   **alta**
+10. A1-19 `cinema-nasceu-na-franca` (`historia`) — 1ª exibição pública
+    paga de cinema, irmãos Lumière, Paris 1895 — ligado a "le cinéma"
+    desta lição — **alta**
+
+zh (8 notas, Unit 2 a Unit 12):
+11. Unit 2 `ordem-nomes-sobrenome-primeiro` (`costume`) — sobrenome vem
+    antes do nome próprio — ligado ao "小李" (Xiǎo Lǐ) que já aparece no
+    diálogo desta lição — **alta**
+12. Unit 3 `xusui-ano-novo` (`festividade`) — sistema tradicional de
+    idade nominal (虚岁) — **alta**
+13. Unit 3 `si-numero-azarado` (`costume`) — 四 (sì, "quatro") soa como
+    死 (sǐ, "morte"), número evitado — ligado ao 四 desta lição — **alta**
+14. Unit 4 `politica-filho-unico-historia` (`historia`) — política do
+    filho único (1979-2015/16) — ligado a 孩子 (háizi) desta lição —
+    **alta**
+15. Unit 5 `cha-origem-china` (`historia`) — China é o berço do chá —
+    **alta**
+16. Unit 6 `fuso-horario-unico` (`historia`) — China inteira usa o
+    horário de Pequim, apesar da extensão geográfica — ligado a 点 (diǎn)
+    desta lição — **alta**
+17. Unit 8 `regatear-mercado` (`costume`) — regatear é normal em
+    mercados/feiras, não em lojas de preço fixo — ligado ao próprio
+    diálogo desta lição, que já mostra o preço caindo de 30 pra 25 kuài —
+    **alta**
+18. Unit 12 `guangchangwu-danca-praca` (`costume`) — dança de praça
+    (广场舞), tradição social chinesa — ligado a 跳舞 (tiàowǔ) desta lição —
+    **alta**
+
+Todas as 13 notas novas validadas via `renderConceptStep()` contra o app
+real (banner certo por categoria, título renderizando). Nenhuma entrou em
+confiança média/baixa nesta varredura.
+
+**Cobertura**: das 20 unidades A1 do fr (excluindo as 10 `type:"grammar"`),
+10 têm nota cultural — as outras 10 não tinham candidato com confiança
+alta o bastante quando revisadas (mesmo critério de `reality`: não força).
+Das 18 unidades HSK1 do zh, 7 têm nota cultural (Unit 2, 3, 4, 5, 6, 8, 12
+— Unit 3 tem 2) — as outras 11 não tinham candidato genuíno. Isso não
+significa que essas unidades nunca vão ter uma nota — uma sessão futura
+pode achar algo que eu não vi, mesmo texto de fechamento já usado na
+varredura de `reality`.

@@ -120,6 +120,27 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Nota cultural (varredura completa 2026-09-18, ver CLAUDE.md) --
+      // categoria 'costume', fato isolado sem contraste de forma. Ligada ao
+      // próprio cumprimento praticado nesta lição/diálogo ("Encontro na
+      // rua"). Confiança ALTA: "la bise" é um costume social francês
+      // amplamente documentado, não uma generalização arriscada.
+      {
+        id: "la-bise-cumprimento",
+        kind: "culture",
+        category: "costume",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "Por que os franceses se cumprimentam com beijinhos no rosto?",
+            body: "Além de dizer \"bonjour\", é muito comum cumprimentar amigos e familiares com <strong>la bise</strong> — um ou mais beijinhos leves no rosto (o número varia por região: 2 é o mais comum, mas em algumas regiões são 3 ou até 4!). Entre desconhecidos ou em contexto formal/profissional, aperta-se a mão em vez disso.",
+            examples: [
+              { f: "faire la bise", t: "cumprimentar com beijinho(s) no rosto" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     trueFalseExercises: [{ subject: "Merci beaucoup !", emoji: "🙏", claim: "Isso é o que dizemos quando alguém nos ajuda muito.", answer: true,
@@ -532,6 +553,26 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'costume'. Ligada
+      // ao vocabulário de família desta lição. Confiança ALTA: o "repas
+      // dominical" (almoço de domingo em família, longo e à mesa) é um
+      // costume francês amplamente documentado, distinto do dia a dia.
+      {
+        id: "repas-dominical",
+        kind: "culture",
+        category: "costume",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "O almoço de domingo em família",
+            body: "Na França, é tradicional que a família se reúna pra um <strong>repas dominical</strong> — o almoço de domingo — que costuma ser mais longo e elaborado que as refeições do resto da semana, com várias etapas (entrada, prato principal, queijo, sobremesa). É um dos momentos em que várias gerações da família se encontram.",
+            examples: [
+              { f: "le repas dominical", t: "o almoço de domingo em família" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     vocab: [
@@ -785,6 +826,27 @@ const UNITS = [
             body: "Diferente da idade (que usa avoir), as horas em francês usam o verbo <strong>être</strong>: <strong>il est</strong> huit heures (são oito horas). Repare que aqui o \"il\" não se refere a ninguém — é um \"il\" impessoal, só pra montar a frase, igual ao \"está\" de \"está chovendo\" em português.",
             examples: [
               { f: "l'heure", t: "a hora" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'costume'. Ligada
+      // ao "le midi" desta lição. Confiança ALTA: o almoço longo/sentado à
+      // mesa por volta de meio-dia-treze horas é um costume francês bem
+      // documentado, culturalmente diferente do almoço rápido em muitos
+      // outros países.
+      {
+        id: "le-midi-almoco-longo",
+        kind: "culture",
+        category: "costume",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "\"Le midi\" na França é hora de sentar pra comer de verdade",
+            body: "Na França, o almoço (<strong>le déjeuner</strong>, por volta de meio-dia às treze horas) costuma ser uma pausa de verdade — muitos restaurantes e cantinas de trabalho servem uma refeição completa (entrada, prato principal, às vezes sobremesa), e é comum reservar 45 minutos a uma hora só pra isso, em vez de comer rápido na mesa de trabalho.",
+            examples: [
+              { f: "le déjeuner", t: "o almoço" }
             ],
             wrapup: true
           }
@@ -1442,6 +1504,27 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'costume'. Ligada
+      // ao tema de "fazer compras de mercado" desta lição. Confiança ALTA:
+      // o marché aberto (feira ao ar livre, geralmente 1-2x por semana) é
+      // um costume francês bem documentado, distinto de ir só ao
+      // supermercado.
+      {
+        id: "le-marche-tradicao",
+        kind: "culture",
+        category: "costume",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "Além do supermercado: o marché",
+            body: "Em muitas cidades e vilarejos franceses, além do supermercado, é tradição fazer compras no <strong>marché</strong> — uma feira ao ar livre que costuma acontecer 1 ou 2 vezes por semana, com bancas de produtores locais vendendo frutas, legumes, queijos, carnes e pães frescos. É também um momento social: muita gente encontra vizinhos e conhecidos por lá.",
+            examples: [
+              { f: "le marché", t: "a feira / o mercado ao ar livre" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     vocab: [
@@ -1658,6 +1741,26 @@ const UNITS = [
             examples: [
               { f: "le métro", t: "o metrô" },
               { f: "à pied", t: "a pé" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'historia'. Ligada
+      // ao "le métro" desta lição. Confiança ALTA: a data de inauguração
+      // (1900, Exposição Universal de Paris) é um fato histórico bem
+      // documentado.
+      {
+        id: "metro-paris-historia",
+        kind: "culture",
+        category: "historia",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "O metrô de Paris nasceu numa feira mundial",
+            body: "O metrô de Paris abriu em <strong>1900</strong>, bem a tempo da Exposição Universal daquele ano — um evento gigante que trouxe milhões de visitantes à cidade. É um dos metrôs mais antigos do mundo, e ainda hoje várias estações preservam a entrada original em ferro fundido no estilo Art Nouveau, desenhada por Hector Guimard.",
+            examples: [
+              { f: "le métro", t: "o metrô" }
             ],
             wrapup: true
           }
@@ -2173,6 +2276,29 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'costume'. Ligada
+      // ao vocabulário de cômodos desta lição -- inclusive à própria frase
+      // "La chambre est au premier étage" já usada nas phrases desta
+      // unidade, que é exatamente onde essa contagem confunde. Confiança
+      // ALTA: a diferença rez-de-chaussée/1er étage é uma convenção bem
+      // documentada na França (e em boa parte da Europa).
+      {
+        id: "andar-terreo-premier-etage",
+        kind: "culture",
+        category: "costume",
+        trigger: { afterVocabIdx: 2 },
+        blocks: [
+          {
+            title: "\"1er étage\" não é o térreo",
+            body: "Na França, o andar térreo tem nome próprio: <strong>le rez-de-chaussée</strong>. A contagem só começa depois dele — <strong>le premier étage</strong> é o que, no Brasil, chamaríamos de \"segundo andar\" (um andar acima do térreo). Vale prestar atenção nisso ao procurar um endereço ou pegar o elevador.",
+            examples: [
+              { f: "le rez-de-chaussée", t: "o térreo" },
+              { f: "le premier étage", t: "o 1º andar (acima do térreo)" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     vocab: [
@@ -2313,6 +2439,26 @@ const UNITS = [
             body: "Pra instrumentos musicais, usa-se <strong>jouer de</strong>: jouer <strong>de la</strong> guitare, jouer <strong>du</strong> piano. Pra esportes e jogos, usa-se <strong>jouer à</strong>: jouer <strong>au</strong> foot, jouer <strong>aux</strong> cartes. É uma regrinha simples, mas sem ela dá pra trocar tudo — vale decorar esse par de preposições.",
             examples: [
               { f: "jouer", t: "jogar / tocar (instrumento)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'historia'. Ligada
+      // ao "le cinéma" desta lição. Confiança ALTA: a primeira exibição
+      // pública paga de cinema pelos irmãos Lumière (Paris, 1895) é um
+      // fato histórico amplamente documentado.
+      {
+        id: "cinema-nasceu-na-franca",
+        kind: "culture",
+        category: "historia",
+        trigger: { afterVocabIdx: 0 },
+        blocks: [
+          {
+            title: "O cinema nasceu na França",
+            body: "Em 1895, os irmãos <strong>Auguste e Louis Lumière</strong> fizeram em Paris a primeira exibição pública e paga de filmes da história, usando o cinematógrafo que eles mesmos inventaram. É por isso que a França é considerada o berço do cinema — e até hoje tem uma cena cinematográfica muito valorizada, com o Festival de Cannes entre os mais importantes do mundo.",
+            examples: [
+              { f: "le cinéma", t: "o cinema" }
             ],
             wrapup: true
           }

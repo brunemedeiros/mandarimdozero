@@ -219,6 +219,27 @@ const UNITS = [
             wrapup: true
           }
         ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'costume'. Ligada
+      // ao próprio diálogo desta lição, que já mostra "小李" (Xiǎo Lǐ) --
+      // sobrenome Lǐ com o prefixo carinhoso 小 na frente, demonstrando a
+      // ordem sobrenome+nome. Confiança ALTA: a ordem de nomes chineses é
+      // um fato amplamente documentado.
+      {
+        id: "ordem-nomes-sobrenome-primeiro",
+        kind: "culture",
+        category: "costume",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "Em chinês, o sobrenome vem primeiro",
+            body: "Repare em \"小李\" (Xiǎo Lǐ) no diálogo: <strong>Lǐ</strong> é o sobrenome, e vem ANTES do nome próprio — o oposto da ordem em português. 小 (xiǎo, \"pequeno\") é um prefixo carinhoso e informal, comum entre colegas e amigos mais próximos, usado com o sobrenome de alguém mais jovem ou da mesma idade.",
+            examples: [
+              { c: "小李", p: "Xiǎo Lǐ", t: "(apelido carinhoso) \"Li\" — sobrenome Lǐ + prefixo 小" }
+            ],
+            wrapup: true
+          }
+        ]
       }
     ],
     trueFalseExercises: [{ subject: "你叫什么名字？", pinyin: "nǐ jiào shénme míngzi?", emoji: "🙋", claim: "Essa pergunta serve pra saber a nacionalidade de alguém.", answer: false,
@@ -327,6 +348,28 @@ const UNITS = [
             body: "No sistema tradicional chinês (<strong>虚岁, xūsuì</strong>, \"idade nominal\"), um bebê já nasce com 1 ano, e todo mundo ganha mais um ano junto no Ano Novo Chinês — não no próprio aniversário. Hoje o sistema ocidental (idade real, 周岁) é o mais usado no dia a dia, mas o 虚岁 ainda aparece em contextos tradicionais.",
             examples: [
               { c: "虚岁", p: "xūsuì", t: "idade nominal (sistema tradicional)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // 2ª nota cultural desta unidade (varredura 2026-09-18) -- categoria
+      // 'costume'. Ligada ao 四 (sì) desta lição. Confiança ALTA: a
+      // associação 四/死 (homófonos quase idênticos) e a superstição
+      // resultante são um fato cultural amplamente documentado sobre a
+      // China (e outros países de língua chinesa).
+      {
+        id: "si-numero-azarado",
+        kind: "culture",
+        category: "costume",
+        trigger: { afterVocabIdx: 4 },
+        blocks: [
+          {
+            title: "Por que o número 4 é evitado na China",
+            body: "四 (sì, \"quatro\") soa muito parecido com 死 (sǐ, \"morte\") — por causa dessa semelhança de som, muita gente evita o número 4 em situações do dia a dia: é comum prédios pularem o 4º andar (ou o número do apartamento), e números de telefone ou placas de carro com 4 podem ser considerados menos desejáveis. É o mesmo tipo de superstição que o número 13 tem em vários países ocidentais.",
+            examples: [
+              { c: "四", p: "sì", t: "quatro" },
+              { c: "死", p: "sǐ", t: "morte / morrer" }
             ],
             wrapup: true
           }
@@ -444,6 +487,25 @@ const UNITS = [
             body: "Pra negar 有 (ter), o chinês não usa 不 — usa 没 ou 没有, especialmente pra isso. É uma das poucas exceções à regra geral de negação com 不.",
             examples: [
               { c: "我没有妹妹。", p: "Wǒ méiyǒu mèimei.", t: "Eu não tenho irmã mais nova." }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'historia'. Ligada
+      // ao 孩子 (háizi) desta lição. Confiança ALTA: a política do filho
+      // único (1979-2015/16) é um fato histórico amplamente documentado.
+      {
+        id: "politica-filho-unico-historia",
+        kind: "culture",
+        category: "historia",
+        trigger: { afterVocabIdx: 7 },
+        blocks: [
+          {
+            title: "Por que muita gente da geração dos pais só tem um irmão (ou nenhum)",
+            body: "De 1979 até o fim de 2015, a China teve a <strong>política do filho único</strong> (一孩政策), que limitava a maioria das famílias urbanas a ter apenas um filho, como forma de conter o crescimento populacional. A política foi encerrada oficialmente em 2016, substituída primeiro pela permissão de dois filhos e depois de três — mas seu efeito ainda aparece hoje na estrutura de muitas famílias chinesas.",
+            examples: [
+              { c: "孩子", p: "háizi", t: "filho(a) / criança" }
             ],
             wrapup: true
           }
@@ -609,6 +671,26 @@ const UNITS = [
             examples: [
               { c: "七点", p: "qī diǎn", t: "7 horas" },
               { c: "现在几点？", p: "xiànzài jǐ diǎn?", t: "que horas são agora?" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'historia'. Ligada
+      // ao 点 (diǎn, "hora(s)") desta lição. Confiança ALTA: a China usar
+      // um único fuso horário nacional (apesar da extensão geográfica) é
+      // um fato amplamente documentado.
+      {
+        id: "fuso-horario-unico",
+        kind: "culture",
+        category: "historia",
+        trigger: { afterVocabIdx: 0 },
+        blocks: [
+          {
+            title: "A China inteira usa o mesmo horário",
+            body: "Apesar de o território da China cobrir uma faixa larga o bastante pra caber 5 fusos horários geográficos, o país inteiro usa um único horário oficial: o <strong>horário de Pequim</strong> (北京时间). Isso significa que, no extremo oeste do país, o sol pode nascer bem mais tarde no relógio do que no leste — mas todo mundo diz as horas do mesmo jeito.",
+            examples: [
+              { c: "北京时间", p: "Běijīng shíjiān", t: "horário de Pequim (horário oficial do país todo)" }
             ],
             wrapup: true
           }
@@ -823,6 +905,27 @@ const UNITS = [
             body: "Você já viu que todo número precisa de um classificador antes do substantivo (个/口, lá na Unidade 4). Assim como 口 é específico pra contar pessoas da família, outras categorias de coisas têm seu próprio classificador — como 件 pra roupas.",
             examples: [
               { c: "一件衣服", p: "yí jiàn yīfu", t: "uma peça de roupa" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'costume'. Ligada
+      // ao próprio diálogo desta lição, que já mostra o preço caindo de 30
+      // para 25 kuài. Confiança ALTA: o regatear em mercados/feiras
+      // (não em lojas de preço fixo/shopping) é um costume amplamente
+      // documentado na China.
+      {
+        id: "regatear-mercado",
+        kind: "culture",
+        category: "costume",
+        trigger: { after: "dialogue" },
+        blocks: [
+          {
+            title: "Regatear é normal — mas só em certos lugares",
+            body: "Repare como o preço caiu de 30 para 25 kuài no diálogo: em mercados de rua, feiras e pequenas lojas de bairro, regatear o preço é normal e até esperado. Mas em shoppings, supermercados e lojas de marca, o preço é fixo e regatear soa fora de lugar — o segredo é reconhecer o tipo de estabelecimento antes de tentar.",
+            examples: [
+              { c: "便宜一点吧", p: "piányi yìdiǎn ba", t: "faz mais barato (frase típica de regateio)" }
             ],
             wrapup: true
           }
@@ -1178,6 +1281,25 @@ const UNITS = [
             examples: [
               { c: "看书", p: "kàn shū", t: "ler livro (atividade visual)" },
               { c: "听音乐", p: "tīng yīnyuè", t: "ouvir música (atividade auditiva)" }
+            ],
+            wrapup: true
+          }
+        ]
+      },
+      // Nota cultural (varredura 2026-09-18) -- categoria 'costume'. Ligada
+      // ao 跳舞 (tiàowǔ) desta lição. Confiança ALTA: a dança de praça
+      // (广场舞) é um fenômeno social chinês amplamente documentado.
+      {
+        id: "guangchangwu-danca-praca",
+        kind: "culture",
+        category: "costume",
+        trigger: { afterVocabIdx: 6 },
+        blocks: [
+          {
+            title: "A dança de praça: um hobby muito chinês",
+            body: "Em praças e parques por toda a China, é comum ver grupos — geralmente de senhoras de meia-idade e idosas — se reunindo todo fim de tarde pra dançar em conjunto ao som de música, numa tradição conhecida como <strong>guǎngchǎng wǔ</strong> (广场舞, \"dança de praça\"). É ao mesmo tempo exercício físico e um momento social importante para essa geração.",
+            examples: [
+              { c: "广场舞", p: "guǎngchǎng wǔ", t: "dança de praça" }
             ],
             wrapup: true
           }
