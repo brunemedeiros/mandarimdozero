@@ -532,7 +532,7 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
       <div class="section-label">Idiomas &amp; progresso</div>
       <div class="profile-langs-row">${langsHTML}</div>
       <div class="profile-nums-row">
-        <div class="profile-num"><div class="v">🔥 ${STATE.streak}</div><div class="l">dias seguidos</div></div>
+        <div class="profile-num"><div class="v">🔥 ${effectiveStreak()}</div><div class="l">dias seguidos</div></div>
         <div class="profile-num"><div class="v">${STATE.xp}</div><div class="l">XP acumulado</div></div>
       </div>
       <button class="profile-stats-link" id="profile-stats-link">Ver estatísticas completas →</button>

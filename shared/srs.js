@@ -75,3 +75,19 @@ function dateStrDaysAgo(days){
   const dd = String(d.getDate()).padStart(2,'0');
   return `${d.getFullYear()}-${mm}-${dd}`;
 }
+
+// STATE.streak só é recalculado dentro de registerStudyToday() (fr/zh
+// app.js), ou seja, só muda quando a pessoa efetivamente estuda -- se ela
+// para de aparecer, o número fica CONGELADO no último valor alcançado em
+// vez de zerar. Telas que exibem o streak como "status atual" (chama no
+// topbar, card "Dias seguidos" do perfil) precisam checar aqui se ele
+// ainda está vivo, não ler STATE.streak direto -- mesma regra de gap que
+// registerStudyToday() já usa (hoje ou ontem = vivo, mais que isso =
+// quebrado). Bug relatado pela autora (2026-09-18): notificação
+// "user_inactive_3" batendo com o flame do topbar ainda mostrando "3".
+function effectiveStreak(){
+  if (!STATE.streak || !STATE.lastStudyDay) return 0;
+  const today = todayStr();
+  if (STATE.lastStudyDay === today || STATE.lastStudyDay === dateStrDaysAgo(1)) return STATE.streak;
+  return 0;
+}

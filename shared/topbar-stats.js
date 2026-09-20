@@ -36,11 +36,15 @@ function animateStatPill(el, newVal){
 }
 
 function renderTopbarStats(){
-  animateStatPill(document.getElementById('streak-count'), STATE.streak);
+  // effectiveStreak() (shared/srs.js), não STATE.streak direto -- o valor
+  // bruto fica congelado no último streak alcançado quando a pessoa some,
+  // em vez de zerar (ver comentário na função).
+  const streak = effectiveStreak();
+  animateStatPill(document.getElementById('streak-count'), streak);
   animateStatPill(document.getElementById('xp-count'), STATE.xp);
   // Card "Status" da sidebar desktop (Fase 3) só existe a partir de 900px,
   // mas o elemento sempre está no DOM (escondido por CSS abaixo disso) --
   // atualiza junto, sem precisar de um segundo hook em outro lugar.
   animateStatPill(document.getElementById('side-xp-count'), STATE.xp);
-  animateStatPill(document.getElementById('side-streak-count'), STATE.streak);
+  animateStatPill(document.getElementById('side-streak-count'), streak);
 }
