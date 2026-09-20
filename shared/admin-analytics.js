@@ -1365,9 +1365,10 @@ async function renderAdminAnalyticsView(){
   await switchAnalyticsTab(ANALYTICS_STATE.tab);
 }
 
-// Alterna entre as duas seções do Painel de Admin (Badges/Analytics) --
-// cada uma renderiza no seu próprio wrap (#admin-badges-content /
-// #admin-analytics-content), só um fica visível por vez.
+// Alterna entre as seções do Painel de Admin (Badges/Analytics/
+// Notificações/Reports/Alunos) -- cada uma renderiza no seu próprio wrap
+// (#admin-badges-content / #admin-analytics-content / ...), só um fica
+// visível por vez.
 function switchAdminPanelSection(section){
   ADMIN_PANEL_STATE.section = section;
   document.querySelectorAll('[data-admin-section]').forEach(btn => btn.classList.toggle('active', btn.dataset.adminSection === section));
@@ -1375,9 +1376,11 @@ function switchAdminPanelSection(section){
   document.getElementById('admin-analytics-content').style.display = section === 'analytics' ? '' : 'none';
   document.getElementById('admin-notifications-content').style.display = section === 'notifications' ? '' : 'none';
   document.getElementById('admin-reports-content').style.display = section === 'reports' ? '' : 'none';
+  document.getElementById('admin-students-content').style.display = section === 'students' ? '' : 'none';
   if (section === 'badges') renderAdminBadgesView();
   else if (section === 'notifications') renderAdminNotificationsView();
   else if (section === 'reports') renderAdminReportsView();
+  else if (section === 'students') renderAdminStudentsView();
   else renderAdminAnalyticsView();
 }
 
