@@ -33,7 +33,7 @@ async function renderAdminStudentsView(){
 
   const [students, profiles] = await Promise.all([fetchMyStudents(), fetchAllProfiles()]);
 
-  const usernameDatalistHTML = profiles.map(p => `<option value="${p.username}">${p.display_name ? escapeHTML(p.display_name) : ''}</option>`).join('');
+  const usernameOptionsHTML = profiles.map(p => `<option value="${p.username}">@${p.username}${p.display_name ? ` — ${escapeHTML(p.display_name)}` : ''}</option>`).join('');
   const languageOptionsHTML = Object.entries(STUDENT_LANGUAGE_LABELS)
     .map(([key, label]) => `<option value="${key}">${label}</option>`).join('');
 
@@ -51,12 +51,11 @@ async function renderAdminStudentsView(){
     <div class="profile-section">
       <div class="section-label">Vincular aluna</div>
       <form id="admin-assign-student-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-student-username">@username da aluna</label>
-        <div class="profile-edit-username-wrap">
-          <span class="profile-edit-at">@</span>
-          <input type="text" id="admin-student-username" class="profile-edit-input" maxlength="24" placeholder="username" list="admin-student-username-datalist" autocomplete="off">
-        </div>
-        <datalist id="admin-student-username-datalist">${usernameDatalistHTML}</datalist>
+        <label class="profile-edit-label" for="admin-student-username">Conta da aluna</label>
+        <select id="admin-student-username" class="profile-edit-input">
+          <option value="" disabled ${profiles.length ? 'selected' : ''}>Selecione uma conta...</option>
+          ${usernameOptionsHTML}
+        </select>
         <label class="profile-edit-label" for="admin-student-language">Idioma</label>
         <select id="admin-student-language" class="profile-edit-input">${languageOptionsHTML}</select>
         <p class="profile-edit-error" id="admin-assign-student-error"></p>
