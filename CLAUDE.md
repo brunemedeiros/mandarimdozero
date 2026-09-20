@@ -1002,3 +1002,104 @@ fase, e é uma limitação do mock de teste, não um bug real do app).
 
 Próxima fase (2 -- flashcards) só começa depois de autorização explícita
 da autora, com o relatório acima já entregue antes de pedir luz verde.
+
+**Atualização: autorizada e entregue (2026-09-20), "Pode seguir para a
+fase 1" seguida depois por "Sim, e depois passe pra próxima fase" (após
+aprovar abrir/mergear os PRs da Fase 1 e de um fix de streak em
+paralelo).**
+
+## Fase 2 (flashcards autorados por professora) -- só o modelo de dados + autoria, sem revisão ainda
+
+**Escopo explicitamente restrito**, mesmo princípio de todas as fases
+anteriores desta feature: Fase 2 no prompt-mestre é "flashcards", Fase 3
+é "integração com revisão" -- são fases SEPARADAS de propósito. Esta
+entrega cobre só a professora poder AUTORAR um cartão e atribuí-lo a uma
+aluna específica; o cartão criado aqui **não entra em `STATE.cards`, não
+participa de `getStudyQueue()`/FSRS, e a aluna não tem nenhuma tela que
+leia isto ainda** -- isso é explicitamente Fase 3, ainda não iniciada.
+
+**O bloqueio identificado na Fase 0** (`STATE.cards` reconstruído do zero
+via `buildCardsFromUnits()` a cada carregamento; `applySerializedState()`
+só faz `Object.assign` nos cartões que já existem nessa lista fresca,
+então um cartão salvo sem correspondência em `content.js` é descartado
+silenciosamente -- confirmado lendo o código de novo nesta fase,
+`fr/app.js` linha ~813) **continua sem solução nesta entrega, de
+propósito** -- resolver isso é justamente o primeiro passo da Fase 3
+(fazer os cartões desta tabela sobreviverem ao ciclo save/load), não
+desta.
+
+**O que foi feito:**
+
+- **Migration `026_create_teacher_flashcards_table.sql`** -- tabela
+  `teacher_flashcards` (`teacher_id`, `student_id`, `language_app_key`
+  -- mesmo par que `teacher_students` já usa --, `front`, `back_trans`,
+  `note` opcional, `status` em `('active','archived')`). RLS: professora
+  lê o que ela criou, aluna lê o que foi atribuído a ela (schema já
+  pronto pra Fase 3 poder ler do lado da aluna, mesmo sem nenhuma tela
+  hoje), escrita só pra administração (mesmo padrão de `023`/`025`).
+  Aplicada AO VIVO nesta sessão via `mcp__Supabase__apply_migration` --
+  não é passo manual pendente.
+- **`status:'archived'` em vez de delete físico** -- mesmo princípio
+  geral do prompt-mestre ("nunca apagar histórico/dado ao remover
+  associação"), aplicado por precaução aqui: quando a Fase 3 ligar isto
+  à revisão, um cartão arquivado não deveria levar embora nenhum estado
+  de memória que a aluna já tenha acumulado nele.
+- **`shared/teacher-flashcards.js`** (novo) -- `fetchFlashcardsForStudent`,
+  `createFlashcard` (valida front/back não-vazios antes de gravar),
+  `setFlashcardStatus` (usado tanto pra arquivar quanto pra reativar).
+- **`shared/admin-flashcards.js`** (novo) + nova subseção "📇 Flashcards"
+  no Painel de Admin (fr+zh), ao lado de "🎓 Alunos": select de aluna
+  (populado por `fetchMyStudents()`, já existente da Fase 1) + form de
+  criar cartão (frente/verso/nota opcional) + lista de cartões ativos e
+  arquivados, com botão de arquivar/reativar por cartão. Reaproveita as
+  mesmas classes CSS de `admin-students.js` (`admin-badge-row` etc.) --
+  zero CSS novo.
+
+**Decisões arquiteturais tomadas nesta fase:**
+1. `languageAppKey` do cartão vem do vínculo já existente em
+   `teacher_students` (a aluna selecionada), não é escolhido de novo no
+   form -- consistente com "cada aluna vale pra 1 idioma" (Fase 1).
+2. Tela de admin exige que já exista pelo menos uma aluna vinculada
+   (aponta pra aba "🎓 Alunos" se não houver nenhuma) -- não duplica
+   nenhuma lógica de vínculo aqui, só consome `fetchMyStudents()`.
+3. Card "pertence" à aluna (biblioteca dela, quando a Fase 3 existir) mas
+   tem ORIGEM na professora -- distinção já registrada no topo desta
+   seção do CLAUDE.md, mantida consistente: `teacher_flashcards` é
+   metadado de origem, não um sistema de revisão paralelo (que nunca vai
+   existir, por princípio arquitetural central desta feature).
+
+**Gratuito x Premium (avaliado, não implementado):** mesma conclusão da
+Fase 1 -- ferramenta de gestão da própria professora/admin sobre suas
+próprias alunas, sem conceito de cobrança nesta ponta. Fica a mesma
+pergunta em aberto pra quando existir mais de uma professora na
+plataforma (ex: limite de cartões/alunas simultâneas por professora no
+plano gratuito) -- não travado em código.
+
+**Testes realizados:** `node --check` nos arquivos tocados, sem erro.
+Validação funcional via Playwright (fr+zh), mesmo padrão de stub de
+`window.supabase.createClient()` da Fase 1: seleção de aluna renderiza
+corretamente, criação de cartão sobe a contagem no banco fake e no DOM,
+rejeição de frente/verso vazio confirmada (`emptyFrontRejected===true`),
+arquivar um cartão move ele pra seção "Arquivados" (`status` muda,
+re-render reflete), gate de não-admin bloqueia com a mesma mensagem já
+usada em "🎓 Alunos". Sem erro de console novo atribuível a este código
+(mesmo `pageerror` pré-existente de `shared/notifications.js`/`.is()` já
+registrado como limitação do mock na entrega da Fase 1, não bug real).
+
+**O que ainda falta / não foi feito nesta fase (de propósito, é a Fase
+3):**
+- Cartão criado aqui não aparece em nenhuma tela da aluna, não entra em
+  `STATE.cards`, não é revisável (FSRS/`getStudyQueue()`).
+- O bloqueio arquitetural da Fase 0 (`applySerializedState()` descarta
+  cartão sem correspondência em `content.js`) não foi tocado -- é
+  trabalho da Fase 3, não desta.
+- Nenhum filtro por origem (`study`/`teacher`/`self`) em nenhuma tela --
+  Fase 4.
+- Edição de um cartão já criado (só front/back/note, não status) não foi
+  implementada -- só criar e arquivar/reativar. Se isso for necessário
+  antes da Fase 3, é um adendo pequeno e contido a esta fase, não
+  Fase 3 em si.
+
+Próxima fase (3 -- integração com revisão) só começa depois de
+autorização explícita da autora, com este relatório já entregue antes de
+pedir luz verde.
