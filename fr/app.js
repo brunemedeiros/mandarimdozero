@@ -406,6 +406,11 @@ function buildCardsFromUnits(units){
         type: 'vocab',
         front: v.f,
         back_trans: v.t,
+        // Fase 3 do sistema de alunas particulares (ver CLAUDE.md):
+        // 'origin' é metadado de UM só motor de cartão -- distingue "de onde
+        // veio" (trilha vs. professora vs. futura auto-criação) sem nunca
+        // virar um sistema de revisão paralelo. Cartão de trilha = 'study'.
+        origin: 'study',
         ef: 2.5,
         interval: 0,
         reps: 0,
@@ -427,6 +432,66 @@ function buildCardsFromUnits(units){
     });
   });
   return cards;
+}
+
+// Fase 3 do sistema de alunas particulares (ver CLAUDE.md) -- cartão
+// autorado por uma professora (shared/teacher-flashcards.js, tabela
+// teacher_flashcards), atribuído a ESTA aluna. Mesmo shape de card que
+// buildCardsFromUnits() produz (mesmo motor de memória/FSRS, mesma
+// getStudyQueue()) -- só ORIGEM diferente. id `t${row.id}` -- namespace
+// separado de `u${unitId}-v${idx}`, nunca colide. `unitId`/`vocabIdx`
+// ficam `null` de propósito (não pertence a nenhuma unidade/lição) --
+// isCardLessonCompleted() trata `origin==='teacher'` como um caso à
+// parte, sem o gate de lição. `flashcardStatus` espelha `status` da linha
+// (ativo/arquivado) -- também consultado por isCardLessonCompleted() pra
+// decidir se o cartão entra na fila de revisão hoje.
+function buildCardFromTeacherFlashcard(row){
+  return {
+    id: `t${row.id}`,
+    unitId: null,
+    unitTitle: 'Da sua professora',
+    vocabIdx: null,
+    type: 'vocab',
+    front: row.front,
+    back_trans: row.back_trans,
+    origin: 'teacher',
+    teacherNote: row.note || null,
+    flashcardStatus: row.status,
+    ef: 2.5,
+    interval: 0,
+    reps: 0,
+    due: 0,
+    lapses: 0,
+    stability: 0,
+    difficulty: 0,
+    state: 'new',
+    lastReview: null,
+    fsrsReps: 0,
+    fsrsLapses: 0
+  };
+}
+
+// Busca os flashcards atribuídos a esta conta (shared/teacher-flashcards.js)
+// e mescla em STATE.cards -- precisa rodar ANTES de loadState()/
+// applySerializedState(), pra que o merge por id lá (Fase 0: "cartão salvo
+// sem correspondência na lista fresca é descartado silenciosamente")
+// encontre esses ids já presentes e restaure o progresso de memória já
+// acumulado. Busca TODOS os status (ativo e arquivado) de propósito --
+// arquivar não pode apagar progresso já salvo, só tirar o cartão da fila
+// de revisão (ver isCardLessonCompleted). Idempotente dentro da mesma
+// sessão (ids já presentes não são duplicados) -- não recarrega uma
+// edição feita pela professora no meio da sessão, mesmo princípio de
+// STATE.units não recarregar ao vivo.
+async function mergeTeacherFlashcardsIntoState(){
+  if (typeof fetchFlashcardsForCurrentStudent !== 'function') return;
+  const rows = await fetchFlashcardsForCurrentStudent(APP_KEY);
+  if (!rows.length) return;
+  const existingIds = new Set(STATE.cards.map(c => c.id));
+  rows.forEach(row => {
+    const id = `t${row.id}`;
+    if (existingIds.has(id)) return;
+    STATE.cards.push(buildCardFromTeacherFlashcard(row));
+  });
 }
 
 // ---------- Taxonomia de "notas de realidade" (sociolinguística) ----------
@@ -714,6 +779,12 @@ document.getElementById('feedback-sound-switch').addEventListener('click', () =>
 updateFeedbackSoundSwitch();
 
 async function loadStateAndRender(){
+  // Fase 3 do sistema de alunas particulares (ver CLAUDE.md): precisa
+  // rodar ANTES de loadState(), pra que os cartões de professora já
+  // estejam em STATE.cards quando applySerializedState() fizer o merge
+  // por id (senão um cartão salvo sem correspondência na lista fresca é
+  // descartado -- exatamente o bloqueio identificado na Fase 0).
+  await mergeTeacherFlashcardsIntoState();
   await loadState();
   // Fase 10: aplica a preferência de frequência de revisão (padrão ou
   // salva) no motor FSRS -- precisa rodar antes de qualquer grading real.
@@ -5641,6 +5712,12 @@ function lessonIndexForVocabIdx(unit, vocabIdx){
 // pra cardsDueNow), o vocabulário de lições 2+ nunca vistas entrava na fila
 // de revisão junto.
 function isCardLessonCompleted(card){
+  // Fase 3 do sistema de alunas particulares (ver CLAUDE.md): cartão de
+  // professora não pertence a nenhuma unidade/lição -- o gate aqui não se
+  // aplica a ele. Elegibilidade própria: só entra na fila de revisão
+  // enquanto a professora não arquivou o cartão (flashcardStatus, espelha
+  // `teacher_flashcards.status`, atualizado a cada mergeTeacherFlashcardsIntoState()).
+  if (card.origin === 'teacher') return card.flashcardStatus === 'active';
   const prog = STATE.unitProgress[card.unitId];
   if (!prog?.started) return false;
   const unit = UNITS.find(u => u.id === card.unitId);

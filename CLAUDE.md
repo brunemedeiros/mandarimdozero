@@ -1103,3 +1103,137 @@ registrado como limitação do mock na entrega da Fase 1, não bug real).
 Próxima fase (3 -- integração com revisão) só começa depois de
 autorização explícita da autora, com este relatório já entregue antes de
 pedir luz verde.
+
+**Atualização: autorizada e entregue (2026-09-20), no mesmo pedido que
+corrigiu o campo @username de "Alunos" pra virar `<select>` -- "Faça o
+campo... Em seguida, continue para a fase 3".**
+
+## Fase 3 (integração com revisão) -- resolve o bloqueio da Fase 0, cartão de professora vira revisável de verdade
+
+**Isto é o núcleo arquitetural da feature inteira** -- as fases 0-2 só
+prepararam o terreno (auditoria, modelo de dados, autoria). Esta fase
+resolve o bloqueio identificado desde a Fase 0 e faz o cartão de
+professora entrar no MESMO motor de memória/revisão que a trilha sempre
+usou, sem criar um sistema paralelo (princípio central desta feature,
+ver topo da seção anterior).
+
+**O bloqueio, resolvido:** `STATE.cards` era reconstruído do zero a cada
+carregamento via `buildCardsFromUnits()`, e `applySerializedState()` só
+faz `Object.assign` nos cartões que JÁ existem nessa lista fresca --
+qualquer cartão salvo sem correspondência era descartado em silêncio. A
+fase anterior identificou isso; esta resolve **sem mudar o mecanismo de
+merge em si** -- só passa a colocar os cartões de professora na lista
+fresca também, antes do merge rodar:
+
+- **`buildCardFromTeacherFlashcard(row)`** (novo, fr/zh `app.js`) --
+  constrói um card com o MESMO shape que `buildCardsFromUnits()` produz
+  (mesmos campos de FSRS: `ef`/`interval`/`reps`/`due`/`lapses`/
+  `stability`/`difficulty`/`state`/`lastReview`/`fsrsReps`/`fsrsLapses`),
+  id `t${row.id}` (namespace separado de `u${unitId}-v${idx}`, nunca
+  colide), `origin: 'teacher'`, `unitId`/`vocabIdx: null` (não pertence a
+  nenhuma unidade), `flashcardStatus` espelhando `status` da linha.
+- **`mergeTeacherFlashcardsIntoState()`** (novo) -- busca os flashcards da
+  aluna logada (`fetchFlashcardsForCurrentStudent`, novo em
+  `shared/teacher-flashcards.js`, RLS já existente desde a migration 026:
+  `student_id = auth.uid()`) e empurra pra `STATE.cards`. **Busca TODOS os
+  status (ativo E arquivado) de propósito** -- arquivar não pode apagar
+  progresso de memória já acumulado, só tirar da fila de revisão (ver
+  abaixo). Chamado logo no INÍCIO de `loadStateAndRender()`, ANTES de
+  `loadState()` -- exatamente pra que a lista fresca já contenha esses
+  ids quando `applySerializedState()` rodar o merge por id. Idempotente
+  dentro da sessão (não duplica se chamado 2x).
+- **`isCardLessonCompleted(card)`** ganhou um caso à parte pro
+  `origin==='teacher'`: em vez do gate de "lição concluída" (que não faz
+  sentido pra um cartão que não pertence a nenhuma unidade), a
+  elegibilidade é `flashcardStatus === 'active'`. Isso é o único ponto de
+  checagem no app inteiro pra "este cartão entra hoje na fila de
+  revisão" -- `eligibleReviewPool()`, `getStudyQueue()` e os 4 pontos de
+  entrada de revisão (Flashcard/Palavras Difíceis/Speed Review/Combinar)
+  já delegam pra cá, então nenhum deles precisou de mudança própria --
+  a arquitetura de seleção centralizada da Fase 4 do projeto de motor de
+  memória (ver seção "Fase4.1: projetar getStudyQueue() central" no
+  histórico) já pagava esse dividendo.
+- **Cartão de trilha também ganhou `origin: 'study'`** (antes não tinha
+  campo de origem nenhum) -- explícito agora, mesmo princípio "dono x
+  origem" travado no topo desta seção do CLAUDE.md.
+- **Achado específico do zh, resolvido antes de mesclar**: diferente do
+  fr (um único campo `front`), o cartão de revisão do zh exige hanzi e
+  pinyin em campos SEPARADOS (`front_pinyin`/`back_hanzi` -- a tela
+  sempre mostra os dois juntos, nunca um sozinho). `teacher_flashcards`
+  (migration 026) só tinha `front`/`back_trans`/`note` -- suficiente pro
+  fr, mas um cartão de mandarim sem pinyin mostraria a string literal
+  "undefined" onde o pinyin deveria estar. **Migration
+  `027_add_pinyin_to_teacher_flashcards.sql`** -- coluna opcional
+  `front_pinyin`, aditiva/sem risco, aplicada AO VIVO nesta sessão via
+  `mcp__Supabase__apply_migration` (não é passo manual pendente). UI de
+  admin (`shared/admin-flashcards.js`) mostra o campo "Pinyin" só quando
+  a aluna selecionada é de mandarim (progressive disclosure -- zero
+  mudança visual pra quem só cria cartão de francês).
+
+**Decisões arquiteturais tomadas nesta fase:**
+1. Card arquivado continua em `STATE.cards` (nunca removido) -- só sai da
+   fila de revisão. Preserva qualquer progresso de memória (`stability`/
+   `reps`/etc.) que a aluna já tenha acumulado nele, caso a professora
+   reative depois. Sem isso, arquivar apagaria dado histórico do próximo
+   save -- contra a regra geral desta feature ("nunca apagar histórico/
+   dado ao remover associação").
+2. Nenhum `getStudyQueue()`/FSRS precisou de mudança -- só
+   `isCardLessonCompleted()` (o único filtro que já existia especificamente
+   pra "cartão pertence a uma unidade") ganhou o caso `origin==='teacher'`.
+   Confirma que a arquitetura "um motor, uma fila central" das fases
+   anteriores realmente absorve uma origem nova sem duplicar lógica --
+   era a aposta arquitetural do prompt-mestre, validada na prática agora.
+3. `unitTitle: 'Da sua professora'` (em vez de deixar `undefined`) --
+   único texto novo visível pra aluna nesta fase: o "flashcard-tag" que já
+   existia (mostra o nome da unidade em todo cartão de trilha) agora
+   mostra essa string pro cartão de professora. Não é um filtro por
+   origem (isso é Fase 4) -- é só o mesmo espaço de UI já preenchido com
+   um valor que faz sentido em vez de vazar `undefined` pra tela.
+4. `buildSpeedOptions()` (distratores de múltipla escolha do Speed
+   Review) já tinha fallback pra quando a "unidade" de um cartão não tem
+   3 outras cartas (`c.unitId === card.unitId` -- pra cartões de
+   professora, todos compartilham `unitId: null`, então esse agrupamento
+   os trata como "mesma unidade" entre si, com fallback pra
+   `eligibleReviewPool()` geral quando insuficientes) -- não precisou de
+   nenhuma mudança, o fallback já existente cobre o caso.
+
+**Gratuito x Premium (avaliado, não implementado):** mesma conclusão das
+Fases 1/2 -- o cartão em si é conteúdo autorado pela própria professora,
+sem custo marginal de servir; a pergunta de premium continua em aberto
+pra quando houver mais de uma professora na plataforma (ex: limite de
+cartões ativos simultâneos), não travada em código.
+
+**Testes realizados:** `node --check` sem erro nos arquivos tocados.
+Validação funcional via Playwright (fr+zh), login como CONTA ALUNA
+(diferente das fases anteriores, que validavam do lado admin) com
+`teacher_flashcards` semeado (1 ativo + 1 arquivado no fr, 1 ativo com
+pinyin no zh): confirmado `STATE.cards` ganha os cartões corretos
+(`origin:'teacher'`, `flashcardStatus` espelhando o status),
+`isCardLessonCompleted()` retorna `true` pro ativo e `false` pro
+arquivado, `eligibleReviewPool()` inclui o ativo e exclui o arquivado,
+`getStudyQueue(scope:'due')` inclui o cartão ativo (fila central
+funciona ponta a ponta), cartão de trilha confirmado com `origin:'study'`.
+Validação adicional só no fr: sessão de revisão real
+(`startReviewSession()`/`renderReviewView()`) renderizada de ponta a
+ponta pro cartão de professora -- tag "Da sua professora", frente "la
+bibliothèque" com botão de áudio, verso "a biblioteca" após virar o
+cartão, sem nenhum "undefined" na tela e sem erro de console novo
+atribuível a este código (os `pageerror`/`insert`/`upsert`/`.is` vistos
+nos logs são limitações do mock minimalista deste teste em chamadas de
+fundo não relacionadas -- analytics/badges/notificações -- mesmo padrão
+já registrado nas fases anteriores).
+
+**O que ainda falta / não foi feito nesta fase (de propósito):**
+- Nenhum filtro por origem (`study`/`teacher`/`self`) em nenhuma tela --
+  isso é Fase 4 explicitamente. A aluna vê o cartão de professora
+  misturado com os de trilha na mesma fila, sem indicação visual além da
+  tag "Da sua professora" já existente no espaço que todo cartão usa.
+- A aluna ainda não tem NENHUMA tela dedicada pra ver "meus cartões da
+  professora" separadamente, nem sabe que foi vinculada a uma professora
+  -- só vê os cartões aparecendo naturalmente na revisão normal.
+- Edição de um cartão já criado pela professora não foi implementada
+  nesta fase nem na anterior (só criar/arquivar/reativar).
+
+Próxima fase (4 -- filtros por origem) só começa depois de autorização
+explícita da autora, com este relatório já entregue antes de pedir luz
+verde.
