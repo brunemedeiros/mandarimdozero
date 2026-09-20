@@ -1377,10 +1377,12 @@ function switchAdminPanelSection(section){
   document.getElementById('admin-notifications-content').style.display = section === 'notifications' ? '' : 'none';
   document.getElementById('admin-reports-content').style.display = section === 'reports' ? '' : 'none';
   document.getElementById('admin-students-content').style.display = section === 'students' ? '' : 'none';
+  document.getElementById('admin-flashcards-content').style.display = section === 'flashcards' ? '' : 'none';
   if (section === 'badges') renderAdminBadgesView();
   else if (section === 'notifications') renderAdminNotificationsView();
   else if (section === 'reports') renderAdminReportsView();
   else if (section === 'students') renderAdminStudentsView();
+  else if (section === 'flashcards') renderAdminFlashcardsView();
   else renderAdminAnalyticsView();
 }
 
