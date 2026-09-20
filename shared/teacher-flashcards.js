@@ -1,8 +1,9 @@
-// ---------- Flashcards autorados por professora -- Fase 2 do sistema de
+// ---------- Flashcards autorados por professora -- Fase 2/3 do sistema de
 // alunas particulares (ver CLAUDE.md) ----------
-// Escopo desta fase: só CRIAR/ATRIBUIR o conteúdo do cartão a uma aluna.
-// Não entra em STATE.cards nem na fila de revisão ainda -- isso é Fase 3
-// ("integração com revisão"), fase separada e ainda não autorizada.
+// Fase 2: só CRIAR/ATRIBUIR o conteúdo do cartão a uma aluna (admin).
+// Fase 3 (integração com revisão): a própria aluna busca seus cartões
+// (fetchFlashcardsForCurrentStudent) pra mesclar em STATE.cards no boot do
+// app (fr/zh app.js).
 //
 // Depende de (mesma posição de shared/roles.js -- antes de app.js):
 //   - shared/supabase-client.js (supabaseClient)
@@ -20,10 +21,34 @@ async function fetchFlashcardsForStudent(studentId){
   return data || [];
 }
 
-// front/back_trans obrigatórios (é o mínimo pra um cartão existir); note é
-// opcional. languageAppKey vem do vínculo já existente em teacher_students
-// (cada aluna vale pra 1 idioma -- não é escolhido de novo aqui).
-async function createFlashcard({ studentId, languageAppKey, front, backTrans, note }){
+// Todos os flashcards (ativos E arquivados) atribuídos à conta LOGADA como
+// aluna, num idioma específico -- chamado do lado da aluna (RLS
+// teacher_flashcards_student_read, migration 026: auth.uid()=student_id),
+// não do lado da professora. Inclui arquivados de propósito: STATE.cards
+// precisa deles presentes pra não perder o progresso de memória já
+// acumulado (ver applySerializedState/merge por id, Fase 0) -- só ficam de
+// fora da FILA DE REVISÃO (isCardLessonCompleted checa `status` na
+// origem 'teacher', fr/zh app.js).
+async function fetchFlashcardsForCurrentStudent(languageAppKey){
+  if (!CURRENT_USER) return [];
+  const { data, error } = await supabaseClient
+    .from('teacher_flashcards')
+    .select('*')
+    .eq('student_id', CURRENT_USER.id)
+    .eq('language_app_key', languageAppKey);
+  if (error){ console.error('Erro ao carregar flashcards da aluna:', error); return []; }
+  return data || [];
+}
+
+// front/back_trans obrigatórios (é o mínimo pra um cartão existir); note e
+// frontPinyin são opcionais. frontPinyin só faz sentido pra
+// languageAppKey==='mandarim' (ver migration 027 -- zh mostra pinyin e
+// hanzi em campos separados no flashcard de revisão, diferente do fr que
+// usa só `front`); a UI (shared/admin-flashcards.js) só mostra o campo
+// quando a aluna selecionada é de mandarim. languageAppKey vem do vínculo
+// já existente em teacher_students (cada aluna vale pra 1 idioma -- não é
+// escolhido de novo aqui).
+async function createFlashcard({ studentId, languageAppKey, front, backTrans, note, frontPinyin }){
   const cleanFront = (front || '').trim();
   const cleanBack = (backTrans || '').trim();
   if (!cleanFront) return { ok: false, error: 'Digite o texto da frente do cartão.' };
@@ -37,6 +62,7 @@ async function createFlashcard({ studentId, languageAppKey, front, backTrans, no
       front: cleanFront,
       back_trans: cleanBack,
       note: (note || '').trim() || null,
+      front_pinyin: (frontPinyin || '').trim() || null,
     })
     .select()
     .single();

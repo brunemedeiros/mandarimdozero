@@ -1,9 +1,8 @@
-// ---------- Flashcards (admin) -- Fase 2 do sistema de alunas particulares ----------
+// ---------- Flashcards (admin) -- Fase 2/3 do sistema de alunas particulares ----------
 // Autoria de flashcard pela professora, atribuído a uma aluna específica.
-// Escopo desta fase: só criar/arquivar o conteúdo do cartão -- não lê nem
-// escreve em STATE.cards, não participa de getStudyQueue()/FSRS ainda (ver
-// CLAUDE.md, "Fase 2" -- isso é Fase 3, "integração com revisão", ainda não
-// autorizada). A aluna não tem hoje nenhuma tela que leia estes cartões.
+// Desde a Fase 3, o cartão criado aqui é mesclado em STATE.cards da aluna
+// (fr/zh app.js, mergeTeacherFlashcardsIntoState) e passa a ser revisável
+// via getStudyQueue()/FSRS -- ver CLAUDE.md.
 //
 // Depende de (mesma posição de shared/admin-students.js -- antes de app.js):
 //   - shared/roles.js              (fetchMyStudents)
@@ -43,7 +42,7 @@ async function renderAdminFlashcardsView(){
   const cardRowHTML = (c) => `
     <div class="admin-badge-row">
       <div class="admin-badge-info">
-        <div class="admin-badge-name">${escapeHTML(c.front)} → ${escapeHTML(c.back_trans)}</div>
+        <div class="admin-badge-name">${escapeHTML(c.front)}${c.front_pinyin ? ` (${escapeHTML(c.front_pinyin)})` : ''} → ${escapeHTML(c.back_trans)}</div>
         <div class="admin-badge-desc">${c.note ? escapeHTML(c.note) + ' · ' : ''}criado em ${new Date(c.created_at).toLocaleDateString('pt-BR')}</div>
       </div>
       <button class="admin-badge-delete-btn" data-toggle-flashcard="${c.id}" data-next-status="${c.status === 'active' ? 'archived' : 'active'}" title="${c.status === 'active' ? 'Arquivar' : 'Reativar'}">${c.status === 'active' ? '🗃' : '↺'}</button>
@@ -60,7 +59,11 @@ async function renderAdminFlashcardsView(){
       <div class="section-label">Novo flashcard${current ? ` -- ${STUDENT_LANGUAGE_LABELS[current.language_app_key] || current.language_app_key}` : ''}</div>
       <form id="admin-create-flashcard-form" class="profile-edit-form">
         <label class="profile-edit-label" for="admin-flashcard-front">Frente (no idioma estudado)</label>
-        <input type="text" id="admin-flashcard-front" class="profile-edit-input" placeholder="ex: la bibliothèque" autocomplete="off">
+        <input type="text" id="admin-flashcard-front" class="profile-edit-input" placeholder="${current && current.language_app_key === 'mandarim' ? 'ex: 图书馆' : 'ex: la bibliothèque'}" autocomplete="off">
+        ${current && current.language_app_key === 'mandarim' ? `
+        <label class="profile-edit-label" for="admin-flashcard-pinyin">Pinyin</label>
+        <input type="text" id="admin-flashcard-pinyin" class="profile-edit-input" placeholder="ex: túshūguǎn" autocomplete="off">
+        ` : ''}
         <label class="profile-edit-label" for="admin-flashcard-back">Verso (tradução)</label>
         <input type="text" id="admin-flashcard-back" class="profile-edit-input" placeholder="ex: a biblioteca" autocomplete="off">
         <label class="profile-edit-label" for="admin-flashcard-note">Nota (opcional)</label>
@@ -99,6 +102,7 @@ async function renderAdminFlashcardsView(){
       front: document.getElementById('admin-flashcard-front').value,
       backTrans: document.getElementById('admin-flashcard-back').value,
       note: document.getElementById('admin-flashcard-note').value,
+      frontPinyin: document.getElementById('admin-flashcard-pinyin')?.value,
     });
     btn.disabled = false;
     if (!result.ok){ errorEl.textContent = result.error; return; }
