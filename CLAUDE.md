@@ -792,3 +792,162 @@ o que um brasileiro diria no dia a dia, não só se a tradução está
 gramaticalmente correta — o mesmo padrão de cuidado já aplicado à
 "coerência pedagógica" (ver topo deste arquivo), agora estendido ao
 REGISTRO da própria língua de interface.
+
+## Sistema de alunas particulares + conteúdo personalizado -- Fase 0/1 (2026-09-19/20)
+
+Feature nova, grande, entregue em fases travadas por autorização explícita
+da autora a cada etapa (não pular fase, não implementar funcionalidade de
+fase futura adiantado). Princípio arquitetural central, definido no
+prompt-mestre que abriu esta feature e que continua valendo pra todas as
+fases futuras (flashcards de professora, criação de cartão pela própria
+aluna, histórico de aula etc.): **uma só biblioteca de flashcards por
+aluna, um só motor de revisão/memória** -- nunca construir um sistema de
+revisão paralelo pra cartão de trilha vs. cartão de professora vs. cartão
+próprio. "Origem" do cartão (`study`/`teacher`/`self`) é sempre metadado
+de UM sistema, nunca vira sistema novo. Distinguir DONO do cartão
+(biblioteca de quem) de ORIGEM (quem criou/recomendou) desde o desenho.
+
+**Fase 0 (auditoria, só leitura, já concluída antes desta entrega)**
+mapeou a arquitetura atual do app e identificou o bloqueio real pra
+flashcards de professora existir no futuro: `STATE.cards` hoje NÃO é uma
+entidade independente -- é reconstruído do zero a partir de `content.js`
+(`UNITS`) a cada carregamento via `buildCardsFromUnits()`, com esquema de
+id `u${unitId}-v${idx}`; `applySerializedState()` descarta silenciosamente
+qualquer cartão salvo cujo id não bate mais com essa reconstrução. Isso
+significa que um cartão "solto" (atribuído por uma professora, sem
+unidade/índice correspondente em `content.js`) simplesmente desapareceria
+do estado salvo hoje -- é o problema real que a Fase 2 (flashcards) vai
+ter que resolver, registrado aqui pra não virar surpresa nessa hora.
+
+**Fase 1 (modelo de dados aluna/papel, esta entrega) -- o que foi feito:**
+
+- **Migration `024_add_role_to_profiles.sql`** -- coluna `profiles.role
+  text not null default 'student' check (role in ('student', 'teacher',
+  'admin'))`, aditiva/sem risco. Aplicada AO VIVO nesta sessão via
+  `mcp__Supabase__apply_migration` no projeto `eigjocalzwamisgqilhg` (não
+  é passo manual pendente pra autora). A mesma migration promove pra
+  `role = 'admin'` a conta cujo e-mail é `brunemed1310@gmail.com` (a
+  única `role` !== `'student'` hoje). Confirmado ao vivo: 1 admin, 21
+  alunas.
+- **Migration `025_create_teacher_students_table.sql`** -- tabela nova
+  `teacher_students` (`teacher_id`, `student_id` -- ambos `auth.users`,
+  `language_app_key` obrigatório em `('frances','mandarim','portugues')`,
+  `status` em `('active','invited','removed')`, `unique(teacher_id,
+  student_id, language_app_key)`), RLS com policies de leitura pra
+  professora e pra aluna (cada uma só vê seus próprios vínculos) e de
+  escrita só pro e-mail admin (mesmo padrão de `023`). Aplicada AO VIVO
+  via MCP na mesma sessão -- não é passo manual pendente.
+  `language_app_key` é obrigatório (não um vínculo "geral" de conta)
+  porque a autora confirmou explicitamente: **"cada aluno vale para
+  apenas 1 idioma"** -- ela pode ter uma Sandra de francês e uma Sandra de
+  chinês como duas alunas DIFERENTES, cada vínculo escopado a um idioma.
+- **`'portugues'` já é um valor aceito no enum de `language_app_key`**,
+  decisão explícita da autora (via `AskUserQuestion`, opção "só o schema
+  fica pronto"): ela é professora de Francês e de Português para
+  Estrangeiros hoje, o Português ainda não existe como idioma no site.
+  Isso é PURAMENTE de schema -- `languages/index.js` (`AVAILABLE_LANGUAGES`)
+  não ganhou nenhuma entrada nova, nem "em breve"/desabilitada; zero
+  mudança visual em qualquer lugar do site pra aluna/visitante comum.
+  Só a tela nova de admin (`shared/admin-students.js`,
+  `STUDENT_LANGUAGE_LABELS`) já lista "Português (em breve)" como opção
+  de atribuição -- é justamente o "anexar a possibilidade" que a autora
+  pediu, sem prometer um curso que ainda não existe.
+- **`shared/roles.js`** (novo) -- só LÊ o papel novo, não substitui
+  `isAdminUser()` em nenhum call site existente (decisão explícita, fora
+  do escopo desta fase): `fetchMyRole()` (usa o `select('*')` que
+  `ensureProfileLoaded()` já fazia, sem round-trip extra),
+  `isTeacherOrAdmin()`, `fetchMyStudents()` (join manual em JS entre
+  `teacher_students` e `profiles`, mesmo padrão de
+  `fetchAllGrantsWithUsernames()` em `admin-badges.js`),
+  `assignStudentToTeacher(username, languageAppKey)` (resolve @username
+  via `resolveProfileByUsername()` reaproveitado de `admin-badges.js`,
+  rejeita auto-atribuição, trata violação de unicidade -- `error.code ===
+  '23505'` -- como "já é sua aluna nesse idioma" em vez de erro genérico),
+  `removeStudentLink(linkId)` (delete simples -- ver nota abaixo sobre o
+  que isso NÃO apaga).
+- **`shared/admin-students.js`** (novo) + nova subseção "🎓 Alunos" no
+  Painel de Admin (`fr/index.html`+`zh/index.html`, `#admin-students-content`,
+  fiado em `switchAdminPanelSection()` de `shared/admin-analytics.js`,
+  mesmo padrão de toggle das outras 4 subseções -- badges/analytics/
+  notificações/reports). Form "Vincular aluna" (username com
+  `<datalist>` de autocomplete + select de idioma) + lista "Suas alunas
+  (N)" com botão de remover por vínculo. Gate-check de `isAdminUser()`
+  no topo de `renderAdminStudentsView()`, mesmo padrão de toda tela de
+  admin existente.
+
+**Decisões arquiteturais tomadas nesta fase:**
+1. Papel (`profiles.role`) é uma peça de dado NOVA e SEPARADA da
+   identidade admin atual (`isAdminUser()`, e-mail hardcoded) -- nenhum
+   call site existente foi migrado pra ler `role` em vez do e-mail. Os
+   dois vão conviver até uma fase futura explícita decidir unificar (fora
+   do escopo desta entrega, não decidido ainda).
+2. Vínculo professora-aluna mora em tabela própria (`teacher_students`),
+   não em coluna solta em `profiles` (ex: `profiles.teacher_id`) -- deixa
+   aberto pra um dia uma aluna ter mais de uma professora, sem migração
+   de schema nova quando isso acontecer.
+3. `remover vínculo` (`removeStudentLink`) é `delete` na linha de
+   `teacher_students` -- NÃO apaga nada de `profiles`/`progress` da
+   aluna, nem histórico dela em nenhuma tabela. A aluna só some da lista
+   "Suas alunas" da professora; o progresso dela continua intacto (regra
+   geral do prompt-mestre desta feature: nunca apagar histórico/dado ao
+   remover associação). O texto de confirmação no `confirm()` já deixa
+   isso explícito pra autora no momento do clique.
+4. Nenhuma tela nova é alcançável por conta comum -- só o Painel de Admin
+   (que já é 100% gate-checked por `isAdminUser()`) ganhou a subseção
+   nova. Uma aluna sendo vinculada não ganha nenhuma UI nova ainda (isso
+   é fase futura -- ela nem fica sabendo que foi vinculada, por design
+   desta fase específica).
+
+**Gratuito x Premium (avaliado, não implementado):** feature inteira hoje
+é ferramenta de gestão pra própria autora (professora/admin) sobre suas
+próprias alunas -- não há conceito de "aluna paga por isso" nesta fase.
+A pergunta relevante fica pra quando a Fase 2+ (flashcards de professora)
+entrar: cada professora poder gerenciar SUAS PRÓPRIAS alunas é plano
+core do produto (a autora É a professora), então não faz sentido premium
+nesta ponta; o que pode virar premium mais adiante é limite de nº de
+alunas simultâneas por professora, se a plataforma um dia tiver mais de
+uma professora usando o sistema -- não travado em código, só registrado
+aqui como pergunta em aberto pro dia em que isso for relevante.
+
+**Testes realizados:** `node --check` em todos os arquivos JS tocados
+(sem erro de sintaxe); suíte de regressão de respostas (11+31 testes)
+sem quebras (não exercita este código, mas confirma que nada existente
+quebrou). Validação funcional via Playwright (fr+zh) com stub de
+`window.supabase.createClient()` (CDN do Supabase é bloqueado pelo proxy
+de saída deste ambiente sandbox -- ver padrão já registrado em sessões
+anteriores) simulando uma sessão logada como a conta admin: confirmado
+`isAdminUser()===true`, `fetchMyRole()==='admin'`,
+`isTeacherOrAdmin()===true`, `fetchMyStudents()` retorna o vínculo
+semeado corretamente, `renderAdminStudentsView()` desenha form + lista,
+fluxo de vincular nova aluna funciona (contagem sobe no banco fake e no
+DOM), rejeição de duplicata/@username inexistente/auto-atribuição todas
+retornam `ok:false` como esperado, fluxo de remover vínculo funciona
+(contagem cai no banco fake e no DOM), e o gate de "não-admin" mostra a
+mensagem de bloqueio em vez do form. Testado nos dois idiomas (fr/zh),
+sem erro de console novo atribuível a este código (o único `pageerror`
+capturado durante a validação -- `.is is not a function` -- vem de
+`shared/notifications.js`, código pré-existente não tocado por esta
+fase, e é uma limitação do mock de teste, não um bug real do app).
+
+**O que ainda falta / não foi feito nesta fase (de propósito):**
+- Nenhuma UI de flashcard, revisão ou "cartão atribuído" -- isso é Fase 2.
+- Nenhuma mudança em `getStudyQueue()`, FSRS ou qualquer motor de
+  revisão -- Fase 3.
+- Nenhum filtro por origem de cartão (`study`/`teacher`/`self`) -- Fase 4.
+- Aluna não tem nenhuma tela nova pra ver que foi vinculada a uma
+  professora, nem pra ver "minha professora" -- fora do escopo desta
+  fase (a tela existe só do lado da professora/admin).
+- `fake_supabase.js`: o histórico de tarefas de sessões anteriores
+  registrado no ambiente menciona esse arquivo várias vezes (ex.
+  "Perfil 7.4: Update fake_supabase.js mock", "AdminMode 5: fake_supabase.js
+  mock default admin_mode:true"), mas uma busca (`grep -rl
+  "fake_supabase"`) neste checkout real do repositório não encontra
+  nenhuma ocorrência -- o arquivo não existe aqui. Não recriei/inventei
+  esse arquivo; a validação desta fase usou um stub Playwright ad-hoc em
+  vez disso (ver "Testes realizados" acima). Uma sessão futura que
+  encontrar essa mesma discrepância deve considerar isso um artefato de
+  histórico de tarefas de sessões anteriores não aplicável a este
+  checkout, não recriar o arquivo às cegas.
+
+Próxima fase (2 -- flashcards) só começa depois de autorização explícita
+da autora, com o relatório acima já entregue antes de pedir luz verde.
