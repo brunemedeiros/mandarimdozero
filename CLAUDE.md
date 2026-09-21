@@ -1591,3 +1591,151 @@ Sem erro de console novo atribuível a este código (mesmos dois
 Próxima fase (6 -- supervisão da professora/métricas, conforme o
 prompt-mestre original) só começa depois de autorização explícita da
 autora, com este relatório já entregue antes de pedir luz verde.
+
+**Atualização: autorizada e entregue (2026-09-21), "Siga para a fase 6" +
+grilling de escopo (o nome "supervisão da professora/métricas" nunca
+tinha sido detalhado no prompt-mestre original) + segunda confirmação
+explícita antes de tocar em dado sensível (ver abaixo).**
+
+## Fase 6a (painel de métricas por aluna) -- primeira vez que uma professora lê dado de progresso de uma aluna
+
+**Escopo, grillado em 2 rodadas antes de codar:** a Fase 6 nunca teve
+descrição além do nome no prompt-mestre original. Perguntei explicitamente
+o que ela deveria cobrir -- a autora escolheu a opção maior
+("Painel + alertas de infrequência"), mas eu já tinha sinalizado na
+própria pergunta que isso provavelmente merecia virar duas entregas
+separadas. Auditando (só leitura) antes de codar, achei um motivo
+CONCRETO pra isso, não só disciplina de escopo: o "painel" esbarra num
+bloqueio de dados real que o "alerta" não esbarra (alerta cruza pro
+`notification-cron`, sistema já existente, sem essa questão). Por isso
+esta entrega é só o painel (**Fase 6a**) -- alertas de infrequência ficam
+pra uma **Fase 6b** explicitamente separada, só depois de autorização de
+novo.
+
+**O bloqueio encontrado (auditoria ao vivo via Supabase MCP, antes de
+qualquer código):** `progress` é uma tabela de UMA linha por conta
+(`user_id`, `data` jsonb, `updated_at`) -- `data` é o `STATE` inteiro
+serializado, namespaced por idioma (`{ frances: {...}, mandarim: {...} }`,
+confirmado lendo `shared/auth.js` `saveState()`/`loadState()`). RLS de
+`progress` hoje: só `auth.uid() = user_id`, pra leitura E escrita --
+**nenhuma professora, vinculada ou não, tinha (ou tem agora, ver abaixo)
+acesso a ler o progresso de nenhuma aluna.** Isso significa que "painel
+de métricas" não é só UI -- é a PRIMEIRA vez nesta feature (e no app
+inteiro) que uma conta passaria a enxergar dado de progresso de outra
+conta. Reconheci isso como uma fronteira de privacidade nova, não uma
+feature de UI comum, e voltei pra autora com uma segunda confirmação
+explícita antes de tocar em RLS/dado sensível -- ela confirmou
+"Sim, com o escopo mínimo".
+
+**Decisão de design pra manter o escopo mínimo prometido:** em vez de uma
+RLS policy de `SELECT` direta em `progress` (que exporia a linha INTEIRA
+-- os dois idiomas juntos, todas as respostas/histórico granular,
+inclusive os cartões que a ALUNA criou sozinha, que não são da
+professora), o único ponto de acesso é uma **function `SECURITY DEFINER`**
+(`get_teacher_student_metrics(p_student_id, p_language_app_key)`,
+migration `029_create_teacher_student_metrics_function.sql`) que:
+1. Checa o vínculo ativo (`teacher_students`, `status='active'`,
+   `teacher_id = auth.uid()`) ELA MESMA, antes de tocar em qualquer dado
+   -- se não autorizada, devolve `{"error": "not_authorized"}`, nunca a
+   linha. **Testado ao vivo**: chamando a function pra um par
+   aluna/idioma qualquer sem contexto de professora autenticada, o
+   retorno foi exatamente `{"error":"not_authorized"}` -- confirma que o
+   bloqueio é real, não só teórico.
+2. Escopa ao idioma do vínculo (`data -> p_language_app_key`), nunca ao
+   outro idioma que a mesma conta possa ter.
+3. Filtra `cards[]` só pelos ids que pertencem a `teacher_flashcards`
+   DESTA professora especificamente pra ESTA aluna (`id = 't' ||
+   teacher_flashcards.id`) -- nunca cartão de trilha (`origin:'study'`)
+   nem auto-criado pela aluna (`origin:'self'`, Fase 5).
+4. Devolve só AGREGADOS (contagens) -- nunca a frente/verso de um cartão
+   específico, nunca uma resposta/histórico granular: `lastStudyDay`,
+   `teacherCardsTotal/Active/Archived/NeverReviewed`, e uma classificação
+   `Weak/Medium/Strong` que reaproveita **a mesma regra exata** de
+   `vocabStrengthBuckets()` (fr/zh `app.js`: `reps===0||lapses>=2` =
+   fraca, `reps>0&&lapses<2&&interval>=60` = forte, resto = mediana) --
+   não inventei um critério novo.
+- RLS de `progress` continua **sem nenhuma policy nova** -- toda a
+  autorização mora dentro da function, não na tabela.
+- Migration aplicada AO VIVO nesta sessão via
+  `mcp__Supabase__apply_migration` -- não é passo manual pendente.
+
+**O que foi feito no cliente:**
+- **`shared/student-metrics.js`** (novo) -- `fetchTeacherStudentMetrics(studentId,
+  languageAppKey)`, único call site que chama a RPC. Trata `data.error`
+  (não-autorizado) e erro de rede da mesma forma -- devolve `null`, UI
+  mostra fallback genérico em vez de vazar qual dos dois aconteceu.
+- **`shared/admin-students.js`** estendido -- cada linha de "Suas alunas"
+  (aba "🎓 Alunos") ganhou um botão "📊" que expande/recolhe um painel
+  inline logo abaixo da própria linha (mesmo padrão visual de
+  `admin-badge-row`, zero CSS novo). Busca via RPC só na PRIMEIRA vez que
+  aquele vínculo é aberto na sessão (`STUDENT_METRICS_CACHE`, chave =
+  id do vínculo, não do aluno -- evita colisão se a mesma aluna tiver mais
+  de um vínculo/idioma) -- clique de fechar/abrir depois disso é só
+  toggle de `display`, sem nova chamada de rede.
+- 3 estados de exibição tratados explicitamente: com dado (contagens
+  reais), sem nenhum cartão da professora ainda pra essa aluna (aponta
+  pra aba "📇 Flashcards"), e falha/não-autorizado (mensagem genérica).
+
+**Decisões arquiteturais tomadas nesta fase:**
+1. Métricas escopadas SÓ aos cartões que a PRÓPRIA professora autorou --
+   não é um "raio-x" da conta inteira da aluna (que incluiria trilha e
+   cartões próprios da Fase 5). Reflexo direto do "escopo mínimo"
+   aprovado: a professora só precisa saber como ESTÁ INDO O QUE ELA
+   ENSINOU, não vigiar tudo que a aluna faz no app.
+2. `lastStudyDay`/"última atividade geral" É a única informação que sai
+   do escopo "só cartões da professora" -- decisão deliberada: sem saber
+   se a aluna ainda está ativa no app, os números de "fracas/medianas/
+   fortes" ficam sem contexto (uma aluna com 0 "fracas" porque sumiu há 3
+   semanas não é a mesma coisa que uma com 0 fracas porque está
+   estudando bem). Não expõe streak (`STATE.streak`, hoje sabidamente
+   "congelável", ver seção anterior deste arquivo) nem XP nem nenhum
+   outro campo de `data`.
+3. `SECURITY DEFINER` + checagem de autorização DENTRO da function (não
+   uma RLS policy declarativa) foi escolha deliberada, não atalho -- uma
+   RLS policy em `progress` só consegue controlar acesso por LINHA
+   inteira; o requisito de "só o idioma do vínculo, só agregado, nunca o
+   cartão auto-criado" precisa de lógica além do que `USING`/`WITH CHECK`
+   conseguem expressar sozinhos.
+
+**Gratuito x Premium (avaliado, não implementado):** mesma conclusão das
+Fases 1-3 -- ferramenta de gestão da própria professora sobre suas
+próprias alunas, sem conceito de cobrança nesta ponta (a professora É a
+autora/admin hoje). Fica a mesma pergunta em aberto já registrada nas
+fases anteriores pra quando houver mais de uma professora na plataforma.
+
+**Testes realizados:** `node --check` sem erro. Verificação ao vivo da
+function no banco real (`mcp__Supabase__execute_sql`) confirmando que uma
+chamada sem professora autenticada retorna `{"error":"not_authorized"}`
+-- a fronteira de segurança é real, testada contra o Postgres de
+produção, não só assumida pela leitura do SQL. Validação funcional via
+Playwright (fr), 3 cenários mockando a resposta da RPC: (1) com dado
+completo -- painel mostra "2 dias atrás"/"4 ativos, 1 arquivados"/
+"2 nunca revisados"/"3 fracas · 1 medianas · 1 forte", todos os números
+batendo com o mock; (2) resposta `not_authorized` -- painel mostra a
+mensagem de fallback genérica, sem crash; (3) zero cartões da professora
+ainda -- painel mostra o estado vazio apontando pra "📇 Flashcards".
+Toggle abrir/fechar confirmado nos 3 cenários. Sem erro de console novo
+atribuível a este código (mesmo `pageerror` de `.maybeSingle` já
+registrado em fases anteriores como limitação do mock, não deste código).
+
+**O que ainda falta / não foi feito nesta fase (de propósito):**
+- **Fase 6b (alertas de infrequência)** -- a metade que a autora também
+  pediu, mas que cruza pro `notification-cron` (Edge Function já em
+  produção) em vez de só UI/RLS -- escopo e mecanismo (novo tipo de
+  notificação pra professora? novo `event_type`? dispara quando?) ainda
+  não desenhados, só nomeados. Próxima entrega explícita, não começada.
+- Painel só mostra métricas dos cartões DA PROFESSORA -- nenhuma
+  visibilidade sobre progresso geral da trilha ou cartões próprios da
+  aluna (Fase 5), decisão deliberada (ver acima), não esquecimento.
+- Nenhuma exportação/histórico ao longo do tempo -- é um snapshot do
+  estado atual, sem gráfico de evolução.
+- zh não foi validado separadamente nesta entrega (só fr) -- a tela
+  "🎓 Alunos"/painel de métricas é 100% compartilhada entre os dois
+  idiomas (mesmo `shared/admin-students.js`, sem nenhum branch por
+  idioma), então o risco de regressão zh-específica é baixo, mas registrar
+  aqui por completude -- mesmo padrão de honestidade já usado quando uma
+  fase anterior valida só um idioma.
+
+Próxima fase (6b -- alertas de infrequência pra professora) só começa
+depois de autorização explícita da autora, com este relatório já
+entregue antes de pedir luz verde.
