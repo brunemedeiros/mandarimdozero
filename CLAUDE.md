@@ -1237,3 +1237,94 @@ já registrado nas fases anteriores).
 Próxima fase (4 -- filtros por origem) só começa depois de autorização
 explícita da autora, com este relatório já entregue antes de pedir luz
 verde.
+
+**Atualização: autorizada e entregue (2026-09-21), "Siga para a fase 4".**
+
+## Fase 4 (filtro por origem) -- aluna pode escolher revisar só trilha ou só cartões da professora
+
+**Escopo**: filtro puramente de UI/seleção, sem migração nenhuma --
+`origin` já existia em todo cartão desde a Fase 3. A ideia é simples:
+deixar a aluna escolher, na tela Revisão, se quer ver TODOS os cartões
+(padrão), só os DA TRILHA, ou só os DA PROFESSORA.
+
+**Onde entrou:** `eligibleReviewPool()` -- o único pool base que toda tela
+de revisão/prática já usava (Flashcard, Palavras Difíceis, Speed Review,
+Combinar, hero widget "Revisões pendentes", mode-select) -- ganhou mais um
+`.filter()` (`matchesReviewOriginFilter`), na frente de
+`STATE.studySettings.reviewOriginFilter` (`'all'` padrão | `'study'` |
+`'teacher'`). Como era o único pool que todo mundo já usava (herança das
+Fases 4/7 do projeto de motor de memória, ver histórico), bastou mexer
+num lugar só pro filtro valer em toda tela -- mesma vitória arquitetural
+já registrada como "aposta validada" na entrega da Fase 3.
+
+**Achado durante a implementação, corrigido antes de finalizar:**
+`startReviewSession()` (a função que de fato monta a fila jogada na tela
+de Flashcard) tinha sua PRÓPRIA cópia inline do filtro
+(`STATE.cards.filter(isCardLessonCompleted)`), sem passar por
+`eligibleReviewPool()`. Se eu só tivesse mexido em `eligibleReviewPool()`,
+o painel de configurações mostraria contagens filtradas corretamente mas
+a sessão de revisão de verdade ignoraria o filtro -- a prévia mentiria
+sobre o que a aluna ia receber. Corrigido trocando essa cópia por
+`eligibleReviewPool()` também (só no ramo de revisão geral -- estudar
+uma unidade específica da trilha, `STATE.reviewSessionUnitFilter`,
+continua fora do filtro de origem de propósito: cartão de professora
+nunca pertence a uma unidade mesmo, então nunca entraria ali de
+qualquer forma).
+
+**UI**: novo `<select id="review-origin-select">` no painel "⚙️
+Configurar sessão" (mesmo painel de Filtro de fila/Frequência/Palavras
+novas/Intensidade), com contagem entre parênteses em cada opção (mesmo
+padrão do filtro de fila existente). **Só aparece pra quem TEM pelo
+menos um cartão de origem `'teacher'`** (`review-origin-select-wrap`
+com `hidden` controlado em `renderReviewSettingsView()`) -- pra
+99%+ das alunas (sem professora vinculada ainda) esse controle seria
+ruído puro, uma escolha sem nenhum efeito. Replicado fr+zh, mesma
+estrutura de HTML/JS nos dois.
+
+**Decisões arquiteturais tomadas nesta fase:**
+1. Filtro é um `STATE.studySettings` normal (mesmo padrão de
+   `reviewFilter`/`reviewFrequency`/etc.) -- persiste em
+   `serializeState()`/`applySerializedState()` sem nenhuma mudança
+   nelas (já serializam `studySettings` inteiro).
+2. `matchesReviewOriginFilter()` é função própria (não inline dentro de
+   `eligibleReviewPool()`) só pra manter o padrão de nomear cada
+   critério de filtro isoladamente, mesmo espírito de
+   `isCardLessonCompleted()`.
+3. Contagens do filtro de fila (Todas/Mais difíceis primeiro/Mais
+   antigas primeiro) dentro do painel de config JÁ herdam o filtro de
+   origem automaticamente, porque todas elas partem de
+   `eligibleReviewPool()` -- não precisou de nenhum ajuste adicional
+   pra manter os dois filtros consistentes entre si.
+
+**Gratuito x Premium (avaliado, não implementado):** filtro de
+visualização puro, sem custo marginal -- mesma conclusão das fases
+anteriores, nenhuma razão pra diferenciar por plano.
+
+**Testes realizados:** `node --check` sem erro. Playwright (fr+zh), 2
+cenários por idioma -- aluna COM cartão de professora e aluna SEM
+nenhum: confirmado que o `<select>` fica oculto quando não há cartão de
+professora (`originWrapHidden===true`) e visível com as 3 opções
+corretas quando há (`"Todas (N)"`/`"Da trilha (N)"`/`"Da professora
+(N)"`); filtrar por `'teacher'` retorna só cartões `origin==='teacher'`,
+filtrar por `'study'` só `origin==='study'`, e a soma dos dois bate com
+o total sem filtro (`sumMatches===true`); confirmado que
+`startReviewSession()` (não só `eligibleReviewPool()`) respeita o
+filtro -- a fila de revisão de verdade só contém cartões de professora
+quando o filtro está em `'teacher'`. Sem erro de console novo atribuível
+a este código (mesmo `pageerror` pré-existente de
+`shared/notifications.js`/`.is()` já registrado nas fases anteriores).
+
+**O que ainda falta / não foi feito nesta fase (de propósito):**
+- Nenhuma indicação de origem fora da tela de Revisão -- "Suas palavras"
+  (fracas/medianas/fortes) e outros widgets continuam agregando as duas
+  origens juntas, sem quebra por origem. Não foi pedido nesta fase.
+- Filtro por origem só existe pra REVISÃO -- não afeta "Trilha"/Estudo
+  normal (que nunca mostra cartão de professora mesmo, só vocabulário de
+  unidade).
+- Aluna continua sem nenhuma tela dedicada "meus cartões da professora"
+  fora da fila de revisão normal -- a única forma de isolar é usar este
+  filtro, não existe uma lista/galeria separada.
+
+Próxima fase (5 -- criação de cartão pela própria aluna) só começa
+depois de autorização explícita da autora, com este relatório já
+entregue antes de pedir luz verde.

@@ -682,7 +682,10 @@ const STATE = {
     reviewFrequency: 'balanced', // 'frequent' | 'balanced' (padrão) | 'spaced'
     newCardsPerDay: 10,
     sessionIntensity: 'normal', // 'light' | 'normal' (padrão) | 'intense'
-    reviewFilter: 'oldest' // 'all' | 'hard' | 'oldest' (padrão) -- ver reviewFilterQueue()
+    reviewFilter: 'oldest', // 'all' | 'hard' | 'oldest' (padrão) -- ver reviewFilterQueue()
+    // Fase 4 do sistema de alunas particulares (ver CLAUDE.md): filtro por
+    // origem do cartão -- ver matchesReviewOriginFilter/eligibleReviewPool.
+    reviewOriginFilter: 'all' // 'all' (padrão) | 'study' | 'teacher'
   },
   dailyMinutesLog: {}, // legado -- não lido mais pra nada, só continua sendo escrito (addStudyMinutes) pra não perder histórico já salvo
   dailyLessonsLog: {}, // 'YYYY-MM-DD' -> lições (que contam pra meta) concluídas naquele dia
@@ -4984,8 +4987,19 @@ function buildSpeedOptions(card){
   return shuffle([card, ...distractors]);
 }
 
+// Fase 4 do sistema de alunas particulares (ver CLAUDE.md): filtro por
+// ORIGEM do cartão ('all'/'study'/'teacher'), aplicado aqui -- o único
+// pool base que TODA tela de revisão/prática já usa (Flashcard, Palavras
+// Difíceis, Speed Review, Combinar, hero widget, mode-select). Um só
+// ponto de checagem, mesmo padrão de isCardLessonCompleted() -- nunca
+// reimplementar este filtro solto em outro lugar.
+function matchesReviewOriginFilter(card){
+  const filter = STATE.studySettings.reviewOriginFilter || 'all';
+  return filter === 'all' || card.origin === filter;
+}
+
 function eligibleReviewPool(){
-  return STATE.cards.filter(isCardLessonCompleted);
+  return STATE.cards.filter(isCardLessonCompleted).filter(matchesReviewOriginFilter);
 }
 
 function hardWordsPool(){
@@ -5098,6 +5112,11 @@ function reviewFilterQueue(filter, pool){
 // hero (sem contagem, só o nome do filtro ativo) -- texto-fonte único
 // pra nunca dessincronizar entre os dois.
 const REVIEW_FILTER_LABELS = { all: 'Todas', hard: 'Mais difíceis primeiro', oldest: 'Mais antigas primeiro' };
+
+// Fase 4 do sistema de alunas particulares (ver CLAUDE.md): rótulos do
+// filtro de ORIGEM -- diferente de REVIEW_FILTER_LABELS (que decide COMO
+// consumir a fila), este decide DE ONDE vêm os cartões.
+const REVIEW_ORIGIN_LABELS = { all: 'Todas', study: 'Da trilha', teacher: 'Da professora' };
 
 // Bloco hero (topo da Revisão): número grande = trueCount, sempre o total
 // real pendente, nunca o cortado pela sessão -- fixo, não muda com o
@@ -5730,9 +5749,19 @@ function isCardLessonCompleted(card){
 
 function startReviewSession(){
   trackEvent('lesson_start', 'flashcard_review', null);
+  // eligibleReviewPool() (não STATE.cards.filter(isCardLessonCompleted)
+  // solto): mesma função que a tela de modo/hero widget já usa pra contar
+  // -- Fase 4 do sistema de alunas particulares (ver CLAUDE.md) adicionou
+  // o filtro por origem lá dentro, então a sessão de verdade precisa
+  // consumir a MESMA fonte, senão a prévia da tela de config mentiria
+  // sobre o que a sessão realmente inclui. Estudar uma unidade específica
+  // (STATE.reviewSessionUnitFilter) continua fora do filtro de origem --
+  // é uma ação deliberada vinda da trilha, e cartão de professora nunca
+  // pertence a uma unidade (`unitId: null`) mesmo, então nunca entraria
+  // aqui de qualquer forma.
   const pool = STATE.reviewSessionUnitFilter
     ? STATE.cards.filter(c => c.unitId === STATE.reviewSessionUnitFilter && isCardLessonCompleted(c))
-    : STATE.cards.filter(isCardLessonCompleted);
+    : eligibleReviewPool();
 
   // Fase 4 (projeto anterior): seleção centralizada em getStudyQueue()
   // (shared/study-queue.js) -- due primeiro, mais um lote limitado de
@@ -6688,6 +6717,29 @@ function renderReviewSettingsView(){
   if (newCardsSelect) newCardsSelect.value = String(normalizeNewCardsPerDay(s.newCardsPerDay));
   const intensitySelect = document.getElementById('review-intensity-select');
   if (intensitySelect) intensitySelect.value = s.sessionIntensity;
+
+  // Fase 4 do sistema de alunas particulares (ver CLAUDE.md): o filtro de
+  // origem só aparece pra quem TEM pelo menos um cartão de professora --
+  // pra 99% das alunas (sem professora vinculada) esse controle seria
+  // ruído puro, oferecendo uma escolha sem efeito nenhum.
+  const originWrap = document.getElementById('review-origin-select-wrap');
+  const originSelect = document.getElementById('review-origin-select');
+  const hasTeacherCards = STATE.cards.some(c => c.origin === 'teacher');
+  if (originWrap) originWrap.hidden = !hasTeacherCards;
+  if (originSelect && hasTeacherCards){
+    const basePool = STATE.cards.filter(isCardLessonCompleted);
+    const originCounts = {
+      all: basePool.length,
+      study: basePool.filter(c => c.origin === 'study').length,
+      teacher: basePool.filter(c => c.origin === 'teacher').length
+    };
+    const currentOrigin = s.reviewOriginFilter || 'all';
+    originSelect.innerHTML = `
+      <option value="all" ${currentOrigin === 'all' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.all} (${originCounts.all})</option>
+      <option value="study" ${currentOrigin === 'study' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.study} (${originCounts.study})</option>
+      <option value="teacher" ${currentOrigin === 'teacher' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.teacher} (${originCounts.teacher})</option>
+    `;
+  }
 }
 
 // Persiste + reaplica ao motor imediatamente -- não precisa de botão "Salvar"
@@ -6716,6 +6768,13 @@ document.getElementById('review-newcards-select').addEventListener('change', (e)
 });
 document.getElementById('review-intensity-select').addEventListener('change', (e) => {
   updateStudySetting({ sessionIntensity: e.target.value });
+});
+// Fase 4 do sistema de alunas particulares (ver CLAUDE.md) -- elemento só
+// existe no HTML se o app tiver a seção nova (index.html); no-op seguro
+// se por algum motivo não existir (mesmo padrão defensivo de outros
+// selects opcionais desta tela).
+document.getElementById('review-origin-select')?.addEventListener('change', (e) => {
+  updateStudySetting({ reviewOriginFilter: e.target.value });
 });
 // Ícone "⚙️" no cabeçalho da tela de Revisão (3ª sessão de grilling --
 // antes era um botão de texto solto entre o dropdown e REVISAR, a autora
