@@ -653,6 +653,70 @@ async function processFeaturedBadgeReminders(
   return created;
 }
 
+// Fase 6b do sistema de alunas particulares (ver CLAUDE.md) -- alerta de
+// infrequência pra professora. Primeiro evento em que o DESTINATÁRIO
+// (userId passado a maybeNotify) não é o SUJEITO do dado -- a professora
+// recebe um aviso sobre a INATIVIDADE DA ALUNA, não sobre si mesma.
+// maybeNotify() já era agnóstico quanto a isso (userId é só "quem
+// recebe"), então nenhuma mudança de mecanismo foi necessária -- só uma
+// categoria nova ('supervisao') + templates (migration 030).
+//
+// Roda 1x por invocação (mesmo padrão de processWeeklyRankingResults/
+// processFeaturedBadgeReminders), não por usuário/idioma como
+// processUserLanguage -- porque agrupa TODAS as alunas inativas de uma
+// mesma professora/idioma numa notificação só, em vez de uma por aluna
+// (evita spam quando várias somem no mesmo dia; também é por isso que
+// notification_rules.supervisao.daily_cap=1 já basta).
+//
+// Marco de dias (não cooldown corrido) -- mesmo mecanismo do calendário
+// de reengajamento: só dispara quando daysSince(lastStudyDay) bate
+// EXATAMENTE um dos números em schedule_days, uma vez por marco, não
+// todo dia depois disso.
+async function processTeacherStudentAlerts(
+  supabase: any, rules: Map<string, any>, prefsCache: Map<string, any>, emailCache: Map<string, string | null>,
+  progressByUserId: Map<string, any>,
+): Promise<number> {
+  const scheduleDays: number[] = rules.get('supervisao')?.schedule_days || [];
+  if (!scheduleDays.length) return 0;
+
+  const { data: links, error } = await supabase
+    .from('teacher_students')
+    .select('teacher_id, student_id, language_app_key')
+    .eq('status', 'active');
+  if (error || !links?.length) return 0;
+
+  // Chave "teacher_id|language_app_key" -- cada grupo vira NO MÁXIMO uma
+  // notificação (uma professora com alunas de francês E mandarim recebe
+  // até 2, uma por idioma, nunca uma por aluna).
+  const groups = new Map<string, { teacherId: string; languageAppKey: string; hits: { studentId: string; days: number }[] }>();
+  for (const link of links) {
+    const state = progressByUserId.get(link.student_id)?.[link.language_app_key];
+    const days = daysSince(state?.lastStudyDay);
+    if (days === null || !scheduleDays.includes(days)) continue;
+    const key = `${link.teacher_id}|${link.language_app_key}`;
+    const group = groups.get(key) || { teacherId: link.teacher_id, languageAppKey: link.language_app_key, hits: [] };
+    group.hits.push({ studentId: link.student_id, days });
+    groups.set(key, group);
+  }
+  if (!groups.size) return 0;
+
+  const allStudentIds = [...new Set([...groups.values()].flatMap((g) => g.hits.map((h) => h.studentId)))];
+  const { data: profiles } = await supabase.from('profiles').select('user_id, username, display_name').in('user_id', allStudentIds);
+  const nameById = new Map<string, string>((profiles || []).map((p: any) => [p.user_id, p.display_name || (p.username ? `@${p.username}` : 'aluna')]));
+
+  let created = 0;
+  for (const group of groups.values()) {
+    const studentList = group.hits
+      .map((h) => `${nameById.get(h.studentId) || 'aluna'} (${h.days} dias)`)
+      .join(', ');
+    if (await maybeNotify(
+      supabase, rules, prefsCache, emailCache, group.teacherId, group.languageAppKey,
+      'student_inactive_alert', 'supervisao', { count: group.hits.length, studentList }, 'admin-badges',
+    )) created++;
+  }
+  return created;
+}
+
 Deno.serve(async (_req: Request) => {
   const supabase = createClient(supabaseUrl, serviceRoleKey);
 
@@ -704,10 +768,16 @@ Deno.serve(async (_req: Request) => {
     errors.push(`lembrete de badge em destaque: ${String(e)}`);
   }
 
+  try {
+    notificationsCreated += await processTeacherStudentAlerts(supabase, rules, prefsCache, emailCache, progressByUserId);
+  } catch (e) {
+    errors.push(`alerta de infrequência pra professora: ${String(e)}`);
+  }
+
   const summary = {
     ok: true,
     ranAt: new Date().toISOString(),
-    phase: 'Fase 5 -- review_overdue, streak_at_risk, study_goal_remaining, reengajamento (calendário completo 1-30, 9/15/20/30 também por e-mail), daily_missions_reminder, ranking_weekly_result, featured_badge_reminder',
+    phase: 'Fase 6b -- + student_inactive_alert (alerta de infrequência pra professora, categoria supervisao); demais eventos desde Fase 5: review_overdue, streak_at_risk, study_goal_remaining, reengajamento (calendário completo 1-30, 9/15/20/30 também por e-mail), daily_missions_reminder, ranking_weekly_result, featured_badge_reminder',
     usersScanned,
     notificationsCreated,
     errorCount: errors.length,
