@@ -3224,7 +3224,11 @@ footer.app-footer img{ height:40px; opacity:.85; }
           <option value="normal">Normal (recomendado)</option>
           <option value="intense">Intensa (sessões mais longas)</option>
         </select>
-        <p class="settings-more-note">O filtro decide quais cartões entram na sessão agora; os outros 3 ajustam o motor de revisão nos bastidores -- você não precisa entender os detalhes técnicos.</p>
+        <div id="review-origin-select-wrap" hidden>
+          <div class="section-label">Origem</div>
+          <select class="review-settings-select" id="review-origin-select"></select>
+        </div>
+        <p class="settings-more-note">O filtro decide quais cartões entram na sessão agora; os outros ajustam o motor de revisão nos bastidores -- você não precisa entender os detalhes técnicos.</p>
       </div>
 
       <div class="section-label" id="review-mode-revisar-label">Revisar</div>
