@@ -1881,3 +1881,137 @@ marco, invocar a function, e checar a tabela `notifications`.
 Próxima fase (7 -- histórico de "Aula", conforme o prompt-mestre
 original) só começa depois de autorização explícita da autora, com este
 relatório já entregue antes de pedir luz verde.
+
+**Atualização: autorizada e entregue (2026-09-21), "Siga para a fase 7" +
+grilling de escopo prévio (3 perguntas, ver abaixo).**
+
+## Fase 7 (histórico de "Aula") -- diário de bordo da professora, fora do motor de cartões/revisão
+
+**Escopo, grillado em 1 rodada antes de codar:** a Fase 7 nunca teve
+descrição além do nome ("histórico de Aula") no prompt-mestre original --
+mesma situação da Fase 6 antes do grilling daquela vez. 3 perguntas via
+`AskUserQuestion`:
+
+1. *O que a professora registra por aula?* → **opções 1+2 combinadas**
+   (texto livre + campos estruturados), mas com uma correção importante
+   da autora sobre a Opção 1: **só DATA, sem hora automática** -- ela
+   registra várias aulas juntas no fim do dia, então uma hora "de
+   criação" gravada automaticamente ficaria errada pra todas as entradas
+   de um mesmo lote (ex: 3 aulas de manhãs diferentes, todas ganhando a
+   hora de quando ela sentou pra digitar à noite). Os 4 campos de
+   conteúdo (tópico/lição de casa/observações/texto livre) são todos
+   opcionais INDIVIDUALMENTE -- exemplo dado por ela: aula de passé
+   composé → tópico="passé composé", lição de casa=se houver, observações
+   =material/página usada, texto livre=vocabulário e gramática
+   trabalhados.
+2. *Quem vê?* → **só a professora** (mesmo escopo mínimo já usado no
+   painel de métricas da Fase 6a) -- não existe NENHUM caminho pra aluna
+   ver isto, diferente de "🎓 Alunos"/"📇 Flashcards".
+3. *Editar/apagar?* → **desde já**, diferente de teacher_flashcards/
+   student_flashcards (que usam `status:'archived'`, nunca deletam, pra
+   preservar progresso de memória FSRS acumulado): uma entrada de aula
+   não tem NENHUM estado de memória dependente dela, então DELETE físico
+   é seguro aqui -- primeira vez nesta feature que uma tabela usa delete
+   de verdade em vez do padrão de arquivamento.
+
+**O que foi feito:**
+
+- **Migration `031_create_teacher_class_logs_table.sql`** -- tabela nova
+  `teacher_class_logs` (`teacher_id`, `student_id`, `language_app_key` --
+  mesmo trio que `teacher_students`/`teacher_flashcards` já usam --,
+  `class_date` DATE (não timestamptz, ver decisão 1 acima, default
+  `current_date`), `topic`/`homework`/`observations`/`notes` todos
+  nullable). RLS de UMA política só (`teacher_class_logs_owner_all`, `for
+  all using/with check auth.uid() = teacher_id`) -- mesmo padrão "dono
+  único" de `student_flashcards`, mas aqui o dono é a PROFESSORA, não a
+  aluna (que não tem NENHUMA policy de leitura nesta tabela, ver decisão
+  2). Aplicada AO VIVO nesta sessão via `mcp__Supabase__apply_migration`
+  -- não é passo manual pendente.
+- **`shared/teacher-class-logs.js`** (novo) -- `fetchClassLogs`,
+  `createClassLog` (valida que pelo menos 1 dos 4 campos de conteúdo
+  esteja preenchido, senão rejeita com mensagem explícita -- nenhum CHECK
+  constraint no banco pra isso, mesmo nível de rigor de outras validações
+  de conteúdo já existentes no app), `updateClassLog` (mesma validação),
+  `deleteClassLog` (DELETE físico, ver decisão 3).
+- **`shared/admin-class-logs.js`** (novo) + nova subseção "📝 Aulas" no
+  Painel de Admin (fr+zh), ao lado de "📇 Flashcards": select de aluna
+  (populado por `fetchMyStudents()`, já existente da Fase 1) + form de
+  nova aula (data pré-preenchida com hoje, editável; tópico/lição de
+  casa/observações/notas) + lista de aulas já registradas, mais recente
+  primeiro, cada uma com botões Editar (abre um form inline no lugar da
+  própria linha, com Salvar/Cancelar) e Apagar (com `confirm()`).
+  Reaproveita as mesmas classes CSS de `admin-flashcards.js`
+  (`admin-badge-row`/`profile-section`) -- zero CSS novo.
+
+**Decisões arquiteturais tomadas nesta fase:**
+1. `teacher_class_logs` é **completamente desconectado** de
+   `STATE.cards`/FSRS/`getStudyQueue()` -- nenhum builder de card, nenhum
+   merge no boot do app, nenhuma origem nova (`study`/`teacher`/`self`
+   continuam sendo as únicas 3). É puramente um diário de bordo da
+   professora sobre suas próprias aulas -- diferente de TODAS as fases
+   anteriores desta feature (1 a 6), que sempre giravam em torno do motor
+   único de cartão/revisão. Fase 7 é a primeira peça da feature que vive
+   inteiramente fora dele, por natureza (não é conteúdo revisável pela
+   aluna).
+2. **Primeira tabela desta feature com DELETE físico de verdade** (ver
+   decisão 3 do grilling) -- todas as anteriores (`teacher_flashcards`,
+   `student_flashcards`) usam `status:'archived'` porque têm progresso de
+   memória FSRS acumulado dependente da linha continuar existindo. Uma
+   entrada de aula não tem essa dependência, então a regra geral do
+   prompt-mestre ("nunca apagar histórico/dado ao remover associação")
+   não se aplica aqui -- ela existe pra proteger PROGRESSO DE MEMÓRIA da
+   aluna, não qualquer linha de qualquer tabela; a autora confirmou
+   explicitamente que quer edição/exclusão reais pra este diário
+   específico.
+3. `class_date` é DATE puro (sem hora), default `current_date`, mas
+   EDITÁVEL no formulário -- não travado como "hoje" imutável. Permite a
+   professora registrar uma aula de um dia anterior (ela relatou que
+   registra em lote no fim do dia, o que sugere que pode querer voltar
+   uma aula pro dia real em que aconteceu).
+4. Edição é inline (troca a própria linha por um form, não um modal) --
+   mesmo padrão de "editar no lugar" já visto em outras telas simples do
+   Painel de Admin, sem introduzir um componente de modal novo pra isso.
+
+**Gratuito x Premium (avaliado, não implementado):** mesma conclusão das
+fases 1-6b -- ferramenta de gestão da própria professora sobre as
+próprias aulas, sem conceito de cobrança nesta ponta (a professora É a
+autora/admin hoje). Mesma pergunta em aberto já registrada repetidamente
+pra quando houver mais de uma professora na plataforma.
+
+**Testes realizados:** `node --check` sem erro em `shared/teacher-class-
+logs.js`, `shared/admin-class-logs.js` e `shared/admin-analytics.js`
+(editado pra rotear a nova seção). Validação funcional via Playwright
+(fr+zh), stub de `window.supabase.createClient()` no mesmo padrão das
+fases anteriores: gate de não-admin bloqueia com a mensagem padrão;
+validação de "pelo menos 1 campo preenchido" rejeita uma tentativa
+totalmente vazia sem gravar no banco; criar uma aula pelo formulário sobe
+a contagem no banco fake E aparece na lista imediatamente, com a data
+pré-preenchida em hoje; editar (abrir form inline, mudar o tópico, salvar)
+atualiza o banco E a exibição, fechando o form de edição; cancelar a
+edição fecha o form sem gravar; apagar remove do banco E da lista,
+voltando ao estado vazio. **Achado durante a validação, só no harness de
+teste (não no código do app)**: o mock minimalista usado nesta sessão
+tinha um `update()` que não encadeava `.eq()` corretamente (bug só do
+script de teste, replicado do template usado em fases anteriores que
+nunca tinha exercitado `.update().eq()` numa tabela nova) -- corrigido no
+script de validação antes de reportar os resultados acima; **não é um bug
+no código de produção**, `shared/teacher-class-logs.js` sempre usou o
+mesmo padrão `.update(payload).eq('id', id)` já usado em
+`setFlashcardStatus` (Fase 2), que é a forma correta de chamar o
+Supabase real. Sem erro de console novo atribuível a este código (mesmo
+`pageerror` de `.is()` já registrado em fases anteriores como limitação
+do mock, não deste código).
+
+**O que ainda falta / não foi feito nesta fase (de propósito):**
+- Nenhuma exportação/impressão do histórico de aulas -- é só uma lista na
+  tela, sem PDF/CSV.
+- Nenhuma busca/filtro por tópico ou período dentro da lista de aulas de
+  uma aluna -- lista simples ordenada por data, mais recente primeiro.
+- Nenhuma contagem/resumo de aulas no painel de métricas da Fase 6a --
+  são features irmãs mas não integradas uma à outra; a professora não vê
+  "N aulas registradas" no card de métricas expandido de uma aluna.
+- Fase 8 (outros tipos de conteúdo, conforme o prompt-mestre original)
+  continua não iniciada.
+
+Próxima fase (8) só começa depois de autorização explícita da autora, com
+este relatório já entregue antes de pedir luz verde.
