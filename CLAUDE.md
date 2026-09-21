@@ -1739,3 +1739,145 @@ registrado em fases anteriores como limitação do mock, não deste código).
 Próxima fase (6b -- alertas de infrequência pra professora) só começa
 depois de autorização explícita da autora, com este relatório já
 entregue antes de pedir luz verde.
+
+**Atualização: autorizada e entregue (2026-09-21), "Pode seguir".**
+
+## Fase 6b (alerta de infrequência pra professora) -- segundo evento cruzando pra `notification-cron`, primeiro com destinatário ≠ sujeito
+
+**Escopo**: avisar a professora quando uma aluna vinculada some por um
+número de dias, dentro do `notification-cron` (Edge Function já em
+produção) -- diferente da Fase 6a (painel puxado sob demanda pela
+professora), aqui é a plataforma que avisa PROATIVAMENTE, mesmo mecanismo
+de `review_overdue`/`streak_at_risk`/reengajamento já existentes, só que o
+DESTINATÁRIO da notificação não é o SUJEITO do dado -- primeira vez que
+isso acontece no arquivo inteiro. Antes de codar, reli `maybeNotify()`
+(a função central de disparo) e confirmei que ela já era agnóstica quanto
+a isso -- `userId` é só "pra quem grava/envia", nunca presumido como "de
+quem é o progresso lido" -- então nenhuma mudança de mecanismo foi
+necessária, só uma categoria nova + um processador novo que lê o progresso
+de UMA conta (aluna) e notifica OUTRA (professora).
+
+**O que foi feito:**
+
+- **Migration `030_add_teacher_supervisao_notification.sql`** -- nova
+  linha em `notification_rules` (categoria `supervisao`, `priority:3`,
+  `cooldown_minutes:1440`/`daily_cap:1` -- mesmo padrão de
+  `reengajamento`, no máximo 1 aviso por professora por dia, ver abaixo
+  por quê basta) + 4 linhas em `notification_templates`
+  (`event_type:'student_inactive_alert'`, só canal `in_app`, 2 variantes
+  x 2 `language_app_key`). `schedule_days: [3,7,14]` -- reaproveita o
+  MESMO mecanismo de marco de dias do calendário de reengajamento (só
+  dispara quando `daysSince(lastStudyDay)` bate EXATAMENTE um desses
+  números, não em todo dia depois disso) -- marcos mais curtos que o
+  autorreengajamento da própria aluna (1..30), porque aqui quem decide
+  agir é a professora, faz sentido ela saber mais cedo. **Números
+  escolhidos por mim, não confirmados com a autora** -- são um parâmetro
+  de UMA linha (`UPDATE notification_rules SET schedule_days=... WHERE
+  category='supervisao'`), ajustável a qualquer momento sem deploy de
+  código novo; sinalizando aqui pra ela poder pedir outro valor se achar
+  os marcos muito cedo/tarde. Aplicada AO VIVO nesta sessão via
+  `mcp__Supabase__apply_migration` -- não é passo manual pendente.
+- **`processTeacherStudentAlerts()`** (novo, `supabase/functions/
+  notification-cron/index.ts`) -- roda 1x por invocação (mesmo padrão de
+  `processWeeklyRankingResults`/`processFeaturedBadgeReminders`, não por
+  usuário/idioma como `processUserLanguage`): lê todos os vínculos ativos
+  de `teacher_students`, agrupa por `(teacher_id, language_app_key)`, e
+  pra cada aluna do grupo cujo `daysSince(lastStudyDay)` bate um marco de
+  `schedule_days`, acumula um "hit". Se o grupo tiver pelo menos 1 hit,
+  busca os nomes em `profiles` (join manual em JS, mesmo padrão de
+  `fetchMyStudents()`/`admin-badges.js`) e dispara UMA ÚNICA
+  `maybeNotify()` pro grupo inteiro, com `studentList` já formatado
+  ("Nome (N dias)", separado por vírgula quando há mais de uma). **Por
+  que agrupar em vez de 1 notificação por aluna**: evita que uma
+  professora com várias alunas sumindo no mesmo dia estoure o
+  `daily_cap` da categoria e perca avisos -- e evita spam mesmo dentro do
+  cap. `actionTab: 'admin-badges'` -- mesmo id de aba que "🛠️ Painel de
+  Admin" usa (`renderAdminPanelView`, que já mostra a subseção "🎓 Alunos"
+  quando é essa a selecionada); não existe deep-link pra uma subseção
+  específica do painel hoje, então cai na mesma aba que os outros eventos
+  de admin (`featured_badge_reminder` usa `'profile-edit'` por um motivo
+  parecido -- entra na aba mais próxima que já existe, sem inventar
+  roteamento novo).
+- **`NOTIFICATION_CATEGORY_ICON.supervisao = '🎓'`** (`shared/
+  notifications.js`) -- ícone de fallback no sino/dropdown quando o
+  template não tiver um `icon` próprio (mesmo emoji já usado na aba "🎓
+  Alunos", consistência visual).
+- **`'supervisao'` de propósito NÃO entrou em `NOTIFICATION_PREF_
+  CATEGORIES`** (`shared/notification-preferences.js`) -- mesmo
+  precedente já usado por `'perfil'` (lembrete de badge em destaque):
+  categoria de baixíssimo volume, só afeta contas professora/admin,
+  `categoryAllowsInApp()` já retorna `true` por padrão quando não há
+  preferência salva pra ela, então funciona sem exigir um toggle
+  dedicado nesta fase. Sem variante de e-mail também (só `in_app`) --
+  mesmo critério de várias outras categorias que não têm pool de e-mail
+  próprio ainda.
+
+**Deploy da Edge Function**: feito AO VIVO nesta sessão via
+`mcp__Supabase__deploy_edge_function` (`notification-cron` v15→v16,
+mesmo `verify_jwt:true`) -- não é passo manual pendente pra esta
+correção, mesmo princípio já registrado na seção "Edge Functions: um fix
+no código só vale em produção depois de um novo deploy" acima (aqui é
+feature nova, não fix, mas o mesmo raciocínio de deploy-é-parte-da-
+entrega se aplica).
+
+**Achado durante a validação, FORA do escopo desta fase, reportado sem
+corrigir:** invoquei a function v16 ao vivo (`curl` direto contra a URL
+de produção, com a anon key só pra passar o `verify_jwt`) pra confirmar
+que `processTeacherStudentAlerts()` não quebra o resto do cron.
+`usersScanned:18`, sem erro atribuível ao código novo (a função rodou e
+devolveu `notificationsCreated:0` pra essa parte, correto -- confirmei
+com `select count(*) from teacher_students where status='active'` que
+existem 11 vínculos reais ativos hoje, nenhum deles bateu exatamente nos
+marcos 3/7/14 no momento do teste, o que é esperado, não um bug). Mas a
+resposta trouxe **3 erros PRÉ-EXISTENTES, não relacionados a esta fase**:
+`TypeError: Cannot read properties of undefined (reading 'split')` pra 3
+contas distintas, sempre em `frances`. Rastreei a origem sem alterar
+nada: `computeMissionProgress()` → `missionCurrent()` →
+`getFieldValue(daily, def.field!)` -- quando `state.daily.missions`
+contém um `id` de missão que não existe em `MISSION_FIELD_BY_ID` (o mapa
+duplicado server-side, ver comentário já existente no arquivo sobre essa
+duplicação), `def` vira `{}`, `def.field` vira `undefined`, e
+`field.split('.')` quebra. Isso derruba a "Missão 5" (`daily_missions_
+reminder`) pra essas 3 contas/idioma a cada execução -- não afeta os
+passos 1-4 de `processUserLanguage` (já rodaram e já gravaram suas
+notificações antes do crash no passo 5), então não é um bloqueio total,
+mas é uma notificação real perdida silenciosamente pra 3 contas, todo
+dia, desde antes desta sessão (não introduzi isso -- não toquei em
+nenhuma dessas 3 funções). **Não corrigi** por disciplina de escopo desta
+fase (é um bug de outra feature -- missões do dia -- não de alertas de
+infrequência); registrando aqui pra uma sessão futura investigar qual
+`id` de missão está desalinhado entre o cliente e
+`MISSION_FIELD_BY_ID`.
+
+**Gratuito x Premium (avaliado, não implementado):** mesma conclusão das
+fases 1-6a -- alerta sobre as PRÓPRIAS alunas da professora/admin, sem
+conceito de cobrança nesta ponta. Mesma pergunta em aberto já registrada
+repetidamente pra quando houver mais de uma professora na plataforma.
+
+**Testes realizados:** `npx tsc --noEmit` sobre o arquivo editado
+confirmou zero erro de sintaxe/tipo novo (só os erros pré-existentes de
+`Cannot find name 'Deno'`, esperados sem as ambient types do Deno
+carregadas -- mesmos erros que o arquivo já tinha antes desta edição).
+Invocação real da function v16 em produção (ver "Achado" acima) confirma
+que o código novo roda sem lançar exceção e não interfere no resto do
+cron. **Não testei o caminho "notificação realmente disparada"
+ponta-a-ponta** (nenhuma aluna real bateu um marco de `schedule_days` no
+momento do teste) -- a lógica foi validada por leitura + tipo-checagem +
+execução real sem erro, não por uma notificação de fato criada e vista no
+sino. Uma sessão futura que quiser confirmar o caminho feliz pode
+temporariamente ajustar `lastStudyDay` de uma conta de teste pra bater um
+marco, invocar a function, e checar a tabela `notifications`.
+
+**O que ainda falta / não foi feito nesta fase (de propósito):**
+- Nenhum canal de e-mail/push pra `supervisao` -- só in-app.
+- Marcos de dias (3/7/14) são um palpite meu, não confirmados com a
+  autora -- ver nota acima, ajustável com um UPDATE simples.
+- Bug pré-existente de `computeMissionProgress` (3 contas, categoria
+  `desafios`) encontrado mas não corrigido, ver "Achado" acima --
+  trabalho de outra fase.
+- Fase 7 (histórico de "Aula") e Fase 8 (outros tipos de conteúdo) do
+  prompt-mestre original continuam não iniciadas.
+
+Próxima fase (7 -- histórico de "Aula", conforme o prompt-mestre
+original) só começa depois de autorização explícita da autora, com este
+relatório já entregue antes de pedir luz verde.
