@@ -1328,3 +1328,180 @@ a este código (mesmo `pageerror` pré-existente de
 Próxima fase (5 -- criação de cartão pela própria aluna) só começa
 depois de autorização explícita da autora, com este relatório já
 entregue antes de pedir luz verde.
+
+**Atualização: autorizada e entregue (2026-09-21), "Siga para a fase 5".**
+
+## Fase 5 (criação de cartão pela própria aluna) -- terceira origem no mesmo motor, "Meus Cartões" pra toda conta
+
+**Escopo**: dar à ALUNA (qualquer conta logada, não só quem tem professora
+vinculada) a possibilidade de autorar seus próprios flashcards -- palavras/
+frases que ela quer memorizar mesmo que não estejam na trilha nem tenham
+sido atribuídas por uma professora. Mesmo princípio arquitetural central de
+toda a feature (topo da seção "Sistema de alunas particulares" acima): uma
+terceira origem (`origin: 'self'`) no MESMO motor de cartão/revisão, nunca
+um sistema paralelo -- irmã de `origin: 'teacher'` (Fase 2/3), não uma
+reinvenção.
+
+**O que foi feito:**
+
+- **Migration `028_create_student_flashcards_table.sql`** -- tabela nova
+  `student_flashcards` (`student_id`, `language_app_key`, `front`,
+  `front_pinyin` opcional, `back_trans`, `note` opcional, `status` em
+  `('active','archived')`). Diferente de `teacher_flashcards` (escrita só
+  admin), aqui quem autora e quem é dona do cartão são a MESMA pessoa --
+  RLS de uma linha só (`student_flashcards_owner_all`, `for all using/with
+  check auth.uid() = student_id`), sem distinção leitura/escrita
+  professora/aluna. Aplicada AO VIVO nesta sessão via
+  `mcp__Supabase__apply_migration` no projeto `eigjocalzwamisgqilhg` --
+  não é passo manual pendente pra autora.
+- **`shared/student-flashcards.js`** (novo) -- irmão de
+  `shared/teacher-flashcards.js`: `fetchMyOwnFlashcards` (todos os status,
+  mesmo motivo de `fetchFlashcardsForCurrentStudent` -- preservar progresso
+  de memória de cartão arquivado), `createOwnFlashcard` (mesma validação
+  front/back não-vazios), `setOwnFlashcardStatus`.
+- **`shared/my-flashcards.js`** (novo) -- tela "Meus Cartões"
+  (`renderMyFlashcardsView`), irmã de `shared/admin-flashcards.js` mas SEM
+  gate de admin e sem seletor de aluna/idioma (o idioma é sempre o do site
+  em que a conta está, `APP_KEY` -- a aluna não escolhe pra quem é o
+  cartão, é sempre pra ela mesma). Campo Pinyin só aparece quando
+  `APP_KEY==='mandarim'` (mesmo padrão progressivo de
+  `admin-flashcards.js`). Reaproveita as mesmas classes CSS
+  (`admin-badge-row`/`profile-section`) -- zero CSS novo, mesmo padrão já
+  usado em `admin-students.js`/`admin-flashcards.js`.
+- **Nova entrada "📇 Meus cartões" no menu do avatar** (`#user-menu-dropdown`,
+  fr+zh), entre "🏆 Ranking" e "⚙️ Configurações" -- SEM a classe
+  `admin-only-nav` (diferente de "🛠️ Painel de Admin" logo abaixo), porque
+  é uma feature pra QUALQUER conta, não só professora/admin. Nova
+  `<div class="view" id="view-my-flashcards">` (fr+zh `index.html`), aba
+  registrada em `tabHandlers` (`shared/tabs.js`/`createTabSwitcher`) como
+  `'my-flashcards': renderMyFlashcardsView`.
+- **`buildCardFromSelfFlashcard(row)`** (novo, fr/zh `app.js`) -- terceiro
+  builder de card, ao lado de `buildCardsFromUnits()` (`origin:'study'`) e
+  `buildCardFromTeacherFlashcard()` (`origin:'teacher'`). Mesmo shape
+  completo de FSRS, `origin:'self'`, `unitId`/`vocabIdx: null`,
+  `unitTitle: 'Meus cartões'`. id `s${row.id}` -- terceiro namespace,
+  nunca colide com `u${unitId}-v${idx}` (trilha) nem `t${row.id}`
+  (professora, tabela DIFERENTE -- ids numéricos podem coincidir entre as
+  duas tabelas sem problema, o prefixo já resolve). No zh, mesmo
+  mapeamento hanzi/pinyin separado já usado no cartão de professora
+  (`front_pinyin`/`back_hanzi`, `|| ''` pra nunca renderizar "undefined").
+- **`mergeSelfFlashcardsIntoState()`** (novo) -- busca os cartões da conta
+  logada e mescla em `STATE.cards`, chamada logo depois de
+  `mergeTeacherFlashcardsIntoState()` em `loadStateAndRender()`, ANTES de
+  `loadState()` -- exatamente o mesmo mecanismo da Fase 3 (o merge por id
+  de `applySerializedState()` só preserva progresso de cartão cuja id já
+  esteja na lista fresca).
+- **`isCardLessonCompleted(card)`** ganhou `origin==='self'` no MESMO
+  `if` que já tratava `origin==='teacher'` (`return card.flashcardStatus
+  === 'active'`) -- não um `else if` novo, o critério é idêntico pras
+  duas origens (nenhuma pertence a unidade, elegibilidade = não estar
+  arquivado). Confirma de novo a aposta arquitetural da Fase 3: uma
+  origem nova só precisou tocar este ÚNICO ponto de checagem pra
+  propagar corretamente a `eligibleReviewPool()`/`getStudyQueue()`/os 4
+  pontos de entrada de revisão -- nenhum deles precisou de mudança
+  própria.
+- **`addSelfFlashcardToState(row)` / `updateSelfFlashcardStatusInState(id,
+  status)`** (novos) -- diferença importante em relação à Fase 2/3: lá,
+  quem cria/arquiva o cartão de professora é a PROFESSORA (outra sessão
+  de navegador, sem `STATE.cards` da aluna carregado ali). Aqui, quem
+  cria/arquiva é a PRÓPRIA aluna, na MESMA sessão de navegador que já tem
+  `STATE.cards` carregado -- sem essas duas funções, o cartão recém-criado
+  só entraria na fila de revisão (ou um arquivamento só sairia dela) no
+  PRÓXIMO carregamento do app (`mergeSelfFlashcardsIntoState()` só roda no
+  boot), fazendo o toast "já entra na sua fila de revisão" ser uma
+  promessa vazia até a aluna recarregar a página. Chamadas direto de
+  `shared/my-flashcards.js` depois de `createOwnFlashcard`/
+  `setOwnFlashcardStatus` bem-sucedidos.
+- **Filtro de origem da Fase 4 estendido pra 3 origens** -- `<option
+  value="self">` no `#review-origin-select`, `REVIEW_ORIGIN_LABELS.self =
+  'Meus cartões'`. Diferente da Fase 4 original (só 2 origens possíveis
+  além de "Todas", sempre mostradas juntas quando `hasTeacherCards`), com
+  3 origens possíveis mostrar uma opção sempre-zero seria confuso --
+  `renderReviewSettingsView()` agora só inclui `<option value="teacher">`
+  quando `hasTeacherCards` e `<option value="self">` quando
+  `hasSelfCards`, independentemente uma da outra (uma aluna pode ter só
+  cartão próprio, só de professora, os dois, ou nenhum). O wrap
+  (`#review-origin-select-wrap`) fica visível se QUALQUER uma das duas
+  origens especiais existir. `matchesReviewOriginFilter()` e
+  `eligibleReviewPool()` (Fase 4) não precisaram de NENHUMA mudança --
+  já eram genéricos (`card.origin === filter`), só passaram a valer pra
+  um terceiro valor possível de origem automaticamente.
+
+**Decisões arquiteturais tomadas nesta fase:**
+1. `student_flashcards` é tabela PRÓPRIA, não uma extensão de
+   `teacher_flashcards` com `teacher_id` nulo -- mantém a distinção clara
+   de responsabilidade/RLS (uma tabela é "conteúdo que uma professora dá
+   pra uma aluna administrar", a outra é "conteúdo que a aluna administra
+   sozinha"), mesmo que o *shape* de card resultante em `STATE.cards`
+   seja quase idêntico (reflexo do princípio "dono x origem": tabelas de
+   origem podem ser plurais, o motor de revisão que consome o resultado é
+   um só).
+2. Sem seleção de idioma no formulário de "Meus Cartões" -- diferente do
+   form de admin (`admin-flashcards.js`, onde a professora escolhe entre
+   várias alunas de idiomas potencialmente diferentes), aqui a conta só
+   tem UM idioma relevante no momento: o do site em que está (`APP_KEY`).
+   Se a mesma pessoa estuda francês E mandarim (duas contas/perfis
+   separados hoje, sem conceito de conta multi-idioma no app), cada
+   cartão próprio criado em `fr/` ou `zh/` fica automaticamente escopado
+   ao `language_app_key` certo, sem pergunta extra.
+3. `addSelfFlashcardToState`/`updateSelfFlashcardStatusInState` só
+   existem pro lado "self" (não pro lado "teacher") porque só aqui
+   criador e "dona da sessão aberta" são a mesma pessoa -- reforça que
+   Fase 2/3 não precisava disso: a professora nunca tem o `STATE.cards`
+   da aluna carregado na própria sessão.
+
+**Gratuito x Premium (avaliado, não implementado):** primeira vez nesta
+feature em que a pergunta toca uma conta comum diretamente (não só
+professora/admin) -- avaliada explicitamente, não pulada. Conclusão: sem
+custo marginal de servir (é conteúdo escrito pela própria aluna, mesmo
+raciocínio das fases anteriores), então tudo grátis por enquanto faz
+sentido como padrão -- mas esta é a primeira peça da feature onde um
+LIMITE por conta (ex: nº máximo de cartões próprios simultâneos no plano
+gratuito, com um teto maior ou ilimitado no premium) seria uma alavanca de
+monetização natural e direta, diferente das fases anteriores (onde o
+"produto" ainda era só ferramenta de gestão da professora). Não travado em
+código nesta entrega -- fica registrado aqui como a pergunta mais concreta
+até agora pra quando a infraestrutura de assinatura (ainda inexistente,
+ver seção "Considerar plano gratuito x premium" no topo deste arquivo)
+existir de verdade.
+
+**Testes realizados:** `node --check` sem erro em todos os arquivos
+tocados/novos. Validação funcional via Playwright (fr+zh), login como
+CONTA ALUNA com `student_flashcards` semeado (2 cartões no fr -- 1 ativo +
+1 arquivado --, 1 cartão ativo com pinyin no zh): confirmado `STATE.cards`
+ganha os cartões corretos (`origin:'self'`, `flashcardStatus` espelhando o
+status), `isCardLessonCompleted()` concorda com `flashcardStatus` nos
+dois casos. Fluxo de CRIAÇÃO AO VIVO testado de ponta a ponta: preencher o
+formulário "Meus Cartões" e submeter sobe a contagem no banco fake E no
+DOM, e -- ponto crítico desta fase -- o cartão novo já aparece em
+`eligibleReviewPool()` IMEDIATAMENTE, sem precisar recarregar a página
+(`addSelfFlashcardToState` confirmado funcionando, não só teórico).
+Arquivar via UI confirmado atualizando `status` no banco E
+`flashcardStatus` no `STATE.cards` já carregado na mesma sessão
+(`updateSelfFlashcardStatusInState`), com o cartão saindo de
+`isCardLessonCompleted()`/elegibilidade imediatamente, mesma lógica
+"nunca some de `STATE.cards`, só sai da fila" das fases anteriores.
+Filtro de origem confirmado mostrando a opção "Meus cartões" (não
+"Da professora", que não existia neste cenário) quando só há cartão
+próprio, com contagem correta. Testado nos dois idiomas (fr+zh), campo
+Pinyin confirmado ausente no fr e presente no zh. Sem erro de console novo
+atribuível a este código (mesmos dois `pageerror` pré-existentes de
+`shared/notifications.js`/`.is()` e `shared/analytics.js`/`.upsert()` já
+registrados como limitação do mock em todas as fases anteriores).
+
+**O que ainda falta / não foi feito nesta fase (de propósito):**
+- Edição de um cartão próprio já criado (só front/back/note/pinyin, não
+  status) não foi implementada -- só criar e arquivar/reativar, mesmo
+  escopo que `teacher_flashcards` ficou nas Fases 2/3.
+- Nenhum limite de quantidade de cartões próprios por conta -- ver
+  "Gratuito x Premium" acima, pergunta em aberto, não travada em código.
+- Filtro por origem (Fase 4) continua só na tela de Revisão -- "Meus
+  Cartões" é uma tela de GESTÃO (criar/arquivar), não de revisão em si; a
+  aluna revisa o cartão próprio misturado com os outros na fila normal,
+  ou isolado via o filtro de origem já existente.
+- Fase 6 do prompt-mestre original (supervisão da professora/métricas) e
+  Fase 7 (histórico de "Aula") continuam não iniciadas.
+
+Próxima fase (6 -- supervisão da professora/métricas, conforme o
+prompt-mestre original) só começa depois de autorização explícita da
+autora, com este relatório já entregue antes de pedir luz verde.

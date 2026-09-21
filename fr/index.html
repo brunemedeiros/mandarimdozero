@@ -3425,6 +3425,15 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <div id="admin-flashcards-content" style="display:none;"></div>
   </div>
 
+  <!-- ===== MEUS CARTÕES (Fase 5, aberta pra qualquer conta) ===== -->
+  <div class="view" id="view-my-flashcards">
+    <div class="path-header">
+      <h2>📇 Meus cartões</h2>
+      <p>Crie seus próprios flashcards -- palavras e frases que você quer memorizar, mesmo que não estejam na trilha.</p>
+    </div>
+    <div id="my-flashcards-content"></div>
+  </div>
+
   <!-- ===== DITADOS ===== -->
   <div class="view" id="view-dictation">
     <div id="dictation-list-wrap">
@@ -3529,6 +3538,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <button class="user-dropdown-item mais-extra-tab" id="mais-conjugaison-btn" data-tab="conjugaison">✍️ Conjugação</button>
   <button class="user-dropdown-item mais-extra-tab" id="mais-challenges-btn" data-tab="challenges">🎯 Desafios</button>
   <button class="user-dropdown-item" id="leaderboard-btn">🏆 Ranking</button>
+  <button class="user-dropdown-item" id="my-flashcards-btn">📇 Meus cartões</button>
   <button class="user-dropdown-item" id="user-settings-btn">⚙️ Configurações</button>
   <button class="user-dropdown-item admin-only-nav" id="admin-badges-btn" style="display:none;">🛠️ Painel de Admin</button>
   <button class="user-dropdown-item" id="report-menu-btn">⚑ Reportar problema</button>
@@ -3892,6 +3902,8 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <script src="../shared/admin-students.js"></script>
 <script src="../shared/teacher-flashcards.js"></script>
 <script src="../shared/admin-flashcards.js"></script>
+<script src="../shared/student-flashcards.js"></script>
+<script src="../shared/my-flashcards.js"></script>
 <script src="../shared/admin-analytics.js"></script>
 <script src="../shared/admin-notifications.js"></script>
 <script src="../shared/admin-reports.js"></script>
