@@ -76,3 +76,22 @@ async function removeStudentLink(linkId){
   const { error } = await supabaseClient.from('teacher_students').delete().eq('id', linkId);
   return { ok: !error };
 }
+
+// Fase 5.1 do sistema de alunas particulares (ver CLAUDE.md, seção
+// "limite de cartões próprios") -- checa se a conta logada tem pelo menos
+// um vínculo ATIVO como aluna de alguma professora (teacher_students,
+// status='active'). Usado por shared/my-flashcards.js como o eixo "aluno x
+// não-aluno" que decide se o limite de quantidade de "Meus Cartões" se
+// aplica: aluna vinculada a uma professora tem cartões ilimitados, o resto
+// (hoje a maioria das contas) tem o teto do plano grátis. Não substitui
+// fetchMyRole()/isTeacherOrAdmin() -- eixo diferente (vínculo, não papel).
+async function hasActiveTeacherLink(){
+  if (!CURRENT_USER) return false;
+  const { data, error } = await supabaseClient
+    .from('teacher_students')
+    .select('id')
+    .eq('student_id', CURRENT_USER.id)
+    .eq('status', 'active');
+  if (error){ console.error('Erro ao checar vínculo com professora:', error); return false; }
+  return (data || []).length > 0;
+}

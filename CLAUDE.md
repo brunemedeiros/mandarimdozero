@@ -1495,12 +1495,98 @@ registrados como limitação do mock em todas as fases anteriores).
   escopo que `teacher_flashcards` ficou nas Fases 2/3.
 - Nenhum limite de quantidade de cartões próprios por conta -- ver
   "Gratuito x Premium" acima, pergunta em aberto, não travada em código.
+  **Resolvido logo em seguida, ver Fase 5.1 abaixo.**
 - Filtro por origem (Fase 4) continua só na tela de Revisão -- "Meus
   Cartões" é uma tela de GESTÃO (criar/arquivar), não de revisão em si; a
   aluna revisa o cartão próprio misturado com os outros na fila normal,
   ou isolado via o filtro de origem já existente.
 - Fase 6 do prompt-mestre original (supervisão da professora/métricas) e
   Fase 7 (histórico de "Aula") continuam não iniciadas.
+
+## Fase 5.1 (limite de cartões próprios) -- grillada explicitamente, teto pro plano grátis em vez de bloqueio total
+
+A autora pediu, logo após a entrega da Fase 5: "grave no código: criar
+cartões próprios é uma feature premium ou de alunos... deve haver algum
+ícone/stamp/selo e aviso pop up... ou acha melhor apenas limitar o número
+de cartões próprios?" Antes de implementar, grillei 2 perguntas (via
+`AskUserQuestion`) porque a resposta óbvia entraria em conflito direto com
+a regra "não presumir infraestrutura ativa" (topo deste arquivo): não
+existe Stripe/tabela de planos/checagem de tier em nenhum lugar do código
+-- nenhuma das 21 contas reais é "premium" hoje, porque não há COMO uma
+conta virar premium ainda.
+
+**Perguntas e respostas da autora:**
+1. *O que define "aluno" pra esse gate, já que toda conta nasce com
+   `role='student'` por padrão?* → **Ter vínculo ativo com uma professora**
+   (`teacher_students`, `status='active'`) -- reaproveita dado real já
+   existente desde a Fase 1, não um conceito novo.
+2. *Como aplicar a parte "premium" agora, sem assinatura real?* → **Só
+   limite de quantidade, sem bloqueio total** -- rejeitou a opção de selo
+   + popup bloqueando de vez (que, checada explicitamente na pergunta,
+   deixaria "Meus Cartões" inutilizável pra praticamente todas as contas
+   reais hoje, revertendo na prática o que a Fase 5 acabou de entregar).
+
+**Síntese implementada, combinando as duas respostas:** `FREE_OWN_
+FLASHCARD_LIMIT = 20` (`shared/my-flashcards.js`) -- teto de cartões
+PRÓPRIOS ATIVOS pro plano grátis (a maioria das contas hoje). Uma aluna
+com vínculo ativo com QUALQUER professora (`hasActiveTeacherLink()`, novo
+em `shared/roles.js`, checa `teacher_students` onde `student_id=auth.uid()`
+e `status='active'`) fica ISENTA do teto -- cartões ilimitados. Nenhuma
+conta é bloqueada de usar a feature; só quem não tem vínculo e já criou 20
+cartões ativos não consegue criar o 21º até arquivar algum ou vincular com
+uma professora.
+
+**O que foi feito:**
+
+- **`hasActiveTeacherLink()`** (novo, `shared/roles.js`) -- único ponto de
+  checagem pra "esta conta está isenta do teto". Eixo DIFERENTE de
+  `fetchMyRole()`/`isTeacherOrAdmin()` (aqueles leem `profiles.role`; este
+  lê o vínculo em `teacher_students` do lado da aluna).
+- **Selo de tier** (não "premium" -- só comunica o que já é real hoje):
+  `renderMyFlashcardsView()` mostra `✨ Aluna vinculada — cartões
+  ilimitados` (reaproveita `.pill`, já existe no CSS pro streak/XP do
+  topbar, zero CSS novo) quando `hasActiveTeacherLink()===true`, ou
+  `🔒 Plano grátis — N/20 cartões` quando `false`.
+- **Botão desabilitado + texto muda pra "Limite atingido"** quando
+  `!hasLink && activeCards.length >= 20` -- feedback já visível antes de
+  tentar submeter, não só no popup.
+- **Popup de aviso** (`#flashcard-limit-modal`, novo em fr+zh
+  `index.html`, mesmo padrão HTML/JS de todo modal existente no app --
+  `.app-modal-overlay`/`.app-modal`, abrir com `style.display='flex'`,
+  fechar via botão `✕` ou clique no fundo) -- aberto pelo handler de
+  submit do formulário como checagem de verdade (não só o `disabled` do
+  botão, que cobre o caminho normal mas não é a fonte da verdade). Texto
+  explica o teto E a saída (arquivar um cartão, ou vínculo com professora
+  remove o limite) -- nunca promete "upgrade pra premium" porque essa
+  opção não existe no produto ainda.
+- **Nada em `student_flashcards`/RLS mudou** -- o limite é checado só no
+  cliente (client-side gate, mesmo nível de confiança de outros limites
+  de UI no app hoje, ex: `newCardsPerDay` do motor de revisão). Não é uma
+  fronteira de segurança (uma aluna tecnicamente poderia inserir na tabela
+  direto via API) -- aceitável pro escopo desta feature (não é dado
+  sensível, é o próprio conteúdo dela), mesmo nível de rigor de outros
+  limites de UX já existentes no app.
+
+**Gratuito x Premium (resolvido nesta entrega, substitui a pergunta em
+aberto da Fase 5):** com a resposta da autora, "premium" nesta feature
+específica não existe ainda como conceito formal -- o que existe é
+"aluna vinculada a uma professora" vs. "conta sem vínculo", e o teto de
+20 é hoje o único comportamento que distingue os dois. Quando a
+plataforma tiver assinatura de verdade, este é o ponto exato a
+substituir/estender (`hasActiveTeacherLink()` → checagem de tier real,
+ou um segundo eixo além do vínculo) -- não reinventar do zero.
+
+**Testes realizados:** `node --check` sem erro. Playwright (fr+zh), 4
+cenários: (1) sem vínculo, poucos cartões -- badge mostra contagem,
+criação funciona normalmente; (2) sem vínculo, EXATAMENTE no teto (20
+ativos) -- badge `20/20`, botão desabilitado com texto "Limite atingido",
+tentativa de submit não grava no banco (`dbCountDelta===0`) e abre o
+popup (`limitModalVisible===true`), popup fecha corretamente pelo botão
+✕; (3) COM vínculo ativo, 25 cartões (acima do teto) -- badge mostra
+"ilimitado", criação funciona normalmente mesmo acima de 20
+(`dbCountDelta===1`); (4) zh no cenário do teto, mesmo resultado do fr.
+Sem erro de console novo atribuível a este código (mesmos dois
+`pageerror` pré-existentes de mock já registrados na Fase 5).
 
 Próxima fase (6 -- supervisão da professora/métricas, conforme o
 prompt-mestre original) só começa depois de autorização explícita da
