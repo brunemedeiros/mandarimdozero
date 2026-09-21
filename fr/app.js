@@ -494,6 +494,77 @@ async function mergeTeacherFlashcardsIntoState(){
   });
 }
 
+// Fase 5 do sistema de alunas particulares (ver CLAUDE.md) -- cartão
+// autorado pela PRÓPRIA aluna (shared/student-flashcards.js, tabela
+// student_flashcards). Irmão de buildCardFromTeacherFlashcard() -- mesmo
+// shape de card (mesmo motor de memória/FSRS, mesma getStudyQueue()), só
+// ORIGEM diferente. id `s${row.id}` -- terceiro namespace, nunca colide com
+// `u${unitId}-v${idx}` (trilha) nem `t${row.id}` (professora, tabela
+// DIFERENTE -- ids podem coincidir numericamente entre as duas tabelas sem
+// problema, o prefixo já resolve). `unitId`/`vocabIdx` ficam `null` pelo
+// mesmo motivo do cartão de professora -- isCardLessonCompleted() trata
+// `origin==='self'` igual a `origin==='teacher'` (mesmo gate por
+// `flashcardStatus`, sem o gate de lição).
+function buildCardFromSelfFlashcard(row){
+  return {
+    id: `s${row.id}`,
+    unitId: null,
+    unitTitle: 'Meus cartões',
+    vocabIdx: null,
+    type: 'vocab',
+    front: row.front,
+    back_trans: row.back_trans,
+    origin: 'self',
+    teacherNote: row.note || null,
+    flashcardStatus: row.status,
+    ef: 2.5,
+    interval: 0,
+    reps: 0,
+    due: 0,
+    lapses: 0,
+    stability: 0,
+    difficulty: 0,
+    state: 'new',
+    lastReview: null,
+    fsrsReps: 0,
+    fsrsLapses: 0
+  };
+}
+
+// Busca os cartões que a PRÓPRIA aluna já criou (shared/student-flashcards.js)
+// e mescla em STATE.cards -- mesmo motivo/posicionamento de
+// mergeTeacherFlashcardsIntoState() (precisa rodar ANTES de loadState(),
+// ver comentário lá). Busca todos os status de propósito, mesma razão.
+async function mergeSelfFlashcardsIntoState(){
+  if (typeof fetchMyOwnFlashcards !== 'function') return;
+  const rows = await fetchMyOwnFlashcards(APP_KEY);
+  if (!rows.length) return;
+  const existingIds = new Set(STATE.cards.map(c => c.id));
+  rows.forEach(row => {
+    const id = `s${row.id}`;
+    if (existingIds.has(id)) return;
+    STATE.cards.push(buildCardFromSelfFlashcard(row));
+  });
+}
+
+// Empurra um cartão recém-criado por shared/my-flashcards.js direto em
+// STATE.cards, sem esperar o próximo boot (mergeSelfFlashcardsIntoState()
+// só roda no carregamento do app) -- assim ele já entra na fila de revisão
+// nesta mesma sessão. Idempotente pelo mesmo padrão do merge acima.
+function addSelfFlashcardToState(row){
+  const id = `s${row.id}`;
+  if (STATE.cards.some(c => c.id === id)) return;
+  STATE.cards.push(buildCardFromSelfFlashcard(row));
+}
+
+// Espelha um arquivar/reativar feito em shared/my-flashcards.js direto no
+// STATE.cards já carregado, mesmo motivo de addSelfFlashcardToState() --
+// sem isto, isCardLessonCompleted() só veria o novo status no próximo boot.
+function updateSelfFlashcardStatusInState(rowId, status){
+  const card = STATE.cards.find(c => c.id === `s${rowId}`);
+  if (card) card.flashcardStatus = status;
+}
+
 // ---------- Taxonomia de "notas de realidade" (sociolinguística) ----------
 // Grilling 2026-09-17: proposta de mostrar contraste "forma ensinada vs
 // forma real" (registro, gíria, variação regional, desvio gramatical
@@ -788,6 +859,7 @@ async function loadStateAndRender(){
   // por id (senão um cartão salvo sem correspondência na lista fresca é
   // descartado -- exatamente o bloqueio identificado na Fase 0).
   await mergeTeacherFlashcardsIntoState();
+  await mergeSelfFlashcardsIntoState();
   await loadState();
   // Fase 10: aplica a preferência de frequência de revisão (padrão ou
   // salva) no motor FSRS -- precisa rodar antes de qualquer grading real.
@@ -838,6 +910,14 @@ document.getElementById('user-settings-btn').addEventListener('click', () => {
 document.getElementById('admin-badges-btn').addEventListener('click', () => {
   document.getElementById('user-menu-dropdown').classList.remove('open');
   switchTab('admin-badges');
+});
+
+// Fase 5 do sistema de alunas particulares (ver CLAUDE.md) -- "Meus
+// Cartões" é pra TODA conta logada (diferente de admin-badges-btn acima,
+// que é admin-only-nav), por isso não tem a classe de gate visual.
+document.getElementById('my-flashcards-btn').addEventListener('click', () => {
+  document.getElementById('user-menu-dropdown').classList.remove('open');
+  switchTab('my-flashcards');
 });
 
 // Entrada geral da bandeira ⚑ (menu "Mais"/usuário) -- sem contexto de
@@ -5116,7 +5196,7 @@ const REVIEW_FILTER_LABELS = { all: 'Todas', hard: 'Mais difíceis primeiro', ol
 // Fase 4 do sistema de alunas particulares (ver CLAUDE.md): rótulos do
 // filtro de ORIGEM -- diferente de REVIEW_FILTER_LABELS (que decide COMO
 // consumir a fila), este decide DE ONDE vêm os cartões.
-const REVIEW_ORIGIN_LABELS = { all: 'Todas', study: 'Da trilha', teacher: 'Da professora' };
+const REVIEW_ORIGIN_LABELS = { all: 'Todas', study: 'Da trilha', teacher: 'Da professora', self: 'Meus cartões' };
 
 // Bloco hero (topo da Revisão): número grande = trueCount, sempre o total
 // real pendente, nunca o cortado pela sessão -- fixo, não muda com o
@@ -5736,7 +5816,11 @@ function isCardLessonCompleted(card){
   // aplica a ele. Elegibilidade própria: só entra na fila de revisão
   // enquanto a professora não arquivou o cartão (flashcardStatus, espelha
   // `teacher_flashcards.status`, atualizado a cada mergeTeacherFlashcardsIntoState()).
-  if (card.origin === 'teacher') return card.flashcardStatus === 'active';
+  // Fase 5: cartão autorado pela própria aluna (origin==='self',
+  // student_flashcards) segue exatamente o mesmo caso -- também não
+  // pertence a unidade nenhuma, também usa `flashcardStatus` (espelha
+  // `student_flashcards.status`) como único critério de elegibilidade.
+  if (card.origin === 'teacher' || card.origin === 'self') return card.flashcardStatus === 'active';
   const prog = STATE.unitProgress[card.unitId];
   if (!prog?.started) return false;
   const unit = UNITS.find(u => u.id === card.unitId);
@@ -6615,6 +6699,7 @@ const switchTab = createTabSwitcher({
     profile: renderProfileView,
     settings: renderSettingsView,
     'admin-badges': renderAdminPanelView,
+    'my-flashcards': renderMyFlashcardsView,
     leaderboard: renderLeaderboardView,
     path: renderUnitsGrid,
     dictation: renderDictationList,
@@ -6719,25 +6804,32 @@ function renderReviewSettingsView(){
   if (intensitySelect) intensitySelect.value = s.sessionIntensity;
 
   // Fase 4 do sistema de alunas particulares (ver CLAUDE.md): o filtro de
-  // origem só aparece pra quem TEM pelo menos um cartão de professora --
-  // pra 99% das alunas (sem professora vinculada) esse controle seria
-  // ruído puro, oferecendo uma escolha sem efeito nenhum.
+  // origem só aparece pra quem TEM pelo menos um cartão de professora ou
+  // (Fase 5) autorado por ela mesma -- pra maioria das alunas (só cartão de
+  // trilha) esse controle seria ruído puro, oferecendo uma escolha sem
+  // efeito nenhum. 'teacher'/'self' só entram nas <option>s quando aquela
+  // origem específica tem pelo menos 1 cartão -- diferente da Fase 4
+  // original (só 2 origens possíveis, sempre as duas juntas), agora com 3
+  // origens possíveis mostrar uma opção sempre-zero seria confuso.
   const originWrap = document.getElementById('review-origin-select-wrap');
   const originSelect = document.getElementById('review-origin-select');
   const hasTeacherCards = STATE.cards.some(c => c.origin === 'teacher');
-  if (originWrap) originWrap.hidden = !hasTeacherCards;
-  if (originSelect && hasTeacherCards){
+  const hasSelfCards = STATE.cards.some(c => c.origin === 'self');
+  if (originWrap) originWrap.hidden = !hasTeacherCards && !hasSelfCards;
+  if (originSelect && (hasTeacherCards || hasSelfCards)){
     const basePool = STATE.cards.filter(isCardLessonCompleted);
     const originCounts = {
       all: basePool.length,
       study: basePool.filter(c => c.origin === 'study').length,
-      teacher: basePool.filter(c => c.origin === 'teacher').length
+      teacher: basePool.filter(c => c.origin === 'teacher').length,
+      self: basePool.filter(c => c.origin === 'self').length
     };
     const currentOrigin = s.reviewOriginFilter || 'all';
     originSelect.innerHTML = `
       <option value="all" ${currentOrigin === 'all' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.all} (${originCounts.all})</option>
       <option value="study" ${currentOrigin === 'study' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.study} (${originCounts.study})</option>
-      <option value="teacher" ${currentOrigin === 'teacher' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.teacher} (${originCounts.teacher})</option>
+      ${hasTeacherCards ? `<option value="teacher" ${currentOrigin === 'teacher' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.teacher} (${originCounts.teacher})</option>` : ''}
+      ${hasSelfCards ? `<option value="self" ${currentOrigin === 'self' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.self} (${originCounts.self})</option>` : ''}
     `;
   }
 }
