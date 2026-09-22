@@ -20,6 +20,11 @@
 // só a aluna do <select> único), com o @username prefixado em cada linha
 // quando há mais de uma selecionada, pra não confundir de quem é o quê.
 //
+// Fase 8c: quarto formato, "Completar a frase" (grillado: a aluna digita a
+// palavra que falta numa frase escrita pela professora). Mutuamente
+// exclusivo com "Múltipla escolha" (marcar um desmarca o outro) -- os dois
+// mudam a MECÂNICA de revisão do cartão, não faz sentido os dois juntos.
+//
 // Depende de (mesma posição de shared/admin-students.js -- antes de app.js):
 //   - shared/roles.js              (fetchMyStudents)
 //   - shared/teacher-flashcards.js (fetchFlashcardsForStudent, createFlashcard, setFlashcardStatus, uploadFlashcardMedia)
@@ -69,6 +74,7 @@ async function renderAdminFlashcardsView(){
     c.image_url ? '🖼️ imagem' : '',
     c.audio_url ? '🎧 áudio' : '',
     (c.choices && c.choices.length) ? '🔤 múltipla escolha' : '',
+    c.cloze_sentence ? '📝 completar frase' : '',
   ].filter(Boolean).join(' · ');
 
   const cardRowHTML = (c) => `
@@ -137,6 +143,20 @@ async function renderAdminFlashcardsView(){
           <label class="profile-edit-label" for="admin-flashcard-mc-3">Opção errada 3 (opcional)</label>
           <input type="text" id="admin-flashcard-mc-3" class="profile-edit-input" autocomplete="off">
         </div>
+        <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+          <input type="checkbox" id="admin-flashcard-cloze-toggle">
+          Completar a frase (a aluna digita a palavra que falta)
+        </label>
+        <div id="admin-flashcard-cloze-fields" style="display:none;">
+          <label class="profile-edit-label" for="admin-flashcard-cloze-sentence">Frase com lacuna (use ___ pra marcar o espaço)</label>
+          <input type="text" id="admin-flashcard-cloze-sentence" class="profile-edit-input" placeholder="${anyMandarim ? 'ex: 我 ___ 巴西人。' : 'ex: Je ___ de Paris.'}" autocomplete="off">
+          <label class="profile-edit-label" for="admin-flashcard-cloze-answer">Resposta certa</label>
+          <input type="text" id="admin-flashcard-cloze-answer" class="profile-edit-input" placeholder="${anyMandarim ? 'ex: 是' : 'ex: viens'}" autocomplete="off">
+          ${anyMandarim ? `
+          <label class="profile-edit-label" for="admin-flashcard-cloze-pinyin">Pinyin da resposta (é o que a aluna vai digitar)</label>
+          <input type="text" id="admin-flashcard-cloze-pinyin" class="profile-edit-input" placeholder="ex: shì" autocomplete="off">
+          ` : ''}
+        </div>
         <p class="profile-edit-error" id="admin-create-flashcard-error"></p>
         <button type="submit" class="btn btn-primary btn-block" id="admin-create-flashcard-btn">Criar cartão${selectedStudents.length > 1 ? ` pra ${selectedStudents.length} alunas` : ''}</button>
       </form>
@@ -176,8 +196,23 @@ async function renderAdminFlashcardsView(){
     renderAdminFlashcardsView();
   });
 
+  // Múltipla escolha e Completar a frase são mutuamente exclusivos (os
+  // dois mudam a MECÂNICA de revisão do cartão) -- marcar um desmarca e
+  // esconde o outro, em vez de deixar os dois campos preenchidos ao mesmo
+  // tempo e só validar no submit.
   document.getElementById('admin-flashcard-mc-toggle').addEventListener('change', (e) => {
     document.getElementById('admin-flashcard-mc-fields').style.display = e.target.checked ? '' : 'none';
+    if (e.target.checked){
+      document.getElementById('admin-flashcard-cloze-toggle').checked = false;
+      document.getElementById('admin-flashcard-cloze-fields').style.display = 'none';
+    }
+  });
+  document.getElementById('admin-flashcard-cloze-toggle').addEventListener('change', (e) => {
+    document.getElementById('admin-flashcard-cloze-fields').style.display = e.target.checked ? '' : 'none';
+    if (e.target.checked){
+      document.getElementById('admin-flashcard-mc-toggle').checked = false;
+      document.getElementById('admin-flashcard-mc-fields').style.display = 'none';
+    }
   });
 
   document.getElementById('admin-create-flashcard-form').addEventListener('submit', async (e) => {
@@ -227,12 +262,17 @@ async function renderAdminFlashcardsView(){
     const note = document.getElementById('admin-flashcard-note').value;
     const pinyinValue = document.getElementById('admin-flashcard-pinyin')?.value;
 
+    const isCloze = document.getElementById('admin-flashcard-cloze-toggle').checked;
+    const clozeSentence = isCloze ? document.getElementById('admin-flashcard-cloze-sentence').value : '';
+    const clozeAnswer = isCloze ? document.getElementById('admin-flashcard-cloze-answer').value : '';
+    const clozeAnswerPinyin = isCloze ? document.getElementById('admin-flashcard-cloze-pinyin')?.value : '';
+
     // Uma linha em teacher_flashcards POR aluna selecionada -- mesmo
     // conteúdo, cada uma com o language_app_key da PRÓPRIA aluna (nunca o
-    // de outra, mesmo numa seleção mista fr+zh). Pinyin só vai junto pras
-    // que são de mandarim -- gravar pinyin numa linha de francês seria
-    // dado morto (nada no fr lê `front_pinyin`), então evita sujar o
-    // registro à toa.
+    // de outra, mesmo numa seleção mista fr+zh). Pinyin (front E cloze) só
+    // vai junto pras que são de mandarim -- gravar pinyin numa linha de
+    // francês seria dado morto (nada no fr lê esses campos), então evita
+    // sujar o registro à toa.
     const results = await Promise.all(selectedStudents.map(s => createFlashcard({
       studentId: s.student_id,
       languageAppKey: s.language_app_key,
@@ -241,6 +281,8 @@ async function renderAdminFlashcardsView(){
       note,
       frontPinyin: s.language_app_key === 'mandarim' ? pinyinValue : '',
       imageUrl, audioUrl, choices,
+      clozeSentence, clozeAnswer,
+      clozeAnswerPinyin: s.language_app_key === 'mandarim' ? clozeAnswerPinyin : '',
     })));
     btn.disabled = false;
 

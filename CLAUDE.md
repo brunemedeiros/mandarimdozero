@@ -2443,3 +2443,209 @@ de honestidade já usado quando a Fase 6a validou só fr.
 Próxima fase (8c -- exercício interativo novo) só começa depois de
 autorização explícita da autora, com este relatório já entregue antes de
 pedir luz verde.
+
+**Atualização: autorizada e entregue (2026-09-22, mesmo dia), "Siga para
+a fase 8c" + grilling de 4 perguntas antes de codar (ver Fase 8c
+abaixo).**
+
+## Fase 8c (exercício interativo novo: "completar a frase") -- último sub-passo da Fase 8
+
+**Escopo grillado em 1 rodada (4 perguntas) antes de codar**, mesma
+disciplina de toda a Fase 8:
+
+1. *Que tipo de exercício?* -- **Completar a frase (recomendado)** --
+   professora escreve uma frase com uma lacuna (`___`), a aluna digita a
+   palavra que falta.
+2. *Arquitetura de dado?* -- **Estender `teacher_flashcards`
+   (recomendado)** -- colunas novas opcionais, nunca uma tabela nova,
+   mesmo padrão aditivo de imagem/áudio/múltipla escolha (Fase 8a).
+3. *Integração com revisão/FSRS?* -- **Mesma fila/FSRS (recomendado)** --
+   acerto=Bom(2), erro=Errei(0), mesma convenção da múltipla escolha
+   (Fase 8a), reaproveitando `gradeCurrentCard()`.
+4. *Multi-atribuição?* -- **Sim (recomendado)** -- mesmo padrão de
+   checkboxes multi-select já usado em flashcards (adendo da Fase 8a) e
+   material de apoio (Fase 8b).
+
+**Quarto formato de `teacher_flashcards`, mutuamente exclusivo com
+`choices` (múltipla escolha)** -- os dois mudam a MECÂNICA de revisão do
+cartão (como o aluno responde), então não fazem sentido coexistindo no
+mesmo cartão; imagem/áudio continuam livres pra combinar com qualquer um
+dos dois (ou nenhum), por não mudarem mecânica nenhuma.
+
+**O que foi feito:**
+
+- **Migration `034_add_cloze_to_teacher_flashcards.sql`** -- 3 colunas
+  novas em `teacher_flashcards`: `cloze_sentence` (a frase com a lacuna
+  marcada literalmente como `___`, 3 underscores), `cloze_answer` (a
+  resposta certa -- aceita "/" pra mais de uma forma, mesma convenção de
+  `acceptedForms()` já usada pelos exercícios digitados da trilha),
+  `cloze_answer_pinyin` (só relevante pro zh -- o que a aluna
+  efetivamente DIGITA; teclado latino não digita hanzi, mesmo motivo
+  pelo qual o cloze da trilha em zh já pede pinyin, não hanzi -- fica
+  sempre `null` no fr). Aplicada AO VIVO nesta sessão via
+  `mcp__Supabase__apply_migration` -- não é passo manual pendente pra
+  autora.
+- **`shared/teacher-flashcards.js`** -- `createFlashcard()` estendido com
+  `clozeSentence`/`clozeAnswer`/`clozeAnswerPinyin` (todos opcionais,
+  vazio = cartão sem esse formato). Validação: se `clozeSentence` foi
+  preenchida, precisa conter EXATAMENTE um `___` (senão não há onde a
+  aluna digitar, ou é ambíguo qual lacuna é a certa), `clozeAnswer` não
+  pode ficar vazia, e -- só quando `languageAppKey==='mandarim'` --
+  `clozeAnswerPinyin` também é obrigatório (sem ele o cartão não teria
+  como ser comparado contra o que a aluna digita).
+- **`shared/admin-flashcards.js`** -- checkbox "Completar a frase" no
+  formulário, ao lado do de múltipla escolha (Fase 8a), revelando 2-3
+  campos (frase com `___`, resposta certa, +pinyin só quando alguma aluna
+  selecionada é de mandarim). **Mutuamente exclusivo na própria UI, não
+  só na validação do submit** -- marcar "Múltipla escolha" desmarca e
+  esconde "Completar a frase" automaticamente, e vice-versa (mesmo
+  raciocínio de UX já usado em outras exclusividades do app: melhor
+  impedir o estado ambíguo de existir do que só rejeitar no fim). Badge
+  novo na lista de cartões (`📝 completar frase`) ao lado dos já
+  existentes de imagem/áudio/múltipla escolha. Submit handler estendido
+  pra ler os 3 campos e passá-los em cada chamada de `createFlashcard()`
+  do loop multi-aluna (mesmo padrão de `frontPinyin`: `clozeAnswerPinyin`
+  só vai junto nas linhas cujo idioma é mandarim).
+- **`fr/app.js`/`zh/app.js`**:
+  - `buildCardFromTeacherFlashcard(row)` ganhou `clozeSentence`/
+    `clozeAnswer` (+ `clozeAnswerPinyin` só no zh) no card construído.
+  - `startReviewSession()` ganhou `STATE.reviewClozeAnswered = null;`,
+    mesmo espírito do reset de `STATE.reviewMCPicked`/`reviewMCCorrect`
+    já existente (zera estado transitório de uma pergunta que possa ter
+    ficado "respondida, aguardando Continuar" de uma sessão anterior
+    interrompida no meio).
+  - `renderReviewView()` ganhou um novo desvio, logo depois do de
+    `card.choices` (múltipla escolha): se `card.clozeSentence &&
+    card.clozeAnswer`, chama `renderClozeReviewCard(card)` em vez do
+    flip tradicional -- nunca coexistem (garantido na criação).
+  - **`renderClozeReviewCard(card)`** (nova função, fr+zh) -- reaproveita
+    100% do idioma visual já existente do cloze da trilha
+    (`.cloze-sentence`/`.cloze-blank`/`.cloze-type-wrap`,
+    `frAccentPickerHTML()`/`pinyinTonePickerHTML()`) dentro do wrapper
+    `.flashcard` já usado por todo cartão de revisão (mesma tag "Da sua
+    professora", imagem/áudio próprio quando presentes, igual à Fase
+    8a). Estado não respondido: input de texto + teclinha de
+    acento/tom + botão "Verificar". Ao verificar, compara o texto
+    digitado (normalizado -- `normalizeLoose()` no fr,
+    `normalizePinyinAnswer()` no zh -- e sem pontuação, mesma função
+    `strip()` já usada pelo cloze da trilha) contra
+    `acceptedForms(card.clozeAnswer)` no fr ou
+    `acceptedForms(card.clozeAnswerPinyin)` no zh (a aluna SEMPRE digita
+    pinyin no zh, nunca hanzi -- mesmo motivo do cloze da trilha).
+    Estado respondido: revela a resposta certa dentro do próprio espaço
+    da lacuna (`.cloze-blank.correct`/`.incorrect`, reaproveitando as
+    MESMAS classes CSS -- já calibradas -- do cloze da trilha, zero CSS
+    novo), mostra a tradução, e troca pro botão "Continuar"
+    (`.mc-continue-btn`, reaproveitado da Fase 8a) que chama
+    `gradeCurrentCard(wasCorrect ? 2 : 0)` -- herda de graça toda a
+    plumbing já existente (XP, streak, requeue-em-erro, save, avanço de
+    índice), mesma disciplina de "um motor só" de toda a feature.
+  - `buildSpeedOptions()` **não precisou de nenhuma mudança** -- um
+    cartão só-cloze (sem `choices`) continua caindo no mesmo fallback de
+    distratores computados que já existia antes da Fase 8a pra cartão
+    de professora sem múltipla escolha própria; o desvio pra
+    "completar a frase" só existe dentro de `renderReviewView()`
+    (Flashcard/Palavras Difíceis), nunca no Speed Review -- mesmo escopo
+    que a múltipla escolha já teve (grillado na Fase 8a, não reaberto
+    aqui).
+- **Zero CSS novo** -- `.cloze-sentence`/`.cloze-hanzi`/`.cloze-pinyin`/
+  `.cloze-blank`/`.cloze-type-wrap`/`.pinyin-tone-picker` já existiam nos
+  dois `index.html` (do cloze da trilha) e o botão "Continuar" reaproveita
+  `.mc-continue-btn` (Fase 8a) -- confirmado por leitura antes de
+  escrever qualquer linha de CSS (regra deste arquivo sobre reaproveitar
+  tokens/classes existentes em vez de duplicar).
+
+**Decisões arquiteturais tomadas nesta fase:**
+1. `cloze_sentence`/`cloze_answer` são a fonte de verdade do formato --
+   `front`/`back_trans` continuam obrigatórios e sempre presentes (regra
+   de schema desde a Fase 2), então um cartão cloze também tem um
+   front/back "normal" por baixo, só que a tela de revisão nunca mostra
+   esse par quando o cloze está presente (mesmo princípio já usado pela
+   múltipla escolha, que também não descarta `back_trans` -- ele vira a
+   opção certa dentro de `card.mcOptions`).
+2. Mutuamente exclusivo com `choices` decidido e IMPOSTO NA UI (toggle
+   exclusivo), não só documentado como convenção -- mesma escolha de
+   design já tomada pela Fase 8a entre si e agora estendida ao par
+   MC/cloze, evitando um estado ambíguo (as duas mudam a mesma coisa:
+   como a aluna responde) chegar a existir no banco.
+3. zh compara contra pinyin (`clozeAnswerPinyin`), nunca hanzi
+   (`clozeAnswer`) -- decisão derivada diretamente de como o cloze da
+   trilha já funciona (`normalizePinyinAnswer`/teclado latino), não uma
+   escolha nova; `clozeAnswer` (hanzi) só é usado pra REVELAR a resposta
+   depois de julgada, nunca pra comparação.
+4. Nenhuma mudança em `getStudyQueue()`/`eligibleReviewPool()`/FSRS --
+   mesma conclusão já validada pela múltipla escolha na Fase 8a: um
+   formato novo de APRESENTAÇÃO/RESPOSTA não precisa tocar a fila que
+   decide QUAIS cartões aparecem, só o ponto de RENDER
+   (`renderReviewView()`) e o motor de nota permanece
+   `gradeCurrentCard()` de sempre.
+
+**Gratuito x Premium (avaliado, não implementado):** mesma conclusão de
+toda a Fase 2 em diante -- conteúdo autorado pela própria professora pras
+próprias alunas, sem custo marginal de servir. Mesma pergunta em aberto
+já registrada repetidamente pra quando houver mais de uma professora na
+plataforma -- nada específico a este formato (texto puro, sem mídia) que
+mudasse essa conclusão.
+
+**Testes realizados:** `node --check` sem erro em
+`shared/teacher-flashcards.js`, `shared/admin-flashcards.js`, `fr/app.js`
+e `zh/app.js`. Validação funcional via Playwright (fr+zh), mesmo padrão
+de stub de `window.supabase.createClient()` de toda a feature: (1) toggle
+"Completar a frase" revela os campos certos e é mutuamente exclusivo com
+"Múltipla escolha" nos dois sentidos (marcar um desmarca e esconde o
+outro); (2) validação rejeita frase sem `___`, frase com `___` mas sem
+resposta, e (zh) resposta sem pinyin -- nenhum dos 3 grava no banco
+(`dbCountAfter*Reject:0` em todos os casos); (3) submit válido cria o
+cartão com `cloze_sentence`/`cloze_answer`/`cloze_answer_pinyin`
+corretos e sem `choices`, badge "📝 completar frase" aparece na lista;
+(4) lado da aluna -- cartão com `clozeSentence`+`clozeAnswer` confirmado
+desviando pra `renderClozeReviewCard()` (nunca vira card normal, nunca
+mostra `.mc-option`), sentença renderiza com a lacuna como `___`; digitar
+uma resposta ERRADA aplica `.cloze-blank.incorrect`, revela a resposta
+certa no próprio espaço da lacuna, `gradeCurrentCard(0)` confirmado
+disparando de verdade (`due`/`reps` do cartão mudam); digitar a resposta
+CERTA (fr: a palavra; zh: o pinyin) aplica `.cloze-blank.correct`,
+`gradeCurrentCard(2)` confirmado (`due`/`reps` mudam); `buildSpeedOptions()`
+confirmado continuando a funcionar normalmente pra um cartão só-cloze
+(sem `choices`), sem erro. Testado nos dois idiomas (fr+zh). Sem erro de
+console novo atribuível a este código (mesmos 2 `pageerror` de mock --
+`.is()`/`.upsert()` -- já registrados em toda a feature).
+
+**Validação visual das 4 combinações obrigatórias** (regra deste arquivo
+pra qualquer elemento com cor de fundo customizada, ver seção "Tokens de
+cor de marca vs. semânticos" -- aplicada aqui mesmo sem CSS novo, por
+prudência, já que o contexto visual -- dentro do wrapper `.flashcard` --
+era novo mesmo reaproveitando classes antigas): screenshot Playwright de
+fr-claro, fr-escuro, zh-claro, zh-escuro, nos 3 estados (não respondido /
+resposta errada / resposta certa) -- texto legível em todos, nenhum
+problema de contraste encontrado; `.cloze-blank.correct`/`.incorrect`
+herdam as MESMAS cores já calibradas pelo cloze da trilha (nunca
+recalculadas aqui), então o risco que motivou aquela seção do arquivo
+(sobrescrever só `background` sem revisar `color` junto) não se aplica --
+nenhum dos dois foi tocado nesta fase.
+
+**O que ainda falta / não foi feito nesta fase (de propósito):**
+- `student_flashcards` (cartão da própria aluna, Fase 5) não ganhou o
+  formato cloze -- mesma decisão de escopo já tomada na Fase 8a pros
+  outros 3 formatos (imagem/áudio/múltipla escolha): estender pro cartão
+  auto-criado é trabalho natural de uma fase futura, não decidido nem
+  começado aqui.
+- Combinar (jogo de pareamento) não tenta suportar cloze de forma
+  alguma -- mesma exclusão já registrada na Fase 8a pra múltipla escolha,
+  mesmo motivo (arquitetura incompatível com "1 pergunta, 1 resposta
+  digitada" dentro de um jogo de pares).
+- Edição de um cartão já criado com cloze (só trocar a frase/resposta)
+  não foi implementada -- mesmo escopo restrito que todo o resto de
+  `teacher_flashcards` já tem desde as Fases 2/3 (só criar e
+  arquivar/reativar).
+- **Esta era a última sub-fase nomeada no grilling original da Fase 8**
+  (8a formatos de flashcard → 8b material de apoio → 8c exercício
+  interativo, ordem travada e cumprida). Com 8c entregue, a Fase 8 do
+  prompt-mestre original ("outros tipos de conteúdo") está com todo o
+  escopo grillado até aqui completo -- qualquer trabalho além disso
+  (estender cloze/MC/mídia pra `student_flashcards`, editar conteúdo já
+  criado, integrar `gramatica-coloquial` das notas de realidade à
+  correção de exercícios digitados, Fase 6b/7 já entregues mas com itens
+  em aberto próprios) é fora do prompt-mestre original desta feature e
+  precisa de autorização/escopo explícitos numa sessão futura, não
+  presumido como próximo passo automático.

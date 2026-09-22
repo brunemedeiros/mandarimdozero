@@ -570,6 +570,15 @@ function buildCardFromTeacherFlashcard(row){
     imageUrl: row.image_url || null,
     audioUrl: row.audio_url || null,
     choices: (row.choices && row.choices.length) ? row.choices : null,
+    // Fase 8c (ver CLAUDE.md) -- "completar a frase", 4º formato,
+    // mutuamente exclusivo com `choices` (garantido na criação, ver
+    // shared/admin-flashcards.js). clozeSentence contém um único "___"
+    // (em hanzi) marcando a lacuna; clozeAnswerPinyin é o que a aluna
+    // efetivamente DIGITA (teclado latino não digita hanzi, mesmo motivo
+    // dos exercícios de digitar da trilha).
+    clozeSentence: row.cloze_sentence || null,
+    clozeAnswer: row.cloze_answer || null,
+    clozeAnswerPinyin: row.cloze_answer_pinyin || null,
     ef: 2.5,
     interval: 0,
     reps: 0,
@@ -6246,6 +6255,10 @@ function startReviewSession(){
   // a anterior tenha sido interrompida no meio de uma pergunta respondida.
   STATE.reviewMCPicked = null;
   STATE.reviewMCCorrect = null;
+  // Fase 8c -- mesmo espírito, pro estado transitório do cartão "completar
+  // a frase" (ver renderClozeReviewCard). null=não respondido ainda,
+  // true/false=acerto/erro já registrado, aguardando "Continuar".
+  STATE.reviewClozeAnswered = null;
   renderReviewView();
 }
 
@@ -6348,6 +6361,76 @@ function renderMultipleChoiceReviewCard(card){
   }
 }
 
+// Fase 8c (ver CLAUDE.md) -- cartão "completar a frase" autorado pela
+// professora. Reaproveita o mesmo idioma visual do cloze da trilha
+// (.cloze-sentence/.cloze-hanzi/.cloze-pinyin/.cloze-blank/.cloze-type-wrap,
+// pinyinTonePickerHTML) e o mesmo mecanismo de nota FSRS de
+// renderMultipleChoiceReviewCard (gradeCurrentCard, acerto=Bom(2)/
+// erro=Errei(0)) -- mutuamente exclusivo com card.choices, garantido na
+// criação (shared/admin-flashcards.js). card.clozeSentence tem a lacuna em
+// HANZI ("___"); a aluna digita PINYIN (teclado latino não digita hanzi,
+// mesmo motivo do cloze da trilha), comparado contra card.clozeAnswerPinyin
+// -- não card.clozeAnswer (hanzi), que só é revelado depois de responder.
+// STATE.reviewClozeAnswered: null (não respondido) | true/false (resultado).
+function renderClozeReviewCard(card){
+  const el = document.getElementById('review-content');
+  const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
+  const answered = STATE.reviewClozeAnswered !== null && STATE.reviewClozeAnswered !== undefined;
+  const blankHTML = answered
+    ? `<span class="cloze-blank ${STATE.reviewClozeAnswered ? 'correct' : 'incorrect'}" id="cloze-blank">${card.clozeAnswer}</span>`
+    : `<span class="cloze-blank" id="cloze-blank">___</span>`;
+  const sentenceHTML = card.clozeSentence.replace('___', blankHTML);
+
+  el.innerHTML = `
+    <div class="review-progress">
+      <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
+      <div class="review-progress-count">${STATE.reviewIndex+1} / ${STATE.reviewQueue.length}</div>
+    </div>
+    <div class="flashcard" id="flashcard">
+      <div class="flashcard-tag">${card.unitTitle}</div>
+      ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
+      <div class="cloze-sentence">
+        <div class="cloze-hanzi">${sentenceHTML}</div>
+        ${answered ? `<div class="cloze-pinyin pinyin">${card.clozeAnswerPinyin}</div>` : ''}
+      </div>
+      ${card.audioUrl ? customAudioBtnHTML(card.audioUrl) : ''}
+      ${answered ? `<div class="cloze-trans">${card.back_trans}</div>` : ''}
+    </div>
+    ${!answered ? `
+      <div class="cloze-type-wrap">
+        <input type="text" id="cloze-review-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite o pinyin que falta">
+        ${pinyinTonePickerHTML()}
+        <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">Verificar</button>
+      </div>
+    ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
+  `;
+
+  wireCustomAudioButtons(el);
+
+  if (!answered){
+    const inputEl = document.getElementById('cloze-review-input');
+    inputEl.focus();
+    wirePinyinTonePicker(el.querySelector('.pinyin-tone-picker'), inputEl);
+    const strip = s => normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
+    function verify(){
+      if (inputEl.disabled) return;
+      inputEl.disabled = true;
+      document.getElementById('cloze-review-verify-btn').disabled = true;
+      const typed = strip(inputEl.value);
+      STATE.reviewClozeAnswered = acceptedForms(card.clozeAnswerPinyin).some(form => strip(form) === typed);
+      renderClozeReviewCard(card);
+    }
+    inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
+    document.getElementById('cloze-review-verify-btn').addEventListener('click', verify);
+  } else {
+    document.getElementById('cloze-continue-btn').addEventListener('click', () => {
+      const wasCorrect = STATE.reviewClozeAnswered;
+      STATE.reviewClozeAnswered = null;
+      gradeCurrentCard(wasCorrect ? 2 : 0);
+    });
+  }
+}
+
 function renderReviewView(){
   stopExerciseAudio();
   const el = document.getElementById('review-content');
@@ -6420,6 +6503,13 @@ function renderReviewView(){
   // pareamento, arquitetura incompatível com "1 pergunta, N opções").
   if (card.choices && card.choices.length){
     renderMultipleChoiceReviewCard(card);
+    return;
+  }
+
+  // Fase 8c -- mesmo desvio, agora pro cartão "completar a frase" (nunca
+  // coexiste com card.choices acima, ver comentário em renderClozeReviewCard).
+  if (card.clozeSentence && card.clozeAnswer){
+    renderClozeReviewCard(card);
     return;
   }
 
