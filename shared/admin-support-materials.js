@@ -222,7 +222,7 @@ async function renderAdminSupportMaterialsView(){
 
   // Busca casa por nome E @usuário (mesmo padrão de admin-flashcards.js).
   const studentCheckboxesHTML = students.map(s => `
-    <label data-student-row data-lang="${s.language_app_key}" data-searchtext="${escapeHTML(`${s.display_name || ''} ${s.username || ''}`.toLowerCase())}" style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 0;">
+    <label data-student-row data-lang="${s.language_app_key}" data-searchtext="${escapeHTML(`${s.display_name || ''} ${s.username || ''}`.toLowerCase())}" style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 0; width:100%; box-sizing:border-box;">
       <input type="checkbox" data-material-student-checkbox value="${s.student_id}" ${ADMIN_MATERIALS_STATE.studentIds.has(s.student_id) ? 'checked' : ''}>
       ${materialStudentLabel(s)} -- ${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key}
     </label>
@@ -244,7 +244,7 @@ async function renderAdminSupportMaterialsView(){
         <a href="#" id="admin-material-select-all" style="font-size:13px;">Selecionar todos</a>
         <a href="#" id="admin-material-select-none" style="font-size:13px;">Limpar seleção</a>
       </div>
-      <div class="profile-edit-input" style="height:auto; max-height:180px; overflow-y:auto; display:block;">
+      <div class="profile-edit-input" style="height:auto; max-height:180px; overflow-y:auto; display:flex; flex-direction:column;">
         ${studentCheckboxesHTML}
       </div>
       <p class="profile-edit-hint" id="admin-material-selection-counter" style="font-weight:700; margin-top:6px;">${selectionCountLabel}</p>
