@@ -3082,3 +3082,64 @@ registrados em toda a feature).
 materials.js`, `shared/admin-class-logs.js` reescritos com a mesma
 estrutura incremental. Nenhuma migração, nenhuma mudança de schema,
 nenhum passo manual pendente pra autora.
+
+## UX-fix 6: bug de layout -- checkboxes de aluno aparecendo lado a lado em vez de lista vertical
+
+A autora mandou um print (`ALUNOS`, aba Flashcards) mostrando os
+checkboxes de aluno quebrando como texto corrido -- lado a lado,
+"wrapando" na linha de baixo -- em vez de uma linha por aluno. Pedido:
+"fix the problem where (in both languages) students are shown side by
+side instead of a vertical list".
+
+**Não consegui reproduzir o bug localmente, registrado aqui com
+honestidade em vez de inflar certeza**: rodei 2 tentativas via
+Playwright/`getComputedStyle()`/`getBoundingClientRect()` -- a primeira
+com 3 alunos fake, a segunda com 11 alunos fake usando os MESMOS nomes/
+@usuários do print real dela (Virgínia Veneri, Priscila de Mello,
+Marconi Patterson etc.). Nas duas, `display:flex` já calculava
+corretamente em cada `<label>` e as linhas já apareciam empilhadas
+verticalmente (`top` crescente, mesmo `left`/`width`) -- o bug não se
+manifestou no meu ambiente de teste com o código então já mergeado (PR
+#253). Tentei checar a produção real (`app.profbrune.com.br`) direto via
+`curl`, mas o proxy de saída deste sandbox bloqueia domínios externos
+(mesma limitação já documentada neste arquivo pro CDN do Supabase) --
+não consegui confirmar o que está de fato servido lá.
+
+**Fix aplicado mesmo sem causa raiz confirmada**: em vez de continuar
+tentando reproduzir uma discrepância que não bati, apliquei um fix
+estrutural defensivo nos 3 arquivos (`shared/admin-flashcards.js`,
+`shared/admin-support-materials.js`, `shared/admin-class-logs.js`) --
+mesmo padrão nos 3: o container da lista de checkboxes (`<div
+class="profile-edit-input" style="...">`) tinha só `display:block;`
+(deixando o empilhamento vertical depender de cada `<label>` filho
+calcular block-level sozinho); trocado pra `display:flex;
+flex-direction:column;` explícito -- isso torna o empilhamento vertical
+uma GARANTIA estrutural do container flex (itens de um
+`flex-direction:column` sem `flex-wrap` não podem ficar lado a lado, por
+definição), independente de qualquer causa que eu não consegui isolar.
+Also adicionado `width:100%; box-sizing:border-box;` em cada `<label
+data-student-row>` -- reforço extra, garante que cada linha ocupa a
+largura inteira do container mesmo que algum navegador/cascade calcule o
+`width` do `<label>` de um jeito que eu não previ.
+
+**Testado (Playwright, fr+zh, mesmo roster de 11 alunos do print real da
+autora)**: nas 3 telas (Flashcards/Material de apoio/Aulas) x 2 idiomas
+(6 combinações), confirmado via `getBoundingClientRect()` que as 11
+linhas ficam empilhadas verticalmente (`top` estritamente crescente,
+mesmo `left`/`width` em todas) -- nenhuma lado a lado. Screenshot
+(fr, claro e escuro) confirma visualmente a lista vertical limpa nos
+dois temas. `node --check` sem erro nos 3 arquivos. Sem erro de console
+novo atribuível a este código.
+
+**Honestidade sobre o que isso significa**: o fix é estruturalmente
+sólido (elimina essa CLASSE inteira de bug, não só um sintoma pontual),
+mas como não reproduzi o bug original, não posso confirmar com certeza
+que era exatamente essa a causa do que a autora viu. Se ela continuar
+vendo o mesmo problema depois de um recarregamento forçado (F5/hard
+refresh, pra garantir que não é cache do navegador/service worker
+servindo a versão anterior), é sinal de que a causa real é outra e
+precisa de mais investigação -- print novo + inspeção do DOM ao vivo
+seria o próximo passo, não repetir o mesmo fix.
+
+**Escopo**: só os 3 arquivos já citados. Nenhuma migração, nenhum passo
+manual pendente pra autora.
