@@ -2250,3 +2250,43 @@ pronto).
 Próxima fase (8b -- material de apoio não-revisável) só começa depois de
 autorização explícita da autora, com este relatório já entregue antes de
 pedir luz verde.
+
+**Atualização (2026-09-22, mesmo dia): campo "Aluna" virou multi-seleção,
+pedido direto da autora logo após a entrega acima.** "Ao criar um
+flashcard, quero poder atribuir a mais pessoas ao mesmo tempo. O campo
+'Aluna' no menu de criação Flashcards, podia ter um multiselect ao invés
+de select individual." -- pequeno adendo de UX à Fase 8a (não uma fase
+nova, não mexeu em schema).
+
+`shared/admin-flashcards.js`: o `<select>` único virou uma lista de
+checkboxes (`ADMIN_FLASHCARDS_STATE.studentId` → `.studentIds` um `Set`),
+com links "Selecionar todas"/"Limpar seleção". Ao submeter, cria **uma
+linha em `teacher_flashcards` por aluna marcada** (mesmo front/back/nota/
+imagem/áudio/choices), cada uma com o `language_app_key` da PRÓPRIA aluna
+-- uma seleção pode misturar francês e mandarim na mesma turma sem
+problema (testado explicitamente: 2 alunas fr + 1 aluna zh na mesma
+seleção → 3 linhas, cada uma no idioma certo). Upload de imagem/áudio
+acontece só 1 vez (mesmo arquivo reaproveitado pras N linhas, não
+reenviado por aluna). O campo Pinyin (visível quando QUALQUER aluna
+selecionada é de mandarim) só é gravado nas linhas cujo `language_app_key`
+é `'mandarim'` -- nunca em linha de francês, pra não sujar dado que o fr
+nunca lê.
+
+A lista de cartões abaixo do formulário também passou a agregar as
+alunas selecionadas (antes só mostrava a aluna do `<select>` único) --
+com `@username` prefixado em cada linha só quando há MAIS de uma aluna
+selecionada (evita ruído visual no caso comum de 1 só). Nunca deixa a
+seleção ficar vazia (recai pra 1ª aluna se `studentIds` esvaziar) -- sem
+isso, "Limpar seleção" deixaria o formulário sem alvo válido pra criar
+cartão nenhum.
+
+**Testado (Playwright, fr+zh):** seleção múltipla mista fr+zh confirmada
+criando 3 linhas com `language_app_key` corretos cada, pinyin só na linha
+zh, prefixo `@username` aparecendo nas 3 linhas da lista quando 3
+selecionadas e sumindo quando volta pra 1 só, "Limpar seleção" nunca
+zera de verdade (sempre sobra ≥1 marcada), "Selecionar todas" marca as 3.
+Sem erro de console novo (mesmos 2 `pageerror` de mock -- `.is()`/
+`.upsert()` -- já registrados em toda a Fase 8a). `node --check` sem
+erro. Nenhuma mudança em `shared/teacher-flashcards.js`/migration/schema
+-- só orquestração no cliente, reaproveitando `createFlashcard()` como já
+era chamado.

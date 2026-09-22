@@ -10,6 +10,16 @@
 // quiz em QUALQUER modo de revisão quando tem respostas erradas
 // cadastradas, não só Speed Review -- render em fr/zh app.js).
 //
+// Pós-Fase 8a: campo "Aluna" virou multi-seleção (checkboxes) -- pedido da
+// autora pra poder atribuir o MESMO cartão a várias alunas de uma vez, sem
+// repetir o formulário. Um clique em "Criar cartão" cria uma linha em
+// teacher_flashcards POR aluna selecionada (mesmo front/back/note/mídia/
+// choices, cada linha com o language_app_key da PRÓPRIA aluna -- uma turma
+// pode misturar francês e mandarim na mesma seleção). A lista de cartões
+// abaixo do formulário passou a agregar as alunas selecionadas (antes era
+// só a aluna do <select> único), com o @username prefixado em cada linha
+// quando há mais de uma selecionada, pra não confundir de quem é o quê.
+//
 // Depende de (mesma posição de shared/admin-students.js -- antes de app.js):
 //   - shared/roles.js              (fetchMyStudents)
 //   - shared/teacher-flashcards.js (fetchFlashcardsForStudent, createFlashcard, setFlashcardStatus, uploadFlashcardMedia)
@@ -17,7 +27,7 @@
 //   - shared/toast.js              (showToast)
 //   - languages/<lang>/app.js      (isAdminUser)
 
-let ADMIN_FLASHCARDS_STATE = { studentId: null };
+let ADMIN_FLASHCARDS_STATE = { studentIds: new Set() };
 
 async function renderAdminFlashcardsView(){
   const wrap = document.getElementById('admin-flashcards-content');
@@ -34,16 +44,24 @@ async function renderAdminFlashcardsView(){
     return;
   }
 
-  if (!ADMIN_FLASHCARDS_STATE.studentId || !students.some(s => s.student_id === ADMIN_FLASHCARDS_STATE.studentId)){
-    ADMIN_FLASHCARDS_STATE.studentId = students[0].student_id;
+  // Descarta seleções de alunas que não existem mais (vínculo removido
+  // entre um render e outro) e, se nada sobrou selecionado, cai de volta
+  // pro comportamento antigo de "a primeira aluna já vem marcada".
+  const validIds = new Set(students.map(s => s.student_id));
+  ADMIN_FLASHCARDS_STATE.studentIds = new Set([...ADMIN_FLASHCARDS_STATE.studentIds].filter(id => validIds.has(id)));
+  if (!ADMIN_FLASHCARDS_STATE.studentIds.size){
+    ADMIN_FLASHCARDS_STATE.studentIds.add(students[0].student_id);
   }
-  const current = students.find(s => s.student_id === ADMIN_FLASHCARDS_STATE.studentId);
 
-  const studentOptionsHTML = students.map(s => `<option value="${s.student_id}" ${s.student_id === ADMIN_FLASHCARDS_STATE.studentId ? 'selected' : ''}>@${s.username || '(usuário removido)'} -- ${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key}</option>`).join('');
+  const selectedStudents = students.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+  const anyMandarim = selectedStudents.some(s => s.language_app_key === 'mandarim');
 
-  const cards = await fetchFlashcardsForStudent(ADMIN_FLASHCARDS_STATE.studentId);
-  const activeCards = cards.filter(c => c.status === 'active');
-  const archivedCards = cards.filter(c => c.status === 'archived');
+  const studentCheckboxesHTML = students.map(s => `
+    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 0;">
+      <input type="checkbox" data-student-checkbox value="${s.student_id}" ${ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id) ? 'checked' : ''}>
+      @${escapeHTML(s.username || '(usuário removido)')} -- ${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key}
+    </label>
+  `).join('');
 
   // Fase 8a -- badges curtos indicando os formatos extras do cartão, só
   // quando presentes (cartão comum não ganha nenhum badge novo).
@@ -56,26 +74,47 @@ async function renderAdminFlashcardsView(){
   const cardRowHTML = (c) => `
     <div class="admin-badge-row">
       <div class="admin-badge-info">
-        <div class="admin-badge-name">${escapeHTML(c.front)}${c.front_pinyin ? ` (${escapeHTML(c.front_pinyin)})` : ''} → ${escapeHTML(c.back_trans)}</div>
+        <div class="admin-badge-name">${selectedStudents.length > 1 ? `<span style="opacity:.6">@${escapeHTML(c.__studentUsername || '?')}</span> · ` : ''}${escapeHTML(c.front)}${c.front_pinyin ? ` (${escapeHTML(c.front_pinyin)})` : ''} → ${escapeHTML(c.back_trans)}</div>
         <div class="admin-badge-desc">${c.note ? escapeHTML(c.note) + ' · ' : ''}criado em ${new Date(c.created_at).toLocaleDateString('pt-BR')}${formatBadgesHTML(c) ? ' · ' + formatBadgesHTML(c) : ''}</div>
       </div>
       <button class="admin-badge-delete-btn" data-toggle-flashcard="${c.id}" data-next-status="${c.status === 'active' ? 'archived' : 'active'}" title="${c.status === 'active' ? 'Arquivar' : 'Reativar'}">${c.status === 'active' ? '🗃' : '↺'}</button>
     </div>
   `;
 
+  // Cartões de TODAS as alunas selecionadas, agregados numa lista só --
+  // antes era sempre 1 fetch (select único); agora reflete a mesma
+  // seleção usada pra atribuir o próximo cartão.
+  const cardLists = await Promise.all(selectedStudents.map(s => fetchFlashcardsForStudent(s.student_id)));
+  const cards = cardLists.flatMap((list, i) => list.map(c => ({ ...c, __studentUsername: selectedStudents[i].username })));
+  cards.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  const activeCards = cards.filter(c => c.status === 'active');
+  const archivedCards = cards.filter(c => c.status === 'archived');
+
+  const newCardSubtitle = selectedStudents.length === 1
+    ? ` -- ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
+    : selectedStudents.length > 1
+      ? ` -- ${selectedStudents.length} alunas selecionadas`
+      : '';
+
   wrap.innerHTML = `
     <div class="profile-section">
-      <div class="section-label">Aluna</div>
-      <select id="admin-flashcard-student-select" class="profile-edit-input">${studentOptionsHTML}</select>
+      <div class="section-label">Alunas (selecione 1 ou mais)</div>
+      <div style="display:flex; gap:12px; margin-bottom:4px;">
+        <a href="#" id="admin-flashcard-select-all" style="font-size:13px;">Selecionar todas</a>
+        <a href="#" id="admin-flashcard-select-none" style="font-size:13px;">Limpar seleção</a>
+      </div>
+      <div class="profile-edit-input" style="height:auto; max-height:180px; overflow-y:auto; display:block;">
+        ${studentCheckboxesHTML}
+      </div>
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Novo flashcard${current ? ` -- ${STUDENT_LANGUAGE_LABELS[current.language_app_key] || current.language_app_key}` : ''}</div>
+      <div class="section-label">Novo flashcard${newCardSubtitle}</div>
       <form id="admin-create-flashcard-form" class="profile-edit-form">
         <label class="profile-edit-label" for="admin-flashcard-front">Frente (no idioma estudado)</label>
-        <input type="text" id="admin-flashcard-front" class="profile-edit-input" placeholder="${current && current.language_app_key === 'mandarim' ? 'ex: 图书馆' : 'ex: la bibliothèque'}" autocomplete="off">
-        ${current && current.language_app_key === 'mandarim' ? `
-        <label class="profile-edit-label" for="admin-flashcard-pinyin">Pinyin</label>
+        <input type="text" id="admin-flashcard-front" class="profile-edit-input" placeholder="${anyMandarim ? 'ex: 图书馆' : 'ex: la bibliothèque'}" autocomplete="off">
+        ${anyMandarim ? `
+        <label class="profile-edit-label" for="admin-flashcard-pinyin">Pinyin (usado só nas alunas de mandarim selecionadas)</label>
         <input type="text" id="admin-flashcard-pinyin" class="profile-edit-input" placeholder="ex: túshūguǎn" autocomplete="off">
         ` : ''}
         <label class="profile-edit-label" for="admin-flashcard-back">Verso (tradução)</label>
@@ -99,13 +138,13 @@ async function renderAdminFlashcardsView(){
           <input type="text" id="admin-flashcard-mc-3" class="profile-edit-input" autocomplete="off">
         </div>
         <p class="profile-edit-error" id="admin-create-flashcard-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-create-flashcard-btn">Criar cartão</button>
+        <button type="submit" class="btn btn-primary btn-block" id="admin-create-flashcard-btn">Criar cartão${selectedStudents.length > 1 ? ` pra ${selectedStudents.length} alunas` : ''}</button>
       </form>
     </div>
 
     <div class="profile-section">
       <div class="section-label">Cartões ativos (${activeCards.length})</div>
-      ${activeCards.length ? activeCards.map(cardRowHTML).join('') : `<p class="profile-empty-note">Nenhum cartão ainda pra esta aluna.</p>`}
+      ${activeCards.length ? activeCards.map(cardRowHTML).join('') : `<p class="profile-empty-note">Nenhum cartão ainda pra${selectedStudents.length > 1 ? 's essas alunas' : ' esta aluna'}.</p>`}
     </div>
 
     ${archivedCards.length ? `
@@ -115,8 +154,25 @@ async function renderAdminFlashcardsView(){
     </div>` : ''}
   `;
 
-  document.getElementById('admin-flashcard-student-select').addEventListener('change', (e) => {
-    ADMIN_FLASHCARDS_STATE.studentId = e.target.value;
+  wrap.querySelectorAll('[data-student-checkbox]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      if (cb.checked) ADMIN_FLASHCARDS_STATE.studentIds.add(cb.value);
+      else ADMIN_FLASHCARDS_STATE.studentIds.delete(cb.value);
+      renderAdminFlashcardsView();
+    });
+  });
+
+  document.getElementById('admin-flashcard-select-all').addEventListener('click', (e) => {
+    e.preventDefault();
+    ADMIN_FLASHCARDS_STATE.studentIds = new Set(students.map(s => s.student_id));
+    renderAdminFlashcardsView();
+  });
+  document.getElementById('admin-flashcard-select-none').addEventListener('click', (e) => {
+    e.preventDefault();
+    // O topo da função nunca deixa a seleção vazia (recai pra primeira
+    // aluna) -- limpar aqui e deixar esse fallback agir é mais simples do
+    // que duplicar a mesma regra dos dois lados.
+    ADMIN_FLASHCARDS_STATE.studentIds = new Set();
     renderAdminFlashcardsView();
   });
 
@@ -129,11 +185,17 @@ async function renderAdminFlashcardsView(){
     const btn = document.getElementById('admin-create-flashcard-btn');
     const errorEl = document.getElementById('admin-create-flashcard-error');
     errorEl.textContent = '';
+
+    if (!selectedStudents.length){
+      errorEl.textContent = 'Selecione ao menos uma aluna.';
+      return;
+    }
     btn.disabled = true;
 
-    // Fase 8a -- upload de imagem/áudio ANTES de criar o cartão (a URL
-    // pública precisa existir pra gravar junto no insert). Se um upload
-    // falhar, aborta sem criar um cartão pela metade.
+    // Fase 8a -- upload de imagem/áudio ANTES de criar o(s) cartão(ões) (a
+    // URL pública precisa existir pra gravar junto no insert). Feito UMA
+    // vez só, mesmo com várias alunas selecionadas -- o arquivo é o mesmo
+    // pra todas, reenviar por aluna seria desperdício de banda/Storage.
     const imageFile = document.getElementById('admin-flashcard-image').files[0];
     const audioFile = document.getElementById('admin-flashcard-audio').files[0];
     let imageUrl = null, audioUrl = null;
@@ -160,18 +222,39 @@ async function renderAdminFlashcardsView(){
       return;
     }
 
-    const result = await createFlashcard({
-      studentId: ADMIN_FLASHCARDS_STATE.studentId,
-      languageAppKey: current.language_app_key,
-      front: document.getElementById('admin-flashcard-front').value,
-      backTrans: document.getElementById('admin-flashcard-back').value,
-      note: document.getElementById('admin-flashcard-note').value,
-      frontPinyin: document.getElementById('admin-flashcard-pinyin')?.value,
+    const front = document.getElementById('admin-flashcard-front').value;
+    const backTrans = document.getElementById('admin-flashcard-back').value;
+    const note = document.getElementById('admin-flashcard-note').value;
+    const pinyinValue = document.getElementById('admin-flashcard-pinyin')?.value;
+
+    // Uma linha em teacher_flashcards POR aluna selecionada -- mesmo
+    // conteúdo, cada uma com o language_app_key da PRÓPRIA aluna (nunca o
+    // de outra, mesmo numa seleção mista fr+zh). Pinyin só vai junto pras
+    // que são de mandarim -- gravar pinyin numa linha de francês seria
+    // dado morto (nada no fr lê `front_pinyin`), então evita sujar o
+    // registro à toa.
+    const results = await Promise.all(selectedStudents.map(s => createFlashcard({
+      studentId: s.student_id,
+      languageAppKey: s.language_app_key,
+      front,
+      backTrans,
+      note,
+      frontPinyin: s.language_app_key === 'mandarim' ? pinyinValue : '',
       imageUrl, audioUrl, choices,
-    });
+    })));
     btn.disabled = false;
-    if (!result.ok){ errorEl.textContent = result.error; return; }
-    showToast('✓ Cartão criado.');
+
+    const failed = results.filter(r => !r.ok);
+    if (failed.length === results.length){
+      errorEl.textContent = failed[0].error;
+      return;
+    }
+    const okCount = results.length - failed.length;
+    if (failed.length){
+      showToast(`✓ ${okCount} cartão(ões) criado(s), ${failed.length} falharam.`);
+    } else {
+      showToast(results.length > 1 ? `✓ ${okCount} cartões criados.` : '✓ Cartão criado.');
+    }
     renderAdminFlashcardsView();
   });
 
