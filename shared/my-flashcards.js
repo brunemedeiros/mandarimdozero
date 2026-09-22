@@ -56,7 +56,7 @@ async function renderMyFlashcardsView(){
   // professora), nunca promete "premium" (que não existe em nenhum lugar
   // do app ainda).
   const tierBadgeHTML = hasLink
-    ? `<span class="pill">✨ Aluna vinculada — cartões ilimitados</span>`
+    ? `<span class="pill">✨ Aluno vinculado — cartões ilimitados</span>`
     : `<span class="pill">🔒 Plano grátis — ${activeCards.length}/${FREE_OWN_FLASHCARD_LIMIT} cartões</span>`;
 
   wrap.innerHTML = `

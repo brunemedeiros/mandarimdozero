@@ -78,7 +78,7 @@ async function createFlashcard({ studentId, languageAppKey, front, backTrans, no
     }
     if (!cleanClozeAnswer) return { ok: false, error: 'Digite a resposta certa pro espaço em branco.' };
     if (languageAppKey === 'mandarim' && !(clozeAnswerPinyin || '').trim()){
-      return { ok: false, error: 'Digite o pinyin da resposta (é o que a aluna vai digitar).' };
+      return { ok: false, error: 'Digite o pinyin da resposta (é o que o aluno vai digitar).' };
     }
   }
   const { data, error } = await supabaseClient

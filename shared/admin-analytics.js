@@ -1284,7 +1284,7 @@ function adminModeToggleHTML(adminModeOn){
       <div class="pref-row">
         <div class="pref-row-text">
           <div class="pref-row-title">Admin Mode</div>
-          <div class="pref-row-sub">Desligado, sua conta navega e conclui lições exatamente como uma aluna comum (mesmo continuando reconhecida como admin) -- útil pra testar a experiência real sem os atalhos de admin. Mesmo controle do pill 🔒 Admin na tela principal.</div>
+          <div class="pref-row-sub">Desligado, sua conta navega e conclui lições exatamente como um aluno comum (mesmo continuando reconhecida como admin) -- útil pra testar a experiência real sem os atalhos de admin. Mesmo controle do pill 🔒 Admin na tela principal.</div>
         </div>
         <button class="pref-switch" id="admin-mode-analytics-switch" role="switch" aria-checked="${adminModeOn ? 'true' : 'false'}"><span class="pref-switch-knob"></span></button>
       </div>
@@ -1304,7 +1304,7 @@ function wireAdminModeAnalyticsToggle(){
     if (typeof renderUnitsGrid === 'function') renderUnitsGrid();
     showToast(next
       ? '🔒 Admin Mode ligado — privilégios de admin restaurados.'
-      : '🔒 Admin Mode desligado — navegando como uma aluna comum.');
+      : '🔒 Admin Mode desligado — navegando como um aluno comum.');
   });
 }
 

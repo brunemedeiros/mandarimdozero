@@ -250,7 +250,7 @@ document.getElementById('admin-mode-toggle-btn')?.addEventListener('click', asyn
   // imediata, não só na próxima navegação).
   if (typeof renderUnitsGrid === 'function') renderUnitsGrid();
   showToast(wasOn
-    ? '🔒 Admin Mode desligado — navegando como uma aluna comum.'
+    ? '🔒 Admin Mode desligado — navegando como um aluno comum.'
     : '🔒 Admin Mode ligado — privilégios de admin restaurados.');
 });
 

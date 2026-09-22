@@ -2770,3 +2770,96 @@ nova introduzida.
 não foi a tela criticada). `shared/admin-class-logs.js` ("📝 Aulas") não
 tem o mesmo padrão -- usa um `<select>` de aluna única, que sempre tem um
 valor por natureza do próprio elemento HTML, não o mesmo bug.
+
+## UX-fix 3: "aluna"→"aluno" em todo texto visível + busca por @usuário na seleção de destinatários
+
+Mesmo dia da UX-fix 2 acima, 3 instruções diretas e curtas da autora, sem
+grilling (eram claras o bastante pra não precisar de rodada de perguntas):
+"Siga para a próxima aba que você quiser ajustar.", "Mude aluna para
+alunos.", "Busca é mais interessante do que paginação." -- a 3ª reabre e
+inverte explicitamente minha própria decisão anterior (UX-fix 2 registrada
+acima) de adiar busca/paginação como "prematuro".
+
+**Escopo do rename "aluna"→"aluno", decisão minha não detalhada pela
+autora, registrada aqui pra ficar auditável**: só texto VISÍVEL (labels,
+hints, placeholders, botões, toasts, mensagens de erro, `title`/tooltip,
+texto de modal) -- comentários de código e todo o histórico já escrito
+neste CLAUDE.md (inclusive as seções acima, que usam "aluna"/"alunas"
+consistentemente desde a Fase 1) foram deixados como estão. Motivo: são
+registro histórico de como a decisão foi tomada, não UI que a professora
+ou a aluno vê -- reescrever retroativamente o histórico deste arquivo
+apagaria o contexto real de quando/por que cada escolha foi feita. Seções
+NOVAS daqui pra frente (como esta) já nascem usando "aluno"/"alunos" como
+termo corrente.
+
+Arquivos com texto visível corrigido: `shared/admin-flashcards.js`,
+`shared/admin-support-materials.js`, `shared/admin-class-logs.js`,
+`shared/admin-students.js`, `shared/admin-analytics.js` (pill de Admin
+Mode: descrição + toast), `shared/my-flashcards.js` (pill "Aluno
+vinculado"), `shared/teacher-flashcards.js` (erro de validação de
+pinyin), `shared/auth.js` (toast de Admin Mode), `fr/index.html`+
+`zh/index.html` (`title` do botão de Admin Mode + texto do modal de
+limite de cartões, Fase 5.1). Cada troca revisada pra concordância de
+gênero nas palavras vizinhas (`vinculada`→`vinculado`,
+`nenhuma`→`nenhum`, `esta`→`este`, `ela`→`ele`, `selecionada(s)`→
+`selecionado(s)`, etc.) -- nunca find-replace cego. Conferido por grep
+completo no fim: todas as ocorrências restantes de "aluna" no
+repositório são comentário de código, HTML `<!-- -->`/CSS `/* */`, ou
+texto histórico deste arquivo -- nenhuma some de tela nenhuma.
+
+**Achado incidental, corrigido de graça pelo rename**: o texto de estado
+vazio de `admin-flashcards.js` tinha um bug de português pré-existente
+(`` `Nenhum cartão ainda pra${n>1 ? 's essas alunas' : ...}` ``, que
+concatenava pra "pras essas alunas" -- duplo artigo errado, "para as
+essas alunas"). A troca pro texto novo (`' esses alunos'`) já corrige
+isso de passagem, não foi um fix buscado deliberadamente.
+
+**"Próxima aba" escolhida por mim (escopo aberto na instrução da
+autora, sem ela nomear qual)**: "📚 Material de apoio" -- estruturalmente
+quase idêntica a "📇 Flashcards" (mesmo padrão de checkboxes
+multi-seleção + formulário único), por isso foi a candidata natural pra
+herdar a mesma melhoria de hierarquia/busca sem trabalho de design novo.
+"📝 Aulas" ficou de fora de propósito -- usa um `<select>` de aluno único,
+que por natureza do próprio elemento HTML nunca fica "vazio sem querer"
+e não tem lista pra buscar, então não se beneficia do mesmo fix.
+Registrando aqui explicitamente porque foi decisão minha sobre uma
+instrução aberta ("a próxima aba que você quiser") -- se a intenção era
+outra aba, é só redirecionar.
+
+**Busca por @usuário, adicionada em `admin-flashcards.js` E
+`admin-support-materials.js`** (as duas telas com lista de checkboxes de
+alunos): `<input type="text">` (reaproveita `.profile-edit-input`, zero
+CSS novo) que filtra as linhas via `style.display` direto no DOM
+(`row.style.display = !q || username.includes(q) ? '' : 'none'`), SEM
+re-renderizar a view inteira -- decisão técnica deliberada: as funções de
+render são `async` e mostram um estado de loading antes de resolver a
+busca de rede, então re-renderizar a cada tecla digitada perderia o foco
+do campo de busca (o cursor "sumiria" do input a cada letra). Filtro
+puro client-side sobre a lista já carregada, sem chamada de rede nova.
+
+**Testes realizados**: `node --check` sem erro em todos os arquivos
+tocados. Playwright (fr): confirmado texto "Selecione os alunos..." (não
+"alunas"), contador "Nenhum aluno selecionado"/"N alunos selecionados"
+(singular/plural corretos), "Selecionar todos"/"Vincular aluno"/"Seus
+alunos (N)" nas 3 abas (Flashcards/Alunos/Material de apoio); busca
+digitando "joa" filtra pra só a linha de @joao (`visibleAfterSearch`),
+foco do input preservado durante a filtragem (`focusRetained:true`),
+limpar a busca restaura todas as linhas; mesmo padrão replicado e
+validado em "📚 Material de apoio" (busca por "marc" filtra pra só
+@marconi). Screenshot (fr, tema claro) confirma visualmente a seção
+"DESTINATÁRIOS" com busca funcionando (digitado "li", só `@li_wei --
+Chinês` visível) sem defeito de layout. Sem erro de console novo
+atribuível a este código (mesmos `pageerror` de mock -- `.is()`/
+`.upsert()` -- já registrados em toda a feature). **Não foi tirado
+screenshot de tema escuro nesta rodada** -- risco considerado baixo
+porque nenhuma cor/CSS nova foi introduzida (só texto e um `<input>`
+reaproveitando classe já calibrada nos dois temas), mas registrando aqui
+por completude/honestidade, mesmo padrão já usado quando outras entregas
+desta feature validaram só um cenário.
+
+**O que ainda falta / não foi feito nesta rodada (de propósito)**:
+- Nenhuma migração de schema -- mudança 100% client-side (texto + filtro
+  DOM).
+- "📝 Aulas" não ganhou busca (ver justificativa acima -- `<select>` não
+  se beneficia do mesmo padrão).
+- Nenhum passo manual pendente pra autora nesta entrega.

@@ -1,22 +1,31 @@
-// ---------- Material de apoio (admin) -- Fase 8b do sistema de alunas
+// ---------- Material de apoio (admin) -- Fase 8b do sistema de alunos
 // particulares (ver CLAUDE.md) ----------
 // Autoria de material de apoio pela professora (texto + link + arquivo,
 // todos opcionais individualmente, pelo menos 1 exigido -- ver
-// shared/teacher-support-materials.js), atribuído a 1+ alunas de uma vez
+// shared/teacher-support-materials.js), atribuído a 1+ alunos de uma vez
 // (multi-seleção, mesmo padrão recém-adicionado a "📇 Flashcards" --
 // grillado desde já, não copiado depois). Diferente de "📇 Flashcards"/
-// "📝 Aulas": este conteúdo NUNCA entra em STATE.cards/FSRS, e a aluna TEM
-// uma tela pra ver o que foi atribuído a ela (shared/support-materials-
+// "📝 Aulas": este conteúdo NUNCA entra em STATE.cards/FSRS, e o aluno TEM
+// uma tela pra ver o que foi atribuído a ele (shared/support-materials-
 // view.js) -- grillado, "não-revisável" mas visível, ao contrário de
 // "📝 Aulas" (Fase 7, só a professora vê).
 //
 // UX-fix (mesmo dia da Fase 8c): mesmo bug de estado encontrado e
 // corrigido em shared/admin-flashcards.js (ver comentário lá, seção
 // "UX-fix") existia aqui também -- a seleção nunca podia ficar vazia
-// (caía de volta pra "primeira aluna"), o que fazia "Limpar seleção" não
+// (caía de volta pra "primeiro aluno"), o que fazia "Limpar seleção" não
 // limpar de verdade. Corrigido do mesmo jeito: seleção pode ficar
 // genuinamente vazia, "Enviar material" fica desabilitado nesse estado,
 // com contador visível acima do form.
+//
+// UX-fix 2 (pedido direto da autora, mesmo dia): trazida pro mesmo padrão
+// visual/terminológico de admin-flashcards.js depois de ela pedir pra
+// seguir pra "a próxima aba" -- rótulo "Destinatários" (era "Alunas
+// (selecione 1 ou mais)"), busca por @usuário acima da lista de
+// checkboxes (mesmo filtro puro de DOM, sem re-render/re-fetch por tecla),
+// e "aluna"->"aluno" em todo texto visível (comentários de código e o
+// nome histórico da feature ficam como estavam, mesmo critério já
+// registrado em admin-flashcards.js).
 //
 // Depende de (mesma posição de shared/admin-flashcards.js -- antes de
 // app.js):
@@ -84,7 +93,7 @@ async function renderAdminSupportMaterialsView(){
 
   const students = await fetchMyStudents();
   if (!students.length){
-    wrap.innerHTML = `<p class="profile-empty-note">Vincule uma aluna primeiro, na aba "🎓 Alunos", pra poder enviar material de apoio pra ela.</p>`;
+    wrap.innerHTML = `<p class="profile-empty-note">Vincule um aluno primeiro, na aba "🎓 Alunos", pra poder enviar material de apoio pra ele.</p>`;
     return;
   }
 
@@ -93,13 +102,15 @@ async function renderAdminSupportMaterialsView(){
 
   const selectedStudents = students.filter(s => ADMIN_MATERIALS_STATE.studentIds.has(s.student_id));
   const selectionCountLabel = selectedStudents.length === 0
-    ? 'Nenhuma aluna selecionada'
+    ? 'Nenhum aluno selecionado'
     : selectedStudents.length === 1
-      ? '1 aluna selecionada'
-      : `${selectedStudents.length} alunas selecionadas`;
+      ? '1 aluno selecionado'
+      : `${selectedStudents.length} alunos selecionados`;
 
+  // Busca é só um filtro de DOM (mesmo padrão de admin-flashcards.js) --
+  // nunca dispara renderAdminSupportMaterialsView() de novo.
   const studentCheckboxesHTML = students.map(s => `
-    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 0;">
+    <label data-student-row data-username="${escapeHTML((s.username || '').toLowerCase())}" style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 0;">
       <input type="checkbox" data-material-student-checkbox value="${s.student_id}" ${ADMIN_MATERIALS_STATE.studentIds.has(s.student_id) ? 'checked' : ''}>
       @${escapeHTML(s.username || '(usuário removido)')} -- ${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key}
     </label>
@@ -112,14 +123,16 @@ async function renderAdminSupportMaterialsView(){
   const newMaterialSubtitle = selectedStudents.length === 1
     ? ` -- ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
     : selectedStudents.length > 1
-      ? ` -- ${selectedStudents.length} alunas selecionadas`
+      ? ` -- ${selectedStudents.length} alunos selecionados`
       : '';
 
   wrap.innerHTML = `
     <div class="profile-section">
-      <div class="section-label">Alunas (selecione 1 ou mais)</div>
+      <div class="section-label">Destinatários</div>
+      <p class="profile-edit-hint">Selecione os alunos que vão receber este material.</p>
+      <input type="text" id="admin-material-search" class="profile-edit-input" placeholder="Buscar por @usuário..." autocomplete="off" style="margin-bottom:8px;">
       <div style="display:flex; gap:12px; margin-bottom:4px;">
-        <a href="#" id="admin-material-select-all" style="font-size:13px;">Selecionar todas</a>
+        <a href="#" id="admin-material-select-all" style="font-size:13px;">Selecionar todos</a>
         <a href="#" id="admin-material-select-none" style="font-size:13px;">Limpar seleção</a>
       </div>
       <div class="profile-edit-input" style="height:auto; max-height:180px; overflow-y:auto; display:block;">
@@ -130,7 +143,7 @@ async function renderAdminSupportMaterialsView(){
 
     <div class="profile-section">
       <div class="section-label">Novo material${newMaterialSubtitle}</div>
-      ${selectedStudents.length ? '' : `<p class="profile-edit-hint">Selecione ao menos uma aluna acima pra poder enviar o material.</p>`}
+      ${selectedStudents.length ? '' : `<p class="profile-edit-hint">Selecione ao menos um aluno acima pra poder enviar o material.</p>`}
       <form id="admin-create-material-form" class="profile-edit-form">
         <label class="profile-edit-label" for="admin-material-title">Título</label>
         <input type="text" id="admin-material-title" class="profile-edit-input" placeholder="ex: Resumo do passé composé" autocomplete="off">
@@ -141,13 +154,13 @@ async function renderAdminSupportMaterialsView(){
         <label class="profile-edit-label" for="admin-material-file">Arquivo (opcional)</label>
         <input type="file" id="admin-material-file" class="profile-edit-input">
         <p class="profile-edit-error" id="admin-create-material-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-create-material-btn" ${selectedStudents.length ? '' : 'disabled'}>Enviar material${selectedStudents.length > 1 ? ` pra ${selectedStudents.length} alunas` : ''}</button>
+        <button type="submit" class="btn btn-primary btn-block" id="admin-create-material-btn" ${selectedStudents.length ? '' : 'disabled'}>Enviar material${selectedStudents.length > 1 ? ` pra ${selectedStudents.length} alunos` : ''}</button>
       </form>
     </div>
 
     <div class="profile-section">
       <div class="section-label">Materiais enviados (${materials.length})</div>
-      ${materials.length ? materials.map(m => materialRowHTML(m, selectedStudents.length > 1)).join('') : `<p class="profile-empty-note">Nenhum material ainda pra${selectedStudents.length > 1 ? 's essas alunas' : selectedStudents.length === 1 ? ' esta aluna' : ' nenhuma aluna selecionada'}.</p>`}
+      ${materials.length ? materials.map(m => materialRowHTML(m, selectedStudents.length > 1)).join('') : `<p class="profile-empty-note">Nenhum material ainda pra${selectedStudents.length > 1 ? ' esses alunos' : selectedStudents.length === 1 ? ' este aluno' : ' nenhum aluno selecionado'}.</p>`}
     </div>
   `;
 
@@ -167,9 +180,16 @@ async function renderAdminSupportMaterialsView(){
   document.getElementById('admin-material-select-none').addEventListener('click', (e) => {
     e.preventDefault();
     // Seleção vazia é um estado válido (ver comentário no topo do
-    // arquivo) -- limpa de verdade, sem cair de volta pra uma aluna default.
+    // arquivo) -- limpa de verdade, sem cair de volta pra um aluno default.
     ADMIN_MATERIALS_STATE.studentIds = new Set();
     renderAdminSupportMaterialsView();
+  });
+
+  document.getElementById('admin-material-search').addEventListener('input', (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    wrap.querySelectorAll('[data-student-row]').forEach(row => {
+      row.style.display = !q || row.dataset.username.includes(q) ? '' : 'none';
+    });
   });
 
   document.getElementById('admin-create-material-form').addEventListener('submit', async (e) => {
@@ -179,7 +199,7 @@ async function renderAdminSupportMaterialsView(){
     errorEl.textContent = '';
 
     if (!selectedStudents.length){
-      errorEl.textContent = 'Selecione ao menos uma aluna.';
+      errorEl.textContent = 'Selecione ao menos um aluno.';
       return;
     }
     btn.disabled = true;
@@ -197,10 +217,10 @@ async function renderAdminSupportMaterialsView(){
     const description = document.getElementById('admin-material-desc').value;
     const linkUrl = document.getElementById('admin-material-link').value;
 
-    // Uma linha em teacher_support_materials POR aluna selecionada --
+    // Uma linha em teacher_support_materials POR aluno selecionado --
     // mesmo padrão recém-adicionado aos flashcards (ver CLAUDE.md):
     // mesmo conteúdo/arquivo (upload feito 1 vez só acima), cada linha
-    // com o language_app_key da PRÓPRIA aluna.
+    // com o language_app_key do PRÓPRIO aluno.
     const results = await Promise.all(selectedStudents.map(s => createSupportMaterial({
       studentId: s.student_id,
       languageAppKey: s.language_app_key,
@@ -213,7 +233,7 @@ async function renderAdminSupportMaterialsView(){
       errorEl.textContent = failed[0].error;
       return;
     }
-    showToast(results.length > 1 ? `✓ Material enviado pra ${results.length - failed.length} alunas.` : '✓ Material enviado.');
+    showToast(results.length > 1 ? `✓ Material enviado pra ${results.length - failed.length} alunos.` : '✓ Material enviado.');
     renderAdminSupportMaterialsView();
   });
 
