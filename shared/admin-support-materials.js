@@ -10,6 +10,14 @@
 // view.js) -- grillado, "não-revisável" mas visível, ao contrário de
 // "📝 Aulas" (Fase 7, só a professora vê).
 //
+// UX-fix (mesmo dia da Fase 8c): mesmo bug de estado encontrado e
+// corrigido em shared/admin-flashcards.js (ver comentário lá, seção
+// "UX-fix") existia aqui também -- a seleção nunca podia ficar vazia
+// (caía de volta pra "primeira aluna"), o que fazia "Limpar seleção" não
+// limpar de verdade. Corrigido do mesmo jeito: seleção pode ficar
+// genuinamente vazia, "Enviar material" fica desabilitado nesse estado,
+// com contador visível acima do form.
+//
 // Depende de (mesma posição de shared/admin-flashcards.js -- antes de
 // app.js):
 //   - shared/roles.js                     (fetchMyStudents)
@@ -82,11 +90,13 @@ async function renderAdminSupportMaterialsView(){
 
   const validIds = new Set(students.map(s => s.student_id));
   ADMIN_MATERIALS_STATE.studentIds = new Set([...ADMIN_MATERIALS_STATE.studentIds].filter(id => validIds.has(id)));
-  if (!ADMIN_MATERIALS_STATE.studentIds.size){
-    ADMIN_MATERIALS_STATE.studentIds.add(students[0].student_id);
-  }
 
   const selectedStudents = students.filter(s => ADMIN_MATERIALS_STATE.studentIds.has(s.student_id));
+  const selectionCountLabel = selectedStudents.length === 0
+    ? 'Nenhuma aluna selecionada'
+    : selectedStudents.length === 1
+      ? '1 aluna selecionada'
+      : `${selectedStudents.length} alunas selecionadas`;
 
   const studentCheckboxesHTML = students.map(s => `
     <label style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 0;">
@@ -115,10 +125,12 @@ async function renderAdminSupportMaterialsView(){
       <div class="profile-edit-input" style="height:auto; max-height:180px; overflow-y:auto; display:block;">
         ${studentCheckboxesHTML}
       </div>
+      <p class="profile-edit-hint" style="font-weight:700; margin-top:6px;">${selectionCountLabel}</p>
     </div>
 
     <div class="profile-section">
       <div class="section-label">Novo material${newMaterialSubtitle}</div>
+      ${selectedStudents.length ? '' : `<p class="profile-edit-hint">Selecione ao menos uma aluna acima pra poder enviar o material.</p>`}
       <form id="admin-create-material-form" class="profile-edit-form">
         <label class="profile-edit-label" for="admin-material-title">Título</label>
         <input type="text" id="admin-material-title" class="profile-edit-input" placeholder="ex: Resumo do passé composé" autocomplete="off">
@@ -129,13 +141,13 @@ async function renderAdminSupportMaterialsView(){
         <label class="profile-edit-label" for="admin-material-file">Arquivo (opcional)</label>
         <input type="file" id="admin-material-file" class="profile-edit-input">
         <p class="profile-edit-error" id="admin-create-material-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-create-material-btn">Enviar material${selectedStudents.length > 1 ? ` pra ${selectedStudents.length} alunas` : ''}</button>
+        <button type="submit" class="btn btn-primary btn-block" id="admin-create-material-btn" ${selectedStudents.length ? '' : 'disabled'}>Enviar material${selectedStudents.length > 1 ? ` pra ${selectedStudents.length} alunas` : ''}</button>
       </form>
     </div>
 
     <div class="profile-section">
       <div class="section-label">Materiais enviados (${materials.length})</div>
-      ${materials.length ? materials.map(m => materialRowHTML(m, selectedStudents.length > 1)).join('') : `<p class="profile-empty-note">Nenhum material ainda pra${selectedStudents.length > 1 ? 's essas alunas' : ' esta aluna'}.</p>`}
+      ${materials.length ? materials.map(m => materialRowHTML(m, selectedStudents.length > 1)).join('') : `<p class="profile-empty-note">Nenhum material ainda pra${selectedStudents.length > 1 ? 's essas alunas' : selectedStudents.length === 1 ? ' esta aluna' : ' nenhuma aluna selecionada'}.</p>`}
     </div>
   `;
 
@@ -154,6 +166,8 @@ async function renderAdminSupportMaterialsView(){
   });
   document.getElementById('admin-material-select-none').addEventListener('click', (e) => {
     e.preventDefault();
+    // Seleção vazia é um estado válido (ver comentário no topo do
+    // arquivo) -- limpa de verdade, sem cair de volta pra uma aluna default.
     ADMIN_MATERIALS_STATE.studentIds = new Set();
     renderAdminSupportMaterialsView();
   });

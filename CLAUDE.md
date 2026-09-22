@@ -2445,6 +2445,12 @@ autorização explícita da autora, com este relatório já entregue antes de
 pedir luz verde.
 
 **Atualização: autorizada e entregue (2026-09-22, mesmo dia), "Siga para
+a fase 8c" + grilling de 4 perguntas antes de codar (ver Fase 8c abaixo);
+seguida no mesmo dia por um pedido de reorganização visual da própria
+tela de Flashcards (crítica detalhada com print real, ver "UX-fix:
+formulário de flashcard" logo depois da Fase 8c).**
+
+**Atualização: autorizada e entregue (2026-09-22, mesmo dia), "Siga para
 a fase 8c" + grilling de 4 perguntas antes de codar (ver Fase 8c
 abaixo).**
 
@@ -2649,3 +2655,118 @@ nenhum dos dois foi tocado nesta fase.
   em aberto próprios) é fora do prompt-mestre original desta feature e
   precisa de autorização/escopo explícitos numa sessão futura, não
   presumido como próximo passo automático.
+
+## UX-fix: formulário de "Novo flashcard" -- bug de seleção nunca-vazia + hierarquia visual
+
+Mesmo dia da entrega da Fase 8c, a autora revisou a tela real (print
+anexado) e mandou uma crítica de UX detalhada, ponto a ponto (17 itens).
+Não é uma fase nova do prompt-mestre da feature "alunas particulares" --
+é uma correção pontual de UX na tela de admin que a Fase 8a/8c já tinham
+construído, motivada por um problema real que ela identificou, não só
+preferência estética.
+
+**O achado principal, tratado como bug real, não só gosto**: desde a
+Fase 8a, a seleção de alunas (checkboxes multi-seleção) nunca podia ficar
+genuinamente vazia -- o código caía de volta pra "a primeira aluna já
+vem marcada" toda vez que o `Set` esvaziava, inclusive imediatamente
+depois de clicar "Limpar seleção". A autora identificou exatamente o
+risco: um erro do tipo "selecionar outra pessoa e esquecer que a
+primeira continuou marcada" é especialmente perigoso numa ferramenta
+administrativa (criar um cartão pra aluna errada por engano). Como ela
+descreveu: "o estado inicial deve representar zero destinatários
+selecionados" -- e "Limpar seleção" deve sempre resultar em exatamente
+zero, nunca reverter pra ninguém.
+
+**Decisões tomadas, sem nova rodada de grilling** (a crítica da autora já
+veio com 17 pontos concretos e justificados; distingui os que eram bug
+real/pedido direto dos que eram sugestão especulativa antes de
+implementar, sem devolver pergunta pra ela sobre cada um):
+
+1. **Corrigido nos 2 lugares onde o mesmo padrão existia**
+   (`shared/admin-flashcards.js` e `shared/admin-support-materials.js`,
+   ambos documentados desde a Fase 8b/8a addendum como "mesmo padrão
+   copiado de propósito"): removida a linha que recaía pra "primeira
+   aluna" quando o Set esvaziava. Seleção vazia agora é um estado válido
+   e persistente. Botão "Criar cartão"/"Enviar material" fica
+   `disabled` nesse estado (com contador visível acima do form: "Nenhuma
+   aluna selecionada" / "N aluna(s) selecionada(s)"), e a validação de
+   submit já existente continua como cinto-de-segurança extra caso o
+   `disabled` seja contornado de algum jeito.
+2. **Hierarquia visual em `admin-flashcards.js`** (única tela que a
+   autora efetivamente screenshotou e criticou em detalhe -- a de
+   Material de apoio só recebeu o fix de bug acima, não o redesenho
+   completo, por não ter sido a tela mostrada): reorganizado em 3 blocos
+   rotulados -- "Destinatários" (fora do `<form>`, como já era) →
+   "Conteúdo" (com um sub-rótulo "Recursos opcionais" agrupando nota/
+   imagem/áudio) → "Modo de prática" (dentro do mesmo `<form>`, agora
+   como um **radio group nativo** `name="admin-flashcard-mode"` com 3
+   opções -- Flashcard normal / Múltipla escolha / Completar a frase --
+   em vez dos 2 checkboxes independentes da Fase 8c que precisavam de JS
+   forçando a exclusividade um no outro. A exclusividade MC/cloze
+   (decidida na Fase 8c) agora é o próprio HTML, não uma regra imposta
+   por cima. Reaproveita `.section-label` (já existente no CSS, usado
+   como cabeçalho de `.profile-section`) como cabeçalho de cada
+   sub-bloco dentro do mesmo painel -- **zero CSS novo**.
+
+**Pontos da crítica da autora explicitamente NÃO implementados, com
+justificativa registrada aqui pra não parecer esquecimento:**
+- **Renomear "Alunas" → "Alunos"**: ela sugeriu isso pra neutralidade de
+  gênero futura. Não implementado -- "aluna"/"alunas" é usado
+  consistentemente em dezenas de arquivos desta feature desde a Fase 1
+  (reflete o roster real e 100% feminino da autora hoje, confirmado ao
+  vivo: "1 admin, 21 alunas"). É uma mudança de terminologia grande e
+  transversal ao produto inteiro, não uma correção de UX pontual --
+  fica pra decisão explícita futura, não presumida numa sessão que
+  estava corrigindo outra coisa.
+- **Bloquear seleção de alunas com idiomas diferentes na mesma
+  criação**: a crítica presumia que isso já era um bug ("isso não pode
+  ser atribuído aos dois"). Investigado e confirmado que NÃO é um bug --
+  desde o adendo da Fase 8a, o código já cria uma linha por aluna no
+  idioma DELA (`language_app_key` de cada uma, nunca misturado), testado
+  explicitamente com seleção mista fr+zh na época. Bloquear seria
+  remover uma feature que já foi pedida e testada, não corrigir algo
+  quebrado -- por isso não implementado. O título "Novo flashcard --
+  Português (em breve)" do print da autora só mostra o idioma quando
+  EXATAMENTE 1 aluna está selecionada (comportamento correto); com 2+,
+  já mostrava "N alunas selecionadas" sem citar idioma nenhum.
+- **Busca/paginação na lista de alunas**: prematuro com ~22 alunas reais
+  hoje (a lista já tem scroll interno de 180px). Fica pra quando o
+  volume justificar.
+- **Largura/alinhamento do botão "Criar cartão"**: ela sugeriu
+  encurtar/alinhar à direita. Não alterado -- `btn btn-primary
+  btn-block` (largura total) é a convenção usada em TODO submit
+  primário desta feature inteira (Fases 2 a 8b, dezenas de forms);
+  mudar só este botão quebraria a consistência visual do Painel de
+  Admin como um todo, não seria uma melhoria isolada.
+- **Copy do rótulo de "Áudio próprio"**: ela sugeriu encurtar. Mantido o
+  texto original ("Áudio próprio (além da pronúncia automática)") --
+  confirmado no código que o áudio próprio TOCA JUNTO com a pronúncia
+  automática (TTS), não a substitui, então o texto já descreve o
+  comportamento real; risco de simplificar demais e a frase parar de
+  ser precisa.
+
+**Testes realizados:** `node --check` sem erro nos 2 arquivos tocados.
+Validação funcional via Playwright (fr), cobrindo especificamente o bug
+relatado: estado inicial com 0 alunas marcadas, contador "Nenhuma aluna
+selecionada", botão desabilitado; selecionar 1 aluna atualiza o
+contador e habilita o botão; "Selecionar todas" marca todas; "Limpar
+seleção" zera de verdade (`checkedCountAfterClear:0`); selecionar uma
+aluna DIFERENTE logo depois de limpar resulta SÓ nela marcada
+(`pickedIsSecondOnly:true` -- o cenário exato que a autora descreveu como
+perigoso, confirmado corrigido); radio group testado nos 3 sentidos
+(flip→mc→cloze→flip, campos certos aparecendo/escondendo, exclusividade
+nativa sem JS extra); fluxo de criação completo ainda funciona
+(`cardCreated:true`, atribuído à aluna certa). Mesmo fix replicado e
+testado em "📚 Material de apoio". Sem erro de console novo atribuível a
+este código (mesmos 2 `pageerror` de mock -- `.is()`/`.upsert()` -- já
+registrados em toda a feature). Validação visual (screenshot Playwright,
+fr claro + escuro, estado vazio e estado com seleção mista fr+zh em modo
+múltipla escolha) confirma a hierarquia nova legível nos dois temas --
+esperado, já que reaproveita só classes CSS já calibradas, nenhuma cor
+nova introduzida.
+
+**Escopo**: só `shared/admin-flashcards.js` (redesenho completo) e
+`shared/admin-support-materials.js` (só o fix de bug, sem redesenho --
+não foi a tela criticada). `shared/admin-class-logs.js` ("📝 Aulas") não
+tem o mesmo padrão -- usa um `<select>` de aluna única, que sempre tem um
+valor por natureza do próprio elemento HTML, não o mesmo bug.
