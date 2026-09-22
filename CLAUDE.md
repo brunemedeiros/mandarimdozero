@@ -2863,3 +2863,93 @@ desta feature validaram só um cenário.
 - "📝 Aulas" não ganhou busca (ver justificativa acima -- `<select>` não
   se beneficia do mesmo padrão).
 - Nenhum passo manual pendente pra autora nesta entrega.
+
+## UX-fix 4: "Aulas" ganha o mesmo multi-select das outras 2 telas + rótulo "Alunos" unificado nas 3
+
+A autora testou a entrega da UX-fix 3 acima e voltou com 2 pontos: (1)
+"Aulas" deveria ter o mesmo multi-select de Flashcards/Material de apoio
+-- a justificativa da UX-fix 3 ("`<select>` não se beneficia do mesmo
+padrão") tratava só a ausência de busca, não considerou que a autora
+queria a MESMA MECÂNICA de seleção (múltiplos alunos de uma vez) nas 3
+telas, não só em 2; (2) unificar "Alunos"/"Destinatários" como "Alunos"
+nas 3 telas -- eram 2 rótulos diferentes pro mesmo bloco (Flashcards/
+Material de apoio diziam "Destinatários", Aulas dizia "Aluno"); (3) ela
+relatou não estar vendo a caixa de busca em Flashcards/Material de apoio.
+
+**Investigação do ponto 3 antes de mudar qualquer coisa**: reli
+`shared/admin-flashcards.js` e `shared/admin-support-materials.js` -- a
+caixa de busca (`#admin-flashcard-search`/`#admin-material-search`) já
+estava no código desde a UX-fix 3, corretamente wireada. Validado ao vivo
+via Playwright (`offsetParent !== null`, ou seja renderizada e visível no
+DOM, não `display:none`) nos dois arquivos -- a busca funciona no código
+atual. A explicação mais provável é a autora ter testado antes do cache
+do navegador/service worker pegar o deploy mais recente (o app já tem um
+fix de auto-reload em atualização de service worker, mas pode haver uma
+janela entre o merge e o primeiro carregamento novo) -- não um bug
+reintroduzido. Se ela continuar sem ver a busca depois de um F5/recarregar
+forçado, é uma regressão real e vale investigar de novo com mais detalhe
+(print da tela, inspecionar o DOM ao vivo).
+
+**O que foi feito pros pontos 1 e 2:**
+
+- **`shared/admin-class-logs.js` reescrito** pro mesmo padrão de
+  `ADMIN_FLASHCARDS_STATE`/`ADMIN_MATERIALS_STATE`: `ADMIN_CLASS_LOGS_
+  STATE.studentId` (único) virou `.studentIds` (`Set`), com checkboxes +
+  busca por `@usuário` + "Selecionar todos"/"Limpar seleção" + contador
+  ("Nenhum aluno selecionado"/"N aluno(s) selecionado(s)"), idêntico ao
+  bloco já usado nas outras 2 telas. Registrar uma aula com vários alunos
+  marcados cria **uma linha em `teacher_class_logs` por aluno selecionado**
+  (mesmo conteúdo pra todos) -- mesmo padrão já usado em
+  `teacher_flashcards`/`teacher_support_materials`, e faz sentido aqui
+  também: uma aula em grupo tem o mesmo tópico/lição de casa pra todo
+  mundo. A lista "Aulas registradas" agora agrega os logs de TODOS os
+  alunos selecionados (antes só o do `<select>` único), com `@username`
+  prefixado quando há mais de um selecionado -- mesmo critério visual já
+  usado nas outras 2 telas.
+- **Rótulo unificado como "Alunos"** (era "Destinatários" em Flashcards/
+  Material de apoio, "Aluno" em Aulas) -- as 3 seções agora dizem só
+  "Alunos", texto de hint específico por tela continua diferente ("...que
+  vão receber este cartão"/"...este material"/"...desta aula").
+- **`shared/teacher-class-logs.js` não precisou de NENHUMA mudança** --
+  `createClassLog({studentId, ...})` já aceitava um `studentId` por
+  chamada; a tela de admin só passou a chamá-la em `Promise.all()` uma
+  vez por aluno selecionado, mesmo padrão já usado em `createFlashcard`/
+  `createSupportMaterial`.
+- Edição/exclusão de uma aula já registrada continuam operando em UMA
+  linha por vez (por `id`), sem relação com a seleção multi-aluno do
+  formulário "Nova aula" -- não precisou de mudança, `updateClassLog`/
+  `deleteClassLog` já recebiam só o `id`.
+
+**Testado (Playwright, fr, mesmo padrão de stub das entregas
+anteriores):** as 3 telas mostram "Alunos" como rótulo; busca confirmada
+presente E VISÍVEL (`offsetParent !== null`) em Flashcards e Material de
+apoio; em Aulas -- checkboxes presentes (`classLogsCheckboxCount:3`),
+contador "Nenhum aluno selecionado" no estado vazio, botão desabilitado;
+selecionar 2 alunos (clique sequencial, aguardando o re-render entre um
+clique e outro -- clicar os dois sem esperar bate num nó já substituído
+pelo re-render anterior, artefato só do script de teste, não do app real)
+confirma contador "2 alunos selecionados" e texto do botão "Registrar
+aula pra 2 alunos"; submeter cria 2 linhas no banco
+(`dbCountAfterCreate:2`), lista mostra as 2 com `@sandra`/`@joao`
+prefixados; "Limpar seleção" zera de verdade; busca por "pri" filtra pra
+só `@priscila`. Screenshot (fr, claro E escuro) confirma a tela
+renderizando corretamente nos dois temas, sem quebra visual -- validado
+mesmo sem CSS novo (reaproveita 100% as classes já calibradas de
+Flashcards/Material de apoio). Sem erro de console novo atribuível a
+este código (mesmos 2 `pageerror` de mock -- `.is()`/`.upsert()` -- já
+registrados em toda a feature). `node --check` sem erro.
+
+**Achado incidental, não corrigido nesta entrega (fora do pedido)**: os
+links "Selecionar todos"/"Limpar seleção" (`<a href="#">` sem cor
+customizada, herdando a cor padrão de link do navegador) ficam com
+contraste baixo no tema escuro -- visível no screenshot desta entrega,
+mas é o MESMO markup já usado em Flashcards/Material de apoio desde a
+UX-fix 3 (não introduzido por esta mudança), e aquela entrega não tinha
+validado tema escuro (registrado lá como pendência). Não corrigido aqui
+por estar fora do escopo do pedido desta rodada -- registrando pra uma
+sessão futura tratar como um ajuste de contraste pontual nas 3 telas
+juntas (reaproveitar um token `--link`/similar em vez de cor padrão do
+navegador), não uma urgência.
+
+**Escopo**: só `shared/admin-class-logs.js` foi reescrito. Nenhuma
+migração, nenhum passo manual pendente pra autora.

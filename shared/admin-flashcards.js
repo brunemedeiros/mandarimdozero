@@ -152,7 +152,7 @@ async function renderAdminFlashcardsView(){
 
   wrap.innerHTML = `
     <div class="profile-section">
-      <div class="section-label">Destinatários</div>
+      <div class="section-label">Alunos</div>
       <p class="profile-edit-hint">Selecione os alunos que vão receber este cartão.</p>
       <input type="text" id="admin-flashcard-search" class="profile-edit-input" placeholder="Buscar por @usuário..." autocomplete="off" style="margin-bottom:8px;">
       <div style="display:flex; gap:12px; margin-bottom:4px;">
