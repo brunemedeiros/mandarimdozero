@@ -40,9 +40,26 @@ async function renderAdminStudentsView(){
 
   const [students, profiles] = await Promise.all([fetchMyStudents(), fetchAllProfiles()]);
 
-  const usernameOptionsHTML = profiles.map(p => `<option value="${p.username}">@${p.username}${p.display_name ? ` — ${escapeHTML(p.display_name)}` : ''}</option>`).join('');
+  // Aluno já vinculado some da lista "Conta do aluno" -- mas só pro MESMO
+  // idioma que já tem vínculo. "Cada aluno vale pra 1 idioma" (Fase 1)
+  // significa que a mesma conta pode ser vinculada de novo, legitimamente,
+  // pra um idioma DIFERENTE (ex: Sandra de francês + Sandra de mandarim
+  // como 2 vínculos separados) -- por isso o filtro depende do idioma
+  // escolhido no 2º select, não é uma exclusão fixa de "quem já é aluno".
+  const linkedUsernamesByLang = {};
+  students.forEach(s => {
+    if (!s.username) return;
+    if (!linkedUsernamesByLang[s.language_app_key]) linkedUsernamesByLang[s.language_app_key] = new Set();
+    linkedUsernamesByLang[s.language_app_key].add(s.username);
+  });
+  const usernameOptionsHTMLForLang = (lang) => {
+    const linked = linkedUsernamesByLang[lang] || new Set();
+    return profiles.filter(p => !linked.has(p.username))
+      .map(p => `<option value="${p.username}">@${p.username}${p.display_name ? ` — ${escapeHTML(p.display_name)}` : ''}</option>`).join('');
+  };
   const languageOptionsHTML = Object.entries(STUDENT_LANGUAGE_LABELS)
     .map(([key, label]) => `<option value="${key}">${label}</option>`).join('');
+  const defaultLang = Object.keys(STUDENT_LANGUAGE_LABELS)[0];
 
   const studentsHTML = students.length ? students.map(s => `
     <div class="admin-badge-row">
@@ -62,8 +79,8 @@ async function renderAdminStudentsView(){
       <form id="admin-assign-student-form" class="profile-edit-form">
         <label class="profile-edit-label" for="admin-student-username">Conta do aluno</label>
         <select id="admin-student-username" class="profile-edit-input">
-          <option value="" disabled ${profiles.length ? 'selected' : ''}>Selecione uma conta...</option>
-          ${usernameOptionsHTML}
+          <option value="" disabled selected>Selecione uma conta...</option>
+          ${usernameOptionsHTMLForLang(defaultLang)}
         </select>
         <label class="profile-edit-label" for="admin-student-language">Idioma</label>
         <select id="admin-student-language" class="profile-edit-input">${languageOptionsHTML}</select>
@@ -77,6 +94,15 @@ async function renderAdminStudentsView(){
       ${studentsHTML}
     </div>
   `;
+
+  // Reconstrói a lista de contas disponíveis a cada troca de idioma -- um
+  // aluno que já tem vínculo em Francês continua aparecendo aqui se ela
+  // trocar pra Mandarim (ver comentário acima sobre linkedUsernamesByLang).
+  document.getElementById('admin-student-language').addEventListener('change', (e) => {
+    const usernameSelect = document.getElementById('admin-student-username');
+    const opts = usernameOptionsHTMLForLang(e.target.value);
+    usernameSelect.innerHTML = `<option value="" disabled selected>Selecione uma conta...</option>${opts}`;
+  });
 
   document.getElementById('admin-assign-student-form').addEventListener('submit', async (e) => {
     e.preventDefault();

@@ -3586,15 +3586,23 @@ footer.app-footer img{ height:40px; opacity:.85; }
 
 <div id="user-menu-dropdown" class="user-dropdown">
   <div class="user-dropdown-email" id="user-dropdown-email"></div>
-  <button class="user-dropdown-item" id="user-profile-btn">👤 Meu perfil</button>
-  <!-- Só mobile (menu "Mais") -- no desktop essas abas já moram na sidebar. -->
+  <!-- mais-extra-tab: item duplica uma aba que a sidebar de desktop já tem
+       (ver .sidebar-nav-secondary) -- some do dropdown em >=900px, mesmo
+       mecanismo já usado por Conjugação/Desafios, só que estendido pros 4
+       itens que sempre foram redundantes ali e ninguém tinha reaplicado a
+       regra (achado ao investigar reclamação de "menu grande demais"). No
+       mobile continuam aparecendo normalmente (perfil já tem seu próprio
+       #user-profile-btn{display:none} mobile -- ver bloco de tema mobile;
+       os outros 3 não têm aba fixa própria na barra inferior, então
+       continuam só alcançáveis via "Mais" lá). -->
+  <button class="user-dropdown-item mais-extra-tab" id="user-profile-btn">👤 Meu perfil</button>
   <button class="user-dropdown-item mais-extra-tab" id="mais-conjugaison-btn" data-tab="conjugaison">✍️ Conjugação</button>
   <button class="user-dropdown-item mais-extra-tab" id="mais-challenges-btn" data-tab="challenges">🎯 Desafios</button>
-  <button class="user-dropdown-item" id="leaderboard-btn">🏆 Ranking</button>
+  <button class="user-dropdown-item mais-extra-tab" id="leaderboard-btn">🏆 Ranking</button>
   <button class="user-dropdown-item" id="my-flashcards-btn">📇 Meus cartões</button>
   <button class="user-dropdown-item" id="support-materials-btn">📚 Material de apoio</button>
-  <button class="user-dropdown-item" id="user-settings-btn">⚙️ Configurações</button>
-  <button class="user-dropdown-item admin-only-nav" id="admin-badges-btn" style="display:none;">🛠️ Painel de Admin</button>
+  <button class="user-dropdown-item mais-extra-tab" id="user-settings-btn">⚙️ Configurações</button>
+  <button class="user-dropdown-item admin-only-nav mais-extra-tab" id="admin-badges-btn" style="display:none;">🛠️ Painel de Admin</button>
   <button class="user-dropdown-item" id="report-menu-btn">⚑ Reportar problema</button>
   <div class="user-dropdown-sep"></div>
   <button class="user-dropdown-item danger" id="logout-btn">Sair da conta</button>
