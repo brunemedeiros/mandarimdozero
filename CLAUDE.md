@@ -3220,3 +3220,71 @@ validado em zh porque zh não foi tocado (já estava correto).
 **Escopo**: só `fr/index.html` (3 blocos de variáveis CSS + 2 regras de
 classe). Nenhuma migração, nenhum arquivo JS tocado, nenhum passo manual
 pendente pra autora.
+
+## Filtro de aluno já vinculado no select + achado real por trás do menu do avatar "gigante"
+
+Mesma sessão da entrega acima, 2 pedidos/perguntas sobre 2 prints
+diferentes da tela "🎓 Alunos" e do menu do avatar (canto superior
+direito):
+
+**1. "Tem como tirar do select quem já é 'Seus alunos', pra saber quem
+falta adicionar?"** -- pedido concreto, implementado. `renderAdminStudentsView()`
+(`shared/admin-students.js`) montava a lista `usernameOptionsHTML` a
+partir de TODOS os `profiles`, sem checar contra `students` (já
+vinculados) -- sempre mostrava a lista inteira, obrigando a autora a
+lembrar de cor quem já tinha vinculado. Corrigido com um cuidado
+importante: o filtro não pode ser "sumir de vez" -- "cada aluno vale pra
+1 idioma" (Fase 1) significa que a MESMA conta pode ser vinculada de
+novo, legitimamente, pra um idioma DIFERENTE (ex: Sandra de francês +
+Sandra de mandarim como 2 vínculos separados). Por isso o filtro
+(`linkedUsernamesByLang`, novo) é por IDIOMA -- reconstrói a lista de
+contas disponíveis a cada troca do `<select>` de idioma (`change`
+listener novo), excluindo só quem já está vinculado NAQUELE idioma
+específico, nunca uma exclusão global de "quem já é aluno em qualquer
+idioma".
+
+**2. "Por que esse menu abriu tão grande???"** -- não era bug de CSS (já
+descartei isso investigando a UX-fix 6 anterior, nesta mesma sessão) --
+era uma REGRESSÃO real de arquitetura de navegação, achada ao comparar o
+dropdown do avatar com a sidebar de desktop lado a lado. `#user-menu-dropdown`
+tem uma regra já existente e comentada (`.mais-extra-tab{ display:none }`
+só em `@media (min-width:900px)`) que esconde do dropdown, no desktop,
+qualquer item que a sidebar já cobre -- hoje só aplicada a
+Conjugação/Desafios (fr) / 汉字 (zh). Mas 4 outros itens do MESMO dropdown
+-- "👤 Meu perfil", "🏆 Ranking", "⚙️ Configurações", "🛠️ Painel de
+Admin" -- são 100% redundantes com `data-tab="profile"/"leaderboard"/
+"settings"/"admin-badges"` que a sidebar (`.sidebar-nav-secondary`) JÁ
+tem, e disparam exatamente o mesmo `switchTab(...)` (confirmado lendo
+`fr/app.js` linhas 914-943) -- só que ninguém tinha aplicado a mesma
+classe `mais-extra-tab` a eles. Resultado: no desktop, a autora via 8
+itens no dropdown quando só 4 (Meus cartões/Material de apoio/Reportar
+problema/Sair) não existem em lugar nenhum da sidebar -- os outros 4
+eram puro ruído duplicado, um acúmulo silencioso de fases anteriores
+(Fase 5/8b adicionaram Meus Cartões/Material de apoio ao dropdown sem
+ninguém reconferir se os itens PRÉ-EXISTENTES continuavam justificados
+ali).
+
+**Fix**: adicionada a classe `mais-extra-tab` a `#user-profile-btn`/
+`#leaderboard-btn`/`#user-settings-btn`/`#admin-badges-btn`, em
+`fr/index.html` E `zh/index.html` -- zero CSS novo, reaproveita a regra
+já existente. No MOBILE nada muda (Perfil já tinha seu próprio
+`#user-profile-btn{display:none}` específico ali, por ter aba fixa
+própria na barra inferior; os outros 3 continuam alcançáveis via "Mais",
+que é exatamente pra isso -- itens sem aba fixa/sidebar equivalente).
+
+**Testado (Playwright, fr+zh)**: filtro do select -- vincular em
+"Francês" exclui quem já está vinculado em francês mas mantém quem só
+tem vínculo em outro idioma; trocar pra "Mandarim" (idioma sem
+ninguém vinculado no cenário de teste) mostra a lista cheia de novo;
+trocar pra "Português" exclui só quem tem vínculo EM português.
+Dropdown do avatar -- desktop (1400px): confirmado só 4 itens visíveis
+(`my-flashcards-btn`/`support-materials-btn`/`report-menu-btn`/
+`logout-btn`), altura caiu de ~380px pra 203px; mobile (480px):
+confirmado que TODOS os 8-9 itens continuam visíveis ali (nada
+regrediu no "Mais"). Screenshot do dropdown desktop confirma visualmente
+o menu compacto, sidebar ao lado mostrando os mesmos 4 itens que
+sumiram do dropdown. `node --check` sem erro em `shared/admin-students.js`.
+
+**Escopo**: `shared/admin-students.js` + `fr/index.html` + `zh/index.html`
+(só classe CSS adicionada em 4 botões existentes, zero CSS novo).
+Nenhuma migração, nenhum passo manual pendente pra autora.
