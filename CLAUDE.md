@@ -3143,3 +3143,80 @@ seria o próximo passo, não repetir o mesmo fix.
 
 **Escopo**: só os 3 arquivos já citados. Nenhuma migração, nenhum passo
 manual pendente pra autora.
+
+## Perguntas de acompanhamento na tela de Revisão + bug real de contraste nos botões de grau (fr)
+
+Mesma sessão da UX-fix 6 acima, 3 perguntas/pedidos da autora sobre 2
+prints diferentes da tela de Revisão:
+
+**1. "Onde fica Meus cartões?"** -- confirmado ao vivo (Playwright,
+`#my-flashcards-btn` dentro de `#user-menu-dropdown`): fica no menu do
+avatar/nome (canto superior direito), entre "🏆 Ranking" e "⚙️
+Configurações" -- exatamente como a Fase 5 entregou, nada mudou.
+
+**2. "Filtro de fila não devia ter mudado?"** -- JÁ MUDOU, confirmado
+lendo o código (comentários "3ª rodada"/"4ª rodada de grilling" em
+`fr/index.html`, por volta da linha 1436): o botão "⚙️ Configurar
+sessão" saiu de solto no meio da tela pra um ícone circular ao lado do
+título "Revisão" (`.review-header-settings-btn`, dentro de
+`.review-path-header-row` -- confirmado ao vivo no DOM); "Filtro de
+fila" entrou como 1º controle DENTRO desse painel (junto de "Novas
+palavras por dia" -- renome de "Frequência de revisão" numa rodada
+anterior -- e "Intensidade da sessão"); a legenda redundante "N palavras
+prontas pra revisar" virou um rótulo estático sem número. O print que a
+autora mandou (`FILTRO DE FILA`/`NOVAS PALAVRAS POR DIA`/`INTENSIDADE DA
+SESSÃO` dentro do mesmo painel) já É o resultado dessas mudanças -- não
+uma tela desatualizada esperando a mudança acontecer.
+
+**3. "Por que tem 2 botões com contraste diferente dos outros? É bug?
+Fix it."** -- confirmado bug real, mas só de CONSISTÊNCIA (não de
+acessibilidade -- os 2 botões "diferentes" já passavam WCAG AA antes,
+verificado por cálculo: 5.48:1/6.76:1 claro/escuro pro "Bom", 7.94:1 pro
+"Difícil"). O problema real: no tema CLARO, "Errei"/"Fácil" usavam texto
+branco (`--on-vivid`) enquanto "Difícil"/"Bom" usavam texto escuro
+(`--on-seal-red`, fixo nos 2 temas) -- 2 estilos visuais diferentes nos 4
+botões da mesma linha, exatamente o que a autora viu no print (fr,
+`.grade-hard`/`.grade-good` em `fr/index.html`).
+
+**Causa raiz**: `.grade-hard` usava um hex solto (`#E0A526`, ouro) e
+`.grade-good` reaproveitava `var(--seal-red)` -- a cor de MARCA (azul em
+fr, ver seção "Tokens de cor de marca vs. semânticos" acima) -- os dois
+pareados com `--on-seal-red` (texto escuro FIXO nos 2 temas, calibrado
+especificamente pra ler bem sobre a cor de marca). Já `.grade-again`/
+`.grade-easy` usam `var(--error-red)`/`var(--jade)` + `--on-vivid` (texto
+que ALTERNA branco/escuro conforme o tema, porque essas 2 cores clareiam
+no escuro). Resultado: no claro, 2 brancos + 2 escuros lado a lado; por
+coincidência, no escuro os 4 já convergiam pra texto escuro (--on-vivid
+escuro + --on-seal-red sempre escuro) -- só o tema claro tinha o defeito
+visível, o que bate com o print da autora ser claro.
+
+**Fix**: `.grade-hard`/`.grade-good` ganharam cor PRÓPRIA
+(`--grade-hard-bg`/`--grade-good-bg`, novas variáveis no `:root` claro E
+nos 2 blocos de tema escuro de `fr/index.html`, mesmo padrão de 3
+declarações já usado por `--seal-red`/`--jade`/etc.) -- não reaproveitam
+mais `--seal-red` (marca) nem um hex solto -- e passaram a usar
+`var(--on-vivid)` como os outros 2, em vez de `--on-seal-red`. Valores
+calculados (não chutados) pra manter >=4.5:1 nos 2 sentidos: claro
+`#8C5F0E`/`#1D5A82` vs branco = 5.59:1/7.42:1; escuro `#C9973A`/`#5FA8D3`
+vs `--on-vivid` escuro (`#201335`) = 6.61:1/6.65:1. Resultado: os 4
+botões concordam agora nos 2 temas -- texto branco no claro, texto
+escuro no escuro -- em vez de 2 fixos + 2 que alternavam.
+
+**zh não tem esse bug** -- checado antes de mexer em fr: `zh/index.html`
+usa uma abordagem totalmente diferente e já consistente pros 4 botões
+(`.grade-btn{ color:white; }` uma vez só, cores de fundo fixas e
+propositalmente escuras nos 4 -- `#A83A2E`/`#C07A1F`/`var(--jade)`/
+`#2E7D4F` -- nunca clareiam por tema). zh não foi tocado nesta entrega.
+
+**Testes realizados**: contraste calculado manualmente (fórmula WCAG,
+luminância relativa) pros 4 botões nos 2 temas antes de escrever
+qualquer cor nova -- não chutado. Playwright (fr, claro+escuro):
+`getComputedStyle()` confirma as 4 cores de fundo/texto computadas
+batendo com o esperado (`rgb(255,255,255)` texto nos 4 no claro,
+`rgb(32,19,53)` nos 4 no escuro); screenshot dos 4 botões nos 2 temas
+confirma visualmente a paleta unificada, sem quebra de layout. Não
+validado em zh porque zh não foi tocado (já estava correto).
+
+**Escopo**: só `fr/index.html` (3 blocos de variáveis CSS + 2 regras de
+classe). Nenhuma migração, nenhum arquivo JS tocado, nenhum passo manual
+pendente pra autora.
