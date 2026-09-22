@@ -54,12 +54,33 @@ async function fetchFlashcardsForCurrentStudent(languageAppKey){
 // escolha, ou múltipla escolha sem imagem). `choices` é um array de 1-3
 // respostas ERRADAS -- a certa continua sendo `backTrans`, nunca duplicada
 // aqui (ver comentário na migration 032). Vazio/undefined -> cartão comum.
-async function createFlashcard({ studentId, languageAppKey, front, backTrans, note, frontPinyin, imageUrl, audioUrl, choices }){
+//
+// Fase 8c (ver CLAUDE.md) -- clozeSentence/clozeAnswer/clozeAnswerPinyin:
+// quarto formato, "completar a frase". clozeSentence precisa conter
+// exatamente 1 marcador "___" (3 underscores) -- sem isso não há onde a
+// aluna digitar. clozeAnswerPinyin só é gravado quando languageAppKey é
+// 'mandarim' (a aluna digita pinyin, não hanzi -- mesmo motivo dos
+// exercícios de digitar da trilha zh). Mutuamente exclusivo com `choices`
+// -- checado na UI (shared/admin-flashcards.js), não aqui: esta função
+// não impede tecnicamente gravar os dois juntos, mas nenhum call site
+// real faz isso.
+async function createFlashcard({ studentId, languageAppKey, front, backTrans, note, frontPinyin, imageUrl, audioUrl, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin }){
   const cleanFront = (front || '').trim();
   const cleanBack = (backTrans || '').trim();
   if (!cleanFront) return { ok: false, error: 'Digite o texto da frente do cartão.' };
   if (!cleanBack) return { ok: false, error: 'Digite a tradução (verso do cartão).' };
   const cleanChoices = (choices || []).map(c => (c || '').trim()).filter(Boolean);
+  const cleanClozeSentence = (clozeSentence || '').trim();
+  const cleanClozeAnswer = (clozeAnswer || '').trim();
+  if (cleanClozeSentence){
+    if ((cleanClozeSentence.match(/___/g) || []).length !== 1){
+      return { ok: false, error: 'A frase precisa ter exatamente um espaço marcado com ___ (3 underscores).' };
+    }
+    if (!cleanClozeAnswer) return { ok: false, error: 'Digite a resposta certa pro espaço em branco.' };
+    if (languageAppKey === 'mandarim' && !(clozeAnswerPinyin || '').trim()){
+      return { ok: false, error: 'Digite o pinyin da resposta (é o que a aluna vai digitar).' };
+    }
+  }
   const { data, error } = await supabaseClient
     .from('teacher_flashcards')
     .insert({
@@ -73,6 +94,9 @@ async function createFlashcard({ studentId, languageAppKey, front, backTrans, no
       image_url: imageUrl || null,
       audio_url: audioUrl || null,
       choices: cleanChoices.length ? cleanChoices : null,
+      cloze_sentence: cleanClozeSentence || null,
+      cloze_answer: cleanClozeAnswer || null,
+      cloze_answer_pinyin: languageAppKey === 'mandarim' ? ((clozeAnswerPinyin || '').trim() || null) : null,
     })
     .select()
     .single();
