@@ -2015,3 +2015,238 @@ do mock, não deste código).
 
 Próxima fase (8) só começa depois de autorização explícita da autora, com
 este relatório já entregue antes de pedir luz verde.
+
+**Atualização: autorizada e entregue (2026-09-22), "Siga para a fase 8" +
+grilling de escopo em 2 rodadas (ver Fase 8a abaixo).**
+
+## Fase 8 (outros tipos de conteúdo) -- grillada em 2 rodadas, escopo travado antes de codar
+
+A Fase 8 nunca teve descrição além do nome ("outros tipos de conteúdo") no
+prompt-mestre original -- mesma situação já registrada nas Fases 6 e 7
+antes do grilling daquela vez. 2 rodadas via `AskUserQuestion`:
+
+1. *O que "outros tipos de conteúdo" deve cobrir concretamente?* -- a
+   autora selecionou as **3 opções** oferecidas (multiSelect): novos
+   formatos de flashcard, material de apoio não-revisável, exercício
+   interativo novo.
+2. *Em que ordem, e qual o escopo do primeiro sub-passo?* -- ordem
+   confirmada **formatos de flashcard → material de apoio →
+   exercício interativo**; pro primeiro sub-passo (Fase 8a), a autora
+   selecionou os **3 formatos** oferecidos (multiSelect): imagem, áudio,
+   múltipla escolha.
+
+Como "múltipla escolha" muda MECÂNICA de revisão (não só conteúdo
+passivo como imagem/áudio), rodei uma 3ª pergunta focada só nisso antes
+de codar (ver Fase 8a abaixo) -- disciplina já usada nas fases 6/7: nunca
+presumir o design de uma peça que muda comportamento, mesmo com a opção
+já selecionada num round anterior.
+
+Fase 8 inteira segue fatiada em sub-fases próprias (8a/8b/8c), cada uma
+com seu próprio relatório e autorização antes da próxima -- mesmo
+princípio de todo o resto desta feature.
+
+## Fase 8a (novos formatos de flashcard: imagem, áudio, múltipla escolha)
+
+**Escopo confirmado num 3º grilling, focado só na múltipla escolha** (a
+única peça das 3 que muda mecânica, não só conteúdo):
+
+1. *Em que modo de revisão o cartão de múltipla escolha aparece?* --
+   **sempre múltipla escolha, em qualquer modo** (não só Speed Review) --
+   a autora rejeitou a opção mais conservadora (só Speed Review, que já é
+   nativamente múltipla escolha) em favor de fazer o cartão virar quiz
+   onde quer que ele apareça (Flashcard, Palavras Difíceis, inclusive).
+2. *Como mapear acerto/erro pra nota FSRS?* -- **acerto = Bom (grade 2),
+   erro = Errei (grade 0)** (recomendado) -- reaproveita a mesma escala
+   de graus já usada em toda a revisão, sem inventar um 5º grau.
+
+**Escopo explicitamente restrito a `teacher_flashcards`** -- não
+`student_flashcards` (Fase 5). A pergunta original que abriu a Fase 8
+falou em "novos formatos de flashcard" no genérico, mas cada fase desta
+feature trabalha num ponto de dado por vez; estender os 3 formatos novos
+pro cartão que a PRÓPRIA aluna cria é trabalho natural de uma fase futura
+(o dado seria praticamente idêntico -- `image_url`/`audio_url`/`choices`
+em `student_flashcards` também), mas não decidido nem começado aqui.
+
+**O que foi feito:**
+
+- **Migration `032_add_flashcard_media_and_choices.sql`** -- 3 colunas
+  novas em `teacher_flashcards` (`image_url`, `audio_url`, `choices`
+  jsonb -- array de 1-3 respostas ERRADAS; a certa continua sendo
+  `back_trans`, nunca duplicada) + bucket de Storage novo
+  `flashcard-media` (público pra leitura, escrita restrita à pasta do
+  próprio `auth.uid()` -- mesmo padrão RLS do bucket `avatars`, Fase
+  Perfil 7.1 -- mas com path com componente aleatório, mesmo padrão do
+  bucket `report-screenshots`, não path fixo/upsert, porque um cartão
+  pode ter sua própria mídia sem sobrescrever a de outro). Aplicada AO
+  VIVO nesta sessão via `mcp__Supabase__apply_migration` -- não é passo
+  manual pendente pra autora.
+- **`shared/teacher-flashcards.js`** -- `createFlashcard()` estendido com
+  `imageUrl`/`audioUrl`/`choices` (todos opcionais e independentes entre
+  si -- um cartão pode ter imagem sem ser múltipla escolha, ou múltipla
+  escolha sem imagem). Nova `uploadFlashcardMedia(file, kind)` -- sobe
+  pro bucket `flashcard-media` e devolve a URL pública já pronta pra
+  gravar junto no `createFlashcard()`; não grava nada no banco sozinha.
+- **`shared/admin-flashcards.js`** -- form ganhou 2 campos de arquivo
+  (`<input type="file">` pra imagem/áudio) + um checkbox "Múltipla
+  escolha" que revela 3 campos de texto (1 obrigatório, 2 opcionais) pra
+  digitar respostas erradas. Submit faz upload de imagem/áudio ANTES de
+  criar o cartão (aborta com erro se um upload falhar, sem criar cartão
+  pela metade) e valida que pelo menos 1 opção errada esteja preenchida
+  quando o checkbox de múltipla escolha está marcado. Lista de cartões
+  ganhou badges curtos (`🖼️ imagem`/`🎧 áudio`/`🔤 múltipla escolha`) só
+  quando o formato está presente -- cartão comum não ganha nenhum badge
+  novo.
+- **`fr/app.js`/`zh/app.js`** (mudanças espelhadas nos dois, com o
+  ajuste zh de sempre pro shape hanzi/pinyin):
+  - `buildCardFromTeacherFlashcard(row)` ganhou `imageUrl`/`audioUrl`/
+    `choices` no card construído.
+  - `customAudioBtnHTML()`/`wireCustomAudioButtons()` (novo) -- botão
+    🎧 separado do botão de pronúncia automática (TTS) que o app já
+    tinha -- áudio próprio da professora é um arquivo real tocado via
+    `new Audio(url).play()`, não geração de voz.
+  - `buildSpeedOptions(card)` ganhou um branch no topo: se o cartão tem
+    `choices`, devolve as opções AUTORADAS pela professora em vez de
+    calcular distratores de cartões-irmãos -- Speed Review (que já era
+    nativamente múltipla escolha) simplesmente passou a preferir o
+    conteúdo autorado quando ele existe, zero mudança na mecânica do
+    Speed Review em si.
+  - `renderReviewView()` ganhou um branch logo no início: se
+    `card.choices` existe, desvia pra `renderMultipleChoiceReviewCard(card)`
+    em vez do fluxo de virar cartão -- vale em QUALQUER lugar que passa
+    por esta função (Flashcard e Palavras Difíceis, que compartilham a
+    mesma tela -- grillado, decisão 1 acima). **Fora do escopo,
+    deliberadamente: Combinar** (jogo de pareamento, arquitetura
+    incompatível com "1 pergunta, N opções" -- não foi perguntado à
+    autora explicitamente se Combinar deveria tentar suportar múltipla
+    escolha de alguma forma; ficou de fora por não caber na mecânica do
+    jogo, não por decisão consciente dela).
+  - `renderMultipleChoiceReviewCard(card)` (novo) -- reaproveita
+    `gradeCurrentCard(wasCorrect ? 2 : 0)` pra aplicar a nota FSRS depois
+    que a aluna clica "Continuar", herdando de graça toda a plumbing já
+    existente (XP, streak, requeue-em-erro, save, avanço de índice) sem
+    reimplementar nada disso -- mesma disciplina de "um motor só" já
+    usada em toda a feature. As opções (`card.mcOptions`) são embaralhadas
+    1x e cacheadas no próprio cartão -- embaralhar de novo a cada
+    re-render (ex: depois de clicar) trocaria a posição dos botões debaixo
+    do dedo da aluna.
+  - Flip-mode do flashcard tradicional ganhou `<img class="flashcard-image">`
+    (quando `card.imageUrl` existe) e o botão de áudio próprio (quando
+    `card.audioUrl` existe) -- um cartão pode ter imagem/áudio SEM ser
+    múltipla escolha, e continua virando normalmente.
+- **`fr/index.html`/`zh/index.html`** -- CSS novo pra `.flashcard-image`,
+  `.mc-options`/`.mc-option` (+ estados `.correct`/`.incorrect`/
+  `.disabled`) e `.mc-continue-btn`; seletor `.audio-btn` estendido pra
+  `.audio-btn, .custom-audio-btn` (mesmo estilo visual, dois botões
+  physicamente diferentes na tela quando os dois existem).
+
+**Erro de token de cor pego e corrigido durante a própria implementação
+(auto-detectado, não reportado pela autora)** -- mesmo tipo de erro já
+registrado na seção "Tokens de cor de marca vs. semânticos" no topo
+deste arquivo: a primeira versão de `.mc-option.correct`/`.incorrect`
+usava `color: var(--on-vivid)` (calibrado especificamente pra texto
+sobre as cores SÓLIDAS `--jade`/`--error-red`) só que aplicado sobre um
+FUNDO CLARO com tinta rgba dessas mesmas cores (`rgba(58,115,89,0.12)`/
+`rgba(214,38,25,0.1)`) -- contraste incorreto no caso geral, mesmo que
+não tenha chegado a virar screenshot ilegível de fato porque `--ink` e
+`--on-vivid` coincidem em alguns temas. Corrigido pra `color: var(--ink)`
+nos dois arquivos, igualando o idioma visual já usado por
+`.gram-exercise.ok`/`.wrong` (borda + tinta clara + texto `--ink` simples,
+sem token de contraste especial) que já existia nos mesmos arquivos.
+Validado nos 4 cenários obrigatórios (ver Testes abaixo) antes de
+reportar como pronto.
+
+**Decisões arquiteturais tomadas nesta fase:**
+1. `choices` é array de respostas ERRADAS apenas (1-3) -- a resposta
+   certa nunca é duplicada, continua sendo `back_trans` (a mesma fonte
+   que o cartão tradicional já usa pro verso). Evita os dois campos
+   discordarem se um dia só um dos dois for editado.
+2. Upload de mídia acontece ANTES do insert do cartão (2 chamadas de
+   rede sequenciais quando os dois arquivos estão presentes) -- mantém
+   `createFlashcard()` simples (só grava URLs já prontas, nunca lida com
+   `File`), e a UI aborta cedo com erro claro se um upload falhar, em vez
+   de criar um cartão com mídia quebrada.
+3. Botão de áudio próprio (`.custom-audio-btn`, 🎧) é visualmente
+   distinto do botão de pronúncia automática (`.audio-btn`, alto-falante)
+   quando os dois aparecem juntos -- são fontes de áudio semanticamente
+   diferentes (voz real da professora/gravação vs. TTS do navegador), a
+   aluna não deveria confundir qual é qual.
+4. Nenhuma mudança em `getStudyQueue()`/`eligibleReviewPool()`/FSRS --
+   múltipla escolha é só uma forma de APRESENTAR e RESPONDER o cartão
+   (a fila que decide QUAIS cartões aparecem continua idêntica); a
+   integração inteira ficou contida em `renderReviewView()` (desvio de
+   render) + `renderMultipleChoiceReviewCard()` (chama
+   `gradeCurrentCard()` como qualquer outro fluxo).
+
+**Gratuito x Premium (avaliado, não implementado):** mesma conclusão de
+toda a Fase 2 em diante -- conteúdo autorado pela própria professora pras
+próprias alunas, sem custo marginal de servir (mídia é hospedada no
+Storage do próprio Supabase, sem serviço pago de terceiros envolvido).
+Mesma pergunta em aberto já registrada repetidamente pra quando houver
+mais de uma professora na plataforma (aqui, especificamente, um limite de
+espaço de Storage usado por professora seria a alavanca mais natural, já
+que mídia ocupa espaço de forma que texto não ocupa) -- não travada em
+código.
+
+**Testes realizados:** `node --check` sem erro em
+`shared/teacher-flashcards.js`, `shared/admin-flashcards.js`, `fr/app.js`
+e `zh/app.js`. Validação funcional via Playwright (fr+zh), mesmo padrão
+de stub de `window.supabase.createClient()` das fases anteriores,
+estendido com um stub de `storage.from(bucket).upload()`/`getPublicUrl()`
+que grava as chamadas de upload num array pra inspeção: (1) fluxo de
+CRIAÇÃO no admin -- upload de imagem+áudio confirmado chamando o bucket
+certo (`uploadCallsCount:2`, `uploadBuckets:['flashcard-media',
+'flashcard-media']`), URLs gravadas no cartão criado
+(`plainCardHasImageUrl`/`plainCardHasAudioUrl:true`), badges de formato
+aparecendo na lista (`🖼️ imagem · 🎧 áudio`); (2) toggle de múltipla
+escolha -- campos escondidos por padrão, revelados ao marcar o checkbox;
+submeter com o checkbox marcado e todas as 3 opções vazias é REJEITADO
+com mensagem clara, sem gravar no banco (`dbCountAfterEmptyChoicesReject:0`);
+preencher 1-2 opções e submeter cria o cartão com `choices` correto; (3)
+lado da aluna -- cartão com `choices` confirmado desviando pra
+`renderMultipleChoiceReviewCard()` em vez de virar
+(`mcOptionsRendered:3`, imagem e botão de áudio próprio renderizados
+junto do quiz), clicar a opção certa aplica a classe `.correct` e
+desabilita todas as opções, botão "Continuar" aparece só depois de
+responder, clicar "Continuar" chama `gradeCurrentCard()` de verdade
+(`dueChangedAfterGrading`/`repsIncremented:true`, sessão avança); (4)
+cartão de professora SEM `choices` (mas com imagem/áudio) confirmado
+continuando a virar normalmente, com imagem e botão de áudio próprio
+presentes no flip tradicional; (5) `buildSpeedOptions()` confirmado
+preferindo `card.choices` autorados em vez de calcular distratores de
+cartões-irmãos quando `choices` existe. Testado nos dois idiomas (fr+zh),
+incluindo o shape hanzi/pinyin específico do zh no card de múltipla
+escolha. Sem erro de console novo atribuível a este código (os 2
+`pageerror` vistos na fase de admin -- `.is()`/`.upsert()` -- são a mesma
+limitação de mock já registrada em todas as fases anteriores, não deste
+código; a fase de revisão do lado da aluna não teve NENHUM erro de
+console).
+
+**Validação visual dos 4 cenários obrigatórios** (regra explícita deste
+arquivo pra qualquer cor de fundo customizada nova, ver seção "Tokens de
+cor de marca vs. semânticos" no topo): screenshot Playwright de
+`.mc-option.correct` (fundo verde-claro/`--jade` tintado + texto `--ink`)
+em fr-claro, fr-escuro, zh-claro, zh-escuro -- texto legível nos 4,
+nenhum problema de contraste encontrado (foi exatamente essa verificação
+que pegou o erro de `--on-vivid` descrito acima, antes de reportar como
+pronto).
+
+**O que ainda falta / não foi feito nesta fase (de propósito):**
+- `student_flashcards` (cartão da própria aluna, Fase 5) não ganhou
+  nenhum dos 3 formatos novos -- decisão de escopo, não esquecimento (ver
+  "Escopo" acima).
+- Combinar (jogo de pareamento) não tenta suportar múltipla escolha de
+  forma alguma -- arquitetura incompatível, fora do escopo grillado.
+- Edição de um cartão já criado com imagem/áudio/múltipla escolha (só
+  trocar/remover a mídia, ou editar as opções) não foi implementada --
+  mesmo escopo que `teacher_flashcards` já tinha desde as Fases 2/3 (só
+  criar e arquivar/reativar, sem editar o conteúdo em si).
+- Nenhum limite de tamanho de arquivo de upload aplicado no cliente --
+  confia no limite que o próprio bucket do Supabase Storage aplica, sem
+  validação adicional de tamanho/dimensão antes do upload.
+- Fase 8b (material de apoio não-revisável) e Fase 8c (exercício
+  interativo novo) continuam não iniciadas -- ordem já travada no
+  grilling acima.
+
+Próxima fase (8b -- material de apoio não-revisável) só começa depois de
+autorização explícita da autora, com este relatório já entregue antes de
+pedir luz verde.
