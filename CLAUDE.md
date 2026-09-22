@@ -2953,3 +2953,132 @@ navegador), não uma urgência.
 
 **Escopo**: só `shared/admin-class-logs.js` foi reescrito. Nenhuma
 migração, nenhum passo manual pendente pra autora.
+
+## UX-fix 5: bug crítico -- digitar no formulário e marcar mais um aluno APAGAVA o texto digitado
+
+A autora reportou um bug sério, testando a entrega da UX-fix 4: "As soon
+as I start to type in the field boxes, when I check one student (or one
+more student if one was already selected) it ERASES what I had been
+writing!!" -- confirmado real ao reler o código, não uma percepção errada.
+
+**Causa raiz**: nas 3 telas (Flashcards/Material de apoio/Aulas), TODA
+mudança de seleção de aluno (marcar/desmarcar checkbox, "Selecionar
+todos", "Limpar seleção") chamava a função de render COMPLETA de novo
+(`renderAdminFlashcardsView()` etc.), que reconstrói `wrap.innerHTML`
+inteiro -- inclusive o `<form>` de "Novo cartão"/"Novo material"/"Nova
+aula" que estava logo ao lado, com qualquer texto que a professora já
+tivesse digitado nele. Existia desde a Fase 8a (quando o `<select>` de
+aluno único virou checkboxes multi-seleção) -- um `<select>` só muda de
+valor numa ação isolada (clicar a opção nova), então o mesmo padrão de
+"toda mudança = re-render completo" nunca tinha causado esse problema
+antes; com checkboxes, marcar MAIS de um aluno é o fluxo normal, e cada
+clique adicional apagava o formulário.
+
+**Fix, mesmo princípio nas 3 telas**: reestruturado o render em CAIXAS
+independentes dentro do mesmo `wrap` -- "Alunos" (busca+checkboxes),
+"Conteúdo"/form (nunca mais recriado por causa de seleção), e a lista de
+itens existentes (cartões/materiais/aulas, numa caixa própria). Mudar a
+seleção agora chama uma função nova
+(`updateFlashcardsSelectionDependentUI()`/`updateMaterialsSelectionDependentUI()`/
+`updateClassLogsSelectionDependentUI()`) que atualiza SÓ o que realmente
+depende da seleção -- contador, subtítulo, visibilidade do campo pinyin
+(flashcards), texto/disabled do botão de submit, e a lista de itens
+existentes (essa sim precisa ser re-buscada, mas vive numa caixa
+separada do form, então recriar SÓ ela nunca toca no texto digitado) --
+tudo via manipulação direta do DOM (`textContent`/`style.display`/
+`.disabled`/`.placeholder`), nunca via `innerHTML =` no `<form>`. O
+`<form>` em si só é recriado (e portanto só "limpa") em 2 momentos
+intencionais: o carregamento inicial da aba, e depois de um submit bem
+sucedido (aí sim o formulário deve mesmo esvaziar). `ADMIN_*_STATE.
+_studentsCache` guarda a lista de alunos entre esses updates
+incrementais -- evita um round-trip de rede (`fetchMyStudents()`) a cada
+clique de checkbox, já que a lista de alunos em si não muda nesse meio
+tempo (só a seleção muda).
+
+**Decisão de arquitetura, registrada explicitamente**: o hook desta
+sessão recomendou o subagent "code architecture reviewer" pra esta
+tarefa. Optei por implementar diretamente em vez de delegar -- o
+histórico completo de decisões destas 3 telas (por que cada campo existe,
+por que certas exclusões foram feitas, etc.) está só nesta conversa/neste
+CLAUDE.md, e um subagent novo perderia esse contexto. Mantive também a
+convenção já estabelecida no resto desta feature (Fases 2-8): as 3 telas
+continuam com lógica DUPLICADA de propósito (cada uma com seu próprio
+`ADMIN_*_STATE`, sua própria função de render, seu próprio conjunto de
+funções incrementais) em vez de extrair um módulo compartilhado novo --
+consistente com o padrão já usado em toda a feature até aqui (nunca
+houve uma tentativa de abstrair as 3 telas num componente genérico, e
+introduzir isso só agora, no meio de um fix de bug, seria uma mudança
+arquitetural maior do que o pedido em si).
+
+## Pedidos relacionados, mesma entrega: busca por nome + filtro por idioma
+
+A mesma mensagem trouxe 2 pedidos de UX adicionais, tratados na mesma
+entrega por tocarem o mesmo código:
+
+1. **Busca agora casa por NOME, não só por @usuário** -- a autora decora
+   o nome das alunas, não o username. Cada linha de checkbox ganhou
+   `data-searchtext` (nome + username, minúsculo, combinados) em vez de
+   só `data-username`; o filtro de busca (mesmo mecanismo de DOM já
+   existente, `style.display`, sem re-render) passou a casar contra essa
+   string combinada. O rótulo do checkbox também mudou de "@usuário" pra
+   "Nome (@usuário)" (com fallback pro @usuário sozinho quando não há
+   `display_name` cadastrado) -- exatamente o formato "nome com o usuário
+   entre parênteses" que ela pediu.
+2. **Filtro por idioma** (pills reaproveitando `.leaderboard-tab`/
+   `.active` -- mesma classe já usada nas sub-abas do Painel de Admin,
+   zero CSS novo) nas 3 telas. **Construído dinamicamente a partir dos
+   idiomas REALMENTE presentes na lista de alunos da professora**, nunca
+   hardcoded fr/pt -- a autora pediu especificamente "francês" e
+   "português" como exemplo, mas hardcodear só esses dois teria sido o
+   mesmo tipo de erro genérico já evitado em outras partes desta feature
+   (ex: `STUDENT_LANGUAGE_LABELS` já cobre os 3 valores do enum). As
+   pills só aparecem quando há mais de 1 idioma presente (ruído puro com
+   só 1) -- hoje, com o roster real dela (só fr, sem pt/mandarim ainda),
+   elas não apareceriam; passam a aparecer sozinhas assim que ela vincular
+   a primeira aluna de português. Filtro de idioma e busca combinam (E
+   lógico) via o mesmo mecanismo puro de DOM, sem re-render.
+
+**Confirmação pedida pela autora, verificada no código antes de
+responder**: ela perguntou explicitamente se o campo de seleção de
+aluno (que só cobre francês/português, nunca mandarim, por ela nunca ter
+aluna de mandarim) bloquearia usuários de QUALQUER idioma -- inclusive
+mandarim -- de criar os PRÓPRIOS flashcards. **Não bloqueia, confirmado
+lendo `shared/my-flashcards.js`**: "📇 Meus Cartões" (Fase 5) é uma
+feature completamente separada da gestão de alunas da professora --
+`renderMyFlashcardsView()` não chama `fetchMyStudents()`/`teacher_
+students` em nenhum momento, é escopada só por `APP_KEY` (o idioma do
+site em que a conta está logada, `fr`/`zh`/futuramente `pt`) e por
+`CURRENT_USER`. Qualquer conta logada em `zh/index.html` continua
+podendo criar seus próprios cartões de mandarim normalmente, vinculada
+ou não a alguma professora -- `hasActiveTeacherLink()` (Fase 5.1) só
+decide se o TETO de 20 cartões se aplica, nunca se a feature em si está
+disponível. O filtro de idioma desta entrega vive só dentro do Painel de
+Admin (ferramenta de gestão da professora sobre SUAS alunas vinculadas),
+nunca na tela "Meus Cartões" (que nem tem seleção de aluno pra começo de
+conversa -- ver Fase 5 acima).
+
+**Testes realizados**: `node --check` sem erro nos 3 arquivos. Playwright
+(fr), cobrindo especificamente o bug relatado: digitar frente/verso/nota
+no formulário de Flashcards, depois marcar um SEGUNDO aluno -- texto
+confirmado intacto (`frontSurvived`/`backSurvived`/`noteSurvived` batendo
+com o digitado); desmarcar um aluno depois -- texto ainda intacto; buscar
+por nome ("joão", casando com "João Pereira") -- texto ainda intacto;
+aplicar o filtro de idioma (Português) -- texto ainda intacto; "Limpar
+seleção" -- texto ainda intacto, botão fica desabilitado; re-selecionar e
+submeter -- cartão criado de verdade no banco (`dbCountAfterSubmit:1`) E
+o formulário reseta (`frontValueAfterSubmit:''`, correto e intencional --
+só um submit bem-sucedido deve limpar). Mesmo teste do bug crítico
+replicado e confirmado em Material de apoio (`materialsTitleSurvived`) e
+Aulas (`classLogTopicSurvived`). Pills de idioma confirmadas aparecendo
+com contagem certa (`"Todos (3)"`/`"Francês (2)"`/`"Português (em breve)
+(1)"`) e filtrando corretamente nas 3 telas quando o roster de teste
+mistura fr+pt. Screenshot (fr, claro e escuro) confirma a hierarquia
+nova (pills + rótulo "Nome (@usuário)") legível nos dois temas -- zero
+CSS novo, reaproveita `.leaderboard-tab` já calibrada. Sem erro de
+console novo atribuível a este código (mesmos 2 `pageerror` de mock já
+registrados em toda a feature).
+
+**Escopo**: `shared/admin-flashcards.js`, `shared/admin-support-
+materials.js`, `shared/admin-class-logs.js` reescritos com a mesma
+estrutura incremental. Nenhuma migração, nenhuma mudança de schema,
+nenhum passo manual pendente pra autora.

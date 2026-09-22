@@ -33,37 +33,49 @@
 // detalhada). 2 mudanças de fundo, não só estética:
 // 1. **Bug real, não só gosto**: a seleção de alunos nunca podia ficar
 //    vazia -- o código caía de volta pra "primeiro aluno" sempre que o Set
-//    esvaziava, inclusive logo depois de clicar "Limpar seleção". Isso é
-//    perigoso numa ferramenta administrativa (criar um cartão pro aluno
-//    errado por engano de quem esqueceu que a seleção "limpa" não estava
-//    realmente vazia). Corrigido: seleção pode ficar genuinamente vazia,
-//    "Criar cartão" fica desabilitado nesse estado (com contador visível
-//    "Nenhum aluno selecionado" acima do form), e a validação de submit
-//    continua como cinto-de-segurança extra.
-// 2. **Hierarquia visual**: a tela misturava "pra quem" (destinatários),
-//    "o quê" (conteúdo) e "como" (modo de prática) no mesmo nível visual,
-//    um formulário longo sem agrupamento. Reorganizado em 3 blocos
-//    rotulados dentro do mesmo <form> (Destinatários continua fora do
-//    form, como já era -- seleção dispara re-render, não submit):
-//    Destinatários -> Conteúdo (+ "Recursos opcionais" pra nota/imagem/
-//    áudio) -> Modo de prática (radios). Reaproveita `.section-label`
-//    (já existente no CSS) como cabeçalho de cada bloco -- zero CSS novo.
+//    esvaziava, inclusive logo depois de clicar "Limpar seleção". Corrigido:
+//    seleção pode ficar genuinamente vazia, "Criar cartão" fica desabilitado
+//    nesse estado (com contador visível acima do form), e a validação de
+//    submit continua como cinto-de-segurança extra.
+// 2. **Hierarquia visual**: reorganizado em 3 blocos rotulados dentro do
+//    mesmo <form> (Destinatários continua fora do form, como já era --
+//    seleção dispara re-render, não submit): Destinatários -> Conteúdo
+//    (+ "Recursos opcionais") -> Modo de prática (radios).
 //
-// UX-fix 2 (pedido direto da autora, mesmo dia): "aluna"->"aluno" aplicado
-// em todo o texto VISÍVEL desta tela (era explicitamente fora de escopo na
-// entrega anterior, revertido aqui por pedido explícito). Comentários de
-// código e o nome histórico da feature no CLAUDE.md ("sistema de alunas
-// particulares") continuam como estavam -- são registro histórico de
-// quando/por que cada decisão foi tomada, não a UI que a autora vê; mudar
-// isso seria reescrever histórico, não corrigir uma tela. Busca por
-// @usuário também adicionada acima da lista de checkboxes (filtro só de
-// DOM, sem re-render/re-fetch, pra não perder foco do campo a cada tecla)
-// -- a autora preferiu busca a paginação quando perguntada.
+// UX-fix 2/3: "aluna"->"aluno" no texto visível, rótulo "Alunos" unificado,
+// busca por @usuário (ver CLAUDE.md).
 //
-// Decisão que CONTINUA fora de escopo, não revertida: bloquear seleção
-// mista de idiomas -- já funciona corretamente (1 linha por aluno no
-// idioma DELE, testado desde o adendo da Fase 8a), bloquear removeria uma
-// feature já pedida e testada, não corrigiria um bug.
+// UX-fix 5 (bug real reportado pela autora, mesmo dia da UX-fix 4): marcar
+// um checkbox de aluno ENQUANTO a professora já tinha digitado algo no
+// formulário (frente/verso/nota/tópico etc.) APAGAVA o texto digitado --
+// causa raiz: toda mudança de seleção chamava renderAdminFlashcardsView()
+// de novo, que reconstrói TODO o wrap.innerHTML, inclusive o <form> com o
+// texto já digitado dentro. Corrigido reestruturando o render em 3 CAIXAS
+// independentes dentro do mesmo wrap (Alunos / Conteúdo+form / Cartões):
+// mudar a seleção (checkbox, Selecionar todos, Limpar seleção, filtro de
+// idioma) agora só chama updateFlashcardsSelectionDependentUI(), que
+// atualiza SÓ o que depende da seleção via DOM direto (contador, subtítulo,
+// visibilidade do campo pinyin, texto/disabled do botão, e a lista de
+// cartões -- essa sim re-buscada, mas vive numa caixa separada do form) --
+// o <form> em si (#admin-create-flashcard-form) nunca é recriado por causa
+// de uma mudança de seleção, só no boot da tela ou depois de um submit bem
+// sucedido (aí sim o form deve mesmo limpar). Mesmo princípio replicado em
+// admin-support-materials.js e admin-class-logs.js (mesmo bug, mesmo fix).
+// `ADMIN_FLASHCARDS_STATE._studentsCache` guarda a lista de alunos entre
+// re-renders incrementais -- evita um round-trip de rede (fetchMyStudents)
+// a cada clique de checkbox, já que a lista de alunos não muda nesse meio
+// tempo.
+//
+// UX-fix 5 também endereça 2 pedidos relacionados da autora: (1) busca
+// agora casa por NOME também, não só @usuário (`data-searchtext` combina
+// os dois, minúsculo) -- rótulo do checkbox virou "Nome (@usuário)" quando
+// há display_name, com fallback pro @usuário sozinho quando não há; (2)
+// filtro por idioma (pills reaproveitando .leaderboard-tab/.active, zero
+// CSS novo) -- construído dinamicamente a partir dos idiomas REALMENTE
+// presentes na lista de alunos da professora (nunca hardcoded fr/pt), então
+// funciona sem mudança de código se/quando ela tiver aluno de outro idioma.
+// Filtro de idioma e busca combinam (AND) via mesmo mecanismo de
+// style.display no DOM (não re-renderiza a lista de checkboxes).
 //
 // Depende de (mesma posição de shared/admin-students.js -- antes de app.js):
 //   - shared/roles.js              (fetchMyStudents)
@@ -72,7 +84,140 @@
 //   - shared/toast.js              (showToast)
 //   - languages/<lang>/app.js      (isAdminUser)
 
-let ADMIN_FLASHCARDS_STATE = { studentIds: new Set() };
+let ADMIN_FLASHCARDS_STATE = { studentIds: new Set(), langFilter: 'all', _studentsCache: [] };
+
+function flashcardStudentLabel(s){
+  return s.display_name
+    ? `${escapeHTML(s.display_name)} (@${escapeHTML(s.username || '?')})`
+    : `@${escapeHTML(s.username || '(usuário removido)')}`;
+}
+
+// Badges curtos indicando os formatos extras do cartão, só quando
+// presentes (cartão comum não ganha nenhum badge novo).
+function flashcardFormatBadgesHTML(c){
+  return [
+    c.image_url ? '🖼️ imagem' : '',
+    c.audio_url ? '🎧 áudio' : '',
+    (c.choices && c.choices.length) ? '🔤 múltipla escolha' : '',
+    c.cloze_sentence ? '📝 completar frase' : '',
+  ].filter(Boolean).join(' · ');
+}
+
+function flashcardCardRowHTML(c, showUsername){
+  return `
+    <div class="admin-badge-row">
+      <div class="admin-badge-info">
+        <div class="admin-badge-name">${showUsername ? `<span style="opacity:.6">@${escapeHTML(c.__studentUsername || '?')}</span> · ` : ''}${escapeHTML(c.front)}${c.front_pinyin ? ` (${escapeHTML(c.front_pinyin)})` : ''} → ${escapeHTML(c.back_trans)}</div>
+        <div class="admin-badge-desc">${c.note ? escapeHTML(c.note) + ' · ' : ''}criado em ${new Date(c.created_at).toLocaleDateString('pt-BR')}${flashcardFormatBadgesHTML(c) ? ' · ' + flashcardFormatBadgesHTML(c) : ''}</div>
+      </div>
+      <button class="admin-badge-delete-btn" data-toggle-flashcard="${c.id}" data-next-status="${c.status === 'active' ? 'archived' : 'active'}" title="${c.status === 'active' ? 'Arquivar' : 'Reativar'}">${c.status === 'active' ? '🗃' : '↺'}</button>
+    </div>
+  `;
+}
+
+// Busca + monta o HTML da caixa "Cartões" pra um conjunto de alunos
+// selecionados -- vive numa função própria porque é chamada tanto no
+// render completo quanto (re-fetch isolado) a cada mudança de seleção,
+// SEM tocar no <form> ao lado (ver comentário no topo do arquivo).
+async function buildFlashcardsCardsBoxHTML(selectedStudents){
+  const cardLists = await Promise.all(selectedStudents.map(s => fetchFlashcardsForStudent(s.student_id)));
+  const cards = cardLists.flatMap((list, i) => list.map(c => ({ ...c, __studentUsername: selectedStudents[i].username })));
+  cards.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  const activeCards = cards.filter(c => c.status === 'active');
+  const archivedCards = cards.filter(c => c.status === 'archived');
+  const showUsername = selectedStudents.length > 1;
+
+  return `
+    <div class="profile-section">
+      <div class="section-label">Cartões ativos (${activeCards.length})</div>
+      ${activeCards.length ? activeCards.map(c => flashcardCardRowHTML(c, showUsername)).join('') : `<p class="profile-empty-note">Nenhum cartão ainda pra${selectedStudents.length > 1 ? ' esses alunos' : selectedStudents.length === 1 ? ' este aluno' : ' nenhum aluno selecionado'}.</p>`}
+    </div>
+    ${archivedCards.length ? `
+    <div class="profile-section">
+      <div class="section-label">Arquivados (${archivedCards.length})</div>
+      ${archivedCards.map(c => flashcardCardRowHTML(c, showUsername)).join('')}
+    </div>` : ''}
+  `;
+}
+
+function wireFlashcardsCardsBox(cardsBox){
+  cardsBox.querySelectorAll('[data-toggle-flashcard]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      await setFlashcardStatus(btn.dataset.toggleFlashcard, btn.dataset.nextStatus);
+      const selectedStudents = ADMIN_FLASHCARDS_STATE._studentsCache.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+      cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
+      wireFlashcardsCardsBox(cardsBox);
+    });
+  });
+}
+
+// Atualiza tudo que depende da seleção de alunos SEM recriar o <form> --
+// chamada por: mudar um checkbox, "Selecionar todos", "Limpar seleção",
+// e o filtro de idioma. Nunca toca em #admin-create-flashcard-form.
+async function updateFlashcardsSelectionDependentUI(wrap){
+  const students = ADMIN_FLASHCARDS_STATE._studentsCache;
+  const selectedStudents = students.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+  const anyMandarim = selectedStudents.some(s => s.language_app_key === 'mandarim');
+  const selectionCountLabel = selectedStudents.length === 0
+    ? 'Nenhum aluno selecionado'
+    : selectedStudents.length === 1
+      ? '1 aluno selecionado'
+      : `${selectedStudents.length} alunos selecionados`;
+
+  const counterEl = document.getElementById('admin-flashcard-selection-counter');
+  if (counterEl) counterEl.textContent = selectionCountLabel;
+
+  const subtitleEl = document.getElementById('admin-flashcard-content-subtitle');
+  if (subtitleEl) subtitleEl.textContent = selectedStudents.length === 1
+    ? ` -- ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
+    : selectedStudents.length > 1 ? ` -- ${selectedStudents.length} alunos selecionados` : '';
+
+  const contentHint = document.getElementById('admin-flashcard-content-hint');
+  if (contentHint) contentHint.style.display = selectedStudents.length ? 'none' : '';
+
+  const frontInput = document.getElementById('admin-flashcard-front');
+  if (frontInput) frontInput.placeholder = anyMandarim ? 'ex: 图书馆' : 'ex: la bibliothèque';
+
+  const pinyinWrap = document.getElementById('admin-flashcard-pinyin-wrap');
+  if (pinyinWrap) pinyinWrap.style.display = anyMandarim ? '' : 'none';
+
+  const clozeSentenceInput = document.getElementById('admin-flashcard-cloze-sentence');
+  if (clozeSentenceInput) clozeSentenceInput.placeholder = anyMandarim ? 'ex: 我 ___ 巴西人。' : 'ex: Je ___ de Paris.';
+  const clozeAnswerInput = document.getElementById('admin-flashcard-cloze-answer');
+  if (clozeAnswerInput) clozeAnswerInput.placeholder = anyMandarim ? 'ex: 是' : 'ex: viens';
+  const clozePinyinWrap = document.getElementById('admin-flashcard-cloze-pinyin-wrap');
+  if (clozePinyinWrap){
+    const modeChecked = wrap.querySelector('input[name="admin-flashcard-mode"]:checked')?.value;
+    clozePinyinWrap.style.display = (modeChecked === 'cloze' && anyMandarim) ? '' : 'none';
+  }
+
+  const btn = document.getElementById('admin-create-flashcard-btn');
+  if (btn){
+    btn.disabled = !selectedStudents.length;
+    btn.textContent = `Criar cartão${selectedStudents.length > 1 ? ` pra ${selectedStudents.length} alunos` : ''}`;
+  }
+
+  const cardsBox = document.getElementById('admin-flashcards-cards-box');
+  if (cardsBox){
+    cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
+    wireFlashcardsCardsBox(cardsBox);
+  }
+
+  return selectedStudents;
+}
+
+// Busca (texto) + filtro de idioma combinados (AND) -- os dois são filtros
+// puros de DOM (style.display) sobre a lista de checkboxes já renderizada,
+// nunca re-renderizam nada (nem a lista de alunos, nem o form).
+function applyFlashcardPickerFilters(wrap){
+  const q = (document.getElementById('admin-flashcard-search')?.value || '').trim().toLowerCase();
+  const lang = ADMIN_FLASHCARDS_STATE.langFilter;
+  wrap.querySelectorAll('[data-student-row]').forEach(row => {
+    const matchesText = !q || row.dataset.searchtext.includes(q);
+    const matchesLang = lang === 'all' || row.dataset.lang === lang;
+    row.style.display = (matchesText && matchesLang) ? '' : 'none';
+  });
+}
 
 async function renderAdminFlashcardsView(){
   const wrap = document.getElementById('admin-flashcards-content');
@@ -88,12 +233,11 @@ async function renderAdminFlashcardsView(){
     wrap.innerHTML = `<p class="profile-empty-note">Vincule um aluno primeiro, na aba "🎓 Alunos", pra poder criar flashcards pra ele.</p>`;
     return;
   }
+  ADMIN_FLASHCARDS_STATE._studentsCache = students;
 
   // Descarta seleções de alunos que não existem mais (vínculo removido
   // entre um render e outro) -- SEM cair de volta pra "primeiro aluno"
-  // quando o resultado fica vazio (ver comentário no topo do arquivo:
-  // seleção vazia é um estado válido e intencional agora, não um bug a
-  // esconder).
+  // quando o resultado fica vazio (seleção vazia é um estado válido).
   const validIds = new Set(students.map(s => s.student_id));
   ADMIN_FLASHCARDS_STATE.studentIds = new Set([...ADMIN_FLASHCARDS_STATE.studentIds].filter(id => validIds.has(id)));
 
@@ -105,44 +249,28 @@ async function renderAdminFlashcardsView(){
       ? '1 aluno selecionado'
       : `${selectedStudents.length} alunos selecionados`;
 
-  // Busca é só um filtro de DOM (data-student-row/data-username, wired
-  // abaixo) -- nunca dispara renderAdminFlashcardsView() de novo, senão o
-  // campo perderia o foco a cada tecla digitada (a autora preferiu busca a
-  // paginação; com poucas dezenas de alunos, um filtro simples já resolve).
+  // Filtro de idioma: pills construídas a partir dos idiomas REALMENTE
+  // presentes nos alunos desta professora (nunca hardcoded fr/pt/mandarim)
+  // -- reaproveita .leaderboard-tab/.active (mesma classe já usada nas
+  // sub-abas do Painel de Admin), zero CSS novo. Só aparece quando há mais
+  // de 1 idioma na lista (ruído puro com só 1).
+  const langsPresent = [...new Set(students.map(s => s.language_app_key))];
+  const langFilterHTML = langsPresent.length > 1 ? `
+    <div class="leaderboard-tabs" role="tablist" aria-label="Filtrar por idioma" style="justify-content:flex-start; margin-bottom:8px;">
+      <button type="button" class="leaderboard-tab ${ADMIN_FLASHCARDS_STATE.langFilter === 'all' ? 'active' : ''}" data-lang-filter="all">Todos (${students.length})</button>
+      ${langsPresent.map(key => `<button type="button" class="leaderboard-tab ${ADMIN_FLASHCARDS_STATE.langFilter === key ? 'active' : ''}" data-lang-filter="${key}">${STUDENT_LANGUAGE_LABELS[key] || key} (${students.filter(s => s.language_app_key === key).length})</button>`).join('')}
+    </div>
+  ` : '';
+
+  // Busca casa por nome E @usuário (data-searchtext combina os dois) --
+  // filtro só de DOM (data-student-row/data-searchtext, wired abaixo),
+  // nunca dispara renderAdminFlashcardsView() de novo.
   const studentCheckboxesHTML = students.map(s => `
-    <label data-student-row data-username="${escapeHTML((s.username || '').toLowerCase())}" style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 0;">
+    <label data-student-row data-lang="${s.language_app_key}" data-searchtext="${escapeHTML(`${s.display_name || ''} ${s.username || ''}`.toLowerCase())}" style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 0;">
       <input type="checkbox" data-student-checkbox value="${s.student_id}" ${ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id) ? 'checked' : ''}>
-      @${escapeHTML(s.username || '(usuário removido)')} -- ${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key}
+      ${flashcardStudentLabel(s)} -- ${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key}
     </label>
   `).join('');
-
-  // Fase 8a -- badges curtos indicando os formatos extras do cartão, só
-  // quando presentes (cartão comum não ganha nenhum badge novo).
-  const formatBadgesHTML = (c) => [
-    c.image_url ? '🖼️ imagem' : '',
-    c.audio_url ? '🎧 áudio' : '',
-    (c.choices && c.choices.length) ? '🔤 múltipla escolha' : '',
-    c.cloze_sentence ? '📝 completar frase' : '',
-  ].filter(Boolean).join(' · ');
-
-  const cardRowHTML = (c) => `
-    <div class="admin-badge-row">
-      <div class="admin-badge-info">
-        <div class="admin-badge-name">${selectedStudents.length > 1 ? `<span style="opacity:.6">@${escapeHTML(c.__studentUsername || '?')}</span> · ` : ''}${escapeHTML(c.front)}${c.front_pinyin ? ` (${escapeHTML(c.front_pinyin)})` : ''} → ${escapeHTML(c.back_trans)}</div>
-        <div class="admin-badge-desc">${c.note ? escapeHTML(c.note) + ' · ' : ''}criado em ${new Date(c.created_at).toLocaleDateString('pt-BR')}${formatBadgesHTML(c) ? ' · ' + formatBadgesHTML(c) : ''}</div>
-      </div>
-      <button class="admin-badge-delete-btn" data-toggle-flashcard="${c.id}" data-next-status="${c.status === 'active' ? 'archived' : 'active'}" title="${c.status === 'active' ? 'Arquivar' : 'Reativar'}">${c.status === 'active' ? '🗃' : '↺'}</button>
-    </div>
-  `;
-
-  // Cartões de TODOS os alunos selecionados, agregados numa lista só --
-  // antes era sempre 1 fetch (select único); agora reflete a mesma
-  // seleção usada pra atribuir o próximo cartão.
-  const cardLists = await Promise.all(selectedStudents.map(s => fetchFlashcardsForStudent(s.student_id)));
-  const cards = cardLists.flatMap((list, i) => list.map(c => ({ ...c, __studentUsername: selectedStudents[i].username })));
-  cards.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  const activeCards = cards.filter(c => c.status === 'active');
-  const archivedCards = cards.filter(c => c.status === 'archived');
 
   const newCardSubtitle = selectedStudents.length === 1
     ? ` -- ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
@@ -154,7 +282,8 @@ async function renderAdminFlashcardsView(){
     <div class="profile-section">
       <div class="section-label">Alunos</div>
       <p class="profile-edit-hint">Selecione os alunos que vão receber este cartão.</p>
-      <input type="text" id="admin-flashcard-search" class="profile-edit-input" placeholder="Buscar por @usuário..." autocomplete="off" style="margin-bottom:8px;">
+      ${langFilterHTML}
+      <input type="text" id="admin-flashcard-search" class="profile-edit-input" placeholder="Buscar por nome ou @usuário..." autocomplete="off" style="margin-bottom:8px;">
       <div style="display:flex; gap:12px; margin-bottom:4px;">
         <a href="#" id="admin-flashcard-select-all" style="font-size:13px;">Selecionar todos</a>
         <a href="#" id="admin-flashcard-select-none" style="font-size:13px;">Limpar seleção</a>
@@ -162,19 +291,19 @@ async function renderAdminFlashcardsView(){
       <div class="profile-edit-input" style="height:auto; max-height:180px; overflow-y:auto; display:block;">
         ${studentCheckboxesHTML}
       </div>
-      <p class="profile-edit-hint" style="font-weight:700; margin-top:6px;">${selectionCountLabel}</p>
+      <p class="profile-edit-hint" id="admin-flashcard-selection-counter" style="font-weight:700; margin-top:6px;">${selectionCountLabel}</p>
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Conteúdo${newCardSubtitle}</div>
-      ${selectedStudents.length ? '' : `<p class="profile-edit-hint">Selecione ao menos um aluno acima pra poder criar o cartão.</p>`}
+      <div class="section-label">Conteúdo<span id="admin-flashcard-content-subtitle">${newCardSubtitle}</span></div>
+      <p class="profile-edit-hint" id="admin-flashcard-content-hint" style="${selectedStudents.length ? 'display:none;' : ''}">Selecione ao menos um aluno acima pra poder criar o cartão.</p>
       <form id="admin-create-flashcard-form" class="profile-edit-form">
         <label class="profile-edit-label" for="admin-flashcard-front">Frente (no idioma estudado)</label>
         <input type="text" id="admin-flashcard-front" class="profile-edit-input" placeholder="${anyMandarim ? 'ex: 图书馆' : 'ex: la bibliothèque'}" autocomplete="off">
-        ${anyMandarim ? `
-        <label class="profile-edit-label" for="admin-flashcard-pinyin">Pinyin (usado só nos alunos de mandarim selecionados)</label>
-        <input type="text" id="admin-flashcard-pinyin" class="profile-edit-input" placeholder="ex: túshūguǎn" autocomplete="off">
-        ` : ''}
+        <div id="admin-flashcard-pinyin-wrap" style="${anyMandarim ? '' : 'display:none;'}">
+          <label class="profile-edit-label" for="admin-flashcard-pinyin">Pinyin (usado só nos alunos de mandarim selecionados)</label>
+          <input type="text" id="admin-flashcard-pinyin" class="profile-edit-input" placeholder="ex: túshūguǎn" autocomplete="off">
+        </div>
         <label class="profile-edit-label" for="admin-flashcard-back">Verso (tradução)</label>
         <input type="text" id="admin-flashcard-back" class="profile-edit-input" placeholder="ex: a biblioteca" autocomplete="off">
 
@@ -213,10 +342,10 @@ async function renderAdminFlashcardsView(){
           <input type="text" id="admin-flashcard-cloze-sentence" class="profile-edit-input" placeholder="${anyMandarim ? 'ex: 我 ___ 巴西人。' : 'ex: Je ___ de Paris.'}" autocomplete="off">
           <label class="profile-edit-label" for="admin-flashcard-cloze-answer">Resposta certa</label>
           <input type="text" id="admin-flashcard-cloze-answer" class="profile-edit-input" placeholder="${anyMandarim ? 'ex: 是' : 'ex: viens'}" autocomplete="off">
-          ${anyMandarim ? `
-          <label class="profile-edit-label" for="admin-flashcard-cloze-pinyin">Pinyin da resposta (é o que o aluno vai digitar)</label>
-          <input type="text" id="admin-flashcard-cloze-pinyin" class="profile-edit-input" placeholder="ex: shì" autocomplete="off">
-          ` : ''}
+          <div id="admin-flashcard-cloze-pinyin-wrap" style="display:none;">
+            <label class="profile-edit-label" for="admin-flashcard-cloze-pinyin">Pinyin da resposta (é o que o aluno vai digitar)</label>
+            <input type="text" id="admin-flashcard-cloze-pinyin" class="profile-edit-input" placeholder="ex: shì" autocomplete="off">
+          </div>
         </div>
 
         <p class="profile-edit-error" id="admin-create-flashcard-error"></p>
@@ -224,60 +353,53 @@ async function renderAdminFlashcardsView(){
       </form>
     </div>
 
-    <div class="profile-section">
-      <div class="section-label">Cartões ativos (${activeCards.length})</div>
-      ${activeCards.length ? activeCards.map(cardRowHTML).join('') : `<p class="profile-empty-note">Nenhum cartão ainda pra${selectedStudents.length > 1 ? ' esses alunos' : selectedStudents.length === 1 ? ' este aluno' : ' nenhum aluno selecionado'}.</p>`}
+    <div class="profile-section" id="admin-flashcards-cards-box">
+      ${await buildFlashcardsCardsBoxHTML(selectedStudents)}
     </div>
-
-    ${archivedCards.length ? `
-    <div class="profile-section">
-      <div class="section-label">Arquivados (${archivedCards.length})</div>
-      ${archivedCards.map(cardRowHTML).join('')}
-    </div>` : ''}
   `;
+
+  wireFlashcardsCardsBox(document.getElementById('admin-flashcards-cards-box'));
 
   wrap.querySelectorAll('[data-student-checkbox]').forEach(cb => {
     cb.addEventListener('change', () => {
       if (cb.checked) ADMIN_FLASHCARDS_STATE.studentIds.add(cb.value);
       else ADMIN_FLASHCARDS_STATE.studentIds.delete(cb.value);
-      renderAdminFlashcardsView();
+      updateFlashcardsSelectionDependentUI(wrap);
     });
   });
 
   document.getElementById('admin-flashcard-select-all').addEventListener('click', (e) => {
     e.preventDefault();
     ADMIN_FLASHCARDS_STATE.studentIds = new Set(students.map(s => s.student_id));
-    renderAdminFlashcardsView();
+    wrap.querySelectorAll('[data-student-checkbox]').forEach(cb => { cb.checked = true; });
+    updateFlashcardsSelectionDependentUI(wrap);
   });
   document.getElementById('admin-flashcard-select-none').addEventListener('click', (e) => {
     e.preventDefault();
-    // Seleção vazia é um estado válido agora (ver comentário no topo do
-    // arquivo) -- "Limpar seleção" limpa de verdade, sem cair de volta pra
-    // nenhum aluno default.
     ADMIN_FLASHCARDS_STATE.studentIds = new Set();
-    renderAdminFlashcardsView();
+    wrap.querySelectorAll('[data-student-checkbox]').forEach(cb => { cb.checked = false; });
+    updateFlashcardsSelectionDependentUI(wrap);
   });
 
-  // Busca por @usuário -- filtro puro de DOM (mostra/esconde os data-
-  // student-row já renderizados), nunca chama renderAdminFlashcardsView()
-  // de novo. Um re-render a cada tecla perderia o foco do campo de busca
-  // (a função inteira faz await de rede antes de recriar o innerHTML).
-  document.getElementById('admin-flashcard-search').addEventListener('input', (e) => {
-    const q = e.target.value.trim().toLowerCase();
-    wrap.querySelectorAll('[data-student-row]').forEach(row => {
-      row.style.display = !q || row.dataset.username.includes(q) ? '' : 'none';
+  wrap.querySelectorAll('[data-lang-filter]').forEach(pill => {
+    pill.addEventListener('click', () => {
+      ADMIN_FLASHCARDS_STATE.langFilter = pill.dataset.langFilter;
+      wrap.querySelectorAll('[data-lang-filter]').forEach(p => p.classList.toggle('active', p === pill));
+      applyFlashcardPickerFilters(wrap);
     });
   });
 
+  document.getElementById('admin-flashcard-search').addEventListener('input', () => applyFlashcardPickerFilters(wrap));
+
   // "Modo de prática" é um radio group (name="admin-flashcard-mode") --
   // exclusividade entre Flashcard normal/Múltipla escolha/Completar a
-  // frase já vem de graça do próprio HTML, não precisa de JS forçando
-  // (era isso antes, com 2 checkboxes independentes se desmarcando uma à
-  // outra -- trocado por semântica nativa).
+  // frase já vem de graça do próprio HTML, não precisa de JS forçando.
   wrap.querySelectorAll('input[name="admin-flashcard-mode"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
       document.getElementById('admin-flashcard-mc-fields').style.display = e.target.value === 'mc' ? '' : 'none';
       document.getElementById('admin-flashcard-cloze-fields').style.display = e.target.value === 'cloze' ? '' : 'none';
+      const anyMandarimNow = ADMIN_FLASHCARDS_STATE._studentsCache.some(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id) && s.language_app_key === 'mandarim');
+      document.getElementById('admin-flashcard-cloze-pinyin-wrap').style.display = (e.target.value === 'cloze' && anyMandarimNow) ? '' : 'none';
     });
   });
 
@@ -287,7 +409,8 @@ async function renderAdminFlashcardsView(){
     const errorEl = document.getElementById('admin-create-flashcard-error');
     errorEl.textContent = '';
 
-    if (!selectedStudents.length){
+    const selectedNow = ADMIN_FLASHCARDS_STATE._studentsCache.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+    if (!selectedNow.length){
       errorEl.textContent = 'Selecione ao menos um aluno.';
       return;
     }
@@ -341,7 +464,7 @@ async function renderAdminFlashcardsView(){
     // vai junto pros que são de mandarim -- gravar pinyin numa linha de
     // francês seria dado morto (nada no fr lê esses campos), então evita
     // sujar o registro à toa.
-    const results = await Promise.all(selectedStudents.map(s => createFlashcard({
+    const results = await Promise.all(selectedNow.map(s => createFlashcard({
       studentId: s.student_id,
       languageAppKey: s.language_app_key,
       front,
@@ -365,13 +488,10 @@ async function renderAdminFlashcardsView(){
     } else {
       showToast(results.length > 1 ? `✓ ${okCount} cartões criados.` : '✓ Cartão criado.');
     }
+    // Único ponto onde um re-render COMPLETO acontece por causa da seleção
+    // -- e é intencional aqui: um submit bem sucedido deve mesmo limpar o
+    // formulário (frente/verso/nota/mídia/modo), diferente de marcar um
+    // checkbox, que não deveria apagar nada.
     renderAdminFlashcardsView();
-  });
-
-  wrap.querySelectorAll('[data-toggle-flashcard]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      await setFlashcardStatus(btn.dataset.toggleFlashcard, btn.dataset.nextStatus);
-      renderAdminFlashcardsView();
-    });
   });
 }
