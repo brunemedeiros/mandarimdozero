@@ -5087,8 +5087,22 @@ const SPEED_STATE = {
 //
 // Embaralhar destruiria a ordem que "Mais antigas primeiro" promete --
 // só embaralha pros outros 2 filtros (mesmo princípio de startReviewSession).
+// Fase 1 da reestruturação do formulário de flashcards do admin (ver
+// CLAUDE.md) -- desde a migration 035, um cartão de professora "Completar
+// a frase" pode não ter `front` (esse modo nunca exibiu Frente em
+// nenhuma tela, ver renderClozeReviewCard). Combinar e Speed Review nunca
+// entendem cloze -- os dois pressupõem um par frente/verso simples (front
+// como prompt/tile, back_trans como resposta) -- então um cartão cloze
+// SEM front quebraria a exibição deles (tile/prompt em branco). Cartões
+// cloze já existentes continuam com front preenchido (nunca migrados) e
+// continuam elegíveis aqui, sem mudança de comportamento -- este filtro só
+// passa a excluir cartões NOVOS criados sem front.
+function hasPlainFrontBack(card){
+  return !(card.clozeSentence && !card.front);
+}
+
 function buildSpeedQueue(){
-  const queue = reviewFilterQueue(STATE.studySettings.reviewFilter, eligibleReviewPool());
+  const queue = reviewFilterQueue(STATE.studySettings.reviewFilter, eligibleReviewPool().filter(hasPlainFrontBack));
   return STATE.studySettings.reviewFilter === 'oldest' ? queue : shuffle(queue);
 }
 
@@ -5486,7 +5500,7 @@ function startMatchGame(){
   trackEvent('lesson_start', 'match_game', null);
   // Fase 4: seleção via getStudyQueue(scope:'all') -- mesmo pool de antes,
   // Combinar é prática de reconhecimento, não revisão SRS.
-  const pool = shuffle(getStudyQueue(eligibleReviewPool(), { scope: 'all' }));
+  const pool = shuffle(getStudyQueue(eligibleReviewPool().filter(hasPlainFrontBack), { scope: 'all' }));
   const pairCount = Math.min(MATCH_STATE.pairSize, pool.length);
   MATCH_STATE.pairs = pool.slice(0, pairCount);
   MATCH_STATE.tiles = shuffle([
@@ -7132,7 +7146,11 @@ const ANKI_EXPORT_CONFIG = {
       : `${APP_IDENTITY.apps.fr.name} - ${UNITS.find(u=>String(u.id)===sel).title}`;
   },
   cards(sel){
-    return sel === 'all' ? STATE.cards : STATE.cards.filter(c => String(c.unitId) === sel);
+    // .filter(hasPlainFrontBack) -- ver comentário em buildSpeedQueue():
+    // exporta um cartão cloze só se ele tem front preenchido (todos os
+    // já existentes têm); um cartão cloze novo sem front (migration 035)
+    // ficaria com noteFields()[0] vazio, então fica de fora do .apkg.
+    return (sel === 'all' ? STATE.cards : STATE.cards.filter(c => String(c.unitId) === sel)).filter(hasPlainFrontBack);
   },
   noteFields(card){
     return [card.front, card.back_trans];

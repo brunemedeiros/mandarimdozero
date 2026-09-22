@@ -3288,3 +3288,206 @@ sumiram do dropdown. `node --check` sem erro em `shared/admin-students.js`.
 **Escopo**: `shared/admin-students.js` + `fr/index.html` + `zh/index.html`
 (só classe CSS adicionada em 4 botões existentes, zero CSS novo).
 Nenhuma migração, nenhum passo manual pendente pra autora.
+
+## Prompt-mestre "reestruturação do formulário de flashcards do admin" -- Fase 0 (auditoria) + Fase 1 (Modo de prática antes de Conteúdo, front deixa de ser obrigatório no cloze)
+
+Prompt-mestre grande, fatiado em fases próprias travadas por autorização
+explícita a cada etapa (mesmo padrão já usado em toda a feature de alunas
+particulares) -- o comando de ativação exigia rodar SÓ a Fase 0 (auditoria
+de leitura, sem código) e esperar autorização explícita antes de tocar em
+qualquer arquivo.
+
+**Fase 0 (auditoria) -- achado central, reportado antes de codar**: a
+tela de admin (`shared/admin-flashcards.js`) já tinha Frente/Verso/
+Recursos opcionais ANTES de Modo de prática no HTML/DOM -- ordem oposta à
+pedida no prompt-mestre. Mais importante: Frente/Verso eram lidos e
+gravados INCONDICIONALMENTE em todo modo, inclusive Completar a frase --
+mas `renderClozeReviewCard` (fr/zh `app.js`) nunca lê `card.front`/
+`card.back_hanzi` em NENHUMA tela de revisão pra esse modo. Ou seja: todo
+cartão cloze já criado tinha um `front` gravado no banco que nunca era
+mostrado a ninguém -- dado morto só pra satisfazer a constraint `not null`
+de `teacher_flashcards.front` (migration 026). Reportado como decisão em
+aberto antes de tocar em schema: opção (a) copiar algo pra `front`
+automaticamente, ou (b) relaxar a constraint e não exigir mais o campo
+nesse modo. A autora escolheu explicitamente a opção (b), com instrução
+verbatim de NÃO inventar valor substituto nenhum ("Isso criaria dado
+redundante/artificial").
+
+**Checklist de verificação pedido pela autora antes de tocar em
+`teacher-flashcards.js`** (respondido com leitura real do código, não
+suposição, antes de escrever qualquer linha):
+1. `front` aceitava NULL no banco? Não -- `not null` desde a migration
+   026, nunca relaxado.
+2. Todos os locais que leem `front` de `teacher_flashcards`? Mapeados via
+   grep: `shared/admin-flashcards.js` (lista "Cartões ativos"),
+   `fr/app.js`+`zh/app.js` (`buildCardFromTeacherFlashcard`, Combinar --
+   `MATCH_STATE.pairs`, Speed Review -- `buildSpeedQueue`/render, export
+   Anki -- `ANKI_EXPORT_CONFIG`), `shared/reports.js` (contexto de
+   report, já tinha fallback `card.front || card.back_hanzi || null`,
+   sem risco). `renderClozeReviewCard` -- o único que NUNCA lê `front` --
+   confirmado por leitura direta do código.
+3. `buildFlashcardsCardsBoxHTML` depende de `front`? Sim, via
+   `flashcardCardRowHTML` -- ajustado (ver abaixo).
+4. Edição/exclusão/filtros administrativos dependem de `front`? Edição de
+   cartão já criado nunca foi implementada (nem nesta fase nem nas
+   anteriores -- só criar/arquivar), então não há UI de edição pra
+   ajustar. Exclusão (`setFlashcardStatus`) e filtros (busca/idioma de
+   ALUNO, não de cartão) não tocam `front`.
+5. Outro consumidor além de `renderClozeReviewCard`? Sim, achados
+   CRÍTICOS não óbvios à primeira vista: **Combinar** (jogo de
+   pareamento) e **Speed Review** nunca sabem o que é "cloze" -- os dois
+   pressupõem um par frente/verso simples e leem `card.front`/
+   `card.back_hanzi` sem checar `clozeSentence`. Um cartão cloze SEM
+   `front` quebraria a exibição deles (tile/prompt em branco). Mesmo
+   achado na exportação de baralho Anki (`ANKI_EXPORT_CONFIG.noteFields`)
+   -- um cartão sem front geraria uma nota do Anki com a frente vazia.
+6. Cartões cloze já existentes continuam funcionando sem alteração?
+   Sim, confirmado -- nenhuma migração de dado, nenhum backfill; a
+   migration só relaxa a constraint, cartões antigos mantêm `front`
+   preenchido como sempre, e o filtro novo (ver abaixo) só passa a
+   excluir cartões NOVOS sem front dos poucos lugares que dependem dele.
+7. Interface de edição de cartões cloze precisaria respeitar a regra?
+   Não se aplica -- não existe edição de conteúdo de cartão já criado em
+   nenhuma fase desta feature até aqui (só criar/arquivar/reativar).
+
+**O que foi feito:**
+
+- **Migration `035_allow_null_front_teacher_flashcards.sql`** --
+  `alter table teacher_flashcards alter column front drop not null`.
+  Aditiva/sem risco (só relaxa uma constraint, não migra nenhuma linha
+  existente). Aplicada AO VIVO nesta sessão via
+  `mcp__Supabase__apply_migration` no projeto `eigjocalzwamisgqilhg` --
+  não é passo manual pendente pra autora.
+- **`shared/teacher-flashcards.js`** -- `createFlashcard()`: `front` só é
+  exigido quando NÃO é um cartão cloze (`isCloze = !!cleanClozeSentence`).
+  `back_trans` continua obrigatório em TODO modo, sem exceção (é o que
+  `renderClozeReviewCard` mostra como tradução depois de responder, além
+  de ser o verso normal/opção certa nos outros 2 modos). Insert grava
+  `front: cleanFront || null` -- nunca um valor substituto, gravação real
+  de `NULL` quando o modo é cloze.
+- **`shared/admin-flashcards.js` reestruturado** -- ordem visual agora é
+  Destinatários (Alunos) → Modo de prática (radios) → Conteúdo →
+  Recursos opcionais → Criar cartão → Cartões ativos, exatamente a ordem
+  pedida. "Conteúdo" virou 2 blocos MUTUAMENTE EXCLUSIVOS (nunca os dois
+  visíveis juntos, controlados pelo `change` do radio "Modo de prática"):
+  - `#admin-flashcard-content-main` -- Frente + pinyin (mandarim) +
+    Verso, reaproveitado tanto por "Flashcard normal" quanto por
+    "Múltipla escolha" (só os RÓTULOS trocam entre os 2 -- "Frente"/
+    "Verso" vira "Pergunta/termo"/"Resposta correta" no modo mc, via
+    `textContent` nos 2 `<label>` com id próprio). "Outras opções"
+    (`choices`) fica dentro deste bloco, visível só no modo mc.
+  - `#admin-flashcard-content-cloze` -- Frase com lacuna + Resposta
+    certa + pinyin da resposta (mandarim) + **Tradução** (campo NOVO,
+    `#admin-flashcard-cloze-trans`, mapeado pra `back_trans` no submit).
+    Campo de Tradução foi inferência minha, não estava explícito na
+    lista de campos por modo que a autora mandou (que listava só "Frase
+    com lacuna"/"Resposta correta" pro modo cloze) -- mas a MESMA
+    mensagem dela, 2 linhas acima dessa lista, travava explicitamente
+    "Completar a frase → cloze_sentence + cloze_answer + **back_trans**"
+    como a semântica de dado certa do modo, e `back_trans` continua
+    hard-obrigatório no banco (é o que a tela de revisão mostra como
+    tradução ao aluno). Resolvi a aparente omissão a favor da frase mais
+    precisa (a semântica de dado), não deixei o campo de fora -- sinalizando
+    aqui explicitamente pra revisão da autora, caso a intenção real fosse
+    outra.
+  - Campos que não pertencem ao modo selecionado ficam GENUINAMENTE
+    escondidos (`display:none` no bloco inteiro), não só reordenados --
+    no modo cloze, nem o campo Frente existe na tela.
+- **`flashcardFrontSummaryHTML()`** (novo, `shared/admin-flashcards.js`)
+  -- a lista "Cartões ativos" mostrava `c.front` cru; agora cai pra
+  mostrar a frase-cloze resolvida (`"Je [viens] de Paris."`, resposta
+  certa entre colchetes) quando `front` é `null`. Cartões cloze com
+  `front` preenchido (todos os já existentes) continuam mostrando o
+  front normalmente, ZERO mudança visual pra eles -- o fallback só entra
+  pra cartões novos sem front.
+- **`hasPlainFrontBack(card)`** (novo, fr+zh `app.js`, mesma função
+  espelhada com a adaptação de idioma de sempre -- checa `card.front` no
+  fr, `card.back_hanzi` no zh) -- exclui um cartão cloze SEM front dos 3
+  consumidores que nunca entendem cloze: `buildSpeedQueue()` (Speed
+  Review), `startMatchGame()` (Combinar) e `ANKI_EXPORT_CONFIG.cards()`
+  (exportação de baralho). **`eligibleReviewPool()` em si NÃO leva esse
+  filtro** -- Revisão (Flashcard/Palavras Difíceis) é o lugar CERTO pro
+  cartão cloze aparecer, com ou sem front; só os 3 consumidores que
+  pressupõem par frente/verso simples precisavam do filtro. Cartões
+  cloze já existentes (front preenchido) continuam elegíveis nos 3
+  lugares, sem mudança de comportamento.
+
+**Decisões arquiteturais tomadas nesta fase:**
+1. `front` nullable é específico ao modo cloze -- não virou opcional pros
+   outros 2 modos (flip/mc continuam exigindo Frente, mesmo
+   comportamento de sempre).
+2. Reaproveitar os MESMOS inputs de Frente/Verso entre Flashcard normal
+   e Múltipla escolha (só trocando rótulo) em vez de duplicar campos --
+   evita 2 fontes de verdade pro mesmo dado e é consistente com o motor
+   de dado já existente (MC já usava `front`/`back_trans` como
+   pergunta/resposta certa desde a Fase 8a, só a UI não deixava isso
+   claro visualmente).
+3. Tradução do modo cloze ganhou input PRÓPRIO
+   (`#admin-flashcard-cloze-trans`) em vez de tentar reaproveitar
+   `#admin-flashcard-back` via reparenting/DOM move -- mantém o padrão já
+   estabelecido no arquivo (MC e cloze já tinham cada um seus próprios
+   sub-campos, ex: `admin-flashcard-mc-1/2/3`), sem introduzir
+   complexidade de mover elementos de lugar no DOM.
+4. Filtro de "front ausente" (`hasPlainFrontBack`) ficou fora de
+   `eligibleReviewPool()` de propósito -- aplicar lá excluiria cartão
+   cloze inteiro da Revisão, que é exatamente o lugar onde ele DEVE
+   aparecer; o filtro só pertence aos 3 consumidores que não entendem
+   cloze mecanicamente.
+
+**Gratuito x Premium (avaliado, não implementado):** nenhuma mudança de
+conceito nesta fase -- é reorganização de UI + relaxamento de constraint,
+sem nova superfície de produto. Mesma conclusão de todas as fases
+anteriores desta feature.
+
+**Testes realizados:** `node --check` sem erro em
+`shared/teacher-flashcards.js`, `shared/admin-flashcards.js`, `fr/app.js`,
+`zh/app.js`. Validação funcional via Playwright (fr+zh), mesmo padrão de
+stub de sempre: (1) ordem visual confirmada via
+`compareDocumentPosition` -- "Modo de prática" vem antes de "Conteúdo" no
+DOM; (2) troca de modo confirmada via `getComputedStyle().display` --
+flip mostra bloco principal com rótulos "Frente"/"Verso", mc mostra o
+MESMO bloco com rótulos "Pergunta/termo"/"Resposta correta" + "Outras
+opções" visível, cloze esconde o bloco principal inteiro e mostra só
+Frase/Resposta/Pinyin(mandarim)/Tradução; (3) submit cloze sem tradução
+rejeitado (`dbDelta:0`, erro "Digite a tradução..."); sem `___`
+rejeitado; zh sem pinyin da resposta rejeitado; (4) submit cloze válido
+sem preencher Frente confirma `front === null` gravado de verdade no
+banco (`frontIsNull:true`), nunca um valor inventado; (5) lista "Cartões
+ativos" confirmada mostrando o cartão cloze legado (front preenchido,
+"Tu es → ...") normalmente E o cartão novo sem front como
+"Je [viens] de Paris. → Eu venho de Paris." (fallback funcionando); (6)
+`hasPlainFrontBack()` chamada diretamente confirma `true` pro cartão
+cloze legado (front preenchido), `false` pro cartão novo sem front,
+`true` pro cartão flip comum -- nos dois idiomas; (7) do lado da ALUNA
+(sessão separada, `mergeTeacherFlashcardsIntoState` real): confirmado
+`eligibleReviewPool()` inclui os DOIS cartões cloze (legado e sem front),
+enquanto `eligibleReviewPool().filter(hasPlainFrontBack)` (Speed/
+Combinar) exclui só o sem front; sessão de revisão real
+(`renderReviewView`/`renderClozeReviewCard`/`gradeCurrentCard`) rodada
+de ponta a ponta pro cartão SEM front -- lacuna renderiza, resposta
+errada aplica `.incorrect` e revela a resposta certa, `gradeCurrentCard`
+dispara de verdade (`reps`/`due` mudam); (8) regressão de Múltipla
+escolha confirmada -- criar cartão mc com front/back/choices continua
+funcionando sem nenhuma mudança de comportamento. Validação visual
+(screenshot Playwright, fr, claro+escuro) dos 3 modos confirma a nova
+hierarquia legível nos dois temas, zero CSS novo (reaproveita classes já
+calibradas). Sem erro de console novo atribuível a este código (mesmos
+`pageerror` de mock -- `.is()`/`.upsert()`/`insert().then()` -- já
+registrados em toda a feature).
+
+**O que ainda falta / não foi feito nesta fase (de propósito, é escopo
+de fase futura se pedido):**
+- `student_flashcards` (cartão da própria aluna, Fase 5) não foi tocado
+  -- a reestruturação e o relaxamento de `front` são só pra
+  `teacher_flashcards`, mesmo escopo restrito já usado em toda a Fase 8.
+- Edição de conteúdo de um cartão já criado continua não implementada --
+  fora do escopo desta fase (era sobre reestruturar CRIAÇÃO, não
+  adicionar edição).
+- `shared/admin-support-materials.js`/`admin-class-logs.js` não foram
+  tocados -- não têm o conceito de "modo de prática", fora do escopo
+  deste prompt-mestre específico.
+
+Esta é a Fase 1 de um prompt-mestre que travou explicitamente "não avance
+automaticamente" após cada fase. Próxima fase só começa depois de
+autorização explícita da autora, com este relatório já entregue antes de
+pedir luz verde.

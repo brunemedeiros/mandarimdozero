@@ -40,14 +40,22 @@ async function fetchFlashcardsForCurrentStudent(languageAppKey){
   return data || [];
 }
 
-// front/back_trans obrigatórios (é o mínimo pra um cartão existir); note e
-// frontPinyin são opcionais. frontPinyin só faz sentido pra
-// languageAppKey==='mandarim' (ver migration 027 -- zh mostra pinyin e
-// hanzi em campos separados no flashcard de revisão, diferente do fr que
-// usa só `front`); a UI (shared/admin-flashcards.js) só mostra o campo
-// quando a aluna selecionada é de mandarim. languageAppKey vem do vínculo
-// já existente em teacher_students (cada aluna vale pra 1 idioma -- não é
-// escolhido de novo aqui).
+// back_trans é obrigatório em QUALQUER modo (é o mínimo pra um cartão
+// existir -- ver comentário na migration 035): no flip é o verso, na
+// múltipla escolha é a opção certa dentro de card.mcOptions, no cloze é a
+// tradução revelada depois de responder (renderClozeReviewCard). `front`
+// só é obrigatório fora do modo cloze -- ver migration 035: no modo
+// "Completar a frase" o conteúdo inteiro do cartão já vive em
+// cloze_sentence/cloze_answer, e `front` nunca é lido/exibido em nenhuma
+// tela pra esse modo (renderClozeReviewCard não referencia card.front/
+// card.back_hanzi) -- exigi-lo ali forçaria dado morto só pra satisfazer
+// uma constraint. note e frontPinyin são sempre opcionais. frontPinyin só
+// faz sentido pra languageAppKey==='mandarim' (ver migration 027 -- zh
+// mostra pinyin e hanzi em campos separados no flashcard de revisão,
+// diferente do fr que usa só `front`); a UI (shared/admin-flashcards.js)
+// só mostra o campo quando a aluna selecionada é de mandarim.
+// languageAppKey vem do vínculo já existente em teacher_students (cada
+// aluna vale pra 1 idioma -- não é escolhido de novo aqui).
 //
 // Fase 8a (ver CLAUDE.md) -- imageUrl/audioUrl/choices são todos opcionais
 // e independentes entre si (um cartão pode ter imagem sem ser múltipla
@@ -67,11 +75,16 @@ async function fetchFlashcardsForCurrentStudent(languageAppKey){
 async function createFlashcard({ studentId, languageAppKey, front, backTrans, note, frontPinyin, imageUrl, audioUrl, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin }){
   const cleanFront = (front || '').trim();
   const cleanBack = (backTrans || '').trim();
-  if (!cleanFront) return { ok: false, error: 'Digite o texto da frente do cartão.' };
-  if (!cleanBack) return { ok: false, error: 'Digite a tradução (verso do cartão).' };
-  const cleanChoices = (choices || []).map(c => (c || '').trim()).filter(Boolean);
   const cleanClozeSentence = (clozeSentence || '').trim();
   const cleanClozeAnswer = (clozeAnswer || '').trim();
+  const isCloze = !!cleanClozeSentence;
+  // front só é exigido fora do modo cloze -- ver migration 035/comentário
+  // acima. Nunca inventamos um valor substituto quando ausente: gravamos
+  // `null` de verdade (ver insert abaixo), não uma cópia da frase-cloze
+  // nem da tradução.
+  if (!isCloze && !cleanFront) return { ok: false, error: 'Digite o texto da frente do cartão.' };
+  if (!cleanBack) return { ok: false, error: 'Digite a tradução (verso do cartão).' };
+  const cleanChoices = (choices || []).map(c => (c || '').trim()).filter(Boolean);
   if (cleanClozeSentence){
     if ((cleanClozeSentence.match(/___/g) || []).length !== 1){
       return { ok: false, error: 'A frase precisa ter exatamente um espaço marcado com ___ (3 underscores).' };
@@ -87,7 +100,7 @@ async function createFlashcard({ studentId, languageAppKey, front, backTrans, no
       teacher_id: CURRENT_USER.id,
       student_id: studentId,
       language_app_key: languageAppKey,
-      front: cleanFront,
+      front: cleanFront || null,
       back_trans: cleanBack,
       note: (note || '').trim() || null,
       front_pinyin: (frontPinyin || '').trim() || null,

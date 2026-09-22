@@ -1,0 +1,21 @@
+-- Fase 1 da reestruturação do formulário de flashcards do admin (ver
+-- CLAUDE.md) -- `front` deixa de ser `not null` em teacher_flashcards.
+--
+-- Motivo: no modo "Completar a frase" (cloze_sentence/cloze_answer,
+-- migration 034), o texto do cartão vive inteiro em cloze_sentence --
+-- `front` nunca é exibido em nenhuma tela pra esse modo
+-- (renderClozeReviewCard, fr/zh app.js, nunca lê card.front/back_hanzi).
+-- Mantê-lo obrigatório forçava a professora a digitar (ou o código a
+-- inventar) um valor que nunca seria mostrado a ninguém -- dado morto só
+-- pra satisfazer a constraint. A autora pediu explicitamente pra NÃO
+-- inventar um valor substituto (ex: copiar a frase-cloze ou a tradução
+-- pra dentro de `front`); a alteração estrutural mínima é relaxar a
+-- própria constraint.
+--
+-- Escopo: só afeta CRIAÇÃO futura de cartão via modo Completar a frase
+-- (shared/teacher-flashcards.js: front só é exigido quando cloze_sentence
+-- NÃO foi preenchida). Cartões já existentes -- inclusive os cloze
+-- criados antes desta migration -- continuam com `front` preenchido como
+-- estava, sem nenhuma migração/backfill de dado; esta alteração só afeta
+-- constraint, nunca toca uma linha existente.
+alter table public.teacher_flashcards alter column front drop not null;
