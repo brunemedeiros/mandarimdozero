@@ -48,19 +48,19 @@ async function renderAdminStudentsView(){
     <div class="admin-badge-row">
       <div class="admin-badge-info">
         <div class="admin-badge-name">@${s.username || '(usuário removido)'}${s.display_name ? ` <span class="admin-grant-badge-name">— ${escapeHTML(s.display_name)}</span>` : ''}</div>
-        <div class="admin-badge-desc">${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key} · vinculada em ${new Date(s.created_at).toLocaleDateString('pt-BR')}</div>
+        <div class="admin-badge-desc">${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key} · vinculado em ${new Date(s.created_at).toLocaleDateString('pt-BR')}</div>
       </div>
       <button class="admin-badge-delete-btn" data-toggle-metrics="${s.id}" data-metrics-student="${s.student_id}" data-metrics-lang="${s.language_app_key}" title="Ver métricas">📊</button>
       <button class="admin-badge-delete-btn" data-remove-link="${s.id}" title="Remover vínculo">✕</button>
     </div>
     <div class="admin-badge-desc" id="metrics-link-${s.id}" style="display:none; padding:10px 0 14px;"></div>
-  `).join('') : `<p class="profile-empty-note">Nenhuma aluna vinculada ainda.</p>`;
+  `).join('') : `<p class="profile-empty-note">Nenhum aluno vinculado ainda.</p>`;
 
   wrap.innerHTML = `
     <div class="profile-section">
-      <div class="section-label">Vincular aluna</div>
+      <div class="section-label">Vincular aluno</div>
       <form id="admin-assign-student-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-student-username">Conta da aluna</label>
+        <label class="profile-edit-label" for="admin-student-username">Conta do aluno</label>
         <select id="admin-student-username" class="profile-edit-input">
           <option value="" disabled ${profiles.length ? 'selected' : ''}>Selecione uma conta...</option>
           ${usernameOptionsHTML}
@@ -73,7 +73,7 @@ async function renderAdminStudentsView(){
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Suas alunas (${students.length})</div>
+      <div class="section-label">Seus alunos (${students.length})</div>
       ${studentsHTML}
     </div>
   `;
@@ -90,13 +90,13 @@ async function renderAdminStudentsView(){
     );
     btn.disabled = false;
     if (!result.ok){ errorEl.textContent = result.error; return; }
-    showToast(`✓ @${result.target.username} vinculada como aluna.`);
+    showToast(`✓ @${result.target.username} vinculado como aluno.`);
     renderAdminStudentsView();
   });
 
   wrap.querySelectorAll('[data-remove-link]').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm('Remover este vínculo? O progresso e histórico da aluna continuam preservados -- ela só deixa de aparecer na sua lista.')) return;
+      if (!confirm('Remover este vínculo? O progresso e histórico do aluno continuam preservados -- ele só deixa de aparecer na sua lista.')) return;
       await removeStudentLink(btn.dataset.removeLink);
       renderAdminStudentsView();
     });
@@ -141,7 +141,7 @@ function renderStudentMetricsHTML(m){
     return '<p class="profile-empty-note">Não foi possível carregar as métricas agora.</p>';
   }
   if (!m.teacherCardsTotal){
-    return '<p class="profile-empty-note">Você ainda não criou nenhum cartão pra esta aluna, na aba "📇 Flashcards".</p>';
+    return '<p class="profile-empty-note">Você ainda não criou nenhum cartão pra este aluno, na aba "📇 Flashcards".</p>';
   }
   const daysAgo = m.lastStudyDay
     ? Math.round((Date.parse(todayStr()) - Date.parse(m.lastStudyDay)) / 86400000)
@@ -152,7 +152,7 @@ function renderStudentMetricsHTML(m){
     : `${daysAgo} dias atrás`;
   return `
     <div>Última atividade geral: <strong>${lastActivityLabel}</strong></div>
-    <div>Cartões que você criou pra ela: <strong>${m.teacherCardsActive} ativos</strong>${m.teacherCardsArchived ? `, ${m.teacherCardsArchived} arquivados` : ''}</div>
+    <div>Cartões que você criou pra ele: <strong>${m.teacherCardsActive} ativos</strong>${m.teacherCardsArchived ? `, ${m.teacherCardsArchived} arquivados` : ''}</div>
     <div>Ainda nunca revisados: <strong>${m.teacherCardsNeverReviewed}</strong></div>
     <div>Memória: <strong>${m.teacherCardsWeak} fracas</strong> · ${m.teacherCardsMedium} medianas · ${m.teacherCardsStrong} fortes</div>
   `;

@@ -1,10 +1,10 @@
-// ---------- Aulas (histórico) -- Fase 7 do sistema de alunas particulares ----------
-// Diário de bordo da professora: registra, por aluna, o que foi trabalhado
+// ---------- Aulas (histórico) -- Fase 7 do sistema de alunos particulares ----------
+// Diário de bordo da professora: registra, por aluno, o que foi trabalhado
 // numa aula (tópico/lição de casa/observações/texto livre, todos
 // opcionais individualmente, pelo menos 1 exigido -- ver
 // shared/teacher-class-logs.js). Só a professora vê isto (RLS, migration
 // 031) -- diferente de "🎓 Alunos"/"📇 Flashcards", não existe NENHUM
-// caminho pra aluna enxergar este conteúdo.
+// caminho pro aluno enxergar este conteúdo.
 //
 // Depende de (mesma posição de shared/admin-flashcards.js -- antes de
 // app.js):
@@ -77,7 +77,7 @@ async function renderAdminClassLogsView(){
 
   const students = await fetchMyStudents();
   if (!students.length){
-    wrap.innerHTML = `<p class="profile-empty-note">Vincule uma aluna primeiro, na aba "🎓 Alunos", pra poder registrar aulas pra ela.</p>`;
+    wrap.innerHTML = `<p class="profile-empty-note">Vincule um aluno primeiro, na aba "🎓 Alunos", pra poder registrar aulas pra ele.</p>`;
     return;
   }
 
@@ -92,7 +92,7 @@ async function renderAdminClassLogsView(){
 
   wrap.innerHTML = `
     <div class="profile-section">
-      <div class="section-label">Aluna</div>
+      <div class="section-label">Aluno</div>
       <select id="admin-classlog-student-select" class="profile-edit-input">${studentOptionsHTML}</select>
     </div>
 
@@ -116,7 +116,7 @@ async function renderAdminClassLogsView(){
 
     <div class="profile-section">
       <div class="section-label">Aulas registradas (${logs.length})</div>
-      ${logs.length ? logs.map(classLogRowHTML).join('') : `<p class="profile-empty-note">Nenhuma aula registrada ainda pra esta aluna.</p>`}
+      ${logs.length ? logs.map(classLogRowHTML).join('') : `<p class="profile-empty-note">Nenhuma aula registrada ainda pra este aluno.</p>`}
     </div>
   `;
 
