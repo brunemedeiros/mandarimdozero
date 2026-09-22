@@ -77,6 +77,35 @@
 // Filtro de idioma e busca combinam (AND) via mesmo mecanismo de
 // style.display no DOM (não re-renderiza a lista de checkboxes).
 //
+// Reestruturação Fase 1 (prompt-mestre "formulário de flashcards do
+// admin", ver CLAUDE.md) -- ordem/lógica do formulário mudou de propósito:
+// "Modo de prática" (radio) agora vem ANTES de "Conteúdo", porque é o modo
+// que decide quais campos de conteúdo fazem sentido, não o contrário.
+// "Conteúdo" passou a ter 2 blocos MUTUAMENTE EXCLUSIVOS na tela (nunca os
+// dois visíveis juntos):
+//   - #admin-flashcard-content-main -- Frente/pinyin/Verso, reaproveitado
+//     tanto por "Flashcard normal" quanto por "Múltipla escolha" (só os
+//     RÓTULOS trocam entre os 2 modos -- "Frente"/"Verso" vs. "Pergunta/
+//     termo"/"Resposta correta"; "Outras opções" -- choices -- aparece só
+//     dentro dele, só no modo mc).
+//   - #admin-flashcard-content-cloze -- Frase com lacuna/Resposta certa/
+//     Tradução, campos PRÓPRIOS (não reaproveita front/back do bloco
+//     acima) -- "Frente" nunca existiu pra esse modo em nenhuma tela de
+//     revisão (renderClozeReviewCard nunca lê card.front/back_hanzi),
+//     então deixou de ser um campo obrigatório em teacher_flashcards
+//     (migration 035, "front" agora aceita NULL) -- sem inventar um valor
+//     substituto (a autora foi explícita sobre isso). "Tradução" virou
+//     campo próprio deste bloco porque back_trans continua obrigatório em
+//     TODO modo (é o que renderClozeReviewCard mostra depois de
+//     responder) -- só migrou de input, não de exigência.
+// "Recursos opcionais" (Nota/Imagem/Áudio) continua mode-independente,
+// sempre visível, agora depois de Conteúdo. Consumidores de card.front/
+// back_hanzi fora da Revisão (Combinar, Speed Review, exportação Anki --
+// nenhum entende "cloze", todos pressupõem par frente/verso) ganharam um
+// filtro novo em fr/zh app.js pra excluir cartões cloze SEM front (ver
+// hasPlainFrontBack() lá) -- cartões cloze já existentes continuam com
+// front preenchido, então continuam aparecendo ali normalmente.
+//
 // Depende de (mesma posição de shared/admin-students.js -- antes de app.js):
 //   - shared/roles.js              (fetchMyStudents)
 //   - shared/teacher-flashcards.js (fetchFlashcardsForStudent, createFlashcard, setFlashcardStatus, uploadFlashcardMedia)
@@ -103,11 +132,24 @@ function flashcardFormatBadgesHTML(c){
   ].filter(Boolean).join(' · ');
 }
 
+// Fase 1 da reestruturação (ver CLAUDE.md) -- `front` deixou de ser
+// obrigatório no modo cloze (migration 035): um cartão "Completar a
+// frase" criado depois dessa mudança não tem `c.front`. Resumo cai pra
+// mostrar a frase-lacuna resolvida (com a resposta entre colchetes) em
+// vez de um "" → tradução vazio. Cartões cloze já existentes continuam
+// com `front` preenchido como sempre -- esse ramo nunca entra pra eles,
+// zero mudança visual.
+function flashcardFrontSummaryHTML(c){
+  if (c.front) return `${escapeHTML(c.front)}${c.front_pinyin ? ` (${escapeHTML(c.front_pinyin)})` : ''}`;
+  if (c.cloze_sentence) return escapeHTML(c.cloze_sentence.replace('___', `[${c.cloze_answer || '...'}]`));
+  return '';
+}
+
 function flashcardCardRowHTML(c, showUsername){
   return `
     <div class="admin-badge-row">
       <div class="admin-badge-info">
-        <div class="admin-badge-name">${showUsername ? `<span style="opacity:.6">@${escapeHTML(c.__studentUsername || '?')}</span> · ` : ''}${escapeHTML(c.front)}${c.front_pinyin ? ` (${escapeHTML(c.front_pinyin)})` : ''} → ${escapeHTML(c.back_trans)}</div>
+        <div class="admin-badge-name">${showUsername ? `<span style="opacity:.6">@${escapeHTML(c.__studentUsername || '?')}</span> · ` : ''}${flashcardFrontSummaryHTML(c)} → ${escapeHTML(c.back_trans)}</div>
         <div class="admin-badge-desc">${c.note ? escapeHTML(c.note) + ' · ' : ''}criado em ${new Date(c.created_at).toLocaleDateString('pt-BR')}${flashcardFormatBadgesHTML(c) ? ' · ' + flashcardFormatBadgesHTML(c) : ''}</div>
       </div>
       <button class="admin-badge-delete-btn" data-toggle-flashcard="${c.id}" data-next-status="${c.status === 'active' ? 'archived' : 'active'}" title="${c.status === 'active' ? 'Arquivar' : 'Reativar'}">${c.status === 'active' ? '🗃' : '↺'}</button>
@@ -175,6 +217,8 @@ async function updateFlashcardsSelectionDependentUI(wrap){
   const contentHint = document.getElementById('admin-flashcard-content-hint');
   if (contentHint) contentHint.style.display = selectedStudents.length ? 'none' : '';
 
+  const modeChecked = wrap.querySelector('input[name="admin-flashcard-mode"]:checked')?.value;
+
   const frontInput = document.getElementById('admin-flashcard-front');
   if (frontInput) frontInput.placeholder = anyMandarim ? 'ex: 图书馆' : 'ex: la bibliothèque';
 
@@ -187,7 +231,6 @@ async function updateFlashcardsSelectionDependentUI(wrap){
   if (clozeAnswerInput) clozeAnswerInput.placeholder = anyMandarim ? 'ex: 是' : 'ex: viens';
   const clozePinyinWrap = document.getElementById('admin-flashcard-cloze-pinyin-wrap');
   if (clozePinyinWrap){
-    const modeChecked = wrap.querySelector('input[name="admin-flashcard-mode"]:checked')?.value;
     clozePinyinWrap.style.display = (modeChecked === 'cloze' && anyMandarim) ? '' : 'none';
   }
 
@@ -295,28 +338,11 @@ async function renderAdminFlashcardsView(){
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Conteúdo<span id="admin-flashcard-content-subtitle">${newCardSubtitle}</span></div>
+      <div class="section-label">Cartão<span id="admin-flashcard-content-subtitle">${newCardSubtitle}</span></div>
       <p class="profile-edit-hint" id="admin-flashcard-content-hint" style="${selectedStudents.length ? 'display:none;' : ''}">Selecione ao menos um aluno acima pra poder criar o cartão.</p>
       <form id="admin-create-flashcard-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-flashcard-front">Frente (no idioma estudado)</label>
-        <input type="text" id="admin-flashcard-front" class="profile-edit-input" placeholder="${anyMandarim ? 'ex: 图书馆' : 'ex: la bibliothèque'}" autocomplete="off">
-        <div id="admin-flashcard-pinyin-wrap" style="${anyMandarim ? '' : 'display:none;'}">
-          <label class="profile-edit-label" for="admin-flashcard-pinyin">Pinyin (usado só nos alunos de mandarim selecionados)</label>
-          <input type="text" id="admin-flashcard-pinyin" class="profile-edit-input" placeholder="ex: túshūguǎn" autocomplete="off">
-        </div>
-        <label class="profile-edit-label" for="admin-flashcard-back">Verso (tradução)</label>
-        <input type="text" id="admin-flashcard-back" class="profile-edit-input" placeholder="ex: a biblioteca" autocomplete="off">
-
-        <div class="section-label" style="margin:18px 0 6px;">Recursos opcionais</div>
-        <label class="profile-edit-label" for="admin-flashcard-note">Nota</label>
-        <input type="text" id="admin-flashcard-note" class="profile-edit-input" placeholder="contexto, dica de uso..." autocomplete="off">
-        <label class="profile-edit-label" for="admin-flashcard-image">Imagem</label>
-        <input type="file" id="admin-flashcard-image" class="profile-edit-input" accept="image/*">
-        <label class="profile-edit-label" for="admin-flashcard-audio">Áudio próprio (além da pronúncia automática)</label>
-        <input type="file" id="admin-flashcard-audio" class="profile-edit-input" accept="audio/*">
-
-        <div class="section-label" style="margin:18px 0 6px;">Modo de prática</div>
-        <p class="profile-edit-hint" style="margin-top:-2px;">Como o aluno vai responder este cartão.</p>
+        <div class="section-label" style="margin:0 0 6px;">Modo de prática</div>
+        <p class="profile-edit-hint" style="margin-top:-2px;">Como o aluno vai responder este cartão -- decide os campos abaixo.</p>
         <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
           <input type="radio" name="admin-flashcard-mode" value="flip" checked>
           Flashcard normal -- vira o cartão pra ver a resposta
@@ -325,19 +351,31 @@ async function renderAdminFlashcardsView(){
           <input type="radio" name="admin-flashcard-mode" value="mc">
           Múltipla escolha -- escolhe entre opções
         </label>
-        <div id="admin-flashcard-mc-fields" style="display:none; margin:4px 0 4px 26px;">
-          <label class="profile-edit-label" for="admin-flashcard-mc-1">Opção errada 1</label>
-          <input type="text" id="admin-flashcard-mc-1" class="profile-edit-input" autocomplete="off">
-          <label class="profile-edit-label" for="admin-flashcard-mc-2">Opção errada 2 (opcional)</label>
-          <input type="text" id="admin-flashcard-mc-2" class="profile-edit-input" autocomplete="off">
-          <label class="profile-edit-label" for="admin-flashcard-mc-3">Opção errada 3 (opcional)</label>
-          <input type="text" id="admin-flashcard-mc-3" class="profile-edit-input" autocomplete="off">
-        </div>
         <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
           <input type="radio" name="admin-flashcard-mode" value="cloze">
           Completar a frase -- digita a palavra que falta
         </label>
-        <div id="admin-flashcard-cloze-fields" style="display:none; margin:4px 0 4px 26px;">
+
+        <div class="section-label" style="margin:18px 0 6px;">Conteúdo</div>
+        <div id="admin-flashcard-content-main">
+          <label class="profile-edit-label" id="admin-flashcard-front-label" for="admin-flashcard-front">Frente (no idioma estudado)</label>
+          <input type="text" id="admin-flashcard-front" class="profile-edit-input" placeholder="${anyMandarim ? 'ex: 图书馆' : 'ex: la bibliothèque'}" autocomplete="off">
+          <div id="admin-flashcard-pinyin-wrap" style="${anyMandarim ? '' : 'display:none;'}">
+            <label class="profile-edit-label" for="admin-flashcard-pinyin">Pinyin (usado só nos alunos de mandarim selecionados)</label>
+            <input type="text" id="admin-flashcard-pinyin" class="profile-edit-input" placeholder="ex: túshūguǎn" autocomplete="off">
+          </div>
+          <label class="profile-edit-label" id="admin-flashcard-back-label" for="admin-flashcard-back">Verso (tradução)</label>
+          <input type="text" id="admin-flashcard-back" class="profile-edit-input" placeholder="ex: a biblioteca" autocomplete="off">
+          <div id="admin-flashcard-mc-fields" style="display:none; margin:4px 0 0;">
+            <label class="profile-edit-label" for="admin-flashcard-mc-1">Outras opções -- opção errada 1</label>
+            <input type="text" id="admin-flashcard-mc-1" class="profile-edit-input" autocomplete="off">
+            <label class="profile-edit-label" for="admin-flashcard-mc-2">Opção errada 2 (opcional)</label>
+            <input type="text" id="admin-flashcard-mc-2" class="profile-edit-input" autocomplete="off">
+            <label class="profile-edit-label" for="admin-flashcard-mc-3">Opção errada 3 (opcional)</label>
+            <input type="text" id="admin-flashcard-mc-3" class="profile-edit-input" autocomplete="off">
+          </div>
+        </div>
+        <div id="admin-flashcard-content-cloze" style="display:none;">
           <label class="profile-edit-label" for="admin-flashcard-cloze-sentence">Frase com lacuna (use ___ pra marcar o espaço)</label>
           <input type="text" id="admin-flashcard-cloze-sentence" class="profile-edit-input" placeholder="${anyMandarim ? 'ex: 我 ___ 巴西人。' : 'ex: Je ___ de Paris.'}" autocomplete="off">
           <label class="profile-edit-label" for="admin-flashcard-cloze-answer">Resposta certa</label>
@@ -346,7 +384,17 @@ async function renderAdminFlashcardsView(){
             <label class="profile-edit-label" for="admin-flashcard-cloze-pinyin">Pinyin da resposta (é o que o aluno vai digitar)</label>
             <input type="text" id="admin-flashcard-cloze-pinyin" class="profile-edit-input" placeholder="ex: shì" autocomplete="off">
           </div>
+          <label class="profile-edit-label" for="admin-flashcard-cloze-trans">Tradução (mostrada ao aluno depois de responder)</label>
+          <input type="text" id="admin-flashcard-cloze-trans" class="profile-edit-input" placeholder="ex: Eu venho de Paris." autocomplete="off">
         </div>
+
+        <div class="section-label" style="margin:18px 0 6px;">Recursos opcionais</div>
+        <label class="profile-edit-label" for="admin-flashcard-note">Nota</label>
+        <input type="text" id="admin-flashcard-note" class="profile-edit-input" placeholder="contexto, dica de uso..." autocomplete="off">
+        <label class="profile-edit-label" for="admin-flashcard-image">Imagem</label>
+        <input type="file" id="admin-flashcard-image" class="profile-edit-input" accept="image/*">
+        <label class="profile-edit-label" for="admin-flashcard-audio">Áudio próprio (além da pronúncia automática)</label>
+        <input type="file" id="admin-flashcard-audio" class="profile-edit-input" accept="audio/*">
 
         <p class="profile-edit-error" id="admin-create-flashcard-error"></p>
         <button type="submit" class="btn btn-primary btn-block" id="admin-create-flashcard-btn" ${selectedStudents.length ? '' : 'disabled'}>Criar cartão${selectedStudents.length > 1 ? ` pra ${selectedStudents.length} alunos` : ''}</button>
@@ -394,12 +442,24 @@ async function renderAdminFlashcardsView(){
   // "Modo de prática" é um radio group (name="admin-flashcard-mode") --
   // exclusividade entre Flashcard normal/Múltipla escolha/Completar a
   // frase já vem de graça do próprio HTML, não precisa de JS forçando.
+  // Fase 1 da reestruturação (ver CLAUDE.md): o modo agora decide qual
+  // bloco de Conteúdo aparece -- #admin-flashcard-content-main (Frente/
+  // Verso/pinyin, reaproveitado tanto por Flashcard normal quanto por
+  // Múltipla escolha -- só os RÓTULOS mudam, "Frente"/"Verso" vs.
+  // "Pergunta/termo"/"Resposta correta") ou #admin-flashcard-content-cloze
+  // (Frase com lacuna/Resposta certa/Tradução, campos próprios). Os campos
+  // que não pertencem ao modo selecionado ficam genuinamente escondidos,
+  // não só reordenados.
   wrap.querySelectorAll('input[name="admin-flashcard-mode"]').forEach(radio => {
     radio.addEventListener('change', (e) => {
-      document.getElementById('admin-flashcard-mc-fields').style.display = e.target.value === 'mc' ? '' : 'none';
-      document.getElementById('admin-flashcard-cloze-fields').style.display = e.target.value === 'cloze' ? '' : 'none';
+      const mode = e.target.value;
+      document.getElementById('admin-flashcard-content-main').style.display = mode === 'cloze' ? 'none' : '';
+      document.getElementById('admin-flashcard-content-cloze').style.display = mode === 'cloze' ? '' : 'none';
+      document.getElementById('admin-flashcard-mc-fields').style.display = mode === 'mc' ? '' : 'none';
+      document.getElementById('admin-flashcard-front-label').textContent = mode === 'mc' ? 'Pergunta/termo (no idioma estudado)' : 'Frente (no idioma estudado)';
+      document.getElementById('admin-flashcard-back-label').textContent = mode === 'mc' ? 'Resposta correta' : 'Verso (tradução)';
       const anyMandarimNow = ADMIN_FLASHCARDS_STATE._studentsCache.some(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id) && s.language_app_key === 'mandarim');
-      document.getElementById('admin-flashcard-cloze-pinyin-wrap').style.display = (e.target.value === 'cloze' && anyMandarimNow) ? '' : 'none';
+      document.getElementById('admin-flashcard-cloze-pinyin-wrap').style.display = (mode === 'cloze' && anyMandarimNow) ? '' : 'none';
     });
   });
 
@@ -449,10 +509,18 @@ async function renderAdminFlashcardsView(){
       return;
     }
 
-    const front = document.getElementById('admin-flashcard-front').value;
-    const backTrans = document.getElementById('admin-flashcard-back').value;
+    // Fase 1 da reestruturação (ver CLAUDE.md): no modo cloze, "Frente"
+    // não existe na tela (nunca lida/exibida em renderClozeReviewCard) --
+    // front some vazio, createFlashcard() grava `null` (migration 035),
+    // sem inventar um valor substituto. "Verso"/tradução continua sempre
+    // obrigatório em todo modo, só migra de input conforme o bloco visível
+    // (#admin-flashcard-back pro flip/mc, #admin-flashcard-cloze-trans pro
+    // cloze -- back_trans é o que renderClozeReviewCard mostra depois de
+    // responder).
+    const front = isCloze ? '' : document.getElementById('admin-flashcard-front').value;
+    const backTrans = isCloze ? document.getElementById('admin-flashcard-cloze-trans').value : document.getElementById('admin-flashcard-back').value;
     const note = document.getElementById('admin-flashcard-note').value;
-    const pinyinValue = document.getElementById('admin-flashcard-pinyin')?.value;
+    const pinyinValue = isCloze ? '' : document.getElementById('admin-flashcard-pinyin')?.value;
 
     const clozeSentence = isCloze ? document.getElementById('admin-flashcard-cloze-sentence').value : '';
     const clozeAnswer = isCloze ? document.getElementById('admin-flashcard-cloze-answer').value : '';
