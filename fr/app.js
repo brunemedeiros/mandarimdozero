@@ -308,6 +308,23 @@ function audioBtnHTML(text, extraClass){
   return `<button class="audio-btn ${extraClass||''}" data-speak="${safe}" aria-label="Ouvir pronúncia" title="Ouvir pronúncia">🔊</button>`;
 }
 
+// Fase 8a (ver CLAUDE.md) -- áudio PRÓPRIO enviado pela professora
+// (teacher_flashcards.audio_url), diferente do botão acima (TTS
+// automático da pronúncia). Classe própria (não "audio-btn") de propósito
+// -- wireAudioButtons() casa por `.audio-btn` e chamaria speakFrench()
+// com data-speak indefinido se este botão compartilhasse a classe.
+function customAudioBtnHTML(url){
+  return `<button class="custom-audio-btn" data-audio-url="${url}" aria-label="Ouvir áudio" title="Ouvir áudio">🎧</button>`;
+}
+function wireCustomAudioButtons(container){
+  container.querySelectorAll('.custom-audio-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      new Audio(btn.dataset.audioUrl).play().catch(() => showToast('Não foi possível tocar o áudio.'));
+    });
+  });
+}
+
 // Botão de áudio devagar -- companheiro de qualquer "Écouter" manual
 // (desafios/exemplos onde o áudio NÃO toca sozinho, decisão explícita da
 // autora), exceto a frase de exemplo de vocabulário ("Na frase", ver
@@ -457,6 +474,13 @@ function buildCardFromTeacherFlashcard(row){
     origin: 'teacher',
     teacherNote: row.note || null,
     flashcardStatus: row.status,
+    // Fase 8a (ver CLAUDE.md) -- formatos extras opcionais, sempre
+    // independentes entre si. `choices` presente (array não-vazio) marca
+    // o cartão como múltipla escolha -- renderReviewView() desvia pra
+    // renderMultipleChoiceCard() em vez do flip normal quando isso é true.
+    imageUrl: row.image_url || null,
+    audioUrl: row.audio_url || null,
+    choices: (row.choices && row.choices.length) ? row.choices : null,
     ef: 2.5,
     interval: 0,
     reps: 0,
@@ -5055,6 +5079,15 @@ function buildSpeedQueue(){
 }
 
 function buildSpeedOptions(card){
+  // Fase 8a (ver CLAUDE.md) -- cartão de múltipla escolha autorado usa as
+  // opções ERRADAS que a professora escreveu, nunca os distratores
+  // automáticos abaixo (mais preciso/intencional pro que ela quis testar
+  // especificamente nesse cartão). Objetos pseudo-carta (só back_trans) --
+  // o resto do fluxo (answerSpeedQuestion) só lê essa propriedade e
+  // compara identidade com `card`, então funciona sem mudança nenhuma lá.
+  if (card.choices && card.choices.length){
+    return shuffle([card, ...card.choices.map(text => ({ back_trans: text }))]);
+  }
   const pool = STATE.cards.filter(c => c !== card && c.unitId === card.unitId);
   let distractors = shuffle(pool).slice(0, 3);
   if (distractors.length < 3){
@@ -5873,6 +5906,11 @@ function startReviewSession(){
   STATE.reviewQueue = shouldShuffle ? shuffle(queue) : queue;
   STATE.reviewIndex = 0;
   STATE.reviewShowingAnswer = false;
+  // Fase 8a -- estado transitório do quiz de múltipla escolha (ver
+  // renderMultipleChoiceReviewCard); zera ao entrar numa sessão nova, caso
+  // a anterior tenha sido interrompida no meio de uma pergunta respondida.
+  STATE.reviewMCPicked = null;
+  STATE.reviewMCCorrect = null;
   renderReviewView();
 }
 
@@ -5902,6 +5940,75 @@ function gradeButtonsHTML(card){
       ${GRADES.map(g => `<button class="grade-btn ${g.cls}" data-grade="${g.grade}">${g.label}<small>${formatReviewInterval(previewNextIntervalDays(card, g.grade, now))}</small></button>`).join('')}
     </div>
   `;
+}
+
+// Fase 8a (ver CLAUDE.md) -- quiz de múltipla escolha pra um cartão
+// autorado pela professora com `choices`. Reaproveita gradeCurrentCard()
+// pra aplicar a nota FSRS -- acerto=Bom(2), erro=Errei(0) (grillado) --
+// então herda de graça toda a plumbing já existente (XP, streak,
+// requeue-em-erro, save, avanço de índice), sem reimplementar nada disso.
+// `card.mcOptions` é cacheado no próprio cartão (mesmo padrão de
+// `card.reviewDirection`, calculado 1x e reaproveitado entre re-renders
+// desta MESMA pergunta) -- embaralhar de novo a cada clique trocaria a
+// posição dos botões debaixo do dedo da aluna.
+function renderMultipleChoiceReviewCard(card){
+  const el = document.getElementById('review-content');
+  const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
+
+  if (!card.mcOptions){
+    card.mcOptions = shuffle([
+      { text: card.back_trans, correct: true },
+      ...card.choices.map(text => ({ text, correct: false })),
+    ]);
+  }
+  const answered = STATE.reviewMCPicked !== null && STATE.reviewMCPicked !== undefined;
+
+  el.innerHTML = `
+    <div class="review-progress">
+      <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
+      <div class="review-progress-count">${STATE.reviewIndex+1} / ${STATE.reviewQueue.length}</div>
+    </div>
+    <div class="flashcard" id="flashcard">
+      <div class="flashcard-tag">${card.unitTitle}</div>
+      ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
+      <div class="flashcard-french">${card.front} ${audioBtnHTML(card.front, 'audio-btn-lg')}${card.audioUrl ? customAudioBtnHTML(card.audioUrl) : ''}</div>
+    </div>
+    <div class="mc-options">
+      ${card.mcOptions.map((opt, i) => {
+        let cls = 'mc-option';
+        if (answered){
+          cls += ' disabled';
+          if (opt.correct) cls += ' correct';
+          else if (i === STATE.reviewMCPicked) cls += ' incorrect';
+        }
+        return `<button class="${cls}" data-idx="${i}"${answered ? ' disabled' : ''}>${escapeHTML(opt.text)}</button>`;
+      }).join('')}
+    </div>
+    ${answered ? `<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">Continuar</button>` : ''}
+  `;
+
+  wireAudioButtons(el);
+  wireCustomAudioButtons(el);
+  if (canSpeakFrench(card.front)) speakFrench(card.front, el.querySelector('.audio-btn-lg'), true);
+
+  if (!answered){
+    el.querySelectorAll('.mc-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx);
+        STATE.reviewMCPicked = idx;
+        STATE.reviewMCCorrect = card.mcOptions[idx].correct;
+        renderMultipleChoiceReviewCard(card);
+      });
+    });
+  } else {
+    document.getElementById('mc-continue-btn').addEventListener('click', () => {
+      const wasCorrect = STATE.reviewMCCorrect;
+      card.mcOptions = null;
+      STATE.reviewMCPicked = null;
+      STATE.reviewMCCorrect = null;
+      gradeCurrentCard(wasCorrect ? 2 : 0);
+    });
+  }
 }
 
 function renderReviewView(){
@@ -5968,6 +6075,17 @@ function renderReviewView(){
   }
 
   const card = STATE.reviewQueue[STATE.reviewIndex];
+
+  // Fase 8a (ver CLAUDE.md) -- cartão de múltipla escolha autorado pela
+  // professora SEMPRE vira quiz aqui, em qualquer modo que passe por esta
+  // função (Flashcard, Palavras Difíceis) -- grillado com a autora, nunca
+  // "vira" no sentido tradicional. Fora do escopo: Combinar (jogo de
+  // pareamento, arquitetura incompatível com "1 pergunta, N opções").
+  if (card.choices && card.choices.length){
+    renderMultipleChoiceReviewCard(card);
+    return;
+  }
+
   const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
 
   // Direção estilo Anki: frente->verso (padrão, reconhecimento: vê a
@@ -5991,7 +6109,9 @@ function renderReviewView(){
     </div>
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${card.unitTitle}</div>
+      ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
       ${frontHTML}
+      ${card.audioUrl ? customAudioBtnHTML(card.audioUrl) : ''}
       ${STATE.reviewShowingAnswer ? `
         <div class="divider-line"></div>
         ${backHTML}
@@ -6013,6 +6133,7 @@ function renderReviewView(){
   // Áudio disponível (e tocado automaticamente) sempre que o francês está
   // visível no cartão.
   wireAudioButtons(el);
+  wireCustomAudioButtons(el);
   if (frenchVisibleNow && canSpeakFrench(card.front)){
     speakFrench(card.front, el.querySelector('.audio-btn-lg'), true);
   }

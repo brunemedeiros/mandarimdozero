@@ -48,11 +48,18 @@ async function fetchFlashcardsForCurrentStudent(languageAppKey){
 // quando a aluna selecionada é de mandarim. languageAppKey vem do vínculo
 // já existente em teacher_students (cada aluna vale pra 1 idioma -- não é
 // escolhido de novo aqui).
-async function createFlashcard({ studentId, languageAppKey, front, backTrans, note, frontPinyin }){
+//
+// Fase 8a (ver CLAUDE.md) -- imageUrl/audioUrl/choices são todos opcionais
+// e independentes entre si (um cartão pode ter imagem sem ser múltipla
+// escolha, ou múltipla escolha sem imagem). `choices` é um array de 1-3
+// respostas ERRADAS -- a certa continua sendo `backTrans`, nunca duplicada
+// aqui (ver comentário na migration 032). Vazio/undefined -> cartão comum.
+async function createFlashcard({ studentId, languageAppKey, front, backTrans, note, frontPinyin, imageUrl, audioUrl, choices }){
   const cleanFront = (front || '').trim();
   const cleanBack = (backTrans || '').trim();
   if (!cleanFront) return { ok: false, error: 'Digite o texto da frente do cartão.' };
   if (!cleanBack) return { ok: false, error: 'Digite a tradução (verso do cartão).' };
+  const cleanChoices = (choices || []).map(c => (c || '').trim()).filter(Boolean);
   const { data, error } = await supabaseClient
     .from('teacher_flashcards')
     .insert({
@@ -63,11 +70,32 @@ async function createFlashcard({ studentId, languageAppKey, front, backTrans, no
       back_trans: cleanBack,
       note: (note || '').trim() || null,
       front_pinyin: (frontPinyin || '').trim() || null,
+      image_url: imageUrl || null,
+      audio_url: audioUrl || null,
+      choices: cleanChoices.length ? cleanChoices : null,
     })
     .select()
     .single();
   if (error){ console.error('Erro ao criar flashcard:', error); return { ok: false, error: 'Não foi possível criar o cartão agora.' }; }
   return { ok: true, card: data };
+}
+
+// Fase 8a -- upload de mídia pro bucket `flashcard-media` (migration 032,
+// leitura pública/escrita restrita à pasta do próprio auth.uid() -- sempre
+// a PROFESSORA aqui). Path com componente aleatório -- diferente do avatar
+// (path fixo, upsert), cada cartão pode ter sua própria mídia sem
+// sobrescrever a de outro. Devolve a URL pública já pronta pra gravar em
+// createFlashcard(); não grava nada no banco sozinho.
+async function uploadFlashcardMedia(file, kind){
+  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
+  const path = `${CURRENT_USER.id}/${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { error } = await supabaseClient.storage
+    .from('flashcard-media')
+    .upload(path, file, { contentType: file.type || undefined, cacheControl: '3600' });
+  if (error){ console.error(`Erro ao subir ${kind} do flashcard:`, error); return { ok: false, error: 'Não foi possível enviar o arquivo agora.' }; }
+  const { data: pub } = supabaseClient.storage.from('flashcard-media').getPublicUrl(path);
+  return { ok: true, url: pub.publicUrl };
 }
 
 async function setFlashcardStatus(id, status){
