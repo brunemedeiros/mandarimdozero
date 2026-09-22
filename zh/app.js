@@ -1077,6 +1077,14 @@ document.getElementById('my-flashcards-btn').addEventListener('click', () => {
   switchTab('my-flashcards');
 });
 
+// Fase 8b do sistema de alunas particulares (ver CLAUDE.md) -- "Material
+// de apoio" é pra TODA conta logada (mesmo raciocínio de my-flashcards-btn
+// acima), mas só LEITURA -- quem envia é a professora, não a própria conta.
+document.getElementById('support-materials-btn').addEventListener('click', () => {
+  document.getElementById('user-menu-dropdown').classList.remove('open');
+  switchTab('support-materials');
+});
+
 // Entrada geral da bandeira ⚑ (menu "Mais"/usuário) -- sem contexto de
 // exercício específico, captureReportContext() ainda pega unidade/lição
 // atual se o clique acontecer em modo foco.
@@ -6833,6 +6841,7 @@ const switchTab = createTabSwitcher({
     settings: renderSettingsView,
     'admin-badges': renderAdminPanelView,
     'my-flashcards': renderMyFlashcardsView,
+    'support-materials': renderSupportMaterialsView,
     leaderboard: renderLeaderboardView,
     path: renderUnitsGrid,
   }

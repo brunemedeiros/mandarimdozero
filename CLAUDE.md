@@ -2290,3 +2290,156 @@ Sem erro de console novo (mesmos 2 `pageerror` de mock -- `.is()`/
 erro. Nenhuma mudança em `shared/teacher-flashcards.js`/migration/schema
 -- só orquestração no cliente, reaproveitando `createFlashcard()` como já
 era chamado.
+
+## Fase 8b (material de apoio não-revisável) -- terceiro tipo de conteúdo, primeiro visível pra aluna que ela não cria
+
+**Escopo grillado em 1 rodada (4 perguntas) antes de codar** -- mesma
+disciplina das Fases 6/7/8 (nome sem descrição no prompt-mestre original):
+
+1. *Que forma o material deve ter?* -- **texto + link + arquivo, todos
+   opcionais individualmente** (recomendado) -- a professora usa o que
+   fizer sentido pra cada material, sem formato único forçado.
+2. *Quem vê, e onde?* -- **aluna vê numa tela nova dedicada** (recomendado)
+   -- "📚 Material de apoio" no menu do avatar, mesma visibilidade de
+   "📇 Meus Cartões" (Fase 5).
+3. *Multi-atribuição desde já?* -- **sim** (recomendado) -- mesmo padrão
+   recém-adicionado aos flashcards (ver adendo da Fase 8a acima): a
+   professora marca 1+ alunas, o mesmo material vai pra todas de uma vez.
+4. *Editar/apagar?* -- **de verdade, desde já** (recomendado) -- mesmo
+   raciocínio da Fase 7 (`teacher_class_logs`): sem estado de memória FSRS
+   dependente da linha, DELETE físico é seguro.
+
+**"Não-revisável" ≠ "só a professora vê"** -- diferença importante em
+relação à Fase 7 ("📝 Aulas", só professora): aqui a aluna TEM uma tela
+pra ver o material (grillado, pergunta 2 acima). "Não-revisável" significa
+só que o conteúdo NUNCA entra em `STATE.cards`/FSRS/`getStudyQueue()` --
+é conteúdo passivo compartilhado, não algo que a aluna precisa memorizar
+num ciclo de repetição espaçada. Primeira peça desta feature que é ao
+mesmo tempo (a) visível pra aluna e (b) completamente fora do motor de
+revisão -- `teacher_flashcards`/`student_flashcards` são (a)+dentro do
+motor, `teacher_class_logs` é fora do motor mas não-(a).
+
+**O que foi feito:**
+
+- **Migration `033_create_teacher_support_materials.sql`** -- tabela nova
+  `teacher_support_materials` (`teacher_id`, `student_id`,
+  `language_app_key` -- mesmo trio de sempre --, `title` obrigatório,
+  `description`/`link_url`/`file_url`/`file_name` todos opcionais). RLS:
+  professora gerencia tudo que criou (`for all`, mesmo padrão "dono
+  único" de `teacher_class_logs`), aluna só LÊ o que foi atribuído a ela
+  (`for select`, `auth.uid() = student_id`). Bucket de Storage novo
+  `support-materials` (leitura pública, escrita restrita à pasta do
+  próprio `auth.uid()`, path aleatório -- mesmo padrão RLS do bucket
+  `flashcard-media`, Fase 8a). Aplicada AO VIVO nesta sessão via
+  `mcp__Supabase__apply_migration` -- não é passo manual pendente pra
+  autora.
+- **`shared/teacher-support-materials.js`** (novo) --
+  `fetchSupportMaterialsForStudent`/`fetchSupportMaterialsForCurrentStudent`
+  (lado professora/lado aluna, mesmo par de sempre), `uploadSupportMaterialFile`
+  (bucket `support-materials`, sem restrição de tipo -- PDF/imagem/doc,
+  guarda o `fileName` original porque a URL pública é um path opaco),
+  `createSupportMaterial` (título obrigatório + pelo menos 1 de
+  descrição/link/arquivo, mesmo rigor de `createClassLog`),
+  `updateSupportMaterial` (título/descrição/link -- não o arquivo, mesmo
+  escopo restrito de edição que `teacher_flashcards` já tinha),
+  `deleteSupportMaterial` (DELETE físico, grillado).
+- **`shared/admin-support-materials.js`** (novo) + nova subseção "📚
+  Material de apoio" no Painel de Admin (fr+zh), ao lado de "📝 Aulas":
+  combina o multi-select de checkboxes recém-adicionado aos flashcards
+  (adendo da Fase 8a acima) com o padrão de edição inline + apagar da
+  Fase 7 (`admin-class-logs.js`) -- primeira tela desta feature a herdar
+  os dois padrões ao mesmo tempo. Cria uma linha por aluna selecionada
+  (mesmo arquivo/conteúdo, upload feito 1 vez só), lista agregada com
+  `@username` prefixado quando >1 selecionada.
+- **`shared/support-materials-view.js`** (novo) -- tela SÓ LEITURA pro
+  lado da aluna (`renderSupportMaterialsView`), sem nenhum controle de
+  edição/exclusão (esses ficam só no Painel de Admin). Card por material:
+  título, descrição, link clicável (`target="_blank"`), arquivo como link
+  de download (nome original ou "Baixar arquivo" como fallback), data.
+- **Nova entrada "📚 Material de apoio" no menu do avatar** (fr+zh,
+  `#support-materials-btn`), entre "📇 Meus cartões" e "⚙️
+  Configurações" -- SEM `admin-only-nav`, mesma visibilidade de "Meus
+  Cartões" (qualquer conta). Nova `<div class="view"
+  id="view-support-materials">`, aba registrada em `tabHandlers` como
+  `'support-materials': renderSupportMaterialsView`.
+
+**Decisões arquiteturais tomadas nesta fase:**
+1. `teacher_support_materials` é **completamente desconectada** de
+   `STATE.cards`/FSRS -- nenhum builder de card, nenhum merge no boot,
+   nenhuma origem nova (`study`/`teacher`/`self` continuam sendo as
+   únicas 3) -- mesmo princípio da Fase 7, mas com uma tela nova pro
+   lado da aluna (diferença chave já registrada acima).
+2. Entrada de menu "📚 Material de apoio" fica **sempre visível**, mesmo
+   pra quem nunca vai ter nada lá (maioria das contas sem professora
+   vinculada) -- mesmo raciocínio já usado em "📇 Meus Cartões" (Fase 5),
+   não o raciocínio de "esconder quando irrelevante" já usado no filtro
+   de origem da Fase 4. Decisão deliberada: gastar uma chamada de rede
+   extra no BOOT do app só pra decidir se esconde um item de menu não
+   valeria a pena pelo ganho de UX -- o estado vazio já é claro o
+   suficiente ("sua professora ainda não enviou nada").
+3. Edição de material cobre título/descrição/link, não o arquivo anexado
+   -- trocar/remover mídia de um material já criado não foi pedido no
+   grilling; mesmo escopo restrito que `teacher_flashcards` já tinha
+   desde as Fases 2/3 (criar não-vazio + editar campos de texto, nunca
+   trocar mídia já enviada).
+4. Upload de arquivo não distingue tipo (imagem/áudio/PDF/doc) -- ao
+   contrário de `uploadFlashcardMedia` (Fase 8a, que separa `image`/
+   `audio` só pra nomear o path), aqui é sempre "um arquivo anexo
+   genérico", sem necessidade de diferenciação.
+
+**Gratuito x Premium (avaliado, não implementado):** mesma conclusão de
+toda a feature desde a Fase 2 -- conteúdo autorado pela própria
+professora pras próprias alunas, sem custo marginal de servir (Storage
+do próprio Supabase). Mesma pergunta em aberto já registrada
+repetidamente pra quando houver mais de uma professora na plataforma
+(aqui, de novo, um limite de espaço de Storage por professora seria a
+alavanca mais natural) -- não travada em código.
+
+**Testes realizados:** `node --check` sem erro em
+`shared/teacher-support-materials.js`, `shared/admin-support-materials.js`,
+`shared/support-materials-view.js`, `shared/admin-analytics.js`, `fr/app.js`
+e `zh/app.js`. Validação funcional via Playwright (fr+zh pro lado admin,
+fr pro lado aluna -- ver nota de cobertura abaixo), mesmo padrão de stub
+de `window.supabase.createClient()` já usado em toda a feature: (1)
+multi-seleção de 2 alunas confirmada criando 2 linhas
+(`createdStudentIds` batendo com as 2 alunas selecionadas), submeter só
+com título (sem descrição/link/arquivo) é REJEITADO sem gravar no banco
+(`dbCountAfterEmptyReject:0`), lista mostra `@username` prefixado nas 2
+linhas quando 2 selecionadas e some quando volta pra 1 só; (2) edição
+inline confirmada atualizando o título no banco de verdade
+(`editedTitleInDb` reflete o valor editado); (3) apagar confirmado
+removendo do banco (`stillInDbAfterDelete:false`); (4) lado da aluna --
+`fetchSupportMaterialsForCurrentStudent` confirmado retornando os 2
+materiais semeados, título/link/arquivo renderizados corretamente na
+tela (`linkRendered`/`fileLinkRendered:true`), nenhum botão de
+editar/apagar presente (`noEditOrDeleteButtons:true`, confirma que é
+mesmo só-leitura), estado vazio mostrando a mensagem certa quando a
+aluna não tem nenhum material. Sem erro de console novo atribuível a
+este código (mesmos `pageerror` de mock -- `.is()`/`.upsert()` -- já
+registrados em toda a feature; o lado da aluna não teve NENHUM erro de
+console). **Achado de harness, não de produção**: o mock desta sessão
+tinha o mesmo bug já documentado na Fase 7 (`.update().eq()` exigindo 2
+chamadas encadeadas em vez de 1) -- corrigido no script de validação
+antes de reportar os resultados acima; `updateSupportMaterial` sempre
+usou o padrão `.update(payload).eq('id', id)` correto, mesmo já usado em
+`setFlashcardStatus`/`updateClassLog`.
+
+**Nota de cobertura**: validação do lado da aluna rodou só em fr (não
+zh) -- `shared/support-materials-view.js` é 100% compartilhado entre os
+dois idiomas, sem nenhum branch por idioma, então o risco de regressão
+zh-específica é baixo, mas registrando aqui por completude, mesmo padrão
+de honestidade já usado quando a Fase 6a validou só fr.
+
+**O que ainda falta / não foi feito nesta fase (de propósito):**
+- Nenhum limite de tamanho/tipo de arquivo aplicado no cliente -- confia
+  no limite que o bucket do Supabase Storage aplica, mesmo critério já
+  registrado na Fase 8a.
+- Nenhuma contagem/resumo de materiais no painel de métricas da Fase 6a
+  -- são features irmãs mas não integradas, mesmo padrão já registrado
+  quando a Fase 7 (Aulas) fez a mesma observação.
+- Fase 8c (exercício interativo novo) continua não iniciada -- último
+  sub-passo da Fase 8, ordem já travada no grilling da Fase 8 original.
+
+Próxima fase (8c -- exercício interativo novo) só começa depois de
+autorização explícita da autora, com este relatório já entregue antes de
+pedir luz verde.

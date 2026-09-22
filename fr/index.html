@@ -3431,6 +3431,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
       <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="students">🎓 Alunos</button>
       <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="flashcards">📇 Flashcards</button>
       <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="classlogs">📝 Aulas</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="materials">📚 Material de apoio</button>
     </div>
     <div id="admin-badges-content"></div>
     <div id="admin-analytics-content" style="display:none;"></div>
@@ -3439,6 +3440,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <div id="admin-students-content" style="display:none;"></div>
     <div id="admin-flashcards-content" style="display:none;"></div>
     <div id="admin-classlogs-content" style="display:none;"></div>
+    <div id="admin-materials-content" style="display:none;"></div>
   </div>
 
   <!-- ===== MEUS CARTÕES (Fase 5, aberta pra qualquer conta) ===== -->
@@ -3448,6 +3450,16 @@ footer.app-footer img{ height:40px; opacity:.85; }
       <p>Crie seus próprios flashcards -- palavras e frases que você quer memorizar, mesmo que não estejam na trilha.</p>
     </div>
     <div id="my-flashcards-content"></div>
+  </div>
+
+  <!-- ===== MATERIAL DE APOIO (Fase 8b, aberta pra qualquer conta -- só
+       leitura: quem envia é a professora, ver Painel de Admin) ===== -->
+  <div class="view" id="view-support-materials">
+    <div class="path-header">
+      <h2>📚 Material de apoio</h2>
+      <p>Resumos, links e arquivos que sua professora compartilhou com você.</p>
+    </div>
+    <div id="support-materials-content"></div>
   </div>
 
   <!-- ===== DITADOS ===== -->
@@ -3555,6 +3567,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <button class="user-dropdown-item mais-extra-tab" id="mais-challenges-btn" data-tab="challenges">🎯 Desafios</button>
   <button class="user-dropdown-item" id="leaderboard-btn">🏆 Ranking</button>
   <button class="user-dropdown-item" id="my-flashcards-btn">📇 Meus cartões</button>
+  <button class="user-dropdown-item" id="support-materials-btn">📚 Material de apoio</button>
   <button class="user-dropdown-item" id="user-settings-btn">⚙️ Configurações</button>
   <button class="user-dropdown-item admin-only-nav" id="admin-badges-btn" style="display:none;">🛠️ Painel de Admin</button>
   <button class="user-dropdown-item" id="report-menu-btn">⚑ Reportar problema</button>
@@ -3937,6 +3950,9 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <script src="../shared/admin-flashcards.js"></script>
 <script src="../shared/teacher-class-logs.js"></script>
 <script src="../shared/admin-class-logs.js"></script>
+<script src="../shared/teacher-support-materials.js"></script>
+<script src="../shared/admin-support-materials.js"></script>
+<script src="../shared/support-materials-view.js"></script>
 <script src="../shared/student-flashcards.js"></script>
 <script src="../shared/my-flashcards.js"></script>
 <script src="../shared/admin-analytics.js"></script>
