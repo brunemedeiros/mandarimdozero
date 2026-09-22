@@ -78,6 +78,16 @@ try{
      escuro (essas cores ficam mais claras no escuro pra se destacar do
      fundo escuro, então precisam de texto escuro em cima). */
   --on-vivid: #FFFFFF;
+  /* grade-hard/grade-good (botões Difícil/Bom da revisão) -- cor PRÓPRIA
+     (não reaproveita --seal-red, a cor de MARCA, nem um hex solto) que seguem
+     o MESMO padrão claro-escuro/on-vivid de --error-red/--jade acima, em vez
+     de ficarem fixas com --on-seal-red (texto escuro sempre) como antes --
+     apanhado visual real: no tema claro os 4 botões (Errei/Difícil/Bom/Fácil)
+     ficavam 2 com texto branco e 2 com texto escuro lado a lado, relatado
+     pela autora via print. #8C5F0E vs branco = 5.59:1, #1D5A82 vs branco =
+     7.42:1 (claro); ver contraste do par escuro no bloco de tema escuro. */
+  --grade-hard-bg: #8C5F0E;
+  --grade-good-bg: #1D5A82;
 
   --font-display: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-body: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -128,6 +138,12 @@ try{
     --jade: #52B487;
     --ink-soft: #C5B8D9;
     --on-vivid: #201335;
+    /* Par escuro de grade-hard/grade-good (ver :root claro) -- mesmo padrão
+       "mais claro/pastel no escuro" de --error-red/--jade, pra continuar
+       passando com --on-vivid (que também vira texto escuro no escuro).
+       #C9973A vs #201335 = 6.61:1, #5FA8D3 vs #201335 = 6.65:1. */
+    --grade-hard-bg: #C9973A;
+    --grade-good-bg: #5FA8D3;
     --dc-slot-0: #F7B84A;
     --dc-slot-1: #9A85FF;
     --dc-slot-2: #5B9DFF;
@@ -154,6 +170,8 @@ try{
   --jade: #52B487;
   --ink-soft: #C5B8D9;
   --on-vivid: #201335;
+  --grade-hard-bg: #C9973A;
+  --grade-good-bg: #5FA8D3;
   --dc-slot-0: #F7B84A;
   --dc-slot-1: #9A85FF;
   --dc-slot-2: #5B9DFF;
@@ -1629,12 +1647,19 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   color:var(--ink-soft); font-size:12.5px; font-weight:700; text-align:center; cursor:pointer;
   font-family:var(--font-body); text-decoration:underline;
 }
-/* Cor de texto escolhida por fundo (não dá pra usar uma única cor pros 4 --
-   error-red/jade têm contraste bom com branco só no tema claro, enquanto
-   hard/seal-red precisam de texto escuro nos dois temas). */
+/* 4 botões unificados no MESMO par cor-de-fundo/on-vivid (antes hard/good
+   usavam --on-seal-red -- texto escuro sempre, mesmo no claro, enquanto
+   again/easy usavam on-vivid -- texto branco no claro. Ficava 2 brancos +
+   2 escuros lado a lado no claro, print real reportado pela autora).
+   grade-hard/grade-good (ver --grade-hard-bg/--grade-good-bg no :root)
+   ganharam cor PRÓPRIA (não var(--seal-red), a cor de MARCA, nem o hex
+   solto #E0A526 de antes) que também clareia no escuro como
+   --error-red/--jade -- agora os 4 concordam: texto branco no claro,
+   texto escuro no escuro, em vez de 2 fixos sempre-escuro + 2 que
+   alternam. */
 .grade-again{ background: var(--error-red); color: var(--on-vivid); }
-.grade-hard{ background: #E0A526; color: var(--on-seal-red); }
-.grade-good{ background: var(--seal-red); color: var(--on-seal-red); }
+.grade-hard{ background: var(--grade-hard-bg); color: var(--on-vivid); }
+.grade-good{ background: var(--grade-good-bg); color: var(--on-vivid); }
 .grade-easy{ background: var(--jade); color: var(--on-vivid); }
 
 /* ---------- Progress / gamification view ---------- */
