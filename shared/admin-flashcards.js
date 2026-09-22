@@ -22,8 +22,42 @@
 //
 // Fase 8c: quarto formato, "Completar a frase" (grillado: a aluna digita a
 // palavra que falta numa frase escrita pela professora). Mutuamente
-// exclusivo com "Múltipla escolha" (marcar um desmarca o outro) -- os dois
-// mudam a MECÂNICA de revisão do cartão, não faz sentido os dois juntos.
+// exclusivo com "Múltipla escolha" -- os dois mudam a MECÂNICA de revisão
+// do cartão, não faz sentido os dois juntos. Desde a reorganização visual
+// abaixo, essa exclusividade é o próprio HTML (um <input type="radio">
+// grupo "Modo de prática"), não mais 2 checkboxes independentes com JS
+// forçando a exclusividade uma na outra.
+//
+// UX-fix (pós-Fase 8c, mesmo dia): reorganização visual + correção de bug
+// de estado, pedida pela autora após revisar a tela real (print + crítica
+// detalhada). 2 mudanças de fundo, não só estética:
+// 1. **Bug real, não só gosto**: a seleção de alunas nunca podia ficar
+//    vazia -- o código caía de volta pra "primeira aluna" sempre que o Set
+//    esvaziava, inclusive logo depois de clicar "Limpar seleção". Isso é
+//    perigoso numa ferramenta administrativa (criar um cartão pra aluna
+//    errada por engano de quem esqueceu que a seleção "limpa" não estava
+//    realmente vazia). Corrigido: seleção pode ficar genuinamente vazia,
+//    "Criar cartão" fica desabilitado nesse estado (com contador visível
+//    "Nenhuma aluna selecionada" acima do form), e a validação de submit
+//    continua como cinto-de-segurança extra.
+// 2. **Hierarquia visual**: a tela misturava "pra quem" (destinatários),
+//    "o quê" (conteúdo) e "como" (modo de prática) no mesmo nível visual,
+//    um formulário longo sem agrupamento. Reorganizado em 3 blocos
+//    rotulados dentro do mesmo <form> (Destinatários continua fora do
+//    form, como já era -- seleção dispara re-render, não submit):
+//    Destinatários -> Conteúdo (+ "Recursos opcionais" pra nota/imagem/
+//    áudio) -> Modo de prática (radios). Reaproveita `.section-label`
+//    (já existente no CSS) como cabeçalho de cada bloco -- zero CSS novo.
+// Decisões EXPLICITAMENTE fora do escopo desta correção, sinalizadas pela
+// autora mas não implementadas aqui: renomear "Alunas"->"Alunos" (termo
+// usado consistentemente em dezenas de arquivos desta feature desde a
+// Fase 1, é uma mudança de terminologia grande e transversal, não uma
+// correção de UX pontual -- fica pra decisão explícita futura, não
+// presumida aqui); busca/paginação na lista de alunas (prematuro com
+// ~22 alunas reais hoje); bloquear seleção mista de idiomas (já funciona
+// corretamente -- 1 linha por aluna no idioma DELA, testado desde o
+// adendo da Fase 8a -- bloquear seria remover uma feature que já foi
+// pedida e testada, não corrigir um bug).
 //
 // Depende de (mesma posição de shared/admin-students.js -- antes de app.js):
 //   - shared/roles.js              (fetchMyStudents)
@@ -50,16 +84,20 @@ async function renderAdminFlashcardsView(){
   }
 
   // Descarta seleções de alunas que não existem mais (vínculo removido
-  // entre um render e outro) e, se nada sobrou selecionado, cai de volta
-  // pro comportamento antigo de "a primeira aluna já vem marcada".
+  // entre um render e outro) -- SEM cair de volta pra "primeira aluna"
+  // quando o resultado fica vazio (ver comentário no topo do arquivo:
+  // seleção vazia é um estado válido e intencional agora, não um bug a
+  // esconder).
   const validIds = new Set(students.map(s => s.student_id));
   ADMIN_FLASHCARDS_STATE.studentIds = new Set([...ADMIN_FLASHCARDS_STATE.studentIds].filter(id => validIds.has(id)));
-  if (!ADMIN_FLASHCARDS_STATE.studentIds.size){
-    ADMIN_FLASHCARDS_STATE.studentIds.add(students[0].student_id);
-  }
 
   const selectedStudents = students.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
   const anyMandarim = selectedStudents.some(s => s.language_app_key === 'mandarim');
+  const selectionCountLabel = selectedStudents.length === 0
+    ? 'Nenhuma aluna selecionada'
+    : selectedStudents.length === 1
+      ? '1 aluna selecionada'
+      : `${selectedStudents.length} alunas selecionadas`;
 
   const studentCheckboxesHTML = students.map(s => `
     <label style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 0;">
@@ -104,7 +142,8 @@ async function renderAdminFlashcardsView(){
 
   wrap.innerHTML = `
     <div class="profile-section">
-      <div class="section-label">Alunas (selecione 1 ou mais)</div>
+      <div class="section-label">Destinatários</div>
+      <p class="profile-edit-hint">Selecione as alunas que vão receber este cartão.</p>
       <div style="display:flex; gap:12px; margin-bottom:4px;">
         <a href="#" id="admin-flashcard-select-all" style="font-size:13px;">Selecionar todas</a>
         <a href="#" id="admin-flashcard-select-none" style="font-size:13px;">Limpar seleção</a>
@@ -112,10 +151,12 @@ async function renderAdminFlashcardsView(){
       <div class="profile-edit-input" style="height:auto; max-height:180px; overflow-y:auto; display:block;">
         ${studentCheckboxesHTML}
       </div>
+      <p class="profile-edit-hint" style="font-weight:700; margin-top:6px;">${selectionCountLabel}</p>
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Novo flashcard${newCardSubtitle}</div>
+      <div class="section-label">Conteúdo${newCardSubtitle}</div>
+      ${selectedStudents.length ? '' : `<p class="profile-edit-hint">Selecione ao menos uma aluna acima pra poder criar o cartão.</p>`}
       <form id="admin-create-flashcard-form" class="profile-edit-form">
         <label class="profile-edit-label" for="admin-flashcard-front">Frente (no idioma estudado)</label>
         <input type="text" id="admin-flashcard-front" class="profile-edit-input" placeholder="${anyMandarim ? 'ex: 图书馆' : 'ex: la bibliothèque'}" autocomplete="off">
@@ -125,17 +166,26 @@ async function renderAdminFlashcardsView(){
         ` : ''}
         <label class="profile-edit-label" for="admin-flashcard-back">Verso (tradução)</label>
         <input type="text" id="admin-flashcard-back" class="profile-edit-input" placeholder="ex: a biblioteca" autocomplete="off">
-        <label class="profile-edit-label" for="admin-flashcard-note">Nota (opcional)</label>
+
+        <div class="section-label" style="margin:18px 0 6px;">Recursos opcionais</div>
+        <label class="profile-edit-label" for="admin-flashcard-note">Nota</label>
         <input type="text" id="admin-flashcard-note" class="profile-edit-input" placeholder="contexto, dica de uso..." autocomplete="off">
-        <label class="profile-edit-label" for="admin-flashcard-image">Imagem (opcional)</label>
+        <label class="profile-edit-label" for="admin-flashcard-image">Imagem</label>
         <input type="file" id="admin-flashcard-image" class="profile-edit-input" accept="image/*">
-        <label class="profile-edit-label" for="admin-flashcard-audio">Áudio próprio (opcional, além da pronúncia automática)</label>
+        <label class="profile-edit-label" for="admin-flashcard-audio">Áudio próprio (além da pronúncia automática)</label>
         <input type="file" id="admin-flashcard-audio" class="profile-edit-input" accept="audio/*">
-        <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-          <input type="checkbox" id="admin-flashcard-mc-toggle">
-          Múltipla escolha (o cartão vira quiz de opções em vez de virar cartão)
+
+        <div class="section-label" style="margin:18px 0 6px;">Modo de prática</div>
+        <p class="profile-edit-hint" style="margin-top:-2px;">Como a aluna vai responder este cartão.</p>
+        <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
+          <input type="radio" name="admin-flashcard-mode" value="flip" checked>
+          Flashcard normal -- vira o cartão pra ver a resposta
         </label>
-        <div id="admin-flashcard-mc-fields" style="display:none;">
+        <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
+          <input type="radio" name="admin-flashcard-mode" value="mc">
+          Múltipla escolha -- escolhe entre opções
+        </label>
+        <div id="admin-flashcard-mc-fields" style="display:none; margin:4px 0 4px 26px;">
           <label class="profile-edit-label" for="admin-flashcard-mc-1">Opção errada 1</label>
           <input type="text" id="admin-flashcard-mc-1" class="profile-edit-input" autocomplete="off">
           <label class="profile-edit-label" for="admin-flashcard-mc-2">Opção errada 2 (opcional)</label>
@@ -143,11 +193,11 @@ async function renderAdminFlashcardsView(){
           <label class="profile-edit-label" for="admin-flashcard-mc-3">Opção errada 3 (opcional)</label>
           <input type="text" id="admin-flashcard-mc-3" class="profile-edit-input" autocomplete="off">
         </div>
-        <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-          <input type="checkbox" id="admin-flashcard-cloze-toggle">
-          Completar a frase (a aluna digita a palavra que falta)
+        <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
+          <input type="radio" name="admin-flashcard-mode" value="cloze">
+          Completar a frase -- digita a palavra que falta
         </label>
-        <div id="admin-flashcard-cloze-fields" style="display:none;">
+        <div id="admin-flashcard-cloze-fields" style="display:none; margin:4px 0 4px 26px;">
           <label class="profile-edit-label" for="admin-flashcard-cloze-sentence">Frase com lacuna (use ___ pra marcar o espaço)</label>
           <input type="text" id="admin-flashcard-cloze-sentence" class="profile-edit-input" placeholder="${anyMandarim ? 'ex: 我 ___ 巴西人。' : 'ex: Je ___ de Paris.'}" autocomplete="off">
           <label class="profile-edit-label" for="admin-flashcard-cloze-answer">Resposta certa</label>
@@ -157,14 +207,15 @@ async function renderAdminFlashcardsView(){
           <input type="text" id="admin-flashcard-cloze-pinyin" class="profile-edit-input" placeholder="ex: shì" autocomplete="off">
           ` : ''}
         </div>
+
         <p class="profile-edit-error" id="admin-create-flashcard-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-create-flashcard-btn">Criar cartão${selectedStudents.length > 1 ? ` pra ${selectedStudents.length} alunas` : ''}</button>
+        <button type="submit" class="btn btn-primary btn-block" id="admin-create-flashcard-btn" ${selectedStudents.length ? '' : 'disabled'}>Criar cartão${selectedStudents.length > 1 ? ` pra ${selectedStudents.length} alunas` : ''}</button>
       </form>
     </div>
 
     <div class="profile-section">
       <div class="section-label">Cartões ativos (${activeCards.length})</div>
-      ${activeCards.length ? activeCards.map(cardRowHTML).join('') : `<p class="profile-empty-note">Nenhum cartão ainda pra${selectedStudents.length > 1 ? 's essas alunas' : ' esta aluna'}.</p>`}
+      ${activeCards.length ? activeCards.map(cardRowHTML).join('') : `<p class="profile-empty-note">Nenhum cartão ainda pra${selectedStudents.length > 1 ? 's essas alunas' : selectedStudents.length === 1 ? ' esta aluna' : ' nenhuma aluna selecionada'}.</p>`}
     </div>
 
     ${archivedCards.length ? `
@@ -189,30 +240,23 @@ async function renderAdminFlashcardsView(){
   });
   document.getElementById('admin-flashcard-select-none').addEventListener('click', (e) => {
     e.preventDefault();
-    // O topo da função nunca deixa a seleção vazia (recai pra primeira
-    // aluna) -- limpar aqui e deixar esse fallback agir é mais simples do
-    // que duplicar a mesma regra dos dois lados.
+    // Seleção vazia é um estado válido agora (ver comentário no topo do
+    // arquivo) -- "Limpar seleção" limpa de verdade, sem cair de volta pra
+    // nenhuma aluna default.
     ADMIN_FLASHCARDS_STATE.studentIds = new Set();
     renderAdminFlashcardsView();
   });
 
-  // Múltipla escolha e Completar a frase são mutuamente exclusivos (os
-  // dois mudam a MECÂNICA de revisão do cartão) -- marcar um desmarca e
-  // esconde o outro, em vez de deixar os dois campos preenchidos ao mesmo
-  // tempo e só validar no submit.
-  document.getElementById('admin-flashcard-mc-toggle').addEventListener('change', (e) => {
-    document.getElementById('admin-flashcard-mc-fields').style.display = e.target.checked ? '' : 'none';
-    if (e.target.checked){
-      document.getElementById('admin-flashcard-cloze-toggle').checked = false;
-      document.getElementById('admin-flashcard-cloze-fields').style.display = 'none';
-    }
-  });
-  document.getElementById('admin-flashcard-cloze-toggle').addEventListener('change', (e) => {
-    document.getElementById('admin-flashcard-cloze-fields').style.display = e.target.checked ? '' : 'none';
-    if (e.target.checked){
-      document.getElementById('admin-flashcard-mc-toggle').checked = false;
-      document.getElementById('admin-flashcard-mc-fields').style.display = 'none';
-    }
+  // "Modo de prática" é um radio group (name="admin-flashcard-mode") --
+  // exclusividade entre Flashcard normal/Múltipla escolha/Completar a
+  // frase já vem de graça do próprio HTML, não precisa de JS forçando
+  // (era isso antes, com 2 checkboxes independentes se desmarcando uma à
+  // outra -- trocado por semântica nativa).
+  wrap.querySelectorAll('input[name="admin-flashcard-mode"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      document.getElementById('admin-flashcard-mc-fields').style.display = e.target.value === 'mc' ? '' : 'none';
+      document.getElementById('admin-flashcard-cloze-fields').style.display = e.target.value === 'cloze' ? '' : 'none';
+    });
   });
 
   document.getElementById('admin-create-flashcard-form').addEventListener('submit', async (e) => {
@@ -245,7 +289,10 @@ async function renderAdminFlashcardsView(){
       audioUrl = up.url;
     }
 
-    const isMC = document.getElementById('admin-flashcard-mc-toggle').checked;
+    const mode = wrap.querySelector('input[name="admin-flashcard-mode"]:checked').value;
+    const isMC = mode === 'mc';
+    const isCloze = mode === 'cloze';
+
     const choices = isMC ? [
       document.getElementById('admin-flashcard-mc-1').value,
       document.getElementById('admin-flashcard-mc-2').value,
@@ -262,7 +309,6 @@ async function renderAdminFlashcardsView(){
     const note = document.getElementById('admin-flashcard-note').value;
     const pinyinValue = document.getElementById('admin-flashcard-pinyin')?.value;
 
-    const isCloze = document.getElementById('admin-flashcard-cloze-toggle').checked;
     const clozeSentence = isCloze ? document.getElementById('admin-flashcard-cloze-sentence').value : '';
     const clozeAnswer = isCloze ? document.getElementById('admin-flashcard-cloze-answer').value : '';
     const clozeAnswerPinyin = isCloze ? document.getElementById('admin-flashcard-cloze-pinyin')?.value : '';
