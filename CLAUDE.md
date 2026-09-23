@@ -4097,3 +4097,281 @@ quando outras entregas validaram só um subconjunto.
 Nenhuma migração pendente de passo manual -- a `036_flashcard_direction_
 and_revision.sql` foi aplicada ao vivo nesta sessão via
 `mcp__Supabase__apply_migration`, projeto `eigjocalzwamisgqilhg`.
+
+## Prompt-mestre "perfil público / flashcards públicos" -- Fase 1 (identidade + progresso por idioma, sem lista de cartões ainda)
+
+Pedido original da autora, verbatim: "Opção de tornar os flashcards
+criados por você públicos ou privados no seu perfil. Quando forem
+públicos, as pessoas podem adicionar os flashcards que você criou na
+conta/deck delas. (privados por default) Como alguém pode entrar no seu
+perfil? Clicando no seu nome no ranking. Verificar como haver no site um
+/user/username para que as pessoas possam compartilhar seus perfis e,
+consequentemente, disponibilizar seus flashcards. Uma espécie de 'quero
+compartilhar meus flashcards com você, entre aqui no meu perfil e
+adicione nos seus: Link do perfil'" -- pedido explicitamente pra "fazer
+um grilling dessas propostas" antes de codar, mesma disciplina de toda
+esta feature/repositório.
+
+**Grilling completo, 2 rodadas (12 perguntas), cada uma precedida de
+investigação real no código -- nunca perguntado o que já dava pra
+responder lendo o repositório.** Achados relevantes ANTES de perguntar:
+
+- `/user/username` como PATH de servidor é literalmente impossível neste
+  site (GitHub Pages estático, sem rewrite) -- a única forma real é
+  hash-based, `fr/#/user/username`, mesmo padrão já usado por toda a
+  navegação interna (`shared/router.js`). Confirmado com a autora e
+  aprovado (Q2).
+- **Achado que reduziu MUITO o escopo real desta fase**: `profiles` já
+  tem `profiles_public_read` (`to anon, authenticated using (true)`)
+  desde a migration 001 -- ou seja, nome/@usuário/bio/avatar JÁ eram
+  publicamente legíveis, inclusive sem login, desde o início do projeto
+  (o comentário da própria migration 001 já antecipava essa feature
+  futura). O mesmo vale pra `badge_grants`/`badge_catalog`/`earned_badges`
+  (migrations 002/003/017). O modal de perfil público que abre ao clicar
+  num nome no Ranking (Rank1-4, já existia) já mostrava tudo isso pra
+  QUALQUER linha do ranking, sem checar nada. Ou seja: identidade e
+  badges não precisavam de NENHUMA peça de segurança nova -- só
+  progresso/XP/streak (que vive em `progress`, RLS owner-only) exigia
+  algo novo.
+- `STATE.xp`/`STATE.streak`/`STATE.lastStudyDay` são escopados POR SITE
+  (cada idioma lê/grava seu próprio namespace em `progress.data[langKey]`)
+  -- nunca somados entre francês e mandarim. Isso mudou o desenho final
+  do perfil público: um card POR IDIOMA (com sua própria barra/XP/streak),
+  nunca um número único combinado.
+
+**Perguntas e respostas do grilling (resumo -- as 12 completas, com a
+recomendação numerada de cada uma, estão no histórico desta sessão):**
+1. Interruptor de privacidade: **conta inteira** (`profiles.public_profile`,
+   default `false` -- privado por padrão) + **cada cartão próprio** ganha
+   um botão de esconder individual, no lugar onde já fica o botão de
+   Arquivar. Cascata: conta privada = todo cartão implicitamente escondido;
+   conta pública = todo cartão público, EXCETO os marcados
+   individualmente como escondidos. Nunca o contrário.
+2. Conteúdo do perfil público: foto, nome, conquistas (já existia via
+   Rank1-4) + **XP ACUMULADO** (trocado de "XP da semana", que já dá pra
+   ver no Ranking) + **progresso e streak por idioma** (novo).
+3. Ver/adicionar cartões de alguém exige login -- "Faça o login pra ver
+   os cartões e adicionar ao seu perfil" com fundo embaçado. **Não
+   implementado nesta fase** (ver "O que fica pra Fase 2" abaixo).
+4. Reaproveitar o mesmo modal/página do perfil público com um botão "Ver
+   cartões criados pelo usuário", multi-select com Selecionar
+   todos/Limpar seleção pra importar. **Não implementado nesta fase**
+   (mesma razão do item 3).
+5. Popup de limite ao tentar importar acima do teto do plano grátis, com
+   link pra uma pág de upgrade (Stripe/pagamento) que ainda não existe --
+   "vamos adicionar isso agora após essa tarefa". **Fica pra uma Fase 3
+   futura, explicitamente fora desta entrega** -- não presumir que
+   infraestrutura de pagamento existe (ver seção "Considerar plano
+   gratuito x premium" no topo deste arquivo).
+6. Botão de reportar problema no perfil público de alguém: aprovado,
+   **não implementado nesta fase** (cai na mesma Fase 2 da lista de
+   cartões, já que reportar é sobre um cartão específico da lista).
+7. Cartão importado guarda só uma REFERÊNCIA-cópia -- editar o cartão
+   original depois de já ter sido importado NÃO altera a cópia já salva
+   na conta de quem importou (vira, na prática, um cartão novo e
+   independente a partir da importação). Decisão de design confirmada,
+   implementação fica pra Fase 2.
+8. XP/streak no perfil público: **por idioma**, nunca somado -- confirma
+   o achado técnico acima.
+9. Card de idioma só aparece se `pct > 0` -- "se a pessoa só estuda
+   francês, mostrar só a barra de francês". Confirmado explicitamente
+   depois que eu sinalizei a diferença entre isso e o layout ATUAL do
+   perfil privado (que separa streak+XP combinados de uma lista de barras
+   por idioma) -- a autora aprovou o design novo e mais coerente ("esconda
+   o XP e streak de idiomas com progresso zero; se houver progresso, esse
+   idioma ganha seu cartão com barra + XP + streak").
+10-12. Detalhes de UI adicionais do botão "ver cartão como se fosse
+   editar, sem poder editar" (Q11) -- fica pra Fase 2 (é sobre a LISTA de
+   cartões, não implementada ainda).
+
+**Fatiamento em 3 fases proposto e autorizado ("Pode seguir para a fase
+1")**: Fase 1 = modelo de dados + identidade/progresso público (esta
+entrega). Fase 2 = lista de cartões + importação + gate de login + popup
+de reportar. Fase 3 = integração com pagamento/Stripe quando essa
+infraestrutura existir. Mesmo padrão de fatiamento por autorização
+explícita já usado em toda a feature de alunas particulares.
+
+**O que foi feito (Fase 1):**
+
+- **Migration `037_public_profile.sql`** -- `profiles.public_profile
+  boolean not null default false` (interruptor mestre, grillado como
+  privado por padrão) + `student_flashcards.hidden_from_profile boolean
+  not null default false` (exceção por cartão, só tem efeito quando a
+  conta já é pública) + function `get_public_profile_stats(p_username)`
+  SECURITY DEFINER, mesmo padrão de `get_teacher_student_metrics`
+  (migration 029, Fase 6a da feature de alunas particulares): checa
+  `public_profile=true` ELA MESMA antes de tocar em qualquer dado,
+  devolve só agregados (`pct`/`levelLabel`/`xp`/`streak`/`lastStudyDay`
+  por idioma, nunca resposta/histórico granular), só inclui um idioma se
+  `pct>0`. Reaproveita o campo `progressSummary` que `serializeState()`
+  já grava em todo save (não recalcula % em SQL). **Diferença chave em
+  relação a `get_teacher_student_metrics`**: esta é a única function
+  SECURITY DEFINER da plataforma concedida também a `anon` (`grant
+  execute ... to anon, authenticated`) -- precisa funcionar SEM login,
+  já que a página em si funciona sem login (ver abaixo). RLS de
+  `progress` continua sem nenhuma policy nova. Aplicada AO VIVO nesta
+  sessão via `mcp__Supabase__apply_migration`, projeto
+  `eigjocalzwamisgqilhg` -- não é passo manual pendente pra autora.
+- **`shared/srs.js`** -- `effectiveStreak()` refatorado em
+  `effectiveStreakFor(streak, lastStudyDay)` (mesma regra de "streak
+  vivo" -- hoje ou ontem = vivo, senão 0 -- já usada pro streak da
+  própria conta desde o bugfix registrado na seção "Streak (🔥)...
+  ficava CONGELADO" acima) + `effectiveStreak()` que chama a nova função
+  com `STATE.streak/STATE.lastStudyDay`. Reaproveitada agora também pro
+  streak de OUTRA conta (par bruto devolvido pela RPC) -- nunca duplicar
+  a mesma data-math em dois lugares.
+- **`shared/public-profile.js`** (novo) -- `fetchPublicProfileByUsername(username)`
+  (busca `profiles` + badges de identidade/gameplay via as funções já
+  existentes em `shared/leaderboard.js`/`shared/profile.js` + a RPC de
+  stats), `renderPublicProfileInto(bodyEl, username)` (container-agnóstico
+  -- preenche TANTO o modal (`#public-profile-modal-body`) QUANTO a
+  página standalone (`#public-profile-page-body`), nunca duas
+  implementações de render), `openPublicProfileModalForUsername(username)`
+  (usada de dentro do app, logada ou convidada) e
+  `renderStandalonePublicProfile(username)` (usada quando NÃO há sessão
+  nem modo convidado). `publicProfileUsernameFromHash()` extrai o
+  username de `#/user/<username>`. Token de corrida por container
+  (`WeakMap`, um por `bodyEl`) -- clicar rápido em 2 nomes diferentes no
+  Ranking não deixa a resposta do primeiro sobrescrever o conteúdo do
+  segundo.
+- **`shared/auth.js`** -- `initAuth()` ganhou um desvio, só no ramo "sem
+  sessão E sem modo convidado": se o hash bate `#/user/username`, chama
+  `renderStandalonePublicProfile()` em vez de `goToNeutralGate()`.
+  Primeira vez que qualquer tela deste app precisa funcionar pra um
+  visitante totalmente anônimo (sem conta, sem modo convidado) -- link de
+  perfil compartilhado por outra pessoa. Qualquer outra rota interna
+  continua exigindo login/convidado como sempre.
+- **`shared/router.js`** -- rota nova `{type:'publicProfile', username}`
+  (`#/user/<username>` ↔ hash), mesma estrutura de `unit`/`unitResult` já
+  existentes. `renderRoute()` chama `openPublicProfilePage(username)`
+  (shared/public-profile.js) -- que hoje só abre o MESMO modal do Ranking
+  por cima do que já estava na tela (nunca troca de aba por baixo), pra
+  um F5 em cima de `#/user/x` com sessão ativa restaurar corretamente.
+- **`fr/index.html`+`zh/index.html`** -- `#public-profile-standalone`
+  (novo, FORA de `#app`, ao lado de `#login-screen`) com
+  `#public-profile-page-body` + um rodapé "Criar minha conta →". CSS
+  novo: `.public-profile-lang-card`/`.public-profile-lang-stats` (card
+  por idioma, estende `.profile-lang-card`/etc. já existentes com
+  XP+streak embutidos) e `.public-profile-page`/`.public-profile-page-inner`/
+  `.public-profile-page-footer` (moldura da página standalone) --
+  zero token de cor novo, só `var(--paper)`/`var(--paper-warm)`/
+  `var(--paper-line)`/`var(--ink-soft)`/`var(--seal-red-dark)`/
+  `var(--shadow-lift)`/`var(--radius)` já calibrados. Script tag de
+  `shared/public-profile.js` adicionado logo depois de
+  `shared/leaderboard.js` (de quem depende) e antes de `shared/auth.js`
+  (que o chama).
+- **`shared/leaderboard.js`** -- o modal antigo (`openPublicProfileModal(row,
+  catalog)`, mostrava posição+XP da semana do Ranking) foi REMOVIDO --
+  substituído por uma chamada a `openPublicProfileModalForUsername(username)`
+  no clique da linha (agora com identidade+badges+progresso/XP
+  acumulado/streak por idioma, conforme Q2 do grilling). `PUBLIC_PROFILE_MODAL_TOKEN`
+  (guard de corrida antigo) também removido -- o guard equivalente agora
+  vive dentro de `renderPublicProfileInto` (WeakMap por container, ver
+  acima).
+- **`shared/profile.js`** -- `saveProfileEdits()` ganhou o parâmetro
+  `publicProfile`, gravado como `profiles.public_profile`.
+  `openEditProfileModal()` inicializa um novo `.pref-switch` ("Perfil
+  público", mesma classe já usada por Modo escuro/Cloze/Som -- zero CSS
+  novo) a partir de `p?.public_profile`. O switch só ALTERA visualmente
+  (`aria-checked`) no clique -- só é lido e persistido junto com nome/
+  username/bio no Salvar do formulário, mesmo padrão dos outros campos
+  deste modal (diferente de Modo escuro/Admin Mode, que salvam na hora,
+  fora de um form).
+- **`shared/student-flashcards.js`** -- `setOwnFlashcardHidden(id, hidden)`
+  (novo), grava `student_flashcards.hidden_from_profile`. Eixo
+  DELIBERADAMENTE separado de `status` (active/archived, que decide fila
+  de revisão) -- um cartão pode estar ativo na revisão mas escondido do
+  perfil, ou arquivado mas ainda visível no perfil, os dois nunca se
+  misturam.
+- **`shared/my-flashcards.js`** -- botão de olho (👁️ visível / 🙈
+  escondido) adicionado na linha de cada cartão, **ao lado do botão de
+  Arquivar** (posição pedida explicitamente no grilling Q1, não em cima
+  dele). Nenhuma atualização em `STATE.cards` precisa acontecer ao
+  clicar -- diferente de arquivar/apagar/criar (que afetam a fila de
+  revisão via `addSelfFlashcardToState`/etc.), esconder do perfil não
+  toca em FSRS/revisão de forma alguma, só no dado que
+  `renderPublicProfileInto` vai ler quando a Fase 2 existir.
+
+**Decisões arquiteturais desta fase:**
+1. Identidade (nome/@usuário/bio/avatar) e badges continuam SEMPRE
+   públicos pra qualquer username existente, independente de
+   `public_profile` -- não é uma peça nova desta fase, é um fato do RLS
+   desde o dia 1 (ver achado acima), só agora reaproveitado numa tela
+   nova. Só progresso/XP/streak fica atrás do interruptor.
+2. `get_public_profile_stats` é a ÚNICA porta de leitura de `progress`
+   pra outra conta -- nenhuma RLS policy declarativa nova na tabela (ela
+   continua absolutamente owner-only), mesmo princípio já validado na
+   Fase 6a da feature de alunas particulares.
+3. O modal do Ranking (Rank1-4) e a página standalone (`#/user/username`
+   sem sessão) renderizam o MESMO conteúdo através da MESMA função
+   (`renderPublicProfileInto`) -- nunca duas implementações divergentes
+   do "perfil público" dentro do mesmo app.
+4. `hidden_from_profile` é um eixo NOVO e INDEPENDENTE de `status`
+   (Fase 2/3/5 do sistema de alunas particulares) -- reforça o padrão já
+   estabelecido nesta feature inteira de nunca misturar dois conceitos
+   diferentes numa coluna só.
+
+**Gratuito x Premium (avaliado, não implementado):** a pergunta mais
+concreta já registrada é a do próprio grilling (item 5 acima) -- teto de
+importação de cartões alheios acima de um limite do plano grátis, com
+link pra uma futura página de upgrade/Stripe. **Não implementado nesta
+fase** de propósito -- não existe infraestrutura de pagamento nenhuma no
+código ainda (mesma regra do topo deste arquivo), e a própria lista de
+cartões pra importar (onde esse limite se aplicaria) é Fase 2, não Fase
+1. A visibilidade do perfil em si (público/privado) não tem nenhuma razão
+pra virar premium -- é controle de privacidade, não uma feature paga.
+
+**Testes realizados:** `node --check` sem erro em todos os arquivos
+tocados (`shared/srs.js`, `shared/public-profile.js`, `shared/router.js`,
+`shared/auth.js`, `shared/leaderboard.js`, `shared/profile.js`,
+`shared/my-flashcards.js`, `shared/student-flashcards.js`). Validação
+funcional via Playwright (fr+zh), stub de `window.supabase.createClient()`
+mesmo padrão de toda a feature: (1) **visitante anônimo, perfil público
+com progresso** -- `#public-profile-standalone` visível,
+`#login-screen` escondido, nome/@usuário renderizados, card de francês
+com `A1 · 42%`/`🔥 3`/`120` XP batendo com o mock; (2) **visitante
+anônimo, perfil PRIVADO** -- mensagem "optou por manter o progresso
+privado" mostrada, ZERO card de idioma renderizado, e confirmado que o
+XP/streak reais daquela conta (999/99, propositalmente distintos no
+mock) NUNCA aparecem em lugar nenhum do DOM -- a barreira de segurança
+é real, não só teórica; (3) **username inexistente** -- "Perfil não
+encontrado"; (4) mesmo cenário (1) validado em zh também; (5) **logada,
+clique equivalente ao do Ranking** -- `openPublicProfileModalForUsername()`
+abre o modal com o mesmo conteúdo (identidade+progresso), fecha
+corretamente; (6) **toggle "Perfil público" no Editar Perfil** -- estado
+inicial `false`, clique muda visualmente pra `true`, salvar grava
+`public_profile:true` de verdade no banco fake, reabrir o modal confirma
+o estado persistido (leu de `PROFILE_CACHE` atualizado); (7) **botão de
+olho em Meus Cartões** -- ícone inicial 👁️, clique grava
+`hidden_from_profile:true` no banco e troca o ícone pra 🙈, clique de
+novo reverte os dois. Sem erro de console novo atribuível a este código
+(mesmo `pageerror` de `.is()` já registrado repetidas vezes nesta feature
+como limitação de mock em chamadas de fundo não relacionadas --
+notificações --, não deste código). Validação visual (screenshot
+Playwright, claro+escuro) da página standalone confirma legibilidade nos
+dois temas -- esperado, zero cor nova introduzida, só tokens já
+calibrados.
+
+**O que ainda falta / não foi feito nesta fase (de propósito, é Fase 2
+ou 3):**
+- **Fase 2 inteira**: lista de cartões públicos de alguém, gate de login
+  pra ver/importar (fundo embaçado + "Faça login pra ver os cartões"),
+  multi-select com Selecionar todos/Limpar seleção pra importar, botão
+  de reportar um cartão específico, botão "ver como se fosse editar,
+  sem poder editar". `hidden_from_profile` já existe no schema e já tem
+  UI pra marcar (esta fase), mas nada ainda LÊ esse campo pra filtrar
+  uma lista -- porque a lista em si não existe ainda.
+- **Fase 3**: popup de limite de importação + link de upgrade/Stripe --
+  não existe conceito de plano pago no código ainda, nem faria sentido
+  antes da Fase 2 existir (não há o que importar em excesso sem a lista).
+- Nenhuma mudança em `STATE.cards`/FSRS/fila de revisão -- confirmado
+  intacto, esta fase inteira é sobre identidade/visibilidade, não
+  conteúdo de estudo.
+
+Nenhum passo manual pendente pra autora nesta entrega -- as duas
+migrations desta sessão (`036` reconstruída/salva no repo, `037` nova)
+já foram aplicadas ao vivo via `mcp__Supabase__apply_migration`.
+
+Próxima fase (2 -- lista de cartões + importação) só começa depois de
+autorização explícita da autora, com este relatório já entregue antes de
+pedir luz verde.

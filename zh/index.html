@@ -1963,6 +1963,40 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 }
 .profile-stats-link:hover{ text-decoration:underline; }
 
+/* ---------- Perfil público (Fase 1, ver CLAUDE.md) ----------
+   Card por idioma dentro de #public-profile-modal/#public-profile-standalone
+   -- estende .profile-lang-card/.profile-lang-flag/.profile-lang-info/etc.
+   (já existentes, ver acima) com XP+streak embutidos, sem duplicar nenhum
+   desses tokens/classes. */
+.public-profile-langs-row{ display:flex; flex-direction:column; gap:10px; }
+.public-profile-lang-card{
+  background:var(--paper); border:1px solid var(--paper-line); border-radius:12px; padding:12px 14px;
+}
+.public-profile-lang-top{ display:flex; align-items:center; gap:10px; }
+.public-profile-lang-stats{ display:flex; gap:20px; margin-top:10px; padding-top:10px; border-top:1px solid var(--paper-line); }
+.public-profile-lang-stat{ display:flex; flex-direction:column; align-items:center; flex:1; }
+.public-profile-lang-stat .v{ font-size:15px; font-weight:800; color:var(--seal-red-dark); }
+.public-profile-lang-stat .l{ font-size:10px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; margin-top:2px; }
+
+/* Página standalone -- usada quando quem visita #/user/username NÃO tem
+   sessão nem modo convidado (ver shared/auth.js initAuth(), bypass de
+   goToNeutralGate()). Fora de #app por completo -- nenhum token/classe daqui
+   depende de nada carregado só depois do login. */
+.public-profile-page{
+  min-height:100vh; display:flex; align-items:flex-start; justify-content:center;
+  padding:40px 16px; background:var(--paper-warm);
+}
+.public-profile-page-inner{
+  max-width:440px; width:100%; background:var(--paper); border-radius:var(--radius);
+  padding:28px 22px; box-shadow:var(--shadow-lift); border:1px solid var(--paper-line);
+}
+.public-profile-page-footer{
+  text-align:center; margin-top:20px; padding-top:16px; border-top:1px solid var(--paper-line);
+  font-size:13px; color:var(--ink-soft);
+}
+.public-profile-page-footer a{ color:var(--seal-red-dark); font-weight:700; text-decoration:none; }
+.public-profile-page-footer a:hover{ text-decoration:underline; }
+
 /* Vitrine de badges na Visão geral do Perfil -- mostra TODAS as conquistas
    já ganhas (não só as últimas 4), reaproveitando o mesmo cartão .badge do
    grid completo de Progresso (ver renderProgressView) só que num grid mais
@@ -2740,6 +2774,23 @@ body.hide-pinyin .prompt-pinyin{
   </div>
 </div>
 
+<!-- Fase 1 do perfil público (ver CLAUDE.md) -- única tela deste site que
+     precisa renderizar pra um visitante SEM sessão e SEM modo convidado
+     (link de perfil compartilhado, #/user/username). Fica FORA de #app de
+     propósito -- nunca fica visível ao mesmo tempo que #login-screen/#app
+     (ver renderStandalonePublicProfile em shared/public-profile.js, único
+     lugar que mexe no display: dela). -->
+<div id="public-profile-standalone" style="display:none;">
+  <div class="public-profile-page">
+    <div class="public-profile-page-inner">
+      <div id="public-profile-page-body"></div>
+      <div class="public-profile-page-footer">
+        Quer estudar mandarim também? <a href="../">Criar minha conta →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="app" style="display:none;">
   <div class="topbar">
     <div class="brand">
@@ -3454,6 +3505,23 @@ body.hide-pinyin .prompt-pinyin{
         <textarea id="profile-edit-bio" class="profile-edit-textarea" maxlength="160" placeholder="Conte um pouco sobre você e por que está aprendendo mandarim"></textarea>
         <div class="profile-edit-bio-count" id="profile-edit-bio-count">0/160</div>
 
+        <!-- Fase 1 do perfil público (ver CLAUDE.md, grilling Q1) --
+             interruptor mestre da conta: público = nome/@usuário/bio/
+             badges/progresso por idioma ficam visíveis pra qualquer
+             visitante em #/user/username, E todo cartão próprio
+             (Meus Cartões) some público por padrão, exceto os
+             marcados individualmente como escondidos (botão de olho,
+             ver shared/my-flashcards.js). Privado por padrão -- só
+             SALVA quando o formulário inteiro é salvo, mesmo padrão
+             dos outros campos deste modal (nome/username/bio). -->
+        <div class="pref-row">
+          <div class="pref-row-text">
+            <div class="pref-row-title">Perfil público</div>
+            <div class="pref-row-sub">Deixa seu nome, badges, progresso e cartões próprios visíveis a quem tiver o link do seu perfil.</div>
+          </div>
+          <button type="button" class="pref-switch" id="profile-edit-public-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
+        </div>
+
         <div id="profile-edit-featured-badge-row" style="display:none;">
           <label class="profile-edit-label" for="profile-edit-featured-badge">Badge em destaque (aparece no Ranking)</label>
           <select id="profile-edit-featured-badge" class="profile-edit-input"></select>
@@ -3663,6 +3731,7 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../shared/admin-notifications.js"></script>
 <script src="../shared/admin-reports.js"></script>
 <script src="../shared/leaderboard.js"></script>
+<script src="../shared/public-profile.js"></script>
 <script src="../shared/topbar-stats.js"></script>
 <script src="../shared/analytics.js"></script>
 <script src="../shared/tabs.js"></script>

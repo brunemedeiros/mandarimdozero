@@ -61,6 +61,8 @@ function routeToHash(route){
       return `#/unit/${route.unitId}/result`;
     case 'unitComplete':
       return `#/unit/${route.unitId}/complete`;
+    case 'publicProfile':
+      return `#/user/${route.username}`;
     default:
       return '';
   }
@@ -91,6 +93,13 @@ function hashToRoute(hash){
     if (parts[2] === 'complete') return { type: 'unitComplete', unitId };
     return { type: 'unit', unitId };
   }
+  // Fase 1 do perfil público (ver CLAUDE.md) -- #/user/<username>, único
+  // formato hash-based possível pro "/user/username" pedido originalmente
+  // (GitHub Pages não tem rewrite de servidor, ver comentário no topo do
+  // arquivo). Username já vem só com o alfabeto aceito por slugifyUsername
+  // (shared/profile.js) -- sem sanitização extra aqui, mesmo nível de
+  // confiança que parseUnitIdFromHash já tem pro id de unidade.
+  if (parts[0] === 'user' && parts[1]) return { type: 'publicProfile', username: parts[1] };
   return { type: 'tab', tab: parts[0] };
 }
 
@@ -189,6 +198,14 @@ function renderRoute(route){
           renderDailyChallengesScreen();
           STEP_STATE.onChallengesScreen = true;
         }
+        break;
+      }
+      case 'publicProfile': {
+        // Só a rota MESMO -- shared/public-profile.js abre por cima do que
+        // já estiver na tela (modal), nunca troca de aba/vista de baixo.
+        // Sem isso, um F5 em cima de #/user/x reabriria a Trilha por baixo
+        // do modal em vez de restaurar exatamente onde a pessoa estava.
+        if (typeof openPublicProfilePage === 'function') openPublicProfilePage(route.username);
         break;
       }
       default:

@@ -279,12 +279,16 @@ async function renderLeaderboardView(){
   });
 
   // Clicar em qualquer linha (a própria incluída) abre o preview do
-  // perfil -- "isso deve ser possível para todos". Reaproveita os dados já
-  // buscados pra essa linha (row/catalog), sem consulta nova ao Supabase.
+  // perfil -- "isso deve ser possível para todos". Fase 1 do perfil público
+  // (ver CLAUDE.md) trocou o que o modal busca (identidade+badges+progresso
+  // por idioma via @username, não mais posição/XP da semana desta linha) --
+  // shared/public-profile.js faz sua PRÓPRIA busca a partir do @username,
+  // então não precisa mais do `row`/`catalog` já carregados aqui.
   wrap.querySelectorAll('.leaderboard-row[data-user-id]').forEach(el => {
     el.addEventListener('click', () => {
       const row = rows.find(r => r.user_id === el.dataset.userId);
-      if (row) openPublicProfileModal(row, catalog);
+      const username = row?.profile?.username;
+      if (username && typeof openPublicProfileModalForUsername === 'function') openPublicProfileModalForUsername(username);
     });
   });
 
@@ -344,126 +348,18 @@ function animateOwnRowRankChange(meRow, scope, weekStart, rows){
   }
 }
 
-// Incrementado a cada abertura do modal -- guarda contra a resposta
-// assíncrona de fetchUserBadgeGrants() de um clique ANTERIOR chegar depois
-// que a pessoa já fechou o modal ou clicou em outra linha, e escrever os
-// badges de alguém errado no popup que está na tela agora.
-let PUBLIC_PROFILE_MODAL_TOKEN = 0;
-
 // ---------- Modal: perfil público (a partir de uma linha do Ranking) ----------
-// Preview somente-leitura -- não é a tela de Meu Perfil completa, só o que
-// já é confirmadamente público (profiles/badge_grants têm RLS de leitura
-// pública desde a criação, ver 001/002_create_*_table.sql, pensando
-// exatamente nesse cenário) mais o que a própria linha do ranking já trouxe
-// (amount/rank da semana corrente). A lista de badges é a única parte que
-// pede uma consulta nova (fetchUserBadgeGrants) -- o resto renderiza na
-// hora com o que a linha já tinha.
-//
-// Mostra TODOS os badges de identidade da pessoa aqui (diferente da linha
-// do Ranking, que mostra só o "em destaque" escolhido por ela) -- pensado
-// pra quando existir um badge de usuário premium: a linha continua
-// enxuta com o badge mais relevante, mas o popup do perfil deixa claro
-// tudo que a pessoa já conquistou.
-//
-// Além disso, mostra a vitrine de CONQUISTAS de gameplay (BADGES) dessa
-// pessoa, igual à seção "Conquistas" da própria Visão geral do Perfil
-// (mesmo .profile-badge-showcase/.badge.earned) -- é justamente o pedido
-// de "esse perfil com os badges seja visto por todos ao clicar no nome no
-// Ranking": antes só os badges de IDENTIDADE apareciam aqui, os de
-// gameplay ficavam de fora. Fonte: earned_badges (pública, ver
-// fetchUserEarnedBadges), não a `progress` privada da outra pessoa.
-async function openPublicProfileModal(row, catalog){
-  const modal = document.getElementById('public-profile-modal');
-  const body = document.getElementById('public-profile-modal-body');
-  if (!modal || !body) return;
-  const token = ++PUBLIC_PROFILE_MODAL_TOKEN;
-
-  const name = row.profile?.display_name || row.profile?.username || 'Aluno(a)';
-  const username = row.profile?.username;
-  const initials = avatarInitials(name);
-  const color = avatarColor(row.user_id);
-  const avatarHTML = row.profile?.avatar_url
-    ? `<img class="public-profile-avatar" src="${row.profile.avatar_url}" alt="Foto de perfil">`
-    : `<div class="public-profile-avatar" style="background:${color};">${initials}</div>`;
-  const bio = row.profile?.bio;
-
-  body.innerHTML = `
-    <div class="public-profile-header">
-      ${avatarHTML}
-      <div class="public-profile-name">${escapeHTML(name)}</div>
-      ${username ? `<div class="public-profile-username">@${escapeHTML(username)}</div>` : ''}
-    </div>
-    ${bio ? `<p class="public-profile-bio">${escapeHTML(bio)}</p>` : ''}
-    <div class="public-profile-badges" id="public-profile-badges">${loadingHTML()}</div>
-    <div class="public-profile-stats">
-      <div class="public-profile-stat"><div class="value">${leaderboardRankBadge(row.rank)}</div><div class="label">Posição</div></div>
-      <div class="public-profile-stat"><div class="value">⭐ ${row.amount}</div><div class="label">XP essa semana</div></div>
-    </div>
-    <div class="public-profile-conquests-section">
-      <div class="section-label">Conquistas</div>
-      <div class="public-profile-conquests" id="public-profile-conquests">${loadingHTML()}</div>
-    </div>
-  `;
-  modal.style.display = 'flex';
-
-  const [grantedIds, earnedBadges] = await Promise.all([
-    fetchUserBadgeGrants(row.user_id),
-    fetchUserEarnedBadges(row.user_id),
-  ]);
-  if (token !== PUBLIC_PROFILE_MODAL_TOKEN) return; // modal já fechado/trocado -- descarta
-
-  // Une o que foi concedido via badge_grants com o badge em destaque
-  // escolhido pela pessoa -- necessário porque "em destaque" pode ser um
-  // badge por REGRA (Fundadora/Beta Tester, calculado, nunca gravado em
-  // badge_grants), não só um concedido manualmente.
-  const allIds = new Set(grantedIds);
-  if (row.profile?.featured_badge_id) allIds.add(row.profile.featured_badge_id);
-  const badges = [...allIds]
-    .map(id => ({ id, ...resolveFeaturedBadge(id, catalog) }))
-    .filter(b => b.icon);
-
-  const badgesEl = document.getElementById('public-profile-badges');
-  if (badgesEl){
-    if (!badges.length){
-      badgesEl.remove();
-    } else {
-      badgesEl.innerHTML = badges.map(b => `
-        <button type="button" class="public-profile-badge-chip" data-badge-id="${b.id}">
-          <span class="icon">${b.icon}</span><span>${escapeHTML(b.name)}</span>
-        </button>
-      `).join('');
-      badgesEl.querySelectorAll('.public-profile-badge-chip').forEach(el => {
-        el.addEventListener('click', () => {
-          const b = badges.find(x => x.id === el.dataset.badgeId);
-          if (b) showBadgeInfo(el, `${b.icon} ${b.name}`, b.desc || '');
-        });
-      });
-    }
-  }
-
-  const conquestsEl = document.getElementById('public-profile-conquests');
-  if (conquestsEl){
-    const section = conquestsEl.closest('.public-profile-conquests-section');
-    if (!earnedBadges.length){
-      if (section) section.remove(); else conquestsEl.remove();
-    } else {
-      conquestsEl.innerHTML = earnedBadges.slice().reverse().map(b => `
-        <div class="badge earned profile-badge" data-badge-id="${b.id}">
-          <div class="icon">${b.icon}</div>
-          <div class="name">${b.name}</div>
-        </div>
-      `).join('');
-      conquestsEl.classList.add('profile-badge-showcase');
-      conquestsEl.querySelectorAll('.profile-badge[data-badge-id]').forEach(el => {
-        el.addEventListener('click', () => {
-          const b = earnedBadges.find(x => x.id === el.dataset.badgeId);
-          if (b) showBadgeInfo(el, `${b.icon} ${b.name}`, b.desc || '');
-        });
-      });
-    }
-  }
-}
-
+// Fase 1 do prompt-mestre "perfil público / flashcards públicos" (ver
+// CLAUDE.md, grilling completo em 2 rodadas antes de codar) substituiu o
+// conteúdo antigo daqui (posição + XP DA SEMANA do ranking) por identidade +
+// badges + CONQUISTAS + progresso/XP acumulado/streak POR IDIOMA (Q2 do
+// grilling, aprovado) -- a implementação de verdade agora mora em
+// shared/public-profile.js (openPublicProfileModalForUsername/
+// renderPublicProfileInto), reaproveitada também pelo router (#/user/
+// username) e pela página standalone pra quem não tem sessão. Este arquivo
+// só precisa saber o @username da linha clicada -- não usa mais row.amount/
+// row.rank nem o `catalog` já buscado aqui (a busca de badges migrou pra
+// dentro de fetchPublicProfileByUsername).
 function closePublicProfileModal(){
   const modal = document.getElementById('public-profile-modal');
   if (modal) modal.style.display = 'none';

@@ -85,9 +85,18 @@ function dateStrDaysAgo(days){
 // registerStudyToday() já usa (hoje ou ontem = vivo, mais que isso =
 // quebrado). Bug relatado pela autora (2026-09-18): notificação
 // "user_inactive_3" batendo com o flame do topbar ainda mostrando "3".
-function effectiveStreak(){
-  if (!STATE.streak || !STATE.lastStudyDay) return 0;
+// Extraído de propósito (Fase 1 do perfil público, ver CLAUDE.md) -- o
+// perfil público de OUTRA conta precisa aplicar a MESMA regra de "streak
+// vivo" sobre um par streak/lastStudyDay que não é o STATE local (vem da
+// function get_public_profile_stats). Nunca duplicar a data-math em dois
+// lugares.
+function effectiveStreakFor(streak, lastStudyDay){
+  if (!streak || !lastStudyDay) return 0;
   const today = todayStr();
-  if (STATE.lastStudyDay === today || STATE.lastStudyDay === dateStrDaysAgo(1)) return STATE.streak;
+  if (lastStudyDay === today || lastStudyDay === dateStrDaysAgo(1)) return streak;
   return 0;
+}
+
+function effectiveStreak(){
+  return effectiveStreakFor(STATE.streak, STATE.lastStudyDay);
 }

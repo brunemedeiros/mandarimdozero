@@ -75,7 +75,23 @@ async function initAuth(){
   } else if (sessionStorageSafeGet(GUEST_MODE_FLAG) === '1'){
     enterGuestMode();
   } else {
-    goToNeutralGate();
+    // Fase 1 do perfil público (ver CLAUDE.md) -- primeira vez que uma tela
+    // deste app precisa funcionar pra um visitante SEM sessão e SEM modo
+    // convidado: alguém que recebeu um link de perfil (#/user/username)
+    // compartilhado por outra pessoa, sem conta aqui ainda. Sem este
+    // desvio, goToNeutralGate() redirecionaria pro portão antes que
+    // qualquer coisa renderizasse -- o link nunca mostraria o perfil.
+    // Só cobre ESTE formato de hash específico -- qualquer outra rota
+    // interna (#/unit/3 etc.) continua exigindo login/convidado como
+    // sempre, comportamento inalterado.
+    const publicProfileUsername = (typeof publicProfileUsernameFromHash === 'function')
+      ? publicProfileUsernameFromHash()
+      : null;
+    if (publicProfileUsername && typeof renderStandalonePublicProfile === 'function'){
+      await renderStandalonePublicProfile(publicProfileUsername);
+    } else {
+      goToNeutralGate();
+    }
   }
 
   supabaseClient.auth.onAuthStateChange(async (event, session) => {

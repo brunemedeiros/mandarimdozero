@@ -134,6 +134,7 @@ function myFlashcardRowHTML(c){
       <div style="display:flex; gap:6px;">
         <button class="admin-badge-delete-btn" data-edit-own-flashcard="${c.id}" title="Editar">✏️</button>
         <button class="admin-badge-delete-btn" data-toggle-own-flashcard="${c.id}" data-next-status="${c.status === 'active' ? 'archived' : 'active'}" title="${c.status === 'active' ? 'Arquivar' : 'Reativar'}">${c.status === 'active' ? '🗃' : '↺'}</button>
+        <button class="admin-badge-delete-btn" data-toggle-own-flashcard-visibility="${c.id}" data-next-hidden="${c.hidden_from_profile ? 'false' : 'true'}" title="${c.hidden_from_profile ? 'Escondido do perfil -- clique pra tornar visível' : 'Visível no perfil (se a conta for pública) -- clique pra esconder'}">${c.hidden_from_profile ? '🙈' : '👁️'}</button>
         <button class="admin-badge-delete-btn" data-delete-own-flashcard="${c.id}" title="Apagar permanentemente">🗑</button>
       </div>
     </div>
@@ -271,6 +272,22 @@ function wireMyFlashcardsCardButtons(wrap){
       // um cartão só sairia da fila de revisão (isCardLessonCompleted checa
       // flashcardStatus) no próximo carregamento, não nesta mesma sessão.
       if (typeof updateSelfFlashcardStatusInState === 'function') updateSelfFlashcardStatusInState(id, nextStatus);
+      renderMyFlashcardsView();
+    });
+  });
+
+  // Fase 1 do perfil público (ver CLAUDE.md, grilling Q1) -- botão de olho,
+  // posicionado ao lado do de Arquivar (mesmo pedido da autora), eixo
+  // separado do status active/archived (ver comentário de
+  // setOwnFlashcardHidden em shared/student-flashcards.js). Nenhuma
+  // atualização em STATE.cards/addSelfFlashcardToState precisa acontecer
+  // aqui -- diferente de arquivar/apagar, esconder do perfil não afeta a
+  // fila de revisão, só o dado que renderPublicProfileInto lê da tabela.
+  wrap.querySelectorAll('[data-toggle-own-flashcard-visibility]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.toggleOwnFlashcardVisibility;
+      const nextHidden = btn.dataset.nextHidden === 'true';
+      await setOwnFlashcardHidden(id, nextHidden);
       renderMyFlashcardsView();
     });
   });
