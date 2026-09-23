@@ -31,10 +31,18 @@
 // devolver qualquer dado (mesmo padrão de get_teacher_student_metrics,
 // migration 029, Fase 6a da feature de alunas particulares).
 //
-// A LISTA de flashcards próprios pra importar (grilling Q3/Q4 -- blur +
-// "faça login pra ver/adicionar", multi-select com Selecionar todos/Limpar
-// seleção) é Fase 2, ainda NÃO implementada aqui -- ver migration 037,
-// comentário no topo. Esta fase é só identidade + estatísticas.
+// Fase 2 (ver CLAUDE.md) acrescentou a LISTA de flashcards PRÓPRIOS
+// públicos pra importar (grilling Q3/Q4/Q6/Q7/Q11): botão "Ver cartões",
+// atrás de um gate de login (fundo embaçado + "Faça login..." quando não
+// há CURRENT_USER -- cobre anônimo E convidado, os dois sem conta real pra
+// importar PARA), multi-select com Selecionar todos/Limpar seleção, botão
+// de pré-visualizar cada cartão (Q11) e de reportar (Q6, reaproveita
+// shared/reports.js sem nenhuma mudança lá). Importar SEMPRE cria uma
+// cópia independente (createOwnFlashcard) -- nunca uma referência viva ao
+// cartão original (Q7: editar o original depois não altera a cópia já
+// importada). Respeita o MESMO teto de 20 cartões do plano grátis já
+// travado na Fase 5.1 (FREE_OWN_FLASHCARD_LIMIT/hasActiveTeacherLink) --
+// importar não é uma forma de contornar esse limite.
 //
 // Depende de (todos carregados antes deste arquivo):
 //   - shared/supabase-client.js (supabaseClient)
@@ -46,12 +54,16 @@
 //   - shared/srs.js             (effectiveStreakFor -- mesma regra de "streak
 //                                 vivo" aplicada aqui sobre o par streak/
 //                                 lastStudyDay de OUTRA conta, nunca duplicada)
+//   - shared/roles.js           (hasActiveTeacherLink -- Fase 5.1)
+//   - shared/student-flashcards.js (fetchMyOwnFlashcards, createOwnFlashcard)
+//   - shared/reports.js         (openReportModal -- Q6, sem mudança lá)
 //   - languages/index.js        (AVAILABLE_LANGUAGES, pra bandeira/nome por
 //                                 languageAppKey)
 // E (referenciados só dentro de função, nunca no top-level -- por isso este
 // arquivo pode carregar antes de languages/<lang>/app.js):
-//   - shared/toast.js  (showBadgeInfo, ver shared/utils.js)
+//   - shared/toast.js  (showBadgeInfo/showToast, ver shared/utils.js)
 //   - shared/router.js (routerNavigate -- só chamado quando existir)
+//   - fr/zh app.js      (APP_KEY, addSelfFlashcardToState)
 
 // ---------- Busca ----------
 
@@ -230,6 +242,20 @@ async function renderPublicProfileInto(bodyEl, username){
     </div>
   ` : `<p class="profile-empty-note">Nenhuma conquista ainda.</p>`;
 
+  // Fase 2 -- só existe o convite pra ver cartões quando o perfil É
+  // público (mesmo interruptor mestre de sempre, ver Q1 do grilling da
+  // Fase 1: conta privada esconde TUDO, cartões inclusive, não só as
+  // estatísticas). get_public_flashcards() confere isso de novo no
+  // servidor (defesa em profundidade), mas nem vale a pena mostrar o
+  // botão/gastar clique se já se sabe aqui que a resposta vai ser vazia.
+  const cardsHTML = isPublic ? `
+    <div class="public-profile-cards-section">
+      <div class="section-label">Flashcards</div>
+      <button type="button" class="btn btn-secondary btn-block" id="public-profile-cards-toggle-btn">📇 Ver cartões criados por @${escapeHTML(profile.username)}</button>
+      <div id="public-profile-cards-box" style="display:none; margin-top:10px;"></div>
+    </div>
+  ` : '';
+
   bodyEl.innerHTML = `
     <div class="public-profile-header">
       ${avatarHTML}
@@ -246,6 +272,7 @@ async function renderPublicProfileInto(bodyEl, username){
       <div class="section-label">Conquistas</div>
       ${conquestsHTML}
     </div>
+    ${cardsHTML}
   `;
 
   bodyEl.querySelectorAll('.public-profile-badge-chip').forEach(el => {
@@ -260,7 +287,279 @@ async function renderPublicProfileInto(bodyEl, username){
       if (b) showBadgeInfo(el, `${b.icon} ${b.name}`, b.desc || '');
     });
   });
+
+  if (isPublic){
+    const toggleBtn = bodyEl.querySelector('#public-profile-cards-toggle-btn');
+    const box = bodyEl.querySelector('#public-profile-cards-box');
+    toggleBtn?.addEventListener('click', () => {
+      const opening = box.style.display === 'none';
+      box.style.display = opening ? 'block' : 'none';
+      // Busca só na PRIMEIRA vez que abre -- reabrir/fechar depois disso é
+      // só toggle de display, mesmo padrão de custo de rede já usado no
+      // painel de métricas da Fase 6a (feature de alunas particulares).
+      if (opening && !box.dataset.loaded){
+        box.dataset.loaded = '1';
+        renderPublicProfileCardsBox(bodyEl, profile.username);
+      }
+    });
+  }
 }
+
+// ---------- Fase 2: lista de flashcards públicos + importação ----------
+// Estado ÚNICO (não por bodyEl) -- diferente do WeakMap de corrida acima,
+// só um container de cartões pode estar aberto de verdade por vez na
+// prática (modal e página standalone nunca são populados na mesma sessão
+// de página, ver comentário do topo do arquivo), então um objeto global
+// simples é suficiente; guarda o que o formulário de importação precisa
+// entre o clique de "Selecionar"/checkbox e o clique de "Adicionar".
+const PUBLIC_PROFILE_IMPORT_STATE = { username: null, cardsCache: [], selectedIds: new Set(), remainingSlots: Infinity };
+
+async function fetchPublicFlashcardsByUsername(username, languageAppKey){
+  const { data, error } = await supabaseClient.rpc('get_public_flashcards', { p_username: username, p_language_app_key: languageAppKey });
+  if (error || !data){ console.error('Erro ao carregar cartões públicos:', error); return { cards: [] }; }
+  if (data.error) return { cards: [] }; // not_found/not_public -- silencioso, o botão só aparece quando isPublic já é true
+  return { cards: data.cards || [] };
+}
+
+// Q3 do grilling: ver E importar cartões exige LOGIN de verdade -- cobre
+// tanto visitante totalmente anônimo (página standalone, CURRENT_USER
+// sempre null ali) quanto modo convidado (CURRENT_USER===false) -- os
+// dois sem uma conta real em que gravar a cópia importada. Fundo
+// "embaçado" (filter:blur numa lista de linhas fictícias) + convite pra
+// entrar, exatamente como pedido.
+function publicProfileCardsLoginGateHTML(){
+  const fakeRow = `
+    <div class="admin-badge-row">
+      <div class="admin-badge-info">
+        <div class="admin-badge-name">•••••• → ••••••</div>
+        <div class="admin-badge-desc">••••••••••••</div>
+      </div>
+    </div>
+  `;
+  return `
+    <div class="public-profile-cards-gate">
+      <div class="public-profile-cards-gate-skeleton">${fakeRow}${fakeRow}${fakeRow}</div>
+      <div class="public-profile-cards-gate-overlay">
+        <div class="public-profile-cards-gate-card">
+          <p>🔒 Faça login para ver os cartões e adicionar ao seu perfil.</p>
+          <a href="../" class="btn btn-primary btn-block">Fazer login →</a>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function publicProfileFlashcardRowHTML(c){
+  return `
+    <div class="admin-badge-row" data-card-row="${c.id}">
+      <input type="checkbox" class="public-profile-card-check" data-card-id="${c.id}">
+      <div class="admin-badge-info">
+        <div class="admin-badge-name">${escapeHTML(c.front)}${c.frontPinyin ? ` (${escapeHTML(c.frontPinyin)})` : ''} → ${escapeHTML(c.backTrans)}</div>
+        ${c.note ? `<div class="admin-badge-desc">${escapeHTML(c.note)}</div>` : ''}
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button type="button" class="admin-badge-delete-btn" data-preview-card="${c.id}" title="Ver detalhes, sem editar">👁</button>
+        <button type="button" class="admin-badge-delete-btn" data-report-card="${c.id}" title="Reportar este cartão">🚩</button>
+      </div>
+    </div>
+  `;
+}
+
+async function renderPublicProfileCardsBox(bodyEl, username){
+  const box = bodyEl.querySelector('#public-profile-cards-box');
+  if (!box) return;
+
+  // !CURRENT_USER cobre os 3 estados possíveis desta variável (null na
+  // página standalone, false em modo convidado, objeto quando logada de
+  // verdade) -- só o terceiro caso passa.
+  if (!CURRENT_USER){
+    box.innerHTML = publicProfileCardsLoginGateHTML();
+    return;
+  }
+
+  box.innerHTML = loadingHTML();
+
+  const [cardsRes, hasLink, myCards] = await Promise.all([
+    fetchPublicFlashcardsByUsername(username, APP_KEY),
+    (typeof hasActiveTeacherLink === 'function') ? hasActiveTeacherLink() : Promise.resolve(false),
+    (typeof fetchMyOwnFlashcards === 'function') ? fetchMyOwnFlashcards(APP_KEY) : Promise.resolve([]),
+  ]);
+
+  PUBLIC_PROFILE_IMPORT_STATE.username = username;
+  PUBLIC_PROFILE_IMPORT_STATE.cardsCache = cardsRes.cards;
+  PUBLIC_PROFILE_IMPORT_STATE.selectedIds = new Set();
+  // Mesmo teto da Fase 5.1 (FREE_OWN_FLASHCARD_LIMIT, shared/my-flashcards.js)
+  // -- importar cartão alheio não é uma forma de contornar o limite do
+  // plano grátis, é só mais uma forma de CRIAR um cartão próprio.
+  const activeMyCount = myCards.filter(c => c.status === 'active').length;
+  PUBLIC_PROFILE_IMPORT_STATE.remainingSlots = hasLink
+    ? Infinity
+    : Math.max(0, (typeof FREE_OWN_FLASHCARD_LIMIT === 'number' ? FREE_OWN_FLASHCARD_LIMIT : 20) - activeMyCount);
+
+  if (!cardsRes.cards.length){
+    box.innerHTML = `<p class="profile-empty-note">Este usuário ainda não tem nenhum cartão público.</p>`;
+    return;
+  }
+
+  box.innerHTML = `
+    <div class="admin-recipients-summary">
+      <span class="pill" id="public-profile-cards-counter">Nenhum cartão selecionado</span>
+      <div class="admin-recipients-actions">
+        <a href="#" class="admin-select-link" id="public-profile-cards-select-all">Selecionar todos</a>
+        <a href="#" class="admin-select-link" id="public-profile-cards-clear">Limpar seleção</a>
+      </div>
+    </div>
+    <div id="public-profile-cards-list">${cardsRes.cards.map(publicProfileFlashcardRowHTML).join('')}</div>
+    <button type="button" class="btn btn-primary btn-block" id="public-profile-cards-import-btn" disabled style="margin-top:10px;">Adicionar aos meus cartões</button>
+    <p class="profile-edit-error" id="public-profile-cards-import-error"></p>
+  `;
+
+  wirePublicProfileCardsBox(box);
+}
+
+function updatePublicProfileCardsCounter(box){
+  const n = PUBLIC_PROFILE_IMPORT_STATE.selectedIds.size;
+  const counter = box.querySelector('#public-profile-cards-counter');
+  if (counter) counter.textContent = n === 0 ? 'Nenhum cartão selecionado' : `${n} cartão(ões) selecionado(s)`;
+  const importBtn = box.querySelector('#public-profile-cards-import-btn');
+  if (importBtn) importBtn.disabled = n === 0;
+}
+
+function wirePublicProfileCardsBox(box){
+  box.querySelectorAll('.public-profile-card-check').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const id = Number(cb.dataset.cardId);
+      if (cb.checked) PUBLIC_PROFILE_IMPORT_STATE.selectedIds.add(id);
+      else PUBLIC_PROFILE_IMPORT_STATE.selectedIds.delete(id);
+      updatePublicProfileCardsCounter(box);
+    });
+  });
+
+  box.querySelector('#public-profile-cards-select-all')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    PUBLIC_PROFILE_IMPORT_STATE.selectedIds = new Set(PUBLIC_PROFILE_IMPORT_STATE.cardsCache.map(c => c.id));
+    box.querySelectorAll('.public-profile-card-check').forEach(cb => { cb.checked = true; });
+    updatePublicProfileCardsCounter(box);
+  });
+  box.querySelector('#public-profile-cards-clear')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    PUBLIC_PROFILE_IMPORT_STATE.selectedIds = new Set();
+    box.querySelectorAll('.public-profile-card-check').forEach(cb => { cb.checked = false; });
+    updatePublicProfileCardsCounter(box);
+  });
+
+  box.querySelectorAll('[data-preview-card]').forEach(btn => {
+    btn.addEventListener('click', () => openPublicFlashcardPreview(Number(btn.dataset.previewCard)));
+  });
+  box.querySelectorAll('[data-report-card]').forEach(btn => {
+    btn.addEventListener('click', () => reportPublicFlashcard(Number(btn.dataset.reportCard)));
+  });
+
+  box.querySelector('#public-profile-cards-import-btn')?.addEventListener('click', () => importSelectedPublicFlashcards(box));
+}
+
+// Q11 do grilling: "ver cada cartão como se fosse editá-lo, mas sem
+// permitir a edição" -- reaproveita o mesmo vocabulário visual dos forms
+// de edição (.profile-edit-label) só que como texto estático, nunca
+// campos editáveis nem botão de salvar.
+function openPublicFlashcardPreview(cardId){
+  const c = PUBLIC_PROFILE_IMPORT_STATE.cardsCache.find(x => x.id === cardId);
+  const modal = document.getElementById('public-flashcard-preview-modal');
+  const body = document.getElementById('public-flashcard-preview-body');
+  if (!c || !modal || !body) return;
+  const direction = c.frontIsTargetLanguage === false
+    ? 'Frente na tradução, verso no idioma estudado'
+    : 'Frente no idioma estudado, verso na tradução';
+  body.innerHTML = `
+    <div class="profile-edit-label">Frente</div>
+    <p>${escapeHTML(c.front)}</p>
+    ${c.frontPinyin ? `<div class="profile-edit-label">Pinyin</div><p>${escapeHTML(c.frontPinyin)}</p>` : ''}
+    <div class="profile-edit-label">Verso</div>
+    <p>${escapeHTML(c.backTrans)}</p>
+    ${c.note ? `<div class="profile-edit-label">Nota</div><p>${escapeHTML(c.note)}</p>` : ''}
+    <div class="profile-edit-label">Direção</div>
+    <p>${direction}</p>
+  `;
+  modal.style.display = 'flex';
+}
+
+// Q6 do grilling: aprovado sem ressalva -- reaproveita 100% o sistema de
+// report já existente (shared/reports.js), só com um `source` e o
+// conteúdo do cartão como contexto extra. Nenhuma mudança em reports.js.
+function reportPublicFlashcard(cardId){
+  const c = PUBLIC_PROFILE_IMPORT_STATE.cardsCache.find(x => x.id === cardId);
+  if (!c || typeof openReportModal !== 'function') return;
+  openReportModal({
+    source: 'public_profile_flashcard',
+    flashcard_owner_username: PUBLIC_PROFILE_IMPORT_STATE.username,
+    flashcard_front: c.front,
+    flashcard_back: c.backTrans,
+  });
+}
+
+async function importSelectedPublicFlashcards(box){
+  const errorEl = box.querySelector('#public-profile-cards-import-error');
+  if (errorEl) errorEl.textContent = '';
+  const ids = [...PUBLIC_PROFILE_IMPORT_STATE.selectedIds];
+  if (!ids.length) return;
+
+  if (ids.length > PUBLIC_PROFILE_IMPORT_STATE.remainingSlots){
+    const modal = document.getElementById('flashcard-limit-modal');
+    if (modal) modal.style.display = 'flex';
+    else if (errorEl) errorEl.textContent = 'Você atingiu o limite de cartões do plano grátis.';
+    return;
+  }
+
+  const btn = box.querySelector('#public-profile-cards-import-btn');
+  if (btn){ btn.disabled = true; btn.textContent = 'Adicionando...'; }
+
+  let importedCount = 0;
+  for (const id of ids){
+    const c = PUBLIC_PROFILE_IMPORT_STATE.cardsCache.find(x => x.id === id);
+    if (!c) continue;
+    // Q7 do grilling: SEMPRE uma cópia independente -- createOwnFlashcard()
+    // cria uma linha NOVA na conta de quem importa, nunca uma referência
+    // viva ao cartão original. Editar o original depois disso não altera
+    // esta cópia.
+    const result = await createOwnFlashcard({
+      languageAppKey: APP_KEY,
+      front: c.front,
+      backTrans: c.backTrans,
+      note: c.note,
+      frontPinyin: c.frontPinyin,
+      frontIsTargetLanguage: c.frontIsTargetLanguage,
+    });
+    if (result.ok){
+      importedCount++;
+      // Mesmo motivo de sempre (ver comentário de addSelfFlashcardToState
+      // em fr/zh app.js) -- sem isto, o cartão só entraria na fila de
+      // revisão no PRÓXIMO carregamento do app.
+      if (typeof addSelfFlashcardToState === 'function') addSelfFlashcardToState(result.card);
+    }
+  }
+
+  if (importedCount > 0 && typeof showToast === 'function'){
+    showToast(`✓ ${importedCount} cartão(ões) adicionado(s) à sua conta.`);
+  }
+  if (importedCount < ids.length && errorEl){
+    errorEl.textContent = 'Alguns cartões não puderam ser adicionados. Tente de novo.';
+  }
+  // Re-renderiza a caixa inteira -- reflete o espaço restante novo (pode
+  // ter zerado) e limpa a seleção, mesmo padrão de "só um submit
+  // bem-sucedido reseta o estado" já usado em Meus Cartões. box.parentElement
+  // é `.public-profile-cards-section`, e o pai DELE é sempre o bodyEl
+  // (modal ou página standalone) -- estrutura fixa montada acima, nunca
+  // varia por contexto.
+  await renderPublicProfileCardsBox(box.parentElement.parentElement, PUBLIC_PROFILE_IMPORT_STATE.username);
+}
+
+document.getElementById('public-flashcard-preview-close')?.addEventListener('click', () => {
+  const modal = document.getElementById('public-flashcard-preview-modal');
+  if (modal) modal.style.display = 'none';
+});
+document.getElementById('public-flashcard-preview-modal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'public-flashcard-preview-modal') e.target.style.display = 'none';
+});
 
 // ---------- Entrada 1: dentro do app (logada ou convidada) ----------
 // Reaproveita o MESMO modal que o Ranking já usava (#public-profile-modal,

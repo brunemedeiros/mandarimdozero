@@ -4375,3 +4375,203 @@ já foram aplicadas ao vivo via `mcp__Supabase__apply_migration`.
 Próxima fase (2 -- lista de cartões + importação) só começa depois de
 autorização explícita da autora, com este relatório já entregue antes de
 pedir luz verde.
+
+**Atualização: autorizada e entregue (2026-09-23, mesmo dia), "Siga para
+a próxima fase".**
+
+## Fase 2 (lista de flashcards públicos + importação, gate de login, preview, report)
+
+Cobre os itens explicitamente adiados na Fase 1: lista de cartões
+PRÓPRIOS (`student_flashcards`, `origin:'self'`) de um perfil público,
+atrás de um gate de login (Q3), multi-select com Selecionar todos/Limpar
+seleção (Q4), importação como cópia independente (Q7), botão de
+pré-visualizar sem editar (Q11) e botão de reportar (Q6). Fase 3 (popup
+de limite com link de upgrade/Stripe) continua fora do escopo -- sem
+infraestrutura de pagamento no código ainda.
+
+**O que foi feito:**
+
+- **Migration `038_public_profile_flashcards.sql`** -- function
+  `get_public_flashcards(p_username, p_language_app_key)`, mesmo padrão
+  SECURITY DEFINER de `get_public_profile_stats` (Fase 1)/
+  `get_teacher_student_metrics` (Fase 6a da feature de alunas
+  particulares): checa `public_profile=true` ela mesma antes de tocar em
+  qualquer linha, devolve só os campos necessários pra exibir/importar um
+  cartão (`front`/`frontPinyin`/`backTrans`/`note`/
+  `frontIsTargetLanguage`), nunca a linha inteira. Filtra
+  `status='active'` e `hidden_from_profile=false` (cascata da Fase 1: só
+  o que a própria dona não escondeu individualmente) e por
+  `language_app_key` -- um visitante em `fr/#/user/x` só pode ver/
+  importar cartões de francês daquela pessoa, nunca os de mandarim que
+  ela possa ter em outra conta/site (mesma regra que a importação manual
+  via arquivo/link, Prop 6 do prompt-mestre "7 propostas", já aplicava).
+  Concedida a `anon` também (mesmo motivo da 037 -- a página standalone
+  chama o mesmo código, mesmo que na prática o cliente só invoque isto
+  depois de confirmar login). RLS de `student_flashcards` continua
+  intocada (owner-only, migration 028). Aplicada AO VIVO nesta sessão via
+  `mcp__Supabase__apply_migration`, projeto `eigjocalzwamisgqilhg` --
+  não é passo manual pendente pra autora.
+- **`shared/public-profile.js`** estendido -- `renderPublicProfileInto()`
+  ganhou uma seção "Flashcards" (só quando `isPublic===true`, mesmo
+  raciocínio da seção de Progresso: conta privada esconde tudo, não só
+  as estatísticas) com um botão "📇 Ver cartões criados por @username"
+  que expande uma caixa carregada sob demanda (busca só na primeira
+  abertura, mesmo padrão de custo de rede já usado no painel de métricas
+  da Fase 6a).
+  - **Gate de login (Q3)**: `!CURRENT_USER` cobre os 3 estados possíveis
+    dessa variável (`null` na página standalone, `false` em modo
+    convidado, objeto quando logada de verdade) com uma única checagem --
+    tanto visitante anônimo quanto convidado caem no gate, porque nenhum
+    dos dois tem uma conta real em que gravar a cópia importada. Mostra
+    linhas fictícias borradas (`filter:blur`) atrás de um cartão
+    centralizado "🔒 Faça login para ver os cartões e adicionar ao seu
+    perfil" + link `../` (mesmo link já usado no rodapé "Criar minha
+    conta" da Fase 1). **Nenhuma chamada de rede acontece nesse caminho**
+    -- a checagem é 100% client-side, antes de `fetchPublicFlashcardsByUsername`
+    ser sequer chamada (confirmado no teste: `get_public_flashcards`
+    nunca aparece nas chamadas de RPC quando o gate está ativo).
+  - **Multi-select (Q4)**: reaproveita 100% o par
+    `.admin-recipients-summary`/`.admin-recipients-actions`/
+    `.admin-select-link` já calibrado em `shared/admin-flashcards.js`
+    (Fase 3 do prompt-mestre "reestruturação do formulário de
+    flashcards") -- zero CSS novo pro toolbar. Contador
+    ("Nenhum cartão selecionado"/"N cartão(ões) selecionado(s)"),
+    "Selecionar todos"/"Limpar seleção", botão de importar desabilitado
+    com 0 selecionados.
+  - **Importação (Q7)**: `importSelectedPublicFlashcards()` chama
+    `createOwnFlashcard()` (já existente desde a Fase 5 do sistema de
+    alunas particulares) uma vez por cartão selecionado -- sempre cria
+    uma linha NOVA e independente na conta de quem importa, nunca uma
+    referência viva ao cartão original (confirmado no grilling: editar o
+    original depois não altera a cópia). `addSelfFlashcardToState()`
+    chamado a cada sucesso, mesmo motivo de sempre -- sem isso o cartão
+    só entraria na fila de revisão no próximo carregamento do app, não
+    nesta mesma sessão.
+  - **Teto de 20 cartões (Fase 5.1) respeitado na importação** -- decisão
+    minha, não pedida explicitamente no grilling da Fase 1 (que só falou
+    do popup de upgrade, adiado pra Fase 3), mas necessária por
+    coerência: importar é só mais uma forma de CRIAR um cartão próprio,
+    então precisa respeitar o MESMO limite que criar manualmente em
+    "Meus Cartões" já respeita (`FREE_OWN_FLASHCARD_LIMIT`/
+    `hasActiveTeacherLink()`, ambos reaproveitados sem nenhuma mudança).
+    Se a seleção excede o espaço restante, a importação inteira é
+    bloqueada ANTES de criar qualquer cartão (nunca uma importação
+    parcial) e reabre o MESMO popup `#flashcard-limit-modal` já usado em
+    Meus Cartões -- nenhum popup novo, nenhuma menção a upgrade/Stripe
+    (esse texto mais rico fica pra Fase 3, quando essa infraestrutura
+    existir).
+  - **Preview sem editar (Q11)**: `openPublicFlashcardPreview()`, modal
+    novo (`#public-flashcard-preview-modal`, fr+zh `index.html`) com
+    campos totalmente estáticos (`<p>`, nunca `<input>`/`<textarea>`) --
+    Frente, Pinyin (só quando existe), Verso, Nota (só quando existe),
+    Direção. Reaproveita `.profile-edit-label` como rótulo, zero CSS
+    novo.
+  - **Reportar (Q6)**: `reportPublicFlashcard()` chama
+    `openReportModal({source:'public_profile_flashcard',
+    flashcard_owner_username, flashcard_front, flashcard_back})` --
+    reaproveita o sistema de report global já existente
+    (`shared/reports.js`) sem NENHUMA mudança lá, só um `source` novo e
+    o conteúdo do cartão como contexto extra (o mecanismo já suporta
+    isso via `Object.assign` no `extraContext`, desenhado desde o
+    "projeto Report global" justamente pra aceitar contexto arbitrário
+    do chamador).
+
+**Decisões arquiteturais desta fase:**
+1. `public_profile` continua sendo o ÚNICO interruptor -- não criei um
+   segundo campo tipo "cartões públicos" separado de "perfil público".
+   A cascata já travada na Fase 1 (conta pública = tudo público exceto o
+   marcado individualmente como escondido) vale igual pra identidade,
+   progresso E cartões.
+2. `get_public_flashcards` nunca devolve `id` como algo sensível (é só
+   um inteiro sequencial, sem valor de exploração), mas devolve só os
+   campos que a UI realmente precisa pra exibir/copiar um cartão -- nunca
+   `student_id`/`created_at`/`status`/`hidden_from_profile` (esses
+   últimos dois, inclusive, são exatamente os campos que decidem se o
+   cartão aparece ali pra começo de conversa -- não fazia sentido
+   devolvê-los de novo pro cliente).
+3. O botão "Ver cartões" e toda a seção só existem quando `isPublic`
+   (calculado a partir da MESMA resposta de `get_public_profile_stats`
+   já buscada pra seção de Progresso) -- evita uma consulta extra
+   (`get_public_flashcards`) a um perfil que já se sabe ser privado, e
+   mantém as duas seções (Progresso/Flashcards) sempre consistentes
+   entre si sem duas fontes de verdade sobre "este perfil é público?".
+4. Teto de 20 cartões (ver acima) tratado como parte natural desta fase,
+   não como a Fase 3 antecipada -- Fase 3 é especificamente sobre a
+   PARTE PAGA (link de upgrade, texto sobre plano), o limite em si já
+   existia desde a Fase 5.1 e só precisava ser respeitado neste novo
+   caminho de criação de cartão.
+
+**Gratuito x Premium (avaliado, não implementado):** mesma conclusão da
+Fase 1 -- nenhuma peça nova desta fase muda o cálculo. A única
+alavanca concreta continua sendo o teto de cartões próprios (já
+existente desde a Fase 5.1, só estendido pra este novo caminho, ver
+acima) -- a Fase 3 (popup com link de upgrade/Stripe) é onde essa
+alavanca ganharia uma saída de monetização de verdade, ainda sem
+infraestrutura de pagamento no código.
+
+**Testes realizados:** `node --check` sem erro em
+`shared/public-profile.js`. Validação funcional via Playwright (fr+zh),
+mesmo padrão de stub de `window.supabase.createClient()` de toda a
+feature, estendido com um mock de `get_public_flashcards`: (1)
+**visitante anônimo (página standalone)** -- gate mostrado com fundo
+embaçado + link de login, e confirmado que `get_public_flashcards`
+NUNCA é chamada nesse caminho (`A_noCardsRpcCalled`); (2) **logada,
+lista filtrada corretamente** -- de 4 cartões semeados (2 visíveis, 1
+`hidden_from_profile:true`, 1 `status:'archived'`), só os 2 corretos
+aparecem no DOM, os outros 2 confirmados ausentes
+(`B_hiddenRowAbsent`/`B_archivedRowAbsent`); "Selecionar todos"/"Limpar
+seleção" atualizam contador e estado do botão de importar
+corretamente; (3) **preview (Q11)** -- modal mostra frente/nota
+corretos, fecha corretamente; (4) **reportar (Q6)** -- modal de report
+abre com `source:'public_profile_flashcard'` e o front do cartão certo
+no contexto; (5) **importação bem-sucedida** -- 1 cartão selecionado e
+importado grava de verdade no banco fake
+(`E_dbCountAfterImport===1`) E entra em `STATE.cards` imediatamente
+com `origin:'self'` (`E_stateCardsHasImported`), sem esperar reload;
+(6) **teto de 20 respeitado** -- com 19 cartões próprios ativos já
+existentes, selecionar 2 cartões públicos (19+2=21>20) abre o popup de
+limite e NÃO grava nada (`F_dbCountUnchanged`); reduzir a seleção pra 1
+(19+1=20) permite a importação, banco confirma 20 cartões depois
+(`F_dbCountAfterAllowedImport`); (7) **vínculo com professora = sem
+teto** -- com 25 cartões próprios já existentes e vínculo ativo,
+importar 2 cartões funciona normalmente e o popup de limite nunca abre
+(`G_dbCountAfterImport===27`, `G_limitModalStayedHidden`); (8)
+**perfil privado -- nem o botão aparece** -- confirmado
+`#public-profile-cards-toggle-btn` ausente do DOM quando
+`public_profile=false` (`H_noCardsButton`). Testado nos dois idiomas
+(fr completo, zh com o cenário núcleo -- botão + gate -- confirmado sem
+erro de console). Sem erro de console novo atribuível a este código
+(mesmos `pageerror` de mock -- `.is()`/`.upsert()` -- já registrados
+repetidas vezes nesta feature, chamadas de fundo não relacionadas).
+Validação visual (screenshot Playwright, fr, claro+escuro) do estado de
+gate (fundo embaçado + cartão de login) confirma legibilidade nos dois
+temas -- esperado, zero cor nova introduzida (`--paper`/`--paper-line`/
+`--shadow-lift`/`--ink`, todos já calibrados).
+
+**O que ainda falta / não foi feito nesta fase (de propósito, é Fase 3
+ou fora do escopo original):**
+- **Fase 3**: popup de limite com link de upgrade/Stripe -- continua
+  reaproveitando o popup genérico já existente (Fase 5.1), sem menção a
+  pagamento, porque essa infraestrutura não existe no código ainda.
+- Edição/exclusão de um cartão IMPORTADO segue as mesmas regras que
+  qualquer outro cartão próprio em "Meus Cartões" (Prop 4 do
+  prompt-mestre "7 propostas") -- nada novo criado aqui, a cópia
+  importada é indistinguível de um cartão criado manualmente depois que
+  a importação termina.
+- Nenhuma notificação/aviso pro dono original do cartão avisando que
+  alguém importou uma cópia dele -- não foi pedido, e o design de
+  "cópia independente" (Q7) nem precisaria disso pra funcionar
+  corretamente.
+- `note` é copiado junto na importação (mesmo campo que `createOwnFlashcard`
+  já aceita) -- decisão minha, não detalhada no grilling, mas
+  consistente com o que Prop 6 (export/import manual via arquivo/link)
+  já fazia antes desta fase.
+
+Nenhum passo manual pendente pra autora nesta entrega -- a migration
+`038` já foi aplicada ao vivo via `mcp__Supabase__apply_migration`.
+
+Com a Fase 2 entregue, o prompt-mestre "perfil público / flashcards
+públicos" original está com todo o escopo grillado (Fases 1 e 2)
+completo -- só a Fase 3 (integração com pagamento/Stripe) continua em
+aberto, explicitamente bloqueada até essa infraestrutura existir de
+verdade no produto, não porque falta trabalho de UI.
