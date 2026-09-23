@@ -3259,9 +3259,23 @@ footer.app-footer img{ height:40px; opacity:.85; }
       </div>
       <div id="review-today-widget"></div>
 
+      <!-- Prop 3 (ver CLAUDE.md, "7 propostas") -- "Meus Cartões" saiu do
+           menu do avatar (ninguém clicava lá) e ganhou este botão, no
+           mesmo estilo de pill já usado pras sub-abas do Painel de
+           Admin/Perfil (.leaderboard-tabs/.leaderboard-tab), zero CSS
+           novo. -->
+      <div class="leaderboard-tabs" role="tablist" aria-label="Atalhos de Revisão" style="justify-content:flex-start; margin-bottom:10px;">
+        <button type="button" class="leaderboard-tab" id="review-my-flashcards-btn">📇 Meus Cartões</button>
+      </div>
+
       <div class="review-settings-panel" id="review-settings-panel" hidden>
-        <div class="section-label">Filtro de fila</div>
-        <select class="review-settings-select" id="review-filter-select"></select>
+        <!-- Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila"
+             removido de vez; "Origem" (Fase 4 do sistema de alunas
+             particulares) subiu pro topo do painel. -->
+        <div id="review-origin-select-wrap" hidden>
+          <div class="section-label">Origem</div>
+          <select class="review-settings-select" id="review-origin-select"></select>
+        </div>
         <div class="section-label">Frequência de revisão</div>
         <select class="review-settings-select" id="review-frequency-select">
           <option value="frequent">Mais frequente (revisa mais cedo e mais vezes)</option>
@@ -3283,11 +3297,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
           <option value="normal">Normal (recomendado)</option>
           <option value="intense">Intensa (sessões mais longas)</option>
         </select>
-        <div id="review-origin-select-wrap" hidden>
-          <div class="section-label">Origem</div>
-          <select class="review-settings-select" id="review-origin-select"></select>
-        </div>
-        <p class="settings-more-note">O filtro decide quais cartões entram na sessão agora; os outros ajustam o motor de revisão nos bastidores -- você não precisa entender os detalhes técnicos.</p>
+        <p class="settings-more-note">Estes ajustes controlam o motor de revisão nos bastidores -- você não precisa entender os detalhes técnicos.</p>
       </div>
 
       <div class="section-label" id="review-mode-revisar-label">Revisar</div>
@@ -3619,7 +3629,6 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <button class="user-dropdown-item mais-extra-tab" id="mais-conjugaison-btn" data-tab="conjugaison">✍️ Conjugação</button>
   <button class="user-dropdown-item mais-extra-tab" id="mais-challenges-btn" data-tab="challenges">🎯 Desafios</button>
   <button class="user-dropdown-item mais-extra-tab" id="leaderboard-btn">🏆 Ranking</button>
-  <button class="user-dropdown-item" id="my-flashcards-btn">📇 Meus cartões</button>
   <button class="user-dropdown-item" id="support-materials-btn">📚 Material de apoio</button>
   <button class="user-dropdown-item mais-extra-tab" id="user-settings-btn">⚙️ Configurações</button>
   <button class="user-dropdown-item admin-only-nav mais-extra-tab" id="admin-badges-btn" style="display:none;">🛠️ Painel de Admin</button>
@@ -3879,6 +3888,27 @@ footer.app-footer img{ height:40px; opacity:.85; }
     </div>
     <div class="app-modal-body">
       <p>Você atingiu o limite de <strong>20 cartões próprios ativos</strong> do plano grátis. Pra criar mais, arquive algum cartão que já não usa, ou peça pra sua professora te vincular -- alunos vinculados a uma professora têm cartões próprios ilimitados.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Prop 4 (ver CLAUDE.md, "7 propostas") -- confirmação obrigatória antes
+     de salvar uma edição de flashcard (professora OU aluno editando o
+     próprio): editar reinicia o progresso de revisão (mesmo mecanismo de
+     id-com-revisão de shared/teacher-flashcards.js/shared/student-flashcards.js).
+     Compartilhado entre shared/admin-flashcards.js e shared/my-flashcards.js. -->
+<div id="flashcard-reset-confirm-modal" class="app-modal-overlay" style="display:none;">
+  <div class="app-modal">
+    <div class="app-modal-header">
+      <h3>⚠️ Confirmar edição</h3>
+      <button class="app-modal-close" id="flashcard-reset-confirm-close" aria-label="Fechar">✕</button>
+    </div>
+    <div class="app-modal-body">
+      <p>Esta edição irá reiniciar o progresso de revisão deste cartão. Deseja continuar?</p>
+      <div style="display:flex; gap:10px; margin-top:14px;">
+        <button class="btn btn-secondary" id="flashcard-reset-confirm-discard" style="flex:1;">Descartar edições</button>
+        <button class="btn btn-primary" id="flashcard-reset-confirm-yes" style="flex:1;">Sim</button>
+      </div>
     </div>
   </div>
 </div>

@@ -164,7 +164,27 @@
 //   - shared/toast.js              (showToast)
 //   - languages/<lang>/app.js      (isAdminUser)
 
-let ADMIN_FLASHCARDS_STATE = { studentIds: new Set(), langFilter: 'all', _studentsCache: [] };
+// Prop 4 (ver CLAUDE.md, "7 propostas") -- editingCardId: qual cartão está
+// mostrando o form de edição agora (null = nenhum); _cardsCache: última
+// lista de cartões buscada (buildFlashcardsCardsBoxHTML), pra achar o
+// objeto completo do cartão em edição sem precisar refazer a busca.
+let ADMIN_FLASHCARDS_STATE = { studentIds: new Set(), langFilter: 'all', _studentsCache: [], editingCardId: null, _cardsCache: [] };
+
+// Prop 4 -- confirmação obrigatória antes de salvar uma edição (grillado
+// com a autora: editar reinicia o progresso de revisão, ela quer avisar
+// antes com "Sim"/"Descartar edições"). Modal compartilhado com
+// shared/my-flashcards.js (#flashcard-reset-confirm-modal, fr/zh
+// index.html) -- usa .onclick (não addEventListener) nos 3 botões de
+// propósito, pra nunca empilhar handlers de chamadas anteriores.
+function openFlashcardResetConfirm(onConfirm){
+  const modal = document.getElementById('flashcard-reset-confirm-modal');
+  if (!modal){ onConfirm(); return; }
+  modal.style.display = 'flex';
+  const close = () => { modal.style.display = 'none'; };
+  document.getElementById('flashcard-reset-confirm-yes').onclick = () => { close(); onConfirm(); };
+  document.getElementById('flashcard-reset-confirm-discard').onclick = close;
+  document.getElementById('flashcard-reset-confirm-close').onclick = close;
+}
 
 // Fase 4 da reestruturação (mesmo prompt-mestre, ver CLAUDE.md) -- "Recursos
 // opcionais" (Nota/Imagem/Áudio) continua sempre visível nos 3 modos (Imagem/
@@ -210,14 +230,213 @@ function flashcardFrontSummaryHTML(c){
   return '';
 }
 
+// Prop 4 (ver CLAUDE.md, "7 propostas") -- edição real (TODOS os campos,
+// grillado explicitamente) de um cartão já criado, mais exclusão física.
+// Vive numa div própria em vez de <form> porque troca de conteúdo entre
+// modos precisa mostrar/esconder blocos, mesmo padrão do form de criação
+// -- mas com ids PRÓPRIOS (edit-flashcard-*, não admin-flashcard-*) pra
+// nunca colidir com o form de criação ao lado. `direction` (Prop 1+2) só
+// aparece quando o idioma do ALUNO DESTE cartão não é mandarim -- mesmo
+// motivo do form de criação (ver comentário lá): não existe um
+// "back_pinyin" pra completar o par hanzi+pinyin se invertido no zh.
+function flashcardEditFormHTML(c){
+  const isMandarim = c.language_app_key === 'mandarim';
+  const isMC = !!(c.choices && c.choices.length);
+  const isCloze = !!c.cloze_sentence;
+  const mode = isCloze ? 'cloze' : (isMC ? 'mc' : 'flip');
+  const direction = c.front_is_target_language === false ? 'target-back' : 'target-front';
+  const choices = c.choices || [];
+  return `
+    <div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:8px;">
+      <div class="section-label" style="margin:0;">Editar cartão</div>
+
+      <div>
+        <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
+          <input type="radio" name="edit-flashcard-mode" value="flip" ${mode === 'flip' ? 'checked' : ''}> Flashcard normal
+        </label>
+        <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
+          <input type="radio" name="edit-flashcard-mode" value="mc" ${mode === 'mc' ? 'checked' : ''}> Múltipla escolha
+        </label>
+        <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
+          <input type="radio" name="edit-flashcard-mode" value="cloze" ${mode === 'cloze' ? 'checked' : ''}> Completar a frase
+        </label>
+      </div>
+
+      ${!isMandarim ? `
+      <div id="edit-flashcard-direction-wrap" style="${mode === 'cloze' ? 'display:none;' : ''}">
+        <div class="section-label" style="margin:0 0 4px;">Idioma de cada lado</div>
+        <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
+          <input type="radio" name="edit-flashcard-direction" value="target-front" ${direction === 'target-front' ? 'checked' : ''}> Frente no idioma estudado, verso na tradução
+        </label>
+        <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
+          <input type="radio" name="edit-flashcard-direction" value="target-back" ${direction === 'target-back' ? 'checked' : ''}> Frente na tradução, verso no idioma estudado
+        </label>
+      </div>` : ''}
+
+      <div id="edit-flashcard-content-main" style="${mode === 'cloze' ? 'display:none;' : ''}">
+        <label class="profile-edit-label" id="edit-flashcard-front-label">${mode === 'mc' ? 'Pergunta/termo' : 'Frente'}</label>
+        <textarea id="edit-flashcard-front" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(c.front || '')}</textarea>
+        ${isMandarim ? `
+        <label class="profile-edit-label">Pinyin</label>
+        <input type="text" id="edit-flashcard-pinyin" class="profile-edit-input" value="${escapeHTML(c.front_pinyin || '')}">` : ''}
+        <label class="profile-edit-label" id="edit-flashcard-back-label">${mode === 'mc' ? 'Resposta correta' : 'Verso'}</label>
+        <textarea id="edit-flashcard-back" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(c.back_trans || '')}</textarea>
+        <div id="edit-flashcard-mc-fields" style="${mode === 'mc' ? '' : 'display:none;'} margin:4px 0 0;">
+          <label class="profile-edit-label">Outras opções -- opção errada 1</label>
+          <input type="text" id="edit-flashcard-mc-1" class="profile-edit-input" value="${escapeHTML(choices[0] || '')}">
+          <label class="profile-edit-label">Opção errada 2 (opcional)</label>
+          <input type="text" id="edit-flashcard-mc-2" class="profile-edit-input" value="${escapeHTML(choices[1] || '')}">
+          <label class="profile-edit-label">Opção errada 3 (opcional)</label>
+          <input type="text" id="edit-flashcard-mc-3" class="profile-edit-input" value="${escapeHTML(choices[2] || '')}">
+        </div>
+      </div>
+
+      <div id="edit-flashcard-content-cloze" style="${mode === 'cloze' ? '' : 'display:none;'}">
+        <label class="profile-edit-label">Frase com lacuna (use ___ pra marcar o espaço)</label>
+        <input type="text" id="edit-flashcard-cloze-sentence" class="profile-edit-input" value="${escapeHTML(c.cloze_sentence || '')}">
+        <label class="profile-edit-label">Resposta certa</label>
+        <input type="text" id="edit-flashcard-cloze-answer" class="profile-edit-input" value="${escapeHTML(c.cloze_answer || '')}">
+        ${isMandarim ? `
+        <label class="profile-edit-label">Pinyin da resposta</label>
+        <input type="text" id="edit-flashcard-cloze-pinyin" class="profile-edit-input" value="${escapeHTML(c.cloze_answer_pinyin || '')}">` : ''}
+        <label class="profile-edit-label">Tradução</label>
+        <textarea id="edit-flashcard-cloze-trans" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(c.back_trans || '')}</textarea>
+      </div>
+
+      <div>
+        <label class="profile-edit-label">Nota</label>
+        <textarea id="edit-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(c.note || '')}</textarea>
+        <label class="profile-edit-label">Imagem${c.image_url ? ' (já tem uma -- escolha um arquivo só pra trocar)' : ''}</label>
+        <input type="file" id="edit-flashcard-image" class="profile-edit-input" accept="image/*">
+        <label class="profile-edit-label">Áudio próprio${c.audio_url ? ' (já tem um -- escolha um arquivo só pra trocar)' : ''}</label>
+        <input type="file" id="edit-flashcard-audio" class="profile-edit-input" accept="audio/*">
+      </div>
+
+      <p class="profile-edit-error" id="edit-flashcard-error"></p>
+      <div style="display:flex; gap:10px;">
+        <button type="button" class="btn btn-secondary" id="edit-flashcard-cancel" style="flex:1;">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="edit-flashcard-save" style="flex:1;">Salvar</button>
+      </div>
+    </div>
+  `;
+}
+
+// Wiring do form de edição -- mode-switch replica o mesmo comportamento
+// do form de criação (esconde/mostra blocos, troca rótulos), mas escopado
+// aos ids `edit-flashcard-*`. Salvar passa pelo modal de confirmação
+// (openFlashcardResetConfirm) ANTES de chamar updateFlashcardContent --
+// só depois do "Sim" a chamada de rede acontece de verdade.
+function wireFlashcardEditForm(c, container){
+  const isMandarim = c.language_app_key === 'mandarim';
+
+  container.querySelectorAll('input[name="edit-flashcard-mode"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      const mode = e.target.value;
+      const contentMain = document.getElementById('edit-flashcard-content-main');
+      const contentCloze = document.getElementById('edit-flashcard-content-cloze');
+      const mcFields = document.getElementById('edit-flashcard-mc-fields');
+      const directionWrap = document.getElementById('edit-flashcard-direction-wrap');
+      if (contentMain) contentMain.style.display = mode === 'cloze' ? 'none' : '';
+      if (contentCloze) contentCloze.style.display = mode === 'cloze' ? '' : 'none';
+      if (mcFields) mcFields.style.display = mode === 'mc' ? '' : 'none';
+      if (directionWrap) directionWrap.style.display = mode === 'cloze' ? 'none' : '';
+      const frontLabel = document.getElementById('edit-flashcard-front-label');
+      const backLabel = document.getElementById('edit-flashcard-back-label');
+      if (frontLabel) frontLabel.textContent = mode === 'mc' ? 'Pergunta/termo' : 'Frente';
+      if (backLabel) backLabel.textContent = mode === 'mc' ? 'Resposta correta' : 'Verso';
+    });
+  });
+
+  document.getElementById('edit-flashcard-cancel').addEventListener('click', () => {
+    ADMIN_FLASHCARDS_STATE.editingCardId = null;
+    updateFlashcardsSelectionDependentUI(document.getElementById('admin-flashcards-content'));
+  });
+
+  document.getElementById('edit-flashcard-save').addEventListener('click', () => {
+    const errorEl = document.getElementById('edit-flashcard-error');
+    errorEl.textContent = '';
+    const mode = container.querySelector('input[name="edit-flashcard-mode"]:checked').value;
+    const isMC = mode === 'mc';
+    const isCloze = mode === 'cloze';
+    const direction = container.querySelector('input[name="edit-flashcard-direction"]:checked')?.value || 'target-front';
+
+    if (!isCloze){
+      if (!document.getElementById('edit-flashcard-front').value.trim()){ errorEl.textContent = 'Digite a frente.'; return; }
+      if (!document.getElementById('edit-flashcard-back').value.trim()){ errorEl.textContent = 'Digite o verso.'; return; }
+      if (isMC){
+        const anyChoice = ['edit-flashcard-mc-1', 'edit-flashcard-mc-2', 'edit-flashcard-mc-3'].some(id => document.getElementById(id).value.trim());
+        if (!anyChoice){ errorEl.textContent = 'Digite pelo menos 1 opção errada.'; return; }
+      }
+    } else {
+      const sentence = document.getElementById('edit-flashcard-cloze-sentence').value.trim();
+      if ((sentence.match(/___/g) || []).length !== 1){ errorEl.textContent = 'A frase precisa ter exatamente um espaço marcado com ___.'; return; }
+      if (!document.getElementById('edit-flashcard-cloze-answer').value.trim()){ errorEl.textContent = 'Digite a resposta certa.'; return; }
+      if (isMandarim && !document.getElementById('edit-flashcard-cloze-pinyin').value.trim()){ errorEl.textContent = 'Digite o pinyin da resposta.'; return; }
+      if (!document.getElementById('edit-flashcard-cloze-trans').value.trim()){ errorEl.textContent = 'Digite a tradução.'; return; }
+    }
+
+    openFlashcardResetConfirm(async () => {
+      const saveBtn = document.getElementById('edit-flashcard-save');
+      if (saveBtn) saveBtn.disabled = true;
+      const imageFile = document.getElementById('edit-flashcard-image').files[0];
+      const audioFile = document.getElementById('edit-flashcard-audio').files[0];
+      // undefined = mantém a mídia já existente (updateFlashcardContent só
+      // sobrescreve image_url/audio_url quando o valor não é undefined).
+      let imageUrl, audioUrl;
+      if (imageFile){
+        const up = await uploadFlashcardMedia(imageFile, 'image');
+        if (!up.ok){ errorEl.textContent = up.error; if (saveBtn) saveBtn.disabled = false; return; }
+        imageUrl = up.url;
+      }
+      if (audioFile){
+        const up = await uploadFlashcardMedia(audioFile, 'audio');
+        if (!up.ok){ errorEl.textContent = up.error; if (saveBtn) saveBtn.disabled = false; return; }
+        audioUrl = up.url;
+      }
+      const front = isCloze ? '' : document.getElementById('edit-flashcard-front').value;
+      const backTrans = isCloze ? document.getElementById('edit-flashcard-cloze-trans').value : document.getElementById('edit-flashcard-back').value;
+      const note = document.getElementById('edit-flashcard-note').value;
+      const pinyinValue = (!isCloze && isMandarim) ? document.getElementById('edit-flashcard-pinyin').value : '';
+      const choices = isMC ? [
+        document.getElementById('edit-flashcard-mc-1').value,
+        document.getElementById('edit-flashcard-mc-2').value,
+        document.getElementById('edit-flashcard-mc-3').value,
+      ] : [];
+      const clozeSentence = isCloze ? document.getElementById('edit-flashcard-cloze-sentence').value : '';
+      const clozeAnswer = isCloze ? document.getElementById('edit-flashcard-cloze-answer').value : '';
+      const clozeAnswerPinyin = (isCloze && isMandarim) ? document.getElementById('edit-flashcard-cloze-pinyin').value : '';
+
+      const result = await updateFlashcardContent(c.id, {
+        languageAppKey: c.language_app_key,
+        front, backTrans, note,
+        frontPinyin: pinyinValue,
+        imageUrl, audioUrl, choices,
+        clozeSentence, clozeAnswer, clozeAnswerPinyin,
+        frontIsTargetLanguage: direction === 'target-front',
+        revision: (c.revision || 0) + 1,
+      });
+      if (saveBtn) saveBtn.disabled = false;
+      if (!result.ok){ errorEl.textContent = result.error; return; }
+      showToast('✓ Cartão editado. O progresso de revisão foi reiniciado.');
+      ADMIN_FLASHCARDS_STATE.editingCardId = null;
+      updateFlashcardsSelectionDependentUI(document.getElementById('admin-flashcards-content'));
+    });
+  });
+}
+
 function flashcardCardRowHTML(c, showUsername){
+  if (ADMIN_FLASHCARDS_STATE.editingCardId === c.id) return flashcardEditFormHTML(c);
   return `
     <div class="admin-badge-row">
       <div class="admin-badge-info">
         <div class="admin-badge-name">${showUsername ? `<span style="opacity:.6">@${escapeHTML(c.__studentUsername || '?')}</span> · ` : ''}${flashcardFrontSummaryHTML(c)} → ${escapeHTML(c.back_trans)}</div>
         <div class="admin-badge-desc">${c.note ? escapeHTML(c.note) + ' · ' : ''}criado em ${new Date(c.created_at).toLocaleDateString('pt-BR')}${flashcardFormatBadgesHTML(c) ? ' · ' + flashcardFormatBadgesHTML(c) : ''}</div>
       </div>
-      <button class="admin-badge-delete-btn" data-toggle-flashcard="${c.id}" data-next-status="${c.status === 'active' ? 'archived' : 'active'}" title="${c.status === 'active' ? 'Arquivar' : 'Reativar'}">${c.status === 'active' ? '🗃' : '↺'}</button>
+      <div style="display:flex; gap:6px;">
+        <button class="admin-badge-delete-btn" data-edit-flashcard="${c.id}" title="Editar">✏️</button>
+        <button class="admin-badge-delete-btn" data-toggle-flashcard="${c.id}" data-next-status="${c.status === 'active' ? 'archived' : 'active'}" title="${c.status === 'active' ? 'Arquivar' : 'Reativar'}">${c.status === 'active' ? '🗃' : '↺'}</button>
+        <button class="admin-badge-delete-btn" data-delete-flashcard="${c.id}" title="Apagar permanentemente">🗑</button>
+      </div>
     </div>
   `;
 }
@@ -230,6 +449,10 @@ async function buildFlashcardsCardsBoxHTML(selectedStudents){
   const cardLists = await Promise.all(selectedStudents.map(s => fetchFlashcardsForStudent(s.student_id)));
   const cards = cardLists.flatMap((list, i) => list.map(c => ({ ...c, __studentUsername: selectedStudents[i].username })));
   cards.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  // Prop 4 (ver CLAUDE.md, "7 propostas") -- cacheia a lista buscada pra
+  // wireFlashcardsCardsBox() achar o objeto completo do cartão em edição
+  // sem precisar refazer a busca de rede.
+  ADMIN_FLASHCARDS_STATE._cardsCache = cards;
   const activeCards = cards.filter(c => c.status === 'active');
   const archivedCards = cards.filter(c => c.status === 'archived');
   const showUsername = selectedStudents.length > 1;
@@ -256,6 +479,32 @@ function wireFlashcardsCardsBox(cardsBox){
       wireFlashcardsCardsBox(cardsBox);
     });
   });
+  // Prop 4 (ver CLAUDE.md, "7 propostas") -- Editar/Apagar.
+  cardsBox.querySelectorAll('[data-edit-flashcard]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      ADMIN_FLASHCARDS_STATE.editingCardId = Number(btn.dataset.editFlashcard);
+      const selectedStudents = ADMIN_FLASHCARDS_STATE._studentsCache.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+      cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
+      wireFlashcardsCardsBox(cardsBox);
+    });
+  });
+  cardsBox.querySelectorAll('[data-delete-flashcard]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Isso vai apagar o cartão e todo o histórico de revisão permanentemente. Não pode ser desfeito. Continuar?')) return;
+      await deleteFlashcardPermanently(btn.dataset.deleteFlashcard);
+      showToast('Cartão apagado.');
+      const selectedStudents = ADMIN_FLASHCARDS_STATE._studentsCache.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+      cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
+      wireFlashcardsCardsBox(cardsBox);
+    });
+  });
+  // Se um cartão está em edição, o HTML acima já renderizou
+  // flashcardEditFormHTML() no lugar da linha normal (ver
+  // flashcardCardRowHTML) -- falta só wirear os handlers do form.
+  if (ADMIN_FLASHCARDS_STATE.editingCardId != null){
+    const editingCard = ADMIN_FLASHCARDS_STATE._cardsCache.find(c => c.id === ADMIN_FLASHCARDS_STATE.editingCardId);
+    if (editingCard) wireFlashcardEditForm(editingCard, cardsBox);
+  }
 }
 
 // Atualiza tudo que depende da seleção de alunos SEM recriar o <form> --
@@ -295,6 +544,13 @@ async function updateFlashcardsSelectionDependentUI(wrap){
 
   const pinyinWrap = document.getElementById('admin-flashcard-pinyin-wrap');
   if (pinyinWrap) pinyinWrap.style.display = anyMandarim ? '' : 'none';
+
+  // Seletor de direção (Prop 1+2, grillado): não se aplica ao zh -- hanzi
+  // (front_pinyin+back_hanzi) é um par inseparável, sem back_pinyin pra
+  // completar a inversão -- ver CLAUDE.md pra achado completo. Também não
+  // se aplica ao modo cloze (não tem noção de "frente"/"verso").
+  const directionWrap = document.getElementById('admin-flashcard-direction-wrap');
+  if (directionWrap) directionWrap.style.display = (!anyMandarim && modeChecked !== 'cloze') ? '' : 'none';
 
   const clozeSentenceInput = document.getElementById('admin-flashcard-cloze-sentence');
   if (clozeSentenceInput) clozeSentenceInput.placeholder = anyMandarim ? 'ex: 我 ___ 巴西人。' : 'ex: Je ___ de Paris.';
@@ -574,17 +830,35 @@ async function renderAdminFlashcardsView(){
           Completar a frase -- digita a palavra que falta
         </label>
 
+        <!-- Prop 1+2 (ver CLAUDE.md, "7 propostas") -- qual lado tem o
+             idioma estudado; decide (a) o rótulo dos campos abaixo e (b)
+             qual lado recebe a pronúncia automática. Só aparece quando
+             NENHUMA aluna selecionada é de mandarim -- não existe um
+             "back_pinyin" pra completar o par hanzi+pinyin se invertido
+             no zh (ver comentário em fr/zh app.js, buildCardFromTeacherFlashcard). -->
+        <div id="admin-flashcard-direction-wrap" style="${anyMandarim ? 'display:none;' : ''}">
+          <div class="section-label" style="margin:18px 0 4px;">Idioma de cada lado</div>
+          <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
+            <input type="radio" name="admin-flashcard-direction" value="target-front" checked>
+            Frente no idioma estudado, verso na tradução (padrão)
+          </label>
+          <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
+            <input type="radio" name="admin-flashcard-direction" value="target-back">
+            Frente na tradução, verso no idioma estudado
+          </label>
+        </div>
+
         <div class="section-label" style="margin:18px 0 6px;">Conteúdo</div>
         <div id="admin-flashcard-content-main">
-          <label class="profile-edit-label" id="admin-flashcard-front-label" for="admin-flashcard-front">Frente (no idioma estudado)</label>
-          <input type="text" id="admin-flashcard-front" class="profile-edit-input" placeholder="${anyMandarim ? 'ex: 图书馆' : 'ex: la bibliothèque'}" autocomplete="off">
+          <label class="profile-edit-label" id="admin-flashcard-front-label" for="admin-flashcard-front">Frente</label>
+          <textarea id="admin-flashcard-front" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="${anyMandarim ? 'ex: 图书馆' : 'ex: la bibliothèque'}"></textarea>
           <p class="profile-edit-field-error" id="admin-flashcard-front-error"></p>
           <div id="admin-flashcard-pinyin-wrap" style="${anyMandarim ? '' : 'display:none;'}">
             <label class="profile-edit-label" for="admin-flashcard-pinyin">Pinyin (usado só nos alunos de mandarim selecionados)</label>
             <input type="text" id="admin-flashcard-pinyin" class="profile-edit-input" placeholder="ex: túshūguǎn" autocomplete="off">
           </div>
-          <label class="profile-edit-label" id="admin-flashcard-back-label" for="admin-flashcard-back">Verso (tradução)</label>
-          <input type="text" id="admin-flashcard-back" class="profile-edit-input" placeholder="ex: a biblioteca" autocomplete="off">
+          <label class="profile-edit-label" id="admin-flashcard-back-label" for="admin-flashcard-back">Verso</label>
+          <textarea id="admin-flashcard-back" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="ex: a biblioteca"></textarea>
           <p class="profile-edit-field-error" id="admin-flashcard-back-error"></p>
           <div id="admin-flashcard-mc-fields" style="display:none; margin:4px 0 0;">
             <label class="profile-edit-label" for="admin-flashcard-mc-1">Outras opções -- opção errada 1</label>
@@ -616,7 +890,7 @@ async function renderAdminFlashcardsView(){
         <div class="section-label" style="margin:18px 0 6px;">Recursos opcionais</div>
         <p class="profile-edit-hint" id="admin-flashcard-resources-hint" style="margin-top:-2px;">${FLASHCARD_RESOURCES_HINT.flip}</p>
         <label class="profile-edit-label" for="admin-flashcard-note">Nota</label>
-        <input type="text" id="admin-flashcard-note" class="profile-edit-input" placeholder="contexto, dica de uso..." autocomplete="off">
+        <textarea id="admin-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="contexto, dica de uso..."></textarea>
         <label class="profile-edit-label" for="admin-flashcard-image">Imagem</label>
         <input type="file" id="admin-flashcard-image" class="profile-edit-input" accept="image/*">
         <label class="profile-edit-label" for="admin-flashcard-audio">Áudio próprio (além da pronúncia automática)</label>
@@ -682,10 +956,15 @@ async function renderAdminFlashcardsView(){
       document.getElementById('admin-flashcard-content-main').style.display = mode === 'cloze' ? 'none' : '';
       document.getElementById('admin-flashcard-content-cloze').style.display = mode === 'cloze' ? '' : 'none';
       document.getElementById('admin-flashcard-mc-fields').style.display = mode === 'mc' ? '' : 'none';
-      document.getElementById('admin-flashcard-front-label').textContent = mode === 'mc' ? 'Pergunta/termo (no idioma estudado)' : 'Frente (no idioma estudado)';
-      document.getElementById('admin-flashcard-back-label').textContent = mode === 'mc' ? 'Resposta correta' : 'Verso (tradução)';
+      document.getElementById('admin-flashcard-front-label').textContent = mode === 'mc' ? 'Pergunta/termo' : 'Frente';
+      document.getElementById('admin-flashcard-back-label').textContent = mode === 'mc' ? 'Resposta correta' : 'Verso';
       const anyMandarimNow = ADMIN_FLASHCARDS_STATE._studentsCache.some(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id) && s.language_app_key === 'mandarim');
       document.getElementById('admin-flashcard-cloze-pinyin-wrap').style.display = (mode === 'cloze' && anyMandarimNow) ? '' : 'none';
+      // Prop 1+2 (grillado, ver CLAUDE.md): direção não se aplica ao modo
+      // cloze (sem noção de frente/verso) nem ao zh (par hanzi/pinyin
+      // inseparável) -- o wrap já nasce escondido pro zh (ver HTML).
+      const directionWrapEl = document.getElementById('admin-flashcard-direction-wrap');
+      if (directionWrapEl && !anyMandarimNow) directionWrapEl.style.display = mode === 'cloze' ? 'none' : '';
       // Fase 4 da reestruturação (ver CLAUDE.md) -- texto de apoio de
       // "Recursos opcionais" muda conforme o modo (Imagem/Áudio continuam
       // sempre visíveis nos 3, só a explicação de ONDE eles aparecem muda).
@@ -773,6 +1052,14 @@ async function renderAdminFlashcardsView(){
     const clozeAnswer = isCloze ? document.getElementById('admin-flashcard-cloze-answer').value : '';
     const clozeAnswerPinyin = isCloze ? document.getElementById('admin-flashcard-cloze-pinyin')?.value : '';
 
+    // Prop 1+2 (grillado, ver CLAUDE.md): direção só existe na UI quando o
+    // wrap está visível (não-cloze, não-mandarim) -- pra qualquer outro
+    // caso (cloze, ou seleção com mandarim) o padrão `true` (frente =
+    // idioma estudado) é o único comportamento que sempre existiu, então
+    // nunca lê um radio que pode nem estar renderizado.
+    const directionRadio = wrap.querySelector('input[name="admin-flashcard-direction"]:checked');
+    const frontIsTargetLanguage = directionRadio ? directionRadio.value !== 'target-back' : true;
+
     // Uma linha em teacher_flashcards POR aluno selecionado -- mesmo
     // conteúdo, cada uma com o language_app_key do PRÓPRIO aluno (nunca o
     // de outro, mesmo numa seleção mista fr+zh). Pinyin (front E cloze) só
@@ -789,6 +1076,10 @@ async function renderAdminFlashcardsView(){
       imageUrl, audioUrl, choices,
       clozeSentence, clozeAnswer,
       clozeAnswerPinyin: s.language_app_key === 'mandarim' ? clozeAnswerPinyin : '',
+      // zh nunca lê este campo (par hanzi/pinyin inseparável, ver
+      // CLAUDE.md) -- grava o padrão `true` pra linha de mandarim mesmo
+      // que uma seleção mista fr+zh tenha ficado com o wrap escondido.
+      frontIsTargetLanguage: s.language_app_key === 'mandarim' ? true : frontIsTargetLanguage,
     })));
     btn.disabled = false;
 
