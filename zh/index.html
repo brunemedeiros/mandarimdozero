@@ -2017,6 +2017,12 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .profile-edit-bio-count{ font-size:11px; color:var(--ink-soft); text-align:right; margin-top:2px; }
 .profile-edit-error{ color:var(--seal-red-dark); font-size:12.5px; min-height:16px; margin:8px 0 4px; }
 .profile-edit-hint{ font-size:12px; color:var(--ink-soft); margin:4px 0 2px; line-height:1.5; }
+/* Fase 2 da reestruturação do formulário de flashcards (ver CLAUDE.md) --
+   mesmo par border-color/background já usado em .mc-option.incorrect
+   (validação de opção errada), reaproveitado aqui pra sinalizar um campo
+   obrigatório vazio/inválido antes do submit. */
+.profile-edit-input.field-invalid{ border-color: var(--error-red); background: rgba(214,38,25,0.08); }
+.profile-edit-field-error{ color:var(--seal-red-dark); font-size:12px; margin:2px 0 6px; min-height:14px; }
 
 /* ---------- Modal: reportar problema/sugestão (bandeira ⚑) ---------- */
 .report-modal-label{ font-size:12px; font-weight:700; color:var(--ink-soft); margin:14px 0 6px; }
