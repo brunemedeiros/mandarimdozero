@@ -550,9 +550,31 @@ function buildCardsFromUnits(units){
 // `back_hanzi`; `row.front_pinyin` (campo extra só pra mandarim, migration
 // 027) mapeia pra `front_pinyin` -- `|| ''` pra nunca renderizar a string
 // literal "undefined" se a professora deixou o pinyin em branco.
+// Prompt-mestre "flashcards -- 7 propostas" (ver CLAUDE.md) -- id ganha um
+// sufixo de revisão quando o cartão já foi editado (revision>0). Mesmo
+// mecanismo de fr/app.js -- ver comentário lá pra detalhe completo do
+// "reset via id novo". Prop 1+2 (seletor de direção idioma estudado/
+// nativo) NÃO se aplica ao zh -- ver nota em buildCardFromTeacherFlashcard
+// abaixo -- então frontIsTargetLanguage não é lido aqui de propósito.
+function flashcardIdForRow(prefix, row){
+  return row.revision > 0 ? `${prefix}${row.id}-r${row.revision}` : `${prefix}${row.id}`;
+}
+
+// Prop 1+2 (ver CLAUDE.md, "7 propostas") -- o seletor "qual lado é o
+// idioma estudado" NÃO se aplica ao zh: fr tem 2 campos simétricos (front/
+// back_trans, cada um uma string simples, qualquer um pode ser o idioma
+// estudado); zh tem 3 campos ASSIMÉTRICOS (front_pinyin+back_hanzi formam
+// um PAR fixo -- hanzi sempre vem com pinyin do lado, nunca sozinho --
+// enquanto back_trans é uma string solta). Não existe um "back_pinyin"
+// pra completar o par se a direção fosse invertida, então o zh continua
+// sempre back_hanzi=idioma estudado/back_trans=tradução, como já era --
+// front_is_target_language é gravado na tabela (mesma coluna que o fr
+// usa) mas nunca lido no client zh. shared/admin-flashcards.js esconde o
+// seletor da UI quando a aluna selecionada é de mandarim (ver lá).
 function buildCardFromTeacherFlashcard(row){
   return {
-    id: `t${row.id}`,
+    id: flashcardIdForRow('t', row),
+    rowId: row.id,
     unitId: null,
     unitTitle: 'Da sua professora',
     vocabIdx: null,
@@ -608,7 +630,7 @@ async function mergeTeacherFlashcardsIntoState(){
   if (!rows.length) return;
   const existingIds = new Set(STATE.cards.map(c => c.id));
   rows.forEach(row => {
-    const id = `t${row.id}`;
+    const id = flashcardIdForRow('t', row);
     if (existingIds.has(id)) return;
     STATE.cards.push(buildCardFromTeacherFlashcard(row));
   });
@@ -624,7 +646,8 @@ async function mergeTeacherFlashcardsIntoState(){
 // separados, `|| ''` pra nunca renderizar "undefined").
 function buildCardFromSelfFlashcard(row){
   return {
-    id: `s${row.id}`,
+    id: flashcardIdForRow('s', row),
+    rowId: row.id,
     unitId: null,
     unitTitle: 'Meus cartões',
     vocabIdx: null,
@@ -658,7 +681,7 @@ async function mergeSelfFlashcardsIntoState(){
   if (!rows.length) return;
   const existingIds = new Set(STATE.cards.map(c => c.id));
   rows.forEach(row => {
-    const id = `s${row.id}`;
+    const id = flashcardIdForRow('s', row);
     if (existingIds.has(id)) return;
     STATE.cards.push(buildCardFromSelfFlashcard(row));
   });
@@ -668,17 +691,35 @@ async function mergeSelfFlashcardsIntoState(){
 // STATE.cards, sem esperar o próximo boot -- pra ele já entrar na fila de
 // revisão nesta mesma sessão. Idempotente pelo mesmo padrão do merge acima.
 function addSelfFlashcardToState(row){
-  const id = `s${row.id}`;
+  const id = flashcardIdForRow('s', row);
   if (STATE.cards.some(c => c.id === id)) return;
   STATE.cards.push(buildCardFromSelfFlashcard(row));
 }
 
 // Espelha um arquivar/reativar feito em shared/my-flashcards.js direto no
 // STATE.cards já carregado -- sem isto, isCardLessonCompleted() só veria o
-// novo status no próximo boot.
+// novo status no próximo boot. Casa por `rowId`, não por um id reconstruído
+// -- ver comentário equivalente em fr/app.js (o card já pode ter um id
+// com sufixo de revisão se já foi editado antes).
 function updateSelfFlashcardStatusInState(rowId, status){
-  const card = STATE.cards.find(c => c.id === `s${rowId}`);
+  const card = STATE.cards.find(c => c.origin === 'self' && String(c.rowId) === String(rowId));
   if (card) card.flashcardStatus = status;
+}
+
+// Prop 4 (ver CLAUDE.md, "7 propostas") -- remove um cartão apagado de
+// verdade do STATE.cards já carregado nesta sessão (mesmo motivo de
+// updateSelfFlashcardStatusInState acima).
+function removeSelfFlashcardFromState(rowId){
+  STATE.cards = STATE.cards.filter(c => !(c.origin === 'self' && String(c.rowId) === String(rowId)));
+}
+
+// Prop 4 -- espelha uma EDIÇÃO de conteúdo na MESMA sessão: remove a
+// entrada antiga (progresso de memória descartado de propósito) e insere
+// uma fresca a partir da linha já atualizada (revision incrementado).
+// Mesmo mecanismo de fr/app.js.
+function replaceSelfFlashcardInState(rowId, updatedRow){
+  removeSelfFlashcardFromState(rowId);
+  addSelfFlashcardToState(updatedRow);
 }
 
 // Um cartão SRS por caractere (do banco completo de hanzi), reaproveitando a mesma estrutura de
@@ -1078,13 +1119,9 @@ document.getElementById('admin-badges-btn').addEventListener('click', () => {
   switchTab('admin-badges');
 });
 
-// Fase 5 do sistema de alunas particulares (ver CLAUDE.md) -- "Meus
-// Cartões" é pra TODA conta logada (diferente de admin-badges-btn acima,
-// que é admin-only-nav), por isso não tem a classe de gate visual.
-document.getElementById('my-flashcards-btn').addEventListener('click', () => {
-  document.getElementById('user-menu-dropdown').classList.remove('open');
-  switchTab('my-flashcards');
-});
+// Prop 3 (ver CLAUDE.md, "7 propostas") -- "Meus Cartões" saiu do menu do
+// avatar e ganhou um botão de verdade no topo da tela de Revisão
+// (#review-my-flashcards-btn, wired mais abaixo).
 
 // Fase 8b do sistema de alunas particulares (ver CLAUDE.md) -- "Material
 // de apoio" é pra TODA conta logada (mesmo raciocínio de my-flashcards-btn
@@ -5437,8 +5474,10 @@ function hasPlainFrontBack(card){
 }
 
 function buildSpeedQueue(){
-  const queue = reviewFilterQueue(STATE.studySettings.reviewFilter, eligibleReviewPool().filter(hasPlainFrontBack));
-  return STATE.studySettings.reviewFilter === 'oldest' ? queue : shuffle(queue);
+  // Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila" removido da
+  // UI; comportamento travado em 'oldest' (mesmo raciocínio de fr/app.js:
+  // é o único dos 3 que continua respeitando "Intensidade da sessão").
+  return reviewFilterQueue('oldest', eligibleReviewPool().filter(hasPlainFrontBack));
 }
 
 function buildSpeedOptions(card){
@@ -5576,7 +5615,10 @@ function todaysReviewCount(pool){
 //             precisa ser pulado só pra este filtro, senão a ordem não
 //             sobrevive até a tela.
 function reviewFilterQueue(filter, pool){
-  filter = filter || STATE.studySettings.reviewFilter || 'oldest';
+  // Prop 5 (ver CLAUDE.md, "7 propostas") -- não lê mais
+  // STATE.studySettings.reviewFilter como fallback (controle removido da
+  // UI); todo call site que não passa `filter` explícito recebe 'oldest'.
+  filter = filter || 'oldest';
   if (filter === 'hard') return getStudyQueue(pool, { scope: 'hard' });
   if (filter === 'all') return getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
   const queue = getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
@@ -5596,13 +5638,10 @@ const REVIEW_FILTER_LABELS = { all: 'Todas', hard: 'Mais difíceis primeiro', ol
 const REVIEW_ORIGIN_LABELS = { all: 'Todas', study: 'Da trilha', teacher: 'Da professora', self: 'Meus cartões' };
 
 // Bloco hero (topo da Revisão): número grande = trueCount, sempre o total
-// real pendente, nunca o cortado pela sessão -- fixo, não muda com o
-// filtro selecionado. 4ª rodada de grilling: o <select> de filtro saiu
-// daqui e foi pro painel ⚙️ (junto de Frequência/Palavras novas/
-// Intensidade -- autora achou estranho ter 2 lugares de config na mesma
-// tela). Pra não perder visibilidade do filtro ativo (painel fica
-// fechado por padrão), sobra um indicador discreto de texto abaixo do
-// número -- não é clicável, só informa qual critério está em uso agora.
+// real pendente, nunca o cortado pela sessão -- fixo, não muda com nenhum
+// filtro. Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila" (e o
+// indicador "Filtro: X" que ficava aqui embaixo do número) foi removido
+// da UI de propósito.
 function renderReviewTodayWidget(){
   const wrap = document.getElementById('review-today-widget');
   if (!wrap) return;
@@ -5610,13 +5649,9 @@ function renderReviewTodayWidget(){
   const trueCount = trueDueReviewCount(pool);
   if (pool.length === 0 || trueCount === 0){ wrap.innerHTML = ''; return; }
 
-  const current = STATE.studySettings.reviewFilter || 'oldest';
-  const filterLabel = REVIEW_FILTER_LABELS[current] || REVIEW_FILTER_LABELS.oldest;
-
   wrap.innerHTML = `
     <div class="review-today-label">Revisões pendentes</div>
     <div class="review-today-count">${trueCount}</div>
-    <p class="review-active-filter">Filtro: ${filterLabel}</p>
   `;
 }
 
@@ -6249,9 +6284,11 @@ function startReviewSession(){
   // MESMA função que Speed Review chama (ver buildSpeedQueue) -- fonte
   // única da fila REVISAR, agora sensível ao filtro escolhido na tela
   // (Todas/Mais difíceis primeiro/Mais antigas primeiro).
+  // Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila" removido da
+  // UI, comportamento travado em 'oldest' (ver buildSpeedQueue()).
   const queue = STATE.reviewSessionUnitFilter
     ? getStudyQueue(pool, { scope: 'unit', newCardsLimit: STATE.studySettings.newCardsPerDay })
-    : reviewFilterQueue(STATE.studySettings.reviewFilter, pool);
+    : reviewFilterQueue('oldest', pool);
 
   // Decide a direção de cada carta ANTES de embaralhar/mostrar -- alterna a
   // partir da última vez que essa carta foi revisada (ver nextCardDirection
@@ -6260,9 +6297,8 @@ function startReviewSession(){
 
   // "Mais antigas primeiro" só cumpre o que promete se a ordem sobreviver
   // até a tela -- embaralhar (como sempre foi) destruiria exatamente essa
-  // ordem. Unidade específica e os outros 2 filtros continuam embaralhados,
-  // como sempre.
-  const shouldShuffle = !!STATE.reviewSessionUnitFilter || STATE.studySettings.reviewFilter !== 'oldest';
+  // ordem. Unidade específica continua embaralhada, como sempre.
+  const shouldShuffle = !!STATE.reviewSessionUnitFilter;
   STATE.reviewQueue = shouldShuffle ? shuffle(queue) : queue;
   STATE.reviewIndex = 0;
   STATE.reviewShowingAnswer = false;
@@ -6336,8 +6372,8 @@ function renderMultipleChoiceReviewCard(card){
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${card.unitTitle}</div>
       ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
-      <div class="flashcard-hanzi">${card.back_hanzi} ${audioBtnHTML(card.back_hanzi, 'audio-btn-lg')}${card.audioUrl ? customAudioBtnHTML(card.audioUrl) : ''}</div>
-      <div class="flashcard-pinyin pinyin">${card.front_pinyin}</div>
+      <div class="flashcard-hanzi">${escapeHTML(card.back_hanzi)} ${audioBtnHTML(card.back_hanzi, 'audio-btn-lg')}${card.audioUrl ? customAudioBtnHTML(card.audioUrl) : ''}</div>
+      <div class="flashcard-pinyin pinyin">${escapeHTML(card.front_pinyin)}</div>
     </div>
     <div class="mc-options">
       ${card.mcOptions.map((opt, i) => {
@@ -6407,10 +6443,10 @@ function renderClozeReviewCard(card){
       ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="cloze-sentence">
         <div class="cloze-hanzi">${sentenceHTML}</div>
-        ${answered ? `<div class="cloze-pinyin pinyin">${card.clozeAnswerPinyin}</div>` : ''}
+        ${answered ? `<div class="cloze-pinyin pinyin">${escapeHTML(card.clozeAnswerPinyin)}</div>` : ''}
       </div>
       ${card.audioUrl ? customAudioBtnHTML(card.audioUrl) : ''}
-      ${answered ? `<div class="cloze-trans">${card.back_trans}</div>` : ''}
+      ${answered ? `<div class="cloze-trans">${escapeHTML(card.back_trans)}</div>` : ''}
     </div>
     ${!answered ? `
       <div class="cloze-type-wrap">
@@ -6539,10 +6575,10 @@ function renderReviewView(){
   // não recalculado a cada render (senão viraria a cada re-render).
   const isReverse = card.reviewDirection === 'back-to-front';
   const hanziSideHTML = `
-    <div class="flashcard-hanzi">${card.back_hanzi} ${audioBtnHTML(card.back_hanzi, 'audio-btn-lg')}</div>
-    <div class="flashcard-pinyin pinyin">${card.front_pinyin}</div>
+    <div class="flashcard-hanzi">${escapeHTML(card.back_hanzi)} ${audioBtnHTML(card.back_hanzi, 'audio-btn-lg')}</div>
+    <div class="flashcard-pinyin pinyin">${escapeHTML(card.front_pinyin)}</div>
   `;
-  const transSideHTML = `<div class="flashcard-trans">${card.back_trans}</div>`;
+  const transSideHTML = `<div class="flashcard-trans">${escapeHTML(card.back_trans)}</div>`;
   const frontHTML = isReverse ? transSideHTML : hanziSideHTML;
   const backHTML = isReverse ? hanziSideHTML : transSideHTML;
   // Áudio automático só quando o hanzi está do lado JÁ visível nesse
@@ -7022,33 +7058,9 @@ function normalizeNewCardsPerDay(n){
 function renderReviewSettingsView(){
   const s = STATE.studySettings;
 
-  const filterSelect = document.getElementById('review-filter-select');
-  if (filterSelect){
-    const pool = eligibleReviewPool();
-    const trueCount = trueDueReviewCount(pool);
-    const counts = {
-      all: trueCount,
-      hard: getStudyQueue(pool, { scope: 'hard' }).length,
-      oldest: reviewFilterQueue('oldest', pool).length
-    };
-    const current = s.reviewFilter || 'oldest';
-    filterSelect.innerHTML = `
-      <option value="all" ${current === 'all' ? 'selected' : ''}>${REVIEW_FILTER_LABELS.all} (${counts.all})</option>
-      <option value="hard" ${current === 'hard' ? 'selected' : ''}>${REVIEW_FILTER_LABELS.hard} (${counts.hard})</option>
-      <option value="oldest" ${current === 'oldest' ? 'selected' : ''}>${REVIEW_FILTER_LABELS.oldest} (${counts.oldest})</option>
-    `;
-  }
-  const freqSelect = document.getElementById('review-frequency-select');
-  if (freqSelect) freqSelect.value = s.reviewFrequency;
-  const newCardsSelect = document.getElementById('review-newcards-select');
-  if (newCardsSelect) newCardsSelect.value = String(normalizeNewCardsPerDay(s.newCardsPerDay));
-  const intensitySelect = document.getElementById('review-intensity-select');
-  if (intensitySelect) intensitySelect.value = s.sessionIntensity;
-
-  // Fase 4 do sistema de alunas particulares (ver CLAUDE.md): o filtro de
-  // origem só aparece pra quem TEM pelo menos um cartão de professora ou
-  // (Fase 5) autorado por ela mesma. 'teacher'/'self' só entram nas
-  // <option>s quando aquela origem específica tem pelo menos 1 cartão.
+  // Prop 5 (ver CLAUDE.md, "7 propostas") -- "Origem" (Fase 4 do sistema
+  // de alunas particulares) subiu pro TOPO do painel, "Filtro de fila"
+  // (que existia aqui) foi removido de vez.
   const originWrap = document.getElementById('review-origin-select-wrap');
   const originSelect = document.getElementById('review-origin-select');
   const hasTeacherCards = STATE.cards.some(c => c.origin === 'teacher');
@@ -7070,6 +7082,13 @@ function renderReviewSettingsView(){
       ${hasSelfCards ? `<option value="self" ${currentOrigin === 'self' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.self} (${originCounts.self})</option>` : ''}
     `;
   }
+
+  const freqSelect = document.getElementById('review-frequency-select');
+  if (freqSelect) freqSelect.value = s.reviewFrequency;
+  const newCardsSelect = document.getElementById('review-newcards-select');
+  if (newCardsSelect) newCardsSelect.value = String(normalizeNewCardsPerDay(s.newCardsPerDay));
+  const intensitySelect = document.getElementById('review-intensity-select');
+  if (intensitySelect) intensitySelect.value = s.sessionIntensity;
 }
 
 // Persiste + reaplica ao motor imediatamente -- não precisa de botão "Salvar"
@@ -7087,9 +7106,6 @@ function updateStudySetting(patch){
   saveState();
 }
 
-document.getElementById('review-filter-select').addEventListener('change', (e) => {
-  updateStudySetting({ reviewFilter: e.target.value });
-});
 document.getElementById('review-frequency-select').addEventListener('change', (e) => {
   updateStudySetting({ reviewFrequency: e.target.value });
 });
@@ -7110,6 +7126,12 @@ document.getElementById('review-origin-select')?.addEventListener('change', (e) 
 // antes era um botão de texto solto entre o dropdown e REVISAR, a autora
 // não gostou) -- recolhido por padrão, sincroniza ao abrir (4 controles
 // de sessão, ver renderReviewSettingsView).
+// Prop 3 (ver CLAUDE.md, "7 propostas") -- "Meus Cartões" ganhou um botão
+// de verdade no topo da tela de Revisão, substituindo a entrada que
+// existia (e foi removida) do menu do avatar.
+document.getElementById('review-my-flashcards-btn')?.addEventListener('click', () => {
+  switchTab('my-flashcards');
+});
 const reviewHeaderSettingsBtn = document.getElementById('review-header-settings-btn');
 if (reviewHeaderSettingsBtn){
   reviewHeaderSettingsBtn.addEventListener('click', () => {

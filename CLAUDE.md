@@ -3798,3 +3798,302 @@ atribuível a este código (mesmos `pageerror` de mock -- `.is()`/
 
 Próxima fase (se houver) só começa depois de autorização explícita da
 autora, com este relatório já entregue antes de pedir luz verde.
+
+## "7 propostas" -- grilling completo (15 perguntas) sobre feedback real de uso, todas implementadas numa sessão só
+
+A autora testou o app de verdade (2 screenshots reais anexados -- tela de
+revisão de múltipla escolha e formulário de criação de flashcard) e trouxe
+7 propostas numeradas de uma vez, pedindo "faça um grilling dessas
+propostas" antes de implementar -- mesma disciplina de toda sessão desta
+feature. Grilling de 15 perguntas rodado (`AskUserQuestion`), respostas
+resumidas abaixo por proposta; a autora fechou a rodada com "Todo o resto
+foi aprovado, pode implementar", autorizando as 7 de uma vez (quebra do
+padrão usual "1 fase por vez" desta feature, porque ela pediu
+explicitamente).
+
+**Prop 1+2 (áudio automático erra o idioma + rótulos fixos "no idioma
+estudado"/"(tradução)", quer poder inverter):** grillado junto porque são
+a mesma causa raiz -- o app sempre presumiu `front`=idioma estudado.
+Decisão: campo novo `front_is_target_language` (boolean, default `true` --
+zero regressão em cartão existente) em `teacher_flashcards` E
+`student_flashcards` (migration `036_flashcard_direction_and_revision`,
+aplicada AO VIVO via `mcp__Supabase__apply_migration`, projeto
+`eigjocalzwamisgqilhg`). Decide (a) rótulo dos campos Frente/Verso na
+tela de admin/Meus Cartões -- viraram "Frente"/"Verso" puros, sem
+parênteses, porque agora dependem de um seletor visível ao lado ("Idioma
+de cada lado"), não fixos; (b) qual lado recebe pronúncia automática
+(TTS) no flip e no quiz de múltipla escolha.
+
+**Achado arquitetural que restringiu o escopo, não presumido -- zh não
+suporta inversão**: `fr` tem forma simétrica (`front`/`back_trans`, duas
+strings soltas, qualquer uma pode ser o idioma estudado). `zh` é
+ASSIMÉTRICO -- `front_pinyin`+`back_hanzi` são um par inseparável (hanzi
+sempre mostrado junto do pinyin), `back_trans` é uma string solta sem
+contraparte de pinyin. Não existe `back_pinyin` pra completar o par se a
+direção invertesse. **Decisão: Prop 1+2 não se aplica ao zh** -- a coluna
+`front_is_target_language` ainda é gravada nas linhas zh (consistência de
+schema), mas `zh/app.js` NUNCA lê esse campo (sempre assume
+`back_hanzi`=idioma estudado, mesmo comportamento hardcoded de sempre); o
+seletor de direção fica genuinamente escondido na UI (admin e Meus
+Cartões) sempre que a seleção envolve mandarim.
+
+**Escopo da Prop 2 estendido pela autora no grilling** (Q2): eu recomendei
+só o modo flip; ela pediu explicitamente que múltipla escolha TAMBÉM
+tivesse seletor ("front em português pra tentar adivinhar a resposta
+certa entre as opções em francês") -- implementado: quando invertido, a
+pergunta do quiz mostra o texto NATIVO (`front`) e as opções (`back_trans`
++ `choices`) ficam no idioma estudado. **Sem áudio automático nenhum
+quando invertido** (nem no front, nem em nenhuma opção) -- tocar a
+pronúncia certa antes da aluna responder entregaria a resposta; decisão
+minimalista, não inventei um botão de áudio por opção que não foi pedido.
+
+**Prop 3 (mover "Meus Cartões" do menu do avatar pra dentro de
+Revisão):** a autora relatou que ninguém clica no botão de perfil/avatar,
+fica escondido demais. Grillado o local exato (Q5) -- ela pediu
+explicitamente "um botão no topo dentro de Revisão, assim como
+Badges/Notificações/Analytics dentro do Painel de Admin, ou Visão
+Geral/Metas/Progresso no Perfil" (um pill de atalho, não um item de
+sub-navegação). Implementado como `#review-my-flashcards-btn`
+(`.leaderboard-tab`, reaproveitando a MESMA classe de pill já usada pra
+essas sub-navegações -- zero CSS novo), logo abaixo do título "Revisão".
+**Removido do dropdown do avatar** (Q6, override da minha recomendação de
+manter os dois) -- ela pediu remoção explícita: "no momento eu quero até
+remover esse menu do topbar já que ele já está na sidebar" (a parte da
+sidebar não foi tocada nesta sessão -- fora do escopo desta proposta
+específica, registrado só como contexto dela, não instrução de ação).
+
+**Prop 4 (não dá pra editar/excluir cartão próprio, só arquivar --
+autora quer editar de verdade E poder deletar):** a maior mudança
+arquitetural das 7. Grilling em 3 perguntas (Q7-Q10):
+- Q7 confirmou a leitura do bug: hoje só arquivar/reativar existe, sem
+  editar/excluir, tanto pro cartão da PRÓPRIA aluna quanto pro cartão
+  autorado pela professora.
+- Q9 (quais campos editáveis + como avisar sobre reset de progresso): eu
+  recomendei só texto (front/back/nota); ela pediu TODOS os campos
+  editáveis (inclusive modo/mídia/direção), com um popup de confirmação
+  EXATO: "Esta edição irá reiniciar o progresso de revisão deste cartão.
+  Deseja continuar?" + botões "Sim"/"Descartar edições" -- texto
+  implementado literal, novo `#flashcard-reset-confirm-modal`
+  (compartilhado entre `admin-flashcards.js` e `my-flashcards.js`, mesmo
+  padrão HTML/JS de todo modal do app).
+- Q10 (arquivar não resolve o caso "adicionei um cartão errado por
+  engano e só percebi depois" -- ela quer DELETE de verdade, mesmo com
+  histórico de revisão): autorizado explicitamente perder o histórico
+  FSRS nesse caso -- e ela mesma sugeriu, se fosse mais simples pro
+  código, que EDITAR também resetasse o progresso (não só criar um
+  "editar sem resetar" complexo).
+
+**Mecanismo escolhido pra "editar reseta progresso" -- reaproveita
+infraestrutura já existente, não inventa um reset novo**: coluna
+`revision integer not null default 0` (mesma migration `036`) em
+`teacher_flashcards`/`student_flashcards`. `flashcardIdForRow(prefix,
+row)` (novo, fr+zh `app.js`) -- `row.revision > 0 ? '${prefix}${row.id}
+-r${row.revision}' : '${prefix}${row.id}'`. Ou seja, o id do card SÓ MUDA
+na primeira edição -- antes disso, comportamento idêntico a sempre (zero
+regressão pra cartão nunca editado). Quando editado, o id novo não bate
+com nenhum id salvo no `STATE` serializado, e o mecanismo de merge-por-id
+de `applySerializedState()` (documentado desde a Fase 0 desta feature
+inteira -- "cartão salvo sem correspondência na lista fresca é descartado
+em silêncio") já faz o reset sozinho, sem nenhum código de "resetar
+progresso" novo. `card.rowId` (novo campo) guarda o id numérico puro (sem
+sufixo de revisão) pra `updateSelfFlashcardStatusInState`/
+`removeSelfFlashcardFromState` conseguirem casar o cartão certo mesmo
+depois de já ter sido editado uma vez.
+
+**DELETE físico de verdade** -- `deleteFlashcardPermanently`
+(`shared/teacher-flashcards.js`) e `deleteOwnFlashcardPermanently`
+(`shared/student-flashcards.js`), botão 🗑 com `confirm()` nativo
+("Isso vai apagar o cartão e todo o histórico de revisão permanentemente.
+Não pode ser desfeito. Continuar?") nas duas telas (admin e Meus
+Cartões). `removeSelfFlashcardFromState()` (novo) tira o cartão do
+`STATE.cards` já carregado na MESMA sessão, mesmo motivo de sempre
+(sem isso, o cartão só sumiria da fila no próximo boot).
+
+**Prop 5 (remover "Filtro de fila", mover "Origem" pro topo da lista de
+ajustes):** implementado como pedido -- `<select id="review-filter-
+select">` removido inteiro do painel "⚙️ Configurar sessão" (fr+zh
+`index.html`), bloco `#review-origin-select-wrap` movido pra ser o
+PRIMEIRO filho do painel (antes de Frequência/Novas palavras/
+Intensidade). **Autocorreção registrada durante a implementação, não
+depois**: eu disse a ela no grilling (Q11) que o comportamento padrão
+pós-remoção seria `'all'` (mostrar tudo). Ao implementar, percebi que
+`'all'` IGNORA completamente "Intensidade da sessão" (não passa `limit`
+pro `getStudyQueue()`), o que tornaria esse controle -- que continua
+visível na tela -- um no-op silencioso pra sempre. Corrigi pra
+hardcodar `'oldest'` em vez de `'all'` (`reviewFilterQueue()`,
+`buildSpeedQueue()`, `startReviewSession()`, fr+zh `app.js`) -- é o
+único dos 3 valores antigos do filtro que ainda respeita Intensidade,
+e era o padrão real que a maioria das contas já usava de qualquer jeito.
+**Registrando aqui explicitamente porque diverge do que falei pra ela
+durante o grilling** -- 'oldest' (mais antigas primeiro) no lugar de
+'all' (tudo, sem ordenação por intensidade).
+
+**Prop 6 (exportar/importar cartões PRÓPRIOS entre alunos):** Q13
+perguntou o mecanismo -- ela pediu OS DOIS ("pode ser um arquivo .json se
+for mais fácil, mas gosto de ter um link de compartilhamento também"), não
+só um. Implementado em `shared/my-flashcards.js`:
+`myFlashcardsExportPayload(cards)` monta `{languageAppKey, cards:
+[{front, frontPinyin, backTrans, note, frontIsTargetLanguage}, ...]}` --
+nunca ids/timestamps/status (toda importação sempre cria linhas NOVAS na
+conta de quem importa, nunca tenta sincronizar/sobrescrever). Modal de
+exportação com 2 botões: "⬇️ Baixar .json" (`Blob`+`URL.createObjectURL`)
+e "🔗 Copiar link" (mesmo payload em base64 no fragmento da URL,
+`#import=...`, sem backend novo nenhum). Importação por 2 caminhos:
+upload de arquivo (`<input type="file">`) OU auto-detecção do parâmetro
+`#import=` na URL ao carregar a tela (`maybeAutoImportFromUrl()`) -- os
+dois passam por `confirmAndImportMyFlashcards()`, que sempre pede
+confirmação com a contagem ("Importar N cartão(ões) pra sua conta?") e
+**rejeita explicitamente se `languageAppKey` do payload não bater com o
+idioma do site atual** (`APP_KEY`) -- um cartão de mandarim não pode
+entrar numa conta de francês e vice-versa, mensagem de erro clara em vez
+de falha silenciosa.
+
+**Prop 7 (não dá pra apertar Enter/quebrar linha num campo de
+flashcard):** causa raiz óbvia -- Frente/Verso/Nota eram `<input
+type="text">` (single-line por definição do próprio elemento HTML), não
+`<textarea>`. Trocados pra `<textarea class="profile-edit-input
+profile-edit-textarea" rows="2">` nos 2 formulários (admin e Meus
+Cartões, criação E edição) -- `.profile-edit-input, .profile-edit-
+textarea{...}` já era um seletor combinado no CSS (herda border/padding/
+resize/min-height sem precisar de nenhuma regra nova).
+
+**Achado incidental durante a investigação de Prop 7, confirmado com a
+autora antes de corrigir (Q15, "confirmado")**: `card.front`/
+`card.back_trans` (fr) e `card.back_hanzi`/`card.front_pinyin`/
+`card.back_trans`/`card.clozeAnswerPinyin` (zh) eram interpolados SEM
+`escapeHTML()` no render de flip e múltipla escolha -- um cartão com
+`<img src=x onerror=...>` no front executaria HTML/JS arbitrário na tela
+de revisão de QUALQUER aluno que revisasse aquele cartão (o professor
+autora do cartão já é uma conta confiável hoje, mas o princípio de nunca
+confiar em texto solto interpolado direto continua valendo, e cartões
+PRÓPRIOS -- Fase 5 -- são autorados pela própria aluna sem revisão
+nenhuma). Corrigido (`escapeHTML()` adicionado nos 2 pontos, fr+zh)
+**deliberadamente NÃO estendido a `card.clozeSentence`** -- essa
+interpolação já é antiga (pré-existente a esta sessão), fora do escopo
+literal da Prop 7, e estruturalmente entrelaçada com HTML injetado pro
+blank (`blankHTML`) -- um fix ingênuo ali arriscaria quebrar o
+comportamento intencional em vez de só fechar um buraco de segurança;
+registrado aqui como candidato pra uma sessão futura tratar isoladamente,
+não esquecido.
+
+**Bug real encontrado e corrigido durante a implementação, fora do que
+foi pedido (auto-detectado, não reportado pela autora)**:
+`MY_FLASHCARDS_STATE.editingCardId` (`shared/my-flashcards.js`) era
+atribuído direto de `btn.dataset.editOwnFlashcard` (sempre STRING, por
+natureza de todo `dataset`), mas comparado com `===` contra `c.id` (
+SEMPRE NÚMERO, como o Supabase devolve uma coluna inteira) em 2 pontos
+(`myFlashcardRowHTML()`/`renderMyFlashcardsView()`) -- comparação
+`"1006" === 1006` é sempre `false` em JS, então o formulário de edição da
+própria aluna NUNCA teria aparecido em produção (o botão ✏️ pareceria
+simplesmente não fazer nada). `shared/admin-flashcards.js` já fazia
+`Number(btn.dataset.editFlashcard)` corretamente desde que essa tela foi
+escrita -- o mesmo padrão não tinha sido replicado no arquivo irmão.
+Corrigido com `Number(...)` no ponto de atribuição, mesmo padrão do
+arquivo admin. Achado via teste automatizado (Playwright com mock que
+clona objetos por chamada, não compartilha referência -- ver "Testes
+realizados" abaixo), não por inspeção visual.
+
+**Segundo bug de robustez encontrado e corrigido, também via teste
+automatizado**: `wireMyFlashcardEditForm()` computava `(c.revision ||
+0) + 1` em DUAS expressões separadas (uma pro payload de
+`updateOwnFlashcardContent`, outra pro payload de
+`replaceSelfFlashcardInState`) -- funcionalmente correto em produção
+(supabase-js real nunca muta o objeto JS local que foi lido antes),
+mas frágil por definição: duas leituras separadas da mesma derivação,
+sem garantia estrutural de que `c.revision` não muda entre elas.
+Corrigido pra computar `nextRevision` UMA vez e reaproveitar nos dois
+lugares -- mesmo princípio de `note`/`frontPinyinValue` (lidos do DOM
+uma vez só, não relidos depois do `await`).
+
+**Decisões arquiteturais desta sessão:**
+1. `front_is_target_language`/`revision` são colunas genuinamente
+   aditivas com default seguro -- nenhuma migração de dado, cartão já
+   existente continua se comportando exatamente como antes (front=idioma
+   estudado, id sem sufixo de revisão) até que alguém explicitamente
+   inverta a direção ou edite o cartão pela primeira vez.
+2. `flashcardIdForRow()` é a ÚNICA função que decide o id de um cartão de
+   professora/aluna em todo o app -- reaproveitada nos 4 pontos que antes
+   construíam a string manualmente (`buildCardFromTeacherFlashcard`,
+   `buildCardFromSelfFlashcard`, `mergeTeacherFlashcardsIntoState`,
+   `mergeSelfFlashcardsIntoState`, `addSelfFlashcardToState`) -- nunca
+   duas fontes de verdade pro mesmo cálculo.
+3. Direção (Prop 1+2) e formato de conteúdo (Fase 8a: imagem/áudio/MC/
+   cloze) são eixos ORTOGONAIS -- um cartão cloze não tem seletor de
+   direção (não existe noção de "frente"/"verso" numa lacuna), mas
+   imagem/áudio continuam livres de combinar com qualquer coisa, mesmo
+   comportamento de antes desta sessão.
+4. `student_flashcards` (Fase 5) e `teacher_flashcards` (Fase 2+) ganharam
+   as 7 propostas EM PARALELO, não uma de cada vez -- diferente do padrão
+   normal desta feature (uma tabela por vez), porque as propostas da
+   autora vieram sobre as duas telas juntas (ela usa as duas) e a maioria
+   do código (validação, revisão, direção) já era espelhado entre elas
+   desde antes.
+
+**Gratuito x Premium (avaliado, não implementado):** nenhuma proposta
+desta rodada muda o cálculo já registrado nas fases anteriores -- edição/
+exclusão/direção são melhorias de UX sobre conteúdo que já existe (sem
+custo marginal novo de servir); export/import é puramente client-side
+(sem novo dado no servidor, só reorganiza o que já está lá). Mesma
+pergunta em aberto já registrada repetidamente (limite por professora
+quando houver mais de uma na plataforma) continua válida, sem mudança.
+
+**Testes realizados:** `node --check` sem erro em
+`shared/teacher-flashcards.js`, `shared/student-flashcards.js`,
+`shared/admin-flashcards.js`, `shared/my-flashcards.js`, `fr/app.js`,
+`zh/app.js`. Validação funcional via Playwright (fr+zh), mock
+propositalmente mais rigoroso que o de fases anteriores -- linhas
+retornadas por `select()` são CLONADAS (`{...r}`), não a mesma referência
+do array interno do banco fake, replicando o comportamento real do
+supabase-js (foi exatamente essa mudança no mock que expôs o bug de
+dupla-leitura de `c.revision` acima, que um mock com referência
+compartilhada mascarava). Cenários cobertos: (1) seletor de direção
+visível só quando não-mandarim e não-cloze, escondido corretamente pro
+zh e pro modo cloze; (2) rótulos "Frente"/"Verso" sem parênteses fixos;
+(3) criação com direção invertida grava `front_is_target_language:false`
+de verdade no banco; (4) lista de cartões do admin escapa HTML
+corretamente (`<img src=x onerror=...>` nunca aparece cru no DOM); (5)
+fluxo de edição -- modal de confirmação aparece, clicar "Sim" salva e
+incrementa `revision` pra 1; (6) delete físico remove a linha do banco de
+verdade; (7) lado da aluna -- seletor de direção presente em fr/ausente
+em zh, criação com quebra de linha preservada, edição com o MESMO fluxo
+de confirmação + `STATE.cards` refletindo o novo id com sufixo `-r1`
+IMEDIATAMENTE (sem esperar reload), delete removendo de `STATE.cards`
+também; (8) export/import roundtrip -- payload exportado de N cartões
+importa de volta N cartões novos; import com `languageAppKey` errado
+rejeitado sem gravar nada; (9) painel "⚙️ Configurar sessão" -- confirmado
+sem `#review-filter-select`, botão "📇 Meus Cartões" presente dentro de
+Revisão e AUSENTE do dropdown do avatar, clique navega pra "Meus
+Cartões" de verdade. Validação adicional isolada da tela de Revisão
+(cartão semeado direto em `STATE.cards`, sem passar pelo formulário):
+modo flip invertido mostra o texto-alvo (`la bibliothèque`) com botão de
+áudio e o texto nativo (`a biblioteca`) sem áudio, sem nenhuma chamada de
+`speakFrench()` automática; modo múltipla escolha invertido mostra a
+PERGUNTA em português (`a biblioteca`), SEM botão de áudio ao lado dela,
+opções embaralhadas no idioma estudado incluindo a resposta certa, sem
+nenhuma chamada de TTS automática (confirmando que a resposta nunca
+vaza por áudio antes da aluna responder). Validação visual (screenshot
+Playwright, fr, claro) do formulário de admin com o seletor de direção +
+textareas + rótulos corrigidos -- layout limpo, sem quebra visual; zero
+CSS novo introduzido nesta sessão inteira (radio group/textarea/pill
+reaproveitam classes já calibradas em fases anteriores), então o risco de
+regressão de contraste tema escuro é baixo, mas não foi comparado
+lado-a-lado explicitamente nos 4 cenários (claro/escuro x fr/zh) desta
+vez -- registrando por completude, mesmo padrão de honestidade já usado
+quando outras entregas validaram só um subconjunto.
+
+**O que ainda falta / não foi feito nesta rodada (de propósito):**
+- `card.clozeSentence` continua sem `escapeHTML()` -- achado registrado
+  acima, fora do escopo literal da Prop 7, candidato pra sessão futura.
+- Nenhuma migração de dado pros cartões já existentes -- todos continuam
+  com `front_is_target_language=true`/`revision=0` (comportamento
+  idêntico a antes desta sessão).
+- Export/import (Prop 6) é só pra `student_flashcards` (Meus Cartões) --
+  não existe um export equivalente pro lado da professora
+  (`teacher_flashcards`), não foi pedido.
+- Nenhuma validação de tema escuro lado-a-lado nos 4 cenários
+  obrigatórios (fr/zh x claro/escuro) -- risco considerado baixo (zero
+  CSS novo), mas não confirmado visualmente desta vez.
+
+Nenhuma migração pendente de passo manual -- a `036_flashcard_direction_
+and_revision.sql` foi aplicada ao vivo nesta sessão via
+`mcp__Supabase__apply_migration`, projeto `eigjocalzwamisgqilhg`.

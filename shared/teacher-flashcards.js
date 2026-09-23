@@ -72,7 +72,15 @@ async function fetchFlashcardsForCurrentStudent(languageAppKey){
 // -- checado na UI (shared/admin-flashcards.js), não aqui: esta função
 // não impede tecnicamente gravar os dois juntos, mas nenhum call site
 // real faz isso.
-async function createFlashcard({ studentId, languageAppKey, front, backTrans, note, frontPinyin, imageUrl, audioUrl, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin }){
+// Prompt-mestre "flashcards -- 7 propostas" (ver CLAUDE.md, Q1-Q4): qual
+// lado (Frente/Verso) contém o idioma estudado -- decide (a) o rótulo dos
+// campos e (b) qual lado recebe a pronúncia automática (fr/zh app.js,
+// renderReviewView/renderMultipleChoiceReviewCard). Vale só pros modos
+// flip/mc (grillado -- cloze não usa front/back_trans pra isso, mantém a
+// mecânica de sempre). Default `true` -- todo cartão já existente tem de
+// fato o front no idioma estudado, então omitir o parâmetro preserva
+// comportamento.
+function _validateFlashcardContent({ languageAppKey, front, backTrans, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin }){
   const cleanFront = (front || '').trim();
   const cleanBack = (backTrans || '').trim();
   const cleanClozeSentence = (clozeSentence || '').trim();
@@ -80,8 +88,7 @@ async function createFlashcard({ studentId, languageAppKey, front, backTrans, no
   const isCloze = !!cleanClozeSentence;
   // front só é exigido fora do modo cloze -- ver migration 035/comentário
   // acima. Nunca inventamos um valor substituto quando ausente: gravamos
-  // `null` de verdade (ver insert abaixo), não uma cópia da frase-cloze
-  // nem da tradução.
+  // `null` de verdade, não uma cópia da frase-cloze nem da tradução.
   if (!isCloze && !cleanFront) return { ok: false, error: 'Digite o texto da frente do cartão.' };
   if (!cleanBack) return { ok: false, error: 'Digite a tradução (verso do cartão).' };
   const cleanChoices = (choices || []).map(c => (c || '').trim()).filter(Boolean);
@@ -94,27 +101,83 @@ async function createFlashcard({ studentId, languageAppKey, front, backTrans, no
       return { ok: false, error: 'Digite o pinyin da resposta (é o que o aluno vai digitar).' };
     }
   }
+  return { ok: true, cleanFront, cleanBack, cleanChoices, cleanClozeSentence, cleanClozeAnswer };
+}
+
+async function createFlashcard({ studentId, languageAppKey, front, backTrans, note, frontPinyin, imageUrl, audioUrl, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin, frontIsTargetLanguage }){
+  const v = _validateFlashcardContent({ languageAppKey, front, backTrans, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin });
+  if (!v.ok) return v;
   const { data, error } = await supabaseClient
     .from('teacher_flashcards')
     .insert({
       teacher_id: CURRENT_USER.id,
       student_id: studentId,
       language_app_key: languageAppKey,
-      front: cleanFront || null,
-      back_trans: cleanBack,
+      front: v.cleanFront || null,
+      back_trans: v.cleanBack,
       note: (note || '').trim() || null,
       front_pinyin: (frontPinyin || '').trim() || null,
       image_url: imageUrl || null,
       audio_url: audioUrl || null,
-      choices: cleanChoices.length ? cleanChoices : null,
-      cloze_sentence: cleanClozeSentence || null,
-      cloze_answer: cleanClozeAnswer || null,
+      choices: v.cleanChoices.length ? v.cleanChoices : null,
+      cloze_sentence: v.cleanClozeSentence || null,
+      cloze_answer: v.cleanClozeAnswer || null,
       cloze_answer_pinyin: languageAppKey === 'mandarim' ? ((clozeAnswerPinyin || '').trim() || null) : null,
+      front_is_target_language: frontIsTargetLanguage !== false,
     })
     .select()
     .single();
   if (error){ console.error('Erro ao criar flashcard:', error); return { ok: false, error: 'Não foi possível criar o cartão agora.' }; }
   return { ok: true, card: data };
+}
+
+// Prop 4 (ver CLAUDE.md, "7 propostas") -- edição real de um cartão já
+// criado, TODOS os campos (grillado explicitamente -- inclui modo/mídia/
+// direção, não só texto). `revision` é calculado pelo CHAMADOR a partir do
+// valor que já tem em mãos (`(card.revision||0)+1`) -- evita um round-trip
+// extra só pra ler o valor atual antes de incrementar. fr/zh app.js usa
+// esse número pra recompor o id do card (`t${id}` quando revision=0,
+// `t${id}-r${revision}` quando >0) -- um id novo nunca bate com nenhum já
+// salvo em STATE.cards, então applySerializedState() descarta o progresso
+// de memória antigo pelo MESMO mecanismo que já descarta qualquer cartão
+// sem correspondência (Fase 0), sem precisar de nenhum código especial de
+// "reset". `imageUrl`/`audioUrl` passados como `undefined` mantêm a mídia
+// já existente (não sobrescreve com null); passe `null` explicitamente
+// pra remover.
+async function updateFlashcardContent(id, { languageAppKey, front, backTrans, note, frontPinyin, imageUrl, audioUrl, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin, frontIsTargetLanguage, revision }){
+  const v = _validateFlashcardContent({ languageAppKey, front, backTrans, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin });
+  if (!v.ok) return v;
+  const patch = {
+    front: v.cleanFront || null,
+    back_trans: v.cleanBack,
+    note: (note || '').trim() || null,
+    front_pinyin: (frontPinyin || '').trim() || null,
+    choices: v.cleanChoices.length ? v.cleanChoices : null,
+    cloze_sentence: v.cleanClozeSentence || null,
+    cloze_answer: v.cleanClozeAnswer || null,
+    cloze_answer_pinyin: languageAppKey === 'mandarim' ? ((clozeAnswerPinyin || '').trim() || null) : null,
+    front_is_target_language: frontIsTargetLanguage !== false,
+    revision,
+  };
+  if (imageUrl !== undefined) patch.image_url = imageUrl;
+  if (audioUrl !== undefined) patch.audio_url = audioUrl;
+  const { error } = await supabaseClient.from('teacher_flashcards').update(patch).eq('id', id);
+  if (error){ console.error('Erro ao editar flashcard:', error); return { ok: false, error: 'Não foi possível salvar a edição agora.' }; }
+  return { ok: true };
+}
+
+// Prop 4 -- delete físico de verdade (grillado: a autora aceita perder o
+// histórico de revisão pra poder corrigir um cartão criado por engano),
+// diferente de setFlashcardStatus('archived') abaixo, que preserva
+// progresso. A linha some de teacher_flashcards; a próxima vez que a
+// aluna carregar o app, mergeTeacherFlashcardsIntoState() simplesmente
+// não vai mais encontrar essa linha -- o cartão órfão em STATE.cards
+// salvo é descartado pelo mesmo mecanismo de sempre (Fase 0), sem
+// precisar de nenhum código novo.
+async function deleteFlashcardPermanently(id){
+  const { error } = await supabaseClient.from('teacher_flashcards').delete().eq('id', id);
+  if (error){ console.error('Erro ao apagar flashcard:', error); return { ok: false }; }
+  return { ok: true };
 }
 
 // Fase 8a -- upload de mídia pro bucket `flashcard-media` (migration 032,
