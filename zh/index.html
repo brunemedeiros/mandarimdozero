@@ -1997,6 +1997,23 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .public-profile-page-footer a{ color:var(--seal-red-dark); font-weight:700; text-decoration:none; }
 .public-profile-page-footer a:hover{ text-decoration:underline; }
 
+/* Fase 2 do perfil público (ver CLAUDE.md) -- "Ver cartões", grillado
+   Q3/Q4: fundo embaçado + convite pra login quando não há CURRENT_USER,
+   lista de checkboxes (reaproveita .admin-badge-row/.admin-recipients-*,
+   já calibradas em shared/admin-flashcards.js) quando há. */
+.public-profile-cards-section .section-label{ margin-top:22px; }
+.public-profile-cards-gate{ position:relative; min-height:150px; border-radius:12px; overflow:hidden; }
+.public-profile-cards-gate-skeleton{ filter:blur(5px); pointer-events:none; user-select:none; }
+.public-profile-cards-gate-skeleton .admin-badge-row{ margin-bottom:8px; }
+.public-profile-cards-gate-overlay{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:16px;
+}
+.public-profile-cards-gate-card{
+  background:var(--paper); border:1px solid var(--paper-line); border-radius:12px; padding:16px 18px;
+  box-shadow:var(--shadow-lift); text-align:center; max-width:260px;
+}
+.public-profile-cards-gate-card p{ font-size:13.5px; color:var(--ink); margin:0 0 10px; }
+
 /* Vitrine de badges na Visão geral do Perfil -- mostra TODAS as conquistas
    já ganhas (não só as últimas 4), reaproveitando o mesmo cartão .badge do
    grid completo de Progresso (ver renderProgressView) só que num grid mais
@@ -3614,6 +3631,20 @@ body.hide-pinyin .prompt-pinyin{
       <button class="app-modal-close" id="public-profile-modal-close" aria-label="Fechar">✕</button>
     </div>
     <div class="app-modal-body" id="public-profile-modal-body"></div>
+  </div>
+</div>
+
+<!-- Fase 2 do perfil público (ver CLAUDE.md, grilling Q11) -- "ver cada
+     cartão como se fosse editá-lo, mas sem permitir a edição". Sempre
+     campos estáticos (nunca <input>/<textarea>), sem botão de salvar --
+     ver openPublicFlashcardPreview em shared/public-profile.js. -->
+<div id="public-flashcard-preview-modal" class="app-modal-overlay" style="display:none;">
+  <div class="app-modal">
+    <div class="app-modal-header">
+      <h3>👁 Cartão</h3>
+      <button class="app-modal-close" id="public-flashcard-preview-close" aria-label="Fechar">✕</button>
+    </div>
+    <div class="app-modal-body" id="public-flashcard-preview-body"></div>
   </div>
 </div>
 
