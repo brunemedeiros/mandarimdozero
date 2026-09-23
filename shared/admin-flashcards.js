@@ -106,6 +106,21 @@
 // hasPlainFrontBack() lá) -- cartões cloze já existentes continuam com
 // front preenchido, então continuam aparecendo ali normalmente.
 //
+// Reestruturação Fase 2 (mesmo prompt-mestre da Fase 1 acima, ver
+// CLAUDE.md) -- validação contextual por campo: cada campo obrigatório do
+// modo selecionado ganha borda vermelha + mensagem específica embaixo
+// dele (`.field-invalid`/`.profile-edit-field-error`, mesmo par border-
+// color/background já usado em `.gram-exercise.wrong input`/`.mc-option.
+// incorrect`, zero cor nova) em vez de só uma frase genérica no rodapé.
+// Valida em tempo real no blur de cada campo (wireFlashcardFieldValidation)
+// e de forma completa/definitiva no submit (validateFlashcardForm, roda
+// ANTES do upload de mídia -- não sobe arquivo à toa se o resto do
+// formulário ainda está inválido). Só valida campos que pertencem ao modo
+// ATUAL -- nunca marca "Frente" como inválida no modo cloze, por exemplo,
+// já que esse campo nem existe pra esse modo. createFlashcard() continua
+// validando de novo do lado do dado (fonte de verdade); isto é só a
+// camada de UX na frente.
+//
 // Depende de (mesma posição de shared/admin-students.js -- antes de app.js):
 //   - shared/roles.js              (fetchMyStudents)
 //   - shared/teacher-flashcards.js (fetchFlashcardsForStudent, createFlashcard, setFlashcardStatus, uploadFlashcardMedia)
@@ -197,6 +212,12 @@ function wireFlashcardsCardsBox(cardsBox){
 // chamada por: mudar um checkbox, "Selecionar todos", "Limpar seleção",
 // e o filtro de idioma. Nunca toca em #admin-create-flashcard-form.
 async function updateFlashcardsSelectionDependentUI(wrap){
+  // Fase 2 da reestruturação (ver CLAUDE.md) -- trocar a seleção de
+  // alunos pode mudar se pinyin (mandarim) é exigido no modo cloze;
+  // limpa erros de campo já marcados pra não deixar um aviso "obrigatório
+  // pra aluno de mandarim" preso na tela depois que ela desmarcou o único
+  // aluno de mandarim da seleção.
+  clearAllFlashcardFieldErrors();
   const students = ADMIN_FLASHCARDS_STATE._studentsCache;
   const selectedStudents = students.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
   const anyMandarim = selectedStudents.some(s => s.language_app_key === 'mandarim');
@@ -260,6 +281,151 @@ function applyFlashcardPickerFilters(wrap){
     const matchesLang = lang === 'all' || row.dataset.lang === lang;
     row.style.display = (matchesText && matchesLang) ? '' : 'none';
   });
+}
+
+// Fase 2 da reestruturação do formulário de flashcards (ver CLAUDE.md) --
+// validação contextual por campo: borda vermelha + mensagem específica
+// embaixo do campo (mesmo par border-color/background já usado em
+// .gram-exercise.wrong input/.mc-option.incorrect, zero cor nova), em vez
+// de só uma frase genérica no rodapé do formulário. createFlashcard()
+// continua sendo a fonte de verdade da validação (client-side é só a
+// camada de UX na frente, mesmo nível de confiança de outros gates de UI
+// já existentes no app -- ver Fase 5.1 no CLAUDE.md).
+function markFlashcardFieldInvalid(inputId, errorId, message){
+  const input = document.getElementById(inputId);
+  const errEl = document.getElementById(errorId);
+  if (input) input.classList.add('field-invalid');
+  if (errEl) errEl.textContent = message;
+}
+
+function clearFlashcardFieldInvalid(inputId, errorId){
+  const input = document.getElementById(inputId);
+  const errEl = document.getElementById(errorId);
+  if (input) input.classList.remove('field-invalid');
+  if (errEl) errEl.textContent = '';
+}
+
+const FLASHCARD_FIELD_IDS = [
+  ['admin-flashcard-front', 'admin-flashcard-front-error'],
+  ['admin-flashcard-back', 'admin-flashcard-back-error'],
+  ['admin-flashcard-mc-1', 'admin-flashcard-mc-error'],
+  ['admin-flashcard-cloze-sentence', 'admin-flashcard-cloze-sentence-error'],
+  ['admin-flashcard-cloze-answer', 'admin-flashcard-cloze-answer-error'],
+  ['admin-flashcard-cloze-pinyin', 'admin-flashcard-cloze-pinyin-error'],
+  ['admin-flashcard-cloze-trans', 'admin-flashcard-cloze-trans-error'],
+];
+
+function clearAllFlashcardFieldErrors(){
+  FLASHCARD_FIELD_IDS.forEach(([inputId, errorId]) => clearFlashcardFieldInvalid(inputId, errorId));
+}
+
+// Valida só os campos que pertencem ao MODO atualmente selecionado --
+// campos escondidos (ex: Frente no modo cloze) nunca são marcados
+// inválidos, mesmo que vazios, porque não fazem parte do cartão que será
+// criado nesse modo. Devolve `true`/`false`; ao devolver `false`, já
+// marcou cada campo problemático e focou o primeiro.
+function validateFlashcardForm(wrap){
+  const mode = wrap.querySelector('input[name="admin-flashcard-mode"]:checked').value;
+  const isMC = mode === 'mc';
+  const isCloze = mode === 'cloze';
+  const anyMandarimNow = ADMIN_FLASHCARDS_STATE._studentsCache.some(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id) && s.language_app_key === 'mandarim');
+  clearAllFlashcardFieldErrors();
+  let ok = true;
+  let firstInvalid = null;
+  function fail(inputId, errorId, message){
+    markFlashcardFieldInvalid(inputId, errorId, message);
+    if (!firstInvalid) firstInvalid = document.getElementById(inputId);
+    ok = false;
+  }
+
+  if (!isCloze){
+    if (!document.getElementById('admin-flashcard-front').value.trim()){
+      fail('admin-flashcard-front', 'admin-flashcard-front-error', 'Obrigatório.');
+    }
+    if (!document.getElementById('admin-flashcard-back').value.trim()){
+      fail('admin-flashcard-back', 'admin-flashcard-back-error', 'Obrigatório.');
+    }
+    if (isMC){
+      const anyChoiceFilled = ['admin-flashcard-mc-1', 'admin-flashcard-mc-2', 'admin-flashcard-mc-3']
+        .some(id => document.getElementById(id).value.trim());
+      if (!anyChoiceFilled){
+        fail('admin-flashcard-mc-1', 'admin-flashcard-mc-error', 'Digite pelo menos 1 opção errada.');
+      }
+    }
+  } else {
+    const sentence = document.getElementById('admin-flashcard-cloze-sentence').value.trim();
+    const blankCount = (sentence.match(/___/g) || []).length;
+    if (!sentence){
+      fail('admin-flashcard-cloze-sentence', 'admin-flashcard-cloze-sentence-error', 'Obrigatório.');
+    } else if (blankCount !== 1){
+      fail('admin-flashcard-cloze-sentence', 'admin-flashcard-cloze-sentence-error', 'Precisa ter exatamente um espaço marcado com ___.');
+    }
+    if (!document.getElementById('admin-flashcard-cloze-answer').value.trim()){
+      fail('admin-flashcard-cloze-answer', 'admin-flashcard-cloze-answer-error', 'Obrigatório.');
+    }
+    if (anyMandarimNow && !document.getElementById('admin-flashcard-cloze-pinyin').value.trim()){
+      fail('admin-flashcard-cloze-pinyin', 'admin-flashcard-cloze-pinyin-error', 'Obrigatório pra aluno(s) de mandarim.');
+    }
+    if (!document.getElementById('admin-flashcard-cloze-trans').value.trim()){
+      fail('admin-flashcard-cloze-trans', 'admin-flashcard-cloze-trans-error', 'Obrigatório.');
+    }
+  }
+
+  if (firstInvalid) firstInvalid.focus();
+  return ok;
+}
+
+// Validação em tempo real: cada campo obrigatório valida no blur (assim
+// que a professora sai dele, não só quando ela clica "Criar cartão") e
+// limpa o próprio erro assim que ela volta a digitar -- feedback
+// imediato nos dois sentidos, sem esperar o submit pra descobrir o que
+// falta. `validateFlashcardForm()` continua sendo a checagem completa e
+// definitiva rodada no submit (cobre também campos que a professora
+// nunca chegou a tocar).
+function wireFlashcardFieldValidation(wrap){
+  const currentMode = () => wrap.querySelector('input[name="admin-flashcard-mode"]:checked').value;
+  const anyMandarimNow = () => ADMIN_FLASHCARDS_STATE._studentsCache.some(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id) && s.language_app_key === 'mandarim');
+
+  function onBlurRequired(inputId, errorId, relevantModes){
+    const input = document.getElementById(inputId);
+    input.addEventListener('blur', () => {
+      if (!relevantModes.includes(currentMode())) return;
+      if (!input.value.trim()) markFlashcardFieldInvalid(inputId, errorId, 'Obrigatório.');
+    });
+    input.addEventListener('input', () => clearFlashcardFieldInvalid(inputId, errorId));
+  }
+
+  onBlurRequired('admin-flashcard-front', 'admin-flashcard-front-error', ['flip', 'mc']);
+  onBlurRequired('admin-flashcard-back', 'admin-flashcard-back-error', ['flip', 'mc']);
+  onBlurRequired('admin-flashcard-cloze-answer', 'admin-flashcard-cloze-answer-error', ['cloze']);
+  onBlurRequired('admin-flashcard-cloze-trans', 'admin-flashcard-cloze-trans-error', ['cloze']);
+
+  ['admin-flashcard-mc-1', 'admin-flashcard-mc-2', 'admin-flashcard-mc-3'].forEach(id => {
+    const input = document.getElementById(id);
+    input.addEventListener('blur', () => {
+      if (currentMode() !== 'mc') return;
+      const anyFilled = ['admin-flashcard-mc-1', 'admin-flashcard-mc-2', 'admin-flashcard-mc-3']
+        .some(i => document.getElementById(i).value.trim());
+      if (!anyFilled) markFlashcardFieldInvalid('admin-flashcard-mc-1', 'admin-flashcard-mc-error', 'Digite pelo menos 1 opção errada.');
+    });
+    input.addEventListener('input', () => clearFlashcardFieldInvalid('admin-flashcard-mc-1', 'admin-flashcard-mc-error'));
+  });
+
+  const clozeSentence = document.getElementById('admin-flashcard-cloze-sentence');
+  clozeSentence.addEventListener('blur', () => {
+    if (currentMode() !== 'cloze') return;
+    const v = clozeSentence.value.trim();
+    if (!v) markFlashcardFieldInvalid('admin-flashcard-cloze-sentence', 'admin-flashcard-cloze-sentence-error', 'Obrigatório.');
+    else if ((v.match(/___/g) || []).length !== 1) markFlashcardFieldInvalid('admin-flashcard-cloze-sentence', 'admin-flashcard-cloze-sentence-error', 'Precisa ter exatamente um espaço marcado com ___.');
+  });
+  clozeSentence.addEventListener('input', () => clearFlashcardFieldInvalid('admin-flashcard-cloze-sentence', 'admin-flashcard-cloze-sentence-error'));
+
+  const clozePinyin = document.getElementById('admin-flashcard-cloze-pinyin');
+  clozePinyin.addEventListener('blur', () => {
+    if (currentMode() !== 'cloze' || !anyMandarimNow()) return;
+    if (!clozePinyin.value.trim()) markFlashcardFieldInvalid('admin-flashcard-cloze-pinyin', 'admin-flashcard-cloze-pinyin-error', 'Obrigatório pra aluno(s) de mandarim.');
+  });
+  clozePinyin.addEventListener('input', () => clearFlashcardFieldInvalid('admin-flashcard-cloze-pinyin', 'admin-flashcard-cloze-pinyin-error'));
 }
 
 async function renderAdminFlashcardsView(){
@@ -360,15 +526,18 @@ async function renderAdminFlashcardsView(){
         <div id="admin-flashcard-content-main">
           <label class="profile-edit-label" id="admin-flashcard-front-label" for="admin-flashcard-front">Frente (no idioma estudado)</label>
           <input type="text" id="admin-flashcard-front" class="profile-edit-input" placeholder="${anyMandarim ? 'ex: 图书馆' : 'ex: la bibliothèque'}" autocomplete="off">
+          <p class="profile-edit-field-error" id="admin-flashcard-front-error"></p>
           <div id="admin-flashcard-pinyin-wrap" style="${anyMandarim ? '' : 'display:none;'}">
             <label class="profile-edit-label" for="admin-flashcard-pinyin">Pinyin (usado só nos alunos de mandarim selecionados)</label>
             <input type="text" id="admin-flashcard-pinyin" class="profile-edit-input" placeholder="ex: túshūguǎn" autocomplete="off">
           </div>
           <label class="profile-edit-label" id="admin-flashcard-back-label" for="admin-flashcard-back">Verso (tradução)</label>
           <input type="text" id="admin-flashcard-back" class="profile-edit-input" placeholder="ex: a biblioteca" autocomplete="off">
+          <p class="profile-edit-field-error" id="admin-flashcard-back-error"></p>
           <div id="admin-flashcard-mc-fields" style="display:none; margin:4px 0 0;">
             <label class="profile-edit-label" for="admin-flashcard-mc-1">Outras opções -- opção errada 1</label>
             <input type="text" id="admin-flashcard-mc-1" class="profile-edit-input" autocomplete="off">
+            <p class="profile-edit-field-error" id="admin-flashcard-mc-error"></p>
             <label class="profile-edit-label" for="admin-flashcard-mc-2">Opção errada 2 (opcional)</label>
             <input type="text" id="admin-flashcard-mc-2" class="profile-edit-input" autocomplete="off">
             <label class="profile-edit-label" for="admin-flashcard-mc-3">Opção errada 3 (opcional)</label>
@@ -378,14 +547,18 @@ async function renderAdminFlashcardsView(){
         <div id="admin-flashcard-content-cloze" style="display:none;">
           <label class="profile-edit-label" for="admin-flashcard-cloze-sentence">Frase com lacuna (use ___ pra marcar o espaço)</label>
           <input type="text" id="admin-flashcard-cloze-sentence" class="profile-edit-input" placeholder="${anyMandarim ? 'ex: 我 ___ 巴西人。' : 'ex: Je ___ de Paris.'}" autocomplete="off">
+          <p class="profile-edit-field-error" id="admin-flashcard-cloze-sentence-error"></p>
           <label class="profile-edit-label" for="admin-flashcard-cloze-answer">Resposta certa</label>
           <input type="text" id="admin-flashcard-cloze-answer" class="profile-edit-input" placeholder="${anyMandarim ? 'ex: 是' : 'ex: viens'}" autocomplete="off">
+          <p class="profile-edit-field-error" id="admin-flashcard-cloze-answer-error"></p>
           <div id="admin-flashcard-cloze-pinyin-wrap" style="display:none;">
             <label class="profile-edit-label" for="admin-flashcard-cloze-pinyin">Pinyin da resposta (é o que o aluno vai digitar)</label>
             <input type="text" id="admin-flashcard-cloze-pinyin" class="profile-edit-input" placeholder="ex: shì" autocomplete="off">
+            <p class="profile-edit-field-error" id="admin-flashcard-cloze-pinyin-error"></p>
           </div>
           <label class="profile-edit-label" for="admin-flashcard-cloze-trans">Tradução (mostrada ao aluno depois de responder)</label>
           <input type="text" id="admin-flashcard-cloze-trans" class="profile-edit-input" placeholder="ex: Eu venho de Paris." autocomplete="off">
+          <p class="profile-edit-field-error" id="admin-flashcard-cloze-trans-error"></p>
         </div>
 
         <div class="section-label" style="margin:18px 0 6px;">Recursos opcionais</div>
@@ -460,8 +633,14 @@ async function renderAdminFlashcardsView(){
       document.getElementById('admin-flashcard-back-label').textContent = mode === 'mc' ? 'Resposta correta' : 'Verso (tradução)';
       const anyMandarimNow = ADMIN_FLASHCARDS_STATE._studentsCache.some(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id) && s.language_app_key === 'mandarim');
       document.getElementById('admin-flashcard-cloze-pinyin-wrap').style.display = (mode === 'cloze' && anyMandarimNow) ? '' : 'none';
+      // Fase 2 da reestruturação (ver CLAUDE.md) -- trocar de modo esconde
+      // um bloco de campo inteiro; nenhum erro marcado nele deveria
+      // continuar visível quando ele reaparecer num estado limpo.
+      clearAllFlashcardFieldErrors();
     });
   });
+
+  wireFlashcardFieldValidation(wrap);
 
   document.getElementById('admin-create-flashcard-form').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -474,6 +653,20 @@ async function renderAdminFlashcardsView(){
       errorEl.textContent = 'Selecione ao menos um aluno.';
       return;
     }
+
+    // Fase 2 da reestruturação (ver CLAUDE.md) -- validação contextual por
+    // campo RODA ANTES do upload de mídia/chamada de rede, não só depois:
+    // evita subir imagem/áudio à toa quando o resto do formulário ainda
+    // está inválido, e mostra exatamente qual campo corrigir (borda +
+    // mensagem embaixo dele) em vez de só uma frase genérica no rodapé.
+    // createFlashcard() continua validando de novo do lado do dado -- isto
+    // é só a camada de UX na frente, mesmo espírito de outros gates de UI
+    // já existentes no app.
+    if (!validateFlashcardForm(wrap)){
+      errorEl.textContent = 'Corrija os campos destacados acima.';
+      return;
+    }
+
     btn.disabled = true;
 
     // Fase 8a -- upload de imagem/áudio ANTES de criar o(s) cartão(ões) (a
@@ -498,16 +691,13 @@ async function renderAdminFlashcardsView(){
     const isMC = mode === 'mc';
     const isCloze = mode === 'cloze';
 
+    // Múltipla escolha já foi validada (pelo menos 1 opção preenchida) em
+    // validateFlashcardForm() acima -- não precisa checar de novo aqui.
     const choices = isMC ? [
       document.getElementById('admin-flashcard-mc-1').value,
       document.getElementById('admin-flashcard-mc-2').value,
       document.getElementById('admin-flashcard-mc-3').value,
     ] : [];
-    if (isMC && !choices.some(c => c.trim())){
-      btn.disabled = false;
-      errorEl.textContent = 'Digite pelo menos 1 opção errada pra ativar múltipla escolha.';
-      return;
-    }
 
     // Fase 1 da reestruturação (ver CLAUDE.md): no modo cloze, "Frente"
     // não existe na tela (nunca lida/exibida em renderClozeReviewCard) --

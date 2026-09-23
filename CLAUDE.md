@@ -3491,3 +3491,125 @@ Esta é a Fase 1 de um prompt-mestre que travou explicitamente "não avance
 automaticamente" após cada fase. Próxima fase só começa depois de
 autorização explícita da autora, com este relatório já entregue antes de
 pedir luz verde.
+
+**Atualização: autorizada e entregue (2026-09-23), "Siga para a fase 2".**
+Não tinha o texto literal das Fases 2+ do prompt-mestre original salvo
+nesta sessão (só um resumo genérico sobrevive de sessões anteriores) --
+em vez de adivinhar o escopo numa tela administrativa já corrigida
+várias vezes por bug real, perguntei à autora via `AskUserQuestion` com 3
+opções concretas + "outra coisa". Ela escolheu **"Validação contextual
+mais rica / mensagens de erro por campo"**.
+
+## Fase 2 (validação contextual por campo) -- borda + mensagem específica embaixo de cada campo, tempo real no blur
+
+**O que foi feito**, só em `shared/admin-flashcards.js` +
+`fr/index.html`/`zh/index.html` (CSS):
+
+- **`.field-invalid`** (novo, fr+zh `index.html`) -- reaproveita o MESMO
+  par `border-color: var(--error-red)` + `background: rgba(214,38,25,
+  0.08)` já usado em `.gram-exercise.wrong input`/`.conj-field.wrong
+  input` (fr) e `.mc-option.incorrect` (fr+zh) -- zero cor nova, mesmo
+  princípio de reaproveitar tokens já calibrados em vez de inventar.
+  `.profile-edit-field-error` (novo) -- mesma cor/tamanho de
+  `.profile-edit-error` (rodapé), só menor/mais próximo do campo.
+- **`<p class="profile-edit-field-error">` embaixo de cada campo
+  obrigatório** (Frente/Verso/1ª opção errada MC/Frase-cloze/Resposta-
+  cloze/Pinyin-cloze/Tradução-cloze) -- vazio por padrão, populado só
+  quando aquele campo específico falha.
+- **`validateFlashcardForm(wrap)`** -- validação completa/definitiva,
+  rodada no SUBMIT, ANTES do upload de mídia (evita subir imagem/áudio à
+  toa se o resto do formulário ainda está inválido -- melhoria real, não
+  só cosmética). Só valida os campos que pertencem ao MODO atualmente
+  selecionado -- nunca marca "Frente" como inválida no modo cloze
+  (esse campo nem existe pra esse modo, ver Fase 1 acima). Foca o
+  primeiro campo inválido automaticamente.
+- **`wireFlashcardFieldValidation(wrap)`** -- validação em TEMPO REAL:
+  cada campo obrigatório valida no `blur` (assim que a professora sai
+  dele, não só no clique de "Criar cartão") e limpa o próprio erro
+  assim que ela volta a digitar (`input`). Pedido explícito da autora
+  ("validação em tempo real... em vez de só no clique") -- antes disso,
+  só existia uma frase genérica no rodapé, só depois do clique.
+- **`clearAllFlashcardFieldErrors()`** chamada em 2 pontos extras, pra
+  nenhum erro ficar "preso" num estado que não faz mais sentido: (1) ao
+  trocar de "Modo de prática" (um campo que estava marcado inválido no
+  modo anterior pode nem existir mais no modo novo -- ex: trocar de flip
+  pra cloze escondendo "Frente" com erro ainda visível seria confuso);
+  (2) em `updateFlashcardsSelectionDependentUI()`, ao mudar a seleção de
+  alunos -- desmarcar o único aluno de mandarim da seleção deveria
+  limpar um erro "Pinyin obrigatório pra aluno(s) de mandarim" que não
+  se aplica mais.
+- **Mensagens específicas por tipo de falha**, não uma genérica pra
+  tudo: "Obrigatório." pros campos vazios simples; "Precisa ter
+  exatamente um espaço marcado com ___." quando a frase-cloze não tem
+  a lacuna certa (distinto de "vazio"); "Digite pelo menos 1 opção
+  errada." pro grupo de múltipla escolha; "Obrigatório pra aluno(s) de
+  mandarim." pro pinyin-cloze quando a seleção inclui mandarim.
+- **Removido o check redundante pós-upload** de "múltipla escolha sem
+  nenhuma opção errada" que existia desde a Fase 8a -- já coberto por
+  `validateFlashcardForm()` ANTES do upload agora, então rodar de novo
+  depois seria trabalho morto (e a validação nova já roda mais cedo,
+  então esse caminho de código nunca mais seria alcançado com choices
+  vazio).
+
+**Decisões arquiteturais tomadas nesta fase:**
+1. `createFlashcard()` (`shared/teacher-flashcards.js`) NÃO foi tocado --
+   continua sendo a fonte de verdade da validação (mesma validação
+   server-side de antes). A validação de campo desta fase é só uma
+   camada de UX na frente, mesmo nível de confiança de outros gates de
+   UI já existentes no app (ex: teto de 20 cartões da Fase 5.1) -- não
+   uma fronteira de segurança nova.
+2. Validação em tempo real É por campo individual (blur/input), não uma
+   chamada de `validateFlashcardForm()` completa a cada tecla -- rodar a
+   validação completa a cada blur marcaria campos que a professora ainda
+   nem chegou a preencher (ex: sair do campo Frente já marcaria "Verso"
+   vazio como erro, antes dela sequer ter chance de preenchê-lo). Cada
+   campo só valida a SI MESMO no seu próprio blur.
+3. Mensagem do rodapé (`#admin-create-flashcard-error`) não sumiu --
+   agora mostra um resumo genérico ("Corrija os campos destacados
+   acima.") só quando `validateFlashcardForm()` falha no submit, servindo
+   de âncora visual pra quem não notar os campos individuais de cara.
+
+**Gratuito x Premium (avaliado, não implementado):** validação de UI
+pura, sem custo marginal -- mesma conclusão de toda a Fase 1 e de todo o
+resto desta feature, nenhuma razão pra diferenciar por plano.
+
+**Testes realizados:** `node --check` sem erro. Playwright (fr+zh),
+mesmo padrão de stub de sempre: (1) blur num campo vazio marca
+`.field-invalid` + mensagem "Obrigatório.", digitar limpa os dois
+imediatamente; (2) submeter com Frente preenchida mas Verso vazio marca
+SÓ o Verso (Frente permanece sem erro), foca o Verso, mostra o resumo no
+rodapé, `dbDelta:0`; (3) trocar de modo (flip→mc) confirma que o erro de
+Frente não persiste (`frontStillInvalid:false`), e que o campo de
+múltipla escolha (1ª opção errada) valida corretamente no blur e limpa
+ao corrigir; (4) modo cloze -- frase sem `___` recebe a mensagem
+ESPECÍFICA ("Precisa ter exatamente um..."), não a genérica
+"Obrigatório.", enquanto Resposta/Tradução (ainda vazias mas não
+tocadas nesse teste) não são marcadas incorretamente; (5) submit
+completo e válido em cloze cria o cartão de verdade (`dbDelta:1`) nos
+dois idiomas -- no zh, confirmado que o pinyin-cloze É exigido (aluno
+mandarim selecionado) e barra o submit até ser preenchido
+(`pinyinInvalidBeforeFill:true`), depois passa. Validação visual
+(screenshot Playwright, fr, claro+escuro) do estado de 2 campos
+inválidos ao mesmo tempo (Frente+Verso) confirma legibilidade nos dois
+temas -- esperado, já que reaproveita só o par border-color/background
+já calibrado em `.gram-exercise.wrong input`/`.mc-option.incorrect`,
+nenhuma cor nova. Sem erro de console novo atribuível a este código
+(mesmos `pageerror` de mock -- `.is()`/`.upsert()` -- já registrados em
+toda a feature).
+
+**O que ainda falta / não foi feito nesta fase (de propósito, é escopo
+de fase futura se pedido):**
+- Nenhuma validação client-side de formato de arquivo/tamanho de
+  imagem/áudio antes do upload -- fora do escopo desta fase (era sobre
+  campos de texto/seleção).
+- `student_flashcards`/`admin-support-materials.js`/`admin-class-logs.js`
+  não ganharam o mesmo padrão de validação por campo -- fora do escopo
+  deste prompt-mestre específico (que é só o formulário de flashcards do
+  admin).
+- Não foi confirmado com a autora se as 3 outras opções descartadas na
+  pergunta inicial (reestruturar Destinatários visualmente; Recursos
+  opcionais contextual por modo) fazem parte de uma Fase 3 futura --
+  ficam como candidatas, não decididas.
+
+Próxima fase só começa depois de autorização explícita da autora, com
+este relatório já entregue antes de pedir luz verde.
