@@ -183,7 +183,7 @@ async function isUsernameAvailable(candidate){
   return !data;
 }
 
-async function saveProfileEdits({ displayName, username, bio, featuredBadgeId }){
+async function saveProfileEdits({ displayName, username, bio, featuredBadgeId, publicProfile }){
   const cleanUsername = slugifyUsername(username);
   if (cleanUsername.length < 3){
     return { ok: false, error: 'Nome de usuário precisa ter pelo menos 3 caracteres (letras, números, ponto, traço ou _).' };
@@ -206,6 +206,11 @@ async function saveProfileEdits({ displayName, username, bio, featuredBadgeId })
     // pessoa É pra plataforma entra no "em destaque" do Ranking, não o que
     // ela jogou.
     featured_badge_id: featuredBadgeId || null,
+    // Fase 1 do perfil público (ver CLAUDE.md) -- interruptor mestre,
+    // grillado como "privado por padrão" (Q1): !! garante boolean mesmo se
+    // o chamador passar undefined (conta sem PROFILE_CACHE carregado
+    // ainda, mesmo cuidado que os outros campos deste payload já tomam).
+    public_profile: !!publicProfile,
   };
   const { data, error } = await supabaseClient
     .from('profiles')
@@ -632,6 +637,7 @@ function openEditProfileModal(specialBadges){
   document.getElementById('profile-edit-bio-count').textContent = `${(p?.bio || '').length}/160`;
   document.getElementById('profile-edit-error').textContent = '';
   document.getElementById('profile-edit-avatar-error').textContent = '';
+  document.getElementById('profile-edit-public-switch')?.setAttribute('aria-checked', p?.public_profile ? 'true' : 'false');
   renderFeaturedBadgeSelect(specialBadges, p?.featured_badge_id || '');
   renderAvatarPreview(p);
   modal.style.display = 'flex';
@@ -696,6 +702,16 @@ function wireProfileEditModal(){
     document.getElementById('profile-edit-bio-count').textContent = `${bioInput.value.length}/160`;
   });
 
+  // Só alterna o visual (aria-checked) -- diferente de theme-pref-switch/
+  // cloze-mode-switch/feedback-sound-switch (que salvam na hora, fora de
+  // um form), este vive DENTRO do form de Editar Perfil e só é lido/salvo
+  // junto com nome/username/bio no submit abaixo, mesmo padrão dos outros
+  // campos deste modal.
+  document.getElementById('profile-edit-public-switch')?.addEventListener('click', (e) => {
+    const checked = e.currentTarget.getAttribute('aria-checked') === 'true';
+    e.currentTarget.setAttribute('aria-checked', checked ? 'false' : 'true');
+  });
+
   document.getElementById('profile-edit-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const saveBtn = document.getElementById('profile-edit-save-btn');
@@ -709,6 +725,7 @@ function wireProfileEditModal(){
       username: document.getElementById('profile-edit-username').value,
       bio: bioInput.value,
       featuredBadgeId: document.getElementById('profile-edit-featured-badge')?.value,
+      publicProfile: document.getElementById('profile-edit-public-switch')?.getAttribute('aria-checked') === 'true',
     });
 
     saveBtn.disabled = false;

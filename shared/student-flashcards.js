@@ -70,6 +70,19 @@ async function setOwnFlashcardStatus(id, status){
   return { ok: !error };
 }
 
+// Fase 1 do perfil público (ver CLAUDE.md, grilling Q1) -- eixo SEPARADO de
+// `status` (active/archived, que decide se o cartão entra na fila de
+// revisão): `hidden_from_profile` só decide se ESTE cartão específico
+// aparece na lista de cartões públicos de um perfil PÚBLICO. Nunca afeta
+// revisão/FSRS (mesmo princípio já vale pra `status`, não muda aqui) --
+// escondido do perfil e arquivado da revisão são perguntas diferentes, uma
+// aluna pode ter um cartão ativo (revisa normalmente) mas escondido do
+// perfil, ou arquivado mas ainda visível no perfil.
+async function setOwnFlashcardHidden(id, hidden){
+  const { error } = await supabaseClient.from('student_flashcards').update({ hidden_from_profile: !!hidden }).eq('id', id).eq('student_id', CURRENT_USER.id);
+  return { ok: !error };
+}
+
 // Prop 4 (ver CLAUDE.md, "7 propostas") -- edição real (todos os campos)
 // de um cartão que a própria aluna criou. `revision` calculado pelo
 // CHAMADOR (`(card.revision||0)+1`) -- mesmo mecanismo de "reset via id
