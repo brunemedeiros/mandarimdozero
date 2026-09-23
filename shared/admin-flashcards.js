@@ -140,6 +140,23 @@
 // não foram redesenhados nesta fase (mesmo escopo restrito já usado
 // desde a Fase 1: só a tela de flashcards é o alvo deste prompt-mestre).
 //
+// Reestruturação Fase 4 (mesmo prompt-mestre das Fases 1/2/3 acima, ver
+// CLAUDE.md) -- "Recursos opcionais contextual por modo". Investigado antes
+// de mudar qualquer coisa (mesma disciplina de "investigação antes de mudar"
+// já usada em UX-fix 4/6): Imagem/Áudio (card.imageUrl/audioUrl) JÁ renderizam
+// corretamente nos 3 modos de revisão hoje (flip/mc/cloze, fr+zh app.js) --
+// escondê-los por modo seria regressão, não melhoria. Nota (card.note/
+// teacherNote) nunca aparece pro aluno em NENHUM modo, mas isso também não é
+// bug de modo -- é o único ponto de leitura confirmado (buildFlashcardsCardsBoxHTML
+// acima), um lembrete privado da própria professora, não um campo destinado
+// ao aluno. Ou seja: nenhum dos 3 campos genuinamente varia por modo hoje.
+// Perguntado à autora o que "contextual" deveria significar dado esse achado
+// -- resposta: só o TEXTO de apoio (`#admin-flashcard-resources-hint`,
+// `FLASHCARD_RESOURCES_HINT`) muda conforme o modo selecionado, explicando
+// onde Imagem/Áudio aparecem NAQUELE modo especificamente; Nota continua
+// descrita como lembrete privado nos 3. Zero mudança de visibilidade/
+// comportamento dos campos em si.
+//
 // Depende de (mesma posição de shared/admin-students.js -- antes de app.js):
 //   - shared/roles.js              (fetchMyStudents)
 //   - shared/teacher-flashcards.js (fetchFlashcardsForStudent, createFlashcard, setFlashcardStatus, uploadFlashcardMedia)
@@ -148,6 +165,20 @@
 //   - languages/<lang>/app.js      (isAdminUser)
 
 let ADMIN_FLASHCARDS_STATE = { studentIds: new Set(), langFilter: 'all', _studentsCache: [] };
+
+// Fase 4 da reestruturação (mesmo prompt-mestre, ver CLAUDE.md) -- "Recursos
+// opcionais" (Nota/Imagem/Áudio) continua sempre visível nos 3 modos (Imagem/
+// Áudio já funcionam corretamente nos 3 -- renderReviewView/renderMultipleChoiceReviewCard/
+// renderClozeReviewCard em fr+zh app.js todos mostram card.imageUrl/audioUrl;
+// esconder algum deles por modo seria regressão, não melhoria -- confirmado
+// lendo o código antes de mudar qualquer coisa). "Contextual por modo" aqui é
+// só o TEXTO de apoio embaixo do rótulo, explicando onde cada recurso aparece
+// NAQUELE modo específico -- nenhuma mudança de visibilidade/comportamento.
+const FLASHCARD_RESOURCES_HINT = {
+  flip: 'Imagem e áudio aparecem junto da frente do cartão. Nota é um lembrete só seu -- o aluno nunca vê.',
+  mc: 'Imagem e áudio aparecem junto da pergunta, acima das opções de múltipla escolha. Nota é um lembrete só seu -- o aluno nunca vê.',
+  cloze: 'Imagem e áudio aparecem junto da frase com a lacuna. Nota é um lembrete só seu -- o aluno nunca vê.',
+};
 
 function flashcardStudentLabel(s){
   return s.display_name
@@ -583,6 +614,7 @@ async function renderAdminFlashcardsView(){
         </div>
 
         <div class="section-label" style="margin:18px 0 6px;">Recursos opcionais</div>
+        <p class="profile-edit-hint" id="admin-flashcard-resources-hint" style="margin-top:-2px;">${FLASHCARD_RESOURCES_HINT.flip}</p>
         <label class="profile-edit-label" for="admin-flashcard-note">Nota</label>
         <input type="text" id="admin-flashcard-note" class="profile-edit-input" placeholder="contexto, dica de uso..." autocomplete="off">
         <label class="profile-edit-label" for="admin-flashcard-image">Imagem</label>
@@ -654,6 +686,10 @@ async function renderAdminFlashcardsView(){
       document.getElementById('admin-flashcard-back-label').textContent = mode === 'mc' ? 'Resposta correta' : 'Verso (tradução)';
       const anyMandarimNow = ADMIN_FLASHCARDS_STATE._studentsCache.some(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id) && s.language_app_key === 'mandarim');
       document.getElementById('admin-flashcard-cloze-pinyin-wrap').style.display = (mode === 'cloze' && anyMandarimNow) ? '' : 'none';
+      // Fase 4 da reestruturação (ver CLAUDE.md) -- texto de apoio de
+      // "Recursos opcionais" muda conforme o modo (Imagem/Áudio continuam
+      // sempre visíveis nos 3, só a explicação de ONDE eles aparecem muda).
+      document.getElementById('admin-flashcard-resources-hint').textContent = FLASHCARD_RESOURCES_HINT[mode];
       // Fase 2 da reestruturação (ver CLAUDE.md) -- trocar de modo esconde
       // um bloco de campo inteiro; nenhum erro marcado nele deveria
       // continuar visível quando ele reaparecer num estado limpo.

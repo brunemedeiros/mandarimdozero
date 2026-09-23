@@ -3694,3 +3694,107 @@ registrados em toda a feature).
 
 Próxima fase só começa depois de autorização explícita da autora, com
 este relatório já entregue antes de pedir luz verde.
+
+**Atualização: autorizada e entregue (2026-09-23, mesmo dia), "Siga para:
+Recursos opcionais contextual por modo" -- investigação prévia invalidou a
+leitura literal do pedido (ver Fase 4 abaixo), resolvida com uma pergunta
+antes de codar (`AskUserQuestion`).**
+
+## Fase 4 (Recursos opcionais contextual por modo) -- investigação invalida a leitura literal, texto de apoio muda por modo
+
+**Investigação antes de codar** (mesma disciplina de "investigação antes de
+mudar qualquer coisa" já usada em UX-fix 4/6 deste arquivo): antes de tocar
+em qualquer campo do bloco "Recursos opcionais" (Nota/Imagem/Áudio, hoje
+mode-independente, sempre visível nos 3 modos), confirmei por leitura direta
+do código de revisão (fr/zh `app.js`) se algum dos 3 campos realmente varia
+por modo hoje:
+- **Imagem/Áudio** (`card.imageUrl`/`card.audioUrl`) já renderizam
+  corretamente nos 3 modos -- `renderReviewView()` (flip),
+  `renderMultipleChoiceReviewCard()` (mc) e `renderClozeReviewCard()`
+  (cloze), fr+zh, todos mostram os dois quando presentes. Escondê-los por
+  modo seria REGRESSÃO contra comportamento que já funciona, não uma
+  melhoria.
+- **Nota** (`card.note`/`teacherNote`) nunca aparece pro aluno em NENHUM
+  modo -- mas não é um bug de modo: o único ponto de leitura confirmado
+  (`grep` em `shared/admin-flashcards.js:187`) é a própria lista "Cartões
+  ativos" da PROFESSORA -- um lembrete privado dela, nunca destinado ao
+  aluno. Funciona como projetado, uniformemente nos 3 modos.
+
+Ou seja: nenhum dos 3 campos genuinamente varia por modo hoje -- a premissa
+literal por trás de "Recursos opcionais contextual por modo" (esconder
+algo dependendo do modo) não se sustenta contra o código real. Implementá-la
+ao pé da letra arriscaria esconder Imagem/Áudio, que já funcionam
+corretamente nos 3 modos.
+
+**Resolvido com uma pergunta à autora** (`AskUserQuestion`, 3 opções: só
+texto de apoio contextual / nada a fazer / outra ideia), reportando o
+achado acima antes de propor qualquer mudança. Resposta: **"Só texto de
+apoio contextual"** -- manter os 3 campos sempre visíveis nos 3 modos
+(comportamento atual, correto), mas trocar o texto de hint da seção
+conforme o modo selecionado, explicando ONDE cada recurso aparece
+NAQUELE modo especificamente. Nenhuma mudança funcional.
+
+**O que foi feito**, só em `shared/admin-flashcards.js`:
+
+- **`FLASHCARD_RESOURCES_HINT`** (novo, objeto com uma entrada por modo:
+  `flip`/`mc`/`cloze`) -- 3 textos, cada um descrevendo onde Imagem/Áudio
+  aparecem NAQUELE modo (ex: "junto da pergunta, acima das opções de
+  múltipla escolha" no modo mc) e reafirmando que Nota é um lembrete
+  privado que o aluno nunca vê, nos 3.
+- **`<p class="profile-edit-hint" id="admin-flashcard-resources-hint">`**
+  (novo) logo abaixo do rótulo "Recursos opcionais", inicializado com o
+  texto do modo padrão (`flip`, já `checked` por padrão no radio group).
+- **Listener de `change` do radio "Modo de prática"** (já existente desde
+  a Fase 1, mesmo bloco que troca rótulos Frente/Verso e visibilidade dos
+  blocos de Conteúdo) ganhou mais uma linha: atualiza
+  `#admin-flashcard-resources-hint` com `FLASHCARD_RESOURCES_HINT[mode]` --
+  reaproveita o mesmo mecanismo já existente, não um listener novo.
+
+**Decisões arquiteturais tomadas nesta fase:**
+1. Zero mudança de visibilidade/comportamento dos 3 campos -- eles
+   continuam sempre presentes nos 3 modos, exatamente como confirmado
+   correto na investigação. "Contextual" aqui é estritamente sobre texto
+   explicativo, não sobre esconder/mostrar.
+2. Nenhuma mudança em `createFlashcard()`/schema/migração -- é uma
+   mudança 100% de UI (um texto que troca de conteúdo), sem novo dado
+   sendo capturado ou persistido.
+3. Reaproveita a classe `.profile-edit-hint` já usada por todo hint do
+   formulário (zero CSS novo), e o mesmo listener de `change` do radio
+   group já existente desde a Fase 1 -- não um sistema de hint contextual
+   novo, só mais uma linha nesse listener.
+
+**Gratuito x Premium (avaliado, não implementado):** mudança de texto de
+UI pura, sem custo marginal -- mesma conclusão de toda a Fase 1/2/3.
+
+**Testes realizados:** `node --check` sem erro. Playwright (fr+zh): hint
+inicial confirmado batendo com o modo `flip` (padrão `checked`); trocar
+pra `mc` e depois `cloze` confirma o texto mudando pra cada um; voltar pra
+`flip` confirma o texto original restaurado (`===` com o inicial); os 3
+campos (Nota/Imagem/Áudio) confirmados **continuando visíveis
+(`offsetParent !== null`) nos 3 modos** -- a checagem específica pra
+garantir que a regressão que esta investigação identificou como risco não
+foi introduzida; fluxo de submit completo (criar cartão) confirmado
+continuando a funcionar sem nenhuma regressão (`dbDelta:1`) depois da
+mudança, nos dois idiomas. Validação visual (screenshot Playwright, fr,
+claro+escuro, modo múltipla escolha) confirma o hint novo legível nos dois
+temas -- esperado, já que reaproveita só a classe `.profile-edit-hint` já
+calibrada, nenhuma cor nova introduzida. Sem erro de console novo
+atribuível a este código (mesmos `pageerror` de mock -- `.is()`/
+`.upsert()` -- já registrados em toda a feature).
+
+**O que ainda falta / não foi feito nesta fase (de propósito):**
+- Nenhuma mudança nos 3 campos em si (Nota/Imagem/Áudio) -- só o texto de
+  apoio acima deles.
+- `admin-support-materials.js`/`admin-class-logs.js` não têm o conceito
+  de "Modo de prática" (não se aplica -- fora do escopo deste
+  prompt-mestre, que é só o formulário de flashcards do admin).
+- **Este era o último dos 3 candidatos oferecidos na pergunta que abriu a
+  Fase 2** (reestruturar Destinatários -> Fase 3; validação por campo ->
+  Fase 2; Recursos opcionais contextual -> esta fase). Com os 3
+  endereçados, não há mais nenhum item pendente conhecido deste
+  prompt-mestre específico -- qualquer trabalho além disso precisa de
+  escopo/autorização explícitos numa sessão futura, não presumido como
+  próximo passo automático.
+
+Próxima fase (se houver) só começa depois de autorização explícita da
+autora, com este relatório já entregue antes de pedir luz verde.
