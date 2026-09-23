@@ -3613,3 +3613,84 @@ de fase futura se pedido):**
 
 Próxima fase só começa depois de autorização explícita da autora, com
 este relatório já entregue antes de pedir luz verde.
+
+**Atualização: autorizada e entregue (2026-09-23, mesmo dia), "Siga para
+a fase 3: reestruturar Destinatários visualmente" -- escopo já vinha
+explícito na própria instrução, sem precisar de outra rodada de
+`AskUserQuestion`.**
+
+## Fase 3 (reestruturar Destinatários visualmente) -- contador vira pill no topo, corrige de passagem contraste dos links "Selecionar todos/Limpar seleção"
+
+**O que foi feito**, só em `shared/admin-flashcards.js` +
+`fr/index.html`/`zh/index.html` (CSS):
+
+- **Contador de seleção virou `.pill`** (classe já existente, reaproveitada
+  do streak/XP da topbar e do selo "Aluno vinculado" de `my-flashcards.js`
+  -- zero CSS novo pro chip em si) e **subiu pro TOPO do bloco "Alunos"**,
+  logo abaixo do hint -- antes era um `<p>` de texto solto embaixo da
+  lista rolável de checkboxes, obrigando a rolar até o fim pra saber
+  quantos alunos estavam marcados.
+- **"Selecionar todos"/"Limpar seleção" viraram uma linha (`.admin-
+  recipients-actions`) ao lado do pill**, dentro do mesmo toolbar
+  (`.admin-recipients-summary`, `display:flex; justify-content:space-
+  between; flex-wrap:wrap` -- quebra pra 2 linhas em telas estreitas sem
+  overflow, confirmado no screenshot) -- antes ficavam soltos entre a
+  busca e a lista, sem relação visual com o contador.
+- **`.admin-select-link`** (novo, fr+zh `index.html`) -- reaproveita
+  `--seal-red-dark`, o MESMO token já usado por `.side-card-link` ("Ver
+  ranking completo →") -- corrige de passagem um contraste baixo real: os
+  2 links não tinham cor própria antes, herdavam o azul padrão do
+  navegador, que ficava pouco legível no tema escuro -- pendência já
+  registrada na UX-fix 4/5 ("achado incidental, não corrigido... registrar
+  pra sessão futura tratar"). Só aplicado em `shared/admin-flashcards.js`
+  -- `admin-support-materials.js`/`admin-class-logs.js` têm o MESMO
+  markup sem cor própria, mas não foram tocados aqui (fora do escopo
+  desta fase -- só a tela de Flashcards é o alvo deste prompt-mestre,
+  mesmo princípio já usado desde a Fase 1).
+
+**Decisões arquiteturais tomadas nesta fase:**
+1. Nenhuma mudança em `updateFlashcardsSelectionDependentUI()` --
+   `counterEl.textContent = ...` já funcionava independente da tag/classe
+   do elemento, então trocar `<p class="profile-edit-hint">` por `<span
+   class="pill">` não exigiu nenhuma mudança de lógica, só de template.
+2. Fixar o contraste dos 2 links foi decisão minha, não pedida
+   explicitamente nesta instrução -- mas diretamente adjacente ao que
+   estava sendo tocado (os mesmos 2 elementos, movidos de posição) e já
+   estava registrado como pendência conhecida no CLAUDE.md; corrigir
+   enquanto mexia no mesmo HTML foi mais barato que deixar pra depois.
+   Escopo explicitamente NÃO estendido às outras 2 telas com o mesmo
+   markup (ver acima).
+
+**Gratuito x Premium (avaliado, não implementado):** reorganização de UI
+pura, sem custo marginal -- mesma conclusão de toda a Fase 1/2.
+
+**Testes realizados:** `node --check` sem erro. Playwright (fr): ordem
+confirmada via `compareDocumentPosition` (toolbar de contador+ações vem
+ANTES da lista de checkboxes no DOM); contador é `<span class="pill">` de
+verdade; `.admin-select-link` aplicado com cor computada `rgb(29,90,130)`
+(fr, claro -- bate com `--seal-red-dark` já calibrado, mesmo valor usado
+na correção dos botões de grau registrada anteriormente neste arquivo);
+contador atualiza corretamente em 3 cenários (selecionar 1, "Selecionar
+todos", "Limpar seleção"); fluxo de submit completo (criar cartão)
+confirmado continuando a funcionar sem nenhuma regressão
+(`dbDelta:1`) depois da reestruturação. Validação visual (screenshot
+Playwright, fr+zh, claro+escuro) confirma o toolbar novo legível nos 4
+cenários -- destaque pro tema escuro, onde os 2 links agora usam a cor
+calibrada certa em vez do azul padrão do navegador (fr) / ficam no tom
+vermelho de marca do zh, ambos claramente legíveis, confirmando visualmente
+a correção do contraste. Sem erro de console novo atribuível a este
+código (mesmos `pageerror` de mock -- `.is()`/`.upsert()` -- já
+registrados em toda a feature).
+
+**O que ainda falta / não foi feito nesta fase (de propósito):**
+- `admin-support-materials.js`/`admin-class-logs.js` continuam com os
+  mesmos 2 links sem cor própria (baixo contraste no escuro) -- a classe
+  `.admin-select-link` já existe e está pronta pra ser aplicada lá também
+  quando/se uma sessão futura for autorizada a tocar essas 2 telas.
+- Nenhuma outra mudança visual no bloco "Alunos" além do reposicionamento
+  do contador/ações -- pills de filtro de idioma, busca e lista de
+  checkboxes continuam com o mesmo layout de antes (não fizeram parte do
+  pedido).
+
+Próxima fase só começa depois de autorização explícita da autora, com
+este relatório já entregue antes de pedir luz verde.

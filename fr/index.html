@@ -1957,6 +1957,20 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
    aqui pra sinalizar um campo obrigatório vazio/inválido antes do submit. */
 .profile-edit-input.field-invalid{ border-color: var(--error-red); background: rgba(214,38,25,0.08); }
 .profile-edit-field-error{ color:var(--seal-red-dark); font-size:12px; margin:2px 0 6px; min-height:14px; }
+/* Fase 3 da reestruturação do formulário de flashcards (ver CLAUDE.md) --
+   redesenho do bloco "Alunos"/Destinatários: contador vira um .pill (já
+   existente, reaproveitado do streak/XP da topbar) posicionado no TOPO do
+   bloco, ao lado de "Selecionar todos"/"Limpar seleção", em vez de uma
+   linha de texto solta embaixo da lista rolável (que exigia rolar até o
+   fim pra ver quantos alunos estavam marcados). `.admin-select-link`
+   reaproveita `--seal-red-dark`, o mesmo token já usado por `.side-card-
+   link` ("Ver ranking completo") -- corrige de passagem o contraste baixo
+   desses 2 links no tema escuro (cor padrão de navegador antes), já
+   registrado como pendência na UX-fix 4. */
+.admin-recipients-summary{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin:10px 0 10px; }
+.admin-recipients-actions{ display:flex; gap:12px; }
+.admin-select-link{ font-size:13px; font-weight:700; color:var(--seal-red-dark); }
+.admin-select-link:hover{ text-decoration:underline; }
 
 /* ---------- Modal: reportar problema/sugestão (bandeira ⚑) ---------- */
 .report-modal-label{ font-size:12px; font-weight:700; color:var(--ink-soft); margin:14px 0 6px; }

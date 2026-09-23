@@ -121,6 +121,25 @@
 // validando de novo do lado do dado (fonte de verdade); isto é só a
 // camada de UX na frente.
 //
+// Reestruturação Fase 3 (mesmo prompt-mestre das Fases 1/2 acima, ver
+// CLAUDE.md) -- redesenho visual do bloco "Alunos" (Destinatários): o
+// contador de seleção (`#admin-flashcard-selection-counter`) virou um
+// `.pill` (mesma classe já usada pro streak/XP da topbar e pelo selo de
+// "Aluno vinculado" em my-flashcards.js -- zero CSS novo pro chip em si)
+// posicionado no TOPO do bloco, ao lado de "Selecionar todos"/"Limpar
+// seleção" -- antes ficava como texto solto embaixo da lista rolável de
+// checkboxes, exigindo rolar até o fim pra ver quantos alunos estavam
+// marcados. `admin-flashcard-select-all`/`-select-none` ganharam a classe
+// `.admin-select-link` (nova, fr+zh index.html) -- reaproveita
+// `--seal-red-dark`, o mesmo token já usado por `.side-card-link` ("Ver
+// ranking completo"), corrigindo de passagem o contraste baixo desses 2
+// links no tema escuro (antes sem cor própria, herdavam o azul padrão do
+// navegador -- pendência já registrada na UX-fix 4/5). Só
+// `shared/admin-flashcards.js` foi tocado -- `admin-support-materials.js`/
+// `admin-class-logs.js` têm o MESMO markup de link sem cor própria, mas
+// não foram redesenhados nesta fase (mesmo escopo restrito já usado
+// desde a Fase 1: só a tela de flashcards é o alvo deste prompt-mestre).
+//
 // Depende de (mesma posição de shared/admin-students.js -- antes de app.js):
 //   - shared/roles.js              (fetchMyStudents)
 //   - shared/teacher-flashcards.js (fetchFlashcardsForStudent, createFlashcard, setFlashcardStatus, uploadFlashcardMedia)
@@ -491,16 +510,18 @@ async function renderAdminFlashcardsView(){
     <div class="profile-section">
       <div class="section-label">Alunos</div>
       <p class="profile-edit-hint">Selecione os alunos que vão receber este cartão.</p>
+      <div class="admin-recipients-summary">
+        <span class="pill" id="admin-flashcard-selection-counter">${selectionCountLabel}</span>
+        <div class="admin-recipients-actions">
+          <a href="#" id="admin-flashcard-select-all" class="admin-select-link">Selecionar todos</a>
+          <a href="#" id="admin-flashcard-select-none" class="admin-select-link">Limpar seleção</a>
+        </div>
+      </div>
       ${langFilterHTML}
       <input type="text" id="admin-flashcard-search" class="profile-edit-input" placeholder="Buscar por nome ou @usuário..." autocomplete="off" style="margin-bottom:8px;">
-      <div style="display:flex; gap:12px; margin-bottom:4px;">
-        <a href="#" id="admin-flashcard-select-all" style="font-size:13px;">Selecionar todos</a>
-        <a href="#" id="admin-flashcard-select-none" style="font-size:13px;">Limpar seleção</a>
-      </div>
       <div class="profile-edit-input" style="height:auto; max-height:180px; overflow-y:auto; display:flex; flex-direction:column;">
         ${studentCheckboxesHTML}
       </div>
-      <p class="profile-edit-hint" id="admin-flashcard-selection-counter" style="font-weight:700; margin-top:6px;">${selectionCountLabel}</p>
     </div>
 
     <div class="profile-section">
