@@ -4939,20 +4939,48 @@ código já usado em `grantBadgeByUsername`/`admin-badges.js`, risco baixo)
 -- confirmado ao vivo que o backfill retroativo funcionou (10/11 já
 tinham, o 11º recebeu agora).
 
-## Perfil público por padrão -- pergunta em aberto, não implementada ainda
+## Perfil público virou o padrão -- reversão explícita e confirmada da
+decisão de privacidade original, INCLUSIVE retroativa
 
 A autora perguntou: "Tem como tornar todo perfil público (cartões,
 progresso, conquistas etc) dos usuários por default ao invés de
-privado por default?" -- **não implementado ainda**, fica pra confirmar
-com ela antes de tocar em algo que reverte uma decisão de privacidade já
-grillada explicitamente (Fase 1 do prompt-mestre "perfil público /
+privado por default?" -- reverte uma decisão de privacidade que tinha
+sido grillada explicitamente (Fase 1 do prompt-mestre "perfil público /
 flashcards públicos", ver seção acima -- "privados por default" foi
 resposta a uma pergunta direta do grilling na época, não um default
-arbitrário). Hoje: 23 contas registradas, 0 com `public_profile=true` --
-mudar só o `default` da coluna afetaria apenas contas NOVAS; tornar as 23
-JÁ existentes públicas exige uma ação retroativa separada (`UPDATE`
-em massa), que exporia dado de gente que nunca opinou sobre isso.
-Perguntei à autora qual dos dois escopos ela quer antes de executar.
+arbitrário), então antes de tocar em qualquer coisa perguntei o escopo
+exato: só contas NOVAS, ou também as 23 já registradas (que nunca
+opinaram sobre isso, sem nenhum canal de notificação existente pra
+avisá-las). **Ela confirmou explicitamente: também as 23 já
+existentes.**
+
+**Executado ao vivo, migration `041_public_profile_default_true.sql`**
+(`mcp__Supabase__apply_migration`, projeto `eigjocalzwamisgqilhg`): (1)
+`alter column public_profile set default true` -- toda conta nova a
+partir de agora já nasce pública; (2) `update profiles set
+public_profile = true where public_profile = false` -- as 23 contas já
+existentes na época (inclusive as 11 alunas formalmente vinculadas)
+viraram públicas na mesma migration. Confirmado ao vivo depois:
+`23 total, 23 now_public`.
+
+**Nenhuma mudança de código foi necessária** -- toda a UI/lógica de
+perfil público (Fase 1/2 do prompt-mestre) já lia `profiles.
+public_profile` dinamicamente desde que foi construída, sem nenhum
+hardcode assumindo "privado" (conferido antes de rodar a migration:
+`shared/profile.js`/`fr/index.html`/`zh/index.html`, o toggle e o texto
+de apoio já refletem o valor real da conta, nunca um texto estático
+"privado por padrão"). Só o DADO mudou.
+
+**O que continua igual, de propósito**: `student_flashcards.hidden_from_profile`
+(o botão de olho por cartão, Fase 1 do perfil público) não foi tocado --
+uma aluna que já tinha marcado algum cartão como escondido continua com
+ele escondido mesmo agora que a conta inteira é pública por padrão; os
+dois eixos continuam independentes, exatamente como desenhado.
+
+**Sem passo manual pendente** -- migration já aplicada ao vivo. Nenhuma
+das 23 contas foi notificada sobre a mudança (não existe canal pra isso
+hoje) -- risco reconhecido e aceito explicitamente pela autora ao
+confirmar o escopo "também as já existentes".
 
 ## Auditoria de terminologia "aluno/student" x "usuário/user" (2026-09-24)
 
