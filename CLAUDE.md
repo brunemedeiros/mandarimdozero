@@ -5676,14 +5676,139 @@ puro, sem nenhum dado real ou caminho de UI capaz de produzir
 `normal_reversed`/Cloze multi-marca hoje; o smoke test de browser da
 Fase 4 já cobriu o caminho legado, que continua bit-a-bit idêntico).
 
-**O que ainda falta / não foi feito nesta fase (de propósito, restrição
+**O que ficou de fora nesta entrega original (de propósito, restrição
 7):** editor visual; checkbox/seletor de tipo em qualquer UI; coluna SQL
 real pra `cardGenerationMode`; rich text; botão "Cloze" de
-selecionar-texto; interface de definir pinyin sem expor sintaxe; o loop
+selecionar-texto; interface de definir pinyin sem expor sintaxe. O loop
 de merge em `fr/app.js`/`zh/app.js` continuar truncando pro primeiro
-card (achado acima, fora do arquivo autorizado nesta fase, fica
-explicitamente marcado pra Fase 6 resolver).
+card foi relatado como um achado a resolver -- a autora recusou
+explicitamente deixar isso pra Fase 6, ver fechamento abaixo.
 
-Próxima fase (6 -- editor visual, conforme o prompt-mestre original) só
-começa depois de autorização explícita da autora, com este relatório já
-entregue antes de pedir luz verde.
+## Fase 5 (fechamento) -- `build...From...()` deixa de truncar pro
+primeiro CardInstance, `STATE.cards` passa a carregar 1..N por nota
+
+A autora aprovou o motor da Fase 5, mas recusou deixar pendente um ponto
+que eu tinha relatado como "não é bug ativo hoje, mas é ponto de
+integração da Fase 6": `buildCardFromTeacherFlashcard()`/
+`buildCardFromSelfFlashcard()` (fr/zh `app.js`) ainda pegavam só
+`array[0]` do resultado de `interpretNoteFromRow()`/
+`buildEngineCardsFromRow()` -- o motor já sabia produzir `normal_reversed`
+→ 2 CardInstances e Cloze multi-marca → 2+ CardInstances, mas o
+consumidor real descartava tudo além do primeiro. Instrução literal:
+"A Fase 5 deve terminar com o pipeline de geração capaz de transportar
+1..N CardInstances até `STATE.cards`", com 9 restrições (não alterar a
+arquitetura Note/CardInstance; não criar UI; não criar coluna SQL; não
+alterar o editor; não alterar FSRS; não criar bridge/shape legado novo) e
+o contrato-alvo explícito: `build...From...() → Card[]`, com o merge
+fazendo o flatten apropriado pra `STATE.cards`.
+
+**Contrato antes/depois, `fr/app.js` e `zh/app.js` (os dois espelhados,
+idênticos na estrutura):**
+
+```js
+// ANTES -- truncava pro primeiro CardInstance
+function buildCardFromTeacherFlashcard(row){
+  return buildEngineCardsFromRow(row, { origin:'teacher', appKey:APP_KEY, idPrefix:'t' })[0];
+}
+// DEPOIS -- devolve o array completo, contrato build...() -> Card[]
+function buildCardFromTeacherFlashcard(row){
+  return buildEngineCardsFromRow(row, { origin:'teacher', appKey:APP_KEY, idPrefix:'t' });
+}
+```
+
+Mesma mudança em `buildCardFromSelfFlashcard()`. As 4 funções que
+consomem esses builders foram ajustadas pra lidar com array em vez de
+card único:
+
+- **`mergeTeacherFlashcardsIntoState()`/`mergeSelfFlashcardsIntoState()`**
+  -- de checar 1 id "representante" por linha (`flashcardIdForRow`)
+  contra `existingIds`, pra iterar CADA card devolvido pelo builder e
+  checar/empurrar por id individual. Necessário porque o id
+  "representante" de uma linha de Cloze nativo multi-marca
+  (`t${row.id}`, sem sufixo) nunca corresponde a nenhum card real
+  (todos os ids reais saem sufixados `-c1`/`-c2`) -- o check antigo nunca
+  bateria, o que duplicaria cartões numa hipotética 2ª chamada de merge
+  na mesma sessão.
+- **`addSelfFlashcardToState(row)`** -- de 1 check + 1 `.push()` de um
+  card único, pra iterar todos os cards do array e empurrar cada um
+  individualmente. Sem este fix, a mudança de contrato faria este ponto
+  empurrar o ARRAY INTEIRO como um único elemento corrompido de
+  `STATE.cards` -- achado proativo, não pedido explicitamente pela
+  autora, mas necessário pra a mudança de contrato não quebrar a criação
+  de cartão na mesma sessão (Fase 5 do sistema de alunas particulares).
+- **`updateSelfFlashcardStatusInState(rowId, status)`** -- de `.find()`
+  (só atualiza o primeiro card que bate o `rowId`) pra `.forEach()`
+  (atualiza TODOS os cards que compartilham aquele `rowId`). Necessário
+  porque múltiplos CardInstances (as 2 metades de um `normal_reversed`,
+  ou `c1`/`c2`/... de um Cloze multi-marca) agora compartilham o mesmo
+  `rowId` -- `.find()` deixaria os cards seguintes com `flashcardStatus`
+  desatualizado dentro da mesma sessão (autocorrigia no próximo reload,
+  mas era uma inconsistência real enquanto isso).
+- **`removeSelfFlashcardFromState(rowId)`** -- já usava `.filter()`,
+  que lida corretamente com múltiplos cards do mesmo `rowId` sem
+  nenhuma mudança.
+- **`replaceSelfFlashcardInState(rowId, updatedRow)`** -- já chama
+  `removeSelfFlashcardFromState` seguido de `addSelfFlashcardToState`,
+  os dois já corrigidos -- nenhum fix separado necessário, a correção
+  já cascateia.
+
+**Testes realizados**, exatamente como a autora exigiu -- suíte Node
+completa + testes de regressão + smoke test de navegador real, nos dois
+idiomas:
+
+- `node --check fr/app.js`/`zh/app.js` sem erro.
+- Suíte Node completa re-executada, sem nenhuma regressão (esperado --
+  as 3 suítes só exercitam `shared/flashcard-model.js`, não tocado nesta
+  correção): `test_fase4_engine.js` 32/32, `test_fase4d_regression.js`
+  30/30, `test_fase5_generation.js` 43/43 -- **105/105**.
+- **Smoke test de navegador real** (Playwright, fr+zh, modo convidado,
+  CDN do Supabase stubado, `fetchFlashcardsForCurrentStudent`/
+  `fetchMyOwnFlashcards` monkey-patchadas com fixtures sintéticas
+  cobrindo os 6 cenários exigidos: normal→1, normal_reversed→2, cloze
+  c1+c2→2, múltipla escolha→1, "digite a resposta"→1, cloze legado de
+  uma lacuna só→1) -- resultados reais, capturados da execução:
+  - **fr**: `teacherCardCount:7` (ids `t80001, t80002, t80002-b,
+    t80003-c1, t80003-c2, t80004, t80005`) -- confirma normal(1) +
+    normal_reversed(2) + cloze-multi(2) + mc(1) + cloze-legado(1) = 7;
+    `teacherCardCountAfterSecondMerge:7` (idempotente, sem duplicar
+    numa 2ª chamada de merge); `selfCardCount:7`;
+    `totalCardCountAfterBothMerges:14`; `reversedBothPresent:true`,
+    `reversedIdsDistinct:true`, `reversedFsrsIndependent:true`;
+    `clozeMultiBothPresent:true`, `clozeMultiIdsDistinct:true`,
+    `clozeMultiFsrsIndependent:true`; `normalSingleCard:1`,
+    `mcSingleCard:1`, `legacyClozeSingleCard:1`,
+    `legacyClozeIdUnsuffixed:true` (confirma que o legado continua sem
+    sufixo, id idêntico a antes); **cartão pré-existente preservado**:
+    `preExistingCardStillPresent:true`, `preExistingCardIdUnchanged:true`,
+    `preExistingCardNotDuplicated:true`,
+    `preExistingCardProgressPreserved:true` (due:33/reps:2 preservados
+    exatamente -- nenhum cartão legado desaparece, muda de id ou perde
+    progresso); `addSelfReversedCount:2`,
+    `addSelfReversedIds:["s90002","s90002-b"]` (confirma o fix de
+    `addSelfFlashcardToState` na mesma sessão, sem reload);
+    `allArchivedAfterUpdate:true` (confirma o fix de
+    `updateSelfFlashcardStatusInState`, as 2 metades arquivadas juntas).
+    2 erros de console, ambos `ERR_TUNNEL_CONNECTION_FAILED`
+    pré-existentes (proxy de saída deste sandbox, já documentado em
+    toda a sessão, não deste código).
+  - **zh**: mesmos resultados/flags, todos `true`, `teacherCardCount:5`
+    (fixture zh sem mc/cloze-legado), `addSelfReversedIds:["s90002",
+    "s90002-b"]`, `allArchivedAfterUpdate:true`. 3 erros de console,
+    mesmo padrão pré-existente.
+
+**Decisão arquitetural desta correção**: nenhuma bridge/shape legado
+novo foi criada (restrição 9) -- o merge só passou a iterar o que o
+motor já produzia desde a Fase 5 original; nenhuma mudança em
+`shared/flashcard-model.js` (motor intocado); nenhuma UI, coluna SQL,
+editor ou FSRS tocados (restrições 5-8). O mecanismo de persistência
+(merge-por-id em `applySerializedState()`, já existente desde a Fase 0
+do sistema de alunas particulares) não precisou de nenhuma mudança --
+funciona automaticamente pra N cards por nota desde que cada
+CardInstance tenha id estável e único, o que já era garantido pelo
+motor da Fase 5 original.
+
+Com esta correção, a Fase 5 está encerrada -- pipeline completo
+(Note→CardType→CardInstance(s)→`STATE.cards`) capaz de transportar 1..N
+cards por nota, sem nenhuma ponte/atalho temporário. Próxima fase (6 --
+editor visual) só começa depois de autorização explícita da autora --
+não avançar automaticamente.

@@ -478,13 +478,21 @@ function flashcardIdForRow(prefix, row){
 // Fase 4b do prompt-mestre "reestruturação inspirada no Anki" (ver
 // CLAUDE.md): esta função NÃO usa mais a ponte (legacyFlashcardRowToCard/
 // bridgeNoteCardsToLegacyShape) -- delega pra buildEngineCardsFromRow()
-// (shared/flashcard-model.js), que devolve o card já no shape NATIVO
-// (`note`+`cardInstance`, sem nenhum campo de conteúdo legado solto tipo
-// `front`/`back_trans`/`choices`). `[0]` porque dado legado nunca produz
-// mais de 1 CardInstance por linha (nenhuma coluna pede "Normal com
-// reverso") -- ver relatório da Fase 4a.
+// (shared/flashcard-model.js), que devolve o(s) card(s) já no shape
+// NATIVO (`note`+`cardInstance`, sem nenhum campo de conteúdo legado
+// solto tipo `front`/`back_trans`/`choices`).
+// Fase 5, fechamento (ver CLAUDE.md) -- ANTES desta correção, esta
+// função devolvia só `[0]` do array (assumindo, corretamente até então,
+// que nenhuma linha produzia mais de 1 CardInstance). O motor da Fase 5
+// passou a produzir 2+ CardInstances por linha (normal_reversed, Cloze
+// multi-marca) -- `[0]` truncava silenciosamente as demais antes de
+// chegarem perto de STATE.cards. Contrato agora é
+// `buildCardFromTeacherFlashcard(row) -> Card[]` (sempre um array, 1
+// elemento pra todo dado legado -- zero mudança de comportamento pra
+// eles) -- quem chama precisa espalhar o array em STATE.cards, nunca
+// fazer `.push()` direto do retorno.
 function buildCardFromTeacherFlashcard(row){
-  return buildEngineCardsFromRow(row, { origin: 'teacher', appKey: APP_KEY, idPrefix: 't' })[0];
+  return buildEngineCardsFromRow(row, { origin: 'teacher', appKey: APP_KEY, idPrefix: 't' });
 }
 
 // Busca os flashcards atribuídos a esta conta (shared/teacher-flashcards.js)
@@ -495,18 +503,26 @@ function buildCardFromTeacherFlashcard(row){
 // acumulado. Busca TODOS os status (ativo e arquivado) de propósito --
 // arquivar não pode apagar progresso já salvo, só tirar o cartão da fila
 // de revisão (ver isCardLessonCompleted). Idempotente dentro da mesma
-// sessão (ids já presentes não são duplicados) -- não recarrega uma
-// edição feita pela professora no meio da sessão, mesmo princípio de
-// STATE.units não recarregar ao vivo.
+// sessão -- não recarrega uma edição feita pela professora no meio da
+// sessão, mesmo princípio de STATE.units não recarregar ao vivo.
+// Fase 5, fechamento -- dedup agora é POR CARD (checa `card.id` de cada
+// elemento do array devolvido por buildCardFromTeacherFlashcard), não
+// mais por um único id "representante" da linha. Isso é estritamente
+// necessário pra normal_reversed/Cloze multi-marca: o id "representante"
+// de uma linha cloze multi-marca (`t${row.id}`) nunca existe de verdade
+// (os ids reais são `t${row.id}-c1`/`-c2`/...) -- checar só ele faria o
+// guard de idempotência nunca bater, duplicando cartões numa 2ª chamada.
 async function mergeTeacherFlashcardsIntoState(){
   if (typeof fetchFlashcardsForCurrentStudent !== 'function') return;
   const rows = await fetchFlashcardsForCurrentStudent(APP_KEY);
   if (!rows.length) return;
   const existingIds = new Set(STATE.cards.map(c => c.id));
   rows.forEach(row => {
-    const id = flashcardIdForRow('t', row);
-    if (existingIds.has(id)) return;
-    STATE.cards.push(buildCardFromTeacherFlashcard(row));
+    buildCardFromTeacherFlashcard(row).forEach(card => {
+      if (existingIds.has(card.id)) return;
+      STATE.cards.push(card);
+      existingIds.add(card.id);
+    });
   });
 }
 
@@ -532,23 +548,29 @@ async function mergeTeacherFlashcardsIntoState(){
 // mudança no motor de revisão.
 // Fase 4b (ver comentário de buildCardFromTeacherFlashcard acima, mesmo
 // princípio) -- irmã gêmea, só troca origin/idPrefix.
+// Fase 5, fechamento -- mesmo contrato `-> Card[]` da irmã (ver comentário
+// completo em buildCardFromTeacherFlashcard acima).
 function buildCardFromSelfFlashcard(row){
-  return buildEngineCardsFromRow(row, { origin: 'self', appKey: APP_KEY, idPrefix: 's' })[0];
+  return buildEngineCardsFromRow(row, { origin: 'self', appKey: APP_KEY, idPrefix: 's' });
 }
 
 // Busca os cartões que a PRÓPRIA aluna já criou (shared/own-flashcards.js)
 // e mescla em STATE.cards -- mesmo motivo/posicionamento de
 // mergeTeacherFlashcardsIntoState() (precisa rodar ANTES de loadState(),
 // ver comentário lá). Busca todos os status de propósito, mesma razão.
+// Fase 5, fechamento -- dedup por card, mesmo motivo/mecanismo de
+// mergeTeacherFlashcardsIntoState() acima.
 async function mergeSelfFlashcardsIntoState(){
   if (typeof fetchMyOwnFlashcards !== 'function') return;
   const rows = await fetchMyOwnFlashcards(APP_KEY);
   if (!rows.length) return;
   const existingIds = new Set(STATE.cards.map(c => c.id));
   rows.forEach(row => {
-    const id = flashcardIdForRow('s', row);
-    if (existingIds.has(id)) return;
-    STATE.cards.push(buildCardFromSelfFlashcard(row));
+    buildCardFromSelfFlashcard(row).forEach(card => {
+      if (existingIds.has(card.id)) return;
+      STATE.cards.push(card);
+      existingIds.add(card.id);
+    });
   });
 }
 
@@ -556,10 +578,16 @@ async function mergeSelfFlashcardsIntoState(){
 // STATE.cards, sem esperar o próximo boot (mergeSelfFlashcardsIntoState()
 // só roda no carregamento do app) -- assim ele já entra na fila de revisão
 // nesta mesma sessão. Idempotente pelo mesmo padrão do merge acima.
+// Fase 5, fechamento -- buildCardFromSelfFlashcard() agora devolve `Card[]`
+// (normal_reversed/Cloze multi-marca podem produzir 2+ cartões pra uma
+// única linha criada); espalha TODOS em STATE.cards, checando cada id
+// individualmente -- nunca `.push()` do array inteiro como 1 elemento só.
 function addSelfFlashcardToState(row){
-  const id = flashcardIdForRow('s', row);
-  if (STATE.cards.some(c => c.id === id)) return;
-  STATE.cards.push(buildCardFromSelfFlashcard(row));
+  const existingIds = new Set(STATE.cards.map(c => c.id));
+  buildCardFromSelfFlashcard(row).forEach(card => {
+    if (existingIds.has(card.id)) return;
+    STATE.cards.push(card);
+  });
 }
 
 // Espelha um arquivar/reativar feito em shared/my-flashcards.js direto no
@@ -569,9 +597,15 @@ function addSelfFlashcardToState(row){
 // nunca muda a revisão, mas o card já pode ter um id `s${id}-r${n}` se já
 // foi editado antes, então reconstruir `s${rowId}` sem checar a revisão
 // atual não encontraria o cartão certo.
+// Fase 5, fechamento -- `.forEach()` em vez de `.find()`: uma linha agora
+// pode ter gerado 2+ cartões que compartilham o MESMO rowId (as 2 metades
+// de normal_reversed, ou c1/c2/... de um Cloze multi-marca) -- `.find()`
+// só atualizaria o primeiro que aparecesse, deixando os demais com
+// `flashcardStatus` desatualizado até o próximo reload.
 function updateSelfFlashcardStatusInState(rowId, status){
-  const card = STATE.cards.find(c => c.origin === 'self' && String(c.rowId) === String(rowId));
-  if (card) card.flashcardStatus = status;
+  STATE.cards.forEach(c => {
+    if (c.origin === 'self' && String(c.rowId) === String(rowId)) c.flashcardStatus = status;
+  });
 }
 
 // Prop 4 (ver CLAUDE.md, "7 propostas") -- remove um cartão apagado de
