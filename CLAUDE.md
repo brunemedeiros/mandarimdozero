@@ -5812,3 +5812,216 @@ Com esta correção, a Fase 5 está encerrada -- pipeline completo
 cards por nota, sem nenhuma ponte/atalho temporário. Próxima fase (6 --
 editor visual) só começa depois de autorização explícita da autora --
 não avançar automaticamente.
+
+## Prompt-mestre "reestruturação Note/CardType/CardInstance" -- Fase 6A
+(auditoria do editor atual, só leitura) + Fase 6B (Note nativa: fields +
+card_generation_mode persistidos no motor, `type_answer` completo)
+
+**Fase 6A (auditoria, sem código)** -- mapeamento completo do editor atual
+(`shared/admin-flashcards.js`/`shared/my-flashcards.js`) contra o modelo
+Note/Field/CardType pretendido. Achado central: o editor hoje nunca passa
+por `shared/flashcard-model.js` -- escreve direto nas colunas legadas
+(`front`/`back_trans`/`cloze_sentence`/`choices`/etc.) via
+`createFlashcard()`/`createOwnFlashcard()`, sem nenhum conceito de Field/
+CardType. O motor (Fase 4/5) já sabia interpretar `cardGenerationMode` e
+Cloze nativo multi-marca, mas nada no editor podia produzir uma linha
+assim -- motor e editor evoluíram em paralelo, sem se tocar. Relatório
+completo (14 pontos: campos atuais, mapa pro modelo novo, UX por Card
+Type, fluxo de Cloze visual, compareAnswer no zh, proposta de
+persistência, compatibilidade, Preview, impacto em cada arquivo, riscos)
+entregue e revisado pela autora, que corrigiu a arquitetura em 8 pontos
+antes de autorizar código -- ver Fase 6B abaixo pra tudo que foi
+efetivamente implementado.
+
+**Escopo da Fase 6B, travado explicitamente pela autora**: só
+`shared/flashcard-model.js` (camada de modelo/motor). Nada de editor,
+UI, rich text, TTS, comportamento visual de áudio/imagem, Preview, ou
+migration SQL executada nesta entrega -- confirmado no `git status` ao
+final: **só `shared/flashcard-model.js` foi tocado**.
+
+**O que foi feito:**
+
+- **Note nativa: `fields` + `card_generation_mode`, sempre pareados** --
+  `isNoteFieldsPresent(row)`/`isCardGenerationModePresent(row)` (novos)
+  decidem se uma linha é nativa; `validateNativeNoteRow(row)` valida a
+  estrutura inteira ANTES de qualquer geração (nunca confia só no CHECK
+  constraint proposto pra migration, ainda não aplicada): pareamento
+  ambos-ou-nenhum, `fields` array não vazio, `card_generation_mode`
+  reconhecido, todo Field com `id`, ids únicos dentro da Note,
+  `pinyinFieldId` sempre apontando pra um Field real da mesma Note, e
+  (novo achado, ver abaixo) pelo menos 2 "slots" de conteúdo pros 4 modos
+  posicionais. `interpretNoteFromRow()` chama essa validação e **lança um
+  Error de verdade** pra Note nativa inválida (não degrada silenciosamente
+  -- não existe hoje nenhum dado real que possa disparar isso, já que não
+  há editor ainda, então falhar alto é seguro e correto nesta fase).
+- **`role` NÃO decide direção** (correção explícita da autora em relação
+  à minha proposta original da Fase 6A/6B-primeira-versão, que sugeria
+  `role:'front'`/`'back'` como fallback) -- `normal`/`normal_reversed`/
+  `type_answer`/`cloze` são **sempre posicionais** (nunca consultam
+  `role`); só `multiple_choice` usa `role` (`'prompt'`/`'answer'`/
+  `'distractor'`), porque é o único tipo com mais de 2 Fields
+  semanticamente distintos -- posição sozinha não bastaria pra
+  desambiguar prompt/answer/1-3 distratores.
+- **Achado corrigido ANTES de escrever os testes, não depois**: a
+  primeira versão do código posicional usava índices fixos `0`/`1` pra
+  front/back -- funciona pra uma Note fr simples (2 Fields), mas quebra
+  pra uma Note zh nativa de 3 Fields (hanzi+pinyin+tradução, mesmo
+  formato que o caminho legado já usa) -- `back` cairia no Field de
+  PINYIN (índice 1) em vez da tradução (índice 2). Corrigido com
+  `contentFieldIndices(rawFields)` (novo) -- pula qualquer Field que seja
+  alvo do `pinyinFieldId` de outro Field ao montar a lista de "slots" de
+  conteúdo (mesmo espírito de `audio`/`image`: um Field de pinyin é
+  satélite de outro Field, nunca uma posição própria). Pra uma Note fr de
+  2 Fields (sem pinyin), `contentFieldIndices` devolve `[0,1]`,
+  comportamento idêntico ao design original. Pra uma Note zh de 3 Fields,
+  devolve `[0,2]` -- front=hanzi, back=tradução, pulando o pinyin do
+  meio, igual ao legado. Testado explicitamente (normal zh 3-fields,
+  normal_reversed zh confirmando que o pareamento hanzi/pinyin sobrevive
+  à troca de lado -- metade B tem `back`=hanzi com pinyin resolvendo
+  certo, não perde a informação).
+- **`buildNativeRuntimeFields(rawFields)`** (novo) -- converte
+  `row.fields` (persistido, `pinyinFieldId` por ID ESTÁVEL) pro shape
+  runtime que `resolveCardField()` já consumia sem NENHUMA mudança
+  (`pinyinFieldIndex` por índice) -- traduz id→índice uma vez, na
+  leitura. Continua válido mesmo se a ordem dos Fields mudar no editor
+  (testado explicitamente: pinyin ANTES do hanzi no array persistido,
+  resolve corretamente do mesmo jeito).
+- **5 Card Types gerados nativamente** (`interpretNativeNoteFromRow`,
+  novo): `normal`, `normal_reversed` (via `buildReversedCardInstancePair`,
+  já existente desde a Fase 4a, reaproveitada sem mudança), `cloze` (via
+  Field nativo em vez da coluna `cloze_sentence` -- mesmo
+  `parseClozeMarks`/`renderClozeText` da Fase 5, sem nenhuma mudança),
+  `multiple_choice` (via `role`, com **validação de cardinalidade no
+  motor, não só na UI** -- `validateMultipleChoiceFields()`: exatamente 1
+  `role:'prompt'`, exatamente 1 `role:'answer'` nunca no mesmo Field, 1 a
+  3 `role:'distractor'`), e **`type_answer`** (novo, ver abaixo).
+- **`type_answer` completo, incluído nesta fase como a autora exigiu** --
+  `cardGenerationMode:'type_answer'` → CardInstance (`promptFieldIndex`/
+  `answerFieldIndex`) → `resolveTypeAnswerCardView()` (existente desde a
+  Fase 4a, ganhou uma linha nova) → renderer já existente
+  (`renderTypeAnswerReviewCard`, fr+zh, construído na Fase 4 mas nunca
+  alcançável por dado real até agora). **compareAnswer pro zh reaproveita
+  o MESMO pareamento hanzi/pinyin que Normal já usa via
+  `pinyinFieldIndex`** -- não um canal de comparação novo: a cadeia de
+  prioridade agora é `cardInstance.compareAnswer` explícito (mantido por
+  compatibilidade com o teste da Fase 4a que já testava isso) → senão
+  `answer.pinyinText` (novo) → senão `displayAnswerText`. Testado fr (sem
+  pinyin, cai pro texto) e zh (com `pinyinFieldId`, resolve pro pinyin)
+  como a autora pediu explicitamente ("faça testes específicos para os
+  dois casos"). `type_answer` é 100% nativo -- nenhum dado legado jamais
+  representou "digite a resposta", então não existe (nem precisa existir)
+  um caso correspondente no ramo `else` (legado).
+- **Imagem virou propriedade do Field** (decisão revisada explicitamente
+  pela autora -- minha proposta original da rodada anterior mantinha
+  imagem só no nível da Note; ela rejeitou: "o renderer atual poder
+  tratar imagem como propriedade global é uma limitação do renderer
+  legado, não uma razão pra perpetuar isso no modelo nativo").
+  `buildNativeRuntimeFields()` carrega `field.image` através sem
+  transformação (só modelagem/persistência, **nenhuma mudança de
+  `resolveCardField()`/renderer** -- confirmado deliberadamente: estender
+  `resolveCardField()` pra expor `imageUrl` quebraria várias asserções de
+  shape exato já existentes em `test_fase4_engine.js`, e não era
+  necessário pra "modelar e persistir corretamente" -- só pra uma
+  lógica visual que é explicitamente Fase 6C/D). `note.image`
+  (Note-level) continua existindo só pro caminho LEGADO, nunca populado
+  pelo caminho nativo (`image: null` fixo em `interpretNativeNoteFromRow`).
+  Testado que imagem/áudio ficam genuinamente independentes por Field
+  (um Field com imagem e sem áudio, outro com áudio e sem imagem, nenhum
+  vaza pro outro).
+- **Áudio TTS explícito modelado, sem efeito de runtime novo** --
+  `field.audio` (`{source:'upload',url,...}` ou `{source:'tts',enabled}`)
+  é passado através sem transformação; `resolveCardField()` já lê `.url`
+  defensivamente, então `source:'tts'` (sem url, porque é gerado em
+  runtime) corretamente nunca produz `audioUrl` automático -- comportamento
+  correto sem precisar de nenhuma mudança na função. Testado
+  explicitamente.
+- **Mecanismo `row.cardGenerationMode` (camelCase) da Fase 5 RETIRADO** --
+  achado importante, não presumido: a Fase 5 permitia `normal_reversed`
+  sobre colunas legadas SOLTAS (sem `fields`), via um campo camelCase que
+  a própria Fase 5 já registrava como provisório ("o nome físico da
+  coluna fica pra Fase 6"). A Fase 6B decide o nome real
+  (`card_generation_mode`, snake_case) e trava que ele SEMPRE anda
+  pareado com `fields` -- o estado que o mecanismo antigo produzia
+  (`card_generation_mode` setado, `fields` ausente) virou EXPLICITAMENTE
+  INVÁLIDO pela nova regra de pareamento. Manter os 2 mecanismos vivos ao
+  mesmo tempo criaria duas fontes de verdade pro mesmo conceito -- por
+  isso retirado do motor, não deixado como código morto. Nenhuma linha
+  real jamais usou o campo camelCase (a própria Fase 5 já confirmava
+  isso), então a retirada não tem impacto em produção. Os 2 cenários de
+  teste da Fase 5 que exercitavam esse mecanismo
+  (`test_fase5_generation.js`) foram **repropostos**, não só apagados --
+  agora testam exatamente o novo estado inválido (`card_generation_mode`
+  sem `fields`, e vice-versa) sendo rejeitado, que é um dos cenários que
+  a autora pediu explicitamente pra esta fase.
+
+**Testes realizados:**
+
+- **`node --check shared/flashcard-model.js`** sem erro.
+- **4 suítes Node, 169/169 passando**: `test_fase4_engine.js` 32/32,
+  `test_fase4d_regression.js` 30/30, `test_fase5_generation.js` 33/33
+  (2 cenários repropostos, ver acima -- confirmando que nenhuma linha
+  real jamais usava o mecanismo retirado), `test_fase6b_native_notes.js`
+  74/74 (novo -- cobre TODOS os cenários pedidos explicitamente pela
+  autora: pareamento fields/card_generation_mode nos dois sentidos
+  rejeitado; normal nativo fr sem role e zh com pinyin 3-fields;
+  normal_reversed nativo fr e zh -- este último confirmando que o
+  pareamento pinyin sobrevive à troca de lado; múltipla escolha com 1, 2
+  e 3 distractors válidos; múltipla escolha inválido -- sem prompt, sem
+  answer, 0 distractors, 4 distractors, role conflitante -- todos os 5
+  rejeitados pelo motor, não só pela UI; Cloze nativo marca única e
+  multi-marca, fr e zh com compareAnswer embutido; type_answer fr e zh;
+  pinyinFieldId válido, inválido, e sobrevivendo a uma reordenação física
+  do array `fields`; imagem e áudio armazenados independentemente por
+  Field, inclusive TTS explícito nunca produzindo `audioUrl` automático;
+  regressão confirmando que dado legado continua 100% intocado).
+- **Smoke test de navegador real** (Playwright, fr+zh, mesmo padrão de
+  sempre -- modo convidado, CDN do Supabase stubado,
+  `fetchFlashcardsForCurrentStudent` monkey-patchada com 5 linhas
+  nativas sintéticas, uma por Card Type) -- prova que
+  `mergeTeacherFlashcardsIntoState()`/`buildCardFromTeacherFlashcard()`
+  (fr/zh `app.js`, **nenhuma mudança nesta fase**) absorvem o caminho
+  nativo de graça, exatamente como o fechamento da Fase 5 previa:
+  `STATE.cards` recebeu os 7 cards esperados (normal + 2×reversed + mc +
+  2×cloze-multi + type_answer) nos dois idiomas, idempotente numa 2ª
+  chamada de merge, `origin:'teacher'` em todos, conteúdo resolvido
+  corretamente pra cada tipo (incluindo zh: front=hanzi correto, cloze
+  revelando hanzi via compareAnswer=pinyin, type_answer
+  displayAnswerText=hanzi/compareAnswerText=pinyin), e
+  `hasPlainFrontBack()` (Fase 4b, intocada) continuando a incluir
+  normal/mc e excluir cloze/type_answer corretamente também pro caminho
+  nativo. Zero erro de console novo nos dois idiomas -- só os mesmos 2-3
+  `ERR_TUNNEL_CONNECTION_FAILED` pré-existentes (proxy de saída deste
+  sandbox, documentado em toda a sessão, não relacionado a este código).
+
+**Achado reportado, não corrigido nesta entrega (fora do escopo "só
+`shared/flashcard-model.js`" que a autora travou)**: `mergeTeacherFlashcardsIntoState()`/
+`mergeSelfFlashcardsIntoState()` (fr/zh `app.js`) chamam
+`buildCardFromTeacherFlashcard(row)`/`buildCardFromSelfFlashcard(row)`
+dentro de um `.forEach()` SEM `try/catch` -- como `interpretNoteFromRow()`
+agora pode **lançar** pra uma Note nativa inválida (decisão desta fase,
+ver acima), uma ÚNICA linha nativa malformada quebraria o `forEach`
+inteiro, derrubando o carregamento de TODOS os cartões daquela
+conta/idioma (nativos E legados) no boot do app -- não só o cartão
+problemático. Hoje isso é inofensivo (nenhuma linha real tem `fields`
+populado, nenhum editor existe ainda pra escrever uma nativa por engano),
+mas vale endereçar antes do editor (Fase 6D) existir de verdade -- fica
+como candidato explícito pra Fase 6C (que já vai mexer no caminho de
+merge/renderer) ou uma fase própria, não corrigido agora porque exigiria
+tocar em `fr/app.js`/`zh/app.js`, fora do escopo que a autora travou
+("nesta entrega quero somente a camada de modelo/motor").
+
+**O que ficou de fora nesta entrega, de propósito (restrição explícita da
+autora):** editor visual; checkbox/seletor de tipo em qualquer UI; rich
+text; TTS de verdade (só modelado, sem gerar áudio); novo comportamento
+visual de áudio/imagem; Preview; migration SQL **não executada** (proposta
+pronta, revisada e aprovada na rodada anterior, aguardando autorização
+explícita pra rodar).
+
+Antes de qualquer migration: pare. A autora pediu explicitamente relatório
++ parada antes de tocar no banco -- nenhuma chamada ao Supabase foi feita
+nesta entrega.
+
+Próxima etapa (rodar a migration `fields`/`card_generation_mode` +
+CHECK constraints, conforme já revisada e aprovada na rodada anterior) só
+acontece depois de autorização explícita da autora pra isso especificamente
+-- distinta da autorização de código desta entrega.

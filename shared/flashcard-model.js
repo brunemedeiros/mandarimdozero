@@ -88,6 +88,255 @@ function renderClozeText(text, targetMarkId, opts){
   });
 }
 
+// ============================================================
+// Fase 6B (ver CLAUDE.md) -- Note NATIVA: persistência real de Fields como
+// unidade de conteúdo, ao lado (nunca em cima) da inferência implícita que
+// já existia. `fields` (array de Field) + `card_generation_mode` (string)
+// SEMPRE pareados numa linha nativa -- ausência dos dois é o caminho
+// legado (ramo `else` de interpretNoteFromRow, intocado desde a Fase 3);
+// presença de só um dos dois é um estado inválido, nunca gravado por
+// escrita correta (CHECK constraint proposto pra migration, ainda NÃO
+// aplicada) mas SEMPRE revalidado aqui -- o motor nunca confia só na
+// constraint do banco.
+//
+// Shape de Field persistido (row.fields[i]):
+//   { id, lang, role, content: {type:'plain', value}, audio, image, pinyinFieldId }
+// -- `id` é estável (não muda se a ordem dos Fields mudar no editor) e é o
+// que `pinyinFieldId` referencia -- nunca um índice de array (índice muda
+// se a ordem mudar; id não). Nada no motor de geração de CardInstance usa
+// `id` pra decidir DIREÇÃO -- frontFieldIndex/backFieldIndex/promptFieldIndex/
+// answerFieldIndex continuam por ÍNDICE de array, exatamente como o
+// caminho legado já fazia (ver buildNativeRuntimeFields/interpretNativeNoteFromRow
+// abaixo). `role` NUNCA decide direção de normal/normal_reversed/
+// type_answer/cloze (restrição explícita da autora: "role não determina
+// direção") -- pra esses 4 tipos, o convênio é sempre posicional (índice 0
+// = front/prompt/texto-cloze, índice 1 = back/answer/tradução), mesmo se a
+// professora nunca marcar `role` em nenhum Field. Só múltipla escolha
+// consulta `role`, porque é o único tipo com mais de 2 Fields
+// semanticamente distintos (prompt/answer/1-3 distractors) -- posição
+// sozinha não basta pra desambiguar 5 fields.
+// ============================================================
+
+const CARD_GENERATION_MODES = ['normal', 'normal_reversed', 'multiple_choice', 'cloze', 'type_answer'];
+
+function isNoteFieldsPresent(row){
+  return row.fields !== null && row.fields !== undefined;
+}
+function isCardGenerationModePresent(row){
+  return row.card_generation_mode !== null && row.card_generation_mode !== undefined && row.card_generation_mode !== '';
+}
+
+// Cardinalidade de múltipla escolha nativa -- o motor valida, nunca confia
+// só na UI (restrição explícita da autora: "não confie apenas na validação
+// da UI"). Exatamente 1 Field role:'prompt', exatamente 1 role:'answer'
+// (nunca o MESMO Field nos dois papéis), 1 a 3 role:'distractor'.
+function validateMultipleChoiceFields(fields){
+  const prompts = fields.filter(f => f.role === 'prompt');
+  const answers = fields.filter(f => f.role === 'answer');
+  const distractors = fields.filter(f => f.role === 'distractor');
+  if (prompts.length !== 1) return { ok: false, error: `Múltipla escolha precisa de exatamente 1 Field com role 'prompt' (encontrado: ${prompts.length}).` };
+  if (answers.length !== 1) return { ok: false, error: `Múltipla escolha precisa de exatamente 1 Field com role 'answer' (encontrado: ${answers.length}).` };
+  if (prompts[0].id === answers[0].id) return { ok: false, error: 'O mesmo Field não pode ser prompt e resposta ao mesmo tempo.' };
+  if (distractors.length < 1 || distractors.length > 3) return { ok: false, error: `Múltipla escolha precisa de 1 a 3 Fields com role 'distractor' (encontrado: ${distractors.length}).` };
+  return { ok: true };
+}
+
+// Validação estrutural completa de uma linha nativa -- chamada por
+// interpretNoteFromRow() ANTES de gerar qualquer CardInstance. Devolve
+// {ok:false,error} em vez de lançar, pra ser testável isoladamente;
+// interpretNoteFromRow() decide lançar a partir do resultado (ver abaixo).
+function validateNativeNoteRow(row){
+  const hasFields = isNoteFieldsPresent(row);
+  const hasMode = isCardGenerationModePresent(row);
+  if (hasFields !== hasMode){
+    return { ok: false, error: 'fields e card_generation_mode precisam estar ambos presentes ou ambos ausentes (nunca só um).' };
+  }
+  if (!hasFields) return { ok: true, native: false };
+  if (!Array.isArray(row.fields) || !row.fields.length){
+    return { ok: false, error: 'fields precisa ser um array não vazio quando presente.' };
+  }
+  if (!CARD_GENERATION_MODES.includes(row.card_generation_mode)){
+    return { ok: false, error: `card_generation_mode desconhecido: "${row.card_generation_mode}".` };
+  }
+  if (row.fields.some(f => !f || !f.id)){
+    return { ok: false, error: 'Todo Field precisa ter um id.' };
+  }
+  const ids = row.fields.map(f => f.id);
+  if (new Set(ids).size !== ids.length){
+    return { ok: false, error: 'Fields precisam ter ids únicos dentro da mesma Note.' };
+  }
+  for (const f of row.fields){
+    if (f.pinyinFieldId != null && !ids.includes(f.pinyinFieldId)){
+      return { ok: false, error: `pinyinFieldId "${f.pinyinFieldId}" não corresponde a nenhum Field desta Note.` };
+    }
+  }
+  if (row.card_generation_mode === 'multiple_choice'){
+    const mc = validateMultipleChoiceFields(row.fields);
+    if (!mc.ok) return mc;
+  } else {
+    // normal/normal_reversed/type_answer/cloze são todos posicionais (ver
+    // contentFieldIndices abaixo) -- precisam de pelo menos 2 "slots" de
+    // conteúdo, descontando Fields que só existem como par de pinyin de
+    // outro Field.
+    const slots = contentFieldIndices(row.fields);
+    if (slots.length < 2){
+      return { ok: false, error: `Este modo precisa de pelo menos 2 Fields de conteúdo, descontando pares de pinyin (encontrado: ${slots.length}).` };
+    }
+  }
+  return { ok: true, native: true };
+}
+
+// Converte row.fields (persistido, pinyinFieldId por ID ESTÁVEL) pro shape
+// runtime que resolveCardField() já consome (pinyinFieldIndex por ÍNDICE) --
+// resolveCardField() não precisa de NENHUMA mudança, só esta função traduz
+// id->índice uma vez, na leitura (e continua válida mesmo que a ordem dos
+// Fields mude no editor, porque a referência persistida é sempre por id).
+// `audio` é passado através sem transformação -- resolveCardField() já lê
+// `.url` dele defensivamente (upload tem url, tts não tem, então nunca
+// produz audioUrl automático -- correto, TTS é gerado em runtime pelo
+// motor de pronúncia já existente, nunca guarda URL própria).
+// `image` é só armazenado aqui (`field.image`), sem nenhuma resolução pra
+// view/renderer ainda -- modelagem/persistência desta fase, comportamento
+// visual fica pra Fase 6C/D (ver CLAUDE.md, decisão explícita da autora).
+function buildNativeRuntimeFields(rawFields){
+  const idToIndex = new Map(rawFields.map((f, i) => [f.id, i]));
+  return rawFields.map(f => {
+    const field = {
+      lang: f.lang,
+      text: (f.content && f.content.value) || '',
+      role: f.role || null,
+      audio: f.audio || null,
+      image: f.image || null,
+    };
+    if (f.pinyinFieldId != null && idToIndex.has(f.pinyinFieldId)){
+      field.pinyinFieldIndex = idToIndex.get(f.pinyinFieldId);
+    }
+    return field;
+  });
+}
+
+function fieldIndexByRole(rawFields, role){
+  return rawFields.findIndex(f => f.role === role);
+}
+
+// "Slot" posicional (front/back, prompt/answer, texto/tradução) pula
+// Fields que são satélites de pinyin de outro Field -- mesmo espírito de
+// audio/image (um Field de pinyin não é uma posição própria, é um anexo de
+// outro Field; só é modelado como Field separado, em vez de inline, por
+// herdar o shape que resolveCardField()/pinyinFieldIndex já usa desde a
+// Fase 3). Sem isso, um Note zh de 3 Fields (hanzi+pinyin+tradução) teria
+// "back" apontando pro Field de PINYIN (índice 1) em vez da tradução
+// (índice 2) -- quebraria o mesmo convênio que o caminho legado já usa
+// (ver ramo `else`, isZh: front=0, back=2, pulando o pinyin do meio).
+// Nenhuma `role` envolvida aqui -- é puramente estrutural (quem é alvo de
+// pinyinFieldId de outro Field nunca conta como slot de conteúdo).
+function contentFieldIndices(rawFields){
+  const pinyinTargetIds = new Set(rawFields.filter(f => f.pinyinFieldId != null).map(f => f.pinyinFieldId));
+  const indices = [];
+  rawFields.forEach((f, i) => { if (!pinyinTargetIds.has(f.id)) indices.push(i); });
+  return indices;
+}
+
+// Gera { note, cards } a partir de uma linha NATIVA já validada por
+// validateNativeNoteRow(). Mesmo shape de retorno do caminho legado -- todo
+// consumidor a jusante (buildEngineCardsFromRow, resolveCardContentView, os
+// resolvers) já é agnóstico a qual dos dois caminhos produziu a Note --
+// nenhum deles precisa de nenhuma mudança por causa desta função existir.
+function interpretNativeNoteFromRow(row, { origin, appKey, idPrefix, cardId }){
+  const rawFields = row.fields;
+  const fields = buildNativeRuntimeFields(rawFields);
+  const note = {
+    id: cardId,
+    legacyRowId: row.id,
+    origin,
+    languageAppKey: appKey,
+    status: row.status,
+    note: row.note || null,
+    // Fase 6B -- imagem nativa vive no FIELD agora (ver buildNativeRuntimeFields),
+    // não na Note -- "imagem como propriedade exclusiva da Note" foi
+    // explicitamente rejeitado pela autora. Note.image continua existindo
+    // só pro caminho LEGADO (ramo `else`, intocado) -- nunca populado aqui.
+    image: null,
+    fields,
+    fieldOrder: fields.map((_, i) => i),
+  };
+
+  const mode = row.card_generation_mode;
+
+  if (mode === 'multiple_choice'){
+    const promptIdx = fieldIndexByRole(rawFields, 'prompt');
+    const answerIdx = fieldIndexByRole(rawFields, 'answer');
+    const distractorTexts = rawFields
+      .filter(f => f.role === 'distractor')
+      .map(f => (f.content && f.content.value) || '');
+    const cards = [{
+      id: cardId, noteId: cardId, cardTypeId: 'multiple_choice',
+      promptFieldIndex: promptIdx, correctFieldIndex: answerIdx, distractors: distractorTexts,
+      ...FLASHCARD_MODEL_FSRS_DEFAULTS,
+    }];
+    return { note, cards };
+  }
+
+  // normal/normal_reversed/type_answer/cloze são todos posicionais --
+  // "slot" 0 = front/prompt/texto-cloze, slot 1 = back/answer/tradução,
+  // PULANDO Fields que são satélite de pinyin de outro Field (ver
+  // contentFieldIndices -- é o que faz um Note zh de 3 Fields resolver
+  // front=hanzi/back=tradução, sem cair no Field de pinyin do meio,
+  // exatamente como o caminho legado já faz). validateNativeNoteRow() já
+  // garantiu slots.length>=2 antes de chegar aqui.
+  const slots = contentFieldIndices(rawFields);
+
+  if (mode === 'type_answer'){
+    // Fase 6B -- primeiro tipo genuinamente novo no motor (nenhum dado
+    // legado jamais representou "digite a resposta", é 100% nativo, sem
+    // caminho de inferência implícita correspondente no ramo `else`).
+    // compareAnswer NÃO é gravado aqui como campo próprio -- reaproveita o
+    // MESMO pareamento hanzi/pinyin que Normal já usa via pinyinFieldIndex
+    // (ver resolveTypeAnswerCardView, que ganhou um fallback novo pra
+    // isso): o Field de resposta pode ter um pinyinFieldIndex, e o
+    // resolver cai pra ele -- nenhum canal de comparação novo inventado.
+    const cards = [{
+      id: cardId, noteId: cardId, cardTypeId: 'type_answer',
+      promptFieldIndex: slots[0], answerFieldIndex: slots[1],
+      ...FLASHCARD_MODEL_FSRS_DEFAULTS,
+    }];
+    return { note, cards };
+  }
+
+  if (mode === 'cloze'){
+    // slots[0] é o texto com as marcas {{cN::...}} -- mesmo convênio
+    // posicional do caminho legado (textFieldIndex:0), só a FONTE do texto
+    // muda (Field nativo em vez da coluna cloze_sentence). Mecanismo de
+    // marcas (parseClozeMarks/renderClozeText) inalterado, já validado na
+    // Fase 5 -- reaproveitado aqui sem nenhuma mudança.
+    const text = fields[slots[0]].text;
+    const marks = parseClozeMarks(text);
+    const cards = marks.map(mark => ({
+      id: `${cardId}-${mark.id}`, noteId: cardId, cardTypeId: 'cloze', markId: mark.id,
+      textFieldIndex: slots[0], translationFieldIndex: slots[1],
+      compareAnswer: null, // idem legado -- resolveClozeCardView() cai pro compareAnswer embutido na própria marca (mark.compareAnswer)
+      ...FLASHCARD_MODEL_FSRS_DEFAULTS,
+    }));
+    return { note, cards };
+  }
+
+  if (mode === 'normal_reversed'){
+    // buildReversedCardInstancePair já existe desde a Fase 4a, reaproveitada
+    // sem nenhuma mudança -- só os índices passados agora respeitam
+    // contentFieldIndices() em vez de 0/1 fixos.
+    const cards = buildReversedCardInstancePair(cardId, slots[0], slots[1]);
+    return { note, cards };
+  }
+
+  // mode === 'normal'
+  const cards = [{
+    id: cardId, noteId: cardId, cardTypeId: 'normal',
+    frontFieldIndex: slots[0], backFieldIndex: slots[1],
+    ...FLASHCARD_MODEL_FSRS_DEFAULTS,
+  }];
+  return { note, cards };
+}
+
 // ---------- O adapter ----------
 // row: linha crua de teacher_flashcards/own_flashcards.
 // opts.origin: 'teacher' | 'self'
@@ -110,23 +359,38 @@ function interpretNoteFromRow(row, opts){
   const studyLang = STUDY_LANG_FOR_APP_KEY[appKey];
   const cardId = flashcardIdForRow(idPrefix, row);
 
-  // Fase 5 (ver CLAUDE.md) -- ponto de integração explícito de tipo/geração.
-  // Prioridade: se row.cardGenerationMode for um valor reconhecido, ele
-  // decide o tipo -- sobre a inferência implícita abaixo. Nenhuma linha
-  // real tem esse campo hoje (não existe coluna SQL pra isso ainda -- o
-  // nome físico da coluna fica pra Fase 6, quando o editor passar a
-  // persistir de verdade), então 100% do dado legado cai sempre no
-  // caminho de inferência implícita de sempre, sem nenhuma mudança de
-  // comportamento. `cloze`/`multiple_choice` já são auto-descritivos
-  // (cloze_sentence/choices), então o modo explícito é redundante-mas-
-  // -inofensivo pra eles -- é `normal_reversed` quem genuinamente PRECISA
-  // dele (nenhum dado consegue sinalizar "sou reversível" sozinho).
-  const CARD_GENERATION_MODES = ['normal', 'normal_reversed', 'multiple_choice', 'cloze'];
-  const explicitMode = CARD_GENERATION_MODES.includes(row.cardGenerationMode) ? row.cardGenerationMode : null;
+  // Fase 6B (ver CLAUDE.md) -- Note NATIVA: fields+card_generation_mode
+  // (snake_case, nome real de coluna decidido nesta fase) sempre PAREADOS.
+  // Presença de só um dos dois é estado inválido, rejeitado por
+  // validateNativeNoteRow() -- o motor nunca confia só no CHECK constraint
+  // proposto pra migration (ainda NÃO aplicada), valida de novo aqui.
+  // Ramo curto-circuita ANTES de qualquer lógica legada abaixo -- nenhuma
+  // linha com fields populado toca no código que segue.
+  if (isNoteFieldsPresent(row) || isCardGenerationModePresent(row)){
+    const validation = validateNativeNoteRow(row);
+    if (!validation.ok) throw new Error(`Note nativa inválida (linha id=${row.id}): ${validation.error}`);
+    return interpretNativeNoteFromRow(row, { origin, appKey, idPrefix, cardId });
+  }
 
-  const isCloze = explicitMode ? explicitMode === 'cloze' : !!row.cloze_sentence;
-  const isMC = explicitMode ? explicitMode === 'multiple_choice' : (!isCloze && !!(row.choices && row.choices.length));
-  const isReversed = explicitMode === 'normal_reversed';
+  // Inferência implícita de sempre (Fase 3), pro dado 100% legado (sem
+  // fields) -- comportamento intocado.
+  //
+  // Fase 6B, mudança em relação à Fase 5: o mecanismo `row.cardGenerationMode`
+  // (camelCase, só em memória de teste -- nunca existiu como coluna SQL)
+  // que permitia "normal_reversed sobre colunas legadas soltas, sem
+  // fields" foi RETIRADO. A própria Fase 5 já registrava esse nome como
+  // provisório ("o nome físico da coluna fica pra Fase 6") -- agora que a
+  // Fase 6B decide o nome real (`card_generation_mode`, sempre pareado com
+  // `fields`), manter os 2 mecanismos vivos ao mesmo tempo criaria duas
+  // fontes de verdade pro mesmo conceito, exatamente o que este projeto
+  // evita sistematicamente (ver princípio geral no topo do CLAUDE.md).
+  // Nenhuma linha real jamais usou esse campo -- retirada sem impacto em
+  // produção. Quem quiser normal_reversed agora usa uma Note nativa
+  // (fields+card_generation_mode), não mais um flag solto sobre colunas
+  // legadas -- testes que exercitavam o mecanismo antigo foram
+  // atualizados/substituídos (ver relatório desta fase).
+  const isCloze = !!row.cloze_sentence;
+  const isMC = !isCloze && !!(row.choices && row.choices.length);
   const cardTypeId = isCloze ? 'cloze' : isMC ? 'multiple_choice' : 'normal';
 
   const noteBase = {
@@ -263,17 +527,10 @@ function interpretNoteFromRow(row, opts){
 
   const note = { ...noteBase, fields, fieldOrder: fields.map((_, i) => i) };
 
-  if (isReversed){
-    // Fase 5 (ver CLAUDE.md) -- exercitado pelo caminho REAL de produção
-    // (interpretNoteFromRow -> buildReversedCardInstancePair), não só por
-    // um teste direto da função isolada. 2 CardInstances independentes
-    // (ids cardId/${cardId}-b), cada um com seu próprio FSRS -- prova que
-    // a futura informação de tipo (cardGenerationMode) atravessa o
-    // pipeline de geração inteiro, do jeito que a Fase 6 vai alimentar.
-    const cards = buildReversedCardInstancePair(cardId, frontFieldIndex, backFieldIndex);
-    return { note, cards };
-  }
-
+  // Fase 6B -- normal_reversed sobre colunas legadas soltas foi retirado
+  // (ver comentário no topo desta função); pra reverso, use uma Note
+  // nativa (fields+card_generation_mode:'normal_reversed'), que já
+  // reaproveita buildReversedCardInstancePair() no ramo nativo acima.
   const cards = [{
     id: cardId, noteId: cardId, cardTypeId,
     frontFieldIndex, backFieldIndex,
@@ -411,12 +668,19 @@ function resolveTypeAnswerCardView(note, cardInstance){
   const prompt = resolveCardField(note, cardInstance.promptFieldIndex);
   const answer = resolveCardField(note, cardInstance.answerFieldIndex);
   const displayAnswerText = answer ? answer.text : '';
-  return {
-    prompt,
-    displayAnswerText,
-    compareAnswerText: cardInstance.compareAnswer !== null && cardInstance.compareAnswer !== undefined
-      ? cardInstance.compareAnswer : displayAnswerText,
-  };
+  // Fase 6B (ver CLAUDE.md) -- compareAnswer pro zh reaproveita o MESMO
+  // pareamento hanzi/pinyin que resolveCardField() já resolve pra QUALQUER
+  // Field (pinyinFieldIndex) -- não um canal de comparação próprio deste
+  // tipo. cardInstance.compareAnswer explícito continua tendo prioridade
+  // (mantém a mesma flexibilidade de antes, testada na Fase 4a), mas nenhum
+  // caminho de geração hoje (legado nem nativo) o define pra type_answer --
+  // é sempre null/undefined nesse caso, então a cadeia cai pro pinyin do
+  // Field de resposta (zh) ou pro próprio texto da resposta (fr, sem
+  // pinyin) -- mesmo espírito já usado por Normal/resolveNormalCardView.
+  const compareAnswerText = (cardInstance.compareAnswer !== null && cardInstance.compareAnswer !== undefined)
+    ? cardInstance.compareAnswer
+    : (answer && answer.pinyinText ? answer.pinyinText : displayAnswerText);
+  return { prompt, displayAnswerText, compareAnswerText };
 }
 
 // Cloze -- reaproveita parseClozeMarks/renderClozeText já existentes
