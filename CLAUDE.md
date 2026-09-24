@@ -4905,3 +4905,97 @@ alterados estruturalmente, só ganharam 2 linhas a mais escrevendo
 
 **O que ainda falta / não foi feito (de propósito):** nada pendente --
 escopo pontual de texto, sem migração, sem passo manual.
+
+## Badge "Aluno/a da Prof. Brune" concedido automaticamente ao vincular
+
+Pedido da autora: "Tem como atribuir o Badge de aluno automaticamente
+para todo aluno vinculado por mim?" -- confirmado que o badge já existia
+(`badge_catalog`, id `student`, "Aluno/a da Prof. Brune" 🎓, criado numa
+sessão anterior) mas era só concedido manualmente via "🎖️ Badges". Ao
+conferir o estado real (`badge_grants` x `teacher_students` ativos): 10
+dos 11 vínculos ativos já tinham o badge (concedido manualmente antes),
+só `@hirschbarae` estava sem -- **concedido agora, ao vivo, via SQL**
+(`mcp__Supabase__execute_sql`, mesmo padrão de "aplicar direto quando é
+aditivo/baixo risco" já usado neste arquivo pra migrations).
+
+**O que foi feito**: `assignStudentToTeacher()` (`shared/roles.js`)
+ganhou um segundo insert, logo depois do insert em `teacher_students` ter
+sucesso -- concede o badge `student` pro `target.user_id` automaticamente,
+toda vez que a autora vincular alguém como aluno(a) daqui pra frente
+(qualquer tela que chame essa função -- hoje só "🎓 Alunos"). Erro
+`23505` (já tem o badge -- ex: a mesma pessoa sendo vinculada num
+SEGUNDO idioma) é esperado e ignorado, não reportado como falha. Um erro
+de qualquer outro tipo no badge é logado no console mas **nunca desfaz
+nem reporta falha no vínculo em si** -- a aluna já foi vinculada com
+sucesso antes dessa linha rodar, um problema no badge é secundário.
+
+**Decisão arquitetural**: nenhuma tabela/coluna nova -- reaproveita
+`badge_grants` (migration 002) e o badge `student` já existente no
+catálogo, só automatiza a concessão que já existia manualmente.
+
+**Testes**: `node --check` sem erro em `shared/roles.js`. Não testado via
+Playwright nesta entrega (mudança pequena e direta, mesmo padrão de
+código já usado em `grantBadgeByUsername`/`admin-badges.js`, risco baixo)
+-- confirmado ao vivo que o backfill retroativo funcionou (10/11 já
+tinham, o 11º recebeu agora).
+
+## Perfil público por padrão -- pergunta em aberto, não implementada ainda
+
+A autora perguntou: "Tem como tornar todo perfil público (cartões,
+progresso, conquistas etc) dos usuários por default ao invés de
+privado por default?" -- **não implementado ainda**, fica pra confirmar
+com ela antes de tocar em algo que reverte uma decisão de privacidade já
+grillada explicitamente (Fase 1 do prompt-mestre "perfil público /
+flashcards públicos", ver seção acima -- "privados por default" foi
+resposta a uma pergunta direta do grilling na época, não um default
+arbitrário). Hoje: 23 contas registradas, 0 com `public_profile=true` --
+mudar só o `default` da coluna afetaria apenas contas NOVAS; tornar as 23
+JÁ existentes públicas exige uma ação retroativa separada (`UPDATE`
+em massa), que exporia dado de gente que nunca opinou sobre isso.
+Perguntei à autora qual dos dois escopos ela quer antes de executar.
+
+## Auditoria de terminologia "aluno/student" x "usuário/user" (2026-09-24)
+
+Pedido da autora, depois do mal-entendido registrado na entrega anterior
+("Fase 3", onde confundi "aluna" com "usuária" numa pergunta de
+grilling): mapear onde o código usa cada termo, pra confirmar que os dois
+conceitos continuam bem separados. Feito só como auditoria de leitura
+(grep + inspeção), sem nenhuma mudança de código.
+
+**Os dois conceitos, e onde cada um mora:**
+- **"Aluno/a"** = vínculo FORMAL numa linha ativa de `teacher_students`
+  (quem a autora vinculou explicitamente em "🎓 Alunos"). Funções-chave:
+  `fetchMyStudents()`, `assignStudentToTeacher()`, `removeStudentLink()`,
+  `hasActiveTeacherLink()` (todas em `shared/roles.js`). Telas que usam
+  esse termo na UI, sempre nesse sentido correto: "🎓 Alunos"
+  (`admin-students.js`), "Flashcards"/"Aulas"/"Material de apoio" do
+  admin (`admin-flashcards.js`/`admin-class-logs.js`/
+  `admin-support-materials.js` -- os 3 seletores de destinatário "Nenhum
+  aluno selecionado"/"N alunos selecionados"), e o selo "Aluno vinculado"
+  em "Meus Cartões" (`my-flashcards.js`, referindo-se à PRÓPRIA aluna
+  logada, sempre correto).
+- **"Usuário/conta"** = QUALQUER perfil registrado (`profiles`), sem
+  nenhuma relação com vínculo pedagógico. Funções-chave:
+  `fetchAllProfiles()` (`admin-badges.js`), `fetchMyRole()`,
+  `fetchMyPlanTier()`/`isPremium()`/`setPlanTier()`/
+  `searchAnyProfileByUsername()` (todas em `shared/roles.js`, Fase
+  "reformulação gratuito x premium"). UI: "Nome de usuário" (campo de
+  perfil), "Conta"/"Sua conta"/"Sair da conta" (menu de Configurações) --
+  todos genéricos, sem confusão com vínculo pedagógico.
+
+**Conferido, nenhuma inconsistência encontrada**: busquei especificamente
+por texto visível na UI (`grep` em `fr/index.html`/`zh/index.html` e nos
+template strings de `shared/*.js`) que dissesse "aluno" fora de um
+contexto de vínculo formal, ou "usuário"/"conta" num contexto que na
+verdade devesse dizer "aluno vinculado" -- não achei nenhum. A confusão
+da entrega anterior aconteceu numa PERGUNTA MINHA de grilling (texto que
+eu escrevi na hora, não um bug em código já existente) -- não há
+equivalente disso "gravado" no código pra corrigir. Registrando aqui como
+auditoria concluída, não como lista de bugs -- nada foi mudado.
+
+**O que fica pra próximas sessões evitarem o mesmo erro**: ao escrever
+qualquer pergunta de grilling ou texto novo que precise se referir a "os
+alunos"/"as contas" da autora, checar explicitamente qual dos dois
+conceitos acima é o pretendido antes de escrever a frase -- "aluno" sem
+qualificação sempre significa vínculo formal em `teacher_students`, nunca
+"toda conta registrada".
