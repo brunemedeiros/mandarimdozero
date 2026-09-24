@@ -55,7 +55,7 @@
 //                                 vivo" aplicada aqui sobre o par streak/
 //                                 lastStudyDay de OUTRA conta, nunca duplicada)
 //   - shared/roles.js           (hasActiveTeacherLink -- Fase 5.1)
-//   - shared/student-flashcards.js (fetchMyOwnFlashcards, createOwnFlashcard)
+//   - shared/own-flashcards.js (fetchMyOwnFlashcards, createOwnFlashcard)
 //   - shared/reports.js         (openReportModal -- Q6, sem mudança lá)
 //   - languages/index.js        (AVAILABLE_LANGUAGES, pra bandeira/nome por
 //                                 languageAppKey)

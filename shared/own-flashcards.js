@@ -1,9 +1,12 @@
-// ---------- Flashcards autorados pela PRÓPRIA aluna -- Fase 5 do sistema de
+// ---------- Flashcards autorados pela PRÓPRIA conta -- Fase 5 do sistema de
 // alunas particulares (ver CLAUDE.md) ----------
 // Irmão de shared/teacher-flashcards.js (mesma tabela-espelho, mesmo padrão
 // de status active/archived), mas quem autora e quem é dona do cartão são a
-// MESMA pessoa -- por isso a RLS de student_flashcards (migration 028) é
-// "dono lê/escreve tudo", sem distinção professora/aluna.
+// MESMA pessoa -- por isso a RLS de own_flashcards (migration 028, tabela
+// renomeada de student_flashcards na migration 043 -- ver CLAUDE.md,
+// "aluno/a" sempre significa vínculo formal em teacher_students, e esta
+// tabela nunca foi isso: qualquer conta registrada usa "Meus Cartões",
+// vinculada ou não) é "dono lê/escreve tudo", sem distinção professora/aluna.
 //
 // Depende de (mesma posição de shared/teacher-flashcards.js -- antes de app.js):
 //   - shared/supabase-client.js (supabaseClient)
@@ -19,9 +22,9 @@
 async function fetchMyOwnFlashcards(languageAppKey){
   if (!CURRENT_USER) return [];
   const { data, error } = await supabaseClient
-    .from('student_flashcards')
+    .from('own_flashcards')
     .select('*')
-    .eq('student_id', CURRENT_USER.id)
+    .eq('owner_id', CURRENT_USER.id)
     .eq('language_app_key', languageAppKey)
     .order('created_at', { ascending: false });
   if (error){ console.error('Erro ao carregar seus flashcards:', error); return []; }
@@ -73,9 +76,9 @@ async function createOwnFlashcard({ languageAppKey, front, backTrans, note, fron
   const v = _validateOwnFlashcardContent({ front, backTrans, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin, languageAppKey });
   if (!v.ok) return v;
   const { data, error } = await supabaseClient
-    .from('student_flashcards')
+    .from('own_flashcards')
     .insert({
-      student_id: CURRENT_USER.id,
+      owner_id: CURRENT_USER.id,
       language_app_key: languageAppKey,
       front: v.cleanFront || null,
       back_trans: v.cleanBack,
@@ -114,7 +117,7 @@ async function uploadOwnFlashcardMedia(file, kind){
 }
 
 async function setOwnFlashcardStatus(id, status){
-  const { error } = await supabaseClient.from('student_flashcards').update({ status }).eq('id', id).eq('student_id', CURRENT_USER.id);
+  const { error } = await supabaseClient.from('own_flashcards').update({ status }).eq('id', id).eq('owner_id', CURRENT_USER.id);
   return { ok: !error };
 }
 
@@ -127,7 +130,7 @@ async function setOwnFlashcardStatus(id, status){
 // aluna pode ter um cartão ativo (revisa normalmente) mas escondido do
 // perfil, ou arquivado mas ainda visível no perfil.
 async function setOwnFlashcardHidden(id, hidden){
-  const { error } = await supabaseClient.from('student_flashcards').update({ hidden_from_profile: !!hidden }).eq('id', id).eq('student_id', CURRENT_USER.id);
+  const { error } = await supabaseClient.from('own_flashcards').update({ hidden_from_profile: !!hidden }).eq('id', id).eq('owner_id', CURRENT_USER.id);
   return { ok: !error };
 }
 
@@ -141,14 +144,14 @@ async function setOwnFlashcardHidden(id, hidden){
 async function updateOwnFlashcardContent(id, { front, backTrans, note, frontPinyin, frontIsTargetLanguage, revision }){
   const v = _validateOwnFlashcardContent({ front, backTrans });
   if (!v.ok) return v;
-  const { error } = await supabaseClient.from('student_flashcards').update({
+  const { error } = await supabaseClient.from('own_flashcards').update({
     front: v.cleanFront,
     back_trans: v.cleanBack,
     note: (note || '').trim() || null,
     front_pinyin: (frontPinyin || '').trim() || null,
     front_is_target_language: frontIsTargetLanguage !== false,
     revision,
-  }).eq('id', id).eq('student_id', CURRENT_USER.id);
+  }).eq('id', id).eq('owner_id', CURRENT_USER.id);
   if (error){ console.error('Erro ao editar seu flashcard:', error); return { ok: false, error: 'Não foi possível salvar a edição agora.' }; }
   return { ok: true };
 }
@@ -159,7 +162,7 @@ async function updateOwnFlashcardContent(id, { front, backTrans, note, frontPiny
 // arquivados). Mesmo padrão de deleteFlashcardPermanently em
 // shared/teacher-flashcards.js.
 async function deleteOwnFlashcardPermanently(id){
-  const { error } = await supabaseClient.from('student_flashcards').delete().eq('id', id).eq('student_id', CURRENT_USER.id);
+  const { error } = await supabaseClient.from('own_flashcards').delete().eq('id', id).eq('owner_id', CURRENT_USER.id);
   if (error){ console.error('Erro ao apagar seu flashcard:', error); return { ok: false }; }
   return { ok: true };
 }

@@ -5152,3 +5152,118 @@ mostra `admin:1, user:22` (nenhuma linha ficou em `'student'`);
 **Escopo**: `shared/supabase_migrations/042_rename_role_student_to_user.sql`
 (nova) + `shared/roles.js`. Nenhum passo manual pendente pra autora --
 migration já aplicada ao vivo.
+
+## Mesmo tratamento nos 2 outros "student" que não eram vínculo formal
+(`usage_events.actor_type` e a tabela `student_flashcards`)
+
+A entrega anterior (rename de `profiles.role`) já tinha identificado e
+deliberadamente deixado de fora 2 outras ocorrências de `'student'` no
+schema. A autora perguntou explicitamente se essas duas também deveriam
+seguir "o mesmo raciocínio" -- e apontou o contraste que já estava
+implícito: o badge automático concedido em `assignStudentToTeacher()`
+(`badge_catalog`/`badge_grants`, id `'student'`) está certo do jeito que
+está, porque só é concedido quando alguém é vinculada de verdade em
+"🎓 Alunos" (vínculo formal em `teacher_students`) -- não é a mesma
+colisão de nome. As duas ocorrências restantes, porém, eram exatamente
+esse tipo de colisão: usar "student" pra rotular QUALQUER conta, não só
+quem tem vínculo formal.
+
+Como a pergunta envolvia 2 mudanças técnicas (uma tabela inteira sendo
+renomeada, não só um valor de enum), perguntei antes de executar (pedido
+explícito da autora: "não entendi direito, mas explique de um jeito que
+não-desenvolvedores entendam") -- resposta: **"Both"**, fazer as duas.
+
+**1) `usage_events.actor_type`** -- coluna que classifica cada linha de
+analytics como `'admin'` (quando `isAdminUser()===true`) ou `'student'`
+(qualquer outra conta, mesmo sem vínculo formal nenhum -- a MESMA colisão
+de nome já corrigida em `profiles.role`, só que numa tabela diferente).
+**Migration `044_rename_actor_type_student_to_user.sql`** -- `alter
+column actor_type set default 'user'` + `update ... set
+actor_type='user' where actor_type='student'`. Aditiva/sem risco, mesmo
+padrão de sempre. Aplicada AO VIVO via `mcp__Supabase__apply_migration`,
+projeto `eigjocalzwamisgqilhg` -- confirmado depois: `admin:183,
+user:939` (era `admin:183, student:939`). Nenhuma mudança de código
+necessária -- `shared/analytics.js`/`shared/admin-analytics.js` nunca
+comparavam contra a string `'student'` (só contra `'admin'`), então o
+valor no outro ramo era só o que sobrava no banco, sem lógica
+dependendo do nome exato.
+
+**2) Tabela `student_flashcards` (Fase 5 do sistema de alunas
+particulares, "Meus Cartões")** -- essa era a colisão mais séria: uma
+tabela INTEIRA, com uma coluna `student_id`, usada pra guardar os
+cartões que a PRÓPRIA CONTA cria pra si mesma -- sem nenhuma relação com
+vínculo formal de professora (qualquer conta, vinculada ou não, sempre
+pôde usar "Meus Cartões" desde a Fase 5, confirmado de novo nesta
+sessão: `shared/my-flashcards.js` nunca chama `fetchMyStudents()`/
+`teacher_students`). Diferente de `teacher_flashcards` (que SIM é
+"cartão que uma professora atribui a uma aluna vinculada" -- esse nome
+está certo e não foi tocado).
+
+**Migration `043_rename_student_flashcards_to_own_flashcards.sql`** --
+`alter table student_flashcards rename to own_flashcards` + `alter table
+own_flashcards rename column student_id to owner_id` + as 4 constraints
++ a policy RLS (`student_flashcards_owner_all` →
+`own_flashcards_owner_all`) renomeadas junto. **Achado técnico
+importante, verificado ao vivo antes de escrever a migration**: um
+`RENAME TABLE`/`RENAME COLUMN` no Postgres atualiza sozinho tudo que
+referencia por OID (constraints, índices, policies) -- mas NÃO atualiza o
+corpo de uma function PL/pgSQL, que é guardado como texto literal. A
+function `get_public_flashcards()` (migration 038, usada pelo perfil
+público) tinha `from student_flashcards where student_id = ...` escrito
+no corpo -- precisou de um `CREATE OR REPLACE FUNCTION` explícito dentro
+da mesma migration, ou teria continuado apontando pro nome antigo (que
+não existiria mais) e quebrado em produção. Aplicada AO VIVO via
+`mcp__Supabase__apply_migration` -- verificado depois: 3 linhas
+preservadas, constraints/policy renomeadas, function chamável e
+devolvendo o erro `not_authorized`/`not_found` esperado pra um username
+inexistente.
+
+**Lado do cliente**: `shared/student-flashcards.js` (8 funções --
+`fetchMyOwnFlashcards`, `createOwnFlashcard`, `uploadOwnFlashcardMedia`,
+`setOwnFlashcardStatus`, `setOwnFlashcardHidden`,
+`updateOwnFlashcardContent`, `deleteOwnFlashcardPermanently` + validação
+interna) apagado e recriado como **`shared/own-flashcards.js`** -- mesma
+lógica exata, só trocando `.from('student_flashcards')`→
+`.from('own_flashcards')` e `student_id`→`owner_id` em todo lugar (nomes
+de FUNÇÃO nunca mudaram -- só o arquivo/tabela/coluna por baixo -- então
+nenhum call site em `shared/my-flashcards.js` precisou de nenhuma
+mudança, só os 2 comentários que citavam o nome antigo do arquivo).
+`fr/index.html`/`zh/index.html`: tag `<script src="../shared/
+student-flashcards.js">` → `own-flashcards.js`. Comentários corrigidos
+(sem mudança funcional) em `fr/app.js`, `zh/app.js` (2 blocos cada, perto
+de `buildCardFromSelfFlashcard`/`isCardLessonCompleted`),
+`shared/teacher-class-logs.js` e `shared/public-profile.js`.
+
+**O que ficou de fora, de propósito** (mesmo critério da entrega
+anterior -- migrar o arquivo histórico da migration quebraria o registro
+do que rodou de verdade naquela data): as migrations antigas
+(`028`/`031`/`032`/`033`/`036`/`037`/`038`/`040`) continuam com
+`student_flashcards`/`student_id` no texto SQL -- são o registro real do
+que foi executado então, nunca reescritas.
+
+**Testes realizados**: `node --check` sem erro em todos os arquivos
+tocados. Grep completo do repositório (fora das migrations antigas)
+confirma zero referência sobrando a `student_flashcards`/
+`student-flashcards.js`. Validação funcional via Playwright: carreguei
+`shared/own-flashcards.js` isolado num browser real (Chromium) com um
+`supabaseClient` fake que registra cada chamada -- confirmado que as 7
+funções exportadas existem e que `fetchMyOwnFlashcards`/
+`createOwnFlashcard`/`setOwnFlashcardStatus`/`setOwnFlashcardHidden`/
+`deleteOwnFlashcardPermanently` todas chamam `.from('own_flashcards')`
+e filtram/gravam por `owner_id` (nunca `student_id`), inclusive o
+`insert()` de `createOwnFlashcard` confirmado gravando `owner_id`
+corretamente no payload. Não foi possível validar a tela completa "Meus
+Cartões" ponta-a-ponta neste ambiente porque carregar `fr/index.html`/
+`zh/index.html` direto (sem passar pela seleção de idioma da raiz do
+site) dispara um redirect da própria arquitetura do app (não relacionado
+a esta mudança) -- a validação isolada do módulo (acima) cobre o risco
+real desta entrega, que é 100% renomeação mecânica sem lógica nova.
+
+**Escopo**: `shared/supabase_migrations/043_rename_student_flashcards_to_own_flashcards.sql`
++ `044_rename_actor_type_student_to_user.sql` (novas) +
+`shared/own-flashcards.js` (novo, substitui `shared/student-flashcards.js`,
+apagado) + `fr/index.html`/`zh/index.html`/`fr/app.js`/`zh/app.js`/
+`shared/teacher-class-logs.js`/`shared/public-profile.js` (só
+referências/comentários). Nenhum passo manual pendente pra autora --
+as duas migrations já foram aplicadas ao vivo via
+`mcp__Supabase__apply_migration`.

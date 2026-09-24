@@ -9,7 +9,7 @@
 // fr/app.js e zh/app.js antes desta função rodar).
 //
 // Depende de (mesma posição de shared/admin-flashcards.js -- antes de app.js):
-//   - shared/student-flashcards.js (fetchMyOwnFlashcards, createOwnFlashcard, uploadOwnFlashcardMedia, setOwnFlashcardStatus, updateOwnFlashcardContent, deleteOwnFlashcardPermanently)
+//   - shared/own-flashcards.js (fetchMyOwnFlashcards, createOwnFlashcard, uploadOwnFlashcardMedia, setOwnFlashcardStatus, updateOwnFlashcardContent, deleteOwnFlashcardPermanently)
 //   - shared/roles.js              (hasActiveTeacherLink, fetchMyPlanTier)
 //   - shared/toast.js              (showToast)
 //   - shared/admin-flashcards.js   (openFlashcardResetConfirm -- carregado ANTES deste arquivo, mesma página, função global reaproveitada sem duplicar)
@@ -415,7 +415,7 @@ function wireMyFlashcardsCardButtons(wrap){
   // Fase 1 do perfil público (ver CLAUDE.md, grilling Q1) -- botão de olho,
   // posicionado ao lado do de Arquivar (mesmo pedido da autora), eixo
   // separado do status active/archived (ver comentário de
-  // setOwnFlashcardHidden em shared/student-flashcards.js). Nenhuma
+  // setOwnFlashcardHidden em shared/own-flashcards.js). Nenhuma
   // atualização em STATE.cards/addSelfFlashcardToState precisa acontecer
   // aqui -- diferente de arquivar/apagar, esconder do perfil não afeta a
   // fila de revisão, só o dado que renderPublicProfileInto lê da tabela.
