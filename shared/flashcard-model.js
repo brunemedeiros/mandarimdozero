@@ -48,23 +48,41 @@ const FLASHCARD_MODEL_FSRS_DEFAULTS = Object.freeze({
 // Puras -- só entendem a sintaxe NOVA, nunca cloze_sentence/cloze_answer.
 const CLOZE_MARK_RE = /\{\{(c\d+)::(.*?)\}\}/g;
 
+// Fase 5 (ver CLAUDE.md) -- {{cN::texto|compareAnswer}}: "|" separa o
+// texto que fica embutido na frase (sempre mostrado ao revelar) do valor
+// de comparação opcional daquela lacuna (pinyin no zh). Sem "|", a marca
+// não tem compareAnswer próprio (caso comum do fr -- o próprio texto é a
+// resposta esperada). Nunca confundir com "/" (aceita múltiplas formas
+// dentro do próprio texto ou compareAnswer, ex. "viens/vient" -- feature
+// separada, já tratada por acceptedForms() em fr/zh app.js).
+function splitClozeMarkRaw(raw){
+  const pipeIdx = raw.indexOf('|');
+  if (pipeIdx === -1) return { answer: raw, compareAnswer: null };
+  return { answer: raw.slice(0, pipeIdx), compareAnswer: raw.slice(pipeIdx + 1) };
+}
+
 function parseClozeMarks(text){
   const marks = [];
   let m;
   CLOZE_MARK_RE.lastIndex = 0;
-  while ((m = CLOZE_MARK_RE.exec(text))) marks.push({ id: m[1], answer: m[2] });
+  while ((m = CLOZE_MARK_RE.exec(text))){
+    const { answer, compareAnswer } = splitClozeMarkRaw(m[2]);
+    marks.push({ id: m[1], answer, compareAnswer });
+  }
   return marks;
 }
 
 // Mostra `text` com a lacuna `targetMarkId` oculta (___) por padrão, e
 // qualquer outra marcação da mesma nota já revelada como texto puro --
-// relevante quando uma nota tiver c1+c2+c3 (não acontece em dado legado,
-// que só tem 1 "___" por natureza da coluna antiga, mas a função já nasce
-// pronta pra isso). `opts.reveal=true` também revela o alvo.
+// relevante quando uma nota tiver c1+c2+c3 (Fase 5: geração real disso
+// existe agora em interpretNoteFromRow(), ver seção correspondente).
+// `opts.reveal=true` também revela o alvo. Nunca vaza a parte pós-"|"
+// (compareAnswer) no texto renderizado -- só o texto embutido (answer).
 function renderClozeText(text, targetMarkId, opts){
   const reveal = !!(opts && opts.reveal);
   CLOZE_MARK_RE.lastIndex = 0;
-  return text.replace(CLOZE_MARK_RE, (_, id, answer) => {
+  return text.replace(CLOZE_MARK_RE, (_, id, raw) => {
+    const { answer } = splitClozeMarkRaw(raw);
     if (id !== targetMarkId) return answer;
     return reveal ? answer : '___';
   });
@@ -91,8 +109,24 @@ function interpretNoteFromRow(row, opts){
   const isZh = appKey === 'mandarim';
   const studyLang = STUDY_LANG_FOR_APP_KEY[appKey];
   const cardId = flashcardIdForRow(idPrefix, row);
-  const isCloze = !!row.cloze_sentence;
-  const isMC = !isCloze && !!(row.choices && row.choices.length);
+
+  // Fase 5 (ver CLAUDE.md) -- ponto de integração explícito de tipo/geração.
+  // Prioridade: se row.cardGenerationMode for um valor reconhecido, ele
+  // decide o tipo -- sobre a inferência implícita abaixo. Nenhuma linha
+  // real tem esse campo hoje (não existe coluna SQL pra isso ainda -- o
+  // nome físico da coluna fica pra Fase 6, quando o editor passar a
+  // persistir de verdade), então 100% do dado legado cai sempre no
+  // caminho de inferência implícita de sempre, sem nenhuma mudança de
+  // comportamento. `cloze`/`multiple_choice` já são auto-descritivos
+  // (cloze_sentence/choices), então o modo explícito é redundante-mas-
+  // -inofensivo pra eles -- é `normal_reversed` quem genuinamente PRECISA
+  // dele (nenhum dado consegue sinalizar "sou reversível" sozinho).
+  const CARD_GENERATION_MODES = ['normal', 'normal_reversed', 'multiple_choice', 'cloze'];
+  const explicitMode = CARD_GENERATION_MODES.includes(row.cardGenerationMode) ? row.cardGenerationMode : null;
+
+  const isCloze = explicitMode ? explicitMode === 'cloze' : !!row.cloze_sentence;
+  const isMC = explicitMode ? explicitMode === 'multiple_choice' : (!isCloze && !!(row.choices && row.choices.length));
+  const isReversed = explicitMode === 'normal_reversed';
   const cardTypeId = isCloze ? 'cloze' : isMC ? 'multiple_choice' : 'normal';
 
   const noteBase = {
@@ -111,8 +145,49 @@ function interpretNoteFromRow(row, opts){
   };
 
   if (isCloze){
+    // Fase 5 (ver CLAUDE.md) -- detecção estrutural, não depende de
+    // explicitMode: se cloze_sentence já contém marcação nativa
+    // {{cN::...}}, ela é a ÚNICA fonte de verdade pra geração -- nunca
+    // misturada com cloze_answer/cloze_answer_pinyin legados da mesma
+    // linha (ajuste explícito da autora). Nenhum dado legado real produz
+    // isso hoje (schema antigo só permite "___", nunca "{{c") -- só uma
+    // linha construída por um editor futuro (Fase 6) ou por teste.
+    const hasNativeMarks = /\{\{c\d+::/.test(row.cloze_sentence || '');
+    if (hasNativeMarks){
+      // Um CardInstance por cN distinto -- id/FSRS/histórico próprios
+      // pra cada um (`${cardId}-${markId}`, nunca colide com `-b` de
+      // normal_reversed nem com `-r{revision}` de edição). A sintaxe
+      // {{cN::texto}}/{{cN::texto|compareAnswer}} é representação
+      // INTERNA apenas -- a professora nunca digita isso à mão, quem
+      // gera é o editor visual (Fase 6, fora do escopo aqui).
+      const text = row.cloze_sentence;
+      const textField = { lang: isZh ? 'zh' : studyLang, text };
+      if (row.audio_url) textField.audio = { url: row.audio_url, source: 'upload' };
+      const note = {
+        ...noteBase,
+        fields: [
+          textField,
+          { lang: 'pt-BR', text: row.back_trans },
+        ],
+        fieldOrder: [0, 1],
+      };
+      const marks = parseClozeMarks(text);
+      const cards = marks.map(mark => ({
+        id: `${cardId}-${mark.id}`, noteId: cardId, cardTypeId: 'cloze', markId: mark.id,
+        textFieldIndex: 0, translationFieldIndex: 1,
+        // compareAnswer null de propósito -- resolveClozeCardView() cai
+        // pro compareAnswer embutido na própria marca (mark.compareAnswer,
+        // extraído do "|" por parseClozeMarks), nunca lê cloze_answer_pinyin
+        // aqui (seria misturar as duas fontes, proibido pelo ajuste 3).
+        compareAnswer: null,
+        ...FLASHCARD_MODEL_FSRS_DEFAULTS,
+      }));
+      return { note, cards };
+    }
+
     // ÚNICO trecho que ainda conhece cloze_sentence/cloze_answer/
-    // cloze_answer_pinyin -- reconstrói a sintaxe {{c1::...}} na hora.
+    // cloze_answer_pinyin (caminho legado, "___" -- inalterado desde a
+    // Fase 3) -- reconstrói a sintaxe {{c1::...}} na hora.
     // zh: o que a aluna DIGITA é pinyin (cloze_answer_pinyin), o que está
     // de fato escrito na frase e é revelado depois é hanzi (cloze_answer)
     // -- por isso a marcação embute o hanzi (é o conteúdo real da frase)
@@ -187,6 +262,17 @@ function interpretNoteFromRow(row, opts){
   }
 
   const note = { ...noteBase, fields, fieldOrder: fields.map((_, i) => i) };
+
+  if (isReversed){
+    // Fase 5 (ver CLAUDE.md) -- exercitado pelo caminho REAL de produção
+    // (interpretNoteFromRow -> buildReversedCardInstancePair), não só por
+    // um teste direto da função isolada. 2 CardInstances independentes
+    // (ids cardId/${cardId}-b), cada um com seu próprio FSRS -- prova que
+    // a futura informação de tipo (cardGenerationMode) atravessa o
+    // pipeline de geração inteiro, do jeito que a Fase 6 vai alimentar.
+    const cards = buildReversedCardInstancePair(cardId, frontFieldIndex, backFieldIndex);
+    return { note, cards };
+  }
 
   const cards = [{
     id: cardId, noteId: cardId, cardTypeId,
@@ -343,14 +429,24 @@ function resolveClozeCardView(note, cardInstance){
   const marks = parseClozeMarks(textField.text);
   const mark = marks.find(m => m.id === cardInstance.markId) || marks[0];
   const displayAnswerText = mark ? mark.answer : '';
+  // Fase 5 -- prioridade de compareAnswer: cardInstance.compareAnswer
+  // explícito (caminho legado, vem de cloze_answer_pinyin) vence; senão
+  // cai pro compareAnswer embutido na própria marca (mark.compareAnswer,
+  // extraído do "|" por parseClozeMarks -- caminho nativo multi-marca);
+  // senão usa o próprio texto da marca (fr sem pinyin, nos dois caminhos).
+  // Nunca mistura cloze_answer_pinyin legado com marca nativa da mesma
+  // nota -- as duas fontes já são mutuamente exclusivas por construção em
+  // interpretNoteFromRow() (uma nota ou é 100% legada ou 100% nativa).
+  const compareAnswerText = (cardInstance.compareAnswer !== null && cardInstance.compareAnswer !== undefined)
+    ? cardInstance.compareAnswer
+    : (mark && mark.compareAnswer !== null && mark.compareAnswer !== undefined ? mark.compareAnswer : displayAnswerText);
   return {
     rawSentenceText: textField.text,
     markId: cardInstance.markId,
     audioUrl: (textField.audio && textField.audio.url) || null,
     translation,
     displayAnswerText,
-    compareAnswerText: cardInstance.compareAnswer !== null && cardInstance.compareAnswer !== undefined
-      ? cardInstance.compareAnswer : displayAnswerText,
+    compareAnswerText,
   };
 }
 

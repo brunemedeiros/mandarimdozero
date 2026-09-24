@@ -5506,3 +5506,184 @@ cumprido (prossegui só depois da própria autorização da autora dizer
 "prossiga... sem pedir nova autorização"). Próxima fase só começa depois
 de autorização explícita da autora, com este relatório já entregue antes
 de pedir luz verde.
+
+## Prompt-mestre "reestruturação Note/CardType/CardInstance" -- Fase 5
+(cartões gerados): normal_reversed e Cloze multi-marca atravessam o
+pipeline real de geração
+
+Fase 5 nunca teve descrição além do nome antes desta sessão -- travada
+como "FASE 5 -- CARTÕES GERADOS: implementar Note → Card Type → Card
+Instance(s), especialmente Normal→1 card / Normal com reverso→2 cards
+independentes com FSRS próprio, e decidir/explicitar como Cloze gera
+cartões quando houver c1/c2/c3 antes de implementar." Só depois de
+`AskUserQuestion` (2 perguntas concretas, achados do código real embutidos
+nas próprias opções) veio a autorização -- e mesmo assim a autora pediu um
+PLANO por escrito (8 pontos + as duas decisões de sintaxe Cloze) antes de
+qualquer código, aprovado com 7 ajustes explícitos antes de codar de
+verdade.
+
+**Os 7 ajustes da autora, travados antes de codar (cumpridos nesta
+entrega):**
+1. `cardGenerationMode` explícito tem prioridade sobre a inferência
+   legada -- nunca o contrário. Sem coluna SQL definitiva nesta fase; o
+   nome físico fica pra Fase 6.
+2. Cloze múltiplo aprovado exatamente como proposto -- 1 Field de texto,
+   múltiplos `cN` no mesmo Field, 1 CardInstance independente por `cN`,
+   FSRS próprio, ids `${cardId}-${markId}`. Sintaxe interna
+   `{{cN::texto}}`/`{{cN::texto|compareAnswer}}` -- a professora NUNCA
+   digita isso à mão, é trabalho do editor visual da Fase 6.
+3. Se o Field contiver marcação nativa `{{cN::...}}`, ela é a ÚNICA fonte
+   de verdade -- nunca misturar com `cloze_answer`/`cloze_answer_pinyin`
+   legados da mesma linha.
+4. "Os dois formatos coexistem pra sempre" NÃO é requisito definitivo --
+   só "preservar dado legado + não migrar destrutivamente nesta fase". Se
+   um dia tudo migrar pro formato nativo, é decisão de uma fase futura,
+   não travada aqui.
+5. Teste de persistência precisa verificar explicitamente: ids diferentes
+   pra c1/c2, FSRS próprio de cada um, mutar um não afeta o outro,
+   reload preserva os dois separadamente.
+6. `normal_reversed` precisa ser exercitado pelo caminho REAL
+   (`interpretNoteFromRow()` → `buildReversedCardInstancePair()` → 2
+   CardInstances) -- não só um teste direto da função isolada. Isso é o
+   próprio objetivo da fase: provar que a informação de tipo atravessa o
+   pipeline de geração inteiro.
+7. Nada de editor, checkbox, seletor de tipo na UI, coluna SQL
+   definitiva, rich text, botão Cloze, interface de pinyin, ou qualquer
+   outra parte da Fase 6 -- só o motor de geração/persistência e os
+   testes necessários.
+
+**O que foi feito, tudo em `shared/flashcard-model.js` (único arquivo
+tocado):**
+
+- **`cardGenerationMode`** -- `interpretNoteFromRow()` ganhou uma checagem
+  no topo: se `row.cardGenerationMode` for um dos 4 valores reconhecidos
+  (`normal`/`normal_reversed`/`multiple_choice`/`cloze`), ele decide o
+  tipo, sobre a inferência implícita de sempre (`cloze_sentence`
+  populado→cloze, `choices` populado→mc, senão→normal). Nenhuma linha
+  real hoje tem esse campo (não existe coluna SQL pra ele) -- 100% do
+  dado legado cai sempre no caminho de inferência, comportamento
+  idêntico a antes desta fase. `cloze`/`multiple_choice` já eram
+  auto-descritivos pelos próprios dados (`cloze_sentence`/`choices`); é
+  só `normal_reversed` quem genuinamente PRECISA do campo, porque nada
+  no dado consegue sinalizar "sou reversível" sozinho.
+- **`normal_reversed` wireado no caminho real** -- depois de montar
+  `fields`/`frontFieldIndex`/`backFieldIndex` (mesmo código de sempre pro
+  par normal/MC), se `explicitMode === 'normal_reversed'`,
+  `interpretNoteFromRow()` chama `buildReversedCardInstancePair(cardId,
+  frontFieldIndex, backFieldIndex)` (função já existente desde a Fase
+  4a, agora finalmente invocada por dentro da função de produção, não
+  isolada) e devolve os 2 CardInstances direto. Testado explicitamente
+  via `buildEngineCardsFromRow()` (o caminho que STATE.cards de verdade
+  usa): 2 cards no array, ids `t9020`/`t9020-b`, front/back trocados
+  entre si, FSRS default idêntico nos 2 no nascimento, e mutar
+  due/reps/stability de um confirmado NÃO vazando pro outro.
+- **Cloze nativo multi-marca** -- detecção estrutural (não depende de
+  `cardGenerationMode`): se `cloze_sentence` já contém `{{c\d+::`, é o
+  caminho nativo -- gera 1 CardInstance por marca distinta encontrada via
+  `parseClozeMarks()`, ids `${cardId}-${markId}` pra TODAS (mesmo com 1
+  marca só -- formato novo, nunca colide com dado legado porque o schema
+  antigo nunca produziu `{{c` em `cloze_sentence`). Sem `{{c`, cai no
+  caminho legado de sempre (`___` + `cloze_answer`), byte a byte
+  idêntico ao que já existia -- id sem sufixo, `markId:'c1'` fixo.
+- **Sintaxe `{{cN::texto|compareAnswer}}`** -- `splitClozeMarkRaw()`
+  (novo) separa, no `::`, o texto que fica embutido na frase (sempre
+  mostrado ao revelar) do valor de comparação opcional depois do `|`
+  (pinyin no zh). `parseClozeMarks()` agora devolve `{id, answer,
+  compareAnswer}` por marca (`compareAnswer:null` quando não há `|`);
+  `renderClozeText()` nunca deixa a parte pós-`|` vazar no texto
+  renderizado (nem oculto nem revelado) -- só `answer`.
+  `resolveClozeCardView()` ganhou a prioridade: `cardInstance.
+  compareAnswer` explícito (caminho legado, `cloze_answer_pinyin`) vence
+  se presente; senão cai pro `compareAnswer` da própria marca (caminho
+  nativo); senão usa o próprio texto da marca (fr sem pinyin, nos dois
+  caminhos) -- nunca mistura as duas fontes na mesma nota (ajuste 3).
+- Mudança de shape em `parseClozeMarks()` (nova chave `compareAnswer` no
+  objeto por marca) quebrou 2 asserções por igualdade estrita de JSON na
+  suíte de regressão da Fase 4d (esperado, disclosed no plano antes de
+  codar) -- atualizadas pra incluir `compareAnswer: null`, sem mudança
+  de comportamento real (só o shape do teste).
+
+**Achado relevante, reportado sem corrigir nesta fase**:
+`buildCardFromTeacherFlashcard(row)`/`buildCardFromSelfFlashcard(row)`
+(fr/zh `app.js`) chamam `buildEngineCardsFromRow(row, opts)[0]` --
+pegam só o PRIMEIRO card do array, e `mergeTeacherFlashcardsIntoState()`/
+`mergeSelfFlashcardsIntoState()` empurram só esse 1 card pra
+`STATE.cards` por linha. Ou seja: o motor de geração (`shared/
+flashcard-model.js`) já sabe produzir 2+ CardInstances por Note (provado
+pelos testes desta fase), mas o ponto de consumo em `STATE.cards` ainda
+trunca pro primeiro -- se uma linha real algum dia carregar
+`cardGenerationMode:'normal_reversed'` ou `cloze_sentence` com 2+ marcas
+nativas, só a 1ª CardInstance chegaria de fato à fila de revisão da
+aluna, silenciosamente perdendo as demais. **Não é um bug ativo hoje**
+(nenhuma linha real produz mais de 1 card, então `[0]` sempre pega tudo)
+-- é um ponto de integração que só passa a importar quando o editor da
+Fase 6 conseguir gravar essas linhas de verdade. Fora do escopo desta
+fase por estar em `fr/app.js`/`zh/app.js`, não em `shared/flashcard-
+model.js` (o único arquivo que as 7 restrições autorizavam tocar) --
+registrando aqui explicitamente pra não virar surpresa na Fase 6: o
+loop de merge vai precisar iterar o array inteiro (`.forEach`), não só
+pegar `[0]`.
+
+**Decisões arquiteturais desta fase:**
+1. `cardGenerationMode` mora como propriedade normalizada do objeto de
+   entrada (`row`), lida defensivamente -- não uma coluna SQL real ainda.
+   Funciona hoje só com linhas construídas em teste; funcionará sem
+   nenhuma mudança de código quando a Fase 6 escrever uma coluna real
+   com esse nome (ou outro -- o nome físico é decisão da Fase 6, este
+   código só lê `row.cardGenerationMode`, agnóstico à origem do campo).
+2. Detecção de Cloze nativo é ESTRUTURAL (regex sobre o conteúdo), não
+   via `cardGenerationMode` -- um texto com `{{c` já se autodescreve,
+   não precisa de um campo extra dizendo "isto é cloze".
+   `cardGenerationMode` só é load-bearing pra `normal_reversed`.
+3. Zero mudança em `buildEngineCardsFromRow()`/`resolveCardContentView()`
+   -- ambos já operavam sobre array de qualquer tamanho desde a Fase 4b,
+   confirmando de novo a aposta arquitetural de "um motor só" (mesma
+   conclusão já registrada em várias fases anteriores desta feature).
+4. Nenhuma migração, nenhuma mudança de schema, nenhuma mudança em
+   `fr/app.js`/`zh/app.js`/qualquer renderer -- 100% contido em
+   `shared/flashcard-model.js`, exatamente como as 7 restrições pediam.
+
+**Gratuito x Premium (avaliado, não implementado):** mudança de motor
+pura, sem nova superfície de produto -- mesma conclusão de toda fase de
+infraestrutura desta feature.
+
+**Testes realizados:** `node --check` sem erro. Suíte nova
+`test_fase5_generation.js` (43 cenários): `cardGenerationMode` ausente →
+dado legado 100% inalterado (id, `cardTypeId`, `displayAnswerText`);
+`cardGenerationMode` reconhecido vence a inferência mesmo quando os dados
+"pareceriam" outro tipo (linha com `choices` forçada pra `normal`);
+`cardGenerationMode` não reconhecido cai na inferência sem quebrar;
+`normal_reversed` via `interpretNoteFromRow`+`buildEngineCardsFromRow`
+reais -- 2 cards, ids corretos, front/back trocados, FSRS independente
+(mutação testada nos dois sentidos); Cloze multi-marca fr (2 marcas sem
+`|`) -- 2 CardInstances, ids `-c1`/`-c2`, `compareAnswerText` cai no
+próprio texto, FSRS independente; Cloze nativo zh (1 marca com `|pinyin`)
+-- `displayAnswerText` é o hanzi, `compareAnswerText` é o pinyin, e o
+pinyin confirmado NUNCA vazando no texto que `renderClozeText()`
+realmente produz (nem oculto nem revelado); marca nativa confirmada
+ignorando `cloze_answer`/`cloze_answer_pinyin` legados da mesma linha
+(ajuste 3, valores-sentinela no teste que nunca deveriam aparecer,
+confirmados ausentes); teste de persistência dedicado (ajuste 5) --
+serializa/reconstrói uma nota com 2 marcas simulando reload real via
+merge-por-id (mesmo mecanismo de `applySerializedState()`), confirma
+ids diferentes, progresso de c1 preservado (due/reps/stability), c2
+continua intocado. Suítes anteriores re-executadas sem regressão:
+`test_fase4_engine.js` 32/32, `test_fase4d_regression.js` 30/30 (2
+asserções atualizadas pro novo shape de `parseClozeMarks`, disclosed
+acima, sem mudança de comportamento real). Não foi feita validação de
+navegador (Playwright) nesta fase -- não fazia sentido pro escopo (motor
+puro, sem nenhum dado real ou caminho de UI capaz de produzir
+`normal_reversed`/Cloze multi-marca hoje; o smoke test de browser da
+Fase 4 já cobriu o caminho legado, que continua bit-a-bit idêntico).
+
+**O que ainda falta / não foi feito nesta fase (de propósito, restrição
+7):** editor visual; checkbox/seletor de tipo em qualquer UI; coluna SQL
+real pra `cardGenerationMode`; rich text; botão "Cloze" de
+selecionar-texto; interface de definir pinyin sem expor sintaxe; o loop
+de merge em `fr/app.js`/`zh/app.js` continuar truncando pro primeiro
+card (achado acima, fora do arquivo autorizado nesta fase, fica
+explicitamente marcado pra Fase 6 resolver).
+
+Próxima fase (6 -- editor visual, conforme o prompt-mestre original) só
+começa depois de autorização explícita da autora, com este relatório já
+entregue antes de pedir luz verde.
