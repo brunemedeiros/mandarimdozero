@@ -76,15 +76,16 @@ function renderClozeText(text, targetMarkId, opts){
 // opts.appKey: 'frances' | 'mandarim' (== APP_KEY do site)
 // opts.idPrefix: 't' | 's' (mesmo prefixo que flashcardIdForRow já usa)
 //
-// Devolve { note, cards, legacyRaw }:
+// Devolve { note, cards }:
 //   - note: Note (Fase 2 v2)
 //   - cards: array de CardInstance (sempre 1 elemento pra dado legado --
 //     Cloze com múltiplas lacunas nunca ocorre aqui, porque cloze_sentence
 //     só suporta um "___" por natureza da coluna antiga)
-//   - legacyRaw: valores que o modelo novo não tem onde guardar mas que
-//     precisam sobreviver pra não quebrar consumidores que ainda leem o
-//     shape antigo (ver bridgeNoteCardsToLegacyShape) -- nunca lido por
-//     mais ninguém além da própria ponte desta fase.
+// Fase 4d (ver CLAUDE.md): a ponte pro shape legado plano
+// (bridgeNoteCardsToLegacyShape/legacyFlashcardRowToCard/legacyRaw) foi
+// removida -- o fluxo real agora é sempre Note+CardInstance ->
+// resolveCardField() -> renderer/feature (ver seção "Fase 4b" abaixo),
+// nunca mais um objeto legado intermediário.
 function interpretNoteFromRow(row, opts){
   const { origin, appKey, idPrefix } = opts;
   const isZh = appKey === 'mandarim';
@@ -107,24 +108,6 @@ function interpretNoteFromRow(row, opts){
     // (Field.image continua existindo no modelo pra uso futuro do editor
     // novo, Fase 6+, só não é usado por este adapter).
     image: row.image_url ? { url: row.image_url } : null,
-  };
-
-  // Passthrough legado: front/front_pinyin de um cartão Cloze são dado
-  // MORTO (nunca mostrado em revisão -- ver auditoria da Fase 0/1), mas
-  // continuam existindo na linha (constraint só virou opcional na
-  // migration 035, nada foi apagado retroativamente) e 3 consumidores
-  // (Speed Review/Combinar/export Anki, via hasPlainFrontBack()) ainda
-  // checam a PRESENÇA desse valor pra decidir elegibilidade. Preservado
-  // aqui só pra ponte reconstruir o shape antigo sem regressão -- nenhuma
-  // outra parte do sistema deve olhar pra isto.
-  // fr-only: o shape legado plano sempre incluía frontIsTargetLanguage em
-  // TODO cartão (inclusive cloze, onde vale sempre `true` -- cloze nunca
-  // teve seletor de direção). Guardado aqui pra a ponte reconstruir sem
-  // precisar reabrir `row`.
-  const legacyRaw = {
-    front: row.front,
-    frontPinyin: row.front_pinyin,
-    frontIsTargetLanguage: row.front_is_target_language !== false,
   };
 
   if (isCloze){
@@ -156,7 +139,7 @@ function interpretNoteFromRow(row, opts){
       compareAnswer: isZh ? (row.cloze_answer_pinyin || '') : null,
       ...FLASHCARD_MODEL_FSRS_DEFAULTS,
     }];
-    return { note, cards, legacyRaw };
+    return { note, cards };
   }
 
   // Normal / Múltipla escolha -- mesmo par de Fields (frente/verso); só o
@@ -215,118 +198,22 @@ function interpretNoteFromRow(row, opts){
     } : {}),
     ...FLASHCARD_MODEL_FSRS_DEFAULTS,
   }];
-  return { note, cards, legacyRaw };
-}
-
-// ---------- Ponte de compatibilidade pro motor de revisão atual ----------
-// A Fase 3 NÃO reescreve renderReviewView()/renderMultipleChoiceReviewCard()/
-// renderClozeReviewCard() -- isso é trabalho explícito da Fase 4 (motor de
-// tipos/templates), fora do escopo desta fase. Esta ponte garante só que,
-// daqui pra frente, SÓ interpretNoteFromRow() lê as colunas legadas --
-// buildCardFromTeacherFlashcard/buildCardFromSelfFlashcard (fr/zh app.js)
-// e tudo depois deles trabalham em cima do {note, cards} devolvido pelo
-// adapter, nunca da linha crua de novo.
-function bridgeNoteCardsToLegacyShape(note, cards, legacyRaw, appKey){
-  const isZh = appKey === 'mandarim';
-  const card = cards[0]; // legado: sempre 1 CardInstance por nota (Cloze multi-lacuna nunca ocorre em dado legado)
-  const unitTitle = note.origin === 'teacher' ? 'Da sua professora' : 'Meus cartões';
-
-  const {
-    id, noteId, cardTypeId, frontFieldIndex, backFieldIndex,
-    promptFieldIndex, correctFieldIndex, distractors,
-    markId, textFieldIndex, translationFieldIndex, compareAnswer,
-    ...fsrs
-  } = card;
-
-  const base = {
-    id: card.id,
-    rowId: note.legacyRowId,
-    unitId: null,
-    unitTitle,
-    vocabIdx: null,
-    type: 'vocab',
-    origin: note.origin,
-    teacherNote: note.note,
-    flashcardStatus: note.status,
-    imageUrl: note.image ? note.image.url : null,
-    ...fsrs,
-  };
-
-  if (cardTypeId === 'cloze'){
-    const textField = note.fields[textFieldIndex];
-    const marks = parseClozeMarks(textField.text);
-    const mark = marks.find(x => x.id === markId) || marks[0];
-    const out = {
-      ...base,
-      back_trans: note.fields[translationFieldIndex].text,
-      clozeSentence: renderClozeText(textField.text, markId, { reveal: false }),
-      clozeAnswer: mark ? mark.answer : '',
-      // O shape legado plano sempre incluía estas 3 chaves em TODO cartão,
-      // inclusive cloze (onde choices é sempre null -- cloze/MC são
-      // mutuamente exclusivos por construção desde a Fase 8c). Preservado
-      // aqui pra fidelidade estrutural mesmo sem uso funcional em cloze.
-      audioUrl: (textField.audio && textField.audio.url) || null,
-      choices: null,
-    };
-    if (isZh){
-      out.front_pinyin = legacyRaw.frontPinyin || '';
-      out.back_hanzi = legacyRaw.front;   // dado morto, nunca mostrado -- só pra hasPlainFrontBack() continuar correto
-      out.clozeAnswerPinyin = compareAnswer || '';
-    } else {
-      out.front = legacyRaw.front;        // idem -- dado morto, presença checada por hasPlainFrontBack()
-      out.frontIsTargetLanguage = legacyRaw.frontIsTargetLanguage;
-    }
-    return out;
-  }
-
-  const frontField = note.fields[frontFieldIndex];
-  const backField = note.fields[backFieldIndex];
-  const audioUrl = (frontField.audio && frontField.audio.url) || (backField.audio && backField.audio.url) || null;
-
-  if (isZh){
-    const pinyinField = note.fields[frontField.pinyinFieldIndex];
-    return {
-      ...base,
-      front_pinyin: pinyinField ? pinyinField.text : '',
-      back_hanzi: frontField.text,
-      back_trans: backField.text,
-      audioUrl,
-      choices: distractors || null,
-      clozeSentence: null,
-      clozeAnswer: null,
-    };
-  }
-  return {
-    ...base,
-    front: frontField.text,
-    back_trans: backField.text,
-    frontIsTargetLanguage: frontField.lang !== 'pt-BR',
-    audioUrl,
-    choices: distractors || null,
-    clozeSentence: null,
-    clozeAnswer: null,
-  };
-}
-
-// Atalho pros 2 call sites reais (buildCardFromTeacherFlashcard/
-// buildCardFromSelfFlashcard, fr/zh app.js) -- interpreta + já devolve no
-// shape legado que o resto do app (ainda NÃO migrado -- Fase 4b/4c, ver
-// abaixo) espera. Existe só durante a transição; ver nota de depreciação
-// logo acima de bridgeNoteCardsToLegacyShape() -- some junto com ela ao
-// final da Fase 4 (4d), quando o último call site parar de precisar dela.
-function legacyFlashcardRowToCard(row, opts){
-  const { note, cards, legacyRaw } = interpretNoteFromRow(row, opts);
-  return bridgeNoteCardsToLegacyShape(note, cards, legacyRaw, opts.appKey);
+  return { note, cards };
 }
 
 // ============================================================
 // Fase 4 do prompt-mestre "reestruturação inspirada no Anki" (ver
-// CLAUDE.md) -- MOTOR DE TIPOS/TEMPLATES. Tudo abaixo desta linha é
-// aditivo (nada do que já existia acima foi alterado nesta subfase, 4a) --
-// a camada de compatibilidade continua viva e funcionando exatamente como
-// antes até 4b/4c trocarem os consumidores reais por este motor novo, e só
-// então (4d) bridgeNoteCardsToLegacyShape()/legacyFlashcardRowToCard()/
-// legacyRaw são removidos de vez.
+// CLAUDE.md) -- MOTOR DE TIPOS/TEMPLATES.
+//
+// 4d (concluída): a ponte pro shape legado plano
+// (bridgeNoteCardsToLegacyShape/legacyFlashcardRowToCard/legacyRaw) foi
+// REMOVIDA -- não existe mais nenhum objeto legado intermediário em
+// nenhum ponto do sistema. buildCardFromTeacherFlashcard/
+// buildCardFromSelfFlashcard (fr/zh app.js) chamam buildEngineCardsFromRow()
+// diretamente; todo consumidor (renderizadores de Revisão, Speed Review,
+// Combinar, export Anki) lê `note`/`cardInstance` via
+// resolveCardField()/resolveCardContentView(), nunca um campo de conteúdo
+// solto tipo `card.front`/`card.choices`/`card.clozeSentence`.
 //
 // Princípio central, travado pela autora (Fase 4, restrições 2-5): o fluxo
 // final é
@@ -415,6 +302,13 @@ function resolveMultipleChoiceCardView(note, cardInstance){
   const correct = resolveCardField(note, cardInstance.correctFieldIndex);
   return {
     prompt,
+    // `correct` (Field resolvido inteiro, com audioUrl) fica disponível pro
+    // renderer buscar áudio próprio em qualquer um dos 2 lados -- a
+    // heurística de interpretação (Fase 3) vincula o upload ao campo cujo
+    // idioma é o estudado, que pode ser prompt OU correct dependendo da
+    // direção do cartão. `correctText` continua exposto solto por
+    // conveniência (é o que a maioria dos chamadores só precisa).
+    correct,
     correctText: correct ? correct.text : '',
     distractorTexts: cardInstance.distractors || [],
   };
@@ -482,4 +376,81 @@ function buildReversedCardInstancePair(noteId, frontFieldIndex, backFieldIndex){
     { id: noteId, noteId, cardTypeId: CARD_TYPE_IDS.NORMAL, frontFieldIndex, backFieldIndex, ...FLASHCARD_MODEL_FSRS_DEFAULTS },
     { id: `${noteId}-b`, noteId, cardTypeId: CARD_TYPE_IDS.NORMAL, frontFieldIndex: backFieldIndex, backFieldIndex: frontFieldIndex, ...FLASHCARD_MODEL_FSRS_DEFAULTS },
   ];
+}
+
+// ============================================================
+// Fase 4b -- caminho REAL de construção de STATE.cards (substitui
+// legacyFlashcardRowToCard() como o que buildCardFromTeacherFlashcard()/
+// buildCardFromSelfFlashcard() de fato chamam a partir de agora).
+// ============================================================
+
+// Constrói o(s) card(s) nativos pro STATE.cards a partir de uma linha
+// legada. Diferença central em relação à ponte (Fase 3): NENHUM campo de
+// conteúdo (front/back_trans/clozeSentence/choices/frontIsTargetLanguage/
+// audioUrl de Field) é reconstruído solto no card -- `note`+`cardInstance`
+// vão INTEIROS, e quem precisar de texto/áudio passa por
+// resolveCardField()/resolveCardContentView() abaixo, nunca lendo
+// `card.front` etc. (esse campo simplesmente não existe mais no objeto).
+//
+// Campos FSRS continuam FLAT no nível de topo do card -- mesmo lugar de
+// sempre, porque shared/fsrs.js (não tocado nesta fase, restrição da
+// autora) lê/escreve ali direto (`applyMemoryGrade(card, grade)` muta
+// `card.due`/`card.stability`/etc. do objeto que se passa a ele). Por
+// isso eles são DESTRUCTURADOS pra fora do CardInstance bruto aqui --
+// `cardInstance` guardado no card carrega só identidade/apresentação
+// (id/cardTypeId/índices de campo), nunca uma 2ª cópia dos campos FSRS
+// que iria dessincronizar da cópia real assim que a 1ª revisão acontecer.
+//
+// Devolve um ARRAY -- hoje sempre 1 elemento pra dado legado (nenhuma
+// linha jamais pediu "Normal com reverso"), mas o formato já é o que
+// "Normal com reverso"/multi-CardInstance vai precisar quando o editor
+// existir (Fase 6+).
+function buildEngineCardsFromRow(row, opts){
+  const { note, cards } = interpretNoteFromRow(row, opts);
+  const unitTitle = note.origin === 'teacher' ? 'Da sua professora' : 'Meus cartões';
+  return cards.map(rawCardInstance => {
+    const {
+      id, noteId, cardTypeId,
+      ef, interval, reps, due, lapses, stability, difficulty, state, lastReview, fsrsReps, fsrsLapses,
+      ...presentationFields
+    } = rawCardInstance;
+    const cardInstance = { id, noteId, cardTypeId, ...presentationFields };
+    return {
+      id,
+      rowId: note.legacyRowId,
+      unitId: null,
+      unitTitle,
+      vocabIdx: null,
+      type: 'vocab',
+      origin: note.origin,
+      teacherNote: note.note,
+      flashcardStatus: note.status,
+      // Note-level (nunca de um Field específico -- achado da Fase 3,
+      // confirmado de novo aqui): imagem ilustra o conceito inteiro.
+      imageUrl: note.image ? note.image.url : null,
+      note,
+      cardInstance,
+      ef, interval, reps, due, lapses, stability, difficulty, state, lastReview, fsrsReps, fsrsLapses,
+    };
+  });
+}
+
+// Dispatcher único -- dado um card de STATE.cards já construído por
+// buildEngineCardsFromRow(), devolve a "view" de conteúdo certa pro tipo
+// dele (ver resolvers acima). É o ponto de entrada que renderers/Speed
+// Review/Combinar/export Anki (Fase 4b/4c) chamam -- nunca despacham por
+// conta própria olhando `card.choices`/`card.clozeSentence` (esses campos
+// não existem mais no card nativo).
+function resolveCardContentView(card){
+  const { note, cardInstance } = card;
+  if (cardInstance.cardTypeId === CARD_TYPE_IDS.MULTIPLE_CHOICE){
+    return { kind: CARD_TYPE_IDS.MULTIPLE_CHOICE, ...resolveMultipleChoiceCardView(note, cardInstance) };
+  }
+  if (cardInstance.cardTypeId === CARD_TYPE_IDS.TYPE_ANSWER){
+    return { kind: CARD_TYPE_IDS.TYPE_ANSWER, ...resolveTypeAnswerCardView(note, cardInstance) };
+  }
+  if (cardInstance.cardTypeId === CARD_TYPE_IDS.CLOZE){
+    return { kind: CARD_TYPE_IDS.CLOZE, ...resolveClozeCardView(note, cardInstance) };
+  }
+  return { kind: CARD_TYPE_IDS.NORMAL, ...resolveNormalCardView(note, cardInstance) };
 }

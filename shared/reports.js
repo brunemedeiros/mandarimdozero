@@ -159,10 +159,15 @@ function captureReportContext(extra){
 
   // Revisão -- Flashcard e Palavras difíceis usam a MESMA tela
   // (#review-content/STATE.reviewQueue), distinguidos só por
-  // STATE.reviewActiveMode (ver openReviewSession). Front/verso variam por
-  // idioma (fr: front/back_trans; zh: back_hanzi/front_pinyin) -- por isso
-  // os dois fallbacks. Só conta quando #review-content está mesmo visível
-  // (não quando Speed Review/Combinar estão ativos na mesma aba).
+  // STATE.reviewActiveMode (ver openReviewSession). Fase 4b (motor de
+  // tipos/templates, ver CLAUDE.md): cartão nativo (Note/CardInstance,
+  // origin teacher/self) não tem mais `card.front`/`card.back_hanzi`/
+  // `card.back_trans` soltos -- cardPromptText()/cardAnswerText()
+  // (definidas em fr/app.js e zh/app.js, mesmo par usado por Speed Review/
+  // Combinar/export Anki) resolvem os dois casos (trilha OU nativo)
+  // uniformemente, nunca lendo campo de conteúdo legado direto. Só conta
+  // quando #review-content está mesmo visível (não quando Speed Review/
+  // Combinar estão ativos na mesma aba).
   try {
     const reviewSessionOpen = document.getElementById('review-session-wrap')?.style.display !== 'none';
     const reviewContentVisible = reviewSessionOpen && document.getElementById('review-content')?.style.display === 'block';
@@ -172,8 +177,8 @@ function captureReportContext(extra){
       if (card){
         ctx.review_mode = STATE.reviewActiveMode || null;
         ctx.review_position = `${STATE.reviewIndex + 1}/${STATE.reviewQueue.length}`;
-        ctx.review_card_front = card.front || card.back_hanzi || null;
-        const snippet = card.back_trans;
+        ctx.review_card_front = (typeof cardPromptText === 'function' ? cardPromptText(card) : (card.front || card.back_hanzi)) || null;
+        const snippet = typeof cardAnswerText === 'function' ? cardAnswerText(card) : card.back_trans;
         if (snippet) ctx.review_card_snippet = String(snippet).slice(0, 140);
       }
     }
@@ -191,8 +196,8 @@ function captureReportContext(extra){
       ctx.review_position = `${SPEED_STATE.index + 1}/${SPEED_STATE.queue.length}`;
       ctx.speed_review_score = SPEED_STATE.score;
       if (card){
-        ctx.review_card_front = card.front || card.back_hanzi || null;
-        const snippet = card.back_trans;
+        ctx.review_card_front = (typeof cardPromptText === 'function' ? cardPromptText(card) : (card.front || card.back_hanzi)) || null;
+        const snippet = typeof cardAnswerText === 'function' ? cardAnswerText(card) : card.back_trans;
         if (snippet) ctx.review_card_snippet = String(snippet).slice(0, 140);
       }
     }

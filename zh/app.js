@@ -571,15 +571,14 @@ function flashcardIdForRow(prefix, row){
 // front_is_target_language é gravado na tabela (mesma coluna que o fr
 // usa) mas nunca lido no client zh. shared/admin-flashcards.js esconde o
 // seletor da UI quando a aluna selecionada é de mandarim (ver lá).
-// Fase 3 do prompt-mestre "reestruturação inspirada no Anki" (ver
-// CLAUDE.md): esta função NÃO lê mais `row.*` direto -- delega inteira pra
-// shared/flashcard-model.js (interpretNoteFromRow + bridgeNoteCardsToLegacyShape),
-// o único lugar do app com permissão de conhecer as colunas legadas. O
-// shape devolvido aqui continua idêntico ao de antes desta fase -- o motor
-// de revisão ainda não foi reescrito pra consumir Note/CardInstance
-// diretamente, isso é trabalho explícito da Fase 4.
+// Fase 4b do prompt-mestre "reestruturação inspirada no Anki" (ver
+// CLAUDE.md): esta função NÃO usa mais a ponte -- delega pra
+// buildEngineCardsFromRow() (shared/flashcard-model.js), que devolve o
+// card já no shape NATIVO (`note`+`cardInstance`, sem campo de conteúdo
+// legado solto). `[0]` porque dado legado nunca produz mais de 1
+// CardInstance por linha (ver relatório da Fase 4a).
 function buildCardFromTeacherFlashcard(row){
-  return legacyFlashcardRowToCard(row, { origin: 'teacher', appKey: APP_KEY, idPrefix: 't' });
+  return buildEngineCardsFromRow(row, { origin: 'teacher', appKey: APP_KEY, idPrefix: 't' })[0];
 }
 // Busca os flashcards atribuídos a esta conta (shared/teacher-flashcards.js)
 // e mescla em STATE.cards -- precisa rodar ANTES de loadState()/
@@ -615,10 +614,10 @@ async function mergeTeacherFlashcardsIntoState(){
 // (clozeAnswerPinyin é o que a aluna digita, clozeAnswer/hanzi só revela a
 // resposta depois de julgada -- mesmo motivo de buildCardFromTeacherFlashcard
 // acima). Origin-agnóstico no motor de revisão, nenhuma mudança lá.
-// Fase 3 (ver comentário de buildCardFromTeacherFlashcard acima, mesmo
+// Fase 4b (ver comentário de buildCardFromTeacherFlashcard acima, mesmo
 // princípio) -- irmã gêmea, só troca origin/idPrefix.
 function buildCardFromSelfFlashcard(row){
-  return legacyFlashcardRowToCard(row, { origin: 'self', appKey: APP_KEY, idPrefix: 's' });
+  return buildEngineCardsFromRow(row, { origin: 'self', appKey: APP_KEY, idPrefix: 's' })[0];
 }
 
 // Busca os cartões que a PRÓPRIA aluna já criou (shared/own-flashcards.js)
@@ -5418,8 +5417,45 @@ const SPEED_STATE = {
 // preenchido (nunca migrados) e continuam elegíveis aqui, sem mudança de
 // comportamento -- este filtro só passa a excluir cartões NOVOS criados
 // sem front.
+// Fase 4b -- reescrita em cima do motor de tipos (não mais presença de
+// `back_hanzi`, que nem existe mais no card nativo). Elegível = tipos com
+// par prompt/resposta curto e fixo (normal, múltipla escolha) -- cloze e
+// "digite a resposta" ficam de fora (resposta aberta/digitada), mesmo
+// critério de sempre.
 function hasPlainFrontBack(card){
-  return !(card.clozeSentence && !card.back_hanzi);
+  if (!card.cardInstance) return true; // trilha (origin:'study') -- sempre foi par simples hanzi/pinyin/trans
+  return card.cardInstance.cardTypeId === 'normal' || card.cardInstance.cardTypeId === 'multiple_choice';
+}
+
+// Fase 4b -- únicos pontos que Speed Review/Combinar/export Anki usam pra
+// extrair texto de um card, trilha OU nativo (Note/CardInstance). Nunca
+// leem `card.back_hanzi`/`card.front_pinyin`/`card.back_trans` soltos --
+// esses campos não existem mais num card nativo (ver buildEngineCardsFromRow,
+// shared/flashcard-model.js). `cardOrPseudo` porque buildSpeedOptions()
+// também gera pseudo-objetos só com `displayAnswerText` pras opções erradas
+// de múltipla escolha.
+function cardPromptText(cardOrPseudo){
+  if (cardOrPseudo.cardInstance){
+    const view = resolveCardContentView(cardOrPseudo);
+    return (view.kind === 'multiple_choice' ? view.prompt : view.front).text;
+  }
+  return cardOrPseudo.back_hanzi; // trilha
+}
+function cardPromptPinyinText(cardOrPseudo){
+  if (cardOrPseudo.cardInstance){
+    const view = resolveCardContentView(cardOrPseudo);
+    const field = view.kind === 'multiple_choice' ? view.prompt : view.front;
+    return (field && field.pinyinText) || '';
+  }
+  return cardOrPseudo.front_pinyin || ''; // trilha
+}
+function cardAnswerText(cardOrPseudo){
+  if ('displayAnswerText' in cardOrPseudo) return cardOrPseudo.displayAnswerText;
+  if (cardOrPseudo.cardInstance){
+    const view = resolveCardContentView(cardOrPseudo);
+    return view.kind === 'multiple_choice' ? view.correctText : view.back.text;
+  }
+  return cardOrPseudo.back_trans; // trilha
 }
 
 function buildSpeedQueue(){
@@ -5433,19 +5469,32 @@ function buildSpeedOptions(card){
   // Fase 8a (ver CLAUDE.md) -- cartão de múltipla escolha autorado usa as
   // opções ERRADAS que a professora escreveu, nunca os distratores
   // automáticos abaixo (mais preciso/intencional pro que ela quis testar
-  // especificamente nesse cartão). Objetos pseudo-carta (só back_trans) --
-  // o resto do fluxo (answerSpeedQuestion) só lê essa propriedade e
-  // compara identidade com `card`, então funciona sem mudança nenhuma lá.
-  if (card.choices && card.choices.length){
-    return shuffle([card, ...card.choices.map(text => ({ back_trans: text }))]);
+  // especificamente nesse cartão). Objetos pseudo-carta (`displayAnswerText`,
+  // lido por cardAnswerText() acima) -- o resto do fluxo (answerSpeedQuestion)
+  // compara identidade com `card` pra saber se ACERTOU, e só usa o texto
+  // pra exibição, então funciona sem mudança nenhuma lá.
+  if (card.cardInstance && card.cardInstance.cardTypeId === 'multiple_choice'){
+    const view = resolveCardContentView(card);
+    return shuffle([card, ...view.distractorTexts.map(text => ({ displayAnswerText: text }))]);
   }
-  const pool = STATE.cards.filter(c => c !== card && c.unitId === card.unitId);
+  // hasPlainFrontBack() nos dois filtros abaixo -- achado no smoke test da
+  // Fase 4: cartões nativos (teacher/self) sempre compartilham `unitId:
+  // null`, então o agrupamento por unidade tratava TODOS os cartões
+  // nativos como "mesma unidade" entre si, inclusive um cloze/"digite a
+  // resposta" ao lado de um card 'normal'. Antes da Fase 4 isso nunca
+  // quebrava (o bridge legado sempre populava back_trans plano em
+  // qualquer tipo); agora resolveClozeCardView()/resolveTypeAnswerCardView()
+  // não têm `.back`, e cardAnswerText() quebraria ao tentar ler
+  // view.back.text de um distrator desse tipo. Nunca oferecer um cloze/
+  // "digite a resposta" como opção de múltipla escolha de qualquer forma
+  // (não são pares prompt/resposta curtos, mesmo critério de sempre).
+  const pool = STATE.cards.filter(c => c !== card && c.unitId === card.unitId && hasPlainFrontBack(c));
   let distractors = shuffle(pool).slice(0, 3);
   if (distractors.length < 3){
     // Fallback só quando a unidade não tem 3 outras cartas -- puxa de
     // eligibleReviewPool() (não STATE.cards puro) pra não arriscar mostrar,
     // mesmo como alternativa errada, uma palavra de uma unidade nunca aberta.
-    const extra = shuffle(eligibleReviewPool().filter(c => c !== card && !distractors.includes(c))).slice(0, 3 - distractors.length);
+    const extra = shuffle(eligibleReviewPool().filter(c => c !== card && hasPlainFrontBack(c) && !distractors.includes(c))).slice(0, 3 - distractors.length);
     distractors = distractors.concat(extra);
   }
   return shuffle([card, ...distractors]);
@@ -5819,8 +5868,8 @@ function startMatchGame(){
   const pairCount = Math.min(MATCH_STATE.pairSize, pool.length);
   MATCH_STATE.pairs = pool.slice(0, pairCount);
   MATCH_STATE.tiles = shuffle([
-    ...MATCH_STATE.pairs.map(c => ({ cardId: c.id, side: 'front', text: c.back_hanzi })),
-    ...MATCH_STATE.pairs.map(c => ({ cardId: c.id, side: 'back', text: c.back_trans }))
+    ...MATCH_STATE.pairs.map(c => ({ cardId: c.id, side: 'front', text: cardPromptText(c) })),
+    ...MATCH_STATE.pairs.map(c => ({ cardId: c.id, side: 'back', text: cardAnswerText(c) }))
   ]);
   MATCH_STATE.selected = null;
   MATCH_STATE.matchedCount = 0;
@@ -6089,11 +6138,11 @@ function renderSpeedReview(){
     </div>
     <div class="speed-timer-track"><div class="speed-timer-fill" id="speed-timer-fill" style="width:100%"></div></div>
     <div class="speed-prompt">
-      <div class="hanzi">${card.back_hanzi}</div>
-      <div class="pinyin">${card.front_pinyin}</div>
+      <div class="hanzi">${cardPromptText(card)}</div>
+      <div class="pinyin">${cardPromptPinyinText(card)}</div>
     </div>
     <div class="speed-options">
-      ${options.map((opt, i) => `<button class="speed-option" data-idx="${i}">${opt.back_trans}</button>`).join('')}
+      ${options.map((opt, i) => `<button class="speed-option" data-idx="${i}">${cardAnswerText(opt)}</button>`).join('')}
     </div>
   `;
 
@@ -6134,10 +6183,11 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
   const elapsed = Date.now() - SPEED_STATE.timerStart;
   const card = SPEED_STATE.queue[SPEED_STATE.index];
   const options = Array.from(el.querySelectorAll('.speed-option'));
+  const correctText = cardAnswerText(card);
 
   options.forEach((btn, i) => {
     btn.classList.add('disabled');
-    if (btn.textContent === card.back_trans) btn.classList.add('correct');
+    if (btn.textContent === correctText) btn.classList.add('correct');
     else if (i === chosenIdx) btn.classList.add('incorrect');
   });
 
@@ -6239,10 +6289,16 @@ function startReviewSession(){
     ? getStudyQueue(pool, { scope: 'unit', newCardsLimit: STATE.studySettings.newCardsPerDay })
     : reviewFilterQueue('oldest', pool);
 
-  // Decide a direção de cada carta ANTES de embaralhar/mostrar -- alterna a
-  // partir da última vez que essa carta foi revisada (ver nextCardDirection
-  // em shared/srs.js). Calculado 1x aqui, não a cada render.
-  queue.forEach(c => { c.reviewDirection = nextCardDirection(c); });
+  // Decide a direção de cada carta de TRILHA ANTES de embaralhar/mostrar --
+  // alterna a partir da última vez que essa carta foi revisada (ver
+  // nextCardDirection em shared/srs.js). Calculado 1x aqui, não a cada
+  // render. Fase 4 (motor de tipos/templates, ver CLAUDE.md): cartão nativo
+  // (Note/CardInstance, origin teacher/self) NUNCA recebe reviewDirection --
+  // a direção dele é 100% decidida pelo CardInstance (frontFieldIndex/
+  // backFieldIndex), a sessão nunca escolhe/alterna (restrição explícita da
+  // autora). "Normal com reverso" (2 CardInstance independentes, Fase 4a) é
+  // o único jeito de ver as 2 direções -- nunca um toggle de sessão.
+  queue.forEach(c => { if (!c.cardInstance) c.reviewDirection = nextCardDirection(c); });
 
   // "Mais antigas primeiro" só cumpre o que promete se a ordem sobreviver
   // até a tela -- embaralhar (como sempre foi) destruiria exatamente essa
@@ -6304,14 +6360,25 @@ function gradeButtonsHTML(card){
 function renderMultipleChoiceReviewCard(card){
   const el = document.getElementById('review-content');
   const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
+  // Fase 4b -- lê Note/CardInstance via resolveCardContentView(), nunca
+  // `card.back_hanzi`/`card.front_pinyin`/`card.back_trans`/`card.choices`
+  // (não existem mais no card nativo).
+  const view = resolveCardContentView(card);
 
   if (!card.mcOptions){
     card.mcOptions = shuffle([
-      { text: card.back_trans, correct: true },
-      ...card.choices.map(text => ({ text, correct: false })),
+      { text: view.correctText, correct: true },
+      ...view.distractorTexts.map(text => ({ text, correct: false })),
     ]);
   }
   const answered = STATE.reviewMCPicked !== null && STATE.reviewMCPicked !== undefined;
+  // isStudyLanguageField() -- direção já decidida pelo CardInstance
+  // (view.prompt já é o campo certo); zh nunca inverte (Fase 0/1 da
+  // auditoria: front_is_target_language nunca é lido aqui), então isto é
+  // sempre `true` na prática hoje, mas mantido explícito por consistência
+  // com fr/app.js e por segurança caso isso mude no futuro.
+  const promptSpeakable = isStudyLanguageField(view.prompt, APP_KEY);
+  const customAudioUrl = view.prompt.audioUrl || (view.correct && view.correct.audioUrl) || null;
 
   el.innerHTML = `
     <div class="review-progress">
@@ -6321,8 +6388,8 @@ function renderMultipleChoiceReviewCard(card){
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${card.unitTitle}</div>
       ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
-      <div class="flashcard-hanzi">${escapeHTML(card.back_hanzi)} ${audioBtnHTML(card.back_hanzi, 'audio-btn-lg')}${card.audioUrl ? customAudioBtnHTML(card.audioUrl) : ''}</div>
-      <div class="flashcard-pinyin pinyin">${escapeHTML(card.front_pinyin)}</div>
+      <div class="flashcard-hanzi">${escapeHTML(view.prompt.text)}${promptSpeakable ? ` ${audioBtnHTML(view.prompt.text, 'audio-btn-lg')}` : ''}${customAudioUrl ? customAudioBtnHTML(customAudioUrl) : ''}</div>
+      <div class="flashcard-pinyin pinyin">${escapeHTML(view.prompt.pinyinText || '')}</div>
     </div>
     <div class="mc-options">
       ${card.mcOptions.map((opt, i) => {
@@ -6340,7 +6407,7 @@ function renderMultipleChoiceReviewCard(card){
 
   wireAudioButtons(el);
   wireCustomAudioButtons(el);
-  if (canSpeakChinese(card.back_hanzi)) speakChinese(card.back_hanzi, el.querySelector('.audio-btn-lg'), true);
+  if (promptSpeakable && canSpeakChinese(view.prompt.text)) speakChinese(view.prompt.text, el.querySelector('.audio-btn-lg'), true);
 
   if (!answered){
     el.querySelectorAll('.mc-option').forEach(btn => {
@@ -6376,11 +6443,19 @@ function renderMultipleChoiceReviewCard(card){
 function renderClozeReviewCard(card){
   const el = document.getElementById('review-content');
   const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
+  // Fase 4b -- lê Note/CardInstance via resolveCardContentView(), nunca
+  // `card.clozeSentence`/`card.clozeAnswer`/`card.clozeAnswerPinyin`/
+  // `card.back_trans`/`card.audioUrl` (não existem mais no card nativo).
+  // view.displayAnswerText = hanzi (revelado); view.compareAnswerText =
+  // pinyin (o que a aluna digita) -- exatamente o mesmo par
+  // clozeAnswer/clozeAnswerPinyin de antes, só vindo do resolver agora.
+  const view = resolveCardContentView(card);
   const answered = STATE.reviewClozeAnswered !== null && STATE.reviewClozeAnswered !== undefined;
   const blankHTML = answered
-    ? `<span class="cloze-blank ${STATE.reviewClozeAnswered ? 'correct' : 'incorrect'}" id="cloze-blank">${card.clozeAnswer}</span>`
+    ? `<span class="cloze-blank ${STATE.reviewClozeAnswered ? 'correct' : 'incorrect'}" id="cloze-blank">${view.displayAnswerText}</span>`
     : `<span class="cloze-blank" id="cloze-blank">___</span>`;
-  const sentenceHTML = card.clozeSentence.replace('___', blankHTML);
+  const hiddenSentence = renderClozeText(view.rawSentenceText, view.markId, { reveal: false });
+  const sentenceHTML = hiddenSentence.replace('___', blankHTML);
 
   el.innerHTML = `
     <div class="review-progress">
@@ -6392,10 +6467,10 @@ function renderClozeReviewCard(card){
       ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="cloze-sentence">
         <div class="cloze-hanzi">${sentenceHTML}</div>
-        ${answered ? `<div class="cloze-pinyin pinyin">${escapeHTML(card.clozeAnswerPinyin)}</div>` : ''}
+        ${answered ? `<div class="cloze-pinyin pinyin">${escapeHTML(view.compareAnswerText)}</div>` : ''}
       </div>
-      ${card.audioUrl ? customAudioBtnHTML(card.audioUrl) : ''}
-      ${answered ? `<div class="cloze-trans">${escapeHTML(card.back_trans)}</div>` : ''}
+      ${view.audioUrl ? customAudioBtnHTML(view.audioUrl) : ''}
+      ${answered ? `<div class="cloze-trans">${escapeHTML(view.translation.text)}</div>` : ''}
     </div>
     ${!answered ? `
       <div class="cloze-type-wrap">
@@ -6418,8 +6493,73 @@ function renderClozeReviewCard(card){
       inputEl.disabled = true;
       document.getElementById('cloze-review-verify-btn').disabled = true;
       const typed = strip(inputEl.value);
-      STATE.reviewClozeAnswered = acceptedForms(card.clozeAnswerPinyin).some(form => strip(form) === typed);
+      STATE.reviewClozeAnswered = acceptedForms(view.compareAnswerText).some(form => strip(form) === typed);
       renderClozeReviewCard(card);
+    }
+    inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
+    document.getElementById('cloze-review-verify-btn').addEventListener('click', verify);
+  } else {
+    document.getElementById('cloze-continue-btn').addEventListener('click', () => {
+      const wasCorrect = STATE.reviewClozeAnswered;
+      STATE.reviewClozeAnswered = null;
+      gradeCurrentCard(wasCorrect ? 2 : 0);
+    });
+  }
+}
+
+// Fase 4 (motor de tipos/templates, ver CLAUDE.md) -- "Digite a resposta",
+// tipo novo sem dado legado. Estrutura análoga ao Cloze acima (mesma
+// distinção hanzi revelado/pinyin comparado), só sem lacuna embutida numa
+// frase -- pergunta inteira, resposta digitada inteira. Reaproveita
+// STATE.reviewClozeAnswered (mesma variável do Cloze, nunca coexistem no
+// mesmo cartão) e as mesmas classes CSS -- zero CSS novo.
+function renderTypeAnswerReviewCard(card){
+  const el = document.getElementById('review-content');
+  const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
+  const view = resolveCardContentView(card);
+  const answered = STATE.reviewClozeAnswered !== null && STATE.reviewClozeAnswered !== undefined;
+  const promptSpeakable = isStudyLanguageField(view.prompt, APP_KEY);
+
+  el.innerHTML = `
+    <div class="review-progress">
+      <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
+      <div class="review-progress-count">${STATE.reviewIndex+1} / ${STATE.reviewQueue.length}</div>
+    </div>
+    <div class="flashcard" id="flashcard">
+      <div class="flashcard-tag">${card.unitTitle}</div>
+      ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
+      <div class="flashcard-hanzi">${escapeHTML(view.prompt.text)}${promptSpeakable ? ` ${audioBtnHTML(view.prompt.text, 'audio-btn-lg')}` : ''}${view.prompt.audioUrl ? customAudioBtnHTML(view.prompt.audioUrl) : ''}</div>
+      <div class="flashcard-pinyin pinyin">${escapeHTML(view.prompt.pinyinText || '')}</div>
+      ${answered ? `
+        <div class="divider-line"></div>
+        <span class="cloze-blank ${STATE.reviewClozeAnswered ? 'correct' : 'incorrect'}">${escapeHTML(view.displayAnswerText)}</span>
+      ` : ''}
+    </div>
+    ${!answered ? `
+      <div class="cloze-type-wrap">
+        <input type="text" id="cloze-review-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a resposta em pinyin">
+        ${pinyinTonePickerHTML()}
+        <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">Verificar</button>
+      </div>
+    ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
+  `;
+
+  wireAudioButtons(el);
+  wireCustomAudioButtons(el);
+  if (promptSpeakable && canSpeakChinese(view.prompt.text)) speakChinese(view.prompt.text, el.querySelector('.audio-btn-lg'), true);
+
+  if (!answered){
+    const inputEl = document.getElementById('cloze-review-input');
+    inputEl.focus();
+    wirePinyinTonePicker(el.querySelector('.pinyin-tone-picker'), inputEl);
+    const strip = s => normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
+    function verify(){
+      if (inputEl.disabled) return;
+      inputEl.disabled = true;
+      document.getElementById('cloze-review-verify-btn').disabled = true;
+      const typed = strip(inputEl.value);
+      STATE.reviewClozeAnswered = acceptedForms(view.compareAnswerText).some(form => strip(form) === typed);
+      renderTypeAnswerReviewCard(card);
     }
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
     document.getElementById('cloze-review-verify-btn').addEventListener('click', verify);
@@ -6497,37 +6637,56 @@ function renderReviewView(){
 
   const card = STATE.reviewQueue[STATE.reviewIndex];
 
-  // Fase 8a (ver CLAUDE.md) -- cartão de múltipla escolha autorado pela
-  // professora SEMPRE vira quiz aqui, em qualquer modo que passe por esta
-  // função (Flashcard, Palavras Difíceis) -- grillado com a autora, nunca
-  // "vira" no sentido tradicional. Fora do escopo: Combinar (jogo de
-  // pareamento, arquitetura incompatível com "1 pergunta, N opções").
-  if (card.choices && card.choices.length){
-    renderMultipleChoiceReviewCard(card);
-    return;
-  }
-
-  // Fase 8c -- mesmo desvio, agora pro cartão "completar a frase" (nunca
-  // coexiste com card.choices acima, ver comentário em renderClozeReviewCard).
-  if (card.clozeSentence && card.clozeAnswer){
-    renderClozeReviewCard(card);
-    return;
+  // Fase 4 (motor de tipos/templates, ver CLAUDE.md) -- despacho por
+  // cardTypeId. Cartão nativo (Note/CardInstance, origin teacher/self)
+  // sempre tem `card.cardInstance`; trilha (origin:'study') nunca tem --
+  // nunca teve múltipla escolha/cloze/"digite a resposta" (buildCardsFromUnits
+  // só produz par hanzi/pinyin/tradução simples), então cai direto no flip
+  // padrão abaixo sem checar nada.
+  if (card.cardInstance){
+    const cardTypeId = card.cardInstance.cardTypeId;
+    if (cardTypeId === 'multiple_choice'){ renderMultipleChoiceReviewCard(card); return; }
+    if (cardTypeId === 'type_answer'){ renderTypeAnswerReviewCard(card); return; }
+    if (cardTypeId === 'cloze'){ renderClozeReviewCard(card); return; }
+    // cardTypeId === 'normal' (inclusive uma das 2 metades de "Normal com
+    // reverso", Fase 4a) cai no flip padrão abaixo.
   }
 
   const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
 
-  // Direção estilo Anki: frente->verso (padrão, reconhecimento: vê hanzi,
-  // lembra o significado) ou verso->frente (mais difícil, produção ativa:
-  // vê a tradução, precisa lembrar o hanzi). O pinyin sempre acompanha o
-  // hanzi, nunca aparece sozinho -- então o toggle de pinyin nunca deixa
-  // um lado do cartão vazio. Decidido 1x por sessão em startReviewSession,
-  // não recalculado a cada render (senão viraria a cada re-render).
-  const isReverse = card.reviewDirection === 'back-to-front';
-  const hanziSideHTML = `
-    <div class="flashcard-hanzi">${escapeHTML(card.back_hanzi)} ${audioBtnHTML(card.back_hanzi, 'audio-btn-lg')}</div>
-    <div class="flashcard-pinyin pinyin">${escapeHTML(card.front_pinyin)}</div>
-  `;
-  const transSideHTML = `<div class="flashcard-trans">${escapeHTML(card.back_trans)}</div>`;
+  // Direção -- ver restrições da Fase 4 (CLAUDE.md): pra cartão nativo, é
+  // 100% decidida pelo CardInstance (frontFieldIndex/backFieldIndex), a
+  // sessão NUNCA escolhe/alterna aqui -- "Normal com reverso" (2
+  // CardInstance independentes, cada um com seu próprio FSRS, Fase 4a) é o
+  // único jeito de existir as 2 direções, nunca um toggle de sessão. Pra
+  // cartão de trilha (fora do escopo desta reestruturação, nunca teve
+  // CardInstance), o mecanismo de variedade de sessão que sempre existiu
+  // (nextCardDirection, ver startReviewSession) continua intacto -- o
+  // pinyin sempre acompanha o hanzi, nunca aparece sozinho, então o toggle
+  // nunca deixa um lado do cartão vazio.
+  let isReverse, hanziSideHTML, transSideHTML, targetAudioUrl, hanziIsSpeakable, hanziTextForSpeech;
+  if (card.cardInstance){
+    const view = resolveCardContentView(card); // kind: 'normal'
+    isReverse = false;
+    hanziSideHTML = `
+      <div class="flashcard-hanzi">${escapeHTML(view.front.text)} ${audioBtnHTML(view.front.text, 'audio-btn-lg')}</div>
+      <div class="flashcard-pinyin pinyin">${escapeHTML(view.front.pinyinText || '')}</div>
+    `;
+    transSideHTML = `<div class="flashcard-trans">${escapeHTML(view.back.text)}</div>`;
+    targetAudioUrl = view.front.audioUrl || view.back.audioUrl;
+    hanziIsSpeakable = isStudyLanguageField(view.front, APP_KEY);
+    hanziTextForSpeech = view.front.text;
+  } else {
+    isReverse = card.reviewDirection === 'back-to-front';
+    hanziSideHTML = `
+      <div class="flashcard-hanzi">${escapeHTML(card.back_hanzi)} ${audioBtnHTML(card.back_hanzi, 'audio-btn-lg')}</div>
+      <div class="flashcard-pinyin pinyin">${escapeHTML(card.front_pinyin)}</div>
+    `;
+    transSideHTML = `<div class="flashcard-trans">${escapeHTML(card.back_trans)}</div>`;
+    targetAudioUrl = null;
+    hanziIsSpeakable = true;
+    hanziTextForSpeech = card.back_hanzi;
+  }
   const frontHTML = isReverse ? transSideHTML : hanziSideHTML;
   const backHTML = isReverse ? hanziSideHTML : transSideHTML;
   // Áudio automático só quando o hanzi está do lado JÁ visível nesse
@@ -6544,7 +6703,7 @@ function renderReviewView(){
       <div class="flashcard-tag">${card.unitTitle}</div>
       ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
       ${frontHTML}
-      ${card.audioUrl ? customAudioBtnHTML(card.audioUrl) : ''}
+      ${targetAudioUrl ? customAudioBtnHTML(targetAudioUrl) : ''}
       ${STATE.reviewShowingAnswer ? `
         <div class="divider-line"></div>
         ${backHTML}
@@ -6568,8 +6727,8 @@ function renderReviewView(){
   // Toca automaticamente quando o hanzi aparece -- reforço auditivo
   // imediato. Só dispara se já houver voz chinesa disponível, pra não
   // repetir o aviso de "instale a voz" a cada cartão de uma sessão inteira.
-  if (hanziVisibleNow && canSpeakChinese(card.back_hanzi)){
-    speakChinese(card.back_hanzi, el.querySelector('.audio-btn-lg'), true);
+  if (hanziVisibleNow && hanziIsSpeakable && canSpeakChinese(hanziTextForSpeech)){
+    speakChinese(hanziTextForSpeech, el.querySelector('.audio-btn-lg'), true);
   }
 
   if (STATE.reviewShowingAnswer){
@@ -6627,7 +6786,11 @@ function gradeCurrentCard(grade){
   const wasOverdue = card.due > 0 && card.due < new Date().setHours(0, 0, 0, 0);
   const intervalBefore = card.interval;
   // Grava a direção mostrada nesta revisão -- da próxima vez que essa carta
-  // ficar due, nextCardDirection() (shared/srs.js) alterna pra outra.
+  // ficar due, nextCardDirection() (shared/srs.js) alterna pra outra. Só
+  // tem efeito pra cartão de trilha (`card.reviewDirection` só é setado
+  // pra ele, ver startReviewSession) -- no-op inofensivo pra cartão nativo
+  // (Note/CardInstance), que nunca ganha reviewDirection (Fase 4: direção
+  // é do CardInstance, não da sessão).
   card.lastDirection = card.reviewDirection;
   // Fase 5: Flashcard agora usa o motor FSRS (shared/fsrs.js) -- due deixa
   // de ser calculado por regras SM-2 fixas.
@@ -7129,17 +7292,17 @@ const ANKI_EXPORT_CONFIG = {
       : `${APP_IDENTITY.apps.zh.name} - ${UNITS.find(u=>String(u.id)===sel).title}`;
   },
   cards(sel){
-    // .filter(hasPlainFrontBack) -- ver comentário em buildSpeedQueue():
-    // exporta um cartão cloze só se ele tem back_hanzi preenchido (todos
-    // os já existentes têm); um cartão cloze novo sem front (migration
-    // 035) ficaria com noteFields()[1] vazio, então fica de fora do .apkg.
+    // .filter(hasPlainFrontBack) -- ver comentário na função (Fase 4b):
+    // exporta só tipos com par prompt/resposta curto e fixo (normal,
+    // múltipla escolha) -- cloze/"digite a resposta" ficam de fora
+    // (resposta aberta/digitada, sem texto curto pronto pro .apkg).
     return (sel === 'all' ? STATE.cards : STATE.cards.filter(c => String(c.unitId) === sel)).filter(hasPlainFrontBack);
   },
   noteFields(card){
-    return [card.front_pinyin, card.back_hanzi, card.back_trans];
+    return [cardPromptPinyinText(card), cardPromptText(card), cardAnswerText(card)];
   },
   sortField(card){
-    return card.front_pinyin;
+    return cardPromptPinyinText(card);
   },
   filename(sel){
     return `chines-com-prof-brune-${sel === 'all' ? 'completo' : 'unidade-'+sel}.apkg`;

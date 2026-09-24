@@ -5267,3 +5267,242 @@ apagado) + `fr/index.html`/`zh/index.html`/`fr/app.js`/`zh/app.js`/
 referências/comentários). Nenhum passo manual pendente pra autora --
 as duas migrations já foram aplicadas ao vivo via
 `mcp__Supabase__apply_migration`.
+
+## Prompt-mestre "reestruturação Note/CardType/CardInstance" -- Fase 4
+(motor de tipos/templates): a ponte legada é REALMENTE eliminada
+
+Prompt-mestre grande, fatiado em fases próprias travadas por autorização
+explícita a cada etapa (Fase 1: auditoria só-leitura; Fase 2: modelo
+Note/Field/CardType/CardInstance + `interpretNoteFromRow()`; Fase 3:
+camada de compatibilidade -- `bridgeNoteCardsToLegacyShape()`, adapter
+temporário pros renderizadores antigos continuarem funcionando sem
+reescrever tudo de uma vez). A autora aprovou a Fase 3 só depois de um
+smoke test real de navegador (Playwright, fr+zh, adapter carregado,
+`buildCardFromTeacherFlashcard()` funcionando via adapter, os 4 formatos
+existentes confirmados -- normal/normal-invertido/múltipla-escolha/cloze
+com e sem áudio próprio, Speed Review/Combinar continuando elegíveis) --
+e avisou, ao aprovar, que a Fase 4 NÃO poderia simplesmente empilhar mais
+funcionalidade em cima da ponte: "o `bridgeNoteCardsToLegacyShape()` é
+uma ponte temporária, não parte da arquitetura final... esse é
+provavelmente o principal risco de a implementação 'funcionar' e o
+Claude depois ficar tentado a manter a ponte indefinidamente."
+
+**Autorização da Fase 4, 8 restrições obrigatórias, travadas ANTES de
+codar (verbatim resumido, todas cumpridas nesta entrega):**
+1. **OPÇÃO B** -- a ponte devia ser REALMENTE eliminada ao final da Fase
+   4, não substituída por um helper equivalente que reconstrói o shape
+   antigo. Fluxo final exigido: `Note + CardInstance → resolveCardField()
+   → renderer/feature`, nunca `Note + CardInstance → shape intermediário
+   → renderer/feature`. Isso exigia migrar Speed Review, Combinar e
+   exportação Anki também, não só os 3 renderizadores de revisão.
+2. **"Normal com reverso" = 2 CardInstances independentes** (direções
+   opostas, cada um com seu próprio FSRS/histórico, ambos derivados da
+   mesma Note) -- nunca um toggle de direção em nível de sessão.
+3. **`isReverse`/`nextCardDirection()` não podiam continuar como
+   mecanismo estrutural de direção**, nem dentro do tipo `normal` --
+   direção decidida pelo próprio CardInstance via os campos que ele
+   referencia (`frontFieldIndex`/`backFieldIndex`), nunca pela sessão de
+   revisão escolhendo/alternando.
+4. `fieldOrder` continua sendo só a ordem de campos no editor -- nunca
+   usado pra decidir direção de revisão.
+5. `lang` continua propriedade do Field -- nunca usado pra decidir
+   automaticamente qual lado é front/back, se deve haver áudio, ou qual
+   template usar.
+6. Checkpoint técnico obrigatório depois da Fase 4a (motor aditivo),
+   ANTES de tocar em qualquer renderizador -- entregue e reportado nesta
+   mesma sessão, sem correção da autora (só um lembrete automático de
+   commit) -- prossegui pra 4b→4d sem pedir nova autorização, conforme a
+   própria instrução dela ("desde que o modelo continue exatamente
+   dentro das decisões acima").
+7. Não implementar nesta fase: novo editor; TTS/AwesomeTTS; templates
+   customizáveis pelo usuário; novos recursos de criação; mudanças no
+   FSRS; customização de Card Types. **Nada disso foi tocado.**
+8. Manter compatibilidade com dados existentes -- não alterar IDs/
+   histórico/FSRS já existentes sem necessidade.
+
+**O que foi feito, por subfase:**
+
+- **4a (aditiva, checkpoint entregue)** -- `shared/flashcard-model.js`
+  ganhou, sem tocar em nada pré-existente: `CARD_TYPE_IDS` (`normal`,
+  `type_answer`, `cloze`, `multiple_choice` -- só 4 `cardTypeId`
+  distintos; "Normal com reverso" de propósito NÃO tem `cardTypeId`
+  próprio, reaproveita `'normal'` duas vezes -- mesmo espírito do Anki
+  real, cujo note type "Basic and reversed card" usa o MESMO template
+  "Card" pros dois lados); `resolveCardField(note, fieldIndex)` (ponto
+  único de projeção Field→exibição, nunca decide direção, resolve pinyin
+  automaticamente via `field.pinyinFieldIndex`); `resolveNormalCardView`/
+  `resolveMultipleChoiceCardView`/`resolveTypeAnswerCardView`/
+  `resolveClozeCardView` (um resolver por Card Type);
+  `buildReversedCardInstancePair(noteId, frontFieldIndex, backFieldIndex)`
+  (utilitário puro, ainda não wireado em `interpretNoteFromRow()` --
+  nenhuma coluna legada pede "reversível" hoje -- retorna 2
+  CardInstances com ids `noteId`/`${noteId}-b`, cada um com seu PRÓPRIO
+  bloco `FLASHCARD_MODEL_FSRS_DEFAULTS` completo, testado que mutar um
+  nunca vaza pro outro).
+- **4b** -- `buildEngineCardsFromRow(row, opts)` (caminho de construção
+  real: chama `interpretNoteFromRow()`, DESTRÓI os campos FSRS de cada
+  CardInstance cru antes de guardá-lo em `card.cardInstance` -- evita uma
+  segunda cópia defasada de FSRS depois que `shared/fsrs.js` começa a
+  mutar só o card top-level, testado explicitamente que mutar o FSRS
+  top-level nunca vaza pro `cardInstance` guardado); `resolveCardContentView(card)`
+  (dispatcher único por `card.cardInstance.cardTypeId` -- o ponto que
+  TODO consumidor devia chamar, satisfazendo a restrição 1).
+- **4c** -- migração de fato dos consumidores, nos dois idiomas:
+  `buildCardFromTeacherFlashcard`/`buildCardFromSelfFlashcard` →
+  `buildEngineCardsFromRow`; `hasPlainFrontBack` reescrito (`normal`/
+  `multiple_choice` = par curto exportável/comparável, `cloze`/
+  `type_answer` ficam de fora -- resposta aberta, sem texto curto fixo);
+  novas `cardPromptText`/`cardAnswerText` (+ `cardPromptPinyinText` no
+  zh) -- ponto único que Speed Review/Combinar/export Anki usam pra
+  extrair texto de QUALQUER card (trilha OU nativo OU pseudo-objeto de
+  opção errada de MC); `renderMultipleChoiceReviewCard`/
+  `renderClozeReviewCard` reescritos pra `resolveCardContentView()`;
+  `renderTypeAnswerReviewCard` (NOVO -- "digite a resposta", 4º Card
+  Type que nenhum dado legado nunca gerou, mas o motor já suporta);
+  `renderReviewView()` dispatcher reescrito (`cardInstance.cardTypeId` →
+  renderizador certo; corpo de flip usa `resolveNormalCardView()` quando
+  `card.cardInstance` existe, preserva o mecanismo antigo `isReverse`/
+  `card.reviewDirection` **só no ramo `else` de trilha**, que nunca
+  passou pelo modelo Note/CardInstance); `startReviewSession()`:
+  `queue.forEach(c => { if (!c.cardInstance) c.reviewDirection =
+  nextCardDirection(c); })` -- cartão nativo NUNCA recebe
+  `reviewDirection` (restrição 3 cumprida: a sessão não escolhe/alterna
+  direção de cartão nativo, só de trilha); `buildSpeedOptions`/
+  `startMatchGame`/`ANKI_EXPORT_CONFIG.noteFields`/`.sortField`
+  migrados pra `resolveCardContentView()`/`cardPromptText`/
+  `cardAnswerText` (restrição 1, Speed Review/Combinar/Anki também
+  migrados, não só os 3 renderizadores).
+- **4d** -- `legacyRaw` removido de `interpretNoteFromRow()` (não
+  existe mais objeto legado intermediário nenhum); `bridgeNoteCardsToLegacyShape()`
+  e `legacyFlashcardRowToCard()` **DELETADOS por completo** (confirmado
+  via grep, antes de apagar, que zero call site restante dependia
+  deles). `bridgeNoteCardsToLegacyShape`/`legacyRaw` não existem mais em
+  lugar nenhum do repositório -- restrição 1 cumprida de verdade, não só
+  nominalmente.
+
+**Mudança de comportamento real, visível pra quem usa o app hoje --
+disclosed explicitamente, não só uma nota técnica**: antes desta fase,
+um cartão nativo "Normal" da professora/aluna alternava front↔back de
+sessão pra sessão (mesmo mecanismo `isReverse`/`nextCardDirection` que a
+trilha sempre usou). A restrição 3 da própria autora proíbe exatamente
+esse mecanismo pra cartão nativo -- a direção agora é decidida pelo
+CardInstance (`frontFieldIndex`/`backFieldIndex`), nunca pela sessão. Como
+nenhum dado legado hoje gera um par "normal com reverso" (isso exigiria
+um editor que ainda não existe -- explicitamente fora do escopo desta
+fase, restrição 7), **todo cartão "Normal" já existente passou a mostrar
+sempre na MESMA direção fixa** (a que o `front_is_target_language`
+daquela linha já codificava), perdendo a variedade de sessão que tinha
+antes. É consequência direta e deliberada da restrição 3, não um bug --
+mas muda o que a professora/aluna realmente vê hoje, então precisa ficar
+registrado aqui, não só nos comentários do código. Quando um editor
+futuro permitir autorar "normal com reverso" de propósito, a variedade
+volta -- só que agora como 2 cartões genuinamente independentes (2 FSRS,
+2 históricos), não um toggle raso.
+
+**Bug real encontrado e corrigido durante a validação desta fase (não
+reportado pela autora -- achado no smoke test de browser real, ver
+abaixo):** `buildSpeedOptions()` (Speed Review) tinha um fallback de
+distratores por "cartões da mesma unidade" (`STATE.cards.filter(c => c
+!== card && c.unitId === card.unitId)`) que nunca filtrava por
+`hasPlainFrontBack()`. Cartões nativos SEMPRE compartilham `unitId:
+null` entre si (não pertencem a nenhuma unidade) -- então esse
+agrupamento tratava TODOS os cartões nativos como "mesma unidade",
+inclusive um cloze/"digite a resposta" podendo ser sorteado como
+distrator de um cartão 'normal'. Antes da Fase 4 isso nunca quebrava (a
+ponte legada sempre populava `back_trans` plano em QUALQUER tipo,
+inclusive cloze); depois de 4d, `resolveClozeCardView()`/
+`resolveTypeAnswerCardView()` não têm campo `.back`, e `cardAnswerText()`
+quebraria tentando ler `view.back.text` de um distrator desse tipo --
+exatamente o que o smoke test capturou (TypeError real, não teórico).
+Corrigido nos dois pontos de fallback de `buildSpeedOptions()` (pool
+principal + extra de `eligibleReviewPool()`), fr+zh, acrescentando
+`hasPlainFrontBack(c)` ao filtro -- mesmo critério que `buildSpeedQueue()`
+e `startMatchGame()` já aplicavam no pool DE ENTRADA, só que faltava
+também no fallback de distratores.
+
+**Segundo achado, sem código pra corrigir (confirmado seguro por
+leitura)**: `shared/reports.js` (contexto do modal "Reportar problema",
+2 blocos -- modo Flashcard e modo Speed Review) lia `card.front`/
+`card.back_hanzi`/`card.back_trans` direto -- campos que não existem
+mais num card nativo pós-4d. Envolto em try/catch (nunca quebrava a
+tela), mas degradava silenciosamente o contexto do report pra `null`/
+`undefined` quando o report era feito durante a revisão de um cartão
+nativo. Corrigido pra usar `cardPromptText`/`cardAnswerText` (com
+fallback defensivo pro campo antigo, caso essas funções globais não
+existam por algum motivo).
+
+**Suítes de teste**: `test_fase4_engine.js` (novo, motor Fase 4a/4b --
+`resolveCardField`/`fieldHasAudio`/os 4 resolvers/`buildReversedCardInstancePair`/
+`buildEngineCardsFromRow`/`resolveCardContentView`, 32/32) +
+`test_fase4d_regression.js` (novo, porta os MESMOS cenários de dado de
+entrada de `test_flashcard_model.js` -- Fase 3, agora aposentada porque
+testava `legacyFlashcardRowToCard()` que foi deliberadamente deletada --
+validados contra a API real de hoje, 30/30). `test_flashcard_model.js`
+(Fase 3) fica no disco só como histórico, não é mais executada -- chamar
+`legacyFlashcardRowToCard` nela agora dá erro por desenho, não é
+regressão. **Smoke test de navegador real** (Playwright, fr+zh, mesmo
+padrão exigido pela autora na aprovação da Fase 3): boot em modo
+convidado (evita mockar profiles/badges/notificações -- só a sessão
+Supabase é stubada, CDN bloqueado neste sandbox) + injeção direta dos 5
+Card Types em `STATE.cards` (normal, normal-invertido com áudio custom,
+múltipla escolha, cloze, "digite a resposta" sintético -- nenhum dado
+legado gera esse tipo hoje) + par "normal com reverso" via
+`buildReversedCardInstancePair` + `startReviewSession()`/`renderReviewView()`
+reais rodando ponta a ponta pra cada um. Confirmado: fila de revisão
+inclui todos os cartões injetados; par invertido com 2 ids distintos e
+FSRS genuinamente independente; nenhum "undefined" vazando em nenhum
+HTML renderizado, nos 5 tipos, nos 2 idiomas; múltipla escolha renderiza
+opções e o clique+"Continuar" dispara `gradeCurrentCard()` de verdade
+(due/reps mudam); cloze renderiza a lacuna; áudio próprio aparece
+corretamente no lado invertido (mesmo comportamento `||`-fallback que a
+ponte antiga tinha, replicado de propósito); `hasPlainFrontBack` exclui
+cloze/type_answer corretamente; `ANKI_EXPORT_CONFIG.cards('all')` exclui
+cloze e inclui normal; `buildSpeedOptions()` não quebra mais com pool
+misto (confirma o fix acima); mecanismo `nextCardDirection` continua
+presente (trilha inalterada). **Zero erro de JavaScript no console em
+nenhum dos dois idiomas** (só 2-3 avisos de rede `ERR_TUNNEL_CONNECTION_FAILED`,
+mesma limitação de proxy de saída já documentada neste arquivo, não
+relacionada ao código).
+
+**Utilitário construído mas não usado no final, registrado por
+transparência**: `fieldHasAudio()` (Fase 4a) foi pensado pra decidir
+elegibilidade de pronúncia automática consultando `lang` -- mas os
+renderizadores finais (4b/4c) acabaram reaproveitando `isStudyLanguageField()`
+(já existente desde a Fase 2/3, já aprovada pela autora como "helper pra
+regras que genuinamente dependem do idioma do app") em vez de
+`fieldHasAudio()`, por operar sobre o mesmo shape `{lang}` com o mesmo
+propósito. `fieldHasAudio()` continua no arquivo, testada (32 testes
+cobrem ela), mas sem nenhum call site real hoje -- não removida por
+enquanto (baixo custo de manter, pode ganhar um chamador quando um
+próximo formato precisar da checagem "upload sempre conta, TTS só se
+`lang` bate"), mas registrando aqui pra não parecer uma peça esquecida
+por acidente.
+
+**Compatibilidade com dados existentes (restrição 8)**: nenhuma
+migração de schema, nenhum id/histórico/FSRS alterado. `serializeState()`/
+`applySerializedState()` continuam fazendo merge raso por id --
+confirmado que isso só depende dos NOMES dos campos FSRS (inalterados,
+`shared/fsrs.js` não foi tocado), nunca do formato dos campos de
+conteúdo -- o câmbio de shape (campos legados soltos → `note`+
+`cardInstance`) é seguro pro progresso real já salvo no Supabase.
+
+**Gratuito x Premium (avaliado, não implementado):** mudança
+arquitetural pura, sem nova superfície de produto -- mesma conclusão de
+toda fase de infraestrutura sem feature nova visível.
+
+**O que ainda falta / não foi feito nesta fase (de propósito, restrição
+7):** novo editor de cartão (é o que permitiria autorar "normal com
+reverso"/"digite a resposta"/cloze de verdade pela UI -- hoje só
+`buildReversedCardInstancePair`/`resolveTypeAnswerCardView` existem como
+motor, sem nenhum formulário que os produza); TTS/AwesomeTTS; templates
+customizáveis; novos recursos de criação; mudanças no FSRS; customização
+de Card Type. `student_flashcards`/`teacher_flashcards` (as tabelas)
+não ganharam nenhuma coluna nova -- é reestruturação do motor que já lê
+as colunas existentes, não do schema.
+
+Esta é a Fase 4 completa (4a→4d) de um prompt-mestre que travou
+explicitamente "não avance automaticamente" após o checkpoint da 4a --
+cumprido (prossegui só depois da própria autorização da autora dizer
+"prossiga... sem pedir nova autorização"). Próxima fase só começa depois
+de autorização explícita da autora, com este relatório já entregue antes
+de pedir luz verde.
