@@ -27,6 +27,31 @@ const FREE_OWN_FLASHCARD_LIMIT = 20;
 
 const MY_FLASHCARDS_STATE = { editingCardId: null, _cardsCache: [] };
 
+// Grillado com a autora (ver CLAUDE.md, "rótulo do seletor de direção do
+// cartão") -- rótulos com o nome do idioma de verdade em vez de "idioma
+// estudado"/"tradução" genéricos. "Meus Cartões" é o caso simples do
+// grilling: este bloco inteiro só aparece quando `!isMandarim`, e como
+// cada site só ensina 1 idioma (APP_KEY fixo pra toda a sessão), o par
+// alvo/nativo é sempre o mesmo -- sem lógica de seleção nenhuma, ao
+// contrário de shared/admin-flashcards.js (multi-aluno, precisa recalcular
+// por seleção). Cai pro texto genérico de sempre só se APP_KEY não tiver
+// entrada no mapa (nunca deveria acontecer pro fr/zh reais, mas evita
+// mostrar "undefined" se um idioma novo for adicionado sem atualizar
+// FLASHCARD_DIRECTION_LANGUAGE_LABELS em admin-students.js).
+function myFlashcardDirectionLabels(){
+  const pair = FLASHCARD_DIRECTION_LANGUAGE_LABELS[APP_KEY];
+  if (!pair){
+    return {
+      targetFirst: 'Frente no idioma estudado, verso na tradução (padrão)',
+      nativeFirst: 'Frente na tradução, verso no idioma estudado',
+    };
+  }
+  return {
+    targetFirst: `Frente em ${pair.target} (com áudio), verso com tradução em ${pair.native}`,
+    nativeFirst: `Frente na tradução em ${pair.native}, verso em ${pair.target} (com áudio)`,
+  };
+}
+
 async function renderMyFlashcardsView(){
   const wrap = document.getElementById('my-flashcards-content');
   if (!wrap) return;
@@ -80,10 +105,10 @@ async function renderMyFlashcardsView(){
         <div id="my-flashcard-direction-wrap" style="${isMandarim ? 'display:none;' : ''}">
         <div class="section-label" style="margin:0 0 4px;">Idioma de cada lado</div>
         <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
-          <input type="radio" name="my-flashcard-direction" value="target-front" checked> Frente no idioma estudado, verso na tradução (padrão)
+          <input type="radio" name="my-flashcard-direction" value="target-front" checked> ${myFlashcardDirectionLabels().targetFirst}
         </label>
         <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400; margin-bottom:10px;">
-          <input type="radio" name="my-flashcard-direction" value="target-back"> Frente na tradução, verso no idioma estudado
+          <input type="radio" name="my-flashcard-direction" value="target-back"> ${myFlashcardDirectionLabels().nativeFirst}
         </label>
         </div>
         <div id="my-flashcard-content-main">
@@ -203,10 +228,10 @@ function myFlashcardEditFormHTML(c){
       <div>
         <div class="section-label" style="margin:0 0 4px;">Idioma de cada lado</div>
         <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
-          <input type="radio" name="edit-my-flashcard-direction" value="target-front" ${direction === 'target-front' ? 'checked' : ''}> Frente no idioma estudado, verso na tradução
+          <input type="radio" name="edit-my-flashcard-direction" value="target-front" ${direction === 'target-front' ? 'checked' : ''}> ${myFlashcardDirectionLabels().targetFirst}
         </label>
         <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
-          <input type="radio" name="edit-my-flashcard-direction" value="target-back" ${direction === 'target-back' ? 'checked' : ''}> Frente na tradução, verso no idioma estudado
+          <input type="radio" name="edit-my-flashcard-direction" value="target-back" ${direction === 'target-back' ? 'checked' : ''}> ${myFlashcardDirectionLabels().nativeFirst}
         </label>
       </div>` : ''}
       <div>

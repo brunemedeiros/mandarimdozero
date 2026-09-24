@@ -4811,3 +4811,97 @@ validaram só um subconjunto.
 Nenhum passo manual pendente pra autora nesta entrega -- as duas
 migrations (`039`/`040`) já foram aplicadas ao vivo via
 `mcp__Supabase__apply_migration`.
+
+## UX-fix: rótulo do seletor de direção do cartão ("Idioma de cada lado")
+ganha o nome real do idioma em vez de "idioma estudado"/"tradução" genéricos
+
+Pedido da autora, com print da tela (antes de mergear o PR #264): trocar
+"Frente no idioma estudado, verso na tradução (padrão)" / "Frente na
+tradução, verso no idioma estudado" por texto com o nome real do idioma
+-- ex: "Frente em francês (com áudio), verso com tradução em português".
+Ela também perguntou explicitamente se os rótulos precisariam mudar
+conforme o aluno selecionado -- grillado em 4 perguntas antes de codar,
+porque a resposta é DIFERENTE em cada tela que usa este seletor.
+
+**Achado antes de perguntar**: "Meus Cartões" (`shared/my-flashcards.js`)
+só mostra este bloco quando `!isMandarim` -- ou seja, sempre
+francês↔português, sem ambiguidade, texto fixo sem lógica nenhuma.
+"Flashcards" do admin (`shared/admin-flashcards.js`, a tela do print)
+tem seletor de MÚLTIPLOS alunos, que pode incluir um vinculado em
+`portugues` (aceito no schema desde a Fase 1, mesmo sem site próprio
+ainda) -- é aí que mora a complexidade real: o que mostrar se a seleção
+tiver alunos de idiomas diferentes, ou nenhum selecionado ainda?
+
+**Decisões do grilling:**
+1. As duas telas recebem a mudança.
+2. Idioma nativo pareado com `portugues` -- **"inglês", decisão explícita
+   da autora**, mesmo sem confirmação nenhuma no código (eu recomendei
+   esconder o seletor pra português até o site existir de verdade, mesmo
+   princípio de "não presumir infraestrutura" já travado neste arquivo --
+   ela optou por travar "inglês" já, sabendo que pode mudar quando o site
+   de português existir). Registrado aqui pra não parecer suposição minha.
+3. Sem seleção nenhuma no admin -> texto genérico de sempre, como
+   fallback (não esconde o bloco).
+4. Formato exato: "Frente em {idioma} (com áudio), verso com tradução em
+   {nativo}" / "Frente na tradução em {nativo}, verso em {idioma} (com
+   áudio)".
+
+**Decisão minha, não coberta explicitamente no grilling**: quando a
+seleção do admin é MISTA entre 2+ idiomas elegíveis (hoje só
+possível entre francês e português, já que mandarim já esconde o bloco
+inteiro por conta própria) -- caiu pro MESMO fallback genérico do "sem
+seleção" (regra 3 acima), em vez de mostrar um rótulo ambíguo ou inventar
+um formato novo pra esse caso. Funcionalmente nada muda (o campo
+`frontIsTargetLanguage` já era um booleano único aplicado por linha,
+cada linha resolve "alvo" a partir do PRÓPRIO `language_app_key`,
+correto mesmo com seleção mista) -- só o rótulo mostrado fica genérico
+nesse caso raro.
+
+**O que foi feito:**
+
+- **`FLASHCARD_DIRECTION_LANGUAGE_LABELS`** (novo, `shared/admin-
+  students.js`, ao lado de `STUDENT_LANGUAGE_LABELS` já existente) --
+  `{ frances: {target:'francês', native:'português'}, portugues:
+  {target:'português', native:'inglês'} }`. `mandarim` deliberadamente
+  fora do mapa (nunca precisa de rótulo, o bloco já não se aplica a ele).
+- **`shared/my-flashcards.js`** -- `myFlashcardDirectionLabels()` (novo)
+  usa `FLASHCARD_DIRECTION_LANGUAGE_LABELS[APP_KEY]` direto (site fixo =
+  1 idioma só) nos 2 radios do formulário de criação E nos 2 do formulário
+  de edição -- 4 pontos no total, todos trocados.
+- **`shared/admin-flashcards.js`** -- `adminFlashcardDirectionLabels
+  (selectedStudents)` (novo) calcula o conjunto de idiomas elegíveis
+  presentes na seleção (`language_app_key` filtrado pelo mapa acima);
+  só devolve rótulo concreto quando esse conjunto tem exatamente 1
+  idioma, senão cai pro texto genérico (regras 3+4 acima). Usado em 3
+  pontos: o `<span>` com id próprio no render inicial (recalculado
+  também em `updateFlashcardsSelectionDependentUI()` a cada mudança de
+  seleção, sem re-render do form inteiro -- mesmo padrão incremental já
+  usado nesta tela desde a UX-fix 5), e o formulário de EDIÇÃO de um
+  cartão já existente (`flashcardEditFormHTML(c)`, que edita 1 cartão só
+  -- usa `adminFlashcardDirectionLabels([c])`, sempre um idioma único e
+  concreto, nunca cai no fallback genérico).
+
+**Gratuito x Premium**: não se aplica -- é só texto de rótulo, sem mudança
+de comportamento/dado.
+
+**Testes realizados:** `node --check` sem erro em `shared/admin-
+students.js`/`shared/admin-flashcards.js`/`shared/my-flashcards.js`.
+Validação via Playwright (fr): "Meus Cartões" (conta premium) confirmado
+mostrando os 2 rótulos exatos ("Frente em francês (com áudio), verso com
+tradução em português" / "Frente na tradução em português, verso em
+francês (com áudio)"). `adminFlashcardDirectionLabels()` chamada
+diretamente com 5 cenários -- sem seleção (genérico), só francês
+(dinâmico), só português (dinâmico, "inglês" confirmado), francês+
+português misto (genérico, decisão registrada acima), francês+mandarim
+misto (mostra o rótulo de francês -- correto, ainda que essa combinação
+nunca fique visível de fato porque `anyMandarim` já esconde o bloco
+inteiro por outro caminho). Não foi feita validação end-to-end da tela
+completa do admin (checkboxes clicados de verdade) nem de zh -- o
+seletor não existe em zh (mandarim sempre exclui o bloco) e a lógica do
+admin foi validada como função pura, risco considerado baixo dado que
+`updateFlashcardsSelectionDependentUI()`/render inicial não foram
+alterados estruturalmente, só ganharam 2 linhas a mais escrevendo
+`textContent`.
+
+**O que ainda falta / não foi feito (de propósito):** nada pendente --
+escopo pontual de texto, sem migração, sem passo manual.
