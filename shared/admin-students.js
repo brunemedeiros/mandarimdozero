@@ -29,6 +29,22 @@ const STUDENT_LANGUAGE_LABELS = {
   portugues: 'Português (em breve)',
 };
 
+// Grillado explicitamente com a autora (ver CLAUDE.md, "rótulo do
+// seletor de direção do cartão") -- pareamento idioma estudado/idioma
+// nativo usado só pelo texto do radio "Idioma de cada lado" (shared/
+// admin-flashcards.js + shared/my-flashcards.js). `mandarim`
+// deliberadamente FORA deste mapa -- o seletor de direção já não se
+// aplica a ele (par hanzi/pinyin inseparável, sem "back_pinyin" pra
+// completar a inversão), então nunca precisa de um rótulo. `portugues`
+// pareado com "inglês" foi uma decisão EXPLÍCITA da autora no grilling
+// (não uma suposição minha) mesmo sem existir site/interface de
+// português ainda -- se isso mudar quando o site de português for
+// construído de verdade, é só atualizar esta entrada.
+const FLASHCARD_DIRECTION_LANGUAGE_LABELS = {
+  frances: { target: 'francês', native: 'português' },
+  portugues: { target: 'português', native: 'inglês' },
+};
+
 async function renderAdminStudentsView(){
   const wrap = document.getElementById('admin-students-content');
   if (!wrap) return;

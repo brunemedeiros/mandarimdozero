@@ -200,6 +200,34 @@ const FLASHCARD_RESOURCES_HINT = {
   cloze: 'Imagem e áudio aparecem junto da frase com a lacuna. Nota é um lembrete só seu -- o aluno nunca vê.',
 };
 
+// Grillado com a autora (ver CLAUDE.md, "rótulo do seletor de direção do
+// cartão") -- rótulo com o nome do idioma de verdade em vez de "idioma
+// estudado"/"tradução" genéricos. Diferente de shared/my-flashcards.js
+// (sempre 1 idioma só, o do site), aqui a seleção pode ter vários alunos
+// -- só mostra o par de idiomas concreto quando a seleção inteira
+// (excluindo mandarim, que já esconde o bloco) compartilha o MESMO
+// idioma-alvo elegível (`FLASHCARD_DIRECTION_LANGUAGE_LABELS`, hoje só
+// francês/português -- decisão minha, não pedida explicitamente no
+// grilling, mas segue o mesmo padrão já aprovado pra "sem seleção" ->
+// texto genérico: nunca inventa um rótulo ambíguo quando não há um único
+// idioma-alvo pra mostrar). Cai pro texto genérico quando: nenhum aluno
+// selecionado, seleção mista entre 2+ idiomas elegíveis, ou o idioma não
+// tem entrada no mapa.
+function adminFlashcardDirectionLabels(selectedStudents){
+  const eligibleKeys = [...new Set(selectedStudents.map(s => s.language_app_key).filter(key => FLASHCARD_DIRECTION_LANGUAGE_LABELS[key]))];
+  const pair = eligibleKeys.length === 1 ? FLASHCARD_DIRECTION_LANGUAGE_LABELS[eligibleKeys[0]] : null;
+  if (!pair){
+    return {
+      targetFirst: 'Frente no idioma estudado, verso na tradução (padrão)',
+      nativeFirst: 'Frente na tradução, verso no idioma estudado',
+    };
+  }
+  return {
+    targetFirst: `Frente em ${pair.target} (com áudio), verso com tradução em ${pair.native}`,
+    nativeFirst: `Frente na tradução em ${pair.native}, verso em ${pair.target} (com áudio)`,
+  };
+}
+
 function flashcardStudentLabel(s){
   return s.display_name
     ? `${escapeHTML(s.display_name)} (@${escapeHTML(s.username || '?')})`
@@ -266,10 +294,10 @@ function flashcardEditFormHTML(c){
       <div id="edit-flashcard-direction-wrap" style="${mode === 'cloze' ? 'display:none;' : ''}">
         <div class="section-label" style="margin:0 0 4px;">Idioma de cada lado</div>
         <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
-          <input type="radio" name="edit-flashcard-direction" value="target-front" ${direction === 'target-front' ? 'checked' : ''}> Frente no idioma estudado, verso na tradução
+          <input type="radio" name="edit-flashcard-direction" value="target-front" ${direction === 'target-front' ? 'checked' : ''}> ${adminFlashcardDirectionLabels([c]).targetFirst}
         </label>
         <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
-          <input type="radio" name="edit-flashcard-direction" value="target-back" ${direction === 'target-back' ? 'checked' : ''}> Frente na tradução, verso no idioma estudado
+          <input type="radio" name="edit-flashcard-direction" value="target-back" ${direction === 'target-back' ? 'checked' : ''}> ${adminFlashcardDirectionLabels([c]).nativeFirst}
         </label>
       </div>` : ''}
 
@@ -551,6 +579,11 @@ async function updateFlashcardsSelectionDependentUI(wrap){
   // se aplica ao modo cloze (não tem noção de "frente"/"verso").
   const directionWrap = document.getElementById('admin-flashcard-direction-wrap');
   if (directionWrap) directionWrap.style.display = (!anyMandarim && modeChecked !== 'cloze') ? '' : 'none';
+  const directionLabels = adminFlashcardDirectionLabels(selectedStudents);
+  const directionTargetLabel = document.getElementById('admin-flashcard-direction-target-label');
+  if (directionTargetLabel) directionTargetLabel.textContent = directionLabels.targetFirst;
+  const directionNativeLabel = document.getElementById('admin-flashcard-direction-native-label');
+  if (directionNativeLabel) directionNativeLabel.textContent = directionLabels.nativeFirst;
 
   const clozeSentenceInput = document.getElementById('admin-flashcard-cloze-sentence');
   if (clozeSentenceInput) clozeSentenceInput.placeholder = anyMandarim ? 'ex: 我 ___ 巴西人。' : 'ex: Je ___ de Paris.';
@@ -840,11 +873,11 @@ async function renderAdminFlashcardsView(){
           <div class="section-label" style="margin:18px 0 4px;">Idioma de cada lado</div>
           <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
             <input type="radio" name="admin-flashcard-direction" value="target-front" checked>
-            Frente no idioma estudado, verso na tradução (padrão)
+            <span id="admin-flashcard-direction-target-label">${adminFlashcardDirectionLabels(selectedStudents).targetFirst}</span>
           </label>
           <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
             <input type="radio" name="admin-flashcard-direction" value="target-back">
-            Frente na tradução, verso no idioma estudado
+            <span id="admin-flashcard-direction-native-label">${adminFlashcardDirectionLabels(selectedStudents).nativeFirst}</span>
           </label>
         </div>
 

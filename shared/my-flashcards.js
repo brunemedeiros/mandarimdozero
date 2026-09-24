@@ -9,8 +9,8 @@
 // fr/app.js e zh/app.js antes desta função rodar).
 //
 // Depende de (mesma posição de shared/admin-flashcards.js -- antes de app.js):
-//   - shared/student-flashcards.js (fetchMyOwnFlashcards, createOwnFlashcard, setOwnFlashcardStatus, updateOwnFlashcardContent, deleteOwnFlashcardPermanently)
-//   - shared/roles.js              (hasActiveTeacherLink)
+//   - shared/student-flashcards.js (fetchMyOwnFlashcards, createOwnFlashcard, uploadOwnFlashcardMedia, setOwnFlashcardStatus, updateOwnFlashcardContent, deleteOwnFlashcardPermanently)
+//   - shared/roles.js              (hasActiveTeacherLink, fetchMyPlanTier)
 //   - shared/toast.js              (showToast)
 //   - shared/admin-flashcards.js   (openFlashcardResetConfirm -- carregado ANTES deste arquivo, mesma página, função global reaproveitada sem duplicar)
 //   - fr/zh app.js                 (APP_KEY, CURRENT_USER via shared/auth.js)
@@ -27,6 +27,31 @@ const FREE_OWN_FLASHCARD_LIMIT = 20;
 
 const MY_FLASHCARDS_STATE = { editingCardId: null, _cardsCache: [] };
 
+// Grillado com a autora (ver CLAUDE.md, "rótulo do seletor de direção do
+// cartão") -- rótulos com o nome do idioma de verdade em vez de "idioma
+// estudado"/"tradução" genéricos. "Meus Cartões" é o caso simples do
+// grilling: este bloco inteiro só aparece quando `!isMandarim`, e como
+// cada site só ensina 1 idioma (APP_KEY fixo pra toda a sessão), o par
+// alvo/nativo é sempre o mesmo -- sem lógica de seleção nenhuma, ao
+// contrário de shared/admin-flashcards.js (multi-aluno, precisa recalcular
+// por seleção). Cai pro texto genérico de sempre só se APP_KEY não tiver
+// entrada no mapa (nunca deveria acontecer pro fr/zh reais, mas evita
+// mostrar "undefined" se um idioma novo for adicionado sem atualizar
+// FLASHCARD_DIRECTION_LANGUAGE_LABELS em admin-students.js).
+function myFlashcardDirectionLabels(){
+  const pair = FLASHCARD_DIRECTION_LANGUAGE_LABELS[APP_KEY];
+  if (!pair){
+    return {
+      targetFirst: 'Frente no idioma estudado, verso na tradução (padrão)',
+      nativeFirst: 'Frente na tradução, verso no idioma estudado',
+    };
+  }
+  return {
+    targetFirst: `Frente em ${pair.target} (com áudio), verso com tradução em ${pair.native}`,
+    nativeFirst: `Frente na tradução em ${pair.native}, verso em ${pair.target} (com áudio)`,
+  };
+}
+
 async function renderMyFlashcardsView(){
   const wrap = document.getElementById('my-flashcards-content');
   if (!wrap) return;
@@ -37,21 +62,24 @@ async function renderMyFlashcardsView(){
   wrap.innerHTML = loadingHTML();
 
   const isMandarim = APP_KEY === 'mandarim';
-  const [cards, hasLink] = await Promise.all([
+  const [cards, hasLink, planTier] = await Promise.all([
     fetchMyOwnFlashcards(APP_KEY),
     hasActiveTeacherLink(),
+    fetchMyPlanTier(),
   ]);
+  const premium = planTier === 'premium';
   MY_FLASHCARDS_STATE._cardsCache = cards;
   const activeCards = cards.filter(c => c.status === 'active');
   const archivedCards = cards.filter(c => c.status === 'archived');
   const atLimit = !hasLink && activeCards.length >= FREE_OWN_FLASHCARD_LIMIT;
 
-  // Selo de tier -- só comunica o que já é real hoje (vínculo com
-  // professora), nunca promete "premium" (que não existe em nenhum lugar
-  // do app ainda).
-  const tierBadgeHTML = hasLink
+  // Selo de tier -- eixo de QUANTIDADE (vínculo com professora) continua
+  // separado do eixo de PREMIUM (formatos ricos) -- ver comentário em
+  // shared/roles.js. Uma conta pode mostrar os dois selos juntos.
+  const tierBadgeHTML = (hasLink
     ? `<span class="pill">✨ Aluno vinculado — cartões ilimitados</span>`
-    : `<span class="pill">🔒 Plano grátis — ${activeCards.length}/${FREE_OWN_FLASHCARD_LIMIT} cartões</span>`;
+    : `<span class="pill">🔒 Plano grátis — ${activeCards.length}/${FREE_OWN_FLASHCARD_LIMIT} cartões</span>`)
+    + (premium ? `<span class="pill">⭐ Premium</span>` : '');
 
   wrap.innerHTML = `
     <div class="profile-section">
@@ -60,25 +88,69 @@ async function renderMyFlashcardsView(){
         ${tierBadgeHTML}
       </div>
       <form id="my-create-flashcard-form" class="profile-edit-form">
-        ${!isMandarim ? `
-        <div class="section-label" style="margin:0 0 4px;">Idioma de cada lado</div>
+        ${premium ? `
+        <div class="section-label" style="margin:0 0 6px;">Modo de prática</div>
         <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
-          <input type="radio" name="my-flashcard-direction" value="target-front" checked> Frente no idioma estudado, verso na tradução (padrão)
+          <input type="radio" name="my-flashcard-mode" value="flip" checked> Flashcard normal — vira o cartão pra ver a resposta
+        </label>
+        <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
+          <input type="radio" name="my-flashcard-mode" value="mc"> Múltipla escolha — escolhe entre opções
         </label>
         <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400; margin-bottom:10px;">
-          <input type="radio" name="my-flashcard-direction" value="target-back"> Frente na tradução, verso no idioma estudado
+          <input type="radio" name="my-flashcard-mode" value="cloze"> Completar a frase — digita a palavra que falta
         </label>
-        ` : ''}
-        <label class="profile-edit-label" for="my-flashcard-front">Frente</label>
+        ` : `
+        <p class="profile-edit-hint">🔒 <strong>Premium</strong> desbloqueia imagem, áudio, múltipla escolha e completar a frase nos seus próprios cartões. Fale com a administração pra ativar.</p>
+        `}
+        <div id="my-flashcard-direction-wrap" style="${isMandarim ? 'display:none;' : ''}">
+        <div class="section-label" style="margin:0 0 4px;">Idioma de cada lado</div>
+        <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
+          <input type="radio" name="my-flashcard-direction" value="target-front" checked> ${myFlashcardDirectionLabels().targetFirst}
+        </label>
+        <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400; margin-bottom:10px;">
+          <input type="radio" name="my-flashcard-direction" value="target-back"> ${myFlashcardDirectionLabels().nativeFirst}
+        </label>
+        </div>
+        <div id="my-flashcard-content-main">
+        <label class="profile-edit-label" id="my-flashcard-front-label" for="my-flashcard-front">Frente</label>
         <textarea id="my-flashcard-front" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="${isMandarim ? 'ex: 图书馆' : 'ex: la bibliothèque'}"></textarea>
         ${isMandarim ? `
         <label class="profile-edit-label" for="my-flashcard-pinyin">Pinyin</label>
         <input type="text" id="my-flashcard-pinyin" class="profile-edit-input" placeholder="ex: túshūguǎn" autocomplete="off">
         ` : ''}
-        <label class="profile-edit-label" for="my-flashcard-back">Verso</label>
+        <label class="profile-edit-label" id="my-flashcard-back-label" for="my-flashcard-back">Verso</label>
         <textarea id="my-flashcard-back" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="ex: a biblioteca"></textarea>
+        ${premium ? `
+        <div id="my-flashcard-mc-fields" style="display:none; margin:4px 0 0;">
+          <label class="profile-edit-label" for="my-flashcard-mc-1">Outras opções — opção errada 1</label>
+          <input type="text" id="my-flashcard-mc-1" class="profile-edit-input" autocomplete="off">
+          <label class="profile-edit-label" for="my-flashcard-mc-2">Opção errada 2 (opcional)</label>
+          <input type="text" id="my-flashcard-mc-2" class="profile-edit-input" autocomplete="off">
+          <label class="profile-edit-label" for="my-flashcard-mc-3">Opção errada 3 (opcional)</label>
+          <input type="text" id="my-flashcard-mc-3" class="profile-edit-input" autocomplete="off">
+        </div>` : ''}
+        </div>
+        ${premium ? `
+        <div id="my-flashcard-content-cloze" style="display:none;">
+          <label class="profile-edit-label" for="my-flashcard-cloze-sentence">Frase com lacuna (use ___ pra marcar o espaço)</label>
+          <input type="text" id="my-flashcard-cloze-sentence" class="profile-edit-input" placeholder="${isMandarim ? 'ex: 我 ___ 巴西人。' : 'ex: Je ___ de Paris.'}" autocomplete="off">
+          <label class="profile-edit-label" for="my-flashcard-cloze-answer">Resposta certa</label>
+          <input type="text" id="my-flashcard-cloze-answer" class="profile-edit-input" placeholder="${isMandarim ? 'ex: 是' : 'ex: viens'}" autocomplete="off">
+          <div id="my-flashcard-cloze-pinyin-wrap" style="display:none;">
+            <label class="profile-edit-label" for="my-flashcard-cloze-pinyin">Pinyin da resposta (é o que você vai digitar)</label>
+            <input type="text" id="my-flashcard-cloze-pinyin" class="profile-edit-input" placeholder="ex: shì" autocomplete="off">
+          </div>
+          <label class="profile-edit-label" for="my-flashcard-cloze-trans">Tradução (mostrada depois de responder)</label>
+          <input type="text" id="my-flashcard-cloze-trans" class="profile-edit-input" placeholder="ex: Eu venho de Paris." autocomplete="off">
+        </div>` : ''}
         <label class="profile-edit-label" for="my-flashcard-note">Nota (opcional)</label>
         <textarea id="my-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="contexto, dica de uso..."></textarea>
+        ${premium ? `
+        <label class="profile-edit-label" for="my-flashcard-image">Imagem (opcional)</label>
+        <input type="file" id="my-flashcard-image" class="profile-edit-input" accept="image/*">
+        <label class="profile-edit-label" for="my-flashcard-audio">Áudio próprio (opcional, além da pronúncia automática)</label>
+        <input type="file" id="my-flashcard-audio" class="profile-edit-input" accept="audio/*">
+        ` : ''}
         <p class="profile-edit-error" id="my-create-flashcard-error"></p>
         <button type="submit" class="btn btn-primary btn-block" id="my-create-flashcard-btn" ${atLimit ? 'disabled' : ''}>${atLimit ? 'Limite atingido' : 'Criar cartão'}</button>
       </form>
@@ -110,7 +182,7 @@ async function renderMyFlashcardsView(){
     </div>
   `;
 
-  wireMyFlashcardsForm(wrap, atLimit);
+  wireMyFlashcardsForm(wrap, atLimit, premium);
   wireMyFlashcardsCardButtons(wrap);
   document.getElementById('my-flashcards-export-btn')?.addEventListener('click', () => openMyFlashcardsExportModal(activeCards.concat(archivedCards).filter(c => c.status === 'active')));
   document.getElementById('my-flashcards-import-file')?.addEventListener('change', (e) => handleMyFlashcardsImportFile(e.target.files[0]));
@@ -156,10 +228,10 @@ function myFlashcardEditFormHTML(c){
       <div>
         <div class="section-label" style="margin:0 0 4px;">Idioma de cada lado</div>
         <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
-          <input type="radio" name="edit-my-flashcard-direction" value="target-front" ${direction === 'target-front' ? 'checked' : ''}> Frente no idioma estudado, verso na tradução
+          <input type="radio" name="edit-my-flashcard-direction" value="target-front" ${direction === 'target-front' ? 'checked' : ''}> ${myFlashcardDirectionLabels().targetFirst}
         </label>
         <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
-          <input type="radio" name="edit-my-flashcard-direction" value="target-back" ${direction === 'target-back' ? 'checked' : ''}> Frente na tradução, verso no idioma estudado
+          <input type="radio" name="edit-my-flashcard-direction" value="target-back" ${direction === 'target-back' ? 'checked' : ''}> ${myFlashcardDirectionLabels().nativeFirst}
         </label>
       </div>` : ''}
       <div>
@@ -224,7 +296,30 @@ function wireMyFlashcardEditForm(c, wrap){
   });
 }
 
-function wireMyFlashcardsForm(wrap, atLimit){
+function wireMyFlashcardsForm(wrap, atLimit, premium){
+  // Prompt-mestre "reformulação gratuito x premium" (ver CLAUDE.md) -- só
+  // existe pra quem é premium (os radios nem são renderizados pra quem não
+  // é, ver renderMyFlashcardsView). Mesmo padrão de mode-toggle de
+  // shared/admin-flashcards.js, sem a parte de multi-aluno (aqui é sempre
+  // "pra mim mesma") nem a validação por campo (escopo reduzido de
+  // propósito -- ver comentário no topo do arquivo).
+  if (premium){
+    wrap.querySelectorAll('input[name="my-flashcard-mode"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        const mode = wrap.querySelector('input[name="my-flashcard-mode"]:checked').value;
+        document.getElementById('my-flashcard-content-main').style.display = mode === 'cloze' ? 'none' : '';
+        document.getElementById('my-flashcard-content-cloze').style.display = mode === 'cloze' ? '' : 'none';
+        document.getElementById('my-flashcard-mc-fields').style.display = mode === 'mc' ? '' : 'none';
+        const isMandarim = APP_KEY === 'mandarim';
+        document.getElementById('my-flashcard-cloze-pinyin-wrap').style.display = (mode === 'cloze' && isMandarim) ? '' : 'none';
+        const directionWrapEl = document.getElementById('my-flashcard-direction-wrap');
+        if (directionWrapEl && !isMandarim) directionWrapEl.style.display = mode === 'cloze' ? 'none' : '';
+        document.getElementById('my-flashcard-front-label').textContent = mode === 'mc' ? 'Pergunta/termo' : 'Frente';
+        document.getElementById('my-flashcard-back-label').textContent = mode === 'mc' ? 'Resposta correta' : 'Verso';
+      });
+    });
+  }
+
   document.getElementById('my-create-flashcard-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     // Checagem no submit, não só `disabled` no botão -- disabled já cobre o
@@ -238,16 +333,57 @@ function wireMyFlashcardsForm(wrap, atLimit){
     const btn = document.getElementById('my-create-flashcard-btn');
     const errorEl = document.getElementById('my-create-flashcard-error');
     errorEl.textContent = '';
+    const mode = premium ? (wrap.querySelector('input[name="my-flashcard-mode"]:checked')?.value || 'flip') : 'flip';
+    const isCloze = mode === 'cloze';
+    const isMC = mode === 'mc';
+
     btn.disabled = true;
+
+    // Upload de imagem/áudio ANTES de criar o cartão -- mesmo padrão de
+    // shared/admin-flashcards.js (a URL pública precisa existir pra gravar
+    // junto no insert).
+    let imageUrl = null, audioUrl = null;
+    if (premium){
+      const imageFile = document.getElementById('my-flashcard-image')?.files[0];
+      const audioFile = document.getElementById('my-flashcard-audio')?.files[0];
+      if (imageFile){
+        const up = await uploadOwnFlashcardMedia(imageFile, 'image');
+        if (!up.ok){ btn.disabled = false; errorEl.textContent = up.error; return; }
+        imageUrl = up.url;
+      }
+      if (audioFile){
+        const up = await uploadOwnFlashcardMedia(audioFile, 'audio');
+        if (!up.ok){ btn.disabled = false; errorEl.textContent = up.error; return; }
+        audioUrl = up.url;
+      }
+    }
+
     const directionRadio = wrap.querySelector('input[name="my-flashcard-direction"]:checked');
     const frontIsTargetLanguage = directionRadio ? directionRadio.value !== 'target-back' : true;
+    const choices = isMC ? [
+      document.getElementById('my-flashcard-mc-1').value,
+      document.getElementById('my-flashcard-mc-2').value,
+      document.getElementById('my-flashcard-mc-3').value,
+    ] : [];
+    const front = isCloze ? '' : document.getElementById('my-flashcard-front').value;
+    const backTrans = isCloze ? document.getElementById('my-flashcard-cloze-trans').value : document.getElementById('my-flashcard-back').value;
+    const clozeSentence = isCloze ? document.getElementById('my-flashcard-cloze-sentence').value : '';
+    const clozeAnswer = isCloze ? document.getElementById('my-flashcard-cloze-answer').value : '';
+    const clozeAnswerPinyin = isCloze ? document.getElementById('my-flashcard-cloze-pinyin')?.value : '';
+
     const result = await createOwnFlashcard({
       languageAppKey: APP_KEY,
-      front: document.getElementById('my-flashcard-front').value,
-      backTrans: document.getElementById('my-flashcard-back').value,
+      front,
+      backTrans,
       note: document.getElementById('my-flashcard-note').value,
-      frontPinyin: document.getElementById('my-flashcard-pinyin')?.value,
+      frontPinyin: isCloze ? '' : document.getElementById('my-flashcard-pinyin')?.value,
       frontIsTargetLanguage,
+      imageUrl,
+      audioUrl,
+      choices,
+      clozeSentence,
+      clozeAnswer,
+      clozeAnswerPinyin,
     });
     btn.disabled = false;
     if (!result.ok){ errorEl.textContent = result.error; return; }

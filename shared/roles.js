@@ -95,3 +95,54 @@ async function hasActiveTeacherLink(){
   if (error){ console.error('Erro ao checar vínculo com professora:', error); return false; }
   return (data || []).length > 0;
 }
+
+// ---------- Prompt-mestre "reformulação gratuito x premium" (ver CLAUDE.md,
+// grillado em 3 rodadas) ----------
+// Eixo NOVO e SEPARADO de hasActiveTeacherLink() acima -- vínculo com
+// professora continua isentando do teto de QUANTIDADE de cartões próprios
+// (Fase 5.1, sem mudança). `plan_tier` decide uma coisa diferente: se a
+// conta pode usar os formatos RICOS (imagem/áudio/múltipla escolha/
+// completar frase) em cartão próprio -- hoje exclusivos de cartão de
+// professora (Fase 8a/8c). Uma conta pode ter as duas isenções, uma só, ou
+// nenhuma -- não são a mesma coisa, mesmo que as duas acabem "desbloqueando
+// coisa" pra quantidade/qualidade de Meus Cartões.
+async function fetchMyPlanTier(){
+  const profile = await ensureProfileLoaded();
+  return profile?.plan_tier || 'free';
+}
+
+function isPremium(){
+  return PROFILE_CACHE?.plan_tier === 'premium';
+}
+
+// Ativação/remoção manual do Premium -- sem checkout Stripe real nesta
+// entrega (escopo travado no grilling: "só infraestrutura por enquanto").
+// Só quem já é admin pode chamar isto (gate de UI em shared/admin-users.js,
+// RLS de profiles continua exigindo o mesmo e-mail admin pra UPDATE, mesmo
+// padrão de todo campo administrativo já existente -- ver migration 023).
+async function setPlanTier(userId, tier){
+  if (!['free', 'premium'].includes(tier)) return { ok: false, error: 'Plano inválido.' };
+  const { error } = await supabaseClient.from('profiles').update({ plan_tier: tier }).eq('user_id', userId);
+  if (error){ console.error('Erro ao mudar plano:', error); return { ok: false, error: 'Não foi possível mudar o plano agora.' }; }
+  return { ok: true };
+}
+
+// Busca QUALQUER conta registrada por @username -- diferente de
+// fetchMyStudents() (só as vinculadas como aluno formal), Premium se
+// aplica a qualquer perfil (decisão do grilling: "qualquer conta
+// registrada", não só quem tem vínculo pedagógico com uma professora).
+// Select próprio (não reaproveita resolveProfileByUsername de
+// admin-badges.js) porque precisa de `plan_tier` junto -- os outros
+// chamadores daquela função não precisam desse campo, evitar carregar
+// dado extra que ninguém mais usa.
+async function searchAnyProfileByUsername(username){
+  const clean = slugifyUsername(username);
+  if (!clean) return null;
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .select('user_id, username, display_name, plan_tier')
+    .eq('username', clean)
+    .maybeSingle();
+  if (error){ console.error('Erro ao buscar usuário:', error); return null; }
+  return data;
+}
