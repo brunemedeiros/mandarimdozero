@@ -310,8 +310,176 @@ function bridgeNoteCardsToLegacyShape(note, cards, legacyRaw, appKey){
 
 // Atalho pros 2 call sites reais (buildCardFromTeacherFlashcard/
 // buildCardFromSelfFlashcard, fr/zh app.js) -- interpreta + já devolve no
-// shape legado que o resto do app (ainda não migrado, Fase 4+) espera.
+// shape legado que o resto do app (ainda NÃO migrado -- Fase 4b/4c, ver
+// abaixo) espera. Existe só durante a transição; ver nota de depreciação
+// logo acima de bridgeNoteCardsToLegacyShape() -- some junto com ela ao
+// final da Fase 4 (4d), quando o último call site parar de precisar dela.
 function legacyFlashcardRowToCard(row, opts){
   const { note, cards, legacyRaw } = interpretNoteFromRow(row, opts);
   return bridgeNoteCardsToLegacyShape(note, cards, legacyRaw, opts.appKey);
+}
+
+// ============================================================
+// Fase 4 do prompt-mestre "reestruturação inspirada no Anki" (ver
+// CLAUDE.md) -- MOTOR DE TIPOS/TEMPLATES. Tudo abaixo desta linha é
+// aditivo (nada do que já existia acima foi alterado nesta subfase, 4a) --
+// a camada de compatibilidade continua viva e funcionando exatamente como
+// antes até 4b/4c trocarem os consumidores reais por este motor novo, e só
+// então (4d) bridgeNoteCardsToLegacyShape()/legacyFlashcardRowToCard()/
+// legacyRaw são removidos de vez.
+//
+// Princípio central, travado pela autora (Fase 4, restrições 2-5): o fluxo
+// final é
+//     Note + CardInstance -> resolveCardField() -> renderer/feature
+// nunca
+//     Note + CardInstance -> objeto legado/shape intermediário -> renderer
+// resolveCardField() é o ÚNICO ponto que projeta um Field pra texto/áudio
+// exibível -- nenhum renderer (ou Speed Review/Combinar/export Anki, a
+// partir de 4c) deve ler `note.fields[i]` direto.
+// ============================================================
+
+// Catálogo dos 5 tipos previstos nesta fase -- só documentação/referência,
+// não uma tabela de despacho (o despacho de verdade mora em cada
+// renderer/feature, olhando `cardInstance.cardTypeId`). "Normal com
+// reverso" NÃO tem um cardTypeId próprio -- ver buildReversedCardInstancePair()
+// logo abaixo pra explicação de por quê.
+const CARD_TYPE_IDS = Object.freeze({
+  NORMAL: 'normal',
+  TYPE_ANSWER: 'type_answer',
+  CLOZE: 'cloze',
+  MULTIPLE_CHOICE: 'multiple_choice',
+});
+
+// ---------- resolveCardField() -- o único ponto de projeção Field->exibição ----------
+// Devolve o texto/pinyin/áudio/imagem de UM Field, dado seu índice dentro
+// de note.fields. Nunca decide direção (isso já foi decidido antes, por
+// quem escolheu QUAL índice passar aqui -- o CardInstance) nem lê `lang`
+// pra inferir front/back/template -- só devolve o que o Field já carrega.
+// `field.pinyinFieldIndex` (zh) é resolvido aqui pra nenhum chamador
+// precisar saber que hanzi/pinyin são 2 Fields relacionados.
+function resolveCardField(note, fieldIndex){
+  if (fieldIndex === null || fieldIndex === undefined) return null;
+  const field = note.fields[fieldIndex];
+  if (!field) return null;
+  const pinyinField = field.pinyinFieldIndex !== undefined && field.pinyinFieldIndex !== null
+    ? note.fields[field.pinyinFieldIndex] : null;
+  return {
+    text: field.text,
+    lang: field.lang,
+    pinyinText: pinyinField ? pinyinField.text : null,
+    audioUrl: (field.audio && field.audio.url) || null,
+  };
+}
+
+// ---------- Elegibilidade de pronúncia automática (TTS) ----------
+// Ressalva importante, sinalizada explicitamente no checkpoint da Fase 4a
+// (não decidida em silêncio): a restrição da autora ("lang nunca decide se
+// deve existir áudio") é sobre usar `lang` pra inventar DIREÇÃO/estrutura
+// (ex: "este campo é lang==studyLang, então ele É o front") -- isso
+// continua proibido, e resolveCardField() acima não faz isso em nenhum
+// caso. Esta função aqui é uma categoria DIFERENTE de decisão: o motor de
+// pronúncia do app (speakFrench()/AUDIO_MANIFEST, fr/app.js -- não
+// reconstruído nesta fase, restrição 7) só sabe falar UM idioma real;
+// chamá-lo sobre texto que não está nesse idioma produziria pronúncia
+// errada (voz francesa lendo português), não uma escolha de
+// apresentação. `lang` aqui é consultado como propriedade INTRÍNSECA do
+// próprio Field (o mesmo tipo de checagem que já se faz sobre `field.text`
+// em si), nunca pra decidir qual campo É o front/back -- isso o
+// CardInstance já decidiu antes de resolveCardField() ser chamado.
+// audio_url explícito (upload) sempre conta como "tem áudio", em
+// QUALQUER idioma -- só a tentativa de TTS AUTOMÁTICO depende do idioma
+// real do campo.
+function fieldHasAudio(resolvedField, appKey){
+  if (!resolvedField) return false;
+  if (resolvedField.audioUrl) return true;
+  return resolvedField.lang === STUDY_LANG_FOR_APP_KEY[appKey];
+}
+
+// ---------- Resolvers por Card Type ----------
+// Cada um devolve só texto/áudio já resolvido (via resolveCardField) --
+// nenhum HTML, nenhuma decisão de tela. O renderer (fr/zh app.js, Fase
+// 4b/4c) decide como desenhar isso; este arquivo nunca sabe de DOM.
+
+// Normal -- também usado pelas DUAS CardInstance de um par "Normal com
+// reverso" (ver buildReversedCardInstancePair) -- mecanicamente idênticas,
+// só com frontFieldIndex/backFieldIndex trocados entre si.
+function resolveNormalCardView(note, cardInstance){
+  return {
+    front: resolveCardField(note, cardInstance.frontFieldIndex),
+    back: resolveCardField(note, cardInstance.backFieldIndex),
+  };
+}
+
+function resolveMultipleChoiceCardView(note, cardInstance){
+  const prompt = resolveCardField(note, cardInstance.promptFieldIndex);
+  const correct = resolveCardField(note, cardInstance.correctFieldIndex);
+  return {
+    prompt,
+    correctText: correct ? correct.text : '',
+    distractorTexts: cardInstance.distractors || [],
+  };
+}
+
+// "Digite a resposta" -- novo nesta fase, sem dado legado (nenhuma coluna
+// de teacher_flashcards/own_flashcards jamais pediu este tipo). Estrutura
+// deliberadamente próxima da de Cloze (promptFieldIndex/answerFieldIndex
+// em vez de textFieldIndex/markId, porque não há lacuna embutida numa
+// frase -- é pergunta inteira -> resposta digitada inteira) -- mesmo
+// mecanismo de comparação (compareAnswer opcional, pro caso zh em que o
+// que se digita, pinyin, difere do que se revela, hanzi).
+function resolveTypeAnswerCardView(note, cardInstance){
+  const prompt = resolveCardField(note, cardInstance.promptFieldIndex);
+  const answer = resolveCardField(note, cardInstance.answerFieldIndex);
+  const displayAnswerText = answer ? answer.text : '';
+  return {
+    prompt,
+    displayAnswerText,
+    compareAnswerText: cardInstance.compareAnswer !== null && cardInstance.compareAnswer !== undefined
+      ? cardInstance.compareAnswer : displayAnswerText,
+  };
+}
+
+// Cloze -- reaproveita parseClozeMarks/renderClozeText já existentes
+// (sintaxe {{cN::...}}, nunca cloze_sentence/cloze_answer aqui). Devolve a
+// frase com TODAS as marcações ainda embutidas (`rawSentenceText`) -- quem
+// desenha decide se usa renderClozeText pra ocultar/revelar a lacuna alvo.
+function resolveClozeCardView(note, cardInstance){
+  const textField = note.fields[cardInstance.textFieldIndex];
+  const translation = resolveCardField(note, cardInstance.translationFieldIndex);
+  const marks = parseClozeMarks(textField.text);
+  const mark = marks.find(m => m.id === cardInstance.markId) || marks[0];
+  const displayAnswerText = mark ? mark.answer : '';
+  return {
+    rawSentenceText: textField.text,
+    markId: cardInstance.markId,
+    audioUrl: (textField.audio && textField.audio.url) || null,
+    translation,
+    displayAnswerText,
+    compareAnswerText: cardInstance.compareAnswer !== null && cardInstance.compareAnswer !== undefined
+      ? cardInstance.compareAnswer : displayAnswerText,
+  };
+}
+
+// ---------- "Normal com reverso" ----------
+// Decisão arquitetural (reportada explicitamente no checkpoint 4a, não
+// presumida): NÃO existe um cardTypeId `normal_reversed` -- uma Note
+// reversível gera 2 CardInstance, cada uma com cardTypeId:'normal'
+// (renderizadas pelo MESMO resolveNormalCardView acima), só com
+// frontFieldIndex/backFieldIndex trocados entre si. É fiel ao Anki real
+// (a note type "Basic and reversed card" gera Card 1 e Card 2, as duas
+// usando o mesmo template "Card", só com Frente/Verso invertidos -- não
+// um template distinto) e evita inventar uma 6ª forma de renderizar
+// quando a lógica já é idêntica à de "Normal".
+// Sufixo de id `-b` (nunca `-r{revision}`, que já significa "cartão
+// editado" desde a Fase 8) -- garante que as 2 metades do par nunca
+// colidem entre si nem com o mecanismo de reset-por-edição já existente.
+// Pura/independente -- não chamada por interpretNoteFromRow() (nenhuma
+// linha legada jamais pediu isto, não há coluna pra "reversível" em
+// teacher_flashcards/own_flashcards) -- existe pronta pro editor futuro
+// (Fase 6+, fora do escopo desta fase) poder gerar uma Note reversível.
+function buildReversedCardInstancePair(noteId, frontFieldIndex, backFieldIndex){
+  return [
+    { id: noteId, noteId, cardTypeId: CARD_TYPE_IDS.NORMAL, frontFieldIndex, backFieldIndex, ...FLASHCARD_MODEL_FSRS_DEFAULTS },
+    { id: `${noteId}-b`, noteId, cardTypeId: CARD_TYPE_IDS.NORMAL, frontFieldIndex: backFieldIndex, backFieldIndex: frontFieldIndex, ...FLASHCARD_MODEL_FSRS_DEFAULTS },
+  ];
 }
