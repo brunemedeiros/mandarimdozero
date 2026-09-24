@@ -554,6 +554,15 @@ async function mergeTeacherFlashcardsIntoState(){
 // mesmo motivo do cartão de professora -- isCardLessonCompleted() trata
 // `origin==='self'` igual a `origin==='teacher'` (mesmo gate por
 // `flashcardStatus`, sem o gate de lição).
+// Prompt-mestre "reformulação gratuito x premium" (ver CLAUDE.md) --
+// imageUrl/audioUrl/choices/clozeSentence/clozeAnswer: mesmos 4 campos
+// opcionais já usados por buildCardFromTeacherFlashcard() acima (Fase
+// 8a/8c), agora também presentes em cartão próprio (migration 040). Gate
+// de "é premium?" fica só na UI de criação (shared/my-flashcards.js) --
+// renderReviewView()/buildSpeedOptions() já são origin-agnósticos (checam
+// card.choices/card.clozeSentence direto, nunca card.origin), então um
+// cartão próprio com esses campos populados já funciona sem nenhuma
+// mudança no motor de revisão.
 function buildCardFromSelfFlashcard(row){
   return {
     id: flashcardIdForRow('s', row),
@@ -568,6 +577,11 @@ function buildCardFromSelfFlashcard(row){
     teacherNote: row.note || null,
     flashcardStatus: row.status,
     frontIsTargetLanguage: row.front_is_target_language !== false,
+    imageUrl: row.image_url || null,
+    audioUrl: row.audio_url || null,
+    choices: (row.choices && row.choices.length) ? row.choices : null,
+    clozeSentence: row.cloze_sentence || null,
+    clozeAnswer: row.cloze_answer || null,
     ef: 2.5,
     interval: 0,
     reps: 0,

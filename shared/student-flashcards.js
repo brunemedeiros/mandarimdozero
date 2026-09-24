@@ -37,32 +37,80 @@ async function fetchMyOwnFlashcards(languageAppKey){
 // -- qual lado tem o idioma estudado, decide rótulo + pronúncia automática
 // (fr/zh app.js). Default `true` preserva o comportamento de todo cartão
 // já existente.
-function _validateOwnFlashcardContent({ front, backTrans }){
+//
+// Prompt-mestre "reformulação gratuito x premium" (ver CLAUDE.md) --
+// choices/clozeSentence/clozeAnswer/clozeAnswerPinyin: mesmos 2 formatos
+// ricos (múltipla escolha, completar a frase) que só teacher_flashcards
+// tinha até aqui (Fase 8a/8c), agora também disponíveis em cartão próprio
+// -- gate de "é premium?" fica na UI (shared/my-flashcards.js), não aqui:
+// esta função só valida o CONTEÚDO, mesmo princípio de _validateFlashcardContent
+// em teacher-flashcards.js (copiada aqui de propósito, não importada --
+// mesmo padrão de duplicação intencional já usado nas 3 telas de admin).
+// `front` só é exigido fora do modo cloze (migration 040, mesmo motivo da
+// 035 pra teacher_flashcards).
+function _validateOwnFlashcardContent({ front, backTrans, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin, languageAppKey }){
   const cleanFront = (front || '').trim();
   const cleanBack = (backTrans || '').trim();
-  if (!cleanFront) return { ok: false, error: 'Digite o texto da frente do cartão.' };
+  const cleanClozeSentence = (clozeSentence || '').trim();
+  const cleanClozeAnswer = (clozeAnswer || '').trim();
+  const isCloze = !!cleanClozeSentence;
+  if (!isCloze && !cleanFront) return { ok: false, error: 'Digite o texto da frente do cartão.' };
   if (!cleanBack) return { ok: false, error: 'Digite a tradução (verso do cartão).' };
-  return { ok: true, cleanFront, cleanBack };
+  const cleanChoices = (choices || []).map(c => (c || '').trim()).filter(Boolean);
+  if (cleanClozeSentence){
+    if ((cleanClozeSentence.match(/___/g) || []).length !== 1){
+      return { ok: false, error: 'A frase precisa ter exatamente um espaço marcado com ___ (3 underscores).' };
+    }
+    if (!cleanClozeAnswer) return { ok: false, error: 'Digite a resposta certa pro espaço em branco.' };
+    if (languageAppKey === 'mandarim' && !(clozeAnswerPinyin || '').trim()){
+      return { ok: false, error: 'Digite o pinyin da resposta (é o que você vai digitar).' };
+    }
+  }
+  return { ok: true, cleanFront, cleanBack, cleanChoices, cleanClozeSentence, cleanClozeAnswer };
 }
 
-async function createOwnFlashcard({ languageAppKey, front, backTrans, note, frontPinyin, frontIsTargetLanguage }){
-  const v = _validateOwnFlashcardContent({ front, backTrans });
+async function createOwnFlashcard({ languageAppKey, front, backTrans, note, frontPinyin, frontIsTargetLanguage, imageUrl, audioUrl, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin }){
+  const v = _validateOwnFlashcardContent({ front, backTrans, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin, languageAppKey });
   if (!v.ok) return v;
   const { data, error } = await supabaseClient
     .from('student_flashcards')
     .insert({
       student_id: CURRENT_USER.id,
       language_app_key: languageAppKey,
-      front: v.cleanFront,
+      front: v.cleanFront || null,
       back_trans: v.cleanBack,
       note: (note || '').trim() || null,
       front_pinyin: (frontPinyin || '').trim() || null,
       front_is_target_language: frontIsTargetLanguage !== false,
+      image_url: imageUrl || null,
+      audio_url: audioUrl || null,
+      choices: v.cleanChoices.length ? v.cleanChoices : null,
+      cloze_sentence: v.cleanClozeSentence || null,
+      cloze_answer: v.cleanClozeAnswer || null,
+      cloze_answer_pinyin: languageAppKey === 'mandarim' ? ((clozeAnswerPinyin || '').trim() || null) : null,
     })
     .select()
     .single();
   if (error){ console.error('Erro ao criar seu flashcard:', error); return { ok: false, error: 'Não foi possível criar o cartão agora.' }; }
   return { ok: true, card: data };
+}
+
+// Upload de mídia (imagem/áudio) pro bucket `flashcard-media` -- mesmo
+// bucket já usado por teacher-flashcards.js (uploadFlashcardMedia): a
+// policy de escrita já é "qualquer autenticado, restrito à própria pasta
+// (auth.uid())" (migration 032), nunca escopada a professora -- funciona
+// pra cartão próprio sem nenhuma migração nova. Path com prefixo `self-`
+// só pra facilitar auditoria manual do bucket (não afeta RLS nem leitura).
+async function uploadOwnFlashcardMedia(file, kind){
+  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
+  const path = `${CURRENT_USER.id}/self-${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { error } = await supabaseClient.storage
+    .from('flashcard-media')
+    .upload(path, file, { contentType: file.type || undefined, cacheControl: '3600' });
+  if (error){ console.error(`Erro ao subir ${kind} do cartão:`, error); return { ok: false, error: 'Não foi possível enviar o arquivo agora.' }; }
+  const { data: pub } = supabaseClient.storage.from('flashcard-media').getPublicUrl(path);
+  return { ok: true, url: pub.publicUrl };
 }
 
 async function setOwnFlashcardStatus(id, status){

@@ -644,6 +644,11 @@ async function mergeTeacherFlashcardsIntoState(){
 // `t${row.id}` (professora, tabela DIFERENTE). Mesmo mapeamento
 // hanzi/pinyin de buildCardFromTeacherFlashcard (front_pinyin/back_hanzi
 // separados, `|| ''` pra nunca renderizar "undefined").
+// Prompt-mestre "reformulação gratuito x premium" (ver CLAUDE.md) --
+// mesma extensão do irmão fr, com o mapeamento hanzi/pinyin de sempre
+// (clozeAnswerPinyin é o que a aluna digita, clozeAnswer/hanzi só revela a
+// resposta depois de julgada -- mesmo motivo de buildCardFromTeacherFlashcard
+// acima). Origin-agnóstico no motor de revisão, nenhuma mudança lá.
 function buildCardFromSelfFlashcard(row){
   return {
     id: flashcardIdForRow('s', row),
@@ -658,6 +663,12 @@ function buildCardFromSelfFlashcard(row){
     origin: 'self',
     teacherNote: row.note || null,
     flashcardStatus: row.status,
+    imageUrl: row.image_url || null,
+    audioUrl: row.audio_url || null,
+    choices: (row.choices && row.choices.length) ? row.choices : null,
+    clozeSentence: row.cloze_sentence || null,
+    clozeAnswer: row.cloze_answer || null,
+    clozeAnswerPinyin: row.cloze_answer_pinyin || null,
     ef: 2.5,
     interval: 0,
     reps: 0,

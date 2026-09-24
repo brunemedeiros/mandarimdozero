@@ -4575,3 +4575,239 @@ públicos" original está com todo o escopo grillado (Fases 1 e 2)
 completo -- só a Fase 3 (integração com pagamento/Stripe) continua em
 aberto, explicitamente bloqueada até essa infraestrutura existir de
 verdade no produto, não porque falta trabalho de UI.
+
+## Prompt-mestre "reformulação gratuito x premium" -- infraestrutura de plano
+(sem cobrança real), valor concreto = formatos ricos em cartão próprio
+
+Pedido da autora: "Confirme se está tudo funcionando na produção e siga
+para a fase 3" -- referência à Fase 3 do prompt-mestre "perfil público"
+(pagamento/Stripe, registrada acima como explicitamente bloqueada até
+existir infraestrutura de assinatura). Antes de tocar em código de
+pagamento, grillado em 3 rodadas (`AskUserQuestion`) porque essa fase
+cruza uma linha que nenhuma anterior cruzou -- é a primeira vez que este
+produto toca dinheiro de verdade, e o CLAUDE.md já travava explicitamente
+"não presumir infraestrutura de assinatura/pagamento" (ver seção
+"Considerar plano gratuito x premium" no topo deste arquivo).
+
+**Confirmação de produção, feita antes do grilling**: deploy do commit
+mais recente (`07bee67`, Fase 2 do perfil público) confirmado com
+`conclusion:"success"` no workflow "Deploy to GitHub Pages" (GitHub
+Actions) + migrations `037`/`038` confirmadas ao vivo no Supabase
+(`list_migrations`) + colunas/functions novas confirmadas existindo de
+verdade no banco real (`execute_sql`). Curl direto em
+`app.profbrune.com.br` continua bloqueado pelo proxy de saída deste
+sandbox (mesma limitação já documentada neste arquivo pra domínios
+externos) -- as duas confirmações acima (Actions + Supabase) são o
+substituto real dessa vez.
+
+**Rodada 1 do grilling -- decisões**: Stripe como provedor (quando
+integração real existir); "redesenhar do zero" o desenho de gratuito x
+premium em vez de só remendar o teto de 20 cartões já existente (Fase
+5.1); só infraestrutura nesta entrega, **nenhuma cobrança real ainda**.
+
+**Rodada 2 -- decisões**: cliente pagante = **qualquer conta registrada**
+(não só quem tem vínculo pedagógico formal com uma professora -- hoje 11
+pessoas vinculadas via "🎓 Alunos", de um total maior de contas
+registradas no app; a autora corrigiu explicitamente uma confusão minha
+de terminologia aqui, ver abaixo); auditoria completa feature por
+feature antes de fixar a alavanca (conclusão: só a categoria de AUTORIA/
+CAPACIDADE PESSOAL de conteúdo -- "Meus Cartões", Fase 5 -- tem uma razão
+real pra virar alavanca de monetização; todo o núcleo pedagógico --
+trilha, FSRS, notas de realidade/cultura, badges, ranking -- fica sempre
+grátis, e ferramentas do lado da professora ficam fora do escopo desta
+fase, que é especificamente o eixo "aluno individual", não o eixo
+hipotético "professora-inquilina/multi-tenant"); um único nível pago
+(binário free/premium, sem tiers).
+
+**Correção de terminologia da autora, registrada explicitamente porque
+quase contaminou o desenho inteiro**: eu usei "21 alunas" pra descrever o
+universo de contas na Rodada 2, misturando dois conceitos que o CLAUDE.md
+já distinguia em seções anteriores (migration 024) mas que eu mesmo
+confundi na hora de perguntar -- "aluna" no sentido da feature de alunas
+particulares é só quem está EXPLICITAMENTE vinculada no Painel de Admin
+("🎓 Alunos", `teacher_students`, vínculo ativo -- **11 pessoas hoje**,
+confirmado pela autora); "usuária"/conta registrada é qualquer perfil no
+app (`profiles`, nasce com `role='student'` só pra dizer "não é admin",
+sem nenhuma relação com vínculo pedagógico -- o "21" que citei era esse
+número). A resposta da Rodada 1 ("aluno individual paga por si mesma") já
+implicava a resposta certa (qualquer conta, não só as 11 vinculadas), mas
+a pergunta como formulada por mim poderia ter travado o desenho errado se
+ela não tivesse corrigido -- registrado aqui pra não se repetir.
+
+**Rodada 3 -- decisões**: vínculo com professora continua isentando do
+TETO DE QUANTIDADE de cartões próprios (Fase 5.1, ninguém perde o que já
+tem hoje) -- Premium é um eixo NOVO e SEPARADO cujo valor real é
+desbloquear FORMATOS RICOS (imagem/áudio/múltipla escolha/completar
+frase) em cartão próprio, algo que nenhuma conta tem hoje mesmo com
+vínculo; ativação manual via botão no Painel de Admin (sem checkout
+Stripe ainda); todas as contas existentes começam `'free'` por padrão,
+sem grandfathering.
+
+**O que foi feito:**
+
+- **Migration `039_add_plan_tier_to_profiles.sql`** -- `profiles.plan_tier
+  text not null default 'free' check (plan_tier in ('free','premium'))`.
+  Aditiva/sem risco, mesmo padrão de `profiles.role` (migration 024) --
+  nenhuma conta muda de comportamento com esta migration. Aplicada AO
+  VIVO nesta sessão via `mcp__Supabase__apply_migration`, projeto
+  `eigjocalzwamisgqilhg` -- não é passo manual pendente pra autora.
+- **Migration `040_student_flashcards_rich_formats.sql`** -- as mesmas
+  colunas que `teacher_flashcards` já tinha desde a Fase 8a/8c
+  (`image_url`/`audio_url`/`choices`/`cloze_sentence`/`cloze_answer`/
+  `cloze_answer_pinyin`) replicadas em `student_flashcards` (que nunca
+  tinha ganho esses formatos -- Fase 8a/8c registraram isso
+  explicitamente como "fora do escopo, fase futura"), + `front` vira
+  nullable (mesmo motivo/mesma migration-irmã de
+  `allow_null_front_teacher_flashcards`, 035 -- cartão cloze não tem
+  front tradicional). Aplicada AO VIVO nesta sessão -- não é passo manual
+  pendente.
+- **`shared/roles.js`** -- `fetchMyPlanTier()`/`isPremium()` (eixo NOVO,
+  separado de `hasActiveTeacherLink()` -- ver Rodada 3 acima, os dois
+  podem coexistir independentemente numa mesma conta), `setPlanTier(userId,
+  tier)` (ativação/remoção manual, só chamada do Painel de Admin),
+  `searchAnyProfileByUsername(username)` (busca QUALQUER conta por
+  @username, com select próprio incluindo `plan_tier` -- diferente de
+  `resolveProfileByUsername()` de `admin-badges.js`, que os outros
+  chamadores não precisam desse campo extra).
+- **`shared/student-flashcards.js`** -- `createOwnFlashcard()` estendido
+  com `imageUrl`/`audioUrl`/`choices`/`clozeSentence`/`clozeAnswer`/
+  `clozeAnswerPinyin` (mesma validação de `_validateFlashcardContent` de
+  `teacher-flashcards.js`, copiada aqui de propósito -- mesmo padrão de
+  duplicação intencional já usado nas telas de admin, não uma tentativa
+  de compartilhar módulo novo). Nova `uploadOwnFlashcardMedia(file,
+  kind)` -- reaproveita o MESMO bucket `flashcard-media` (migration 032)
+  que já era "qualquer autenticado, restrito à própria pasta" -- nunca
+  escopado a professora --, então funcionou pra cartão próprio sem
+  nenhuma migração de Storage nova, só um prefixo `self-` no path pra
+  facilitar auditoria manual do bucket.
+- **`shared/my-flashcards.js`** -- formulário "Meus Cartões" ganhou o
+  radio group "Modo de prática" (flip/mc/cloze) + campos de imagem/áudio,
+  só renderizados quando `isPremium()===true`; conta free vê uma única
+  linha de aviso honesto ("🔒 Premium desbloqueia imagem, áudio, múltipla
+  escolha e completar a frase... Fale com a administração pra ativar" --
+  nunca promete um checkout que não existe) no lugar dos controles, sem
+  nenhuma mudança no formulário básico que já tinha (frente/verso/nota
+  continuam funcionando exatamente como antes pra qualquer conta). Escopo
+  deliberadamente mais simples que `shared/admin-flashcards.js`
+  (destinatário-múltiplo, validação por campo com blur) -- aqui é sempre
+  "pra mim mesma", então a validação roda só no submit, mesmo nível de
+  rigor de `createOwnFlashcard()` server-side.
+- **`fr/app.js`/`zh/app.js`** -- `buildCardFromSelfFlashcard()` ganhou os
+  mesmos 4-5 campos que `buildCardFromTeacherFlashcard()` já tinha desde
+  a Fase 8a/8c. **Nenhuma mudança no motor de revisão** --
+  `renderReviewView()`/`buildSpeedOptions()`/`hasPlainFrontBack()` já
+  eram origin-agnósticos (checam `card.choices`/`card.clozeSentence`
+  direto, nunca `card.origin`), confirmado por leitura antes de escrever
+  qualquer linha nova -- a mesma aposta arquitetural "um motor só"
+  validada em cada fase anterior desta feature (alunas particulares)
+  paga o dividendo de novo aqui, dessa vez pra origem `'self'`.
+- **`shared/admin-premium.js`** (novo) + nova subseção "⭐ Premium" no
+  Painel de Admin (fr+zh, ao lado de "📚 Material de apoio"): busca por
+  @username (`searchAnyProfileByUsername` -- funciona pra QUALQUER
+  conta, vinculada ou não, diferente de "🎓 Alunos" que só lista quem já
+  tem vínculo formal) + botão "Tornar Premium"/"Remover Premium". Sem
+  listagem de "todas as contas" -- não existe isso em nenhum lugar do
+  admin hoje e construir um navegador de usuários seria escopo maior que
+  o pedido ("botão no Painel de Admin", não um CRM de usuários).
+
+**Decisões arquiteturais desta fase:**
+1. `plan_tier` e `hasActiveTeacherLink()` (vínculo) são dois eixos
+   ORTOGONAIS que ambos podem "desbloquear coisa" em Meus Cartões, mas
+   nunca a MESMA coisa -- vínculo isenta do teto de QUANTIDADE (Fase
+   5.1, inalterado), Premium desbloqueia FORMATOS (novo). Uma conta pode
+   ter os dois, um só, ou nenhum -- os dois selos aparecem juntos quando
+   aplicável (`tierBadgeHTML` em `my-flashcards.js`).
+2. Reaproveitar o bucket `flashcard-media` já existente (em vez de criar
+   um novo escopado a "cartão próprio") funcionou porque a RLS dele já
+   era "qualquer autenticado, pasta própria" desde a Fase 8a -- nunca
+   dependeu de papel de professora, só de dono da pasta (`auth.uid()`).
+   Confirmado por leitura da migration 032 antes de decidir, não
+   assumido.
+3. `searchAnyProfileByUsername()` tem select PRÓPRIO (não reaproveita
+   `resolveProfileByUsername()` de `admin-badges.js`) só pra poder trazer
+   `plan_tier` junto -- evita carregar esse campo extra em todos os
+   outros lugares que já usam a função original e não precisam dele.
+4. Ativação de Premium é 100% manual (SQL via este botão de admin) até
+   Stripe existir -- nenhuma tentativa de simular checkout, trial, ou
+   qualquer fluxo de autoatendimento que sugira que pagamento real já
+   funciona. Mesmo princípio de honestidade já usado no teto de 20
+   cartões (Fase 5.1): a UI nunca promete infraestrutura que não existe.
+
+**Gratuito x Premium (é o assunto desta fase inteira, não uma nota à
+margem)**: núcleo pedagógico (trilha, exercícios, FSRS, notas de
+realidade/cultura, badges, ranking, notificações) fica **sempre grátis**
+pra qualquer conta -- gatear isso contradiria a missão do produto já
+registrada neste arquivo ("ensinar o idioma real"). Ferramentas do lado
+da professora (Fases 1-3/6a/6b/7/8 do sistema de alunas particulares)
+ficam **fora do escopo desta fase** -- são o eixo hipotético "professora-
+inquilina/multi-tenant" já registrado repetidamente como pergunta em
+aberto, e hoje só existe 1 professora real (a autora) usando essas
+ferramentas, então não geraria receita ainda. A única alavanca real
+nesta entrega é a capacidade de AUTORIA PESSOAL em "Meus Cartões":
+quantidade (já existia, Fase 5.1) e agora formatos ricos (novo). Preço/
+moeda/período de cobrança **não foram definidos** -- essa é
+explicitamente a Fase 3 de verdade (checkout Stripe), ainda bloqueada
+até a autora decidir ativar.
+
+**Testes realizados:** `node --check` sem erro em
+`shared/roles.js`/`shared/student-flashcards.js`/`shared/my-flashcards.js`/
+`shared/admin-premium.js`/`shared/admin-analytics.js`/`fr/app.js`/
+`zh/app.js`. Validação funcional via Playwright (fr+zh), boot completo do
+app (não só chamada isolada de função) com `getSession()` mockada
+devolvendo uma sessão real -- mesmo padrão de fidelidade mais alto já
+usado em fases anteriores desta feature: (1) **conta free** -- sem radio
+de "Modo de prática", sem campo de imagem, aviso de upsell presente,
+criação de cartão comum (sem campos ricos) continua funcionando
+normalmente (`dbCount:1`); (2) **conta premium, fr** -- radios presentes,
+cartão de múltipla escolha criado com 2 opções erradas gravadas
+corretamente, cartão cloze criado com `front:null` confirmado no banco
+(nunca um valor inventado, mesmo princípio da migration 035),
+`buildCardFromSelfFlashcard()` confirmado populando `choices`/
+`clozeSentence` corretamente e com `origin:'self'` preservado,
+`hasPlainFrontBack()` confirmado `true` pro cartão MC (tem front) e
+`false` pro cloze (sem front) -- a mesma exclusão de Speed Review/
+Combinar/Anki export que já protegia cartão de professora sem front
+agora protege cartão próprio também, sem nenhuma mudança de código
+nessas 3 funções; upload de imagem confirmado batendo no bucket
+`flashcard-media` com path prefixado `self-`; (3) **zh premium** --
+cloze sem pinyin da resposta REJEITADO (`dbCount:0`, mensagem específica
+"Digite o pinyin da resposta..."), com pinyin ACEITO e gravado
+corretamente; (4) **Painel de Admin, "⭐ Premium"** -- busca por
+@username encontra a conta certa mostrando o plano atual, clique em
+"Tornar Premium" grava `plan_tier:'premium'` de verdade no banco e o
+botão vira "Remover Premium". Sem erro de console novo atribuível a
+este código nos cenários premium/admin; o cenário free só mostrou os
+`ERR_TUNNEL_CONNECTION_FAILED` já esperados (CDN do Supabase bloqueado
+pelo proxy de saída deste sandbox, mesma limitação documentada em
+sessões anteriores). Não foi feita validação visual de tema
+claro/escuro nesta entrega -- zero CSS novo introduzido (reaproveita
+`.pill`/`.profile-edit-*`/`.btn-*` já calibrados em todas as fases
+anteriores de flashcards), risco considerado baixo mas registrando por
+completude, mesmo padrão de honestidade já usado quando outras entregas
+validaram só um subconjunto.
+
+**O que ainda falta / não foi feito nesta fase (de propósito):**
+- **Checkout Stripe real / cobrança de verdade** -- continua
+  explicitamente fora do escopo, é a Fase 3 de verdade do prompt-mestre
+  original, só desbloqueada quando a autora decidir ativar (precisa de
+  conta Stripe, preço definido, e provavelmente uma Edge Function nova
+  pro webhook, no mesmo padrão já usado pra Resend).
+- **Eixo "professora-inquilina" (multi-tenant)** -- pergunta em aberto
+  registrada repetidamente nas fases anteriores (limite de alunas/
+  Storage por professora quando houver mais de uma na plataforma) --
+  não tocado aqui, fora do escopo desta fase de propósito.
+- **Formatos ricos em cartão próprio não têm edição** -- só criar; editar
+  um cartão próprio já criado (Prop 4, "7 propostas") continua limitado a
+  front/back/note/direção, não ganhou os campos novos nesta entrega
+  (mesmo escopo restrito que `teacher_flashcards` teve entre as Fases
+  8a/8c e a integração de edição -- que lá também não cobriu modo/mídia
+  além do que já existia quando a edição foi implementada).
+- Nenhuma listagem/navegador de "todas as contas registradas" no admin --
+  só busca pontual por @username, suficiente pro pedido ("botão", não um
+  CRM).
+- Nenhuma notificação avisando a conta quando ela vira Premium -- não foi
+  pedido.
+
+Nenhum passo manual pendente pra autora nesta entrega -- as duas
+migrations (`039`/`040`) já foram aplicadas ao vivo via
+`mcp__Supabase__apply_migration`.
