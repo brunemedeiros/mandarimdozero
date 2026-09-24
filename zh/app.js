@@ -571,50 +571,16 @@ function flashcardIdForRow(prefix, row){
 // front_is_target_language é gravado na tabela (mesma coluna que o fr
 // usa) mas nunca lido no client zh. shared/admin-flashcards.js esconde o
 // seletor da UI quando a aluna selecionada é de mandarim (ver lá).
+// Fase 3 do prompt-mestre "reestruturação inspirada no Anki" (ver
+// CLAUDE.md): esta função NÃO lê mais `row.*` direto -- delega inteira pra
+// shared/flashcard-model.js (interpretNoteFromRow + bridgeNoteCardsToLegacyShape),
+// o único lugar do app com permissão de conhecer as colunas legadas. O
+// shape devolvido aqui continua idêntico ao de antes desta fase -- o motor
+// de revisão ainda não foi reescrito pra consumir Note/CardInstance
+// diretamente, isso é trabalho explícito da Fase 4.
 function buildCardFromTeacherFlashcard(row){
-  return {
-    id: flashcardIdForRow('t', row),
-    rowId: row.id,
-    unitId: null,
-    unitTitle: 'Da sua professora',
-    vocabIdx: null,
-    type: 'vocab',
-    front_pinyin: row.front_pinyin || '',
-    back_hanzi: row.front,
-    back_trans: row.back_trans,
-    origin: 'teacher',
-    teacherNote: row.note || null,
-    flashcardStatus: row.status,
-    // Fase 8a (ver CLAUDE.md) -- formatos extras opcionais, sempre
-    // independentes entre si. `choices` presente (array não-vazio) marca
-    // o cartão como múltipla escolha -- renderReviewView() desvia pra
-    // renderMultipleChoiceReviewCard() em vez do flip normal quando true.
-    imageUrl: row.image_url || null,
-    audioUrl: row.audio_url || null,
-    choices: (row.choices && row.choices.length) ? row.choices : null,
-    // Fase 8c (ver CLAUDE.md) -- "completar a frase", 4º formato,
-    // mutuamente exclusivo com `choices` (garantido na criação, ver
-    // shared/admin-flashcards.js). clozeSentence contém um único "___"
-    // (em hanzi) marcando a lacuna; clozeAnswerPinyin é o que a aluna
-    // efetivamente DIGITA (teclado latino não digita hanzi, mesmo motivo
-    // dos exercícios de digitar da trilha).
-    clozeSentence: row.cloze_sentence || null,
-    clozeAnswer: row.cloze_answer || null,
-    clozeAnswerPinyin: row.cloze_answer_pinyin || null,
-    ef: 2.5,
-    interval: 0,
-    reps: 0,
-    due: 0,
-    lapses: 0,
-    stability: 0,
-    difficulty: 0,
-    state: 'new',
-    lastReview: null,
-    fsrsReps: 0,
-    fsrsLapses: 0
-  };
+  return legacyFlashcardRowToCard(row, { origin: 'teacher', appKey: APP_KEY, idPrefix: 't' });
 }
-
 // Busca os flashcards atribuídos a esta conta (shared/teacher-flashcards.js)
 // e mescla em STATE.cards -- precisa rodar ANTES de loadState()/
 // applySerializedState(), pra que o merge por id lá (Fase 0: "cartão salvo
@@ -649,38 +615,10 @@ async function mergeTeacherFlashcardsIntoState(){
 // (clozeAnswerPinyin é o que a aluna digita, clozeAnswer/hanzi só revela a
 // resposta depois de julgada -- mesmo motivo de buildCardFromTeacherFlashcard
 // acima). Origin-agnóstico no motor de revisão, nenhuma mudança lá.
+// Fase 3 (ver comentário de buildCardFromTeacherFlashcard acima, mesmo
+// princípio) -- irmã gêmea, só troca origin/idPrefix.
 function buildCardFromSelfFlashcard(row){
-  return {
-    id: flashcardIdForRow('s', row),
-    rowId: row.id,
-    unitId: null,
-    unitTitle: 'Meus cartões',
-    vocabIdx: null,
-    type: 'vocab',
-    front_pinyin: row.front_pinyin || '',
-    back_hanzi: row.front,
-    back_trans: row.back_trans,
-    origin: 'self',
-    teacherNote: row.note || null,
-    flashcardStatus: row.status,
-    imageUrl: row.image_url || null,
-    audioUrl: row.audio_url || null,
-    choices: (row.choices && row.choices.length) ? row.choices : null,
-    clozeSentence: row.cloze_sentence || null,
-    clozeAnswer: row.cloze_answer || null,
-    clozeAnswerPinyin: row.cloze_answer_pinyin || null,
-    ef: 2.5,
-    interval: 0,
-    reps: 0,
-    due: 0,
-    lapses: 0,
-    stability: 0,
-    difficulty: 0,
-    state: 'new',
-    lastReview: null,
-    fsrsReps: 0,
-    fsrsLapses: 0
-  };
+  return legacyFlashcardRowToCard(row, { origin: 'self', appKey: APP_KEY, idPrefix: 's' });
 }
 
 // Busca os cartões que a PRÓPRIA aluna já criou (shared/own-flashcards.js)

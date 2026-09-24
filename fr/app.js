@@ -475,49 +475,17 @@ function flashcardIdForRow(prefix, row){
   return row.revision > 0 ? `${prefix}${row.id}-r${row.revision}` : `${prefix}${row.id}`;
 }
 
+// Fase 3 do prompt-mestre "reestruturação inspirada no Anki" (ver
+// CLAUDE.md): esta função NÃO lê mais `row.*` direto -- delega inteira pra
+// shared/flashcard-model.js (interpretNoteFromRow + bridgeNoteCardsToLegacyShape),
+// o único lugar do app com permissão de conhecer as colunas legadas
+// (front/back_trans/front_is_target_language/choices/cloze_sentence/
+// cloze_answer/audio_url/image_url). O shape devolvido aqui continua
+// idêntico ao de antes desta fase -- o motor de revisão (renderReviewView
+// e afins) ainda não foi reescrito pra consumir Note/CardInstance
+// diretamente, isso é trabalho explícito da Fase 4.
 function buildCardFromTeacherFlashcard(row){
-  return {
-    id: flashcardIdForRow('t', row),
-    rowId: row.id,
-    unitId: null,
-    unitTitle: 'Da sua professora',
-    vocabIdx: null,
-    type: 'vocab',
-    front: row.front,
-    back_trans: row.back_trans,
-    origin: 'teacher',
-    teacherNote: row.note || null,
-    flashcardStatus: row.status,
-    // Prop 1+2 (ver CLAUDE.md, "7 propostas") -- qual lado tem o idioma
-    // estudado. Vale só pros modos flip/mc (renderReviewView/
-    // renderMultipleChoiceReviewCard) -- cloze não usa front/back_trans
-    // pra isso, mecânica de sempre.
-    frontIsTargetLanguage: row.front_is_target_language !== false,
-    // Fase 8a (ver CLAUDE.md) -- formatos extras opcionais, sempre
-    // independentes entre si. `choices` presente (array não-vazio) marca
-    // o cartão como múltipla escolha -- renderReviewView() desvia pra
-    // renderMultipleChoiceCard() em vez do flip normal quando isso é true.
-    imageUrl: row.image_url || null,
-    audioUrl: row.audio_url || null,
-    choices: (row.choices && row.choices.length) ? row.choices : null,
-    // Fase 8c (ver CLAUDE.md) -- "completar a frase", 4º formato,
-    // mutuamente exclusivo com `choices` (garantido na criação, ver
-    // shared/admin-flashcards.js). clozeSentence contém um único "___"
-    // marcando a lacuna.
-    clozeSentence: row.cloze_sentence || null,
-    clozeAnswer: row.cloze_answer || null,
-    ef: 2.5,
-    interval: 0,
-    reps: 0,
-    due: 0,
-    lapses: 0,
-    stability: 0,
-    difficulty: 0,
-    state: 'new',
-    lastReview: null,
-    fsrsReps: 0,
-    fsrsLapses: 0
-  };
+  return legacyFlashcardRowToCard(row, { origin: 'teacher', appKey: APP_KEY, idPrefix: 't' });
 }
 
 // Busca os flashcards atribuídos a esta conta (shared/teacher-flashcards.js)
@@ -563,37 +531,10 @@ async function mergeTeacherFlashcardsIntoState(){
 // card.choices/card.clozeSentence direto, nunca card.origin), então um
 // cartão próprio com esses campos populados já funciona sem nenhuma
 // mudança no motor de revisão.
+// Fase 3 (ver comentário de buildCardFromTeacherFlashcard acima, mesmo
+// princípio) -- irmã gêmea, só troca origin/idPrefix.
 function buildCardFromSelfFlashcard(row){
-  return {
-    id: flashcardIdForRow('s', row),
-    rowId: row.id,
-    unitId: null,
-    unitTitle: 'Meus cartões',
-    vocabIdx: null,
-    type: 'vocab',
-    front: row.front,
-    back_trans: row.back_trans,
-    origin: 'self',
-    teacherNote: row.note || null,
-    flashcardStatus: row.status,
-    frontIsTargetLanguage: row.front_is_target_language !== false,
-    imageUrl: row.image_url || null,
-    audioUrl: row.audio_url || null,
-    choices: (row.choices && row.choices.length) ? row.choices : null,
-    clozeSentence: row.cloze_sentence || null,
-    clozeAnswer: row.cloze_answer || null,
-    ef: 2.5,
-    interval: 0,
-    reps: 0,
-    due: 0,
-    lapses: 0,
-    stability: 0,
-    difficulty: 0,
-    state: 'new',
-    lastReview: null,
-    fsrsReps: 0,
-    fsrsLapses: 0
-  };
+  return legacyFlashcardRowToCard(row, { origin: 'self', appKey: APP_KEY, idPrefix: 's' });
 }
 
 // Busca os cartões que a PRÓPRIA aluna já criou (shared/own-flashcards.js)
