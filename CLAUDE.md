@@ -5098,3 +5098,57 @@ subconjunto.
 
 **Escopo**: só `shared/admin-flashcards.js`. Nenhuma migração, nenhum
 passo manual pendente pra autora.
+
+## Rename `profiles.role`: `'student'` → `'user'` (schema, não texto de UI)
+
+A autora perguntou se o default `'student'` de `profiles.role` (migration
+024) não era exatamente o mesmo tipo de colisão de terminologia já
+auditado na entrega anterior ("aluno/a" = vínculo formal em
+`teacher_students`, nunca "toda conta registrada"). Confirmado que sim,
+lendo a migration 024 de novo: o próprio comentário dela dizia "toda
+conta existente hoje já é implicitamente aluna", reusando a mesma palavra
+que o resto do código reserva estritamente pro vínculo formal. **Sem bug
+funcional** -- grep confirmou que nenhum call site fazia `role ===
+'student'` pra decidir vínculo (isso sempre leu `teacher_students`/
+`hasActiveTeacherLink()`) -- mas a colisão de NOME era real e podia
+confundir uma sessão futura, exatamente o risco que a auditoria anterior
+existia pra prevenir. Pedido direto da autora: "Rename it, run the
+migration. From 'student' to 'user'".
+
+**Migration `042_rename_role_student_to_user.sql`** -- `profiles.role`:
+constraint antiga (`profiles_role_check`, confirmada ao vivo via
+`pg_constraint` antes de escrever a migration) trocada por `role in
+('user','teacher','admin')`; `update ... set role='user' where
+role='student'` (22 linhas migradas, confirmado ao vivo -- as mesmas 22
+contas que eram `'student'`, 1 admin intacta); `default` da coluna
+também trocado pra `'user'`. Aplicada AO VIVO via
+`mcp__Supabase__apply_migration`, projeto `eigjocalzwamisgqilhg` -- não é
+passo manual pendente pra autora. `shared/roles.js` (`fetchMyRole()`)
+ajustado pro mesmo fallback (`|| 'user'`).
+
+**Escopo explicitamente NÃO estendido a 2 outras ocorrências de
+`'student'` no código, confirmadas como sistemas DIFERENTES antes de
+decidir não tocar**:
+- `badge_catalog.badge_id`/`badge_grants.badge_id = 'student'` -- é o id
+  do badge "Aluno/a da Prof. Brune" (`shared/roles.js`,
+  `assignStudentToTeacher()`), uma tabela e conceito totalmente
+  diferentes de `profiles.role`. Renomear isto seria uma migração de
+  dado separada e mais arriscada (referenciado por linhas já existentes
+  de `badge_grants`), não pedida.
+- `usage_events.actor_type = 'student'` (`shared/analytics.js`/
+  `shared/admin-analytics.js`) -- classificação de analytics
+  ("atividade real" vs. `'admin'`, quando `isAdminUser()===true`), outra
+  coluna/tabela sem relação nenhuma com `profiles.role`.
+
+Nenhuma mudança de UI/texto visível nesta entrega -- é puramente uma
+correção de nome de valor de enum no schema, sem efeito em nenhuma tela.
+
+**Testes**: `node --check` sem erro em `shared/roles.js`. Verificação ao
+vivo pós-migration confirma as 3 partes -- `select role, count(*) ...`
+mostra `admin:1, user:22` (nenhuma linha ficou em `'student'`);
+`pg_get_constraintdef` confirma a nova constraint;
+`information_schema.columns` confirma `column_default = 'user'::text`.
+
+**Escopo**: `shared/supabase_migrations/042_rename_role_student_to_user.sql`
+(nova) + `shared/roles.js`. Nenhum passo manual pendente pra autora --
+migration já aplicada ao vivo.

@@ -16,10 +16,13 @@
 //                                 slugifyUsername)
 
 // `role` vem de graça no `select('*')` que ensureProfileLoaded() já faz --
-// sem round-trip extra.
+// sem round-trip extra. Valor padrão da coluna é 'user' (renomeado de
+// 'student' -- ver migration 042/CLAUDE.md: "role" é um papel de
+// PLATAFORMA, distinto de "aluno formal" (vínculo em teacher_students),
+// que nunca teve nada a ver com esta coluna).
 async function fetchMyRole(){
   const profile = await ensureProfileLoaded();
-  return profile?.role || 'student';
+  return profile?.role || 'user';
 }
 
 function isTeacherOrAdmin(){
