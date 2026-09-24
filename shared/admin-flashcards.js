@@ -802,10 +802,19 @@ async function renderAdminFlashcardsView(){
   // -- reaproveita .leaderboard-tab/.active (mesma classe já usada nas
   // sub-abas do Painel de Admin), zero CSS novo. Só aparece quando há mais
   // de 1 idioma na lista (ruído puro com só 1).
+  //
+  // Sem pill "Todos" de propósito -- pedido explícito da autora: um cartão
+  // (áudio próprio + pronúncia automática/TTS) só faz sentido pra UM idioma
+  // por vez, então misturar alunos de idiomas diferentes na mesma seleção
+  // gera pronúncia errada pra quem não é do idioma escolhido no momento da
+  // criação. Sempre exatamente 1 idioma ativo quando há 2+ presentes -- o
+  // filtro deixa de ser "visualização", vira a própria trava de seleção.
   const langsPresent = [...new Set(students.map(s => s.language_app_key))];
+  if (langsPresent.length > 1 && !langsPresent.includes(ADMIN_FLASHCARDS_STATE.langFilter)){
+    ADMIN_FLASHCARDS_STATE.langFilter = langsPresent[0];
+  }
   const langFilterHTML = langsPresent.length > 1 ? `
     <div class="leaderboard-tabs" role="tablist" aria-label="Filtrar por idioma" style="justify-content:flex-start; margin-bottom:8px;">
-      <button type="button" class="leaderboard-tab ${ADMIN_FLASHCARDS_STATE.langFilter === 'all' ? 'active' : ''}" data-lang-filter="all">Todos (${students.length})</button>
       ${langsPresent.map(key => `<button type="button" class="leaderboard-tab ${ADMIN_FLASHCARDS_STATE.langFilter === key ? 'active' : ''}" data-lang-filter="${key}">${STUDENT_LANGUAGE_LABELS[key] || key} (${students.filter(s => s.language_app_key === key).length})</button>`).join('')}
     </div>
   ` : '';
@@ -949,10 +958,17 @@ async function renderAdminFlashcardsView(){
     });
   });
 
+  // "Selecionar todos" respeita o filtro de idioma ativo (quando há 2+
+  // idiomas presentes) -- sem isso, marcar "todos" poderia juntar alunos de
+  // idiomas diferentes na mesma seleção pela porta dos fundos, quebrando a
+  // mesma trava que a remoção da pill "Todos" (acima) existe pra garantir.
   document.getElementById('admin-flashcard-select-all').addEventListener('click', (e) => {
     e.preventDefault();
-    ADMIN_FLASHCARDS_STATE.studentIds = new Set(students.map(s => s.student_id));
-    wrap.querySelectorAll('[data-student-checkbox]').forEach(cb => { cb.checked = true; });
+    const eligible = langsPresent.length > 1
+      ? students.filter(s => s.language_app_key === ADMIN_FLASHCARDS_STATE.langFilter)
+      : students;
+    ADMIN_FLASHCARDS_STATE.studentIds = new Set(eligible.map(s => s.student_id));
+    wrap.querySelectorAll('[data-student-checkbox]').forEach(cb => { cb.checked = eligible.some(s => s.student_id === cb.value); });
     updateFlashcardsSelectionDependentUI(wrap);
   });
   document.getElementById('admin-flashcard-select-none').addEventListener('click', (e) => {
@@ -964,9 +980,18 @@ async function renderAdminFlashcardsView(){
 
   wrap.querySelectorAll('[data-lang-filter]').forEach(pill => {
     pill.addEventListener('click', () => {
+      if (ADMIN_FLASHCARDS_STATE.langFilter === pill.dataset.langFilter) return;
       ADMIN_FLASHCARDS_STATE.langFilter = pill.dataset.langFilter;
+      // Trocar de idioma sempre zera a seleção -- é o que de fato GARANTE
+      // que nunca existe seleção mista entre idiomas (o filtro deixou de
+      // ser só uma lente de visualização, ver comentário acima de
+      // langFilterHTML). Sem isso, um aluno marcado em "Francês" continuaria
+      // marcado (só escondido) ao trocar pra "Português".
+      ADMIN_FLASHCARDS_STATE.studentIds = new Set();
+      wrap.querySelectorAll('[data-student-checkbox]').forEach(cb => { cb.checked = false; });
       wrap.querySelectorAll('[data-lang-filter]').forEach(p => p.classList.toggle('active', p === pill));
       applyFlashcardPickerFilters(wrap);
+      updateFlashcardsSelectionDependentUI(wrap);
     });
   });
 

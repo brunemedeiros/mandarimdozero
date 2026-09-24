@@ -16,10 +16,13 @@
 //                                 slugifyUsername)
 
 // `role` vem de graça no `select('*')` que ensureProfileLoaded() já faz --
-// sem round-trip extra.
+// sem round-trip extra. Valor padrão da coluna é 'user' (renomeado de
+// 'student' -- ver migration 042/CLAUDE.md: "role" é um papel de
+// PLATAFORMA, distinto de "aluno formal" (vínculo em teacher_students),
+// que nunca teve nada a ver com esta coluna).
 async function fetchMyRole(){
   const profile = await ensureProfileLoaded();
-  return profile?.role || 'student';
+  return profile?.role || 'user';
 }
 
 function isTeacherOrAdmin(){
@@ -68,6 +71,20 @@ async function assignStudentToTeacher(studentUsername, languageAppKey){
     if (error.code === '23505') return { ok: false, error: `@${target.username} já é sua aluna nesse idioma.` };
     console.error('Erro ao vincular aluna:', error);
     return { ok: false, error: 'Não foi possível vincular agora.' };
+  }
+  // Pedido da autora (ver CLAUDE.md) -- toda aluna vinculada ganha o badge
+  // "Aluno/a da Prof. Brune" (badge_catalog, id='student') automaticamente,
+  // sem precisar de uma segunda ação manual em "🎖️ Badges". `on conflict`
+  // não existe aqui (insert simples), então o erro 23505 (já tem o badge --
+  // ex: vínculo num segundo idioma pra quem já era aluna em outro) é
+  // esperado e ignorado, não um erro de verdade. Nunca falha o vínculo por
+  // causa disto -- a aluna já foi vinculada com sucesso acima, um problema
+  // no badge não deveria desfazer isso nem aparecer como erro pra autora.
+  const { error: badgeError } = await supabaseClient
+    .from('badge_grants')
+    .insert({ user_id: target.user_id, badge_id: 'student', granted_by: CURRENT_USER?.email || null, note: 'Concedido automaticamente ao vincular como aluno(a)' });
+  if (badgeError && badgeError.code !== '23505'){
+    console.error('Erro ao conceder badge de aluno automaticamente:', badgeError);
   }
   return { ok: true, target };
 }

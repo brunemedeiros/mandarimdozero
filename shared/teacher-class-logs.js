@@ -1,7 +1,7 @@
 // ---------- Histórico de Aula -- Fase 7 do sistema de alunas particulares
 // (ver CLAUDE.md) ----------
 // Diário de bordo da professora sobre suas próprias aulas com uma aluna
-// específica -- diferente de teacher_flashcards/student_flashcards, isto
+// específica -- diferente de teacher_flashcards/own_flashcards, isto
 // NUNCA entra em STATE.cards nem no motor de revisão (FSRS/getStudyQueue).
 // Só a professora tem acesso (RLS: auth.uid() = teacher_id, sem policy
 // nenhuma pro lado da aluna, ver migration 031) -- por isso, diferente de
@@ -86,7 +86,7 @@ async function updateClassLog(id, { classDate, topic, homework, observations, no
 }
 
 // DELETE físico de propósito -- diferente de teacher_flashcards/
-// student_flashcards (status:'archived', nunca apagado, pra preservar
+// own_flashcards (status:'archived', nunca apagado, pra preservar
 // progresso de memória FSRS), um registro de aula não tem nenhum estado
 // de memória dependente dele (ver comentário na migration 031).
 async function deleteClassLog(id){

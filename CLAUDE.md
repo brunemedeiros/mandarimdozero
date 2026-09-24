@@ -4905,3 +4905,365 @@ alterados estruturalmente, só ganharam 2 linhas a mais escrevendo
 
 **O que ainda falta / não foi feito (de propósito):** nada pendente --
 escopo pontual de texto, sem migração, sem passo manual.
+
+## Badge "Aluno/a da Prof. Brune" concedido automaticamente ao vincular
+
+Pedido da autora: "Tem como atribuir o Badge de aluno automaticamente
+para todo aluno vinculado por mim?" -- confirmado que o badge já existia
+(`badge_catalog`, id `student`, "Aluno/a da Prof. Brune" 🎓, criado numa
+sessão anterior) mas era só concedido manualmente via "🎖️ Badges". Ao
+conferir o estado real (`badge_grants` x `teacher_students` ativos): 10
+dos 11 vínculos ativos já tinham o badge (concedido manualmente antes),
+só `@hirschbarae` estava sem -- **concedido agora, ao vivo, via SQL**
+(`mcp__Supabase__execute_sql`, mesmo padrão de "aplicar direto quando é
+aditivo/baixo risco" já usado neste arquivo pra migrations).
+
+**O que foi feito**: `assignStudentToTeacher()` (`shared/roles.js`)
+ganhou um segundo insert, logo depois do insert em `teacher_students` ter
+sucesso -- concede o badge `student` pro `target.user_id` automaticamente,
+toda vez que a autora vincular alguém como aluno(a) daqui pra frente
+(qualquer tela que chame essa função -- hoje só "🎓 Alunos"). Erro
+`23505` (já tem o badge -- ex: a mesma pessoa sendo vinculada num
+SEGUNDO idioma) é esperado e ignorado, não reportado como falha. Um erro
+de qualquer outro tipo no badge é logado no console mas **nunca desfaz
+nem reporta falha no vínculo em si** -- a aluna já foi vinculada com
+sucesso antes dessa linha rodar, um problema no badge é secundário.
+
+**Decisão arquitetural**: nenhuma tabela/coluna nova -- reaproveita
+`badge_grants` (migration 002) e o badge `student` já existente no
+catálogo, só automatiza a concessão que já existia manualmente.
+
+**Testes**: `node --check` sem erro em `shared/roles.js`. Não testado via
+Playwright nesta entrega (mudança pequena e direta, mesmo padrão de
+código já usado em `grantBadgeByUsername`/`admin-badges.js`, risco baixo)
+-- confirmado ao vivo que o backfill retroativo funcionou (10/11 já
+tinham, o 11º recebeu agora).
+
+## Perfil público virou o padrão -- reversão explícita e confirmada da
+decisão de privacidade original, INCLUSIVE retroativa
+
+A autora perguntou: "Tem como tornar todo perfil público (cartões,
+progresso, conquistas etc) dos usuários por default ao invés de
+privado por default?" -- reverte uma decisão de privacidade que tinha
+sido grillada explicitamente (Fase 1 do prompt-mestre "perfil público /
+flashcards públicos", ver seção acima -- "privados por default" foi
+resposta a uma pergunta direta do grilling na época, não um default
+arbitrário), então antes de tocar em qualquer coisa perguntei o escopo
+exato: só contas NOVAS, ou também as 23 já registradas (que nunca
+opinaram sobre isso, sem nenhum canal de notificação existente pra
+avisá-las). **Ela confirmou explicitamente: também as 23 já
+existentes.**
+
+**Executado ao vivo, migration `041_public_profile_default_true.sql`**
+(`mcp__Supabase__apply_migration`, projeto `eigjocalzwamisgqilhg`): (1)
+`alter column public_profile set default true` -- toda conta nova a
+partir de agora já nasce pública; (2) `update profiles set
+public_profile = true where public_profile = false` -- as 23 contas já
+existentes na época (inclusive as 11 alunas formalmente vinculadas)
+viraram públicas na mesma migration. Confirmado ao vivo depois:
+`23 total, 23 now_public`.
+
+**Nenhuma mudança de código foi necessária** -- toda a UI/lógica de
+perfil público (Fase 1/2 do prompt-mestre) já lia `profiles.
+public_profile` dinamicamente desde que foi construída, sem nenhum
+hardcode assumindo "privado" (conferido antes de rodar a migration:
+`shared/profile.js`/`fr/index.html`/`zh/index.html`, o toggle e o texto
+de apoio já refletem o valor real da conta, nunca um texto estático
+"privado por padrão"). Só o DADO mudou.
+
+**O que continua igual, de propósito**: `student_flashcards.hidden_from_profile`
+(o botão de olho por cartão, Fase 1 do perfil público) não foi tocado --
+uma aluna que já tinha marcado algum cartão como escondido continua com
+ele escondido mesmo agora que a conta inteira é pública por padrão; os
+dois eixos continuam independentes, exatamente como desenhado.
+
+**Sem passo manual pendente** -- migration já aplicada ao vivo. Nenhuma
+das 23 contas foi notificada sobre a mudança (não existe canal pra isso
+hoje) -- risco reconhecido e aceito explicitamente pela autora ao
+confirmar o escopo "também as já existentes".
+
+## Auditoria de terminologia "aluno/student" x "usuário/user" (2026-09-24)
+
+Pedido da autora, depois do mal-entendido registrado na entrega anterior
+("Fase 3", onde confundi "aluna" com "usuária" numa pergunta de
+grilling): mapear onde o código usa cada termo, pra confirmar que os dois
+conceitos continuam bem separados. Feito só como auditoria de leitura
+(grep + inspeção), sem nenhuma mudança de código.
+
+**Os dois conceitos, e onde cada um mora:**
+- **"Aluno/a"** = vínculo FORMAL numa linha ativa de `teacher_students`
+  (quem a autora vinculou explicitamente em "🎓 Alunos"). Funções-chave:
+  `fetchMyStudents()`, `assignStudentToTeacher()`, `removeStudentLink()`,
+  `hasActiveTeacherLink()` (todas em `shared/roles.js`). Telas que usam
+  esse termo na UI, sempre nesse sentido correto: "🎓 Alunos"
+  (`admin-students.js`), "Flashcards"/"Aulas"/"Material de apoio" do
+  admin (`admin-flashcards.js`/`admin-class-logs.js`/
+  `admin-support-materials.js` -- os 3 seletores de destinatário "Nenhum
+  aluno selecionado"/"N alunos selecionados"), e o selo "Aluno vinculado"
+  em "Meus Cartões" (`my-flashcards.js`, referindo-se à PRÓPRIA aluna
+  logada, sempre correto).
+- **"Usuário/conta"** = QUALQUER perfil registrado (`profiles`), sem
+  nenhuma relação com vínculo pedagógico. Funções-chave:
+  `fetchAllProfiles()` (`admin-badges.js`), `fetchMyRole()`,
+  `fetchMyPlanTier()`/`isPremium()`/`setPlanTier()`/
+  `searchAnyProfileByUsername()` (todas em `shared/roles.js`, Fase
+  "reformulação gratuito x premium"). UI: "Nome de usuário" (campo de
+  perfil), "Conta"/"Sua conta"/"Sair da conta" (menu de Configurações) --
+  todos genéricos, sem confusão com vínculo pedagógico.
+
+**Conferido, nenhuma inconsistência encontrada**: busquei especificamente
+por texto visível na UI (`grep` em `fr/index.html`/`zh/index.html` e nos
+template strings de `shared/*.js`) que dissesse "aluno" fora de um
+contexto de vínculo formal, ou "usuário"/"conta" num contexto que na
+verdade devesse dizer "aluno vinculado" -- não achei nenhum. A confusão
+da entrega anterior aconteceu numa PERGUNTA MINHA de grilling (texto que
+eu escrevi na hora, não um bug em código já existente) -- não há
+equivalente disso "gravado" no código pra corrigir. Registrando aqui como
+auditoria concluída, não como lista de bugs -- nada foi mudado.
+
+**O que fica pra próximas sessões evitarem o mesmo erro**: ao escrever
+qualquer pergunta de grilling ou texto novo que precise se referir a "os
+alunos"/"as contas" da autora, checar explicitamente qual dos dois
+conceitos acima é o pretendido antes de escrever a frase -- "aluno" sem
+qualificação sempre significa vínculo formal em `teacher_students`, nunca
+"toda conta registrada".
+
+## Fix: seleção mista de idiomas em "📇 Flashcards" causava pronúncia errada (TTS)
+
+Pedido da autora: impedir que a seleção de destinatários em "📇
+Flashcards" (Painel de Admin) misture alunos de idiomas diferentes (ex:
+francês + português) na mesma criação de cartão -- um cartão tem UM
+idioma-alvo só (Prop 1+2, "7 propostas", ver seção acima: direção +
+pronúncia automática/TTS dependem de qual lado é o idioma estudado), então
+uma seleção mista faz o TTS tocar no idioma errado pra quem não é do
+idioma escolhido. Pedido concreto: remover a pill "Todos" do filtro de
+idioma e manter só as pills por idioma.
+
+**Achado antes de mexer**: o filtro de idioma (`ADMIN_FLASHCARDS_STATE.langFilter`,
+introduzido na Fase "5.1"/"reformulação gratuito x premium" da tela) já
+existia, mas era só uma LENTE DE VISUALIZAÇÃO -- trocar de pill escondia
+linhas via `style.display`, mas nunca tocava em `studentIds`. Um aluno
+marcado enquanto o filtro estava em "Francês" continuava marcado (só
+invisível) depois de trocar pra "Português" -- ou seja, mesmo com a pill
+"Todos" removida, a seleção mista continuaria possível pela combinação
+marcar→trocar de pill→marcar de novo. Corrigir só a pill sem tocar nisso
+teria resolvido a superfície mas não a causa raiz.
+
+**O que foi feito**, só em `shared/admin-flashcards.js` (linhas da função
+`renderAdminFlashcardsView`, mesma tela; `admin-class-logs.js`/
+`admin-support-materials.js` têm o mesmo padrão de pills mas nenhuma
+lógica de TTS/direção -- fora do escopo, forçar a mesma trava lá removeria
+funcionalidade que já funciona sem corrigir nada):
+
+1. Pill "Todos" removida de `langFilterHTML` -- só pills por idioma
+   restam quando há 2+ idiomas presentes entre os alunos da professora.
+2. `ADMIN_FLASHCARDS_STATE.langFilter` deixa de poder ficar em `'all'`
+   quando há 2+ idiomas -- se o valor guardado não está mais na lista de
+   idiomas presentes (primeiro carregamento, ou uma sessão anterior que
+   ainda tinha `'all'`), a tela auto-corrige pro primeiro idioma da lista.
+3. **Trocar de pill agora zera `studentIds` de verdade** (e desmarca os
+   checkboxes no DOM) -- é isto que garante a invariante, não só a
+   ausência da pill "Todos". Clicar na MESMA pill já ativa é no-op
+   (não reseta a seleção à toa).
+4. **"Selecionar todos" passou a respeitar o filtro de idioma ativo** --
+   achado durante a implementação, não pedido explicitamente: sem isso,
+   marcar "Selecionar todos" ainda juntaria alunos de idiomas diferentes
+   pela porta dos fundos (a função selecionava `students` inteiro, sem
+   filtrar por `langFilter`). Agora, com 2+ idiomas presentes, só marca
+   quem pertence ao idioma da pill ativa no momento do clique.
+
+**Decisão de escopo**: nenhuma mudança em `createFlashcard()`/schema --
+é 100% client-side (estado de seleção + filtro de DOM), mesmo nível de
+"trava de UI, não fronteira de segurança" já usado noutros limites desta
+feature (ex: teto de 20 cartões da Fase 5.1). A trava evita o erro por
+acidente na UI normal; não impede alguém de inserir direto via API (fora
+do modelo de ameaça desta tela, que é ferramenta interna da própria
+professora/admin).
+
+**Testes realizados:** `node --check` sem erro. Playwright (fr, roster
+misto 2 francês + 1 mandarim): confirmado só 2 pills (sem "Todos"), pill
+padrão já ativa no primeiro idioma presente (`frances`); marcar uma aluna
+de francês e trocar pra pill de mandarim zera a seleção
+(`afterSwitchToZhCount: "Nenhum aluno selecionado"`, checkbox
+desmarcado); "Selecionar todos" com o filtro em mandarim marca só o aluno
+de mandarim (não o de francês, mesmo ele estando escondido pelo filtro);
+trocar de volta pra francês e "Selecionar todos" marca os 2 alunos de
+francês, sem incluir o de mandarim; clicar na pill já ativa não reseta
+uma seleção em andamento. Não validado em zh nem tema escuro nesta
+entrega -- mudança é 100% JS de estado/filtro, zero CSS novo e zero
+diferença de idioma na lógica (o arquivo é compartilhado sem branch por
+idioma), risco considerado baixo, registrando por completude mesmo
+padrão de honestidade já usado quando outras entregas validaram só um
+subconjunto.
+
+**Escopo**: só `shared/admin-flashcards.js`. Nenhuma migração, nenhum
+passo manual pendente pra autora.
+
+## Rename `profiles.role`: `'student'` → `'user'` (schema, não texto de UI)
+
+A autora perguntou se o default `'student'` de `profiles.role` (migration
+024) não era exatamente o mesmo tipo de colisão de terminologia já
+auditado na entrega anterior ("aluno/a" = vínculo formal em
+`teacher_students`, nunca "toda conta registrada"). Confirmado que sim,
+lendo a migration 024 de novo: o próprio comentário dela dizia "toda
+conta existente hoje já é implicitamente aluna", reusando a mesma palavra
+que o resto do código reserva estritamente pro vínculo formal. **Sem bug
+funcional** -- grep confirmou que nenhum call site fazia `role ===
+'student'` pra decidir vínculo (isso sempre leu `teacher_students`/
+`hasActiveTeacherLink()`) -- mas a colisão de NOME era real e podia
+confundir uma sessão futura, exatamente o risco que a auditoria anterior
+existia pra prevenir. Pedido direto da autora: "Rename it, run the
+migration. From 'student' to 'user'".
+
+**Migration `042_rename_role_student_to_user.sql`** -- `profiles.role`:
+constraint antiga (`profiles_role_check`, confirmada ao vivo via
+`pg_constraint` antes de escrever a migration) trocada por `role in
+('user','teacher','admin')`; `update ... set role='user' where
+role='student'` (22 linhas migradas, confirmado ao vivo -- as mesmas 22
+contas que eram `'student'`, 1 admin intacta); `default` da coluna
+também trocado pra `'user'`. Aplicada AO VIVO via
+`mcp__Supabase__apply_migration`, projeto `eigjocalzwamisgqilhg` -- não é
+passo manual pendente pra autora. `shared/roles.js` (`fetchMyRole()`)
+ajustado pro mesmo fallback (`|| 'user'`).
+
+**Escopo explicitamente NÃO estendido a 2 outras ocorrências de
+`'student'` no código, confirmadas como sistemas DIFERENTES antes de
+decidir não tocar**:
+- `badge_catalog.badge_id`/`badge_grants.badge_id = 'student'` -- é o id
+  do badge "Aluno/a da Prof. Brune" (`shared/roles.js`,
+  `assignStudentToTeacher()`), uma tabela e conceito totalmente
+  diferentes de `profiles.role`. Renomear isto seria uma migração de
+  dado separada e mais arriscada (referenciado por linhas já existentes
+  de `badge_grants`), não pedida.
+- `usage_events.actor_type = 'student'` (`shared/analytics.js`/
+  `shared/admin-analytics.js`) -- classificação de analytics
+  ("atividade real" vs. `'admin'`, quando `isAdminUser()===true`), outra
+  coluna/tabela sem relação nenhuma com `profiles.role`.
+
+Nenhuma mudança de UI/texto visível nesta entrega -- é puramente uma
+correção de nome de valor de enum no schema, sem efeito em nenhuma tela.
+
+**Testes**: `node --check` sem erro em `shared/roles.js`. Verificação ao
+vivo pós-migration confirma as 3 partes -- `select role, count(*) ...`
+mostra `admin:1, user:22` (nenhuma linha ficou em `'student'`);
+`pg_get_constraintdef` confirma a nova constraint;
+`information_schema.columns` confirma `column_default = 'user'::text`.
+
+**Escopo**: `shared/supabase_migrations/042_rename_role_student_to_user.sql`
+(nova) + `shared/roles.js`. Nenhum passo manual pendente pra autora --
+migration já aplicada ao vivo.
+
+## Mesmo tratamento nos 2 outros "student" que não eram vínculo formal
+(`usage_events.actor_type` e a tabela `student_flashcards`)
+
+A entrega anterior (rename de `profiles.role`) já tinha identificado e
+deliberadamente deixado de fora 2 outras ocorrências de `'student'` no
+schema. A autora perguntou explicitamente se essas duas também deveriam
+seguir "o mesmo raciocínio" -- e apontou o contraste que já estava
+implícito: o badge automático concedido em `assignStudentToTeacher()`
+(`badge_catalog`/`badge_grants`, id `'student'`) está certo do jeito que
+está, porque só é concedido quando alguém é vinculada de verdade em
+"🎓 Alunos" (vínculo formal em `teacher_students`) -- não é a mesma
+colisão de nome. As duas ocorrências restantes, porém, eram exatamente
+esse tipo de colisão: usar "student" pra rotular QUALQUER conta, não só
+quem tem vínculo formal.
+
+Como a pergunta envolvia 2 mudanças técnicas (uma tabela inteira sendo
+renomeada, não só um valor de enum), perguntei antes de executar (pedido
+explícito da autora: "não entendi direito, mas explique de um jeito que
+não-desenvolvedores entendam") -- resposta: **"Both"**, fazer as duas.
+
+**1) `usage_events.actor_type`** -- coluna que classifica cada linha de
+analytics como `'admin'` (quando `isAdminUser()===true`) ou `'student'`
+(qualquer outra conta, mesmo sem vínculo formal nenhum -- a MESMA colisão
+de nome já corrigida em `profiles.role`, só que numa tabela diferente).
+**Migration `044_rename_actor_type_student_to_user.sql`** -- `alter
+column actor_type set default 'user'` + `update ... set
+actor_type='user' where actor_type='student'`. Aditiva/sem risco, mesmo
+padrão de sempre. Aplicada AO VIVO via `mcp__Supabase__apply_migration`,
+projeto `eigjocalzwamisgqilhg` -- confirmado depois: `admin:183,
+user:939` (era `admin:183, student:939`). Nenhuma mudança de código
+necessária -- `shared/analytics.js`/`shared/admin-analytics.js` nunca
+comparavam contra a string `'student'` (só contra `'admin'`), então o
+valor no outro ramo era só o que sobrava no banco, sem lógica
+dependendo do nome exato.
+
+**2) Tabela `student_flashcards` (Fase 5 do sistema de alunas
+particulares, "Meus Cartões")** -- essa era a colisão mais séria: uma
+tabela INTEIRA, com uma coluna `student_id`, usada pra guardar os
+cartões que a PRÓPRIA CONTA cria pra si mesma -- sem nenhuma relação com
+vínculo formal de professora (qualquer conta, vinculada ou não, sempre
+pôde usar "Meus Cartões" desde a Fase 5, confirmado de novo nesta
+sessão: `shared/my-flashcards.js` nunca chama `fetchMyStudents()`/
+`teacher_students`). Diferente de `teacher_flashcards` (que SIM é
+"cartão que uma professora atribui a uma aluna vinculada" -- esse nome
+está certo e não foi tocado).
+
+**Migration `043_rename_student_flashcards_to_own_flashcards.sql`** --
+`alter table student_flashcards rename to own_flashcards` + `alter table
+own_flashcards rename column student_id to owner_id` + as 4 constraints
++ a policy RLS (`student_flashcards_owner_all` →
+`own_flashcards_owner_all`) renomeadas junto. **Achado técnico
+importante, verificado ao vivo antes de escrever a migration**: um
+`RENAME TABLE`/`RENAME COLUMN` no Postgres atualiza sozinho tudo que
+referencia por OID (constraints, índices, policies) -- mas NÃO atualiza o
+corpo de uma function PL/pgSQL, que é guardado como texto literal. A
+function `get_public_flashcards()` (migration 038, usada pelo perfil
+público) tinha `from student_flashcards where student_id = ...` escrito
+no corpo -- precisou de um `CREATE OR REPLACE FUNCTION` explícito dentro
+da mesma migration, ou teria continuado apontando pro nome antigo (que
+não existiria mais) e quebrado em produção. Aplicada AO VIVO via
+`mcp__Supabase__apply_migration` -- verificado depois: 3 linhas
+preservadas, constraints/policy renomeadas, function chamável e
+devolvendo o erro `not_authorized`/`not_found` esperado pra um username
+inexistente.
+
+**Lado do cliente**: `shared/student-flashcards.js` (8 funções --
+`fetchMyOwnFlashcards`, `createOwnFlashcard`, `uploadOwnFlashcardMedia`,
+`setOwnFlashcardStatus`, `setOwnFlashcardHidden`,
+`updateOwnFlashcardContent`, `deleteOwnFlashcardPermanently` + validação
+interna) apagado e recriado como **`shared/own-flashcards.js`** -- mesma
+lógica exata, só trocando `.from('student_flashcards')`→
+`.from('own_flashcards')` e `student_id`→`owner_id` em todo lugar (nomes
+de FUNÇÃO nunca mudaram -- só o arquivo/tabela/coluna por baixo -- então
+nenhum call site em `shared/my-flashcards.js` precisou de nenhuma
+mudança, só os 2 comentários que citavam o nome antigo do arquivo).
+`fr/index.html`/`zh/index.html`: tag `<script src="../shared/
+student-flashcards.js">` → `own-flashcards.js`. Comentários corrigidos
+(sem mudança funcional) em `fr/app.js`, `zh/app.js` (2 blocos cada, perto
+de `buildCardFromSelfFlashcard`/`isCardLessonCompleted`),
+`shared/teacher-class-logs.js` e `shared/public-profile.js`.
+
+**O que ficou de fora, de propósito** (mesmo critério da entrega
+anterior -- migrar o arquivo histórico da migration quebraria o registro
+do que rodou de verdade naquela data): as migrations antigas
+(`028`/`031`/`032`/`033`/`036`/`037`/`038`/`040`) continuam com
+`student_flashcards`/`student_id` no texto SQL -- são o registro real do
+que foi executado então, nunca reescritas.
+
+**Testes realizados**: `node --check` sem erro em todos os arquivos
+tocados. Grep completo do repositório (fora das migrations antigas)
+confirma zero referência sobrando a `student_flashcards`/
+`student-flashcards.js`. Validação funcional via Playwright: carreguei
+`shared/own-flashcards.js` isolado num browser real (Chromium) com um
+`supabaseClient` fake que registra cada chamada -- confirmado que as 7
+funções exportadas existem e que `fetchMyOwnFlashcards`/
+`createOwnFlashcard`/`setOwnFlashcardStatus`/`setOwnFlashcardHidden`/
+`deleteOwnFlashcardPermanently` todas chamam `.from('own_flashcards')`
+e filtram/gravam por `owner_id` (nunca `student_id`), inclusive o
+`insert()` de `createOwnFlashcard` confirmado gravando `owner_id`
+corretamente no payload. Não foi possível validar a tela completa "Meus
+Cartões" ponta-a-ponta neste ambiente porque carregar `fr/index.html`/
+`zh/index.html` direto (sem passar pela seleção de idioma da raiz do
+site) dispara um redirect da própria arquitetura do app (não relacionado
+a esta mudança) -- a validação isolada do módulo (acima) cobre o risco
+real desta entrega, que é 100% renomeação mecânica sem lógica nova.
+
+**Escopo**: `shared/supabase_migrations/043_rename_student_flashcards_to_own_flashcards.sql`
++ `044_rename_actor_type_student_to_user.sql` (novas) +
+`shared/own-flashcards.js` (novo, substitui `shared/student-flashcards.js`,
+apagado) + `fr/index.html`/`zh/index.html`/`fr/app.js`/`zh/app.js`/
+`shared/teacher-class-logs.js`/`shared/public-profile.js` (só
+referências/comentários). Nenhum passo manual pendente pra autora --
+as duas migrations já foram aplicadas ao vivo via
+`mcp__Supabase__apply_migration`.

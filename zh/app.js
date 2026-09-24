@@ -637,8 +637,8 @@ async function mergeTeacherFlashcardsIntoState(){
 }
 
 // Fase 5 do sistema de alunas particulares (ver CLAUDE.md) -- cartão
-// autorado pela PRÓPRIA aluna (shared/student-flashcards.js, tabela
-// student_flashcards). Irmão de buildCardFromTeacherFlashcard() -- mesmo
+// autorado pela PRÓPRIA aluna (shared/own-flashcards.js, tabela
+// own_flashcards). Irmão de buildCardFromTeacherFlashcard() -- mesmo
 // shape de card, só ORIGEM diferente. id `s${row.id}` -- terceiro
 // namespace, nunca colide com `u${unitId}-v${idx}` (trilha) nem
 // `t${row.id}` (professora, tabela DIFERENTE). Mesmo mapeamento
@@ -683,7 +683,7 @@ function buildCardFromSelfFlashcard(row){
   };
 }
 
-// Busca os cartões que a PRÓPRIA aluna já criou (shared/student-flashcards.js)
+// Busca os cartões que a PRÓPRIA aluna já criou (shared/own-flashcards.js)
 // e mescla em STATE.cards -- mesmo motivo/posicionamento de
 // mergeTeacherFlashcardsIntoState() (precisa rodar ANTES de loadState()).
 async function mergeSelfFlashcardsIntoState(){
@@ -6257,7 +6257,7 @@ function isCardLessonCompleted(card){
   // enquanto a professora não arquivou o cartão (flashcardStatus, espelha
   // `teacher_flashcards.status`, atualizado a cada mergeTeacherFlashcardsIntoState()).
   // Fase 5: cartão autorado pela própria aluna (origin==='self',
-  // student_flashcards) segue exatamente o mesmo caso.
+  // own_flashcards) segue exatamente o mesmo caso.
   if (card.origin === 'teacher' || card.origin === 'self') return card.flashcardStatus === 'active';
   const prog = STATE.unitProgress[card.unitId];
   if (!prog?.started) return false;
