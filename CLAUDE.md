@@ -5027,3 +5027,74 @@ alunos"/"as contas" da autora, checar explicitamente qual dos dois
 conceitos acima é o pretendido antes de escrever a frase -- "aluno" sem
 qualificação sempre significa vínculo formal em `teacher_students`, nunca
 "toda conta registrada".
+
+## Fix: seleção mista de idiomas em "📇 Flashcards" causava pronúncia errada (TTS)
+
+Pedido da autora: impedir que a seleção de destinatários em "📇
+Flashcards" (Painel de Admin) misture alunos de idiomas diferentes (ex:
+francês + português) na mesma criação de cartão -- um cartão tem UM
+idioma-alvo só (Prop 1+2, "7 propostas", ver seção acima: direção +
+pronúncia automática/TTS dependem de qual lado é o idioma estudado), então
+uma seleção mista faz o TTS tocar no idioma errado pra quem não é do
+idioma escolhido. Pedido concreto: remover a pill "Todos" do filtro de
+idioma e manter só as pills por idioma.
+
+**Achado antes de mexer**: o filtro de idioma (`ADMIN_FLASHCARDS_STATE.langFilter`,
+introduzido na Fase "5.1"/"reformulação gratuito x premium" da tela) já
+existia, mas era só uma LENTE DE VISUALIZAÇÃO -- trocar de pill escondia
+linhas via `style.display`, mas nunca tocava em `studentIds`. Um aluno
+marcado enquanto o filtro estava em "Francês" continuava marcado (só
+invisível) depois de trocar pra "Português" -- ou seja, mesmo com a pill
+"Todos" removida, a seleção mista continuaria possível pela combinação
+marcar→trocar de pill→marcar de novo. Corrigir só a pill sem tocar nisso
+teria resolvido a superfície mas não a causa raiz.
+
+**O que foi feito**, só em `shared/admin-flashcards.js` (linhas da função
+`renderAdminFlashcardsView`, mesma tela; `admin-class-logs.js`/
+`admin-support-materials.js` têm o mesmo padrão de pills mas nenhuma
+lógica de TTS/direção -- fora do escopo, forçar a mesma trava lá removeria
+funcionalidade que já funciona sem corrigir nada):
+
+1. Pill "Todos" removida de `langFilterHTML` -- só pills por idioma
+   restam quando há 2+ idiomas presentes entre os alunos da professora.
+2. `ADMIN_FLASHCARDS_STATE.langFilter` deixa de poder ficar em `'all'`
+   quando há 2+ idiomas -- se o valor guardado não está mais na lista de
+   idiomas presentes (primeiro carregamento, ou uma sessão anterior que
+   ainda tinha `'all'`), a tela auto-corrige pro primeiro idioma da lista.
+3. **Trocar de pill agora zera `studentIds` de verdade** (e desmarca os
+   checkboxes no DOM) -- é isto que garante a invariante, não só a
+   ausência da pill "Todos". Clicar na MESMA pill já ativa é no-op
+   (não reseta a seleção à toa).
+4. **"Selecionar todos" passou a respeitar o filtro de idioma ativo** --
+   achado durante a implementação, não pedido explicitamente: sem isso,
+   marcar "Selecionar todos" ainda juntaria alunos de idiomas diferentes
+   pela porta dos fundos (a função selecionava `students` inteiro, sem
+   filtrar por `langFilter`). Agora, com 2+ idiomas presentes, só marca
+   quem pertence ao idioma da pill ativa no momento do clique.
+
+**Decisão de escopo**: nenhuma mudança em `createFlashcard()`/schema --
+é 100% client-side (estado de seleção + filtro de DOM), mesmo nível de
+"trava de UI, não fronteira de segurança" já usado noutros limites desta
+feature (ex: teto de 20 cartões da Fase 5.1). A trava evita o erro por
+acidente na UI normal; não impede alguém de inserir direto via API (fora
+do modelo de ameaça desta tela, que é ferramenta interna da própria
+professora/admin).
+
+**Testes realizados:** `node --check` sem erro. Playwright (fr, roster
+misto 2 francês + 1 mandarim): confirmado só 2 pills (sem "Todos"), pill
+padrão já ativa no primeiro idioma presente (`frances`); marcar uma aluna
+de francês e trocar pra pill de mandarim zera a seleção
+(`afterSwitchToZhCount: "Nenhum aluno selecionado"`, checkbox
+desmarcado); "Selecionar todos" com o filtro em mandarim marca só o aluno
+de mandarim (não o de francês, mesmo ele estando escondido pelo filtro);
+trocar de volta pra francês e "Selecionar todos" marca os 2 alunos de
+francês, sem incluir o de mandarim; clicar na pill já ativa não reseta
+uma seleção em andamento. Não validado em zh nem tema escuro nesta
+entrega -- mudança é 100% JS de estado/filtro, zero CSS novo e zero
+diferença de idioma na lógica (o arquivo é compartilhado sem branch por
+idioma), risco considerado baixo, registrando por completude mesmo
+padrão de honestidade já usado quando outras entregas validaram só um
+subconjunto.
+
+**Escopo**: só `shared/admin-flashcards.js`. Nenhuma migração, nenhum
+passo manual pendente pra autora.
