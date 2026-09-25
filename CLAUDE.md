@@ -7530,3 +7530,203 @@ Nenhuma implementação foi feita nesta auditoria -- `git status` limpo do
 início ao fim (confirmado). Próxima fase (6D.1, ou a ordem que a autora
 preferir) só começa depois de autorização explícita sobre as 6 decisões
 acima, com este relatório já entregue antes de pedir luz verde.
+
+## Fase 6D.1 -- estado/modelo nativo do editor (fundação, zero UI nova)
+
+Primeira subfase de código da Fase 6D, autorizada com 6 decisões já
+travadas (ver mensagem completa): imagem é propriedade do Field (não do
+Note); rich text explicitamente adiado, `Field.content` continua
+`{value: string}`; cartão legado NUNCA convertido automaticamente (abrir
++ cancelar não pode gravar nada); `revision` incrementa em QUALQUER
+alteração de conteúdo persistível (regra coarse, de propósito, mesma
+disciplina do editor legado hoje); ordem 6D.1→6D.8 confirmada; Cloze
+multi-marca faz parte do MVP da 6D.5 (fora do escopo desta subfase).
+
+**Reauditoria antes de codar** (pedido explícito): reli
+`shared/admin-flashcards.js`, `shared/my-flashcards.js`,
+`shared/teacher-flashcards.js`, `shared/own-flashcards.js`, `fr/app.js`,
+`zh/app.js` e `shared/flashcard-model.js` de novo -- confirmado que nada
+mudou desde a auditoria da Fase 6D (mesma estrutura, mesmo achado
+central: editor legado nunca toca `interpretNoteFromRow`/o modelo
+Note/Field).
+
+**O que foi feito -- um único arquivo novo, `shared/flashcard-editor-state.js`**
+(script-global plano, mesma convenção de todo `shared/*.js` do repo --
+sem IIFE/módulo, carregado logo depois de `shared/flashcard-model.js` em
+`fr/index.html`/`zh/index.html`, ANTES de `shared/teacher-flashcards.js`).
+**Nenhum call site real chama nada deste arquivo ainda** -- é fundação
+pura, sem efeito em produção. Os 4 baldes pedidos, cada um com sua
+própria seção no arquivo:
+
+1. **Note editor state** (o que É persistível) -- `createFieldState()`
+   (Field: `id`/`lang`/`role`/`content:{value}`/`audio`/`image`/
+   `pinyinFieldId`, EXATAMENTE o shape que `validateNativeNoteRow`/
+   `buildNativeRuntimeFields` do motor já consomem, nenhuma propriedade
+   extra); `createNativeNoteEditorState()` (estado novo, do zero);
+   `createNativeNoteEditorStateFromRow(row)` (a partir de uma linha JÁ
+   nativa -- reaproveita `isNoteFieldsPresent`/`isCardGenerationModePresent`/
+   `validateNativeNoteRow` do motor pra validar/rejeitar, nunca
+   reimplementa a checagem).
+2. **"Note" o conceito** (`fields`+`cardGenerationMode`) -- vive DENTRO
+   do state acima, não confundido com o balde 3. `cardGenerationMode`
+   validado contra `CARD_GENERATION_MODES` (mesma constante do motor,
+   nunca uma cópia).
+3. **Estado de UI efêmero** -- `createEditorUiState()`, objeto
+   TOTALMENTE SEPARADO (nunca mesclado no Note editor state) --
+   deliberadamente mínimo (`selectedFieldId`/`focusedFieldId`), reservado
+   pras subfases 6D.2+. Testado explicitamente que mutar esse objeto
+   nunca muda o snapshot do Note editor state (são objetos disjuntos, a
+   garantia é estrutural, não uma convenção).
+4. **Legacy row** -- `createLegacyNoteEditorStateFromRow(row)` embrulha
+   as 10 colunas legadas relevantes (`front`/`back_trans`/
+   `front_pinyin`/`front_is_target_language`/`note`/`image_url`/
+   `audio_url`/`choices`/`cloze_sentence`/`cloze_answer`/
+   `cloze_answer_pinyin`) num `{kind:'legacy', legacyRow:{...}}` --
+   NUNCA converte pra native. Testado explicitamente: abrir (criar o
+   estado) + clonar + descartar não muta nem o clone-original nem a
+   linha (`row`) de origem, bit a bit.
+
+**Dispatcher único** -- `createNoteEditorStateFromRow(row)` decide
+native vs. legacy com o MESMO critério de pareamento que
+`interpretNoteFromRow()` (motor) já usa; `isNativeNoteEditorState()`/
+`isLegacyNoteEditorState()` são os únicos pontos de checagem do
+discriminador `state.kind`.
+
+**Clonagem/snapshot/comparação** -- `cloneNoteEditorState()` (round-trip
+JSON, seguro porque todo state é dado 100% plano); `snapshotNoteEditorState()`
+(string estável, NUNCA comparação por referência de objeto JS -- pedido
+explícito da autora); `noteEditorStatesEqual()`/`noteEditorStateChanged()`/
+`noteEditorStateRequiresNewRevision()` (as duas últimas hoje são
+IDÊNTICAS de propósito -- regra coarse da decisão 4 -- expostas com
+nomes próprios pra quando uma taxonomia mais fina existir, só essa função
+mudar).
+
+**Achado de design não trivial, resolvido antes de escrever os testes**:
+a comparação de conteúdo (`noteEditorStateContentForComparison()`,
+função interna) EXCLUI `noteId`/`revision`/`origin` do que é comparado --
+são identidade/versão/proveniência, não conteúdo. Incluir `revision` na
+comparação seria circular (o valor que se está decidindo se deve
+incrementar já estaria dentro do critério que decide isso). Não estava
+explícito no pedido, mas é necessário pra a API fazer sentido -- documentado
+no código com essa justificativa.
+
+**`noteEditorStateToRow(state, extra)`** -- transform de dado PURO
+(nenhuma chamada de rede), devolve o shape de linha que
+`interpretNoteFromRow()`/`buildEngineCardsFromRow()` (motor real) já
+sabem interpretar. Preparação explícita pra 6D.6 (persistência)/6D.7
+(Preview) -- usado nos testes desta subfase pra confirmar ROUND-TRIP
+REAL contra o motor (não uma cópia/simulação): um estado construído por
+este arquivo, convertido pra "linha", passado pelo `buildEngineCardsFromRow()`
+de produção, produz o CardInstance certo.
+
+**Decisões arquiteturais desta subfase:**
+1. `Field.content` permanece `{value: string}` -- nenhum campo `type`
+   especulativo adicionado (um teste de sessão anterior, Fase 6B, já
+   usava `content:{type:'plain', value}` como convenção só de teste,
+   nunca lida pelo motor -- decidido NÃO copiar essa convenção aqui, pra
+   não fechar nem abrir a decisão de rich text ainda em aberto, ver
+   seção 7 da auditoria da Fase 6D).
+2. `privateNote` (nota privada da professora, coluna `note` legada)
+   mora no Note editor state, não em nenhum Field -- não é conteúdo
+   pedagógico do cartão. ENTRA na comparação de conteúdo/revision
+   (decisão 4, coarse) -- editar só a nota privada hoje já reseta
+   `revision` no editor legado (`updateFlashcardContent` sempre
+   incrementa, não importa o campo), então incluir `privateNote` aqui
+   mantém paridade com esse comportamento, não é uma regressão nova.
+3. Um único arquivo compartilhado fr+zh (não duas cópias) -- a
+   estrutura de estado não depende de idioma nenhum (confirmado na
+   auditoria da Fase 6D, seção 12: "compartilhável sem adaptação"); as
+   regras específicas de zh (pinyin sempre pareado, seletor de direção
+   desabilitado) ficam pra quando a UI de fato existir (6D.2+), não
+   precisam de nenhuma duplicação nesta camada de estado puro.
+4. Nenhuma mutação de `CardInstance` em lugar nenhum do arquivo --
+   confirmado por busca final (ver abaixo) -- CardInstances continuam
+   100% derivados/não-persistidos, este arquivo nunca toca em `card.
+   cardInstance`/`STATE.cards`.
+
+**Testes realizados:**
+- `node --check shared/flashcard-editor-state.js` sem erro.
+- **Suíte Node nova, `test_fase6d1_editor_state.js`, 99/99** -- cobre
+  TODOS os itens pedidos explicitamente (Field state/geração de id/
+  normalização de content; criação native nova com múltiplos Fields/
+  role/audio/image/pinyinFieldId; criação a partir de linha real pros 5
+  Card Types -- `normal`/`normal_reversed`/`multiple_choice`/
+  `type_answer`/`cloze` -- via `buildEngineCardsFromRow()`+
+  `resolveCardContentView()` REAIS do motor, não simulados, inclusive
+  `normal_reversed` com FSRS confirmadamente independente entre as 2
+  metades e Cloze multi-marca gerando 2 CardInstances reais; legacy
+  embrulhado sem converter, com teste dedicado de "abrir+clonar+descartar
+  nunca muta a linha original"; dispatcher roteando native/legacy/
+  pareamento-quebrado corretamente; UI efêmera comprovadamente disjunta
+  do Note editor state; snapshot/comparação nos 8 tipos de alteração
+  pedidos -- conteúdo, idioma, Field adicionado, Field removido, Card
+  Type, áudio, imagem, `pinyinFieldId` -- mais o caso "só `noteId`/
+  `revision` mudou não conta como mudança de conteúdo"; `noteEditorStateToRow`
+  com round-trip real através do motor; varredura final confirmando
+  ausência de `isReverse`/`reviewDirection`/`nextCardDirection` em
+  qualquer estado gerado, e confirmando que `front_is_target_language`
+  só existe dentro de `legacyRow` (nunca como mecanismo native).
+- Suítes anteriores re-executadas sem nenhuma regressão (esperado --
+  `shared/flashcard-model.js` não foi tocado): `test_fase4_engine.js`
+  32/32, `test_fase4d_regression.js` 30/30, `test_fase5_generation.js`
+  33/33, `test_fase6b_native_notes.js` 74/74 -- **169/169**.
+- **Smoke test de navegador real, FR+ZH** (`test_fase6d1_browser_smoke.js`,
+  Playwright, mesmo padrão de boot/stub de todas as subfases anteriores)
+  -- confirma que introduzir o novo `<script>` (sem nenhum call site
+  ainda) NÃO quebrou nada: as 15 funções do módulo novo acessíveis
+  globalmente na página real (confirma ordem de `<script>` certa --
+  `CARD_GENERATION_MODES` do motor acessível); o módulo novo funciona
+  de ponta a ponta no contexto real da página (não só isolado em `vm`);
+  `ADMIN_FLASHCARDS_STATE`/`MY_FLASHCARDS_STATE`/`flashcardIdForRow()`
+  do editor ATUAL continuam com a mesma forma/comportamento de sempre;
+  os 4 renderers da Fase 6C (`renderNormalCard`/`renderMultipleChoiceCard`/
+  `renderTypeAnswerCard`/`renderClozeCard`) continuam presentes e
+  `renderNormalCard()` chamado de verdade sobre um cartão legado real
+  produz o HTML esperado (Review 100% intacto); cartão nativo (Fase 6B)
+  continua gerável via `buildEngineCardsFromRow()`; e um estado
+  construído por este arquivo a partir da MESMA linha nativa bate em
+  contagem de Fields com o que o motor de fato lê -- nos dois idiomas,
+  todos os checks `true`. Zero erro de console novo (só os mesmos
+  `ERR_TUNNEL_CONNECTION_FAILED` pré-existentes do proxy de saída deste
+  sandbox, já documentados em toda a sessão).
+- **Busca final**: `isReverse`/`reviewDirection`/`nextCardDirection` --
+  só 1 ocorrência no arquivo novo, dentro de um COMENTÁRIO listando o
+  que é proibido, zero em código executável;
+  `frontIsTargetLanguage`/`front_is_target_language` -- só na prosa do
+  comentário e dentro do shape de `legacyRow` (exatamente onde deveria
+  estar -- é a coluna legada real, preservada como está, nunca um
+  mecanismo native); `note.audio`/`note.image`/`card.audio`/`card.image`
+  -- só num comentário explicando que são intencionalmente ausentes,
+  nunca criados de fato; nenhuma chamada `supabaseClient`/`.insert(`/
+  `.update(`/`.from(` no arquivo novo (zero I/O, confirmado); `git diff`
+  de `fr/index.html`/`zh/index.html` mostra EXATAMENTE as 2 linhas de
+  `<script>` adicionadas, nada mais.
+
+**Escopo respeitado**: só `shared/flashcard-editor-state.js` (novo) +
+2 linhas de `<script>` em `fr/index.html`/`zh/index.html`. Nenhum
+renderer da Fase 6C tocado, nenhum Review, FSRS, TTS, Preview, migration,
+ou UI nova (seletor de Card Type/editor de Field/toolbar/Cloze visual/MC/
+Type Answer/upload) implementados -- todos explicitamente reservados pra
+6D.2+.
+
+**O que fica pra 6D.2+ (nada disto foi feito aqui, de propósito):**
+- Nenhum call site real (`admin-flashcards.js`/`my-flashcards.js`) chama
+  `createNoteEditorStateFromRow`/`createNativeNoteEditorState`/etc.
+  ainda -- o editor continua 100% no shape legado plano hoje.
+- Nenhum mutador de Field (`addField`/`removeField`/`updateField`) --
+  decisão consciente de não antecipar isso, pertence à 6D.3 (editor de
+  Field reutilizável), que vai decidir a forma certa de mutar em cima de
+  UI real, não adivinhada agora sem um call site.
+- Nenhuma UI nova de nenhum tipo (seletor de Card Type, editor de Field,
+  Cloze visual, upload de mídia, Preview) -- confirmado zero-CSS/zero-DOM
+  novo nesta entrega.
+- Persistência (INSERT/UPDATE gravando `fields`/`card_generation_mode`
+  de verdade) -- `noteEditorStateToRow()` já existe como preparação, mas
+  nada chama Supabase com ele ainda -- 6D.6.
+- Estratégia de conversão legacy→native no editar (decisão (a) vs (b) da
+  auditoria da Fase 6D, seção 10) -- ainda não escolhida, fica pra 6D.8.
+
+Nenhum passo manual pendente pra autora -- zero migração/mudança de
+schema nesta subfase. Próxima subfase (6D.2 -- seletor de Card Type) só
+começa depois de autorização explícita, com este relatório já entregue
+antes de pedir luz verde.
