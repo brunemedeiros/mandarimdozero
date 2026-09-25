@@ -6090,3 +6090,348 @@ na rodada anterior).
 
 Parando aqui conforme instrução explícita -- **Fase 6C (renderer +
 Preview) NÃO iniciada**, aguardando autorização separada da autora.
+
+## Prompt-mestre "reestruturação Note/CardType/CardInstance" -- Fase 6C
+(auditoria do renderer + proposta técnica de `localState`, AINDA NÃO
+IMPLEMENTADA)
+
+**Objetivo da fase, travado pela autora**: eliminar a dependência
+estrutural do renderer atual em mecanismos legados e preparar um renderer
+ÚNICO usado tanto pelo Review real quanto pelo Preview do editor (Fase
+6D, ainda não iniciada) -- "Preview e Review devem usar o MESMO
+renderer", nunca dois renderers/HTML/lógica de reveal/alternativas/áudio/
+Cloze duplicados. Pedido explícito: só auditoria + proposta nesta rodada,
+zero código alterado -- confirmado `git status` limpo nas duas entregas
+que compõem esta fase (auditoria inicial e este refinamento).
+
+### 1. Auditoria completa do Review atual
+
+**Call graph mapeado:**
+```
+startReviewSession()                                    [SESSÃO]
+  -- monta STATE.reviewQueue, decide reviewDirection SÓ pra cartão legado
+  -- (nextCardDirection() só roda quando !c.cardInstance -- confirmado
+  --  que cartão nativo NUNCA recebe reviewDirection, restrição da Fase 4
+  --  continua 100% respeitada hoje, sem precisar de mudança)
+  -> renderReviewView()                                  [DISPATCHER]
+     -- estados vazios/fim-de-sessão: pura tela de status, session-owned
+     -- dispatch por card.cardInstance.cardTypeId:
+        multiple_choice -> renderMultipleChoiceReviewCard(card)
+        type_answer     -> renderTypeAnswerReviewCard(card)
+        cloze           -> renderClozeReviewCard(card)
+        normal (default)-> bloco INLINE dentro do próprio renderReviewView()
+                           (achado: "normal" não tem função própria hoje --
+                            único tipo sem render dedicado)
+     -> cada render*: resolveCardContentView(card) [MODEL, já limpo]
+                    -> innerHTML em #review-content (id FIXO, 1 instância só)
+                    -> lê/escreve STATE.review* pra saber "já respondeu?"
+                    -> wireAudioButtons/wireCustomAudioButtons/speakFrench
+                       [puros -- só tomam `container`/`text`/`btnEl` como
+                        parâmetro, nunca leem STATE, já 100% reaproveitáveis]
+                    -> on-confirm: chama gradeCurrentCard(grade) DIRETO
+                                                          [pula pra SESSÃO]
+```
+
+`gradeCurrentCard()` é 100% motor de sessão, zero relevância pra Preview:
+aplica FSRS (`applyMemoryGrade`), XP, streak, contador de atrasadas,
+requeue em erro, avança `STATE.reviewIndex`, `saveState()`, re-renderiza.
+
+**STATE lido/escrito direto dentro das funções de render (a acoplagem
+real que bloqueava reuso, achado central desta auditoria)**:
+- `STATE.reviewQueue`/`reviewIndex` -- % de progresso, card atual
+- `STATE.reviewShowingAnswer` -- flip do tipo "normal"
+- `STATE.reviewMCPicked`/`reviewMCCorrect` -- resposta transitória do MC
+- `STATE.reviewClozeAnswered` -- **compartilhado entre Cloze E Type
+  Answer** (mesmo boolean, reaproveitado só porque "os dois nunca
+  coexistem no mesmo cartão" -- acoplamento por convenção, não por dois
+  estados locais independentes)
+- `card.mcOptions` -- shuffle cacheado *no próprio objeto do card*
+  (também global, só que preso de outro jeito -- mutação direta de uma
+  entrada de `STATE.cards`)
+- `card.reviewDirection` -- confirmado exclusivo de `!card.cardInstance`
+  (trilha legada), nunca setado pra cartão nativo.
+
+### 2. CardInstance -> View Model -> Renderer -> DOM
+
+```
+CardInstance (card.cardInstance, ausente pra trilha)
+    v resolveCardContentView(card)         [shared/flashcard-model.js -- LIMPO]
+      view = {kind, front/back | prompt/correct/distractorTexts | rawSentenceText/markId/...}
+    v render*ReviewCard() / bloco inline    [fr/zh app.js -- MISTURADO]
+      mistura: (a) desenhar DOM a partir da view
+               (b) guardar "já respondeu, o quê" em STATE global
+               (c) decidir o que acontece ao confirmar = chamada
+                   hardcoded a gradeCurrentCard()
+    v innerHTML de #review-content (id fixo)
+```
+
+`resolveCardContentView`/os 4 resolvers já estão limpos (nunca tocam DOM,
+nunca leem STATE) -- alvo real da Fase 6C é só a camada (b)+(c) acima.
+
+**Achado paralelo, fora do escopo**: `openPublicFlashcardPreview()`
+(`shared/public-profile.js`, Fase 2 do prompt-mestre "perfil público") já
+é um "preview" -- mas de contexto totalmente diferente (cartão importável
+de outra conta, campos legados soltos vindos de `get_public_flashcards()`,
+nunca Note/CardInstance). Não usa e não deve usar o renderer unificado --
+registrado só pra não confundir com o alvo real desta fase.
+
+### 3. Contrato do renderer, aprovado
+
+```
+renderer(mountEl, card, localState, callbacks)
+```
+- `mountEl` -- substitui o id fixo `#review-content`, permite Review e
+  Preview existirem na tela ao mesmo tempo.
+- `card` -- mesmo shape de sempre.
+- `localState` -- ver seção 4 abaixo (refinamento desta rodada).
+- `callbacks` -- `{onAnswered(wasCorrect, grade)}`. Review's callback
+  chama `gradeCurrentCard(grade)`; Preview's callback só re-renderiza
+  mostrando o resultado, nunca grava nada. **O renderer nunca sabe em que
+  contexto está** -- zero `if (isPreview)` dentro dele.
+
+4 funções candidatas (sem sufixo "Review" no nome, já que passam a
+servir os dois contextos): `renderNormalCard`/`renderMultipleChoiceCard`/
+`renderClozeCard`/`renderTypeAnswerCard`. "Normal com reverso" continua
+reaproveitando `renderNormalCard`, como já reaproveita
+`resolveNormalCardView` hoje.
+
+**O que muda**: assinatura das 4 funções (+mountEl/localState/callbacks);
+`STATE.reviewMCPicked`/`reviewMCCorrect`/`reviewClozeAnswered` deixam de
+ser campos globais lidos direto pelo renderer; `#review-content` vira
+parâmetro; `gradeCurrentCard()` deixa de ser chamado hardcoded de dentro
+do renderer.
+
+**O que NÃO muda**: `resolveCardContentView`/resolvers; separação fr/zh
+em arquivos próprios (Fase 6C não tenta unificar fr/zh, é outro projeto);
+`reviewDirection`/`isReverse`/`nextCardDirection` (mecanismo intocado,
+exclusivo de trilha); `gradeCurrentCard`/FSRS/XP/streak/`saveState`
+(motor de sessão, fora do renderer); `getStudyQueue`/`eligibleReviewPool`/
+`startReviewSession` (fila continua responsabilidade da sessão).
+
+### 4. Refinamento do `localState` (esta rodada) -- ownership e ciclo de vida
+
+A autora rejeitou explicitamente a versão implícita da proposta original
+("substituir os 3 campos STATE.review* por 1 objeto global maior") --
+"isso apenas mudaria o nome do acoplamento". A resposta correta não é
+sobre QUANTOS campos existem, é sobre **granularidade, ownership e
+ciclo de vida explícitos**, e sobre o `localState` nunca ser lido/escrito
+pelo renderer via `STATE.*` direto -- só recebido como parâmetro.
+
+**1. Quem é o dono do `localState` no Review?** A camada de SESSÃO
+(as mesmas funções que já são donas de `STATE.reviewQueue`/`reviewIndex`
+-- `renderReviewView()`/`gradeCurrentCard()`/`reviewMoreCurrentCard()`),
+nunca o renderer. O renderer só recebe a referência como parâmetro e muta
+campos NELA -- nunca sabe (nem precisa saber) que existe um `STATE` por
+trás.
+
+**2. Quem cria o `localState`?** `renderReviewView()`, e só ela --
+único ponto de criação, mesmo espírito de `resolveCardContentView()` ser
+o único ponto de leitura de conteúdo.
+
+**3. Em que momento é criado?** No instante em que `STATE.reviewQueue[STATE.reviewIndex]`
+aponta pra um card DIFERENTE do que o `localState` armazenado
+representa (rastreado por uma pequena identidade -- ex:
+`STATE.reviewCardState.forQueuePosition !== STATE.reviewIndex`) --
+ANTES da primeira renderização daquele card. Re-renderizações do MESMO
+card (ex: depois de marcar uma opção de MC) NUNCA recriam -- reaproveitam/
+mutam o objeto já existente.
+
+**4. Em que momento é descartado?** No instante em que `STATE.reviewIndex`
+avança -- dentro de `gradeCurrentCard()` e de `reviewMoreCurrentCard()`,
+que já são os 2 únicos pontos que mexem em `reviewIndex` hoje. Cada um
+seta `STATE.reviewCardState = null` explicitamente antes de chamar
+`renderReviewView()` de novo -- não é "deixar a próxima renderização
+sobrescrever silenciosamente", é um descarte ativo e visível no código,
+no mesmo lugar que já reseta `STATE.reviewShowingAnswer = false` hoje.
+
+**5. Por CardInstance, por renderização, ou por sessão?** **Nenhum dos
+3** -- é **por EXIBIÇÃO** (um "turno": o intervalo entre um card virar
+`STATE.reviewQueue[STATE.reviewIndex]` e deixar de ser). Não pode ser
+por CardInstance (identidade) porque o MESMO CardInstance pode aparecer
+2x na mesma sessão (requeue de "Errei", `remaining>=3` em
+`gradeCurrentCard`; ou "Rever mais",
+`reviewMoreCurrentCard`) -- a 2ª aparição precisa nascer "não respondida"
+de novo, então amarrar por identidade de CardInstance faria a 2ª
+aparição herdar erroneamente o estado da 1ª. Não pode ser por
+renderização (recriar a cada chamada da função de render) porque MC/
+Cloze/TypeAnswer precisam SOBREVIVER a várias re-renderizações
+intermediárias da mesma pergunta (marcar opção -> re-render pra mostrar
+cor -> clicar Continuar). Não pode ser por sessão (1 objeto vivendo a
+sessão inteira) porque é exatamente esse o erro já cometido por
+`STATE.reviewClozeAnswered` (campo único reaproveitado entre 2 tipos
+diferentes por convenção, nunca por desenho).
+
+**6. Como o renderer é re-renderizado após cada interação?**
+- **Multiple Choice**: clicar opção -> muta `localState.selectedIndex`/
+  `answered`/`wasCorrect` -> o PRÓPRIO renderer se chama de novo
+  (`rendererFn(mountEl, card, localState, callbacks)`, auto-recursão,
+  **sem envolver a sessão** -- exatamente como `renderMultipleChoiceReviewCard(card)`
+  já se autochama hoje) -> só ao clicar "Continuar" (interação FINAL) o
+  renderer chama `callbacks.onAnswered(wasCorrect, 2|0)`.
+- **Type Answer**: digitar não re-renderiza (input nativo captura o
+  valor sozinho); clicar "Verificar" muta `localState` e o renderer se
+  autochama pra mostrar revelado/colorido; clicar "Continuar" chama
+  `callbacks.onAnswered`.
+- **Cloze**: mesmo padrão exato de Type Answer.
+- **Normal (reveal)**: clicar no flashcard -> muta `localState.revealed=true`
+  -> renderer se autochama pra mostrar o verso + botões de grau; clicar
+  um botão de grau chama `callbacks.onAnswered(null, grade)` direto --
+  pra Normal não existe um veredito certo/errado calculado pelo
+  renderer, a aluna autorrelata via o botão de grau clicado (mesmo
+  comportamento de hoje, só formalizado no contrato).
+
+  Ou seja: **re-renderização intermediária (dentro da mesma pergunta) é
+  responsabilidade do renderer, via auto-chamada com os mesmos 4
+  parâmetros** -- nunca pede pra sessão re-renderizar por ele. Só a
+  transição FINAL (que dispara grade/avanço de fila/descarte de
+  localState) sobe pra sessão via `callbacks.onAnswered`.
+
+**7. Como o Review mantém esse estado sem colocá-lo no CardInstance?**
+Um único slot ownado pela sessão -- `STATE.reviewCardState` -- criado/
+lido/escrito só pelas 3 funções de sessão (seção 2-4 acima), NUNCA pelo
+renderer via `STATE.*` direto. O renderer recebe a referência como
+`localState` e muta campos nela; como é a MESMA referência que a sessão
+guarda em `STATE.reviewCardState`, a mutação "persiste" sem o renderer
+saber que `STATE` existe.
+
+**8. Como o Preview terá seu próprio estado, independente do Review?**
+Uma variável local PRÓPRIA do módulo/componente de Preview (Fase 6D,
+`shared/admin-flashcards.js` -- ex: `let previewCardState = null;` no
+escopo do editor, nunca um campo em `STATE`). Criada quando o Preview
+monta um card sintético; **descartada e recriada sempre que o formulário
+muda materialmente** (trocar Card Type, editar frase/opções) -- mesmo
+princípio de "descarta e recria" do Review, só que o gatilho é edição do
+formulário em vez de avanço de fila. Nenhuma leitura/escrita cruzada com
+`STATE.reviewQueue`/`reviewIndex`/`reviewCardState` -- armazenamento
+completamente disjunto do Review, ainda que a FORMA de cada tipo (seção
+12) seja idêntica -- é o mesmo contrato de dados, nunca a mesma
+instância.
+
+**9. O que pertence ao `localState` (efêmero de interação) vs. outro
+lugar?** Confirmado: SÓ estado efêmero de interação/exibição --
+`revealed`/`typedAnswer`/`selectedIndex`/`answered`/`wasCorrect`/
+opções embaralhadas. NUNCA dado durável (texto de front/back/opções em
+si -- isso vem de `view` via `resolveCardContentView()`, recalculado do
+zero a cada render, nunca copiado pro `localState`) e NUNCA
+contabilidade de sessão (posição na fila, resultado FSRS já aplicado,
+XP) -- isso continua ownado pela camada de sessão, fora do `localState`.
+
+**10. `card.mcOptions` -- deve sair do card object?** **Sim,
+explicitamente.** Hoje é mutação direta de uma entrada real de
+`STATE.cards` (objeto durável, com id, potencialmente serializado se
+alguém esquecer de limpar) -- mesma categoria de problema dos outros
+campos `STATE.review*`, só escondida num objeto diferente. Vira
+`localState.shuffledOptions`, com o MESMO ciclo de vida do resto do
+`localState` (criado quando o card vira atual, descartado quando deixa
+de ser) -- garante que (a) nunca vaza pro shape que `serializeState()`
+salva de verdade, e (b) o Preview ganha seu próprio shuffle independente
+sem nunca tocar um card real de `STATE.cards`.
+
+**11. `reviewClozeAnswered` compartilhado entre Cloze e Type Answer --
+estados independentes propostos.** Cada tipo ganha seu PRÓPRIO conjunto
+de campos, no PRÓPRIO objeto de `localState` (nunca a mesma referência/
+mesmo campo de `STATE` lido pelos 2 renderers) -- mesmo que a FORMA saia
+igual (`answered`/`wasCorrect`/`typedAnswer`), o discriminador de tipo é
+estrutural (o `kind` do próprio `localState`, batendo com
+`card.cardInstance.cardTypeId`), nunca uma convenção implícita de "os
+dois nunca coexistem no mesmo cartão". Um dia que um dos dois ganhar um
+campo novo (ex: Cloze querer guardar "quantas tentativas"), o outro tipo
+não corre risco nenhum de herdar isso por acidente.
+
+**12. Exemplo concreto de `localState` por tipo:**
+
+Normal:
+```js
+{
+  kind: 'normal',
+  revealed: false,       // flip -- verso já foi mostrado?
+}
+```
+
+Multiple Choice:
+```js
+{
+  kind: 'multiple_choice',
+  shuffledOptions: null,   // [{text, correct}], gerado 1x na 1ª renderização
+  selectedIndex: null,     // null = ainda não respondeu
+  answered: false,
+  wasCorrect: null,
+}
+```
+
+Type Answer:
+```js
+{
+  kind: 'type_answer',
+  typedAnswer: '',
+  answered: false,
+  wasCorrect: null,
+}
+```
+
+Cloze:
+```js
+{
+  kind: 'cloze',
+  typedAnswer: '',
+  answered: false,
+  wasCorrect: null,
+}
+```
+
+**13. Diagrama conceitual:**
+
+Review:
+```
+startReviewSession()
+  -> monta STATE.reviewQueue/reviewIndex (sessão)
+renderReviewView()
+  -> card = STATE.reviewQueue[STATE.reviewIndex]
+  -> se STATE.reviewCardState ausente OU não é deste card/posição:
+       STATE.reviewCardState = createLocalStateFor(cardTypeId)  [fresh, tipado]
+  -> view = resolveCardContentView(card)
+  -> callbacks = { onAnswered: (wasCorrect, grade) => gradeCurrentCard(grade) }
+  -> renderer(mountEl, card, STATE.reviewCardState, callbacks)
+       -- interação intermediária (ex: clicar opção MC): renderer muta
+          STATE.reviewCardState e CHAMA A SI MESMO de novo (auto-render,
+          sem envolver a sessão)
+       -- interação final (Continuar/botão de grau): renderer chama
+          callbacks.onAnswered(...)
+gradeCurrentCard(grade)
+  -> aplica FSRS/XP/streak/save (SESSÃO)
+  -> STATE.reviewIndex += 1
+  -> STATE.reviewCardState = null  (descarta -- próximo card começa do zero)
+  -> renderReviewView()  (recria localState pro próximo card, ciclo reinicia)
+```
+
+Preview:
+```
+Editor (shared/admin-flashcards.js, Fase 6D, ainda não construída)
+  -> monta card sintético via interpretNoteFromRow()/buildEngineCardsFromRow()
+     sobre os dados atuais do formulário (nunca um objeto paralelo que só
+     imita o shape real -- é a MESMA função de produção)
+  -> previewCardState = createLocalStateFor(cardTypeId)  (variável local
+     do módulo de preview, NUNCA STATE.review*, NUNCA STATE.cards)
+  -> callbacks = { onAnswered: (wasCorrect) => { /* só re-renderiza
+       mostrando o resultado -- SEM FSRS, SEM XP, SEM saveState */ } }
+  -> renderer(previewMountEl, syntheticCard, previewCardState, callbacks)
+       -- mesma função, mesmo contrato, comportamento idêntico -- o
+          renderer não sabe (nem precisa saber) que está em Preview
+  -> quando o formulário muda (trocar Card Type, editar frase/opções):
+       previewCardState = createLocalStateFor(novoTipo)  (descarta e recria)
+```
+
+**Decisão em aberto, não travada nesta rodada**: onde mora fisicamente
+`createLocalStateFor(cardTypeId)` -- candidata natural é
+`shared/flashcard-model.js` (já é dono de `CARD_TYPE_IDS`, e a função é
+pura -- só mapeia tipo -> shape inicial, sem DOM/STATE) versus morar
+junto dos renderers em fr/zh `app.js` (que já são arquivos espelhados,
+um por idioma). Decisão de implementação, não arquitetural -- fica pra
+quando a Fase 6C for de fato autorizada a virar código.
+
+**Nesta entrega (refinamento)**: zero código alterado, zero arquivo
+tocado além deste `CLAUDE.md` -- `git status` confirma árvore limpa.
+
+Aguardando autorização explícita da autora pra Fase 6C virar código
+(extrair as 4 funções de renderer com o contrato acima + o ciclo de vida
+de `localState` detalhado nesta seção).
