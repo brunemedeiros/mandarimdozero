@@ -6971,3 +6971,562 @@ com este relatório já entregue antes de pedir luz verde.
 Escopo estrito respeitado -- nenhum Preview/editor/migração/mudança de
 Card Type iniciados. Parando aqui, aguardando revisão da autora antes de
 continuar.
+
+## Fase 6D -- EDITOR: auditoria e especificação (só leitura, zero código)
+
+Pedido explícito da autora, confirmando a Fase 6C concluída (`ee7b829`):
+migrar o editor de flashcards (`shared/admin-flashcards.js`/
+`shared/my-flashcards.js`) pra trabalhar nativamente com o modelo
+Note/Fields já pronto no motor desde a Fase 6B, **sem implementar nada
+nesta rodada** -- só ler, mapear e propor. `git status`/`git diff`
+confirmados limpos do início ao fim desta auditoria -- nenhum arquivo de
+implementação foi tocado.
+
+### 1. Mapa do editor atual
+
+`shared/admin-flashcards.js` (professora, ~1160 linhas) e
+`shared/my-flashcards.js` (aluna, ~600 linhas) são **completamente
+alheios ao modelo Note/Field** -- nenhum dos dois importa/chama nada de
+`shared/flashcard-model.js`. Escrevem direto nas colunas legadas via
+`createFlashcard()`/`updateFlashcardContent()`
+(`shared/teacher-flashcards.js`) e `createOwnFlashcard()`/
+`updateOwnFlashcardContent()` (`shared/own-flashcards.js`): `front`,
+`front_pinyin`, `back_trans`, `front_is_target_language`, `choices`,
+`cloze_sentence`, `cloze_answer`, `cloze_answer_pinyin`, `note`,
+`image_url`, `audio_url`. O motor (`interpretNoteFromRow`) já sabe
+INTERPRETAR essas colunas (ramo legado) E interpretar `fields`+
+`card_generation_mode` (ramo nativo) -- só ninguém escreve o ramo nativo
+ainda.
+
+Estado do formulário: 2 objetos globais mutáveis,
+`ADMIN_FLASHCARDS_STATE{studentIds:Set, langFilter, _studentsCache,
+editingCardId, _cardsCache}` e `MY_FLASHCARDS_STATE{editingCardId,
+_cardsCache}` -- sem nenhuma noção de Note/Field, só um "modo" solto
+(`radio[name=admin-flashcard-mode]` com valores `flip`/`mc`/`cloze`,
+UI-only, nunca persistido como tal) que decide quais blocos de HTML
+aparecem. Criação: 1 `<form>` com blocos mutuamente exclusivos por modo
+(`#admin-flashcard-content-main` pra flip/mc, `#admin-flashcard-content-
+cloze` pro cloze) + "Recursos opcionais" (nota/imagem/áudio, sempre
+visível) + radio de direção (`target-front`/`target-back`, escondido pra
+zh/cloze). Edição: `flashcardEditFormHTML(c)`/`myFlashcardEditFormHTML(c)`
+-- MESMA estrutura visual, ids próprios (`edit-flashcard-*`), reconstrói o
+"modo" a partir dos dados (`isCloze = !!c.cloze_sentence`, `isMC =
+!!(c.choices&&c.choices.length)`) porque não há campo que diga isso
+explicitamente. Salvar: sempre grava TODAS as colunas de novo (não é um
+PATCH parcial), incrementa `revision` (`(c.revision||0)+1`, calculado
+pelo CHAMADOR) -- é o único "versionamento" que existe: um id novo
+(`flashcardIdForRow`, fr/zh app.js) nunca bate com nenhum salvo em
+`STATE.cards`, então o merge-por-id de `applySerializedState()` descarta
+o progresso antigo sozinho, sem código de reset dedicado. Reset: não
+existe um "reset" formal -- é a MESMA mecânica do revision acima.
+Apagar/arquivar: `deleteFlashcardPermanently`/`setFlashcardStatus` (DELETE
+físico vs. soft-status), sem relação com Note/Field.
+
+`teacher_flashcards` (professora) vs. `own_flashcards` (aluna): mesmo
+schema de colunas, 2 diferenças reais no editor -- (a) professora escolhe
+1+ alunos via checkboxes multi-seleção (`buildFlashcardsCardsBoxHTML`
+busca por vários `student_id`, cria 1 linha POR aluno selecionado,
+mesmo conteúdo) e o idioma vem do vínculo da aluna (`s.language_app_key`,
+nunca escolhido à mão); aluna sempre cria "pra si mesma", idioma é sempre
+`APP_KEY` fixo do site. (b) `my-flashcards.js` só mostra modo/mídia/
+múltipla escolha/cloze quando `fetchMyPlanTier()==='premium'` (gate
+Premium, prompt-mestre "reformulação gratuito x premium") -- conta free
+só cria flip simples. `admin-flashcards.js` não tem esse gate (é
+ferramenta da própria professora/admin).
+
+Como o editor distingue os 5 Card Types hoje: **não distingue 5, só 3**
+-- `flip`/`mc`/`cloze` (radio group). "Normal com reverso" e "Digite a
+resposta" não têm NENHUMA UI -- só existem no motor (Fase 4a/6B),
+alcançáveis hoje só por teste direto (`buildReversedCardInstancePair`,
+`cardGenerationMode:'type_answer'`), nunca por um clique real.
+
+### 2. Mapa pro contrato nativo (Fase 6B)
+
+O motor já define e valida (`validateNativeNoteRow`, `shared/flashcard-
+model.js:148`) exatamente o shape que o editor precisa produzir --
+nenhum campo novo precisa ser inventado, só popular o que já existe:
+
+```
+row.fields = [
+  { id: <string estável>, lang: <string>, role: <'prompt'|'answer'|'distractor'|null>,
+    content: { value: <string> }, audio: {url,source}|{source:'tts',enabled}|null,
+    image: {url}|null, pinyinFieldId: <id de outro Field>|null },
+  ...
+]
+row.card_generation_mode = 'normal'|'normal_reversed'|'multiple_choice'|'type_answer'|'cloze'
+```
+
+Regras já travadas e ENFORÇADAS pelo motor (não pela UI -- o editor só
+precisa produzir dado que passa por elas, a validação de verdade já
+existe): `fields`/`card_generation_mode` sempre pareados (`validateNativeNoteRow`);
+todo Field com `id` único dentro da Note; `pinyinFieldId` sempre aponta
+pra um `id` real da mesma Note; múltipla escolha exige exatamente 1
+`role:'prompt'`, exatamente 1 `role:'answer'` (nunca o mesmo Field nos
+dois), 1-3 `role:'distractor'` (`validateMultipleChoiceFields`); os
+outros 4 modos são POSICIONAIS (`contentFieldIndices` -- slot 0/1, pulando
+Fields que são satélite de `pinyinFieldId` de outro) e exigem pelo menos
+2 slots de conteúdo. `fieldOrder` é só ordem de exibição no editor (nunca
+lido pra decidir direção -- confirmado, ninguém no motor consulta esse
+campo pra outra coisa).
+
+### 3. Estrutura de campos por Card Type
+
+- **Normal**: 2 Fields de conteúdo (mais 1 opcional de pinyin, satélite
+  de um deles, no zh) -- `slots[0]`=front, `slots[1]`=back. A professora
+  escolhe o IDIOMA de cada Field (não uma direção abstrata "estudado/
+  nativo") -- é essa escolha que decide `lang` de cada Field; a Note não
+  guarda "direção", guarda 2 Fields com `lang` próprio cada. Áudio/imagem
+  já são propriedade de FIELD no schema (`field.audio`/`field.image`) --
+  mas ver achado crítico na seção 6 abaixo: o pipeline de leitura ainda
+  não expõe imagem por Field em lugar nenhum.
+- **Normal com reverso**: **a Note é UMA SÓ** (mesmo par de 2 Fields do
+  Normal) -- `card_generation_mode:'normal_reversed'` é o que diz ao
+  motor "gere as 2 CardInstances" (`buildReversedCardInstancePair`, já
+  pronta, nunca chamada por nenhum editor). O editor NUNCA duplica
+  conteúdo -- é literalmente o MESMO formulário do Normal, só um modo
+  diferente selecionado.
+- **Múltipla escolha**: 1 Field `role:'prompt'`, 1 `role:'answer'`, 1-3
+  `role:'distractor'` -- hoje o form já tem essa forma de fato (front=
+  pergunta, back=resposta certa, mc-1/2/3=erradas), só falta gravar
+  `role` explícito em vez de posição implícita (front/back) +
+  `choices[]`. Validação de cardinalidade já existe no motor
+  (`validateMultipleChoiceFields`) -- o editor não precisa reimplementar,
+  só não pode contar só com a validação de tela (já é a postura atual,
+  ver `validateFlashcardForm`, mas hoje ela valida contagem de
+  `choices[]`, não Fields com role).
+- **Digite a resposta**: `promptFieldIndex`/`answerFieldIndex`,
+  estruturalmente idêntico ao Normal (2 slots posicionais) -- só o
+  `card_generation_mode` muda. `pinyinFieldId` no Field de resposta
+  decide o que a aluna zh compara contra (reaproveita o MESMO mecanismo
+  hanzi/pinyin do Normal, não um canal próprio -- `resolveTypeAnswerCardView`).
+  Nenhuma UI hoje pra este tipo -- seria um 4º radio.
+- **Cloze**: **1 Field de texto só**, com marcação `{{cN::resposta}}` ou
+  `{{cN::resposta|compareAnswer}}` embutida (`shared/flashcard-model.js`,
+  `parseClozeMarks`/`splitClozeMarkRaw`) -- múltiplas marcas na MESMA
+  frase geram automaticamente 1 CardInstance por `cN` distinto
+  (`interpretNativeNoteFromRow`, ramo `cloze`). **A sintaxe é 100%
+  interna** -- a professora nunca deveria digitar `{{c1::...}}` à mão
+  (confirmado pela própria intenção documentada no motor, comentário em
+  `interpretNativeNoteFromRow`). O editor precisa de um mecanismo de
+  SELEÇÃO DE TEXTO ("selecione a palavra, clique 'Cloze'") que:
+  (a) insere a marcação na string armazenada em `content.value` por
+  baixo dos panos; (b) numera automaticamente `c1`/`c2`/... conforme
+  marcas já existentes na frase; (c) permite editar uma marca já feita
+  (trocar a palavra marcada, ou seu `compareAnswer`) sem reconstituir a
+  frase inteira à mão; (d) permite REMOVER uma marca (reverter o trecho
+  pra texto puro). O caso zh (`compareAnswer` = pinyin da resposta,
+  diferente do hanzi revelado) precisa de um campo de entrada PRÓPRIO no
+  momento de marcar o texto (não um campo solto como hoje
+  `#admin-flashcard-cloze-pinyin`) -- ex: um popover/inline-editor que
+  abre ao selecionar texto, com "Resposta" (preenchida com a seleção) +
+  "Pinyin (o que a aluna digita)" quando o idioma é mandarim.
+
+### 4. Direção -- ponto crítico
+
+Achados, todos por leitura direta do código (nenhum presumido):
+
+- `frontIsTargetLanguage`/`front_is_target_language`: existe SÓ no
+  schema legado (`teacher_flashcards`/`own_flashcards`), lido pelo
+  ADAPTER (`interpretNoteFromRow`, ramo legado) pra decidir `lang` de
+  cada Field na hora de CONSTRUIR a Note a partir da linha antiga -- é
+  puramente um mecanismo de INTERPRETAÇÃO de dado histórico. No modelo
+  nativo esse campo **não existe e não deve existir** -- a professora
+  escolhe o idioma de CADA Field diretamente (Field.lang), não um
+  booleano de "qual lado está invertido".
+- `isReverse`/`reviewDirection`/`nextCardDirection()`: confirmado (Fase
+  4, restrição 3, já cumprida) que são exclusivos da TRILHA
+  (`!card.cardInstance`) -- nenhum cartão nativo jamais recebe
+  `reviewDirection`. O editor não precisa (nem pode) tocar nesse
+  mecanismo -- ele simplesmente não existe pro que o editor produz.
+- O editor ATUAL já não decide direção "por idioma" de forma automática
+  -- o radio `target-front`/`target-back` é uma escolha EXPLÍCITA da
+  professora, gravada em `front_is_target_language`. Isso é
+  estruturalmente compatível com o modelo nativo: a única mudança é que,
+  em vez de um booleano interpretado por um adapter, o editor nativo
+  grava `lang` diretamente em cada Field (a escolha vira "qual Field é
+  qual idioma", não "front é o estudado ou não").
+- Pra `normal_reversed`: a autora escolhe o CARD TYPE explicitamente (o
+  radio/seletor de modo) -- não uma "direção" à parte. Uma vez
+  escolhido `normal_reversed`, não existe mais pergunta de "qual lado
+  fica na frente" (as duas CardInstances cobrem as duas ordens).
+- **O que precisa DESAPARECER do editor**: o radio `target-front`/
+  `target-back` como está hoje (um booleano pós-hoc sobre 2 campos
+  fixos "Frente"/"Verso"). **O que substitui**: um seletor de idioma por
+  Field (ex: dropdown "francês"/"português" em cada campo de texto), sem
+  nenhuma noção de "frente"/"verso" embutida no PRÓPRIO conceito de
+  direção -- a UI pode continuar mostrando 2 caixas de texto lado a lado
+  (isso é só posição na tela, `fieldOrder`), só que cada uma pergunta seu
+  próprio idioma, e a ORDEM em que elas viram slot 0/1 é o que o motor lê
+  como "front"/"back" (nunca o idioma decide isso).
+
+### 5. Áudio -- auditoria, sem implementar nada novo
+
+Hoje: `<input type="file" accept="audio/*">` -> upload real
+(`uploadFlashcardMedia`/`uploadOwnFlashcardMedia`, bucket
+`flashcard-media`) -> URL pública gravada em `audio_url` (coluna única,
+nível de LINHA, não de campo). É **áudio próprio explícito** (gravação/
+arquivo da professora), sempre um upload -- **não existe TTS gravado em
+lugar nenhum do editor** (TTS é gerado em runtime pelo motor de
+pronúncia já existente do app -- `speakFrench()`/`AUDIO_MANIFEST` --,
+nunca uma URL persistida). O adapter legado (`interpretNoteFromRow`,
+ramo `else`) vincula esse `audio_url` único ao Field cujo idioma é o
+estudado via heurística (`isStudyLanguageField`) -- é dado histórico
+reinterpretado, o editor nunca expressou essa escolha diretamente.
+
+O modelo nativo (`field.audio: {url,source:'upload'}` ou
+`{source:'tts',enabled:true}`) já é POR FIELD -- é estritamente mais
+expressivo que a coluna única de hoje (poderia ter áudio em cada lado
+separadamente, algo impossível hoje). O que precisa mudar no editor
+(fase futura, não aqui): o campo de upload de áudio deixa de ser 1 input
+solto no formulário e passa a viver DENTRO de cada Field (upload próprio
+por campo de texto). Nenhuma mudança na mecânica de TTS em si -- resolver
+"o áudio automático de pronúncia tenta este campo?" já é decidido por
+`isStudyLanguageField(field, appKey)` no runtime (não no editor, não
+precisa mudar).
+
+### 6. Imagem -- achado crítico, não presumido
+
+`image_url` legado é NOTE-level (`note.image = {url}`,
+`buildEngineCardsFromRow`: `imageUrl: note.image ? note.image.url :
+null`) -- confirmado que os 4 renderers (`renderNormalCard`/
+`renderMultipleChoiceCard`/`renderTypeAnswerCard`/`renderClozeCard`, os 4
+em fr+zh) leem `card.imageUrl` (card-level, vindo de `note.image`), nunca
+por Field. A decisão da Fase 6B (CLAUDE.md, "Fase 6A/6B") foi
+explicitamente que "imagem é propriedade do FIELD, não da Note" --
+`buildNativeRuntimeFields` já ARMAZENA `field.image` por Field -- **mas
+nada no pipeline de LEITURA (`resolveCardField`/`buildEngineCardsFromRow`)
+resolve ou expõe esse dado**. Ou seja: o schema já suporta imagem por
+Field, mas a via de consumo (resolver -> view -> renderer) continua 100%
+Note-global, idêntica ao legado. **Isto é um gap real entre Fase 6B e o
+que os renderers da Fase 6C de fato leem** -- registrado aqui, não
+corrigido (fora do escopo desta auditoria E do que a autora autorizou
+tocar: `shared/flashcard-model.js` e os renderers da Fase 6C estão
+travados). Uma fase futura de "imagem por Field" precisaria: (a) estender
+`resolveCardField()` pra incluir `imageUrl` na projeção de cada Field
+resolvido; (b) decidir, por Card Type, qual Field(s) mostram imagem (ex:
+Normal -- imagem do lado front? dos dois?); (c) só DEPOIS disso o editor
+ganharia um upload de imagem por Field em vez do único solto de hoje.
+Até lá, o editor nativo pode continuar oferecendo só 1 upload de imagem
+por Note (grava em `note.image`, exatamente como o legado) sem
+contradizer o schema -- só não realiza ainda a promessa "imagem é do
+Field" que o schema já permite.
+
+### 7. Rich text -- análise técnica, não implementado
+
+`Field.content` hoje é `{value: <string>}` -- uma STRING PURA (nenhuma
+marcação, nenhum range, nenhum nó). `resolveCardField()` devolve
+`field.text` cru pra dentro de `escapeHTML()` nos renderers (fr/zh
+app.js) -- ou seja, hoje o pipeline inteiro trata conteúdo como texto
+puro, escapado como HTML por segurança (achado da sessão "7 propostas":
+antes disso havia um XSS real por falta de `escapeHTML`, já corrigido).
+Pra suportar negrito/itálico/sublinhado/tachado/cor/destaque/remover
+formatação/imagem inline/áudio inline/Cloze dentro do texto, `content`
+precisaria deixar de ser `{value:string}` e virar uma estrutura com
+marcação -- 2 caminhos tecnicamente viáveis, nenhum decidido aqui:
+(a) `content.value` continua string, mas passa a ser HTML sanitizado
+(mais simples de integrar com o `escapeHTML()`/render atual, mas mistura
+apresentação com dado, e formatação livre em HTML cru é risco de XSS se
+o sanitizador tiver brecha); (b) `content` vira `{value: <doc
+estruturado>}` (tipo ProseMirror/Slate JSON, ou um Markdown restrito) --
+mais seguro e mais alinhado ao espírito "Field é dado, não HTML", mas
+exige um renderer de rich text novo em CADA um dos 4 Card Type renderers
+(fr+zh, 8 pontos de render) pra desenhar o texto formatado, além de
+mudar `resolveCardField()` (hoje devolve `.text` cru). Cloze inteiro
+dentro de rich text é o caso mais delicado: a marcação `{{cN::...}}`
+hoje é regex sobre string plana -- se `content.value` virar um documento
+estruturado, `parseClozeMarks`/`renderClozeText` precisariam operar
+sobre esse documento (não mais regex), ou o texto cloze precisaria
+continuar sendo string plana MESMO que outros Card Types ganhem rich
+text (2 representações de `content` coexistindo por Card Type -- viável,
+mas é uma decisão de design própria, não decidida aqui). **Nenhuma linha
+de código foi escrita pra isso nesta auditoria** -- é puramente a análise
+pedida.
+
+### 8. Preview -- auditoria, distinção importante
+
+Existe HOJE um "preview" (`openPublicFlashcardPreview`, `shared/public-
+profile.js:465`) -- **confirmado que NÃO é o Preview-alvo da Fase 6C/6D**:
+é uma modal read-only pro fluxo de "ver cartão público de outra conta
+antes de importar" (prompt-mestre "perfil público"), que renderiza campos
+LEGADOS soltos (`c.front`/`c.frontPinyin`/`c.backTrans`/`c.note`/
+`c.frontIsTargetLanguage`) vindos direto da RPC `get_public_flashcards()`
+-- nunca passa por Note/CardInstance, nunca chama `resolveCardContentView`,
+nunca reaproveita nenhum renderer da Fase 6C. É puro texto estático em
+`<p>` tags, sem interatividade nenhuma (nem vira/nem responde). **Duplica
+conceito, não código** -- ele mostra "o que É o cartão" (metadado), nunca
+"como seria estudar esse cartão" (o que os 4 renderers da Fase 6C fazem).
+Não é candidato a virar a base do Preview do editor.
+
+O Preview real (Fase 6C, decisão já travada: "Preview e Review devem
+usar o MESMO renderer") **não existe ainda em nenhum lugar do código**.
+O que os 4 renderers (`renderNormalCard`/`renderMultipleChoiceCard`/
+`renderTypeAnswerCard`/`renderClozeCard`, fr+zh) já suportam, confirmado
+na auditoria da Fase 6C (seção "3. Contrato do renderer" e "8. Como o
+Preview terá seu próprio estado"): assinatura `renderer(mountEl, card,
+localState, callbacks)`, mount explícito (não mais `#review-content`
+fixo), `localState` que o CHAMADOR cria/descarta (não `STATE.reviewCardState`
+-- pro Preview seria uma variável local do módulo do editor), `callbacks.
+onAnswered` que o Preview implementaria como um NO-OP de gravação (só
+re-renderiza mostrando o resultado, nunca `gradeCurrentCard`/FSRS/XP/
+save). Adaptação necessária pro editor conseguir montar um Preview:
+form -> `row` sintético (mesmo shape que `createFlashcard()` grava) ->
+`buildEngineCardsFromRow(row, opts)` (a MESMA função de produção, sem
+round-trip de rede -- o `row` é construído em memória a partir do estado
+do formulário, nunca salvo primeiro) -> escolhe o card certo do array
+(pra Normal-com-reverso/Cloze-multi-marca, o Preview mostraria só o
+primeiro, ou um seletor entre eles -- decisão de UX pra fase futura) ->
+`renderer(previewMountEl, card, previewLocalState, previewCallbacks)`.
+Nenhuma chamada de rede nem gravação em nenhum ponto desse fluxo.
+
+### 9. Persistência -- mapeamento
+
+Onde o submit constrói o objeto: dentro do handler `submit` de
+`#admin-create-flashcard-form`/`#my-create-flashcard-form`
+(`admin-flashcards.js`/`my-flashcards.js`), lê cada `<input>`/`<textarea>`
+por id, monta um objeto plano `{front, backTrans, note, frontPinyin,
+imageUrl, audioUrl, choices, clozeSentence, clozeAnswer,
+clozeAnswerPinyin, frontIsTargetLanguage}` passado direto pra
+`createFlashcard()`/`createOwnFlashcard()`. Supabase é chamado só DENTRO
+de `shared/teacher-flashcards.js`/`shared/own-flashcards.js` (nunca
+direto do editor) -- `supabaseClient.from('teacher_flashcards'|
+'own_flashcards').insert({...}).select().single()`. Colunas gravadas
+hoje: as 12 legadas listadas na seção 1, mais `teacher_id`/`student_id`
+(ou `owner_id`)/`language_app_key`/`status` (default `'active'`) -- `id`/
+`created_at`/`revision` (default 0) são geridos pelo banco. `fields`/
+`card_generation_mode` (migration 045, já aplicada ao vivo, ver seção
+"Fase 6B" acima) existem na tabela mas NUNCA são escritos por nenhum
+código cliente hoje -- só lidos pelo motor quando presentes (o schema
+está pronto, o editor é quem falta escrever neles).
+
+Quando `revision` incrementa: só em EDIÇÃO
+(`updateFlashcardContent`/`updateOwnFlashcardContent`, chamador calcula
+`(c.revision||0)+1`, nunca o servidor). Pra uma Note nativa, a mesma regra
+vale -- qualquer alteração ESTRUTURAL (trocar Card Type, adicionar/
+remover Field, mudar `pinyinFieldId`) precisa incrementar `revision`
+exatamente como hoje, pelo MESMO motivo (id novo -> reset de progresso
+via merge-por-id, sem código de reset dedicado). Uma edição que só
+corrige um erro de digitação sem mudar estrutura poderia, em teoria, não
+incrementar `revision` -- mas hoje o editor NÃO distingue "mudança de
+conteúdo" de "mudança estrutural" (sempre incrementa) -- se isso deveria
+mudar é uma decisão de UX pra fase futura, não decidida aqui.
+
+Como uma edição deveria passar a gravar `fields`+`card_generation_mode`:
+o submit do editor nativo montaria `row.fields` a partir dos Fields
+editados na tela (cada um com `id` estável -- ver seção 10) e
+`row.card_generation_mode` a partir do Card Type selecionado, em vez de
+montar o objeto plano de 12 colunas de hoje. As 12 colunas legadas
+continuariam existindo no schema (nunca removidas, ver seção 10), mas um
+cartão criado/editado pelo editor NOVO gravaria `null` nelas (ou as
+deixaria como estavam, se for uma edição de um cartão que já era legado
+-- decisão da seção 10) e populares só `fields`/`card_generation_mode`.
+Nenhuma execução de SQL/migration foi feita nesta auditoria.
+
+### 10. Compatibilidade -- proposta, não implementada
+
+- **Editor de cartão NOVO -> sempre nativo**: todo cartão criado do zero
+  pelo editor migrado grava `fields`+`card_generation_mode` desde o
+  primeiro save, nunca as 12 colunas legadas (exceto que elas continuam
+  `NOT NULL`-livres pelo schema atual -- só `back_trans`/`front`
+  parcialmente obrigatórios hoje, migration 035/040 já tornou `front`
+  opcional; as demais já são nullable desde sempre).
+- **Edição de um cartão LEGADO existente**: 2 estratégias possíveis, sem
+  decisão travada aqui --
+  (a) **conversão no OPEN**: ao abrir o form de edição, o editor já
+  reconstrói `fields`/`card_generation_mode` EM MEMÓRIA a partir das
+  colunas legadas (mesma lógica que `interpretNoteFromRow()` já faz no
+  motor, só espelhada no client antes de mostrar o form) -- a professora
+  edita já no modelo novo, mas o SAVE só grava de fato como nativo se ela
+  confirmar (ou sempre, silenciosamente). Risco: se ela cancelar sem
+  salvar, nada muda (bom); se salvar, o cartão "migra" de propósito.
+  (b) **conversão no SAVE**: o form de edição continua mostrando/editando
+  as colunas legadas como hoje (zero mudança de UX pra cartão antigo),
+  e só ganha um botão explícito "Migrar pro editor novo" que, quando
+  clicado, reconstrói e grava `fields`/`card_generation_mode` (mantendo
+  as colunas legadas como estavam, só ADICIONANDO os campos novos) --
+  edição posterior desse mesmo cartão já cai automaticamente no editor
+  nativo (porque `fields` já está presente). Esta opção é mais
+  conservadora (nunca migra sem ação explícita), mas duplica esforço de
+  UI (2 editores convivendo por um tempo).
+  Nenhuma das duas foi escolhida -- fica pra a autora decidir (ver seção
+  "decisões pendentes" abaixo).
+- **Nunca conversão AUTOMÁTICA em massa/silenciosa de todo o histórico**
+  -- nenhuma migration de dado proposta aqui, consistente com o
+  princípio geral já travado (Fase 6B: "nunca migrar destrutivamente").
+- **Preservar IDs/histórico FSRS/origin/metadados**: a migração de UMA
+  linha de legado pra nativo (seja (a) ou (b) acima) só populariza
+  `fields`/`card_generation_mode` -- NUNCA muda `id` da linha, `teacher_id`/
+  `student_id`/`owner_id`, `language_app_key`, `status`, `created_at`.
+  Como `flashcardIdForRow()` (fr/zh app.js) deriva o id do CARD a partir
+  de `row.id`+`row.revision` (nunca do conteúdo/`fields`), migrar uma
+  linha pro shape nativo SEM incrementar `revision` preservaria o id do
+  card e portanto o progresso FSRS -- só precisaria incrementar
+  `revision` se a ESTRUTURA (não só a representação) mudar de fato (ex:
+  virar Cloze multi-marca onde antes era mono-marca, mudando quantos
+  CardInstances a linha produz). Migrar um Normal legado pra um Normal
+  nativo com os MESMOS 2 campos, na MESMA ordem, não precisaria de
+  `revision++` -- o card resultante teria o mesmo `id`/`unitTitle`/
+  `frontFieldIndex`/`backFieldIndex` de antes.
+
+### 11. Validações -- lista completa, por categoria
+
+**Estrutural (Note/Field, universal a todo Card Type)**:
+- `fields` não vazio.
+- Todo Field com `id` único dentro da Note.
+- `pinyinFieldId` (quando presente) aponta pra um `id` real da mesma Note.
+- `card_generation_mode` é um dos 5 valores reconhecidos.
+- `fields`/`card_generation_mode` sempre pareados (nunca só um).
+- (Já ENFORÇADO pelo motor, `validateNativeNoteRow` -- o editor só
+  precisa produzir dado que passa, não reimplementar a checagem, mas
+  DEVE validar client-side também pra dar feedback rápido, mesmo nível
+  de confiança já usado hoje: client valida por UX, servidor/motor é a
+  fonte de verdade.)
+
+**Por Card Type**:
+- **Normal**: os 2 slots de conteúdo não-vazios; se algum Field tem
+  `pinyinFieldId`, o Field alvo existe e tem conteúdo (senão pinyin
+  aponta pra um campo vazio).
+- **Normal com reverso**: mesma validação do Normal (é a mesma Note) --
+  nenhuma validação adicional própria, o motor já trata os 2
+  CardInstances como 2 Normals independentes.
+- **Múltipla escolha**: exatamente 1 `prompt`, exatamente 1 `answer`
+  (nunca o mesmo Field), 1-3 `distractor`, todos com conteúdo não-vazio
+  (já enforçado no motor, `validateMultipleChoiceFields` -- o editor
+  precisa mostrar essas mensagens ANTES do submit, mesmo padrão já
+  usado hoje pra `choices[]`).
+- **Type Answer**: prompt e answer não-vazios; se `languageAppKey===
+  'mandarim'`, o Field de resposta precisa ter `pinyinFieldId` apontando
+  pra um Field com conteúdo (senão a comparação zh não tem contra o que
+  comparar -- mesma regra que Cloze já aplica pro zh hoje).
+- **Cloze**: o texto do Field precisa conter pelo menos 1 marca
+  `{{cN::...}}` válida (o editor NUNCA deixa o texto sem marca nenhuma
+  chegar no submit, já que a marcação é feita via UI, não digitada);
+  cada marca com `answer` não-vazio; se `languageAppKey==='mandarim'`,
+  cada marca precisa de `compareAnswer` (pinyin) preenchido (mesma regra
+  que `clozeAnswerPinyin` já aplica hoje, só que por MARCA em vez de por
+  cartão inteiro -- diferença real: hoje só 1 marca por cartão existe,
+  múltiplas marcas cada uma precisaria da própria checagem).
+- `pinyinFieldId`: quando o idioma da Note é mandarim e um Field é
+  `lang:'zh'`, o editor deveria pedir (não necessariamente EXIGIR) um
+  Field de pinyin pareado -- hoje isso é implícito (front_pinyin sempre
+  ao lado de front no zh); no editor nativo isso vira "adicionar Field
+  de pinyin" como uma ação explícita por Field zh.
+
+**UX (não bloqueiam o motor, mas evitam erro óbvio antes de gastar uma
+chamada de rede)**: mesmo padrão já em uso hoje (`wireFlashcardFieldValidation`,
+borda vermelha + mensagem no blur) -- replicar por Field em vez de por
+input fixo; desabilitar "Criar"/"Salvar" enquanto a seleção de
+destinatários (professora) ou Card Type está incompleto; avisar ANTES do
+submit se um upload de mídia falhar (já existe, mantém).
+
+### 12. FR e ZH -- comparação
+
+**Compartilhável sem adaptação**: toda a ESTRUTURA de estado/orquestração
+do editor (`ADMIN_FLASHCARDS_STATE`/multi-seleção de alunos/busca/filtro
+de idioma/mecânica de re-render incremental) -- não depende de idioma
+nenhum, já é escrita 1x e só existe em cada arquivo por causa da
+convenção espelhada fr/zh do repo (`shared/admin-flashcards.js` já É
+compartilhado entre os 2 sites -- confirmado no cabeçalho do arquivo:
+"Depende de... languages/<lang>/app.js" -- é o `fr/app.js`/`zh/app.js`
+que diferem, não o admin-flashcards.js em si). **Continua compartilhado
+no editor nativo** sem mudança.
+
+**Precisa ficar específico**: (a) o mecanismo de pinyin -- zh SEMPRE quer
+um Field de pinyin pareado a qualquer Field `lang:'zh'` (via UI: "esse
+campo é chinês? adicione o pinyin dele"), fr nunca tem esse conceito; (b)
+o seletor de direção (seção 4) -- fr oferece a escolha de idioma por
+Field livremente (`FLASHCARD_DIRECTION_LANGUAGE_LABELS.frances`), zh HOJE
+esconde o bloco inteiro (hanzi+pinyin é par inseparável, sem forma de
+"inverter" sem um `back_pinyin` que não existe) -- essa restrição
+continua válida no modelo nativo: um Field zh com `pinyinFieldId` só faz
+sentido como slot FIXO (não pode virar "back" com um pinyin correspondente
+inexistente do outro lado), então a UI de "trocar qual Field é front/
+back" precisa CONTINUAR desabilitada quando qualquer Field envolvido
+tem `pinyinFieldId`/é alvo de um -- não é uma limitação nova, é a MESMA
+que já existe hoje, só reexpressa em termos de Field em vez de
+`front_is_target_language`.
+`compareAnswer` (Cloze/Type Answer): entra igual nos 2 idiomas
+estruturalmente (é sempre "o que a aluna digita, se for diferente do
+texto revelado") -- só o zh tipicamente PRECISA dele (pinyin != hanzi),
+fr tipicamente não (mesma string pros 2 papéis) -- o editor pode pedir o
+campo sempre, mas só EXIGIR preenchido quando `languageAppKey===
+'mandarim'` (mesma regra condicional já usada hoje).
+
+### 13. Arquitetura proposta -- divisão em subfases
+
+Estrutura sugerida pela autora, ajustada com achados desta auditoria (só
+1 ajuste: 6D.4 dividido em 6D.4a/6D.4b porque "Múltipla escolha" e "Type
+Answer" têm complexidade bem diferente -- MC já tem quase toda a UI
+pronta hoje, Type Answer não tem NENHUMA):
+
+- **6D.1 -- Estado/modelo do editor**: trocar o objeto de estado plano
+  (`{front, backTrans, ...}`) por um objeto que já modela `{fields:[],
+  cardGenerationMode}` na memória do formulário -- SEM mudar nenhuma UI
+  visível ainda, só a representação interna. Menor risco possível,
+  puramente refatoração de dado.
+- **6D.2 -- Seleção de Card Type**: substitui o radio `flip/mc/cloze`
+  por um seletor que cobre os 5 tipos reais (incluindo `normal_reversed`
+  e `type_answer`, hoje sem UI nenhuma) -- ainda sem editor de Field
+  completo, só a escolha + esqueleto de campos por tipo.
+- **6D.3 -- Editor de Field**: componente reaproveitável "1 Field" (texto
+  + seletor de idioma + upload de áudio próprio + upload de imagem +
+  toggle de pinyin pareado) -- usado por Normal (2x)/Normal-reversed
+  (2x, mesmo componente)/Type Answer (2x).
+- **6D.4a -- Múltipla escolha**: adapta o componente de Field pra
+  `role` (prompt/answer/distractor) em vez de posição -- menor esforço,
+  UI já existe quase pronta hoje.
+- **6D.4b -- Type Answer**: primeiro tipo 100% novo na UI -- reaproveita
+  o componente de Field de 6D.3, sem UI própria significativa além de
+  ligar `promptFieldIndex`/`answerFieldIndex`.
+- **6D.5 -- Cloze visual**: o item mais grande/arriscado (seleção de
+  texto + inserção de marca + numeração automática + editar/remover
+  marca + popover de `compareAnswer` pro zh) -- merece ficar sozinho,
+  sem competir com nenhuma outra mudança na mesma entrega.
+- **6D.6 -- Persistência nativa**: submit passa a gravar `fields`+
+  `card_generation_mode` de verdade (em vez de só simular em memória
+  desde 6D.1) -- só DEPOIS que 6D.1-6D.5 já provaram a UI inteira contra
+  dado em memória, reduz risco de gravar lixo no banco por um bug de UI
+  ainda não pego.
+- **6D.7 -- Preview**: monta `row` sintético a partir do estado do
+  formulário (já no shape nativo desde 6D.1) e chama
+  `buildEngineCardsFromRow`+o renderer certo (Fase 6C) num
+  `previewMountEl` dedicado, com `callbacks.onAnswered` no-op -- só faz
+  sentido depois que 6D.1-6D.5 garantem que o `row` sintético é
+  representativo do que será salvo de verdade.
+- **6D.8 -- Compatibilidade/migração de edição**: decide e implementa
+  (a) ou (b) da seção 10 pra cartão legado sendo editado -- deliberadamente
+  por ÚLTIMO, depois que o editor nativo já está provado em cartão NOVO;
+  editar cartão antigo é o caminho de maior risco (dado real, histórico
+  FSRS real).
+
+### Decisões que precisam de aprovação explícita da autora antes de
+qualquer código (nenhuma travada nesta auditoria)
+
+1. **Imagem por Field** (seção 6): o schema já suporta, o pipeline de
+   leitura não resolve ainda -- decidir se uma fase própria estende
+   `resolveCardField()`/renderers ANTES do editor tentar oferecer upload
+   de imagem por Field, ou se o editor nativo continua com 1 imagem por
+   Note (como o legado) até essa fase existir.
+2. **Rich text** (seção 7): qual dos 2 caminhos técnicos (HTML
+   sanitizado vs. documento estruturado) -- ou se rich text fica de fora
+   do escopo da Fase 6D inteira e vira uma Fase 9 própria mais adiante.
+3. **Compatibilidade de edição de cartão legado** (seção 10): estratégia
+   (a) conversão no open vs. (b) conversão explícita via botão -- ou uma
+   terceira opção que a autora prefira.
+4. **`revision` em edição não-estrutural** (seção 9): manter sempre
+   incrementando (comportamento atual, simples) ou distinguir edição de
+   conteúdo (não reseta progresso) de edição estrutural (reseta) -- mais
+   fiel à intenção original do mecanismo, mas exige o editor saber
+   classificar o tipo de mudança.
+5. **Ordem/escopo das subfases** (seção 13): confirmar a divisão 6D.1-
+   6D.8 acima, ou repriorizar (ex: `type_answer`/`normal_reversed` podem
+   ficar pra depois se a prioridade real for só polir os 3 tipos que já
+   têm UI hoje).
+6. **Cloze multi-marca na UI** (seção 3): confirmar que o editor deve
+   suportar MÚLTIPLAS marcas por frase desde já (o motor já suporta
+   desde a Fase 5), ou se o MVP da 6D.5 cobre só 1 marca por frase
+   (paridade com o legado) e multi-marca fica pra depois.
+
+Nenhuma implementação foi feita nesta auditoria -- `git status` limpo do
+início ao fim (confirmado). Próxima fase (6D.1, ou a ordem que a autora
+preferir) só começa depois de autorização explícita sobre as 6 decisões
+acima, com este relatório já entregue antes de pedir luz verde.
