@@ -941,7 +941,19 @@ const STATE = {
   currentUnitId: null,
   reviewQueue: [],
   reviewIndex: 0,
-  reviewShowingAnswer: false,
+  // Fase 6C.1 (ver CLAUDE.md) -- estado efêmero da exibição ATUAL do
+  // renderer de Normal (hoje só {kind:'normal', revealed}). Dono é a
+  // SESSÃO (renderReviewView cria, gradeCurrentCard/reviewMoreCurrentCard
+  // descartam) -- o renderer nunca lê/escreve isto por nome, só recebe a
+  // referência como parâmetro `localState`. Substitui o antigo
+  // `reviewShowingAnswer` (removido -- só era usado dentro do bloco de
+  // Normal, nunca por MC/Cloze/TypeAnswer, confirmado por grep antes de
+  // remover). MC/Cloze/TypeAnswer continuam com seus próprios campos
+  // soltos (reviewMCPicked/reviewMCCorrect/reviewClozeAnswered,
+  // inicializados em startReviewSession) até serem extraídos numa
+  // sub-fase futura -- fora do escopo desta. `hanziReviewShowingAnswer`
+  // (abaixo) é de OUTRA feature (revisão de hanzi), não tocado aqui.
+  reviewCardState: null,
   reviewSessionUnitFilter: null, // if set, review only this unit's cards
   hanziReviewQueue: [],
   hanziReviewIndex: 0,
@@ -5809,7 +5821,7 @@ function openReviewSession(mode){
     // Fase 4: getStudyQueue(scope:'hard') -- mesmo critério de hardWordsPool()
     STATE.reviewQueue = shuffle(getStudyQueue(eligibleReviewPool(), { scope: 'hard' }));
     STATE.reviewIndex = 0;
-    STATE.reviewShowingAnswer = false;
+    STATE.reviewCardState = null;
     renderReviewView();
   } else if (mode === 'match'){
     renderMatchSizePicker();
@@ -6340,7 +6352,9 @@ function startReviewSession(){
   const shouldShuffle = !!STATE.reviewSessionUnitFilter;
   STATE.reviewQueue = shouldShuffle ? shuffle(queue) : queue;
   STATE.reviewIndex = 0;
-  STATE.reviewShowingAnswer = false;
+  // Fase 6C.1 -- descarta o localState de Normal da sessão anterior (se
+  // houver); renderReviewView() cria um novo na primeira renderização.
+  STATE.reviewCardState = null;
   // Fase 8a -- estado transitório do quiz de múltipla escolha (ver
   // renderMultipleChoiceReviewCard); zera ao entrar numa sessão nova, caso
   // a anterior tenha sido interrompida no meio de uma pergunta respondida.
@@ -6686,18 +6700,73 @@ function renderReviewView(){
     // reverso", Fase 4a) cai no flip padrão abaixo.
   }
 
+  // Fase 6C.1 (ver CLAUDE.md) -- "normal" (inclusive uma das 2 metades de
+  // "Normal com reverso") extraído pro renderer renderNormalCard(),
+  // seguindo o contrato aprovado na Fase 6C: (mountEl, card, localState,
+  // callbacks). A SESSÃO (aqui) é quem cria/descarta STATE.reviewCardState
+  // -- o renderer nunca lê/escreve STATE por nome, só recebe a referência
+  // como parâmetro. Criação é preguiçosa (só quando ainda não existe --
+  // gradeCurrentCard()/reviewMoreCurrentCard() já o zeram ao avançar a
+  // fila, então "ausente" aqui sempre significa "cartão novo, começar do
+  // zero"; re-renderizações do MESMO cartão -- ex: depois de revelar --
+  // reaproveitam a mesma referência, nunca recriam).
+  if (!STATE.reviewCardState){
+    STATE.reviewCardState = { kind: 'normal', revealed: false };
+  }
+  renderNormalCard(el, card, STATE.reviewCardState, {
+    onAnswered: (wasCorrect, grade) => gradeCurrentCard(grade),
+    onReviewMore: () => reviewMoreCurrentCard(),
+  });
+}
+
+// Fase 6C.1 (ver CLAUDE.md) -- renderer de "Normal", extraído do bloco
+// que antes vivia inline dentro de renderReviewView(). Contrato aprovado
+// na Fase 6C: (mountEl, card, localState, callbacks) -- reutilizável tal
+// e qual pelo Preview do editor (Fase 6D, ainda não construída), sem
+// nenhuma segunda implementação paralela: o Preview vai chamar esta
+// MESMA função, só trocando localState (variável local do editor, nunca
+// STATE) e callbacks (onAnswered vira um no-op visual, nunca
+// gradeCurrentCard). O renderer não sabe -- nem precisa saber -- se está
+// em Review ou Preview.
+//
+// localState: {kind:'normal', revealed}. Único campo -- substitui
+// STATE.reviewShowingAnswer (removido, era usado exclusivamente aqui).
+// Nenhum acesso a STATE pra saber "revelado?" -- só localState.revealed.
+//
+// callbacks.onAnswered(wasCorrect, grade): chamado quando um botão de
+// grau é clicado -- pra Normal não existe veredito certo/errado
+// calculado pelo renderer (a aluna autorrelata via o grau escolhido),
+// então `wasCorrect` é sempre null aqui; `grade` é o que importa.
+// callbacks.onReviewMore(): chamado pelo link "Rever mais" -- extensão
+// necessária além do onAnswered único esboçado na auditoria (Fase 6C),
+// porque "Rever mais" é uma 3ª transição que não grada nada (não é
+// "resposta", é só pedido de mais exposição) -- sinalizado aqui, não
+// decidido em silêncio.
+//
+// Direção: pra cartão nativo (card.cardInstance), SEMPRE false --
+// resolveNormalCardView() já devolve front/back na ordem certa
+// (frontFieldIndex/backFieldIndex do CardInstance); a direção nunca é
+// escolhida/alternada aqui. Pra cartão legado de trilha
+// (!card.cardInstance), o mecanismo de variedade de sessão que sempre
+// existiu (card.reviewDirection, setado 1x em startReviewSession() via
+// nextCardDirection()) continua 100% intocado -- fora do escopo desta
+// reestruturação (nunca ganhou CardInstance). Nem isReverse nem
+// reviewDirection nem nextCardDirection() foram reintroduzidos como
+// mecanismo NATIVO -- o `if (card.cardInstance)` abaixo é a mesma
+// checagem de sempre, só movida pra dentro da função extraída.
+//
+// Progresso (STATE.reviewIndex/reviewQueue.length): continua lido direto
+// de STATE aqui, igual aos outros 3 renderers (MC/Cloze/TypeAnswer,
+// ainda não extraídos nesta subfase) -- é contabilidade de SESSÃO, não
+// estado efêmero de interação (a proibição da Fase 6C é especificamente
+// sobre não ler STATE pra saber "revelado?"/"respondido?", não uma
+// proibição geral de qualquer leitura). Uniformizar isso (ex: passar
+// como parâmetro de contexto) fica pra quando os 4 renderers forem
+// extraídos juntos -- não resolvido isoladamente só pro Normal, pra não
+// introduzir um mecanismo que os outros 3 ainda não teriam.
+function renderNormalCard(mountEl, card, localState, callbacks){
   const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
 
-  // Direção -- ver restrições da Fase 4 (CLAUDE.md): pra cartão nativo, é
-  // 100% decidida pelo CardInstance (frontFieldIndex/backFieldIndex), a
-  // sessão NUNCA escolhe/alterna aqui -- "Normal com reverso" (2
-  // CardInstance independentes, cada um com seu próprio FSRS, Fase 4a) é o
-  // único jeito de existir as 2 direções, nunca um toggle de sessão. Pra
-  // cartão de trilha (fora do escopo desta reestruturação, nunca teve
-  // CardInstance), o mecanismo de variedade de sessão que sempre existiu
-  // (nextCardDirection, ver startReviewSession) continua intacto -- o
-  // pinyin sempre acompanha o hanzi, nunca aparece sozinho, então o toggle
-  // nunca deixa um lado do cartão vazio.
   let isReverse, hanziSideHTML, transSideHTML, targetAudioUrl, hanziIsSpeakable, hanziTextForSpeech;
   if (card.cardInstance){
     const view = resolveCardContentView(card); // kind: 'normal'
@@ -6726,9 +6795,9 @@ function renderReviewView(){
   // Áudio automático só quando o hanzi está do lado JÁ visível nesse
   // instante -- no modo padrão isso é o front (toca ao entrar no cartão),
   // no modo invertido é o back (toca só ao revelar a resposta).
-  const hanziVisibleNow = isReverse ? STATE.reviewShowingAnswer : true;
+  const hanziVisibleNow = isReverse ? localState.revealed : true;
 
-  el.innerHTML = `
+  mountEl.innerHTML = `
     <div class="review-progress">
       <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
       <div class="review-progress-count">${STATE.reviewIndex+1} / ${STATE.reviewQueue.length}</div>
@@ -6738,47 +6807,50 @@ function renderReviewView(){
       ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
       ${frontHTML}
       ${targetAudioUrl ? customAudioBtnHTML(targetAudioUrl) : ''}
-      ${STATE.reviewShowingAnswer ? `
+      ${localState.revealed ? `
         <div class="divider-line"></div>
         ${backHTML}
       ` : `<div class="flashcard-hint">toque para ver a resposta</div>`}
     </div>
-    ${STATE.reviewShowingAnswer ? `
+    ${localState.revealed ? `
       ${gradeButtonsHTML(card)}
       <button class="review-more-link" id="review-more-btn">🔁 Rever mais (não conta como resposta)</button>
     ` : ''}
   `;
 
-  document.getElementById('flashcard').addEventListener('click', () => {
-    if (!STATE.reviewShowingAnswer){
-      STATE.reviewShowingAnswer = true;
-      renderReviewView();
+  mountEl.querySelector('#flashcard').addEventListener('click', () => {
+    if (!localState.revealed){
+      // Interação intermediária (revelar) -- o PRÓPRIO renderer se chama
+      // de novo com os mesmos 4 parâmetros, sem envolver a sessão. Só a
+      // transição FINAL (grau escolhido / Rever mais) sobe via callbacks.
+      localState.revealed = true;
+      renderNormalCard(mountEl, card, localState, callbacks);
     }
   });
 
-  wireAudioButtons(el);
-  wireCustomAudioButtons(el);
+  wireAudioButtons(mountEl);
+  wireCustomAudioButtons(mountEl);
   // Toca automaticamente quando o hanzi aparece -- reforço auditivo
   // imediato. Só dispara se já houver voz chinesa disponível, pra não
   // repetir o aviso de "instale a voz" a cada cartão de uma sessão inteira.
   if (hanziVisibleNow && hanziIsSpeakable && canSpeakChinese(hanziTextForSpeech)){
-    speakChinese(hanziTextForSpeech, el.querySelector('.audio-btn-lg'), true);
+    speakChinese(hanziTextForSpeech, mountEl.querySelector('.audio-btn-lg'), true);
   }
 
-  if (STATE.reviewShowingAnswer){
+  if (localState.revealed){
     // Fase 11: PRATICAR != REVISAR -- "Rever mais" só reinsere o cartão
     // mais à frente na fila DESTA sessão (efêmero, nunca persistido). Não
     // chama applyMemoryGrade nem addXP -- só ser mostrada de novo não é
     // evidência de recuperação, então não pode alterar o agendamento
     // (devido/stability) sem uma resposta real que justifique isso.
-    document.getElementById('review-more-btn').addEventListener('click', (e) => {
+    mountEl.querySelector('#review-more-btn').addEventListener('click', (e) => {
       e.stopPropagation();
-      reviewMoreCurrentCard();
+      callbacks.onReviewMore();
     });
-    el.querySelectorAll('.grade-btn').forEach(btn => {
+    mountEl.querySelectorAll('.grade-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        gradeCurrentCard(parseInt(btn.dataset.grade));
+        callbacks.onAnswered(null, parseInt(btn.dataset.grade));
       });
     });
   }
@@ -6808,7 +6880,9 @@ function reviewMoreCurrentCard(){
   const reinsertAt = Math.min(STATE.reviewQueue.length, STATE.reviewIndex + 4);
   STATE.reviewQueue.splice(reinsertAt, 0, card);
   STATE.reviewIndex += 1;
-  STATE.reviewShowingAnswer = false;
+  // Fase 6C.1 -- avançou a posição da fila, descarta o localState de
+  // Normal desta exibição (renderReviewView cria um novo pro próximo card).
+  STATE.reviewCardState = null;
   renderReviewView();
 }
 
@@ -6852,7 +6926,9 @@ function gradeCurrentCard(grade){
   }
 
   STATE.reviewIndex += 1;
-  STATE.reviewShowingAnswer = false;
+  // Fase 6C.1 -- avançou a posição da fila, descarta o localState de
+  // Normal desta exibição (renderReviewView cria um novo pro próximo card).
+  STATE.reviewCardState = null;
   saveState();
   renderTopbarStats();
   renderReviewView();

@@ -6435,3 +6435,125 @@ tocado além deste `CLAUDE.md` -- `git status` confirma árvore limpa.
 Aguardando autorização explícita da autora pra Fase 6C virar código
 (extrair as 4 funções de renderer com o contrato acima + o ciclo de vida
 de `localState` detalhado nesta seção).
+
+## Fase 6C.1 -- extração do renderer de Normal (primeira das 4 funções,
+escopo estrito)
+
+Primeira subfase de código da Fase 6C, restrita EXPLICITAMENTE a extrair
+só o renderer de "Normal" (inclusive as 2 metades de "Normal com
+reverso") pro contrato aprovado -- MC/Cloze/TypeAnswer, editor, Preview,
+FSRS, banco, Card Type e pipeline de geração ficaram fora de propósito,
+sem nenhuma alteração.
+
+**Arquivos alterados**: só `fr/app.js` + `zh/app.js` (`git diff --stat`:
+137/138 linhas, +213/-62 no total). Nenhum outro arquivo tocado --
+confirmado que `shared/admin-flashcards.js`/`shared/my-flashcards.js`/
+`shared/public-profile.js`/`shared/flashcard-model.js` continuam
+intactos.
+
+**O que foi feito, nos dois idiomas (mudanças espelhadas):**
+
+1. **`renderNormalCard(mountEl, card, localState, callbacks)`** (novo) --
+   extraído do bloco que antes vivia inline dentro de `renderReviewView()`.
+   Corpo idêntico ao original (mesma lógica de direção/HTML/áudio), só
+   trocando `document.getElementById('review-content')`→`mountEl`,
+   `STATE.reviewShowingAnswer`→`localState.revealed`, e as 2 chamadas
+   diretas (`gradeCurrentCard(grade)`/`reviewMoreCurrentCard()`) por
+   `callbacks.onAnswered(null, grade)`/`callbacks.onReviewMore()`.
+2. **`STATE.reviewCardState`** (novo campo, substitui
+   `STATE.reviewShowingAnswer` -- removido, confirmado por grep antes de
+   apagar que era usado EXCLUSIVAMENTE dentro do bloco de Normal, nunca
+   por MC/Cloze/TypeAnswer nem por `hanziReviewShowingAnswer` -- feature
+   de revisão de hanzi do zh, totalmente separada, não tocada). Ciclo de
+   vida exatamente como definido na seção anterior deste CLAUDE.md:
+   criado preguiçosamente em `renderReviewView()` (só quando `null`,
+   nunca recriado numa re-renderização do MESMO cartão), descartado
+   (`= null`) nos 3 únicos pontos que avançam `STATE.reviewIndex` --
+   `gradeCurrentCard()`, `reviewMoreCurrentCard()`, e os 2 pontos de
+   início de sessão (`startReviewSession()`/`openReviewSession('hard')`).
+3. **`callbacks.onReviewMore()`** -- extensão além do `onAnswered` único
+   esboçado na auditoria da Fase 6C, necessária porque "Rever mais" é uma
+   3ª transição que não grada nada (nunca é "resposta", só pedido de mais
+   exposição) -- disclosed explicitamente no código e aqui, não decidida
+   em silêncio.
+4. **Direção**: nem `isReverse` nem `reviewDirection` nem
+   `nextCardDirection()` foram reintroduzidos como mecanismo NATIVO --
+   pra cartão com `card.cardInstance`, `isReverse` continua sempre
+   `false` (a `resolveNormalCardView()` já devolve front/back na ordem
+   certa); pra cartão legado (`!card.cardInstance`), `card.reviewDirection`
+   (setado 1x em `startReviewSession()`) continua 100% intocado --
+   mesmíssimo código, só movido pra dentro da função extraída.
+5. **Progresso** (`STATE.reviewIndex`/`reviewQueue.length`): continua
+   lido direto de `STATE` dentro de `renderNormalCard()` -- decisão
+   deliberada, disclosed no código: é contabilidade de SESSÃO, não
+   "estado efêmero de interação" (a restrição da Fase 6C é
+   especificamente sobre não ler `STATE` pra saber "revelado?"/
+   "respondido?"). Uniformizar isso fica pra quando os 4 renderers forem
+   extraídos juntos, não resolvido isoladamente só pro Normal pra não
+   introduzir um mecanismo (parâmetro de contexto de sessão) que os
+   outros 3 ainda não teriam.
+
+**Busca final por lógica paralela de Preview (pedida explicitamente)**:
+`grep -n "function.*[Nn]ormal.*("` confirma **um único** `renderNormalCard`
+por idioma (mais `resolveNormalCardView` no motor, já existente desde a
+Fase 4a, intocado). `grep -rn "Preview"` em `fr/app.js`/`zh/app.js`
+mostra só (a) os 3 comentários novos desta entrega citando o Preview
+futuro (Fase 6D, sem código), e (b) `challengePreviewMode`/
+`openChallengePreview` -- feature pré-existente e totalmente sem relação
+(banner de preview de Desafios), não tocada. Nenhuma segunda
+implementação de renderer criada.
+
+**Testes realizados:**
+- `node --check fr/app.js`/`zh/app.js` sem erro.
+- 4 suítes Node re-executadas, **169/169 sem regressão** (esperado --
+  exercitam só `shared/flashcard-model.js`, não tocado nesta subfase):
+  `test_fase4_engine.js` 32/32, `test_fase4d_regression.js` 30/30,
+  `test_fase5_generation.js` 33/33, `test_fase6b_native_notes.js` 74/74.
+- **Suíte nova `test_fase6c1_normal_renderer.js`** (Playwright, fr+zh),
+  cobrindo item a item o que a autora pediu:
+  1. `reviewShowingAnswerRemoved:true` -- confirmado via
+     `!Object.prototype.hasOwnProperty.call(STATE, 'reviewShowingAnswer')`
+     (campo global removido de fato, não só sem uso).
+  2. **Normal nativo**: `localStateCreated` (`{kind:'normal',
+     revealed:false}` na primeira renderização), front visível, revelar
+     -> `localState.revealed===true` E `card.due`/`card.reps`
+     **inalterados** (confirma que revelar sozinho nunca aciona FSRS/XP
+     por conta própria do renderer -- só o clique num botão de grau, via
+     `callbacks.onAnswered`, chama `gradeCurrentCard` de verdade: `due`/
+     `reps` mudam só DEPOIS desse clique), `STATE.reviewIndex` avança,
+     `STATE.reviewCardState` descartado.
+  3. **Normal reverso**: `resolveCardContentView()` das 2 metades
+     confirma front/back trocados entre si; ids distintos; cada metade
+     renderizada via `renderNormalCard()` (não uma função separada);
+     graduar a 1ª metade NÃO muta `reps`/`due` da 2ª (FSRS genuinamente
+     independente, mesma garantia já validada desde a Fase 4a, agora
+     também através do renderer extraído).
+  4. **Cartão legado** (`!card.cardInstance`, `reviewDirection:
+     'back-to-front'`): confirmado caindo no mesmo `renderNormalCard()`
+     (não um caminho separado), tradução aparece primeiro (direção
+     legada respeitada), grau clicado grada de verdade (`reps`/`due`
+     mudam).
+  5. **Regressão MC** (não tocado nesta subfase): `.mc-option` continua
+     renderizando, `STATE.reviewMCPicked` continua `null` no boot
+     (campo próprio intocado, nunca leu/gravou `STATE.reviewCardState`).
+  - Console: só os mesmos `ERR_TUNNEL_CONNECTION_FAILED` pré-existentes
+    (proxy de saída do sandbox), zero erro novo, nos dois idiomas.
+
+**Problemas encontrados**: nenhum -- implementação direta a partir do
+contrato já aprovado, sem surpresas durante a extração (o bloco original
+já era isolável quase 1:1, confirmando que a auditoria da Fase 6C tinha
+mapeado a fronteira certa).
+
+**O que ainda falta / não foi feito nesta subfase (de propósito)**:
+MC/Cloze/TypeAnswer continuam com `STATE.reviewMCPicked`/`reviewMCCorrect`/
+`reviewClozeAnswered` sem tocar -- extração deles é subfase futura
+(6C.2/6C.3/6C.4, não nomeadas/autorizadas ainda). Nenhum editor/Preview
+construído -- `renderNormalCard()` está pronto pra ser chamado pelo
+Preview quando a Fase 6D existir, mas nada chama ainda. `mountEl` ainda é
+sempre `#review-content` fixo na chamada de dentro de `renderReviewView()`
+-- o PARÂMETRO já existe e o renderer não hardcoda mais o id
+internamente, mas o Review continua passando o mesmo elemento de sempre
+(esperado, só o Preview vai passar um `mountEl` diferente).
+
+Escopo estrito respeitado -- nenhuma 6C.2/6C.3 iniciada. Parando aqui,
+aguardando revisão da autora antes de continuar.
