@@ -40,7 +40,11 @@ const FREE_OWN_FLASHCARD_LIMIT = 20;
 // top-level pra let/const), quebrando a página inteira -- mesmo motivo
 // pelo qual openFlashcardResetConfirm já era só reaproveitada, nunca
 // duplicada (ver "Depende de" no topo do arquivo).
-const MY_FLASHCARDS_STATE = { editingCardId: null, _cardsCache: [], nativeCardState: createNativeNoteEditorState({ cardGenerationMode: 'normal' }) };
+// Fase 6D.6 (ver CLAUDE.md) -- editingNativeState: mesmo papel de
+// ADMIN_FLASHCARDS_STATE.editingNativeState (shared/admin-flashcards.js) --
+// Note editor state nativo do cartão em edição, só quando a edição está
+// no editor novo. `null` = edição legada de sempre.
+const MY_FLASHCARDS_STATE = { editingCardId: null, editingNativeState: null, _cardsCache: [], nativeCardState: createNativeNoteEditorState({ cardGenerationMode: 'normal' }) };
 
 // Grillado com a autora (ver CLAUDE.md, "rótulo do seletor de direção do
 // cartão") -- rótulos com o nome do idioma de verdade em vez de "idioma
@@ -83,6 +87,7 @@ async function renderMyFlashcardsView(){
   // só tem UM idioma relevante, o do site, então `languageAppKey` é
   // sempre `APP_KEY` diretamente, sem precisar de um sinal `anyMandarim`.
   MY_FLASHCARDS_STATE.nativeCardState = createNativeNoteEditorState({ cardGenerationMode: 'normal', languageAppKey: APP_KEY });
+  MY_FLASHCARDS_STATE.editingNativeState = null;
   wrap.innerHTML = loadingHTML();
 
   const isMandarim = APP_KEY === 'mandarim';
@@ -145,8 +150,8 @@ async function renderMyFlashcardsView(){
              mesmo critério do bloco "Modo de prática" acima -- sem isso,
              uma conta grátis veria um seletor de 5 tipos sem nenhum dos 3
              campos correspondentes na tela. -->
-        <div class="section-label" style="margin:14px 0 4px;">Card Type (novo motor -- pré-visualização, Fase 6D)</div>
-        <p class="profile-edit-hint" style="margin-top:-2px;">Seletor novo, ainda em construção -- não afeta o cartão criado. O "Modo de prática" acima continua sendo o que decide o cartão salvo de fato.</p>
+        <div class="section-label" style="margin:14px 0 4px;">Card Type (novo motor, Fase 6D)</div>
+        <p class="profile-edit-hint" style="margin-top:-2px;">Escolha o tipo do cartão nativo abaixo. Só vale se você preencher "Campos nativos" -- deixando aquela seção vazia, o "Modo de prática" acima continua decidindo o cartão salvo.</p>
         <select id="my-flashcard-card-type-preview" class="profile-edit-input">
           ${CARD_TYPE_UI_META.map(t => `<option value="${t.id}" ${t.id === 'normal' ? 'selected' : ''}>${t.label}</option>`).join('')}
         </select>
@@ -156,8 +161,8 @@ async function renderMyFlashcardsView(){
              shared/admin-flashcards.js (shared/flashcard-field-editor.js),
              conectado a MY_FLASHCARDS_STATE.nativeCardState.fields. Gated
              por premium, mesmo critério do seletor de Card Type acima. -->
-        <div class="section-label" style="margin:14px 0 4px;">Campos nativos (novo motor -- pré-visualização, Fase 6D)</div>
-        <p class="profile-edit-hint" style="margin-top:-2px;">Ainda não afeta o cartão criado -- só o novo estado nativo, em construção.</p>
+        <div class="section-label" style="margin:14px 0 4px;">Campos nativos (novo motor, Fase 6D)</div>
+        <p class="profile-edit-hint" style="margin-top:-2px;">Assim que você adicionar um campo aqui, ELE (não "Frente"/"Verso" abaixo) vira o cartão salvo. Deixe vazio pra continuar usando o formulário de sempre.</p>
         <div id="my-flashcard-native-fields"></div>
         ` : ''}
         <div id="my-flashcard-content-main">
@@ -211,7 +216,7 @@ async function renderMyFlashcardsView(){
         ${cards.length ? `<button type="button" class="admin-select-link" id="my-flashcards-export-btn" style="background:none; border:none; cursor:pointer;">⬇️ Exportar / compartilhar</button>` : ''}
       </div>
       <div id="my-flashcards-active-box">
-        ${activeCards.length ? activeCards.map(c => myFlashcardRowHTML(c)).join('') : `<p class="profile-empty-note">Você ainda não criou nenhum cartão. Use o formulário acima pra adicionar palavras/frases que quer memorizar, mesmo que não estejam na trilha.</p>`}
+        ${activeCards.length ? activeCards.map(c => myFlashcardRowHTML(c, premium)).join('') : `<p class="profile-empty-note">Você ainda não criou nenhum cartão. Use o formulário acima pra adicionar palavras/frases que quer memorizar, mesmo que não estejam na trilha.</p>`}
       </div>
     </div>
 
@@ -219,7 +224,7 @@ async function renderMyFlashcardsView(){
     <div class="profile-section">
       <div class="section-label">Arquivados (${archivedCards.length})</div>
       <div id="my-flashcards-archived-box">
-        ${archivedCards.map(c => myFlashcardRowHTML(c)).join('')}
+        ${archivedCards.map(c => myFlashcardRowHTML(c, premium)).join('')}
       </div>
     </div>` : ''}
 
@@ -232,20 +237,37 @@ async function renderMyFlashcardsView(){
   `;
 
   wireMyFlashcardsForm(wrap, atLimit, premium);
-  wireMyFlashcardsCardButtons(wrap);
+  wireMyFlashcardsCardButtons(wrap, premium);
   document.getElementById('my-flashcards-export-btn')?.addEventListener('click', () => openMyFlashcardsExportModal(activeCards.concat(archivedCards).filter(c => c.status === 'active')));
   document.getElementById('my-flashcards-import-file')?.addEventListener('change', (e) => handleMyFlashcardsImportFile(e.target.files[0]));
 
   if (MY_FLASHCARDS_STATE.editingCardId != null){
     const editingCard = MY_FLASHCARDS_STATE._cardsCache.find(c => c.id === MY_FLASHCARDS_STATE.editingCardId);
-    if (editingCard) wireMyFlashcardEditForm(editingCard, wrap);
+    if (editingCard){
+      if (MY_FLASHCARDS_STATE.editingNativeState){
+        wireMyFlashcardNativeEditForm(editingCard, MY_FLASHCARDS_STATE.editingNativeState, wrap);
+      } else {
+        wireMyFlashcardEditForm(editingCard, wrap, premium);
+      }
+    }
   }
 
   maybeAutoImportFromUrl();
 }
 
-function myFlashcardRowHTML(c){
-  if (MY_FLASHCARDS_STATE.editingCardId === c.id) return myFlashcardEditFormHTML(c);
+function myFlashcardRowHTML(c, premium){
+  if (MY_FLASHCARDS_STATE.editingCardId === c.id){
+    // Fase 6D.6 (ver CLAUDE.md) -- mesmo critério de
+    // shared/admin-flashcards.js: cartão já nativo sempre edita no editor
+    // novo (choices/cloze_sentence legados ficam null numa Note nativa,
+    // o form legado não teria o que mostrar); seedado LAZY, só na
+    // primeira vez que este cartão entra em edição nesta sessão.
+    if (!MY_FLASHCARDS_STATE.editingNativeState && isNoteFieldsPresent(c) && isCardGenerationModePresent(c)){
+      MY_FLASHCARDS_STATE.editingNativeState = createNativeNoteEditorStateFromRow(c);
+    }
+    if (MY_FLASHCARDS_STATE.editingNativeState) return myFlashcardNativeEditFormHTML(c, MY_FLASHCARDS_STATE.editingNativeState);
+    return myFlashcardEditFormHTML(c, premium);
+  }
   return `
     <div class="admin-badge-row">
       <div class="admin-badge-info">
@@ -268,11 +290,12 @@ function myFlashcardRowHTML(c){
 // nunca teve modo/mídia/cloze (esses formatos ficaram restritos a
 // teacher_flashcards desde a Fase 8a, ver CLAUDE.md), então não há radios
 // de modo aqui, só direção (quando aplicável) + front/pinyin/back/note.
-function myFlashcardEditFormHTML(c){
+function myFlashcardEditFormHTML(c, premium){
   const isMandarim = APP_KEY === 'mandarim';
   const direction = c.front_is_target_language === false ? 'target-back' : 'target-front';
   return `
     <div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:10px;">
+      ${premium ? `<button type="button" class="admin-select-link" id="edit-my-flashcard-use-native" style="align-self:flex-start; background:none; border:none; cursor:pointer; padding:0;">🧪 Usar o novo editor de campos (nativo) -- preserva o conteúdo já digitado</button>` : ''}
       ${!isMandarim ? `
       <div>
         <div class="section-label" style="margin:0 0 4px;">Idioma de cada lado</div>
@@ -303,9 +326,20 @@ function myFlashcardEditFormHTML(c){
   `;
 }
 
-function wireMyFlashcardEditForm(c, wrap){
+function wireMyFlashcardEditForm(c, wrap, premium){
+  // Fase 6D.6 (ver CLAUDE.md) -- mesma ação explícita de
+  // shared/admin-flashcards.js: só existe quando `premium` (mesmo gate
+  // do resto do editor nativo nesta tela). Monta o editorState a partir
+  // do conteúdo JÁ EXISTENTE (nativeNoteEditorStateFromLegacyRow) --
+  // nada é salvo até o clique em "Salvar" do formulário nativo.
+  document.getElementById('edit-my-flashcard-use-native')?.addEventListener('click', () => {
+    MY_FLASHCARDS_STATE.editingNativeState = nativeNoteEditorStateFromLegacyRow(c);
+    renderMyFlashcardsView();
+  });
+
   document.getElementById('edit-my-flashcard-cancel')?.addEventListener('click', () => {
     MY_FLASHCARDS_STATE.editingCardId = null;
+    MY_FLASHCARDS_STATE.editingNativeState = null;
     renderMyFlashcardsView();
   });
   document.getElementById('edit-my-flashcard-save')?.addEventListener('click', () => {
@@ -342,6 +376,103 @@ function wireMyFlashcardEditForm(c, wrap){
       MY_FLASHCARDS_STATE.editingCardId = null;
       renderMyFlashcardsView();
     });
+  });
+}
+
+// ---------- Fase 6D.6 (ver CLAUDE.md) -- edição de um cartão próprio
+// NATIVO, ou conversão explícita de um legado (via o botão "Usar o novo
+// editor de campos" acima) ----------
+//
+// Irmão de flashcardNativeEditFormHTML/wireFlashcardNativeEditForm
+// (shared/admin-flashcards.js) -- mesmo componente reaproveitado
+// (refreshNativeCardTypeBox/transitionToXxx/CARD_TYPE_UI_META), só
+// chamando createOwnFlashcard()/updateOwnFlashcardContent() em vez das
+// versões teacher_flashcards.
+function myFlashcardNativeEditFormHTML(c, editorState){
+  return `
+    <div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:10px;">
+      <div class="section-label" style="margin:0;">Editar cartão (editor nativo)</div>
+      <p class="profile-edit-hint" style="margin:0;">Este cartão usa o novo modelo de campos -- editando aqui, o conteúdo é gravado em fields/card_generation_mode, nunca nas colunas antigas.</p>
+      <div class="section-label" style="margin:6px 0 4px;">Card Type</div>
+      <select id="edit-my-native-flashcard-card-type" class="profile-edit-input">
+        ${CARD_TYPE_UI_META.map(t => `<option value="${t.id}" ${t.id === editorState.cardGenerationMode ? 'selected' : ''}>${t.label}</option>`).join('')}
+      </select>
+      <div id="edit-my-native-flashcard-fields"></div>
+      <label class="profile-edit-label">Nota (opcional)</label>
+      <textarea id="edit-my-native-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(editorState.privateNote || '')}</textarea>
+      <p class="profile-edit-error" id="edit-my-native-flashcard-error"></p>
+      <div style="display:flex; gap:10px;">
+        <button type="button" class="btn btn-secondary" id="edit-my-native-flashcard-cancel" style="flex:1;">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="edit-my-native-flashcard-save" style="flex:1;">Salvar edição</button>
+      </div>
+    </div>
+  `;
+}
+
+function wireMyFlashcardNativeEditForm(c, editorState, wrap){
+  const boxEl = document.getElementById('edit-my-native-flashcard-fields');
+  refreshNativeCardTypeBox(boxEl, editorState, { namePrefix: 'edit-my-native' });
+
+  document.getElementById('edit-my-native-flashcard-card-type').addEventListener('change', (e) => {
+    const newMode = e.target.value;
+    const wasCloze = editorState.cardGenerationMode === 'cloze';
+    if (wasCloze && newMode !== 'cloze') stripClozeMarksFromEditorState(editorState);
+    if (newMode === 'multiple_choice') transitionToMultipleChoice(editorState);
+    else if (newMode === 'type_answer') transitionToTypeAnswer(editorState);
+    else if (newMode === 'cloze') transitionToCloze(editorState);
+    else editorState.cardGenerationMode = newMode;
+    refreshNativeCardTypeBox(boxEl, editorState, { namePrefix: 'edit-my-native' });
+  });
+
+  document.getElementById('edit-my-native-flashcard-cancel').addEventListener('click', () => {
+    MY_FLASHCARDS_STATE.editingCardId = null;
+    MY_FLASHCARDS_STATE.editingNativeState = null;
+    renderMyFlashcardsView();
+  });
+
+  document.getElementById('edit-my-native-flashcard-save').addEventListener('click', () => {
+    const errorEl = document.getElementById('edit-my-native-flashcard-error');
+    errorEl.textContent = '';
+    editorState.privateNote = (document.getElementById('edit-my-native-flashcard-note').value || '').trim() || null;
+    const v = validateNoteEditorStateForSave(editorState);
+    if (!v.ok){ errorEl.textContent = v.error; return; }
+
+    // Mesma disciplina de shared/admin-flashcards.js: ID sempre
+    // preservado, revision só incrementa quando algo realmente mudou (ou
+    // sempre, no caso de uma conversão Legacy->Native de verdade).
+    const wasNative = isNoteFieldsPresent(c) && isCardGenerationModePresent(c);
+    let nextRevision = c.revision || 0;
+    if (wasNative){
+      const original = createNativeNoteEditorStateFromRow(c);
+      if (noteEditorStateRequiresNewRevision(original, editorState)) nextRevision += 1;
+    } else {
+      nextRevision += 1;
+    }
+
+    const doSave = async () => {
+      const saveBtn = document.getElementById('edit-my-native-flashcard-save');
+      if (saveBtn) saveBtn.disabled = true;
+      const result = await updateOwnFlashcardContent(c.id, { revision: nextRevision, nativeState: editorState });
+      if (saveBtn) saveBtn.disabled = false;
+      if (!result.ok){ errorEl.textContent = result.error; return; }
+      // Reflete o reset NA MESMA sessão, mesmo motivo de sempre (ver
+      // wireMyFlashcardEditForm acima) -- reconstrói o card via o motor
+      // real (buildEngineCardsFromRow) a partir da linha atualizada, não
+      // um objeto plano inventado à mão.
+      if (typeof replaceSelfFlashcardInState === 'function'){
+        replaceSelfFlashcardInState(c.id, Object.assign({}, c, { revision: nextRevision }, nativeContentColumnsFromEditorState(editorState)));
+      }
+      showToast(nextRevision > (c.revision || 0) ? '✓ Cartão editado. O progresso de revisão foi reiniciado.' : '✓ Cartão editado.');
+      MY_FLASHCARDS_STATE.editingCardId = null;
+      MY_FLASHCARDS_STATE.editingNativeState = null;
+      renderMyFlashcardsView();
+    };
+
+    if (nextRevision > (c.revision || 0)){
+      openFlashcardResetConfirm(doSave);
+    } else {
+      doSave();
+    }
   });
 }
 
@@ -412,6 +543,36 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
     const btn = document.getElementById('my-create-flashcard-btn');
     const errorEl = document.getElementById('my-create-flashcard-error');
     errorEl.textContent = '';
+
+    // Fase 6D.6 (ver CLAUDE.md) -- mesmo critério de
+    // shared/admin-flashcards.js: "Campos nativos" com pelo menos 1 campo
+    // vira o cartão salvo de fato, ignorando "Modo de prática"/Frente/
+    // Verso legados por completo; vazio (estado inicial) continua 100%
+    // legado. Só existe quando `premium` (mesmo gate do bloco nativo
+    // inteiro, ver renderMyFlashcardsView) -- conta free nunca tem
+    // MY_FLASHCARDS_STATE.nativeCardState.fields populado, então
+    // `useNative` é sempre `false` pra ela, sem precisar checar `premium`
+    // de novo aqui.
+    const nativeState = MY_FLASHCARDS_STATE.nativeCardState;
+    const useNative = isNativeNoteEditorState(nativeState) && (nativeState.fields || []).length > 0;
+    if (useNative){
+      if (atLimit){
+        document.getElementById('flashcard-limit-modal').style.display = 'flex';
+        return;
+      }
+      nativeState.privateNote = (document.getElementById('my-flashcard-note').value || '').trim() || null;
+      const v = validateNoteEditorStateForSave(nativeState);
+      if (!v.ok){ errorEl.textContent = v.error; return; }
+      btn.disabled = true;
+      const result = await createOwnFlashcard({ languageAppKey: APP_KEY, nativeState });
+      btn.disabled = false;
+      if (!result.ok){ errorEl.textContent = result.error; return; }
+      if (typeof addSelfFlashcardToState === 'function') addSelfFlashcardToState(result.card);
+      showToast('✓ Cartão criado. Ele já entra na sua fila de revisão.');
+      renderMyFlashcardsView();
+      return;
+    }
+
     const mode = premium ? (wrap.querySelector('input[name="my-flashcard-mode"]:checked')?.value || 'flip') : 'flip';
     const isCloze = mode === 'cloze';
     const isMC = mode === 'mc';
@@ -514,6 +675,11 @@ function wireMyFlashcardsCardButtons(wrap){
       // precisa dos dois lados no mesmo tipo (mesmo bug já evitado em
       // admin-flashcards.js, ver ADMIN_FLASHCARDS_STATE.editingCardId).
       MY_FLASHCARDS_STATE.editingCardId = Number(btn.dataset.editOwnFlashcard);
+      // Fase 6D.6 (ver CLAUDE.md) -- toda NOVA edição começa sem
+      // editingNativeState -- myFlashcardRowHTML() semeia de novo se o
+      // cartão for nativo, ou continua null (legado) até o botão "Usar o
+      // novo editor" ser clicado.
+      MY_FLASHCARDS_STATE.editingNativeState = null;
       renderMyFlashcardsView();
     });
   });

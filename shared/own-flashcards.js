@@ -72,14 +72,23 @@ function _validateOwnFlashcardContent({ front, backTrans, choices, clozeSentence
   return { ok: true, cleanFront, cleanBack, cleanChoices, cleanClozeSentence, cleanClozeAnswer };
 }
 
-async function createOwnFlashcard({ languageAppKey, front, backTrans, note, frontPinyin, frontIsTargetLanguage, imageUrl, audioUrl, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin }){
+// Fase 6D.6 (ver CLAUDE.md) -- `nativeState` opcional, mesmo contrato de
+// createFlashcard() em shared/teacher-flashcards.js: presente = única
+// fonte de conteúdo (parâmetros legados ignorados), ausente = comportamento
+// idêntico a antes desta fase.
+async function createOwnFlashcard({ languageAppKey, front, backTrans, note, frontPinyin, frontIsTargetLanguage, imageUrl, audioUrl, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin, nativeState }){
+  const identity = { owner_id: CURRENT_USER.id, language_app_key: languageAppKey };
+  if (nativeState){
+    const payload = Object.assign({}, identity, nativeContentColumnsFromEditorState(nativeState));
+    const { data, error } = await supabaseClient.from('own_flashcards').insert(payload).select().single();
+    if (error){ console.error('Erro ao criar seu flashcard (nativo):', error); return { ok: false, error: 'Não foi possível criar o cartão agora.' }; }
+    return { ok: true, card: data };
+  }
   const v = _validateOwnFlashcardContent({ front, backTrans, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin, languageAppKey });
   if (!v.ok) return v;
   const { data, error } = await supabaseClient
     .from('own_flashcards')
-    .insert({
-      owner_id: CURRENT_USER.id,
-      language_app_key: languageAppKey,
+    .insert(Object.assign({}, identity, {
       front: v.cleanFront || null,
       back_trans: v.cleanBack,
       note: (note || '').trim() || null,
@@ -91,7 +100,7 @@ async function createOwnFlashcard({ languageAppKey, front, backTrans, note, fron
       cloze_sentence: v.cleanClozeSentence || null,
       cloze_answer: v.cleanClozeAnswer || null,
       cloze_answer_pinyin: languageAppKey === 'mandarim' ? ((clozeAnswerPinyin || '').trim() || null) : null,
-    })
+    }))
     .select()
     .single();
   if (error){ console.error('Erro ao criar seu flashcard:', error); return { ok: false, error: 'Não foi possível criar o cartão agora.' }; }
@@ -141,7 +150,15 @@ async function setOwnFlashcardHidden(id, hidden){
 // comentário lá pra detalhe completo. Aqui quem edita e quem é dona da
 // sessão são a MESMA pessoa -- fr/zh app.js chama replaceSelfFlashcardInState()
 // logo em seguida pra refletir o reset NA MESMA sessão, sem esperar reload.
-async function updateOwnFlashcardContent(id, { front, backTrans, note, frontPinyin, frontIsTargetLanguage, revision }){
+// Fase 6D.6 (ver CLAUDE.md) -- `nativeState` opcional, mesmo contrato de
+// updateFlashcardContent() em shared/teacher-flashcards.js.
+async function updateOwnFlashcardContent(id, { front, backTrans, note, frontPinyin, frontIsTargetLanguage, revision, nativeState }){
+  if (nativeState){
+    const patch = Object.assign({ revision }, nativeContentColumnsFromEditorState(nativeState));
+    const { error } = await supabaseClient.from('own_flashcards').update(patch).eq('id', id).eq('owner_id', CURRENT_USER.id);
+    if (error){ console.error('Erro ao editar seu flashcard (nativo):', error); return { ok: false, error: 'Não foi possível salvar a edição agora.' }; }
+    return { ok: true };
+  }
   const v = _validateOwnFlashcardContent({ front, backTrans });
   if (!v.ok) return v;
   const { error } = await supabaseClient.from('own_flashcards').update({

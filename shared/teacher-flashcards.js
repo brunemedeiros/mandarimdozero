@@ -104,15 +104,35 @@ function _validateFlashcardContent({ languageAppKey, front, backTrans, choices, 
   return { ok: true, cleanFront, cleanBack, cleanChoices, cleanClozeSentence, cleanClozeAnswer };
 }
 
-async function createFlashcard({ studentId, languageAppKey, front, backTrans, note, frontPinyin, imageUrl, audioUrl, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin, frontIsTargetLanguage }){
+// Fase 6D.6 da reestruturação Note/CardType/CardInstance (ver CLAUDE.md) --
+// `nativeState` (opcional) é um Note editor state NATIVO já validado por
+// validateNoteEditorStateForSave() (shared/flashcard-native-persistence.js)
+// -- quando presente, ele é a ÚNICA fonte de conteúdo persistido: os
+// parâmetros legados (front/backTrans/choices/clozeSentence/etc.) são
+// IGNORADOS por completo, nunca misturados como uma segunda fonte de
+// verdade. Sem `nativeState` (o caso de toda chamada já existente antes
+// desta fase), o comportamento é BYTE A BYTE idêntico a antes -- "legacy
+// aberto != automaticamente migrado" (regra central desta fase) cumprida
+// por construção: nada aqui decide converter sozinho, quem decide é o
+// CHAMADOR (shared/admin-flashcards.js), passando `nativeState` só quando
+// o usuário explicitamente usou o editor nativo.
+async function createFlashcard({ studentId, languageAppKey, front, backTrans, note, frontPinyin, imageUrl, audioUrl, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin, frontIsTargetLanguage, nativeState }){
+  const identity = {
+    teacher_id: CURRENT_USER.id,
+    student_id: studentId,
+    language_app_key: languageAppKey,
+  };
+  if (nativeState){
+    const payload = Object.assign({}, identity, nativeContentColumnsFromEditorState(nativeState));
+    const { data, error } = await supabaseClient.from('teacher_flashcards').insert(payload).select().single();
+    if (error){ console.error('Erro ao criar flashcard (nativo):', error); return { ok: false, error: 'Não foi possível criar o cartão agora.' }; }
+    return { ok: true, card: data };
+  }
   const v = _validateFlashcardContent({ languageAppKey, front, backTrans, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin });
   if (!v.ok) return v;
   const { data, error } = await supabaseClient
     .from('teacher_flashcards')
-    .insert({
-      teacher_id: CURRENT_USER.id,
-      student_id: studentId,
-      language_app_key: languageAppKey,
+    .insert(Object.assign({}, identity, {
       front: v.cleanFront || null,
       back_trans: v.cleanBack,
       note: (note || '').trim() || null,
@@ -124,7 +144,7 @@ async function createFlashcard({ studentId, languageAppKey, front, backTrans, no
       cloze_answer: v.cleanClozeAnswer || null,
       cloze_answer_pinyin: languageAppKey === 'mandarim' ? ((clozeAnswerPinyin || '').trim() || null) : null,
       front_is_target_language: frontIsTargetLanguage !== false,
-    })
+    }))
     .select()
     .single();
   if (error){ console.error('Erro ao criar flashcard:', error); return { ok: false, error: 'Não foi possível criar o cartão agora.' }; }
@@ -144,7 +164,21 @@ async function createFlashcard({ studentId, languageAppKey, front, backTrans, no
 // "reset". `imageUrl`/`audioUrl` passados como `undefined` mantêm a mídia
 // já existente (não sobrescreve com null); passe `null` explicitamente
 // pra remover.
-async function updateFlashcardContent(id, { languageAppKey, front, backTrans, note, frontPinyin, imageUrl, audioUrl, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin, frontIsTargetLanguage, revision }){
+// Fase 6D.6 (ver CLAUDE.md) -- `nativeState` (opcional), mesmo contrato de
+// createFlashcard() acima: quando presente, é a ÚNICA fonte de conteúdo do
+// UPDATE (parâmetros legados ignorados). `revision` continua vindo do
+// CHAMADOR (mesmo mecanismo de sempre -- id novo de STATE.cards via
+// flashcardIdForRow, reset de progresso via merge-por-id, nenhum código
+// especial de "reset" aqui) -- só que agora o chamador decide incrementar
+// ou não usando noteEditorStateRequiresNewRevision() (Fase 6D.1) em vez de
+// incrementar sempre incondicionalmente.
+async function updateFlashcardContent(id, { languageAppKey, front, backTrans, note, frontPinyin, imageUrl, audioUrl, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin, frontIsTargetLanguage, revision, nativeState }){
+  if (nativeState){
+    const patch = Object.assign({ revision }, nativeContentColumnsFromEditorState(nativeState));
+    const { error } = await supabaseClient.from('teacher_flashcards').update(patch).eq('id', id);
+    if (error){ console.error('Erro ao editar flashcard (nativo):', error); return { ok: false, error: 'Não foi possível salvar a edição agora.' }; }
+    return { ok: true };
+  }
   const v = _validateFlashcardContent({ languageAppKey, front, backTrans, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin });
   if (!v.ok) return v;
   const patch = {

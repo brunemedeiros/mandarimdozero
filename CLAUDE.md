@@ -9018,3 +9018,301 @@ escopo desta subfase.
 Próxima subfase (6D.6 -- persistência nativa) só começa depois de
 autorização explícita da autora, com este relatório já entregue antes de
 pedir luz verde. **Não avançar automaticamente.**
+
+## Fase 6D.6 -- persistência nativa do editor (Editor State -> validação
+-> Supabase, 1 rota só, legado nunca migrado sozinho)
+
+Última peça que faltava pro editor nativo (Fases 6D.1-6D.5) deixar de ser
+"pré-visualização" e passar a gravar de verdade em `fields`/
+`card_generation_mode`. Instrução com 29 seções numeradas, regra central
+repetida em várias delas: **"legacy aberto != automaticamente migrado"**
+-- abrir/salvar um cartão legado sem tocar no editor novo nunca grava
+`fields`/`card_generation_mode`; conversão só acontece quando a
+professora/aluna explicitamente usa o editor nativo (seleciona um Card
+Type e preenche Campos nativos, ou clica "Usar o novo editor de campos"
+num cartão já existente) e confirma salvando.
+
+**Arquivos alterados** (confirmado por `git status`/`git diff --stat`,
+nenhum arquivo fora desta lista foi tocado): `shared/flashcard-native-
+persistence.js` (novo), `shared/teacher-flashcards.js`,
+`shared/own-flashcards.js`, `shared/admin-flashcards.js`,
+`shared/my-flashcards.js`, `fr/index.html`+`zh/index.html` (só a tag
+`<script>` do arquivo novo, posicionada depois de `flashcard-cloze-
+editor.js` e antes de `teacher-flashcards.js`). Nenhuma migração SQL
+nesta subfase -- as colunas/constraints já existiam desde a migration
+045 (Fase 6B), aplicada numa sessão anterior.
+
+**A rota única, ponta a ponta**: `ADMIN_FLASHCARDS_STATE.nativeCardState`/
+`MY_FLASHCARDS_STATE.nativeCardState` (o mesmo Editor State que 6D.2-6D.5
+já mutavam em memória) -> `validateNoteEditorStateForSave(editorState)`
+(novo, `shared/flashcard-native-persistence.js` -- dispatcher único que
+NUNCA reimplementa validação, só decide qual validador de Card Type já
+existente chamar: `validateNativeMultipleChoiceStructure`/
+`validateNativeTypeAnswerStructure`/`validateNativeClozeStructure`
+-- Fases 6D.4a/6D.4b/6D.5 -- ou, pra `normal`/`normal_reversed` -- que
+nunca tiveram validador próprio, só editavam Fields soltos sem exigir
+conteúdo --, `validateNativeNoteRow()` do motor + uma checagem de
+conteúdo não-vazio nos 2 slots, escrita nesta subfase) -> se `ok`,
+`nativeContentColumnsFromEditorState(editorState)` (novo, mesmo arquivo
+-- monta as colunas nativas a partir de `noteEditorStateToRow()`, o MESMO
+transform já existente desde a 6D.1, nunca duplicado) -> `createFlashcard()`/
+`updateFlashcardContent()` (`shared/teacher-flashcards.js`) ou
+`createOwnFlashcard()`/`updateOwnFlashcardContent()`
+(`shared/own-flashcards.js`), cada uma agora aceitando um parâmetro
+opcional `nativeState` -- quando presente, é a ÚNICA fonte de conteúdo do
+INSERT/UPDATE (os parâmetros legados do mesmo call são ignorados por
+completo, nunca misturados como 2ª fonte de verdade); quando ausente
+(toda chamada já existente antes desta fase), o comportamento é BYTE A
+BYTE idêntico a antes.
+
+**Legado permanece intacto**: nenhuma mudança em `_validateFlashcardContent`/
+`_validateOwnFlashcardContent` nem no corpo do ramo `else` (sem
+`nativeState`) de nenhuma das 4 funções -- confirmado por diff, o código
+legado só ganhou uma checagem `if (nativeState){ ...; return; }` NO TOPO
+da função, antes de qualquer lógica antiga. O formulário de criação
+("Modo de prática"/Frente/Verso) e o formulário de edição legado
+(`flashcardEditFormHTML`/`myFlashcardEditFormHTML`) continuam 100%
+funcionais sem nenhuma alteração de comportamento. O gatilho de "isto
+deve salvar nativo" é só `nativeCardState.fields.length > 0` (a
+professora/aluna precisa ter adicionado pelo menos 1 campo em "Campos
+nativos") -- com 0 campos (o estado inicial de toda tela), o submit cai
+no caminho legado de sempre, sem `nativeCardState` sequer ser consultado
+além dessa checagem de tamanho. O texto de apoio de "Card Type"/"Campos
+nativos" (que dizia "não afeta o cartão criado ainda") foi atualizado pra
+refletir a nova realidade -- única mudança de UI fora do fluxo de
+salvar/editar em si.
+
+**Legacy -> Native, só explícito**: um cartão que JÁ é nativo
+(`fields`+`card_generation_mode` presentes) sempre edita no editor novo
+(seedado via `createNativeNoteEditorStateFromRow(c)`, já existente desde
+a 6D.1) -- não haveria pra onde mais editá-lo, já que `choices`/
+`cloze_sentence` legados ficam `null` numa linha nativa. Um cartão LEGADO
+continua abrindo no form legado de sempre; um botão novo, "🧪 Usar o
+novo editor de campos (nativo)" (só aparece nesse caso -- em
+`my-flashcards.js`, também só quando `premium`, mesmo gate do resto do
+editor nativo nessa tela), constrói o editor nativo a partir do conteúdo
+JÁ EXISTENTE via `nativeNoteEditorStateFromLegacyRow(row)` (novo) --
+nunca uma tela em branco. Essa função replica a MESMA leitura de shape
+que `interpretNoteFromRow()` (motor) já usa pro ramo legado (front/
+back_trans simples -> Normal com Field de pinyin satélite se zh+
+front_pinyin; `choices` -> Múltipla escolha com role; `cloze_sentence`+
+`cloze_answer`(+pinyin) -> Cloze nativo, sintetizando `{{c1::resposta}}`
+ou `{{c1::resposta|pinyin}}`) -- só que constrói um EDITOR STATE (pra
+revisão antes de salvar), nunca grava nada sozinha. Clicar o botão é
+navegação pura (sem chamada de rede); só o clique em "Salvar" do
+formulário nativo resultante persiste de verdade.
+
+**ID sempre preservado**: nem a conversão explícita nem uma edição comum
+geram uma linha nova -- `updateFlashcardContent(id, ...)`/
+`updateOwnFlashcardContent(id, ...)` sempre fazem `UPDATE ... WHERE id =
+id` na MESMA linha (`id` vem de `c.id`, nunca recalculado). Confirmado
+tanto nos testes Node (cenário 11 -- id antes/depois idêntico) quanto no
+smoke de navegador (`afterConvert.id === legacyCardId`) quanto na
+migration 045 (que só adicionou colunas, nunca uma tabela nova).
+
+**Revision**: reaproveita `noteEditorStateRequiresNewRevision()` (Fase
+6D.1, já existente, nunca uma 2ª implementação) pra decidir se uma EDIÇÃO
+de um cartão JÁ nativo precisa incrementar -- compara o estado original
+(`createNativeNoteEditorStateFromRow(c)`) contra o estado editado; só
+incrementa se `fields`/`cardGenerationMode`/`privateNote`/`languageAppKey`
+genuinamente mudaram (confirmado no smoke: editar sem tocar em nada e
+clicar Salvar NÃO incrementa `revision`, não mostra o modal de reset,
+nada é regravado). Uma conversão Legacy->Native SEMPRE incrementa
+(estrutura muda de fato -- colunas soltas viram Note/Field -- mesmo
+espírito de "editar sempre reseta progresso" já em vigor desde a Prop 4/
+"7 propostas"). O modal de confirmação de reset (`openFlashcardResetConfirm`,
+já existente) só é mostrado quando um reset vai de fato acontecer --
+melhoria de honestidade em relação ao form legado (que sempre mostra,
+porque sempre incrementa).
+
+**FSRS/histórico preservados**: nenhuma linha desta subfase toca
+`shared/fsrs.js` nem os campos `ef`/`interval`/`reps`/`due`/`lapses`/
+`stability`/`difficulty`/`state`/`lastReview` -- persistência é só sobre
+as colunas de CONTEÚDO (`fields`/`card_generation_mode`/`note`/`front`/
+`back_trans`). O mecanismo de "reset via id novo" continua sendo
+inteiramente `flashcardIdForRow(prefix, row)` (fr/zh app.js, não tocado)
+-- `revision` incrementando é o que já fazia o merge-por-id de
+`applySerializedState()` descartar o progresso antigo, sem nenhum código
+de reset dedicado nesta subfase nem antes dela.
+
+**Os 5 Card Types, o que é persistido pra cada um**:
+- **normal**/**normal_reversed** -- `fields` (2 Fields posicionais) +
+  `card_generation_mode`. `normal_reversed` persiste a MESMA Note de 2
+  Fields que `normal` -- nunca duas linhas, nunca 4 Fields (confirmado no
+  teste 2 do smoke: `fields.length === 2` depois de criar via UI). As 2
+  CardInstances continuam 100% derivadas em runtime por
+  `buildReversedCardInstancePair()` (motor, Fase 4a, não tocado).
+- **multiple_choice** -- `fields` com `role` (`prompt`/`answer`/
+  `distractor`) + `card_generation_mode`. `choices` legado gravado como
+  `null` sempre que `nativeState` está presente -- nunca um 2º lugar onde
+  a resposta certa/erradas poderiam divergir.
+- **type_answer** -- `fields` (`role` prompt/answer) + `card_generation_mode`.
+  `cloze_sentence` legado sempre `null`.
+- **cloze** -- `fields` com a sintaxe `{{cN::resposta}}`/
+  `{{cN::resposta|pinyin}}` embutida no Field de texto + `card_generation_mode`.
+  `cloze_answer`/`cloze_sentence` legados sempre `null`. Múltiplas marcas
+  na mesma frase continuam dentro do MESMO Field (nunca uma lista
+  separada) -- confirmado no teste 21 do Node suite gerando 2
+  CardInstances em runtime a partir de 1 única linha.
+
+**Mirror legado write-only, só pra `front`/`back_trans`**: achado
+importante desta subfase, não presumido -- `back_trans text not null`
+NUNCA foi relaxado em nenhuma migration (diferente de `front`, relaxado
+nas migrations 035/040) e esta subfase não altera schema (Seção 28). Um
+INSERT nativo precisa de ALGUM valor ali. `deriveLegacyMirrorFromNoteEditorState()`
+(novo) deriva `front`/`back_trans` a partir dos Fields (prompt/answer pra
+MC, slots posicionais pros demais, `front:null` pra Cloze -- mesmo
+convênio do Cloze legado) -- confirmado por leitura do motor ANTES de
+escrever isto que `interpretNoteFromRow()` (`shared/flashcard-model.js`)
+curto-circuita pro ramo nativo sempre que `fields` está presente e NUNCA
+lê `front`/`back_trans`/`choices`/`cloze_sentence` nesse caso -- este
+mirror é genuinamente write-only/decorativo pro motor (nunca uma 2ª fonte
+de verdade de LEITURA), só mantém a lista "Cartões ativos"
+(`flashcardCardRowHTML`) legível sem precisar reescrevê-la pra entender
+`fields`/`role`/sintaxe cloze. `image_url`/`audio_url`/`front_pinyin`
+nunca são mirrorados (ficam `null`) -- confirmado por leitura que
+`interpretNativeNoteFromRow()` (ramo nativo) sempre grava `note.image:
+null` e lê mídia só de `field.audio`/`field.image`, então essas 2 colunas
+legadas não têm nenhum efeito funcional pro caminho nativo.
+
+**CardInstances nunca persistidas**: confirmado por leitura de todo o
+código novo (nenhuma referência a `cardInstance`/`buildEngineCardsFromRow`/
+`interpretNoteFromRow` em `shared/flashcard-native-persistence.js`) e
+pela busca final (ver Auditoria de duplicação abaixo) -- `normal_reversed`
+continua gerando as 2 CardInstances em runtime via
+`buildReversedCardInstancePair()`; Cloze multi-marca continua gerando N
+CardInstances em runtime via `parseClozeMarks()`. Nenhuma linha extra é
+gravada por CardInstance -- a Note é a unidade de persistência, sempre.
+
+**Atomicidade (Seção 12)**: cada cenário de save é 1 ÚNICA chamada
+`supabaseClient.from(table).insert(payload)`/`.update(patch).eq('id',
+id)`, com `fields`+`card_generation_mode` sempre dentro do MESMO objeto
+`payload`/`patch` -- nunca duas chamadas separadas. Isso já garante
+atomicidade real (1 `INSERT`/`UPDATE` Postgres é sempre atômico por
+natureza do protocolo, sem precisar de transação/RPC explícita) --
+confirmado no teste Node #6 (`exatamente 1 chamada insert`) e no smoke de
+navegador (nenhum estado intermediário "só fields, sem card_generation_mode"
+observado em nenhum momento).
+
+**Testes Node/VM** (`test_fase6d6_native_persistence.js`, novo, **85/85**
+passando) -- cobre os 26 cenários pedidos, numerados 1-26 no arquivo:
+Normal/Normal Reversed/MC/Type Answer/Cloze novos (payload correto,
+1-5); atomicidade (6); Card Type inválido nunca persiste (7); Native Note
+inválida nunca passa (8); legacy aberto sem mudança continua legado (9);
+legacy salvo via caminho legado permanece legado (10); legacy
+explicitamente convertido preserva ID (11); metadados preservados na
+conversão -- `teacher_id`/`student_id`/`language_app_key`/`status`/
+`created_at` intactos, pinyin preservado como Field satélite (12);
+revision incrementa quando conteúdo muda (13) e NÃO incrementa quando não
+muda (14); IDs de Field estáveis através de um insert+update (15);
+`pinyinFieldId` válido após save, confirmado via ROUND-TRIP REAL pelo
+motor (`buildEngineCardsFromRow`+`resolveNormalCardView`, não só
+inspeção do payload) (16); MC/Type Answer/Cloze nunca geram
+`choices`/`expectedAnswer`/`cloze_answer` paralelos (17-19); Normal
+Reversed nunca gera `isReverse`/`reviewDirection`, CardInstances sempre
+derivadas em runtime (20); múltiplos clozes num único Field, round-trip
+real confirma 2 CardInstances a partir de 1 linha (21); mídia por Field
+preservada no save (22); erro de rede preserva o editorState sem mutação
+(23, via `snapshotNoteEditorState` antes/depois); FR e ZH compartilham o
+MESMO formato nativo (24); Admin e Meus Cartões usam a MESMA serialização
+(25); validação central bloqueia ANTES de qualquer chamada de rede (26).
+**8 suítes anteriores (Fases 4-6D.5) re-executadas, 588/588 sem
+regressão** -- total desta entrega + histórico: **673/673**.
+
+**Testes de integração/DB** (Seção 24, contra o Supabase real do projeto
+`eigjocalzwamisgqilhg`, via `mcp__Supabase__execute_sql`, mesmo padrão
+transação+rollback já usado na validação ao vivo da migration 045):
+snapshot antes (`teacher_flashcards: 5 linhas, hash afe805e5a3c3ec7fa05
+645a6a2a6e607`); dentro de uma única transação -- INSERT nativo válido
+(sucesso), UPDATE nativo válido na mesma linha (sucesso, `card_generation_mode`
+trocado pra `cloze`), INSERT legado NULL/NULL (sucesso) -- `ROLLBACK`
+no final, confirma que os 3 primeiros cenários passaram (uma violação de
+constraint teria abortado a transação inteira antes de chegar no 3º);
+3 transações separadas pros cenários de rejeição -- `fields` sem
+`card_generation_mode` rejeitado por `teacher_flashcards_fields_paired`
+(23514), `card_generation_mode` sem `fields` rejeitado pela MESMA
+constraint, `card_generation_mode='nao_existe'` rejeitado por
+`teacher_flashcards_card_generation_mode_check` -- as 3 confirmadas por
+mensagem de erro real do Postgres. Snapshot depois: `teacher_flashcards:
+5 linhas, MESMO hash` -- confirma que nenhuma linha de teste sobreviveu
+(o `id` sequence avançou, comportamento esperado/inofensivo de
+`GENERATED ALWAYS AS IDENTITY`, sequences não são transacionais).
+
+**Browser smoke FR+ZH** (`test_fase6d6_browser_smoke.js`, novo, Playwright,
+mesmo padrão de stub de `window.supabase.createClient()` de toda a
+feature, agora com um fake `teacher_flashcards` em memória que simula
+INSERT/UPDATE reais -- **82/82 checks passando nos 2 idiomas**): criação
+nativa via clique real na UI pros 5 Card Types (Normal -- 2 campos
+adicionados via "+ Adicionar campo"; Normal Reversed -- idem, confirma
+`fields.length===2`; Múltipla escolha -- `data-mc-add-prompt/answer/
+distractor`; Digite a resposta -- `data-ta-add-prompt/answer`; Cloze --
+seleção de texto REAL via `Selection`/`Range` API + `data-cloze-mark-btn`
++ `data-cloze-add-translation`, com painel de pinyin real no zh via
+`data-cloze-edit-compare`+`data-cloze-edit-save`); atomicidade (5 cartões
+criados, `fields`/`card_generation_mode` sempre pareados); edição nativa
+de um cartão Normal já criado (abre direto no editor novo, ids de Field
+preservados, revision incrementa, modal de reset mostrado só quando
+relevante); edição sem mudança NÃO incrementa revision; criação legada
+(sem tocar em Campos nativos) grava `fields:null`; abrir e salvar um
+cartão legado SEM clicar em "Usar o novo editor" continua legado (nunca
+auto-converte); clicar "Usar o novo editor" preserva o conteúdo
+digitado, salvar converte de verdade preservando `id`/`teacher_id`;
+regressão -- um cartão nativo persistido (`normal_reversed` do teste 2)
+passado pelo pipeline REAL (`buildCardFromTeacherFlashcard` ->
+`STATE.cards` -> `renderReviewView()`) confirma 2 CardInstances com ids
+distintos, sufixo `-b`, FSRS genuinamente independente, Review renderiza
+sem erro, `buildSpeedOptions()`/`hasPlainFrontBack()` não quebram com um
+cartão nativo. **Zero pageerror/console.error novo** em nenhum dos 2
+idiomas (só os mesmos `ERR_TUNNEL_CONNECTION_FAILED` pré-existentes do
+proxy de saída deste sandbox, documentados em toda a sessão).
+
+**3 achados de bug reais no PRÓPRIO SCRIPT DE TESTE, corrigidos antes de
+reportar como passando** (nunca no código de produção, registrados por
+transparência): (1) a seleção de alunos NÃO é limpa por um submit bem-
+sucedido (comportamento intencional já existente desde antes desta fase
+-- só o formulário de conteúdo/modo limpa, pra permitir criar vários
+cartões seguidos pro mesmo aluno) -- o teste assumia erroneamente que
+clicaria; corrigido trocando `page.click()` por `page.check()`
+(idempotente) no helper de seleção; (2) o sinal certo de "o re-render
+completo do submit terminou" não é o contador de seleção (nunca some) --
+corrigido pra esperar `ADMIN_FLASHCARDS_STATE.nativeCardState.fields.length
+=== 0` (só true depois que `renderAdminFlashcardsView()` de fato recria o
+estado do zero); (3) os seletores de "adicionar tradução" no editor de
+Cloze são `data-cloze-add-translation` (próprio do editor de Cloze,
+Fase 6D.5), não `data-field-add` (genérico) -- confundidos na 1ª versão
+do teste.
+
+**Auditoria de duplicação** (Seção 27, via grep sobre os arquivos
+tocados): `fields:` array nunca montado manualmente fora de
+`shared/flashcard-native-persistence.js`; `card_generation_mode` nunca
+atribuído como string literal em `admin-flashcards.js`/`my-flashcards.js`/
+`teacher-flashcards.js`/`own-flashcards.js` (só aparece em comentários/
+hint text); zero ocorrência de `correctChoice`/`expectedAnswer`/
+`typeAnswerAnswer`/`pinyinAnswer`/`multipleChoiceOptions` no módulo novo;
+`isReverse`/`reviewDirection`/`nextCardDirection` -- 1 única ocorrência
+em todo o diff, dentro de um COMENTÁRIO pré-existente da Fase 6D.2
+explicando o que NUNCA foi feito; `validateNoteEditorStateForSave()`
+chamada exatamente 4 vezes (2 em cada arquivo de UI -- submit de criação
++ salvar edição nativa), nunca uma 2ª rota de validação. `git diff
+--stat` confirma só os 6 arquivos + 1 novo, nenhum arquivo fora do
+escopo desta subfase tocado.
+
+**O que ainda falta / não foi feito nesta subfase (de propósito, Seção
+28 -- escopo estrito):** nenhum Preview reaproveitando os renderers da
+Fase 6C (6D.7); nenhuma migração em massa/automática de cartões legados
+existentes -- só conversão pontual, explícita, 1 cartão por vez; nenhum
+rich text/TTS/upload de mídia novo (o indicador textual de áudio/imagem
+já vinculados continua só leitura, mesmo escopo da 6D.3); nenhuma
+mudança em `getStudyQueue()`/`eligibleReviewPool()`/FSRS/renderers da
+Fase 6C -- confirmado que persistência nativa não precisou tocar em
+nenhum deles, mesma aposta arquitetural "um motor só" validada de novo;
+`student_flashcards`/`teacher_flashcards` (as tabelas) não ganharam
+nenhuma coluna nova -- migration 045 (Fase 6B) já bastava. Achado fora do
+escopo, reportado sem corrigir: nenhum -- não foi encontrado nenhum
+problema real fora do que a instrução já antecipava (o mirror write-only
+de `front`/`back_trans`, necessário pela constraint NOT NULL de
+`back_trans`, já discutido acima).
+
+Escopo estrito respeitado -- nenhuma 6D.7/6D.8/rich text/migração em
+massa iniciados. Parando aqui, aguardando revisão da autora antes de
+continuar.
