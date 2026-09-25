@@ -6025,3 +6025,68 @@ Próxima etapa (rodar a migration `fields`/`card_generation_mode` +
 CHECK constraints, conforme já revisada e aprovada na rodada anterior) só
 acontece depois de autorização explícita da autora pra isso especificamente
 -- distinta da autorização de código desta entrega.
+
+**Atualização: migration `045` aprovada e aplicada (2026-09-25).** A
+autora aprovou a proposta exatamente como revisada (`fields jsonb NULL` +
+`card_generation_mode text NULL` nas duas tabelas, CHECK de pareamento,
+CHECK fechado do enum de 5 valores, sem validação estrutural adicional em
+SQL, sem backfill) e pediu execução com validação pós-migration em 7
+pontos, usando transação/rollback pros testes de rejeição pra não deixar
+dado de teste no banco -- e travou explicitamente "NÃO avance para a Fase
+6C" depois.
+
+**Migration aplicada AO VIVO** via `mcp__Supabase__apply_migration`,
+projeto `eigjocalzwamisgqilhg`, arquivo
+`shared/supabase_migrations/045_add_native_note_fields_to_flashcards.sql`
+(já commitado antes, byte a byte igual ao que rodou). Snapshot antes:
+`teacher_flashcards` 5 linhas (hash agregado `254729e4...`), `own_flashcards`
+7 linhas (hash `34a7b80c...`).
+
+**Validação pós-migration, os 7 pontos pedidos:**
+1. Schema confirmado via `information_schema.columns` -- `fields`
+   (jsonb, nullable) e `card_generation_mode` (text, nullable) presentes
+   nas duas tabelas.
+2. `NULL`/`NULL` continua válido pra todo registro legado -- 5/5 linhas
+   de `teacher_flashcards` e 7/7 de `own_flashcards` com os dois campos
+   `NULL`.
+3. Note nativa válida persiste com sucesso -- insert de teste (2 Fields,
+   `card_generation_mode:'normal'`) dentro de `BEGIN`/`ROLLBACK`: o
+   `RETURNING` confirmou o insert passando pelas duas CHECK constraints
+   (id 6 gerado), e a consulta pós-`ROLLBACK` confirmou zero linha
+   remanescente (`total:5`, `leftover_test_rows:0`).
+4. `fields` preenchido + `card_generation_mode NULL` -- rejeitado,
+   `23514 check_violation` em `teacher_flashcards_fields_paired`, nada
+   commitado.
+5. `fields NULL` + `card_generation_mode` preenchido -- rejeitado, mesma
+   constraint (`teacher_flashcards_fields_paired`), simétrico ao ponto 4.
+6. `card_generation_mode` fora dos 5 valores (`'invalid_mode_xyz'`) --
+   rejeitado por uma constraint DIFERENTE
+   (`teacher_flashcards_card_generation_mode_check`), confirmando que as
+   duas CHECKs disparam de forma independente e correta cada uma pro seu
+   caso.
+7. Nenhum registro existente foi alterado -- hash agregado + contagem
+   pós-migration IDÊNTICOS ao snapshot pré-migration nas duas tabelas
+   (`teacher_flashcards`: 5 linhas, hash `254729e4...`; `own_flashcards`:
+   7 linhas, hash `34a7b80c...`), e varredura final confirma
+   `leftover_test_rows:0` -- nenhum dos 4 inserts de teste (1 válido + 3
+   de rejeição) deixou rastro.
+
+**Testes do motor + smoke test, re-executados sem nenhuma mudança de
+código**: as 4 suítes Node (`test_fase4_engine.js` 32/32,
+`test_fase4d_regression.js` 30/30, `test_fase5_generation.js` 33/33,
+`test_fase6b_native_notes.js` 74/74 -- **169/169**) e o smoke test de
+navegador real (`fase6b_native_smoke.js`, Playwright fr+zh) -- resultados
+idênticos à rodada anterior (7 cards cada idioma, ids/FSRS/conteúdo
+corretos, `hasPlainFrontBack` correto, idempotência confirmada), mesmos
+`ERR_TUNNEL_CONNECTION_FAILED` pré-existentes no console (proxy de saída
+do sandbox), nenhum erro novo. Esperado -- a migration só torna a coluna
+disponível no banco real, o motor/testes já validavam a lógica sobre
+linhas construídas em memória desde a entrega anterior.
+
+**Escopo desta entrega**: só a migration aplicada + validação -- nenhuma
+alteração de código/UI (`git status` confirma árvore de trabalho limpa
+antes e depois desta rodada, além do arquivo da migration já commitado
+na rodada anterior).
+
+Parando aqui conforme instrução explícita -- **Fase 6C (renderer +
+Preview) NÃO iniciada**, aguardando autorização separada da autora.
