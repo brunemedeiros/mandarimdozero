@@ -8685,3 +8685,336 @@ Próxima subfase (6D.5 -- Cloze visual) só começa depois de autorização
 explícita da autora, com este relatório já entregue antes de pedir luz
 verde. **Não avançar automaticamente**, conforme instrução explícita
 desta entrega.
+
+**Atualização: autorizada e entregue (2026-09-25), "FASE 6D.5 --
+IMPLEMENTAÇÃO: CLOZE VISUAL NATIVO" -- instrução com 26 seções numeradas
+de restrições/pedidos, todas cumpridas nesta entrega, ver abaixo.**
+
+## Fase 6D.5 -- editor visual nativo de Cloze (seleção de texto real,
+múltiplas lacunas, sem persistência/Preview/Review tocados)
+
+Última das 4 subfases de código da Fase 6D.4/6D.5 (Normal já era coberto
+desde a 6D.1-6D.3; Multiple Choice na 6D.4a; Type Answer na 6D.4b; Cloze
+aqui) -- com esta entrega, os 4 Card Types de `shared/flashcard-model.js`
+(exceto `normal_reversed`, que reaproveita o mesmo Field editor genérico
+de Normal, sem UI própria) têm um editor visual dedicado.
+
+**Achado arquitetural, verificado ANTES de codar (não presumido)**: a
+instrução (Seção 1) diz que Cloze usa "exatamente 1 Field de conteúdo
+textual" -- mas `validateNativeNoteRow()` (motor, `shared/flashcard-
+model.js`, ramo `else` que cobre normal/normal_reversed/type_answer/
+cloze) já exige `contentFieldIndices(row.fields).length >= 2` pra
+QUALQUER um desses 4 modos, cloze incluído -- confirmado por leitura
+direta, não assumido. Resolvido interpretando "exatamente 1 Field de
+conteúdo textual" como o Field que carrega a frase com as marcas
+`{{cN::...}}` -- um 2º Field de conteúdo comum (a TRADUÇÃO, mostrada à
+aluna depois de responder, `resolveClozeCardView().translationFieldIndex`)
+é exigido ao lado dele, exatamente o mesmo par posicional que `normal` já
+usa pro front/back. Nenhuma mudança no motor por causa disso (restrição
+19, confirmado por `git status`/`git diff` no fim -- só
+`shared/flashcard-cloze-editor.js` novo + 4 arquivos de integração
+tocados).
+
+**O que foi feito -- 1 arquivo novo, `shared/flashcard-cloze-editor.js`:**
+
+- **Camada de "segmentos" pura, sem DOM** (`parseClozeSegments`/
+  `serializeClozeSegments`/`coalesceClozeSegments`) -- ponte entre a
+  string canônica do motor (`{{cN::resposta}}`/`{{cN::resposta|
+  compareAnswer}}`, reaproveitando `CLOZE_MARK_RE`/`splitClozeMarkRaw` já
+  existentes desde a Fase 4a/5, NUNCA duplicados -- confirmado por busca
+  final que `parseClozeMarks` completo não foi reimplementado) e uma
+  representação `[{kind:'text', text} | {kind:'mark', markId, answer,
+  compareAnswer}]` fácil de desenhar/editar. `Field.content.value`
+  continua sendo a ÚNICA fonte de verdade persistível -- segmentos só
+  existem em memória enquanto o editor está aberto, sempre re-derivados/
+  re-serializados a partir da string canônica (restrição 4/14).
+- **`nextClozeMarkId(segments)`** -- sempre `max(existente)+1`, nunca
+  reaproveita um "buraco" deixado por uma marca removida (restrição 5,
+  decisão explícita porque a instrução deixava em aberto qual das 2
+  leituras usar).
+- **`insertClozeMarkAtLogicalOffsets(segments, start, end, compareAnswer)`**
+  -- função pura que decide se um intervalo de OFFSETS LÓGICOS (posição
+  no "texto visível", nunca offset na string canônica com sintaxe) pode
+  virar uma lacuna nova. Regras determinísticas e conservadoras
+  (restrição 8): seleção vazia -> bloqueia; só espaço em branco ->
+  bloqueia; intersecta QUALQUER marca já existente -- parcial, contendo a
+  marca inteira, ou dentro dela -- sempre bloqueia (aninhamento
+  explicitamente fora do MVP, nunca um caso especial tratado diferente).
+- **`domRangeToLogicalOffsets(containerEl, range)`** -- a função EXPLÍCITA
+  de conversão DOM Selection/Range -> offsets lógicos pedida na restrição
+  7: percorre os childNodes reais do container somando o comprimento
+  visível de cada um (span atômico de marca conta como `answer.length`,
+  nunca seu HTML) até achar o nó/offset alvo -- nunca assume que a
+  seleção é um simples offset de string plana.
+- **`renderClozeSegmentsHTML`/`domToClozeSegments`** -- o par simétrico
+  de conversão segmentos<->DOM: marcas viram `<span contenteditable=
+  "false" data-cloze-mark-id="cN">answer</span>` (técnica padrão de
+  "token atômico" dentro de um container `contenteditable="true"` maior --
+  mesmo padrão usado por editores tipo Notion/Gmail pra chips inline --
+  o navegador trata o span como unidade indivisível pro cursor, nunca
+  deixando o usuário digitar sintaxe bruta dentro dele, restrição 4). O
+  texto VISÍVEL de uma marca é sempre `seg.answer`, nunca `{{cN::...}}`.
+- **`updateClozeMarkText`/`updateClozeMarkCompareAnswer`/`removeClozeMark`**
+  -- mutações pontuais numa marca já existente (restrição 6: editar texto
+  dentro de uma lacuna, editar/limpar o pinyin, remover uma lacuna
+  revertendo pro próprio texto -- nunca desaparece, só perde a marcação).
+- **`stripClozeMarkupToPlainText`** -- usado só ao SAIR do modo cloze pra
+  outro Card Type (restrição 12): reverte TODAS as marcas pro próprio
+  texto (`answer`), reaproveitando o parser/serializer já existentes,
+  nunca escreve sintaxe cloze presa num Field que outro Card Type vai ler
+  como texto puro.
+- **`validateNativeClozeStructure(editorState)`** -- reutilizável pela
+  6D.6 (mesmo padrão de `validateNativeMultipleChoiceStructure`/
+  `validateNativeTypeAnswerStructure`): converte o `editorState` pra
+  shape de linha via `noteEditorStateToRow()` (Fase 6D.1) e passa direto
+  pra `validateNativeNoteRow()` do motor -- nunca uma 2ª implementação da
+  regra de `>=2` slots/pareamento/ids únicos. Checagens A MAIS, de tempo
+  de edição, que o motor não faz: texto/tradução não-vazios, sintaxe sem
+  chave solta (`hasMalformedClozeSyntax`, restrição 13), pelo menos 1
+  marca, ids de marca únicos, toda marca com `answer` não-vazio, e --
+  só quando `editorState.languageAppKey === 'mandarim'` -- toda marca com
+  `compareAnswer` não-vazio (regra JÁ existente pro caso legado
+  `cloze_answer_pinyin`, reaproveitada aqui por marca em vez de por
+  cartão inteiro, restrição 9: nunca uma regra nova inventada).
+- **`transitionToCloze(editorState)`** -- reaproveita os Fields JÁ
+  EXISTENTES (o de texto vira o Field cloze, o outro vira tradução),
+  nunca inventa conteúdo (restrição 11) -- funcionalmente idêntica ao
+  ramo genérico que já tratava essa transição antes desta subfase, agora
+  nomeada explicitamente.
+- **`renderClozeEditorHTML`/`wireClozeEditor`/`refreshClozeEditorBox`** --
+  3 seções: "Frase com lacunas" (toolbar "✂️ Marcar seleção como lacuna" +
+  `.cloze-editor-text` contenteditable + painel inline de edição de marca
+  quando uma está selecionada), "Tradução" (reaproveita
+  `renderFieldEditorHTML()`/`wireFieldEditorList()` da Fase 6D.3, SEM
+  nenhum editor textual paralelo), "Outros campos" (Fields sobrando de
+  uma transição, ex: satélite de pinyin de outro modo -- removíveis via o
+  mesmo botão genérico da 6D.3, nunca escondidos silenciosamente). Digitar
+  texto normal (fora de uma marca) NUNCA re-renderiza -- só re-deriva os
+  segmentos do DOM real e serializa de volta, mesma disciplina anti-
+  "UX-fix 5" já usada em toda a feature, agora aplicada a um
+  `contenteditable` em vez de `<input>`/`<textarea>`. Clicar "Marcar
+  seleção como lacuna" lê `window.getSelection()`, converte via
+  `domRangeToLogicalOffsets`, chama `insertClozeMarkAtLogicalOffsets`, e
+  mostra mensagens de erro específicas por `reason` (nunca uma genérica)
+  quando bloqueado.
+- **`refreshNativeCardTypeBox()` REDEFINIDO com um 4º branch** (mesmo
+  padrão de cascata das 2 subfases anteriores -- `flashcard-mc-editor.js`
+  → `flashcard-typeanswer-editor.js` → aqui, cada arquivo redefine a
+  função acrescentando seu próprio Card Type, preservando os anteriores):
+  `cloze` → `refreshClozeEditorBox`; os outros 3 branches (multiple_choice/
+  type_answer/fallback genérico) continuam intactos.
+
+**Integração** (`shared/admin-flashcards.js`/`shared/my-flashcards.js`,
+diff mínimo nos dois): o listener de `change` do `<select>` de Card Type
+ganhou (a) checagem `wasCloze` ANTES de trocar de modo -- se estava em
+`cloze` e o novo modo não é, chama `stripClozeMarksFromEditorState()`
+primeiro (restrição 12, nunca sintaxe presa); (b) `else if (newMode ===
+'cloze') transitionToCloze(...)`. `<script src="../shared/flashcard-
+cloze-editor.js">` adicionado em `fr/index.html`/`zh/index.html`, logo
+depois de `flashcard-typeanswer-editor.js` e antes de `teacher-
+flashcards.js` -- mesma posição de carregamento das 2 subfases
+anteriores. **`nativeCardState.languageAppKey` passou a ser preenchido**
+(achado necessário pra `validateNativeClozeStructure` saber se exige
+`compareAnswer`, nunca existia antes porque MC/TypeAnswer não dependiam
+dele): em `admin-flashcards.js`, espelha o mesmo sinal `anyMandarim`
+(booleano) já usado no resto da tela pra decidir pinyin -- nunca escolhe
+um idioma "representante" arbitrário pra uma seleção mista de alunos,
+só o booleano relevante -- setado no render inicial E dentro de
+`updateFlashcardsSelectionDependentUI()` (mutação pura de estado, nunca
+dispara re-render da caixa de Cloze); em `my-flashcards.js`, é sempre
+`APP_KEY` direto (conta só tem 1 idioma relevante, o do site).
+
+**CSS novo** (`.cloze-editor-text`/`.cloze-editor-mark`/`.cloze-editor-
+mark-panel`/`.cloze-editor-mark-panel-actions`/`.cloze-editor-toolbar`,
+fr+zh `index.html`, idêntico nos 2 arquivos) -- **zero cor nova**: reusa
+`--jade`/rgba(58,115,89,0.12) (mesmo par já calibrado de `.mc-option.
+correct`/`.cloze-blank.correct` da Fase 6C/8a) pra marca inline,
+`--paper`/`--paper-warm`/`--paper-line`/`--ink`/`--seal-red` (todos já
+existentes) pro resto -- confirmado por leitura antes de escrever
+qualquer regra, mesma disciplina já travada no CLAUDE.md ("Tokens de cor
+de marca vs. semânticos").
+
+**Decisões arquiteturais desta subfase:**
+1. `>=2` Fields de conteúdo pra Cloze (achado acima) -- decisão de
+   interpretação, não de arquitetura nova: o motor já exigia isso desde a
+   Fase 6B, esta subfase só constrói a UI que respeita a exigência já
+   existente.
+2. Painel de edição de marca é um mecanismo ÚNICO pra criar/editar
+   pinyin E pra editar/remover uma marca já existente (clicar QUALQUER
+   marca, nova ou antiga, abre o mesmo painel) -- simplificação
+   deliberada em relação à leitura mais literal da instrução ("abre
+   automaticamente" um campo de pinyin no momento de marcar), que teria
+   exigido um popup modal bloqueante; a validação (`validateNativeClozeStructure`)
+   já sinaliza claramente quando falta pinyin, direcionando o usuário a
+   clicar na marca.
+3. `CLOZE_EDITOR_ACTIVE_MARK_ID` (estado efêmero de "qual marca está
+   sendo editada agora") é uma variável de MÓDULO, não `STATE.review*`
+   nem CardInstance -- mesmo princípio já travado na auditoria da Fase
+   6C pro `localState`/Preview futuro: nunca usar armazenamento do Review
+   pra estado de editor. Reseta sozinho quando a marca ativa deixa de
+   existir nos segmentos atuais (ex: removida por Backspace direto no
+   contenteditable).
+4. Cloze nunca ganhou UI de reatribuir/mover uma marca de lugar -- só
+   criar (via seleção), editar texto/pinyin, remover. Mover seria
+   equivalente a remover+recriar, sem perda de expressividade real.
+
+**Gratuito x Premium**: nenhuma mudança de conceito -- é extensão de UI
+sobre um Card Type que já existia no motor desde a Fase 4a/6B, mesmo gate
+`premium` que o resto do editor nativo já usa em "Meus Cartões" desde a
+"reformulação gratuito x premium".
+
+**Testes realizados:**
+- `node --check shared/flashcard-cloze-editor.js` sem erro.
+- **Suíte Node nova `test_fase6d5_cloze_editor.js`, 71/71** -- os 20
+  cenários pedidos explicitamente (Seção 22): normal→cloze preserva
+  conteúdo (ids estáveis); 1ª/2ª seleção geram c1/c2 com ids
+  determinísticos (`max+1`, nunca reaproveita); texto normal fora das
+  lacunas preservado; edição do texto ao redor preserva marca já
+  existente; remover 1 marca não corrompe as outras (reverte pro próprio
+  texto); seleção vazia bloqueada; seleção só espaço em branco bloqueada;
+  seleção parcialmente sobreposta a marca existente bloqueada; seleção
+  aninhada (contida OU englobando uma marca) bloqueada nos 2 sentidos;
+  sintaxe malformada (`{{` sem fechar) rejeitada pela validação;
+  `{{c1::汉字|pinyin}}` preservado, hanzi/pinyin separados corretamente,
+  round-trip de serialização idêntico; compareAnswer vazio OK em fr,
+  exigido em zh (regra já existente, não nova); nenhuma estrutura
+  paralela (`cloze_sentence`/`cloze_answer`/`clozeAnswers[]`/
+  `clozeSelections[]`) criada no editorState; Field ID estável através de
+  2 marcações seguidas; mídia (áudio) do Field sobrevive a marcar uma
+  lacuna; legacy nunca convertido (clone+mutação nunca afeta o original);
+  **round-trip REAL através do motor** (`noteEditorStateToRow`+
+  `buildEngineCardsFromRow`+`resolveCardContentView`, não só validação
+  estrutural) confirmando 2 CardInstances com ids `t900-c1`/`t900-c2`,
+  FSRS genuinamente independente (mutar um nunca vaza pro outro), e o
+  mesmo round-trip repetido pro caso zh com compareAnswer; FR+ZH
+  carregando no MESMO sandbox sem conflito de scripts (confirma que
+  `refreshNativeCardTypeBox` foi redefinido em cascata sem
+  `SyntaxError`); múltiplas lacunas cobertas com profundidade (3 marcas
+  na mesma frase, edição/remoção de uma sem afetar as outras 2). Busca
+  arquitetural embutida no próprio arquivo de teste confirma zero padrão
+  proibido em código executável do arquivo de produção.
+- **4 suítes anteriores + 4 subfases da 6D re-executadas, 517/517 sem
+  regressão** (esperado -- nenhuma toca o arquivo novo):
+  `test_fase4_engine.js` 32/32, `test_fase4d_regression.js` 30/30,
+  `test_fase5_generation.js` 33/33, `test_fase6b_native_notes.js` 74/74,
+  `test_fase6d1_editor_state.js` 99/99, `test_fase6d2_state.js` 31/31,
+  `test_fase6d3_field_editor.js` 65/65, `test_fase6d4a_mc_editor.js`
+  91/91, `test_fase6d4b_typeanswer_editor.js` 62/62.
+- **Browser smoke, FR+ZH, `test_fase6d5_browser_smoke.js`, 84/84
+  checks** -- os itens da Seção 23 cobertos com SELEÇÃO DE TEXTO REAL
+  (`window.getSelection()`/`Range`, nunca campo de índice nem digitação
+  de sintaxe): abrir editor + selecionar Cloze via o `<select>` real;
+  estrutura vazia mostra botão de criar frase; criar frase + digitar via
+  `input` real no `contenteditable` (mesmo nó do DOM nunca recriado);
+  **seleção real do 1º trecho + clique em "Marcar seleção como lacuna"**
+  cria `{{c1::Je}}`/`{{c1::我}}` de verdade no `Field.content.value`
+  (conteúdo SERIALIZADO confirmado, não só aparência do DOM), texto
+  visível da marca no DOM é sempre `answer`, nunca a sintaxe bruta;
+  criar tradução (Field genérico da 6D.3); **2ª seleção real** cria
+  `{{c2::suis}}`/`{{c2::是}}` sem apagar `c1`; estrutura em zh
+  corretamente INVÁLIDA sem pinyin nas 2 marcas, válida em fr sem
+  pinyin nenhum; clicar numa marca abre o painel inline, em zh o campo
+  de pinyin salva de verdade DENTRO da sintaxe (`{{c1::我|wǒ}}`),
+  estrutura fica totalmente válida depois das 2 marcas terem pinyin;
+  **seleção vazia mostra erro, sem gravar nada**; **seleção parcialmente
+  sobreposta a uma marca existente (span atômico) mostra erro,
+  contagem de marcas inalterada**; remover 1 marca reverte pro próprio
+  texto preservando a outra marca intacta; **transição Cloze→Normal
+  remove TODA a sintaxe `{{cN::...}}`** (confirmado via regex sobre o
+  `Field.content.value` real) preservando o texto plano e os 2 Fields;
+  Multiple Choice e Type Answer (6D.4a/6D.4b) continuam funcionando
+  depois de toda a interação com Cloze, inclusive voltando pra Cloze de
+  novo; editor legado ("Modo de prática", 3 radios) continua presente;
+  submit legacy (Admin Flashcards e Meus Cartões) continua criando
+  cartão exatamente como antes, `nativeCardState` reseta corretamente
+  pro padrão depois do submit; Review continua renderizando sem erro pra
+  um cartão de trilha real. **Zero erro de console novo** em nenhum dos
+  dois idiomas (excluindo os `ERR_TUNNEL_CONNECTION_FAILED` pré-
+  existentes do proxy de saída deste sandbox, documentados em toda a
+  sessão). Achado técnico durante a escrita do teste, não do produto:
+  pra validar corretamente a exigência de pinyin em zh, a seleção de
+  aluno (que alimenta `nativeCardState.languageAppKey`) precisa
+  acontecer ANTES de interagir com o editor de Cloze -- comportamento
+  correto e esperado (o sinal só existe depois de um aluno selecionado),
+  só um ajuste na ORDEM do script de teste, não um bug.
+- **Validação visual dos 4 cenários obrigatórios** (CLAUDE.md, "Tokens de
+  cor de marca vs. semânticos") -- screenshot Playwright de
+  `.cloze-editor-mark`/`.cloze-editor-mark-panel` em fr-claro,
+  fr-escuro, zh-claro, zh-escuro, com uma marca já criada e o painel de
+  edição aberto: texto/bordas legíveis nos 4 cenários, nenhum problema
+  de contraste -- esperado, zero cor nova introduzida (só tokens já
+  calibrados por `.mc-option.correct`/`.cloze-blank.correct` desde a
+  Fase 6C/8a).
+
+**Busca arquitetural final** (Seção 24): confirmado por `grep`
+programático (removendo comentários antes de checar, mesmo rigor das
+subfases anteriores) que `shared/flashcard-cloze-editor.js` NUNCA contém,
+em código executável: `cloze_sentence`/`cloze_answer`/
+`cloze_answer_pinyin` (colunas legadas), `clozeAnswers`/`clozeSelections`
+(estrutura paralela hipotética que a instrução proibia), `frontIsTargetLanguage`/
+`reviewDirection`/`isReverse`/`nextCardDirection` (mecanismo de direção
+da trilha/legado, nunca relevante pra Cloze), `STATE.review*` (estado de
+sessão do Review), ou uma reimplementação de `parseClozeMarks`/
+`renderClozeText` (usa só `CLOZE_MARK_RE`/`splitClozeMarkRaw`, os
+primitivos mais baixos do motor). A sintaxe `{{cN::...}}` do motor está
+presente E ESPERADA (só em `serializeClozeSegments`, o único ponto que
+produz a string canônica). `git status`/`git diff` confirmam que só 5
+arquivos foram tocados no total (`shared/flashcard-cloze-editor.js`
+novo, `shared/admin-flashcards.js`, `shared/my-flashcards.js`,
+`fr/index.html`, `zh/index.html`) -- nenhuma linha em `fr/app.js`,
+`zh/app.js`, `shared/flashcard-model.js`, nenhum renderer da Fase 6C,
+`gradeCurrentCard`, FSRS, ou qualquer arquivo de schema/migration.
+
+**Confirmações pedidas explicitamente na Seção 26:**
+- Arquivos alterados: listados acima (1 novo + 4 tocados).
+- Arquitetura visual: seleção real (Selection/Range API) sobre um
+  `contenteditable`, marcas viram spans atômicos inline, clique numa
+  marca abre painel de edição -- nada de campos de índice/digitação de
+  sintaxe/modal obrigatório.
+- Como a seleção DOM vira conteúdo serializado: `domRangeToLogicalOffsets`
+  (DOM Range → offsets no "texto visível") → `insertClozeMarkAtLogicalOffsets`
+  (pura, decide se é válido e onde cortar os segmentos) →
+  `serializeClozeSegments` (segmentos → string canônica `{{cN::...}}`) →
+  gravado em `Field.content.value` via `updateFieldInEditorState`.
+- Múltiplos clozes: cada `{{cN::...}}` distinto na mesma frase já vira 1
+  CardInstance própria no motor (Fase 5, reaproveitado sem mudança) --
+  esta subfase só constrói a UI que permite criar/editar/remover cada
+  marca independentemente, com ids `c1`/`c2`/... sempre determinísticos.
+- Chinês/pinyin/compareAnswer: nunca um Field separado -- vive dentro da
+  própria marcação (`|compareAnswer`), editável só através do painel
+  inline da marca correspondente; `pinyinFieldId` (mecanismo de Fields
+  satélite doutros Card Types) nunca é usado/confundido aqui.
+- Sintaxe interna nunca exposta ao usuário: confirmado no browser smoke
+  -- o texto visível de uma marca é sempre `seg.answer`.
+- `fields` continua a única fonte de verdade: confirmado pelo teste
+  arquitetural (nenhuma propriedade paralela no `editorState`).
+- Testes Node/VM: 71/71 novos + 517/517 das subfases anteriores, 0
+  falhas.
+- Browser smoke FR+ZH: 84/84 checks.
+- Pageerrors/console errors: zero novos em ambos os idiomas.
+- Busca arquitetural final: limpa, listada acima.
+
+**O que ainda falta / não foi feito nesta subfase (de propósito,
+restrição 17/25 -- escopo estrito):**
+- Nenhuma persistência nativa (INSERT/UPDATE gravando `fields`/
+  `card_generation_mode` de verdade) -- 6D.6.
+- Nenhum Preview reaproveitando os renderers da Fase 6C -- 6D.7.
+- Nenhuma conversão legacy→native ao abrir um cartão Cloze já existente
+  pra editar -- 6D.8.
+- Nenhum rich text/toolbar geral (bold/italic/underline/color/highlight)
+  -- fora do escopo desde a auditoria da Fase 6D (seção 7), nunca parte
+  desta subfase.
+- Nenhuma migração de schema, nenhum passo manual pendente pra autora --
+  100% client-side, confirmado por `git status` limpo antes/depois além
+  dos 5 arquivos já listados no escopo.
+
+Com Cloze entregue, os 4 Card Types que já têm dado real (normal/
+multiple_choice/type_answer/cloze -- `normal_reversed` reaproveita o
+editor de Normal, sem UI própria) têm um editor visual dedicado dentro
+do estado nativo -- ainda sem persistência (6D.6), sem Preview (6D.7), e
+sem conversão de cartão legado (6D.8), todas explicitamente fora do
+escopo desta subfase.
+
+Próxima subfase (6D.6 -- persistência nativa) só começa depois de
+autorização explícita da autora, com este relatório já entregue antes de
+pedir luz verde. **Não avançar automaticamente.**

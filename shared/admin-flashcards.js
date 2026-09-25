@@ -575,6 +575,11 @@ async function updateFlashcardsSelectionDependentUI(wrap){
   const students = ADMIN_FLASHCARDS_STATE._studentsCache;
   const selectedStudents = students.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
   const anyMandarim = selectedStudents.some(s => s.language_app_key === 'mandarim');
+  // Fase 6D.5 (ver CLAUDE.md) -- mesma regra do render inicial: só o
+  // booleano relevante pra validação (compareAnswer/pinyin obrigatório),
+  // mutação pura de estado, NUNCA dispara re-render da caixa "Campos
+  // nativos" (que só re-renderiza por sua própria mudança estrutural).
+  ADMIN_FLASHCARDS_STATE.nativeCardState.languageAppKey = anyMandarim ? 'mandarim' : null;
   const selectionCountLabel = selectedStudents.length === 0
     ? 'Nenhum aluno selecionado'
     : selectedStudents.length === 1
@@ -824,6 +829,12 @@ async function renderAdminFlashcardsView(){
 
   const selectedStudents = students.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
   const anyMandarim = selectedStudents.some(s => s.language_app_key === 'mandarim');
+  // Fase 6D.5 (ver CLAUDE.md) -- languageAppKey do editor nativo espelha o
+  // mesmo sinal `anyMandarim` que o resto desta função já usa pra decidir
+  // se pinyin é exigido (mistura fr+pt não precisa de compareAnswer, só
+  // mandarim precisa) -- nunca escolhe um idioma "representante" arbitrário
+  // pra seleção mista, só o booleano relevante pra validação.
+  ADMIN_FLASHCARDS_STATE.nativeCardState.languageAppKey = anyMandarim ? 'mandarim' : null;
   const selectionCountLabel = selectedStudents.length === 0
     ? 'Nenhum aluno selecionado'
     : selectedStudents.length === 1
@@ -1101,15 +1112,24 @@ async function renderAdminFlashcardsView(){
   // nativa (gravar fields/card_generation_mode de verdade) é a Fase 6D.6.
   document.getElementById('admin-flashcard-card-type-preview')?.addEventListener('change', (e) => {
     const newMode = e.target.value;
-    // Fase 6D.4a/6D.4b (ver CLAUDE.md) -- trocar PRA multiple_choice/
-    // type_answer passa pela transição dedicada de cada um (reaproveita
-    // Fields sem role existentes de forma determinística, nunca inventa
-    // conteúdo/distrator) em vez de só atribuir o modo; qualquer outra
-    // troca continua sendo a atribuição direta de sempre (normal_reversed/
-    // cloze não ganharam transição própria ainda -- fora do escopo destas
-    // subfases).
+    // Fase 6D.5 (ver CLAUDE.md, restrição 12) -- sair do modo cloze pra
+    // qualquer outro nunca deixa sintaxe {{cN::...}} presa num Field que o
+    // Card Type novo vai ler como texto puro -- reverte todas as marcas
+    // pro próprio texto (answer) ANTES de trocar o modo. Checado ANTES da
+    // atribuição, porque depois dela `cardGenerationMode` já não seria
+    // mais 'cloze'.
+    const wasCloze = ADMIN_FLASHCARDS_STATE.nativeCardState.cardGenerationMode === 'cloze';
+    if (wasCloze && newMode !== 'cloze') stripClozeMarksFromEditorState(ADMIN_FLASHCARDS_STATE.nativeCardState);
+    // Fase 6D.4a/6D.4b/6D.5 (ver CLAUDE.md) -- trocar PRA multiple_choice/
+    // type_answer/cloze passa pela transição dedicada de cada um
+    // (reaproveita Fields sem role existentes de forma determinística,
+    // nunca inventa conteúdo/distrator) em vez de só atribuir o modo;
+    // qualquer outra troca continua sendo a atribuição direta de sempre
+    // (normal_reversed não ganhou transição própria ainda -- fora do
+    // escopo destas subfases).
     if (newMode === 'multiple_choice') transitionToMultipleChoice(ADMIN_FLASHCARDS_STATE.nativeCardState);
     else if (newMode === 'type_answer') transitionToTypeAnswer(ADMIN_FLASHCARDS_STATE.nativeCardState);
+    else if (newMode === 'cloze') transitionToCloze(ADMIN_FLASHCARDS_STATE.nativeCardState);
     else ADMIN_FLASHCARDS_STATE.nativeCardState.cardGenerationMode = newMode;
     refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native' });
   });

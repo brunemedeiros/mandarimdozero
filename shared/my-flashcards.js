@@ -13,6 +13,10 @@
 //   - shared/roles.js              (hasActiveTeacherLink, fetchMyPlanTier)
 //   - shared/toast.js              (showToast)
 //   - shared/admin-flashcards.js   (openFlashcardResetConfirm, CARD_TYPE_UI_META -- carregado ANTES deste arquivo, mesma página, reaproveitado sem duplicar; ver Fase 6D.2 no CLAUDE.md)
+//   - shared/flashcard-mc-editor.js/flashcard-typeanswer-editor.js/flashcard-cloze-editor.js
+//     (transitionToMultipleChoice/transitionToTypeAnswer/transitionToCloze/
+//     stripClozeMarksFromEditorState/refreshNativeCardTypeBox -- carregados
+//     ANTES deste arquivo; ver Fase 6D.4a/6D.4b/6D.5 no CLAUDE.md)
 //   - fr/zh app.js                 (APP_KEY, CURRENT_USER via shared/auth.js)
 
 // Fase 5.1 (ver CLAUDE.md, "limite de cartões próprios") -- não existe
@@ -70,11 +74,15 @@ async function renderMyFlashcardsView(){
     wrap.innerHTML = `<p class="profile-empty-note">Entre na sua conta pra criar seus próprios cartões.</p>`;
     return;
   }
-  // Fase 6D.2 (ver CLAUDE.md) -- nativeCardState reinicia a cada render
-  // COMPLETO (carregamento inicial + depois de um submit bem sucedido),
-  // mesmo ciclo de vida do resto do formulário. Mesmo padrão de
-  // ADMIN_FLASHCARDS_STATE em shared/admin-flashcards.js.
-  MY_FLASHCARDS_STATE.nativeCardState = createNativeNoteEditorState({ cardGenerationMode: 'normal' });
+  // Fase 6D.2/6D.5 (ver CLAUDE.md) -- nativeCardState reinicia a cada
+  // render COMPLETO (carregamento inicial + depois de um submit bem
+  // sucedido), mesmo ciclo de vida do resto do formulário. Mesmo padrão
+  // de ADMIN_FLASHCARDS_STATE em shared/admin-flashcards.js. `APP_KEY` já
+  // é acessível aqui dentro (função chamada só pós-boot) -- diferente do
+  // admin (que mistura idiomas entre alunos selecionados), aqui a conta
+  // só tem UM idioma relevante, o do site, então `languageAppKey` é
+  // sempre `APP_KEY` diretamente, sem precisar de um sinal `anyMandarim`.
+  MY_FLASHCARDS_STATE.nativeCardState = createNativeNoteEditorState({ cardGenerationMode: 'normal', languageAppKey: APP_KEY });
   wrap.innerHTML = loadingHTML();
 
   const isMandarim = APP_KEY === 'mandarim';
@@ -370,10 +378,17 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
     // HTML, ver renderMyFlashcardsView).
     document.getElementById('my-flashcard-card-type-preview')?.addEventListener('change', (e) => {
       const newMode = e.target.value;
-      // Fase 6D.4a/6D.4b (ver CLAUDE.md) -- mesma transição dedicada de
-      // shared/admin-flashcards.js ao trocar PRA multiple_choice/type_answer.
+      // Fase 6D.5 (ver CLAUDE.md, restrição 12) -- mesma proteção de
+      // shared/admin-flashcards.js: sair do modo cloze nunca deixa sintaxe
+      // {{cN::...}} presa num Field de outro Card Type, checado ANTES da
+      // troca de modo.
+      const wasCloze = MY_FLASHCARDS_STATE.nativeCardState.cardGenerationMode === 'cloze';
+      if (wasCloze && newMode !== 'cloze') stripClozeMarksFromEditorState(MY_FLASHCARDS_STATE.nativeCardState);
+      // Fase 6D.4a/6D.4b/6D.5 (ver CLAUDE.md) -- mesma transição dedicada de
+      // shared/admin-flashcards.js ao trocar PRA multiple_choice/type_answer/cloze.
       if (newMode === 'multiple_choice') transitionToMultipleChoice(MY_FLASHCARDS_STATE.nativeCardState);
       else if (newMode === 'type_answer') transitionToTypeAnswer(MY_FLASHCARDS_STATE.nativeCardState);
+      else if (newMode === 'cloze') transitionToCloze(MY_FLASHCARDS_STATE.nativeCardState);
       else MY_FLASHCARDS_STATE.nativeCardState.cardGenerationMode = newMode;
       refreshNativeCardTypeBox(document.getElementById('my-flashcard-native-fields'), MY_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'my-native' });
     });

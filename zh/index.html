@@ -1078,6 +1078,28 @@ button.correct-feedback-continue{ background: var(--jade); }
 .mc-option.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.1); color: var(--ink); }
 .mc-continue-btn{ margin-top:14px; }
 
+/* ---------- Fase 6D.5: editor visual de Cloze nativo (ver CLAUDE.md) ----------
+   Zero cor nova -- reaproveita .mc-option/.cloze-blank (já calibrados) pras
+   marcas inline e .admin-select-link/.profile-edit-field-error pro resto. */
+.cloze-editor-toolbar{ margin:6px 0 8px; }
+.cloze-editor-text{
+  border:2px solid var(--paper-line); background: var(--paper-warm); color: var(--ink);
+  border-radius:12px; padding:12px 14px; font-size:15px; line-height:1.6;
+  min-height:64px; white-space:pre-wrap;
+}
+.cloze-editor-text:focus{ outline:none; border-color: var(--seal-red); }
+.cloze-editor-mark{
+  display:inline-block; border:2px solid var(--jade); background: rgba(58,115,89,0.12);
+  color: var(--ink); border-radius:8px; padding:0 6px; margin:0 1px; cursor:pointer;
+  font-weight:700;
+}
+.cloze-editor-mark:hover{ border-color: var(--seal-red); }
+.cloze-editor-mark-panel{
+  border:2px solid var(--paper-line); border-radius:12px; padding:12px 14px;
+  margin-top:10px; background: var(--paper);
+}
+.cloze-editor-mark-panel-actions{ display:flex; gap:14px; align-items:center; margin-top:8px; flex-wrap:wrap; }
+
 .stroke-btn{
   border:none; background: var(--paper-warm); color: var(--imperial-gold);
   width:26px; height:26px; border-radius:50%; cursor:pointer; font-size:13px;
@@ -3757,6 +3779,7 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../shared/flashcard-field-editor.js"></script>
 <script src="../shared/flashcard-mc-editor.js"></script>
 <script src="../shared/flashcard-typeanswer-editor.js"></script>
+<script src="../shared/flashcard-cloze-editor.js"></script>
 <script src="../shared/teacher-flashcards.js"></script>
 <script src="../shared/admin-flashcards.js"></script>
 <script src="../shared/teacher-class-logs.js"></script>
