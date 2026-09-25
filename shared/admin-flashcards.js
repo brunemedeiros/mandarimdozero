@@ -936,6 +936,17 @@ async function renderAdminFlashcardsView(){
           ${CARD_TYPE_UI_META.map(t => `<option value="${t.id}" ${t.id === 'normal' ? 'selected' : ''}>${t.label}</option>`).join('')}
         </select>
 
+        <!-- Fase 6D.3 da reestruturação Note/CardType/CardInstance (ver
+             CLAUDE.md) -- editor de Fields nativos reutilizável
+             (shared/flashcard-field-editor.js), conectado a
+             ADMIN_FLASHCARDS_STATE.nativeCardState.fields. Mesmo espírito
+             aditivo do seletor de Card Type acima (Fase 6D.2): não afeta o
+             cartão criado nesta subfase, o "Modo de prática" legado
+             continua sendo o único lido no submit. -->
+        <div class="section-label" style="margin:14px 0 4px;">Campos nativos (novo motor -- pré-visualização, Fase 6D)</div>
+        <p class="profile-edit-hint" style="margin-top:-2px;">Ainda não afeta o cartão criado -- só o novo estado nativo, em construção. Adicione/edite campos livremente pra testar.</p>
+        <div id="admin-flashcard-native-fields"></div>
+
         <div class="section-label" style="margin:18px 0 6px;">Conteúdo</div>
         <div id="admin-flashcard-content-main">
           <label class="profile-edit-label" id="admin-flashcard-front-label" for="admin-flashcard-front">Frente</label>
@@ -1091,6 +1102,13 @@ async function renderAdminFlashcardsView(){
   document.getElementById('admin-flashcard-card-type-preview')?.addEventListener('change', (e) => {
     ADMIN_FLASHCARDS_STATE.nativeCardState.cardGenerationMode = e.target.value;
   });
+
+  // Fase 6D.3 (ver CLAUDE.md) -- editor de Fields nativos reutilizável
+  // (shared/flashcard-field-editor.js). Renderizado/wireado UMA vez aqui
+  // (carregamento inicial + depois de um submit bem sucedido, mesmo ciclo
+  // de vida de nativeCardState em si) -- add/remove de Field re-renderiza
+  // só esta caixa (refreshNativeFieldsBox), nunca o form inteiro.
+  refreshNativeFieldsBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native' });
 
   wireFlashcardFieldValidation(wrap);
 

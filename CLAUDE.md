@@ -7909,3 +7909,263 @@ Nenhum passo manual pendente pra autora -- zero migração/mudança de
 schema nesta subfase (100% client-side). Próxima subfase (6D.3 -- editor
 de Field) só começa depois de autorização explícita, com este relatório
 já entregue antes de pedir luz verde.
+
+**Atualização: autorizada e entregue (2026-09-25), "Agora implemente
+SOMENTE a subfase 6D.3: criar o editor reutilizável de Fields nativos e
+conectá-lo ao estado nativo do editor. NÃO avance para 6D.4a, 6D.4b,
+6D.5, 6D.6, 6D.7 ou 6D.8" -- instrução veio com 21 restrições
+arquiteturais numeradas, todas cumpridas nesta entrega, ver abaixo.**
+
+## Fase 6D.3 -- editor de Fields nativos, reutilizável (texto + idioma,
+sem rich text/mídia/pinyin completos ainda)
+
+**Auditoria obrigatória feita antes de qualquer código** (pedido explícito
+no início da instrução): reli por completo `shared/flashcard-editor-
+state.js` (Fase 6D.1), `shared/admin-flashcards.js` (1219 linhas, inteiro
+-- inclusive a parte não lida numa auditoria anterior desta sessão),
+`shared/my-flashcards.js` (649 linhas, inteiro), `shared/teacher-
+flashcards.js`, `shared/own-flashcards.js`, e os trechos relevantes de
+`fr/app.js` (`buildCardFromTeacherFlashcard`/`buildCardFromSelfFlashcard`/
+`mergeTeacherFlashcardsIntoState`/`mergeSelfFlashcardsIntoState`/
+`addSelfFlashcardToState`/`updateSelfFlashcardStatusInState`/
+`removeSelfFlashcardFromState`) -- confirmando pontos que a auditoria da
+Fase 6D já tinha mapeado e que continuavam válidos: nenhum dos dois
+editores toca `shared/flashcard-model.js` hoje (escrevem só nas 12
+colunas legadas); o par `fields`/`card_generation_mode` (migration 045)
+existe na tabela mas nunca é escrito por código cliente; o discipline de
+"nunca re-renderizar o form inteiro por causa de seleção" (UX-fix 5) é
+crítico de preservar; o form de EDIÇÃO de um cartão já existente
+(`flashcardEditFormHTML`/`myFlashcardEditFormHTML`) é um caminho
+COMPLETAMENTE separado do de criação, e nunca foi tocado pela Fase 6D.2
+-- confirmado que continua assim nesta subfase também (ver decisão 16
+abaixo).
+
+**O que foi feito -- 1 arquivo novo, `shared/flashcard-field-editor.js`:**
+
+- **Opera DIRETAMENTE sobre o Field state da 6D.1** (`createFieldState()`
+  -- `{id, lang, role, content:{value}, audio, image, pinyinFieldId}`) --
+  nenhuma estrutura paralela (`frontText`/`backText`/`fieldValue`/
+  `fieldLanguage`) foi criada como fonte de verdade (restrição 3).
+- **`FIELD_LANG_OPTIONS`** -- lista fechada mas extensível dos idiomas já
+  conhecidos pelo motor (`fr`/`zh`/`zh-pinyin`/`pt-BR`, os mesmos valores
+  literais que `STUDY_LANG_FOR_APP_KEY`/`isStudyLanguageField`
+  (`shared/flashcard-model.js`) já usam) -- nunca inferidos a partir de
+  `APP_KEY`/direção (isso seria recriar `frontIsTargetLanguage`, restrição
+  6). Reutilizável nos dois idiomas do site sem nenhuma bifurcação por
+  arquivo (restrição 15).
+- **`renderFieldEditorHTML(field, index, opts)`/`renderFieldEditorListHTML(editorState, opts)`**
+  -- render puro (HTML string, sem side-effect), com `escapeHTML()` em todo
+  conteúdo interpolado (mesmo cuidado de segurança já documentado na
+  sessão "7 propostas" pra outros campos de flashcard). Mostra um
+  indicador textual (não editável) quando `field.audio`/`field.image`/
+  `field.pinyinFieldId` já existem -- nenhuma UI de upload/TTS/player/
+  pinyin completo (restrições 8/9/10).
+- **`addFieldToEditorState`/`removeFieldFromEditorState`/
+  `updateFieldInEditorState`/`cloneFieldIntoEditorState`** -- os 4
+  mutadores puros:
+  - `addFieldToEditorState` -- sempre um Field NOVO (id gerado por
+    `createFieldState`), adicionado ao FIM de `editorState.fields` --
+    `fields` continua sendo só a ordem estrutural/editorial, nunca
+    interpretada como frente/verso por este módulo (restrição 5).
+  - `removeFieldFromEditorState` -- remove por **ID**, nunca por índice
+    (restrição 4) -- os Fields restantes preservam id/conteúdo/lang/
+    role/audio/image/pinyinFieldId intactos.
+  - `updateFieldInEditorState` -- casa por id, faz um `Object.assign`
+    raso com o `patch` recebido -- campos NÃO mencionados no patch (ex:
+    editar só `content` nunca toca `audio`/`image`/`role`/
+    `pinyinFieldId`) continuam exatamente como estavam. É isto que
+    garante as restrições 8/9/10/7 (preservar áudio/imagem/pinyin/role
+    ao editar texto/idioma) -- **nunca cria um Field novo nem gera um id
+    novo** (restrição 4, "editar conteúdo NÃO cria novo ID").
+  - `cloneFieldIntoEditorState` -- o ÚNICO caso em que um id novo é
+    esperado (restrição 4, "clonar um Field deliberadamente DEVE criar um
+    novo ID") -- copia lang/role/content/audio/image do original, mas
+    **nunca copia `pinyinFieldId`** (apontaria pro Field ORIGINAL, não
+    faria sentido dentro do clone -- criaria uma referência cruzada entre
+    2 Fields que ninguém pediu).
+- **`wireFieldEditorList(container, editorState, onChange)`** -- liga o
+  DOM (`data-field-content`/`data-field-lang`/`data-field-remove`/
+  `data-field-add`) aos mutadores acima. `onChange(kind, fieldId)` avisa
+  quem integra sobre `'content'`/`'lang'`/`'remove'`/`'add'` -- decisão
+  explícita: edição de texto/idioma **NUNCA** dispara re-render (o próprio
+  input/select já reflete a mutação, e re-renderizar apagaria o que a
+  pessoa está digitando -- mesma disciplina da UX-fix 5, "toda mudança de
+  seleção = re-render completo = apaga o formulário" era exatamente o bug
+  daquela entrega); só `'add'`/`'remove'` precisam de re-render (a LISTA
+  de linhas mudou de tamanho).
+- **`refreshNativeFieldsBox(boxEl, editorState, opts)`** -- helper de
+  integração reutilizado pelos dois editores: renderiza a caixa + rewire,
+  reconstruindo a si mesma só quando `wireFieldEditorList` reporta
+  `'add'`/`'remove'`.
+- **`isValidFieldState(field)`** -- validação básica pedida na restrição
+  21 (`id` string não-vazia, `content.value` string) -- **não é chamada
+  por nenhum fluxo de submit nesta subfase** (submit continua 100%
+  legacy, restrição 18) -- fica pronta pra quando 6D.6+ precisar dela.
+
+**Integração nos 2 editores existentes** (restrição 17 -- conectar aos 2
+fluxos, sem misturar seleção de alunos/permissões/origem teacher-self com
+o componente genérico):
+
+- **`shared/admin-flashcards.js`** -- novo bloco "Campos nativos (novo
+  motor -- pré-visualização, Fase 6D)" logo abaixo do seletor de Card
+  Type da 6D.2, ANTES de "Conteúdo" (legacy). `refreshNativeFieldsBox(...)`
+  chamado 1x no fim de `renderAdminFlashcardsView()` (mesmo ciclo de vida
+  de `ADMIN_FLASHCARDS_STATE.nativeCardState` -- reset completo no
+  carregamento inicial e depois de um submit bem sucedido, nunca tocado
+  pelo re-render incremental de seleção de aluno/idioma).
+- **`shared/my-flashcards.js`** -- mesmo bloco, gated por `premium`
+  (mesmo critério do seletor de Card Type da 6D.2 -- sem isso, conta
+  grátis veria um editor de Fields sem nenhuma linha de contexto sobre
+  o que ele faz).
+- **`fr/index.html`/`zh/index.html`** -- `<script src="../shared/
+  flashcard-field-editor.js">` inserido logo depois de `flashcard-editor-
+  state.js` e antes de `teacher-flashcards.js` (nos dois idiomas, mesma
+  posição relativa).
+
+**Decisão explícita: sem auto-seed de Fields.** Um Note nativo novo
+começa com `fields:[]` (mesmo default já travado desde a 6D.1/6D.2) --
+NÃO populei 2 Fields em branco automaticamente pra `normal`/
+`normal_reversed`/`type_answer` (que estruturalmente precisam de 2 slots).
+Motivo: qualquer heurística de "quantos Fields por Card Type" seria regra
+de CARD TYPE, não de Field editor -- exatamente a mistura que a restrição
+14 proíbe ("Field editor = edição de Field; Card Type editor = regras do
+tipo; não colocar toda a lógica dos 5 tipos dentro do Field editor").
+Adicionar/remover Fields é 100% manual nesta subfase, via o botão "+
+Adicionar campo" -- funciona igual pra qualquer Card Type (2 pra normal, 1
+pra cloze, mais pra MC), sem o Field editor precisar saber qual é qual.
+
+**Decisão explícita: `role` fica de fora da UI, mas preservado no
+dado.** Nenhum controle de `role` foi renderizado nesta subfase (restrição
+7 -- "para Normal nesta fase, não inventar roles desnecessárias"; UI de
+`role` pra Múltipla Escolha/Type Answer é 6D.4a/6D.4b). Mas
+`updateFieldInEditorState` nunca apaga um `role` já presente ao editar
+texto/idioma (testado explicitamente, item 14 da suíte -- ver Testes
+abaixo) -- o dado sobrevive mesmo sem controle visível pra ele ainda.
+
+**Decisão explícita: form de EDIÇÃO de cartão legado NÃO ganhou este
+editor.** `flashcardEditFormHTML`/`myFlashcardEditFormHTML` continuam
+100% no caminho legacy, sem nenhum `<select id="...card-type-preview">`
+nem Field editor -- cumpre a restrição 16 por construção: **abrir um
+cartão legado pra editar nunca aciona nenhum código relacionado a
+`fields`/`nativeCardState`**, então não há como "converter automaticamente"
+nada -- o mecanismo simplesmente não existe nesse caminho ainda. Conversão
+formal (decisão (a) vs (b) já esboçada na auditoria da Fase 6D, seção 10)
+continua sendo trabalho da Fase 6D.8, não desta.
+
+**Decisão explícita: submit continua 100% legacy.** Nem
+`shared/admin-flashcards.js` nem `shared/my-flashcards.js` tiveram seus
+handlers de submit tocados -- continuam lendo só o radio "Modo de
+prática" legado e as 12 colunas de sempre (`createFlashcard()`/
+`createOwnFlashcard()`), exatamente como confirmado pela busca final
+abaixo (restrição 18: "o submit atual não deve começar a gravar fields/
+card_generation_mode só porque o Field editor existe"). O estado nativo
+(`nativeCardState.fields`) É atualizado em tempo real conforme a
+professora/aluna edita (confirmado via testes D/E/F do smoke, ver
+abaixo) -- só não é persistido em lugar nenhum ainda.
+
+**Testes realizados (26 itens pedidos, todos cobertos):**
+
+- `node --check` sem erro em `shared/flashcard-field-editor.js`,
+  `shared/admin-flashcards.js`, `shared/my-flashcards.js`.
+- **Suíte Node/vm nova `test_fase6d3_field_editor.js`, 65/65** -- criar
+  Field (id gerado, content/lang corretos); editar Field (conteúdo,
+  idioma) preservando id; adicionar Field (2 ids distintos); remover
+  Field por ID (não por índice, o restante intacto); reordenar Fields
+  (conjunto de ids não muda, só a ordem); clonar Field deliberadamente
+  (id NOVO, copia lang/role/content/audio, NUNCA copia pinyinFieldId);
+  Normal com múltiplos Fields (2 Fields, cardGenerationMode inalterado
+  pelo Field editor); normal_reversed sem duplicação (2 Fields
+  continuam 2, sem cardInstance/cardInstances/isReverse/reviewDirection
+  no editorState); áudio preservado através de 2 edições seguidas
+  (conteúdo + idioma); imagem preservada; pinyinFieldId preservado
+  (inclusive: remover um Field NÃO relacionado não quebra a referência de
+  outro); role preservado mesmo sem UI de role nesta fase; estado de UI
+  efêmero (`createEditorUiState`, 6D.1) confirmado DISJUNTO do Note editor
+  state; nenhum `note.audio`/`note.image` criado; nenhuma chamada a
+  `buildEngineCardsFromRow`/`interpretNoteFromRow`/`supabaseClient`/
+  `.insert(`/`.update(`/`.from(` no módulo (via leitura de código,
+  ignorando comentários); render puro escapa HTML perigoso; lista vazia
+  não quebra o render; validação básica (`isValidFieldState`) aceita
+  Field válido e rejeita `null`/sem id/sem `content.value` string; reset
+  produz `fields:[]` e NUNCA reaproveita um id de uma instância anterior;
+  FR (acentos/apóstrofo sobrevivem à edição); ZH (Field hanzi + Field
+  pinyin, os dois preservados juntos, `pinyinFieldId` sobrevive a uma
+  edição de `lang`).
+- **4 suítes anteriores re-executadas, 268/268 sem regressão**
+  (esperado -- nenhuma toca `shared/flashcard-field-editor.js`):
+  `test_fase4_engine.js` 32/32, `test_fase4d_regression.js` 30/30,
+  `test_fase5_generation.js` 33/33, `test_fase6b_native_notes.js` 74/74,
+  `test_fase6d1_editor_state.js` 99/99, `test_fase6d2_state.js` 31/31.
+- **Browser smoke, FR+ZH, `test_fase6d3_browser_smoke.js`, 46/46 checks**
+  -- editor abre (caixa de Fields existe, começa vazia, mostra mensagem de
+  estado vazio -- confirma a decisão de "sem auto-seed"); seletor de Card
+  Type da 6D.2 continua funcionando (regressão); Fields aparecem no DOM
+  via clique real no botão "+ Adicionar campo" (2 cliques -> 2 Fields, 2
+  linhas no DOM); conteúdo pode ser alterado via `input` real (reflete em
+  `nativeCardState.fields` de verdade); idioma pode ser alterado via
+  `change` real; **IDs permanecem ESTÁVEIS durante toda essa edição**
+  (confirmado comparando o conjunto de ids antes/depois de editar
+  conteúdo E idioma dos 2 Fields); o input editado continua sendo o
+  MESMO nó do DOM (nunca recriado por um re-render inteiro -- confirma
+  que `updateFieldInEditorState`/`wireFieldEditorList` não disparam
+  `refreshNativeFieldsBox` em edição de texto/idioma); remover 1 de 2
+  Fields funciona, o OUTRO preserva seu próprio conteúdo intacto; **mudar
+  pra `normal_reversed` NÃO duplica Fields** (continuam 1, sem
+  `cardInstance`/`cardInstances` no `nativeCardState`); **submit legacy
+  atual continua funcionando EXATAMENTE como antes** nos dois editores
+  (`createFlashcard`/`createOwnFlashcard` chamados 1x cada, cartão criado
+  de verdade) MESMO com o editor nativo tendo Fields soltos não
+  persistidos -- confirma que os 2 caminhos são genuinamente
+  independentes; `nativeCardState` reseta (`fields:[]`) depois de um
+  submit bem-sucedido (mesmo ciclo de vida de sempre); **Review continua
+  funcionando** -- um cartão de TRILHA real (`origin:'study'`, já
+  construído pelo boot normal a partir de `content.js`) foi colocado na
+  fila e `renderReviewView()` rodou sem erro, nos 2 idiomas (achado
+  técnico: o primeiro rascunho do teste tentava um card sintético
+  fr-shaped em zh, o que quebrou `audioBtnHTML()` -- **bug do script de
+  teste, não do código de produção** -- corrigido reaproveitando um card
+  real de `STATE.cards` em vez de inventar um shape à mão). **Zero erro
+  de console novo** em nenhum dos dois idiomas (excluindo os
+  `ERR_TUNNEL_CONNECTION_FAILED` pré-existentes do proxy de saída deste
+  sandbox, documentados em toda a sessão).
+- **Busca final (12 categorias pedidas)** -- todas as ocorrências de
+  `frontText`/`backText`/`frontLanguage`/`backLanguage`/`isReverse`/
+  `reviewDirection`/`nextCardDirection`/`frontIsTargetLanguage` no arquivo
+  novo estão SÓ dentro de comentários (confirmado programaticamente,
+  removendo linhas `//` antes de checar); zero `note.audio`/`note.image`
+  criados; zero chamada a `buildEngineCardsFromRow(`/`interpretNoteFromRow(`
+  (parênteses reais, não citação em comentário); zero `supabaseClient`/
+  `.insert(`/`.update(`/`.from(` no módulo inteiro (sem I/O de rede, sem
+  gravação de `fields`/`card_generation_mode` antes da 6D.6); zero
+  duplicação de Field pra `normal_reversed` (confirmado no smoke real
+  acima); zero id baseado em índice (`removeFieldFromEditorState`/
+  `updateFieldInEditorState` sempre casam por `f.id`, nunca por posição
+  do array). Diff completo de `shared/admin-flashcards.js`/
+  `shared/my-flashcards.js` inspecionado linha a linha -- só HTML aditivo
+  + 1 chamada a `refreshNativeFieldsBox(...)` por arquivo, nenhuma das 12
+  categorias proibidas presente nas linhas adicionadas.
+
+**O que ainda falta / não foi feito nesta subfase (de propósito, restrição
+25 -- escopo estrito):**
+- Nenhuma UI de `role` (prompt/answer/distractor) pra Múltipla Escolha --
+  6D.4a.
+- Nenhuma UI de Type Answer (promptFieldIndex/answerFieldIndex) -- 6D.4b.
+- Nenhuma seleção visual de texto pra marcar Cloze, incluindo múltiplas
+  marcas -- 6D.5.
+- Nenhum upload real de áudio/imagem, nenhum TTS, nenhum player -- só o
+  indicador textual de que já existem (quando existirem) e a garantia de
+  que editar o resto do Field não os apaga.
+- Nenhuma UI completa de pinyin/`compareAnswer` -- só a preservação de
+  `pinyinFieldId` através de edições.
+- Nenhuma persistência nativa (INSERT/UPDATE gravando `fields`/
+  `card_generation_mode` de verdade) -- 6D.6.
+- Nenhum Preview reaproveitando os 4 renderers da Fase 6C -- 6D.7.
+- Nenhuma conversão legacy→native ao abrir um cartão já existente pra
+  editar -- 6D.8.
+- Nenhuma migração de schema, nenhum passo manual pendente pra autora --
+  100% client-side, confirmado por `git status` limpo antes/depois além
+  dos arquivos já listados no escopo.
+
+Próxima subfase (6D.4a -- regras de Múltipla Escolha via `role`) só
+começa depois de autorização explícita da autora, com este relatório já
+entregue antes de pedir luz verde.

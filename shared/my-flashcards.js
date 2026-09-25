@@ -142,6 +142,15 @@ async function renderMyFlashcardsView(){
         <select id="my-flashcard-card-type-preview" class="profile-edit-input">
           ${CARD_TYPE_UI_META.map(t => `<option value="${t.id}" ${t.id === 'normal' ? 'selected' : ''}>${t.label}</option>`).join('')}
         </select>
+
+        <!-- Fase 6D.3 da reestruturação Note/CardType/CardInstance (ver
+             CLAUDE.md) -- mesmo editor de Fields nativos reutilizável de
+             shared/admin-flashcards.js (shared/flashcard-field-editor.js),
+             conectado a MY_FLASHCARDS_STATE.nativeCardState.fields. Gated
+             por premium, mesmo critério do seletor de Card Type acima. -->
+        <div class="section-label" style="margin:14px 0 4px;">Campos nativos (novo motor -- pré-visualização, Fase 6D)</div>
+        <p class="profile-edit-hint" style="margin-top:-2px;">Ainda não afeta o cartão criado -- só o novo estado nativo, em construção.</p>
+        <div id="my-flashcard-native-fields"></div>
         ` : ''}
         <div id="my-flashcard-content-main">
         <label class="profile-edit-label" id="my-flashcard-front-label" for="my-flashcard-front">Frente</label>
@@ -362,6 +371,11 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
     document.getElementById('my-flashcard-card-type-preview')?.addEventListener('change', (e) => {
       MY_FLASHCARDS_STATE.nativeCardState.cardGenerationMode = e.target.value;
     });
+
+    // Fase 6D.3 (ver CLAUDE.md) -- editor de Fields nativos reutilizável,
+    // mesmo padrão de shared/admin-flashcards.js. Só existe quando `premium`
+    // (mesmo gate do bloco HTML acima, ver renderMyFlashcardsView).
+    refreshNativeFieldsBox(document.getElementById('my-flashcard-native-fields'), MY_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'my-native' });
   }
 
   document.getElementById('my-create-flashcard-form').addEventListener('submit', async (e) => {
