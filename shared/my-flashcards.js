@@ -12,7 +12,7 @@
 //   - shared/own-flashcards.js (fetchMyOwnFlashcards, createOwnFlashcard, uploadOwnFlashcardMedia, setOwnFlashcardStatus, updateOwnFlashcardContent, deleteOwnFlashcardPermanently)
 //   - shared/roles.js              (hasActiveTeacherLink, fetchMyPlanTier)
 //   - shared/toast.js              (showToast)
-//   - shared/admin-flashcards.js   (openFlashcardResetConfirm -- carregado ANTES deste arquivo, mesma página, função global reaproveitada sem duplicar)
+//   - shared/admin-flashcards.js   (openFlashcardResetConfirm, CARD_TYPE_UI_META -- carregado ANTES deste arquivo, mesma página, reaproveitado sem duplicar; ver Fase 6D.2 no CLAUDE.md)
 //   - fr/zh app.js                 (APP_KEY, CURRENT_USER via shared/auth.js)
 
 // Fase 5.1 (ver CLAUDE.md, "limite de cartões próprios") -- não existe
@@ -25,7 +25,18 @@
 // ponto a substituir/estender, não reinventar do zero.
 const FREE_OWN_FLASHCARD_LIMIT = 20;
 
-const MY_FLASHCARDS_STATE = { editingCardId: null, _cardsCache: [] };
+// Fase 6D.2 (ver CLAUDE.md) -- nativeCardState: mesmo papel de
+// ADMIN_FLASHCARDS_STATE.nativeCardState (shared/admin-flashcards.js),
+// começando sempre em cardGenerationMode:'normal'. `CARD_TYPE_UI_META`
+// NÃO é redeclarado aqui -- admin-flashcards.js carrega antes desta view
+// na mesma página (fr/zh index.html) e já declara essa constante no
+// escopo global do documento; um segundo `const CARD_TYPE_UI_META` neste
+// arquivo lançaria SyntaxError de redeclaração assim que este <script>
+// rodasse (scripts separados compartilham o mesmo escopo léxico de
+// top-level pra let/const), quebrando a página inteira -- mesmo motivo
+// pelo qual openFlashcardResetConfirm já era só reaproveitada, nunca
+// duplicada (ver "Depende de" no topo do arquivo).
+const MY_FLASHCARDS_STATE = { editingCardId: null, _cardsCache: [], nativeCardState: createNativeNoteEditorState({ cardGenerationMode: 'normal' }) };
 
 // Grillado com a autora (ver CLAUDE.md, "rótulo do seletor de direção do
 // cartão") -- rótulos com o nome do idioma de verdade em vez de "idioma
@@ -59,6 +70,11 @@ async function renderMyFlashcardsView(){
     wrap.innerHTML = `<p class="profile-empty-note">Entre na sua conta pra criar seus próprios cartões.</p>`;
     return;
   }
+  // Fase 6D.2 (ver CLAUDE.md) -- nativeCardState reinicia a cada render
+  // COMPLETO (carregamento inicial + depois de um submit bem sucedido),
+  // mesmo ciclo de vida do resto do formulário. Mesmo padrão de
+  // ADMIN_FLASHCARDS_STATE em shared/admin-flashcards.js.
+  MY_FLASHCARDS_STATE.nativeCardState = createNativeNoteEditorState({ cardGenerationMode: 'normal' });
   wrap.innerHTML = loadingHTML();
 
   const isMandarim = APP_KEY === 'mandarim';
@@ -111,6 +127,22 @@ async function renderMyFlashcardsView(){
           <input type="radio" name="my-flashcard-direction" value="target-back"> ${myFlashcardDirectionLabels().nativeFirst}
         </label>
         </div>
+        ${premium ? `
+        <!-- Fase 6D.2 da reestruturação Note/CardType/CardInstance (ver
+             CLAUDE.md) -- seletor NOVO, aditivo, ao lado do "Modo de
+             prática" legado acima (que continua sendo o único lido na
+             hora de salvar). Mesmo padrão de shared/admin-flashcards.js:
+             só muta MY_FLASHCARDS_STATE.nativeCardState.cardGenerationMode,
+             zero efeito no cartão criado nesta subfase. Gated por premium,
+             mesmo critério do bloco "Modo de prática" acima -- sem isso,
+             uma conta grátis veria um seletor de 5 tipos sem nenhum dos 3
+             campos correspondentes na tela. -->
+        <div class="section-label" style="margin:14px 0 4px;">Card Type (novo motor -- pré-visualização, Fase 6D)</div>
+        <p class="profile-edit-hint" style="margin-top:-2px;">Seletor novo, ainda em construção -- não afeta o cartão criado. O "Modo de prática" acima continua sendo o que decide o cartão salvo de fato.</p>
+        <select id="my-flashcard-card-type-preview" class="profile-edit-input">
+          ${CARD_TYPE_UI_META.map(t => `<option value="${t.id}" ${t.id === 'normal' ? 'selected' : ''}>${t.label}</option>`).join('')}
+        </select>
+        ` : ''}
         <div id="my-flashcard-content-main">
         <label class="profile-edit-label" id="my-flashcard-front-label" for="my-flashcard-front">Frente</label>
         <textarea id="my-flashcard-front" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="${isMandarim ? 'ex: 图书馆' : 'ex: la bibliothèque'}"></textarea>
@@ -317,6 +349,18 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
         document.getElementById('my-flashcard-front-label').textContent = mode === 'mc' ? 'Pergunta/termo' : 'Frente';
         document.getElementById('my-flashcard-back-label').textContent = mode === 'mc' ? 'Resposta correta' : 'Verso';
       });
+    });
+
+    // Fase 6D.2 (ver CLAUDE.md) -- seletor NOVO, puramente aditivo: só
+    // muta MY_FLASHCARDS_STATE.nativeCardState.cardGenerationMode, nunca
+    // cria um campo paralelo/duplicado, não dispara chamada de rede, e não
+    // altera a visibilidade dos blocos de Conteúdo legados (controlados só
+    // pelo radio "Modo de prática" acima). O submit handler abaixo
+    // continua lendo só esse radio legado -- a persistência nativa é a
+    // Fase 6D.6. Só existe quando `premium` (mesmo gate do seletor no
+    // HTML, ver renderMyFlashcardsView).
+    document.getElementById('my-flashcard-card-type-preview')?.addEventListener('change', (e) => {
+      MY_FLASHCARDS_STATE.nativeCardState.cardGenerationMode = e.target.value;
     });
   }
 

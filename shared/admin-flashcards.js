@@ -168,7 +168,15 @@
 // mostrando o form de edição agora (null = nenhum); _cardsCache: última
 // lista de cartões buscada (buildFlashcardsCardsBoxHTML), pra achar o
 // objeto completo do cartão em edição sem precisar refazer a busca.
-let ADMIN_FLASHCARDS_STATE = { studentIds: new Set(), langFilter: 'all', _studentsCache: [], editingCardId: null, _cardsCache: [] };
+//
+// Fase 6D.2 (ver CLAUDE.md) -- nativeCardState: estado do editor nativo
+// (shared/flashcard-editor-state.js, Fase 6D.1) pro cartão sendo CRIADO
+// agora, começando sempre em cardGenerationMode:'normal' (nunca outro
+// default silencioso). Reiniciado a cada render COMPLETO do formulário
+// (renderAdminFlashcardsView), nunca mutado fora do listener do novo
+// seletor de Card Type -- puramente aditivo, sem efeito na criação real
+// de cartão nesta subfase (ver CARD_TYPE_UI_META acima).
+let ADMIN_FLASHCARDS_STATE = { studentIds: new Set(), langFilter: 'all', _studentsCache: [], editingCardId: null, _cardsCache: [], nativeCardState: createNativeNoteEditorState({ cardGenerationMode: 'normal' }) };
 
 // Prop 4 -- confirmação obrigatória antes de salvar uma edição (grillado
 // com a autora: editar reinicia o progresso de revisão, ela quer avisar
@@ -199,6 +207,25 @@ const FLASHCARD_RESOURCES_HINT = {
   mc: 'Imagem e áudio aparecem junto da pergunta, acima das opções de múltipla escolha. Nota é um lembrete só seu -- o aluno nunca vê.',
   cloze: 'Imagem e áudio aparecem junto da frase com a lacuna. Nota é um lembrete só seu -- o aluno nunca vê.',
 };
+
+// Fase 6D.2 da reestruturação Note/CardType/CardInstance (ver CLAUDE.md) --
+// os 5 Card Types "oficiais" do motor nativo (shared/flashcard-model.js,
+// CARD_GENERATION_MODES), só pra rotular o seletor novo abaixo. Esta
+// subfase introduz SÓ a seleção explícita -- o valor escolhido grava em
+// ADMIN_FLASHCARDS_STATE.nativeCardState.cardGenerationMode (novo, shared/
+// flashcard-editor-state.js, Fase 6D.1), nunca num campo paralelo/duplicado
+// (nada de `selectedCardType`/`cardType`/`type` soltos). Este seletor NÃO
+// afeta o que é de fato salvo nesta fase -- "Modo de prática" (os 3 radios
+// legados acima) continua sendo o único lido pelo submit handler; a
+// persistência nativa (gravar fields/card_generation_mode de verdade) é a
+// Fase 6D.6, o editor de Fields completo é a 6D.3+.
+const CARD_TYPE_UI_META = [
+  { id: 'normal', label: 'Normal' },
+  { id: 'normal_reversed', label: 'Normal com reverso' },
+  { id: 'multiple_choice', label: 'Múltipla escolha' },
+  { id: 'type_answer', label: 'Digite a resposta' },
+  { id: 'cloze', label: 'Completar a frase (Cloze)' },
+];
 
 // Grillado com a autora (ver CLAUDE.md, "rótulo do seletor de direção do
 // cartão") -- rótulo com o nome do idioma de verdade em vez de "idioma
@@ -774,6 +801,12 @@ async function renderAdminFlashcardsView(){
     wrap.innerHTML = `<p class="profile-empty-note">Esta tela é só pra administração da plataforma.</p>`;
     return;
   }
+  // Fase 6D.2 (ver CLAUDE.md) -- nativeCardState reinicia a cada render
+  // COMPLETO (carregamento inicial + depois de um submit bem sucedido),
+  // mesmo ciclo de vida do resto do formulário (frente/verso/modo voltam
+  // ao padrão). Nunca resetado por updateFlashcardsSelectionDependentUI()
+  // (re-render incremental por seleção de aluno/idioma) -- só aqui.
+  ADMIN_FLASHCARDS_STATE.nativeCardState = createNativeNoteEditorState({ cardGenerationMode: 'normal' });
   wrap.innerHTML = loadingHTML();
 
   const students = await fetchMyStudents();
@@ -889,6 +922,19 @@ async function renderAdminFlashcardsView(){
             <span id="admin-flashcard-direction-native-label">${adminFlashcardDirectionLabels(selectedStudents).nativeFirst}</span>
           </label>
         </div>
+
+        <!-- Fase 6D.2 da reestruturação Note/CardType/CardInstance (ver
+             CLAUDE.md) -- seletor NOVO, aditivo, ao lado do "Modo de
+             prática" legado acima (que continua existindo e continua
+             sendo o único lido na hora de salvar). Este seletor só existe
+             pra provar a seleção explícita de Card Type contra o novo
+             estado nativo (ADMIN_FLASHCARDS_STATE.nativeCardState) --
+             zero efeito no cartão criado nesta subfase. -->
+        <div class="section-label" style="margin:18px 0 4px;">Card Type (novo motor -- pré-visualização, Fase 6D)</div>
+        <p class="profile-edit-hint" style="margin-top:-2px;">Seletor novo, ainda em construção -- não afeta o cartão criado. O "Modo de prática" acima continua sendo o que decide o cartão salvo de fato.</p>
+        <select id="admin-flashcard-card-type-preview" class="profile-edit-input">
+          ${CARD_TYPE_UI_META.map(t => `<option value="${t.id}" ${t.id === 'normal' ? 'selected' : ''}>${t.label}</option>`).join('')}
+        </select>
 
         <div class="section-label" style="margin:18px 0 6px;">Conteúdo</div>
         <div id="admin-flashcard-content-main">
@@ -1032,6 +1078,18 @@ async function renderAdminFlashcardsView(){
       // continuar visível quando ele reaparecer num estado limpo.
       clearAllFlashcardFieldErrors();
     });
+  });
+
+  // Fase 6D.2 (ver CLAUDE.md) -- seletor NOVO, puramente aditivo: só muta
+  // ADMIN_FLASHCARDS_STATE.nativeCardState.cardGenerationMode, nunca cria
+  // um campo paralelo/duplicado (`selectedCardType`/`isReverse`/etc.), não
+  // dispara nenhuma chamada de rede/gravação, e não altera a visibilidade
+  // dos blocos de Conteúdo legados (esses continuam controlados só pelo
+  // radio "Modo de prática" de sempre, ver listener acima). O submit
+  // handler abaixo continua lendo só o radio legado -- a persistência
+  // nativa (gravar fields/card_generation_mode de verdade) é a Fase 6D.6.
+  document.getElementById('admin-flashcard-card-type-preview')?.addEventListener('change', (e) => {
+    ADMIN_FLASHCARDS_STATE.nativeCardState.cardGenerationMode = e.target.value;
   });
 
   wireFlashcardFieldValidation(wrap);

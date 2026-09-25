@@ -7730,3 +7730,182 @@ Nenhum passo manual pendente pra autora -- zero migração/mudança de
 schema nesta subfase. Próxima subfase (6D.2 -- seletor de Card Type) só
 começa depois de autorização explícita, com este relatório já entregue
 antes de pedir luz verde.
+
+**Atualização: autorizada e entregue (2026-09-25), "A Fase 6D.1 foi
+concluída e commitada em `b786e12`... Agora implemente SOMENTE a subfase
+6D.2: introduzir no editor a seleção explícita de Card Type. NÃO avance
+para a 6D.3."**
+
+## Fase 6D.2 -- seletor explícito de Card Type (aditivo, 5 tipos, zero
+efeito na persistência real ainda)
+
+**Escopo travado pela autora antes de codar**: os 5 Card Types oficiais
+são `normal`/`normal_reversed`/`multiple_choice`/`type_answer`/`cloze`
+(mesmos `CARD_GENERATION_MODES` do motor); o seletor escreve DIRETO em
+`editorState.cardGenerationMode`, nunca cria um campo paralelo
+(`selectedCardType`/`cardType`/`type`/`isReverse`); `normal_reversed`
+gera 2 CardInstances mas o editor continua criando só UMA Note (nunca
+duplica Fields, nunca cria 2 Notes, nunca monta CardInstance manualmente
+-- isso é geração, que já é do motor); default de cartão novo permanece
+`normal`, nunca `normal_reversed` silencioso; trocar de tipo nesta fase
+NÃO precisa reconstruir os Fields (sem editor de alternativas MC, sem UI
+de marcação Cloze, sem UI de Type Answer -- fica pra 6D.4a/6D.4b/6D.5);
+nenhum mecanismo de reversão via `frontIsTargetLanguage`/`isReverse`/
+`reviewDirection`/`nextCardDirection`; cartão legado nunca é
+auto-convertido só por abrir a edição, e mesmo selecionar um tipo
+só-nativo nesta fase não implementa a conversão (isso é 6D.8); controles
+legados existentes NÃO são removidos (documentar o que fica obsoleto, não
+apagar); seletor existe nos 2 editores (`admin-flashcards.js`/
+`my-flashcards.js`), compartilhando lógica onde genuinamente comum, sem
+forçar refactor grande; nenhuma mudança em `shared/flashcard-model.js`,
+geração de CardInstance, resolvers, renderers, Review ou FSRS; nenhuma
+persistência nativa (sem INSERT/UPDATE gravando `fields`/
+`card_generation_mode` de verdade -- isso é 6D.6); nenhum Preview, TTS,
+upload de imagem/áudio, rich text, seleção visual de Cloze/múltiplos
+Clozes, alternativas completas de Múltipla escolha, ou UI completa de
+Type Answer.
+
+**O que foi feito, só em `shared/admin-flashcards.js` +
+`shared/my-flashcards.js` (nenhum outro arquivo tocado, confirmado por
+`git status`/`git diff --stat`):**
+
+- **`CARD_TYPE_UI_META`** (novo, `shared/admin-flashcards.js`) -- array
+  com os 5 ids + rótulo, só pra popular o `<select>` novo. Declarado UMA
+  vez só (não redeclarado em `my-flashcards.js`, que já reaproveita
+  globais de `admin-flashcards.js` desde sempre -- `openFlashcardResetConfirm`
+  já documentava esse padrão) -- **achado técnico importante, corrigido
+  ANTES de rodar qualquer teste**: os dois arquivos são carregados como
+  `<script>` separados na MESMA página (fr/zh `index.html`, confirmado
+  via grep antes de escrever qualquer linha), e top-level `const`/`let`
+  de scripts diferentes que compartilham o mesmo escopo global de
+  documento colidem -- um segundo `const CARD_TYPE_UI_META` em
+  `my-flashcards.js` teria lançado `SyntaxError: Identifier ... has
+  already been declared` assim que esse `<script>` rodasse, quebrando a
+  página inteira. Corrigido projetando a constante como pertencente só a
+  `admin-flashcards.js` desde o início (mesmo padrão já usado por
+  `openFlashcardResetConfirm`), com o comentário do "Depende de" em
+  `my-flashcards.js` atualizado pra documentar essa dependência
+  explicitamente.
+- **`ADMIN_FLASHCARDS_STATE.nativeCardState`/
+  `MY_FLASHCARDS_STATE.nativeCardState`** (novo campo, nos 2 objetos de
+  estado) -- `createNativeNoteEditorState({cardGenerationMode:'normal'})`
+  (Fase 6D.1), sempre default `normal`. Reiniciado (nova instância) no
+  TOPO de `renderAdminFlashcardsView()`/`renderMyFlashcardsView()` --
+  mesmo ciclo de vida do resto do formulário (carregamento inicial +
+  depois de um submit bem sucedido), nunca resetado pelo re-render
+  incremental de seleção de aluno/idioma.
+- **Novo `<select id="admin-flashcard-card-type-preview">`/
+  `<select id="my-flashcard-card-type-preview">`** -- ADITIVO, inserido
+  logo abaixo do bloco "Idioma de cada lado" e ANTES de "Conteúdo",
+  claramente rotulado "Card Type (novo motor -- pré-visualização, Fase
+  6D)" com um hint explícito ("ainda não afeta o cartão criado... o Modo
+  de prática acima continua sendo o que decide o cartão salvo de fato").
+  Em `my-flashcards.js`, gated por `premium` -- mesmo critério do bloco
+  "Modo de prática" legado (conta free não vê nenhum dos dois, consistente
+  com o resto da tela).
+- **Listener de `change`** -- só muta `nativeCardState.cardGenerationMode`,
+  nada mais: não toca `#admin-flashcard-content-main`/`-cloze`, não
+  dispara `clearAllFlashcardFieldErrors()`, não chama rede/Supabase, não
+  interage de forma alguma com o radio "Modo de prática" legado.
+- **Submit handler NÃO TOCADO** -- continua lendo só
+  `wrap.querySelector('input[name="admin-flashcard-mode"]:checked')`/
+  `input[name="my-flashcard-mode"]:checked'` (radios legados), nunca
+  `nativeCardState`. Confirmado via teste (ver abaixo): selecionar
+  `cloze`/`normal_reversed` no seletor NOVO e submeter com o radio legado
+  ainda em `flip` cria um cartão comum de front/back, ignorando
+  completamente o valor do seletor novo.
+- **Form de EDIÇÃO (`flashcardEditFormHTML`/`myFlashcardEditFormHTML`)
+  não foi tocado** -- decisão de escopo: abrir um cartão legado pra
+  editar continua 100% no caminho legado de sempre, sem nenhum `<select
+  id="...card-type-preview">` nem leitura de `nativeCardState` -- "nunca
+  auto-converter ao abrir" cumprido por simplesmente não existir nenhum
+  código novo nesse caminho ainda, não por uma checagem condicional.
+
+**Testes realizados:**
+- `node --check` sem erro nos 2 arquivos.
+- **Suíte Node/vm nova `test_fase6d2_state.js`, 31/31** -- carregar
+  `admin-flashcards.js`+`my-flashcards.js` juntos no MESMO sandbox (mesma
+  ordem/mesmo escopo global de fr/zh `index.html`) não lança erro de
+  redeclaração; `CARD_TYPE_UI_META` cobre exatamente os 5
+  `CARD_GENERATION_MODES`; `nativeCardState` default `normal` nos 2
+  estados, `fields:[]`, sem `cardInstance`/`cardInstances`, sem
+  `isReverse`/`reviewDirection`/`frontIsTargetLanguage`; os 2
+  `nativeCardState` são instâncias DISTINTAS (mutar um não vaza pro
+  outro); os 5 ids do `CARD_TYPE_UI_META` são todos aceitos por
+  `createNativeNoteEditorState()` sem lançar, um id desconhecido continua
+  rejeitado (validação da 6D.1 não enfraquecida); confirmado por leitura
+  estática que `my-flashcards.js` de fato referencia `CARD_TYPE_UI_META`
+  dentro de `renderMyFlashcardsView()` (a dependência documentada é real,
+  não presumida).
+- **Smoke test de navegador real, FR+ZH** (`test_fase6d2_browser_smoke.js`,
+  Playwright) -- **achado técnico não trivial durante a escrita do
+  teste**: `window.CURRENT_USER = {...}` não funciona pra sobrescrever a
+  variável global `CURRENT_USER` (`let CURRENT_USER = null;`,
+  `shared/auth.js`) -- em JS de navegador, `let`/`const` top-level de um
+  script clássico criam um binding no registro léxico do documento,
+  SEPARADO do objeto `window`; escrever em `window.CURRENT_USER` só cria
+  uma propriedade nova no objeto `window`, que nenhuma referência de
+  identificador `CURRENT_USER` dentro do código do app enxerga -- a
+  atribuição precisa ser feita SEM o prefixo `window.` (`CURRENT_USER =
+  {...}`, resolução normal de identificador, que atualiza o binding
+  léxico certo). `isAdminUser`/`fetchMyStudents`/`createFlashcard`/etc.
+  (declarados via `function`) não sofrem desse problema (declaração de
+  função top-level sincroniza com o objeto global), mas troquei TODOS os
+  monkey-patches do teste pra atribuição sem `window.` por consistência
+  e segurança, não só o de `CURRENT_USER`. Confirmado nos 2 idiomas: (1)
+  seletor novo existe, começa em `normal`, options batem exatamente com
+  `CARD_GENERATION_MODES`; (2) legacy "Modo de prática" continua em
+  `flip` por padrão, blocos de Conteúdo legados visíveis normalmente; (3)
+  selecionar CADA um dos 5 tipos via o DOM real (`select.value=...` +
+  `dispatchEvent('change')`) atualiza SÓ `nativeCardState.
+  cardGenerationMode` -- radio/blocos legados nunca mudam por causa
+  disso, `fields` continua vazio, sem `cardInstance`, ZERO chamada de
+  rede (`createFlashcard`/`createOwnFlashcard` nunca chamados só por
+  trocar o seletor); (4) submit real com o seletor novo em `cloze`/
+  `normal_reversed` ainda cria um cartão comum via o radio legado --
+  persistência 100% desacoplada do seletor novo nesta fase; (5) render
+  COMPLETO pós-submit reinicia `nativeCardState` de volta pra `normal`,
+  seletor no DOM também volta pra `normal`; (6) abrir o form de edição de
+  um cartão legado existente não cria nenhum `<select
+  id="...card-type-preview">` dentro dele e não toca `nativeCardState`
+  (confere: JSON idêntico antes/depois de abrir a edição); (7) conta
+  FREE em "Meus Cartões" não tem nem o seletor novo nem o radio legado
+  (mesmo gate `premium` dos dois), `nativeCardState` continua existindo/
+  resetado mesmo sem UI visível pra ele. Zero `pageerror` novo em
+  qualquer um dos 2 idiomas -- só os mesmos `ERR_TUNNEL_CONNECTION_FAILED`
+  pré-existentes (proxy de saída deste sandbox bloqueando o CDN do
+  Supabase, documentado em toda a sessão).
+- **4 suítes anteriores + 6D.1 re-executadas, 169+99=268/268 sem
+  regressão**: `test_fase4_engine.js` 32/32, `test_fase4d_regression.js`
+  30/30, `test_fase5_generation.js` 33/33, `test_fase6b_native_notes.js`
+  74/74, `test_fase6d1_editor_state.js` 99/99.
+- **Busca final, os 12 padrões proibidos** -- todas as ocorrências de
+  `selectedCardType`/`cardType`/`isReverse` são só dentro de COMENTÁRIOS
+  explicando o que NÃO foi feito, nunca código executável;
+  `reviewDirection`/`nextCardDirection` -- zero ocorrências nos 2
+  arquivos; `frontIsTargetLanguage` -- só nos pontos LEGADOS
+  pré-existentes (radio de direção do submit real, nunca ligado a
+  `nativeCardState`); nenhuma chamada a `buildReversedCardInstancePair`/
+  `buildEngineCardsFromRow`/`interpretNoteFromRow`/`cardInstance` em
+  nenhum dos 2 arquivos (editor nunca cria CardInstance);
+  `createNativeNoteEditorState` chamado só nos 2 pontos esperados por
+  arquivo (declaração do estado + reset no render completo) -- nunca
+  duas Notes pra `normal_reversed`; nenhum `.insert(`/`.update(` novo nos
+  2 arquivos (persistência intocada); `git diff --stat -- shared/fsrs.js
+  fr/app.js zh/app.js` vazio (motor/renderers/FSRS 100% intocados);
+  `CARD_TYPE_UI_META` declarado exatamente 1 vez (`admin-flashcards.js`),
+  0 vezes em `my-flashcards.js`.
+
+**O que ainda falta / não foi feito nesta subfase (de propósito, restrição
+explícita da autora):** editor de Field reutilizável (texto+idioma+áudio+
+imagem+pinyin) -- 6D.3; UI de alternativas de Múltipla escolha via `role`
+-- 6D.4a; UI de Type Answer -- 6D.4b; seleção visual de texto pra marcar
+Cloze (incluindo múltiplas marcas) -- 6D.5; persistência nativa (INSERT/
+UPDATE gravando `fields`/`card_generation_mode` de verdade) -- 6D.6;
+Preview reaproveitando os 4 renderers da Fase 6C -- 6D.7; estratégia de
+conversão legacy→native ao editar um cartão já existente -- 6D.8.
+
+Nenhum passo manual pendente pra autora -- zero migração/mudança de
+schema nesta subfase (100% client-side). Próxima subfase (6D.3 -- editor
+de Field) só começa depois de autorização explícita, com este relatório
+já entregue antes de pedir luz verde.
