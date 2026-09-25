@@ -1101,13 +1101,15 @@ async function renderAdminFlashcardsView(){
   // nativa (gravar fields/card_generation_mode de verdade) é a Fase 6D.6.
   document.getElementById('admin-flashcard-card-type-preview')?.addEventListener('change', (e) => {
     const newMode = e.target.value;
-    // Fase 6D.4a (ver CLAUDE.md) -- trocar PRA multiple_choice passa pela
-    // transição dedicada (reaproveita Fields sem role existentes de forma
-    // determinística, nunca inventa distractor) em vez de só atribuir o
-    // modo; qualquer outra troca continua sendo a atribuição direta de
-    // sempre (normal_reversed/type_answer/cloze não ganharam transição
-    // própria ainda -- fora do escopo desta subfase, restrição 11).
+    // Fase 6D.4a/6D.4b (ver CLAUDE.md) -- trocar PRA multiple_choice/
+    // type_answer passa pela transição dedicada de cada um (reaproveita
+    // Fields sem role existentes de forma determinística, nunca inventa
+    // conteúdo/distrator) em vez de só atribuir o modo; qualquer outra
+    // troca continua sendo a atribuição direta de sempre (normal_reversed/
+    // cloze não ganharam transição própria ainda -- fora do escopo destas
+    // subfases).
     if (newMode === 'multiple_choice') transitionToMultipleChoice(ADMIN_FLASHCARDS_STATE.nativeCardState);
+    else if (newMode === 'type_answer') transitionToTypeAnswer(ADMIN_FLASHCARDS_STATE.nativeCardState);
     else ADMIN_FLASHCARDS_STATE.nativeCardState.cardGenerationMode = newMode;
     refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native' });
   });

@@ -370,9 +370,10 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
     // HTML, ver renderMyFlashcardsView).
     document.getElementById('my-flashcard-card-type-preview')?.addEventListener('change', (e) => {
       const newMode = e.target.value;
-      // Fase 6D.4a (ver CLAUDE.md) -- mesma transição dedicada de
-      // shared/admin-flashcards.js ao trocar PRA multiple_choice.
+      // Fase 6D.4a/6D.4b (ver CLAUDE.md) -- mesma transição dedicada de
+      // shared/admin-flashcards.js ao trocar PRA multiple_choice/type_answer.
       if (newMode === 'multiple_choice') transitionToMultipleChoice(MY_FLASHCARDS_STATE.nativeCardState);
+      else if (newMode === 'type_answer') transitionToTypeAnswer(MY_FLASHCARDS_STATE.nativeCardState);
       else MY_FLASHCARDS_STATE.nativeCardState.cardGenerationMode = newMode;
       refreshNativeCardTypeBox(document.getElementById('my-flashcard-native-fields'), MY_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'my-native' });
     });

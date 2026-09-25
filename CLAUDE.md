@@ -8457,3 +8457,231 @@ restrição 22 -- escopo estrito):**
 Próxima subfase (6D.4b -- Type Answer) só começa depois de autorização
 explícita da autora, com este relatório já entregue antes de pedir luz
 verde.
+
+**Atualização: autorizada e entregue (2026-09-25), "FASE 6D.4b —
+IMPLEMENTAÇÃO: EDITOR NATIVO DE TYPE ANSWER" -- instrução com 18 seções
+numeradas de restrições/pedidos, todas cumpridas nesta entrega, ver
+abaixo.**
+
+## Fase 6D.4b -- editor nativo de Type Answer ("Digite a resposta")
+
+**Achado arquitetural encontrado ANTES de codar, reportado aqui em vez de
+resolvido em silêncio (Seção 11/17 da própria instrução exigiam isso)**:
+a instrução pedia explicitamente `role:'prompt'`/`role:'answer'` pros 2
+Fields de Type Answer, no mesmo espírito de Multiple Choice (6D.4a). Reli
+o motor (`shared/flashcard-model.js`) ANTES de escrever qualquer linha e
+confirmei que `type_answer` é gerado de forma **POSICIONAL**
+(`interpretNativeNoteFromRow`, ramo `type_answer`:
+`promptFieldIndex:slots[0], answerFieldIndex:slots[1]`, o MESMO mecanismo
+de `contentFieldIndices`/slots que `normal` já usa) -- o motor NUNCA
+consulta `field.role` pra decidir o CardInstance de Type Answer, decisão
+já travada desde a Fase 6B ("só multiple_choice usa role, porque é o
+único tipo com mais de 2 Fields semanticamente distintos -- posição
+sozinha não bastaria pra desambiguar prompt/answer/1-3 distratores").
+**Resolução, sem alterar o motor** (restrição 11 da instrução: "não
+alterar o motor a menos que exista incompatibilidade objetiva e
+inevitável" -- não havia): marcar os 2 Fields com `role:'prompt'`/
+`role:'answer'` na camada de EDITOR é seguro e não-destrutivo -- o motor
+continua gerando o CardInstance só por posição/índice, `role` aqui é só
+metadado informativo pro EDITOR saber "qual Field já é a pergunta, qual
+já é a resposta" entre re-renders (mesmo princípio "role é apenas
+semântico; nunca determina direção" já travado na Fase 6B). Nenhuma
+mudança em `shared/flashcard-model.js` -- confirmado por `git status`/
+`git diff` no fim da entrega (só `shared/flashcard-typeanswer-editor.js`
+novo + 2 arquivos de integração + 2 `<script>` tags).
+
+**O que foi feito -- 1 arquivo novo, `shared/flashcard-typeanswer-editor.js`,
+mesmo padrão arquitetural de `shared/flashcard-mc-editor.js` (6D.4a),
+adaptado pras diferenças reais de Type Answer:**
+
+- **`TYPE_ANSWER_ROLES = ['prompt', 'answer']`** -- só 2 roles, nunca
+  distractors (Type Answer é estruturalmente idêntico a `normal`, 2 slots
+  de conteúdo -- só muda como a aluna responde, digitando em vez de virar
+  o cartão).
+- **`validateNativeTypeAnswerStructure(editorState)`** -- reutiliza, sem
+  duplicar, a validação estrutural do motor (`noteEditorStateToRow()` +
+  `validateNativeNoteRow()`, o MESMO transform que a 6D.6 vai usar pra
+  persistir, mesmo padrão de `validateNativeMultipleChoiceStructure`).
+  Checagens A MAIS, de tempo de edição, que o motor não faz: (a)
+  self-reference de `pinyinFieldId` (`f.pinyinFieldId === f.id`) -- o
+  motor só confirma que o id referenciado EXISTE na Note, e o próprio id
+  do Field também está nessa lista, então essa checagem é só nossa; (b)
+  Fields satélite de pinyin (apontados por `pinyinFieldId` de outro
+  Field) nunca contam como prompt/answer/campo sem papel -- são
+  complemento de outro Field, não uma pergunta/resposta adicional; (c)
+  exatamente 1 prompt, exatamente 1 answer entre os Fields NÃO-satélite;
+  (d) conteúdo não-vazio nos dois.
+- **`transitionToTypeAnswer(editorState)`** -- mesma disciplina
+  determinística de `transitionToMultipleChoice`: reaproveita os
+  primeiros 2 Fields SEM role (nunca sobrescreve um role já atribuído,
+  nunca inventa conteúdo, nunca copia o mesmo texto pros dois lados só
+  pra "tornar o estado válido"). Sem Fields suficientes, a estrutura fica
+  EXPLICITAMENTE incompleta até o usuário adicionar via "+ Criar campo
+  de pergunta"/"+ Criar campo de resposta" -- nunca preenchida
+  automaticamente.
+- **Sem UI de reatribuição de role** (restrição 4 -- "não invente uma
+  nova UX complexa") -- diferente de MC (que tem `promoteDistractorToAnswer`
+  porque existe um 3º papel, `distractor`, pra promover), Type Answer só
+  tem 2 papéis, cada um criado uma vez só; nenhuma ação de "trocar quem é
+  prompt/quem é answer" foi construída.
+- **Suporte a Field satélite de pinyin (`pinyinFieldId`), restrição 5** --
+  a Fase 6D.3 já tinha decidido não construir UI de ATRIBUIR pinyin ainda
+  (só preservar o que já existir, reconstruído de uma linha nativa real
+  via `createNativeNoteEditorStateFromRow`) -- esta subfase seguiu a
+  MESMA decisão: o render mostra o Field satélite quando ele já existe no
+  estado (numa seção própria "Pinyin (satélite de outro campo)",
+  removível, nunca contado como 3º prompt/answer), mas não introduz
+  nenhum botão novo de "associar pinyin" -- fora de escopo, mesmo
+  critério já usado pela 6D.3. `resolveTypeAnswerCardView()` (motor, não
+  tocado) já resolve `compareAnswerText` pro pinyin via o MESMO
+  mecanismo hanzi/pinyin que Normal já usa (`pinyinFieldIndex`) -- não um
+  canal de comparação próprio.
+- **`renderTypeAnswerEditorHTML`/`wireTypeAnswerEditor`/
+  `refreshTypeAnswerEditorBox`** -- mesmo padrão de MC: 2 seções
+  ("Pergunta/Prompt"/"Resposta esperada"), cada Field renderizado via o
+  MESMO `renderFieldEditorHTML()` da 6D.3 (nunca um editor textual
+  paralelo), re-renderiza só em mudança 'structure' (criar prompt/
+  answer -- nunca em edição de texto/idioma, mesma disciplina anti-UX-fix-5
+  já usada em toda a feature).
+- **`refreshNativeCardTypeBox()` estendido** com um 3º branch
+  (`type_answer` → `refreshTypeAnswerEditorBox`) -- a função é
+  REDEFINIDA neste arquivo (que carrega DEPOIS de
+  `shared/flashcard-mc-editor.js`, mesma posição de `<script>`), mantendo
+  o branch de `multiple_choice` intacto e o fallback pro Field editor
+  genérico (normal/normal_reversed/cloze) sem nenhuma mudança.
+
+**Integração nos 2 editores existentes** (`shared/admin-flashcards.js`/
+`shared/my-flashcards.js`) -- só o `if/else` do listener de `change` do
+`<select>` de Card Type ganhou um `else if (newMode === 'type_answer')
+transitionToTypeAnswer(...)`, entre o `if` de `multiple_choice` (6D.4a) e
+o `else` genérico (normal_reversed/cloze, sem transição própria ainda).
+Nenhuma outra linha tocada nesses 2 arquivos. `fr/index.html`/
+`zh/index.html` ganharam `<script src="../shared/flashcard-typeanswer-editor.js">`,
+logo depois de `flashcard-mc-editor.js`.
+
+**FR e ZH (restrição 13)**: um único arquivo compartilhado, sem nenhum
+branch por idioma -- a estrutura de Type Answer (prompt/answer + pinyin
+satélite opcional) não depende de idioma nenhum na camada de EDITOR; a
+diferença real (zh compara contra pinyin, fr contra o próprio texto) já
+é resolvida inteiramente pelo motor (`resolveTypeAnswerCardView`, não
+tocado), consumindo o `pinyinFieldId` que o editor só precisa preservar
+corretamente.
+
+**Confirmação explícita (restrição 6): nenhum estado paralelo de
+resposta** -- `editorState` nunca ganha `answer`/`expectedAnswer`/
+`correctAnswer`/`typeAnswerAnswer`/`pinyinAnswer`/`choices` (testado
+programaticamente, ver Testes abaixo); `editorState.fields` continua
+sendo a única fonte de verdade, exatamente como MC.
+
+**Legacy (restrição 8)**: nenhuma conversão automática -- abrir um
+cartão legacy continua no caminho 100% legado de sempre
+(`flashcardEditFormHTML`/`myFlashcardEditFormHTML`, não tocados por esta
+subfase); selecionar Type Answer no seletor novo entra no fluxo nativo em
+memória, mas o submit continua lendo só o radio "Modo de prática"
+legado -- persistência nativa é a 6D.6, não tocada aqui.
+
+**Testes Node/vm (`test_fase6d4b_typeanswer_editor.js`, novo, 62/62)** --
+os 19 cenários pedidos na restrição 14, todos cobertos: (1) válido 1
+prompt+1 answer; (2) prompt vazio rejeitado; (3) answer vazio (só
+espaços) rejeitado; (4) 2 prompts rejeitados; (5) 2 answers rejeitados;
+(6) role desconhecida (`distractor`) rejeitada pra type_answer; (7)
+pinyinFieldId válido aceito; (8) pinyinFieldId inexistente rejeitado; (9)
+pinyinFieldId auto-referenciado rejeitado; (10) Field satélite de pinyin
+não conta como prompt/answer adicional (testado com os 2 papéis + 1
+satélite = ainda válido, e confirmando que a mensagem de erro não cita
+"sem papel definido" pro satélite); (11) IDs de prompt/answer estáveis
+através de várias edições; (12) áudio no prompt e imagem no answer
+sobrevivem à edição de conteúdo, sem vazar entre os 2 Fields; (13)
+transição normal->type_answer não inventa conteúdo (3 sub-casos: reaproveita
+os 2 Fields existentes com texto original intacto; com só 1 Field
+disponível, vira só prompt e fica explicitamente inválido -- nunca
+inventa um 2º; idempotente, não sobrescreve um Field já roleado
+`distractor` de uma sessão MC anterior); (14) nenhuma propriedade
+paralela de resposta criada no editorState; (15) `fields` continua a
+única fonte de verdade (chaves do editorState conferidas uma a uma);
+(16) estado legacy nunca convertido -- `createLegacyNoteEditorStateFromRow`
++ clone + descarte nunca mutam a linha original; (17)
+`noteEditorStateToRow()` produz estrutura compatível com o pipeline
+nativo, validado com **round-trip REAL através do motor**
+(`buildEngineCardsFromRow`+`resolveCardContentView`, não só a validação
+estrutural) -- confirma que a linha produzida pelo editor realmente vira
+um CardInstance `type_answer` utilizável; (18) FR aceita Type Answer
+baseado em texto puro (`compareAnswerText` cai no próprio texto, sem
+pinyin); (19) ZH aceita Type Answer com `pinyinFieldId`
+(`displayAnswerText` continua sendo o hanzi, `compareAnswerText` resolve
+pro pinyin -- exatamente o que a aluna digita). Busca arquitetural
+embutida no próprio arquivo de teste confirma ausência de todo padrão
+proibido (`correctAnswer`/`expectedAnswer`/`typeAnswerAnswer`/
+`pinyinAnswer`/`choices`/`multipleChoiceOptions`/`frontIsTargetLanguage`/
+`reviewDirection`/`isReverse`/`nextCardDirection`/chamada direta a
+CardInstance) no código executável de `shared/flashcard-typeanswer-editor.js`,
+e ausência de qualquer chamada `supabaseClient`/`.insert(`/`.update(`/
+`.from(` (zero I/O). **8 suítes anteriores re-executadas, 455/455 sem
+regressão** (`test_fase4_engine.js` 32/32, `test_fase4d_regression.js`
+30/30, `test_fase5_generation.js` 33/33, `test_fase6b_native_notes.js`
+74/74, `test_fase6d1_editor_state.js` 99/99, `test_fase6d2_state.js`
+31/31, `test_fase6d3_field_editor.js` 65/65, `test_fase6d4a_mc_editor.js`
+91/91) -- total **517/517** incluindo esta subfase.
+
+**Browser smoke, FR+ZH (`test_fase6d4b_browser_smoke.js`, novo, 76/76
+checks)** -- os itens pedidos na restrição 15: abrir editor + selecionar
+Type Answer via o `<select>` real; estrutura vazia mostra os 2 botões de
+criar campo e é INVÁLIDA; criar prompt (aparece no DOM/state, ainda
+inválida por falta de answer); criar answer (aparece, ainda inválida por
+conteúdo vazio); editar prompt via `input` real (reflete no state, MESMO
+nó do DOM -- nunca recriado por um re-render inteiro); editar answer via
+`input` real (idem, estrutura fica VÁLIDA depois dos 2 preenchidos);
+áudio anexado ao prompt e imagem anexada ao answer sobrevivem a uma nova
+edição de conteúdo, sem vazar entre os 2 Fields; adicionar um Field
+"solto" (via estado direto, simulando um satélite futuro) aparece como
+"outro campo" removível, invalida a estrutura até ser removido/roleado, e
+removê-lo restaura a validade sem afetar os ids de prompt/answer;
+transição a partir de Normal reaproveita os MESMOS 2 Fields (ids
+idênticos antes/depois, inclusive numa 2ª ida-e-volta Normal↔Type
+Answer); Multiple Choice (6D.4a) continua funcionando sem quebra depois
+de toda a interação com Type Answer, e o dispatcher roteia certo entre
+os 2 (nunca os 2 editores no DOM ao mesmo tempo); editor legado ("Modo de
+prática", 3 radios) continua presente; submit legacy (Admin Flashcards e
+Meus Cartões) continua criando cartão exatamente como antes
+(`createFlashcardCalls===1`/`createOwnFlashcardCalls===1`), mesmo depois
+de toda a interação com o editor nativo, e `nativeCardState` reseta
+corretamente pro padrão (`fields:[]`/`normal`) só depois do submit bem
+sucedido; Review continua renderizando sem erro pra um cartão de trilha
+real (`origin:'study'`). **Zero erro de console novo** em nenhum dos dois
+idiomas (excluindo os `ERR_TUNNEL_CONNECTION_FAILED` pré-existentes do
+proxy de saída deste sandbox, documentados em toda a sessão).
+
+**Busca arquitetural final (restrição 16)** -- confirmada nos arquivos de
+produção reais (não só no teste): `grep` em
+`shared/flashcard-typeanswer-editor.js` por `correctAnswer`/
+`expectedAnswer`/`typeAnswerAnswer`/`pinyinAnswer`/`choices\[`/
+`multipleChoiceOptions`/`frontIsTargetLanguage`/`reviewDirection`/
+`isReverse`/`nextCardDirection` -- zero ocorrência em código executável
+(só 1 menção, dentro de um COMENTÁRIO explicando o que NÃO foi feito).
+`git diff`/`git status` confirmam que só 5 arquivos foram tocados no
+total (`shared/flashcard-typeanswer-editor.js` novo,
+`shared/admin-flashcards.js`, `shared/my-flashcards.js`, `fr/index.html`,
+`zh/index.html`) -- nenhuma linha em `fr/app.js`, `zh/app.js`,
+`shared/flashcard-model.js`, nenhum renderer da Fase 6C, `gradeCurrentCard`,
+FSRS, ou qualquer arquivo de schema/migration. O diff dos 2 arquivos de
+integração é mínimo (2-4 linhas cada, um `else if` a mais no listener de
+`change` + comentário atualizado).
+
+**O que ainda falta / não foi feito nesta subfase (de propósito,
+restrição 17 -- escopo estrito):**
+- Nenhuma persistência nativa (INSERT/UPDATE gravando `fields`/
+  `card_generation_mode` de verdade) -- 6D.6.
+- Nenhum Preview reaproveitando os renderers da Fase 6C -- 6D.7.
+- Nenhuma conversão legacy→native ao abrir um cartão de Type Answer já
+  existente pra editar -- 6D.8.
+- Nenhuma UI pra reatribuir role de prompt/answer -- não descrita como
+  necessária no grilling desta subfase (Type Answer só tem 2 papéis,
+  cada um criado uma vez só, sem 3º papel pra "promover").
+- Nenhuma migração de schema, nenhum passo manual pendente pra autora --
+  100% client-side, confirmado por `git status` limpo antes/depois além
+  dos 5 arquivos já listados no escopo.
+
+Próxima subfase (6D.5 -- Cloze visual) só começa depois de autorização
+explícita da autora, com este relatório já entregue antes de pedir luz
+verde. **Não avançar automaticamente**, conforme instrução explícita
+desta entrega.
