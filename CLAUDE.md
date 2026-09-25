@@ -6557,3 +6557,171 @@ internamente, mas o Review continua passando o mesmo elemento de sempre
 
 Escopo estrito respeitado -- nenhuma 6C.2/6C.3 iniciada. Parando aqui,
 aguardando revisão da autora antes de continuar.
+
+## Fase 6C.2 -- extração dos renderers de Multiple Choice e Type Answer
+
+Segunda subfase de código da Fase 6C, autorizada explicitamente pela
+autora depois de revisar a 6C.1 ("A Fase 6C.1 foi revisada e aprovada. [...]
+Agora implemente SOMENTE a Fase 6C.2"). Mesmo contrato aprovado na
+auditoria da Fase 6C -- `renderer(mountEl, card, localState, callbacks)`
+-- estendido agora pra Múltipla escolha e Digite a resposta, com uma
+lista de 7 proibições explícitas dadas pela autora antes de codar (nunca
+acessar `STATE` direto pra estado efêmero, nunca chamar
+`gradeCurrentCard()`/`reviewMoreCurrentCard()` direto, nunca executar
+FSRS/XP/save, nunca decidir direção de CardInstance) -- todas cumpridas,
+ver detalhamento abaixo.
+
+**Arquivos alterados**: só `fr/app.js` (+152/-63, confirmado por
+`git diff --stat`) e `zh/app.js` (+149/-60). Nenhum outro arquivo tocado
+-- `shared/flashcard-model.js`/`shared/admin-flashcards.js`/
+`shared/my-flashcards.js`/`shared/public-profile.js` continuam intactos,
+confirmado por `git status --short` mostrando só os 2 arquivos.
+
+**O que foi feito, nos dois idiomas (mudanças espelhadas):**
+
+1. **`renderMultipleChoiceCard(mountEl, card, localState, callbacks)`**
+   (novo, substitui `renderMultipleChoiceReviewCard(card)`) -- mesmo
+   corpo visual de sempre (opções embaralhadas, feedback certo/errado,
+   botão "Continuar"), agora lendo/escrevendo tudo em `localState` em vez
+   de `STATE.reviewMCPicked`/`STATE.reviewMCCorrect`/`card.mcOptions`
+   (os 3 eliminados por completo -- confirmado via grep, sem sobrar
+   nenhuma referência fora de comentário). `localState.shuffledOptions`
+   é gerado 1x na 1ª renderização desta EXIBIÇÃO (nunca mais mutação
+   direta de uma entrada real de `STATE.cards`) -- interação intermediária
+   (marcar uma opção) muta `localState.selectedIndex`/`answered`/
+   `wasCorrect` e o renderer se autochama com os mesmos 4 parâmetros, sem
+   envolver a sessão; só o clique em "Continuar" chama
+   `callbacks.onAnswered(wasCorrect, grade)`.
+2. **`renderTypeAnswerCard(mountEl, card, localState, callbacks)`** (novo,
+   substitui `renderTypeAnswerReviewCard(card)`) -- mesma lógica de
+   comparação/revelação/confirmar de sempre (`acceptedForms`,
+   `compareAnswerText`, teclinha de acento/tom), agora usando
+   `localState.typedAnswer`/`answered`/`wasCorrect` em vez de
+   `STATE.reviewClozeAnswered` -- a MESMA variável global que o Cloze usa,
+   compartilhada só por convenção ("os dois nunca coexistem no mesmo
+   cartão", nunca por desenho estrutural, ver auditoria da Fase 6C). Cloze
+   (`renderClozeReviewCard`, fora do escopo desta subfase) continua
+   intocado, usando `STATE.reviewClozeAnswered` exatamente como antes --
+   confirmado por teste dedicado que o TypeAnswer NUNCA mais toca esse
+   campo (ver Testes abaixo).
+3. **`renderReviewView()`** -- dispatch de `multiple_choice`/`type_answer`
+   passou a criar `STATE.reviewCardState` preguiçosamente (só quando
+   ausente, tipado por `kind`) e passar `callbacks.onAnswered` que chama
+   `gradeCurrentCard(grade)` -- exatamente o mesmo padrão já usado pro
+   dispatch de `normal` desde a 6C.1. Cloze permanece com seu dispatch
+   antigo (`renderClozeReviewCard(card)`, sem `localState`/`callbacks`).
+4. **`startReviewSession()`** -- removidas as 2 linhas que inicializavam
+   `STATE.reviewMCPicked`/`STATE.reviewMCCorrect` (não existem mais em
+   lugar nenhum do código); `STATE.reviewClozeAnswered = null` continua
+   (ainda usado pelo Cloze). Comentário da declaração de `STATE.reviewCardState`
+   (no objeto default do estado) atualizado pra documentar os 3 shapes
+   possíveis hoje.
+
+**Ajuste ao shape documentado na auditoria, avisado antes de codar (pedido
+explícito da autora, "se perceber que o shape precisa de um pequeno
+ajuste, documente")**: nenhum ajuste foi necessário -- os 2 shapes
+implementados batem exatamente com o que a auditoria da Fase 6C já tinha
+travado:
+```js
+// Multiple Choice
+{ kind: 'multiple_choice', shuffledOptions: null, selectedIndex: null, answered: false, wasCorrect: null }
+// Type Answer
+{ kind: 'type_answer', typedAnswer: '', answered: false, wasCorrect: null }
+```
+
+**Decisões arquiteturais desta subfase:**
+1. Mesmo padrão de auto-recursão da 6C.1 (Normal) -- interação
+   intermediária nunca sobe pra sessão, o renderer se rechama sozinho com
+   os mesmos 4 parâmetros. Confirma que o padrão estabelecido na 6C.1
+   generaliza sem ajuste pros outros 2 tipos, não precisou de nenhum
+   mecanismo novo.
+2. `localState.typedAnswer` guarda o texto bruto digitado (não usado por
+   nenhum consumidor hoje, mas parte do shape já travado na auditoria) --
+   mantido por fidelidade ao contrato aprovado, não removido por não ter
+   uso imediato.
+3. `mountEl.querySelector(...)` substituiu `document.getElementById(...)`
+   em toda função extraída (mesmo padrão já usado por `renderNormalCard`
+   na 6C.1) -- necessário pro contrato valer de verdade quando o Preview
+   (Fase 6D) passar um `mountEl` diferente de `#review-content`.
+
+**Testes realizados** (os 15 itens pedidos, numerados):
+1. **4 suítes Node completas** -- `test_fase4_engine.js` 32/32,
+   `test_fase4d_regression.js` 30/30, `test_fase5_generation.js` 33/33,
+   `test_fase6b_native_notes.js` 74/74 (**169/169**, sem regressão --
+   esperado, nenhuma exercita `fr/app.js`/`zh/app.js`).
+2. **Smoke test de navegador real, FR+ZH** -- novo
+   `test_fase6c2_mc_typeanswer_renderer.js` (Playwright), mesmo padrão de
+   stub/boot da 6C.1.
+3. **Múltipla escolha nativa** -- `STATE.reviewCardState` criado com
+   `kind:'multiple_choice'` na 1ª renderização, confirmado nos 2 idiomas.
+4. **1, 2 e 3 distratores** -- 3 cartões nativos com `role:'distractor'`
+   variando de 1 a 3, contagem de `.mc-option` confirmada em 2/3/4
+   (1 certa + N erradas) nos 2 idiomas.
+5. **Seleção -> feedback -> grade** -- clicar uma opção marca
+   `localState.answered`/`selectedIndex`/`wasCorrect`, aplica classe
+   `.correct`/`.incorrect` no botão certo (reconsultado do DOM vivo pós
+   auto-render, já que o clique original troca o `innerHTML`), revela o
+   botão "Continuar"; clicar "Continuar" confirma `reps`/`due` mudando de
+   verdade (FSRS aplicado via `gradeCurrentCard`).
+6. **`shuffledOptions` fora de `card`/`STATE.cards`** -- confirmado
+   `!('mcOptions' in card)` e `!('shuffledOptions' in card)` no
+   CardInstance real após toda a interação, só `STATE.reviewCardState.
+   shuffledOptions` existe.
+7. **Type Answer em francês** -- prompt="Où habites-tu ?", resposta
+   digitada comparada contra `compareAnswerText`, fluxo completo
+   validado.
+8. **Type Answer em chinês, `pinyinFieldId`** -- `compareAnswerText`
+   resolve pro pinyin (`"nǐ zhù zài nǎlǐ?"`), `displayAnswerText`
+   permanece hanzi (`"你住在哪里？"`) -- exatamente a distinção que o
+   motor (`resolveTypeAnswerCardView`, Fase 4a/6B, intocado) já garantia;
+   este teste confirma que o renderer extraído continua respeitando essa
+   distinção.
+9. **Resposta certa** -- MC (clicar a opção certa) e Type Answer (digitar
+   o `compareAnswerText` exato) -- `wasCorrect:true`, classe `.correct`
+   aplicada, `gradeCurrentCard(2)` disparado só após "Continuar".
+10. **Resposta errada** -- MC (clicar opção errada) e Type Answer (digitar
+    texto incorreto) -- `wasCorrect:false`, classe `.incorrect` aplicada,
+    `lapses` incrementado após "Continuar".
+11. **Revelação** -- Type Answer errado confirma que o texto certo
+    (`displayAnswerText`) aparece na tela assim que `answered:true`, antes
+    mesmo de "Continuar" ser clicado.
+12. **Interação antes do grade não altera FSRS/XP** -- confirmado
+    explicitamente nos 2 formatos: `due`/`reps` do CardInstance
+    idênticos ANTES e DEPOIS de selecionar uma opção MC ou verificar uma
+    resposta digitada (só mudam depois do clique em "Continuar").
+13. **`gradeCurrentCard()` só alcançado via callback/sessão** --
+    confirmado indiretamente pelo item 12 (nada muda até "Continuar") e
+    diretamente pelo `STATE.reviewIndex` só avançando após esse clique,
+    nunca na seleção/verificação em si.
+14. **Nenhum renderer paralelo de Preview** -- confirmado
+    `typeof renderMultipleChoiceReviewCard === 'undefined'` e
+    `typeof renderTypeAnswerReviewCard === 'undefined'` (funções antigas
+    removidas de verdade, não só substituídas por atalho) e que só existe
+    UMA função `renderMultipleChoiceCard`/`renderTypeAnswerCard` por
+    idioma (grep confirma, mesma disciplina da 6C.1).
+15. **Normal sem regressão** -- fluxo completo (revelar + graduar) rodado
+    de novo neste mesmo teste, `due`/`reps` mudando corretamente via
+    `renderNormalCard` (6C.1, intocado nesta subfase).
+
+Teste adicional, além dos 15 pedidos: confirmado que TypeAnswer NUNCA
+mais toca `STATE.reviewClozeAnswered` (setado a `null` simulando o que
+`startReviewSession()` faz, permanece `null` depois de 2 fluxos completos
+de TypeAnswer, certo e errado) -- prova concreta de que a dependência
+compartilhada por convenção com o Cloze (existente desde a Fase 4) foi
+eliminada de vez deste lado.
+
+Console: só os mesmos `ERR_TUNNEL_CONNECTION_FAILED` pré-existentes
+(proxy de saída deste sandbox bloqueando o CDN do Supabase, já
+documentado em toda a sessão), zero erro novo atribuível a este código,
+nos dois idiomas.
+
+**O que ainda falta / não foi feito nesta subfase (de propósito, restrição
+explícita da autora):** Cloze não foi tocado -- extração dele fica pra uma
+Fase 6C.3 futura, ainda não autorizada. Nenhum editor/Preview construído
+-- `renderMultipleChoiceCard`/`renderTypeAnswerCard` estão prontos pra
+serem chamados pelo Preview quando a Fase 6D existir, mas nada os chama
+ainda fora do Review. Áudio/imagem, banco/migration, Card Types e
+geração de cartão não foram tocados.
+
+Escopo estrito respeitado -- nenhuma 6C.3/Preview/editor iniciados.
+Parando aqui, aguardando revisão da autora antes de continuar.

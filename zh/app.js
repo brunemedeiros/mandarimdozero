@@ -941,18 +941,21 @@ const STATE = {
   currentUnitId: null,
   reviewQueue: [],
   reviewIndex: 0,
-  // Fase 6C.1 (ver CLAUDE.md) -- estado efêmero da exibição ATUAL do
-  // renderer de Normal (hoje só {kind:'normal', revealed}). Dono é a
-  // SESSÃO (renderReviewView cria, gradeCurrentCard/reviewMoreCurrentCard
-  // descartam) -- o renderer nunca lê/escreve isto por nome, só recebe a
-  // referência como parâmetro `localState`. Substitui o antigo
-  // `reviewShowingAnswer` (removido -- só era usado dentro do bloco de
-  // Normal, nunca por MC/Cloze/TypeAnswer, confirmado por grep antes de
-  // remover). MC/Cloze/TypeAnswer continuam com seus próprios campos
-  // soltos (reviewMCPicked/reviewMCCorrect/reviewClozeAnswered,
-  // inicializados em startReviewSession) até serem extraídos numa
-  // sub-fase futura -- fora do escopo desta. `hanziReviewShowingAnswer`
-  // (abaixo) é de OUTRA feature (revisão de hanzi), não tocado aqui.
+  // Fase 6C.1/6C.2 (ver CLAUDE.md) -- estado efêmero da exibição ATUAL do
+  // renderer em uso (shape varia por `kind`: {kind:'normal', revealed} |
+  // {kind:'multiple_choice', shuffledOptions, selectedIndex, answered,
+  // wasCorrect} | {kind:'type_answer', typedAnswer, answered, wasCorrect}).
+  // Dono é a SESSÃO (renderReviewView cria, gradeCurrentCard/
+  // reviewMoreCurrentCard descartam) -- o renderer nunca lê/escreve isto
+  // por nome, só recebe a referência como parâmetro `localState`.
+  // Substitui o antigo `reviewShowingAnswer` (Fase 6C.1) e
+  // `reviewMCPicked`/`reviewMCCorrect` (Fase 6C.2) -- cada um era usado
+  // exclusivamente dentro de um único renderer, confirmado por grep antes
+  // de remover. Cloze (renderClozeReviewCard) continua com seu próprio
+  // campo solto (`STATE.reviewClozeAnswered`, inicializado em
+  // startReviewSession) até ser extraído numa sub-fase futura (6C.3) --
+  // fora do escopo da 6C.2. `hanziReviewShowingAnswer` (abaixo) é de
+  // OUTRA feature (revisão de hanzi), não tocado aqui.
   reviewCardState: null,
   reviewSessionUnitFilter: null, // if set, review only this unit's cards
   hanziReviewQueue: [],
@@ -6352,16 +6355,16 @@ function startReviewSession(){
   const shouldShuffle = !!STATE.reviewSessionUnitFilter;
   STATE.reviewQueue = shouldShuffle ? shuffle(queue) : queue;
   STATE.reviewIndex = 0;
-  // Fase 6C.1 -- descarta o localState de Normal da sessão anterior (se
-  // houver); renderReviewView() cria um novo na primeira renderização.
+  // Fase 6C.1/6C.2 -- descarta o localState (Normal/Múltipla escolha/
+  // Digite a resposta) da sessão anterior, se houver; renderReviewView()
+  // cria um novo, tipado pro card atual, na primeira renderização. Fase
+  // 6C.2 eliminou STATE.reviewMCPicked/STATE.reviewMCCorrect (Múltipla
+  // escolha migrou 100% pra este slot único) -- não há mais nada pra
+  // zerar ali.
   STATE.reviewCardState = null;
-  // Fase 8a -- estado transitório do quiz de múltipla escolha (ver
-  // renderMultipleChoiceReviewCard); zera ao entrar numa sessão nova, caso
-  // a anterior tenha sido interrompida no meio de uma pergunta respondida.
-  STATE.reviewMCPicked = null;
-  STATE.reviewMCCorrect = null;
-  // Fase 8c -- mesmo espírito, pro estado transitório do cartão "completar
-  // a frase" (ver renderClozeReviewCard). null=não respondido ainda,
+  // Fase 8c -- estado transitório do cartão "completar a frase" (Cloze,
+  // ver renderClozeReviewCard -- ainda não extraído pro contrato de
+  // localState, fora do escopo da Fase 6C.2). null=não respondido ainda,
   // true/false=acerto/erro já registrado, aguardando "Continuar".
   STATE.reviewClozeAnswered = null;
   renderReviewView();
@@ -6396,30 +6399,43 @@ function gradeButtonsHTML(card){
   `;
 }
 
-// Fase 8a (ver CLAUDE.md) -- quiz de múltipla escolha pra um cartão
-// autorado pela professora com `choices`. Reaproveita gradeCurrentCard()
-// pra aplicar a nota FSRS -- acerto=Bom(2), erro=Errei(0) (grillado) --
-// então herda de graça toda a plumbing já existente (XP, streak,
-// requeue-em-erro, save, avanço de índice), sem reimplementar nada disso.
-// `card.mcOptions` é cacheado no próprio cartão (mesmo padrão de
-// `card.reviewDirection`, calculado 1x e reaproveitado entre re-renders
-// desta MESMA pergunta) -- embaralhar de novo a cada clique trocaria a
-// posição dos botões debaixo do dedo da aluna.
-function renderMultipleChoiceReviewCard(card){
-  const el = document.getElementById('review-content');
+// Fase 6C.2 (ver CLAUDE.md) -- renderer de "Múltipla escolha", extraído
+// pro contrato aprovado na Fase 6C: (mountEl, card, localState, callbacks)
+// -- mesmo espírito da extração de Normal (Fase 6C.1). Reutilizável tal e
+// qual pelo Preview do editor (Fase 6D, ainda não construída): o Preview
+// vai chamar esta MESMA função, só trocando localState (variável local do
+// editor, nunca STATE) e callbacks (onAnswered vira um no-op visual,
+// nunca gradeCurrentCard). O renderer não sabe -- nem precisa saber -- se
+// está em Review ou Preview.
+//
+// localState: {kind:'multiple_choice', shuffledOptions, selectedIndex,
+// answered, wasCorrect}. `shuffledOptions` substitui `card.mcOptions`
+// (Fase 8a) -- antes era mutação direta de uma entrada REAL de
+// STATE.cards (objeto durável, potencialmente serializado se alguém
+// esquecesse de limpar); agora é gerado 1x na 1ª renderização desta
+// EXIBIÇÃO e vive só no localState, que nunca é persistido. `view.
+// correctText`/`view.distractorTexts` (resolveCardContentView, Fase 4b,
+// intocado) sempre vêm do MESMO CardInstance -- a mesma pergunta sempre
+// produz as mesmas alternativas e a mesma resposta certa; só a ORDEM do
+// shuffle muda entre exibições.
+//
+// Interação intermediária (marcar uma opção): o PRÓPRIO renderer se
+// chama de novo com os mesmos 4 parâmetros -- sem envolver a sessão. Só
+// a transição FINAL (clicar "Continuar") chama callbacks.onAnswered.
+function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
   const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
   // Fase 4b -- lê Note/CardInstance via resolveCardContentView(), nunca
   // `card.back_hanzi`/`card.front_pinyin`/`card.back_trans`/`card.choices`
   // (não existem mais no card nativo).
   const view = resolveCardContentView(card);
 
-  if (!card.mcOptions){
-    card.mcOptions = shuffle([
+  if (!localState.shuffledOptions){
+    localState.shuffledOptions = shuffle([
       { text: view.correctText, correct: true },
       ...view.distractorTexts.map(text => ({ text, correct: false })),
     ]);
   }
-  const answered = STATE.reviewMCPicked !== null && STATE.reviewMCPicked !== undefined;
+  const answered = localState.answered;
   // isStudyLanguageField() -- direção já decidida pelo CardInstance
   // (view.prompt já é o campo certo); zh nunca inverte (Fase 0/1 da
   // auditoria: front_is_target_language nunca é lido aqui), então isto é
@@ -6428,7 +6444,7 @@ function renderMultipleChoiceReviewCard(card){
   const promptSpeakable = isStudyLanguageField(view.prompt, APP_KEY);
   const customAudioUrl = view.prompt.audioUrl || (view.correct && view.correct.audioUrl) || null;
 
-  el.innerHTML = `
+  mountEl.innerHTML = `
     <div class="review-progress">
       <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
       <div class="review-progress-count">${STATE.reviewIndex+1} / ${STATE.reviewQueue.length}</div>
@@ -6440,12 +6456,12 @@ function renderMultipleChoiceReviewCard(card){
       <div class="flashcard-pinyin pinyin">${escapeHTML(view.prompt.pinyinText || '')}</div>
     </div>
     <div class="mc-options">
-      ${card.mcOptions.map((opt, i) => {
+      ${localState.shuffledOptions.map((opt, i) => {
         let cls = 'mc-option';
         if (answered){
           cls += ' disabled';
           if (opt.correct) cls += ' correct';
-          else if (i === STATE.reviewMCPicked) cls += ' incorrect';
+          else if (i === localState.selectedIndex) cls += ' incorrect';
         }
         return `<button class="${cls}" data-idx="${i}"${answered ? ' disabled' : ''}>${escapeHTML(opt.text)}</button>`;
       }).join('')}
@@ -6453,26 +6469,30 @@ function renderMultipleChoiceReviewCard(card){
     ${answered ? `<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">Continuar</button>` : ''}
   `;
 
-  wireAudioButtons(el);
-  wireCustomAudioButtons(el);
-  if (promptSpeakable && canSpeakChinese(view.prompt.text)) speakChinese(view.prompt.text, el.querySelector('.audio-btn-lg'), true);
+  wireAudioButtons(mountEl);
+  wireCustomAudioButtons(mountEl);
+  if (promptSpeakable && canSpeakChinese(view.prompt.text)) speakChinese(view.prompt.text, mountEl.querySelector('.audio-btn-lg'), true);
 
   if (!answered){
-    el.querySelectorAll('.mc-option').forEach(btn => {
+    mountEl.querySelectorAll('.mc-option').forEach(btn => {
       btn.addEventListener('click', () => {
         const idx = parseInt(btn.dataset.idx);
-        STATE.reviewMCPicked = idx;
-        STATE.reviewMCCorrect = card.mcOptions[idx].correct;
-        renderMultipleChoiceReviewCard(card);
+        // Interação intermediária -- muta localState e o renderer se
+        // autochama, sem envolver a sessão (nunca STATE.reviewMCPicked/
+        // reviewMCCorrect, eliminados nesta fase).
+        localState.selectedIndex = idx;
+        localState.answered = true;
+        localState.wasCorrect = localState.shuffledOptions[idx].correct;
+        renderMultipleChoiceCard(mountEl, card, localState, callbacks);
       });
     });
   } else {
-    document.getElementById('mc-continue-btn').addEventListener('click', () => {
-      const wasCorrect = STATE.reviewMCCorrect;
-      card.mcOptions = null;
-      STATE.reviewMCPicked = null;
-      STATE.reviewMCCorrect = null;
-      gradeCurrentCard(wasCorrect ? 2 : 0);
+    mountEl.querySelector('#mc-continue-btn').addEventListener('click', () => {
+      // Transição FINAL -- sobe pra sessão via callback. A sessão (não
+      // este renderer) é quem descarta STATE.reviewCardState ao avançar
+      // STATE.reviewIndex (gradeCurrentCard), mesmo ciclo de vida já
+      // estabelecido pra Normal na Fase 6C.1.
+      callbacks.onAnswered(localState.wasCorrect, localState.wasCorrect ? 2 : 0);
     });
   }
 }
@@ -6555,20 +6575,25 @@ function renderClozeReviewCard(card){
   }
 }
 
-// Fase 4 (motor de tipos/templates, ver CLAUDE.md) -- "Digite a resposta",
-// tipo novo sem dado legado. Estrutura análoga ao Cloze acima (mesma
-// distinção hanzi revelado/pinyin comparado), só sem lacuna embutida numa
-// frase -- pergunta inteira, resposta digitada inteira. Reaproveita
-// STATE.reviewClozeAnswered (mesma variável do Cloze, nunca coexistem no
-// mesmo cartão) e as mesmas classes CSS -- zero CSS novo.
-function renderTypeAnswerReviewCard(card){
-  const el = document.getElementById('review-content');
+// Fase 6C.2 (ver CLAUDE.md) -- renderer de "Digite a resposta", extraído
+// pro contrato aprovado na Fase 6C: (mountEl, card, localState, callbacks).
+// Antes (Fase 4) reaproveitava STATE.reviewClozeAnswered -- a MESMA
+// variável global que o Cloze usa, só por convenção ("os dois nunca
+// coexistem no mesmo cartão", nunca por desenho estrutural). Agora tem seu
+// PRÓPRIO localState, estruturalmente independente -- Cloze continua
+// usando STATE.reviewClozeAnswered (renderClozeReviewCard, acima, fora do
+// escopo desta subfase -- extração dele fica pra uma 6C.3 futura). Mesma
+// distinção hanzi revelado/pinyin comparado de sempre, só a
+// leitura/escrita de "já respondeu?" muda de STATE pra localState.
+//
+// localState: {kind:'type_answer', typedAnswer, answered, wasCorrect}.
+function renderTypeAnswerCard(mountEl, card, localState, callbacks){
   const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
   const view = resolveCardContentView(card);
-  const answered = STATE.reviewClozeAnswered !== null && STATE.reviewClozeAnswered !== undefined;
+  const answered = localState.answered;
   const promptSpeakable = isStudyLanguageField(view.prompt, APP_KEY);
 
-  el.innerHTML = `
+  mountEl.innerHTML = `
     <div class="review-progress">
       <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
       <div class="review-progress-count">${STATE.reviewIndex+1} / ${STATE.reviewQueue.length}</div>
@@ -6580,7 +6605,7 @@ function renderTypeAnswerReviewCard(card){
       <div class="flashcard-pinyin pinyin">${escapeHTML(view.prompt.pinyinText || '')}</div>
       ${answered ? `
         <div class="divider-line"></div>
-        <span class="cloze-blank ${STATE.reviewClozeAnswered ? 'correct' : 'incorrect'}">${escapeHTML(view.displayAnswerText)}</span>
+        <span class="cloze-blank ${localState.wasCorrect ? 'correct' : 'incorrect'}">${escapeHTML(view.displayAnswerText)}</span>
       ` : ''}
     </div>
     ${!answered ? `
@@ -6592,30 +6617,34 @@ function renderTypeAnswerReviewCard(card){
     ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
   `;
 
-  wireAudioButtons(el);
-  wireCustomAudioButtons(el);
-  if (promptSpeakable && canSpeakChinese(view.prompt.text)) speakChinese(view.prompt.text, el.querySelector('.audio-btn-lg'), true);
+  wireAudioButtons(mountEl);
+  wireCustomAudioButtons(mountEl);
+  if (promptSpeakable && canSpeakChinese(view.prompt.text)) speakChinese(view.prompt.text, mountEl.querySelector('.audio-btn-lg'), true);
 
   if (!answered){
-    const inputEl = document.getElementById('cloze-review-input');
+    const inputEl = mountEl.querySelector('#cloze-review-input');
     inputEl.focus();
-    wirePinyinTonePicker(el.querySelector('.pinyin-tone-picker'), inputEl);
+    wirePinyinTonePicker(mountEl.querySelector('.pinyin-tone-picker'), inputEl);
     const strip = s => normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
     function verify(){
       if (inputEl.disabled) return;
       inputEl.disabled = true;
-      document.getElementById('cloze-review-verify-btn').disabled = true;
+      mountEl.querySelector('#cloze-review-verify-btn').disabled = true;
       const typed = strip(inputEl.value);
-      STATE.reviewClozeAnswered = acceptedForms(view.compareAnswerText).some(form => strip(form) === typed);
-      renderTypeAnswerReviewCard(card);
+      // Interação intermediária (verificar) -- muta localState e o
+      // renderer se autochama, sem envolver a sessão.
+      localState.typedAnswer = inputEl.value;
+      localState.answered = true;
+      localState.wasCorrect = acceptedForms(view.compareAnswerText).some(form => strip(form) === typed);
+      renderTypeAnswerCard(mountEl, card, localState, callbacks);
     }
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
-    document.getElementById('cloze-review-verify-btn').addEventListener('click', verify);
+    mountEl.querySelector('#cloze-review-verify-btn').addEventListener('click', verify);
   } else {
-    document.getElementById('cloze-continue-btn').addEventListener('click', () => {
-      const wasCorrect = STATE.reviewClozeAnswered;
-      STATE.reviewClozeAnswered = null;
-      gradeCurrentCard(wasCorrect ? 2 : 0);
+    mountEl.querySelector('#cloze-continue-btn').addEventListener('click', () => {
+      // Transição FINAL -- sobe pra sessão via callback, mesmo ciclo de
+      // vida de STATE.reviewCardState já estabelecido na Fase 6C.1.
+      callbacks.onAnswered(localState.wasCorrect, localState.wasCorrect ? 2 : 0);
     });
   }
 }
@@ -6693,8 +6722,32 @@ function renderReviewView(){
   // padrão abaixo sem checar nada.
   if (card.cardInstance){
     const cardTypeId = card.cardInstance.cardTypeId;
-    if (cardTypeId === 'multiple_choice'){ renderMultipleChoiceReviewCard(card); return; }
-    if (cardTypeId === 'type_answer'){ renderTypeAnswerReviewCard(card); return; }
+    // Fase 6C.2 -- Múltipla escolha/Digite a resposta seguem o mesmo
+    // padrão de criação preguiçosa de STATE.reviewCardState já
+    // estabelecido pra Normal na Fase 6C.1: só criado quando ausente
+    // (cartão novo, gradeCurrentCard/reviewMoreCurrentCard já zeraram ao
+    // avançar a fila), tipado (`kind`) pro card atual; re-renderizações
+    // do MESMO cartão reaproveitam a mesma referência.
+    if (cardTypeId === 'multiple_choice'){
+      if (!STATE.reviewCardState){
+        STATE.reviewCardState = { kind: 'multiple_choice', shuffledOptions: null, selectedIndex: null, answered: false, wasCorrect: null };
+      }
+      renderMultipleChoiceCard(el, card, STATE.reviewCardState, {
+        onAnswered: (wasCorrect, grade) => gradeCurrentCard(grade),
+      });
+      return;
+    }
+    if (cardTypeId === 'type_answer'){
+      if (!STATE.reviewCardState){
+        STATE.reviewCardState = { kind: 'type_answer', typedAnswer: '', answered: false, wasCorrect: null };
+      }
+      renderTypeAnswerCard(el, card, STATE.reviewCardState, {
+        onAnswered: (wasCorrect, grade) => gradeCurrentCard(grade),
+      });
+      return;
+    }
+    // Cloze fora do escopo da Fase 6C.2 -- continua no formato antigo
+    // (STATE.reviewClozeAnswered), extração fica pra uma 6C.3 futura.
     if (cardTypeId === 'cloze'){ renderClozeReviewCard(card); return; }
     // cardTypeId === 'normal' (inclusive uma das 2 metades de "Normal com
     // reverso", Fase 4a) cai no flip padrão abaixo.
