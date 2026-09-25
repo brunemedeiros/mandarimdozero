@@ -369,13 +369,18 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
     // Fase 6D.6. Só existe quando `premium` (mesmo gate do seletor no
     // HTML, ver renderMyFlashcardsView).
     document.getElementById('my-flashcard-card-type-preview')?.addEventListener('change', (e) => {
-      MY_FLASHCARDS_STATE.nativeCardState.cardGenerationMode = e.target.value;
+      const newMode = e.target.value;
+      // Fase 6D.4a (ver CLAUDE.md) -- mesma transição dedicada de
+      // shared/admin-flashcards.js ao trocar PRA multiple_choice.
+      if (newMode === 'multiple_choice') transitionToMultipleChoice(MY_FLASHCARDS_STATE.nativeCardState);
+      else MY_FLASHCARDS_STATE.nativeCardState.cardGenerationMode = newMode;
+      refreshNativeCardTypeBox(document.getElementById('my-flashcard-native-fields'), MY_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'my-native' });
     });
 
-    // Fase 6D.3 (ver CLAUDE.md) -- editor de Fields nativos reutilizável,
-    // mesmo padrão de shared/admin-flashcards.js. Só existe quando `premium`
+    // Fase 6D.3/6D.4a (ver CLAUDE.md) -- caixa "Campos nativos", mesmo
+    // padrão de shared/admin-flashcards.js. Só existe quando `premium`
     // (mesmo gate do bloco HTML acima, ver renderMyFlashcardsView).
-    refreshNativeFieldsBox(document.getElementById('my-flashcard-native-fields'), MY_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'my-native' });
+    refreshNativeCardTypeBox(document.getElementById('my-flashcard-native-fields'), MY_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'my-native' });
   }
 
   document.getElementById('my-create-flashcard-form').addEventListener('submit', async (e) => {

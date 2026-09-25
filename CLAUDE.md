@@ -8169,3 +8169,291 @@ abaixo) -- só não é persistido em lugar nenhum ainda.
 Próxima subfase (6D.4a -- regras de Múltipla Escolha via `role`) só
 começa depois de autorização explícita da autora, com este relatório já
 entregue antes de pedir luz verde.
+
+**Atualização: autorizada e entregue (2026-09-25), "FASE 6D.4a —
+MULTIPLE CHOICE... Agora implemente SOMENTE a subfase 6D.4a: editor
+nativo de Multiple Choice. NÃO avance para 6D.4b, 6D.5, 6D.6, 6D.7 ou
+6D.8" -- instrução veio com 25 seções numeradas de restrições/pedidos,
+todas cumpridas nesta entrega, ver abaixo.**
+
+## Fase 6D.4a -- editor nativo de Multiple Choice (via `role`, sem
+persistência/Preview/legacy migration)
+
+**Auditoria obrigatória feita antes de qualquer código**: reli
+`shared/flashcard-editor-state.js`, `shared/flashcard-field-editor.js`
+(6D.3), `shared/admin-flashcards.js`, `shared/my-flashcards.js`, e as
+seções de `shared/flashcard-model.js` relativas a Múltipla Escolha
+(`validateMultipleChoiceFields`, `validateNativeNoteRow`,
+`interpretNativeNoteFromRow` ramo `multiple_choice`,
+`buildNativeRuntimeFields`, `resolveCardField`,
+`resolveMultipleChoiceCardView`, e o ramo legado `else` de
+`interpretNoteFromRow` que lê `row.choices`). Achados:
+
+- **Como MC é representado hoje**: legado -- `choices` é array de STRINGS
+  planas (não Fields), gravado direto na coluna `teacher_flashcards.
+  choices`/`own_flashcards.choices`; o CardInstance legado grava
+  `promptFieldIndex: frontFieldIndex, correctFieldIndex: backFieldIndex,
+  distractors: row.choices` (reaproveitando os mesmos 2 Fields de
+  front/back que `normal` já usa, mais o array de choices cru). **Nativo
+  (já existente desde a Fase 6B, nunca alcançável por nenhuma UI até
+  agora)** -- `interpretNativeNoteFromRow()` já sabe montar o CardInstance
+  a partir de `role`: `promptFieldIndex`/`correctFieldIndex` vêm de
+  `fieldIndexByRole(rawFields, 'prompt'/'answer')`, e `distractors` é um
+  array de STRINGS extraído de `rawFields.filter(f => f.role ===
+  'distractor').map(f => f.content.value)` -- ou seja, **o shape do
+  CardInstance É IDÊNTICO entre legado e nativo** (`distractors` sempre
+  vira array de texto puro na hora de gerar o CardInstance, nunca uma
+  referência a Field) -- o renderer (`resolveMultipleChoiceCardView`,
+  `renderMultipleChoiceCard` da Fase 6C.2) não precisa (e não pode) saber
+  se veio de `choices` legado ou de Fields nativos com role.
+- **Como a resposta correta é identificada**: legado, por posição
+  (`correctFieldIndex = backFieldIndex`, sempre o "verso"); nativo, por
+  `role === 'answer'` -- já validado (`validateMultipleChoiceFields`,
+  Fase 6B) como exatamente 1 Field, nunca o mesmo Field que `role ===
+  'prompt'`.
+- **Cardinalidade já validada pelo motor**: `validateMultipleChoiceFields(fields)`
+  (shared/flashcard-model.js linha 133, já existente desde a Fase 6B, sem
+  nenhuma UI que a alcançasse até agora) -- exatamente 1 prompt, exatamente
+  1 answer, 1-3 distractors, chamada de dentro de `validateNativeNoteRow()`
+  sempre que `card_generation_mode==='multiple_choice'`.
+- **Nenhum bug real encontrado no pipeline** que impedisse o editor
+  nativo de funcionar -- a engine já suportava Múltipla Escolha nativa
+  corretamente, só faltava uma UI que a alcançasse. Nenhuma refatoração
+  preventiva foi feita em `shared/flashcard-model.js` (intocado nesta
+  subfase, confirmado por `git diff --stat`).
+- **Gap real identificado (não um bug, uma lacuna de escopo)**:
+  `validateNativeNoteRow()`/`validateMultipleChoiceFields()` NUNCA
+  validam CONTEÚDO de Field (só estrutura/cardinalidade/ids) -- um Field
+  de múltipla escolha com `content.value` vazio é estruturalmente válido
+  pro motor, mas pedagogicamente sem sentido. Resolvido nesta subfase
+  pela camada de validação PRÓPRIA do editor (ver abaixo), sem tocar o
+  motor.
+
+**O que foi feito -- 1 arquivo novo, `shared/flashcard-mc-editor.js`:**
+
+- **`MC_ROLES = ['prompt', 'answer', 'distractor']`**, `MC_MAX_DISTRACTORS
+  = 3`, `MC_MIN_DISTRACTORS = 1` -- os únicos 3 roles que este editor
+  atribui/reconhece (restrição explícita: "não introduzir outros roles
+  nesta subfase").
+- **`validateNativeMultipleChoiceStructure(editorState)`** -- validação
+  explícita, **reutilizável pela 6D.6**: converte `editorState` pra shape
+  de linha via `noteEditorStateToRow()` (já existente desde a 6D.1 --
+  literalmente o MESMO transform que a 6D.6 vai usar pra persistir) e
+  passa direto pra `validateNativeNoteRow()` do motor -- **nunca uma
+  segunda implementação** da regra de cardinalidade/pareamento/ids
+  únicos/pinyinFieldId, só reaproveita o que já existe. Duas checagens A
+  MAIS, que o motor não faz (tempo de edição, não geração de
+  CardInstance): **"todos os roles reconhecidos"** (qualquer Field com
+  role fora de prompt/answer/distractor, ou sem role nenhuma, numa Note
+  `multiple_choice` é tratado como estrutura AMBÍGUA/incompleta -- nunca
+  ignorado silenciosamente) e **"conteúdo válido"** (pergunta/resposta/
+  todo distrator precisam de texto não-vazio depois de `.trim()`).
+- **`transitionToMultipleChoice(editorState)`** (restrição 14, "normal →
+  multiple_choice") -- reaproveita, de forma DETERMINÍSTICA, os Fields
+  que já existiam: o 1º Field SEM role nenhuma vira `prompt` (se ainda
+  não houver nenhum), o 2º SEM role vira `answer` (se ainda não houver
+  nenhum) -- **nunca sobrescreve um role já definido** (um Field que já
+  era `distractor` de uma edição MC anterior permanece `distractor` numa
+  transição idempotente). **Nunca inventa distractor** -- se não sobrar
+  nenhum Field pra virar um, a estrutura fica EXPLICITAMENTE incompleta
+  (a validação reporta isso) até o usuário adicionar via "+ Adicionar
+  distrator". Achado durante os testes: numa transição a partir de um
+  Note zh de 3 Fields (hanzi + pinyin satélite + tradução), só os 2
+  primeiros SEM role viram prompt/answer -- o 3º fica "sobrando" sem
+  role, e a UI mostra isso numa seção própria "Outros campos" (ver
+  abaixo) em vez de escondê-lo silenciosamente.
+- **`addMultipleChoicePromptField`/`addMultipleChoiceAnswerField`/
+  `addMultipleChoiceDistractorField`** -- wrappers finos sobre
+  `addFieldToEditorState()` (6D.3, reaproveitado, nunca duplicado) que só
+  fixam `role`. `removeMultipleChoiceDistractorField` -- idem sobre
+  `removeFieldFromEditorState()`. Restrição 15 ("adicionar distractor
+  cria novo ID... remover remove só aquele Field... não renumerar IDs")
+  já é garantida de graça pelos próprios primitivos da 6D.3, sem código
+  novo.
+- **`promoteDistractorToAnswer(editorState, distractorFieldId)`**
+  (restrição 7 -- "trocar answer↔distractor altera só a semântica do
+  Field, não deve criar/deletar CardInstances") -- rebaixa a resposta
+  ATUAL (se existir) a `distractor` e promove o Field escolhido a
+  `answer`, **preservando os ids/conteúdo/lang/audio/image/pinyinFieldId
+  dos DOIS** -- só `role` troca. Funciona também quando ainda não existe
+  nenhuma resposta certa (equivale a "usar este distrator como resposta"
+  direto). Esta é a ÚNICA forma de mudar role que o editor oferece nesta
+  subfase -- não existe UI pra reatribuir `prompt` (não descrito nas
+  restrições, e não haveria caso de uso claro já que só 1 Field pode ter
+  esse role e ele é criado explicitamente via "+ Criar campo de
+  pergunta").
+- **`renderMultipleChoiceEditorHTML(editorState, opts)`** -- 3 seções
+  semanticamente rotuladas ("Pergunta/Prompt", "Resposta correta",
+  "Distratores (N/3)"), cada Field individual renderizado via o MESMO
+  `renderFieldEditorHTML()` da 6D.3 (nunca um editor textual paralelo,
+  restrições 3/4/6) -- prompt/answer com `removable:false` (únicos
+  criados via botão dedicado, nunca removidos diretamente -- só trocados
+  via `promoteDistractorToAnswer` no caso do answer), distratores com
+  botões próprios "✓ Marcar como resposta certa"/"🗑 Remover distrator".
+  Fields "sobrando" (role fora de prompt/answer/distractor, ex: o Field
+  de pinyin satélite numa transição zh) aparecem numa seção "Outros
+  campos (sem papel definido)" com o botão de remover GENÉRICO da 6D.3
+  (`data-field-remove`, reaproveitado, nunca um botão novo) -- nunca
+  escondidos silenciosamente, já que esconder um Field que ainda existe
+  no estado deixaria a mensagem de validação incompreensível. Rodapé
+  mostra a mensagem de `validateNativeMultipleChoiceStructure()` (✓
+  completo, ou o erro específico).
+- **`wireMultipleChoiceEditor(container, editorState, onChange)`** --
+  reaproveita `wireFieldEditorList()` (6D.3) pra TODO conteúdo/idioma
+  editável aqui dentro (nunca reimplementa), mais os 5 botões próprios
+  (`data-mc-add-prompt`/`-add-answer`/`-add-distractor`/
+  `-remove-distractor`/`-promote-distractor`). `onChange(kind)` distingue
+  `'content'`/`'lang'` (nunca re-renderiza -- mesma disciplina da UX-fix
+  5/6D.3, preserva foco durante digitação) de `'structure'` (add/remove/
+  promote -- SEMPRE re-renderiza, porque o conjunto de linhas visíveis ou
+  a mensagem de validação mudou).
+- **`refreshMultipleChoiceEditorBox(boxEl, editorState, opts)`** --
+  helper de integração, mesmo padrão de `refreshNativeFieldsBox` (6D.3).
+- **`refreshNativeCardTypeBox(boxEl, editorState, opts)`** -- dispatcher
+  único que os 2 editores chamam pra desenhar a caixa "Campos nativos":
+  Múltipla Escolha → UI estruturada desta subfase; qualquer outro Card
+  Type → o Field editor genérico da 6D.3 (`refreshNativeFieldsBox`), sem
+  nenhuma mudança. Vive neste arquivo MC-específico (não em
+  `flashcard-field-editor.js`) de propósito -- o Field editor genérico
+  continua sem NENHUM conhecimento de Card Type (restrição 14), é este
+  arquivo que sabe "pra multiple_choice, use a UI estruturada; pro resto,
+  caia no genérico".
+
+**Integração em `shared/admin-flashcards.js`/`shared/my-flashcards.js`**
+(restrição 17, "integrar FR/ZH"): o listener de `change` do `<select>`
+de Card Type (já existente desde a 6D.2) passou a, ao selecionar
+`multiple_choice`, chamar `transitionToMultipleChoice()` em vez de só
+atribuir o modo direto (qualquer OUTRA troca continua sendo a atribuição
+simples de sempre -- `normal_reversed`/`type_answer`/`cloze` não
+ganharam transição própria, fora do escopo, restrição 11), e a caixa
+"Campos nativos" passou a ser desenhada por `refreshNativeCardTypeBox()`
+em vez de `refreshNativeFieldsBox()` direto (2 call sites por arquivo:
+o listener de `change` e o render inicial). `my-flashcards.js` continua
+gated por `premium` (mesmo critério de sempre). **Trocar de Card Type
+NUNCA apaga Fields** -- confirmado explicitamente no browser smoke (ver
+abaixo): voltar de `multiple_choice` pra `normal` preserva os 3 Fields
+já criados, só muda qual UI os mostra (o Field editor genérico da 6D.3
+passa a listá-los, sem role nenhum sendo interpretado como frente/verso
+por ele).
+
+**Decisão explícita: sem UI pra reatribuir o role de `prompt`.** As
+restrições descrevem só a troca `answer↔distractor` (via
+`promoteDistractorToAnswer`) -- não há descrição de um caso de uso pra
+"trocar qual Field é a pergunta" (só 1 pode existir, criado
+explicitamente). Não inventei essa ação nesta subfase.
+
+**Decisão explícita: `choices` legado continua 100% intocado.**
+`shared/teacher-flashcards.js`/`shared/own-flashcards.js`
+(`createFlashcard`/`createOwnFlashcard`, coluna `choices`) e o submit
+handler de ambos os editores não foram tocados -- nenhuma linha nova é
+gravada com `fields`/`card_generation_mode` por causa desta subfase
+(confirmado no browser smoke: `createFlashcard`/`createOwnFlashcard`
+continuam sendo chamados exatamente 1x por submit, só com as colunas
+legadas de sempre). Abrir um cartão de múltipla escolha LEGADO pra editar
+continua no caminho 100% legacy (`flashcardEditFormHTML`/
+`myFlashcardEditFormHTML`, não tocados) -- sem auto-conversão, sem
+destruir `choices`, exatamente como a restrição 10 exige.
+
+**Testes realizados:**
+
+- `node --check` sem erro em `shared/flashcard-mc-editor.js`,
+  `shared/admin-flashcards.js`, `shared/my-flashcards.js`.
+- **Suíte Node/vm nova `test_fase6d4a_mc_editor.js`, 91/91** -- os 11
+  cenários de ESTRUTURA pedidos (1+1+1/1+1+2/1+1+3 válidos; 0 e 4
+  distractors inválidos; 0 e 2 prompts inválidos; 0 e 2 answers
+  inválidos; role desconhecido inválido; ids duplicados inválido -- mais
+  3 extras: conteúdo vazio em prompt/answer/distractor invalida;
+  pinyinFieldId quebrado invalida via reuso do motor; Card Type errado
+  nunca "aprova" via esta validação); os 13 cenários de EDITOR (criar MC
+  do zero; editar prompt/answer; adicionar/editar/remover distractor;
+  preservar IDs através de várias operações; `promoteDistractorToAnswer`
+  nos dois sentidos -- com e sem resposta prévia, preservando conteúdo/
+  ids dos 2 Fields envolvidos, nunca criando CardInstance/isReverse/
+  reviewDirection; mudar idioma sem afetar role/direção; preservar
+  audio/image/pinyinFieldId através de edições de conteúdo;
+  `transitionToMultipleChoice` a partir de `normal` fr -- reaproveita 2
+  Fields deterministicamente, nunca inventa distractor, estrutura fica
+  explicitamente incompleta; mesma transição em zh com 3 Fields --
+  confirma que o Field de pinyin satélite fica "sobrando" sem role
+  (testado isolando a checagem de cardinalidade da checagem de role,
+  completando com 1 distractor válido antes de checar a mensagem
+  específica); transição idempotente não sobrescreve role já definida;
+  "múltipla escolha existente → edição" via
+  `createNativeNoteEditorStateFromRow()` real -- reconstrói ids/lang/
+  role/audio/image corretamente, `revision` não incrementa só por
+  carregar; reset produz `normal`/`fields:[]`, nunca reaproveita id de
+  sessão anterior); os 10 itens de ARQUITETURA (fields é a única fonte
+  de verdade -- nenhum `choices[]`/`multipleChoiceOptions`/
+  `correctChoice` no editorState; nenhum cardInstance/cardInstances;
+  nenhum isReverse/reviewDirection/frontIsTargetLanguage; nenhum
+  note.audio/note.image; busca por código, ignorando comentários,
+  confirma zero chamada real a `buildEngineCardsFromRow(`/
+  `interpretNoteFromRow(`/`supabaseClient`/`.insert(`/`.update(`/
+  `.from(`/id-por-índice); mais os testes de REVISION (mudar prompt/
+  adicionar distractor/remover distractor/alterar role via promote/
+  alterar idioma -- todos detectáveis por `noteEditorStateChanged()`
+  sem nenhum código novo, só por reaproveitar os mesmos primitivos da
+  6D.3; clone idêntico não conta como mudança).
+- **7 suítes anteriores re-executadas, 334/334 sem regressão** (esperado
+  -- nenhuma toca `shared/flashcard-mc-editor.js`): `test_fase4_engine.js`
+  32/32, `test_fase4d_regression.js` 30/30, `test_fase5_generation.js`
+  33/33, `test_fase6b_native_notes.js` 74/74, `test_fase6d1_editor_
+  state.js` 99/99, `test_fase6d2_state.js` 31/31,
+  `test_fase6d3_field_editor.js` 65/65.
+- **Browser smoke, FR+ZH, `test_fase6d4a_browser_smoke.js`, 62/62
+  checks** -- selecionar Múltipla Escolha via o `<select>` real; editor
+  de MC aparece no DOM (`[data-mc-editor]`); estrutura vazia mostra
+  botões de criar prompt/answer e "Distratores (0/3)"; criar prompt via
+  clique real -> aparece no state E no DOM; criar answer -> aparece;
+  adicionar distractor -> aparece, "Distratores (1/3)"; editar conteúdo
+  via `input` real reflete no state, o input editado continua sendo o
+  MESMO nó do DOM (nunca recriado); mínimo/máximo respeitados -- 3
+  distractors escondem o botão "+ Adicionar", remover 1 volta pra 2/3 e
+  reexibe o botão, IDs dos distratores restantes permanecem estáveis;
+  `promoteDistractorToAnswer` via clique real -- o distrator promovido
+  vira answer, a resposta antiga vira distrator, sempre exatamente 1
+  answer depois; editor legado ("Modo de prática", 3 radios) continua
+  presente/intacto; **voltar pra `normal` troca a caixa pro Field editor
+  genérico SEM apagar os 3 Fields já criados** (achado confirmado
+  explicitamente: trocar de Card Type nunca destrói dado); submit legacy
+  continua criando cartão exatamente como antes (`createFlashcard`
+  chamado 1x, `nativeCardState` reseta pra `fields:[]`/`normal` só
+  DEPOIS do submit, mesmo ciclo de vida de sempre); mesmo fluxo completo
+  replicado em "Meus Cartões" (gated por premium); **Review continua
+  funcionando** (cartão de trilha real renderizado sem erro, nos 2
+  idiomas). **Zero erro de console novo** em nenhum dos dois idiomas
+  (excluindo os `ERR_TUNNEL_CONNECTION_FAILED` pré-existentes do proxy de
+  saída deste sandbox).
+- **Busca final (14 categorias pedidas)** -- `choices`/
+  `selectedCorrectChoice`/`multipleChoiceOptions`/`isReverse`/
+  `reviewDirection`/`nextCardDirection`/`frontIsTargetLanguage`/
+  `cardInstance`/`CardInstance`/`note.audio`/`note.image`/`.insert(`/
+  `.update(`/`.from(`/id-por-índice-só: **ZERO ocorrências** em
+  `shared/flashcard-mc-editor.js` inteiro (nem em comentário, confirmado
+  removendo comentários antes de checar -- diferente da 6D.3, onde
+  alguns desses termos apareciam em comentários explicando o que NÃO foi
+  feito, aqui nem isso: o arquivo nunca precisou mencioná-los). Diff
+  completo de `shared/admin-flashcards.js`/`shared/my-flashcards.js`
+  inspecionado linha a linha -- só a troca de `refreshNativeFieldsBox`
+  por `refreshNativeCardTypeBox` + a chamada a
+  `transitionToMultipleChoice` no listener de `change`, nenhuma das 14
+  categorias proibidas presente.
+
+**O que ainda falta / não foi feito nesta subfase (de propósito,
+restrição 22 -- escopo estrito):**
+- Nenhuma UI de Type Answer -- 6D.4b.
+- Nenhuma seleção visual de texto pra marcar Cloze -- 6D.5.
+- Nenhuma persistência nativa (INSERT/UPDATE gravando `fields`/
+  `card_generation_mode` de verdade) -- 6D.6.
+- Nenhum Preview reaproveitando os renderers da Fase 6C -- 6D.7.
+- Nenhuma conversão legacy→native ao abrir um cartão MC já existente pra
+  editar -- 6D.8.
+- Nenhuma UI pra reatribuir o role de `prompt` (só `answer↔distractor`
+  via promote, ver decisão acima).
+- Nenhuma migração de schema, nenhum passo manual pendente pra autora --
+  100% client-side, confirmado por `git status` limpo antes/depois além
+  dos arquivos já listados no escopo.
+
+Próxima subfase (6D.4b -- Type Answer) só começa depois de autorização
+explícita da autora, com este relatório já entregue antes de pedir luz
+verde.

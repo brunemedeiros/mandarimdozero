@@ -1100,15 +1100,26 @@ async function renderAdminFlashcardsView(){
   // handler abaixo continua lendo só o radio legado -- a persistência
   // nativa (gravar fields/card_generation_mode de verdade) é a Fase 6D.6.
   document.getElementById('admin-flashcard-card-type-preview')?.addEventListener('change', (e) => {
-    ADMIN_FLASHCARDS_STATE.nativeCardState.cardGenerationMode = e.target.value;
+    const newMode = e.target.value;
+    // Fase 6D.4a (ver CLAUDE.md) -- trocar PRA multiple_choice passa pela
+    // transição dedicada (reaproveita Fields sem role existentes de forma
+    // determinística, nunca inventa distractor) em vez de só atribuir o
+    // modo; qualquer outra troca continua sendo a atribuição direta de
+    // sempre (normal_reversed/type_answer/cloze não ganharam transição
+    // própria ainda -- fora do escopo desta subfase, restrição 11).
+    if (newMode === 'multiple_choice') transitionToMultipleChoice(ADMIN_FLASHCARDS_STATE.nativeCardState);
+    else ADMIN_FLASHCARDS_STATE.nativeCardState.cardGenerationMode = newMode;
+    refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native' });
   });
 
-  // Fase 6D.3 (ver CLAUDE.md) -- editor de Fields nativos reutilizável
-  // (shared/flashcard-field-editor.js). Renderizado/wireado UMA vez aqui
-  // (carregamento inicial + depois de um submit bem sucedido, mesmo ciclo
-  // de vida de nativeCardState em si) -- add/remove de Field re-renderiza
-  // só esta caixa (refreshNativeFieldsBox), nunca o form inteiro.
-  refreshNativeFieldsBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native' });
+  // Fase 6D.3/6D.4a (ver CLAUDE.md) -- caixa "Campos nativos", renderizada/
+  // wireada UMA vez aqui (carregamento inicial + depois de um submit bem
+  // sucedido, mesmo ciclo de vida de nativeCardState em si).
+  // refreshNativeCardTypeBox() decide entre o editor estruturado de
+  // Multiple Choice (6D.4a) e o Field editor genérico (6D.3) conforme o
+  // Card Type atual -- add/remove/mudança estrutural re-renderiza só esta
+  // caixa, nunca o form inteiro.
+  refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native' });
 
   wireFlashcardFieldValidation(wrap);
 
