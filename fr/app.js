@@ -826,20 +826,20 @@ const STATE = {
   currentUnitId: null,
   reviewQueue: [],
   reviewIndex: 0,
-  // Fase 6C.1/6C.2 (ver CLAUDE.md) -- estado efêmero da exibição ATUAL do
-  // renderer em uso (shape varia por `kind`: {kind:'normal', revealed} |
-  // {kind:'multiple_choice', shuffledOptions, selectedIndex, answered,
-  // wasCorrect} | {kind:'type_answer', typedAnswer, answered, wasCorrect}).
-  // Dono é a SESSÃO (renderReviewView cria, gradeCurrentCard/
+  // Fase 6C.1/6C.2/6C.3 (ver CLAUDE.md) -- estado efêmero da exibição
+  // ATUAL do renderer em uso (shape varia por `kind`: {kind:'normal',
+  // revealed} | {kind:'multiple_choice', shuffledOptions, selectedIndex,
+  // answered, wasCorrect} | {kind:'type_answer', typedAnswer, answered,
+  // wasCorrect} | {kind:'cloze', markId, typedAnswer, answered,
+  // wasCorrect}). Dono é a SESSÃO (renderReviewView cria, gradeCurrentCard/
   // reviewMoreCurrentCard descartam) -- o renderer nunca lê/escreve isto
   // por nome, só recebe a referência como parâmetro `localState`.
-  // Substitui o antigo `reviewShowingAnswer` (Fase 6C.1) e
-  // `reviewMCPicked`/`reviewMCCorrect` (Fase 6C.2) -- cada um era usado
-  // exclusivamente dentro de um único renderer, confirmado por grep antes
-  // de remover. Cloze (renderClozeReviewCard) continua com seu próprio
-  // campo solto (`STATE.reviewClozeAnswered`, inicializado em
-  // startReviewSession) até ser extraído numa sub-fase futura (6C.3) --
-  // fora do escopo da 6C.2.
+  // Substitui o antigo `reviewShowingAnswer` (Fase 6C.1),
+  // `reviewMCPicked`/`reviewMCCorrect` (Fase 6C.2) e `reviewClozeAnswered`
+  // (Fase 6C.3) -- cada um era usado exclusivamente dentro de um único
+  // renderer, confirmado por grep antes de remover. Nenhum campo solto de
+  // tipo restante -- os 4 Card Types hoje suportados (normal/
+  // multiple_choice/type_answer/cloze) usam exclusivamente este slot.
   reviewCardState: null,
   reviewSessionUnitFilter: null,
   currentLevel: LEVELS[0].id,
@@ -5133,7 +5133,7 @@ const SPEED_STATE = {
 // Fase 1 da reestruturação do formulário de flashcards do admin (ver
 // CLAUDE.md) -- desde a migration 035, um cartão de professora "Completar
 // a frase" pode não ter `front` (esse modo nunca exibiu Frente em
-// nenhuma tela, ver renderClozeReviewCard). Combinar e Speed Review nunca
+// nenhuma tela, ver renderClozeCard). Combinar e Speed Review nunca
 // entendem cloze -- os dois pressupõem um par frente/verso simples (front
 // como prompt/tile, back_trans como resposta) -- então um cartão cloze
 // SEM front quebraria a exibição deles (tile/prompt em branco). Cartões
@@ -6035,18 +6035,14 @@ function startReviewSession(){
   const shouldShuffle = !!STATE.reviewSessionUnitFilter;
   STATE.reviewQueue = shouldShuffle ? shuffle(queue) : queue;
   STATE.reviewIndex = 0;
-  // Fase 6C.1/6C.2 -- descarta o localState (Normal/Múltipla escolha/
-  // Digite a resposta) da sessão anterior, se houver; renderReviewView()
+  // Fase 6C.1/6C.2/6C.3 -- descarta o localState (Normal/Múltipla escolha/
+  // Digite a resposta/Cloze) da sessão anterior, se houver; renderReviewView()
   // cria um novo, tipado pro card atual, na primeira renderização. Fase
-  // 6C.2 eliminou STATE.reviewMCPicked/STATE.reviewMCCorrect (Múltipla
-  // escolha migrou 100% pra este slot único) -- não há mais nada pra
-  // zerar ali.
+  // 6C.2 eliminou STATE.reviewMCPicked/STATE.reviewMCCorrect; Fase 6C.3
+  // eliminou STATE.reviewClozeAnswered (Cloze migrou 100% pra este slot
+  // único, mesmo padrão dos outros 3 tipos) -- não há mais nenhum campo
+  // solto de tipo pra zerar aqui.
   STATE.reviewCardState = null;
-  // Fase 8c -- estado transitório do cartão "completar a frase" (Cloze,
-  // ver renderClozeReviewCard -- ainda não extraído pro contrato de
-  // localState, fora do escopo da Fase 6C.2). null=não respondido ainda,
-  // true/false=acerto/erro já registrado, aguardando "Continuar".
-  STATE.reviewClozeAnswered = null;
   renderReviewView();
 }
 
@@ -6187,30 +6183,43 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
   }
 }
 
-// Fase 8c (ver CLAUDE.md) -- cartão "completar a frase" autorado pela
-// professora. Reaproveita o mesmo idioma visual do cloze da trilha
-// (.cloze-sentence/.cloze-blank/.cloze-type-wrap, frAccentPickerHTML) e o
-// mesmo mecanismo de nota FSRS de renderMultipleChoiceReviewCard
-// (gradeCurrentCard, acerto=Bom(2)/erro=Errei(0)) -- mutuamente exclusivo
-// com card.choices, garantido na criação (shared/admin-flashcards.js).
-// STATE.reviewClozeAnswered: null (não respondido) | true/false (resultado).
-function renderClozeReviewCard(card){
-  const el = document.getElementById('review-content');
+// Fase 6C.3 (ver CLAUDE.md) -- renderer de "Cloze" (completar a frase),
+// extraído pro contrato aprovado na Fase 6C: (mountEl, card, localState,
+// callbacks). Mesmo espírito de todas as extrações anteriores desta fase
+// (Normal 6C.1, Múltipla escolha/Digite a resposta 6C.2) -- reutilizável
+// tal e qual pelo Preview do editor (Fase 6D, ainda não construída).
+//
+// localState: {kind:'cloze', markId, typedAnswer, answered, wasCorrect}.
+// `markId` -- AJUSTE em relação ao shape que a auditoria da Fase 6C tinha
+// esboçado pra Cloze (idêntico, campo a campo, ao de Type Answer) --
+// identifica explicitamente A QUAL CardInstance/marca este estado
+// pertence, mesmo sabendo que hoje só existe 1 markId por exibição (cada
+// {{cN::...}} de uma Note vira sua PRÓPRIA CardInstance/posição de fila
+// desde a Fase 5 -- nunca 2 marcas mostradas juntas na mesma tela). Sem
+// isso, o shape ficaria estruturalmente idêntico ao de Type Answer de
+// novo -- exatamente o "boolean genérico compartilhado" que esta subfase
+// foi instruída a evitar, mesmo já sendo 2 objetos/campos `STATE.
+// reviewCardState.kind` DISTINTOS desde a criação (nunca a mesma
+// referência) -- ver relatório da Fase 6C.3 pra detalhe desta decisão.
+//
+// Fase 4b -- lê Note/CardInstance via resolveCardContentView(), nunca
+// `card.clozeSentence`/`card.clozeAnswer`/`card.back_trans`/`card.audioUrl`
+// (não existem mais no card nativo). `view.rawSentenceText` ainda tem
+// {{cN::...}} embutido -- é este renderer que decide ocultar/revelar via
+// renderClozeText(), não o resolver (comportamento intocado, o resolver
+// já só devolve a marca que pertence a ESTA CardInstance -- markId --
+// nunca todas de uma Note com múltiplas lacunas).
+function renderClozeCard(mountEl, card, localState, callbacks){
   const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
-  // Fase 4b -- lê Note/CardInstance via resolveCardContentView(), nunca
-  // `card.clozeSentence`/`card.clozeAnswer`/`card.back_trans`/`card.audioUrl`
-  // (não existem mais no card nativo). `view.rawSentenceText` ainda tem
-  // {{cN::...}} embutido -- é esta função (o renderer) que decide ocultar/
-  // revelar via renderClozeText(), não o resolver.
   const view = resolveCardContentView(card);
-  const answered = STATE.reviewClozeAnswered !== null && STATE.reviewClozeAnswered !== undefined;
+  const answered = localState.answered;
   const blankHTML = answered
-    ? `<span class="cloze-blank ${STATE.reviewClozeAnswered ? 'correct' : 'incorrect'}" id="cloze-blank">${view.displayAnswerText}</span>`
+    ? `<span class="cloze-blank ${localState.wasCorrect ? 'correct' : 'incorrect'}" id="cloze-blank">${view.displayAnswerText}</span>`
     : `<span class="cloze-blank" id="cloze-blank">___</span>`;
   const hiddenSentence = renderClozeText(view.rawSentenceText, view.markId, { reveal: false });
   const sentenceHTML = hiddenSentence.replace('___', blankHTML);
 
-  el.innerHTML = `
+  mountEl.innerHTML = `
     <div class="review-progress">
       <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
       <div class="review-progress-count">${STATE.reviewIndex+1} / ${STATE.reviewQueue.length}</div>
@@ -6231,28 +6240,32 @@ function renderClozeReviewCard(card){
     ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
   `;
 
-  wireCustomAudioButtons(el);
+  wireCustomAudioButtons(mountEl);
 
   if (!answered){
-    const inputEl = document.getElementById('cloze-review-input');
+    const inputEl = mountEl.querySelector('#cloze-review-input');
     inputEl.focus();
-    wireFrAccentPicker(el.querySelector('.fr-accent-picker'), inputEl);
+    wireFrAccentPicker(mountEl.querySelector('.fr-accent-picker'), inputEl);
     const strip = s => normalizeLoose(s).replace(/[.,!?;:'"’]/g, '').trim();
     function verify(){
       if (inputEl.disabled) return;
       inputEl.disabled = true;
-      document.getElementById('cloze-review-verify-btn').disabled = true;
+      mountEl.querySelector('#cloze-review-verify-btn').disabled = true;
       const typed = strip(inputEl.value);
-      STATE.reviewClozeAnswered = acceptedForms(view.compareAnswerText).some(form => strip(form) === typed);
-      renderClozeReviewCard(card);
+      // Interação intermediária (verificar) -- muta localState e o
+      // renderer se autochama, sem envolver a sessão.
+      localState.typedAnswer = inputEl.value;
+      localState.answered = true;
+      localState.wasCorrect = acceptedForms(view.compareAnswerText).some(form => strip(form) === typed);
+      renderClozeCard(mountEl, card, localState, callbacks);
     }
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
-    document.getElementById('cloze-review-verify-btn').addEventListener('click', verify);
+    mountEl.querySelector('#cloze-review-verify-btn').addEventListener('click', verify);
   } else {
-    document.getElementById('cloze-continue-btn').addEventListener('click', () => {
-      const wasCorrect = STATE.reviewClozeAnswered;
-      STATE.reviewClozeAnswered = null;
-      gradeCurrentCard(wasCorrect ? 2 : 0);
+    mountEl.querySelector('#cloze-continue-btn').addEventListener('click', () => {
+      // Transição FINAL -- sobe pra sessão via callback, mesmo ciclo de
+      // vida de STATE.reviewCardState já estabelecido na Fase 6C.1.
+      callbacks.onAnswered(localState.wasCorrect, localState.wasCorrect ? 2 : 0);
     });
   }
 }
@@ -6260,14 +6273,14 @@ function renderClozeReviewCard(card){
 // Fase 6C.2 (ver CLAUDE.md) -- renderer de "Digite a resposta", extraído
 // pro contrato aprovado na Fase 6C: (mountEl, card, localState, callbacks).
 // Antes (Fase 4) reaproveitava STATE.reviewClozeAnswered -- a MESMA
-// variável global que o Cloze usa, só por convenção ("os dois nunca
+// variável global que o Cloze usava, só por convenção ("os dois nunca
 // coexistem no mesmo cartão", nunca por desenho estrutural). Agora tem seu
-// PRÓPRIO localState, estruturalmente independente -- Cloze continua
-// usando STATE.reviewClozeAnswered (renderClozeReviewCard, acima, fora do
-// escopo desta subfase -- extração dele fica pra uma 6C.3 futura). Mesma
-// lógica de comparação/compareAnswer/pinyin/revelação/confirmar de
-// sempre, só a leitura/escrita de "já respondeu?" muda de STATE pra
-// localState.
+// PRÓPRIO localState, estruturalmente independente -- Cloze (renderClozeCard,
+// acima) também migrou pro próprio localState desde a Fase 6C.3, com
+// `kind:'cloze'` distinto (nunca mais o mesmo campo global compartilhado
+// entre os dois). Mesma lógica de comparação/compareAnswer/pinyin/
+// revelação/confirmar de sempre, só a leitura/escrita de "já respondeu?"
+// muda de STATE pra localState.
 //
 // localState: {kind:'type_answer', typedAnswer, answered, wasCorrect}.
 function renderTypeAnswerCard(mountEl, card, localState, callbacks){
@@ -6428,9 +6441,17 @@ function renderReviewView(){
       });
       return;
     }
-    // Cloze fora do escopo da Fase 6C.2 -- continua no formato antigo
-    // (STATE.reviewClozeAnswered), extração fica pra uma 6C.3 futura.
-    if (cardTypeId === 'cloze'){ renderClozeReviewCard(card); return; }
+    if (cardTypeId === 'cloze'){
+      if (!STATE.reviewCardState){
+        // markId identifica explicitamente a marca desta CardInstance --
+        // ver comentário completo em renderClozeCard() pra motivo.
+        STATE.reviewCardState = { kind: 'cloze', markId: card.cardInstance.markId, typedAnswer: '', answered: false, wasCorrect: null };
+      }
+      renderClozeCard(el, card, STATE.reviewCardState, {
+        onAnswered: (wasCorrect, grade) => gradeCurrentCard(grade),
+      });
+      return;
+    }
     // cardTypeId === 'normal' (inclusive uma das 2 metades de "Normal com
     // reverso", Fase 4a) cai no flip padrão abaixo.
   }

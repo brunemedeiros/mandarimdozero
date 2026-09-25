@@ -6725,3 +6725,249 @@ geração de cartão não foram tocados.
 
 Escopo estrito respeitado -- nenhuma 6C.3/Preview/editor iniciados.
 Parando aqui, aguardando revisão da autora antes de continuar.
+
+## Fase 6C.3 -- extração do renderer de Cloze
+
+Terceira e última subfase de código da Fase 6C, autorizada explicitamente
+pela autora depois de revisar a 6C.2 ("A Fase 6C.2 foi revisada e
+aprovada. [...] Agora implemente SOMENTE a Fase 6C.3"). Mesmo contrato
+`renderer(mountEl, card, localState, callbacks)` aprovado na auditoria da
+Fase 6C, agora estendido pro último dos 4 Card Types em uso hoje --
+Cloze -- com a mesma lista de proibições já cumpridas em 6C.1/6C.2 (nunca
+acessar `STATE` pra estado efêmero, nunca chamar `gradeCurrentCard()`/
+`reviewMoreCurrentCard()` direto, nunca executar FSRS/XP/save, nunca
+decidir direção de CardInstance) e mais uma restrição nova, específica
+desta subfase: não criar um boolean genérico compartilhado com Type
+Answer -- cada Cloze precisa de estado identificado pelo `markId`.
+
+**Leitura obrigatória feita antes de codar** (pedido explícito da
+autora): reli o renderer atual de Cloze em `fr/app.js`/`zh/app.js`,
+`resolveClozeCardView`/`parseClozeMarks`/`renderClozeText`/
+`splitClozeMarkRaw` em `shared/flashcard-model.js`, a geração de
+múltiplas CardInstances por Note na Fase 5 (`interpretNativeNoteFromRow`,
+ramo `mode === 'cloze'`, e o caminho legado equivalente em
+`interpretNoteFromRow`), e os relatórios da Fase 6C (auditoria) e das
+6C.1/6C.2 no CLAUDE.md. Confirmado, não presumido: `resolveClozeCardView`
+já devolve a view escopada a UMA marca (`cardInstance.markId`) -- mesmo
+quando a Note tem 2+ marcas, cada CardInstance/posição de fila carrega
+só a sua própria marca; o renderer nunca precisa (nem pode) "descobrir"
+outras marcas da mesma Note.
+
+**Arquivos alterados**: só `fr/app.js` (+82/-61, `git diff --numstat`) e
+`zh/app.js` (+84/-66). Nenhum outro arquivo tocado --
+`shared/flashcard-model.js` (parser/sintaxe Cloze, resolvers) continua
+100% intocado, nenhum bug concreto foi encontrado que justificasse
+alterá-lo nesta subfase.
+
+**O que foi feito, nos dois idiomas (mudanças espelhadas, com as
+particularidades reais de cada idioma preservadas -- zh mantém
+`.cloze-hanzi`/`.cloze-pinyin`, `pinyinTonePickerHTML`,
+`normalizePinyinAnswer`; fr mantém `frAccentPickerHTML`,
+`normalizeLoose`; nenhuma tentativa de unificação):**
+
+1. **`renderClozeCard(mountEl, card, localState, callbacks)`** (novo,
+   substitui `renderClozeReviewCard(card)`) -- mesmo corpo visual de
+   sempre (frase com lacuna via `renderClozeText`, feedback certo/errado
+   no próprio espaço da lacuna, tradução revelada, áudio próprio quando
+   existe, botão "Continuar"), agora lendo/escrevendo tudo em
+   `localState` em vez de `STATE.reviewClozeAnswered` (eliminado por
+   completo -- confirmado via grep, nenhuma atribuição restante em
+   `fr/app.js`/`zh/app.js`, só comentários históricos). Interação
+   intermediária (clicar "Verificar") muta `localState.typedAnswer`/
+   `answered`/`wasCorrect` e o renderer se autochama com os mesmos 4
+   parâmetros, sem envolver a sessão; só o clique em "Continuar" chama
+   `callbacks.onAnswered(wasCorrect, grade)`.
+2. **`renderReviewView()`** -- dispatch de `cloze` passou a criar
+   `STATE.reviewCardState` preguiçosamente (só quando ausente, tipado por
+   `kind:'cloze'`, com `markId: card.cardInstance.markId` já embutido na
+   criação) e passar `callbacks.onAnswered` que chama
+   `gradeCurrentCard(grade)` -- exatamente o mesmo padrão já usado pros
+   outros 3 tipos desde 6C.1/6C.2. Não há mais nenhum `cardTypeId` com
+   dispatch "antigo" -- os 4 tipos suportados hoje (normal/
+   multiple_choice/type_answer/cloze) usam 100% o contrato novo.
+3. **`startReviewSession()`** -- removida a linha que inicializava
+   `STATE.reviewClozeAnswered = null` (não existe mais em lugar nenhum do
+   código). Comentário da declaração de `STATE.reviewCardState` (objeto
+   default do estado) atualizado pra documentar os 4 shapes possíveis
+   hoje -- nenhum campo solto de tipo restante em `STATE`.
+
+**Ajuste ao shape documentado na auditoria, avisado antes de codar**
+(pedido explícito da autora): o shape que a auditoria da Fase 6C tinha
+esboçado pra Cloze era campo-a-campo IDÊNTICO ao de Type Answer
+(`{kind:'cloze', typedAnswer, answered, wasCorrect}`) -- literalmente o
+"boolean genérico compartilhado" que esta subfase foi instruída a evitar,
+mesmo sabendo que desde a 6C.2 os dois já são objetos/instâncias
+estruturalmente distintos (nunca a mesma referência de `STATE.
+reviewCardState`, `kind` sempre discrimina qual é qual). Adicionei
+`markId` ao shape de Cloze:
+```js
+{ kind: 'cloze', markId, typedAnswer: '', answered: false, wasCorrect: null }
+```
+`markId` é preenchido no momento da criação (`card.cardInstance.markId`)
+e identifica explicitamente a QUAL CardInstance/marca aquele estado
+pertence -- mesmo sabendo que hoje só existe 1 markId por exibição (cada
+`{{cN::...}}` de uma Note vira sua PRÓPRIA CardInstance/posição de fila
+desde a Fase 5, nunca 2 marcas mostradas juntas na mesma tela). Sem essa
+adição, o shape voltaria a ser estruturalmente idêntico ao de Type
+Answer -- exatamente o risco que a instrução da autora apontava.
+
+**Achado sobre lógica já pertencente ao resolver, não movida pro
+renderer**: confirmado por leitura, não presumido -- `resolveClozeCardView`
+já centraliza 100% da regra de comparação (`compareAnswerText`, com a
+prioridade `cardInstance.compareAnswer` explícito > `mark.compareAnswer`
+embutido no `{{cN::texto|compareAnswer}}` > texto puro da marca) e da
+revelação (`displayAnswerText`). O renderer só CONSOME esses 2 campos
+prontos -- nunca recalcula nada que o resolver já fornece. A única lógica
+que continua no renderer (como já documentado desde a Fase 4b, e
+preservada intocada aqui) é a decisão de OCULTAR/REVELAR a lacuna na
+frase (`renderClozeText(view.rawSentenceText, view.markId, {reveal})`) --
+decisão de APRESENTAÇÃO (o quê aparece na tela agora), não de
+COMPARAÇÃO (se a resposta está certa) -- distinção que já estava correta
+antes desta subfase, nenhuma mudança necessária.
+
+**Áudio e imagem**: comportamento 100% preservado, nenhuma mudança de
+arquitetura -- `card.imageUrl`/`view.audioUrl`/`customAudioBtnHTML`
+continuam exatamente onde estavam, só com `mountEl` no lugar de
+`document.getElementById('review-content')`.
+
+**Decisões arquiteturais desta subfase:**
+1. Mesmo padrão de auto-recursão de 6C.1/6C.2 -- interação intermediária
+   (verificar resposta) nunca sobe pra sessão, o renderer se rechama
+   sozinho com os mesmos 4 parâmetros. Terceira confirmação de que o
+   padrão estabelecido na 6C.1 generaliza sem ajuste pra todos os 4 tipos.
+2. `mountEl.querySelector(...)` substituiu `document.getElementById(...)`
+   em toda a função extraída (mesmo padrão já usado por
+   `renderNormalCard`/`renderMultipleChoiceCard`/`renderTypeAnswerCard`)
+   -- necessário pro contrato valer de verdade quando o Preview (Fase 6D)
+   passar um `mountEl` diferente de `#review-content`.
+3. Comentários que citavam `renderClozeReviewCard`/`STATE.
+   reviewClozeAnswered` em outros pontos do arquivo (não no renderer em
+   si -- ex: comentário de `hasPlainFrontBack`/filtro de Speed Review/
+   Combinar na Fase 8a, e o comentário do próprio `renderTypeAnswerCard`
+   da 6C.2 que descrevia o campo compartilhado como "ainda em uso por
+   Cloze") foram atualizados pra refletir o estado atual -- evita que uma
+   sessão futura leia um comentário desatualizado e presuma que o campo
+   antigo ainda existe.
+
+**Testes realizados** (os 18 itens pedidos, numerados):
+1. **4 suítes Node completas** -- `test_fase4_engine.js` 32/32,
+   `test_fase4d_regression.js` 30/30, `test_fase5_generation.js` 33/33,
+   `test_fase6b_native_notes.js` 74/74 (**169/169**, sem regressão --
+   esperado, nenhuma exercita `fr/app.js`/`zh/app.js`).
+2. **Smoke test de navegador real, FR+ZH** -- novo
+   `test_fase6c3_cloze_renderer.js` (Playwright), mesmo padrão de
+   stub/boot das subfases anteriores.
+3. **Cloze nativo simples em francês** -- "Je suis {{c1::brésilien}}."
+   -> 1 CardInstance, `markId:'c1'`, lacuna oculta (`___`) na 1ª
+   renderização, `localState` criado com `kind:'cloze'`/`markId`
+   corretos.
+4. **Cloze nativo com múltiplas marcas** -- "{{c1::Je}} {{c2::suis}}
+   brésilienne." (fr) e "{{c1::你|nǐ}}{{c2::好|hǎo}}" (zh) -> 2
+   CardInstances cada, ids e `markId` distintos confirmados.
+5. **Cloze nativo em chinês** -- "我{{c1::是|shì}}巴西人。" ->
+   `displayAnswerText` hanzi ("是"), `compareAnswerText` pinyin ("shì"),
+   mesma distinção hanzi-revelado/pinyin-comparado de sempre, renderizada
+   corretamente via `renderClozeCard`.
+6. **Cloze com `compareAnswer`** -- confirmado por marca, não misturado:
+   no cenário multi-marca zh, `compareAnswer0:"nǐ"`/`compareAnswer1:"hǎo"`,
+   cada CardInstance resolvendo só o seu próprio `mark.compareAnswer`
+   (extraído do `|` por `parseClozeMarks`, `shared/flashcard-model.js`
+   intocado).
+7. **Resposta correta** -- digitar o `compareAnswerText` exato marca
+   `wasCorrect:true`, aplica classe `.correct` no espaço da lacuna,
+   `gradeCurrentCard(2)` disparado só após "Continuar".
+8. **Resposta incorreta** -- digitar texto errado marca
+   `wasCorrect:false`, classe `.incorrect` aplicada, `lapses`
+   incrementado após "Continuar".
+9. **Reveal** -- confirmado que `displayAnswerText` (a forma REVELADA,
+   nunca o texto digitado) aparece no espaço da lacuna assim que
+   `answered:true`, antes mesmo de "Continuar" ser clicado.
+10. **Re-render após resposta sem perder estado** -- chamada explícita a
+    `renderReviewView()` de novo, SEM avançar `STATE.reviewIndex`,
+    confirma que `answered`/`wasCorrect`/a revelação continuam
+    exatamente como estavam (a mesma referência de `localState` é
+    reaproveitada, nunca recriada por uma re-renderização do MESMO
+    cartão).
+11. **Estado de cada cloze independente** -- confirmado nos 2 níveis: (a)
+    localState fresh e tipado com o `markId` certo ao entrar na 2ª marca
+    (`answered:false` de novo, mesmo a 1ª tendo sido respondida); (b)
+    FSRS -- graduar a 1ª marca não altera `due`/`reps` da 2ª (ainda em 0
+    reps), e graduar a 2ª (errada) não desfaz o resultado já persistido
+    da 1ª (continua em 1 rep) -- 2 CardInstances genuinamente
+    independentes, mesma garantia já validada pra "Normal com reverso"
+    na Fase 6C.1.
+12. **`STATE.reviewClozeAnswered` não é mais usado** -- confirmado via
+    `!Object.prototype.hasOwnProperty.call(STATE, 'reviewClozeAnswered')`
+    em tempo real de navegador, nos 2 idiomas, E via a "busca final"
+    (grep) descrita abaixo -- nenhuma atribuição restante no código,
+    só comentários históricos explicando a migração.
+13. **CardInstance não mutado pelo renderer** -- `JSON.stringify(card.
+    cardInstance)` capturado antes de qualquer interação e comparado
+    depois de responder (antes do grade): idêntico. Depois do grade (que
+    SÓ muta os campos FSRS, via `applyMemoryGrade`, fora do renderer),
+    o conjunto de CHAVES do CardInstance (`Object.keys`, excluindo
+    valores) continua idêntico -- nenhuma propriedade nova (`typedAnswer`/
+    `answered`/etc.) vazou pro objeto real de `STATE.cards`.
+14. **FSRS/XP intocados antes do callback final** -- `due`/`reps`
+    idênticos ANTES e DEPOIS de digitar+verificar uma resposta (certa ou
+    errada), só mudam depois do clique em "Continuar".
+15. **`gradeCurrentCard()` só alcançado pela sessão/callback** --
+    confirmado indiretamente pelo item 14 (nada muda até "Continuar") e
+    diretamente por `STATE.reviewIndex` só avançando após esse clique,
+    nunca na verificação em si.
+16. **Normal, Multiple Choice e Type Answer continuam funcionando** --
+    fluxo completo de cada um rodado de novo neste mesmo teste (revelar+
+    graduar Normal; renderizar MC com `localState.kind` correto;
+    renderizar Type Answer com input presente) -- nenhuma regressão nos
+    3 renderers das subfases anteriores.
+17. **Nenhum renderer paralelo de Preview** -- confirmado
+    `typeof renderClozeReviewCard === 'undefined'` (função antiga
+    removida de verdade) e que só existe UMA função `renderClozeCard` por
+    idioma (grep confirma, mesma disciplina de 6C.1/6C.2).
+18. **Ausência de novos erros de console** -- só os mesmos
+    `ERR_TUNNEL_CONNECTION_FAILED` pré-existentes (proxy de saída deste
+    sandbox bloqueando o CDN do Supabase, já documentado em toda a
+    sessão), zero erro novo atribuível a este código, nos dois idiomas.
+
+**Busca final** (pedida explicitamente, executada via grep sobre
+`fr/app.js`/`zh/app.js` completos):
+- `reviewClozeAnswered` -- 3 ocorrências restantes em cada arquivo, todas
+  dentro de COMENTÁRIOS explicando a migração ("Fase 6C.2 eliminou...",
+  "Fase 6C.3 eliminou..."), zero em código executável.
+- Acessos a `STATE` dentro de `renderClozeCard` -- só
+  `STATE.reviewIndex`/`STATE.reviewQueue.length` (2 ocorrências, pra
+  calcular `pct`/contagem de progresso) -- mesma exceção documentada e já
+  aceita desde a 6C.1 pra Normal/MC/TypeAnswer: é contabilidade de
+  SESSÃO (posição na fila), não estado efêmero de interação -- a
+  proibição da Fase 6C é especificamente sobre não ler `STATE` pra saber
+  "respondido?"/"revelado?"/"o quê foi digitado?", nunca uma proibição
+  geral de qualquer leitura. Nenhum outro campo de `STATE` acessado.
+- Mutações de `card` feitas pelo renderer -- nenhuma encontrada (confirmado
+  também pelo teste de snapshot do item 13 acima).
+- Chamadas diretas a `gradeCurrentCard`/`reviewMoreCurrentCard` dentro do
+  renderer -- nenhuma; só existe a chamada de `callbacks.onAnswered(...)`,
+  que a SESSÃO (dentro de `renderReviewView()`) é quem mapeia pra
+  `gradeCurrentCard(grade)`.
+- `reviewDirection`/`nextCardDirection`/`isReverse` dentro do renderer --
+  nenhuma ocorrência; Cloze nunca teve direção (não existe conceito de
+  "frente"/"verso" numa lacuna), então esse mecanismo nunca foi relevante
+  pra este tipo, nem antes nem depois da extração.
+
+**O que ainda falta / não foi feito nesta subfase (de propósito,
+restrição explícita da autora):** nenhum editor/Preview construído --
+`renderClozeCard` está pronto pra ser chamado pelo Preview quando a Fase
+6D existir, mas nada o chama ainda fora do Review. Banco/migration, Card
+Types, FSRS, parser/sintaxe de Cloze (nenhum bug concreto encontrado que
+justificasse mexer), rich text, e qualquer nova arquitetura de áudio/
+imagem não foram tocados.
+
+Com a extração de Cloze, os 4 Card Types em uso hoje (normal/
+multiple_choice/type_answer/cloze) seguem 100% o mesmo contrato
+`renderer(mountEl, card, localState, callbacks)` -- a Fase 6C (extração
+dos renderers) está completa. Próxima etapa (Fase 6D -- Preview/editor,
+ou qualquer outra) só começa depois de autorização explícita da autora,
+com este relatório já entregue antes de pedir luz verde.
+
+Escopo estrito respeitado -- nenhum Preview/editor/migração/mudança de
+Card Type iniciados. Parando aqui, aguardando revisão da autora antes de
+continuar.
