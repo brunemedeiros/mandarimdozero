@@ -11897,3 +11897,658 @@ vivo via `mcp__Supabase__apply_migration`.
 (export Anki com mídia) NÃO foram implementados nesta subfase.** Próxima
 etapa só começa depois de autorização explícita da autora, com este
 relatório já entregue antes de pedir luz verde.
+
+## Fase 7f -- Auditoria/arquitetura: TTS explícito por Field (SÓ
+AUDITORIA/ESPECIFICAÇÃO, zero código funcional alterado)
+
+Instrução de 25 seções, mesma disciplina de "documentação antes de
+código" já usada na auditoria original da Fase 7 (`dcb0528`) -- desta
+vez focada especificamente em desenhar como TTS explícito por Field
+(`Field.audio.type==='tts'`, contrato já travado na Fase 7b) DEVERIA
+funcionar, sem implementar nenhuma geração de verdade. Releitura
+completa antes de escrever qualquer linha: `CLAUDE.md` (seções Fase
+7/7a/7b/7c/7d/7e), `fr/app.js` (TTS/áudio inteiro, linhas 17-400 e os 4
+renderers de revisão), `shared/flashcard-model.js` (contrato de
+`Field.audio`, os 4 resolvers), `shared/flashcard-editor-state.js`,
+`shared/flashcard-native-persistence.js`, `shared/flashcard-field-editor.js`
+(bloco de áudio da Fase 7e), `shared/flashcard-preview.js`,
+`shared/admin-flashcards.js`, `shared/my-flashcards.js`, além de
+`shared/supabase_migrations/046_flashcard_media_size_mime_limits.sql` e
+`fr/scripts/regenerate_broken_audio.py`. Confirmado por grep, não
+presumido: nenhuma Edge Function de TTS existe hoje (`supabase/functions/`
+só tem `notification-cron`/`push-send`/`report-reply-send`), nenhuma
+referência a chave de API de TTS (`GOOGLE_TTS`/`ELEVENLABS`/
+`AZURE_SPEECH`/etc.) em lugar nenhum do repositório -- mesma regra geral
+do topo deste arquivo ("nunca presumir infraestrutura externa ativa"):
+o pipeline offline (`fr/scripts/regenerate_broken_audio.py`, Google
+Cloud TTS neural, `fr-FR-Chirp3-HD-Achernar`/`cmn-CN-Chirp3-HD-Achernar`)
+roda manualmente, fora do runtime do app, e não prova que existe
+credencial nenhuma acessível a um servidor/Edge Function do produto.
+
+### 1) Estado atual (auditado, não presumido)
+
+**Duas camadas de reprodução de áudio hoje, já bem separadas uma da
+outra, confirmadas de novo por leitura -- nenhuma das duas muda nesta
+auditoria:**
+
+- **Camada A -- pronúncia AUTOMÁTICA por idioma** (🔊, `audioBtnHTML`/
+  `wireAudioButtons`/`speakFrench`/`speakChinese`, fr/zh `app.js`): serve
+  QUALQUER texto do app (trilha, exercícios, flashcards) de forma
+  genérica, sem nenhuma relação com `Field.audio`. `canSpeakFrench(text)`
+  decide elegibilidade (manifest OU voz do navegador carregada);
+  elegibilidade de MOSTRAR o botão nos flashcards é
+  `isStudyLanguageField(field, APP_KEY)` -- só compara `field.lang` contra
+  o idioma do site, nunca lê `field.audio`. Fluxo de reprodução:
+  `AUDIO_MANIFEST[text]` (lookup por STRING LITERAL, gerado offline) →
+  `playPregeneratedAudio()` (mp3 real, `PREGEN_AUDIO_RATE=0.9`) → senão
+  `SpeechSynthesisUtterance` (Web Speech API do navegador, `fr-FR`/
+  `zh-CN`, `rate:0.9`, com retry de 800ms se `onstart` nunca disparar).
+  **`AUDIO_MANIFEST` só cobre vocabulário/frases da TRILHA** (gerado por
+  um script Python offline contra `content.js`) -- texto autorado por
+  professora/aluna num Field quase nunca bate uma chave, então o botão
+  🔊 de um flashcard hoje SEMPRE cai no Web Speech API ao vivo, nunca na
+  voz neural pré-gerada.
+- **Camada B -- áudio EXPLÍCITO por Field** (🎧, `customAudioBtnHTML`/
+  `wireCustomAudioButtons`, Fase 8a, estendida na 7a/7b/7e): serve
+  QUALQUER `resolveFieldAudioUrl(field.audio)` não-nulo, através do MESMO
+  botão/função pros 3 tipos que já têm `.url` resolvível hoje (`url`,
+  `upload`, e -- achado confirmado nesta auditoria, ver "achado 1.1"
+  abaixo -- `tts` com `generatedUrl` já preenchido). `wireCustomAudioButtons`
+  nunca chama `registerAudioPlay()` em nenhum contexto (Review ou
+  Preview) -- só `new Audio(url).play()`. Distinta e sem sobreposição da
+  Camada A (classes CSS diferentes, `.audio-btn` vs `.custom-audio-btn`,
+  ambas podem coexistir na mesma tela quando um Field tem os dois).
+
+**Achado 1.1, confirmado por leitura de `resolveFieldAudioUrl()`
+(`shared/flashcard-model.js:173`) e dos 4 renderers -- o caminho de
+REPRODUÇÃO de um TTS já gerado já funciona hoje, sem nenhuma mudança de
+código**: `resolveFieldAudioUrl(audio)` já trata `type:'tts'` lendo
+`audio.generatedUrl` (em vez de `.url`) desde a Fase 7b; `resolveCardField()`
+já expõe isso como `audioUrl` pra qualquer Field, nos 4 resolvers; os 4
+renderers já leem esse `audioUrl` genericamente (`view.front.audioUrl`,
+`view.prompt.audioUrl`, `view.answer.audioUrl` só depois de revelado,
+`view.audioUrl` do Field de texto do Cloze) e desenham `customAudioBtnHTML(url)`
+sem checar `field.audio.type` em nenhum ponto. **Ou seja: se um Field
+algum dia tiver `{type:'tts', generatedUrl:'https://.../x.mp3', ...}`,
+o botão 🎧 já aparece e já toca o arquivo certo, em Review E em Preview,
+sem tocar em nenhum renderer** -- confirma que a arquitetura "Field é a
+fonte, resolver projeta, renderer só consome" (decisão desde a Fase 6C)
+já absorve TTS de graça no lado da LEITURA. O que falta inteiramente é
+a ESCRITA (geração/cache de `generatedUrl`) e a UI de configuração --
+exatamente o escopo desta auditoria.
+
+**Camada de upload (Fase 7e, `shared/teacher-flashcards.js`/
+`shared/own-flashcards.js`)**: `uploadFlashcardMedia`/
+`uploadOwnFlashcardMedia(file, kind, resourceId)` -> bucket
+`flashcard-media` (migration 032, endurecido pela 046 com
+`file_size_limit:5242880`/`allowed_mime_types` -- os mesmos 8 valores
+espelhados em `FIELD_AUDIO_UPLOAD_MIME_TYPES`, `shared/flashcard-model.js`).
+Path `{userId}/{kind}-{resourceId?}-{ts}-{rand}.{ext}` (professora) /
+`{userId}/self-...` (aluna). RLS: qualquer autenticado, restrito à
+própria pasta -- nunca escopado a papel de professora. Só aceita `kind:
+'audio'`/`'image'` hoje; a validação de MIME/tamanho (`validateFieldAudioUploadFile`)
+já existe e é reutilizável tal e qual por um upload de TTS gerado
+server-side (se o resultado da geração virar um arquivo subido pelo
+MESMO mecanismo -- ver seção "Storage" abaixo).
+
+**Editor de áudio (Fase 7e, `shared/flashcard-field-editor.js`,
+`renderFieldAudioBlockHTML`/`wireFieldAudioBlockFor`)**: já tem o
+`<select>` de origem com as 5 opções (`Sem áudio`/`URL externa (em
+breve)`/`Arquivo (upload)`/`Texto para voz (em breve)`/`Gravação (em
+breve)`) -- hoje o `<select>` inteiro fica `disabled`, só o painel de
+upload funciona. `fieldAudioIndicatorText(audio)` já distingue
+`'🎧 TTS configurado (áudio ainda não gerado)'` de
+`'🎧 áudio TTS gerado'` (baseado em `generatedUrl` presente/ausente) --
+texto já escrito, sem nenhum controle real por trás ainda (nenhum código
+hoje pode produzir um Field com `type:'tts'`, exceto teste/dado
+construído à mão). Reutilizado nos 2 editores (Admin/Meus Cartões) e no
+Field de texto do Cloze (via chamada explícita, já que Cloze não passa
+por `renderFieldEditorHTML()` genérico) -- confirma que um futuro
+controle de "Gerar áudio" herdaria os MESMOS 3 pontos de integração sem
+nenhuma duplicação.
+
+**Preview (`shared/flashcard-preview.js`)**: confirmado por grep nesta
+sessão -- ZERO menção a `audio`/`Audio`/`speak`/`TTS` no arquivo inteiro.
+Delega 100% aos mesmos 4 renderers reais (Fase 6D.7) -- qualquer
+comportamento de TTS que os renderers ganharem se propaga pro Preview
+automaticamente, sem nenhum código específico de Preview. O isolamento
+de analytics (Fase 7d, `card.__isPreviewCard`) já suprime tanto o
+autoplay (Camada A) quanto redireciona o clique manual pra
+`playAudioPreview()` (sem `registerAudioPlay()`) -- mas só cobre a
+Camada A/botão 🔊; o botão 🎧 (`wireCustomAudioButtons`) nunca chamou
+`registerAudioPlay()` em nenhum contexto desde que foi escrito (Fase 7d
+já registrou isso), então já está correto pra TTS/upload/URL sem
+precisar de nenhuma mudança.
+
+### 2) Arquitetura proposta -- provedor de TTS
+
+**Nenhum provedor com credencial ativa existe hoje** (confirmado acima)
+-- esta seção compara opções, sem presumir que alguma já está disponível:
+
+| Opção | Qualidade | Custo/infra | Runtime necessário |
+|---|---|---|---|
+| **Web Speech API (atual, Camada A)** | Inconsistente entre navegador/SO, robótica em muitos | Zero -- já embutido no navegador | Nenhum -- 100% client-side |
+| **API de TTS externa (Google Cloud TTS/outro), via Edge Function** | Alta, consistente (mesma voz neural do manifest offline) | Precisa de conta+chave de API (NÃO existe hoje, mesma regra de "não presumir Resend/Stripe/etc. antes de confirmar ao vivo") + Edge Function nova (mesmo padrão de `notification-cron`/`push-send`) | Servidor (Supabase Edge Function) |
+| **Pipeline offline (como a trilha já usa)** | Alta, mas manual/batch, roda por script Python fora do produto | Já existe, mas não é ACIONÁVEL a partir do editor web em tempo real | Nenhum runtime -- inviável pra conteúdo autorado ao vivo |
+
+**Recomendação, não implementada**: caminho do meio (Edge Function nova
+com um provedor de TTS externo, reaproveitando o MESMO padrão já
+validado pra Resend -- `mcp__Resend__*`/`RESEND_API_KEY` em Secrets do
+Supabase) é o único que entrega qualidade consistente pra conteúdo
+DINÂMICO (autorado em tempo real por qualquer professora/aluna, nunca
+sabido de antemão como o pipeline offline da trilha). **Web Speech API
+continua tendo um papel** (ver seção 3), mas nunca como o mecanismo de
+geração oficial/persistente -- só como fallback de reprodução quando não
+há `generatedUrl` (papel que já desempenha hoje, sem mudança).
+
+### 3) Papel do Web Speech API na arquitetura nova
+
+**Fallback de reprodução, nunca mecanismo de geração persistente** --
+decisão explícita, resolve a pergunta do item 4 da instrução: quando um
+Field `type:'tts'` não tem `generatedUrl` (config existe, áudio ainda
+não gerado -- estado já suportado pelo contrato da 7b), Review/Preview
+NÃO devem cair automaticamente pro Web Speech API como se fosse "o
+áudio desse Field" -- confundiria "TTS configurado, ainda sem arquivo"
+com "sem áudio nenhum, tenta a pronúncia automática genérica" (2
+conceitos diferentes, ver Regras de Review/Preview abaixo, itens 16/17).
+O Web Speech API continua servindo exatamente o papel que já tem hoje
+(Camada A, pronúncia automática por idioma, `isStudyLanguageField`) --
+NUNCA é acionado como consequência de um Field ter `type:'tts'` sem
+`generatedUrl`. Um `type:'tts'` sem `generatedUrl` simplesmente não
+produz `audioUrl` (já é o comportamento de `resolveFieldAudioUrl` hoje,
+sem nenhuma mudança necessária) -- a Camada A (🔊) continua funcionando
+em paralelo, do mesmo jeito que já funciona pra um Field sem `audio`
+nenhum.
+
+### 4) Semântica exata de `text`/`language`/`voiceId`/`rate`
+
+Já travada na Fase 7b, reafirmada aqui sem nenhuma mudança de contrato
+-- releitura confirma que continua correta:
+- **`text`** (nullable) -- override do texto a sintetizar; `null` = usa
+  `field.content.value` no momento da geração. Nunca lido por nenhum
+  código hoje (sem geração ainda) -- na hora de implementar 7f-código, é
+  o texto que a Edge Function de geração recebe.
+- **`language`** (nullable, ex: `'fr-FR'`/`'zh-CN'`) -- locale EXPLÍCITO
+  de síntese, **eixo deliberadamente independente de `Field.lang`**
+  (`'fr'`/`'zh'`, idioma PEDAGÓGICO do Field). Nunca derivado
+  automaticamente por nenhum resolver/renderer -- confirmado de novo por
+  grep nesta auditoria, nenhuma função lê `field.lang` pra popular
+  `audio.language`. Uma futura UI PODE sugerir um valor inicial a partir
+  de `field.lang` (conveniência de formulário), mas o valor gravado é
+  sempre a escolha explícita (ou `null`).
+- **`voiceId`** (nullable) -- id da voz dentro do provedor escolhido
+  (dependente de qual provedor a 7f-código escolher -- não travado
+  aqui). `null` = "provedor decide/usa a voz padrão do idioma".
+- **`rate`** (nullable, número) -- velocidade de síntese. `null` = usa
+  o padrão do provedor (equivalente a `1.0`, ou ao `0.9` já calibrado
+  pra pronúncia normal hoje -- decisão de default fica pra 7f-código).
+
+### 5) Cloze -- TTS por marca, não por Field
+
+**Reafirma explicitamente a decisão da Fase 6B/6D, sem reabrir**: um
+Field de Cloze com múltiplas marcas (`{{c1::...}}`, `{{c2::...}}`) tem
+UM SÓ objeto `field.audio` -- todas as CardInstances derivadas dessa
+Note (c1, c2, ...) compartilham o MESMO `textFieldIndex`, logo a MESMA
+origem de áudio (confirmado por leitura de `resolveClozeCardView()`,
+que resolve `textFieldView.audioUrl` uma vez só, nunca por marca). Isso
+já é estruturalmente garantido, sem nenhum código especial -- **nenhuma
+mudança nesta auditoria, nem proposta pra 7f-código**: TTS de Cloze
+sintetiza a FRASE INTEIRA (com a resposta embutida em texto puro, nunca
+a sintaxe `{{cN::...}}` -- ver achado de segurança já registrado na
+sessão "7 propostas" sobre `card.clozeSentence` nunca ser interpolado
+cru; o texto que vai pro provedor de TTS precisa ser o texto RENDERIZADO/
+revelado, nunca a marcação bruta). Cada CardInstance (c1/c2/...) toca o
+MESMO áudio da frase completa quando aparece na fila -- consistente com
+o comportamento de hoje (Camada A também já toca a frase completa por
+trás da lacuna, nunca uma palavra isolada).
+
+### 6) Múltipla Escolha -- só o prompt, nunca a resposta/distratores
+
+**Reafirma a correção já aplicada na Fase 7a**: `customAudioUrl =
+view.prompt.audioUrl` (nunca mais fallback pro `correct`, achado #1 da
+auditoria original). Pra TTS explícito, a MESMA regra vale sem
+exceção: só o Field de `role:'prompt'` pode ter `type:'tts'` gerado e
+tocado ANTES da resposta ser escolhida -- gerar TTS pro Field de
+`role:'answer'`/`role:'distractor'` não é proibido no MODELO de dado
+(um Field qualquer pode ter `field.audio`), mas a UI de Review NUNCA
+deve tocar esse áudio automaticamente nem oferecer um botão pra tocá-lo
+ANTES de `answered===true` -- vazaria a resposta certa pelo ouvido,
+exatamente o vazamento que a Fase 7a já fechou pra upload/URL. **Nenhuma
+geração automática "pra todas as alternativas de uma vez"** -- cada
+Field de MC (prompt/answer/distractor) teria seu PRÓPRIO controle de
+"Gerar áudio" na UI futura (7e já suporta isso, `renderFieldAudioBlockHTML`
+já é por-Field, reutilizado em cada um dos até 5 Fields de um MC), mas
+gerar é sempre uma ação EXPLÍCITA por Field, nunca em lote.
+
+### 7) Digite a resposta -- timing prompt vs. answer, relação com `pinyinFieldId`
+
+Mesma regra já em vigor desde a Fase 7a: `view.prompt.audioUrl` sempre
+disponível (o prompt nunca é "a resposta", sempre visível desde o
+início); `view.answer.audioUrl` só lido/mostrado quando
+`answered===true` (achado #2 da auditoria original, já corrigido).
+**TTS não muda esse timing** -- um Field de resposta com `type:'tts'`
+gerado (`generatedUrl` presente) só toca depois de revelado, mesma
+regra de upload/URL. `pinyinFieldId` continua sendo o mecanismo de
+COMPARAÇÃO (zh: o que a aluna digita é pinyin, o que é revelado/
+mostrado é hanzi, via `resolveTypeAnswerCardView`'s `compareAnswerText`)
+-- **eixo INDEPENDENTE de TTS**: o áudio de um Field zh (hanzi) toca a
+pronúncia do HANZI (o texto do próprio Field), nunca do pinyin -- o
+Field satélite de pinyin é só texto de comparação, não ganha `audio`
+próprio nem faz sentido ganhar (pinyin não é "falado" como um idioma
+separado, é a transcrição do mesmo som que o Field de hanzi já
+representa).
+
+### 8) Chinês/mandarim -- nenhuma regra nova além do já existente
+
+`Field.lang` continua `'zh'`/`'zh-pinyin'`/`'fr'`/`'pt-BR'` (Fase 6D.3),
+nunca confundido com `audio.tts.language` (locale de síntese, ex:
+`'zh-CN'`). Um Field zh-pinyin não deveria, em princípio, ganhar TTS
+próprio (não existe "pronúncia do pinyin" distinta da pronúncia do
+hanzi que ele acompanha) -- mas o CONTRATO não impede tecnicamente
+(qualquer Field pode ter `field.audio`); é uma convenção de UX pra 7f-
+código decidir se vale a pena ESCONDER o bloco de áudio nos Fields
+satélite de pinyin (`field.pinyinFieldId` apontado por outro Field), não
+uma restrição do modelo.
+
+### 9) `generationKey` -- definição formal
+
+**Entradas que participam do hash** (ordem fixa, sempre as mesmas 6,
+concatenadas de forma determinística antes de hashear -- ex:
+`sha256(text|language|voiceId|rate|providerModelId|configVersion)`):
+1. `text` EFETIVO (o override `audio.text` se presente, senão
+   `field.content.value` no momento do cálculo) -- nunca o texto bruto
+   de Cloze com marcação, sempre o texto que de fato seria enviado ao
+   provedor (ver seção 5).
+2. `language` (`audio.language`, nunca `field.lang`).
+3. `voiceId` (`audio.voiceId`).
+4. `rate` (`audio.rate`).
+5. **`providerModelId`** (novo conceito, não existente no contrato 7b --
+   ex: `"google-tts-chirp3-hd"` ou equivalente) -- identifica QUAL
+   provedor/modelo gerou o áudio; trocar de provedor no futuro (ex:
+   migrar de um serviço pra outro) precisa invalidar o cache mesmo que
+   texto/idioma/voz/velocidade não tenham mudado, porque o ÁUDIO
+   RESULTANTE seria diferente.
+6. **`configVersion`** (novo conceito -- um inteiro/string de versão do
+   próprio algoritmo de geração, ex: se o prompt/parâmetros enviados ao
+   provedor mudarem numa atualização futura do código de geração) --
+   permite invalidar cache em massa sem precisar tocar em nenhum dado
+   de Field, só incrementando uma constante no código da 7f-código.
+
+`generationKey` continua **dado DERIVADO, nunca fonte de verdade** (as 6
+entradas acima é que são a fonte -- reafirma a Fase 7b). "Desatualizado"
+(stale) é sempre um estado CALCULADO na hora (comparar o `generationKey`
+recém-computado contra o já persistido em `audio.generationKey`), nunca
+um booleano persistido -- mesma regra já especificada na Fase 7c.
+
+**Regra de QUAL texto invalida** (já especificada na Fase 7c, reafirmada
+sem mudança): se `audio.text` é `null` (caso comum), editar
+`field.content.value` conta como mudança de texto; se `audio.text` é um
+override explícito, editar `field.content.value` NÃO invalida nada.
+
+### 10) Não destruir `generatedUrl` válido -- estado representável?
+
+**Checado explicitamente contra o shape exato da Fase 7b -- SIM, já é
+suficiente, nenhuma mudança de shape necessária.** O contrato já separa
+CONFIGURAÇÃO (`text`/`language`/`voiceId`/`rate`) de ATIVO RESOLVIDO
+(`generatedUrl`/`generatedAt`) desde que foi desenhado -- os dois podem
+divergir livremente: é perfeitamente representável hoje ter
+`generatedUrl:'https://.../velho.mp3'` (ainda válido, tocável) enquanto
+`text`/`voiceId`/`rate` já foram editados pra uma config NOVA (ainda não
+gerada pra essa config). O único elemento que FALTA no shape pra
+representar "pendente/erro" de forma persistida é justamente o que a
+Fase 7c já decidiu deliberadamente NÃO adicionar (erro é sempre
+transiente/só-de-UI, nunca persistido -- ver Fase 7c, seção D, item 4) --
+"pendente" já é representável (`generationKey` calculado ≠
+`audio.generationKey` persistido = pendente/desatualizado; nenhum campo
+booleano extra necessário). **Nenhuma mudança de shape proposta.**
+
+**Regra de não-destruição, formal**: uma tentativa de geração que FALHA
+nunca escreve em `field.audio` -- só um erro transitório de UI (toast,
+mesmo padrão já usado no resto do app). Uma tentativa que TEM SUCESSO só
+escreve depois de confirmado (`generatedUrl`/`generatedAt`/
+`generationKey` atualizados atomicamente, os 3 juntos, nunca um sem os
+outros -- evita um estado intermediário onde `generationKey` já bate mas
+`generatedUrl` ainda é o antigo, ou vice-versa). Entre o clique em
+"Gerar"/"Regenerar" e a resposta, o `generatedUrl` ANTIGO continua
+tocável (o botão de ouvir não desaparece durante uma geração em curso).
+
+### 11) Concorrência
+
+Cenário: duplo-clique em "Gerar áudio", ou 2 abas editando o mesmo
+cartão. Regra proposta (client-side, sem infraestrutura de lock
+server-side -- consistente com o nível de rigor já aplicado a outros
+controles deste editor, ex: teto de 20 cartões da Fase 5.1, "trava de
+UI, não fronteira de segurança"): (1) o botão "Gerar"/"Regenerar" fica
+`disabled` assim que clicado, até a Promise resolver -- impede o
+duplo-clique óbvio na MESMA aba; (2) cada requisição de geração carrega
+consigo o `generationKey` que ela está tentando satisfazer (calculado no
+momento do clique); quando a resposta volta, só aplica o resultado ao
+`field.audio` **se o `generationKey` da resposta ainda bate com o
+`generationKey` recém-recalculado do estado ATUAL do Field** -- se a
+pessoa editou o texto enquanto a geração antiga estava em voo, o
+resultado antigo (agora obsoleto) é descartado silenciosamente em vez de
+sobrescrever a config nova por engano (evita que um resultado
+"atrasado" clobber um estado mais fresco -- exatamente o requisito do
+item 11 da instrução). Duas abas simultâneas: sem lock distribuído
+nesta fase -- a MESMA regra de comparação de `generationKey` já evita
+que uma resposta atrasada de uma aba sobrescreva o resultado mais novo
+que a outra aba já salvou, na maioria dos casos reais (edição
+colaborativa em tempo real no mesmo cartão nunca foi um requisito desta
+feature em nenhuma fase anterior).
+
+### 12) Estratégia de cache
+
+**Escopo do cache**: por `generationKey`, não por usuário/global
+separadamente -- 2 Fields DIFERENTES (de professoras diferentes, ou da
+mesma professora em 2 cartões) com texto/idioma/voz/velocidade
+IDÊNTICOS produziriam o MESMO `generationKey` e, em teoria, poderiam
+reaproveitar o MESMO arquivo gerado -- mas esta auditoria NÃO propõe uma
+tabela de cache-por-`generationKey` compartilhada entre Fields/contas
+(mesma decisão já tomada na Fase 7c: "aceitável ter áudios idênticos
+redundantes, custo de Storage conhecido, não escondido" -- introduzir
+deduplicação cross-Field/cross-conta é complexidade desproporcional ao
+problema, mesmo padrão de decisão já usado repetidamente nesta feature
+pra não construir infraestrutura especulativa). Cache é, na prática, POR
+FIELD -- `audio.generatedUrl` armazenado no próprio Field É o cache; "não
+regerar se `generationKey` não mudou" é a regra de cache real (evita
+custo de API repetido pro MESMO Field, que é o caso comum). **Privacidade**:
+nenhum dado sensível envolvido (texto pedagógico já visível na própria
+tela do editor) -- sem necessidade de isolamento adicional além do RLS
+de Storage já existente (pasta por `auth.uid()`).
+
+### 13) Estratégia de Storage
+
+**Reaproveitar a MESMA infraestrutura da Fase 7e** (`uploadFlashcardMedia`/
+`uploadOwnFlashcardMedia`, bucket `flashcard-media`, mesmas MIME
+types/limite de 5 MiB já configurados na migration 046) -- **nunca criar
+um bucket novo**, mesma disciplina já travada ("nunca auto-criar bucket").
+Justificativa: um áudio TTS gerado é, do ponto de vista do Storage, um
+arquivo de áudio como qualquer outro -- mesmo RLS (pasta por
+`auth.uid()`), mesma leitura pública, mesmo path pattern (`{userId}/
+tts-{fieldId}-{ts}-{rand}.mp3`, reaproveitando o parâmetro `resourceId`
+já existente em `uploadFlashcardMedia`). A ÚNICA diferença é QUEM chama a
+função de upload: hoje é sempre o browser (arquivo escolhido pela
+pessoa); com TTS, seria a Edge Function de geração (Seção 14) que
+recebe os bytes do provedor de TTS e os grava no MESMO bucket via a API
+do Supabase Storage (server-side, usando a service role da função, não
+o cliente) -- o resultado (uma URL pública) é indistinguível de um
+upload manual pro resto do pipeline (`resolveFieldAudioUrl` nunca
+precisa saber se a URL veio de upload humano ou de geração).
+
+### 14) Segurança
+
+- **Chave de API do provedor de TTS**: NUNCA no cliente -- vive só como
+  Secret de uma Edge Function nova (mesmo padrão já usado pra
+  `RESEND_API_KEY`, Edge Functions > Secrets do projeto Supabase). O
+  cliente nunca vê a chave, só chama a Edge Function (`supabase.functions.invoke`
+  ou fetch equivalente) passando `{text, language, voiceId, rate}`.
+- **Autenticação**: a Edge Function exige um JWT válido (mesmo
+  `verify_jwt:true` já usado por `notification-cron`/`push-send`) --
+  qualquer conta autenticada pode chamar (não é uma ferramenta exclusiva
+  de professora/admin, já que "Meus Cartões" também ganharia TTS um dia,
+  gated por `isPremium()` como o resto do editor nativo em Meus
+  Cartões).
+- **Rate limiting / limite de caracteres por geração**: NÃO existe hoje
+  nenhum mecanismo de rate limiting em nenhuma Edge Function deste
+  projeto -- precisaria ser construído do zero na 7f-código (ex: um
+  contador simples por `auth.uid()` numa tabela nova, ou um limite fixo
+  de caracteres por requisição validado na própria função antes de
+  chamar o provedor externo, pra nunca deixar um texto absurdamente
+  longo -- ou um loop de "gerar em massa" -- estourar custo de API sem
+  controle). Não decidido/dimensionado nesta auditoria -- fica como
+  requisito explícito pra 7f-código, não pode ser esquecido.
+- **Isolamento**: cada geração só pode escrever na pasta do próprio
+  `auth.uid()` (mesmo RLS de Storage já existente) -- a Edge Function
+  usando a service role bypassa RLS por natureza, então a checagem de
+  "essa pessoa pode mesmo editar este Field/cartão" precisa acontecer
+  DENTRO da função (ex: confirmar que o `teacher_id`/`owner_id` da linha
+  de `teacher_flashcards`/`own_flashcards` bate com `auth.uid()` do
+  chamador, antes de gastar uma chamada de API externa) -- mesmo padrão
+  de autorização-dentro-da-function já usado por `get_teacher_student_metrics`/
+  `get_public_profile_stats` (SECURITY DEFINER + checagem manual, Fases
+  6a/1 do sistema de alunas particulares/perfil público).
+
+### 15) Controle de custo
+
+Geração de TTS **nunca pode ser efeito colateral de um renderer** --
+única e exclusivamente uma ação EXPLÍCITA (clique em "Gerar áudio"/
+"Regenerar"), nunca disparada por: abrir o editor, abrir o Preview,
+revisar um cartão no Review, ou qualquer re-render automático. A regra
+de `generationKey` (Seção 9) já é o mecanismo de controle de custo
+central: se o `generationKey` calculado bate com o já persistido, o
+botão mostra "já gerado"/toca o áudio existente, nunca regenera --
+clicar "Regenerar" numa config JÁ satisfeita ainda seria uma AÇÃO
+explícita da pessoa (talvez pra forçar uma nova tentativa mesmo sem
+mudança), não um gatilho automático.
+
+### 16) Regras de Preview
+
+- **Só toca se já gerado** (`generatedUrl` presente) -- nunca gera
+  nada, nunca chama a Edge Function de geração.
+- **Nenhuma escrita em Storage** -- Preview é read-only por natureza
+  (mesma garantia já estabelecida desde a Fase 6D.7: `callbacks.onAnswered`
+  é sempre no-op de persistência).
+- **Nenhuma analytics** -- já garantido de graça (Seção 1: Preview
+  delega 100% aos mesmos 4 renderers, e o botão 🎧/`wireCustomAudioButtons`
+  já nunca chamou `registerAudioPlay()` em nenhum contexto).
+- **Estado vazio apropriado quando não gerado**: um Field `type:'tts'`
+  sem `generatedUrl` simplesmente NÃO produz `audioUrl`
+  (`resolveFieldAudioUrl` já devolve `null` nesse caso) -- o Preview
+  (como o Review) já mostra corretamente "nenhum botão 🎧" nesse estado,
+  sem nenhuma mudança de código necessária. Não é uma mensagem de erro
+  nem um estado quebrado -- é simplesmente "esse Field não tem áudio
+  customizado tocável agora", igual a qualquer Field sem `audio` nenhum.
+
+### 17) Regras de Review
+
+- **Só toca `generatedUrl` quando disponível** -- mesma regra do
+  Preview, já garantida de graça pela arquitetura atual (achado 1.1).
+- **Nunca gera** -- Review não tem (e não deveria ganhar) nenhum botão
+  de "Gerar áudio"; geração é ferramenta de AUTORIA (editor), nunca de
+  ESTUDO (Review).
+- **Web Speech fallback só como decisão arquitetural JÁ tomada** (Seção
+  3) -- continua sendo a Camada A independente, nunca acionada "porque"
+  um `type:'tts'` está sem `generatedUrl`. Review nunca vira gerador.
+
+### 18) Preservação do sistema Legacy
+
+`AUDIO_MANIFEST`/`speakFrench`/`speakChinese`/fallback Web Speech API
+continuam existindo e funcionando exatamente como hoje, pra SEMPRE que
+`Field.audio` não resolver nada (`type:'tts'` sem `generatedUrl`, Field
+sem `audio` nenhum, ou qualquer conteúdo de trilha que nunca passa por
+Field). **Distinção Legacy vs. Nativo permanece clara, nunca misturada**:
+Camada A (🔊, pronúncia automática) é sempre Legacy/genérica, por
+IDIOMA; Camada B (🎧, áudio explícito) é sempre Nativa/por-Field
+(upload, URL, e -- quando implementado -- TTS gerado). As duas
+coexistem na mesma tela, nos mesmos 4 renderers, desde a Fase 8a --
+nenhuma mudança proposta aqui além de, quando 7f-código existir,
+`type:'tts'` COM `generatedUrl` passar a alimentar a Camada B do MESMO
+jeito que upload/URL já alimentam hoje (zero código de renderer novo,
+achado 1.1).
+
+### 19) Consideração futura -- export Anki
+
+Reafirma a Fase 7 original (achado #3, seção I da auditoria): o export
+Anki hoje nunca inclui mídia (`zip.file("media", JSON.stringify({}))`
+sempre vazio). Um áudio TTS só pode ser exportado se já tiver
+`generatedUrl` (um arquivo REAL, baixável) -- nunca dispara geração a
+partir do fluxo de exportação (mesmo princípio de "nunca gerar como
+efeito colateral", Seção 15). Cartão com TTS configurado mas não gerado
+seria tratado como "sem áudio" no export, ou pulado/avisado -- decisão
+de UX pra quando a 7i (export com mídia) for de fato implementada, não
+travada aqui.
+
+### 20) Fluxo de UI futuro (especificado, não implementado)
+
+Dentro do bloco "Áudio" já existente por Field
+(`renderFieldAudioBlockHTML`, Fase 7e), quando "Texto para voz" for
+habilitado no `<select>` de origem:
+
+```
+Origem: [Texto para voz ▾]
+  Texto a sintetizar: [_________________] (pré-preenchido com o
+                                            texto do Field, editável)
+  Idioma:  [francês (fr-FR) ▾]
+  Voz:     [<lista do provedor> ▾]
+  Velocidade: [normal ▾] (lento/normal/rápido, ou slider)
+
+  [🔊 Gerar áudio]   -- disabled enquanto uma geração está em voo
+
+  -- estado "não gerado": nenhum player, texto "TTS configurado,
+     áudio ainda não gerado" (já existe, fieldAudioIndicatorText)
+  -- estado "gerando": botão vira "Gerando...", disabled
+  -- estado "disponível": <audio controls> (já existe no bloco atual)
+     + "gerado em <data>" + [🔊 Ouvir] [↻ Regenerar] [🗑 Remover]
+  -- estado "desatualizado" (generationKey mudou desde o generatedUrl
+     salvo): mesmo player do "disponível" (áudio antigo continua
+     tocável) + aviso "config mudou desde a última geração" +
+     [↻ Regenerar] em destaque
+  -- estado "erro" (transiente, nunca persistido): toast "Não foi
+     possível gerar o áudio agora." -- volta pro estado anterior
+     (gerado ou não-gerado, conforme o que já existia antes da
+     tentativa)
+```
+
+### 21) O shape da Fase 7b é suficiente?
+
+**Sim, com uma MUDANÇA MÍNIMA identificada, não implementada aqui**:
+faltam `providerModelId` e `configVersion` como parte das entradas do
+`generationKey` (Seção 9) -- hoje o comentário da Fase 7b já lista
+`generationKey` como "hash de texto efetivo + language + voiceId +
+rate", sem mencionar provedor/versão de config. Como o cálculo de
+`generationKey` **nunca foi implementado ainda** (só reservado como
+campo), isso não exige nenhuma migração de dado nem mudança de shape em
+`Field.audio` em si -- é só uma correção da FÓRMULA de cálculo que
+7f-código vai escrever, quando escrever. **Nenhum campo novo em
+`Field.audio` proposto** -- os 7 campos já existentes (`text`/
+`language`/`voiceId`/`rate`/`generationKey`/`generatedUrl`/`generatedAt`)
+continuam suficientes; `providerModelId`/`configVersion` entram só como
+CONSTANTES do código de geração (não como propriedade persistida por
+Field), exatamente como já são hoje `PREGEN_AUDIO_RATE`/vozes fixas do
+pipeline offline -- não precisam variar por Field.
+
+### 22) Especificação de testes futuros (16 cenários, não implementados)
+
+A. Config válida (`text`+`language`+`voiceId`+`rate` todos preenchidos)
+   -> `isValidFieldAudio()` aceita (já verdadeiro hoje, sem mudança).
+B. Config inválida (`type:'tts'` com `rate` de tipo errado, ex: string)
+   -> `isValidFieldAudio()` rejeita (já verdadeiro hoje).
+C. `generationKey` determinístico -- mesmas 6 entradas (Seção 9) ->
+   mesmo hash, chamado 2x.
+D. Mesma config -> mesma `generationKey` -- confirmando estabilidade
+   entre sessões (recalcular do zero bate com o valor persistido antes).
+E. Mudar `text` -> `generationKey` novo.
+F. Mudar `voiceId` -> `generationKey` novo.
+G. Mudar `rate` -> `generationKey` novo.
+H. Mudar `language` -> `generationKey` novo.
+I. Geração bem-sucedida -- `generatedUrl`/`generatedAt`/`generationKey`
+   gravados atomicamente, os 3 juntos.
+J. Geração falha -- `field.audio` permanece BYTE A BYTE idêntico a
+   antes da tentativa (nenhum campo tocado).
+K. Áudio antigo preservado -- editar a config (texto/voz/etc.) SEM
+   regenerar mantém `generatedUrl` antigo tocável, `generationKey`
+   antigo ainda em `field.audio.generationKey` (só o CALCULADO na hora
+   diverge -- é isso que sinaliza "desatualizado").
+L. Geração concorrente -- 2 chamadas de geração disparadas (config A
+   depois config B, resposta de A chega DEPOIS da de B) -- resultado
+   final reflete B (a resposta de A, com `generationKey` obsoleto, é
+   descartada, ver Seção 11).
+M. Preview nunca gera -- abrir/interagir com Preview sobre um Field
+   `type:'tts'` sem `generatedUrl` nunca chama a função de geração,
+   nunca escreve em `field.audio`/Storage.
+N. Review nunca gera -- mesmo cenário, dentro de uma sessão de Revisão
+   real.
+O. `Field.lang` nunca seleciona TTS automaticamente -- criar/editar um
+   Field com `lang:'fr'` nunca popula `audio`/`audio.language` sozinho;
+   `type:'tts'` só existe se explicitamente escolhido no `<select>` de
+   origem.
+P. Legacy continua funcional -- um Field sem `audio` (ou com
+   `type:'upload'`/`'url'` já existente) continua funcionando
+   exatamente como hoje depois que 7f-código existir -- nenhuma
+   regressão no caminho não-TTS.
+
+### 23) O que NÃO foi tocado nesta auditoria (confirmado)
+
+`git status`/`git diff` no fim desta entrega confirmam: só este
+`CLAUDE.md` foi modificado. Nenhuma linha de `shared/flashcard-model.js`
+(o `type:'tts'`/`FIELD_AUDIO_TYPES`/`isValidFieldAudio`/
+`resolveFieldAudioUrl` já existiam desde a Fase 7b, intocados), nenhum
+dos 4 renderers (`fr/app.js`/`zh/app.js`), nenhum editor
+(`shared/flashcard-field-editor.js`/`admin-flashcards.js`/
+`my-flashcards.js`), nenhum `shared/flashcard-preview.js`, nenhuma
+migração SQL, nenhuma Edge Function, nenhuma chave de API, nenhum
+`MediaRecorder`/`getUserMedia`. Zero geração de TTS real ocorreu nesta
+sessão.
+
+### Decisões em aberto (não resolvidas nesta auditoria, ficam pra quando
+7f-código for autorizada)
+
+1. Qual provedor de TTS externo de fato contratar (nenhuma conta/API key
+   existe hoje -- decisão de negócio da autora, não técnica).
+2. Dimensionamento exato do rate limiting/limite de caracteres por
+   geração (Seção 14) -- nenhum número travado.
+3. Se Fields satélite de pinyin (zh) devem ESCONDER o bloco de áudio
+   por completo, ou só não ativar TTS por padrão neles (Seção 8) --
+   convenção de UX, não decidida.
+4. Se/quando estender TTS pra distratores de Múltipla Escolha (a UI já
+   suportaria por-Field, mas nenhum caso de uso concreto foi levantado
+   -- mesma pergunta em aberto já registrada desde a Fase 7).
+5. Valor de default pra `rate`/`voiceId` quando a pessoa nunca escolhe
+   (Seção 4) -- nenhum valor travado, fica pra quando a UI de fato
+   existir e o provedor estiver escolhido.
+
+### Relatório final (10 pontos)
+
+1. **Arquitetura de TTS proposta**: Edge Function nova (padrão já
+   validado por `notification-cron`/`push-send`, mesmo `verify_jwt:true`)
+   chamando um provedor de TTS externo ainda não contratado, geração
+   sempre ação explícita (nunca efeito colateral de renderer), resultado
+   persistido como `field.audio.generatedUrl` via o MESMO pipeline de
+   upload da Fase 7e (bucket `flashcard-media`, sem bucket novo). Web
+   Speech API continua só como fallback de pronúncia AUTOMÁTICA
+   genérica (Camada A), nunca acionado por um `type:'tts'` sem áudio
+   gerado.
+2. **Provedor/infraestrutura identificados**: nenhum ativo hoje
+   (confirmado por grep -- zero Edge Function de TTS, zero chave de API
+   referenciada em lugar nenhum do repo). O único precedente real é o
+   pipeline offline (`fr/scripts/regenerate_broken_audio.py`, Google
+   Cloud TTS neural), que roda fora do runtime do produto e não prova
+   credencial acessível a um servidor.
+3. **`generationKey`**: hash determinístico de 6 entradas (texto
+   efetivo, language, voiceId, rate, `providerModelId`, `configVersion`)
+   -- os 2 últimos são conceitos NOVOS desta auditoria (nunca persistidos
+   por Field, só constantes do código de geração), necessários pra
+   invalidar cache corretamente numa troca de provedor/algoritmo.
+4. **Cache**: por `generationKey`, armazenado só no próprio
+   `field.audio` (não uma tabela de cache compartilhada entre
+   Fields/contas -- decisão consciente de não construir isso, mesmo
+   padrão de "não infraestrutura especulativa" já usado em toda a
+   feature).
+5. **Storage**: reaproveita o bucket `flashcard-media` já endurecido
+   (Fase 7e/migration 046) e o mesmo path pattern -- nunca um bucket
+   novo, geração gravaria via a service role da Edge Function usando a
+   mesma API que `uploadFlashcardMedia` já usa do lado do cliente.
+6. **Segurança**: chave de API só em Secrets da Edge Function, nunca no
+   cliente; autenticação JWT obrigatória; autorização checada DENTRO da
+   função (dono da linha == `auth.uid()`), mesmo padrão de
+   `get_teacher_student_metrics`; rate limiting/limite de caracteres
+   ainda NÃO dimensionado, fica como requisito explícito pra não
+   esquecer na implementação.
+7. **Preview/Review**: os dois já tocam `generatedUrl` de graça, sem
+   NENHUMA mudança de renderer necessária (achado central desta
+   auditoria) -- a arquitetura Field->resolver->renderer da Fase 6C/7a
+   já absorve TTS na LEITURA; falta só a ESCRITA (geração). Nenhum dos
+   dois pode gerar áudio -- geração é sempre ação explícita do editor.
+8. **Decisões em aberto**: provedor de TTS a contratar, dimensionamento
+   de rate limiting, convenção de UX pra Fields satélite de pinyin,
+   extensão futura a distratores de MC, valores de default de
+   voz/velocidade -- nenhuma travada nesta auditoria.
+9. **Arquivo alterado**: só `CLAUDE.md` (esta seção) -- confirmado por
+   `git status`/`git diff --stat`, nenhum código funcional tocado.
+10. **Commit**: aplicado nesta mesma entrega, mensagem referenciando
+    "Fase 7f (auditoria)", com a atribuição obrigatória.
+
+**PARE conforme instrução explícita -- nenhuma geração de TTS
+implementada nesta fase.** Próxima etapa (7f-código, 7g gravação, ou 7i
+export Anki com mídia) só começa depois de autorização explícita da
+autora, com este relatório já entregue antes de pedir luz verde.
