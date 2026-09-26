@@ -238,7 +238,10 @@ function renderMultipleChoiceEditorHTML(editorState, opts){
 // editor genérico, nunca disparam re-render, mesma disciplina da 6D.3) ou
 // 'structure' (add/remove/promote -- disparam re-render, porque o CONJUNTO
 // de linhas visíveis ou a mensagem de validação mudou).
-function wireMultipleChoiceEditor(container, editorState, onChange){
+// `opts` (novo, Fase 7e -- ver CLAUDE.md) repassado pra wireFieldEditorList,
+// que por sua vez repassa pra wireFieldAudioBlockFor (uploadFn/deleteFn) --
+// nenhuma outra parte deste wiring precisa dele.
+function wireMultipleChoiceEditor(container, editorState, onChange, opts){
   if (!container) return;
   // Reaproveita o wiring de conteúdo/idioma do Field editor genérico (6D.3)
   // pra TODO Field mostrado aqui (prompt/answer/distractors/outros) -- e
@@ -247,7 +250,7 @@ function wireMultipleChoiceEditor(container, editorState, onChange){
   // próprio data-mc-remove-distractor abaixo).
   wireFieldEditorList(container, editorState, (kind, fieldId) => {
     if (onChange) onChange(kind, fieldId);
-  });
+  }, opts);
 
   const addPromptBtn = container.querySelector('[data-mc-add-prompt]');
   if (addPromptBtn) addPromptBtn.addEventListener('click', () => {
@@ -288,7 +291,7 @@ function refreshMultipleChoiceEditorBox(boxEl, editorState, opts){
   boxEl.innerHTML = renderMultipleChoiceEditorHTML(editorState, opts);
   wireMultipleChoiceEditor(boxEl, editorState, (kind) => {
     if (kind === 'structure') refreshMultipleChoiceEditorBox(boxEl, editorState, opts);
-  });
+  }, opts);
 }
 
 // ---------- Dispatcher por Card Type ----------

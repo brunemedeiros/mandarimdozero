@@ -213,6 +213,38 @@ function nativeContentColumnsFromEditorState(editorState){
   };
 }
 
+// ---------- Fase 7e (upload de áudio por Field, ver CLAUDE.md, Seção 14) ----------
+//
+// Compensação BEST-EFFORT de atomicidade Storage<->DB: um upload de
+// áudio bem-sucedido NESTA sessão de edição (`editorState.
+// __freshMediaUploads`, populado por wireFieldAudioBlockFor -- shared/
+// flashcard-field-editor.js -- a cada upload concluído) nunca é
+// referenciado por nenhuma linha real enquanto a Note ainda não foi
+// salva. Se o INSERT/UPDATE que salvaria essa Note falhar logo em
+// seguida, o objeto no Storage vira um órfão garantido -- seguro
+// removê-lo (nenhuma outra linha pode estar apontando pra ele ainda,
+// diferente de "substituir"/"remover" um áudio JÁ SALVO, que nunca é
+// deletado fisicamente -- ver justificativa completa em
+// wireFieldAudioBlockFor). Best-effort/nunca lança -- uma falha ao
+// tentar limpar o órfão não pode mascarar o erro de save já em
+// andamento, que é o que a tela de fato mostra pra professora/aluna.
+async function compensateFreshMediaUploads(editorState){
+  const uploads = (editorState && editorState.__freshMediaUploads) || [];
+  if (editorState) editorState.__freshMediaUploads = [];
+  await Promise.all(uploads.map(u => {
+    if (!u || typeof u.deleteFn !== 'function' || !u.path) return Promise.resolve();
+    return Promise.resolve(u.deleteFn(u.path)).catch(() => {});
+  }));
+}
+
+// Depois de um SAVE bem-sucedido, os uploads desta sessão passam a estar
+// legitimamente referenciados pela linha persistida -- nunca devem ser
+// deletados, mesmo que uma edição FUTURA (de outra sessão, outro cartão)
+// falhe depois. Só limpa a lista, sem tocar o Storage.
+function clearFreshMediaUploads(editorState){
+  if (editorState) editorState.__freshMediaUploads = [];
+}
+
 // ---------- Legacy -> Native (conversão explícita, nunca automática) ----------
 //
 // Seção 7/21 (ver CLAUDE.md) -- quando a professora/aluna pede

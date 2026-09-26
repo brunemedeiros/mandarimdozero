@@ -525,6 +525,13 @@ function renderClozeEditorHTML(editorState, opts){
   const activeMark = segments.find(seg => seg.kind === 'mark' && seg.markId === CLOZE_EDITOR_ACTIVE_MARK_ID) || null;
   if (!activeMark) CLOZE_EDITOR_ACTIVE_MARK_ID = null;
 
+  // Fase 7e (ver CLAUDE.md) -- o Field de FRASE nunca passa por
+  // renderFieldEditorHTML() (tem seu próprio editor visual, seleção de
+  // texto pra marcar lacunas) -- então o bloco de áudio precisa ser
+  // chamado direto aqui, pro áudio da frase inteira (ex: a professora
+  // gravou a pronúncia da frase completa) continuar disponível mesmo no
+  // modo Cloze. wireClozeEditor() liga este bloco explicitamente (ver
+  // abaixo), nunca via wireFieldEditorList (que não conhece este Field).
   const textHTML = textField
     ? `
       <div class="cloze-editor-toolbar">
@@ -533,6 +540,7 @@ function renderClozeEditorHTML(editorState, opts){
       <div class="cloze-editor-text" contenteditable="true" data-cloze-field-id="${escapeHTML(textField.id)}">${renderClozeSegmentsHTML(segments)}</div>
       <p class="profile-edit-field-error" data-cloze-mark-error></p>
       ${activeMark ? clozeMarkPanelHTML(activeMark, namePrefix, isMandarim) : ''}
+      ${renderFieldAudioBlockHTML(textField, opts)}
     `
     : `<p class="profile-edit-hint">Nenhuma frase ainda.</p><button type="button" class="admin-select-link" data-cloze-add-text>+ Criar frase</button>`;
 
@@ -568,7 +576,11 @@ function renderClozeEditorHTML(editorState, opts){
 // Wiring
 // ============================================================
 
-function wireClozeEditor(container, editorState, onChange){
+// `opts` (Fase 7e -- ver CLAUDE.md) repassado pra wireFieldEditorList
+// (Tradução/Outros campos) e chamado direto pra wireFieldAudioBlockFor
+// (Field de frase, que não passa por wireFieldEditorList -- ver
+// renderClozeEditorHTML acima).
+function wireClozeEditor(container, editorState, onChange, opts){
   if (!container) return;
 
   // Reaproveita o wiring de conteúdo/idioma do Field editor genérico
@@ -577,7 +589,21 @@ function wireClozeEditor(container, editorState, onChange){
   // disciplina anti-UX-fix-5 de todo o resto desta feature).
   wireFieldEditorList(container, editorState, (kind, fieldId) => {
     if (onChange) onChange(kind, fieldId);
-  });
+  }, opts);
+
+  // Fase 7e -- áudio do Field de FRASE, wireado direto (nunca via
+  // wireFieldEditorList, que só conhece Fields renderizados por
+  // renderFieldEditorHTML -- a frase tem seu próprio editor visual).
+  // Identificado por EXCLUSÃO (nunca dentro de `[data-field-editor]`,
+  // diferente do bloco de áudio da Tradução/"Outros campos" acima) --
+  // robusto a qualquer reordenação futura do template, nunca "o
+  // primeiro bloco da tela" por posição.
+  const textFieldBlock = [...container.querySelectorAll('[data-field-audio-field]')].find(el => !el.closest('[data-field-editor]'));
+  if (textFieldBlock){
+    wireFieldAudioBlockFor(container, editorState, textFieldBlock.dataset.fieldAudioField, (kind, fieldId) => {
+      if (onChange) onChange(kind, fieldId);
+    }, opts);
+  }
 
   const addTextBtn = container.querySelector('[data-cloze-add-text]');
   if (addTextBtn) addTextBtn.addEventListener('click', () => {
@@ -702,7 +728,7 @@ function refreshClozeEditorBox(boxEl, editorState, opts){
   boxEl.innerHTML = renderClozeEditorHTML(editorState, opts);
   wireClozeEditor(boxEl, editorState, (kind) => {
     if (kind === 'structure') refreshClozeEditorBox(boxEl, editorState, opts);
-  });
+  }, opts);
 }
 
 // ---------- Extensão do dispatcher por Card Type ----------

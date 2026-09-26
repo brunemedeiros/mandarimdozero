@@ -113,16 +113,41 @@ async function createOwnFlashcard({ languageAppKey, front, backTrans, note, fron
 // (auth.uid())" (migration 032), nunca escopada a professora -- funciona
 // pra cartão próprio sem nenhuma migração nova. Path com prefixo `self-`
 // só pra facilitar auditoria manual do bucket (não afeta RLS nem leitura).
-async function uploadOwnFlashcardMedia(file, kind){
+//
+// Fase 7e (ver CLAUDE.md) -- mesmas 2 extensões de uploadFlashcardMedia
+// (shared/teacher-flashcards.js): validação MIME/tamanho quando
+// `kind==='audio'` (validateFieldAudioUploadFile, shared/flashcard-
+// model.js, mesma migration 046 espelhada dos dois lados) + `resourceId`
+// opcional pra rastreabilidade do path (sanitizado, nunca usado pra
+// decisão de segurança -- ownership continua vindo só de CURRENT_USER.id).
+async function uploadOwnFlashcardMedia(file, kind, resourceId){
   if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
-  const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
-  const path = `${CURRENT_USER.id}/self-${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  if (kind === 'audio'){
+    const v = validateFieldAudioUploadFile(file);
+    if (!v.ok) return { ok: false, error: v.error };
+  }
+  const extRaw = (file.name || '').split('.').pop() || 'bin';
+  const ext = (extRaw.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().slice(0, 8)) || 'bin';
+  const safeResourceId = (resourceId ? String(resourceId) : '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40);
+  const resourceSegment = safeResourceId ? `${safeResourceId}-` : '';
+  const path = `${CURRENT_USER.id}/self-${kind}-${resourceSegment}${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
   const { error } = await supabaseClient.storage
     .from('flashcard-media')
     .upload(path, file, { contentType: file.type || undefined, cacheControl: '3600' });
   if (error){ console.error(`Erro ao subir ${kind} do cartão:`, error); return { ok: false, error: 'Não foi possível enviar o arquivo agora.' }; }
   const { data: pub } = supabaseClient.storage.from('flashcard-media').getPublicUrl(path);
-  return { ok: true, url: pub.publicUrl };
+  return { ok: true, url: pub.publicUrl, path };
+}
+
+// Fase 7e (ver CLAUDE.md) -- mesma remoção best-effort de
+// deleteFlashcardMedia (shared/teacher-flashcards.js), espelhada aqui pro
+// lado da própria aluna. Mesmo bucket, mesma RLS de ownership por
+// auth.uid() -- nenhuma diferença funcional entre os dois lados.
+async function deleteOwnFlashcardMedia(path){
+  if (!path) return { ok: false };
+  const { error } = await supabaseClient.storage.from('flashcard-media').remove([path]);
+  if (error){ console.warn('Não foi possível remover mídia órfã do cartão (best-effort):', error); return { ok: false }; }
+  return { ok: true };
 }
 
 async function setOwnFlashcardStatus(id, status){

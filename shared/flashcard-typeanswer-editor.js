@@ -241,11 +241,13 @@ function renderTypeAnswerEditorHTML(editorState, opts){
 // editor genérico, nunca disparam re-render) ou 'structure' (criar prompt/
 // answer -- dispara re-render, porque o CONJUNTO de linhas visíveis ou a
 // mensagem de validação mudou).
-function wireTypeAnswerEditor(container, editorState, onChange){
+// `opts` (Fase 7e -- ver CLAUDE.md) repassado pra wireFieldEditorList
+// (uploadFn/deleteFn), mesmo padrão de wireMultipleChoiceEditor.
+function wireTypeAnswerEditor(container, editorState, onChange, opts){
   if (!container) return;
   wireFieldEditorList(container, editorState, (kind, fieldId) => {
     if (onChange) onChange(kind, fieldId);
-  });
+  }, opts);
 
   const addPromptBtn = container.querySelector('[data-ta-add-prompt]');
   if (addPromptBtn) addPromptBtn.addEventListener('click', () => {
@@ -268,7 +270,7 @@ function refreshTypeAnswerEditorBox(boxEl, editorState, opts){
   boxEl.innerHTML = renderTypeAnswerEditorHTML(editorState, opts);
   wireTypeAnswerEditor(boxEl, editorState, (kind) => {
     if (kind === 'structure') refreshTypeAnswerEditorBox(boxEl, editorState, opts);
-  });
+  }, opts);
 }
 
 // ---------- Extensão do dispatcher por Card Type (shared/flashcard-mc-editor.js) ----------

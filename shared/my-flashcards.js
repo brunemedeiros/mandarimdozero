@@ -429,8 +429,13 @@ function myFlashcardNativeEditFormHTML(c, editorState){
 }
 
 function wireMyFlashcardNativeEditForm(c, editorState, wrap){
+  // Fase 7e (ver CLAUDE.md) -- mesmo par uploadFn/deleteFn de
+  // shared/admin-flashcards.js, só que as versões "own" (aluna é dona do
+  // conteúdo) -- shared/flashcard-field-editor.js nunca chama
+  // supabaseClient/Storage direto, só através destas 2 funções.
+  const nativeFieldOpts = { namePrefix: 'edit-my-native', uploadFn: uploadOwnFlashcardMedia, deleteFn: deleteOwnFlashcardMedia };
   const boxEl = document.getElementById('edit-my-native-flashcard-fields');
-  refreshNativeCardTypeBox(boxEl, editorState, { namePrefix: 'edit-my-native' });
+  refreshNativeCardTypeBox(boxEl, editorState, nativeFieldOpts);
 
   document.getElementById('edit-my-native-flashcard-card-type').addEventListener('change', (e) => {
     const newMode = e.target.value;
@@ -440,7 +445,7 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap){
     else if (newMode === 'type_answer') transitionToTypeAnswer(editorState);
     else if (newMode === 'cloze') transitionToCloze(editorState);
     else editorState.cardGenerationMode = newMode;
-    refreshNativeCardTypeBox(boxEl, editorState, { namePrefix: 'edit-my-native' });
+    refreshNativeCardTypeBox(boxEl, editorState, nativeFieldOpts);
   });
 
   // Fase 6D.7 (ver CLAUDE.md) -- Preview do rascunho de edição atual.
@@ -449,6 +454,10 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap){
   });
 
   document.getElementById('edit-my-native-flashcard-cancel').addEventListener('click', () => {
+    // Fase 7e (ver CLAUDE.md) -- mesma compensação de
+    // shared/admin-flashcards.js: cancelar descarta o rascunho, qualquer
+    // áudio enviado nesta sessão de edição nunca chega a ser referenciado.
+    compensateFreshMediaUploads(editorState);
     MY_FLASHCARDS_STATE.editingCardId = null;
     MY_FLASHCARDS_STATE.editingNativeState = null;
     renderMyFlashcardsView();
@@ -478,7 +487,14 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap){
       if (saveBtn) saveBtn.disabled = true;
       const result = await updateOwnFlashcardContent(c.id, { revision: nextRevision, nativeState: editorState });
       if (saveBtn) saveBtn.disabled = false;
-      if (!result.ok){ errorEl.textContent = result.error; return; }
+      if (!result.ok){
+        // Fase 7e (ver CLAUDE.md, Seção 14) -- a Note não foi salva:
+        // compensação best-effort do(s) áudio(s) enviado(s) nesta sessão.
+        compensateFreshMediaUploads(editorState);
+        errorEl.textContent = result.error;
+        return;
+      }
+      clearFreshMediaUploads(editorState);
       // Reflete o reset NA MESMA sessão, mesmo motivo de sempre (ver
       // wireMyFlashcardEditForm acima) -- reconstrói o card via o motor
       // real (buildEngineCardsFromRow) a partir da linha atualizada, não
@@ -545,13 +561,15 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
       else if (newMode === 'type_answer') transitionToTypeAnswer(MY_FLASHCARDS_STATE.nativeCardState);
       else if (newMode === 'cloze') transitionToCloze(MY_FLASHCARDS_STATE.nativeCardState);
       else MY_FLASHCARDS_STATE.nativeCardState.cardGenerationMode = newMode;
-      refreshNativeCardTypeBox(document.getElementById('my-flashcard-native-fields'), MY_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'my-native' });
+      refreshNativeCardTypeBox(document.getElementById('my-flashcard-native-fields'), MY_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'my-native', uploadFn: uploadOwnFlashcardMedia, deleteFn: deleteOwnFlashcardMedia });
     });
 
     // Fase 6D.3/6D.4a (ver CLAUDE.md) -- caixa "Campos nativos", mesmo
     // padrão de shared/admin-flashcards.js. Só existe quando `premium`
     // (mesmo gate do bloco HTML acima, ver renderMyFlashcardsView).
-    refreshNativeCardTypeBox(document.getElementById('my-flashcard-native-fields'), MY_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'my-native' });
+    // Fase 7e -- uploadFn/deleteFn (uploadOwnFlashcardMedia/
+    // deleteOwnFlashcardMedia) habilitam o upload de áudio real por Field.
+    refreshNativeCardTypeBox(document.getElementById('my-flashcard-native-fields'), MY_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'my-native', uploadFn: uploadOwnFlashcardMedia, deleteFn: deleteOwnFlashcardMedia });
 
     // Fase 6D.7 (ver CLAUDE.md) -- Preview do rascunho atual (não salvo).
     // languageAppKey aqui é sempre APP_KEY (o site fixa o idioma pra
@@ -598,7 +616,15 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
       btn.disabled = true;
       const result = await createOwnFlashcard({ languageAppKey: APP_KEY, nativeState });
       btn.disabled = false;
-      if (!result.ok){ errorEl.textContent = result.error; return; }
+      if (!result.ok){
+        // Fase 7e (ver CLAUDE.md, Seção 14) -- a Note nunca chegou a ser
+        // criada -- compensação best-effort do(s) áudio(s) enviado(s)
+        // nesta sessão.
+        compensateFreshMediaUploads(nativeState);
+        errorEl.textContent = result.error;
+        return;
+      }
+      clearFreshMediaUploads(nativeState);
       if (typeof addSelfFlashcardToState === 'function') addSelfFlashcardToState(result.card);
       showToast('✓ Cartão criado. Ele já entra na sua fila de revisão.');
       renderMyFlashcardsView();

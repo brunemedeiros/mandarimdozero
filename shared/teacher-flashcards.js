@@ -220,16 +220,59 @@ async function deleteFlashcardPermanently(id){
 // (path fixo, upsert), cada cartão pode ter sua própria mídia sem
 // sobrescrever a de outro. Devolve a URL pública já pronta pra gravar em
 // createFlashcard(); não grava nada no banco sozinho.
-async function uploadFlashcardMedia(file, kind){
+//
+// Fase 7e (ver CLAUDE.md) -- 2 extensões, aditivas, sem quebrar nenhum
+// call site existente (kind==='image', sem resourceId):
+// 1. `kind==='audio'` passa por validateFieldAudioUploadFile() (shared/
+//    flashcard-model.js) ANTES de qualquer chamada de rede -- MIME/
+//    tamanho espelhando exatamente a migration 046 (bucket já reforça a
+//    mesma regra do lado do servidor, esta é só a 1ª camada/feedback
+//    rápido). `kind==='image'` nunca passa por essa checagem -- fora do
+//    escopo desta subfase (só áudio).
+// 2. `resourceId` (opcional -- Seção 5, "path deve permitir identificar o
+//    recurso") -- quando presente (o id do Field, gerado por
+//    createFieldState), entra no path como um segmento a mais entre
+//    `kind` e o timestamp. Nunca usado pra decisão de segurança (a
+//    ownership continua vindo só de `CURRENT_USER.id`, 1º segmento do
+//    path, checado pela RLS de Storage) -- sanitizado defensivamente
+//    (só [a-zA-Z0-9_-], truncado) porque field ids são gerados por este
+//    app (nunca confiáveis por padrão, Seção 15 -- nunca deixar o
+//    usuário escolher um path arbitrário).
+async function uploadFlashcardMedia(file, kind, resourceId){
   if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
-  const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
-  const path = `${CURRENT_USER.id}/${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  if (kind === 'audio'){
+    const v = validateFieldAudioUploadFile(file);
+    if (!v.ok) return { ok: false, error: v.error };
+  }
+  const extRaw = (file.name || '').split('.').pop() || 'bin';
+  const ext = (extRaw.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().slice(0, 8)) || 'bin';
+  const safeResourceId = (resourceId ? String(resourceId) : '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40);
+  const resourceSegment = safeResourceId ? `${safeResourceId}-` : '';
+  const path = `${CURRENT_USER.id}/${kind}-${resourceSegment}${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
   const { error } = await supabaseClient.storage
     .from('flashcard-media')
     .upload(path, file, { contentType: file.type || undefined, cacheControl: '3600' });
   if (error){ console.error(`Erro ao subir ${kind} do flashcard:`, error); return { ok: false, error: 'Não foi possível enviar o arquivo agora.' }; }
   const { data: pub } = supabaseClient.storage.from('flashcard-media').getPublicUrl(path);
-  return { ok: true, url: pub.publicUrl };
+  return { ok: true, url: pub.publicUrl, path };
+}
+
+// Fase 7e (ver CLAUDE.md, Seção 10/14) -- remoção BEST-EFFORT de um objeto
+// do bucket -- nunca lança, falha é sempre silenciosa (best-effort, quem
+// chama já decide o que fazer se `ok:false`). Só 2 usos legítimos, os
+// dois documentados no relatório da fase: (a) compensação de upload
+// órfão quando a professora subiu um áudio novo nesta sessão de edição e
+// a gravação da Note falhou logo em seguida (nesse caso o objeto nunca
+// chegou a ser referenciado por nenhuma linha real -- seguro deletar);
+// (b) nunca usado em "substituir"/"remover" um áudio JÁ SALVO -- ver
+// shared/flashcard-field-editor.js pra justificativa completa (um Field
+// clonado pode compartilhar a mesma URL, tornando delete físico ali
+// inseguro sem contagem de referências).
+async function deleteFlashcardMedia(path){
+  if (!path) return { ok: false };
+  const { error } = await supabaseClient.storage.from('flashcard-media').remove([path]);
+  if (error){ console.warn('Não foi possível remover mídia órfã do flashcard (best-effort):', error); return { ok: false }; }
+  return { ok: true };
 }
 
 async function setFlashcardStatus(id, status){

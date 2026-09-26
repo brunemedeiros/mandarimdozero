@@ -176,6 +176,44 @@ function resolveFieldAudioUrl(audio){
   return typeof candidate === 'string' && candidate ? candidate : null;
 }
 
+// ---------- Fase 7e (upload de áudio por Field, ver CLAUDE.md) ----------
+//
+// Espelha EXATAMENTE os valores da migration 046
+// (shared/supabase_migrations/046_flashcard_media_size_mime_limits.sql,
+// aplicada ao vivo no bucket `flashcard-media`) -- nunca uma lista
+// inventada a partir de conhecimento geral. A validação aqui é uma
+// SEGUNDA camada, cliente, redundante de propósito com o
+// file_size_limit/allowed_mime_types do próprio bucket (regra já travada
+// neste arquivo/CLAUDE.md: "nunca confiar somente no cliente") -- dá
+// feedback imediato sem round-trip de rede, mas o Storage rejeita de
+// qualquer jeito um upload que burle esta checagem (ex: via devtools).
+const FIELD_AUDIO_UPLOAD_MIME_TYPES = [
+  'audio/mpeg', 'audio/mp3', 'audio/mp4', 'audio/aac',
+  'audio/ogg', 'audio/wav', 'audio/webm', 'audio/x-m4a',
+];
+const FIELD_AUDIO_UPLOAD_MAX_BYTES = 5242880; // 5 MiB
+
+// Validação PURA de um File/Blob antes de subir pro Storage -- nunca faz
+// I/O, nunca lança. `file.type` (MIME reportado pelo navegador) é a
+// mesma fonte que `allowed_mime_types` do bucket já usa pra decidir --
+// não é 100% confiável (um navegador pode reportar tipo errado/vazio),
+// por isso é só a PRIMEIRA camada; a policy do bucket é quem de fato
+// impede um upload malicioso. `file.name`/extensão NUNCA entram nesta
+// checagem (Seção 15 -- nunca confiar no nome de arquivo pra decisão de
+// segurança).
+function validateFieldAudioUploadFile(file){
+  if (!file) return { ok: false, error: 'Nenhum arquivo selecionado.' };
+  if (typeof file.size === 'number' && file.size <= 0) return { ok: false, error: 'Arquivo vazio.' };
+  if (typeof file.size === 'number' && file.size > FIELD_AUDIO_UPLOAD_MAX_BYTES){
+    return { ok: false, error: 'Arquivo maior que 5 MB -- escolha um arquivo de áudio menor.' };
+  }
+  const type = file.type || '';
+  if (!FIELD_AUDIO_UPLOAD_MIME_TYPES.includes(type)){
+    return { ok: false, error: 'Formato de áudio não suportado. Use MP3, M4A/AAC, OGG, WAV ou WEBM.' };
+  }
+  return { ok: true };
+}
+
 const FLASHCARD_MODEL_FSRS_DEFAULTS = Object.freeze({
   ef: 2.5, interval: 0, reps: 0, due: 0, lapses: 0,
   stability: 0, difficulty: 0, state: 'new', lastReview: null,

@@ -11625,3 +11625,275 @@ migração/mudança de schema.
 Próxima subfase (7e, 7f, 7g ou 7i, conforme a decomposição da auditoria
 da Fase 7) só começa depois de autorização explícita da autora, com este
 relatório já entregue antes de pedir luz verde.
+
+## Fase 7e -- upload de áudio por Field (primeira subfase de código de Fase
+7 autorizada a introduzir infraestrutura de mídia de verdade)
+
+Primeira subfase da Fase 7 que efetivamente grava e reproduz um arquivo
+enviado pela professora/aluna -- as anteriores (7a resolução de mídia por
+Field, 7b contrato de `Field.audio`, 7c especificação de UX,
+7d isolamento de analytics no Preview) prepararam o terreno sem tocar em
+upload/gravação real, exatamente como cada relatório anterior deixou
+registrado. TTS server-side e gravação por microfone continuam fora do
+escopo (7f/7g), assim como qualquer trabalho em `student_flashcards`/
+migração legada em massa/export Anki -- nada disso foi tocado.
+
+**Infraestrutura de Storage usada -- bucket `flashcard-media` (migration
+032, Fase 8a) endurecido nesta sessão pela migration `046_flashcard_
+media_size_mime_limits.sql`** (aplicada AO VIVO via
+`mcp__Supabase__apply_migration`, projeto `eigjocalzwamisgqilhg` --
+confirmado na auditoria desta fase que o bucket nunca tinha
+`file_size_limit`/`allowed_mime_types` configurados desde a criação em
+2026-09-22, aceitando qualquer arquivo de qualquer tamanho até agora):
+`file_size_limit: 5242880` (5 MiB) e `allowed_mime_types:
+['audio/mpeg','audio/mp3','audio/mp4','audio/aac','audio/ogg','audio/wav',
+'audio/webm','audio/x-m4a']` -- confirmado ao vivo por `select id, public,
+file_size_limit, allowed_mime_types from storage.buckets where
+id='flashcard-media'` antes de escrever qualquer linha de código cliente,
+não presumido. Nenhum bucket novo criado -- o já existente já era
+adequado (leitura pública, escrita restrita à pasta do próprio
+`auth.uid()`), só ganhou as 2 travas de infraestrutura que nunca tinha.
+Verificado ANTES da migration que zero linha em `teacher_flashcards`/
+`own_flashcards` tinha `audio_url` preenchido -- endurecer o bucket não
+quebrou nenhum arquivo já referenciado por um cartão real.
+
+**Path do objeto no Storage** -- mesmo padrão já existente desde a Fase
+8a (`{userId}/{kind}-{ts}-{rand}.{ext}` pra professora,
+`{userId}/self-{kind}-{ts}-{rand}.{ext}` pra aluna), estendido com um
+componente de `resourceId` opcional (o id do Field, ex:
+`{userId}/audio-{fieldId}-{ts}-{rand}.mp3`) pra rastreabilidade (Seção
+5) -- sanitizado defensivamente (`[^a-zA-Z0-9_-]` removido, truncado em
+40 caracteres) antes de entrar no path, nunca usado pra decisão de
+segurança (a ownership continua vindo só do 1º segmento, `auth.uid()`,
+checado pela RLS de Storage já existente). Extensão do arquivo também
+sanitizada (`[^a-zA-Z0-9]` removido) -- achado da auditoria: a versão
+anterior de `uploadFlashcardMedia`/`uploadOwnFlashcardMedia` derivava a
+extensão direto de `file.name.split('.').pop()` sem sanitizar, o que
+teoricamente permitiria um `/` entrar no path via um nome de arquivo
+malicioso sem extensão (`file.name` sem `.` faz `.pop()` devolver a
+string inteira) -- corrigido de passagem nesta subfase (Seção 15).
+
+**Permissões** -- inalteradas: RLS de `flashcard-media` já era
+"qualquer autenticado, restrito à pasta do próprio `auth.uid()`" desde
+a migration 032, nunca escopada a professora -- funciona pra Admin e
+Meus Cartões sem nenhuma mudança de policy. Nenhuma permissão aberta
+globalmente, nenhum arquivo privado virou público.
+
+**MIME whitelist** -- fonte é a MESMA lista da migration 046 (nunca uma
+lista inventada de conhecimento geral): `FIELD_AUDIO_UPLOAD_MIME_TYPES`
+(`shared/flashcard-model.js`) espelha os 8 valores exatos, checados no
+cliente ANTES de qualquer chamada de rede (`validateFieldAudioUploadFile`)
+e de novo pela policy do bucket (2ª camada real -- "nunca confiar
+somente no cliente", regra já travada neste arquivo). `accept="..."` do
+`<input type="file">` usa a mesma lista.
+
+**Limite de tamanho** -- 5 MiB (`FIELD_AUDIO_UPLOAD_MAX_BYTES`), mesmo
+valor da migration. Justificativa: não existia limite anterior nenhum
+no projeto pra esse tipo de mídia (achado da auditoria) -- escolhido um
+valor razoável pra um clipe de pronúncia/explicação curta de flashcard
+(alguns minutos de MP3 comprimido cabem sobrando em 5 MiB), nunca um
+podcast inteiro. Validado no cliente (feedback imediato) E no bucket
+(fronteira de segurança real).
+
+**Fluxo nativo** -- Field -> professora/aluna escolhe um arquivo (input
+real, sem seletor de origem funcional pra URL/TTS/gravação ainda, ver
+abaixo) -> validação client-side (MIME+tamanho, `validateFieldAudioUploadFile`)
+-> `uploadFn(file, 'audio', fieldId)` (`uploadFlashcardMedia`/
+`uploadOwnFlashcardMedia`, agora aceitando `kind`+`resourceId` opcional)
+-> só DEPOIS do sucesso, `updateFieldInEditorState(editorState, fieldId,
+{audio:{type:'upload', url, uploadedAt, mimeType}})` -- nunca antes.
+Falha: `field.audio` permanece exatamente como estava (nunca sobrescrito
+com um shape parcial/inválido), mensagem de erro transitória no próprio
+bloco do Field, input reabilitado. `editorState`/`revision` nunca são
+tocados nesse caminho -- só o Note em si é salvo, quando a professora/
+aluna clica Salvar/Criar.
+
+**Comportamento de substituição** -- escolher um novo arquivo quando já
+existe áudio NUNCA apaga o antigo antes do novo terminar: `field.audio`
+só é sobrescrito depois do `await uploadFn(...)` resolver com sucesso
+(confirmado por teste dedicado -- `field.audio` inalterado enquanto a
+Promise do upload está em voo). Se falhar, o áudio anterior continua lá,
+tocável normalmente.
+
+**Remoção** -- distinção explícita entre (A) remover a REFERÊNCIA
+(`field.audio = null`, botão "🗑 Remover áudio") e (B) apagar o objeto
+físico do Storage -- **nunca (B) numa remoção/substituição explícita**.
+Motivo, documentado no próprio código (`wireFieldAudioBlockFor`,
+`shared/flashcard-field-editor.js`): `cloneFieldIntoEditorState` (Fase
+6D.3) copia `audio` POR VALOR (mesma URL) -- 2 Fields podem compartilhar
+o mesmo objeto no Storage sem nenhuma contagem de referências, então
+deletar fisicamente ao remover/substituir arriscaria quebrar o áudio de
+um Field CLONADO que ainda aponta pra lá. Nenhum sistema de garbage
+collection foi construído nesta fase (explicitamente fora do escopo,
+Seção 10) -- arquivos órfãos de remoção/substituição ficam documentados
+aqui como candidatos a uma rotina de limpeza futura, nunca apagados às
+cegas agora.
+
+**Compensação de atomicidade Storage<->DB (Seção 14)** -- caso
+DIFERENTE do anterior, tratado com delete físico de verdade: um upload
+bem-sucedido NESTA MESMA sessão de edição (`editorState.
+__freshMediaUploads`, populado a cada sucesso) nunca é referenciado por
+nenhuma linha real enquanto a Note ainda não foi salva -- se o INSERT/
+UPDATE que a salvaria falhar logo em seguida (ou a edição for
+cancelada), o objeto no Storage é garantidamente órfão, seguro remover
+(`compensateFreshMediaUploads`, `shared/flashcard-native-persistence.js`,
+best-effort, nunca lança, nunca mascara o erro de save que já está sendo
+mostrado). Num save com MÚLTIPLOS alunos selecionados (Admin, um insert
+por aluno com o MESMO áudio embutido), só compensa se TODAS as inserções
+falharem -- uma falha PARCIAL já deixa o áudio referenciado por pelo
+menos 1 linha real, nunca seguro deletar nesse caso. Depois de um save
+bem-sucedido, `clearFreshMediaUploads()` só limpa a lista sem tocar o
+Storage -- os uploads passam a estar legitimamente referenciados.
+
+**Revision** -- nenhuma regra nova inventada: `noteEditorStateContentForComparison()`
+(Fase 6B/7b, `shared/flashcard-editor-state.js`) já incluía `audio` por
+Field na comparação de conteúdo desde que o contrato de `Field.audio`
+foi travado -- editar/substituir/remover áudio já disparava corretamente
+`noteEditorStateRequiresNewRevision()` sem precisar de nenhuma mudança
+de código nesta fase (confirmado pelo teste de browser: substituir áudio
++ salvar incrementa `revision` de verdade).
+
+**Relação com Preview** -- nenhuma mudança em `shared/flashcard-preview.js`
+foi necessária: Preview já delega 100% aos mesmos 4 renderers reais
+(Fase 6D.7), que já leem `field.audio`/`resolveFieldAudioUrl()` desde a
+Fase 7a/7b -- um Field com áudio recém-enviado aparece no Preview
+automaticamente, sem nenhum código específico. O isolamento de
+analytics (Fase 7d, `card.__isPreviewCard`) já cobre o autoplay de TTS;
+o botão de áudio PRÓPRIO (`.custom-audio-btn`, o que esta fase alimenta)
+nunca chamou `registerAudioPlay()` em nenhum contexto desde que foi
+escrito (achado já registrado na Fase 7d) -- confirmado de novo aqui
+por teste dedicado (`STATE.totalAudioPlays` inalterado depois de montar
+um Preview com áudio).
+
+**Limitações conhecidas, documentadas sem correção nesta fase**:
+- Nenhuma exclusão física de arquivo em remoção/substituição (ver acima)
+  -- rotina de limpeza de órfãos é trabalho de uma fase futura, se algum
+  dia justificado pelo volume real de uso.
+- Origem de áudio "URL externa"/"Texto para voz"/"Gravação" aparecem no
+  `<select>` do editor (Seção 8 -- "o seletor deve continuar compatível
+  com os 5 valores") mas o `<select>` inteiro fica `disabled` -- só
+  Upload é funcional nesta fase, nada finge que as outras opções já
+  funcionam.
+- `student_flashcards`(`own_flashcards`)/editor de Field JÁ ganharam
+  upload (Meus Cartões usa a MESMA infraestrutura que Admin, só trocando
+  `uploadFn`/`deleteFn` pros equivalentes "own") -- diferente de outras
+  fases desta feature que restringiam a professora, aqui os dois
+  contextos foram cobertos de propósito desde o início (Seção 7).
+- Imagem por Field continua sem UI de upload (só áudio nesta fase,
+  Seção 8/19) -- indicador textual read-only de `field.image`
+  inalterado.
+- Nenhuma validação de duração de áudio (só tamanho em bytes) --
+  suficiente pro caso de uso (clipe curto), sem necessidade adicional
+  identificada.
+
+**Pontos futuros pra TTS (7f)/gravação (7g)**: o shape `Field.audio`
+(`type:'tts'`/`type:'recording'`) já existe desde a Fase 7b, pronto pra
+receber essas 2 subfases -- 7f precisa de infraestrutura NOVA (Edge
+Function + chave de API de TTS, nunca presumida como já ativa) além da
+UI; 7g precisa de `MediaRecorder`/permissão de microfone, mas reaproveita
+a MESMA infraestrutura de upload construída aqui (o resultado de uma
+gravação é só mais um `File`/`Blob` subindo pelo mesmo `uploadFn`).
+
+**Testes realizados:**
+- `node --check` sem erro nos 10 arquivos tocados (`shared/flashcard-
+  model.js`, `shared/teacher-flashcards.js`, `shared/own-flashcards.js`,
+  `shared/flashcard-field-editor.js`, `shared/flashcard-mc-editor.js`,
+  `shared/flashcard-typeanswer-editor.js`, `shared/flashcard-cloze-editor.js`,
+  `shared/flashcard-native-persistence.js`, `shared/admin-flashcards.js`,
+  `shared/my-flashcards.js`).
+- **Suíte Node/VM nova, 46/46** -- cobre os cenários A-T pedidos
+  explicitamente: whitelist/limite espelham a migration 046 (não
+  inventados); upload válido -> `Field.audio.type==='upload'`/URL/
+  mimeType/uploadedAt persistidos; arquivo de tipo/tamanho inválido
+  nunca chama `uploadFn`; upload falho preserva o áudio anterior
+  intacto; substituição só troca a referência DEPOIS do sucesso
+  (confirmado que `field.audio` não muda enquanto a Promise está em
+  voo); remoção limpa só a referência; clonar Field preserva áudio;
+  persistência nativa preserva áudio com ROUND-TRIP REAL pelo motor
+  (`nativeContentColumnsFromEditorState` -> `buildEngineCardsFromRow` ->
+  `resolveCardContentView`); `resolveCardField` isolado resolve
+  `audioUrl` corretamente; `resourceId` malicioso sanitizado nunca vira
+  path arbitrário; compensação best-effort chama `deleteFn` só nos
+  uploads frescos da sessão, nunca em save bem-sucedido; Admin e Meus
+  Cartões confirmados usando a MESMA infraestrutura parametrizada, nunca
+  duas implementações.
+- **8 suítes de regressão de fases anteriores (Fase 4-7b), re-executadas,
+  936/936 no total desta rodada (incluindo os 46 novos) sem nenhuma
+  falha** -- confirma zero regressão introduzida.
+- **Achado durante a validação, corrigido antes de reportar**: a
+  suíte arquitetural de `test_fase6d5_cloze_editor.js` (grep por
+  `.insert(`/`.update(`/`.from(`/`supabaseClient` em código executável)
+  falsou-positivo contra `Array.from(container.querySelectorAll(...))`
+  que eu tinha usado em `wireClozeEditor` pra identificar o Field de
+  frase por exclusão -- o grep casa a SUBSTRING `.from(`, não só chamadas
+  de rede. Trocado por `[...container.querySelectorAll(...)]` (mesmo
+  resultado, sem a substring ambígua) -- confirmado que não era um bug
+  real (nenhuma chamada de rede nova), só uma colisão textual com um
+  teste de fase anterior; suíte volta a passar 71/71 depois do ajuste.
+- **Browser smoke novo, FR+ZH, `52/52 checks`, via arquivo de upload
+  REAL** (`page.setInputFiles({name,mimeType,buffer})`, sem depender de
+  nenhum arquivo em disco) passando pelo código de PRODUÇÃO de ponta a
+  ponta (nunca uma função de upload de teste paralela -- só o nível de
+  rede de `storage.upload()`/`getPublicUrl()`/`remove()` foi
+  interceptado): (1) **Criação (Admin)** -- 2 Fields adicionados via UI
+  real, upload de áudio no 1º Field, `<audio>` de preview aparece com a
+  URL certa ANTES de salvar, submit cria a linha real com `fields[0].audio`
+  persistido, "reload" (`createNativeNoteEditorStateFromRow` sobre a
+  linha real) confirma o áudio sobrevivendo ao round-trip completo; (2)
+  **Edição/substituição** -- abre o cartão nativo recém-criado, mesmo
+  `fieldId` preservado, novo arquivo sobe, URL troca só depois do
+  sucesso, salva com confirmação de reset, linha real atualizada com a
+  URL nova, `revision` incrementado; (3) **Falha** -- upload simulado
+  falhando (`window.__UPLOAD_SHOULD_FAIL__`) confirma o áudio ANTERIOR
+  intacto, mensagem de erro visível; (4) **Remoção** -- remove a
+  referência, `field.audio===null` no estado ANTES de salvar, salva,
+  linha real confirma ausência, e confirmado que a remoção explícita
+  NUNCA chama `storage.remove()` (0 chamadas registradas -- só a
+  compensação de falha/cancelamento chamaria, testada isoladamente no
+  Node/VM); (5) **Review** -- cartão nativo real com áudio no Field de
+  front, `renderNormalCard()` real produz o botão `.custom-audio-btn`
+  com a URL certa; (6) **Preview** -- mesmo mecanismo, `STATE.
+  totalAudioPlays` confirmado inalterado; (7) **Meus Cartões (own)** --
+  mesmo fluxo de criação com upload real, linha `own_flashcards`
+  confirmada com o áudio persistido, usando `uploadOwnFlashcardMedia`
+  (função DIFERENTE da usada pelo Admin, confirmado que os 2 contextos
+  nunca compartilham a mesma função, só o mesmo padrão de integração).
+  Testado nos 2 idiomas -- FR completo (todos os 7 blocos), ZH com o
+  fluxo de criação central (upload real + persistência), suficiente pra
+  confirmar que o código (idêntico nos 2 idiomas, sem branch por idioma
+  em nenhum dos arquivos tocados) funciona igual. **Console**: só os
+  mesmos `ERR_TUNNEL_CONNECTION_FAILED` pré-existentes (proxy de saída
+  deste sandbox, documentados em toda a sessão) + o `console.error`
+  ESPERADO da própria cena de Falha (item 3 acima, disparado de
+  propósito pra confirmar o comportamento de preservação) -- zero erro
+  novo/inesperado atribuível a este código.
+- **Nenhum teste de integração Storage real (Seção 21) foi executado
+  contra o projeto Supabase de produção** -- diferente das migrations
+  (aplicadas e verificadas ao vivo), um upload de arquivo real deixaria
+  um objeto órfão no bucket `flashcard-media` sem um mecanismo de limpeza
+  garantido nesta sessão (a função de remoção só está disponível pelo
+  código cliente, não por uma query SQL direta contra o Storage) --
+  documentando a limitação em vez de arriscar lixo em produção, conforme
+  a própria instrução autorizava ("se não puder garantir limpeza, não
+  execute o teste real"). O contrato de `uploadFlashcardMedia`/
+  `uploadOwnFlashcardMedia` (path/validação/retorno) foi validado por
+  leitura + `node --check` + o smoke test de navegador acima, que exercita
+  a função de produção real contra um stub de rede -- cobertura
+  equivalente sem o risco de órfão em produção.
+
+**Confirmações finais (Seção 25)**: `git status`/`git diff --stat`
+mostram só os 10 arquivos `.js` já listados + a migration `046` (nova) --
+nenhum arquivo fora do escopo desta subfase tocado; nenhum dado legado
+alterado (migration 046 só endurece o bucket, nenhum UPDATE em
+`teacher_flashcards`/`own_flashcards`); nenhuma mudança de schema SQL
+além da já necessária (`file_size_limit`/`allowed_mime_types` do bucket,
+sem nenhuma coluna/tabela nova); nenhum arquivo de teste abandonado no
+Storage real (nenhum upload real foi feito contra produção, ver acima).
+
+Nenhum passo manual pendente pra autora -- migration 046 já aplicada ao
+vivo via `mcp__Supabase__apply_migration`.
+
+**PARE conforme instrução explícita -- 7f (TTS), 7g (gravação) e 7i
+(export Anki com mídia) NÃO foram implementados nesta subfase.** Próxima
+etapa só começa depois de autorização explícita da autora, com este
+relatório já entregue antes de pedir luz verde.

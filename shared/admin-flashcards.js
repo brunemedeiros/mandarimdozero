@@ -557,8 +557,13 @@ function flashcardNativeEditFormHTML(c, editorState){
 }
 
 function wireFlashcardNativeEditForm(c, editorState, container){
+  // Fase 7e (ver CLAUDE.md) -- uploadFn/deleteFn são o único ponto de
+  // integração que a caixa "Campos nativos" precisa pra oferecer upload
+  // de áudio de verdade -- shared/flashcard-field-editor.js nunca chama
+  // supabaseClient/Storage direto, só através destas 2 funções.
+  const nativeFieldOpts = { namePrefix: 'edit-native', uploadFn: uploadFlashcardMedia, deleteFn: deleteFlashcardMedia };
   const boxEl = document.getElementById('edit-native-flashcard-fields');
-  refreshNativeCardTypeBox(boxEl, editorState, { namePrefix: 'edit-native' });
+  refreshNativeCardTypeBox(boxEl, editorState, nativeFieldOpts);
 
   document.getElementById('edit-native-flashcard-card-type').addEventListener('change', (e) => {
     const newMode = e.target.value;
@@ -568,7 +573,7 @@ function wireFlashcardNativeEditForm(c, editorState, container){
     else if (newMode === 'type_answer') transitionToTypeAnswer(editorState);
     else if (newMode === 'cloze') transitionToCloze(editorState);
     else editorState.cardGenerationMode = newMode;
-    refreshNativeCardTypeBox(boxEl, editorState, { namePrefix: 'edit-native' });
+    refreshNativeCardTypeBox(boxEl, editorState, nativeFieldOpts);
   });
 
   // Fase 6D.7 (ver CLAUDE.md) -- Preview do rascunho de EDIÇÃO atual
@@ -585,6 +590,12 @@ function wireFlashcardNativeEditForm(c, editorState, container){
   });
 
   document.getElementById('edit-native-flashcard-cancel').addEventListener('click', () => {
+    // Fase 7e (ver CLAUDE.md) -- cancelar descarta o rascunho inteiro,
+    // mesma disciplina de sempre (Seção 16/17); qualquer áudio enviado
+    // durante esta sessão de edição nunca chega a ser referenciado por
+    // nenhuma linha real, mesmo tratamento de órfão que uma falha de
+    // save já recebe.
+    compensateFreshMediaUploads(editorState);
     ADMIN_FLASHCARDS_STATE.editingCardId = null;
     ADMIN_FLASHCARDS_STATE.editingNativeState = null;
     updateFlashcardsSelectionDependentUI(document.getElementById('admin-flashcards-content'));
@@ -619,7 +630,16 @@ function wireFlashcardNativeEditForm(c, editorState, container){
       if (saveBtn) saveBtn.disabled = true;
       const result = await updateFlashcardContent(c.id, { revision: nextRevision, nativeState: editorState });
       if (saveBtn) saveBtn.disabled = false;
-      if (!result.ok){ errorEl.textContent = result.error; return; }
+      if (!result.ok){
+        // Fase 7e (ver CLAUDE.md, Seção 14) -- a Note não foi salva:
+        // qualquer áudio enviado NESTA sessão de edição nunca chega a
+        // ser referenciado por nenhuma linha real -- compensação
+        // best-effort pra não deixar lixo acumulando no bucket.
+        compensateFreshMediaUploads(editorState);
+        errorEl.textContent = result.error;
+        return;
+      }
+      clearFreshMediaUploads(editorState);
       showToast(nextRevision > (c.revision || 0) ? '✓ Cartão editado. O progresso de revisão foi reiniciado.' : '✓ Cartão editado.');
       ADMIN_FLASHCARDS_STATE.editingCardId = null;
       ADMIN_FLASHCARDS_STATE.editingNativeState = null;
@@ -1335,7 +1355,7 @@ async function renderAdminFlashcardsView(){
     else if (newMode === 'type_answer') transitionToTypeAnswer(ADMIN_FLASHCARDS_STATE.nativeCardState);
     else if (newMode === 'cloze') transitionToCloze(ADMIN_FLASHCARDS_STATE.nativeCardState);
     else ADMIN_FLASHCARDS_STATE.nativeCardState.cardGenerationMode = newMode;
-    refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native' });
+    refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native', uploadFn: uploadFlashcardMedia, deleteFn: deleteFlashcardMedia });
   });
 
   // Fase 6D.7 (ver CLAUDE.md) -- Preview do RASCUNHO atual do editor
@@ -1359,7 +1379,7 @@ async function renderAdminFlashcardsView(){
   // Multiple Choice (6D.4a) e o Field editor genérico (6D.3) conforme o
   // Card Type atual -- add/remove/mudança estrutural re-renderiza só esta
   // caixa, nunca o form inteiro.
-  refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native' });
+  refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native', uploadFn: uploadFlashcardMedia, deleteFn: deleteFlashcardMedia });
 
   wireFlashcardFieldValidation(wrap);
 
@@ -1413,9 +1433,17 @@ async function renderAdminFlashcardsView(){
       btn.disabled = false;
       const failed = results.filter(r => !r.ok);
       if (failed.length === results.length){
+        // Fase 7e (ver CLAUDE.md, Seção 14) -- TODAS as inserções
+        // falharam -- nenhuma linha real ficou de pé referenciando o
+        // áudio recém-enviado nesta sessão, seguro compensar. Se só
+        // PARTE falhou (vários alunos selecionados), o mesmo áudio já
+        // está referenciado pela(s) linha(s) que teve(tiveram) sucesso --
+        // nunca compensa nesse caso.
+        compensateFreshMediaUploads(nativeState);
         errorEl.textContent = failed[0].error;
         return;
       }
+      clearFreshMediaUploads(nativeState);
       const okCount = results.length - failed.length;
       if (failed.length){
         showToast(`✓ ${okCount} cartão(ões) criado(s), ${failed.length} falharam.`);

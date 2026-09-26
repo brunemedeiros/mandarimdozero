@@ -55,15 +55,14 @@ function fieldLangLabel(lang){
   return found ? found.label : (lang ? lang : '(idioma não definido)');
 }
 
-// Fase 7b (ver CLAUDE.md) -- indicador textual (ainda 100% read-only,
-// nenhuma UI de edição/upload/geração nova nesta fase) agora reflete o
-// `type` canônico de Field.audio em vez de um "tem áudio vinculado"
-// genérico -- deixa visível, mesmo sem poder editar ainda, a diferença
-// entre um link externo, um upload, uma configuração de TTS ainda sem
-// áudio gerado, e uma gravação futura. Shape legado/desconhecido (ex:
-// `{url, source:'upload'}` de dado já persistido antes desta fase) cai
-// no fallback genérico -- nunca quebra a tela por causa de um `type`
-// ausente.
+// Fase 7b (ver CLAUDE.md) -- indicador textual reflete o `type` canônico
+// de Field.audio em vez de um "tem áudio vinculado" genérico -- deixa
+// visível a diferença entre um link externo, um upload, uma configuração
+// de TTS ainda sem áudio gerado, e uma gravação futura. Shape legado/
+// desconhecido (ex: `{url, source:'upload'}` de dado já persistido antes
+// da Fase 7b) cai no fallback genérico -- nunca quebra a tela por causa
+// de um `type` ausente. Reutilizado pela Fase 7e (renderFieldAudioBlockHTML,
+// abaixo) como linha de status dentro do editor de áudio de verdade.
 function fieldAudioIndicatorText(audio){
   if (!audio) return null;
   if (audio.type === 'tts') return audio.generatedUrl ? '🎧 áudio TTS gerado' : '🎧 TTS configurado (áudio ainda não gerado)';
@@ -71,6 +70,149 @@ function fieldAudioIndicatorText(audio){
   if (audio.type === 'url') return '🎧 áudio (link externo)';
   if (audio.type === 'upload') return '🎧 áudio (upload)';
   return '🎧 tem áudio vinculado';
+}
+
+// ---------- Editor de áudio por Field -- Fase 7e (ver CLAUDE.md) ----------
+//
+// Único componente de UI reutilizado por TODO Card Type que passa por
+// renderFieldEditorHTML() (normal/normal_reversed/multiple_choice/
+// type_answer, mais a TRADUÇÃO do cloze) -- e chamado A MAIS, direto,
+// pelo Field de TEXTO do cloze (shared/flashcard-cloze-editor.js, que
+// tem seu próprio editor visual e nunca passa por renderFieldEditorHTML).
+// Nunca uma segunda implementação por Card Type -- exatamente o mesmo
+// espírito de "Field editor genérico, sem conhecimento de Card Type" já
+// travado desde a Fase 6D.3.
+//
+// Escopo desta subfase (Seção 8): só "Arquivo (upload)" é funcional --
+// URL externa/Texto para voz/Gravação aparecem no seletor de origem (pra
+// já existir o espaço visual quando 7f/7g existirem) mas o `<select>`
+// inteiro fica `disabled` -- nunca finge que essas opções já funcionam.
+const FIELD_AUDIO_ORIGIN_UI_META = [
+  { value: 'none', label: 'Sem áudio' },
+  { value: 'url', label: 'URL externa (em breve)' },
+  { value: 'upload', label: 'Arquivo (upload)' },
+  { value: 'tts', label: 'Texto para voz (em breve)' },
+  { value: 'recording', label: 'Gravação (em breve)' },
+];
+
+// Render puro -- nunca side-effect. `resolveFieldAudioUrl`/
+// `FIELD_AUDIO_UPLOAD_MIME_TYPES` vêm de shared/flashcard-model.js
+// (carregado antes deste arquivo, ver "Depende de" no topo) -- checados
+// defensivamente (`typeof ... !== 'undefined'`) só pra este arquivo nunca
+// quebrar sozinho se algum dia for carregado fora de ordem num teste.
+function renderFieldAudioBlockHTML(field, opts){
+  opts = opts || {};
+  const namePrefix = opts.namePrefix || 'field-editor';
+  const audio = field.audio || null;
+  const originValue = audio ? audio.type : 'none';
+  const resolvedUrl = (typeof resolveFieldAudioUrl === 'function') ? resolveFieldAudioUrl(audio) : null;
+  const statusText = fieldAudioIndicatorText(audio) || 'Nenhum áudio configurado.';
+  const acceptAttr = (typeof FIELD_AUDIO_UPLOAD_MIME_TYPES !== 'undefined') ? FIELD_AUDIO_UPLOAD_MIME_TYPES.join(',') : 'audio/*';
+  return `
+    <div class="field-audio-block" data-field-audio-field="${field.id}" style="margin-top:6px; padding-top:6px; border-top:1px dashed var(--paper-line);">
+      <label class="profile-edit-label" for="${namePrefix}-audio-origin-${field.id}">Áudio</label>
+      <select id="${namePrefix}-audio-origin-${field.id}" class="profile-edit-input" disabled>
+        ${FIELD_AUDIO_ORIGIN_UI_META.map(o => `<option value="${o.value}" ${originValue === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
+      </select>
+      <p class="profile-edit-hint" style="margin:2px 0 6px;">URL externa, texto para voz e gravação chegam em fases futuras -- use o upload de arquivo abaixo.</p>
+      <p class="profile-edit-hint" data-field-audio-status="${field.id}" style="margin:0 0 4px;">${escapeHTML(statusText)}</p>
+      ${resolvedUrl ? `<audio controls preload="none" style="width:100%; margin-bottom:6px;" src="${escapeHTML(resolvedUrl)}"></audio>` : ''}
+      <input type="file" accept="${acceptAttr}" data-field-audio-file="${field.id}">
+      <p class="profile-edit-field-error" data-field-audio-error="${field.id}"></p>
+      ${audio ? `<button type="button" class="admin-select-link" data-field-audio-remove="${field.id}">🗑 Remover áudio</button>` : ''}
+    </div>
+  `;
+}
+
+// Liga o bloco de áudio de UM Field (identificado por `fieldId`) dentro
+// de `container` -- chamada tanto pelo wiring genérico
+// (wireFieldEditorList, abaixo) quanto direto pelo editor de Cloze
+// (shared/flashcard-cloze-editor.js, pro Field de frase, que nunca passa
+// por wireFieldEditorList). `opts.uploadFn`/`opts.deleteFn` (Seção 7 --
+// "mesma infraestrutura pros dois editores") vêm de quem integra
+// (shared/admin-flashcards.js -> uploadFlashcardMedia/deleteFlashcardMedia;
+// shared/my-flashcards.js -> uploadOwnFlashcardMedia/deleteOwnFlashcardMedia).
+function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts){
+  opts = opts || {};
+  const block = container.querySelector(`[data-field-audio-field="${fieldId}"]`);
+  if (!block) return;
+  const fileInput = block.querySelector('[data-field-audio-file]');
+  const errorEl = block.querySelector('[data-field-audio-error]');
+  const statusEl = block.querySelector('[data-field-audio-status]');
+  const removeBtn = block.querySelector('[data-field-audio-remove]');
+
+  if (fileInput){
+    fileInput.addEventListener('change', async () => {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      if (errorEl) errorEl.textContent = '';
+      // Validação client-side ANTES de qualquer chamada de rede (Seção 4) --
+      // uploadFn() valida de novo do lado do dado (mesma disciplina de
+      // duas camadas já usada em toda a feature), mas checar aqui primeiro
+      // evita gastar uma chamada de Storage num arquivo já sabidamente
+      // inválido.
+      if (typeof validateFieldAudioUploadFile === 'function'){
+        const v = validateFieldAudioUploadFile(file);
+        if (!v.ok){
+          if (errorEl) errorEl.textContent = v.error;
+          fileInput.value = '';
+          return;
+        }
+      }
+      if (typeof opts.uploadFn !== 'function'){
+        if (errorEl) errorEl.textContent = 'Upload de áudio não está disponível nesta tela.';
+        return;
+      }
+      fileInput.disabled = true;
+      if (statusEl) statusEl.textContent = 'Enviando áudio...';
+      const up = await opts.uploadFn(file, 'audio', fieldId);
+      // Seção 8 (relatório da fase) -- guarda contra o container ter sido
+      // removido do DOM enquanto o upload estava em voo (ex: a professora
+      // cancelou a edição/trocou de Card Type antes do upload terminar) --
+      // nunca mutar um editorState que a tela já abandonou, nunca tocar um
+      // elemento desconectado.
+      if (!block.isConnected) return;
+      if (!up.ok){
+        fileInput.disabled = false;
+        fileInput.value = '';
+        if (errorEl) errorEl.textContent = up.error || 'Não foi possível enviar o áudio agora.';
+        if (statusEl){
+          const currentField = (editorState.fields || []).find(f => f.id === fieldId);
+          statusEl.textContent = fieldAudioIndicatorText(currentField && currentField.audio) || 'Nenhum áudio configurado.';
+        }
+        return; // Seção 2/9 -- upload falhou: o áudio anterior (se havia) permanece intacto, nada é sobrescrito.
+      }
+      // Seção 14 -- rastreia o upload recém-concluído NESTA sessão de
+      // edição, pra a tela de integração poder compensar (best-effort
+      // delete) se a gravação da Note falhar logo em seguida -- ver
+      // shared/admin-flashcards.js/shared/my-flashcards.js, handlers de
+      // submit/salvar, que leem editorState.__freshMediaUploads.
+      editorState.__freshMediaUploads = editorState.__freshMediaUploads || [];
+      editorState.__freshMediaUploads.push({ path: up.path, deleteFn: opts.deleteFn || null });
+      // Só ATUALIZA field.audio depois do upload ter sucesso de verdade
+      // (Seção 2/9) -- nunca antes.
+      updateFieldInEditorState(editorState, fieldId, {
+        audio: { type: 'upload', url: up.url, uploadedAt: new Date().toISOString(), mimeType: file.type || null },
+      });
+      if (onChange) onChange('structure', fieldId);
+    });
+  }
+
+  if (removeBtn){
+    removeBtn.addEventListener('click', () => {
+      // Seção 10 -- remoção EXPLÍCITA é só de REFERÊNCIA (field.audio =
+      // null), NUNCA delete físico do objeto no Storage: um Field
+      // clonado (cloneFieldIntoEditorState, Fase 6D.3) copia `audio` por
+      // VALOR (mesma URL), então 2 Fields podem apontar pro mesmo
+      // arquivo sem nenhuma contagem de referências -- deletar aqui
+      // arriscaria quebrar o áudio do OUTRO Field clonado. O arquivo
+      // órfão fica documentado no relatório desta fase (CLAUDE.md) como
+      // candidato a uma rotina de limpeza futura, nunca apagado às cegas
+      // agora ("nenhum garbage collector é necessário nesta fase").
+      updateFieldInEditorState(editorState, fieldId, { audio: null });
+      if (onChange) onChange('structure', fieldId);
+    });
+  }
 }
 
 // ---------- Validação básica (Fase 6D.3 -- só o Field, não o Card Type
@@ -98,9 +240,11 @@ function renderFieldEditorHTML(field, index, opts){
   const removable = opts.removable !== false;
   const label = opts.label || `Campo ${index + 1}`;
   const contentValue = field.content && typeof field.content.value === 'string' ? field.content.value : '';
+  // Fase 7e (ver CLAUDE.md) -- áudio saiu de `mediaNotes` (texto estático)
+  // e virou o editor de verdade (renderFieldAudioBlockHTML, acima) --
+  // imagem/pinyin continuam só indicador textual, ainda fora do escopo
+  // desta subfase (Seção 8/19 -- só upload de ÁUDIO é implementado agora).
   const mediaNotes = [];
-  const audioIndicator = fieldAudioIndicatorText(field.audio);
-  if (audioIndicator) mediaNotes.push(audioIndicator);
   if (field.image) mediaNotes.push('🖼️ tem imagem vinculada');
   if (field.pinyinFieldId) mediaNotes.push('🔤 tem um campo de pinyin vinculado');
   return `
@@ -116,7 +260,8 @@ function renderFieldEditorHTML(field, index, opts){
         <option value="" ${!field.lang ? 'selected' : ''}>(não definido)</option>
         ${FIELD_LANG_OPTIONS.map(o => `<option value="${o.value}" ${field.lang === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
       </select>
-      ${mediaNotes.length ? `<p class="profile-edit-hint" style="margin-top:6px;">${mediaNotes.join(' · ')} (edição de mídia/pinyin ainda não implementada nesta fase -- preservados como estão).</p>` : ''}
+      ${renderFieldAudioBlockHTML(field, opts)}
+      ${mediaNotes.length ? `<p class="profile-edit-hint" style="margin-top:6px;">${mediaNotes.join(' · ')} (edição ainda não implementada nesta fase -- preservados como estão).</p>` : ''}
     </div>
   `;
 }
@@ -216,7 +361,11 @@ function cloneFieldIntoEditorState(editorState, fieldId){
 // pessoa está digitando -- mesma disciplina de
 // updateFlashcardsSelectionDependentUI(), ver "UX-fix 5" no CLAUDE.md);
 // add/remove SIM precisam de re-render (a lista de linhas mudou).
-function wireFieldEditorList(container, editorState, onChange){
+// `opts` (novo, Fase 7e -- ver CLAUDE.md) é opcional, repassado pra
+// wireFieldAudioBlockFor() (uploadFn/deleteFn) -- nenhum dos 4 wirings
+// pré-existentes (content/lang/remove/add) precisou de `opts`, só o de
+// áudio, adicionado ao final.
+function wireFieldEditorList(container, editorState, onChange, opts){
   if (!container) return;
   container.querySelectorAll('[data-field-content]').forEach(el => {
     el.addEventListener('input', () => {
@@ -244,18 +393,32 @@ function wireFieldEditorList(container, editorState, onChange){
       if (onChange) onChange('add', field.id);
     });
   }
+  // Fase 7e -- liga o editor de áudio de CADA Field mostrado neste
+  // container VIA renderFieldEditorHTML (escopado a `[data-field-editor]
+  // [data-field-audio-field]`, de propósito -- o Field de FRASE do Cloze
+  // tem seu próprio bloco de áudio, injetado direto por
+  // renderClozeEditorHTML() FORA de qualquer `.field-editor-row`, e é
+  // wireado explicitamente por wireClozeEditor(); sem este escopo, os
+  // dois wirings casariam o MESMO bloco e duplicariam os listeners de
+  // upload/remoção nele).
+  container.querySelectorAll('[data-field-editor] [data-field-audio-field]').forEach(block => {
+    wireFieldAudioBlockFor(container, editorState, block.dataset.fieldAudioField, onChange, opts);
+  });
 }
 
 // Helper de integração reutilizado pelos dois editores (admin/my-flashcards)
 // -- re-renderiza SÓ a caixa de Fields nativos (nunca o form inteiro) e
-// rewire, mas só quando a MUDANÇA foi estrutural (add/remove); edição de
-// texto/idioma já está refletida no próprio DOM sem precisar de nada extra.
-// `boxEl` é o container que recebe renderFieldEditorListHTML(); `opts` é
-// repassado pra renderFieldEditorHTML (namePrefix/label/removable/allowAdd).
+// rewire, quando a MUDANÇA foi estrutural (add/remove, ou 'structure' --
+// Fase 7e, emitido por um upload/remoção de áudio concluído); edição de
+// texto/idioma já está refletida no próprio DOM sem precisar de nada
+// extra. `boxEl` é o container que recebe renderFieldEditorListHTML();
+// `opts` é repassado pra renderFieldEditorHTML (namePrefix/label/
+// removable/allowAdd) E pra wireFieldEditorList (uploadFn/deleteFn,
+// Fase 7e).
 function refreshNativeFieldsBox(boxEl, editorState, opts){
   if (!boxEl) return;
   boxEl.innerHTML = renderFieldEditorListHTML(editorState, opts);
   wireFieldEditorList(boxEl, editorState, (kind) => {
-    if (kind === 'add' || kind === 'remove') refreshNativeFieldsBox(boxEl, editorState, opts);
-  });
+    if (kind === 'add' || kind === 'remove' || kind === 'structure') refreshNativeFieldsBox(boxEl, editorState, opts);
+  }, opts);
 }
