@@ -11444,3 +11444,184 @@ Próxima subfase (a implementação de fato do editor de áudio, ou
 qualquer outra ordem que a autora prefira -- 7d/7e/7f/7g/7i) só começa
 depois de autorização explícita, com este relatório já entregue antes de
 pedir luz verde.
+
+## Fase 7d -- isolamento de reprodução de áudio no Preview (o achado #7 da
+auditoria da Fase 7, corrigido)
+
+A auditoria da Fase 7 tinha identificado um achado NOVO (não corrigido
+naquela hora, "fora do escopo -- zero código funcional"): abrir o Preview
+do editor de flashcards (Fase 6D.7) já não disparava mais o AUTOPLAY de
+áudio como reprodução real (fix da Fase 7a, via `card.__isPreviewCard`),
+mas clicar MANUALMENTE no botão 🔊 dentro do Preview continuava chamando
+`speakFrench()`/`speakChinese()` normalmente -- que sempre chama
+`registerAudioPlay()` incondicionalmente como sua primeira instrução,
+incrementando `STATE.totalAudioPlays`/`STATE.daily.audioPlaysToday` e
+rodando `checkAndCelebrateBadges()` de verdade. Ou seja: testar um
+cartão no Preview podia inflar estatística real da conta e até desbloquear
+um badge de verdade, um efeito colateral que a Fase 6D.7 já tinha
+cuidadosamente isolado pro resto (FSRS/XP/persistência, via
+`callbacks.onAnswered` no-op), mas que escapava justamente porque o
+autoplay de TTS nunca passa pelos `callbacks` -- é uma chamada direta
+dentro do próprio corpo de cada renderer.
+
+**Auditoria feita antes de codar** (releitura de `shared/flashcard-
+preview.js`, `shared/flashcard-model.js`, `shared/flashcard-editor-
+state.js`, `shared/flashcard-field-editor.js`, e as seções relevantes de
+`fr/app.js`/`zh/app.js` -- `registerAudioPlay`/`speakFrench`/
+`speakChinese`/`playPregeneratedAudio`/`audioBtnHTML`/`customAudioBtnHTML`/
+`wireAudioButtons`/`wireCustomAudioButtons` e os 4 renderers inteiros)
+confirmou, por leitura direta, não presumida:
+- `speakFrench(text, btnEl, isAutoplay)`/`speakChinese(...)` chamam
+  `registerAudioPlay()` como primeira instrução, sempre, independente de
+  `isAutoplay` (que só afeta qual toast aparece se o autoplay for
+  bloqueado pelo navegador -- nunca gate de analytics).
+- `wireAudioButtons(container)` (sem 2º parâmetro, no código pré-7d)
+  ligava TODO clique em `.audio-btn` direto a `speakFrench`/`speakChinese`
+  -- chamado incondicionalmente nos 3 renderers que têm botão de
+  pronúncia automática (`renderNormalCard`/`renderMultipleChoiceCard`/
+  `renderTypeAnswerCard`), sem nenhuma checagem de `card.__isPreviewCard`.
+  Este é o único ponto real do vazamento.
+- `wireCustomAudioButtons(container)` (botão 🎧, áudio PRÓPRIO/upload da
+  professora, Fase 8a) **nunca chamou `registerAudioPlay()` em nenhum
+  contexto, Review ou Preview** -- já estava "isolado" por construção
+  desde que foi escrito, sem relação nenhuma com este bug. Confirmado por
+  leitura, não presumido -- nenhuma mudança foi necessária nele.
+- `renderClozeCard` **nunca chama `wireAudioButtons`** -- Cloze só tem o
+  botão 🎧 customizado (áudio da frase), nunca um botão de pronúncia
+  automática (`.audio-btn`) -- confirmado por leitura completa da função.
+  Ou seja: Cloze não tinha (e continua sem ter) nenhum vazamento deste
+  tipo pra corrigir -- os 3 outros renderers é que precisavam do fix.
+
+**O princípio, travado antes de codar**: Preview é uma simulação visual/
+interativa de Review, nunca Review de verdade. No Review real, tocar
+áudio → reprodução normal + analytics normal (como sempre foi). No
+Preview, tocar áudio → SÓ a reprodução, nunca nenhum efeito colateral de
+analytics. Nenhuma reprodução de áudio dentro do Preview deveria contar
+como estudo real, do mesmo jeito que clicar um grau de FSRS ali dentro
+não grada nada de verdade.
+
+**A solução -- separar reprodução de analytics, num único ponto de
+decisão, nunca espalhado (`fr/app.js` e `zh/app.js`, mudanças espelhadas
+byte a byte entre os 2 idiomas):**
+
+1. **`speakFrenchAudioOnly(text, btnEl, isAutoplay)`/
+   `speakChineseAudioOnly(...)`** (novo) -- o corpo INTEIRO que antes
+   vivia dentro de `speakFrench`/`speakChinese` (manifest lookup, mp3
+   pré-gerado, fallback Web Speech API com watchdog de retry), extraído
+   byte a byte, só sem a chamada a `registerAudioPlay()` que estava no
+   topo. Reprodução PURA, sem efeito colateral nenhum.
+2. **`speakFrench`/`speakChinese`** viram wrappers finos: `registerAudioPlay();
+   speakFrenchAudioOnly(text, btnEl, isAutoplay);` -- comportamento
+   externamente IDÊNTICO a antes (mesma assinatura, mesmo efeito), só
+   reorganizado por dentro. Todo call site existente (dezenas, na
+   trilha/exercícios/diálogos, nenhum tocado) continua funcionando sem
+   nenhuma mudança.
+3. **`playAudioPreview(text, btnEl)`** (novo) -- a porta de reprodução
+   ISOLADA: chama só `speakFrenchAudioOnly`/`speakChineseAudioOnly`
+   (`isAutoplay: false`, sempre um clique manual), nunca
+   `registerAudioPlay()`. Mesmo mecanismo de reprodução de sempre (mp3
+   pré-gerado OU Web Speech API) -- nunca uma reimplementação paralela.
+4. **`wireAudioButtons(container, isPreview)`** ganhou um 2º parâmetro
+   opcional (default falso/ausente, preserva 100% o comportamento de
+   sempre pra qualquer call site que não passa nada) -- é o ÚNICO lugar
+   do código inteiro que decide se um clique manual em `.audio-btn` conta
+   como reprodução real (`speakFrench`/`speakChinese`) ou isolada
+   (`playAudioPreview`). Nunca um `if (isPreview)` espalhado pelos 4
+   renderers -- cada um só passa `card.__isPreviewCard` (Fase 6D.7,
+   mesmo flag que já suprimia o autoplay desde a Fase 7a) como argumento,
+   a decisão em si mora só aqui.
+5. Os 3 call sites afetados (`renderNormalCard`/`renderMultipleChoiceCard`/
+   `renderTypeAnswerCard`, fr+zh) trocaram `wireAudioButtons(mountEl)`
+   por `wireAudioButtons(mountEl, card.__isPreviewCard)` -- 1 linha por
+   call site, nenhuma outra mudança de lógica. `renderClozeCard` não
+   precisou de nenhuma mudança (nunca chamava `wireAudioButtons`, ver
+   acima).
+
+**O que NÃO mudou, de propósito**: o autoplay continua exatamente como a
+Fase 7a já tinha corrigido -- suprimido por completo dentro do Preview
+(`if (!card.__isPreviewCard && ...) speakFrench(...)`), nunca
+redirecionado pra `playAudioPreview()` (não foi pedido, e "Preview sem
+autoplay algum" já era o comportamento correto validado na Fase 7a --
+só o CLIQUE MANUAL precisava de isolamento, que é exatamente o gap que
+esta subfase fecha). `wireCustomAudioButtons`/botão 🎧 não foi tocado
+(nunca teve o vazamento). `Field.audio` (contrato da Fase 7b),
+`shared/flashcard-model.js`, os resolvers, `shared/flashcard-preview.js`
+(a orquestração do Preview em si -- que já delega 100% aos 4 renderers
+reais, sem duplicar nada) -- nenhum destes foi tocado. Nenhuma migração,
+nenhum schema, nenhuma UI nova, nenhum upload/gravação/TTS server-side.
+
+**Testes realizados:**
+- `node --check` sem erro em `fr/app.js`/`zh/app.js`.
+- **14 suítes Node/VM de regressão re-executadas, 890/890 sem nenhuma
+  falha** (nenhuma toca `fr/app.js`/`zh/app.js`, esperado):
+  `test_fase4_engine.js` 34/34, `test_fase4d_regression.js` 30/30,
+  `test_fase5_generation.js` 33/33, `test_fase6b_native_notes.js`
+  74/74, `test_fase6d1_editor_state.js` 99/99, `test_fase6d2_state.js`
+  31/31, `test_fase6d3_field_editor.js` 65/65,
+  `test_fase6d4a_mc_editor.js` 92/92, `test_fase6d4b_typeanswer_editor.js`
+  62/62, `test_fase6d5_cloze_editor.js` 71/71,
+  `test_fase6d6_native_persistence.js` 85/85,
+  `test_fase6d7_preview_logic.js` 59/59, `test_fase6d8_legacy_conversion.js`
+  92/92, `test_fase7b_field_audio_contract.js` 83/83.
+- **3 suítes de browser smoke de regressão dos renderers/Preview,
+  re-executadas sem falha** (`test_fase6c1_normal_renderer.js`,
+  `test_fase6c2_mc_typeanswer_renderer.js`,
+  `test_fase6c3_cloze_renderer.js`, e `test_fase7a_browser_smoke.js` --
+  este último confirma explicitamente que a resolução de mídia por Field
+  da Fase 7a continua intacta, TUDO OK).
+- **Browser smoke novo, `test_fase7d_preview_audio_isolation.js`,
+  Playwright/Chromium real, FR+ZH, 38 asserções por idioma (76 no
+  total), todas `true`** -- cobrindo item a item os cenários A-P pedidos:
+  (A/B) Review real -- clicar `.audio-btn` chama `speakFrench`/
+  `speakChinese` de verdade, `registerAudioPlay()` dispara,
+  `STATE.totalAudioPlays` incrementa; (C/D/E) Preview -- o clique chama a
+  função de reprodução de BAIXO NÍVEL (`speakXAudioOnly`, mesma usada
+  pelo Review), mas `registerAudioPlay()`/o wrapper `speakX` NUNCA são
+  chamados, `STATE.totalAudioPlays` permanece idêntico; (F) XP inalterado
+  no Preview; (G) FSRS (`due`/`reps`/`lapses` do CardInstance) inalterado
+  no Preview; (H) nenhum registro de Review criado -- `STATE.reviewQueue`/
+  `reviewIndex` nunca tocados, `gradeCurrentCard`/`saveState` nunca
+  chamados por causa do clique de áudio; (I/J) autoplay E clique manual,
+  na MESMA sessão de Preview, nenhum dos dois registra reprodução real;
+  (K/L/M/N) os 4 Card Types verificados individualmente -- Normal,
+  Múltipla Escolha e Digite a Resposta com Review registrando/Preview
+  isolando; Cloze confirmado sem NENHUM `.audio-btn` em nenhum dos 2
+  contextos (nunca teve o vazamento, nem precisava de fix); (O/P) FR e ZH
+  -- mesmo comportamento de isolamento confirmado nos 2 idiomas (o teste
+  inteiro roda 1x por idioma). Cobertura adicional além do pedido
+  mínimo: multi-origem (texto que bate um mp3 pré-gerado real do
+  `AUDIO_MANIFEST`, ex. "Bonjour !"/"一", VERSUS texto autoral que cai no
+  fallback Web Speech API) -- os 2 caminhos de reprodução confirmados
+  isolados igualmente no Preview, provando que o isolamento acontece no
+  nível certo (a decisão em `wireAudioButtons`), não amarrado a uma
+  origem de áudio específica; confirmação explícita de que "Preview sem
+  analytics" não virou "Preview sem áudio" -- o botão continua presente,
+  clicável, e a função de reprodução é genuinamente invocada. Regressão
+  final -- Review real continua registrando áudio E gradando de verdade
+  depois de toda a interação com Preview na mesma sessão de teste. **Zero
+  page error** em qualquer um dos 2 idiomas (só os mesmos
+  `ERR_TUNNEL_CONNECTION_FAILED` pré-existentes do proxy de saída deste
+  sandbox, documentados em toda a sessão, não relacionados a este
+  código).
+
+**Confirmações finais pedidas:** Review real intacto -- confirmado (item
+A/B/regressão final, `registerAudioPlay`/`STATE.totalAudioPlays`/grade
+real continuam funcionando exatamente como sempre). Preview não gera
+nenhuma analytics -- confirmado (item C-J, nos 4 Card Types, nos 2
+idiomas, com e sem manifest, autoplay e clique manual). Nenhum achado
+fora do escopo desta subfase foi encontrado durante a implementação --
+a única pendência já conhecida (botão 🎧 nunca precisou de fix, Cloze
+nunca teve o vazamento) foi confirmada, não descoberta agora.
+
+**Escopo respeitado**: só `fr/app.js` + `zh/app.js` tocados (confirmado
+por `git status`/`git diff --stat`, 70 linhas +/- em fr, 78 em zh, só
+nos pontos documentados acima). Nenhum upload, TTS server-side, UI nova,
+MediaRecorder, export Anki, schema, ou mudança em Review real -- todos
+explicitamente fora do escopo desta subfase.
+
+Nenhum passo manual pendente pra autora -- 100% client-side, nenhuma
+migração/mudança de schema.
+
+Próxima subfase (7e, 7f, 7g ou 7i, conforme a decomposição da auditoria
+da Fase 7) só começa depois de autorização explícita da autora, com este
+relatório já entregue antes de pedir luz verde.

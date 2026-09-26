@@ -218,8 +218,14 @@ function playPregeneratedAudio(file, btnEl, isAutoplay){
   });
 }
 
-function speakChinese(text, btnEl, isAutoplay){
-  registerAudioPlay();
+// Fase 7d (ver CLAUDE.md) -- reprodução PURA de áudio (mp3 pré-gerado ou
+// Web Speech API), sem o efeito colateral de analytics (registerAudioPlay).
+// Extraída de dentro do que era o corpo de speakChinese() -- byte a byte o
+// mesmo código de sempre, só sem a chamada a registerAudioPlay() no topo.
+// speakChinese() (Review real, qualquer tela) chama registerAudioPlay() e
+// delega pra cá; playAudioPreview() (Preview do editor, Fase 6D.7) chama só
+// isto, nunca registerAudioPlay() -- ver os dois logo abaixo.
+function speakChineseAudioOnly(text, btnEl, isAutoplay){
   const pregenFile = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
   if (pregenFile){
     playPregeneratedAudio(pregenFile, btnEl, isAutoplay);
@@ -302,6 +308,24 @@ function speakChinese(text, btnEl, isAutoplay){
   }, 800);
 }
 
+function speakChinese(text, btnEl, isAutoplay){
+  registerAudioPlay();
+  speakChineseAudioOnly(text, btnEl, isAutoplay);
+}
+
+// Fase 7d (ver CLAUDE.md) -- porta de reprodução ISOLADA pro Preview do
+// editor de flashcards (Fase 6D.7): toca o áudio de verdade (mesmo
+// mecanismo de sempre -- mp3 pré-gerado ou Web Speech API, via
+// speakChineseAudioOnly acima), mas NUNCA chama registerAudioPlay() --
+// nunca incrementa STATE.totalAudioPlays/daily.audioPlaysToday, nunca
+// dispara checkAndCelebrateBadges(). Preview é uma simulação visual/
+// interativa de Review, não Review de verdade -- nenhuma reprodução de
+// áudio dentro dele deveria contar como estudo real. Sempre isAutoplay:
+// false (um clique manual, nunca um autoplay automático).
+function playAudioPreview(text, btnEl){
+  speakChineseAudioOnly(text, btnEl, false);
+}
+
 // Bug conhecido do Chromium/Opera: o speechSynthesis pode "adormecer" se
 // ficar muitos segundos sem uso, mesmo fora de uma fala ativa. Um resume()
 // periódico e leve evita que o próximo clique de áudio saia mudo.
@@ -321,11 +345,19 @@ function audioBtnHTML(hanziText, extraClass){
 }
 
 // Ativa todos os .audio-btn dentro de um container (delegação simples por escopo)
-function wireAudioButtons(container){
+// Fase 7d (ver CLAUDE.md) -- `isPreview` (booleano, opcional -- default
+// falso/ausente preserva 100% o comportamento de sempre) é o ÚNICO ponto
+// que decide se um clique MANUAL em `.audio-btn` conta como reprodução
+// real (speakChinese, com registerAudioPlay) ou isolada (playAudioPreview,
+// sem nenhum efeito colateral) -- nunca espalhado em `if(isPreview)` pelos
+// 4 renderers/pontos de chamada; cada um só passa `card.__isPreviewCard`
+// (Fase 6D.7) como 2º argumento, a decisão em si mora só aqui.
+function wireAudioButtons(container, isPreview){
   container.querySelectorAll('.audio-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      speakChinese(btn.dataset.speak, btn);
+      if (isPreview) playAudioPreview(btn.dataset.speak, btn);
+      else speakChinese(btn.dataset.speak, btn);
     });
   });
 }
@@ -6500,11 +6532,12 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
     ${answered ? `<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">Continuar</button>` : ''}
   `;
 
-  wireAudioButtons(mountEl);
+  wireAudioButtons(mountEl, card.__isPreviewCard);
   wireCustomAudioButtons(mountEl);
-  // Fase 7a -- `card.__isPreviewCard` suprime só o AUTOPLAY (registerAudioPlay()
-  // real não deveria disparar por abrir um Preview) -- ver mesmo comentário
-  // em renderNormalCard().
+  // Fase 7a -- `card.__isPreviewCard` suprime o AUTOPLAY; Fase 7d -- o
+  // MESMO flag agora também isola o clique MANUAL (wireAudioButtons acima
+  // já passa pra playAudioPreview() em vez de speakChinese() quando em
+  // Preview) -- ver mesmo comentário em renderNormalCard().
   if (!card.__isPreviewCard && promptSpeakable && canSpeakChinese(view.prompt.text)) speakChinese(view.prompt.text, mountEl.querySelector('.audio-btn-lg'), true);
 
   if (!answered){
@@ -6679,10 +6712,12 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
     ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
   `;
 
-  wireAudioButtons(mountEl);
+  wireAudioButtons(mountEl, card.__isPreviewCard);
   wireCustomAudioButtons(mountEl);
-  // Fase 7a -- `card.__isPreviewCard` suprime só o AUTOPLAY, ver mesmo
-  // comentário em renderNormalCard().
+  // Fase 7a -- `card.__isPreviewCard` suprime o AUTOPLAY; Fase 7d -- o
+  // MESMO flag agora também isola o clique MANUAL (wireAudioButtons acima
+  // já passa pra playAudioPreview() em vez de speakChinese() quando em
+  // Preview) -- ver mesmo comentário em renderNormalCard().
   if (!card.__isPreviewCard && promptSpeakable && canSpeakChinese(view.prompt.text)) speakChinese(view.prompt.text, mountEl.querySelector('.audio-btn-lg'), true);
 
   if (!answered){
@@ -6968,18 +7003,21 @@ function renderNormalCard(mountEl, card, localState, callbacks){
     }
   });
 
-  wireAudioButtons(mountEl);
-  wireCustomAudioButtons(mountEl);
   // Toca automaticamente quando o hanzi aparece -- reforço auditivo
   // imediato. Só dispara se já houver voz chinesa disponível, pra não
   // repetir o aviso de "instale a voz" a cada cartão de uma sessão inteira.
-  // Fase 7a (ver CLAUDE.md) -- `card.__isPreviewCard` suprime só o
-  // AUTOPLAY: `speakChinese()` sempre chama `registerAudioPlay()`
-  // internamente (incrementa STATE.totalAudioPlays/daily + checa badge de
-  // verdade) -- abrir um Preview nunca deveria mexer em estatística real
-  // da conta. Clique MANUAL no botão 🔊 continua chamando speakChinese()
-  // normalmente mesmo dentro do Preview (wireAudioButtons acima não é
-  // condicional).
+  // Fase 7d (ver CLAUDE.md) -- `card.__isPreviewCard` (Fase 6D.7) agora
+  // isola TANTO o autoplay QUANTO o clique manual: `wireAudioButtons`
+  // recebe o flag e decide, num único lugar, se um clique em `.audio-btn`
+  // chama `speakChinese()` (registra `registerAudioPlay()` de verdade) ou
+  // `playAudioPreview()` (mesma reprodução, sem nenhum efeito colateral de
+  // analytics -- nunca STATE.totalAudioPlays/XP/badge/FSRS/histórico). O
+  // autoplay abaixo continua suprimido por completo dentro do Preview
+  // (mesmo comportamento já validado na Fase 7a -- nenhuma mudança aqui),
+  // nunca redirecionado pra playAudioPreview() (não pedido, e "Preview sem
+  // autoplay" já era o comportamento correto).
+  wireAudioButtons(mountEl, card.__isPreviewCard);
+  wireCustomAudioButtons(mountEl);
   if (!card.__isPreviewCard && hanziVisibleNow && hanziIsSpeakable && canSpeakChinese(hanziTextForSpeech)){
     speakChinese(hanziTextForSpeech, mountEl.querySelector('.audio-btn-lg'), true);
   }

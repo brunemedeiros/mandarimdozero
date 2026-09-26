@@ -228,8 +228,14 @@ function playPregeneratedAudio(file, btnEl, isAutoplay, rate){
 // à parte, isto aqui só normaliza o ritmo padrão.
 const PREGEN_AUDIO_RATE = 0.9;
 
-function speakFrench(text, btnEl, isAutoplay){
-  registerAudioPlay();
+// Fase 7d (ver CLAUDE.md) -- reprodução PURA de áudio (mp3 pré-gerado ou
+// Web Speech API), sem o efeito colateral de analytics (registerAudioPlay).
+// Extraída de dentro do que era o corpo de speakFrench() -- byte a byte o
+// mesmo código de sempre, só sem a chamada a registerAudioPlay() no topo.
+// speakFrench() (Review real, qualquer tela) chama registerAudioPlay() e
+// delega pra cá; playAudioPreview() (Preview do editor, Fase 6D.7) chama só
+// isto, nunca registerAudioPlay() -- ver os dois logo abaixo.
+function speakFrenchAudioOnly(text, btnEl, isAutoplay){
   const pregenFile = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
   if (pregenFile){
     playPregeneratedAudio(pregenFile, btnEl, isAutoplay, PREGEN_AUDIO_RATE);
@@ -295,6 +301,24 @@ function speakFrench(text, btnEl, isAutoplay){
   }, 800);
 }
 
+function speakFrench(text, btnEl, isAutoplay){
+  registerAudioPlay();
+  speakFrenchAudioOnly(text, btnEl, isAutoplay);
+}
+
+// Fase 7d (ver CLAUDE.md) -- porta de reprodução ISOLADA pro Preview do
+// editor de flashcards (Fase 6D.7): toca o áudio de verdade (mesmo
+// mecanismo de sempre -- mp3 pré-gerado ou Web Speech API, via
+// speakFrenchAudioOnly acima), mas NUNCA chama registerAudioPlay() --
+// nunca incrementa STATE.totalAudioPlays/daily.audioPlaysToday, nunca
+// dispara checkAndCelebrateBadges(). Preview é uma simulação visual/
+// interativa de Review, não Review de verdade -- nenhuma reprodução de
+// áudio dentro dele deveria contar como estudo real. Sempre isAutoplay:
+// false (um clique manual, nunca um autoplay automático).
+function playAudioPreview(text, btnEl){
+  speakFrenchAudioOnly(text, btnEl, false);
+}
+
 if (TTS.supported){
   setInterval(() => {
     if (!window.speechSynthesis.speaking){
@@ -356,11 +380,19 @@ function scenarioSceneHTML(emoji){
   return svg ? `<span class="scenario-flag">${svg}</span>` : emoji;
 }
 
-function wireAudioButtons(container){
+// Fase 7d (ver CLAUDE.md) -- `isPreview` (booleano, opcional -- default
+// falso/ausente preserva 100% o comportamento de sempre) é o ÚNICO ponto
+// que decide se um clique MANUAL em `.audio-btn` conta como reprodução
+// real (speakFrench, com registerAudioPlay) ou isolada (playAudioPreview,
+// sem nenhum efeito colateral) -- nunca espalhado em `if(isPreview)` pelos
+// 4 renderers/pontos de chamada; cada um só passa `card.__isPreviewCard`
+// (Fase 6D.7) como 2º argumento, a decisão em si mora só aqui.
+function wireAudioButtons(container, isPreview){
   container.querySelectorAll('.audio-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      speakFrench(btn.dataset.speak, btn);
+      if (isPreview) playAudioPreview(btn.dataset.speak, btn);
+      else speakFrench(btn.dataset.speak, btn);
     });
   });
 }
@@ -6182,7 +6214,7 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
     ${answered ? `<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">Continuar</button>` : ''}
   `;
 
-  wireAudioButtons(mountEl);
+  wireAudioButtons(mountEl, card.__isPreviewCard);
   wireCustomAudioButtons(mountEl);
   // Prop 1+2 (ver CLAUDE.md, "7 propostas") -- só tenta pronunciar
   // automaticamente quando o prompt é de fato o idioma estudado. Quando
@@ -6362,10 +6394,12 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
     ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
   `;
 
-  wireAudioButtons(mountEl);
+  wireAudioButtons(mountEl, card.__isPreviewCard);
   wireCustomAudioButtons(mountEl);
-  // Fase 7a -- `card.__isPreviewCard` suprime só o AUTOPLAY, ver mesmo
-  // comentário em renderNormalCard().
+  // Fase 7a -- `card.__isPreviewCard` suprime o AUTOPLAY; Fase 7d -- o
+  // MESMO flag agora também isola o clique MANUAL (wireAudioButtons acima
+  // já passa pra playAudioPreview() em vez de speakFrench() quando em
+  // Preview) -- ver mesmo comentário em renderNormalCard().
   if (!card.__isPreviewCard && promptSpeakable && canSpeakFrench(view.prompt.text)) speakFrench(view.prompt.text, mountEl.querySelector('.audio-btn-lg'), true);
 
   if (!answered){
@@ -6662,16 +6696,18 @@ function renderNormalCard(mountEl, card, localState, callbacks){
 
   // Áudio disponível (e tocado automaticamente) sempre que o francês está
   // visível no cartão.
-  wireAudioButtons(mountEl);
+  // Fase 7d (ver CLAUDE.md) -- `card.__isPreviewCard` (Fase 6D.7) agora
+  // isola TANTO o autoplay QUANTO o clique manual: `wireAudioButtons`
+  // recebe o flag e decide, num único lugar, se um clique em `.audio-btn`
+  // chama `speakFrench()` (registra `registerAudioPlay()` de verdade) ou
+  // `playAudioPreview()` (mesma reprodução, sem nenhum efeito colateral de
+  // analytics -- nunca STATE.totalAudioPlays/XP/badge/FSRS/histórico). O
+  // autoplay abaixo continua suprimido por completo dentro do Preview
+  // (mesmo comportamento já validado na Fase 7a -- nenhuma mudança aqui),
+  // nunca redirecionado pra playAudioPreview() (não pedido, e "Preview sem
+  // autoplay" já era o comportamento correto).
+  wireAudioButtons(mountEl, card.__isPreviewCard);
   wireCustomAudioButtons(mountEl);
-  // Fase 7a (ver CLAUDE.md) -- `card.__isPreviewCard` (Fase 6D.7) suprime
-  // só o AUTOPLAY: `speakFrench()` sempre chama `registerAudioPlay()`
-  // internamente (incrementa STATE.totalAudioPlays/daily + checa badge de
-  // verdade) -- abrir um Preview nunca deveria mexer em estatística real
-  // da conta. Clique MANUAL no botão 🔊 continua chamando speakFrench()
-  // normalmente mesmo dentro do Preview (wireAudioButtons acima não é
-  // condicional) -- suprimir isso também exigiria alterar a arquitetura
-  // de TTS em si (fora do escopo desta subfase, ver CLAUDE.md).
   if (!card.__isPreviewCard && frenchVisibleNow && targetIsSpeakable && canSpeakFrench(targetText)){
     speakFrench(targetText, mountEl.querySelector('.audio-btn-lg'), true);
   }
