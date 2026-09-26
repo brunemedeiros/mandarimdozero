@@ -313,6 +313,7 @@ function flashcardEditFormHTML(c){
     <div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:8px;">
       <div class="section-label" style="margin:0;">Editar cartão</div>
       <button type="button" class="admin-select-link" id="edit-flashcard-use-native" style="align-self:flex-start; background:none; border:none; cursor:pointer; padding:0;">🧪 Usar o novo editor de campos (nativo) -- preserva o conteúdo já digitado</button>
+      <p class="profile-edit-error" id="edit-flashcard-use-native-error"></p>
 
       <div>
         <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
@@ -415,11 +416,29 @@ function wireFlashcardEditForm(c, container){
   // (nunca automática): clicar aqui monta um Note editor state a partir
   // do conteúdo JÁ EXISTENTE deste cartão (nativeNoteEditorStateFromLegacyRow,
   // shared/flashcard-native-persistence.js -- preserva front/back_trans/
-  // choices/cloze_sentence+cloze_answer(+pinyin), nunca começa em branco)
-  // e troca a exibição pro editor nativo -- mas NADA é salvo ainda; só o
-  // clique em "Salvar" do formulário nativo grava de verdade.
+  // choices/cloze_sentence+cloze_answer(+pinyin)/audio_url, nunca começa
+  // em branco) e troca a exibição pro editor nativo -- mas NADA é salvo
+  // ainda; só o clique em "Salvar" do formulário nativo grava de verdade.
+  //
+  // Fase 6D.8 (ver CLAUDE.md, Seção 6/18) -- legacyFlashcardConversionPreflight()
+  // roda ANTES: bloqueia (sem trocar de tela) os 2 casos em que o
+  // mapeamento em si é indeterminável (Cloze sem "___" exato, MC sem
+  // resposta certa definida) -- nunca converte "adivinhando" nem produz
+  // uma Nota nativa que parece válida mas está errada.
   document.getElementById('edit-flashcard-use-native')?.addEventListener('click', async () => {
+    const errorEl = document.getElementById('edit-flashcard-use-native-error');
+    const preflight = legacyFlashcardConversionPreflight(c);
+    if (!preflight.ok){ if (errorEl) errorEl.textContent = preflight.error; return; }
+    if (errorEl) errorEl.textContent = '';
     ADMIN_FLASHCARDS_STATE.editingNativeState = nativeNoteEditorStateFromLegacyRow(c);
+    if (c.image_url){
+      // Seção 10 -- limitação conhecida (registrada em
+      // shared/flashcard-native-persistence.js, attachLegacyMediaToFields):
+      // a URL da imagem é preservada no Field, mas ainda não é exibida na
+      // Revisão pro caminho nativo (gap fora do escopo desta fase) --
+      // avisa em vez de deixar a professora achar que a imagem sumiu.
+      showToast('⚠️ A imagem deste cartão foi preservada nos dados, mas ainda não aparece na tela de Revisão pra cartões do novo editor.');
+    }
     const cardsBox = document.getElementById('admin-flashcards-cards-box');
     const selectedStudents = ADMIN_FLASHCARDS_STATE._studentsCache.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
     cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
@@ -586,7 +605,7 @@ function wireFlashcardNativeEditForm(c, editorState, container){
     // sempre muda -- colunas legadas soltas viram Note/Field -- reset é
     // esperado e coerente com o resto do app: editar sempre reseta
     // progresso desde a Fase Prop4/"7 propostas").
-    const wasNative = isNoteFieldsPresent(c) && isCardGenerationModePresent(c);
+    const wasNative = classifyFlashcardRowModel(c) === 'native';
     let nextRevision = c.revision || 0;
     if (wasNative){
       const original = createNativeNoteEditorStateFromRow(c);
@@ -630,7 +649,7 @@ function flashcardCardRowHTML(c, showUsername){
     // ainda não existe um editingNativeState desta sessão de edição) --
     // trocar de Card Type/editar Fields depois não deveria resetar o
     // estado do editor a cada re-render da caixa de cartões.
-    if (!ADMIN_FLASHCARDS_STATE.editingNativeState && isNoteFieldsPresent(c) && isCardGenerationModePresent(c)){
+    if (!ADMIN_FLASHCARDS_STATE.editingNativeState && classifyFlashcardRowModel(c) === 'native'){
       ADMIN_FLASHCARDS_STATE.editingNativeState = createNativeNoteEditorStateFromRow(c);
     }
     if (ADMIN_FLASHCARDS_STATE.editingNativeState) return flashcardNativeEditFormHTML(c, ADMIN_FLASHCARDS_STATE.editingNativeState);

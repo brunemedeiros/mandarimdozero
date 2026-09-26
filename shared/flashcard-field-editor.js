@@ -119,6 +119,23 @@ function renderFieldEditorListHTML(editorState, opts){
 // ---------- Mutadores puros (Field state -- nunca tocam CardInstance/FSRS/
 // nunca chamam rede) ----------
 
+// Fase 6D.8 -- os Fields que são satélite de pinyin de outro Field (alvo
+// de ALGUM field.pinyinFieldId na mesma Note) nunca contam como candidato
+// a "campo sem papel ainda" -- mesmo critério que contentFieldIndices()
+// (motor, shared/flashcard-model.js) já usa pra nunca tratar um satélite
+// de pinyin como um slot de conteúdo próprio. Achado real durante a Fase
+// 6D.8: transitionToMultipleChoice()/transitionToTypeAnswer() (6D.4a/6D.4b)
+// nunca excluíam o satélite ao escolher `unroled[cursor]` -- inofensivo
+// enquanto nenhum estado convertido de legado carregava um satélite de
+// pinyin antes de trocar de Card Type, mas quebrava de verdade nesse
+// cenário real (ex: converter um Normal zh com front_pinyin, depois trocar
+// pra "Digite a resposta" -- o Field de pinyin virava `answer` por engano,
+// perdendo a tradução real). Corrigido aqui, reutilizado pelos 2
+// transitionTo*, nunca duplicado.
+function fieldIsPinyinSatellite(field, fields){
+  return fields.some(f => f.pinyinFieldId === field.id);
+}
+
 // Cria um Field NOVO (id gerado por createFieldState, Fase 6D.1) e o
 // adiciona ao FIM de editorState.fields. `fields` continua sendo só a
 // ordem estrutural/editorial -- nunca interpretado como frente/verso por

@@ -9500,3 +9500,397 @@ travado pela própria instrução -- Seção 24):**
 Próxima subfase (6D.8) só começa depois de autorização explícita da
 autora, com este relatório já entregue antes de pedir luz verde. **Não
 avançar para 6D.8 automaticamente.**
+
+## Fase 6D.8 -- Legacy → Native (edição/conversão explícita de cards
+legados) -- FECHA A FASE 6D INTEIRA
+
+Última subfase do prompt-mestre de reestruturação Note/CardType/
+CardInstance. Instrução com 27 seções, regra central repetida em várias
+delas: **não é migração em massa** -- nenhum UPDATE em lote, nenhum
+script de backfill, nenhuma migration SQL convertendo conteúdo, nenhuma
+conversão automática no load/login/save-legado. A conversão só acontece
+via ação explícita do usuário no editor, um cartão de cada vez -- exatamente
+o botão "🧪 Usar o novo editor de campos (nativo)" já introduzido (não
+inventado agora) na Fase 6D.6.
+
+**Arquivos alterados** (6 no total, confirmado por `git diff --stat` --
+nenhuma migração, nenhum outro arquivo tocado): `shared/flashcard-native-
+persistence.js` (+165/-9, o grosso do trabalho), `shared/admin-
+flashcards.js` (+29/-6), `shared/my-flashcards.js` (+22/-6),
+`shared/flashcard-field-editor.js` (+17, novo helper compartilhado),
+`shared/flashcard-mc-editor.js` (+18/-4), `shared/flashcard-typeanswer-
+editor.js` (+9/-2).
+
+### O mapeamento Legacy → Native, por Card Type
+
+`nativeNoteEditorStateFromLegacyRow(row)` (já existia desde a Fase 6D.6,
+usada nesta fase pra corrigir 2 gaps reais -- ver "Achados" abaixo) é o
+ÚNICO ponto de conversão, chamado só de dentro dos 2 handlers de clique
+("Usar o novo editor", `admin-flashcards.js`/`my-flashcards.js`) --
+nunca em nenhum outro call site (confirmado por grep: só 2 chamadas
+reais no repositório inteiro, cada uma dentro do handler certo).
+
+- **Normal** (fr/pt) -- 2 Fields posicionais (front/back, MESMA posição
+  do banco -- `front` sempre índice 0). `front_is_target_language` é
+  interpretado SÓ nesta função pra decidir o `lang` de cada Field
+  (`'fr'`/`'pt-BR'`, usando `STUDY_LANG_FOR_APP_KEY` -- mesmo mapa que o
+  motor legado já usa) -- **nunca persiste como propriedade do
+  editorState nativo** (confirmado por teste: `JSON.stringify(editorState)`
+  nunca contém `front_is_target_language`). Depois de convertido, a
+  direção do cartão vem só de `lang`+posição de cada Field -- exatamente
+  o mesmo mecanismo que um cartão nativo criado do zero (Fase 6D.2/6D.3)
+  já usa.
+- **Normal (zh)** -- mesmo par de 2 Fields, sempre `lang:'zh'`/`'pt-BR'`
+  fixos (zh nunca inverte, decisão já travada desde a sessão "7
+  propostas" -- sem `back_pinyin` pra completar uma inversão). Se
+  `front_pinyin` existir, um 3º Field `zh-pinyin` é criado como satélite
+  (`frontField.pinyinFieldId = pinyinField.id`) -- nunca conta como slot
+  de conteúdo (`contentFieldIndices()`, motor, já pula satélites).
+- **Normal com reverso** -- a Note convertida é SEMPRE Normal (2 Fields);
+  o usuário escolhe "Normal com reverso" DEPOIS, trocando o Card Type
+  dentro do editor nativo já aberto (mesmo mecanismo de sempre, Fase
+  6D.2) -- `card_generation_mode='normal_reversed'` sobre os MESMOS 2
+  Fields, nunca uma Note/linha nova, nunca `isReverse`/`reviewDirection`
+  criados (confirmado: 0 ocorrências em código executável do arquivo,
+  só em comentários explicando o que nunca foi feito).
+- **Múltipla escolha** -- legado é INEQUÍVOCO sobre quem é a resposta
+  certa (sempre `back_trans`, nunca `choices[]`) -- mapeamento 1:1 direto,
+  nunca uma adivinhação: `front`→`role:'prompt'`, `back_trans`→
+  `role:'answer'`, `choices[]`→até 3 `role:'distractor'`. `choices`
+  nunca sobra como fonte nativa (sempre `null` no save, ver "Legacy
+  columns" abaixo). ZH também preserva `front_pinyin` do prompt como
+  satélite (achado durante esta fase -- o formulário legado sempre
+  mostrava o campo Pinyin pra `isMandarim` independente do modo, inclusive
+  MC, confirmado por leitura de `admin-flashcards.js` antes de presumir).
+- **Digite a resposta** -- legado nunca representou este tipo. A
+  conversão produz sempre Normal; o usuário troca pra "Digite a
+  resposta" DENTRO do editor (mesmo mecanismo de `normal_reversed`
+  acima) -- `transitionToTypeAnswer()` (já existente desde a 6D.4b)
+  reaproveita os MESMOS 2-3 Fields, nunca inventa conteúdo novo. ZH
+  preserva pinyin via `pinyinFieldId` (o MESMO mecanismo hanzi/pinyin de
+  Normal, nunca um `answerPinyin` paralelo -- confirmado ausente por
+  grep).
+- **Cloze** -- `cloze_sentence`/`cloze_answer`/`cloze_answer_pinyin`
+  NUNCA sobrevivem como fonte nativa. Convertido pra sintaxe embutida
+  `{{c1::resposta}}` (fr) ou `{{c1::resposta|pinyin}}` (zh) dentro do
+  ÚNICO Field de texto -- sempre `c1` só (legado nunca teve mais de 1
+  lacuna, nunca inventamos uma 2ª). Depois de convertido, a EDIÇÃO usa o
+  editor visual de Cloze de sempre (seleção de texto, Fase 6D.5) -- não
+  existe mais sintaxe crua visível em lugar nenhum da UI.
+
+### Achados reais encontrados e corrigidos durante esta fase (não
+presumidos, descobertos escrevendo os testes)
+
+**1. `front_is_target_language`/áudio/imagem nunca eram tratados antes
+desta fase** -- a versão da função herdada da 6D.6 não interpretava
+`front_is_target_language` (gravava `lang:null` sempre em fr, perdendo o
+botão de pronúncia automática -- `isStudyLanguageField()` depende de
+`lang` bater com o idioma estudado) e nunca preservava `audio_url`/
+`image_url` em NENHUM Card Type. Corrigido com
+`attachLegacyMediaToFields(fields, row, languageAppKey)` (novo) --
+vincula áudio/imagem ao Field cujo `lang` é o idioma estudado, MESMA
+heurística que `interpretNoteFromRow()` (motor, ramo legado) já usa pra
+interpretar esse dado histórico (`isStudyLanguageField`), nunca uma
+regra nova inventada.
+
+**Ressalva sobre imagem, documentada e comunicada ao usuário, não
+escondida**: o pipeline de LEITURA nativo (`resolveCardField()`) só
+resolve imagem no nível da NOTE (`note.image`), nunca de `field.image` --
+gap arquitetural já identificado na auditoria da Fase 6D (seção 6) e
+explicitamente fora do escopo de 6D.8 (Seção 26 proíbe estender
+renderers aqui). `field.image` É preenchido (a URL nunca é descartada --
+fica visível no indicador textual do Field editor da Fase 6D.3, pronta
+pra quando um projeto futuro estender o pipeline), mas a imagem NÃO
+aparece de fato na Revisão depois da conversão até essa extensão
+existir. Pra nunca deixar isso implícito: um toast não-bloqueante ("⚠️ A
+imagem deste cartão foi preservada nos dados, mas ainda não aparece na
+tela de Revisão pra cartões do novo editor.") aparece assim que a
+conversão é feita, se o cartão tinha `image_url`. Áudio não tem essa
+ressalva -- `resolveCardField()` já resolve `field.audio.url`
+corretamente pro caminho nativo, confirmado por leitura do motor antes
+de presumir.
+
+**2. Cloze sem "___" era um bug de falha silenciosa, não só "conteúdo
+incompleto"** -- `sentence.replace('___', marcação)` não faz NADA se
+"___" não existir (comportamento padrão de `String.replace`), produzindo
+um Field com a frase crua e ZERO marcas `{{cN::...}}` -- exatamente o
+"Note nativo que parece válido mas está semanticamente errado" que a
+Seção 18 proíbe. Resolvido com `legacyFlashcardConversionPreflight(row)`
+(novo), chamado ANTES de `nativeNoteEditorStateFromLegacyRow()` nos 2
+handlers de clique -- bloqueia a conversão inteira (sem trocar de tela)
+com mensagem específica ("não tem nenhum / tem mais de um '___'") quando
+a frase não tem exatamente 1 lacuna. MC sem resposta determinável
+(`back_trans` vazio/só espaço) também bloqueado pelo mesmo preflight,
+com mensagem própria.
+
+**Distinção deliberada, registrada explicitamente**: o preflight NUNCA
+bloqueia por conteúdo simplesmente INCOMPLETO (ex: Normal com
+front/back vazios, Cloze zh sem pinyin ainda) -- isso é papel da
+validação de SAVE já existente (`validateNoteEditorStateForSave()`,
+6D.6), que mostra os campos já convertidos pro usuário completar antes
+de salvar ("a UI pode apresentar os dados existentes pra correção
+manual", texto literal da Seção 7). O preflight só bloqueia os 2 casos
+em que o MAPEAMENTO em si é indeterminável (onde fica a lacuna? qual é a
+resposta certa?) -- distinção testada explicitamente (item 23/24 da
+suíte Node).
+
+**3. `transitionToMultipleChoice()`/`transitionToTypeAnswer()` (Fases
+6D.4a/6D.4b, pré-existentes) nunca excluíam um satélite de pinyin ao
+escolher qual Field vira prompt/answer** -- bug latente desde a 6D.4a/
+6D.4b, nunca triggado antes porque nenhum código anterior produzia um
+estado com satélite de pinyin ANTES de trocar de Card Type. A conversão
+desta fase é o primeiro código que faz exatamente isso (Normal zh com
+`front_pinyin` → trocar pra Type Answer/Multiple Choice dentro do
+editor) -- sem o fix, o Field de PINYIN virava `answer` por engano,
+perdendo a tradução real (achado confirmado ao vivo no browser smoke,
+não só hipotético). Corrigido com `fieldIsPinyinSatellite(field, fields)`
+(novo, `shared/flashcard-field-editor.js`, reutilizado pelos 2
+`transitionTo*` -- nunca duplicado) -- mesmo critério que
+`contentFieldIndices()` (motor) já usa pra nunca tratar um satélite como
+slot de conteúdo. `validateNativeMultipleChoiceStructure()` também
+precisou da mesma exceção (sem ela, o satélite ficaria pra sempre
+"Field sem papel definido", bloqueando o SAVE de um MC zh com pinyin
+preservado -- o próprio caso que a Seção 7 desta fase pede pra suportar).
+Este achado NÃO é fora do escopo de 6D.8 -- é uma correção necessária
+pra que o próprio requisito desta fase (Seção 8, "ZH: preservar pinyin
+existente... usando pinyinFieldId") funcione de fato através do fluxo
+real de edição (converter → trocar Card Type → salvar), não só em teoria.
+
+**Teste pré-existente da Fase 6D.4a corrigido em consequência** --
+`test_fase6d4a_mc_editor.js` tinha um cenário que testava e ATESTAVA o
+comportamento ANTIGO (buggy) como se fosse intencional ("hanzi vira
+answer, pinyin vira prompt, tradução fica sobrando"). Reescrito pra
+refletir o comportamento CORRETO (pinyin nunca vira prompt/answer,
+hanzi vira prompt, tradução vira answer, estrutura fica válida com o
+satélite presente) -- não foi enfraquecido, foi corrigido pra parar de
+validar um bug.
+
+### Preservação de ID/histórico/FSRS
+
+- **ID nunca muda** -- `updateFlashcardContent(c.id, ...)`/
+  `updateOwnFlashcardContent(c.id, ...)` (já existentes desde a 6D.6)
+  sempre fazem `UPDATE ... WHERE id = c.id` -- confirmado ao vivo contra
+  o Supabase real (ver "Testes de banco" abaixo): mesmo `id` antes e
+  depois da conversão.
+- **Nenhuma linha nova, nenhum CardInstance persistido** -- a Note é
+  sempre a unidade de persistência; `normal_reversed`/Cloze multi-marca
+  continuam gerando CardInstances só EM RUNTIME (`buildReversedCardInstancePair`/
+  `parseClozeMarks`, motor, intocados) -- nunca uma 2ª linha no banco.
+- **Revision segue a MESMA regra já travada desde a Fase 6D.6** -- uma
+  conversão Legacy→Native SEMPRE incrementa `revision` (a estrutura
+  muda de fato -- colunas soltas viram Note/Field -- mesmo espírito de
+  "editar sempre reseta progresso" desde a Prop 4/"7 propostas"). Isso
+  NÃO foi inventado nesta fase -- `wireFlashcardNativeEditForm`/
+  `wireMyFlashcardNativeEditForm` (6D.6) já tinham essa regra
+  (`wasNative ? condicional : sempre incrementa`); 6D.8 só a EXERCITA
+  pela primeira vez através do caminho real de conversão. O reset de
+  FSRS que resulta disso é o MESMO mecanismo de sempre
+  (`flashcardIdForRow` gera um novo id sintético `-r{revision}` pro
+  merge-por-id de `applySerializedState()` descartar sozinho) -- nunca
+  um reset inventado de propósito nesta fase, nunca um campo FSRS tocado
+  diretamente (confirmado: `reps`/`due`/`lapses`/`stability`/
+  `difficulty`/`lastReview` não aparecem em nenhuma linha executável de
+  `shared/flashcard-native-persistence.js`).
+- **Metadados preservados** -- `teacher_id`/`student_id`/`owner_id`/
+  `language_app_key`/`status`/`created_at`/`origin` nunca são tocados
+  pela conversão (o payload de save só inclui as colunas de CONTEÚDO,
+  nunca identidade/proveniência) -- confirmado ao vivo no teste de banco.
+
+### Legacy columns após a conversão
+
+Nenhuma coluna legada foi apagada nesta fase (sem migração nova). Depois
+de uma conversão nativa: `fields`/`card_generation_mode` são a fonte de
+verdade; `front`/`back_trans` recebem um mirror WRITE-ONLY mínimo (já
+existente desde a 6D.6, só pra lista "Cartões ativos"/export Anki
+continuarem legíveis sem reescrever esses 2 consumidores) --
+`choices`/`cloze_sentence`/`cloze_answer`/`cloze_answer_pinyin`/
+`front_pinyin` sempre gravados como `null` no save nativo (nunca ficam
+com lixo de uma edição legada anterior). **Nenhuma sincronização
+bidirecional** -- editar um Field nativo nunca reconstrói as 12 colunas
+legadas por completo a cada edição; só o mirror mínimo já definido na
+6D.6, reafirmado (não estendido) nesta fase.
+
+### Reconhecimento de modelo (Seção 15)
+
+`classifyFlashcardRowModel(row)` (novo) -- `'native'|'legacy'|'invalid'`,
+único ponto de checagem, substitui o padrão implícito
+`isNoteFieldsPresent(c) && isCardGenerationModePresent(c)` usado em 4
+call sites (`admin-flashcards.js`×2, `my-flashcards.js`×2). O CHECK
+constraint da migration 045 já torna `'invalid'` estruturalmente
+impossível numa linha real vinda do Supabase (confirmado ao vivo, ver
+"Testes de banco") -- esta função existe mesmo assim como ponto único,
+auditável, de checagem defensiva no cliente, exatamente como a Seção 15
+pede ("não aceitar um estado híbrido silencioso"), nunca reimplementando
+`validateNativeNoteRow()` (motor).
+
+### Cancelamento e fluxo em memória (Seções 16-17)
+
+Confirmado (Node + browser smoke): clicar "Usar o novo editor" NUNCA
+salva nada -- só monta `editingNativeState` em memória
+(`ADMIN_FLASHCARDS_STATE.editingNativeState`/`MY_FLASHCARDS_STATE.
+editingNativeState`). Editar os campos do rascunho e clicar "Cancelar"
+descarta o rascunho inteiro -- a linha no banco fica byte-a-byte idêntica
+a antes (confirmado via snapshot JSON antes/depois no browser smoke).
+Fechar sem salvar (navegar pra outra tela) tem o mesmo efeito -- nenhum
+handler de navegação chama `updateFlashcardContent`/
+`updateOwnFlashcardContent`. Preview (Fase 6D.7, reaproveitado sem
+mudança) também nunca salva -- confirmado com um teste dedicado
+(contagem de linhas no banco antes/depois de abrir e usar o Preview
+durante uma conversão em andamento, idêntica).
+
+### Admin e Meus Cartões (Seção 19) -- mesma lógica compartilhada
+
+Os 2 arquivos chamam exatamente as MESMAS funções de
+`shared/flashcard-native-persistence.js` (`nativeNoteEditorStateFromLegacyRow`/
+`legacyFlashcardConversionPreflight`/`classifyFlashcardRowModel`) -- zero
+lógica de mapeamento duplicada ou divergente entre professora/aluna.
+Única diferença de comportamento (não de LÓGICA de conversão): o toast
+de aviso de imagem e o preflight são idênticos nos 2; o que difere é só
+orquestração de UI já existente desde a 6D.6 (admin reconstrói a lista
+inteira após converter, `my-flashcards` reaproveita `renderMyFlashcardsView()`
+completo) -- mesma assimetria já documentada desde a 6D.6, não nova.
+
+### Testes realizados
+
+**Node/VM** -- `test_fase6d8_legacy_conversion.js` (novo), **92/92**,
+cobrindo os 25 cenários da Seção 21 (Normal fr preserva conteúdo/id;
+`front_is_target_language` decide só `lang`, nunca posição, nunca
+persiste como mecanismo nativo; Normal Reversed via motor real com FSRS
+independente confirmado; MC com resposta determinável -> prompt/answer/
+distractors sem nunca usar `choices[]` como fonte; MC sem resposta
+bloqueado no preflight com e sem espaços; Type Answer fr/zh com pinyin
+via `pinyinFieldId`, sem `answerPinyin` paralelo; Cloze fr/zh ->
+`{{c1::...}}`/`{{c1::...|pinyin}}` via round-trip real do motor
+`resolveCardContentView`; Cloze sem "___" e com "___" duplicado
+bloqueados com mensagens específicas; áudio/imagem vinculados ao Field
+certo, nunca duplicados no lado errado, seguindo o IDIOMA não a posição;
+Field IDs estáveis entre 2 conversões da mesma linha, sem mutação
+cruzada; conversão nunca cria novo Card ID/CardInstance; FSRS nunca
+aparece no editorState nativo; colunas legadas nunca mutadas pela
+conversão em si -- função pura; cancelamento (documentado, testado de
+verdade no browser smoke); conversão explícita confirmada via leitura de
+código; abrir sem converter não altera `fields`/`card_generation_mode`;
+cartão já nativo nunca passa pelo conversor legado -- usa
+`createNativeNoteEditorStateFromRow`; estado híbrido sempre `'invalid'`,
+nunca `'native'`; FR e ZH compartilham a mesma função; `nativeContentColumnsFromEditorState`
+nunca reescreve `choices`/`cloze_sentence`/`cloze_answer`). **8 suítes
+anteriores (Fases 4-6D.7) re-executadas, 642/642 sem regressão**
+(incluindo o teste da 6D.4a corrigido, ver "Achados" acima) -- total
+desta entrega + histórico: **734/734**.
+
+**Testes de banco/integração** (transação+rollback, mesmo padrão da
+6D.6, projeto `eigjocalzwamisgqilhg`, snapshot antes/depois idêntico
+confirmado -- `teacher_flashcards: 5 linhas, hash afe805e5a3c3ec7fa05645a6a2a6e607`;
+`own_flashcards: 7 linhas, hash 62f9c84cebecc3d6805163082c837b21`, ambos
+IDÊNTICOS antes e depois de todos os 3 cenários): (1) **legacy untouched**
+-- `select` puro numa linha real confirma `fields`/`card_generation_mode`
+`null`, antes e depois de qualquer tentativa de conversão na mesma
+sessão; (2) **conversão explícita** -- `UPDATE` simulando exatamente o
+payload de `nativeContentColumnsFromEditorState()` numa linha real,
+dentro de transação com `ROLLBACK`: `RETURNING` confirma MESMO `id`,
+`fields`/`card_generation_mode` populados, `teacher_id`/`student_id`/
+`language_app_key`/`status`/`created_at` preservados intactos, `revision`
+incrementado de 0→1; (3) **conversão falha** -- tentativa de gravar
+`fields` SEM `card_generation_mode` (estado híbrido) rejeitada de
+verdade pelo Postgres (`23514`, `teacher_flashcards_fields_paired`),
+confirmado que NENHUM UPDATE parcial ficou de pé (hash/contagem
+idênticos ao original depois). Nenhum registro real de produção foi
+alterado permanentemente.
+
+**Browser smoke FR+ZH** -- 2 suítes: `test_fase6d6_browser_smoke.js`
+(regressão, já existente, **82/82** -- confirma que o preflight/fix novo
+não quebrou o fluxo de conversão Normal simples já validado na 6D.6) +
+`test_fase6d8_browser_smoke.js` (novo, **66/66**, FR+ZH), cobrindo os
+itens da Seção 23 que a regressão da 6D.6 ainda não exercitava: (A)
+preflight bloqueia MC sem resposta, permanece no formulário legado, erro
+visível; (B) preflight bloqueia Cloze sem "___", mensagem menciona
+"___" especificamente; (C) conversão de MC com resposta determinável --
+Card Type correto, prompt/distractors preservados, `id` preservado,
+`choices` nulificado no save; (D) conversão pra Type Answer (trocando
+Card Type dentro do editor já aberto) preserva prompt/answer, ZH
+confirma pinyin preservado (prova ao vivo do fix do achado 3); (E)
+conversão de Cloze -- marca visual renderiza mostrando a RESPOSTA (nunca
+a sintaxe `{{`), ZH confirma `|pinyin` embutido corretamente,
+`cloze_sentence` nulificado no save; (F) cancelar no meio da conversão
+(editando um campo e clicando Cancelar) -- linha no banco byte-a-byte
+idêntica à original; (G) mídia -- áudio e imagem confirmados vinculados
+ao Field de idioma estudado (nunca ao lado errado), toast de aviso de
+imagem confirmado aparecendo; (H) Preview durante uma conversão em
+andamento -- modal abre, renderiza o cartão, ZERO chamada de save
+disparada; (I) abrir legado sem clicar em converter -- `fields`/
+`card_generation_mode` continuam `null`; (J) regressão -- um cartão MC
+convertido nesta mesma sessão (passo C) entra em `STATE.cards` via o
+pipeline real (`buildCardFromTeacherFlashcard`) e Review/Speed Review/
+`hasPlainFrontBack` continuam funcionando sem erro. **Zero
+pageerror/console error novo** em nenhum dos 2 idiomas (só os mesmos
+`ERR_TUNNEL_CONNECTION_FAILED` pré-existentes do proxy de saída deste
+sandbox, documentados em toda a sessão).
+
+### Auditoria final (Seção 25)
+
+Busca programática (grep, removendo comentários antes de checar, mesmo
+rigor de toda a Fase 6D) confirma, nos 6 arquivos tocados: (1) conversão
+NUNCA acontece sem ação explícita -- só 2 call sites reais de
+`nativeNoteEditorStateFromLegacyRow()`, ambos dentro dos handlers de
+clique dos botões "Usar o novo editor"; (2) nenhum novo ID criado --
+`UPDATE ... WHERE id = c.id` sempre, confirmado também ao vivo no
+Supabase; (3) nenhuma nova linha de CardInstance -- Note continua sendo
+a única unidade persistida; (4) nenhum reset de FSRS inventado -- o
+reset que ACONTECE é o mesmo mecanismo de merge-por-id já existente
+desde antes da Fase 6, disparado pela regra de revision já travada na
+6D.6, nunca um campo FSRS tocado direto; (5) nenhuma metadata legada
+apagada -- zero coluna de identidade/proveniência tocada pelo payload de
+conversão; (6) `choices`/`cloze_answer`/`cloze_sentence` NUNCA usados
+como fonte nativa -- só lidos pra INTERPRETAR o legado, sempre gravados
+`null` no save nativo; (7) `frontIsTargetLanguage` nunca vira mecanismo
+nativo -- interpretado só durante a conversão, nunca persistido no
+editorState; (8) `reviewDirection`/`isReverse` -- 0 ocorrências em
+código executável; (9) nenhuma sincronização bidirecional -- só o
+mirror write-only mínimo, já existente desde a 6D.6, não estendido.
+Resultado confirmado: **Legacy → conversão explícita → Native → editor/
+persistência nativa, sem nenhum caminho automático de volta.**
+
+### Escopo respeitado (Seção 26) -- nada disto foi tocado
+
+Migração em massa; SQL migration nova; cartões públicos; rich text; TTS
+gravado; upload novo (o upload de mídia já existente desde a Fase 8a
+continua intocado -- esta fase só PRESERVA URLs já existentes, nunca
+implementa upload novo); templates customizados; novos Card Types (os 5
+já existentes desde a Fase 6B são os únicos usados); redesign; mudanças
+no FSRS; novas regras de Review.
+
+**Achados fora do escopo, registrados sem correção automática** (Seção
+26, "registrar, não corrigir, continuar se não bloquear"): nenhum
+encontrado nesta fase além dos 3 já descritos acima em "Achados reais"
+-- todos os 3 foram corrigidos porque bloqueavam diretamente um
+requisito EXPLÍCITO desta própria fase (Seções 5/6/8/10/18), não por
+iniciativa de ir além do escopo pedido.
+
+### O que ainda falta / não foi feito nesta fase (de propósito)
+
+- Imagem de cartão convertido não aparece na Revisão ainda (limitação
+  conhecida, documentada, comunicada via toast -- ver "Achados" acima) --
+  requer estender `resolveCardField()` pra ler `field.image`, fora do
+  escopo de 6D.8.
+- Nenhuma migração/backfill de cartões legados existentes -- todos os 5
+  `teacher_flashcards`/7 `own_flashcards` reais continuam 100% legados
+  até que a professora/aluna clique em "Usar o novo editor" em cada um,
+  um de cada vez.
+- Edição de conteúdo (não-estrutural) de um cartão já nativo continua
+  com o mesmo escopo de sempre (front/back/opções/etc.) -- nada novo
+  adicionado aqui.
+
+**Com esta entrega, a Fase 6D inteira (6D.1 a 6D.8) está concluída** --
+o editor nativo cobre os 5 Card Types de ponta a ponta: estado (6D.1),
+seleção de tipo (6D.2), edição de Field (6D.3), Múltipla Escolha
+(6D.4a), Digite a resposta (6D.4b), Cloze visual (6D.5), persistência
+(6D.6), Preview (6D.7) e agora conversão explícita de cartão legado
+(6D.8) -- sem nenhuma migração em massa, sem nenhum caminho automático
+de conversão, sem nenhuma ponte/atalho temporário sobrevivendo (a ponte
+legada da Fase 3 foi eliminada de vez na Fase 4d).
+
+**Nenhuma fase posterior foi iniciada** -- não existe "6D.9" no
+prompt-mestre original; qualquer trabalho além deste ponto (editor pra
+`student_flashcards`, rich text, templates customizáveis, migração de
+dado legado em massa, integração de imagem por Field na Revisão)
+precisa de escopo e autorização explícitos numa sessão futura.

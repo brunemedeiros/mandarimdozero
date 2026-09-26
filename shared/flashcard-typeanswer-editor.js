@@ -54,7 +54,8 @@
 //   - shared/flashcard-editor-state.js (noteEditorStateToRow, createNativeNoteEditorState)
 //   - shared/flashcard-field-editor.js (renderFieldEditorHTML, wireFieldEditorList,
 //                                        addFieldToEditorState, removeFieldFromEditorState,
-//                                        updateFieldInEditorState, refreshNativeFieldsBox)
+//                                        updateFieldInEditorState, refreshNativeFieldsBox,
+//                                        fieldIsPinyinSatellite -- Fase 6D.8)
 //   - shared/flashcard-mc-editor.js    (refreshNativeCardTypeBox -- dispatcher
 //                                        estendido aqui embaixo com o branch type_answer)
 //   - escapeHTML (fr/zh app.js)
@@ -149,7 +150,11 @@ function transitionToTypeAnswer(editorState){
   const fields = editorState.fields || [];
   const hasPrompt = fields.some(f => f.role === 'prompt');
   const hasAnswer = fields.some(f => f.role === 'answer');
-  const unroled = fields.filter(f => !f.role);
+  // Fase 6D.8 -- nunca escolhe um satélite de pinyin como prompt/answer
+  // (fieldIsPinyinSatellite, shared/flashcard-field-editor.js) -- achado
+  // real: converter um Normal zh (front+pinyin+back) e trocar pra "Digite
+  // a resposta" atribuía `answer` ao Field de PINYIN em vez da tradução.
+  const unroled = fields.filter(f => !f.role && !fieldIsPinyinSatellite(f, fields));
   let cursor = 0;
   if (!hasPrompt && unroled[cursor]){
     updateFieldInEditorState(editorState, unroled[cursor].id, { role: 'prompt' });

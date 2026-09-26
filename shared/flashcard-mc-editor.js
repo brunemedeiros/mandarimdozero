@@ -20,7 +20,8 @@
 //   - shared/flashcard-editor-state.js (noteEditorStateToRow, createNativeNoteEditorState)
 //   - shared/flashcard-field-editor.js (renderFieldEditorHTML, wireFieldEditorList,
 //                                        addFieldToEditorState, removeFieldFromEditorState,
-//                                        updateFieldInEditorState, refreshNativeFieldsBox)
+//                                        updateFieldInEditorState, refreshNativeFieldsBox,
+//                                        fieldIsPinyinSatellite -- Fase 6D.8)
 //   - escapeHTML (fr/zh app.js)
 
 // Os 3 roles reconhecidos por Multiple Choice -- os únicos que este editor
@@ -72,7 +73,16 @@ function validateNativeMultipleChoiceStructure(editorState){
   if (!structural.ok) return structural;
 
   const fields = editorState.fields || [];
-  const unrecognized = fields.filter(f => !MC_ROLES.includes(f.role));
+  // Fase 6D.8 -- um satélite de pinyin (alvo de outro field.pinyinFieldId,
+  // ex: pinyin do prompt num MC zh convertido de legado) NUNCA precisa de
+  // role própria -- ele já está vinculado ao Field dono via pinyinFieldId,
+  // exatamente como Normal/Type Answer/Cloze já tratam. Achado real:
+  // legacyFlashcardConversionPreflight()/nativeNoteEditorStateFromLegacyRow()
+  // (mesma fase) preservam pinyin do prompt de um MC zh legado -- sem esta
+  // exceção, essa conversão nunca conseguiria ser salva (bloqueada aqui
+  // por um Field que é correto, só sem role, mesmo motivo que
+  // fieldIsPinyinSatellite já existe pras transições).
+  const unrecognized = fields.filter(f => !MC_ROLES.includes(f.role) && !fieldIsPinyinSatellite(f, fields));
   if (unrecognized.length){
     return { ok: false, error: `Múltipla escolha não aceita Field sem papel definido (${unrecognized.length} campo(s) sem prompt/resposta/distrator) -- atribua um papel ou remova.` };
   }
@@ -106,7 +116,9 @@ function transitionToMultipleChoice(editorState){
   const fields = editorState.fields || [];
   const hasPrompt = fields.some(f => f.role === 'prompt');
   const hasAnswer = fields.some(f => f.role === 'answer');
-  const unroled = fields.filter(f => !f.role);
+  // Fase 6D.8 -- nunca escolhe um satélite de pinyin como prompt/answer
+  // (fieldIsPinyinSatellite, shared/flashcard-field-editor.js).
+  const unroled = fields.filter(f => !f.role && !fieldIsPinyinSatellite(f, fields));
   let cursor = 0;
   if (!hasPrompt && unroled[cursor]){
     updateFieldInEditorState(editorState, unroled[cursor].id, { role: 'prompt' });

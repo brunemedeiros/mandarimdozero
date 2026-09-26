@@ -22,10 +22,79 @@
 // shared/flashcard-cloze-editor.js, antes de shared/teacher-flashcards.js):
 //   - shared/flashcard-editor-state.js (noteEditorStateToRow,
 //     isNativeNoteEditorState, createNativeNoteEditorState, createFieldState)
-//   - shared/flashcard-model.js (validateNativeNoteRow, contentFieldIndices)
+//   - shared/flashcard-model.js (validateNativeNoteRow, contentFieldIndices,
+//     isNoteFieldsPresent, isCardGenerationModePresent, STUDY_LANG_FOR_APP_KEY,
+//     isStudyLanguageField -- Fase 6D.8, ver abaixo)
 //   - shared/flashcard-mc-editor.js       (validateNativeMultipleChoiceStructure)
 //   - shared/flashcard-typeanswer-editor.js (validateNativeTypeAnswerStructure)
 //   - shared/flashcard-cloze-editor.js    (validateNativeClozeStructure)
+
+// ---------- Fase 6D.8 -- classificação do modelo de uma linha (Seção 15) ----------
+//
+// Nome explícito pro padrão que já era usado implicitamente em 4 pontos
+// (shared/admin-flashcards.js/shared/my-flashcards.js: decidir se um
+// cartão já carregado é nativo, legado, ou um estado híbrido nunca
+// esperado). O CHECK constraint da migration 045 (fields/card_generation_mode
+// sempre pareados) já torna 'invalid' estruturalmente impossível numa linha
+// real vinda do Supabase -- mas esta função existe mesmo assim como ponto
+// único, auditável, de checagem defensiva no cliente (Seção 15 pede
+// explicitamente que o front-end NUNCA aceite silenciosamente um estado
+// híbrido como se fosse nativo válido) -- nunca reimplementa
+// validateNativeNoteRow(), só decide qual dos 3 buckets uma linha cai antes
+// de qualquer decisão de UI (mostrar form legado vs. nativo).
+function classifyFlashcardRowModel(row){
+  const hasFields = isNoteFieldsPresent(row);
+  const hasMode = isCardGenerationModePresent(row);
+  if (hasFields && hasMode) return 'native';
+  if (!hasFields && !hasMode) return 'legacy';
+  return 'invalid';
+}
+
+// ---------- Fase 6D.8 -- preflight de conversão (Seção 6/8/18) ----------
+//
+// Chamado ANTES de nativeNoteEditorStateFromLegacyRow(), só pra bloquear os
+// 2 casos em que o MAPEAMENTO em si é genuinamente indeterminável -- nunca
+// pra exigir conteúdo completo (isso já é responsabilidade de
+// validateNoteEditorStateForSave(), rodada dentro do editor nativo depois
+// da conversão, com a MESMA disciplina de "a UI pode apresentar os dados
+// existentes pra correção manual" que a Seção 18 já autoriza). A distinção
+// importa: um cartão MC sem 3ª opção errada, ou um Cloze sem tradução
+// ainda, são casos de CONTEÚDO INCOMPLETO -- convertem normalmente, o
+// usuário vê os campos já preenchidos e corrige o que falta antes de
+// salvar. Os 2 casos abaixo são diferentes: não há ONDE colocar a
+// informação, então converter de qualquer jeito produziria uma Nota nativa
+// que PARECE válida mas está errada (exatamente o que a Seção 18 proíbe).
+//
+// 1. Cloze sem exatamente 1 "___" na frase -- sem isso, não dá pra saber
+//    ONDE a lacuna fica. Achado real (não hipotético): o código de
+//    conversão antigo usava `sentence.replace('___', markup)`, que
+//    SILENCIOSAMENTE não faz nada se "___" não existir -- o Field
+//    resultante teria a frase crua, zero marcas {{cN::...}}, e só seria
+//    pego por acaso pela validação genérica "pelo menos 1 marca" (mensagem
+//    que não explica a causa real: a frase nunca teve onde marcar).
+// 2. Múltipla escolha sem resposta certa (back_trans vazio) -- o schema
+//    legado é inequívoco sobre QUEM é a resposta certa (sempre back_trans,
+//    nunca ambíguo entre choices[]), mas se essa coluna estiver vazia não
+//    há nenhuma resposta certa pra promover a `role:'answer'` -- bloquear
+//    em vez de criar um Field de resposta vazio que passaria despercebido
+//    até o clique em Salvar.
+function legacyFlashcardConversionPreflight(row){
+  const isCloze = !!row.cloze_sentence;
+  if (isCloze){
+    const blankMatches = (row.cloze_sentence.match(/___/g) || []).length;
+    if (blankMatches !== 1){
+      return { ok: false, error: blankMatches === 0
+        ? 'Esta frase de completar não tem nenhum "___" marcando a lacuna -- não dá pra saber onde a resposta entra. Corrija a frase pelo formulário de sempre antes de usar o editor novo.'
+        : 'Esta frase de completar tem mais de um "___" -- o formulário legado só suporta 1 lacuna por cartão, então não dá pra determinar automaticamente qual delas vira a marca nativa. Corrija a frase pelo formulário de sempre antes de usar o editor novo.' };
+    }
+    return { ok: true };
+  }
+  const isMC = !!(row.choices && row.choices.length);
+  if (isMC && !(row.back_trans || '').trim()){
+    return { ok: false, error: 'Este cartão de múltipla escolha não tem uma resposta certa definida (verso vazio) -- não dá pra determinar qual é a resposta certa. Preencha o verso pelo formulário de sempre antes de usar o editor novo.' };
+  }
+  return { ok: true };
+}
 
 // ---------- Validação central (dispatcher único, reutilizado por
 // shared/admin-flashcards.js e shared/my-flashcards.js, e pelos testes) ----------
@@ -156,9 +225,39 @@ function nativeContentColumnsFromEditorState(editorState){
 // é chamada só quando o usuário clica em "Usar o novo editor de campos",
 // e o resultado só vira linha real no banco se ele confirmar clicando
 // Salvar no formulário nativo que aparece em seguida.
+// Fase 6D.8 (Seção 4/9/10) -- anexa audio_url/image_url legados ao Field
+// certo, na MESMA heurística que interpretNoteFromRow() (motor, ramo
+// legado) já usa pra interpretar esse dado histórico: o campo cujo `lang`
+// é o idioma ESTUDADO (isStudyLanguageField). Nunca inventa um lado --
+// se `targetField` não existir (nunca deveria acontecer, os 2 branches
+// abaixo sempre montam um Field de idioma estudado antes de chamar isto),
+// simplesmente não anexa nada, sem lançar erro.
+//
+// Ressalva IMPORTANTE sobre imagem (documentada aqui, não escondida): o
+// pipeline de LEITURA nativo (resolveCardField()/buildEngineCardsFromRow(),
+// shared/flashcard-model.js) só resolve imagem no nível da NOTE
+// (note.image), nunca a partir de field.image -- gap arquitetural já
+// identificado na auditoria da Fase 6D ("Fase 6D -- EDITOR: auditoria",
+// seção 6) e explicitamente fora do escopo desta fase (Seção 26 proíbe
+// estender resolveCardField()/renderers aqui). Por isso: field.image É
+// preenchido (a URL nunca é descartada -- fica visível no indicador
+// textual do Field editor, Fase 6D.3, e pronta pra quando um projeto
+// futuro estender o pipeline de leitura), mas a imagem NÃO vai aparecer
+// de fato na tela de Revisão depois da conversão até essa extensão
+// existir -- limitação conhecida, não um bug desta fase, sinalizada de
+// volta pro usuário no próprio fluxo de conversão (ver Seção 27/relatório).
+function attachLegacyMediaToFields(fields, row, languageAppKey){
+  const targetField = fields.find(f => isStudyLanguageField(f, languageAppKey));
+  if (!targetField) return;
+  if (row.audio_url) targetField.audio = { url: row.audio_url, source: 'upload' };
+  if (row.image_url) targetField.image = { url: row.image_url };
+}
+
 function nativeNoteEditorStateFromLegacyRow(row){
   const isCloze = !!row.cloze_sentence;
   const isMC = !isCloze && !!(row.choices && row.choices.length);
+  const isZh = row.language_app_key === 'mandarim';
+  const studyLang = STUDY_LANG_FOR_APP_KEY[row.language_app_key] || null;
   const base = {
     noteId: row.id,
     revision: row.revision || 0,
@@ -168,24 +267,51 @@ function nativeNoteEditorStateFromLegacyRow(row){
   };
 
   if (isMC){
-    const promptField = createFieldState({ role: 'prompt', content: { value: row.front || '' } });
-    const answerField = createFieldState({ role: 'answer', content: { value: row.back_trans || '' } });
+    // Seção 6 -- legado nunca é ambíguo sobre quem é a resposta certa
+    // (sempre back_trans, nunca choices[]) -- mapeamento 1:1 direto, sem
+    // adivinhação. front_is_target_language decide só o IDIOMA de cada
+    // Field (nunca a posição/papel -- prompt continua sempre o Field do
+    // "front" legado, answer sempre o de "back_trans"), mesma leitura já
+    // usada pelo branch normal abaixo e pelo motor legado
+    // (shared/flashcard-model.js:497-511) -- nunca vira um mecanismo de
+    // direção nativo (Seção 4/5): depois de convertido, os 2 Fields só
+    // têm `lang`, nunca um flag de direção salvo.
+    const frontIsTarget = row.front_is_target_language !== false;
+    const promptLang = isZh ? 'zh' : (frontIsTarget ? studyLang : 'pt-BR');
+    const answerLang = isZh ? 'pt-BR' : (frontIsTarget ? 'pt-BR' : studyLang);
+    const promptField = createFieldState({ role: 'prompt', lang: promptLang, content: { value: row.front || '' } });
+    const answerField = createFieldState({ role: 'answer', lang: answerLang, content: { value: row.back_trans || '' } });
     const distractorFields = (row.choices || []).slice(0, 3).map(c => createFieldState({ role: 'distractor', content: { value: c || '' } }));
+    const fields = [promptField, answerField].concat(distractorFields);
+    // Seção 6 -- ZH também preserva pinyin do prompt (front_pinyin já era
+    // um campo genérico, mostrado pro modo MC no formulário legado --
+    // conferido em shared/admin-flashcards.js antes de escrever isto,
+    // nunca presumido). Field satélite, nunca conta como 4ª opção.
+    if (isZh && row.front_pinyin){
+      const pinyinField = createFieldState({ lang: 'zh-pinyin', content: { value: row.front_pinyin } });
+      promptField.pinyinFieldId = pinyinField.id;
+      fields.splice(1, 0, pinyinField);
+    }
+    attachLegacyMediaToFields(fields, row, row.language_app_key);
     return createNativeNoteEditorState(Object.assign({}, base, {
       cardGenerationMode: 'multiple_choice',
-      fields: [promptField, answerField].concat(distractorFields),
+      fields,
     }));
   }
 
   if (isCloze){
-    const isZh = row.language_app_key === 'mandarim';
+    // legacyFlashcardConversionPreflight() já garantiu, ANTES desta função
+    // ser chamada, que cloze_sentence tem EXATAMENTE 1 "___" -- o
+    // `.replace()` abaixo nunca mais é um no-op silencioso (Seção 6/18).
     const pinyinSuffix = (isZh && row.cloze_answer_pinyin) ? `|${row.cloze_answer_pinyin}` : '';
-    const markedSentence = (row.cloze_sentence || '').replace('___', `{{c1::${row.cloze_answer || ''}${pinyinSuffix}}}`);
-    const textField = createFieldState({ content: { value: markedSentence } });
-    const translationField = createFieldState({ content: { value: row.back_trans || '' } });
+    const markedSentence = row.cloze_sentence.replace('___', `{{c1::${row.cloze_answer || ''}${pinyinSuffix}}}`);
+    const textField = createFieldState({ lang: isZh ? 'zh' : studyLang, content: { value: markedSentence } });
+    const translationField = createFieldState({ lang: 'pt-BR', content: { value: row.back_trans || '' } });
+    const fields = [textField, translationField];
+    attachLegacyMediaToFields(fields, row, row.language_app_key);
     return createNativeNoteEditorState(Object.assign({}, base, {
       cardGenerationMode: 'cloze',
-      fields: [textField, translationField],
+      fields,
     }));
   }
 
@@ -193,16 +319,29 @@ function nativeNoteEditorStateFromLegacyRow(row){
   // relacionados (frontField.pinyinFieldId -> pinyinField.id) quando o
   // cartão legado é de mandarim e tem front_pinyin -- mesmo shape que
   // contentFieldIndices() já sabe pular (o Field de pinyin nunca conta
-  // como um 3º slot de conteúdo).
-  const isZh = row.language_app_key === 'mandarim';
-  const frontField = createFieldState({ lang: isZh ? 'zh' : null, content: { value: row.front || '' } });
+  // como um 3º slot de conteúdo). fr/pt: front_is_target_language decide
+  // qual dos 2 Fields é o idioma estudado -- interpretado só AQUI, na
+  // conversão (Seção 4/5), nunca persistido como mecanismo nativo: depois
+  // de convertido, a direção do cartão vem só de `lang`/posição de cada
+  // Field, igual a qualquer outro cartão nativo criado do zero pelo
+  // editor -- mesma leitura exata do motor legado
+  // (shared/flashcard-model.js:497-511), nunca reinventada aqui.
+  let frontField, backField;
+  if (isZh){
+    frontField = createFieldState({ lang: 'zh', content: { value: row.front || '' } });
+    backField = createFieldState({ lang: 'pt-BR', content: { value: row.back_trans || '' } });
+  } else {
+    const frontIsTarget = row.front_is_target_language !== false;
+    frontField = createFieldState({ lang: frontIsTarget ? studyLang : 'pt-BR', content: { value: row.front || '' } });
+    backField = createFieldState({ lang: frontIsTarget ? 'pt-BR' : studyLang, content: { value: row.back_trans || '' } });
+  }
   let pinyinField = null;
   if (isZh && row.front_pinyin){
     pinyinField = createFieldState({ lang: 'zh-pinyin', content: { value: row.front_pinyin } });
     frontField.pinyinFieldId = pinyinField.id;
   }
-  const backField = createFieldState({ content: { value: row.back_trans || '' } });
   const fields = pinyinField ? [frontField, pinyinField, backField] : [frontField, backField];
+  attachLegacyMediaToFields(fields, row, row.language_app_key);
   return createNativeNoteEditorState(Object.assign({}, base, {
     cardGenerationMode: 'normal',
     fields,

@@ -13,6 +13,9 @@
 //   - shared/roles.js              (hasActiveTeacherLink, fetchMyPlanTier)
 //   - shared/toast.js              (showToast)
 //   - shared/admin-flashcards.js   (openFlashcardResetConfirm, CARD_TYPE_UI_META -- carregado ANTES deste arquivo, mesma página, reaproveitado sem duplicar; ver Fase 6D.2 no CLAUDE.md)
+//   - shared/flashcard-native-persistence.js (nativeNoteEditorStateFromLegacyRow,
+//     validateNoteEditorStateForSave, nativeContentColumnsFromEditorState,
+//     classifyFlashcardRowModel, legacyFlashcardConversionPreflight -- Fase 6D.6/6D.8)
 //   - shared/flashcard-mc-editor.js/flashcard-typeanswer-editor.js/flashcard-cloze-editor.js
 //     (transitionToMultipleChoice/transitionToTypeAnswer/transitionToCloze/
 //     stripClozeMarksFromEditorState/refreshNativeCardTypeBox -- carregados
@@ -263,7 +266,7 @@ function myFlashcardRowHTML(c, premium){
     // novo (choices/cloze_sentence legados ficam null numa Note nativa,
     // o form legado não teria o que mostrar); seedado LAZY, só na
     // primeira vez que este cartão entra em edição nesta sessão.
-    if (!MY_FLASHCARDS_STATE.editingNativeState && isNoteFieldsPresent(c) && isCardGenerationModePresent(c)){
+    if (!MY_FLASHCARDS_STATE.editingNativeState && classifyFlashcardRowModel(c) === 'native'){
       MY_FLASHCARDS_STATE.editingNativeState = createNativeNoteEditorStateFromRow(c);
     }
     if (MY_FLASHCARDS_STATE.editingNativeState) return myFlashcardNativeEditFormHTML(c, MY_FLASHCARDS_STATE.editingNativeState);
@@ -297,7 +300,8 @@ function myFlashcardEditFormHTML(c, premium){
   const direction = c.front_is_target_language === false ? 'target-back' : 'target-front';
   return `
     <div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:10px;">
-      ${premium ? `<button type="button" class="admin-select-link" id="edit-my-flashcard-use-native" style="align-self:flex-start; background:none; border:none; cursor:pointer; padding:0;">🧪 Usar o novo editor de campos (nativo) -- preserva o conteúdo já digitado</button>` : ''}
+      ${premium ? `<button type="button" class="admin-select-link" id="edit-my-flashcard-use-native" style="align-self:flex-start; background:none; border:none; cursor:pointer; padding:0;">🧪 Usar o novo editor de campos (nativo) -- preserva o conteúdo já digitado</button>
+      <p class="profile-edit-error" id="edit-my-flashcard-use-native-error"></p>` : ''}
       ${!isMandarim ? `
       <div>
         <div class="section-label" style="margin:0 0 4px;">Idioma de cada lado</div>
@@ -334,8 +338,20 @@ function wireMyFlashcardEditForm(c, wrap, premium){
   // do resto do editor nativo nesta tela). Monta o editorState a partir
   // do conteúdo JÁ EXISTENTE (nativeNoteEditorStateFromLegacyRow) --
   // nada é salvo até o clique em "Salvar" do formulário nativo.
+  //
+  // Fase 6D.8 (ver CLAUDE.md, Seção 6/18) -- mesmo preflight de
+  // shared/admin-flashcards.js: bloqueia (sem trocar de tela) os 2 casos
+  // em que o mapeamento é indeterminável (Cloze sem "___" exato, MC sem
+  // resposta certa).
   document.getElementById('edit-my-flashcard-use-native')?.addEventListener('click', () => {
+    const errorEl = document.getElementById('edit-my-flashcard-use-native-error');
+    const preflight = legacyFlashcardConversionPreflight(c);
+    if (!preflight.ok){ if (errorEl) errorEl.textContent = preflight.error; return; }
+    if (errorEl) errorEl.textContent = '';
     MY_FLASHCARDS_STATE.editingNativeState = nativeNoteEditorStateFromLegacyRow(c);
+    if (c.image_url){
+      showToast('⚠️ A imagem deste cartão foi preservada nos dados, mas ainda não aparece na tela de Revisão pra cartões do novo editor.');
+    }
     renderMyFlashcardsView();
   });
 
@@ -448,7 +464,7 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap){
     // Mesma disciplina de shared/admin-flashcards.js: ID sempre
     // preservado, revision só incrementa quando algo realmente mudou (ou
     // sempre, no caso de uma conversão Legacy->Native de verdade).
-    const wasNative = isNoteFieldsPresent(c) && isCardGenerationModePresent(c);
+    const wasNative = classifyFlashcardRowModel(c) === 'native';
     let nextRevision = c.revision || 0;
     if (wasNative){
       const original = createNativeNoteEditorStateFromRow(c);
