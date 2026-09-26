@@ -9894,3 +9894,581 @@ prompt-mestre original; qualquer trabalho além deste ponto (editor pra
 `student_flashcards`, rich text, templates customizáveis, migração de
 dado legado em massa, integração de imagem por Field na Revisão)
 precisa de escopo e autorização explícitos numa sessão futura.
+
+## Fase 7 -- Auditoria e arquitetura de áudio/mídia por Field (SÓ AUDITORIA,
+zero código funcional alterado)
+
+Prompt-mestre de 25 seções, pedido logo após o fechamento da Fase 6D
+(Legacy→Native), com restrição travada desde o título: **auditoria e
+especificação, nenhuma implementação de código funcional nesta entrega**
+-- exceção só pra um teste de leitura opcional, não obrigatório, sem
+alterar comportamento (não escrito nesta entrega -- toda a auditoria foi
+feita por leitura direta do código real já em produção, sem necessidade
+de um teste novo pra confirmar nada). Renderers, motor, FSRS, Review,
+Preview, editor, banco, Storage, TTS e upload foram lidos, nunca
+alterados -- confirmado por `git status`/`git diff` vazios do início ao
+fim desta entrega.
+
+### A) Mapa do estado atual -- todo consumidor de áudio/imagem
+
+**Modelo (`shared/flashcard-model.js`)**:
+- `Field.audio`/`Field.image` (shape: `{url, source}`/`{url}`, ou `null`)
+  já existem desde a Fase 6B, preservados sem transformação por
+  `buildNativeRuntimeFields()` (linha 201-216).
+- `resolveCardField(note, fieldIndex)` (linha 590) é o ÚNICO ponto que
+  projeta um Field pra `{text, lang, pinyinText, audioUrl}` -- **resolve
+  áudio (`field.audio.url`), mas NUNCA resolve imagem**. Um Field com
+  `field.image` setado nunca produz nada usável a partir daqui -- achado
+  confirmado por leitura direta, não presumido (mesmo gap já sinalizado
+  na auditoria da Fase 6D, seção 6, ainda intocado).
+- `fieldHasAudio(resolvedField, appKey)` (linha 622) -- construída na
+  Fase 4a como candidata a decidir elegibilidade de TTS automático
+  (`audioUrl` explícito OU `lang` bate com o idioma estudado). **Nunca
+  chamada por nenhum renderer** -- confirmado por grep em `fr/app.js`/
+  `zh/app.js`: os 4 renderers usam `isStudyLanguageField(field, appKey)`
+  direto em vez dela. Continua no arquivo, testada (32 testes desde a
+  Fase 4a cobrem ela), mas é código morto sem nenhum call site real hoje,
+  mesma situação já registrada desde a Fase 6B.
+- `resolveMultipleChoiceCardView` devolve `prompt`+`correct` (Fields
+  resolvidos inteiros, cada um com seu `audioUrl`) mas `distractorTexts`
+  é sempre STRING PURA (`.map(f => f.content.value)`, linha 269-271, e
+  no ramo legado `row.choices` já são strings) -- um distrator nunca
+  carrega áudio, mesmo que a Note nativa tenha um Field `role:'distractor'`
+  com `field.audio` setado (a informação é descartada na geração do
+  CardInstance, não no resolver).
+- `resolveTypeAnswerCardView` resolve `answer = resolveCardField(...)`
+  internamente, mas **devolve só `displayAnswerText`/`compareAnswerText`
+  (strings) -- o objeto `answer` resolvido inteiro, com seu `audioUrl`,
+  é descartado antes do `return`** (linha 667-684). Ou seja: mesmo que o
+  Field de resposta tenha `field.audio` setado, isso nunca chega ao
+  renderer -- achado confirmado por leitura, não presumido.
+- `resolveClozeCardView` resolve `textField.audio.url` DIRETO (linha
+  710, não passa por `resolveCardField()` -- inconsistência de caminho,
+  ainda que o resultado funcional seja o mesmo) e resolve `translation =
+  resolveCardField(...)` (com seu próprio `audioUrl` computado) -- mas o
+  `translation.audioUrl` nunca é lido por nenhum renderer (ver abaixo).
+
+**Renderers (`fr/app.js`/`zh/app.js`, os 4 da Fase 6C, estrutura
+idêntica nos dois idiomas -- `speakChinese`/`hanzi` no lugar de
+`speakFrench`/`french`):**
+- **Normal** (`renderNormalCard`, fr:6539): `targetAudioUrl =
+  view.front.audioUrl || view.back.audioUrl` (upload, fallback entre os
+  dois lados) renderizado via `customAudioBtnHTML` **sempre visível**,
+  junto do `frontHTML` (independente de `localState.revealed`) --
+  **achado confirmado, não hipotético**: se o áudio pertence ao Field
+  do VERSO (`view.back.audioUrl`, quando o front não tem áudio próprio),
+  o botão 🎧 aparece de qualquer jeito, ANTES da revelação -- tocando-o
+  reproduz o áudio do lado ainda oculto, um vazamento real de
+  informação via áudio que o texto ainda esconde. TTS automático (🔊,
+  `audioBtnHTML`+`speakFrench`) só toca quando `frenchVisibleNow` é
+  true (`isReverse ? localState.revealed : true`) -- esse mecanismo
+  está corretamente gated; só o botão de áudio CUSTOMIZADO (upload) não
+  está.
+- **Múltipla escolha** (`renderMultipleChoiceCard`, fr:6128):
+  `customAudioUrl = view.prompt.audioUrl || (view.correct &&
+  view.correct.audioUrl) || null`, sempre visível junto do prompt, ANTES
+  de qualquer escolha ser feita -- **mesmo padrão de vazamento**: se o
+  Field de resposta certa (`view.correct`) tem áudio próprio e o prompt
+  não, o botão 🎧 toca a pronúncia da RESPOSTA CERTA antes da aluna
+  escolher entre as opções, sem nenhum gate. TTS automático (🔊) só
+  toca sobre `view.prompt.text`, nunca sobre `view.correct` -- esse não
+  vaza (`promptSpeakable` calculado só sobre o prompt).
+- **Digite a resposta** (`renderTypeAnswerCard`, fr:6306): só
+  `view.prompt.audioUrl` é usado (nunca `view.correct`/`answer`, que nem
+  chega ao renderer -- ver acima) -- sem vazamento aqui, mas também sem
+  NENHUMA forma de ouvir o áudio da resposta depois de revelada, mesmo
+  que o Field de resposta tenha um `field.audio` de verdade anexado (é
+  descartado na resolução, não só não-mostrado).
+- **Cloze** (`renderClozeCard`, fr:6236): `view.audioUrl` (áudio do
+  Field de texto/frase) sempre visível, em qualquer estado
+  (respondido ou não) -- aqui isso NÃO é vazamento (a frase inteira,
+  lacuna incluída, é o mesmo conteúdo visível o tempo todo; o áudio é da
+  frase, não da resposta específica). `view.translation.audioUrl`
+  (calculado por `resolveCardField` dentro do resolver) nunca é lido
+  pelo renderer -- mesmo padrão de "resolvido mas nunca consumido" do
+  Type Answer.
+- **Imagem**: `card.imageUrl` (Note-level, nunca Field-level -- ver
+  `resolveCardField`) é a única fonte usada nos 4 renderers, idêntica
+  nos dois idiomas, sempre no topo do `.flashcard`, sem nenhuma condição
+  de revelação (correto -- é ilustração do conceito inteiro, nunca da
+  resposta específica).
+
+**TTS/pronúncia automática (motor pré-existente, não construído pra
+Field -- reaproveitado por ele)**:
+- `speakFrench(text, btnEl, isAutoplay)`/`speakChinese(...)` (fr:231,
+  zh:221) são a ÚNICA porta de TTS do app inteiro -- chamadas por
+  QUALQUER tela (trilha, exercícios, flashcards) igualmente. Fluxo:
+  `AUDIO_MANIFEST[text]` (lookup por TEXTO LITERAL, não por Field/id) →
+  se existir, toca o mp3 pré-gerado (Google Cloud TTS neural,
+  `fr-FR-Chirp3-HD-Achernar`/`cmn-CN-Chirp3-HD-Achernar`, rate 0.9/0.85)
+  via `playPregeneratedAudio`; senão, cai pro Web Speech API do
+  navegador (`SpeechSynthesisUtterance`, `lang:'fr-FR'`/`'zh-CN'`, com
+  retry de 800ms se `onstart` nunca disparar).
+- **`AUDIO_MANIFEST` (`fr/audio-manifest.js`/`zh/audio-manifest.js`,
+  764/428 linhas) é um mapa texto→arquivo.mp3, gerado por um pipeline
+  OFFLINE** (`fr/scripts/regenerate_broken_audio.py`, que reaproveita
+  `challenges_pipeline/tts.py` -- mesma voz, validação por
+  Speech-to-Text + pico de amplitude via `miniaudio`) -- não é
+  executado em runtime, não conhece Field/Note/CardInstance, só cobre
+  vocabulário/frases da TRILHA que já existiam quando o pipeline rodou.
+  **Achado importante**: como o manifest só tem texto de trilha, o texto
+  de um Field autorado por professora/aluna (front/back/prompt digitado
+  no editor) quase nunca bate uma chave do manifest -- na prática, o
+  botão 🔊 de um flashcard SEMPRE cai pro Web Speech API ao vivo, nunca
+  reaproveita a voz neural pré-gerada que a trilha usa. Isso não é um
+  bug (o app já funciona assim, silenciosamente, desde a Fase 4a/6C) --
+  é uma característica arquitetural que qualquer decisão futura de "TTS
+  pra Field" precisa levar em conta: gerar/cachear um mp3 por Field
+  seria uma peça NOVA, não uma extensão do manifest existente (que é
+  estático, versionado no repositório, gerado por script Python
+  offline, nunca por upload/geração em runtime).
+- **`fieldHasAudio()` e `isStudyLanguageField()` são dois eixos
+  DIFERENTES, confundíveis**: `isStudyLanguageField(field, appKey)` (o
+  que os renderers realmente usam) decide só "o motor de pronúncia PODE
+  tentar este Field" (idioma bate) -- nunca olha `field.audio`. Isso
+  significa que a Seção 4 do prompt-mestre ("áudio não é automático por
+  idioma") já é tecnicamente verdadeira para o conceito `Field.audio`
+  (upload/TTS explícito) -- mas o botão 🔊 de pronúncia AUTOMÁTICA
+  continua 100% automático por idioma, sempre existiu assim
+  (pré-existente ao modelo Field, herdado da trilha) e roda em paralelo,
+  nunca controlado por `field.audio`. São dois mecanismos ortogonais
+  hoje: (1) pronúncia automática por idioma (🔊, sempre ligada quando
+  `lang` bate, independe de `field.audio`); (2) áudio customizado (🎧,
+  só existe quando `field.audio.url` está setado). Qualquer arquitetura
+  futura de "escolha de fonte de áudio por Field" precisa decidir
+  explicitamente se PASSA A CONTROLAR o mecanismo (1) também, ou se
+  mantém os dois paralelos como hoje -- não é uma decisão que já está
+  tomada em código, é uma pergunta em aberto criada por este achado.
+- **`/` no texto lido por TTS -- bug já apontado, confirmado por
+  leitura, não corrigido**: `acceptedForms(expected)`
+  (`fr/app.js:7728`) usa `/` como separador de múltiplas formas aceitas
+  (`"un/une".split('/')`) -- convenção usada em vários pontos do app
+  pra exercícios digitados. `audioBtnHTML(text)`/`speakFrench(text)`
+  (assim como o lookup `AUDIO_MANIFEST[text]`) usam o texto do Field
+  CRU, sem nenhuma normalização/remoção de `/` antes de tentar falar ou
+  procurar no manifest -- se um Field (trilha ou flashcard) tiver `/`
+  no meio do texto, ele é lido literalmente pela Web Speech API (que
+  varia por navegador -- alguns leem "barra", outros pulam) e nunca bate
+  uma chave do manifest (que é sempre a forma "limpa"). Confirmado como
+  problema estrutural real (a função de TTS nunca normaliza `/`, ponto),
+  não confirmado com um exemplo ao vivo específico de qual Field hoje
+  dispara isso -- não fui atrás disso porque corrigir/investigar mais
+  fundo estaria fora do escopo desta fase (auditoria, não correção).
+
+**Áudio próprio / upload (`shared/teacher-flashcards.js:223`,
+`shared/own-flashcards.js:116`)**:
+- `uploadFlashcardMedia(file, kind)`/`uploadOwnFlashcardMedia(file,
+  kind)` -- único mecanismo de upload que existe hoje, pro bucket
+  Supabase Storage `flashcard-media` (migration 032, leitura pública,
+  escrita restrita à pasta `auth.uid()` de quem envia). Path:
+  `{userId}/{kind}-{timestamp}-{random}.{ext}` (professora) ou
+  `{userId}/self-{kind}-{timestamp}-{random}.{ext}` (aluna, mesmo
+  bucket, só prefixo `self-` diferente). Devolve URL pública já pronta;
+  nunca grava no banco sozinha (quem chama decide onde a URL vai).
+  `kind` é só `'image'`/`'audio'` -- usado apenas pra nomear o path, sem
+  nenhuma validação de tipo/tamanho de arquivo no cliente (confia 100%
+  no limite que o próprio bucket aplica, mesmo critério já documentado
+  desde a Fase 8a).
+- **Nenhuma infraestrutura de GRAVAÇÃO existe** -- confirmado por grep
+  no repositório inteiro: zero ocorrência de `MediaRecorder`,
+  `getUserMedia`, `navigator.mediaDevices`. Hoje "áudio customizado" é
+  estritamente "arquivo já gravado em outro lugar, enviado via
+  `<input type="file">`" -- nunca gravado direto no navegador.
+- **A editora nativa de Field (`shared/flashcard-field-editor.js`, Fase
+  6D.3) só MOSTRA que um Field já tem áudio/imagem** (indicador
+  textual, "🎧 tem áudio vinculado"/"🖼️ tem imagem vinculada", linha
+  84-85) -- **não existe NENHUM controle nela pra ANEXAR áudio/imagem
+  novos a um Field**. A única forma hoje de um Field ganhar
+  `field.audio`/`field.image` é (a) via conversão Legacy→Native (Fase
+  6D.8, `attachLegacyMediaToFields`, heurística por idioma) ou (b) via
+  teste/construção manual do `editorState`. O upload real (arquivo
+  `<input>` + `uploadFlashcardMedia`) só existe hoje no formulário
+  LEGADO (`shared/admin-flashcards.js`/`shared/my-flashcards.js`,
+  campos "Imagem"/"Áudio próprio" fora do editor nativo) -- grava
+  `image_url`/`audio_url` na LINHA (não num Field), e só entra no
+  modelo nativo se/quando essa linha for convertida.
+
+**Speed Review / Combinar / export Anki (confirmado, não presumido, por
+leitura direta -- nenhum dos 3 tem qualquer relação com áudio hoje)**:
+- **Speed Review** (`buildSpeedQueue`/`buildSpeedOptions`/
+  `renderSpeedReviewCard`, fr:5177-5886) -- usa só `cardPromptText`/
+  `cardAnswerText` (strings puras, Fase 4c). Nenhum `audioBtnHTML`,
+  nenhum `speakFrench`, nenhum `customAudioBtnHTML` em nenhum ponto do
+  fluxo -- confirmado lendo o render completo (linha 5864-5876): é
+  texto puro dos dois lados, sem áudio de espécie nenhuma, pra QUALQUER
+  Card Type (inclusive os que teriam áudio anexado, se existisse).
+- **Combinar** (`startMatchGame`/`renderMatchTiles`, fr:5593-5650) --
+  mesmo padrão: `MATCH_STATE.tiles` guarda só `{cardId, side, text}`,
+  renderizado como texto puro no tile. Zero áudio.
+- **Export Anki** (`shared/anki-export.js` + `ANKI_EXPORT_CONFIG`,
+  fr:7488-7526) -- `noteFields(card)` devolve só `[cardPromptText(card),
+  cardAnswerText(card)]` (2 strings). O empacotador do `.apkg`
+  (`shared/anki-export.js:157`) escreve `zip.file("media",
+  JSON.stringify({}))` -- **manifesto de mídia SEMPRE vazio,
+  incondicionalmente** -- confirmado por leitura direta do código de
+  empacotamento, não inferido: nenhum áudio de nenhum Field, de nenhum
+  Card Type, jamais é incluído no `.apkg` exportado hoje, mesmo que o
+  cartão tenha `field.audio`/`image_url` reais.
+
+**Trilha (Study Trail, pré-nativo)**: vocabulário/frases da trilha
+(`v.f`/`v.c`, `ex.f`/`ex.c`, etc., de `content.js`) usam `audioBtnHTML`+
+`speakFrench`/`speakChinese` diretamente sobre o texto do item --
+NUNCA passam por `Field`/`Note`/`resolveCardField` (a trilha é 100%
+fora do modelo Note/Field, sempre foi -- confirmado pela ausência total
+de `card.cardInstance` nesses call sites, e pelo padrão já documentado
+desde a Fase 4/6 de que só `teacher_flashcards`/`own_flashcards` passam
+pelo motor). Não há (nem precisa haver, hoje) nenhum adaptador
+Trilha→Field -- os dois sistemas de áudio (`AUDIO_MANIFEST`+`speakX`)
+são compartilhados só na CAMADA DE TTS/BOTÃO (funções `audioBtnHTML`/
+`speakFrench`/`speakChinese`, que qualquer tela pode chamar sobre
+qualquer string), nunca na camada de MODELO DE DADO.
+
+### B) Problemas comprovados por código (não hipóteses)
+
+1. **Vazamento de resposta via áudio customizado em Normal e Múltipla
+   Escolha** -- o botão 🎧 de áudio próprio é calculado com fallback
+   entre os dois lados (`front||back` / `prompt||correct`) e SEMPRE
+   renderizado junto do conteúdo já visível, mesmo quando o áudio na
+   verdade pertence ao lado ainda oculto/à resposta certa. Toca-lo antes
+   de responder/revelar entrega a resposta pelo ouvido mesmo com o texto
+   escondido. Afeta fr E zh igualmente (mesmo código, linhas espelhadas).
+2. **Áudio de resposta (Type Answer) e de tradução (Cloze) nunca
+   alcançável** -- `resolveTypeAnswerCardView`/`resolveClozeCardView`
+   resolvem (ou poderiam resolver) áudio desses campos, mas o dado é
+   descartado antes de chegar ao renderer -- mesmo que uma professora
+   anexe áudio ao Field de resposta/tradução, ele nunca é reproduzido em
+   lugar nenhum da Revisão hoje.
+3. **Distratores de Múltipla Escolha nunca carregam áudio** -- mesmo que
+   um Field `role:'distractor'` tenha `field.audio`, a geração do
+   CardInstance (`interpretNativeNoteFromRow`) já extrai só o texto
+   (`distractorTexts`), descartando a estrutura Field inteira antes do
+   resolver sequer rodar.
+4. **`fieldHasAudio()` é código morto** desde que foi escrita (Fase 4a)
+   -- nenhum renderer chama, `isStudyLanguageField()` faz o trabalho
+   real. Não é um bug funcional (o comportamento atual está correto),
+   mas é uma função pronta e testada sem nenhum consumidor, candidata a
+   reaproveitamento ou remoção quando a arquitetura de áudio for
+   revisitada de verdade.
+5. **Imagem nunca é resolvida por Field, apesar do schema já suportar**
+   -- `field.image` é persistido (Fase 6B) e mostrado como indicador no
+   editor (Fase 6D.3), mas `resolveCardField()` nunca o inclui na
+   projeção -- toda imagem exibida hoje vem de `note.image` (nível de
+   Note, só populado pelo caminho LEGADO). Gap já documentado desde a
+   Fase 6D, confirmado de novo aqui sem mudança de status.
+6. **Editor nativo de Field não tem NENHUM controle de anexar
+   áudio/imagem** -- só mostra que já existe (herdado de conversão
+   legada ou teste). Upload real só existe no formulário legado, fora do
+   modelo Note/Field.
+7. **Preview vaza efeitos colaterais reais de áudio, mesmo isolado de
+   grade/FSRS/persistência** -- achado NOVO desta auditoria, não
+   documentado em nenhuma entrega anterior: `shared/flashcard-preview.js`
+   nunca menciona `audio`/`image` (confirmado por grep, zero ocorrência)
+   -- ele delega 100% aos 4 renderers reais, exatamente como pretendido
+   (ver seção G). MAS os renderers chamam `speakFrench`/`speakChinese`
+   DIRETO (nunca via `callbacks`) sempre que `promptSpeakable &&
+   canSpeakFrench(...)` -- e `speakFrench`/`speakChinese` sempre chamam
+   `registerAudioPlay()` (fr:114-119: incrementa `STATE.totalAudioPlays`/
+   `STATE.daily.audioPlaysToday` e roda `checkAndCelebrateBadges()`) --
+   INCLUSIVE quando quem está renderizando é o Preview do editor (Fase
+   6D.7), não uma sessão de Revisão real. Ou seja: abrir um Preview de um
+   cartão com Field falável incrementa estatísticas REAIS da conta e pode
+   disparar celebração de badge de verdade -- um efeito colateral que
+   escapou do isolamento cuidadoso que a Fase 6D.7 construiu pra
+   grade/FSRS/persistência (via `callbacks.onAnswered` no-op), porque o
+   autoplay de TTS nunca passa pelos callbacks -- é uma chamada direta
+   dentro do próprio corpo do renderer. Não corrigido nesta auditoria
+   (fora do escopo -- zero código funcional), registrado aqui como
+   achado real de código, não hipótese.
+8. **`AUDIO_MANIFEST` nunca cobre conteúdo de flashcard** -- consequência
+   arquitetural (não bug): o botão de pronúncia automática de um
+   flashcard sempre cai no Web Speech API ao vivo, nunca na voz neural
+   pré-gerada que a trilha usa, porque o manifest é gerado offline só
+   pra vocabulário de trilha.
+
+### C) Modelo `Field.audio`/`Field.image` proposto (não implementado)
+
+Comparação das alternativas de shape pra `Field.audio`, com o shape ATUAL
+(`{url, source}`, source ∈ `'upload'|'tts'` já usado desde a Fase 6B/8a)
+como ponto de partida -- ele já cobre boa parte do necessário, a proposta
+é uma extensão, não uma reescrita:
+
+```js
+// Proposto -- extensão aditiva do shape já existente, compatível com
+// toda linha já gravada (audio:{url,source:'upload'} continua válido
+// sem nenhuma migração de dado):
+Field.audio = null
+  | { source: 'upload', url, uploadedAt, mimeType? }   // já existe hoje
+  | { source: 'tts', voiceId?, generatedUrl?, generatedAt?, textHash? }
+```
+
+- **`source` continua sendo o discriminador único** -- nunca dois campos
+  booleanos (`hasUpload`/`hasTts`) que poderiam ambos ser `true` ao
+  mesmo tempo de forma inconsistente. `null` = "sem áudio", estado
+  válido e comum (a maioria dos Fields hoje).
+- **`url` (upload) é sempre a fonte de verdade quando `source==='upload'`**
+  -- comportamento já correto hoje (`resolveCardField` já lê `.url`
+  defensivamente).
+- **`source:'tts'` propositalmente NÃO tem `url` obrigatório hoje** (só
+  `enabled`, conforme já documentado desde a Fase 6B) -- a proposta
+  estende isso pra opcionalmente cachear um `generatedUrl` (ver seção D,
+  "regenerar vs cachear"), mas nunca torna isso obrigatório: um Field
+  `source:'tts'` sem `generatedUrl` continua significando "gere ao vivo,
+  toda vez" (comportamento equivalente ao botão 🔊 de hoje, só que
+  agora uma ESCOLHA EXPLÍCITA da professora por Field, não um automatismo
+  por idioma).
+- **`textHash`** (proposto, novo) -- hash do texto do Field no momento
+  em que o áudio TTS foi gerado/cacheado; serve pra invalidação (ver D)
+  -- se o texto do Field mudar e `textHash` não bater mais, a UI sabe
+  mostrar "áudio desatualizado, regenere" em vez de tocar um áudio que
+  já não corresponde ao texto atual.
+- **Por que não um array de fontes** (`audio: [{...}, {...}]`, várias
+  opções por Field) -- rejeitado: nenhum requisito levantado pede mais
+  de UMA fonte de áudio ativa por Field ao mesmo tempo; um array
+  introduziria a pergunta "qual toca?" sem nenhum benefício aparente.
+  Se um dia a professora quiser TROCAR de upload pra TTS, é uma
+  substituição (`field.audio = {novo}`), nunca uma adição.
+- **`Field.image` proposto**: mesmo princípio, shape já existente
+  (`{url}`) é suficiente pro que já foi pedido -- nenhuma extensão
+  necessária além de FAZER `resolveCardField()` finalmente resolvê-lo
+  (ver K, subfase própria) -- não foi levantado nenhum requisito de
+  "imagem gerada"/fonte alternativa de imagem que justifique um
+  `source` como o de áudio.
+
+### D) Arquitetura de TTS recomendada (não implementada)
+
+- **Entrada**: sempre `Field.content.value` (o texto do próprio Field) --
+  nunca uma string derivada/recalculada (ex: nunca a frase Cloze inteira
+  com marcação, que precisa passar por `renderClozeText` antes).
+- **Idioma**: sempre `Field.lang` (já é a fonte de verdade, nunca
+  recalculado a partir de posição/direção/Card Type -- decisão já
+  travada, esta arquitetura não reabre isso).
+- **Voz**: hoje é implícita (1 voz fixa por idioma, `TTS.voice`
+  carregada uma vez). Proposta: manter 1 voz PADRÃO por idioma
+  configurável globalmente (não por Field) pro Web Speech API, já que
+  não há evidência de necessidade real de escolher voz por Field -- se
+  isso mudar, é decisão pra quando um requisito concreto aparecer, não
+  antecipada aqui.
+- **Onde gerar**: comparação de 3 caminhos --
+  1. **Cliente, ao vivo, sempre** (comportamento atual do botão 🔊) --
+     zero infraestrutura nova, zero custo de armazenamento, mas
+     qualidade inconsistente entre navegadores/SOs e nunca cacheável
+     (gera de novo a cada play).
+  2. **Servidor, sob demanda, com cache** (mesmo padrão que o pipeline
+     offline já usa pra trilha, só que em runtime) -- qualidade
+     consistente (voz neural), mas precisa de uma Edge Function nova
+     (chave de API do provedor de TTS, ex: Google Cloud TTS, como
+     `RESEND_API_KEY` foi feito pra e-mail) + Storage pra guardar o
+     resultado.
+  3. **Offline/build-time, como o pipeline de trilha já faz** --
+     inviável pra conteúdo autorado por professora/aluna em tempo real
+     (o pipeline atual roda manualmente, por script Python, contra
+     vocabulário fixo do currículo -- não é acionável a partir do
+     editor web).
+  **Recomendação**: caminho 2 (servidor, sob demanda, com cache) é o
+  único que entrega qualidade consistente pra conteúdo dinâmico -- mas
+  é uma peça de infraestrutura NOVA (mesma disciplina de "não presumir
+  infraestrutura ativa" do topo deste arquivo: hoje NENHUMA API de TTS
+  server-side está configurada, só o pipeline offline Python que já
+  existe pra trilha). Caminho 1 (client-side ao vivo) continua sendo o
+  fallback natural quando o áudio cacheado não existir/falhar --
+  mesma relação que já existe hoje entre manifest e Web Speech.
+- **Persistência do áudio gerado**: se o caminho 2 for adotado, o
+  resultado vira um upload comum pro bucket `flashcard-media` (mesma
+  infraestrutura de Storage já existente, `source:'tts'` com
+  `generatedUrl` apontando pra lá) -- nunca um mecanismo de Storage
+  paralelo.
+- **Comportamento ao editar o texto**: 3 opções comparadas --
+  (a) manter o áudio velho tocando um texto desatualizado (silencioso,
+  arriscado -- o áudio mentiria sobre o texto atual);
+  (b) apagar o áudio automaticamente a cada edição de texto (seguro, mas
+  destrutivo -- reforça regeneração toda vez, custo de API a cada
+  pequena correção de digitação);
+  (c) **marcar como desatualizado (via `textHash` descasado) sem apagar,
+  deixando a professora decidir regenerar ou manter** -- recomendado:
+  não perde o áudio silenciosamente, não força custo de regeneração
+  numa correção de typo, e a UI já tem precedente de "avisar sem
+  bloquear" (mesmo espírito do toast de imagem-não-migra da Fase 6D.8).
+- **Cache**: por Field (não por texto global) -- 2 Fields diferentes com
+  o mesmo texto poderiam, em teoria, gerar 2 áudios idênticos
+  redundantes; isso é aceitável (evita uma tabela de cache-por-texto
+  nova, complexidade desproporcional ao problema) mas vale registrar
+  como custo de Storage conhecido, não escondido.
+
+### E) Arquitetura de upload/gravação recomendada (não implementada)
+
+- **Upload de arquivo**: já existe e funciona (`uploadFlashcardMedia`/
+  `uploadOwnFlashcardMedia`, bucket `flashcard-media`) -- a única peça
+  que falta é CONECTAR isso ao editor nativo de Field (hoje só existe no
+  formulário legado). Nenhuma mudança de backend necessária pra isso.
+- **Gravação direta no navegador (MediaRecorder)**: não existe hoje,
+  proposta como arquitetura futura, não implementada -- fluxo:
+  `getUserMedia({audio:true})` → `MediaRecorder` → `Blob` → mesmo
+  `uploadFlashcardMedia`/`uploadOwnFlashcardMedia` já existente (o
+  upload não precisa saber se o arquivo veio de um `<input
+  type="file">` ou de uma gravação -- é só um `File`/`Blob` no fim das
+  contas). Recomendação: tratar como MELHORIA DE UX sobre a
+  infraestrutura de upload já existente, nunca um caminho de
+  persistência paralelo.
+- **Segurança/performance (avaliação, não implementação)**: bucket
+  público-leitura já é adequado pra áudio de flashcard (mesmo modelo já
+  aprovado pra avatares/mídia de material de apoio); sem limite de
+  tamanho de arquivo hoje (mesma lacuna já registrada desde a Fase 8a) --
+  recomendação: um limite explícito (ex: alguns MB) validado no cliente
+  ANTES do upload evitaria gasto de Storage/banda com arquivos grandes
+  por engano, sem exigir mudança de RLS/bucket. CORS não é uma
+  preocupação nova (bucket já público, mesma configuração de
+  `avatars`/`report-screenshots`). Autoplay (🔊 automático) já existe e
+  já é tratado com fallback silencioso (`showToast` quando o navegador
+  bloqueia) -- nenhuma mudança necessária aí.
+
+### F) Como a Revisão deveria resolver áudio (recomendação futura)
+
+O princípio já correto hoje (CardInstance decide QUAL Field é mostrado;
+`resolveCardField` decide O QUE existe naquele Field) deve se manter --
+a correção recomendada é só de EXTENSÃO, nunca de arquitetura nova:
+
+1. `resolveCardField()` passa a resolver `imageUrl` também (fecha o
+   achado #5 da seção B) -- mudança pequena, mas precisa revalidar os 4
+   renderers (que hoje leem `card.imageUrl` de nível de card, não de
+   Field) e decidir explicitamente se um Card Type mostra imagem de UM
+   lado só ou dos dois -- pergunta em aberto, não decidida aqui.
+2. `resolveTypeAnswerCardView`/`resolveClozeCardView` passam a devolver
+   o objeto `answer`/`translation` resolvido inteiro (não só o texto),
+   pro renderer decidir se/quando mostrar o áudio dele -- fecha o
+   achado #2.
+3. **O botão de áudio customizado nunca deve ser calculado por
+   fallback entre dois lados quando só um está visível** -- fecha o
+   achado #1: o renderer deve escolher o áudio do lado ATUALMENTE
+   VISÍVEL, nunca "qualquer um dos dois que tiver". Pra Normal, isso
+   significa: enquanto `!localState.revealed`, só `view.front.audioUrl`
+   pode aparecer; depois de revelado, os dois (front OU back conforme o
+   lado). Pra Múltipla Escolha, só `view.prompt.audioUrl` antes de
+   responder -- nunca `view.correct.audioUrl` antecipado.
+4. Múltipla escolha precisa de uma decisão de produto explícita antes de
+   qualquer código: distratores ganham áudio individual (exigiria
+   `resolveMultipleChoiceCardView` devolver Fields resolvidos pros
+   distratores, não strings) ou continuam intencionalmente sem -- não
+   decidido aqui, só a lacuna registrada.
+5. Nenhuma mudança em `getStudyQueue()`/`eligibleReviewPool()`/FSRS --
+   mesma conclusão de toda fase anterior desta feature, áudio é só
+   apresentação.
+
+### G) Como o Preview deveria reusar a Revisão (confirmado + 1 gap)
+
+**Confirmado, positivo**: `shared/flashcard-preview.js` já cumpre a
+exigência da Fase 6C ("Preview e Review usam o MESMO renderer") de
+forma estrita -- zero menção a `audio`/`image` no arquivo inteiro (grep
+confirma), porque ele delega 100% aos 4 renderers reais via o mesmo
+contrato `(mountEl, card, localState, callbacks)`. Não existe
+`previewAudio`/lógica paralela alguma -- o comportamento de áudio do
+Preview É, estruturalmente, o mesmo da Revisão, por construção.
+
+**Gap real (achado #7 da seção B), recomendação**: como o autoplay de
+TTS acontece dentro do PRÓPRIO CORPO do renderer (chamada direta a
+`speakFrench`/`speakChinese`, nunca via `callbacks`), ele roda também no
+Preview -- inclusive `registerAudioPlay()` (contagem real + checagem de
+badge). Recomendação pra quando isso for corrigido: os 4 renderers
+precisam de um jeito de saber "não sou uma sessão real" (mesmo padrão já
+usado por `card.__isPreviewCard` pra pular a barra de progresso,
+Fase 6D.7) e, nesse caso, pular a chamada de autoplay (ou chamar uma
+função equivalente que TOCA o áudio sem incrementar contadores/checar
+badges) -- nunca duplicar `speakFrench`/`speakChinese` em duas versões.
+Registrado aqui como gap concreto pra fase de implementação futura, não
+corrigido nesta auditoria.
+
+### H) Compatibilidade legada (confirmado, sem mudança recomendada)
+
+O caminho já construído (Fase 6D.8, `attachLegacyMediaToFields`) --
+vincular `audio_url`/`image_url` (nível de linha) ao Field cujo idioma é
+o estudado, via a mesma heurística `isStudyLanguageField()` que o
+adapter legado (`interpretNoteFromRow`) já usa pra interpretação em
+tempo real -- continua sendo a abordagem certa: nunca inventar um valor,
+nunca perder o dado histórico, sempre reversível (o toast de aviso sobre
+imagem já comunica a limitação conhecida). Nenhuma mudança recomendada
+aqui além do que já existe -- a única pendência é a mesma do resto do
+relatório (imagem por Field não é lida em nenhum render ainda), não algo
+específico da conversão legada em si.
+
+### I) Lacunas no export Anki (confirmado, recomendação futura)
+
+Áudio nunca é exportado hoje (achado #3 acima, `zip.file("media",
+JSON.stringify({}))` sempre vazio). Recomendação, quando essa fase for
+priorizada: (1) baixar cada `field.audio.url`/áudio TTS cacheado
+referenciado pelos cartões selecionados (fetch + blob, já que são URLs
+públicas do bucket `flashcard-media`), (2) nomear os arquivos de forma
+estável dentro do `.apkg` (ex: hash da URL, evita colisão entre cartões
+diferentes), (3) referenciar via `[sound:nome.mp3]` no campo certo do
+`noteFields()`, (4) decidir explicitamente se "Normal com reverso"
+duplica o arquivo de áudio nas 2 notas exportadas (Anki permite
+reaproveitar o mesmo arquivo de mídia entre notas -- recomendação:
+reaproveitar, nunca duplicar o download) e (5) Cloze -- como Cloze não é
+exportado hoje (`hasPlainFrontBack` já exclui, ver Fase 4c) e não há
+requisito novo pra mudar isso, esta lacuna fica registrada mas fora do
+escopo imediato de qualquer correção de áudio.
+
+### J) Migração de áudio/imagem legado daqui pra frente
+
+Sem mudança de recomendação em relação ao que a Fase 6D.8 já implementou
+-- a única extensão natural é: quando o editor nativo ganhar controles
+reais de anexar áudio/imagem por Field (peça ainda não construída, ver
+K), o mesmo botão "🧪 Usar o novo editor" (conversão explícita, nunca
+automática) continua sendo o único gatilho -- nenhuma migração em massa
+proposta nesta auditoria, consistente com a regra geral do projeto.
+
+### K) Decomposição concreta em subfases futuras (não implementadas)
+
+1. **7a -- `resolveCardField()` resolve imagem por Field** (fecha achado
+   #5) + decisão de produto sobre "imagem em qual lado" por Card Type.
+   Toca só `shared/flashcard-model.js` + os 4 renderers (consumo).
+2. **7b -- Corrigir o vazamento de áudio customizado em Normal/MC**
+   (fecha achado #1) -- escolher áudio do lado VISÍVEL, nunca fallback
+   cego entre lados. Só renderers, sem mudança de schema/motor.
+3. **7c -- Expor áudio de resposta (Type Answer) e tradução (Cloze)**
+   (fecha achado #2) -- `resolveTypeAnswerCardView`/`resolveClozeCardView`
+   devolvem o Field resolvido inteiro, renderer decide quando mostrar.
+4. **7d -- Corrigir vazamento de autoplay no Preview** (fecha achado #7)
+   -- introduzir um jeito explícito de suprimir/redirecionar o autoplay
+   quando `card.__isPreviewCard`, sem duplicar `speakFrench`/`speakChinese`.
+5. **7e -- Editor nativo de Field ganha upload real** (áudio/imagem) --
+   conecta `uploadFlashcardMedia`/`uploadOwnFlashcardMedia` (já
+   existentes) a um controle de verdade dentro de
+   `shared/flashcard-field-editor.js`, substituindo o indicador
+   read-only atual. Pré-requisito de UX pra qualquer coisa de TTS
+   explícito por Field fazer sentido.
+6. **7f -- TTS explícito por Field** (arquitetura da seção D) -- exige
+   infraestrutura nova (Edge Function + chave de API de TTS,
+   nunca presumida como já ativa) + extensão do shape `Field.audio`
+   (seção C) + UI de "gerar/regenerar áudio" no editor (depende de 7e).
+   Maior das subfases, deliberadamente por último.
+7. **7g -- Gravação direta (MediaRecorder)** -- melhoria de UX sobre a
+   infraestrutura de upload de 7e, não um requisito bloqueante de
+   nenhuma das anteriores.
+8. **7h -- Áudio em distratores de Múltipla Escolha** -- só depois de
+   uma decisão de produto explícita (achado #4/seção F item 4) sobre se
+   isso é sequer desejado.
+9. **7i -- Export Anki com áudio** (seção I) -- independente das
+   anteriores, pode ser feita a qualquer momento depois que o shape de
+   áudio estiver estável (não precisa esperar 7f/7g).
+
+Cada subfase segue o mesmo padrão de autorização explícita já usado em
+toda a Fase 6D -- nenhuma foi iniciada nesta entrega.
+
+### Checklist de entrega desta auditoria
+
+Arquivos lidos (nenhum alterado): `shared/flashcard-model.js`,
+`fr/app.js`/`zh/app.js` (renderers, TTS, Speed Review, Combinar, export
+Anki), `fr/audio-manifest.js`/`zh/audio-manifest.js`,
+`fr/scripts/regenerate_broken_audio.py`, `shared/flashcard-preview.js`,
+`shared/flashcard-field-editor.js`, `shared/teacher-flashcards.js`,
+`shared/own-flashcards.js`, `shared/anki-export.js`,
+`shared/supabase_migrations/032_add_flashcard_media_and_choices.sql`,
+`shared/teacher-support-materials.js` (confirmado irrelevante -- upload
+genérico sem relação com Field). `git status`/`git diff` confirmados
+vazios (só este `CLAUDE.md` foi tocado nesta entrega inteira). Nenhum
+teste novo escrito -- toda a auditoria foi por leitura direta de código
+já em produção, sem necessidade de um teste de leitura pra confirmar
+nada que a leitura já não confirmasse com citação de linha exata.
+
+**NÃO implementada nenhuma subfase da Fase 7 nesta entrega** -- próxima
+etapa só começa depois de autorização explícita da autora, com este
+relatório já entregue antes de pedir luz verde.
