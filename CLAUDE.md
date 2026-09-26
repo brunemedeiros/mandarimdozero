@@ -11019,3 +11019,428 @@ client-side, nenhuma migração/mudança de schema.
 Próxima subfase (a definir pela autora, seguindo a decomposição já
 proposta na auditoria da Fase 7) só começa depois de autorização
 explícita, com este relatório já entregue antes de pedir luz verde.
+
+## Fase 7c -- Editor de áudio por Field (SÓ AUDITORIA/ESPECIFICAÇÃO, zero
+código funcional alterado)
+
+**Nota sobre numeração, registrada por transparência**: a decomposição
+original proposta na auditoria da Fase 7 (seção K, "7a" a "7i") não bate
+1:1 com a numeração usada na prática a partir daqui -- a autora decidiu
+nomear as entregas seguintes em ordem de execução, não pela lista
+original. O que foi de fato entregue como **"Fase 7a"** (`7fd5075`)
+absorveu, numa entrega só, os itens originais 7a (imagem por Field) + 7b
+(vazamento de áudio em Normal/MC) + 7c (áudio de resposta/tradução em
+Type Answer/Cloze) + metade do 7d (autoplay do Preview, só a parte
+automática). O que foi entregue como **"Fase 7b"** (`76c8ffc`, contrato
+de `Field.audio`) nem existia na lista original -- foi uma subfase nova,
+inserida como pré-requisito de dado antes de qualquer UI de edição fazer
+sentido. Esta entrega, pedida como **"Fase 7c"**, cobre o mesmo escopo
+que a lista original chamava de "7e" (editor ganha upload real) mais as
+partes de especificação de UX dos originais "7f" (TTS) e "7g"
+(gravação) -- só que como AUDITORIA/ESPECIFICAÇÃO, não implementação
+(a autora foi explícita: "não implemente nada"). Daqui pra frente, a
+numeração que importa é a da autora (7, 7a, 7b, 7c, ...), não mais a
+lista K) original -- registrado aqui pra nenhuma sessão futura se
+confundir tentando casar as duas.
+
+**Escopo desta entrega**: só leitura + este relatório. `git status`/
+`git diff` confirmados no fim -- só `CLAUDE.md` foi tocado.
+
+### A) Estado atual (auditoria)
+
+Reli, sem presumir a partir da documentação anterior:
+`shared/flashcard-editor-state.js`, `shared/flashcard-field-editor.js`,
+`shared/flashcard-native-persistence.js`, `shared/flashcard-model.js`,
+`shared/flashcard-mc-editor.js`, `shared/flashcard-typeanswer-editor.js`,
+`shared/flashcard-cloze-editor.js`, `shared/flashcard-preview.js`,
+`shared/admin-flashcards.js`, `shared/my-flashcards.js`, e os trechos
+relevantes de `fr/app.js` (Study Trail, Speed Review, Combinar, export
+Anki -- `zh/app.js` é estruturalmente idêntico nesses pontos, mesma
+convenção de sempre).
+
+- **Onde Fields são criados**: `createFieldState()` (`shared/flashcard-
+  editor-state.js`) é o único construtor -- chamado por
+  `addFieldToEditorState()` (`shared/flashcard-field-editor.js`, Fase
+  6D.3) e pelos wrappers específicos de cada Card Type
+  (`addMultipleChoicePromptField`/`AnswerField`/`DistractorField` em
+  `flashcard-mc-editor.js`; equivalentes em `flashcard-typeanswer-
+  editor.js`; a criação do Field de texto/tradução em `flashcard-cloze-
+  editor.js`), e por `nativeNoteEditorStateFromLegacyRow()` (`shared/
+  flashcard-native-persistence.js`, Fase 6D.8, conversão Legacy->Native).
+- **Onde Fields são editados**: `updateFieldInEditorState(editorState,
+  fieldId, patch)` (`flashcard-field-editor.js`) -- um `Object.assign`
+  RASO que preserva qualquer propriedade não mencionada no patch
+  (confirmado, de novo, que isso já protege `audio`/`image`/`role`/
+  `pinyinFieldId` através de qualquer edição de conteúdo/idioma, testado
+  desde a Fase 6D.3/7b). Chamado pelo wiring genérico
+  (`wireFieldEditorList`, inputs `data-field-content`/`data-field-lang`)
+  e pelos helpers de transição de papel (`promoteDistractorToAnswer`/
+  `transitionToMultipleChoice`/`TypeAnswer`/`Cloze`) -- estes últimos só
+  tocam `role`/`cardGenerationMode`, nunca `audio`.
+- **Onde Fields são clonados**: `cloneFieldIntoEditorState(editorState,
+  fieldId)` (`flashcard-field-editor.js`, Fase 6D.3) -- já existe como
+  infraestrutura pura, já preserva `audio`/`image` (testado na Fase 7b,
+  item I). **Achado**: nenhum botão de "Clonar campo" existe hoje em
+  `admin-flashcards.js`/`my-flashcards.js` -- confirmado por grep, a
+  função só é chamada por testes. Ou seja: a pergunta "clonar Field deve
+  clonar o áudio?" já tem resposta implementada (sim) antes mesmo de
+  existir um jeito de clonar pela UI -- registrado aqui pra próxima
+  sessão saber que não precisa reabrir essa decisão.
+- **Como cada Field é renderizado**: `renderFieldEditorHTML(field, index,
+  opts)` (`flashcard-field-editor.js`) é o ÚNICO renderer genérico,
+  usado diretamente por Normal/Normal com reverso (2 Fields soltos),
+  Digite a resposta (prompt+answer), Múltipla Escolha (prompt+answer+até
+  3 distratores) e pela TRADUÇÃO do Cloze. **Exceção real, achado
+  importante**: a FRASE do Cloze (o Field com as marcas `{{cN::...}}`)
+  NUNCA passa por `renderFieldEditorHTML()` -- tem sua própria UI
+  dedicada (`renderClozeEditorHTML()`, `.cloze-editor-text`
+  `contenteditable`, Fase 6D.5), porque precisa de seleção de texto pra
+  marcar lacunas, incompatível com um `<textarea>` simples. Isso é
+  ARQUITETURALMENTE RELEVANTE pra esta subfase (ver seção C).
+- **Como o estado é atualizado**: sempre via `updateFieldInEditorState()`
+  -- nenhum outro ponto muta `field.audio` diretamente fora dela e dos
+  construtores/conversores já listados.
+- **Como mudanças são detectadas**: `noteEditorStateChanged()`/
+  `noteEditorStatesEqual()` (`flashcard-editor-state.js`), via
+  `snapshotNoteEditorState()` -- `noteEditorStateContentForComparison()`
+  já inclui `audio`/`image` por Field desde a Fase 6B/7b, confirmado de
+  novo por leitura: **nenhuma mudança é necessária aqui** -- qualquer
+  edição futura de áudio já vai disparar corretamente a detecção de
+  "precisa de nova revision" sem tocar em uma linha de código.
+- **Como o `nativeState` é serializado**: `noteEditorStateToRow()`
+  (`flashcard-editor-state.js`) e `nativeContentColumnsFromEditorState()`
+  (`flashcard-native-persistence.js`) já carregam `audio`/`image` através
+  sem transformação (Fase 7b) -- idem, nenhuma mudança necessária.
+- **Onde uma futura ação de áudio deve entrar**: `renderFieldEditorHTML()`
+  é o ponto que, sozinho, já daria o bloco de áudio de graça pra TODOS os
+  Card Types (Normal, Normal com reverso, os 2 Fields de Digite a
+  resposta, os 1-4 Fields de Múltipla Escolha, a tradução do Cloze) --
+  EXCETO a frase do Cloze, que precisa do MESMO bloco sendo chamado
+  separadamente de dentro de `renderClozeEditorHTML()` (achado acima).
+  Esta é a descoberta arquitetural central desta auditoria: o componente
+  de áudio não pode viver só "dentro" de `renderFieldEditorHTML()` como
+  se fosse parte inseparável dela -- precisa ser uma peça PRÓPRIA,
+  reutilizável nos 2 lugares.
+- **Admin x Meus Cartões**: `shared/admin-flashcards.js` e `shared/my-
+  flashcards.js` têm exatamente a mesma estrutura
+  (`ADMIN_FLASHCARDS_STATE.nativeCardState`/`MY_FLASHCARDS_STATE.
+  nativeCardState`, ambos chamando `refreshNativeCardTypeBox()` no
+  render inicial e no listener de troca de Card Type, em 2 pontos cada
+  -- formulário de criação e formulário de edição nativa). **Único
+  diferencial relevante**: em `my-flashcards.js`, todo o bloco "Campos
+  nativos" (Card Type + Fields) já é gated por `isPremium()` (Fase
+  "reformulação gratuito x premium") -- confirmado que essa gate
+  envolve o bloco INTEIRO, então um editor de áudio por Field, vivendo
+  dentro desse mesmo bloco, herda o gate de graça, sem nenhum código
+  novo de permissão.
+
+### B) UX proposta (não implementar)
+
+Bloco "Áudio" por Field, mesma linguagem visual já usada no resto do
+editor (`.section-label` como rótulo pequeno, `.profile-edit-hint` pra
+texto de apoio, `.profile-edit-input` pros controles) -- substitui o
+indicador read-only de hoje (`fieldAudioIndicatorText()`, Fase 7b) por
+um controle de verdade, sem prometer nenhuma UI específica de antemão
+além da estrutura:
+
+1. Um `<select>` de ORIGEM (mesmo padrão do `<select>` de "Idioma" já
+   existente no próprio `renderFieldEditorHTML()`): "Sem áudio" / "URL
+   externa" / "Arquivo (upload)" / "Texto para voz (TTS)" / "Gravação" --
+   os mesmos 4 `type` do contrato da 7b + a opção "sem áudio" (`null`).
+2. Escolher uma origem revela um painel condicional logo abaixo (mesmo
+   padrão de progressive disclosure já usado noutros pontos deste editor
+   -- ex: campos de MC/Cloze que só aparecem conforme o modo escolhido):
+   - **URL externa**: 1 campo de texto pra colar a URL + botão "▶️
+     Ouvir" (desabilitado até ter uma URL não-vazia).
+   - **Arquivo (upload)**: `<input type="file">` (fase futura, 7e) +
+     depois de enviado, mostra a URL resultante (só leitura) + botão de
+     ouvir + link "Remover".
+   - **Texto para voz (TTS)**: `<textarea>` pré-preenchida com
+     `field.content.value` mas editável/sobrescrevível (grava em
+     `audio.text` só se a pessoa mudar -- ver Decisão 1 abaixo), `<select>`
+     de idioma/locale (sugestão default a partir de `field.lang`, nunca
+     salva sozinha -- ver Decisão 2), `<select>` de voz, `<select>`/slider
+     de velocidade, botão "🔊 Gerar áudio" (fase futura, 7f) -- depois de
+     gerado: botão de ouvir + legenda "gerado em <data>" + links
+     "Regerar"/"Remover".
+   - **Gravação**: botões iniciar/parar/ouvir/regravar/cancelar/salvar
+     (fase futura, 7g) -- depois de gravado: botão de ouvir + legenda de
+     duração + links "Regravar"/"Remover".
+3. Reutilizado nos MESMOS 2 lugares que `renderFieldEditorHTML()` já
+   aparece HOJE, mais 1 lugar novo (a frase do Cloze) -- ver seção C.
+
+### C) Arquitetura do componente de áudio
+
+**Proposta**: 2 novas funções em `shared/flashcard-field-editor.js`
+(mesmo arquivo que já é dono de `renderFieldEditorHTML`/
+`wireFieldEditorList`/`fieldAudioIndicatorText`, Fases 6D.3/7b):
+
+- `renderFieldAudioBlockHTML(field, opts)` -- HTML puro (sem side
+  effect), desenha o `<select>` de origem + o painel condicional certo
+  pro `field.audio` atual.
+- `wireFieldAudioBlock(container, editorState, fieldId, onChange)` --
+  liga os controles a `updateFieldInEditorState()` (o MESMO mutador
+  primitivo de sempre -- nunca um segundo caminho de mutação de Field).
+
+`renderFieldEditorHTML()` passa a chamar `renderFieldAudioBlockHTML()`
+internamente, no lugar de onde hoje só mostra o indicador textual de
+`fieldAudioIndicatorText()` (que continua existindo -- vira o texto
+usado DENTRO do próprio bloco de áudio, não descartado). `renderClozeEditorHTML()`
+(`flashcard-cloze-editor.js`) ganha 1 chamada A MAIS, logo depois do
+toolbar/`contenteditable` da frase, pro MESMO componente, aplicado ao
+Field de texto. **Nenhum dos 3 editores de Card Type específicos (MC/
+Type Answer/Cloze) precisa de lógica de áudio própria** -- eles já
+delegam 100% da renderização de Field pra `renderFieldEditorHTML()`
+(confirmado na auditoria A), então herdam o bloco novo automaticamente,
+sem duplicação -- exceto o único ponto (frase do Cloze) que já não usa
+esse caminho por outro motivo (seleção de texto), e que precisa da
+chamada explícita mencionada acima.
+
+**Contrato de `onChange`**: o par `wireFieldEditorList`/`wireFieldAudioBlock`
+já usa `onChange(kind, fieldId)` com `kind` em `'content'`/`'lang'`
+(nunca re-renderiza) ou `'structure'` (sempre re-renderiza, Fase 6D.3-
+6D.8). Proposta: um 3º valor, `'audio'`, tratado como **duas
+sub-categorias** por quem integra -- trocar a ORIGEM (o `<select>`
+principal) precisa recriar o painel condicional inteiro (equivalente a
+`'structure'`, precisa reconstruir o HTML), enquanto digitar dentro de
+um campo já visível (URL, texto de TTS) é equivalente a `'content'`
+(nunca re-renderiza, mesma disciplina anti-"UX-fix 5" já travada desde a
+Fase 6D.5/6D.6 -- reconstruir o DOM enquanto a pessoa digita apagaria o
+que ela está escrevendo).
+
+### D) Estados da UI (documentados, sem alterar schema)
+
+1. **Nenhum áudio** (`field.audio === null`) -- só o `<select>` de
+   origem em "Sem áudio", nenhum painel.
+2. **Áudio configurado E disponível** -- `url`/`upload` com `.url`
+   presente, ou `tts`/`recording` com `generatedUrl`/`url` presentes --
+   botão de ouvir habilitado, preview funciona.
+3. **Áudio configurado mas PENDENTE de geração/gravação** -- `tts` com
+   `generatedUrl:null` ou `recording` com `url:null` -- a CONFIGURAÇÃO
+   existe (texto/idioma/voz escolhidos, ou "modo gravação" escolhido),
+   mas nada tocável ainda. UI precisa deixar isso claro ("ainda não
+   gerado"/"ainda não gravado"), com o CTA de gerar/gravar em destaque e
+   o botão de ouvir ausente ou desabilitado -- nunca fingir que existe
+   áudio quando `resolveFieldAudioUrl()` devolveria `null`.
+4. **Áudio com erro** -- **não existe no schema da 7b** (nenhuma
+   propriedade `error`/`status` em `type:'tts'`/`type:'recording'`).
+   Decisão proposta, não travada em código: **erro de geração/upload é
+   SEMPRE transiente/só-de-UI** (mesmo padrão de toast já usado no resto
+   do app pra falha de upload/reprodução -- `showToast('Não foi possível
+   ...')`), nunca persistido no `Field.audio`. Justificativa: manter o
+   schema limpo (sem um campo que só faz sentido durante os poucos
+   segundos de uma tentativa) é mais simples que adicionar um estado
+   persistido que precisaria ser limpo depois -- se uma sessão futura
+   (7f/7g) achar que precisa de retry/histórico de erro, é uma decisão
+   NOVA, a ser tomada naquela hora, não aqui.
+5. **Áudio antigo continua disponível enquanto uma nova configuração é
+   preparada** -- o caso mais delicado, decisão explícita: trocar o
+   `<select>` de origem (ex: de "URL externa" já configurada pra "Texto
+   para voz") **NUNCA deve sobrescrever `field.audio` imediatamente**.
+   A nova escolha fica só no RASCUNHO da própria UI do bloco (estado
+   efêmero, balde #3 já reservado desde a Fase 6D.1 --
+   `createEditorUiState()` -- ou um estado local só do componente) até
+   que um ativo concreto exista de verdade (upload termina, TTS gera,
+   gravação termina) -- só NESSE momento `field.audio` é substituído. A
+   ÚNICA forma de limpar `field.audio` antes disso é a pessoa escolher
+   "Sem áudio" explicitamente. Sem essa regra, um clique acidental no
+   `<select>` destruiria um áudio já funcionando (a URL externa, upload
+   ou gravação anteriores) antes mesmo da nova configuração produzir
+   qualquer coisa.
+
+### E) Clone/remove/reorder (decisões)
+
+- **Clonar um Field CLONA o áudio junto** -- já é o comportamento
+  implementado (`cloneFieldIntoEditorState`, Fase 6D.3), confirmado na
+  auditoria A. Mantido: um Field clonado é uma variante independente;
+  quem clona decide depois se troca/remove o áudio; zerar
+  automaticamente surpreenderia mais do que preservar.
+- **Remover um Field remove seu áudio junto** -- não é uma regra nova,
+  é consequência direta de `removeFieldFromEditorState()` apagar o
+  objeto Field inteiro (que já contém `audio` como propriedade sua,
+  nunca uma referência externa). Nada a decidir aqui.
+- **Reordenar Fields não afeta áudio de nenhum jeito** -- `audio` é
+  propriedade do PRÓPRIO objeto Field, nunca referenciado por índice em
+  lugar nenhum do motor (confirmado de novo por leitura) -- mover um
+  Field de posição leva seu áudio junto, estruturalmente, sem nenhum
+  código especial.
+- **Mudar `Field.lang` NUNCA toca `field.audio` automaticamente** --
+  trocar o idioma de um Field com upload/URL/gravação já anexados
+  preserva esse áudio intacto (a pessoa anexou um arquivo real; mudar o
+  metadado de idioma não invalida o arquivo). Pro caso TTS
+  especificamente: mudar `Field.lang` **nunca sobrescreve**
+  `audio.tts.language` já escolhido (regra já travada na 7b, reafirmada
+  aqui) -- o que MUDA é só o valor SUGERIDO que uma UI futura mostraria
+  num `audio.tts.language` ainda `null` (nunca um valor já escolhido).
+- **Mudar o texto do Field** -- caso mais sutil, tratado na seção F
+  (invalidação de TTS) por estar diretamente ligado a ela.
+
+### F) Regras de invalidação de TTS/cache (não implementar o algoritmo)
+
+Tabela de comportamento esperado (`generationKey` é sempre dado
+DERIVADO, nunca persistido como fonte de verdade -- ver 7b):
+
+| Mudança | `generationKey` | `generatedUrl` |
+|---|---|---|
+| A. texto muda (`audio.text` explícito, OU `field.content.value` quando `audio.text` é `null` -- ver abaixo) | muda | fica MARCADO como desatualizado (nunca apagado sozinho) |
+| B. idioma (`audio.language`) muda | muda | idem A |
+| C. voz (`audio.voiceId`) muda | muda | idem A |
+| D. velocidade (`audio.rate`) muda | muda | idem A |
+| E. nada muda | continua igual | continua válido (nenhuma regeneração necessária -- é o ganho real do cache) |
+
+**Regra específica sobre QUAL texto invalida** (resolve a pergunta "mudar
+o texto do Field invalida `generatedUrl`?"): depende de `audio.text`.
+Se `audio.text` é `null` (o caso comum -- "sintetize o texto do próprio
+Field"), editar `field.content.value` conta como mudança de texto (linha
+A da tabela). Se `audio.text` é um override explícito (não-null), editar
+`field.content.value` **NÃO invalida nada** -- o TTS lê sua própria
+config, independente do texto de exibição do Field.
+
+**"Desatualizado" é sempre um estado CALCULADO na hora** (comparar um
+`generationKey` recém-computado contra o já persistido), nunca um
+booleano persistido -- mantém o schema exatamente como a 7b definiu
+(zero mudança de schema nesta subfase, regra 16). Quando marcado como
+desatualizado, o áudio ANTIGO continua tocável/disponível (nunca
+apagado automaticamente) até uma regeneração de sucesso -- é a mesma
+regra do estado D5 acima, agora aplicada especificamente ao caso TTS.
+**O algoritmo de cálculo de `generationKey` em si (hash de quê,
+formato) fica pra 7f** -- esta subfase só especifica QUANDO ele precisa
+mudar conceitualmente, nunca como.
+
+### G) Comportamento esperado no Review
+
+Nenhuma mudança em relação ao que a Fase 7a já corrigiu -- reafirmado,
+não revertido: áudio só aparece pro lado ATUALMENTE VISÍVEL (Normal
+por lado, Múltipla Escolha só o prompt antes de responder, Digite a
+resposta/Cloze só depois de `answered`). Um Field `type:'tts'` com
+`generatedUrl:null` continua, hoje e depois desta subfase, sem nenhum
+botão de áudio próprio (`resolveFieldAudioUrl()` já devolve `null`) --
+a pronúncia AUTOMÁTICA (`speakFrench`/`isStudyLanguageField`) continua
+funcionando em paralelo, eixo separado, inalterado. Nenhuma mudança de
+código é necessária no Review por causa desta subfase -- o contrato de
+dado (7b) e a resolução (7a) já cobrem qualquer novo `field.audio` que
+o editor futuro vier a produzir.
+
+### H) Comportamento esperado no Preview
+
+Preview continua delegando 100% aos mesmos 4 renderers (nenhuma
+duplicação, arquitetura já correta desde a Fase 6D.7) -- reafirmado, não
+alterado. **Gap já conhecido, não corrigido aqui** (achado da Fase 7a):
+clicar manualmente no botão 🎧/🔊 DENTRO do Preview ainda chama
+`registerAudioPlay()` de verdade (o guard `!card.__isPreviewCard` só
+suprime o AUTOPLAY, nunca o clique manual). Especificação pra quando
+isso for corrigido (não implementado agora): extrair um helper
+`playAudioPreview(url)` -- só `new Audio(url).play()`, nunca
+`speakFrench`/`registerAudioPlay` envolvidos -- reutilizado em 3 lugares
+que vão precisar dele: (1) o botão "▶️ Ouvir"/"Regerar"/preview DENTRO
+do próprio editor de áudio (novo, desta subfase futura), que NUNCA pode
+contar como uma reprodução real de estudo; (2) o eventual fix do clique
+manual do Preview (item já registrado na Fase 7a); (3) qualquer botão de
+teste futuro. Os 3 contextos compartilham a mesma exigência: tocar áudio
+sem afetar `STATE.totalAudioPlays`/checagem de badge.
+
+### I) Study Trail
+
+Confirmado de novo (grep fresco, não presumido): vocabulário/frases da
+trilha (`content.js`) nunca passam por Field/Note/CardInstance -- sempre
+chamam `audioBtnHTML`+`speakFrench`/`speakChinese` direto sobre texto
+literal. Zero relação com `Field.audio`, hoje. **Sem risco de 2 sistemas
+concorrentes** -- os dois caminhos de dado são completamente disjuntos
+(trilha nunca vira Note, cartão nativo nunca vira item de trilha); o
+risco só existiria se uma refatoração futura tentasse unificar os dois
+modelos de dado, o que não está proposto nem cogitado aqui.
+
+### J) Speed Review / Combinar
+
+Confirmado de novo (grep fresco): NENHUM dos dois renderiza áudio hoje,
+pra NENHUM Card Type (nativo ou trilha) -- `buildSpeedQueue`/
+`cardPromptText`/`cardAnswerText`/`MATCH_STATE.tiles` são 100% texto.
+**Speed Review consumir `Field.audio` no futuro é plausível e sem
+bloqueio arquitetural** -- `resolveCardContentView()`/`resolveCardField()`
+já expõem `audioUrl` por Field, Speed Review só precisaria lê-lo; não é
+decidido nem autorizado aqui, fica registrado como pergunta de produto
+em aberto pra uma subfase própria. **Combinar tem valor bem menor** --
+o jogo não tem um momento de "revelação" análogo a virar o cartão/ver a
+resposta, então áudio ali não foi recomendado sem um pedido específico.
+
+### K) Anki export
+
+Confirmado por leitura de `shared/anki-export.js` (não presumido): o
+manifesto de mídia é **sempre vazio** (`zip.file("media",
+JSON.stringify({}))`), incondicionalmente, pra qualquer cartão hoje.
+Especificação pra uma futura 7i (não implementada aqui):
+- `url`/`upload` -- baixar a URL (já pública), embutir como arquivo de
+  mídia numerado no `.apkg`, referenciar via `[sound:N.mp3]` anexado ao
+  campo do note.
+- `tts` -- mesmo tratamento, só se `generatedUrl` já existir (**nunca**
+  disparar geração a partir de um fluxo de exportação); se pendente,
+  avisar/pular esse cartão específico, nunca travar a exportação
+  inteira.
+- `recording` -- mesmo tratamento de `upload`, uma vez que `url` exista.
+- Como Cloze/Digite a resposta já são excluídos do export Anki hoje
+  (`hasPlainFrontBack`, resposta aberta sem texto curto fixo), a
+  pergunta de áudio no export por enquanto só se aplica a Normal/
+  Múltipla Escolha.
+- Colisão de nome de arquivo de mídia: hash pela URL, reaproveitado
+  entre notes que referenciam o MESMO ativo (mesma conclusão já
+  registrada na seção I da auditoria original da Fase 7).
+
+### L) Segurança/validação (requisitos futuros, não implementar infra)
+
+- MIME whitelist pra upload/gravação (`audio/mpeg`/`audio/webm`/
+  `audio/wav`/`audio/ogg` -- lista exata decidida em 7e/7g).
+- Tamanho máximo de arquivo (poucos MB, mesma lacuna já registrada desde
+  a Fase 8a pra outros uploads deste editor).
+- Duração máxima de gravação (limite em segundos, decidido em 7g).
+- URL externa (`type:'url'`) -- exigir `https://` (nunca `http://`, risco
+  de conteúdo misto num app servido via https); sem validar
+  alcançabilidade/`content-type` no momento de salvar (não dá pra
+  buscar cross-origin de forma confiável do cliente) -- o próprio
+  elemento `<audio>`/`<button>` de preview já falha graciosamente com o
+  MESMO toast já usado noutros pontos do app (`showToast('Não foi
+  possível tocar o áudio.')`).
+- Nenhum esquema de signed URL/acesso privado necessário pra `upload`/
+  `recording` -- o bucket `flashcard-media` já é público-leitura
+  (mesmo modelo de hoje); se uma exigência de privacidade futura mudar
+  isso, é decisão de nível de BUCKET, não do modelo de áudio.
+- `field.audio.url`/`generatedUrl` nunca são interpolados como HTML cru
+  -- sempre como atributo (`src`/`data-audio-url`), mesma disciplina de
+  escape já usada em todo o resto do editor (confirmado, não presumido,
+  que nenhum ponto atual faz `innerHTML` com uma URL de áudio sem
+  escapar o contexto ao redor).
+
+### M) Dependências para as próximas subfases
+
+- **7e (upload real)** precisa de: `renderFieldAudioBlockHTML`/
+  `wireFieldAudioBlock` (esta especificação) + as funções de upload já
+  existentes (`uploadFlashcardMedia`/`uploadOwnFlashcardMedia`, Fase
+  8a/"reformulação gratuito x premium") ligadas ao novo painel de
+  "Arquivo (upload)".
+- **7f (TTS real)** precisa de: o comportamento de "rascunho antes de
+  commitar" da seção D5 + infraestrutura NOVA (Edge Function + chave de
+  API de TTS, nunca presumida como já ativa -- mesma regra geral do
+  topo deste arquivo) + o algoritmo de `generationKey` (seção F, ainda
+  não especificado em detalhe).
+- **7g (gravação)** precisa de: o fluxo da seção B/D + `MediaRecorder`/
+  `getUserMedia` + a mesma infraestrutura de upload da 7e pro arquivo
+  final.
+- **7d (fix do vazamento de `registerAudioPlay()` no clique manual do
+  Preview, já identificado na 7a)** precisa do helper `playAudioPreview()`
+  proposto na seção H.
+- **7i (export Anki com mídia)** precisa da abordagem de manifesto
+  descrita na seção K.
+
+### O que NÃO foi tocado nesta subfase (confirmado, seção 16 da instrução)
+
+Schema SQL, banco, upload real, `MediaRecorder`, TTS server-side, APIs
+externas, Edge Functions, os 4 renderers (`fr/app.js`/`zh/app.js`),
+Preview, Review, export Anki, dados legados -- nenhum destes foi
+alterado. Confirmado por `git status`/`git diff` no fim desta entrega:
+só `CLAUDE.md` foi modificado.
+
+Nenhum passo manual pendente pra autora -- é só documentação.
+
+Próxima subfase (a implementação de fato do editor de áudio, ou
+qualquer outra ordem que a autora prefira -- 7d/7e/7f/7g/7i) só começa
+depois de autorização explícita, com este relatório já entregue antes de
+pedir luz verde.
