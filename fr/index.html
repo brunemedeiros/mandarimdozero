@@ -4022,6 +4022,26 @@ footer.app-footer img{ height:40px; opacity:.85; }
   </div>
 </div>
 
+<!-- Fase 6D.7 (ver CLAUDE.md) -- Preview nativo do editor: mostra
+     exatamente como o cartão vai aparecer na Revisão de verdade,
+     reaproveitando os MESMOS renderers do Review (shared/flashcard-preview.js).
+     Nunca uma sessão de Review de verdade -- nenhuma gravação, nenhum
+     FSRS/XP/streak. Compartilhado entre shared/admin-flashcards.js e
+     shared/my-flashcards.js. -->
+<div id="flashcard-preview-modal" class="app-modal-overlay" style="display:none;">
+  <div class="app-modal">
+    <div class="app-modal-header">
+      <h3>👁️ Pré-visualização</h3>
+      <button class="app-modal-close" id="flashcard-preview-modal-close" aria-label="Fechar">✕</button>
+    </div>
+    <div class="app-modal-body">
+      <p class="profile-edit-hint" style="margin-top:0;">Isto é só uma pré-visualização de como o cartão vai aparecer na Revisão -- nada é salvo ou avaliado aqui.</p>
+      <div id="flashcard-preview-modal-body"></div>
+      <div id="flashcard-preview-modal-nav" style="display:flex; align-items:center; justify-content:center; margin-top:12px;"></div>
+    </div>
+  </div>
+</div>
+
 <div id="public-profile-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
@@ -4160,6 +4180,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <script src="../shared/flashcard-typeanswer-editor.js"></script>
 <script src="../shared/flashcard-cloze-editor.js"></script>
 <script src="../shared/flashcard-native-persistence.js"></script>
+<script src="../shared/flashcard-preview.js"></script>
 <script src="../shared/teacher-flashcards.js"></script>
 <script src="../shared/admin-flashcards.js"></script>
 <script src="../shared/teacher-class-logs.js"></script>

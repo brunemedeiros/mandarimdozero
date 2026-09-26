@@ -525,6 +525,7 @@ function flashcardNativeEditFormHTML(c, editorState){
         ${CARD_TYPE_UI_META.map(t => `<option value="${t.id}" ${t.id === editorState.cardGenerationMode ? 'selected' : ''}>${t.label}</option>`).join('')}
       </select>
       <div id="edit-native-flashcard-fields"></div>
+      <button type="button" class="admin-select-link" id="edit-native-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; align-self:flex-start; padding:0;">👁️ Pré-visualizar</button>
       <label class="profile-edit-label">Nota (privada -- o aluno nunca vê)</label>
       <textarea id="edit-native-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(editorState.privateNote || '')}</textarea>
       <p class="profile-edit-error" id="edit-native-flashcard-error"></p>
@@ -549,6 +550,19 @@ function wireFlashcardNativeEditForm(c, editorState, container){
     else if (newMode === 'cloze') transitionToCloze(editorState);
     else editorState.cardGenerationMode = newMode;
     refreshNativeCardTypeBox(boxEl, editorState, { namePrefix: 'edit-native' });
+  });
+
+  // Fase 6D.7 (ver CLAUDE.md) -- Preview do rascunho de EDIÇÃO atual
+  // (editorState, já mutado por qualquer troca de Card Type/Field feita
+  // nesta tela antes de salvar) -- nunca do que já está gravado no banco
+  // (c), exatamente a mesma regra "estado atual do editor" da criação.
+  // languageAppKey já vem correto de createNativeNoteEditorStateFromRow()/
+  // nativeNoteEditorStateFromLegacyRow() (row.language_app_key).
+  document.getElementById('edit-native-flashcard-preview-btn')?.addEventListener('click', () => {
+    openFlashcardPreviewFromEditorState(editorState, {
+      appKey: editorState.languageAppKey || c.language_app_key || 'frances',
+      origin: 'teacher',
+    });
   });
 
   document.getElementById('edit-native-flashcard-cancel').addEventListener('click', () => {
@@ -629,6 +643,7 @@ function flashcardCardRowHTML(c, showUsername){
         <div class="admin-badge-desc">${c.note ? escapeHTML(c.note) + ' · ' : ''}criado em ${new Date(c.created_at).toLocaleDateString('pt-BR')}${flashcardFormatBadgesHTML(c) ? ' · ' + flashcardFormatBadgesHTML(c) : ''}</div>
       </div>
       <div style="display:flex; gap:6px;">
+        <button class="admin-badge-delete-btn" data-preview-flashcard="${c.id}" title="Pré-visualizar como o aluno vai ver na Revisão">👁</button>
         <button class="admin-badge-delete-btn" data-edit-flashcard="${c.id}" title="Editar">✏️</button>
         <button class="admin-badge-delete-btn" data-toggle-flashcard="${c.id}" data-next-status="${c.status === 'active' ? 'archived' : 'active'}" title="${c.status === 'active' ? 'Arquivar' : 'Reativar'}">${c.status === 'active' ? '🗃' : '↺'}</button>
         <button class="admin-badge-delete-btn" data-delete-flashcard="${c.id}" title="Apagar permanentemente">🗑</button>
@@ -667,6 +682,21 @@ async function buildFlashcardsCardsBoxHTML(selectedStudents){
 }
 
 function wireFlashcardsCardsBox(cardsBox){
+  // Fase 6D.7 (ver CLAUDE.md) -- Preview a partir de uma linha JÁ SALVA
+  // (nativa ou legada), sempre usando o idioma REAL daquela linha
+  // (c.language_app_key), nunca o idioma do site onde o Painel de Admin
+  // está sendo visto agora -- a professora pode estar em fr/index.html
+  // gerenciando um aluno de mandarim (anyMandarim já cobre esse cenário
+  // pra criação), e o Preview precisa resolver pronúncia/pinyin contra o
+  // idioma certo independente disso.
+  cardsBox.querySelectorAll('[data-preview-flashcard]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = Number(btn.dataset.previewFlashcard);
+      const card = ADMIN_FLASHCARDS_STATE._cardsCache.find(c => c.id === id);
+      if (!card){ openFlashcardPreviewWithError('Não foi possível carregar este cartão pra pré-visualizar.'); return; }
+      openFlashcardPreviewFromRow(card, { appKey: card.language_app_key, origin: 'teacher' });
+    });
+  });
   cardsBox.querySelectorAll('[data-toggle-flashcard]').forEach(btn => {
     btn.addEventListener('click', async () => {
       await setFlashcardStatus(btn.dataset.toggleFlashcard, btn.dataset.nextStatus);
@@ -1111,6 +1141,7 @@ async function renderAdminFlashcardsView(){
         <div class="section-label" style="margin:14px 0 4px;">Campos nativos (novo motor, Fase 6D)</div>
         <p class="profile-edit-hint" style="margin-top:-2px;">Assim que você adicionar um campo aqui, ELE (não o "Conteúdo" abaixo) vira o cartão salvo ao clicar "Criar cartão". Deixe vazio pra continuar usando o formulário de sempre.</p>
         <div id="admin-flashcard-native-fields"></div>
+        <button type="button" class="admin-select-link" id="admin-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; margin:6px 0 0;">👁️ Pré-visualizar</button>
 
         <div class="section-label" style="margin:18px 0 6px;">Conteúdo</div>
         <div id="admin-flashcard-content-main">
@@ -1286,6 +1317,20 @@ async function renderAdminFlashcardsView(){
     else if (newMode === 'cloze') transitionToCloze(ADMIN_FLASHCARDS_STATE.nativeCardState);
     else ADMIN_FLASHCARDS_STATE.nativeCardState.cardGenerationMode = newMode;
     refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native' });
+  });
+
+  // Fase 6D.7 (ver CLAUDE.md) -- Preview do RASCUNHO atual do editor
+  // nativo (não salvo) -- reaproveita o MESMO estado que o submit já lê
+  // (ADMIN_FLASHCARDS_STATE.nativeCardState), nunca uma cópia separada.
+  // `languageAppKey` já é mantido correto por updateFlashcardsSelectionDependentUI()
+  // a cada troca de seleção de aluno ('mandarim' ou null); 'frances' é o
+  // fallback quando null -- hoje o único outro caso real (nenhum aluno de
+  // mandarim selecionado).
+  document.getElementById('admin-flashcard-preview-btn')?.addEventListener('click', () => {
+    openFlashcardPreviewFromEditorState(ADMIN_FLASHCARDS_STATE.nativeCardState, {
+      appKey: ADMIN_FLASHCARDS_STATE.nativeCardState.languageAppKey || 'frances',
+      origin: 'teacher',
+    });
   });
 
   // Fase 6D.3/6D.4a (ver CLAUDE.md) -- caixa "Campos nativos", renderizada/

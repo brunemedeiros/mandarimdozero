@@ -164,6 +164,7 @@ async function renderMyFlashcardsView(){
         <div class="section-label" style="margin:14px 0 4px;">Campos nativos (novo motor, Fase 6D)</div>
         <p class="profile-edit-hint" style="margin-top:-2px;">Assim que você adicionar um campo aqui, ELE (não "Frente"/"Verso" abaixo) vira o cartão salvo. Deixe vazio pra continuar usando o formulário de sempre.</p>
         <div id="my-flashcard-native-fields"></div>
+        <button type="button" class="admin-select-link" id="my-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; margin:6px 0 0;">👁️ Pré-visualizar</button>
         ` : ''}
         <div id="my-flashcard-content-main">
         <label class="profile-edit-label" id="my-flashcard-front-label" for="my-flashcard-front">Frente</label>
@@ -275,6 +276,7 @@ function myFlashcardRowHTML(c, premium){
         <div class="admin-badge-desc">${c.note ? escapeHTML(c.note) + ' · ' : ''}criado em ${new Date(c.created_at).toLocaleDateString('pt-BR')}</div>
       </div>
       <div style="display:flex; gap:6px;">
+        <button class="admin-badge-delete-btn" data-preview-own-flashcard="${c.id}" title="Pré-visualizar como vai aparecer na Revisão">🔎</button>
         <button class="admin-badge-delete-btn" data-edit-own-flashcard="${c.id}" title="Editar">✏️</button>
         <button class="admin-badge-delete-btn" data-toggle-own-flashcard="${c.id}" data-next-status="${c.status === 'active' ? 'archived' : 'active'}" title="${c.status === 'active' ? 'Arquivar' : 'Reativar'}">${c.status === 'active' ? '🗃' : '↺'}</button>
         <button class="admin-badge-delete-btn" data-toggle-own-flashcard-visibility="${c.id}" data-next-hidden="${c.hidden_from_profile ? 'false' : 'true'}" title="${c.hidden_from_profile ? 'Escondido do perfil -- clique pra tornar visível' : 'Visível no perfil (se a conta for pública) -- clique pra esconder'}">${c.hidden_from_profile ? '🙈' : '👁️'}</button>
@@ -398,6 +400,7 @@ function myFlashcardNativeEditFormHTML(c, editorState){
         ${CARD_TYPE_UI_META.map(t => `<option value="${t.id}" ${t.id === editorState.cardGenerationMode ? 'selected' : ''}>${t.label}</option>`).join('')}
       </select>
       <div id="edit-my-native-flashcard-fields"></div>
+      <button type="button" class="admin-select-link" id="edit-my-native-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; align-self:flex-start; padding:0;">👁️ Pré-visualizar</button>
       <label class="profile-edit-label">Nota (opcional)</label>
       <textarea id="edit-my-native-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(editorState.privateNote || '')}</textarea>
       <p class="profile-edit-error" id="edit-my-native-flashcard-error"></p>
@@ -422,6 +425,11 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap){
     else if (newMode === 'cloze') transitionToCloze(editorState);
     else editorState.cardGenerationMode = newMode;
     refreshNativeCardTypeBox(boxEl, editorState, { namePrefix: 'edit-my-native' });
+  });
+
+  // Fase 6D.7 (ver CLAUDE.md) -- Preview do rascunho de edição atual.
+  document.getElementById('edit-my-native-flashcard-preview-btn')?.addEventListener('click', () => {
+    openFlashcardPreviewFromEditorState(editorState, { appKey: APP_KEY, origin: 'self' });
   });
 
   document.getElementById('edit-my-native-flashcard-cancel').addEventListener('click', () => {
@@ -528,6 +536,14 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
     // padrão de shared/admin-flashcards.js. Só existe quando `premium`
     // (mesmo gate do bloco HTML acima, ver renderMyFlashcardsView).
     refreshNativeCardTypeBox(document.getElementById('my-flashcard-native-fields'), MY_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'my-native' });
+
+    // Fase 6D.7 (ver CLAUDE.md) -- Preview do rascunho atual (não salvo).
+    // languageAppKey aqui é sempre APP_KEY (o site fixa o idioma pra
+    // "Meus Cartões" -- nunca precisa do fallback/mistura que
+    // shared/admin-flashcards.js trata).
+    document.getElementById('my-flashcard-preview-btn')?.addEventListener('click', () => {
+      openFlashcardPreviewFromEditorState(MY_FLASHCARDS_STATE.nativeCardState, { appKey: APP_KEY, origin: 'self' });
+    });
   }
 
   document.getElementById('my-create-flashcard-form').addEventListener('submit', async (e) => {
@@ -639,6 +655,18 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
 }
 
 function wireMyFlashcardsCardButtons(wrap){
+  // Fase 6D.7 (ver CLAUDE.md) -- Preview a partir de uma linha JÁ SALVA
+  // (nativa ou legada). MY_FLASHCARDS_STATE._cardsCache já tem a lista
+  // inteira (cache de renderMyFlashcardsView, sem round-trip novo).
+  wrap.querySelectorAll('[data-preview-own-flashcard]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = Number(btn.dataset.previewOwnFlashcard);
+      const card = MY_FLASHCARDS_STATE._cardsCache.find(c => c.id === id);
+      if (!card){ openFlashcardPreviewWithError('Não foi possível carregar este cartão pra pré-visualizar.'); return; }
+      openFlashcardPreviewFromRow(card, { appKey: APP_KEY, origin: 'self' });
+    });
+  });
+
   wrap.querySelectorAll('[data-toggle-own-flashcard]').forEach(btn => {
     btn.addEventListener('click', async () => {
       const id = btn.dataset.toggleOwnFlashcard;

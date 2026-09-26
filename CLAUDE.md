@@ -9316,3 +9316,187 @@ de `front`/`back_trans`, necessário pela constraint NOT NULL de
 Escopo estrito respeitado -- nenhuma 6D.7/6D.8/rich text/migração em
 massa iniciados. Parando aqui, aguardando revisão da autora antes de
 continuar.
+
+## Fase 6D.7 -- Preview nativo do editor (mesmo pipeline, mesmos 4
+renderers da Fase 6C, zero persistência)
+
+Última peça do editor nativo antes da conversão legacy->native (6D.8):
+um botão "👁️ Pré-visualizar" que mostra exatamente como um cartão vai
+aparecer na Revisão de verdade, sem gravar nada. Instrução com 25 seções
+numeradas, regra central: **nunca duplicar renderer** -- proibido criar
+`renderPreviewNormalCard`/`renderPreviewMultipleChoiceCard`/etc.; o
+Preview precisa chamar os MESMOS `renderNormalCard`/`renderMultipleChoiceCard`/
+`renderTypeAnswerCard`/`renderClozeCard` (fr/zh `app.js`, Fase 6C) que o
+Review real usa.
+
+**Arquivos alterados**: `shared/flashcard-preview.js` (novo),
+`shared/admin-flashcards.js`, `shared/my-flashcards.js`, `fr/app.js`,
+`zh/app.js`, `fr/index.html`, `zh/index.html`. Nenhuma migração, nenhum
+arquivo fora desta lista tocado (confirmado por `git status`).
+
+**Achado que exigiu o único ajuste no motor de render (Fase 6C), feito
+ANTES desta fase (sessão anterior) e concluído no início desta**: os 4
+renderers liam `STATE.reviewIndex`/`STATE.reviewQueue.length` direto pra
+desenhar a barra de progresso ("N / M") -- fora de uma sessão de Review
+de verdade (o caso do Preview), isso valeria `0/undefined`/`NaN`.
+Resolvido com a extração MÍNIMA necessária: `reviewProgressBarHTML(card)`
+(novo, fr+zh `app.js`, mesma posição nos dois -- logo antes de
+`renderMultipleChoiceCard`) -- quando `card.__isPreviewCard` é
+verdadeiro, devolve um rótulo estático "👁️ Pré-visualização" em vez da
+barra; quando ausente/falso (SEMPRE o caso pra cartão real de
+`STATE.cards`), devolve exatamente o HTML de antes, byte a byte
+idêntico -- confirmado nos 4 call sites (`renderNormalCard`/
+`renderMultipleChoiceCard`/`renderTypeAnswerCard`/`renderClozeCard`) nos
+2 idiomas. Nenhuma outra mudança nos 4 renderers -- eles continuam
+recebendo `(mountEl, card, localState, callbacks)` exatamente como desde
+a Fase 6C, sem saber (nem precisar saber) se estão em Review ou Preview.
+
+**O pipeline, ponta a ponta**: `editorState` (rascunho não salvo do
+formulário) OU `row` já persistida (nativa ou legada, vinda da lista
+"Cartões ativos") -> `noteEditorStateToRow()`/row crua -> a MESMA
+`buildEngineCardsFromRow()` que `buildCardFromTeacherFlashcard()`/
+`buildCardFromSelfFlashcard()` (fr/zh `app.js`) já usam em produção,
+sem nenhum atalho paralelo -> 1..N cards com `card.cardInstance` -> os 4
+renderers globais da Fase 6C, via um dispatcher local
+(`renderFlashcardPreviewCard()`) que espelha -- nunca duplica -- o mesmo
+despacho por `cardTypeId` que `renderReviewView()` já faz.
+
+**2 pontos de entrada**, cobrindo os 2 casos pedidos:
+- **`openFlashcardPreviewFromEditorState(editorState, opts)`** -- a
+  partir do RASCUNHO ATUAL do editor nativo (não salvo). Reaproveita a
+  MESMA validação central da Fase 6D.6 (`validateNoteEditorStateForSave`)
+  -- um estado inválido bloqueia o Preview com a MESMA mensagem que
+  bloquearia o Salvar, nunca tenta renderizar um CardInstance
+  incompleto. Ligado a 4 botões novos: "👁️ Pré-visualizar" no formulário
+  de CRIAÇÃO (admin e Meus Cartões) e no formulário de EDIÇÃO nativa
+  (`flashcardNativeEditFormHTML`/`myFlashcardNativeEditFormHTML`, admin
+  e Meus Cartões) -- 4 no total.
+- **`openFlashcardPreviewFromRow(row, opts)`** -- a partir de uma linha
+  JÁ PERSISTIDA (nativa OU legada), usada pelo botão "👁"/"🔎" de cada
+  linha em "Cartões ativos"/"Arquivados". Cobre o caso legado sem
+  inventar um rastreador de estado ao vivo pro formulário legado (que
+  hoje só lê valores no momento do submit) -- reflete a linha exatamente
+  como está salva; `interpretNoteFromRow()` (chamado por dentro de
+  `buildEngineCardsFromRow()`, motor intocado) já lida com os 2 formatos
+  sem diferença nenhuma pro chamador, nunca converte pro modelo nativo
+  silenciosamente.
+
+**Estado local do Preview, estruturalmente separado do Review real**:
+`FLASHCARD_PREVIEW_SESSION` (`{cards, index, localState}`), variável
+módulo-local em `shared/flashcard-preview.js` -- NUNCA
+`STATE.reviewQueue`/`STATE.reviewIndex`/`STATE.reviewCardState`/
+`STATE.reviewShowingAnswer`/`STATE.reviewMCPicked`/
+`STATE.reviewClozeAnswered`. `createFlashcardPreviewLocalState(card)`
+reaproveita os MESMOS 4 shapes que `renderReviewView()` já cria pra
+`STATE.reviewCardState` (Fases 6C.1-6C.3) -- nunca reinventados.
+Navegação "Cartão N de M" (Normal com reverso -> 2 CardInstances, Cloze
+multi-marca -> N) descarta o `localState` a cada troca de card -- mesmo
+ciclo de vida de `STATE.reviewCardState` no Review real (card diferente
+= estado novo).
+
+**Callbacks são no-ops de persistência/FSRS de propósito**:
+`callbacks.onAnswered`/`onReviewMore` passados aos 4 renderers só dão um
+`showToast()` leve ("👁️ Pré-visualização -- nada foi salvo ou
+avaliado.") -- nunca `gradeCurrentCard()`, nunca
+`reviewMoreCurrentCard()`, nunca `saveState()`, nenhum efeito colateral
+real. O renderer não sabe -- nem precisa saber -- se está em Review ou
+Preview (mesma disciplina "um motor só" de toda a Fase 6).
+
+**Fechar o Preview nunca toca no formulário**: `closeFlashcardPreview()`
+só zera `FLASHCARD_PREVIEW_SESSION` -- `ADMIN_FLASHCARDS_STATE.
+nativeCardState`/`MY_FLASHCARDS_STATE.nativeCardState` (Fields já
+digitados, seleção de alunos, Card Type escolhido) continuam intactos.
+
+**Modal singleton compartilhado** (`#flashcard-preview-modal`, fr+zh
+`index.html`, mesmo padrão `.app-modal-overlay`/`.app-modal` de todo
+modal do app, zero CSS novo) -- vive em `shared/flashcard-preview.js`
+(não em `admin-flashcards.js` nem `my-flashcards.js`, já que é usado
+pelos dois), com wiring de fechar por botão ✕ ou clique fora já ligado
+no próprio arquivo (mesmo padrão de todo modal singleton já existente,
+ex: `#flashcard-reset-confirm-modal`).
+
+**Testes realizados:**
+- **Suíte Node/VM `test_fase6d7_preview_logic.js`, 59/59** -- construção
+  de cards via o motor real (Normal, Normal Reversed com FSRS
+  independente, Múltipla Escolha, Cloze multi-marca, Type Answer zh com
+  pinyin) a partir de `editorState`/`row`; isolamento (zero chamada de
+  persistência/grade durante o Preview); auditoria arquitetural embutida
+  (grep contra o próprio `shared/flashcard-preview.js` real, confirmando
+  ausência de padrões proibidos); estado inválido/vazio bloqueado antes
+  de qualquer render; `buildPreviewCardsFromRow` pra linha legada e
+  nativa; shape de `createFlashcardPreviewLocalState` por tipo;
+  navegação multi-card; preservação do `editorState` original
+  (`snapshotNoteEditorState` antes/depois do Preview, idêntico).
+- **`node --check`** sem erro em `shared/flashcard-preview.js`,
+  `shared/admin-flashcards.js`, `shared/my-flashcards.js`, `fr/app.js`,
+  `zh/app.js`.
+- **Browser smoke, FR+ZH, `test_fase6d7_browser_smoke.js`, 31/31 checks
+  em cada idioma** (Playwright, Chromium real) -- os 5 Card Types
+  testados com interação real (clique/seleção/digitação real, nunca
+  simulado por atribuição direta de estado): Normal (revelar não muda
+  `due`, graduar via clique real, fechar preserva o `editorState`
+  intacto); Múltipla Escolha (criação via clique real nos botões
+  `data-mc-add-*`, seleção de opção aplica classe de feedback, botão
+  Continuar aparece); Type Answer (input real, revelação após
+  verificar); Cloze (seleção de texto REAL via `Selection`/`Range` API
+  pra marcar a lacuna, revelação após verificar); Normal Reversed
+  (navegação "Cartão 1 de 2"/"Cartão 2 de 2" via clique real no botão
+  "Próximo", ids distintos, FSRS confirmadamente independente entre as 2
+  metades); isolamento confirmado nos 3 eixos (zero chamada de
+  persistência, zero `gradeCurrentCard`, zero `reviewMoreCurrentCard`
+  disparadas por qualquer interação dentro do Preview); Preview por
+  LINHA da lista (legado E nativo) confirmado funcionando nos 2 casos;
+  Preview em "Meus Cartões" (aluna) confirmado com o mesmo isolamento;
+  **regressão do Review real** -- um cartão de trilha genuíno
+  (`origin:'study'`) colocado em `STATE.reviewQueue`/renderizado via
+  `renderReviewView()` de verdade, clicado e graduado via clique real,
+  com `STATE.cards[0].reps` confirmado incrementando de fato através de
+  `gradeCurrentCard()` -- prova que a extração de `reviewProgressBarHTML()`
+  não regrediu o caminho real. Zero `pageErrors` (exceções não
+  capturadas) em qualquer um dos 2 idiomas -- os únicos `consoleErrors`
+  restantes são os já documentados repetidamente nesta feature
+  (`ERR_TUNNEL_CONNECTION_FAILED` do proxy de saída deste sandbox,
+  `saveState: recusado...` -- guard defensivo esperado nesse cenário de
+  teste que pula o boot normal de carregamento do progresso -- e um erro
+  de notificação por limitação do mock de RPC, mesma categoria de
+  `.is()`/`.upsert()` já registrada em toda a feature).
+- **Teste negativo explícito de persistência**: `window.__calls.insert`
+  (spy sobre `createFlashcard`/`createOwnFlashcard`/
+  `updateFlashcardContent`/`updateOwnFlashcardContent`) confirmado
+  `length === 0` depois de toda a interação com o Preview nos 3 pontos
+  de entrada (formulário de criação, formulário de edição nativa, linha
+  da lista) -- nenhuma chamada de gravação disparada só por abrir/usar o
+  Preview.
+- **Auditoria arquitetural** (grep contra os arquivos de produção reais,
+  não só o teste): zero ocorrência de `gradeCurrentCard`/
+  `reviewMoreCurrentCard`/`startReviewSession` em código executável de
+  `shared/flashcard-preview.js` (só em comentários explicando o que
+  NUNCA é feito); zero `STATE.reviewQueue`/`STATE.reviewIndex`/
+  `STATE.reviewCardState` mutados por este arquivo; zero
+  `supabaseClient`/`.insert(`/`.update(`/`.from(` -- nenhuma chamada de
+  rede em lugar nenhum do módulo; `renderFlashcardPreviewChrome`/
+  `renderFlashcardPreviewCard` são os únicos 2 nomes de função com
+  prefixo `render*` no arquivo -- nenhum `renderPreview<CardType>Card`
+  duplicando um dos 4 renderers da Fase 6C.
+
+**Gratuito x Premium (avaliado, não implementado):** ferramenta de
+visualização pura sobre conteúdo que a própria professora/aluna já
+estava autorando -- sem custo marginal, sem nova superfície de produto.
+Mesma conclusão de toda a Fase 6D.
+
+**O que ainda falta / não foi feito nesta fase (de propósito, escopo
+travado pela própria instrução -- Seção 24):**
+- Nenhuma migração legada em massa/automática -- só Preview, que já lida
+  com linha legada sem convertê-la.
+- Nenhum redesenho geral do editor, rich text, upload novo, TTS
+  gravado, cartões públicos, Card Type novo, template customizável,
+  mudança de FSRS, ou refatoração ampla do Review.
+- Combinar (jogo de pareamento) continua sem Preview -- nunca teve
+  (mesma exclusão já registrada desde a Fase 8a: arquitetura
+  incompatível com "1 pergunta, 1 resposta").
+- Fase 6D.8 (conversão legacy->native ao editar um cartão legado)
+  continua não iniciada.
+
+Próxima subfase (6D.8) só começa depois de autorização explícita da
+autora, com este relatório já entregue antes de pedir luz verde. **Não
+avançar para 6D.8 automaticamente.**

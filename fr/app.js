@@ -6074,14 +6074,42 @@ function gradeButtonsHTML(card){
   `;
 }
 
+// Fase 6D.7 (ver CLAUDE.md) -- único ponto de acoplamento residual dos 4
+// renderers extraídos na Fase 6C a STATE.reviewQueue/reviewIndex (posição
+// na fila real de Review -- contabilidade de SESSÃO, nunca estado
+// efêmero de interação; a proibição da Fase 6C nunca foi sobre isto, ver
+// comentário original de renderNormalCard mais abaixo). Preview (Fase
+// 6D.7, shared/flashcard-preview.js) nunca tem uma fila real de Review --
+// `card.__isPreviewCard` (setado SÓ por aquele arquivo, nunca por nenhum
+// card real de STATE.cards) troca a barra de progresso por um rótulo
+// "Pré-visualização" em vez de ler STATE.reviewQueue (que valeria 0/NaN
+// fora de uma sessão de Review de verdade). Esta é a alteração MÍNIMA
+// necessária pra permitir o contrato compartilhado renderer(mountEl,
+// card, localState, callbacks) sem alterar o comportamento real de
+// Review -- quando `card.__isPreviewCard` é falso/ausente (SEMPRE o caso
+// pra cartão real), o HTML produzido é byte a byte idêntico ao de antes
+// desta fase.
+function reviewProgressBarHTML(card){
+  if (card.__isPreviewCard){
+    return `<div class="review-progress"><div class="review-progress-count">👁️ Pré-visualização</div></div>`;
+  }
+  const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
+  return `
+    <div class="review-progress">
+      <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
+      <div class="review-progress-count">${STATE.reviewIndex+1} / ${STATE.reviewQueue.length}</div>
+    </div>
+  `;
+}
+
 // Fase 6C.2 (ver CLAUDE.md) -- renderer de "Múltipla escolha", extraído
 // pro contrato aprovado na Fase 6C: (mountEl, card, localState, callbacks)
 // -- mesmo espírito da extração de Normal (Fase 6C.1). Reutilizável tal e
-// qual pelo Preview do editor (Fase 6D, ainda não construída): o Preview
-// vai chamar esta MESMA função, só trocando localState (variável local do
-// editor, nunca STATE) e callbacks (onAnswered vira um no-op visual,
-// nunca gradeCurrentCard). O renderer não sabe -- nem precisa saber -- se
-// está em Review ou Preview.
+// qual pelo Preview do editor (Fase 6D.7, ver reviewProgressBarHTML
+// acima): o Preview chama esta MESMA função, só trocando localState
+// (variável local do Preview, nunca STATE) e callbacks (onAnswered vira
+// um no-op visual, nunca gradeCurrentCard). O renderer não sabe -- nem
+// precisa saber -- se está em Review ou Preview.
 //
 // localState: {kind:'multiple_choice', shuffledOptions, selectedIndex,
 // answered, wasCorrect}. `shuffledOptions` substitui `card.mcOptions`
@@ -6098,7 +6126,6 @@ function gradeButtonsHTML(card){
 // chama de novo com os mesmos 4 parâmetros -- sem envolver a sessão. Só
 // a transição FINAL (clicar "Continuar") chama callbacks.onAnswered.
 function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
-  const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
   // Fase 4b -- lê Note/CardInstance via resolveCardContentView(), nunca
   // `card.front`/`card.back_trans`/`card.choices` (não existem mais no
   // card nativo). `view.prompt`/`view.correct` são Fields já resolvidos
@@ -6127,10 +6154,7 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
   const customAudioUrl = view.prompt.audioUrl || (view.correct && view.correct.audioUrl) || null;
 
   mountEl.innerHTML = `
-    <div class="review-progress">
-      <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
-      <div class="review-progress-count">${STATE.reviewIndex+1} / ${STATE.reviewQueue.length}</div>
-    </div>
+    ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${card.unitTitle}</div>
       ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
@@ -6210,7 +6234,6 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
 // já só devolve a marca que pertence a ESTA CardInstance -- markId --
 // nunca todas de uma Note com múltiplas lacunas).
 function renderClozeCard(mountEl, card, localState, callbacks){
-  const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
   const view = resolveCardContentView(card);
   const answered = localState.answered;
   const blankHTML = answered
@@ -6220,10 +6243,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
   const sentenceHTML = hiddenSentence.replace('___', blankHTML);
 
   mountEl.innerHTML = `
-    <div class="review-progress">
-      <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
-      <div class="review-progress-count">${STATE.reviewIndex+1} / ${STATE.reviewQueue.length}</div>
-    </div>
+    ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${card.unitTitle}</div>
       ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
@@ -6284,16 +6304,12 @@ function renderClozeCard(mountEl, card, localState, callbacks){
 //
 // localState: {kind:'type_answer', typedAnswer, answered, wasCorrect}.
 function renderTypeAnswerCard(mountEl, card, localState, callbacks){
-  const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
   const view = resolveCardContentView(card);
   const answered = localState.answered;
   const promptSpeakable = isStudyLanguageField(view.prompt, APP_KEY);
 
   mountEl.innerHTML = `
-    <div class="review-progress">
-      <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
-      <div class="review-progress-count">${STATE.reviewIndex+1} / ${STATE.reviewQueue.length}</div>
-    </div>
+    ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${card.unitTitle}</div>
       ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
@@ -6521,8 +6537,6 @@ function renderReviewView(){
 // extraídos juntos -- não resolvido isoladamente só pro Normal, pra não
 // introduzir um mecanismo que os outros 3 ainda não teriam.
 function renderNormalCard(mountEl, card, localState, callbacks){
-  const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
-
   let isReverse, targetText, nativeText, targetAudioUrl, targetIsSpeakable;
   if (card.cardInstance){
     const view = resolveCardContentView(card); // kind: 'normal'
@@ -6556,10 +6570,7 @@ function renderNormalCard(mountEl, card, localState, callbacks){
   const frenchVisibleNow = isReverse ? localState.revealed : true;
 
   mountEl.innerHTML = `
-    <div class="review-progress">
-      <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
-      <div class="review-progress-count">${STATE.reviewIndex+1} / ${STATE.reviewQueue.length}</div>
-    </div>
+    ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${card.unitTitle}</div>
       ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
