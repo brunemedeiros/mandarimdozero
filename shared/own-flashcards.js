@@ -122,7 +122,10 @@ async function createOwnFlashcard({ languageAppKey, front, backTrans, note, fron
 // decisão de segurança -- ownership continua vindo só de CURRENT_USER.id).
 async function uploadOwnFlashcardMedia(file, kind, resourceId){
   if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
-  if (kind === 'audio'){
+  // Fase 7g (ver CLAUDE.md) -- mesma generalização de
+  // uploadFlashcardMedia (shared/teacher-flashcards.js): `kind==='recording'`
+  // passa pela MESMA validação MIME/tamanho que `kind==='audio'` já usava.
+  if (kind === 'audio' || kind === 'recording'){
     const v = validateFieldAudioUploadFile(file);
     if (!v.ok) return { ok: false, error: v.error };
   }

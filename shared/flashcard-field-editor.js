@@ -84,21 +84,27 @@ function fieldAudioIndicatorText(audio){
 // travado desde a Fase 6D.3.
 //
 // Escopo desta subfase (Fase 7e): "Arquivo (upload)" é funcional -- URL
-// externa/Gravação continuam só de espaço reservado (`<select>` nunca
-// finge que funcionam). "Texto para voz" (Fase 7f -- implementação, ver
-// CLAUDE.md) passou a ser um 3º ORIGEM FUNCIONAL, deliberadamente MÍNIMA
-// (nunca o "seletor completo" descrito na auditoria da Fase 7f, Seção
-// 20 -- sem lista de vozes vinda de um provedor real, sem indicador visual
-// rico de "desatualizado", sem popover) -- só o necessário pra provar o
-// contrato ponta a ponta: texto+idioma+voz(opcional)+velocidade+botão
+// externa continua só de espaço reservado (`<select>` nunca finge que
+// funciona). "Texto para voz" (Fase 7f -- implementação, ver CLAUDE.md)
+// passou a ser um 3º ORIGEM FUNCIONAL, deliberadamente MÍNIMA (nunca o
+// "seletor completo" descrito na auditoria da Fase 7f, Seção 20 -- sem
+// lista de vozes vinda de um provedor real, sem indicador visual rico de
+// "desatualizado", sem popover) -- só o necessário pra provar o contrato
+// ponta a ponta: texto+idioma+voz(opcional)+velocidade+botão
 // Gerar/Regenerar, reaproveitando os mesmos controles/classes CSS já
 // calibrados no resto do editor (zero CSS novo).
+//
+// "Gravação" (Fase 7g -- ver CLAUDE.md) passou a ser a 4ª ORIGEM
+// FUNCIONAL -- captura real via microfone (shared/flashcard-field-audio-
+// recorder.js), upload pra Storage reaproveitando a MESMA infraestrutura
+// da Fase 7e, `field.audio` só atualizado depois do upload ter sucesso de
+// verdade (mesma disciplina de upload/TTS -- nunca antes).
 const FIELD_AUDIO_ORIGIN_UI_META = [
   { value: 'none', label: 'Sem áudio' },
   { value: 'url', label: 'URL externa (em breve)' },
   { value: 'upload', label: 'Arquivo (upload)' },
   { value: 'tts', label: 'Texto para voz' },
-  { value: 'recording', label: 'Gravação (em breve)' },
+  { value: 'recording', label: 'Gravação' },
 ];
 
 // Locale de síntese (audio.language) -- eixo DELIBERADAMENTE independente
@@ -122,6 +128,24 @@ const TTS_RATE_UI_OPTIONS = [
   { value: '1', label: 'Normal' },
   { value: '1.2', label: 'Rápido' },
 ];
+
+// ---------- Fase 7g (gravação de áudio por Field, ver CLAUDE.md) ----------
+//
+// Texto de status mostrado dentro do painel de gravação -- reflete o
+// `status` da máquina de estados PURA (shared/flashcard-field-audio-
+// recorder.js), nunca um estado próprio duplicado aqui. `recState` pode
+// ser `null`/ausente na 1ª renderização antes do recorder existir --
+// cai no mesmo texto de "idle".
+function fieldAudioRecordingStatusLabel(recState){
+  const status = (recState && recState.status) || 'idle';
+  if (status === 'requesting_permission') return 'Aguardando permissão do microfone...';
+  if (status === 'recording') return '🔴 Gravando...';
+  if (status === 'stopping') return 'Finalizando gravação...';
+  if (status === 'uploading') return 'Enviando gravação...';
+  if (status === 'ready') return 'Gravação salva.';
+  if (status === 'error') return (recState && recState.errorMessage) || 'Não foi possível gravar.';
+  return 'Clique em "🎙️ Gravar" para começar.';
+}
 
 // Render puro -- nunca side-effect (mesmo I/O de rede que o Gerar áudio
 // dispara vive só em wireFieldAudioBlockFor, abaixo). `resolveFieldAudioUrl`/
@@ -148,6 +172,8 @@ function renderFieldAudioBlockHTML(field, opts){
 
   const showUpload = originValue === 'upload' || originValue === 'none';
   const showTts = originValue === 'tts';
+  const showRecording = originValue === 'recording';
+  const recordingAudio = (audio && audio.type === 'recording') ? audio : null;
 
   return `
     <div class="field-audio-block" data-field-audio-field="${field.id}" style="margin-top:6px; padding-top:6px; border-top:1px dashed var(--paper-line);">
@@ -155,7 +181,7 @@ function renderFieldAudioBlockHTML(field, opts){
       <select id="${namePrefix}-audio-origin-${field.id}" class="profile-edit-input" data-field-audio-origin="${field.id}">
         ${FIELD_AUDIO_ORIGIN_UI_META.map(o => `<option value="${o.value}" ${originValue === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
       </select>
-      <p class="profile-edit-hint" style="margin:2px 0 6px;">URL externa e gravação chegam em fases futuras -- use upload de arquivo ou texto para voz.</p>
+      <p class="profile-edit-hint" style="margin:2px 0 6px;">URL externa chega em fase futura -- use upload de arquivo, texto para voz ou gravação pelo microfone.</p>
       <p class="profile-edit-hint" data-field-audio-status="${field.id}" style="margin:0 0 4px;">${escapeHTML(statusText)}</p>
       ${resolvedUrl ? `<audio controls preload="none" style="width:100%; margin-bottom:6px;" src="${escapeHTML(resolvedUrl)}"></audio>` : ''}
 
@@ -180,6 +206,14 @@ function renderFieldAudioBlockHTML(field, opts){
           <button type="button" class="btn btn-secondary" style="margin-top:6px;" data-field-audio-tts-generate="${field.id}">${generateLabel}</button>
           <p class="profile-edit-hint" data-field-audio-tts-msg="${field.id}" style="margin:4px 0 0;"></p>
         ` : `<p class="profile-edit-hint">Salve o cartão primeiro para poder gerar áudio por texto.</p>`}
+      </div>
+
+      <div data-field-audio-panel-recording="${field.id}" style="${showRecording ? '' : 'display:none;'}">
+        <p class="profile-edit-hint" data-field-audio-record-status="${field.id}" style="margin:0 0 6px;">${escapeHTML(fieldAudioRecordingStatusLabel(null))}</p>
+        <button type="button" class="btn btn-secondary" data-field-audio-record-start="${field.id}">${recordingAudio ? '🎙️ Regravar' : '🎙️ Gravar'}</button>
+        <button type="button" class="btn btn-secondary" data-field-audio-record-stop="${field.id}" style="display:none;">⏹ Parar</button>
+        <button type="button" class="admin-select-link" data-field-audio-record-cancel="${field.id}" style="display:none;">Cancelar</button>
+        ${recordingAudio && recordingAudio.durationMs != null ? `<p class="profile-edit-hint" style="margin:4px 0 0;">Duração: ${Math.round(recordingAudio.durationMs / 1000)}s</p>` : ''}
       </div>
 
       <p class="profile-edit-field-error" data-field-audio-error="${field.id}"></p>
@@ -207,20 +241,22 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
   const originSelect = block.querySelector('[data-field-audio-origin]');
   const uploadPanel = block.querySelector('[data-field-audio-panel-upload]');
   const ttsPanel = block.querySelector('[data-field-audio-panel-tts]');
+  const recordingPanel = block.querySelector('[data-field-audio-panel-recording]');
 
   // Trocar de ORIGEM no `<select>` NUNCA sobrescreve field.audio sozinho
   // (decisão travada na auditoria da Fase 7c, item D5) -- exceto
   // escolher "Sem áudio" explicitamente, que é a ÚNICA outra forma
   // (além do botão "Remover áudio") de limpar a referência antes de
-  // existir um ativo concreto novo. Trocar pra 'upload'/'tts' só alterna
-  // QUAL PAINEL aparece (mutação de DOM local, nunca re-render da caixa
-  // inteira -- mesma disciplina de "nunca perder o que a pessoa já
-  // digitou" já usada em todo o resto deste arquivo).
+  // existir um ativo concreto novo. Trocar pra 'upload'/'tts'/'recording'
+  // só alterna QUAL PAINEL aparece (mutação de DOM local, nunca re-render
+  // da caixa inteira -- mesma disciplina de "nunca perder o que a pessoa
+  // já digitou" já usada em todo o resto deste arquivo).
   if (originSelect){
     originSelect.addEventListener('change', () => {
       const val = originSelect.value;
       if (uploadPanel) uploadPanel.style.display = (val === 'upload' || val === 'none') ? '' : 'none';
       if (ttsPanel) ttsPanel.style.display = (val === 'tts') ? '' : 'none';
+      if (recordingPanel) recordingPanel.style.display = (val === 'recording') ? '' : 'none';
       if (val === 'none'){
         updateFieldInEditorState(editorState, fieldId, { audio: null });
         if (onChange) onChange('structure', fieldId);
@@ -383,6 +419,63 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
       });
       if (onChange) onChange('structure', fieldId);
     });
+  }
+
+  // ---------- Fase 7g (gravação de áudio por Field, ver CLAUDE.md) ----------
+  //
+  // getOrCreateFieldAudioRecorder() REAPROVEITA a instância viva deste
+  // Field entre re-renders (nunca cria uma nova a cada wire-up) -- sem
+  // isso, um re-render disparado por OUTRO Field (add/remove campo em
+  // qualquer lugar da mesma caixa) destruiria a referência ao
+  // MediaRecorder/stream ativos enquanto este Field estivesse gravando,
+  // vazando o microfone ligado sem nenhum jeito de pará-lo pela UI.
+  // `onReady` só é chamado DEPOIS que a gravação já foi enviada ao
+  // Storage com sucesso (mesma disciplina de upload/TTS -- nunca antes) --
+  // é só aí que field.audio é atualizado.
+  const recordStartBtn = block.querySelector('[data-field-audio-record-start]');
+  const recordStopBtn = block.querySelector('[data-field-audio-record-stop]');
+  const recordCancelBtn = block.querySelector('[data-field-audio-record-cancel]');
+  const recordStatusEl = block.querySelector('[data-field-audio-record-status]');
+  if (typeof getOrCreateFieldAudioRecorder === 'function' && (recordStartBtn || recordStopBtn || recordCancelBtn)){
+    const recorder = getOrCreateFieldAudioRecorder(fieldId, {
+      uploadFn: opts.uploadFn || null,
+      deleteFn: opts.deleteFn || null,
+      onReady: (result) => {
+        // Guarda contra o container ter sido removido do DOM enquanto o
+        // upload estava em voo (mesmo padrão já usado por upload/TTS) --
+        // nunca muta um editorState que a tela já abandonou.
+        if (!block.isConnected) return;
+        editorState.__freshMediaUploads = editorState.__freshMediaUploads || [];
+        editorState.__freshMediaUploads.push({ path: result.path, deleteFn: result.deleteFn || null });
+        updateFieldInEditorState(editorState, fieldId, {
+          audio: { type: 'recording', url: result.url, recordedAt: result.recordedAt, mimeType: result.mimeType, durationMs: result.durationMs, storagePath: result.path || null },
+        });
+        if (onChange) onChange('structure', fieldId);
+      },
+    });
+
+    const applyRecorderUi = (recState) => {
+      if (!block.isConnected) return;
+      if (recordStatusEl) recordStatusEl.textContent = fieldAudioRecordingStatusLabel(recState);
+      const status = (recState && recState.status) || 'idle';
+      if (recordStartBtn){
+        recordStartBtn.style.display = canStartFieldAudioRecording(status) ? '' : 'none';
+        recordStartBtn.textContent = (status === 'ready' || status === 'error') ? '🎙️ Regravar' : '🎙️ Gravar';
+      }
+      if (recordStopBtn) recordStopBtn.style.display = canStopFieldAudioRecording(status) ? '' : 'none';
+      if (recordCancelBtn) recordCancelBtn.style.display = canCancelFieldAudioRecording(status) ? '' : 'none';
+    };
+    applyRecorderUi(recorder.getState());
+    recorder.onStateChange(applyRecorderUi);
+
+    if (recordStartBtn){
+      recordStartBtn.addEventListener('click', () => {
+        if (errorEl) errorEl.textContent = '';
+        recorder.start();
+      });
+    }
+    if (recordStopBtn) recordStopBtn.addEventListener('click', () => recorder.stop());
+    if (recordCancelBtn) recordCancelBtn.addEventListener('click', () => recorder.cancel());
   }
 
   if (removeBtn){
@@ -569,6 +662,11 @@ function wireFieldEditorList(container, editorState, onChange, opts){
   container.querySelectorAll('[data-field-remove]').forEach(el => {
     el.addEventListener('click', () => {
       const fieldId = el.dataset.fieldRemove;
+      // Fase 7g -- libera (cancela + tira do registro) qualquer gravação
+      // em andamento/pendente deste Field ANTES de removê-lo -- nunca
+      // deixa um microfone ligado órfão referenciando um Field que não
+      // existe mais no editorState.
+      if (typeof releaseFieldAudioRecorder === 'function') releaseFieldAudioRecorder(fieldId);
       removeFieldFromEditorState(editorState, fieldId);
       if (onChange) onChange('remove', fieldId);
     });

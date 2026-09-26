@@ -240,7 +240,17 @@ async function deleteFlashcardPermanently(id){
 //    usuário escolher um path arbitrário).
 async function uploadFlashcardMedia(file, kind, resourceId){
   if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
-  if (kind === 'audio'){
+  // Fase 7g (ver CLAUDE.md) -- `kind==='recording'` (gravação por
+  // microfone, shared/flashcard-field-audio-recorder.js) passa pela MESMA
+  // validação de MIME/tamanho que `kind==='audio'` (upload manual, Fase
+  // 7e) já usava -- generalização mínima, nunca uma segunda função de
+  // validação: os dois produzem um arquivo de áudio que precisa respeitar
+  // o mesmo `allowed_mime_types`/`file_size_limit` do bucket (migration
+  // 046). Só o valor literal de `kind` difere entre os dois, o que já
+  // basta pra dar ao path resultante (`kind-{resourceId}-{ts}-{rand}.ext`,
+  // abaixo) um segmento identificável como gravação, distinto de um
+  // upload manual, sem precisar de nenhum parâmetro novo.
+  if (kind === 'audio' || kind === 'recording'){
     const v = validateFieldAudioUploadFile(file);
     if (!v.ok) return { ok: false, error: v.error };
   }

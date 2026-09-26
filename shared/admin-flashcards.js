@@ -448,6 +448,7 @@ function wireFlashcardEditForm(c, container){
   document.getElementById('edit-flashcard-cancel').addEventListener('click', () => {
     ADMIN_FLASHCARDS_STATE.editingCardId = null;
     ADMIN_FLASHCARDS_STATE.editingNativeState = null;
+    if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
     updateFlashcardsSelectionDependentUI(document.getElementById('admin-flashcards-content'));
   });
 
@@ -602,6 +603,7 @@ function wireFlashcardNativeEditForm(c, editorState, container){
     compensateFreshMediaUploads(editorState);
     ADMIN_FLASHCARDS_STATE.editingCardId = null;
     ADMIN_FLASHCARDS_STATE.editingNativeState = null;
+    if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
     updateFlashcardsSelectionDependentUI(document.getElementById('admin-flashcards-content'));
   });
 
@@ -647,6 +649,7 @@ function wireFlashcardNativeEditForm(c, editorState, container){
       showToast(nextRevision > (c.revision || 0) ? '✓ Cartão editado. O progresso de revisão foi reiniciado.' : '✓ Cartão editado.');
       ADMIN_FLASHCARDS_STATE.editingCardId = null;
       ADMIN_FLASHCARDS_STATE.editingNativeState = null;
+    if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
       updateFlashcardsSelectionDependentUI(document.getElementById('admin-flashcards-content'));
     };
 
@@ -757,6 +760,7 @@ function wireFlashcardsCardsBox(cardsBox){
       // cartão for nativo, ou continua null (legado, sem toggle ainda
       // clicado) até a professora explicitamente pedir o editor novo.
       ADMIN_FLASHCARDS_STATE.editingNativeState = null;
+    if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
       const selectedStudents = ADMIN_FLASHCARDS_STATE._studentsCache.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
       cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
       wireFlashcardsCardsBox(cardsBox);

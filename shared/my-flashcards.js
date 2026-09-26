@@ -358,6 +358,7 @@ function wireMyFlashcardEditForm(c, wrap, premium){
   document.getElementById('edit-my-flashcard-cancel')?.addEventListener('click', () => {
     MY_FLASHCARDS_STATE.editingCardId = null;
     MY_FLASHCARDS_STATE.editingNativeState = null;
+    if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
     renderMyFlashcardsView();
   });
   document.getElementById('edit-my-flashcard-save')?.addEventListener('click', () => {
@@ -462,6 +463,7 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap){
     compensateFreshMediaUploads(editorState);
     MY_FLASHCARDS_STATE.editingCardId = null;
     MY_FLASHCARDS_STATE.editingNativeState = null;
+    if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
     renderMyFlashcardsView();
   });
 
@@ -507,6 +509,7 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap){
       showToast(nextRevision > (c.revision || 0) ? '✓ Cartão editado. O progresso de revisão foi reiniciado.' : '✓ Cartão editado.');
       MY_FLASHCARDS_STATE.editingCardId = null;
       MY_FLASHCARDS_STATE.editingNativeState = null;
+    if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
       renderMyFlashcardsView();
     };
 
@@ -754,6 +757,7 @@ function wireMyFlashcardsCardButtons(wrap){
       // cartão for nativo, ou continua null (legado) até o botão "Usar o
       // novo editor" ser clicado.
       MY_FLASHCARDS_STATE.editingNativeState = null;
+    if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
       renderMyFlashcardsView();
     });
   });

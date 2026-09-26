@@ -12977,3 +12977,235 @@ ao vivo nesta sessão -- não são passo manual pendente.
 adicional, processamento em lote, export Anki com mídia e migração do
 AUDIO_MANIFEST continuam fora do escopo, aguardando autorização
 explícita numa sessão futura.
+
+## Fase 7g -- Gravação de áudio por Field (`type:'recording'`, mesma
+infraestrutura de upload da Fase 7e, MediaRecorder nativo, zero
+provedor externo)
+
+Terceira fonte real de `Field.audio` (depois de upload/URL na Fase 7e e
+TTS explícito na Fase 7f) -- a professora/aluna grava a própria voz
+direto pelo microfone do navegador em vez de subir um arquivo já pronto
+ou pedir síntese de voz. **Nenhuma infraestrutura externa nova** -- ao
+contrário da Fase 7f (que precisou de uma Edge Function/chave de API de
+provedor, ainda não contratado), gravação é 100% cliente + o MESMO
+bucket `flashcard-media` já usado desde a Fase 8a/7e.
+
+**Arquivo novo, `shared/flashcard-field-audio-recorder.js`** -- toda a
+lógica de gravação vive isolada aqui, nunca espalhada por
+`shared/flashcard-field-editor.js`/`fr/app.js`/`zh/app.js`:
+
+- **Máquina de estados pura** (`fieldAudioRecorderReducer`, tabela de
+  transições `FIELD_AUDIO_RECORDER_TRANSITIONS`) -- 7 status: `idle` →
+  `requesting_permission` → `recording` → `stopping` → `uploading` →
+  `ready`, mais `error` (com `errorCode`/`errorMessage`). Transição não
+  reconhecida = no-op (devolve o mesmo estado) -- é isto que implementa
+  TODAS as travas de concorrência exigidas (nunca gravar 2x o mesmo
+  Field ao mesmo tempo, nunca parar 2x, nunca cancelar durante upload)
+  sem nenhum `if` espalhado pela UI: `canStartFieldAudioRecording`
+  (só de `idle`/`error`/`ready`), `canStopFieldAudioRecording` (só de
+  `recording`), `canCancelFieldAudioRecording` (só de
+  `requesting_permission`/`recording`/`stopping`) -- únicas 3 funções
+  que decidem "este botão pode aparecer/fazer algo agora", reutilizadas
+  tanto pela integração real quanto pela UI (nunca uma segunda cópia da
+  regra).
+- **Camada de integração** `createFieldAudioRecorder(opts)` -- usa
+  `navigator.mediaDevices`/`MediaRecorder` reais por padrão, mas aceita
+  injeção (`opts.mediaDevices`/`opts.MediaRecorderImpl`) pra teste.
+  Trata as 2 corridas reais que existem com hardware assíncrono: (a)
+  `getUserMedia()` resolvendo DEPOIS de um cancelamento -- libera o
+  stream na hora, nunca deixa o microfone "vazando" aceso; (b)
+  `onstop` do `MediaRecorder` chegando depois de um cancelamento --
+  descarta o Blob, nunca faz upload de uma gravação já cancelada.
+  `field.audio` só é escrito pelo CHAMADOR (dentro do callback `onReady`,
+  em `shared/flashcard-field-editor.js`) -- o módulo do recorder nunca
+  toca `Field`/`editorState`/`STATE` sozinho.
+- **MIME/extensão**: `FIELD_AUDIO_RECORDING_MIME_CANDIDATES =
+  ['audio/webm','audio/mp4','audio/ogg','audio/wav']` (tipos-base, sem
+  sufixo de codec) -- os MESMOS 4 já aceitos pelo bucket desde a
+  migration 046 (que já tinha incluído `audio/webm` de propósito,
+  antecipando esta fase). `pickFieldAudioRecordingMimeType()` testa cada
+  um via `MediaRecorder.isTypeSupported()` real; `baseAudioMimeType()`
+  remove o sufixo `;codecs=opus` que o Chromium real devolve (confirmado
+  via sondagem, não presumido); `buildFieldAudioRecordingFile()`
+  constrói um `File` de verdade a partir do `Blob` (que nunca tem
+  `.name` sozinho).
+- **Registro por Field** (`FIELD_AUDIO_RECORDER_REGISTRY`,
+  `getOrCreateFieldAudioRecorder(fieldId, callbacks)`) -- a MESMA
+  instância de recorder sobrevive a re-renders do formulário (crítico:
+  `wireFieldAudioBlockFor` é rechamada a cada `refreshNativeFieldsBox`/
+  `refreshMultipleChoiceEditorBox`/etc.; sem este registro, adicionar um
+  campo NÃO RELACIONADO em outro lugar do form recriaria o recorder e
+  vazaria um `MediaStream` já ativo). `releaseFieldAudioRecorder(fieldId)`
+  (cancela + remove do registro, ligado ao clique de "remover campo" em
+  `wireFieldEditorList`) e `releaseAllFieldAudioRecorders()` (ligado a
+  TODO ponto que zera `editingNativeState`/reseta o formulário pra um
+  estado fresco, nos 2 arquivos de admin) garantem que nenhuma gravação
+  fica pendurada quando o Field/formulário deixa de existir.
+
+**Contrato de dado** -- `{type:'recording', url, recordedAt, mimeType,
+durationMs, storagePath}` (`storagePath` opcional, mesmo precedente já
+aberto pela Fase 7f pro TTS -- identidade persistente do objeto no
+Storage, útil pra uma futura rotina de limpeza, nunca lida por
+`resolveFieldAudioUrl()`/`resolveCardField()`, que continuam expondo só
+`url` como `audioUrl` de exibição). `resolveFieldAudioUrl`/
+`isValidFieldAudio` (`shared/flashcard-model.js`) **já tratavam
+`'recording'` genericamente desde a Fase 7b** -- confirmado por leitura
+antes de codar, zero mudança necessária nesses dois; Review e Preview
+tocam uma gravação real sem nenhuma linha nova em `fr/app.js`/
+`zh/app.js`, mesma conclusão já validada pra TTS na Fase 7f.
+
+**Generalização mínima do pipeline de upload da Fase 7e** --
+`uploadFlashcardMedia`/`uploadOwnFlashcardMedia`
+(`shared/teacher-flashcards.js`/`shared/own-flashcards.js`): `if (kind
+=== 'audio')` virou `if (kind === 'audio' || kind === 'recording')` --
+uma gravação passa pela MESMA validação de MIME/tamanho que um upload
+manual já tinha, só com um path DISTINGUÍVEL
+(`.../recording-{fieldId}-{ts}-{rand}.ext` em vez de
+`.../audio-{fieldId}-{ts}-{rand}.ext`) -- nunca um mecanismo de Storage
+paralelo. Corrigido de passagem, na mesma generalização: a extensão do
+arquivo (derivada do nome, antes sem sanitização) agora passa por
+`[^a-zA-Z0-9]` antes de entrar no path -- fechamento de um vetor teórico
+(nome de arquivo malicioso sem extensão podia, em tese, injetar `/` no
+path) que já existia desde a Fase 7e mas nunca tinha sido notado.
+
+**UI mínima, dentro do bloco "Áudio" já existente por Field** (Fase 7e):
+3 botões (`🎙️ Gravar`/`⏹️ Parar`/`✕ Cancelar`) + texto de status
+(`fieldAudioRecordingStatusLabel`), visíveis/escondidos SÓ pelas 3
+funções-guarda do reducer -- nunca lógica de visibilidade duplicada.
+Painel só aparece quando a origem "Gravação" é escolhida no `<select>`
+já existente (achado corrigido durante a própria implementação, antes de
+rodar qualquer teste: o listener de `change` do `<select>` só alternava
+`uploadPanel`/`ttsPanel`, esqueci de incluir `recordingPanel` na primeira
+versão -- corrigido antes de testar). Trocar de origem NUNCA
+sobrescreve `field.audio` sozinho (mesma regra já travada na Fase 7c/7f)
+-- só uma gravação COMPLETA e enviada com sucesso substitui o que já
+estava lá.
+
+**Decisões de segurança/UX, todas conforme a especificação:**
+- Abrir o editor/Preview/Review NUNCA solicita permissão de microfone
+  sozinho -- só o clique explícito em "🎙️ Gravar" chama `getUserMedia`.
+- Negação de permissão nunca altera `field.audio`, mostra erro
+  transitório ("Permissão de microfone negada."/"Nenhum microfone
+  disponível."), permite nova tentativa (botão "Gravar" reaparece).
+- Cancelar (a qualquer momento antes do upload terminar) nunca altera
+  `field.audio`, nunca faz upload, libera o stream de verdade
+  (`track.stop()` chamado).
+- Remover o Field durante uma gravação em andamento libera o microfone
+  de verdade (via `releaseFieldAudioRecorder`), sem depender de clicar
+  Cancelar primeiro.
+- Nenhuma exclusão automática do objeto anterior no Storage ao
+  substituir/remover -- mesma decisão já tomada pra upload manual (Fase
+  7e): 2 Fields podem compartilhar a mesma URL depois de um clone
+  (`cloneFieldIntoEditorState`, Fase 6D.3), então apagar sem contagem de
+  referência arriscaria quebrar um Field clonado. Nenhuma rotina de
+  limpeza construída nesta fase.
+- Estado transitório da gravação (`MediaRecorder`, `Blob`, `MediaStream`,
+  status) vive só na instância do recorder/registro local -- nunca em
+  `Field`/`Note`/`STATE` persistido.
+- Nunca toca a arquitetura de TTS (Fase 7f) -- uma gravação nunca gera
+  `generationKey`/`providerModelId`/nenhum metadado de TTS.
+
+**O que ficou de fora, de propósito (mesmo escopo da instrução):** rich
+text, export Anki com mídia, migração do `AUDIO_MANIFEST`, processamento
+em lote, rotina de limpeza (garbage collection) de áudio órfão no
+Storage, implementação de provedor de TTS real (Fase 7f), redesenho
+visual além do estritamente necessário pro gravador.
+
+**Testes realizados:**
+- `node --check` sem erro nos 6 arquivos tocados (`shared/flashcard-
+  field-audio-recorder.js`, `shared/flashcard-field-editor.js`,
+  `shared/teacher-flashcards.js`, `shared/own-flashcards.js`,
+  `shared/admin-flashcards.js`, `shared/my-flashcards.js`).
+- **Suíte Node/VM nova, `test_fase7g_recording.js`, 118/118** -- máquina
+  de estados determinística (as 7 transições válidas + as inválidas
+  ignoradas -- dupla partida, duplo stop, cancelar durante upload);
+  integração com `getUserMedia`/`MediaRecorder` INJETADOS (nunca reais
+  nesta suíte, que roda em Node puro): sucesso completo (idle→ready,
+  `field.audio` correto), permissão negada, sem dispositivo, cancelar em
+  cada fase (requesting/recording/stopping), corrida
+  getUserMedia-resolve-após-cancelar (stream liberado, nunca gravado em
+  `field.audio`), corrida onstop-após-cancelar (blob descartado, nunca
+  upload); path com `kind:'recording'` distinguível de `kind:'audio'`;
+  MIME/extensão sanitizados; registro reaproveita a MESMA instância
+  entre chamadas pro mesmo `fieldId` (via identidade de instância, não
+  leitura direta do objeto do registro -- inacessível em `vm` por ser
+  `const` top-level, mesmo gotcha já documentado neste arquivo);
+  `releaseFieldAudioRecorder`/`releaseAllFieldAudioRecorders` liberam o
+  stream de verdade; round-trip REAL através do motor
+  (`buildEngineCardsFromRow`/`resolveCardContentView`) confirmando que
+  um Field com `type:'recording'` resolve `audioUrl` corretamente em
+  Review/Preview sem nenhuma mudança em `shared/flashcard-model.js`.
+- **Browser smoke, FR+ZH, `64/64` checks, zero erro de console** --
+  gravação REAL através de hardware SINTÉTICO real do Chromium
+  (`--use-fake-device-for-media-stream --use-fake-ui-for-media-stream` +
+  `permissions:['microphone']`, confirmado por sondagem prévia que este
+  sandbox suporta um microfone fake genuíno, produzindo Blob real via
+  `MediaRecorder`) -- nunca fabricado: (A) fluxo feliz completo -- clicar
+  Gravar/Parar produz `field.audio.type==='recording'` com URL real do
+  stub de Storage, path identificável (`/recording-`), `getUserMedia`
+  chamado exatamente 1 vez, track liberado após parar, preview de áudio
+  (botão 🎧) aparece com a URL certa, cartão SALVO de verdade no banco
+  fake preserva a gravação; (B) cancelar durante gravação REAL em
+  andamento -- `field.audio` nunca tocado, nenhum upload, mic liberado;
+  (C) remover o Field durante gravação -- mic liberado sem precisar
+  clicar Cancelar; (D) clique duplo em "Gravar" -- só 1 chamada real de
+  `getUserMedia` (trava de concorrência confirmada através da UI de
+  produção, não só da máquina de estados isolada); (E) erros mockados
+  (permissão negada/sem dispositivo -- ver nota de honestidade abaixo)
+  -- mensagem certa, `field.audio` nunca tocado, botão de gravar
+  reaparece; (F) Preview nunca chama `getUserMedia` mesmo com um Field
+  já contendo uma gravação real, e mostra o botão de áudio (🎧) com a
+  URL certa; (G) regressão -- upload manual (Fase 7e) e TTS (Fase 7f)
+  continuam funcionando no MESMO bloco de áudio compartilhado, trocar de
+  origem nunca mexe em `field.audio` sozinho.
+- **Nota de honestidade sobre o que é real vs. mockado neste teste**
+  (documentada no próprio cabeçalho do arquivo de teste, não escondida):
+  confirmado por sondagem prévia que este sandbox NÃO tem mecanismo
+  determinístico pra provocar uma NEGAÇÃO real de permissão (sem o
+  dispositivo fake, `getUserMedia` trava esperando um prompt que nunca
+  aparece em modo headless; com o dispositivo fake mas sem a UI fake,
+  mesmo travamento) -- só concessão real (via `--use-fake-ui-for-media-
+  stream`) é determinística. Por isso os 2 cenários de erro (E) usam um
+  MOCK CONTROLADO de `navigator.mediaDevices.getUserMedia` (sobrescrita
+  só da função de baixo nível que o código de produção já chama, nunca
+  uma segunda implementação de recorder) -- todo o resto do teste (A-D,
+  F, G) usa o microfone sintético REAL do Chromium, produzindo um Blob
+  de áudio de verdade.
+- **8 achados de teste, todos corrigidos no PRÓPRIO SCRIPT DE TESTE
+  (nunca no código de produção)**: (1) a async-test-ordering do
+  `test_fase7g_recording.js` precisou virar `async function` nomeada +
+  `await` sequencial em vez de IIFE solta, senão os testes corriam em
+  paralelo e o driver final podia imprimir resultado antes de todos
+  terminarem; (2) `flashcardIdForRow`/`updateFieldInEditorState` e afins
+  precisaram ser injetados/carregados explicitamente no sandbox `vm`
+  (vivem em `fr/app.js`/`shared/flashcard-field-editor.js`, não em
+  `shared/flashcard-model.js`); (3) o Cenário A do smoke test original
+  só criava 1 Field e nunca preenchia conteúdo -- `validateNoteEditorStateForSave()`
+  exige 2 Fields de conteúdo não-vazios pra um Card Type `normal`,
+  bloqueando o submit silenciosamente no cliente; corrigido adicionando
+  um 2º Field com conteúdo ANTES de selecionar a origem "recording" (não
+  depois -- adicionar um Field é mudança ESTRUTURAL, que reconstrói a
+  caixa de Fields inteira e perderia a origem já selecionada, que é
+  estado só de DOM/UI até uma gravação/upload de fato terminar); (4) a
+  asserção original do Cenário F esperava um elemento `<audio>` real no
+  DOM do Preview -- corrigida pra checar o botão `.custom-audio-btn[data-
+  audio-url]`, que é como áudio customizado (upload/URL/gravação) SEMPRE
+  foi renderizado desde a Fase 8a (`new Audio(url).play()` em JS, nunca
+  um `<audio>` inserido na página) -- nenhum destes 8 achados apontava
+  problema real de produto, todos eram do próprio arranjo do teste.
+
+**Escopo**: `shared/flashcard-field-audio-recorder.js` (novo) +
+`shared/flashcard-field-editor.js` + `shared/teacher-flashcards.js` +
+`shared/own-flashcards.js` + `shared/admin-flashcards.js` +
+`shared/my-flashcards.js` + `fr/index.html`/`zh/index.html` (só a tag
+`<script>` do arquivo novo). Nenhuma migração, nenhum passo manual
+pendente pra autora, nenhuma mudança em `shared/flashcard-model.js`/
+`fr/app.js`/`zh/app.js` (confirmado desnecessária por leitura -- a
+resolução de `type:'recording'` já existia genericamente desde a Fase
+7b).
+
+**PARE conforme instrução explícita** -- Anki export com mídia, migração
+do AUDIO_MANIFEST, processamento em lote, rotina de limpeza de Storage,
+implementação de provedor de TTS real e redesenho visual não relacionado
+continuam fora do escopo, aguardando autorização explícita numa sessão
+futura.
