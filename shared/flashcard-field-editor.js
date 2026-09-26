@@ -360,6 +360,23 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
         ? await computeTtsGenerationKey(text, language, voiceId, rate)
         : null;
 
+      // Idempotência (Fase 7f -- implementação, Seções 2.8/6 da própria
+      // especificação): se o Field JÁ tem um asset TTS gerado pra ESTA
+      // MESMA config (mesmo generationKey), não gasta uma chamada de rede/
+      // custo de provedor à toa -- reutiliza o asset já existente (o
+      // `<audio>`/botão de tocar já reflete `field.audio.generatedUrl`,
+      // sem precisar de nenhuma ação nova). Comparação 100% local (mesmo
+      // hash já calculado acima pra `myKey`), sem tabela de cache global --
+      // o "cache" é o próprio `field.audio` do Field, exatamente como a
+      // especificação exige.
+      const fieldBeforeGen = (editorState.fields || []).find(f => f.id === fieldId);
+      const existingAudio = fieldBeforeGen && fieldBeforeGen.audio;
+      if (existingAudio && existingAudio.type === 'tts' && existingAudio.generatedUrl
+        && myKey !== null && existingAudio.generationKey === myKey){
+        if (msgEl) msgEl.textContent = 'Áudio já está atualizado para esta configuração -- nenhuma geração nova foi solicitada.';
+        return;
+      }
+
       ttsGenerateBtn.disabled = true;
       const originalLabel = ttsGenerateBtn.textContent;
       ttsGenerateBtn.textContent = 'Gerando áudio...';

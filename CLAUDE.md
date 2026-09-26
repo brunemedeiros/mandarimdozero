@@ -13209,3 +13209,237 @@ do AUDIO_MANIFEST, processamento em lote, rotina de limpeza de Storage,
 implementação de provedor de TTS real e redesenho visual não relacionado
 continuam fora do escopo, aguardando autorização explícita numa sessão
 futura.
+
+## Fase 7f -- verificação/reconciliação + fix de idempotência (retomada de
+sessão, após a implementação original ser confundida com "não iniciada")
+
+Uma nova sessão recebeu uma instrução extremamente detalhada (18 seções)
+pra "retomar a IMPLEMENTAÇÃO da Fase 7f", com a premissa explícita de que
+só a AUDITORIA (`ca034f4`) tinha sido feita até então -- a instrução
+proibia refazer a auditoria e pedia construir do zero a Edge Function, o
+`generationKey`, a abstração de provider, o serviço de frontend, etc.
+
+**Antes de escrever qualquer linha, a instrução da própria autora exigia
+"leia CLAUDE.md e o código atual antes de editar" -- e essa leitura
+revelou que a premissa estava desatualizada**: a seção "## Fase 7f
+(implementação) -- infraestrutura real de TTS explícito por Field" (logo
+acima desta) já documentava, e o repositório já continha de verdade,
+TODA a infraestrutura pedida -- commitada como `a521c29`, ANTES da Fase
+7g (`1fd56a0`), não depois. Confirmado ao vivo, não só por leitura de
+CLAUDE.md: `git log` mostra `a521c29` no histórico do branch atual;
+`supabase/functions/tts-generate/index.ts` (Edge Function completa, auth
+via header repassado, RLS-based authorization, rate limit, provider
+abstraction com mock/erro explícito, upload pro bucket `flashcard-media`)
+existe no disco; a migration `047_tts_generation_rate_limit.sql`
+(`tts_generation_log`, RLS owner-only) está aplicada AO VIVO no projeto
+Supabase (`eigjocalzwamisgqilhg`, confirmado via `list_migrations`); a
+função `tts-generate` está deployada e `ACTIVE` (`list_edge_functions`,
+v1, `verify_jwt:true`); `shared/flashcard-model.js` já tem
+`TTS_PROVIDER_MODEL_ID`/`TTS_CONFIG_VERSION`/`computeTtsGenerationKey()`
+(SHA-256, serialização canônica com separador `\u001F`, nunca
+`JSON.stringify`); `shared/teacher-flashcards.js`/`shared/own-
+flashcards.js` já têm `requestFieldAudioTTS`/`requestOwnFieldAudioTTS`;
+`shared/flashcard-field-editor.js` já tem o painel mínimo de TTS
+(gerado/gate por `noteId`, comparação de `generationKey` em voo pra
+descartar resposta obsoleta). A suíte de testes já existente daquela
+entrega (39 cenários Node/VM) rodou de novo contra o código atual e
+continuou 39/39 -- nada tinha regredido nem sido revertido.
+
+**Decisão tomada, dado o achado**: em vez de (a) re-implementar do zero
+uma infraestrutura que já existe e já está em produção (o que duplicaria
+trabalho e arriscaria introduzir uma segunda Edge Function/um segundo
+algoritmo de `generationKey` divergente), ou (b) simplesmente não fazer
+nada e reportar "já está pronto" sem verificar de verdade -- fez-se uma
+AUDITORIA DE CONFORMIDADE rigorosa da implementação já existente contra
+as 18 seções/32 cenários de teste da nova instrução, ponto por ponto,
+lendo o código de produção real (não confiando só na prosa do CLAUDE.md
+anterior) -- e corrigiu-se o ÚNICO gap real encontrado.
+
+**O gap encontrado (Seções 2.8 e 6 da própria especificação -- "verificar
+se já existe asset correspondente quando possível" / "não gere de novo
+desnecessariamente; reutilize o asset quando possível")**: a função
+`isTtsAudioStale(field)` (já existente desde a implementação original,
+`shared/flashcard-model.js`) era exatamente o primitivo certo pra decidir
+"esta config já tem um asset gerado e válido?" -- mas **nunca era chamada
+de dentro do handler de clique real** (`shared/flashcard-field-editor.js`,
+bloco `data-field-audio-tts-generate`). Clicar "Gerar/Regenerar áudio"
+sempre disparava uma nova chamada de rede/custo de provedor, mesmo quando
+a configuração (texto/idioma/voz/velocidade) era idêntica à já gerada --
+violando a idempotência exigida pela especificação, mesmo com toda a
+infraestrutura de suporte (o próprio `generationKey`) já pronta.
+
+**Fix, cirúrgico, 1 arquivo, +17 linhas** (`shared/flashcard-field-editor.js`):
+no handler de clique, logo depois de calcular `myKey` (o `generationKey`
+da config no momento do clique -- já existia, usado pra descartar
+respostas obsoletas em concorrência), uma nova checagem compara
+`myKey` contra `field.audio.generationKey` do Field ATUAL, quando
+`field.audio.type === 'tts'` e `field.audio.generatedUrl` já existe. Se
+baterem, a função retorna IMEDIATAMENTE (nunca chama `opts.ttsFn`, nunca
+gasta uma chamada de Edge Function/provedor) e mostra "Áudio já está
+atualizado para esta configuração -- nenhuma geração nova foi
+solicitada." em vez de regenerar. **Nenhuma tabela de cache nova, nenhum
+compartilhamento global** -- o "cache" continua sendo só o próprio
+`field.audio` do Field, exatamente como a especificação exige (Seção 6:
+"o cache deve continuar associado à identidade do asset/configuração").
+Mudar QUALQUER componente relevante (texto/idioma/voz/velocidade) ainda
+dispara uma geração real de verdade -- confirmado por teste dedicado
+(ver abaixo) que o caminho idempotente nunca "gruda" incorretamente numa
+config genuinamente diferente.
+
+**Confirmação ponto a ponto contra as 18 seções da especificação (sem
+reabrir nenhuma):**
+1. **Provider abstraction** -- já isolada em `generateTTS()` (Edge
+   Function), sem credencial real, mock só via `TTS_MOCK_ENABLED`,
+   ausência de config -> `provider_not_configured` explícito. Intocado.
+2. **Edge Function** -- os 12 passos do checklist (auth, JWT, payload,
+   autorização via RLS real -- nunca `userId` do cliente --, validação de
+   texto/config, `generationKey`, upload, resposta estruturada) já
+   presentes, confirmados por leitura linha a linha do arquivo real
+   nesta sessão. Intocado.
+3. **`Field.audio.tts`** -- contrato da Fase 7b preservado + `storagePath`
+   (Decisão 4 da entrega original -- identidade persistente do asset no
+   Storage, separada de `generatedUrl`, a URL de acesso derivada/
+   cacheada). Intocado.
+4. **`generationKey`** -- determinístico, serialização canônica (nunca
+   ordem incidental de objeto), inclui texto efetivo/language/voiceId/
+   rate/providerModelId/configVersion, exclui generatedUrl/generatedAt/
+   timestamps. Intocado, re-testado (41 cenários, incluindo os 2 novos
+   desta sessão).
+5. **Storage** -- só o bucket `flashcard-media` já existente (migration
+   032/046), path separando usuário/tipo de mídia, nunca ultrapassa os
+   limites da 046. Intocado.
+6. **Idempotência** -- era o ÚNICO item genuinamente incompleto (o
+   primitivo existia, a integração no clique real não) -- **corrigido
+   nesta sessão** (ver acima).
+7. **Frontend service** -- `requestFieldAudioTTS`/`requestOwnFieldAudioTTS`
+   já recebem parâmetros explícitos, chamam a Edge Function, devolvem
+   resultado estruturado, nunca tocam DOM/`STATE.review*`, nunca salvam
+   a Note sozinhos. Intocado.
+8. **Invalidação** -- mudar qualquer componente muda `generationKey`
+   (recalculado, nunca persistido como booleano `stale`), áudio anterior
+   nunca apagado fisicamente, sem garbage collection. Intocado.
+9. **Web Speech** -- as 2 camadas (A: pronúncia genérica/`speakFrench`/
+   `speakChinese`, sem persistência; B: `Field.audio.type='tts'`
+   persistido) continuam distintas -- confirmado de novo por grep que
+   nenhum código faz "TTS falhou -> cai pro Web Speech -> marca como
+   TTS". Intocado.
+10. **AUDIO_MANIFEST** -- não tocado, não migrado, a nova infra funciona
+    independente dele (confirmado, zero referência cruzada).
+11. **Pinyin/satélite** -- `pinyinFieldId` continua sendo o único
+    mecanismo, sem heurística de posição, sem conversão automática de
+    todo Field `zh-pinyin` em TTS -- decisão já registrada como "fora da
+    geração automática" desde a especificação original. Intocado.
+12. **Multiple Choice** -- TTS continua propriedade explícita de
+    QUALQUER Field (prompt/answer/distractor), sem geração automática em
+    lote pros distratores. Intocado.
+13. **Rate limiting** -- `tts_generation_log` (migration 047, RLS
+    owner-only, mesmo padrão de `push_subscriptions`) já é uma proteção
+    real (20 gerações/10min por conta), não fingida -- confirmado
+    aplicada ao vivo (tabela existe, RLS ativa, 0 linhas hoje porque
+    nenhuma geração real jamais aconteceu, mock ou não). Intocado.
+14. **Testes** -- os 32 cenários da especificação já tinham cobertura
+    quase completa (39 testes da entrega original); os 2 cenários que
+    faltavam especificamente sobre idempotência (posição da checagem no
+    código-fonte + comportamento do hash "mesma config -> mesma key")
+    foram adicionados nesta sessão -- suíte agora com 41/41.
+15. **Browser smoke FR/ZH** -- não existia nenhum arquivo de smoke salvo
+    no scratchpad desta sessão pra Fase 7f (só os testes Node/VM
+    sobreviveram entre sessões) -- **escrito do zero nesta sessão**,
+    cobrindo especificamente o fluxo completo com o fix de idempotência
+    ao vivo (ver "Testes realizados" abaixo).
+16. **Não implementado nesta sessão** -- confirmado: nenhuma UI completa
+    de seletor TTS nova, nenhuma mudança na gravação da Fase 7g (só
+    validada como intacta), nenhum Anki export, nenhuma migração de
+    AUDIO_MANIFEST, nenhum processamento em lote, nenhuma geração
+    automática, nenhum garbage collection, nenhum cache global, nenhum
+    bucket novo, nenhum CardInstance persistido, nenhuma mudança de
+    FSRS, nenhuma mudança cosmética.
+17. **Documentação** -- esta seção.
+18. **Validação final** -- ver "Testes realizados" abaixo; `git diff
+    --stat` confirma só `shared/flashcard-field-editor.js` tocado (+17
+    linhas); nenhuma API key foi adicionada ao repositório em nenhum
+    momento (a Edge Function já existia sem nenhuma credencial real, e
+    esta sessão não tocou o arquivo dela); nenhum CardInstance
+    persistido (confirmado de novo via smoke test -- `buildCardFromTeacherFlashcard`
+    continua 100% runtime).
+
+**Testes realizados:**
+- `node --check shared/flashcard-field-editor.js`/`shared/flashcard-
+  model.js` sem erro.
+- **Suíte Node/VM da entrega original, estendida com o cenário de
+  idempotência, 41/41** -- os 39 testes já existentes (provider ausente/
+  presente, `generationKey` determinístico e sensível a cada uma das 6
+  entradas, payload inválido, usuário não autorizado, falha não destrói
+  áudio anterior, concorrência descarta resposta obsoleta, consistência
+  cliente<->Edge Function, requestFieldAudioTTS/requestOwnFieldAudioTTS,
+  auditoria arquitetural -- RLS/service-role/rate-limit) continuam
+  passando sem nenhuma mudança de comportamento; 2 testes NOVOS
+  confirmam (a) que a checagem `existingAudio.generationKey === myKey`
+  aparece no código-fonte ANTES da chamada real a `opts.ttsFn` e sempre
+  faz `return` antes de chegar nela (nunca só um log), e (b) que a
+  mesma config produz sempre o mesmo `generationKey` (idempotência
+  genuína) enquanto uma config realmente diferente produz uma key
+  diferente (nunca falso-positivo de "já atualizado").
+- **9 suítes de regressão de fases anteriores (Fase 4 a 7g),
+  re-executadas, 1069/1069 sem nenhuma falha** -- confirma que o fix
+  cirúrgico não regrediu nada em nenhuma fase anterior desta feature
+  inteira (`test_fase4_engine.js` 34/34, `test_fase4d_regression.js`
+  30/30, `test_fase5_generation.js` 33/33, `test_fase6b_native_notes.js`
+  74/74, `test_fase6d1_editor_state.js` 99/99, `test_fase6d2_state.js`
+  31/31, `test_fase6d3_field_editor.js` 65/65,
+  `test_fase6d4a_mc_editor.js` 92/92, `test_fase6d4b_typeanswer_editor.js`
+  62/62, `test_fase6d5_cloze_editor.js` 71/71,
+  `test_fase6d6_native_persistence.js` 85/85,
+  `test_fase6d7_preview_logic.js` 59/59, `test_fase6d8_legacy_conversion.js`
+  92/92, `test_fase7b_field_audio_contract.js` 83/83,
+  `test_fase7g_recording.js` 118/118).
+- **Browser smoke novo, FR+ZH, Playwright/Chromium real, 44/44 checks**
+  -- ponta a ponta através do código de produção real (nunca uma segunda
+  implementação de recorder/upload/TTS): cria+salva um cartão comum
+  primeiro (achado confirmado por leitura: o painel "Gerar áudio" só
+  existe quando `opts.noteId` é uma linha JÁ SALVA -- um rascunho de
+  criação nunca tem o botão, mostra "Salve o cartão primeiro" em vez
+  dele -- por isso o fluxo de teste abre a EDIÇÃO do cartão recém-criado,
+  onde `noteId` já é real); seleciona origem "tts" pro Field, confirma
+  painel/botão visíveis; provider ausente -> erro explícito, `field.audio`
+  nunca tocado; geração bem-sucedida (mock estruturado, nunca um provedor
+  real simulado) -> `field.audio` grava `type/generatedUrl/storagePath/
+  generationKey` corretos; **clicar "Gerar" de novo com a MESMA config
+  confirmado NÃO disparando nenhuma chamada de rede nova** (prova ao vivo
+  do fix desta sessão), mostra a mensagem de "já atualizado", mantém o
+  mesmo asset; mudar o texto e clicar de novo confirmado DISPARANDO uma
+  regeneração real (nunca preso no caminho idempotente por engano);
+  salvar o cartão confirma o áudio TTS sobrevivendo à persistência real
+  E o `revision` incrementando (mesma regra de reset de progresso já
+  existente desde a Fase 6D.6, sem mudança); Review real
+  (`buildCardFromTeacherFlashcard`/`renderReviewView`) confirmado
+  mostrando o botão de áudio customizado com a URL certa E nunca
+  chamando `tts-generate`; Preview (`openFlashcardPreviewFromRow`)
+  confirmado idem; upload (Fase 7e) e gravação real via microfone
+  sintético (Fase 7g) confirmados continuando a funcionar no MESMO
+  editor de Field depois de toda essa interação com o painel de TTS.
+  Zero erro de console novo em nenhum dos 2 idiomas (só os mesmos
+  `ERR_TUNNEL_CONNECTION_FAILED` pré-existentes do proxy de saída deste
+  sandbox, documentados em toda a sessão).
+
+**Lição registrada pra sessões futuras**: o histórico de tarefas/
+instruções que uma nova sessão recebe pode descrever um estado
+desatualizado do repositório (aqui, uma instrução detalhada presumindo
+que uma fase inteira não tinha começado, quando na verdade já estava
+implementada, testada e deployada numa sessão anterior). A própria regra
+já travada no topo deste arquivo ("nunca presumir infraestrutura ativa
+sem checar") se estende também a **instruções recebidas sobre o próprio
+progresso do projeto** -- confirmar contra `git log`/o código real antes
+de reimplementar do zero é sempre mais barato (e mais seguro) que
+duplicar uma Edge Function/um algoritmo de hash já em produção.
+
+**Escopo desta sessão**: só `shared/flashcard-field-editor.js` (+17
+linhas). Nenhuma migração nova, nenhum passo manual pendente pra
+autora -- a migration `047` e a Edge Function `tts-generate` já estavam
+aplicadas/deployadas ao vivo desde a entrega original (`a521c29`).
+
+**PARE conforme a mesma instrução explícita que abriu esta sessão** --
+UI completa de seletor TTS, gravação (Fase 7g, intocada e confirmada
+funcionando), Anki export, migração de AUDIO_MANIFEST, processamento em
+lote, e qualquer mudança de arquitetura FSRS continuam fora do escopo,
+aguardando autorização explícita numa sessão futura.
