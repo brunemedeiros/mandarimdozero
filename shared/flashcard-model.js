@@ -70,15 +70,14 @@ function isStudyLanguageField(field, appKey){
 //     (ver nota de compatibilidade).
 //
 //   { type: 'tts', text, language, voiceId, rate, generationKey,
-//     generatedUrl, generatedAt }
+//     generatedUrl, generatedAt, storagePath }
 //     -- CONFIGURAÇÃO de síntese de voz, nunca execução. Cada propriedade
 //     é opcional/nullable -- um Field pode ter `type:'tts'` com TODAS
 //     essas propriedades `null`, representando "o modo TTS foi escolhido
 //     mas nada mais foi configurado ainda" (estado válido, não um erro).
 //     - `text`: override opcional do texto a sintetizar -- `null` (o caso
 //       comum) significa "sintetize field.content.value no momento da
-//       geração", nunca lido/consumido por nenhum código nesta fase (não
-//       existe geração ainda).
+//       geração".
 //     - `language`: locale EXPLÍCITO da síntese (ex: 'fr-FR'/'zh-CN') --
 //       DELIBERADAMENTE DISTINTO de `field.lang` (idioma pedagógico do
 //       Field, ex: 'fr'/'zh'). NUNCA derivado automaticamente de
@@ -87,22 +86,55 @@ function isStudyLanguageField(field, appKey){
 //       fica gravado é sempre a escolha explícita (ou `null`, se a
 //       pessoa ainda não escolheu). Nem `resolveFieldAudioUrl()` nem
 //       `resolveCardField()` abaixo leem `language` pra decidir nada --
-//       só existe como configuração, pra uma fase futura de geração
-//       consumir.
+//       só existe como configuração, pra a geração (Fase 7f
+//       implementação) consumir.
 //     - `voiceId`/`rate`: configuração de síntese, mesma lógica de
 //       "nullable = ainda não escolhido" que `language`.
-//     - `generationKey`: hash/id derivado de (text efetivo + language +
-//       voiceId + rate), reservado pra uma futura camada de cache
-//       server-side identificar se um áudio já foi gerado pra esta
-//       configuração exata -- é dado DERIVADO, nunca a fonte de verdade
-//       (a fonte de verdade são as 4 propriedades acima); nenhum código
-//       nesta fase calcula ou consome este campo, só reserva o lugar.
+//     - `generationKey`: hash SHA-256 determinístico de (texto efetivo +
+//       language + voiceId + rate + providerModelId + configVersion --
+//       os 2 últimos são CONSTANTES DE CÓDIGO, nunca persistidas aqui,
+//       ver TTS_PROVIDER_MODEL_ID/TTS_CONFIG_VERSION abaixo) -- calculado
+//       por computeTtsGenerationKey(). É dado DERIVADO, nunca a fonte de
+//       verdade (a fonte de verdade são as propriedades de configuração
+//       acima) -- serve só pra decidir idempotência/staleness
+//       (isTtsAudioStale()), comparando o valor recém-computado contra
+//       este já persistido.
 //     - `generatedUrl`/`generatedAt`: o ATIVO já gerado e cacheado (se
-//       existir) -- distinção explícita entre CONFIGURAÇÃO (as 4
+//       existir) -- distinção explícita entre CONFIGURAÇÃO (as
 //       propriedades acima, o que a pessoa pediu) e ATIVO RESOLVIDO
 //       (isto, o que de fato existe como arquivo hoje). Um Field pode
 //       ter `type:'tts'` com configuração completa e `generatedUrl:null`
 //       (ainda não gerado) -- estado perfeitamente válido.
+//     - `storagePath` (Fase 7f -- implementação): a REFERÊNCIA ESTÁVEL
+//       ao objeto no bucket `flashcard-media` (ex:
+//       `{userId}/tts-{fieldId}-{ts}-{rand}.wav`) -- É ESTA a IDENTIDADE
+//       PERSISTENTE do asset, nunca `generatedUrl`. `generatedUrl` é só a
+//       URL de ACESSO derivada/cacheada a partir dela
+//       (`storage.from('flashcard-media').getPublicUrl(storagePath)`) --
+//       hoje as duas coincidem em conteúdo (o bucket é público, sem URL
+//       assinada/expirável, então `getPublicUrl()` de um path sempre
+//       devolve a mesma URL, sem nunca precisar re-derivar), mas por que
+//       guardar as duas mesmo assim: (1) uma futura rotina de limpeza de
+//       áudio órfão (já cogitada, nunca implementada -- ver Fase 7e)
+//       precisa do PATH pra chamar `storage.remove([path])`, nunca da
+//       URL pública (extrair o path de dentro da URL seria acoplamento
+//       implícito ao formato atual de URL pública do Supabase, frágil se
+//       esse formato mudar); (2) se o bucket algum dia precisar virar
+//       privado/com URL assinada (mudança de infraestrutura, não
+//       decidida aqui), a URL vira algo com expiração -- o PATH continua
+//       sendo a única coisa que permite re-derivar/re-assinar uma URL de
+//       acesso nova sem precisar regenerar o áudio do zero. Nullable
+//       (`null` quando o Field ainda não tem asset gerado, mesmo motivo
+//       de `generatedUrl:null`) -- nunca lido por `resolveFieldAudioUrl()`/
+//       `resolveCardField()` (que continuam expondo só `generatedUrl`
+//       como `audioUrl` de exibição -- `storagePath` é metadado de
+//       identidade/gestão, não de apresentação, mesmo papel que
+//       `uploadedAt`/`mimeType` já tinham pro tipo `'upload'`). Adição
+//       ADITIVA e OPCIONAL ao contrato -- nunca quebra dado já persistido
+//       sem esta propriedade (um Field TTS gerado antes desta mudança
+//       simplesmente tem `storagePath` ausente/`undefined`, continua
+//       resolvendo `audioUrl` normalmente via `generatedUrl`, só não
+//       participa de uma futura rotina de limpeza até ser regenerado).
 //
 //   { type: 'recording', url, recordedAt, mimeType, durationMs }
 //     -- suporte estrutural pra gravação futura (MediaRecorder), NÃO
@@ -157,7 +189,7 @@ function isValidFieldAudio(audio){
   const strOrNull = (v) => v === null || v === undefined || typeof v === 'string';
   return strOrNull(audio.text) && strOrNull(audio.language) && strOrNull(audio.voiceId)
     && (audio.rate === null || audio.rate === undefined || typeof audio.rate === 'number')
-    && strOrNull(audio.generationKey) && strOrNull(audio.generatedUrl) && strOrNull(audio.generatedAt);
+    && strOrNull(audio.generationKey) && strOrNull(audio.generatedUrl) && strOrNull(audio.generatedAt) && strOrNull(audio.storagePath);
 }
 
 // Único ponto que decide "que URL este `field.audio` resolve HOJE" --
@@ -213,6 +245,119 @@ function validateFieldAudioUploadFile(file){
   }
   return { ok: true };
 }
+
+// ---------- Fase 7f (TTS explícito por Field, implementação -- ver
+// CLAUDE.md) -- contrato de geração compartilhado ----------
+//
+// providerModelId/configVersion são CONSTANTES DE CÓDIGO, nunca
+// persistidas em Field.audio -- decisão explícita da auditoria da Fase
+// 7f (Seção 21): o shape já travado na Fase 7b (text/language/voiceId/
+// rate/generationKey/generatedUrl/generatedAt) já é suficiente; os 2
+// conceitos novos (Seção 9 da auditoria: "generationKey precisa incluir
+// QUAL provedor/modelo gerou, e QUAL versão do algoritmo de geração, pra
+// invalidar cache numa troca futura") entram só como entrada do hash,
+// espelhadas EXATAMENTE aqui e em supabase/functions/tts-generate/index.ts
+// -- os dois lados precisam concordar no mesmo valor pro cliente conseguir
+// calcular "está desatualizado?" sem round-trip de rede. Trocar de
+// provedor/algoritmo no futuro = mudar as 2 constantes nos DOIS lugares --
+// invalida o cache de TODO Field TTS já gerado (generationKey muda pra
+// todo mundo), sem nenhuma migração de dado.
+const TTS_PROVIDER_MODEL_ID = 'unconfigured'; // trocar quando um provedor real for contratado (ver Edge Function tts-generate)
+const TTS_CONFIG_VERSION = 1;
+
+// Limite de caracteres por geração -- controle de custo (auditoria Fase
+// 7f, Seção 14/15: "nunca gerar um texto absurdamente longo"). Mesmo
+// valor espelhado na Edge Function (2ª camada real -- nunca confia só no
+// cliente, mesma disciplina de FIELD_AUDIO_UPLOAD_MAX_BYTES acima).
+const TTS_TEXT_MAX_LENGTH = 500;
+
+// Hash SHA-256 das 6 entradas do generationKey (Seção 9 da auditoria), em
+// ORDEM FIXA -- nunca JSON.stringify de um objeto (ordem de chave não é
+// garantida entre engines/versões, e um hash que depende disso deixaria
+// de ser determinístico). Usa Web Crypto (crypto.subtle), disponível tanto
+// no navegador quanto no runtime Deno das Edge Functions -- mesmo
+// algoritmo nos dois lados, sem duplicar lógica de hash em JS puro.
+// Assíncrona (subtle.digest é sempre Promise) -- só chamada em pontos que
+// já são async (gerar/checar "está desatualizado?"), nunca no caminho de
+// render síncrono (resolveCardField()/resolveFieldAudioUrl() continuam
+// 100% síncronas, nunca tocam nisto).
+async function computeTtsGenerationKey(effectiveText, language, voiceId, rate){
+  const parts = [
+    effectiveText || '',
+    language || '',
+    voiceId || '',
+    (rate === null || rate === undefined) ? '' : String(rate),
+    TTS_PROVIDER_MODEL_ID,
+    String(TTS_CONFIG_VERSION),
+  ];
+  const input = parts.map(p => encodeURIComponent(p)).join('\u001F');
+  const bytes = new TextEncoder().encode(input);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Texto EFETIVO que seria sintetizado AGORA pra um dado Field + a
+// configuração TTS que ele já carrega -- regra já travada na Fase 7c
+// (Seção F): se `audio.text` é um override explícito (não-null,
+// não-vazio), usa ele; senão usa `field.content.value` (o texto de
+// exibição do próprio Field) -- é essa regra que decide QUAL mudança
+// invalida o cache (editar o Field invalida só quando não há override;
+// editar o override nunca é afetado por uma edição do texto de exibição).
+function ttsEffectiveText(field, audioConfig){
+  const override = (audioConfig && typeof audioConfig.text === 'string') ? audioConfig.text : null;
+  if (override !== null && override !== '') return override;
+  return (field && field.content && field.content.value) || '';
+}
+
+// "Desatualizado" é sempre um estado CALCULADO na hora (Seção 9/10 da
+// auditoria), nunca um booleano persistido em Field.audio -- compara o
+// generationKey recém-computado (a partir do estado ATUAL do Field)
+// contra o já persistido em `audio.generationKey`. Um Field sem
+// `type:'tts'`, ou com `type:'tts'` mas ainda sem `generatedUrl` (nunca
+// gerado), nunca é "desatualizado" -- essa pergunta só faz sentido quando
+// já existe um ativo gerado pra comparar contra.
+async function isTtsAudioStale(field){
+  const audio = field && field.audio;
+  if (!audio || audio.type !== 'tts' || !audio.generatedUrl) return false;
+  const text = ttsEffectiveText(field, audio);
+  const freshKey = await computeTtsGenerationKey(text, audio.language, audio.voiceId, audio.rate);
+  return freshKey !== audio.generationKey;
+}
+
+// Validação de ENTRADA pura (nunca I/O) -- mesma disciplina de
+// validateFieldAudioUploadFile acima: camada CLIENTE, feedback imediato
+// sem round-trip; a Edge Function tts-generate valida de novo do lado do
+// servidor (2ª camada real, nunca confia só nisto).
+function validateTtsGenerationRequest({ text, language }){
+  const cleanText = (text || '').trim();
+  if (!cleanText) return { ok: false, error: 'Digite o texto a sintetizar.' };
+  if (cleanText.length > TTS_TEXT_MAX_LENGTH){
+    return { ok: false, error: `Texto muito longo (máximo ${TTS_TEXT_MAX_LENGTH} caracteres).` };
+  }
+  if (!language || typeof language !== 'string'){
+    return { ok: false, error: 'Escolha o idioma da síntese.' };
+  }
+  return { ok: true };
+}
+
+// Rótulos de erro compartilhados entre shared/teacher-flashcards.js e
+// shared/own-flashcards.js (os 2 serviços de front-end que chamam a Edge
+// Function tts-generate) -- declarado UMA vez só aqui (shared/
+// flashcard-model.js já carrega antes dos dois, mesma posição de
+// FIELD_AUDIO_UPLOAD_MIME_TYPES) pra nunca colidir como top-level `const`
+// duplicado no mesmo escopo global de documento (mesmo problema já
+// corrigido na Fase 6D.2 pra CARD_TYPE_UI_META).
+const TTS_GENERATION_ERROR_LABELS = {
+  provider_not_configured: 'Geração de áudio por TTS ainda não está configurada no servidor (nenhum provedor de voz contratado).',
+  provider_not_implemented: 'Geração de áudio por TTS ainda não está disponível -- infraestrutura em construção.',
+  rate_limited: 'Muitas gerações de áudio em pouco tempo -- espere alguns minutos e tente de novo.',
+  not_authorized: 'Sem permissão para gerar áudio para este cartão.',
+  invalid_session: 'Sessão expirada -- faça login de novo.',
+  text_too_long: `Texto muito longo (máximo ${TTS_TEXT_MAX_LENGTH} caracteres).`,
+  missing_text: 'Digite o texto a sintetizar.',
+  missing_language: 'Escolha o idioma da síntese.',
+  upload_failed: 'Áudio gerado, mas não foi possível salvá-lo -- tente de novo.',
+};
 
 const FLASHCARD_MODEL_FSRS_DEFAULTS = Object.freeze({
   ef: 2.5, interval: 0, reps: 0, due: 0, lapses: 0,

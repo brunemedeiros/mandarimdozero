@@ -275,6 +275,33 @@ async function deleteFlashcardMedia(path){
   return { ok: true };
 }
 
+// ---------- Fase 7f (TTS explícito por Field, implementação -- ver
+// CLAUDE.md) -- serviço de front-end ----------
+//
+// Só CHAMA a Edge Function tts-generate (supabase/functions/tts-generate)
+// e devolve o resultado estruturado -- NUNCA muta STATE global, NUNCA
+// grava nada em `field.audio` sozinha, NUNCA persiste a Note (isso
+// continua sendo decisão exclusiva de quem chama, dentro do fluxo normal
+// de edição -- shared/flashcard-field-editor.js só aplica o resultado ao
+// editorState em memória; a gravação de verdade só acontece quando a
+// professora clica Salvar no formulário, mesmo caminho de sempre via
+// updateFlashcardContent()). Validação client-side ANTES da chamada de
+// rede (validateTtsGenerationRequest, shared/flashcard-model.js) -- a
+// Edge Function valida de novo do lado do servidor, 2ª camada real.
+async function requestFieldAudioTTS({ rowId, fieldId, text, language, voiceId, rate }){
+  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  const v = validateTtsGenerationRequest({ text, language });
+  if (!v.ok) return v;
+  const { data, error } = await supabaseClient.functions.invoke('tts-generate', {
+    body: { table: 'teacher_flashcards', rowId, fieldId, text, language, voiceId: voiceId || null, rate: (rate === undefined ? null : rate) },
+  });
+  if (error || !data?.ok){
+    const code = data?.error || error?.context?.error || null;
+    return { ok: false, error: TTS_GENERATION_ERROR_LABELS[code] || 'Não foi possível gerar o áudio agora.' };
+  }
+  return { ok: true, url: data.url, path: data.path, generationKey: data.generationKey, generatedAt: data.generatedAt };
+}
+
 async function setFlashcardStatus(id, status){
   const { error } = await supabaseClient.from('teacher_flashcards').update({ status }).eq('id', id);
   return { ok: !error };

@@ -560,8 +560,12 @@ function wireFlashcardNativeEditForm(c, editorState, container){
   // Fase 7e (ver CLAUDE.md) -- uploadFn/deleteFn são o único ponto de
   // integração que a caixa "Campos nativos" precisa pra oferecer upload
   // de áudio de verdade -- shared/flashcard-field-editor.js nunca chama
-  // supabaseClient/Storage direto, só através destas 2 funções.
-  const nativeFieldOpts = { namePrefix: 'edit-native', uploadFn: uploadFlashcardMedia, deleteFn: deleteFlashcardMedia };
+  // supabaseClient/Storage direto, só através destas 2 funções. Fase 7f
+  // (implementação) -- ttsFn (requestFieldAudioTTS) + noteId (a linha JÁ
+  // existe de verdade nesta tela de EDIÇÃO -- editorState.noteId sempre
+  // preenchido, mesmo num cartão recém-convertido de legado pra nativo,
+  // Fase 6D.8) habilitam o botão "Gerar áudio" de verdade.
+  const nativeFieldOpts = { namePrefix: 'edit-native', uploadFn: uploadFlashcardMedia, deleteFn: deleteFlashcardMedia, ttsFn: requestFieldAudioTTS, noteId: editorState.noteId };
   const boxEl = document.getElementById('edit-native-flashcard-fields');
   refreshNativeCardTypeBox(boxEl, editorState, nativeFieldOpts);
 
@@ -1355,7 +1359,7 @@ async function renderAdminFlashcardsView(){
     else if (newMode === 'type_answer') transitionToTypeAnswer(ADMIN_FLASHCARDS_STATE.nativeCardState);
     else if (newMode === 'cloze') transitionToCloze(ADMIN_FLASHCARDS_STATE.nativeCardState);
     else ADMIN_FLASHCARDS_STATE.nativeCardState.cardGenerationMode = newMode;
-    refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native', uploadFn: uploadFlashcardMedia, deleteFn: deleteFlashcardMedia });
+    refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native', uploadFn: uploadFlashcardMedia, deleteFn: deleteFlashcardMedia, ttsFn: requestFieldAudioTTS, noteId: ADMIN_FLASHCARDS_STATE.nativeCardState.noteId });
   });
 
   // Fase 6D.7 (ver CLAUDE.md) -- Preview do RASCUNHO atual do editor
@@ -1379,7 +1383,13 @@ async function renderAdminFlashcardsView(){
   // Multiple Choice (6D.4a) e o Field editor genérico (6D.3) conforme o
   // Card Type atual -- add/remove/mudança estrutural re-renderiza só esta
   // caixa, nunca o form inteiro.
-  refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native', uploadFn: uploadFlashcardMedia, deleteFn: deleteFlashcardMedia });
+  // Fase 7f (TTS explícito por Field, implementação -- ver CLAUDE.md) --
+  // ttsFn/noteId seguem o MESMO par uploadFn/deleteFn acima: `noteId` é
+  // sempre `null` aqui (o rascunho ainda não foi salvo) -- o botão "Gerar
+  // áudio" mostra "Salve o cartão primeiro" até o 1º submit bem-sucedido
+  // (mesmo motivo do upload real só existir depois de um Field ter um
+  // `rowId` real pra a Edge Function checar autorização contra).
+  refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native', uploadFn: uploadFlashcardMedia, deleteFn: deleteFlashcardMedia, ttsFn: requestFieldAudioTTS, noteId: ADMIN_FLASHCARDS_STATE.nativeCardState.noteId });
 
   wireFlashcardFieldValidation(wrap);
 

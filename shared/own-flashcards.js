@@ -150,6 +150,29 @@ async function deleteOwnFlashcardMedia(path){
   return { ok: true };
 }
 
+// Fase 7f (TTS explícito por Field, implementação -- ver CLAUDE.md) --
+// mesmo serviço de front-end de requestFieldAudioTTS (shared/
+// teacher-flashcards.js), espelhado aqui pro lado da própria conta:
+// mesma Edge Function (tts-generate), só troca `table` pra 'own_flashcards'
+// -- a function decide sozinha (via RLS de own_flashcards, owner-only)
+// se esta conta pode tocar na linha. TTS_GENERATION_ERROR_LABELS vem de
+// shared/flashcard-model.js (declarado 1 vez só ali, nunca duplicado aqui
+// -- mesmo motivo de CARD_TYPE_UI_META na Fase 6D.2, evita colisão de
+// `const` top-level entre 2 <script> no mesmo escopo global).
+async function requestOwnFieldAudioTTS({ rowId, fieldId, text, language, voiceId, rate }){
+  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  const v = validateTtsGenerationRequest({ text, language });
+  if (!v.ok) return v;
+  const { data, error } = await supabaseClient.functions.invoke('tts-generate', {
+    body: { table: 'own_flashcards', rowId, fieldId, text, language, voiceId: voiceId || null, rate: (rate === undefined ? null : rate) },
+  });
+  if (error || !data?.ok){
+    const code = data?.error || error?.context?.error || null;
+    return { ok: false, error: TTS_GENERATION_ERROR_LABELS[code] || 'Não foi possível gerar o áudio agora.' };
+  }
+  return { ok: true, url: data.url, path: data.path, generationKey: data.generationKey, generatedAt: data.generatedAt };
+}
+
 async function setOwnFlashcardStatus(id, status){
   const { error } = await supabaseClient.from('own_flashcards').update({ status }).eq('id', id).eq('owner_id', CURRENT_USER.id);
   return { ok: !error };

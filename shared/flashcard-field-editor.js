@@ -83,19 +83,48 @@ function fieldAudioIndicatorText(audio){
 // espírito de "Field editor genérico, sem conhecimento de Card Type" já
 // travado desde a Fase 6D.3.
 //
-// Escopo desta subfase (Seção 8): só "Arquivo (upload)" é funcional --
-// URL externa/Texto para voz/Gravação aparecem no seletor de origem (pra
-// já existir o espaço visual quando 7f/7g existirem) mas o `<select>`
-// inteiro fica `disabled` -- nunca finge que essas opções já funcionam.
+// Escopo desta subfase (Fase 7e): "Arquivo (upload)" é funcional -- URL
+// externa/Gravação continuam só de espaço reservado (`<select>` nunca
+// finge que funcionam). "Texto para voz" (Fase 7f -- implementação, ver
+// CLAUDE.md) passou a ser um 3º ORIGEM FUNCIONAL, deliberadamente MÍNIMA
+// (nunca o "seletor completo" descrito na auditoria da Fase 7f, Seção
+// 20 -- sem lista de vozes vinda de um provedor real, sem indicador visual
+// rico de "desatualizado", sem popover) -- só o necessário pra provar o
+// contrato ponta a ponta: texto+idioma+voz(opcional)+velocidade+botão
+// Gerar/Regenerar, reaproveitando os mesmos controles/classes CSS já
+// calibrados no resto do editor (zero CSS novo).
 const FIELD_AUDIO_ORIGIN_UI_META = [
   { value: 'none', label: 'Sem áudio' },
   { value: 'url', label: 'URL externa (em breve)' },
   { value: 'upload', label: 'Arquivo (upload)' },
-  { value: 'tts', label: 'Texto para voz (em breve)' },
+  { value: 'tts', label: 'Texto para voz' },
   { value: 'recording', label: 'Gravação (em breve)' },
 ];
 
-// Render puro -- nunca side-effect. `resolveFieldAudioUrl`/
+// Locale de síntese (audio.language) -- eixo DELIBERADAMENTE independente
+// de Field.lang (idioma pedagógico), nunca derivado automaticamente (ver
+// contrato da Fase 7b em shared/flashcard-model.js) -- só usado aqui pra
+// SUGERIR um valor inicial no `<select>`, nunca gravado sozinho.
+const TTS_LANGUAGE_UI_OPTIONS = [
+  { value: '', label: '-- escolha o idioma --' },
+  { value: 'fr-FR', label: 'Francês (fr-FR)' },
+  { value: 'zh-CN', label: 'Mandarim (zh-CN)' },
+  { value: 'pt-BR', label: 'Português (pt-BR)' },
+];
+function suggestedTtsLanguageForFieldLang(lang){
+  if (lang === 'fr') return 'fr-FR';
+  if (lang === 'zh' || lang === 'zh-pinyin') return 'zh-CN';
+  if (lang === 'pt-BR') return 'pt-BR';
+  return '';
+}
+const TTS_RATE_UI_OPTIONS = [
+  { value: '0.8', label: 'Lento' },
+  { value: '1', label: 'Normal' },
+  { value: '1.2', label: 'Rápido' },
+];
+
+// Render puro -- nunca side-effect (mesmo I/O de rede que o Gerar áudio
+// dispara vive só em wireFieldAudioBlockFor, abaixo). `resolveFieldAudioUrl`/
 // `FIELD_AUDIO_UPLOAD_MIME_TYPES` vêm de shared/flashcard-model.js
 // (carregado antes deste arquivo, ver "Depende de" no topo) -- checados
 // defensivamente (`typeof ... !== 'undefined'`) só pra este arquivo nunca
@@ -108,16 +137,51 @@ function renderFieldAudioBlockHTML(field, opts){
   const resolvedUrl = (typeof resolveFieldAudioUrl === 'function') ? resolveFieldAudioUrl(audio) : null;
   const statusText = fieldAudioIndicatorText(audio) || 'Nenhum áudio configurado.';
   const acceptAttr = (typeof FIELD_AUDIO_UPLOAD_MIME_TYPES !== 'undefined') ? FIELD_AUDIO_UPLOAD_MIME_TYPES.join(',') : 'audio/*';
+
+  const canGenerate = !!(opts.noteId) && typeof opts.ttsFn === 'function';
+  const ttsAudio = (audio && audio.type === 'tts') ? audio : null;
+  const ttsText = (ttsAudio && typeof ttsAudio.text === 'string' && ttsAudio.text) ? ttsAudio.text : (field.content.value || '');
+  const ttsLanguage = (ttsAudio && ttsAudio.language) || suggestedTtsLanguageForFieldLang(field.lang);
+  const ttsVoiceId = (ttsAudio && ttsAudio.voiceId) || '';
+  const ttsRate = (ttsAudio && ttsAudio.rate !== null && ttsAudio.rate !== undefined) ? String(ttsAudio.rate) : '1';
+  const generateLabel = (ttsAudio && ttsAudio.generatedUrl) ? '🔊 Regenerar áudio' : '🔊 Gerar áudio';
+
+  const showUpload = originValue === 'upload' || originValue === 'none';
+  const showTts = originValue === 'tts';
+
   return `
     <div class="field-audio-block" data-field-audio-field="${field.id}" style="margin-top:6px; padding-top:6px; border-top:1px dashed var(--paper-line);">
       <label class="profile-edit-label" for="${namePrefix}-audio-origin-${field.id}">Áudio</label>
-      <select id="${namePrefix}-audio-origin-${field.id}" class="profile-edit-input" disabled>
+      <select id="${namePrefix}-audio-origin-${field.id}" class="profile-edit-input" data-field-audio-origin="${field.id}">
         ${FIELD_AUDIO_ORIGIN_UI_META.map(o => `<option value="${o.value}" ${originValue === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
       </select>
-      <p class="profile-edit-hint" style="margin:2px 0 6px;">URL externa, texto para voz e gravação chegam em fases futuras -- use o upload de arquivo abaixo.</p>
+      <p class="profile-edit-hint" style="margin:2px 0 6px;">URL externa e gravação chegam em fases futuras -- use upload de arquivo ou texto para voz.</p>
       <p class="profile-edit-hint" data-field-audio-status="${field.id}" style="margin:0 0 4px;">${escapeHTML(statusText)}</p>
       ${resolvedUrl ? `<audio controls preload="none" style="width:100%; margin-bottom:6px;" src="${escapeHTML(resolvedUrl)}"></audio>` : ''}
-      <input type="file" accept="${acceptAttr}" data-field-audio-file="${field.id}">
+
+      <div data-field-audio-panel-upload="${field.id}" style="${showUpload ? '' : 'display:none;'}">
+        <input type="file" accept="${acceptAttr}" data-field-audio-file="${field.id}">
+      </div>
+
+      <div data-field-audio-panel-tts="${field.id}" style="${showTts ? '' : 'display:none;'}">
+        ${canGenerate ? `
+          <label class="profile-edit-label" for="${namePrefix}-audio-tts-text-${field.id}">Texto a sintetizar</label>
+          <textarea id="${namePrefix}-audio-tts-text-${field.id}" class="profile-edit-input profile-edit-textarea" rows="2" data-field-audio-tts-text="${field.id}">${escapeHTML(ttsText)}</textarea>
+          <label class="profile-edit-label" for="${namePrefix}-audio-tts-lang-${field.id}">Idioma da síntese</label>
+          <select id="${namePrefix}-audio-tts-lang-${field.id}" class="profile-edit-input" data-field-audio-tts-lang="${field.id}">
+            ${TTS_LANGUAGE_UI_OPTIONS.map(o => `<option value="${o.value}" ${ttsLanguage === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
+          </select>
+          <label class="profile-edit-label" for="${namePrefix}-audio-tts-voice-${field.id}">Voz (opcional)</label>
+          <input type="text" id="${namePrefix}-audio-tts-voice-${field.id}" class="profile-edit-input" placeholder="ex: padrão do provedor" value="${escapeHTML(ttsVoiceId)}" data-field-audio-tts-voice="${field.id}">
+          <label class="profile-edit-label" for="${namePrefix}-audio-tts-rate-${field.id}">Velocidade</label>
+          <select id="${namePrefix}-audio-tts-rate-${field.id}" class="profile-edit-input" data-field-audio-tts-rate="${field.id}">
+            ${TTS_RATE_UI_OPTIONS.map(o => `<option value="${o.value}" ${ttsRate === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
+          </select>
+          <button type="button" class="btn btn-secondary" style="margin-top:6px;" data-field-audio-tts-generate="${field.id}">${generateLabel}</button>
+          <p class="profile-edit-hint" data-field-audio-tts-msg="${field.id}" style="margin:4px 0 0;"></p>
+        ` : `<p class="profile-edit-hint">Salve o cartão primeiro para poder gerar áudio por texto.</p>`}
+      </div>
+
       <p class="profile-edit-field-error" data-field-audio-error="${field.id}"></p>
       ${audio ? `<button type="button" class="admin-select-link" data-field-audio-remove="${field.id}">🗑 Remover áudio</button>` : ''}
     </div>
@@ -140,6 +204,29 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
   const errorEl = block.querySelector('[data-field-audio-error]');
   const statusEl = block.querySelector('[data-field-audio-status]');
   const removeBtn = block.querySelector('[data-field-audio-remove]');
+  const originSelect = block.querySelector('[data-field-audio-origin]');
+  const uploadPanel = block.querySelector('[data-field-audio-panel-upload]');
+  const ttsPanel = block.querySelector('[data-field-audio-panel-tts]');
+
+  // Trocar de ORIGEM no `<select>` NUNCA sobrescreve field.audio sozinho
+  // (decisão travada na auditoria da Fase 7c, item D5) -- exceto
+  // escolher "Sem áudio" explicitamente, que é a ÚNICA outra forma
+  // (além do botão "Remover áudio") de limpar a referência antes de
+  // existir um ativo concreto novo. Trocar pra 'upload'/'tts' só alterna
+  // QUAL PAINEL aparece (mutação de DOM local, nunca re-render da caixa
+  // inteira -- mesma disciplina de "nunca perder o que a pessoa já
+  // digitou" já usada em todo o resto deste arquivo).
+  if (originSelect){
+    originSelect.addEventListener('change', () => {
+      const val = originSelect.value;
+      if (uploadPanel) uploadPanel.style.display = (val === 'upload' || val === 'none') ? '' : 'none';
+      if (ttsPanel) ttsPanel.style.display = (val === 'tts') ? '' : 'none';
+      if (val === 'none'){
+        updateFieldInEditorState(editorState, fieldId, { audio: null });
+        if (onChange) onChange('structure', fieldId);
+      }
+    });
+  }
 
   if (fileInput){
     fileInput.addEventListener('change', async () => {
@@ -193,6 +280,106 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
       // (Seção 2/9) -- nunca antes.
       updateFieldInEditorState(editorState, fieldId, {
         audio: { type: 'upload', url: up.url, uploadedAt: new Date().toISOString(), mimeType: file.type || null },
+      });
+      if (onChange) onChange('structure', fieldId);
+    });
+  }
+
+  // ---------- Fase 7f (TTS explícito por Field, implementação -- ver
+  // CLAUDE.md) -- botão "Gerar/Regenerar áudio" ----------
+  const ttsGenerateBtn = block.querySelector('[data-field-audio-tts-generate]');
+  if (ttsGenerateBtn){
+    ttsGenerateBtn.addEventListener('click', async () => {
+      const textEl = block.querySelector('[data-field-audio-tts-text]');
+      const langEl = block.querySelector('[data-field-audio-tts-lang]');
+      const voiceEl = block.querySelector('[data-field-audio-tts-voice]');
+      const rateEl = block.querySelector('[data-field-audio-tts-rate]');
+      const msgEl = block.querySelector('[data-field-audio-tts-msg]');
+      const text = (textEl && textEl.value) || '';
+      const language = (langEl && langEl.value) || '';
+      const voiceId = (voiceEl && voiceEl.value.trim()) || null;
+      const rate = rateEl ? Number(rateEl.value) : null;
+
+      if (errorEl) errorEl.textContent = '';
+      if (typeof validateTtsGenerationRequest === 'function'){
+        const v = validateTtsGenerationRequest({ text, language });
+        if (!v.ok){
+          if (errorEl) errorEl.textContent = v.error;
+          return;
+        }
+      }
+      if (typeof opts.ttsFn !== 'function' || !opts.noteId){
+        if (errorEl) errorEl.textContent = 'Geração de áudio não está disponível nesta tela.';
+        return;
+      }
+
+      // Concorrência (Seção 11 da auditoria da Fase 7f) -- calcula o
+      // generationKey da config NO MOMENTO DO CLIQUE, antes de disparar a
+      // requisição. Se a pessoa editar texto/idioma/voz/velocidade
+      // enquanto a geração está em voo, a resposta que voltar é
+      // comparada de novo contra a config ATUAL do formulário -- só
+      // aplicada se ainda bater; senão é DESCARTADA silenciosamente
+      // (nunca sobrescreve uma config mais nova com um resultado velho).
+      const myKey = (typeof computeTtsGenerationKey === 'function')
+        ? await computeTtsGenerationKey(text, language, voiceId, rate)
+        : null;
+
+      ttsGenerateBtn.disabled = true;
+      const originalLabel = ttsGenerateBtn.textContent;
+      ttsGenerateBtn.textContent = 'Gerando áudio...';
+      if (msgEl) msgEl.textContent = '';
+
+      const res = await opts.ttsFn({ rowId: opts.noteId, fieldId, text, language, voiceId, rate });
+
+      if (!block.isConnected) return; // guarda contra container abandonado enquanto a geração estava em voo (Seção 8, mesmo padrão do upload)
+
+      ttsGenerateBtn.disabled = false;
+      ttsGenerateBtn.textContent = originalLabel;
+
+      if (!res.ok){
+        if (errorEl) errorEl.textContent = res.error || 'Não foi possível gerar o áudio agora.';
+        return; // falha nunca sobrescreve o áudio anterior (se havia) -- mesma regra do upload.
+      }
+
+      const stillCurrentText = (textEl && textEl.value) || '';
+      const stillCurrentLanguage = (langEl && langEl.value) || '';
+      const stillCurrentVoiceId = (voiceEl && voiceEl.value.trim()) || null;
+      const stillCurrentRate = rateEl ? Number(rateEl.value) : null;
+      const currentKey = (typeof computeTtsGenerationKey === 'function')
+        ? await computeTtsGenerationKey(stillCurrentText, stillCurrentLanguage, stillCurrentVoiceId, stillCurrentRate)
+        : myKey;
+      if (myKey !== null && currentKey !== myKey){
+        // A pessoa mudou a config enquanto a geração estava em voo --
+        // resultado obsoleto, descartado (nunca aplicado). O áudio
+        // devolvido ainda ficou salvo no Storage (órfão) -- best-effort,
+        // mesma categoria já documentada pra remoção/substituição (sem
+        // garbage collector nesta fase).
+        if (msgEl) msgEl.textContent = 'A configuração mudou enquanto o áudio era gerado -- clique em Gerar de novo.';
+        return;
+      }
+
+      // Só ATUALIZA field.audio depois da geração ter sucesso de verdade
+      // (mesma regra 2/9 do upload) -- text:null quando o texto digitado
+      // é idêntico ao texto de exibição do Field (sem override explícito,
+      // ver ttsEffectiveText em shared/flashcard-model.js); um override
+      // real só é gravado quando a pessoa de fato mudou o texto padrão.
+      const currentField = (editorState.fields || []).find(f => f.id === fieldId);
+      const currentFieldText = (currentField && currentField.content && currentField.content.value) || '';
+      const override = (text !== currentFieldText) ? text : null;
+      editorState.__freshMediaUploads = editorState.__freshMediaUploads || [];
+      editorState.__freshMediaUploads.push({ path: res.path, deleteFn: opts.deleteFn || null });
+      // storagePath (Decisão 4, ver CLAUDE.md/shared/flashcard-model.js) --
+      // a IDENTIDADE persistente do asset no bucket (res.path, o mesmo
+      // valor já rastreado em __freshMediaUploads acima), gravada
+      // SEPARADA de generatedUrl (a URL de acesso derivada/cacheada) --
+      // nunca a única fonte de verdade, só a referência estável pra uma
+      // futura rotina de limpeza/re-derivação de URL.
+      updateFieldInEditorState(editorState, fieldId, {
+        audio: {
+          type: 'tts', text: override, language, voiceId, rate,
+          generationKey: res.generationKey, generatedUrl: res.url, generatedAt: res.generatedAt,
+          storagePath: res.path || null,
+        },
       });
       if (onChange) onChange('structure', fieldId);
     });

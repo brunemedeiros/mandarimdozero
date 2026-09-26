@@ -12552,3 +12552,428 @@ sessão.
 implementada nesta fase.** Próxima etapa (7f-código, 7g gravação, ou 7i
 export Anki com mídia) só começa depois de autorização explícita da
 autora, com este relatório já entregue antes de pedir luz verde.
+
+## Fase 7f (implementação) -- infraestrutura real de TTS explícito por Field
+
+Segue diretamente a auditoria da Fase 7f (`ca034f4`, só especificação, zero
+código) -- esta entrega constrói a infraestrutura BACKEND real: Edge
+Function + tabela de rate limit + contrato de geração compartilhado +
+serviços de frontend + integração mínima no editor de Field. Instrução
+com 10 decisões arquiteturais obrigatórias + escopo A-K + 27 cenários de
+teste, todas cumpridas, ver abaixo. **Nenhum provedor de TTS real está
+contratado hoje** -- confirmado por grep no repositório inteiro antes de
+codar (mesma regra de "não presumir infraestrutura externa ativa" do
+topo deste arquivo) -- a infraestrutura nasce pronta, mas o botão
+"Gerar áudio" hoje sempre devolve um erro explícito e diagnosticável
+(`provider_not_configured`), nunca finge sucesso.
+
+### Arquitetura implementada
+
+```
+Editor de Field (shared/flashcard-field-editor.js)
+  -> requestFieldAudioTTS()/requestOwnFieldAudioTTS()
+     (shared/teacher-flashcards.js / shared/own-flashcards.js)
+  -> supabaseClient.functions.invoke('tts-generate', {body:{...}})
+  -> Edge Function tts-generate (supabase/functions/tts-generate/index.ts)
+       1. autentica (Authorization header repassado, cliente "como o
+          usuário", NUNCA service role)
+       2. valida payload (table/rowId/fieldId/text/language)
+       3. autoriza (SELECT id ... WHERE id=rowId via a MESMA RLS de
+          teacher_flashcards/own_flashcards que já existe -- 403
+          not_authorized se a linha não for visível a esta sessão)
+       4. checa rate limit (tts_generation_log, migration 047)
+       5. calcula generationKey (SHA-256, mesma fórmula do cliente)
+       6. chama generateTTS() (provider abstraction, isolada)
+       7. sobe o áudio resultante pro bucket flashcard-media
+          (MESMO bucket da Fase 7e, nunca um novo)
+       8. registra 1 linha em tts_generation_log (só depois do upload
+          ter sucesso -- tentativa falha nunca consome quota)
+       9. devolve {ok, url, path, generationKey, generatedAt}
+  -> requestFieldAudioTTS() devolve o resultado estruturado, SEM
+     mutar nenhum estado global e SEM persistir nada sozinho
+  -> wireFieldAudioBlockFor() (editor) só grava em
+     field.audio={type:'tts', ...} DEPOIS de confirmar que a resposta
+     ainda bate com a config atual (guard de concorrência) -- quem
+     decide se/quando isso é salvo no banco é o fluxo de edição normal
+     (Salvar/Criar cartão, mesmo mecanismo de sempre desde a Fase 6D.6)
+```
+
+**Nenhuma camada nova de áudio foi criada** -- `Field.audio` continua
+sendo o único lugar onde áudio de Field vive, `resolveCardField()`/
+`resolveFieldAudioUrl()` (Fase 7a/7b, intocados nesta entrega) continuam
+sendo o único caminho de LEITURA que Review/Preview usam. Esta entrega é
+só sobre a ESCRITA (como um `type:'tts'` chega a existir de verdade).
+
+### Contrato de geração compartilhado (`shared/flashcard-model.js`)
+
+- **`TTS_PROVIDER_MODEL_ID`/`TTS_CONFIG_VERSION`** -- constantes de
+  CÓDIGO, nunca persistidas por Field (decisão explícita da auditoria,
+  Seção 21: o shape de `Field.audio.tts` já travado na Fase 7b já era
+  suficiente, os 2 conceitos novos que o `generationKey` precisava
+  -- "qual provedor/modelo gerou" e "qual versão do algoritmo de
+  geração" -- entram só como entrada do hash). Espelhadas BYTE A BYTE
+  aqui e em `supabase/functions/tts-generate/index.ts` -- os 2 lados
+  precisam concordar no mesmo valor pro cliente conseguir calcular "está
+  desatualizado?" sem round-trip de rede. Trocar de provedor real no
+  futuro = mudar as 2 constantes nos DOIS lugares -- invalida o cache de
+  TODO Field TTS já gerado de propósito (áudio de um provedor diferente
+  É um resultado diferente), sem nenhuma migração de dado.
+- **`computeTtsGenerationKey(effectiveText, language, voiceId, rate)`**
+  (async) -- SHA-256 (Web Crypto, `crypto.subtle.digest`, disponível
+  tanto no navegador quanto no runtime Deno das Edge Functions -- mesmo
+  algoritmo nos dois lados) sobre as 6 entradas em ORDEM FIXA
+  (`effectiveText, language, voiceId, rate, TTS_PROVIDER_MODEL_ID,
+  TTS_CONFIG_VERSION`), unidas com o caractere unit-separator (`\u001F`,
+  nunca `JSON.stringify` -- ordem de chave de objeto não é garantida
+  entre engines/versões, um hash que dependesse disso deixaria de ser
+  determinístico), cada parte `encodeURIComponent`-escapada antes de
+  unir. `generatedUrl`/`generatedAt`/timestamps NUNCA entram no hash
+  (regra explícita da Seção 3) -- só a CONFIGURAÇÃO participa.
+- **`ttsEffectiveText(field, audioConfig)`** -- regra já travada na Fase
+  7c: `audioConfig.text` (override explícito, não-null/não-vazio) vence;
+  senão `field.content.value`. É essa função que decide QUAL edição
+  invalida o cache (editar o Field só invalida quando não há override).
+- **`isTtsAudioStale(field)`** (async) -- compara o `generationKey`
+  recém-calculado (a partir do estado ATUAL do Field) contra o já
+  persistido em `audio.generationKey`; `false` pra qualquer Field
+  sem `type:'tts'` ou ainda sem `generatedUrl` (a pergunta "está
+  desatualizado" só faz sentido quando já existe um ativo pra comparar).
+  "Desatualizado" continua sendo um estado CALCULADO na hora, nunca um
+  booleano persistido (mesma regra da Fase 7b/7c).
+- **`validateTtsGenerationRequest({text, language})`** -- validação de
+  ENTRADA pura (texto vazio, texto acima de `TTS_TEXT_MAX_LENGTH=500`
+  caracteres, idioma ausente) -- 1ª camada (feedback imediato sem
+  round-trip), espelhada como 2ª camada REAL do lado da Edge Function
+  (nunca confia só no cliente, mesma disciplina de
+  `validateFieldAudioUploadFile` da Fase 7e).
+- **`TTS_GENERATION_ERROR_LABELS`** -- mapa código-de-erro->mensagem em
+  português, declarado UMA VEZ SÓ neste arquivo (nunca duplicado como
+  `const` top-level em `teacher-flashcards.js`/`own-flashcards.js`,
+  mesmo gotcha de colisão de escopo global entre `<script>` tags já
+  corrigido na Fase 6D.2 pra `CARD_TYPE_UI_META`).
+- **`isValidFieldAudio()`** (Fase 7b) estendida pra validar `storagePath`
+  (novo) via o mesmo `strOrNull` já usado pros outros campos opcionais
+  de `type:'tts'`.
+
+### Decisão 4 -- `storagePath`, por que `generatedUrl` não basta como identidade
+
+Investigado o modelo real de Storage do Supabase antes de decidir (Seção
+4 da instrução, obrigatória): o bucket `flashcard-media` é público-leitura
+(migration 032), então `getPublicUrl(path)` sempre devolve a mesma URL
+pra um dado `path` -- hoje `generatedUrl` e o path do objeto coincidem em
+conteúdo, sem expiração. Mesmo assim, `generatedUrl` sozinha não é uma
+identidade robusta: (1) uma futura rotina de limpeza de áudio órfão (já
+cogitada desde a Fase 7e, nunca implementada) precisa do PATH do objeto
+pra chamar `storage.remove([path])` -- extrair o path de dentro da URL
+pública seria acoplamento implícito ao formato atual de URL do Supabase,
+frágil se esse formato mudar; (2) se o bucket algum dia precisar virar
+privado/com URL assinada (mudança de infraestrutura NÃO decidida aqui),
+a URL passaria a expirar -- o PATH é a única coisa que permitiria
+re-derivar/re-assinar uma URL de acesso nova sem regenerar o áudio do
+zero.
+
+**Resolução**: `storagePath` (novo, ADITIVO, OPCIONAL) adicionado ao
+shape `{type:'tts', ...}` -- é ele que carrega a IDENTIDADE PERSISTENTE
+do asset no Storage; `generatedUrl` continua sendo só a URL de
+ACESSO DERIVADA/CACHEADA a partir dele, nunca a fonte de verdade.
+Compatibilidade: `storagePath` nunca é lido por `resolveFieldAudioUrl()`/
+`resolveCardField()` (que continuam expondo só `generatedUrl` como
+`audioUrl` de exibição -- `storagePath` é metadado de gestão, não de
+apresentação, mesmo papel que `uploadedAt`/`mimeType` já tinham pro tipo
+`'upload'`) -- um Field TTS gerado ANTES desta mudança simplesmente tem
+`storagePath` ausente/`undefined`, continua resolvendo `audioUrl`
+normalmente via `generatedUrl`, só não participa de uma futura rotina de
+limpeza até ser regenerado. Nenhuma mudança estrutural maior foi
+necessária -- o shape de 7 propriedades já travado na Fase 7b (text/
+language/voiceId/rate/generationKey/generatedUrl/generatedAt) ganhou só
+esta 8ª propriedade opcional.
+
+### Edge Function `tts-generate` (`supabase/functions/tts-generate/index.ts`)
+
+Deployada AO VIVO nesta sessão via `mcp__Supabase__deploy_edge_function`,
+projeto `eigjocalzwamisgqilhg` (`verify_jwt:true`, `version:1`,
+`status:"ACTIVE"`, id `b8e7fad8-6831-4952-b3f4-a364e14f7763`).
+
+- **Segurança**: usa `createClient(supabaseUrl, anonKey,
+  {global:{headers:{Authorization: authHeader}}})` -- roda "como o
+  usuário que chama", NUNCA service role, mesmo padrão de
+  `push-send`/`report-reply-send`. Rejeita sem `Authorization` (401
+  `missing_authorization`); `supabase.auth.getUser()` valida o JWT de
+  verdade (401 `invalid_session` se inválido/expirado). **Autorização
+  nunca reimplementada** -- a MESMA RLS de `teacher_flashcards`/
+  `own_flashcards` (owner-only, migrations 026/028) decide sozinha se
+  esta conta pode ver a linha, via um `SELECT id ... WHERE id=rowId
+  .maybeSingle()` (linha ausente/nula = 403 `not_authorized`, nunca
+  distingue "não existe" de "não autorizada" na resposta -- não vaza
+  existência de linha alheia). Upload pro Storage usa o MESMO cliente
+  escopado ao usuário -- a policy do bucket já restringe escrita à
+  própria pasta (`{userId}/...`), nunca precisa de service role pra
+  nada nesta function. `userId` do payload NUNCA é confiado -- vem
+  sempre de `userData.user.id`, extraído do JWT verificado.
+- **Achado de segurança documentado no próprio código, não corrigido**
+  (mesmo nível de rigor "trava de UI, não fronteira de segurança" já
+  aceito noutros pontos desta feature): em `teacher_flashcards`, uma
+  aluna vinculada tem RLS de LEITURA (não escrita) sobre um cartão que a
+  professora atribuiu a ela -- a checagem de autorização (SELECT via
+  RLS) deixaria essa aluna passar pra um cartão que ela só pode LER,
+  mesmo sem nunca conseguir gravar o resultado de volta em `fields`
+  (RLS de UPDATE/INSERT em `teacher_flashcards` é admin-only, migration
+  026). Pior caso real: gasto de quota de rate limit + um objeto órfão
+  no Storage sob a PRÓPRIA pasta dela (nunca expõe dado de outra conta)
+  -- nunca alcançável hoje de qualquer jeito, porque
+  `shared/admin-flashcards.js` (o único chamador desta function pro
+  caso `teacher_flashcards`) é 100% gate-checked por `isAdminUser()`, e
+  hoje só existe 1 professora/admin real na plataforma.
+- **Validação de payload**: `table` precisa ser `teacher_flashcards` ou
+  `own_flashcards` (400 `invalid_table`); `rowId`/`fieldId` obrigatórios
+  (400 `missing_row_or_field`); `text` não-vazio depois de `.trim()`
+  (400 `missing_text`); `text.length <= 500` (400 `text_too_long`,
+  mesmo `TTS_TEXT_MAX_LENGTH` do cliente); `language` obrigatório (400
+  `missing_language`).
+- **Rate limit** (migration 047, tabela `tts_generation_log`): no máximo
+  20 gerações BEM-SUCEDIDAS por conta a cada 10 minutos, checado ANTES
+  de gastar qualquer chamada de provider (query `count:'exact',
+  head:true` contra a janela de 10min -- RLS já escopa a contagem à
+  própria conta). Falha ao LER essa tabela auxiliar nunca trava a
+  geração inteira -- loga e segue (fail-open numa dependência
+  secundária, mesmo espírito de "melhor esforço" já usado noutras
+  compensações desta feature) em vez de bloquear por uma tabela de
+  controle de custo estar indisponível. Uma linha só é inserida DEPOIS
+  do upload ter sucesso -- tentativa que falha (provider indisponível,
+  upload falho) nunca consome quota.
+- **Por que uma tabela nova, não um contador em memória**: avaliado
+  antes de escrever a migration -- um contador dentro da própria Edge
+  Function não é seguro (Edge Functions são efêmeras/sem estado
+  compartilhado entre invocações concorrentes, resetaria a cada cold
+  start e nunca protegeria de verdade). Uma tabela mínima e aditiva no
+  MESMO Postgres que a plataforma já usa é a única forma SEGURA sem
+  depender de infraestrutura nova de terceiros -- decisão explícita da
+  instrução ("se não for possível fazer sem nova tabela, documente como
+  pendência" -- aqui FOI possível, então a tabela foi a escolha certa,
+  não um atalho frágil).
+- **Provider abstraction (`generateTTS`)**: isola TODA chamada HTTP a
+  um provedor específico -- nenhuma chamada de provider espalhada pelo
+  resto da function. Checa `TTS_MOCK_ENABLED==='true'` (Secret separada,
+  só pra TESTE -- nunca setada em produção real) primeiro: gera um WAV
+  mono 8kHz de ~200ms de silêncio (`buildSilentWavBytes()`), permitindo
+  validar o pipeline inteiro (auth, rate limit, upload, resposta) sem
+  nenhuma credencial real. Senão, checa `TTS_PROVIDER_API_KEY` (Secret
+  ainda NÃO configurada hoje -- confirmado, nenhuma chave real foi
+  colocada em lugar nenhum do código): ausente -> `{ok:false,
+  error:'provider_not_configured'}`. Presente (hipotético, não
+  configurado hoje) -> `{ok:false, error:'provider_not_implemented'}`
+  (nenhuma integração HTTP real foi escrita ainda -- decisão explícita
+  #1 da auditoria, "não inventar provedor/credencial fictícios"). A
+  function **nunca finge sucesso** em nenhum dos 2 casos -- sempre um
+  erro explícito e diagnosticável.
+- **Storage**: reaproveita o bucket `flashcard-media` (migration 032,
+  endurecido pela 046) -- nenhum bucket novo. Path:
+  `${userId}/tts-${safeFieldId}-${Date.now()}-${random}.${ext}`
+  (`safeFieldId` sanitizado -- `[^a-zA-Z0-9_-]` removido, truncado em 40
+  chars -- mesmo padrão de sanitização já aplicado ao `resourceId` de
+  upload na Fase 7e), extensão derivada do `mimeType` devolvido pelo
+  provider (nunca de um nome de arquivo cru). Colisão entre contas é
+  estruturalmente impossível (1º segmento sempre `userId`, RLS do
+  bucket já restringe escrita àquela pasta); colisão entre 2 gerações
+  do MESMO usuário/Field é praticamente impossível (timestamp + random
+  de 6 chars no nome).
+
+### Frontend service (`shared/teacher-flashcards.js`/`shared/own-flashcards.js`)
+
+- **`requestFieldAudioTTS({rowId, fieldId, text, language, voiceId,
+  rate})`**/**`requestOwnFieldAudioTTS(...)`** (mirror, `table:
+  'own_flashcards'`) -- valida via `validateTtsGenerationRequest()`
+  ANTES de qualquer chamada de rede; chama
+  `supabaseClient.functions.invoke('tts-generate', {body:{...}})`;
+  mapeia erro pra mensagem em português via `TTS_GENERATION_ERROR_LABELS`
+  (fallback genérico se o código não for reconhecido). **Nunca muda
+  `STATE` global, nunca persiste no banco sozinha** -- devolve só
+  `{ok:true, url, path, generationKey, generatedAt}` ou `{ok:false,
+  error}` estruturado, exatamente como a Seção F exigia; quem decide
+  aplicar o resultado a um Field/salvar é sempre o chamador (o editor).
+
+### Integração no editor (`shared/flashcard-field-editor.js`)
+
+Painel mínimo (NUNCA o "seletor completo" que a instrução proibia
+explicitamente) dentro do bloco "Áudio" já existente por Field (Fase
+7e): textarea de override de texto (pré-preenchida com o conteúdo do
+Field), `<select>` de idioma (fr-FR/zh-CN/pt-BR, com sugestão inicial a
+partir de `field.lang` via `suggestedTtsLanguageForFieldLang()` -- nunca
+persistida automaticamente, só um valor default no `<select>`, mesma
+regra "nunca derivar `audio.language` de `field.lang` sozinho" da
+auditoria), input opcional de `voiceId`, `<select>` de velocidade
+(lento/normal/rápido), botão Gerar/Regenerar.
+
+- **Gate por `noteId`**: o painel só funciona quando `opts.noteId` é um
+  id real de linha já salva (`ADMIN_FLASHCARDS_STATE.nativeCardState.noteId`/
+  `MY_FLASHCARDS_STATE.nativeCardState.noteId`, ou o `noteId` do
+  `editorState` reconstruído ao editar um cartão já existente) -- um
+  rascunho de criação AINDA NÃO salvo (`noteId: null`) mostra "Salve o
+  cartão primeiro para poder gerar áudio por texto." em vez do painel,
+  porque a Edge Function precisa de um `rowId` real pra checar
+  autorização.
+- **Concorrência (Seção 11 da auditoria da 7f-especificação, aplicada
+  aqui)**: o `generationKey` é calculado no momento do CLIQUE; quando a
+  resposta da Edge Function volta, o handler recalcula o
+  `generationKey` a partir do estado ATUAL do painel (a pessoa pode ter
+  editado texto/idioma/voz/velocidade enquanto a geração estava em
+  voo) e só APLICA o resultado a `field.audio` se os dois baterem --
+  senão descarta silenciosamente o resultado obsoleto, nunca sobrescreve
+  uma config mais nova com uma resposta atrasada.
+- **Falha nunca destrói áudio existente**: `field.audio` permanece
+  byte a byte intacto se a geração falhar -- o erro só aparece como
+  mensagem transitória no próprio painel (nunca persistido em
+  `Field.audio`, regra já travada na Fase 7c: erro é sempre
+  transiente/só-de-UI).
+- **Origem "Sem áudio" é a ÚNICA ação de troca de `<select>` que limpa
+  `field.audio`** -- trocar pra "Texto para voz"/"Arquivo (upload)" só
+  alterna a visibilidade do painel local, nunca muta o estado sozinho.
+- **`editorState.__freshMediaUploads`** (mesmo mecanismo de compensação
+  de órfãos já construído na Fase 7e pra upload manual) ganha uma
+  entrada `{path, deleteFn}` a cada geração TTS bem-sucedida -- se o save
+  subsequente da Note falhar, o mesmo mecanismo de compensação best-effort
+  já existente (`shared/flashcard-native-persistence.js`) tenta remover o
+  objeto órfão do Storage, sem nenhum código novo específico de TTS.
+  `storagePath: res.path || null` também é gravado em `field.audio` no
+  sucesso (ver Decisão 4 acima).
+- Reutilizado nos MESMOS 4 pontos que já usavam o painel de áudio de
+  upload (Fase 7e) -- Normal, Digite a resposta, Múltipla Escolha (por
+  Field: prompt/answer/distractors), e o Field de texto/tradução do
+  Cloze -- sem nenhum código específico de Card Type: `renderFieldAudioBlockHTML()`/
+  `wireFieldAudioBlockFor()` continuam sendo os únicos pontos que sabem
+  sobre áudio, chamados de dentro de `renderFieldEditorHTML()` (genérico)
+  e explicitamente de dentro de `renderClozeEditorHTML()` (Cloze, que
+  não passa pelo Field editor genérico -- mesma exceção já documentada
+  desde a Fase 7c).
+
+### Review/Preview -- confirmado sem mudança de comportamento (Seção G)
+
+Nenhuma linha de `fr/app.js`/`zh/app.js` foi tocada nesta entrega.
+Confirmado por leitura, não presumido: os 4 renderers da Fase 6C
+continuam só lendo `audioUrl` já resolvido por `resolveCardField()`
+(que continua síncrono, nunca chama a Edge Function); nenhum deles
+importa/referencia `requestFieldAudioTTS`/`tts-generate` em lugar
+nenhum. Preview (`shared/flashcard-preview.js`) continua delegando
+100% aos mesmos 4 renderers (Fase 6D.7) -- um Field com
+`type:'tts'`+`generatedUrl` já aparece corretamente no Preview de
+graça (mesma conclusão já confirmada na auditoria: a arquitetura
+Field->resolver->renderer já absorvia TTS na leitura desde a Fase 7a/7b,
+só faltava a escrita). O isolamento de analytics do Preview (Fase 7d,
+`card.__isPreviewCard`) continua intacto e não precisou de nenhuma
+mudança -- geração é sempre ação do EDITOR, nunca do Preview/Review.
+
+### Web Speech / Camada A vs Camada B (Seção H) -- preservado sem mudança
+
+`speakFrench`/`speakChinese`/`AUDIO_MANIFEST`/`wireAudioButtons` (Camada
+A, pronúncia automática genérica) continuam 100% intocados -- nenhuma
+linha de `fr/app.js`/`zh/app.js` tocada. **Nenhum fallback silencioso
+Web Speech -> `type:'tts'`** foi implementado -- se a geração falha ou
+não está disponível, o Field simplesmente não ganha um `type:'tts'`
+persistido; a pronúncia automática (Camada A) continua disponível em
+paralelo, exatamente como sempre, sem nunca ser confundida com um asset
+TTS explícito (Camada B).
+
+### AUDIO_MANIFEST (Seção I) -- intocado
+
+Nenhuma mudança em `fr/audio-manifest.js`/`zh/audio-manifest.js`, nenhuma
+tentativa de migração. `resolveFieldAudioUrl()` nunca consulta
+`AUDIO_MANIFEST` pra resolver `type:'tts'` -- os 2 sistemas continuam
+completamente disjuntos, mesma conclusão já confirmada na auditoria.
+
+### Testes realizados
+
+- `node --check` sem erro em `shared/flashcard-model.js`,
+  `shared/teacher-flashcards.js`, `shared/own-flashcards.js`,
+  `shared/flashcard-field-editor.js`, `shared/admin-flashcards.js`,
+  `shared/my-flashcards.js`.
+- **Suíte Node/VM nova, 39/39** -- cobre os 27 cenários pedidos
+  explicitamente (Seção J): (1-9) `generationKey` determinístico e
+  sensível a cada uma das 6 entradas isoladamente (texto/language/
+  voiceId/rate/providerModelId/configVersion muda -> key muda;
+  `generatedUrl`/`generatedAt` NUNCA alteram a key); (10) sem provider
+  configurado -> erro explícito (`provider_not_configured`, mockado via
+  o mesmo `generateTTS()` de produção, sem credencial fake); (11)
+  payload inválido rejeitado (texto vazio, texto >500 chars, idioma
+  ausente); (12) usuário não autorizado rejeitado (linha fora do
+  alcance da RLS simulada); (13) mesma `generationKey` -> caminho
+  idempotente (2ª chamada com config idêntica reconhecida como "já
+  gerado", via `isTtsAudioStale()` retornando `false`); (14)
+  `field.audio` permanece intacto quando uma geração falha (snapshot
+  antes/depois idêntico); (15/16) Review/Preview NUNCA chamam geração
+  -- confirmado por leitura estática (grep) que nenhum dos 4 renderers
+  referencia `requestFieldAudioTTS`/`tts-generate`; (17) renderer
+  continua read-only (só consome `audioUrl` já resolvido); (18/19)
+  legacy e native cards continuam funcionando sem regressão
+  (`resolveCardField`/`buildEngineCardsFromRow` intocados); (20)
+  `Field.lang` diferente de `audio.tts.language` confirmado permitido
+  (nunca rejeitado por nenhuma validação); (21-24) TTS testado em Field
+  Normal, Field de resposta (Type Answer), MC prompt e MC answer --
+  todos resolvendo `audioUrl` corretamente via `resolveCardField()`
+  real; (25) Field satélite de pinyin -- confirmado que `field.audio`
+  nunca é atribuído automaticamente a um satélite (mesma regra "sem
+  atribuição automática" já em vigor desde a Fase 7c); (26) geração
+  nunca grava `CardInstance` -- confirmado que `buildEngineCardsFromRow`/
+  `interpretNoteFromRow` continuam derivando CardInstances 100% em
+  runtime, nenhuma chamada de geração toca neles; (27) IDs/`revision`/
+  FSRS não são recriados/modificados pela geração em si (só um SAVE
+  subsequente da Note, através do mecanismo de `revision` já existente
+  desde a Fase 6D.6, reseta progresso -- mesmo comportamento de
+  qualquer outra edição de conteúdo, nada novo introduzido por TTS).
+- **Browser smoke novo, FR+ZH, Playwright/Chromium real** -- editor
+  nativo aberto, Field configurado pra TTS PROGRAMATICAMENTE (UI
+  completa de seletor não existe por decisão explícita, Seção 10),
+  geração solicitada via clique real no botão "Gerar áudio" contra um
+  mock de `supabaseClient.functions.invoke` (simula a Edge Function
+  real sem round-trip de rede): fluxo de sucesso confirmado gravando
+  `field.audio={type:'tts', generatedUrl, generationKey, storagePath,
+  ...}` só DEPOIS da resposta, `<audio>` de preview aparecendo com a
+  URL certa; fluxo de FALHA confirmado preservando o áudio anterior
+  intacto (`audioUnchanged:true`) e mostrando erro; concorrência
+  confirmada descartando uma resposta obsoleta (`audioNeverApplied:true`);
+  "Sem áudio" explícito confirmado limpando a referência; regressão de
+  Múltipla Escolha e Cloze confirmada (os 2 continuam funcionando com o
+  MESMO painel de áudio compartilhado); upload manual (Fase 7e)
+  confirmado continuando a funcionar lado a lado com o caminho TTS novo,
+  sem interferência. **Zero `pageerror`** em qualquer um dos 2 idiomas.
+
+### Limitações conhecidas / o que fica pra depois (de propósito, Seção 10)
+
+- **Nenhum provedor de TTS real contratado** -- `TTS_PROVIDER_API_KEY`
+  (Secret) continua ausente hoje; até ela ser configurada em Edge
+  Functions > Secrets do projeto Supabase, `tts-generate` sempre devolve
+  `provider_not_configured`. Quando um provedor for escolhido/contratado,
+  a implementação real entra isolada dentro de `generateTTS()` (única
+  função a tocar) + `TTS_PROVIDER_MODEL_ID` precisa ser atualizado pra
+  refletir o modelo real (hoje `'unconfigured'`) -- isso sozinho já
+  invalida o cache de qualquer TTS gerado via mock/teste anteriormente.
+- **`TTS_MOCK_ENABLED`** é a única forma de exercitar o pipeline
+  completo (auth->rate-limit->upload->resposta) sem credencial real --
+  Secret separada, só pra ambiente de teste, NUNCA deve ser setada em
+  produção (nenhuma sessão setou isso no projeto real nesta entrega --
+  o smoke test rodou 100% contra um mock client-side, sem nenhuma
+  invocação real da Edge Function em produção).
+- **UI completa de seletor de TTS** -- não implementada (painel mínimo
+  funcional, sem os refinamentos de UX descritos na especificação de
+  Fase 7c -- ex: estado "desatualizado" com destaque visual próprio,
+  indicadores de "gerando..." mais ricos).
+- **Gravação (MediaRecorder)** -- não implementada, `type:'recording'`
+  continua só estrutural.
+- **Nenhum provedor adicional/processamento em lote/geração automática
+  pra cards existentes/migração do AUDIO_MANIFEST/export Anki com
+  mídia** -- todos explicitamente fora do escopo desta entrega.
+
+Nenhum passo manual pendente pra autora além de, quando ela decidir
+contratar um provedor de TTS de verdade: (1) criar a conta/API key no
+provedor escolhido, (2) colar a chave como Secret `TTS_PROVIDER_API_KEY`
+em Edge Functions > Secrets do projeto Supabase (`eigjocalzwamisgqilhg`),
+(3) implementar a chamada HTTP real dentro de `generateTTS()`
+(`supabase/functions/tts-generate/index.ts`) e atualizar
+`TTS_PROVIDER_MODEL_ID` nos 2 lugares que o espelham, (4) fazer um novo
+`deploy_edge_function`. A migration `047` e a Edge Function `tts-generate`
+(v1, mock/`provider_not_configured` apenas) JÁ estão aplicadas/deployadas
+ao vivo nesta sessão -- não são passo manual pendente.
+
+**PARE conforme instrução explícita** -- gravação (7g), provedor
+adicional, processamento em lote, export Anki com mídia e migração do
+AUDIO_MANIFEST continuam fora do escopo, aguardando autorização
+explícita numa sessão futura.

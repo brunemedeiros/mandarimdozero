@@ -433,7 +433,9 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap){
   // shared/admin-flashcards.js, só que as versões "own" (aluna é dona do
   // conteúdo) -- shared/flashcard-field-editor.js nunca chama
   // supabaseClient/Storage direto, só através destas 2 funções.
-  const nativeFieldOpts = { namePrefix: 'edit-my-native', uploadFn: uploadOwnFlashcardMedia, deleteFn: deleteOwnFlashcardMedia };
+  // Fase 7f (implementação -- ver CLAUDE.md) -- ttsFn/noteId (linha JÁ
+  // existe de verdade nesta tela de EDIÇÃO) habilitam "Gerar áudio".
+  const nativeFieldOpts = { namePrefix: 'edit-my-native', uploadFn: uploadOwnFlashcardMedia, deleteFn: deleteOwnFlashcardMedia, ttsFn: requestOwnFieldAudioTTS, noteId: editorState.noteId };
   const boxEl = document.getElementById('edit-my-native-flashcard-fields');
   refreshNativeCardTypeBox(boxEl, editorState, nativeFieldOpts);
 
@@ -561,7 +563,7 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
       else if (newMode === 'type_answer') transitionToTypeAnswer(MY_FLASHCARDS_STATE.nativeCardState);
       else if (newMode === 'cloze') transitionToCloze(MY_FLASHCARDS_STATE.nativeCardState);
       else MY_FLASHCARDS_STATE.nativeCardState.cardGenerationMode = newMode;
-      refreshNativeCardTypeBox(document.getElementById('my-flashcard-native-fields'), MY_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'my-native', uploadFn: uploadOwnFlashcardMedia, deleteFn: deleteOwnFlashcardMedia });
+      refreshNativeCardTypeBox(document.getElementById('my-flashcard-native-fields'), MY_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'my-native', uploadFn: uploadOwnFlashcardMedia, deleteFn: deleteOwnFlashcardMedia, ttsFn: requestOwnFieldAudioTTS, noteId: MY_FLASHCARDS_STATE.nativeCardState.noteId });
     });
 
     // Fase 6D.3/6D.4a (ver CLAUDE.md) -- caixa "Campos nativos", mesmo
@@ -569,7 +571,9 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
     // (mesmo gate do bloco HTML acima, ver renderMyFlashcardsView).
     // Fase 7e -- uploadFn/deleteFn (uploadOwnFlashcardMedia/
     // deleteOwnFlashcardMedia) habilitam o upload de áudio real por Field.
-    refreshNativeCardTypeBox(document.getElementById('my-flashcard-native-fields'), MY_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'my-native', uploadFn: uploadOwnFlashcardMedia, deleteFn: deleteOwnFlashcardMedia });
+    // Fase 7f (implementação) -- ttsFn/noteId (sempre `null` aqui, o
+    // rascunho ainda não foi salvo) habilitam "Gerar áudio".
+    refreshNativeCardTypeBox(document.getElementById('my-flashcard-native-fields'), MY_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'my-native', uploadFn: uploadOwnFlashcardMedia, deleteFn: deleteOwnFlashcardMedia, ttsFn: requestOwnFieldAudioTTS, noteId: MY_FLASHCARDS_STATE.nativeCardState.noteId });
 
     // Fase 6D.7 (ver CLAUDE.md) -- Preview do rascunho atual (não salvo).
     // languageAppKey aqui é sempre APP_KEY (o site fixa o idioma pra
