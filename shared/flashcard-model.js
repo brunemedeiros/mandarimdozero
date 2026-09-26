@@ -587,6 +587,14 @@ const CARD_TYPE_IDS = Object.freeze({
 // pra inferir front/back/template -- só devolve o que o Field já carrega.
 // `field.pinyinFieldIndex` (zh) é resolvido aqui pra nenhum chamador
 // precisar saber que hanzi/pinyin são 2 Fields relacionados.
+//
+// Fase 7a (ver CLAUDE.md) -- `imageUrl` passou a ser resolvido aqui
+// também, exatamente pelo mesmo padrão de `audioUrl` (só lê `field.image.url`
+// defensivamente, nunca inventa nada). Antes desta fase, imagem SÓ existia
+// no nível da Note (`note.image`, caminho legado) -- `field.image` já era
+// persistido desde a Fase 6B mas nunca chegava a lugar nenhum de exibição.
+// `resolveCardField()` continua sendo o ÚNICO ponto de projeção Field->
+// exibição -- nenhuma segunda função de "resolver imagem" foi criada.
 function resolveCardField(note, fieldIndex){
   if (fieldIndex === null || fieldIndex === undefined) return null;
   const field = note.fields[fieldIndex];
@@ -598,6 +606,7 @@ function resolveCardField(note, fieldIndex){
     lang: field.lang,
     pinyinText: pinyinField ? pinyinField.text : null,
     audioUrl: (field.audio && field.audio.url) || null,
+    imageUrl: (field.image && field.image.url) || null,
   };
 }
 
@@ -680,7 +689,13 @@ function resolveTypeAnswerCardView(note, cardInstance){
   const compareAnswerText = (cardInstance.compareAnswer !== null && cardInstance.compareAnswer !== undefined)
     ? cardInstance.compareAnswer
     : (answer && answer.pinyinText ? answer.pinyinText : displayAnswerText);
-  return { prompt, displayAnswerText, compareAnswerText };
+  // Fase 7a (ver CLAUDE.md) -- `answer` (o Field resolvido inteiro, com seu
+  // próprio audioUrl/imageUrl) passa a ser devolvido, não só descartado
+  // depois de extrair `displayAnswerText`/`pinyinText` dele -- achado #2 da
+  // auditoria da Fase 7 (mídia da resposta nunca chegava ao renderer, mesmo
+  // que o Field a tivesse). O renderer decide QUANDO mostrar (só depois de
+  // revelada -- nunca antes, seria vazar a resposta pelo ouvido/imagem).
+  return { prompt, answer, displayAnswerText, compareAnswerText };
 }
 
 // Cloze -- reaproveita parseClozeMarks/renderClozeText já existentes
@@ -688,9 +703,17 @@ function resolveTypeAnswerCardView(note, cardInstance){
 // frase com TODAS as marcações ainda embutidas (`rawSentenceText`) -- quem
 // desenha decide se usa renderClozeText pra ocultar/revelar a lacuna alvo.
 function resolveClozeCardView(note, cardInstance){
-  const textField = note.fields[cardInstance.textFieldIndex];
+  // Fase 7a (ver CLAUDE.md) -- passou a resolver o Field de texto via
+  // resolveCardField() (antes lia `.audio.url` direto do Field cru, nunca
+  // considerava imagem) -- mesmo ÚNICO ponto de projeção Field->exibição
+  // que todo o resto do motor já usa, nenhuma segunda leitura de imagem/
+  // áudio inventada aqui. Como TODAS as CardInstance (c1/c2/...) de uma
+  // mesma Note compartilham o MESMO textFieldIndex, elas naturalmente
+  // resolvem a MESMA origem de mídia -- nunca um áudio/imagem diferente
+  // por lacuna, sem precisar de nenhum código especial pra garantir isso.
+  const textFieldView = resolveCardField(note, cardInstance.textFieldIndex);
   const translation = resolveCardField(note, cardInstance.translationFieldIndex);
-  const marks = parseClozeMarks(textField.text);
+  const marks = parseClozeMarks(textFieldView.text);
   const mark = marks.find(m => m.id === cardInstance.markId) || marks[0];
   const displayAnswerText = mark ? mark.answer : '';
   // Fase 5 -- prioridade de compareAnswer: cardInstance.compareAnswer
@@ -705,9 +728,10 @@ function resolveClozeCardView(note, cardInstance){
     ? cardInstance.compareAnswer
     : (mark && mark.compareAnswer !== null && mark.compareAnswer !== undefined ? mark.compareAnswer : displayAnswerText);
   return {
-    rawSentenceText: textField.text,
+    rawSentenceText: textFieldView.text,
     markId: cardInstance.markId,
-    audioUrl: (textField.audio && textField.audio.url) || null,
+    audioUrl: textFieldView.audioUrl,
+    imageUrl: textFieldView.imageUrl,
     translation,
     displayAnswerText,
     compareAnswerText,

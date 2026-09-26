@@ -6147,17 +6147,25 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
   // pronúncia (que só sabe falar UM idioma real) pode tentar esse campo
   // específico, nunca qual campo é o prompt.
   const promptSpeakable = isStudyLanguageField(view.prompt, APP_KEY);
-  // Áudio próprio (upload): igual à ponte antiga, procurado nos dois
-  // campos (prompt e correto) -- a heurística de interpretação (Fase 3)
-  // vincula o upload ao campo cujo idioma é o estudado, que pode ser
-  // qualquer um dos dois dependendo da direção do cartão.
-  const customAudioUrl = view.prompt.audioUrl || (view.correct && view.correct.audioUrl) || null;
+  // Fase 7a (ver CLAUDE.md) -- áudio/imagem customizados vêm SÓ do Field
+  // do prompt agora, nunca mais com fallback pro `correct` (achado da
+  // auditoria da Fase 7: o fallback antigo, `prompt.audioUrl ||
+  // correct.audioUrl`, podia tocar a pronúncia da RESPOSTA CERTA antes da
+  // aluna sequer ver as opções, se só o Field de resposta tivesse áudio/
+  // imagem próprio -- um vazamento real). O prompt é sempre visível desde
+  // o início (não há "revelação" nele), então usar só sua própria mídia é
+  // seguro em qualquer direção do cartão. `view.correct`/os distratores
+  // continuam sem exibir mídia própria nesta subfase (nenhum slot de UI
+  // pra isso hoje, e distratores nem carregam Field/mídia -- ver
+  // CLAUDE.md, achado #3 da Fase 7).
+  const customAudioUrl = view.prompt.audioUrl || null;
+  const promptImageUrl = card.imageUrl || view.prompt.imageUrl || null;
 
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${card.unitTitle}</div>
-      ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
+      ${promptImageUrl ? `<img src="${promptImageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="flashcard-french">${escapeHTML(view.prompt.text)}${promptSpeakable ? ` ${audioBtnHTML(view.prompt.text, 'audio-btn-lg')}` : ''}${customAudioUrl ? customAudioBtnHTML(customAudioUrl) : ''}</div>
     </div>
     <div class="mc-options">
@@ -6181,7 +6189,10 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
   // invertido (prompt=tradução, opções no idioma estudado), NÃO existe
   // pronúncia automática de opção nenhuma -- tocar a opção certa antes da
   // aluna responder entregaria a resposta.
-  if (promptSpeakable && canSpeakFrench(view.prompt.text)) speakFrench(view.prompt.text, mountEl.querySelector('.audio-btn-lg'), true);
+  // Fase 7a -- `card.__isPreviewCard` suprime só o AUTOPLAY (registerAudioPlay()
+  // real não deveria disparar por abrir um Preview) -- ver mesmo comentário
+  // em renderNormalCard().
+  if (!card.__isPreviewCard && promptSpeakable && canSpeakFrench(view.prompt.text)) speakFrench(view.prompt.text, mountEl.querySelector('.audio-btn-lg'), true);
 
   if (!answered){
     mountEl.querySelectorAll('.mc-option').forEach(btn => {
@@ -6241,12 +6252,23 @@ function renderClozeCard(mountEl, card, localState, callbacks){
     : `<span class="cloze-blank" id="cloze-blank">___</span>`;
   const hiddenSentence = renderClozeText(view.rawSentenceText, view.markId, { reveal: false });
   const sentenceHTML = hiddenSentence.replace('___', blankHTML);
+  // Fase 7a (ver CLAUDE.md) -- imagem/áudio agora resolvidos via o MESMO
+  // Field de texto que carrega a frase inteira (`resolveClozeCardView()`
+  // usa resolveCardField() por baixo agora, nunca mais lia `.audio.url`
+  // direto do Field cru) -- todas as CardInstance (c1/c2/...) de uma
+  // mesma Note compartilham esse Field, então nunca há mídia diferente
+  // por lacuna (comportamento já garantido pela estrutura, não por
+  // código especial aqui). Sem gate de revelação -- é a frase inteira
+  // (lacuna incluída) que fica visível o tempo todo, nunca a resposta
+  // isolada, então mostrar sempre não vaza nada (mesma conclusão da
+  // auditoria da Fase 7).
+  const clozeImageUrl = card.imageUrl || view.imageUrl || null;
 
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${card.unitTitle}</div>
-      ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
+      ${clozeImageUrl ? `<img src="${clozeImageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="cloze-sentence">${sentenceHTML}</div>
       ${view.audioUrl ? customAudioBtnHTML(view.audioUrl) : ''}
       ${answered ? `<div class="cloze-trans">${view.translation.text}</div>` : ''}
@@ -6307,16 +6329,28 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
   const view = resolveCardContentView(card);
   const answered = localState.answered;
   const promptSpeakable = isStudyLanguageField(view.prompt, APP_KEY);
+  // Fase 7a (ver CLAUDE.md) -- imagem do prompt vem do Field certo agora
+  // (`view.prompt.imageUrl`, com o fallback legado de `card.imageUrl` só
+  // pra Note-level histórico -- os dois nunca coexistem de verdade, ver
+  // shared/flashcard-model.js). `view.answer` (Field resolvido inteiro,
+  // achado #2 da auditoria da Fase 7 -- antes só o texto sobrevivia) só é
+  // usado DEPOIS de `answered`, nunca antes -- mostrar o áudio/imagem da
+  // resposta antes da revelação seria vazar a resposta.
+  const promptImageUrl = card.imageUrl || view.prompt.imageUrl || null;
+  const answerAudioUrl = (answered && view.answer && view.answer.audioUrl) || null;
+  const answerImageUrl = (answered && view.answer && view.answer.imageUrl) || null;
 
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${card.unitTitle}</div>
-      ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
+      ${promptImageUrl ? `<img src="${promptImageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="flashcard-french">${escapeHTML(view.prompt.text)}${promptSpeakable ? ` ${audioBtnHTML(view.prompt.text, 'audio-btn-lg')}` : ''}${view.prompt.audioUrl ? customAudioBtnHTML(view.prompt.audioUrl) : ''}</div>
       ${answered ? `
         <div class="divider-line"></div>
         <span class="cloze-blank ${localState.wasCorrect ? 'correct' : 'incorrect'}">${escapeHTML(view.displayAnswerText)}</span>
+        ${answerImageUrl ? `<img src="${answerImageUrl}" class="flashcard-image" alt="">` : ''}
+        ${answerAudioUrl ? customAudioBtnHTML(answerAudioUrl) : ''}
       ` : ''}
     </div>
     ${!answered ? `
@@ -6330,7 +6364,9 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
 
   wireAudioButtons(mountEl);
   wireCustomAudioButtons(mountEl);
-  if (promptSpeakable && canSpeakFrench(view.prompt.text)) speakFrench(view.prompt.text, mountEl.querySelector('.audio-btn-lg'), true);
+  // Fase 7a -- `card.__isPreviewCard` suprime só o AUTOPLAY, ver mesmo
+  // comentário em renderNormalCard().
+  if (!card.__isPreviewCard && promptSpeakable && canSpeakFrench(view.prompt.text)) speakFrench(view.prompt.text, mountEl.querySelector('.audio-btn-lg'), true);
 
   if (!answered){
     const inputEl = mountEl.querySelector('#cloze-review-input');
@@ -6537,17 +6573,25 @@ function renderReviewView(){
 // extraídos juntos -- não resolvido isoladamente só pro Normal, pra não
 // introduzir um mecanismo que os outros 3 ainda não teriam.
 function renderNormalCard(mountEl, card, localState, callbacks){
-  let isReverse, targetText, nativeText, targetAudioUrl, targetIsSpeakable;
+  let isReverse, targetText, nativeText, frontAudioUrl, backAudioUrl, frontImageUrl, backImageUrl, targetIsSpeakable;
   if (card.cardInstance){
     const view = resolveCardContentView(card); // kind: 'normal'
     isReverse = false;
     targetText = view.front.text;
     nativeText = view.back.text;
-    // Áudio próprio (upload): procurado nos dois lados, igual à ponte
-    // antiga (Fase 3) -- a heurística de interpretação vincula o upload ao
-    // campo cujo idioma é o estudado, que pode ser front OU back
-    // dependendo da direção do cartão.
-    targetAudioUrl = view.front.audioUrl || view.back.audioUrl;
+    // Fase 7a (ver CLAUDE.md) -- áudio/imagem customizados resolvidos POR
+    // LADO, nunca mais por fallback entre os dois (`front.audioUrl ||
+    // back.audioUrl`, como era antes desta fase). Esse fallback era o
+    // vazamento identificado na auditoria da Fase 7: se só o VERSO tinha
+    // áudio/imagem próprio, ele aparecia junto do front, antes da
+    // revelação -- entregando a resposta pelo ouvido/pela imagem mesmo com
+    // o texto ainda escondido. Cada lado só expõe sua PRÓPRIA mídia agora;
+    // o template abaixo já garante que a mídia do back só é desenhada
+    // dentro do bloco `localState.revealed`, nunca antes.
+    frontAudioUrl = view.front.audioUrl;
+    backAudioUrl = view.back.audioUrl;
+    frontImageUrl = view.front.imageUrl;
+    backImageUrl = view.back.imageUrl;
     // isStudyLanguageField() aqui é o uso que a Fase 2 sempre permitiu:
     // direção já decidida (view.front já é o campo certo) -- isto só
     // decide se o motor de pronúncia (que só fala UM idioma real) pode
@@ -6557,11 +6601,30 @@ function renderNormalCard(mountEl, card, localState, callbacks){
     isReverse = card.reviewDirection === 'back-to-front';
     targetText = card.front;
     nativeText = card.back_trans;
-    targetAudioUrl = null;
+    frontAudioUrl = null; backAudioUrl = null;
+    frontImageUrl = null; backImageUrl = null;
     targetIsSpeakable = true;
   }
-  const frenchSideHTML = `<div class="flashcard-french">${escapeHTML(targetText)} ${audioBtnHTML(targetText, 'audio-btn-lg')}</div>`;
-  const transSideHTML = `<div class="flashcard-trans">${escapeHTML(nativeText)}</div>`;
+  // Fase 7a -- `isReverse` só é `true` pra cartão de TRILHA
+  // (!card.cardInstance, mecanismo de variedade de sessão pré-existente,
+  // intocado) -- nesse caminho, front/back/imageUrl são sempre null (ver
+  // ramo `else` acima). Pra cartão com CardInstance (teacher/own
+  // flashcards, nativo ou legado), `isReverse` é sempre `false`, então
+  // `frontAudioUrl`/`frontImageUrl` sempre correspondem ao que
+  // `frenchSideHTML` de fato mostra, e `backAudioUrl`/`backImageUrl` ao
+  // que `transSideHTML` mostra -- nenhuma troca extra necessária aqui.
+  //
+  // Imagem LEGADA (`card.imageUrl`, nível de Note, populada só pelo
+  // caminho `image_url` legado) nunca é duplicada no lado do verso --
+  // continua aparecendo uma vez só, junto do front, exatamente como antes
+  // desta fase. Pra cartão nativo, `card.imageUrl` é sempre `null`
+  // (`Note.image` nunca é populado no caminho nativo, ver
+  // shared/flashcard-model.js) -- o fallback abaixo nunca ativa os dois
+  // ao mesmo tempo.
+  const resolvedFrontImageUrl = card.imageUrl || frontImageUrl || null;
+  const resolvedBackImageUrl = backImageUrl || null;
+  const frenchSideHTML = `<div class="flashcard-french">${escapeHTML(targetText)} ${audioBtnHTML(targetText, 'audio-btn-lg')}${frontAudioUrl ? customAudioBtnHTML(frontAudioUrl) : ''}</div>`;
+  const transSideHTML = `<div class="flashcard-trans">${escapeHTML(nativeText)}${backAudioUrl ? customAudioBtnHTML(backAudioUrl) : ''}</div>`;
   const frontHTML = isReverse ? transSideHTML : frenchSideHTML;
   const backHTML = isReverse ? frenchSideHTML : transSideHTML;
   // Áudio automático só quando o idioma estudado está do lado JÁ visível --
@@ -6573,11 +6636,11 @@ function renderNormalCard(mountEl, card, localState, callbacks){
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${card.unitTitle}</div>
-      ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
+      ${resolvedFrontImageUrl ? `<img src="${resolvedFrontImageUrl}" class="flashcard-image" alt="">` : ''}
       ${frontHTML}
-      ${targetAudioUrl ? customAudioBtnHTML(targetAudioUrl) : ''}
       ${localState.revealed ? `
         <div class="divider-line"></div>
+        ${resolvedBackImageUrl ? `<img src="${resolvedBackImageUrl}" class="flashcard-image" alt="">` : ''}
         ${backHTML}
       ` : `<div class="flashcard-hint">toque para ver a resposta</div>`}
     </div>
@@ -6601,7 +6664,15 @@ function renderNormalCard(mountEl, card, localState, callbacks){
   // visível no cartão.
   wireAudioButtons(mountEl);
   wireCustomAudioButtons(mountEl);
-  if (frenchVisibleNow && targetIsSpeakable && canSpeakFrench(targetText)){
+  // Fase 7a (ver CLAUDE.md) -- `card.__isPreviewCard` (Fase 6D.7) suprime
+  // só o AUTOPLAY: `speakFrench()` sempre chama `registerAudioPlay()`
+  // internamente (incrementa STATE.totalAudioPlays/daily + checa badge de
+  // verdade) -- abrir um Preview nunca deveria mexer em estatística real
+  // da conta. Clique MANUAL no botão 🔊 continua chamando speakFrench()
+  // normalmente mesmo dentro do Preview (wireAudioButtons acima não é
+  // condicional) -- suprimir isso também exigiria alterar a arquitetura
+  // de TTS em si (fora do escopo desta subfase, ver CLAUDE.md).
+  if (!card.__isPreviewCard && frenchVisibleNow && targetIsSpeakable && canSpeakFrench(targetText)){
     speakFrench(targetText, mountEl.querySelector('.audio-btn-lg'), true);
   }
 

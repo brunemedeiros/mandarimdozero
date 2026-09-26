@@ -10472,3 +10472,274 @@ nada que a leitura já não confirmasse com citação de linha exata.
 **NÃO implementada nenhuma subfase da Fase 7 nesta entrega** -- próxima
 etapa só começa depois de autorização explícita da autora, com este
 relatório já entregue antes de pedir luz verde.
+
+## Fase 7a -- Media Resolution por Field (Field como fonte real de mídia
+no pipeline nativo, fecha os achados #1/#2/#3/#5/#7 da auditoria da Fase 7)
+
+Primeira subfase de código da Fase 7 (auditoria em `dcb0528`), escopo
+estrito: só resolução de áudio/imagem por Field no caminho nativo +
+correção do vazamento de áudio customizado já identificado na auditoria.
+**Nada de TTS explícito, gravação, upload novo, editor de áudio/imagem,
+Preview novo, exportação Anki com mídia, redesign de Review, ou
+infraestrutura server-side** -- todos ficam para subfases posteriores,
+confirmados intocados por `git diff --stat` (só `shared/flashcard-
+model.js`, `fr/app.js`, `zh/app.js`).
+
+**Auditoria de novo antes de alterar** (pedido explícito da instrução --
+"não assuma que o estado descrito na auditoria ainda é exatamente o
+estado atual"): reli `shared/flashcard-model.js`, os 4 renderers em
+fr/zh `app.js`, `shared/flashcard-field-editor.js`,
+`shared/flashcard-native-persistence.js` e `shared/flashcard-preview.js`
+de novo -- confirmado que nada mudou desde `dcb0528` (só documentação
+naquela entrega) e que os achados da auditoria continuavam
+byte-a-byte válidos.
+
+### O que foi corrigido em `shared/flashcard-model.js`
+
+- **`resolveCardField(note, fieldIndex)`** ganhou `imageUrl: (field.image
+  && field.image.url) || null` -- exatamente o mesmo padrão defensivo já
+  usado por `audioUrl`, nunca uma segunda função de "resolver imagem".
+  Continua sendo o ÚNICO ponto de projeção Field->exibição -- nenhum
+  segundo ponto de leitura de imagem foi criado em lugar nenhum do
+  motor. `field.image` já era persistido desde a Fase 6B mas nunca
+  chegava a lugar nenhum de exibição -- fecha o achado #5 da auditoria.
+- **`resolveTypeAnswerCardView`** deixou de DESCARTAR o Field de resposta
+  resolvido depois de extrair `displayAnswerText`/`pinyinText` dele --
+  agora devolve `answer` (o Field inteiro, com seu próprio `audioUrl`/
+  `imageUrl`) junto de `prompt`. Fecha o achado #2 da auditoria ("mídia
+  da resposta nunca alcançável, mesmo que o Field a tivesse"). O
+  renderer decide QUANDO mostrar (só depois de `answered`, nunca antes
+  -- mostrar antes vazaria a resposta).
+- **`resolveClozeCardView`** passou a resolver o Field de texto via
+  `resolveCardField()` (antes lia `textField.audio.url` direto do Field
+  cru, ignorando imagem por completo) -- mesmo ponto único de projeção
+  que todo o resto do motor já usa. `imageUrl` do Field de texto agora
+  sai no `view` (`view.imageUrl`), ao lado do `audioUrl` que já existia.
+  Como TODAS as CardInstance (c1/c2/...) de uma mesma Note compartilham
+  o MESMO `textFieldIndex`, elas naturalmente resolvem a MESMA origem de
+  mídia -- **nenhum código especial foi necessário** pra garantir "nunca
+  um áudio/imagem diferente por lacuna" (item H da instrução), é uma
+  consequência estrutural do desenho já existente desde a Fase 5.
+- **`resolveMultipleChoiceCardView`** e **`resolveNormalCardView`** não
+  precisaram de NENHUMA mudança de código -- seus campos (`prompt`/
+  `correct`/`front`/`back`) já eram Fields inteiros vindos de
+  `resolveCardField()`, então ganharam `imageUrl` de graça assim que
+  `resolveCardField()` foi estendido.
+- **`CardInstance` não ganhou nenhuma propriedade nova** (restrição
+  explícita da instrução) -- toda mídia resolvida vive nos objetos de
+  VIEW devolvidos pelos resolvers, nunca no `cardInstance` armazenado em
+  `STATE.cards`. Confirmado por teste dedicado (item K da instrução,
+  suíte `test_fase7a_media_resolution.js`) que as chaves do
+  `cardInstance` real nunca mudaram antes/depois de renderizar/interagir
+  com um card.
+- **Nada de `note.audio`/`note.image` novo** -- `note.image` continua
+  existindo só no caminho LEGADO (`row.image_url`), nunca populado pelo
+  caminho nativo (sempre `null`, confirmado de novo por leitura antes de
+  mexer). Legado nunca ganha `field.image`/`field.audio` que não seja o
+  já existente via a heurística de interpretação (`isStudyLanguageField`,
+  Fase 3, intocada).
+
+### O que foi corrigido nos 4 renderers (`fr/app.js`/`zh/app.js`,
+mudanças espelhadas nos dois idiomas)
+
+**Achado #1 da auditoria (vazamento de áudio/imagem customizados) --
+corrigido em Normal e Múltipla Escolha:**
+
+- **`renderNormalCard`** -- antes: `targetAudioUrl = view.front.audioUrl
+  || view.back.audioUrl` (fallback cego entre os dois lados), sempre
+  visível junto do front, mesmo antes de revelar. Se só o VERSO tivesse
+  áudio/imagem próprio, o botão apareceria ANTES da revelação, entregando
+  a resposta pelo ouvido/pela imagem com o texto ainda escondido --
+  vazamento real, confirmado na auditoria. Corrigido: `frontAudioUrl`/
+  `backAudioUrl`/`frontImageUrl`/`backImageUrl` resolvidos SEPARADAMENTE
+  (`view.front.audioUrl`/`view.back.audioUrl` sem fallback nenhum entre
+  os dois) -- cada lado só mostra sua PRÓPRIA mídia, e a mídia do verso
+  só é desenhada dentro do bloco `${localState.revealed ? ... : ...}`,
+  nunca antes. Testado explicitamente (browser smoke, cenário 2): áudio/
+  imagem do verso NÃO aparecem antes de revelar, aparecem corretamente
+  depois. Imagem LEGADA (`card.imageUrl`, Note-level) preservada
+  exatamente como antes -- continua uma vez só, junto do front,
+  `resolvedBackImageUrl` nunca inclui o fallback legado (evita duplicar
+  a mesma imagem legada nos dois lados, o que seria uma REGRESSÃO
+  visual, não um fix).
+- **`renderMultipleChoiceCard`** -- antes: `customAudioUrl =
+  view.prompt.audioUrl || (view.correct && view.correct.audioUrl) ||
+  null`. Se o Field de RESPOSTA CERTA tivesse áudio/imagem próprio e o
+  prompt não, o botão tocaria a pronúncia da resposta ANTES da aluna
+  sequer ver as opções -- vazamento real, mais grave que o de Normal
+  (aqui é literalmente a resposta do quiz). Corrigido: `customAudioUrl =
+  view.prompt.audioUrl || null` (nunca mais fallback pro `correct`),
+  `promptImageUrl = card.imageUrl || view.prompt.imageUrl || null`.
+  `view.correct`/distratores continuam sem UI de mídia própria nesta
+  subfase (nenhum slot de UI pra isso hoje, e distratores nem carregam
+  Field -- ver achado #3 abaixo, decisão explícita de não antecipar).
+
+**Achado #2 da auditoria (mídia da resposta nunca alcançável) --
+corrigido em Digite a resposta:**
+
+- **`renderTypeAnswerCard`** -- `view.answer` (agora exposto pelo
+  resolver, ver acima) é usado só DEPOIS de `answered`:
+  `answerAudioUrl = (answered && view.answer && view.answer.audioUrl) ||
+  null` -- nunca antes (mostrar antes da revelação vazaria a resposta,
+  mesmo princípio do achado #1). Testado explicitamente: áudio/imagem da
+  resposta ausentes antes de verificar, presentes depois.
+
+**Achado sem vazamento, só field-correctness -- Cloze:**
+
+- **`renderClozeCard`** -- `clozeImageUrl = card.imageUrl || view.imageUrl
+  || null` (era só `card.imageUrl`, sempre `null` pra cartão nativo --
+  Cloze nativo NUNCA mostrava imagem antes desta fase, mesmo com
+  `field.image` setado). Sem gate de revelação (correto -- é a frase
+  inteira, lacuna incluída, que fica visível o tempo todo; mostrar
+  sempre não vaza nada, confirmado na auditoria).
+
+**Achado #7 da auditoria (Preview vazando `registerAudioPlay()` real) --
+corrigido nos 4 renderers, os 2 idiomas:**
+
+- Cada chamada de autoplay (`speakFrench(...)`/`speakChinese(...)`, nos
+  4 renderers) ganhou o guard `!card.__isPreviewCard &&` antes da
+  condição já existente. `speakFrench`/`speakChinese` sempre chamam
+  `registerAudioPlay()` internamente (incrementa `STATE.totalAudioPlays`/
+  `STATE.daily.audioPlaysToday` + roda `checkAndCelebrateBadges()`) --
+  abrir um Preview do editor nunca deveria mexer em estatística real da
+  conta, mas antes desta fase o autoplay disparava incondicionalmente
+  mesmo dentro do Preview (achado NOVO da auditoria, nunca documentado
+  antes). `card.__isPreviewCard` já existe desde a Fase 6D.7 (usado por
+  `reviewProgressBarHTML`) -- reaproveitado aqui, mesmo padrão, nenhum
+  mecanismo novo. Testado explicitamente (browser smoke, cenário 9):
+  `STATE.totalAudioPlays` idêntico antes/depois de abrir um Preview com
+  Field falável.
+  **Escopo deliberadamente restrito** (instrução explícita: "se exigir
+  mudança arquitetural maior, apenas documente"): só o AUTOPLAY foi
+  suprimido -- clique MANUAL no botão 🔊 dentro do Preview continua
+  chamando `speakFrench`/`speakChinese` normalmente (o `wireAudioButtons`
+  que liga esse clique não é condicional) e continua incrementando
+  `registerAudioPlay()` de verdade. Suprimir isso também exigiria alterar
+  a arquitetura de TTS em si (uma "flag de contexto" threaded pelas
+  próprias funções `speakFrench`/`speakChinese`/`registerAudioPlay`),
+  explicitamente fora do escopo desta subfase ("NÃO ALTERAR A
+  ARQUITETURA DE TTS NESTA SUBFASE") -- registrado aqui como gap
+  conhecido e MENOR (clique manual é uma ação deliberada da professora
+  testando o Preview, bem menos surpreendente que o autoplay automático
+  que rodava em toda abertura de Preview sem nenhuma ação do usuário).
+
+### O que ficou de propósito sem UI/mudança nesta subfase
+
+- **Distratores de Múltipla Escolha continuam sem mídia própria**
+  (achado #3 da auditoria) -- `resolveMultipleChoiceCardView` continua
+  devolvendo `distractorTexts` como array de strings puras
+  (`interpretNativeNoteFromRow` já descarta a estrutura Field dos
+  distratores antes do resolver sequer rodar) -- confirmado por teste
+  dedicado (item F3) que isso não mudou. Estender isso exigiria decisão
+  de produto explícita (a UI hoje só tem 1 slot de áudio, junto do
+  prompt) -- fora do escopo desta subfase.
+- **`fieldHasAudio()` continua código morto** -- não foi removido nem
+  chamado por nenhum renderer (os 4 continuam usando
+  `isStudyLanguageField()` pra decidir elegibilidade de TTS automático,
+  exatamente como antes) -- mudar isso seria mexer na arquitetura de TTS,
+  fora do escopo.
+- **Nenhuma coluna/migration nova** -- o schema (`Field.audio`/
+  `Field.image`) já existia desde a Fase 6B, esta subfase só fez o
+  pipeline de LEITURA finalmente usá-lo por completo.
+- **Legacy (`image_url`/`audio_url`) 100% preservado** -- nenhuma
+  migração automática, nenhuma alteração de dado, nenhuma mudança na
+  heurística de interpretação (`isStudyLanguageField`) já existente
+  desde a Fase 3. Confirmado por teste dedicado (item I) que o
+  comportamento é byte-a-byte idêntico a antes.
+- **Preview não foi redesenhado** -- continua delegando 100% aos 4
+  renderers reais (nenhuma mudança em `shared/flashcard-preview.js`
+  nesta subfase); a correção de mídia se propaga pra lá de graça, porque
+  Preview nunca duplicou lógica de renderer -- só o guard de autoplay
+  (que vive DENTRO dos renderers, não no Preview) precisou saber de
+  `card.__isPreviewCard`.
+
+### Testes realizados
+
+- **`node --check`** sem erro em `shared/flashcard-model.js`,
+  `fr/app.js`, `zh/app.js`.
+- **Suítes Node/VM pré-existentes, re-executadas sem regressão** (com 2
+  expectativas atualizadas em `test_fase4_engine.js` pra refletir o
+  shape aditivo -- `imageUrl` em `resolveCardField`/`resolveNormalCardView`/
+  `resolveMultipleChoiceCardView`/`resolveTypeAnswerCardView`/
+  `resolveClozeCardView`, e `answer` em `resolveTypeAnswerCardView` --
+  nunca uma mudança de comportamento, só de shape mais completo):
+  `test_fase4_engine.js` 34/34 (32+2 novos), `test_fase4d_regression.js`
+  30/30, `test_fase5_generation.js` 33/33, `test_fase6b_native_notes.js`
+  74/74.
+- **Suíte Node/VM nova `test_fase7a_media_resolution.js`, 45/45** --
+  cobre os 11 itens A-K pedidos explicitamente: (A) imagem nativa
+  resolvida no Field certo, nunca herdada por um Field vizinho; (B)
+  áudio explícito idem; (C) Field sem áudio nunca inventa um; (D) Normal
+  -- front/back resolvem mídia dos respectivos Fields, nunca cruzados;
+  (E) Normal Reverse -- as 2 CardInstances resolvem cada uma seu próprio
+  Field (mesma Note, índices trocados), FSRS confirmadamente
+  independente, direção nunca inferida por mídia; (F) Múltipla Escolha
+  -- prompt nunca herda áudio do `correct` (a estrutura de dado nunca
+  mistura os dois, mesmo antes da UI decidir o que mostrar);
+  distractorTexts confirmados strings puras (sem Field); (G) Digite a
+  resposta -- `answer` (Field resolvido inteiro) sobrevive no retorno,
+  nunca vazado pro `prompt`; (H) Cloze multi-marca -- c1/c2 resolvem a
+  MESMA origem de áudio/imagem (via `buildEngineCardsFromRow`/
+  `resolveCardContentView` reais, não simulado); (I) Legacy --
+  `image_url`/`audio_url` continuam funcionando via a mesma heurística de
+  sempre, Fields legados nunca ganham `imageUrl` próprio; (J) presença de
+  `fields` continua sendo o discriminador Native/Legacy (`note.image`
+  sempre `null` no nativo, sempre populável no legado -- e vice-versa
+  pra `field.image`); (K) regressão de shape -- `resolveCardField()`
+  continua devolvendo text/lang/pinyinText/audioUrl inalterados, só
+  ADICIONANDO `imageUrl` (5 chaves no total, nenhuma removida).
+- **Browser smoke novo `test_fase7a_browser_smoke.js`, Playwright,
+  Chromium real, FR+ZH, 37 checks por idioma, todos `true`** -- cobrindo
+  a Seção 11 da instrução com interação REAL de DOM (clique/reveal, não
+  simulado): (1) Normal com Field audio+image só no front -- visível
+  desde o início, `src` correto; (2) Normal com Field audio+image só no
+  back -- **confirmado ausente antes de revelar, presente e com `src`
+  correto depois** (prova direta do fix do achado #1); (3) Normal sem
+  áudio nenhum -- nenhum botão de áudio customizado inventado, mesmo
+  depois de revelar; (4) Normal Reverse -- 2 CardInstances com ids
+  distintos, 1ª metade mostra o áudio do seu próprio Field desde o
+  início, 2ª metade NÃO mostra áudio antes de revelar e mostra depois
+  (o Field que tem áudio virou o "verso" da 2ª metade); (5) Múltipla
+  Escolha -- **confirmado que o áudio da RESPOSTA CERTA nunca aparece
+  junto do prompt** (prova direta do fix do achado #1/mais grave); (6)
+  Digite a resposta -- áudio/imagem da resposta ausentes antes de
+  verificar, presentes e com `src` correto depois (prova do fix do
+  achado #2); (7) Cloze com 2 marcas -- confirmado que c1 e c2 resolvem
+  o MESMO `audioUrl`/`src` de imagem (prova de que a estrutura já
+  garante isso sem código especial); (8) Legacy com `image_url`/
+  `audio_url` -- continua funcionando exatamente como antes, imagem
+  nunca duplicada ao revelar; (9) Preview -- mostra a MESMA
+  imagem/áudio que o Review mostraria (mesmo pipeline), **`STATE.
+  totalAudioPlays` confirmado INALTERADO** antes/depois de abrir (prova
+  do fix do achado #7), `card.__isPreviewCard` confirmado `true` só
+  dentro da sessão de Preview, `STATE.cards` confirmado bit-a-bit
+  idêntico depois de fechar o Preview (nenhum CardInstance real
+  mutado/persistido); (10) regressão -- Review real continua graduando
+  de verdade (`reps`/`due` mudam) depois de tudo isso. **Zero
+  `pageerror`** em qualquer um dos 2 idiomas (só os mesmos
+  `ERR_TUNNEL_CONNECTION_FAILED` pré-existentes do proxy de saída deste
+  sandbox, documentados em toda a sessão, não relacionados a este
+  código).
+- **Suítes de regressão de fases anteriores (Fase 6C.1/6C.2/6C.3, Fase
+  6D.7), re-executadas via Playwright contra o código já modificado
+  desta subfase, sem nenhuma regressão** (todas confirmam `true` em
+  todos os checks, apontando pra `renderNormalCard`/`renderMultipleChoiceCard`/
+  `renderTypeAnswerCard`/`renderClozeCard`/Preview continuando a
+  funcionar exatamente como documentado nas fases que os criaram, agora
+  com a resolução de mídia corrigida por baixo).
+
+### O que fica pra próximas subfases da Fase 7 (não implementado, de
+propósito)
+
+TTS explícito por Field (7f na decomposição da auditoria); upload/
+gravação conectados ao editor nativo (7e); áudio em distratores de MC
+(7h, depende de decisão de produto); export Anki com mídia (7i); guard
+de `registerAudioPlay()` também pro clique MANUAL dentro do Preview
+(gap menor registrado acima, exigiria mudança na arquitetura de TTS).
+
+Nenhum passo manual pendente pra autora nesta entrega -- 100%
+client-side, nenhuma migração/mudança de schema.
+
+Próxima subfase (a definir pela autora, seguindo a decomposição já
+proposta na auditoria) só começa depois de autorização explícita, com
+este relatório já entregue antes de pedir luz verde.
