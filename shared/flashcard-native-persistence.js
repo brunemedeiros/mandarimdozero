@@ -249,7 +249,12 @@ function nativeContentColumnsFromEditorState(editorState){
 function attachLegacyMediaToFields(fields, row, languageAppKey){
   const targetField = fields.find(f => isStudyLanguageField(f, languageAppKey));
   if (!targetField) return;
-  if (row.audio_url) targetField.audio = { url: row.audio_url, source: 'upload' };
+  // Fase 7b (ver CLAUDE.md) -- discriminador canônico de Field.audio é
+  // `type`, não `source` (ver shared/flashcard-model.js) -- nada em
+  // produção jamais leu `.source`, então esta troca não tem efeito
+  // funcional sobre dado já persistido (resolveFieldAudioUrl() só olha
+  // `.url`), só alinha toda escrita nova ao contrato único.
+  if (row.audio_url) targetField.audio = { url: row.audio_url, type: 'upload' };
   if (row.image_url) targetField.image = { url: row.image_url };
 }
 

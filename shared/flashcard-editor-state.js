@@ -85,11 +85,15 @@ function createFieldState(overrides){
     lang: o.lang || null,
     role: o.role || null,
     content: normalizeFieldContent(o.content),
-    // audio/image: {url, source} | {source:'tts', enabled:true} | null --
-    // passados através sem transformação, mesmo shape que
-    // buildNativeRuntimeFields() já espera. Upload/TTS de verdade são
-    // fora do escopo desta subfase (ver instrução 5/12 do pedido) -- este
-    // construtor só garante que a PROPRIEDADE existe no Field certo,
+    // audio: contrato canônico travado na Fase 7b (ver shared/
+    // flashcard-model.js, FIELD_AUDIO_TYPES/isValidFieldAudio) --
+    // null | {type:'url',url} | {type:'upload',url,...} |
+    // {type:'tts',language,voiceId,rate,generationKey,generatedUrl,...} |
+    // {type:'recording',url,...}. image: {url} | null. Passados através
+    // sem transformação nem validação aqui -- mesmo shape que
+    // buildNativeRuntimeFields() já espera. Upload/TTS/gravação de
+    // verdade continuam fora do escopo (Fases 7e/7f/7g, ver CLAUDE.md) --
+    // este construtor só garante que a PROPRIEDADE existe no Field certo,
     // nunca em note.audio/note.image/card.audio/card.image.
     audio: o.audio || null,
     image: o.image || null,

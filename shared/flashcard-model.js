@@ -38,6 +38,144 @@ function isStudyLanguageField(field, appKey){
   return field.lang === STUDY_LANG_FOR_APP_KEY[appKey];
 }
 
+// ============================================================
+// Fase 7b (ver CLAUDE.md) -- CONTRATO NATIVO DE Field.audio
+// ============================================================
+//
+// Ausência de áudio é sempre `null` (nunca `{type:'none'}`) -- decisão
+// explícita: todo o código já existente (buildNativeRuntimeFields,
+// resolveCardField, comparação de estado do editor) já trata `field.audio`
+// como "tem ou não tem" via checagem de truthiness (`field.audio || null`,
+// `if (field.audio)`); introduzir um segundo valor "vazio mas presente"
+// (`{type:'none'}`) duplicaria a representação de "nada" sem nenhum
+// requisito real que precise distinguir "nunca configurado" de
+// "explicitamente sem áudio" -- e obrigaria reescrever toda checagem
+// truthy já existente pra também excluir esse novo caso.
+//
+// Quando presente, `field.audio` é SEMPRE um objeto com discriminador
+// `type` (nunca `source` -- ver nota de compatibilidade abaixo) em um dos
+// 4 valores de FIELD_AUDIO_TYPES:
+//
+//   { type: 'url', url }
+//     -- link externo arbitrário, colado pela professora/aluna (nunca
+//     hospedado pelo próprio app). `url` obrigatório.
+//
+//   { type: 'upload', url, uploadedAt, mimeType }
+//     -- arquivo hospedado no próprio Storage do app (mesmo bucket
+//     `flashcard-media` já usado pelo upload legado, migration 032).
+//     `url` obrigatório; `uploadedAt`/`mimeType` são metadado opcional,
+//     nunca lidos por resolveCardField() (só documentação/auditoria
+//     futura). MESMO shape funcional que o código legado já produzia
+//     (`{url, source:'upload'}`) -- só o nome do discriminador mudou
+//     (ver nota de compatibilidade).
+//
+//   { type: 'tts', text, language, voiceId, rate, generationKey,
+//     generatedUrl, generatedAt }
+//     -- CONFIGURAÇÃO de síntese de voz, nunca execução. Cada propriedade
+//     é opcional/nullable -- um Field pode ter `type:'tts'` com TODAS
+//     essas propriedades `null`, representando "o modo TTS foi escolhido
+//     mas nada mais foi configurado ainda" (estado válido, não um erro).
+//     - `text`: override opcional do texto a sintetizar -- `null` (o caso
+//       comum) significa "sintetize field.content.value no momento da
+//       geração", nunca lido/consumido por nenhum código nesta fase (não
+//       existe geração ainda).
+//     - `language`: locale EXPLÍCITO da síntese (ex: 'fr-FR'/'zh-CN') --
+//       DELIBERADAMENTE DISTINTO de `field.lang` (idioma pedagógico do
+//       Field, ex: 'fr'/'zh'). NUNCA derivado automaticamente de
+//       `field.lang` por nenhum código deste motor -- uma futura UI PODE
+//       oferecer um valor sugerido a partir de `field.lang`, mas o que
+//       fica gravado é sempre a escolha explícita (ou `null`, se a
+//       pessoa ainda não escolheu). Nem `resolveFieldAudioUrl()` nem
+//       `resolveCardField()` abaixo leem `language` pra decidir nada --
+//       só existe como configuração, pra uma fase futura de geração
+//       consumir.
+//     - `voiceId`/`rate`: configuração de síntese, mesma lógica de
+//       "nullable = ainda não escolhido" que `language`.
+//     - `generationKey`: hash/id derivado de (text efetivo + language +
+//       voiceId + rate), reservado pra uma futura camada de cache
+//       server-side identificar se um áudio já foi gerado pra esta
+//       configuração exata -- é dado DERIVADO, nunca a fonte de verdade
+//       (a fonte de verdade são as 4 propriedades acima); nenhum código
+//       nesta fase calcula ou consome este campo, só reserva o lugar.
+//     - `generatedUrl`/`generatedAt`: o ATIVO já gerado e cacheado (se
+//       existir) -- distinção explícita entre CONFIGURAÇÃO (as 4
+//       propriedades acima, o que a pessoa pediu) e ATIVO RESOLVIDO
+//       (isto, o que de fato existe como arquivo hoje). Um Field pode
+//       ter `type:'tts'` com configuração completa e `generatedUrl:null`
+//       (ainda não gerado) -- estado perfeitamente válido.
+//
+//   { type: 'recording', url, recordedAt, mimeType, durationMs }
+//     -- suporte estrutural pra gravação futura (MediaRecorder), NÃO
+//     implementada nesta fase (sem microfone, sem UI, sem upload
+//     específico -- ver CLAUDE.md, Fase 7 auditoria, subfase 7g). `url`
+//     é nullable (`null` = "modo gravação escolhido, ainda sem arquivo",
+//     mesmo espírito do TTS antes de gerar) -- uma vez gravado, aponta
+//     pro MESMO tipo de URL que `upload` já usa (reaproveita a mesma
+//     infraestrutura de Storage, nunca um mecanismo de persistência
+//     paralelo).
+//
+// Nota de compatibilidade -- discriminador renomeado de `source` pra
+// `type`: o shape anterior (`{url, source:'upload'}` / `{source:'tts',
+// enabled:true}`, Fase 6B/8a) usava `source` como discriminador, mas
+// NENHUM código em produção jamais LÊ essa propriedade (confirmado por
+// grep antes de decidir isto) -- só é escrita. resolveCardField() sempre
+// leu `.url` direto, então dado já persistido com `source` continua
+// resolvendo corretamente mesmo sem nenhuma migração (a chave que
+// importa pra resolução, `.url`, nunca mudou de nome). Ainda assim, os
+// pontos que ESCREVEM esse shape (interpretação de audio_url legado, os
+// call sites em interpretNoteFromRow()/attachLegacyMediaToFields) foram
+// atualizados nesta fase pra emitir `type:'upload'` -- daqui pra frente,
+// toda escrita nova usa o discriminador canônico único (`type`), nunca
+// os dois convivendo como fontes de verdade diferentes.
+const FIELD_AUDIO_TYPES = ['url', 'upload', 'tts', 'recording'];
+
+// Validação ESTRUTURAL pura -- nunca lança, nunca decide nada sobre
+// direção/apresentação. `null`/`undefined` são sempre válidos (ausência
+// de áudio). Quando presente, exige um `type` reconhecido; exige `url`
+// string não-vazia pra 'url'/'upload' (são inúteis sem link); 'tts' e
+// 'recording' toleram todas as propriedades ausentes/null (representam
+// configuração incompleta, não erro -- ver comentário acima). Usada por
+// testes e por uma futura UI de edição de áudio (Fase 7e) -- NÃO é
+// chamada hoje por validateNoteEditorStateForSave() (shared/
+// flashcard-native-persistence.js): áudio continua opcional em qualquer
+// Card Type, e a ausência de UI de edição real nesta fase significa que
+// nenhum fluxo de salvar hoje pode produzir um `field.audio` inválido de
+// qualquer jeito -- gate de validação forte fica pra quando a UI de
+// edição (7e) existir de verdade.
+function isValidFieldAudio(audio){
+  if (audio === null || audio === undefined) return true;
+  if (typeof audio !== 'object' || Array.isArray(audio)) return false;
+  if (!FIELD_AUDIO_TYPES.includes(audio.type)) return false;
+  if (audio.type === 'url' || audio.type === 'upload'){
+    return typeof audio.url === 'string' && audio.url.length > 0;
+  }
+  if (audio.type === 'recording'){
+    return audio.url === null || audio.url === undefined || (typeof audio.url === 'string' && audio.url.length > 0);
+  }
+  // type === 'tts' -- toda propriedade é opcional/nullable (ver comentário
+  // acima); só rejeita se algo presente tiver o TIPO errado.
+  const strOrNull = (v) => v === null || v === undefined || typeof v === 'string';
+  return strOrNull(audio.text) && strOrNull(audio.language) && strOrNull(audio.voiceId)
+    && (audio.rate === null || audio.rate === undefined || typeof audio.rate === 'number')
+    && strOrNull(audio.generationKey) && strOrNull(audio.generatedUrl) && strOrNull(audio.generatedAt);
+}
+
+// Único ponto que decide "que URL este `field.audio` resolve HOJE" --
+// nunca gera TTS, nunca busca nada externo, nunca escolhe áudio baseado
+// em `field.lang`. Defensivo: qualquer shape não reconhecido (incluindo
+// lixo/estado inválido) devolve `null` em vez de lançar -- resolução pra
+// EXIBIÇÃO nunca deve quebrar a tela por causa de um dado malformado
+// (rejeitar dado malformado é trabalho de isValidFieldAudio(), numa
+// camada de validação, não de leitura). Compatível com o shape anterior
+// (`source` em vez de `type`) sem nenhuma normalização especial -- a
+// única propriedade que importa pra 'url'/'upload'/'recording' já era
+// `.url` desde a Fase 6B, nome nunca mudou.
+function resolveFieldAudioUrl(audio){
+  if (!audio || typeof audio !== 'object') return null;
+  const candidate = audio.type === 'tts' ? audio.generatedUrl : audio.url;
+  return typeof candidate === 'string' && candidate ? candidate : null;
+}
+
 const FLASHCARD_MODEL_FSRS_DEFAULTS = Object.freeze({
   ef: 2.5, interval: 0, reps: 0, due: 0, lapses: 0,
   stability: 0, difficulty: 0, state: 'new', lastReview: null,
@@ -426,7 +564,7 @@ function interpretNoteFromRow(row, opts){
       // gera é o editor visual (Fase 6, fora do escopo aqui).
       const text = row.cloze_sentence;
       const textField = { lang: isZh ? 'zh' : studyLang, text };
-      if (row.audio_url) textField.audio = { url: row.audio_url, source: 'upload' };
+      if (row.audio_url) textField.audio = { url: row.audio_url, type: 'upload' };
       const note = {
         ...noteBase,
         fields: [
@@ -463,7 +601,7 @@ function interpretNoteFromRow(row, opts){
     // (confirmado na auditoria da Fase 0/1) -- precisa sobreviver à ponte
     // igual ao caso normal/MC abaixo, vinculado ao único Field que
     // representa o idioma estudado (o campo de texto com a lacuna).
-    if (row.audio_url) textField.audio = { url: row.audio_url, source: 'upload' };
+    if (row.audio_url) textField.audio = { url: row.audio_url, type: 'upload' };
     const note = {
       ...noteBase,
       fields: [
@@ -522,7 +660,7 @@ function interpretNoteFromRow(row, opts){
   // gravar o áudio explicitamente no Field certo, sem depender disto.
   if (row.audio_url){
     const studyIdx = fields.findIndex(f => isStudyLanguageField(f, appKey));
-    if (studyIdx >= 0) fields[studyIdx].audio = { url: row.audio_url, source: 'upload' };
+    if (studyIdx >= 0) fields[studyIdx].audio = { url: row.audio_url, type: 'upload' };
   }
 
   const note = { ...noteBase, fields, fieldOrder: fields.map((_, i) => i) };
@@ -595,6 +733,20 @@ const CARD_TYPE_IDS = Object.freeze({
 // persistido desde a Fase 6B mas nunca chegava a lugar nenhum de exibição.
 // `resolveCardField()` continua sendo o ÚNICO ponto de projeção Field->
 // exibição -- nenhuma segunda função de "resolver imagem" foi criada.
+//
+// Fase 7b (ver CLAUDE.md) -- `audioUrl` passou a ser calculado via
+// resolveFieldAudioUrl() (definida acima, junto do contrato de
+// Field.audio), em vez da leitura inline `(field.audio && field.audio.url)
+// || null` -- mesmo resultado pra todo dado já existente (upload/url
+// sempre tinham `.url`), mas agora também resolve corretamente
+// `type:'tts'` (usa `generatedUrl` se já existir, `null` senão -- nunca
+// gera nada aqui) e `type:'recording'` (idem `upload`, `url` nullable).
+// A View devolvida por resolveCardField() continua expondo só o ATIVO
+// resolvido (`audioUrl`, uma URL ou null) -- nunca a CONFIGURAÇÃO
+// completa de `field.audio` (ex: `language`/`voiceId`/`generationKey` do
+// modo TTS não aparecem aqui, de propósito: quem precisar da
+// configuração pra oferecer uma UI de edição/geração lê `field.audio`
+// direto, nunca por meio desta view de exibição).
 function resolveCardField(note, fieldIndex){
   if (fieldIndex === null || fieldIndex === undefined) return null;
   const field = note.fields[fieldIndex];
@@ -605,7 +757,7 @@ function resolveCardField(note, fieldIndex){
     text: field.text,
     lang: field.lang,
     pinyinText: pinyinField ? pinyinField.text : null,
-    audioUrl: (field.audio && field.audio.url) || null,
+    audioUrl: resolveFieldAudioUrl(field.audio),
     imageUrl: (field.image && field.image.url) || null,
   };
 }

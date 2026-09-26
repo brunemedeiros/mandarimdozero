@@ -10743,3 +10743,279 @@ client-side, nenhuma migração/mudança de schema.
 Próxima subfase (a definir pela autora, seguindo a decomposição já
 proposta na auditoria) só começa depois de autorização explícita, com
 este relatório já entregue antes de pedir luz verde.
+
+## Fase 7b -- contrato nativo de `Field.audio` (formalização do modelo,
+sem TTS/upload/gravação de verdade)
+
+Segunda subfase de código da Fase 7 (áudio/mídia por Field), autorizada
+com escopo explícito e estrito: formalizar um contrato ROBUSTO e
+EXTENSÍVEL pra `Field.audio` -- a base de dados que as fases futuras (TTS
+real, upload conectado ao editor, gravação) vão consumir --, propagado
+corretamente por todo o pipeline já existente (editor state, persistência
+nativa, `resolveCardField()`, os 4 renderers), sem implementar nenhuma
+infraestrutura de geração/upload/gravação de verdade nesta entrega.
+
+**Reauditoria antes de codar** (pedido explícito -- "não assuma o shape
+apenas com base na documentação anterior"): reli `shared/flashcard-
+model.js`, `shared/flashcard-editor-state.js`, `shared/flashcard-native-
+persistence.js`, `shared/flashcard-field-editor.js`, `shared/flashcard-
+preview.js`, e os trechos de `fr/app.js`/`zh/app.js` que resolvem áudio
+nos 4 renderers -- confirmando, por leitura direta (não presumido):
+`field.audio` hoje é `null | {url, source:'upload'} | {source:'tts',
+enabled:true}`, passado através sem transformação por
+`buildNativeRuntimeFields()`; **`.source` e `.enabled` são propriedades
+write-only** -- confirmado por grep no repositório inteiro que nenhum
+código em produção jamais LÊ nenhuma das duas, só `.url` é lido (por
+`resolveCardField()`, via `(field.audio && field.audio.url) || null`).
+Os 4 renderers (`renderNormalCard`/`renderMultipleChoiceCard`/
+`renderTypeAnswerCard`/`renderClozeCard`, fr/zh `app.js`) consomem
+SÓ o `audioUrl` já resolvido pela `view` que os resolvers devolvem --
+nenhum deles lê `field.audio`/`card.audio` diretamente -- confirmado por
+grep (`field\.audio`/`\.audio\.url`) achando zero ocorrência fora de
+comentários. Essa confirmação foi o que permitiu concluir, sem
+adivinhar, que a reformulação do contrato de `Field.audio` não exige
+NENHUMA mudança nos 4 renderers.
+
+**O contrato canônico, travado nesta subfase (`shared/flashcard-
+model.js`, `FIELD_AUDIO_TYPES`/`isValidFieldAudio`/`resolveFieldAudioUrl`,
+logo antes de `FLASHCARD_MODEL_FSRS_DEFAULTS`):**
+
+```js
+Field.audio = null                                  // ausência de áudio
+  | { type: 'url', url }
+  | { type: 'upload', url, uploadedAt, mimeType }
+  | { type: 'tts', text, language, voiceId, rate,
+      generationKey, generatedUrl, generatedAt }
+  | { type: 'recording', url, recordedAt, mimeType, durationMs }
+```
+
+**Decisão 1 -- ausência é sempre `null`, nunca `{type:'none'}`.**
+Justificativa registrada no próprio código: todo o código já existente
+(`buildNativeRuntimeFields`, `resolveCardField`, comparação de estado do
+editor) já trata `field.audio` via checagem de truthiness (`field.audio
+|| null`, `if (field.audio)`) -- introduzir um segundo valor "vazio mas
+presente" duplicaria a representação de "nada" sem nenhum requisito real
+que precise distinguir "nunca configurado" de "explicitamente sem
+áudio", e obrigaria reescrever toda checagem truthy já existente.
+
+**Decisão 2 -- discriminador é `type`, nunca `source`.** O shape anterior
+usava `source` (Fase 6B/8a) -- confirmado por grep, `.source` nunca é
+lido em produção, só escrito. Renomear pra `type` custou zero risco
+funcional (a única propriedade que a resolução de fato usa, `.url`,
+nunca mudou de nome) e alinha o vocabulário ao resto do motor
+(`card_generation_mode`, `cardTypeId`, "Card Type"). Os 3 pontos que
+ESCREVEM o shape a partir de `audio_url` legado (`interpretNoteFromRow()`,
+2x no ramo Cloze + 1x no ramo Normal/MC) e o 4º ponto
+(`attachLegacyMediaToFields()`, conversão Legacy->Native da Fase 6D.8)
+foram atualizados nesta subfase pra emitir `type:'upload'` em vez de
+`source:'upload'` -- daqui pra frente só existe UM discriminador
+canônico, nunca os dois convivendo como fontes de verdade diferentes.
+Dado já persistido com `source` (se algum existir em produção, de uma
+conversão Legacy->Native anterior a esta subfase) continua resolvendo
+`audioUrl` corretamente -- `resolveFieldAudioUrl()` nunca leu `.source`/
+`.type` pra decidir isso, só `.url`/`.generatedUrl`.
+
+**Os 4 tipos, o que cada um representa:**
+- `url` -- link externo arbitrário, colado pela professora/aluna (nunca
+  hospedado pelo próprio app). `url` obrigatório.
+- `upload` -- arquivo hospedado no Storage do próprio app (mesmo bucket
+  `flashcard-media`, migration 032, já usado pelo upload legado hoje).
+  `url` obrigatório; `uploadedAt`/`mimeType` são metadado opcional,
+  nunca lidos por `resolveCardField()` -- é o MESMO shape funcional que
+  o código legado já produzia (só o discriminador mudou de nome, ver
+  Decisão 2).
+- `tts` -- **CONFIGURAÇÃO de síntese de voz, nunca execução.** Todas as
+  7 propriedades são opcionais/nullable -- um Field pode ter `type:'tts'`
+  com TODAS elas `null`, representando "o modo TTS foi escolhido mas
+  nada mais foi configurado ainda" (estado VÁLIDO, não um erro, testado
+  explicitamente -- item G da suíte). Distinção explícita entre
+  CONFIGURAÇÃO (`text`/`language`/`voiceId`/`rate`, o que a pessoa
+  pediu) e ATIVO RESOLVIDO (`generatedUrl`/`generatedAt`, o que de fato
+  existe como arquivo hoje) -- um Field pode ter configuração completa e
+  `generatedUrl:null` (ainda não gerado), estado perfeitamente válido.
+  `generationKey` é dado DERIVADO (hash de text+language+voiceId+rate),
+  reservado pra uma futura camada de cache server-side identificar se um
+  áudio já foi gerado pra esta configuração exata -- nenhum código nesta
+  subfase calcula ou consome este campo, só reserva o lugar.
+- `recording` -- suporte ESTRUTURAL pra gravação futura (MediaRecorder),
+  **não implementada nesta subfase** (sem microfone, sem UI, sem upload
+  específico -- Fase 7g da decomposição). `url` nullable (`null` = "modo
+  gravação escolhido, ainda sem arquivo", mesmo espírito do TTS antes de
+  gerar) -- uma vez gravado, aponta pro MESMO tipo de URL que `upload` já
+  usa (reaproveita a mesma infraestrutura de Storage, nunca um mecanismo
+  de persistência paralelo).
+
+**`Field.lang` (idioma pedagógico) e `audio.tts.language` (locale de
+síntese) são eixos DELIBERADAMENTE INDEPENDENTES, nunca derivados um do
+outro por nenhum código deste motor.** `language:null` num Field
+`type:'tts'` é um estado VÁLIDO ("ainda não escolhido") -- nenhuma
+função (nem `resolveCardField()`, nem `resolveFieldAudioUrl()`, nem
+nenhum resolver) jamais preenche/deriva `audio.language` a partir de
+`field.lang`. Uma futura UI de edição PODE oferecer um valor sugerido a
+partir de `field.lang` (ex: Field `lang:'fr'` sugere `language:'fr-FR'`
+por padrão no seletor), mas o que fica gravado é sempre a ESCOLHA
+EXPLÍCITA da pessoa (ou `null`, se ela ainda não escolheu) -- testado
+explicitamente (item G da suíte) que um Field `lang:'zh'` com
+`audio.tts.language:'fr-FR'` não é rejeitado pelo modelo (cenário
+bizarro, mas o contrato nunca impede isso -- só uma UI futura decidiria
+avisar/impedir).
+
+**`resolveCardField()` expõe só o ATIVO resolvido (`audioUrl`), nunca a
+CONFIGURAÇÃO inteira de `field.audio`** -- confirmado por teste (item O)
+que o shape de retorno continua com exatamente 5 chaves
+(`text`/`lang`/`pinyinText`/`audioUrl`/`imageUrl`), nunca `language`/
+`voiceId`/`generationKey` vazando pra view de exibição. Quem precisar da
+configuração completa (uma futura UI de edição/geração) lê `field.audio`
+direto, nunca por meio desta view.
+
+**`resolveFieldAudioUrl(audio)`** (novo, `shared/flashcard-model.js`) --
+único ponto que decide "que URL este `field.audio` resolve HOJE": pra
+`url`/`upload`/`recording`, é `.url` (só se for string não-vazia); pra
+`tts`, é `.generatedUrl` (só se já existir -- **nunca gera nada aqui**,
+nunca busca nada externo, nunca escolhe áudio baseado em `field.lang`).
+**Defensivo por design** -- qualquer shape não reconhecido (lixo,
+`{type:'nao-existe'}`, uma string solta, um número) devolve `null` em
+vez de lançar (testado explicitamente, item F da suíte, 8 variações de
+shape inválido) -- resolução pra EXIBIÇÃO nunca deve quebrar a tela por
+causa de dado malformado; rejeitar dado malformado é trabalho de
+`isValidFieldAudio()`, numa camada de validação separada.
+
+**`isValidFieldAudio(audio)`** (novo) -- validação ESTRUTURAL pura,
+nunca lança, nunca decide nada sobre direção/apresentação. `null`/
+`undefined` sempre válidos; presente, exige `type` reconhecido e `url`
+string não-vazia pra `url`/`upload`; `recording` e `tts` toleram toda
+propriedade ausente/null (configuração incompleta é estado válido, não
+erro). **Não é chamada por `validateNoteEditorStateForSave()`** (Fase
+6D.6) nesta subfase -- decisão deliberada: áudio continua opcional em
+qualquer Card Type, e a ausência de UI de edição real (Fase 7e, ainda
+não construída) significa que nenhum fluxo de salvar hoje pode produzir
+um `field.audio` inválido de qualquer jeito -- gate de validação forte
+no save fica pra quando a UI de edição existir de verdade. Fica pronta,
+testada, e reutilizável (por testes e por essa UI futura) desde já.
+
+**Indicador textual do Field editor (Fase 6D.3, `shared/flashcard-
+field-editor.js`) tornado type-aware, ainda 100% read-only** --
+`fieldAudioIndicatorText(audio)` (novo) troca o "🎧 tem áudio vinculado"
+genérico por um texto específico por tipo ("🎧 áudio (link externo)"/
+"🎧 áudio (upload)"/"🎧 TTS configurado (áudio ainda não gerado)"/"🎧
+áudio TTS gerado"/"🎙️ gravação configurada (ainda sem arquivo)"/"🎙️
+gravação vinculada") -- shape legado/desconhecido cai num fallback
+genérico, nunca quebra a tela. **Nenhuma UI de edição/upload/geração
+nova** -- só o texto do indicador mudou, nenhum controle novo foi
+adicionado.
+
+**O que NÃO foi tocado, de propósito:**
+- Os 4 renderers (`fr/app.js`/`zh/app.js`) -- confirmado que não
+  precisavam de nenhuma mudança (só consomem `audioUrl` já resolvido).
+- `shared/flashcard-preview.js` -- zero menção a áudio no arquivo,
+  delega 100% aos 4 renderers reais; nada a mudar.
+- `validateNoteEditorStateForSave()` -- áudio continua fora da
+  validação de save nesta subfase, ver decisão acima.
+- Nenhuma migração SQL -- `fields` já é `jsonb` (migration 045, Fase
+  6B), já suporta o shape novo sem nenhuma mudança de schema.
+- Nenhuma infraestrutura de TTS/upload/gravação de verdade -- zero Edge
+  Function, zero chave de API, zero `MediaRecorder`/`getUserMedia`,
+  zero UI de seleção de fonte de áudio.
+- Legacy (`audio_url`/`image_url`) -- nenhuma migração automática, nenhum
+  backfill, nenhuma mudança de IDs/FSRS/revision/histórico.
+
+**Testes realizados:**
+- `node --check` sem erro nos 4 arquivos tocados (`shared/flashcard-
+  model.js`, `shared/flashcard-editor-state.js`, `shared/flashcard-
+  native-persistence.js`, `shared/flashcard-field-editor.js`).
+- **Suíte Node/VM nova `test_fase7b_field_audio_contract.js`, 83/83** --
+  cobre os 19 itens A-S pedidos explicitamente: A-E (os 5 estados --
+  sem áudio, url, upload, tts pendente/cacheado, recording pendente/
+  gravado -- via `resolveCardField()` real); F (8 shapes inválidos,
+  todos rejeitados por `isValidFieldAudio()` e tratados defensivamente
+  -- nunca lançam -- por `resolveFieldAudioUrl()`/`resolveCardField()`);
+  G (`language:null` é válido, nunca derivado de `field.lang`, e um
+  Field `lang:'zh'` com `tts.language:'fr-FR'` não é rejeitado -- eixos
+  independentes confirmados); H (config TTS completa, resolve o ativo
+  cacheado); I (`cloneFieldIntoEditorState`, Fase 6D.3, preserva áudio
+  através da clonagem, indicador textual confirmado por tipo); J/K/L
+  (snapshot/`noteEditorStatesEqual`/`noteEditorStateChanged` detectam
+  mudança só em áudio, inclusive remover áudio existente); M
+  (`noteEditorStateToRow` preserva áudio no Field certo); N
+  (`nativeContentColumnsFromEditorState` preserva áudio, com
+  ROUND-TRIP REAL através de `buildEngineCardsFromRow`/
+  `resolveCardContentView`, não só inspeção do payload); O
+  (`resolveCardField` expõe só o ativo, nunca a config completa, shape
+  de retorno com exatamente 5 chaves); P (Legacy continua usando
+  `audio_url`, gravado como `type:'upload'` canônico, `row.audio_url`
+  em si nunca mutado); Q (Native ignora `row.audio_url` por completo
+  quando `fields` já existe -- testado com uma URL "armadilha" na linha
+  que nunca deveria vazar pro Field, e não vazou); R (verificação
+  arquitetural -- `AUDIO_MANIFEST` nunca é referenciado em código
+  executável de `shared/flashcard-model.js`, nem existe como global no
+  motor); S (2 Fields com o MESMO `lang` e áudios diferentes/nenhum
+  resolvem independentemente -- `fieldHasAudio()`, elegibilidade de TTS
+  AUTOMÁTICO por idioma, confirmado como eixo SEPARADO de `audioUrl`
+  explícito, nunca confundidos).
+- **5 suítes anteriores re-executadas, 216/216 sem regressão**
+  (esperado -- a única mudança funcional real foi `resolveFieldAudioUrl()`
+  ficar mais estrita, validando `typeof === 'string'` em vez de só
+  truthy, o que nenhum teste anterior dependia de contornar):
+  `test_fase4_engine.js` 34/34, `test_fase4d_regression.js` 30/30,
+  `test_fase5_generation.js` 33/33, `test_fase6b_native_notes.js`
+  74/74, `test_fase7a_media_resolution.js` 45/45.
+- **Browser smoke novo `test_fase7b_browser_smoke.js`, Playwright,
+  Chromium real, FR+ZH, 23 checks por idioma, todos batendo** --
+  ponta-a-ponta com as funções de PRODUÇÃO reais (nunca simuladas):
+  criar uma Note nativa (`createNativeNoteEditorState`) com Field
+  `type:'url'`; editar via `updateFieldInEditorState` (Fase 6D.3) pra
+  `type:'upload'`; clonar o Field via `cloneFieldIntoEditorState`
+  (confirmado id novo, áudio preservado); "salvar" via
+  `nativeContentColumnsFromEditorState`; "recarregar" via
+  `buildEngineCardsFromRow` sobre a linha resultante (round-trip real
+  pelo motor de produção); resolver via `resolveCardContentView`
+  (`audioUrl` bate com o que foi salvo); `resolveFieldAudioUrl` direto
+  pra TTS pendente/cacheado e recording pendente/gravado, shape
+  inválido nunca lança; **Review real** -- um card com `type:'upload'`
+  mostra o botão de áudio próprio com a URL certa
+  (`.custom-audio-btn[data-audio-url]`), um card com `type:'tts'`
+  pendente (sem `generatedUrl`) **não mostra nenhum botão** (confirma
+  que o motor nunca inventa um áudio pra um TTS ainda não gerado);
+  **Preview real** (`buildPreviewCardsFromNativeEditorState`, Fase
+  6D.7) sobre o MESMO editorState nativo, `__isPreviewCard` confirmado,
+  áudio resolvido corretamente. **Zero `pageerror`** em qualquer um dos
+  2 idiomas (só os mesmos `ERR_TUNNEL_CONNECTION_FAILED` pré-existentes
+  do proxy de saída deste sandbox, documentados em toda a sessão).
+
+**Achado incidental, corrigido durante a escrita dos testes (não um bug
+de produto, só um caso de borda de robustez)**: a primeira versão de
+`resolveFieldAudioUrl()` usava `audio.url || null` -- um `url` com tipo
+errado (ex: `{type:'upload', url:42}`, nunca produzido por nenhum código
+real hoje, mas um shape que `isValidFieldAudio()` já rejeitava)
+retornaria `42` em vez de `null`, porque `42` é truthy. Corrigido pra
+`typeof candidate === 'string' && candidate ? candidate : null` --
+garante que o "defensivo, nunca quebra" da função vale de verdade mesmo
+pra um shape parcialmente malformado, não só pra ausência total.
+
+**O que ainda falta / não foi feito nesta subfase (de propósito, escopo
+estrito):**
+- 7c (expor áudio de resposta/tradução aos renderers -- já resolvido na
+  verdade pela Fase 7a, que já fez isso pra Type Answer/Cloze; não
+  reaberto aqui).
+- 7e (upload real conectado ao editor nativo de Field) -- o indicador
+  textual continua só leitura, nenhum `<input type="file">`/botão de
+  anexar nesta subfase.
+- 7f (TTS de verdade -- geração/cache server-side, Edge Function, chave
+  de API) -- o shape `type:'tts'` está pronto pra receber essa
+  implementação, mas nada nesta subfase gera nem cacheia áudio nenhum.
+- 7g (gravação via MediaRecorder) -- o shape `type:'recording'` está
+  pronto, mas sem microfone/UI/upload específico.
+- 7h (áudio em distratores de Múltipla Escolha) -- `distractorTexts`
+  continua array de strings puras, sem Field associado, mesma
+  conclusão já registrada na auditoria da Fase 7.
+- 7i (export Anki com mídia) -- não tocado.
+- Guard de `registerAudioPlay()` pro clique MANUAL dentro do Preview
+  (gap menor já registrado na Fase 7a, exigiria mudança na arquitetura
+  de TTS) -- não corrigido aqui, fora do escopo desta subfase.
+
+Nenhum passo manual pendente pra autora nesta entrega -- 100%
+client-side, nenhuma migração/mudança de schema.
+
+Próxima subfase (a definir pela autora, seguindo a decomposição já
+proposta na auditoria da Fase 7) só começa depois de autorização
+explícita, com este relatório já entregue antes de pedir luz verde.

@@ -55,6 +55,24 @@ function fieldLangLabel(lang){
   return found ? found.label : (lang ? lang : '(idioma não definido)');
 }
 
+// Fase 7b (ver CLAUDE.md) -- indicador textual (ainda 100% read-only,
+// nenhuma UI de edição/upload/geração nova nesta fase) agora reflete o
+// `type` canônico de Field.audio em vez de um "tem áudio vinculado"
+// genérico -- deixa visível, mesmo sem poder editar ainda, a diferença
+// entre um link externo, um upload, uma configuração de TTS ainda sem
+// áudio gerado, e uma gravação futura. Shape legado/desconhecido (ex:
+// `{url, source:'upload'}` de dado já persistido antes desta fase) cai
+// no fallback genérico -- nunca quebra a tela por causa de um `type`
+// ausente.
+function fieldAudioIndicatorText(audio){
+  if (!audio) return null;
+  if (audio.type === 'tts') return audio.generatedUrl ? '🎧 áudio TTS gerado' : '🎧 TTS configurado (áudio ainda não gerado)';
+  if (audio.type === 'recording') return audio.url ? '🎙️ gravação vinculada' : '🎙️ gravação configurada (ainda sem arquivo)';
+  if (audio.type === 'url') return '🎧 áudio (link externo)';
+  if (audio.type === 'upload') return '🎧 áudio (upload)';
+  return '🎧 tem áudio vinculado';
+}
+
 // ---------- Validação básica (Fase 6D.3 -- só o Field, não o Card Type
 // inteiro; validação de cardinalidade por tipo, como Múltipla Escolha,
 // continua sendo trabalho de fase futura/do motor, nunca deste módulo) ----------
@@ -81,7 +99,8 @@ function renderFieldEditorHTML(field, index, opts){
   const label = opts.label || `Campo ${index + 1}`;
   const contentValue = field.content && typeof field.content.value === 'string' ? field.content.value : '';
   const mediaNotes = [];
-  if (field.audio) mediaNotes.push('🎧 tem áudio vinculado');
+  const audioIndicator = fieldAudioIndicatorText(field.audio);
+  if (audioIndicator) mediaNotes.push(audioIndicator);
   if (field.image) mediaNotes.push('🖼️ tem imagem vinculada');
   if (field.pinyinFieldId) mediaNotes.push('🔤 tem um campo de pinyin vinculado');
   return `
