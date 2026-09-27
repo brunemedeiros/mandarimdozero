@@ -14633,3 +14633,275 @@ posterior automaticamente.** Próxima etapa (ex: a recomendação de
 remapeamento via satélite de pinyin pro export zh, registrada acima)
 só começa depois de autorização explícita da autora, com este relatório
 já entregue antes de pedir luz verde.
+
+## Fase 7j (fechamento) -- 3 gaps corrigidos: hierarquia de Deck
+preservada como dado estruturado, Tags viram propriedade nativa da
+Note, round-trip zh resolvido reaproveitando `pinyinFieldId`
+
+A entrega original da Fase 7j (seção acima) foi rejeitada pela autora
+como incompleta -- 3 gaps concretos, cada um com processo próprio
+obrigatório antes de codar. Os 3 foram fechados nesta mesma sessão,
+**sem tocar em Deck Engine, Painel ou Study Trail** (fora do escopo
+desta rodada, confirmado por essa mesma instrução) -- só os 3 gaps do
+importador Anki.
+
+### Gap 1 -- hierarquia de Deck nunca mais descartada silenciosamente
+
+**Achado da auditoria (antes de codar)**: confirmado por grep no
+repositório inteiro que **nenhuma entidade de Deck existe hoje** em
+lugar nenhum do app -- nem schema, nem UI, nem conceito no motor. Um
+"Deck Engine" de verdade é trabalho de uma fase própria, fora do escopo
+autorizado aqui. A instrução foi explícita: **proibido inventar uma
+estrutura paralela/temporária** (nomeadamente, um campo textual
+`anki_deck` solto na Note) -- isso criaria uma 2ª fonte de verdade de
+hierarquia que uma futura Fase de Decks teria que migrar/descartar
+depois.
+
+**O que foi feito** -- `shared/anki-import.js`:
+- **`ankiDeckPathFromName(deckName)`** -- separa o nome de deck do Anki
+  pelo delimitador `::` (hierarquia nativa do Anki), devolve
+  `['Vocabulário','Animais']` pra `"Vocabulário::Animais"`.
+- **`buildAnkiDeckTree(notes)`** -- agrega, em memória, uma árvore
+  `{name, count, children:[...]}` a partir de `deckPath` de cada Note --
+  `count` de um nó pai soma ele mesmo mais TODOS os descendentes (mesma
+  regra de agregação que o documento de arquitetura consolidada,
+  fornecido pela autora, já descreve na seção 3.3 pra uma futura tela de
+  Painel).
+- **`buildAnkiImportPlan()`** passou a computar `deckPath`/`deckName`
+  por Note (em TODAS as ramificações, sucesso ou falha -- inclusive Notes
+  rejeitadas continuam carregando de onde vieram) e expõe
+  `plan.deckTree` (a árvore completa do `.apkg`).
+- **`shared/anki-import-ui.js`** -- resumo agora mostra a árvore de Deck
+  encontrada (nomes + contagem por nível, indentada), com uma mensagem
+  HONESTA: "este app ainda não tem Decks -- todos os cartões
+  selecionados entram em 'Meus Cartões', sem separação por deck; essa
+  hierarquia foi capturada e fica pronta pra quando os Decks existirem".
+  **Nunca finge que a hierarquia será preservada na prática hoje.**
+- **Nada disso é persistido** -- `deckPath`/`deckName`/`deckTree` vivem
+  só em `plan` (objeto JS em memória, nunca serializado pro banco).
+  `nativeContentColumnsFromEditorState()` (a função que decide o que
+  realmente vai pro INSERT) nunca lê/inclui nenhum campo de deck --
+  confirmado por auditoria final (grep) que nenhuma linha gravada em
+  `own_flashcards` carrega `.deck`/`.deckPath`/`.anki_deck` em nenhum
+  cenário.
+
+### Gap 2 -- Tags viram propriedade nativa e real da Note
+
+**Achado da auditoria**: nenhuma normalização de tag existia em lugar
+nenhum do código (a única função próxima, `slugifyUsername()` em
+`shared/profile.js`, usa um alfabeto/regra diferente, pra username --
+não reaproveitável aqui sem confundir 2 conceitos). Conforme o documento
+de arquitetura consolidada da autora (seção sobre Tags): tags pertencem
+à NOTE, são globais na conta, compartilhadas entre idiomas, e um futuro
+"Painel" as usaria como filtro.
+
+**Migration `048_add_tags_to_flashcards.sql`** -- aplicada AO VIVO via
+`mcp__Supabase__apply_migration`, projeto `eigjocalzwamisgqilhg`:
+```sql
+alter table teacher_flashcards add column if not exists tags text[] not null default '{}'::text[];
+alter table own_flashcards add column if not exists tags text[] not null default '{}'::text[];
+```
+Aditiva/sem risco, mesmo padrão de sempre -- confirmado antes de rodar
+que nenhuma das duas tabelas tinha essa coluna.
+
+**`normalizeTagSlug(raw)`/`normalizeNoteTags(rawTags)`** (novo,
+`shared/flashcard-model.js`, logo depois de `isCardGenerationModePresent`)
+-- **a única implementação canônica de normalização de tag no app
+inteiro**, reutilizável por qualquer código futuro (editor, Painel,
+atribuição pública de Deck, Study Trail) em vez de cada um reimplementar
+a regra: minúsculas, acentos removidos (NFD), espaços/`::`→`-`, sem
+hierarquia de subtag (achatada), dedup case-insensitive preservando a
+1ª ocorrência.
+
+**Threaded através de todo o pipeline de estado do editor** (reaproveitando
+os pontos já existentes, nunca um caminho paralelo):
+- `createNativeNoteEditorState()` (`shared/flashcard-editor-state.js`) --
+  normaliza `tags` UMA vez, na criação -- todo chamador (novo cartão,
+  reconstrução de linha existente, importador Anki) herda a normalização
+  de graça, nunca precisa chamar `normalizeNoteTags()` de novo.
+- `createNativeNoteEditorStateFromRow(row)` -- passa `row.tags` adiante.
+- `noteEditorStateContentForComparison()`/`noteEditorStateToRow()` --
+  `tags` agora faz parte do que conta como "conteúdo" (uma edição de tag
+  já dispara `noteEditorStateChanged()` corretamente, sem nenhuma regra
+  nova) e do que é serializado de volta pra uma linha.
+- `nativeContentColumnsFromEditorState()` (`shared/flashcard-native-
+  persistence.js`) -- repassa `tags: row.tags` pro payload final, **nunca
+  renormaliza** (a normalização já aconteceu 1 vez, na criação do
+  `editorState`).
+- **Importador Anki** (`shared/anki-import.js`) -- `note.tags` (já
+  parseado pelo parser, `shared/anki-parser.js`, formato Anki real: 1
+  string por Note, tags separadas por espaço, nunca com espaço LITERAL
+  dentro de uma tag -- multi-palavra usa `_`) é passado pra
+  `createNativeNoteEditorState({tags: note.tags, ...})` nas 4
+  ramificações de mapeamento (basic/basic_reversed/type_answer/cloze/
+  zh_pinyin_normal) -- normalizado automaticamente pelo ponto único
+  acima. `plan.notes[i].normalizedTags` fica disponível pro resumo; o
+  plano também expõe `plan.uniqueTags`/`plan.tagsPresent`.
+- **`shared/anki-import-ui.js`** -- resumo mostra as tags encontradas já
+  normalizadas (`#vocab #a1 #comida ...`), e a mensagem antiga ("este
+  app ainda não tem esse recurso") foi **removida** -- Gap 2 fechado de
+  verdade, não só documentado como pendência.
+
+### Gap 3 -- round-trip zh resolvido reaproveitando `pinyinFieldId`, nunca um hack
+
+**Processo obrigatório seguido à risca**: auditoria só-leitura ANTES de
+qualquer código, confirmando exatamente como o mecanismo já existente
+representa pinyin/hanzi/tradução:
+- `createFieldState()` (Fase 6D.1) -- shape `{id, lang, role,
+  content:{value}, audio, image, pinyinFieldId}`; `pinyinFieldId` num
+  Field aponta pro `id` de OUTRO Field da mesma Note (o "satélite de
+  pinyin").
+- `buildNativeRuntimeFields()` traduz `pinyinFieldId` persistido (por
+  id) pra `pinyinFieldIndex` runtime (por índice) -- usado por
+  `resolveCardField()` pra montar `pinyinText` na projeção de exibição.
+- `contentFieldIndices(rawFields)` -- decide quais Fields contam como
+  "slot de conteúdo" (front/back) pra Normal/Type Answer/Cloze, **pulando
+  explicitamente** qualquer Field que seja alvo do `pinyinFieldId` de
+  outro -- é assim que um Field de pinyin nunca vira "3º slot" por
+  engano.
+- **`nativeNoteEditorStateFromLegacyRow()`** (`shared/flashcard-native-
+  persistence.js`, Fase 6D.8, conversão de cartão zh LEGADO pro modelo
+  nativo) **já usava exatamente este padrão**: `hanziField.lang='zh'`,
+  `pinyinField.lang='zh-pinyin'`, `hanziField.pinyinFieldId =
+  pinyinField.id`, `translationField.lang='pt-BR'` -- confirmando que o
+  mecanismo já é suficiente pra representar hanzi+pinyin+tradução, sem
+  precisar de nada novo.
+- **O exportador zh do próprio app** (`zh/app.js`, `ANKI_EXPORT_CONFIG`)
+  confirmado gerando sempre o MESMO model de 3 Fields: `Pinyin` (ord 0),
+  `Caractere` (ord 1), `Tradução` (ord 2), com `qfmt` mostrando só
+  Pinyin e `afmt` revelando Caractere+Tradução -- essa é a assinatura
+  estrutural exata que o importador precisa reconhecer.
+
+Como a auditoria confirmou que o mecanismo é genuinamente suficiente,
+**o fallback "pare e reporte o gap" nunca precisou ser acionado** --
+implementação seguiu direto.
+
+**O que foi feito, `shared/anki-import.js`:**
+- **`ZH_PINYIN_CHAR_TRANSLATION_FIELD_NAMES`** + **`classifyKnownZhPinyinCharTranslationModel(model)`**
+  -- reconhecimento por **assinatura ESTRUTURAL exata** (nomes de Field
+  E posição de `qfmt`/`afmt` batendo com o padrão real do exportador
+  deste app), **nunca** por heurística de idioma da conta ou posição
+  arbitrária -- um model de 3 Fields que não bate essa assinatura exata
+  continua caindo no fluxo geral (`classifyAnkiTemplate`), que hoje
+  rejeita corretamente (`afmtRefsRaw.length === 1`, fix de uma sessão
+  anterior) em vez de perder conteúdo silenciosamente.
+- **Novo branch `zh_pinyin_normal`** dentro de `mapAnkiNoteToNativeEditorState()`
+  -- monta os 3 Fields exatamente como `nativeNoteEditorStateFromLegacyRow()`
+  já fazia pro caso legado (`hanziField.pinyinFieldId = pinyinField.id`,
+  mesmos `lang` `'zh'`/`'zh-pinyin'`/`'pt-BR'`) -- **reaproveita o
+  mecanismo existente**, nunca um caminho de mapeamento novo/paralelo.
+
+**Achado real corrigido durante o processo (não um artefato de teste)**:
+o round-trip contra um `.apkg` REAL exportado pelo próprio app (171
+Notes reais da trilha zh) revelou que `classifyAnkiTemplate()` usava
+`afmtRefsRaw.length >= 1` -- um model de 3 Fields (como o próprio
+exportador zh gera) batia essa checagem capturando só o 1º Field extra
+(Caractere) e **descartando a Tradução silenciosamente**. Corrigido pra
+`=== 1` (alinhado ao próprio comentário do código, que já dizia "EXATAMENTE
+1"). Esse fix, junto do reconhecimento estrutural do `zh_pinyin_normal`
+acima, faz com que hoje **166 de 171 Notes reais da trilha zh** importem
+com sucesso -- hanzi/pinyin/tradução preservados, `pinyinFieldId`
+corretamente reconstruído, confirmado via round-trip REAL pelo motor
+(`buildEngineCardsFromRow`/`resolveCardContentView`), não só inspeção
+estrutural.
+
+**Limitação real, documentada, não corrigida por decisão de escopo**
+(não por esquecimento): não existe hoje um jeito seguro e suficientemente
+restrito de reconhecer "Field[0]=pinyin satélite/Field[1]=hanzi/
+Field[2]=tradução" quando os nomes de Field NÃO batem exatamente com o
+padrão do próprio exportador deste app (ex: um `.apkg` de terceiros com
+um model de 3 Fields parecido, mas nomeado diferente) -- a escolha
+SEGURA (rejeitar com aviso específico em vez de arriscar perder dado)
+já resolve o problema de correção; remapear via satélite de pinyin
+nesses casos é tecnicamente viável (o mecanismo já existe, pronto), mas
+exigiria um raio de mudança maior (nova heurística de reconhecimento +
+mais testes) não pedido nesta rodada -- registrado como recomendação
+concreta pra uma sessão futura, não implementado agora.
+
+### O que continua igual, de propósito (lista "não quebrar")
+
+Confirmado por auditoria final (grep, código executável, comentários
+excluídos): nenhuma persistência direta de `CardInstance` em lugar
+nenhum; Note+CardType→CardInstances continuam 100% derivadas em runtime
+(`buildEngineCardsFromRow`/`interpretNoteFromRow`/
+`interpretNativeNoteFromRow`, nenhum tocado nesta fase); nenhum
+histórico de revisão/FSRS do Anki jamais lido (`card.type`/`card.queue`/
+`card.due`/`card.ivl`/`card.factor`/`card.reps`/`card.lapses` nunca
+consultados -- todo cartão nativo importado nasce com FSRS no default de
+sempre); Múltipla Escolha/Digite a resposta só reconhecidos quando
+inequívocos (inalterado); Cloze inválido continua pulado com aviso
+específico; `.apkg` zstd/protobuf continuam rejeitados com mensagem
+acionável; GUID do Anki (`note.guid`) só existe dentro de
+`plan.notes[i].ankiGuid` (rastreabilidade/log), **nunca gravado em
+nenhuma coluna** -- confirmado por grep que `persistAnkiImportBatches()`
+só grava o que `nativeContentColumnsFromEditorState()` devolve, que
+nunca inclui `ankiGuid`; nenhuma duplicata criada silenciosamente
+(seleção default desmarca prováveis duplicatas, nunca sobrescreve);
+limite de coleção (Fase 5.1) validado ANTES de qualquer escrita, sem
+exceção nova pro importador; import continua atômico por lote (40
+Notes/lote, retry nunca reimporta lote já confirmado); mídia preservada
+quando possível, falha por Note nunca aborta o lote inteiro; avisos
+sempre visíveis, nunca silenciosos; `isReverse`/`reviewDirection` nunca
+usados como mecanismo de direção nativa (zero ocorrência nos arquivos
+do importador); nenhum "Importado" global auto-criado (nenhuma
+persistência de deck ocorre, então a pergunta nem se aplica); nenhum
+cartão aterrissa "na raiz do idioma" (todo cartão importado vai pra
+"Meus Cartões" da conta, mesmo destino de sempre de um cartão criado
+manualmente -- não existe conceito de "raiz do idioma" nesta tabela).
+
+### Testes (categorias A-D, todas cobertas)
+
+**A -- hierarquia de Deck**: árvore simples + subdecks + preservação de
+hierarquia relativa (`deckPath` de uma Note em `Vocabulário::Animais`
+resolve pra `['Vocabulário','Animais']`); agregação de contagem no nó
+pai (soma de si + descendentes); destino sempre "Meus Cartões" (nunca
+um Deck próprio, porque Decks não existem); confirmado que nenhum campo
+de deck é persistido em nenhuma linha real.
+
+**B -- Tags**: múltiplas tags por Note; normalização correta (acentos,
+espaço/underscore, minúsculas, dedup); tags confirmadas globais/
+compartilhadas na conta (persistidas na própria linha da Note, sem
+nenhum escopo por idioma na coluna em si -- `language_app_key` já
+escopa a LINHA, `tags` é só mais uma coluna dela); "filtro do Painel" é
+explicitamente N/A -- o Painel não existe ainda, não simulado/fingido;
+confirmado que não existe um 2º sistema de tag em lugar nenhum do
+código.
+
+**C -- round-trip zh com `.apkg` REAL** (produzido pelo próprio
+exportador zh deste app, nunca um fixture sintético pra este cenário
+específico): pinyin/hanzi/tradução confirmados preservados;
+`pinyinFieldId` corretamente reconstruído (comparação estrutural E via
+motor real); nenhuma perda silenciosa de conteúdo (o achado do fix
+`afmtRefsRaw` foi descoberto exatamente por este teste).
+
+**D -- regressão completa**: suíte Node/VM (`test_fase7j_anki_import_unit.js`,
+**148/148**), round-trip real (`test_fase7j_roundtrip.js`, **33/33**),
+smoke de navegador real FR+ZH (`test_fase7j_browser.js`, **82/82**,
+Playwright/Chromium, seleção real de arquivo `.apkg`, cliques reais em
+"Selecionar todos"/confirmar, persistência real em `own_flashcards`
+fake), e **integração real contra o banco de produção** (transação +
+`ROLLBACK`, projeto `eigjocalzwamisgqilhg`): snapshot antes (7 linhas,
+hash `3a856c6170e81c7a0f3faae24e779dee`) -- INSERT real de uma linha
+`zh_pinyin_normal`-shaped (`fields` com hanzi+pinyin satélite+tradução,
+`card_generation_mode:'normal'`, `tags:['vocab','a1','coisas-que-errei']`)
+dentro de uma transação sem commit -- `RETURNING` confirmou `id`/
+`back_trans`/`fields`/`tags`/`revision` gravados corretamente (schema
+aceita o payload sem violar nenhuma constraint) -- conexão fechada sem
+`COMMIT` explícito (Postgres descarta a transação automaticamente) --
+snapshot depois idêntico ao de antes (7 linhas, MESMO hash) -- confirma
+que nenhum dado de teste ficou de pé em produção.
+
+### Escopo respeitado (confirmado, não presumido)
+
+`git status`/`git diff --stat` confirmam só 6 arquivos tocados nesta
+rodada de fechamento: `shared/anki-import.js`, `shared/anki-import-ui.js`,
+`shared/flashcard-model.js`, `shared/flashcard-editor-state.js`,
+`shared/flashcard-native-persistence.js` + a migration `048` nova.
+Nenhum Deck Engine, Painel ou Study Trail construído -- exatamente como
+a instrução exigia. Nenhum passo manual pendente pra autora -- a
+migration `048` já foi aplicada ao vivo via `mcp__Supabase__apply_migration`.
+
+Com os 3 gaps fechados, testados nas 4 categorias exigidas e a auditoria
+final limpa, a Fase 7j está de fato completa. **PARE conforme instrução
+explícita -- não avançar pra Deck Engine, Painel ou Study Trail sem
+autorização explícita da autora.**

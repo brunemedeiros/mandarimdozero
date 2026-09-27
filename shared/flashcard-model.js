@@ -465,6 +465,60 @@ function isCardGenerationModePresent(row){
   return row.card_generation_mode !== null && row.card_generation_mode !== undefined && row.card_generation_mode !== '';
 }
 
+// ---------- Tags (Note-level) -- Fase 7j fechamento (ver CLAUDE.md,
+// arquitetura consolidada "Decks/Tags/Painel", seção 10) ----------
+//
+// Tags pertencem à Note, nunca ao CardInstance -- por isso vivem só no
+// editor state/linha persistida (shared/flashcard-editor-state.js), nunca
+// no objeto `note`/`cards` que este arquivo gera em runtime pra
+// Review/FSRS (interpretNoteFromRow/interpretNativeNoteFromRow nunca leem
+// nem propagam tags -- não são propriedade de apresentação/scheduling).
+// São globais na conta, compartilhadas entre idiomas (seção 10) -- a
+// normalização mora aqui, no motor Note/Field, e não dentro de nenhuma
+// feature específica (Anki import, editor, Painel), porque TODAS
+// precisam produzir/ler o MESMO formato canônico de tag. ÚNICA função de
+// normalização do app inteiro -- auditado antes de escrever (grep no
+// repositório inteiro): nenhuma normalização de tag existia em lugar
+// nenhum -- só slugifyUsername() (shared/profile.js), regra DIFERENTE e
+// restrita ao alfabeto de username (nunca transiliteração de acento),
+// nunca reaproveitável aqui. Qualquer código futuro que precise
+// normalizar uma tag (editor nativo, Painel, atribuição de autoria de
+// Deck público, Study Trail) deve chamar normalizeTagSlug()/
+// normalizeNoteTags(), nunca reimplementar a regra.
+//
+// Regra (seção 10.1): minúsculas; sem acento (NFD + remove diacríticos,
+// mesmo idioma já usado por normalizeLoose() em fr/app.js/normalizePinyinAnswer
+// em zh/app.js pra outro propósito -- reaproveita o MESMO padrão de
+// remoção de acento já estabelecido no repo, não inventa um novo);
+// espaços viram '-'; hierarquia do Anki (parent::child) NUNCA é
+// preservada como estrutura -- "Não haverá hierarquia de subtags" --
+// '::' também vira '-', achatado numa tag plana só; qualquer caractere
+// fora de [a-z0-9-] vira '-'; maiúsculas/minúsculas são a MESMA tag
+// (normalização faz isso convergir).
+function normalizeTagSlug(raw){
+  return String(raw || '')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/::/g, '-')
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+// Normaliza uma lista de tags crua (qualquer fonte -- Anki, um editor
+// nativo futuro) -- descarta as que normalizam pra vazio, deduplica (2
+// tags cruas diferentes que colapsam na mesma forma normalizada, ex:
+// "Erro"/"erro", contam como 1 só), preserva a ORDEM de 1ª aparição.
+function normalizeNoteTags(rawTags){
+  const seen = new Set();
+  const out = [];
+  (Array.isArray(rawTags) ? rawTags : []).forEach(raw => {
+    const slug = normalizeTagSlug(raw);
+    if (slug && !seen.has(slug)){ seen.add(slug); out.push(slug); }
+  });
+  return out;
+}
+
 // Cardinalidade de múltipla escolha nativa -- o motor valida, nunca confia
 // só na UI (restrição explícita da autora: "não confie apenas na validação
 // da UI"). Exatamente 1 Field role:'prompt', exatamente 1 role:'answer'

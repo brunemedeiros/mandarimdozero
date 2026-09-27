@@ -127,6 +127,15 @@ function createNativeNoteEditorState(overrides){
     privateNote: o.privateNote || null,
     cardGenerationMode: mode,
     fields: (o.fields || []).map(f => createFieldState(f)),
+    // Tags (Fase 7j fechamento, ver CLAUDE.md) -- propriedade da Note,
+    // nunca do Field/CardInstance (arquitetura consolidada "Decks/Tags/
+    // Painel", seção 6/10). SEMPRE normalizadas aqui, no único ponto de
+    // construção do estado nativo -- garante que TODO Note editor state
+    // (Anki import de hoje, um editor manual de tags futuro) carrega
+    // tags já no formato canônico, nunca dependendo de cada chamador
+    // lembrar de normalizar (normalizeTagSlug/normalizeNoteTags,
+    // shared/flashcard-model.js -- reutilizado, nunca duplicado aqui).
+    tags: (typeof normalizeNoteTags === 'function') ? normalizeNoteTags(o.tags) : (Array.isArray(o.tags) ? o.tags.slice() : []),
   };
 }
 
@@ -155,6 +164,7 @@ function createNativeNoteEditorStateFromRow(row){
     privateNote: row.note || null,
     cardGenerationMode: row.card_generation_mode,
     fields: row.fields,
+    tags: row.tags,
   });
 }
 
@@ -251,6 +261,11 @@ function noteEditorStateContentForComparison(state){
       languageAppKey: state.languageAppKey,
       privateNote: state.privateNote,
       cardGenerationMode: state.cardGenerationMode,
+      // tags entram na comparação de CONTEÚDO com a mesma disciplina
+      // "coarse" já travada pra privateNote (Fase 6D.1) -- mudar tags é
+      // uma alteração persistível como qualquer outra, mesmo não sendo
+      // mostrada na tela de Revisão.
+      tags: (state.tags || []).slice(),
       fields: state.fields.map(f => ({
         id: f.id,
         lang: f.lang,
@@ -330,5 +345,6 @@ function noteEditorStateToRow(state, extra){
       pinyinFieldId: f.pinyinFieldId,
     })),
     card_generation_mode: state.cardGenerationMode,
+    tags: (state.tags || []).slice(),
   }, extra || {});
 }

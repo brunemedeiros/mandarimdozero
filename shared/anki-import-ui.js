@@ -145,10 +145,12 @@ function ankiImportNoteRowHTML(note){
       </label>`;
   }
   const typeLabel = ANKI_IMPORT_CARD_TYPE_LABELS[note.cardTypeLabel] || note.cardTypeLabel;
+  const tagPills = (note.normalizedTags || []).map(t => `<span class="pill" style="font-size:10px;">#${escapeHTML(t)}</span>`).join(' ');
   const badges = [
     `<span class="pill" style="font-size:11px;">${escapeHTML(typeLabel)}</span>`,
     note.hasMedia ? `<span class="pill" style="font-size:11px;">🎧🖼️ mídia</span>` : '',
     note.isDuplicate ? `<span class="pill" style="font-size:11px;">⚠️ possível duplicata</span>` : '',
+    tagPills,
   ].filter(Boolean).join(' ');
   const preview = (note.editorState.fields[0].content.value || '').slice(0, 80);
   return `
@@ -159,6 +161,43 @@ function ankiImportNoteRowHTML(note){
         <div class="admin-badge-desc">${badges}${note.warnings.length ? `<br>⚠️ ${note.warnings.map(escapeHTML).join(' · ')}` : ''}</div>
       </div>
     </label>`;
+}
+
+// Gap 1 (Fase 7j fechamento, ver CLAUDE.md) -- lista indentada, SÓ
+// LEITURA, da hierarquia de Decks encontrada no .apkg -- nunca um
+// controle de destino de verdade (nenhum Deck existe neste app ainda,
+// ver comentário de buildAnkiDeckTree em shared/anki-import.js). Existe
+// só pra a pessoa CONFERIR que a estrutura foi reconhecida (nunca
+// descartada silenciosamente), mesmo sem poder direcioná-la ainda.
+function ankiDeckTreeRowsHTML(node, depth){
+  return node.children.map(child => {
+    const indent = depth * 16;
+    const childRows = ankiDeckTreeRowsHTML(child, depth + 1);
+    return `<div style="padding-left:${indent}px; font-size:13px; color:var(--ink-soft);">📁 ${escapeHTML(child.name)} <span style="opacity:.75;">(${child.count})</span></div>${childRows}`;
+  }).join('');
+}
+
+function ankiImportDeckSummaryHTML(plan){
+  const tree = plan.deckTree;
+  if (!tree || !tree.children.length) return '';
+  return `
+    <div class="profile-edit-hint" style="margin-top:8px;">
+      <strong>📚 Baralhos (Decks) encontrados no Anki:</strong>
+      <div style="margin-top:4px; max-height:120px; overflow-y:auto;">${ankiDeckTreeRowsHTML(tree, 0)}</div>
+      Este app ainda não tem Decks -- todos os cartões confirmados entram direto em "Meus Cartões", sem essa organização por enquanto. Assim que os Decks existirem, esta hierarquia (já reconhecida e guardada) poderá recriar a mesma estrutura automaticamente.
+    </div>`;
+}
+
+function ankiImportTagsSummaryHTML(plan){
+  if (!plan.tagsPresent) return '';
+  const shown = plan.uniqueTags.slice(0, 20);
+  const pills = shown.map(t => `<span class="pill" style="font-size:11px;">#${escapeHTML(t)}</span>`).join(' ');
+  return `
+    <div class="profile-edit-hint" style="margin-top:8px;">
+      <strong>🏷️ Tags encontradas (${plan.uniqueTags.length}):</strong>
+      <div style="margin-top:4px;">${pills}${plan.uniqueTags.length > shown.length ? ' …' : ''}</div>
+      As tags serão salvas em cada cartão (Note) exatamente como no Anki (normalizadas -- minúsculas, sem acento, espaços viram "-") e ficarão disponíveis pra filtro quando o Painel existir.
+    </div>`;
 }
 
 function renderAnkiImportSummary(body){
@@ -173,8 +212,9 @@ function renderAnkiImportSummary(body){
       <strong>${plan.skippedCount}</strong> não puderam ser reconhecidos com segurança (ver avisos abaixo, ficam de fora).
       ${plan.duplicateCount ? `<br>⚠️ ${plan.duplicateCount} parecem já existir na sua conta (desmarcados por padrão, mas você pode marcar mesmo assim).` : ''}
       ${plan.mediaCount ? `<br>🎧🖼️ ${plan.mediaCount} têm áudio/imagem -- só é baixado/enviado dos cartões que você de fato confirmar.` : ''}
-      ${plan.tagsPresent ? `<br>🏷️ Este .apkg tem tags do Anki -- este app ainda não tem esse recurso, então as tags não são importadas.` : ''}
     </p>
+    ${ankiImportDeckSummaryHTML(plan)}
+    ${ankiImportTagsSummaryHTML(plan)}
     <div class="admin-recipients-summary">
       <span class="pill" id="anki-import-counter">Nenhum cartão selecionado</span>
       <div class="admin-recipients-actions">

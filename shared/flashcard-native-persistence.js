@@ -186,6 +186,10 @@ function nativeContentColumnsFromEditorState(editorState){
     fields: row.fields,
     card_generation_mode: row.card_generation_mode,
     note: row.note,
+    // Tags (Fase 7j fechamento, ver CLAUDE.md) -- propriedade nativa da
+    // Note (migration 048), já normalizada por createNativeNoteEditorState()
+    // -- este transform só repassa, nunca renormaliza/reimplementa.
+    tags: row.tags,
     front: mirror.front,
     back_trans: mirror.back_trans,
     // Colunas legadas explicitamente NUNCA usadas pelo caminho nativo --

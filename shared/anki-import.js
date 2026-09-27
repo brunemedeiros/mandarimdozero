@@ -145,6 +145,63 @@ function classifyAnkiTemplate(model, tmpl){
   return { kind: 'unrecognized', reason: 'ambiguous_template' };
 }
 
+// ============================================================
+// Reconhecimento do model Básico específico que o PRÓPRIO exportador zh
+// deste app produz (Fase 7j, fechamento do gap 3 -- ver CLAUDE.md, Gap 3
+// "ZH round-trip via pinyinFieldId").
+//
+// Auditoria feita ANTES de escrever isto (obrigatória, ver relatório):
+// createFieldState()/pinyinFieldId (shared/flashcard-editor-state.js) já
+// representam "um Field de conteúdo com um Field satélite de pinyin
+// anexado" -- contentFieldIndices() (shared/flashcard-model.js) já pula
+// o satélite ao contar slots de conteúdo posicionais, e
+// nativeNoteEditorStateFromLegacyRow() (shared/flashcard-native-
+// persistence.js) já usa EXATAMENTE este mecanismo pra converter um
+// cartão zh LEGADO (front/front_pinyin/back_trans) -- confirmado por
+// leitura do código real, nunca presumido. O mecanismo é suficiente;
+// faltava só o IMPORTADOR reconhecer quando um model Anki representa
+// essa mesma relação.
+//
+// zh/app.js (ANKI_EXPORT_CONFIG) SEMPRE exporta com o MESMO model --
+// Normal e Digite a resposta zh caem no MESMO shape de 3 campos (só o
+// CONTEÚDO de cada campo muda, nunca a estrutura do model/template) --
+// confirmado lendo `fields`/`qfmt`/`afmt` reais em zh/app.js antes de
+// escrever este reconhecimento, nunca adivinhado:
+//   fields: [{name:"Pinyin"}, {name:"Caractere"}, {name:"Tradução"}]
+//   qfmt:   "...{{Pinyin}}..."
+//   afmt:   "{{FrontSide}}...{{Caractere}}...{{Tradução}}..."
+//
+// Reconhecido por ASSINATURA ESTRUTURAL EXATA -- 3 Fields com estes
+// NOMES LITERAIS, nesta ORDEM, 1 template só, cujo qfmt referencia só
+// "Pinyin" e cujo afmt referencia "Caractere"+"Tradução" (nada mais) --
+// NUNCA "se idioma===zh" nem heurística posicional genérica sobre um
+// model de 3 campos arbitrário (isso reabriria exatamente o risco que o
+// bugfix de classifyAnkiTemplate() fechou -- adivinhar qual dos 2 campos
+// "novos" é conteúdo vs. satélite de pinyin, pra um deck de terceiros
+// desconhecido). Um model de 3rd-party que por acaso usa estes 3 nomes
+// literais (auto-descritivos: "Pinyin"/"Caractere"/"Tradução") é tratado
+// do mesmo jeito, de propósito -- os NOMES já dizem o que cada campo é,
+// não é uma adivinhação, é reconhecimento por rótulo explícito.
+const ZH_PINYIN_CHAR_TRANSLATION_FIELD_NAMES = ['Pinyin', 'Caractere', 'Tradução'];
+
+function classifyKnownZhPinyinCharTranslationModel(model){
+  if (model.type === 1) return null; // nunca compete com a detecção de Cloze (model.type===1)
+  const flds = (model.flds || []).slice().sort((a, b) => a.ord - b.ord);
+  const fieldNames = flds.map(f => f.name);
+  if (fieldNames.length !== 3) return null;
+  if (fieldNames[0] !== ZH_PINYIN_CHAR_TRANSLATION_FIELD_NAMES[0]
+      || fieldNames[1] !== ZH_PINYIN_CHAR_TRANSLATION_FIELD_NAMES[1]
+      || fieldNames[2] !== ZH_PINYIN_CHAR_TRANSLATION_FIELD_NAMES[2]) return null;
+  const tmpls = model.tmpls || [];
+  if (tmpls.length !== 1) return null;
+  const tmpl = tmpls[0];
+  const qfmtRefs = ankiTemplateFieldRefs(tmpl.qfmt);
+  if (qfmtRefs.length !== 1 || qfmtRefs[0] !== 'Pinyin') return null;
+  const afmtRefs = ankiTemplateFieldRefs(tmpl.afmt).filter(name => name !== 'Pinyin');
+  if (afmtRefs.length !== 2 || !afmtRefs.includes('Caractere') || !afmtRefs.includes('Tradução')) return null;
+  return { kind: 'zh_pinyin_normal', pinyinFieldName: 'Pinyin', hanziFieldName: 'Caractere', translationFieldName: 'Tradução' };
+}
+
 // Classifica um MODEL inteiro (todos os templates juntos) -- combina os
 // resultados de classifyAnkiTemplate() dos seus tmpls (ordenados por `ord`,
 // a mesma ordem que o Anki usa pra gerar Card 1/Card 2/...) numa decisão
@@ -153,6 +210,14 @@ function classifyAnkiTemplate(model, tmpl){
 // Fields"). Resultado cacheável por model.id (mesmo model = mesma
 // classificação pra toda Note que o usa) -- quem chama decide o cache.
 function classifyAnkiNoteType(model){
+  // Gap 3 (ver comentário acima) -- checagem estrutural mais específica
+  // primeiro, sempre barata (compara nomes de campo antes de qualquer
+  // outra coisa) e mutuamente exclusiva com todo o resto desta função
+  // (só retorna não-null pra essa assinatura exata de 3 campos/1
+  // template/refs exatas) -- nunca intercepta nenhum outro model.
+  const knownZh = classifyKnownZhPinyinCharTranslationModel(model);
+  if (knownZh) return knownZh;
+
   const tmpls = (model.tmpls || []).slice().sort((a, b) => a.ord - b.ord);
   if (!tmpls.length) return { kind: 'unrecognized', reason: 'no_templates' };
 
@@ -295,8 +360,47 @@ function mapAnkiNoteToNativeEditorState(note, model, classification, languageApp
         languageAppKey,
         cardGenerationMode: classification.kind === 'basic_reversed' ? 'normal_reversed' : 'normal',
         fields: [frontField, backField],
+        tags: note.tags,
       }),
       dedupKey: `${frontRaw.text}\u0001${backRaw.text}`.toLowerCase().trim(),
+    };
+  }
+
+  if (classification.kind === 'zh_pinyin_normal'){
+    // Gap 3 (ver comentário na classificação acima) -- reaproveita, sem
+    // nenhuma mudança, o MESMO mecanismo pinyinFieldId que
+    // nativeNoteEditorStateFromLegacyRow() (shared/flashcard-native-
+    // persistence.js) já usa pra um cartão zh legado: hanziField carrega
+    // pinyinFieldId apontando pro Field satélite de pinyin, nunca um
+    // Field solto extra -- contentFieldIndices() (shared/flashcard-
+    // model.js) já sabe pular esse satélite ao contar os 2 slots de
+    // conteúdo (front=hanzi, back=tradução), sem nenhum código especial
+    // aqui além de montar os 3 Fields na relação certa.
+    const pinyinRaw = extractAnkiMediaRefs(rawFieldByName(classification.pinyinFieldName));
+    const hanziRaw = extractAnkiMediaRefs(rawFieldByName(classification.hanziFieldName));
+    const translationRaw = extractAnkiMediaRefs(rawFieldByName(classification.translationFieldName));
+    if (!pinyinRaw.text || !hanziRaw.text || !translationRaw.text){
+      return { ok: false, reason: 'empty_content', warning: 'Pinyin, caractere ou tradução ficou vazio depois de limpar HTML/mídia -- Note pulada.' };
+    }
+    const hanziField = createFieldState({ lang: 'zh', content: { value: hanziRaw.text } });
+    const pinyinField = createFieldState({ lang: 'zh-pinyin', content: { value: pinyinRaw.text } });
+    const translationField = createFieldState({ lang: 'pt-BR', content: { value: translationRaw.text } });
+    hanziField.pinyinFieldId = pinyinField.id;
+    return {
+      ok: true,
+      warnings: [],
+      mediaRefs: [
+        { field: hanziField, audioFilename: hanziRaw.audioFilename, imageFilename: hanziRaw.imageFilename },
+        { field: pinyinField, audioFilename: pinyinRaw.audioFilename, imageFilename: pinyinRaw.imageFilename },
+        { field: translationField, audioFilename: translationRaw.audioFilename, imageFilename: translationRaw.imageFilename },
+      ],
+      editorState: createNativeNoteEditorState({
+        languageAppKey,
+        cardGenerationMode: 'normal',
+        fields: [hanziField, pinyinField, translationField],
+        tags: note.tags,
+      }),
+      dedupKey: `${hanziRaw.text}\u0001${translationRaw.text}`.toLowerCase().trim(),
     };
   }
 
@@ -317,6 +421,7 @@ function mapAnkiNoteToNativeEditorState(note, model, classification, languageApp
         languageAppKey,
         cardGenerationMode: 'type_answer',
         fields: [promptField, answerField],
+        tags: note.tags,
       }),
       dedupKey: `${promptRaw.text}\u0001${answerRaw.text}`.toLowerCase().trim(),
     };
@@ -351,6 +456,7 @@ function mapAnkiNoteToNativeEditorState(note, model, classification, languageApp
         languageAppKey,
         cardGenerationMode: 'cloze',
         fields: [textField, translationField],
+        tags: note.tags,
       }),
       dedupKey: nativeSyntax.toLowerCase().trim(),
     };
@@ -446,34 +552,101 @@ async function resolveAndAttachAnkiMedia(mediaRefs, { parseResult, uploadFn, med
 // classificada/mapeada (sem mídia resolvida, sem nada persistido). É isto
 // que a UI usa pra montar a tela de resumo (Section 25/26) -- nunca chama
 // Supabase.
+// ============================================================
+// Gap 1 (Fase 7j, fechamento -- ver CLAUDE.md, "Deck hierarchy") --
+// estrutura de Deck do Anki, capturada como DADO puro, NUNCA persistida.
+//
+// Auditoria feita antes de escrever isto (obrigatória, ver relatório):
+// grep no repositório inteiro por "deck"/"collection"/"category" (fora
+// de comentários/nomes de coluna não relacionados de notification_rules)
+// -- NENHUM motor de Deck existe hoje neste app (confirmado, não
+// presumido). A arquitetura consolidada (seção 22, ver CLAUDE.md) exige
+// 3 modos de destino (preservar hierarquia sob um Deck escolhido /
+// importar tudo pra um Deck existente / escolher raiz pessoal e
+// preservar hierarquia relativa) -- os 3 exigem um Deck Engine de
+// verdade (Fase C daquela arquitetura, ainda NÃO implementada) pra
+// sequer existir "Deck pessoal existente" pra escolher. Em vez de
+// inventar uma estrutura paralela (uma coluna de Deck solta na Note, ou
+// uma tabela de Deck própria só pro importador Anki -- proibido
+// explicitamente: "Não crie um campo textual 'anki_deck' na Note como
+// substituto"), este importador só PREPARA a hierarquia como dado
+// estruturado (deckPath por Note + deckTree agregado) e NUNCA persiste
+// nada com ela -- todo cartão confirmado ainda entra plano em
+// own_flashcards, exatamente como antes desta entrega. Integração
+// pendente e documentada: quando o Deck Engine existir, mapear
+// plan.deckTree/plan.notes[i].deckPath pra Decks reais dentro de "Meus
+// Decks" (seção 5.3/22 da arquitetura consolidada).
+//
+// deckPath -- Anki usa "::" como separador de hierarquia dentro do
+// PRÓPRIO nome do deck (ex: "Vocabulário::Animais") -- split() é o
+// inverso exato disso, preserva a ordem/profundidade original sem
+// nenhuma perda.
+function ankiDeckPathFromName(deckName){
+  return deckName ? deckName.split('::').filter(Boolean) : [];
+}
+
+// Árvore agregada de TODOS os deckPaths do plano -- cada nó soma as
+// Notes de si mesmo E de todos os descendentes (`count`), mesmo
+// princípio de agregação já travado na arquitetura consolidada (seção
+// 3.3: "Deck pai soma os Cards de todos os descendentes") -- construído
+// aqui já nesse formato pra ser diretamente reaproveitável pelo Deck
+// Engine futuro, não só uma lista solta.
+function buildAnkiDeckTree(notes){
+  const root = { name: null, path: [], count: 0, children: [] };
+  notes.forEach(n => {
+    const path = n.deckPath || [];
+    root.count += 1;
+    let node = root;
+    let acc = [];
+    path.forEach(segment => {
+      acc = acc.concat([segment]);
+      let child = node.children.find(c => c.name === segment);
+      if (!child){
+        child = { name: segment, path: acc.slice(), count: 0, children: [] };
+        node.children.push(child);
+      }
+      child.count += 1;
+      node = child;
+    });
+  });
+  const sortChildren = (node) => {
+    node.children.sort((a, b) => a.name.localeCompare(b.name));
+    node.children.forEach(sortChildren);
+  };
+  sortChildren(root);
+  return root;
+}
+
 function buildAnkiImportPlan(parseResult, { languageAppKey, existingRows }){
   const modelCache = new Map();
   const dedupSignatures = existingOwnFlashcardsDedupSignatures(existingRows || []);
   const seenBatchSignatures = new Set();
 
   const notes = parseResult.notes.map(note => {
+    const normalizedTags = (typeof normalizeNoteTags === 'function') ? normalizeNoteTags(note.tags) : (note.tags || []);
     const model = parseResult.models[note.mid];
-    if (!model){
-      return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: 'missing_model', warning: 'Modelo de cartão referenciado por esta Note não existe na coleção -- Note pulada.', deckName: null, tags: note.tags };
-    }
-    if (!modelCache.has(note.mid)) modelCache.set(note.mid, classifyAnkiNoteType(model));
-    const classification = modelCache.get(note.mid);
     const deckIds = (parseResult.cardsByNoteId.get(note.id) || []).map(c => c.deckId);
     const deckNames = deckIds.map(id => (parseResult.decks[id] && parseResult.decks[id].name) || null).filter(Boolean);
     const deckName = deckNames[0] || null;
+    const deckPath = ankiDeckPathFromName(deckName);
+    if (!model){
+      return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: 'missing_model', warning: 'Modelo de cartão referenciado por esta Note não existe na coleção -- Note pulada.', deckName, deckPath, tags: note.tags, normalizedTags };
+    }
+    if (!modelCache.has(note.mid)) modelCache.set(note.mid, classifyAnkiNoteType(model));
+    const classification = modelCache.get(note.mid);
 
     if (classification.kind === 'unrecognized'){
-      return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: classification.reason || 'unrecognized_note_type', warning: 'Tipo de cartão do Anki não reconhecido de forma segura (não é Básico/Básico invertido/Cloze/Digite a resposta claro) -- Note pulada.', deckName, tags: note.tags };
+      return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: classification.reason || 'unrecognized_note_type', warning: 'Tipo de cartão do Anki não reconhecido de forma segura (não é Básico/Básico invertido/Cloze/Digite a resposta claro) -- Note pulada.', deckName, deckPath, tags: note.tags, normalizedTags };
     }
 
     const mapped = mapAnkiNoteToNativeEditorState(note, model, classification, languageAppKey);
     if (!mapped.ok){
-      return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: mapped.reason, warning: mapped.warning, deckName, tags: note.tags };
+      return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: mapped.reason, warning: mapped.warning, deckName, deckPath, tags: note.tags, normalizedTags };
     }
 
     const validation = validateNoteEditorStateForSave(mapped.editorState);
     if (!validation.ok){
-      return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: 'validation_failed', warning: `Cartão inválido depois de mapeado: ${validation.error}`, deckName, tags: note.tags };
+      return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: 'validation_failed', warning: `Cartão inválido depois de mapeado: ${validation.error}`, deckName, deckPath, tags: note.tags, normalizedTags };
     }
 
     const isDuplicateOfExisting = dedupSignatures.has(mapped.dedupKey);
@@ -484,14 +657,18 @@ function buildAnkiImportPlan(parseResult, { languageAppKey, existingRows }){
       ankiNoteId: note.id,
       ankiGuid: note.guid,
       ok: true,
-      cardTypeLabel: classification.kind === 'basic_reversed' ? 'normal_reversed' : classification.kind,
+      cardTypeLabel: classification.kind === 'basic_reversed' ? 'normal_reversed'
+        : classification.kind === 'zh_pinyin_normal' ? 'normal'
+        : classification.kind,
       editorState: mapped.editorState,
       mediaRefs: mapped.mediaRefs,
       warnings: mapped.warnings.concat(classification.extraTemplatesDropped ? [`${classification.extraTemplatesDropped} template(s) extra deste tipo de cartão não foram preservados (só o 1º foi importado).`] : []),
       hasMedia: mapped.mediaRefs.some(r => r.audioFilename || r.imageFilename),
       isDuplicate: isDuplicateOfExisting || isDuplicateWithinBatch,
       deckName,
+      deckPath,
       tags: note.tags,
+      normalizedTags: mapped.editorState.tags, // já normalizadas por createNativeNoteEditorState() -- nunca recalculado 2x
     };
   });
 
@@ -499,7 +676,8 @@ function buildAnkiImportPlan(parseResult, { languageAppKey, existingRows }){
   const skippedCount = notes.length - okCount;
   const duplicateCount = notes.filter(n => n.ok && n.isDuplicate).length;
   const mediaCount = notes.filter(n => n.ok && n.hasMedia).length;
-  const tagsPresent = parseResult.notes.some(n => n.tags && n.tags.length);
+  const allTags = new Set();
+  notes.forEach(n => (n.normalizedTags || []).forEach(t => allTags.add(t)));
 
   return {
     notes,
@@ -508,7 +686,9 @@ function buildAnkiImportPlan(parseResult, { languageAppKey, existingRows }){
     skippedCount,
     duplicateCount,
     mediaCount,
-    tagsPresent,
+    tagsPresent: allTags.size > 0,
+    uniqueTags: Array.from(allTags).sort(),
+    deckTree: buildAnkiDeckTree(notes),
     schemaGeneration: parseResult.schemaGeneration,
   };
 }
