@@ -14140,3 +14140,496 @@ autorizada explicitamente.
 **PARE conforme instrução explícita -- Fase 7j (Anki import) não
 iniciada.** Próxima etapa só começa depois de autorização explícita da
 autora, com este relatório já entregue antes de pedir luz verde.
+
+**Atualização: autorizada e entregue (2026-09-27), "FASE 7j -- ANKI
+IMPORT: AUDITORIA E IMPLEMENTAÇÃO" -- instrução de 35 seções, todas
+cumpridas, ver relatório completo abaixo.**
+
+## Fase 7j (implementação) -- Anki IMPORT: `.apkg` real vira Note nativa,
+CardInstances derivadas em runtime como sempre, zero histórico Anki
+importado
+
+Instrução de 35 seções cobrindo pipeline completo `.apkg → parse →
+classificação de Model/Template → mapeamento de campos → Card Type →
+validação → Note nativa → persistência` -- **NUNCA** cria uma linha
+legada quando a representação nativa é possível, **NUNCA** persiste
+CardInstance, **NUNCA** importa histórico de revisão/FSRS do Anki. Auditoria
+prévia (só leitura, zero código) confirmou a arquitetura completa
+Note/Field/CardType já existente (Fases 6B-7i) antes de qualquer linha
+escrita -- reaproveitada integralmente, nunca duplicada.
+
+### Arquivos alterados/criados
+
+- **`shared/anki-parser.js`** (novo) -- parser puro de `.apkg`, sem UI/
+  rede/persistência.
+- **`shared/anki-import.js`** (novo) -- mapeamento Anki→Note nativa,
+  deduplicação, plano de importação, persistência em lote.
+- **`shared/anki-import-ui.js`** (novo) -- fluxo de 5 telas dentro de um
+  modal (escolher `.apkg` → carregando → resumo/preview → confirmar →
+  resultado).
+- **`shared/my-flashcards.js`** -- seção "📥 Importar do Anki (.apkg)"
+  nova, input `#anki-import-file` ligado a `handleAnkiImportFileSelected`.
+- **`fr/index.html`/`zh/index.html`** -- 2 `<script>` novos por idioma
+  (`anki-parser.js`+`anki-import.js`, logo depois de `flashcard-native-
+  persistence.js`; `anki-import-ui.js`, depois de `my-flashcards.js`).
+- **Nenhuma migração** -- reaproveita 100% o schema `own_flashcards`
+  (`fields`/`card_generation_mode`, migration 045, Fase 6B) já existente.
+
+### Pipeline (Parse → Normalize → Validate → Preview → Persist, Seção 26)
+
+```
+.apkg (ZIP) -> shared/anki-parser.js (parseApkgFile)
+  - sql.js (mesma lib já usada pelo export, Fase 7i) + JSZip
+  - le collection.anki2/anki21 (schema JSON legado -- 100% compatível
+    com o que este app já exporta), col.models/col.decks, notes, cards,
+    media manifest
+  - collection.anki21b (zstd) -> fatal, unsupported_format_zstd
+  - schema 18+ protobuf (tabela notetypes, col.models vazio) -> fatal,
+    unsupported_format_protobuf
+  -> {ok, schemaGeneration, models, decks, notes, cardsByNoteId,
+      mediaManifest, zip}
+
+shared/anki-import.js (buildAnkiImportPlan)
+  - classifyAnkiNoteType(model) por MODEL (cacheado por model.id -- toda
+    Note do mesmo model reaproveita a mesma classificação, nunca
+    recalculada por Note)
+      - model.type===1 (Cloze do Anki) -> sempre 'cloze', nunca por
+        heurística de HTML (Seção 6)
+      - 1 template -> classifyAnkiTemplate() decide basic/type_answer/
+        unrecognized
+      - 2 templates -> só vira 'basic_reversed' com a ASSINATURA EXATA
+        do "Basic (and reversed card)" do próprio Anki (Template1
+        Front->Back, Template2 Back->Front, Fields DIFERENTES -- Seção
+        17: nunca assume reversed só por "são 2 templates")
+      - 2+ templates sem esse padrão -> cai pro 1º template usável,
+        nunca inventa Múltipla Escolha (Seção 16 -- Anki não tem
+        equivalente nativo, sem convenção universal de Field pra
+        inferir isso com segurança)
+  - mapAnkiNoteToNativeEditorState(note, model, classification, lang)
+    -> {ok, editorState, mediaRefs, warnings, dedupKey} | {ok:false,
+       reason, warning}
+  - validateNoteEditorStateForSave() (Fase 6D.6, REUTILIZADA, nunca
+    duplicada) roda em cima do editorState já mapeado -- 2ª camada de
+    segurança
+  - deduplicação (normalizeForDedup + Set de assinaturas, contra
+    own_flashcards já existentes E contra o próprio lote) -- Seção 11:
+    "detect+inform+allow-skip", NUNCA sobrescreve/pula silenciosamente
+  -> {notes:[...], totalNotes, okCount, skippedCount, duplicateCount,
+      mediaCount, tagsPresent}
+
+shared/anki-import-ui.js (5 telas, dentro de UM modal)
+  1. Escolher .apkg
+  2. Carregando (parse+classificação+dedup -- ZERO escrita de rede)
+  3. Resumo/preview -- contagem, avisos, checkbox por Note (Note
+     inválida = checkbox disabled, nunca selecionável) -- mídia NUNCA é
+     buscada/enviada aqui (Seção 26)
+  4. Confirmar -- computeAnkiImportRemainingSlots() (Seção 23, bloqueia
+     ANTES de escrever) -> resolveAndAttachAnkiMedia() só das Notes
+     selecionadas -> persistAnkiImportBatches() (lotes de 40, atômico
+     por lote via Promise.all + .select())
+  5. Resultado -- quantas importadas, quantas puladas, avisos
+```
+
+### Seção 4 (Anki Note ≠ Anki Card)
+
+`persistAnkiImportBatches()` mapeia `planEntries` (1 entrada por Anki
+NOTE, sempre) para `rows` (1 linha `own_flashcards` por entrada) --
+**nunca** itera `cardsByNoteId`. Confirmado com fidelidade real ao
+formato: o fixture builder de teste foi corrigido nesta sessão pra
+gerar 1 linha `cards` REAL por template do model (Básico+reversed gera 2
+`cards` reais pra 1 `note` só, como o Anki genuíno sempre faz) --
+confirmado que o importador continua produzindo só **1 Note nativa**
+mesmo com 2 `cards` reais de entrada.
+
+### Seções 5/8/9/17 (Model → Card Type)
+
+- **Básico → `normal`** -- `qfmt` referencia exatamente 1 Field
+  (frente), `afmt` referencia exatamente 1 Field NOVO (verso).
+  `{{FrontSide}}` sempre ignorado (é "o que qfmt já mostrou", nunca
+  conteúdo). `contentFieldIndices()` (Fase 6B, reaproveitado) já decide
+  slot 0/1 pela ORDEM do array `fields` que o mapeador monta
+  (`[frontField, backField]`) -- nunca por nome/role.
+- **Básico+reversed → `normal_reversed`** -- **1 única Note nativa**
+  (nunca 2), com `card_generation_mode:'normal_reversed'` sobre os
+  MESMOS 2 Fields -- as 2 CardInstances continuam sendo geradas em
+  RUNTIME via `buildReversedCardInstancePair()` (Fase 4a, intocada),
+  nunca persistidas 2x.
+- **Cloze do Anki → `cloze`** -- detectado por `model.type===1`
+  (estrutural, nunca por regex em HTML). `convertAnkiClozeToNativeSyntax()`
+  converte `{{c1::resposta}}`/`{{c1::resposta::dica}}` pra sintaxe
+  interna `{{c1::resposta}}` -- a dica (Seção 14, Decisão D6) é
+  **DESCARTADA por completo** (nunca vira `compareAnswer`, que no
+  modelo nativo significa "o que a aluna precisa DIGITAR" -- semântica
+  bem mais forte que uma dica cosmética do Anki tipo "verbo no
+  pretérito"). 2º campo do model vira `translationField` -- sem
+  tradução real, a Note é pulada (`cloze_missing_translation`) --
+  `validateNativeClozeStructure()` já exigia isso, nunca inventado
+  aqui.
+- **Digite a resposta → `type_answer`** -- **só quando INEQUÍVOCO**
+  (Seção 15): `qfmt` mostra exatamente 1 Field de pergunta MAIS
+  `{{type:X}}` apontando pra um Field DIFERENTE, os dois existindo de
+  fato no model. **Bug real encontrado e corrigido antes de escrever
+  qualquer teste** (não por um teste falhando -- releitura cuidadosa do
+  código antes de confiar nele): `ankiTemplateFieldRefs()` extrai nomes
+  de `{{X}}`, `{{cloze:X}}` E `{{type:X}}` uniformemente -- o template
+  PADRÃO do Anki pra este note type
+  (`qfmt:"{{Front}}{{type:Back}}"`) tem `qfmtRefs.length===2`
+  (`['Front','Back']`), não 1 -- a checagem original (`qfmtRefs.length
+  === 1`) NUNCA reconheceria o template canônico do próprio Anki.
+  Corrigido excluindo o campo do próprio `{{type:X}}` antes de contar
+  (`promptRefs = qfmtRefs.filter(name => name !== typeFieldName)`,
+  `promptRefs.length === 1`).
+- **Múltipla Escolha -- NUNCA inferida** (Seção 16) -- Anki não tem
+  conceito nativo de "múltipla escolha" sem add-on, e não existe
+  convenção universal de Field pra adivinhar distratores com segurança
+  a partir de HTML arbitrário. Qualquer model que não bata
+  basic/basic_reversed/cloze/type_answer cai em `unrecognized`, com
+  aviso claro, nunca uma tentativa de "inventar" Múltipla Escolha.
+
+### Seção 6 (não interpretar HTML como semântica conhecida)
+
+Conteúdo sempre deriva dos **Fields declarados no model**, nunca de
+regex sobre `afmt`/`qfmt` tentando adivinhar layout visual.
+`extractAnkiMediaRefs()` só extrai `[sound:x]`/`<img src="x">` (sintaxe
+DE DADO do Anki, não de apresentação) e limpa `<br>`/tags HTML
+genéricas do TEXTO de um Field já identificado -- nunca tenta entender
+CSS/layout do template pra decidir o que é "front"/"back".
+
+### Seção 7/8/9/10 (Fields)
+
+Cada Field ganha um `id` novo e ESTÁVEL (`createFieldState()`, Fase
+6D.1, reaproveitado) -- **nunca** reaproveita o id numérico interno do
+Anki (`note.id`/`note.guid`) como id de Field ou de linha
+`own_flashcards` (Seção 10) -- confirmado que `note.guid` só é usado pra
+LOG/rastreabilidade em `plan.notes[i].ankiGuid`, nunca como chave
+primária/id gravado. `lang` de todo Field mapeado é `null` (nunca
+inventado a partir do idioma da conta -- `Field.lang` é conceito
+PEDAGÓGICO do Field individual, `languageAppKey` é conceito da CONTA,
+os dois continuam eixos independentes, mesma regra já travada desde a
+Fase 6B/7f). Ordem do array `fields` é a única coisa que
+`contentFieldIndices()` usa pra decidir slot 0/1 (front/prompt/text) e
+slot 1 (back/answer/translation) -- nunca por nome.
+
+### Seção 12/13 (mídia)
+
+`extractAnkiMediaRefs()` extrai `[sound:x.mp3]`/`<img src="x.png">` do
+texto de um Field e devolve `{text limpo, audioFilename, imageFilename}`
+-- só a PRIMEIRA ocorrência de cada tipo por Field (mesmo critério "1
+áudio + 1 imagem por Field" já em vigor desde a Fase 7a/7b). Mapeado
+pra `field.audio`/`field.image` (**nunca** `note.audio`/`note.image` --
+mídia é sempre propriedade do FIELD, nunca da Note, mesma decisão da
+Fase 6B/7a). `resolveAndAttachAnkiMedia()` só roda DEPOIS da
+confirmação (nunca no preview), lê o byte real do arquivo referenciado
+no manifest do `.apkg`, sobe via `uploadOwnFlashcardMedia()`
+(REUTILIZADA da Fase 7e, nunca uma 2ª implementação de upload). Mídia
+ausente/corrompida nunca aborta a Note inteira -- o Field fica só com o
+texto (já limpo da tag `[sound:...]`/`<img...>` -- Seção 13, "nunca
+deixar a marcação crua vazando na tela"), um warning é acumulado e
+reportado no resultado final.
+
+### Seção 11 (duplicatas)
+
+`normalizeForDedup()` (lowercase+trim+collapse-espaços) +
+`existingOwnFlashcardsDedupSignatures()` (assinatura front+back, contra
+linhas JÁ existentes) + `seenBatchSignatures` (contra o PRÓPRIO lote,
+2 Notes idênticas no mesmo `.apkg`) -- provável duplicata vem **desmarcada
+por padrão** (nunca selecionada automaticamente), mas o checkbox continua
+disponível -- a pessoa decide, nunca é bloqueada/sobrescrita
+silenciosamente.
+
+### Seção 18 (tags)
+
+`note.tags` é lido e preservado no plano (`plan.notes[i].tags`), e
+`plan.tagsPresent` sinaliza no resumo "este `.apkg` tem tags do Anki --
+este app ainda não tem esse recurso, então as tags não são importadas"
+-- **nunca inventa um sistema de tags novo**, e nunca finge
+silenciosamente que tags foram preservadas quando não foram.
+
+### Seção 19 (múltiplos decks)
+
+`parseApkgFile()` já devolve `decks` como mapa completo; `deckName`
+por Note é resolvido via `cardsByNoteId`, sem nenhuma suposição de "1
+deck só" -- testado com múltiplos decks no mesmo `.apkg` (Node/VM,
+Seção 29).
+
+### Seções 20/22 (nunca importa FSRS/histórico)
+
+`mapAnkiNoteToNativeEditorState()` **nunca lê** `card.type`/`card.queue`/
+`card.due`/`card.ivl`/`card.factor`/`card.reps`/`card.lapses` (os
+campos de agendamento do Anki, presentes em `cardsByNoteId` mas nunca
+consultados pelo mapeador) -- só `notes.flds`/`notes.tags`. Todo cartão
+nativo criado nasce com FSRS no estado DEFAULT de sempre
+(`FLASHCARD_MODEL_FSRS_DEFAULTS`, Fase 4a, intocado) -- exatamente o
+mesmo caminho que criar um cartão manualmente pelo editor já usa
+(`buildCardFromSelfFlashcard`/`buildEngineCardsFromRow`, Fase 6B-6D,
+nenhuma linha nova nesses arquivos). CardInstances continuam 100%
+derivadas em runtime -- confirmado por busca (ver auditoria final
+abaixo) que `cardInstance` nunca é referenciado em nenhum dos 3
+arquivos novos.
+
+### Seção 21 (origin)
+
+Nenhum enum novo -- `addSelfFlashcardToState()` (fr/zh `app.js`,
+EXISTENTE desde a Fase 5, reutilizada sem nenhuma mudança) já atribui
+`origin:'self'` a qualquer linha de `own_flashcards`, exatamente como
+já fazia pra um cartão criado manualmente. Confirmado no smoke de
+navegador: todo cartão importado tem `origin==='self'`.
+
+### Seção 23 (limite de coleção)
+
+`computeAnkiImportRemainingSlots(activeOwnCardCount, hasActiveTeacherLink)`
+(reaproveita `FREE_OWN_FLASHCARD_LIMIT`, Fase 5.1, e
+`hasActiveTeacherLink()`, Fase 5.1, sem nenhuma exceção nova pra
+importação) -- `confirmAnkiImport()` bloqueia **ANTES de qualquer
+escrita** (reaproveita `#flashcard-limit-modal`, o mesmo modal já usado
+em toda a feature, nunca um popup novo) quando a seleção excede o
+espaço restante -- nunca uma importação parcial silenciosa.
+
+### Seção 24 (atomicidade/lotes/retry)
+
+`ANKI_IMPORT_BATCH_SIZE=40` -- `persistAnkiImportBatches()` insere lote
+por lote (`Promise` sequencial, nunca paralelo -- ordem preservada pra
+`onBatchDone` reportar progresso), cada `.insert().select()` é 1
+statement atômico real do Postgres. Falha num lote nunca reprocessa os
+já criados (retorna `createdRows` do que JÁ foi persistido +
+`failedAtBatch`) -- um retry re-executando o MESMO plano nunca duplica
+os lotes que já tiveram sucesso, testado explicitamente (Node/VM,
+cenário de retry).
+
+### Seção 25/26 (UI, Preview/Dry-Run nunca persiste)
+
+5 telas dentro de UM modal (`#anki-import-modal`, mesmo padrão de todo
+modal já existente no app). Resumo mostra contagem/avisos ANTES de
+qualquer confirmação -- fechar o modal nessa hora (`#anki-import-close`)
+**nunca grava nada** (confirmado via clique real no smoke test).
+**`shared/flashcard-preview.js` (Preview do EDITOR de cartão) nunca é
+referenciado/reutilizado aqui** -- são conceitos deliberadamente
+diferentes (Preview do editor mostra "como este cartão vai aparecer na
+Revisão"; o resumo do import mostra "o que existe no `.apkg` e o que
+será criado") -- confirmado por grep, zero menção cruzada entre os
+arquivos.
+
+### Seção 27 (reutilização de validadores)
+
+`validateNoteEditorStateForSave()` (Fase 6D.6) é a ÚNICA validação
+estrutural chamada -- nunca uma cópia. Isso automaticamente reaproveita,
+sem nenhuma linha nova, `validateNativeMultipleChoiceStructure`/
+`validateNativeTypeAnswerStructure`/`validateNativeClozeStructure`
+(Fases 6D.4a/4b/5) por baixo -- é exatamente esse mecanismo que rejeita
+um Cloze `mandarim` sem `compareAnswer`/pinyin (mesma regra de CRIAÇÃO
+manual, nunca uma regra nova só pro import).
+
+### Seção 28 (Fatal vs. Recuperável)
+
+- **Fatal** (aborta ANTES de escrever qualquer coisa): `.apkg` inválido/
+  corrompido, SQLite ilegível, `collection.anki2`/`anki21` ausente,
+  `collection.anki21b` presente (zstd, sem suporte), schema 18+
+  protobuf (sem `col.models` populado). `parseApkgFile()` devolve
+  `{ok:false, error}` com mensagem ACIONÁVEL
+  (`ANKI_PARSER_ERROR_MESSAGES`), a UI mostra e para -- nenhuma
+  tentativa de continuar com dado parcial.
+- **Recuperável por Note** (nunca bloqueia as outras): mídia ausente,
+  Note sem tradução (Cloze), model não reconhecido, conteúdo vazio
+  depois de limpar HTML/mídia, validação estrutural falhando (ex:
+  Cloze mandarim sem pinyin) -- cada uma vira `{ok:false, warning}`,
+  visível na lista, nunca aborta o `.apkg` inteiro.
+
+### Testes realizados
+
+**Node/VM, `test_fase7j_anki_import_unit.js`, 117/117** -- carrega os
+arquivos de PRODUÇÃO reais via `vm` (mesma convenção de toda a sessão),
+`.apkg` REAIS construídos com `sql.js`+`jszip` via npm (fidelidade de
+byte real ao formato, nunca simulado) -- cobre os ~30 cenários da
+Seção 29: básico simples; básico+reversed (confirma 1 Note, mesmo com 2
+`cards` reais de entrada -- fixture builder corrigido nesta sessão pra
+gerar 1 `cards` por template, fidelidade real ao Anki); cloze simples/
+multi-marca + hint descartado + tradução ausente rejeitada; type_answer
+reconhecível (template canônico do Anki, pós-fix) e não-reconhecível
+(fallback pra unrecognized); Múltipla Escolha nunca inferida (model
+"parece" MC mas nunca é assumido como tal); ordem de Field preservada;
+ids nativos nunca colidem; GUID do Anki nunca vira id interno; mídia
+imagem+áudio; aviso de mídia ausente; HTML preservado sem confundir
+template com conteúdo; hint do Cloze nunca vira `compareAnswer`; tags
+seguem a política existente (registradas, nunca um sistema novo);
+múltiplos decks não quebram o parser; duplicata detectada (dentro do
+lote E contra existentes, case/espaço-insensível); limite de coleção
+calculado corretamente; legado nunca criado quando nativo é possível;
+CardInstances nunca persistidas + FSRS nunca herda default incorreto;
+origin correto (`self`); Note inválida nunca persistida (reusa
+`validateNoteEditorStateForSave`); falha fatal de formato aborta ANTES
+de escrever (zstd/protobuf/zip inválido/SQLite corrompido/collection
+ausente); aviso por Note nunca bloqueia as outras; lote atômico +
+retry nunca duplica; FR+ZH compartilham o MESMO pipeline nativo (com a
+nuance correta: Cloze sem pinyin rejeita pra mandarim, aceita pra
+frances -- mesma regra, mesmo validador, resultado consistente por
+idioma) -- auditoria arquitetural embutida no próprio arquivo de teste
+confirma ausência de todo termo proibido em código executável.
+
+**Integração real contra o banco de produção** (transação+rollback,
+projeto `eigjocalzwamisgqilhg`, mesmo padrão já usado em toda a Fase
+6D/7): snapshot antes (`own_flashcards`: 7 linhas, hash
+`62f9c84cebecc3d6805163082c837b21`) -- `INSERT` real dentro de
+`BEGIN`/`ROLLBACK` simulando exatamente o payload que
+`persistAnkiImportBatches()` produziria (`fields`+`card_generation_mode`
+populados, `front`/`choices`/`cloze_sentence`/`cloze_answer`/
+`cloze_answer_pinyin`/`front_pinyin` todos `null`, confirmado via
+`RETURNING`) -- `ROLLBACK` confirmado deixando ZERO rastro (snapshot
+depois: mesmas 7 linhas, mesmo hash, byte a byte idêntico). Nenhum dado
+real de produção foi alterado.
+
+**Browser smoke real, FR+ZH, `test_fase7j_browser.js`, 54/54 -- zero
+pageerror, zero console.error novo** (Playwright/Chromium real,
+`--headless=new`, `serviceWorkers:'block'` -- achado de infraestrutura
+de teste registrado abaixo). Fluxo completo via UI real: seleciona
+`.apkg` (fixture combinando Básico/Básico+reversed/Cloze multi-marca/
+duplicata/mídia ausente), resumo mostra contagem+avisos de
+duplicata+mídia; cancelar antes de confirmar NUNCA persiste nada;
+reabrir+"Selecionar todos"+confirmar importa de verdade (linhas reais
+em `own_flashcards`, 1 por Anki Note); `normal_reversed` presente como
+1 Note só; `STATE.cards` cresce na MESMA sessão sem reload; `origin`
+correto; Review real renderiza o cartão importado com FSRS em estado
+default (`reps===0`); limite de coleção bloqueia ANTES de escrever;
+`.apkg` zstd recusado via UI com mensagem acionável. **Achado
+específico do ZH, tratado corretamente e testado explicitamente**: um
+Cloze importado do Anki é SEMPRE rejeitado pra mandarim (pinyin nunca é
+derivável da dica do Anki, Seção 14) -- confirmado que isso já aparece
+no resumo ANTES de confirmar, com o checkbox correspondente vindo
+`disabled` (nunca selecionável), nunca silencioso.
+
+**Round-trip real, Export→Import, `test_fase7j_roundtrip.js`, 23/23**
+(Seção 32) -- 3 Notes nativas reais (Normal com áudio+imagem, Normal
+Reversed, Cloze multi-marca) exportadas de verdade pelo BROWSER (mesmo
+`generateApkg()` da Fase 7i, nenhuma simulação) e os bytes resultantes
+reimportados através do MESMO pipeline Node/VM já validado. **FR: 100%
+correto** -- Normal reimporta com front/back/mídia intactos; Reversed e
+Cloze multi-marca reimportam com o CONTEÚDO de cada CardInstance
+preservado, mas com uma **perda de agrupamento ESPERADA e DOCUMENTADA**
+(nunca uma surpresa): o exportador (Fase 7i) trata cada CardInstance
+como um card Anki independente sempre no modelo Básico/Cloze -- nunca
+reconstrói um model Anki "Basic (and reversed card)" de 2 templates, e
+cada marca de um Cloze multi-marca vira sua própria nota Cloze de 1
+marca. Isso é uma limitação REAL do formato Anki combinada com a
+decisão de design já travada desde a Fase 5 (cada CardInstance sempre
+teve FSRS genuinamente independente -- o exportador só reflete isso
+fielmente, nunca fingiu uma união que o motor nunca tratou como uma
+coisa só). Reimportado, vira 2 Notes `normal` (rev-a→rev-b e
+rev-b→rev-a) e 2 Notes `cloze` (1 marca cada, com a resposta da OUTRA
+marca corretamente achatada em texto puro) -- conteúdo 100% preservado,
+agrupamento original perdido.
+
+**Achado REAL de correção encontrado pelo próprio round-trip (exatamente
+o que a Seção 32 pedia pra ele fazer) -- não um artefato de teste**:
+`classifyAnkiTemplate()` já tinha o comentário "afmt precisa referenciar
+EXATAMENTE 1 Field novo", mas comparava com `>= 1` -- um model de 3
+Fields (como o PRÓPRIO export deste app pro zh: `qfmt:{{Pinyin}}`,
+`afmt:{{Caractere}}+{{Tradução}}`) batia mesmo assim, capturando só o
+1º Field extra (Caractere/hanzi) e **descartando o 2º (Tradução) sem
+nenhum aviso**. Confirmado ao vivo, reimportando um `.apkg` real
+exportado pelo próprio app: o cartão nativo resultante virava
+`["nǐ hǎo","你好"]` -- a tradução ("olá" etc.) sumia por completo,
+silenciosamente, pra 166 de 171 notas reais da trilha zh. **Corrigido**
+(`shared/anki-import.js`, `afmtRefsRaw.length >= 1` → `=== 1`) --
+alinhado ao que o próprio comentário já dizia. Efeito: esse tipo de
+model agora vira `unrecognized` (Note pulada, aviso visível), nunca
+mais perde conteúdo sem avisar. **Efeito colateral real e esperado,
+não um bug novo**: o próprio export zh deste app (3 Fields) deixa de
+ser round-trip-ável como `normal` -- 0/171 zh Básico "passam" agora
+(antes eram 166/171 "passando" com perda silenciosa de 1/3 do
+conteúdo). Reexecutado o Node/VM (117/117, sem regressão -- nenhum
+fixture de teste usa model de 3 Fields) e o browser smoke completo
+(54/54, sem regressão -- os fixtures da Seção 31 usam Básico de 2
+Fields) depois do fix, confirmando zero efeito colateral fora do caso
+que a correção deliberadamente muda.
+
+**Limitação real, documentada, não corrigida nesta sessão**: não existe
+hoje um jeito SEGURO e NARROW o bastante de reconhecer "Field[0]=pinyin
+satélite de Field[1]=hanzi, Field[2]=tradução" sem uma heurística
+nomeada especificamente pro shape exato do export deste app (algo como
+"se os 3 Fields se chamam literalmente Pinyin/Caractere/Tradução E a
+conta é mandarim, remapear via o mecanismo `pinyinFieldId` já existente
+desde a Fase 6D.3") -- essa heurística FOI identificada e é
+tecnicamente viável (o mecanismo de satélite de pinyin já existe,
+pronto, só faltaria a detecção por nome), mas fica **fora do escopo
+desta sessão**, deliberadamente: a escolha SEGURA (rejeitar com aviso
+em vez de perder dado silenciosamente) já resolve o problema de
+correção; a escolha MAIS COMPLETA (remapear via satélite de pinyin)
+teria um raio de mudança maior (novo caminho de classificação + novo
+caminho de mapeamento + mais testes) sem ter sido pedida explicitamente
+-- registrado aqui como recomendação concreta e específica pra uma
+sessão futura, não implementada por decisão de escopo, nunca por
+esquecimento.
+
+**Achados de infraestrutura de teste, nunca de produção** (documentados
+por transparência, mesmo padrão de toda a sessão): (1) `CURRENT_USER` é
+`let` top-level em `shared/auth.js` -- `window.CURRENT_USER` nunca
+reflete essa variável (mesmo gotcha já documentado na Fase 6D.2, agora
+do lado do LEITOR externo -- `page.waitForFunction(() => window.
+CURRENT_USER...)` nunca resolve; corrigido usando o identificador puro
+`CURRENT_USER` sem prefixo `window.`, que Playwright já enxerga
+corretamente via `page.evaluate`/`waitForFunction`); (2) o roteador
+interno (Fase Router 6) remove `/index.html` da URL via `pushState` --
+um `page.reload()` depois de navegar internamente reforça a URL como
+`.../fr/#/aba`, que o navegador envia ao servidor como `GET /fr/` (o
+fragmento nunca é enviado) -- o servidor estático do teste só tratava a
+raiz `/` bare, corrigido pra tratar qualquer caminho terminado em `/`;
+(3) o app registra um Service Worker real (mesmo já documentado no
+CLAUDE.md, "Fix stale-UI bug") -- um SW ativo intercepta `fetch()` da
+própria página ANTES da camada de `page.route()` do Playwright
+conseguir interceptar, escondendo a rota de mídia simulada durante o
+teste de export/mídia -- corrigido com `serviceWorkers:'block'` no
+`browser.newContext()`.
+
+### Auditoria arquitetural final (Seção 33)
+
+Busca programática (repo inteiro, código executável, comentários
+excluídos) confirma ausência total de: `cardInstance` persistido (zero
+ocorrência em `shared/anki-*.js`); linha legada criada quando nativo é
+possível (`nativeContentColumnsFromEditorState` sempre grava
+`fields`+`card_generation_mode`, os 5 campos legados sempre `null`);
+`frontIsTargetLanguage`/`reviewDirection`/`isReverse` como mecanismo
+nativo; `choices`/`correctChoice`/`cloze_answer`/`cloze_sentence`/
+`cloze_answer_pinyin` como fonte de dado paralela (só existem como
+colunas legadas sempre `null` no caminho de import); `note.audio`/
+`note.image` (mídia sempre em `field.audio`/`field.image`); reset de
+FSRS fora do já existente (nenhum campo de agendamento do Anki jamais
+lido); import/overwrite silencioso (`.update`/`.upsert`/`.delete`
+contra `own_flashcards` -- zero ocorrências, só `.insert`); sistema de
+ID paralelo (`flashcardIdForRow`, já existente, nunca reimplementado);
+`parseClozeMarks`/`resolveCardField`/`validateNativeNoteRow` duplicados
+(cada um definido 1 única vez, em `shared/flashcard-model.js`, sempre
+reutilizados). `git status`/`git diff --stat` confirmam só os 3
+arquivos novos (`shared/anki-parser.js`/`shared/anki-import.js`/
+`shared/anki-import-ui.js`) + os 3 já tocados pré-compactação
+(`shared/my-flashcards.js`, `fr/index.html`, `zh/index.html`) -- nenhum
+arquivo fora do escopo desta fase.
+
+### Escopo explicitamente fora desta entrega (Seção 34, nunca implementado)
+
+Sincronização bidirecional; importação de histórico de revisão/FSRS
+(deliberadamente nunca lido, ver Seção 20 acima); todos os plugins do
+Anki; reprodução perfeita de CSS/templates visuais; importação de
+decks online/marketplace/cartões públicos; novos Card Types (só os 5 já
+existentes desde a Fase 6B são reconhecidos); templates
+customizáveis pelo usuário; migração em massa de dado legado existente.
+Nenhum equivalente inseguro foi inventado em lugar de qualquer um
+desses -- onde a informação não tinha um destino seguro (tags, hint de
+Cloze, Tradução de um model 3-Field), a Note é reportada como
+pulada/com aviso, nunca com um dado inventado silenciosamente.
+
+**Gratuito x Premium (avaliado, não implementado):** Import do Anki é
+uma via de ENTRADA de conteúdo pra "Meus Cartões" (Fase 5) -- já herda
+o mesmo teto de 20 cartões/plano grátis (Fase 5.1) e a mesma isenção
+por vínculo com professora (`hasActiveTeacherLink`), sem nenhuma
+exceção nova (Seção 23 exige isso explicitamente). Nenhuma pergunta
+nova de monetização introduzida por esta feature -- mesma conclusão de
+"reformulação gratuito x premium".
+
+Nenhum passo manual pendente pra autora -- 100% client-side, nenhuma
+migração/mudança de schema (reaproveita `fields`/`card_generation_mode`
+já existentes desde a migration 045).
+
+**PARE conforme instrução explícita -- não avançar para nenhuma fase
+posterior automaticamente.** Próxima etapa (ex: a recomendação de
+remapeamento via satélite de pinyin pro export zh, registrada acima)
+só começa depois de autorização explícita da autora, com este relatório
+já entregue antes de pedir luz verde.

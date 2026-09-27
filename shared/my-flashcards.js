@@ -238,10 +238,20 @@ async function renderMyFlashcardsView(){
       <input type="file" id="my-flashcards-import-file" accept="application/json" style="margin-top:6px;">
       <p class="profile-edit-error" id="my-flashcards-import-error"></p>
     </div>
+
+    <div class="profile-section">
+      <div class="section-label">📥 Importar do Anki (.apkg)</div>
+      <p class="profile-edit-hint">Tem um baralho do Anki? Escolha o arquivo .apkg exportado de lá -- você confere um resumo (quantos cartões, tipos, avisos) antes de confirmar, nada é importado sem sua confirmação.</p>
+      <input type="file" id="anki-import-file" accept=".apkg" style="margin-top:6px;">
+    </div>
   `;
 
   wireMyFlashcardsForm(wrap, atLimit, premium);
   wireMyFlashcardsCardButtons(wrap, premium);
+  document.getElementById('anki-import-file')?.addEventListener('change', (e) => {
+    if (typeof handleAnkiImportFileSelected === 'function') handleAnkiImportFileSelected(e.target.files[0]);
+    e.target.value = '';
+  });
   document.getElementById('my-flashcards-export-btn')?.addEventListener('click', () => openMyFlashcardsExportModal(activeCards.concat(archivedCards).filter(c => c.status === 'active')));
   document.getElementById('my-flashcards-import-file')?.addEventListener('change', (e) => handleMyFlashcardsImportFile(e.target.files[0]));
 
