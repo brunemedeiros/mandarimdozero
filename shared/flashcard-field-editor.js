@@ -152,6 +152,52 @@ function fieldAudioRecordingStatusLabel(recState){
   return 'Clique em "🎙️ Gravar" para começar.';
 }
 
+// ---------- Fase 7h.2 (fechamento/auditoria da UI de áudio por Field, ver
+// CLAUDE.md) -- registro por Field pra guarda de "geração" contra corrida
+// entre origens, SOBREVIVE a re-renders ----------
+//
+// Achado real desta auditoria: upload/TTS/gravação já se protegiam contra
+// uma resposta chegar DEPOIS que o bloco inteiro foi destruído
+// (`!block.isConnected`, re-render estrutural), e o TTS já se protegia
+// contra a PRÓPRIA config mudar em voo (myKey/currentKey, dentro de
+// wireFieldAudioBlockFor) -- mas nenhum dos 3 verificava se OUTRA ORIGEM já
+// tinha assumido field.audio enquanto eles estavam em voo. Trocar de
+// origem (ex: TTS -> Upload) só alterna qual painel aparece via
+// style.display -- nunca cancela a operação assíncrona da origem anterior.
+// Cenário real sem este guard: iniciar geração de TTS, trocar pra Upload
+// antes dela terminar, subir um arquivo com sucesso (field.audio=upload) --
+// quando a resposta do TTS chegasse depois, ela sobrescreveria o upload
+// recém-aplicado, silenciosamente.
+//
+// Por que um REGISTRO por fieldId, não uma variável local dentro de
+// wireFieldAudioBlockFor: uma operação de áudio bem-sucedida (TTS/upload/
+// gravação) já dispara `onChange('structure', fieldId)`, que RE-RENDERIZA
+// A CAIXA INTEIRA (refreshNativeFieldsBox/refreshNativeCardTypeBox) --
+// inclusive Fields QUE NÃO MUDARAM. Isso recria `wireFieldAudioBlockFor`
+// (e portanto qualquer variável local) do ZERO pra TODO Field da caixa.
+// Uma gravação real iniciada ANTES desse re-render (Fase 7g: o MediaRecorder
+// sobrevive a re-renders via FIELD_AUDIO_RECORDER_REGISTRY, de propósito)
+// continuaria rodando -- e seu `onReady`, ao finalmente disparar, chamaria
+// o closure NOVO (pós-re-render), cujo contador reiniciaria em 0/null,
+// nunca detectando que a gravação era de uma "geração" anterior já
+// superada. Corrigido com um registro module-level, no MESMO espírito de
+// FIELD_AUDIO_RECORDER_REGISTRY (Fase 7g) -- persiste através de qualquer
+// número de re-renders, só é limpo quando o Field é removido de verdade
+// (ver wireFieldEditorList, [data-field-remove], abaixo).
+const FIELD_AUDIO_OP_GENERATION_REGISTRY = {};
+const FIELD_AUDIO_PENDING_RECORDING_REGISTRY = {};
+function beginFieldAudioOp(fieldId){
+  FIELD_AUDIO_OP_GENERATION_REGISTRY[fieldId] = (FIELD_AUDIO_OP_GENERATION_REGISTRY[fieldId] || 0) + 1;
+  return FIELD_AUDIO_OP_GENERATION_REGISTRY[fieldId];
+}
+function currentFieldAudioOpGeneration(fieldId){
+  return FIELD_AUDIO_OP_GENERATION_REGISTRY[fieldId] || 0;
+}
+function clearFieldAudioOpGeneration(fieldId){
+  delete FIELD_AUDIO_OP_GENERATION_REGISTRY[fieldId];
+  delete FIELD_AUDIO_PENDING_RECORDING_REGISTRY[fieldId];
+}
+
 // Render puro -- nunca side-effect (mesmo I/O de rede que o Gerar áudio
 // dispara vive só em wireFieldAudioBlockFor, abaixo). `resolveFieldAudioUrl`/
 // `FIELD_AUDIO_UPLOAD_MIME_TYPES` vêm de shared/flashcard-model.js
@@ -258,6 +304,12 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
   const ttsPanel = block.querySelector('[data-field-audio-panel-tts]');
   const recordingPanel = block.querySelector('[data-field-audio-panel-recording]');
 
+  // Fase 7h.2 -- helpers locais que delegam pro registro module-level
+  // (declarado acima, ver comentário completo lá sobre por que precisa
+  // sobreviver a re-renders). `beginAudioOp()` é só um atalho pra não
+  // repetir `fieldId` em toda chamada dentro deste wiring.
+  function beginAudioOp(){ return beginFieldAudioOp(fieldId); }
+
   // Trocar de ORIGEM no `<select>` NUNCA sobrescreve field.audio sozinho
   // (decisão travada na auditoria da Fase 7c, item D5) -- exceto
   // escolher "Sem áudio" explicitamente, que é a ÚNICA outra forma
@@ -268,6 +320,7 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
   // o que a pessoa já digitou" já usada em todo o resto deste arquivo).
   if (originSelect){
     originSelect.addEventListener('change', () => {
+      beginAudioOp(); // Fase 7h.2 -- trocar de origem invalida qualquer operação da origem anterior ainda em voo.
       const val = originSelect.value;
       if (urlPanel) urlPanel.style.display = (val === 'url') ? '' : 'none';
       if (uploadPanel) uploadPanel.style.display = (val === 'upload' || val === 'none') ? '' : 'none';
@@ -294,6 +347,7 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
   const urlInput = block.querySelector('[data-field-audio-url-input]');
   if (urlApplyBtn && urlInput){
     urlApplyBtn.addEventListener('click', () => {
+      beginAudioOp(); // Fase 7h.2 -- aplicar uma URL invalida qualquer operação de outra origem ainda em voo.
       if (errorEl) errorEl.textContent = '';
       const v = (typeof validateFieldAudioUrl === 'function')
         ? validateFieldAudioUrl(urlInput.value)
@@ -329,6 +383,13 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
         if (errorEl) errorEl.textContent = 'Upload de áudio não está disponível nesta tela.';
         return;
       }
+      // Fase 7h.2 -- captura a "geração" desta tentativa ANTES de subir de
+      // verdade (ver comentário de FIELD_AUDIO_OP_GENERATION_REGISTRY
+      // acima): se outra origem (TTS/gravação/URL/"Sem áudio") produzir um
+      // resultado
+      // enquanto este upload ainda está em voo, o resultado deste upload é
+      // descartado ao voltar, nunca sobrescreve um field.audio mais recente.
+      const myGeneration = beginAudioOp();
       fileInput.disabled = true;
       if (statusEl) statusEl.textContent = 'Enviando áudio...';
       const up = await opts.uploadFn(file, 'audio', fieldId);
@@ -338,9 +399,9 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
       // nunca mutar um editorState que a tela já abandonou, nunca tocar um
       // elemento desconectado.
       if (!block.isConnected) return;
+      fileInput.disabled = false;
+      fileInput.value = '';
       if (!up.ok){
-        fileInput.disabled = false;
-        fileInput.value = '';
         if (errorEl) errorEl.textContent = up.error || 'Não foi possível enviar o áudio agora.';
         if (statusEl){
           const currentField = (editorState.fields || []).find(f => f.id === fieldId);
@@ -352,9 +413,21 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
       // edição, pra a tela de integração poder compensar (best-effort
       // delete) se a gravação da Note falhar logo em seguida -- ver
       // shared/admin-flashcards.js/shared/my-flashcards.js, handlers de
-      // submit/salvar, que leem editorState.__freshMediaUploads.
+      // submit/salvar, que leem editorState.__freshMediaUploads. Rastreado
+      // MESMO se o resultado for descartado abaixo (a corrida de origem) --
+      // o objeto foi genuinamente criado no Storage, então continua
+      // candidato à mesma compensação best-effort.
       editorState.__freshMediaUploads = editorState.__freshMediaUploads || [];
       editorState.__freshMediaUploads.push({ path: up.path, deleteFn: opts.deleteFn || null });
+      if (myGeneration !== currentFieldAudioOpGeneration(fieldId)){
+        // Outra origem já assumiu field.audio enquanto este upload estava
+        // em voo (Fase 7h.2) -- descarta silenciosamente, nunca sobrescreve.
+        if (statusEl){
+          const currentField = (editorState.fields || []).find(f => f.id === fieldId);
+          statusEl.textContent = fieldAudioIndicatorText(currentField && currentField.audio) || 'Nenhum áudio configurado.';
+        }
+        return;
+      }
       // Só ATUALIZA field.audio depois do upload ter sucesso de verdade
       // (Seção 2/9) -- nunca antes.
       updateFieldInEditorState(editorState, fieldId, {
@@ -435,6 +508,14 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
         return;
       }
 
+      // Fase 7h.2 -- captura a "geração" desta tentativa (ver comentário
+      // de FIELD_AUDIO_OP_GENERATION_REGISTRY acima): protege contra OUTRA
+      // ORIGEM (upload/URL/gravação/"Sem áudio") assumir field.audio
+      // enquanto esta geração ainda está em voo -- eixo diferente do
+      // myKey/currentKey
+      // logo abaixo, que só protege contra a PRÓPRIA config de TTS mudar.
+      const myGeneration = beginAudioOp();
+
       // Concorrência (Seção 11 da auditoria da Fase 7f) -- calcula o
       // generationKey da config NO MOMENTO DO CLIQUE, antes de disparar a
       // requisição. Se a pessoa editar texto/idioma/voz/velocidade
@@ -478,6 +559,16 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
       if (!res.ok){
         if (errorEl) errorEl.textContent = res.error || 'Não foi possível gerar o áudio agora.';
         return; // falha nunca sobrescreve o áudio anterior (se havia) -- mesma regra do upload.
+      }
+
+      if (myGeneration !== currentFieldAudioOpGeneration(fieldId)){
+        // Outra origem (upload/URL/gravação/"Sem áudio") já assumiu
+        // field.audio enquanto esta geração estava em voo (Fase 7h.2) --
+        // descarta o resultado silenciosamente, nunca sobrescreve o que já
+        // é mais recente. O áudio devolvido continua salvo no Storage
+        // (órfão, best-effort -- sem garbage collector nesta fase).
+        if (msgEl) msgEl.textContent = 'Outra origem de áudio foi usada enquanto este era gerado -- o resultado foi descartado.';
+        return;
       }
 
       const stillCurrentText = (textEl && textEl.value) || '';
@@ -550,6 +641,16 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
         if (!block.isConnected) return;
         editorState.__freshMediaUploads = editorState.__freshMediaUploads || [];
         editorState.__freshMediaUploads.push({ path: result.path, deleteFn: result.deleteFn || null });
+        // Fase 7h.2 -- protege contra OUTRA ORIGEM (TTS/upload/URL/"Sem
+        // áudio") ter assumido field.audio enquanto esta gravação (que
+        // sobrevive a trocas de origem E a re-renders inteiros da caixa,
+        // ver comentário de FIELD_AUDIO_OP_GENERATION_REGISTRY acima) ainda
+        // estava em voo -- descarta silenciosamente, nunca sobrescreve. O
+        // valor é lido do REGISTRO module-level (nunca uma variável local
+        // deste closure) porque `onReady` pode disparar bem depois de um ou
+        // mais re-renders estruturais terem recriado este wiring do zero.
+        const pendingGen = FIELD_AUDIO_PENDING_RECORDING_REGISTRY[fieldId];
+        if (pendingGen !== undefined && pendingGen !== currentFieldAudioOpGeneration(fieldId)) return;
         updateFieldInEditorState(editorState, fieldId, {
           audio: { type: 'recording', url: result.url, recordedAt: result.recordedAt, mimeType: result.mimeType, durationMs: result.durationMs, storagePath: result.path || null },
         });
@@ -574,6 +675,14 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
     if (recordStartBtn){
       recordStartBtn.addEventListener('click', () => {
         if (errorEl) errorEl.textContent = '';
+        // Fase 7h.2 -- captura a "geração" desta tentativa de gravação NO
+        // CLIQUE (não em onReady, que dispara bem depois, possivelmente
+        // após a pessoa ter trocado de origem e voltado, e possivelmente
+        // depois de um ou mais re-renders estruturais -- ver comentário de
+        // FIELD_AUDIO_OP_GENERATION_REGISTRY acima). Gravada no REGISTRO
+        // module-level, nunca numa variável local deste closure, porque
+        // `onReady` (acima) pode rodar num closure diferente deste.
+        FIELD_AUDIO_PENDING_RECORDING_REGISTRY[fieldId] = beginAudioOp();
         recorder.start();
       });
     }
@@ -583,6 +692,7 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
 
   if (removeBtn){
     removeBtn.addEventListener('click', () => {
+      beginAudioOp(); // Fase 7h.2 -- remoção explícita invalida qualquer operação de outra origem ainda em voo.
       // Seção 10 -- remoção EXPLÍCITA é só de REFERÊNCIA (field.audio =
       // null), NUNCA delete físico do objeto no Storage: um Field
       // clonado (cloneFieldIntoEditorState, Fase 6D.3) copia `audio` por
@@ -770,6 +880,10 @@ function wireFieldEditorList(container, editorState, onChange, opts){
       // deixa um microfone ligado órfão referenciando um Field que não
       // existe mais no editorState.
       if (typeof releaseFieldAudioRecorder === 'function') releaseFieldAudioRecorder(fieldId);
+      // Fase 7h.2 -- limpa também o registro de "geração" de áudio deste
+      // Field (removido de verdade, nunca mais vai casar com nenhum
+      // resultado tardio de qualquer origem).
+      clearFieldAudioOpGeneration(fieldId);
       removeFieldFromEditorState(editorState, fieldId);
       if (onChange) onChange('remove', fieldId);
     });

@@ -13654,3 +13654,203 @@ editor. Nenhum passo manual pendente pra autora.
 **PARE conforme instrução explícita -- não avançar para 7h.2.** Próxima
 subfase só começa depois de autorização explícita da autora, com este
 relatório já entregue antes de pedir luz verde.
+
+## Fase 7h.2 -- fechamento e auditoria final da UI de áudio por Field
+
+Instrução explícita: auditar a UI de áudio por Field já entregue (7e
+upload/7f TTS/7g gravação/7h.1 URL+staleness), corrigir só problemas
+REAIS encontrados (nunca mudança cosmética, nunca reimplementar upload/
+TTS/generationKey/Edge Function/MediaRecorder/playback/Field model/
+Review/FSRS), e fechar o ciclo com testes + relatório. Releitura completa
+de `shared/flashcard-field-editor.js` (o componente compartilhado inteiro,
+todas as 5 origens), `shared/flashcard-editor-state.js`,
+`shared/flashcard-field-audio-recorder.js`, `shared/flashcard-model.js`
+(contrato `Field.audio`/`resolveFieldAudioUrl`/`isTtsAudioStale`/
+`computeTtsGenerationKey`), `shared/flashcard-native-persistence.js` e
+confirmação por grep de que Review (`fr/app.js`/`zh/app.js`) e Preview
+(`shared/flashcard-preview.js`) nunca referenciam upload/TTS/gravação --
+feita ANTES de qualquer edição, exatamente como a instrução exigia.
+
+**1 problema REAL encontrado, corrigido -- corrida entre origens
+assíncronas nunca coberta por nenhuma fase anterior.** Upload (7e)/TTS
+(7f)/gravação (7g) já se protegiam contra: (a) o `block` ter sido
+destruído por um re-render antes da resposta chegar (`!block.isConnected`);
+(b) no caso do TTS, a PRÓPRIA configuração (texto/idioma/voz/velocidade)
+ter mudado enquanto a geração estava em voo (`myKey`/`currentKey`). Mas
+nenhum dos 3 verificava se **OUTRA ORIGEM** já tinha assumido
+`field.audio` enquanto eles ainda estavam em voo -- trocar de origem no
+`<select>` (ex: TTS -> Upload) só alterna qual painel aparece
+(`style.display`), nunca cancela a operação assíncrona da origem
+anterior. Cenário real, reproduzido no teste antes de corrigir: iniciar
+geração de TTS, trocar pra Upload antes dela terminar, subir um arquivo
+com sucesso (`field.audio` = upload) -- quando a resposta do TTS chegasse
+depois, ela sobrescrevia o upload recém-aplicado, silenciosamente. O
+mesmo valia pra Upload->URL e pra Gravação (que sobrevive a trocas de
+origem, já que trocar de painel nunca chama `recorder.cancel()`) contra
+TTS/Upload.
+
+**Fix -- contador de "geração" por Field, num REGISTRO module-level (não
+uma variável local)**: `FIELD_AUDIO_OP_GENERATION_REGISTRY`/
+`FIELD_AUDIO_PENDING_RECORDING_REGISTRY` (novos, `shared/flashcard-
+field-editor.js`) + `beginFieldAudioOp(fieldId)`/
+`currentFieldAudioOpGeneration(fieldId)`/`clearFieldAudioOpGeneration(fieldId)`.
+Cada tentativa de mudar `field.audio` (trocar de origem, aplicar URL,
+selecionar arquivo, clicar Gerar áudio, clicar Gravar, clicar Remover)
+captura o contador NO INÍCIO; ao terminar, só aplica o resultado se o
+contador ainda bater -- senão descarta silenciosamente (nunca sobrescreve
+o que já é mais recente). **Achado de design durante a própria
+implementação, corrigido antes de reportar como pronto**: a 1ª versão
+usava uma variável `let audioOpGeneration` LOCAL dentro de
+`wireFieldAudioBlockFor` -- funcionava pra corridas simples (TTS->Upload,
+Upload->URL), mas falhava no cenário "Gravação em andamento -> troca pra
+TTS -> gera com sucesso -> volta pra Gravação -> Para" porque uma geração
+de TTS bem-sucedida dispara `onChange('structure', fieldId)`, que
+RE-RENDERIZA A CAIXA INTEIRA (`refreshNativeFieldsBox`/
+`refreshNativeCardTypeBox`) -- recriando `wireFieldAudioBlockFor` (e
+portanto qualquer variável local) do ZERO pra TODO Field da caixa,
+inclusive os que não mudaram. A gravação (que sobrevive a re-renders de
+propósito, via `FIELD_AUDIO_RECORDER_REGISTRY`, Fase 7g) continuava
+rodando com o `onReady` apontando pro closure NOVO, cujo contador local
+reiniciava em 0/null -- nunca detectando que a gravação era de uma
+"geração" já superada. Corrigido movendo o contador pra um registro
+module-level, no MESMO espírito arquitetural do
+`FIELD_AUDIO_RECORDER_REGISTRY` que a Fase 7g já usava exatamente pra
+esse motivo -- sobrevive a qualquer número de re-renders, só é limpo
+quando o Field é removido de verdade (`clearFieldAudioOpGeneration`,
+chamado junto de `releaseFieldAudioRecorder` no handler de
+`[data-field-remove]`).
+
+**Confirmações de auditoria (sem mudança de código, já corretas antes
+desta fase, reverificadas em vez de presumidas):**
+- **Falha nunca sobrescreve o áudio anterior** -- upload/TTS/gravação já
+  faziam isso desde 7e/7f/7g; confirmado de novo por leitura + testado.
+- **Substituição só troca `field.audio` depois de um resultado
+  concreto** -- nunca antes (upload/TTS/gravação só chamam
+  `updateFieldInEditorState` depois do `await` ter sucesso).
+- **Clone (`cloneFieldIntoEditorState`, Fase 6D.3) copia `audio` por
+  valor, nunca `pinyinFieldId`** -- intocado, confirmado ainda correto.
+- **Reorder nunca afeta áudio** -- `audio` é propriedade do próprio
+  objeto Field, nunca indexado por posição em lugar nenhum do motor.
+- **Remover Field remove só a referência daquele Field, nunca deleta do
+  Storage, nunca afeta outro Field** -- intocado.
+- **Preview (`shared/flashcard-preview.js`) nunca referencia
+  `requestFieldAudioTTS`/`requestOwnFieldAudioTTS`/`uploadFlashcardMedia`/
+  `uploadOwnFlashcardMedia`/`getOrCreateFieldAudioRecorder`** (grep
+  confirma zero ocorrência) -- Preview só toca áudio já resolvido
+  (`resolveFieldAudioUrl`), nunca gera/sobe/grava nada, nunca persiste,
+  nunca mexe em FSRS/`revision`/`editorState` fora da própria sessão de
+  Preview (Fase 6D.7, isolamento intacto).
+- **Review (`fr/app.js`/`zh/app.js`) nunca referencia nenhuma das mesmas
+  5 funções** (grep confirma) -- Review só toca áudio já resolvido,
+  nunca gera TTS, nunca dispara upload/gravação; nenhuma mudança feita
+  em Review nesta fase (nenhuma regressão objetiva encontrada que
+  justificasse tocar nele).
+- **Legacy continua sem conversão automática** -- `flashcardEditFormHTML`
+  (`shared/admin-flashcards.js`) é uma função separada de
+  `flashcardNativeEditFormHTML`, nunca chama `wireFieldAudioBlockFor`;
+  "🧪 Usar o novo editor de campos (nativo)" continua sendo o ÚNICO
+  gatilho de transição (confirmado por grep, 1 botão só).
+- **Admin e Meus Cartões usam o MESMO componente** (`renderFieldAudioBlockHTML`/
+  `wireFieldAudioBlockFor`, `shared/flashcard-field-editor.js`) -- nenhuma
+  implementação duplicada; gate `isPremium()` de Meus Cartões continua
+  envolvendo o bloco "Campos nativos" inteiro (herda o gate sem código
+  novo, mesmo já confirmado na Fase 7h.1).
+- **`noteEditorStateContentForComparison()`/`noteEditorStateRequiresNewRevision()`
+  já incluíam `audio` por Field na comparação de conteúdo desde a Fase
+  6B/7b** -- mudar/substituir/remover áudio já disparava corretamente a
+  regra de nova `revision` sem precisar de nenhuma mudança nesta fase.
+- **`noteEditorStateToRow()` já serializa `f.audio` por inteiro**
+  (inclusive `storagePath`, quando presente) -- persistência/reabertura
+  de URL/upload/TTS/gravação já funcionava ponta a ponta desde 7e/7f/7g/
+  7h.1, reconfirmado sem mudança de código.
+
+**Testes realizados:**
+- `node --check shared/flashcard-field-editor.js` sem erro.
+- **Suíte Node/VM nova, `test_fase7h2_audio_race.js`** (não escrita --
+  este arquivo em si é Playwright real, ver abaixo; a suíte Node/VM de
+  regressão pura reaproveitada foi a já existente da 7h.1,
+  `test_fase7h1_audio_ui.js`, 38/38 sem regressão).
+- **Browser smoke NOVO, FR+ZH, `test_fase7h2_audio_race.js`, 26/26
+  checks passando** (Playwright/Chromium real, `--use-fake-device-for-
+  media-stream --use-fake-ui-for-media-stream` pro cenário de gravação
+  real) -- usa "gates" (Promises resolvidas manualmente pelo teste, nunca
+  timeouts frágeis) pra simular com precisão "operação A ainda em voo
+  quando operação B já terminou": (D1) TTS em voo -> troca pra Upload ->
+  upload completa com sucesso -> TTS chega depois -> TTS descartado,
+  `field.audio` permanece `upload`; (D2) Upload em voo -> troca pra URL ->
+  URL aplicada -> upload chega depois -> upload descartado, `field.audio`
+  permanece `url`; (D3) **gravação REAL via microfone sintético** em
+  andamento -> troca pra TTS -> TTS gerado com sucesso -> volta pra
+  origem Gravação (Parar reaparece, já que a gravação real nunca parou) ->
+  clica Parar -> a gravação (iniciada ANTES da troca) é descartada,
+  `field.audio` permanece `tts` (era exatamente o cenário que a 1ª versão
+  do fix, com contador local, não cobria -- confirmado falhando antes do
+  redesenho pro registro module-level, passando depois); (D4)
+  cancelamento simples sem corrida -- aplicar URL, trocar de origem sem
+  completar nada na nova, `field.audio` permanece inalterado; "Sem
+  áudio" explícito continua limpando de verdade; (E1) regressão -- TTS
+  sem nenhuma troca de origem continua aplicando normalmente (o guard
+  novo nunca bloqueia o caminho comum, sem corrida nenhuma). Zero erro de
+  console novo nos 2 idiomas (só os mesmos `ERR_TUNNEL_CONNECTION_FAILED`
+  pré-existentes do proxy de saída deste sandbox).
+- **Regressão completa, todas as suítes já existentes re-executadas,
+  todas sem falha nova**: Node/VM -- `test_fase4_engine.js` 34/34,
+  `test_fase4d_regression.js` 30/30, `test_fase5_generation.js` 33/33,
+  `test_fase6b_native_notes.js` 74/74, `test_fase6d1_editor_state.js`
+  99/99, `test_fase6d2_state.js` 31/31, `test_fase6d3_field_editor.js`
+  65/65, `test_fase6d4a_mc_editor.js` 92/92,
+  `test_fase6d4b_typeanswer_editor.js` 62/62,
+  `test_fase6d5_cloze_editor.js` 71/71,
+  `test_fase6d6_native_persistence.js` 85/85,
+  `test_fase6d7_preview_logic.js` 59/59,
+  `test_fase6d8_legacy_conversion.js` 92/92,
+  `test_fase7a_media_resolution.js` 45/45,
+  `test_fase7b_field_audio_contract.js` 83/83, `test_fase7f_impl_tts.js`
+  41/41, `test_fase7g_recording.js` 118/118, `test_fase7h1_audio_ui.js`
+  38/38. Browser smoke -- `test_fase7h1_browser_smoke.js` 38/38,
+  `test_fase6d6_browser_smoke.js` 82/82, `test_fase6d8_browser_smoke.js`
+  66/66, `test_fase7e_browser_smoke.js` 52/52,
+  `test_fase7f_impl_browser_smoke.js` 44/44, `test_fase7g_browser_smoke.js`
+  64/64.
+- **2 falhas de regressão pré-existentes, confirmadas NÃO relacionadas a
+  esta fase** (verificado explicitamente via `git stash`/re-execução
+  contra o commit anterior, `fce8b1b`, ANTES de qualquer mudança desta
+  sessão -- as mesmas falhas já existiam): `test_fase6d3_browser_smoke.js`
+  (6 checks, `J_legacySubmitStillCreatesCard`/`J_nativeStateResetAfterSubmit`/
+  `M_myLegacySubmitStillCreatesCard`, fr+zh) -- teste antigo (era da Fase
+  6D.3) cujo fluxo de submit legado provavelmente não acompanhou todas
+  as mudanças de formulário das fases seguintes (Card Type selector,
+  MC/Cloze/TypeAnswer, painéis de áudio) -- staleness do PRÓPRIO SCRIPT
+  DE TESTE, não um bug de produção, e fora do escopo desta fase (que é
+  só áudio); `test_fase6d7_browser_smoke.js` (2 checks,
+  `legacyRowPreviewWorks`/`nativeRowPreviewWorks`, só zh) -- mesma
+  conclusão, pré-existente. Nenhuma das duas foi corrigida nesta fase
+  (regra explícita: "corrija só problemas reais encontrados", e estes já
+  existiam antes da 7h.2 começar, em código de teste que não faz parte
+  do escopo de áudio) -- registrado aqui só por transparência.
+
+**Escopo respeitado**: só `shared/flashcard-field-editor.js` tocado
+(confirmado por `git diff --stat`/`git status`). Nenhuma migração,
+nenhuma Edge Function nova, nenhuma mudança em `shared/flashcard-model.js`/
+`shared/flashcard-editor-state.js`/`shared/flashcard-field-audio-
+recorder.js`/`shared/flashcard-native-persistence.js`/`shared/admin-
+flashcards.js`/`shared/my-flashcards.js`/`fr/app.js`/`zh/app.js`/
+`shared/flashcard-preview.js` -- todos lidos/reauditados, nenhum
+alterado. Fases 7e/7f/7g/7h.1 confirmadas intactas (regressão 100%
+verde, exceto as 2 falhas pré-existentes documentadas acima).
+
+**O que NÃO foi feito nesta fase, de propósito** (fora do escopo,
+conforme instrução explícita): Anki export com mídia, migração de
+`AUDIO_MANIFEST`, TTS em lote, garbage collection de Storage, bucket/
+provedor novo, rich text, mudança de FSRS/CardInstance, redesign geral
+do editor, nenhuma auditoria visual dedicada de desktop/mobile/claro/
+escuro além do que já foi validado nas Fases 7e-7h.1 (nenhuma mudança de
+CSS nesta fase -- só lógica de controle de concorrência -- então o risco
+de regressão visual é nulo).
+
+Nenhum passo manual pendente pra autora -- 100% client-side, nenhuma
+migração/mudança de schema.
+
+**PARE conforme instrução explícita.** Não avançar para Anki export ou
+migração de AUDIO_MANIFEST -- a Fase 7h.2 fecha a camada de UI de áudio
+por Field, não abre uma arquitetura nova.
