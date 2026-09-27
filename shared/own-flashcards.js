@@ -72,14 +72,23 @@ function _validateOwnFlashcardContent({ front, backTrans, choices, clozeSentence
   return { ok: true, cleanFront, cleanBack, cleanChoices, cleanClozeSentence, cleanClozeAnswer };
 }
 
-async function createOwnFlashcard({ languageAppKey, front, backTrans, note, frontPinyin, frontIsTargetLanguage, imageUrl, audioUrl, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin }){
+// Fase 6D.6 (ver CLAUDE.md) -- `nativeState` opcional, mesmo contrato de
+// createFlashcard() em shared/teacher-flashcards.js: presente = única
+// fonte de conteúdo (parâmetros legados ignorados), ausente = comportamento
+// idêntico a antes desta fase.
+async function createOwnFlashcard({ languageAppKey, front, backTrans, note, frontPinyin, frontIsTargetLanguage, imageUrl, audioUrl, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin, nativeState }){
+  const identity = { owner_id: CURRENT_USER.id, language_app_key: languageAppKey };
+  if (nativeState){
+    const payload = Object.assign({}, identity, nativeContentColumnsFromEditorState(nativeState));
+    const { data, error } = await supabaseClient.from('own_flashcards').insert(payload).select().single();
+    if (error){ console.error('Erro ao criar seu flashcard (nativo):', error); return { ok: false, error: 'Não foi possível criar o cartão agora.' }; }
+    return { ok: true, card: data };
+  }
   const v = _validateOwnFlashcardContent({ front, backTrans, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin, languageAppKey });
   if (!v.ok) return v;
   const { data, error } = await supabaseClient
     .from('own_flashcards')
-    .insert({
-      owner_id: CURRENT_USER.id,
-      language_app_key: languageAppKey,
+    .insert(Object.assign({}, identity, {
       front: v.cleanFront || null,
       back_trans: v.cleanBack,
       note: (note || '').trim() || null,
@@ -91,7 +100,7 @@ async function createOwnFlashcard({ languageAppKey, front, backTrans, note, fron
       cloze_sentence: v.cleanClozeSentence || null,
       cloze_answer: v.cleanClozeAnswer || null,
       cloze_answer_pinyin: languageAppKey === 'mandarim' ? ((clozeAnswerPinyin || '').trim() || null) : null,
-    })
+    }))
     .select()
     .single();
   if (error){ console.error('Erro ao criar seu flashcard:', error); return { ok: false, error: 'Não foi possível criar o cartão agora.' }; }
@@ -104,16 +113,67 @@ async function createOwnFlashcard({ languageAppKey, front, backTrans, note, fron
 // (auth.uid())" (migration 032), nunca escopada a professora -- funciona
 // pra cartão próprio sem nenhuma migração nova. Path com prefixo `self-`
 // só pra facilitar auditoria manual do bucket (não afeta RLS nem leitura).
-async function uploadOwnFlashcardMedia(file, kind){
+//
+// Fase 7e (ver CLAUDE.md) -- mesmas 2 extensões de uploadFlashcardMedia
+// (shared/teacher-flashcards.js): validação MIME/tamanho quando
+// `kind==='audio'` (validateFieldAudioUploadFile, shared/flashcard-
+// model.js, mesma migration 046 espelhada dos dois lados) + `resourceId`
+// opcional pra rastreabilidade do path (sanitizado, nunca usado pra
+// decisão de segurança -- ownership continua vindo só de CURRENT_USER.id).
+async function uploadOwnFlashcardMedia(file, kind, resourceId){
   if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
-  const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
-  const path = `${CURRENT_USER.id}/self-${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  // Fase 7g (ver CLAUDE.md) -- mesma generalização de
+  // uploadFlashcardMedia (shared/teacher-flashcards.js): `kind==='recording'`
+  // passa pela MESMA validação MIME/tamanho que `kind==='audio'` já usava.
+  if (kind === 'audio' || kind === 'recording'){
+    const v = validateFieldAudioUploadFile(file);
+    if (!v.ok) return { ok: false, error: v.error };
+  }
+  const extRaw = (file.name || '').split('.').pop() || 'bin';
+  const ext = (extRaw.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().slice(0, 8)) || 'bin';
+  const safeResourceId = (resourceId ? String(resourceId) : '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40);
+  const resourceSegment = safeResourceId ? `${safeResourceId}-` : '';
+  const path = `${CURRENT_USER.id}/self-${kind}-${resourceSegment}${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
   const { error } = await supabaseClient.storage
     .from('flashcard-media')
     .upload(path, file, { contentType: file.type || undefined, cacheControl: '3600' });
   if (error){ console.error(`Erro ao subir ${kind} do cartão:`, error); return { ok: false, error: 'Não foi possível enviar o arquivo agora.' }; }
   const { data: pub } = supabaseClient.storage.from('flashcard-media').getPublicUrl(path);
-  return { ok: true, url: pub.publicUrl };
+  return { ok: true, url: pub.publicUrl, path };
+}
+
+// Fase 7e (ver CLAUDE.md) -- mesma remoção best-effort de
+// deleteFlashcardMedia (shared/teacher-flashcards.js), espelhada aqui pro
+// lado da própria aluna. Mesmo bucket, mesma RLS de ownership por
+// auth.uid() -- nenhuma diferença funcional entre os dois lados.
+async function deleteOwnFlashcardMedia(path){
+  if (!path) return { ok: false };
+  const { error } = await supabaseClient.storage.from('flashcard-media').remove([path]);
+  if (error){ console.warn('Não foi possível remover mídia órfã do cartão (best-effort):', error); return { ok: false }; }
+  return { ok: true };
+}
+
+// Fase 7f (TTS explícito por Field, implementação -- ver CLAUDE.md) --
+// mesmo serviço de front-end de requestFieldAudioTTS (shared/
+// teacher-flashcards.js), espelhado aqui pro lado da própria conta:
+// mesma Edge Function (tts-generate), só troca `table` pra 'own_flashcards'
+// -- a function decide sozinha (via RLS de own_flashcards, owner-only)
+// se esta conta pode tocar na linha. TTS_GENERATION_ERROR_LABELS vem de
+// shared/flashcard-model.js (declarado 1 vez só ali, nunca duplicado aqui
+// -- mesmo motivo de CARD_TYPE_UI_META na Fase 6D.2, evita colisão de
+// `const` top-level entre 2 <script> no mesmo escopo global).
+async function requestOwnFieldAudioTTS({ rowId, fieldId, text, language, voiceId, rate }){
+  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  const v = validateTtsGenerationRequest({ text, language });
+  if (!v.ok) return v;
+  const { data, error } = await supabaseClient.functions.invoke('tts-generate', {
+    body: { table: 'own_flashcards', rowId, fieldId, text, language, voiceId: voiceId || null, rate: (rate === undefined ? null : rate) },
+  });
+  if (error || !data?.ok){
+    const code = data?.error || error?.context?.error || null;
+    return { ok: false, error: TTS_GENERATION_ERROR_LABELS[code] || 'Não foi possível gerar o áudio agora.' };
+  }
+  return { ok: true, url: data.url, path: data.path, generationKey: data.generationKey, generatedAt: data.generatedAt };
 }
 
 async function setOwnFlashcardStatus(id, status){
@@ -141,7 +201,15 @@ async function setOwnFlashcardHidden(id, hidden){
 // comentário lá pra detalhe completo. Aqui quem edita e quem é dona da
 // sessão são a MESMA pessoa -- fr/zh app.js chama replaceSelfFlashcardInState()
 // logo em seguida pra refletir o reset NA MESMA sessão, sem esperar reload.
-async function updateOwnFlashcardContent(id, { front, backTrans, note, frontPinyin, frontIsTargetLanguage, revision }){
+// Fase 6D.6 (ver CLAUDE.md) -- `nativeState` opcional, mesmo contrato de
+// updateFlashcardContent() em shared/teacher-flashcards.js.
+async function updateOwnFlashcardContent(id, { front, backTrans, note, frontPinyin, frontIsTargetLanguage, revision, nativeState }){
+  if (nativeState){
+    const patch = Object.assign({ revision }, nativeContentColumnsFromEditorState(nativeState));
+    const { error } = await supabaseClient.from('own_flashcards').update(patch).eq('id', id).eq('owner_id', CURRENT_USER.id);
+    if (error){ console.error('Erro ao editar seu flashcard (nativo):', error); return { ok: false, error: 'Não foi possível salvar a edição agora.' }; }
+    return { ok: true };
+  }
   const v = _validateOwnFlashcardContent({ front, backTrans });
   if (!v.ok) return v;
   const { error } = await supabaseClient.from('own_flashcards').update({

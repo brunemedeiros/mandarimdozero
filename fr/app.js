@@ -228,8 +228,14 @@ function playPregeneratedAudio(file, btnEl, isAutoplay, rate){
 // à parte, isto aqui só normaliza o ritmo padrão.
 const PREGEN_AUDIO_RATE = 0.9;
 
-function speakFrench(text, btnEl, isAutoplay){
-  registerAudioPlay();
+// Fase 7d (ver CLAUDE.md) -- reprodução PURA de áudio (mp3 pré-gerado ou
+// Web Speech API), sem o efeito colateral de analytics (registerAudioPlay).
+// Extraída de dentro do que era o corpo de speakFrench() -- byte a byte o
+// mesmo código de sempre, só sem a chamada a registerAudioPlay() no topo.
+// speakFrench() (Review real, qualquer tela) chama registerAudioPlay() e
+// delega pra cá; playAudioPreview() (Preview do editor, Fase 6D.7) chama só
+// isto, nunca registerAudioPlay() -- ver os dois logo abaixo.
+function speakFrenchAudioOnly(text, btnEl, isAutoplay){
   const pregenFile = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
   if (pregenFile){
     playPregeneratedAudio(pregenFile, btnEl, isAutoplay, PREGEN_AUDIO_RATE);
@@ -295,6 +301,24 @@ function speakFrench(text, btnEl, isAutoplay){
   }, 800);
 }
 
+function speakFrench(text, btnEl, isAutoplay){
+  registerAudioPlay();
+  speakFrenchAudioOnly(text, btnEl, isAutoplay);
+}
+
+// Fase 7d (ver CLAUDE.md) -- porta de reprodução ISOLADA pro Preview do
+// editor de flashcards (Fase 6D.7): toca o áudio de verdade (mesmo
+// mecanismo de sempre -- mp3 pré-gerado ou Web Speech API, via
+// speakFrenchAudioOnly acima), mas NUNCA chama registerAudioPlay() --
+// nunca incrementa STATE.totalAudioPlays/daily.audioPlaysToday, nunca
+// dispara checkAndCelebrateBadges(). Preview é uma simulação visual/
+// interativa de Review, não Review de verdade -- nenhuma reprodução de
+// áudio dentro dele deveria contar como estudo real. Sempre isAutoplay:
+// false (um clique manual, nunca um autoplay automático).
+function playAudioPreview(text, btnEl){
+  speakFrenchAudioOnly(text, btnEl, false);
+}
+
 if (TTS.supported){
   setInterval(() => {
     if (!window.speechSynthesis.speaking){
@@ -356,11 +380,19 @@ function scenarioSceneHTML(emoji){
   return svg ? `<span class="scenario-flag">${svg}</span>` : emoji;
 }
 
-function wireAudioButtons(container){
+// Fase 7d (ver CLAUDE.md) -- `isPreview` (booleano, opcional -- default
+// falso/ausente preserva 100% o comportamento de sempre) é o ÚNICO ponto
+// que decide se um clique MANUAL em `.audio-btn` conta como reprodução
+// real (speakFrench, com registerAudioPlay) ou isolada (playAudioPreview,
+// sem nenhum efeito colateral) -- nunca espalhado em `if(isPreview)` pelos
+// 4 renderers/pontos de chamada; cada um só passa `card.__isPreviewCard`
+// (Fase 6D.7) como 2º argumento, a decisão em si mora só aqui.
+function wireAudioButtons(container, isPreview){
   container.querySelectorAll('.audio-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      speakFrench(btn.dataset.speak, btn);
+      if (isPreview) playAudioPreview(btn.dataset.speak, btn);
+      else speakFrench(btn.dataset.speak, btn);
     });
   });
 }
@@ -475,49 +507,24 @@ function flashcardIdForRow(prefix, row){
   return row.revision > 0 ? `${prefix}${row.id}-r${row.revision}` : `${prefix}${row.id}`;
 }
 
+// Fase 4b do prompt-mestre "reestruturação inspirada no Anki" (ver
+// CLAUDE.md): esta função NÃO usa mais a ponte (legacyFlashcardRowToCard/
+// bridgeNoteCardsToLegacyShape) -- delega pra buildEngineCardsFromRow()
+// (shared/flashcard-model.js), que devolve o(s) card(s) já no shape
+// NATIVO (`note`+`cardInstance`, sem nenhum campo de conteúdo legado
+// solto tipo `front`/`back_trans`/`choices`).
+// Fase 5, fechamento (ver CLAUDE.md) -- ANTES desta correção, esta
+// função devolvia só `[0]` do array (assumindo, corretamente até então,
+// que nenhuma linha produzia mais de 1 CardInstance). O motor da Fase 5
+// passou a produzir 2+ CardInstances por linha (normal_reversed, Cloze
+// multi-marca) -- `[0]` truncava silenciosamente as demais antes de
+// chegarem perto de STATE.cards. Contrato agora é
+// `buildCardFromTeacherFlashcard(row) -> Card[]` (sempre um array, 1
+// elemento pra todo dado legado -- zero mudança de comportamento pra
+// eles) -- quem chama precisa espalhar o array em STATE.cards, nunca
+// fazer `.push()` direto do retorno.
 function buildCardFromTeacherFlashcard(row){
-  return {
-    id: flashcardIdForRow('t', row),
-    rowId: row.id,
-    unitId: null,
-    unitTitle: 'Da sua professora',
-    vocabIdx: null,
-    type: 'vocab',
-    front: row.front,
-    back_trans: row.back_trans,
-    origin: 'teacher',
-    teacherNote: row.note || null,
-    flashcardStatus: row.status,
-    // Prop 1+2 (ver CLAUDE.md, "7 propostas") -- qual lado tem o idioma
-    // estudado. Vale só pros modos flip/mc (renderReviewView/
-    // renderMultipleChoiceReviewCard) -- cloze não usa front/back_trans
-    // pra isso, mecânica de sempre.
-    frontIsTargetLanguage: row.front_is_target_language !== false,
-    // Fase 8a (ver CLAUDE.md) -- formatos extras opcionais, sempre
-    // independentes entre si. `choices` presente (array não-vazio) marca
-    // o cartão como múltipla escolha -- renderReviewView() desvia pra
-    // renderMultipleChoiceCard() em vez do flip normal quando isso é true.
-    imageUrl: row.image_url || null,
-    audioUrl: row.audio_url || null,
-    choices: (row.choices && row.choices.length) ? row.choices : null,
-    // Fase 8c (ver CLAUDE.md) -- "completar a frase", 4º formato,
-    // mutuamente exclusivo com `choices` (garantido na criação, ver
-    // shared/admin-flashcards.js). clozeSentence contém um único "___"
-    // marcando a lacuna.
-    clozeSentence: row.cloze_sentence || null,
-    clozeAnswer: row.cloze_answer || null,
-    ef: 2.5,
-    interval: 0,
-    reps: 0,
-    due: 0,
-    lapses: 0,
-    stability: 0,
-    difficulty: 0,
-    state: 'new',
-    lastReview: null,
-    fsrsReps: 0,
-    fsrsLapses: 0
-  };
+  return buildEngineCardsFromRow(row, { origin: 'teacher', appKey: APP_KEY, idPrefix: 't' });
 }
 
 // Busca os flashcards atribuídos a esta conta (shared/teacher-flashcards.js)
@@ -528,18 +535,26 @@ function buildCardFromTeacherFlashcard(row){
 // acumulado. Busca TODOS os status (ativo e arquivado) de propósito --
 // arquivar não pode apagar progresso já salvo, só tirar o cartão da fila
 // de revisão (ver isCardLessonCompleted). Idempotente dentro da mesma
-// sessão (ids já presentes não são duplicados) -- não recarrega uma
-// edição feita pela professora no meio da sessão, mesmo princípio de
-// STATE.units não recarregar ao vivo.
+// sessão -- não recarrega uma edição feita pela professora no meio da
+// sessão, mesmo princípio de STATE.units não recarregar ao vivo.
+// Fase 5, fechamento -- dedup agora é POR CARD (checa `card.id` de cada
+// elemento do array devolvido por buildCardFromTeacherFlashcard), não
+// mais por um único id "representante" da linha. Isso é estritamente
+// necessário pra normal_reversed/Cloze multi-marca: o id "representante"
+// de uma linha cloze multi-marca (`t${row.id}`) nunca existe de verdade
+// (os ids reais são `t${row.id}-c1`/`-c2`/...) -- checar só ele faria o
+// guard de idempotência nunca bater, duplicando cartões numa 2ª chamada.
 async function mergeTeacherFlashcardsIntoState(){
   if (typeof fetchFlashcardsForCurrentStudent !== 'function') return;
   const rows = await fetchFlashcardsForCurrentStudent(APP_KEY);
   if (!rows.length) return;
   const existingIds = new Set(STATE.cards.map(c => c.id));
   rows.forEach(row => {
-    const id = flashcardIdForRow('t', row);
-    if (existingIds.has(id)) return;
-    STATE.cards.push(buildCardFromTeacherFlashcard(row));
+    buildCardFromTeacherFlashcard(row).forEach(card => {
+      if (existingIds.has(card.id)) return;
+      STATE.cards.push(card);
+      existingIds.add(card.id);
+    });
   });
 }
 
@@ -563,52 +578,31 @@ async function mergeTeacherFlashcardsIntoState(){
 // card.choices/card.clozeSentence direto, nunca card.origin), então um
 // cartão próprio com esses campos populados já funciona sem nenhuma
 // mudança no motor de revisão.
+// Fase 4b (ver comentário de buildCardFromTeacherFlashcard acima, mesmo
+// princípio) -- irmã gêmea, só troca origin/idPrefix.
+// Fase 5, fechamento -- mesmo contrato `-> Card[]` da irmã (ver comentário
+// completo em buildCardFromTeacherFlashcard acima).
 function buildCardFromSelfFlashcard(row){
-  return {
-    id: flashcardIdForRow('s', row),
-    rowId: row.id,
-    unitId: null,
-    unitTitle: 'Meus cartões',
-    vocabIdx: null,
-    type: 'vocab',
-    front: row.front,
-    back_trans: row.back_trans,
-    origin: 'self',
-    teacherNote: row.note || null,
-    flashcardStatus: row.status,
-    frontIsTargetLanguage: row.front_is_target_language !== false,
-    imageUrl: row.image_url || null,
-    audioUrl: row.audio_url || null,
-    choices: (row.choices && row.choices.length) ? row.choices : null,
-    clozeSentence: row.cloze_sentence || null,
-    clozeAnswer: row.cloze_answer || null,
-    ef: 2.5,
-    interval: 0,
-    reps: 0,
-    due: 0,
-    lapses: 0,
-    stability: 0,
-    difficulty: 0,
-    state: 'new',
-    lastReview: null,
-    fsrsReps: 0,
-    fsrsLapses: 0
-  };
+  return buildEngineCardsFromRow(row, { origin: 'self', appKey: APP_KEY, idPrefix: 's' });
 }
 
 // Busca os cartões que a PRÓPRIA aluna já criou (shared/own-flashcards.js)
 // e mescla em STATE.cards -- mesmo motivo/posicionamento de
 // mergeTeacherFlashcardsIntoState() (precisa rodar ANTES de loadState(),
 // ver comentário lá). Busca todos os status de propósito, mesma razão.
+// Fase 5, fechamento -- dedup por card, mesmo motivo/mecanismo de
+// mergeTeacherFlashcardsIntoState() acima.
 async function mergeSelfFlashcardsIntoState(){
   if (typeof fetchMyOwnFlashcards !== 'function') return;
   const rows = await fetchMyOwnFlashcards(APP_KEY);
   if (!rows.length) return;
   const existingIds = new Set(STATE.cards.map(c => c.id));
   rows.forEach(row => {
-    const id = flashcardIdForRow('s', row);
-    if (existingIds.has(id)) return;
-    STATE.cards.push(buildCardFromSelfFlashcard(row));
+    buildCardFromSelfFlashcard(row).forEach(card => {
+      if (existingIds.has(card.id)) return;
+      STATE.cards.push(card);
+      existingIds.add(card.id);
+    });
   });
 }
 
@@ -616,10 +610,16 @@ async function mergeSelfFlashcardsIntoState(){
 // STATE.cards, sem esperar o próximo boot (mergeSelfFlashcardsIntoState()
 // só roda no carregamento do app) -- assim ele já entra na fila de revisão
 // nesta mesma sessão. Idempotente pelo mesmo padrão do merge acima.
+// Fase 5, fechamento -- buildCardFromSelfFlashcard() agora devolve `Card[]`
+// (normal_reversed/Cloze multi-marca podem produzir 2+ cartões pra uma
+// única linha criada); espalha TODOS em STATE.cards, checando cada id
+// individualmente -- nunca `.push()` do array inteiro como 1 elemento só.
 function addSelfFlashcardToState(row){
-  const id = flashcardIdForRow('s', row);
-  if (STATE.cards.some(c => c.id === id)) return;
-  STATE.cards.push(buildCardFromSelfFlashcard(row));
+  const existingIds = new Set(STATE.cards.map(c => c.id));
+  buildCardFromSelfFlashcard(row).forEach(card => {
+    if (existingIds.has(card.id)) return;
+    STATE.cards.push(card);
+  });
 }
 
 // Espelha um arquivar/reativar feito em shared/my-flashcards.js direto no
@@ -629,9 +629,15 @@ function addSelfFlashcardToState(row){
 // nunca muda a revisão, mas o card já pode ter um id `s${id}-r${n}` se já
 // foi editado antes, então reconstruir `s${rowId}` sem checar a revisão
 // atual não encontraria o cartão certo.
+// Fase 5, fechamento -- `.forEach()` em vez de `.find()`: uma linha agora
+// pode ter gerado 2+ cartões que compartilham o MESMO rowId (as 2 metades
+// de normal_reversed, ou c1/c2/... de um Cloze multi-marca) -- `.find()`
+// só atualizaria o primeiro que aparecesse, deixando os demais com
+// `flashcardStatus` desatualizado até o próximo reload.
 function updateSelfFlashcardStatusInState(rowId, status){
-  const card = STATE.cards.find(c => c.origin === 'self' && String(c.rowId) === String(rowId));
-  if (card) card.flashcardStatus = status;
+  STATE.cards.forEach(c => {
+    if (c.origin === 'self' && String(c.rowId) === String(rowId)) c.flashcardStatus = status;
+  });
 }
 
 // Prop 4 (ver CLAUDE.md, "7 propostas") -- remove um cartão apagado de
@@ -852,7 +858,21 @@ const STATE = {
   currentUnitId: null,
   reviewQueue: [],
   reviewIndex: 0,
-  reviewShowingAnswer: false,
+  // Fase 6C.1/6C.2/6C.3 (ver CLAUDE.md) -- estado efêmero da exibição
+  // ATUAL do renderer em uso (shape varia por `kind`: {kind:'normal',
+  // revealed} | {kind:'multiple_choice', shuffledOptions, selectedIndex,
+  // answered, wasCorrect} | {kind:'type_answer', typedAnswer, answered,
+  // wasCorrect} | {kind:'cloze', markId, typedAnswer, answered,
+  // wasCorrect}). Dono é a SESSÃO (renderReviewView cria, gradeCurrentCard/
+  // reviewMoreCurrentCard descartam) -- o renderer nunca lê/escreve isto
+  // por nome, só recebe a referência como parâmetro `localState`.
+  // Substitui o antigo `reviewShowingAnswer` (Fase 6C.1),
+  // `reviewMCPicked`/`reviewMCCorrect` (Fase 6C.2) e `reviewClozeAnswered`
+  // (Fase 6C.3) -- cada um era usado exclusivamente dentro de um único
+  // renderer, confirmado por grep antes de remover. Nenhum campo solto de
+  // tipo restante -- os 4 Card Types hoje suportados (normal/
+  // multiple_choice/type_answer/cloze) usam exclusivamente este slot.
+  reviewCardState: null,
   reviewSessionUnitFilter: null,
   currentLevel: LEVELS[0].id,
   checkpointProgress: {},
@@ -5145,15 +5165,45 @@ const SPEED_STATE = {
 // Fase 1 da reestruturação do formulário de flashcards do admin (ver
 // CLAUDE.md) -- desde a migration 035, um cartão de professora "Completar
 // a frase" pode não ter `front` (esse modo nunca exibiu Frente em
-// nenhuma tela, ver renderClozeReviewCard). Combinar e Speed Review nunca
+// nenhuma tela, ver renderClozeCard). Combinar e Speed Review nunca
 // entendem cloze -- os dois pressupõem um par frente/verso simples (front
 // como prompt/tile, back_trans como resposta) -- então um cartão cloze
 // SEM front quebraria a exibição deles (tile/prompt em branco). Cartões
 // cloze já existentes continuam com front preenchido (nunca migrados) e
 // continuam elegíveis aqui, sem mudança de comportamento -- este filtro só
 // passa a excluir cartões NOVOS criados sem front.
+// Fase 4b -- reescrita em cima do motor de tipos (não mais presença de
+// `front`, que nem existe mais no card nativo). Elegível = tipos com par
+// prompt/resposta curto e fixo (normal, múltipla escolha) -- cloze e
+// "digite a resposta" ficam de fora (resposta aberta/digitada, sem texto
+// curto pronto pra virar tile/opção), mesmo critério de sempre.
 function hasPlainFrontBack(card){
-  return !(card.clozeSentence && !card.front);
+  if (!card.cardInstance) return true; // trilha (origin:'study') -- sempre foi par simples front/back
+  return card.cardInstance.cardTypeId === 'normal' || card.cardInstance.cardTypeId === 'multiple_choice';
+}
+
+// Fase 4b -- únicos pontos que Speed Review/Combinar/export Anki usam pra
+// extrair texto de um card, trilha OU nativo (Note/CardInstance). Nunca
+// leem `card.front`/`card.back_trans` soltos -- esses campos não existem
+// mais num card nativo (ver buildEngineCardsFromRow, shared/flashcard-model.js).
+// `cardOrPseudo` porque buildSpeedOptions() também gera pseudo-objetos só
+// com `displayAnswerText` pras opções erradas de múltipla escolha (ver
+// abaixo) -- cardAnswerText() aceita os dois sem o chamador precisar saber
+// qual é qual.
+function cardPromptText(cardOrPseudo){
+  if (cardOrPseudo.cardInstance){
+    const view = resolveCardContentView(cardOrPseudo);
+    return (view.kind === 'multiple_choice' ? view.prompt : view.front).text;
+  }
+  return cardOrPseudo.front; // trilha
+}
+function cardAnswerText(cardOrPseudo){
+  if ('displayAnswerText' in cardOrPseudo) return cardOrPseudo.displayAnswerText;
+  if (cardOrPseudo.cardInstance){
+    const view = resolveCardContentView(cardOrPseudo);
+    return view.kind === 'multiple_choice' ? view.correctText : view.back.text;
+  }
+  return cardOrPseudo.back_trans; // trilha
 }
 
 function buildSpeedQueue(){
@@ -5172,19 +5222,32 @@ function buildSpeedOptions(card){
   // Fase 8a (ver CLAUDE.md) -- cartão de múltipla escolha autorado usa as
   // opções ERRADAS que a professora escreveu, nunca os distratores
   // automáticos abaixo (mais preciso/intencional pro que ela quis testar
-  // especificamente nesse cartão). Objetos pseudo-carta (só back_trans) --
-  // o resto do fluxo (answerSpeedQuestion) só lê essa propriedade e
-  // compara identidade com `card`, então funciona sem mudança nenhuma lá.
-  if (card.choices && card.choices.length){
-    return shuffle([card, ...card.choices.map(text => ({ back_trans: text }))]);
+  // especificamente nesse cartão). Objetos pseudo-carta (`displayAnswerText`,
+  // lido por cardAnswerText() acima) -- o resto do fluxo (answerSpeedQuestion)
+  // compara identidade com `card` pra saber se ACERTOU, e só usa o texto
+  // pra exibição, então funciona sem mudança nenhuma lá.
+  if (card.cardInstance && card.cardInstance.cardTypeId === 'multiple_choice'){
+    const view = resolveCardContentView(card);
+    return shuffle([card, ...view.distractorTexts.map(text => ({ displayAnswerText: text }))]);
   }
-  const pool = STATE.cards.filter(c => c !== card && c.unitId === card.unitId);
+  // hasPlainFrontBack() nos dois filtros abaixo -- achado no smoke test da
+  // Fase 4: cartões nativos (teacher/self) sempre compartilham `unitId:
+  // null`, então o agrupamento por unidade tratava TODOS os cartões
+  // nativos como "mesma unidade" entre si, inclusive um cloze/"digite a
+  // resposta" ao lado de um card 'normal'. Antes da Fase 4 isso nunca
+  // quebrava (o bridge legado sempre populava back_trans plano em
+  // qualquer tipo); agora resolveClozeCardView()/resolveTypeAnswerCardView()
+  // não têm `.back`, e cardAnswerText() quebraria ao tentar ler
+  // view.back.text de um distrator desse tipo. Nunca oferecer um cloze/
+  // "digite a resposta" como opção de múltipla escolha de qualquer forma
+  // (não são pares prompt/resposta curtos, mesmo critério de sempre).
+  const pool = STATE.cards.filter(c => c !== card && c.unitId === card.unitId && hasPlainFrontBack(c));
   let distractors = shuffle(pool).slice(0, 3);
   if (distractors.length < 3){
     // Fallback só quando a unidade não tem 3 outras cartas -- puxa de
     // eligibleReviewPool() (não STATE.cards puro) pra não arriscar mostrar,
     // mesmo como alternativa errada, uma palavra de uma unidade nunca aberta.
-    const extra = shuffle(eligibleReviewPool().filter(c => c !== card && !distractors.includes(c))).slice(0, 3 - distractors.length);
+    const extra = shuffle(eligibleReviewPool().filter(c => c !== card && hasPlainFrontBack(c) && !distractors.includes(c))).slice(0, 3 - distractors.length);
     distractors = distractors.concat(extra);
   }
   return shuffle([card, ...distractors]);
@@ -5469,7 +5532,7 @@ function openReviewSession(mode){
     // Fase 4: getStudyQueue(scope:'hard') -- mesmo critério de hardWordsPool()
     STATE.reviewQueue = shuffle(getStudyQueue(eligibleReviewPool(), { scope: 'hard' }));
     STATE.reviewIndex = 0;
-    STATE.reviewShowingAnswer = false;
+    STATE.reviewCardState = null;
     renderReviewView();
   } else if (mode === 'match'){
     renderMatchSizePicker();
@@ -5567,8 +5630,8 @@ function startMatchGame(){
   const pairCount = Math.min(MATCH_STATE.pairSize, pool.length);
   MATCH_STATE.pairs = pool.slice(0, pairCount);
   MATCH_STATE.tiles = shuffle([
-    ...MATCH_STATE.pairs.map(c => ({ cardId: c.id, side: 'front', text: c.front })),
-    ...MATCH_STATE.pairs.map(c => ({ cardId: c.id, side: 'back', text: c.back_trans }))
+    ...MATCH_STATE.pairs.map(c => ({ cardId: c.id, side: 'front', text: cardPromptText(c) })),
+    ...MATCH_STATE.pairs.map(c => ({ cardId: c.id, side: 'back', text: cardAnswerText(c) }))
   ]);
   MATCH_STATE.selected = null;
   MATCH_STATE.matchedCount = 0;
@@ -5837,10 +5900,10 @@ function renderSpeedReview(){
     </div>
     <div class="speed-timer-track"><div class="speed-timer-fill" id="speed-timer-fill" style="width:100%"></div></div>
     <div class="speed-prompt">
-      <div class="french">${card.front}</div>
+      <div class="french">${cardPromptText(card)}</div>
     </div>
     <div class="speed-options">
-      ${options.map((opt, i) => `<button class="speed-option" data-idx="${i}">${opt.back_trans}</button>`).join('')}
+      ${options.map((opt, i) => `<button class="speed-option" data-idx="${i}">${cardAnswerText(opt)}</button>`).join('')}
     </div>
   `;
 
@@ -5881,10 +5944,11 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
   const elapsed = Date.now() - SPEED_STATE.timerStart;
   const card = SPEED_STATE.queue[SPEED_STATE.index];
   const options = Array.from(el.querySelectorAll('.speed-option'));
+  const correctText = cardAnswerText(card);
 
   options.forEach((btn, i) => {
     btn.classList.add('disabled');
-    if (btn.textContent === card.back_trans) btn.classList.add('correct');
+    if (btn.textContent === correctText) btn.classList.add('correct');
     else if (i === chosenIdx) btn.classList.add('incorrect');
   });
 
@@ -5986,10 +6050,16 @@ function startReviewSession(){
     ? getStudyQueue(pool, { scope: 'unit', newCardsLimit: STATE.studySettings.newCardsPerDay })
     : reviewFilterQueue('oldest', pool);
 
-  // Decide a direção de cada carta ANTES de embaralhar/mostrar -- alterna a
-  // partir da última vez que essa carta foi revisada (ver nextCardDirection
-  // em shared/srs.js). Calculado 1x aqui, não a cada render.
-  queue.forEach(c => { c.reviewDirection = nextCardDirection(c); });
+  // Decide a direção de cada carta de TRILHA ANTES de embaralhar/mostrar --
+  // alterna a partir da última vez que essa carta foi revisada (ver
+  // nextCardDirection em shared/srs.js). Calculado 1x aqui, não a cada
+  // render. Fase 4 (motor de tipos/templates, ver CLAUDE.md): cartão nativo
+  // (Note/CardInstance, origin teacher/self) NUNCA recebe reviewDirection --
+  // a direção dele é 100% decidida pelo CardInstance (frontFieldIndex/
+  // backFieldIndex), a sessão nunca escolhe/alterna (restrição explícita da
+  // autora). "Normal com reverso" (2 CardInstance independentes, Fase 4a) é
+  // o único jeito de ver as 2 direções -- nunca um toggle de sessão.
+  queue.forEach(c => { if (!c.cardInstance) c.reviewDirection = nextCardDirection(c); });
 
   // "Mais antigas primeiro" só cumpre o que promete se a ordem sobreviver
   // até a tela -- embaralhar (como sempre foi) destruiria exatamente essa
@@ -5997,16 +6067,14 @@ function startReviewSession(){
   const shouldShuffle = !!STATE.reviewSessionUnitFilter;
   STATE.reviewQueue = shouldShuffle ? shuffle(queue) : queue;
   STATE.reviewIndex = 0;
-  STATE.reviewShowingAnswer = false;
-  // Fase 8a -- estado transitório do quiz de múltipla escolha (ver
-  // renderMultipleChoiceReviewCard); zera ao entrar numa sessão nova, caso
-  // a anterior tenha sido interrompida no meio de uma pergunta respondida.
-  STATE.reviewMCPicked = null;
-  STATE.reviewMCCorrect = null;
-  // Fase 8c -- mesmo espírito, pro estado transitório do cartão "completar
-  // a frase" (ver renderClozeReviewCard). null=não respondido ainda,
-  // true/false=acerto/erro já registrado, aguardando "Continuar".
-  STATE.reviewClozeAnswered = null;
+  // Fase 6C.1/6C.2/6C.3 -- descarta o localState (Normal/Múltipla escolha/
+  // Digite a resposta/Cloze) da sessão anterior, se houver; renderReviewView()
+  // cria um novo, tipado pro card atual, na primeira renderização. Fase
+  // 6C.2 eliminou STATE.reviewMCPicked/STATE.reviewMCCorrect; Fase 6C.3
+  // eliminou STATE.reviewClozeAnswered (Cloze migrou 100% pra este slot
+  // único, mesmo padrão dos outros 3 tipos) -- não há mais nenhum campo
+  // solto de tipo pra zerar aqui.
+  STATE.reviewCardState = null;
   renderReviewView();
 }
 
@@ -6038,44 +6106,107 @@ function gradeButtonsHTML(card){
   `;
 }
 
-// Fase 8a (ver CLAUDE.md) -- quiz de múltipla escolha pra um cartão
-// autorado pela professora com `choices`. Reaproveita gradeCurrentCard()
-// pra aplicar a nota FSRS -- acerto=Bom(2), erro=Errei(0) (grillado) --
-// então herda de graça toda a plumbing já existente (XP, streak,
-// requeue-em-erro, save, avanço de índice), sem reimplementar nada disso.
-// `card.mcOptions` é cacheado no próprio cartão (mesmo padrão de
-// `card.reviewDirection`, calculado 1x e reaproveitado entre re-renders
-// desta MESMA pergunta) -- embaralhar de novo a cada clique trocaria a
-// posição dos botões debaixo do dedo da aluna.
-function renderMultipleChoiceReviewCard(card){
-  const el = document.getElementById('review-content');
-  const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
-
-  if (!card.mcOptions){
-    card.mcOptions = shuffle([
-      { text: card.back_trans, correct: true },
-      ...card.choices.map(text => ({ text, correct: false })),
-    ]);
+// Fase 6D.7 (ver CLAUDE.md) -- único ponto de acoplamento residual dos 4
+// renderers extraídos na Fase 6C a STATE.reviewQueue/reviewIndex (posição
+// na fila real de Review -- contabilidade de SESSÃO, nunca estado
+// efêmero de interação; a proibição da Fase 6C nunca foi sobre isto, ver
+// comentário original de renderNormalCard mais abaixo). Preview (Fase
+// 6D.7, shared/flashcard-preview.js) nunca tem uma fila real de Review --
+// `card.__isPreviewCard` (setado SÓ por aquele arquivo, nunca por nenhum
+// card real de STATE.cards) troca a barra de progresso por um rótulo
+// "Pré-visualização" em vez de ler STATE.reviewQueue (que valeria 0/NaN
+// fora de uma sessão de Review de verdade). Esta é a alteração MÍNIMA
+// necessária pra permitir o contrato compartilhado renderer(mountEl,
+// card, localState, callbacks) sem alterar o comportamento real de
+// Review -- quando `card.__isPreviewCard` é falso/ausente (SEMPRE o caso
+// pra cartão real), o HTML produzido é byte a byte idêntico ao de antes
+// desta fase.
+function reviewProgressBarHTML(card){
+  if (card.__isPreviewCard){
+    return `<div class="review-progress"><div class="review-progress-count">👁️ Pré-visualização</div></div>`;
   }
-  const answered = STATE.reviewMCPicked !== null && STATE.reviewMCPicked !== undefined;
-
-  el.innerHTML = `
+  const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
+  return `
     <div class="review-progress">
       <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
       <div class="review-progress-count">${STATE.reviewIndex+1} / ${STATE.reviewQueue.length}</div>
     </div>
+  `;
+}
+
+// Fase 6C.2 (ver CLAUDE.md) -- renderer de "Múltipla escolha", extraído
+// pro contrato aprovado na Fase 6C: (mountEl, card, localState, callbacks)
+// -- mesmo espírito da extração de Normal (Fase 6C.1). Reutilizável tal e
+// qual pelo Preview do editor (Fase 6D.7, ver reviewProgressBarHTML
+// acima): o Preview chama esta MESMA função, só trocando localState
+// (variável local do Preview, nunca STATE) e callbacks (onAnswered vira
+// um no-op visual, nunca gradeCurrentCard). O renderer não sabe -- nem
+// precisa saber -- se está em Review ou Preview.
+//
+// localState: {kind:'multiple_choice', shuffledOptions, selectedIndex,
+// answered, wasCorrect}. `shuffledOptions` substitui `card.mcOptions`
+// (Fase 8a) -- antes era mutação direta de uma entrada REAL de
+// STATE.cards (objeto durável, potencialmente serializado se alguém
+// esquecesse de limpar); agora é gerado 1x na 1ª renderização desta
+// EXIBIÇÃO e vive só no localState, que nunca é persistido. `view.
+// correctText`/`view.distractorTexts` (resolveCardContentView, Fase 4b,
+// intocado) sempre vêm do MESMO CardInstance -- a mesma pergunta sempre
+// produz as mesmas alternativas e a mesma resposta certa; só a ORDEM do
+// shuffle muda entre exibições.
+//
+// Interação intermediária (marcar uma opção): o PRÓPRIO renderer se
+// chama de novo com os mesmos 4 parâmetros -- sem envolver a sessão. Só
+// a transição FINAL (clicar "Continuar") chama callbacks.onAnswered.
+function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
+  // Fase 4b -- lê Note/CardInstance via resolveCardContentView(), nunca
+  // `card.front`/`card.back_trans`/`card.choices` (não existem mais no
+  // card nativo). `view.prompt`/`view.correct` são Fields já resolvidos
+  // (texto+lang+áudio), `view.correctText`/`view.distractorTexts` são as
+  // strings prontas pros botões.
+  const view = resolveCardContentView(card);
+
+  if (!localState.shuffledOptions){
+    localState.shuffledOptions = shuffle([
+      { text: view.correctText, correct: true },
+      ...view.distractorTexts.map(text => ({ text, correct: false })),
+    ]);
+  }
+  const answered = localState.answered;
+  // isStudyLanguageField() aqui é exatamente o uso que a ressalva da Fase 2
+  // sempre permitiu ("helper pra regras que genuinamente dependem do idioma
+  // do app") -- a DIREÇÃO já foi decidida pelo CardInstance antes deste
+  // ponto (view.prompt já é o campo certo); isto só decide se o motor de
+  // pronúncia (que só sabe falar UM idioma real) pode tentar esse campo
+  // específico, nunca qual campo é o prompt.
+  const promptSpeakable = isStudyLanguageField(view.prompt, APP_KEY);
+  // Fase 7a (ver CLAUDE.md) -- áudio/imagem customizados vêm SÓ do Field
+  // do prompt agora, nunca mais com fallback pro `correct` (achado da
+  // auditoria da Fase 7: o fallback antigo, `prompt.audioUrl ||
+  // correct.audioUrl`, podia tocar a pronúncia da RESPOSTA CERTA antes da
+  // aluna sequer ver as opções, se só o Field de resposta tivesse áudio/
+  // imagem próprio -- um vazamento real). O prompt é sempre visível desde
+  // o início (não há "revelação" nele), então usar só sua própria mídia é
+  // seguro em qualquer direção do cartão. `view.correct`/os distratores
+  // continuam sem exibir mídia própria nesta subfase (nenhum slot de UI
+  // pra isso hoje, e distratores nem carregam Field/mídia -- ver
+  // CLAUDE.md, achado #3 da Fase 7).
+  const customAudioUrl = view.prompt.audioUrl || null;
+  const promptImageUrl = card.imageUrl || view.prompt.imageUrl || null;
+
+  mountEl.innerHTML = `
+    ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${card.unitTitle}</div>
-      ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
-      <div class="flashcard-french">${escapeHTML(card.front)}${card.frontIsTargetLanguage !== false ? ` ${audioBtnHTML(card.front, 'audio-btn-lg')}` : ''}${card.audioUrl ? customAudioBtnHTML(card.audioUrl) : ''}</div>
+      ${promptImageUrl ? `<img src="${promptImageUrl}" class="flashcard-image" alt="">` : ''}
+      <div class="flashcard-french">${escapeHTML(view.prompt.text)}${promptSpeakable ? ` ${audioBtnHTML(view.prompt.text, 'audio-btn-lg')}` : ''}${customAudioUrl ? customAudioBtnHTML(customAudioUrl) : ''}</div>
     </div>
     <div class="mc-options">
-      ${card.mcOptions.map((opt, i) => {
+      ${localState.shuffledOptions.map((opt, i) => {
         let cls = 'mc-option';
         if (answered){
           cls += ' disabled';
           if (opt.correct) cls += ' correct';
-          else if (i === STATE.reviewMCPicked) cls += ' incorrect';
+          else if (i === localState.selectedIndex) cls += ' incorrect';
         }
         return `<button class="${cls}" data-idx="${i}"${answered ? ' disabled' : ''}>${escapeHTML(opt.text)}</button>`;
       }).join('')}
@@ -6083,62 +6214,96 @@ function renderMultipleChoiceReviewCard(card){
     ${answered ? `<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">Continuar</button>` : ''}
   `;
 
-  wireAudioButtons(el);
-  wireCustomAudioButtons(el);
+  wireAudioButtons(mountEl, card.__isPreviewCard);
+  wireCustomAudioButtons(mountEl);
   // Prop 1+2 (ver CLAUDE.md, "7 propostas") -- só tenta pronunciar
-  // automaticamente quando a Frente é de fato o idioma estudado. Quando
-  // invertido (front=tradução, opções no idioma estudado), NÃO existe
+  // automaticamente quando o prompt é de fato o idioma estudado. Quando
+  // invertido (prompt=tradução, opções no idioma estudado), NÃO existe
   // pronúncia automática de opção nenhuma -- tocar a opção certa antes da
   // aluna responder entregaria a resposta.
-  if (card.frontIsTargetLanguage !== false && canSpeakFrench(card.front)) speakFrench(card.front, el.querySelector('.audio-btn-lg'), true);
+  // Fase 7a -- `card.__isPreviewCard` suprime só o AUTOPLAY (registerAudioPlay()
+  // real não deveria disparar por abrir um Preview) -- ver mesmo comentário
+  // em renderNormalCard().
+  if (!card.__isPreviewCard && promptSpeakable && canSpeakFrench(view.prompt.text)) speakFrench(view.prompt.text, mountEl.querySelector('.audio-btn-lg'), true);
 
   if (!answered){
-    el.querySelectorAll('.mc-option').forEach(btn => {
+    mountEl.querySelectorAll('.mc-option').forEach(btn => {
       btn.addEventListener('click', () => {
         const idx = parseInt(btn.dataset.idx);
-        STATE.reviewMCPicked = idx;
-        STATE.reviewMCCorrect = card.mcOptions[idx].correct;
-        renderMultipleChoiceReviewCard(card);
+        // Interação intermediária -- muta localState e o renderer se
+        // autochama, sem envolver a sessão (nunca STATE.reviewMCPicked/
+        // reviewMCCorrect, eliminados nesta fase).
+        localState.selectedIndex = idx;
+        localState.answered = true;
+        localState.wasCorrect = localState.shuffledOptions[idx].correct;
+        renderMultipleChoiceCard(mountEl, card, localState, callbacks);
       });
     });
   } else {
-    document.getElementById('mc-continue-btn').addEventListener('click', () => {
-      const wasCorrect = STATE.reviewMCCorrect;
-      card.mcOptions = null;
-      STATE.reviewMCPicked = null;
-      STATE.reviewMCCorrect = null;
-      gradeCurrentCard(wasCorrect ? 2 : 0);
+    mountEl.querySelector('#mc-continue-btn').addEventListener('click', () => {
+      // Transição FINAL -- sobe pra sessão via callback. A sessão (não
+      // este renderer) é quem descarta STATE.reviewCardState ao avançar
+      // STATE.reviewIndex (gradeCurrentCard), mesmo ciclo de vida já
+      // estabelecido pra Normal na Fase 6C.1.
+      callbacks.onAnswered(localState.wasCorrect, localState.wasCorrect ? 2 : 0);
     });
   }
 }
 
-// Fase 8c (ver CLAUDE.md) -- cartão "completar a frase" autorado pela
-// professora. Reaproveita o mesmo idioma visual do cloze da trilha
-// (.cloze-sentence/.cloze-blank/.cloze-type-wrap, frAccentPickerHTML) e o
-// mesmo mecanismo de nota FSRS de renderMultipleChoiceReviewCard
-// (gradeCurrentCard, acerto=Bom(2)/erro=Errei(0)) -- mutuamente exclusivo
-// com card.choices, garantido na criação (shared/admin-flashcards.js).
-// STATE.reviewClozeAnswered: null (não respondido) | true/false (resultado).
-function renderClozeReviewCard(card){
-  const el = document.getElementById('review-content');
-  const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
-  const answered = STATE.reviewClozeAnswered !== null && STATE.reviewClozeAnswered !== undefined;
+// Fase 6C.3 (ver CLAUDE.md) -- renderer de "Cloze" (completar a frase),
+// extraído pro contrato aprovado na Fase 6C: (mountEl, card, localState,
+// callbacks). Mesmo espírito de todas as extrações anteriores desta fase
+// (Normal 6C.1, Múltipla escolha/Digite a resposta 6C.2) -- reutilizável
+// tal e qual pelo Preview do editor (Fase 6D, ainda não construída).
+//
+// localState: {kind:'cloze', markId, typedAnswer, answered, wasCorrect}.
+// `markId` -- AJUSTE em relação ao shape que a auditoria da Fase 6C tinha
+// esboçado pra Cloze (idêntico, campo a campo, ao de Type Answer) --
+// identifica explicitamente A QUAL CardInstance/marca este estado
+// pertence, mesmo sabendo que hoje só existe 1 markId por exibição (cada
+// {{cN::...}} de uma Note vira sua PRÓPRIA CardInstance/posição de fila
+// desde a Fase 5 -- nunca 2 marcas mostradas juntas na mesma tela). Sem
+// isso, o shape ficaria estruturalmente idêntico ao de Type Answer de
+// novo -- exatamente o "boolean genérico compartilhado" que esta subfase
+// foi instruída a evitar, mesmo já sendo 2 objetos/campos `STATE.
+// reviewCardState.kind` DISTINTOS desde a criação (nunca a mesma
+// referência) -- ver relatório da Fase 6C.3 pra detalhe desta decisão.
+//
+// Fase 4b -- lê Note/CardInstance via resolveCardContentView(), nunca
+// `card.clozeSentence`/`card.clozeAnswer`/`card.back_trans`/`card.audioUrl`
+// (não existem mais no card nativo). `view.rawSentenceText` ainda tem
+// {{cN::...}} embutido -- é este renderer que decide ocultar/revelar via
+// renderClozeText(), não o resolver (comportamento intocado, o resolver
+// já só devolve a marca que pertence a ESTA CardInstance -- markId --
+// nunca todas de uma Note com múltiplas lacunas).
+function renderClozeCard(mountEl, card, localState, callbacks){
+  const view = resolveCardContentView(card);
+  const answered = localState.answered;
   const blankHTML = answered
-    ? `<span class="cloze-blank ${STATE.reviewClozeAnswered ? 'correct' : 'incorrect'}" id="cloze-blank">${card.clozeAnswer}</span>`
+    ? `<span class="cloze-blank ${localState.wasCorrect ? 'correct' : 'incorrect'}" id="cloze-blank">${view.displayAnswerText}</span>`
     : `<span class="cloze-blank" id="cloze-blank">___</span>`;
-  const sentenceHTML = card.clozeSentence.replace('___', blankHTML);
+  const hiddenSentence = renderClozeText(view.rawSentenceText, view.markId, { reveal: false });
+  const sentenceHTML = hiddenSentence.replace('___', blankHTML);
+  // Fase 7a (ver CLAUDE.md) -- imagem/áudio agora resolvidos via o MESMO
+  // Field de texto que carrega a frase inteira (`resolveClozeCardView()`
+  // usa resolveCardField() por baixo agora, nunca mais lia `.audio.url`
+  // direto do Field cru) -- todas as CardInstance (c1/c2/...) de uma
+  // mesma Note compartilham esse Field, então nunca há mídia diferente
+  // por lacuna (comportamento já garantido pela estrutura, não por
+  // código especial aqui). Sem gate de revelação -- é a frase inteira
+  // (lacuna incluída) que fica visível o tempo todo, nunca a resposta
+  // isolada, então mostrar sempre não vaza nada (mesma conclusão da
+  // auditoria da Fase 7).
+  const clozeImageUrl = card.imageUrl || view.imageUrl || null;
 
-  el.innerHTML = `
-    <div class="review-progress">
-      <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
-      <div class="review-progress-count">${STATE.reviewIndex+1} / ${STATE.reviewQueue.length}</div>
-    </div>
+  mountEl.innerHTML = `
+    ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${card.unitTitle}</div>
-      ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
+      ${clozeImageUrl ? `<img src="${clozeImageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="cloze-sentence">${sentenceHTML}</div>
-      ${card.audioUrl ? customAudioBtnHTML(card.audioUrl) : ''}
-      ${answered ? `<div class="cloze-trans">${card.back_trans}</div>` : ''}
+      ${view.audioUrl ? customAudioBtnHTML(view.audioUrl) : ''}
+      ${answered ? `<div class="cloze-trans">${view.translation.text}</div>` : ''}
     </div>
     ${!answered ? `
       <div class="cloze-type-wrap">
@@ -6149,28 +6314,118 @@ function renderClozeReviewCard(card){
     ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
   `;
 
-  wireCustomAudioButtons(el);
+  wireCustomAudioButtons(mountEl);
 
   if (!answered){
-    const inputEl = document.getElementById('cloze-review-input');
+    const inputEl = mountEl.querySelector('#cloze-review-input');
     inputEl.focus();
-    wireFrAccentPicker(el.querySelector('.fr-accent-picker'), inputEl);
+    wireFrAccentPicker(mountEl.querySelector('.fr-accent-picker'), inputEl);
     const strip = s => normalizeLoose(s).replace(/[.,!?;:'"’]/g, '').trim();
     function verify(){
       if (inputEl.disabled) return;
       inputEl.disabled = true;
-      document.getElementById('cloze-review-verify-btn').disabled = true;
+      mountEl.querySelector('#cloze-review-verify-btn').disabled = true;
       const typed = strip(inputEl.value);
-      STATE.reviewClozeAnswered = acceptedForms(card.clozeAnswer).some(form => strip(form) === typed);
-      renderClozeReviewCard(card);
+      // Interação intermediária (verificar) -- muta localState e o
+      // renderer se autochama, sem envolver a sessão.
+      localState.typedAnswer = inputEl.value;
+      localState.answered = true;
+      localState.wasCorrect = acceptedForms(view.compareAnswerText).some(form => strip(form) === typed);
+      renderClozeCard(mountEl, card, localState, callbacks);
     }
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
-    document.getElementById('cloze-review-verify-btn').addEventListener('click', verify);
+    mountEl.querySelector('#cloze-review-verify-btn').addEventListener('click', verify);
   } else {
-    document.getElementById('cloze-continue-btn').addEventListener('click', () => {
-      const wasCorrect = STATE.reviewClozeAnswered;
-      STATE.reviewClozeAnswered = null;
-      gradeCurrentCard(wasCorrect ? 2 : 0);
+    mountEl.querySelector('#cloze-continue-btn').addEventListener('click', () => {
+      // Transição FINAL -- sobe pra sessão via callback, mesmo ciclo de
+      // vida de STATE.reviewCardState já estabelecido na Fase 6C.1.
+      callbacks.onAnswered(localState.wasCorrect, localState.wasCorrect ? 2 : 0);
+    });
+  }
+}
+
+// Fase 6C.2 (ver CLAUDE.md) -- renderer de "Digite a resposta", extraído
+// pro contrato aprovado na Fase 6C: (mountEl, card, localState, callbacks).
+// Antes (Fase 4) reaproveitava STATE.reviewClozeAnswered -- a MESMA
+// variável global que o Cloze usava, só por convenção ("os dois nunca
+// coexistem no mesmo cartão", nunca por desenho estrutural). Agora tem seu
+// PRÓPRIO localState, estruturalmente independente -- Cloze (renderClozeCard,
+// acima) também migrou pro próprio localState desde a Fase 6C.3, com
+// `kind:'cloze'` distinto (nunca mais o mesmo campo global compartilhado
+// entre os dois). Mesma lógica de comparação/compareAnswer/pinyin/
+// revelação/confirmar de sempre, só a leitura/escrita de "já respondeu?"
+// muda de STATE pra localState.
+//
+// localState: {kind:'type_answer', typedAnswer, answered, wasCorrect}.
+function renderTypeAnswerCard(mountEl, card, localState, callbacks){
+  const view = resolveCardContentView(card);
+  const answered = localState.answered;
+  const promptSpeakable = isStudyLanguageField(view.prompt, APP_KEY);
+  // Fase 7a (ver CLAUDE.md) -- imagem do prompt vem do Field certo agora
+  // (`view.prompt.imageUrl`, com o fallback legado de `card.imageUrl` só
+  // pra Note-level histórico -- os dois nunca coexistem de verdade, ver
+  // shared/flashcard-model.js). `view.answer` (Field resolvido inteiro,
+  // achado #2 da auditoria da Fase 7 -- antes só o texto sobrevivia) só é
+  // usado DEPOIS de `answered`, nunca antes -- mostrar o áudio/imagem da
+  // resposta antes da revelação seria vazar a resposta.
+  const promptImageUrl = card.imageUrl || view.prompt.imageUrl || null;
+  const answerAudioUrl = (answered && view.answer && view.answer.audioUrl) || null;
+  const answerImageUrl = (answered && view.answer && view.answer.imageUrl) || null;
+
+  mountEl.innerHTML = `
+    ${reviewProgressBarHTML(card)}
+    <div class="flashcard" id="flashcard">
+      <div class="flashcard-tag">${card.unitTitle}</div>
+      ${promptImageUrl ? `<img src="${promptImageUrl}" class="flashcard-image" alt="">` : ''}
+      <div class="flashcard-french">${escapeHTML(view.prompt.text)}${promptSpeakable ? ` ${audioBtnHTML(view.prompt.text, 'audio-btn-lg')}` : ''}${view.prompt.audioUrl ? customAudioBtnHTML(view.prompt.audioUrl) : ''}</div>
+      ${answered ? `
+        <div class="divider-line"></div>
+        <span class="cloze-blank ${localState.wasCorrect ? 'correct' : 'incorrect'}">${escapeHTML(view.displayAnswerText)}</span>
+        ${answerImageUrl ? `<img src="${answerImageUrl}" class="flashcard-image" alt="">` : ''}
+        ${answerAudioUrl ? customAudioBtnHTML(answerAudioUrl) : ''}
+      ` : ''}
+    </div>
+    ${!answered ? `
+      <div class="cloze-type-wrap">
+        <input type="text" id="cloze-review-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a resposta">
+        ${frAccentPickerHTML()}
+        <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">Verificar</button>
+      </div>
+    ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
+  `;
+
+  wireAudioButtons(mountEl, card.__isPreviewCard);
+  wireCustomAudioButtons(mountEl);
+  // Fase 7a -- `card.__isPreviewCard` suprime o AUTOPLAY; Fase 7d -- o
+  // MESMO flag agora também isola o clique MANUAL (wireAudioButtons acima
+  // já passa pra playAudioPreview() em vez de speakFrench() quando em
+  // Preview) -- ver mesmo comentário em renderNormalCard().
+  if (!card.__isPreviewCard && promptSpeakable && canSpeakFrench(view.prompt.text)) speakFrench(view.prompt.text, mountEl.querySelector('.audio-btn-lg'), true);
+
+  if (!answered){
+    const inputEl = mountEl.querySelector('#cloze-review-input');
+    inputEl.focus();
+    wireFrAccentPicker(mountEl.querySelector('.fr-accent-picker'), inputEl);
+    const strip = s => normalizeLoose(s).replace(/[.,!?;:'"’]/g, '').trim();
+    function verify(){
+      if (inputEl.disabled) return;
+      inputEl.disabled = true;
+      mountEl.querySelector('#cloze-review-verify-btn').disabled = true;
+      const typed = strip(inputEl.value);
+      // Interação intermediária (verificar) -- muta localState e o
+      // renderer se autochama, sem envolver a sessão.
+      localState.typedAnswer = inputEl.value;
+      localState.answered = true;
+      localState.wasCorrect = acceptedForms(view.compareAnswerText).some(form => strip(form) === typed);
+      renderTypeAnswerCard(mountEl, card, localState, callbacks);
+    }
+    inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
+    mountEl.querySelector('#cloze-review-verify-btn').addEventListener('click', verify);
+  } else {
+    mountEl.querySelector('#cloze-continue-btn').addEventListener('click', () => {
+      // Transição FINAL -- sobe pra sessão via callback, mesmo ciclo de
+      // vida de STATE.reviewCardState já estabelecido na Fase 6C.1.
+      callbacks.onAnswered(localState.wasCorrect, localState.wasCorrect ? 2 : 0);
     });
   }
 }
@@ -6240,97 +6495,237 @@ function renderReviewView(){
 
   const card = STATE.reviewQueue[STATE.reviewIndex];
 
-  // Fase 8a (ver CLAUDE.md) -- cartão de múltipla escolha autorado pela
-  // professora SEMPRE vira quiz aqui, em qualquer modo que passe por esta
-  // função (Flashcard, Palavras Difíceis) -- grillado com a autora, nunca
-  // "vira" no sentido tradicional. Fora do escopo: Combinar (jogo de
-  // pareamento, arquitetura incompatível com "1 pergunta, N opções").
-  if (card.choices && card.choices.length){
-    renderMultipleChoiceReviewCard(card);
-    return;
+  // Fase 4 (motor de tipos/templates, ver CLAUDE.md) -- despacho por
+  // cardTypeId. Cartão nativo (Note/CardInstance, origin teacher/self)
+  // sempre tem `card.cardInstance`; trilha (origin:'study') nunca tem --
+  // nunca teve múltipla escolha/cloze/"digite a resposta" (buildCardsFromUnits
+  // só produz par front/back_trans simples), então cai direto no flip
+  // padrão abaixo sem checar nada.
+  if (card.cardInstance){
+    const cardTypeId = card.cardInstance.cardTypeId;
+    // Fase 6C.2 -- Múltipla escolha/Digite a resposta seguem o mesmo
+    // padrão de criação preguiçosa de STATE.reviewCardState já
+    // estabelecido pra Normal na Fase 6C.1: só criado quando ausente
+    // (cartão novo, gradeCurrentCard/reviewMoreCurrentCard já zeraram ao
+    // avançar a fila), tipado (`kind`) pro card atual; re-renderizações
+    // do MESMO cartão reaproveitam a mesma referência.
+    if (cardTypeId === 'multiple_choice'){
+      if (!STATE.reviewCardState){
+        STATE.reviewCardState = { kind: 'multiple_choice', shuffledOptions: null, selectedIndex: null, answered: false, wasCorrect: null };
+      }
+      renderMultipleChoiceCard(el, card, STATE.reviewCardState, {
+        onAnswered: (wasCorrect, grade) => gradeCurrentCard(grade),
+      });
+      return;
+    }
+    if (cardTypeId === 'type_answer'){
+      if (!STATE.reviewCardState){
+        STATE.reviewCardState = { kind: 'type_answer', typedAnswer: '', answered: false, wasCorrect: null };
+      }
+      renderTypeAnswerCard(el, card, STATE.reviewCardState, {
+        onAnswered: (wasCorrect, grade) => gradeCurrentCard(grade),
+      });
+      return;
+    }
+    if (cardTypeId === 'cloze'){
+      if (!STATE.reviewCardState){
+        // markId identifica explicitamente a marca desta CardInstance --
+        // ver comentário completo em renderClozeCard() pra motivo.
+        STATE.reviewCardState = { kind: 'cloze', markId: card.cardInstance.markId, typedAnswer: '', answered: false, wasCorrect: null };
+      }
+      renderClozeCard(el, card, STATE.reviewCardState, {
+        onAnswered: (wasCorrect, grade) => gradeCurrentCard(grade),
+      });
+      return;
+    }
+    // cardTypeId === 'normal' (inclusive uma das 2 metades de "Normal com
+    // reverso", Fase 4a) cai no flip padrão abaixo.
   }
 
-  // Fase 8c -- mesmo desvio, agora pro cartão "completar a frase" (nunca
-  // coexiste com card.choices acima, ver comentário em renderClozeReviewCard).
-  if (card.clozeSentence && card.clozeAnswer){
-    renderClozeReviewCard(card);
-    return;
+  // Fase 6C.1 (ver CLAUDE.md) -- "normal" (inclusive uma das 2 metades de
+  // "Normal com reverso") extraído pro renderer renderNormalCard(),
+  // seguindo o contrato aprovado na Fase 6C: (mountEl, card, localState,
+  // callbacks). A SESSÃO (aqui) é quem cria/descarta STATE.reviewCardState
+  // -- o renderer nunca lê/escreve STATE por nome, só recebe a referência
+  // como parâmetro. Criação é preguiçosa (só quando ainda não existe --
+  // gradeCurrentCard()/reviewMoreCurrentCard() já o zeram ao avançar a
+  // fila, então "ausente" aqui sempre significa "cartão novo, começar do
+  // zero"; re-renderizações do MESMO cartão -- ex: depois de revelar --
+  // reaproveitam a mesma referência, nunca recriam).
+  if (!STATE.reviewCardState){
+    STATE.reviewCardState = { kind: 'normal', revealed: false };
   }
+  renderNormalCard(el, card, STATE.reviewCardState, {
+    onAnswered: (wasCorrect, grade) => gradeCurrentCard(grade),
+    onReviewMore: () => reviewMoreCurrentCard(),
+  });
+}
 
-  const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
-
-  // Direção estilo Anki: frente->verso (padrão, reconhecimento: vê a
-  // palavra em francês, lembra o significado) ou verso->frente (mais
-  // difícil, produção ativa: vê a tradução, precisa lembrar o francês).
-  // Decidido 1x por sessão em startReviewSession, não a cada render.
-  const isReverse = card.reviewDirection === 'back-to-front';
-  // Prop 1+2 (ver CLAUDE.md, "7 propostas") -- qual VALOR é o idioma
-  // estudado depende de card.frontIsTargetLanguage (cartão de professora/
-  // Meus Cartões pode ter isso invertido); cartão de trilha nunca seta o
-  // campo (default true), zero mudança pra ele. `isReverse` continua
-  // decidindo só a ORDEM de exibição (front-to-back vs back-to-front,
-  // variedade de sessão) -- os dois mecanismos são independentes.
-  const targetText = card.frontIsTargetLanguage !== false ? card.front : card.back_trans;
-  const nativeText = card.frontIsTargetLanguage !== false ? card.back_trans : card.front;
-  const frenchSideHTML = `<div class="flashcard-french">${escapeHTML(targetText)} ${audioBtnHTML(targetText, 'audio-btn-lg')}</div>`;
-  const transSideHTML = `<div class="flashcard-trans">${escapeHTML(nativeText)}</div>`;
+// Fase 6C.1 (ver CLAUDE.md) -- renderer de "Normal", extraído do bloco
+// que antes vivia inline dentro de renderReviewView(). Contrato aprovado
+// na Fase 6C: (mountEl, card, localState, callbacks) -- reutilizável tal
+// e qual pelo Preview do editor (Fase 6D, ainda não construída), sem
+// nenhuma segunda implementação paralela: o Preview vai chamar esta
+// MESMA função, só trocando localState (variável local do editor, nunca
+// STATE) e callbacks (onAnswered vira um no-op visual, nunca
+// gradeCurrentCard). O renderer não sabe -- nem precisa saber -- se está
+// em Review ou Preview.
+//
+// localState: {kind:'normal', revealed}. Único campo -- substitui
+// STATE.reviewShowingAnswer (removido, era usado exclusivamente aqui).
+// Nenhum acesso a STATE pra saber "revelado?" -- só localState.revealed.
+//
+// callbacks.onAnswered(wasCorrect, grade): chamado quando um botão de
+// grau é clicado -- pra Normal não existe veredito certo/errado
+// calculado pelo renderer (a aluna autorrelata via o grau escolhido),
+// então `wasCorrect` é sempre null aqui; `grade` é o que importa.
+// callbacks.onReviewMore(): chamado pelo link "Rever mais" -- extensão
+// necessária além do onAnswered único esboçado na auditoria (Fase 6C),
+// porque "Rever mais" é uma 3ª transição que não grada nada (não é
+// "resposta", é só pedido de mais exposição) -- sinalizado aqui, não
+// decidido em silêncio.
+//
+// Direção: pra cartão nativo (card.cardInstance), SEMPRE false --
+// resolveNormalCardView() já devolve front/back na ordem certa
+// (frontFieldIndex/backFieldIndex do CardInstance); a direção nunca é
+// escolhida/alternada aqui. Pra cartão legado de trilha
+// (!card.cardInstance), o mecanismo de variedade de sessão que sempre
+// existiu (card.reviewDirection, setado 1x em startReviewSession() via
+// nextCardDirection()) continua 100% intocado -- fora do escopo desta
+// reestruturação (nunca ganhou CardInstance). Nem isReverse nem
+// reviewDirection nem nextCardDirection() foram reintroduzidos como
+// mecanismo NATIVO -- o `if (card.cardInstance)` abaixo é a mesma
+// checagem de sempre, só movida pra dentro da função extraída.
+//
+// Progresso (STATE.reviewIndex/reviewQueue.length): continua lido direto
+// de STATE aqui, igual aos outros 3 renderers (MC/Cloze/TypeAnswer,
+// ainda não extraídos nesta subfase) -- é contabilidade de SESSÃO, não
+// estado efêmero de interação (a proibição da Fase 6C é especificamente
+// sobre não ler STATE pra saber "revelado?"/"respondido?", não uma
+// proibição geral de qualquer leitura). Uniformizar isso (ex: passar
+// como parâmetro de contexto) fica pra quando os 4 renderers forem
+// extraídos juntos -- não resolvido isoladamente só pro Normal, pra não
+// introduzir um mecanismo que os outros 3 ainda não teriam.
+function renderNormalCard(mountEl, card, localState, callbacks){
+  let isReverse, targetText, nativeText, frontAudioUrl, backAudioUrl, frontImageUrl, backImageUrl, targetIsSpeakable;
+  if (card.cardInstance){
+    const view = resolveCardContentView(card); // kind: 'normal'
+    isReverse = false;
+    targetText = view.front.text;
+    nativeText = view.back.text;
+    // Fase 7a (ver CLAUDE.md) -- áudio/imagem customizados resolvidos POR
+    // LADO, nunca mais por fallback entre os dois (`front.audioUrl ||
+    // back.audioUrl`, como era antes desta fase). Esse fallback era o
+    // vazamento identificado na auditoria da Fase 7: se só o VERSO tinha
+    // áudio/imagem próprio, ele aparecia junto do front, antes da
+    // revelação -- entregando a resposta pelo ouvido/pela imagem mesmo com
+    // o texto ainda escondido. Cada lado só expõe sua PRÓPRIA mídia agora;
+    // o template abaixo já garante que a mídia do back só é desenhada
+    // dentro do bloco `localState.revealed`, nunca antes.
+    frontAudioUrl = view.front.audioUrl;
+    backAudioUrl = view.back.audioUrl;
+    frontImageUrl = view.front.imageUrl;
+    backImageUrl = view.back.imageUrl;
+    // isStudyLanguageField() aqui é o uso que a Fase 2 sempre permitiu:
+    // direção já decidida (view.front já é o campo certo) -- isto só
+    // decide se o motor de pronúncia (que só fala UM idioma real) pode
+    // tentar esse campo específico.
+    targetIsSpeakable = isStudyLanguageField(view.front, APP_KEY);
+  } else {
+    isReverse = card.reviewDirection === 'back-to-front';
+    targetText = card.front;
+    nativeText = card.back_trans;
+    frontAudioUrl = null; backAudioUrl = null;
+    frontImageUrl = null; backImageUrl = null;
+    targetIsSpeakable = true;
+  }
+  // Fase 7a -- `isReverse` só é `true` pra cartão de TRILHA
+  // (!card.cardInstance, mecanismo de variedade de sessão pré-existente,
+  // intocado) -- nesse caminho, front/back/imageUrl são sempre null (ver
+  // ramo `else` acima). Pra cartão com CardInstance (teacher/own
+  // flashcards, nativo ou legado), `isReverse` é sempre `false`, então
+  // `frontAudioUrl`/`frontImageUrl` sempre correspondem ao que
+  // `frenchSideHTML` de fato mostra, e `backAudioUrl`/`backImageUrl` ao
+  // que `transSideHTML` mostra -- nenhuma troca extra necessária aqui.
+  //
+  // Imagem LEGADA (`card.imageUrl`, nível de Note, populada só pelo
+  // caminho `image_url` legado) nunca é duplicada no lado do verso --
+  // continua aparecendo uma vez só, junto do front, exatamente como antes
+  // desta fase. Pra cartão nativo, `card.imageUrl` é sempre `null`
+  // (`Note.image` nunca é populado no caminho nativo, ver
+  // shared/flashcard-model.js) -- o fallback abaixo nunca ativa os dois
+  // ao mesmo tempo.
+  const resolvedFrontImageUrl = card.imageUrl || frontImageUrl || null;
+  const resolvedBackImageUrl = backImageUrl || null;
+  const frenchSideHTML = `<div class="flashcard-french">${escapeHTML(targetText)} ${audioBtnHTML(targetText, 'audio-btn-lg')}${frontAudioUrl ? customAudioBtnHTML(frontAudioUrl) : ''}</div>`;
+  const transSideHTML = `<div class="flashcard-trans">${escapeHTML(nativeText)}${backAudioUrl ? customAudioBtnHTML(backAudioUrl) : ''}</div>`;
   const frontHTML = isReverse ? transSideHTML : frenchSideHTML;
   const backHTML = isReverse ? frenchSideHTML : transSideHTML;
   // Áudio automático só quando o idioma estudado está do lado JÁ visível --
   // no modo padrão isso é o front (toca ao entrar no cartão), no modo
   // invertido é o back (toca só ao revelar a resposta).
-  const frenchVisibleNow = isReverse ? STATE.reviewShowingAnswer : true;
+  const frenchVisibleNow = isReverse ? localState.revealed : true;
 
-  el.innerHTML = `
-    <div class="review-progress">
-      <div class="review-progress-bar"><div class="review-progress-fill" style="width:${pct}%"></div></div>
-      <div class="review-progress-count">${STATE.reviewIndex+1} / ${STATE.reviewQueue.length}</div>
-    </div>
+  mountEl.innerHTML = `
+    ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
       <div class="flashcard-tag">${card.unitTitle}</div>
-      ${card.imageUrl ? `<img src="${card.imageUrl}" class="flashcard-image" alt="">` : ''}
+      ${resolvedFrontImageUrl ? `<img src="${resolvedFrontImageUrl}" class="flashcard-image" alt="">` : ''}
       ${frontHTML}
-      ${card.audioUrl ? customAudioBtnHTML(card.audioUrl) : ''}
-      ${STATE.reviewShowingAnswer ? `
+      ${localState.revealed ? `
         <div class="divider-line"></div>
+        ${resolvedBackImageUrl ? `<img src="${resolvedBackImageUrl}" class="flashcard-image" alt="">` : ''}
         ${backHTML}
       ` : `<div class="flashcard-hint">toque para ver a resposta</div>`}
     </div>
-    ${STATE.reviewShowingAnswer ? `
+    ${localState.revealed ? `
       ${gradeButtonsHTML(card)}
       <button class="review-more-link" id="review-more-btn">🔁 Rever mais (não conta como resposta)</button>
     ` : ''}
   `;
 
-  document.getElementById('flashcard').addEventListener('click', () => {
-    if (!STATE.reviewShowingAnswer){
-      STATE.reviewShowingAnswer = true;
-      renderReviewView();
+  mountEl.querySelector('#flashcard').addEventListener('click', () => {
+    if (!localState.revealed){
+      // Interação intermediária (revelar) -- o PRÓPRIO renderer se chama
+      // de novo com os mesmos 4 parâmetros, sem envolver a sessão. Só a
+      // transição FINAL (grau escolhido / Rever mais) sobe via callbacks.
+      localState.revealed = true;
+      renderNormalCard(mountEl, card, localState, callbacks);
     }
   });
 
   // Áudio disponível (e tocado automaticamente) sempre que o francês está
   // visível no cartão.
-  wireAudioButtons(el);
-  wireCustomAudioButtons(el);
-  if (frenchVisibleNow && canSpeakFrench(targetText)){
-    speakFrench(targetText, el.querySelector('.audio-btn-lg'), true);
+  // Fase 7d (ver CLAUDE.md) -- `card.__isPreviewCard` (Fase 6D.7) agora
+  // isola TANTO o autoplay QUANTO o clique manual: `wireAudioButtons`
+  // recebe o flag e decide, num único lugar, se um clique em `.audio-btn`
+  // chama `speakFrench()` (registra `registerAudioPlay()` de verdade) ou
+  // `playAudioPreview()` (mesma reprodução, sem nenhum efeito colateral de
+  // analytics -- nunca STATE.totalAudioPlays/XP/badge/FSRS/histórico). O
+  // autoplay abaixo continua suprimido por completo dentro do Preview
+  // (mesmo comportamento já validado na Fase 7a -- nenhuma mudança aqui),
+  // nunca redirecionado pra playAudioPreview() (não pedido, e "Preview sem
+  // autoplay" já era o comportamento correto).
+  wireAudioButtons(mountEl, card.__isPreviewCard);
+  wireCustomAudioButtons(mountEl);
+  if (!card.__isPreviewCard && frenchVisibleNow && targetIsSpeakable && canSpeakFrench(targetText)){
+    speakFrench(targetText, mountEl.querySelector('.audio-btn-lg'), true);
   }
 
-  if (STATE.reviewShowingAnswer){
+  if (localState.revealed){
     // Fase 11: PRATICAR != REVISAR -- "Rever mais" só reinsere o cartão
     // mais à frente na fila DESTA sessão (efêmero, nunca persistido). Não
     // chama applyMemoryGrade nem addXP -- só ser mostrada de novo não é
     // evidência de recuperação, então não pode alterar o agendamento
     // (devido/stability) sem uma resposta real que justifique isso.
-    document.getElementById('review-more-btn').addEventListener('click', (e) => {
+    mountEl.querySelector('#review-more-btn').addEventListener('click', (e) => {
       e.stopPropagation();
-      reviewMoreCurrentCard();
+      callbacks.onReviewMore();
     });
-    el.querySelectorAll('.grade-btn').forEach(btn => {
+    mountEl.querySelectorAll('.grade-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        gradeCurrentCard(parseInt(btn.dataset.grade));
+        callbacks.onAnswered(null, parseInt(btn.dataset.grade));
       });
     });
   }
@@ -6360,7 +6755,9 @@ function reviewMoreCurrentCard(){
   const reinsertAt = Math.min(STATE.reviewQueue.length, STATE.reviewIndex + 4);
   STATE.reviewQueue.splice(reinsertAt, 0, card);
   STATE.reviewIndex += 1;
-  STATE.reviewShowingAnswer = false;
+  // Fase 6C.1 -- avançou a posição da fila, descarta o localState de
+  // Normal desta exibição (renderReviewView cria um novo pro próximo card).
+  STATE.reviewCardState = null;
   renderReviewView();
 }
 
@@ -6372,7 +6769,11 @@ function gradeCurrentCard(grade){
   const wasOverdue = card.due > 0 && card.due < new Date().setHours(0, 0, 0, 0);
   const intervalBefore = card.interval;
   // Grava a direção mostrada nesta revisão -- da próxima vez que essa carta
-  // ficar due, nextCardDirection() (shared/srs.js) alterna pra outra.
+  // ficar due, nextCardDirection() (shared/srs.js) alterna pra outra. Só
+  // tem efeito pra cartão de trilha (`card.reviewDirection` só é setado
+  // pra ele, ver startReviewSession) -- no-op inofensivo pra cartão nativo
+  // (Note/CardInstance), que nunca ganha reviewDirection (Fase 4: direção
+  // é do CardInstance, não da sessão).
   card.lastDirection = card.reviewDirection;
   // Fase 5: Flashcard agora usa o motor FSRS (shared/fsrs.js) -- due deixa
   // de ser calculado por regras SM-2 fixas.
@@ -6400,7 +6801,9 @@ function gradeCurrentCard(grade){
   }
 
   STATE.reviewIndex += 1;
-  STATE.reviewShowingAnswer = false;
+  // Fase 6C.1 -- avançou a posição da fila, descarta o localState de
+  // Normal desta exibição (renderReviewView cria um novo pro próximo card).
+  STATE.reviewCardState = null;
   saveState();
   renderTopbarStats();
   renderReviewView();
@@ -7212,17 +7615,61 @@ const ANKI_EXPORT_CONFIG = {
       : `${APP_IDENTITY.apps.fr.name} - ${UNITS.find(u=>String(u.id)===sel).title}`;
   },
   cards(sel){
-    // .filter(hasPlainFrontBack) -- ver comentário em buildSpeedQueue():
-    // exporta um cartão cloze só se ele tem front preenchido (todos os
-    // já existentes têm); um cartão cloze novo sem front (migration 035)
-    // ficaria com noteFields()[0] vazio, então fica de fora do .apkg.
-    return (sel === 'all' ? STATE.cards : STATE.cards.filter(c => String(c.unitId) === sel)).filter(hasPlainFrontBack);
+    // Fase 7i (ver CLAUDE.md) -- `.filter(hasPlainFrontBack)` removido.
+    // Aquele filtro (Fase 4b) existia só porque `cardPromptText()`/
+    // `cardAnswerText()` (compartilhadas com Speed Review/Combinar, NUNCA
+    // tocadas nesta fase) quebram pra cloze/type_answer -- o export
+    // ganhou seu PRÓPRIO caminho de extração de texto pra esses 2 tipos
+    // (ver noteFields()/clozeFields() abaixo, que nunca chamam
+    // cardPromptText/cardAnswerText pra eles), então todo tipo (normal,
+    // múltipla escolha, digite a resposta, cloze, trilha) já é
+    // exportável agora -- nenhum filtro por tipo precisa mais existir
+    // aqui.
+    return (sel === 'all' ? STATE.cards : STATE.cards.filter(c => String(c.unitId) === sel));
   },
-  noteFields(card){
-    return [card.front, card.back_trans];
+  // Fase 7i -- `media` vem de collectExportMediaAssets() (shared/anki-export.js),
+  // já resolvido em `[sound:]`/`<img>` prontos pra concatenar (nunca URLs
+  // cruas aqui) -- ver resolveCardExportMedia() (shared/flashcard-model.js)
+  // pra saber QUAL mídia cada lado carrega. `type_answer` precisou de um
+  // caminho próprio (não `cardPromptText`/`cardAnswerText`, que quebram
+  // pra esse tipo -- só sabem "front"/"back", e a view de type_answer não
+  // tem esses campos) -- lê resolveCardContentView() direto.
+  noteFields(card, media){
+    if (card.cardInstance && card.cardInstance.cardTypeId === 'type_answer'){
+      const view = resolveCardContentView(card);
+      return [
+        ankiFieldHTML(view.prompt.text, media && media.front),
+        ankiFieldHTML(view.displayAnswerText, media && media.back),
+      ];
+    }
+    return [
+      ankiFieldHTML(cardPromptText(card), media && media.front),
+      ankiFieldHTML(cardAnswerText(card), media && media.back),
+    ];
+  },
+  // Fase 7i -- cards Cloze vão pro modelo "Cloze" nativo do Anki (ver
+  // shared/anki-export.js), não pro modelo Básico -- 2 campos genéricos
+  // (Text/Tradução), a sintaxe {{c1::...}} já convertida por
+  // buildAnkiClozeFieldText() (shared/flashcard-model.js, nunca
+  // reimplementada aqui). Mídia da frase (áudio/imagem) vai junto do
+  // campo Text -- a tradução nunca tem mídia própria (mesmo critério do
+  // renderer de Revisão, Fase 7a).
+  clozeFields(card, media){
+    const view = resolveCardContentView(card);
+    return [
+      ankiFieldHTML(buildAnkiClozeFieldText(view.rawSentenceText, view.markId), media && media.front),
+      view.translation ? view.translation.text : '',
+    ];
   },
   sortField(card){
-    return card.front;
+    if (card.cardInstance && card.cardInstance.cardTypeId === 'cloze'){
+      const view = resolveCardContentView(card);
+      return renderClozeText(view.rawSentenceText, view.markId, { reveal: true });
+    }
+    if (card.cardInstance && card.cardInstance.cardTypeId === 'type_answer'){
+      return resolveCardContentView(card).prompt.text;
+    }
+    return cardPromptText(card);
   },
   filename(sel){
     return `frances-com-prof-brune-${sel === 'all' ? 'completo' : 'unidade-'+sel}.apkg`;
