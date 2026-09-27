@@ -7615,16 +7615,60 @@ const ANKI_EXPORT_CONFIG = {
       : `${APP_IDENTITY.apps.fr.name} - ${UNITS.find(u=>String(u.id)===sel).title}`;
   },
   cards(sel){
-    // .filter(hasPlainFrontBack) -- ver comentário na função (Fase 4b):
-    // exporta só tipos com par prompt/resposta curto e fixo (normal,
-    // múltipla escolha) -- cloze/"digite a resposta" ficam de fora
-    // (resposta aberta/digitada, sem texto curto pronto pro .apkg).
-    return (sel === 'all' ? STATE.cards : STATE.cards.filter(c => String(c.unitId) === sel)).filter(hasPlainFrontBack);
+    // Fase 7i (ver CLAUDE.md) -- `.filter(hasPlainFrontBack)` removido.
+    // Aquele filtro (Fase 4b) existia só porque `cardPromptText()`/
+    // `cardAnswerText()` (compartilhadas com Speed Review/Combinar, NUNCA
+    // tocadas nesta fase) quebram pra cloze/type_answer -- o export
+    // ganhou seu PRÓPRIO caminho de extração de texto pra esses 2 tipos
+    // (ver noteFields()/clozeFields() abaixo, que nunca chamam
+    // cardPromptText/cardAnswerText pra eles), então todo tipo (normal,
+    // múltipla escolha, digite a resposta, cloze, trilha) já é
+    // exportável agora -- nenhum filtro por tipo precisa mais existir
+    // aqui.
+    return (sel === 'all' ? STATE.cards : STATE.cards.filter(c => String(c.unitId) === sel));
   },
-  noteFields(card){
-    return [cardPromptText(card), cardAnswerText(card)];
+  // Fase 7i -- `media` vem de collectExportMediaAssets() (shared/anki-export.js),
+  // já resolvido em `[sound:]`/`<img>` prontos pra concatenar (nunca URLs
+  // cruas aqui) -- ver resolveCardExportMedia() (shared/flashcard-model.js)
+  // pra saber QUAL mídia cada lado carrega. `type_answer` precisou de um
+  // caminho próprio (não `cardPromptText`/`cardAnswerText`, que quebram
+  // pra esse tipo -- só sabem "front"/"back", e a view de type_answer não
+  // tem esses campos) -- lê resolveCardContentView() direto.
+  noteFields(card, media){
+    if (card.cardInstance && card.cardInstance.cardTypeId === 'type_answer'){
+      const view = resolveCardContentView(card);
+      return [
+        ankiFieldHTML(view.prompt.text, media && media.front),
+        ankiFieldHTML(view.displayAnswerText, media && media.back),
+      ];
+    }
+    return [
+      ankiFieldHTML(cardPromptText(card), media && media.front),
+      ankiFieldHTML(cardAnswerText(card), media && media.back),
+    ];
+  },
+  // Fase 7i -- cards Cloze vão pro modelo "Cloze" nativo do Anki (ver
+  // shared/anki-export.js), não pro modelo Básico -- 2 campos genéricos
+  // (Text/Tradução), a sintaxe {{c1::...}} já convertida por
+  // buildAnkiClozeFieldText() (shared/flashcard-model.js, nunca
+  // reimplementada aqui). Mídia da frase (áudio/imagem) vai junto do
+  // campo Text -- a tradução nunca tem mídia própria (mesmo critério do
+  // renderer de Revisão, Fase 7a).
+  clozeFields(card, media){
+    const view = resolveCardContentView(card);
+    return [
+      ankiFieldHTML(buildAnkiClozeFieldText(view.rawSentenceText, view.markId), media && media.front),
+      view.translation ? view.translation.text : '',
+    ];
   },
   sortField(card){
+    if (card.cardInstance && card.cardInstance.cardTypeId === 'cloze'){
+      const view = resolveCardContentView(card);
+      return renderClozeText(view.rawSentenceText, view.markId, { reveal: true });
+    }
+    if (card.cardInstance && card.cardInstance.cardTypeId === 'type_answer'){
+      return resolveCardContentView(card).prompt.text;
+    }
     return cardPromptText(card);
   },
   filename(sel){

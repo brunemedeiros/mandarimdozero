@@ -13854,3 +13854,289 @@ migração/mudança de schema.
 **PARE conforme instrução explícita.** Não avançar para Anki export ou
 migração de AUDIO_MANIFEST -- a Fase 7h.2 fecha a camada de UI de áudio
 por Field, não abre uma arquitetura nova.
+
+## Fase 7i -- Anki export + mídia (EXPORT SÓ, import fica pra Fase 7j)
+
+Instrução explícita: auditar o exportador `.apkg` atual e sua relação com
+Note/Fields/Card Type/CardInstances/`Field.audio`/`Field.image`/Normal com
+reverso/múltiplas clozes/Type Answer/Multiple Choice/cards legados, e então
+implementar export de verdade pros 5 Card Types + mídia por Field --
+**só export, nunca import** (`.apkg`/`.colpkg`/template Anki/CSV-TSV/TTS em
+lote/limpeza de Storage/feature de mídia nova ficam explicitamente fora,
+reservados pra uma Fase 7j futura).
+
+**Auditoria (antes de qualquer código)** -- confirmado por leitura direta,
+não presumido a partir de documentação anterior:
+
+- `shared/anki-export.js` (`generateApkg()`) já monta um `.apkg` real
+  (schema SQLite do Anki via sql.js, empacotado em zip via JSZip) --
+  MAS `zip.file("media", JSON.stringify({}))` era **sempre vazio,
+  incondicionalmente** -- nenhum áudio/imagem jamais tinha ido pro pacote,
+  confirmado lendo o código (não só repetindo a auditoria da Fase 7
+  original).
+- **Achado central, que definiu o desenho inteiro**: `resolveCardContentView(card)`
+  já projeta corretamente a DIREÇÃO de qualquer card nativo via o próprio
+  CardInstance (`cardInstance.frontFieldIndex`/`backFieldIndex`/
+  `promptFieldIndex`/`answerFieldIndex`/`textFieldIndex`) -- `cardPromptText`/
+  `cardAnswerText` (as funções que o exportador ANTIGO já usava,
+  compartilhadas com Speed Review/Combinar) NUNCA leem `frontIsTargetLanguage`/
+  `isReverse`/`reviewDirection` -- então "Normal com reverso" **já
+  exportava as 2 metades com direção correta antes desta fase**, sem
+  precisar de nenhuma mudança de mecanismo de direção (confirma que a
+  restrição "não usar frontIsTargetLanguage/isReverse/reviewDirection pra
+  decidir direção" já estava satisfeita por construção, desde a Fase 4).
+- **O bloqueio real pra Cloze/Type Answer nunca serem exportados**:
+  `cardPromptText`/`cardAnswerText` acessam `view.front`/`view.back` --
+  que só existem pro `kind==='normal'` (e MC, via `view.prompt`/
+  `correctText`). Pra `kind==='cloze'`/`'type_answer'`, essas propriedades
+  são `undefined` -- chamar essas funções nesses 2 tipos **lançaria uma
+  exceção** (`undefined.text`). Era exatamente por isso que
+  `hasPlainFrontBack()` (compartilhada com Speed Review/Combinar, NUNCA
+  tocada nesta fase -- restrição explícita) excluía cloze/type_answer do
+  `.filter()` do exportador -- não por decisão de design do export em si,
+  só pra não quebrar.
+- Múltipla Escolha: `distractorTexts` são sempre strings puras (sem
+  `Field`/mídia própria) desde a geração do CardInstance
+  (`interpretNativeNoteFromRow`, ramo `multiple_choice`) -- confirma que
+  distratores nunca poderiam carregar mídia mesmo que o export quisesse,
+  sem mudar o motor (fora do escopo desta fase).
+- Mídia legada: imagem é Note-level (`note.image`/`card.imageUrl`, só
+  populado pelo caminho legado); áudio legado é vinculado ao Field cujo
+  idioma é o estudado via `isStudyLanguageField()` (heurística de
+  interpretação, Fase 3) -- os 2 já chegam corretamente resolvidos em
+  `view.front.audioUrl`/`imageUrl` etc. via `resolveCardField()`, sem
+  precisar de nenhum código especial pro export distinguir legado de
+  nativo.
+- `resolveFieldAudioUrl()` (Fase 7b) já é exatamente a função certa pra
+  "nunca gerar TTS durante export": pra `type:'tts'`, só devolve
+  `generatedUrl` se já existir, nunca dispara geração.
+
+**O que foi implementado, arquivo por arquivo:**
+
+- **`shared/flashcard-model.js`** (só 2 funções novas, adicionadas ao
+  final do arquivo, nada existente alterado):
+  - **`resolveCardExportMedia(card)`** -- espelha EXATAMENTE as mesmas
+    fórmulas de fallback que os 4 renderers de Revisão/Preview já usam
+    (conferidas linha a linha em `fr/app.js` antes de escrever isto, ver
+    Fase 7a): normal -- frente com fallback de imagem legada
+    (`card.imageUrl || view.front.imageUrl`), verso NUNCA usa esse
+    fallback (evita duplicar a mesma imagem legada nos 2 lados);
+    multiple_choice -- só o prompt tem mídia (resposta certa/distratores
+    nunca, mesmo critério de segurança da Fase 7a -- nunca vazar a
+    resposta antes de escolher); type_answer -- prompt com fallback de
+    imagem legada, resposta com mídia própria SEM gate de "respondida"
+    (o .apkg não tem estado de revelação -- é o próprio template do Anki
+    que decide quando mostrar a Resposta); cloze -- só a frase tem mídia
+    (com fallback de imagem legada), a tradução nunca; trilha (`!card.
+    cardInstance`) -- **sem mídia nenhuma**, decisão explícita (ver
+    "Limitações" abaixo). Nunca gera nada -- só lê URLs já resolvidas via
+    `resolveCardContentView()`/`resolveFieldAudioUrl()`.
+  - **`buildAnkiClozeFieldText(rawText, targetMarkId)`** -- converte a
+    sintaxe interna `{{cN::resposta}}`/`{{cN::resposta|compareAnswer}}`
+    (Fase 5) pra sintaxe NATIVA do Anki (`{{cN::resposta}}`/
+    `{{cN::resposta::hint}}` -- Anki usa `::` pra hint, nunca `|`). Só a
+    marca `targetMarkId` vira marcação Cloze de verdade; qualquer OUTRA
+    marca da MESMA Note (Cloze multi-marca, Fase 5, gera 1 CardInstance
+    POR lacuna) é achatada pro próprio texto revelado -- cada
+    CardInstance é exportada como sua PRÓPRIA nota Anki independente,
+    **nunca dependendo do mecanismo nativo do Anki de "1 nota Cloze gera
+    N cards"** (que acoplaria marcas que este app trata como progresso
+    FSRS genuinamente independentes). Sempre renumera a marca alvo pra
+    "c1" (nunca preserva `c2`/`c3` original) -- cada nota exportada
+    representa só 1 card (`ord:0`, mesmo padrão que o resto do
+    exportador já usa), e o filtro `{{cloze:Text}}` do Anki decide o que
+    esconder a partir do número da marca vs. o `ord` do card -- `ord:0`
+    só combina com `c1`.
+- **`shared/anki-export.js`** (reescrito, ~+213 linhas):
+  - **`collectExportMediaAssets(exportCards)`** (novo, async) -- passa por
+    todos os cards, resolve mídia via `resolveCardExportMedia()`,
+    **deduplica por URL** (2 cards podem apontar pro MESMO arquivo -- ex:
+    Cloze multi-marca, onde todas as CardInstance compartilham o mesmo
+    Field de áudio/imagem, Fase 7a), baixa cada URL única exatamente 1
+    vez (`fetch`, nunca modifica/apaga nada no Storage -- só leitura).
+    **Falha em baixar UMA mídia específica nunca aborta a exportação
+    inteira** -- essa mídia simplesmente não entra no pacote (o campo
+    fica só com o texto, sem a tag `[sound:]`/`<img>`), e o total de
+    falhas é reportado no status final (nunca silenciosamente).
+  - **`mediaTagHTML(kind, filename)`**/**`ankiFieldHTML(text, mediaSide)`**
+    -- sintaxe padrão do Anki (`[sound:filename]`/`<img src="filename">`)
+    + concatenação com o texto (imagem antes, com `<br>`; áudio depois --
+    mesma ordem visual dos renderers de Revisão).
+  - **`ankiExportCardKind(card)`** -- só cloze vai pro modelo Cloze
+    nativo do Anki; todo o resto (normal, normal_reversed -- ambas
+    metades têm `cardTypeId:'normal'` -- multiple_choice, type_answer,
+    trilha) vai pro modelo Básico de sempre.
+  - **`generateApkg()`**: agora monta **2 modelos (note types) no
+    pacote**, condicionalmente -- o modelo Básico de sempre (inalterado
+    em estrutura: `fields`/`qfmt`/`afmt`/`css` continuam vindo de
+    `config`, mesmo número de campos de sempre por idioma) + um modelo
+    **Cloze nativo do Anki** (`type:1`, `qfmt:"{{cloze:Text}}"`, 2 campos
+    genéricos `Text`/`Tradução`, `css` reaproveitado de `config.css` pra
+    manter a identidade de marca sem duplicar a definição do modelo por
+    idioma) -- **só incluído no pacote quando a seleção atual tem pelo
+    menos 1 card Cloze** (nunca importa um note type vazio/nunca usado no
+    Anki de quem nunca criou um cartão desse tipo). Cada nota grava o
+    `mid` certo (Básico ou Cloze) conforme `ankiExportCardKind(card)`.
+    `zip.file("media", JSON.stringify(manifest))` -- manifesto real agora,
+    populado a partir do resultado de `collectExportMediaAssets()`, nunca
+    mais `{}` incondicional. Status final do export passa a avisar
+    explicitamente quando alguma mídia não pôde ser incluída (nunca
+    silencioso).
+- **`fr/app.js`/`zh/app.js`** (`ANKI_EXPORT_CONFIG`, mudanças
+  espelhadas):
+  - `cards(sel)` -- `.filter(hasPlainFrontBack)` **removido** (aquele
+    filtro só existia pra não quebrar `cardPromptText`/`cardAnswerText`
+    em cloze/type_answer -- o export ganhou seu próprio caminho de
+    extração de texto pra esses 2 tipos, então todo tipo já é exportável
+    agora: normal, múltipla escolha, digite a resposta, cloze, trilha).
+  - `noteFields(card, media)` -- estendido com um 2º parâmetro (`media`,
+    já resolvido em tags `[sound:]`/`<img>` prontas por
+    `collectExportMediaAssets()`); ganhou um ramo pra `type_answer` que
+    lê `resolveCardContentView(card)` direto (`view.prompt.text`/
+    `view.displayAnswerText`) -- **nunca chama `cardPromptText`/
+    `cardAnswerText` pra esse tipo** (continuam intocadas, ainda usadas
+    só pra normal/multiple_choice/trilha, exatamente como Speed Review/
+    Combinar as usam).
+  - `clozeFields(card, media)` (novo) -- só pra cards Cloze, 2 campos
+    (Text via `buildAnkiClozeFieldText()`, Tradução em texto puro).
+  - `sortField(card)` -- ganhou ramos pra cloze (`renderClozeText(...,
+    {reveal:true})`, texto totalmente revelado sem chaves) e type_answer
+    (texto do prompt).
+  - **zh, só**: `zhTypeAnswerExportColumns(view)` (novo) -- diferente de
+    Normal/Múltipla Escolha (onde zh NUNCA inverte -- hanzi sempre é o
+    "front"/prompt, garantido desde a Fase 3/6D), Digite a resposta não
+    tem essa garantia: o editor nativo (Fase 6D.4b) deixa a professora
+    criar prompt/resposta livremente, cada um com seu próprio idioma --
+    então o lado chinês (com pinyin) pode ser QUALQUER um dos 2. Detecta
+    isso olhando qual `Field` resolvido tem `pinyinText` (**nunca por
+    posição/`role`** -- `role` não decide direção, restrição já travada
+    desde a Fase 6B) e monta as 3 colunas (Pinyin/Caractere/Tradução) do
+    modelo Básico do zh de acordo, junto de qual "lado" (front/back)
+    carrega a mídia de cada coluna.
+
+**Compatibilidade/limitações reais, documentadas em vez de forçadas**
+(conforme a instrução: "implemente só o necessário OU documente
+claramente a limitação, nunca invente uma arquitetura de template
+nova"):
+
+1. **Múltipla Escolha perde os distratores no `.apkg`** -- Anki não tem
+   um conceito nativo de "múltipla escolha" no cliente desktop sem
+   add-on; o card exportado vira um Básico simples (pergunta → resposta
+   certa), igual a antes desta fase. Não é regressão -- já era assim.
+2. **Type Answer não usa o `{{type:Back}}` nativo do Anki** -- avaliado e
+   descartado deliberadamente: a comparação do Anki é string-match
+   literal contra UM campo, enquanto este app aceita formas alternativas
+   (`/`) e compara pinyin-vs-hanzi em zh -- mapear isso fielmente
+   exigiria uma lógica de comparação que o Anki não tem embutida. Exportado
+   como Básico (prompt → resposta revelada), perdendo só a interatividade
+   de "digitar e conferir" -- o CONTEÚDO (pergunta/resposta certa)
+   preserva 100%.
+3. **Trilha (vocabulário/frases de `content.js`) nunca ganha mídia no
+   export** -- decisão explícita: o áudio da trilha vem de
+   `AUDIO_MANIFEST` (arquivos estáticos pré-gerados por um pipeline
+   Python offline, referenciados por TEXTO LITERAL, nunca por
+   `Field.audio`) -- integrar isso ao export seria uma arquitetura de
+   mídia NOVA e não relacionada ao contrato `Field.audio` da Fase 7b,
+   fora do escopo explícito desta fase ("reutilize o contrato existente,
+   não invente um novo"). Trilha continua exportável (texto puro, sem
+   mídia), comportamento idêntico ao de antes.
+4. **`storagePath` (Fase 7f, TTS) nunca é lido pelo export** -- só
+   `resolveFieldAudioUrl()` (que já lê `generatedUrl`) é consultado;
+   consistente com o resto do motor, `storagePath` é metadado de
+   gestão/identidade, nunca de apresentação.
+5. **Nenhuma limpeza de mídia órfã no Storage** -- explicitamente fora do
+   escopo (a instrução proibiu). `collectExportMediaAssets()` só LÊ.
+6. **Falha de rede ao baixar 1 mídia nunca aborta a exportação inteira**
+   -- degrada graciosamente (mídia ausente, exportação segue), status
+   final avisa quantas falharam -- nunca finge que deu tudo certo.
+
+**Testes realizados** -- **126 verificações, 0 falhas**, cobrindo os 12
+cenários pedidos (normal/normal_reversed/multiple_choice/type_answer/
+cloze com múltiplas lacunas/áudio por Field/imagem por Field/combinação
+áudio+imagem/legado/FR/ZH/ausência de mídia/export sem gerar TTS):
+
+- **Node/VM, `test_fase7i_anki_export_unit.js`, 49/49** -- carrega os
+  arquivos de PRODUÇÃO reais (nunca cópias): `resolveCardExportMedia`
+  pros 4 tipos nativos + trilha + legado (direção normal E invertida,
+  confirmando a heurística de áudio legado segue o Field, nunca posição
+  fixa) + normal_reversed (2 CardInstances, FSRS genuinamente
+  independente, mídia corretamente TROCADA entre as 2 metades --
+  confirma direção via CardInstance, nunca `isReverse`);
+  `buildAnkiClozeFieldText` (marca simples, com hint zh, multi-marca --
+  cada exportação referenciando só a SUA marca, sintaxe `{{c2` nunca
+  sobrando); `ankiExportCardKind` pros 5 tipos + trilha; `mediaTagHTML`/
+  `ankiFieldHTML`; `collectExportMediaAssets` com `fetch` mockado --
+  dedup real (URL compartilhada buscada 1 vez só, mesmo referenciada por
+  2 cards), falha parcial isolada (só a mídia que falhou fica sem tag,
+  o resto do card intacto), manifesto/zip só com os downloads
+  bem-sucedidos.
+- **Browser smoke real, Playwright/Chromium, `test_fase7i_browser_smoke.js`,
+  53/53 (FR+ZH)** -- carrega a página REAL (`fr/index.html`/
+  `zh/index.html`, servida por `http-server` local) com o código de
+  produção real (`ANKI_EXPORT_CONFIG` de `fr/app.js`/`zh/app.js`,
+  `shared/anki-export.js`, `shared/flashcard-model.js`), boot em modo
+  convidado (Supabase/CDN bloqueados neste sandbox -- mesma limitação
+  documentada em toda a sessão -- stubados só nesses 3 pontos: Supabase,
+  `initSqlJs`/`JSZip`, e `fetch` de mídia). 6 linhas sintéticas (normal
+  com mídia nos 2 lados, normal_reversed, multiple_choice com distrator
+  de áudio-que-nunca-deve-vazar, type_answer com pinyin no lado certo
+  dinamicamente, cloze multi-marca com hint, legado) construídas via
+  `buildCardFromTeacherFlashcard()` REAL -- gera os 8 CardInstances
+  esperados -- e exportadas de ponta a ponta via `generateApkg()` real:
+  confirmado 2 modelos no pacote (Básico+Cloze) com a contagem de campos
+  certa por idioma; 6 notas no modelo Básico + 2 no Cloze; áudio da
+  resposta certa de Múltipla Escolha NUNCA vaza no `.apkg`; as 2 metades
+  de normal_reversed exportadas com direção REALMENTE trocada (campo
+  certo por idioma); sintaxe interna `|` nunca vaza crua (sempre `::`
+  nativo do Anki), sem `{{c2` sobrando em nenhuma nota; manifesto de
+  mídia com 7 entradas reais (nunca mais `{}`), todo índice do manifesto
+  com o arquivo binário de fato presente no zip; 1 falha de mídia
+  simulada avisada no status sem abortar a exportação; legado exportado
+  sem nenhuma conversão automática, sempre pro modelo Básico.
+- **Regressão focada, `test_fase7i_regression_check.js`, 24/24 (FR+ZH)**
+  -- confirma que Review/Preview/Speed Review/Combinar (proibidos de
+  alterar) continuam 100% intocados: as 12 funções centrais continuam
+  definidas; `hasPlainFrontBack()` continua excluindo cloze/type_answer
+  (comportamento IDÊNTICO ao de antes -- só o export ganhou um caminho
+  paralelo, a função em si nunca mudou); `cardPromptText`/
+  `cardAnswerText` continuam funcionando pra normal sem nenhuma
+  alteração; `buildSpeedQueue()`/`startMatchGame()` rodam sem lançar;
+  `resolveCardContentView()` mantém o shape esperado pelos 4 renderers
+  pros 4 tipos; zero `pageerror` durante toda a execução.
+
+**Arquivos alterados** (confirmado por `git diff --stat`, nada fora
+desta lista): `shared/flashcard-model.js` (+102 linhas, só 2 funções
+novas no final do arquivo), `shared/anki-export.js` (reescrito, +213/-15
+linhas), `fr/app.js` (+58/-14 linhas, só dentro de `ANKI_EXPORT_CONFIG`),
+`zh/app.js` (+75/-16 linhas, `ANKI_EXPORT_CONFIG` + `zhTypeAnswerExportColumns`
+novo). **Nenhuma migração, nenhum passo manual pendente pra autora** --
+100% client-side, nenhuma mudança de schema/Storage/Edge Function.
+
+**O que NÃO foi tocado nesta fase, confirmado**: `shared/fsrs.js`, os 4
+renderers de Revisão/Preview (`renderNormalCard`/`renderMultipleChoiceCard`/
+`renderTypeAnswerCard`/`renderClozeCard`), `hasPlainFrontBack`/
+`cardPromptText`/`cardAnswerText` (só LIDAS, nunca alteradas),
+`buildSpeedQueue`/`buildSpeedOptions`/`startMatchGame`, qualquer
+migration SQL, qualquer Edge Function, `AUDIO_MANIFEST`, o contrato de
+`Field.audio` (Fase 7b, só reaproveitado via `resolveFieldAudioUrl()`,
+nunca modificado).
+
+**Próxima fase (7j -- Anki import + templates + mídia)**: explicitamente
+NÃO iniciada nesta entrega -- nenhum código de import de `.apkg`/
+`.colpkg`, nenhum parser de template Anki, nenhum importador CSV/TSV.
+Informação preservada pra quando essa fase for autorizada: o exportador
+atual já produz um schema Anki genuíno (SQLite real via sql.js) com 2
+note types (Básico + Cloze, quando aplicável) -- um importador precisaria
+decidir o inverso do que esta fase decidiu pro Cloze (ler `{{cN::...}}`
+nativo do Anki e reconstruir a sintaxe interna `{{cN::resposta|
+compareAnswer}}`, incluindo como inferir um `compareAnswer`/hint quando
+o Anki original não tiver nenhum) e como mapear um note type Anki
+arbitrário (que pode ter qualquer número de campos/templates, nunca
+necessariamente parecido com os 5 Card Types deste app) de volta pra um
+dos 5 tipos suportados ou rejeitar/pedir mapeamento manual -- nenhuma
+dessas decisões foi tomada aqui, ficam pra quando a Fase 7j for
+autorizada explicitamente.
+
+**PARE conforme instrução explícita -- Fase 7j (Anki import) não
+iniciada.** Próxima etapa só começa depois de autorização explícita da
+autora, com este relatório já entregue antes de pedir luz verde.

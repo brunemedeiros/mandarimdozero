@@ -36,6 +36,136 @@ function simpleChecksum(str){
   return Math.abs(hash) % 100000000;
 }
 
+// ============================================================
+// Fase 7i (ver CLAUDE.md) -- MÍDIA no export Anki
+// ============================================================
+//
+// Nenhuma arquitetura de mídia nova -- só REUTILIZA o contrato de
+// Field.audio/Field.image já travado desde a Fase 7b/7a
+// (resolveCardExportMedia(), shared/flashcard-model.js, carregado ANTES
+// deste arquivo em fr/zh index.html) e baixa as URLs já resolvidas pra
+// dentro do pacote .apkg -- NUNCA gera TTS (resolveFieldAudioUrl(), usado
+// por baixo de resolveCardExportMedia(), só devolve `generatedUrl` de um
+// Field TTS se ele já existir, nunca dispara geração), NUNCA apaga/altera
+// arquivo nenhum no Storage (só LÊ, via fetch()).
+
+// `[sound:filename]`/`<img src="filename">` -- sintaxe padrão do Anki pra
+// referenciar um arquivo já presente na pasta "media" do pacote (ver
+// collectExportMediaAssets() abaixo).
+function mediaTagHTML(kind, filename){
+  return kind === 'audio' ? `[sound:${filename}]` : `<img src="${filename}">`;
+}
+
+// Concatena o texto de um campo com a mídia já resolvida pro lado dele
+// (`mediaSide`, vindo de collectExportMediaAssets() -- já são strings
+// `[sound:...]`/`<img ...>` prontas, ou '' quando não há mídia nesse lado
+// ou o download dela falhou). Imagem antes do texto (mesma ordem visual
+// que os 4 renderers de Revisão já usam -- imagem no topo do flashcard,
+// texto abaixo); áudio depois do texto (mesmo lugar do botão 🎧 na tela).
+function ankiFieldHTML(text, mediaSide){
+  const imageTag = (mediaSide && mediaSide.imageTag) || '';
+  const audioTag = (mediaSide && mediaSide.audioTag) || '';
+  return `${imageTag}${imageTag ? '<br>' : ''}${text || ''}${audioTag}`;
+}
+
+// Extensão do arquivo de mídia -- só pra dar um nome legível dentro do
+// pacote (Anki não liga pra extensão em si, só usa o nome pra casar
+// `[sound:x]`/`<img src="x">` com o arquivo de fato presente no zip).
+// Nunca lê o nome do arquivo original enviado pela professora (esse dado
+// nem chega até aqui -- só a URL pública já resolvida) -- deriva da
+// própria URL, com fallback seguro se não achar nada reconhecível.
+function guessMediaExtension(url, kind){
+  try{
+    const path = new URL(url, window.location.href).pathname;
+    const m = /\.([a-zA-Z0-9]{2,5})$/.exec(path);
+    if (m) return `.${m[1].toLowerCase()}`;
+  }catch(e){ /* URL inválida/relativa -- cai no fallback abaixo */ }
+  return kind === 'audio' ? '.mp3' : '.jpg';
+}
+
+// Dado UM card já construído (STATE.cards), decide se ele vai pro modelo
+// "Cloze" nativo do Anki ou pro modelo "Básico" (o mesmo modelo
+// frente/verso de sempre, agora também usado por Múltipla Escolha/
+// Digite a resposta/trilha -- ver noteFields()/clozeFields() em fr/zh
+// app.js). Mesma checagem nos 2 idiomas -- fica aqui, não em `config`,
+// pra nunca duplicar/divergir entre fr e zh.
+function ankiExportCardKind(card){
+  return (card.cardInstance && card.cardInstance.cardTypeId === 'cloze') ? 'cloze' : 'basic';
+}
+
+// Passa por TODOS os cards a exportar, resolve a mídia de cada um
+// (resolveCardExportMedia(), shared/flashcard-model.js -- nunca
+// reimplementado aqui), deduplica por URL (2 cards podem apontar pro
+// MESMO arquivo -- ex: as várias CardInstance de um Cloze multi-marca
+// compartilham o mesmo Field de áudio/imagem, Fase 7a), baixa cada URL
+// única exatamente 1 vez (`fetch`, nunca modifica/apaga nada no
+// Storage -- só leitura) e devolve, por card, os textos `[sound:]`/
+// `<img>` já prontos pra `ankiFieldHTML()` concatenar.
+//
+// Falha em baixar UMA mídia específica (rede, CORS, arquivo removido)
+// nunca aborta a exportação inteira -- essa mídia simplesmente não entra
+// no pacote (o campo fica só com o texto, sem a tag), e o total de
+// falhas é reportado no status final pra usuária não ficar achando que
+// deu tudo certo silenciosamente.
+async function collectExportMediaAssets(exportCards){
+  const urlEntries = new Map(); // url -> {index, filename, kind, url, failed}
+  let nextIndex = 0;
+
+  function registerUrl(url, kind){
+    if (!url) return null;
+    if (urlEntries.has(url)) return urlEntries.get(url);
+    const entry = { index: nextIndex, filename: `${kind}_${nextIndex}${guessMediaExtension(url, kind)}`, kind, url, failed: false };
+    urlEntries.set(url, entry);
+    nextIndex += 1;
+    return entry;
+  }
+
+  const rawMediaForCard = new Map();
+  exportCards.forEach(card => {
+    const media = resolveCardExportMedia(card); // shared/flashcard-model.js -- nunca gera nada, só lê URLs já resolvidas
+    rawMediaForCard.set(card.id, {
+      front: media.front ? {
+        audioEntry: registerUrl(media.front.audioUrl, 'audio'),
+        imageEntry: registerUrl(media.front.imageUrl, 'image'),
+      } : null,
+      back: media.back ? {
+        audioEntry: registerUrl(media.back.audioUrl, 'audio'),
+        imageEntry: registerUrl(media.back.imageUrl, 'image'),
+      } : null,
+    });
+  });
+
+  const zipFiles = [];
+  const manifest = {};
+  await Promise.all(Array.from(urlEntries.values()).map(async entry => {
+    try{
+      const res = await fetch(entry.url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const bytes = await res.arrayBuffer();
+      zipFiles.push({ index: entry.index, bytes });
+      manifest[String(entry.index)] = entry.filename;
+    }catch(err){
+      console.error('[anki-export] não foi possível baixar mídia pro pacote:', entry.url, err);
+      entry.failed = true;
+    }
+  }));
+
+  function sideTags(sideMedia){
+    if (!sideMedia) return { audioTag: '', imageTag: '' };
+    const audioTag = (sideMedia.audioEntry && !sideMedia.audioEntry.failed) ? mediaTagHTML('audio', sideMedia.audioEntry.filename) : '';
+    const imageTag = (sideMedia.imageEntry && !sideMedia.imageEntry.failed) ? mediaTagHTML('image', sideMedia.imageEntry.filename) : '';
+    return { audioTag, imageTag };
+  }
+
+  const mediaForCard = new Map();
+  rawMediaForCard.forEach((val, cardId) => {
+    mediaForCard.set(cardId, { front: sideTags(val.front), back: sideTags(val.back) });
+  });
+
+  const failedCount = Array.from(urlEntries.values()).filter(e => e.failed).length;
+  return { mediaForCard, manifest, zipFiles, failedCount };
+}
+
 async function generateApkg(config){
   const statusEl = document.getElementById('export-status');
   statusEl.textContent = 'Gerando arquivo...';
@@ -81,6 +211,35 @@ async function generateApkg(config){
 
     const deckName = config.deckName(exportSelectedUnit);
 
+    // ---- Popula notes + cards a partir dos cartões do app ----
+    const exportCards = config.cards(exportSelectedUnit);
+
+    if (!exportCards.length){
+      statusEl.textContent = 'Nenhum cartão para exportar nessa seleção.';
+      statusEl.className = 'export-status err';
+      return;
+    }
+
+    // Fase 7i -- segundo "modelo" (note type) do Anki, só pra cards Cloze
+    // nativos (ver ankiExportCardKind()). Estrutura (campos/qfmt/afmt)
+    // é a MESMA nos 2 idiomas -- Cloze não tem coluna de pinyin separada
+    // (o pinyin, quando existe, já vem embutido como HINT nativo do
+    // próprio Anki dentro da marca, ver buildAnkiClozeFieldText() em
+    // shared/flashcard-model.js) -- só o `css` (cores de marca) vem do
+    // `config` de cada idioma, pra manter a identidade visual sem
+    // duplicar a definição do modelo inteiro por idioma. Só é criado/
+    // incluído no pacote quando a seleção atual tem pelo menos 1 card
+    // Cloze -- nunca importa um note type "Cloze" vazio/não usado no
+    // Anki de quem nunca criou um cartão desse tipo.
+    const hasClozeCards = exportCards.some(c => ankiExportCardKind(c) === 'cloze');
+    const clozeModelId = hasClozeCards ? ankiRandId() : null;
+
+    // Fase 7i -- baixa toda a mídia (áudio/imagem) referenciada pelos
+    // cards selecionados ANTES de montar os campos das notes -- é isso
+    // que permite `noteFields()`/`clozeFields()` (config de cada idioma)
+    // já receberem as tags `[sound:]`/`<img>` prontas pra concatenar.
+    const media = await collectExportMediaAssets(exportCards);
+
     const model = {
       [modelId]: {
         id: modelId, name: config.modelName, type: 0, mod: now, usn: -1,
@@ -98,6 +257,29 @@ async function generateApkg(config){
         latexPre: "", latexPost: "", latexsvg:false, req: [[0,"any",[0]]]
       }
     };
+    if (hasClozeCards){
+      model[clozeModelId] = {
+        id: clozeModelId, name: `${config.modelName} - Cloze`, type: 1, mod: now, usn: -1,
+        sortf: 0, did: deckId,
+        flds: [
+          { name: "Text", ord:0, font: "Arial", size: 22 },
+          { name: "Tradução", ord:1, font: "Arial", size: 18 },
+        ],
+        tmpls: [
+          {
+            name: "Cloze", ord:0,
+            qfmt: "{{cloze:Text}}",
+            afmt: "{{cloze:Text}}<hr id='answer'><div style='text-align:center;font-size:18px;'>{{Tradução}}</div>",
+            bqfmt:"", bafmt:"", did: null
+          }
+        ],
+        // Reaproveita o css de marca do idioma (mesmas cores do modelo
+        // Básico) -- nunca uma definição de modelo por idioma duplicada,
+        // só a folha de estilo é per-idioma.
+        css: config.css,
+        latexPre: "", latexPost: "", latexsvg:false, req: [[0,"any",[0]]]
+      };
+    }
 
     const decks = {
       "1": { id:1, name:"Default", extendRev:50, usn:0, collapsed:false, newToday:[0,0], revToday:[0,0], lrnToday:[0,0], timeToday:[0,0], conf:1, desc:"", dyn:0 },
@@ -116,15 +298,6 @@ async function generateApkg(config){
       JSON.stringify(dconf), JSON.stringify({})
     ]);
 
-    // ---- Popula notes + cards a partir dos cartões do app ----
-    const exportCards = config.cards(exportSelectedUnit);
-
-    if (!exportCards.length){
-      statusEl.textContent = 'Nenhum cartão para exportar nessa seleção.';
-      statusEl.className = 'export-status err';
-      return;
-    }
-
     let usnCounter = -1;
     const baseId = Date.now();
     exportCards.forEach((card, i) => {
@@ -132,13 +305,16 @@ async function generateApkg(config){
       // mesmo exportando centenas de cartões na mesma chamada.
       const noteId = baseId + (i * 2);
       const cardId = baseId + (i * 2) + 1;
-      const flds = config.noteFields(card).join('\x1f');
+      const kind = ankiExportCardKind(card);
+      const cardMedia = media.mediaForCard.get(card.id) || { front: null, back: null };
+      const noteMid = kind === 'cloze' ? clozeModelId : modelId;
+      const flds = (kind === 'cloze' ? config.clozeFields(card, cardMedia) : config.noteFields(card, cardMedia)).join('\x1f');
       const sfld = config.sortField(card);
       const csum = simpleChecksum(sfld);
       const guid = `${config.guidPrefix}${card.id}`;
 
       db.run(`INSERT INTO notes VALUES (?,?,?,?,?,?,?,?,?,?,?)`, [
-        noteId, guid, modelId, now, usnCounter, `unidade${card.unitId} `, flds, sfld, csum, 0, ""
+        noteId, guid, noteMid, now, usnCounter, `unidade${card.unitId} `, flds, sfld, csum, 0, ""
       ]);
 
       db.run(`INSERT INTO cards VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
@@ -154,7 +330,13 @@ async function generateApkg(config){
     // ---- Empacota em .apkg (é um zip contendo collection.anki2 + media) ----
     const zip = new JSZip();
     zip.file("collection.anki2", dbBytes);
-    zip.file("media", JSON.stringify({}));
+    // Fase 7i -- manifesto de mídia real (antes sempre `{}`, incondicional
+    // -- nenhum áudio/imagem jamais tinha ido pro pacote). Chave = índice
+    // numérico (nome do arquivo DENTRO do zip, ver zip.file(String(index),...)
+    // abaixo), valor = nome de arquivo legível (o que as tags `[sound:]`/
+    // `<img>` embutidas nos campos referenciam).
+    zip.file("media", JSON.stringify(media.manifest));
+    media.zipFiles.forEach(f => zip.file(String(f.index), f.bytes));
 
     const blob = await zip.generateAsync({ type:"blob" });
     const url = URL.createObjectURL(blob);
@@ -166,8 +348,11 @@ async function generateApkg(config){
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
 
-    statusEl.textContent = `Exportado! ${exportCards.length} cartão(ões) no arquivo .apkg — importe direto no Anki.`;
-    statusEl.className = 'export-status ok';
+    const mediaNote = media.failedCount > 0
+      ? ` (${media.failedCount} arquivo(s) de mídia não puderam ser incluídos -- os cartões foram exportados mesmo assim, só sem esse áudio/imagem específico.)`
+      : '';
+    statusEl.textContent = `Exportado! ${exportCards.length} cartão(ões) no arquivo .apkg — importe direto no Anki.${mediaNote}`;
+    statusEl.className = `export-status ${media.failedCount > 0 ? 'err' : 'ok'}`;
 
   }catch(err){
     console.error(err);

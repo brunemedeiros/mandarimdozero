@@ -7566,6 +7566,26 @@ document.querySelectorAll('[data-settings-section]').forEach(btn => {
 // guidPrefix NÃO muda: é o identificador de GUID que o Anki usa pra casar notas num
 // reimport -- trocar agora faria o Anki tratar decks já exportados por usuários
 // existentes como notas novas/duplicadas em vez de atualizar as existentes.
+// Fase 7i (ver CLAUDE.md) -- só pro export Anki de "Digite a resposta" em
+// zh. Diferente de Normal/Múltipla Escolha (onde zh NUNCA inverte --
+// hanzi sempre é o "front"/prompt, checado em várias fases anteriores),
+// Digite a resposta não tem essa garantia: o editor nativo (Fase 6D.4b)
+// deixa a professora criar prompt/resposta livremente, cada um com seu
+// próprio idioma -- então o lado chinês (com pinyin) pode ser QUALQUER
+// um dos 2. Detecta isso olhando qual Field resolvido tem `pinyinText`
+// (nunca por posição/`role` -- role não decide direção, restrição já
+// travada desde a Fase 6B) e monta as 3 colunas (Pinyin/Caractere/
+// Tradução) do modelo Básico do zh de acordo, mais qual "lado" (front/
+// back, ver resolveCardExportMedia()) carrega a mídia de cada coluna.
+function zhTypeAnswerExportColumns(view){
+  if (view.prompt && view.prompt.pinyinText){
+    return { pinyin: view.prompt.pinyinText, hanzi: view.prompt.text, translation: view.displayAnswerText, hanziSide: 'front', translationSide: 'back' };
+  }
+  const answerPinyin = (view.answer && view.answer.pinyinText) || '';
+  const pinyin = (view.compareAnswerText && view.compareAnswerText !== view.displayAnswerText) ? view.compareAnswerText : answerPinyin;
+  return { pinyin, hanzi: view.displayAnswerText, translation: view.prompt.text, hanziSide: 'back', translationSide: 'front' };
+}
+
 const ANKI_EXPORT_CONFIG = {
   modelName: APP_IDENTITY.apps.zh.name,
   fields: [
@@ -7587,16 +7607,57 @@ const ANKI_EXPORT_CONFIG = {
       : `${APP_IDENTITY.apps.zh.name} - ${UNITS.find(u=>String(u.id)===sel).title}`;
   },
   cards(sel){
-    // .filter(hasPlainFrontBack) -- ver comentário na função (Fase 4b):
-    // exporta só tipos com par prompt/resposta curto e fixo (normal,
-    // múltipla escolha) -- cloze/"digite a resposta" ficam de fora
-    // (resposta aberta/digitada, sem texto curto pronto pro .apkg).
-    return (sel === 'all' ? STATE.cards : STATE.cards.filter(c => String(c.unitId) === sel)).filter(hasPlainFrontBack);
+    // Fase 7i (ver CLAUDE.md) -- `.filter(hasPlainFrontBack)` removido,
+    // mesmo raciocínio de fr/app.js: aquele filtro só existia porque
+    // `cardPromptText()`/`cardAnswerText()` (compartilhadas com Speed
+    // Review/Combinar, nunca tocadas nesta fase) quebram pra cloze/
+    // type_answer -- o export ganhou seu próprio caminho de extração de
+    // texto pra esses 2 tipos (ver noteFields()/clozeFields() abaixo),
+    // então todo tipo já é exportável agora.
+    return (sel === 'all' ? STATE.cards : STATE.cards.filter(c => String(c.unitId) === sel));
   },
-  noteFields(card){
-    return [cardPromptPinyinText(card), cardPromptText(card), cardAnswerText(card)];
+  // Fase 7i -- `media` já vem resolvido em `[sound:]`/`<img>` prontos
+  // (ver collectExportMediaAssets(), shared/anki-export.js). `type_answer`
+  // usa zhTypeAnswerExportColumns() (acima) pra decidir dinamicamente
+  // qual lado é o chinês (com pinyin) -- diferente de Normal/Múltipla
+  // Escolha, aqui não há garantia de direção fixa.
+  noteFields(card, media){
+    if (card.cardInstance && card.cardInstance.cardTypeId === 'type_answer'){
+      const view = resolveCardContentView(card);
+      const cols = zhTypeAnswerExportColumns(view);
+      return [
+        cols.pinyin,
+        ankiFieldHTML(cols.hanzi, media && media[cols.hanziSide]),
+        ankiFieldHTML(cols.translation, media && media[cols.translationSide]),
+      ];
+    }
+    return [
+      cardPromptPinyinText(card),
+      ankiFieldHTML(cardPromptText(card), media && media.front),
+      ankiFieldHTML(cardAnswerText(card), media && media.back),
+    ];
+  },
+  // Fase 7i -- cards Cloze (mesmo caminho de fr/app.js -- estrutura
+  // genérica, sem coluna de pinyin separada: quando o texto tem um Field
+  // de pinyin embutido via `|`, buildAnkiClozeFieldText() já converte
+  // isso pro hint nativo do Anki `{{c1::hanzi::pinyin}}`, mostrado no
+  // lugar da lacuna antes de revelar).
+  clozeFields(card, media){
+    const view = resolveCardContentView(card);
+    return [
+      ankiFieldHTML(buildAnkiClozeFieldText(view.rawSentenceText, view.markId), media && media.front),
+      view.translation ? view.translation.text : '',
+    ];
   },
   sortField(card){
+    if (card.cardInstance && card.cardInstance.cardTypeId === 'cloze'){
+      const view = resolveCardContentView(card);
+      return renderClozeText(view.rawSentenceText, view.markId, { reveal: true });
+    }
+    if (card.cardInstance && card.cardInstance.cardTypeId === 'type_answer'){
+      const cols = zhTypeAnswerExportColumns(resolveCardContentView(card));
+      return cols.pinyin || cols.hanzi;
+    }
     return cardPromptPinyinText(card);
   },
   filename(sel){

@@ -1191,3 +1191,105 @@ function resolveCardContentView(card){
   }
   return { kind: CARD_TYPE_IDS.NORMAL, ...resolveNormalCardView(note, cardInstance) };
 }
+
+// ============================================================
+// Fase 7i (ver CLAUDE.md) -- resolução de mídia para EXPORTAÇÃO ANKI
+// ============================================================
+//
+// resolveCardExportMedia(card) -- mesma pergunta que os 4 renderers de
+// Revisão/Preview (Fase 6C/7a) já respondem, só que num único ponto PURO
+// e language-agnostic, reutilizado pelo exportador Anki
+// (ANKI_EXPORT_CONFIG, fr/zh app.js + shared/anki-export.js) em vez de
+// reimplementar a mesma lógica de novo. NUNCA gera nada -- só resolve
+// URLs JÁ existentes via resolveCardContentView()/resolveFieldAudioUrl()
+// (pra `type:'tts'`, resolveFieldAudioUrl() só devolve `generatedUrl` se
+// já existir, nunca dispara geração -- restrição explícita desta fase:
+// "nunca gerar TTS durante a exportação").
+//
+// Espelha EXATAMENTE as mesmas fórmulas de fallback que os renderers já
+// usam (conferido linha a linha em fr/app.js antes de escrever isto --
+// zh/app.js é estruturalmente idêntico nesses pontos):
+//   - normal (inclui as 2 metades de "normal com reverso"): a frente
+//     pega a imagem LEGADA (`card.imageUrl`, Note-level) como fallback
+//     quando o Field da frente não tem imagem própria; o verso NUNCA usa
+//     esse fallback (evita duplicar a mesma imagem legada nos 2 lados) --
+//     mesma regra de `renderNormalCard`.
+//   - multiple_choice: só o prompt tem mídia (imagem com fallback
+//     legado, áudio sem fallback) -- a resposta certa/distratores NUNCA
+//     têm mídia própria exibida, mesmo critério de `renderMultipleChoiceCard`
+//     desde a Fase 7a (evita vazar a resposta certa pelo áudio/imagem
+//     antes de a aluna escolher entre as opções).
+//   - type_answer: prompt com fallback legado de imagem; resposta sem
+//     fallback (só a própria mídia do Field de resposta, se houver) --
+//     mesmo critério de `renderTypeAnswerCard`, só que lá é condicionado
+//     a `answered` (runtime); aqui a exportação sempre inclui, já que o
+//     .apkg não tem um estado de "revelado" -- é o próprio template do
+//     Anki (afmt) que decide quando mostrar a Resposta.
+//   - cloze: só a frase (Field de texto) tem mídia, com fallback legado
+//     de imagem -- a tradução nunca tem mídia própria, mesmo critério de
+//     `renderClozeCard`.
+//   - trilha (`!card.cardInstance`): SEM mídia nenhuma -- o áudio da
+//     trilha vem de AUDIO_MANIFEST (arquivos estáticos pré-gerados,
+//     referenciados por texto literal, nunca por Field.audio) e fica
+//     fora do escopo desta fase (ver relatório da Fase 7i, CLAUDE.md).
+//
+// Devolve { front, back } -- cada um `null` (sem mídia nesse lado) ou
+// `{ audioUrl, imageUrl }` (qualquer um dos 2 pode ser `null` individualmente).
+function resolveCardExportMedia(card){
+  if (!card.cardInstance) return { front: null, back: null };
+  const view = resolveCardContentView(card);
+  if (view.kind === CARD_TYPE_IDS.MULTIPLE_CHOICE){
+    return {
+      front: { audioUrl: view.prompt.audioUrl, imageUrl: card.imageUrl || view.prompt.imageUrl || null },
+      back: null,
+    };
+  }
+  if (view.kind === CARD_TYPE_IDS.TYPE_ANSWER){
+    return {
+      front: { audioUrl: view.prompt.audioUrl, imageUrl: card.imageUrl || view.prompt.imageUrl || null },
+      back: view.answer ? { audioUrl: view.answer.audioUrl, imageUrl: view.answer.imageUrl } : null,
+    };
+  }
+  if (view.kind === CARD_TYPE_IDS.CLOZE){
+    return {
+      front: { audioUrl: view.audioUrl, imageUrl: card.imageUrl || view.imageUrl || null },
+      back: null,
+    };
+  }
+  // normal (inclui as 2 metades de "normal com reverso")
+  return {
+    front: { audioUrl: view.front.audioUrl, imageUrl: card.imageUrl || view.front.imageUrl || null },
+    back: { audioUrl: view.back.audioUrl, imageUrl: view.back.imageUrl },
+  };
+}
+
+// buildAnkiClozeFieldText(rawText, targetMarkId) -- converte a sintaxe
+// INTERNA {{cN::resposta}}/{{cN::resposta|compareAnswer}} (Fase 5) pra
+// sintaxe NATIVA do Anki ({{cN::resposta}}/{{cN::resposta::hint}} -- o
+// Anki usa "::" pra hint, nunca "|"). Só a marca `targetMarkId` vira
+// marcação Cloze de verdade -- qualquer OUTRA marca da mesma Note (uma
+// nota com múltiplas lacunas gera 1 CardInstance por lacuna, ver Fase 5)
+// é achatada pro próprio texto revelado, mesmo espírito de
+// `renderClozeText(text, targetMarkId, {reveal:false})` (revela tudo
+// exceto a marca alvo) -- só que aqui a marca alvo vira sintaxe Cloze de
+// verdade em vez de "___". Cada CardInstance de Cloze é exportada como
+// sua PRÓPRIA nota Anki independente (nunca dependendo do mecanismo
+// nativo do Anki de "1 nota Cloze gera N cards", que acoplaria marcas
+// que este app trata como progresso FSRS genuinamente independentes).
+//
+// SEMPRE renumera a marca alvo pra "c1", nunca preserva o markId
+// original (`c2`, `c3`...) -- cada nota exportada representa só 1 card
+// (ord:0 sempre, mesmo padrão que o resto do exportador já usa pra
+// qualquer tipo), e o filtro `{{cloze:Text}}` do Anki decide o que
+// esconder a partir do número da marca vs. o `ord` do card -- ord:0 só
+// combina com c1.
+function buildAnkiClozeFieldText(rawText, targetMarkId){
+  CLOZE_MARK_RE.lastIndex = 0;
+  return (rawText || '').replace(CLOZE_MARK_RE, (_, id, raw) => {
+    const { answer, compareAnswer } = splitClozeMarkRaw(raw);
+    if (id !== targetMarkId) return answer;
+    return (compareAnswer !== null && compareAnswer !== undefined && compareAnswer !== '')
+      ? `{{c1::${answer}::${compareAnswer}}}`
+      : `{{c1::${answer}}}`;
+  });
+}
