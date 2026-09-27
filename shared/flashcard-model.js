@@ -246,6 +246,24 @@ function validateFieldAudioUploadFile(file){
   return { ok: true };
 }
 
+// ---------- Fase 7h.1 (UI completa de áudio por Field, ver CLAUDE.md) ----------
+//
+// Validação PURA de uma URL externa de áudio -- nunca faz I/O (nunca busca
+// a URL pra confirmar que existe/responde áudio de verdade; o próprio
+// elemento `<audio>` de preview já falha graciosamente se a URL não tocar,
+// mesma decisão já registrada na auditoria da Fase 7c, Seção L). Exige
+// `https://` explícito -- nunca `http://` (conteúdo misto num app servido
+// via https) nem qualquer outro esquema (`javascript:`/`data:`/`file:`/etc,
+// vetor de XSS/leitura local se aceito cru) -- e um comprimento razoável.
+const FIELD_AUDIO_URL_MAX_LENGTH = 2000;
+function validateFieldAudioUrl(url){
+  const clean = (url || '').trim();
+  if (!clean) return { ok: false, error: 'Cole o link do áudio.' };
+  if (clean.length > FIELD_AUDIO_URL_MAX_LENGTH) return { ok: false, error: 'Link muito longo.' };
+  if (!/^https:\/\//i.test(clean)) return { ok: false, error: 'O link precisa começar com https://.' };
+  return { ok: true, url: clean };
+}
+
 // ---------- Fase 7f (TTS explícito por Field, implementação -- ver
 // CLAUDE.md) -- contrato de geração compartilhado ----------
 //

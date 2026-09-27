@@ -13443,3 +13443,214 @@ UI completa de seletor TTS, gravação (Fase 7g, intocada e confirmada
 funcionando), Anki export, migração de AUDIO_MANIFEST, processamento em
 lote, e qualquer mudança de arquitetura FSRS continuam fora do escopo,
 aguardando autorização explícita numa sessão futura.
+
+## Fase 7h.1 -- UI completa de áudio por Field ("URL externa" funcional +
+staleness de TTS exibida na UI)
+
+Instrução pedindo a UI completa de áudio por Field (5 origens: Sem áudio/
+URL/Upload/TTS/Gravação), com a restrição central de sempre: **reutilizar,
+nunca reimplementar** upload (Fase 7e), TTS (Fase 7f) e gravação (Fase
+7g). Leitura obrigatória de `shared/flashcard-editor-state.js`,
+`shared/flashcard-field-editor.js`, `shared/flashcard-field-audio-
+recorder.js`, `shared/flashcard-native-persistence.js`,
+`shared/flashcard-model.js`, `shared/teacher-flashcards.js`,
+`shared/own-flashcards.js`, `shared/admin-flashcards.js`,
+`shared/my-flashcards.js` feita ANTES de qualquer código.
+
+**Achado central desta leitura, que definiu o escopo real**: `shared/
+flashcard-field-editor.js` já continha, desde as Fases 7e/7f/7g, um
+componente ÚNICO e já compartilhado (`renderFieldAudioBlockHTML`/
+`wireFieldAudioBlockFor`) com o `<select>` de 5 origens, painéis de
+upload/TTS/gravação totalmente funcionais, troca de origem sem destruir
+áudio existente, remoção só de referência (nunca delete físico do
+Storage), e reprodução via `<audio controls>` nativo (sem nenhuma
+chamada a `registerAudioPlay()` -- sem analytics de Review, já correto
+desde a Fase 8a/7d). Ou seja: a maior parte do que uma instrução de "UI
+completa de áudio por Field" pediria **já existia**, construída
+incrementalmente pelas 3 fases anteriores dentro do MESMO arquivo/
+componente (nunca duplicado entre Admin e Meus Cartões -- os dois
+chamam `refreshNativeCardTypeBox(boxEl, editorState, {namePrefix,
+uploadFn, deleteFn, ttsFn, noteId})` com o mesmo shape de `opts`, só
+trocando as funções de serviço -- `uploadFlashcardMedia`/
+`requestFieldAudioTTS` no admin, `uploadOwnFlashcardMedia`/
+`requestOwnFieldAudioTTS` em Meus Cartões).
+
+**Os 2 gaps reais encontrados, confirmados por leitura (não presumidos)
+e é isso que esta subfase implementou:**
+
+1. **"URL externa" ainda era só espaço reservado** -- `<option value="url">
+   URL externa (em breve)</option>`, sem painel algum, com um texto de
+   hint dizendo "chega em fase futura". Não havia `validateFieldAudioUrl()`
+   em lugar nenhum do motor.
+2. **`isTtsAudioStale()` (Fase 7f, `shared/flashcard-model.js`) nunca
+   era chamada por nenhum código de produção** -- confirmado por grep
+   antes de presumir: a função de detectar "TTS desatualizado" existia,
+   testada, pronta, mas nenhuma UI a consumia -- o botão sempre dizia só
+   "Regenerar áudio" sem nenhum aviso distinto de "a config mudou desde
+   a última geração".
+
+**O que foi feito, só em `shared/flashcard-model.js` + `shared/
+flashcard-field-editor.js` (nenhum outro arquivo tocado, confirmado por
+`git diff --stat`):**
+
+- **`validateFieldAudioUrl(url)`** (novo, `shared/flashcard-model.js`,
+  logo antes da seção de TTS) -- validação PURA (nunca I/O, nunca busca a
+  URL pra confirmar que ela responde áudio de verdade -- o próprio
+  `<audio>` de preview já falha graciosamente se não tocar, mesma decisão
+  já registrada na auditoria da Fase 7c, Seção L). Exige **`https://`
+  explícito** -- nunca `http://` (conteúdo misto num app servido via
+  https) nem `javascript:`/`data:`/`file:`/qualquer outro esquema (vetor
+  de XSS/leitura local se aceito cru) -- e um comprimento razoável
+  (`FIELD_AUDIO_URL_MAX_LENGTH = 2000`). Trim automático.
+- **`FIELD_AUDIO_ORIGIN_UI_META`** (`shared/flashcard-field-editor.js`)
+  -- label de "url" mudou de "URL externa (em breve)" pra "URL externa"
+  simples -- agora é a 5ª origem genuinamente funcional.
+- **Painel de URL** (`data-field-audio-panel-url`) -- 1 `<input
+  type="url">` + botão "🔗 Usar este link", reaproveitando o MESMO padrão
+  visual/CSS de todo o resto do bloco de áudio (zero CSS novo). Trocar
+  pra essa origem no `<select>` só alterna qual painel aparece (mesma
+  disciplina de sempre) -- **nunca grava `field.audio` sozinho**; só o
+  clique explícito em "Usar este link" chama `validateFieldAudioUrl()` e,
+  se válido, `updateFieldInEditorState(editorState, fieldId, {audio:
+  {type:'url', url}})` -- exatamente o mesmo mutador primitivo já usado
+  por upload/TTS/gravação, nenhum caminho de persistência novo. Falha de
+  validação nunca toca `field.audio` -- um áudio já existente (se havia)
+  permanece intacto, mesma regra de upload/TTS/gravação.
+- **Staleness de TTS exibida na UI** -- novo `<p data-field-audio-tts-stale>`
+  dentro do painel de TTS (classe `.profile-edit-field-error`, reaproveita
+  o mesmo token vermelho já calibrado, zero cor nova), populado por uma
+  nova função `refreshTtsStaleUi()` dentro de `wireFieldAudioBlockFor()`
+  -- chama `isTtsAudioStale(currentField)` (assíncrona, SHA-256 via Web
+  Crypto, já existente desde a Fase 7f, nunca reimplementada) contra o
+  ESTADO ATUAL do Field no `editorState` (nunca contra os inputs ainda
+  não aplicados do próprio painel de TTS) e, se `true`, mostra "⚠️ Áudio
+  desatualizado -- o texto ou a configuração mudou desde a última
+  geração. Clique em 'Gerar novamente' para atualizar." e troca o texto
+  do botão pra "🔄 Gerar novamente" (nunca muda o comportamento do botão
+  em si -- clicar continua chamando exatamente o mesmo handler de sempre,
+  que já recalcula o `generationKey` no momento do clique). Chamada 1x ao
+  ligar o wiring (equivalente ao estado no momento em que o Field entrou
+  na tela) e de novo automaticamente sempre que uma mudança ESTRUTURAL
+  reconstrói a caixa inteira (add/remove Field, geração concluída) --
+  mesmo ciclo de vida de `refreshNativeFieldsBox`. **Nunca dispara
+  nenhuma chamada de rede/geração sozinha** -- só lê e exibe.
+
+**Limitação conhecida, documentada e não corrigida nesta subfase**:
+editar só o texto PRINCIPAL do Field (`[data-field-content]`, `kind:
+'content'`) nunca re-renderiza sozinho (mesma disciplina "nunca perder o
+que a pessoa está digitando" travada desde a Fase 6D.3/UX-fix 5) -- então
+a mensagem de staleness não atualiza em tempo real a cada tecla digitada,
+só depois da PRÓXIMA mudança estrutural (adicionar/remover um Field,
+reabrir a edição, gerar/regenerar). Isso é uma consequência aceita da
+arquitetura existente, não um bug introduzido aqui -- `isTtsAudioStale()`
+em si sempre calcula certo quando finalmente é chamada (confirmado nos
+testes), só o GATILHO de quando ela é recalculada é que não é a cada
+tecla. Corrigir isso exigiria mudar a disciplina de "nunca re-renderizar
+em edição de conteúdo" só pra este painel -- fora do escopo desta subfase
+(instrução explícita: reutilizar, nunca redesenhar o mecanismo geral).
+
+**O que foi confirmado como já correto/completo e NÃO precisou de
+nenhuma mudança (Admin/Meus Cartões, legado/nativo, Preview/Review):**
+- **Substituição/cancelamento seguros** -- trocar de origem só altera QUAL
+  painel é mostrado, nunca sobrescreve `field.audio` (exceto "Sem áudio",
+  a única outra forma de limpar a referência); um upload/geração/gravação
+  em voo que falha preserva o áudio anterior intacto (já testado desde
+  7e/7f/7g, reconfirmado aqui via regressão).
+- **Clone/reorder/remove** -- `cloneFieldIntoEditorState` já preserva
+  `audio` (agora testado explicitamente também com `type:'url'`);
+  `removeFieldFromEditorState` só afeta o Field removido; reordenar
+  nunca toca `audio` (é propriedade do próprio objeto Field, não indexada
+  por posição).
+- **Reprodução sem analytics de Review** -- `<audio controls>` nativo do
+  navegador, nunca `registerAudioPlay()`/`speakFrench`/`speakChinese` --
+  confirmado que Preview (`shared/flashcard-preview.js`) e o editor
+  compartilham exatamente o mesmo comportamento aqui, sem nenhum código
+  específico de Preview necessário.
+- **Legado vs. nativo** -- o bloco de áudio só existe dentro de
+  `renderFieldEditorHTML()`/`renderClozeEditorHTML()` (editor NATIVO,
+  Fase 6D.3+), nunca no formulário legado (`flashcardEditFormHTML`); abrir
+  um cartão legado continua 100% sem conversão automática, exatamente
+  como a Fase 6D.8 já garantia -- nenhuma mudança necessária aqui.
+- **Admin/Meus Cartões (paridade + gate premium)** -- confirmado por
+  grep que os 2 arquivos chamam `refreshNativeCardTypeBox` com o mesmo
+  shape de `opts`, só trocando as 2 funções de serviço -- o gate
+  `isPremium()` de Meus Cartões já envolve o bloco "Campos nativos"
+  inteiro (herdado da Fase "reformulação gratuito x premium"), então URL/
+  staleness ficam automaticamente atrás do mesmo gate, sem nenhum código
+  novo de permissão.
+
+**Testes realizados:**
+- `node --check` sem erro em `shared/flashcard-model.js`,
+  `shared/flashcard-field-editor.js`.
+- **Suíte Node/VM nova, `test_fase7h1_audio_ui.js`, 38/38** -- cobre:
+  `validateFieldAudioUrl` (https válida aceita; vazia/só-espaço/http/
+  javascript:/data:/file:/sem-esquema/absurdamente-longa rejeitadas;
+  trim automático; case-insensitive no esquema); `FIELD_AUDIO_ORIGIN_UI_META`
+  com as 5 origens e "url" sem "(em breve)"; aplicar URL via
+  `updateFieldInEditorState` preservando lang/role/pinyinFieldId/id do
+  Field, sem afetar OUTRO Field da mesma Note; "Sem áudio" remove só a
+  referência, nunca o Field; round-trip REAL pelo motor
+  (`resolveCardField`/`buildEngineCardsFromRow`/`resolveCardContentView`)
+  confirmando que `type:'url'` resolve `audioUrl` pelo MESMO caminho de
+  upload/TTS/gravação, sem nenhum branch novo em `resolveCardField()`;
+  `isValidFieldAudio` inalterado pra `type:'url'`; clonar/remover Field
+  com áudio de URL preserva/isola corretamente; **6 cenários de
+  staleness** (recém-gerado não é desatualizado; editar `content.value`
+  sem override TORNA desatualizado; com override, editar `content.value`
+  NÃO afeta staleness; `generationKey` persistido divergente do
+  recém-calculado é desatualizado; Field sem `type:'tts'`/sem
+  `generatedUrl` nunca é "desatualizado" -- pergunta não se aplica);
+  render puro (painéis corretos por origem, valor pré-preenchido,
+  escape de HTML perigoso na URL, elemento de staleness presente mas
+  escondido no render síncrono); regressão (`FIELD_AUDIO_UPLOAD_MIME_TYPES`/
+  `MAX_BYTES`/`TTS_PROVIDER_MODEL_ID`/`TTS_CONFIG_VERSION`/
+  `TTS_TEXT_MAX_LENGTH` inalterados, `getOrCreateFieldAudioRecorder`
+  continua exportado); auditoria arquitetural (zero chamada de rede/
+  bucket novo em `flashcard-field-editor.js`, `wireFieldAudioBlockFor`/
+  `renderFieldAudioBlockHTML` continuam existindo 1x só cada -- nenhuma
+  segunda implementação).
+- **16 suítes de regressão de fases anteriores (Fase 4 a 7g),
+  re-executadas, todas 0 falhas** -- `test_fase4_engine.js` 34/34,
+  `test_fase4d_regression.js` 30/30, `test_fase5_generation.js` 33/33,
+  `test_fase6b_native_notes.js` 74/74, `test_fase6d1_editor_state.js`
+  99/99, `test_fase6d2_state.js` 31/31, `test_fase6d3_field_editor.js`
+  65/65, `test_fase6d4a_mc_editor.js` 92/92, `test_fase6d4b_typeanswer_editor.js`
+  62/62, `test_fase6d5_cloze_editor.js` 71/71, `test_fase6d6_native_persistence.js`
+  85/85, `test_fase6d7_preview_logic.js` 59/59, `test_fase6d8_legacy_conversion.js`
+  92/92, `test_fase7b_field_audio_contract.js` 83/83, `test_fase7g_recording.js`
+  118/118, `test_fase7f_impl_tts.js` 41/41.
+- **Browser smoke novo, FR+ZH, `test_fase7h1_browser_smoke.js`, 38/38
+  checks (76 no total, 2 idiomas)** -- ponta a ponta através do código de
+  produção real, sem nenhuma segunda implementação: (A) URL externa --
+  painel visível ao selecionar a origem, upload escondido; `http://`
+  rejeitado (`field.audio` continua `null`, mensagem menciona "https");
+  `javascript:` rejeitado; `https://` válido aplicado via CLIQUE REAL no
+  botão, sem nenhuma chamada de rede (upload/TTS) disparada; áudio de um
+  Field nunca vaza pro outro; **salvar + reabrir a edição confirma
+  persistência real** -- a origem "url" e o link ficam pré-selecionados/
+  pré-preenchidos depois de um round-trip completo pelo banco fake; (B)
+  staleness -- gerar TTS com sucesso não mostra aviso; editar o texto
+  PRINCIPAL do Field (`page.fill` real em `[data-field-content]`) +
+  disparar uma mudança estrutural real (adicionar e remover um Field
+  auxiliar via clique) recalcula e EXIBE "⚠️ Áudio desatualizado", com o
+  botão trocando pra "🔄 Gerar novamente"; (C) regressão -- upload e
+  gravação (microfone sintético REAL do Chromium, mesmo padrão da Fase
+  7g) continuam funcionando no MESMO editor de Field depois de toda a
+  interação com URL/TTS; "Remover áudio" confirmado limpando só a
+  referência, **zero chamada a `storage.remove()`** nessa ação explícita.
+  **Zero erro de console novo** em qualquer um dos 2 idiomas (só os
+  mesmos `ERR_TUNNEL_CONNECTION_FAILED` pré-existentes do proxy de saída
+  deste sandbox, documentados em toda a sessão).
+
+**Escopo respeitado (confirmado por `git diff --stat`/`git status`)**:
+só `shared/flashcard-model.js` (+16 linhas) e `shared/flashcard-field-
+editor.js` (+~60 linhas). Nenhuma migração, nenhuma mudança de schema,
+nenhum novo bucket/provider, nenhuma reimplementação de upload/TTS/
+gravação, nenhuma mudança em `fr/app.js`/`zh/app.js`/Review/Preview/FSRS,
+nenhum Anki export, nenhuma migração de `AUDIO_MANIFEST`, nenhum batch
+TTS, nenhum garbage collection de Storage, nenhum redesign geral do
+editor. Nenhum passo manual pendente pra autora.
+
+**PARE conforme instrução explícita -- não avançar para 7h.2.** Próxima
+subfase só começa depois de autorização explícita da autora, com este
+relatório já entregue antes de pedir luz verde.
