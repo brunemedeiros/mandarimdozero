@@ -15415,3 +15415,234 @@ UX de áudio, sem alterar o motor) é a próxima fase da série e NÃO foi
 implementada nesta entrega.** Próxima etapa só começa depois de
 autorização explícita da autora, com este relatório já entregue antes de
 pedir luz verde.
+
+## CONSOLIDAÇÃO-4 -- ÁUDIO: simplificar a UX sem alterar o motor
+
+Quarta fase da série CONSOLIDAÇÃO. Escopo travado pelo prompt-mestre:
+reorganizar a APRESENTAÇÃO do editor de áudio por Field (Fases 7e/7f/7g/
+7h.1/7h.2) num fluxo de 2 passos -- "o usuário decide SE quer áudio antes
+de decidir COMO" -- sem tocar em nenhuma linha do motor (upload/TTS/
+gravação/URL/persistência/contrato `Field.audio`), sem reconstruir nada.
+
+### Auditoria (feita antes de qualquer código)
+
+Confirmado por leitura, não presumido: **todo o estado e toda a lógica de
+áudio por Field vivem num único arquivo**, `shared/flashcard-field-
+editor.js` -- `renderFieldAudioBlockHTML()` (render puro) +
+`wireFieldAudioBlockFor()` (os 4 corredores técnicos: upload, URL, TTS,
+gravação, mais o botão de remover). Esse componente é reutilizado
+IDENTICAMENTE pelos 4 Card Types que hoje têm campos de texto: Normal/
+Normal com reverso/Múltipla Escolha/Digite a resposta via
+`renderFieldEditorHTML()` (genérico), e Cloze via uma chamada direta
+(`shared/flashcard-cloze-editor.js`, que tem UI própria de seleção de
+texto e não passa pelo Field editor genérico). Nunca há uma segunda
+implementação -- confirmado por grep, os dois admin (`shared/admin-
+flashcards.js`) e aluna (`shared/my-flashcards.js`) só chamam
+`refreshNativeCardTypeBox(...)` passando `uploadFn`/`deleteFn`/`ttsFn`/
+`noteId`/`allowedAudioOrigins` -- nunca reimplementam nada do editor de
+áudio em si.
+
+**A matriz Free/Premium (Seção 10 do prompt-mestre) já estava
+implementada** desde a Fase 7h.1 -- `allowedAudioOrigins` já filtrava
+`upload`/`url` pro plano grátis e `tts`/`recording` pra Premium, com a
+mesma regra "a origem JÁ SALVA continua acessível mesmo se a conta
+baixar de tier, só não pode ESCOLHER de novo" já em vigor. Admin/
+professora nunca passa `allowedAudioOrigins` (sempre irrestrito, "vê
+tudo sempre"). Nada disso precisou de mudança nesta fase -- só a UI que
+CONSOME esse filtro precisava ser redesenhada.
+
+**O problema real, confirmado**: `renderFieldAudioBlockHTML()` mostrava
+um `<select>` técnico com as 5 origens (`Sem áudio`/`URL externa`/
+`Arquivo (upload)`/`Texto para voz`/`Gravação`) + um parágrafo explicando
+o que cada uma significa + o painel INTEIRO do método atualmente
+selecionado, tudo de uma vez, mesmo pra um Field que nunca teve áudio
+nenhum -- exatamente a "lista de opções técnicas expostas" que o
+prompt-mestre pedia pra eliminar.
+
+### O que foi feito (só `shared/flashcard-field-editor.js`)
+
+**Nova UX em 3 estados, controlados só por um atributo de DOM
+(`data-field-audio-ui-state`, nunca persistido -- puramente
+apresentacional):**
+
+1. **`summary`** (estado inicial de sempre, inclusive depois de qualquer
+   sucesso) -- sem áudio: texto "Sem áudio." + botão único "+ Adicionar
+   áudio". Com áudio: `<audio controls>` + o texto de status já existente
+   (`fieldAudioIndicatorText()`, intocado) + botões "Substituir" e "🗑
+   Remover".
+2. **`picker`** (aberto por "+ Adicionar áudio" ou "Substituir") -- lista
+   de botões só com os MÉTODOS permitidos pela entitlement
+   (`FIELD_AUDIO_METHOD_UI_META`, novo: 📁 Enviar arquivo / 🔗 Usar link /
+   🔊 Texto para voz / 🎙️ Gravar áudio, na mesma ordem do mockup aprovado
+   -- grátis primeiro) + "Cancelar" (nunca muta `field.audio`).
+3. **`panel`** -- o painel técnico do método escolhido (upload/URL/TTS/
+   gravação), com um link "← Voltar" no topo. **Os 4 painéis são BYTE A
+   BYTE os mesmos elementos/ids/data-attributes de antes desta fase** --
+   só passaram a viver dentro de um wrapper que a nova camada de UI
+   esconde/mostra; nenhuma linha da lógica que decide QUAL painel
+   corresponde à origem atual foi tocada.
+
+**O `<select>` técnico continua existindo** (`data-field-audio-origin`,
+agora `style="display:none" aria-hidden="true" tabindex="-1"`) -- é o
+motor por baixo: escolher um método no picker só faz
+`originSelect.value = method; originSelect.dispatchEvent(new
+Event('change'))`, reaproveitando 100% o listener de `change` já
+existente (que decide visibilidade de painel + invalida operações em
+voo via `beginAudioOp()`, Fase 7h.2) -- nunca uma segunda implementação
+da mesma decisão.
+
+**Único ajuste real na lógica** (não cosmético): `data-field-audio-
+status` (usado só pelo corredor de upload pra mostrar "Enviando
+áudio..."/mensagens de descarte por corrida) foi promovido pra um
+elemento PRÓPRIO dentro do painel de upload
+(`data-field-audio-upload-status`), porque o parágrafo de status
+genérico que existia antes virou parte do estado `summary` (escondido
+enquanto o usuário está no painel de upload) -- sem essa mudança, o
+feedback de "Enviando áudio..." ficaria escrito num elemento invisível.
+As 3 chamadas que escreviam nesse elemento (`shared/flashcard-field-
+editor.js`, corredor de upload) foram atualizadas pro novo seletor;
+nenhuma outra lógica de upload/TTS/gravação/URL foi tocada.
+
+### Confirmações (pedidas explicitamente na Seção 28 do prompt-mestre)
+
+1. **Arquivos alterados**: só `shared/flashcard-field-editor.js` (+162/
+   -53 linhas, confirmado por `git diff --stat`). Nenhum outro arquivo
+   (motor, Review, Preview, editores de MC/Type Answer/Cloze, admin/
+   aluna) precisou de nenhuma mudança -- os dois integradores continuam
+   chamando exatamente as mesmas funções (`renderFieldAudioBlockHTML`/
+   `wireFieldAudioBlockFor`/`refreshNativeCardTypeBox`) com a mesma
+   assinatura de sempre.
+2. **Antes**: `<select>` técnico visível com 5 opções + hint explicando
+   cada uma + painel inteiro do método atual sempre exposto, mesmo pra
+   Field sem áudio nenhum.
+3. **Depois**: resumo (toca/substitui/remove, ou "Sem áudio"+"Adicionar")
+   → picker de método (só os permitidos pela entitlement) → painel só do
+   método escolhido, com "Voltar"/"Cancelar" em cada passo.
+4. **Modelo Native intocado**: `Field.audio` continua exatamente o
+   contrato da Fase 7b (`{type, url/generatedUrl/..., }`), nenhum campo
+   novo, nenhuma tabela nova, nenhum `audioType` paralelo -- confirmado
+   por leitura, a única mudança em qualquer estrutura de dado foi
+   renomear o SELETOR de um elemento de status de UI
+   (`data-field-audio-status` → `data-field-audio-upload-status`), nunca
+   um campo de `Field`/`editorState`.
+5. **Motor de áudio não reconstruído**: `resolveFieldAudioUrl`/
+   `isValidFieldAudio`/`computeTtsGenerationKey`/`isTtsAudioStale`/
+   `validateFieldAudioUrl`/`validateFieldAudioUploadFile`/
+   `validateTtsGenerationRequest` (`shared/flashcard-model.js`), a Edge
+   Function `tts-generate`, `shared/flashcard-field-audio-recorder.js`
+   (máquina de estados de gravação, Fase 7g), `uploadFlashcardMedia`/
+   `uploadOwnFlashcardMedia`/`requestFieldAudioTTS`/
+   `requestOwnFieldAudioTTS` -- nenhum destes foi tocado, confirmado por
+   `git diff --stat` (só 1 arquivo mudou) e por leitura de cada um antes
+   de decidir não mexer.
+6. **Matriz Free/Premium confirmada intacta**: FREE continua só
+   upload+URL, PREMIUM continua ganhando TTS+gravação, mesmo mecanismo
+   `allowedAudioOrigins` já existente desde a Fase 7h.1, agora só
+   controlando quais BOTÕES aparecem no picker em vez de quais `<option>`
+   aparecem no `<select>` escondido. Testado explicitamente (ver abaixo)
+   que uma conta FREE nunca vê "Texto para voz"/"Gravar áudio" no picker,
+   e que professora/admin (sem `allowedAudioOrigins`) sempre vê os 4.
+7. **Áudio existente preservado**: `resolveFieldAudioUrl`/
+   `fieldAudioIndicatorText` continuam sendo a única fonte do que o
+   `summary` mostra -- um Field com áudio já salvo nunca precisa do
+   picker pra o usuário descobrir que ele existe (Seção 9 do
+   prompt-mestre), confirmado visualmente (ver screenshots) e via teste.
+8. **Legacy → Native**: `nativeNoteEditorStateFromLegacyRow()` (Fase
+   6D.8) não foi tocada -- continua populando `field.audio` a partir de
+   `audio_url` legado exatamente como antes; como o novo `summary` lê
+   `field.audio`/`resolveFieldAudioUrl()` do mesmo jeito que o código
+   antigo já lia, um Field convertido do legado com áudio já aparece
+   corretamente na tela nova sem nenhuma adaptação.
+9. **Preview/Review confirmados intocados**: `fr/app.js`/`zh/app.js`/
+   `shared/flashcard-preview.js` não aparecem no diff -- Preview e Review
+   continuam lendo só `card.cardInstance`/`resolveCardContentView()`,
+   nunca o editor de Field em si; a UX nova é estritamente sobre a tela
+   de EDIÇÃO/CRIAÇÃO, nunca sobre como o áudio é consumido depois de
+   salvo.
+
+### Testes realizados
+
+- `node --check` sem erro em `shared/flashcard-field-editor.js` e nos 7
+  arquivos adjacentes que consomem/compartilham o componente
+  (`admin-flashcards.js`/`my-flashcards.js`/`flashcard-mc-editor.js`/
+  `flashcard-typeanswer-editor.js`/`flashcard-cloze-editor.js`/
+  `flashcard-field-audio-recorder.js`/`flashcard-model.js`) -- nenhum
+  regrediu.
+- **Playwright real, Chromium real, FR+ZH, 43 verificações por idioma
+  (86 no total) através do app de produção servido estático** (boot
+  guest bypassado via `CURRENT_USER` fake + monkey-patch só das funções
+  de REDE -- `fetchMyOwnFlashcards`/`hasActiveTeacherLink`/
+  `fetchMyPlanTier`/`uploadOwnFlashcardMedia`/`deleteOwnFlashcardMedia`/
+  `requestOwnFieldAudioTTS`/`createOwnFlashcard` -- nunca uma segunda
+  implementação do editor): estado inicial = `summary` com "Sem áudio."+
+  "+ Adicionar áudio"; `<select>` técnico confirmado escondido; picker
+  FREE mostra só Enviar arquivo/Usar link, nunca TTS/Gravar; Cancelar no
+  picker volta pra summary sem mutar `field.audio`; fluxo de upload
+  REAL (arquivo de verdade via `setInputFiles`) -- painel certo aparece,
+  upload disparado exatamente 1 vez, sucesso volta sozinho pra summary
+  com `<audio>`/Substituir/Remover; Substituir reabre o picker (nunca
+  exige remover primeiro); URL inválida (`http://`) rejeitada sem tocar
+  no áudio já existente; URL válida aplicada de verdade (substituição
+  funcionando, `<audio src>` novo confirmado); Remover volta pra "Sem
+  áudio" sem recriar o Field (id preservado); salvar um cartão SEM áudio
+  continua funcionando (persistência real confirmada: `fields`/
+  `card_generation_mode` gravados corretamente, payload sem `audio` em
+  nenhum Field); PREMIUM mostra os 4 métodos no picker; TTS sem `noteId`
+  (rascunho ainda não salvo) mostra o aviso "Salve o cartão primeiro..."
+  de sempre, nunca chama a rede; "Voltar" retorna pra summary sem mutar
+  nada; painel de gravação alcançável (botão Gravar presente, Parar
+  escondido até começar); Professora/admin (`renderFieldAudioBlockHTML`
+  sem `allowedAudioOrigins`) sempre mostra os 4 métodos, nunca gateado.
+  Os únicos 2 `pageerror` capturados (1 por idioma) são
+  `TypeError: ...createClient`/`supabaseClient is not defined` -- a
+  MESMA classe de erro pré-existente documentada dezenas de vezes nesta
+  sessão inteira (CDN do Supabase bloqueado pelo proxy de saída deste
+  sandbox, nunca relacionado a código deste app), não um erro novo.
+- **Inspeção visual real** (screenshot Playwright, fr, 480px -- largura
+  de telefone): confirmado que o estado `summary` sem áudio mostra só
+  "Sem áudio." + 1 botão; o `picker` (Premium) mostra os 4 métodos com
+  ícone+rótulo, sem nenhum campo técnico visível; o `summary` com áudio
+  mostra o player nativo + status + Substituir/Remover -- nenhum ID,
+  path de storage, ou detalhe de implementação exposto em nenhum dos 3
+  estados, confirmando visualmente (não só via assert) que a
+  complexidade técnica interna permanece, mas a complexidade EXPOSTA ao
+  usuário caiu como pedido.
+
+### Limitações conhecidas / débito técnico (nenhum bloqueante)
+
+- A ordenação exata dos 4 métodos no picker (grátis primeiro, Premium
+  depois) é a mesma do mockup aprovado no prompt-mestre -- não foi
+  perguntado se a autora prefere agrupar visualmente os 2 grupos com
+  algum separador; ficou como uma lista simples, mesma disciplina de
+  "não inventar componente novo" já usada no resto da fase.
+  Reconsiderar só se a autora pedir.
+- "Substituir" sempre reabre o picker completo (nunca pré-seleciona o
+  método atual) -- decisão deliberada (Seção 10 do prompt-mestre: "não
+  force o usuário a remover primeiro", nunca disse "pule direto pro
+  mesmo método"); se escolher o MESMO método de novo, o painel técnico
+  já vem pré-preenchido com o valor atual (comportamento herdado sem
+  mudança, confirmado no teste de URL).
+- Nenhuma auditoria de acessibilidade além do pedido explícito (labels/
+  estados disabled/loading/foco continuam os mesmos de antes, nada
+  removido) -- não foi feita uma auditoria completa de acessibilidade do
+  editor inteiro, só confirmado que esta mudança não introduz regressão
+  óbvia (Seção 20 do prompt-mestre, "não é uma auditoria de
+  acessibilidade do projeto inteiro").
+- Não foi feito um teste interativo separado clicando através de
+  `shared/admin-flashcards.js` (professora) além da verificação
+  estrutural direta de `renderFieldAudioBlockHTML()` sem
+  `allowedAudioOrigins` -- justificativa: é literalmente o MESMO
+  componente que já foi testado interativamente do lado da aluna (código
+  compartilhado, confirmado por leitura), então o risco de comportamento
+  divergente é baixo, mas registrando por completude/honestidade, mesmo
+  padrão já usado repetidas vezes nesta feature quando uma entrega
+  validou só um dos dois lados.
+
+**Escopo desta entrega**: só `shared/flashcard-field-editor.js`. Nenhuma
+migração, nenhum passo manual pendente pra autora.
+
+**PARE conforme instrução explícita -- CONSOLIDAÇÃO-5 (Tags + correção/
+validação do Anki export) é a próxima fase da série e NÃO foi
+implementada nesta entrega.** Próxima etapa só começa depois de
+autorização explícita da autora, com este relatório já entregue antes de
+pedir luz verde.
