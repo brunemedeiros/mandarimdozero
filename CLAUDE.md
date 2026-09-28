@@ -15646,3 +15646,147 @@ validação do Anki export) é a próxima fase da série e NÃO foi
 implementada nesta entrega.** Próxima etapa só começa depois de
 autorização explícita da autora, com este relatório já entregue antes de
 pedir luz verde.
+
+## CONSOLIDAÇÃO-5 -- Tags no Anki Export + correção do "unidadenull" na
+origem
+
+Última fase da série CONSOLIDAÇÃO. Precedida de uma auditoria só-leitura
+apresentada antes de qualquer código (regra explícita da autora: "antes de
+codificar, faça a auditoria e me mostre o diagnóstico... implemente
+somente o que o diagnóstico justificar"). O diagnóstico confirmou 2
+achados: (1) `shared/anki-export.js` sempre gravava
+`` `unidade${card.unitId} ` `` na coluna `notes.tags` do Anki, incondicional
+-- e `card.unitId` é SEMPRE `null` pra qualquer cartão teacher/self (Fase
+4, `buildEngineCardsFromRow()`), produzindo a string literal
+`"unidadenull "` pra todo cartão autorado por professora/aluna; (2) a
+feature real de Tags (migration 048, `teacher_flashcards.tags`/
+`own_flashcards.tags`, já normalizada via `normalizeTagSlug`/
+`normalizeNoteTags` desde o fechamento da Fase 7j) nunca chegava ao
+`card` em runtime -- `buildEngineCardsFromRow()` lia `rowId`/`teacherNote`/
+`imageUrl` de `row`/`note`, mas nunca `row.tags`. Autorizado exatamente
+como diagnosticado, com 14 restrições explícitas (ver abaixo).
+
+**Correção, 2 arquivos, cirúrgica:**
+
+- **`shared/flashcard-model.js`, `buildEngineCardsFromRow(row, opts)`** --
+  ganhou `const tags = normalizeNoteTags(row.tags);` computado 1x por
+  linha (nunca por CardInstance), incluído no objeto retornado dentro do
+  `.map()` -- mesmo "bucket" de metadado Note-level que `rowId`/
+  `teacherNote`/`imageUrl` já usavam. `interpretNoteFromRow()`/
+  `interpretNativeNoteFromRow()` continuam SEM ler tags (restrição 1,
+  intocadas) -- tags nunca viram Field nem propriedade de direção.
+  Como o cálculo é feito 1x fora do `.map()`, `normal_reversed` (2
+  CardInstances) e Cloze multi-marca (N CardInstances) recebem a MESMA
+  referência normalizada -- nunca tags divergentes entre irmãs da mesma
+  Note (restrição 6).
+- **`shared/anki-export.js`** -- nova função `ankiNoteTagsString(card)`:
+  `card.unitId != null` (cartão de trilha) preserva EXATAMENTE
+  `` `unidade${card.unitId} ` `` (restrição 4, byte a byte, nunca tocado);
+  `card.unitId == null` (professora/aluna) usa `card.tags` real,
+  formatado no padrão canônico do Anki (`" tag1 tag2 "`, compatível com
+  `shared/anki-parser.js:150`, `(row[3]||'').trim().split(/\s+/)`) --
+  sem tags reais, string vazia, **nunca** "unidadenull" nem nenhum outro
+  placeholder (restrição 5/10 -- corrigido na origem, nunca um
+  `.replace()` posterior). A única chamada `db.run('INSERT INTO notes...')`
+  trocou `` `unidade${card.unitId} ` `` por `ankiNoteTagsString(card)`.
+
+**Testes executados, números reais (nunca inventados):**
+- **Node/VM, `test_consolidacao5_tags_export.js` (novo), 52/52** --
+  cobre `normalizeTagSlug`/`normalizeNoteTags` isolados (acentos, case,
+  dedup); propagação de tags via `buildEngineCardsFromRow()` real pra
+  Native+Legacy × teacher+own × sem-tags/1-tag/múltiplas-tags/duplicatas;
+  os 5 Card Types (Normal, Normal com reverso -- 2 CardInstances com as
+  MESMAS tags mesmo com FSRS mutado independentemente --, Cloze
+  multi-marca -- 2 CardInstances com as MESMAS tags --, Múltipla Escolha,
+  Digite a resposta); `ankiNoteTagsString()` isolada (trilha preservada
+  byte a byte inclusive `unitId===0`; tags reais formatadas; sem tags ->
+  vazio; regressão explícita "nunca produz a string unidadenull", com e
+  sem `card.tags` definido); um **round-trip REAL** Import→Storage→Export
+  -- `.apkg` genuíno construído com sql.js+JSZip (`notes.tags` = `"
+  Vocab A1 café-com-leite vocab "`), parseado por `parseApkgFile()` +
+  `buildAnkiImportPlan()` (produção real, `shared/anki-parser.js`/
+  `shared/anki-import.js`, intocados nesta fase), o `editorState`
+  resultante convertido pra linha via `nativeContentColumnsFromEditorState()`
+  (simulando "armazenamento"), realimentado em `buildEngineCardsFromRow()`
+  + `ankiNoteTagsString()` -- confirma `['vocab','a1','cafe-com-leite']`
+  preservado semanticamente (dedup Vocab/vocab, acento normalizado) do
+  Import até a string `.apkg` final, nunca "unidadenull" mesmo vindo de
+  um cartão 100% importado do Anki, e que reimportar a string exportada
+  produz o MESMO conjunto (round-trip estável/idempotente).
+- **Regressão de todas as fases anteriores que tocam `shared/flashcard-
+  model.js`/`shared/anki-export.js`, re-executadas sem nenhuma mudança de
+  comportamento**: `test_fase4_engine.js` 34/34, `test_fase4d_regression.js`
+  30/30, `test_fase5_generation.js` 33/33, `test_fase6b_native_notes.js`
+  74/74, `test_fase6d1_editor_state.js` 99/99, `test_fase6d3_field_editor.js`
+  65/65, `test_fase6d4a_mc_editor.js` 92/92, `test_fase6d5_cloze_editor.js`
+  71/71, `test_fase6d6_native_persistence.js` 85/85,
+  `test_fase6d7_preview_logic.js` 59/59, `test_fase6d8_legacy_conversion.js`
+  92/92, `test_fase7a_media_resolution.js` 45/45,
+  `test_fase7b_field_audio_contract.js` 83/83, `test_fase7f_impl_tts.js`
+  41/41, `test_fase7g_recording.js` 118/118,
+  `test_fase7i_anki_export_unit.js` 49/49, `test_consolidacao1_unit.js`
+  62/62, `test_consolidacao2_unit.js` 60/60, `test_consolidacao3_unit.js`
+  12/12 -- **total 1057/1057 sem nenhuma regressão**. 2 falhas
+  pré-existentes e NÃO-relacionadas (`test_fase6d2_state.js`,
+  `test_fase6d4b_typeanswer_editor.js`) confirmadas idênticas contra o
+  commit anterior via `git stash`/`git stash pop` -- já documentadas
+  desde o fechamento da CONSOLIDAÇÃO-2 como scripts de teste
+  desatualizados, não código de produção.
+- **Supabase real, transação + rollback (projeto `eigjocalzwamisgqilhg`)**
+  -- confirmado ao vivo que `teacher_flashcards.tags`/`own_flashcards.tags`
+  (migration 048) já existem (`text[] not null default '{}'::text[]`).
+  Snapshot antes: `teacher_flashcards` 5 linhas (hash
+  `fb70341cdae90af70f90613b7445b12c`), `own_flashcards` 7 linhas (hash
+  `bb393e2d0e27534c956ad9e67a3caf09`). `BEGIN`; INSERT real em
+  `teacher_flashcards` reaproveitando `teacher_id`/`student_id`/
+  `language_app_key` de uma linha existente, com `tags:
+  ARRAY['Vocab','A1',' café-com-leite ','vocab']`; INSERT real em
+  `own_flashcards` com `tags: ARRAY['Professora','unidade-1']`,
+  `RETURNING` confirmado; `ROLLBACK`. Snapshot depois: MESMAS contagens
+  E MESMOS hashes (byte a byte idênticos ao antes), `leftover_test_rows:0`
+  -- confirma que o schema aceita o payload real de `tags` sem violar
+  constraint nenhuma, e que nenhum dado de teste ficou de pé em produção.
+- **Browser smoke mínimo, `test_consolidacao5_browser_smoke.js` (novo),
+  FR+ZH, 32/32, zero UI nova** -- página real servida estática, só as 3
+  dependências externas (Supabase, sql.js/JSZip, `fetch`) fakeadas.
+  Confirma, através do código de produção real (nunca uma cópia):
+  `buildCardFromTeacherFlashcard()` propaga `card.tags` normalizado;
+  `buildCardFromSelfFlashcard()` (Legacy, sem tags) devolve `[]`, nunca
+  `undefined`; `ankiNoteTagsString()` acessível globalmente com o
+  comportamento correto nos 4 casos (trilha preservada, sem tags,
+  com tags, `card.tags` ausente); `generateApkg()` completo continua
+  funcionando de ponta a ponta, com o card sintético exportado carregando
+  as tags REAIS no `.apkg` (`" professora "`, nunca "unidadenull").
+
+**Comportamento das Tags -- matriz confirmada por teste:**
+
+| Origem | unitId | Antes (bug) | Depois (correção) |
+|---|---|---|---|
+| Trilha (`origin:'study'`) | número real | `"unidade{N} "` | **Inalterado**, `"unidade{N} "` |
+| Professora/Aluna, Native, sem tags | `null` | `"unidadenull "` | `""` (vazio) |
+| Professora/Aluna, Legacy, sem tags | `null` | `"unidadenull "` | `""` (vazio) |
+| Professora/Aluna, com 1+ tags | `null` | `"unidadenull "` | `" tag1 tag2 "` |
+| Normal com reverso (2 CardInstances) | `null` nas 2 | `"unidadenull "` nas 2 | mesmas tags reais nas 2 |
+| Cloze multi-marca (N CardInstances) | `null` em todas | `"unidadenull "` em todas | mesmas tags reais em todas |
+| Múltipla Escolha / Digite a resposta | `null` | `"unidadenull "` | tags reais |
+
+**Problemas fora de escopo, registrados sem correção (nenhuma
+implementada nesta fase, conforme restrições 2/7/8/9)**:
+- Nenhuma UI de Tags nova (busca/filtro/gestão/autocomplete) -- as tags
+  continuam só legíveis via `card.tags`, sem nenhuma tela pra
+  visualizar/editar além do que já existia (Anki Import, que já
+  gravava tags desde o fechamento da Fase 7j).
+- Nenhum Deck Engine/Deck-0, nenhuma mudança no limite de 20 cartões
+  grátis, nenhuma mudança em FSRS/Review/Preview/renderer/áudio,
+  nenhuma mudança de arquitetura Native/Legacy, nenhuma migração/
+  backfill de dado existente, nenhuma coluna legada removida.
+- `shared/anki-parser.js`/`shared/anki-import.js` não foram tocados --
+  já corretos desde o fechamento da Fase 7j, só reutilizados pelo
+  teste de round-trip.
+
+**Arquivos alterados**: `shared/flashcard-model.js` (+12/-0),
+`shared/anki-export.js` (+34/-1). Nenhuma migração SQL nesta fase --
+`tags` já existia desde a migration 048 (fechamento da Fase 7j). Nenhum
+passo manual pendente pra autora.
+
+**Commit**: aplicado nesta mesma entrega, branch `claude/test-previous-changes-bo5atv`.

@@ -1199,6 +1199,17 @@ function buildReversedCardInstancePair(noteId, frontFieldIndex, backFieldIndex){
 function buildEngineCardsFromRow(row, opts){
   const { note, cards } = interpretNoteFromRow(row, opts);
   const unitTitle = note.origin === 'teacher' ? 'Da sua professora' : 'Meus cartões';
+  // Tags (CONSOLIDAÇÃO-5) -- pertencem à Note, nunca à CardInstance.
+  // Lidas direto de `row` (nunca via interpretNoteFromRow()/
+  // interpretNativeNoteFromRow(), que continuam sem ler tags -- essa
+  // exclusão é intencional e documentada na seção "Tags" acima). Mesmo
+  // "bucket" de metadado Note-level que rowId/teacherNote/imageUrl já
+  // usam aqui. Normalizadas 1x por linha via a única implementação
+  // canônica (normalizeTagSlug/normalizeNoteTags) -- nunca reimplementada
+  // -- e aplicadas idênticas a toda CardInstance derivada da mesma Note
+  // (normal_reversed, Cloze multi-marca): nunca uma 2ª fonte de verdade,
+  // nunca tags divergentes entre irmãs da mesma Note.
+  const tags = normalizeNoteTags(row.tags);
   return cards.map(rawCardInstance => {
     const {
       id, noteId, cardTypeId,
@@ -1219,6 +1230,7 @@ function buildEngineCardsFromRow(row, opts){
       // Note-level (nunca de um Field específico -- achado da Fase 3,
       // confirmado de novo aqui): imagem ilustra o conceito inteiro.
       imageUrl: note.image ? note.image.url : null,
+      tags,
       note,
       cardInstance,
       ef, interval, reps, due, lapses, stability, difficulty, state, lastReview, fsrsReps, fsrsLapses,
