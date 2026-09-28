@@ -14905,3 +14905,281 @@ Com os 3 gaps fechados, testados nas 4 categorias exigidas e a auditoria
 final limpa, a Fase 7j está de fato completa. **PARE conforme instrução
 explícita -- não avançar pra Deck Engine, Painel ou Study Trail sem
 autorização explícita da autora.**
+
+## CONSOLIDAÇÃO-2 -- Fronteira Legacy -> Native / Conversão explícita
+(segue a CONSOLIDAÇÃO-1, "criação sempre nativa" -- ver seção anterior no
+histórico deste arquivo, não reproduzida aqui por já estar registrada)
+
+Prompt-mestre de 25 seções, escopo estrito: **só a fronteira entre um
+cartão Legacy já existente e o modelo Native** -- nunca migração em massa,
+nunca um botão "Converter todos", nunca automatismo (load da lista, abrir
+pra editar, abrir Preview, trocar de versão, salvar OUTRO cartão). O único
+gatilho continua sendo o clique explícito em "🧪 Usar o novo editor de
+campos (nativo)", já existente desde a Fase 6D.8 -- esta consolidação não
+criou esse botão, auditou e corrigiu o que acontece a partir dele.
+
+### 1) Auditoria (antes de qualquer código)
+
+Confirmado por leitura, não presumido: o conversor já existia
+(`nativeNoteEditorStateFromLegacyRow()`, `shared/flashcard-native-
+persistence.js`, Fase 6D.8) e já preservava `noteId`/`revision`/
+`languageAppKey`/`origin`/`privateNote` corretamente, nunca inventando
+`normal_reversed`/`type_answer` a partir de dado legado (só produz
+`normal`/`multiple_choice`/`cloze` -- os outros 2 só existem trocando o
+Card Type DENTRO do editor nativo depois da conversão, mecanismo já
+existente desde a Fase 6D.2/6D.4, não novo). `legacyFlashcardConversionPreflight()`
+já bloqueava os 2 casos indetermináveis (Cloze sem exatamente 1 `"___"`;
+MC sem `back_trans`). `updateFlashcardContent`/`updateOwnFlashcardContent`
+(`shared/teacher-flashcards.js`/`shared/own-flashcards.js`) já faziam UM
+único `UPDATE` atômico via `nativeState` -- nenhuma segunda escrita, nunca
+um `INSERT` (id sempre preservado, nunca uma linha nova).
+
+**O que a auditoria encontrou faltando -- decisão de `revision` na
+conversão em si** (§4, "crítico"): antes desta fase,
+`wireFlashcardNativeEditForm`/`wireMyFlashcardNativeEditForm` sempre
+incrementavam `revision` em QUALQUER salvamento pós-conversão, mesmo sem
+nenhuma edição -- resetando FSRS/histórico de um cartão que a professora/
+aluna só queria "abrir no editor novo", sem mudar nada. Contra §4 ("nunca
+perda silenciosa de histórico", "preservar identidade/revision" pra
+Normal/MC quando não editado).
+
+**Conflito arquitetural real, encontrado e documentado (não resolvido
+silenciosamente, conforme §4/§IMPORTANTE exigia)**: Cloze é o ÚNICO
+Card Type onde isso é estruturalmente IMPOSSÍVEL de preservar mesmo sem
+nenhuma edição. Confirmado lendo os dois ramos de `shared/flashcard-
+model.js`: o Cloze LEGADO (frase com 1 `"___"`) gera a CardInstance com
+id `cardId` puro (sem sufixo); o Cloze NATIVO (`interpretNativeNoteFromRow`,
+qualquer marca `{{cN::...}}`, inclusive uma única) gera SEMPRE
+`${cardId}-${mark.id}` (ex.: `-c1`). Ou seja: mesmo com `revision`
+perfeitamente preservada, a simples TROCA de representação (legado ->
+nativa) já muda o id do CardInstance -- e é esse id, não `revision`
+isolada, que o merge-por-id de `applySerializedState()` usa pra encontrar
+o FSRS salvo. Preservar `revision` sem mudar esse esquema de id não
+resolveria nada (o merge continuaria não encontrando o cartão antigo);
+mudar o esquema de id do Cloze NATIVO pra acomodar isso afetaria TODO
+cartão Cloze nativo já existente (nunca só os convertidos), fora do
+escopo desta fase (§23: "nenhuma mudança em Review/FSRS/renderer").
+**Decisão, registrada aqui em vez de escondida**: Cloze continua
+CONVERSÍVEL (não regredir uma capacidade já entregue e testada desde a
+Fase 6D.8), mas `revision` SEMPRE incrementa nesse caso específico,
+mesmo sem edição -- o toast honesto ("...progresso de revisão foi
+reiniciado.") reflete o que de fato acontece, nunca finge preservação
+que a arquitetura atual não permite entregar.
+
+### 2) Conversão explícita, por linha só -- confirmado, não modificado
+
+Nenhum novo caminho de conversão automática foi criado. `noteId`/
+`revision`/`languageAppKey`/`origin` continuam vindo só de
+`nativeNoteEditorStateFromLegacyRow(c)`, chamada só dentro do handler de
+clique do botão -- nunca ao carregar a lista, abrir Review, abrir
+Preview, ou salvar outro cartão.
+
+### 3) O que foi implementado
+
+- **`nextRevisionForNativeSave(c, editorState, conversionBaseline)`**
+  (novo, `shared/flashcard-native-persistence.js`) -- ÚNICO ponto de
+  decisão de `revision`, reutilizado pelos dois editores (nunca
+  duplicado): cartão JÁ nativo -> compara contra o estado ORIGINAL
+  (`createNativeNoteEditorStateFromRow`) via `noteEditorStateRequiresNewRevision()`
+  (Fase 6D.1, reaproveitada -- nunca uma segunda função de comparação);
+  cartão RECÉM-convertido de Legacy -> compara contra o `conversionBaseline`
+  (clone do editorState capturado NO INSTANTE do clique em "Usar o novo
+  editor", antes de qualquer edição) -- preserva `revision` se nada
+  mudou, **exceto quando o baseline é Cloze**, caso em que sempre
+  incrementa (a exceção documentada acima, com comentário completo no
+  próprio código explicando o motivo -- não um número mágico).
+- **`ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline`/
+  `MY_FLASHCARDS_STATE.editingNativeConversionBaseline`** (novo, os dois
+  arquivos de UI) -- clone (`cloneNoteEditorState`, round-trip JSON já
+  existente desde a Fase 6D.1) capturado no clique de "Usar o novo
+  editor", limpo em todo ponto que já limpava `editingNativeState`
+  (cancelar, salvar com sucesso, começar nova edição, render completo) --
+  nunca um estado órfão sobrevivendo entre edições.
+- Os dois blocos de decisão de revision, antes duplicados inline (um em
+  cada arquivo), foram substituídos por uma ÚNICA chamada a
+  `nextRevisionForNativeSave(...)` -- mesma disciplina de centralização
+  já usada em toda a Fase 6D (`classifyFlashcardRowModel`/
+  `legacyFlashcardConversionPreflight`/`validateNoteEditorStateForSave`).
+
+**Bug real encontrado e corrigido, fora do que foi pedido inicialmente
+mas necessário pro próprio objetivo desta fase valer pro lado da aluna
+(§17, "testar professora e aluno separadamente")**: `renderMyFlashcardsView()`
+(`shared/my-flashcards.js`) resetava `MY_FLASHCARDS_STATE.editingNativeState`/
+`editingNativeConversionBaseline` pra `null` INCONDICIONALMENTE, logo no
+topo da função, ANTES de qualquer `await` -- e o handler de "Usar o novo
+editor" seta esses dois campos e IMEDIATAMENTE chama
+`renderMyFlashcardsView()`. Como o corpo síncrono de uma função `async`
+roda no MESMO tick de quem a chama (só cede controle no primeiro
+`await`), o reset acontecia ANTES de qualquer render de fato ocorrer --
+a conversão nunca aparecia na tela pra aluna: clicar o botão
+silenciosamente reexibia o MESMO formulário legado de novo, sem erro
+visível nenhum. **Este bug é pré-existente à CONSOLIDAÇÃO-2** (existia
+desde que o botão foi introduzido na Fase 6D.8/6D.6) -- nunca tinha sido
+exercitado por nenhum teste de navegador real antes (a suíte de smoke da
+Fase 6D.8 cobria só `admin-flashcards.js`, que usa um caminho DIFERENTE
+e sem esse problema -- reconstrói só `#admin-flashcards-cards-box` via
+`buildFlashcardsCardsBoxHTML`, nunca chama o `renderAdminFlashcardsView()`
+completo de dentro desse handler). Corrigido com o mínimo de mudança:
+`renderMyFlashcardsView(opts)` ganhou um parâmetro
+`opts.preserveEditingNativeState` (default `false`, preserva 100% o
+comportamento de todo call site existente); só o handler de "Usar o novo
+editor" passa `{ preserveEditingNativeState: true }` -- os outros
+(cancelar, salvar, começar nova edição) continuam sem passar `opts`
+porque já QUEREM `null` nesses casos (nenhuma mudança de comportamento
+neles).
+
+### 4) Tipos Legacy -- classificação (§6)
+
+- **Normal, Normal-reverso** (via troca de Card Type pós-conversão),
+  **Múltipla Escolha**, **zh Hanzi/Pinyin/tradução** -- seguros:
+  `revision`/id do CardInstance preservados quando não editados (o id
+  do CardInstance nesses tipos é `cardId` puro nos dois ramos, legado e
+  nativo -- confirmado idêntico por leitura, sem o mesmo problema do
+  Cloze).
+- **Cloze** -- seguro-com-perda-documentada: conversível, mas SEMPRE
+  reseta `revision`/histórico mesmo sem edição (achado arquitetural
+  acima). O toast já avisa; nenhum comportamento escondido.
+- **Type Answer** -- nunca existiu no schema legado (não é um tipo pra
+  "classificar" na conversão -- só alcançável trocando Card Type depois,
+  mesma mecânica de Normal-reverso).
+- **Estruturas ambíguas** (Cloze sem `"___"` exato, MC sem resposta) --
+  continuam rejeitadas pelo preflight já existente, sem nenhuma mudança.
+
+### 5) Identidade (§3) -- preservada, confirmado
+
+`c.id` nunca muda (sempre `UPDATE ... WHERE id = c.id`, nunca `INSERT`);
+`teacher_id`/`student_id`/`owner_id`/`language_app_key`/`status`/
+`created_at`/`origin` nunca tocados pelo payload de conversão -- só
+colunas de CONTEÚDO (`fields`/`card_generation_mode`/`note`/`front`/
+`back_trans` etc.) são gravadas.
+
+### 6) Mídia (§7)
+
+Áudio/imagem já existentes na linha legada continuam preservados pelo
+mesmo `attachLegacyMediaToFields()` (Fase 6D.8, intocado nesta fase) --
+vinculados ao Field cujo idioma é o estudado. Gap conhecido, não
+resolvido aqui (fora de escopo, §7 explícito): imagem preservada no
+dado, mas ainda não exibida na Revisão pro caminho nativo -- o toast de
+aviso (já existente) continua avisando disso no momento da conversão.
+
+### 7) Testes realizados
+
+- **Node/VM, `test_consolidacao2_unit.js` (novo), 60/60** -- cenários A-T:
+  Normal (revision preservada quando não editado, bump quando editado);
+  Normal-reverso (conversão produz Normal simples, nunca duplica Fields;
+  trocar pra `normal_reversed` DEPOIS bumpa revision corretamente, gera
+  2 CardInstances via `buildReversedCardInstancePair`, FSRS genuinamente
+  independente); Cloze (SEMPRE bumpa mesmo sem edição -- provado via
+  `buildEngineCardsFromRow` que o id do CardInstance de fato muda,
+  `t503-r3` -> `t503-r4-c1`, confirmando a necessidade real da exceção);
+  MC (revision preservada quando não editado; MC sem resposta rejeitado);
+  Type Answer (nunca produzido direto da conversão, só via troca de Card
+  Type depois, bump correto); zh Hanzi/Pinyin (revision preservada,
+  `pinyinFieldId` correto); áudio/imagem preservados; professora
+  (`student_id`/`origin` preservados) e aluna (`origin:'self'`
+  preservado) testadas separadamente; falha de preflight nunca muta
+  estado; payload de save nunca contém `"id"` (nunca `INSERT`);
+  `nativeNoteEditorStateFromLegacyRow()` nunca toca campo de FSRS;
+  classificação Native/Legacy correta pós-conversão/sem-conversão;
+  `reviewDirection`/`frontIsTargetLanguage`/`isReverse` nunca aparecem
+  no editorState convertido; payload nunca inclui `status`/`created_at`
+  (conversão nunca pode contar 2x no limite de cartões, é sempre
+  `UPDATE`, nunca `INSERT`).
+- **`test_fase6d8_legacy_conversion.js` (Fase 6D.8, pré-existente),
+  92/92** -- sem regressão.
+- **`node --check`** limpo nos 3 arquivos tocados.
+- **Regressão ampla** -- re-executadas as suítes de Fases 4 a 7j
+  já existentes no scratchpad da sessão, sem nenhuma falha NOVA. 2
+  falhas confirmadas PRÉ-EXISTENTES e não-relacionadas (via
+  `git stash`/`git stash pop`, reproduzidas identicamente contra o
+  commit anterior a esta fase): `test_fase6d2_state.js` ("renderMyFlashcardsView()
+  de fato referencia CARD_TYPE_UI_META") e
+  `test_fase6d4b_typeanswer_editor.js` ("15. só as chaves esperadas de
+  Note editor state existem") -- scripts de teste desatualizados de
+  fases anteriores (provavelmente da remoção do formulário legado de
+  CRIAÇÃO na CONSOLIDAÇÃO-1), não tocados aqui por estarem fora do
+  escopo desta fase.
+
+### 8) Testes Supabase/live DB (§21)
+
+Transação única (`begin` ... `rollback`, mesma técnica já usada em toda
+a sessão -- MCP `execute_sql` isola cada chamada, então tudo precisa
+caber numa só), projeto `eigjocalzwamisgqilhg`: INSERT real de uma linha
+legada em `teacher_flashcards`, UPDATE real com o payload EXATO que
+`nativeContentColumnsFromEditorState()` produziria (via `RETURNING`,
+confirmado `fields`/`card_generation_mode` populados, `front`/`choices`/
+`cloze_sentence` corretamente nulificados, `teacher_id`/`student_id`/
+`status`/`created_at` intactos) -- `rollback` ao final, zero dado de
+teste permanente (contagem/hash de `teacher_flashcards` idênticos antes
+e depois). Confirmado também que a constraint `teacher_flashcards_fields_paired`
+(migration 045) segue ativa como rede de segurança de banco.
+
+### 9) Testes Playwright (§22)
+
+**`test_consolidacao2_browser_smoke.js` (novo), FR+ZH, 36/36 checks**,
+cobrindo especificamente o que a suíte de smoke da 6D.8 (já existente)
+não cobria -- a PRESERVAÇÃO de revision em si, com cliques reais
+(nenhum estado forjado por atribuição direta):
+- Professora, Normal convertido + salvo SEM edição -> `revision`
+  preservada, SEM modal de confirmação de reset, toast sem "reiniciado".
+- Professora, Cloze convertido + salvo SEM edição -> `revision` SEMPRE
+  bump (a exceção documentada), modal aparece, toast com "reiniciado" --
+  confirmado também via `buildEngineCardsFromRow` real no navegador que
+  o id da CardInstance muda de fato.
+- Aluna (`my-flashcards.js`, gated `premium`), mesmo par Normal/Cloze --
+  é este fluxo que expôs o bug real do reset síncrono, corrigido acima;
+  confirmado funcionando de ponta a ponta depois do fix.
+- "Recarregar" (reabrir a edição a partir da linha já salva) confirma
+  classificação Native, ausência do botão "Usar o novo editor", e
+  NENHUMA linha duplicada (contagem idêntica antes/depois) -- nos 2
+  papéis (professora/aluna) e nos 2 idiomas.
+- Zero erro de console novo (só os mesmos `ERR_TUNNEL_CONNECTION_FAILED`
+  pré-existentes do proxy de saída deste sandbox, documentados
+  repetidamente nesta sessão).
+
+### 10) Casos deliberadamente deixados Legacy / fora de escopo (§13)
+
+Nenhum -- todo tipo Legacy que já era convertível continua convertível;
+nenhum novo bloqueio foi introduzido. O único "não resolvido" é o
+achado arquitetural do Cloze (item 1 acima), que não bloqueia a
+conversão -- só torna explícito que ela reseta progresso nesse caso
+específico, documentado no código e aqui, nunca escondido.
+
+### 11) Débito técnico descoberto (§25.14)
+
+1. **Esquema de id do Cloze nativo (`-c{mark}` sempre, mesmo com 1
+   marca só) difere do Cloze legado (sem sufixo)** -- é a causa raiz de
+   por que Cloze nunca pode preservar FSRS na conversão. Unificar isso
+   exigiria mudar `interpretNativeNoteFromRow()` (afeta TODO cartão
+   Cloze nativo, não só conversões) -- fora do escopo desta fase, fica
+   registrado como candidato de uma fase futura dedicada, se algum dia
+   a perda de histórico do Cloze-na-conversão for considerada um
+   problema que vale essa mudança maior.
+2. **2 scripts de teste desatualizados** (`test_fase6d2_state.js`,
+   `test_fase6d4b_typeanswer_editor.js`) -- falham contra o código atual
+   por motivos não relacionados a esta fase (provavelmente resquício da
+   CONSOLIDAÇÃO-1), confirmados pré-existentes via `git stash`. Não
+   corrigidos aqui, fora do escopo.
+3. **O bug de reset síncrono em `my-flashcards.js`** (item 3 acima) era
+   pré-existente desde a Fase 6D.6/6D.8 -- registrado aqui não como
+   débito NOVO, mas como um lembrete de que a única suíte de smoke que
+   existia pra essa fase nunca exercitou o lado da aluna via clique
+   real, só via atribuição direta de estado -- daí o bug ter passado
+   despercebido até esta fase testar com cliques de verdade.
+
+**Critério de sucesso (§24) confirmado**: Legacy continua Legacy até
+conversão explícita; "Usar o novo editor" converte 1 cartão por vez,
+com FSRS preservado sempre que a arquitetura permite (Normal/MC/zh) e
+reset honesto e documentado quando não permite (Cloze); nenhum estado
+híbrido, nenhuma duplicata, nenhuma conversão silenciosa.
+
+**Escopo respeitado (§23)**: nenhuma migração em massa, nenhum botão
+"Converter todos", nenhuma remoção de schema/coluna/adapter legado,
+nenhum sistema de Archive/Tags novo, nenhum upload de imagem novo,
+nenhum redesign de áudio, nenhum Deck, nenhuma mudança em Review/FSRS/
+renderer/matriz de planos. Nenhuma migração SQL nesta fase -- 100%
+client-side, nenhum passo manual pendente pra autora.
+
+**PARE conforme instrução explícita -- CONSOLIDAÇÃO-3 (ARQUIVAMENTO) NÃO
+iniciada.** Próxima etapa só começa depois de autorização explícita da
+autora, com este relatório já entregue antes de pedir luz verde.

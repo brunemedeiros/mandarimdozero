@@ -47,7 +47,12 @@ const FREE_OWN_FLASHCARD_LIMIT = 20;
 // ADMIN_FLASHCARDS_STATE.editingNativeState (shared/admin-flashcards.js) --
 // Note editor state nativo do cartão em edição, só quando a edição está
 // no editor novo. `null` = edição legada de sempre.
-const MY_FLASHCARDS_STATE = { editingCardId: null, editingNativeState: null, _cardsCache: [], nativeCardState: createNativeNoteEditorState({ cardGenerationMode: 'normal' }) };
+//
+// CONSOLIDAÇÃO-2 (ver CLAUDE.md) -- editingNativeConversionBaseline: mesmo
+// papel de ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline -- clone
+// do editorState no instante da conversão Legacy->Native, usado no save
+// pra decidir se revision (e portanto FSRS) é preservado.
+const MY_FLASHCARDS_STATE = { editingCardId: null, editingNativeState: null, editingNativeConversionBaseline: null, _cardsCache: [], nativeCardState: createNativeNoteEditorState({ cardGenerationMode: 'normal' }) };
 
 // Grillado com a autora (ver CLAUDE.md, "rótulo do seletor de direção do
 // cartão") -- rótulos com o nome do idioma de verdade em vez de "idioma
@@ -74,7 +79,7 @@ function myFlashcardDirectionLabels(){
   };
 }
 
-async function renderMyFlashcardsView(){
+async function renderMyFlashcardsView(opts){
   const wrap = document.getElementById('my-flashcards-content');
   if (!wrap) return;
   if (!CURRENT_USER){
@@ -90,7 +95,23 @@ async function renderMyFlashcardsView(){
   // só tem UM idioma relevante, o do site, então `languageAppKey` é
   // sempre `APP_KEY` diretamente, sem precisar de um sinal `anyMandarim`.
   MY_FLASHCARDS_STATE.nativeCardState = createNativeNoteEditorState({ cardGenerationMode: 'normal', languageAppKey: APP_KEY });
-  MY_FLASHCARDS_STATE.editingNativeState = null;
+  // CONSOLIDAÇÃO-2 (ver CLAUDE.md) -- bug real encontrado e corrigido
+  // aqui: `editingNativeState`/`editingNativeConversionBaseline` eram
+  // SEMPRE zerados aqui, incondicionalmente, ANTES do primeiro `await`
+  // desta função -- o corpo síncrono de uma função `async` roda no MESMO
+  // tick de quem a chama. O clique em "Usar o novo editor"
+  // (wireMyFlashcardEditForm) setava os dois e IMEDIATAMENTE chamava
+  // renderMyFlashcardsView(), cujo início síncrono zerava os dois de
+  // volta antes de qualquer render acontecer -- a conversão nunca
+  // aparecia na tela (a aluna via o mesmo formulário legado de novo, sem
+  // nenhum erro visível). `opts.preserveEditingNativeState` é o único
+  // call site (o clique de "Usar o novo editor") que precisa pular este
+  // reset -- todos os outros (novo clique de editar, cancelar, salvar)
+  // já querem `null` mesmo, então continuam sem passar `opts`.
+  if (!(opts && opts.preserveEditingNativeState)){
+    MY_FLASHCARDS_STATE.editingNativeState = null;
+    MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
+  }
   wrap.innerHTML = loadingHTML();
 
   const isMandarim = APP_KEY === 'mandarim';
@@ -292,15 +313,26 @@ function wireMyFlashcardEditForm(c, wrap, premium){
     if (!preflight.ok){ if (errorEl) errorEl.textContent = preflight.error; return; }
     if (errorEl) errorEl.textContent = '';
     MY_FLASHCARDS_STATE.editingNativeState = nativeNoteEditorStateFromLegacyRow(c);
+    // CONSOLIDAÇÃO-2 (ver CLAUDE.md) -- baseline capturado ANTES de
+    // qualquer mutação do usuário (clone, mesmo mecanismo de
+    // shared/admin-flashcards.js) -- é contra ISTO que o save compara pra
+    // decidir se revision precisa incrementar.
+    MY_FLASHCARDS_STATE.editingNativeConversionBaseline = cloneNoteEditorState(MY_FLASHCARDS_STATE.editingNativeState);
     if (c.image_url){
       showToast('⚠️ A imagem deste cartão foi preservada nos dados, mas ainda não aparece na tela de Revisão pra cartões do novo editor.');
     }
-    renderMyFlashcardsView();
+    // CONSOLIDAÇÃO-2 (ver CLAUDE.md) -- `preserveEditingNativeState:true`
+    // é obrigatório aqui: sem ele, o topo de renderMyFlashcardsView()
+    // zeraria de volta o editingNativeState que acabamos de setar, no
+    // MESMO tick síncrono (ver comentário completo lá) -- a conversão
+    // nunca chegaria a aparecer na tela.
+    renderMyFlashcardsView({ preserveEditingNativeState: true });
   });
 
   document.getElementById('edit-my-flashcard-cancel')?.addEventListener('click', () => {
     MY_FLASHCARDS_STATE.editingCardId = null;
     MY_FLASHCARDS_STATE.editingNativeState = null;
+    MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
     renderMyFlashcardsView();
   });
@@ -406,6 +438,7 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap){
     compensateFreshMediaUploads(editorState);
     MY_FLASHCARDS_STATE.editingCardId = null;
     MY_FLASHCARDS_STATE.editingNativeState = null;
+    MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
     renderMyFlashcardsView();
   });
@@ -417,17 +450,12 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap){
     const v = validateNoteEditorStateForSave(editorState);
     if (!v.ok){ errorEl.textContent = v.error; return; }
 
-    // Mesma disciplina de shared/admin-flashcards.js: ID sempre
-    // preservado, revision só incrementa quando algo realmente mudou (ou
-    // sempre, no caso de uma conversão Legacy->Native de verdade).
-    const wasNative = classifyFlashcardRowModel(c) === 'native';
-    let nextRevision = c.revision || 0;
-    if (wasNative){
-      const original = createNativeNoteEditorStateFromRow(c);
-      if (noteEditorStateRequiresNewRevision(original, editorState)) nextRevision += 1;
-    } else {
-      nextRevision += 1;
-    }
+    // CONSOLIDAÇÃO-2 (ver CLAUDE.md) -- mesma disciplina de
+    // shared/admin-flashcards.js: decisão de revision inteira centralizada
+    // em nextRevisionForNativeSave() (shared/flashcard-native-persistence.js,
+    // comentário completo lá -- inclui a exceção documentada do Cloze) --
+    // nunca duplicada aqui.
+    const nextRevision = nextRevisionForNativeSave(c, editorState, MY_FLASHCARDS_STATE.editingNativeConversionBaseline);
 
     const doSave = async () => {
       const saveBtn = document.getElementById('edit-my-native-flashcard-save');
@@ -452,6 +480,7 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap){
       showToast(nextRevision > (c.revision || 0) ? '✓ Cartão editado. O progresso de revisão foi reiniciado.' : '✓ Cartão editado.');
       MY_FLASHCARDS_STATE.editingCardId = null;
       MY_FLASHCARDS_STATE.editingNativeState = null;
+      MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
       renderMyFlashcardsView();
     };
@@ -628,6 +657,7 @@ function wireMyFlashcardsCardButtons(wrap){
       // cartão for nativo, ou continua null (legado) até o botão "Usar o
       // novo editor" ser clicado.
       MY_FLASHCARDS_STATE.editingNativeState = null;
+      MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
       renderMyFlashcardsView();
     });

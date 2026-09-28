@@ -195,7 +195,19 @@
 // de campos" num cartão legado (nativeNoteEditorStateFromLegacyRow) --
 // nunca populado sozinho só por abrir a edição de um cartão legado
 // (Seção 6, "legacy aberto != automaticamente migrado").
-let ADMIN_FLASHCARDS_STATE = { studentIds: new Set(), langFilter: 'all', _studentsCache: [], editingCardId: null, editingNativeState: null, _cardsCache: [], nativeCardState: createNativeNoteEditorState({ cardGenerationMode: 'normal' }) };
+//
+// CONSOLIDAÇÃO-2 (ver CLAUDE.md) -- editingNativeConversionBaseline: um
+// CLONE (cloneNoteEditorState, round-trip JSON -- nunca a mesma
+// referência) do editorState produzido no INSTANTE da conversão
+// Legacy->Native (logo depois de nativeNoteEditorStateFromLegacyRow()),
+// antes de qualquer edição do usuário. Único ponto de comparação pra
+// decidir, no save, se a conversão preserva revision/FSRS (nada mudou
+// desde a conversão) ou se precisa incrementar (usuário editou algo
+// depois de converter) -- mesmo mecanismo (noteEditorStateRequiresNewRevision)
+// já usado pra edição nativa->nativa, nunca uma 2ª implementação de
+// comparação. `null` sempre que não há uma conversão em andamento nesta
+// sessão de edição -- limpo em todo ponto que também zera editingNativeState.
+let ADMIN_FLASHCARDS_STATE = { studentIds: new Set(), langFilter: 'all', _studentsCache: [], editingCardId: null, editingNativeState: null, editingNativeConversionBaseline: null, _cardsCache: [], nativeCardState: createNativeNoteEditorState({ cardGenerationMode: 'normal' }) };
 
 // Prop 4 -- confirmação obrigatória antes de salvar uma edição (grillado
 // com a autora: editar reinicia o progresso de revisão, ela quer avisar
@@ -453,6 +465,11 @@ function wireFlashcardEditForm(c, container){
     if (!preflight.ok){ if (errorEl) errorEl.textContent = preflight.error; return; }
     if (errorEl) errorEl.textContent = '';
     ADMIN_FLASHCARDS_STATE.editingNativeState = nativeNoteEditorStateFromLegacyRow(c);
+    // CONSOLIDAÇÃO-2 -- baseline capturado ANTES de qualquer mutação do
+    // usuário (clone, nunca a mesma referência que o Field editor vai
+    // mutar em seguida) -- é contra ISTO que o save compara pra decidir
+    // se revision precisa incrementar (ver wireFlashcardNativeEditForm).
+    ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = cloneNoteEditorState(ADMIN_FLASHCARDS_STATE.editingNativeState);
     if (c.image_url){
       // Seção 10 -- limitação conhecida (registrada em
       // shared/flashcard-native-persistence.js, attachLegacyMediaToFields):
@@ -470,6 +487,7 @@ function wireFlashcardEditForm(c, container){
   document.getElementById('edit-flashcard-cancel').addEventListener('click', () => {
     ADMIN_FLASHCARDS_STATE.editingCardId = null;
     ADMIN_FLASHCARDS_STATE.editingNativeState = null;
+    ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
     updateFlashcardsSelectionDependentUI(document.getElementById('admin-flashcards-content'));
   });
@@ -625,6 +643,7 @@ function wireFlashcardNativeEditForm(c, editorState, container){
     compensateFreshMediaUploads(editorState);
     ADMIN_FLASHCARDS_STATE.editingCardId = null;
     ADMIN_FLASHCARDS_STATE.editingNativeState = null;
+    ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
     updateFlashcardsSelectionDependentUI(document.getElementById('admin-flashcards-content'));
   });
@@ -636,22 +655,12 @@ function wireFlashcardNativeEditForm(c, editorState, container){
     const v = validateNoteEditorStateForSave(editorState);
     if (!v.ok){ errorEl.textContent = v.error; return; }
 
-    // Seção 4/5/21 (ver CLAUDE.md) -- ID sempre preservado (mesmo c.id,
-    // nunca um novo). Revision só incrementa quando: (a) o cartão já era
-    // nativo E o conteúdo/estrutura genuinamente mudou
-    // (noteEditorStateRequiresNewRevision, Fase 6D.1 -- nunca reimplementado
-    // aqui); ou (b) é uma conversão Legacy->Native de verdade (a estrutura
-    // sempre muda -- colunas legadas soltas viram Note/Field -- reset é
-    // esperado e coerente com o resto do app: editar sempre reseta
-    // progresso desde a Fase Prop4/"7 propostas").
-    const wasNative = classifyFlashcardRowModel(c) === 'native';
-    let nextRevision = c.revision || 0;
-    if (wasNative){
-      const original = createNativeNoteEditorStateFromRow(c);
-      if (noteEditorStateRequiresNewRevision(original, editorState)) nextRevision += 1;
-    } else {
-      nextRevision += 1;
-    }
+    // CONSOLIDAÇÃO-2 (ver CLAUDE.md) -- ID sempre preservado (mesmo c.id,
+    // nunca um novo, UPDATE sempre na mesma linha). Decisão de revision
+    // inteira centralizada em nextRevisionForNativeSave() (shared/
+    // flashcard-native-persistence.js, comentário completo lá -- inclui a
+    // exceção documentada do Cloze) -- nunca duplicada aqui.
+    const nextRevision = nextRevisionForNativeSave(c, editorState, ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline);
 
     const doSave = async () => {
       const saveBtn = document.getElementById('edit-native-flashcard-save');
@@ -671,6 +680,7 @@ function wireFlashcardNativeEditForm(c, editorState, container){
       showToast(nextRevision > (c.revision || 0) ? '✓ Cartão editado. O progresso de revisão foi reiniciado.' : '✓ Cartão editado.');
       ADMIN_FLASHCARDS_STATE.editingCardId = null;
       ADMIN_FLASHCARDS_STATE.editingNativeState = null;
+      ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
       updateFlashcardsSelectionDependentUI(document.getElementById('admin-flashcards-content'));
     };
@@ -782,6 +792,7 @@ function wireFlashcardsCardsBox(cardsBox){
       // cartão for nativo, ou continua null (legado, sem toggle ainda
       // clicado) até a professora explicitamente pedir o editor novo.
       ADMIN_FLASHCARDS_STATE.editingNativeState = null;
+      ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
       const selectedStudents = ADMIN_FLASHCARDS_STATE._studentsCache.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
       cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
@@ -895,6 +906,7 @@ async function renderAdminFlashcardsView(){
   // (re-render incremental por seleção de aluno/idioma) -- só aqui.
   ADMIN_FLASHCARDS_STATE.nativeCardState = createNativeNoteEditorState({ cardGenerationMode: 'normal' });
   ADMIN_FLASHCARDS_STATE.editingNativeState = null;
+  ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
   wrap.innerHTML = loadingHTML();
 
   const students = await fetchMyStudents();
