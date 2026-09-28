@@ -15789,4 +15789,4 @@ implementada nesta fase, conforme restrições 2/7/8/9)**:
 `tags` já existia desde a migration 048 (fechamento da Fase 7j). Nenhum
 passo manual pendente pra autora.
 
-**Commit**: aplicado nesta mesma entrega, branch `claude/test-previous-changes-bo5atv`.
+**Commit**: `92b3d39` (branch `claude/test-previous-changes-bo5atv`).
