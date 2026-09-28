@@ -15183,3 +15183,235 @@ client-side, nenhum passo manual pendente pra autora.
 **PARE conforme instrução explícita -- CONSOLIDAÇÃO-3 (ARQUIVAMENTO) NÃO
 iniciada.** Próxima etapa só começa depois de autorização explícita da
 autora, com este relatório já entregue antes de pedir luz verde.
+
+## CONSOLIDAÇÃO-3 -- ARQUIVAMENTO: encerrar o modelo antigo sem destruir
+histórico
+
+Terceira fase da série CONSOLIDAÇÃO (CONSOLIDAÇÃO-1 = unificar criação de
+cartão só no editor nativo; CONSOLIDAÇÃO-2 = fronteira explícita
+Legacy→Native, ver seções anteriores). Escopo desta fase, travado pelo
+prompt-mestre: remover "Arquivar" de toda a UX normal, sem nunca destruir,
+migrar em massa, resetar contagem, ou auto-converter nenhum cartão já
+arquivado -- e sem confundir arquivamento (visibilidade/gestão) com
+suspensão de Review/FSRS (elegibilidade de estudo), que são eixos
+completamente separados desde que `status` foi criado (migrations 026/028).
+
+### §1 -- Auditoria (código-livre, feita antes de qualquer edição)
+
+Confirmado por leitura, não presumido: o mecanismo de arquivamento inteiro
+se resume a **1 coluna** (`status text not null default 'active' check
+(status in ('active','archived'))`, idêntica em `teacher_flashcards`
+-- migration 026 -- e `own_flashcards`, ex-`student_flashcards`, migration
+028) e **2 funções de escrita** (`setFlashcardStatus(id,status)` em
+`shared/teacher-flashcards.js`, `setOwnFlashcardStatus(id,status)` em
+`shared/own-flashcards.js`) -- nenhuma outra tabela, view, function SQL ou
+Edge Function toca nesse campo. Quem LÊ `status`:
+- **UI de gestão** -- `shared/admin-flashcards.js` (professora) e
+  `shared/my-flashcards.js` (aluna), cada um com uma lista "Cartões
+  ativos" + seção "Arquivados" separada, e um botão único por linha que
+  alternava 🗃 Arquivar / ↺ Reativar (`data-toggle-flashcard`/
+  `data-toggle-own-flashcard`, `data-next-status` dinâmico).
+- **Review/FSRS (eixo TOTALMENTE separado, nunca tocado nesta fase)** --
+  `note.status = row.status` (`shared/flashcard-model.js`, nos dois ramos
+  de interpretação, nativo e legado) vira `flashcardStatus: note.status`
+  em `buildEngineCardsFromRow()`, e o ÚNICO consumidor é
+  `isCardLessonCompleted()` (fr/zh `app.js`, linha ~6011):
+  `if (card.origin==='teacher'||card.origin==='self') return
+  card.flashcardStatus==='active';` -- é isto (não uma coluna dedicada)
+  que já mantém cartão arquivado fora da fila de revisão, desde a Fase 3
+  do sistema de alunas particulares.
+- **Limite de 20 cartões grátis** -- `FREE_OWN_FLASHCARD_LIMIT`
+  (`shared/my-flashcards.js`) e `computeAnkiImportRemainingSlots()`
+  (`shared/anki-import.js`) já filtram estritamente por
+  `status==='active'` -- comportamento correto pré-existente, confirmado
+  por leitura, nunca alterado.
+- **Métricas da professora** -- o painel expandível de "🎓 Alunos"
+  (`shared/admin-students.js`) já mostra "N ativos, M arquivados" como
+  contagem pura, sem nenhuma ação de arquivar ali.
+- **Não relacionado, confirmado explicitamente pra não confundir** --
+  `hidden_from_profile` (Fase 1 do prompt-mestre "perfil público", eixo
+  de visibilidade PÚBLICA por cartão, independente); `teacher_students.status`
+  (`'active'/'invited'/'removed'`, vínculo professora-aluna, outra
+  tabela); `challenges.status` (feature de Desafios, francês, sem
+  relação); `teacher_class_logs` (delete físico de verdade, nunca usou
+  `status`, decisão consciente desde a Fase 7 por não ter progresso FSRS
+  dependente).
+- **Teste de cobertura pré-existente**: nenhum teste Node/VM ou
+  Playwright de nenhuma fase anterior exercitava especificamente o botão
+  Arquivar/Reativar em si (as suítes de Fase 6D+ focam no motor
+  Note/CardType) -- esta fase precisou escrever a primeira suíte
+  dedicada.
+
+### §2 -- Regra absoluta (cumprida)
+
+Nenhum cartão já arquivado foi tocado por código nesta fase --
+confirmado ao vivo (ver §Testes/Live-DB abaixo): id, Note/Fields, Card
+Type, CardInstances (derivadas em runtime, nunca persistidas -- intocado),
+`revision`, campos FSRS, `origin`, `teacher_id`/`student_id`/`owner_id`,
+tags (migration 048), timestamps, e o próprio `status` de todo cartão
+já arquivado antes desta fase permanecem exatamente como estavam. Nenhuma
+migração de dado, nenhum backfill, nenhuma remoção de coluna, nenhuma
+alteração em massa de `status`, nenhum reset de contagem, nenhuma
+auto-conversão archived→active.
+
+### §3 -- "Arquivar" removido de toda UX normal (sem substituto renomeado)
+
+**`shared/admin-flashcards.js`** (professora) -- a linha de botões de um
+cartão ATIVO deixou de renderizar QUALQUER botão de status. O botão
+"Reativar" (↺) só é renderizado quando `c.status==='archived'` (condição
+adicionada, nunca um segundo mecanismo):
+```js
+${c.status === 'archived' ? `<button class="admin-badge-delete-btn"
+  data-toggle-flashcard="${c.id}" data-next-status="active"
+  title="Reativar (tirar do arquivo histórico)">↺</button>` : ''}
+```
+Nenhum "Ocultar"/"Esconder"/"Suspender"/"Desativar"/"Mover para arquivo"
+foi introduzido como substituto -- confirmado por grep dedicado (ver
+§16 abaixo) que os únicos usos dessas palavras no arquivo são comentários
+explicando o que NÃO foi feito, ou o toggle `hidden_from_profile`
+(👁️/🙈, eixo de visibilidade pública, completamente separado). Uma vez
+reativado, um cartão nunca mais ganha nenhum botão de status --
+indistinguível de um cartão que nunca foi arquivado.
+
+**`shared/my-flashcards.js`** (aluna) -- mudança espelhada
+(`data-toggle-own-flashcard`), mesma condição, mesmo raciocínio. O botão
+👁️/🙈 de `hidden_from_profile` ao lado permanece intocado (eixo
+diferente, confirmado na auditoria).
+
+`wireFlashcardsCardsBox()`/`wireMyFlashcardsCardButtons()` (os
+listeners de clique do botão `[data-toggle-flashcard]`/
+`[data-toggle-own-flashcard]`) não precisaram de nenhuma mudança --
+são genéricos, chamam `setFlashcardStatus`/`setOwnFlashcardStatus` com o
+que `data-next-status` disser, e como a UI agora só produz
+`data-next-status="active"`, eles nunca mais recebem `'archived'` vindo
+de um clique real.
+
+`setFlashcardStatus`/`setOwnFlashcardStatus` (as 2 funções de escrita)
+**não foram alteradas** -- continuam aceitando `'archived'` como valor
+válido (é a fonte de verdade do schema, `status in
+('active','archived')`), só ninguém na UI as chama mais com esse
+argumento.
+
+### §5 -- Área histórica separada (reuso, não reconstrução)
+
+A seção "Arquivados" já existia visualmente separada em ambas as telas
+desde a Fase 2/5 do sistema de alunas particulares -- satisfaz §5 sem
+nenhuma arquitetura nova. Único ajuste: o rótulo mudou de `Arquivados
+(${n})` para `Arquivados historicamente (${n})` nos dois arquivos, pra
+deixar explícito que é histórico, nunca "escondido"/"suspenso". A lista
+continua paginada/renderizada pelo mesmo `buildFlashcardsCardsBoxHTML()`/
+render equivalente de `my-flashcards.js` -- reaproveitado, não
+duplicado.
+
+### §4/§6/§7 -- confirmados intocados
+
+`flashcardStatus`/`isCardLessonCompleted()` -- zero linha alterada.
+`classifyFlashcardRowModel()` (Native vs. Legacy) -- independente de
+`status`, não tocado. Fluxo de criação (`nativeContentColumnsFromEditorState()`,
+`createFlashcard`/`createOwnFlashcard`) -- nenhum dos dois jamais incluiu
+uma chave `status` no payload de INSERT; "novo cartão sempre ativo" é o
+DEFAULT DO BANCO (`status text not null default 'active'`), nunca uma
+escolha ativa do código -- confirmado por teste dedicado (ver abaixo) que
+o payload nunca contém `status`/`archived`.
+
+### §8/§9/§10 -- professora e aluna, sem quebrar nada adjacente
+
+Professora perde a ação normal de arquivar; cartões já arquivados de
+alunas suas permanecem preservados, não recriados, não reatribuídos.
+Aluna: teto de 20 cartões grátis (Fase 5.1) confirmado imune --
+arquivado nunca conta como ativo, nunca reduz capacidade de criação,
+nunca infla o limite; `hasActiveTeacherLink()` (isenção de teto)
+inalterado; Native/Legacy/conversão explícita (CONSOLIDAÇÃO-2) inalterados.
+
+### §11/§12 -- schema e Anki, confirmados sem impacto
+
+Nenhuma tabela de archive nova, nenhuma coluna removida, nenhum backfill.
+Verificado quanto ao Anki export/import (Fases 7i/7j): nenhum dos dois
+lê/filtra por `status` -- `own_flashcards`/`teacher_flashcards` só
+alimentam export/import via `fields`/`card_generation_mode`/conteúdo,
+nunca por estado de arquivamento (um cartão arquivado que a professora
+selecionar pra exportar seria exportado normalmente, comportamento
+idêntico a antes desta fase, sem necessidade de mudança). Nenhum
+problema de compatibilidade real encontrado, nenhuma mudança feita.
+
+### §13 -- Testes
+
+**Node/VM** (`test_consolidacao3_unit.js`, 12/12 passando) -- 3 grupos:
+Modelo/dados (cartão arquivado preserva id/revision/status/classificação
+Native-vs-Legacy através do motor real, `buildEngineCardsFromRow`);
+Criação (payload de criação nativa nunca inclui `status`/`archived`,
+`editorState` nunca ganha propriedade de status); Limite (fórmula real de
+`remainingSlots` confirma que 5 ou 50 cartões arquivados nunca reduzem o
+teto de 20).
+
+**Playwright browser-smoke** (`test_consolidacao3_browser_smoke.js`,
+48/48 passando, FR+ZH, professora+aluna) -- ausência total de "Arquivar"
+em qualquer lugar da UI (nenhum botão, nenhum menu, nenhuma ação em
+massa); linhas arquivadas permanecem visíveis, rotuladas "Arquivados
+historicamente", com botão Reativar funcional; cartão reativado nunca
+recupera botão de status; fluxo real de criação de cartão (clique real,
+não estado forjado) confirma `status:'active'` sempre; matemática do
+teto de 20 confirmada imune a cartões arquivados; gate de Review
+(`isCardLessonCompleted`/`flashcardStatus`) confirmado idêntico pra
+cartão ativo e arquivado, nos dois idiomas e papéis.
+
+**Live-DB (Supabase real, `eigjocalzwamisgqilhg`)** -- confirmado ao
+vivo que `status` (`teacher_flashcards`/`own_flashcards`) segue com
+default `'active'`/`not null`, sem alteração pela migration 045/046/047/
+048 de fases anteriores. Transação real `BEGIN; INSERT(status='archived')
+RETURNING; UPDATE(status='active') WHERE id=...; ROLLBACK;` executada
+com sucesso nas duas tabelas (usando `auth.users` diretamente pra
+`teacher_id`/`student_id`/`owner_id`, já que são as FKs reais, não
+`profiles`) -- confirma que o próprio mecanismo de reativação da UI
+(`UPDATE ... SET status='active' WHERE id=?`) funciona contra o schema
+real. Contagem de linhas antes e depois idêntica nas duas tabelas
+(`teacher_flashcards`: 5, `own_flashcards`: 7) -- zero rastro permanente
+de teste.
+
+### §16 -- Busca final por referências restantes de archive/archived
+
+`grep` project-wide por `arquiv|archive` (case-insensitive) retorna 77
+arquivos -- maioria falsos-positivos (português "arquivo" = "file",
+nomes de cache do service worker/PWA, `ARCHITECTURE.md`, pipeline de TTS
+offline). Restringindo a padrões reais do mecanismo de arquivamento
+(`'archived'`, `status===`, `Arquivar`, `Arquivado`), classificação:
+
+- **(a) código de compatibilidade necessário** -- `setFlashcardStatus`/
+  `setOwnFlashcardStatus` (ainda a única via de escrita de `status`,
+  usada agora só com `'active'` pela UI, mas preservada como está por
+  ser a fonte de verdade do schema); os filtros `status==='active'` em
+  listagens/teto/import Anki; o gate `flashcardStatus` de Review; as
+  migrations 026/028 (registro histórico, nunca reescritas); o contador
+  "N ativos, M arquivados" em `admin-students.js`; os comentários
+  explicativos desta fase e da Fase 2/5 nos arquivos de UI/schema; menções
+  em CLAUDE.md (histórico de decisões).
+- **(b) código morto** -- nenhum encontrado.
+- **(c) UI de arquivamento ainda ativa** -- nenhuma encontrada; confirmado
+  por grep dedicado que `🗃` (emoji do botão antigo) e
+  `data-next-status="archived"` não existem em lugar nenhum do
+  repositório.
+
+### O que ficou deliberadamente de fora desta fase (§14, confirmado)
+
+Decks, suspensão de CardInstance, estados "congelados" novos, nova lógica
+FSRS, novo sistema de hide/status, migração em massa, conversão automática
+Legacy→Native, redesenho completo de listagem, nova arquitetura de Tags,
+nova UX de áudio, novos limites de cartão, mudanças de plano/assinatura --
+nenhum destes foi tocado, criado, ou mesmo mencionado como necessário.
+
+### Débito técnico / achados fora do escopo
+
+Nenhum encontrado nesta fase -- a auditoria (§1) confirmou que o
+mecanismo já era mínimo e bem isolado (1 coluna, 2 funções de escrita, 1
+consumidor de Review) antes mesmo de qualquer código ser tocado.
+
+**Escopo desta entrega**: `shared/admin-flashcards.js`,
+`shared/my-flashcards.js` (só a renderização do botão de status + o
+rótulo da seção "Arquivados"). Nenhuma migração, nenhum passo manual
+pendente pra autora.
+
+**PARE conforme instrução explícita -- CONSOLIDAÇÃO-4 (simplificação de
+UX de áudio, sem alterar o motor) é a próxima fase da série e NÃO foi
+implementada nesta entrega.** Próxima etapa só começa depois de
+autorização explícita da autora, com este relatório já entregue antes de
+pedir luz verde.

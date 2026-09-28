@@ -700,6 +700,17 @@ function wireFlashcardNativeEditForm(c, editorState, container){
   });
 }
 
+// CONSOLIDAÇÃO-3 (ver CLAUDE.md) -- "Arquivar" deixou de ser uma ação
+// normal de produto: um cartão ATIVO não tem mais nenhum botão de
+// arquivar aqui, em lugar nenhum. O único vestígio do mecanismo que
+// sobrevive é "Reativar" (↺), mostrado só em cartões JÁ arquivados
+// (`c.status === 'archived'`, herdados de antes desta fase) -- nunca um
+// substituto/nome novo pra "esconder"/"suspender": é a AÇÃO INVERSA
+// (devolver um cartão histórico pro estado ativo padrão), e uma vez
+// reativado o cartão não tem mais nenhum botão de status (vira
+// indistinguível de um cartão que nunca foi arquivado). `setFlashcardStatus`
+// (shared/teacher-flashcards.js) não mudou -- só quem chama com
+// `'archived'` deixou de existir na UI.
 function flashcardCardRowHTML(c, showUsername){
   if (ADMIN_FLASHCARDS_STATE.editingCardId === c.id){
     // Cartão já nativo -> sempre edita no editor novo (nunca mostra a
@@ -723,7 +734,7 @@ function flashcardCardRowHTML(c, showUsername){
       <div style="display:flex; gap:6px;">
         <button class="admin-badge-delete-btn" data-preview-flashcard="${c.id}" title="Pré-visualizar como o aluno vai ver na Revisão">👁</button>
         <button class="admin-badge-delete-btn" data-edit-flashcard="${c.id}" title="Editar">✏️</button>
-        <button class="admin-badge-delete-btn" data-toggle-flashcard="${c.id}" data-next-status="${c.status === 'active' ? 'archived' : 'active'}" title="${c.status === 'active' ? 'Arquivar' : 'Reativar'}">${c.status === 'active' ? '🗃' : '↺'}</button>
+        ${c.status === 'archived' ? `<button class="admin-badge-delete-btn" data-toggle-flashcard="${c.id}" data-next-status="active" title="Reativar (tirar do arquivo histórico)">↺</button>` : ''}
         <button class="admin-badge-delete-btn" data-delete-flashcard="${c.id}" title="Apagar permanentemente">🗑</button>
       </div>
     </div>
@@ -746,6 +757,15 @@ async function buildFlashcardsCardsBoxHTML(selectedStudents){
   const archivedCards = cards.filter(c => c.status === 'archived');
   const showUsername = selectedStudents.length > 1;
 
+  // CONSOLIDAÇÃO-3 (ver CLAUDE.md) -- esta seção "Arquivados" já era, desde
+  // antes desta fase, uma área visualmente SEPARADA de "Cartões ativos"
+  // (label própria, nunca misturada na mesma lista) -- exatamente o que
+  // §5 pede ("área separada de históricos arquivados"), então foi
+  // reaproveitada tal como estava, sem nenhuma reconstrução. O que mudou
+  // é só que nenhum cartão pode mais CHEGAR aqui por uma ação da UI --
+  // só existe o que já estava arquivado antes desta fase (ou um cartão
+  // que a professora reativou e arquivou de novo ANTES desta fase
+  // existir, mas nenhum daqui pra frente).
   return `
     <div class="profile-section">
       <div class="section-label">Cartões ativos (${activeCards.length})</div>
@@ -753,7 +773,7 @@ async function buildFlashcardsCardsBoxHTML(selectedStudents){
     </div>
     ${archivedCards.length ? `
     <div class="profile-section">
-      <div class="section-label">Arquivados (${archivedCards.length})</div>
+      <div class="section-label">Arquivados historicamente (${archivedCards.length})</div>
       ${archivedCards.map(c => flashcardCardRowHTML(c, showUsername)).join('')}
     </div>` : ''}
   `;

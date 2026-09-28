@@ -180,7 +180,7 @@ async function renderMyFlashcardsView(opts){
 
     ${archivedCards.length ? `
     <div class="profile-section">
-      <div class="section-label">Arquivados (${archivedCards.length})</div>
+      <div class="section-label">Arquivados historicamente (${archivedCards.length})</div>
       <div id="my-flashcards-archived-box">
         ${archivedCards.map(c => myFlashcardRowHTML(c, premium)).join('')}
       </div>
@@ -223,6 +223,14 @@ async function renderMyFlashcardsView(opts){
   maybeAutoImportFromUrl();
 }
 
+// CONSOLIDAÇÃO-3 (ver CLAUDE.md) -- mesma decisão de shared/admin-flashcards.js
+// (flashcardCardRowHTML): "Arquivar" some da UX normal, sem substituto --
+// um cartão ATIVO não tem mais nenhum botão de status. "Reativar" (↺)
+// continua existindo só em cartões JÁ arquivados de antes desta fase,
+// como via de recuperação -- nunca um jeito novo de "esconder"/"suspender"
+// (é a ação INVERSA). Uma vez reativado, o cartão não tem mais botão de
+// status nenhum. `setOwnFlashcardStatus` (shared/own-flashcards.js) não
+// mudou -- só quem chama com `'archived'` deixou de existir na UI.
 function myFlashcardRowHTML(c, premium){
   if (MY_FLASHCARDS_STATE.editingCardId === c.id){
     // Fase 6D.6 (ver CLAUDE.md) -- mesmo critério de
@@ -245,7 +253,7 @@ function myFlashcardRowHTML(c, premium){
       <div style="display:flex; gap:6px;">
         <button class="admin-badge-delete-btn" data-preview-own-flashcard="${c.id}" title="Pré-visualizar como vai aparecer na Revisão">🔎</button>
         <button class="admin-badge-delete-btn" data-edit-own-flashcard="${c.id}" title="Editar">✏️</button>
-        <button class="admin-badge-delete-btn" data-toggle-own-flashcard="${c.id}" data-next-status="${c.status === 'active' ? 'archived' : 'active'}" title="${c.status === 'active' ? 'Arquivar' : 'Reativar'}">${c.status === 'active' ? '🗃' : '↺'}</button>
+        ${c.status === 'archived' ? `<button class="admin-badge-delete-btn" data-toggle-own-flashcard="${c.id}" data-next-status="active" title="Reativar (tirar do arquivo histórico)">↺</button>` : ''}
         <button class="admin-badge-delete-btn" data-toggle-own-flashcard-visibility="${c.id}" data-next-hidden="${c.hidden_from_profile ? 'false' : 'true'}" title="${c.hidden_from_profile ? 'Escondido do perfil -- clique pra tornar visível' : 'Visível no perfil (se a conta for pública) -- clique pra esconder'}">${c.hidden_from_profile ? '🙈' : '👁️'}</button>
         <button class="admin-badge-delete-btn" data-delete-own-flashcard="${c.id}" title="Apagar permanentemente">🗑</button>
       </div>
