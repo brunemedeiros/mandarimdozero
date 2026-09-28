@@ -209,6 +209,19 @@ function renderFieldAudioBlockHTML(field, opts){
   const namePrefix = opts.namePrefix || 'field-editor';
   const audio = field.audio || null;
   const originValue = audio ? audio.type : 'none';
+  // CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- matriz Free/Premium aprovada: Free só
+  // vê Sem áudio/URL/Upload; TTS/Gravação ficam atrás de Premium. Filtro
+  // puramente de UI (quais opções o <select> oferece), nunca reescreve o
+  // motor de áudio (Fase 7e/7f/7g intocadas). A origem JÁ SALVA de um Field
+  // continua sempre incluída na lista mesmo se não estiver mais permitida
+  // (ex: conta que foi Premium e criou um TTS, depois voltou pra Free) --
+  // nunca esconde/perde um dado já existente, só limita o que pode ser
+  // ESCOLHIDO de novo. `opts.allowedAudioOrigins` ausente = sem restrição
+  // (professora/admin, sempre; aluna Premium).
+  const allowedOrigins = Array.isArray(opts.allowedAudioOrigins) ? opts.allowedAudioOrigins : null;
+  const originMeta = allowedOrigins
+    ? FIELD_AUDIO_ORIGIN_UI_META.filter(o => allowedOrigins.includes(o.value) || o.value === originValue)
+    : FIELD_AUDIO_ORIGIN_UI_META;
   const resolvedUrl = (typeof resolveFieldAudioUrl === 'function') ? resolveFieldAudioUrl(audio) : null;
   const statusText = fieldAudioIndicatorText(audio) || 'Nenhum áudio configurado.';
   const acceptAttr = (typeof FIELD_AUDIO_UPLOAD_MIME_TYPES !== 'undefined') ? FIELD_AUDIO_UPLOAD_MIME_TYPES.join(',') : 'audio/*';
@@ -232,7 +245,7 @@ function renderFieldAudioBlockHTML(field, opts){
     <div class="field-audio-block" data-field-audio-field="${field.id}" style="margin-top:6px; padding-top:6px; border-top:1px dashed var(--paper-line);">
       <label class="profile-edit-label" for="${namePrefix}-audio-origin-${field.id}">Áudio</label>
       <select id="${namePrefix}-audio-origin-${field.id}" class="profile-edit-input" data-field-audio-origin="${field.id}">
-        ${FIELD_AUDIO_ORIGIN_UI_META.map(o => `<option value="${o.value}" ${originValue === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
+        ${originMeta.map(o => `<option value="${o.value}" ${originValue === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
       </select>
       <p class="profile-edit-hint" style="margin:2px 0 6px;">Escolha de onde vem o áudio deste campo: link externo, upload de arquivo, texto sintetizado por voz, ou gravação pelo microfone.</p>
       <p class="profile-edit-hint" data-field-audio-status="${field.id}" style="margin:0 0 4px;">${escapeHTML(statusText)}</p>
