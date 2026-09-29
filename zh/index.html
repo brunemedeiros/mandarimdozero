@@ -995,8 +995,10 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .wrong-feedback, .correct-feedback{
   margin-top:22px; border-radius: var(--radius); text-align:left; animation: wrongFeedbackIn .25s ease;
 }
-.correct-feedback{ background: rgba(58,115,89,0.12); }
-.wrong-feedback{ background: rgba(192,35,31,0.10); }
+/* Fade suave de cima pra baixo + borda fina na cor do estado (visual de
+   painel "clássico"), em vez de uma cor chapada. */
+.correct-feedback{ background: linear-gradient(180deg, rgba(58,115,89,0.16), rgba(58,115,89,0.05)); border:1px solid rgba(58,115,89,0.40); }
+.wrong-feedback{ background: linear-gradient(180deg, rgba(192,35,31,0.15), rgba(192,35,31,0.05)); border:1px solid rgba(192,35,31,0.42); }
 .feedback-card-body{ padding: 18px 20px 20px; }
 /* A caixa neutra (fundo --paper-warm) pro conteúdo em si -- mesmo padrão
    já usado em outras caixas de exemplo do app (.vocab-phrase-example,
@@ -1004,8 +1006,8 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
    quando a explicação tem mais de um bloco (tradução + "onde você já viu
    isso") -- eles compartilham a mesma caixa, nunca uma caixa cada. */
 .feedback-inner-box{
-  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius: var(--radius);
-  padding: 14px 16px;
+  background: var(--paper); border:1px solid var(--paper-line); border-radius: var(--radius);
+  padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 @keyframes wrongFeedbackIn{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
 /* Shake nas opções erradas (múltipla escolha, V/F, cloze, slots de
@@ -1049,7 +1051,11 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .wrong-feedback-continue, .correct-feedback-continue{
   display:block; width:100%; margin-top:18px;
 }
-button.correct-feedback-continue{ background: var(--jade); }
+button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid); box-shadow: 0 3px 10px rgba(58,115,89,0.28); }
+/* Continuar do painel de erro: vermelho mais escuro e menos saturado que o
+   .btn-primary padrão (par background+color revisado junto: texto branco
+   fixo sobre fundo escuro, legível nos dois temas). */
+button.wrong-feedback-continue{ background: linear-gradient(135deg, #9A2C28, #7A211E); color:#fff; box-shadow: 0 3px 10px rgba(122,33,30,0.28); }
 
 /* ---------- Audio button (TTS) ---------- */
 .audio-btn, .custom-audio-btn{
