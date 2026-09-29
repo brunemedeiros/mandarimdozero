@@ -50,6 +50,58 @@ function classifyFlashcardRowModel(row){
   return 'invalid';
 }
 
+// ---------- CONSOLIDAÇÃO-2 (ver CLAUDE.md) -- decisão de revision no save
+// do editor nativo, único ponto, reutilizado por admin-flashcards.js e
+// my-flashcards.js (nunca duplicado) ----------
+//
+// Cobre os 2 cenários que chegam ao mesmo botão "Salvar":
+// 1. Edição nativa->nativa (row já era native): compara o editorState
+//    atual contra `createNativeNoteEditorStateFromRow(row)` (reconstrução
+//    do que está gravado) -- já era assim desde a Fase 6D.6, sem mudança.
+// 2. Conversão Legacy->Native ACABADA DE ACONTECER nesta sessão de edição:
+//    ANTES desta fase, `revision` incrementava incondicionalmente aqui --
+//    sempre resetando FSRS, mesmo quando a professora/aluna só clicou
+//    "Usar o novo editor" e salvou sem tocar em nada. Agora compara contra
+//    `conversionBaseline` (um clone do editorState capturado no instante
+//    da conversão, antes de qualquer edição -- ver
+//    ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline/
+//    MY_FLASHCARDS_STATE.editingNativeConversionBaseline) com o MESMO
+//    `noteEditorStateRequiresNewRevision()` já usado no caso 1 -- nunca
+//    uma segunda implementação de comparação.
+//
+// EXCEÇÃO CONFIRMADA (achado de auditoria desta fase, documentado em vez
+// de corrigido silenciosamente): Cloze nunca entra nesse caminho
+// "preservado" -- o motor NATIVO (interpretNativeNoteFromRow, shared/
+// flashcard-model.js) sempre sufixa o id do CardInstance com "-{markId}"
+// (mesmo pra 1 marca só, ex: "t500-c1"), enquanto o Cloze LEGADO de marca
+// única (interpretNoteFromRow, ramo "___") usa o id SEM sufixo ("t500").
+// flashcardIdForRow() nunca muda (só depende de row.id/revision), mas o
+// id de CardInstance final muda de qualquer jeito por causa dessa
+// diferença estrutural entre os 2 caminhos de interpretação -- preservar
+// `revision` sozinho NÃO preserva o histórico de revisão de um Cloze
+// convertido. Resolver isso exigiria mudar o esquema de id do Cloze
+// nativo (usado por TODO cartão Cloze nativo, não só conversão) -- fora
+// do escopo desta fase (proibido tocar em FSRS/CardInstance/renderer
+// aqui, ver CLAUDE.md Seção 23). Por isso Cloze SEMPRE incrementa
+// revision na conversão (idêntico ao comportamento que já existia antes
+// desta fase) -- a mensagem "progresso reiniciado" (já derivada de
+// `nextRevision > (c.revision||0)` nos 2 arquivos de UI) continua batendo
+// com a realidade em vez de prometer uma preservação que a arquitetura
+// atual não entrega.
+function nextRevisionForNativeSave(c, editorState, conversionBaseline){
+  const current = c.revision || 0;
+  const wasNative = classifyFlashcardRowModel(c) === 'native';
+  if (wasNative){
+    const original = createNativeNoteEditorStateFromRow(c);
+    return noteEditorStateRequiresNewRevision(original, editorState) ? current + 1 : current;
+  }
+  const baselineWasCloze = !!conversionBaseline && conversionBaseline.cardGenerationMode === 'cloze';
+  if (conversionBaseline && !baselineWasCloze && !noteEditorStateRequiresNewRevision(conversionBaseline, editorState)){
+    return current;
+  }
+  return current + 1;
+}
+
 // ---------- Fase 6D.8 -- preflight de conversão (Seção 6/8/18) ----------
 //
 // Chamado ANTES de nativeNoteEditorStateFromLegacyRow(), só pra bloquear os
@@ -387,4 +439,50 @@ function nativeNoteEditorStateFromLegacyRow(row){
     cardGenerationMode: 'normal',
     fields,
   }));
+}
+
+// ---------- CONSOLIDAÇÃO-6 (ver CLAUDE.md) -- import de cartão externo
+// vira criação NATIVA, nunca Legacy ----------
+//
+// 2 telas criam cartões NOVOS a partir de um payload externo, historicamente
+// no formato antigo (front/backTrans/note/frontPinyin/frontIsTargetLanguage
+// -- nunca choices/clozeSentence/mídia, nenhum dos 2 formatos jamais
+// carregou isso): o export/import .json/link entre alunas
+// (shared/my-flashcards.js, confirmAndImportMyFlashcards) e a importação de
+// cartão do perfil público de outra conta (shared/public-profile.js,
+// importSelectedPublicFlashcards). Antes desta fase, os 2 chamavam
+// createOwnFlashcard() SEM `nativeState` -- iam direto pro branch Legacy de
+// INSERT, criando uma linha sem fields/card_generation_mode, fora do
+// princípio "todo cartão novo é Native" que o resto do app já segue desde
+// CONSOLIDAÇÃO-1.
+//
+// Reaproveita 100% nativeNoteEditorStateFromLegacyRow() (a MESMA função que
+// já converte um cartão Legacy JÁ EXISTENTE quando a professora/aluna clica
+// "Usar o novo editor") -- nunca uma 2ª implementação do mapeamento
+// front/back->Field. `id:null`/`revision:0` deixam explícito que isto é uma
+// CRIAÇÃO nova (nunca aponta pra uma linha existente); `origin:'self'`
+// sempre -- os 2 chamadores só criam na PRÓPRIA conta de quem importa
+// (own_flashcards), nunca em teacher_flashcards. Como o payload nunca tem
+// choices/cloze_sentence, o resultado é sempre um Note `cardGenerationMode:
+// 'normal'` de 2 Fields (+ satélite de pinyin quando aplicável) -- mesmo
+// resultado visual de sempre (frente/verso simples), só que gravado no
+// modelo nativo.
+function nativeNoteEditorStateFromImportPayload(payload, languageAppKey){
+  return nativeNoteEditorStateFromLegacyRow({
+    id: null,
+    revision: 0,
+    language_app_key: languageAppKey,
+    origin: 'self',
+    note: payload.note || null,
+    front: payload.front || '',
+    back_trans: payload.backTrans || '',
+    front_pinyin: payload.frontPinyin || null,
+    front_is_target_language: payload.frontIsTargetLanguage,
+    choices: null,
+    cloze_sentence: null,
+    cloze_answer: null,
+    cloze_answer_pinyin: null,
+    image_url: null,
+    audio_url: null,
+  });
 }
