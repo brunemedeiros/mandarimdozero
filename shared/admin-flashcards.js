@@ -207,7 +207,7 @@
 // já usado pra edição nativa->nativa, nunca uma 2ª implementação de
 // comparação. `null` sempre que não há uma conversão em andamento nesta
 // sessão de edição -- limpo em todo ponto que também zera editingNativeState.
-let ADMIN_FLASHCARDS_STATE = { studentIds: new Set(), langFilter: 'all', _studentsCache: [], editingCardId: null, editingNativeState: null, editingNativeConversionBaseline: null, _cardsCache: [], nativeCardState: createNativeNoteEditorState({ cardGenerationMode: 'normal' }) };
+let ADMIN_FLASHCARDS_STATE = { studentIds: new Set(), langFilter: 'all', _studentsCache: [], editingCardId: null, editingNativeState: null, editingNativeConversionBaseline: null, _cardsCache: [], decksByLang: {}, destByStudent: {}, _ensuredKeys: new Set(), _destToken: 0, nativeCardState: createNativeNoteEditorState({ cardGenerationMode: 'normal' }) };
 
 // Prop 4 -- confirmação obrigatória antes de salvar uma edição (grillado
 // com a autora: editar reinicia o progresso de revisão, ela quer avisar
@@ -700,6 +700,126 @@ function wireFlashcardNativeEditForm(c, editorState, container){
   });
 }
 
+// ---------- Fase G -- Teacher Decks no Painel (destino por aluno) ----------
+//
+// Camada de UI mínima sobre shared/deck-engine.js (regras) e
+// shared/deck-data.js (I/O). Nenhuma regra de árvore é replicada aqui: só
+// aparecem como destino os Decks que getTeacherDecksForStudent() devolve
+// (teacher_root + subdecks da PRÓPRIA professora para AQUELE aluno+idioma).
+
+async function loadTeacherDecksByLang(students){
+  const langs = [...new Set(students.map(s => s.language_app_key))];
+  await Promise.all(langs.map(async lang => {
+    if (!ADMIN_FLASHCARDS_STATE.decksByLang[lang]){
+      ADMIN_FLASHCARDS_STATE.decksByLang[lang] = await fetchDecksForLanguage(lang);
+    }
+  }));
+}
+
+function teacherTreeForStudent(studentId, languageAppKey){
+  return getTeacherDecksForStudent(ADMIN_FLASHCARDS_STATE.decksByLang[languageAppKey] || [],
+    { teacherId: CURRENT_USER.id, studentId, languageAppKey });
+}
+
+function teacherDeckLabel(deck){
+  return deck.kind === 'teacher_root' ? 'Cartões da professora (padrão)' : deck.name;
+}
+
+function teacherDeckOptionsHTML(tree, selectedId){
+  return orderedTeacherDecks(tree, tree).map(({ deck, depth }) => {
+    const pad = '  '.repeat(depth);
+    return `<option value="${deck.id}" ${deck.id === selectedId ? 'selected' : ''}>${pad}${escapeHTML(teacherDeckLabel(deck))}</option>`;
+  }).join('');
+}
+
+// Rótulo do Deck de um cartão já criado (destino sempre visível na lista).
+function teacherCardDeckLabelHTML(c){
+  if (c.deck_id == null) return '📂 <em>sem Deck (cartão anterior aos Decks)</em> · ';
+  const deck = getDeckById(ADMIN_FLASHCARDS_STATE.decksByLang[c.language_app_key] || [], c.deck_id);
+  return `📂 ${escapeHTML(deck ? teacherDeckLabel(deck) : 'Deck')} · `;
+}
+
+// Mover cartão entre Teacher Decks do MESMO aluno (a Note inteira -- os
+// CardInstances irmãos de reverso/Cloze andam juntos, pois deck_id vive na
+// linha, nunca no CardInstance).
+function teacherCardMoveSelectHTML(c){
+  const tree = teacherTreeForStudent(c.student_id, c.language_app_key);
+  if (!tree.length) return '';
+  return `<select class="profile-edit-input" data-move-card="${c.id}" title="Mover este cartão para outro Deck deste aluno" style="width:auto; max-width:190px; padding:2px 4px;">
+    <option value="">Mover para…</option>
+    ${orderedTeacherDecks(tree, tree).filter(({ deck }) => deck.id !== c.deck_id).map(({ deck, depth }) =>
+      `<option value="${deck.id}">${'  '.repeat(depth)}${escapeHTML(teacherDeckLabel(deck))}</option>`).join('')}
+  </select>`;
+}
+
+function renderTeacherDestinationRows(box, selected, problems){
+  const S = ADMIN_FLASHCARDS_STATE;
+  box.innerHTML = selected.map(s => {
+    const key = `${s.student_id}|${s.language_app_key}`;
+    const head = `<div class="admin-badge-name">${flashcardStudentLabel(s)} -- ${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key}</div>`;
+    if (problems[key]) return `<div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:4px;">${head}<p class="profile-edit-error">${escapeHTML(problems[key])}</p></div>`;
+    const tree = teacherTreeForStudent(s.student_id, s.language_app_key);
+    const root = tree.find(d => d.kind === 'teacher_root');
+    const chosen = tree.some(d => d.id === S.destByStudent[s.student_id]) ? S.destByStudent[s.student_id] : (root ? root.id : null);
+    return `<div class="admin-badge-row" data-dest-row="${s.student_id}" style="flex-direction:column; align-items:stretch; gap:6px;">
+      ${head}
+      <select class="profile-edit-input" data-dest-select="${s.student_id}" aria-label="Deck de destino de ${escapeHTML(s.username || '')}">${teacherDeckOptionsHTML(tree, chosen)}</select>
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <input type="text" class="profile-edit-input" data-dest-subname="${s.student_id}" placeholder="Nome do novo subdeck (dentro do Deck escolhido)" maxlength="60" style="flex:1; min-width:140px;">
+        <button type="button" class="btn btn-secondary" data-dest-newsub="${s.student_id}">+ Subdeck</button>
+      </div>
+      <p class="profile-edit-error" data-dest-err="${s.student_id}"></p>
+    </div>`;
+  }).join('');
+  selected.forEach(s => {
+    const sel = box.querySelector(`[data-dest-select="${s.student_id}"]`);
+    if (!sel) return;
+    S.destByStudent[s.student_id] = Number(sel.value);
+    sel.addEventListener('change', () => { S.destByStudent[s.student_id] = Number(sel.value); });
+    box.querySelector(`[data-dest-newsub="${s.student_id}"]`).addEventListener('click', async () => {
+      const errEl = box.querySelector(`[data-dest-err="${s.student_id}"]`);
+      errEl.textContent = '';
+      const list = S.decksByLang[s.language_app_key] || [];
+      const parent = getDeckById(list, Number(sel.value));
+      const res = await createTeacherDeck({ name: box.querySelector(`[data-dest-subname="${s.student_id}"]`).value, parentDeck: parent, decks: list });
+      if (!res.ok){ errEl.textContent = res.error; return; }
+      list.push(res.deck);
+      S.destByStudent[s.student_id] = res.deck.id;
+      renderTeacherDestinationRows(box, selected, problems);
+      showToast('✓ Subdeck criado.');
+    });
+  });
+}
+
+// Bootstrap LAZY: só quando o aluno é selecionado no formulário (nunca no
+// boot do app). Idempotente (ensure_teacher_decks, migration 053).
+async function refreshTeacherDestinationsUI(){
+  const box = document.getElementById('admin-flashcard-destinations');
+  if (!box) return;
+  const S = ADMIN_FLASHCARDS_STATE;
+  const selected = S._studentsCache.filter(s => S.studentIds.has(s.student_id));
+  const token = ++S._destToken;
+  if (!selected.length){
+    box.innerHTML = '<p class="profile-edit-hint">Selecione ao menos um aluno para escolher o Deck de destino.</p>';
+    return;
+  }
+  box.innerHTML = '<p class="profile-edit-hint">Preparando os Decks…</p>';
+  const problems = {};
+  const freshLangs = new Set();
+  await Promise.all(selected.map(async s => {
+    const key = `${s.student_id}|${s.language_app_key}`;
+    if (S._ensuredKeys.has(key)) return;
+    const r = await ensureTeacherDecksForStudent(s.student_id, s.language_app_key);
+    if (r.ok){ S._ensuredKeys.add(key); freshLangs.add(s.language_app_key); }
+    else problems[key] = r.error;
+  }));
+  if (token !== S._destToken) return;
+  freshLangs.forEach(lang => { delete S.decksByLang[lang]; });
+  await loadTeacherDecksByLang(selected);
+  if (token !== S._destToken) return;
+  renderTeacherDestinationRows(box, selected, problems);
+}
+
 // CONSOLIDAÇÃO-3 (ver CLAUDE.md) -- "Arquivar" deixou de ser uma ação
 // normal de produto: um cartão ATIVO não tem mais nenhum botão de
 // arquivar aqui, em lugar nenhum. O único vestígio do mecanismo que
@@ -729,9 +849,10 @@ function flashcardCardRowHTML(c, showUsername){
     <div class="admin-badge-row">
       <div class="admin-badge-info">
         <div class="admin-badge-name">${showUsername ? `<span style="opacity:.6">@${escapeHTML(c.__studentUsername || '?')}</span> · ` : ''}${flashcardFrontSummaryHTML(c)} → ${escapeHTML(c.back_trans)}</div>
-        <div class="admin-badge-desc">${c.note ? escapeHTML(c.note) + ' · ' : ''}criado em ${new Date(c.created_at).toLocaleDateString('pt-BR')}${flashcardFormatBadgesHTML(c) ? ' · ' + flashcardFormatBadgesHTML(c) : ''}</div>
+        <div class="admin-badge-desc">${teacherCardDeckLabelHTML(c)}${c.note ? escapeHTML(c.note) + ' · ' : ''}criado em ${new Date(c.created_at).toLocaleDateString('pt-BR')}${flashcardFormatBadgesHTML(c) ? ' · ' + flashcardFormatBadgesHTML(c) : ''}</div>
       </div>
-      <div style="display:flex; gap:6px;">
+      <div style="display:flex; gap:6px; align-items:center;">
+        ${teacherCardMoveSelectHTML(c)}
         <button class="admin-badge-delete-btn" data-preview-flashcard="${c.id}" title="Pré-visualizar como o aluno vai ver na Revisão">👁</button>
         <button class="admin-badge-delete-btn" data-edit-flashcard="${c.id}" title="Editar">✏️</button>
         ${c.status === 'archived' ? `<button class="admin-badge-delete-btn" data-toggle-flashcard="${c.id}" data-next-status="active" title="Reativar (tirar do arquivo histórico)">↺</button>` : ''}
@@ -746,6 +867,7 @@ function flashcardCardRowHTML(c, showUsername){
 // render completo quanto (re-fetch isolado) a cada mudança de seleção,
 // SEM tocar no <form> ao lado (ver comentário no topo do arquivo).
 async function buildFlashcardsCardsBoxHTML(selectedStudents){
+  await loadTeacherDecksByLang(selectedStudents);
   const cardLists = await Promise.all(selectedStudents.map(s => fetchFlashcardsForStudent(s.student_id)));
   const cards = cardLists.flatMap((list, i) => list.map(c => ({ ...c, __studentUsername: selectedStudents[i].username })));
   cards.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -793,6 +915,20 @@ function wireFlashcardsCardsBox(cardsBox){
       const card = ADMIN_FLASHCARDS_STATE._cardsCache.find(c => c.id === id);
       if (!card){ openFlashcardPreviewWithError('Não foi possível carregar este cartão pra pré-visualizar.'); return; }
       openFlashcardPreviewFromRow(card, { appKey: card.language_app_key, origin: 'teacher' });
+    });
+  });
+  cardsBox.querySelectorAll('[data-move-card]').forEach(sel => {
+    sel.addEventListener('change', async () => {
+      if (!sel.value) return;
+      const card = ADMIN_FLASHCARDS_STATE._cardsCache.find(c => c.id === Number(sel.dataset.moveCard));
+      const list = card ? (ADMIN_FLASHCARDS_STATE.decksByLang[card.language_app_key] || []) : [];
+      const destination = getDeckById(list, Number(sel.value));
+      const res = card ? await setTeacherFlashcardDeck({ note: card, destination, decks: list }) : { ok: false, error: 'Cartão não encontrado.' };
+      if (!res.ok){ showToast(res.error || 'Não foi possível mover o cartão.'); sel.value = ''; return; }
+      showToast('✓ Cartão movido.');
+      const selectedStudents = ADMIN_FLASHCARDS_STATE._studentsCache.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+      cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
+      wireFlashcardsCardsBox(cardsBox);
     });
   });
   cardsBox.querySelectorAll('[data-toggle-flashcard]').forEach(btn => {
@@ -881,6 +1017,8 @@ async function updateFlashcardsSelectionDependentUI(wrap){
     btn.textContent = `Criar cartão${selectedStudents.length > 1 ? ` pra ${selectedStudents.length} alunos` : ''}`;
   }
 
+  await refreshTeacherDestinationsUI();
+
   const cardsBox = document.getElementById('admin-flashcards-cards-box');
   if (cardsBox){
     cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
@@ -927,6 +1065,10 @@ async function renderAdminFlashcardsView(){
   ADMIN_FLASHCARDS_STATE.nativeCardState = createNativeNoteEditorState({ cardGenerationMode: 'normal' });
   ADMIN_FLASHCARDS_STATE.editingNativeState = null;
   ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
+  // Fase G -- Decks sempre relidos num render completo (ex.: depois de um
+  // submit); destByStudent (destino escolhido por aluno) é preservado pra
+  // professora continuar criando no mesmo Deck.
+  ADMIN_FLASHCARDS_STATE.decksByLang = {};
   wrap.innerHTML = loadingHTML();
 
   const students = await fetchMyStudents();
@@ -1010,6 +1152,12 @@ async function renderAdminFlashcardsView(){
       <div class="profile-edit-input" style="height:auto; max-height:180px; overflow-y:auto; display:flex; flex-direction:column;">
         ${studentCheckboxesHTML}
       </div>
+    </div>
+
+    <div class="profile-section" id="admin-flashcard-dest-section">
+      <div class="section-label">Destino (Deck de cada aluno)</div>
+      <p class="profile-edit-hint">Cada aluno tem a sua própria árvore de Decks. Por padrão o cartão vai para "Cartões da professora" do aluno; escolha um subdeck se quiser organizar.</p>
+      <div id="admin-flashcard-destinations"></div>
     </div>
 
     <div class="profile-section">
@@ -1156,6 +1304,8 @@ async function renderAdminFlashcardsView(){
   // `rowId` real pra a Edge Function checar autorização contra).
   refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native', uploadFn: uploadFlashcardMedia, deleteFn: deleteFlashcardMedia, ttsFn: requestFieldAudioTTS, noteId: ADMIN_FLASHCARDS_STATE.nativeCardState.noteId });
 
+  refreshTeacherDestinationsUI();
+
   document.getElementById('admin-create-flashcard-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('admin-create-flashcard-btn');
@@ -1199,11 +1349,27 @@ async function renderAdminFlashcardsView(){
     // conteúdo/Fields, cada uma com o language_app_key do PRÓPRIO aluno
     // (nunca compartilhando id/linha entre alunos, mesmo numa seleção
     // mista fr+zh).
-    const results = await Promise.all(selectedNow.map(s => createFlashcard({
-      studentId: s.student_id,
-      languageAppKey: s.language_app_key,
-      nativeState,
-    })));
+    // Fase G -- cada aluno resolve o SEU destino (teacher_root dele por
+    // padrão, ou o subdeck escolhido pra ele) e cria a SUA linha: N criações
+    // independentes, cada uma atômica (Note+Fields+deck_id num só INSERT).
+    // NÃO existe atomicidade entre alunos: pode haver sucesso parcial, e uma
+    // falha nunca atribui o cartão ao Deck de outro aluno.
+    const results = await Promise.all(selectedNow.map(async s => {
+      const dest = await resolveTeacherCreationDeck({
+        studentId: s.student_id,
+        languageAppKey: s.language_app_key,
+        deckId: ADMIN_FLASHCARDS_STATE.destByStudent[s.student_id],
+        decks: ADMIN_FLASHCARDS_STATE.decksByLang[s.language_app_key],
+      });
+      if (!dest.ok) return { ok: false, error: dest.error, student: s };
+      const r = await createFlashcard({
+        studentId: s.student_id,
+        languageAppKey: s.language_app_key,
+        nativeState,
+        deckId: dest.deckId,
+      });
+      return Object.assign({ student: s }, r);
+    }));
     btn.disabled = false;
     const failed = results.filter(r => !r.ok);
     if (failed.length === results.length){
@@ -1220,7 +1386,7 @@ async function renderAdminFlashcardsView(){
     clearFreshMediaUploads(nativeState);
     const okCount = results.length - failed.length;
     if (failed.length){
-      showToast(`✓ ${okCount} cartão(ões) criado(s), ${failed.length} falharam.`);
+      showToast(`✓ ${okCount} cartão(ões) criado(s); falhou pra: ${failed.map(f => '@' + (f.student.username || '?')).join(', ')}.`);
     } else {
       showToast(results.length > 1 ? `✓ ${okCount} cartões criados.` : '✓ Cartão criado.');
     }

@@ -218,3 +218,94 @@ async function ensureCourseDecksForCurrentUser(languageAppKey, units){
   if (error){ console.error('Erro ao preparar Course Decks:', error); return { ok: false, error: 'Não foi possível preparar os Decks do curso agora.' }; }
   return { ok: true, decks: data || [] };
 }
+
+// ---------- Fase G -- Teacher Decks (cartões da professora) ----------
+//
+// Camada de I/O fina sobre shared/deck-engine.js (regras) e a migration 053
+// (ensure_teacher_decks). Nenhuma regra de árvore é replicada aqui; o banco
+// (RLS + triggers decks_validate_hierarchy/teacher_flashcards_validate_deck)
+// continua sendo a autoridade final. Sempre a professora LOGADA
+// (CURRENT_USER.id) -- teacher_id nunca vem de parâmetro.
+
+// Bootstrap lazy do teacher_root de 1 aluno+idioma (idempotente; exige
+// vínculo ativo -- checado DENTRO da RPC). Nunca chamado no boot do app:
+// só quando a professora seleciona o aluno no formulário de cartão.
+async function ensureTeacherDecksForStudent(studentId, languageAppKey){
+  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  const { data, error } = await supabaseClient.rpc('ensure_teacher_decks', {
+    p_student_id: studentId,
+    p_language_app_key: languageAppKey,
+  });
+  if (error){ console.error('Erro ao preparar Decks da professora:', error); return { ok: false, error: 'Não foi possível preparar os Decks deste aluno agora.' }; }
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row || row.teacher_root_deck_id == null){
+    return { ok: false, error: 'Não foi possível preparar os Decks deste aluno agora.' };
+  }
+  return { ok: true, rootDeckId: row.root_deck_id, teacherRootDeckId: row.teacher_root_deck_id };
+}
+
+// Destino de UM cartão novo para UM aluno. `deckId` ausente = teacher_root
+// daquele aluno (padrão). Cada aluno resolve o SEU destino -- falha aqui
+// nunca cai no Deck de outro aluno. `decks` opcional (lista já carregada).
+async function resolveTeacherCreationDeck({ studentId, languageAppKey, deckId, decks }){
+  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  const boot = await ensureTeacherDecksForStudent(studentId, languageAppKey);
+  if (!boot.ok) return { ok: false, error: boot.error };
+  const targetId = (deckId != null) ? deckId : boot.teacherRootDeckId;
+  let list = decks && decks.length ? decks : null;
+  if (!list || !getDeckById(list, targetId)) list = await fetchDecksForLanguage(languageAppKey);
+  const deck = getDeckById(list, targetId);
+  const check = canPlaceTeacherNoteInDeck(
+    { teacher_id: CURRENT_USER.id, student_id: studentId, language_app_key: languageAppKey }, deck);
+  if (!check.ok) return { ok: false, error: 'Escolha um Deck válido da árvore deste aluno como destino.', reason: check.reason };
+  return { ok: true, deckId: deck.id, decks: list };
+}
+
+async function createTeacherDeck({ name, parentDeck, decks }){
+  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  const check = canCreateTeacherSubdeck(parentDeck, { teacherId: CURRENT_USER.id });
+  if (!check.ok) return { ok: false, error: 'Só é possível criar um Deck dentro da árvore deste aluno.', reason: check.reason };
+  const cleanName = (name || '').trim();
+  if (!cleanName) return { ok: false, error: 'Digite um nome pro Deck.' };
+  const { data, error } = await supabaseClient.from('decks').insert({
+    owner_id: parentDeck.owner_id,
+    teacher_id: CURRENT_USER.id,
+    parent_deck_id: parentDeck.id,
+    kind: 'teacher',
+    name: cleanName,
+    language_app_key: parentDeck.language_app_key,
+  }).select().single();
+  if (error){ console.error('Erro ao criar Deck da professora:', error); return { ok: false, error: 'Não foi possível criar o Deck agora.' }; }
+  return { ok: true, deck: data };
+}
+
+// Mover Teacher Deck dentro da própria árvore (só troca o pai).
+async function moveTeacherDeck({ deck, destination, decks }){
+  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  if (!deck || deck.teacher_id !== CURRENT_USER.id) return { ok: false, error: 'Deck inválido.', reason: 'wrong_teacher' };
+  const validation = validateDeckMove({ deck, destination, decks });
+  if (!validation.ok) return validation;
+  const { error } = await supabaseClient.from('decks')
+    .update({ parent_deck_id: destination.id })
+    .eq('id', deck.id).eq('teacher_id', CURRENT_USER.id).eq('kind', 'teacher');
+  if (error){ console.error('Erro ao mover Deck da professora:', error); return { ok: false, error: 'Não foi possível mover o Deck agora.' }; }
+  return { ok: true };
+}
+
+// Excluir Teacher Deck: só subdeck vazio (sem filhos e sem Notes) -- mesma
+// regra dos pessoais (validateDeckDeletion). Notes têm `on delete set null`,
+// então NUNCA confiar só no banco: checa antes.
+async function deleteTeacherDeck({ deck, decks }){
+  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  if (!deck || deck.teacher_id !== CURRENT_USER.id) return { ok: false, error: 'Deck inválido.', reason: 'wrong_teacher' };
+  const hasChildren = getDeckChildren(decks, deck.id).length > 0;
+  const { count, error: cErr } = await supabaseClient.from('teacher_flashcards')
+    .select('id', { count: 'exact', head: true }).eq('deck_id', deck.id);
+  if (cErr){ console.error('Erro ao checar cartões do Deck:', cErr); return { ok: false, error: 'Não foi possível verificar o Deck agora.' }; }
+  const validation = validateDeckDeletion({ deck, hasChildren, hasNotes: (count || 0) > 0 });
+  if (!validation.ok) return validation;
+  const { error } = await supabaseClient.from('decks').delete()
+    .eq('id', deck.id).eq('teacher_id', CURRENT_USER.id).eq('kind', 'teacher');
+  if (error){ console.error('Erro ao apagar Deck da professora:', error); return { ok: false, error: 'Não foi possível apagar o Deck agora.' }; }
+  return { ok: true };
+}

@@ -126,12 +126,20 @@ function _validateFlashcardContent({ languageAppKey, front, backTrans, choices, 
 // nova, então não é abrangido por essa limpeza (Seção 2/6 da fase:
 // "o que deve desaparecer é o Legacy como caminho de CRIAÇÃO", nunca a
 // compatibilidade com cartão já existente).
-async function createFlashcard({ studentId, languageAppKey, nativeState }){
+// Fase G -- `deckId` (Teacher Deck do PRÓPRIO aluno, resolvido por
+// resolveTeacherCreationDeck em shared/deck-data.js) vai no MESMO INSERT da
+// Note: criação individual atômica, Note+Fields+deck_id juntos. Ausente =
+// linha sem Deck (comportamento anterior -- só chamadores antigos/testes;
+// o formulário do Painel sempre resolve um destino). deck_id NÃO entra em
+// nativeContentColumnsFromEditorState (usado também na edição): editar não
+// muda Deck. O trigger teacher_flashcards_validate_deck é a autoridade final.
+async function createFlashcard({ studentId, languageAppKey, nativeState, deckId }){
   const identity = {
     teacher_id: CURRENT_USER.id,
     student_id: studentId,
     language_app_key: languageAppKey,
   };
+  if (deckId != null) identity.deck_id = deckId;
   const payload = Object.assign({}, identity, nativeContentColumnsFromEditorState(nativeState));
   const { data, error } = await supabaseClient.from('teacher_flashcards').insert(payload).select().single();
   if (error){ console.error('Erro ao criar flashcard:', error); return { ok: false, error: 'Não foi possível criar o cartão agora.' }; }

@@ -16971,3 +16971,84 @@ acima.**
   trocar o Secret `GCP_TTS_KEY`, apagar a antiga); (3) camada de "texto
   falado" para português e outros idiomas entra como nova lista em
   `RULES_BY_LANG`, sem misturar regras (ex.: sandhi de "os carros azuis").
+
+## Fase G -- Teacher Decks: cartões da professora no Deck Engine (2026-09-29)
+
+**Modelo**: `Note → Fields → Card Type → CardInstances → Teacher Deck → Review/FSRS`,
+sem arquitetura paralela. Teacher Deck = Deck real (`decks`, kinds `teacher_root`/
+`teacher`) que pertence ao RELACIONAMENTO professora→aluno→idioma
+(`owner_id` = aluno, `teacher_id` = professora). Schema/RLS/triggers já existiam
+(049); a única migration nova é a **053** (aplicada ao vivo).
+
+**Decisões confirmadas pela autora**: (1) Teacher Cards NÃO entram no limite de 20
+(o teto continua só sobre `own_flashcards`; preflight da Fase F intocado; a matriz
+de Card Types Free/Premium segue valendo); (2) `teacher_root` é o destino padrão
+("aluno → idioma → teacher_root → criar cartão"), subdeck é opcional.
+
+**Migration `053_ensure_teacher_decks.sql`** (aditiva, sem backfill, idempotente):
+`ensure_teacher_decks(p_student_id, p_language_app_key)`, SECURITY DEFINER,
+`revoke` de public e anon, `grant` a authenticated. Chamador = sempre `auth.uid()`
+(a professora); exige vínculo `teacher_students` ATIVO (professora+aluno+idioma) --
+sem vínculo, idioma sem vínculo, aluno de outra professora, ou o próprio aluno
+chamando → `not_authorized`. **Não duplica o bootstrap do `root`**: se o root do
+aluno não existe, chama `ensure_user_decks()` (fonte única; efeito colateral:
+cria também o `personal_root` do aluno). Consequência registrada: como
+`ensure_user_decks` só aceita "a própria conta ou o admin", uma professora
+NÃO-admin cujo aluno ainda nunca abriu o app receberia `not_authorized` nesse
+passo -- não ampliamos permissões (hoje a professora real é o admin). O arquivo
+versionado tem comentários a mais que o SQL aplicado; a lógica é idêntica.
+
+**Código** (fr/app.js e zh/app.js NÃO foram tocados; linha `(de)` preservada):
+- `shared/deck-engine.js`: `getTeacherDecksForStudent`, `getTeacherRootDeck`,
+  `orderedTeacherDecks`, `canCreateTeacherSubdeck`, `canMoveTeacherDeck`;
+  `canMoveDeck` delega `kind='teacher'`; `isDeckDeletableKind` inclui `teacher`
+  (`teacher_root` nunca move nem apaga).
+- `shared/deck-data.js`: `ensureTeacherDecksForStudent` (lazy, só ao selecionar o
+  aluno), `resolveTeacherCreationDeck` (padrão = teacher_root; valida com
+  `canPlaceTeacherNoteInDeck`), `createTeacherDeck`, `moveTeacherDeck`,
+  `deleteTeacherDeck` (só vazio: sem filhos e sem Notes -- `deck_id` tem
+  `on delete set null`, então checa antes).
+- `shared/teacher-flashcards.js`: `createFlashcard({..., deckId})` grava `deck_id`
+  no MESMO INSERT da Note (atômico por aluno). Editar não muda Deck.
+- `shared/admin-flashcards.js` (UI mínima): seção "Destino (Deck de cada aluno)"
+  com UM seletor por aluno selecionado (nunca um global), criar subdeck, Deck do
+  cartão visível na lista, "Mover para…" (entre Decks do mesmo aluno). Editor
+  nativo reutilizado; nenhum editor novo.
+- `shared/my-flashcards.js`: seção **somente leitura** "Cartões da professora"
+  (só "Estudar este Deck" → `startDeckReviewSession`; nenhum controle de
+  criar/mover/apagar; some se a conta não recebeu Teacher Decks).
+
+**Multi-aluno**: uma linha independente POR aluno (como já era), cada uma com o
+`deck_id` do PRÓPRIO aluno. `Promise.all` → **pode haver sucesso parcial**
+(sem atomicidade global entre alunos); cada criação individual é atômica e uma
+falha nunca atribui o cartão ao Deck de outro aluno (toast lista os @usuários
+que falharam).
+
+**Review/FSRS/contagem**: nada novo -- escopo = `getStudyScopeForDeck` sobre o
+subtree; contagem por CardInstance (reverso=2, Cloze=N); FSRS do CardInstance do
+aluno. "Estudar" não existe no lado da professora (o FSRS é do aluno).
+
+**Históricos**: as 5 linhas de `teacher_flashcards` com `deck_id NULL` NÃO foram
+migradas (mesma regra da Fase F); um cartão histórico só recebe Deck se a
+professora o mover explicitamente.
+
+**Limitações registradas**: (a) `teacher_flashcards` continua com escrita só do
+admin por e-mail (026) e `decks_admin_write` deixa o admin apagar QUALQUER Deck
+(inclusive `teacher_root`, cascateando filhos e zerando `deck_id` dos cartões por
+`on delete set null`) -- a proteção "só Deck vazio" vive no domínio
+(`validateDeckDeletion`), não no banco; o teste SQL mostra que professora
+não-admin não apaga `teacher_root`; (b) sem UI para mover/apagar Teacher Deck (as
+funções existem e são testadas); (c) `teacher_root` se chama sempre "Cartões da
+professora" (aluno com 2 professoras vê 2 raízes com o mesmo nome); (d) cópia
+Teacher Card→Meus Decks NÃO implementada; (e) concorrência de 2 abas no limite
+Free, Tags e Painel não tocados.
+
+**Testes versionados** (`tests/fase-g/`): `test_teacher_decks_unit.js` (Node/VM,
+134/134, fr+zh), `test_supabase_real.sql` (Postgres real, transação + ROLLBACK,
+52/52; rodado com aluno 1/2 reais vinculados à professora, mais uma "outra
+professora" criada só dentro da transação), `test_playwright.js` (FR+ZH,
+68/68). Regressão: Fase F unit 68/68 + Playwright 46/46; Fase E unit 75/75 +
+Playwright 38/38. Suítes antigas de consolidação/6D/Anki/áudio NÃO estão
+versionadas -- não foram executadas. Banco após os testes: `decks` 0,
+`teacher_flashcards` 5 (5 com `deck_id` nulo), `own_flashcards` 7, vínculos 12 --
+idêntico ao início, zero resíduo.

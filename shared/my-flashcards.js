@@ -126,6 +126,37 @@ function personalDecksListHTML(decks){
   }).join('');
 }
 
+// ---------- Fase G -- "Cartões da professora" (SOMENTE LEITURA) ----------
+//
+// Teacher Decks que a aluna RECEBEU (kind teacher_root/teacher com
+// owner_id = ela; RLS decks_owner_select já a deixa LER, nunca escrever).
+// Estruturalmente só-leitura: nenhum botão de criar/mover/apagar Deck nem de
+// mudar o Deck de um cartão -- só "Estudar este Deck", que usa o MESMO
+// caminho de sempre (startDeckReviewSession, Fase D; nenhuma fila/FSRS
+// separados). Estudar um Teacher Deck estuda também os descendentes.
+// Cópia para "Meus Decks" NÃO existe (fluxo futuro, fora da Fase G).
+function teacherReceivedDecks(decks){
+  return (decks || []).filter(d => ['teacher_root', 'teacher'].includes(d.kind) && d.owner_id === CURRENT_USER.id);
+}
+
+function teacherDecksReadOnlyHTML(decks){
+  const mine = teacherReceivedDecks(decks);
+  if (!mine.length) return '';
+  const cards = (typeof STATE !== 'undefined' && STATE.cards) || [];
+  const rows = orderedTeacherDecks(decks, mine).map(({ deck, depth }) => {
+    const n = getStudyScopeForDeck(decks, deck.id, cards).length;
+    return `<div class="admin-badge-row" style="padding-left:${depth * 16}px;">
+      <span style="flex:1;">${escapeHTML(deck.name)} <span class="profile-edit-hint">(${n} cartões)</span></span>
+      <button type="button" class="btn btn-secondary" data-study-deck="${deck.id}" ${n ? '' : 'disabled'}>Estudar este Deck</button>
+    </div>`;
+  }).join('');
+  return `<div class="profile-section" id="teacher-decks-section">
+      <div class="section-label">Cartões da professora</div>
+      <p class="profile-edit-hint">Decks organizados pela sua professora. Aqui você só estuda; ela cuida da organização.</p>
+      <div id="teacher-decks-list">${rows}</div>
+    </div>`;
+}
+
 function wireMyDecksSection(wrap){
   wrap.querySelectorAll('[data-study-deck]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -259,6 +290,8 @@ async function renderMyFlashcardsView(opts){
       </div>
       <p class="profile-edit-error" id="my-deck-error"></p>
     </div>
+
+    ${teacherDecksReadOnlyHTML(decks)}
 
     <div class="profile-section">
       <div class="section-label" style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">

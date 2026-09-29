@@ -155,6 +155,9 @@ function canPlaceTeacherNoteInDeck(note, deck){
 // o próprio Deck.
 function canMoveDeck(decks, deck, destination){
   if (!deck || !destination) return { ok: false, reason: 'missing_data' };
+  // Fase G -- Teacher Deck só se move DENTRO da própria árvore (mesma
+  // aluna/professora/idioma); regras próprias em canMoveTeacherDeck().
+  if (deck.kind === 'teacher') return canMoveTeacherDeck(decks, deck, destination);
   if (deck.kind !== 'personal') return { ok: false, reason: 'not_movable_kind' };
   if (destination.id === deck.id) return { ok: false, reason: 'same_deck' };
   if (!['personal_root', 'personal'].includes(destination.kind)){
@@ -383,7 +386,9 @@ function validateDeckMove({ deck, destination, decks }){
 // decidir mover-subtree-vs-apagar-permanente).
 // ============================================================
 function isDeckDeletableKind(deck){
-  return !!deck && deck.kind === 'personal';
+  // Fase G: 'teacher' (subdeck de professora) segue a MESMA regra dos
+  // pessoais (só vazio: sem filhos e sem Notes). teacher_root nunca.
+  return !!deck && (deck.kind === 'personal' || deck.kind === 'teacher');
 }
 
 // hasChildren/hasNotes: booleans que o CHAMADOR já levantou (via
@@ -463,4 +468,69 @@ function assignCourseDeckIds(cards, index){
     if (c.deckId != null) assigned++;
   });
   return assigned;
+}
+
+// ============================================================
+// 12) TEACHER DECKS (Fase G -- cartões da professora integrados ao Deck Engine)
+// ============================================================
+// Domínio PURO. Teacher Deck é propriedade do RELACIONAMENTO
+// professora->aluno->idioma (owner_id = aluno, teacher_id = professora),
+// nunca um agrupamento visual. Mesma árvore de `decks` -- sem estrutura
+// paralela. Regras de banco (trigger decks_validate_hierarchy, RLS,
+// teacher_flashcards_validate_deck) continuam sendo a autoridade final;
+// aqui só se evita mandar ao banco o que o domínio já sabe que ele recusa.
+
+// Decks da árvore que `teacherId` controla para `studentId`+idioma
+// (teacher_root + subdecks). Nunca inclui Deck pessoal/curso/de outra
+// professora/de outro aluno.
+function getTeacherDecksForStudent(decks, { teacherId, studentId, languageAppKey }){
+  return (decks || []).filter(d =>
+    (d.kind === 'teacher_root' || d.kind === 'teacher') &&
+    d.owner_id === studentId && d.teacher_id === teacherId &&
+    d.language_app_key === languageAppKey);
+}
+
+// teacher_root = destino PADRÃO de um cartão novo (nenhuma categoria nova).
+function getTeacherRootDeck(decks, { teacherId, studentId, languageAppKey }){
+  return getTeacherDecksForStudent(decks, { teacherId, studentId, languageAppKey })
+    .find(d => d.kind === 'teacher_root') || null;
+}
+
+// Árvore ordenada (pai antes dos filhos) com profundidade -- pra <select>
+// indentado e lista do aluno. `depth` 0 = teacher_root.
+function orderedTeacherDecks(decks, treeDecks){
+  const list = treeDecks || [];
+  const out = [];
+  const walk = (parentId, depth) => {
+    list.filter(d => (d.parent_deck_id == null ? null : d.parent_deck_id) === parentId)
+      .sort((a, b) => a.id - b.id)
+      .forEach(d => { out.push({ deck: d, depth }); walk(d.id, depth + 1); });
+  };
+  const roots = list.filter(d => d.kind === 'teacher_root');
+  roots.forEach(r => { out.push({ deck: r, depth: 0 }); walk(r.id, 1); });
+  return out;
+}
+
+// Criar subdeck: pai precisa ser teacher_root/teacher DA PRÓPRIA professora.
+function canCreateTeacherSubdeck(parent, { teacherId }){
+  if (!parent) return { ok: false, reason: 'missing_data' };
+  if (!['teacher_root', 'teacher'].includes(parent.kind)) return { ok: false, reason: 'wrong_parent_kind' };
+  if (parent.teacher_id !== teacherId) return { ok: false, reason: 'wrong_teacher' };
+  return { ok: true };
+}
+
+// Mover Teacher Deck: só kind='teacher' (teacher_root nunca move -- é
+// tratado em canMoveDeck via not_movable_kind), destino teacher_root/teacher
+// da MESMA aluna+professora+idioma, nunca ele mesmo nem um descendente
+// (ciclo). Nunca muda aluno/professora/idioma (só troca o pai).
+function canMoveTeacherDeck(decks, deck, destination){
+  if (!deck || !destination) return { ok: false, reason: 'missing_data' };
+  if (deck.kind !== 'teacher') return { ok: false, reason: 'not_movable_kind' };
+  if (destination.id === deck.id) return { ok: false, reason: 'same_deck' };
+  if (!['teacher_root', 'teacher'].includes(destination.kind)) return { ok: false, reason: 'destination_wrong_kind' };
+  if (destination.owner_id !== deck.owner_id) return { ok: false, reason: 'different_student' };
+  if (destination.teacher_id !== deck.teacher_id) return { ok: false, reason: 'different_teacher' };
+  if (destination.language_app_key !== deck.language_app_key) return { ok: false, reason: 'different_language' };
+  if (isDescendantOf(decks, destination.id, deck.id)) return { ok: false, reason: 'destination_is_descendant' };
+  return { ok: true };
 }
