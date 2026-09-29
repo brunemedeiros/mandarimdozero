@@ -80,9 +80,10 @@ expected = {"allemand / allemande", "américain / américaine", "anglais / angla
 check("relatório fr = exatamente as 14 esperadas", disp == expected)
 check("relatório zh vazio", st.report_affected_entries(zh, "zh") == [])
 
-# a 9 entradas com barra são justamente as que o gerador antigo tratou (hash != texto exibido)
+# Antes da regeneração, só as 9 entradas com barra tinham hash != texto exibido
+# (gerador antigo cortava na barra). Depois de regenerar, todas batem.
 mismatched = {k for k, v in fr.items() if md5(k) != v}
-check("as 9 com hash!=exibido são as 9 com barra", mismatched == {d for d in expected if " / " in d})
+check("manifest fr: todo hash == md5 do texto exibido (regenerado)", mismatched == set())
 check("todo mismatch de hash é coberto por uma regra", mismatched <= disp)
 check("zh: todo hash == texto exibido", all(md5(k) == v for k, v in zh.items()))
 
