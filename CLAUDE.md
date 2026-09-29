@@ -16015,3 +16015,225 @@ bifurcação Legacy de criação removida), `shared/own-flashcards.js`
 migrado + comentário corrigido), `shared/public-profile.js` (+7/-8,
 import migrado) -- 115 inserções/89 deleções no total, mais esta seção
 do CLAUDE.md.
+
+## Prompt-mestre "Decks, Tags e Painel" -- Fase A (auditoria pré-Deck
+Engine, só leitura) + Fase B (modelo de dados de Deck)
+
+Prompt-mestre novo, distinto da série CONSOLIDAÇÃO (que fechou o motor
+Note/CardType/CardInstance) -- fonte de verdade é o documento externo
+"Arquitetura Total -- Decks, Tags, Painel e Sistema de Estudo" (40
+seções, entregue pela autora), nunca uma arquitetura alternativa. Mesma
+disciplina de fatiamento por autorização explícita de toda a sessão:
+Fase A (auditoria, zero código) -> Fase B (modelo de dados, esta
+entrega) -> Fase C (Deck Engine, NÃO iniciada).
+
+**Fase A -- achados principais (checkpoint entregue só no chat, sem
+tocar em nenhum arquivo, confirmado por `git status` limpo)**: Note/
+Field/CardType/CardInstance já existiam prontos desde as Fases 4-7j;
+CardInstance nunca é persistido (sempre derivado em runtime via
+`buildEngineCardsFromRow()`); FSRS já é global por conta; Tags já
+pertencem à Note (`tags text[]`, migration 048); Anki Import já
+calculava `deckTree`/`deckPath` em memória (`shared/anki-import.js`,
+Fase 7j) mas descartava depois do resumo; **não existia nenhuma
+entidade Deck, nenhuma coluna `deck_id`, nenhuma árvore** -- Study
+Trail continuava com pipeline 100% próprio (`buildCardsFromUnits()`,
+fora do banco) e o teto de 20 cartões grátis (Fase 5.1) contava
+linhas/Notes, não CardInstances.
+
+**Fase B -- o que foi feito**: migration `049_create_decks_table.sql`
+(aplicada AO VIVO via `mcp__Supabase__apply_migration`, projeto
+`eigjocalzwamisgqilhg`) -- só fundação de dados, nenhum Deck Engine,
+seguindo à risca as 12 decisões arquiteturais já travadas pelo
+prompt-mestre (Note continua fonte de verdade; CardInstance nunca
+persistido; Deck nunca contém Fields/conteúdo/direção/Card Type; uma
+Note tem no máximo 1 Deck efetivo; Cards irmãos -- Normal-reverso,
+Cloze multi-marca -- sempre compartilham Deck porque a associação vive
+na NOTE, nunca no CardInstance que nem existe persistido; `deck_id`
+nunca no CardInstance; Curso ≠ Deck, `unitId`/nível/módulo/lição nunca
+viram `deck_id`; Study Trail não migrado nesta fase; Teacher Deck só
+schema, UI fica pra Fase H; Public Deck só suporte de dado, zero
+experiência pública; Tags/FSRS intocados).
+
+**Tabela `decks`** (auditada a convenção do schema real antes de
+escrever -- `bigint generated always as identity`, `uuid references
+auth.users(id) on delete cascade`, `text not null check (col in
+(...))` pra todo enum-like, nunca tipo `enum` nativo, mesmo padrão de
+`teacher_students`/`teacher_flashcards`/`profiles`): `id`, `owner_id`
+(nullable -- de quem é a ÁRVORE; sempre populado exceto em `kind=
+'course'`), `teacher_id` (nullable, só em `teacher_root`/`teacher` --
+mesmo par de nomes que `teacher_flashcards.teacher_id`/`student_id` já
+usa, `owner_id` fazendo o papel de "aluna" nesse caso), `parent_deck_id`
+(self-FK, `on delete cascade`), `kind` (6 valores: `root`/
+`personal_root`/`personal`/`course`/`teacher_root`/`teacher` --
+**nenhum kind `'public'` separado**, "público" é sempre uma flag
+`is_public` sobre um Deck pessoal já existente, nunca uma categoria
+estrutural nova, decisão explícita da seção 10), `name`,
+`language_app_key` (mesmo check de sempre, `frances`/`mandarim`/
+`portugues`), `is_public boolean default false`, `created_at`. Único
+CHECK direto na tabela: `parent_deck_id is null or parent_deck_id <>
+id` (auto-parent nunca válido). Índices únicos parciais (`decks_unique_
+root`/`decks_unique_personal_root`/`decks_unique_teacher_root`) --
+no máximo 1 raiz/Meus Decks por (dono, idioma), 1 raiz de professora
+por (aluna, professora, idioma). Índices normais em `parent_deck_id`/
+`owner_id`/`teacher_id`/`language_app_key`/`kind`.
+
+**Trigger `decks_validate_hierarchy()`** (BEFORE INSERT/UPDATE, não só
+CHECK -- a validação cruza linhas: o parent precisa existir e ter kind/
+dono/idioma compatíveis com o filho, e detecção de ciclo mais profundo
+precisa andar a árvore) -- regras por `kind`: `root` nunca tem parent/
+teacher_id, sempre owner_id, nunca `is_public`; `personal_root` sempre
+filho de um `root` do MESMO dono/idioma; `personal` sempre filho de
+`personal_root`/`personal` do mesmo dono/idioma; `teacher_root` sempre
+filho de um `root` da MESMA aluna/idioma, sempre com owner_id (aluna) +
+teacher_id (professora); `teacher` sempre filho de `teacher_root`/
+`teacher` da mesma aluna+professora+idioma; `course` nunca tem owner_id/
+teacher_id (conteúdo do sistema, não de conta -- nenhuma linha deste
+`kind` é criada por esta migration, Study Trail continua fora do banco).
+Detecção de ciclo mais profundo (walk pela cadeia de `parent_deck_id`,
+limite de 100 níveis) -- só importa de verdade quando um futuro "mover
+Deck" (Fase C) fizer UPDATE de `parent_deck_id`; testada e confirmada
+funcionando via um cenário real (2 decks `personal` irmãos, kinds/dono/
+idioma compatíveis entre si, só o walk de ancestralidade barra).
+
+**RLS de `decks`** (auditadas antes as policies de `teacher_students`/
+`teacher_flashcards`/`own_flashcards` pra seguir a mesma convenção --
+nome `{tabela}_{qualificador}_{ação}`, admin via e-mail hardcoded):
+`decks_owner_select`/`decks_teacher_select` (leitura ampla -- dono lê a
+própria árvore inteira incluindo `teacher_root`/`teacher` que ELA é a
+aluna, mesmo espírito de "aluno pode estudar/visualizar" da seção 15;
+professora lê toda a árvore que controla, de qualquer aluna);
+`decks_owner_write` (só `kind='personal'` que ela mesma possui -- nunca
+`root`/`personal_root`, que são bootstrap-only); `decks_teacher_write`
+(só `kind='teacher'` na própria árvore -- nunca `teacher_root`, mesmo
+motivo); `decks_admin_write` (bypass total, mesmo padrão de sempre).
+Confirmado por teste ao vivo (ver abaixo): aluno NUNCA tem write sobre
+Teacher Deck (nem o próprio), curso não é alterável por ninguém além do
+admin, conta B nunca lê/altera Deck pessoal de conta A.
+
+**`own_flashcards`/`teacher_flashcards` ganham `deck_id bigint
+references decks(id) on delete set null`** (nullable, indexado, `on
+delete set null` -- NUNCA cascade, apagar um Deck não pode apagar a
+Note/Fields/FSRS/progresso dela, só a organização volta a "sem Deck",
+igual a uma linha Legacy hoje). **Mesma coluna serve Legacy e Nativo**
+-- Deck é eixo de ORGANIZAÇÃO, ortogonal a Legacy x Nativo, mesmo
+espírito de `tags` (migration 048) -- nenhuma segunda coluna/estrutura
+pra Legacy, conforme a seção 12 exigia. Cards irmãos (Normal-reverso,
+Cloze multi-marca) **sempre compartilham Deck estruturalmente** -- não
+por nenhuma lógica nova, mas porque não existe (nunca existiu, nunca
+vai existir) `deck_id` por CardInstance pra divergir: todas as
+CardInstances de uma Note são derivadas em runtime da MESMA linha, que
+só tem 1 `deck_id`.
+
+**Triggers `own_flashcards_validate_deck()`/
+`teacher_flashcards_validate_deck()`** (BEFORE INSERT/UPDATE, rodando
+como o papel que já faz a escrita -- nunca SECURITY DEFINER -- porque a
+RLS de leitura de `decks` já filtra naturalmente um `deck_id` de outra
+conta, reforçando a segurança numa 2ª camada sem substituir a RLS de
+escrita das duas tabelas): Note própria só aceita Deck `personal_root`/
+`personal` do MESMO dono+idioma; Note de professora só aceita Deck
+`teacher_root`/`teacher` da MESMA aluna+professora+idioma. Testado que
+uma Note própria NUNCA consegue apontar pra Teacher Deck (nem o dela
+mesma) e vice-versa.
+
+**`ensure_user_decks(p_owner_id, p_language_app_key)`** (SECURITY
+DEFINER, mesmo padrão de `get_teacher_student_metrics`, migration 029
+-- precisa bypassar RLS porque cria `root`/`personal_root`, que a RLS
+normal de escrita do usuário deliberadamente não permite) -- idempotente
+(reconsulta antes de inserir, `on conflict do nothing` + releitura pra
+corrida concorrente), checagem de autorização interna (só a própria
+conta ou admin pode bootstrapar pra um `owner_id`). **Escopo desta
+migration: só `root`+`personal_root`** -- `teacher_root` fica pra
+quando a Fase H decidir o mecanismo de disparo (ex.: no momento em que
+um vínculo `teacher_students` é criado), não implementado aqui de
+propósito. **Não invocada nesta migration pra nenhuma das 22 contas
+reais existentes** -- decisão documentada, não um bloqueio: nada
+consome `root`/`personal_root` ainda (Deck Engine, o único consumidor
+futuro, não existe), backfill silencioso seria especulativo; fica pra
+quando a Fase C decidir se chama isto sob demanda (lazy, na 1ª leitura
+de Decks) ou via backfill explícito.
+
+**Testes realizados, todos ao vivo contra o Supabase real (transação +
+`ROLLBACK`, nunca dado de teste sobrevivendo) -- 42 cenários, 0
+falhas**: **Grupo 1 (16, hierarquia/integridade)** -- criar root/
+personal_root/personal/personal aninhado/teacher_root/teacher child/
+course OK; parent inexistente, self-parent (via UPDATE), kind inválido,
+idioma inválido, `personal_root` com parent de kind errado, `personal_
+root` de dono divergente do parent, `teacher_root` sem `teacher_id`,
+`course` com `owner_id` setado -- todos rejeitados com a mensagem certa.
+**Grupo 2 (10, Note -> Deck)** -- ciclo profundo real (2 decks
+`personal` irmãos, kinds compatíveis, só o walk barra) rejeitado; own
+Note aceita Deck pessoal certo, rejeita dono diferente/idioma
+diferente/Teacher Deck; teacher Note aceita Teacher Deck certo, rejeita
+professora errada/Deck pessoal; confirmado `deck_id` é coluna simples
+(nunca array/N:N) e que uma Note nativa `normal_reversed` continua com
+1 `deck_id` só (irmãos compartilham). **Grupo 3 (5, inicialização)** --
+1ª chamada de `ensure_user_decks` cria root+personal_root; 2ª chamada
+idempotente (mesmos ids); confirmado só 1 linha de cada kind no banco
+depois das 2 chamadas; bootstrap por conta não-dona/não-admin rejeitado
+com `not_authorized`; bootstrap por admin pra OUTRA conta (bypass)
+funciona. **Grupo 4 (11, segurança/RLS, via `set local role
+authenticated` + `set local request.jwt.claims` simulando sessões
+reais de 3 contas distintas)** -- conta B não lê/não altera/não cria
+Deck com `owner_id` de A (RLS bloqueia as 3 formas, nome de A nunca
+mudou); aluna PODE ler seu próprio Teacher Deck mas NÃO pode alterá-lo;
+professora lê+cria na própria árvore de Teacher Decks; aluno não altera
+nem cria Deck de curso. **Compatibilidade** -- confirmado ao vivo que
+`teacher_flashcards` (5 linhas) e `own_flashcards` (7 linhas) continuam
+com a MESMA contagem e o MESMO hash agregado (id+front+back_trans+
+fields+card_generation_mode+tags+revision) de antes de toda a sessão de
+teste, `deck_id` NULL em 100% das linhas reais (nenhum backfill), 0
+linhas em `decks` (todo teste rolou back), nenhuma tabela
+`*card_instance*` criada. **Regressão** -- `git status`/`git diff
+--stat` confirmam que só a migration foi adicionada, nenhum arquivo
+cliente (`.js`/`.html`) tocado -- sem superfície de regressão client-side
+pra testar.
+
+**O que NÃO foi implementado nesta fase (confirmado explicitamente, §21
+do prompt-mestre)**: Deck Engine; ancestors/descendants/subtree
+aggregation; New/Learning/Review por Deck; Study now; Add card dentro
+do Deck; move/delete Deck; Painel; Deck UI completa; migração de Study
+Trail; Teacher Deck UI; Public Deck UI/import; Anki destination UI/
+export hierárquico; mudança do teto Free (continua contando linhas, não
+CardInstances -- `Fase D` vai calcular `generatedCardInstanceCount(Note)`
+a partir de `card_generation_mode` via `buildEngineCardsFromRow(row,
+opts).length`, sem campo `card_count` persistido); mudança de FSRS/
+Review.
+
+**Decisões tomadas nesta fase (só as necessárias pra transformar o
+documento em schema, nenhuma delas reabre as 12 já travadas)**: (1)
+`kind` como coluna `text check`, não enum nativo nem tabela de lookup --
+mesma convenção já confirmada em todo o schema existente; (2)
+`owner_id`+`teacher_id` (nunca um 3º vocabulário) -- mirror exato do par
+que `teacher_flashcards` já usa; (3) `is_public` é flag sobre Deck
+pessoal, nunca um `kind` próprio; (4) unicidade estrutural via índice
+parcial, não `UNIQUE` simples (só se aplica a alguns `kind`); (5)
+integridade cross-row via trigger, não só CHECK (parent precisa existir
+com kind/dono/idioma compatíveis -- inexpressável num CHECK simples,
+documentado explicitamente em vez de escondido só na UI); (6) `teacher_
+root`/`root`/`personal_root` são bootstrap-only (só `ensure_user_decks`/
+admin escrevem), nunca criáveis por ação normal do usuário -- decisão
+implícita da própria arquitetura de RLS, não pedida à parte; (7) não
+bootstrapar as 22 contas reais existentes nesta migration (documentado
+acima, não um bloqueio -- nada consome ainda). Nenhuma decisão
+bloqueou a migration -- não foi necessário parar e reportar impasse.
+
+**Próxima fase (C -- Deck Engine)**: pré-requisitos já entregues por
+esta fase -- tabela `decks` real, hierarquia íntegra, `deck_id` nas 2
+tabelas de Note, RLS protegendo os 4 tipos de Deck, bootstrap
+idempotente pronto (sem consumidor ainda). Decisões que a Fase C
+ainda precisa tomar, não resolvidas aqui de propósito: quando/como
+disparar `ensure_user_decks` (lazy vs. backfill, e se estende pra
+`teacher_root` também); algoritmo de agregação de contagem por
+subtree (ancestors/descendants); mecanismo de "mover Deck" (reparent
+via UPDATE, que o trigger de ciclo já suporta, mas sem UI/API ainda);
+como Study Trail (Fase E) se encaixa -- Deck de curso por aluna vs.
+árvore global por idioma, deixado explicitamente em aberto na seção
+`course` do trigger; cálculo de `generatedCardInstanceCount(Note)` pro
+novo teto Free (Fase D).
+
+Nenhum passo manual pendente pra autora -- migration `049` já aplicada
+ao vivo via `mcp__Supabase__apply_migration`.
+
+**PARE conforme instrução explícita -- Fase C (Deck Engine) NÃO
+iniciada.** Próxima etapa só começa depois de autorização explícita da
+autora, com este checkpoint já entregue antes de pedir luz verde.
