@@ -14,6 +14,8 @@ declare
   v_root1 bigint; v_pr1 bigint; v_course bigint; v_id bigint; v_n int; v_hist bigint[];
   v_fields jsonb := '[{"id":"f1","lang":"fr","role":null,"content":{"value":"a"},"audio":null,"image":null,"pinyinFieldId":null},{"id":"f2","lang":"pt-BR","role":null,"content":{"value":"b"},"audio":null,"image":null,"pinyinFieldId":null}]'::jsonb;
   r record; msg text; okflag boolean;
+  v_hn int; v_n2 int; v_child bigint; v_bsub bigint; v_bchild bigint; v_bcard bigint; v_x bigint; v_p1 bigint; v_p2 bigint;
+  v_tmp uuid := gen_random_uuid(); v_troot_tmp bigint;
 begin
   select id into t from auth.users where email = ADMIN_EMAIL;
   select student_id into s1 from teacher_students where teacher_id = t and language_app_key = 'frances' and status = 'active' order by student_id limit 1;
@@ -200,6 +202,122 @@ begin
   delete from decks where id = subb;
   get diagnostics v_n = row_count;
   insert into results values ('16g. professora B apaga subdeck vazio proprio', v_n = 1, 'rows=' || v_n);
+
+  -- ===== J. HARDENING (migration 054): proteção estrutural contra DELETE de Teacher Decks =====
+  -- J1. admin (bypass de RLS via decks_admin_write) NÃO apaga teacher_root (nem vazio)
+  reset role;
+  perform set_config('request.jwt.claims', json_build_object('sub', t, 'role', 'authenticated', 'email', ADMIN_EMAIL)::text, true);
+  set local role authenticated;
+  select count(*) into v_hn from teacher_flashcards where deck_id is not null;
+  begin
+    delete from decks where id = troot_b;   -- teacher_root da professora B, VAZIO
+    insert into results values ('J1a. admin NAO apaga teacher_root vazio', false, 'APAGOU');
+  exception when others then insert into results values ('J1a. admin NAO apaga teacher_root vazio', sqlerrm like '%teacher_root nao pode%', sqlerrm); end;
+  begin
+    delete from decks where id = a1;        -- teacher_root com filhos e cartões
+    insert into results values ('J1b. admin NAO apaga teacher_root com filhos/cartoes', false, 'APAGOU');
+  exception when others then insert into results values ('J1b. admin NAO apaga teacher_root com filhos/cartoes', sqlerrm like '%teacher_root nao pode%', sqlerrm); end;
+  -- J2. teacher com filho -> rejeitado (admin)
+  insert into decks(owner_id, teacher_id, parent_deck_id, kind, name, language_app_key) values (s1, t, sub2, 'teacher', 'Filho', 'frances') returning id into v_child;
+  begin
+    delete from decks where id = sub2;
+    insert into results values ('J2. admin NAO apaga teacher com subdeck', false, 'APAGOU');
+  exception when others then insert into results values ('J2. admin NAO apaga teacher com subdeck', sqlerrm like '%subdecks%', sqlerrm); end;
+  -- J3. teacher com Teacher Card -> rejeitado (admin); deck_id do cartão intacto
+  begin
+    delete from decks where id = sub1;      -- sub1 tem o cartão '7b' (normal_reversed)
+    insert into results values ('J3. admin NAO apaga teacher com cartao', false, 'APAGOU');
+  exception when others then insert into results values ('J3. admin NAO apaga teacher com cartao', sqlerrm like '%cartoes%', sqlerrm); end;
+  select count(*) into v_n from teacher_flashcards where deck_id = sub1;
+  insert into results values ('J3b. cartao continua com deck_id = sub1 (nada virou NULL)', v_n >= 1, v_n::text);
+  select count(*) into v_n2 from teacher_flashcards where deck_id is not null;
+  insert into results values ('J3c. total de cartoes com deck_id inalterado apos as tentativas', v_n2 = v_hn, v_n2 || ' = ' || v_hn);
+  -- J4. teacher VAZIO (folha) -> admin apaga (comportamento definido: só Deck vazio some)
+  delete from decks where id = v_child;
+  get diagnostics v_n = row_count;
+  insert into results values ('J4. admin apaga Teacher Deck vazio (folha)', v_n = 1, 'rows=' || v_n);
+  -- J5. professora NÃO-admin B: subdeck com filho e com cartão protegidos; teacher_root, RLS/trigger
+  reset role;
+  perform set_config('request.jwt.claims', json_build_object('sub', u, 'role', 'authenticated', 'email', 'outra@example.com')::text, true);
+  set local role authenticated;
+  insert into decks(owner_id, teacher_id, parent_deck_id, kind, name, language_app_key) values (s1, u, troot_b, 'teacher', 'B-sub', 'frances') returning id into v_bsub;
+  insert into decks(owner_id, teacher_id, parent_deck_id, kind, name, language_app_key) values (s1, u, v_bsub, 'teacher', 'B-sub-filho', 'frances') returning id into v_bchild;
+  begin
+    delete from decks where id = v_bsub;
+    insert into results values ('J5a. professora nao-admin NAO apaga o proprio teacher com filho', false, 'APAGOU');
+  exception when others then insert into results values ('J5a. professora nao-admin NAO apaga o proprio teacher com filho', sqlerrm like '%subdecks%', sqlerrm); end;
+  delete from decks where id = troot_b;
+  get diagnostics v_n = row_count;
+  insert into results values ('J5b. professora nao-admin: teacher_root protegido (RLS 0 linhas)', v_n = 0, 'rows=' || v_n);
+  -- cartão da professora B (escrita admin-only) dentro de v_bchild
+  reset role;
+  perform set_config('request.jwt.claims', json_build_object('sub', t, 'role', 'authenticated', 'email', ADMIN_EMAIL)::text, true);
+  set local role authenticated;
+  insert into teacher_flashcards(teacher_id, student_id, language_app_key, deck_id, front, back_trans, fields, card_generation_mode)
+    values (u, s1, 'frances', v_bchild, 'a', 'b', v_fields, 'normal') returning id into v_bcard;
+  reset role;
+  perform set_config('request.jwt.claims', json_build_object('sub', u, 'role', 'authenticated', 'email', 'outra@example.com')::text, true);
+  set local role authenticated;
+  begin
+    delete from decks where id = v_bchild;
+    insert into results values ('J5c. professora nao-admin NAO apaga o proprio teacher com cartao', false, 'APAGOU');
+  exception when others then insert into results values ('J5c. professora nao-admin NAO apaga o proprio teacher com cartao', sqlerrm like '%cartoes%', sqlerrm); end;
+  reset role;
+  select deck_id into v_x from teacher_flashcards where id = v_bcard;
+  insert into results values ('J5d. cartao da professora B continua em v_bchild', v_x = v_bchild, v_x::text);
+  -- J6. mesmo como superusuario (SQL direto/função): trigger vale para todos os papéis
+  begin
+    delete from decks where id = a1;
+    insert into results values ('J6a. superusuario/SQL direto NAO apaga teacher_root', false, 'APAGOU');
+  exception when others then insert into results values ('J6a. superusuario/SQL direto NAO apaga teacher_root', sqlerrm like '%teacher_root nao pode%', sqlerrm); end;
+  begin
+    delete from decks where id = v_bchild;
+    insert into results values ('J6b. superusuario/SQL direto NAO apaga teacher com cartao', false, 'APAGOU');
+  exception when others then insert into results values ('J6b. superusuario/SQL direto NAO apaga teacher com cartao', sqlerrm like '%cartoes%', sqlerrm); end;
+  -- J7. Deck pessoal: regras anteriores (dono apaga; cascata de filhos continua)
+  perform set_config('request.jwt.claims', json_build_object('sub', s1, 'role', 'authenticated', 'email', 'aluno@example.com')::text, true);
+  set local role authenticated;
+  select id into v_pr1 from decks where kind = 'personal_root' and owner_id = s1 and language_app_key = 'frances';
+  insert into decks(owner_id, parent_deck_id, kind, name, language_app_key) values (s1, v_pr1, 'personal', 'P1', 'frances') returning id into v_p1;
+  insert into decks(owner_id, parent_deck_id, kind, name, language_app_key) values (s1, v_p1, 'personal', 'P1-filho', 'frances') returning id into v_p2;
+  delete from decks where id = v_p1;
+  get diagnostics v_n = row_count;
+  select count(*) into v_n2 from decks where id in (v_p1, v_p2);
+  insert into results values ('J7a. Deck pessoal com filho: dono apaga e a cascata segue (regra anterior)', v_n = 1 and v_n2 = 0, 'rows=' || v_n || ' restantes=' || v_n2);
+  delete from decks where id = v_pr1;
+  get diagnostics v_n = row_count;
+  insert into results values ('J7b. personal_root segue nao-apagavel pelo dono (RLS: so kind=personal)', v_n = 0, 'rows=' || v_n);
+  -- J8. Deck de curso: aluno não apaga (RLS); admin apaga (regra anterior intacta)
+  delete from decks where id = v_course;
+  get diagnostics v_n = row_count;
+  insert into results values ('J8a. aluno nao apaga Course Deck (RLS)', v_n = 0, 'rows=' || v_n);
+  reset role;
+  perform set_config('request.jwt.claims', json_build_object('sub', t, 'role', 'authenticated', 'email', ADMIN_EMAIL)::text, true);
+  set local role authenticated;
+  delete from decks where id = v_course;
+  get diagnostics v_n = row_count;
+  insert into results values ('J8b. admin apaga Course Deck (regra anterior intacta)', v_n = 1, 'rows=' || v_n);
+  reset role;
+  -- J9. remoção de CONTA (cascata de auth.users) não fica travada pelo trigger
+  begin
+    insert into auth.users(id, instance_id, aud, role, email) values (v_tmp, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'tmp-fase-g@example.invalid');
+    insert into teacher_students(teacher_id, student_id, language_app_key, status) values (t, v_tmp, 'frances', 'active');
+    perform set_config('request.jwt.claims', json_build_object('sub', t, 'role', 'authenticated', 'email', ADMIN_EMAIL)::text, true);
+    set local role authenticated;
+    select teacher_root_deck_id into v_troot_tmp from ensure_teacher_decks(v_tmp, 'frances');
+    insert into teacher_flashcards(teacher_id, student_id, language_app_key, deck_id, front, back_trans, fields, card_generation_mode)
+      values (t, v_tmp, 'frances', v_troot_tmp, 'a', 'b', v_fields, 'normal');
+    reset role;
+    delete from auth.users where id = v_tmp;
+    select count(*) into v_n from decks where owner_id = v_tmp;
+    insert into results values ('J9. remocao da conta do aluno leva a arvore junto (cascata nao bloqueada)', v_n = 0, 'restantes=' || v_n);
+  exception when others then
+    reset role;
+    insert into results values ('J9. remocao da conta do aluno leva a arvore junto (cascata nao bloqueada)', false, sqlerrm);
+  end;
+  -- J10. históricos intactos
+  select count(*) into v_n from teacher_flashcards where id = any(v_hist) and deck_id is null;
+  insert into results values ('J10. 5 historicos continuam com deck_id nulo', v_n = coalesce(array_length(v_hist,1),0), v_n::text);
 
   reset role;
   -- ===== I. históricos =====

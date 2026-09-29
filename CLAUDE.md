@@ -17052,3 +17052,19 @@ Playwright 38/38. Suítes antigas de consolidação/6D/Anki/áudio NÃO estão
 versionadas -- não foram executadas. Banco após os testes: `decks` 0,
 `teacher_flashcards` 5 (5 com `deck_id` nulo), `own_flashcards` 7, vínculos 12 --
 idêntico ao início, zero resíduo.
+
+## Fase G -- hardening: proteção estrutural dos Teacher Decks contra DELETE (2026-09-29)
+
+**Lacuna**: `decks_admin_write` (ALL) deixava o admin apagar qualquer Deck, inclusive `teacher_root`; como `teacher_flashcards.deck_id` é `ON DELETE SET NULL`, isso desassociaria cartões em silêncio. Auditado ao vivo antes de alterar: FK `teacher_flashcards_deck_id_fkey` = `ON DELETE SET NULL`; `decks_parent_deck_id_fkey` = `ON DELETE CASCADE`; único trigger de `decks` era `decks_validate_hierarchy` (sem DELETE); policies intactas (`decks_admin_write` ALL por e-mail, `decks_teacher_write` só `kind='teacher'`, `decks_owner_write` só `personal`).
+
+**Migration `054_protect_teacher_decks_delete.sql`** (aditiva, aplicada ao vivo; nenhuma policy/FK/migration antiga alterada): trigger `BEFORE DELETE` em `decks` (`decks_protect_teacher_delete`, SECURITY DEFINER, `search_path=public,auth`, sem EXECUTE para public/anon/authenticated):
+- `teacher_root`: nunca apagável (vazio ou não), por qualquer papel (admin, professora, SQL direto, função);
+- `teacher`: só apagável se vazio (sem subdecks e sem `teacher_flashcards`); senão exceção `23503`;
+- exceção única: remoção da CONTA (cascata de `auth.users`) -- se aluno ou professora do Deck já não existe em `auth.users`, o Deck pode ir junto (testado com usuário temporário);
+- `personal`/`personal_root`/`root`/`course`: sem mudança. SECURITY DEFINER foi necessário: o trigger roda como quem apaga e `authenticated` não lê `auth.users` (o 1º teste real falhou com `permission denied for table users`; corrigido).
+
+**Testes** (`tests/fase-g/test_supabase_real.sql`, seção J, transação + ROLLBACK; rodada ao vivo em versão enxuta com admin + professora B não-admin criada na transação + aluno + vínculo ativo, 19/19 ok: J1 admin não apaga teacher_root; J2 teacher com filho; J3 teacher com cartão e nenhum `deck_id` virou NULL; J4 folha vazia apagável; J5 não-admin protegida por RLS+trigger; J6 SQL direto; J7 pessoal segue regra anterior; J8 curso segue regra anterior; J9 cascata de conta; J10 5 históricos intactos). O arquivo versionado completo (seção J embutida no cenário maior) NÃO foi executado inteiro nesta rodada -- só a versão enxuta acima. Node/VM G 134/134, Playwright G 68/68 (FR+ZH), regressão F 68/68 + 46/46, E 75/75 + 38/38. `node --check` ok. Banco antes/depois idêntico: decks 0; teacher_flashcards 5 (hash `c903f626...`, 5 com `deck_id` nulo); own_flashcards 7 (hash `86fbf5d2...`); sem usuário temporário.
+
+**Confirmações**: `fr/app.js`/`zh/app.js` intocados (linha `(de)` intacta); `ec7f513` inexistente; nenhum cartão histórico alterado; nenhum `deck_id` zerado.
+
+**Limitações restantes**: escrita de `teacher_flashcards` segue admin-only (026); a UI ainda não oferece mover/apagar Teacher Deck (funções existem e passam pelo trigger); `teacher_root` sempre chamado "Cartões da professora"; cópia Teacher Card→Meus Decks, Tags e Painel não implementados; conta com 2 professoras vê 2 raízes de mesmo nome.
