@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       modo:
-        description: "laboratorio = gera variantes pra ouvir | regenerar = refaz os mp3 afetados pelas regras"
+        description: "laboratorio = gera variantes pra ouvir | regenerar = refaz os mp3 afetados pelas regras | gerar-faltantes = cria mp3 para textos sem áudio (zh e fr)"
         type: choice
-        options: [laboratorio, regenerar]
+        options: [laboratorio, regenerar, gerar-faltantes]
         default: laboratorio
 
 permissions:
@@ -39,18 +39,24 @@ jobs:
       - name: Regenerar
         if: inputs.modo == 'regenerar'
         run: python3 fr/scripts/regenerate_spoken_audio.py
+      - name: Gerar faltantes (zh)
+        if: inputs.modo == 'gerar-faltantes'
+        run: node fr/scripts/list_missing_audio.js zh | python3 fr/scripts/generate_missing_audio.py zh
+      - name: Gerar faltantes (fr)
+        if: always() && inputs.modo == 'gerar-faltantes'
+        run: node fr/scripts/list_missing_audio.js fr | python3 fr/scripts/generate_missing_audio.py fr
       - name: Commitar
-        if: always() && inputs.modo == 'regenerar'
+        if: always() && inputs.modo != 'laboratorio'
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add fr/audio fr/audio-manifest.js
+          git add fr/audio fr/audio-manifest.js zh/audio zh/audio-manifest.js
           git diff --cached --quiet || git commit -m "Regenera áudios com a camada de texto falado (Chirp 3 HD)"
           git push
       # Commits feitos pelo próprio workflow (GITHUB_TOKEN) NÃO disparam a
       # publicação do site sozinhos -- pede explicitamente.
       - name: Publicar o site
-        if: always() && inputs.modo == 'regenerar'
+        if: always() && inputs.modo != 'laboratorio'
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run deploy-pages.yml --ref main

@@ -88,10 +88,19 @@ def _words_missing_from_transcript(source_text, transcript):
     return source_words - transcript_words
 
 
-def _synthesize_raw(text, retries=3):
+# Voz e locale por idioma (fr é o padrão -- todo o resto do pipeline continua igual).
+_VOICE_BY_LANG = {
+    "fr": ("fr-FR", None),  # None = usa config.TTS_VOICE
+    "zh": ("cmn-CN", "cmn-CN-Chirp3-HD-Achernar"),
+}
+_STT_LOCALE_BY_LANG = {"fr": "fr-FR", "zh": "cmn-Hans-CN"}
+
+
+def _synthesize_raw(text, retries=3, lang="fr"):
     body = json.dumps({
         "input": {"text": text},
-        "voice": {"languageCode": "fr-FR", "name": config.TTS_VOICE},
+        "voice": {"languageCode": _VOICE_BY_LANG[lang][0],
+                  "name": _VOICE_BY_LANG[lang][1] or config.TTS_VOICE},
         "audioConfig": {"audioEncoding": "MP3"},
     })
     last_error = None
@@ -113,9 +122,9 @@ def _synthesize_raw(text, retries=3):
     raise RuntimeError(f"TTS falhou para o texto {text!r}: {last_error}")
 
 
-def _transcribe(audio_bytes):
+def _transcribe(audio_bytes, lang="fr"):
     body = {
-        "config": {"encoding": "MP3", "sampleRateHertz": 24000, "languageCode": "fr-FR"},
+        "config": {"encoding": "MP3", "sampleRateHertz": 24000, "languageCode": _STT_LOCALE_BY_LANG[lang]},
         "audio": {"content": base64.b64encode(audio_bytes).decode()},
     }
     try:
