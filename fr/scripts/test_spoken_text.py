@@ -63,6 +63,8 @@ del st.SPOKEN_OVERRIDES["fr"]["un / une"]
 # --- explain ----------------------------------------------------------------
 check("explain slash", st.explain_spoken_text("un / une", "fr") == ["fr.slash-alternatives"])
 check("explain paren", st.explain_spoken_text("un kilo (de)", "fr") == ["fr.parenthetical-particle"])
+check("l'âge sem circunflexo", st.to_spoken_text("l'âge", "fr") == "l'age")
+check("quel âge não muda", st.to_spoken_text("t'as quel âge ?", "fr") == "t'as quel âge ?")
 check("explain nada", st.explain_spoken_text("Bonjour !", "fr") == [])
 
 # --- contra o manifest REAL --------------------------------------------------
@@ -76,8 +78,9 @@ affected = st.report_affected_entries(fr, "fr")
 disp = {d for d, _, _ in affected}
 expected = {"allemand / allemande", "américain / américaine", "anglais / anglaise", "brésilien / brésilienne",
             "espagnol / espagnole", "français / française", "italien / italienne", "portugais / portugaise",
-            "un / une", "un kilo (de)", "une bouteille (de)", "une tranche (de)", "l'œuf", "L'œuf est cuit."}
-check("relatório fr = exatamente as 14 esperadas", disp == expected)
+            "un / une", "un kilo (de)", "une bouteille (de)", "une tranche (de)", "l'œuf", "L'œuf est cuit.",
+            "l'âge", "Quel est l'âge de ton père ?"}
+check("relatório fr = exatamente as 16 esperadas", disp == expected)
 check("relatório zh vazio", st.report_affected_entries(zh, "zh") == [])
 
 # Antes da regeneração, só as 9 entradas com barra tinham hash != texto exibido

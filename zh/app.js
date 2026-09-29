@@ -4333,7 +4333,7 @@ function buildFullSentenceExercises(unit){
     }
 
     const distractorSentences = distractors
-      .filter(blocks => blocks.map(b => b.c).join('') !== phrase.c) // nunca deixa um distrator coincidir com a frase correta
+      .filter(blocks => blocks.map(b => b.c).join('') !== phrase.blocks.map(b => b.c).join('')) // nunca deixa um distrator coincidir com a frase correta
       .reduce((unique, blocks) => { // deduplica por texto final (hanzi), não por referência de array
         const text = blocks.map(b => b.c).join('');
         if (!unique.some(u => u.text === text)) unique.push({ text, blocks });
@@ -4345,13 +4345,17 @@ function buildFullSentenceExercises(unit){
         c: blocks.map(b => b.c).join('')
       }));
 
-    const correctSentence = { p: phrase.p, c: phrase.c };
+    // Frase com duas formas alternativas ("/"): as opções só testam a primeira
+    // (é o que `blocks` cobre) -- nunca a frase inteira com as duas perguntas.
+    const correctSentence = phrase.c.includes('/')
+      ? { p: phrase.blocks.map(b => b.p).join(' '), c: phrase.blocks.map(b => b.c).join('') }
+      : { p: phrase.p, c: phrase.c };
     const options = shuffle([correctSentence, ...distractorSentences]);
 
     // phrase (com .t) reaproveita o mesmo painel de acerto/erro já usado
     // pelo reorder e pelo cloze (showCorrectReorderPanel/answerExplanationParts
     // leem ex.phrase, não um campo próprio deste formato).
-    return { format: 'fullsentence', phrase: { c: phrase.c, t: phrase.t }, correct: correctSentence, options };
+    return { format: 'fullsentence', phrase: { c: correctSentence.c, p: correctSentence.p, t: phrase.t }, correct: correctSentence, options };
   });
 }
 
@@ -4571,17 +4575,46 @@ function addStudyMinutes(){
 // vem junto da explicação, não atrás de um botão "Rever conteúdo" separado --
 // "Por que não foi essa" já cumpre sozinho o papel de reconectar o aluno ao
 // conteúdo.
+// Detalhe do painel de acerto/erro do "Complete a frase": SEMPRE a frase
+// completa certa (hanzi + pinyin + áudio) e a tradução -- igual no acerto e
+// no erro. No erro/"Não sei", `withCorrect` acrescenta a resposta certa.
+// Frase falada/mostrada no "Complete a frase": quando a frase tem duas formas
+// alternativas separadas por "/" (ex.: "你几岁？/ 你多大？"), o exercício só
+// testa a primeira (é o que `blocks` cobre) -- áudio e painel usam só essa,
+// nunca a frase inteira com as duas perguntas.
+function phraseForExercise(phrase){
+  if (!phrase.c.includes('/') || !phrase.blocks) return { c: phrase.c, p: phrase.p };
+  return { c: phrase.blocks.map(b => b.c).join(''), p: phrase.blocks.map(b => b.p).join(' ') };
+}
+function clozeExercisePhrase(ex){ return phraseForExercise(ex.phrase); }
+
+// Padrão dos painéis de acerto/erro de exercícios baseados numa frase: a
+// frase em chinês (hanzi + áudio + pinyin) num bloco e a tradução logo abaixo,
+// visualmente diferenciada (linha separadora, texto em português mais claro).
+// `correctLine` (opcional) vai antes, ex.: "Resposta certa: 我叫".
+function phraseFeedbackDetailHTML(phrase, translation, correctLine){
+  const f = phraseForExercise(phrase);
+  return `${correctLine ? `<div class="feedback-correct-line">${correctLine}</div>` : ''}
+    <div class="feedback-phrase-zh"><strong>${f.c}</strong> ${audioBtnHTML(f.c)}<br><span class="pinyin">${f.p}</span></div>
+    <div class="feedback-phrase-trans">${translation}</div>`;
+}
+
+function clozeFeedbackDetailHTML(ex, withCorrect){
+  const correct = withCorrect
+    ? `Resposta certa: <strong>${ex.correctBlock.c}</strong> <span class="pinyin">(${ex.correctBlock.p})</span>`
+    : '';
+  return phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t, correct);
+}
+
 function answerExplanationHTML(ex){
-  if (ex && (ex.format === 'cloze' || ex.format === 'fullsentence')){
-    // tradução completa já aparece no prompt e na frase preenchida — repeti-la aqui é redundante
-    return '';
-  }
+  if (ex && ex.format === 'cloze') return clozeFeedbackDetailHTML(ex, true);
+  if (ex && ex.format === 'fullsentence') return phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t);
   if (ex && ex.phrase){
-    const phraseHTML = `<p class="usage-note-body"><strong>${ex.phrase.c}</strong><br><span class="pinyin">${ex.phrase.p}</span><br>${ex.phrase.t}</p>`;
+    const phraseHTML = phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t);
     return phraseHTML + (noteOrConceptReviewHTML() || '');
   }
   if (ex && ex.item){
-    const itemHTML = `<p class="usage-note-body"><strong>${ex.item.c}</strong> (${ex.item.p}) = ${ex.item.t}</p>`;
+    const itemHTML = `<p class="usage-note-body"><strong>${ex.item.c}</strong> ${audioBtnHTML(ex.item.c)} (${ex.item.p}) = ${ex.item.t}</p>`;
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
     const origin = findMatchingPhrase(ex.item, u);
     // Sem frase de origem: só cai pra nota de conceito quando ela REALMENTE
@@ -4659,10 +4692,10 @@ function showAnswerPanel(contentEl, ex, opts = {}){
   panel.className = 'wrong-feedback';
   panel.innerHTML = `
     <div class="feedback-card-body">
-      <div class="wrong-feedback-header">${revealed ? '👀 Resposta revelada' : '❌ Não foi dessa vez'}</div>
+      <div class="wrong-feedback-header">${revealed ? '👀 Resposta revelada' : (opts.toneOnly ? (opts.toneOnly === 'wrong' ? '🎯 Quase! O tom não é esse' : '🎯 Quase! Faltou o tom') : '❌ Não foi dessa vez')}</div>
       ${explanation ? `
         <div class="wrong-feedback-why">
-          <div class="wrong-feedback-why-label">${revealed ? 'Resposta' : 'Por que não foi essa'}</div>
+          <div class="wrong-feedback-why-label">${ex && (ex.format === 'cloze' || ex.format === 'fullsentence') ? (ex.format === 'cloze' ? 'Frase completa' : 'Resposta certa') : (revealed ? 'Resposta' : 'Por que não foi essa')}</div>
           <div class="feedback-inner-box">${explanation}</div>
         </div>
       ` : ''}
@@ -4670,6 +4703,7 @@ function showAnswerPanel(contentEl, ex, opts = {}){
     </div>
   `;
   wrap.appendChild(panel);
+  wireAudioButtons(panel);
 
   panel.querySelector('#wrong-continue-btn').addEventListener('click', () => {
     addStudyMinutes();
@@ -4679,8 +4713,29 @@ function showAnswerPanel(contentEl, ex, opts = {}){
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function showWrongAnswerPanel(contentEl, ex){
-  showAnswerPanel(contentEl, ex, { revealed: false });
+function showWrongAnswerPanel(contentEl, ex, opts = {}){
+  showAnswerPanel(contentEl, ex, { revealed: false, toneOnly: opts.toneOnly || false });
+}
+
+// Aviso "Quase! ..." na revisão, quando o erro foi só de tom (ver
+// isToneOnlyMiss) -- só aparece depois de responder, nunca antes.
+function toneHintHTML(localState){
+  if (!localState.answered || localState.wasCorrect || !localState.toneOnly) return '';
+  return `<div class="wrong-feedback-header tone-hint">${localState.toneOnly === 'wrong' ? '🎯 Quase! O tom não é esse' : '🎯 Quase! Faltou o tom'}</div>`;
+}
+
+// Pinyin sem marcas de tom (mantém o trema do ü) -- usado só pra distinguir
+// "errou a sílaba" de "acertou a sílaba, faltou/errou só o tom".
+function pinyinWithoutTones(str){
+  return String(str || '').normalize('NFD').replace(/[\u0300\u0301\u0304\u030c]/g, '').normalize('NFC');
+}
+// true quando a resposta digitada só difere de UMA das formas aceitas pelo tom.
+// Devolve false (não é só o tom), 'missing' (digitou sem nenhum tom) ou
+// 'wrong' (digitou um tom, mas não o certo).
+function isToneOnlyMiss(typed, expectedForms, strip){
+  const t = pinyinWithoutTones(typed);
+  if (!expectedForms.some(f => pinyinWithoutTones(strip(f)) === t)) return false;
+  return pinyinWithoutTones(typed) === String(typed).normalize('NFC') ? 'missing' : 'wrong';
 }
 
 // ---------- Exercício de múltipla escolha (meaning / listen) ----------
@@ -4812,7 +4867,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
   }
 
-  function finish(isCorrect){
+  function finish(isCorrect, toneOnly){
     STEP_STATE.exerciseAnswered = true;
     playFeedbackSound(isCorrect);
     lockInputs();
@@ -4825,12 +4880,12 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
       // Detalhe extra vale a pena aqui (diferente da múltipla escolha): o
       // exercício testou só o pinyin de ouvido, o hanzi nunca apareceu na
       // tela antes de responder.
-      setTimeout(() => showCorrectFeedbackPanel(contentEl, ex.item.c), 500);
+      setTimeout(() => showCorrectFeedbackPanel(contentEl, `<strong>${ex.item.c}</strong> ${audioBtnHTML(ex.item.c)}`), 500);
     } else {
       // A resposta certa já aparece dentro do próprio painel de resultado
       // (answerExplanationHTML mostra ex.item.p) -- sem repetir aqui como um
       // texto solto antes do painel, num estilo diferente.
-      showWrongAnswerPanel(contentEl, ex);
+      showWrongAnswerPanel(contentEl, ex, { toneOnly });
     }
   }
 
@@ -4842,7 +4897,9 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     // Vocabulário/pinyin com forma dupla (ex: "X / Y") -- qualquer uma das
     // duas conta como resposta completa, não só a string inteira com a barra.
     const typed = strip(inputEl.value);
-    finish(acceptedForms(ex.item.p).some(form => strip(form) === typed));
+    const forms = acceptedForms(ex.item.p);
+    const ok = forms.some(form => strip(form) === typed);
+    finish(ok, !ok && isToneOnlyMiss(typed, forms, strip));
   });
 
   wireDontKnowButton(contentEl, ex, () => {
@@ -5011,9 +5068,8 @@ function acceptedForms(expected){
 // ---------- Teclinha de tons do pinyin (exercícios digitados) ----------
 // Ninguém tem um teclado chinês pra digitar vogais com tom -- isso dá um
 // jeito de inserir o caractere certo sem precisar de IME. Importante: o
-// tom NÃO é exigido pra acertar (normalizeLoose acima remove os
-// diacríticos dos dois lados antes de comparar) -- isso é só pra quem
-// quer treinar digitando o tom certo mesmo, não um requisito escondido.
+// tom É exigido pra acertar -- a comparação (normalizePinyinAnswer) mantém
+// os diacríticos dos dois lados, então "ba" NÃO é aceito no lugar de "bā".
 const PINYIN_TONE_GROUPS = [
   ['ā', 'á', 'ǎ', 'à'],
   ['ē', 'é', 'ě', 'è'],
@@ -5102,14 +5158,15 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     // O áudio só aparece (e toca sozinho) depois de responder — antes disso
     // ele entregaria a resposta de graça, sem precisar completar a frase.
     const audioRow = document.getElementById('cloze-audio-row');
-    audioRow.innerHTML = audioBtnHTML(ex.phrase.c);
+    const spokenC = clozeExercisePhrase(ex).c;
+    audioRow.innerHTML = audioBtnHTML(spokenC);
     wireAudioButtons(audioRow);
-    if (canSpeakChinese(ex.phrase.c)) speakChinese(ex.phrase.c, audioRow.querySelector('.audio-btn'), true);
+    if (canSpeakChinese(spokenC)) speakChinese(spokenC, audioRow.querySelector('.audio-btn'), true);
     document.getElementById('exercise-dontknow-btn')?.classList.add('disabled');
     contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
   }
 
-  function finish(isCorrect){
+  function finish(isCorrect, toneOnly){
     STEP_STATE.exerciseAnswered = true;
     playFeedbackSound(isCorrect);
     revealBlank(isCorrect ? 'ok' : 'wrong');
@@ -5118,12 +5175,9 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       STEP_STATE.exerciseScore += 1;
       addXP(exerciseXP(ex, 4));
       addStudyMinutes();
-      // Sem detalhe extra no painel -- a tradução já apareceu na tela ao
-      // revelar o espaço em branco (revealBlank), logo acima, não precisa
-      // repetir dentro do painel de novo.
-      setTimeout(() => showCorrectFeedbackPanel(contentEl, null), 500);
+      setTimeout(() => showCorrectFeedbackPanel(contentEl, clozeFeedbackDetailHTML(ex, false)), 500);
     } else {
-      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
+      setTimeout(() => showWrongAnswerPanel(contentEl, ex, { toneOnly }), 500);
     }
   }
 
@@ -5143,7 +5197,9 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       inputEl.disabled = true;
       const strip = s => normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
       const typed = strip(inputEl.value);
-      finish(acceptedForms(ex.correctBlock.p).some(form => strip(form) === typed));
+      const forms = acceptedForms(ex.correctBlock.p);
+      const ok = forms.some(form => strip(form) === typed);
+      finish(ok, !ok && isToneOnlyMiss(typed, forms, strip));
     });
   } else {
     contentEl.querySelectorAll('.cloze-option').forEach(btn => {
@@ -5184,10 +5240,13 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
 // ---------- Exercício de frase completa (PT -> escolher entre 4 frases) ----------
 function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
   const optionsHTML = ex.options.map((opt, i) => `
-    <button class="exercise-option exercise-option-sentence" data-idx="${i}">
-      <div class="pinyin opt-pinyin-sentence">${opt.p}</div>
-      <div class="opt-hanzi-sentence">${opt.c}</div>
-    </button>
+    <div class="exercise-option exercise-option-sentence" role="button" tabindex="0" data-idx="${i}">
+      <div class="opt-sentence-text">
+        <div class="pinyin opt-pinyin-sentence">${opt.p}</div>
+        <div class="opt-hanzi-sentence">${opt.c}</div>
+      </div>
+      ${audioBtnHTML(opt.c)}
+    </div>
   `).join('');
 
   contentEl.innerHTML = `
@@ -5203,6 +5262,12 @@ function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
   `;
 
   nextBtn.style.display = 'none';
+  wireAudioButtons(contentEl);
+  contentEl.querySelectorAll('.exercise-option-sentence').forEach(el => {
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); el.click(); }
+    });
+  });
 
   function revealCorrectVisual(chosenIdx){
     contentEl.querySelectorAll('.exercise-option-sentence').forEach((b, i) => {
@@ -5226,7 +5291,7 @@ function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
       if (isCorrect){
         STEP_STATE.exerciseScore += 1;
         addXP(exerciseXP(ex, 4)); // vale um pouco mais que múltipla escolha simples, mesmo critério do reorder
-        setTimeout(() => showCorrectFeedbackPanel(contentEl, ex.phrase.t), 500);
+        setTimeout(() => showCorrectFeedbackPanel(contentEl, phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t)), 500);
       } else {
         setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
       }
@@ -5372,7 +5437,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
       STEP_STATE.exerciseScore += 1;
       addXP(exerciseXP(ex, 4)); // ordenar frase vale um pouco mais que múltipla escolha simples
       addStudyMinutes();
-      setTimeout(() => showCorrectFeedbackPanel(contentEl, ex.phrase.t), 500);
+      setTimeout(() => showCorrectFeedbackPanel(contentEl, phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t)), 500);
     } else {
       setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
     }
@@ -5456,11 +5521,12 @@ function showCorrectFeedbackPanel(contentEl, detail){
   panel.innerHTML = `
     <div class="feedback-card-body">
       <div class="correct-feedback-header">${comboBadgeHTML}✅ ${headerText}</div>
-      ${detail ? `<p class="correct-feedback-trans feedback-inner-box">${detail}</p>` : ''}
+      ${detail ? `<div class="correct-feedback-trans feedback-inner-box">${detail}</div>` : ''}
       <button class="btn btn-primary btn-block correct-feedback-continue" id="correct-continue-btn">Continuar →</button>
     </div>
   `;
   wrap.appendChild(panel);
+  wireAudioButtons(panel);
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
   document.getElementById('correct-continue-btn').addEventListener('click', () => {
@@ -6787,7 +6853,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
         ${pinyinTonePickerHTML()}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">Verificar</button>
       </div>
-    ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
+    ` : `${toneHintHTML(localState)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
   `;
 
   wireCustomAudioButtons(mountEl);
@@ -6806,7 +6872,9 @@ function renderClozeCard(mountEl, card, localState, callbacks){
       // renderer se autochama, sem envolver a sessão.
       localState.typedAnswer = inputEl.value;
       localState.answered = true;
-      localState.wasCorrect = acceptedForms(view.compareAnswerText).some(form => strip(form) === typed);
+      const forms = acceptedForms(view.compareAnswerText);
+      localState.wasCorrect = forms.some(form => strip(form) === typed);
+      localState.toneOnly = localState.wasCorrect ? false : isToneOnlyMiss(typed, forms, strip);
       renderClozeCard(mountEl, card, localState, callbacks);
     }
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
@@ -6868,7 +6936,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
         ${pinyinTonePickerHTML()}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">Verificar</button>
       </div>
-    ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
+    ` : `${toneHintHTML(localState)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
   `;
 
   wireAudioButtons(mountEl, card.__isPreviewCard);
@@ -6893,7 +6961,9 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
       // renderer se autochama, sem envolver a sessão.
       localState.typedAnswer = inputEl.value;
       localState.answered = true;
-      localState.wasCorrect = acceptedForms(view.compareAnswerText).some(form => strip(form) === typed);
+      const forms = acceptedForms(view.compareAnswerText);
+      localState.wasCorrect = forms.some(form => strip(form) === typed);
+      localState.toneOnly = localState.wasCorrect ? false : isToneOnlyMiss(typed, forms, strip);
       renderTypeAnswerCard(mountEl, card, localState, callbacks);
     }
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });

@@ -29,7 +29,7 @@ from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional, Tuple
 
 # Sobe quando o comportamento de qualquer regra muda (regenerar o que a regra afeta).
-SPOKEN_RULES_VERSION = 3
+SPOKEN_RULES_VERSION = 4
 
 
 @dataclass(frozen=True)
@@ -84,6 +84,17 @@ _FR_RULES: List[SpokenRule] = [
         ),
         pattern=r"œuf",
         replacement="oeuf",
+    ),
+    SpokenRule(
+        id="fr.age-elision",
+        lang="fr",
+        reason=(
+            '"l\'âge" era lido como duas palavras ("l âge"), o mesmo problema do '
+            '"l\'œuf". Escrever "l\'age" (sem o circunflexo) faz o Chirp ler '
+            'uma palavra só. Vale só depois de l\' -- "quel âge" não muda.'
+        ),
+        pattern=r"\b([lL])(['\u2019])âge",
+        replacement=r"\1\2age",
     ),
 ]
 

@@ -16928,3 +16928,46 @@ igual), `test_playwright.js` (FR+ZH, 48/48: criar Deck -> Card Type ->
 Fields -> Deck -> Preview -> salvar -> Estudar este Deck -> grade FSRS;
 limite Free/Premium/vínculo; import de arquivo). Fase E re-executada:
 unit 75/75, playwright 38/38.
+
+**Atualização (2026-09-29): passo 1 concluído e em produção (PRs #274 e #275,
+já mergeados). Decisões e estado atual, substituem a lista "Ainda NÃO feito"
+acima.**
+
+- **Regras de texto falado vigentes (`SPOKEN_RULES_VERSION = 4`, só `fr`):**
+  `fr.slash-alternatives` (` / ` -> `, `), `fr.parenthetical-particle`
+  (`(de)` lido; exceção em `SPOKEN_OVERRIDES` para "une bouteille (de)"),
+  `fr.oe-ligature-elision` (`œuf` -> `oeuf`) e `fr.age-elision`
+  (`l'âge` -> `l'age`, só depois de `l'`; "quel âge" não muda). zh: nenhuma
+  regra. Nova regra = nova entrada em `RULES_BY_LANG` + subir a versão +
+  atualizar o conjunto esperado em `test_spoken_text.py` (16 entradas afetadas
+  hoje). Só o texto enviado ao TTS muda, nunca o exibido nem a chave do manifest.
+- **Como regenerar (sem terminal):** GitHub Actions > "Áudio TTS"
+  (`.github/workflows/audio-tts.yml`), modos `laboratorio` (só variantes para
+  ouvir), `regenerar` (refaz TODAS as entradas afetadas pelas regras, não só a
+  nova) e `gerar-faltantes` (cria mp3 de itens do manifest ausentes). O robô
+  commita mp3/manifest na branch e dispara o deploy (commits do GITHUB_TOKEN
+  não disparam outros workflows sozinhos). A chave vive SÓ no Secret
+  `GCP_TTS_KEY`; nunca em arquivo, commit, PR ou chat. Voz: Chirp 3 HD
+  Achernar (fr-FR e cmn-CN); cota grátis 1M caracteres/mês (site inteiro usa
+  ~1,3%).
+- **Validação do gerador (`tts.py`):** comparação STT tolerante a elisão
+  (t'as = tu as, t'es = tu es) + checagem física do mp3 (`audio_is_healthy`,
+  volume/duração), não só reconhecimento de fala. Bug corrigido: o manifest
+  não era atualizado para pares com barra (hash sem ".mp3"); hoje todo hash
+  do manifest bate com o texto exibido.
+- **Também entregue:** 67 áudios de exemplo zh (inclui 拜拜), 25 itens fr,
+  3 frases coloquiais ("t'es français ?", "t'as quel âge ?", "t'as fait quoi
+  hier ?"), e uma linha em `fr/app.js` (`findMatchingPhrase` ignora `(de)`
+  para achar a frase de exemplo de "un kilo (de)").
+- **Regra de processo desta frente:** NÃO abrir PR nem mergear por iniciativa
+  própria (há outro chat editando flashcards/Anki/`app.js`/`index.html`/este
+  arquivo); só quando a autora pedir. Se outro chat também editar este
+  arquivo, manter os dois blocos.
+- **Pendente:** (1) relatório #5 -- opções do checkpoint do zh sem áudio;
+  desejo: mostrar a frase chinesa correta com áudio e depois a tradução,
+  diferenciadas visualmente (mudança só nessa tela de `zh/app.js`; precisa do
+  print e do layout preferido); (2) segurança -- a chave de API foi colada em
+  chat: restringir a TTS/STT e rotacionar (nova chave no Google Cloud,
+  trocar o Secret `GCP_TTS_KEY`, apagar a antiga); (3) camada de "texto
+  falado" para português e outros idiomas entra como nova lista em
+  `RULES_BY_LANG`, sem misturar regras (ex.: sandhi de "os carros azuis").
