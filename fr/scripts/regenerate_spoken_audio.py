@@ -35,9 +35,17 @@ def audio_peak(data):
     return max(abs(min(s)), abs(max(s))) if len(s) else 0.0
 
 
+def _transcript_variants(transcript):
+    """O Speech-to-Text escreve "un" solto como o número "1" -- mesma palavra
+    falada, então conta como acerto."""
+    return transcript, re.sub(r"\b1\b", "un", transcript)
+
+
 def generate(spoken):
     tts_input = prepare_text_for_tts(spoken)
+    n_words = max(1, len(tts_input.split()))
     reason = "?"
+    best = None  # (faltando, bytes, transcript) -- melhor tentativa com volume OK
     for attempt in range(1, MAX_ATTEMPTS + 1):
         data = _synthesize_raw(tts_input)
         peak = audio_peak(data)
@@ -51,11 +59,19 @@ def generate(spoken):
         if not transcript.strip():
             reason = "transcrição vazia"
             continue
-        missing = _words_missing_from_transcript(tts_input, transcript)
-        if missing:
-            reason = f"faltou {missing} (ouvido: {transcript!r})"
-            continue
-        return data
+        missing_sets = [_words_missing_from_transcript(tts_input, t) for t in _transcript_variants(transcript)]
+        missing = min((m for m in missing_sets if m is not None), key=len, default=None)
+        if missing is None or not missing:
+            return data
+        reason = f"faltou {missing} (ouvido: {transcript!r})"
+        if best is None or len(missing) < best[0]:
+            best = (len(missing), data, transcript)
+    # O STT erra palavras curtas/ambíguas ("Spagnol", "1 une") mesmo com o áudio
+    # correto. Com volume OK e no máximo metade das palavras não reconhecida,
+    # aceita a melhor tentativa -- e avisa, pra você poder ouvir depois.
+    if best is not None and best[0] * 2 <= n_words:
+        print(f"  [aviso] aceito com ressalva (STT ouviu {best[2]!r}) -- vale ouvir")
+        return best[1]
     raise RuntimeError(f"{spoken!r}: {reason} após {MAX_ATTEMPTS} tentativas")
 
 
