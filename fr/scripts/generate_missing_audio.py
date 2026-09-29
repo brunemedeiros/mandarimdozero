@@ -20,6 +20,7 @@ from challenges_pipeline import config  # noqa: E402
 from challenges_pipeline.spoken_text import to_spoken_text  # noqa: E402
 from challenges_pipeline.tts import (  # noqa: E402
     _synthesize_raw, _transcribe, _words_missing_from_transcript, prepare_text_for_tts,
+    audio_is_healthy,
 )
 
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
@@ -38,8 +39,9 @@ def generate(display, lang):
     best = None
     for _ in range(MAX_ATTEMPTS):
         data = _synthesize_raw(text, lang=lang)
-        if audio_peak(data) < PEAK_THRESHOLD:
-            reason = "quase mudo"
+        ok, why = audio_is_healthy(data)
+        if not ok:
+            reason = why
             continue
         if lang == "zh":
             # sem espaços entre palavras: só exige que o STT tenha ouvido algo

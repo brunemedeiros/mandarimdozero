@@ -21,6 +21,7 @@ from challenges_pipeline import config  # noqa: E402
 from challenges_pipeline.spoken_text import load_manifest, report_affected_entries  # noqa: E402
 from challenges_pipeline.tts import (  # noqa: E402
     _synthesize_raw, _transcribe, _words_missing_from_transcript, prepare_text_for_tts,
+    audio_is_healthy,
 )
 
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
@@ -49,9 +50,9 @@ def generate(spoken):
     empty_stt = None  # áudio com volume OK que o STT não transcreveu (palavra muito curta)
     for attempt in range(1, MAX_ATTEMPTS + 1):
         data = _synthesize_raw(tts_input)
-        peak = audio_peak(data)
-        if peak < PEAK_THRESHOLD:
-            reason = f"quase mudo (pico {peak:.3f})"
+        ok, why = audio_is_healthy(data)
+        if not ok:
+            reason = why
             continue
         transcript = _transcribe(data)
         if transcript is None:

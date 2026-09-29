@@ -785,5 +785,8 @@ const AUDIO_MANIFEST = {
  "y'a une chambre": "dcde95a9a583.mp3",
  "le rez-de-chaussée": "3960d983dfba.mp3",
  "le premier étage": "b652e55e6ce3.mp3",
- "on sait pas encore": "1ff46cf3dd9f.mp3"
+ "on sait pas encore": "1ff46cf3dd9f.mp3",
+ "t'es français ?": "76c5a55eafb8.mp3",
+ "t'as quel âge ?": "6d11acb66461.mp3",
+ "t'as fait quoi hier ?": "282164c2af36.mp3"
 };
