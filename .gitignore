@@ -4,3 +4,6 @@ __pycache__/
 # Claude Code
 .claude/settings.local.json
 .claude/hooks/node_modules/
+
+# Laboratório de escuta (mp3 temporários)
+fr/scripts/lab_output/

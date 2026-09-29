@@ -25,6 +25,7 @@ import unicodedata
 import requests
 
 from . import config
+from .spoken_text import to_spoken_text
 
 TTS_URL = "https://texttospeech.googleapis.com/v1/text:synthesize"
 STT_URL = "https://speech.googleapis.com/v1/speech:recognize"
@@ -130,7 +131,7 @@ def _transcribe(audio_bytes):
         return None
 
 
-def synthesize(text, retries=3, validate=True, max_synthesis_attempts=3):
+def synthesize(text, retries=3, validate=True, max_synthesis_attempts=3, lang="fr"):
     """Sintetiza `text` e salva em AUDIO_OUTPUT_DIR, nomeado por hash do
     texto ORIGINAL (mesmo texto -> mesmo arquivo, evita regenerar à toa).
     Devolve só o nome do arquivo, pra usar como `audioFile` no
@@ -152,7 +153,10 @@ def synthesize(text, retries=3, validate=True, max_synthesis_attempts=3):
     if os.path.exists(out_path) and os.path.getsize(out_path) > 0:
         return filename
 
-    tts_input = prepare_text_for_tts(text)
+    # O arquivo continua nomeado pelo hash do texto EXIBIDO (é a chave do
+    # manifest); só o que é ENVIADO ao TTS passa pela camada de texto falado
+    # (spoken_text.py) -- e é contra esse texto falado que o STT valida.
+    tts_input = prepare_text_for_tts(to_spoken_text(text, lang))
 
     last_missing = None
     for attempt in range(max_synthesis_attempts):
