@@ -4667,7 +4667,7 @@ function showAnswerPanel(contentEl, ex, opts = {}){
   panel.className = 'wrong-feedback';
   panel.innerHTML = `
     <div class="feedback-card-body">
-      <div class="wrong-feedback-header">${revealed ? '👀 Resposta revelada' : '❌ Não foi dessa vez'}</div>
+      <div class="wrong-feedback-header">${revealed ? '👀 Resposta revelada' : (opts.toneOnly ? (opts.toneOnly === 'wrong' ? '🎯 Quase! O tom não é esse' : '🎯 Quase! Faltou o tom') : '❌ Não foi dessa vez')}</div>
       ${explanation ? `
         <div class="wrong-feedback-why">
           <div class="wrong-feedback-why-label">${ex && (ex.format === 'cloze' || ex.format === 'fullsentence') ? (ex.format === 'cloze' ? 'Frase completa' : 'Resposta certa') : (revealed ? 'Resposta' : 'Por que não foi essa')}</div>
@@ -4688,8 +4688,22 @@ function showAnswerPanel(contentEl, ex, opts = {}){
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function showWrongAnswerPanel(contentEl, ex){
-  showAnswerPanel(contentEl, ex, { revealed: false });
+function showWrongAnswerPanel(contentEl, ex, opts = {}){
+  showAnswerPanel(contentEl, ex, { revealed: false, toneOnly: opts.toneOnly || false });
+}
+
+// Pinyin sem marcas de tom (mantém o trema do ü) -- usado só pra distinguir
+// "errou a sílaba" de "acertou a sílaba, faltou/errou só o tom".
+function pinyinWithoutTones(str){
+  return String(str || '').normalize('NFD').replace(/[\u0300\u0301\u0304\u030c]/g, '').normalize('NFC');
+}
+// true quando a resposta digitada só difere de UMA das formas aceitas pelo tom.
+// Devolve false (não é só o tom), 'missing' (digitou sem nenhum tom) ou
+// 'wrong' (digitou um tom, mas não o certo).
+function isToneOnlyMiss(typed, expectedForms, strip){
+  const t = pinyinWithoutTones(typed);
+  if (!expectedForms.some(f => pinyinWithoutTones(strip(f)) === t)) return false;
+  return pinyinWithoutTones(typed) === String(typed).normalize('NFC') ? 'missing' : 'wrong';
 }
 
 // ---------- Exercício de múltipla escolha (meaning / listen) ----------
@@ -4821,7 +4835,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
   }
 
-  function finish(isCorrect){
+  function finish(isCorrect, toneOnly){
     STEP_STATE.exerciseAnswered = true;
     playFeedbackSound(isCorrect);
     lockInputs();
@@ -4839,7 +4853,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
       // A resposta certa já aparece dentro do próprio painel de resultado
       // (answerExplanationHTML mostra ex.item.p) -- sem repetir aqui como um
       // texto solto antes do painel, num estilo diferente.
-      showWrongAnswerPanel(contentEl, ex);
+      showWrongAnswerPanel(contentEl, ex, { toneOnly });
     }
   }
 
@@ -4851,7 +4865,9 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
     // Vocabulário/pinyin com forma dupla (ex: "X / Y") -- qualquer uma das
     // duas conta como resposta completa, não só a string inteira com a barra.
     const typed = strip(inputEl.value);
-    finish(acceptedForms(ex.item.p).some(form => strip(form) === typed));
+    const forms = acceptedForms(ex.item.p);
+    const ok = forms.some(form => strip(form) === typed);
+    finish(ok, !ok && isToneOnlyMiss(typed, forms, strip));
   });
 
   wireDontKnowButton(contentEl, ex, () => {
@@ -5118,7 +5134,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
   }
 
-  function finish(isCorrect){
+  function finish(isCorrect, toneOnly){
     STEP_STATE.exerciseAnswered = true;
     playFeedbackSound(isCorrect);
     revealBlank(isCorrect ? 'ok' : 'wrong');
@@ -5129,7 +5145,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       addStudyMinutes();
       setTimeout(() => showCorrectFeedbackPanel(contentEl, clozeFeedbackDetailHTML(ex, false)), 500);
     } else {
-      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
+      setTimeout(() => showWrongAnswerPanel(contentEl, ex, { toneOnly }), 500);
     }
   }
 
@@ -5149,7 +5165,9 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       inputEl.disabled = true;
       const strip = s => normalizePinyinAnswer(s).replace(/[.,!?;:'"，。！？；：]/g, '').trim();
       const typed = strip(inputEl.value);
-      finish(acceptedForms(ex.correctBlock.p).some(form => strip(form) === typed));
+      const forms = acceptedForms(ex.correctBlock.p);
+      const ok = forms.some(form => strip(form) === typed);
+      finish(ok, !ok && isToneOnlyMiss(typed, forms, strip));
     });
   } else {
     contentEl.querySelectorAll('.cloze-option').forEach(btn => {
