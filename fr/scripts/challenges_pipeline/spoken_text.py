@@ -29,7 +29,7 @@ from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional, Tuple
 
 # Sobe quando o comportamento de qualquer regra muda (regenerar o que a regra afeta).
-SPOKEN_RULES_VERSION = 1
+SPOKEN_RULES_VERSION = 2
 
 
 @dataclass(frozen=True)
@@ -57,11 +57,11 @@ _FR_RULES: List[SpokenRule] = [
         lang="fr",
         reason=(
             '"un kilo (de)": o TTS tratava o parêntese como um aparte e fazia '
-            'uma pausa grande antes de "de". A partícula deve ser lida no mesmo '
-            'fluxo da expressão, sem parênteses e sem pausa: "un kilo de".'
+            'uma pausa grande antes de "de". Escolha da autora no laboratório: '
+            '"un kilo de…" (reticências dão uma pausa curta e o "de" é lido).'
         ),
         pattern=r"\s*\(([^()]*)\)",
-        replacement=r" \1",
+        replacement=r" \1…",
     ),
     SpokenRule(
         id="fr.slash-alternatives",
@@ -78,14 +78,12 @@ _FR_RULES: List[SpokenRule] = [
         id="fr.oe-ligature-elision",
         lang="fr",
         reason=(
-            '"l\'œuf" é lido como duas palavras ("L œuf"). A forma de escrita '
-            "que o Chirp lê como uma palavra só só se descobre OUVINDO variantes "
-            "(audio_lab.py). Fica desligada até a autora escolher."
+            '"l\'œuf" era lido como duas palavras ("L œuf"). Escolha da autora no '
+            'laboratório: escrever "oeuf" (sem a ligadura) faz o Chirp ler como '
+            'uma palavra só ("l\'oeuf"). Vale também para "œufs".'
         ),
-        pattern=r"l'œuf",
-        replacement=r"l'œuf",  # placeholder: será a variante vencedora do laboratório
-        enabled=False,
-        status="pending-lab",
+        pattern=r"œuf",
+        replacement="oeuf",
     ),
 ]
 
@@ -106,7 +104,12 @@ RULES_BY_LANG: Dict[str, List[SpokenRule]] = {
 # Correção manual pontual, quando nenhuma regra genérica resolve: texto exibido
 # -> texto falado. Tem prioridade sobre as regras.
 SPOKEN_OVERRIDES: Dict[str, Dict[str, str]] = {
-    "fr": {},
+    # Escolhas da autora no laboratório (audio_lab.py), onde a regra genérica
+    # (vírgula) não é a que ela ouviu melhor / a que funcionou de forma estável.
+    "fr": {
+        "français / française": "français. française",
+        "une bouteille (de)": "une bouteille (de)",
+    },
     "zh": {},
 }
 
