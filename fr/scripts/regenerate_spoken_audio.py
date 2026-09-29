@@ -103,10 +103,14 @@ def main():
         new_name = hashlib.md5(display.encode("utf-8")).hexdigest()[:12] + ".mp3"
         with open(os.path.join(AUDIO_DIR, new_name), "wb") as f:
             f.write(data)
-        old_name = manifest[display]
+        old_name = manifest[display] + ".mp3"  # load_manifest devolve só o hash
         esc = display.replace('"', '\\"')
+        before = src
         src = src.replace(f' "{esc}": "{old_name}"', f' "{esc}": "{new_name}"')
-        still_used = sum(1 for v in manifest.values() if v == old_name) > 1
+        if old_name != new_name and src == before:
+            print(f"  ERRO: manifest não foi atualizado para {display!r}", file=sys.stderr)
+            failures.append(display)
+        still_used = sum(1 for v in manifest.values() if v + ".mp3" == old_name) > 1
         if old_name != new_name and not still_used:
             try:
                 os.remove(os.path.join(AUDIO_DIR, old_name))
