@@ -14905,3 +14905,45 @@ Com os 3 gaps fechados, testados nas 4 categorias exigidas e a auditoria
 final limpa, a Fase 7j está de fato completa. **PARE conforme instrução
 explícita -- não avançar pra Deck Engine, Painel ou Study Trail sem
 autorização explícita da autora.**
+
+## Projeto de melhoria do sistema de áudio (TTS) -- camada de "texto falado", passo 1 (2026-09-29)
+
+Motivado por 3 reports (áudio de `un / une`, `français / française` e `l'œuf`
+lidos errado) + pedido da autora de resolver o **critério de geração**, não só
+os mp3 pontuais.
+
+**Achado (forense por MD5):** o nome de cada mp3 do manifest é o MD5 do texto
+enviado ao TTS. Em fr, 741 de 750 entradas batem com o texto exibido; as 9
+que NÃO batem são exatamente as 9 com ` / ` -- e batem só com a **1ª forma**
+(`"un / une"` foi gerado como `"un"`). O gerador original (nunca commitado)
+cortava o texto na barra. Em zh, 424/424 batem (nunca houve pré-processamento).
+Não existia correção anterior para `brésilien / brésilienne`.
+
+**Regras aprovadas pela autora (camada 1):** ` / ` -> `, ` (pausa curta);
+`(de)` lido, sem parênteses e sem a pausa grande; `l'œuf` lido como uma
+palavra só (forma a escolher OUVINDO variantes -- regra pendente e desligada).
+
+**Feito nesta entrega (só `fr/scripts/`, `.gitignore`; zero mudança em app.js):**
+- `challenges_pipeline/spoken_text.py` -- tabela de regras POR IDIOMA
+  (`to_spoken_text`, `explain_spoken_text`, `report_affected_entries`,
+  `SPOKEN_RULES_VERSION`, overrides manuais). Português/outros idiomas entram
+  como mais uma lista, sem misturar regras (ex.: sandhi de "os carros azuis").
+- `tts.synthesize()` passa a enviar `to_spoken_text(text, lang)`; arquivo
+  continua nomeado pelo hash do texto EXIBIDO (chave do manifest); o STT
+  valida contra o texto falado.
+- `test_spoken_text.py` (31 testes, sem rede) e `audio_lab.py` (gera variantes
+  e uma página HTML pra ouvir; `--dry-run` não usa rede).
+- Relatório: `python3 fr/scripts/challenges_pipeline/spoken_text.py` -> 12
+  entradas fr mudam (9 com barra + 3 com `(de)`), 203 caracteres; 0 em zh.
+
+**Custo (pesquisado, conferir na página de preços do Google antes de rodar em
+massa):** Chirp 3 HD tem 1 milhão de caracteres/mês gratuitos, depois ~US$30
+por milhão. O site inteiro (fr 12.009 + zh 1.461 caracteres) usa ~1,3% da cota.
+
+**Ainda NÃO feito (passos seguintes):** ouvir o laboratório e decidir `l'œuf`
+e `(de)`; regenerar os mp3 afetados (exige `GCP_TTS_KEY`, ainda não
+disponível -- proposta: rodar via GitHub Actions com a chave em Secrets, sem
+terminal); camada 5 (validar contra o texto falado + pico de volume no
+pipeline geral); exemplo de frase para `un kilo (de)`/`une tranche (de)`/
+`une bouteille (de)` (conteúdo em fr/content.js, e o cartão de vocabulário
+não tem campo de exemplo -- mudança de app.js, fora desta entrega).
