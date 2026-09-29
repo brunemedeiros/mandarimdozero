@@ -15,7 +15,8 @@
 //   - shared/admin-flashcards.js   (openFlashcardResetConfirm, CARD_TYPE_UI_META -- carregado ANTES deste arquivo, mesma página, reaproveitado sem duplicar; ver Fase 6D.2 no CLAUDE.md)
 //   - shared/flashcard-native-persistence.js (nativeNoteEditorStateFromLegacyRow,
 //     validateNoteEditorStateForSave, nativeContentColumnsFromEditorState,
-//     classifyFlashcardRowModel, legacyFlashcardConversionPreflight -- Fase 6D.6/6D.8)
+//     classifyFlashcardRowModel, legacyFlashcardConversionPreflight -- Fase 6D.6/6D.8;
+//     nativeNoteEditorStateFromImportPayload -- CONSOLIDAÇÃO-6)
 //   - shared/flashcard-mc-editor.js/flashcard-typeanswer-editor.js/flashcard-cloze-editor.js
 //     (transitionToMultipleChoice/transitionToTypeAnswer/transitionToCloze/
 //     stripClozeMarksFromEditorState/refreshNativeCardTypeBox -- carregados
@@ -580,10 +581,13 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
     errorEl.textContent = '';
 
     // CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- criação sempre nativa agora, sem
-    // bifurcação legado/nativo: não existe mais um caminho de fallback
-    // pra `createOwnFlashcard({front, backTrans, ...})` na CRIAÇÃO -- essa
-    // assinatura continua existindo só pro EDIT legado
-    // (updateOwnFlashcardContent, myFlashcardEditFormHTML, intocado).
+    // bifurcação legado/nativo. CONSOLIDAÇÃO-6 -- `createOwnFlashcard()`
+    // nem aceita mais os parâmetros legados (front/backTrans/...): só
+    // `{languageAppKey, nativeState}`. Editar um cartão Legacy já
+    // existente continua funcionando normalmente, mas por uma função
+    // DIFERENTE (updateOwnFlashcardContent, myFlashcardEditFormHTML,
+    // intocada -- edição nunca criou linha nova, fora do escopo desta
+    // limpeza).
     const nativeState = MY_FLASHCARDS_STATE.nativeCardState;
     nativeState.privateNote = (document.getElementById('my-flashcard-note').value || '').trim() || null;
     const v = validateNoteEditorStateForSave(nativeState);
@@ -807,14 +811,14 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
   if (!confirm(`Importar ${payload.cards.length} cartão(ões) pra sua conta?`)) return;
   let importedCount = 0;
   for (const card of payload.cards){
-    const result = await createOwnFlashcard({
-      languageAppKey: APP_KEY,
-      front: card.front,
-      backTrans: card.backTrans,
-      note: card.note,
-      frontPinyin: card.frontPinyin,
-      frontIsTargetLanguage: card.frontIsTargetLanguage,
-    });
+    // CONSOLIDAÇÃO-6 (ver CLAUDE.md) -- cartão importado agora nasce
+    // NATIVO (fields/card_generation_mode), nunca mais o branch Legacy de
+    // createOwnFlashcard(). Reaproveita nativeNoteEditorStateFromImportPayload()
+    // (shared/flashcard-native-persistence.js), que por sua vez reaproveita
+    // o mesmo mapeamento front/back->Field já usado pra converter um
+    // cartão Legacy existente -- nenhuma 2ª implementação.
+    const nativeState = nativeNoteEditorStateFromImportPayload(card, APP_KEY);
+    const result = await createOwnFlashcard({ languageAppKey: APP_KEY, nativeState });
     if (result.ok){
       importedCount++;
       if (typeof addSelfFlashcardToState === 'function') addSelfFlashcardToState(result.card);

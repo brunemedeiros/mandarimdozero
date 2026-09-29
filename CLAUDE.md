@@ -15790,3 +15790,228 @@ implementada nesta fase, conforme restrições 2/7/8/9)**:
 passo manual pendente pra autora.
 
 **Commit**: `92b3d39` (branch `claude/test-previous-changes-bo5atv`).
+
+## CONSOLIDAÇÃO-6 -- limpeza do Legacy e encerramento do caminho de
+criação antigo
+
+Sexta e (por ora) última fase da série CONSOLIDAÇÃO. Regra de ouro do
+prompt-mestre, confirmada e cumprida: **PODE remover** código cujo único
+propósito é criar um cartão NOVO no formato Legacy (branches de INSERT
+soltos, formulários mortos, testes que só validam essa criação).
+**NUNCA remove**: ler/editar um cartão Legacy já existente, a conversão
+explícita Legacy->Native (Fase 6D.8), export de cartão Legacy, colunas/
+dado Legacy no banco, os adapters que interpretam dado histórico.
+
+### Auditoria inicial
+
+A auditoria (feita ANTES de qualquer código, apresentada como diagnóstico
+via chat e só implementada após autorização explícita) confirmou que a
+CONSOLIDAÇÃO-1 já tinha eliminado o formulário de criação Legacy da UI --
+restavam só **2 call sites reais** que ainda criavam um cartão novo pelo
+branch Legacy de `createOwnFlashcard()`, os dois em fluxos de IMPORTAÇÃO
+de cartão externo, nunca no formulário manual "+ Criar cartão":
+1. `confirmAndImportMyFlashcards()` (`shared/my-flashcards.js`) -- import
+   de arquivo `.json`/link entre alunas (Prop 6, "7 propostas").
+2. `importSelectedPublicFlashcards()` (`shared/public-profile.js`) --
+   importar um cartão do perfil público de outra conta (Fase 2 do
+   prompt-mestre "perfil público").
+
+Os dois chamavam `createOwnFlashcard({languageAppKey, front, backTrans,
+note, frontPinyin, frontIsTargetLanguage})` -- sem `nativeState`, caindo
+direto no branch Legacy de INSERT (linha sem `fields`/
+`card_generation_mode`), fora do princípio "todo cartão novo é Native"
+que o resto do app já seguia desde a CONSOLIDAÇÃO-1.
+
+**Pergunta feita à autora antes de tocar em código** (via
+`AskUserQuestion`, 2 rodadas -- a 1ª pergunta era técnica demais, a
+autora pediu mais detalhe; reexplicado em linguagem simples com os 2
+trechos de código reais antes de reperguntar): "deixar como está" vs.
+"migrar pro formato novo". **Resposta explícita: "Migrar pro formato
+novo."**
+
+### Limpeza realizada
+
+- **`shared/flashcard-native-persistence.js`** -- nova função
+  `nativeNoteEditorStateFromImportPayload(payload, languageAppKey)`,
+  reaproveitando 100% `nativeNoteEditorStateFromLegacyRow()` (a MESMA
+  função que já converte um cartão Legacy JÁ EXISTENTE quando a
+  professora/aluna clica "Usar o novo editor", Fase 6D.8) -- constrói um
+  "row" sintético Legacy-shaped (`id:null, revision:0, origin:'self'`,
+  nunca choices/cloze_sentence/mídia -- nenhum dos 2 formatos de import
+  jamais carregou isso) e devolve um Note editorState Native pronto. `id:
+  null` deixa explícito que é uma CRIAÇÃO nova, nunca aponta pra linha
+  existente.
+- **`shared/my-flashcards.js`**/**`shared/public-profile.js`** -- os 2
+  call sites passaram a construir `nativeState` via a função acima ANTES
+  de chamar `createOwnFlashcard({languageAppKey, nativeState})` -- mesmo
+  resultado visual de sempre (frente/verso simples), agora gravado no
+  modelo nativo. Um comentário stale em `my-flashcards.js` (que ainda
+  implicava a existência da assinatura Legacy de criação) foi corrigido
+  na mesma auditoria de grep pós-edição.
+
+**Extrapolação registrada explicitamente, além da pergunta literal
+respondida**: a partir da confirmação de que os 2 únicos chamadores
+restantes tinham sido migrados, uma auditoria de grep no repositório
+inteiro confirmou que **nenhum outro caller real** chamava mais
+`createFlashcard()`/`createOwnFlashcard()` sem `nativeState` -- ou seja,
+o branch Legacy de INSERT dessas 2 funções tinha virado código
+genuinamente morto. Isso já estava coberto pela Seção 9 do próprio
+prompt-mestre ("existe algum fluxo legítimo que ainda chama isto pra
+CRIAR um cartão? Se não, e for genuinamente morto -> remover"), então o
+branch foi removido nesta mesma sessão:
+- **`createFlashcard()`** (`shared/teacher-flashcards.js`) --
+  `nativeState` agora é sempre obrigatório; a bifurcação `if
+  (nativeState){...}else{...INSERT Legacy solto...}` foi eliminada,
+  sobra só o caminho nativo.
+- **`createOwnFlashcard()`** (`shared/own-flashcards.js`) -- mesma
+  limpeza, mesmo raciocínio.
+- `_validateFlashcardContent()`/`_validateOwnFlashcardContent()`
+  (validadores privados de conteúdo Legacy) **não foram removidos** --
+  ganharam só um comentário esclarecendo que agora são chamados
+  exclusivamente pelo branch Legacy de EDIÇÃO, nunca mais por criação.
+
+### Legacy
+
+**Intocado, confirmado por leitura e por teste**: `updateFlashcardContent()`/
+`updateOwnFlashcardContent()` continuam com os 2 branches (nativo e
+Legacy) exatamente como antes -- editar um cartão Legacy já existente
+sem `nativeState` continua gravando só colunas soltas
+(`front`/`back_trans`/etc.), nunca cria uma linha nova, nunca é forçado
+a virar Native sozinho (Seção 6 do prompt-mestre, "não é o mesmo tipo de
+mudança que criar um cartão novo"). `flashcardEditFormHTML`/
+`wireFlashcardEditForm` (admin) e `myFlashcardEditFormHTML`/
+`wireMyFlashcardEditForm` (aluna) continuam intactos. A conversão
+explícita Legacy->Native (`legacyFlashcardConversionPreflight()`,
+`nativeNoteEditorStateFromLegacyRow()`, botão "🧪 Usar o novo editor de
+campos", Fase 6D.8) não foi tocada -- confirmado que
+`test_fase6d8_legacy_conversion.js` (a suíte canônica dessa capacidade,
+que constrói linhas Legacy via um helper próprio, nunca via
+`createFlashcard()`) continua 92/92 sem nenhuma falha.
+
+### Native
+
+Nenhuma migração de schema, nenhum backfill de dado existente. Confirmado
+via query real (transação + `rollback`, projeto `eigjocalzwamisgqilhg`)
+que um INSERT no shape exato que `nativeNoteEditorStateFromImportPayload()`
++ `nativeContentColumnsFromEditorState()` produzem grava `fields`/
+`card_generation_mode` corretamente e todas as colunas Legacy (`choices`/
+`cloze_sentence`/`front_pinyin`) como `null` -- e que a MESMA constraint
+que já protegia `teacher_flashcards` (`own_flashcards_fields_paired`,
+migration 045) segue rejeitando um estado híbrido (fields sem
+card_generation_mode) na tabela `own_flashcards` também. Confirmado que
+o UPDATE do branch Legacy de edição continua funcionando numa linha real
+já existente, sem tocar `fields`/`card_generation_mode`. Nenhum dado de
+teste ficou de pé -- hash/contagem de `teacher_flashcards` (5 linhas) e
+`own_flashcards` (7 linhas) idênticos antes/depois de toda a validação.
+
+### Testes
+
+**Suíte Node/vm nova, `test_consolidacao6_unit.js`, 78/78** -- cobre:
+mapeamento correto de `nativeNoteEditorStateFromImportPayload()` (fr/zh,
+com/sem pinyin, `frontIsTargetLanguage` true/false/ausente, nota
+presente/ausente, mídia nunca inventada); round-trip REAL pelo motor
+(`nativeContentColumnsFromEditorState` -> linha simulada ->
+`buildEngineCardsFromRow` -> `resolveCardContentView`) confirmando
+resultado visual idêntico a um flip simples de sempre e FSRS em estado
+default (`reps:0`/`lapses:0`/`state:'new'`); `createFlashcard()`/
+`createOwnFlashcard()` SEM `nativeState` agora falham de forma clara
+(via o guard estrutural de `noteEditorStateToRow()`), sem nenhuma
+chamada de rede antes disso; COM `nativeState` real, o payload que
+chega no INSERT bate exatamente com o esperado (`teacher_id`/
+`owner_id` certos, `fields`/`card_generation_mode` presentes,
+`choices` sempre null); `updateFlashcardContent()`/
+`updateOwnFlashcardContent()` confirmadas intocadas, exercitando de
+fato o branch Legacy de edição sobre um cartão existente; auditoria
+arquitetural embutida no próprio teste (grep contra o código de
+produção real) confirmando ausência de `if(nativeState)` residual nas 2
+funções de criação e **zero call site, no repositório inteiro, de
+`createFlashcard(`/`createOwnFlashcard(` sem `nativeState`**.
+
+**Regressão re-executada, números reais**: `test_consolidacao1_unit.js`
+62/62, `test_consolidacao2_unit.js` 60/60, `test_consolidacao3_unit.js`
+12/12, `test_consolidacao5_tags_export.js` 52/52,
+`test_fase6d8_legacy_conversion.js` 92/92 -- todas sem regressão.
+**Uma falha pré-existente reproduzida e classificada, não corrigida**:
+`test_fase6d6_native_persistence.js` (suíte da Fase 6D.6, anterior a
+toda a série CONSOLIDAÇÃO) quebra nos cenários 9-12 -- eles usavam
+`createFlashcard()` SEM `nativeState` só pra SEMEAR uma linha Legacy de
+teste (não pra testar a criação Legacy em si na maioria dos casos, mas
+dependiam do mecanismo que acabou de ser removido). Confirmado por
+leitura que é exatamente o comportamento que esta fase foi autorizada a
+eliminar -- não é um bug, é a consequência direta e esperada da
+limpeza. Vive só no scratchpad (nunca commitado, `git ls-files` confirma
+zero teste rastreado neste repo), não editada -- é um artefato histórico
+de uma fase anterior, não uma spec viva; a capacidade real que ela
+tentava validar (seed de linha Legacy + conversão) continua 100%
+coberta por `test_fase6d8_legacy_conversion.js`, que nunca dependeu de
+`createFlashcard()` pra isso.
+
+### Auditoria global final
+
+Re-grep de todo o repositório (`shared/`, `fr/`, `zh/`) pelos termos do
+prompt-mestre, classificados A(Native, devia sumir)/B(Legacy compat,
+correto permanecer)/C(doc/comentário)/D(morto):
+- `frontIsTargetLanguage` -- todas as ocorrências restantes são **B**
+  (branch Legacy de edição em `updateFlashcardContent`/
+  `updateOwnFlashcardContent`/`shared/admin-flashcards.js`/
+  `shared/my-flashcards.js`, ou leitura de dado Legacy pra export/preview
+  em `shared/public-profile.js`/`myFlashcardsExportPayload`) ou **C**
+  (comentários documentando que Native nunca usa isso).
+- `reviewDirection`/`isReverse`/`nextCardDirection` -- todas **B**,
+  exclusivas do mecanismo de trilha (`!card.cardInstance`), já
+  confirmado desde a Fase 4/7a que cartão nativo nunca recebe nenhum dos
+  3; nenhuma ocorrência nova, nenhuma introduzida por esta fase.
+- `legacyFlashcard*`/`createLegacy*` -- `createLegacyNoteEditorStateFromRow`
+  (wrap de exibição/comparação de um Legacy existente, Fase 6D.1),
+  `legacyFlashcardConversionPreflight` (o gate da conversão explícita,
+  Fase 6D.8) -- ambos **B**, exatamente o que deve permanecer. Menções a
+  `legacyFlashcardRowToCard`/`bridgeNoteCardsToLegacyShape` são só **C**
+  (comentários históricos, essas funções já tinham sido eliminadas nas
+  Fases 3/4, muito antes desta série).
+- **Nenhum call site D (morto) sobrou** -- confirmado que, no
+  repositório inteiro, só 3 pontos fazem `INSERT` em
+  `teacher_flashcards`/`own_flashcards`: `createFlashcard()`,
+  `createOwnFlashcard()` (as 2 agora Native-only) e
+  `persistAnkiImportBatches()` (`shared/anki-import.js`, Fase 7j) --
+  confirmado por leitura que esta terceira já constrói seu payload via
+  `nativeContentColumnsFromEditorState()`, sempre Native, nunca dependeu
+  do branch removido.
+
+**Achado incidental, fora do escopo desta fase, registrado sem
+correção**: `myFlashcardsExportPayload()` (`shared/my-flashcards.js`,
+export JSON/link entre alunas, Prop 6) lê `c.front_is_target_language`
+de uma linha crua pra montar o payload de export -- mas
+`nativeContentColumnsFromEditorState()` sempre grava esse mirror como
+`true` FIXO (nunca reflete a direção real escolhida pelos `Field.lang`
+do cartão Native). Resultado: exportar um cartão Native cuja direção
+foi invertida no editor (front=tradução, back=idioma estudado) produz
+um payload de export com `frontIsTargetLanguage:true` errado -- o texto
+em si (`front`/`backTrans`, via o mirror posicional) continua correto,
+só a direção pode ficar invertida na cópia importada por outra conta.
+Pré-existente a esta sessão (não causado pela limpeza de hoje), tangente
+ao objetivo desta fase (que é sobre CRIAÇÃO, não sobre fidelidade do
+export/import), não corrigido -- registrado aqui pra uma sessão futura
+que mexer em `myFlashcardsExportPayload()`/`deriveLegacyMirrorFromNoteEditorState()`.
+
+### Documentação
+
+Esta seção.
+
+### Fora de escopo (Seção 15, confirmado não tocado)
+
+Nenhuma migração de dado em massa, nenhuma coluna Legacy removida,
+nenhum dado apagado, nenhuma mudança em FSRS/Review/Preview/renderer/
+áudio/Tags/Anki/Decks/limite de 20 cartões grátis além do estritamente
+necessário, nenhuma UI nova, nenhuma refatoração estética ampla, nenhuma
+reescrita do motor Native. `shared/flashcard-model.js` não foi tocado.
+
+### Commit
+
+Branch `claude/test-previous-changes-bo5atv`. Arquivos alterados
+(`git diff --numstat`): `shared/flashcard-native-persistence.js`
+(+46/-0, novo helper), `shared/teacher-flashcards.js` (+25/-38,
+bifurcação Legacy de criação removida), `shared/own-flashcards.js`
+(+20/-30, mesma limpeza), `shared/my-flashcards.js` (+17/-13, import
+migrado + comentário corrigido), `shared/public-profile.js` (+7/-8,
+import migrado) -- 115 inserções/89 deleções no total, mais esta seção
+do CLAUDE.md.

@@ -440,3 +440,49 @@ function nativeNoteEditorStateFromLegacyRow(row){
     fields,
   }));
 }
+
+// ---------- CONSOLIDAÇÃO-6 (ver CLAUDE.md) -- import de cartão externo
+// vira criação NATIVA, nunca Legacy ----------
+//
+// 2 telas criam cartões NOVOS a partir de um payload externo, historicamente
+// no formato antigo (front/backTrans/note/frontPinyin/frontIsTargetLanguage
+// -- nunca choices/clozeSentence/mídia, nenhum dos 2 formatos jamais
+// carregou isso): o export/import .json/link entre alunas
+// (shared/my-flashcards.js, confirmAndImportMyFlashcards) e a importação de
+// cartão do perfil público de outra conta (shared/public-profile.js,
+// importSelectedPublicFlashcards). Antes desta fase, os 2 chamavam
+// createOwnFlashcard() SEM `nativeState` -- iam direto pro branch Legacy de
+// INSERT, criando uma linha sem fields/card_generation_mode, fora do
+// princípio "todo cartão novo é Native" que o resto do app já segue desde
+// CONSOLIDAÇÃO-1.
+//
+// Reaproveita 100% nativeNoteEditorStateFromLegacyRow() (a MESMA função que
+// já converte um cartão Legacy JÁ EXISTENTE quando a professora/aluna clica
+// "Usar o novo editor") -- nunca uma 2ª implementação do mapeamento
+// front/back->Field. `id:null`/`revision:0` deixam explícito que isto é uma
+// CRIAÇÃO nova (nunca aponta pra uma linha existente); `origin:'self'`
+// sempre -- os 2 chamadores só criam na PRÓPRIA conta de quem importa
+// (own_flashcards), nunca em teacher_flashcards. Como o payload nunca tem
+// choices/cloze_sentence, o resultado é sempre um Note `cardGenerationMode:
+// 'normal'` de 2 Fields (+ satélite de pinyin quando aplicável) -- mesmo
+// resultado visual de sempre (frente/verso simples), só que gravado no
+// modelo nativo.
+function nativeNoteEditorStateFromImportPayload(payload, languageAppKey){
+  return nativeNoteEditorStateFromLegacyRow({
+    id: null,
+    revision: 0,
+    language_app_key: languageAppKey,
+    origin: 'self',
+    note: payload.note || null,
+    front: payload.front || '',
+    back_trans: payload.backTrans || '',
+    front_pinyin: payload.frontPinyin || null,
+    front_is_target_language: payload.frontIsTargetLanguage,
+    choices: null,
+    cloze_sentence: null,
+    cloze_answer: null,
+    cloze_answer_pinyin: null,
+    image_url: null,
+    audio_url: null,
+  });
+}
