@@ -1470,12 +1470,12 @@ const UNITS = [
         }
       ],
       exercises: [
-        { prompt: "70 em francês:", hint: "60 + 10", answer: "soixante-dix" },
-        { prompt: "71 em francês:", hint: "60 + 11 (com et)", answer: "soixante et onze" },
-        { prompt: "80 em francês:", hint: "4 × 20", answer: "quatre-vingts" },
-        { prompt: "81 em francês:", hint: "4×20 + 1 (sem et)", answer: "quatre-vingt-un" },
-        { prompt: "90 em francês:", hint: "4×20 + 10", answer: "quatre-vingt-dix" },
-        { prompt: "99 em francês:", hint: "4×20 + 19", answer: "quatre-vingt-dix-neuf" }
+        { prompt: "70 em francês:", hint: "60 + 10", answer: "soixante-dix", alt: ["septante"] },
+        { prompt: "71 em francês:", hint: "60 + 11 (com et)", answer: "soixante et onze", alt: ["septante et un"] },
+        { prompt: "80 em francês:", hint: "4 × 20", answer: "quatre-vingts", alt: ["huitante"] },
+        { prompt: "81 em francês:", hint: "4×20 + 1 (sem et)", answer: "quatre-vingt-un", alt: ["huitante et un", "huitante-et-un"] },
+        { prompt: "90 em francês:", hint: "4×20 + 10", answer: "quatre-vingt-dix", alt: ["nonante"] },
+        { prompt: "99 em francês:", hint: "4×20 + 19", answer: "quatre-vingt-dix-neuf", alt: ["nonante-neuf"] }
       ]
     }
   },
