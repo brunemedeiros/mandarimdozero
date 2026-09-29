@@ -4692,6 +4692,13 @@ function showWrongAnswerPanel(contentEl, ex, opts = {}){
   showAnswerPanel(contentEl, ex, { revealed: false, toneOnly: opts.toneOnly || false });
 }
 
+// Aviso "Quase! ..." na revisão, quando o erro foi só de tom (ver
+// isToneOnlyMiss) -- só aparece depois de responder, nunca antes.
+function toneHintHTML(localState){
+  if (!localState.answered || localState.wasCorrect || !localState.toneOnly) return '';
+  return `<div class="wrong-feedback-header tone-hint">${localState.toneOnly === 'wrong' ? '🎯 Quase! O tom não é esse' : '🎯 Quase! Faltou o tom'}</div>`;
+}
+
 // Pinyin sem marcas de tom (mantém o trema do ü) -- usado só pra distinguir
 // "errou a sílaba" de "acertou a sílaba, faltou/errou só o tom".
 function pinyinWithoutTones(str){
@@ -6687,7 +6694,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
         ${pinyinTonePickerHTML()}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">Verificar</button>
       </div>
-    ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
+    ` : `${toneHintHTML(localState)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
   `;
 
   wireCustomAudioButtons(mountEl);
@@ -6706,7 +6713,9 @@ function renderClozeCard(mountEl, card, localState, callbacks){
       // renderer se autochama, sem envolver a sessão.
       localState.typedAnswer = inputEl.value;
       localState.answered = true;
-      localState.wasCorrect = acceptedForms(view.compareAnswerText).some(form => strip(form) === typed);
+      const forms = acceptedForms(view.compareAnswerText);
+      localState.wasCorrect = forms.some(form => strip(form) === typed);
+      localState.toneOnly = localState.wasCorrect ? false : isToneOnlyMiss(typed, forms, strip);
       renderClozeCard(mountEl, card, localState, callbacks);
     }
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
@@ -6768,7 +6777,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
         ${pinyinTonePickerHTML()}
         <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">Verificar</button>
       </div>
-    ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
+    ` : `${toneHintHTML(localState)}<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
   `;
 
   wireAudioButtons(mountEl, card.__isPreviewCard);
@@ -6793,7 +6802,9 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
       // renderer se autochama, sem envolver a sessão.
       localState.typedAnswer = inputEl.value;
       localState.answered = true;
-      localState.wasCorrect = acceptedForms(view.compareAnswerText).some(form => strip(form) === typed);
+      const forms = acceptedForms(view.compareAnswerText);
+      localState.wasCorrect = forms.some(form => strip(form) === typed);
+      localState.toneOnly = localState.wasCorrect ? false : isToneOnlyMiss(typed, forms, strip);
       renderTypeAnswerCard(mountEl, card, localState, callbacks);
     }
     inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
