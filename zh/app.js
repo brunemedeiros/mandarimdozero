@@ -4582,7 +4582,7 @@ function answerExplanationHTML(ex){
     return phraseHTML + (noteOrConceptReviewHTML() || '');
   }
   if (ex && ex.item){
-    const itemHTML = `<p class="usage-note-body"><strong>${ex.item.c}</strong> (${ex.item.p}) = ${ex.item.t}</p>`;
+    const itemHTML = `<p class="usage-note-body"><strong>${ex.item.c}</strong> ${audioBtnHTML(ex.item.c)} (${ex.item.p}) = ${ex.item.t}</p>`;
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
     const origin = findMatchingPhrase(ex.item, u);
     // Sem frase de origem: só cai pra nota de conceito quando ela REALMENTE
@@ -4827,7 +4827,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
       // Detalhe extra vale a pena aqui (diferente da múltipla escolha): o
       // exercício testou só o pinyin de ouvido, o hanzi nunca apareceu na
       // tela antes de responder.
-      setTimeout(() => showCorrectFeedbackPanel(contentEl, ex.item.c), 500);
+      setTimeout(() => showCorrectFeedbackPanel(contentEl, `<strong>${ex.item.c}</strong> ${audioBtnHTML(ex.item.c)}`), 500);
     } else {
       // A resposta certa já aparece dentro do próprio painel de resultado
       // (answerExplanationHTML mostra ex.item.p) -- sem repetir aqui como um
