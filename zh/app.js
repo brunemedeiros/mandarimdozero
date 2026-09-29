@@ -4546,8 +4546,20 @@ function addStudyMinutes(){
 // vem junto da explicação, não atrás de um botão "Rever conteúdo" separado --
 // "Por que não foi essa" já cumpre sozinho o papel de reconectar o aluno ao
 // conteúdo.
+// Detalhe do painel de acerto/erro do "Complete a frase": SEMPRE a frase
+// completa certa (hanzi + pinyin + áudio) e a tradução -- igual no acerto e
+// no erro. No erro/"Não sei", `withCorrect` acrescenta a resposta certa.
+function clozeFeedbackDetailHTML(ex, withCorrect){
+  const p = ex.phrase;
+  const correct = withCorrect
+    ? `<span class="cloze-feedback-correct">Resposta certa: <strong>${ex.correctBlock.c}</strong> <span class="pinyin">(${ex.correctBlock.p})</span></span><br>`
+    : '';
+  return `${correct}<strong>${p.c}</strong> ${audioBtnHTML(p.c)}<br><span class="pinyin">${p.p}</span><br>${p.t}`;
+}
+
 function answerExplanationHTML(ex){
-  if (ex && (ex.format === 'cloze' || ex.format === 'fullsentence')){
+  if (ex && ex.format === 'cloze') return clozeFeedbackDetailHTML(ex, true);
+  if (ex && ex.format === 'fullsentence'){
     // tradução completa já aparece no prompt e na frase preenchida — repeti-la aqui é redundante
     return '';
   }
@@ -4637,7 +4649,7 @@ function showAnswerPanel(contentEl, ex, opts = {}){
       <div class="wrong-feedback-header">${revealed ? '👀 Resposta revelada' : '❌ Não foi dessa vez'}</div>
       ${explanation ? `
         <div class="wrong-feedback-why">
-          <div class="wrong-feedback-why-label">${revealed ? 'Resposta' : 'Por que não foi essa'}</div>
+          <div class="wrong-feedback-why-label">${ex && ex.format === 'cloze' ? 'Frase completa' : (revealed ? 'Resposta' : 'Por que não foi essa')}</div>
           <div class="feedback-inner-box">${explanation}</div>
         </div>
       ` : ''}
@@ -4645,6 +4657,7 @@ function showAnswerPanel(contentEl, ex, opts = {}){
     </div>
   `;
   wrap.appendChild(panel);
+  wireAudioButtons(panel);
 
   panel.querySelector('#wrong-continue-btn').addEventListener('click', () => {
     addStudyMinutes();
@@ -5093,10 +5106,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
       STEP_STATE.exerciseScore += 1;
       addXP(exerciseXP(ex, 4));
       addStudyMinutes();
-      // Sem detalhe extra no painel -- a tradução já apareceu na tela ao
-      // revelar o espaço em branco (revealBlank), logo acima, não precisa
-      // repetir dentro do painel de novo.
-      setTimeout(() => showCorrectFeedbackPanel(contentEl, null), 500);
+      setTimeout(() => showCorrectFeedbackPanel(contentEl, clozeFeedbackDetailHTML(ex, false)), 500);
     } else {
       setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
     }
@@ -5431,11 +5441,12 @@ function showCorrectFeedbackPanel(contentEl, detail){
   panel.innerHTML = `
     <div class="feedback-card-body">
       <div class="correct-feedback-header">${comboBadgeHTML}✅ ${headerText}</div>
-      ${detail ? `<p class="correct-feedback-trans feedback-inner-box">${detail}</p>` : ''}
+      ${detail ? `<div class="correct-feedback-trans feedback-inner-box">${detail}</div>` : ''}
       <button class="btn btn-primary btn-block correct-feedback-continue" id="correct-continue-btn">Continuar →</button>
     </div>
   `;
   wrap.appendChild(panel);
+  wireAudioButtons(panel);
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
   document.getElementById('correct-continue-btn').addEventListener('click', () => {
