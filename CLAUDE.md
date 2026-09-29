@@ -16655,26 +16655,42 @@ nenhum outro arquivo tocado):**
   teste desatualizado de uma fase anterior, não um bug desta entrega, não
   corrigido por estar fora do escopo (§23 não pede correção de testes
   legados).
-- **Teste real Supabase (§21) -- NÃO EXECUTADO nesta entrega, por
-  limitação de ambiente, não por escolha**: a conexão MCP com o Supabase
-  (projeto `eigjocalzwamisgqilhg`) caiu no meio da sessão
-  ("needs you to sign in again") e, mesmo depois de reconectar com
-  sucesso (confirmado via `select 1 as ping;`), caiu de novo antes da
-  transação de teste em si poder ser executada -- esta sessão é
-  não-interativa e não pode completar o fluxo OAuth de reautenticação.
-  Diferente de toda entrega anterior desta feature (que sempre incluiu
-  esse teste), aqui ele fica registrado como PENDENTE DE EXECUÇÃO, não
-  como "não necessário" -- a validação de escopo/contagens/isolamento já
-  está coberta pelas 2 suítes acima (Node/VM sobre o motor puro +
-  Playwright sobre o fluxo real do app), mas nenhuma delas substitui a
-  confirmação de que o schema real (RLS/triggers da Fase B/C) se
-  comporta como esperado contra o Postgres de produção. Recomendado que
-  uma sessão futura, com acesso MCP restaurado, rode o teste de
-  transação+rollback descrito no prompt-mestre original (§21) antes de
-  considerar esta fase 100% validada em produção -- o código em si não
-  depende de nenhuma mudança de schema (nenhuma migração nova nesta
-  fase), então o risco de regressão de banco é baixo, mas não foi
-  formalmente confirmado.
+- **Teste real Supabase (§21) -- executado nesta entrega** (a conexão
+  MCP, que tinha caído durante a sessão anterior, foi restabelecida).
+  Duas transações reais contra o projeto `eigjocalzwamisgqilhg`, ambas
+  com `BEGIN`...`ROLLBACK`: **(1)** snapshot antes (`decks:0`,
+  `teacher_flashcards:5` hash `339a5341...`, `own_flashcards:7` hash
+  `6e415c53...`) -> árvore real (root->personal_root->Deck A->
+  A.nested, + Deck B irmão, + teacher_root->Teacher Deck, + Deck de
+  curso órfão) + Notes reais (own em Deck A, own em A.nested, teacher em
+  Teacher Deck), usando 2 contas reais (professora admin + uma aluna com
+  vínculo `teacher_students` ativo em francês) -> confirmado: escopo do
+  subtree inclui as 2 Notes de A+A.nested e exclui a de fora; move válido
+  de Note (A->A.nested) aceito; moves inválidos rejeitados pela trigger
+  da Fase B/C (Note própria -> Teacher Deck, Note própria -> Curso, Note
+  de professora -> Deck pessoal, Deck A -> dentro do próprio filho
+  -- ciclo, `personal_root` -> Curso) -- todas as 5 rejeições confirmadas
+  com a mensagem exata da trigger, nenhuma delas quebrou a transação
+  (capturadas via `EXCEPTION WHEN OTHERS`); move válido de Deck (A pra
+  dentro de B, irmão) aceito. **(2)** 2ª transação, dedicada a RLS real
+  (`SET LOCAL ROLE authenticated` + `request.jwt.claims` simulando 3
+  contas reais distintas -- aluna/professora/uma 3ª conta sem relação
+  nenhuma): **8/8 confirmados** -- conta terceira lê 0 Decks da árvore e
+  não consegue renomear nenhum; aluna lê a árvore inteira (5 Decks,
+  incluindo o Teacher Deck) mas só consegue renomear o próprio Deck
+  pessoal (0 linhas afetadas tentando renomear o Teacher Deck);
+  professora renomeia o próprio Teacher Deck mas não consegue renomear o
+  Deck pessoal da aluna (0 linhas afetadas). **Achado do próprio processo
+  de teste, corrigido no script antes do resultado final**: a 1ª
+  tentativa desses testes de RLS falhava com "permission denied for
+  table test_results" -- causa raiz era o próprio SCRIPT DE TESTE
+  (`INSERT INTO test_results` sendo chamado ainda sob `role=authenticated`,
+  que não tem permissão na tabela temp criada pelo role de serviço) --
+  nunca um bug de produção; corrigido adiando toda escrita em
+  `test_results` pra depois do `RESET ROLE`. **Zero resíduo confirmado**:
+  snapshot depois (`decks:0`, `teacher_flashcards:5` hash `339a5341...`,
+  `own_flashcards:7` hash `6e415c53...`) byte a byte idêntico ao de
+  antes, nas 2 transações.
 
 **Dados preservados (confirmado)**: nenhum Card ID, valor de FSRS
 (`state`/`due`/`reps`/`lapses`/`stability`/`difficulty`), Field, Tag,
@@ -16701,9 +16717,9 @@ de Deck (Deck-por-curso? Deck-por-unidade? não migrar, deixar os 2
 sistemas paralelos pra sempre?) continua inteiramente em aberto, não
 tocada nesta fase, conforme D3 exigia.
 
-Nenhum passo manual pendente pra autora além do teste real Supabase
-(§21) ainda não executado por limitação de ambiente -- nenhuma migração
-nova nesta fase.
+Nenhum passo manual pendente pra autora -- nenhuma migração nova nesta
+fase, teste real Supabase (§21) executado e confirmado com zero
+resíduo.
 
 **PARE conforme instrução explícita -- Fase E NÃO iniciada.** Só começa
 depois que a autora revisar este checkpoint.
