@@ -57,23 +57,33 @@ def prepare_text_for_tts(text):
     return text
 
 
-def _normalize_for_comparison(text):
-    """Normalização só pra COMPARAR texto original com transcrição do STT
-    (nunca usada pro texto que vai pro TTS nem pro texto exibido). Trata
-    apóstrofo como separador de palavra (`n'écoute` -> `n ecoute`, do jeito
-    que o STT costuma tokenizar elisões) e equipara ligaduras (œ/oe)."""
+# Elisões do francês: o texto escreve "t'as", o STT costuma escrever "tu as"
+# (soam quase iguais). Só pra COMPARAR -- nunca muda o texto exibido nem o enviado.
+_ELISIONS = {"t": "tu", "j": "je", "n": "ne", "m": "me", "s": "se", "d": "de", "c": "ce", "qu": "que"}
+_ARTICLE_FORMS = {"l": "le", "la": "le"}
+
+
+def _tokens_for_comparison(text):
+    """Lista ORDENADA de palavras normalizadas (apóstrofo separa palavra)."""
     text = unicodedata.normalize("NFC", text).lower()
     text = text.translate(_CURLY_QUOTE_MAP)
     text = text.translate(_LIGATURE_MAP)
     text = text.replace("'", " ")
     text = text.replace("-", "")  # "week-end"/"weekend", "c'est-à-dire" etc. -- mesma palavra, STT tokeniza diferente
-    cleaned = []
-    for ch in text:
-        if ch.isalnum() or ch.isspace():
-            cleaned.append(ch)
-        else:
-            cleaned.append(" ")
-    return set("".join(cleaned).split())
+    cleaned = [ch if (ch.isalnum() or ch.isspace()) else " " for ch in text]
+    return "".join(cleaned).split()
+
+
+def _canonical(tok):
+    return _ARTICLE_FORMS.get(tok) or _ELISIONS.get(tok) or tok
+
+
+def _normalize_for_comparison(text):
+    """Conjunto de palavras normalizadas só pra COMPARAR texto original com
+    transcrição do STT (nunca usada pro texto que vai pro TTS nem pro texto
+    exibido). Apóstrofo separa palavra (`n'écoute` -> `n ecoute`), equipara
+    ligaduras (œ/oe) e trata a elisão como a palavra cheia (`t'as` == `tu as`)."""
+    return {_canonical(t) for t in _tokens_for_comparison(text)}
 
 
 def _words_missing_from_transcript(source_text, transcript):
@@ -83,9 +93,44 @@ def _words_missing_from_transcript(source_text, transcript):
     não prova que o TTS errou; tratamos como inconclusivo, não como falha)."""
     if not transcript or not transcript.strip():
         return None
-    source_words = _normalize_for_comparison(source_text)
-    transcript_words = _normalize_for_comparison(transcript)
-    return source_words - transcript_words
+    src = _tokens_for_comparison(source_text)
+    tr_raw = set(_tokens_for_comparison(transcript))
+    tr = {_canonical(t) for t in tr_raw}
+    missing = set()
+    skip_next = False
+    for i, tok in enumerate(src):
+        if skip_next:
+            skip_next = False
+            continue
+        # STT que cola a elisão na palavra seguinte ("t'es" -> "tes")
+        if tok in _ELISIONS and i + 1 < len(src) and (tok + src[i + 1]) in tr_raw:
+            skip_next = True
+            continue
+        if _canonical(tok) not in tr:
+            missing.add(_canonical(tok))
+    return missing
+
+
+def audio_is_healthy(data, min_peak=0.15, min_voiced_s=0.15, min_rms=0.02):
+    """Checagem física do mp3 (independe do STT, que erra palavras curtas):
+    volume de pico, duração com som de verdade e energia média. Pega o caso
+    dos áudios quase mudos ('je', 'tu') sem confiar na transcrição."""
+    import miniaudio
+    dec = miniaudio.decode(data, output_format=miniaudio.SampleFormat.FLOAT32)
+    smp = dec.samples
+    if not len(smp):
+        return False, "vazio"
+    peak = max(abs(min(smp)), abs(max(smp)))
+    voiced = [i for i, x in enumerate(smp) if abs(x) > 0.02]
+    voiced_s = (voiced[-1] - voiced[0]) / dec.sample_rate if voiced else 0.0
+    rms = (sum(x * x for x in smp) / len(smp)) ** 0.5
+    if peak < min_peak:
+        return False, f"quase mudo (pico {peak:.3f})"
+    if voiced_s < min_voiced_s:
+        return False, f"som muito curto ({voiced_s:.2f}s)"
+    if rms < min_rms:
+        return False, f"energia baixa (rms {rms:.3f})"
+    return True, "ok"
 
 
 # Voz e locale por idioma (fr é o padrão -- todo o resto do pipeline continua igual).
