@@ -1623,21 +1623,12 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
   border:1px solid var(--paper-line); border-radius:10px; padding:8px 12px; cursor:pointer; max-width:280px; width:100%;
 }
 
-/* ---------- Acesso a "Configurar sessão" (3ª rodada de grilling): a
-   autora não gostou do botão de texto solto entre o dropdown e REVISAR --
-   vira um ícone no cabeçalho, ao lado do título "Revisão". Reaproveita o
-   formato circular já usado em botões-ícone do app (ex: "Reportar
-   problema", .lesson-close-btn), mas com cor própria (seal-red-dark, a
-   mesma do número grande) pra não parecer a mesma ação que o botão de
-   report -- pedido explícito da autora. */
-.review-path-header-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.review-path-header-row h2{ margin:0 0 4px; }
-.review-header-settings-btn{
-  flex-shrink:0; width:36px; height:36px; border-radius:50%; border:1px solid var(--seal-red-dark);
-  background: color-mix(in srgb, var(--seal-red-dark) 12%, var(--paper)); color: var(--seal-red-dark);
-  font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition: all .15s ease;
-}
-.review-header-settings-btn:hover{ background: color-mix(in srgb, var(--seal-red-dark) 22%, var(--paper)); }
+/* ---------- Acesso a "Configurar sessão" (5ª rodada de grilling): saiu
+   do ícone circular ao lado do título (3ª/4ª rodada) e virou um pill
+   #review-header-settings-btn dentro do MESMO .leaderboard-tabs que
+   "📇 Meus Cartões" já usava -- logo abaixo de título+subtítulo,
+   centralizado, exatamente como as sub-abas do Painel de Admin/Perfil
+   (.leaderboard-tabs/.leaderboard-tab, zero CSS novo pro botão em si). */
 
 /* Painel movido de Configurações > Revisões (2ª rodada) -- recolhido por
    padrão, [hidden] nativo, sem JS extra pra esconder. 4ª rodada: o filtro
@@ -3017,22 +3008,23 @@ body.hide-pinyin .prompt-pinyin{
   <div class="view" id="view-review">
     <div id="review-mode-select-wrap">
       <div class="path-header">
-        <div class="review-path-header-row">
-          <h2>Revisão</h2>
-          <button class="review-header-settings-btn" id="review-header-settings-btn" type="button" aria-label="Configurar sessão" title="Configurar sessão">⚙️</button>
-        </div>
+        <h2>Revisão</h2>
         <p>O que você deve fazer agora?</p>
       </div>
-      <div id="review-today-widget"></div>
 
       <!-- Prop 3 (ver CLAUDE.md, "7 propostas") -- "Meus Cartões" saiu do
-           menu do avatar (ninguém clicava lá) e ganhou este botão, no
-           mesmo estilo de pill já usado pras sub-abas do Painel de
-           Admin/Perfil (.leaderboard-tabs/.leaderboard-tab), zero CSS
-           novo. -->
-      <div class="leaderboard-tabs" role="tablist" aria-label="Atalhos de Revisão" style="justify-content:flex-start; margin-bottom:10px;">
+           menu do avatar (ninguém clicava lá) e ganhou este botão. 5ª
+           rodada de grilling: "⚙️ Configurar sessão" entrou nesta MESMA
+           fileira (saiu do ícone ao lado do título) -- pill igual às
+           sub-abas do Painel de Admin/Perfil, logo abaixo de
+           título+subtítulo, centralizado (mesmo .leaderboard-tabs sem
+           override de alinhamento), zero CSS novo. -->
+      <div class="leaderboard-tabs" role="tablist" aria-label="Atalhos de Revisão">
         <button type="button" class="leaderboard-tab" id="review-my-flashcards-btn">📇 Meus Cartões</button>
+        <button type="button" class="leaderboard-tab" id="review-header-settings-btn">⚙️ Configurar sessão</button>
       </div>
+
+      <div id="review-today-widget"></div>
 
       <div class="review-settings-panel" id="review-settings-panel" hidden>
         <!-- Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila"
