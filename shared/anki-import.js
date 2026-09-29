@@ -18,6 +18,7 @@
 //   - shared/own-flashcards.js     (uploadOwnFlashcardMedia)
 //   - shared/roles.js              (hasActiveTeacherLink)
 //   - shared/my-flashcards.js      (FREE_OWN_FLASHCARD_LIMIT)
+//   - shared/deck-engine.js        (preflightOwnCardInstanceCreation, Fase F)
 //   - shared/supabase-client.js    (supabaseClient -- só pro INSERT em lote)
 //   - shared/auth.js               (CURRENT_USER)
 //
@@ -730,10 +731,7 @@ async function persistAnkiImportBatches(planEntries, { identity, onBatchDone }){
   return { ok: true, createdRows };
 }
 
-// Calcula quantos slots restam no plano gratuito (Section 23) -- MESMA
-// fórmula já usada por shared/public-profile.js (importSelectedPublicFlashcards)
-// e pela tela "Meus Cartões" -- nunca uma exceção especial pra import Anki.
-function computeAnkiImportRemainingSlots(activeOwnCardCount, hasTeacherLink){
-  if (hasTeacherLink) return Infinity;
-  return Math.max(0, FREE_OWN_FLASHCARD_LIMIT - activeOwnCardCount);
-}
+// Fase F -- o limite do plano grátis NÃO é mais calculado aqui: importar é
+// só mais uma forma de criar cartões próprios, então usa a MESMA regra
+// canônica por CardInstance (preflightOwnCardInstanceCreation,
+// shared/deck-engine.js) que a criação manual e os outros imports.

@@ -89,8 +89,16 @@ function _validateOwnFlashcardContent({ front, backTrans, choices, clozeSentence
 // obrigatório. O branch Legacy de EDIÇÃO (updateOwnFlashcardContent,
 // abaixo) continua intocado -- editar um cartão Legacy já existente nunca
 // cria uma linha nova.
-async function createOwnFlashcard({ languageAppKey, nativeState }){
-  const identity = { owner_id: CURRENT_USER.id, language_app_key: languageAppKey };
+//
+// Fase F (ver CLAUDE.md) -- todo cartão novo nasce COM Deck: `deckId` (ou,
+// se ausente, o personal_root do usuário) é resolvido/validado por
+// resolveOwnCreationDeck() ANTES de qualquer INSERT e vai no MESMO INSERT
+// da Note+Fields (1 statement = atômico: ou a linha existe com Deck, ou
+// nada existe). `decks` opcional só evita round-trip em criação em lote.
+async function createOwnFlashcard({ languageAppKey, nativeState, deckId, decks }){
+  const dest = await resolveOwnCreationDeck({ languageAppKey, deckId, decks });
+  if (!dest.ok) return { ok: false, error: dest.error };
+  const identity = { owner_id: CURRENT_USER.id, language_app_key: languageAppKey, deck_id: dest.deckId };
   const payload = Object.assign({}, identity, nativeContentColumnsFromEditorState(nativeState));
   const { data, error } = await supabaseClient.from('own_flashcards').insert(payload).select().single();
   if (error){ console.error('Erro ao criar seu flashcard:', error); return { ok: false, error: 'Não foi possível criar o cartão agora.' }; }

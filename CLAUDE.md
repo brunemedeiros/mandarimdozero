@@ -16870,3 +16870,61 @@ no primeiro uso autenticado); filtro de origem do Review (`self`/`teacher`)
 ainda se aplica ao pool do Deck; sem Painel, Tags UI, Teacher/Public Decks,
 import Anki com hierarquia, movimentação/delete de Course Deck, mudança de
 FSRS ou do limite Free. Fase F não iniciada.
+
+## Fase F -- Add Card + destino em Deck (2026-09-29)
+
+**Fluxo**: `Note → Fields → Card Type → CardInstances → Deck → Review/FSRS`.
+Reaproveita o editor nativo da Fase 6D (nada de 2º editor/gerador/limite/
+fila). Sem migration nem mudança de schema (`own_flashcards.deck_id` e o
+trigger `own_flashcards_validate_deck` já existiam desde a 049/050).
+
+**Achados da auditoria** (antes do código): (1) `deck_id` nunca era gravado
+na criação -- todo cartão novo ficava NULL e o Deck Engine (que escopa por
+`deckId != null`) nunca o achava; (2) o teto Free contava LINHAS, em 4
+lugares (criação manual, import arquivo/link, Anki, perfil público), não
+CardInstances; (3) Course Decks só para units com vocab (units `grammar`
+ficam de fora) é intencional e compatível -- não gera cards, Add Card não
+usa Course Deck; nada reaberto da Fase E.
+
+**Implementado**
+- `shared/deck-engine.js`: regra canônica ÚNICA do limite:
+  `cardInstanceCountForRow`, `ownCardInstanceUsage` (só linhas ativas),
+  `cardInstanceCountForEditorState`, `preflightOwnCardInstanceCreation`
+  (delegam a `generatedCardInstanceCount` -> motor real). Normal=1,
+  reverso=2, Cloze=N. `computeAnkiImportRemainingSlots` foi REMOVIDA.
+- `shared/deck-data.js`: `resolveOwnCreationDeck` -- bootstrap idempotente
+  (`ensure_user_decks`) + destino; padrão = `personal_root` ("Meus Decks",
+  Deck real aceito pelo trigger); valida via `canPlaceOwnNoteInDeck`
+  (regras não replicadas; RLS/trigger seguem a autoridade final).
+- `shared/own-flashcards.js`: `createOwnFlashcard({languageAppKey,
+  nativeState, deckId?, decks?})` grava `deck_id` no MESMO INSERT da Note
+  (atômico). `deck_id` NÃO entra em `nativeContentColumnsFromEditorState`
+  (usado também na edição -- editar não muda Deck).
+- `shared/my-flashcards.js`: seletor "Deck de destino" (só personal_root +
+  subdecks pessoais), preflight antes de gravar (falha = nada persistido,
+  nenhum limite consumido), seção "Meus Decks" (lista, criar subdeck via
+  `createPersonalDeck`, botão **"Estudar este Deck"** ->
+  `startDeckReviewSession`, fora do formulário), selo `N/20` por
+  CardInstance. `STATE.decks` atualizado.
+- Imports de arquivo/link, Anki e perfil público: mesmo preflight e Deck
+  padrão (`personal_root`) resolvido antes de qualquer escrita
+  (`anki-import-ui.js`, `public-profile.js`).
+
+**Não feito (de propósito)**: sem backfill -- as 7 linhas antigas com
+`deck_id NULL` continuam fora de Deck até uma ação explícita futura;
+sem Teacher Decks/Tags UI/Painel/perfil público de Decks; sem mudança em
+FSRS/Review/Study Trail/áudio (`fr/app.js` e `zh/app.js` NÃO foram
+tocados; a linha `(de)` de `findMatchingPhrase` segue intacta). Import
+Anki continua inserindo em lotes de 40 (não é tudo-ou-nada entre lotes --
+comportamento pré-existente; o preflight cobre a seleção inteira).
+Limitação: o teto conta o uso já persistido; corrida entre duas abas
+poderia ultrapassá-lo (é trava de UI, como desde a Fase 5.1).
+
+**Testes versionados** (`tests/fase-f/`): `test_add_card_unit.js` (Node/VM,
+68/68), `test_supabase_real.sql` (Postgres real, transação + ROLLBACK, 14
+cenários ok: Course/Teacher/teacher_root/root/outro usuário/outro idioma/
+inexistente rejeitados, RLS; zero resíduo: decks 0, own_flashcards 7, hash
+igual), `test_playwright.js` (FR+ZH, 48/48: criar Deck -> Card Type ->
+Fields -> Deck -> Preview -> salvar -> Estudar este Deck -> grade FSRS;
+limite Free/Premium/vínculo; import de arquivo). Fase E re-executada:
+unit 75/75, playwright 38/38.

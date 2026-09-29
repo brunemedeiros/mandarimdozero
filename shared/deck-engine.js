@@ -229,6 +229,57 @@ function generatedCardInstanceCount(row){
   }).length;
 }
 
+// ---------- Fase F -- limite Free/Premium por CardInstance (UMA regra só) ----------
+//
+// O teto de cartões próprios (Fase 5.1) contava LINHAS (Notes); a
+// arquitetura pede CardInstances (Normal=1, Normal com reverso=2, Cloze
+// com N lacunas=N). Este é o ÚNICO ponto que implementa essa regra --
+// criação manual, import de arquivo/link, import Anki e import de perfil
+// público chamam estas funções, nunca contam `.length` por conta própria.
+// Reaproveita generatedCardInstanceCount() (que delega ao motor real,
+// buildEngineCardsFromRow) -- nenhuma cardinalidade por Card Type é
+// reimplementada aqui. Preflight puro: nada é gravado; como a contagem
+// "usada" vem só de linhas JÁ persistidas, uma criação que falha nunca
+// consome limite.
+
+// Nunca lança: linha malformada conta 1 (mesma cardinalidade de uma linha
+// Legacy) em vez de derrubar a tela.
+function cardInstanceCountForRow(row){
+  try {
+    const n = generatedCardInstanceCount(row);
+    return n > 0 ? n : 1;
+  } catch (e){
+    return 1;
+  }
+}
+
+// Só linhas ativas consomem limite (arquivar nunca reduz nem aumenta o
+// teto -- mesma regra da CONSOLIDAÇÃO-3).
+function ownCardInstanceUsage(rows){
+  return (rows || [])
+    .filter(r => r && r.status === 'active')
+    .reduce((sum, r) => sum + cardInstanceCountForRow(r), 0);
+}
+
+// Quantos CardInstances um Note editor state (ainda não salvo) vai gerar.
+function cardInstanceCountForEditorState(editorState, languageAppKey){
+  const row = noteEditorStateToRow(editorState);
+  return cardInstanceCountForRow(Object.assign({}, row, {
+    id: 0, language_app_key: languageAppKey, status: 'active',
+  }));
+}
+
+// Preflight único. `editorStates`: os Notes que a operação vai criar.
+// `limit`: teto do plano grátis (FREE_OWN_FLASHCARD_LIMIT, passado pelo
+// chamador -- a constante vive em shared/my-flashcards.js).
+function preflightOwnCardInstanceCreation({ activeRows, hasTeacherLink, editorStates, languageAppKey, limit }){
+  const used = ownCardInstanceUsage(activeRows);
+  const requested = (editorStates || []).reduce((sum, st) => sum + cardInstanceCountForEditorState(st, languageAppKey), 0);
+  if (hasTeacherLink) return { ok: true, used, requested, remaining: Infinity };
+  const remaining = Math.max(0, limit - used);
+  return { ok: requested <= remaining, used, requested, remaining };
+}
+
 // ============================================================
 // 5/6) CONTAGENS -- New / Learning / Review + agregador de Deck
 // ============================================================

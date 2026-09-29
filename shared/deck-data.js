@@ -63,6 +63,28 @@ async function ensureDecksForCurrentUser(languageAppKey){
   return { ok: true, rootDeckId: row.root_deck_id, personalRootDeckId: row.personal_root_deck_id };
 }
 
+// Fase F -- resolve o Deck de destino de uma criação PESSOAL. Única porta
+// de entrada de "onde vai este cartão novo": criação manual, import de
+// arquivo/link, import Anki e import de perfil público passam todos por
+// aqui, nunca gravam sem destino. `deckId` ausente = Deck padrão =
+// personal_root ("Meus Decks", Deck REAL criado por ensure_user_decks,
+// aceito como destino de Note pelo trigger own_flashcards_validate_deck).
+// Validação client-side via canPlaceOwnNoteInDeck (shared/deck-engine.js,
+// nenhuma regra replicada aqui); RLS/trigger do banco continuam sendo a
+// autoridade final. `decks` opcional: chamadores em lote (import) já têm a
+// lista e evitam um round-trip por cartão.
+async function resolveOwnCreationDeck({ languageAppKey, deckId, decks }){
+  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  const boot = await ensureDecksForCurrentUser(languageAppKey);
+  if (!boot.ok) return { ok: false, error: boot.error };
+  const targetId = (deckId != null) ? deckId : boot.personalRootDeckId;
+  const list = decks && decks.length ? decks : await fetchDecksForLanguage(languageAppKey);
+  const deck = getDeckById(list, targetId);
+  const check = canPlaceOwnNoteInDeck({ owner_id: CURRENT_USER.id, language_app_key: languageAppKey }, deck);
+  if (!check.ok) return { ok: false, error: 'Escolha um Deck pessoal válido como destino.', reason: check.reason };
+  return { ok: true, deckId: deck.id, decks: list };
+}
+
 // Criação de subdeck pessoal -- domínio necessário pra C9 (reorganizar
 // subdecks pessoais) ter algo pra criar/mover; nenhuma UI é construída
 // nesta fase pra chamar isto (seção 20, "não implementar Deck UI"), mas

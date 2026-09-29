@@ -53,7 +53,7 @@ const FREE_OWN_FLASHCARD_LIMIT = 20;
 // papel de ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline -- clone
 // do editorState no instante da conversão Legacy->Native, usado no save
 // pra decidir se revision (e portanto FSRS) é preservado.
-const MY_FLASHCARDS_STATE = { editingCardId: null, editingNativeState: null, editingNativeConversionBaseline: null, _cardsCache: [], nativeCardState: createNativeNoteEditorState({ cardGenerationMode: 'normal' }) };
+const MY_FLASHCARDS_STATE = { _decks: [], editingCardId: null, editingNativeState: null, editingNativeConversionBaseline: null, _cardsCache: [], nativeCardState: createNativeNoteEditorState({ cardGenerationMode: 'normal' }) };
 
 // Grillado com a autora (ver CLAUDE.md, "rótulo do seletor de direção do
 // cartão") -- rótulos com o nome do idioma de verdade em vez de "idioma
@@ -78,6 +78,74 @@ function myFlashcardDirectionLabels(){
     targetFirst: `Frente em ${pair.target} (com áudio), verso com tradução em ${pair.native}`,
     nativeFirst: `Frente na tradução em ${pair.native}, verso em ${pair.target} (com áudio)`,
   };
+}
+
+// ---------- Fase F -- Decks pessoais em "Meus Cartões" ----------
+//
+// Camada de UI mínima sobre o Deck Engine (shared/deck-engine.js) e a
+// camada de dado (shared/deck-data.js) -- nenhuma regra de árvore/permissão
+// é replicada aqui: só os Decks que canPlaceOwnNoteInDeck aceita como
+// destino (personal_root + personal do próprio usuário) aparecem.
+// Course/Teacher/outros usuários nunca são listados.
+
+function personalDeckDepth(decks, deck){
+  return getDeckAncestors(decks, deck.id).length;
+}
+
+// Decks pessoais ordenados em árvore (pai antes dos filhos), com a
+// profundidade pra indentação. personal_root primeiro por construção.
+function orderedPersonalDecks(decks){
+  const mine = (decks || []).filter(d => ['personal_root', 'personal'].includes(d.kind) && d.owner_id === CURRENT_USER.id);
+  const out = [];
+  const walk = (parentId) => {
+    mine.filter(d => (d.parent_deck_id || null) === parentId)
+      .sort((a, b) => a.id - b.id)
+      .forEach(d => { out.push(d); walk(d.id); });
+  };
+  const roots = mine.filter(d => d.kind === 'personal_root');
+  roots.forEach(r => { out.push(r); walk(r.id); });
+  return out;
+}
+
+function personalDeckOptionsHTML(decks){
+  return orderedPersonalDecks(decks).map(d => {
+    const pad = '\u00A0\u00A0'.repeat(Math.max(0, personalDeckDepth(decks, d) - 1));
+    return `<option value="${d.id}">${pad}${escapeHTML(d.kind === 'personal_root' ? 'Meus Decks' : d.name)}</option>`;
+  }).join('');
+}
+
+function personalDecksListHTML(decks){
+  const cards = (typeof STATE !== 'undefined' && STATE.cards) || [];
+  return orderedPersonalDecks(decks).map(d => {
+    const pad = Math.max(0, personalDeckDepth(decks, d) - 1) * 16;
+    const n = getStudyScopeForDeck(decks, d.id, cards).length;
+    return `<div class="admin-badge-row" style="padding-left:${pad}px;">
+      <span style="flex:1;">${escapeHTML(d.kind === 'personal_root' ? 'Meus Decks' : d.name)} <span class="profile-edit-hint">(${n} cartões)</span></span>
+      <button type="button" class="btn btn-secondary" data-study-deck="${d.id}">Estudar este Deck</button>
+    </div>`;
+  }).join('');
+}
+
+function wireMyDecksSection(wrap){
+  wrap.querySelectorAll('[data-study-deck]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Único caminho de estudo por Deck: startDeckReviewSession (fr/zh
+      // app.js, Fase D) -- mesma fila/FSRS do Review, nenhuma fila nova.
+      if (typeof startDeckReviewSession === 'function') startDeckReviewSession(Number(btn.dataset.studyDeck));
+    });
+  });
+  document.getElementById('my-deck-new-btn')?.addEventListener('click', async () => {
+    const errEl = document.getElementById('my-deck-error');
+    errEl.textContent = '';
+    const res = await createPersonalDeck({
+      name: document.getElementById('my-deck-new-name').value,
+      parentDeckId: Number(document.getElementById('my-deck-new-parent').value),
+      languageAppKey: APP_KEY,
+      decks: MY_FLASHCARDS_STATE._decks,
+    });
+    if (!res.ok){ errEl.textContent = res.error; return; }
+    renderMyFlashcardsView();
+  });
 }
 
 async function renderMyFlashcardsView(opts){
@@ -116,23 +184,33 @@ async function renderMyFlashcardsView(opts){
   wrap.innerHTML = loadingHTML();
 
   const isMandarim = APP_KEY === 'mandarim';
-  const [cards, hasLink, planTier] = await Promise.all([
+  // Fase F -- Decks pessoais carregados sob demanda (bootstrap idempotente
+  // + leitura); STATE.decks é atualizado pra "Estudar este Deck"
+  // (startDeckReviewSession) nunca enxergar uma lista velha.
+  const [cards, hasLink, planTier, decks] = await Promise.all([
     fetchMyOwnFlashcards(APP_KEY),
     hasActiveTeacherLink(),
     fetchMyPlanTier(),
+    ensureDecksForCurrentUser(APP_KEY).then(() => fetchDecksForLanguage(APP_KEY)),
   ]);
   const premium = planTier === 'premium';
   MY_FLASHCARDS_STATE._cardsCache = cards;
+  MY_FLASHCARDS_STATE._decks = decks;
+  MY_FLASHCARDS_STATE._hasLink = hasLink;
+  if (typeof STATE !== 'undefined') STATE.decks = decks;
   const activeCards = cards.filter(c => c.status === 'active');
   const archivedCards = cards.filter(c => c.status === 'archived');
-  const atLimit = !hasLink && activeCards.length >= FREE_OWN_FLASHCARD_LIMIT;
+  // Fase F -- o teto conta CardInstances (regra única em shared/deck-engine.js),
+  // nunca linhas.
+  const usedInstances = ownCardInstanceUsage(cards);
+  const atLimit = !hasLink && usedInstances >= FREE_OWN_FLASHCARD_LIMIT;
 
   // Selo de tier -- eixo de QUANTIDADE (vínculo com professora) continua
   // separado do eixo de PREMIUM (formatos ricos) -- ver comentário em
   // shared/roles.js. Uma conta pode mostrar os dois selos juntos.
   const tierBadgeHTML = (hasLink
     ? `<span class="pill">✨ Aluno vinculado — cartões ilimitados</span>`
-    : `<span class="pill">🔒 Plano grátis — ${activeCards.length}/${FREE_OWN_FLASHCARD_LIMIT} cartões</span>`)
+    : `<span class="pill">🔒 Plano grátis — ${usedInstances}/${FREE_OWN_FLASHCARD_LIMIT} cartões</span>`)
     + (premium ? `<span class="pill">⭐ Premium</span>` : '');
 
   wrap.innerHTML = `
@@ -162,11 +240,24 @@ async function renderMyFlashcardsView(opts){
         <p class="profile-edit-hint" style="margin-top:-2px;">Adicione os campos deste cartão -- por exemplo, Frente e Verso pra um cartão Normal. Cada campo tem seu próprio idioma e seus próprios recursos de áudio.</p>
         <div id="my-flashcard-native-fields"></div>
         <button type="button" class="admin-select-link" id="my-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; margin:6px 0 0;">👁️ Pré-visualizar</button>
+        <label class="profile-edit-label" for="my-flashcard-deck" style="margin-top:14px;">Deck de destino</label>
+        <select id="my-flashcard-deck" class="profile-edit-input">${personalDeckOptionsHTML(decks)}</select>
         <label class="profile-edit-label" for="my-flashcard-note" style="margin-top:14px;">Nota (opcional)</label>
         <textarea id="my-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="contexto, dica de uso..."></textarea>
         <p class="profile-edit-error" id="my-create-flashcard-error"></p>
         <button type="submit" class="btn btn-primary btn-block" id="my-create-flashcard-btn" ${atLimit ? 'disabled' : ''}>${atLimit ? 'Limite atingido' : 'Criar cartão'}</button>
       </form>
+    </div>
+
+    <div class="profile-section" id="my-decks-section">
+      <div class="section-label">Meus Decks</div>
+      <div id="my-decks-list">${personalDecksListHTML(decks)}</div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
+        <input type="text" id="my-deck-new-name" class="profile-edit-input" placeholder="Nome do novo Deck" maxlength="60" style="flex:1; min-width:140px;">
+        <select id="my-deck-new-parent" class="profile-edit-input" style="flex:1; min-width:140px;">${personalDeckOptionsHTML(decks)}</select>
+        <button type="button" class="btn btn-secondary" id="my-deck-new-btn">+ Criar Deck</button>
+      </div>
+      <p class="profile-edit-error" id="my-deck-error"></p>
     </div>
 
     <div class="profile-section">
@@ -203,6 +294,7 @@ async function renderMyFlashcardsView(opts){
 
   wireMyFlashcardsForm(wrap, atLimit, premium);
   wireMyFlashcardsCardButtons(wrap, premium);
+  wireMyDecksSection(wrap);
   document.getElementById('anki-import-file')?.addEventListener('change', (e) => {
     if (typeof handleAnkiImportFileSelected === 'function') handleAnkiImportFileSelected(e.target.files[0]);
     e.target.value = '';
@@ -592,8 +684,29 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
     nativeState.privateNote = (document.getElementById('my-flashcard-note').value || '').trim() || null;
     const v = validateNoteEditorStateForSave(nativeState);
     if (!v.ok){ errorEl.textContent = v.error; return; }
+    // Fase F -- preflight ANTES de persistir, pela regra canônica (limite
+    // conta CardInstances: Normal=1, reverso=2, Cloze=N lacunas). Nada é
+    // gravado se estourar -- e como o uso vem só de linhas já persistidas,
+    // uma criação que falha depois nunca consome limite.
+    const pre = preflightOwnCardInstanceCreation({
+      activeRows: MY_FLASHCARDS_STATE._cardsCache,
+      hasTeacherLink: !!MY_FLASHCARDS_STATE._hasLink,
+      editorStates: [nativeState],
+      languageAppKey: APP_KEY,
+      limit: FREE_OWN_FLASHCARD_LIMIT,
+    });
+    if (!pre.ok){
+      errorEl.textContent = `Este cartão geraria ${pre.requested} cartão(ões) de estudo, mas restam só ${pre.remaining} no plano grátis.`;
+      document.getElementById('flashcard-limit-modal').style.display = 'flex';
+      return;
+    }
     btn.disabled = true;
-    const result = await createOwnFlashcard({ languageAppKey: APP_KEY, nativeState });
+    const deckSel = document.getElementById('my-flashcard-deck');
+    const result = await createOwnFlashcard({
+      languageAppKey: APP_KEY, nativeState,
+      deckId: deckSel && deckSel.value ? Number(deckSel.value) : undefined,
+      decks: MY_FLASHCARDS_STATE._decks,
+    });
     btn.disabled = false;
     if (!result.ok){
       // Fase 7e (ver CLAUDE.md, Seção 14) -- a Note nunca chegou a ser
@@ -808,6 +921,22 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
     if (errorEl) errorEl.textContent = `Esses cartões são de outro idioma (${payload.languageAppKey}) -- não podem ser importados aqui.`;
     return;
   }
+  // Fase F -- preflight único (mesma regra canônica da criação manual) e
+  // Deck padrão (personal_root) resolvido UMA vez pro lote inteiro.
+  const importStates = payload.cards.map(c => nativeNoteEditorStateFromImportPayload(c, APP_KEY));
+  const pre = preflightOwnCardInstanceCreation({
+    activeRows: MY_FLASHCARDS_STATE._cardsCache,
+    hasTeacherLink: !!MY_FLASHCARDS_STATE._hasLink,
+    editorStates: importStates,
+    languageAppKey: APP_KEY,
+    limit: FREE_OWN_FLASHCARD_LIMIT,
+  });
+  if (!pre.ok){
+    document.getElementById('flashcard-limit-modal').style.display = 'flex';
+    return;
+  }
+  const dest = await resolveOwnCreationDeck({ languageAppKey: APP_KEY });
+  if (!dest.ok){ if (errorEl) errorEl.textContent = dest.error; return; }
   if (!confirm(`Importar ${payload.cards.length} cartão(ões) pra sua conta?`)) return;
   let importedCount = 0;
   for (const card of payload.cards){
@@ -818,7 +947,7 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
     // o mesmo mapeamento front/back->Field já usado pra converter um
     // cartão Legacy existente -- nenhuma 2ª implementação.
     const nativeState = nativeNoteEditorStateFromImportPayload(card, APP_KEY);
-    const result = await createOwnFlashcard({ languageAppKey: APP_KEY, nativeState });
+    const result = await createOwnFlashcard({ languageAppKey: APP_KEY, nativeState, deckId: dest.deckId, decks: dest.decks });
     if (result.ok){
       importedCount++;
       if (typeof addSelfFlashcardToState === 'function') addSelfFlashcardToState(result.card);
