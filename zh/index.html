@@ -1216,7 +1216,14 @@ button.correct-feedback-continue{ background: var(--jade); }
 /* ---------- Exercício "frase completa" (PT -> escolher entre 4 frases) ---------- */
 .prompt-trans-sentence{ font-size:18px; color: var(--ink); line-height:1.4; }
 .exercise-options-sentence{ grid-template-columns: 1fr; gap:10px; }
-.exercise-option-sentence{ padding:16px 18px; text-align:left; }
+.exercise-option-sentence{ padding:16px 18px; text-align:left; flex-direction:row; align-items:center; gap:12px; }
+.exercise-option-sentence .opt-sentence-text{ flex:1; min-width:0; }
+.exercise-option-sentence .audio-btn{ flex-shrink:0; }
+/* Painéis de acerto/erro de exercícios de frase: frase em chinês num bloco,
+   tradução abaixo, diferenciada (separador + cor mais suave + itálico). */
+.feedback-correct-line{ font-size:14px; margin-bottom:8px; color: var(--ink); }
+.feedback-phrase-zh{ font-size:16px; line-height:1.5; color: var(--ink); }
+.feedback-phrase-trans{ margin-top:8px; padding-top:8px; border-top:1px dashed var(--paper-line); font-size:13.5px; font-style:italic; color: var(--ink-soft); }
 .opt-pinyin-sentence{ font-size:13px; color: var(--seal-red-dark); font-weight:700; margin-bottom:4px; }
 .opt-hanzi-sentence{ font-family: var(--font-hanzi); font-size:19px; line-height:1.5; }
 

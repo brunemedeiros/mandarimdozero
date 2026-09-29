@@ -4330,7 +4330,7 @@ function buildFullSentenceExercises(unit){
     // phrase (com .t) reaproveita o mesmo painel de acerto/erro já usado
     // pelo reorder e pelo cloze (showCorrectReorderPanel/answerExplanationParts
     // leem ex.phrase, não um campo próprio deste formato).
-    return { format: 'fullsentence', phrase: { c: correctSentence.c, t: phrase.t }, correct: correctSentence, options };
+    return { format: 'fullsentence', phrase: { c: correctSentence.c, p: correctSentence.p, t: phrase.t }, correct: correctSentence, options };
   });
 }
 
@@ -4557,28 +4557,35 @@ function addStudyMinutes(){
 // alternativas separadas por "/" (ex.: "你几岁？/ 你多大？"), o exercício só
 // testa a primeira (é o que `blocks` cobre) -- áudio e painel usam só essa,
 // nunca a frase inteira com as duas perguntas.
-function clozeExercisePhrase(ex){
-  const p = ex.phrase;
-  if (!p.c.includes('/') || !p.blocks) return { c: p.c, p: p.p };
-  return { c: p.blocks.map(b => b.c).join(''), p: p.blocks.map(b => b.p).join(' ') };
+function phraseForExercise(phrase){
+  if (!phrase.c.includes('/') || !phrase.blocks) return { c: phrase.c, p: phrase.p };
+  return { c: phrase.blocks.map(b => b.c).join(''), p: phrase.blocks.map(b => b.p).join(' ') };
+}
+function clozeExercisePhrase(ex){ return phraseForExercise(ex.phrase); }
+
+// Padrão dos painéis de acerto/erro de exercícios baseados numa frase: a
+// frase em chinês (hanzi + áudio + pinyin) num bloco e a tradução logo abaixo,
+// visualmente diferenciada (linha separadora, texto em português mais claro).
+// `correctLine` (opcional) vai antes, ex.: "Resposta certa: 我叫".
+function phraseFeedbackDetailHTML(phrase, translation, correctLine){
+  const f = phraseForExercise(phrase);
+  return `${correctLine ? `<div class="feedback-correct-line">${correctLine}</div>` : ''}
+    <div class="feedback-phrase-zh"><strong>${f.c}</strong> ${audioBtnHTML(f.c)}<br><span class="pinyin">${f.p}</span></div>
+    <div class="feedback-phrase-trans">${translation}</div>`;
 }
 
 function clozeFeedbackDetailHTML(ex, withCorrect){
-  const p = { ...ex.phrase, ...clozeExercisePhrase(ex) };
   const correct = withCorrect
-    ? `<span class="cloze-feedback-correct">Resposta certa: <strong>${ex.correctBlock.c}</strong> <span class="pinyin">(${ex.correctBlock.p})</span></span><br>`
+    ? `Resposta certa: <strong>${ex.correctBlock.c}</strong> <span class="pinyin">(${ex.correctBlock.p})</span>`
     : '';
-  return `${correct}<strong>${p.c}</strong> ${audioBtnHTML(p.c)}<br><span class="pinyin">${p.p}</span><br>${p.t}`;
+  return phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t, correct);
 }
 
 function answerExplanationHTML(ex){
   if (ex && ex.format === 'cloze') return clozeFeedbackDetailHTML(ex, true);
-  if (ex && ex.format === 'fullsentence'){
-    // tradução completa já aparece no prompt e na frase preenchida — repeti-la aqui é redundante
-    return '';
-  }
+  if (ex && ex.format === 'fullsentence') return phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t);
   if (ex && ex.phrase){
-    const phraseHTML = `<p class="usage-note-body"><strong>${ex.phrase.c}</strong><br><span class="pinyin">${ex.phrase.p}</span><br>${ex.phrase.t}</p>`;
+    const phraseHTML = phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t);
     return phraseHTML + (noteOrConceptReviewHTML() || '');
   }
   if (ex && ex.item){
@@ -4663,7 +4670,7 @@ function showAnswerPanel(contentEl, ex, opts = {}){
       <div class="wrong-feedback-header">${revealed ? '👀 Resposta revelada' : '❌ Não foi dessa vez'}</div>
       ${explanation ? `
         <div class="wrong-feedback-why">
-          <div class="wrong-feedback-why-label">${ex && ex.format === 'cloze' ? 'Frase completa' : (revealed ? 'Resposta' : 'Por que não foi essa')}</div>
+          <div class="wrong-feedback-why-label">${ex && (ex.format === 'cloze' || ex.format === 'fullsentence') ? (ex.format === 'cloze' ? 'Frase completa' : 'Resposta certa') : (revealed ? 'Resposta' : 'Por que não foi essa')}</div>
           <div class="feedback-inner-box">${explanation}</div>
         </div>
       ` : ''}
@@ -5184,10 +5191,13 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
 // ---------- Exercício de frase completa (PT -> escolher entre 4 frases) ----------
 function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
   const optionsHTML = ex.options.map((opt, i) => `
-    <button class="exercise-option exercise-option-sentence" data-idx="${i}">
-      <div class="pinyin opt-pinyin-sentence">${opt.p}</div>
-      <div class="opt-hanzi-sentence">${opt.c}</div>
-    </button>
+    <div class="exercise-option exercise-option-sentence" role="button" tabindex="0" data-idx="${i}">
+      <div class="opt-sentence-text">
+        <div class="pinyin opt-pinyin-sentence">${opt.p}</div>
+        <div class="opt-hanzi-sentence">${opt.c}</div>
+      </div>
+      ${audioBtnHTML(opt.c)}
+    </div>
   `).join('');
 
   contentEl.innerHTML = `
@@ -5203,6 +5213,12 @@ function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
   `;
 
   nextBtn.style.display = 'none';
+  wireAudioButtons(contentEl);
+  contentEl.querySelectorAll('.exercise-option-sentence').forEach(el => {
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); el.click(); }
+    });
+  });
 
   function revealCorrectVisual(chosenIdx){
     contentEl.querySelectorAll('.exercise-option-sentence').forEach((b, i) => {
@@ -5226,7 +5242,7 @@ function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
       if (isCorrect){
         STEP_STATE.exerciseScore += 1;
         addXP(exerciseXP(ex, 4)); // vale um pouco mais que múltipla escolha simples, mesmo critério do reorder
-        setTimeout(() => showCorrectFeedbackPanel(contentEl, ex.phrase.t), 500);
+        setTimeout(() => showCorrectFeedbackPanel(contentEl, phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t)), 500);
       } else {
         setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
       }
@@ -5372,7 +5388,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
       STEP_STATE.exerciseScore += 1;
       addXP(exerciseXP(ex, 4)); // ordenar frase vale um pouco mais que múltipla escolha simples
       addStudyMinutes();
-      setTimeout(() => showCorrectFeedbackPanel(contentEl, ex.phrase.t), 500);
+      setTimeout(() => showCorrectFeedbackPanel(contentEl, phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t)), 500);
     } else {
       setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
     }

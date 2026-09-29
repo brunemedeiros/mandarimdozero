@@ -4333,9 +4333,9 @@ function addStudyMinutes(){
 function clozeFeedbackDetailHTML(ex, withCorrect){
   const p = ex.phrase;
   const correct = withCorrect
-    ? `<span class="cloze-feedback-correct">Resposta certa: <strong>${ex.correctBlock.f}</strong></span><br>`
+    ? `<div class="feedback-correct-line">Resposta certa: <strong>${ex.correctBlock.f}</strong></div>`
     : '';
-  return `${correct}<strong>${p.f}</strong> ${audioBtnHTML(p.f)}<br>${p.t}`;
+  return `${correct}<div class="feedback-phrase-zh"><strong>${p.f}</strong> ${audioBtnHTML(p.f)}</div><div class="feedback-phrase-trans">${p.t}</div>`;
 }
 
 function answerExplanationHTML(ex){
