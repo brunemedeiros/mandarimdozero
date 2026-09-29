@@ -1,0 +1,48 @@
+name: Áudio TTS
+
+# Rodado à mão (aba Actions > Áudio TTS > Run workflow). A chave do Google vive
+# só no Secret GCP_TTS_KEY -- nunca em arquivo do repositório.
+on:
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: "laboratorio = gera variantes pra ouvir | regenerar = refaz os mp3 afetados pelas regras"
+        type: choice
+        options: [laboratorio, regenerar]
+        default: laboratorio
+
+permissions:
+  contents: write
+
+jobs:
+  audio:
+    runs-on: ubuntu-latest
+    env:
+      GCP_TTS_KEY: ${{ secrets.GCP_TTS_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests miniaudio
+      - name: Conferir chave
+        run: test -n "$GCP_TTS_KEY" || (echo "Secret GCP_TTS_KEY não configurado" && exit 1)
+      - name: Laboratório
+        if: inputs.modo == 'laboratorio'
+        run: python3 fr/scripts/audio_lab.py
+      - uses: actions/upload-artifact@v4
+        if: inputs.modo == 'laboratorio'
+        with:
+          name: laboratorio-audio
+          path: fr/scripts/lab_output/
+      - name: Regenerar
+        if: inputs.modo == 'regenerar'
+        run: python3 fr/scripts/regenerate_spoken_audio.py
+      - name: Commitar
+        if: inputs.modo == 'regenerar'
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add fr/audio fr/audio-manifest.js
+          git diff --cached --quiet || git commit -m "Regenera áudios com a camada de texto falado (Chirp 3 HD)"
+          git push
