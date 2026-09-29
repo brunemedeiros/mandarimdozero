@@ -2780,7 +2780,10 @@ function findMatchingPhrase(word, unit){
   const sourcesOf = u2 => [...(u2.phrases || []), ...((u2.dialogue && u2.dialogue.lines) || [])];
   // Case-insensitive: uma frase que começa com a palavra ("Bonjour !") tem
   // maiúscula inicial e não batia com o vocabulário ("bonjour") sem isso.
-  const needle = word.f.toLowerCase();
+  // Parêntese de partícula ("un kilo (de)") é anotação do vocabulário, não
+  // faz parte da forma falada -- sem tirar, "un kilo (de)" nunca casava com
+  // "Je prends un kilo de pommes." e o cartão ficava sem "Na frase".
+  const needle = word.f.replace(/\s*\([^()]*\)/g, '').trim().toLowerCase();
 
   const inUnit = sourcesOf(unit).find(p => p.f.toLowerCase().includes(needle));
   if (inUnit) return inUnit;
