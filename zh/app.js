@@ -4308,7 +4308,7 @@ function buildFullSentenceExercises(unit){
     }
 
     const distractorSentences = distractors
-      .filter(blocks => blocks.map(b => b.c).join('') !== phrase.c) // nunca deixa um distrator coincidir com a frase correta
+      .filter(blocks => blocks.map(b => b.c).join('') !== phrase.blocks.map(b => b.c).join('')) // nunca deixa um distrator coincidir com a frase correta
       .reduce((unique, blocks) => { // deduplica por texto final (hanzi), não por referência de array
         const text = blocks.map(b => b.c).join('');
         if (!unique.some(u => u.text === text)) unique.push({ text, blocks });
@@ -4320,13 +4320,17 @@ function buildFullSentenceExercises(unit){
         c: blocks.map(b => b.c).join('')
       }));
 
-    const correctSentence = { p: phrase.p, c: phrase.c };
+    // Frase com duas formas alternativas ("/"): as opções só testam a primeira
+    // (é o que `blocks` cobre) -- nunca a frase inteira com as duas perguntas.
+    const correctSentence = phrase.c.includes('/')
+      ? { p: phrase.blocks.map(b => b.p).join(' '), c: phrase.blocks.map(b => b.c).join('') }
+      : { p: phrase.p, c: phrase.c };
     const options = shuffle([correctSentence, ...distractorSentences]);
 
     // phrase (com .t) reaproveita o mesmo painel de acerto/erro já usado
     // pelo reorder e pelo cloze (showCorrectReorderPanel/answerExplanationParts
     // leem ex.phrase, não um campo próprio deste formato).
-    return { format: 'fullsentence', phrase: { c: phrase.c, t: phrase.t }, correct: correctSentence, options };
+    return { format: 'fullsentence', phrase: { c: correctSentence.c, t: phrase.t }, correct: correctSentence, options };
   });
 }
 
@@ -4549,8 +4553,18 @@ function addStudyMinutes(){
 // Detalhe do painel de acerto/erro do "Complete a frase": SEMPRE a frase
 // completa certa (hanzi + pinyin + áudio) e a tradução -- igual no acerto e
 // no erro. No erro/"Não sei", `withCorrect` acrescenta a resposta certa.
-function clozeFeedbackDetailHTML(ex, withCorrect){
+// Frase falada/mostrada no "Complete a frase": quando a frase tem duas formas
+// alternativas separadas por "/" (ex.: "你几岁？/ 你多大？"), o exercício só
+// testa a primeira (é o que `blocks` cobre) -- áudio e painel usam só essa,
+// nunca a frase inteira com as duas perguntas.
+function clozeExercisePhrase(ex){
   const p = ex.phrase;
+  if (!p.c.includes('/') || !p.blocks) return { c: p.c, p: p.p };
+  return { c: p.blocks.map(b => b.c).join(''), p: p.blocks.map(b => b.p).join(' ') };
+}
+
+function clozeFeedbackDetailHTML(ex, withCorrect){
+  const p = { ...ex.phrase, ...clozeExercisePhrase(ex) };
   const correct = withCorrect
     ? `<span class="cloze-feedback-correct">Resposta certa: <strong>${ex.correctBlock.c}</strong> <span class="pinyin">(${ex.correctBlock.p})</span></span><br>`
     : '';
@@ -5090,9 +5104,10 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
     // O áudio só aparece (e toca sozinho) depois de responder — antes disso
     // ele entregaria a resposta de graça, sem precisar completar a frase.
     const audioRow = document.getElementById('cloze-audio-row');
-    audioRow.innerHTML = audioBtnHTML(ex.phrase.c);
+    const spokenC = clozeExercisePhrase(ex).c;
+    audioRow.innerHTML = audioBtnHTML(spokenC);
     wireAudioButtons(audioRow);
-    if (canSpeakChinese(ex.phrase.c)) speakChinese(ex.phrase.c, audioRow.querySelector('.audio-btn'), true);
+    if (canSpeakChinese(spokenC)) speakChinese(spokenC, audioRow.querySelector('.audio-btn'), true);
     document.getElementById('exercise-dontknow-btn')?.classList.add('disabled');
     contentEl.querySelector('.exercise-reveal-btn')?.classList.add('disabled');
   }
