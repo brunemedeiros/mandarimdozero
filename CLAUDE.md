@@ -16237,3 +16237,282 @@ ao vivo via `mcp__Supabase__apply_migration`.
 **PARE conforme instrução explícita -- Fase C (Deck Engine) NÃO
 iniciada.** Próxima etapa só começa depois de autorização explícita da
 autora, com este checkpoint já entregue antes de pedir luz verde.
+
+**Atualização: autorizada e entregue (2026-09-29), "FASE C — DECK
+ENGINE".**
+
+## Fase C -- Deck Engine (motor de hierarquia, escopo, agregação e
+movimentação, sem UI)
+
+Constrói o COMPORTAMENTO sobre o schema já criado na Fase B (`decks`,
+`deck_id`, RLS, trigger de hierarquia, `ensure_user_decks()`) -- nenhum
+redesenho de dado, nenhuma segunda entidade de organização,
+`unitId`/`category`/`group` continuam nunca sendo tratados como Deck.
+
+**Auditoria prévia (só leitura, sem alterar nada)** confirmou: `STATE.cards`
+é construído por `buildEngineCardsFromRow()` (`shared/flashcard-model.js`,
+Fase 4b) a partir de `buildCardFromTeacherFlashcard`/
+`buildCardFromSelfFlashcard` (fr/zh `app.js`); CardInstances nunca são
+persistidas, sempre derivadas em runtime via
+`interpretNoteFromRow`/`interpretNativeNoteFromRow`; FSRS mora em
+`shared/fsrs.js`/`shared/srs.js` (`applyMemoryGrade`,
+`migrateCardToFSRS`, `cardsDueNow`); a fila de estudo central é
+`getStudyQueue(pool, options)` (`shared/study-queue.js:34`), que recebe
+um ARRAY de cards já construído -- nunca ela mesma decide quais cards
+existem, só como priorizá-los; `eligibleReviewPool()` (fr/zh `app.js:5267`)
+é o pool padrão (`STATE.cards.filter(isCardLessonCompleted).filter(matchesReviewOriginFilter)`)
+que os 4 pontos de entrada de revisão (Flashcard/Palavras Difíceis/Speed
+Review/Combinar) já consomem, desde a Fase 4.1/4.2. Isso confirma que o
+ponto de integração certo pro Deck Engine é um PRÉ-FILTRO desse mesmo
+array, nunca uma reescrita de `getStudyQueue()`.
+
+### C1 -- `shared/deck-engine.js` (novo, módulo de domínio puro)
+
+Zero chamada de rede (isso vive em `shared/deck-data.js`, ver C8/C9
+abaixo) -- só funções puras sobre um array `decks` (linhas cruas da
+tabela) e, quando aplicável, um array `cards` (o mesmo shape que
+`STATE.cards` já usa). Compartilhado 100% entre fr e zh (1 arquivo só,
+sem nenhum branch por idioma -- a árvore de Deck não depende de idioma
+na LÓGICA, só no dado `language_app_key` de cada linha).
+
+**Árvore** -- `getDeckById`/`getDeckChildren`/`getDeckParent`/
+`getDeckAncestors` (mais próximo->mais distante, guard de 100 níveis)/
+`getDeckDescendants` (BFS, TODOS os níveis, não só filhos diretos, guard
+de 1000)/`getDeckSubtreeIds` (`[deckId, ...descendants]`)/
+`isDescendantOf`/`getDeckRoot`. Proteção de ciclo é ESTRUTURAL (o walk de
+ancestrais/descendentes tem guard de profundidade, nunca confia que o
+dado já chegou sem ciclo) -- mesmo princípio já reforçado no banco pela
+trigger `decks_validate_hierarchy()` da Fase B, aqui reforçado de novo no
+cliente.
+
+**Destino/permissões** -- `canUserAccessDeck`/`canPlaceOwnNoteInDeck`
+(só `personal_root`/`personal`, mesmo dono, mesmo idioma)/
+`canPlaceTeacherNoteInDeck` (só `teacher_root`/`teacher`, mesma
+aluna+professora+idioma)/`canMoveDeck` (só `kind='personal'`, destino
+`personal_root`/`personal`, mesmo dono/idioma, nunca ele mesmo, nunca um
+descendente)/`canMoveOwnNote`/`canMoveTeacherNote` (delegam pras funções
+`canPlace*` acima).
+
+**Escopo de estudo (C3)** -- `getStudyScopeForDeck(decks, deckId, cards)`:
+`cards.filter(c => c.deckId != null && subtreeIds.has(c.deckId))`. Clicar
+num Deck = Deck + TODOS os descendentes, nunca a conta inteira nem só o
+Deck sozinho -- exatamente a regra travada no prompt-mestre (seção 6).
+
+**CardInstance (C4)** -- `generatedCardInstanceCount(row)` chama
+`buildEngineCardsFromRow(row, {origin:'self', appKey:
+row.language_app_key, idPrefix:'x'}).length` -- delega 100% ao motor já
+existente (Fase 4b), NUNCA reimplementa a cardinalidade por Card Type:
+Normal=1, Normal-reverso=2 (via `buildReversedCardInstancePair`, Fase 4a,
+intocado), Cloze=N marcas (via `parseClozeMarks`, Fase 5, intocado),
+Múltipla Escolha=1, Digite a resposta=1. **Legacy**: uma linha sem
+`fields`/`card_generation_mode` cai no ramo `else` de
+`interpretNoteFromRow()` (mesmo motor, sem nenhuma mudança) e sempre
+produz exatamente 1 CardInstance -- `generatedCardInstanceCount()` nunca
+inventa Card Type nem altera conteúdo pra Legacy, só pergunta ao motor
+que já sabe interpretar essa linha.
+
+**Contagens (C5/C6)** -- `bucketCardState(card)`: `relearning` conta como
+`'learning'` (decisão travada explicitamente pelo prompt-mestre --
+"um Card que já estava em Review e entrou em relearning deve ser
+tratado como parte do estado de aprendizagem enquanto estiver em
+relearning"; documentado no próprio código, nunca uma mudança no motor
+FSRS em si, `shared/fsrs.js` intocado). `countNewCards`/`countLearningCards`
+(new+learning+relearning)/`countReviewCards` (usa `cardsDueNow` de
+`shared/srs.js` quando disponível, com fallback -- **disponibilidade,
+não só estado**: um card em estado `review` mas ainda não due NÃO conta
+aqui, exatamente a distinção que o prompt-mestre exigia). `getDeckCounts(decks,
+deckId, cards)` = escopo de estudo + os 3 contadores, único agregador --
+nenhum cálculo duplicado em Review/UI/Painel.
+
+**Study Queue Integration (C7)** -- documentado, não implementado como
+call site ainda (nenhuma tela consome Deck hoje): o fluxo real seria
+`getStudyQueue(getStudyScopeForDeck(decks, deckId, eligibleReviewPool()),
+options)` -- `getStudyScopeForDeck()` vira um PRÉ-FILTRO aplicado ANTES
+de `getStudyQueue()`, nunca uma reescrita dela. Preserva de graça: origem
+(`matchesReviewOriginFilter`, já dentro de `eligibleReviewPool()`), FSRS
+(`getStudyQueue` intocado), teacher/self (já é o que popula `.deckId`
+hoje). **Study Trail NÃO migrado nesta fase** (cards de trilha nunca têm
+`.deckId`, `origin==='study'`, ficam de fora de qualquer escopo de Deck
+até uma Fase E decidir como/se migrar) -- ponto de integração documentado
+pra quando essa fase existir, nunca implementado agora.
+
+**Movimentação de Notes (C8)** -- `validateNoteMove({note, destination,
+decks, table})` (`table:'own'|'teacher'`) -- validação pura, nunca toca
+`CardInstance`/FSRS/IDs/revision/Fields/Tags, delega pra
+`canMoveOwnNote`/`canMoveTeacherNote`. A operação real (`note.deck_id =
+Y`) é feita em `shared/deck-data.js` (`setOwnFlashcardDeck`/
+`setTeacherFlashcardDeck`) -- validação ANTES do `UPDATE`, nunca depois;
+se a validação falhar, `deck_id` original nunca é tocado (nenhum estado
+intermediário inválido).
+
+**Movimentação de Decks (C9)** -- `validateDeckMove({deck, destination,
+decks})` -- só `kind='personal'` pode mover, só pra
+`personal_root`/`personal` do mesmo dono/idioma, nunca root/personal_root/
+Course/teacher_root/teacher/si-mesmo/descendente/outro-idioma/outro-dono
+-- lista completa de rejeição implementada e testada (ver Testes).
+Operação real em `shared/deck-data.js::moveDeck()`.
+
+**Delete/destroy (C10)** -- só identificação, nenhuma UI/botão:
+`isDeckDeletableKind(deck)` (só `kind==='personal'`),
+`validateDeckDeletion({deck, hasChildren, hasNotes})` (rejeita
+root/personal_root/course/teacher_root sempre; rejeita `personal` com
+filhos ou Notes -- "impedir deleção que quebre Notes sem destino", regra
+literal do prompt-mestre). Nenhuma operação destrutiva de fato
+implementada.
+
+**Bootstrap (C11)** -- estratégia única, já existente desde a Fase B
+(`ensure_user_decks`, SECURITY DEFINER, idempotente via SELECT-antes-de-
+INSERT + `on conflict do nothing` + reselect) -- `shared/deck-data.js::
+ensureDecksForCurrentUser(languageAppKey)` é o único wrapper de cliente
+proposto, mas **não foi ligado a nenhum boot flow nesta fase** (nenhuma
+tela consome Deck ainda -- ligar isso ao carregamento do app seria
+trabalho de uma fase futura, quando uma UI real precisar da árvore
+existir). Recomendação registrada, não implementada: bootstrap
+"preguiçoso" (lazy, só na primeira vez que uma tela de Deck for aberta),
+nunca backfill em massa das 22 contas reais -- mesmo princípio já
+seguido pela Fase B ("nada consome ainda"). `ensure_user_decks` continua
+NUNCA bootstrapando `teacher_root` sozinho (só `root`+`personal_root`) --
+criar Teacher Deck automaticamente sem vínculo ativo continua fora de
+escopo, como já travado na Fase B.
+
+### Achado de segurança real, corrigido (não uma decisão de arquitetura
+nova -- um bug encontrado testando ao vivo)
+
+Testando §19 (RLS real), a chamada `ensure_user_decks(<outro_owner_id>,
+'frances')` simulando uma sessão da aluna (JWT com `sub` mas SEM a claim
+`email`) **teve sucesso** quando deveria ter sido rejeitada com
+`not_authorized`. Causa raiz: a checagem original (migration 049)
+`if auth.uid() is distinct from p_owner_id and (auth.jwt()->>'email')
+<> 'brunemed1310@gmail.com' then raise exception` -- em SQL, `NULL <>
+'x'` avalia pra `NULL`, nunca `TRUE`, e um `IF NULL THEN` em PL/pgSQL é
+tratado como `FALSE` -- ou seja, se `auth.jwt()->>'email'` vier `NULL`
+(JWT sem a claim `email`), a checagem inteira falha ABERTA. **Em
+produção isso nunca foi alcançável** (todo JWT real do Supabase Auth
+pra uma conta com e-mail sempre carrega a claim `email`), mas é uma
+falha real de lógica NULL-unsafe, não uma reformulação de arquitetura --
+corrigida com uma migration mínima e cirúrgica.
+
+**Migration `050_fix_ensure_user_decks_null_email_check.sql`** -- só
+troca `(auth.jwt()->>'email') <> '...'` por `coalesce(auth.jwt()->>'email',
+'') <> '...'` (garante que ausência de claim nunca é tratada como
+"é admin"). Aplicada AO VIVO via `mcp__Supabase__apply_migration`,
+projeto `eigjocalzwamisgqilhg`. Nenhuma outra linha da função tocada.
+Reteste confirmou: cross-user bootstrap agora rejeitado com
+`not_authorized`; auto-bootstrap (sub == owner_id, o único caminho que
+`shared/deck-data.js` de fato usa) continua funcionando sem nenhuma
+regressão.
+
+### Testes realizados
+
+**Node/VM, `test_fasec_deck_engine.js` (scratchpad, não commitado -- mesma
+convenção de todo o projeto), 115/115** -- árvore (filhos/pai/ancestrais
+na ordem exigida pelo exemplo literal do prompt-mestre/descendentes em
+TODOS os níveis/isolamento de irmãos/Curso nunca mistura com Meus
+Decks/subtreeIds/isDescendantOf assimétrico/getDeckRoot/isolamento
+cross-idioma e cross-dono/segurança contra ciclo mesmo com array
+construído à mão com ciclo real A↔B); permissões (own/teacher notes em
+Deck certo/errado, incluindo rejeição explícita de root/Course/Teacher
+Deck pra Note própria); escopo de estudo (Meus Decks inclui A+B+raiz,
+exclui Curso e trilha; Deck filho só inclui o próprio subtree); contagem
+de CardInstance pelos 5 Card Types (Legacy Normal=1, Legacy Cloze
+1-lacuna=1, Native Normal=1, Native Normal-reverso=2, Native Cloze
+2-marcas=2, Native Cloze 3-marcas=3, Native MC=1 independente de nº de
+distratores, Native Digite-a-resposta=1); contagens New/Learning/Review
+(bucket de `relearning` dentro de `learning`, `review` só conta due-agora,
+agregador somando 10 cards reais espalhados por 3 Decks); movimentação de
+Notes (válida own→personal, rejeitada own→course/teacher, rejeitada
+teacher→personal, resultado de validação NUNCA contém chave
+`cardInstance`/`fsrs`); movimentação de Decks (válida A→B irmão; rejeição
+completa: root/personal_root/course-por-aluna/teacher_root/teacher-por-
+aluna/si-mesmo/descendente-ciclo/idioma-cruzado/dono-cruzado/destino-
+dentro-de-course); deletabilidade (root/personal_root/course/teacher_root
+nunca deletáveis; personal com filhos/Notes rejeitado; personal-folha
+liberado); regressão de `deckId` em `buildEngineCardsFromRow` (Legacy sem
+coluna→null, Legacy com `deck_id`→o valor real, presença de todas as ~24
+chaves do card, normal-reverso com as 2 metades compartilhando o MESMO
+`deckId` mas ids distintos).
+
+**7 suítes de regressão de fases anteriores, re-executadas depois da
+mudança em `flashcard-model.js`, sem nenhuma falha** --
+`test_fase4_engine.js` 34/34, `test_fase4d_regression.js` 30/30,
+`test_fase5_generation.js` 33/33, `test_fase6b_native_notes.js` 74/74,
+`test_fase6d1_editor_state.js` 99/99, `test_fase7a_media_resolution.js`
+45/45, `test_fase7b_field_audio_contract.js` 83/83 -- total desta fase +
+histórico: **513/513** sem falha.
+
+**Supabase real (`eigjocalzwamisgqilhg`), 3 transações
+`BEGIN...ROLLBACK`, zero dado permanente confirmado por hash/contagem
+byte-a-byte idênticos antes/depois** (`decks: 0`, `teacher_flashcards: 5`
+hash `4decfc28b2abc4a897e4fa7a11e545f9`, `own_flashcards: 7` hash
+`846ad51d3a5920c437dacdfa59094bac`, idênticos nas 3 checagens): (1)
+árvore temporária real de 7 Decks (root/personal_root/2 personal
+aninhados/personal irmão/teacher_root/teacher) + 2 Notes temporárias
+(own+teacher) + moves válidos de Note (own A→A.B, teacher teacher→
+teacher_root) + 3 tentativas de move inválido de Note rejeitadas pela
+trigger da Fase B (`own→teacher_deck`, `own→root`, `teacher→personal`) +
+confirmação de que nenhuma rejeição deixou mutação parcial + move válido
+de Deck (A pra dentro de C) + 2 tentativas de move inválido de Deck
+rejeitadas (ciclo C→B sendo B descendente de C; mover `personal_root`);
+(2) RLS real com 3 personas simuladas (`set local role authenticated` +
+`set local request.jwt.claims`, mesmo padrão já validado na Fase B):
+conta terceira/não-relacionada lê 0 Decks da aluna e sua tentativa de
+`UPDATE` na nota da aluna afeta 0 linhas; aluna lê a própria árvore
+inteira (5 Decks, incluindo o Teacher Deck) mas sua tentativa de
+renomear o Teacher Deck afeta 0 linhas, enquanto editar a própria Note
+afeta 1 linha; professora renomeia o próprio Teacher Deck (1 linha) mas
+não consegue renomear Deck pessoal da aluna (0 linhas) -- **achado
+lateral, não um bug**: mover `teacher_flashcards.deck_id` da própria
+professora deu 0 linhas nesse teste porque a RLS de escrita de
+`teacher_flashcards` (migration 026) é **admin-only por e-mail**
+(`teacher_flashcards_admin_write`), nunca `teacher_id = auth.uid()` --
+diferente da RLS de `decks`, que É genuinamente `teacher_id = auth.uid()`
+(`decks_teacher_write`); confirmado lendo `pg_policies` ao vivo, não
+presumido -- é o mesmo padrão "escrita só pra administração" já
+documentado desde a Fase 2 do sistema de alunas particulares, nunca uma
+regressão desta fase; `setTeacherFlashcardDeck()` funcionará em produção
+porque a professora real desta plataforma É a conta admin; (3) bootstrap
+(usuário novo com self-bootstrap/2ª execução idempotente sem duplicar
+linha/2 idiomas com árvores independentes pro mesmo usuário/índice único
+bloqueando um 2º root simultâneo -- mesma proteção que impediria uma
+corrida real/cross-user rejeitado após o fix de segurança).
+
+### Dados preservados (confirmado)
+
+Nenhum Card ID, valor de FSRS, Field, Tag, `revision`, `origin`, ou linha
+Legacy foi alterado por nenhum código desta fase -- `shared/deck-engine.js`
+nunca escreve em `STATE.cards`/banco (é puro); `shared/deck-data.js` só
+grava `deck_id` (via `UPDATE`, nunca `INSERT`/`DELETE`) depois de validar,
+nunca toca em nenhuma outra coluna. `buildEngineCardsFromRow()` ganhou
+1 propriedade nova (`deckId`) no card retornado -- todas as ~35 chaves
+anteriores permanecem idênticas, confirmado por teste de presença de
+chave.
+
+### O que NÃO foi implementado nesta fase (confirmado)
+
+Nenhuma UI de Deck (seletor, árvore visual, botão "Estudar"/"Adicionar
+cartão"/mover); nenhum Painel; nenhuma migração de Study Trail; nenhuma
+UI de Teacher Deck; nenhum Public Deck; nenhuma mudança visual do limite
+Free (só a função `generatedCardInstanceCount()` existe, nunca chamada
+pelo limite hoje); nenhuma mudança no motor FSRS; nenhum redesenho de
+Review; nenhum cache/materialized view/contagem persistida (nenhuma
+necessidade de performance foi demonstrada -- contagens continuam
+100% derivadas da fonte de verdade, conforme exigido).
+
+### Próxima fase (D -- Integração Deck ↔ FSRS/Review)
+
+Prontos: `getStudyScopeForDeck()` já produz exatamente o shape de array
+que `getStudyQueue()` já consome via `eligibleReviewPool()`;
+`getDeckCounts()` já devolve `{new, learning, review}` agregado por
+subtree; `generatedCardInstanceCount()` pronta pro futuro limite Free;
+movimentação de Notes/Decks validada e seguindo as regras completas de
+"nunca permitir". Em aberto pra Fase D: qual tela vai de fato chamar
+`ensureDecksForCurrentUser()` (lazy on first Deck screen, recomendado,
+não decidido); se/quando Study Trail ganha uma representação de Deck
+(Fase E, fora do escopo de D); nenhuma decisão nova travada aqui além do
+que já está documentado.
+
+Nenhum passo manual pendente pra autora -- migration `050` já aplicada
+ao vivo via `mcp__Supabase__apply_migration`.
+
+**PARE conforme instrução explícita -- Fase D NÃO iniciada.** Só começa
+depois que a autora revisar este checkpoint.

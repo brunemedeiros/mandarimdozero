@@ -1231,6 +1231,14 @@ function buildEngineCardsFromRow(row, opts){
       // confirmado de novo aqui): imagem ilustra o conceito inteiro.
       imageUrl: note.image ? note.image.url : null,
       tags,
+      // Deck (Fase C, "Decks, Tags e Painel") -- mesmo bucket Note-level
+      // de tags/imageUrl acima, nunca lido por interpretNoteFromRow()
+      // (Deck nunca é conteúdo pedagógico, regra 2.3 do prompt-mestre).
+      // null pra qualquer linha ainda não organizada (todo dado legado
+      // hoje) ou pra cartão de trilha (que nem passa por esta função) --
+      // é isto que shared/deck-engine.js::getStudyScopeForDeck() usa pra
+      // filtrar STATE.cards por subtree de Deck.
+      deckId: row.deck_id != null ? row.deck_id : null,
       note,
       cardInstance,
       ef, interval, reps, due, lapses, stability, difficulty, state, lastReview, fsrsReps, fsrsLapses,
