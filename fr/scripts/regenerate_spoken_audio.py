@@ -46,6 +46,7 @@ def generate(spoken):
     n_words = max(1, len(tts_input.split()))
     reason = "?"
     best = None  # (faltando, bytes, transcript) -- melhor tentativa com volume OK
+    empty_stt = None  # áudio com volume OK que o STT não transcreveu (palavra muito curta)
     for attempt in range(1, MAX_ATTEMPTS + 1):
         data = _synthesize_raw(tts_input)
         peak = audio_peak(data)
@@ -58,6 +59,7 @@ def generate(spoken):
             continue
         if not transcript.strip():
             reason = "transcrição vazia"
+            empty_stt = data
             continue
         missing_sets = [_words_missing_from_transcript(tts_input, t) for t in _transcript_variants(transcript)]
         missing = min((m for m in missing_sets if m is not None), key=len, default=None)
@@ -72,6 +74,12 @@ def generate(spoken):
     if best is not None and best[0] * 2 <= n_words:
         print(f"  [aviso] aceito com ressalva (STT ouviu {best[2]!r}) -- vale ouvir")
         return best[1]
+    # Palavra sozinha ("l'oeuf") às vezes volta sem transcrição nenhuma, mesmo
+    # com o áudio audível (volume já validado acima). Só nesse caso extremo
+    # (1-2 palavras) aceita, com aviso.
+    if best is None and empty_stt is not None and n_words <= 2:
+        print("  [aviso] STT não transcreveu (palavra curta), mas o volume está OK -- vale ouvir")
+        return empty_stt
     raise RuntimeError(f"{spoken!r}: {reason} após {MAX_ATTEMPTS} tentativas")
 
 
