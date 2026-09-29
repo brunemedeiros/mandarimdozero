@@ -479,7 +479,7 @@ function wireFlashcardEditForm(c, container){
       showToast('⚠️ A imagem deste cartão foi preservada nos dados, mas ainda não aparece na tela de Revisão pra cartões do novo editor.');
     }
     const cardsBox = document.getElementById('admin-flashcards-cards-box');
-    const selectedStudents = ADMIN_FLASHCARDS_STATE._studentsCache.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+    const selectedStudents = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
     cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
     wireFlashcardsCardsBox(cardsBox);
   });
@@ -707,6 +707,22 @@ function wireFlashcardNativeEditForm(c, editorState, container){
 // aparecem como destino os Decks que getTeacherDecksForStudent() devolve
 // (teacher_root + subdecks da PRÓPRIA professora para AQUELE aluno+idioma).
 
+// Fase H (H8) -- alunos REALMENTE selecionados. A seleção guarda só
+// student_id, mas um aluno pode ter 2 vínculos (idiomas); com 2+ idiomas
+// presentes o idioma ativo (langFilter) decide qual linha vale, senão o
+// aluno de francês selecionado também "selecionaria" a linha dele em outro
+// idioma e o cartão iria para a árvore errada.
+function adminSelectedStudents(students){
+  const S = ADMIN_FLASHCARDS_STATE;
+  const list = students || S._studentsCache;
+  const multiLang = new Set(list.map(x => x.language_app_key)).size > 1;
+  return list.filter(x => S.studentIds.has(x.student_id) && (!multiLang || x.language_app_key === S.langFilter));
+}
+
+// Fase H (H8) -- o Deck de destino é guardado por aluno+IDIOMA (nunca só
+// por aluno): trocar de idioma/contexto nunca reaproveita o deck_id antigo.
+function adminDestKey(s){ return `${s.student_id}|${s.language_app_key}`; }
+
 async function loadTeacherDecksByLang(students){
   const langs = [...new Set(students.map(s => s.language_app_key))];
   await Promise.all(langs.map(async lang => {
@@ -752,6 +768,48 @@ function teacherCardMoveSelectHTML(c){
   </select>`;
 }
 
+// Fase H (H1/H4) -- árvore de Teacher Decks do aluno, com contagem de cartões
+// (Notes) por Deck e exclusão de Teacher Deck VAZIO. A UI só reflete a regra
+// (teacher_root nunca; teacher só sem subdecks e sem cartões); quem decide de
+// verdade é o trigger da migration 054 no banco. Nunca há "apagar e mover
+// cartões automaticamente" nem "substituir por outro Deck".
+async function fillTeacherTreeLists(box, selected, problems){
+  const S = ADMIN_FLASHCARDS_STATE;
+  for (const s of selected){
+    if (problems && problems[`${s.student_id}|${s.language_app_key}`]) continue;
+    const holder = box.querySelector(`[data-tree-list="${s.student_id}"]`);
+    if (!holder) continue;
+    const notes = (await fetchFlashcardsForStudent(s.student_id)).filter(c => c.language_app_key === s.language_app_key);
+    if (!holder.isConnected) return;
+    const tree = teacherTreeForStudent(s.student_id, s.language_app_key);
+    const rows = orderedTeacherDecks(tree, tree).map(({ deck, depth }) => {
+      const own = notes.filter(c => c.deck_id === deck.id).length;
+      const kids = tree.filter(d => d.parent_deck_id === deck.id).length;
+      const deletable = deck.kind === 'teacher' && kids === 0 && own === 0;
+      const del = deck.kind === 'teacher'
+        ? `<button type="button" class="admin-badge-delete-btn" data-tree-delete="${deck.id}" ${deletable ? '' : 'disabled'} title="${deletable ? 'Apagar este Deck (vazio)' : 'Só é possível apagar um Deck sem subdecks e sem cartões'}">🗑</button>`
+        : '';
+      return `<div class="admin-badge-row" data-tree-row="${deck.id}" style="padding-left:${depth * 16}px;">
+        <span style="flex:1;">${escapeHTML(teacherDeckLabel(deck))} <span class="profile-edit-hint">(${own} cartão(ões)${kids ? `, ${kids} subdeck(s)` : ''})</span></span>${del}
+      </div>`;
+    }).join('');
+    holder.innerHTML = `<div class="section-label">Árvore de Decks</div>${rows}`;
+    holder.querySelectorAll('[data-tree-delete]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const list = S.decksByLang[s.language_app_key] || [];
+        const deck = getDeckById(list, Number(btn.dataset.treeDelete));
+        if (!deck || !confirm(`Apagar o Deck "${deck.name}"? Ele está vazio.`)) return;
+        const res = await deleteTeacherDeck({ deck, decks: list });
+        if (!res.ok){ showToast(res.error || 'Não foi possível apagar o Deck.'); return; }
+        S.decksByLang[s.language_app_key] = list.filter(d => d.id !== deck.id);
+        if (S.destByStudent[adminDestKey(s)] === deck.id) delete S.destByStudent[adminDestKey(s)];
+        showToast('✓ Deck apagado.');
+        renderTeacherDestinationRows(box, selected, problems || {});
+      });
+    });
+  }
+}
+
 function renderTeacherDestinationRows(box, selected, problems){
   const S = ADMIN_FLASHCARDS_STATE;
   box.innerHTML = selected.map(s => {
@@ -760,7 +818,7 @@ function renderTeacherDestinationRows(box, selected, problems){
     if (problems[key]) return `<div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:4px;">${head}<p class="profile-edit-error">${escapeHTML(problems[key])}</p></div>`;
     const tree = teacherTreeForStudent(s.student_id, s.language_app_key);
     const root = tree.find(d => d.kind === 'teacher_root');
-    const chosen = tree.some(d => d.id === S.destByStudent[s.student_id]) ? S.destByStudent[s.student_id] : (root ? root.id : null);
+    const chosen = tree.some(d => d.id === S.destByStudent[adminDestKey(s)]) ? S.destByStudent[adminDestKey(s)] : (root ? root.id : null);
     return `<div class="admin-badge-row" data-dest-row="${s.student_id}" style="flex-direction:column; align-items:stretch; gap:6px;">
       ${head}
       <select class="profile-edit-input" data-dest-select="${s.student_id}" aria-label="Deck de destino de ${escapeHTML(s.username || '')}">${teacherDeckOptionsHTML(tree, chosen)}</select>
@@ -769,13 +827,17 @@ function renderTeacherDestinationRows(box, selected, problems){
         <button type="button" class="btn btn-secondary" data-dest-newsub="${s.student_id}">+ Subdeck</button>
       </div>
       <p class="profile-edit-error" data-dest-err="${s.student_id}"></p>
+      <div data-tree-list="${s.student_id}" aria-label="Árvore de Decks de ${escapeHTML(s.username || '')}"></div>
     </div>`;
   }).join('');
+  // Fase H (H1/H4) -- árvore visível por aluno+idioma, com exclusão de
+  // Teacher Deck vazio (assíncrono: precisa contar os cartões de cada Deck).
+  fillTeacherTreeLists(box, selected, problems);
   selected.forEach(s => {
     const sel = box.querySelector(`[data-dest-select="${s.student_id}"]`);
     if (!sel) return;
-    S.destByStudent[s.student_id] = Number(sel.value);
-    sel.addEventListener('change', () => { S.destByStudent[s.student_id] = Number(sel.value); });
+    S.destByStudent[adminDestKey(s)] = Number(sel.value);
+    sel.addEventListener('change', () => { S.destByStudent[adminDestKey(s)] = Number(sel.value); });
     box.querySelector(`[data-dest-newsub="${s.student_id}"]`).addEventListener('click', async () => {
       const errEl = box.querySelector(`[data-dest-err="${s.student_id}"]`);
       errEl.textContent = '';
@@ -784,7 +846,7 @@ function renderTeacherDestinationRows(box, selected, problems){
       const res = await createTeacherDeck({ name: box.querySelector(`[data-dest-subname="${s.student_id}"]`).value, parentDeck: parent, decks: list });
       if (!res.ok){ errEl.textContent = res.error; return; }
       list.push(res.deck);
-      S.destByStudent[s.student_id] = res.deck.id;
+      S.destByStudent[adminDestKey(s)] = res.deck.id;
       renderTeacherDestinationRows(box, selected, problems);
       showToast('✓ Subdeck criado.');
     });
@@ -797,7 +859,7 @@ async function refreshTeacherDestinationsUI(){
   const box = document.getElementById('admin-flashcard-destinations');
   if (!box) return;
   const S = ADMIN_FLASHCARDS_STATE;
-  const selected = S._studentsCache.filter(s => S.studentIds.has(s.student_id));
+  const selected = adminSelectedStudents(S._studentsCache);
   const token = ++S._destToken;
   if (!selected.length){
     box.innerHTML = '<p class="profile-edit-hint">Selecione ao menos um aluno para escolher o Deck de destino.</p>';
@@ -808,9 +870,10 @@ async function refreshTeacherDestinationsUI(){
   const freshLangs = new Set();
   await Promise.all(selected.map(async s => {
     const key = `${s.student_id}|${s.language_app_key}`;
-    if (S._ensuredKeys.has(key)) return;
+    const ensuredKey = `${CURRENT_USER.id}|${key}`; // por professora (troca de conta na mesma página)
+    if (S._ensuredKeys.has(ensuredKey)) return;
     const r = await ensureTeacherDecksForStudent(s.student_id, s.language_app_key);
-    if (r.ok){ S._ensuredKeys.add(key); freshLangs.add(s.language_app_key); }
+    if (r.ok){ S._ensuredKeys.add(ensuredKey); freshLangs.add(s.language_app_key); }
     else problems[key] = r.error;
   }));
   if (token !== S._destToken) return;
@@ -926,15 +989,17 @@ function wireFlashcardsCardsBox(cardsBox){
       const res = card ? await setTeacherFlashcardDeck({ note: card, destination, decks: list }) : { ok: false, error: 'Cartão não encontrado.' };
       if (!res.ok){ showToast(res.error || 'Não foi possível mover o cartão.'); sel.value = ''; return; }
       showToast('✓ Cartão movido.');
-      const selectedStudents = ADMIN_FLASHCARDS_STATE._studentsCache.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+      const selectedStudents = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
       cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
       wireFlashcardsCardsBox(cardsBox);
+      const destBox = document.getElementById('admin-flashcard-destinations');
+      if (destBox) fillTeacherTreeLists(destBox, selectedStudents, {});
     });
   });
   cardsBox.querySelectorAll('[data-toggle-flashcard]').forEach(btn => {
     btn.addEventListener('click', async () => {
       await setFlashcardStatus(btn.dataset.toggleFlashcard, btn.dataset.nextStatus);
-      const selectedStudents = ADMIN_FLASHCARDS_STATE._studentsCache.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+      const selectedStudents = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
       cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
       wireFlashcardsCardsBox(cardsBox);
     });
@@ -950,7 +1015,7 @@ function wireFlashcardsCardsBox(cardsBox){
       ADMIN_FLASHCARDS_STATE.editingNativeState = null;
       ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
-      const selectedStudents = ADMIN_FLASHCARDS_STATE._studentsCache.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+      const selectedStudents = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
       cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
       wireFlashcardsCardsBox(cardsBox);
     });
@@ -960,9 +1025,11 @@ function wireFlashcardsCardsBox(cardsBox){
       if (!confirm('Isso vai apagar o cartão e todo o histórico de revisão permanentemente. Não pode ser desfeito. Continuar?')) return;
       await deleteFlashcardPermanently(btn.dataset.deleteFlashcard);
       showToast('Cartão apagado.');
-      const selectedStudents = ADMIN_FLASHCARDS_STATE._studentsCache.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+      const selectedStudents = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
       cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
       wireFlashcardsCardsBox(cardsBox);
+      const destBox = document.getElementById('admin-flashcard-destinations');
+      if (destBox) fillTeacherTreeLists(destBox, selectedStudents, {});
     });
   });
   // Se um cartão está em edição, o HTML acima já renderizou
@@ -986,7 +1053,12 @@ function wireFlashcardsCardsBox(cardsBox){
 // e o filtro de idioma. Nunca toca em #admin-create-flashcard-form.
 async function updateFlashcardsSelectionDependentUI(wrap){
   const students = ADMIN_FLASHCARDS_STATE._studentsCache;
-  const selectedStudents = students.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+  // (langFilter normalizado ANTES de calcular a seleção efetiva -- H8)
+  const langsPresent = [...new Set(students.map(s => s.language_app_key))];
+  if (langsPresent.length > 1 && !langsPresent.includes(ADMIN_FLASHCARDS_STATE.langFilter)){
+    ADMIN_FLASHCARDS_STATE.langFilter = langsPresent[0];
+  }
+  const selectedStudents = adminSelectedStudents(students);
   const anyMandarim = selectedStudents.some(s => s.language_app_key === 'mandarim');
   // Fase 6D.5 (ver CLAUDE.md) -- mesma regra do render inicial: só o
   // booleano relevante pra validação (compareAnswer/pinyin obrigatório de
@@ -1071,7 +1143,9 @@ async function renderAdminFlashcardsView(){
   ADMIN_FLASHCARDS_STATE.decksByLang = {};
   wrap.innerHTML = loadingHTML();
 
-  const students = await fetchMyStudents();
+  // Fase H (H6) -- só vínculos ATIVOS aparecem: professora sem vínculo ativo
+  // não cria Teacher Decks nem Teacher Cards (o banco também recusa, 055).
+  const students = (await fetchMyStudents()).filter(x => x.status === 'active');
   if (!students.length){
     wrap.innerHTML = `<p class="profile-empty-note">Vincule um aluno primeiro, na aba "🎓 Alunos", pra poder criar flashcards pra ele.</p>`;
     return;
@@ -1084,7 +1158,12 @@ async function renderAdminFlashcardsView(){
   const validIds = new Set(students.map(s => s.student_id));
   ADMIN_FLASHCARDS_STATE.studentIds = new Set([...ADMIN_FLASHCARDS_STATE.studentIds].filter(id => validIds.has(id)));
 
-  const selectedStudents = students.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+  // (langFilter normalizado ANTES de calcular a seleção efetiva -- H8)
+  const langsPresent = [...new Set(students.map(s => s.language_app_key))];
+  if (langsPresent.length > 1 && !langsPresent.includes(ADMIN_FLASHCARDS_STATE.langFilter)){
+    ADMIN_FLASHCARDS_STATE.langFilter = langsPresent[0];
+  }
+  const selectedStudents = adminSelectedStudents(students);
   const anyMandarim = selectedStudents.some(s => s.language_app_key === 'mandarim');
   // Fase 6D.5 (ver CLAUDE.md) -- languageAppKey do editor nativo espelha o
   // mesmo sinal `anyMandarim` que o resto desta função já usa pra decidir
@@ -1110,10 +1189,6 @@ async function renderAdminFlashcardsView(){
   // gera pronúncia errada pra quem não é do idioma escolhido no momento da
   // criação. Sempre exatamente 1 idioma ativo quando há 2+ presentes -- o
   // filtro deixa de ser "visualização", vira a própria trava de seleção.
-  const langsPresent = [...new Set(students.map(s => s.language_app_key))];
-  if (langsPresent.length > 1 && !langsPresent.includes(ADMIN_FLASHCARDS_STATE.langFilter)){
-    ADMIN_FLASHCARDS_STATE.langFilter = langsPresent[0];
-  }
   const langFilterHTML = langsPresent.length > 1 ? `
     <div class="leaderboard-tabs" role="tablist" aria-label="Filtrar por idioma" style="justify-content:flex-start; margin-bottom:8px;">
       ${langsPresent.map(key => `<button type="button" class="leaderboard-tab ${ADMIN_FLASHCARDS_STATE.langFilter === key ? 'active' : ''}" data-lang-filter="${key}">${STUDENT_LANGUAGE_LABELS[key] || key} (${students.filter(s => s.language_app_key === key).length})</button>`).join('')}
@@ -1312,7 +1387,7 @@ async function renderAdminFlashcardsView(){
     const errorEl = document.getElementById('admin-create-flashcard-error');
     errorEl.textContent = '';
 
-    const selectedNow = ADMIN_FLASHCARDS_STATE._studentsCache.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+    const selectedNow = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
     if (!selectedNow.length){
       errorEl.textContent = 'Selecione ao menos um aluno.';
       return;
@@ -1358,7 +1433,7 @@ async function renderAdminFlashcardsView(){
       const dest = await resolveTeacherCreationDeck({
         studentId: s.student_id,
         languageAppKey: s.language_app_key,
-        deckId: ADMIN_FLASHCARDS_STATE.destByStudent[s.student_id],
+        deckId: ADMIN_FLASHCARDS_STATE.destByStudent[adminDestKey(s)],
         decks: ADMIN_FLASHCARDS_STATE.decksByLang[s.language_app_key],
       });
       if (!dest.ok) return { ok: false, error: dest.error, student: s };

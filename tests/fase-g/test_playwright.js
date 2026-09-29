@@ -145,8 +145,8 @@ async function bootPage(browser, lang, port){
         { teacher_id: 'T', student_id: 'S1', language_app_key: appKey, status: 'active' },
         { teacher_id: 'T', student_id: 'S2', language_app_key: appKey, status: 'active' }];
       fetchMyStudents = async () => [
-        { student_id: 'S1', username: 'ana', display_name: 'Ana', language_app_key: appKey },
-        { student_id: 'S2', username: 'bia', display_name: 'Bia', language_app_key: appKey }];
+        { student_id: 'S1', username: 'ana', display_name: 'Ana', language_app_key: appKey, status: 'active' },
+        { student_id: 'S2', username: 'bia', display_name: 'Bia', language_app_key: appKey, status: 'active' }];
       // pré-existente: 1 cartão histórico sem Deck do aluno 1
       window.__DB.teacher_flashcards.push({ id: 1, teacher_id: 'T', student_id: 'S1', language_app_key: appKey, status: 'active', front: 'hist', back_trans: 'hist', deck_id: null, revision: 0, created_at: '2026-01-01T00:00:00Z', tags: [] });
       switchTab('admin-badges');
@@ -235,7 +235,7 @@ async function bootPage(browser, lang, port){
 
     // D) falha de destino: Deck escolhido some/estranho -> só aquele aluno falha, nada gravado
     const nBefore = await ev(() => window.__DB.teacher_flashcards.length);
-    await ev(() => { ADMIN_FLASHCARDS_STATE.destByStudent['S1'] = 999999; });
+    await ev(() => { ADMIN_FLASHCARDS_STATE.destByStudent[adminDestKey({ student_id: 'S1', language_app_key: APP_KEY })] = 999999; });
     await page.selectOption('#admin-flashcard-card-type-preview', 'normal').catch(() => {});
     await ev(() => { const st = createNativeNoteEditorState({ cardGenerationMode: 'normal', languageAppKey: APP_KEY }); addFieldToEditorState(st, { content: { value: 'x' } }); addFieldToEditorState(st, { content: { value: 'y' } }); ADMIN_FLASHCARDS_STATE.nativeCardState = st; });
     await page.click('#admin-create-flashcard-btn');

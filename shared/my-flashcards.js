@@ -144,9 +144,15 @@ function teacherDecksReadOnlyHTML(decks){
   if (!mine.length) return '';
   const cards = (typeof STATE !== 'undefined' && STATE.cards) || [];
   const rows = orderedTeacherDecks(decks, mine).map(({ deck, depth }) => {
+    // Fase H (H10) -- contagens do MESMO Deck Engine (getDeckCounts: New/
+    // Learning/Review sobre CardInstances elegíveis do Deck + descendentes),
+    // nunca uma contagem paralela. `n` = CardInstances no escopo do Deck.
     const n = getStudyScopeForDeck(decks, deck.id, cards).length;
-    return `<div class="admin-badge-row" style="padding-left:${depth * 16}px;">
-      <span style="flex:1;">${escapeHTML(deck.name)} <span class="profile-edit-hint">(${n} cartões)</span></span>
+    const pool = (typeof eligibleReviewPool === 'function') ? eligibleReviewPool() : cards;
+    const c = getDeckCounts(decks, deck.id, pool);
+    const label = deck.kind === 'teacher_root' ? 'Cartões da professora' : deck.name;
+    return `<div class="admin-badge-row" style="padding-left:${depth * 16}px;" data-teacher-deck-row="${deck.id}">
+      <span style="flex:1;">${escapeHTML(label)} <span class="profile-edit-hint">(${n} cartões · ${c.new} novos · ${c.learning} aprendendo · ${c.review} para revisar)</span></span>
       <button type="button" class="btn btn-secondary" data-study-deck="${deck.id}" ${n ? '' : 'disabled'}>Estudar este Deck</button>
     </div>`;
   }).join('');

@@ -183,7 +183,7 @@ begin
   select count(*) into v_n from teacher_flashcards where student_id = s1 and deck_id is not null;
   insert into results values ('15f. aluno enxerga os Teacher Cards que recebeu', v_n >= 2, v_n::text);
 
-  -- ===== H. exclusão: Deck vazio pela professora; com filhos/notas o banco NÃO protege (regra é do domínio) =====
+  -- ===== H. exclusão: Deck vazio pela professora (a proteção de Deck com filhos/cartões é do banco, migration 054 -- ver seção J) =====
   reset role;
   perform set_config('request.jwt.claims', json_build_object('sub', t, 'role', 'authenticated', 'email', ADMIN_EMAIL)::text, true);
   set local role authenticated;
@@ -191,8 +191,8 @@ begin
   get diagnostics v_n = row_count;
   insert into results values ('16f. professora apaga Teacher Deck vazio da própria árvore', v_n = 1, null);
   -- 17: professora NAO-admin (B) nao apaga o proprio teacher_root (RLS so libera kind=teacher).
-  -- Obs.: o admin (hoje a professora real) passa por decks_admin_write e PODE apagar qualquer
-  -- Deck; a protecao "Deck com cartoes/filhos" fica no dominio (validateDeckDeletion).
+  -- Obs.: o admin passa por decks_admin_write, mas o trigger da migration 054 impede apagar
+  -- teacher_root e Teacher Deck com filhos/cartoes (secao J).
   reset role;
   perform set_config('request.jwt.claims', json_build_object('sub', u, 'role', 'authenticated', 'email', 'outra@example.com')::text, true);
   set local role authenticated;

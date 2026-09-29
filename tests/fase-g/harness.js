@@ -13,7 +13,7 @@ const FILES = ['shared/srs.js', 'shared/fsrs.js', 'shared/study-queue.js', 'shar
   'shared/own-flashcards.js', 'shared/teacher-flashcards.js', 'shared/deck-data.js', 'shared/my-flashcards.js'];
 
 function makeFakeSupabase(db, userId){
-  let seq = 100;
+  const nextId = () => (db.seq = (db.seq || 100) + 1);
   const teacherDeckOk = (r) => {
     if (r.deck_id == null) return true;
     const d = db.decks.find(x => x.id === r.deck_id);
@@ -36,7 +36,7 @@ function makeFakeSupabase(db, userId){
               return { data: null, error: { message: 'trigger/rls: deck invalido' } };
           }
         }
-        const created = list.map(r => Object.assign({ id: ++seq, status: 'active', revision: 0, created_at: new Date().toISOString() }, r));
+        const created = list.map(r => Object.assign({ id: nextId(), status: 'active', revision: 0, created_at: new Date().toISOString() }, r));
         created.forEach(c => rows.push(c));
         return { data: st.single ? created[0] : created, error: null };
       }
@@ -78,9 +78,9 @@ function makeFakeSupabase(db, userId){
       const linked = db.teacher_students.some(l => l.teacher_id === userId && l.student_id === sid && l.language_app_key === lang && l.status === 'active');
       if (!linked || sid === userId) return { data: null, error: { message: 'not_authorized' } };
       let root = db.decks.find(d => d.kind === 'root' && d.owner_id === sid && d.language_app_key === lang);
-      if (!root){ root = { id: ++seq, kind: 'root', owner_id: sid, parent_deck_id: null, language_app_key: lang, name: 'root' }; db.decks.push(root); }
+      if (!root){ root = { id: nextId(), kind: 'root', owner_id: sid, parent_deck_id: null, language_app_key: lang, name: 'root' }; db.decks.push(root); }
       let tr = db.decks.find(d => d.kind === 'teacher_root' && d.owner_id === sid && d.teacher_id === userId && d.language_app_key === lang);
-      if (!tr){ tr = { id: ++seq, kind: 'teacher_root', owner_id: sid, teacher_id: userId, parent_deck_id: root.id, language_app_key: lang, name: 'Cartões da professora' }; db.decks.push(tr); }
+      if (!tr){ tr = { id: nextId(), kind: 'teacher_root', owner_id: sid, teacher_id: userId, parent_deck_id: root.id, language_app_key: lang, name: 'Cartões da professora' }; db.decks.push(tr); }
       return { data: [{ root_deck_id: root.id, teacher_root_deck_id: tr.id }], error: null };
     },
   };
@@ -108,4 +108,4 @@ function summary(label){
   console.log(`${label}: ${passed}/${passed + failed} verificações` + (failed ? ` — ${failed} FALHAS` : ' — OK'));
   process.exit(failed ? 1 : 0);
 }
-module.exports = { ROOT, read, load, check, summary };
+module.exports = { ROOT, read, load, check, summary, makeFakeSupabase, FILES };

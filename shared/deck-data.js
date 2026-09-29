@@ -156,11 +156,15 @@ async function setOwnFlashcardDeck({ note, destination, decks }){
 // chamar isto seria barrado pela RLS da própria tabela, mesma fronteira
 // de sempre.
 async function setTeacherFlashcardDeck({ note, destination, decks }){
+  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  // Fase H -- só a PRÓPRIA professora move a Note (Note-level: um único
+  // UPDATE de deck_id; CardInstances irmãos andam juntos, nada mais muda).
+  if (!note || note.teacher_id !== CURRENT_USER.id) return { ok: false, error: 'Cartão inválido.', reason: 'wrong_teacher' };
   const validation = validateNoteMove({ note, destination, decks, table: 'teacher' });
   if (!validation.ok) return validation;
   const { error } = await supabaseClient.from('teacher_flashcards')
     .update({ deck_id: destination.id })
-    .eq('id', note.id);
+    .eq('id', note.id).eq('teacher_id', CURRENT_USER.id);
   if (error){ console.error('Erro ao mover cartão de Deck:', error); return { ok: false, error: 'Não foi possível mover o cartão agora.' }; }
   return { ok: true };
 }
@@ -267,6 +271,7 @@ async function createTeacherDeck({ name, parentDeck, decks }){
   if (!check.ok) return { ok: false, error: 'Só é possível criar um Deck dentro da árvore deste aluno.', reason: check.reason };
   const cleanName = (name || '').trim();
   if (!cleanName) return { ok: false, error: 'Digite um nome pro Deck.' };
+  if (cleanName.length > 60) return { ok: false, error: 'O nome do Deck pode ter no máximo 60 caracteres.' };
   const { data, error } = await supabaseClient.from('decks').insert({
     owner_id: parentDeck.owner_id,
     teacher_id: CURRENT_USER.id,
@@ -303,7 +308,16 @@ async function deleteTeacherDeck({ deck, decks }){
     .select('id', { count: 'exact', head: true }).eq('deck_id', deck.id);
   if (cErr){ console.error('Erro ao checar cartões do Deck:', cErr); return { ok: false, error: 'Não foi possível verificar o Deck agora.' }; }
   const validation = validateDeckDeletion({ deck, hasChildren, hasNotes: (count || 0) > 0 });
-  if (!validation.ok) return validation;
+  if (!validation.ok){
+    const msgs = {
+      has_children: 'Este Deck tem subdecks. Esvazie-o (mova ou apague os subdecks) antes de apagar.',
+      has_notes: 'Este Deck tem cartões. Mova os cartões para outro Deck antes de apagar.',
+      not_deletable_kind: 'Este Deck não pode ser apagado.',
+    };
+    return Object.assign({ error: msgs[validation.reason] || 'Este Deck não pode ser apagado.' }, validation);
+  }
+  // A checagem acima é só UX: o trigger da migration 054 (e 055) é a
+  // autoridade final e recusa o DELETE mesmo que o cliente erre.
   const { error } = await supabaseClient.from('decks').delete()
     .eq('id', deck.id).eq('teacher_id', CURRENT_USER.id).eq('kind', 'teacher');
   if (error){ console.error('Erro ao apagar Deck da professora:', error); return { ok: false, error: 'Não foi possível apagar o Deck agora.' }; }
