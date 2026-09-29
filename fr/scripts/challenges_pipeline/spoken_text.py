@@ -29,7 +29,7 @@ from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional, Tuple
 
 # Sobe quando o comportamento de qualquer regra muda (regenerar o que a regra afeta).
-SPOKEN_RULES_VERSION = 2
+SPOKEN_RULES_VERSION = 3
 
 
 @dataclass(frozen=True)
@@ -107,7 +107,6 @@ SPOKEN_OVERRIDES: Dict[str, Dict[str, str]] = {
     # Escolhas da autora no laboratório (audio_lab.py), onde a regra genérica
     # (vírgula) não é a que ela ouviu melhor / a que funcionou de forma estável.
     "fr": {
-        "français / française": "français. française",
         "une bouteille (de)": "une bouteille (de)",
     },
     "zh": {},
