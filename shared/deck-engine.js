@@ -350,3 +350,66 @@ function validateDeckDeletion({ deck, hasChildren, hasNotes }){
   }
   return { ok: true };
 }
+
+// ============================================================
+// 11) COURSE DECKS (Fase E -- Study Trail <-> Course Decks)
+// ============================================================
+// Domínio PURO (sem I/O, sem STATE) que liga a identidade PEDAGÓGICA de uma
+// Unit (`unitId`, content.js -- string em fr "A1-1", number em zh 1) ao
+// Course Deck correspondente (`decks.id`, bigint). NUNCA `unitId === deckId`:
+// a chave de busca é (language_app_key, course_unit_id) e `course_unit_id`
+// é sempre String(unitId) (migration 051). Deck organiza, nunca define
+// conteúdo/direção/elegibilidade -- lesson completion continua sendo regra
+// pedagógica do app (isCardLessonCompleted), não deste arquivo.
+
+// Units que de fato viram Course Deck: as MESMAS que buildCardsFromUnits()
+// (fr/zh app.js) transforma em cards -- unidades type:'grammar' (fr) e
+// unidades sem vocabulário nunca geram card, então nunca ganham Deck.
+// Devolve o payload exato que ensure_course_decks(p_units) espera.
+function courseUnitsForDecks(units){
+  return (units || [])
+    .filter(u => u && u.type !== 'grammar' && Array.isArray(u.vocab) && u.vocab.length > 0)
+    .map(u => ({ unit_id: String(u.id), title: u.title }));
+}
+
+function isCourseDeck(deck){
+  return !!deck && deck.kind === 'course';
+}
+
+// Índice {rootId, byUnitId: Map<String(unitId), deck.id>} sobre os Decks já
+// carregados. Só considera kind='course' do idioma pedido -- ignora
+// qualquer outro kind por construção (nunca vaza Deck pessoal/de
+// professora pro mapeamento de trilha).
+function buildCourseDeckIndex(decks, languageAppKey){
+  const byUnitId = new Map();
+  let rootId = null;
+  (decks || []).forEach(d => {
+    if (!isCourseDeck(d) || d.language_app_key !== languageAppKey) return;
+    if (d.course_unit_id == null) rootId = d.id;
+    else byUnitId.set(String(d.course_unit_id), d.id);
+  });
+  return { rootId, byUnitId };
+}
+
+// Determinístico: mesma Unit -> mesmo deckId; Unit sem Course Deck -> null
+// (Study Trail continua funcionando sem deckId, ver Fase E no CLAUDE.md).
+function courseDeckIdForUnit(index, unitId){
+  if (!index || unitId == null) return null;
+  const id = index.byUnitId.get(String(unitId));
+  return id != null ? id : null;
+}
+
+// Atribui `deckId` SÓ aos cards de trilha (origin 'study'), a partir do
+// `unitId`. Não toca em NENHUM outro campo (id/unitId/FSRS/estado/vocabIdx)
+// -- só `deckId`. Idempotente. Cards nativos (teacher/self) trazem deck_id
+// da própria linha e nunca passam por aqui. Devolve quantos cards ficaram
+// com deckId != null.
+function assignCourseDeckIds(cards, index){
+  let assigned = 0;
+  (cards || []).forEach(c => {
+    if (!c || c.origin !== 'study') return;
+    c.deckId = courseDeckIdForUnit(index, c.unitId);
+    if (c.deckId != null) assigned++;
+  });
+  return assigned;
+}

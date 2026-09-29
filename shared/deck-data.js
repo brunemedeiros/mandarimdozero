@@ -162,3 +162,37 @@ async function moveDeck({ deck, destination, decks }){
   if (error){ console.error('Erro ao mover Deck:', error); return { ok: false, error: 'Não foi possível mover o Deck agora.' }; }
   return { ok: true };
 }
+
+// ---------- Fase E -- Course Decks (Study Trail) ----------
+//
+// Leitura dos Course Decks de um idioma. NÃO exige sessão: a policy
+// decks_course_select (migration 051) libera SELECT de kind='course' a
+// qualquer papel, inclusive convidado (conteúdo do sistema, sem dado
+// sensível). O filtro por kind aqui é redundante com a RLS de propósito --
+// deixa explícito que esta função nunca lê Deck pessoal/de professora.
+async function fetchCourseDecksForLanguage(languageAppKey){
+  const { data, error } = await supabaseClient
+    .from('decks')
+    .select('*')
+    .eq('kind', 'course')
+    .eq('language_app_key', languageAppKey)
+    .order('id', { ascending: true });
+  if (error){ console.error('Erro ao carregar Course Decks:', error); return []; }
+  return data || [];
+}
+
+// Bootstrap idempotente dos Course Decks. SÓ conta autenticada real -- a
+// RPC é concedida apenas a `authenticated` (migration 051); convidado nunca
+// chama isto (nem tenta: sem sessão o GRANT recusaria). `units` é a lista
+// REAL de UNITS do content.js do idioma; courseUnitsForDecks() (deck-engine)
+// filtra só as que geram cards. Nunca apaga Deck de Unit que sumiu.
+async function ensureCourseDecksForCurrentUser(languageAppKey, units){
+  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  const payload = courseUnitsForDecks(units);
+  const { data, error } = await supabaseClient.rpc('ensure_course_decks', {
+    p_language_app_key: languageAppKey,
+    p_units: payload,
+  });
+  if (error){ console.error('Erro ao preparar Course Decks:', error); return { ok: false, error: 'Não foi possível preparar os Decks do curso agora.' }; }
+  return { ok: true, decks: data || [] };
+}

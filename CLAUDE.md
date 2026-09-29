@@ -16814,3 +16814,59 @@ terminal); camada 5 (validar contra o texto falado + pico de volume no
 pipeline geral); exemplo de frase para `un kilo (de)`/`une tranche (de)`/
 `une bouteille (de)` (conteúdo em fr/content.js, e o cartão de vocabulário
 não tem campo de exemplo -- mudança de app.js, fora desta entrega).
+
+## Fase E -- Study Trail <-> Course Decks (2026-09-29)
+
+**Correção de checkpoint**: o checkpoint citava `21eb99f`, que não existe; o commit real das Fases B-D é **`21ebf99`**, que estava só em `origin/claude/fervent-einstein-emwqjg`. Foi integrado à branch de trabalho por **merge normal** (`d2e5199`), sem rebase/reset. A 051 foi
+conferida: 13.974 bytes, md5 `f4a481f60ec9c26ebfb27b9c43ee06b0`, não alterada.
+
+**Modelo**: `Course → Course root (1/idioma) → Unit Deck (1/unidade com
+vocabulário)`. Cada card de trilha (`origin:'study'`) ganha `deckId` via
+`unitId → String(unitId) = course_unit_id → decks.id`. **Nunca pelo nome**;
+`unitId` (identidade pedagógica) e `deckId` (destino organizacional)
+coexistem, nenhum substitui o outro.
+
+**Código**
+- `shared/deck-engine.js` (puro): `courseUnitsForDecks(units)` (payload da RPC;
+  só units que geram cards -- grammar/sem vocab ficam de fora),
+  `isCourseDeck`, `buildCourseDeckIndex(decks, lang)`, `courseDeckIdForUnit`,
+  `assignCourseDeckIds(cards, index)` (só mexe em `deckId` de cards `study`).
+  Nenhum 2º Deck Engine.
+- `shared/deck-data.js`: `fetchCourseDecksForLanguage` (SELECT, funciona para
+  guest) e `ensureCourseDecksForCurrentUser` (RPC, exige `CURRENT_USER`).
+- `fr/app.js` e `zh/app.js` (espelhados): `deckId:null` no card de trilha;
+  `ensureCourseDecksLoaded()` chamada por `ensureDecksLoadedForReview()`
+  (**sob demanda, nunca no boot**); `STATE.courseDecksLoaded`;
+  `applySerializedState` agora preserva o `deckId` fresco (é dado derivado do
+  banco -- um save antigo não pode sobrescrevê-lo; vale também para cards
+  nativos, correção mínima necessária).
+- **Migration 052** (aplicada ao vivo): `revoke execute ... from anon` em
+  `ensure_course_decks`. O teste real mostrou que a 051 deixava o guest
+  executar a função (o `revoke from public` não remove o grant direto que o
+  Supabase dá a `anon`): um anônimo podia criar/renomear Course Decks.
+  Corrigido e reverificado (`permission denied`). Observação NÃO corrigida
+  (fora do escopo): `ensure_user_decks` também é executável por `anon`
+  (tem checagem interna de auth desde a 050).
+
+**Guest/auth**: guest só LÊ Course Decks (RLS `decks_course_select`); nunca
+chama a RPC. Autenticado: 1 bootstrap idempotente por sessão com a lista REAL
+de `UNITS`. Sem Course Decks (ou antes do bootstrap) os cards ficam com
+`deckId:null` e Study Trail/Review funcionam exatamente como antes.
+
+**Review**: sem fila/FSRS/scheduler novos. `startDeckReviewSession` já usava
+`getStudyScopeForDeck(eligibleReviewPool())`; pertencer ao Deck NÃO torna
+elegível -- `isCardLessonCompleted` continua mandando. Contagens por
+CardInstance (reverso=2, cloze=N).
+
+**Testes versionados** em `tests/fase-e/`: `test_course_decks_unit.js`
+(Node/VM, 75/75), `test_supabase_real.sql` (Postgres real, transação com
+rollback; todos ok após a 052; sem resíduo: 0 decks antes e depois),
+`test_playwright.js` (FR+ZH, 38/38). "Autenticado" no Playwright é simulado
+(`CURRENT_USER` + stub com o contrato da 051/052; o CDN do Supabase é
+bloqueado no sandbox). Regressão: answer_validation fr/zh e spoken_text ok.
+
+**Limitações / não feito**: Course Decks ainda NÃO existem no banco (criados
+no primeiro uso autenticado); filtro de origem do Review (`self`/`teacher`)
+ainda se aplica ao pool do Deck; sem Painel, Tags UI, Teacher/Public Decks,
+import Anki com hierarquia, movimentação/delete de Course Deck, mudança de
+FSRS ou do limite Free. Fase F não iniciada.

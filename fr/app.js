@@ -460,6 +460,10 @@ function buildCardsFromUnits(units){
         // veio" (trilha vs. professora vs. futura auto-criação) sem nunca
         // virar um sistema de revisão paralelo. Cartão de trilha = 'study'.
         origin: 'study',
+        // Fase E: destino organizacional (Course Unit Deck). NUNCA substitui
+        // unitId (identidade pedagógica). null até os Course Decks serem
+        // carregados (ensureCourseDecksLoaded) -- Study Trail funciona igual.
+        deckId: null,
         ef: 2.5,
         interval: 0,
         reps: 0,
@@ -889,6 +893,7 @@ const STATE = {
   // (shared/deck-data.js), este array é só uma leitura recente, nunca uma
   // contagem materializada (ver CLAUDE.md, seção "Performance" da Fase D).
   decks: [],
+  courseDecksLoaded: false,
   currentLevel: LEVELS[0].id,
   checkpointProgress: {},
   levelTestProgress: {},
@@ -1094,7 +1099,15 @@ function applySerializedState(data){
   if (data.cards) {
     const byId = {};
     data.cards.forEach(c => byId[c.id] = c);
-    STATE.cards.forEach(c => { if (byId[c.id]) Object.assign(c, byId[c.id]); });
+    // Fase E: deckId é dado DERIVADO do banco (decks/deck_id), nunca progresso
+    // de memória -- um save antigo carrega o deckId de quando foi salvo, que
+    // pode estar defasado (Deck movido/recriado). O valor fresco vence.
+    STATE.cards.forEach(c => {
+      if (!byId[c.id]) return;
+      const freshDeckId = c.deckId;
+      Object.assign(c, byId[c.id]);
+      c.deckId = freshDeckId === undefined ? null : freshDeckId;
+    });
   }
   // Fase 3 (reestruturação do motor de memória): migração SM2->FSRS,
   // idempotente (migrateCardToFSRS só age se `stability` ainda não existe).
@@ -6122,12 +6135,38 @@ function startReviewSession(){
 // recente da árvore real) -- reaproveitado enquanto a sessão do app durar;
 // isso é uma otimização pragmática (evita um round-trip por clique), nunca
 // o cache de contagem que a seção "Performance" da Fase D proíbe.
+// Fase E -- Study Trail <-> Course Decks. Liga cada card de trilha ao Course
+// Unit Deck da sua unidade (unitId -> String(unitId) -> course_unit_id ->
+// deck.id), SÓ mexendo em `deckId`. Bootstrap (ensure_course_decks) apenas
+// pra conta autenticada; convidado só LÊ (SELECT público de kind='course')
+// e, se os Decks ainda não existirem, os cards simplesmente ficam sem
+// deckId (Study Trail intacto). Idempotente; carrega 1x por sessão do app
+// quando bem sucedido. Nunca chamado no boot -- só sob demanda, junto do
+// resto do fluxo Deck-scoped (ensureDecksLoadedForReview).
+async function ensureCourseDecksLoaded(){
+  if (typeof fetchCourseDecksForLanguage !== 'function' || typeof buildCourseDeckIndex !== 'function') return [];
+  if (!STATE.courseDecksLoaded){
+    if (CURRENT_USER && typeof ensureCourseDecksForCurrentUser === 'function'){
+      await ensureCourseDecksForCurrentUser(APP_KEY, UNITS);
+    }
+    const courseDecks = await fetchCourseDecksForLanguage(APP_KEY);
+    if (courseDecks.length){
+      const known = new Set((STATE.decks || []).map(d => d.id));
+      STATE.decks = (STATE.decks || []).concat(courseDecks.filter(d => !known.has(d.id)));
+      STATE.courseDecksLoaded = true;
+    }
+  }
+  assignCourseDeckIds(STATE.cards, buildCourseDeckIndex(STATE.decks || [], APP_KEY));
+  return STATE.decks || [];
+}
+
 async function ensureDecksLoadedForReview(){
-  if (STATE.decks && STATE.decks.length) return STATE.decks;
-  if (typeof ensureDecksForCurrentUser !== 'function' || typeof fetchDecksForLanguage !== 'function') return [];
-  await ensureDecksForCurrentUser(APP_KEY);
-  STATE.decks = await fetchDecksForLanguage(APP_KEY);
-  return STATE.decks;
+  if (!(STATE.decks && STATE.decks.length)){
+    if (typeof ensureDecksForCurrentUser !== 'function' || typeof fetchDecksForLanguage !== 'function') return [];
+    await ensureDecksForCurrentUser(APP_KEY);
+    STATE.decks = await fetchDecksForLanguage(APP_KEY);
+  }
+  return ensureCourseDecksLoaded();
 }
 
 // D4 -- "integre getDeckCounts() ao domínio de Review": a única mudança
