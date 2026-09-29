@@ -5020,9 +5020,8 @@ function acceptedForms(expected){
 // ---------- Teclinha de tons do pinyin (exercícios digitados) ----------
 // Ninguém tem um teclado chinês pra digitar vogais com tom -- isso dá um
 // jeito de inserir o caractere certo sem precisar de IME. Importante: o
-// tom NÃO é exigido pra acertar (normalizeLoose acima remove os
-// diacríticos dos dois lados antes de comparar) -- isso é só pra quem
-// quer treinar digitando o tom certo mesmo, não um requisito escondido.
+// tom É exigido pra acertar -- a comparação (normalizePinyinAnswer) mantém
+// os diacríticos dos dois lados, então "ba" NÃO é aceito no lugar de "bā".
 const PINYIN_TONE_GROUPS = [
   ['ā', 'á', 'ǎ', 'à'],
   ['ē', 'é', 'ě', 'è'],

@@ -3681,10 +3681,18 @@ function renderGrammarExerciseStep(u, contentEl, nextBtn){
     const expectedEl = document.getElementById('gram-exercise-expected');
     inputEl.disabled = true;
 
-    if (given.trim() === expected.trim()){
+    // Formas aceitas: a resposta principal + `alt` opcional (variantes reais,
+    // ex.: septante/nonante na Bélgica e Suíça). Hífen, espaço e apóstrofo
+    // contam como iguais ("soixante dix" = "soixante-dix" = "soixante et
+    // onze" = "soixante-et-onze") -- só a grafia do separador, nunca deve
+    // custar o ponto de quem sabe a palavra. Acento errado continua "Quase!".
+    const forms = [expected, ...(ex.alt || [])];
+    const canonSep = s => s.normalize('NFC').toLowerCase().trim().replace(/[\s\-‐‑–']+/g, ' ');
+    const looseSep = s => normalizeLoose(s).replace(/[\s\-‐‑–']+/g, ' ');
+    if (forms.some(f => canonSep(given) === canonSep(f))){
       wrapEl.classList.add('ok');
       STEP_STATE.gramExerciseScore += 1;
-    } else if (normalizeLoose(given) === normalizeLoose(expected)){
+    } else if (forms.some(f => looseSep(given) === looseSep(f))){
       wrapEl.classList.add('almost');
       expectedEl.textContent = `Quase! → ${expected}`;
       STEP_STATE.gramExerciseScore += 0.5;
