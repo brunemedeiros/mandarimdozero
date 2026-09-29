@@ -16516,3 +16516,194 @@ ao vivo via `mcp__Supabase__apply_migration`.
 
 **PARE conforme instrução explícita -- Fase D NÃO iniciada.** Só começa
 depois que a autora revisar este checkpoint.
+
+**Atualização: autorizada e entregue (2026-09-29), "FASE D — INTEGRAÇÃO
+DECK ↔ FSRS / REVIEW — D1–D7".**
+
+## Fase D -- Integração Deck <-> FSRS/Review (contagens, escopo de
+estudo e sessão por Deck)
+
+Constrói o COMPORTAMENTO de Review em cima do Deck Engine da Fase C, sem
+tocar em nenhuma linha de `shared/deck-engine.js`/`shared/deck-data.js`/
+`shared/study-queue.js`/`shared/fsrs.js`/`shared/srs.js`/
+`shared/flashcard-model.js` -- confirmado por leitura ANTES de codar que
+toda a integração se resume a COMPOR peças puras já existentes, nunca
+reescrever nenhuma delas. Regra central do prompt-mestre, cumprida:
+"Deck define o ESCOPO; Review/FSRS continua dono do estado/due/
+agendamento/grade/próxima revisão."
+
+**Auditoria prévia (§3, só leitura)** confirmou: `getStudyScopeForDeck(decks,
+deckId, cards)` (Fase C) já filtra `card.deckId != null &&
+subtreeIds.has(card.deckId)` -- compõe perfeitamente com
+`eligibleReviewPool()` (já existente, `STATE.cards.filter(isCardLessonCompleted).
+filter(matchesReviewOriginFilter)`), sem precisar de nenhuma mudança em
+nenhuma das duas; `getDeckCounts(decks, deckId, cards)` (Fase C) já
+devolve `{new, learning, review}` agregado por subtree via
+`bucketCardState`/`cardsDueNow` (shared/srs.js, intocado);
+`reviewFilterQueue('oldest', pool)` (fr/zh app.js, já existente desde a
+Prop 5, único valor real usado hoje) já preserva
+`newCardsPerDay`/`sessionIntensity` como limites globais -- reaproveitado
+sem mudança, satisfazendo D6 de graça; `gradeCurrentCard(grade)` nunca lê/
+escreve `card.deckId` em lugar nenhum (confirmado por grep completo de
+`fr/app.js`) -- Deck nunca participa do cálculo de grade, satisfazendo
+D13; cards de trilha (`buildCardsFromUnits()`) NUNCA têm a propriedade
+`.deckId` (ausente, não `null`) -- o filtro `c.deckId != null` já os
+exclui de qualquer escopo de Deck sem nenhum código especial, satisfazendo
+D3 por construção.
+
+**O que foi feito -- só `fr/app.js`/`zh/app.js` (mudanças espelhadas,
+nenhum outro arquivo tocado):**
+
+- **`async function ensureDecksLoadedForReview()`** (novo) -- carrega
+  `STATE.decks` sob demanda (`ensureDecksForCurrentUser`+
+  `fetchDecksForLanguage`, Fase C, ambos intocados), cacheado em
+  `STATE.decks` pra não recarregar a cada chamada.
+- **`function deckCountsForReview(deckId)`** (novo) -- wrapper fino de
+  `getDeckCounts(STATE.decks, deckId, eligibleReviewPool())`, nenhum
+  algoritmo próprio.
+- **`function deckReviewSummary(deckId)`** (novo) -- resolve os 7 casos
+  de estado vazio exigidos pelo §15 (Deck vazio/sem due/só novas/só
+  aprendendo/sem elegíveis/com arquivados/subtree sem cards) devolvendo
+  `{deckId, totalCards, eligibleCards, archivedCards, new, learning,
+  review}` -- nunca só `[]`, sempre contexto suficiente pra UI futura
+  diferenciar os 7 casos sem recalcular nada.
+- **`async function startDeckReviewSession(deckId)`** (novo) -- ÚNICO
+  ponto de entrada pra "Estudar este Deck": carrega Decks (se
+  necessário) -> `getStudyScopeForDeck(decks, deckId, eligibleReviewPool())`
+  -> `reviewFilterQueue('oldest', pool)` (mesmo motor de fila de sempre,
+  preserva newCardsPerDay/intensidade) -> seta `STATE.reviewSessionDeckId
+  = deckId` (campo novo em `STATE`, mesmo padrão de
+  `STATE.reviewSessionUnitFilter` já existente -- nunca uma variável de
+  módulo solta, nunca um boolean disperso) -> monta
+  `STATE.reviewQueue`/`reviewIndex`/`reviewCardState` exatamente como
+  `startReviewSession()` já fazia -> chama `renderReviewView()`. Direção
+  de card legado (`!card.cardInstance`) continua via
+  `nextCardDirection()`, mesmo mecanismo de sempre -- `isReverse`/
+  `reviewDirection` NUNCA reintroduzidos como mecanismo de card nativo
+  (cartão nativo `normal_reversed` continua resolvendo direção só via
+  `resolveNormalCardView()`/CardInstance, Fase 4a, intocado).
+- **`STATE.reviewSessionDeckId = null;`** adicionado no objeto `STATE`
+  inicial e nos MESMOS 2 pontos de reset que já limpavam
+  `reviewSessionUnitFilter` (`openReviewSession('flashcard'/'hard')`) +
+  nos 2 handlers de fim de sessão (`#review-again`/`#review-go-practice`)
+  -- mesmo ciclo de vida, nunca serializado em `serializeState()` (é
+  estado transitório de sessão, não progresso persistido, mesma regra já
+  aplicada a `reviewSessionUnitFilter`).
+- Título do estado vazio de "fila zerada" (`renderReviewView()`) ganhou
+  um 3º ramo: `STATE.reviewSessionDeckId ? 'Nenhum cartão neste Deck
+  ainda' : (...)` -- mensagem específica pra sessão de Deck, sem alterar
+  o texto dos outros 2 casos já existentes (trilha/revisão geral).
+
+**Testes realizados:**
+- `node --check` sem erro em `fr/app.js`/`zh/app.js`.
+- `test_fasec_deck_engine.js` (Fase C, pré-existente) re-executado,
+  **115/115 sem regressão**.
+- **Suíte Node/VM nova, `test_fased_scope_and_counts.js`, 59/59** -- os 7
+  blocos do §20: escopo por tipo de Deck (root/personal_root/personal-
+  filho/filho-aninhado/course/teacher); isolamento de escopo (Deck A vs.
+  B -- zero card de B aparece/é alterado/é contado, FSRS de B intacto);
+  os 10 cenários controlados de Card Type (Normal Novo/Aprendendo/
+  Devido/Não-devido/Relearning, Normal-reverso, Cloze-2-marcas,
+  Cloze-3-marcas, MC, Digite-a-resposta) confirmando o bucket exato de
+  cada um; independência de Normal-reverso (as 2 metades entram
+  independentemente quando ambas due, só a due entra quando só uma
+  está); agendamento independente de Cloze (3 marcas -> 3 CardInstances,
+  FSRS próprio de cada, Deck count=3, só as due entram na fila); escopo
+  de Teacher Card (aluna pode estudar, FSRS pertence ao card da aluna);
+  Study Trail nunca no escopo de nenhum Deck (sem `.deckId`, nunca
+  associado artificialmente); cartão arquivado nunca entra em escopo/
+  contagem mesmo com Deck válido.
+- **Browser smoke, FR+ZH, `test_fased_browser_smoke.js`, 70/70** --
+  Playwright/Chromium real, servidor estático local, boot em modo
+  convidado com stub mínimo de `window.supabase.createClient()`. 9
+  blocos numerados: (1) Contagens -- `deckCountsForReview`/
+  `deckReviewSummary` batendo com fixtures reais construídas via
+  `buildEngineCardsFromRow()` de produção (nunca objeto fabricado à
+  mão), incluindo agregação correta de subtree (Deck A soma A + A.nested,
+  Deck A.nested isolado dos 3 cards próprios de A); (2) Isolamento --
+  Deck A vs. B, zero vazamento; (3) Grading real -- `gradeCurrentCard()`
+  chamado de dentro de uma sessão `startDeckReviewSession()`, `reps`/
+  `due` mudam de verdade, `card.deckId` nunca tocado; (4) Reverse nos 2
+  sentidos -- com `newCardsPerDay=0` forçado pra determinismo, confirmado
+  que só a metade due entra quando só uma está due, as 2 entram quando
+  ambas due, FSRS de cada metade mutando independentemente; (5) Teacher
+  Card -- aparece na fila com `origin==='teacher'`, gradeia normalmente,
+  Deck nunca muda de dono; (6) Origem/D2 -- filtro de origem
+  (`STATE.studySettings.reviewOriginFilter`) continua funcionando DENTRO
+  do escopo do Deck, nunca escapa nem é limpo silenciosamente ao
+  selecionar um Deck; (7) Estados vazios/D15 -- 2 cenários distintos
+  confirmados com a mensagem certa: Deck genuinamente vazio (nunca teve
+  cards, "Nenhum cartão neste Deck ainda") vs. Deck com cards mas fila
+  esgotada via grading ("Revisão concluída!") -- os 2 textos NUNCA
+  confundidos um pelo outro; (8) Regressão do fluxo legado --
+  `startReviewSession()` (sem Deck) continua funcionando exatamente como
+  antes, cartões nativos continuam renderizando (Normal/MC/Cloze/Digite-
+  a-resposta) via os 4 renderers da Fase 6C, sem nenhum erro novo; (9)
+  zero erro de console novo em qualquer um dos 2 idiomas (só os mesmos
+  `ERR_TUNNEL_CONNECTION_FAILED` pré-existentes do proxy de saída deste
+  sandbox, filtrados por regex já documentados em toda a sessão).
+- **Achado, não corrigido, documentado**: `test_apply_memory_grade.js`
+  (suíte pré-existente, não desta fase) falha um cenário
+  ("state vira 'relearning', não 'new'") -- confirmado via `git stash`
+  contra o commit ANTERIOR a esta fase que a falha já existia antes de
+  qualquer mudança desta entrega (idêntica com e sem o stash) -- é
+  consistente com o próprio comentário já registrado em
+  `shared/deck-engine.js` (Fase C) explicando que "Errei"/grade-0 sempre
+  reseta pra `state='new'` direto, nunca produz `'relearning'` pelo
+  caminho de grading real (`relearning` só surge hoje via o adaptador
+  `migrateCardToFSRS()`, nunca via `applyMemoryGrade()`) -- script de
+  teste desatualizado de uma fase anterior, não um bug desta entrega, não
+  corrigido por estar fora do escopo (§23 não pede correção de testes
+  legados).
+- **Teste real Supabase (§21) -- NÃO EXECUTADO nesta entrega, por
+  limitação de ambiente, não por escolha**: a conexão MCP com o Supabase
+  (projeto `eigjocalzwamisgqilhg`) caiu no meio da sessão
+  ("needs you to sign in again") e, mesmo depois de reconectar com
+  sucesso (confirmado via `select 1 as ping;`), caiu de novo antes da
+  transação de teste em si poder ser executada -- esta sessão é
+  não-interativa e não pode completar o fluxo OAuth de reautenticação.
+  Diferente de toda entrega anterior desta feature (que sempre incluiu
+  esse teste), aqui ele fica registrado como PENDENTE DE EXECUÇÃO, não
+  como "não necessário" -- a validação de escopo/contagens/isolamento já
+  está coberta pelas 2 suítes acima (Node/VM sobre o motor puro +
+  Playwright sobre o fluxo real do app), mas nenhuma delas substitui a
+  confirmação de que o schema real (RLS/triggers da Fase B/C) se
+  comporta como esperado contra o Postgres de produção. Recomendado que
+  uma sessão futura, com acesso MCP restaurado, rode o teste de
+  transação+rollback descrito no prompt-mestre original (§21) antes de
+  considerar esta fase 100% validada em produção -- o código em si não
+  depende de nenhuma mudança de schema (nenhuma migração nova nesta
+  fase), então o risco de regressão de banco é baixo, mas não foi
+  formalmente confirmado.
+
+**Dados preservados (confirmado)**: nenhum Card ID, valor de FSRS
+(`state`/`due`/`reps`/`lapses`/`stability`/`difficulty`), Field, Tag,
+`revision`, `origin`, ou `deck_id` foi alterado por nenhuma linha desta
+fase -- toda a integração é só LEITURA de `STATE.cards`/`STATE.decks` +
+orquestração de UI de sessão (`STATE.reviewQueue`/`reviewIndex`/
+`reviewSessionDeckId`), nunca escrita em Note/Field/CardInstance/banco.
+
+**O que NÃO foi implementado nesta fase (confirmado, §23)**: nenhuma
+tela de Deck (estilo Anki), nenhuma nova homepage de Review, nenhum
+Painel, nenhuma UI de Tags, nenhuma migração de Study Trail, nenhuma UI
+de Teacher Deck, nenhum Public Deck, nenhuma UI de destino Anki, nenhum
+export hierárquico Anki, nenhuma mudança visual do limite Free, nenhum
+preset de FSRS, nenhuma configuração de FSRS por Deck, nenhum redesenho
+de Review -- `startDeckReviewSession()`/`deckCountsForReview()`/
+`deckReviewSummary()` são hoje só FUNÇÕES, sem nenhum botão/tela que as
+chame (nenhum ponto de entrada de UI foi criado nesta fase).
+
+**Próxima fase (E -- integração do Study Trail com Decks)**: fundação
+pronta -- `getStudyScopeForDeck()`/`getDeckCounts()`/
+`startDeckReviewSession()` já compõem corretamente com qualquer card que
+tenha `.deckId`; a decisão de SE/COMO a trilha ganha uma representação
+de Deck (Deck-por-curso? Deck-por-unidade? não migrar, deixar os 2
+sistemas paralelos pra sempre?) continua inteiramente em aberto, não
+tocada nesta fase, conforme D3 exigia.
+
+Nenhum passo manual pendente pra autora além do teste real Supabase
+(§21) ainda não executado por limitação de ambiente -- nenhuma migração
+nova nesta fase.
+
+**PARE conforme instrução explícita -- Fase E NÃO iniciada.** Só começa
+depois que a autora revisar este checkpoint.

@@ -874,6 +874,21 @@ const STATE = {
   // multiple_choice/type_answer/cloze) usam exclusivamente este slot.
   reviewCardState: null,
   reviewSessionUnitFilter: null,
+  // Fase D ("Decks, Tags e Painel" -- Deck Engine, ver CLAUDE.md) -- mesmo
+  // papel/ciclo de vida de reviewSessionUnitFilter acima, só que pra Deck em
+  // vez de unidade: setado só por startDeckReviewSession(), lido só por
+  // renderReviewView() (texto do estado vazio), nulado nos MESMOS pontos que
+  // já nulam reviewSessionUnitFilter -- nunca os dois setados ao mesmo tempo.
+  // Nunca serializado (ver serializeState() -- mesmo motivo de reviewQueue/
+  // reviewIndex/reviewCardState: é estado de SESSÃO, não progresso salvo).
+  reviewSessionDeckId: null,
+  // Fase D -- cache em memória da árvore de Decks do idioma atual, carregada
+  // sob demanda por ensureDecksLoadedForReview() (só quando uma sessão
+  // Deck-scoped é de fato solicitada -- nenhum boot automático, nenhum
+  // backfill). Nunca serializado -- fonte de verdade é sempre o Supabase
+  // (shared/deck-data.js), este array é só uma leitura recente, nunca uma
+  // contagem materializada (ver CLAUDE.md, seção "Performance" da Fase D).
+  decks: [],
   currentLevel: LEVELS[0].id,
   checkpointProgress: {},
   levelTestProgress: {},
@@ -5526,9 +5541,11 @@ function openReviewSession(mode){
 
   if (mode === 'flashcard'){
     STATE.reviewSessionUnitFilter = null;
+    STATE.reviewSessionDeckId = null; // Fase D -- entrada normal (sem Deck) nunca herda escopo de uma sessão anterior
     startReviewSession();
   } else if (mode === 'hard'){
     STATE.reviewSessionUnitFilter = null;
+    STATE.reviewSessionDeckId = null; // Fase D -- idem
     // Fase 4: getStudyQueue(scope:'hard') -- mesmo critério de hardWordsPool()
     STATE.reviewQueue = shuffle(getStudyQueue(eligibleReviewPool(), { scope: 'hard' }));
     STATE.reviewIndex = 0;
@@ -6078,6 +6095,112 @@ function startReviewSession(){
   renderReviewView();
 }
 
+// ============================================================
+// Fase D ("Decks, Tags e Painel" -- Integração Deck <-> FSRS/Review, ver
+// CLAUDE.md) -- ponto de integração de domínio, NUNCA uma fila/motor de
+// revisão paralelo. As 3 funções abaixo só COMPÕEM peças já existentes:
+//   getStudyScopeForDeck()/getDeckCounts() (shared/deck-engine.js, Fase C,
+//   NENHUMA linha alterada nesta fase) + eligibleReviewPool()/
+//   reviewFilterQueue()/getStudyQueue() (já existentes, NENHUMA linha
+//   alterada). O Deck só decide QUEM entra no pool -- devido/estado/grade/
+//   limite de novas por dia/intensidade da sessão continuam 100%
+//   responsabilidade do motor de Review já existente (regra central da
+//   Fase D: "Deck define o ESCOPO, Review define quem do escopo entra").
+// ============================================================
+
+// Carrega a árvore de Decks do idioma atual sob demanda -- só quando uma
+// sessão/contagem Deck-scoped é de fato solicitada (nunca no boot, nunca em
+// resposta a re-render de UI -- não existe nenhuma tela de Deck ainda pra
+// disparar isso sozinha). ensureDecksForCurrentUser()/fetchDecksForLanguage()
+// (shared/deck-data.js, Fase C) já tratam "sem sessão"/"sem Deck ainda"
+// graciosamente (devolvem vazio/erro estruturado, nunca lançam) -- nenhuma
+// guarda extra precisa ser duplicada aqui. Cache simples em STATE.decks
+// (nunca serializado, nunca uma contagem materializada -- só a leitura mais
+// recente da árvore real) -- reaproveitado enquanto a sessão do app durar;
+// isso é uma otimização pragmática (evita um round-trip por clique), nunca
+// o cache de contagem que a seção "Performance" da Fase D proíbe.
+async function ensureDecksLoadedForReview(){
+  if (STATE.decks && STATE.decks.length) return STATE.decks;
+  if (typeof ensureDecksForCurrentUser !== 'function' || typeof fetchDecksForLanguage !== 'function') return [];
+  await ensureDecksForCurrentUser(APP_KEY);
+  STATE.decks = await fetchDecksForLanguage(APP_KEY);
+  return STATE.decks;
+}
+
+// D4 -- "integre getDeckCounts() ao domínio de Review": a única mudança
+// real é QUAL pool passar -- eligibleReviewPool() (lição concluída + não
+// arquivado + filtro de origem já aplicados), nunca STATE.cards cru. Zero
+// código de contagem novo -- getDeckCounts()/bucketCardState()/
+// countReviewCards() (shared/deck-engine.js) já fazem tudo, inclusive
+// separar ESTADO (New/Learning, via card.state) de DISPONIBILIDADE (Review
+// due-agora, via cardsDueNow()) -- ver comentário completo lá.
+function deckCountsForReview(deckId){
+  return getDeckCounts(STATE.decks, deckId, eligibleReviewPool());
+}
+
+// D15 (estados vazios) -- domínio precisa diferenciar "Deck vazio" de
+// "Deck tem cards mas nada due" de "tem cards não elegíveis/arquivados",
+// sem inventar nenhuma UX nova (nenhuma tela consome isto ainda). Um único
+// objeto, computado 2x com o MESMO getStudyScopeForDeck() (nunca uma 2ª
+// implementação de filtro por subtree) -- 1x sobre STATE.cards cru (pra
+// enxergar arquivado/não-elegível também) e 1x sobre o pool elegível (pra
+// contar o que a Revisão de fato usaria). totalCards/eligibleCards/
+// archivedCards já bastam pra uma UI futura distinguir os 7 casos da seção
+// 15 sem recalcular nada por conta própria.
+function deckReviewSummary(deckId){
+  const decks = STATE.decks || [];
+  const allScoped = getStudyScopeForDeck(decks, deckId, STATE.cards);
+  const eligiblePool = eligibleReviewPool();
+  const eligibleScoped = getStudyScopeForDeck(decks, deckId, eligiblePool);
+  const counts = getDeckCounts(decks, deckId, eligiblePool);
+  return {
+    deckId,
+    totalCards: allScoped.length,
+    eligibleCards: eligibleScoped.length,
+    archivedCards: allScoped.filter(c => c.flashcardStatus === 'archived').length,
+    new: counts.new,
+    learning: counts.learning,
+    review: counts.review,
+  };
+}
+
+// D1/D7 -- "forma explícita de iniciar Review com deckId". Espelha
+// byte-a-byte o padrão já usado por STATE.reviewSessionUnitFilter (a única
+// diferença de composição é a origem do pool: getStudyScopeForDeck() em vez
+// de um filtro de unitId solto) -- reviewFilterQueue('oldest', pool) é a
+// MESMA função que startReviewSession()/buildSpeedQueue() já usam pro fluxo
+// normal REVISAR, então newCardsPerDay/sessionIntensity/"mais antigas
+// primeiro" continuam valendo sem nenhum código de limite novo (D6). Direção
+// de carta de TRILHA (nextCardDirection) replicada aqui só por completude
+// defensiva -- getStudyScopeForDeck() já exclui 100% dos cards de trilha
+// (eles nunca têm deckId, D3), então este `if` nunca dispara na prática
+// hoje; mantido pra nunca reintroduzir isReverse/reviewDirection como
+// mecanismo de cartão nativo (nenhuma mudança de direção em relação ao que
+// startReviewSession() já faz, seção 11 -- "Direção").
+async function startDeckReviewSession(deckId){
+  trackEvent('lesson_start', 'flashcard_review', null);
+  const decks = await ensureDecksLoadedForReview();
+  const pool = getStudyScopeForDeck(decks, deckId, eligibleReviewPool());
+  const queue = reviewFilterQueue('oldest', pool);
+  queue.forEach(c => { if (!c.cardInstance) c.reviewDirection = nextCardDirection(c); });
+
+  STATE.reviewSessionUnitFilter = null;
+  STATE.reviewSessionDeckId = deckId;
+  STATE.reviewActiveMode = 'flashcard';
+  STATE.reviewQueue = queue;
+  STATE.reviewIndex = 0;
+  STATE.reviewCardState = null;
+
+  document.getElementById('review-mode-select-wrap').style.display = 'none';
+  document.getElementById('review-session-wrap').style.display = 'block';
+  document.getElementById('review-content').style.display = 'block';
+  document.getElementById('speed-review-content').style.display = 'none';
+  document.getElementById('match-review-content').style.display = 'none';
+
+  renderReviewView();
+  if (typeof routerNavigate === 'function') routerNavigate({ type: 'reviewSession', mode: 'flashcard' });
+}
+
 function shuffle(arr){
   const a = arr.slice();
   for (let i = a.length -1; i>0; i--){
@@ -6444,7 +6567,7 @@ function renderReviewView(){
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">☕</div>
-        <h3>${STATE.reviewSessionUnitFilter ? 'Nenhum cartão nesta unidade ainda' : 'Tudo em dia!'}</h3>
+        <h3>${STATE.reviewSessionDeckId ? 'Nenhum cartão neste Deck ainda' : (STATE.reviewSessionUnitFilter ? 'Nenhum cartão nesta unidade ainda' : 'Tudo em dia!')}</h3>
         <p>${allDue > 0 ? `Você ainda tem ${allDue} cartão(s) pendente(s) no geral.` : 'Volte mais tarde para sua próxima revisão, ou comece uma nova unidade na trilha.'}</p>
         ${allDue > 0 ? `<button class="btn btn-primary" id="review-start-all">Revisar tudo disponível</button>` : ''}
       </div>
@@ -6452,6 +6575,7 @@ function renderReviewView(){
     if (allDue > 0){
       document.getElementById('review-start-all').addEventListener('click', () => {
         STATE.reviewSessionUnitFilter = null;
+        STATE.reviewSessionDeckId = null; // Fase D -- mesmo fallback de "abandona o escopo estreito" já usado pra unidade
         startReviewSession();
       });
     }
@@ -6483,10 +6607,12 @@ function renderReviewView(){
     checkUnitCompletion();
     document.getElementById('review-again').addEventListener('click', () => {
       STATE.reviewSessionUnitFilter = null;
+      STATE.reviewSessionDeckId = null; // Fase D
       switchTab('path');
     });
     document.getElementById('review-go-practice').addEventListener('click', () => {
       STATE.reviewSessionUnitFilter = null;
+      STATE.reviewSessionDeckId = null; // Fase D
       backToReviewModeSelect();
     });
     renderProgressView();
