@@ -80,6 +80,11 @@ async function fetchFlashcardsForCurrentStudent(languageAppKey){
 // mecânica de sempre). Default `true` -- todo cartão já existente tem de
 // fato o front no idioma estudado, então omitir o parâmetro preserva
 // comportamento.
+//
+// CONSOLIDAÇÃO-6 (ver CLAUDE.md) -- desde que a CRIAÇÃO passou a ser
+// sempre nativa (createFlashcard() abaixo), esta função só é chamada pelo
+// branch Legacy de `updateFlashcardContent()` (edição de um cartão Legacy
+// JÁ EXISTENTE) -- nunca removida, é compatibilidade necessária.
 function _validateFlashcardContent({ languageAppKey, front, backTrans, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin }){
   const cleanFront = (front || '').trim();
   const cleanBack = (backTrans || '').trim();
@@ -104,49 +109,31 @@ function _validateFlashcardContent({ languageAppKey, front, backTrans, choices, 
   return { ok: true, cleanFront, cleanBack, cleanChoices, cleanClozeSentence, cleanClozeAnswer };
 }
 
-// Fase 6D.6 da reestruturação Note/CardType/CardInstance (ver CLAUDE.md) --
-// `nativeState` (opcional) é um Note editor state NATIVO já validado por
-// validateNoteEditorStateForSave() (shared/flashcard-native-persistence.js)
-// -- quando presente, ele é a ÚNICA fonte de conteúdo persistido: os
-// parâmetros legados (front/backTrans/choices/clozeSentence/etc.) são
-// IGNORADOS por completo, nunca misturados como uma segunda fonte de
-// verdade. Sem `nativeState` (o caso de toda chamada já existente antes
-// desta fase), o comportamento é BYTE A BYTE idêntico a antes -- "legacy
-// aberto != automaticamente migrado" (regra central desta fase) cumprida
-// por construção: nada aqui decide converter sozinho, quem decide é o
-// CHAMADOR (shared/admin-flashcards.js), passando `nativeState` só quando
-// o usuário explicitamente usou o editor nativo.
-async function createFlashcard({ studentId, languageAppKey, front, backTrans, note, frontPinyin, imageUrl, audioUrl, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin, frontIsTargetLanguage, nativeState }){
+// CONSOLIDAÇÃO-6 (ver CLAUDE.md) -- o branch Legacy de CRIAÇÃO (INSERT com
+// front/backTrans/choices/clozeSentence/etc. soltos, sem `fields`/
+// `card_generation_mode`) foi removido: confirmado por auditoria completa
+// (grep em todo o repositório) que nenhum caller real chamava mais esta
+// função sem `nativeState` -- CONSOLIDAÇÃO-1 já tinha eliminado o
+// formulário de criação legado, e os 2 últimos caminhos que ainda criavam
+// via o branch antigo (import de arquivo/link entre alunas e import de
+// cartão de perfil público, ambos em `own-flashcards.js`/`createOwnFlashcard`)
+// foram migrados pra Native na mesma fase (ver `shared/flashcard-native-
+// persistence.js`, `nativeNoteEditorStateFromImportPayload`). `nativeState`
+// agora é sempre obrigatório -- "todo cartão novo é Native" deixou de ser
+// só uma convenção de UI e virou uma garantia da própria função.
+// O branch Legacy de EDIÇÃO (updateFlashcardContent, abaixo) continua
+// intocado -- editar um cartão Legacy já existente nunca cria uma linha
+// nova, então não é abrangido por essa limpeza (Seção 2/6 da fase:
+// "o que deve desaparecer é o Legacy como caminho de CRIAÇÃO", nunca a
+// compatibilidade com cartão já existente).
+async function createFlashcard({ studentId, languageAppKey, nativeState }){
   const identity = {
     teacher_id: CURRENT_USER.id,
     student_id: studentId,
     language_app_key: languageAppKey,
   };
-  if (nativeState){
-    const payload = Object.assign({}, identity, nativeContentColumnsFromEditorState(nativeState));
-    const { data, error } = await supabaseClient.from('teacher_flashcards').insert(payload).select().single();
-    if (error){ console.error('Erro ao criar flashcard (nativo):', error); return { ok: false, error: 'Não foi possível criar o cartão agora.' }; }
-    return { ok: true, card: data };
-  }
-  const v = _validateFlashcardContent({ languageAppKey, front, backTrans, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin });
-  if (!v.ok) return v;
-  const { data, error } = await supabaseClient
-    .from('teacher_flashcards')
-    .insert(Object.assign({}, identity, {
-      front: v.cleanFront || null,
-      back_trans: v.cleanBack,
-      note: (note || '').trim() || null,
-      front_pinyin: (frontPinyin || '').trim() || null,
-      image_url: imageUrl || null,
-      audio_url: audioUrl || null,
-      choices: v.cleanChoices.length ? v.cleanChoices : null,
-      cloze_sentence: v.cleanClozeSentence || null,
-      cloze_answer: v.cleanClozeAnswer || null,
-      cloze_answer_pinyin: languageAppKey === 'mandarim' ? ((clozeAnswerPinyin || '').trim() || null) : null,
-      front_is_target_language: frontIsTargetLanguage !== false,
-    }))
-    .select()
-    .single();
+  const payload = Object.assign({}, identity, nativeContentColumnsFromEditorState(nativeState));
+  const { data, error } = await supabaseClient.from('teacher_flashcards').insert(payload).select().single();
   if (error){ console.error('Erro ao criar flashcard:', error); return { ok: false, error: 'Não foi possível criar o cartão agora.' }; }
   return { ok: true, card: data };
 }

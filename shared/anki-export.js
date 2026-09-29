@@ -93,6 +93,39 @@ function ankiExportCardKind(card){
   return (card.cardInstance && card.cardInstance.cardTypeId === 'cloze') ? 'cloze' : 'basic';
 }
 
+// Constrói a string de tags do Note (coluna `notes.tags` do Anki),
+// corrigindo na origem o bug "unidadenull" (CONSOLIDAÇÃO-5) em vez de
+// mascará-lo com um .replace() posterior.
+//
+// Causa raiz: a versão anterior gravava incondicionalmente
+// `unidade${card.unitId} ` -- mas `card.unitId` é SEMPRE `null` pra
+// qualquer cartão nativo/legado autorado por professora/aluna (origin
+// teacher/self, ver buildEngineCardsFromRow() em
+// shared/flashcard-model.js), o que produzia a string literal
+// "unidadenull " pra esses cartões (a maioria do conteúdo real). Além
+// de quebrada, essa "tag" nunca teve relação nenhuma com a feature real
+// de Tags (migration 048) -- é um rótulo fabricado a partir de
+// `unitId`, pré-existente à feature de Tags, nunca atualizado quando
+// cartões sem unidade passaram a existir.
+//
+// Correção (nunca um placeholder novo):
+// - cartão de TRILHA (`card.unitId != null`) -- comportamento histórico
+//   preservado EXATAMENTE como estava, byte a byte (`unidade${N} `) --
+//   nunca teve o bug, nunca tocado aqui, fora do escopo desta fase.
+// - cartão de professora/aluna (`card.unitId == null`) -- usa as Tags
+//   REAIS da Note (`card.tags`, já normalizadas por
+//   normalizeNoteTags() dentro de buildEngineCardsFromRow(), nunca
+//   recalculado aqui), formatadas no padrão canônico do Anki (espaço
+//   líder/final quando há tags -- mesmo formato que
+//   shared/anki-parser.js já espera ao reimportar:
+//   `(row[3]||'').trim().split(/\s+/)`). Sem tags reais -> string
+//   vazia, NUNCA "unidadenull" nem qualquer outro placeholder.
+function ankiNoteTagsString(card){
+  if (card.unitId != null) return `unidade${card.unitId} `;
+  const tags = Array.isArray(card.tags) ? card.tags : [];
+  return tags.length ? ` ${tags.join(' ')} ` : '';
+}
+
 // Passa por TODOS os cards a exportar, resolve a mídia de cada um
 // (resolveCardExportMedia(), shared/flashcard-model.js -- nunca
 // reimplementado aqui), deduplica por URL (2 cards podem apontar pro
@@ -314,7 +347,7 @@ async function generateApkg(config){
       const guid = `${config.guidPrefix}${card.id}`;
 
       db.run(`INSERT INTO notes VALUES (?,?,?,?,?,?,?,?,?,?,?)`, [
-        noteId, guid, noteMid, now, usnCounter, `unidade${card.unitId} `, flds, sfld, csum, 0, ""
+        noteId, guid, noteMid, now, usnCounter, ankiNoteTagsString(card), flds, sfld, csum, 0, ""
       ]);
 
       db.run(`INSERT INTO cards VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`, [

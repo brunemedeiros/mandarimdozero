@@ -56,6 +56,8 @@
 //                                 lastStudyDay de OUTRA conta, nunca duplicada)
 //   - shared/roles.js           (hasActiveTeacherLink -- Fase 5.1)
 //   - shared/own-flashcards.js (fetchMyOwnFlashcards, createOwnFlashcard)
+//   - shared/flashcard-native-persistence.js (nativeNoteEditorStateFromImportPayload
+//                                 -- CONSOLIDAÇÃO-6, ver CLAUDE.md)
 //   - shared/reports.js         (openReportModal -- Q6, sem mudança lá)
 //   - languages/index.js        (AVAILABLE_LANGUAGES, pra bandeira/nome por
 //                                 languageAppKey)
@@ -521,14 +523,11 @@ async function importSelectedPublicFlashcards(box){
     // cria uma linha NOVA na conta de quem importa, nunca uma referência
     // viva ao cartão original. Editar o original depois disso não altera
     // esta cópia.
-    const result = await createOwnFlashcard({
-      languageAppKey: APP_KEY,
-      front: c.front,
-      backTrans: c.backTrans,
-      note: c.note,
-      frontPinyin: c.frontPinyin,
-      frontIsTargetLanguage: c.frontIsTargetLanguage,
-    });
+    // CONSOLIDAÇÃO-6 (ver CLAUDE.md) -- mesma mudança de shared/my-flashcards.js:
+    // a cópia importada nasce NATIVA (fields/card_generation_mode), nunca
+    // mais o branch Legacy de createOwnFlashcard().
+    const nativeState = nativeNoteEditorStateFromImportPayload(c, APP_KEY);
+    const result = await createOwnFlashcard({ languageAppKey: APP_KEY, nativeState });
     if (result.ok){
       importedCount++;
       // Mesmo motivo de sempre (ver comentário de addSelfFlashcardToState
