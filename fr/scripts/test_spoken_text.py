@@ -29,12 +29,16 @@ def md5(s):
 # --- regras aprovadas -------------------------------------------------------
 check("slash -> vírgula", st.to_spoken_text("un / une", "fr") == "un, une")
 check("slash com acentos", st.to_spoken_text("brésilien / brésilienne", "fr") == "brésilien, brésilienne")
-check("parêntese lido, sem pausa", st.to_spoken_text("un kilo (de)", "fr") == "un kilo de")
-check("parêntese no fim de outra expressão", st.to_spoken_text("une tranche (de)", "fr") == "une tranche de")
-check("sem espaço duplo", "  " not in st.to_spoken_text("une bouteille (de)", "fr"))
+check("parêntese lido, pausa curta (reticências)", st.to_spoken_text("un kilo (de)", "fr") == "un kilo de…")
+check("parêntese no fim de outra expressão", st.to_spoken_text("une tranche (de)", "fr") == "une tranche de…")
+check("bouteille: override da autora mantém o parêntese", st.to_spoken_text("une bouteille (de)", "fr") == "une bouteille (de)")
+check("français / française: override com ponto", st.to_spoken_text("français / française", "fr") == "français. française")
+check("œuf -> oeuf (uma palavra só)", st.to_spoken_text("l'œuf", "fr") == "l'oeuf")
+check("L'œuf est cuit. -> oeuf", st.to_spoken_text("L'œuf est cuit.", "fr") == "L'oeuf est cuit.")
+check("sem espaço duplo", "  " not in st.to_spoken_text("un kilo (de)", "fr"))
 
 # --- não pode mexer no que já está certo ------------------------------------
-for t in ["Bonjour !", "Je m'appelle Brune.", "C'est ma sœur.", "l'œuf", "Il est français, elle est espagnole.",
+for t in ["Bonjour !", "Je m'appelle Brune.", "C'est ma sœur.", "Il est français, elle est espagnole.",
           "km/h", "Tu as des frères et sœurs ?", "un demi-kilo"]:
     check(f"texto normal intacto: {t!r}", st.to_spoken_text(t, "fr") == t)
 
@@ -43,8 +47,7 @@ check("barra sem espaços fica", st.to_spoken_text("un/une", "fr") == "un/une")
 
 # --- regra pendente do laboratório está DESLIGADA ---------------------------
 pend = [r for r in st.RULES_BY_LANG["fr"] if r.status == "pending-lab"]
-check("existe regra pendente do lab", len(pend) >= 1)
-check("regra pendente do lab está desligada", all(not r.enabled for r in pend))
+check("nenhuma regra pendente do lab sobrando ligada", all(not r.enabled for r in pend))
 
 # --- idiomas isolados -------------------------------------------------------
 check("zh sem regras (identidade)", st.to_spoken_text("你几岁？/ 你多大？", "zh") == "你几岁？/ 你多大？")
@@ -73,8 +76,8 @@ affected = st.report_affected_entries(fr, "fr")
 disp = {d for d, _, _ in affected}
 expected = {"allemand / allemande", "américain / américaine", "anglais / anglaise", "brésilien / brésilienne",
             "espagnol / espagnole", "français / française", "italien / italienne", "portugais / portugaise",
-            "un / une", "un kilo (de)", "une bouteille (de)", "une tranche (de)"}
-check("relatório fr = exatamente as 12 esperadas", disp == expected)
+            "un / une", "un kilo (de)", "une bouteille (de)", "une tranche (de)", "l'œuf", "L'œuf est cuit."}
+check("relatório fr = exatamente as 14 esperadas", disp == expected)
 check("relatório zh vazio", st.report_affected_entries(zh, "zh") == [])
 
 # a 9 entradas com barra são justamente as que o gerador antigo tratou (hash != texto exibido)
