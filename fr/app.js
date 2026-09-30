@@ -5206,7 +5206,7 @@ const SPEED_STATE = {
 // "digite a resposta" ficam de fora (resposta aberta/digitada, sem texto
 // curto pronto pra virar tile/opção), mesmo critério de sempre.
 function hasPlainFrontBack(card){
-  if (!card.cardInstance) return true; // trilha (origin:'study') -- sempre foi par simples front/back
+  // K2-I: todo card de STATE.cards tem cardInstance (study/teacher/self nascem de buildEngineCardsFromRow).
   return card.cardInstance.cardTypeId === 'normal' || card.cardInstance.cardTypeId === 'multiple_choice';
 }
 
@@ -5219,19 +5219,13 @@ function hasPlainFrontBack(card){
 // abaixo) -- cardAnswerText() aceita os dois sem o chamador precisar saber
 // qual é qual.
 function cardPromptText(cardOrPseudo){
-  if (cardOrPseudo.cardInstance){
-    const view = resolveCardContentView(cardOrPseudo);
-    return (view.kind === 'multiple_choice' ? view.prompt : view.front).text;
-  }
-  return cardOrPseudo.front; // trilha
+  const view = resolveCardContentView(cardOrPseudo);
+  return (view.kind === 'multiple_choice' ? view.prompt : view.front).text;
 }
 function cardAnswerText(cardOrPseudo){
   if ('displayAnswerText' in cardOrPseudo) return cardOrPseudo.displayAnswerText;
-  if (cardOrPseudo.cardInstance){
-    const view = resolveCardContentView(cardOrPseudo);
-    return view.kind === 'multiple_choice' ? view.correctText : view.back.text;
-  }
-  return cardOrPseudo.back_trans; // trilha
+  const view = resolveCardContentView(cardOrPseudo);
+  return view.kind === 'multiple_choice' ? view.correctText : view.back.text;
 }
 
 function buildSpeedQueue(){

@@ -135,3 +135,15 @@ Pendência separada, não tocada: "Estudar este Deck" ainda não troca para a ab
 **Limitações**: a sessão respeita `newCardsPerDay` e a intensidade (30 por padrão), então um Deck grande não entra inteiro numa sessão; o fim da sessão usa "Voltar → Trilha" como nas demais sessões.
 
 **Dívida técnica (fora desta fase, NÃO tocada)**: branches `!card.cardInstance` de `hasPlainFrontBack`, `cardPromptText`, `cardAnswerText` — provavelmente inalcançáveis, não são infraestrutura de direção; limpeza futura própria.
+
+## K2-I — auditoria e limpeza dos branches legados de texto
+
+**Escopo**: só os branches `!card.cardInstance` de `hasPlainFrontBack`, `cardPromptText`, `cardPromptPinyinText` (zh) e `cardAnswerText` em fr/zh `app.js`. Nada de K2-G/K2-H, Deck, Anki, Speed/Combinar, FSRS foi alterado.
+
+**Prova de alcance**: `STATE.cards` só é povoado por `buildStudyWordCards` (trilha) e `buildEngineCardsFromRow` (teacher/self, legado ou nativo) — ambos sempre definem `cardInstance`; `mergeSavedCards`/`applySerializedState` só aplicam save sobre cards já construídos (nunca inserem). O teste `tests/k2i/test_reachability.js` instrumenta os helpers e exercita Review geral, "Estudar este Deck", Speed (fila e opções), Combinar, contexto de Report e o export Anki, com cards study/self/teacher, linhas legadas (incl. `front_is_target_language=false`, `choices`) e nativas dos 5 Card Types: ~3400 chamadas por idioma, 0 sem `cardInstance`, exceto as pseudo-opções de múltipla escolha (`{displayAnswerText}`), que `cardAnswerText` trata antes e são preservadas.
+
+**Removido (código morto)**: o `return true` de `hasPlainFrontBack` e os `return card.front/back_hanzi/front_pinyin/back_trans` de `cardPromptText`/`cardPromptPinyinText`/`cardAnswerText`; os `if (cardInstance)` viraram código direto. Trade-off assumido: se o invariante "todo card tem cardInstance" for violado no futuro, o erro passa a ser explícito (TypeError) em vez de fallback silencioso.
+
+**Preservado**: pseudo-opções `displayAnswerText`; o fallback `typeof cardPromptText === 'function' ? … : card.front` em `shared/reports.js` (proteção contra helper ausente, não ramo de card); guards `!card.cardInstance` em `anki-export.js`, `resolveCardExportMedia`, `isStudyWordProjectionCard` e `flashcard-preview.js` (fora do escopo; guards de API). `frontIsTargetLanguage`/`front_is_target_language` continuam só como compatibilidade de linha legada (interpretação do `lang` dos Fields, conversão Legacy→Native, espelho write-only) — nunca determinam direção de CardInstance.
+
+**Dados históricos**: nenhuma migration; nenhuma propriedade persistida foi removida.

@@ -5566,7 +5566,7 @@ const SPEED_STATE = {
 // "digite a resposta" ficam de fora (resposta aberta/digitada), mesmo
 // critério de sempre.
 function hasPlainFrontBack(card){
-  if (!card.cardInstance) return true; // trilha (origin:'study') -- sempre foi par simples hanzi/pinyin/trans
+  // K2-I: todo card de STATE.cards tem cardInstance (study/teacher/self nascem de buildEngineCardsFromRow).
   return card.cardInstance.cardTypeId === 'normal' || card.cardInstance.cardTypeId === 'multiple_choice';
 }
 
@@ -5578,27 +5578,18 @@ function hasPlainFrontBack(card){
 // também gera pseudo-objetos só com `displayAnswerText` pras opções erradas
 // de múltipla escolha.
 function cardPromptText(cardOrPseudo){
-  if (cardOrPseudo.cardInstance){
-    const view = resolveCardContentView(cardOrPseudo);
-    return (view.kind === 'multiple_choice' ? view.prompt : view.front).text;
-  }
-  return cardOrPseudo.back_hanzi; // trilha
+  const view = resolveCardContentView(cardOrPseudo);
+  return (view.kind === 'multiple_choice' ? view.prompt : view.front).text;
 }
 function cardPromptPinyinText(cardOrPseudo){
-  if (cardOrPseudo.cardInstance){
-    const view = resolveCardContentView(cardOrPseudo);
-    const field = view.kind === 'multiple_choice' ? view.prompt : view.front;
-    return (field && field.pinyinText) || '';
-  }
-  return cardOrPseudo.front_pinyin || ''; // trilha
+  const view = resolveCardContentView(cardOrPseudo);
+  const field = view.kind === 'multiple_choice' ? view.prompt : view.front;
+  return (field && field.pinyinText) || '';
 }
 function cardAnswerText(cardOrPseudo){
   if ('displayAnswerText' in cardOrPseudo) return cardOrPseudo.displayAnswerText;
-  if (cardOrPseudo.cardInstance){
-    const view = resolveCardContentView(cardOrPseudo);
-    return view.kind === 'multiple_choice' ? view.correctText : view.back.text;
-  }
-  return cardOrPseudo.back_trans; // trilha
+  const view = resolveCardContentView(cardOrPseudo);
+  return view.kind === 'multiple_choice' ? view.correctText : view.back.text;
 }
 
 function buildSpeedQueue(){
