@@ -101,3 +101,23 @@ Três camadas (não confundir): **Review/FSRS/Deck** A+B = 2 CardInstances; **Sp
 - Testes: `tests/k2f/test_anki_teacher_self_reverse.js` (60, fr+zh) e `tests/k2f/test_playwright_anki_teacher_self.js` (32, `.apkg` real aberto com sql.js). Ambos falham contra o código anterior (teste negativo confirmado).
 - **Pendência separada (não corrigida)**: "Estudar este Deck" ainda não troca automaticamente para a aba Revisão.
 - K2-G (remoção de `nextCardDirection`/`reviewDirection`/`lastDirection`/ramo legado de `renderNormalCard`) não iniciada.
+
+## K2-G — Remoção da infraestrutura legada de direção
+
+**Auditoria (antes de remover).** Todo card do app é CardInstance nativo: `buildCardsFromUnits` (fr 408 / zh 332 cards) não produz nenhum card sem `cardInstance`; teacher/self vêm de `buildEngineCardsFromRow`. Logo, todos os ramos `!card.cardInstance` (escrita de `reviewDirection`, escrita de `lastDirection`, ramo `else` do `renderNormalCard`) eram **inalcançáveis**. O save da trilha já era whitelist de progresso (K2-C): nenhuma direção persistida. `applyMemoryGrade` nunca tocou direção.
+
+**Removido**
+- `nextCardDirection()` (`shared/srs.js`).
+- Em `fr/app.js` e `zh/app.js`: as 2 escritas `c.reviewDirection = nextCardDirection(c)` (`startReviewSession`, `startDeckReviewSession`); a escrita `card.lastDirection = card.reviewDirection` (`gradeCurrentCard`); o ramo legado de `renderNormalCard` (`else` com `card.reviewDirection`/`card.front`/`back_hanzi`); a variável `isReverse` e os ternários que dependiam dela. Sem substituto: nenhuma variável equivalente foi criada.
+- Direção agora = identidade estrutural do CardInstance (`frontFieldIndex`/`backFieldIndex` → `resolveCardContentView`); o renderer só decide de que lado ficam áudio/pinyin pela estrutura (`isStudyLanguageField`), como na K2-D.
+
+**Mantido (justificado)**
+- `frontIsTargetLanguage` / `front_is_target_language`: não determina direção de CardInstance nativo. Continua só como (a) coluna das linhas LEGADAS (interpretação histórica em `interpretNoteFromRow` define o `lang` de cada Field), (b) conversão Legacy→Native, (c) espelho write-only ao salvar nativo, (d) formulário de edição legada e payload de export/import entre alunas, (e) preview do perfil público. Sem consumidor funcional sobre cards nativos.
+- Fora do escopo de direção e mantidos: branches `!card.cardInstance` em `hasPlainFrontBack`/`cardPromptText`/`cardAnswerText` (forma de dado "trilha legada", agora também inalcançáveis — candidatos a limpeza futura separada).
+- Comentários históricos que citam os nomes (editor state, anki-export, study-trail-model) só documentam o que NÃO é usado.
+
+**Dados históricos.** Sem migração. Saves antigos com `lastDirection`: trilha → ignorado pela whitelist; teacher/self → `Object.assign` pode reintroduzir a propriedade no objeto, mas nenhum código a lê (inerte). Testado com poison.
+
+**Testes**: `tests/k2g/test_unit.js` (31; fonte sem os símbolos, poison, A/B estruturais, save histórico, alcançabilidade) e `tests/k2g/test_playwright.js` (58, FR+ZH; renderer idêntico com/sem poison para Study A/B, Teacher A/B, Self A/B; autoplay A ao entrar / B só após revelar; pinyin zh; sessão e grade não escrevem direção; save sem direção). Contra o código anterior o unit falha (9); o Playwright passa, provando que o comportamento nativo não dependia dos ramos removidos. Asserções "ainda existe (sai em K2-G)" de K2-C/K2-D foram invertidas.
+
+Pendência separada, não tocada: "Estudar este Deck" ainda não troca para a aba Revisão.

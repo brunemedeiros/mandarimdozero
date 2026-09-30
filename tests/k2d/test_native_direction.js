@@ -22,7 +22,7 @@ for (const lang of ['fr', 'zh']){
   A.reviewDirection = 'back-to-front'; A.lastDirection = 'front-to-back';
   B.reviewDirection = 'front-to-back'; B.lastDirection = 'back-to-front';
   check(lang + ' reviewDirection/lastDirection não alteram a view nativa', view(A) === a0 && view(B) === b0);
-  check(lang + ' nextCardDirection não é necessário (view idêntica sem chamá-lo)', typeof ctx.nextCardDirection === 'function' && view(A) === a0);
+  check(lang + ' nextCardDirection removido (K2-G); view idêntica', typeof ctx.nextCardDirection === 'undefined' && view(A) === a0);
   // B. independência
   const f = c => JSON.stringify([c.reps, c.due, c.stability, c.difficulty, c.lapses, c.state]);
   const fb = f(B);
@@ -34,9 +34,10 @@ for (const lang of ['fr', 'zh']){
   check(lang + ' A e B são CardInstances distintos', A !== B && A.cardInstance.id !== B.cardInstance.id && A.id !== B.id);
   // Fonte: caminhos de Review não impõem direção legada a card nativo
   const src = read(lang + '/app.js');
-  check(lang + ' fonte: alternância só para card sem CardInstance (start/deck)', (src.match(/if \(!c\.cardInstance\) c\.reviewDirection = nextCardDirection\(c\)/g) || []).length === 2);
-  check(lang + ' fonte: gradeCurrentCard só grava lastDirection p/ legado', /if \(!card\.cardInstance\) card\.lastDirection = card\.reviewDirection;/.test(src) && !/^\s*card\.lastDirection = card\.reviewDirection;/m.test(src));
-  check(lang + ' fonte: ramo legado do renderNormalCard só sob else de cardInstance', /\} else \{\s*isReverse = card\.reviewDirection === 'back-to-front';/.test(src));
+  const code = src.split('\n').filter(l => !l.trim().startsWith('//')).join('\n');
+  check(lang + ' fonte (K2-G): sessão não escolhe direção (sem nextCardDirection/reviewDirection)', !/nextCardDirection|reviewDirection/.test(code));
+  check(lang + ' fonte (K2-G): gradeCurrentCard não grava lastDirection', !/lastDirection/.test(code));
+  check(lang + ' fonte (K2-G): renderNormalCard sem ramo legado nem isReverse', !/isReverse/.test(code));
   // nenhum card de trilha sem CardInstance (ramo legado inalcançável p/ Study Trail)
   check(lang + ' todo card da trilha tem CardInstance', cards.every(c => !!c.cardInstance));
 }

@@ -6117,16 +6117,8 @@ function startReviewSession(){
     ? getStudyQueue(pool, { scope: 'unit', newCardsLimit: STATE.studySettings.newCardsPerDay })
     : reviewFilterQueue('oldest', pool);
 
-  // Decide a direção de cada carta de TRILHA ANTES de embaralhar/mostrar --
-  // alterna a partir da última vez que essa carta foi revisada (ver
-  // nextCardDirection em shared/srs.js). Calculado 1x aqui, não a cada
-  // render. Fase 4 (motor de tipos/templates, ver CLAUDE.md): cartão nativo
-  // (Note/CardInstance, origin teacher/self) NUNCA recebe reviewDirection --
-  // a direção dele é 100% decidida pelo CardInstance (frontFieldIndex/
-  // backFieldIndex), a sessão nunca escolhe/alterna (restrição explícita da
-  // autora). "Normal com reverso" (2 CardInstance independentes, Fase 4a) é
-  // o único jeito de ver as 2 direções -- nunca um toggle de sessão.
-  queue.forEach(c => { if (!c.cardInstance) c.reviewDirection = nextCardDirection(c); });
+  // K2-G: a sessão só decide QUAL CardInstance é estudado; a direção (A/B) é
+  // estrutural do próprio CardInstance (frontFieldIndex/backFieldIndex).
 
   // "Mais antigas primeiro" só cumpre o que promete se a ordem sobreviver
   // até a tela -- embaralhar (como sempre foi) destruiria exatamente essa
@@ -6247,19 +6239,13 @@ function deckReviewSummary(deckId){
 // MESMA função que startReviewSession()/buildSpeedQueue() já usam pro fluxo
 // normal REVISAR, então newCardsPerDay/sessionIntensity/"mais antigas
 // primeiro" continuam valendo sem nenhum código de limite novo (D6). Direção
-// de carta de TRILHA (nextCardDirection) replicada aqui só por completude
-// defensiva -- getStudyScopeForDeck() já exclui 100% dos cards de trilha
-// (eles nunca têm deckId, D3), então este `if` nunca dispara na prática
-// hoje; mantido pra nunca reintroduzir isReverse/reviewDirection como
-// mecanismo de cartão nativo (nenhuma mudança de direção em relação ao que
-// startReviewSession() já faz, seção 11 -- "Direção").
+// (K2-G): estrutural do CardInstance -- a sessão de Deck só escolhe quais entram.
 async function startDeckReviewSession(deckId){
   trackEvent('lesson_start', 'flashcard_review', null);
   const decks = await ensureDecksLoadedForReview();
   // Fase I (Tags): Deck scope AND Tag filter -- o Deck decide o universo, a tag só reduz.
   const pool = getStudyScopeForDeck(decks, deckId, eligibleDeckReviewPool()).filter(matchesReviewTagFilter);
   const queue = reviewFilterQueue('oldest', pool);
-  queue.forEach(c => { if (!c.cardInstance) c.reviewDirection = nextCardDirection(c); });
 
   STATE.reviewSessionUnitFilter = null;
   STATE.reviewSessionDeckId = deckId;
@@ -6788,17 +6774,10 @@ function renderReviewView(){
 // "resposta", é só pedido de mais exposição) -- sinalizado aqui, não
 // decidido em silêncio.
 //
-// Direção: pra cartão nativo (card.cardInstance), SEMPRE false --
-// resolveNormalCardView() já devolve front/back na ordem certa
-// (frontFieldIndex/backFieldIndex do CardInstance); a direção nunca é
-// escolhida/alternada aqui. Pra cartão legado de trilha
-// (!card.cardInstance), o mecanismo de variedade de sessão que sempre
-// existiu (card.reviewDirection, setado 1x em startReviewSession() via
-// nextCardDirection()) continua 100% intocado -- fora do escopo desta
-// reestruturação (nunca ganhou CardInstance). Nem isReverse nem
-// reviewDirection nem nextCardDirection() foram reintroduzidos como
-// mecanismo NATIVO -- o `if (card.cardInstance)` abaixo é a mesma
-// checagem de sempre, só movida pra dentro da função extraída.
+// Direção (K2-G): sempre estrutural -- resolveNormalCardView() devolve
+// front/back na ordem certa (frontFieldIndex/backFieldIndex do CardInstance);
+// nenhuma variável de sessão escolhe ou alterna A/B. Todo card chega aqui com
+// CardInstance (Study Trail, Teacher e Self são todos nativos).
 //
 // Progresso (STATE.reviewIndex/reviewQueue.length): continua lido direto
 // de STATE aqui, igual aos outros 3 renderers (MC/Cloze/TypeAnswer,
@@ -6810,10 +6789,9 @@ function renderReviewView(){
 // extraídos juntos -- não resolvido isoladamente só pro Normal, pra não
 // introduzir um mecanismo que os outros 3 ainda não teriam.
 function renderNormalCard(mountEl, card, localState, callbacks){
-  let isReverse, targetText, nativeText, frontAudioUrl, backAudioUrl, frontImageUrl, backImageUrl, targetIsSpeakable;
-  if (card.cardInstance){
+  let targetText, nativeText, frontAudioUrl, backAudioUrl, frontImageUrl, backImageUrl, targetIsSpeakable;
+  {
     const view = resolveCardContentView(card); // kind: 'normal'
-    isReverse = false;
     targetText = view.front.text;
     nativeText = view.back.text;
     // Fase 7a (ver CLAUDE.md) -- áudio/imagem customizados resolvidos POR
@@ -6834,22 +6812,10 @@ function renderNormalCard(mountEl, card, localState, callbacks){
     // decide se o motor de pronúncia (que só fala UM idioma real) pode
     // tentar esse campo específico.
     targetIsSpeakable = isStudyLanguageField(view.front, APP_KEY);
-  } else {
-    isReverse = card.reviewDirection === 'back-to-front';
-    targetText = card.front;
-    nativeText = card.back_trans;
-    frontAudioUrl = null; backAudioUrl = null;
-    frontImageUrl = null; backImageUrl = null;
-    targetIsSpeakable = true;
   }
-  // Fase 7a -- `isReverse` só é `true` pra cartão de TRILHA
-  // (!card.cardInstance, mecanismo de variedade de sessão pré-existente,
-  // intocado) -- nesse caminho, front/back/imageUrl são sempre null (ver
-  // ramo `else` acima). Pra cartão com CardInstance (teacher/own
-  // flashcards, nativo ou legado), `isReverse` é sempre `false`, então
-  // `frontAudioUrl`/`frontImageUrl` sempre correspondem ao que
-  // `frenchSideHTML` de fato mostra, e `backAudioUrl`/`backImageUrl` ao
-  // que `transSideHTML` mostra -- nenhuma troca extra necessária aqui.
+  // Fase 7a/K2-G -- frontAudioUrl/frontImageUrl correspondem sempre ao que
+  // `frenchSideHTML` mostra e backAudioUrl/backImageUrl ao que `transSideHTML`
+  // mostra (a troca de lados de B é tratada abaixo, pela estrutura do CardInstance).
   //
   // Imagem LEGADA (`card.imageUrl`, nível de Note, populada só pelo
   // caminho `image_url` legado) nunca é duplicada no lado do verso --
@@ -6862,18 +6828,18 @@ function renderNormalCard(mountEl, card, localState, callbacks){
   const resolvedBackImageUrl = backImageUrl || null;
   const frenchSideHTML = `<div class="flashcard-french">${escapeHTML(targetText)} ${audioBtnHTML(targetText, 'audio-btn-lg')}${frontAudioUrl ? customAudioBtnHTML(frontAudioUrl) : ''}</div>`;
   const transSideHTML = `<div class="flashcard-trans">${escapeHTML(nativeText)}${backAudioUrl ? customAudioBtnHTML(backAudioUrl) : ''}</div>`;
-  let frontHTML = isReverse ? transSideHTML : frenchSideHTML;
-  let backHTML = isReverse ? frenchSideHTML : transSideHTML;
+  let frontHTML = frenchSideHTML;
+  let backHTML = transSideHTML;
   // Áudio automático só quando o idioma estudado está do lado JÁ visível --
   // no modo padrão isso é o front (toca ao entrar no cartão), no modo
   // invertido é o back (toca só ao revelar a resposta).
-  let frenchVisibleNow = isReverse ? localState.revealed : true;
+  let frenchVisibleNow = true;
   let speakText = targetText;
   // K2-D: CardInstance nativo cuja FRENTE é a tradução e cujo VERSO é o
   // idioma estudado (ex.: Study Trail B): o botão de áudio/pronúncia acompanha
   // o campo do idioma estudado (verso), nunca a tradução. Direção continua
   // 100% do CardInstance; isto só decide de que lado fica o áudio.
-  if (card.cardInstance){
+  {
     const v = resolveCardContentView(card);
     if (!isStudyLanguageField(v.front, APP_KEY) && isStudyLanguageField(v.back, APP_KEY)){
       frontHTML = `<div class="flashcard-trans">${escapeHTML(v.front.text)}${frontAudioUrl ? customAudioBtnHTML(frontAudioUrl) : ''}</div>`;
@@ -6986,15 +6952,8 @@ function gradeCurrentCard(grade){
   // ser lido antes de applyMemoryGrade/scheduleReview mutar card.due pra reavaliação.
   const wasOverdue = card.due > 0 && card.due < new Date().setHours(0, 0, 0, 0);
   const intervalBefore = card.interval;
-  // Grava a direção mostrada nesta revisão -- da próxima vez que essa carta
-  // ficar due, nextCardDirection() (shared/srs.js) alterna pra outra. Só
-  // tem efeito pra cartão de trilha (`card.reviewDirection` só é setado
-  // pra ele, ver startReviewSession) -- no-op inofensivo pra cartão nativo
-  // (Note/CardInstance), que nunca ganha reviewDirection (Fase 4: direção
-  // é do CardInstance, não da sessão).
-  // K2-D: só cartão legado (sem CardInstance) usa alternância; a direção de
-  // CardInstance nativo (Study Trail A/B, teacher, self) é do próprio CardInstance.
-  if (!card.cardInstance) card.lastDirection = card.reviewDirection;
+  // K2-G: nenhuma direção é gravada aqui -- A/B são CardInstances independentes
+  // e a direção é estrutural; a revisão só aplica o grau (FSRS) ao CardInstance mostrado.
   // Fase 5: Flashcard agora usa o motor FSRS (shared/fsrs.js) -- due deixa
   // de ser calculado por regras SM-2 fixas.
   applyMemoryGrade(card, grade);

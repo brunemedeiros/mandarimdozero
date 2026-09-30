@@ -38,17 +38,10 @@ function registerExerciseCorrect(unit, vocabItem){
 // legado lido por migrateCardToFSRS() (bridge de migração, shared/fsrs.js)
 // -- nenhum código novo escreve nele.
 
-// Direção do flashcard (estilo Anki: frente->verso e verso->frente), igual
-// pros dois idiomas -- só o CONTEÚDO de cada lado é específico de idioma
-// (hanzi só existe no chinês), a alternância em si não. Cada card guarda
-// `lastDirection` (persistido junto do resto de STATE.cards) e alterna a
-// cada revisão -- por construção, uma carta só aparece 1x por sessão (a
-// fila de revisão é montada 1x no início da sessão), então mostrar
-// frente->verso nesta sessão automaticamente deixa verso->frente pra
-// próxima vez que essa carta ficar due, nunca as duas juntas.
-function nextCardDirection(card){
-  return card.lastDirection === 'front-to-back' ? 'back-to-front' : 'front-to-back';
-}
+// K2-G: a direção do flashcard NÃO é mais uma variável de sessão. Todo card
+// (Study Trail A/B, Teacher, Self) é um CardInstance cuja direção vem da
+// identidade estrutural (frontFieldIndex/backFieldIndex, resolvida por
+// resolveCardContentView). Não há "próxima direção" nem "última direção".
 
 function cardsDueNow(pool){
   const now = Date.now();

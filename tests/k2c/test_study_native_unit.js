@@ -119,8 +119,8 @@ for (const lang of ['fr', 'zh']){
   check(lang + ' teacher/self: serializado inteiro (inalterado)', passthru[0] === t);
   // legado: nenhum consumidor direto do shape antigo na construção
   check(lang + ' cards da trilha não têm mais front/back_* soltos', cards.every(c => c.front === undefined && c.back_trans === undefined && c.back_hanzi === undefined));
-  // mecanismos de direção legados continuam existindo (K2-G remove)
-  check(lang + ' nextCardDirection ainda existe', typeof ctx.nextCardDirection === 'function');
-  check(lang + ' app.js ainda referencia reviewDirection/lastDirection', /reviewDirection/.test(src) && /lastDirection/.test(src));
+  // K2-G removeu os mecanismos de direção legados (ver tests/k2g)
+  check(lang + ' nextCardDirection removido', typeof ctx.nextCardDirection === 'undefined');
+  check(lang + ' app.js não referencia mais reviewDirection/lastDirection em código', !/reviewDirection|lastDirection/.test(src.split('\n').filter(l => !l.trim().startsWith('//')).join('\n')));
 }
 summary('K2-C unit');
