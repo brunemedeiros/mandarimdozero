@@ -5689,6 +5689,18 @@ function eligibleReviewPool(){
   return STATE.cards.filter(isCardLessonCompleted).filter(matchesReviewOriginFilter);
 }
 
+// Fase H (hardening) -- precedência do Deck sobre reviewOriginFilter. Uma
+// sessão iniciada EXPLICITAMENTE por um Deck tem o Deck como escopo
+// autoritativo: elegibilidade normal (lição concluída / não arquivado, via
+// isCardLessonCompleted) SEM a exclusão adicional por origem. O filtro de
+// origem é preferência do Review GERAL (eligibleReviewPool acima, inalterada);
+// aqui ele nunca é lido nem alterado, então STATE.studySettings.reviewOriginFilter
+// continua persistido como estava ao entrar/sair de um Deck. Não é
+// autorização -- quem decide o que a conta pode ver é o Deck Engine/RLS.
+function eligibleDeckReviewPool(){
+  return STATE.cards.filter(isCardLessonCompleted);
+}
+
 function hardWordsPool(){
   // Fase 7: delega pra getStudyQueue(scope:'hard') -- fonte única do
   // critério de "Palavras difíceis" (difficulty do FSRS + lapses, não
@@ -6558,7 +6570,7 @@ async function ensureDecksLoadedForReview(){
 // separar ESTADO (New/Learning, via card.state) de DISPONIBILIDADE (Review
 // due-agora, via cardsDueNow()) -- ver comentário completo lá.
 function deckCountsForReview(deckId){
-  return getDeckCounts(STATE.decks, deckId, eligibleReviewPool());
+  return getDeckCounts(STATE.decks, deckId, eligibleDeckReviewPool());
 }
 
 // D15 (estados vazios) -- domínio precisa diferenciar "Deck vazio" de
@@ -6573,7 +6585,7 @@ function deckCountsForReview(deckId){
 function deckReviewSummary(deckId){
   const decks = STATE.decks || [];
   const allScoped = getStudyScopeForDeck(decks, deckId, STATE.cards);
-  const eligiblePool = eligibleReviewPool();
+  const eligiblePool = eligibleDeckReviewPool();
   const eligibleScoped = getStudyScopeForDeck(decks, deckId, eligiblePool);
   const counts = getDeckCounts(decks, deckId, eligiblePool);
   return {
@@ -6603,7 +6615,7 @@ function deckReviewSummary(deckId){
 async function startDeckReviewSession(deckId){
   trackEvent('lesson_start', 'flashcard_review', null);
   const decks = await ensureDecksLoadedForReview();
-  const pool = getStudyScopeForDeck(decks, deckId, eligibleReviewPool());
+  const pool = getStudyScopeForDeck(decks, deckId, eligibleDeckReviewPool());
   const queue = reviewFilterQueue('oldest', pool);
   queue.forEach(c => { if (!c.cardInstance) c.reviewDirection = nextCardDirection(c); });
 

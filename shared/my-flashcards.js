@@ -148,7 +148,10 @@ function teacherDecksReadOnlyHTML(decks){
     // Learning/Review sobre CardInstances elegíveis do Deck + descendentes),
     // nunca uma contagem paralela. `n` = CardInstances no escopo do Deck.
     const n = getStudyScopeForDeck(decks, deck.id, cards).length;
-    const pool = (typeof eligibleReviewPool === 'function') ? eligibleReviewPool() : cards;
+    // Fase H (hardening) -- pool de elegibilidade SEM o filtro de origem: as
+    // contagens da árvore têm que bater com o que 'Estudar este Deck' vai
+    // de fato estudar (Deck é o escopo autoritativo da sessão).
+    const pool = (typeof eligibleDeckReviewPool === 'function') ? eligibleDeckReviewPool() : cards;
     const c = getDeckCounts(decks, deck.id, pool);
     const label = deck.kind === 'teacher_root' ? 'Cartões da professora' : deck.name;
     return `<div class="admin-badge-row" style="padding-left:${depth * 16}px;" data-teacher-deck-row="${deck.id}">
