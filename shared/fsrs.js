@@ -293,6 +293,9 @@ function applyMemoryGrade(card, sm2Grade, now){
     // zeradas), fsrsReps/fsrsLapses acumulam. Única regra de produto
     // mantida da decisão anterior (PR #219): o due de "Errei" é sempre a
     // meia-noite seguinte (previewNextIntervalDays já espelha isso).
+    // REGRA DE SCHEDULING DELIBERADAMENTE PRESERVADA -- não é efeito
+    // acidental da K1 nem "FSRS puro". Due real, preview do botão e testes
+    // (tests/fase-k1) devem continuar usando esta mesma regra.
     scheduleReview(card, 1, now);
     card.due = nextMidnight(now);
     card.interval = Math.max(0, Math.round(card.stability));

@@ -113,20 +113,29 @@ async function bootPage(browser, lang, port){
     // Review real do Deck: responde "Errei" ao 1º card (via clique real no botão)
     const first = await ev(async () => {
       STATE.studySettings.newCardsPerDay = 10;
+      switchTab('review'); // usuário real está na aba Revisão (view visível)
       await startDeckReviewSession(7000);
       return STATE.reviewQueue[0].id;
     });
-    // revela o card (Normal) e clica Errei pela UI real, quando o botão existe; senão via gradeCurrentCard
-    const clicked = await ev(async () => {
-      const card = STATE.reviewQueue[STATE.reviewIndex];
-      const btn0 = document.querySelector('#review-content [data-grade="0"], #review-content .grade-again');
-      if (btn0){ btn0.click(); return 'ui'; }
-      const flash = document.querySelector('#review-content .flashcard');
-      if (flash) flash.click();
-      const b = document.querySelector('#review-content [data-grade="0"], #review-content .grade-again');
-      if (b){ b.click(); return 'ui-after-flip'; }
-      gradeCurrentCard(0); return 'fn';
+    // "Errei" SOMENTE pela UI real: revela o card clicando no .flashcard e clica o botão
+    // .grade-again[data-grade="0"] (gradeButtonsHTML). Sem fallback para gradeCurrentCard:
+    // se o botão não existir ou não puder ser clicado, o teste FALHA.
+    await page.click('#review-content #flashcard .flashcard-hint'); // 'toque para ver a resposta' // revela pelo clique real
+    const previewIntervalText = await ev(() => {
+      const btn = document.querySelector('#review-content .grade-btn.grade-again[data-grade="0"]');
+      if (!btn) throw new Error('UI: botão real "Errei" (.grade-again[data-grade="0"]) não encontrado');
+      return btn.querySelector('small').textContent;
     });
+    const dueBefore = Date.now();
+    await page.click('#review-content .grade-btn.grade-again[data-grade="0"]');
+    const clicked = 'ui';
+    check(lang + ' botão real "Errei" clicado via Playwright (sem fallback a gradeCurrentCard)', true);
+    // Regra de scheduling DELIBERADAMENTE PRESERVADA (PR #219): "Errei" agenda o due para a
+    // meia-noite seguinte; o preview do botão usa a mesma regra (previewNextIntervalDays).
+    // Não é consequência acidental da K1 e não é "FSRS puro".
+    const dueCheck = await ev((id) => { const c = STATE.cards.find(x => x.id === id); return { due: c.due }; }, first);
+    check(lang + ' due real de Errei = próxima meia-noite (regra PR #219 preservada)', dueCheck.due > dueBefore && dueCheck.due <= dueBefore + 86400000 + 5000, dueCheck);
+    check(lang + ' preview do botão Errei mostrado ao usuário: "' + previewIntervalText + '"', typeof previewIntervalText === 'string' && previewIntervalText.length > 0);
     const after = await ev((id) => { const c = STATE.cards.find(x => x.id === id); return { state: c.state, reps: c.reps, lapses: c.lapses, stability: c.stability, bucket: bucketCardState(c), inQueue: STATE.reviewQueue.map(x => x.id) }; }, first);
     check(lang + ' Errei em card novo -> learning (via ' + clicked + ')', after.state === 'learning' && after.reps === 1 && after.lapses === 1 && after.bucket === 'learning', after);
     const c1 = await ev(() => deckCountsForReview(7000));
