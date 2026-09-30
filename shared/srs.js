@@ -55,8 +55,21 @@ function cardsDueNow(pool){
   return pool.filter(c => c.due <= now);
 }
 
+// K1: FONTE ÚNICA da classificação New/Learning/Review, usada pela fila
+// (newCards/getStudyQueue) e pelas contagens de Deck (bucketCardState).
+// New é reservado a cartão SEM histórico (reps===0) e state new/ausente.
+// Um cartão com reps>0 nunca é New, mesmo com state='new' (dado salvo por
+// versões antigas, quando "Errei" resetava o state): conta como Learning.
+// relearning agrupa em Learning (não existe 4ª categoria).
+function cardStudyBucket(card){
+  const state = card.state || 'new';
+  if (state === 'learning' || state === 'relearning') return 'learning';
+  if (state === 'review') return 'review';
+  return card.reps > 0 ? 'learning' : 'new';
+}
+
 function newCards(pool){
-  return pool.filter(c => c.reps === 0 && c.due === 0);
+  return pool.filter(c => cardStudyBucket(c) === 'new');
 }
 
 // ---------- Gamificação ----------

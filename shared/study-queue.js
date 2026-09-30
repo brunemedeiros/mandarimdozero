@@ -69,7 +69,7 @@ function getStudyQueue(pool, options){
     // aqui: "devido" passa a significar só cartões JÁ estudados que
     // venceram (reps>0); cartões novos entram exclusivamente pela via
     // limitada por newCardsLimit.
-    const dueReviewed = pool.filter(c => c.reps > 0 && c.due <= Date.now());
+    const dueReviewed = pool.filter(c => cardStudyBucket(c) !== 'new' && c.due <= Date.now());
     const newLimit = options.newCardsLimit != null ? options.newCardsLimit : 10;
     const fresh = newCards(pool).slice(0, newLimit);
     selected = dueReviewed.concat(fresh);

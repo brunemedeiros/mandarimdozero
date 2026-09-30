@@ -288,20 +288,10 @@ function preflightOwnCardInstanceCreation({ activeRows, hasTeacherLink, editorSt
 // ============================================================
 //
 // Achado da auditoria (Fase A/C), documentado aqui em vez de escondido:
-// `card.state` neste app SÓ assume 'new'/'review' pela via real de jogo
-// (applyMemoryGrade -> scheduleReview, shared/fsrs.js) -- 'learning' e
-// 'relearning' são valores que scheduleReview() sabe produzir, mas
-// applyMemoryGrade() (o ÚNICO funil que os 4 pontos de entrada de
-// verdade usam) nunca invoca scheduleReview() com o grade que os
-// produziria: "Errei" (sm2Grade 0) tem um ramo PRÓPRIO que reseta
-// state='new' direto (nunca chega a virar 'relearning'), e todo grade
-// não-Errei sempre mapeia pra fsrsGrade>=2 (nunca 1), então o ramo
-// `isNew && grade===1 -> 'learning'` de scheduleReview() nunca dispara
-// por essa via também. Os 2 valores SÓ aparecem hoje via
-// migrateCardToFSRS() (bridge de migração SM2->FSRS, um cartão antigo
-// com lapses>0 e interval<3 pode nascer com state='relearning') -- um
-// estado que persiste até a PRÓXIMA revisão daquele cartão (que sempre
-// sobrescreve state via applyMemoryGrade/scheduleReview de novo).
+// K1: "Errei" (applyMemoryGrade grade 0) agora passa por scheduleReview:
+// cartão novo -> 'learning'; cartão estudado -> 'relearning'. Ambos contam
+// como Learning. Save antigo com state='new' e reps>0 (Errei da versão
+// anterior) também é Learning (ver cardStudyBucket em shared/srs.js).
 //
 // Decisão pro bucket "Learning" (pedida explicitamente pela seção 8):
 // 'learning' E 'relearning' contam como Learning -- os dois representam
@@ -310,20 +300,13 @@ function preflightOwnCardInstanceCreation({ activeRows, hasTeacherLink, editorSt
 // sub-fase de aprendizagem, não uma revisão "normal"). Nenhuma mudança no
 // motor FSRS -- só uma classificação de leitura sobre o state já existente.
 function bucketCardState(card){
-  const state = card.state || 'new';
-  if (state === 'learning' || state === 'relearning') return 'learning';
-  if (state === 'review') return 'review';
-  return 'new';
+  // K1: delega à fonte única (shared/srs.js) -- fila e contagem nunca divergem.
+  return cardStudyBucket(card);
 }
 
-// "New": CardInstance que o motor considera novo AGORA -- inclui tanto o
-// nunca-estudado quanto um cartão reiniciado via "Errei" (que
-// applyMemoryGrade também leva de volta a state='new', de propósito, ver
-// CLAUDE.md/shared/fsrs.js). Decisão explícita: usa `card.state`, NÃO a
-// heurística reps===0&&due===0 de newCards() (shared/srs.js) -- essa
-// outra função responde uma pergunta DIFERENTE ("nunca tentado, pra
-// limitar quantos cartões novos entram por dia"), não "o que o motor
-// classifica como novo agora" (seção 8: "Use o estado real existente").
+// "New": CardInstance SEM histórico (K1). Mesma classificação da fila
+// (cardStudyBucket, shared/srs.js): "Errei" de cartão estudado vira
+// Learning/Relearning, nunca New.
 // Sem filtro de due aqui -- New/Learning são sobre CLASSIFICAÇÃO de
 // estado, só Review precisa da distinção estado x disponibilidade
 // (seção 8, "Separe ESTADO de DISPONIBILIDADE").

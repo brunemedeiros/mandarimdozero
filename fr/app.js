@@ -5460,7 +5460,7 @@ function reviewFilterQueue(filter, pool){
   if (filter === 'hard') return getStudyQueue(pool, { scope: 'hard' });
   if (filter === 'all') return getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
   const queue = getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
-  queue.sort((a, b) => (a.reps > 0 ? a.due : Infinity) - (b.reps > 0 ? b.due : Infinity));
+  queue.sort((a, b) => (cardStudyBucket(a) !== 'new' ? a.due : Infinity) - (cardStudyBucket(b) !== 'new' ? b.due : Infinity));
   return queue.slice(0, sessionIntensityToLimit(STATE.studySettings.sessionIntensity));
 }
 
