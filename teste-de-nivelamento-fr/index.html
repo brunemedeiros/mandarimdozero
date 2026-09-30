@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Teste de nivelamento de francês · Prof. Brune</title>
+<meta name="description" content="Descubra seu nível de francês (A1 a C1) em poucos minutos, com a Prof. Brune.">
+<meta name="theme-color" content="#3D167B">
+<meta property="og:title" content="Teste de nivelamento de francês · Prof. Brune">
+<meta property="og:description" content="Descubra seu nível de francês (A1 a C1) em poucos minutos.">
+<meta property="og:url" content="https://app.profbrune.com.br/teste-de-nivelamento-fr/">
+<meta property="og:type" content="website">
+<style>
+  /* Moldura: o formulário mora no Google Apps Script e aparece aqui dentro,
+     então o endereço app.profbrune.com.br/teste-de-nivelamento-fr fica na barra do navegador.
+     Para mudar perguntas ou visual, atualize o Apps Script, não este arquivo. */
+  html, body { margin: 0; height: 100%; background: #FAF5EA; }
+  iframe { display: block; width: 100%; height: 100%; border: 0; }
+  .fallback { position: fixed; inset: auto 0 0 0; padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); font: 600 14px/1.4 system-ui, sans-serif; color: #221633; background: #FAF5EA; text-align: center; }
+  .fallback a { color: #3D167B; font-weight: 800; }
+</style>
+</head>
+<body>
+<iframe id="app" title="Teste de nivelamento de francês" allow="clipboard-write"></iframe>
+<noscript><p class="fallback">Ative o JavaScript para fazer o teste.</p></noscript>
+<script>
+  // Endereço /exec da implantação do Apps Script "Teste de nivelamento".
+  var EXEC = 'https://script.google.com/macros/s/AKfycbwAIymL9R0yP_OWqsZ2qXaP51WgK-d81ySxbLeaDzyaW1NUoEIWWY4btbSbh0vRcXoN-w/exec';
+  var src = EXEC + (location.search || '');
+  document.getElementById('app').src = src;
+</script>
+</body>
+</html>
