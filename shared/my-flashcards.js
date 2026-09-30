@@ -139,6 +139,25 @@ function teacherReceivedDecks(decks){
   return (decks || []).filter(d => ['teacher_root', 'teacher'].includes(d.kind) && d.owner_id === CURRENT_USER.id);
 }
 
+// Fase I (Tags): tags dos Teacher Cards são da NOTE/da professora -- a aluna
+// só VÊ (chips sem botão de remover) e pode filtrar a Revisão por elas;
+// nenhuma cópia editável do lado dela (RLS de teacher_flashcards já é
+// somente-leitura pra aluna).
+function teacherTagsReadOnlyHTML(cards){
+  const tags = collectTagsFromCards((cards || []).filter(c => c.origin === 'teacher'));
+  if (!tags.length) return '';
+  return `<div data-teacher-tags style="margin:6px 0;"><span class="profile-edit-hint">Tags dos cartões da professora:</span> ${noteTagChipsHTML(tags)}</div>`;
+}
+
+// Fase I (Tags): o filtro de tag do Review vale também para "Estudar este
+// Deck" (Deck AND Tag). Aviso visível + atalho para limpar, pra o filtro
+// nunca parecer um "Deck vazio" inexplicável.
+function tagFilterNoticeHTML(){
+  const f = (typeof STATE !== 'undefined' && STATE.studySettings && Array.isArray(STATE.studySettings.reviewTagFilter)) ? STATE.studySettings.reviewTagFilter : [];
+  if (!f.length) return '';
+  return `<p class="profile-edit-hint" data-tag-filter-notice>Filtro de tags ativo na Revisão: ${noteTagChipsHTML(f)} — vale também para "Estudar este Deck". <button type="button" class="admin-select-link" data-clear-review-tag-filter style="background:none;border:none;cursor:pointer;padding:0;">Limpar</button></p>`;
+}
+
 function teacherDecksReadOnlyHTML(decks){
   const mine = teacherReceivedDecks(decks);
   if (!mine.length) return '';
@@ -162,11 +181,16 @@ function teacherDecksReadOnlyHTML(decks){
   return `<div class="profile-section" id="teacher-decks-section">
       <div class="section-label">Cartões da professora</div>
       <p class="profile-edit-hint">Decks organizados pela sua professora. Aqui você só estuda; ela cuida da organização.</p>
+      ${teacherTagsReadOnlyHTML(cards)}
       <div id="teacher-decks-list">${rows}</div>
     </div>`;
 }
 
 function wireMyDecksSection(wrap){
+  wrap.querySelectorAll('[data-clear-review-tag-filter]').forEach(btn => btn.addEventListener('click', () => {
+    if (typeof updateStudySetting === 'function') updateStudySetting({ reviewTagFilter: [] });
+    renderMyFlashcardsView();
+  }));
   wrap.querySelectorAll('[data-study-deck]').forEach(btn => {
     btn.addEventListener('click', () => {
       // Único caminho de estudo por Deck: startDeckReviewSession (fr/zh
@@ -279,6 +303,7 @@ async function renderMyFlashcardsView(opts){
         <div class="section-label" style="margin:14px 0 4px;">Campos</div>
         <p class="profile-edit-hint" style="margin-top:-2px;">Adicione os campos deste cartão -- por exemplo, Frente e Verso pra um cartão Normal. Cada campo tem seu próprio idioma e seus próprios recursos de áudio.</p>
         <div id="my-flashcard-native-fields"></div>
+        <div id="my-flashcard-tags"></div>
         <button type="button" class="admin-select-link" id="my-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; margin:6px 0 0;">👁️ Pré-visualizar</button>
         <label class="profile-edit-label" for="my-flashcard-deck" style="margin-top:14px;">Deck de destino</label>
         <select id="my-flashcard-deck" class="profile-edit-input">${personalDeckOptionsHTML(decks)}</select>
@@ -291,6 +316,7 @@ async function renderMyFlashcardsView(opts){
 
     <div class="profile-section" id="my-decks-section">
       <div class="section-label">Meus Decks</div>
+      ${tagFilterNoticeHTML()}
       <div id="my-decks-list">${personalDecksListHTML(decks)}</div>
       <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
         <input type="text" id="my-deck-new-name" class="profile-edit-input" placeholder="Nome do novo Deck" maxlength="60" style="flex:1; min-width:140px;">
@@ -384,6 +410,7 @@ function myFlashcardRowHTML(c, premium){
       <div class="admin-badge-info">
         <div class="admin-badge-name">${escapeHTML(c.front)}${c.front_pinyin ? ` (${escapeHTML(c.front_pinyin)})` : ''} → ${escapeHTML(c.back_trans)}</div>
         <div class="admin-badge-desc">${c.note ? escapeHTML(c.note) + ' · ' : ''}criado em ${new Date(c.created_at).toLocaleDateString('pt-BR')}</div>
+        ${(c.tags && c.tags.length) ? `<div data-row-tags style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">${noteTagChipsHTML(c.tags)}</div>` : ''}
       </div>
       <div style="display:flex; gap:6px;">
         <button class="admin-badge-delete-btn" data-preview-own-flashcard="${c.id}" title="Pré-visualizar como vai aparecer na Revisão">🔎</button>
@@ -535,6 +562,7 @@ function myFlashcardNativeEditFormHTML(c, editorState){
         ${CARD_TYPE_UI_META.map(t => `<option value="${t.id}" ${t.id === editorState.cardGenerationMode ? 'selected' : ''}>${t.label}</option>`).join('')}
       </select>
       <div id="edit-my-native-flashcard-fields"></div>
+      <div id="edit-my-native-flashcard-tags"></div>
       <button type="button" class="admin-select-link" id="edit-my-native-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; align-self:flex-start; padding:0;">👁️ Pré-visualizar</button>
       <label class="profile-edit-label">Nota (opcional)</label>
       <textarea id="edit-my-native-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(editorState.privateNote || '')}</textarea>
@@ -557,6 +585,7 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap){
   const nativeFieldOpts = { namePrefix: 'edit-my-native', uploadFn: uploadOwnFlashcardMedia, deleteFn: deleteOwnFlashcardMedia, ttsFn: requestOwnFieldAudioTTS, noteId: editorState.noteId };
   const boxEl = document.getElementById('edit-my-native-flashcard-fields');
   refreshNativeCardTypeBox(boxEl, editorState, nativeFieldOpts);
+  mountNoteTagsEditor(document.getElementById('edit-my-native-flashcard-tags'), editorState);
 
   document.getElementById('edit-my-native-flashcard-card-type').addEventListener('change', (e) => {
     const newMode = e.target.value;
@@ -691,6 +720,7 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
   // rascunho ainda não foi salvo) habilitam "Gerar áudio" (Premium only,
   // via allowedAudioOrigins acima).
   refreshNativeCardTypeBox(document.getElementById('my-flashcard-native-fields'), MY_FLASHCARDS_STATE.nativeCardState, nativeFieldOpts);
+  mountNoteTagsEditor(document.getElementById('my-flashcard-tags'), MY_FLASHCARDS_STATE.nativeCardState);
 
   // Fase 6D.7 (ver CLAUDE.md) -- Preview do rascunho atual (não salvo).
   // languageAppKey aqui é sempre APP_KEY (o site fixa o idioma pra
@@ -863,6 +893,7 @@ function myFlashcardsExportPayload(cardsToExport){
       backTrans: c.back_trans,
       note: c.note || null,
       frontIsTargetLanguage: c.front_is_target_language !== false,
+      tags: Array.isArray(c.tags) ? c.tags : [],
     })),
   };
 }
@@ -995,7 +1026,7 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
       if (typeof addSelfFlashcardToState === 'function') addSelfFlashcardToState(result.card);
     }
   }
-  showToast(`✓ ${importedCount} cartão(ões) importado(s).`);
+  showToast(`✓ ${importedCount} cartão(ões) importado(s). ${summarizeDroppedImportTags(importStates)}`.trim());
   renderMyFlashcardsView();
 }
 

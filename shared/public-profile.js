@@ -555,7 +555,7 @@ async function importSelectedPublicFlashcards(box){
   }
 
   if (importedCount > 0 && typeof showToast === 'function'){
-    showToast(`✓ ${importedCount} cartão(ões) adicionado(s) à sua conta.`);
+    showToast(`✓ ${importedCount} cartão(ões) adicionado(s) à sua conta. ${summarizeDroppedImportTags(importStates)}`.trim());
   }
   if (importedCount < ids.length && errorEl){
     errorEl.textContent = 'Alguns cartões não puderam ser adicionados. Tente de novo.';

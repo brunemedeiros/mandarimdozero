@@ -3363,6 +3363,11 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <!-- Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila"
              removido de vez; "Origem" (Fase 4 do sistema de alunas
              particulares) subiu pro topo do painel. -->
+        <div id="review-tag-filter-wrap" hidden>
+          <div class="section-label">Tags</div>
+          <div id="review-tag-chips" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px;"></div>
+          <button type="button" class="admin-select-link" id="review-tag-clear" hidden style="background:none; border:none; cursor:pointer; padding:0;">Limpar filtro de tags</button>
+        </div>
         <div id="review-origin-select-wrap" hidden>
           <div class="section-label">Origem</div>
           <select class="review-settings-select" id="review-origin-select"></select>
@@ -4182,6 +4187,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <script src="../shared/flashcard-mc-editor.js"></script>
 <script src="../shared/flashcard-typeanswer-editor.js"></script>
 <script src="../shared/flashcard-cloze-editor.js"></script>
+<script src="../shared/flashcard-tags-editor.js"></script>
 <script src="../shared/flashcard-native-persistence.js"></script>
 <script src="../shared/anki-parser.js"></script>
 <script src="../shared/anki-import.js"></script>

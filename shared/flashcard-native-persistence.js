@@ -164,6 +164,10 @@ function validateNoteEditorStateForSave(editorState){
   if (!isNativeNoteEditorState(editorState)){
     return { ok: false, error: 'Estado não é nativo -- nada a validar aqui.' };
   }
+  // Fase I (Tags): limites de tag valem pra QUALQUER Card Type, no mesmo
+  // ponto central de validação de save (nunca truncam em silêncio).
+  const tagCheck = validateNoteTags(editorState.tags);
+  if (!tagCheck.ok) return { ok: false, error: tagCheck.error };
   const mode = editorState.cardGenerationMode;
   if (mode === 'multiple_choice') return validateNativeMultipleChoiceStructure(editorState);
   if (mode === 'type_answer') return validateNativeTypeAnswerStructure(editorState);
@@ -357,6 +361,9 @@ function nativeNoteEditorStateFromLegacyRow(row){
     languageAppKey: row.language_app_key,
     origin: row.origin || null,
     privateNote: row.note || null,
+    // Fase I (Tags): tags que a linha Legacy já tinha (ex.: vindas do Anki)
+    // acompanham a conversão -- nunca somem só porque a tela antiga não as conhecia.
+    tags: row.tags,
   };
 
   if (isMC){
@@ -467,8 +474,18 @@ function nativeNoteEditorStateFromLegacyRow(row){
 // 'normal'` de 2 Fields (+ satélite de pinyin quando aplicável) -- mesmo
 // resultado visual de sempre (frente/verso simples), só que gravado no
 // modelo nativo.
+// Fase I (Tags): a origem (arquivo/link/perfil público) é externa -> respeita
+// os limites (20/50) aqui e registra em `__droppedTags` o que ficou de fora,
+// pra quem importa AVISAR (nunca perda silenciosa). `__droppedTags` não é
+// persistido (noteEditorStateToRow ignora chaves desconhecidas).
+function summarizeDroppedImportTags(states){
+  const n = (states || []).reduce((acc, s) => acc + ((s && s.__droppedTags) ? s.__droppedTags.length : 0), 0);
+  return n ? `${n} tag(s) foram ignoradas por passar do limite (${TAG_MAX_PER_NOTE} tags por cartão, ${TAG_MAX_LENGTH} caracteres por tag).` : '';
+}
+
 function nativeNoteEditorStateFromImportPayload(payload, languageAppKey){
-  return nativeNoteEditorStateFromLegacyRow({
+  const part = partitionNoteTagsByLimits(payload.tags);
+  const state = nativeNoteEditorStateFromLegacyRow({
     id: null,
     revision: 0,
     language_app_key: languageAppKey,
@@ -478,6 +495,8 @@ function nativeNoteEditorStateFromImportPayload(payload, languageAppKey){
     back_trans: payload.backTrans || '',
     front_pinyin: payload.frontPinyin || null,
     front_is_target_language: payload.frontIsTargetLanguage,
+    // Fase I (Tags): a cópia carrega as tags da Note (valores, sem vínculo vivo com o original).
+    tags: part.tags,
     choices: null,
     cloze_sentence: null,
     cloze_answer: null,
@@ -485,4 +504,6 @@ function nativeNoteEditorStateFromImportPayload(payload, languageAppKey){
     image_url: null,
     audio_url: null,
   });
+  if (part.dropped.length) state.__droppedTags = part.dropped;
+  return state;
 }

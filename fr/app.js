@@ -854,7 +854,9 @@ const STATE = {
     reviewFilter: 'oldest', // 'all' | 'hard' | 'oldest' (padrão) -- ver reviewFilterQueue()
     // Fase 4 do sistema de alunas particulares (ver CLAUDE.md): filtro por
     // origem do cartão -- ver matchesReviewOriginFilter/eligibleReviewPool.
-    reviewOriginFilter: 'all' // 'all' (padrão) | 'study' | 'teacher'
+    reviewOriginFilter: 'all', // 'all' (padrão) | 'study' | 'teacher'
+    // Fase I (Tags): filtro por Tag, OR entre as selecionadas ([] = sem filtro).
+    reviewTagFilter: []
   },
   dailyMinutesLog: {}, // legado -- não lido mais pra nada, só continua sendo escrito (addStudyMinutes) pra não perder histórico já salvo
   dailyLessonsLog: {}, // 'YYYY-MM-DD' -> lições (que contam pra meta) concluídas naquele dia
@@ -5314,7 +5316,28 @@ function matchesReviewOriginFilter(card){
   return filter === 'all' || card.origin === filter;
 }
 
+// Fase I (Tags): filtro de Review por Tag -- estado PRÓPRIO
+// (STATE.studySettings.reviewTagFilter, lista de slugs), independente de
+// reviewOriginFilter. Semântica: vazio = sem restrição; 1+ tags = OR (o
+// card entra se a NOTE tiver pelo menos uma). A tag é da Note, então
+// CardInstances irmãos (reverso, Cloze) passam/ficam juntos. Só SELECIONA
+// cards elegíveis: nunca toca FSRS, Deck nem origem. cardMatchesTagFilter()
+// vive em shared/flashcard-model.js (fonte única).
+function activeReviewTagFilter(){
+  const f = STATE.studySettings.reviewTagFilter;
+  return Array.isArray(f) ? f : [];
+}
+function matchesReviewTagFilter(card){
+  return cardMatchesTagFilter(card, activeReviewTagFilter());
+}
+
 function eligibleReviewPool(){
+  return STATE.cards.filter(isCardLessonCompleted).filter(matchesReviewOriginFilter).filter(matchesReviewTagFilter);
+}
+
+// Universo de onde a UI tira as tags disponíveis: o pool do Review geral
+// SEM o próprio filtro de tag (senão selecionar uma tag esconderia as outras).
+function reviewTagUniverse(){
   return STATE.cards.filter(isCardLessonCompleted).filter(matchesReviewOriginFilter);
 }
 
@@ -6253,7 +6276,8 @@ function deckReviewSummary(deckId){
 async function startDeckReviewSession(deckId){
   trackEvent('lesson_start', 'flashcard_review', null);
   const decks = await ensureDecksLoadedForReview();
-  const pool = getStudyScopeForDeck(decks, deckId, eligibleDeckReviewPool());
+  // Fase I (Tags): Deck scope AND Tag filter -- o Deck decide o universo, a tag só reduz.
+  const pool = getStudyScopeForDeck(decks, deckId, eligibleDeckReviewPool()).filter(matchesReviewTagFilter);
   const queue = reviewFilterQueue('oldest', pool);
   queue.forEach(c => { if (!c.cardInstance) c.reviewDirection = nextCardDirection(c); });
 
@@ -6640,7 +6664,7 @@ function renderReviewView(){
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">☕</div>
-        <h3>${STATE.reviewSessionDeckId ? 'Nenhum cartão neste Deck ainda' : (STATE.reviewSessionUnitFilter ? 'Nenhum cartão nesta unidade ainda' : 'Tudo em dia!')}</h3>
+        <h3>${activeReviewTagFilter().length ? 'Nenhum cartão com as tags selecionadas' : STATE.reviewSessionDeckId ? 'Nenhum cartão neste Deck ainda' : (STATE.reviewSessionUnitFilter ? 'Nenhum cartão nesta unidade ainda' : 'Tudo em dia!')}</h3>
         <p>${allDue > 0 ? `Você ainda tem ${allDue} cartão(s) pendente(s) no geral.` : 'Volte mais tarde para sua próxima revisão, ou comece uma nova unidade na trilha.'}</p>
         ${allDue > 0 ? `<button class="btn btn-primary" id="review-start-all">Revisar tudo disponível</button>` : ''}
       </div>
@@ -7682,6 +7706,27 @@ function normalizeNewCardsPerDay(n){
 // pro TOPO do painel -- sincroniza os 3 controles restantes + Origem com
 // STATE.studySettings, roda toda vez que o painel "⚙️ Configurar sessão"
 // é aberto ou qualquer um deles muda.
+// Fase I (Tags): chips de seleção múltipla (OR) + "Limpar". Mostra as tags do
+// universo do Review geral E as já selecionadas (mesmo que não existam mais),
+// pra nunca prender o usuário num filtro que ele não consegue desfazer.
+function renderReviewTagFilter(){
+  const wrap = document.getElementById('review-tag-filter-wrap');
+  const chipsEl = document.getElementById('review-tag-chips');
+  if (!wrap || !chipsEl) return;
+  const selected = activeReviewTagFilter();
+  const universe = reviewTagUniverse();
+  const available = collectTagsFromCards(universe);
+  const all = Array.from(new Set(available.concat(selected))).sort();
+  wrap.hidden = all.length === 0;
+  chipsEl.innerHTML = all.map(t => {
+    const n = universe.filter(c => (c.tags || []).includes(t)).length;
+    const on = selected.includes(t);
+    return `<button type="button" class="leaderboard-tab ${on ? 'active' : ''}" data-review-tag="${escapeHTML(t)}" aria-pressed="${on}">#${escapeHTML(t)} (${n})</button>`;
+  }).join(' ');
+  const clearBtn = document.getElementById('review-tag-clear');
+  if (clearBtn) clearBtn.hidden = selected.length === 0;
+}
+
 function renderReviewSettingsView(){
   const s = STATE.studySettings;
 
@@ -7714,6 +7759,8 @@ function renderReviewSettingsView(){
       ${hasSelfCards ? `<option value="self" ${currentOrigin === 'self' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.self} (${originCounts.self})</option>` : ''}
     `;
   }
+
+  renderReviewTagFilter();
 
   const freqSelect = document.getElementById('review-frequency-select');
   if (freqSelect) freqSelect.value = s.reviewFrequency;
@@ -7753,6 +7800,17 @@ document.getElementById('review-intensity-select').addEventListener('change', (e
 // selects opcionais desta tela).
 document.getElementById('review-origin-select')?.addEventListener('change', (e) => {
   updateStudySetting({ reviewOriginFilter: e.target.value });
+});
+// Fase I (Tags): alterna uma tag no filtro (OR); "Limpar" volta a [].
+document.getElementById('review-tag-chips')?.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-review-tag]');
+  if (!btn) return;
+  const tag = btn.dataset.reviewTag;
+  const cur = activeReviewTagFilter();
+  updateStudySetting({ reviewTagFilter: cur.includes(tag) ? cur.filter(t => t !== tag) : cur.concat(tag) });
+});
+document.getElementById('review-tag-clear')?.addEventListener('click', () => {
+  updateStudySetting({ reviewTagFilter: [] });
 });
 // Ícone "⚙️" no cabeçalho da tela de Revisão (3ª sessão de grilling --
 // antes era um botão de texto solto entre o dropdown e REVISAR, a autora

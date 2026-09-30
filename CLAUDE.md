@@ -17110,3 +17110,60 @@ Fecha a experiência funcional sobre B–G (Deck Engine, 053, 054, Review por De
 - **Resíduo zero:** nenhum usuário temporário (`tmp-fase-h@example.invalid`: 0), nenhum Deck, nenhum vínculo criado. Os 5 Teacher Cards históricos seguem sem alteração e nenhum `deck_id` foi criado ou modificado.
 - **Testes já executados:** unit G 134/134; unit H 78/78; Playwright filtro de origem 52/52 (fr+zh); Playwright G 68/68 e H 68/68 (sessão anterior); regressões F (68/68, 46/46) e E (75/75, 38/38).
 - Working tree limpa. Sem migration nova, sem mudança de RLS. Próxima fase do roadmap apenas em nova tarefa (Tags NÃO iniciadas).
+
+## Fase I -- Tags (2026-09-30)
+
+Decisões de produto (fechadas): **Tags pertencem à Note**, nunca ao CardInstance --
+CardInstances irmãos (Normal com reverso, Cloze multi-marca) compartilham
+exatamente a mesma lista (`buildEngineCardsFromRow` calcula `tags` uma vez por
+linha); mover a Note de Deck não muda as Tags. São **globais na conta** e
+independentes de idioma, **sem hierarquia**, sem tabela `tags`: a fonte
+persistida continua `tags text[]` em `own_flashcards`/`teacher_flashcards`
+(migration 048, default `{}`, sem backfill). **Gratuitas** e fora do teto Free
+de 20 CardInstances.
+
+- **Normalização canônica única**: `normalizeTagSlug`/`normalizeNoteTags`
+  (`shared/flashcard-model.js`) -- minúsculas, sem acento, espaço/`::` -> `-`,
+  inválidos removidos, dedup mantendo a 1ª ocorrência. Ninguém reimplementa.
+- **Limites**: 20 tags por Note e 50 caracteres por tag normalizada
+  (`TAG_MAX_PER_NOTE`/`TAG_MAX_LENGTH`), validados em UM ponto
+  (`validateNoteTags`, chamado por `validateNoteEditorStateForSave` e pelo editor).
+  Nunca truncam nem descartam em silêncio: o editor mostra o motivo; em lote
+  (Anki, cópia/importação) `partitionNoteTagsByLimits` mantém as válidas e a UI
+  AVISA quantas ficaram de fora. Rede de segurança no banco: migration
+  **056** (CHECK `*_tags_limits` via `note_tags_within_limits`, aplicada ao vivo;
+  aditiva, sem tocar dados nem RLS).
+- **Editor**: `shared/flashcard-tags-editor.js` (`mountNoteTagsEditor`) -- mount
+  próprio, irmão da caixa de Campos (trocar Card Type/Field não perde tags), usado
+  em criar/editar de Meus Cartões e do admin. Edição legada não toca `tags`
+  (conversão Legacy->Native as preserva).
+- **Teacher Cards**: a professora (admin) edita as tags; a aluna só **vê** (chips
+  sem remover) e **filtra**. Garantia no backend: escrita de `teacher_flashcards`
+  segue admin-only (RLS 026 + triggers 054/055) -- verificado em SQL real (aluna e
+  terceiros: 0 linhas afetadas). Sem cópia editável do lado da aluna.
+- **Review por Tag**: estado próprio `STATE.studySettings.reviewTagFilter`
+  (lista de slugs; nunca reutiliza `reviewOriginFilter`). `[]` = "Todas" (sem
+  restrição); 1+ tags = **OR** (pelo menos uma; sem AND/NOT). **Deck + Tag = AND**:
+  o Deck define o universo (`startDeckReviewSession`), a Tag só reduz -- nunca
+  traz card de outro Deck. A correção da Fase H (sessão de Deck ignora
+  `reviewOriginFilter`) continua valendo. Filtro só seleciona cards elegíveis:
+  não altera FSRS, contagens do Deck (`deckCountsForReview` ignora o filtro) nem
+  `deck_id`. UI: chips no painel "Configurar sessão" (universo = Review geral
+  sem o próprio filtro; tags já selecionadas ficam visíveis para poder limpar),
+  botão Limpar, aviso em "Meus Decks" quando o filtro está ativo. Cards da
+  trilha (sem tags) só passam com o filtro vazio.
+- **Anki**: import normaliza, respeita limites e avisa; export leva as tags da
+  Note (uma vez por nota, sem tags de direção; trilha continua `unidadeN`);
+  round-trip testado. **Cópias** (arquivo/link, perfil público): as tags viajam
+  como valor, sem vínculo vivo; `get_public_flashcards` passou a devolver `tags`.
+- **Futuro (não implementado)**: Panel de gerenciamento global (renomear/excluir
+  Tag em todas as Notes) -- a estrutura atual permite. **Public Cards**: a cópia
+  deverá preservar as tags públicas e receber a tag permanente não removível
+  `criado-por-[username]` (username imutável, nunca display name); ponto de
+  integração: `nativeNoteEditorStateFromImportPayload` (cópia de perfil público) +
+  o editor de tags (marcar a tag de autoria como não removível).
+
+Testes versionados em `tests/fase-i/`: `test_tags_unit.js` (Node/VM, 67),
+`test_playwright.js` (FR+ZH, 64), `test_supabase_real.sql` (Postgres real,
+transação + ROLLBACK, 19/19, zero resíduo). Harness da Fase E ganhou as funções
+do filtro de tag.
