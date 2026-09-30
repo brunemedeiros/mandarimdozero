@@ -38,3 +38,13 @@ Estado: tentei aplicar A, mas o classificador de permissões bloqueou a edição
 - NÃO corrigido aqui (classificado **K2-E pendente**): `checkUnitCompletion` (exige `reps>0` em todo card, B New impede a conclusão por cards), `unitCardCounts` (total = 2 × palavras), palavras aprendidas, gráficos, `vocabStrengthBuckets`, `alreadyKnown`, `pickVocabFormat`. Nada foi mascarado, filtrado ou alterado.
 - `nextCardDirection`/`reviewDirection`/`lastDirection` seguem existindo (saem só em K2-G).
 - Teste: `tests/k2d/test_transitional_window.js` (30 verificações, fr+zh). Regressões K2-B/K2-C/Fase E/K1 verdes.
+
+## K2-D (completa) — Review nativo + direção nativa
+- Auditoria: desde a K2-C todo card da trilha tem CardInstance; `startReviewSession`/`startDeckReviewSession` já só injetavam `reviewDirection` em card sem CardInstance, e `renderNormalCard` já lia a direção de `resolveCardContentView` (A: estudado→tradução; B: tradução→estudado). Portanto a direção **é propriedade do CardInstance**; A e B não alternam por revisão.
+- Mudanças de código (fr/zh `app.js`, espelhadas):
+  1. `gradeCurrentCard`: `lastDirection` só é gravado para card legado (sem CardInstance). Card nativo não recebe mais a propriedade.
+  2. `renderNormalCard`: para CardInstance nativo cuja frente é a tradução e o verso é o idioma estudado (B da trilha; também teacher/self invertidos), o botão 🔊/áudio próprio, o autoplay (só ao revelar) e, no zh, o **pinyin** acompanham o campo do idioma estudado. Antes B mostrava o 🔊 na tradução e perdia o pinyin do hanzi. Sem sistema novo de TTS.
+- Não feito de propósito: B não é escondido nem condicionado a A; FSRS de A/B independente; nenhuma métrica pedagógica corrigida (K2-E); Speed/Combinar/Anki intocados (K2-F).
+- Legado que ainda existe (remoção em K2-G): `nextCardDirection` (shared/srs.js), as 2 atribuições `reviewDirection` guardadas por `!c.cardInstance` (start/deck), `card.lastDirection` legado em `gradeCurrentCard`, o ramo `else` legado de `renderNormalCard` (hoje inalcançável para a trilha — teste prova que todo card tem CardInstance — mas mantido: cards sem CardInstance ainda são possíveis em código externo/testes).
+- Observação fora de escopo: "Estudar este Deck" em Meus Cartões chama `startDeckReviewSession` sem trocar para a aba Revisão (pré-existente; nos testes chamo `switchTab('review')` antes).
+- Testes: `tests/k2d/test_native_direction.js` (24), `tests/k2d/test_playwright.js` (30, fr+zh, clique real em revelar/nota; falha 5 verificações sem a correção de áudio/pinyin), `tests/k2d/test_transitional_window.js` (30, mantido). Regressões K2-B/K2-C/E/F/G/H/I/J/K1 (unit + Playwright) verdes.

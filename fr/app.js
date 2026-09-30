@@ -6844,12 +6844,27 @@ function renderNormalCard(mountEl, card, localState, callbacks){
   const resolvedBackImageUrl = backImageUrl || null;
   const frenchSideHTML = `<div class="flashcard-french">${escapeHTML(targetText)} ${audioBtnHTML(targetText, 'audio-btn-lg')}${frontAudioUrl ? customAudioBtnHTML(frontAudioUrl) : ''}</div>`;
   const transSideHTML = `<div class="flashcard-trans">${escapeHTML(nativeText)}${backAudioUrl ? customAudioBtnHTML(backAudioUrl) : ''}</div>`;
-  const frontHTML = isReverse ? transSideHTML : frenchSideHTML;
-  const backHTML = isReverse ? frenchSideHTML : transSideHTML;
+  let frontHTML = isReverse ? transSideHTML : frenchSideHTML;
+  let backHTML = isReverse ? frenchSideHTML : transSideHTML;
   // Áudio automático só quando o idioma estudado está do lado JÁ visível --
   // no modo padrão isso é o front (toca ao entrar no cartão), no modo
   // invertido é o back (toca só ao revelar a resposta).
-  const frenchVisibleNow = isReverse ? localState.revealed : true;
+  let frenchVisibleNow = isReverse ? localState.revealed : true;
+  let speakText = targetText;
+  // K2-D: CardInstance nativo cuja FRENTE é a tradução e cujo VERSO é o
+  // idioma estudado (ex.: Study Trail B): o botão de áudio/pronúncia acompanha
+  // o campo do idioma estudado (verso), nunca a tradução. Direção continua
+  // 100% do CardInstance; isto só decide de que lado fica o áudio.
+  if (card.cardInstance){
+    const v = resolveCardContentView(card);
+    if (!isStudyLanguageField(v.front, APP_KEY) && isStudyLanguageField(v.back, APP_KEY)){
+      frontHTML = `<div class="flashcard-trans">${escapeHTML(v.front.text)}${frontAudioUrl ? customAudioBtnHTML(frontAudioUrl) : ''}</div>`;
+      backHTML = `<div class="flashcard-french">${escapeHTML(v.back.text)} ${audioBtnHTML(v.back.text, 'audio-btn-lg')}${backAudioUrl ? customAudioBtnHTML(backAudioUrl) : ''}</div>`;
+      frenchVisibleNow = localState.revealed;
+      targetIsSpeakable = true;
+      speakText = v.back.text;
+    }
+  }
 
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
@@ -6893,8 +6908,8 @@ function renderNormalCard(mountEl, card, localState, callbacks){
   // autoplay" já era o comportamento correto).
   wireAudioButtons(mountEl, card.__isPreviewCard);
   wireCustomAudioButtons(mountEl);
-  if (!card.__isPreviewCard && frenchVisibleNow && targetIsSpeakable && canSpeakFrench(targetText)){
-    speakFrench(targetText, mountEl.querySelector('.audio-btn-lg'), true);
+  if (!card.__isPreviewCard && frenchVisibleNow && targetIsSpeakable && canSpeakFrench(speakText)){
+    speakFrench(speakText, mountEl.querySelector('.audio-btn-lg'), true);
   }
 
   if (localState.revealed){
@@ -6959,7 +6974,9 @@ function gradeCurrentCard(grade){
   // pra ele, ver startReviewSession) -- no-op inofensivo pra cartão nativo
   // (Note/CardInstance), que nunca ganha reviewDirection (Fase 4: direção
   // é do CardInstance, não da sessão).
-  card.lastDirection = card.reviewDirection;
+  // K2-D: só cartão legado (sem CardInstance) usa alternância; a direção de
+  // CardInstance nativo (Study Trail A/B, teacher, self) é do próprio CardInstance.
+  if (!card.cardInstance) card.lastDirection = card.reviewDirection;
   // Fase 5: Flashcard agora usa o motor FSRS (shared/fsrs.js) -- due deixa
   // de ser calculado por regras SM-2 fixas.
   applyMemoryGrade(card, grade);

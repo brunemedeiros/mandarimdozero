@@ -7180,12 +7180,27 @@ function renderNormalCard(mountEl, card, localState, callbacks){
     hanziIsSpeakable = true;
     hanziTextForSpeech = card.back_hanzi;
   }
-  const frontHTML = isReverse ? transSideHTML : hanziSideHTML;
-  const backHTML = isReverse ? hanziSideHTML : transSideHTML;
+  let frontHTML = isReverse ? transSideHTML : hanziSideHTML;
+  let backHTML = isReverse ? hanziSideHTML : transSideHTML;
   // Áudio automático só quando o hanzi está do lado JÁ visível nesse
   // instante -- no modo padrão isso é o front (toca ao entrar no cartão),
   // no modo invertido é o back (toca só ao revelar a resposta).
-  const hanziVisibleNow = isReverse ? localState.revealed : true;
+  let hanziVisibleNow = isReverse ? localState.revealed : true;
+  // K2-D: CardInstance nativo cuja FRENTE é a tradução e cujo VERSO é o hanzi
+  // (ex.: Study Trail B): hanzi + pinyin + áudio acompanham o campo do idioma
+  // estudado (verso). Direção continua 100% do CardInstance.
+  if (card.cardInstance){
+    const v = resolveCardContentView(card);
+    if (!isStudyLanguageField(v.front, APP_KEY) && isStudyLanguageField(v.back, APP_KEY)){
+      frontHTML = `<div class="flashcard-trans">${escapeHTML(v.front.text)}${v.front.audioUrl ? customAudioBtnHTML(v.front.audioUrl) : ''}</div>`;
+      backHTML = `
+      <div class="flashcard-hanzi">${escapeHTML(v.back.text)} ${audioBtnHTML(v.back.text, 'audio-btn-lg')}${v.back.audioUrl ? customAudioBtnHTML(v.back.audioUrl) : ''}</div>
+      <div class="flashcard-pinyin pinyin">${escapeHTML(v.back.pinyinText || '')}</div>`;
+      hanziVisibleNow = localState.revealed;
+      hanziIsSpeakable = true;
+      hanziTextForSpeech = v.back.text;
+    }
+  }
   // Fase 7a -- `isReverse` só é `true` pra cartão de TRILHA
   // (!card.cardInstance) -- nesse caminho `frontImageUrl`/`backImageUrl`
   // são sempre null. Pra cartão com CardInstance, `isReverse` é sempre
@@ -7306,7 +7321,9 @@ function gradeCurrentCard(grade){
   // pra ele, ver startReviewSession) -- no-op inofensivo pra cartão nativo
   // (Note/CardInstance), que nunca ganha reviewDirection (Fase 4: direção
   // é do CardInstance, não da sessão).
-  card.lastDirection = card.reviewDirection;
+  // K2-D: só cartão legado (sem CardInstance) usa alternância; a direção de
+  // CardInstance nativo (Study Trail A/B, teacher, self) é do próprio CardInstance.
+  if (!card.cardInstance) card.lastDirection = card.reviewDirection;
   // Fase 5: Flashcard agora usa o motor FSRS (shared/fsrs.js) -- due deixa
   // de ser calculado por regras SM-2 fixas.
   applyMemoryGrade(card, grade);
