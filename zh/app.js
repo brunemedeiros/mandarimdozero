@@ -5605,7 +5605,9 @@ function buildSpeedQueue(){
   // Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila" removido da
   // UI; comportamento travado em 'oldest' (mesmo raciocínio de fr/app.js:
   // é o único dos 3 que continua respeitando "Intensidade da sessão").
-  return reviewFilterQueue('oldest', eligibleReviewPool().filter(hasPlainFrontBack));
+  // K2-F: Speed é exercício de vocabulário -> projeção da palavra (A) para a
+  // trilha; B continua existindo para Review/FSRS/Deck, só não vira 2ª palavra.
+  return reviewFilterQueue('oldest', projectStudyWordsToA(eligibleReviewPool().filter(hasPlainFrontBack)));
 }
 
 function buildSpeedOptions(card){
@@ -5631,13 +5633,14 @@ function buildSpeedOptions(card){
   // view.back.text de um distrator desse tipo. Nunca oferecer um cloze/
   // "digite a resposta" como opção de múltipla escolha de qualquer forma
   // (não são pares prompt/resposta curtos, mesmo critério de sempre).
-  const pool = STATE.cards.filter(c => c !== card && c.unitId === card.unitId && hasPlainFrontBack(c));
+  // K2-F: distratores = 1 por palavra (projeção A); B nunca é distrator.
+  const pool = projectStudyWordsToA(STATE.cards.filter(c => c !== card && c.unitId === card.unitId && hasPlainFrontBack(c)));
   let distractors = shuffle(pool).slice(0, 3);
   if (distractors.length < 3){
     // Fallback só quando a unidade não tem 3 outras cartas -- puxa de
     // eligibleReviewPool() (não STATE.cards puro) pra não arriscar mostrar,
     // mesmo como alternativa errada, uma palavra de uma unidade nunca aberta.
-    const extra = shuffle(eligibleReviewPool().filter(c => c !== card && hasPlainFrontBack(c) && !distractors.includes(c))).slice(0, 3 - distractors.length);
+    const extra = shuffle(projectStudyWordsToA(eligibleReviewPool()).filter(c => c !== card && hasPlainFrontBack(c) && !distractors.includes(c))).slice(0, 3 - distractors.length);
     distractors = distractors.concat(extra);
   }
   return shuffle([card, ...distractors]);
@@ -5910,6 +5913,8 @@ function renderReviewModeSelect(){
     document.getElementById('mode-card-speed').addEventListener('click', () => openReviewSession('speed'));
   }
 
+  // K2-F: Combinar é vocabulário -> conta palavras (projeção A na trilha), não CardInstances.
+  const matchWordCount = projectStudyWordsToA(pool).length;
   const praticarEl = document.getElementById('review-mode-cards-praticar');
   praticarEl.innerHTML = `
     <button class="review-mode-card" id="mode-card-hard" ${hardCount === 0 ? 'disabled' : ''}>
@@ -5918,9 +5923,9 @@ function renderReviewModeSelect(){
       <div class="name">Palavras difíceis</div>
       <div class="desc">As que você mais erra</div>
     </button>
-    <button class="review-mode-card" id="mode-card-match" ${pool.length < 10 ? 'disabled' : ''}>
+    <button class="review-mode-card" id="mode-card-match" ${matchWordCount < 10 ? 'disabled' : ''}>
       <div class="icon">🧩</div>
-      <div class="count">${pool.length}</div>
+      <div class="count">${matchWordCount}</div>
       <div class="name">Combinar</div>
       <div class="desc">Jogo de pares</div>
     </button>
@@ -6000,7 +6005,7 @@ const MATCH_STATE = {
 // escolhido direto via startMatchGame).
 function renderMatchSizePicker(){
   const el = document.getElementById('match-review-content');
-  const poolLen = eligibleReviewPool().length;
+  const poolLen = projectStudyWordsToA(eligibleReviewPool()).length; // K2-F: palavras, não CardInstances da trilha
   const minPairs = Math.min(...MATCH_SIZE_OPTIONS);
   if (poolLen < minPairs * 2){
     el.innerHTML = `
@@ -6040,7 +6045,8 @@ function startMatchGame(){
   trackEvent('lesson_start', 'match_game', null);
   // Fase 4: seleção via getStudyQueue(scope:'all') -- mesmo pool de antes,
   // Combinar é prática de reconhecimento, não revisão SRS.
-  const pool = shuffle(getStudyQueue(eligibleReviewPool().filter(hasPlainFrontBack), { scope: 'all' }));
+  // K2-F: Combinar = vocabulário -> 1 par por palavra (projeção A na trilha).
+  const pool = shuffle(getStudyQueue(projectStudyWordsToA(eligibleReviewPool().filter(hasPlainFrontBack)), { scope: 'all' }));
   const pairCount = Math.min(MATCH_STATE.pairSize, pool.length);
   MATCH_STATE.pairs = pool.slice(0, pairCount);
   MATCH_STATE.tiles = shuffle([
@@ -6201,7 +6207,7 @@ function renderSpeedReview(){
   // aprendida no total). As duas mensagens não podem ser a mesma.
   if (SPEED_STATE.queue.length === 0){
     const pool = eligibleReviewPool();
-    el.innerHTML = pool.length < 4 ? `
+    el.innerHTML = projectStudyWordsToA(pool).length < 4 ? `
       <div class="review-empty">
         <div class="big-emoji">⚡</div>
         <h3>Vocabulário insuficiente ainda</h3>
@@ -7885,6 +7891,10 @@ const ANKI_EXPORT_CONFIG = {
   afmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:36px;'>{{Caractere}}</div><div style='text-align:center;font-size:18px;color:#5C4A3F;'>{{Tradução}}</div>",
   css: ".card { font-family: 'Nunito', Arial, sans-serif; text-align: center; background-color: #FBF4E8; color:#211714; }",
   deckDesc: `Exportado do app ${APP_IDENTITY.apps.zh.name}`,
+  // K2-F: template do modelo "Reverso" (B da trilha): frente = Tradução,
+  // verso = Pinyin + Caractere. Mesmos campos semânticos do Básico.
+  reverseQfmt: "<div style='text-align:center;font-size:22px;color:#5C4A3F;font-weight:bold;'>{{Tradução}}</div>",
+  reverseAfmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:22px;color:#8E1915;font-weight:bold;'>{{Pinyin}}</div><div style='text-align:center;font-size:36px;'>{{Caractere}}</div>",
   guidPrefix: "mzc_",
   unitOptions(){
     return UNITS.map(u => ({ id: String(u.id), label: `${u.id}. ${u.title}` }));
@@ -7930,6 +7940,17 @@ const ANKI_EXPORT_CONFIG = {
   // de pinyin embutido via `|`, buildAnkiClozeFieldText() já converte
   // isso pro hint nativo do Anki `{{c1::hanzi::pinyin}}`, mostrado no
   // lugar da lacuna antes de revelar).
+  // K2-F: B da trilha -- campos SEMÂNTICOS (Pinyin/Caractere/Tradução); a
+  // direção vem do template do modelo Reverso. O pinyin acompanha o hanzi
+  // (lado "back" do CardInstance); mídia: front = tradução, back = hanzi.
+  reverseFields(card, media){
+    const v = resolveCardContentView(card);
+    return [
+      v.back.pinyinText || '',
+      ankiFieldHTML(v.back.text, media && media.back),
+      ankiFieldHTML(v.front.text, media && media.front),
+    ];
+  },
   clozeFields(card, media){
     const view = resolveCardContentView(card);
     return [
@@ -7938,6 +7959,7 @@ const ANKI_EXPORT_CONFIG = {
     ];
   },
   sortField(card){
+    if (ankiExportCardKind(card) === 'reverse') return resolveCardContentView(card).back.pinyinText || resolveCardContentView(card).back.text;
     if (card.cardInstance && card.cardInstance.cardTypeId === 'cloze'){
       const view = resolveCardContentView(card);
       return renderClozeText(view.rawSentenceText, view.markId, { reveal: true });

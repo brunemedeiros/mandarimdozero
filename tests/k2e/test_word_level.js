@@ -111,7 +111,7 @@ for (const lang of ['fr', 'zh']){
   check(lang + ' A e B continuam CardInstances distintas', A(0) !== B(0) && A(0).note === B(0).note);
 
   // H. independência de legado (fonte)
-  const model = read('shared/study-trail-model.js').split('K2-E -- unidade PEDAGÓGICA')[1];
+  const model = read('shared/study-trail-model.js').split('K2-E -- unidade PEDAGÓGICA')[1].split('K2-F -- PROJEÇÃO')[0];
   check(lang + ' H: helpers K2-E não usam lastDirection/reviewDirection/nextCardDirection', !/lastDirection|reviewDirection|nextCardDirection/.test(model));
   const fnSrc = ['unitCardCounts', 'checkUnitCompletion', 'pickVocabFormat', 'vocabStrengthBuckets'].map(f => extractFunction(src, f)).join('\n');
   check(lang + ' H: consumidores migrados não dependem de direção nem de quantidade bruta de cards', !/lastDirection|reviewDirection|nextCardDirection|pool\.length/.test(fnSrc.replace(/dueForReview[^\n]*/g, '').replace(/totalCards: pool\.length/g, '')));

@@ -181,3 +181,22 @@ function wordLevelStrengthBuckets(pool){
   (pool || []).forEach(c => { if (!isStudyTrailWordCard(c)) b[cardStrengthBucket(c)]++; });
   return b;
 }
+
+// ============================================================
+// K2-F -- PROJEÇÃO PEDAGÓGICA (word-level / direção A) para exercícios de
+// vocabulário (Speed, Combinar). Uma palavra da trilha = 1 Note = 2
+// CardInstances; o exercício trabalha sobre a PALAVRA, então usa só a
+// CardInstance cuja FRENTE precede o verso na ordem de Fields da Note (A:
+// idioma estudado → tradução; B tem a ordem inversa). É estrutural
+// (frontFieldIndex < backFieldIndex), nunca por sufixo de id, e não lê
+// lastDirection/reviewDirection. Somente leitura, sem estado novo. Cards
+// fora da trilha (teacher/self) passam intactos -- sem agrupamento.
+// Review/FSRS/Deck/Anki continuam por CardInstance.
+// ============================================================
+function isStudyWordProjectionCard(card){
+  if (!isStudyTrailWordCard(card) || !card.cardInstance) return true;
+  return card.cardInstance.frontFieldIndex < card.cardInstance.backFieldIndex;
+}
+function projectStudyWordsToA(cards){
+  return (cards || []).filter(isStudyWordProjectionCard);
+}

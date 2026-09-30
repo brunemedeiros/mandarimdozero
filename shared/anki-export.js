@@ -90,7 +90,14 @@ function guessMediaExtension(url, kind){
 // app.js). Mesma checagem nos 2 idiomas -- fica aqui, não em `config`,
 // pra nunca duplicar/divergir entre fr e zh.
 function ankiExportCardKind(card){
-  return (card.cardInstance && card.cardInstance.cardTypeId === 'cloze') ? 'cloze' : 'basic';
+  if (card.cardInstance && card.cardInstance.cardTypeId === 'cloze') return 'cloze';
+  // K2-F: B da trilha (normal_reversed, frente = tradução) vai para um modelo
+  // "Reverso" com os MESMOS campos semânticos do Básico, mas frente/verso
+  // invertidos no template -- preserva a direção do CardInstance sem
+  // misturar o conteúdo dos campos. Só a trilha (teacher/self mantêm o
+  // comportamento anterior). Estrutural, não por sufixo de id.
+  if (card.origin === 'study' && card.cardInstance && !isStudyWordProjectionCard(card)) return 'reverse';
+  return 'basic';
 }
 
 // Constrói a string de tags do Note (coluna `notes.tags` do Anki),
@@ -266,6 +273,9 @@ async function generateApkg(config){
     // Anki de quem nunca criou um cartão desse tipo.
     const hasClozeCards = exportCards.some(c => ankiExportCardKind(c) === 'cloze');
     const clozeModelId = hasClozeCards ? ankiRandId() : null;
+    // K2-F -- modelo "Reverso" (só quando há B da trilha na seleção).
+    const hasReverseCards = exportCards.some(c => ankiExportCardKind(c) === 'reverse');
+    const reverseModelId = hasReverseCards ? ankiRandId() : null;
 
     // Fase 7i -- baixa toda a mídia (áudio/imagem) referenciada pelos
     // cards selecionados ANTES de montar os campos das notes -- é isso
@@ -290,6 +300,18 @@ async function generateApkg(config){
         latexPre: "", latexPost: "", latexsvg:false, req: [[0,"any",[0]]]
       }
     };
+    if (hasReverseCards){
+      model[reverseModelId] = {
+        id: reverseModelId, name: `${config.modelName} - Reverso`, type: 0, mod: now, usn: -1,
+        sortf: 0, did: deckId,
+        flds: config.fields,
+        tmpls: [
+          { name: "Cartão 1", ord:0, qfmt: config.reverseQfmt, afmt: config.reverseAfmt, bqfmt:"", bafmt:"", did: null }
+        ],
+        css: config.css,
+        latexPre: "", latexPost: "", latexsvg:false, req: [[0,"any",[0]]]
+      };
+    }
     if (hasClozeCards){
       model[clozeModelId] = {
         id: clozeModelId, name: `${config.modelName} - Cloze`, type: 1, mod: now, usn: -1,
@@ -340,8 +362,10 @@ async function generateApkg(config){
       const cardId = baseId + (i * 2) + 1;
       const kind = ankiExportCardKind(card);
       const cardMedia = media.mediaForCard.get(card.id) || { front: null, back: null };
-      const noteMid = kind === 'cloze' ? clozeModelId : modelId;
-      const flds = (kind === 'cloze' ? config.clozeFields(card, cardMedia) : config.noteFields(card, cardMedia)).join('\x1f');
+      const noteMid = kind === 'cloze' ? clozeModelId : kind === 'reverse' ? reverseModelId : modelId;
+      const flds = (kind === 'cloze' ? config.clozeFields(card, cardMedia)
+        : kind === 'reverse' ? config.reverseFields(card, cardMedia)
+        : config.noteFields(card, cardMedia)).join('\x1f');
       const sfld = config.sortField(card);
       const csum = simpleChecksum(sfld);
       const guid = `${config.guidPrefix}${card.id}`;
