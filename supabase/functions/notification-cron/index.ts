@@ -284,12 +284,48 @@ function isCardLessonCompletedServer(card: any, unitProgress: any, languageAppKe
   return lessonIdx < prog.lessonIdx;
 }
 
+// K2-B: identidade da PALAVRA de um card da Study Trail. Hoje cada palavra é
+// um card `u{unitId}-v{idx}`; a migração da trilha (K2-C) passa a gerar dois
+// CardInstances por palavra: A (`u{unitId}-v{idx}`) e B (`u{unitId}-v{idx}-b`).
+// A/B representam a MESMA palavra e devem contar uma vez só em "palavras
+// prontas pra revisar". A identidade sai do id ancorado (não de "qualquer
+// sufixo -b": ids de professora/aluna são `t{n}`/`s{n}` e nunca casam aqui).
+// Devolve null pra qualquer card que não seja da trilha -- esses mantêm a
+// contagem por card, como sempre.
+const STUDY_CARD_ID_RE = /^(u.+-v(\d+))(-b)?$/;
+
+function studyWordIdentity(card: any): { baseId: string; vocabIdx: number } | null {
+  if (!card) return null;
+  // origin explícito diferente de 'study' nunca é trilha. Saves antigos não
+  // têm `origin`: aí só o formato do id decide (t{n}/s{n} nunca casam).
+  if (card.origin != null && card.origin !== 'study') return null;
+  const m = typeof card.id === 'string' ? STUDY_CARD_ID_RE.exec(card.id) : null;
+  if (!m) return null;
+  return { baseId: m[1], vocabIdx: Number(m[2]) };
+}
+
 function computeReviewOverdueCount(cards: any[] | undefined, unitProgress: any, languageAppKey: string): number {
   const now = Date.now();
-  return (cards || []).filter((c) =>
-    c && c.reps > 0 && c.due && (now - c.due) > REVIEW_OVERDUE_STALE_MS &&
-    isCardLessonCompletedServer(c, unitProgress, languageAppKey)
-  ).length;
+  let count = 0;
+  const seenStudyWords = new Set<string>();
+  for (const c of (cards || [])) {
+    if (!(c && c.reps > 0 && c.due && (now - c.due) > REVIEW_OVERDUE_STALE_MS)) continue;
+    const word = studyWordIdentity(c);
+    // Save da trilha que serialize só id+progresso (K2-C) pode não trazer
+    // unitId/vocabIdx: completa a partir do id só quando faltarem, pra o
+    // gate de lição continuar o mesmo. Com unitId presente nada muda.
+    let gateCard = c;
+    if (word && (c.unitId == null || c.vocabIdx == null)) {
+      gateCard = { ...c, unitId: c.unitId ?? word.baseId.slice(1, word.baseId.lastIndexOf('-v')), vocabIdx: c.vocabIdx ?? word.vocabIdx };
+    }
+    if (!isCardLessonCompletedServer(gateCard, unitProgress, languageAppKey)) continue;
+    if (word) {
+      if (seenStudyWords.has(word.baseId)) continue;
+      seenStudyWords.add(word.baseId);
+    }
+    count++;
+  }
+  return count;
 }
 
 function fillPlaceholders(text: string | null | undefined, payload: Record<string, unknown>): string {

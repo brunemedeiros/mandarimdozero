@@ -19,3 +19,8 @@ Opções:
 Estado: tentei aplicar A, mas o classificador de permissões bloqueou a edição em `fr/app.js`/`zh/app.js`. Parei aí. Tudo depende da sua escolha entre A e B.
 
 (As demais decisões são acrescentadas abaixo pelo orquestrador.)
+
+## D2 (resolvida) — Opção B escolhida; K2-B: notification-cron
+- Study Trail converge para Note + CardInstances (A = `u{unit}-v{idx}`, B = `…-b`).
+- Cron: `computeReviewOverdueCount` deduplica A/B só para cards da trilha (id ancorado `^u.+-v\d+(-b)?$` e origin ausente ou 'study'); demais origins contam por card como antes. Se o save vier só com id+progresso (K2-C), unitId/vocabIdx são completados a partir do id só quando faltam. Threshold, janela de 48h e gate de lição inalterados.
+- Testes: `tests/k2b/test_cron_dedup.js`.
