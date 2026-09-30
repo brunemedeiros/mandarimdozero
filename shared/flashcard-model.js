@@ -1370,7 +1370,6 @@ function resolveCardContentView(card){
 // Devolve { front, back } -- cada um `null` (sem mídia nesse lado) ou
 // `{ audioUrl, imageUrl }` (qualquer um dos 2 pode ser `null` individualmente).
 function resolveCardExportMedia(card){
-  if (!card.cardInstance) return { front: null, back: null };
   const view = resolveCardContentView(card);
   if (view.kind === CARD_TYPE_IDS.MULTIPLE_CHOICE){
     return {

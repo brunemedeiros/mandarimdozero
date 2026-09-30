@@ -90,12 +90,12 @@ function guessMediaExtension(url, kind){
 // app.js). Mesma checagem nos 2 idiomas -- fica aqui, não em `config`,
 // pra nunca duplicar/divergir entre fr e zh.
 function ankiExportCardKind(card){
-  if (card.cardInstance && card.cardInstance.cardTypeId === 'cloze') return 'cloze';
+  if (card.cardInstance.cardTypeId === 'cloze') return 'cloze';
   // K2-F: B da trilha (normal_reversed, frente = tradução) vai para um modelo
   // "Reverso" com os MESMOS campos semânticos do Básico, mas frente/verso
   // invertidos no template -- preserva a direção do CardInstance sem
   // misturar o conteúdo dos campos. Estrutural, não por sufixo de id.
-  if (card.origin === 'study' && card.cardInstance && !isStudyWordProjectionCard(card)) return 'reverse';
+  if (card.origin === 'study' && !isStudyWordProjectionCard(card)) return 'reverse';
   // K2-F hardening: Teacher/Self (CardInstance-level, nunca agrupados) usam o
   // MESMO modelo Reverso quando o lado mostrado na frente é a tradução e o
   // verso é o idioma estudado. Critério estrutural (idioma de cada Field
@@ -108,7 +108,6 @@ function ankiExportCardKind(card){
 // verso (resposta), cada um { text, lang, pinyinText }. Só normal, múltipla
 // escolha e digite-a-resposta (os tipos que usam o modelo Básico/Reverso).
 function ankiExportSides(card){
-  if (!card.cardInstance) return null;
   const v = resolveCardContentView(card);
   if (v.kind === 'normal') return { front: v.front, back: v.back };
   if (v.kind === 'multiple_choice') return { front: v.prompt, back: v.correct || { text: v.correctText, lang: null, pinyinText: null } };

@@ -194,7 +194,7 @@ function wordLevelStrengthBuckets(pool){
 // Review/FSRS/Deck/Anki continuam por CardInstance.
 // ============================================================
 function isStudyWordProjectionCard(card){
-  if (!isStudyTrailWordCard(card) || !card.cardInstance) return true;
+  if (!isStudyTrailWordCard(card)) return true; // teacher/self passam intactos (sem agrupamento)
   return card.cardInstance.frontFieldIndex < card.cardInstance.backFieldIndex;
 }
 function projectStudyWordsToA(cards){

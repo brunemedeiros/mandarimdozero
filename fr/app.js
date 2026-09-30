@@ -5250,7 +5250,7 @@ function buildSpeedOptions(card){
   // lido por cardAnswerText() acima) -- o resto do fluxo (answerSpeedQuestion)
   // compara identidade com `card` pra saber se ACERTOU, e só usa o texto
   // pra exibição, então funciona sem mudança nenhuma lá.
-  if (card.cardInstance && card.cardInstance.cardTypeId === 'multiple_choice'){
+  if (card.cardInstance.cardTypeId === 'multiple_choice'){
     const view = resolveCardContentView(card);
     return shuffle([card, ...view.distractorTexts.map(text => ({ displayAnswerText: text }))]);
   }
@@ -6696,11 +6696,9 @@ function renderReviewView(){
 
   // Fase 4 (motor de tipos/templates, ver CLAUDE.md) -- despacho por
   // cardTypeId. Cartão nativo (Note/CardInstance, origin teacher/self)
-  // sempre tem `card.cardInstance`; trilha (origin:'study') nunca tem --
-  // nunca teve múltipla escolha/cloze/"digite a resposta" (buildCardsFromUnits
-  // só produz par front/back_trans simples), então cai direto no flip
-  // padrão abaixo sem checar nada.
-  if (card.cardInstance){
+  // K2-J: todo card da fila tem `card.cardInstance` (study/teacher/self nascem de
+  // buildStudyWordCards/buildEngineCardsFromRow); normal cai no flip abaixo.
+  {
     const cardTypeId = card.cardInstance.cardTypeId;
     // Fase 6C.2 -- Múltipla escolha/Digite a resposta seguem o mesmo
     // padrão de criação preguiçosa de STATE.reviewCardState já
@@ -7865,7 +7863,7 @@ const ANKI_EXPORT_CONFIG = {
   // pra esse tipo -- só sabem "front"/"back", e a view de type_answer não
   // tem esses campos) -- lê resolveCardContentView() direto.
   noteFields(card, media){
-    if (card.cardInstance && card.cardInstance.cardTypeId === 'type_answer'){
+    if (card.cardInstance.cardTypeId === 'type_answer'){
       const view = resolveCardContentView(card);
       return [
         ankiFieldHTML(view.prompt.text, media && media.front),
@@ -7903,11 +7901,11 @@ const ANKI_EXPORT_CONFIG = {
   },
   sortField(card){
     if (ankiExportCardKind(card) === 'reverse') return ankiExportSides(card).back.text;
-    if (card.cardInstance && card.cardInstance.cardTypeId === 'cloze'){
+    if (card.cardInstance.cardTypeId === 'cloze'){
       const view = resolveCardContentView(card);
       return renderClozeText(view.rawSentenceText, view.markId, { reveal: true });
     }
-    if (card.cardInstance && card.cardInstance.cardTypeId === 'type_answer'){
+    if (card.cardInstance.cardTypeId === 'type_answer'){
       return resolveCardContentView(card).prompt.text;
     }
     return cardPromptText(card);

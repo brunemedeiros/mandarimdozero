@@ -5609,7 +5609,7 @@ function buildSpeedOptions(card){
   // lido por cardAnswerText() acima) -- o resto do fluxo (answerSpeedQuestion)
   // compara identidade com `card` pra saber se ACERTOU, e só usa o texto
   // pra exibição, então funciona sem mudança nenhuma lá.
-  if (card.cardInstance && card.cardInstance.cardTypeId === 'multiple_choice'){
+  if (card.cardInstance.cardTypeId === 'multiple_choice'){
     const view = resolveCardContentView(card);
     return shuffle([card, ...view.distractorTexts.map(text => ({ displayAnswerText: text }))]);
   }
@@ -7048,11 +7048,9 @@ function renderReviewView(){
 
   // Fase 4 (motor de tipos/templates, ver CLAUDE.md) -- despacho por
   // cardTypeId. Cartão nativo (Note/CardInstance, origin teacher/self)
-  // sempre tem `card.cardInstance`; trilha (origin:'study') nunca tem --
-  // nunca teve múltipla escolha/cloze/"digite a resposta" (buildCardsFromUnits
-  // só produz par hanzi/pinyin/tradução simples), então cai direto no flip
-  // padrão abaixo sem checar nada.
-  if (card.cardInstance){
+  // K2-J: todo card da fila tem `card.cardInstance` (study/teacher/self nascem de
+  // buildStudyWordCards/buildEngineCardsFromRow); normal cai no flip abaixo.
+  {
     const cardTypeId = card.cardInstance.cardTypeId;
     // Fase 6C.2 -- Múltipla escolha/Digite a resposta seguem o mesmo
     // padrão de criação preguiçosa de STATE.reviewCardState já
@@ -7884,7 +7882,7 @@ const ANKI_EXPORT_CONFIG = {
   // qual lado é o chinês (com pinyin) -- diferente de Normal/Múltipla
   // Escolha, aqui não há garantia de direção fixa.
   noteFields(card, media){
-    if (card.cardInstance && card.cardInstance.cardTypeId === 'type_answer'){
+    if (card.cardInstance.cardTypeId === 'type_answer'){
       const view = resolveCardContentView(card);
       const cols = zhTypeAnswerExportColumns(view);
       return [
@@ -7924,11 +7922,11 @@ const ANKI_EXPORT_CONFIG = {
   },
   sortField(card){
     if (ankiExportCardKind(card) === 'reverse'){ const b = ankiExportSides(card).back; return b.pinyinText || b.text; }
-    if (card.cardInstance && card.cardInstance.cardTypeId === 'cloze'){
+    if (card.cardInstance.cardTypeId === 'cloze'){
       const view = resolveCardContentView(card);
       return renderClozeText(view.rawSentenceText, view.markId, { reveal: true });
     }
-    if (card.cardInstance && card.cardInstance.cardTypeId === 'type_answer'){
+    if (card.cardInstance.cardTypeId === 'type_answer'){
       const cols = zhTypeAnswerExportColumns(resolveCardContentView(card));
       return cols.pinyin || cols.hanzi;
     }
