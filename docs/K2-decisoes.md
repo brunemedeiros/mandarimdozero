@@ -24,3 +24,10 @@ Estado: tentei aplicar A, mas o classificador de permissões bloqueou a edição
 - Study Trail converge para Note + CardInstances (A = `u{unit}-v{idx}`, B = `…-b`).
 - Cron: `computeReviewOverdueCount` deduplica A/B só para cards da trilha (id ancorado `^u.+-v\d+(-b)?$` e origin ausente ou 'study'); demais origins contam por card como antes. Se o save vier só com id+progresso (K2-C), unitId/vocabIdx são completados a partir do id só quando faltam. Threshold, janela de 48h e gate de lição inalterados.
 - Testes: `tests/k2b/test_cron_dedup.js`.
+
+## K2-C — modelo e geração nativa da Study Trail
+- `shared/study-trail-model.js` (novo): `buildStudyWordCards` (Note sintética `normal_reversed` via `buildEngineCardsFromRow`; A = `u{unit}-v{idx}`, B = `…-b`; metadados origin/unitId/vocabIdx/unitTitle/deckId atribuídos após o motor), `STUDY_PROGRESS_FIELDS` (whitelist), `serializeCardsForSave`, `mergeSavedCards`.
+- Save da trilha = só `{id, ...progresso}`; merge aplica só a whitelist (aceita save antigo com objeto completo sem detecção de formato). teacher/self: caminho anterior.
+- `buildCardsFromUnits(units, appKey='frances'|'mandarim')`: appKey literal porque roda antes de `const APP_KEY`.
+- NÃO releasable sozinho: B (New) já entra nas filas/contagens e `checkUnitCompletion`/`unitCardCounts`/Speed/Combinar/Anki ainda assumem 1 card por palavra (K2-D..F).
+- Testes: `tests/k2c/` (unit 88, playwright 14). Fase E adaptada (contagem por CardInstance = 2 x palavras).

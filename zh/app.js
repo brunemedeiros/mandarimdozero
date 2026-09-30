@@ -523,47 +523,15 @@ document.getElementById('stroke-modal').addEventListener('click', (e) => {
 
 // ---------- Construção do banco de cartões a partir do content.js ----------
 // Cada cartão SRS = 1 item de vocabulário (frente: pinyin, verso: caractere + tradução)
-function buildCardsFromUnits(units){
+function buildCardsFromUnits(units, appKey = 'mandarim'){
+  // K2-C: cada palavra vira uma Note nativa `normal_reversed` com dois
+  // CardInstances (A = id legado, B = `-b`), montados por
+  // shared/study-trail-model.js sobre o motor existente. appKey tem default
+  // literal: este construtor roda no init de STATE, antes de `const APP_KEY`.
   const cards = [];
   units.forEach(u => {
     u.vocab.forEach((v, idx) => {
-      cards.push({
-        id: `u${u.id}-v${idx}`,
-        unitId: u.id,
-        unitTitle: u.title,
-        vocabIdx: idx,
-        type: 'vocab',
-        front_pinyin: v.p,
-        back_hanzi: v.c,
-        back_trans: v.t,
-        // Fase 3 do sistema de alunas particulares (ver CLAUDE.md):
-        // 'origin' é metadado de UM só motor de cartão -- distingue "de onde
-        // veio" (trilha vs. professora vs. futura auto-criação) sem nunca
-        // virar um sistema de revisão paralelo. Cartão de trilha = 'study'.
-        origin: 'study',
-        // Fase E: destino organizacional (Course Unit Deck). NUNCA substitui
-        // unitId (identidade pedagógica). null até os Course Decks serem
-        // carregados (ensureCourseDecksLoaded) -- Study Trail funciona igual.
-        deckId: null,
-        // SRS state (SM-2)
-        ef: 2.5,
-        interval: 0,
-        reps: 0,
-        due: 0, // timestamp; 0 = never studied, due immediately
-        lapses: 0,
-        // Estado FSRS (Fase 3) -- cartão novo nasce direto no novo modelo,
-        // sem precisar passar por migrateCardToFSRS().
-        stability: 0,
-        difficulty: 0,
-        state: 'new',
-        lastReview: null,
-        fsrsReps: 0,
-        fsrsLapses: 0
-        // (sem fsrsMigrated aqui de propósito -- ver comentário em
-        // migrateCardToFSRS() no shared/fsrs.js: setar isso já no
-        // nascimento do cartão faria o merge de um save antigo, que roda
-        // DEPOIS deste construtor, ser ignorado pelo guard da migração.)
-      });
+      buildStudyWordCards(u, v, idx, appKey).forEach(c => cards.push(c));
     });
   });
   return cards;
@@ -1226,7 +1194,7 @@ function computeProgressSummary(){
 
 function serializeState(){
   return {
-    cards: STATE.cards,
+    cards: serializeCardsForSave(STATE.cards),
     hanziCards: STATE.hanziCards,
     unitProgress: STATE.unitProgress,
     xp: STATE.xp,
@@ -1256,23 +1224,9 @@ function serializeState(){
 function applySerializedState(data){
   if (!data) return;
   if (data.cards) {
-    // merge by id to survive content updates
-    const byId = {};
-    data.cards.forEach(c => byId[c.id] = c);
-    // Fase E: deckId é dado DERIVADO do banco (decks/deck_id), nunca progresso
-    // de memória -- um save antigo carrega o deckId de quando foi salvo, que
-    // pode estar defasado (Deck movido/recriado). O valor fresco vence.
-    STATE.cards.forEach(c => {
-      if (!byId[c.id]) return;
-      const freshDeckId = c.deckId;
-      Object.assign(c, byId[c.id]);
-      c.deckId = freshDeckId === undefined ? null : freshDeckId;
-    });
-  }
-  if (data.hanziCards) {
-    const byId = {};
-    data.hanziCards.forEach(c => byId[c.id] = c);
-    STATE.hanziCards.forEach(c => { if (byId[c.id]) Object.assign(c, byId[c.id]); });
+    // K2-C: cards da trilha só recebem a whitelist de progresso; ver
+    // mergeSavedCards (shared/study-trail-model.js).
+    mergeSavedCards(STATE.cards, data.cards);
   }
   // Fase 3 (reestruturação do motor de memória): migração SM2->FSRS,
   // idempotente (migrateCardToFSRS só age se `stability` ainda não existe).
