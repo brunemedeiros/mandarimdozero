@@ -43,7 +43,8 @@ const ANKI_IMPORT_STATE = {
   plan: null,
   parseResult: null,
   selectedIds: new Set(),
-  remainingSlots: Infinity,
+  existingRows: [],
+  hasLink: false,
   mediaCache: null,
 };
 
@@ -113,8 +114,8 @@ async function handleAnkiImportFileSelected(file){
     fetchMyOwnFlashcards(APP_KEY),
     hasActiveTeacherLink(),
   ]);
-  const activeCount = existingRows.filter(r => r.status === 'active').length;
-  ANKI_IMPORT_STATE.remainingSlots = computeAnkiImportRemainingSlots(activeCount, hasLink);
+  ANKI_IMPORT_STATE.existingRows = existingRows;
+  ANKI_IMPORT_STATE.hasLink = hasLink;
 
   const plan = buildAnkiImportPlan(parseResult, { languageAppKey: APP_KEY, existingRows });
   ANKI_IMPORT_STATE.plan = plan;
@@ -274,7 +275,15 @@ async function confirmAnkiImport(body){
   // Section 23 -- bloqueia ANTES de escrever qualquer coisa (nunca uma
   // importação parcial silenciosa por causa do limite), mesmo padrão de
   // shared/public-profile.js (importSelectedPublicFlashcards).
-  if (selectedNotes.length > ANKI_IMPORT_STATE.remainingSlots){
+  // Fase F -- regra única por CardInstance (Normal com reverso=2, Cloze=N).
+  const pre = preflightOwnCardInstanceCreation({
+    activeRows: ANKI_IMPORT_STATE.existingRows,
+    hasTeacherLink: ANKI_IMPORT_STATE.hasLink,
+    editorStates: selectedNotes.map(n => n.editorState),
+    languageAppKey: APP_KEY,
+    limit: FREE_OWN_FLASHCARD_LIMIT,
+  });
+  if (!pre.ok){
     const limitModal = document.getElementById('flashcard-limit-modal');
     if (limitModal) limitModal.style.display = 'flex';
     else if (errorEl) errorEl.textContent = 'Você atingiu o limite de cartões do plano grátis.';
@@ -284,6 +293,14 @@ async function confirmAnkiImport(body){
   const btn = body.querySelector('#anki-import-confirm-btn');
   if (btn){ btn.disabled = true; btn.textContent = 'Importando...'; }
 
+  // Fase F -- Deck padrão (personal_root) resolvido antes de qualquer
+  // escrita; sem destino válido nada é criado (nem mídia enviada).
+  const dest = await resolveOwnCreationDeck({ languageAppKey: APP_KEY });
+  if (!dest.ok){
+    if (errorEl) errorEl.textContent = dest.error;
+    if (btn){ btn.disabled = false; btn.textContent = 'Confirmar importação'; }
+    return;
+  }
   const mediaWarnings = [];
   let doneCount = 0;
   for (const note of selectedNotes){
@@ -299,7 +316,7 @@ async function confirmAnkiImport(body){
     }
   }
 
-  const identity = { owner_id: CURRENT_USER.id, language_app_key: APP_KEY };
+  const identity = { owner_id: CURRENT_USER.id, language_app_key: APP_KEY, deck_id: dest.deckId };
   const persistResult = await persistAnkiImportBatches(selectedNotes, {
     identity,
     onBatchDone: (info) => {

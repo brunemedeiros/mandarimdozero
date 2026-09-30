@@ -56,6 +56,8 @@
 //                                 lastStudyDay de OUTRA conta, nunca duplicada)
 //   - shared/roles.js           (hasActiveTeacherLink -- Fase 5.1)
 //   - shared/own-flashcards.js (fetchMyOwnFlashcards, createOwnFlashcard)
+//   - shared/flashcard-native-persistence.js (nativeNoteEditorStateFromImportPayload
+//                                 -- CONSOLIDAÇÃO-6, ver CLAUDE.md)
 //   - shared/reports.js         (openReportModal -- Q6, sem mudança lá)
 //   - languages/index.js        (AVAILABLE_LANGUAGES, pra bandeira/nome por
 //                                 languageAppKey)
@@ -312,7 +314,7 @@ async function renderPublicProfileInto(bodyEl, username){
 // de página, ver comentário do topo do arquivo), então um objeto global
 // simples é suficiente; guarda o que o formulário de importação precisa
 // entre o clique de "Selecionar"/checkbox e o clique de "Adicionar".
-const PUBLIC_PROFILE_IMPORT_STATE = { username: null, cardsCache: [], selectedIds: new Set(), remainingSlots: Infinity };
+const PUBLIC_PROFILE_IMPORT_STATE = { username: null, cardsCache: [], selectedIds: new Set(), myCards: [], hasLink: false };
 
 async function fetchPublicFlashcardsByUsername(username, languageAppKey){
   const { data, error } = await supabaseClient.rpc('get_public_flashcards', { p_username: username, p_language_app_key: languageAppKey });
@@ -391,10 +393,11 @@ async function renderPublicProfileCardsBox(bodyEl, username){
   // Mesmo teto da Fase 5.1 (FREE_OWN_FLASHCARD_LIMIT, shared/my-flashcards.js)
   // -- importar cartão alheio não é uma forma de contornar o limite do
   // plano grátis, é só mais uma forma de CRIAR um cartão próprio.
-  const activeMyCount = myCards.filter(c => c.status === 'active').length;
-  PUBLIC_PROFILE_IMPORT_STATE.remainingSlots = hasLink
-    ? Infinity
-    : Math.max(0, (typeof FREE_OWN_FLASHCARD_LIMIT === 'number' ? FREE_OWN_FLASHCARD_LIMIT : 20) - activeMyCount);
+  // Fase F -- guarda as linhas e o vínculo; o preflight (regra única por
+  // CardInstance, shared/deck-engine.js) roda em importSelectedPublicFlashcards
+  // sobre o que será de fato criado, nunca contando linhas aqui.
+  PUBLIC_PROFILE_IMPORT_STATE.myCards = myCards;
+  PUBLIC_PROFILE_IMPORT_STATE.hasLink = hasLink;
 
   if (!cardsRes.cards.length){
     box.innerHTML = `<p class="profile-empty-note">Este usuário ainda não tem nenhum cartão público.</p>`;
@@ -503,12 +506,28 @@ async function importSelectedPublicFlashcards(box){
   const ids = [...PUBLIC_PROFILE_IMPORT_STATE.selectedIds];
   if (!ids.length) return;
 
-  if (ids.length > PUBLIC_PROFILE_IMPORT_STATE.remainingSlots){
+  const importStates = ids
+    .map(id => PUBLIC_PROFILE_IMPORT_STATE.cardsCache.find(x => x.id === id))
+    .filter(Boolean)
+    .map(c => nativeNoteEditorStateFromImportPayload(c, APP_KEY));
+  const pre = preflightOwnCardInstanceCreation({
+    activeRows: PUBLIC_PROFILE_IMPORT_STATE.myCards,
+    hasTeacherLink: PUBLIC_PROFILE_IMPORT_STATE.hasLink,
+    editorStates: importStates,
+    languageAppKey: APP_KEY,
+    limit: typeof FREE_OWN_FLASHCARD_LIMIT === 'number' ? FREE_OWN_FLASHCARD_LIMIT : 20,
+  });
+  if (!pre.ok){
     const modal = document.getElementById('flashcard-limit-modal');
     if (modal) modal.style.display = 'flex';
     else if (errorEl) errorEl.textContent = 'Você atingiu o limite de cartões do plano grátis.';
     return;
   }
+
+  // Deck padrão (personal_root) resolvido UMA vez pro lote inteiro; sem
+  // destino válido, nada é criado.
+  const dest = await resolveOwnCreationDeck({ languageAppKey: APP_KEY });
+  if (!dest.ok){ if (errorEl) errorEl.textContent = dest.error; return; }
 
   const btn = box.querySelector('#public-profile-cards-import-btn');
   if (btn){ btn.disabled = true; btn.textContent = 'Adicionando...'; }
@@ -521,14 +540,11 @@ async function importSelectedPublicFlashcards(box){
     // cria uma linha NOVA na conta de quem importa, nunca uma referência
     // viva ao cartão original. Editar o original depois disso não altera
     // esta cópia.
-    const result = await createOwnFlashcard({
-      languageAppKey: APP_KEY,
-      front: c.front,
-      backTrans: c.backTrans,
-      note: c.note,
-      frontPinyin: c.frontPinyin,
-      frontIsTargetLanguage: c.frontIsTargetLanguage,
-    });
+    // CONSOLIDAÇÃO-6 (ver CLAUDE.md) -- mesma mudança de shared/my-flashcards.js:
+    // a cópia importada nasce NATIVA (fields/card_generation_mode), nunca
+    // mais o branch Legacy de createOwnFlashcard().
+    const nativeState = nativeNoteEditorStateFromImportPayload(c, APP_KEY);
+    const result = await createOwnFlashcard({ languageAppKey: APP_KEY, nativeState, deckId: dest.deckId, decks: dest.decks });
     if (result.ok){
       importedCount++;
       // Mesmo motivo de sempre (ver comentário de addSelfFlashcardToState

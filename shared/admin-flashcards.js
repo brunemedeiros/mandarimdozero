@@ -163,6 +163,17 @@
 //   - shared/admin-students.js     (STUDENT_LANGUAGE_LABELS -- reaproveitado)
 //   - shared/toast.js              (showToast)
 //   - languages/<lang>/app.js      (isAdminUser)
+//
+// CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- SUPERA os históricos "Reestruturação
+// Fase 1-4" acima: o formulário legado de CRIAÇÃO ("Modo de prática"/
+// "Idioma de cada lado"/Frente-Verso-pinyin/campos de MC-Cloze legados/
+// "Recursos opcionais" no nível do cartão -- tudo descrito acima) foi
+// REMOVIDO da tela de criação. Único fluxo agora: Tipo de cartão -> Campos
+// -> Pré-visualizar -> Salvar, sempre nativo, sem bifurcação legacy/native
+// no submit. O histórico acima continua registrado por completude (é como
+// o formulário de EDIÇÃO de um cartão legado -- flashcardEditFormHTML/
+// wireFlashcardEditForm, intocados nesta fase -- ainda se comporta), mas
+// não descreve mais a tela de CRIAÇÃO.
 
 // Prop 4 (ver CLAUDE.md, "7 propostas") -- editingCardId: qual cartão está
 // mostrando o form de edição agora (null = nenhum); _cardsCache: última
@@ -184,7 +195,19 @@
 // de campos" num cartão legado (nativeNoteEditorStateFromLegacyRow) --
 // nunca populado sozinho só por abrir a edição de um cartão legado
 // (Seção 6, "legacy aberto != automaticamente migrado").
-let ADMIN_FLASHCARDS_STATE = { studentIds: new Set(), langFilter: 'all', _studentsCache: [], editingCardId: null, editingNativeState: null, _cardsCache: [], nativeCardState: createNativeNoteEditorState({ cardGenerationMode: 'normal' }) };
+//
+// CONSOLIDAÇÃO-2 (ver CLAUDE.md) -- editingNativeConversionBaseline: um
+// CLONE (cloneNoteEditorState, round-trip JSON -- nunca a mesma
+// referência) do editorState produzido no INSTANTE da conversão
+// Legacy->Native (logo depois de nativeNoteEditorStateFromLegacyRow()),
+// antes de qualquer edição do usuário. Único ponto de comparação pra
+// decidir, no save, se a conversão preserva revision/FSRS (nada mudou
+// desde a conversão) ou se precisa incrementar (usuário editou algo
+// depois de converter) -- mesmo mecanismo (noteEditorStateRequiresNewRevision)
+// já usado pra edição nativa->nativa, nunca uma 2ª implementação de
+// comparação. `null` sempre que não há uma conversão em andamento nesta
+// sessão de edição -- limpo em todo ponto que também zera editingNativeState.
+let ADMIN_FLASHCARDS_STATE = { studentIds: new Set(), langFilter: 'all', _studentsCache: [], editingCardId: null, editingNativeState: null, editingNativeConversionBaseline: null, _cardsCache: [], decksByLang: {}, destByStudent: {}, _ensuredKeys: new Set(), _destToken: 0, nativeCardState: createNativeNoteEditorState({ cardGenerationMode: 'normal' }) };
 
 // Prop 4 -- confirmação obrigatória antes de salvar uma edição (grillado
 // com a autora: editar reinicia o progresso de revisão, ela quer avisar
@@ -234,6 +257,17 @@ const CARD_TYPE_UI_META = [
   { id: 'type_answer', label: 'Digite a resposta' },
   { id: 'cloze', label: 'Completar a frase (Cloze)' },
 ];
+
+// CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- matriz Free/Premium aprovada no
+// CONSOLIDAÇÃO-0 (seção 10): plano grátis só vê "Normal" no seletor de
+// Card Type; os outros 4 tipos ficam atrás de Premium. Professora/admin
+// nunca chama isto (não tem gate de plano, sempre vê os 5 -- mesmo
+// comportamento de antes desta fase); usado só por shared/my-flashcards.js
+// no formulário de CRIAÇÃO. Editar um cartão já existente continua
+// mostrando os 5 (fora do escopo desta fase -- edição nunca foi gateada).
+function cardTypeUIMetaForEntitlement(premium){
+  return premium ? CARD_TYPE_UI_META : CARD_TYPE_UI_META.filter(t => t.id === 'normal');
+}
 
 // Grillado com a autora (ver CLAUDE.md, "rótulo do seletor de direção do
 // cartão") -- rótulo com o nome do idioma de verdade em vez de "idioma
@@ -431,6 +465,11 @@ function wireFlashcardEditForm(c, container){
     if (!preflight.ok){ if (errorEl) errorEl.textContent = preflight.error; return; }
     if (errorEl) errorEl.textContent = '';
     ADMIN_FLASHCARDS_STATE.editingNativeState = nativeNoteEditorStateFromLegacyRow(c);
+    // CONSOLIDAÇÃO-2 -- baseline capturado ANTES de qualquer mutação do
+    // usuário (clone, nunca a mesma referência que o Field editor vai
+    // mutar em seguida) -- é contra ISTO que o save compara pra decidir
+    // se revision precisa incrementar (ver wireFlashcardNativeEditForm).
+    ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = cloneNoteEditorState(ADMIN_FLASHCARDS_STATE.editingNativeState);
     if (c.image_url){
       // Seção 10 -- limitação conhecida (registrada em
       // shared/flashcard-native-persistence.js, attachLegacyMediaToFields):
@@ -440,7 +479,7 @@ function wireFlashcardEditForm(c, container){
       showToast('⚠️ A imagem deste cartão foi preservada nos dados, mas ainda não aparece na tela de Revisão pra cartões do novo editor.');
     }
     const cardsBox = document.getElementById('admin-flashcards-cards-box');
-    const selectedStudents = ADMIN_FLASHCARDS_STATE._studentsCache.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+    const selectedStudents = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
     cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
     wireFlashcardsCardsBox(cardsBox);
   });
@@ -448,6 +487,7 @@ function wireFlashcardEditForm(c, container){
   document.getElementById('edit-flashcard-cancel').addEventListener('click', () => {
     ADMIN_FLASHCARDS_STATE.editingCardId = null;
     ADMIN_FLASHCARDS_STATE.editingNativeState = null;
+    ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
     updateFlashcardsSelectionDependentUI(document.getElementById('admin-flashcards-content'));
   });
@@ -603,6 +643,7 @@ function wireFlashcardNativeEditForm(c, editorState, container){
     compensateFreshMediaUploads(editorState);
     ADMIN_FLASHCARDS_STATE.editingCardId = null;
     ADMIN_FLASHCARDS_STATE.editingNativeState = null;
+    ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
     updateFlashcardsSelectionDependentUI(document.getElementById('admin-flashcards-content'));
   });
@@ -614,22 +655,12 @@ function wireFlashcardNativeEditForm(c, editorState, container){
     const v = validateNoteEditorStateForSave(editorState);
     if (!v.ok){ errorEl.textContent = v.error; return; }
 
-    // Seção 4/5/21 (ver CLAUDE.md) -- ID sempre preservado (mesmo c.id,
-    // nunca um novo). Revision só incrementa quando: (a) o cartão já era
-    // nativo E o conteúdo/estrutura genuinamente mudou
-    // (noteEditorStateRequiresNewRevision, Fase 6D.1 -- nunca reimplementado
-    // aqui); ou (b) é uma conversão Legacy->Native de verdade (a estrutura
-    // sempre muda -- colunas legadas soltas viram Note/Field -- reset é
-    // esperado e coerente com o resto do app: editar sempre reseta
-    // progresso desde a Fase Prop4/"7 propostas").
-    const wasNative = classifyFlashcardRowModel(c) === 'native';
-    let nextRevision = c.revision || 0;
-    if (wasNative){
-      const original = createNativeNoteEditorStateFromRow(c);
-      if (noteEditorStateRequiresNewRevision(original, editorState)) nextRevision += 1;
-    } else {
-      nextRevision += 1;
-    }
+    // CONSOLIDAÇÃO-2 (ver CLAUDE.md) -- ID sempre preservado (mesmo c.id,
+    // nunca um novo, UPDATE sempre na mesma linha). Decisão de revision
+    // inteira centralizada em nextRevisionForNativeSave() (shared/
+    // flashcard-native-persistence.js, comentário completo lá -- inclui a
+    // exceção documentada do Cloze) -- nunca duplicada aqui.
+    const nextRevision = nextRevisionForNativeSave(c, editorState, ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline);
 
     const doSave = async () => {
       const saveBtn = document.getElementById('edit-native-flashcard-save');
@@ -649,6 +680,7 @@ function wireFlashcardNativeEditForm(c, editorState, container){
       showToast(nextRevision > (c.revision || 0) ? '✓ Cartão editado. O progresso de revisão foi reiniciado.' : '✓ Cartão editado.');
       ADMIN_FLASHCARDS_STATE.editingCardId = null;
       ADMIN_FLASHCARDS_STATE.editingNativeState = null;
+      ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
       updateFlashcardsSelectionDependentUI(document.getElementById('admin-flashcards-content'));
     };
@@ -668,6 +700,200 @@ function wireFlashcardNativeEditForm(c, editorState, container){
   });
 }
 
+// ---------- Fase G -- Teacher Decks no Painel (destino por aluno) ----------
+//
+// Camada de UI mínima sobre shared/deck-engine.js (regras) e
+// shared/deck-data.js (I/O). Nenhuma regra de árvore é replicada aqui: só
+// aparecem como destino os Decks que getTeacherDecksForStudent() devolve
+// (teacher_root + subdecks da PRÓPRIA professora para AQUELE aluno+idioma).
+
+// Fase H (H8) -- alunos REALMENTE selecionados. A seleção guarda só
+// student_id, mas um aluno pode ter 2 vínculos (idiomas); com 2+ idiomas
+// presentes o idioma ativo (langFilter) decide qual linha vale, senão o
+// aluno de francês selecionado também "selecionaria" a linha dele em outro
+// idioma e o cartão iria para a árvore errada.
+function adminSelectedStudents(students){
+  const S = ADMIN_FLASHCARDS_STATE;
+  const list = students || S._studentsCache;
+  const multiLang = new Set(list.map(x => x.language_app_key)).size > 1;
+  return list.filter(x => S.studentIds.has(x.student_id) && (!multiLang || x.language_app_key === S.langFilter));
+}
+
+// Fase H (H8) -- o Deck de destino é guardado por aluno+IDIOMA (nunca só
+// por aluno): trocar de idioma/contexto nunca reaproveita o deck_id antigo.
+function adminDestKey(s){ return `${s.student_id}|${s.language_app_key}`; }
+
+async function loadTeacherDecksByLang(students){
+  const langs = [...new Set(students.map(s => s.language_app_key))];
+  await Promise.all(langs.map(async lang => {
+    if (!ADMIN_FLASHCARDS_STATE.decksByLang[lang]){
+      ADMIN_FLASHCARDS_STATE.decksByLang[lang] = await fetchDecksForLanguage(lang);
+    }
+  }));
+}
+
+function teacherTreeForStudent(studentId, languageAppKey){
+  return getTeacherDecksForStudent(ADMIN_FLASHCARDS_STATE.decksByLang[languageAppKey] || [],
+    { teacherId: CURRENT_USER.id, studentId, languageAppKey });
+}
+
+function teacherDeckLabel(deck){
+  return deck.kind === 'teacher_root' ? 'Cartões da professora (padrão)' : deck.name;
+}
+
+function teacherDeckOptionsHTML(tree, selectedId){
+  return orderedTeacherDecks(tree, tree).map(({ deck, depth }) => {
+    const pad = '  '.repeat(depth);
+    return `<option value="${deck.id}" ${deck.id === selectedId ? 'selected' : ''}>${pad}${escapeHTML(teacherDeckLabel(deck))}</option>`;
+  }).join('');
+}
+
+// Rótulo do Deck de um cartão já criado (destino sempre visível na lista).
+function teacherCardDeckLabelHTML(c){
+  if (c.deck_id == null) return '📂 <em>sem Deck (cartão anterior aos Decks)</em> · ';
+  const deck = getDeckById(ADMIN_FLASHCARDS_STATE.decksByLang[c.language_app_key] || [], c.deck_id);
+  return `📂 ${escapeHTML(deck ? teacherDeckLabel(deck) : 'Deck')} · `;
+}
+
+// Mover cartão entre Teacher Decks do MESMO aluno (a Note inteira -- os
+// CardInstances irmãos de reverso/Cloze andam juntos, pois deck_id vive na
+// linha, nunca no CardInstance).
+function teacherCardMoveSelectHTML(c){
+  const tree = teacherTreeForStudent(c.student_id, c.language_app_key);
+  if (!tree.length) return '';
+  return `<select class="profile-edit-input" data-move-card="${c.id}" title="Mover este cartão para outro Deck deste aluno" style="width:auto; max-width:190px; padding:2px 4px;">
+    <option value="">Mover para…</option>
+    ${orderedTeacherDecks(tree, tree).filter(({ deck }) => deck.id !== c.deck_id).map(({ deck, depth }) =>
+      `<option value="${deck.id}">${'  '.repeat(depth)}${escapeHTML(teacherDeckLabel(deck))}</option>`).join('')}
+  </select>`;
+}
+
+// Fase H (H1/H4) -- árvore de Teacher Decks do aluno, com contagem de cartões
+// (Notes) por Deck e exclusão de Teacher Deck VAZIO. A UI só reflete a regra
+// (teacher_root nunca; teacher só sem subdecks e sem cartões); quem decide de
+// verdade é o trigger da migration 054 no banco. Nunca há "apagar e mover
+// cartões automaticamente" nem "substituir por outro Deck".
+async function fillTeacherTreeLists(box, selected, problems){
+  const S = ADMIN_FLASHCARDS_STATE;
+  for (const s of selected){
+    if (problems && problems[`${s.student_id}|${s.language_app_key}`]) continue;
+    const holder = box.querySelector(`[data-tree-list="${s.student_id}"]`);
+    if (!holder) continue;
+    const notes = (await fetchFlashcardsForStudent(s.student_id)).filter(c => c.language_app_key === s.language_app_key);
+    if (!holder.isConnected) return;
+    const tree = teacherTreeForStudent(s.student_id, s.language_app_key);
+    const rows = orderedTeacherDecks(tree, tree).map(({ deck, depth }) => {
+      const own = notes.filter(c => c.deck_id === deck.id).length;
+      const kids = tree.filter(d => d.parent_deck_id === deck.id).length;
+      const deletable = deck.kind === 'teacher' && kids === 0 && own === 0;
+      const del = deck.kind === 'teacher'
+        ? `<button type="button" class="admin-badge-delete-btn" data-tree-delete="${deck.id}" ${deletable ? '' : 'disabled'} title="${deletable ? 'Apagar este Deck (vazio)' : 'Só é possível apagar um Deck sem subdecks e sem cartões'}">🗑</button>`
+        : '';
+      return `<div class="admin-badge-row" data-tree-row="${deck.id}" style="padding-left:${depth * 16}px;">
+        <span style="flex:1;">${escapeHTML(teacherDeckLabel(deck))} <span class="profile-edit-hint">(${own} cartão(ões)${kids ? `, ${kids} subdeck(s)` : ''})</span></span>${del}
+      </div>`;
+    }).join('');
+    holder.innerHTML = `<div class="section-label">Árvore de Decks</div>${rows}`;
+    holder.querySelectorAll('[data-tree-delete]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const list = S.decksByLang[s.language_app_key] || [];
+        const deck = getDeckById(list, Number(btn.dataset.treeDelete));
+        if (!deck || !confirm(`Apagar o Deck "${deck.name}"? Ele está vazio.`)) return;
+        const res = await deleteTeacherDeck({ deck, decks: list });
+        if (!res.ok){ showToast(res.error || 'Não foi possível apagar o Deck.'); return; }
+        S.decksByLang[s.language_app_key] = list.filter(d => d.id !== deck.id);
+        if (S.destByStudent[adminDestKey(s)] === deck.id) delete S.destByStudent[adminDestKey(s)];
+        showToast('✓ Deck apagado.');
+        renderTeacherDestinationRows(box, selected, problems || {});
+      });
+    });
+  }
+}
+
+function renderTeacherDestinationRows(box, selected, problems){
+  const S = ADMIN_FLASHCARDS_STATE;
+  box.innerHTML = selected.map(s => {
+    const key = `${s.student_id}|${s.language_app_key}`;
+    const head = `<div class="admin-badge-name">${flashcardStudentLabel(s)} -- ${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key}</div>`;
+    if (problems[key]) return `<div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:4px;">${head}<p class="profile-edit-error">${escapeHTML(problems[key])}</p></div>`;
+    const tree = teacherTreeForStudent(s.student_id, s.language_app_key);
+    const root = tree.find(d => d.kind === 'teacher_root');
+    const chosen = tree.some(d => d.id === S.destByStudent[adminDestKey(s)]) ? S.destByStudent[adminDestKey(s)] : (root ? root.id : null);
+    return `<div class="admin-badge-row" data-dest-row="${s.student_id}" style="flex-direction:column; align-items:stretch; gap:6px;">
+      ${head}
+      <select class="profile-edit-input" data-dest-select="${s.student_id}" aria-label="Deck de destino de ${escapeHTML(s.username || '')}">${teacherDeckOptionsHTML(tree, chosen)}</select>
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <input type="text" class="profile-edit-input" data-dest-subname="${s.student_id}" placeholder="Nome do novo subdeck (dentro do Deck escolhido)" maxlength="60" style="flex:1; min-width:140px;">
+        <button type="button" class="btn btn-secondary" data-dest-newsub="${s.student_id}">+ Subdeck</button>
+      </div>
+      <p class="profile-edit-error" data-dest-err="${s.student_id}"></p>
+      <div data-tree-list="${s.student_id}" aria-label="Árvore de Decks de ${escapeHTML(s.username || '')}"></div>
+    </div>`;
+  }).join('');
+  // Fase H (H1/H4) -- árvore visível por aluno+idioma, com exclusão de
+  // Teacher Deck vazio (assíncrono: precisa contar os cartões de cada Deck).
+  fillTeacherTreeLists(box, selected, problems);
+  selected.forEach(s => {
+    const sel = box.querySelector(`[data-dest-select="${s.student_id}"]`);
+    if (!sel) return;
+    S.destByStudent[adminDestKey(s)] = Number(sel.value);
+    sel.addEventListener('change', () => { S.destByStudent[adminDestKey(s)] = Number(sel.value); });
+    box.querySelector(`[data-dest-newsub="${s.student_id}"]`).addEventListener('click', async () => {
+      const errEl = box.querySelector(`[data-dest-err="${s.student_id}"]`);
+      errEl.textContent = '';
+      const list = S.decksByLang[s.language_app_key] || [];
+      const parent = getDeckById(list, Number(sel.value));
+      const res = await createTeacherDeck({ name: box.querySelector(`[data-dest-subname="${s.student_id}"]`).value, parentDeck: parent, decks: list });
+      if (!res.ok){ errEl.textContent = res.error; return; }
+      list.push(res.deck);
+      S.destByStudent[adminDestKey(s)] = res.deck.id;
+      renderTeacherDestinationRows(box, selected, problems);
+      showToast('✓ Subdeck criado.');
+    });
+  });
+}
+
+// Bootstrap LAZY: só quando o aluno é selecionado no formulário (nunca no
+// boot do app). Idempotente (ensure_teacher_decks, migration 053).
+async function refreshTeacherDestinationsUI(){
+  const box = document.getElementById('admin-flashcard-destinations');
+  if (!box) return;
+  const S = ADMIN_FLASHCARDS_STATE;
+  const selected = adminSelectedStudents(S._studentsCache);
+  const token = ++S._destToken;
+  if (!selected.length){
+    box.innerHTML = '<p class="profile-edit-hint">Selecione ao menos um aluno para escolher o Deck de destino.</p>';
+    return;
+  }
+  box.innerHTML = '<p class="profile-edit-hint">Preparando os Decks…</p>';
+  const problems = {};
+  const freshLangs = new Set();
+  await Promise.all(selected.map(async s => {
+    const key = `${s.student_id}|${s.language_app_key}`;
+    const ensuredKey = `${CURRENT_USER.id}|${key}`; // por professora (troca de conta na mesma página)
+    if (S._ensuredKeys.has(ensuredKey)) return;
+    const r = await ensureTeacherDecksForStudent(s.student_id, s.language_app_key);
+    if (r.ok){ S._ensuredKeys.add(ensuredKey); freshLangs.add(s.language_app_key); }
+    else problems[key] = r.error;
+  }));
+  if (token !== S._destToken) return;
+  freshLangs.forEach(lang => { delete S.decksByLang[lang]; });
+  await loadTeacherDecksByLang(selected);
+  if (token !== S._destToken) return;
+  renderTeacherDestinationRows(box, selected, problems);
+}
+
+// CONSOLIDAÇÃO-3 (ver CLAUDE.md) -- "Arquivar" deixou de ser uma ação
+// normal de produto: um cartão ATIVO não tem mais nenhum botão de
+// arquivar aqui, em lugar nenhum. O único vestígio do mecanismo que
+// sobrevive é "Reativar" (↺), mostrado só em cartões JÁ arquivados
+// (`c.status === 'archived'`, herdados de antes desta fase) -- nunca um
+// substituto/nome novo pra "esconder"/"suspender": é a AÇÃO INVERSA
+// (devolver um cartão histórico pro estado ativo padrão), e uma vez
+// reativado o cartão não tem mais nenhum botão de status (vira
+// indistinguível de um cartão que nunca foi arquivado). `setFlashcardStatus`
+// (shared/teacher-flashcards.js) não mudou -- só quem chama com
+// `'archived'` deixou de existir na UI.
 function flashcardCardRowHTML(c, showUsername){
   if (ADMIN_FLASHCARDS_STATE.editingCardId === c.id){
     // Cartão já nativo -> sempre edita no editor novo (nunca mostra a
@@ -686,12 +912,13 @@ function flashcardCardRowHTML(c, showUsername){
     <div class="admin-badge-row">
       <div class="admin-badge-info">
         <div class="admin-badge-name">${showUsername ? `<span style="opacity:.6">@${escapeHTML(c.__studentUsername || '?')}</span> · ` : ''}${flashcardFrontSummaryHTML(c)} → ${escapeHTML(c.back_trans)}</div>
-        <div class="admin-badge-desc">${c.note ? escapeHTML(c.note) + ' · ' : ''}criado em ${new Date(c.created_at).toLocaleDateString('pt-BR')}${flashcardFormatBadgesHTML(c) ? ' · ' + flashcardFormatBadgesHTML(c) : ''}</div>
+        <div class="admin-badge-desc">${teacherCardDeckLabelHTML(c)}${c.note ? escapeHTML(c.note) + ' · ' : ''}criado em ${new Date(c.created_at).toLocaleDateString('pt-BR')}${flashcardFormatBadgesHTML(c) ? ' · ' + flashcardFormatBadgesHTML(c) : ''}</div>
       </div>
-      <div style="display:flex; gap:6px;">
+      <div style="display:flex; gap:6px; align-items:center;">
+        ${teacherCardMoveSelectHTML(c)}
         <button class="admin-badge-delete-btn" data-preview-flashcard="${c.id}" title="Pré-visualizar como o aluno vai ver na Revisão">👁</button>
         <button class="admin-badge-delete-btn" data-edit-flashcard="${c.id}" title="Editar">✏️</button>
-        <button class="admin-badge-delete-btn" data-toggle-flashcard="${c.id}" data-next-status="${c.status === 'active' ? 'archived' : 'active'}" title="${c.status === 'active' ? 'Arquivar' : 'Reativar'}">${c.status === 'active' ? '🗃' : '↺'}</button>
+        ${c.status === 'archived' ? `<button class="admin-badge-delete-btn" data-toggle-flashcard="${c.id}" data-next-status="active" title="Reativar (tirar do arquivo histórico)">↺</button>` : ''}
         <button class="admin-badge-delete-btn" data-delete-flashcard="${c.id}" title="Apagar permanentemente">🗑</button>
       </div>
     </div>
@@ -703,6 +930,7 @@ function flashcardCardRowHTML(c, showUsername){
 // render completo quanto (re-fetch isolado) a cada mudança de seleção,
 // SEM tocar no <form> ao lado (ver comentário no topo do arquivo).
 async function buildFlashcardsCardsBoxHTML(selectedStudents){
+  await loadTeacherDecksByLang(selectedStudents);
   const cardLists = await Promise.all(selectedStudents.map(s => fetchFlashcardsForStudent(s.student_id)));
   const cards = cardLists.flatMap((list, i) => list.map(c => ({ ...c, __studentUsername: selectedStudents[i].username })));
   cards.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -714,6 +942,15 @@ async function buildFlashcardsCardsBoxHTML(selectedStudents){
   const archivedCards = cards.filter(c => c.status === 'archived');
   const showUsername = selectedStudents.length > 1;
 
+  // CONSOLIDAÇÃO-3 (ver CLAUDE.md) -- esta seção "Arquivados" já era, desde
+  // antes desta fase, uma área visualmente SEPARADA de "Cartões ativos"
+  // (label própria, nunca misturada na mesma lista) -- exatamente o que
+  // §5 pede ("área separada de históricos arquivados"), então foi
+  // reaproveitada tal como estava, sem nenhuma reconstrução. O que mudou
+  // é só que nenhum cartão pode mais CHEGAR aqui por uma ação da UI --
+  // só existe o que já estava arquivado antes desta fase (ou um cartão
+  // que a professora reativou e arquivou de novo ANTES desta fase
+  // existir, mas nenhum daqui pra frente).
   return `
     <div class="profile-section">
       <div class="section-label">Cartões ativos (${activeCards.length})</div>
@@ -721,7 +958,7 @@ async function buildFlashcardsCardsBoxHTML(selectedStudents){
     </div>
     ${archivedCards.length ? `
     <div class="profile-section">
-      <div class="section-label">Arquivados (${archivedCards.length})</div>
+      <div class="section-label">Arquivados historicamente (${archivedCards.length})</div>
       ${archivedCards.map(c => flashcardCardRowHTML(c, showUsername)).join('')}
     </div>` : ''}
   `;
@@ -743,10 +980,26 @@ function wireFlashcardsCardsBox(cardsBox){
       openFlashcardPreviewFromRow(card, { appKey: card.language_app_key, origin: 'teacher' });
     });
   });
+  cardsBox.querySelectorAll('[data-move-card]').forEach(sel => {
+    sel.addEventListener('change', async () => {
+      if (!sel.value) return;
+      const card = ADMIN_FLASHCARDS_STATE._cardsCache.find(c => c.id === Number(sel.dataset.moveCard));
+      const list = card ? (ADMIN_FLASHCARDS_STATE.decksByLang[card.language_app_key] || []) : [];
+      const destination = getDeckById(list, Number(sel.value));
+      const res = card ? await setTeacherFlashcardDeck({ note: card, destination, decks: list }) : { ok: false, error: 'Cartão não encontrado.' };
+      if (!res.ok){ showToast(res.error || 'Não foi possível mover o cartão.'); sel.value = ''; return; }
+      showToast('✓ Cartão movido.');
+      const selectedStudents = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
+      cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
+      wireFlashcardsCardsBox(cardsBox);
+      const destBox = document.getElementById('admin-flashcard-destinations');
+      if (destBox) fillTeacherTreeLists(destBox, selectedStudents, {});
+    });
+  });
   cardsBox.querySelectorAll('[data-toggle-flashcard]').forEach(btn => {
     btn.addEventListener('click', async () => {
       await setFlashcardStatus(btn.dataset.toggleFlashcard, btn.dataset.nextStatus);
-      const selectedStudents = ADMIN_FLASHCARDS_STATE._studentsCache.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+      const selectedStudents = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
       cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
       wireFlashcardsCardsBox(cardsBox);
     });
@@ -760,8 +1013,9 @@ function wireFlashcardsCardsBox(cardsBox){
       // cartão for nativo, ou continua null (legado, sem toggle ainda
       // clicado) até a professora explicitamente pedir o editor novo.
       ADMIN_FLASHCARDS_STATE.editingNativeState = null;
+      ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
-      const selectedStudents = ADMIN_FLASHCARDS_STATE._studentsCache.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+      const selectedStudents = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
       cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
       wireFlashcardsCardsBox(cardsBox);
     });
@@ -771,9 +1025,11 @@ function wireFlashcardsCardsBox(cardsBox){
       if (!confirm('Isso vai apagar o cartão e todo o histórico de revisão permanentemente. Não pode ser desfeito. Continuar?')) return;
       await deleteFlashcardPermanently(btn.dataset.deleteFlashcard);
       showToast('Cartão apagado.');
-      const selectedStudents = ADMIN_FLASHCARDS_STATE._studentsCache.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+      const selectedStudents = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
       cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
       wireFlashcardsCardsBox(cardsBox);
+      const destBox = document.getElementById('admin-flashcard-destinations');
+      if (destBox) fillTeacherTreeLists(destBox, selectedStudents, {});
     });
   });
   // Se um cartão está em edição, o HTML acima já renderizou
@@ -796,19 +1052,19 @@ function wireFlashcardsCardsBox(cardsBox){
 // chamada por: mudar um checkbox, "Selecionar todos", "Limpar seleção",
 // e o filtro de idioma. Nunca toca em #admin-create-flashcard-form.
 async function updateFlashcardsSelectionDependentUI(wrap){
-  // Fase 2 da reestruturação (ver CLAUDE.md) -- trocar a seleção de
-  // alunos pode mudar se pinyin (mandarim) é exigido no modo cloze;
-  // limpa erros de campo já marcados pra não deixar um aviso "obrigatório
-  // pra aluno de mandarim" preso na tela depois que ela desmarcou o único
-  // aluno de mandarim da seleção.
-  clearAllFlashcardFieldErrors();
   const students = ADMIN_FLASHCARDS_STATE._studentsCache;
-  const selectedStudents = students.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+  // (langFilter normalizado ANTES de calcular a seleção efetiva -- H8)
+  const langsPresent = [...new Set(students.map(s => s.language_app_key))];
+  if (langsPresent.length > 1 && !langsPresent.includes(ADMIN_FLASHCARDS_STATE.langFilter)){
+    ADMIN_FLASHCARDS_STATE.langFilter = langsPresent[0];
+  }
+  const selectedStudents = adminSelectedStudents(students);
   const anyMandarim = selectedStudents.some(s => s.language_app_key === 'mandarim');
   // Fase 6D.5 (ver CLAUDE.md) -- mesma regra do render inicial: só o
-  // booleano relevante pra validação (compareAnswer/pinyin obrigatório),
-  // mutação pura de estado, NUNCA dispara re-render da caixa "Campos
-  // nativos" (que só re-renderiza por sua própria mudança estrutural).
+  // booleano relevante pra validação (compareAnswer/pinyin obrigatório de
+  // um Cloze/Digite a resposta em mandarim), mutação pura de estado, NUNCA
+  // dispara re-render da caixa "Campos" (que só re-renderiza por sua
+  // própria mudança estrutural).
   ADMIN_FLASHCARDS_STATE.nativeCardState.languageAppKey = anyMandarim ? 'mandarim' : null;
   const selectionCountLabel = selectedStudents.length === 0
     ? 'Nenhum aluno selecionado'
@@ -827,40 +1083,13 @@ async function updateFlashcardsSelectionDependentUI(wrap){
   const contentHint = document.getElementById('admin-flashcard-content-hint');
   if (contentHint) contentHint.style.display = selectedStudents.length ? 'none' : '';
 
-  const modeChecked = wrap.querySelector('input[name="admin-flashcard-mode"]:checked')?.value;
-
-  const frontInput = document.getElementById('admin-flashcard-front');
-  if (frontInput) frontInput.placeholder = anyMandarim ? 'ex: 图书馆' : 'ex: la bibliothèque';
-
-  const pinyinWrap = document.getElementById('admin-flashcard-pinyin-wrap');
-  if (pinyinWrap) pinyinWrap.style.display = anyMandarim ? '' : 'none';
-
-  // Seletor de direção (Prop 1+2, grillado): não se aplica ao zh -- hanzi
-  // (front_pinyin+back_hanzi) é um par inseparável, sem back_pinyin pra
-  // completar a inversão -- ver CLAUDE.md pra achado completo. Também não
-  // se aplica ao modo cloze (não tem noção de "frente"/"verso").
-  const directionWrap = document.getElementById('admin-flashcard-direction-wrap');
-  if (directionWrap) directionWrap.style.display = (!anyMandarim && modeChecked !== 'cloze') ? '' : 'none';
-  const directionLabels = adminFlashcardDirectionLabels(selectedStudents);
-  const directionTargetLabel = document.getElementById('admin-flashcard-direction-target-label');
-  if (directionTargetLabel) directionTargetLabel.textContent = directionLabels.targetFirst;
-  const directionNativeLabel = document.getElementById('admin-flashcard-direction-native-label');
-  if (directionNativeLabel) directionNativeLabel.textContent = directionLabels.nativeFirst;
-
-  const clozeSentenceInput = document.getElementById('admin-flashcard-cloze-sentence');
-  if (clozeSentenceInput) clozeSentenceInput.placeholder = anyMandarim ? 'ex: 我 ___ 巴西人。' : 'ex: Je ___ de Paris.';
-  const clozeAnswerInput = document.getElementById('admin-flashcard-cloze-answer');
-  if (clozeAnswerInput) clozeAnswerInput.placeholder = anyMandarim ? 'ex: 是' : 'ex: viens';
-  const clozePinyinWrap = document.getElementById('admin-flashcard-cloze-pinyin-wrap');
-  if (clozePinyinWrap){
-    clozePinyinWrap.style.display = (modeChecked === 'cloze' && anyMandarim) ? '' : 'none';
-  }
-
   const btn = document.getElementById('admin-create-flashcard-btn');
   if (btn){
     btn.disabled = !selectedStudents.length;
     btn.textContent = `Criar cartão${selectedStudents.length > 1 ? ` pra ${selectedStudents.length} alunos` : ''}`;
   }
+
+  await refreshTeacherDestinationsUI();
 
   const cardsBox = document.getElementById('admin-flashcards-cards-box');
   if (cardsBox){
@@ -884,150 +1113,14 @@ function applyFlashcardPickerFilters(wrap){
   });
 }
 
-// Fase 2 da reestruturação do formulário de flashcards (ver CLAUDE.md) --
-// validação contextual por campo: borda vermelha + mensagem específica
-// embaixo do campo (mesmo par border-color/background já usado em
-// .gram-exercise.wrong input/.mc-option.incorrect, zero cor nova), em vez
-// de só uma frase genérica no rodapé do formulário. createFlashcard()
-// continua sendo a fonte de verdade da validação (client-side é só a
-// camada de UX na frente, mesmo nível de confiança de outros gates de UI
-// já existentes no app -- ver Fase 5.1 no CLAUDE.md).
-function markFlashcardFieldInvalid(inputId, errorId, message){
-  const input = document.getElementById(inputId);
-  const errEl = document.getElementById(errorId);
-  if (input) input.classList.add('field-invalid');
-  if (errEl) errEl.textContent = message;
-}
-
-function clearFlashcardFieldInvalid(inputId, errorId){
-  const input = document.getElementById(inputId);
-  const errEl = document.getElementById(errorId);
-  if (input) input.classList.remove('field-invalid');
-  if (errEl) errEl.textContent = '';
-}
-
-const FLASHCARD_FIELD_IDS = [
-  ['admin-flashcard-front', 'admin-flashcard-front-error'],
-  ['admin-flashcard-back', 'admin-flashcard-back-error'],
-  ['admin-flashcard-mc-1', 'admin-flashcard-mc-error'],
-  ['admin-flashcard-cloze-sentence', 'admin-flashcard-cloze-sentence-error'],
-  ['admin-flashcard-cloze-answer', 'admin-flashcard-cloze-answer-error'],
-  ['admin-flashcard-cloze-pinyin', 'admin-flashcard-cloze-pinyin-error'],
-  ['admin-flashcard-cloze-trans', 'admin-flashcard-cloze-trans-error'],
-];
-
-function clearAllFlashcardFieldErrors(){
-  FLASHCARD_FIELD_IDS.forEach(([inputId, errorId]) => clearFlashcardFieldInvalid(inputId, errorId));
-}
-
-// Valida só os campos que pertencem ao MODO atualmente selecionado --
-// campos escondidos (ex: Frente no modo cloze) nunca são marcados
-// inválidos, mesmo que vazios, porque não fazem parte do cartão que será
-// criado nesse modo. Devolve `true`/`false`; ao devolver `false`, já
-// marcou cada campo problemático e focou o primeiro.
-function validateFlashcardForm(wrap){
-  const mode = wrap.querySelector('input[name="admin-flashcard-mode"]:checked').value;
-  const isMC = mode === 'mc';
-  const isCloze = mode === 'cloze';
-  const anyMandarimNow = ADMIN_FLASHCARDS_STATE._studentsCache.some(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id) && s.language_app_key === 'mandarim');
-  clearAllFlashcardFieldErrors();
-  let ok = true;
-  let firstInvalid = null;
-  function fail(inputId, errorId, message){
-    markFlashcardFieldInvalid(inputId, errorId, message);
-    if (!firstInvalid) firstInvalid = document.getElementById(inputId);
-    ok = false;
-  }
-
-  if (!isCloze){
-    if (!document.getElementById('admin-flashcard-front').value.trim()){
-      fail('admin-flashcard-front', 'admin-flashcard-front-error', 'Obrigatório.');
-    }
-    if (!document.getElementById('admin-flashcard-back').value.trim()){
-      fail('admin-flashcard-back', 'admin-flashcard-back-error', 'Obrigatório.');
-    }
-    if (isMC){
-      const anyChoiceFilled = ['admin-flashcard-mc-1', 'admin-flashcard-mc-2', 'admin-flashcard-mc-3']
-        .some(id => document.getElementById(id).value.trim());
-      if (!anyChoiceFilled){
-        fail('admin-flashcard-mc-1', 'admin-flashcard-mc-error', 'Digite pelo menos 1 opção errada.');
-      }
-    }
-  } else {
-    const sentence = document.getElementById('admin-flashcard-cloze-sentence').value.trim();
-    const blankCount = (sentence.match(/___/g) || []).length;
-    if (!sentence){
-      fail('admin-flashcard-cloze-sentence', 'admin-flashcard-cloze-sentence-error', 'Obrigatório.');
-    } else if (blankCount !== 1){
-      fail('admin-flashcard-cloze-sentence', 'admin-flashcard-cloze-sentence-error', 'Precisa ter exatamente um espaço marcado com ___.');
-    }
-    if (!document.getElementById('admin-flashcard-cloze-answer').value.trim()){
-      fail('admin-flashcard-cloze-answer', 'admin-flashcard-cloze-answer-error', 'Obrigatório.');
-    }
-    if (anyMandarimNow && !document.getElementById('admin-flashcard-cloze-pinyin').value.trim()){
-      fail('admin-flashcard-cloze-pinyin', 'admin-flashcard-cloze-pinyin-error', 'Obrigatório pra aluno(s) de mandarim.');
-    }
-    if (!document.getElementById('admin-flashcard-cloze-trans').value.trim()){
-      fail('admin-flashcard-cloze-trans', 'admin-flashcard-cloze-trans-error', 'Obrigatório.');
-    }
-  }
-
-  if (firstInvalid) firstInvalid.focus();
-  return ok;
-}
-
-// Validação em tempo real: cada campo obrigatório valida no blur (assim
-// que a professora sai dele, não só quando ela clica "Criar cartão") e
-// limpa o próprio erro assim que ela volta a digitar -- feedback
-// imediato nos dois sentidos, sem esperar o submit pra descobrir o que
-// falta. `validateFlashcardForm()` continua sendo a checagem completa e
-// definitiva rodada no submit (cobre também campos que a professora
-// nunca chegou a tocar).
-function wireFlashcardFieldValidation(wrap){
-  const currentMode = () => wrap.querySelector('input[name="admin-flashcard-mode"]:checked').value;
-  const anyMandarimNow = () => ADMIN_FLASHCARDS_STATE._studentsCache.some(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id) && s.language_app_key === 'mandarim');
-
-  function onBlurRequired(inputId, errorId, relevantModes){
-    const input = document.getElementById(inputId);
-    input.addEventListener('blur', () => {
-      if (!relevantModes.includes(currentMode())) return;
-      if (!input.value.trim()) markFlashcardFieldInvalid(inputId, errorId, 'Obrigatório.');
-    });
-    input.addEventListener('input', () => clearFlashcardFieldInvalid(inputId, errorId));
-  }
-
-  onBlurRequired('admin-flashcard-front', 'admin-flashcard-front-error', ['flip', 'mc']);
-  onBlurRequired('admin-flashcard-back', 'admin-flashcard-back-error', ['flip', 'mc']);
-  onBlurRequired('admin-flashcard-cloze-answer', 'admin-flashcard-cloze-answer-error', ['cloze']);
-  onBlurRequired('admin-flashcard-cloze-trans', 'admin-flashcard-cloze-trans-error', ['cloze']);
-
-  ['admin-flashcard-mc-1', 'admin-flashcard-mc-2', 'admin-flashcard-mc-3'].forEach(id => {
-    const input = document.getElementById(id);
-    input.addEventListener('blur', () => {
-      if (currentMode() !== 'mc') return;
-      const anyFilled = ['admin-flashcard-mc-1', 'admin-flashcard-mc-2', 'admin-flashcard-mc-3']
-        .some(i => document.getElementById(i).value.trim());
-      if (!anyFilled) markFlashcardFieldInvalid('admin-flashcard-mc-1', 'admin-flashcard-mc-error', 'Digite pelo menos 1 opção errada.');
-    });
-    input.addEventListener('input', () => clearFlashcardFieldInvalid('admin-flashcard-mc-1', 'admin-flashcard-mc-error'));
-  });
-
-  const clozeSentence = document.getElementById('admin-flashcard-cloze-sentence');
-  clozeSentence.addEventListener('blur', () => {
-    if (currentMode() !== 'cloze') return;
-    const v = clozeSentence.value.trim();
-    if (!v) markFlashcardFieldInvalid('admin-flashcard-cloze-sentence', 'admin-flashcard-cloze-sentence-error', 'Obrigatório.');
-    else if ((v.match(/___/g) || []).length !== 1) markFlashcardFieldInvalid('admin-flashcard-cloze-sentence', 'admin-flashcard-cloze-sentence-error', 'Precisa ter exatamente um espaço marcado com ___.');
-  });
-  clozeSentence.addEventListener('input', () => clearFlashcardFieldInvalid('admin-flashcard-cloze-sentence', 'admin-flashcard-cloze-sentence-error'));
-
-  const clozePinyin = document.getElementById('admin-flashcard-cloze-pinyin');
-  clozePinyin.addEventListener('blur', () => {
-    if (currentMode() !== 'cloze' || !anyMandarimNow()) return;
-    if (!clozePinyin.value.trim()) markFlashcardFieldInvalid('admin-flashcard-cloze-pinyin', 'admin-flashcard-cloze-pinyin-error', 'Obrigatório pra aluno(s) de mandarim.');
-  });
-  clozePinyin.addEventListener('input', () => clearFlashcardFieldInvalid('admin-flashcard-cloze-pinyin', 'admin-flashcard-cloze-pinyin-error'));
-}
+// CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- markFlashcardFieldInvalid/
+// clearFlashcardFieldInvalid/FLASHCARD_FIELD_IDS/clearAllFlashcardFieldErrors/
+// validateFlashcardForm/wireFlashcardFieldValidation (validação contextual
+// por campo do formulário legado de CRIAÇÃO -- "Modo de prática"/Frente/
+// Verso/campos de MC/Cloze legados) foram removidas: existiam só pra
+// validar um formulário que não existe mais na tela de criação (ver
+// renderAdminFlashcardsView abaixo -- só o editor nativo, sem bifurcação
+// legacy/native). Nenhuma outra função deste arquivo as chamava.
 
 async function renderAdminFlashcardsView(){
   const wrap = document.getElementById('admin-flashcards-content');
@@ -1043,9 +1136,16 @@ async function renderAdminFlashcardsView(){
   // (re-render incremental por seleção de aluno/idioma) -- só aqui.
   ADMIN_FLASHCARDS_STATE.nativeCardState = createNativeNoteEditorState({ cardGenerationMode: 'normal' });
   ADMIN_FLASHCARDS_STATE.editingNativeState = null;
+  ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
+  // Fase G -- Decks sempre relidos num render completo (ex.: depois de um
+  // submit); destByStudent (destino escolhido por aluno) é preservado pra
+  // professora continuar criando no mesmo Deck.
+  ADMIN_FLASHCARDS_STATE.decksByLang = {};
   wrap.innerHTML = loadingHTML();
 
-  const students = await fetchMyStudents();
+  // Fase H (H6) -- só vínculos ATIVOS aparecem: professora sem vínculo ativo
+  // não cria Teacher Decks nem Teacher Cards (o banco também recusa, 055).
+  const students = (await fetchMyStudents()).filter(x => x.status === 'active');
   if (!students.length){
     wrap.innerHTML = `<p class="profile-empty-note">Vincule um aluno primeiro, na aba "🎓 Alunos", pra poder criar flashcards pra ele.</p>`;
     return;
@@ -1058,7 +1158,12 @@ async function renderAdminFlashcardsView(){
   const validIds = new Set(students.map(s => s.student_id));
   ADMIN_FLASHCARDS_STATE.studentIds = new Set([...ADMIN_FLASHCARDS_STATE.studentIds].filter(id => validIds.has(id)));
 
-  const selectedStudents = students.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+  // (langFilter normalizado ANTES de calcular a seleção efetiva -- H8)
+  const langsPresent = [...new Set(students.map(s => s.language_app_key))];
+  if (langsPresent.length > 1 && !langsPresent.includes(ADMIN_FLASHCARDS_STATE.langFilter)){
+    ADMIN_FLASHCARDS_STATE.langFilter = langsPresent[0];
+  }
+  const selectedStudents = adminSelectedStudents(students);
   const anyMandarim = selectedStudents.some(s => s.language_app_key === 'mandarim');
   // Fase 6D.5 (ver CLAUDE.md) -- languageAppKey do editor nativo espelha o
   // mesmo sinal `anyMandarim` que o resto desta função já usa pra decidir
@@ -1084,10 +1189,6 @@ async function renderAdminFlashcardsView(){
   // gera pronúncia errada pra quem não é do idioma escolhido no momento da
   // criação. Sempre exatamente 1 idioma ativo quando há 2+ presentes -- o
   // filtro deixa de ser "visualização", vira a própria trava de seleção.
-  const langsPresent = [...new Set(students.map(s => s.language_app_key))];
-  if (langsPresent.length > 1 && !langsPresent.includes(ADMIN_FLASHCARDS_STATE.langFilter)){
-    ADMIN_FLASHCARDS_STATE.langFilter = langsPresent[0];
-  }
   const langFilterHTML = langsPresent.length > 1 ? `
     <div class="leaderboard-tabs" role="tablist" aria-label="Filtrar por idioma" style="justify-content:flex-start; margin-bottom:8px;">
       ${langsPresent.map(key => `<button type="button" class="leaderboard-tab ${ADMIN_FLASHCARDS_STATE.langFilter === key ? 'active' : ''}" data-lang-filter="${key}">${STUDENT_LANGUAGE_LABELS[key] || key} (${students.filter(s => s.language_app_key === key).length})</button>`).join('')}
@@ -1128,115 +1229,37 @@ async function renderAdminFlashcardsView(){
       </div>
     </div>
 
+    <div class="profile-section" id="admin-flashcard-dest-section">
+      <div class="section-label">Destino (Deck de cada aluno)</div>
+      <p class="profile-edit-hint">Cada aluno tem a sua própria árvore de Decks. Por padrão o cartão vai para "Cartões da professora" do aluno; escolha um subdeck se quiser organizar.</p>
+      <div id="admin-flashcard-destinations"></div>
+    </div>
+
     <div class="profile-section">
       <div class="section-label">Cartão<span id="admin-flashcard-content-subtitle">${newCardSubtitle}</span></div>
       <p class="profile-edit-hint" id="admin-flashcard-content-hint" style="${selectedStudents.length ? 'display:none;' : ''}">Selecione ao menos um aluno acima pra poder criar o cartão.</p>
+      <!-- CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- único fluxo de criação: Tipo de
+           cartão -> Campos -> Pré-visualizar -> Salvar. O formulário legado
+           (Modo de prática/Idioma de cada lado/Frente-Verso/Recursos
+           opcionais no nível do cartão) foi removido da CRIAÇÃO -- continua
+           existindo só pra EDIÇÃO de cartão legado já existente
+           (flashcardEditFormHTML, abaixo), nunca mais como opção de criar
+           um cartão novo. Direção de revisão deixou de ser um controle
+           próprio -- cada Field agora escolhe seu próprio idioma
+           (renderFieldEditorHTML, shared/flashcard-field-editor.js). -->
       <form id="admin-create-flashcard-form" class="profile-edit-form">
-        <div class="section-label" style="margin:0 0 6px;">Modo de prática</div>
-        <p class="profile-edit-hint" style="margin-top:-2px;">Como o aluno vai responder este cartão -- decide os campos abaixo.</p>
-        <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
-          <input type="radio" name="admin-flashcard-mode" value="flip" checked>
-          Flashcard normal -- vira o cartão pra ver a resposta
-        </label>
-        <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
-          <input type="radio" name="admin-flashcard-mode" value="mc">
-          Múltipla escolha -- escolhe entre opções
-        </label>
-        <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
-          <input type="radio" name="admin-flashcard-mode" value="cloze">
-          Completar a frase -- digita a palavra que falta
-        </label>
-
-        <!-- Prop 1+2 (ver CLAUDE.md, "7 propostas") -- qual lado tem o
-             idioma estudado; decide (a) o rótulo dos campos abaixo e (b)
-             qual lado recebe a pronúncia automática. Só aparece quando
-             NENHUMA aluna selecionada é de mandarim -- não existe um
-             "back_pinyin" pra completar o par hanzi+pinyin se invertido
-             no zh (ver comentário em fr/zh app.js, buildCardFromTeacherFlashcard). -->
-        <div id="admin-flashcard-direction-wrap" style="${anyMandarim ? 'display:none;' : ''}">
-          <div class="section-label" style="margin:18px 0 4px;">Idioma de cada lado</div>
-          <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
-            <input type="radio" name="admin-flashcard-direction" value="target-front" checked>
-            <span id="admin-flashcard-direction-target-label">${adminFlashcardDirectionLabels(selectedStudents).targetFirst}</span>
-          </label>
-          <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
-            <input type="radio" name="admin-flashcard-direction" value="target-back">
-            <span id="admin-flashcard-direction-native-label">${adminFlashcardDirectionLabels(selectedStudents).nativeFirst}</span>
-          </label>
-        </div>
-
-        <!-- Fase 6D.2 da reestruturação Note/CardType/CardInstance (ver
-             CLAUDE.md) -- seletor NOVO, aditivo, ao lado do "Modo de
-             prática" legado acima (que continua existindo e continua
-             sendo o único lido na hora de salvar). Este seletor só existe
-             pra provar a seleção explícita de Card Type contra o novo
-             estado nativo (ADMIN_FLASHCARDS_STATE.nativeCardState) --
-             zero efeito no cartão criado nesta subfase. -->
-        <div class="section-label" style="margin:18px 0 4px;">Card Type (novo motor, Fase 6D)</div>
-        <p class="profile-edit-hint" style="margin-top:-2px;">Escolha o tipo do cartão nativo abaixo. Só vale se você preencher "Campos nativos" -- deixando aquela seção vazia, o "Modo de prática" acima continua decidindo o cartão salvo.</p>
+        <div class="section-label" style="margin:0 0 4px;">Tipo de cartão</div>
         <select id="admin-flashcard-card-type-preview" class="profile-edit-input">
           ${CARD_TYPE_UI_META.map(t => `<option value="${t.id}" ${t.id === 'normal' ? 'selected' : ''}>${t.label}</option>`).join('')}
         </select>
 
-        <!-- Fase 6D.3 da reestruturação Note/CardType/CardInstance (ver
-             CLAUDE.md) -- editor de Fields nativos reutilizável
-             (shared/flashcard-field-editor.js), conectado a
-             ADMIN_FLASHCARDS_STATE.nativeCardState.fields. Mesmo espírito
-             aditivo do seletor de Card Type acima (Fase 6D.2): não afeta o
-             cartão criado nesta subfase, o "Modo de prática" legado
-             continua sendo o único lido no submit. -->
-        <div class="section-label" style="margin:14px 0 4px;">Campos nativos (novo motor, Fase 6D)</div>
-        <p class="profile-edit-hint" style="margin-top:-2px;">Assim que você adicionar um campo aqui, ELE (não o "Conteúdo" abaixo) vira o cartão salvo ao clicar "Criar cartão". Deixe vazio pra continuar usando o formulário de sempre.</p>
+        <div class="section-label" style="margin:14px 0 4px;">Campos</div>
+        <p class="profile-edit-hint" style="margin-top:-2px;">Adicione os campos deste cartão -- por exemplo, Frente e Verso pra um cartão Normal. Cada campo tem seu próprio idioma e seus próprios recursos de áudio.</p>
         <div id="admin-flashcard-native-fields"></div>
         <button type="button" class="admin-select-link" id="admin-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; margin:6px 0 0;">👁️ Pré-visualizar</button>
 
-        <div class="section-label" style="margin:18px 0 6px;">Conteúdo</div>
-        <div id="admin-flashcard-content-main">
-          <label class="profile-edit-label" id="admin-flashcard-front-label" for="admin-flashcard-front">Frente</label>
-          <textarea id="admin-flashcard-front" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="${anyMandarim ? 'ex: 图书馆' : 'ex: la bibliothèque'}"></textarea>
-          <p class="profile-edit-field-error" id="admin-flashcard-front-error"></p>
-          <div id="admin-flashcard-pinyin-wrap" style="${anyMandarim ? '' : 'display:none;'}">
-            <label class="profile-edit-label" for="admin-flashcard-pinyin">Pinyin (usado só nos alunos de mandarim selecionados)</label>
-            <input type="text" id="admin-flashcard-pinyin" class="profile-edit-input" placeholder="ex: túshūguǎn" autocomplete="off">
-          </div>
-          <label class="profile-edit-label" id="admin-flashcard-back-label" for="admin-flashcard-back">Verso</label>
-          <textarea id="admin-flashcard-back" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="ex: a biblioteca"></textarea>
-          <p class="profile-edit-field-error" id="admin-flashcard-back-error"></p>
-          <div id="admin-flashcard-mc-fields" style="display:none; margin:4px 0 0;">
-            <label class="profile-edit-label" for="admin-flashcard-mc-1">Outras opções -- opção errada 1</label>
-            <input type="text" id="admin-flashcard-mc-1" class="profile-edit-input" autocomplete="off">
-            <p class="profile-edit-field-error" id="admin-flashcard-mc-error"></p>
-            <label class="profile-edit-label" for="admin-flashcard-mc-2">Opção errada 2 (opcional)</label>
-            <input type="text" id="admin-flashcard-mc-2" class="profile-edit-input" autocomplete="off">
-            <label class="profile-edit-label" for="admin-flashcard-mc-3">Opção errada 3 (opcional)</label>
-            <input type="text" id="admin-flashcard-mc-3" class="profile-edit-input" autocomplete="off">
-          </div>
-        </div>
-        <div id="admin-flashcard-content-cloze" style="display:none;">
-          <label class="profile-edit-label" for="admin-flashcard-cloze-sentence">Frase com lacuna (use ___ pra marcar o espaço)</label>
-          <input type="text" id="admin-flashcard-cloze-sentence" class="profile-edit-input" placeholder="${anyMandarim ? 'ex: 我 ___ 巴西人。' : 'ex: Je ___ de Paris.'}" autocomplete="off">
-          <p class="profile-edit-field-error" id="admin-flashcard-cloze-sentence-error"></p>
-          <label class="profile-edit-label" for="admin-flashcard-cloze-answer">Resposta certa</label>
-          <input type="text" id="admin-flashcard-cloze-answer" class="profile-edit-input" placeholder="${anyMandarim ? 'ex: 是' : 'ex: viens'}" autocomplete="off">
-          <p class="profile-edit-field-error" id="admin-flashcard-cloze-answer-error"></p>
-          <div id="admin-flashcard-cloze-pinyin-wrap" style="display:none;">
-            <label class="profile-edit-label" for="admin-flashcard-cloze-pinyin">Pinyin da resposta (é o que o aluno vai digitar)</label>
-            <input type="text" id="admin-flashcard-cloze-pinyin" class="profile-edit-input" placeholder="ex: shì" autocomplete="off">
-            <p class="profile-edit-field-error" id="admin-flashcard-cloze-pinyin-error"></p>
-          </div>
-          <label class="profile-edit-label" for="admin-flashcard-cloze-trans">Tradução (mostrada ao aluno depois de responder)</label>
-          <input type="text" id="admin-flashcard-cloze-trans" class="profile-edit-input" placeholder="ex: Eu venho de Paris." autocomplete="off">
-          <p class="profile-edit-field-error" id="admin-flashcard-cloze-trans-error"></p>
-        </div>
-
-        <div class="section-label" style="margin:18px 0 6px;">Recursos opcionais</div>
-        <p class="profile-edit-hint" id="admin-flashcard-resources-hint" style="margin-top:-2px;">${FLASHCARD_RESOURCES_HINT.flip}</p>
-        <label class="profile-edit-label" for="admin-flashcard-note">Nota</label>
+        <label class="profile-edit-label" for="admin-flashcard-note" style="margin-top:14px;">Nota (privada -- o aluno nunca vê)</label>
         <textarea id="admin-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="contexto, dica de uso..."></textarea>
-        <label class="profile-edit-label" for="admin-flashcard-image">Imagem</label>
-        <input type="file" id="admin-flashcard-image" class="profile-edit-input" accept="image/*">
-        <label class="profile-edit-label" for="admin-flashcard-audio">Áudio próprio (além da pronúncia automática)</label>
-        <input type="file" id="admin-flashcard-audio" class="profile-edit-input" accept="audio/*">
 
         <p class="profile-edit-error" id="admin-create-flashcard-error"></p>
         <button type="submit" class="btn btn-primary btn-block" id="admin-create-flashcard-btn" ${selectedStudents.length ? '' : 'disabled'}>Criar cartão${selectedStudents.length > 1 ? ` pra ${selectedStudents.length} alunos` : ''}</button>
@@ -1297,51 +1320,12 @@ async function renderAdminFlashcardsView(){
 
   document.getElementById('admin-flashcard-search').addEventListener('input', () => applyFlashcardPickerFilters(wrap));
 
-  // "Modo de prática" é um radio group (name="admin-flashcard-mode") --
-  // exclusividade entre Flashcard normal/Múltipla escolha/Completar a
-  // frase já vem de graça do próprio HTML, não precisa de JS forçando.
-  // Fase 1 da reestruturação (ver CLAUDE.md): o modo agora decide qual
-  // bloco de Conteúdo aparece -- #admin-flashcard-content-main (Frente/
-  // Verso/pinyin, reaproveitado tanto por Flashcard normal quanto por
-  // Múltipla escolha -- só os RÓTULOS mudam, "Frente"/"Verso" vs.
-  // "Pergunta/termo"/"Resposta correta") ou #admin-flashcard-content-cloze
-  // (Frase com lacuna/Resposta certa/Tradução, campos próprios). Os campos
-  // que não pertencem ao modo selecionado ficam genuinamente escondidos,
-  // não só reordenados.
-  wrap.querySelectorAll('input[name="admin-flashcard-mode"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      const mode = e.target.value;
-      document.getElementById('admin-flashcard-content-main').style.display = mode === 'cloze' ? 'none' : '';
-      document.getElementById('admin-flashcard-content-cloze').style.display = mode === 'cloze' ? '' : 'none';
-      document.getElementById('admin-flashcard-mc-fields').style.display = mode === 'mc' ? '' : 'none';
-      document.getElementById('admin-flashcard-front-label').textContent = mode === 'mc' ? 'Pergunta/termo' : 'Frente';
-      document.getElementById('admin-flashcard-back-label').textContent = mode === 'mc' ? 'Resposta correta' : 'Verso';
-      const anyMandarimNow = ADMIN_FLASHCARDS_STATE._studentsCache.some(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id) && s.language_app_key === 'mandarim');
-      document.getElementById('admin-flashcard-cloze-pinyin-wrap').style.display = (mode === 'cloze' && anyMandarimNow) ? '' : 'none';
-      // Prop 1+2 (grillado, ver CLAUDE.md): direção não se aplica ao modo
-      // cloze (sem noção de frente/verso) nem ao zh (par hanzi/pinyin
-      // inseparável) -- o wrap já nasce escondido pro zh (ver HTML).
-      const directionWrapEl = document.getElementById('admin-flashcard-direction-wrap');
-      if (directionWrapEl && !anyMandarimNow) directionWrapEl.style.display = mode === 'cloze' ? 'none' : '';
-      // Fase 4 da reestruturação (ver CLAUDE.md) -- texto de apoio de
-      // "Recursos opcionais" muda conforme o modo (Imagem/Áudio continuam
-      // sempre visíveis nos 3, só a explicação de ONDE eles aparecem muda).
-      document.getElementById('admin-flashcard-resources-hint').textContent = FLASHCARD_RESOURCES_HINT[mode];
-      // Fase 2 da reestruturação (ver CLAUDE.md) -- trocar de modo esconde
-      // um bloco de campo inteiro; nenhum erro marcado nele deveria
-      // continuar visível quando ele reaparecer num estado limpo.
-      clearAllFlashcardFieldErrors();
-    });
-  });
-
-  // Fase 6D.2 (ver CLAUDE.md) -- seletor NOVO, puramente aditivo: só muta
+  // CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- único seletor de Card Type: muta
   // ADMIN_FLASHCARDS_STATE.nativeCardState.cardGenerationMode, nunca cria
-  // um campo paralelo/duplicado (`selectedCardType`/`isReverse`/etc.), não
-  // dispara nenhuma chamada de rede/gravação, e não altera a visibilidade
-  // dos blocos de Conteúdo legados (esses continuam controlados só pelo
-  // radio "Modo de prática" de sempre, ver listener acima). O submit
-  // handler abaixo continua lendo só o radio legado -- a persistência
-  // nativa (gravar fields/card_generation_mode de verdade) é a Fase 6D.6.
+  // um campo paralelo/duplicado (`selectedCardType`/`isReverse`/etc.). É
+  // este valor que decide de verdade o cartão salvo -- não existe mais
+  // nenhum "Modo de prática" concorrente nem bifurcação legacy/native no
+  // submit (ver handler abaixo).
   document.getElementById('admin-flashcard-card-type-preview')?.addEventListener('change', (e) => {
     const newMode = e.target.value;
     // Fase 6D.5 (ver CLAUDE.md, restrição 12) -- sair do modo cloze pra
@@ -1395,7 +1379,7 @@ async function renderAdminFlashcardsView(){
   // `rowId` real pra a Edge Function checar autorização contra).
   refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native', uploadFn: uploadFlashcardMedia, deleteFn: deleteFlashcardMedia, ttsFn: requestFieldAudioTTS, noteId: ADMIN_FLASHCARDS_STATE.nativeCardState.noteId });
 
-  wireFlashcardFieldValidation(wrap);
+  refreshTeacherDestinationsUI();
 
   document.getElementById('admin-create-flashcard-form').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -1403,7 +1387,7 @@ async function renderAdminFlashcardsView(){
     const errorEl = document.getElementById('admin-create-flashcard-error');
     errorEl.textContent = '';
 
-    const selectedNow = ADMIN_FLASHCARDS_STATE._studentsCache.filter(s => ADMIN_FLASHCARDS_STATE.studentIds.has(s.student_id));
+    const selectedNow = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
     if (!selectedNow.length){
       errorEl.textContent = 'Selecione ao menos um aluno.';
       return;
@@ -1421,160 +1405,69 @@ async function renderAdminFlashcardsView(){
     // cumprido por construção: nada aqui decide converter sozinho, só a
     // presença de conteúdo que a própria professora escolheu criar no
     // editor novo.
+    // CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- único caminho de criação: sempre
+    // nativo, sem bifurcação. "Nota" é a única leitura fora de
+    // nativeState/nativeState.fields -- texto simples sem ambiguidade de
+    // Card Type (lembrete privado da professora, nunca mostrado ao
+    // aluno). Imagem/áudio são recursos POR FIELD (dentro do editor
+    // nativo, ver "Campos" acima), nunca mais um upload solto no nível do
+    // cartão -- removidos daqui junto com o resto do formulário legado.
     const nativeState = ADMIN_FLASHCARDS_STATE.nativeCardState;
-    const useNative = isNativeNoteEditorState(nativeState) && (nativeState.fields || []).length > 0;
-    if (useNative){
-      // "Nota" é o único campo do bloco legado "Recursos opcionais" que
-      // faz sentido ler aqui -- é um texto simples sem ambiguidade de
-      // modo (mesmo papel em native/legacy: lembrete privado da
-      // professora, nunca mostrado ao aluno), fica visível na tela
-      // independente do Card Type escolhido. Imagem/áudio NÃO são lidos
-      // pro caminho nativo -- Seção 15 desta fase proíbe implementar
-      // upload/mídia nova; o editor de Field (6D.3) ainda não tem UI pra
-      // anexar mídia a um Field, só preserva o que já existir.
-      nativeState.privateNote = (document.getElementById('admin-flashcard-note').value || '').trim() || null;
-      const v = validateNoteEditorStateForSave(nativeState);
-      if (!v.ok){
-        errorEl.textContent = v.error;
-        return;
-      }
-      btn.disabled = true;
-      const results = await Promise.all(selectedNow.map(s => createFlashcard({
+    nativeState.privateNote = (document.getElementById('admin-flashcard-note').value || '').trim() || null;
+    const v = validateNoteEditorStateForSave(nativeState);
+    if (!v.ok){
+      errorEl.textContent = v.error;
+      return;
+    }
+    btn.disabled = true;
+    // Uma Note (linha em teacher_flashcards) POR aluno selecionado -- mesmo
+    // conteúdo/Fields, cada uma com o language_app_key do PRÓPRIO aluno
+    // (nunca compartilhando id/linha entre alunos, mesmo numa seleção
+    // mista fr+zh).
+    // Fase G -- cada aluno resolve o SEU destino (teacher_root dele por
+    // padrão, ou o subdeck escolhido pra ele) e cria a SUA linha: N criações
+    // independentes, cada uma atômica (Note+Fields+deck_id num só INSERT).
+    // NÃO existe atomicidade entre alunos: pode haver sucesso parcial, e uma
+    // falha nunca atribui o cartão ao Deck de outro aluno.
+    const results = await Promise.all(selectedNow.map(async s => {
+      const dest = await resolveTeacherCreationDeck({
+        studentId: s.student_id,
+        languageAppKey: s.language_app_key,
+        deckId: ADMIN_FLASHCARDS_STATE.destByStudent[adminDestKey(s)],
+        decks: ADMIN_FLASHCARDS_STATE.decksByLang[s.language_app_key],
+      });
+      if (!dest.ok) return { ok: false, error: dest.error, student: s };
+      const r = await createFlashcard({
         studentId: s.student_id,
         languageAppKey: s.language_app_key,
         nativeState,
-      })));
-      btn.disabled = false;
-      const failed = results.filter(r => !r.ok);
-      if (failed.length === results.length){
-        // Fase 7e (ver CLAUDE.md, Seção 14) -- TODAS as inserções
-        // falharam -- nenhuma linha real ficou de pé referenciando o
-        // áudio recém-enviado nesta sessão, seguro compensar. Se só
-        // PARTE falhou (vários alunos selecionados), o mesmo áudio já
-        // está referenciado pela(s) linha(s) que teve(tiveram) sucesso --
-        // nunca compensa nesse caso.
-        compensateFreshMediaUploads(nativeState);
-        errorEl.textContent = failed[0].error;
-        return;
-      }
-      clearFreshMediaUploads(nativeState);
-      const okCount = results.length - failed.length;
-      if (failed.length){
-        showToast(`✓ ${okCount} cartão(ões) criado(s), ${failed.length} falharam.`);
-      } else {
-        showToast(results.length > 1 ? `✓ ${okCount} cartões criados.` : '✓ Cartão criado.');
-      }
-      renderAdminFlashcardsView();
-      return;
-    }
-
-    // Fase 2 da reestruturação (ver CLAUDE.md) -- validação contextual por
-    // campo RODA ANTES do upload de mídia/chamada de rede, não só depois:
-    // evita subir imagem/áudio à toa quando o resto do formulário ainda
-    // está inválido, e mostra exatamente qual campo corrigir (borda +
-    // mensagem embaixo dele) em vez de só uma frase genérica no rodapé.
-    // createFlashcard() continua validando de novo do lado do dado -- isto
-    // é só a camada de UX na frente, mesmo espírito de outros gates de UI
-    // já existentes no app.
-    if (!validateFlashcardForm(wrap)){
-      errorEl.textContent = 'Corrija os campos destacados acima.';
-      return;
-    }
-
-    btn.disabled = true;
-
-    // Fase 8a -- upload de imagem/áudio ANTES de criar o(s) cartão(ões) (a
-    // URL pública precisa existir pra gravar junto no insert). Feito UMA
-    // vez só, mesmo com vários alunos selecionados -- o arquivo é o mesmo
-    // pra todos, reenviar por aluno seria desperdício de banda/Storage.
-    const imageFile = document.getElementById('admin-flashcard-image').files[0];
-    const audioFile = document.getElementById('admin-flashcard-audio').files[0];
-    let imageUrl = null, audioUrl = null;
-    if (imageFile){
-      const up = await uploadFlashcardMedia(imageFile, 'image');
-      if (!up.ok){ btn.disabled = false; errorEl.textContent = up.error; return; }
-      imageUrl = up.url;
-    }
-    if (audioFile){
-      const up = await uploadFlashcardMedia(audioFile, 'audio');
-      if (!up.ok){ btn.disabled = false; errorEl.textContent = up.error; return; }
-      audioUrl = up.url;
-    }
-
-    const mode = wrap.querySelector('input[name="admin-flashcard-mode"]:checked').value;
-    const isMC = mode === 'mc';
-    const isCloze = mode === 'cloze';
-
-    // Múltipla escolha já foi validada (pelo menos 1 opção preenchida) em
-    // validateFlashcardForm() acima -- não precisa checar de novo aqui.
-    const choices = isMC ? [
-      document.getElementById('admin-flashcard-mc-1').value,
-      document.getElementById('admin-flashcard-mc-2').value,
-      document.getElementById('admin-flashcard-mc-3').value,
-    ] : [];
-
-    // Fase 1 da reestruturação (ver CLAUDE.md): no modo cloze, "Frente"
-    // não existe na tela (nunca lida/exibida em renderClozeReviewCard) --
-    // front some vazio, createFlashcard() grava `null` (migration 035),
-    // sem inventar um valor substituto. "Verso"/tradução continua sempre
-    // obrigatório em todo modo, só migra de input conforme o bloco visível
-    // (#admin-flashcard-back pro flip/mc, #admin-flashcard-cloze-trans pro
-    // cloze -- back_trans é o que renderClozeReviewCard mostra depois de
-    // responder).
-    const front = isCloze ? '' : document.getElementById('admin-flashcard-front').value;
-    const backTrans = isCloze ? document.getElementById('admin-flashcard-cloze-trans').value : document.getElementById('admin-flashcard-back').value;
-    const note = document.getElementById('admin-flashcard-note').value;
-    const pinyinValue = isCloze ? '' : document.getElementById('admin-flashcard-pinyin')?.value;
-
-    const clozeSentence = isCloze ? document.getElementById('admin-flashcard-cloze-sentence').value : '';
-    const clozeAnswer = isCloze ? document.getElementById('admin-flashcard-cloze-answer').value : '';
-    const clozeAnswerPinyin = isCloze ? document.getElementById('admin-flashcard-cloze-pinyin')?.value : '';
-
-    // Prop 1+2 (grillado, ver CLAUDE.md): direção só existe na UI quando o
-    // wrap está visível (não-cloze, não-mandarim) -- pra qualquer outro
-    // caso (cloze, ou seleção com mandarim) o padrão `true` (frente =
-    // idioma estudado) é o único comportamento que sempre existiu, então
-    // nunca lê um radio que pode nem estar renderizado.
-    const directionRadio = wrap.querySelector('input[name="admin-flashcard-direction"]:checked');
-    const frontIsTargetLanguage = directionRadio ? directionRadio.value !== 'target-back' : true;
-
-    // Uma linha em teacher_flashcards POR aluno selecionado -- mesmo
-    // conteúdo, cada uma com o language_app_key do PRÓPRIO aluno (nunca o
-    // de outro, mesmo numa seleção mista fr+zh). Pinyin (front E cloze) só
-    // vai junto pros que são de mandarim -- gravar pinyin numa linha de
-    // francês seria dado morto (nada no fr lê esses campos), então evita
-    // sujar o registro à toa.
-    const results = await Promise.all(selectedNow.map(s => createFlashcard({
-      studentId: s.student_id,
-      languageAppKey: s.language_app_key,
-      front,
-      backTrans,
-      note,
-      frontPinyin: s.language_app_key === 'mandarim' ? pinyinValue : '',
-      imageUrl, audioUrl, choices,
-      clozeSentence, clozeAnswer,
-      clozeAnswerPinyin: s.language_app_key === 'mandarim' ? clozeAnswerPinyin : '',
-      // zh nunca lê este campo (par hanzi/pinyin inseparável, ver
-      // CLAUDE.md) -- grava o padrão `true` pra linha de mandarim mesmo
-      // que uma seleção mista fr+zh tenha ficado com o wrap escondido.
-      frontIsTargetLanguage: s.language_app_key === 'mandarim' ? true : frontIsTargetLanguage,
-    })));
+        deckId: dest.deckId,
+      });
+      return Object.assign({ student: s }, r);
+    }));
     btn.disabled = false;
-
     const failed = results.filter(r => !r.ok);
     if (failed.length === results.length){
+      // Fase 7e (ver CLAUDE.md, Seção 14) -- TODAS as inserções
+      // falharam -- nenhuma linha real ficou de pé referenciando o
+      // áudio recém-enviado nesta sessão, seguro compensar. Se só
+      // PARTE falhou (vários alunos selecionados), o mesmo áudio já
+      // está referenciado pela(s) linha(s) que teve(tiveram) sucesso --
+      // nunca compensa nesse caso.
+      compensateFreshMediaUploads(nativeState);
       errorEl.textContent = failed[0].error;
       return;
     }
+    clearFreshMediaUploads(nativeState);
     const okCount = results.length - failed.length;
     if (failed.length){
-      showToast(`✓ ${okCount} cartão(ões) criado(s), ${failed.length} falharam.`);
+      showToast(`✓ ${okCount} cartão(ões) criado(s); falhou pra: ${failed.map(f => '@' + (f.student.username || '?')).join(', ')}.`);
     } else {
       showToast(results.length > 1 ? `✓ ${okCount} cartões criados.` : '✓ Cartão criado.');
     }
     // Único ponto onde um re-render COMPLETO acontece por causa da seleção
     // -- e é intencional aqui: um submit bem sucedido deve mesmo limpar o
-    // formulário (frente/verso/nota/mídia/modo), diferente de marcar um
+    // formulário (Card Type/Campos/Nota), diferente de marcar um
     // checkbox, que não deveria apagar nada.
     renderAdminFlashcardsView();
   });

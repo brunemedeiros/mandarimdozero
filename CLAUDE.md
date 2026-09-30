@@ -14906,6 +14906,1873 @@ final limpa, a Fase 7j está de fato completa. **PARE conforme instrução
 explícita -- não avançar pra Deck Engine, Painel ou Study Trail sem
 autorização explícita da autora.**
 
+## CONSOLIDAÇÃO-2 -- Fronteira Legacy -> Native / Conversão explícita
+(segue a CONSOLIDAÇÃO-1, "criação sempre nativa" -- ver seção anterior no
+histórico deste arquivo, não reproduzida aqui por já estar registrada)
+
+Prompt-mestre de 25 seções, escopo estrito: **só a fronteira entre um
+cartão Legacy já existente e o modelo Native** -- nunca migração em massa,
+nunca um botão "Converter todos", nunca automatismo (load da lista, abrir
+pra editar, abrir Preview, trocar de versão, salvar OUTRO cartão). O único
+gatilho continua sendo o clique explícito em "🧪 Usar o novo editor de
+campos (nativo)", já existente desde a Fase 6D.8 -- esta consolidação não
+criou esse botão, auditou e corrigiu o que acontece a partir dele.
+
+### 1) Auditoria (antes de qualquer código)
+
+Confirmado por leitura, não presumido: o conversor já existia
+(`nativeNoteEditorStateFromLegacyRow()`, `shared/flashcard-native-
+persistence.js`, Fase 6D.8) e já preservava `noteId`/`revision`/
+`languageAppKey`/`origin`/`privateNote` corretamente, nunca inventando
+`normal_reversed`/`type_answer` a partir de dado legado (só produz
+`normal`/`multiple_choice`/`cloze` -- os outros 2 só existem trocando o
+Card Type DENTRO do editor nativo depois da conversão, mecanismo já
+existente desde a Fase 6D.2/6D.4, não novo). `legacyFlashcardConversionPreflight()`
+já bloqueava os 2 casos indetermináveis (Cloze sem exatamente 1 `"___"`;
+MC sem `back_trans`). `updateFlashcardContent`/`updateOwnFlashcardContent`
+(`shared/teacher-flashcards.js`/`shared/own-flashcards.js`) já faziam UM
+único `UPDATE` atômico via `nativeState` -- nenhuma segunda escrita, nunca
+um `INSERT` (id sempre preservado, nunca uma linha nova).
+
+**O que a auditoria encontrou faltando -- decisão de `revision` na
+conversão em si** (§4, "crítico"): antes desta fase,
+`wireFlashcardNativeEditForm`/`wireMyFlashcardNativeEditForm` sempre
+incrementavam `revision` em QUALQUER salvamento pós-conversão, mesmo sem
+nenhuma edição -- resetando FSRS/histórico de um cartão que a professora/
+aluna só queria "abrir no editor novo", sem mudar nada. Contra §4 ("nunca
+perda silenciosa de histórico", "preservar identidade/revision" pra
+Normal/MC quando não editado).
+
+**Conflito arquitetural real, encontrado e documentado (não resolvido
+silenciosamente, conforme §4/§IMPORTANTE exigia)**: Cloze é o ÚNICO
+Card Type onde isso é estruturalmente IMPOSSÍVEL de preservar mesmo sem
+nenhuma edição. Confirmado lendo os dois ramos de `shared/flashcard-
+model.js`: o Cloze LEGADO (frase com 1 `"___"`) gera a CardInstance com
+id `cardId` puro (sem sufixo); o Cloze NATIVO (`interpretNativeNoteFromRow`,
+qualquer marca `{{cN::...}}`, inclusive uma única) gera SEMPRE
+`${cardId}-${mark.id}` (ex.: `-c1`). Ou seja: mesmo com `revision`
+perfeitamente preservada, a simples TROCA de representação (legado ->
+nativa) já muda o id do CardInstance -- e é esse id, não `revision`
+isolada, que o merge-por-id de `applySerializedState()` usa pra encontrar
+o FSRS salvo. Preservar `revision` sem mudar esse esquema de id não
+resolveria nada (o merge continuaria não encontrando o cartão antigo);
+mudar o esquema de id do Cloze NATIVO pra acomodar isso afetaria TODO
+cartão Cloze nativo já existente (nunca só os convertidos), fora do
+escopo desta fase (§23: "nenhuma mudança em Review/FSRS/renderer").
+**Decisão, registrada aqui em vez de escondida**: Cloze continua
+CONVERSÍVEL (não regredir uma capacidade já entregue e testada desde a
+Fase 6D.8), mas `revision` SEMPRE incrementa nesse caso específico,
+mesmo sem edição -- o toast honesto ("...progresso de revisão foi
+reiniciado.") reflete o que de fato acontece, nunca finge preservação
+que a arquitetura atual não permite entregar.
+
+### 2) Conversão explícita, por linha só -- confirmado, não modificado
+
+Nenhum novo caminho de conversão automática foi criado. `noteId`/
+`revision`/`languageAppKey`/`origin` continuam vindo só de
+`nativeNoteEditorStateFromLegacyRow(c)`, chamada só dentro do handler de
+clique do botão -- nunca ao carregar a lista, abrir Review, abrir
+Preview, ou salvar outro cartão.
+
+### 3) O que foi implementado
+
+- **`nextRevisionForNativeSave(c, editorState, conversionBaseline)`**
+  (novo, `shared/flashcard-native-persistence.js`) -- ÚNICO ponto de
+  decisão de `revision`, reutilizado pelos dois editores (nunca
+  duplicado): cartão JÁ nativo -> compara contra o estado ORIGINAL
+  (`createNativeNoteEditorStateFromRow`) via `noteEditorStateRequiresNewRevision()`
+  (Fase 6D.1, reaproveitada -- nunca uma segunda função de comparação);
+  cartão RECÉM-convertido de Legacy -> compara contra o `conversionBaseline`
+  (clone do editorState capturado NO INSTANTE do clique em "Usar o novo
+  editor", antes de qualquer edição) -- preserva `revision` se nada
+  mudou, **exceto quando o baseline é Cloze**, caso em que sempre
+  incrementa (a exceção documentada acima, com comentário completo no
+  próprio código explicando o motivo -- não um número mágico).
+- **`ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline`/
+  `MY_FLASHCARDS_STATE.editingNativeConversionBaseline`** (novo, os dois
+  arquivos de UI) -- clone (`cloneNoteEditorState`, round-trip JSON já
+  existente desde a Fase 6D.1) capturado no clique de "Usar o novo
+  editor", limpo em todo ponto que já limpava `editingNativeState`
+  (cancelar, salvar com sucesso, começar nova edição, render completo) --
+  nunca um estado órfão sobrevivendo entre edições.
+- Os dois blocos de decisão de revision, antes duplicados inline (um em
+  cada arquivo), foram substituídos por uma ÚNICA chamada a
+  `nextRevisionForNativeSave(...)` -- mesma disciplina de centralização
+  já usada em toda a Fase 6D (`classifyFlashcardRowModel`/
+  `legacyFlashcardConversionPreflight`/`validateNoteEditorStateForSave`).
+
+**Bug real encontrado e corrigido, fora do que foi pedido inicialmente
+mas necessário pro próprio objetivo desta fase valer pro lado da aluna
+(§17, "testar professora e aluno separadamente")**: `renderMyFlashcardsView()`
+(`shared/my-flashcards.js`) resetava `MY_FLASHCARDS_STATE.editingNativeState`/
+`editingNativeConversionBaseline` pra `null` INCONDICIONALMENTE, logo no
+topo da função, ANTES de qualquer `await` -- e o handler de "Usar o novo
+editor" seta esses dois campos e IMEDIATAMENTE chama
+`renderMyFlashcardsView()`. Como o corpo síncrono de uma função `async`
+roda no MESMO tick de quem a chama (só cede controle no primeiro
+`await`), o reset acontecia ANTES de qualquer render de fato ocorrer --
+a conversão nunca aparecia na tela pra aluna: clicar o botão
+silenciosamente reexibia o MESMO formulário legado de novo, sem erro
+visível nenhum. **Este bug é pré-existente à CONSOLIDAÇÃO-2** (existia
+desde que o botão foi introduzido na Fase 6D.8/6D.6) -- nunca tinha sido
+exercitado por nenhum teste de navegador real antes (a suíte de smoke da
+Fase 6D.8 cobria só `admin-flashcards.js`, que usa um caminho DIFERENTE
+e sem esse problema -- reconstrói só `#admin-flashcards-cards-box` via
+`buildFlashcardsCardsBoxHTML`, nunca chama o `renderAdminFlashcardsView()`
+completo de dentro desse handler). Corrigido com o mínimo de mudança:
+`renderMyFlashcardsView(opts)` ganhou um parâmetro
+`opts.preserveEditingNativeState` (default `false`, preserva 100% o
+comportamento de todo call site existente); só o handler de "Usar o novo
+editor" passa `{ preserveEditingNativeState: true }` -- os outros
+(cancelar, salvar, começar nova edição) continuam sem passar `opts`
+porque já QUEREM `null` nesses casos (nenhuma mudança de comportamento
+neles).
+
+### 4) Tipos Legacy -- classificação (§6)
+
+- **Normal, Normal-reverso** (via troca de Card Type pós-conversão),
+  **Múltipla Escolha**, **zh Hanzi/Pinyin/tradução** -- seguros:
+  `revision`/id do CardInstance preservados quando não editados (o id
+  do CardInstance nesses tipos é `cardId` puro nos dois ramos, legado e
+  nativo -- confirmado idêntico por leitura, sem o mesmo problema do
+  Cloze).
+- **Cloze** -- seguro-com-perda-documentada: conversível, mas SEMPRE
+  reseta `revision`/histórico mesmo sem edição (achado arquitetural
+  acima). O toast já avisa; nenhum comportamento escondido.
+- **Type Answer** -- nunca existiu no schema legado (não é um tipo pra
+  "classificar" na conversão -- só alcançável trocando Card Type depois,
+  mesma mecânica de Normal-reverso).
+- **Estruturas ambíguas** (Cloze sem `"___"` exato, MC sem resposta) --
+  continuam rejeitadas pelo preflight já existente, sem nenhuma mudança.
+
+### 5) Identidade (§3) -- preservada, confirmado
+
+`c.id` nunca muda (sempre `UPDATE ... WHERE id = c.id`, nunca `INSERT`);
+`teacher_id`/`student_id`/`owner_id`/`language_app_key`/`status`/
+`created_at`/`origin` nunca tocados pelo payload de conversão -- só
+colunas de CONTEÚDO (`fields`/`card_generation_mode`/`note`/`front`/
+`back_trans` etc.) são gravadas.
+
+### 6) Mídia (§7)
+
+Áudio/imagem já existentes na linha legada continuam preservados pelo
+mesmo `attachLegacyMediaToFields()` (Fase 6D.8, intocado nesta fase) --
+vinculados ao Field cujo idioma é o estudado. Gap conhecido, não
+resolvido aqui (fora de escopo, §7 explícito): imagem preservada no
+dado, mas ainda não exibida na Revisão pro caminho nativo -- o toast de
+aviso (já existente) continua avisando disso no momento da conversão.
+
+### 7) Testes realizados
+
+- **Node/VM, `test_consolidacao2_unit.js` (novo), 60/60** -- cenários A-T:
+  Normal (revision preservada quando não editado, bump quando editado);
+  Normal-reverso (conversão produz Normal simples, nunca duplica Fields;
+  trocar pra `normal_reversed` DEPOIS bumpa revision corretamente, gera
+  2 CardInstances via `buildReversedCardInstancePair`, FSRS genuinamente
+  independente); Cloze (SEMPRE bumpa mesmo sem edição -- provado via
+  `buildEngineCardsFromRow` que o id do CardInstance de fato muda,
+  `t503-r3` -> `t503-r4-c1`, confirmando a necessidade real da exceção);
+  MC (revision preservada quando não editado; MC sem resposta rejeitado);
+  Type Answer (nunca produzido direto da conversão, só via troca de Card
+  Type depois, bump correto); zh Hanzi/Pinyin (revision preservada,
+  `pinyinFieldId` correto); áudio/imagem preservados; professora
+  (`student_id`/`origin` preservados) e aluna (`origin:'self'`
+  preservado) testadas separadamente; falha de preflight nunca muta
+  estado; payload de save nunca contém `"id"` (nunca `INSERT`);
+  `nativeNoteEditorStateFromLegacyRow()` nunca toca campo de FSRS;
+  classificação Native/Legacy correta pós-conversão/sem-conversão;
+  `reviewDirection`/`frontIsTargetLanguage`/`isReverse` nunca aparecem
+  no editorState convertido; payload nunca inclui `status`/`created_at`
+  (conversão nunca pode contar 2x no limite de cartões, é sempre
+  `UPDATE`, nunca `INSERT`).
+- **`test_fase6d8_legacy_conversion.js` (Fase 6D.8, pré-existente),
+  92/92** -- sem regressão.
+- **`node --check`** limpo nos 3 arquivos tocados.
+- **Regressão ampla** -- re-executadas as suítes de Fases 4 a 7j
+  já existentes no scratchpad da sessão, sem nenhuma falha NOVA. 2
+  falhas confirmadas PRÉ-EXISTENTES e não-relacionadas (via
+  `git stash`/`git stash pop`, reproduzidas identicamente contra o
+  commit anterior a esta fase): `test_fase6d2_state.js` ("renderMyFlashcardsView()
+  de fato referencia CARD_TYPE_UI_META") e
+  `test_fase6d4b_typeanswer_editor.js` ("15. só as chaves esperadas de
+  Note editor state existem") -- scripts de teste desatualizados de
+  fases anteriores (provavelmente da remoção do formulário legado de
+  CRIAÇÃO na CONSOLIDAÇÃO-1), não tocados aqui por estarem fora do
+  escopo desta fase.
+
+### 8) Testes Supabase/live DB (§21)
+
+Transação única (`begin` ... `rollback`, mesma técnica já usada em toda
+a sessão -- MCP `execute_sql` isola cada chamada, então tudo precisa
+caber numa só), projeto `eigjocalzwamisgqilhg`: INSERT real de uma linha
+legada em `teacher_flashcards`, UPDATE real com o payload EXATO que
+`nativeContentColumnsFromEditorState()` produziria (via `RETURNING`,
+confirmado `fields`/`card_generation_mode` populados, `front`/`choices`/
+`cloze_sentence` corretamente nulificados, `teacher_id`/`student_id`/
+`status`/`created_at` intactos) -- `rollback` ao final, zero dado de
+teste permanente (contagem/hash de `teacher_flashcards` idênticos antes
+e depois). Confirmado também que a constraint `teacher_flashcards_fields_paired`
+(migration 045) segue ativa como rede de segurança de banco.
+
+### 9) Testes Playwright (§22)
+
+**`test_consolidacao2_browser_smoke.js` (novo), FR+ZH, 36/36 checks**,
+cobrindo especificamente o que a suíte de smoke da 6D.8 (já existente)
+não cobria -- a PRESERVAÇÃO de revision em si, com cliques reais
+(nenhum estado forjado por atribuição direta):
+- Professora, Normal convertido + salvo SEM edição -> `revision`
+  preservada, SEM modal de confirmação de reset, toast sem "reiniciado".
+- Professora, Cloze convertido + salvo SEM edição -> `revision` SEMPRE
+  bump (a exceção documentada), modal aparece, toast com "reiniciado" --
+  confirmado também via `buildEngineCardsFromRow` real no navegador que
+  o id da CardInstance muda de fato.
+- Aluna (`my-flashcards.js`, gated `premium`), mesmo par Normal/Cloze --
+  é este fluxo que expôs o bug real do reset síncrono, corrigido acima;
+  confirmado funcionando de ponta a ponta depois do fix.
+- "Recarregar" (reabrir a edição a partir da linha já salva) confirma
+  classificação Native, ausência do botão "Usar o novo editor", e
+  NENHUMA linha duplicada (contagem idêntica antes/depois) -- nos 2
+  papéis (professora/aluna) e nos 2 idiomas.
+- Zero erro de console novo (só os mesmos `ERR_TUNNEL_CONNECTION_FAILED`
+  pré-existentes do proxy de saída deste sandbox, documentados
+  repetidamente nesta sessão).
+
+### 10) Casos deliberadamente deixados Legacy / fora de escopo (§13)
+
+Nenhum -- todo tipo Legacy que já era convertível continua convertível;
+nenhum novo bloqueio foi introduzido. O único "não resolvido" é o
+achado arquitetural do Cloze (item 1 acima), que não bloqueia a
+conversão -- só torna explícito que ela reseta progresso nesse caso
+específico, documentado no código e aqui, nunca escondido.
+
+### 11) Débito técnico descoberto (§25.14)
+
+1. **Esquema de id do Cloze nativo (`-c{mark}` sempre, mesmo com 1
+   marca só) difere do Cloze legado (sem sufixo)** -- é a causa raiz de
+   por que Cloze nunca pode preservar FSRS na conversão. Unificar isso
+   exigiria mudar `interpretNativeNoteFromRow()` (afeta TODO cartão
+   Cloze nativo, não só conversões) -- fora do escopo desta fase, fica
+   registrado como candidato de uma fase futura dedicada, se algum dia
+   a perda de histórico do Cloze-na-conversão for considerada um
+   problema que vale essa mudança maior.
+2. **2 scripts de teste desatualizados** (`test_fase6d2_state.js`,
+   `test_fase6d4b_typeanswer_editor.js`) -- falham contra o código atual
+   por motivos não relacionados a esta fase (provavelmente resquício da
+   CONSOLIDAÇÃO-1), confirmados pré-existentes via `git stash`. Não
+   corrigidos aqui, fora do escopo.
+3. **O bug de reset síncrono em `my-flashcards.js`** (item 3 acima) era
+   pré-existente desde a Fase 6D.6/6D.8 -- registrado aqui não como
+   débito NOVO, mas como um lembrete de que a única suíte de smoke que
+   existia pra essa fase nunca exercitou o lado da aluna via clique
+   real, só via atribuição direta de estado -- daí o bug ter passado
+   despercebido até esta fase testar com cliques de verdade.
+
+**Critério de sucesso (§24) confirmado**: Legacy continua Legacy até
+conversão explícita; "Usar o novo editor" converte 1 cartão por vez,
+com FSRS preservado sempre que a arquitetura permite (Normal/MC/zh) e
+reset honesto e documentado quando não permite (Cloze); nenhum estado
+híbrido, nenhuma duplicata, nenhuma conversão silenciosa.
+
+**Escopo respeitado (§23)**: nenhuma migração em massa, nenhum botão
+"Converter todos", nenhuma remoção de schema/coluna/adapter legado,
+nenhum sistema de Archive/Tags novo, nenhum upload de imagem novo,
+nenhum redesign de áudio, nenhum Deck, nenhuma mudança em Review/FSRS/
+renderer/matriz de planos. Nenhuma migração SQL nesta fase -- 100%
+client-side, nenhum passo manual pendente pra autora.
+
+**PARE conforme instrução explícita -- CONSOLIDAÇÃO-3 (ARQUIVAMENTO) NÃO
+iniciada.** Próxima etapa só começa depois de autorização explícita da
+autora, com este relatório já entregue antes de pedir luz verde.
+
+## CONSOLIDAÇÃO-3 -- ARQUIVAMENTO: encerrar o modelo antigo sem destruir
+histórico
+
+Terceira fase da série CONSOLIDAÇÃO (CONSOLIDAÇÃO-1 = unificar criação de
+cartão só no editor nativo; CONSOLIDAÇÃO-2 = fronteira explícita
+Legacy→Native, ver seções anteriores). Escopo desta fase, travado pelo
+prompt-mestre: remover "Arquivar" de toda a UX normal, sem nunca destruir,
+migrar em massa, resetar contagem, ou auto-converter nenhum cartão já
+arquivado -- e sem confundir arquivamento (visibilidade/gestão) com
+suspensão de Review/FSRS (elegibilidade de estudo), que são eixos
+completamente separados desde que `status` foi criado (migrations 026/028).
+
+### §1 -- Auditoria (código-livre, feita antes de qualquer edição)
+
+Confirmado por leitura, não presumido: o mecanismo de arquivamento inteiro
+se resume a **1 coluna** (`status text not null default 'active' check
+(status in ('active','archived'))`, idêntica em `teacher_flashcards`
+-- migration 026 -- e `own_flashcards`, ex-`student_flashcards`, migration
+028) e **2 funções de escrita** (`setFlashcardStatus(id,status)` em
+`shared/teacher-flashcards.js`, `setOwnFlashcardStatus(id,status)` em
+`shared/own-flashcards.js`) -- nenhuma outra tabela, view, function SQL ou
+Edge Function toca nesse campo. Quem LÊ `status`:
+- **UI de gestão** -- `shared/admin-flashcards.js` (professora) e
+  `shared/my-flashcards.js` (aluna), cada um com uma lista "Cartões
+  ativos" + seção "Arquivados" separada, e um botão único por linha que
+  alternava 🗃 Arquivar / ↺ Reativar (`data-toggle-flashcard`/
+  `data-toggle-own-flashcard`, `data-next-status` dinâmico).
+- **Review/FSRS (eixo TOTALMENTE separado, nunca tocado nesta fase)** --
+  `note.status = row.status` (`shared/flashcard-model.js`, nos dois ramos
+  de interpretação, nativo e legado) vira `flashcardStatus: note.status`
+  em `buildEngineCardsFromRow()`, e o ÚNICO consumidor é
+  `isCardLessonCompleted()` (fr/zh `app.js`, linha ~6011):
+  `if (card.origin==='teacher'||card.origin==='self') return
+  card.flashcardStatus==='active';` -- é isto (não uma coluna dedicada)
+  que já mantém cartão arquivado fora da fila de revisão, desde a Fase 3
+  do sistema de alunas particulares.
+- **Limite de 20 cartões grátis** -- `FREE_OWN_FLASHCARD_LIMIT`
+  (`shared/my-flashcards.js`) e `computeAnkiImportRemainingSlots()`
+  (`shared/anki-import.js`) já filtram estritamente por
+  `status==='active'` -- comportamento correto pré-existente, confirmado
+  por leitura, nunca alterado.
+- **Métricas da professora** -- o painel expandível de "🎓 Alunos"
+  (`shared/admin-students.js`) já mostra "N ativos, M arquivados" como
+  contagem pura, sem nenhuma ação de arquivar ali.
+- **Não relacionado, confirmado explicitamente pra não confundir** --
+  `hidden_from_profile` (Fase 1 do prompt-mestre "perfil público", eixo
+  de visibilidade PÚBLICA por cartão, independente); `teacher_students.status`
+  (`'active'/'invited'/'removed'`, vínculo professora-aluna, outra
+  tabela); `challenges.status` (feature de Desafios, francês, sem
+  relação); `teacher_class_logs` (delete físico de verdade, nunca usou
+  `status`, decisão consciente desde a Fase 7 por não ter progresso FSRS
+  dependente).
+- **Teste de cobertura pré-existente**: nenhum teste Node/VM ou
+  Playwright de nenhuma fase anterior exercitava especificamente o botão
+  Arquivar/Reativar em si (as suítes de Fase 6D+ focam no motor
+  Note/CardType) -- esta fase precisou escrever a primeira suíte
+  dedicada.
+
+### §2 -- Regra absoluta (cumprida)
+
+Nenhum cartão já arquivado foi tocado por código nesta fase --
+confirmado ao vivo (ver §Testes/Live-DB abaixo): id, Note/Fields, Card
+Type, CardInstances (derivadas em runtime, nunca persistidas -- intocado),
+`revision`, campos FSRS, `origin`, `teacher_id`/`student_id`/`owner_id`,
+tags (migration 048), timestamps, e o próprio `status` de todo cartão
+já arquivado antes desta fase permanecem exatamente como estavam. Nenhuma
+migração de dado, nenhum backfill, nenhuma remoção de coluna, nenhuma
+alteração em massa de `status`, nenhum reset de contagem, nenhuma
+auto-conversão archived→active.
+
+### §3 -- "Arquivar" removido de toda UX normal (sem substituto renomeado)
+
+**`shared/admin-flashcards.js`** (professora) -- a linha de botões de um
+cartão ATIVO deixou de renderizar QUALQUER botão de status. O botão
+"Reativar" (↺) só é renderizado quando `c.status==='archived'` (condição
+adicionada, nunca um segundo mecanismo):
+```js
+${c.status === 'archived' ? `<button class="admin-badge-delete-btn"
+  data-toggle-flashcard="${c.id}" data-next-status="active"
+  title="Reativar (tirar do arquivo histórico)">↺</button>` : ''}
+```
+Nenhum "Ocultar"/"Esconder"/"Suspender"/"Desativar"/"Mover para arquivo"
+foi introduzido como substituto -- confirmado por grep dedicado (ver
+§16 abaixo) que os únicos usos dessas palavras no arquivo são comentários
+explicando o que NÃO foi feito, ou o toggle `hidden_from_profile`
+(👁️/🙈, eixo de visibilidade pública, completamente separado). Uma vez
+reativado, um cartão nunca mais ganha nenhum botão de status --
+indistinguível de um cartão que nunca foi arquivado.
+
+**`shared/my-flashcards.js`** (aluna) -- mudança espelhada
+(`data-toggle-own-flashcard`), mesma condição, mesmo raciocínio. O botão
+👁️/🙈 de `hidden_from_profile` ao lado permanece intocado (eixo
+diferente, confirmado na auditoria).
+
+`wireFlashcardsCardsBox()`/`wireMyFlashcardsCardButtons()` (os
+listeners de clique do botão `[data-toggle-flashcard]`/
+`[data-toggle-own-flashcard]`) não precisaram de nenhuma mudança --
+são genéricos, chamam `setFlashcardStatus`/`setOwnFlashcardStatus` com o
+que `data-next-status` disser, e como a UI agora só produz
+`data-next-status="active"`, eles nunca mais recebem `'archived'` vindo
+de um clique real.
+
+`setFlashcardStatus`/`setOwnFlashcardStatus` (as 2 funções de escrita)
+**não foram alteradas** -- continuam aceitando `'archived'` como valor
+válido (é a fonte de verdade do schema, `status in
+('active','archived')`), só ninguém na UI as chama mais com esse
+argumento.
+
+### §5 -- Área histórica separada (reuso, não reconstrução)
+
+A seção "Arquivados" já existia visualmente separada em ambas as telas
+desde a Fase 2/5 do sistema de alunas particulares -- satisfaz §5 sem
+nenhuma arquitetura nova. Único ajuste: o rótulo mudou de `Arquivados
+(${n})` para `Arquivados historicamente (${n})` nos dois arquivos, pra
+deixar explícito que é histórico, nunca "escondido"/"suspenso". A lista
+continua paginada/renderizada pelo mesmo `buildFlashcardsCardsBoxHTML()`/
+render equivalente de `my-flashcards.js` -- reaproveitado, não
+duplicado.
+
+### §4/§6/§7 -- confirmados intocados
+
+`flashcardStatus`/`isCardLessonCompleted()` -- zero linha alterada.
+`classifyFlashcardRowModel()` (Native vs. Legacy) -- independente de
+`status`, não tocado. Fluxo de criação (`nativeContentColumnsFromEditorState()`,
+`createFlashcard`/`createOwnFlashcard`) -- nenhum dos dois jamais incluiu
+uma chave `status` no payload de INSERT; "novo cartão sempre ativo" é o
+DEFAULT DO BANCO (`status text not null default 'active'`), nunca uma
+escolha ativa do código -- confirmado por teste dedicado (ver abaixo) que
+o payload nunca contém `status`/`archived`.
+
+### §8/§9/§10 -- professora e aluna, sem quebrar nada adjacente
+
+Professora perde a ação normal de arquivar; cartões já arquivados de
+alunas suas permanecem preservados, não recriados, não reatribuídos.
+Aluna: teto de 20 cartões grátis (Fase 5.1) confirmado imune --
+arquivado nunca conta como ativo, nunca reduz capacidade de criação,
+nunca infla o limite; `hasActiveTeacherLink()` (isenção de teto)
+inalterado; Native/Legacy/conversão explícita (CONSOLIDAÇÃO-2) inalterados.
+
+### §11/§12 -- schema e Anki, confirmados sem impacto
+
+Nenhuma tabela de archive nova, nenhuma coluna removida, nenhum backfill.
+Verificado quanto ao Anki export/import (Fases 7i/7j): nenhum dos dois
+lê/filtra por `status` -- `own_flashcards`/`teacher_flashcards` só
+alimentam export/import via `fields`/`card_generation_mode`/conteúdo,
+nunca por estado de arquivamento (um cartão arquivado que a professora
+selecionar pra exportar seria exportado normalmente, comportamento
+idêntico a antes desta fase, sem necessidade de mudança). Nenhum
+problema de compatibilidade real encontrado, nenhuma mudança feita.
+
+### §13 -- Testes
+
+**Node/VM** (`test_consolidacao3_unit.js`, 12/12 passando) -- 3 grupos:
+Modelo/dados (cartão arquivado preserva id/revision/status/classificação
+Native-vs-Legacy através do motor real, `buildEngineCardsFromRow`);
+Criação (payload de criação nativa nunca inclui `status`/`archived`,
+`editorState` nunca ganha propriedade de status); Limite (fórmula real de
+`remainingSlots` confirma que 5 ou 50 cartões arquivados nunca reduzem o
+teto de 20).
+
+**Playwright browser-smoke** (`test_consolidacao3_browser_smoke.js`,
+48/48 passando, FR+ZH, professora+aluna) -- ausência total de "Arquivar"
+em qualquer lugar da UI (nenhum botão, nenhum menu, nenhuma ação em
+massa); linhas arquivadas permanecem visíveis, rotuladas "Arquivados
+historicamente", com botão Reativar funcional; cartão reativado nunca
+recupera botão de status; fluxo real de criação de cartão (clique real,
+não estado forjado) confirma `status:'active'` sempre; matemática do
+teto de 20 confirmada imune a cartões arquivados; gate de Review
+(`isCardLessonCompleted`/`flashcardStatus`) confirmado idêntico pra
+cartão ativo e arquivado, nos dois idiomas e papéis.
+
+**Live-DB (Supabase real, `eigjocalzwamisgqilhg`)** -- confirmado ao
+vivo que `status` (`teacher_flashcards`/`own_flashcards`) segue com
+default `'active'`/`not null`, sem alteração pela migration 045/046/047/
+048 de fases anteriores. Transação real `BEGIN; INSERT(status='archived')
+RETURNING; UPDATE(status='active') WHERE id=...; ROLLBACK;` executada
+com sucesso nas duas tabelas (usando `auth.users` diretamente pra
+`teacher_id`/`student_id`/`owner_id`, já que são as FKs reais, não
+`profiles`) -- confirma que o próprio mecanismo de reativação da UI
+(`UPDATE ... SET status='active' WHERE id=?`) funciona contra o schema
+real. Contagem de linhas antes e depois idêntica nas duas tabelas
+(`teacher_flashcards`: 5, `own_flashcards`: 7) -- zero rastro permanente
+de teste.
+
+### §16 -- Busca final por referências restantes de archive/archived
+
+`grep` project-wide por `arquiv|archive` (case-insensitive) retorna 77
+arquivos -- maioria falsos-positivos (português "arquivo" = "file",
+nomes de cache do service worker/PWA, `ARCHITECTURE.md`, pipeline de TTS
+offline). Restringindo a padrões reais do mecanismo de arquivamento
+(`'archived'`, `status===`, `Arquivar`, `Arquivado`), classificação:
+
+- **(a) código de compatibilidade necessário** -- `setFlashcardStatus`/
+  `setOwnFlashcardStatus` (ainda a única via de escrita de `status`,
+  usada agora só com `'active'` pela UI, mas preservada como está por
+  ser a fonte de verdade do schema); os filtros `status==='active'` em
+  listagens/teto/import Anki; o gate `flashcardStatus` de Review; as
+  migrations 026/028 (registro histórico, nunca reescritas); o contador
+  "N ativos, M arquivados" em `admin-students.js`; os comentários
+  explicativos desta fase e da Fase 2/5 nos arquivos de UI/schema; menções
+  em CLAUDE.md (histórico de decisões).
+- **(b) código morto** -- nenhum encontrado.
+- **(c) UI de arquivamento ainda ativa** -- nenhuma encontrada; confirmado
+  por grep dedicado que `🗃` (emoji do botão antigo) e
+  `data-next-status="archived"` não existem em lugar nenhum do
+  repositório.
+
+### O que ficou deliberadamente de fora desta fase (§14, confirmado)
+
+Decks, suspensão de CardInstance, estados "congelados" novos, nova lógica
+FSRS, novo sistema de hide/status, migração em massa, conversão automática
+Legacy→Native, redesenho completo de listagem, nova arquitetura de Tags,
+nova UX de áudio, novos limites de cartão, mudanças de plano/assinatura --
+nenhum destes foi tocado, criado, ou mesmo mencionado como necessário.
+
+### Débito técnico / achados fora do escopo
+
+Nenhum encontrado nesta fase -- a auditoria (§1) confirmou que o
+mecanismo já era mínimo e bem isolado (1 coluna, 2 funções de escrita, 1
+consumidor de Review) antes mesmo de qualquer código ser tocado.
+
+**Escopo desta entrega**: `shared/admin-flashcards.js`,
+`shared/my-flashcards.js` (só a renderização do botão de status + o
+rótulo da seção "Arquivados"). Nenhuma migração, nenhum passo manual
+pendente pra autora.
+
+**PARE conforme instrução explícita -- CONSOLIDAÇÃO-4 (simplificação de
+UX de áudio, sem alterar o motor) é a próxima fase da série e NÃO foi
+implementada nesta entrega.** Próxima etapa só começa depois de
+autorização explícita da autora, com este relatório já entregue antes de
+pedir luz verde.
+
+## CONSOLIDAÇÃO-4 -- ÁUDIO: simplificar a UX sem alterar o motor
+
+Quarta fase da série CONSOLIDAÇÃO. Escopo travado pelo prompt-mestre:
+reorganizar a APRESENTAÇÃO do editor de áudio por Field (Fases 7e/7f/7g/
+7h.1/7h.2) num fluxo de 2 passos -- "o usuário decide SE quer áudio antes
+de decidir COMO" -- sem tocar em nenhuma linha do motor (upload/TTS/
+gravação/URL/persistência/contrato `Field.audio`), sem reconstruir nada.
+
+### Auditoria (feita antes de qualquer código)
+
+Confirmado por leitura, não presumido: **todo o estado e toda a lógica de
+áudio por Field vivem num único arquivo**, `shared/flashcard-field-
+editor.js` -- `renderFieldAudioBlockHTML()` (render puro) +
+`wireFieldAudioBlockFor()` (os 4 corredores técnicos: upload, URL, TTS,
+gravação, mais o botão de remover). Esse componente é reutilizado
+IDENTICAMENTE pelos 4 Card Types que hoje têm campos de texto: Normal/
+Normal com reverso/Múltipla Escolha/Digite a resposta via
+`renderFieldEditorHTML()` (genérico), e Cloze via uma chamada direta
+(`shared/flashcard-cloze-editor.js`, que tem UI própria de seleção de
+texto e não passa pelo Field editor genérico). Nunca há uma segunda
+implementação -- confirmado por grep, os dois admin (`shared/admin-
+flashcards.js`) e aluna (`shared/my-flashcards.js`) só chamam
+`refreshNativeCardTypeBox(...)` passando `uploadFn`/`deleteFn`/`ttsFn`/
+`noteId`/`allowedAudioOrigins` -- nunca reimplementam nada do editor de
+áudio em si.
+
+**A matriz Free/Premium (Seção 10 do prompt-mestre) já estava
+implementada** desde a Fase 7h.1 -- `allowedAudioOrigins` já filtrava
+`upload`/`url` pro plano grátis e `tts`/`recording` pra Premium, com a
+mesma regra "a origem JÁ SALVA continua acessível mesmo se a conta
+baixar de tier, só não pode ESCOLHER de novo" já em vigor. Admin/
+professora nunca passa `allowedAudioOrigins` (sempre irrestrito, "vê
+tudo sempre"). Nada disso precisou de mudança nesta fase -- só a UI que
+CONSOME esse filtro precisava ser redesenhada.
+
+**O problema real, confirmado**: `renderFieldAudioBlockHTML()` mostrava
+um `<select>` técnico com as 5 origens (`Sem áudio`/`URL externa`/
+`Arquivo (upload)`/`Texto para voz`/`Gravação`) + um parágrafo explicando
+o que cada uma significa + o painel INTEIRO do método atualmente
+selecionado, tudo de uma vez, mesmo pra um Field que nunca teve áudio
+nenhum -- exatamente a "lista de opções técnicas expostas" que o
+prompt-mestre pedia pra eliminar.
+
+### O que foi feito (só `shared/flashcard-field-editor.js`)
+
+**Nova UX em 3 estados, controlados só por um atributo de DOM
+(`data-field-audio-ui-state`, nunca persistido -- puramente
+apresentacional):**
+
+1. **`summary`** (estado inicial de sempre, inclusive depois de qualquer
+   sucesso) -- sem áudio: texto "Sem áudio." + botão único "+ Adicionar
+   áudio". Com áudio: `<audio controls>` + o texto de status já existente
+   (`fieldAudioIndicatorText()`, intocado) + botões "Substituir" e "🗑
+   Remover".
+2. **`picker`** (aberto por "+ Adicionar áudio" ou "Substituir") -- lista
+   de botões só com os MÉTODOS permitidos pela entitlement
+   (`FIELD_AUDIO_METHOD_UI_META`, novo: 📁 Enviar arquivo / 🔗 Usar link /
+   🔊 Texto para voz / 🎙️ Gravar áudio, na mesma ordem do mockup aprovado
+   -- grátis primeiro) + "Cancelar" (nunca muta `field.audio`).
+3. **`panel`** -- o painel técnico do método escolhido (upload/URL/TTS/
+   gravação), com um link "← Voltar" no topo. **Os 4 painéis são BYTE A
+   BYTE os mesmos elementos/ids/data-attributes de antes desta fase** --
+   só passaram a viver dentro de um wrapper que a nova camada de UI
+   esconde/mostra; nenhuma linha da lógica que decide QUAL painel
+   corresponde à origem atual foi tocada.
+
+**O `<select>` técnico continua existindo** (`data-field-audio-origin`,
+agora `style="display:none" aria-hidden="true" tabindex="-1"`) -- é o
+motor por baixo: escolher um método no picker só faz
+`originSelect.value = method; originSelect.dispatchEvent(new
+Event('change'))`, reaproveitando 100% o listener de `change` já
+existente (que decide visibilidade de painel + invalida operações em
+voo via `beginAudioOp()`, Fase 7h.2) -- nunca uma segunda implementação
+da mesma decisão.
+
+**Único ajuste real na lógica** (não cosmético): `data-field-audio-
+status` (usado só pelo corredor de upload pra mostrar "Enviando
+áudio..."/mensagens de descarte por corrida) foi promovido pra um
+elemento PRÓPRIO dentro do painel de upload
+(`data-field-audio-upload-status`), porque o parágrafo de status
+genérico que existia antes virou parte do estado `summary` (escondido
+enquanto o usuário está no painel de upload) -- sem essa mudança, o
+feedback de "Enviando áudio..." ficaria escrito num elemento invisível.
+As 3 chamadas que escreviam nesse elemento (`shared/flashcard-field-
+editor.js`, corredor de upload) foram atualizadas pro novo seletor;
+nenhuma outra lógica de upload/TTS/gravação/URL foi tocada.
+
+### Confirmações (pedidas explicitamente na Seção 28 do prompt-mestre)
+
+1. **Arquivos alterados**: só `shared/flashcard-field-editor.js` (+162/
+   -53 linhas, confirmado por `git diff --stat`). Nenhum outro arquivo
+   (motor, Review, Preview, editores de MC/Type Answer/Cloze, admin/
+   aluna) precisou de nenhuma mudança -- os dois integradores continuam
+   chamando exatamente as mesmas funções (`renderFieldAudioBlockHTML`/
+   `wireFieldAudioBlockFor`/`refreshNativeCardTypeBox`) com a mesma
+   assinatura de sempre.
+2. **Antes**: `<select>` técnico visível com 5 opções + hint explicando
+   cada uma + painel inteiro do método atual sempre exposto, mesmo pra
+   Field sem áudio nenhum.
+3. **Depois**: resumo (toca/substitui/remove, ou "Sem áudio"+"Adicionar")
+   → picker de método (só os permitidos pela entitlement) → painel só do
+   método escolhido, com "Voltar"/"Cancelar" em cada passo.
+4. **Modelo Native intocado**: `Field.audio` continua exatamente o
+   contrato da Fase 7b (`{type, url/generatedUrl/..., }`), nenhum campo
+   novo, nenhuma tabela nova, nenhum `audioType` paralelo -- confirmado
+   por leitura, a única mudança em qualquer estrutura de dado foi
+   renomear o SELETOR de um elemento de status de UI
+   (`data-field-audio-status` → `data-field-audio-upload-status`), nunca
+   um campo de `Field`/`editorState`.
+5. **Motor de áudio não reconstruído**: `resolveFieldAudioUrl`/
+   `isValidFieldAudio`/`computeTtsGenerationKey`/`isTtsAudioStale`/
+   `validateFieldAudioUrl`/`validateFieldAudioUploadFile`/
+   `validateTtsGenerationRequest` (`shared/flashcard-model.js`), a Edge
+   Function `tts-generate`, `shared/flashcard-field-audio-recorder.js`
+   (máquina de estados de gravação, Fase 7g), `uploadFlashcardMedia`/
+   `uploadOwnFlashcardMedia`/`requestFieldAudioTTS`/
+   `requestOwnFieldAudioTTS` -- nenhum destes foi tocado, confirmado por
+   `git diff --stat` (só 1 arquivo mudou) e por leitura de cada um antes
+   de decidir não mexer.
+6. **Matriz Free/Premium confirmada intacta**: FREE continua só
+   upload+URL, PREMIUM continua ganhando TTS+gravação, mesmo mecanismo
+   `allowedAudioOrigins` já existente desde a Fase 7h.1, agora só
+   controlando quais BOTÕES aparecem no picker em vez de quais `<option>`
+   aparecem no `<select>` escondido. Testado explicitamente (ver abaixo)
+   que uma conta FREE nunca vê "Texto para voz"/"Gravar áudio" no picker,
+   e que professora/admin (sem `allowedAudioOrigins`) sempre vê os 4.
+7. **Áudio existente preservado**: `resolveFieldAudioUrl`/
+   `fieldAudioIndicatorText` continuam sendo a única fonte do que o
+   `summary` mostra -- um Field com áudio já salvo nunca precisa do
+   picker pra o usuário descobrir que ele existe (Seção 9 do
+   prompt-mestre), confirmado visualmente (ver screenshots) e via teste.
+8. **Legacy → Native**: `nativeNoteEditorStateFromLegacyRow()` (Fase
+   6D.8) não foi tocada -- continua populando `field.audio` a partir de
+   `audio_url` legado exatamente como antes; como o novo `summary` lê
+   `field.audio`/`resolveFieldAudioUrl()` do mesmo jeito que o código
+   antigo já lia, um Field convertido do legado com áudio já aparece
+   corretamente na tela nova sem nenhuma adaptação.
+9. **Preview/Review confirmados intocados**: `fr/app.js`/`zh/app.js`/
+   `shared/flashcard-preview.js` não aparecem no diff -- Preview e Review
+   continuam lendo só `card.cardInstance`/`resolveCardContentView()`,
+   nunca o editor de Field em si; a UX nova é estritamente sobre a tela
+   de EDIÇÃO/CRIAÇÃO, nunca sobre como o áudio é consumido depois de
+   salvo.
+
+### Testes realizados
+
+- `node --check` sem erro em `shared/flashcard-field-editor.js` e nos 7
+  arquivos adjacentes que consomem/compartilham o componente
+  (`admin-flashcards.js`/`my-flashcards.js`/`flashcard-mc-editor.js`/
+  `flashcard-typeanswer-editor.js`/`flashcard-cloze-editor.js`/
+  `flashcard-field-audio-recorder.js`/`flashcard-model.js`) -- nenhum
+  regrediu.
+- **Playwright real, Chromium real, FR+ZH, 43 verificações por idioma
+  (86 no total) através do app de produção servido estático** (boot
+  guest bypassado via `CURRENT_USER` fake + monkey-patch só das funções
+  de REDE -- `fetchMyOwnFlashcards`/`hasActiveTeacherLink`/
+  `fetchMyPlanTier`/`uploadOwnFlashcardMedia`/`deleteOwnFlashcardMedia`/
+  `requestOwnFieldAudioTTS`/`createOwnFlashcard` -- nunca uma segunda
+  implementação do editor): estado inicial = `summary` com "Sem áudio."+
+  "+ Adicionar áudio"; `<select>` técnico confirmado escondido; picker
+  FREE mostra só Enviar arquivo/Usar link, nunca TTS/Gravar; Cancelar no
+  picker volta pra summary sem mutar `field.audio`; fluxo de upload
+  REAL (arquivo de verdade via `setInputFiles`) -- painel certo aparece,
+  upload disparado exatamente 1 vez, sucesso volta sozinho pra summary
+  com `<audio>`/Substituir/Remover; Substituir reabre o picker (nunca
+  exige remover primeiro); URL inválida (`http://`) rejeitada sem tocar
+  no áudio já existente; URL válida aplicada de verdade (substituição
+  funcionando, `<audio src>` novo confirmado); Remover volta pra "Sem
+  áudio" sem recriar o Field (id preservado); salvar um cartão SEM áudio
+  continua funcionando (persistência real confirmada: `fields`/
+  `card_generation_mode` gravados corretamente, payload sem `audio` em
+  nenhum Field); PREMIUM mostra os 4 métodos no picker; TTS sem `noteId`
+  (rascunho ainda não salvo) mostra o aviso "Salve o cartão primeiro..."
+  de sempre, nunca chama a rede; "Voltar" retorna pra summary sem mutar
+  nada; painel de gravação alcançável (botão Gravar presente, Parar
+  escondido até começar); Professora/admin (`renderFieldAudioBlockHTML`
+  sem `allowedAudioOrigins`) sempre mostra os 4 métodos, nunca gateado.
+  Os únicos 2 `pageerror` capturados (1 por idioma) são
+  `TypeError: ...createClient`/`supabaseClient is not defined` -- a
+  MESMA classe de erro pré-existente documentada dezenas de vezes nesta
+  sessão inteira (CDN do Supabase bloqueado pelo proxy de saída deste
+  sandbox, nunca relacionado a código deste app), não um erro novo.
+- **Inspeção visual real** (screenshot Playwright, fr, 480px -- largura
+  de telefone): confirmado que o estado `summary` sem áudio mostra só
+  "Sem áudio." + 1 botão; o `picker` (Premium) mostra os 4 métodos com
+  ícone+rótulo, sem nenhum campo técnico visível; o `summary` com áudio
+  mostra o player nativo + status + Substituir/Remover -- nenhum ID,
+  path de storage, ou detalhe de implementação exposto em nenhum dos 3
+  estados, confirmando visualmente (não só via assert) que a
+  complexidade técnica interna permanece, mas a complexidade EXPOSTA ao
+  usuário caiu como pedido.
+
+### Limitações conhecidas / débito técnico (nenhum bloqueante)
+
+- A ordenação exata dos 4 métodos no picker (grátis primeiro, Premium
+  depois) é a mesma do mockup aprovado no prompt-mestre -- não foi
+  perguntado se a autora prefere agrupar visualmente os 2 grupos com
+  algum separador; ficou como uma lista simples, mesma disciplina de
+  "não inventar componente novo" já usada no resto da fase.
+  Reconsiderar só se a autora pedir.
+- "Substituir" sempre reabre o picker completo (nunca pré-seleciona o
+  método atual) -- decisão deliberada (Seção 10 do prompt-mestre: "não
+  force o usuário a remover primeiro", nunca disse "pule direto pro
+  mesmo método"); se escolher o MESMO método de novo, o painel técnico
+  já vem pré-preenchido com o valor atual (comportamento herdado sem
+  mudança, confirmado no teste de URL).
+- Nenhuma auditoria de acessibilidade além do pedido explícito (labels/
+  estados disabled/loading/foco continuam os mesmos de antes, nada
+  removido) -- não foi feita uma auditoria completa de acessibilidade do
+  editor inteiro, só confirmado que esta mudança não introduz regressão
+  óbvia (Seção 20 do prompt-mestre, "não é uma auditoria de
+  acessibilidade do projeto inteiro").
+- Não foi feito um teste interativo separado clicando através de
+  `shared/admin-flashcards.js` (professora) além da verificação
+  estrutural direta de `renderFieldAudioBlockHTML()` sem
+  `allowedAudioOrigins` -- justificativa: é literalmente o MESMO
+  componente que já foi testado interativamente do lado da aluna (código
+  compartilhado, confirmado por leitura), então o risco de comportamento
+  divergente é baixo, mas registrando por completude/honestidade, mesmo
+  padrão já usado repetidas vezes nesta feature quando uma entrega
+  validou só um dos dois lados.
+
+**Escopo desta entrega**: só `shared/flashcard-field-editor.js`. Nenhuma
+migração, nenhum passo manual pendente pra autora.
+
+**PARE conforme instrução explícita -- CONSOLIDAÇÃO-5 (Tags + correção/
+validação do Anki export) é a próxima fase da série e NÃO foi
+implementada nesta entrega.** Próxima etapa só começa depois de
+autorização explícita da autora, com este relatório já entregue antes de
+pedir luz verde.
+
+## CONSOLIDAÇÃO-5 -- Tags no Anki Export + correção do "unidadenull" na
+origem
+
+Última fase da série CONSOLIDAÇÃO. Precedida de uma auditoria só-leitura
+apresentada antes de qualquer código (regra explícita da autora: "antes de
+codificar, faça a auditoria e me mostre o diagnóstico... implemente
+somente o que o diagnóstico justificar"). O diagnóstico confirmou 2
+achados: (1) `shared/anki-export.js` sempre gravava
+`` `unidade${card.unitId} ` `` na coluna `notes.tags` do Anki, incondicional
+-- e `card.unitId` é SEMPRE `null` pra qualquer cartão teacher/self (Fase
+4, `buildEngineCardsFromRow()`), produzindo a string literal
+`"unidadenull "` pra todo cartão autorado por professora/aluna; (2) a
+feature real de Tags (migration 048, `teacher_flashcards.tags`/
+`own_flashcards.tags`, já normalizada via `normalizeTagSlug`/
+`normalizeNoteTags` desde o fechamento da Fase 7j) nunca chegava ao
+`card` em runtime -- `buildEngineCardsFromRow()` lia `rowId`/`teacherNote`/
+`imageUrl` de `row`/`note`, mas nunca `row.tags`. Autorizado exatamente
+como diagnosticado, com 14 restrições explícitas (ver abaixo).
+
+**Correção, 2 arquivos, cirúrgica:**
+
+- **`shared/flashcard-model.js`, `buildEngineCardsFromRow(row, opts)`** --
+  ganhou `const tags = normalizeNoteTags(row.tags);` computado 1x por
+  linha (nunca por CardInstance), incluído no objeto retornado dentro do
+  `.map()` -- mesmo "bucket" de metadado Note-level que `rowId`/
+  `teacherNote`/`imageUrl` já usavam. `interpretNoteFromRow()`/
+  `interpretNativeNoteFromRow()` continuam SEM ler tags (restrição 1,
+  intocadas) -- tags nunca viram Field nem propriedade de direção.
+  Como o cálculo é feito 1x fora do `.map()`, `normal_reversed` (2
+  CardInstances) e Cloze multi-marca (N CardInstances) recebem a MESMA
+  referência normalizada -- nunca tags divergentes entre irmãs da mesma
+  Note (restrição 6).
+- **`shared/anki-export.js`** -- nova função `ankiNoteTagsString(card)`:
+  `card.unitId != null` (cartão de trilha) preserva EXATAMENTE
+  `` `unidade${card.unitId} ` `` (restrição 4, byte a byte, nunca tocado);
+  `card.unitId == null` (professora/aluna) usa `card.tags` real,
+  formatado no padrão canônico do Anki (`" tag1 tag2 "`, compatível com
+  `shared/anki-parser.js:150`, `(row[3]||'').trim().split(/\s+/)`) --
+  sem tags reais, string vazia, **nunca** "unidadenull" nem nenhum outro
+  placeholder (restrição 5/10 -- corrigido na origem, nunca um
+  `.replace()` posterior). A única chamada `db.run('INSERT INTO notes...')`
+  trocou `` `unidade${card.unitId} ` `` por `ankiNoteTagsString(card)`.
+
+**Testes executados, números reais (nunca inventados):**
+- **Node/VM, `test_consolidacao5_tags_export.js` (novo), 52/52** --
+  cobre `normalizeTagSlug`/`normalizeNoteTags` isolados (acentos, case,
+  dedup); propagação de tags via `buildEngineCardsFromRow()` real pra
+  Native+Legacy × teacher+own × sem-tags/1-tag/múltiplas-tags/duplicatas;
+  os 5 Card Types (Normal, Normal com reverso -- 2 CardInstances com as
+  MESMAS tags mesmo com FSRS mutado independentemente --, Cloze
+  multi-marca -- 2 CardInstances com as MESMAS tags --, Múltipla Escolha,
+  Digite a resposta); `ankiNoteTagsString()` isolada (trilha preservada
+  byte a byte inclusive `unitId===0`; tags reais formatadas; sem tags ->
+  vazio; regressão explícita "nunca produz a string unidadenull", com e
+  sem `card.tags` definido); um **round-trip REAL** Import→Storage→Export
+  -- `.apkg` genuíno construído com sql.js+JSZip (`notes.tags` = `"
+  Vocab A1 café-com-leite vocab "`), parseado por `parseApkgFile()` +
+  `buildAnkiImportPlan()` (produção real, `shared/anki-parser.js`/
+  `shared/anki-import.js`, intocados nesta fase), o `editorState`
+  resultante convertido pra linha via `nativeContentColumnsFromEditorState()`
+  (simulando "armazenamento"), realimentado em `buildEngineCardsFromRow()`
+  + `ankiNoteTagsString()` -- confirma `['vocab','a1','cafe-com-leite']`
+  preservado semanticamente (dedup Vocab/vocab, acento normalizado) do
+  Import até a string `.apkg` final, nunca "unidadenull" mesmo vindo de
+  um cartão 100% importado do Anki, e que reimportar a string exportada
+  produz o MESMO conjunto (round-trip estável/idempotente).
+- **Regressão de todas as fases anteriores que tocam `shared/flashcard-
+  model.js`/`shared/anki-export.js`, re-executadas sem nenhuma mudança de
+  comportamento**: `test_fase4_engine.js` 34/34, `test_fase4d_regression.js`
+  30/30, `test_fase5_generation.js` 33/33, `test_fase6b_native_notes.js`
+  74/74, `test_fase6d1_editor_state.js` 99/99, `test_fase6d3_field_editor.js`
+  65/65, `test_fase6d4a_mc_editor.js` 92/92, `test_fase6d5_cloze_editor.js`
+  71/71, `test_fase6d6_native_persistence.js` 85/85,
+  `test_fase6d7_preview_logic.js` 59/59, `test_fase6d8_legacy_conversion.js`
+  92/92, `test_fase7a_media_resolution.js` 45/45,
+  `test_fase7b_field_audio_contract.js` 83/83, `test_fase7f_impl_tts.js`
+  41/41, `test_fase7g_recording.js` 118/118,
+  `test_fase7i_anki_export_unit.js` 49/49, `test_consolidacao1_unit.js`
+  62/62, `test_consolidacao2_unit.js` 60/60, `test_consolidacao3_unit.js`
+  12/12 -- **total 1057/1057 sem nenhuma regressão**. 2 falhas
+  pré-existentes e NÃO-relacionadas (`test_fase6d2_state.js`,
+  `test_fase6d4b_typeanswer_editor.js`) confirmadas idênticas contra o
+  commit anterior via `git stash`/`git stash pop` -- já documentadas
+  desde o fechamento da CONSOLIDAÇÃO-2 como scripts de teste
+  desatualizados, não código de produção.
+- **Supabase real, transação + rollback (projeto `eigjocalzwamisgqilhg`)**
+  -- confirmado ao vivo que `teacher_flashcards.tags`/`own_flashcards.tags`
+  (migration 048) já existem (`text[] not null default '{}'::text[]`).
+  Snapshot antes: `teacher_flashcards` 5 linhas (hash
+  `fb70341cdae90af70f90613b7445b12c`), `own_flashcards` 7 linhas (hash
+  `bb393e2d0e27534c956ad9e67a3caf09`). `BEGIN`; INSERT real em
+  `teacher_flashcards` reaproveitando `teacher_id`/`student_id`/
+  `language_app_key` de uma linha existente, com `tags:
+  ARRAY['Vocab','A1',' café-com-leite ','vocab']`; INSERT real em
+  `own_flashcards` com `tags: ARRAY['Professora','unidade-1']`,
+  `RETURNING` confirmado; `ROLLBACK`. Snapshot depois: MESMAS contagens
+  E MESMOS hashes (byte a byte idênticos ao antes), `leftover_test_rows:0`
+  -- confirma que o schema aceita o payload real de `tags` sem violar
+  constraint nenhuma, e que nenhum dado de teste ficou de pé em produção.
+- **Browser smoke mínimo, `test_consolidacao5_browser_smoke.js` (novo),
+  FR+ZH, 32/32, zero UI nova** -- página real servida estática, só as 3
+  dependências externas (Supabase, sql.js/JSZip, `fetch`) fakeadas.
+  Confirma, através do código de produção real (nunca uma cópia):
+  `buildCardFromTeacherFlashcard()` propaga `card.tags` normalizado;
+  `buildCardFromSelfFlashcard()` (Legacy, sem tags) devolve `[]`, nunca
+  `undefined`; `ankiNoteTagsString()` acessível globalmente com o
+  comportamento correto nos 4 casos (trilha preservada, sem tags,
+  com tags, `card.tags` ausente); `generateApkg()` completo continua
+  funcionando de ponta a ponta, com o card sintético exportado carregando
+  as tags REAIS no `.apkg` (`" professora "`, nunca "unidadenull").
+
+**Comportamento das Tags -- matriz confirmada por teste:**
+
+| Origem | unitId | Antes (bug) | Depois (correção) |
+|---|---|---|---|
+| Trilha (`origin:'study'`) | número real | `"unidade{N} "` | **Inalterado**, `"unidade{N} "` |
+| Professora/Aluna, Native, sem tags | `null` | `"unidadenull "` | `""` (vazio) |
+| Professora/Aluna, Legacy, sem tags | `null` | `"unidadenull "` | `""` (vazio) |
+| Professora/Aluna, com 1+ tags | `null` | `"unidadenull "` | `" tag1 tag2 "` |
+| Normal com reverso (2 CardInstances) | `null` nas 2 | `"unidadenull "` nas 2 | mesmas tags reais nas 2 |
+| Cloze multi-marca (N CardInstances) | `null` em todas | `"unidadenull "` em todas | mesmas tags reais em todas |
+| Múltipla Escolha / Digite a resposta | `null` | `"unidadenull "` | tags reais |
+
+**Problemas fora de escopo, registrados sem correção (nenhuma
+implementada nesta fase, conforme restrições 2/7/8/9)**:
+- Nenhuma UI de Tags nova (busca/filtro/gestão/autocomplete) -- as tags
+  continuam só legíveis via `card.tags`, sem nenhuma tela pra
+  visualizar/editar além do que já existia (Anki Import, que já
+  gravava tags desde o fechamento da Fase 7j).
+- Nenhum Deck Engine/Deck-0, nenhuma mudança no limite de 20 cartões
+  grátis, nenhuma mudança em FSRS/Review/Preview/renderer/áudio,
+  nenhuma mudança de arquitetura Native/Legacy, nenhuma migração/
+  backfill de dado existente, nenhuma coluna legada removida.
+- `shared/anki-parser.js`/`shared/anki-import.js` não foram tocados --
+  já corretos desde o fechamento da Fase 7j, só reutilizados pelo
+  teste de round-trip.
+
+**Arquivos alterados**: `shared/flashcard-model.js` (+12/-0),
+`shared/anki-export.js` (+34/-1). Nenhuma migração SQL nesta fase --
+`tags` já existia desde a migration 048 (fechamento da Fase 7j). Nenhum
+passo manual pendente pra autora.
+
+**Commit**: `92b3d39` (branch `claude/test-previous-changes-bo5atv`).
+
+## CONSOLIDAÇÃO-6 -- limpeza do Legacy e encerramento do caminho de
+criação antigo
+
+Sexta e (por ora) última fase da série CONSOLIDAÇÃO. Regra de ouro do
+prompt-mestre, confirmada e cumprida: **PODE remover** código cujo único
+propósito é criar um cartão NOVO no formato Legacy (branches de INSERT
+soltos, formulários mortos, testes que só validam essa criação).
+**NUNCA remove**: ler/editar um cartão Legacy já existente, a conversão
+explícita Legacy->Native (Fase 6D.8), export de cartão Legacy, colunas/
+dado Legacy no banco, os adapters que interpretam dado histórico.
+
+### Auditoria inicial
+
+A auditoria (feita ANTES de qualquer código, apresentada como diagnóstico
+via chat e só implementada após autorização explícita) confirmou que a
+CONSOLIDAÇÃO-1 já tinha eliminado o formulário de criação Legacy da UI --
+restavam só **2 call sites reais** que ainda criavam um cartão novo pelo
+branch Legacy de `createOwnFlashcard()`, os dois em fluxos de IMPORTAÇÃO
+de cartão externo, nunca no formulário manual "+ Criar cartão":
+1. `confirmAndImportMyFlashcards()` (`shared/my-flashcards.js`) -- import
+   de arquivo `.json`/link entre alunas (Prop 6, "7 propostas").
+2. `importSelectedPublicFlashcards()` (`shared/public-profile.js`) --
+   importar um cartão do perfil público de outra conta (Fase 2 do
+   prompt-mestre "perfil público").
+
+Os dois chamavam `createOwnFlashcard({languageAppKey, front, backTrans,
+note, frontPinyin, frontIsTargetLanguage})` -- sem `nativeState`, caindo
+direto no branch Legacy de INSERT (linha sem `fields`/
+`card_generation_mode`), fora do princípio "todo cartão novo é Native"
+que o resto do app já seguia desde a CONSOLIDAÇÃO-1.
+
+**Pergunta feita à autora antes de tocar em código** (via
+`AskUserQuestion`, 2 rodadas -- a 1ª pergunta era técnica demais, a
+autora pediu mais detalhe; reexplicado em linguagem simples com os 2
+trechos de código reais antes de reperguntar): "deixar como está" vs.
+"migrar pro formato novo". **Resposta explícita: "Migrar pro formato
+novo."**
+
+### Limpeza realizada
+
+- **`shared/flashcard-native-persistence.js`** -- nova função
+  `nativeNoteEditorStateFromImportPayload(payload, languageAppKey)`,
+  reaproveitando 100% `nativeNoteEditorStateFromLegacyRow()` (a MESMA
+  função que já converte um cartão Legacy JÁ EXISTENTE quando a
+  professora/aluna clica "Usar o novo editor", Fase 6D.8) -- constrói um
+  "row" sintético Legacy-shaped (`id:null, revision:0, origin:'self'`,
+  nunca choices/cloze_sentence/mídia -- nenhum dos 2 formatos de import
+  jamais carregou isso) e devolve um Note editorState Native pronto. `id:
+  null` deixa explícito que é uma CRIAÇÃO nova, nunca aponta pra linha
+  existente.
+- **`shared/my-flashcards.js`**/**`shared/public-profile.js`** -- os 2
+  call sites passaram a construir `nativeState` via a função acima ANTES
+  de chamar `createOwnFlashcard({languageAppKey, nativeState})` -- mesmo
+  resultado visual de sempre (frente/verso simples), agora gravado no
+  modelo nativo. Um comentário stale em `my-flashcards.js` (que ainda
+  implicava a existência da assinatura Legacy de criação) foi corrigido
+  na mesma auditoria de grep pós-edição.
+
+**Extrapolação registrada explicitamente, além da pergunta literal
+respondida**: a partir da confirmação de que os 2 únicos chamadores
+restantes tinham sido migrados, uma auditoria de grep no repositório
+inteiro confirmou que **nenhum outro caller real** chamava mais
+`createFlashcard()`/`createOwnFlashcard()` sem `nativeState` -- ou seja,
+o branch Legacy de INSERT dessas 2 funções tinha virado código
+genuinamente morto. Isso já estava coberto pela Seção 9 do próprio
+prompt-mestre ("existe algum fluxo legítimo que ainda chama isto pra
+CRIAR um cartão? Se não, e for genuinamente morto -> remover"), então o
+branch foi removido nesta mesma sessão:
+- **`createFlashcard()`** (`shared/teacher-flashcards.js`) --
+  `nativeState` agora é sempre obrigatório; a bifurcação `if
+  (nativeState){...}else{...INSERT Legacy solto...}` foi eliminada,
+  sobra só o caminho nativo.
+- **`createOwnFlashcard()`** (`shared/own-flashcards.js`) -- mesma
+  limpeza, mesmo raciocínio.
+- `_validateFlashcardContent()`/`_validateOwnFlashcardContent()`
+  (validadores privados de conteúdo Legacy) **não foram removidos** --
+  ganharam só um comentário esclarecendo que agora são chamados
+  exclusivamente pelo branch Legacy de EDIÇÃO, nunca mais por criação.
+
+### Legacy
+
+**Intocado, confirmado por leitura e por teste**: `updateFlashcardContent()`/
+`updateOwnFlashcardContent()` continuam com os 2 branches (nativo e
+Legacy) exatamente como antes -- editar um cartão Legacy já existente
+sem `nativeState` continua gravando só colunas soltas
+(`front`/`back_trans`/etc.), nunca cria uma linha nova, nunca é forçado
+a virar Native sozinho (Seção 6 do prompt-mestre, "não é o mesmo tipo de
+mudança que criar um cartão novo"). `flashcardEditFormHTML`/
+`wireFlashcardEditForm` (admin) e `myFlashcardEditFormHTML`/
+`wireMyFlashcardEditForm` (aluna) continuam intactos. A conversão
+explícita Legacy->Native (`legacyFlashcardConversionPreflight()`,
+`nativeNoteEditorStateFromLegacyRow()`, botão "🧪 Usar o novo editor de
+campos", Fase 6D.8) não foi tocada -- confirmado que
+`test_fase6d8_legacy_conversion.js` (a suíte canônica dessa capacidade,
+que constrói linhas Legacy via um helper próprio, nunca via
+`createFlashcard()`) continua 92/92 sem nenhuma falha.
+
+### Native
+
+Nenhuma migração de schema, nenhum backfill de dado existente. Confirmado
+via query real (transação + `rollback`, projeto `eigjocalzwamisgqilhg`)
+que um INSERT no shape exato que `nativeNoteEditorStateFromImportPayload()`
++ `nativeContentColumnsFromEditorState()` produzem grava `fields`/
+`card_generation_mode` corretamente e todas as colunas Legacy (`choices`/
+`cloze_sentence`/`front_pinyin`) como `null` -- e que a MESMA constraint
+que já protegia `teacher_flashcards` (`own_flashcards_fields_paired`,
+migration 045) segue rejeitando um estado híbrido (fields sem
+card_generation_mode) na tabela `own_flashcards` também. Confirmado que
+o UPDATE do branch Legacy de edição continua funcionando numa linha real
+já existente, sem tocar `fields`/`card_generation_mode`. Nenhum dado de
+teste ficou de pé -- hash/contagem de `teacher_flashcards` (5 linhas) e
+`own_flashcards` (7 linhas) idênticos antes/depois de toda a validação.
+
+### Testes
+
+**Suíte Node/vm nova, `test_consolidacao6_unit.js`, 78/78** -- cobre:
+mapeamento correto de `nativeNoteEditorStateFromImportPayload()` (fr/zh,
+com/sem pinyin, `frontIsTargetLanguage` true/false/ausente, nota
+presente/ausente, mídia nunca inventada); round-trip REAL pelo motor
+(`nativeContentColumnsFromEditorState` -> linha simulada ->
+`buildEngineCardsFromRow` -> `resolveCardContentView`) confirmando
+resultado visual idêntico a um flip simples de sempre e FSRS em estado
+default (`reps:0`/`lapses:0`/`state:'new'`); `createFlashcard()`/
+`createOwnFlashcard()` SEM `nativeState` agora falham de forma clara
+(via o guard estrutural de `noteEditorStateToRow()`), sem nenhuma
+chamada de rede antes disso; COM `nativeState` real, o payload que
+chega no INSERT bate exatamente com o esperado (`teacher_id`/
+`owner_id` certos, `fields`/`card_generation_mode` presentes,
+`choices` sempre null); `updateFlashcardContent()`/
+`updateOwnFlashcardContent()` confirmadas intocadas, exercitando de
+fato o branch Legacy de edição sobre um cartão existente; auditoria
+arquitetural embutida no próprio teste (grep contra o código de
+produção real) confirmando ausência de `if(nativeState)` residual nas 2
+funções de criação e **zero call site, no repositório inteiro, de
+`createFlashcard(`/`createOwnFlashcard(` sem `nativeState`**.
+
+**Regressão re-executada, números reais**: `test_consolidacao1_unit.js`
+62/62, `test_consolidacao2_unit.js` 60/60, `test_consolidacao3_unit.js`
+12/12, `test_consolidacao5_tags_export.js` 52/52,
+`test_fase6d8_legacy_conversion.js` 92/92 -- todas sem regressão.
+**Uma falha pré-existente reproduzida e classificada, não corrigida**:
+`test_fase6d6_native_persistence.js` (suíte da Fase 6D.6, anterior a
+toda a série CONSOLIDAÇÃO) quebra nos cenários 9-12 -- eles usavam
+`createFlashcard()` SEM `nativeState` só pra SEMEAR uma linha Legacy de
+teste (não pra testar a criação Legacy em si na maioria dos casos, mas
+dependiam do mecanismo que acabou de ser removido). Confirmado por
+leitura que é exatamente o comportamento que esta fase foi autorizada a
+eliminar -- não é um bug, é a consequência direta e esperada da
+limpeza. Vive só no scratchpad (nunca commitado, `git ls-files` confirma
+zero teste rastreado neste repo), não editada -- é um artefato histórico
+de uma fase anterior, não uma spec viva; a capacidade real que ela
+tentava validar (seed de linha Legacy + conversão) continua 100%
+coberta por `test_fase6d8_legacy_conversion.js`, que nunca dependeu de
+`createFlashcard()` pra isso.
+
+### Auditoria global final
+
+Re-grep de todo o repositório (`shared/`, `fr/`, `zh/`) pelos termos do
+prompt-mestre, classificados A(Native, devia sumir)/B(Legacy compat,
+correto permanecer)/C(doc/comentário)/D(morto):
+- `frontIsTargetLanguage` -- todas as ocorrências restantes são **B**
+  (branch Legacy de edição em `updateFlashcardContent`/
+  `updateOwnFlashcardContent`/`shared/admin-flashcards.js`/
+  `shared/my-flashcards.js`, ou leitura de dado Legacy pra export/preview
+  em `shared/public-profile.js`/`myFlashcardsExportPayload`) ou **C**
+  (comentários documentando que Native nunca usa isso).
+- `reviewDirection`/`isReverse`/`nextCardDirection` -- todas **B**,
+  exclusivas do mecanismo de trilha (`!card.cardInstance`), já
+  confirmado desde a Fase 4/7a que cartão nativo nunca recebe nenhum dos
+  3; nenhuma ocorrência nova, nenhuma introduzida por esta fase.
+- `legacyFlashcard*`/`createLegacy*` -- `createLegacyNoteEditorStateFromRow`
+  (wrap de exibição/comparação de um Legacy existente, Fase 6D.1),
+  `legacyFlashcardConversionPreflight` (o gate da conversão explícita,
+  Fase 6D.8) -- ambos **B**, exatamente o que deve permanecer. Menções a
+  `legacyFlashcardRowToCard`/`bridgeNoteCardsToLegacyShape` são só **C**
+  (comentários históricos, essas funções já tinham sido eliminadas nas
+  Fases 3/4, muito antes desta série).
+- **Nenhum call site D (morto) sobrou** -- confirmado que, no
+  repositório inteiro, só 3 pontos fazem `INSERT` em
+  `teacher_flashcards`/`own_flashcards`: `createFlashcard()`,
+  `createOwnFlashcard()` (as 2 agora Native-only) e
+  `persistAnkiImportBatches()` (`shared/anki-import.js`, Fase 7j) --
+  confirmado por leitura que esta terceira já constrói seu payload via
+  `nativeContentColumnsFromEditorState()`, sempre Native, nunca dependeu
+  do branch removido.
+
+**Achado incidental, fora do escopo desta fase, registrado sem
+correção**: `myFlashcardsExportPayload()` (`shared/my-flashcards.js`,
+export JSON/link entre alunas, Prop 6) lê `c.front_is_target_language`
+de uma linha crua pra montar o payload de export -- mas
+`nativeContentColumnsFromEditorState()` sempre grava esse mirror como
+`true` FIXO (nunca reflete a direção real escolhida pelos `Field.lang`
+do cartão Native). Resultado: exportar um cartão Native cuja direção
+foi invertida no editor (front=tradução, back=idioma estudado) produz
+um payload de export com `frontIsTargetLanguage:true` errado -- o texto
+em si (`front`/`backTrans`, via o mirror posicional) continua correto,
+só a direção pode ficar invertida na cópia importada por outra conta.
+Pré-existente a esta sessão (não causado pela limpeza de hoje), tangente
+ao objetivo desta fase (que é sobre CRIAÇÃO, não sobre fidelidade do
+export/import), não corrigido -- registrado aqui pra uma sessão futura
+que mexer em `myFlashcardsExportPayload()`/`deriveLegacyMirrorFromNoteEditorState()`.
+
+### Documentação
+
+Esta seção.
+
+### Fora de escopo (Seção 15, confirmado não tocado)
+
+Nenhuma migração de dado em massa, nenhuma coluna Legacy removida,
+nenhum dado apagado, nenhuma mudança em FSRS/Review/Preview/renderer/
+áudio/Tags/Anki/Decks/limite de 20 cartões grátis além do estritamente
+necessário, nenhuma UI nova, nenhuma refatoração estética ampla, nenhuma
+reescrita do motor Native. `shared/flashcard-model.js` não foi tocado.
+
+### Commit
+
+Branch `claude/test-previous-changes-bo5atv`. Arquivos alterados
+(`git diff --numstat`): `shared/flashcard-native-persistence.js`
+(+46/-0, novo helper), `shared/teacher-flashcards.js` (+25/-38,
+bifurcação Legacy de criação removida), `shared/own-flashcards.js`
+(+20/-30, mesma limpeza), `shared/my-flashcards.js` (+17/-13, import
+migrado + comentário corrigido), `shared/public-profile.js` (+7/-8,
+import migrado) -- 115 inserções/89 deleções no total, mais esta seção
+do CLAUDE.md.
+
+## Prompt-mestre "Decks, Tags e Painel" -- Fase A (auditoria pré-Deck
+Engine, só leitura) + Fase B (modelo de dados de Deck)
+
+Prompt-mestre novo, distinto da série CONSOLIDAÇÃO (que fechou o motor
+Note/CardType/CardInstance) -- fonte de verdade é o documento externo
+"Arquitetura Total -- Decks, Tags, Painel e Sistema de Estudo" (40
+seções, entregue pela autora), nunca uma arquitetura alternativa. Mesma
+disciplina de fatiamento por autorização explícita de toda a sessão:
+Fase A (auditoria, zero código) -> Fase B (modelo de dados, esta
+entrega) -> Fase C (Deck Engine, NÃO iniciada).
+
+**Fase A -- achados principais (checkpoint entregue só no chat, sem
+tocar em nenhum arquivo, confirmado por `git status` limpo)**: Note/
+Field/CardType/CardInstance já existiam prontos desde as Fases 4-7j;
+CardInstance nunca é persistido (sempre derivado em runtime via
+`buildEngineCardsFromRow()`); FSRS já é global por conta; Tags já
+pertencem à Note (`tags text[]`, migration 048); Anki Import já
+calculava `deckTree`/`deckPath` em memória (`shared/anki-import.js`,
+Fase 7j) mas descartava depois do resumo; **não existia nenhuma
+entidade Deck, nenhuma coluna `deck_id`, nenhuma árvore** -- Study
+Trail continuava com pipeline 100% próprio (`buildCardsFromUnits()`,
+fora do banco) e o teto de 20 cartões grátis (Fase 5.1) contava
+linhas/Notes, não CardInstances.
+
+**Fase B -- o que foi feito**: migration `049_create_decks_table.sql`
+(aplicada AO VIVO via `mcp__Supabase__apply_migration`, projeto
+`eigjocalzwamisgqilhg`) -- só fundação de dados, nenhum Deck Engine,
+seguindo à risca as 12 decisões arquiteturais já travadas pelo
+prompt-mestre (Note continua fonte de verdade; CardInstance nunca
+persistido; Deck nunca contém Fields/conteúdo/direção/Card Type; uma
+Note tem no máximo 1 Deck efetivo; Cards irmãos -- Normal-reverso,
+Cloze multi-marca -- sempre compartilham Deck porque a associação vive
+na NOTE, nunca no CardInstance que nem existe persistido; `deck_id`
+nunca no CardInstance; Curso ≠ Deck, `unitId`/nível/módulo/lição nunca
+viram `deck_id`; Study Trail não migrado nesta fase; Teacher Deck só
+schema, UI fica pra Fase H; Public Deck só suporte de dado, zero
+experiência pública; Tags/FSRS intocados).
+
+**Tabela `decks`** (auditada a convenção do schema real antes de
+escrever -- `bigint generated always as identity`, `uuid references
+auth.users(id) on delete cascade`, `text not null check (col in
+(...))` pra todo enum-like, nunca tipo `enum` nativo, mesmo padrão de
+`teacher_students`/`teacher_flashcards`/`profiles`): `id`, `owner_id`
+(nullable -- de quem é a ÁRVORE; sempre populado exceto em `kind=
+'course'`), `teacher_id` (nullable, só em `teacher_root`/`teacher` --
+mesmo par de nomes que `teacher_flashcards.teacher_id`/`student_id` já
+usa, `owner_id` fazendo o papel de "aluna" nesse caso), `parent_deck_id`
+(self-FK, `on delete cascade`), `kind` (6 valores: `root`/
+`personal_root`/`personal`/`course`/`teacher_root`/`teacher` --
+**nenhum kind `'public'` separado**, "público" é sempre uma flag
+`is_public` sobre um Deck pessoal já existente, nunca uma categoria
+estrutural nova, decisão explícita da seção 10), `name`,
+`language_app_key` (mesmo check de sempre, `frances`/`mandarim`/
+`portugues`), `is_public boolean default false`, `created_at`. Único
+CHECK direto na tabela: `parent_deck_id is null or parent_deck_id <>
+id` (auto-parent nunca válido). Índices únicos parciais (`decks_unique_
+root`/`decks_unique_personal_root`/`decks_unique_teacher_root`) --
+no máximo 1 raiz/Meus Decks por (dono, idioma), 1 raiz de professora
+por (aluna, professora, idioma). Índices normais em `parent_deck_id`/
+`owner_id`/`teacher_id`/`language_app_key`/`kind`.
+
+**Trigger `decks_validate_hierarchy()`** (BEFORE INSERT/UPDATE, não só
+CHECK -- a validação cruza linhas: o parent precisa existir e ter kind/
+dono/idioma compatíveis com o filho, e detecção de ciclo mais profundo
+precisa andar a árvore) -- regras por `kind`: `root` nunca tem parent/
+teacher_id, sempre owner_id, nunca `is_public`; `personal_root` sempre
+filho de um `root` do MESMO dono/idioma; `personal` sempre filho de
+`personal_root`/`personal` do mesmo dono/idioma; `teacher_root` sempre
+filho de um `root` da MESMA aluna/idioma, sempre com owner_id (aluna) +
+teacher_id (professora); `teacher` sempre filho de `teacher_root`/
+`teacher` da mesma aluna+professora+idioma; `course` nunca tem owner_id/
+teacher_id (conteúdo do sistema, não de conta -- nenhuma linha deste
+`kind` é criada por esta migration, Study Trail continua fora do banco).
+Detecção de ciclo mais profundo (walk pela cadeia de `parent_deck_id`,
+limite de 100 níveis) -- só importa de verdade quando um futuro "mover
+Deck" (Fase C) fizer UPDATE de `parent_deck_id`; testada e confirmada
+funcionando via um cenário real (2 decks `personal` irmãos, kinds/dono/
+idioma compatíveis entre si, só o walk de ancestralidade barra).
+
+**RLS de `decks`** (auditadas antes as policies de `teacher_students`/
+`teacher_flashcards`/`own_flashcards` pra seguir a mesma convenção --
+nome `{tabela}_{qualificador}_{ação}`, admin via e-mail hardcoded):
+`decks_owner_select`/`decks_teacher_select` (leitura ampla -- dono lê a
+própria árvore inteira incluindo `teacher_root`/`teacher` que ELA é a
+aluna, mesmo espírito de "aluno pode estudar/visualizar" da seção 15;
+professora lê toda a árvore que controla, de qualquer aluna);
+`decks_owner_write` (só `kind='personal'` que ela mesma possui -- nunca
+`root`/`personal_root`, que são bootstrap-only); `decks_teacher_write`
+(só `kind='teacher'` na própria árvore -- nunca `teacher_root`, mesmo
+motivo); `decks_admin_write` (bypass total, mesmo padrão de sempre).
+Confirmado por teste ao vivo (ver abaixo): aluno NUNCA tem write sobre
+Teacher Deck (nem o próprio), curso não é alterável por ninguém além do
+admin, conta B nunca lê/altera Deck pessoal de conta A.
+
+**`own_flashcards`/`teacher_flashcards` ganham `deck_id bigint
+references decks(id) on delete set null`** (nullable, indexado, `on
+delete set null` -- NUNCA cascade, apagar um Deck não pode apagar a
+Note/Fields/FSRS/progresso dela, só a organização volta a "sem Deck",
+igual a uma linha Legacy hoje). **Mesma coluna serve Legacy e Nativo**
+-- Deck é eixo de ORGANIZAÇÃO, ortogonal a Legacy x Nativo, mesmo
+espírito de `tags` (migration 048) -- nenhuma segunda coluna/estrutura
+pra Legacy, conforme a seção 12 exigia. Cards irmãos (Normal-reverso,
+Cloze multi-marca) **sempre compartilham Deck estruturalmente** -- não
+por nenhuma lógica nova, mas porque não existe (nunca existiu, nunca
+vai existir) `deck_id` por CardInstance pra divergir: todas as
+CardInstances de uma Note são derivadas em runtime da MESMA linha, que
+só tem 1 `deck_id`.
+
+**Triggers `own_flashcards_validate_deck()`/
+`teacher_flashcards_validate_deck()`** (BEFORE INSERT/UPDATE, rodando
+como o papel que já faz a escrita -- nunca SECURITY DEFINER -- porque a
+RLS de leitura de `decks` já filtra naturalmente um `deck_id` de outra
+conta, reforçando a segurança numa 2ª camada sem substituir a RLS de
+escrita das duas tabelas): Note própria só aceita Deck `personal_root`/
+`personal` do MESMO dono+idioma; Note de professora só aceita Deck
+`teacher_root`/`teacher` da MESMA aluna+professora+idioma. Testado que
+uma Note própria NUNCA consegue apontar pra Teacher Deck (nem o dela
+mesma) e vice-versa.
+
+**`ensure_user_decks(p_owner_id, p_language_app_key)`** (SECURITY
+DEFINER, mesmo padrão de `get_teacher_student_metrics`, migration 029
+-- precisa bypassar RLS porque cria `root`/`personal_root`, que a RLS
+normal de escrita do usuário deliberadamente não permite) -- idempotente
+(reconsulta antes de inserir, `on conflict do nothing` + releitura pra
+corrida concorrente), checagem de autorização interna (só a própria
+conta ou admin pode bootstrapar pra um `owner_id`). **Escopo desta
+migration: só `root`+`personal_root`** -- `teacher_root` fica pra
+quando a Fase H decidir o mecanismo de disparo (ex.: no momento em que
+um vínculo `teacher_students` é criado), não implementado aqui de
+propósito. **Não invocada nesta migration pra nenhuma das 22 contas
+reais existentes** -- decisão documentada, não um bloqueio: nada
+consome `root`/`personal_root` ainda (Deck Engine, o único consumidor
+futuro, não existe), backfill silencioso seria especulativo; fica pra
+quando a Fase C decidir se chama isto sob demanda (lazy, na 1ª leitura
+de Decks) ou via backfill explícito.
+
+**Testes realizados, todos ao vivo contra o Supabase real (transação +
+`ROLLBACK`, nunca dado de teste sobrevivendo) -- 42 cenários, 0
+falhas**: **Grupo 1 (16, hierarquia/integridade)** -- criar root/
+personal_root/personal/personal aninhado/teacher_root/teacher child/
+course OK; parent inexistente, self-parent (via UPDATE), kind inválido,
+idioma inválido, `personal_root` com parent de kind errado, `personal_
+root` de dono divergente do parent, `teacher_root` sem `teacher_id`,
+`course` com `owner_id` setado -- todos rejeitados com a mensagem certa.
+**Grupo 2 (10, Note -> Deck)** -- ciclo profundo real (2 decks
+`personal` irmãos, kinds compatíveis, só o walk barra) rejeitado; own
+Note aceita Deck pessoal certo, rejeita dono diferente/idioma
+diferente/Teacher Deck; teacher Note aceita Teacher Deck certo, rejeita
+professora errada/Deck pessoal; confirmado `deck_id` é coluna simples
+(nunca array/N:N) e que uma Note nativa `normal_reversed` continua com
+1 `deck_id` só (irmãos compartilham). **Grupo 3 (5, inicialização)** --
+1ª chamada de `ensure_user_decks` cria root+personal_root; 2ª chamada
+idempotente (mesmos ids); confirmado só 1 linha de cada kind no banco
+depois das 2 chamadas; bootstrap por conta não-dona/não-admin rejeitado
+com `not_authorized`; bootstrap por admin pra OUTRA conta (bypass)
+funciona. **Grupo 4 (11, segurança/RLS, via `set local role
+authenticated` + `set local request.jwt.claims` simulando sessões
+reais de 3 contas distintas)** -- conta B não lê/não altera/não cria
+Deck com `owner_id` de A (RLS bloqueia as 3 formas, nome de A nunca
+mudou); aluna PODE ler seu próprio Teacher Deck mas NÃO pode alterá-lo;
+professora lê+cria na própria árvore de Teacher Decks; aluno não altera
+nem cria Deck de curso. **Compatibilidade** -- confirmado ao vivo que
+`teacher_flashcards` (5 linhas) e `own_flashcards` (7 linhas) continuam
+com a MESMA contagem e o MESMO hash agregado (id+front+back_trans+
+fields+card_generation_mode+tags+revision) de antes de toda a sessão de
+teste, `deck_id` NULL em 100% das linhas reais (nenhum backfill), 0
+linhas em `decks` (todo teste rolou back), nenhuma tabela
+`*card_instance*` criada. **Regressão** -- `git status`/`git diff
+--stat` confirmam que só a migration foi adicionada, nenhum arquivo
+cliente (`.js`/`.html`) tocado -- sem superfície de regressão client-side
+pra testar.
+
+**O que NÃO foi implementado nesta fase (confirmado explicitamente, §21
+do prompt-mestre)**: Deck Engine; ancestors/descendants/subtree
+aggregation; New/Learning/Review por Deck; Study now; Add card dentro
+do Deck; move/delete Deck; Painel; Deck UI completa; migração de Study
+Trail; Teacher Deck UI; Public Deck UI/import; Anki destination UI/
+export hierárquico; mudança do teto Free (continua contando linhas, não
+CardInstances -- `Fase D` vai calcular `generatedCardInstanceCount(Note)`
+a partir de `card_generation_mode` via `buildEngineCardsFromRow(row,
+opts).length`, sem campo `card_count` persistido); mudança de FSRS/
+Review.
+
+**Decisões tomadas nesta fase (só as necessárias pra transformar o
+documento em schema, nenhuma delas reabre as 12 já travadas)**: (1)
+`kind` como coluna `text check`, não enum nativo nem tabela de lookup --
+mesma convenção já confirmada em todo o schema existente; (2)
+`owner_id`+`teacher_id` (nunca um 3º vocabulário) -- mirror exato do par
+que `teacher_flashcards` já usa; (3) `is_public` é flag sobre Deck
+pessoal, nunca um `kind` próprio; (4) unicidade estrutural via índice
+parcial, não `UNIQUE` simples (só se aplica a alguns `kind`); (5)
+integridade cross-row via trigger, não só CHECK (parent precisa existir
+com kind/dono/idioma compatíveis -- inexpressável num CHECK simples,
+documentado explicitamente em vez de escondido só na UI); (6) `teacher_
+root`/`root`/`personal_root` são bootstrap-only (só `ensure_user_decks`/
+admin escrevem), nunca criáveis por ação normal do usuário -- decisão
+implícita da própria arquitetura de RLS, não pedida à parte; (7) não
+bootstrapar as 22 contas reais existentes nesta migration (documentado
+acima, não um bloqueio -- nada consome ainda). Nenhuma decisão
+bloqueou a migration -- não foi necessário parar e reportar impasse.
+
+**Próxima fase (C -- Deck Engine)**: pré-requisitos já entregues por
+esta fase -- tabela `decks` real, hierarquia íntegra, `deck_id` nas 2
+tabelas de Note, RLS protegendo os 4 tipos de Deck, bootstrap
+idempotente pronto (sem consumidor ainda). Decisões que a Fase C
+ainda precisa tomar, não resolvidas aqui de propósito: quando/como
+disparar `ensure_user_decks` (lazy vs. backfill, e se estende pra
+`teacher_root` também); algoritmo de agregação de contagem por
+subtree (ancestors/descendants); mecanismo de "mover Deck" (reparent
+via UPDATE, que o trigger de ciclo já suporta, mas sem UI/API ainda);
+como Study Trail (Fase E) se encaixa -- Deck de curso por aluna vs.
+árvore global por idioma, deixado explicitamente em aberto na seção
+`course` do trigger; cálculo de `generatedCardInstanceCount(Note)` pro
+novo teto Free (Fase D).
+
+Nenhum passo manual pendente pra autora -- migration `049` já aplicada
+ao vivo via `mcp__Supabase__apply_migration`.
+
+**PARE conforme instrução explícita -- Fase C (Deck Engine) NÃO
+iniciada.** Próxima etapa só começa depois de autorização explícita da
+autora, com este checkpoint já entregue antes de pedir luz verde.
+
+**Atualização: autorizada e entregue (2026-09-29), "FASE C — DECK
+ENGINE".**
+
+## Fase C -- Deck Engine (motor de hierarquia, escopo, agregação e
+movimentação, sem UI)
+
+Constrói o COMPORTAMENTO sobre o schema já criado na Fase B (`decks`,
+`deck_id`, RLS, trigger de hierarquia, `ensure_user_decks()`) -- nenhum
+redesenho de dado, nenhuma segunda entidade de organização,
+`unitId`/`category`/`group` continuam nunca sendo tratados como Deck.
+
+**Auditoria prévia (só leitura, sem alterar nada)** confirmou: `STATE.cards`
+é construído por `buildEngineCardsFromRow()` (`shared/flashcard-model.js`,
+Fase 4b) a partir de `buildCardFromTeacherFlashcard`/
+`buildCardFromSelfFlashcard` (fr/zh `app.js`); CardInstances nunca são
+persistidas, sempre derivadas em runtime via
+`interpretNoteFromRow`/`interpretNativeNoteFromRow`; FSRS mora em
+`shared/fsrs.js`/`shared/srs.js` (`applyMemoryGrade`,
+`migrateCardToFSRS`, `cardsDueNow`); a fila de estudo central é
+`getStudyQueue(pool, options)` (`shared/study-queue.js:34`), que recebe
+um ARRAY de cards já construído -- nunca ela mesma decide quais cards
+existem, só como priorizá-los; `eligibleReviewPool()` (fr/zh `app.js:5267`)
+é o pool padrão (`STATE.cards.filter(isCardLessonCompleted).filter(matchesReviewOriginFilter)`)
+que os 4 pontos de entrada de revisão (Flashcard/Palavras Difíceis/Speed
+Review/Combinar) já consomem, desde a Fase 4.1/4.2. Isso confirma que o
+ponto de integração certo pro Deck Engine é um PRÉ-FILTRO desse mesmo
+array, nunca uma reescrita de `getStudyQueue()`.
+
+### C1 -- `shared/deck-engine.js` (novo, módulo de domínio puro)
+
+Zero chamada de rede (isso vive em `shared/deck-data.js`, ver C8/C9
+abaixo) -- só funções puras sobre um array `decks` (linhas cruas da
+tabela) e, quando aplicável, um array `cards` (o mesmo shape que
+`STATE.cards` já usa). Compartilhado 100% entre fr e zh (1 arquivo só,
+sem nenhum branch por idioma -- a árvore de Deck não depende de idioma
+na LÓGICA, só no dado `language_app_key` de cada linha).
+
+**Árvore** -- `getDeckById`/`getDeckChildren`/`getDeckParent`/
+`getDeckAncestors` (mais próximo->mais distante, guard de 100 níveis)/
+`getDeckDescendants` (BFS, TODOS os níveis, não só filhos diretos, guard
+de 1000)/`getDeckSubtreeIds` (`[deckId, ...descendants]`)/
+`isDescendantOf`/`getDeckRoot`. Proteção de ciclo é ESTRUTURAL (o walk de
+ancestrais/descendentes tem guard de profundidade, nunca confia que o
+dado já chegou sem ciclo) -- mesmo princípio já reforçado no banco pela
+trigger `decks_validate_hierarchy()` da Fase B, aqui reforçado de novo no
+cliente.
+
+**Destino/permissões** -- `canUserAccessDeck`/`canPlaceOwnNoteInDeck`
+(só `personal_root`/`personal`, mesmo dono, mesmo idioma)/
+`canPlaceTeacherNoteInDeck` (só `teacher_root`/`teacher`, mesma
+aluna+professora+idioma)/`canMoveDeck` (só `kind='personal'`, destino
+`personal_root`/`personal`, mesmo dono/idioma, nunca ele mesmo, nunca um
+descendente)/`canMoveOwnNote`/`canMoveTeacherNote` (delegam pras funções
+`canPlace*` acima).
+
+**Escopo de estudo (C3)** -- `getStudyScopeForDeck(decks, deckId, cards)`:
+`cards.filter(c => c.deckId != null && subtreeIds.has(c.deckId))`. Clicar
+num Deck = Deck + TODOS os descendentes, nunca a conta inteira nem só o
+Deck sozinho -- exatamente a regra travada no prompt-mestre (seção 6).
+
+**CardInstance (C4)** -- `generatedCardInstanceCount(row)` chama
+`buildEngineCardsFromRow(row, {origin:'self', appKey:
+row.language_app_key, idPrefix:'x'}).length` -- delega 100% ao motor já
+existente (Fase 4b), NUNCA reimplementa a cardinalidade por Card Type:
+Normal=1, Normal-reverso=2 (via `buildReversedCardInstancePair`, Fase 4a,
+intocado), Cloze=N marcas (via `parseClozeMarks`, Fase 5, intocado),
+Múltipla Escolha=1, Digite a resposta=1. **Legacy**: uma linha sem
+`fields`/`card_generation_mode` cai no ramo `else` de
+`interpretNoteFromRow()` (mesmo motor, sem nenhuma mudança) e sempre
+produz exatamente 1 CardInstance -- `generatedCardInstanceCount()` nunca
+inventa Card Type nem altera conteúdo pra Legacy, só pergunta ao motor
+que já sabe interpretar essa linha.
+
+**Contagens (C5/C6)** -- `bucketCardState(card)`: `relearning` conta como
+`'learning'` (decisão travada explicitamente pelo prompt-mestre --
+"um Card que já estava em Review e entrou em relearning deve ser
+tratado como parte do estado de aprendizagem enquanto estiver em
+relearning"; documentado no próprio código, nunca uma mudança no motor
+FSRS em si, `shared/fsrs.js` intocado). `countNewCards`/`countLearningCards`
+(new+learning+relearning)/`countReviewCards` (usa `cardsDueNow` de
+`shared/srs.js` quando disponível, com fallback -- **disponibilidade,
+não só estado**: um card em estado `review` mas ainda não due NÃO conta
+aqui, exatamente a distinção que o prompt-mestre exigia). `getDeckCounts(decks,
+deckId, cards)` = escopo de estudo + os 3 contadores, único agregador --
+nenhum cálculo duplicado em Review/UI/Painel.
+
+**Study Queue Integration (C7)** -- documentado, não implementado como
+call site ainda (nenhuma tela consome Deck hoje): o fluxo real seria
+`getStudyQueue(getStudyScopeForDeck(decks, deckId, eligibleReviewPool()),
+options)` -- `getStudyScopeForDeck()` vira um PRÉ-FILTRO aplicado ANTES
+de `getStudyQueue()`, nunca uma reescrita dela. Preserva de graça: origem
+(`matchesReviewOriginFilter`, já dentro de `eligibleReviewPool()`), FSRS
+(`getStudyQueue` intocado), teacher/self (já é o que popula `.deckId`
+hoje). **Study Trail NÃO migrado nesta fase** (cards de trilha nunca têm
+`.deckId`, `origin==='study'`, ficam de fora de qualquer escopo de Deck
+até uma Fase E decidir como/se migrar) -- ponto de integração documentado
+pra quando essa fase existir, nunca implementado agora.
+
+**Movimentação de Notes (C8)** -- `validateNoteMove({note, destination,
+decks, table})` (`table:'own'|'teacher'`) -- validação pura, nunca toca
+`CardInstance`/FSRS/IDs/revision/Fields/Tags, delega pra
+`canMoveOwnNote`/`canMoveTeacherNote`. A operação real (`note.deck_id =
+Y`) é feita em `shared/deck-data.js` (`setOwnFlashcardDeck`/
+`setTeacherFlashcardDeck`) -- validação ANTES do `UPDATE`, nunca depois;
+se a validação falhar, `deck_id` original nunca é tocado (nenhum estado
+intermediário inválido).
+
+**Movimentação de Decks (C9)** -- `validateDeckMove({deck, destination,
+decks})` -- só `kind='personal'` pode mover, só pra
+`personal_root`/`personal` do mesmo dono/idioma, nunca root/personal_root/
+Course/teacher_root/teacher/si-mesmo/descendente/outro-idioma/outro-dono
+-- lista completa de rejeição implementada e testada (ver Testes).
+Operação real em `shared/deck-data.js::moveDeck()`.
+
+**Delete/destroy (C10)** -- só identificação, nenhuma UI/botão:
+`isDeckDeletableKind(deck)` (só `kind==='personal'`),
+`validateDeckDeletion({deck, hasChildren, hasNotes})` (rejeita
+root/personal_root/course/teacher_root sempre; rejeita `personal` com
+filhos ou Notes -- "impedir deleção que quebre Notes sem destino", regra
+literal do prompt-mestre). Nenhuma operação destrutiva de fato
+implementada.
+
+**Bootstrap (C11)** -- estratégia única, já existente desde a Fase B
+(`ensure_user_decks`, SECURITY DEFINER, idempotente via SELECT-antes-de-
+INSERT + `on conflict do nothing` + reselect) -- `shared/deck-data.js::
+ensureDecksForCurrentUser(languageAppKey)` é o único wrapper de cliente
+proposto, mas **não foi ligado a nenhum boot flow nesta fase** (nenhuma
+tela consome Deck ainda -- ligar isso ao carregamento do app seria
+trabalho de uma fase futura, quando uma UI real precisar da árvore
+existir). Recomendação registrada, não implementada: bootstrap
+"preguiçoso" (lazy, só na primeira vez que uma tela de Deck for aberta),
+nunca backfill em massa das 22 contas reais -- mesmo princípio já
+seguido pela Fase B ("nada consome ainda"). `ensure_user_decks` continua
+NUNCA bootstrapando `teacher_root` sozinho (só `root`+`personal_root`) --
+criar Teacher Deck automaticamente sem vínculo ativo continua fora de
+escopo, como já travado na Fase B.
+
+### Achado de segurança real, corrigido (não uma decisão de arquitetura
+nova -- um bug encontrado testando ao vivo)
+
+Testando §19 (RLS real), a chamada `ensure_user_decks(<outro_owner_id>,
+'frances')` simulando uma sessão da aluna (JWT com `sub` mas SEM a claim
+`email`) **teve sucesso** quando deveria ter sido rejeitada com
+`not_authorized`. Causa raiz: a checagem original (migration 049)
+`if auth.uid() is distinct from p_owner_id and (auth.jwt()->>'email')
+<> 'brunemed1310@gmail.com' then raise exception` -- em SQL, `NULL <>
+'x'` avalia pra `NULL`, nunca `TRUE`, e um `IF NULL THEN` em PL/pgSQL é
+tratado como `FALSE` -- ou seja, se `auth.jwt()->>'email'` vier `NULL`
+(JWT sem a claim `email`), a checagem inteira falha ABERTA. **Em
+produção isso nunca foi alcançável** (todo JWT real do Supabase Auth
+pra uma conta com e-mail sempre carrega a claim `email`), mas é uma
+falha real de lógica NULL-unsafe, não uma reformulação de arquitetura --
+corrigida com uma migration mínima e cirúrgica.
+
+**Migration `050_fix_ensure_user_decks_null_email_check.sql`** -- só
+troca `(auth.jwt()->>'email') <> '...'` por `coalesce(auth.jwt()->>'email',
+'') <> '...'` (garante que ausência de claim nunca é tratada como
+"é admin"). Aplicada AO VIVO via `mcp__Supabase__apply_migration`,
+projeto `eigjocalzwamisgqilhg`. Nenhuma outra linha da função tocada.
+Reteste confirmou: cross-user bootstrap agora rejeitado com
+`not_authorized`; auto-bootstrap (sub == owner_id, o único caminho que
+`shared/deck-data.js` de fato usa) continua funcionando sem nenhuma
+regressão.
+
+### Testes realizados
+
+**Node/VM, `test_fasec_deck_engine.js` (scratchpad, não commitado -- mesma
+convenção de todo o projeto), 115/115** -- árvore (filhos/pai/ancestrais
+na ordem exigida pelo exemplo literal do prompt-mestre/descendentes em
+TODOS os níveis/isolamento de irmãos/Curso nunca mistura com Meus
+Decks/subtreeIds/isDescendantOf assimétrico/getDeckRoot/isolamento
+cross-idioma e cross-dono/segurança contra ciclo mesmo com array
+construído à mão com ciclo real A↔B); permissões (own/teacher notes em
+Deck certo/errado, incluindo rejeição explícita de root/Course/Teacher
+Deck pra Note própria); escopo de estudo (Meus Decks inclui A+B+raiz,
+exclui Curso e trilha; Deck filho só inclui o próprio subtree); contagem
+de CardInstance pelos 5 Card Types (Legacy Normal=1, Legacy Cloze
+1-lacuna=1, Native Normal=1, Native Normal-reverso=2, Native Cloze
+2-marcas=2, Native Cloze 3-marcas=3, Native MC=1 independente de nº de
+distratores, Native Digite-a-resposta=1); contagens New/Learning/Review
+(bucket de `relearning` dentro de `learning`, `review` só conta due-agora,
+agregador somando 10 cards reais espalhados por 3 Decks); movimentação de
+Notes (válida own→personal, rejeitada own→course/teacher, rejeitada
+teacher→personal, resultado de validação NUNCA contém chave
+`cardInstance`/`fsrs`); movimentação de Decks (válida A→B irmão; rejeição
+completa: root/personal_root/course-por-aluna/teacher_root/teacher-por-
+aluna/si-mesmo/descendente-ciclo/idioma-cruzado/dono-cruzado/destino-
+dentro-de-course); deletabilidade (root/personal_root/course/teacher_root
+nunca deletáveis; personal com filhos/Notes rejeitado; personal-folha
+liberado); regressão de `deckId` em `buildEngineCardsFromRow` (Legacy sem
+coluna→null, Legacy com `deck_id`→o valor real, presença de todas as ~24
+chaves do card, normal-reverso com as 2 metades compartilhando o MESMO
+`deckId` mas ids distintos).
+
+**7 suítes de regressão de fases anteriores, re-executadas depois da
+mudança em `flashcard-model.js`, sem nenhuma falha** --
+`test_fase4_engine.js` 34/34, `test_fase4d_regression.js` 30/30,
+`test_fase5_generation.js` 33/33, `test_fase6b_native_notes.js` 74/74,
+`test_fase6d1_editor_state.js` 99/99, `test_fase7a_media_resolution.js`
+45/45, `test_fase7b_field_audio_contract.js` 83/83 -- total desta fase +
+histórico: **513/513** sem falha.
+
+**Supabase real (`eigjocalzwamisgqilhg`), 3 transações
+`BEGIN...ROLLBACK`, zero dado permanente confirmado por hash/contagem
+byte-a-byte idênticos antes/depois** (`decks: 0`, `teacher_flashcards: 5`
+hash `4decfc28b2abc4a897e4fa7a11e545f9`, `own_flashcards: 7` hash
+`846ad51d3a5920c437dacdfa59094bac`, idênticos nas 3 checagens): (1)
+árvore temporária real de 7 Decks (root/personal_root/2 personal
+aninhados/personal irmão/teacher_root/teacher) + 2 Notes temporárias
+(own+teacher) + moves válidos de Note (own A→A.B, teacher teacher→
+teacher_root) + 3 tentativas de move inválido de Note rejeitadas pela
+trigger da Fase B (`own→teacher_deck`, `own→root`, `teacher→personal`) +
+confirmação de que nenhuma rejeição deixou mutação parcial + move válido
+de Deck (A pra dentro de C) + 2 tentativas de move inválido de Deck
+rejeitadas (ciclo C→B sendo B descendente de C; mover `personal_root`);
+(2) RLS real com 3 personas simuladas (`set local role authenticated` +
+`set local request.jwt.claims`, mesmo padrão já validado na Fase B):
+conta terceira/não-relacionada lê 0 Decks da aluna e sua tentativa de
+`UPDATE` na nota da aluna afeta 0 linhas; aluna lê a própria árvore
+inteira (5 Decks, incluindo o Teacher Deck) mas sua tentativa de
+renomear o Teacher Deck afeta 0 linhas, enquanto editar a própria Note
+afeta 1 linha; professora renomeia o próprio Teacher Deck (1 linha) mas
+não consegue renomear Deck pessoal da aluna (0 linhas) -- **achado
+lateral, não um bug**: mover `teacher_flashcards.deck_id` da própria
+professora deu 0 linhas nesse teste porque a RLS de escrita de
+`teacher_flashcards` (migration 026) é **admin-only por e-mail**
+(`teacher_flashcards_admin_write`), nunca `teacher_id = auth.uid()` --
+diferente da RLS de `decks`, que É genuinamente `teacher_id = auth.uid()`
+(`decks_teacher_write`); confirmado lendo `pg_policies` ao vivo, não
+presumido -- é o mesmo padrão "escrita só pra administração" já
+documentado desde a Fase 2 do sistema de alunas particulares, nunca uma
+regressão desta fase; `setTeacherFlashcardDeck()` funcionará em produção
+porque a professora real desta plataforma É a conta admin; (3) bootstrap
+(usuário novo com self-bootstrap/2ª execução idempotente sem duplicar
+linha/2 idiomas com árvores independentes pro mesmo usuário/índice único
+bloqueando um 2º root simultâneo -- mesma proteção que impediria uma
+corrida real/cross-user rejeitado após o fix de segurança).
+
+### Dados preservados (confirmado)
+
+Nenhum Card ID, valor de FSRS, Field, Tag, `revision`, `origin`, ou linha
+Legacy foi alterado por nenhum código desta fase -- `shared/deck-engine.js`
+nunca escreve em `STATE.cards`/banco (é puro); `shared/deck-data.js` só
+grava `deck_id` (via `UPDATE`, nunca `INSERT`/`DELETE`) depois de validar,
+nunca toca em nenhuma outra coluna. `buildEngineCardsFromRow()` ganhou
+1 propriedade nova (`deckId`) no card retornado -- todas as ~35 chaves
+anteriores permanecem idênticas, confirmado por teste de presença de
+chave.
+
+### O que NÃO foi implementado nesta fase (confirmado)
+
+Nenhuma UI de Deck (seletor, árvore visual, botão "Estudar"/"Adicionar
+cartão"/mover); nenhum Painel; nenhuma migração de Study Trail; nenhuma
+UI de Teacher Deck; nenhum Public Deck; nenhuma mudança visual do limite
+Free (só a função `generatedCardInstanceCount()` existe, nunca chamada
+pelo limite hoje); nenhuma mudança no motor FSRS; nenhum redesenho de
+Review; nenhum cache/materialized view/contagem persistida (nenhuma
+necessidade de performance foi demonstrada -- contagens continuam
+100% derivadas da fonte de verdade, conforme exigido).
+
+### Próxima fase (D -- Integração Deck ↔ FSRS/Review)
+
+Prontos: `getStudyScopeForDeck()` já produz exatamente o shape de array
+que `getStudyQueue()` já consome via `eligibleReviewPool()`;
+`getDeckCounts()` já devolve `{new, learning, review}` agregado por
+subtree; `generatedCardInstanceCount()` pronta pro futuro limite Free;
+movimentação de Notes/Decks validada e seguindo as regras completas de
+"nunca permitir". Em aberto pra Fase D: qual tela vai de fato chamar
+`ensureDecksForCurrentUser()` (lazy on first Deck screen, recomendado,
+não decidido); se/quando Study Trail ganha uma representação de Deck
+(Fase E, fora do escopo de D); nenhuma decisão nova travada aqui além do
+que já está documentado.
+
+Nenhum passo manual pendente pra autora -- migration `050` já aplicada
+ao vivo via `mcp__Supabase__apply_migration`.
+
+**PARE conforme instrução explícita -- Fase D NÃO iniciada.** Só começa
+depois que a autora revisar este checkpoint.
+
+**Atualização: autorizada e entregue (2026-09-29), "FASE D — INTEGRAÇÃO
+DECK ↔ FSRS / REVIEW — D1–D7".**
+
+## Fase D -- Integração Deck <-> FSRS/Review (contagens, escopo de
+estudo e sessão por Deck)
+
+Constrói o COMPORTAMENTO de Review em cima do Deck Engine da Fase C, sem
+tocar em nenhuma linha de `shared/deck-engine.js`/`shared/deck-data.js`/
+`shared/study-queue.js`/`shared/fsrs.js`/`shared/srs.js`/
+`shared/flashcard-model.js` -- confirmado por leitura ANTES de codar que
+toda a integração se resume a COMPOR peças puras já existentes, nunca
+reescrever nenhuma delas. Regra central do prompt-mestre, cumprida:
+"Deck define o ESCOPO; Review/FSRS continua dono do estado/due/
+agendamento/grade/próxima revisão."
+
+**Auditoria prévia (§3, só leitura)** confirmou: `getStudyScopeForDeck(decks,
+deckId, cards)` (Fase C) já filtra `card.deckId != null &&
+subtreeIds.has(card.deckId)` -- compõe perfeitamente com
+`eligibleReviewPool()` (já existente, `STATE.cards.filter(isCardLessonCompleted).
+filter(matchesReviewOriginFilter)`), sem precisar de nenhuma mudança em
+nenhuma das duas; `getDeckCounts(decks, deckId, cards)` (Fase C) já
+devolve `{new, learning, review}` agregado por subtree via
+`bucketCardState`/`cardsDueNow` (shared/srs.js, intocado);
+`reviewFilterQueue('oldest', pool)` (fr/zh app.js, já existente desde a
+Prop 5, único valor real usado hoje) já preserva
+`newCardsPerDay`/`sessionIntensity` como limites globais -- reaproveitado
+sem mudança, satisfazendo D6 de graça; `gradeCurrentCard(grade)` nunca lê/
+escreve `card.deckId` em lugar nenhum (confirmado por grep completo de
+`fr/app.js`) -- Deck nunca participa do cálculo de grade, satisfazendo
+D13; cards de trilha (`buildCardsFromUnits()`) NUNCA têm a propriedade
+`.deckId` (ausente, não `null`) -- o filtro `c.deckId != null` já os
+exclui de qualquer escopo de Deck sem nenhum código especial, satisfazendo
+D3 por construção.
+
+**O que foi feito -- só `fr/app.js`/`zh/app.js` (mudanças espelhadas,
+nenhum outro arquivo tocado):**
+
+- **`async function ensureDecksLoadedForReview()`** (novo) -- carrega
+  `STATE.decks` sob demanda (`ensureDecksForCurrentUser`+
+  `fetchDecksForLanguage`, Fase C, ambos intocados), cacheado em
+  `STATE.decks` pra não recarregar a cada chamada.
+- **`function deckCountsForReview(deckId)`** (novo) -- wrapper fino de
+  `getDeckCounts(STATE.decks, deckId, eligibleReviewPool())`, nenhum
+  algoritmo próprio.
+- **`function deckReviewSummary(deckId)`** (novo) -- resolve os 7 casos
+  de estado vazio exigidos pelo §15 (Deck vazio/sem due/só novas/só
+  aprendendo/sem elegíveis/com arquivados/subtree sem cards) devolvendo
+  `{deckId, totalCards, eligibleCards, archivedCards, new, learning,
+  review}` -- nunca só `[]`, sempre contexto suficiente pra UI futura
+  diferenciar os 7 casos sem recalcular nada.
+- **`async function startDeckReviewSession(deckId)`** (novo) -- ÚNICO
+  ponto de entrada pra "Estudar este Deck": carrega Decks (se
+  necessário) -> `getStudyScopeForDeck(decks, deckId, eligibleReviewPool())`
+  -> `reviewFilterQueue('oldest', pool)` (mesmo motor de fila de sempre,
+  preserva newCardsPerDay/intensidade) -> seta `STATE.reviewSessionDeckId
+  = deckId` (campo novo em `STATE`, mesmo padrão de
+  `STATE.reviewSessionUnitFilter` já existente -- nunca uma variável de
+  módulo solta, nunca um boolean disperso) -> monta
+  `STATE.reviewQueue`/`reviewIndex`/`reviewCardState` exatamente como
+  `startReviewSession()` já fazia -> chama `renderReviewView()`. Direção
+  de card legado (`!card.cardInstance`) continua via
+  `nextCardDirection()`, mesmo mecanismo de sempre -- `isReverse`/
+  `reviewDirection` NUNCA reintroduzidos como mecanismo de card nativo
+  (cartão nativo `normal_reversed` continua resolvendo direção só via
+  `resolveNormalCardView()`/CardInstance, Fase 4a, intocado).
+- **`STATE.reviewSessionDeckId = null;`** adicionado no objeto `STATE`
+  inicial e nos MESMOS 2 pontos de reset que já limpavam
+  `reviewSessionUnitFilter` (`openReviewSession('flashcard'/'hard')`) +
+  nos 2 handlers de fim de sessão (`#review-again`/`#review-go-practice`)
+  -- mesmo ciclo de vida, nunca serializado em `serializeState()` (é
+  estado transitório de sessão, não progresso persistido, mesma regra já
+  aplicada a `reviewSessionUnitFilter`).
+- Título do estado vazio de "fila zerada" (`renderReviewView()`) ganhou
+  um 3º ramo: `STATE.reviewSessionDeckId ? 'Nenhum cartão neste Deck
+  ainda' : (...)` -- mensagem específica pra sessão de Deck, sem alterar
+  o texto dos outros 2 casos já existentes (trilha/revisão geral).
+
+**Testes realizados:**
+- `node --check` sem erro em `fr/app.js`/`zh/app.js`.
+- `test_fasec_deck_engine.js` (Fase C, pré-existente) re-executado,
+  **115/115 sem regressão**.
+- **Suíte Node/VM nova, `test_fased_scope_and_counts.js`, 59/59** -- os 7
+  blocos do §20: escopo por tipo de Deck (root/personal_root/personal-
+  filho/filho-aninhado/course/teacher); isolamento de escopo (Deck A vs.
+  B -- zero card de B aparece/é alterado/é contado, FSRS de B intacto);
+  os 10 cenários controlados de Card Type (Normal Novo/Aprendendo/
+  Devido/Não-devido/Relearning, Normal-reverso, Cloze-2-marcas,
+  Cloze-3-marcas, MC, Digite-a-resposta) confirmando o bucket exato de
+  cada um; independência de Normal-reverso (as 2 metades entram
+  independentemente quando ambas due, só a due entra quando só uma
+  está); agendamento independente de Cloze (3 marcas -> 3 CardInstances,
+  FSRS próprio de cada, Deck count=3, só as due entram na fila); escopo
+  de Teacher Card (aluna pode estudar, FSRS pertence ao card da aluna);
+  Study Trail nunca no escopo de nenhum Deck (sem `.deckId`, nunca
+  associado artificialmente); cartão arquivado nunca entra em escopo/
+  contagem mesmo com Deck válido.
+- **Browser smoke, FR+ZH, `test_fased_browser_smoke.js`, 70/70** --
+  Playwright/Chromium real, servidor estático local, boot em modo
+  convidado com stub mínimo de `window.supabase.createClient()`. 9
+  blocos numerados: (1) Contagens -- `deckCountsForReview`/
+  `deckReviewSummary` batendo com fixtures reais construídas via
+  `buildEngineCardsFromRow()` de produção (nunca objeto fabricado à
+  mão), incluindo agregação correta de subtree (Deck A soma A + A.nested,
+  Deck A.nested isolado dos 3 cards próprios de A); (2) Isolamento --
+  Deck A vs. B, zero vazamento; (3) Grading real -- `gradeCurrentCard()`
+  chamado de dentro de uma sessão `startDeckReviewSession()`, `reps`/
+  `due` mudam de verdade, `card.deckId` nunca tocado; (4) Reverse nos 2
+  sentidos -- com `newCardsPerDay=0` forçado pra determinismo, confirmado
+  que só a metade due entra quando só uma está due, as 2 entram quando
+  ambas due, FSRS de cada metade mutando independentemente; (5) Teacher
+  Card -- aparece na fila com `origin==='teacher'`, gradeia normalmente,
+  Deck nunca muda de dono; (6) Origem/D2 -- filtro de origem
+  (`STATE.studySettings.reviewOriginFilter`) continua funcionando DENTRO
+  do escopo do Deck, nunca escapa nem é limpo silenciosamente ao
+  selecionar um Deck; (7) Estados vazios/D15 -- 2 cenários distintos
+  confirmados com a mensagem certa: Deck genuinamente vazio (nunca teve
+  cards, "Nenhum cartão neste Deck ainda") vs. Deck com cards mas fila
+  esgotada via grading ("Revisão concluída!") -- os 2 textos NUNCA
+  confundidos um pelo outro; (8) Regressão do fluxo legado --
+  `startReviewSession()` (sem Deck) continua funcionando exatamente como
+  antes, cartões nativos continuam renderizando (Normal/MC/Cloze/Digite-
+  a-resposta) via os 4 renderers da Fase 6C, sem nenhum erro novo; (9)
+  zero erro de console novo em qualquer um dos 2 idiomas (só os mesmos
+  `ERR_TUNNEL_CONNECTION_FAILED` pré-existentes do proxy de saída deste
+  sandbox, filtrados por regex já documentados em toda a sessão).
+- **Achado, não corrigido, documentado**: `test_apply_memory_grade.js`
+  (suíte pré-existente, não desta fase) falha um cenário
+  ("state vira 'relearning', não 'new'") -- confirmado via `git stash`
+  contra o commit ANTERIOR a esta fase que a falha já existia antes de
+  qualquer mudança desta entrega (idêntica com e sem o stash) -- é
+  consistente com o próprio comentário já registrado em
+  `shared/deck-engine.js` (Fase C) explicando que "Errei"/grade-0 sempre
+  reseta pra `state='new'` direto, nunca produz `'relearning'` pelo
+  caminho de grading real (`relearning` só surge hoje via o adaptador
+  `migrateCardToFSRS()`, nunca via `applyMemoryGrade()`) -- script de
+  teste desatualizado de uma fase anterior, não um bug desta entrega, não
+  corrigido por estar fora do escopo (§23 não pede correção de testes
+  legados).
+- **Teste real Supabase (§21) -- executado nesta entrega** (a conexão
+  MCP, que tinha caído durante a sessão anterior, foi restabelecida).
+  Duas transações reais contra o projeto `eigjocalzwamisgqilhg`, ambas
+  com `BEGIN`...`ROLLBACK`: **(1)** snapshot antes (`decks:0`,
+  `teacher_flashcards:5` hash `339a5341...`, `own_flashcards:7` hash
+  `6e415c53...`) -> árvore real (root->personal_root->Deck A->
+  A.nested, + Deck B irmão, + teacher_root->Teacher Deck, + Deck de
+  curso órfão) + Notes reais (own em Deck A, own em A.nested, teacher em
+  Teacher Deck), usando 2 contas reais (professora admin + uma aluna com
+  vínculo `teacher_students` ativo em francês) -> confirmado: escopo do
+  subtree inclui as 2 Notes de A+A.nested e exclui a de fora; move válido
+  de Note (A->A.nested) aceito; moves inválidos rejeitados pela trigger
+  da Fase B/C (Note própria -> Teacher Deck, Note própria -> Curso, Note
+  de professora -> Deck pessoal, Deck A -> dentro do próprio filho
+  -- ciclo, `personal_root` -> Curso) -- todas as 5 rejeições confirmadas
+  com a mensagem exata da trigger, nenhuma delas quebrou a transação
+  (capturadas via `EXCEPTION WHEN OTHERS`); move válido de Deck (A pra
+  dentro de B, irmão) aceito. **(2)** 2ª transação, dedicada a RLS real
+  (`SET LOCAL ROLE authenticated` + `request.jwt.claims` simulando 3
+  contas reais distintas -- aluna/professora/uma 3ª conta sem relação
+  nenhuma): **8/8 confirmados** -- conta terceira lê 0 Decks da árvore e
+  não consegue renomear nenhum; aluna lê a árvore inteira (5 Decks,
+  incluindo o Teacher Deck) mas só consegue renomear o próprio Deck
+  pessoal (0 linhas afetadas tentando renomear o Teacher Deck);
+  professora renomeia o próprio Teacher Deck mas não consegue renomear o
+  Deck pessoal da aluna (0 linhas afetadas). **Achado do próprio processo
+  de teste, corrigido no script antes do resultado final**: a 1ª
+  tentativa desses testes de RLS falhava com "permission denied for
+  table test_results" -- causa raiz era o próprio SCRIPT DE TESTE
+  (`INSERT INTO test_results` sendo chamado ainda sob `role=authenticated`,
+  que não tem permissão na tabela temp criada pelo role de serviço) --
+  nunca um bug de produção; corrigido adiando toda escrita em
+  `test_results` pra depois do `RESET ROLE`. **Zero resíduo confirmado**:
+  snapshot depois (`decks:0`, `teacher_flashcards:5` hash `339a5341...`,
+  `own_flashcards:7` hash `6e415c53...`) byte a byte idêntico ao de
+  antes, nas 2 transações.
+
+**Dados preservados (confirmado)**: nenhum Card ID, valor de FSRS
+(`state`/`due`/`reps`/`lapses`/`stability`/`difficulty`), Field, Tag,
+`revision`, `origin`, ou `deck_id` foi alterado por nenhuma linha desta
+fase -- toda a integração é só LEITURA de `STATE.cards`/`STATE.decks` +
+orquestração de UI de sessão (`STATE.reviewQueue`/`reviewIndex`/
+`reviewSessionDeckId`), nunca escrita em Note/Field/CardInstance/banco.
+
+**O que NÃO foi implementado nesta fase (confirmado, §23)**: nenhuma
+tela de Deck (estilo Anki), nenhuma nova homepage de Review, nenhum
+Painel, nenhuma UI de Tags, nenhuma migração de Study Trail, nenhuma UI
+de Teacher Deck, nenhum Public Deck, nenhuma UI de destino Anki, nenhum
+export hierárquico Anki, nenhuma mudança visual do limite Free, nenhum
+preset de FSRS, nenhuma configuração de FSRS por Deck, nenhum redesenho
+de Review -- `startDeckReviewSession()`/`deckCountsForReview()`/
+`deckReviewSummary()` são hoje só FUNÇÕES, sem nenhum botão/tela que as
+chame (nenhum ponto de entrada de UI foi criado nesta fase).
+
+**Próxima fase (E -- integração do Study Trail com Decks)**: fundação
+pronta -- `getStudyScopeForDeck()`/`getDeckCounts()`/
+`startDeckReviewSession()` já compõem corretamente com qualquer card que
+tenha `.deckId`; a decisão de SE/COMO a trilha ganha uma representação
+de Deck (Deck-por-curso? Deck-por-unidade? não migrar, deixar os 2
+sistemas paralelos pra sempre?) continua inteiramente em aberto, não
+tocada nesta fase, conforme D3 exigia.
+
+Nenhum passo manual pendente pra autora -- nenhuma migração nova nesta
+fase, teste real Supabase (§21) executado e confirmado com zero
+resíduo.
+
+**PARE conforme instrução explícita -- Fase E NÃO iniciada.** Só começa
+depois que a autora revisar este checkpoint.
+
+## Migration 051 (`051_create_course_decks`) -- reconciliação Git <-> Supabase (2026-09-29)
+
+**O que aconteceu:** a migration `051_create_course_decks` (versão
+`20260929145614`, 29/09/2026 14:56 UTC) foi aplicada ao Supabase
+(`eigjocalzwamisgqilhg`) ANTES desta integração e nunca foi versionada --
+nenhuma ref Git a continha (`git log --all -S course_decks` vazio). A
+branch das Fases B-D (`claude/test-previous-changes-bo5atv`) termina na
+`050`. O próprio cabeçalho do SQL a descreve como "Fase E" e cita uma
+seção "Fase E -- Study Trail <-> Decks" do CLAUDE.md que NÃO existe em
+nenhuma ref Git.
+
+**Como foi recuperada:** lida diretamente do banco
+(`supabase_migrations.schema_migrations.statements`, 1 statement, 13.974
+bytes, md5 `f4a481f60ec9c26ebfb27b9c43ee06b0`) e gravada em
+`shared/supabase_migrations/051_create_course_decks.sql` byte a byte
+igual (mesmo tamanho e md5 conferidos). Nenhuma linha foi reescrita,
+simplificada ou "melhorada". NÃO foi reaplicada ao banco -- já estava
+aplicada; o arquivo só reconcilia o histórico versionado com o estado real.
+
+**O que ela contém (aditiva sobre 049/050):**
+- coluna `decks.course_unit_id text` (nullable);
+- índices únicos parciais `decks_unique_course_unit` e
+  `decks_unique_course_root` (1 raiz de curso por idioma, 1 Deck por
+  Unit por idioma);
+- `create or replace` de `decks_validate_hierarchy()` -- só o ramo
+  `course` mudou (owner/teacher nulos, não público, raiz sem parent, Deck
+  por Unit com a raiz do mesmo idioma como parent);
+- policy `decks_course_select` (`for select using (kind = 'course')`);
+- função `ensure_course_decks(p_language_app_key, p_units jsonb)`,
+  `security definer`, só `authenticated`.
+Idempotente (`add column if not exists`, `create ... index if not
+exists`, `drop policy if exists`, `create or replace`).
+
+**Estado do banco verificado (só leitura) antes e depois da integração:**
+`decks` com 0 linhas; nenhum Course Deck criado; nenhum `deck_id`
+preenchido em `own_flashcards` (7) nem em `teacher_flashcards` (5). A
+função `ensure_course_decks` nunca foi chamada. A 051 não produziu dados.
+
+**Relação com as Fases B-D:** independente -- o código de B-D
+(`shared/deck-engine.js`, `shared/deck-data.js`) não referencia
+`course_unit_id`, `ensure_course_decks` nem `decks_course_select`.
+
+**Status da Fase E:** a 051 é só a infraestrutura de banco inicial dos
+Course Decks. A implementação cliente da Fase E NÃO foi realizada nesta
+etapa: nenhuma chamada a `ensure_course_decks`, nenhum Course Deck criado,
+nenhum `deckId` atribuído a cartões da Study Trail, nenhuma alteração em
+Review/Study Trail/UI. A Study Trail continua NÃO integrada aos Course
+Decks. A Fase E será retomada separadamente.
+
 ## Projeto de melhoria do sistema de áudio (TTS) -- camada de "texto falado", passo 1 (2026-09-29)
 
 Motivado por 3 reports (áudio de `un / une`, `français / française` e `l'œuf`
@@ -14947,6 +16814,120 @@ terminal); camada 5 (validar contra o texto falado + pico de volume no
 pipeline geral); exemplo de frase para `un kilo (de)`/`une tranche (de)`/
 `une bouteille (de)` (conteúdo em fr/content.js, e o cartão de vocabulário
 não tem campo de exemplo -- mudança de app.js, fora desta entrega).
+
+## Fase E -- Study Trail <-> Course Decks (2026-09-29)
+
+**Correção de checkpoint**: o checkpoint citava `21eb99f`, que não existe; o commit real das Fases B-D é **`21ebf99`**, que estava só em `origin/claude/fervent-einstein-emwqjg`. Foi integrado à branch de trabalho por **merge normal** (`d2e5199`), sem rebase/reset. A 051 foi
+conferida: 13.974 bytes, md5 `f4a481f60ec9c26ebfb27b9c43ee06b0`, não alterada.
+
+**Modelo**: `Course → Course root (1/idioma) → Unit Deck (1/unidade com
+vocabulário)`. Cada card de trilha (`origin:'study'`) ganha `deckId` via
+`unitId → String(unitId) = course_unit_id → decks.id`. **Nunca pelo nome**;
+`unitId` (identidade pedagógica) e `deckId` (destino organizacional)
+coexistem, nenhum substitui o outro.
+
+**Código**
+- `shared/deck-engine.js` (puro): `courseUnitsForDecks(units)` (payload da RPC;
+  só units que geram cards -- grammar/sem vocab ficam de fora),
+  `isCourseDeck`, `buildCourseDeckIndex(decks, lang)`, `courseDeckIdForUnit`,
+  `assignCourseDeckIds(cards, index)` (só mexe em `deckId` de cards `study`).
+  Nenhum 2º Deck Engine.
+- `shared/deck-data.js`: `fetchCourseDecksForLanguage` (SELECT, funciona para
+  guest) e `ensureCourseDecksForCurrentUser` (RPC, exige `CURRENT_USER`).
+- `fr/app.js` e `zh/app.js` (espelhados): `deckId:null` no card de trilha;
+  `ensureCourseDecksLoaded()` chamada por `ensureDecksLoadedForReview()`
+  (**sob demanda, nunca no boot**); `STATE.courseDecksLoaded`;
+  `applySerializedState` agora preserva o `deckId` fresco (é dado derivado do
+  banco -- um save antigo não pode sobrescrevê-lo; vale também para cards
+  nativos, correção mínima necessária).
+- **Migration 052** (aplicada ao vivo): `revoke execute ... from anon` em
+  `ensure_course_decks`. O teste real mostrou que a 051 deixava o guest
+  executar a função (o `revoke from public` não remove o grant direto que o
+  Supabase dá a `anon`): um anônimo podia criar/renomear Course Decks.
+  Corrigido e reverificado (`permission denied`). Observação NÃO corrigida
+  (fora do escopo): `ensure_user_decks` também é executável por `anon`
+  (tem checagem interna de auth desde a 050).
+
+**Guest/auth**: guest só LÊ Course Decks (RLS `decks_course_select`); nunca
+chama a RPC. Autenticado: 1 bootstrap idempotente por sessão com a lista REAL
+de `UNITS`. Sem Course Decks (ou antes do bootstrap) os cards ficam com
+`deckId:null` e Study Trail/Review funcionam exatamente como antes.
+
+**Review**: sem fila/FSRS/scheduler novos. `startDeckReviewSession` já usava
+`getStudyScopeForDeck(eligibleReviewPool())`; pertencer ao Deck NÃO torna
+elegível -- `isCardLessonCompleted` continua mandando. Contagens por
+CardInstance (reverso=2, cloze=N).
+
+**Testes versionados** em `tests/fase-e/`: `test_course_decks_unit.js`
+(Node/VM, 75/75), `test_supabase_real.sql` (Postgres real, transação com
+rollback; todos ok após a 052; sem resíduo: 0 decks antes e depois),
+`test_playwright.js` (FR+ZH, 38/38). "Autenticado" no Playwright é simulado
+(`CURRENT_USER` + stub com o contrato da 051/052; o CDN do Supabase é
+bloqueado no sandbox). Regressão: answer_validation fr/zh e spoken_text ok.
+
+**Limitações / não feito**: Course Decks ainda NÃO existem no banco (criados
+no primeiro uso autenticado); filtro de origem do Review (`self`/`teacher`)
+ainda se aplica ao pool do Deck; sem Painel, Tags UI, Teacher/Public Decks,
+import Anki com hierarquia, movimentação/delete de Course Deck, mudança de
+FSRS ou do limite Free. Fase F não iniciada.
+
+## Fase F -- Add Card + destino em Deck (2026-09-29)
+
+**Fluxo**: `Note → Fields → Card Type → CardInstances → Deck → Review/FSRS`.
+Reaproveita o editor nativo da Fase 6D (nada de 2º editor/gerador/limite/
+fila). Sem migration nem mudança de schema (`own_flashcards.deck_id` e o
+trigger `own_flashcards_validate_deck` já existiam desde a 049/050).
+
+**Achados da auditoria** (antes do código): (1) `deck_id` nunca era gravado
+na criação -- todo cartão novo ficava NULL e o Deck Engine (que escopa por
+`deckId != null`) nunca o achava; (2) o teto Free contava LINHAS, em 4
+lugares (criação manual, import arquivo/link, Anki, perfil público), não
+CardInstances; (3) Course Decks só para units com vocab (units `grammar`
+ficam de fora) é intencional e compatível -- não gera cards, Add Card não
+usa Course Deck; nada reaberto da Fase E.
+
+**Implementado**
+- `shared/deck-engine.js`: regra canônica ÚNICA do limite:
+  `cardInstanceCountForRow`, `ownCardInstanceUsage` (só linhas ativas),
+  `cardInstanceCountForEditorState`, `preflightOwnCardInstanceCreation`
+  (delegam a `generatedCardInstanceCount` -> motor real). Normal=1,
+  reverso=2, Cloze=N. `computeAnkiImportRemainingSlots` foi REMOVIDA.
+- `shared/deck-data.js`: `resolveOwnCreationDeck` -- bootstrap idempotente
+  (`ensure_user_decks`) + destino; padrão = `personal_root` ("Meus Decks",
+  Deck real aceito pelo trigger); valida via `canPlaceOwnNoteInDeck`
+  (regras não replicadas; RLS/trigger seguem a autoridade final).
+- `shared/own-flashcards.js`: `createOwnFlashcard({languageAppKey,
+  nativeState, deckId?, decks?})` grava `deck_id` no MESMO INSERT da Note
+  (atômico). `deck_id` NÃO entra em `nativeContentColumnsFromEditorState`
+  (usado também na edição -- editar não muda Deck).
+- `shared/my-flashcards.js`: seletor "Deck de destino" (só personal_root +
+  subdecks pessoais), preflight antes de gravar (falha = nada persistido,
+  nenhum limite consumido), seção "Meus Decks" (lista, criar subdeck via
+  `createPersonalDeck`, botão **"Estudar este Deck"** ->
+  `startDeckReviewSession`, fora do formulário), selo `N/20` por
+  CardInstance. `STATE.decks` atualizado.
+- Imports de arquivo/link, Anki e perfil público: mesmo preflight e Deck
+  padrão (`personal_root`) resolvido antes de qualquer escrita
+  (`anki-import-ui.js`, `public-profile.js`).
+
+**Não feito (de propósito)**: sem backfill -- as 7 linhas antigas com
+`deck_id NULL` continuam fora de Deck até uma ação explícita futura;
+sem Teacher Decks/Tags UI/Painel/perfil público de Decks; sem mudança em
+FSRS/Review/Study Trail/áudio (`fr/app.js` e `zh/app.js` NÃO foram
+tocados; a linha `(de)` de `findMatchingPhrase` segue intacta). Import
+Anki continua inserindo em lotes de 40 (não é tudo-ou-nada entre lotes --
+comportamento pré-existente; o preflight cobre a seleção inteira).
+Limitação: o teto conta o uso já persistido; corrida entre duas abas
+poderia ultrapassá-lo (é trava de UI, como desde a Fase 5.1).
+
+**Testes versionados** (`tests/fase-f/`): `test_add_card_unit.js` (Node/VM,
+68/68), `test_supabase_real.sql` (Postgres real, transação + ROLLBACK, 14
+cenários ok: Course/Teacher/teacher_root/root/outro usuário/outro idioma/
+inexistente rejeitados, RLS; zero resíduo: decks 0, own_flashcards 7, hash
+igual), `test_playwright.js` (FR+ZH, 48/48: criar Deck -> Card Type ->
+Fields -> Deck -> Preview -> salvar -> Estudar este Deck -> grade FSRS;
+limite Free/Premium/vínculo; import de arquivo). Fase E re-executada:
+unit 75/75, playwright 38/38.
 
 **Atualização (2026-09-29): passo 1 concluído e em produção (PRs #274 e #275,
 já mergeados). Decisões e estado atual, substituem a lista "Ainda NÃO feito"
@@ -14990,3 +16971,142 @@ acima.**
   trocar o Secret `GCP_TTS_KEY`, apagar a antiga); (3) camada de "texto
   falado" para português e outros idiomas entra como nova lista em
   `RULES_BY_LANG`, sem misturar regras (ex.: sandhi de "os carros azuis").
+
+## Fase G -- Teacher Decks: cartões da professora no Deck Engine (2026-09-29)
+
+**Modelo**: `Note → Fields → Card Type → CardInstances → Teacher Deck → Review/FSRS`,
+sem arquitetura paralela. Teacher Deck = Deck real (`decks`, kinds `teacher_root`/
+`teacher`) que pertence ao RELACIONAMENTO professora→aluno→idioma
+(`owner_id` = aluno, `teacher_id` = professora). Schema/RLS/triggers já existiam
+(049); a única migration nova é a **053** (aplicada ao vivo).
+
+**Decisões confirmadas pela autora**: (1) Teacher Cards NÃO entram no limite de 20
+(o teto continua só sobre `own_flashcards`; preflight da Fase F intocado; a matriz
+de Card Types Free/Premium segue valendo); (2) `teacher_root` é o destino padrão
+("aluno → idioma → teacher_root → criar cartão"), subdeck é opcional.
+
+**Migration `053_ensure_teacher_decks.sql`** (aditiva, sem backfill, idempotente):
+`ensure_teacher_decks(p_student_id, p_language_app_key)`, SECURITY DEFINER,
+`revoke` de public e anon, `grant` a authenticated. Chamador = sempre `auth.uid()`
+(a professora); exige vínculo `teacher_students` ATIVO (professora+aluno+idioma) --
+sem vínculo, idioma sem vínculo, aluno de outra professora, ou o próprio aluno
+chamando → `not_authorized`. **Não duplica o bootstrap do `root`**: se o root do
+aluno não existe, chama `ensure_user_decks()` (fonte única; efeito colateral:
+cria também o `personal_root` do aluno). Consequência registrada: como
+`ensure_user_decks` só aceita "a própria conta ou o admin", uma professora
+NÃO-admin cujo aluno ainda nunca abriu o app receberia `not_authorized` nesse
+passo -- não ampliamos permissões (hoje a professora real é o admin). O arquivo
+versionado tem comentários a mais que o SQL aplicado; a lógica é idêntica.
+
+**Código** (fr/app.js e zh/app.js NÃO foram tocados; linha `(de)` preservada):
+- `shared/deck-engine.js`: `getTeacherDecksForStudent`, `getTeacherRootDeck`,
+  `orderedTeacherDecks`, `canCreateTeacherSubdeck`, `canMoveTeacherDeck`;
+  `canMoveDeck` delega `kind='teacher'`; `isDeckDeletableKind` inclui `teacher`
+  (`teacher_root` nunca move nem apaga).
+- `shared/deck-data.js`: `ensureTeacherDecksForStudent` (lazy, só ao selecionar o
+  aluno), `resolveTeacherCreationDeck` (padrão = teacher_root; valida com
+  `canPlaceTeacherNoteInDeck`), `createTeacherDeck`, `moveTeacherDeck`,
+  `deleteTeacherDeck` (só vazio: sem filhos e sem Notes -- `deck_id` tem
+  `on delete set null`, então checa antes).
+- `shared/teacher-flashcards.js`: `createFlashcard({..., deckId})` grava `deck_id`
+  no MESMO INSERT da Note (atômico por aluno). Editar não muda Deck.
+- `shared/admin-flashcards.js` (UI mínima): seção "Destino (Deck de cada aluno)"
+  com UM seletor por aluno selecionado (nunca um global), criar subdeck, Deck do
+  cartão visível na lista, "Mover para…" (entre Decks do mesmo aluno). Editor
+  nativo reutilizado; nenhum editor novo.
+- `shared/my-flashcards.js`: seção **somente leitura** "Cartões da professora"
+  (só "Estudar este Deck" → `startDeckReviewSession`; nenhum controle de
+  criar/mover/apagar; some se a conta não recebeu Teacher Decks).
+
+**Multi-aluno**: uma linha independente POR aluno (como já era), cada uma com o
+`deck_id` do PRÓPRIO aluno. `Promise.all` → **pode haver sucesso parcial**
+(sem atomicidade global entre alunos); cada criação individual é atômica e uma
+falha nunca atribui o cartão ao Deck de outro aluno (toast lista os @usuários
+que falharam).
+
+**Review/FSRS/contagem**: nada novo -- escopo = `getStudyScopeForDeck` sobre o
+subtree; contagem por CardInstance (reverso=2, Cloze=N); FSRS do CardInstance do
+aluno. "Estudar" não existe no lado da professora (o FSRS é do aluno).
+
+**Históricos**: as 5 linhas de `teacher_flashcards` com `deck_id NULL` NÃO foram
+migradas (mesma regra da Fase F); um cartão histórico só recebe Deck se a
+professora o mover explicitamente.
+
+**Limitações registradas**: (a) `teacher_flashcards` continua com escrita só do
+admin por e-mail (026) e `decks_admin_write` deixa o admin apagar QUALQUER Deck
+(inclusive `teacher_root`, cascateando filhos e zerando `deck_id` dos cartões por
+`on delete set null`) -- a proteção "só Deck vazio" vive no domínio
+(`validateDeckDeletion`), não no banco; o teste SQL mostra que professora
+não-admin não apaga `teacher_root`; (b) sem UI para mover/apagar Teacher Deck (as
+funções existem e são testadas); (c) `teacher_root` se chama sempre "Cartões da
+professora" (aluno com 2 professoras vê 2 raízes com o mesmo nome); (d) cópia
+Teacher Card→Meus Decks NÃO implementada; (e) concorrência de 2 abas no limite
+Free, Tags e Painel não tocados.
+
+**Testes versionados** (`tests/fase-g/`): `test_teacher_decks_unit.js` (Node/VM,
+134/134, fr+zh), `test_supabase_real.sql` (Postgres real, transação + ROLLBACK,
+52/52; rodado com aluno 1/2 reais vinculados à professora, mais uma "outra
+professora" criada só dentro da transação), `test_playwright.js` (FR+ZH,
+68/68). Regressão: Fase F unit 68/68 + Playwright 46/46; Fase E unit 75/75 +
+Playwright 38/38. Suítes antigas de consolidação/6D/Anki/áudio NÃO estão
+versionadas -- não foram executadas. Banco após os testes: `decks` 0,
+`teacher_flashcards` 5 (5 com `deck_id` nulo), `own_flashcards` 7, vínculos 12 --
+idêntico ao início, zero resíduo.
+
+## Fase G -- hardening: proteção estrutural dos Teacher Decks contra DELETE (2026-09-29)
+
+**Lacuna**: `decks_admin_write` (ALL) deixava o admin apagar qualquer Deck, inclusive `teacher_root`; como `teacher_flashcards.deck_id` é `ON DELETE SET NULL`, isso desassociaria cartões em silêncio. Auditado ao vivo antes de alterar: FK `teacher_flashcards_deck_id_fkey` = `ON DELETE SET NULL`; `decks_parent_deck_id_fkey` = `ON DELETE CASCADE`; único trigger de `decks` era `decks_validate_hierarchy` (sem DELETE); policies intactas (`decks_admin_write` ALL por e-mail, `decks_teacher_write` só `kind='teacher'`, `decks_owner_write` só `personal`).
+
+**Migration `054_protect_teacher_decks_delete.sql`** (aditiva, aplicada ao vivo; nenhuma policy/FK/migration antiga alterada): trigger `BEFORE DELETE` em `decks` (`decks_protect_teacher_delete`, SECURITY DEFINER, `search_path=public,auth`, sem EXECUTE para public/anon/authenticated):
+- `teacher_root`: nunca apagável (vazio ou não), por qualquer papel (admin, professora, SQL direto, função);
+- `teacher`: só apagável se vazio (sem subdecks e sem `teacher_flashcards`); senão exceção `23503`;
+- exceção única: remoção da CONTA (cascata de `auth.users`) -- se aluno ou professora do Deck já não existe em `auth.users`, o Deck pode ir junto (testado com usuário temporário);
+- `personal`/`personal_root`/`root`/`course`: sem mudança. SECURITY DEFINER foi necessário: o trigger roda como quem apaga e `authenticated` não lê `auth.users` (o 1º teste real falhou com `permission denied for table users`; corrigido).
+
+**Testes** (`tests/fase-g/test_supabase_real.sql`, seção J, transação + ROLLBACK; rodada ao vivo em versão enxuta com admin + professora B não-admin criada na transação + aluno + vínculo ativo, 19/19 ok: J1 admin não apaga teacher_root; J2 teacher com filho; J3 teacher com cartão e nenhum `deck_id` virou NULL; J4 folha vazia apagável; J5 não-admin protegida por RLS+trigger; J6 SQL direto; J7 pessoal segue regra anterior; J8 curso segue regra anterior; J9 cascata de conta; J10 5 históricos intactos). O arquivo versionado completo (seção J embutida no cenário maior) NÃO foi executado inteiro nesta rodada -- só a versão enxuta acima. Node/VM G 134/134, Playwright G 68/68 (FR+ZH), regressão F 68/68 + 46/46, E 75/75 + 38/38. `node --check` ok. Banco antes/depois idêntico: decks 0; teacher_flashcards 5 (hash `c903f626...`, 5 com `deck_id` nulo); own_flashcards 7 (hash `86fbf5d2...`); sem usuário temporário.
+
+**Confirmações**: `fr/app.js`/`zh/app.js` intocados (linha `(de)` intacta); `ec7f513` inexistente; nenhum cartão histórico alterado; nenhum `deck_id` zerado.
+
+**Limitações restantes**: escrita de `teacher_flashcards` segue admin-only (026); a UI ainda não oferece mover/apagar Teacher Deck (funções existem e passam pelo trigger); `teacher_root` sempre chamado "Cartões da professora"; cópia Teacher Card→Meus Decks, Tags e Painel não implementados; conta com 2 professoras vê 2 raízes de mesmo nome.
+
+## Fase H -- experiência completa de Teacher Decks (2026-09-29)
+
+Fecha a experiência funcional sobre B–G (Deck Engine, 053, 054, Review por Deck), **sem reescrever o Deck Engine, sem tocar `fr/app.js`/`zh/app.js`/áudio/FSRS**. Modelo intacto: `Note → Card Type → CardInstances → Review/FSRS` e `Note → Deck` (Note-level; irmãos ficam juntos).
+
+**Auditoria (achados reais, corrigidos sem mudar regra de produto)**
+1. *Banco*: nada impedia professora com vínculo inativo (ou admin sem vínculo) de criar/renomear/mover/apagar Teacher Decks ou criar Teacher Cards -- só `ensure_teacher_decks` validava vínculo.
+2. *UI*: `fetchMyStudents` traz vínculos `removed/invited` e eles eram selecionáveis; a seleção era por `student_id` (aluno em 2 idiomas selecionava as 2 linhas → cartão criado nos dois idiomas); o destino era guardado por `student_id` sem idioma; `_ensuredKeys` não era por professora; não existia visualização da árvore nem exclusão de Teacher Deck; o aluno via só o total de cartões.
+3. Já existiam e foram reutilizados (nenhuma 2ª implementação): `createTeacherDeck`, `moveTeacherDeck`, `deleteTeacherDeck`, `setTeacherFlashcardDeck`, `resolveTeacherCreationDeck`, `getDeckCounts`, `getStudyScopeForDeck`, `startDeckReviewSession`.
+
+**Migration `055_teacher_decks_require_active_link.sql`** (aditiva, aplicada ao vivo; não altera policies/FK/linhas): triggers `SECURITY DEFINER` -- `decks` (teacher_root/teacher) exige vínculo `teacher_students` (professora+aluno+idioma) `active` em INSERT/UPDATE/DELETE (DELETE liberado só na cascata de remoção de conta, como na 054); `teacher_flashcards` exige vínculo ativo em INSERT e em UPDATE que muda `deck_id` para um Deck (deck_id inalterado ou NULL -- inclui o `SET NULL` de cascata -- e edição de conteúdo NÃO são bloqueados; cartões históricos nunca são destruídos). Vale para qualquer papel, admin inclusive.
+
+**Código**
+- `shared/deck-data.js`: `setTeacherFlashcardDeck` só move Note da PRÓPRIA professora (`teacher_id`), UPDATE único de `deck_id`; `createTeacherDeck` limita nome a 60; `deleteTeacherDeck` devolve mensagem por motivo (a checagem é só UX; 054/055 são a autoridade).
+- `shared/admin-flashcards.js`: `adminSelectedStudents()` (seleção efetiva = aluno + idioma ativo), `adminDestKey()` (destino por aluno+idioma), só vínculos `active` no seletor, `_ensuredKeys` por professora, `fillTeacherTreeLists()` (árvore por aluno/idioma com contagem de cartões por Deck e 🗑 só em `teacher` vazio; teacher_root sem botão; recarrega após mover/apagar cartão). Bug de regressão pego pelo Playwright durante a fase (`langsPresent` fora de escopo no render) corrigido.
+- `shared/my-flashcards.js`: árvore do aluno (somente leitura) com New/Aprendendo/Revisar via `getDeckCounts` sobre o pool elegível (CardInstances, nunca Notes).
+- Nenhuma UI para mover/renomear Teacher Deck (funções existem e são testadas; não pedido), nenhuma para copiar Teacher Card.
+
+**Regras vigentes de Teacher Deck**: teacher_root nunca move/apaga; `teacher` só apaga vazio; mover Note só entre Teacher Decks do mesmo aluno+professora+idioma; destino nunca é global entre alunos (multi-aluno = uma Note e um `deck_id` por aluno, sucesso parcial possível e reportado); vínculo inativo não opera a árvore nem cria cartões; aluno somente leitura; Review de Teacher Deck = mesmo `startDeckReviewSession`/FSRS (escopo do subtree, só cards `teacher` do aluno).
+
+**Testes (versionados em `tests/fase-h/`)**: Node/VM `test_teacher_experience_unit.js` 78/78 (fr+zh); SQL real `test_supabase_real.sql` (transação+ROLLBACK, professora A admin real, B não-admin, aluno, vínculos ativo/removed/invited, cross-teacher/student/language, personal/course/inexistente, mover Note só `deck_id`, DELETE protegido, cascata de conta, 5 históricos byte a byte) 59/59; Playwright `test_playwright.js` 68/68 (FR+ZH). Regressões: G unit 134/134, G Playwright 68/68 (mock ganhou `status` e usa `adminDestKey`), G SQL completo 71/71 (comentários stale atualizados), F unit 68/68 + Playwright 46/46, E unit 75/75 + Playwright 38/38. SQL de E/F não reexecutado (não tocam teacher decks/cards). Banco antes/depois idêntico: decks 0; teacher_flashcards 5 (hash `c903f626…`, 5 com `deck_id` nulo); own_flashcards 7 (`86fbf5d2…`); 12 vínculos; sem usuários temporários. `ec7f513` inexistente; linha `(de)` intacta.
+
+**Limitações / decisões pendentes**: (a) filtro de origem do Review (`reviewOriginFilter`) continua valendo dentro de Deck (decisão da Fase D): com filtro `self`, um Teacher Deck estuda 0 cards -- não alterado (exigiria mexer em `fr/app.js`/`zh/app.js`); (b) aluno com 2 professoras vê 2 raízes de mesmo nome ("Cartões da professora"); (c) sem regra de nome único por nível (a arquitetura atual não exige); (d) escrita de `teacher_flashcards` segue admin-only (026); (e) sem cópia Teacher Card→Meus Decks, Tags, Painel, Public; (f) 5 Teacher Cards históricos sem Deck (sem backfill); (g) Playwright usa mock (CDN bloqueado) -- as regras reais estão no SQL.
+
+## Fase H (hardening final) -- Deck é o escopo autoritativo; `reviewOriginFilter` só vale no Review geral (2026-09-30)
+
+**Regra**: uma sessão iniciada EXPLICITAMENTE por um Deck (`startDeckReviewSession`) estuda os CardInstances do Deck (+ subtree) com elegibilidade normal (`isCardLessonCompleted`: lição concluída / não arquivado) e as regras normais de Review (FSRS, New/Learning/Review, `newCardsPerDay`, intensidade), **sem exclusão adicional por `STATE.studySettings.reviewOriginFilter`**. Antes, um Teacher Deck rendia 0 cartões se o filtro global estivesse em "Meus cartões".
+
+**Auditoria**: o filtro é aplicado num único ponto, `eligibleReviewPool()` (`isCardLessonCompleted` + `matchesReviewOriginFilter`), e vazava para o fluxo de Deck em 4 lugares (`startDeckReviewSession`, `deckCountsForReview`, `deckReviewSummary`, contagens da árvore do aluno em `shared/my-flashcards.js`). Nada refiltra depois de a fila ser montada. O seletor de origem só existe em "Configurar sessão" (fora da sessão), então não há controle a desabilitar.
+
+**Implementação (estrutural, sem novo mecanismo de filtros)**: nova `eligibleDeckReviewPool()` (fr/zh `app.js`, = `STATE.cards.filter(isCardLessonCompleted)`, sem origem) usada pelas 3 funções de Deck e pela árvore do aluno. `eligibleReviewPool()` e o Review geral ficam byte a byte iguais. O valor persistido de `reviewOriginFilter` nunca é lido/alterado na sessão de Deck. Não é autorização (continua sendo do Deck Engine/RLS). Sem migration, sem mudança de dados/RLS, Deck Engine/FSRS/áudio intocados (linha `(de)` preservada).
+
+**Testes** (`tests/fase-h/test_deck_origin_filter.js`, Playwright FR+ZH, 52/52; cobre Teacher/Pessoal/Course Deck × todos os filtros, Review geral, persistência do filtro, arquivado/não-vencido/FSRS/Deck alheio). Verificado que reverter o fix faz o teste falhar. Harness da Fase E ganhou `eligibleDeckReviewPool` na lista de funções extraídas.
+
+## Fase H -- checkpoint final: verificação SQL real concluída, Fase H ENCERRADA (2026-09-30)
+
+- **Commit da Fase H (hardening final):** `0fce4c5` (permanece como está; nenhum código de produção alterado nesta verificação). `ec7f513` não existe no repositório (`git cat-file` -> "Not a valid object name").
+- **SQL real completo e versionado** (`tests/fase-h/test_supabase_real.sql`, projeto `eigjocalzwamisgqilhg`, transação única + ROLLBACK, executado integralmente e sem alteração): **59/59 cenários ok** (A1-A3, B1-B9, C1-C14 incl. 5x C4, D1-D7, E1-E7, F1-F13, G1, H1).
+- **Snapshot antes x depois (idênticos, byte a byte via md5):** `decks` 0 linhas; `teacher_flashcards` 5 (hash `cf25493d4524c50496b543763ac5d946`, 5 com `deck_id` nulo, 0 com `deck_id`); `own_flashcards` 7 (hash `c2626c2898060830bad8f8bd19690257`, 0 com `deck_id`); `teacher_students` 12 (hash `32da7077...`); `auth.users` 41 (hash `f14ff9bf...`); `profiles` 26 (hash `70a2e5d6...`); `tts_generation_log` 0.
+- **Resíduo zero:** nenhum usuário temporário (`tmp-fase-h@example.invalid`: 0), nenhum Deck, nenhum vínculo criado. Os 5 Teacher Cards históricos seguem sem alteração e nenhum `deck_id` foi criado ou modificado.
+- **Testes já executados:** unit G 134/134; unit H 78/78; Playwright filtro de origem 52/52 (fr+zh); Playwright G 68/68 e H 68/68 (sessão anterior); regressões F (68/68, 46/46) e E (75/75, 38/38).
+- Working tree limpa. Sem migration nova, sem mudança de RLS. Próxima fase do roadmap apenas em nova tarefa (Tags NÃO iniciadas).
