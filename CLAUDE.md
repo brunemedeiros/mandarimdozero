@@ -17101,3 +17101,12 @@ Fecha a experiência funcional sobre B–G (Deck Engine, 053, 054, Review por De
 **Implementação (estrutural, sem novo mecanismo de filtros)**: nova `eligibleDeckReviewPool()` (fr/zh `app.js`, = `STATE.cards.filter(isCardLessonCompleted)`, sem origem) usada pelas 3 funções de Deck e pela árvore do aluno. `eligibleReviewPool()` e o Review geral ficam byte a byte iguais. O valor persistido de `reviewOriginFilter` nunca é lido/alterado na sessão de Deck. Não é autorização (continua sendo do Deck Engine/RLS). Sem migration, sem mudança de dados/RLS, Deck Engine/FSRS/áudio intocados (linha `(de)` preservada).
 
 **Testes** (`tests/fase-h/test_deck_origin_filter.js`, Playwright FR+ZH, 52/52; cobre Teacher/Pessoal/Course Deck × todos os filtros, Review geral, persistência do filtro, arquivado/não-vencido/FSRS/Deck alheio). Verificado que reverter o fix faz o teste falhar. Harness da Fase E ganhou `eligibleDeckReviewPool` na lista de funções extraídas.
+
+## Fase H -- checkpoint final: verificação SQL real concluída, Fase H ENCERRADA (2026-09-30)
+
+- **Commit da Fase H (hardening final):** `0fce4c5` (permanece como está; nenhum código de produção alterado nesta verificação). `ec7f513` não existe no repositório (`git cat-file` -> "Not a valid object name").
+- **SQL real completo e versionado** (`tests/fase-h/test_supabase_real.sql`, projeto `eigjocalzwamisgqilhg`, transação única + ROLLBACK, executado integralmente e sem alteração): **59/59 cenários ok** (A1-A3, B1-B9, C1-C14 incl. 5x C4, D1-D7, E1-E7, F1-F13, G1, H1).
+- **Snapshot antes x depois (idênticos, byte a byte via md5):** `decks` 0 linhas; `teacher_flashcards` 5 (hash `cf25493d4524c50496b543763ac5d946`, 5 com `deck_id` nulo, 0 com `deck_id`); `own_flashcards` 7 (hash `c2626c2898060830bad8f8bd19690257`, 0 com `deck_id`); `teacher_students` 12 (hash `32da7077...`); `auth.users` 41 (hash `f14ff9bf...`); `profiles` 26 (hash `70a2e5d6...`); `tts_generation_log` 0.
+- **Resíduo zero:** nenhum usuário temporário (`tmp-fase-h@example.invalid`: 0), nenhum Deck, nenhum vínculo criado. Os 5 Teacher Cards históricos seguem sem alteração e nenhum `deck_id` foi criado ou modificado.
+- **Testes já executados:** unit G 134/134; unit H 78/78; Playwright filtro de origem 52/52 (fr+zh); Playwright G 68/68 e H 68/68 (sessão anterior); regressões F (68/68, 46/46) e E (75/75, 38/38).
+- Working tree limpa. Sem migration nova, sem mudança de RLS. Próxima fase do roadmap apenas em nova tarefa (Tags NÃO iniciadas).
