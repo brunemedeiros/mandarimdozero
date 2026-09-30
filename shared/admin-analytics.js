@@ -1381,6 +1381,7 @@ function switchAdminPanelSection(section){
   document.getElementById('admin-classlogs-content').style.display = section === 'classlogs' ? '' : 'none';
   document.getElementById('admin-materials-content').style.display = section === 'materials' ? '' : 'none';
   document.getElementById('admin-premium-content').style.display = section === 'premium' ? '' : 'none';
+  document.getElementById('admin-tags-content').style.display = section === 'tags' ? '' : 'none';
   if (section === 'badges') renderAdminBadgesView();
   else if (section === 'notifications') renderAdminNotificationsView();
   else if (section === 'reports') renderAdminReportsView();
@@ -1389,6 +1390,7 @@ function switchAdminPanelSection(section){
   else if (section === 'classlogs') renderAdminClassLogsView();
   else if (section === 'materials') renderAdminSupportMaterialsView();
   else if (section === 'premium') renderAdminPremiumView();
+  else if (section === 'tags') renderAdminTagsView();
   else renderAdminAnalyticsView();
 }
 

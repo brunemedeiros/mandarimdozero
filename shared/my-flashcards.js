@@ -328,6 +328,13 @@ async function renderMyFlashcardsView(opts){
 
     ${teacherDecksReadOnlyHTML(decks)}
 
+    <!-- Fase J: gerenciamento global das PRÓPRIAS tags (own_flashcards). Tags de
+         Teacher Cards nunca entram aqui (outra propriedade; somente leitura). -->
+    <div class="profile-section" id="my-tags-section">
+      <div class="section-label">🏷️ Gerenciar tags</div>
+      <div id="my-tag-manager"></div>
+    </div>
+
     <div class="profile-section">
       <div class="section-label" style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
         <span>Seus cartões ativos (${activeCards.length})</span>
@@ -363,6 +370,8 @@ async function renderMyFlashcardsView(opts){
   wireMyFlashcardsForm(wrap, atLimit, premium);
   wireMyFlashcardsCardButtons(wrap, premium);
   wireMyDecksSection(wrap);
+  // Fase J: rename/delete re-renderiza a view (chips das linhas e contagens frescas).
+  renderTagManagerInto(document.getElementById('my-tag-manager'), { scope: 'own', onChanged: () => renderMyFlashcardsView() });
   document.getElementById('anki-import-file')?.addEventListener('change', (e) => {
     if (typeof handleAnkiImportFileSelected === 'function') handleAnkiImportFileSelected(e.target.files[0]);
     e.target.value = '';

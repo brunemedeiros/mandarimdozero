@@ -17167,3 +17167,71 @@ Testes versionados em `tests/fase-i/`: `test_tags_unit.js` (Node/VM, 67),
 `test_playwright.js` (FR+ZH, 64), `test_supabase_real.sql` (Postgres real,
 transação + ROLLBACK, 19/19, zero resíduo). Harness da Fase E ganhou as funções
 do filtro de tag.
+
+## Fase J -- Painel de Tags (2026-09-30)
+
+Gerenciamento global de Tags (listar, renomear, excluir) sobre a arquitetura da
+Fase I, **sem tabela `tags`, sem coluna nova, sem índice**. Migration **057**
+(aplicada ao vivo): 3 RPCs **SECURITY INVOKER** + 1 helper imutável -- a RLS
+existente continua a autoridade; nenhum bypass; `revoke` de `anon`.
+
+- **Armazenamento**: Tags seguem `tags text[]` em `own_flashcards` /
+  `teacher_flashcards` (048/056). Não existe entidade Tag.
+- **"Global" = global dentro do universo de PROPRIEDADE** (independe de idioma,
+  Deck e CardInstance). Dois universos, nunca cruzados:
+  - **Aluna/usuária** (`scope='own'`, `owner_id = auth.uid()`): gerencia só as
+    Tags de `own_flashcards`. Tags de Teacher Cards NÃO aparecem no gerenciador e
+    continuam somente leitura (visíveis/filtráveis no Review). Uma mesma string
+    em `own` e em Teacher Card é a mesma string só para o FILTRO do Review, não
+    para o gerenciamento (renomear a dela não altera a da professora).
+  - **Professora/admin** (`scope='teacher'`, `teacher_id = auth.uid()`): todos os
+    Teacher Cards dela, todos os alunos e idiomas, numa única operação (não
+    escolhe aluno). Escrita de `teacher_flashcards` segue admin-only (RLS 026):
+    uma professora não-admin atinge 0 linhas.
+- **RPCs** (`shared/supabase_migrations/057_note_tag_management_rpcs.sql`):
+  `list_note_tags(scope)` → (tag, notas); `rename_note_tag(scope, old, new)` →
+  `{affected, merged, unchanged}`; `delete_note_tag(scope, tag)` → `{affected}`.
+  Um `UPDATE` atômico por chamada (tudo ou nada, verificado com erro forçado no
+  meio). Igualdade EXATA do slug (nunca LIKE/substring). Os slugs chegam já
+  normalizados pelo cliente (`normalizeNoteTags`/`validateNoteTags`, única
+  normalização); o servidor só valida o formato canônico e os 50 caracteres. O
+  CHECK 20/50 (056) continua valendo. Notes arquivadas também são renomeadas.
+- **Rename com fusão** (decisão de produto fechada): se a Note já tem o destino,
+  fica UMA ocorrência, na posição da 1ª ocorrência; ordem das demais preservada;
+  nunca duplicata. A UI avisa antes ("N notas já usam #destino; serão
+  unificadas") e não bloqueia. Slug normalizado igual ao antigo = nenhuma
+  alteração (sem RPC).
+- **Delete**: `array_remove` da Tag exata; confirmação mostra nome, nº de notas e
+  que é irreversível/global no escopo.
+- **Só `tags` muda**: não altera `revision`, `deck_id`, `fields`, `status`, IDs,
+  Card Type, direção, FSRS nem histórico. **Não reutiliza o editor** (no editor,
+  mudar Tag conta como conteúdo e incrementa `revision`; o Painel é metadata).
+- **`reviewTagFilter`**: após rename/delete (scope `own`) o cliente atualiza
+  `STATE.cards` (origem `self`) e reescreve/limpa o filtro salvo via
+  `updateStudySetting` (rename troca o slug; delete o remove; fusão deduplica).
+  Scope `teacher` não altera o filtro da conta da professora. Outra sessão/aparelho
+  não é sincronizada em tempo real: o filtro antigo continua visível e removível
+  (`renderReviewTagFilter` mostra selecionadas + disponíveis), então nunca fica
+  preso.
+- **UI**: aluna -- seção "🏷️ Gerenciar tags" em **Meus Cartões**; professora --
+  aba "🏷️ Tags" no **Painel de Admin** (`shared/tag-manager.js`, reutiliza
+  `.admin-badge-row`/`.pill`/`.profile-edit-*`, zero CSS novo). Rename inline com
+  pré-visualização do slug, contagem e colisão; delete com confirmação inline;
+  loading/vazio/erro (com "tentar de novo")/sucesso; duplo clique = 1 RPC.
+- **Fora do escopo (futuro)**: `criado-por-[username]` será Tag de **sistema**
+  (não renomeável, não removível pelo receptor) e chega junto de **Public
+  Cards** -- o Painel ainda não tem conceito de Tag protegida; quando existir,
+  basta filtrar/bloquear esse prefixo na lista e nas RPCs. Sem hierarquia,
+  aliases, histórico de renomeações, índice GIN (só se a escala pedir) nem
+  contagem por idioma/Deck no Painel.
+- **Limitações registradas**: o Painel da professora só lista o que a RLS admin
+  permite (professora não-admin não escreve); vínculo inativo não bloqueia
+  rename (o trigger só barra mudança de `deck_id`); após renomear na aluna, a
+  view de Meus Cartões é re-renderizada (rascunho do formulário de criação é
+  descartado).
+
+Testes versionados em `tests/fase-j/`: `test_tag_manager_unit.js` (85),
+`test_supabase_real.sql` (Postgres real, um `DO` que termina em
+`RAISE EXCEPTION 'RESULTS: ...'` → rollback automático, 58 cenários ok, zero
+resíduo), `test_playwright.js` (FR+ZH, 76). Regressão E/F/G/H/I (unit e
+Playwright) verde.
