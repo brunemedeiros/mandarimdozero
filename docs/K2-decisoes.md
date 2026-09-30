@@ -48,3 +48,32 @@ Estado: tentei aplicar A, mas o classificador de permissões bloqueou a edição
 - Legado que ainda existe (remoção em K2-G): `nextCardDirection` (shared/srs.js), as 2 atribuições `reviewDirection` guardadas por `!c.cardInstance` (start/deck), `card.lastDirection` legado em `gradeCurrentCard`, o ramo `else` legado de `renderNormalCard` (hoje inalcançável para a trilha — teste prova que todo card tem CardInstance — mas mantido: cards sem CardInstance ainda são possíveis em código externo/testes).
 - Observação fora de escopo: "Estudar este Deck" em Meus Cartões chama `startDeckReviewSession` sem trocar para a aba Revisão (pré-existente; nos testes chamo `switchTab('review')` antes).
 - Testes: `tests/k2d/test_native_direction.js` (24), `tests/k2d/test_playwright.js` (30, fr+zh, clique real em revelar/nota; falha 5 verificações sem a correção de áudio/pinyin), `tests/k2d/test_transitional_window.js` (30, mantido). Regressões K2-B/K2-C/E/F/G/H/I/J/K1 (unit + Playwright) verdes.
+
+## K2-E — consumidores pedagógicos em nível de palavra (Note)
+Regra: **UMA PALAVRA = UMA NOTE; UM CARTÃO DE ESTUDO = UMA CARDINSTANCE.** Study Trail: 1 Note → 2 CardInstances (A/B). Review, FSRS, fila, Deck e `dueForReview` seguem por CardInstance; métricas de vocabulário contam palavras. Nenhuma abstração "card virtual", nenhuma Note persistida: as irmãs são agrupadas por `unitId+vocabIdx` (a identidade de `u{unit}-v{idx}[-b]`, reconstruída de `content.js`, K2-C). Só a trilha (`origin:'study'`) é agrupada; cards teacher/self continuam contando 1 por CardInstance (fora do escopo; ver K2-G/futuro).
+
+Helpers novos (`shared/study-trail-model.js`, só leem): `studyWordGroups`, `studyWordCardsFor`, `studyWordHasEvidence`, `wordLevelUnits`, `wordLevelLearnedCounts`, `wordLevelFirstLearnedDates`, `cardStrengthBucket`, `studyWordStrengthBucket`, `wordLevelStrengthBuckets`.
+
+Auditoria (fr/zh `app.js`; classe A=palavra, B=CardInstance, C=híbrido):
+| Consumidor | Classe | Decisão |
+|---|---|---|
+| `checkUnitCompletion` | A | conclui quando TODA palavra tem evidência (`reps>0` em alguma irmã). Regra existente preservada; só a unidade mudou (B New não bloqueia). |
+| `unitCardCounts` | C | `total`/`learned` em palavras (`totalCards` novo, por CardInstance); `dueForReview` segue por CardInstance (fila de Review). Usado por `unitProgressFraction`. |
+| "Palavras aprendidas" (`renderProgressView`) | A | `learned/total` em palavras (+ cards avulsos teacher/self); "Pendentes agora" (`cardsDueNow`) segue por CardInstance (B). |
+| Gráfico "palavras aprendidas" (`renderProgressLineChart`) | A | 1 data por palavra = a mais antiga entre as irmãs (zh: hanzi seguem por card). |
+| `vocabStrengthBuckets` | A | 1 bucket por palavra. Força da palavra = a mais fraca entre as CardInstances **com evidência** (`reps>0`), usando a regra por card de sempre (reps=0/lapses≥2 fraca; interval≥60 forte). Sem nenhuma estudada = fraca (equivale ao `reps===0` de antes). B New não puxa a palavra para fraca nem cria 2º bucket. Sem média/soma. |
+| `alreadyKnown` (aquisição) | A | evidência em A **ou** B. |
+| `pickVocabFormat` | A | "exposta" = evidência em A ou B; sempre 1 formato por palavra. |
+| "Já sei?" (`wireKnowButtons`) | A | rótulo reflete a palavra; grada/reseta só o card A (o do id); se a evidência vem só de B, avisa em vez de reescrever o histórico de B. |
+| Lição concluída: `dueCount` (`cardsDueNow(pool reps>0)`), `todaysReviewCount`, contagens de Review/Deck | B | inalterados (CardInstance). |
+| `notification-cron` | A | já deduplicava por palavra na K2-B. |
+| `gradeCurrentCard`/exercícios (`applyMemoryGrade(card…)` do exercício correto) | B | inalterados: FSRS por CardInstance; o exercício grada A. |
+
+Deixados para **K2-F** (apenas observados): Speed (`buildSpeedOptions`/queue, distratores e `reps===0`), Combinar (tiles e `matchedCard.reps===0`), export Anki (`ANKI_EXPORT_CONFIG.cards`). Deixados para **K2-G**: `nextCardDirection`, atribuições legadas de `reviewDirection`, `lastDirection` legado, ramo legado de `renderNormalCard`.
+
+Comportamento transitório: teacher/self nativos `normal_reversed`/Cloze multi-marca ainda contam 1 por CardInstance nas métricas (só a trilha foi agrupada).
+
+Testes: `tests/k2e/test_word_level.js` (64), `tests/k2e/test_playwright.js` (20, fr+zh, UI real: "Palavras aprendidas", gráfico, "Suas palavras", Deck por CardInstance, conclusão, "Já sei"). Sem as mudanças de app: 24 e 12 falhas. `tests/k2d/test_transitional_window.js`: as 2 asserções "[K2-E pendente]" de `checkUnitCompletion`/`unitCardCounts` foram atualizadas para o novo estado (o resto intacto).
+
+### Pendência separada (NÃO faz parte da K2-E; não corrigida)
+"Estudar este Deck" (Meus Cartões) chama `startDeckReviewSession` sem trocar para a aba/view Revisão. Comportamento atual: a sessão inicia mas o usuário permanece na aba. Deve levar direto à Revisão; corrigir em fase de UX/hardening antes do fechamento final.

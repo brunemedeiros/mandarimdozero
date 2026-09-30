@@ -405,6 +405,14 @@ function wireKnowButtons(container){
       const cardId = btn.dataset.cardId;
       const card = STATE.cards.find(c => c.id === cardId);
       if (!card) return;
+      // K2-E: "já sei" é da PALAVRA. O botão grada/reseta o card A (o do id
+      // recebido); se a palavra só tem evidência via a irmã B, não há o que
+      // desmarcar em A -- avisa em vez de reescrever o histórico de B.
+      const siblings = studyWordCardsFor(STATE.cards, card.unitId, card.vocabIdx);
+      if (card.reps === 0 && studyWordHasEvidence(siblings)){
+        showToast('Esta palavra já foi estudada pelo cartão inverso.');
+        return;
+      }
 
       if (card.reps > 0){
         // já estava marcado — permite desmarcar caso tenha sido engano.
@@ -432,6 +440,10 @@ function wireKnowButtons(container){
         btn.textContent = '✓ Já sei';
         showToast('Marcado como já sabido ⭐');
       }
+      // K2-E: o rótulo reflete a PALAVRA (A ou B com histórico).
+      const wordKnown = studyWordHasEvidence(siblings);
+      btn.classList.toggle('known', wordKnown);
+      btn.textContent = wordKnown ? '✓ Já sei' : 'Já sei?';
 
       saveState();
       checkUnitCompletion(STATE.currentUnitId);
@@ -1800,10 +1812,12 @@ function showBadgeUnlockCelebration(badge, onDone){
 // RENDER: Trilha (path)
 // ============================================================
 function unitCardCounts(unitId){
+  // K2-E: total/learned em PALAVRAS (Note = A+B contam 1); dueForReview
+  // continua por CardInstance (é fila de Review, A e B independentes).
   const pool = STATE.cards.filter(c => c.unitId === unitId);
-  const learned = pool.filter(c => c.reps > 0).length;
+  const { total, learned } = wordLevelLearnedCounts(pool);
   const dueForReview = cardsDueNow(pool.filter(c => c.reps > 0)).length;
-  return { total: pool.length, learned, dueForReview };
+  return { total, learned, dueForReview, totalCards: pool.length };
 }
 
 // Unidades de um nível, na ordem — usado tanto pro desbloqueio sequencial
@@ -2800,7 +2814,7 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
   const v = u.vocab[idx];
   const cardId = `u${u.id}-v${idx}`;
   const card = STATE.cards.find(c => c.id === cardId);
-  const alreadyKnown = card && card.reps > 0;
+  const alreadyKnown = studyWordHasEvidence(studyWordCardsFor(STATE.cards, u.id, idx)); // K2-E: nível de palavra
   const matchingPhrase = findMatchingPhrase(v, u);
   acq.introduced[idx] = true;
 
@@ -2854,7 +2868,7 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
 function pickVocabFormat(unit, idx, intent){
   const cardId = `u${unit.id}-v${idx}`;
   const card = STATE.cards.find(c => c.id === cardId);
-  const exposed = card && card.reps > 0;
+  const exposed = studyWordHasEvidence(studyWordCardsFor(STATE.cards, unit.id, idx)); // K2-E: nível de palavra
   const misses = (STEP_STATE.acq && STEP_STATE.acq.wordMisses[idx]) || 0;
 
   if (intent === 'mixed' || intent === 'consolidation'){
@@ -5336,10 +5350,8 @@ function hardWordsPool(){
 //   Medianas = o resto do pool.
 function vocabStrengthBuckets(){
   const pool = eligibleReviewPool();
-  const weak = pool.filter(c => c.reps === 0 || c.lapses >= 2).length;
-  const strong = pool.filter(c => c.reps > 0 && c.lapses < 2 && c.interval >= 60).length;
-  const medium = pool.length - weak - strong;
-  return { weak, medium, strong };
+  // K2-E: cada PALAVRA da trilha conta uma vez (A+B); demais origens por card.
+  return wordLevelStrengthBuckets(pool);
 }
 
 // Fase 12: REVISÕES DE HOJE (o que o motor decidiu que é hora de revisar
@@ -7380,8 +7392,10 @@ function renderLevelTestQuizStep(){
 function checkUnitCompletion(explicitUnitId){
   const unitId = explicitUnitId || STATE.reviewSessionUnitFilter;
   if (!unitId) return;
+  // K2-E: a unidade está aprendida quando TODA palavra tem evidência de
+  // estudo em alguma CardInstance irmã -- B New não bloqueia mais.
   const pool = STATE.cards.filter(c => c.unitId === unitId);
-  const allLearned = pool.every(c => c.reps > 0);
+  const allLearned = studyWordGroups(pool).every(studyWordHasEvidence);
   if (allLearned){
     markUnitCompleted(unitId);
   }
@@ -7396,8 +7410,8 @@ function renderGoalsView(){
 
 function renderProgressView(){
   const completedUnits = Object.values(STATE.unitProgress).filter(u=>u.completed).length;
-  const totalCards = STATE.cards.length;
-  const learnedCards = STATE.cards.filter(c => c.reps > 0).length;
+  // K2-E: "Palavras aprendidas" em palavras (Note), não em CardInstances.
+  const { total: totalCards, learned: learnedCards } = wordLevelLearnedCounts(STATE.cards);
   const dueCount = cardsDueNow(STATE.cards).length;
 
   const guestWarning = !CURRENT_USER ? `
@@ -7454,7 +7468,8 @@ function renderProgressLineChart(){
   const wrap = document.getElementById('progress-line-chart-wrap');
   if (!wrap) return;
 
-  const learnedDates = STATE.cards.filter(c => c.firstLearnedDate).map(c => c.firstLearnedDate);
+  // K2-E: uma data por PALAVRA (A+B = 1; vale a mais antiga das irmãs).
+  const learnedDates = wordLevelFirstLearnedDates(STATE.cards);
 
   if (!learnedDates.length){
     wrap.innerHTML = `<div style="text-align:center; padding:30px 20px; color:var(--ink-soft);"><p>Comece a estudar para ver seu progresso ao longo do tempo aqui.</p></div>`;

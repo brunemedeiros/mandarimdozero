@@ -85,8 +85,8 @@ for (const lang of ['fr', 'zh']){
 // Documenta, por leitura do código real, que os consumidores K2-E continuam por CardInstance.
 for (const lang of ['fr', 'zh']){
   const src = read(lang + '/app.js');
-  check(lang + ' [K2-E pendente]: checkUnitCompletion ainda exige reps>0 em todo card da unidade', /pool\.every\(c => c\.reps > 0\)/.test(src));
-  check(lang + ' [K2-E pendente]: unitCardCounts ainda usa STATE.cards por unitId', /function unitCardCounts[\s\S]{0,200}c\.unitId === unitId/.test(src));
+  check(lang + ' [K2-E migrado]: checkUnitCompletion opera por palavra (não exige reps>0 em todo card)', /studyWordGroups\(pool\)\.every\(studyWordHasEvidence\)/.test(src) && !/pool\.every\(c => c\.reps > 0\)/.test(src));
+  check(lang + ' [K2-E]: unitCardCounts parte de STATE.cards por unitId (contagem de palavras via wordLevelLearnedCounts)', /function unitCardCounts[\s\S]{0,200}c\.unitId === unitId/.test(src));
   check(lang + ': nextCardDirection/reviewDirection/lastDirection ainda existem (saem só em K2-G)',
     /nextCardDirection/.test(src) && /reviewDirection/.test(src) && /lastDirection/.test(src));
 }

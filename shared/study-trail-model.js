@@ -94,3 +94,90 @@ function mergeSavedCards(cards, savedCards){
     c.deckId = freshDeckId === undefined ? null : freshDeckId;
   });
 }
+
+// ============================================================
+// K2-E -- unidade PEDAGÓGICA (palavra = Note) x unidade de ESTUDO
+// (CardInstance). Uma palavra da trilha = 1 Note = 2 CardInstances (A e B).
+// Métricas que falam de PALAVRAS (aprendida, conhecida, força, gráfico,
+// conclusão de unidade) agrupam as CardInstances irmãs pela identidade da
+// palavra (unitId + vocabIdx, a mesma que gera os ids u{unit}-v{idx}[-b]);
+// Review/FSRS/Deck/fila continuam por CardInstance. Nada aqui muda FSRS,
+// direção ou cardinalidade -- só LÊ os dados de progresso já existentes.
+// Só a trilha (origin 'study') é agrupada; cards teacher/self continuam
+// contando 1 por CardInstance, como antes.
+// ============================================================
+function isStudyTrailWordCard(c){
+  return !!c && c.origin === 'study' && c.unitId != null && c.vocabIdx != null;
+}
+function studyWordKey(c){ return String(c.unitId) + ':' + String(c.vocabIdx); }
+
+// Agrupa os cards da trilha por palavra (ordem da 1ª aparição).
+function studyWordGroups(cards){
+  const map = new Map();
+  (cards || []).forEach(c => {
+    if (!isStudyTrailWordCard(c)) return;
+    const k = studyWordKey(c);
+    if (!map.has(k)) map.set(k, []);
+    map.get(k).push(c);
+  });
+  return Array.from(map.values());
+}
+
+// CardInstances irmãs (A e B) de uma palavra específica.
+function studyWordCardsFor(cards, unitId, vocabIdx){
+  return (cards || []).filter(c => isStudyTrailWordCard(c) && c.unitId === unitId && c.vocabIdx === vocabIdx);
+}
+
+// "Evidência de estudo" da palavra: a regra de sempre (reps > 0) aplicada
+// ao nível certo -- basta UMA CardInstance irmã ter sido estudada.
+function studyWordHasEvidence(wordCards){
+  return (wordCards || []).some(c => c.reps > 0);
+}
+
+// Unidades pedagógicas de uma lista de cards: cada palavra da trilha vira
+// UM grupo; qualquer outro card (teacher/self) continua sozinho.
+function wordLevelUnits(cards){
+  const out = studyWordGroups(cards);
+  (cards || []).forEach(c => { if (!isStudyTrailWordCard(c)) out.push([c]); });
+  return out;
+}
+
+// {total, learned} em PALAVRAS (trilha) + cards avulsos (demais origens).
+function wordLevelLearnedCounts(cards){
+  const units = wordLevelUnits(cards);
+  return { total: units.length, learned: units.filter(studyWordHasEvidence).length };
+}
+
+// Data de "primeira vez aprendida" da palavra = a mais antiga entre as irmãs.
+function wordFirstLearnedDate(wordCards){
+  const ds = (wordCards || []).map(c => c.firstLearnedDate).filter(Boolean).sort();
+  return ds.length ? ds[0] : null;
+}
+function wordLevelFirstLearnedDates(cards){
+  return wordLevelUnits(cards).map(wordFirstLearnedDate).filter(Boolean);
+}
+
+// Força de UMA CardInstance -- a mesma regra que sempre existiu em
+// vocabStrengthBuckets (reps===0||lapses>=2 fraca; reps>0&&lapses<2&&
+// interval>=60 forte; resto mediana).
+function cardStrengthBucket(c){
+  if (c.reps === 0 || c.lapses >= 2) return 'weak';
+  if (c.reps > 0 && c.lapses < 2 && c.interval >= 60) return 'strong';
+  return 'medium';
+}
+// Força da PALAVRA: só as CardInstances COM evidência de estudo contam
+// (B New não puxa a palavra para "fraca"); sem nenhuma estudada = fraca
+// (equivale ao reps===0 de antes); com estudadas = a mais fraca entre elas
+// (a palavra só é "forte" se toda direção já estudada for forte).
+function studyWordStrengthBucket(wordCards){
+  const studied = (wordCards || []).filter(c => c.reps > 0);
+  if (!studied.length) return 'weak';
+  const rank = { weak: 0, medium: 1, strong: 2 };
+  return studied.map(cardStrengthBucket).reduce((a, b) => rank[b] < rank[a] ? b : a);
+}
+function wordLevelStrengthBuckets(pool){
+  const b = { weak: 0, medium: 0, strong: 0 };
+  studyWordGroups(pool).forEach(g => { b[studyWordStrengthBucket(g)]++; });
+  (pool || []).forEach(c => { if (!isStudyTrailWordCard(c)) b[cardStrengthBucket(c)]++; });
+  return b;
+}
