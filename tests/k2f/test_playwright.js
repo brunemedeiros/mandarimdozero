@@ -159,7 +159,8 @@ async function readApkg(buf){
     await page.click('#match-size-start-btn');
     await page.waitForSelector('.match-tile');
     const tiles = await page.$$eval('.match-tile', els => els.map(e => ({ id: e.dataset.cardId, side: e.dataset.side, text: e.innerText.replace('?', '').trim() })));
-    check(lang + ' Combinar UI: 2 tiles por palavra, sem B nem texto repetido', tiles.length % 2 === 0 && tiles.length >= 8 && tiles.every(t => !t.id.endsWith('-b')) && new Set(tiles.map(t => t.text)).size === tiles.length, tiles.length);
+    check(lang + ' Combinar UI: 2 tiles por palavra, sem B nem texto repetido', tiles.length % 2 === 0 && tiles.length >= 8 && tiles.every(t => !t.id.endsWith('-b')) && new Set(tiles.map(t => t.id + '|' + t.side)).size === tiles.length, tiles.length);
+    // K2-J: a unicidade é de (card, lado), não de texto: o conteúdo tem palavras repetidas entre unidades (ex.: 工作, manger) e cognatos (dormir/dormir), então 2 tiles com o mesmo texto são legítimos.
     check(lang + ' Combinar UI: cada palavra tem 1 frente e 1 verso', [...new Set(tiles.map(t => t.id))].every(id => tiles.filter(t => t.id === id).length === 2));
     const mcount = await ev(() => { renderReviewModeSelect(); return document.querySelector('#mode-card-match .count').innerText; });
     check(lang + ' Combinar UI: contador do modo = palavras (não 2x)', parseInt(mcount) === setup.words, [mcount, setup.words]);

@@ -159,3 +159,11 @@ Pendência separada, não tocada: "Estudar este Deck" ainda não troca para a ab
 **Efeito**: se o invariante "todo card tem cardInstance" for violado, o erro agora é explícito em vez de fallback silencioso. Teste contra o código anterior: 10/10 nos dois (os guards nunca eram atingidos). Sem mudança de direção, Anki (Study A→Básico, B→Reverso, Teacher/Self idem, Cloze→Cloze), Deck (K2-H) ou dados históricos; sem migration.
 
 **Nota de flakiness (pré-existente)**: `tests/k2f/test_playwright.js` "Combinar UI … texto repetido" falhou em 2 de ~30 execuções; ele amostra 8 pares aleatórios e dois itens podem ter o mesmo texto. Não relacionado aos guards (nenhuma mudança toca `startMatchGame`); não corrigido por estar fora do escopo.
+
+## K2-J (investigação) — falha do teste K2-F "Combinar UI … texto repetido"
+
+**Conclusão: falha do teste, não do produto.** A assertion de `tests/k2f/test_playwright.js` exigia textos de tile únicos entre os 8 pares sorteados, mas o conteúdo real tem textos repetidos: palavras presentes em duas unidades (fr `manger`, `hier`, `français / française`, `brésilien / brésilienne`; zh `工作`, `以后`) e cognatos com frente = verso (fr `dormir`/`dormir`).
+
+Evidência: medindo 3000 chamadas reais de `startMatchGame` por versão, a colisão ocorre em ~4,7% (antes do `ee1f32c`) vs ~5,3% (depois) em fr e ~0,8% vs ~0,5% em zh; forçando o par repetido no topo do pool a colisão é determinística nas duas versões. O `ee1f32c` não toca `startMatchGame`; o único trecho que chega à projeção A (`|| !card.cardInstance`) já estava provado inalcançável.
+
+Correção mínima: unicidade por `(id, lado)` em vez de por texto (o teste continua barrando tiles `-b` e exigindo 1 frente + 1 verso por palavra). Produto não alterado. Se o Combinar deve evitar tiles de texto idêntico, é decisão de produto separada.
