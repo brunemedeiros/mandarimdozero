@@ -17235,3 +17235,8 @@ Testes versionados em `tests/fase-j/`: `test_tag_manager_unit.js` (85),
 `RAISE EXCEPTION 'RESULTS: ...'` → rollback automático, 58 cenários ok, zero
 resíduo), `test_playwright.js` (FR+ZH, 76). Regressão E/F/G/H/I (unit e
 Playwright) verde.
+
+## Fase J -- hardening final (2026-09-30): nenhuma alteração de RPC
+
+- **Vínculo inativo**: a 055 exige vínculo ativo só para INSERT de Teacher Card e para UPDATE que muda `deck_id` para um Deck; edição de conteúdo de cartão histórico é deliberadamente liberada (o histórico não pode travar). Rename/delete de Tag é edição de metadado (só `tags`), mesma categoria de editar conteúdo, não de criar/mover -- então NÃO se exige vínculo ativo; alterar isso seria regra nova por analogia. Provado em SQL real (`tests/fase-j/test_inactive_link.sql`, 4/4, rollback): com vínculo `removed`, rename/delete atingem o card sem tocar id/revision/deck_id/fields/status; criar card segue bloqueado (42501).
+- **Permissão da professora**: `teacher_flashcards_admin_write` (026) é decisão intencional ("escrita só para a administração", padrão 023/025), reafirmada em toda a feature; ownership é `teacher_id` (filtro das RPCs). Não-admin atinge 0 linhas por desenho. Preservado; sem mudança de RLS.
