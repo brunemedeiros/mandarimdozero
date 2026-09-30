@@ -31,3 +31,10 @@ Estado: tentei aplicar A, mas o classificador de permissões bloqueou a edição
 - `buildCardsFromUnits(units, appKey='frances'|'mandarim')`: appKey literal porque roda antes de `const APP_KEY`.
 - NÃO releasable sozinho: B (New) já entra nas filas/contagens e `checkUnitCompletion`/`unitCardCounts`/Speed/Combinar/Anki ainda assumem 1 card por palavra (K2-D..F).
 - Testes: `tests/k2c/` (unit 88, playwright 14). Fase E adaptada (contagem por CardInstance = 2 x palavras).
+
+## K2-D — janela transitória A+B no Review (sem código de app alterado)
+- Consolidado, sem exceção: 1 Note → 2 CardInstances (A histórico, B New). A e B entram no Course Deck, no pool elegível, na fila (B via New, A via Review vencido) e nas contagens de Deck por CardInstance. `newCardsPerDay` pode limitar B; nenhuma regra "B só depois de A".
+- B começa New (sem reps/due/stability/difficulty/lapses herdados); FSRS de A e B é independente nos dois sentidos; direções opostas via CardInstance.
+- NÃO corrigido aqui (classificado **K2-E pendente**): `checkUnitCompletion` (exige `reps>0` em todo card, B New impede a conclusão por cards), `unitCardCounts` (total = 2 × palavras), palavras aprendidas, gráficos, `vocabStrengthBuckets`, `alreadyKnown`, `pickVocabFormat`. Nada foi mascarado, filtrado ou alterado.
+- `nextCardDirection`/`reviewDirection`/`lastDirection` seguem existindo (saem só em K2-G).
+- Teste: `tests/k2d/test_transitional_window.js` (30 verificações, fr+zh). Regressões K2-B/K2-C/Fase E/K1 verdes.
