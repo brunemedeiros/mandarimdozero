@@ -5976,6 +5976,7 @@ function backToReviewModeSelect(){
   SPEED_STATE.active = false;
   document.getElementById('review-mode-select-wrap').style.display = 'block';
   document.getElementById('review-session-wrap').style.display = 'none';
+  STATE.reviewSessionDeckId = null; // K2-H: sair da sessão não deixa escopo de Deck stale
   renderReviewModeSelect();
 
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'tab', tab: 'review' });
@@ -6594,7 +6595,8 @@ function deckReviewSummary(deckId){
 // normal REVISAR, então newCardsPerDay/sessionIntensity/"mais antigas
 // primeiro" continuam valendo sem nenhum código de limite novo (D6). Direção
 // (K2-G): estrutural do CardInstance -- a sessão de Deck só escolhe quais entram.
-async function startDeckReviewSession(deckId){
+async function startDeckReviewSession(deckId, opts){
+  const restore = !!(opts && opts.restore);
   trackEvent('lesson_start', 'flashcard_review', null);
   const decks = await ensureDecksLoadedForReview();
   // Fase I (Tags): Deck scope AND Tag filter -- o Deck decide o universo, a tag só reduz.
@@ -6608,6 +6610,17 @@ async function startDeckReviewSession(deckId){
   STATE.reviewIndex = 0;
   STATE.reviewCardState = null;
 
+  // K2-H: o botão vive fora da aba Review (ex.: "Meus Cartões"); sem trocar
+  // a view ativa a fila era montada numa tela invisível. switchTab('review')
+  // vem ANTES de mostrar a sessão (ele reseta os wrappers para o seletor de
+  // modos); reviewSessionUnitFilter já está nulo, então não dispara a sessão
+  // de unidade. A rota carrega o deckId para voltar/recarregar não perder o escopo.
+  // restore=true (Voltar/recarregar): a parte pós-await roda depois do fim de
+  // renderRoute(), então suprime o router aqui para não empilhar histórico.
+  const wasRestoring = (typeof ROUTER !== 'undefined') ? ROUTER.restoring : false;
+  if (restore && typeof ROUTER !== 'undefined') ROUTER.restoring = true;
+  try {
+  if (typeof switchTab === 'function') switchTab('review');
   document.getElementById('review-mode-select-wrap').style.display = 'none';
   document.getElementById('review-session-wrap').style.display = 'block';
   document.getElementById('review-content').style.display = 'block';
@@ -6615,7 +6628,10 @@ async function startDeckReviewSession(deckId){
   document.getElementById('match-review-content').style.display = 'none';
 
   renderReviewView();
-  if (typeof routerNavigate === 'function') routerNavigate({ type: 'reviewSession', mode: 'flashcard' });
+  if (typeof routerNavigate === 'function') routerNavigate({ type: 'reviewSession', mode: 'flashcard', deckId });
+  } finally {
+    if (restore && typeof ROUTER !== 'undefined') ROUTER.restoring = wasRestoring;
+  }
 }
 
 function shuffle(arr){

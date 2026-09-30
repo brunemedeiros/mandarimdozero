@@ -121,3 +121,17 @@ Três camadas (não confundir): **Review/FSRS/Deck** A+B = 2 CardInstances; **Sp
 **Testes**: `tests/k2g/test_unit.js` (31; fonte sem os símbolos, poison, A/B estruturais, save histórico, alcançabilidade) e `tests/k2g/test_playwright.js` (58, FR+ZH; renderer idêntico com/sem poison para Study A/B, Teacher A/B, Self A/B; autoplay A ao entrar / B só após revelar; pinyin zh; sessão e grade não escrevem direção; save sem direção). Contra o código anterior o unit falha (9); o Playwright passa, provando que o comportamento nativo não dependia dos ramos removidos. Asserções "ainda existe (sai em K2-G)" de K2-C/K2-D foram invertidas.
 
 Pendência separada, não tocada: "Estudar este Deck" ainda não troca para a aba Revisão.
+
+## K2-H — "Estudar este Deck"
+
+**Causa**: `startDeckReviewSession` montava a fila certa (subtree via `getStudyScopeForDeck` + `eligibleDeckReviewPool` + `reviewFilterQueue('oldest')`), mas nunca trocava a view ativa. O botão vive em "Meus Cartões", então a sessão era renderizada em `#view-review` invisível. Além disso a rota `#/review/flashcard` não carregava o Deck: Voltar/recarregar caía em `openReviewSession('flashcard')`, que zera `reviewSessionDeckId` (Review geral, escopo perdido). Sair da sessão (`backToReviewModeSelect`) deixava `reviewSessionDeckId` stale.
+
+**Correção** (fr/zh `app.js`, `shared/router.js`): (1) `switchTab('review')` antes de exibir a sessão (estado da sessão já definido; `reviewSessionUnitFilter` nulo); (2) rota `{type:'reviewSession', mode:'flashcard', deckId}` ↔ `#/review/deck/<id>`; restauração chama `startDeckReviewSession(id,{restore:true})` sem empilhar histórico; (3) `backToReviewModeSelect` zera `reviewSessionDeckId`.
+
+**Fluxo**: Deck → `ensureDecksLoadedForReview` → `getStudyScopeForDeck` (Deck + subtree) sobre `eligibleDeckReviewPool` (elegível, sem filtro de origem — decisão da Fase H) → `matchesReviewTagFilter` (Deck AND Tag; tags entre si OR) → `reviewFilterQueue('oldest')` (mantém `newCardsPerDay`/intensidade) → aba Review → `renderReviewView` → `gradeCurrentCard`.
+
+**Invariantes**: cada CardInstance (A e B, c1/c2…) é um card independente com FSRS próprio; direção vem só de `frontFieldIndex/backFieldIndex` (nenhuma variável de direção nova); New/Learning/Review = classificação K1 (`cardStudyBucket`); nenhum card temporário; nenhum motor de fila novo.
+
+**Limitações**: a sessão respeita `newCardsPerDay` e a intensidade (30 por padrão), então um Deck grande não entra inteiro numa sessão; o fim da sessão usa "Voltar → Trilha" como nas demais sessões.
+
+**Dívida técnica (fora desta fase, NÃO tocada)**: branches `!card.cardInstance` de `hasPlainFrontBack`, `cardPromptText`, `cardAnswerText` — provavelmente inalcançáveis, não são infraestrutura de direção; limpeza futura própria.

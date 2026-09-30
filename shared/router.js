@@ -54,7 +54,7 @@ function routeToHash(route){
       if (route.tab === 'review' && route.unitFilter != null) return `#/review/unit/${route.unitFilter}`;
       return `#/${route.tab}`;
     case 'reviewSession':
-      return `#/review/${route.mode}`;
+      return route.deckId != null ? `#/review/deck/${route.deckId}` : `#/review/${route.mode}`;
     case 'unit':
       return `#/unit/${route.unitId}`;
     case 'unitResult':
@@ -84,6 +84,7 @@ function hashToRoute(hash){
   if (!parts.length) return { type: 'tab', tab: 'path' };
   if (parts[0] === 'review'){
     if (parts[1] === 'unit' && parts[2]) return { type: 'tab', tab: 'review', unitFilter: parseUnitIdFromHash(parts[2]) };
+    if (parts[1] === 'deck' && /^\d+$/.test(parts[2] || '')) return { type: 'reviewSession', mode: 'flashcard', deckId: parseInt(parts[2], 10) };
     if (['flashcard', 'speed', 'hard', 'match'].includes(parts[1])) return { type: 'reviewSession', mode: parts[1] };
     return { type: 'tab', tab: 'review' };
   }
@@ -143,6 +144,10 @@ function renderRoute(route){
         break;
       }
       case 'reviewSession': {
+        if (route.deckId != null && typeof startDeckReviewSession === 'function'){
+          startDeckReviewSession(route.deckId, { restore: true }); // K2-H: restaura a sessão COM o escopo do Deck
+          break;
+        }
         if (typeof switchTab === 'function') switchTab('review');
         if (typeof openReviewSession === 'function') openReviewSession(route.mode);
         break;
