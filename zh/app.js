@@ -7944,7 +7944,7 @@ const ANKI_EXPORT_CONFIG = {
   // direção vem do template do modelo Reverso. O pinyin acompanha o hanzi
   // (lado "back" do CardInstance); mídia: front = tradução, back = hanzi.
   reverseFields(card, media){
-    const v = resolveCardContentView(card);
+    const v = ankiExportSides(card);
     return [
       v.back.pinyinText || '',
       ankiFieldHTML(v.back.text, media && media.back),
@@ -7959,7 +7959,7 @@ const ANKI_EXPORT_CONFIG = {
     ];
   },
   sortField(card){
-    if (ankiExportCardKind(card) === 'reverse') return resolveCardContentView(card).back.pinyinText || resolveCardContentView(card).back.text;
+    if (ankiExportCardKind(card) === 'reverse'){ const b = ankiExportSides(card).back; return b.pinyinText || b.text; }
     if (card.cardInstance && card.cardInstance.cardTypeId === 'cloze'){
       const view = resolveCardContentView(card);
       return renderClozeText(view.rawSentenceText, view.markId, { reveal: true });

@@ -94,10 +94,37 @@ function ankiExportCardKind(card){
   // K2-F: B da trilha (normal_reversed, frente = tradução) vai para um modelo
   // "Reverso" com os MESMOS campos semânticos do Básico, mas frente/verso
   // invertidos no template -- preserva a direção do CardInstance sem
-  // misturar o conteúdo dos campos. Só a trilha (teacher/self mantêm o
-  // comportamento anterior). Estrutural, não por sufixo de id.
+  // misturar o conteúdo dos campos. Estrutural, não por sufixo de id.
   if (card.origin === 'study' && card.cardInstance && !isStudyWordProjectionCard(card)) return 'reverse';
+  // K2-F hardening: Teacher/Self (CardInstance-level, nunca agrupados) usam o
+  // MESMO modelo Reverso quando o lado mostrado na frente é a tradução e o
+  // verso é o idioma estudado. Critério estrutural (idioma de cada Field
+  // resolvido, nunca sufixo de id nem reviewDirection/isReverse).
+  if ((card.origin === 'teacher' || card.origin === 'self') && ankiCardIsReversed(card)) return 'reverse';
   return 'basic';
+}
+
+// Lados do CardInstance na direção em que ele é mostrado: frente (prompt) e
+// verso (resposta), cada um { text, lang, pinyinText }. Só normal, múltipla
+// escolha e digite-a-resposta (os tipos que usam o modelo Básico/Reverso).
+function ankiExportSides(card){
+  if (!card.cardInstance) return null;
+  const v = resolveCardContentView(card);
+  if (v.kind === 'normal') return { front: v.front, back: v.back };
+  if (v.kind === 'multiple_choice') return { front: v.prompt, back: v.correct || { text: v.correctText, lang: null, pinyinText: null } };
+  if (v.kind === 'type_answer'){
+    const a = v.answer || {};
+    return { front: v.prompt, back: { text: v.displayAnswerText, lang: a.lang || null, pinyinText: a.pinyinText || null } };
+  }
+  return null;
+}
+
+// Invertido = frente NÃO está no idioma estudado e o verso está.
+function ankiCardIsReversed(card){
+  const sides = ankiExportSides(card);
+  if (!sides || !sides.front || !sides.back) return false;
+  const appKey = (typeof APP_KEY !== 'undefined') ? APP_KEY : null;
+  return !isStudyLanguageField(sides.front, appKey) && isStudyLanguageField(sides.back, appKey);
 }
 
 // Constrói a string de tags do Note (coluna `notes.tags` do Anki),

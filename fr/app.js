@@ -7919,7 +7919,7 @@ const ANKI_EXPORT_CONFIG = {
   // frente/verso; a direção vem do template do modelo Reverso. Mídia: o lado
   // "front" do CardInstance é a tradução, o "back" é o francês.
   reverseFields(card, media){
-    const v = resolveCardContentView(card);
+    const v = ankiExportSides(card);
     return [
       ankiFieldHTML(v.back.text, media && media.back),
       ankiFieldHTML(v.front.text, media && media.front),
@@ -7933,7 +7933,7 @@ const ANKI_EXPORT_CONFIG = {
     ];
   },
   sortField(card){
-    if (ankiExportCardKind(card) === 'reverse') return resolveCardContentView(card).back.text;
+    if (ankiExportCardKind(card) === 'reverse') return ankiExportSides(card).back.text;
     if (card.cardInstance && card.cardInstance.cardTypeId === 'cloze'){
       const view = resolveCardContentView(card);
       return renderClozeText(view.rawSentenceText, view.markId, { reveal: true });

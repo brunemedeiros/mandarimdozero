@@ -60,7 +60,7 @@ for (const lang of ['fr', 'zh']){
     check(lang + ' Speed: unidade pequena (fallback) também sem B nem irmão', o.every(x => ctx.isStudyWordProjectionCard(x)) && o.filter(x => x.unitId === small.id && x.vocabIdx === 0).length === 1); }
   // Teacher/Self preservados
   fresh();
-  const t1 = { id: 't9', origin: 'teacher', unitId: null, reps: 0, due: 0, state: 'new', flashcardStatus: 'active', cardInstance: { cardTypeId: 'normal', frontFieldIndex: 1, backFieldIndex: 0 }, note: { fields: [{ text: 'x', lang: 'fr' }, { text: 'y', lang: 'pt-BR' }] } };
+  const t1 = { id: 't9', origin: 'teacher', unitId: null, reps: 0, due: 0, state: 'new', flashcardStatus: 'active', cardInstance: { cardTypeId: 'normal', frontFieldIndex: 1, backFieldIndex: 0 }, note: { fields: [{ text: 'x', lang: isZh ? 'zh' : 'fr' }, { text: 'y', lang: 'pt-BR' }] } };
   check(lang + ' Teacher/Self: card invertido (front>back) NÃO é tratado como B da trilha', ctx.isStudyWordProjectionCard(t1) === true && ctx.projectStudyWordsToA([t1]).length === 1);
   const t2 = Object.assign({}, t1, { id: 't9-b' });
   check(lang + ' Teacher/Self: 2 CardInstances continuam 2 itens', ctx.projectStudyWordsToA([t1, t2]).length === 2);
@@ -105,7 +105,8 @@ for (const lang of ['fr', 'zh']){
   }
   check(lang + ' Anki: sortField de B é o texto estudado (não vazio)', cfg.sortField(B(0)) && cfg.sortField(B(0)).length > 0);
   // Teacher/Self e Cloze preservados
-  check(lang + ' Anki: teacher/self (mesmo invertido) continuam no modelo básico', ctx.ankiExportCardKind(t1) === 'basic' && ctx.ankiExportCardKind(Object.assign({}, t1, { origin: 'self' })) === 'basic');
+  // hardening: teacher/self INVERTIDO agora usa o modelo Reverso (ver test_anki_teacher_self_reverse.js); a expectativa antiga era 'basic'
+  check(lang + ' Anki: teacher/self invertido → Reverso (decisão do hardening substitui a K2-F original)', ctx.ankiExportCardKind(t1) === 'reverse' && ctx.ankiExportCardKind(Object.assign({}, t1, { origin: 'self' })) === 'reverse');
   check(lang + ' Anki: Cloze continua cloze (CardInstance-level)', ctx.ankiExportCardKind({ origin: 'self', cardInstance: { cardTypeId: 'cloze' } }) === 'cloze');
 }
 summary('K2-F unit');
