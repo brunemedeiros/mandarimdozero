@@ -1,5 +1,7 @@
 # Contrato de Public Decks + atribuição (v3, fechamento das decisões)
 
+> **v4 (2026-10-01):** a auditoria de identidade/username/tag de atribuição está em `docs/identidade-username-tag-auditoria.md` (pendência 8, seções 7.4 e 8 daqui). Colisão real nos dados: nenhuma (26 perfis); proteção server-side do username e da tag `criado-por-*`: inexistente; decisão de produto necessária antes de implementar.
+
 Somente documentação. Nenhum código, migration, RPC, RLS, rota ou UI foi alterado.
 Substitui as versões v1 (`dce4748`) e v2 (`96bbb00`).
 **Fonte de verdade:** `docs/arquitetura-total-decks-tags-painel.md` (citada como "AT §n" / "inv. n").
