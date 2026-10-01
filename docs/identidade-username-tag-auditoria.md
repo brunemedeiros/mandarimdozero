@@ -492,3 +492,252 @@ primeira cópia emitida já cria atribuição permanente. A imutabilidade **sozi
   tabelas de reserva/alias/redirect, número de usuários de `auth.users` (41) e perfis (26). Nenhuma escrita.
 - Nenhum código, schema, RLS, RPC, UI, username ou dado alterado; sem migration; sem push; sem deploy; migration 059
   **não aplicada**.
+
+---
+
+# PARTE III -- Contrato PROPOSTO de identidade USERNAME <-> TAG (2026-10-01)
+
+Fechamento de contrato, **sem implementação**. Legenda usada nesta parte (em todo item):
+
+- 🟦 **ARQUITETURA JÁ DEFINIDA** -- exigida pela Arquitetura Total (AT), com a seção.
+- 🟩 **PROPOSTA TÉCNICA** -- decisão sugerida para fechar uma lacuna; ainda não aprovada.
+- 🟨 **DECISÃO PENDENTE** -- depende de aprovação de produto/arquitetura.
+- 🟥 **PRÉ-REQUISITO** -- precisa estar pronto antes da fase seguinte.
+
+Nada aqui altera código, schema, usernames ou Tags. Migration 059 continua não aplicada.
+
+## 27. Consulta final (somente leitura, 2026-10-01) -- resultado agregado
+
+Executada no banco real; nenhum username listado; nenhuma escrita.
+
+| Verificação | Resultado |
+|---|---|
+| `profiles` / usernames distintos / duplicados | 26 / 26 / 0 |
+| Fora do formato canônico proposto (`^[a-z0-9]([a-z0-9-]{1,22}[a-z0-9])$`, 3–24) | **3** (todos por `.`) |
+| Fora do canônico **sem hífens consecutivos** | 3 (os mesmos) |
+| Usernames com `--` | 0 |
+| Grupos colidindo sob a regra atual de tag | **0** |
+| Entre os 3 que migrariam: colisão entre si / com username existente (substituindo `.` por `-`) | **0 / 0** |
+| Os 3 têm candidato válido por simples substituição `.`→`-` (3–24, canônico) | **3 de 3** |
+| Notes com tag `criado-por*` (`own_flashcards` / `teacher_flashcards`) | **0 / 0** |
+| Notes com qualquer tag (own / teacher) | 0 / 0 |
+| Decks (qualquer tipo) | **0** (portanto nenhum Deck tem tag `criado-por-*`) |
+| Tabelas de reserva/alias/redirect/username | **0** |
+| `auth.users` sem profile | **15** |
+| Desses 15: parte local do e-mail com `.` / com `_` / com caracteres removíveis | **4 / 0 / 0** |
+| Desses 15: canônico curto demais (<3) / colisão interna / colisão com username existente | 0 / 0 / 0 |
+
+Conclusões: **nenhuma das três atribuições existe**; os 3 usernames com `.` não têm atribuição pública (confirmado:
+zero tags `criado-por*` em todo o banco) e podem ser migrados sem colisão; 4 das 15 contas futuras já nasceriam com
+`.` pela regra atual de derivação por e-mail.
+
+## 28. Dois problemas distintos (ambos precisam ser resolvidos)
+
+| | Problema A -- colisão por normalização | Problema B -- reutilização após exclusão |
+|---|---|---|
+| Causa | `norm` não é injetiva (`ana.silva`, `ana_silva`, `ana-silva`) | O CASCADE de `auth.users` libera o username; nenhuma reserva |
+| Exemplo | duas contas vivas geram a mesma `criado-por-ana-silva` | A exclui `ana`; B registra `ana`; as cópias antigas passam a "pertencer" a B |
+| Resolve imutabilidade? | Não | Não |
+| Resolve tag injetiva? | Sim | Não |
+| Resolve proteção de tag? | Não | Não |
+| Exige | username canônico (ou id interno) | reserva permanente |
+
+🟩 A política proposta só é suficiente se contiver os **dois** mecanismos mais a imutabilidade e a proteção do
+prefixo. Cada um sozinho deixa uma falha aberta.
+
+## 29. Política proposta, ponto a ponto
+
+### 29.1 Username canônico -- 🟩 PROPOSTA TÉCNICA (AT: 🟦 §10.1 "evitar caracteres especiais" para tags; §10.3 exemplo `criado-por-catharinaurbani`)
+
+Regra proposta: `^[a-z0-9]([a-z0-9-]{1,22}[a-z0-9])$` (3–24; só `a-z`, `0-9`, `-`; começa e termina alfanumérico).
+
+**🟥 Incompatibilidade nova, não percebida antes:** a regra *como enunciada* **ainda não é injetiva sobre a tag**.
+`normalizeTagSlug` colapsa `-+` em `-`, portanto `ana--silva` e `ana-silva` (ambos canônicos pela regra proposta)
+geram a mesma tag. Para a tag ser idêntica ao username (`norm(u) = u` para todo username válido) a regra precisa
+**também proibir hífens consecutivos** (`(?!.*--)`). Hoje há 0 usernames com `--`, então não há custo de dados.
+Regra corrigida proposta: `^[a-z0-9]+(-[a-z0-9]+)*$` com comprimento 3–24 (é exatamente o regex canônico de tag
+`note_tag_is_canonical`, sem o limite de 50). Com ela, `normalizeTagSlug("criado-por-" + u) = "criado-por-" + u`:
+a tag é literalmente `criado-por-[username]`, e `___`, `...`, `-a-`, `a--b` deixam de existir.
+
+Compatibilidade verificada:
+
+| Item | Resultado |
+|---|---|
+| CHECK atual `^[a-z0-9_.-]{3,24}$` | A regra nova é um **subconjunto** estrito: pode ser imposta sem rejeitar nenhum valor futuro válido; 23 dos 26 atuais já a satisfazem; 3 não (por `.`). Pode ser adicionada como `CHECK ... NOT VALID` (vale para INSERT/UPDATE novos, não revalida as 3 linhas existentes) e validada depois da migração. Detalhe: a coluna não pode ser UPDATEada nas 3 linhas enquanto estiver `NOT VALID` sem satisfazer a regra -- é o mecanismo desejado |
+| Comprimento | 3–24 mantido; tag máxima `criado-por-` (11) + 24 = 35 ≤ 50 |
+| Rotas `#/user/<username>` | `-` é seguro no hash; o router separa por `/`; sem mudança de rota |
+| Perfil público / RPCs por `p_username` | Sem mudança de forma; as RPCs seguem comparando texto exato (já minúsculo) |
+| Criação automática (`createInitialProfile`) | **Incompatível hoje:** `slugifyUsername` aceita `.`/`_`/`--`; precisa de função de derivação canônica (ver 29.9). Achado latente: sufixo numérico é concatenado **depois** do `slice(0,24)`, então base de 24 caracteres + sufixo estoura o CHECK (erro `23514`, não `23505`, e a função devolve `null` sem tentar de novo). Truncar em 24 pode também terminar com `-` |
+| Auth | Supabase Auth não usa username; sem impacto |
+| Importação / exportação | Não usam username; só tags (ver 29.7) |
+| Edição pelo usuário (UI) | `slugifyUsername`/placeholder `seu_username` (contém `_`) e o input precisam mudar; sem username editável (29.2) |
+
+### 29.2 Username imutável -- 🟦 AT (§10.3, §20, inv. 15) + 🟩 mecanismo proposto
+
+Caminhos a fechar (conceitual): UPDATE direto por API (hoje aberto), RPC (nenhuma altera), Edge Function (nenhuma
+altera), frontend (`saveProfileEdits`), admin (sem tela), `service_role`/SQL.
+Mecanismo proposto: trigger `BEFORE UPDATE` em `profiles` que rejeita `NEW.username <> OLD.username` para qualquer
+papel, com **um único caminho controlado** para a migração das 3 contas (função dedicada ou flag de sessão
+verificável) e desligável apenas por esse caminho; mais a remoção de `username` do payload de `saveProfileEdits` e
+campo somente leitura na UI. 🟥 Pré-requisito: a política de definição inicial (29.9) -- depois de imutável, um
+username derivado do e-mail e nunca revisado não poderá ser corrigido.
+🟨 Pendente: existe "janela final de ajuste" para os 23 perfis canônicos já existentes (podem hoje editar) ou ficam
+travados como estão? A AT diz "imutável" sem janela.
+
+### 29.3 Os 3 usernames existentes com `.` -- 🟩 proposta / 🟨 aprovação
+
+- Regra de transformação proposta: `.` → `-`, colapsar `-+`, remover `-` das pontas, validar 3–24.
+- Resultado verificado na consulta (27): **3 de 3** produzem candidato válido; **0** colisão entre si; **0** colisão com
+  username existente. Se uma colisão aparecer antes da execução, a regra de desempate precisa ser definida
+  **e confirmada** (ex.: sufixo numérico) -- nunca automática.
+- 🟨 **Confirmação/preview obrigatórios:** gerar uma lista `username atual → candidato` para aprovação humana antes de
+  executar; nenhum nome é escolhido silenciosamente.
+- Preservação: a migração só altera `profiles.username` (uuid é a identidade); `profile`, `display_name`, bio, avatar,
+  badges, Premium, vínculos de professora, Cards, Notes e Decks usam `user_id` e permanecem intactos. Não existem
+  Decks nem tags `criado-por-*`, então nada de atribuição é afetado.
+- Impacto em URLs: o link `#/user/<antigo>` deixa de resolver (consulta confirma perfil público ativo nos 3).
+  Reports já gravados guardam o username antigo como texto no payload do contexto.
+- 🟥 **Antes de executar:** repetir a consulta de 27 confirmando 0 tags `criado-por-*` (inclusive nos 3) e 0 Decks.
+
+### 29.4 Aliases / URLs antigas -- 🟨 DECISÃO PENDENTE (AT não define)
+
+Não assumir que são obrigatórios. Comparação (mecanismo de **compatibilidade**, nunca de identidade):
+
+| Opção | Efeito | Custo | Risco |
+|---|---|---|---|
+| Redirect (consulta no nome antigo → perfil atual; só para os 3) | Links antigos continuam funcionando | Tabela mínima de pares antigo→atual + lookup no cliente/RPC | Se o antigo for reservado (29.5) não há conflito; se não, ambiguidade |
+| Alias permanente | Idem, e o antigo pode continuar resolvendo para sempre | Idem; vira dívida permanente | Confunde identidade com URL, se mal desenhado |
+| Perfil "não encontrado" | Link antigo quebra | Nenhum | Perda de links compartilhados dos 3 (único impacto conhecido, sem Decks públicos ainda) |
+| Outra | -- | -- | -- |
+
+Observação: como hoje não existe Deck público nem atribuição, a quebra dos 3 links é de baixo custo **se ocorrer
+antes** de Public Deck.
+
+### 29.5 Reserva permanente após exclusão -- 🟩 DECISÃO DE ARQUITETURA PROPOSTA (AT não define)
+
+- Necessidade: tabela de usernames reservados (`username` único, `reserved_at`, motivo). Recomendação técnica:
+  **reservar ao INSERT do profile** (todo username já atribuído, não só no DELETE), porque o DELETE ocorre por CASCADE de
+  `auth.users`, `service_role` ou SQL e é mais fácil perder; um trigger `BEFORE DELETE` poderia ser redundante.
+- Efeito: após exclusão, o username não pode ser registrado por outra conta. Contas nunca existentes seguem livres.
+- O dono original poderia recuperar o próprio username? 🟨 pendente (a reserva tem que ser vinculada ao `user_id`
+  original ou anônima).
+- Impacto em URLs: `#/user/<excluído>` continua "não encontrado" (sem alias), mas **não é reutilizável**.
+- Impacto em direitos de exclusão (LGPD): a reserva guarda um nome, não dado pessoal adicional; ainda assim 🟨 exige
+  decisão (o nome pode ser pessoal).
+- Interação com a migração dos 3: os nomes `.` antigos entram na reserva (ou no alias, 29.4); nenhuma outra conta os
+  assumirá.
+
+### 29.6 Username sem identidade -- 🟩 consequência do 29.1
+
+Com `^[a-z0-9]+(-[a-z0-9]+)*$`, `___`, `...`, `---`, `-a-` não existem; o sufixo da tag nunca é vazio. Hoje: 0 casos.
+
+### 29.7 `criado-por-*` como Tag de sistema -- 🟦 AT (§10.3: permanente, não apagável pelo destinatário) + 🟩 proteção proposta
+
+Exigência: server-side, em **todas** as portas (21): trigger sobre `tags` de `own_flashcards` e `teacher_flashcards`
+(rejeitar inserir/alterar/remover `criado-por-*` fora do caminho legítimo), validação nas RPCs
+`rename_note_tag`/`delete_note_tag` (nem origem nem destino com o prefixo; sem merge), importação (`.apkg`, arquivo/link,
+cópia de perfil público: descartar ou rejeitar tags com o prefixo vindas do payload) e uma **única via de emissão** no
+servidor que gere a tag a partir do `username` real do autor lido de `profiles` (nunca do cliente). Esconder na UI não
+basta. 🟨 Pendente: na importação, rejeitar a Note, descartar apenas a tag ou reescrever; e se o próprio autor pode
+ver a tag nas suas Notes (a AT diz que aparece como tag da Note, bloqueada).
+
+### 29.8 Atribuição na Note -- 🟦 AT (§10, inv. 11)
+
+Confirmado como contrato: a tag pertence à Note; Reverse e Cloze compartilham; CardInstances irmãos têm a mesma
+origem; regenerar/revisar CardInstances não cria autoria (CardInstance nem é persistido); editar a cópia não remove a
+tag; cópia de cópia mantém só o autor original. **Não** são criados `source_user_id`/`source_card_id`.
+
+### 29.9 Contas sem username (15) -- 🟩 proposta / 🟨 aprovação
+
+Derivação canônica determinística proposta a partir da parte local do e-mail: minúsculas → remover acentos →
+substituir qualquer caractere fora de `[a-z0-9]` por `-` → colapsar `-+` → remover `-` das pontas → se <3 caracteres,
+completar com sufixo determinístico → truncar para caber **junto com o sufixo** em 24 → verificar contra
+`profiles` **e contra a reserva** → em colisão, sufixo numérico canônico (`-2`/`2`; formato a aprovar) reavaliado depois
+do truncamento.
+Dados (27): das 15, **4** têm `.` (viram `-`), 0 `_`, 0 caracteres removíveis, 0 curtos demais, 0 colisão interna,
+0 colisão com username existente. 🟨 Pendente: derivar automaticamente ou pedir confirmação do nome na primeira
+entrada (importante porque o username será imutável).
+
+### 29.10 Deduplicação -- 🟦 separada (v3 pendência 3; AT §19/§23)
+
+`criado-por-*` identifica **autoria**; não decide se já foi importado, se Notes são semelhantes, se devem ser
+fundidas ou qual o algoritmo. Isso pertence à fase de semelhantes/merge. Nenhum campo de origem é criado.
+
+### 29.11 Resumo dos dois problemas
+
+A (normalização) é resolvida por 29.1 corrigido (sem hífens consecutivos); B (reutilização) por 29.5; imutabilidade
+(29.2) e proteção da tag (29.7) fecham estabilidade e forja. Nenhum item sozinho basta.
+
+## 30. Alternativas (nomenclatura desta etapa) -- comparação, sem escolha
+
+Mapeamento: A = manter username livre e mudar a normalização da Tag; B = manter username livre e usar identificador
+interno na Tag; C = username canônico restrito (esta proposta); D = username visual livre + identificador interno; E =
+híbrido (username canônico restrito para novos + identificador/alias para atribuição quando o nome visível diferir).
+
+| Critério | A | B | C (proposta) | D | E |
+|---|---|---|---|---|---|
+| Literal `criado-por-[username]` | Parcial (tag preserva `.`/`_`) | **Não** | **Sim** (tag = username) | Não | Sim para canônicos; id só como exceção |
+| Compat. AT | **Conflita** com §10.1 (sem caracteres especiais) | Contradiz o exemplo §10.3 | Compatível (§10.1/§10.3/§20) | Contradiz §10.3 | Compatível se o id for só auxiliar |
+| Unicidade tag↔autor | Só se o novo mapa for injetivo | Total | **Total**, desde que sem `--` e com reserva | Total | Total |
+| Estabilidade | Com imutabilidade | Total (independe do nome) | Com imutabilidade + reserva | Total | Total |
+| Usernames existentes | Nenhum muda | Nenhum muda | **3 mudam** | Nenhum muda | 3 mudam ou ficam como exceção |
+| URLs | Preserva | Preserva | Quebra as 3 sem redirect (🟨) | Preserva | Preserva |
+| Tags | Muda a função global (editor, Anki, Painel, filtro, 057, CHECK 056) | Tag opaca | Sem mudança de regra de tag | Tag opaca | Sem mudança |
+| Importação | Reescrita de tags históricas | Reescrever em cópias | Proteger prefixo | Idem | Idem |
+| Atribuição / Note / Reverse / Cloze | Igual (nível de Note) | Igual | Igual | Igual | Igual |
+| Complexidade | Alta (mexe numa função compartilhada) | Média/alta | **Baixa/média** | Média/alta | Alta (dois mecanismos) |
+| Risco | Alto (formato global de tag) | Médio (dado novo + exibição) | Médio-baixo; ver incompatibilidades abaixo | Médio | Médio-alto |
+
+**Incompatibilidades de C destacadas (nenhuma é bloqueante, mas todas exigem decisão):**
+1. Sem a proibição de hífens consecutivos, C continua não injetiva (29.1).
+2. Imutabilidade + derivação automática do e-mail: o usuário pode ficar preso a um nome que nunca escolheu (29.2/29.9).
+3. `createInitialProfile` hoje viola o CHECK por sufixo/truncamento em casos de borda (29.1).
+4. As três contas migradas quebram links existentes (29.3/29.4), embora ainda sem atribuição.
+5. A reserva é um mecanismo **novo** (tabela e trigger) que a AT não prevê, embora seja necessário para a permanência
+   que a AT exige; não é opcional em nenhuma alternativa que mantenha o username como base da tag.
+6. A AT não restringe o alfabeto do username: C é uma interpretação *conservadora* de §10.3 ("username" = valor
+   que cabe numa tag), não uma regra explícita da AT.
+
+## 31. Ordem de implementação futura (avaliada)
+
+Ordem proposta pelo contrato: 1 contrato → 2 proteção server-side do username → 3 migração dos existentes → 4 reserva →
+5 Tag de sistema → 6 projeção pública nativa → 7 Public Deck + segurança → 8 importação → 9 semelhantes/merge →
+10 Perfil Público/Decks → 11 K.8.
+
+Dependências encontradas que **alteram** a ordem:
+- A **reserva (4) deve vir antes ou junto da imutabilidade (2) e da migração (3)**: a migração libera nomes `.`
+  (que precisam entrar na reserva) e a reserva-no-INSERT deve estar ativa antes de qualquer novo profile.
+- A **derivação de username (29.9) e a nova função de slug devem ser entregues junto do CHECK canônico**: se o CHECK
+  entrar antes da mudança no cliente, `createInitialProfile` falha para as 4 contas com `.` (e qualquer nova).
+- O **CHECK canônico `NOT VALID` entra junto da imutabilidade**, mas a imutabilidade precisa de **uma exceção
+  controlada** para a própria migração das 3 contas; só depois valida-se a constraint.
+- A **proteção do prefixo (5) pode e deve rodar em paralelo a 2–4** (é independente de dados) e precisa existir antes
+  de 6, mas a emissão da tag (6) **depende de 1–4** (lê o username definitivo no servidor).
+- Importação (8) depende de 5 (descarte/rejeição do prefixo) além de 7.
+Ordem revisada sugerida: **1 → (4 + CHECK NOT VALID + derivação) → 2 → 3 → validar CHECK → 5 → 6 → 7 → 8 → 9 → 10 → 11**,
+com 5 em paralelo desde 2.
+
+## 32. APROVAÇÃO NECESSÁRIA ANTES DA IMPLEMENTAÇÃO
+
+Somente decisões **não** determinadas pela AT. Nenhuma foi respondida pelo Claude.
+
+1. **Aceitar ou não o username canônico restrito.** Proposta: `^[a-z0-9]+(-[a-z0-9]+)*$`, 3–24 (inclui a correção sem
+   `--`). Alternativas A, B, D, E (seção 30).
+2. **Política para os 3 usernames existentes com `.`.** Migrar com preview e confirmação, por `.`→`-` (3 de 3 viáveis, 0
+   colisão), ou aceitar como exceção/grandfather. Pendente: janela final de ajuste para os 23 já canônicos.
+3. **Reserva permanente após exclusão.** Aceitar a tabela de reserva (ao INSERT do profile), e decidir: o dono original
+   pode reaver o username? reservas são anônimas?
+4. **Comportamento de URLs antigas.** Redirect, alias permanente ou "não encontrado" (afeta só os 3 perfis hoje).
+5. **Política de geração para os 15 profiles sem username.** Derivação automática determinística (com colisão/truncamento
+   e consulta à reserva) ou confirmação do nome na primeira entrada, sabendo que ficará imutável.
+6. **Confirmação de que `criado-por-*` será Tag de sistema protegida server-side**, com decisão sobre importação (rejeitar
+   a Note, descartar a tag ou reescrever) e visibilidade para o autor.
+
+Verificação adicional que depende de você: aprovar o regex final **sem hífens consecutivos**, por ser uma ampliação do
+que foi enunciado.
+
+## 33. Verificações desta etapa (Parte III)
+
+Consulta ao banco: sim, somente leitura, agregada (27); sem escrita. Arquivos lidos: os da Parte I/II (nenhum novo foi
+necessário). Código, schema, RLS, RPC, UI, usernames e Tags: **inalterados**. Sem push, sem deploy. Migration 059:
+não aplicada. Testes: não aplicável (documentação).
