@@ -15,7 +15,9 @@ function noteTagChipsHTML(tags, opts){
   const o = opts || {};
   const list = Array.isArray(tags) ? tags : [];
   if (!list.length) return o.emptyText ? `<span class="profile-edit-hint" style="margin:0;">${escapeHTML(o.emptyText)}</span>` : '';
-  return list.map(t => `<span class="pill note-tag-chip" data-tag="${escapeHTML(t)}">#${escapeHTML(t)}${o.removable ? ` <button type="button" class="note-tag-remove" data-tag-remove="${escapeHTML(t)}" aria-label="Remover tag ${escapeHTML(t)}" style="background:none;border:none;cursor:pointer;color:inherit;padding:0 0 0 4px;">✕</button>` : ''}</span>`).join(' ');
+  // Tag de SISTEMA (criado-por-*): atribuição permanente, nunca removível
+  // aqui (o servidor também recusa) e marcada com 🔒.
+  return list.map(t => `<span class="pill note-tag-chip" data-tag="${escapeHTML(t)}"${isAttributionTag(t) ? ' data-system-tag="1" title="Atribuição permanente do autor original"' : ''}>${isAttributionTag(t) ? '🔒 ' : ''}#${escapeHTML(t)}${(o.removable && !isAttributionTag(t)) ? ` <button type="button" class="note-tag-remove" data-tag-remove="${escapeHTML(t)}" aria-label="Remover tag ${escapeHTML(t)}" style="background:none;border:none;cursor:pointer;color:inherit;padding:0 0 0 4px;">✕</button>` : ''}</span>`).join(' ');
 }
 
 // Monta (ou remonta) o editor de tags dentro de mountEl. `onChange` é
@@ -48,6 +50,7 @@ function mountNoteTagsEditor(mountEl, editorState, opts){
       for (const part of parts){
         const slug = normalizeNoteTags([part])[0];
         if (!slug){ notes.push(`"${part}" não é uma tag válida.`); continue; }
+        if (isAttributionTag(slug)){ notes.push('Tags "criado-por-…" são de sistema (atribuição de autoria) e não podem ser criadas manualmente.'); continue; }
         if (next.includes(slug)){ notes.push(`A tag "${slug}" já existe.`); continue; }
         const check = validateNoteTags(next.concat(slug));
         if (!check.ok){ notes.push(check.error); continue; }

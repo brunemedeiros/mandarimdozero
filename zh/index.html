@@ -3549,10 +3549,10 @@ body.hide-pinyin .prompt-pinyin{
         <label class="profile-edit-label" for="profile-edit-display-name">Nome exibido</label>
         <input type="text" id="profile-edit-display-name" class="profile-edit-input" maxlength="60" placeholder="Como você quer ser chamada(o)">
 
-        <label class="profile-edit-label" for="profile-edit-username">Nome de usuário</label>
+        <label class="profile-edit-label" for="profile-edit-username">Seu identificador público (permanente)</label>
         <div class="profile-edit-username-wrap">
           <span class="profile-edit-at">@</span>
-          <input type="text" id="profile-edit-username" class="profile-edit-input" maxlength="24" placeholder="seu_username">
+          <input type="text" id="profile-edit-username" class="profile-edit-input" maxlength="24" readonly aria-readonly="true" title="Gerado pelo sistema; não pode ser alterado">
         </div>
 
         <label class="profile-edit-label" for="profile-edit-bio">Sobre mim</label>

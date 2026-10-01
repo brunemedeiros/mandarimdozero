@@ -543,8 +543,11 @@ async function importSelectedPublicFlashcards(box){
     // CONSOLIDAÇÃO-6 (ver CLAUDE.md) -- mesma mudança de shared/my-flashcards.js:
     // a cópia importada nasce NATIVA (fields/card_generation_mode), nunca
     // mais o branch Legacy de createOwnFlashcard().
+    // Identity/Attribution (migration 060): a cópia passa pela RPC
+    // copy_public_flashcard -- o servidor valida a fonte pública, impede
+    // conteúdo fabricado e grava a tag `criado-por-[autor original]`.
     const nativeState = nativeNoteEditorStateFromImportPayload(c, APP_KEY);
-    const result = await createOwnFlashcard({ languageAppKey: APP_KEY, nativeState, deckId: dest.deckId, decks: dest.decks });
+    const result = await copyPublicFlashcard({ sourceId: c.id, languageAppKey: APP_KEY, nativeState, deckId: dest.deckId, decks: dest.decks });
     if (result.ok){
       importedCount++;
       // Mesmo motivo de sempre (ver comentário de addSelfFlashcardToState
@@ -555,7 +558,7 @@ async function importSelectedPublicFlashcards(box){
   }
 
   if (importedCount > 0 && typeof showToast === 'function'){
-    showToast(`✓ ${importedCount} cartão(ões) adicionado(s) à sua conta. ${summarizeDroppedImportTags(importStates)}`.trim());
+    showToast(`✓ ${importedCount} cartão(ões) adicionado(s) à sua conta. ${summarizeDroppedImportTags(importStates, { ignoreSystem: true })}`.trim());
   }
   if (importedCount < ids.length && errorEl){
     errorEl.textContent = 'Alguns cartões não puderam ser adicionados. Tente de novo.';

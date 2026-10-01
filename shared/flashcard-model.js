@@ -548,7 +548,26 @@ function validateNoteTags(rawTags){
   return { ok: true, tags };
 }
 
-// Para fluxos EM LOTE (importação do Anki), onde recusar a Note inteira
+// ---------- Identity/Attribution: tag de SISTEMA `criado-por-*` ----------
+// A tag de atribuição (`criado-por-[username]`, AT §10.3) é emitida SÓ pelo
+// servidor (RPC copy_public_flashcard, migration 060) e protegida por
+// trigger: o usuário não a cria, renomeia, apaga nem forja. NÃO é a fonte de
+// verdade de identidade (isso é user_id): é a representação persistente
+// exigida pela arquitetura. Estas funções são o espelho de UX dessa regra;
+// a autoridade é o banco. O cliente NUNCA interpreta a tag para decidir
+// identidade/permissão.
+const ATTRIBUTION_TAG_PREFIX = 'criado-por';
+function isAttributionTag(tag){
+  const t = String(tag || '').trim().toLowerCase();
+  return t === ATTRIBUTION_TAG_PREFIX || t.startsWith(ATTRIBUTION_TAG_PREFIX + '-');
+}
+// Remove tags de sistema de uma lista vinda de FORA (arquivo/link/Anki/
+// payload colado): quem importa nunca recebe nem fabrica atribuição.
+function stripSystemTags(rawTags){
+  return (Array.isArray(rawTags) ? rawTags : []).filter(t => !isAttributionTag(normalizeTagSlug(t)));
+}
+
+// Para fluxos EM LOTE (importação do Anki, onde recusar a Note inteira
 // seria pior que importar: mantém as tags válidas (na ordem, até o limite)
 // e devolve EXPLICITAMENTE o que ficou de fora e por quê -- quem chama
 // mostra isso ao usuário (nunca silencioso).
@@ -557,7 +576,9 @@ function partitionNoteTagsByLimits(rawTags){
   const kept = [];
   const dropped = [];
   all.forEach(t => {
-    if (t.length > TAG_MAX_LENGTH) dropped.push({ tag: t, reason: 'too_long' });
+    // Tag de sistema vinda de fora é DESCARTADA (e informada), nunca mantida.
+    if (isAttributionTag(t)) dropped.push({ tag: t, reason: 'system_tag' });
+    else if (t.length > TAG_MAX_LENGTH) dropped.push({ tag: t, reason: 'too_long' });
     else if (kept.length >= TAG_MAX_PER_NOTE) dropped.push({ tag: t, reason: 'over_limit' });
     else kept.push(t);
   });

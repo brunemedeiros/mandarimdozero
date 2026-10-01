@@ -25,7 +25,11 @@
 // Nunca chama o banco. Normaliza pela função canônica (não há 2ª normalização).
 function planTagRename(oldSlug, rawNew, counts){
   const c = counts || {};
+  // Tag de SISTEMA (criado-por-*): nem origem nem destino de rename (o
+  // servidor também recusa -- migration 060).
+  if (isAttributionTag(oldSlug)) return { ok: false, error: 'Tags de atribuição (criado-por-…) são de sistema e não podem ser renomeadas.' };
   const norm = normalizeNoteTags([rawNew]);
+  if (norm.length && isAttributionTag(norm[0])) return { ok: false, error: 'Nomes que começam com "criado-por" são reservados ao sistema.', newSlug: norm[0] };
   if (!norm.length) return { ok: false, error: 'Digite um nome de tag válido (letras, números e hífen).' };
   const newSlug = norm[0];
   const v = validateNoteTags([newSlug]);
@@ -73,6 +77,7 @@ function reviewTagFilterAfterDelete(filter, tag){
 const TAG_MANAGER_ERROR_LABELS = {
   invalid_tag: 'Nome de tag inválido.',
   invalid_scope: 'Escopo inválido.',
+  system_tag_protected: 'Tags de atribuição (criado-por-…) são de sistema e não podem ser criadas, renomeadas ou excluídas.',
 };
 function tagManagerErrorMessage(err){
   const msg = (err && (err.message || err.code)) || '';
@@ -143,6 +148,11 @@ function tagManagerRowsHTML(list, ui){
         <button type="button" class="btn btn-primary" data-tag-delete-confirm="${e}" ${ui.busy ? 'disabled' : ''}>Excluir Tag</button>
         <button type="button" class="btn btn-secondary" data-tag-delete-cancel ${ui.busy ? 'disabled' : ''}>Cancelar</button>
       </div>`;
+    }
+    if (isAttributionTag(tag)){
+      return `<div class="admin-badge-row" data-tag-row="${e}" data-system-tag="1" style="flex-wrap:wrap;">
+      <span style="flex:1; min-width:120px;"><span class="pill note-tag-chip">🔒 #${e}</span> <span class="profile-edit-hint">${noteLabel} · atribuição permanente (sistema)</span></span>
+    </div>`;
     }
     return `<div class="admin-badge-row" data-tag-row="${e}" style="flex-wrap:wrap;">
       <span style="flex:1; min-width:120px;"><span class="pill note-tag-chip">#${e}</span> <span class="profile-edit-hint">${noteLabel}</span></span>

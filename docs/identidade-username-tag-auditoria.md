@@ -741,3 +741,78 @@ que foi enunciado.
 Consulta ao banco: sim, somente leitura, agregada (27); sem escrita. Arquivos lidos: os da Parte I/II (nenhum novo foi
 necessário). Código, schema, RLS, RPC, UI, usernames e Tags: **inalterados**. Sem push, sem deploy. Migration 059:
 não aplicada. Testes: não aplicável (documentação).
+
+---
+
+# Parte IV -- Implementação do modelo de identidade (decisão de produto atualizada)
+
+> Esta parte **substitui** o contrato proposto na Parte III (username escolhido, canônico, migração dos 3 `.`, reserva,
+> redirects). Decisão vigente: o usuário **não escolhe** username. Nada abaixo foi aplicado em produção; a migration
+> `060` existe só como arquivo e foi validada em Postgres local.
+
+## 34. Modelo
+
+| Nível | Campo | Natureza |
+|---|---|---|
+| 1 | `user_id` (uuid, PK, FK `auth.users`) | identidade técnica permanente; toda lógica interna usa só ele |
+| 2 | `username` | identificador público **gerado pelo sistema**, permanente, imutável; nunca derivado de nome/e-mail/display_name |
+| 3 | `display_name` | apresentação, editável; nunca afeta URL, autoria ou histórico |
+
+Formato gerado: `u` + 10 hex de `gen_random_uuid()` (ex.: `u8348e3316f`). **Desvio consciente do exemplo `u_7f3k92m1`:**
+sem separador, a tag de atribuição `criado-por-[username]` fica literalmente igual ao username (o normalizador de tags
+converte `_` em `-`, o que tornaria username e tag divergentes). Contas legadas **mantêm** o username atual (26 contas,
+incluindo as 3 com `.`: nenhuma linha alterada, nenhum redirect). O `CHECK` existente do banco foi mantido.
+
+## 35. Classificação dos usos auditados
+
+| Uso | Classe |
+|---|---|
+| `profiles.user_id`, FKs, `owner_id`/`student_id`/`teacher_id`, RLS, RPCs internas | identidade interna |
+| `#/user/<username>`, `get_public_profile_stats`, `get_public_flashcards`, tag `criado-por-*` | identificador público |
+| `display_name` em perfil, ranking, avatar | apresentação |
+| `slugifyUsername`, `resolveProfileByUsername` (admin digita @) | compatibilidade/legado (mantidos) |
+| `createInitialProfile` (derivava do e-mail), `isUsernameAvailable`, campo editável | **removidos/neutralizados** |
+
+## 36. Implementação (migration `060`)
+
+- `generate_public_username()` + trigger `BEFORE INSERT` em `profiles`: o servidor sempre gera; qualquer username enviado
+  num INSERT é descartado. Retry de colisão; `UNIQUE` existente garante a unicidade sob concorrência.
+- `profiles_protect_identity()` (trigger `BEFORE UPDATE`): `username` e `user_id` **imutáveis para todos os papéis**
+  (authenticated, service_role, SQL direto) -- `username_immutable`/`user_id_immutable`. Um UPDATE que reenvia o mesmo
+  valor (clientes antigos) passa.
+- `ensure_my_profile()` (SECURITY DEFINER, idempotente, segura sob concorrência): cria o perfil da conta autenticada;
+  `display_name` inicial vem do metadado do provedor (apresentação). As 15 contas sem profile ganham username na
+  primeira entrada (preguiçoso), **sem** backfill em massa.
+- Tag de sistema `criado-por[-*]`: `note_tags_guard()` (trigger em `own_flashcards`/`teacher_flashcards`) recusa criar,
+  alterar ou remover o conjunto de tags de sistema vindo de papéis de API (authenticated, anon, service_role,
+  authenticator); recusa tags não canônicas. `rename_note_tag`/`delete_note_tag` recusam a tag de sistema como origem ou
+  destino (impede renomear, apagar e forjar por fusão).
+- `copy_public_flashcard(source_id, language, columns, deck_id)`: única via que emite atribuição. Valida fonte
+  pública/ativa/não oculta e idioma, exige conteúdo igual ao publicado (sem texto fabricado, sem mídia), **ignora tags do
+  cliente**, deriva `criado-por-[username]` do `user_id` do dono da fonte; em cópia de cópia **preserva só a atribuição do
+  autor original** (a já existente na fonte); copiar a própria Note não atribui nada. Sem `source_user_id`/`source_card_id`.
+  Atribuição é por Note (linha): irmãos Reverse/Cloze compartilham a lista. Mudar `display_name` não altera nada.
+- Cliente: perfil criado pela RPC; `saveProfileEdits` nunca envia username; campo de username agora **somente leitura**;
+  import (arquivo/link/Anki/payload) descarta tags de sistema e avisa; editor de tags e gerenciador tratam a atribuição
+  como somente leitura; perfil público importa via `copyPublicFlashcard`.
+
+## 37. Testes
+
+- `tests/fase-identity/test_identity.sql` (Postgres 16 local, migrations 001–058 reais + seed legado + 060): **53/53**.
+- `tests/fase-identity/test_concurrency.sh`: 40 sessões paralelas (40 usernames distintos) e 20 chamadas simultâneas da
+  mesma conta (1 perfil), 0 erros.
+- `tests/fase-identity/test_identity_client.js` (Node/VM): **30/30**.
+- Regressão: unit Fases E/F/G/H/I/J/K1 e Playwright I/J/F verdes.
+
+## 38. Limitações e decisões em aberto (próxima fase parte daqui)
+
+1. **Atribuição não atravessa arquivo/link/Anki:** tags de sistema são descartadas na importação (não dá para validar
+   autoria vinda de fora). Cartão exportado e reimportado perde a atribuição.
+2. **Sem tabela de reserva:** username de conta excluída fica livre (a chance de coincidir com outro gerado é ~1/10^12);
+   política de reserva continua em aberto.
+3. **Cópia pública** mantém a projeção simples de hoje (Note normal, frente/verso/pinyin); cópia de tipos ricos não existe.
+4. **Cópia de cópia** identifica o autor original só pela tag existente (decisão: sem coluna de origem).
+5. **Manutenção:** o trigger de tag só deixa de valer para superusuário/manutenção SQL (papéis não-API).
+6. **Fallback visual** quando `display_name` é nulo mostra o username gerado; decidir se vira "Aluno(a)".
+7. Playwright de perfil/autenticação ponta a ponta não foi reexecutado para a tela de edição (cobertura por teste
+   estático + unit); migration `059` segue **não aplicada** e deve ser aplicada antes do frontend que consome suas chaves.

@@ -478,9 +478,16 @@ function nativeNoteEditorStateFromLegacyRow(row){
 // os limites (20/50) aqui e registra em `__droppedTags` o que ficou de fora,
 // pra quem importa AVISAR (nunca perda silenciosa). `__droppedTags` não é
 // persistido (noteEditorStateToRow ignora chaves desconhecidas).
-function summarizeDroppedImportTags(states){
-  const n = (states || []).reduce((acc, s) => acc + ((s && s.__droppedTags) ? s.__droppedTags.length : 0), 0);
-  return n ? `${n} tag(s) foram ignoradas por passar do limite (${TAG_MAX_PER_NOTE} tags por cartão, ${TAG_MAX_LENGTH} caracteres por tag).` : '';
+function summarizeDroppedImportTags(states, opts){
+  let all = (states || []).reduce((acc, s) => acc.concat((s && s.__droppedTags) || []), []);
+  // Cópia pelo perfil público: a atribuição vem do servidor, então tag de sistema no payload não é "perda".
+  if (opts && opts.ignoreSystem) all = all.filter(d => d.reason !== 'system_tag');
+  const sys = all.filter(d => d.reason === 'system_tag').length;
+  const lim = all.length - sys;
+  const parts = [];
+  if (lim) parts.push(`${lim} tag(s) foram ignoradas por passar do limite (${TAG_MAX_PER_NOTE} tags por cartão, ${TAG_MAX_LENGTH} caracteres por tag).`);
+  if (sys) parts.push(`${sys} tag(s) de sistema (atribuição de autoria) não são importadas por arquivo/link: só uma cópia feita pelo app a cria.`);
+  return parts.join(' ');
 }
 
 function nativeNoteEditorStateFromImportPayload(payload, languageAppKey){

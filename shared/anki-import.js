@@ -654,6 +654,8 @@ function buildAnkiImportPlan(parseResult, { languageAppKey, existingRows }){
       const part = partitionNoteTagsByLimits(mapped.editorState.tags);
       if (part.dropped.length){
         mapped.editorState.tags = part.tags;
+        const sysTags = part.dropped.filter(d => d.reason === 'system_tag').map(d => d.tag);
+        if (sysTags.length) tagLimitWarnings.push(`${sysTags.length} tag(s) de sistema (${sysTags.join(', ')}) não podem ser importadas: a atribuição de autoria só é criada pelo próprio app.`);
         const tooLong = part.dropped.filter(d => d.reason === 'too_long').map(d => d.tag);
         const overLimit = part.dropped.filter(d => d.reason === 'over_limit').map(d => d.tag);
         if (tooLong.length) tagLimitWarnings.push(`${tooLong.length} tag(s) acima de ${TAG_MAX_LENGTH} caracteres não foram importadas: ${tooLong.map(t => t.slice(0, 20) + '…').join(', ')}.`);
