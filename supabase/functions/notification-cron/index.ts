@@ -310,6 +310,16 @@ function computeReviewOverdueCount(cards: any[] | undefined, unitProgress: any, 
   const seenStudyWords = new Set<string>();
   for (const c of (cards || [])) {
     if (!(c && c.reps > 0 && c.due && (now - c.due) > REVIEW_OVERDUE_STALE_MS)) continue;
+    // K.0-C: Teacher/Self não pertencem a nenhuma unidade (unitId null), então
+    // não passam pelo gate de lição da trilha. Espelha isCardLessonCompleted()
+    // do cliente (fr/zh app.js): só flashcardStatus==='active' os libera --
+    // arquivado fica de fora. Cada CardInstance conta individualmente (sem
+    // dedup por Note: o cron trabalha com CardInstances). New já foi excluído
+    // acima (reps>0).
+    if (c.origin === 'teacher' || c.origin === 'self') {
+      if (c.flashcardStatus === 'active') count++;
+      continue;
+    }
     const word = studyWordIdentity(c);
     // Save da trilha que serialize só id+progresso (K2-C) pode não trazer
     // unitId/vocabIdx: completa a partir do id só quando faltarem, pra o
