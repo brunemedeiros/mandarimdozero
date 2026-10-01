@@ -1,5 +1,7 @@
 # Contrato de Public Decks + atribuição (v3, fechamento das decisões)
 
+> **v5 (2026-10-01):** a auditoria técnica do código atual e o contrato implementável estão em `docs/public-decks-contrato-tecnico.md`. Identity está fechada (Parte IV de `identidade-username-tag-auditoria.md`).
+
 > **v4 (2026-10-01):** a auditoria de identidade/username/tag de atribuição está em `docs/identidade-username-tag-auditoria.md` (pendência 8, seções 7.4 e 8 daqui). Colisão real nos dados: nenhuma (26 perfis); proteção server-side do username e da tag `criado-por-*`: inexistente; decisão de produto necessária antes de implementar. **Contrato proposto de identidade (Partes II e III), aguardando aprovação:** `docs/identidade-username-tag-auditoria.md` §27–§33 (seção `APROVAÇÃO NECESSÁRIA ANTES DA IMPLEMENTAÇÃO`).
 
 Somente documentação. Nenhum código, migration, RPC, RLS, rota ou UI foi alterado.
