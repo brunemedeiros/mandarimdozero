@@ -802,7 +802,16 @@ incluindo as 3 com `.`: nenhuma linha alterada, nenhum redirect). O `CHECK` exis
 - `tests/fase-identity/test_concurrency.sh`: 40 sessões paralelas (40 usernames distintos) e 20 chamadas simultâneas da
   mesma conta (1 perfil), 0 erros.
 - `tests/fase-identity/test_identity_client.js` (Node/VM): **30/30**.
+- `tests/fase-identity/test_profile_edit_playwright.js` (Chromium real, FR+ZH): **22/22** -- campo somente leitura, save sem
+  `username`/`user_id` mesmo adulterando o DOM, username igual após salvar, URL pública estável.
 - Regressão: unit Fases E/F/G/H/I/J/K1 e Playwright I/J/F verdes.
+
+### 37.1 Verificação: nenhum fluxo cria dois identificadores para a mesma conta
+Único caminho de criação de profile: `ensure_my_profile()` (e INSERT direto, cujo username é sobrescrito pelo trigger).
+`profiles.user_id` é PK: um 2º INSERT falha; `ON CONFLICT DO UPDATE` não troca o username (trigger). Lacuna encontrada e
+fechada na 060: apagar + recriar o profile de uma conta ainda existente (service_role/SQL direto) geraria um 2º username;
+trigger `profiles_protect_delete` recusa o DELETE enquanto a conta existir em `auth.users` (a exclusão da conta, em
+cascata, segue livre). Testes 22 (7 cenários) no Postgres local: 60/60 no total.
 
 ## 38. Limitações e decisões em aberto (próxima fase parte daqui)
 
@@ -814,5 +823,4 @@ incluindo as 3 com `.`: nenhuma linha alterada, nenhum redirect). O `CHECK` exis
 4. **Cópia de cópia** identifica o autor original só pela tag existente (decisão: sem coluna de origem).
 5. **Manutenção:** o trigger de tag só deixa de valer para superusuário/manutenção SQL (papéis não-API).
 6. **Fallback visual** quando `display_name` é nulo mostra o username gerado; decidir se vira "Aluno(a)".
-7. Playwright de perfil/autenticação ponta a ponta não foi reexecutado para a tela de edição (cobertura por teste
-   estático + unit); migration `059` segue **não aplicada** e deve ser aplicada antes do frontend que consome suas chaves.
+7. Migration `059` segue **não aplicada** e deve ser aplicada antes do frontend que consome suas chaves.

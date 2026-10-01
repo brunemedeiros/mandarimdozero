@@ -158,5 +158,24 @@ select pg_temp.chk('teacher_flashcards: admin não forja nem altera', true);
 select pg_temp.chk('21 get_public_profile_stats segue funcionando por username', (public.get_public_profile_stats('ana.silva') is not null));
 select pg_temp.chk('21 get_public_flashcards segue funcionando por username', ((public.get_public_flashcards((select username from profiles where user_id='00000000-0000-0000-0000-0000000000d1'),'frances') -> 'cards') is not null));
 
+
+-- ===== 22. um único identificador por conta (nenhum fluxo cria dois) =====
+select pg_temp.chk('22 2º INSERT do mesmo user_id viola a PK (não cria 2º profile)',
+  pg_temp.run_as('authenticated','00000000-0000-0000-0000-0000000000a1','a', $$ insert into public.profiles(user_id) values ('00000000-0000-0000-0000-0000000000a1') $$) like '%duplicate key%');
+select pg_temp.chk('22 upsert (ON CONFLICT DO UPDATE) não troca o username',
+  pg_temp.run_as('authenticated','00000000-0000-0000-0000-0000000000a1','a', $$ insert into public.profiles(user_id, username) values ('00000000-0000-0000-0000-0000000000a1','novo') on conflict (user_id) do update set username = excluded.username $$) like 'username_immutable%');
+select pg_temp.chk('22 apagar profile de conta existente: recusado p/ service_role',
+  pg_temp.run_as('service_role',null,'a', $$ delete from public.profiles where user_id='00000000-0000-0000-0000-0000000000a1' $$) like 'profile_delete_forbidden%');
+do $$ begin begin delete from public.profiles where user_id='00000000-0000-0000-0000-0000000000a1'; insert into res values ('22 DELETE por SQL direto recusado', false, 'passou!');
+  exception when others then insert into res values ('22 DELETE por SQL direto recusado', sqlerrm like 'profile_delete_forbidden%', sqlerrm); end; end $$;
+select pg_temp.chk('22 username continua o original', (select username from profiles where user_id='00000000-0000-0000-0000-0000000000a1')='ana.silva');
+select pg_temp.chk('22 ensure_my_profile numa conta que já tem profile devolve o MESMO username',
+  (select username from profiles where user_id='00000000-0000-0000-0000-0000000000a1') = 'ana.silva' and pg_temp.run_as('authenticated','00000000-0000-0000-0000-0000000000a1','a', $$ select public.ensure_my_profile() $$) is null
+  and (select count(*) from profiles where user_id='00000000-0000-0000-0000-0000000000a1')=1);
+-- exclusão da CONTA (cascata) libera o profile
+insert into auth.users(id,email) values ('00000000-0000-0000-0000-0000000000e9','del@example.com'); insert into profiles(user_id) values ('00000000-0000-0000-0000-0000000000e9');
+delete from auth.users where id='00000000-0000-0000-0000-0000000000e9';
+select pg_temp.chk('22 exclusão da conta (cascata) remove o profile normalmente', not exists (select 1 from profiles where user_id='00000000-0000-0000-0000-0000000000e9'));
+
 select (case when ok then 'ok   ' else 'FALHA' end) || ' ' || name || case when ok then '' else '  :: ' || info end from res order by ok, name;
 select 'RESUMO ' || count(*) filter (where ok) || '/' || count(*) || ' ok' from res;

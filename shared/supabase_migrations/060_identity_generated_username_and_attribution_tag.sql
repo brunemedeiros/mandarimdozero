@@ -424,9 +424,30 @@ revoke all on function public.copy_public_flashcard(bigint, text, jsonb, bigint)
 grant execute on function public.copy_public_flashcard(bigint, text, jsonb, bigint) to authenticated;
 
 -- ---------------------------------------------------------------------------
+-- Um identificador por conta, para sempre: o profile de uma conta que ainda
+-- existe em auth.users NÃO pode ser apagado (apagar + recriar geraria um
+-- SEGUNDO username para o mesmo user_id). A exclusão da conta (cascata de
+-- auth.users) continua liberando o profile. Hoje já não há policy de DELETE
+-- (a RLS barra authenticated); isto fecha também service_role/SQL direto.
+-- ---------------------------------------------------------------------------
+create or replace function public.profiles_protect_delete()
+returns trigger language plpgsql security definer set search_path = public, auth as $$
+begin
+  if exists (select 1 from auth.users u where u.id = old.user_id) then
+    raise exception 'profile_delete_forbidden' using errcode = '42501';
+  end if;
+  return old;
+end $$;
+revoke all on function public.profiles_protect_delete() from public, anon, authenticated;
+drop trigger if exists profiles_protect_delete_trigger on public.profiles;
+create trigger profiles_protect_delete_trigger before delete on public.profiles
+  for each row execute function public.profiles_protect_delete();
+
+-- ---------------------------------------------------------------------------
 -- ROLLBACK (manual, se necessário):
 --   drop trigger profiles_assign_username_trigger on public.profiles;
 --   drop trigger profiles_protect_identity_trigger on public.profiles;
+--   drop trigger profiles_protect_delete_trigger on public.profiles; drop function public.profiles_protect_delete();
 --   drop trigger own_flashcards_note_tags_guard on public.own_flashcards;
 --   drop trigger teacher_flashcards_note_tags_guard on public.teacher_flashcards;
 --   drop function public.copy_public_flashcard(bigint, text, jsonb, bigint);
