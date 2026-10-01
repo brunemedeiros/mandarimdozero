@@ -153,6 +153,27 @@ Não alterado de propósito: `todaysReviewCount`/"Tudo em dia" (derivam da fila 
 (recurso próprio). Limitação: o gráfico histórico segue por `firstLearnedDate` de CardInstance (K.4).
 Testes: `tests/k7/test_k7_student_analytics.js` (Playwright FR+ZH, 40).
 
+## K.8 -- Public Analytics: BLOQUEADA POR DEPENDÊNCIA (Public Decks / atribuição ainda não implementados)
+Auditoria de prontidão (só leitura; nenhum código, migration, RPC ou UI criados).
+Existe (Perfil Público, Fases 1-2 do prompt-mestre "perfil público"): `profiles.public_profile` (default true),
+rota `#/user/<username>` (`shared/router.js`, `shared/public-profile.js`), página sem login, RPCs
+`get_public_profile_stats` e `get_public_flashcards` (SECURITY DEFINER, `grant ... to anon`, filtro no servidor,
+`status='active'` e `hidden_from_profile=false`, por idioma), gate de login para ver/importar cartões, cópia
+independente via `createOwnFlashcard` (respeita o teto Free e o `#flashcard-limit-modal`), reporte via
+`openReportModal`, `own_flashcards.hidden_from_profile`.
+NÃO existe: Public Deck (só a coluna `decks.is_public`, que nada lê nem escreve; as triggers rejeitam público em
+root/teacher/course), rota ou RPC de Deck público, visibilidade por Deck, `source_user_id`/`source_card_id`
+(zero ocorrências no repositório), "Já adicionado", importação de Deck inteiro. Os cartões públicos de hoje são
+por CONTA (todos os ativos não escondidos), não por Deck.
+Por que bloqueia: "Public Analytics" do contrato = contagens por Deck público (CardInstance x Note) e estabilidade
+de atribuição; sem Deck público e sem origem do cartão copiado não há unidade nem fonte autorizada para publicar.
+Criar agora seria solução provisória (proibido).
+Achado para a auditoria consolidada (não alterado): o perfil público JÁ publica, por decisão da Fase 1, XP e
+streak por idioma e % de progresso (`get_public_profile_stats`), isto é, agregados de Private Analytics sob a flag
+da conta. Não expõe FSRS/due/N-L-R nem cartões de Teacher; vale revisar se XP/streak devem continuar públicos
+por padrão (hoje `public_profile` é true para todas as contas).
+Retomar quando: Public Decks (flag + RPC autorizada + rota) e `source_user_id/source_card_id` existirem.
+
 ## Fora desta fase
 - Histórico por Note e "última atividade" (`firstLearnedDate`/`lastReview` são por
   CardInstance; `lastReview` de cartões migrados é aproximado).
