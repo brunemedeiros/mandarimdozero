@@ -17260,3 +17260,12 @@ não substituir o contrato por uma solução conveniente no código atual. A aud
 `docs/public-decks-auditoria.md` foi escrita sem este arquivo e precisa ser revisada contra ele (ex.: a
 atribuição é a Tag permanente `criado-por-[username]`; importar Deck público é Premium; limite Free corta
 e informa; só Decks dentro de Meus Decks são públicos; Deck público tem ícone/cor, sem upload).
+
+
+## Public Deck (2026-10-01, local — migrations 059/060/061 NÃO aplicadas)
+
+Implementado sobre o contrato aprovado (`docs/public-decks-contrato-tecnico.md`, seção "v6 — Implementação"): Deck pessoal publicável por RPC,
+`public_id` opaco (`#/deck/<uuid>`), metadado público para anônimo/Free, conteúdo e cópia só Premium/dono, `public_profile=false` esconde sem despublicar,
+`personal_root`/Course/Teacher nunca públicos (CHECK + trigger), `note` nunca público, atribuição `criado-por-[username]` pela regra única `note_attribution_tag`.
+Sem renderer novo (Preview com os 4 renderers). Lista solta de cartões públicos aposentada por flag (`PUBLIC_FLAT_FLASHCARDS_ENABLED=false`).
+Pendências registradas lá: duplicatas, proxy de mídia (uid no caminho do Storage), cleanup da lista solta. Testes em `tests/fase-public-deck/`.

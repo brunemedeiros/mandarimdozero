@@ -63,6 +63,8 @@ function routeToHash(route){
       return `#/unit/${route.unitId}/complete`;
     case 'publicProfile':
       return `#/user/${route.username}`;
+    case 'publicDeck':
+      return `#/deck/${route.publicId}`;
     default:
       return '';
   }
@@ -101,6 +103,12 @@ function hashToRoute(hash){
   // (shared/profile.js) -- sem sanitização extra aqui, mesmo nível de
   // confiança que parseUnitIdFromHash já tem pro id de unidade.
   if (parts[0] === 'user' && parts[1]) return { type: 'publicProfile', username: parts[1] };
+  // Public Deck -- #/deck/<public_id uuid opaco>. Id fora do formato cai na aba
+  // desconhecida (nunca chega à RPC); o public_id não autoriza nada, só identifica.
+  if (parts[0] === 'deck' && typeof publicDeckIdFromHash === 'function'){
+    const publicId = publicDeckIdFromHash(clean);
+    if (publicId) return { type: 'publicDeck', publicId };
+  }
   return { type: 'tab', tab: parts[0] };
 }
 
@@ -211,6 +219,10 @@ function renderRoute(route){
         // Sem isso, um F5 em cima de #/user/x reabriria a Trilha por baixo
         // do modal em vez de restaurar exatamente onde a pessoa estava.
         if (typeof openPublicProfilePage === 'function') openPublicProfilePage(route.username);
+        break;
+      }
+      case 'publicDeck': {
+        if (typeof openPublicDeckPage === 'function') openPublicDeckPage(route.publicId);
         break;
       }
       default:

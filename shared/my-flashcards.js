@@ -125,7 +125,9 @@ function personalDecksListHTML(decks){
     return `<div class="admin-badge-row" style="padding-left:${pad}px;" data-personal-deck-row="${d.id}">
       <span style="flex:1;">${escapeHTML(d.kind === 'personal_root' ? 'Meus Decks' : d.name)} <span class="profile-edit-hint">(${c.total} cartões · ${c.new} novos · ${c.learning} aprendendo · ${c.review} para revisar · ${c.due} devidos)</span></span>
       <button type="button" class="btn btn-secondary" data-study-deck="${d.id}">Estudar este Deck</button>
-    </div>`;
+      ${d.kind === 'personal' && typeof publishBoxHTML === 'function' ? `<button type="button" class="btn btn-secondary" data-publish-deck="${d.id}">${d.is_public ? '🌐 Público' : 'Publicar'}</button>` : ''}
+    </div>
+    ${d.kind === 'personal' ? `<div data-publish-box="${d.id}" style="display:none; padding-left:${pad}px;"></div>` : ''}`;
   }).join('');
 }
 
@@ -203,6 +205,15 @@ function wireMyDecksSection(wrap){
       if (typeof startDeckReviewSession === 'function') startDeckReviewSession(Number(btn.dataset.studyDeck));
     });
   });
+  wrap.querySelectorAll('[data-publish-deck]').forEach(btn => btn.addEventListener('click', () => {
+    const id = Number(btn.dataset.publishDeck);
+    const deck = (MY_FLASHCARDS_STATE._decks || []).find(x => x.id === id);
+    const box = wrap.querySelector(`[data-publish-box="${id}"]`);
+    if (!deck || !box) return;
+    const opening = box.style.display === 'none';
+    box.style.display = opening ? 'block' : 'none';
+    if (opening) openPublishBox(deck, box, (d) => { btn.textContent = d.is_public ? '🌐 Público' : 'Publicar'; });
+  }));
   document.getElementById('my-deck-new-btn')?.addEventListener('click', async () => {
     const errEl = document.getElementById('my-deck-error');
     errEl.textContent = '';

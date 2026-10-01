@@ -87,7 +87,11 @@ async function initAuth(){
     const publicProfileUsername = (typeof publicProfileUsernameFromHash === 'function')
       ? publicProfileUsernameFromHash()
       : null;
-    if (publicProfileUsername && typeof renderStandalonePublicProfile === 'function'){
+    // Public Deck (#/deck/<public_id>) também abre sem sessão: metadado público.
+    const publicDeckId = (typeof publicDeckIdFromHash === 'function') ? publicDeckIdFromHash() : null;
+    if (publicDeckId && typeof renderStandalonePublicDeck === 'function'){
+      await renderStandalonePublicDeck(publicDeckId);
+    } else if (publicProfileUsername && typeof renderStandalonePublicProfile === 'function'){
       await renderStandalonePublicProfile(publicProfileUsername);
     } else {
       goToNeutralGate();

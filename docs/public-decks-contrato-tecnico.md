@@ -279,3 +279,60 @@ de `get_public_profile_stats`. Cliente: `shared/router.js`, `shared/auth.js` (ro
 Somente leitura: código (`profile.js`, `public-profile.js`, `router.js`, `deck-*`, `flashcard-*`, `reports.js`),
 migrations 020/037/038/043/049/051/056/060, banco local. Nada alterado além deste arquivo. Sem push/PR/deploy;
 059 e 060 não aplicadas.
+
+---
+
+# v6 — Implementação (local; migrations 059, 060 e 061 NÃO aplicadas em produção)
+
+As 10 decisões da §17 foram **aprovadas** e implementadas como abaixo. Sem push/PR/deploy.
+
+| # | Decisão aprovada | Implementação |
+|---|---|---|
+| 1 | Publicar é ato explícito por Deck; sem herança | `publish_deck(deck_id,…)` age só no Deck; `get_public_deck` lista só subdecks que **também** têm `is_public`; a cópia percorre só Decks públicos |
+| 2 | URL opaca e estável | `decks.public_id uuid` (UNIQUE parcial), gerado no 1º publish, imutável (trigger), mantido ao despublicar. Rota `#/deck/<uuid>`. **Não autoriza nada** |
+| 3 | `public_profile=false` esconde sem despublicar | Todas as RPCs juntam `profiles.public_profile`; `is_public` fica intacto; URL direta também fica "indisponível" |
+| 4 | Cartões soltos aposentados (transição) | UI da lista solta desligada por `PUBLIC_FLAT_FLASHCARDS_ENABLED=false`; RPC/colunas/`hidden_from_profile` preservadas; cleanup futuro |
+| 5 | Anônimo/Free: metadado; Premium: conteúdo+importar | `viewer.can_open`/`can_import` calculados no servidor; `get_public_deck_notes` devolve `login_required`/`premium_required`; `copy_public_deck` exige Premium |
+| 6 | Free não importa; corte de 20 não vale para Public Deck | Sem importação parcial. Limite global intocado |
+| 7 | Legacy via adapter nativo; incompatível não é publicado | `public_note_native(own_flashcards)` espelha `nativeNoteEditorStateFromLegacyRow` (paridade testada: `test_legacy_parity.js`). Retorna NULL → fora do público + `get_public_deck_owner_status.incompatible` informa o dono. Legacy nunca alterado |
+| 8 | Última atualização | `own_flashcards.updated_at` + `decks.content_updated_at`; ver abaixo |
+| 9 | Report reutiliza o sistema existente | `reports.context` (jsonb) com `source: public_deck` / `public_deck_note`; nenhuma tabela/migration |
+| 10 | `note` fora do público | Nunca selecionado pelas RPCs públicas nem copiado; `get_public_flashcards` deixou de devolvê-lo |
+
+**Correções de segurança desta fase:** `personal_root` não pode mais ser público (CHECK `decks_public_only_personal` + trigger — vale
+para qualquer papel, inclusive SQL direto); campos de publicação (`is_public`, `public_*`, `published_at`) e `content_updated_at`
+só mudam por RPC SECURITY DEFINER (papéis de API são barrados no trigger `decks_public_guard`).
+
+**Migration 061 (aditiva):** colunas `public_id`, `public_description` (≤280), `public_icon`/`public_color` (listas fechadas, sem upload),
+`published_at`, `content_updated_at`; `own_flashcards.updated_at`; triggers; RPCs `publish_deck`, `unpublish_deck`, `get_public_deck`,
+`get_public_deck_notes`, `list_public_decks_for_user`, `get_public_deck_owner_status`, `copy_public_deck`; helpers `note_attribution_tag`
+(regra única de autoria, também usada por `copy_public_flashcard`), `note_copy_tags`, `public_note_native`.
+Valor inicial de `updated_at` para Notes pré-existentes = `created_at` (não há histórico anterior); de `content_updated_at` = momento da migration.
+
+**"Última atualização" (eventos):** criar/editar/mover/arquivar Note (conteúdo, Fields, Card Type, Tags, `deck_id`, `status`); mover atualiza **origem e destino**;
+criar/mover/apagar subdeck atualiza o pai; renomear Deck / mudar metadado público / publicar. **Não** atualizam: revisão, FSRS, due, New/Learning/Review, XP, streak,
+`note` privada, `hidden_from_profile` (FSRS nem vive nessas tabelas).
+
+**Contagem:** `notes_count` = Notes ativas e representáveis no Deck (Reverse=1, Cloze=1, MC=1, Type Answer=1). CardInstances (limite Free) continuam
+calculadas só no cliente (`generatedCardInstanceCount`); o servidor não persiste `card_instances_count`.
+
+**Cópia (`copy_public_deck`)**: uma transação; cria Deck pessoal novo em Meus Decks (ou no destino válido), recria os subdecks públicos, copia Notes nativas
+(Fields/modo/tags comuns) com a atribuição `criado-por-[username do autor original]` (cópia de cópia mantém só a original); não copia FSRS, progresso, `note`,
+`storagePath`, `generationKey`. Sem live link e sem `source_*`. Limite de segurança: 2000 Notes por chamada.
+**Duplicatas/reimportação:** não implementado (decisão pendente própria — algoritmo de similaridade). Ponto de integração: parâmetro futuro de `copy_public_deck`
+(`on_duplicate`), hoje inexistente; reimportar cria nova cópia.
+
+**Mídia — mecanismo definido:** o conteúdo (e portanto as URLs de mídia de `field.audio/image`) só é entregue a Premium/dono pela RPC, sem `storagePath`/`generationKey`;
+anônimo e Free nunca recebem URL de mídia. O bucket `flashcard-media` continua público-leitura com nome de objeto de sufixo aleatório.
+**Risco residual conhecido:** o caminho do objeto contém o `auth.uid()` do dono (já ocorre em avatares). Endurecimento proposto e **não implementado**:
+Edge Function proxy que serve a mídia por `public_id` (checando `is_public`/perfil/Premium) ou bucket separado `public-deck-media` populado na publicação.
+A cópia hoje reaproveita a mesma URL (referência compartilhada; `media_shared_reference=true`): se o autor apagar o arquivo, a cópia perde a mídia — duplicar o arquivo exige Edge Function.
+
+**Cliente:** `shared/public-deck.js` (página, lista de Notes → Preview com os **mesmos 4 renderers**, importar, reportar, controles do dono), rota `publicDeck` em
+`router.js`, bypass anônimo em `auth.js`, seção "Decks públicos" em `public-profile.js`, botão Publicar em Meus Decks (`my-flashcards.js`).
+
+**Testes (`tests/fase-public-deck/`):** `run.sh` + `test_public_deck.sql` (87/87, Postgres local), `test_legacy_parity.js` (16/16), `test_playwright.js` (88/88 FR+ZH),
+`test_concurrency_perf.sh`. Regressões verdes: Identity (60 SQL, 30 cliente, 22 Playwright), Fases E–K1 (unit e Playwright).
+
+**Pendente / fora de escopo:** duplicatas/merge; proxy de mídia; remoção definitiva da lista solta e de `hidden_from_profile`; ícone/cor ainda sem UI de pré-visualização no editor de publicação;
+Deck público de professora (Teacher Deck) continua proibido; busca/descoberta pública (AT §20) inexistente por desenho.

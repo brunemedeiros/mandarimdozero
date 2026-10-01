@@ -274,5 +274,11 @@ select pg_temp.chk('FL get_public_flashcards não devolve mais `note`', (select 
 select pg_temp.chk('RLS anon não lê decks por SELECT', (select count(*)=0 from (select pg_temp.q_as('anon',null,'select count(*)::int::text::jsonb from public.decks where is_public') j) q where (j#>>'{}')::int>0));
 select pg_temp.chk('RLS free não lê Notes do dono por SELECT direto', (pg_temp.q_as('authenticated','00000000-0000-0000-0000-0000000000e2','select count(*)::text::jsonb from public.own_flashcards where owner_id=''00000000-0000-0000-0000-0000000000e1'''))::text='0');
 
+
+-- ===== extras: forja de atribuição por importação externa; metadado sem mídia =====
+select pg_temp.chk('K importação externa com criado-por-* é recusada (INSERT direto)', pg_temp.run_as('authenticated','00000000-0000-0000-0000-0000000000e3','premium@example.com',
+  $$ insert into public.own_flashcards(owner_id,language_app_key,front,back_trans,tags) values ('00000000-0000-0000-0000-0000000000e3','frances','x','y','{criado-por-uaaaaaaaaaa}') $$) like 'system_tag_protected%');
+select pg_temp.chk('MIDIA metadado público não contém nenhuma URL de mídia', (select not (pg_temp.q_as('anon',null,format($$ select public.get_public_deck(%L::uuid) $$,(select public_id from decks where id=(select subpub from ids))))::text ~* '(https?://|\.mp3|storage)')));
+
 select case when ok then 'ok' else 'FALHA' end || '|' || name || case when ok then '' else '  ' || coalesce(info,'') end from res order by ok, name;
 select 'RESULTADO ' || count(*) filter (where ok) || '/' || count(*) from res;

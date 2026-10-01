@@ -2005,6 +2005,20 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .public-profile-lang-stat .v{ font-size:15px; font-weight:800; color:var(--seal-red-dark); }
 .public-profile-lang-stat .l{ font-size:10px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; margin-top:2px; }
 
+/* Public Deck (ver CLAUDE.md / docs/public-decks-contrato-tecnico.md) -- só tokens
+   já calibrados (--paper*/--ink*/--seal-red-dark); cor do Deck vem de uma lista
+   fechada e é aplicada como borda + tinta clara, com o texto sempre em --ink. */
+.public-deck-title-row{ display:flex; align-items:center; gap:12px; margin:6px 0 8px; }
+.public-deck-badge{
+  display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px;
+  border-radius:12px; border:2px solid var(--paper-line); font-size:20px; flex:none; color:var(--ink);
+}
+.public-deck-meta{ display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 12px; }
+.public-deck-subs{ margin:12px 0; }
+.public-deck-sub{ display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--ink); }
+.public-deck-actions{ margin-top:10px; }
+.public-deck-publish-form{ display:flex; flex-direction:column; gap:8px; margin:8px 0 8px 0; }
+
 /* Página standalone -- usada quando quem visita #/user/username NÃO tem
    sessão nem modo convidado (ver shared/auth.js initAuth(), bypass de
    goToNeutralGate()). Fora de #app por completo -- nenhum token/classe daqui
@@ -3681,6 +3695,16 @@ body.hide-pinyin .prompt-pinyin{
   </div>
 </div>
 
+<div id="public-deck-modal" class="app-modal-overlay" style="display:none;">
+  <div class="app-modal">
+    <div class="app-modal-header">
+      <h3>Deck público</h3>
+      <button class="app-modal-close" id="public-deck-modal-close" aria-label="Fechar">✕</button>
+    </div>
+    <div class="app-modal-body" id="public-deck-modal-body"></div>
+  </div>
+</div>
+
 <div id="public-profile-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
@@ -3839,6 +3863,7 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../shared/admin-reports.js"></script>
 <script src="../shared/leaderboard.js"></script>
 <script src="../shared/public-profile.js"></script>
+<script src="../shared/public-deck.js"></script>
 <script src="../shared/topbar-stats.js"></script>
 <script src="../shared/analytics.js"></script>
 <script src="../shared/tabs.js"></script>
