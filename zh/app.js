@@ -1936,7 +1936,7 @@ function unitCardCounts(unitId){
   // K2-E: total/learned em PALAVRAS (Note = A+B contam 1); dueForReview
   // continua por CardInstance (é fila de Review, A e B independentes).
   const pool = STATE.cards.filter(c => c.unitId === unitId);
-  const { total, learned } = wordLevelLearnedCounts(pool);
+  const { total, learned } = studyTrailWordProgress(pool); // mesma semântica de Progresso (Note, só trilha)
   const dueForReview = cardsDueNow(pool.filter(c => c.reps > 0)).length;
   return { total, learned, dueForReview, totalCards: pool.length };
 }
@@ -7422,7 +7422,7 @@ function renderProgressView(){
     <div class="stat-card" data-stat="learning"><div class="num">${sc.learning}</div><div class="label">Aprendendo</div></div>
     <div class="stat-card" data-stat="review"><div class="num">${sc.review}</div><div class="label">Para revisar</div></div>
     <div class="stat-card" data-stat="due"><div class="num">${sc.due}</div><div class="label">Devidos</div></div>
-    <div class="stat-card" data-stat="today"><div class="num">${studyToday}</div><div class="label">Para estudar hoje</div></div>
+    <div class="stat-card" data-stat="today" title="Fila de uma sessão: devidos + novos limitados por 'novas por dia'. Respeita os filtros de origem/tag da Revisão, por isso pode diferir de Novos/Devidos."><div class="num">${studyToday}</div><div class="label">Para estudar hoje</div></div>
     <div class="stat-card"><div class="num">${STATE.xp}</div><div class="label">XP acumulado</div></div>
   `;
 

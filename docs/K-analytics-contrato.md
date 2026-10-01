@@ -57,6 +57,26 @@ própria (não funde por sufixo). Ids `-b`, `-cN`, `-rN` não participam.
   gráfico histórico (por CardInstance/`firstLearnedDate`, fora desta fase), painel da professora
   (agregados do servidor por CardInstance; Note-level exigiria migration).
 
+## K.4 -- consolidação de progresso (Note x CardInstance)
+Superfícies de progresso e a unidade de cada uma:
+| Superfície | Unidade | Numerador / denominador | Helper |
+|---|---|---|---|
+| Palavras aprendidas (Progresso) | Note, só trilha | Notes com irmã `reps>0` / todas as Notes do curso | `studyTrailWordProgress` |
+| Progresso da unidade (`unitCardCounts`, `unitProgressFraction`) | Note, só trilha (por `unitId`) | palavras com evidência / palavras da unidade | `studyTrailWordProgress(pool)`; `totalCards`/`dueForReview` permanecem CardInstance |
+| Conclusão da unidade (`checkUnitCompletion`) | Note | toda palavra com evidência em A ou B (B New não bloqueia) | `studyWordGroups` + `studyWordHasEvidence` |
+| Progresso de unidades/módulo/nível (`computeProgressSummary`) | unidade | unidades concluídas / unidades | regra de unidade, sem relação com cartões |
+| Novos/Aprendendo/Para revisar/Devidos | CardInstance | -- | `structuralCounts` |
+| Força ("Suas palavras") | Note, todas as origens estudáveis | por categoria | `contentMetrics` |
+| Gráfico "Palavras aprendidas ao longo do tempo" | palavra, só trilha | uma data por palavra (a mais antiga das irmãs) | `wordLevelFirstLearnedDates` |
+- K.4 removeu `wordLevelLearnedCounts`/`wordLevelUnits` (misturavam Teacher/Self como "palavras")
+  e restringiu o gráfico à trilha. Teacher/Self nunca entram em palavras aprendidas.
+- O gráfico segue baseado em `firstLearnedDate` por CardInstance (aproximação existente, não é
+  histórico Note-level); no zh soma também 汉字 (`hanziCards`), recurso próprio do zh, inalterado.
+- **Para estudar hoje** reutiliza `trueDueReviewCount(eligibleReviewPool())` de propósito: respeita os
+  filtros de sessão (origem/tag); Novos/Devidos ignoram esses filtros. Não são diretamente comparáveis.
+- Pendência K.6: `get_teacher_student_metrics` conta força/"fracas" por CardInstance (nunca revisados
+  entram como fracos); corrigir exige RPC Note-level no servidor.
+
 ## Fora desta fase
 - Histórico por Note e "última atividade" (`firstLearnedDate`/`lastReview` são por
   CardInstance; `lastReview` de cartões migrados é aproximado).

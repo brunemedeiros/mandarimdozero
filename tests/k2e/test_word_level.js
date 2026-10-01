@@ -102,16 +102,16 @@ for (const lang of ['fr', 'zh']){
   fresh(); study(A(0), { firstLearnedDate: '2026-01-05' }); study(B(0), { firstLearnedDate: '2026-01-09' }); study(A(1), { firstLearnedDate: '2026-01-07' });
   const dates = ctx.wordLevelFirstLearnedDates(ctx.STATE.cards).sort();
   check(lang + ' gráfico: 1 data por palavra (A+B não dobram), vale a mais antiga', dates.length === 2 && dates[0] === '2026-01-05' && dates[1] === '2026-01-07', dates);
-  const lc = ctx.wordLevelLearnedCounts(ctx.STATE.cards);
+  const lc = ctx.studyTrailWordProgress(ctx.STATE.cards);
   check(lang + ' "Palavras aprendidas": learned=2, total = nº de palavras da trilha', lc.learned === 2 && lc.total === totalWords, lc);
   check(lang + ' total de CardInstances continua 2x palavras', ctx.STATE.cards.length === totalWords * 2);
   fresh(); ctx.STATE.cards.push({ id: 't1', origin: 'teacher', reps: 1, firstLearnedDate: '2026-02-01' });
-  const lc2 = ctx.wordLevelLearnedCounts(ctx.STATE.cards);
-  check(lang + ' cards teacher/self continuam contando por card', lc2.total === totalWords + 1 && lc2.learned === 1, lc2);
+  const lc2 = ctx.studyTrailWordProgress(ctx.STATE.cards);
+  check(lang + ' K.4: teacher/self NÃO entram em palavras aprendidas nem no gráfico', lc2.total === totalWords && lc2.learned === 0 && ctx.wordLevelFirstLearnedDates(ctx.STATE.cards).length === 0, lc2);
 
   // Não muta FSRS / não colapsa
   fresh(); study(A(0)); const snap = JSON.stringify(ctx.STATE.cards.map(c => [c.id, c.reps, c.due, c.stability, c.difficulty, c.lapses, c.state]));
-  ctx.unitCardCounts(u0.id); ctx.vocabStrengthBuckets(); ctx.wordLevelLearnedCounts(ctx.STATE.cards); ctx.checkUnitCompletion(u0.id);
+  ctx.unitCardCounts(u0.id); ctx.vocabStrengthBuckets(); ctx.studyTrailWordProgress(ctx.STATE.cards); ctx.checkUnitCompletion(u0.id);
   check(lang + ' helpers só leem: FSRS/cards inalterados', snap === JSON.stringify(ctx.STATE.cards.map(c => [c.id, c.reps, c.due, c.stability, c.difficulty, c.lapses, c.state])));
   check(lang + ' A e B continuam CardInstances distintas', A(0) !== B(0) && A(0).note === B(0).note);
 

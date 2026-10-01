@@ -86,7 +86,7 @@ for (const lang of ['fr', 'zh']){
 for (const lang of ['fr', 'zh']){
   const src = read(lang + '/app.js');
   check(lang + ' [K2-E migrado]: checkUnitCompletion opera por palavra (não exige reps>0 em todo card)', /studyWordGroups\(pool\)\.every\(studyWordHasEvidence\)/.test(src) && !/pool\.every\(c => c\.reps > 0\)/.test(src));
-  check(lang + ' [K2-E]: unitCardCounts parte de STATE.cards por unitId (contagem de palavras via wordLevelLearnedCounts)', /function unitCardCounts[\s\S]{0,200}c\.unitId === unitId/.test(src));
+  check(lang + ' [K2-E]: unitCardCounts parte de STATE.cards por unitId (contagem de palavras via studyTrailWordProgress)', /function unitCardCounts[\s\S]{0,200}c\.unitId === unitId/.test(src));
   check(lang + ': nextCardDirection/reviewDirection/lastDirection removidos em K2-G (só comentários)',
     !/nextCardDirection|reviewDirection|lastDirection/.test(src.split('\n').filter(l => !l.trim().startsWith('//')).join('\n')));
 }

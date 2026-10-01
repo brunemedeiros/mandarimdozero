@@ -109,7 +109,7 @@ async function bootPage(browser, lang, port){
         Object.assign({}, base, { id: 's1', rowId: 1, flashcardStatus: 'active', reps: 2, state: 'review', due: NOW - DAY, interval: 90 }),
         Object.assign({}, base, { id: 's1-b', rowId: 1, flashcardStatus: 'active', reps: 0, state: 'new', due: 0 }),
         Object.assign({}, base, { id: 's2', rowId: 2, flashcardStatus: 'archived', reps: 3, state: 'review', due: NOW - DAY }),
-        Object.assign({}, base, { id: 't1', rowId: 1, origin: 'teacher', flashcardStatus: 'active', reps: 1, state: 'review', due: NOW + DAY }));
+        Object.assign({}, base, { id: 't1', rowId: 1, origin: 'teacher', flashcardStatus: 'active', reps: 1, state: 'review', due: NOW + DAY, firstLearnedDate: '2026-02-01' }));
       switchTab('progress');
     });
     const r = await ev(() => {
@@ -122,7 +122,8 @@ async function bootPage(browser, lang, port){
         own: ownContentProgress(STATE.cards, 'self'), teacher: ownContentProgress(STATE.cards, 'teacher'),
         archived: archivedCounts(STATE.cards, 'self'),
       };
-      return { stat, learned, vs, exp };
+      const dots = document.querySelectorAll('#progress-line-chart-wrap .chart-dot').length;
+      return { stat, learned, vs, exp, dots };
     });
     const e = r.exp;
     check(lang + ' Review sem due NÃO é Devido; Review vencido é Devido', r.stat.due === e.structural.due && e.structural.due === 3 /* v0 review, v2 learning, s1 */, r);
@@ -133,6 +134,7 @@ async function bootPage(browser, lang, port){
     check(lang + ' Self e Teacher separados (1 conteúdo estudado cada)', e.own.studied === 1 && e.teacher.studied === 1 && e.teacher.total === 1);
     check(lang + ' Palavras aprendidas só Study Trail (4 palavras), Teacher/Self fora', r.learned.startsWith('4/') && e.words.learned === 4, r.learned);
     check(lang + ' Força: Self(1) entra no widget junto da trilha como Note; irmã New não rebaixa', r.vs.length === 4 && r.vs[3] >= 1, r.vs);
+    check(lang + ' K.4: gráfico de palavras ignora Teacher/Self (data do Teacher não vira ponto)', r.dots === 0, r.dots);
     check(lang + ' sem erro de página', errors.length === 0, errors);
   }
   await browser.close(); server.close();

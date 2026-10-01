@@ -134,27 +134,16 @@ function studyWordHasEvidence(wordCards){
   return (wordCards || []).some(c => c.reps > 0);
 }
 
-// Unidades pedagógicas de uma lista de cards: cada palavra da trilha vira
-// UM grupo; qualquer outro card (teacher/self) continua sozinho.
-function wordLevelUnits(cards){
-  const out = studyWordGroups(cards);
-  (cards || []).forEach(c => { if (!isStudyTrailWordCard(c)) out.push([c]); });
-  return out;
-}
-
-// {total, learned} em PALAVRAS (trilha) + cards avulsos (demais origens).
-function wordLevelLearnedCounts(cards){
-  const units = wordLevelUnits(cards);
-  return { total: units.length, learned: units.filter(studyWordHasEvidence).length };
-}
-
 // Data de "primeira vez aprendida" da palavra = a mais antiga entre as irmãs.
 function wordFirstLearnedDate(wordCards){
   const ds = (wordCards || []).map(c => c.firstLearnedDate).filter(Boolean).sort();
   return ds.length ? ds[0] : null;
 }
+// K.4: SÓ palavras da Study Trail (Teacher/Self nunca entram no gráfico de
+// palavras). Continua sendo a data da CardInstance mais antiga entre as irmãs
+// (aproximação já existente -- não é histórico Note-level confiável).
 function wordLevelFirstLearnedDates(cards){
-  return wordLevelUnits(cards).map(wordFirstLearnedDate).filter(Boolean);
+  return studyWordGroups(cards).map(wordFirstLearnedDate).filter(Boolean);
 }
 
 // Força de UMA CardInstance -- a mesma regra que sempre existiu em
