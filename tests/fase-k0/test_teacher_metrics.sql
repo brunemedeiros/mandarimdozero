@@ -16,7 +16,7 @@ declare
   total_notes int; before_total int;
 begin
   perform set_config('request.jwt.claims', json_build_object('sub', T, 'role', 'authenticated')::text, true);
-  select (public.get_teacher_student_metrics(S,'frances')->>'teacherCardsTotal')::int into before_total;
+  select (public.get_teacher_student_metrics(S,'frances')->>'contentsTotal')::int into before_total;
   for i in 1..8 loop
     insert into teacher_flashcards(teacher_id, student_id, language_app_key, front, back_trans)
     values (T, S, 'frances', 'k0b-'||i, 'k0b-'||i) returning id into rid;
@@ -62,22 +62,22 @@ begin
         coalesce(data->'frances','{}'::jsonb) || jsonb_build_object('cards', jsonb_build_array(rec.card)))
       where user_id = S;
     res := public.get_teacher_student_metrics(S,'frances');
-    n := coalesce((res->>'teacherCardsActive')::int,0) + coalesce((res->>'teacherCardsArchived')::int,0);
+    n := coalesce((res->>'cardsTotal')::int,0) + coalesce((res->>'archivedCards')::int,0);
     total := total + 1;
     if n = rec.expect then oks := oks + 1; else fails := fails || ' | ' || rec.label || ' esperado ' || rec.expect || ' veio ' || n; end if;
   end loop;
 
-  -- agregados: significado inalterado. Total = nº de LINHAS (Notes), não de cards.
+  -- agregados (K.6, migration 059): conteúdos = Notes ATIVAS (linhas); cartões = CardInstances.
   select jsonb_agg(card) into cards from k0_cases where expect = 1 and label in
     ('Normal t1 (origin+rowId)','Reverse A t2','Reverse B t2-b','Cloze t3-c1','Cloze t3-c2','Cloze t3-c3','Archived t7');
   update progress set data = data || jsonb_build_object('frances',
       coalesce(data->'frances','{}'::jsonb) || jsonb_build_object('cards', cards)) where user_id = S;
   res := public.get_teacher_student_metrics(S,'frances');
   total := total + 4;
-  if (res->>'teacherCardsTotal')::int = before_total + 8 then oks := oks+1; else fails := fails||' | Total deve contar Notes (linhas): '||(res->>'teacherCardsTotal'); end if;
-  if (res->>'teacherCardsActive')::int = 6 and (res->>'teacherCardsArchived')::int = 1 then oks := oks+1; else fails := fails||' | active/archived: '||res::text; end if;
-  if (res->>'teacherCardsNeverReviewed')::int = 1 then oks := oks+1; else fails := fails||' | neverReviewed: '||res::text; end if;
-  if (res->>'teacherCardsWeak')::int + (res->>'teacherCardsMedium')::int + (res->>'teacherCardsStrong')::int = 7 then oks := oks+1; else fails := fails||' | weak+medium+strong: '||res::text; end if;
+  if (res->>'contentsTotal')::int = before_total + 8 then oks := oks+1; else fails := fails||' | contentsTotal deve contar Notes ativas (linhas): '||(res->>'contentsTotal'); end if;
+  if (res->>'cardsTotal')::int = 7 and (res->>'archivedCards')::int = 0 then oks := oks+1; else fails := fails||' | cardsTotal/archivedCards: '||res::text; end if;
+  if (res->>'cardsNew')::int = 1 then oks := oks+1; else fails := fails||' | cardsNew (Reverse B): '||res::text; end if;
+  if (res->>'contentsStudied')::int = 4 then oks := oks+1; else fails := fails||' | contentsStudied (4 Notes com irma estudada): '||res::text; end if;
 
   -- autorização intacta: outra professora/aluno sem vínculo continua not_authorized
   perform set_config('request.jwt.claims', json_build_object('sub', S, 'role', 'authenticated')::text, true);

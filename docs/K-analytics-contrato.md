@@ -74,8 +74,7 @@ Superfícies de progresso e a unidade de cada uma:
   histórico Note-level); no zh soma também 汉字 (`hanziCards`), recurso próprio do zh, inalterado.
 - **Para estudar hoje** reutiliza `trueDueReviewCount(eligibleReviewPool())` de propósito: respeita os
   filtros de sessão (origem/tag); Novos/Devidos ignoram esses filtros. Não são diretamente comparáveis.
-- Pendência K.6: `get_teacher_student_metrics` conta força/"fracas" por CardInstance (nunca revisados
-  entram como fracos); corrigir exige RPC Note-level no servidor.
+- (Pendência K.6 resolvida -- ver seção K.6.)
 
 ## K.5 -- Analytics de Deck
 - **Deck = organização** (árvore); não cria unidade de conteúdo. Estudar/contar um Deck = o Deck
@@ -95,7 +94,39 @@ Superfícies de progresso e a unidade de cada uma:
   Meus Decks = Self. Nenhuma tela exibe conteúdo/força por Deck hoje (helper preparado, sem UI nova).
 - Progresso/percentual de Deck: não existe; nenhum percentual novo foi criado.
 - Due de Deck não usa o limiar de 48h (só do cron) nem se confunde com "Para estudar hoje" (fila de sessão).
-- Fora de K.5: painel da professora (`get_teacher_student_metrics`, força por CardInstance no servidor) -> K.6.
+- Fora de K.5: painel da professora -> K.6.
+
+## K.6 -- Teacher Analytics (`get_teacher_student_metrics`, migration 059)
+Superfície: botão 📊 existente em "🎓 Alunos" (`shared/admin-students.js`); nenhuma tela nova.
+Escopo: UM aluno x UMA professora (auth.uid()) x UM idioma, vínculo `active`; só `origin='teacher'`.
+Study Trail, Self, XP, streak e dados de outros alunos/professoras/idiomas nunca saem do servidor.
+
+**Identidade da Note no servidor**: `card.rowId` = id da linha de `teacher_flashcards` (gravado pelo motor
+em TODA CardInstance da linha: `-b`, `-cN`, `-rN` e combinações). Revisões `-rN` NÃO criam conteúdo novo
+(mesmo rowId). Saves antigos sem rowId: id da linha lido do formato ancorado `t{n}(-r{n})?(-b|-c{n})?`, só
+vale se {n} é linha real desta professora/aluno/idioma (validação K.0-B). Nenhuma outra heurística de id,
+`lastDirection`, `reviewDirection` ou `isReverse`.
+**Atividade/arquivamento** vêm do `status` da LINHA no banco, não do `flashcardStatus` salvo no progresso.
+
+| Campo retornado | Unidade | Definição |
+|---|---|---|
+| `contentsTotal` | Note | linhas ATIVAS (inclui Notes ainda sem card no progresso) |
+| `contentsStudied` / `contentsNotStarted` | Note | alguma irmã ativa com `reps>0` / nenhuma |
+| `contentsStrengthNotStarted/Weak/Medium/Strong` | Note | não iniciada = nenhuma irmã estudada; senão a MAIS FRACA entre as estudadas (irmã New não rebaixa); por card: `lapses>=2` fraca, `lapses<2 e interval>=60` forte, resto média (mesma regra de `cardStrengthBucket`, sem fórmula nova) |
+| `cardsTotal` | CardInstance | cards ativos presentes no progresso do aluno (Reverso=2, Cloze=N) |
+| `cardsNew/Learning/Review` | CardInstance | mesma semântica K1: New=sem histórico; Learning=learning+relearning (e `state new` com `reps>0`); Review=estado Review |
+| `cardsDue` | CardInstance | não-New com `due>0` e `due<=agora`; sem 48h, sem `review_overdue` |
+| `archivedNotes` / `archivedCards` | Note / CardInstance | informativo, nunca somado ao ativo |
+| `lastStudyDay` | conta | atividade da CONTA no idioma (decisão da Fase 6a), NÃO do conteúdo |
+
+Invariantes (testadas): estudados+não iniciados=total; soma da força=total; N+L+R=cardsTotal; Due<=L+R.
+Tela: "Conteúdos" = Notes, "Cartões" = CardInstances; "fracos" nunca inclui não iniciados.
+Limitações de dado: (1) `cardsTotal` só enxerga cards que o aluno já sincronizou no progresso (uma Note
+nova ainda não aberta pelo aluno conta em `contentsTotal` e como Não iniciada, com 0 cartões);
+(2) sem histórico Note-level nem "última atividade do conteúdo" (`lastReview` migrado é aproximado,
+por isso não é retornado); (3) a função antiga (058) falhava com números fracionários/malformados no
+progresso; a 059 os trata como 0. Aplicar a 059 ANTES de publicar o front.
+Testes: `tests/fase-k6/` (SQL em Postgres local, Playwright com respostas geradas pela RPC real).
 
 ## Fora desta fase
 - Histórico por Note e "última atividade" (`firstLearnedDate`/`lastReview` são por
