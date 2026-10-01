@@ -1,113 +1,123 @@
-# Auditoria de prontidão -- Public Decks + atribuição de cópias (somente leitura)
+# Auditoria de prontidão -- Public Decks + atribuição (v2, contra a Arquitetura Total)
 
-Nenhum código, migration, RPC, RLS, rota ou UI foi alterado. Origem das regras: o documento
-"Arquitetura Total" NÃO está no repositório; as regras abaixo vêm das instruções da autora
-(prompts K.8 e desta etapa), de `CLAUDE.md`, `docs/K-analytics-contrato.md` e das migrations.
-Onde isso não decide, está marcado **DECISÃO PENDENTE**.
+Somente leitura: nenhum código, migration, RPC, RLS, rota ou UI foi alterado.
+**Fonte de verdade:** `docs/arquitetura-total-decks-tags-painel.md` (citada por seção, "AT §n").
+**Esta v2 substitui a v1** (commit `dce4748`), escrita sem acesso ao documento. A seção 1 lista o que mudou.
 
-## 1. Status: BLOCKED (para Public Decks e atribuição); Perfil Público = PARTIALLY READY
-O Perfil Público por conta existe e funciona. Public Deck e `source_*` não existem; o modelo público
-atual (por conta, cartões soltos) conflita em pontos concretos com a arquitetura (seção 5).
+## 1. Correções em relação à v1 (o que a v1 errou ou presumiu)
+| # | v1 dizia | O documento define | Efeito |
+|---|---|---|---|
+| 1 | Atribuição por colunas `source_user_id/source_card_id` na Note | Atribuição = **Tag permanente `criado-por-[username]`**, não removível pelo destinatário (AT §10.3, inv. 14). AT §6 prevê "metadados de origem/atribuição/importação" na Note, sem nomear colunas | `source_*` não é exigido pelo documento; deixa de ser premissa. Colunas só se forem necessárias para "semelhante/já importado" (DECISÃO PENDENTE) |
+| 2 | `personal_root` talvez público | **Só Decks DENTRO de Meus Decks** podem ser públicos; não curso, não professora, não raiz do idioma (AT §18) | `personal_root` (Meus Decks em si) fica de fora; a trigger atual a permite e teria de ser apertada |
+| 3 | Visitante vê Notes após login | **Free** sabe que o Deck existe mas **não abre nem importa**; **Premium** importa Deck público de qualquer usuário (AT §18.2) | Gate de login atual é insuficiente; falta gate de plano |
+| 4 | Cópia "atômica", tudo ou nada no teto Free | Cria **só o que cabe, informa o corte** ("Este Deck criaria 100 Cards, mas sua conta pode possuir apenas 20...") e mostra CTA Premium; atômico "quando possível", nunca silencioso (AT §17) | O `preflight` atual (`ok: requested<=remaining`, bloqueia tudo) contradiz o documento |
+| 5 | "Já adicionado" por unicidade `source_*` | Não há "Já adicionado" no documento: há **reimportação manual** que **detecta Deck/Notes semelhantes, avisa e oferece merge/importação** (AT §19.1, §23) | Recurso diferente do que a v1 propunha |
+| 6 | Página pública mostra Notes e contagens a decidir | Página mostra nome, **nº de Notes**, descrição, idioma, autor, data da última atualização, Cards; **sem lista/contagem de Tags** (AT §18) | Contagem pública = **Notes** (decidido); descrição e "última atualização" são novos dados |
+| 7 | Slug/URL pendente | Perfil `fr/#/user/username`; Deck público "tem página própria", sem formato definido (AT §18, §20) | Segue pendente só o formato da rota do Deck |
+| 8 | Visibilidade/exclusão a decidir | Excluir Deck pessoal: avisa, **mover ou excluir permanentemente**, árvore inteira, **não existe arquivamento** (AT §5.4) | Contradiz a UI atual de "Arquivados historicamente" (CONSOLIDAÇÃO-3) |
+| 9 | Pendências de mídia/tags públicas | Tags **são visíveis dentro dos Cards** (AT §18); mídia é propriedade do Field (AT §9); ícone+cor do Deck, **sem upload** (AT §18.1) | Tags públicas decidido; ícone/cor novos |
+| 10 | Username editável? não verificado | **Username único e imutável** (AT §20, inv. 15) | Hoje é **editável** (ver seção 4, C1) |
 
-## 2. O que a arquitetura exige (regras dadas)
-Public Deck é flag sobre Deck pessoal (`is_public`), nunca um `kind` próprio; cartão público pode ser
-copiado; cópia independente, sem live link; `source_user_id/source_card_id` preservados; "Já adicionado";
-cópia entra no teto Free de 20 CardInstances; report via Reports existente; sem duplicata silenciosa;
-sem migração destrutiva; Note = fonte de verdade, CardInstance derivada e nunca persistida; Deck =
-organização; privacidade filtrada no servidor; FSRS/due/N-L-R/Teacher/Study nunca públicos.
+## 2. O que o documento exige (Public Decks, cópia, perfil)
+- Só Decks em Meus Decks; vedados curso/professora/raiz (§18). Página própria; ícone+cor (§18.1).
+- Free enxerga existência; Premium importa (§18.2). Cópia independente, sem live link; Notes, Cards e Tags
+  independentes; recebe a Tag permanente de autoria (§19, §10.3). Em cópias múltiplas preserva-se só a
+  atribuição original (§10.3).
+- Sem assinatura/atualização automática: autor edita/adiciona/renomeia e o Deck segue o mesmo; o importador
+  reimporta manualmente com detecção, aviso e merge, sem duplicar em silêncio (§19.1, §23, inv. 28).
+- Importado entra em `Idioma > Meus Decks` ou subdeck pessoal; nunca raiz "Importado" (§24).
+- Perfil: username único e imutável; display name editável; mostra username, display name, avatar, bio,
+  Decks públicos; **sem busca pública de usuários** (§20).
+- Cópia passa a ser conteúdo pessoal (editável, movível); original não é alterado (§34).
+- Limite Free por CardInstance (§17); FSRS global (§15); Note é a fonte do conteúdo (§2.1, inv. 22-23).
 
-## 3. O que existe
-- `profiles.public_profile` (default true; 041 tornou todas as contas públicas), rota `#/user/<username>`
-  sem login (`shared/router.js`, `shared/public-profile.js`).
-- `get_public_profile_stats(text)` (037) e `get_public_flashcards(text,text)` (038, hoje na versão 056,
-  lê `own_flashcards`): SECURITY DEFINER, `search_path=public`, `grant ... to anon, authenticated`; checam
-  `public_profile` e filtram `status='active'` e `hidden_from_profile=false` no servidor.
-- Gate de login no cliente para ver/importar; cópia via `createOwnFlashcard` (nova linha independente,
-  Deck padrão, preflight do teto Free por CardInstance, `#flashcard-limit-modal`); reporte `openReportModal`;
-  tags viajam como valor.
-- `decks.is_public boolean default false` (049): triggers rejeitam público em `root`, `teacher_root`,
-  `teacher` e `course`; `personal_root` e `personal` NÃO rejeitam. Nada lê ou escreve a flag. RLS de `decks`:
-  dono lê/escreve o próprio `personal`, professora lê a árvore Teacher; ninguém além do dono lê Deck pessoal.
-  `shared/deck-engine.js` registra explicitamente que nenhuma checagem pública foi adicionada.
+## 3. O que existe no código (verificado)
+- `profiles.public_profile` (default true), rota `#/user/<username>`, página sem login; RPCs
+  `get_public_profile_stats` e `get_public_flashcards` (SECURITY DEFINER, `anon`), filtro no servidor
+  (`status='active'`, `hidden_from_profile=false`).
+- Cópia independente via `createOwnFlashcard`, Deck padrão, teto Free por CardInstance com bloqueio total,
+  `openReportModal`, tags viajam como valor; Premium existe (`plan_tier`, `isPremium`, `admin-premium.js`).
+- `decks.is_public` sem nenhum leitor/escritor; triggers rejeitam público em root, teacher_root, teacher e course;
+  **permitem** `personal_root` e `personal`.
+- Exclusão de Deck pessoal: `deleteDeck`/`validateDeckDeletion` em `deck-data.js`/`deck-engine.js` (só vazio);
+  "Arquivados" ainda existe na UI de Meus Cartões.
 
-## 4. Gaps exatos
-1. Nenhum fluxo publica/despublica Deck; nenhuma RPC/rota/slug de Deck público; nenhuma UI de publicar.
-2. Zero `source_user_id`/`source_card_id` (nenhum arquivo). Logo: sem origem permanente, sem "Já adicionado",
-   sem proteção contra duplicata (hoje importar duas vezes cria duas linhas), sem importação de Deck inteiro.
-3. Cópia atual cai no Deck padrão do importador (Meus Decks); a árvore do Deck público não é reproduzida.
-4. Sem política para tornar privado de novo, nem para cópias já feitas.
+## 4. Gaps e conflitos com o documento
+**Gaps (ausente):** publicar/despublicar Deck; página/rota/RPC de Deck público; ícone, cor, descrição, "última
+atualização" no Deck; gate Free/Premium para abrir/importar; Tag `criado-por-[username]` (zero ocorrências) e sua
+proteção contra remoção (hoje o Painel de Tags da Fase J permite renomear/excluir qualquer tag); importação de Deck
+inteiro com hierarquia; detecção de semelhantes/merge na reimportação; escolha de destino em Meus Decks.
+**Conflitos (existe e contradiz):**
+- C1 **Username editável** (`saveProfileEdits` aceita novo username e só checa disponibilidade). Viola inv. 15 e
+  quebra a atribuição permanente e URLs `fr/#/user/username`. Pré-requisito de qualquer publicação.
+- C2 **RPC pública lê o espelho Legacy** (`front`, `back_trans`...), não `fields`/`card_generation_mode`:
+  Cloze nativo tem `front` nulo, MC perde distratores, Type Answer perde formato, mídia por Field não sai. Viola
+  "Native Fields são a fonte" (inv. 23, inv. 24).
+- C3 **Publicação por conta** ("todos os ativos não escondidos") contradiz publicação por Deck; coexistência com
+  `hidden_from_profile` indefinida.
+- C4 **Teto Free tudo-ou-nada** contradiz o corte parcial informado (AT §17); vale também para Anki/arquivo.
+- C5 **Gate só de login**, sem Premium para importar.
+- C6 **Trigger permite `personal_root` público**; documento só admite Decks dentro de Meus Decks.
+- C7 **Tag de autoria seria removível/renomeável** pelo Painel de Tags (K.6/Fase J) se existisse; precisa de tag de
+  sistema protegida (RPCs `rename_note_tag`/`delete_note_tag`).
+- C8 **"Arquivados"** na UI contradiz "não existe arquivamento" (AT §5.4); fora do escopo público, mas afeta o
+  universo ("ativos") das RPCs.
+- C9 **Perfil público expõe XP, streak e % de progresso** por idioma; o documento lista como públicos apenas
+  username, display name, avatar, bio e Decks públicos (AT §20). O documento **não autoriza** XP/streak/progresso
+  públicos. Continua DECISÃO PENDENTE, agora com o documento apontando para remover.
 
-## 5. Conflitos entre arquitetura e implementação
-- **Unidade e fonte do conteúdo público.** `get_public_flashcards` devolve as colunas Legacy espelhadas
-  (`front`, `back_trans`, `front_pinyin`, `front_is_target_language`), não `fields`/`card_generation_mode`.
-  Em Note nativa essas colunas são mirror write-only (6D.6): Cloze tem `front` nulo, Múltipla Escolha perde os
-  distratores, Type Answer perde o formato, mídia por Field não é entregue. Resultado: o que o visitante vê e
-  copia pode ser incompleto/enganoso para Notes nativas. Viola "Note é a fonte de verdade".
-- **Publicação por conta, não por Deck.** "Conta pública = todos os cartões ativos não escondidos" contradiz
-  "Public Deck = flag no Deck". `hidden_from_profile` é um 3º eixo de visibilidade que teria de coexistir.
-- **Contagem.** A RPC devolve uma linha por Note; Reverse/Cloze não aparecem como CardInstances, e o teto
-  Free só é calculado no cliente depois de baixar a Note. A contagem pública de "cartões" exigiria
-  `generatedCardInstanceCount` (cliente hoje) no servidor ou uma regra de exibição só em Notes.
-- **Enumeração.** `anon` pode listar tudo de qualquer username público; o `id` retornado é sequencial.
-  Aceitável hoje (tudo é público por definição), mas uma RPC de Deck por `id` permitiria sondar Decks privados
-  se não responder igual a "não existe" e "privado".
-- `own_flashcards.status='archived'` é excluído (correto); Teacher/Study nunca entram (correto, tabela diferente).
+## 5. Modelo de dados (conceitual; nada criado)
+- **Visibilidade:** `decks.is_public` já existe; restringir a `kind='personal'` (excluir `personal_root`).
+  Acrescentar ao Deck público só o que o documento nomeia: descrição, ícone, cor; "última atualização" pode ser
+  derivada (max de alteração das Notes) para não criar segunda fonte (AT §39).
+- **Atribuição:** Tag de sistema `criado-por-<username>` na Note copiada (Tags pertencem à Note, inv. 11). Como o
+  username é imutável, a tag é estável. Proteção: marcar como tag de sistema (prefixo reservado) bloqueada em
+  editor e Painel de Tags. Origem estruturada (autor + Note de origem) só se a detecção de semelhantes/merge
+  precisar; **DECISÃO PENDENTE** se bastam comparação de conteúdo ou metadado de importação (AT §6 admite
+  "metadados de atribuição/importação").
+- **Conteúdo público:** projeção da Note nativa (campos, `card_generation_mode`, tags, mídia do Field), sem FSRS,
+  `revision` interna, status, `hidden_from_profile`, due.
 
-## 6. Modelo de dados proposto (conceitual, nada criado)
-- **Atribuição vive na NOTE** (linha de `own_flashcards`), não na CardInstance: `source_user_id uuid`
-  (nullable, sem FK com cascade; `on delete set null` ou texto estável) e `source_note_id bigint`
-  (nome do arquivo de regras é `source_card_id`; semanticamente é o id da linha/Note de origem). CardInstances
-  irmãs (Reverse, Cloze, `-rN`) herdam por derivação em runtime porque compartilham o `rowId`; nada novo na
-  CardInstance. Unicidade parcial `(owner_id, source_user_id, source_card_id)` onde não nulo = base de
-  "Já adicionado" e anti-duplicata. Exclusiva de cópias públicas; Teacher e criação própria ficam nulos.
-- **Visibilidade vive no Deck** (`is_public` já existe), só em `personal_root`/`personal` (as triggers já
-  restringem). Conteúdo público = Notes ativas cujo `deck_id` está na subárvore pública. Slug/URL: **DECISÃO PENDENTE**
-  (sugestão: `#/user/<username>/deck/<id>`, estável por id).
-- **Payload público** = projeção da Note nativa (campos de texto, `card_generation_mode`, tags, mídia pública se
-  decidido), sem `revision`, FSRS, due, status, `hidden_from_profile`, ids internos além do necessário.
+## 6. Segurança/RLS/RPC
+Existe: padrão SECURITY DEFINER com checagem no servidor, sem policy pública nas tabelas. Falta: RPC de leitura de
+Deck público (verifica `is_public`, `kind='personal'`, dono; resposta igual para inexistente/privado); RPC de cópia
+que valide Premium e aplique o corte do teto Free **no servidor** (hoje só cliente); proteção da tag de autoria no
+servidor (RPCs de tags e `own_flashcards` UPDATE); username imutável por trigger/policy, não só UI; revisão do
+`grant anon` (só leitura pública). Mídia: bucket público por URL; publicar Deck publica as URLs.
 
-## 7. Segurança/RLS/RPC
-Existe: SECURITY DEFINER + checagem de flag no servidor, sem policy pública em `own_flashcards`/`decks`.
-Faltaria: RPC de Deck público que valide `is_public` em todos os ancestrais relevantes e devolva resposta idêntica
-para "inexistente" e "privado"; RPC de cópia atômica (insere a Note com `source_*` e respeita o teto Free no
-servidor, hoje só cliente); trigger que impeça editar/forjar `source_*` pelo dono depois da inserção; revisão do
-`grant to anon` (manter só nas RPCs de leitura pública); mídia: bucket `flashcard-media` é público por URL,
-então "mídia privada" não existe -- publicar um Deck publica as URLs.
+## 7. Fluxo (conforme AT §18-§24)
+Dono publica Deck em Meus Decks -> qualquer pessoa vê a página do Deck (nome, nº de Notes, autor...) -> Free:
+sabe que existe, não abre/importa; Premium: escolhe destino em Meus Decks -> cópia independente com tag
+`criado-por-<username>`, corte no limite informado -> reimportação manual detecta semelhantes e oferece merge.
 
-## 8. Fluxo conceitual
-Dono publica Deck pessoal -> visitante sem login vê Deck/contagens -> login exigido para ver Notes/copiar ->
-cópia atômica cria Notes novas (Native, Deck de destino, tags, `source_*`) -> coleção própria independente
-(editar/apagar/privatizar o original não altera a cópia; a atribuição permanece) -> "Já adicionado" por unicidade.
+## 8. Decisões pendentes (o documento não decide)
+Formato da rota/URL do Deck público; se publicar uma pasta publica a subárvore ou só o Deck; Deck vazio publicável;
+fate de `hidden_from_profile` e do perfil por conta (substituir); como detectar "semelhante" (conteúdo vs metadado
+de origem) e política de merge; texto de "última atualização"; o que ocorre com cópias se o autor despublica
+(sugestão: nada, são independentes); autor apaga/despublica e a tag permanece; Anki export/import preserva ou não a
+tag (ela é uma Tag comum, então viaja); **política de XP/streak/progresso públicos** (documento não os lista);
+quem pode ver o Deck de um usuário com `public_profile` desligado.
 
-## 9. Decisões pendentes
-Tipos de Deck públicos (arquitetura só afirma "pessoal"; `personal_root` pode?); visibilidade herdada pela
-subárvore ou por Deck; Deck vazio publicável; o que a página mostra (Notes, CardInstances ou ambos; sugestão:
-Notes + contagem de cartões separada, Reverse=1/2, Cloze=1/N); mídia pública; tags públicas; o que acontece com
-cópias ao despublicar (sugestão: nada); original apagado (sugestão: `source_*` permanece, só some o vínculo de
-exibição); conteúdo editável após publicar (a cópia já feita não muda); coexistência com `hidden_from_profile`
-e com o perfil por conta (substituir ou manter); copiar Deck inteiro vs. cartão a cartão e como mapear a árvore;
-Anki export/import preservar `source_*` (sugestão: ficam fora do `.apkg`, preservados só no banco);
-política pública de **XP/streak/progresso (DECISÃO PENDENTE -- manter públicos por padrão ou mudar)**.
+## 9. Ordem recomendada (ajustada ao documento: Fase J)
+1) Decisões da seção 8. 2) **Username imutável** (servidor). 3) Projetar a Note nativa na RPC pública (C2).
+4) Tag de sistema `criado-por-` protegida (editor, Painel de Tags, RPCs). 5) Publicar/despublicar Deck (apenas
+`personal`) + RPC de leitura + rota + ícone/cor/descrição. 6) Importação com gate Premium, destino em Meus Decks,
+corte informado do teto Free (revisar também Anki/arquivo). 7) Reimportação: detecção de semelhantes e merge.
+8) Revisar política de XP/streak/progresso no perfil. 9) Só então Public Analytics (K.8).
 
-## 10. Ordem recomendada
-1) Decisões da seção 9. 2) Corrigir a RPC pública para projetar a Note nativa (sem isso, publicar é enganoso).
-3) `source_*` + unicidade + trigger de imutabilidade (aditivo, sem backfill). 4) RPC de cópia atômica com teto
-Free no servidor e "Já adicionado". 5) Publicar/despublicar Deck + RPC de leitura por Deck + rota. 6) Cópia de
-Deck inteiro. 7) Só então Public Analytics (K.8).
+## 10. Testes necessários antes de publicar
+Privacidade (anon: privado = inexistente; só Decks dentro de Meus Decks; curso/professora/raiz nunca; Teacher/Study/
+FSRS nunca; arquivado fora); projeção nativa por Card Type (Normal, Reverso, Cloze, MC, Type Answer, mídia);
+Free x Premium (existe/abre/importa); corte do teto (parcial, mensagem exata, CTA); cópia (independência,
+tag de autoria imutável e não removível, destino, hierarquia); reimportação (semelhantes, merge, sem duplicata
+silenciosa); username imutável; RLS com papéis reais; Playwright FR/ZH sem login, Free, Premium; enumeração de ids.
 
-## 11. Testes necessários antes de publicar
-Privacidade (anon: privado = inexistente; Teacher/Study/FSRS nunca; arquivado fora; subárvore), unidade
-(Reverse/Cloze/`-rN`), cópia (independência, `source_*` estáveis, edição/exclusão do original, duplicata, "Já
-adicionado", teto Free servidor+cliente, atomicidade), RLS com papéis reais (SQL local e Supabase), Playwright
-FR/ZH sem login e logado, enumeração de ids, Anki round-trip.
+## 11. Impacto em K.8
+Bloqueada. Dependências: itens 2-7 acima e a decisão sobre XP/streak/progresso. "Public Analytics" do contrato K
+(`docs/K-analytics-contrato.md`) usa contagem por **Notes** no Deck público (decidido por AT §18), sem FSRS.
+A menção a `source_*` na seção K.8 desse contrato é a premissa da v1 e deve ser lida como "atribuição por tag".
 
-## 12. Impacto em K.8
-K.8 permanece bloqueada. Pré-requisitos: itens 2-5 acima e a decisão de política de XP/streak/progresso.
-
-## 13. Itens a carregar para a auditoria final
-- K.7: fronteira real da lição (`dueCount` no fim de lição) e texto real do banner de revisão sem teste de
-  browser; só evidência indireta das fórmulas.
-- Política pública de XP/streak/progresso (já publicados por conta, `public_profile` true para todos).
-- Migration 059 NÃO aplicada: aplicar antes de publicar o front da K.6/K.7.
-- `notification-cron` (K.0-C) NÃO deployado.
-- Testes SQL de K.0/K.6 só rodaram em Postgres local com schema mínimo, nunca no Supabase real.
+## 12. A carregar para a auditoria final
+K.7: fronteira de lição e texto real do banner sem teste de browser. Política pública de XP/streak/progresso
+(C9). Migration 059 não aplicada (aplicar antes do front). `notification-cron` não deployado. SQL de K.0/K.6 só em
+Postgres local com schema mínimo. Username editável (C1) e "Arquivados" (C8) como divergências do documento.
