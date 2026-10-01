@@ -104,8 +104,9 @@ for (const lang of ['fr', 'zh']){
   const rc = ctx.structuralCounts(rv, NOW);
   check(lang + ' 11 Review nao implica Devido: 2 Review, 1 devido; New com due=0 nunca devido', rc.review === 2 && rc.reviewDue === 1 && rc.due === 1, rc);
   check(lang + ' 11 isCardDue: New due=0 = false', ctx.isCardDue(rv[2], NOW) === false && ctx.isCardDue(rv[1], NOW) === true && ctx.isCardDue(rv[0], NOW) === false);
-  // paridade com o Deck Engine (mesma semantica de "Para revisar")
-  check(lang + ' 11 reviewDue == countReviewCards do Deck; learning/new idem', rc.reviewDue === ctx.countReviewCards(rv) && sc.learning === ctx.countLearningCards(agree) && sc.new === ctx.countNewCards(agree));
+  // paridade com o Deck Engine (K.5: getDeckCounts delega a structuralCounts)
+  const dk = ctx.getDeckCounts([{ id: 1, kind: 'personal', parent_deck_id: null }], 1, rv.map(c => Object.assign({}, c, { deckId: 1 })), NOW);
+  check(lang + ' 11 getDeckCounts == structuralCounts (review estado, reviewDue, due, new)', dk.review === rc.review && dk.reviewDue === rc.reviewDue && dk.due === rc.due && dk.new === rc.new && dk.total === rc.cards, dk);
 
   // 12. unitId null nao exclui Teacher/Self
   cs = T(11, 'normal', textFields('a', 'b')); study(cs[0]);

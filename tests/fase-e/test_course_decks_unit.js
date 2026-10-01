@@ -134,7 +134,7 @@ for (const lang of ['fr', 'zh']){
 console.log('== CardInstances (contagem por instância)');
 {
   const ctx = loadLang('fr');
-  const base = { id: 1, language_app_key: 'frances', revision: 0, deck_id: 5, back_trans: 'x', front: 'y' };
+  const base = { id: 1, status: 'active', language_app_key: 'frances', revision: 0, deck_id: 5, back_trans: 'x', front: 'y' };
   const norm = ctx.generatedCardInstanceCount(base);
   check('Normal = 1 CardInstance', norm === 1, norm);
   const rev = ctx.generatedCardInstanceCount({ ...base, card_generation_mode: 'normal_reversed', fields: [

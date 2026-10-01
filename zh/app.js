@@ -6579,6 +6579,7 @@ function deckReviewSummary(deckId){
     new: counts.new,
     learning: counts.learning,
     review: counts.review,
+    due: counts.due,
   };
 }
 

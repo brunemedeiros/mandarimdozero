@@ -115,12 +115,15 @@ function personalDeckOptionsHTML(decks){
 }
 
 function personalDecksListHTML(decks){
+  // K.5: mesmo universo e mesmas contagens do Teacher Deck / de "Estudar este
+  // Deck": pool ELEGÍVEL (arquivado fora), subárvore, CardInstances.
   const cards = (typeof STATE !== 'undefined' && STATE.cards) || [];
+  const pool = (typeof eligibleDeckReviewPool === 'function') ? eligibleDeckReviewPool() : cards;
   return orderedPersonalDecks(decks).map(d => {
     const pad = Math.max(0, personalDeckDepth(decks, d) - 1) * 16;
-    const n = getStudyScopeForDeck(decks, d.id, cards).length;
-    return `<div class="admin-badge-row" style="padding-left:${pad}px;">
-      <span style="flex:1;">${escapeHTML(d.kind === 'personal_root' ? 'Meus Decks' : d.name)} <span class="profile-edit-hint">(${n} cartões)</span></span>
+    const c = getDeckCounts(decks, d.id, pool);
+    return `<div class="admin-badge-row" style="padding-left:${pad}px;" data-personal-deck-row="${d.id}">
+      <span style="flex:1;">${escapeHTML(d.kind === 'personal_root' ? 'Meus Decks' : d.name)} <span class="profile-edit-hint">(${c.total} cartões · ${c.new} novos · ${c.learning} aprendendo · ${c.review} para revisar · ${c.due} devidos)</span></span>
       <button type="button" class="btn btn-secondary" data-study-deck="${d.id}">Estudar este Deck</button>
     </div>`;
   }).join('');
@@ -166,15 +169,17 @@ function teacherDecksReadOnlyHTML(decks){
     // Fase H (H10) -- contagens do MESMO Deck Engine (getDeckCounts: New/
     // Learning/Review sobre CardInstances elegíveis do Deck + descendentes),
     // nunca uma contagem paralela. `n` = CardInstances no escopo do Deck.
-    const n = getStudyScopeForDeck(decks, deck.id, cards).length;
+    // K.5: `n` = CardInstances ELEGÍVEIS no escopo (antes contava também os
+    // arquivados); vem de getDeckCounts, junto das demais contagens.
     // Fase H (hardening) -- pool de elegibilidade SEM o filtro de origem: as
     // contagens da árvore têm que bater com o que 'Estudar este Deck' vai
     // de fato estudar (Deck é o escopo autoritativo da sessão).
     const pool = (typeof eligibleDeckReviewPool === 'function') ? eligibleDeckReviewPool() : cards;
     const c = getDeckCounts(decks, deck.id, pool);
+    const n = c.total;
     const label = deck.kind === 'teacher_root' ? 'Cartões da professora' : deck.name;
     return `<div class="admin-badge-row" style="padding-left:${depth * 16}px;" data-teacher-deck-row="${deck.id}">
-      <span style="flex:1;">${escapeHTML(label)} <span class="profile-edit-hint">(${n} cartões · ${c.new} novos · ${c.learning} aprendendo · ${c.review} para revisar)</span></span>
+      <span style="flex:1;">${escapeHTML(label)} <span class="profile-edit-hint">(${n} cartões · ${c.new} novos · ${c.learning} aprendendo · ${c.review} para revisar · ${c.due} devidos)</span></span>
       <button type="button" class="btn btn-secondary" data-study-deck="${deck.id}" ${n ? '' : 'disabled'}>Estudar este Deck</button>
     </div>`;
   }).join('');

@@ -77,6 +77,26 @@ Superfícies de progresso e a unidade de cada uma:
 - Pendência K.6: `get_teacher_student_metrics` conta força/"fracas" por CardInstance (nunca revisados
   entram como fracos); corrigir exige RPC Note-level no servidor.
 
+## K.5 -- Analytics de Deck
+- **Deck = organização** (árvore); não cria unidade de conteúdo. Estudar/contar um Deck = o Deck
+  + toda a subárvore (`getStudyScopeForDeck`), sobre o pool ELEGÍVEL (`eligibleDeckReviewPool`:
+  arquivado/lição não concluída fora). Contagem e "Estudar este Deck" usam o mesmo universo.
+- **Estrutural (CardInstance)** -- `getDeckCounts` agora delega a `structuralCounts` (única fonte):
+  `total`, `new` (sem histórico), `learning` (learning+relearning), `review` (ESTADO Review),
+  `due` (não-New com `due<=agora`), `reviewDue` (Review vencido). Reverso = 2 cartões, Cloze = N.
+- **MUDANÇA K.5**: `review` do Deck era "Review E vencido" (`countReviewCards`); agora é o estado Review,
+  igual a "Para revisar" em Progresso (K.3). O antigo valor é `reviewDue`; Devidos é `due`. Os wrappers
+  `countNewCards/countLearningCards/countReviewCards` foram removidos (duplicavam `structuralCounts`).
+  As listas "Meus Decks" e "Cartões da professora" mostram: total · novos · aprendendo · para revisar · devidos;
+  `total` agora exclui arquivados/inelegíveis (antes contava `STATE.cards` cru).
+- **Pedagógico (Note)** -- `getDeckContentMetrics` devolve `{study, teacher, self}` (cada um `contentMetrics`
+  ou `null`): Reverso = 1 conteúdo, Cloze = 1 conteúdo, força Note-level (Não iniciada/Fraca/Média/Forte).
+  **Nunca há total de conteúdo que misture origens.** Course Deck = Study Trail, Teacher Deck = Teacher,
+  Meus Decks = Self. Nenhuma tela exibe conteúdo/força por Deck hoje (helper preparado, sem UI nova).
+- Progresso/percentual de Deck: não existe; nenhum percentual novo foi criado.
+- Due de Deck não usa o limiar de 48h (só do cron) nem se confunde com "Para estudar hoje" (fila de sessão).
+- Fora de K.5: painel da professora (`get_teacher_student_metrics`, força por CardInstance no servidor) -> K.6.
+
 ## Fora desta fase
 - Histórico por Note e "última atividade" (`firstLearnedDate`/`lastReview` são por
   CardInstance; `lastReview` de cartões migrados é aproximado).

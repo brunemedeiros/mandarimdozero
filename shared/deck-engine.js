@@ -14,7 +14,7 @@
 //   4. CardInstance     -- generatedCardInstanceCount (delega ao motor
 //                          existente, shared/flashcard-model.js -- nunca
 //                          reimplementa geração de CardInstance)
-//   5/6. Agregação      -- bucketCardState/countXCards/getDeckCounts
+//   5/6. Agregação      -- bucketCardState/getDeckCounts/getDeckContentMetrics
 //   8/9/10. Movimentação/delete -- validateNoteMove/validateDeckMove/
 //                                  validateDeckDeletion (só domínio --
 //                                  quem persiste é shared/deck-data.js)
@@ -304,39 +304,33 @@ function bucketCardState(card){
   return cardStudyBucket(card);
 }
 
-// "New": CardInstance SEM histórico (K1). Mesma classificação da fila
-// (cardStudyBucket, shared/srs.js): "Errei" de cartão estudado vira
-// Learning/Relearning, nunca New.
-// Sem filtro de due aqui -- New/Learning são sobre CLASSIFICAÇÃO de
-// estado, só Review precisa da distinção estado x disponibilidade
-// (seção 8, "Separe ESTADO de DISPONIBILIDADE").
-function countNewCards(cards){
-  return cards.filter(c => bucketCardState(c) === 'new').length;
+// K.5: as contagens ESTRUTURAIS (CardInstance) de Deck vêm de UMA fonte só,
+// shared/analytics-metrics.js (structuralCounts), sobre o escopo (subárvore)
+// do Deck -- mesma classificação New/Learning/Review (K1, cardStudyBucket) e
+// mesmo Due (não-New com due<=agora) das telas de Progresso. Nada é
+// reimplementado aqui.
+//   new      = sem histórico            learning = learning + relearning
+//   review   = ESTADO review (não implica devido)
+//   due      = não-New com due<=agora   reviewDue = review E devido
+// `cards` já deve ser o pool ELEGÍVEL (arquivado/inelegível fora); o escopo
+// de subárvore é o de getStudyScopeForDeck (o mesmo que "Estudar este Deck").
+function getDeckCounts(decks, deckId, cards, now){
+  const sc = structuralCounts(getStudyScopeForDeck(decks, deckId, cards), now);
+  return { total: sc.cards, new: sc.new, learning: sc.learning, review: sc.review, reviewDue: sc.reviewDue, due: sc.due };
 }
 
-function countLearningCards(cards){
-  return cards.filter(c => bucketCardState(c) === 'learning').length;
-}
-
-// "Review": cards em estado review E devidos AGORA (disponibilidade, não
-// só estado) -- reaproveita cardsDueNow() (shared/srs.js, já existente),
-// nunca reimplementa a comparação de due.
-function countReviewCards(cards){
-  const dueNow = typeof cardsDueNow === 'function' ? cardsDueNow(cards) : cards.filter(c => c.due <= Date.now());
-  return dueNow.filter(c => bucketCardState(c) === 'review').length;
-}
-
-// Agregador central -- pega TODOS os descendentes do Deck (C3), conta os
-// 3 buckets sobre esse subtree inteiro. Mesmo critério de "cards já
-// elegíveis passados pelo chamador" de getStudyScopeForDeck() -- este
-// agregador nunca reimplementa isCardLessonCompleted().
-function getDeckCounts(decks, deckId, cards){
+// K.5: conteúdo (Note) do Deck, SEMPRE por origem -- nunca um total que
+// misture Study Trail/Teacher/Self. Reverso = 1 conteúdo (2 cartões),
+// Cloze = 1 conteúdo (N cartões), arquivados fora. Uma origem sem Notes no
+// escopo vem como null.
+function getDeckContentMetrics(decks, deckId, cards){
   const scoped = getStudyScopeForDeck(decks, deckId, cards);
-  return {
-    new: countNewCards(scoped),
-    learning: countLearningCards(scoped),
-    review: countReviewCards(scoped),
-  };
+  const out = {};
+  ANALYTICS_ORIGINS.forEach(o => {
+    const part = scoped.filter(c => c.origin === o);
+    out[o] = part.length ? contentMetrics(part) : null;
+  });
+  return out;
 }
 
 // ============================================================

@@ -173,7 +173,7 @@ async function bootPage(browser, lang, port){
       return out;
     });
     check(lang + ' Deck: arquivado fora, review não-vencido fora, novo dentro', !r.hasArchived && !r.hasFuture && r.hasNew, r);
-    check(lang + ' Deck: contagens New/Learning/Review por estado (não por origem)', r.counts.new === 1 && r.counts.review === 0 && r.sum.archivedCards === 1 && r.sum.eligibleCards === 2, r);
+    check(lang + ' Deck: contagens New/Learning/Review por estado (não por origem)', r.counts.new === 1 && r.counts.review === 1 && r.counts.reviewDue === 0 && r.counts.due === 0 /* K.5: review = estado; due separado */ && r.sum.archivedCards === 1 && r.sum.eligibleCards === 2, r);
     // FSRS: grade dentro de sessão de Deck com filtro incompatível
     r = await ev(async () => { STATE.studySettings.reviewOriginFilter = 'study'; await startDeckReviewSession(7101); const c = STATE.reviewQueue[0]; const reps0 = c.reps; gradeCurrentCard(2); return { reps: c.reps, reps0, deckId: c.deckId, origin: c.origin, filter: STATE.studySettings.reviewOriginFilter }; });
     check(lang + ' FSRS: grade funciona; deckId/origem preservados; filtro persistido', r.reps === r.reps0 + 1 && r.deckId === 7101 && r.origin === 'teacher' && r.filter === 'study', r);

@@ -80,12 +80,12 @@ for (const appKey of ['frances', 'mandarim']){
   ctx.__pool = pool;
   const counts = () => JSON.parse(JSON.stringify(run('getDeckCounts(__decks, 1, __pool)')));
   const base = counts();
-  check(label + ' contagem estrutural: new=2 (n + inc), learning=2, review=1 (só devidos)', base.new === 2 && base.learning === 2 && base.review === 1, base);
+  check(label + ' contagem estrutural: new=2 (n + inc), learning=2, review=2 (estado), reviewDue=1 (K.5)', base.new === 2 && base.learning === 2 && base.review === 2 && base.reviewDue === 1 && base.due === 3, base);
   // 'archived' e lição incompleta ficam fora do pool elegível (fora do escopo desta função pura)
   // Filtros de sessão não alteram a contagem estrutural:
   ctx.__filtered = pool.filter(x => x.tags.includes('b'));
   const sessionCounts = JSON.parse(JSON.stringify(run('getDeckCounts(__decks, 1, __filtered)')));
-  check(label + ' contagem estrutural (pool completo) independe do filtro; a da sessão (pool filtrado) pode diferir', JSON.stringify(counts()) === JSON.stringify(base) && sessionCounts.review === 0 && sessionCounts.new === 0 && sessionCounts.learning === 0 && base.review === 1, { base, sessionCounts });
+  check(label + ' contagem estrutural (pool completo) independe do filtro; a da sessão (pool filtrado) pode diferir', JSON.stringify(counts()) === JSON.stringify(base) && sessionCounts.reviewDue === 0 && sessionCounts.new === 0 && sessionCounts.learning === 0 && base.review === 2 && base.reviewDue === 1, { base, sessionCounts });
   ctx.__origin = pool.filter(x => x.origin === 'teacher');
   const orig = JSON.parse(JSON.stringify(run('getDeckCounts(__decks, 1, __origin)')));
   check(label + ' filtro de origem reduz só a contagem da sessão', orig.learning === 1 && JSON.stringify(counts()) === JSON.stringify(base), orig);
@@ -95,7 +95,7 @@ for (const appKey of ['frances', 'mandarim']){
   const qNew = qAll.filter(x => run('bucketCardState')(x) === 'new').length;
   const qLearn = qAll.filter(x => run('bucketCardState')(x) === 'learning').length;
   const qRev = qAll.filter(x => run('bucketCardState')(x) === 'review').length;
-  check(label + ' fila (sem limites) == contagens do Deck', qNew === base.new && qLearn === base.learning && qRev === base.review, { qNew, qLearn, qRev, base });
+  check(label + ' fila (sem limites) == contagens do Deck', qNew === base.new && qLearn === base.learning && qRev === base.reviewDue, { qNew, qLearn, qRev, base });
 
   // ---- 5) Reverse / Cloze: irmãos independentes
   const sib = [mk({ id: 't1', state: 'review', reps: 3, stability: 20, difficulty: 5, fsrsReps: 3, lastReview: now - 20 * DAY, due: now - 1000 }),
