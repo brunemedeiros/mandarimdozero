@@ -1259,7 +1259,9 @@ function maybeShowReviewReminder(){
   const today = todayStr();
   if (STATE.lastReviewReminderDay === today) return;
 
-  const dueCount = cardsDueNow(eligibleReviewPool()).length;
+  // K.7: Devido = não-New com due<=agora (structuralCounts). O antigo
+  // cardsDueNow() contava New (due=0) como pendente.
+  const dueCount = structuralCounts(eligibleReviewPool()).due;
   if (dueCount < REVIEW_REMINDER_THRESHOLD) return;
 
   STATE.lastReviewReminderDay = today;
@@ -1816,7 +1818,7 @@ function unitCardCounts(unitId){
   // continua por CardInstance (é fila de Review, A e B independentes).
   const pool = STATE.cards.filter(c => c.unitId === unitId);
   const { total, learned } = studyTrailWordProgress(pool); // mesma semântica de Progresso (Note, só trilha)
-  const dueForReview = cardsDueNow(pool.filter(c => c.reps > 0)).length;
+  const dueForReview = structuralCounts(pool).due; // K.7: mesma definição de Devido (não-New vencido)
   return { total, learned, dueForReview, totalCards: pool.length };
 }
 
@@ -3384,7 +3386,7 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
   // há cartões pra revisar (e mandar direto pro Flashcard) depois de toda
   // lição com vocabulário novo -- mesmo critério já usado em
   // unitCardCounts() pra "dueForReview".
-  const dueCount = cardsDueNow(eligibleReviewPool().filter(c => c.reps > 0)).length;
+  const dueCount = structuralCounts(eligibleReviewPool()).due; // K.7: Devido estrutural (não-New vencido)
   contentEl.innerHTML = `
     <div class="lesson-complete">
       <div class="lesson-complete-icon tier-pop">✅</div>
@@ -7399,6 +7401,15 @@ function renderProgressView(){
   const sc = structuralCounts(eligibleDeckReviewPool());
   const studyToday = trueDueReviewCount(eligibleReviewPool());
 
+  // K.7: "Conteúdos estudados" (Note) de Teacher e Self, SEMPRE separados e
+  // fora de "Palavras aprendidas"; só aparece a origem que tem conteúdo ativo.
+  const ownContentCards = ['teacher', 'self'].map(o => {
+    const m = ownContentProgress(STATE.cards, o);
+    if (!m.total) return '';
+    const label = o === 'teacher' ? 'Conteúdos da professora estudados' : 'Meus conteúdos estudados';
+    return `<div class="stat-card" data-stat="content-${o}"><div class="num">${m.studied}/${m.total}</div><div class="label">${label}</div></div>`;
+  }).join('');
+
   const guestWarning = !CURRENT_USER ? `
     <div class="guest-warning">
       ⚠️ Você está no modo convidado — seu progresso <strong>não</strong> será salvo ao fechar a aba.
@@ -7416,6 +7427,7 @@ function renderProgressView(){
     <div class="stat-card" data-stat="review"><div class="num">${sc.review}</div><div class="label">Para revisar</div></div>
     <div class="stat-card" data-stat="due"><div class="num">${sc.due}</div><div class="label">Devidos</div></div>
     <div class="stat-card" data-stat="today" title="Fila de uma sessão: devidos + novos limitados por 'novas por dia'. Respeita os filtros de origem/tag da Revisão, por isso pode diferir de Novos/Devidos."><div class="num">${studyToday}</div><div class="label">Para estudar hoje</div></div>
+    ${ownContentCards}
     <div class="stat-card"><div class="num">${STATE.xp}</div><div class="label">XP acumulado</div></div>
   `;
 

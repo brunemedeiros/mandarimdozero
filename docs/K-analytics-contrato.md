@@ -128,6 +128,31 @@ por isso não é retornado); (3) a função antiga (058) falhava com números fr
 progresso; a 059 os trata como 0. Aplicar a 059 ANTES de publicar o front.
 Testes: `tests/fase-k6/` (SQL em Postgres local, Playwright com respostas geradas pela RPC real).
 
+## K.7 -- Student Analytics (métricas do próprio aluno)
+Auditoria das superfícies do aluno (sem API nova; tudo client-side, sobre `STATE.cards`):
+| Superfície | Métrica / unidade | Origem | Helper |
+|---|---|---|---|
+| Progresso: Palavras aprendidas | Note, learned/curso inteiro | só Study | `studyTrailWordProgress` (K.3) |
+| Progresso: Novos/Aprendendo/Para revisar/Devidos | CardInstance | universo estudável | `structuralCounts(eligibleDeckReviewPool())` |
+| Progresso: Para estudar hoje | fila de sessão | respeita filtros origem/tag | `trueDueReviewCount(eligibleReviewPool())` (inalterado) |
+| Progresso: **Conteúdos da professora / Meus conteúdos estudados** (NOVO K.7) | Note, estudados/Notes ativas | Teacher e Self SEPARADOS, só aparece a origem com conteúdo | `ownContentProgress` |
+| "Suas palavras" (força) | Note, 4 categorias | origens estudáveis | `contentMetrics` (K.3) |
+| Decks (Meus Decks / Cartões da professora) | CardInstance | subárvore | `getDeckCounts` (K.5) |
+| Streak, XP, Revisões totais | contadores de conta | -- | inalterados (fora do contrato) |
+| Gráfico de palavras ao longo do tempo | palavra, só Study | -- | `wordLevelFirstLearnedDates` (K.4, inalterado) |
+
+Divergências corrigidas (contavam New com `due=0` como pendente -- a mesma família do antigo "Pendentes agora"):
+- **Lembrete de revisão** (`maybeShowReviewReminder`, banner "N cartões esperando"): usava `cardsDueNow(eligibleReviewPool())`;
+  20 cartões New disparavam o lembrete. Agora `structuralCounts(eligibleReviewPool()).due`. O texto passou de
+  "palavras" para "cartões" (a unidade contada é CardInstance).
+- **Fronteira de lição** e **`unitCardCounts().dueForReview`**: usavam `reps>0` + `cardsDueNow`; agora a mesma definição
+  de Devido (`structuralCounts(...).due`). Resultado equivalente, uma só fórmula.
+Sem mudança: Review Core, FSRS, `eligibleReviewPool`/`eligibleDeckReviewPool`, XP/streak, SQL. Nenhuma RPC nova: o aluno
+não recebe o payload de `get_teacher_student_metrics` (Teacher Analytics é só da professora).
+Não alterado de propósito: `todaysReviewCount`/"Tudo em dia" (derivam da fila de Review) e a revisão de 汉字 do zh
+(recurso próprio). Limitação: o gráfico histórico segue por `firstLearnedDate` de CardInstance (K.4).
+Testes: `tests/k7/test_k7_student_analytics.js` (Playwright FR+ZH, 40).
+
 ## Fora desta fase
 - Histórico por Note e "última atividade" (`firstLearnedDate`/`lastReview` são por
   CardInstance; `lastReview` de cartões migrados é aproximado).
