@@ -7,3 +7,5 @@ psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/share
 psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -f "$HERE/test_public_deck.sql" 2>&1 | grep -v '^\s*$'
 echo "--- P7 independência de mídia ---"
 psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -f "$HERE/test_media_independence.sql" 2>&1 | grep -v '^\s*$'
+echo "--- Hardening final ---"
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -f "$HERE/test_hardening.sql" 2>&1 | grep -v '^\s*$'

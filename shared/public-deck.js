@@ -133,8 +133,12 @@ async function removeCopiedPublicDeckMedia(paths){
 }
 
 // Duplica os objetos do manifest para a pasta do usuário atual. Devolve o mapa urlAntiga -> urlNova.
-async function duplicatePublicDeckMedia(items, uid, onProgress){
+async function duplicatePublicDeckMedia(rawItems, uid, onProgress){
   const created = [], map = {};
+  // O manifest já vem sem repetição; defesa: o mesmo objeto referenciado por várias Fields/Notes
+  // é copiado UMA vez e o destino é reutilizado no media_map.
+  const seen = new Set();
+  const items = (rawItems || []).filter(it => it && it.url && !seen.has(it.url) && seen.add(it.url));
   const bucket = supabaseClient.storage.from(PUBLIC_DECK_MEDIA_BUCKET);
   const stamp = Date.now().toString(36);
   let next = 0, done = 0, failed = null;
@@ -165,13 +169,29 @@ async function copyPublicDeckRpc(publicId, destDeckId, mediaMap){
   const { data, error } = await supabaseClient.rpc('copy_public_deck', {
     p_public_id: publicId, p_dest_deck_id: destDeckId || null, p_media_map: mediaMap || {},
   });
-  if (error) return { ok: false, code: publicDeckErrorCode(error.message), error: publicDeckErrorMessage(error.message) };
+  if (error){
+    const code = publicDeckErrorCode(error.message);
+    // Só é DEFINITIVO (a transação SQL foi revertida) quando o servidor respondeu com erro:
+    // SQLSTATE no `code` ou uma das mensagens da própria RPC. Falha de rede/timeout/gateway
+    // (sem code) é AMBÍGUA: o commit pode ter acontecido e só a resposta se perdeu.
+    const definitive = !!code || (typeof error.code === 'string' && error.code !== '');
+    return { ok: false, code, definitive, error: definitive ? publicDeckErrorMessage(error.message) : publicDeckErrorMessage('rpc_ambiguous') };
+  }
   return { ok: true, result: data };
 }
 
 // Fluxo completo: manifest -> duplicar mídia -> RPC atômica. Se a RPC falhar, remove o que duplicou.
 // Se o Deck mudou entre o manifest e a cópia (media_map_incomplete), tenta de novo uma vez.
+const PUBLIC_DECK_IMPORTS_IN_FLIGHT = new Set();
 async function copyPublicDeckWithMedia(publicId, destDeckId, onProgress){
+  // duplo clique / chamada repetida da MESMA importação enquanto ela roda: ignora (cópias
+  // intencionais separadas continuam possíveis depois que esta termina).
+  if (PUBLIC_DECK_IMPORTS_IN_FLIGHT.has(publicId)) return { ok: false, error: 'Esta importação já está em andamento.' };
+  PUBLIC_DECK_IMPORTS_IN_FLIGHT.add(publicId);
+  try { return await copyPublicDeckWithMediaInner(publicId, destDeckId, onProgress); }
+  finally { PUBLIC_DECK_IMPORTS_IN_FLIGHT.delete(publicId); }
+}
+async function copyPublicDeckWithMediaInner(publicId, destDeckId, onProgress){
   const uid = (typeof CURRENT_USER !== 'undefined' && CURRENT_USER && CURRENT_USER.id) || null;
   if (!uid) return { ok: false, error: 'Entre na sua conta para importar.' };
   for (let attempt = 0; attempt < 2; attempt++){
@@ -186,7 +206,10 @@ async function copyPublicDeckWithMedia(publicId, destDeckId, onProgress){
     }
     const res = await copyPublicDeckRpc(publicId, destDeckId, map);
     if (res.ok) return res;
-    await removeCopiedPublicDeckMedia(created);   // nada foi criado no banco: não deixa órfãos
+    // Erro definitivo = nada foi criado no banco: não deixa órfãos. Erro AMBÍGUO (rede/timeout):
+    // a cópia pode ter sido confirmada, então NUNCA apagar a mídia (Notes ficariam apontando para
+    // arquivos inexistentes). Objetos órfãos são o custo aceito (ver contrato técnico, v7).
+    if (res.definitive) await removeCopiedPublicDeckMedia(created);
     if (res.code === 'media_map_incomplete' && attempt === 0) continue;
     return res;
   }
@@ -205,6 +228,7 @@ function publicDeckErrorMessage(msg){
   if (/deck_too_large/.test(m)) return 'Este Deck é grande demais para importar de uma vez.';
   if (/deck_media_too_large/.test(m)) return 'Este Deck tem arquivos de mídia demais para importar de uma vez.';
   if (/media_copy_failed/.test(m)) return 'Não foi possível copiar os arquivos de mídia. Nada foi importado; tente novamente.';
+  if (/rpc_ambiguous/.test(m)) return 'A conexão falhou durante a importação e ela pode ter sido concluída. Confira em Meus Decks antes de tentar de novo.';
   if (/media_map_incomplete/.test(m)) return 'O Deck mudou durante a importação. Tente novamente.';
   if (/invalid_media_map/.test(m)) return 'Não foi possível validar os arquivos de mídia. Nada foi importado.';
   if (/cannot_copy_own_deck/.test(m)) return 'Este Deck já é seu.';

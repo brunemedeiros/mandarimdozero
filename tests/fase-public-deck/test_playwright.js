@@ -224,6 +224,28 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
         await ctx.close();
       }
       {
+        // HARDENING: erro de rede/timeout na RPC é AMBÍGUO (o commit pode ter ocorrido) -> NUNCA apagar a mídia
+        const { out, ctx } = await runScenario({ items: ITEMS, failAlways: 'TypeError: Failed to fetch' });
+        const removes = out.log.filter(x => x[0] === 'remove');
+        L('RPC com erro de REDE (ambíguo): NÃO remove a mídia duplicada (Notes não podem ficar sem arquivo)', out.copyCalls === 1 && removes.length === 0 && !out.imported, out.log);
+        await ctx.close();
+      }
+      {
+        // HARDENING: mesmo objeto referenciado várias vezes -> copiado UMA vez
+        const { out, ctx } = await runScenario({ items: [ITEMS[0], ITEMS[0], ITEMS[1]] });
+        const copies = out.log.filter(x => x[0] === 'copy');
+        L('manifest com URL repetida: copia cada objeto uma única vez e reutiliza no mapa', copies.length === 2 && Object.keys(out.args.p_media_map).length === 2, copies);
+        await ctx.close();
+      }
+      {
+        // HARDENING: duplo clique na mesma importação -> uma só operação
+        const r = await bootApp({ authenticated: true, premium: true, is_owner: false, can_open: true, can_import: true }, null, mediaHandler);
+        await r.page.evaluate(([sc, uid]) => { window.__SCEN = sc; window.__STORAGE = { log: [], copies: 0, failCopyAt: null }; CURRENT_USER = { id: uid }; }, [{ items: [] }, 'U']);
+        const res = await r.page.evaluate(async (id) => { const a = copyPublicDeckWithMedia(id, null), b = copyPublicDeckWithMedia(id, null); const [x, y] = await Promise.all([a, b]); return { x: x.ok, y: y.ok, calls: window.__SCEN.copyCalls || 0 }; }, PID);
+        L('chamadas simultâneas da MESMA importação: só uma executa (a outra é ignorada)', res.calls === 1 && ((res.x && !res.y) || (!res.x && res.y)), res);
+        await r.ctx.close();
+      }
+      {
         const { out, ctx } = await runScenario({ items: ITEMS, failFirstWith: 'media_map_incomplete' });
         const removes = out.log.filter(x => x[0] === 'remove'), copies = out.log.filter(x => x[0] === 'copy');
         L('Deck mudou durante a importação: limpa a 1ª tentativa e refaz (2 manifests, 2 RPCs, 6 copies)', out.manifest === 2 && out.copyCalls === 2 && copies.length === 6 && removes.length === 1 && removes[0][1].length === 3 && out.imported, { m: out.manifest, c: out.copyCalls });

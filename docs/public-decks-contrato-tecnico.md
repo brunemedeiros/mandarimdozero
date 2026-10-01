@@ -343,3 +343,87 @@ O arquivo do original pode ser apagado/substituído, o Deck despublicado ou excl
 
 **Pendente / fora de escopo:** duplicatas/merge; proxy de mídia; remoção definitiva da lista solta e de `hidden_from_profile`; ícone/cor ainda sem UI de pré-visualização no editor de publicação;
 Deck público de professora (Teacher Deck) continua proibido; busca/descoberta pública (AT §20) inexistente por desenho.
+
+# v7 — Hardening final pós-P7 (local; migrations 059–061 continuam NÃO aplicadas em produção)
+
+Auditoria de integração/segurança/consistência. Nenhuma mudança de SQL, de policy ou de produto; uma
+correção de cliente e testes novos. Duplicatas/reimportação, "Já adicionado" e limpeza da lista legada
+seguem FORA de escopo.
+
+## Cópia de conteúdo ≠ cópia de mídia
+- **Conteúdo**: `copy_public_deck` (SQL, uma transação) cria Decks/Notes novos do copiador, com atribuição
+  `criado-por-[username]` do autor original. **Mídia**: operação separada, feita ANTES pelo cliente com
+  `storage.copy` (fora da transação SQL).
+- Mídia **interna** (bucket `flashcard-media`) é **fisicamente duplicada** na pasta do copiador. Mídia
+  **externa** (`audio.type='url'` para outro host) **não** é duplicada: permanece link.
+- `media_map` (URL antiga → URL nova) só é aceito se TODO destino é objeto real do **próprio copiador**
+  (`<auth.uid()>/…`, existente em `storage.objects`); a RPC **não aceita destino externo**, destino na
+  pasta de outro usuário, destino == origem, nem mapa que não seja objeto. Mapa que não cobre toda URL
+  interna das Notes ⇒ `media_map_incomplete` e a transação inteira é revertida. Chave a mais no mapa
+  (mídia saiu do original depois do manifest) é aceita.
+- O manifest só lista URLs **distintas** (uma entrada por objeto, mesmo referenciado por várias Notes) da
+  árvore pública (raiz + subdecks explicitamente públicos), Notes ativas e compatíveis; nunca arquivadas,
+  subdecks privados, públicos-sob-privado, outros Decks do dono ou links externos. O cliente também
+  deduplica por URL e copia cada objeto uma única vez.
+
+## Storage real: o que foi e o que NÃO foi validado
+- Validado no **banco local** (Postgres + stub de `storage.objects`): autorização do manifest/RPC,
+  validação do mapa, atomicidade, independência após apagar/substituir/despublicar/excluir o original.
+- Validado por **stub** (Playwright): sequência manifest → copy → RPC, compensação, retry, dedupe,
+  trava de reentrância.
+- **NÃO validado contra Storage real**: policies reais de `storage.objects` (032: SELECT público; INSERT/
+  DELETE só na pasta `auth.uid()`; **não há UPDATE**), JWT real e o comportamento de `storage.copy`
+  (exige SELECT na origem + INSERT no destino; sem upsert, destino existente falha). **Antes do deploy**
+  rodar `tests/fase-public-deck/test_real_storage_integration.js` contra um projeto de STAGING (sai com
+  SKIPPED sem as variáveis; SKIPPED não vale como validado). Nenhuma policy foi alterada.
+- A policy de SELECT é pública por desenho do bucket: qualquer um que saiba o caminho lê/copia o objeto.
+  O gate Premium é da RPC/manifest, não do Storage. O manifest expõe o UID do autor no caminho
+  (**exposição de path, independente da cópia**); proxy ou bucket público separado seria uma melhoria
+  futura de exposição, **não** requisito da independência da cópia já implementada.
+
+## Atomicidade Storage ↔ banco
+| Falha | Resultado |
+|---|---|
+| 1º `storage.copy` falha | RPC nem é chamada; cliente remove o que já criou |
+| falha no meio de N | idem |
+| manifest mudou (mídia nova) | `media_map_incomplete`, nada criado; cliente limpa e refaz 1 vez |
+| mapa incompleto / inválido / destino inexistente | RPC recusa, nada criado; cliente limpa |
+| RPC aborta com erro do servidor (SQLSTATE/mensagem conhecida) | transação revertida; cliente limpa |
+| **RPC sem resposta (rede/timeout/gateway)** | **ambíguo**: o commit pode ter ocorrido. **Correção desta etapa**: o cliente NÃO apaga a mídia (antes apagava e poderia deixar Notes apontando para arquivos inexistentes). Pode sobrar órfão; a mensagem manda conferir Meus Decks antes de repetir |
+| aba fechada entre `storage.copy` e RPC | objetos órfãos (aceito) |
+Nenhum caminho persiste Notes apontando para mídia inexistente. **Órfãos são possíveis** (aba morta,
+erro ambíguo, chave a mais no mapa); **limpeza periódica de órfãos é pendência futura** (sem GC agora).
+
+## Idempotência
+Cada cópia intencional é independente (nova árvore, novos objetos). Duplo clique/chamadas simultâneas da
+MESMA importação na mesma aba: a segunda é ignorada (trava em memória). Duas abas/duas cópias seguidas
+criam duas árvores independentes (sem deduplicação de produto). O retry interno só ocorre em
+`media_map_incomplete` (reversão definitiva), nunca em erro ambíguo.
+
+## Limites
+`public_deck_copy_max_notes()` / `public_deck_copy_max_media()` = 2000, **guardrail técnico configurável**
+(`alter database … set app.public_deck_copy_max_*`), cobrem a árvore pública inteira (raiz + subdecks
+públicos; Notes ativas, inclusive as incompatíveis, para ser conservador). **Não** são o limite Free de
+**20 CardInstances**, que é regra separada de produto; a UI não os apresenta como regra Free/Premium.
+Exatamente no limite copia; limite+1 ⇒ `deck_too_large`, nada criado (testado: 2000 ok / 2001 recusado).
+
+## Publicação, subdecks, Legacy, Reports
+- `content_updated_at` muda só por conteúdo/estrutura/metadado público (Note, Tags, mover Note, subdeck,
+  nome, descrição/ícone/cor, publicar); nunca por `note` privada, `hidden_from_profile`, nem por estudo
+  (FSRS/Review vivem em `progress`, fora de `decks`/`own_flashcards`). `public_id` é estável em
+  despublicar/republicar (índice único; `gen_random_uuid`, nunca reaproveitado); despublicado ou
+  `public_profile=false` ⇒ "indisponível" em metadado, conteúdo, manifest e cópia (sem despublicar).
+- Publicar o pai **não** publica filhos; só subdecks explicitamente públicos entram (um público sob um
+  privado não é alcançável). `personal_root`/Course/Teacher nunca públicos (CHECK + trigger + RPC).
+- Legacy: mapeamento SQL = espelho de `nativeNoteEditorStateFromLegacyRow` (paridade testada, 17/17);
+  incompatível (ex.: mídia sem Field de idioma seguro) ⇒ não publica, a linha original não é alterada e o
+  dono vê a contagem em `get_public_deck_owner_status`.
+- Reports: `source: 'public_deck'` / `'public_deck_note'` com `public_id`, nome do Deck, username do dono
+  e índice posicional da Note (nunca ID interno); anônimo pode reportar (guest_id); Notes só são
+  mostradas a Premium/dono.
+
+## Testes (esta etapa)
+Postgres local: 87 + 48 + **20 novos** (`test_hardening.sql`); Playwright 118 (fr+zh, **6 novos**
+verificando erro ambíguo, dedupe e reentrância — falham sem a correção); paridade Legacy 17/17;
+concorrência/perf (8 publish simultâneos ⇒ 1 `public_id`; 4 cópias simultâneas independentes; 2000 ok /
+2001 recusado). Pendente: `test_real_storage_integration.js` (staging).
