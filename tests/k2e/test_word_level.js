@@ -60,23 +60,28 @@ for (const lang of ['fr', 'zh']){
   // E. força
   const bk = () => ctx.vocabStrengthBuckets();
   fresh(); let b = bk();
-  check(lang + ' E: tudo New = todas as palavras fracas (N palavras, não 2N)', b.weak === ctx.studyWordGroups(ctx.STATE.cards).length && b.weak + b.medium + b.strong === ctx.studyWordGroups(ctx.STATE.cards).length, b);
-  const totalWords = ctx.studyWordGroups(ctx.STATE.cards).length;
+  const nW = ctx.studyWordGroups(ctx.STATE.cards).length, totalWords = nW, tot = x => x.notStarted + x.weak + x.medium + x.strong;
+  // K.3: nenhuma irmã estudada = NÃO INICIADA (nunca "fraca")
+  check(lang + ' E: tudo New = todas as palavras NÃO INICIADAS (N palavras, não 2N), nenhuma fraca', b.notStarted === nW && b.weak === 0 && tot(b) === nW, b);
   study(A(0), { interval: 90 });  // A forte, B New
   b = bk();
-  check(lang + ' E: A forte + B New = 1 palavra forte (B New não a torna fraca nem cria 2º bucket)', b.strong === 1 && b.weak === totalWords - 1 && b.weak + b.medium + b.strong === totalWords, b);
+  check(lang + ' E: A forte + B New = 1 palavra forte (B New não rebaixa)', b.strong === 1 && b.weak === 0 && b.notStarted === nW - 1 && tot(b) === nW, b);
   study(B(0), { interval: 10 });  // B mediana estudada
   b = bk();
-  check(lang + ' E: A forte + B mediana estudada = 1 palavra mediana (a mais fraca entre as estudadas)', b.medium === 1 && b.strong === 0 && b.weak + b.medium + b.strong === totalWords, b);
+  check(lang + ' E: A forte + B mediana estudada = 1 palavra mediana (a mais fraca entre as estudadas)', b.medium === 1 && b.strong === 0 && tot(b) === nW, b);
   study(B(0), { interval: 90, lapses: 2 });
   b = bk();
-  check(lang + ' E: qualquer direção estudada com lapses>=2 => palavra fraca', b.strong === 0 && b.medium === 0 && b.weak === totalWords, b);
+  check(lang + ' E: direção estudada com lapses>=2 => palavra fraca; as demais não iniciadas', b.weak === 1 && b.strong === 0 && b.medium === 0 && b.notStarted === nW - 1, b);
   fresh(); study(B(1), { interval: 90 });
   check(lang + ' E: A New + B forte = 1 palavra forte', bk().strong === 1);
-  // cards de outras origens continuam por card
-  fresh(); ctx.STATE.cards.push({ id: 't1', origin: 'teacher', reps: 0, lapses: 0, interval: 0 }, { id: 't2', origin: 'teacher', reps: 5, lapses: 0, interval: 100 });
+  // Teacher/Self: agrupados por Note (rowId), arquivados fora
+  fresh(); ctx.STATE.cards.push(
+    { id: 't1', origin: 'teacher', rowId: 1, flashcardStatus: 'active', reps: 0, lapses: 0, interval: 0 },
+    { id: 't2', origin: 'teacher', rowId: 2, flashcardStatus: 'active', reps: 5, lapses: 0, interval: 100 },
+    { id: 't2-b', origin: 'teacher', rowId: 2, flashcardStatus: 'active', reps: 0, lapses: 0, interval: 0 },
+    { id: 't3', origin: 'teacher', rowId: 3, flashcardStatus: 'archived', reps: 5, lapses: 0, interval: 100 });
   b = bk();
-  check(lang + ' E: cards teacher contam 1 por CardInstance (não agrupados)', b.strong === 1 && b.weak === totalWords + 1, b);
+  check(lang + ' E: teacher agrupado por Note (t2+t2-b = 1 forte; t1 não iniciada; arquivado fora)', b.strong === 1 && b.notStarted === nW + 1 && tot(b) === nW + 2, b);
 
   // F/G. alreadyKnown / pickVocabFormat (nível de palavra)
   fresh();

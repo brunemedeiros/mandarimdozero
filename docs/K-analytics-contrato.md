@@ -40,9 +40,23 @@ própria (não funde por sufixo). Ids `-b`, `-cN`, `-rN` não participam.
 - Elegibilidade: o chamador passa o universo elegível; esta camada só exclui Teacher/Self
   arquivados e escopa por origem (não reimplementa o gate de lição).
 
+## K.3 -- ligação à UI (Progresso e "Suas palavras", fr + zh)
+- "Pendentes agora" (= `cardsDueNow(STATE.cards)`: qualquer card com `due<=agora`,
+  incluindo New com due=0 e lições não concluídas) foi **aposentado**. Em Progresso:
+  Novos / Aprendendo / Para revisar / Devidos (`structuralCounts` sobre
+  `eligibleDeckReviewPool`, CardInstance) + **Para estudar hoje**.
+- **Para revisar = estado Review** (não implica Devido); **Devidos** = não-New com `due<=agora`.
+  (`reviewDue` do K.2 continua disponível mas não é exibido.)
+- **Para estudar hoje** = definição pré-existente do hero da Revisão:
+  `trueDueReviewCount(eligibleReviewPool())` (devidos + novas limitadas por `newCardsPerDay`,
+  sem o teto de intensidade). Respeita filtros de sessão (origem/tag), como o hero.
+- "Palavras aprendidas" = `studyTrailWordProgress` (só Study Trail, curso inteiro).
+- "Suas palavras": `contentMetrics(eligibleReviewPool()).strength` -- Note-level, com
+  **Não iniciadas** como grupo próprio; `wordLevelStrengthBuckets`/`studyWordStrengthBucket` removidos.
+- Mantidos com lógica própria: `wordLevelLearnedCounts` (progresso por unidade, só trilha),
+  gráfico histórico (por CardInstance/`firstLearnedDate`, fora desta fase), painel da professora
+  (agregados do servidor por CardInstance; Note-level exigiria migration).
+
 ## Fora desta fase
 - Histórico por Note e "última atividade" (`firstLearnedDate`/`lastReview` são por
   CardInstance; `lastReview` de cartões migrados é aproximado).
-- Rótulos de UI ("Pendentes agora" etc.) e uso nas telas: K.3+.
-- `vocabStrengthBuckets`/`wordLevelStrengthBuckets` (K2-E) permanecem inalteradas:
-  ainda mapeiam "nenhuma estudada" para fraca; migrar para `not_started` é K.3.

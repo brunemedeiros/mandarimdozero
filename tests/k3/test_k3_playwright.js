@@ -1,4 +1,4 @@
-// K2-E -- Playwright (Chromium real), FR + ZH, modo convidado com o
+// K.3 -- Playwright (Chromium real), FR + ZH, modo convidado com o
 // Supabase do CDN substituído por um stub em memória (o proxy do sandbox
 // bloqueia o CDN). "Autenticado" é simulado setando CURRENT_USER após o
 // boot (o stub de rpc/select respeita o mesmo contrato da migration 051/052).
@@ -94,76 +94,48 @@ async function bootPage(browser, lang, port){
     console.log('== ' + lang);
     const { page, errors } = await bootPage(browser, lang, port);
     const ev = (fn, arg) => page.evaluate(fn, arg);
-    const info = await ev(() => {
-      const words = new Set(STATE.cards.filter(c => c.origin === 'study').map(c => c.unitId + ':' + c.vocabIdx)).size;
-      return { words, cards: STATE.cards.length };
-    });
-    check(lang + ' boot: palavras = cards/2 (1 Note = 2 CardInstances)', info.cards === info.words * 2, info);
-    // estuda SÓ o card A de 3 palavras (B fica New) e o B de uma 4ª (A New)
-    const setup = await ev(() => {
-      const u = UNITS.find(x => x.type !== 'grammar' && x.vocab.length >= 5);
-      const mk = (id, extra) => Object.assign(STATE.cards.find(c => c.id === id), { reps: 3, state: 'review', stability: 8, difficulty: 5, interval: 10, lapses: 0 }, extra);
-      mk(`u${u.id}-v0`, { firstLearnedDate: '2026-01-05' });
-      mk(`u${u.id}-v0-b`, { firstLearnedDate: '2026-01-09' });   // mesma palavra, estudada nos 2 lados
-      mk(`u${u.id}-v1`, { interval: 90, firstLearnedDate: '2026-01-07' });
-      mk(`u${u.id}-v2-b`, { firstLearnedDate: '2026-01-08' });  // só via B
-      return { uid: u.id };
-    });
-    await ev(() => { UNITS.forEach(x => { STATE.unitProgress[x.id] = { started: true, completed: true, lessonIdx: 99, lessonMisses: {} }; }); switchTab('progress'); });
-    const ui = await page.evaluate(() => {
-      const cards = [...document.querySelectorAll('#stat-cards .stat-card')].map(e => e.innerText.replace(/\s+/g, ' ').trim());
-      const learned = cards.find(t => /Palavras aprendidas/.test(t));
-      const chart = document.querySelector('#progress-line-chart-wrap .chart-total');
-      const dots = document.querySelectorAll('#progress-line-chart-wrap .chart-dot').length;
-      const vs = [...document.querySelectorAll('#vocab-strength-widget .vs-count')].map(e => parseInt(e.innerText));
-      const stat = {}; document.querySelectorAll('#stat-cards .stat-card[data-stat]').forEach(e => { stat[e.dataset.stat] = { n: parseInt(e.querySelector('.num').innerText), label: e.querySelector('.label').innerText }; });
-      return { learned, chart: chart && chart.innerText, dots, vs, stat, hasPend: cards.some(t => /Pendentes agora/.test(t)) };
-    });
-    const totalWords = info.words;
-    check(lang + ' UI: "Palavras aprendidas" mostra 3/' + totalWords + ' (palavras, não cards)', ui.learned && ui.learned.startsWith('3/' + totalWords + ' '), ui.learned);
-    check(lang + ' UI: gráfico total acumulado = 3 palavras (A+B da mesma palavra não dobram)', ui.chart && /\b3\b/.test(ui.chart), ui.chart);
-    check(lang + ' UI: gráfico com 3 datas (uma por palavra)', ui.dots === 3, ui.dots);
-    check(lang + ' UI: "Suas palavras" tem 4 grupos (Não iniciadas/Fracas/Medianas/Fortes) e soma = palavras (não 2x)', ui.vs.length === 4 && ui.vs.reduce((a, b) => a + b, 0) === totalWords, ui.vs);
-    check(lang + ' UI: não iniciadas = palavras sem estudo, nenhuma fraca', ui.vs[0] === totalWords - 3 && ui.vs[1] === 0, ui.vs);
-    check(lang + ' UI: 1 palavra forte, 2 medianas', ui.vs[3] === 1 && ui.vs[2] === 2, ui.vs);
-    check(lang + ' UI: "Pendentes agora" aposentado', ui.hasPend === false);
-    check(lang + ' UI: rótulos Novos/Aprendendo/Para revisar/Devidos/Para estudar hoje', ['Novos','Aprendendo','Para revisar','Devidos','Para estudar hoje'].every((l, i) => ui.stat[['new','learning','review','due','today'][i]] && ui.stat[['new','learning','review','due','today'][i]].label === l), ui.stat);
-    check(lang + ' UI: Novos = cartões sem histórico (CardInstance), Para revisar = 4 cartões estudados', ui.stat.new && ui.stat.new.n === info.cards - 4 - 0 && ui.stat.review && ui.stat.review.n === 4, ui.stat);
-    // Deck/Review continuam por CardInstance
-    const cs = await ev(async () => {
+    await ev(() => {
       UNITS.forEach(x => { STATE.unitProgress[x.id] = { started: true, completed: true, lessonIdx: 99, lessonMisses: {} }; });
-      window.CURRENT_USER = window.CURRENT_USER; CURRENT_USER = { id: 'u-test' }; window.__AUTH = true;
-      STATE.studySettings.newCardsPerDay = 1000; STATE.studySettings.sessionIntensity = 'all';
-      await ensureDecksLoadedForReview();
       const u = UNITS.find(x => x.type !== 'grammar' && x.vocab.length >= 5);
-      const s = deckReviewSummary(STATE.cards.find(c => c.id === `u${u.id}-v0`).deckId);
-      return { total: s.totalCards, wordsInUnit: u.vocab.length };
+      const NOW = Date.now(), DAY = 86400e3;
+      const mk = (id, o) => Object.assign(STATE.cards.find(c => c.id === id), { reps: 3, state: 'review', stability: 8, difficulty: 5, interval: 10, lapses: 0 }, o);
+      mk(`u${u.id}-v0`, { due: NOW - DAY });            // Review devido
+      mk(`u${u.id}-v1`, { due: NOW + 5 * DAY });        // Review NÃO devido
+      mk(`u${u.id}-v2`, { state: 'learning', due: NOW - 1000 }); // Learning devido
+      mk(`u${u.id}-v3`, { state: 'relearning', due: NOW + DAY, reps: 4 }); // Relearning (= Learning), não devido
+      // Self: 1 Note com reverso (2 cards), só um estudado, + 1 arquivada estudada; Teacher: 1 Note estudada
+      const base = { origin: 'self', deckId: null, unitId: null, vocabIdx: null, interval: 0, lapses: 0, stability: 0, difficulty: 0 };
+      STATE.cards.push(
+        Object.assign({}, base, { id: 's1', rowId: 1, flashcardStatus: 'active', reps: 2, state: 'review', due: NOW - DAY, interval: 90 }),
+        Object.assign({}, base, { id: 's1-b', rowId: 1, flashcardStatus: 'active', reps: 0, state: 'new', due: 0 }),
+        Object.assign({}, base, { id: 's2', rowId: 2, flashcardStatus: 'archived', reps: 3, state: 'review', due: NOW - DAY }),
+        Object.assign({}, base, { id: 't1', rowId: 1, origin: 'teacher', flashcardStatus: 'active', reps: 1, state: 'review', due: NOW + DAY }));
+      switchTab('progress');
     });
-    check(lang + ' Deck segue por CardInstance (unidade: 2 x palavras)', cs.total === cs.wordsInUnit * 2, cs);
-    // conclusão da unidade (A estudado em todas as palavras, B New) e botão "Já sei" real
-    const done = await ev(async uid => {
-      const u = UNITS.find(x => x.id === uid);
-      STATE.unitProgress[uid] = { started: true, completed: false, lessonIdx: 0, lessonMisses: {} };
-      u.vocab.forEach((_, i) => Object.assign(STATE.cards.find(c => c.id === `u${uid}-v${i}`), { reps: 2, state: 'review', due: 1 }));
-      checkUnitCompletion(uid);
-      return { completed: STATE.unitProgress[uid].completed, bNew: STATE.cards.filter(c => c.unitId === uid && c.id.endsWith('-b') && c.reps === 0).length };
-    }, setup.uid);
-    check(lang + ' checkUnitCompletion na UI real: A estudado + B New conclui a unidade', done.completed === true && done.bNew > 0, done);
-    // Já sei: palavra estudada só via B mostra ✓ e não regrava A
-    const ks = await page.evaluate(async uid => {
-      const u = UNITS.find(x => x.id === uid);
-      STATE.cards.forEach(c => { if (c.unitId === uid){ c.reps = 0; c.state = 'new'; c.due = 0; } });
-      Object.assign(STATE.cards.find(c => c.id === `u${uid}-v3-b`), { reps: 2, state: 'review' });
-      const host = document.createElement('div'); host.id = 'k2e-host';
-      host.innerHTML = `<button class="know-btn" data-card-id="u${uid}-v3">Já sei?</button>`; document.body.appendChild(host);
-      wireKnowButtons(host); host.querySelector('.know-btn').click();
-      const A = STATE.cards.find(c => c.id === `u${uid}-v3`);
-      return { aReps: A.reps, txt: host.innerText };
-    }, setup.uid);
-    check(lang + ' "Já sei" numa palavra já estudada via B não regrava o card A', ks.aReps === 0, ks);
-    check(lang + ' sem pageerror', errors.length === 0, errors);
+    const r = await ev(() => {
+      const stat = {}; document.querySelectorAll('#stat-cards .stat-card[data-stat]').forEach(e => { stat[e.dataset.stat] = parseInt(e.querySelector('.num').innerText); });
+      const learned = [...document.querySelectorAll('#stat-cards .stat-card')].find(e => /Palavras aprendidas/.test(e.innerText)).querySelector('.num').innerText;
+      const vs = [...document.querySelectorAll('#vocab-strength-widget .vs-count')].map(e => parseInt(e.innerText));
+      const exp = {
+        structural: structuralCounts(eligibleDeckReviewPool()),
+        words: studyTrailWordProgress(STATE.cards),
+        own: ownContentProgress(STATE.cards, 'self'), teacher: ownContentProgress(STATE.cards, 'teacher'),
+        archived: archivedCounts(STATE.cards, 'self'),
+      };
+      return { stat, learned, vs, exp };
+    });
+    const e = r.exp;
+    check(lang + ' Review sem due NÃO é Devido; Review vencido é Devido', r.stat.due === e.structural.due && e.structural.due === 3 /* v0 review, v2 learning, s1 */, r);
+    check(lang + ' Para revisar = estado Review (inclui o não vencido)', r.stat.review === e.structural.review && e.structural.review === 4 /* v0,v1,s1,t1 */, r.stat);
+    check(lang + ' Aprendendo = learning + relearning', r.stat.learning === 2, r.stat);
+    check(lang + ' Reverso = 2 CardInstances / 1 conteúdo (self)', e.own.total === 1 && e.own.studied === 1 && e.structural.new >= 1, e.own);
+    check(lang + ' Self: arquivado fora de ativos e só informativo', e.archived.cards === 1 && e.archived.notes === 1);
+    check(lang + ' Self e Teacher separados (1 conteúdo estudado cada)', e.own.studied === 1 && e.teacher.studied === 1 && e.teacher.total === 1);
+    check(lang + ' Palavras aprendidas só Study Trail (4 palavras), Teacher/Self fora', r.learned.startsWith('4/') && e.words.learned === 4, r.learned);
+    check(lang + ' Força: Self(1) entra no widget junto da trilha como Note; irmã New não rebaixa', r.vs.length === 4 && r.vs[3] >= 1, r.vs);
+    check(lang + ' sem erro de página', errors.length === 0, errors);
   }
   await browser.close(); server.close();
-  console.log(`K2-E playwright: ${passed}/${passed + failed} verificações` + (failed ? ` — ${failed} FALHAS` : ' — OK'));
+  console.log(`K.3 playwright: ${passed}/${passed + failed} verificações — ${failed ? 'FALHOU' : 'OK'}`);
   process.exit(failed ? 1 : 0);
 })();

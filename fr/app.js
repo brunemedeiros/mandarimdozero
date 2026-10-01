@@ -5347,8 +5347,11 @@ function hardWordsPool(){
 //   Medianas = o resto do pool.
 function vocabStrengthBuckets(){
   const pool = eligibleReviewPool();
-  // K2-E: cada PALAVRA da trilha conta uma vez (A+B); demais origens por card.
-  return wordLevelStrengthBuckets(pool);
+  // K.3: força é por NOTE (conteúdo) -- A+B da trilha, reverso e Cloze contam
+  // uma vez. Nenhuma irmã estudada = notStarted (nunca "fraca"); com estudadas
+  // = a mais fraca entre elas. Fonte: shared/analytics-metrics.js.
+  const st = contentMetrics(pool).strength;
+  return { notStarted: st.not_started, weak: st.weak, medium: st.medium, strong: st.strong };
 }
 
 // Fase 12: REVISÕES DE HOJE (o que o motor decidiu que é hora de revisar
@@ -5472,9 +5475,9 @@ function renderReviewTodayWidget(){
 function renderVocabStrengthWidget(){
   const wrap = document.getElementById('vocab-strength-widget');
   if (!wrap) return;
-  const { weak, medium, strong } = vocabStrengthBuckets();
-  if (weak + medium + strong === 0){ wrap.innerHTML = ''; return; }
-  const max = Math.max(weak, medium, strong, 1);
+  const { notStarted, weak, medium, strong } = vocabStrengthBuckets();
+  if (notStarted + weak + medium + strong === 0){ wrap.innerHTML = ''; return; }
+  const max = Math.max(notStarted, weak, medium, strong, 1);
   const h = n => Math.max(10, Math.round(n / max * 100));
   const item = (tier, count, label) => `
     <div class="vs-item">
@@ -5485,11 +5488,12 @@ function renderVocabStrengthWidget(){
   wrap.innerHTML = `
     <div class="section-label">Suas palavras</div>
     <div class="vocab-strength-row">
+      ${item('none', notStarted, 'Não iniciadas')}
       ${item('weak', weak, 'Fracas')}
       ${item('mid', medium, 'Medianas')}
       ${item('strong', strong, 'Fortes')}
     </div>
-    <p class="profile-edit-hint">Fraca = ainda não firmou; Forte = já sabe bem há tempos; Mediana = no meio do caminho. Isso é o vocabulário TODO, não as revisões de hoje (acima) -- por isso pode ter palavras medianas aqui mesmo sem nenhuma revisão pendente agora.</p>
+    <p class="profile-edit-hint">Não iniciada = ainda sem nenhum estudo; Fraca = ainda não firmou; Forte = já sabe bem há tempos; Mediana = no meio do caminho. Isso é o vocabulário TODO, não as revisões de hoje (acima) -- por isso pode ter palavras medianas aqui mesmo sem nenhuma revisão pendente agora.</p>
   `;
 }
 
@@ -7383,9 +7387,16 @@ function renderGoalsView(){
 
 function renderProgressView(){
   const completedUnits = Object.values(STATE.unitProgress).filter(u=>u.completed).length;
-  // K2-E: "Palavras aprendidas" em palavras (Note), não em CardInstances.
-  const { total: totalCards, learned: learnedCards } = wordLevelLearnedCounts(STATE.cards);
-  const dueCount = cardsDueNow(STATE.cards).length;
+  // K.3: "Palavras aprendidas" = SÓ Study Trail, em palavras (Note), com o
+  // curso inteiro como denominador (Teacher/Self não entram aqui).
+  const { total: totalCards, learned: learnedCards } = studyTrailWordProgress(STATE.cards);
+  // K.3: o antigo "Pendentes agora" era cardsDueNow(STATE.cards) = qualquer card
+  // com due<=agora, inclusive New (due=0) e lições ainda não concluídas -- uma
+  // mistura. Agora: contagens ESTRUTURAIS (CardInstance) do universo estudável,
+  // sem os filtros de sessão (origem/tag), e "Para estudar hoje" = a fila que
+  // uma sessão entrega (mesma definição/número do hero da Revisão).
+  const sc = structuralCounts(eligibleDeckReviewPool());
+  const studyToday = trueDueReviewCount(eligibleReviewPool());
 
   const guestWarning = !CURRENT_USER ? `
     <div class="guest-warning">
@@ -7399,7 +7410,11 @@ function renderProgressView(){
     <div class="stat-card"><div class="num">${learnedCards}/${totalCards}</div><div class="label">Palavras aprendidas</div></div>
     <div class="stat-card"><div class="num">${effectiveStreak()}</div><div class="label">Dias seguidos</div></div>
     <div class="stat-card"><div class="num">${STATE.totalReviews}</div><div class="label">Revisões totais</div></div>
-    <div class="stat-card"><div class="num">${dueCount}</div><div class="label">Pendentes agora</div></div>
+    <div class="stat-card" data-stat="new"><div class="num">${sc.new}</div><div class="label">Novos</div></div>
+    <div class="stat-card" data-stat="learning"><div class="num">${sc.learning}</div><div class="label">Aprendendo</div></div>
+    <div class="stat-card" data-stat="review"><div class="num">${sc.review}</div><div class="label">Para revisar</div></div>
+    <div class="stat-card" data-stat="due"><div class="num">${sc.due}</div><div class="label">Devidos</div></div>
+    <div class="stat-card" data-stat="today"><div class="num">${studyToday}</div><div class="label">Para estudar hoje</div></div>
     <div class="stat-card"><div class="num">${STATE.xp}</div><div class="label">XP acumulado</div></div>
   `;
 

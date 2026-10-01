@@ -165,22 +165,9 @@ function cardStrengthBucket(c){
   if (c.reps > 0 && c.lapses < 2 && c.interval >= 60) return 'strong';
   return 'medium';
 }
-// Força da PALAVRA: só as CardInstances COM evidência de estudo contam
-// (B New não puxa a palavra para "fraca"); sem nenhuma estudada = fraca
-// (equivale ao reps===0 de antes); com estudadas = a mais fraca entre elas
-// (a palavra só é "forte" se toda direção já estudada for forte).
-function studyWordStrengthBucket(wordCards){
-  const studied = (wordCards || []).filter(c => c.reps > 0);
-  if (!studied.length) return 'weak';
-  const rank = { weak: 0, medium: 1, strong: 2 };
-  return studied.map(cardStrengthBucket).reduce((a, b) => rank[b] < rank[a] ? b : a);
-}
-function wordLevelStrengthBuckets(pool){
-  const b = { weak: 0, medium: 0, strong: 0 };
-  studyWordGroups(pool).forEach(g => { b[studyWordStrengthBucket(g)]++; });
-  (pool || []).forEach(c => { if (!isStudyTrailWordCard(c)) b[cardStrengthBucket(c)]++; });
-  return b;
-}
+// K.3: a força da PALAVRA/conteúdo (Note) agora vive em
+// shared/analytics-metrics.js (noteStrengthBucket/contentMetrics), com
+// 'não iniciada' como categoria própria. Aqui fica só a regra por CardInstance.
 
 // ============================================================
 // K2-F -- PROJEÇÃO PEDAGÓGICA (word-level / direção A) para exercícios de

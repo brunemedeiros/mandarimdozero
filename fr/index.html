@@ -1539,6 +1539,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   background: var(--paper-warm); border:1px solid var(--paper-line); overflow:hidden;
 }
 .vs-fill{ position:absolute; left:0; right:0; bottom:0; }
+.vs-fill[data-tier="none"]{ background: var(--ink-soft); opacity:.45; }
 .vs-fill[data-tier="weak"]{ background: var(--error-red); }
 .vs-fill[data-tier="mid"]{ background: var(--dc-slot-0); }
 .vs-fill[data-tier="strong"]{ background: var(--jade); }
@@ -4183,6 +4184,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <script src="../shared/admin-premium.js"></script>
 <script src="../shared/flashcard-model.js"></script>
 <script src="../shared/study-trail-model.js"></script>
+<script src="../shared/analytics-metrics.js"></script>
 <script src="../shared/deck-engine.js"></script>
 <script src="../shared/flashcard-editor-state.js"></script>
 <script src="../shared/flashcard-field-audio-recorder.js"></script>

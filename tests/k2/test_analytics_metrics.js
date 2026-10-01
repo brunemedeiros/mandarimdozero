@@ -8,7 +8,6 @@ for (const lang of ['fr', 'zh']){
   console.log('== ' + lang);
   const ctx = loadLang(lang);
   const run = c => vm.runInContext(c, ctx);
-  run(read('shared/analytics-metrics.js'));
   const appKey = lang === 'fr' ? 'frances' : 'mandarim';
   const NOW = Date.now(), PAST = NOW - 86400e3, FUT = NOW + 86400e3 * 5;
 
