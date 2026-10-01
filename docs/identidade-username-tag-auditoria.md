@@ -329,7 +329,7 @@ públicos (tabela `decks` vazia), 0 tabelas de alias/redirect.
 |---|---|---|---|---|---|
 | Aceitar como estão (tag normalizada difere do username) | Não | Não | Não | n/a | Não |
 | Impor alfabeto canônico a futuros e deixar os 3 (grandfather) | Não | Não | Não | n/a | Não |
-| Migrar os 3 para o alfabeto canônico | **Sim** (`.` → `-` ou remover) | **Sim**: `#/user/<antigo>` deixa de resolver | Reports antigos guardam o username da época (1 coluna com username em tabelas públicas: contexto de reports); vínculos/Premium/badges usam uuid → intactos | **Não** (precisaria de tabela de alias/histórico; a AT não define) | Não |
+| Migrar os 3 para o alfabeto canônico | **Sim** (`.` → `-` ou remover) | **Sim**: `#/user/<antigo>` deixa de resolver | Reports antigos guardam o username da época (o contexto de Reports guarda o username como texto dentro do payload; nenhuma coluna de tabela além de `profiles.username` o armazena); vínculos/Premium/badges usam uuid → intactos | **Não** (precisaria de tabela de alias/histórico; a AT não define) | Não |
 | Trocar a base da tag para identificador interno | Não | Não | Não | n/a | Não |
 
 Observação: como os 3 já têm perfil público ativo, qualquer migração deles é uma mudança de identidade pública
@@ -388,8 +388,7 @@ Cenário: `ana` cria atribuição `criado-por-ana`, exclui a conta; `B` registra
 - O CHECK permite `___`, `...`, `---`, `-_-`, `.-.` (3+ separadores, sem alfanumérico). Hoje existem **0**.
 - Para qualquer um deles `norm(u) = ""` e `T(u)` vira `criado-por` (a normalização remove o hífen final), tag igual
   para todos eles e sem autor.
-- Também degradado (não vazio, mas pouco informativo): `a__`, `_a_` → `criado-por-a`, colidindo com `a`... se `a` tivesse
-  3 caracteres (hoje o mínimo é 3, então `aaa`); mais realista: `1__` → `criado-por-1`.
+- Também degradado (não vazio, mas pouco informativo): `1__` ou `_a_` → `criado-por-1` / `criado-por-a`, e podem colidir com `1`/`a`-derivados como `1.a`? não; colidem com outro username que normalize igual (ex.: `a--` e `_a_`).
 - AT: **nada define**. Alternativas A/B/F (exigir pelo menos um alfanumérico e/ou iniciar/terminar alfanumérico),
   D/E (irrelevante para a tag, mas ainda precisa de username útil para a URL) -- todas exigem a decisão do
   alfabeto.
