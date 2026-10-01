@@ -153,7 +153,7 @@ Não alterado de propósito: `todaysReviewCount`/"Tudo em dia" (derivam da fila 
 (recurso próprio). Limitação: o gráfico histórico segue por `firstLearnedDate` de CardInstance (K.4).
 Testes: `tests/k7/test_k7_student_analytics.js` (Playwright FR+ZH, 40).
 
-## K.8 -- Public Analytics: BLOQUEADA POR DEPENDÊNCIA (ver docs/public-decks-auditoria.md v2, contra a Arquitetura Total; onde cita `source_*`, ler "atribuição pela Tag `criado-por-<username>`") (Public Decks / atribuição ainda não implementados)
+## K.8 -- Public Analytics: BLOQUEADA POR DEPENDÊNCIA (ver docs/public-decks-auditoria.md v3 (contrato fechado); onde cita `source_*`, ler "atribuição pela Tag `criado-por-<username>`") (Public Decks / atribuição ainda não implementados)
 Auditoria de prontidão (só leitura; nenhum código, migration, RPC ou UI criados).
 Existe (Perfil Público, Fases 1-2 do prompt-mestre "perfil público"): `profiles.public_profile` (default true),
 rota `#/user/<username>` (`shared/router.js`, `shared/public-profile.js`), página sem login, RPCs
