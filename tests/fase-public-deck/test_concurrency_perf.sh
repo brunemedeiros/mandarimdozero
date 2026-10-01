@@ -22,3 +22,18 @@ for i in 1 2 3 4; do ( echo "$(as_user $PREM) select public.copy_public_deck('$P
 echo "cópias simultâneas: decks=$($P -c "select count(*) from decks where owner_id='$PREM' and name='Concorrência'") notas=$($P -c "select count(*) from own_flashcards where owner_id='$PREM'") erros=$(cat /tmp/cp_err_* | grep -ci error || true)"
 echo "cópia de 2000 Notes (1 chamada): $(t $P -c "$(as_user $PREM) select public.copy_public_deck('$PID')")s"
 echo "atribuição única por Note: $($P -c "select count(*) filter (where (select count(*) from unnest(tags) t where t like 'criado-por-%')=1)||'/'||count(*) from own_flashcards where owner_id='$PREM'")"
+# P7 -- tamanho: 500, 1000, 2000 (no limite técnico) e 2001 (acima: deck_too_large, nada é criado).
+bench(){ # $1=N
+  local D=$($P -c "insert into decks(owner_id,kind,name,language_app_key,parent_deck_id) select owner_id,'personal','Bench$1',language_app_key,id from decks where kind='personal_root' and owner_id='$OWN' and language_app_key='frances' returning id" | head -1)
+  $P -c "insert into own_flashcards(owner_id,language_app_key,deck_id,front,back_trans,tags) select '$OWN','frances',$D,'f'||g,'b'||g,'{}' from generate_series(1,$1) g" >/dev/null
+  echo "set role authenticated; select set_config('request.jwt.claim.sub','$OWN',false); select set_config('request.jwt.claims','{\"sub\":\"$OWN\"}',false); select public.publish_deck($D,'b','book','gray');" | $P >/dev/null
+  local B=$($P -c "select public_id from decks where id=$D")
+  local before=$($P -c "select count(*) from own_flashcards where owner_id='$PREM'")
+  local s=$(date +%s.%N)
+  local out=$(echo "$(as_user $PREM) select public.copy_public_deck('$B');" | $P 2>&1 | grep -o 'deck_too_large' | head -1)
+  local el=$(echo "$(date +%s.%N) - $s" | bc)
+  local after=$($P -c "select count(*) from own_flashcards where owner_id='$PREM'")
+  echo "cópia $1 Notes: ${el}s resultado=${out:-ok} criadas=$((after-before))"
+}
+$P -c "delete from own_flashcards where owner_id='$PREM'; delete from decks where owner_id='$PREM' and kind='personal'" >/dev/null
+for n in 500 1000 2000 2001; do bench $n; done

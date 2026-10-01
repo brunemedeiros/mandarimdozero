@@ -18,11 +18,14 @@ const fixtures = [
   { n: 'cloze fr', r: { language_app_key: 'frances', front: null, back_trans: 'Eu sou aqui', cloze_sentence: 'Je ___ ici', cloze_answer: 'suis' } },
   { n: 'cloze zh com pinyin', r: { language_app_key: 'mandarim', front: null, back_trans: 'Eu sou brasileiro', cloze_sentence: '我___巴西人', cloze_answer: '是', cloze_answer_pinyin: 'shì' } },
   { n: 'cloze com chars especiais na resposta', r: { language_app_key: 'frances', front: null, back_trans: 'x', cloze_sentence: 'a ___ b', cloze_answer: 'c\\1&d' } },
-  { n: 'portugues normal (sem idioma estudado mapeado)', r: { language_app_key: 'portugues', front: 'a', back_trans: 'b', audio_url: 'https://x/p.mp3' } },
+  { n: 'portugues normal sem mídia (sem idioma estudado mapeado)', r: { language_app_key: 'portugues', front: 'a', back_trans: 'b' } },
 ];
 const incompat = [
   { n: 'cloze sem ___', r: { language_app_key: 'frances', front: null, back_trans: 'x', cloze_sentence: 'sem', cloze_answer: 'r' } },
   { n: 'cloze com 2 ___', r: { language_app_key: 'frances', front: null, back_trans: 'x', cloze_sentence: 'a ___ b ___', cloze_answer: 'r' } },
+  // P7: o SQL é DELIBERADAMENTE mais estrito que o JS aqui -- o editor descarta a mídia que não tem Field de destino,
+  // mas publicar assim seria publicar a Note incompleta; no Public Deck ela é incompatível (NULL), sem tocar o Legacy.
+  { n: 'portugues com mídia (sem Field de destino)', r: { language_app_key: 'portugues', front: 'a', back_trans: 'b', audio_url: 'https://x/p.mp3' } },
   { n: 'mc sem resposta', r: { language_app_key: 'frances', front: 'q', back_trans: '  ', choices: ['a'] } },
 ];
 const norm = (fields, mode) => ({
@@ -39,9 +42,8 @@ const norm = (fields, mode) => ({
   for (const fx of fixtures.concat(incompat)) {
     const r = fx.r, cols = Object.keys(r), q = (v) => v === null ? 'null' : Array.isArray(v) ? `'${JSON.stringify(v).replace(/'/g, "''")}'::jsonb` : typeof v === 'boolean' ? v : `'${String(v).replace(/'/g, "''")}'`;
     const row = Object.assign({ front_is_target_language: true }, r);
-    psql(`insert into own_flashcards(owner_id,${Object.keys(row).join(',')}) values ('${OWNER}',${Object.values(row).map(q).join(',')})`);
-    const sql = psql(`select public.public_note_native(f)::text from own_flashcards f where id=(select max(id) from own_flashcards)`);
-    if (fx.n.indexOf('cloze sem') === 0 || fx.n.startsWith('cloze com 2') || fx.n.startsWith('mc sem')) {
+    const sql = psql(`with ins as (insert into own_flashcards(owner_id,${Object.keys(row).join(',')}) values ('${OWNER}',${Object.values(row).map(q).join(',')}) returning *) select public.public_note_native(ins)::text from ins`).split('\n')[0].replace(/^INSERT 0 1$/, '');
+    if (fx.n.indexOf('cloze sem') === 0 || fx.n.startsWith('cloze com 2') || fx.n.startsWith('mc sem') || fx.n.startsWith('portugues com mídia')) {
       check('incompatível → NULL no SQL: ' + fx.n, sql === '');
       continue;
     }
@@ -52,7 +54,7 @@ const norm = (fields, mode) => ({
   }
   // JS também rejeita as incompatíveis (preflight), mesma regra
   const pf = vm.runInContext('legacyFlashcardConversionPreflight', ctx);
-  check('preflight JS recusa as mesmas incompatíveis (cloze sem/2 ___, mc sem resposta)', incompat.every(f => pf(f.r).ok === false));
+  check('preflight JS recusa as mesmas incompatíveis (cloze sem/2 ___, mc sem resposta)', incompat.filter(f => !f.n.startsWith('portugues')).every(f => pf(f.r).ok === false));
   psql(`delete from own_flashcards where owner_id='${OWNER}'`);
   summary();
 })();

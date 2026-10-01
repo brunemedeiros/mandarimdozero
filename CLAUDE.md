@@ -17269,3 +17269,4 @@ Implementado sobre o contrato aprovado (`docs/public-decks-contrato-tecnico.md`,
 `personal_root`/Course/Teacher nunca públicos (CHECK + trigger), `note` nunca público, atribuição `criado-por-[username]` pela regra única `note_attribution_tag`.
 Sem renderer novo (Preview com os 4 renderers). Lista solta de cartões públicos aposentada por flag (`PUBLIC_FLAT_FLASHCARDS_ENABLED=false`).
 Pendências registradas lá: duplicatas, proxy de mídia (uid no caminho do Storage), cleanup da lista solta. Testes em `tests/fase-public-deck/`.
+P7: cópia de Public Deck duplica a mídia no Storage do copiador (manifest → storage.copy → RPC com `p_media_map`, compensação em falha); limites 2000 Notes/mídias são guardas técnicas configuráveis.

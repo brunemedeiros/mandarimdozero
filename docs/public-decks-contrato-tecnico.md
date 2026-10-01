@@ -318,7 +318,7 @@ calculadas só no cliente (`generatedCardInstanceCount`); o servidor não persis
 
 **Cópia (`copy_public_deck`)**: uma transação; cria Deck pessoal novo em Meus Decks (ou no destino válido), recria os subdecks públicos, copia Notes nativas
 (Fields/modo/tags comuns) com a atribuição `criado-por-[username do autor original]` (cópia de cópia mantém só a original); não copia FSRS, progresso, `note`,
-`storagePath`, `generationKey`. Sem live link e sem `source_*`. Limite de segurança: 2000 Notes por chamada.
+`storagePath`, `generationKey`. Sem live link e sem `source_*`. Guarda TÉCNICA (não é regra de produto nem tem relação com o limite Free de 20 CardInstances): 2000 Notes e 2000 arquivos de mídia por cópia, contando raiz + subdecks públicos; configuráveis sem migration (`app.public_deck_copy_max_notes` / `app.public_deck_copy_max_media`). O banco copia ~0,7 ms/Note (500=0,36 s, 1000=0,73 s, 2000=1,46 s), então o teto protege memória da resposta e o nº de objetos que o cliente duplica no Storage, não um timeout medido.
 **Duplicatas/reimportação:** não implementado (decisão pendente própria — algoritmo de similaridade). Ponto de integração: parâmetro futuro de `copy_public_deck`
 (`on_duplicate`), hoje inexistente; reimportar cria nova cópia.
 
@@ -326,12 +326,19 @@ calculadas só no cliente (`generatedCardInstanceCount`); o servidor não persis
 anônimo e Free nunca recebem URL de mídia. O bucket `flashcard-media` continua público-leitura com nome de objeto de sufixo aleatório.
 **Risco residual conhecido:** o caminho do objeto contém o `auth.uid()` do dono (já ocorre em avatares). Endurecimento proposto e **não implementado**:
 Edge Function proxy que serve a mídia por `public_id` (checando `is_public`/perfil/Premium) ou bucket separado `public-deck-media` populado na publicação.
-A cópia hoje reaproveita a mesma URL (referência compartilhada; `media_shared_reference=true`): se o autor apagar o arquivo, a cópia perde a mídia — duplicar o arquivo exige Edge Function.
+**Mídia da cópia é INDEPENDENTE (P7).** Fluxo: `get_public_deck_media_manifest(public_id)` (Premium) → o cliente duplica cada objeto do bucket
+`flashcard-media` para a PRÓPRIA pasta (`<uid>/pubcopy-...`, via `storage.copy` com o JWT dele; a policy do bucket só permite escrever na própria pasta) →
+`copy_public_deck(public_id, destino, p_media_map)` valida o mapa (cada destino precisa ser objeto real na pasta do copiador; `invalid_media_map`) e, na MESMA
+transação, copia as Notes reescrevendo toda URL do nosso bucket (`media_map_incomplete` se faltar uma: a cópia nunca aponta para o original). Falha em qualquer
+passo: o cliente remove os objetos que ele mesmo criou (compensação) e nada é criado no banco. Links externos (`audio.type='url'`) permanecem links (não são do app).
+Legado com mídia sem Field de destino seguro (ex.: idioma sem estudo mapeado) é incompatível (não publica parcial). Storage e Postgres não compartilham transação:
+se a aba fechar entre a duplicação e a RPC, sobram objetos órfãos em `<uid>/pubcopy-*` (nenhuma Note os referencia) — limpeza periódica é pendência registrada.
+O arquivo do original pode ser apagado/substituído, o Deck despublicado ou excluído: a cópia continua intacta (testado).
 
 **Cliente:** `shared/public-deck.js` (página, lista de Notes → Preview com os **mesmos 4 renderers**, importar, reportar, controles do dono), rota `publicDeck` em
 `router.js`, bypass anônimo em `auth.js`, seção "Decks públicos" em `public-profile.js`, botão Publicar em Meus Decks (`my-flashcards.js`).
 
-**Testes (`tests/fase-public-deck/`):** `run.sh` + `test_public_deck.sql` (87/87, Postgres local), `test_legacy_parity.js` (16/16), `test_playwright.js` (88/88 FR+ZH),
+**Testes (`tests/fase-public-deck/`):** `run.sh` + `test_public_deck.sql` (87/87) + `test_media_independence.sql` (48/48, Postgres local), `test_legacy_parity.js` (17/17), `test_playwright.js` (110/110 FR+ZH),
 `test_concurrency_perf.sh`. Regressões verdes: Identity (60 SQL, 30 cliente, 22 Playwright), Fases E–K1 (unit e Playwright).
 
 **Pendente / fora de escopo:** duplicatas/merge; proxy de mídia; remoção definitiva da lista solta e de `hidden_from_profile`; ícone/cor ainda sem UI de pré-visualização no editor de publicação;

@@ -17,6 +17,10 @@ const server = http.createServer((req, res) => {
 const src = fs.readFileSync(path.join(ROOT, 'tests/fase-i/test_playwright.js'), 'utf8');
 let STUB = src.slice(src.indexOf('const STUB = `') + 'const STUB = `'.length, src.indexOf('`;', src.indexOf('const STUB = `')));
 STUB = STUB.replace("rpc: async (name, args) => {", "rpc: async (name, args) => {\n      if (window.__rpcLog) window.__rpcLog.push([name, args]);\n      if (window.__rpcHandler){ const r = window.__rpcHandler(name, args); if (r !== undefined) return r; }");
+STUB = STUB.replace("storage: { from: () => ({ upload: async () => ({}), getPublicUrl: () => ({ data: { publicUrl: '' } }), remove: async () => ({}) }) },",
+  "storage: { from: () => ({ upload: async () => ({}), getPublicUrl: (p) => ({ data: { publicUrl: 'https://proj.supabase.co/storage/v1/object/public/flashcard-media/' + p } }),\n" +
+  "  copy: async (src, dest) => { const S = (window.__STORAGE = window.__STORAGE || { log: [], copies: 0, failCopyAt: null }); S.log.push(['copy', src, dest]); if (S.failCopyAt != null && S.copies >= S.failCopyAt) return { data: null, error: { message: 'boom' } }; S.copies++; return { data: { path: dest }, error: null }; },\n" +
+  "  remove: async (paths) => { const S = (window.__STORAGE = window.__STORAGE || { log: [], copies: 0, failCopyAt: null }); S.log.push(['remove', paths]); return { data: paths, error: null }; } }) },");
 STUB = STUB.replace("getSession: async () => ({ data: { session: null } })", "getSession: async () => ({ data: { session: window.__SESSION || null } })");
 
 const PID = '0f8fad5b-d9cb-469f-a165-70867728950e';
@@ -132,9 +136,10 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
     }
     {
       // Premium: abre conteúdo, vê com os renderers reais, importa
-      const copyHandler = `if (name === 'copy_public_deck'){ window.__DB.own_flashcards.push({ id: 9001, owner_id: 'U', language_app_key: '${appKey}', status: 'active', revision: 0, deck_id: 8001, back_trans: 'olá', front: 'bonjour', card_generation_mode: 'normal', tags: ['criado-por-u0123456789'], fields: [{ id: 'a', lang: null, role: null, content: { value: 'bonjour' }, audio: null, image: null, pinyinFieldId: null }, { id: 'b', lang: 'pt-BR', role: null, content: { value: 'olá' }, audio: null, image: null, pinyinFieldId: null }] });
+      const copyHandler = `if (name === 'get_public_deck_media_manifest') return { data: { count: 0, items: [] }, error: null };
+        if (name === 'copy_public_deck'){ window.__DB.own_flashcards.push({ id: 9001, owner_id: 'U', language_app_key: '${appKey}', status: 'active', revision: 0, deck_id: 8001, back_trans: 'olá', front: 'bonjour', card_generation_mode: 'normal', tags: ['criado-por-u0123456789'], fields: [{ id: 'a', lang: null, role: null, content: { value: 'bonjour' }, audio: null, image: null, pinyinFieldId: null }, { id: 'b', lang: 'pt-BR', role: null, content: { value: 'olá' }, audio: null, image: null, pinyinFieldId: null }] });
         window.__DB.decks.push({ id: 8001, kind: 'personal', owner_id: 'U', language_app_key: '${appKey}', parent_deck_id: 7000, name: 'Verbos' });
-        return { data: { deck_id: 8001, notes_copied: 4, skipped_incompatible: 1, media_shared_reference: false }, error: null }; }`;
+        return { data: { deck_id: 8001, notes_copied: 4, skipped_incompatible: 1, media_remapped: 0 }, error: null }; }`;
       const { page, errors, ctx } = await bootApp({ authenticated: true, premium: true, is_owner: false, can_open: true, can_import: true }, null, copyHandler);
       await page.evaluate((id) => openPublicDeckPage(id), PID);
       await page.waitForSelector('#public-deck-open-btn');
@@ -160,12 +165,81 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
       await page.click('#public-deck-import-btn');
       await page.waitForFunction(() => window.__rpcLog.some(x => x[0] === 'copy_public_deck'), null, { timeout: 8000 });
       const args = await page.evaluate(() => window.__rpcLog.find(x => x[0] === 'copy_public_deck')[1]);
-      L('import chama copy_public_deck com o public_id (destino padrão = Meus Decks)', args.p_public_id === PID && args.p_dest_deck_id === null, args);
+      L('import chama copy_public_deck com o public_id (destino padrão = Meus Decks)', args.p_public_id === PID && args.p_dest_deck_id === null && JSON.stringify(args.p_media_map) === '{}', args);
       await page.waitForFunction(() => STATE.cards.some(c => c.origin === 'self' && c.rowId === 9001), null, { timeout: 8000 });
       const imp = await page.evaluate(() => { const c = STATE.cards.find(x => x.origin === 'self' && x.rowId === 9001); return { deck: c.deckId, reps: c.reps, tags: c.tags, decks: STATE.decks.some(d => d.id === 8001) }; });
       L('cópia entra na sessão com deckId, FSRS zerado, atribuição na Tag e Deck na árvore', imp.deck === 8001 && imp.reps === 0 && imp.tags.includes('criado-por-u0123456789') && imp.decks, imp);
       L('Premium: erros de página', errors.length === 0, errors);
       await ctx.close();
+    }
+
+    // ===== P7: cópia com mídia INDEPENDENTE (duplica objetos antes da RPC; compensa em falha) =====
+    {
+      const UID_A = '00000000-0000-0000-0000-00000000aaaa';
+      const U = (p) => 'https://proj.supabase.co/storage/v1/object/public/flashcard-media/' + UID_A + '/' + p;
+      const ITEMS = [{ url: U('audio-1.mp3'), path: UID_A + '/audio-1.mp3' }, { url: U('image-1.png'), path: UID_A + '/image-1.png' }, { url: U('tts-3.mp3'), path: UID_A + '/tts-3.mp3' }];
+      const mediaHandler = `
+        if (name === 'get_public_deck_media_manifest'){ window.__manifestCalls = (window.__manifestCalls || 0) + 1; const items = window.__SCEN.items; return { data: { count: items.length, items }, error: null }; }
+        if (name === 'copy_public_deck'){ const sc = window.__SCEN; sc.copyCalls = (sc.copyCalls || 0) + 1; window.__copyArgs = args;
+          if (sc.failFirstWith && sc.copyCalls === 1) return { data: null, error: { message: sc.failFirstWith } };
+          if (sc.failAlways) return { data: null, error: { message: sc.failAlways } };
+          window.__DB.decks.push({ id: 8100, kind: 'personal', owner_id: 'U', language_app_key: '${appKey}', parent_deck_id: 7000, name: 'Verbos' });
+          window.__DB.own_flashcards.push({ id: 9100, owner_id: 'U', language_app_key: '${appKey}', status: 'active', revision: 0, deck_id: 8100, back_trans: 'olá', front: 'bonjour', card_generation_mode: 'normal', tags: ['criado-por-u0123456789'], fields: [{ id: 'a', lang: null, role: null, content: { value: 'bonjour' }, audio: { type: 'upload', url: Object.values(args.p_media_map)[0] || null }, image: null, pinyinFieldId: null }, { id: 'b', lang: 'pt-BR', role: null, content: { value: 'olá' }, audio: null, image: null, pinyinFieldId: null }] });
+          return { data: { deck_id: 8100, notes_copied: 1, skipped_incompatible: 0, media_remapped: Object.keys(args.p_media_map).length }, error: null }; }`;
+      const runScenario = async (scen, storageInit) => {
+        const r = await bootApp({ authenticated: true, premium: true, is_owner: false, can_open: true, can_import: true }, null, mediaHandler);
+        await r.page.evaluate(([sc, st, uid]) => { window.__SCEN = sc; window.__STORAGE = Object.assign({ log: [], copies: 0, failCopyAt: null }, st || {}); CURRENT_USER = { id: uid }; }, [scen, storageInit, 'U']);
+        await r.page.evaluate((id) => openPublicDeckPage(id), PID);
+        await r.page.waitForSelector('#public-deck-import-btn');
+        await r.page.click('#public-deck-import-btn');
+        await r.page.waitForFunction(() => { const b = document.getElementById('public-deck-import-btn'); return b && !b.disabled; }, null, { timeout: 8000 });
+        await r.page.waitForTimeout(250);
+        const out = await r.page.evaluate(() => ({ log: window.__STORAGE.log, args: window.__copyArgs || null, copyCalls: window.__SCEN.copyCalls || 0, manifest: window.__manifestCalls || 0,
+          imported: STATE.cards.some(c => c.origin === 'self' && c.rowId === 9100), btn: document.getElementById('public-deck-import-btn').textContent }));
+        return Object.assign(r, { out });
+      };
+      {
+        const { out, errors, ctx } = await runScenario({ items: ITEMS });
+        const copies = out.log.filter(x => x[0] === 'copy'), removes = out.log.filter(x => x[0] === 'remove');
+        L('mídia: duplica cada objeto (3 copy do Storage) ANTES da RPC, só para a pasta do copiador', copies.length === 3 && copies.every(c => c[2].startsWith('U/pubcopy-')) && copies.every(c => c[1].startsWith(UID_A + '/')), copies);
+        const keys = Object.keys(out.args.p_media_map);
+        L('mídia: RPC recebe mapa com as 3 URLs; nenhum destino aponta para a pasta do autor', keys.length === 3 && keys.every(k => ITEMS.some(i => i.url === k)) && Object.values(out.args.p_media_map).every(v => !v.includes(UID_A) && v.includes('/U/pubcopy-')), out.args);
+        L('mídia: sucesso não remove nada e a cópia entra na sessão', removes.length === 0 && out.imported && out.manifest === 1);
+        L('mídia: botão volta ao rótulo normal', !/Copiando/.test(out.btn), out.btn);
+        L('mídia: erros de página', errors.length === 0, errors);
+        await ctx.close();
+      }
+      {
+        const { out, ctx } = await runScenario({ items: ITEMS }, { failCopyAt: 1 });
+        const created = out.log.filter(x => x[0] === 'copy').length;   // tentativas
+        const removes = out.log.filter(x => x[0] === 'remove');
+        L('falha ao copiar mídia: RPC NÃO é chamada (nada criado no banco)', out.copyCalls === 0 && !out.imported);
+        L('falha ao copiar mídia: remove os objetos que já havia criado (sem órfãos)', removes.length === 1 && removes[0][1].length === 1 && removes[0][1][0].startsWith('U/pubcopy-'), out.log);
+        await ctx.close();
+      }
+      {
+        const { out, ctx } = await runScenario({ items: ITEMS, failAlways: 'invalid_media_map' });
+        const removes = out.log.filter(x => x[0] === 'remove');
+        L('RPC falha: remove TODOS os 3 objetos duplicados (compensação)', out.copyCalls === 1 && removes.length === 1 && removes[0][1].length === 3 && !out.imported, out.log);
+        await ctx.close();
+      }
+      {
+        const { out, ctx } = await runScenario({ items: ITEMS, failFirstWith: 'media_map_incomplete' });
+        const removes = out.log.filter(x => x[0] === 'remove'), copies = out.log.filter(x => x[0] === 'copy');
+        L('Deck mudou durante a importação: limpa a 1ª tentativa e refaz (2 manifests, 2 RPCs, 6 copies)', out.manifest === 2 && out.copyCalls === 2 && copies.length === 6 && removes.length === 1 && removes[0][1].length === 3 && out.imported, { m: out.manifest, c: out.copyCalls });
+        await ctx.close();
+      }
+      {
+        const { out, ctx } = await runScenario({ items: [] });
+        L('Deck sem mídia: nenhuma operação de Storage, RPC com mapa vazio', out.log.length === 0 && JSON.stringify(out.args.p_media_map) === '{}' && out.imported);
+        await ctx.close();
+      }
+      {
+        const { page, ctx } = await runScenario({ items: [] });
+        L('paridade JS×SQL: publicDeckMediaPathFromUrl', await page.evaluate(([a, b]) => publicDeckMediaPathFromUrl(a) === 'x/y.mp3' && publicDeckMediaPathFromUrl('https://ext.com/x.mp3') === null && publicDeckMediaPathFromUrl('https://p.supabase.co/storage/v1/object/public/avatars/a.png') === null && publicDeckMediaPathFromUrl(b) === null && publicDeckMediaPathFromUrl('https://p.supabase.co/storage/v1/object/public/flashcard-media/a/b.mp3?x=1') === null,
+          ['https://p.supabase.co/storage/v1/object/public/flashcard-media/x/y.mp3', 'https://p.supabase.co/storage/v1/object/public/flashcard-media/a/../b.mp3']));
+        await ctx.close();
+      }
     }
     {
       // Dono: abre sem importar

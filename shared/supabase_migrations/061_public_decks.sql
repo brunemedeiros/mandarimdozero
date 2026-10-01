@@ -315,6 +315,8 @@ begin
     if v_study is not null then
       v_fields := jsonb_set(v_fields, '{0,audio}', coalesce(v_aud, 'null'::jsonb));
       v_fields := jsonb_set(v_fields, '{0,image}', coalesce(v_img, 'null'::jsonb));
+    elsif v_aud is not null or v_img is not null then
+      return null;   -- mídia sem Field de destino seguro: incompatível (nunca publicar parcial)
     end if;
     if btrim(v_back) = '' then return null; end if;
     return jsonb_build_object('mode', 'cloze', 'fields', v_fields);
@@ -349,7 +351,11 @@ begin
       if v_pos is not null then
         v_fields := jsonb_set(v_fields, array[v_pos::text, 'audio'], coalesce(v_aud, 'null'::jsonb));
         v_fields := jsonb_set(v_fields, array[v_pos::text, 'image'], coalesce(v_img, 'null'::jsonb));
+      elsif v_aud is not null or v_img is not null then
+        return null;
       end if;
+    elsif v_aud is not null or v_img is not null then
+      return null;
     end if;
     return jsonb_build_object('mode', 'multiple_choice', 'fields', v_fields);
   end if;
@@ -378,12 +384,133 @@ begin
     if v_pos is not null then
       v_fields := jsonb_set(v_fields, array[v_pos::text, 'audio'], coalesce(v_aud, 'null'::jsonb));
       v_fields := jsonb_set(v_fields, array[v_pos::text, 'image'], coalesce(v_img, 'null'::jsonb));
+    elsif v_aud is not null or v_img is not null then
+      return null;
     end if;
+  elsif v_aud is not null or v_img is not null then
+    return null;
   end if;
   return jsonb_build_object('mode', 'normal', 'fields', v_fields);
 end;
 $$;
 revoke all on function public.public_note_native(public.own_flashcards) from public, anon, authenticated;
+
+-- ---------------------------------------------------------------------------
+-- 5b. Mídia da cópia e limites TÉCNICOS
+--
+--  LIMITES (NÃO são regra de produto, nada têm a ver com o limite Free de 20
+--  CardInstances): guardas técnicas de tamanho/tempo de uma única operação de
+--  cópia. 2000 foi escolhido de forma conservadora: o benchmark local (Postgres)
+--  copia 2000 Notes em ~1 s numa transação, então o banco NÃO é o gargalo; o que
+--  motiva o teto é (a) a resposta/memória de uma única transação e (b) o número de
+--  objetos que o CLIENTE precisa duplicar no Storage antes da RPC (um por mídia).
+--  Configuráveis sem migration:
+--    alter database postgres set app.public_deck_copy_max_notes = '3000';
+--    alter database postgres set app.public_deck_copy_max_media = '3000';
+-- ---------------------------------------------------------------------------
+create or replace function public.public_deck_copy_max_notes() returns int
+language sql stable set search_path = public as $$
+  select coalesce(nullif(current_setting('app.public_deck_copy_max_notes', true), '')::int, 2000)
+$$;
+create or replace function public.public_deck_copy_max_media() returns int
+language sql stable set search_path = public as $$
+  select coalesce(nullif(current_setting('app.public_deck_copy_max_media', true), '')::int, 2000)
+$$;
+
+-- Caminho do objeto no bucket flashcard-media a partir da URL pública; NULL se a URL
+-- não é de um objeto do nosso bucket (link externo, outro bucket, etc.).
+create or replace function public.flashcard_media_path(p_url text) returns text
+language sql immutable set search_path = public as $$
+  select case when p_url ~ '^https?://[^/?#]+/storage/v1/object/public/flashcard-media/[^?#]+$'
+               and p_url !~ '\.\.'
+              then substring(p_url from '/storage/v1/object/public/flashcard-media/([^?#]+)$') end
+$$;
+
+-- URLs (do nosso bucket) referenciadas pelos Fields de uma Note nativa.
+create or replace function public.native_fields_media_urls(p_fields jsonb) returns setof text
+language sql immutable set search_path = public as $$
+  select distinct u from (
+    select e #>> '{audio,url}' as u from jsonb_array_elements(p_fields) e where jsonb_typeof(e -> 'audio') = 'object'
+    union all
+    select e #>> '{audio,generatedUrl}' from jsonb_array_elements(p_fields) e where jsonb_typeof(e -> 'audio') = 'object'
+    union all
+    select e #>> '{image,url}' from jsonb_array_elements(p_fields) e where jsonb_typeof(e -> 'image') = 'object'
+  ) q where u is not null and public.flashcard_media_path(u) is not null
+$$;
+
+-- Reescreve as URLs do nosso bucket de um objeto de mídia pelo mapa antigo->novo.
+-- Mapa incompleto = erro (nunca deixa a cópia apontar para o arquivo do original).
+-- storagePath/generationKey do original nunca sobrevivem.
+create or replace function public._remap_media_obj(o jsonb, m jsonb) returns jsonb
+language plpgsql immutable set search_path = public as $$
+declare k text; v text; res jsonb := o;
+begin
+  foreach k in array array['url', 'generatedUrl'] loop
+    v := o ->> k;
+    if v is not null and public.flashcard_media_path(v) is not null then
+      if m ->> v is null then
+        raise exception 'media_map_incomplete' using errcode = '22023';
+      end if;
+      res := jsonb_set(res, array[k], to_jsonb(m ->> v));
+    end if;
+  end loop;
+  return res - 'storagePath' - 'generationKey';
+end;
+$$;
+
+create or replace function public.native_fields_remap_media(p_fields jsonb, p_map jsonb) returns jsonb
+language sql immutable set search_path = public as $$
+  select coalesce(jsonb_agg(
+           case when jsonb_typeof(e -> 'audio') = 'object' or jsonb_typeof(e -> 'image') = 'object'
+                then e
+                     || case when jsonb_typeof(e -> 'audio') = 'object'
+                             then jsonb_build_object('audio', public._remap_media_obj(e -> 'audio', p_map)) else '{}'::jsonb end
+                     || case when jsonb_typeof(e -> 'image') = 'object'
+                             then jsonb_build_object('image', public._remap_media_obj(e -> 'image', p_map)) else '{}'::jsonb end
+                else e end
+           order by ord), '[]'::jsonb)
+    from jsonb_array_elements(p_fields) with ordinality t(e, ord)
+$$;
+
+-- O mapa enviado pelo cliente só vale se TODO destino é um objeto REAL do próprio
+-- copiador (pasta = auth.uid()) no bucket flashcard-media; nunca de terceiros.
+create or replace function public._validate_media_map(p_map jsonb, p_uid uuid) returns void
+language plpgsql stable security definer set search_path = public as $$
+declare k text; v text; vp text;
+begin
+  if p_map is null or jsonb_typeof(p_map) <> 'object' then
+    raise exception 'invalid_media_map' using errcode = '22023';
+  end if;
+  if (select count(*) from jsonb_object_keys(p_map)) > public.public_deck_copy_max_media() then
+    raise exception 'deck_media_too_large' using errcode = '54000';
+  end if;
+  for k, v in select key, value #>> '{}' from jsonb_each(p_map) loop
+    vp := public.flashcard_media_path(v);
+    if public.flashcard_media_path(k) is null or vp is null
+       or split_part(vp, '/', 1) <> p_uid::text
+       or k = v
+       or not exists (select 1 from storage.objects o where o.bucket_id = 'flashcard-media' and o.name = vp) then
+      raise exception 'invalid_media_map' using errcode = '22023';
+    end if;
+  end loop;
+end;
+$$;
+revoke all on function public._validate_media_map(jsonb, uuid) from public, anon, authenticated;
+revoke all on function public._remap_media_obj(jsonb, jsonb) from public, anon, authenticated;
+revoke all on function public.native_fields_remap_media(jsonb, jsonb) from public, anon, authenticated;
+revoke all on function public.native_fields_media_urls(jsonb) from public, anon, authenticated;
+
+-- Raiz + subdecks que TAMBÉM são públicos do mesmo dono (sem herança de publicação).
+create or replace function public.public_deck_subtree_ids(p_root bigint, p_owner uuid) returns bigint[]
+language sql stable security definer set search_path = public as $$
+  with recursive t(id) as (
+    select p_root
+    union
+    select c.id from public.decks c join t on c.parent_deck_id = t.id
+     where c.is_public and c.kind = 'personal' and c.owner_id = p_owner
+  ) select array_agg(id) from t
+$$;
+revoke all on function public.public_deck_subtree_ids(bigint, uuid) from public, anon, authenticated;
 
 -- ---------------------------------------------------------------------------
 -- 6. Publicar / despublicar (única porta de escrita dos campos de publicação)
@@ -589,9 +716,10 @@ begin
                  public.public_note_native(f) as nat, f.tags
             from public.own_flashcards f
            where f.deck_id = d.id and f.status = 'active') q
-   where q.nat is not null and q.rn <= 2000;
+   where q.nat is not null and q.rn <= public.public_deck_copy_max_notes();
 
-  return jsonb_build_object('language', d.language_app_key, 'total', v_total, 'notes', v_notes);
+  return jsonb_build_object('language', d.language_app_key, 'total', v_total, 'notes', v_notes,
+                            'truncated', v_total > public.public_deck_copy_max_notes());
 end;
 $$;
 
@@ -672,10 +800,65 @@ grant execute on function public.get_public_deck_owner_status(bigint) to authent
 -- ---------------------------------------------------------------------------
 -- 8. Cópia de Public Deck (Premium). Atômica (uma função = uma transação).
 --    Reutiliza a regra única de atribuição. Não copia FSRS, histórico, note,
---    storagePath nem generationKey. Mídia é copiada como REFERÊNCIA (limitação
---    documentada: o arquivo não é duplicado no Storage).
+--    storagePath nem generationKey.
+--
+--    MÍDIA INDEPENDENTE (P7): a cópia nunca aponta para o arquivo do original.
+--    Fluxo (Storage e Postgres não compartilham transação):
+--      1. cliente: get_public_deck_media_manifest(public_id)  -> URLs a duplicar
+--      2. cliente: storage.copy(origem, '<uid do copiador>/pubcopy-...') por arquivo
+--         (com o JWT do próprio copiador; a policy do bucket só deixa criar na
+--         própria pasta -- nenhuma permissão ampla é dada ao cliente)
+--      3. cliente: copy_public_deck(public_id, destino, p_media_map {urlAntiga: urlNova})
+--         -> UMA transação: valida o mapa (destinos reais, na pasta do copiador),
+--         copia as Notes reescrevendo toda URL do nosso bucket pelo mapa; mapa
+--         incompleto/inválido => erro e NADA é criado.
+--      4. falha no passo 2 ou 3: o cliente remove os objetos que ele mesmo criou
+--         (compensação). Links externos (audio.type='url') não são do app e
+--         permanecem como link.
 -- ---------------------------------------------------------------------------
-create or replace function public.copy_public_deck(p_public_id uuid, p_dest_deck_id bigint default null)
+create or replace function public.get_public_deck_media_manifest(p_public_id uuid)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  v_uid uuid := auth.uid();
+  v_premium boolean;
+  src public.decks;
+  v_ids bigint[];
+  v_items jsonb;
+  v_count int;
+begin
+  if v_uid is null then raise exception 'not_authenticated' using errcode = '28000'; end if;
+  select (plan_tier = 'premium') into v_premium from public.profiles where user_id = v_uid;
+  if not coalesce(v_premium, false) then raise exception 'premium_required' using errcode = '42501'; end if;
+  select dk.* into src from public.decks dk join public.profiles pr on pr.user_id = dk.owner_id
+   where dk.public_id = p_public_id and dk.is_public and dk.kind = 'personal' and pr.public_profile;
+  if not found then raise exception 'unavailable' using errcode = 'P0002'; end if;
+  if src.owner_id = v_uid then raise exception 'cannot_copy_own_deck' using errcode = '22023'; end if;
+
+  v_ids := public.public_deck_subtree_ids(src.id, src.owner_id);
+  select coalesce(jsonb_agg(jsonb_build_object('url', u, 'path', public.flashcard_media_path(u)) order by u), '[]'::jsonb)
+    into v_items
+    from (select distinct m as u
+            from public.own_flashcards f
+            cross join lateral public.public_note_native(f) nat
+            cross join lateral public.native_fields_media_urls(nat -> 'fields') m
+           where f.deck_id = any(v_ids) and f.status = 'active' and nat is not null) q;
+  v_count := jsonb_array_length(v_items);
+  if v_count > public.public_deck_copy_max_media() then
+    raise exception 'deck_media_too_large' using errcode = '54000';
+  end if;
+  return jsonb_build_object('count', v_count, 'items', v_items);
+end;
+$$;
+revoke all on function public.get_public_deck_media_manifest(uuid) from public, anon;
+grant execute on function public.get_public_deck_media_manifest(uuid) to authenticated;
+
+drop function if exists public.copy_public_deck(uuid, bigint);
+create or replace function public.copy_public_deck(p_public_id uuid, p_dest_deck_id bigint default null, p_media_map jsonb default '{}'::jsonb)
 returns jsonb
 language plpgsql
 security definer
@@ -693,7 +876,8 @@ declare
   v_new_id bigint;
   v_notes_copied int := 0;
   v_skipped int := 0;
-  v_media boolean := false;
+  v_media_remapped int := 0;
+  v_ids bigint[];
   v_total int := 0;
   f public.own_flashcards;
   nat jsonb;
@@ -736,11 +920,15 @@ begin
     v_parent_id := dest.id;
   end if;
 
-  -- limite de segurança do tamanho da cópia (decks públicos encadeados + notas)
-  select count(*) into v_total from public.own_flashcards where deck_id = src.id and status = 'active';
-  if v_total > 2000 then
+  -- guarda TÉCNICA de tamanho (configurável; não é regra de produto): conta as Notes
+  -- da raiz E dos subdecks públicos que serão copiados.
+  v_ids := public.public_deck_subtree_ids(src.id, src.owner_id);
+  select count(*) into v_total from public.own_flashcards where deck_id = any(v_ids) and status = 'active';
+  if v_total > public.public_deck_copy_max_notes() then
     raise exception 'deck_too_large' using errcode = '54000';
   end if;
+  -- o mapa de mídia só vale se cada destino é objeto real da pasta do copiador
+  perform public._validate_media_map(coalesce(p_media_map, '{}'::jsonb), v_uid);
 
   -- BFS sobre a fonte e seus subdecks que TAMBÉM são públicos (sem herança)
   insert into public.decks (owner_id, kind, name, language_app_key, parent_deck_id)
@@ -776,11 +964,10 @@ begin
                then (select e #>> '{content,value}' from cf where e ->> 'role' = 'answer' limit 1)
              else (select e #>> '{content,value}' from cf order by ord offset 1 limit 1) end
         into v_front, v_back;
-      if exists (select 1 from jsonb_array_elements(nat -> 'fields') x
-                  where (x -> 'audio') is not null and jsonb_typeof(x -> 'audio') = 'object'
-                     or (x -> 'image') is not null and jsonb_typeof(x -> 'image') = 'object') then
-        v_media := true;
-      end if;
+      -- mídia: toda URL do nosso bucket é trocada pela do objeto do copiador
+      -- (erro 'media_map_incomplete' se faltar -- a cópia nunca aponta para o original)
+      v_media_remapped := v_media_remapped + (select count(*) from public.native_fields_media_urls(nat -> 'fields'));
+      nat := jsonb_set(nat, '{fields}', public.native_fields_remap_media(nat -> 'fields', coalesce(p_media_map, '{}'::jsonb)));
       insert into public.own_flashcards
         (owner_id, language_app_key, fields, card_generation_mode, tags, note,
          front, back_trans, front_pinyin, choices, cloze_sentence, cloze_answer, cloze_answer_pinyin,
@@ -807,12 +994,12 @@ begin
     'deck_id', v_root_id,
     'notes_copied', v_notes_copied,
     'skipped_incompatible', v_skipped,
-    'media_shared_reference', v_media);
+    'media_remapped', v_media_remapped);
 end;
 $$;
 
-revoke all on function public.copy_public_deck(uuid, bigint) from public, anon;
-grant execute on function public.copy_public_deck(uuid, bigint) to authenticated;
+revoke all on function public.copy_public_deck(uuid, bigint, jsonb) from public, anon;
+grant execute on function public.copy_public_deck(uuid, bigint, jsonb) to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- 9. Fluxo legado (cartões soltos) -- compatibilidade: `note` deixa de ser público;
@@ -946,7 +1133,8 @@ grant execute on function public.copy_public_flashcard(bigint, text, jsonb, bigi
 
 -- ---------------------------------------------------------------------------
 -- ROLLBACK (manual, se necessário; nada abaixo roda automaticamente):
---   drop function public.copy_public_deck(uuid, bigint);
+--   drop function public.copy_public_deck(uuid, bigint, jsonb);
+--   drop function public.get_public_deck_media_manifest(uuid);
 --   drop function public.get_public_deck_owner_status(bigint);
 --   drop function public.list_public_decks_for_user(text, text);
 --   drop function public.get_public_deck_notes(uuid);

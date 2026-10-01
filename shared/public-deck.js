@@ -106,10 +106,96 @@ async function fetchPublicDeckOwnerStatus(deckId){
   return data;
 }
 
-async function copyPublicDeckRpc(publicId, destDeckId){
-  const { data, error } = await supabaseClient.rpc('copy_public_deck', { p_public_id: publicId, p_dest_deck_id: destDeckId || null });
-  if (error) return { ok: false, error: publicDeckErrorMessage(error.message) };
+// ---------- Cópia com mídia INDEPENDENTE ----------
+// O arquivo de mídia do original nunca é reaproveitado: antes da RPC o cliente duplica cada
+// objeto do bucket para a PRÓPRIA pasta (policy do bucket: só escreve em <uid>/...), e a RPC
+// reescreve as URLs pelo mapa dentro da mesma transação da cópia. Falha => compensação.
+const PUBLIC_DECK_MEDIA_BUCKET = 'flashcard-media';
+const PUBLIC_DECK_MEDIA_CONCURRENCY = 4;
+
+// Espelha public.flashcard_media_path (SQL): caminho do objeto no bucket, ou null para link externo.
+function publicDeckMediaPathFromUrl(url){
+  const m = /^https?:\/\/[^/?#]+\/storage\/v1\/object\/public\/flashcard-media\/([^?#]+)$/.exec(String(url || ''));
+  return m && !m[1].includes('..') ? m[1] : null;
+}
+
+async function fetchPublicDeckMediaManifest(publicId){
+  const { data, error } = await supabaseClient.rpc('get_public_deck_media_manifest', { p_public_id: publicId });
+  if (error) return { ok: false, code: publicDeckErrorCode(error.message), error: publicDeckErrorMessage(error.message) };
+  return { ok: true, items: (data && data.items) || [] };
+}
+
+// Remove (melhor esforço) APENAS os objetos que esta própria operação criou. Nunca lança.
+async function removeCopiedPublicDeckMedia(paths){
+  if (!paths || !paths.length) return;
+  try { await supabaseClient.storage.from(PUBLIC_DECK_MEDIA_BUCKET).remove(paths); }
+  catch (e) { console.error('Não foi possível limpar mídia temporária da importação:', e); }
+}
+
+// Duplica os objetos do manifest para a pasta do usuário atual. Devolve o mapa urlAntiga -> urlNova.
+async function duplicatePublicDeckMedia(items, uid, onProgress){
+  const created = [], map = {};
+  const bucket = supabaseClient.storage.from(PUBLIC_DECK_MEDIA_BUCKET);
+  const stamp = Date.now().toString(36);
+  let next = 0, done = 0, failed = null;
+  const worker = async () => {
+    while (!failed && next < items.length){
+      const i = next++, it = items[i];
+      const srcPath = it.path || publicDeckMediaPathFromUrl(it.url);
+      if (!srcPath){ failed = new Error('invalid_media_path'); return; }
+      const ext = (srcPath.split('.').pop() || 'bin').replace(/[^a-zA-Z0-9]/g, '').slice(0, 8) || 'bin';
+      const dest = `${uid}/pubcopy-${stamp}-${Math.random().toString(36).slice(2, 8)}-${i}.${ext}`;
+      try {
+        const { error } = await bucket.copy(srcPath, dest);
+        if (error) throw error;
+        created.push(dest);
+        const { data: pub } = bucket.getPublicUrl(dest);
+        map[it.url] = pub.publicUrl;
+        done++;
+        if (onProgress) onProgress(done, items.length);
+      } catch (e) { failed = e; return; }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(PUBLIC_DECK_MEDIA_CONCURRENCY, items.length) }, worker));
+  if (failed) return { ok: false, created, error: publicDeckErrorMessage('media_copy_failed') };
+  return { ok: true, created, map };
+}
+
+async function copyPublicDeckRpc(publicId, destDeckId, mediaMap){
+  const { data, error } = await supabaseClient.rpc('copy_public_deck', {
+    p_public_id: publicId, p_dest_deck_id: destDeckId || null, p_media_map: mediaMap || {},
+  });
+  if (error) return { ok: false, code: publicDeckErrorCode(error.message), error: publicDeckErrorMessage(error.message) };
   return { ok: true, result: data };
+}
+
+// Fluxo completo: manifest -> duplicar mídia -> RPC atômica. Se a RPC falhar, remove o que duplicou.
+// Se o Deck mudou entre o manifest e a cópia (media_map_incomplete), tenta de novo uma vez.
+async function copyPublicDeckWithMedia(publicId, destDeckId, onProgress){
+  const uid = (typeof CURRENT_USER !== 'undefined' && CURRENT_USER && CURRENT_USER.id) || null;
+  if (!uid) return { ok: false, error: 'Entre na sua conta para importar.' };
+  for (let attempt = 0; attempt < 2; attempt++){
+    const man = await fetchPublicDeckMediaManifest(publicId);
+    if (!man.ok) return man;
+    let map = {}, created = [];
+    if (man.items.length){
+      const dup = await duplicatePublicDeckMedia(man.items, uid, onProgress);
+      created = dup.created;
+      if (!dup.ok){ await removeCopiedPublicDeckMedia(created); return dup; }
+      map = dup.map;
+    }
+    const res = await copyPublicDeckRpc(publicId, destDeckId, map);
+    if (res.ok) return res;
+    await removeCopiedPublicDeckMedia(created);   // nada foi criado no banco: não deixa órfãos
+    if (res.code === 'media_map_incomplete' && attempt === 0) continue;
+    return res;
+  }
+  return { ok: false, error: publicDeckErrorMessage('media_map_incomplete') };
+}
+
+function publicDeckErrorCode(msg){
+  const m = /(premium_required|unavailable|deck_too_large|deck_media_too_large|cannot_copy_own_deck|invalid_destination|media_map_incomplete|invalid_media_map|description_too_long|public_deck_kind_forbidden|deck_not_found)/.exec(String(msg || ''));
+  return m ? m[1] : null;
 }
 
 function publicDeckErrorMessage(msg){
@@ -117,6 +203,10 @@ function publicDeckErrorMessage(msg){
   if (/premium_required/.test(m)) return 'Importar Decks públicos é um recurso Premium.';
   if (/unavailable/.test(m)) return 'Este Deck não está mais disponível.';
   if (/deck_too_large/.test(m)) return 'Este Deck é grande demais para importar de uma vez.';
+  if (/deck_media_too_large/.test(m)) return 'Este Deck tem arquivos de mídia demais para importar de uma vez.';
+  if (/media_copy_failed/.test(m)) return 'Não foi possível copiar os arquivos de mídia. Nada foi importado; tente novamente.';
+  if (/media_map_incomplete/.test(m)) return 'O Deck mudou durante a importação. Tente novamente.';
+  if (/invalid_media_map/.test(m)) return 'Não foi possível validar os arquivos de mídia. Nada foi importado.';
   if (/cannot_copy_own_deck/.test(m)) return 'Este Deck já é seu.';
   if (/invalid_destination/.test(m)) return 'Escolha um Deck pessoal válido como destino.';
   if (/description_too_long/.test(m)) return 'A descrição pode ter no máximo 280 caracteres.';
@@ -285,8 +375,9 @@ async function importPublicDeck(d){
   if (!ok) return;
   const btn = document.getElementById('public-deck-import-btn');
   if (btn) btn.disabled = true;
-  const res = await copyPublicDeckRpc(d.public_id, null);
-  if (btn) btn.disabled = false;
+  const label = btn ? btn.textContent : '';
+  const res = await copyPublicDeckWithMedia(d.public_id, null, (done, total) => { if (btn) btn.textContent = `Copiando mídia ${done}/${total}...`; });
+  if (btn){ btn.disabled = false; btn.textContent = label; }
   if (!res.ok){ showToast(res.error); return; }
   // Traz as cópias para a sessão atual (mesmo caminho do boot) e atualiza a árvore de Decks.
   try {
