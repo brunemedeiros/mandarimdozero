@@ -17249,3 +17249,14 @@ Playwright) verde.
 - **Contagens de Deck são estruturais**: não respeitam `reviewOriginFilter`, `reviewTagFilter` nem filtros de sessão; a contagem da sessão pode diferir (coberto em teste).
 - Testes: `tests/fase-k1/` (unit 86, Playwright FR+ZH 24). Sem migration.
 - **K1 hardening**: o Playwright de "Errei" agora clica o botão real (`#flashcard .flashcard-hint` para revelar, depois `.grade-btn.grade-again[data-grade="0"]`), sem fallback a `gradeCurrentCard(0)`; falha se o botão não existir. Due de "Errei" = meia-noite seguinte é regra de scheduling deliberadamente preservada (PR #219), comentada em `shared/fsrs.js`; preview do botão, due real e teste usam a mesma regra.
+
+## Fonte de verdade de arquitetura: Decks, Tags, Painel e Sistema de Estudo
+
+O documento "Arquitetura Total -- Decks, Tags, Painel e Sistema de Estudo" (2026-09-27, 40 seções,
+enviado pela autora) está versionado em **`docs/arquitetura-total-decks-tags-painel.md`**. É a fonte de
+verdade para Decks, Tags, Painel, Review, Anki, Decks públicos, atribuição, limite Free por CardInstance e
+as 30 invariantes (seção 38). Ler esse arquivo ANTES de auditar ou implementar qualquer coisa nessa área;
+não substituir o contrato por uma solução conveniente no código atual. A auditoria
+`docs/public-decks-auditoria.md` foi escrita sem este arquivo e precisa ser revisada contra ele (ex.: a
+atribuição é a Tag permanente `criado-por-[username]`; importar Deck público é Premium; limite Free corta
+e informa; só Decks dentro de Meus Decks são públicos; Deck público tem ícone/cor, sem upload).
