@@ -239,7 +239,7 @@ Regra: **sem identidade estável e atribuição não ambígua, não implementar 
 
 - Arquivos inspecionados: `shared/profile.js`, `shared/auth.js`, `shared/router.js`, `shared/public-profile.js`,
   `shared/roles.js`, `shared/admin-*.js`, `shared/leaderboard.js`, `shared/flashcard-model.js`,
-  `shared/anki-import.js`, `shared/my-flashcards.js`, `shared/tag-manager.js` (via RPC), migrations 001/037/038/043/
+  `shared/anki-import.js`, `shared/my-flashcards.js`, `shared/tag-manager.js` (aberto e auditado na Parte II), migrations 001/037/038/043/
   056/057/058/059, `supabase/functions/notification-cron`, `docs/arquitetura-total-decks-tags-painel.md` e
   `docs/public-decks-auditoria.md`, `fr|zh/index.html` (campo de username).
 - Banco real: consultas somente leitura (profiles: triggers, policies, constraints, índices, privilégios; funções
@@ -247,3 +247,249 @@ Regra: **sem identidade estável e atribuição não ambígua, não implementar 
 - Migration 059 (`059_teacher_metrics_note_level.sql`, métricas de professora, sem relação com identidade): o banco
   tem aplicada até `fix_teacher_metrics_card_selection` (058); **059 continua não aplicada**.
 - Código de produção, schema, RLS, RPC, UI e usernames: **inalterados**. Nenhum push, deploy ou migration.
+
+---
+
+# PARTE II -- Fechamento da política de identidade USERNAME <-> TAG (2026-10-01)
+
+Etapa de fechamento: **ainda não é implementação** e **nenhuma decisão foi tomada pelo Claude**. A Parte I
+estava correta no diagnóstico; esta parte inspeciona o arquivo que faltava (`tag-manager.js`), formaliza o problema,
+refina as alternativas e lista o que continua DECISÃO PENDENTE.
+
+## 14. Auditoria de `shared/tag-manager.js` (aberto e lido por inteiro)
+
+| Aspecto | O que o arquivo faz | Efeito sobre `criado-por-*` |
+|---|---|---|
+| Criação | Não cria Tags. O Painel só renomeia/exclui tags já existentes (criação vive no editor, `flashcard-tags-editor.js`) | Sem porta de criação aqui |
+| Renomear | `planTagRename(old, rawNew, counts)` normaliza o texto digitado com `normalizeNoteTags([rawNew])`, valida com `validateNoteTags`, e chama `renameNoteTag(scope, old, newSlug)` → RPC `rename_note_tag`. Campo com `maxlength=80` | **Permite renomear qualquer tag para `criado-por-fulano`** (forja) e renomear a própria `criado-por-x` para outro nome |
+| Excluir | Confirmação inline, depois RPC `delete_note_tag` (remove a tag exata de todas as Notes do escopo) | **Permite apagar `criado-por-*` em todas as Notes de uma vez** |
+| Merge | A RPC funde quando o destino existe; a UI avisa a colisão (`data-tag-collision`) e não bloqueia | Renomear X → `criado-por-fulano` onde já existe funde silenciosamente na tag de sistema |
+| Normalização | Só a função canônica `normalizeNoteTags`/`validateNoteTags` (nenhuma segunda regra) | Sem regra especial de prefixo |
+| Cache/estado | Estado local `ui`; após rename/delete em `scope='own'`, `applyTagChangeToLocalState` atualiza `STATE.cards` (origin `self`) e `reviewTagFilter`. Scope `teacher` não altera estado local | Coerência local; nenhuma proteção |
+| Tratamento de Tag de sistema | **Nenhum.** Zero ocorrência de `criado-por`, prefixo reservado ou lista de tags protegidas; a lista exibe todas as tags igualmente | Confirma 7.3 da v3 |
+| Chamadas RPC | `list_note_tags`, `rename_note_tag`, `delete_note_tag` (057, SECURITY INVOKER); erros mapeados só para `invalid_tag`/`invalid_scope` | Servidor não distingue tag de sistema |
+| Validação client | Só formato/limites (50 chars, 20 por Note). O servidor revalida só `^[a-z0-9]+(-[a-z0-9]+)*$` | Mesmo regex serve a `criado-por-ana` e a uma tag comum |
+
+**Comparação com o diagnóstico anterior:** confirmado integralmente; nenhuma correção necessária. Dois detalhes
+novos: (1) a rota de forja pelo Painel funciona também no escopo `teacher` (professora/admin sobre Teacher Cards);
+(2) o merge do Painel é uma porta para **adulterar** (não só criar) uma atribuição legítima. Editor
+(`flashcard-tags-editor.js`): `commit()` normaliza e adiciona qualquer slug, o chip tem botão ✕ para qualquer tag --
+confirma o mesmo. Importação/exportação: ver 20.
+
+## 15. Contrato ATUAL de username (consolidado, verificado no banco)
+
+| Item | Estado | Origem |
+|---|---|---|
+| Alfabeto | `[a-z0-9_.-]` | CHECK `profiles_username_check` (verificado em `pg_constraint`) |
+| Comprimento | 3–24 | CHECK |
+| Caixa | **Somente minúsculas.** `Ana`/`ANA` são rejeitados pelo CHECK (`^[a-z0-9_.-]{3,24}$` é sensível à caixa) e `UNIQUE (profiles_username_key)` age sobre o texto já minúsculo. Portanto `Ana`/`ana`/`ANA` **não coexistem e não podem existir**, mesmo sem o frontend | banco |
+| Unicidade | `UNIQUE (username)` | banco |
+| Início/fim/sequência de separadores | Permitidos (`-ana`, `ana.`, `a..b`, `---`, `___`, `...`); nenhum perfil atual os usa (edge_sep 0, double_sep 0) | CHECK não restringe |
+| Exigência de letra/dígito | **Nenhuma** no CHECK; hoje 0 perfis sem alfanumérico | CHECK |
+| Armazenamento | `profiles.username`; nenhuma outra tabela guarda username como chave; identidade persistida é uuid | schema |
+| Normalização | `slugifyUsername` no cliente (remove o inválido, corta em 24); não existe normalização no servidor além do CHECK | `profile.js` |
+| Edição | Permitida pela própria conta (UPDATE direto, sem trigger) | RLS + ausência de trigger |
+| Exclusão | `auth.users` → `profiles` ON DELETE CASCADE; o username volta a ficar livre imediatamente. **Não existe tabela de username reservado/aposentado** (0 tabelas com nome `reserved`/`username`/`alias`/`redirect`) | schema |
+| Reutilização | Livre: qualquer nova conta pode registrar um username liberado | UNIQUE sem histórico |
+| Rotas/links | `#/user/<username>`; busca normaliza com `trim().toLowerCase()`; sem alias/redirect/histórico | `router.js`, `public-profile.js` |
+| Perfil público | Resolução por username (RPCs `get_public_profile_stats`, `get_public_flashcards`) | 037/038/043/056 |
+| Criação inicial | `createInitialProfile`: parte local do e-mail → slugify → sufixo numérico em `23505` (até 30 tentativas). **15 das 41 contas de `auth.users` ainda não têm profile**; ao criarem, receberão username derivado do e-mail, possivelmente com `.` | `profile.js:138`, contagem no banco |
+
+## 16. O problema formalizado
+
+Seja `U` o conjunto de usernames válidos hoje: `U = { u : u ~ ^[a-z0-9_.-]{3,24}$ }` e `T(u)` a tag de atribuição
+`normalizeTagSlug("criado-por-" + u)`, **o que equivale a `"criado-por-" + norm(u)` com `norm = trim_hifen ∘
+colapsa_hifen ∘ (. _ → -)`** (para o alfabeto de `U`, NFD e caixa não têm efeito).
+
+- `norm` **não é injetiva** em `U`: existem `u1 ≠ u2` com `T(u1) = T(u2)` (ex.: `ana.silva`, `ana_silva`,
+  `ana-silva`; `ana`, `ana-`, `-ana`, `ana.`).
+- `T` pode ser degenerada: se `u` não tem alfanumérico, `norm(u) = ""` e `T(u) = "criado-por"` (nenhum autor).
+- A AT define `criado-por-[username]` como representação **permanente** da autoria e exige username imutável, mas
+  não impõe que `T` seja injetiva.
+- Logo, **username, no contrato atual, não é chave suficiente para identificar autoria por Tag.** Imutabilidade
+  resolve estabilidade, **não** unicidade; proteção da tag resolve forja, **não** colisão; a unicidade exige uma das
+  decisões da seção 18.
+- Consequência independente: mesmo com `T` injetiva, o username liberado por exclusão pode ser reutilizado (15), o
+  que quebra a permanência da atribuição por outra via.
+
+Estado nos dados: 26 perfis, 0 colisões (Parte I, seção 4); **nenhuma correção histórica é necessária ou proposta**
+e nenhuma migração preventiva de dados deve ser criada nesta etapa.
+
+## 17. Colisões teóricas e usernames existentes
+
+**Teóricas:** ver Parte I (3) e 16.
+**Reais:** nenhuma. **Afetados pela normalização (3 perfis, todos com `.`, nenhum com `_`; 23 já canônicos
+`^[a-z0-9]+(-[a-z0-9]+)*$`):** a tag deles seria `criado-por-<username com . → ->`, diferente do username
+exibido.
+Fatos (consulta somente leitura de 2026-10-01; nenhum username listado): os 3 têm `public_profile = true`, os 3
+têm conteúdo próprio ou vínculos (cartões/vínculo de professora), 0 Notes com tags e 0 com `criado-por-*`, 0 Decks
+públicos (tabela `decks` vazia), 0 tabelas de alias/redirect.
+
+| Política possível para os 3 | Precisam mudar? | URL quebra? | Histórico quebra? | Redirect existe? | Atribuição pública já existe? |
+|---|---|---|---|---|---|
+| Aceitar como estão (tag normalizada difere do username) | Não | Não | Não | n/a | Não |
+| Impor alfabeto canônico a futuros e deixar os 3 (grandfather) | Não | Não | Não | n/a | Não |
+| Migrar os 3 para o alfabeto canônico | **Sim** (`.` → `-` ou remover) | **Sim**: `#/user/<antigo>` deixa de resolver | Reports antigos guardam o username da época (1 coluna com username em tabelas públicas: contexto de reports); vínculos/Premium/badges usam uuid → intactos | **Não** (precisaria de tabela de alias/histórico; a AT não define) | Não |
+| Trocar a base da tag para identificador interno | Não | Não | Não | n/a | Não |
+
+Observação: como os 3 já têm perfil público ativo, qualquer migração deles é uma mudança de identidade pública
+**observável por quem tem o link**. Sem Tags nem Decks públicos ainda, hoje o custo é só de URL, e o momento de
+menor custo é antes de existir qualquer atribuição.
+
+## 18. Alternativas refinadas (nenhuma escolhida)
+
+Refinamento após a leitura de `tag-manager.js`: **nenhuma alternativa dispensa a proteção da tag** (14: o Painel
+renomeia/funde/apaga qualquer tag, e o editor/RPC aceitam o prefixo). Proteção é ortogonal e necessária em todas.
+
+Legenda de avaliação: **literal** = continua sendo `criado-por-[username]` com o username exibido; **AT** = não
+contradiz seção da AT; custo de migração e risco consideram os 26 perfis atuais e 15 contas ainda sem perfil.
+
+| Critério | A. Restringir username ao conjunto que a normalização representa (`[a-z0-9]` + `-` interno) | B. Username canônico desde a origem + ajuste dos 3 existentes | C. Mudar a normalização da tag para preservar mais informação | D. Username livre + identificador interno na tag | E. Híbrido: username visível + identificador estável só p/ atribuição | F. Checagem de unicidade por slug (sem restringir o alfabeto) |
+|---|---|---|---|---|---|---|
+| Literal `criado-por-[username]` | Sim (username = slug) para novos | Sim | Parcial (tag preserva `.`/`_`, mas muda o contrato de formato de tag) | **Não** (tag usa outro valor) | Parcial (tag usa o id; o username aparece ao lado) | Sim para quem não colide; a tag ainda difere do username (`.` vira `-`) |
+| Compatível com a AT | Sim (§10.3, §20, §10.1 "evitar caracteres especiais") | Sim | **Conflita** com §10.1 (tags sem caracteres especiais) e com `note_tag_is_canonical` | Contradiz o exemplo `criado-por-catharinaurbani` (§10.3) | Depende de reinterpretar `[username]`; AT não prevê | Sim |
+| Estabilidade | Com imutabilidade, total | idem | idem | Total (independe do username) | Total | Com imutabilidade |
+| Unicidade tag↔autor | Garante para novos; os 3 `.` ficam fora da garantia se grandfathered | Garante para todos após ajuste | Garante se o mapa for injetivo | Total | Total | Garante contra novas colisões; não impede tags "diferentes do username" |
+| URLs | Preserva (não muda username) | **Quebra** as dos 3 migrados (sem redirect) | Preserva | Preserva | Preserva | Preserva |
+| Perfil Público | Intacto | Muda para os 3 | Intacto | Intacto | Intacto | Intacto |
+| Usernames existentes | 3 com `.` seguem inválidos pela nova regra (grandfather) | Os 3 mudam | Nenhum muda | Nenhum muda | Nenhum muda | Nenhum muda |
+| Contas futuras (15 sem perfil, e-mail com `.`) | Precisam de regra de derivação do username inicial (hoje o e-mail gera `.`) | idem | Sem impacto | Sem impacto | Sem impacto | Colisão detectada na criação; sufixo numérico já existe |
+| Atribuição permanente | OK com imutabilidade + reserva | OK | OK | OK (sobrevive até a renomeação) | OK | OK com reserva |
+| Exclusão de conta / reuso | Precisa de reserva de username | idem | idem | O id interno pode ser aposentado separadamente | idem | Precisa de reserva |
+| Tags / Painel de Tags | Proteger prefixo | idem | Mudança global do regex/normalização | Proteger prefixo; tag opaca | Proteger prefixo | Proteger prefixo |
+| Importação / exportação | Tags `criado-por-*` precisam de política (validar origem) | idem | idem | idem | idem | idem |
+| Notes / CardInstances / Reverse / Cloze | Sem impacto (tag na Note) | idem | idem | idem | idem | idem |
+| Complexidade de migração | Baixa (CHECK novo + regra para os 3) | Média (migra 3 + 15 pendentes) | Alta (mexe em função usada por editor, Anki, Painel, filtro, 057, CHECK 056) | Média/alta (coluna + backfill + UI de exibição) | Média/alta | Baixa/média (índice único por expressão) |
+| Risco de quebrar dados futuros | Baixo | Médio (URLs) | **Alto** (formato de tag global) | Médio (contradiz o exemplo da AT) | Médio | Baixo |
+| Resolve `___` | Sim (exige alfanumérico) | Sim | Parcial | Sim | Sim | Só com regra extra (exigir alfanumérico) |
+| Resolve a colisão | Sim para novos | Sim | Sim | Sim | Sim | Sim (para novos) |
+
+Alternativa **G** (sustentada pelo código/AT? **Não encontrada**): nenhuma outra alternativa é sustentada pela AT;
+combinar A/B/F com a proteção do prefixo é a família menos invasiva, mas **é uma recomendação técnica, não uma
+decisão**.
+
+## 19. Username excluído
+
+Cenário: `ana` cria atribuição `criado-por-ana`, exclui a conta; `B` registra `ana`.
+
+- Hoje: o CASCADE libera `ana`; sem reserva, `B` passa a gerar `criado-por-ana`; as cópias antigas parecem de `B`
+  (ambiguidade histórica; **pior** que colisão de normalização, porque ocorre mesmo com tag injetiva).
+- Alternativa R1: **reservar permanentemente** todo username já usado por uma conta com atribuição (tabela de
+  reservados/aposentados; impede reuso; custo: acúmulo de nomes indisponíveis).
+- Alternativa R2: reservar **só** usernames que já produziram atribuição pública (menor acúmulo; exige o rastreio
+  de "tag emitida").
+- Alternativa R3: permitir reuso e aceitar a ambiguidade (contradiz "permanente/representa o autor", §10.3).
+- Alternativa R4: identificador interno na tag (D/E) torna o reuso inócuo para a atribuição, mas muda a forma.
+- Impacto comum: toda reserva exige tabela/trigger nova e decisão sobre direito de exclusão (LGPD) -- a AT não trata.
+- Estado: **não definido pela AT**.
+
+## 20. Username sem identidade útil
+
+- O CHECK permite `___`, `...`, `---`, `-_-`, `.-.` (3+ separadores, sem alfanumérico). Hoje existem **0**.
+- Para qualquer um deles `norm(u) = ""` e `T(u)` vira `criado-por` (a normalização remove o hífen final), tag igual
+  para todos eles e sem autor.
+- Também degradado (não vazio, mas pouco informativo): `a__`, `_a_` → `criado-por-a`, colidindo com `a`... se `a` tivesse
+  3 caracteres (hoje o mínimo é 3, então `aaa`); mais realista: `1__` → `criado-por-1`.
+- AT: **nada define**. Alternativas A/B/F (exigir pelo menos um alfanumérico e/ou iniciar/terminar alfanumérico),
+  D/E (irrelevante para a tag, mas ainda precisa de username útil para a URL) -- todas exigem a decisão do
+  alfabeto.
+
+## 21. Portas de forja/adulteração (revisão completa, pós `tag-manager.js`)
+
+| Porta | Onde | Pode forjar/apagar `criado-por-*`? | Defesa hoje |
+|---|---|---|---|
+| Editor de tags (criar/remover chip) | client (`flashcard-tags-editor.js`) | Sim (cria, remove) | Nenhuma |
+| Painel (rename) | client + RPC `rename_note_tag` (server) | Sim (forja/adultera/funde) | Nenhuma |
+| Painel (delete) | client + RPC `delete_note_tag` (server) | Sim (apaga global) | Nenhuma |
+| UPDATE direto em `own_flashcards.tags` | **server** (policy `own_flashcards_owner_all`) | Sim | Só CHECK 20×50 |
+| UPDATE em `teacher_flashcards.tags` | server | Só admin (026) | RLS admin-only |
+| Importação `.apkg` | client (`anki-import.js`, tags de `note.tags`) | Sim (tag `criado-por-x` no pacote) | Normalização + limites |
+| Importação por arquivo/link (Meus Cartões) e cópia de perfil público | client (`nativeNoteEditorStateFromImportPayload`, `partitionNoteTagsByLimits`) | Sim (payload editável, tags viajam como valor) | Normalização + limites |
+| Export Anki | client | Exporta como qualquer tag (sem corrupção) | n/a |
+| Operação administrativa | admin só altera `teacher_flashcards`; `service_role`/SQL ignora RLS | Sim (por natureza) | Só trigger poderia limitar |
+| `get_public_flashcards` (056) | server (devolve `tags`) | Divulga as tags como estão | Nenhuma validação de origem |
+| Merge via rename | server | Funde em tag de sistema | Nenhuma |
+
+Conclusão: nenhuma porta distingue tag de sistema; toda defesa precisaria estar no **servidor** (trigger sobre
+`tags` das duas tabelas + validação nas RPCs) e, para a emissão legítima, num caminho server-side único que gere
+`criado-por-*` a partir da identidade real do autor.
+
+## 22. Note/CardInstance (reconfirmação no código)
+
+Tags vivem na linha (`own_flashcards.tags`/`teacher_flashcards.tags`); `buildEngineCardsFromRow` computa
+`normalizeNoteTags(row.tags)` **uma vez** e entrega a mesma lista a todas as CardInstances da linha; Reverse e Cloze
+multi-marca não criam atribuições independentes porque são derivados de uma Note; regerar/revisar mantém a Note;
+renomear/apagar pelo Painel atua por linha. **Exceção:** o export Anki emite CardInstances como notas separadas;
+reimportar cria Notes independentes que podem divergir depois (7j). Isso não é regressão desta auditoria, e a AT já
+proíbe tratar a cópia por Anki como atribuição de Deck público.
+
+## 23. Atribuição NÃO é deduplicação
+
+Contrato explícito: a tag `criado-por-*` identifica **autoria/origem**. Ela **não** decide se o conteúdo já foi
+importado, se duas cópias devem ser fundidas, se Notes semelhantes são iguais nem qual o algoritmo de similaridade
+(pendência 3 da v3). Nenhum `source_card_id`, coluna de origem ou equivalente é proposto aqui; a AT não define isso e
+não foi criado nada.
+
+## 24. Revisão da Arquitetura Total (o que está FECHADO e o que é PENDENTE)
+
+| Questão | Situação | Seção da AT |
+|---|---|---|
+| Atribuição por `criado-por-[username]` | FECHADO | §10.3 |
+| Tag permanente, não apagável pelo destinatário, representa o autor, permanece se o Deck for movido | FECHADO | §10.3 |
+| Em cópias múltiplas preserva-se só a atribuição original | FECHADO | §10.3 |
+| Username único e imutável; display name editável | FECHADO | §10.3, §20, inv. 15 |
+| Tags minúsculas, sem acento, sem espaço, "evitar caracteres especiais", sem hierarquia | FECHADO | §10.1 |
+| Tags pertencem à Note; irmãos compartilham | FECHADO | §10 |
+| Perfil público em `fr/#/user/username` | FECHADO (formato hash) | §20 |
+| Formato canônico do username | **DECISÃO PENDENTE** (AT não restringe o alfabeto do username) | -- |
+| Como resolver a colisão da normalização | **DECISÃO PENDENTE** | -- |
+| Tratamento dos 3 usernames existentes | **DECISÃO PENDENTE** | -- |
+| Reserva de username após exclusão | **DECISÃO PENDENTE** | -- |
+| Username sem alfanumérico | **DECISÃO PENDENTE** | -- |
+| Se `[username]` na tag é o username literal ou admite outro identificador | **DECISÃO PENDENTE** (o exemplo literal da AT sugere o username, mas não proíbe outro) | §10.3 (exemplo) |
+| Redirect/histórico de username | **DECISÃO PENDENTE** (inv. 15 torna desnecessário se não houver mudança; só importa se houver migração dos 3) | -- |
+| Proteção servidor da tag de sistema | Exigida pelo contrato ("não pode ser apagada"); mecanismo **não definido** | §10.3 |
+
+## DECISÕES NECESSÁRIAS ANTES DA IMPLEMENTAÇÃO
+
+Nenhuma respondida pelo Claude. Cada item lista as opções já levantadas.
+
+1. **Qual formato canônico de username será adotado?** (alfabeto, início/fim, exigir alfanumérico; ou manter o atual
+   e depender de F/D/E).
+2. **Os 3 usernames existentes com `.` precisam mudar?** (aceitar como estão / grandfather / migrar com redirect /
+   migrar sem redirect). Impacto: URL pública ativa dos 3; 0 atribuições existentes.
+3. **Como tratar usernames futuros que poderiam colidir?** (restringir alfabeto / unicidade por slug / identificador
+   interno), e como derivar o username inicial do e-mail (15 contas ainda sem perfil).
+4. **Username excluído fica reservado?** (R1 sempre, R2 só se emitiu atribuição, R3 reutilizável, R4 irrelevante
+   com identificador interno).
+5. **O que fazer com username como `___`?** (rejeitar na origem exigindo alfanumérico; ou aceitar com tag
+   degenerada, o que contradiz o contrato).
+6. **A atribuição continuará literalmente baseada no username?** (determina A/B/F vs. D/E).
+7. **A arquitetura permite algum identificador adicional sem substituir a Tag exigida?** (a AT não proíbe nem
+   prevê; exige confirmação de produto).
+8. **Como preservar URLs se usernames forem normalizados?** (grandfather evita; migração exigiria alias).
+9. **Existe necessidade de redirect histórico?** (só se houver migração ou se a imutabilidade admitir exceções).
+
+Ficam fora das decisões de identidade, mas dependentes: o mecanismo de proteção da tag (trigger/RPC), a política de
+importação para tags `criado-por-*` (aceitar, rejeitar ou reescrever na entrada) e o algoritmo de similaridade.
+
+## 25. Dependências entre fases
+
+`IDENTIDADE (decisões 1–9) → USERNAME IMUTÁVEL (trigger/RPC/UI) → TAG DE SISTEMA PROTEGIDA (servidor) → PROJEÇÃO
+PÚBLICA NATIVA (emitir a tag a partir da identidade, sem confiar no cliente) → PUBLIC DECK → IMPORTAÇÃO → SEMELHANTES/
+MERGE → PERFIL PÚBLICO (lista de Decks) → K.8.`
+
+Diferença justificada em relação ao encadeamento proposto: **reserva de username (decisão 4) e proteção do prefixo
+podem ser feitas em paralelo à imutabilidade**, mas nenhuma pode ser adiada para depois da projeção pública, porque a
+primeira cópia emitida já cria atribuição permanente. A imutabilidade **sozinha** não torna a Tag segura: precisa de
+(a) tag injetiva ou identificador, (b) reserva, (c) proteção servidor.
+
+## 26. Verificações da Parte II
+
+- Arquivos realmente abertos: `shared/tag-manager.js` (inteiro), `shared/flashcard-tags-editor.js` (inteiro),
+  trechos de `shared/flashcard-native-persistence.js`, `shared/anki-import.js`, `shared/anki-export.js`,
+  `shared/my-flashcards.js` (grep de `tags`), e a AT (§10, §20, busca por reserva/exclusão/redirect/identificador).
+- Banco real (somente `SELECT`/catálogos): contagens por padrão de caractere em `profiles`, cruzamento com conteúdo,
+  tabelas de reserva/alias/redirect, número de usuários de `auth.users` (41) e perfis (26). Nenhuma escrita.
+- Nenhum código, schema, RLS, RPC, UI, username ou dado alterado; sem migration; sem push; sem deploy; migration 059
+  **não aplicada**.
