@@ -263,3 +263,7 @@ qualquer divergência (EXACT surgiu, VARIANT virou EXACT, NONE virou VARIANT/cro
 - Sem problemas: `auth.uid()`, ids de terceiros, nenhuma sobrescrita de Note, atribuição obrigatória, sem SQL dinâmico, lock por copiador sem ciclo, grants.
 
 **Semântica V1 (inalterada)**: sem merge; EXACT (inclusive arquivada) não é recriada; VARIANT opcional e desmarcada; cross-family informativa; destino em Deck existente é V1.1; árvore sem Note nova é omitida; atribuição permanente; mídia independente; reimportação só acrescenta; lock cobre imports do mesmo usuário (editor manual/Anki fora); 2000 é guardrail técnico; 20 CardInstances é regra Free separada.
+
+### §S.1 — Staging aplicado e migration 064 (2026-10-02)
+
+Staging (`ilfjzizjfcmhibkhwber`) recebeu 001→063 via Supabase CLI (histórico oficial registrado; funções, policies e Storage idênticos à cadeia local estrita). Achado: a tabela `progress` nunca foi versionada (criada no Dashboard da produção). A migration **064** a versiona de forma idempotente e não destrutiva (no-op estrito onde já existe; só aditiva em tabela parcial); contrato extraído da produção por leitura. A cadeia 001→064 é agora autossuficiente em banco novo. **064 NÃO aplicada em produção nem no staging** (staging: via `db push` com o pacote atualizado).
