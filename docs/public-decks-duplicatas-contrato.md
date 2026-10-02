@@ -267,3 +267,129 @@ qualquer divergência (EXACT surgiu, VARIANT virou EXACT, NONE virou VARIANT/cro
 ### §S.1 — Staging aplicado e migration 064 (2026-10-02)
 
 Staging (`ilfjzizjfcmhibkhwber`) recebeu 001→063 via Supabase CLI (histórico oficial registrado; funções, policies e Storage idênticos à cadeia local estrita). Achado: a tabela `progress` nunca foi versionada (criada no Dashboard da produção). A migration **064** a versiona de forma idempotente e não destrutiva (no-op estrito onde já existe; só aditiva em tabela parcial); contrato extraído da produção por leitura. A cadeia 001→064 é agora autossuficiente em banco novo. **064 NÃO aplicada em produção nem no staging** (staging: via `db push` com o pacote atualizado).
+
+### §S.2 — P8: homologação no Staging (2026-10-02) — PARADA em defeito
+
+**Correção de §S/§S.1 (item I).** O texto acima ficou desatualizado: o Staging existe (`ilfjzizjfcmhibkhwber`) e está na **066**. As migrations 001→066 foram aplicadas pelo CLI (versões `20250101000001`…`066`, sem buracos). As migrations **064, 065 e 066 foram aplicadas e validadas no Staging**:
+- 064 (`progress` versionada) foi aplicada na cadeia;
+- 065: paridade de GRANTs, 252/252;
+- 066: INSERT de `profiles` protegido; teste real de login A1/A2/B1/B2/C passou.
+
+A produção (`eigjocalzwamisgqilhg`) não recebeu nada desta série. Este é o registro de **P8.4**: não houve reaplicação.
+
+**Como foi testado.** As suítes locais foram portadas para o Staging e executadas via MCP. Cada execução é uma única transação que termina em `RAISE`, o que força um rollback: resíduo zero, verificado após cada execução (0 Decks, 0 Notes, 0 objetos no Storage, 3 perfis inalterados). Três limitações da ferramenta, registradas:
+1. **Instruções `DELETE` ou `UPDATE` sem `WHERE` acionam uma confirmação "destrutiva" do MCP.** Ela não aparece aqui: a chamada nunca chega ao Postgres (conferido nos logs) e expira em 60 s. Por isso as suítes evitam essas instruções. "Apagar a origem" e "apagar objeto do Storage" foram substituídos por verificações estruturais de independência (nenhuma URL da cópia aponta para a pasta do autor).
+2. **`now()` é fixo na transação.** Os testes de `content_updated_at` envelhecem os timestamps, com o trigger de toque desligado só durante o ajuste e dentro da transação revertida.
+3. **As sessões são simuladas** (`set local role authenticated` + `request.jwt.claims`). Valida RLS, RPCs e triggers reais, mas **não** valida JWT real, policies de `storage.objects` via API nem `statement_timeout` por papel (ver D1).
+
+Ao portar as suítes, foram corrigidas verificações que passavam sem provar nada: UUIDs falsos em `like '%…%'`, um `true` fixo em Z2, comparações com o próprio valor, e a checagem "dono não copia" no K. A versão corrigida é a que foi executada.
+
+#### A. Matriz A–M (duplicatas) — Staging, suíte de duplicatas 72/72
+
+| Caso | Resultado | Evidência (checagens) |
+|---|---|---|
+| A | PASS | C1/C4/C9/C10 EXACT; I3 `skipped_exact=8`; I2 cria só as 7 NONE |
+| B | PASS | I5: Tags locais `{minha,sem-attr}` intactas; I4 hash da coleção local igual |
+| C | PASS (parcial) | C1 EXACT em outro Deck; I4 nada movido. O texto "informa em qual Deck" (UI) não foi verificado no Staging |
+| C2 | PASS | C2 `exact_archived` + `local_archived`; I3 `skipped_exact_archived=1`; nada desarquivado (I4) |
+| D | PASS (parcial) | C6/V1/V2 cross-family não selecionável e recusado na RPC. Só exercitado com Normal×Reverse |
+| E | PASS | C7 desmarcada; V5/V6 seleção explícita cria Note independente, local `pomme/fruta` intacta; P1 |
+| F | PASS | C5: acento e pontuação distinguem (NONE) |
+| G | PASS | C6 (cross-family) e C8 (Reverse custa 2 CardInstances) |
+| H | PARCIAL | Cloze NONE com 2 instâncias (C8), marcas preservadas (I12), Z5. **EXACT/VARIANT entre Clozes não testado** (nem local) |
+| I | PASS | S9/C9: ordem de distratores e caixa irrelevantes → EXACT |
+| J | PARCIAL | Só Type Answer NONE (C11). **"EXACT só contra Type Answer" não testado** |
+| K | NÃO TESTADO | A suíte não tem Teacher/Course na coleção do copiador |
+| L | PASS | S7/C10 Legacy compatível = Native; S8/C10 incompatível fora do plano |
+| M | PASS | S10 attribution não entra na assinatura; I6 Notes novas com a atribuição do autor; I5 existentes intocadas |
+
+Também confirmados no Staging:
+- Recálculo sob lock / plano velho: X1/X2/X3 → `duplicates_changed`, nada criado.
+- `media_map_incomplete`: V7.
+- Guardrail: L1 `deck_too_large` com GUC 3.
+- Destino: L4/L5.
+- Despublicado: Z2 `unavailable`.
+- Assinatura zh: Z3/Z4.
+
+#### B. §15.1–§15.11 (contrato técnico)
+
+| Bloco | Staging (SQL real) | Só local |
+|---|---|---|
+| 15.1 Publicação | PASS (suíte Public Deck 88/88: kinds recusados, não-dono, escrita direta de campos públicos barrada pelo guard, idempotência) | — |
+| 15.2 Perfil | PASS no SQL (`list_public_decks_for_user`, `public_profile=false` esconde sem despublicar) | Exibição na UI |
+| 15.3 Rota | Não aplicável a SQL | Playwright local |
+| 15.4 Conteúdo | PASS no SQL (`get_public_deck_notes` sem `note`/FSRS/`owner_id`; os 5 tipos) | Renderização nos 4 renderers |
+| 15.5 Contagem | PASS (Reverse=1 Note/2 instâncias, Cloze N; arquivadas fora) | — |
+| 15.6 Atribuição | PASS (autor, cópia, cópia de cópia — K; falsificação via payload barrada) | — |
+| 15.7 Permissões | PASS (owner/visitante/autenticado/Free/anon; RLS de `decks`) | — |
+| 15.8 Importação | PASS no SQL (independente, Tags, Free barrado, duplicatas, atomicidade, destino). Mídia: suíte 48/48 + hardening 20/20 (H15/H16 revalidados com envelhecimento) | Storage via API: ver P8.1/P8.5 |
+| 15.9 Privacidade | PASS (privado/despublicado = mesma resposta; sem FSRS/Teacher/`note`; `public_id` opaco) | — |
+| 15.10 Reports | NÃO TESTADO no Staging | Local |
+| 15.11 Regressão | NÃO TESTADO no Staging | Suítes locais (§S) |
+
+#### C. P8.1–P8.6
+
+- **P8.1** `test_real_storage_integration.js`: **BLOQUEADO.** Exige login real de 2 contas (`PD_A_*`/`PD_B_*`), e as senhas não existem nesta sessão (não devem ir pelo chat). Precisa ser rodado pela autora, como o teste de auth da 066.
+- **P8.2** concorrência com 2 sessões reais: **BLOQUEADO** (mesmo motivo). Dados compartilhados exigiriam commit e depois limpeza com `DELETE`, que o MCP não executa sem confirmação. A lógica de recálculo sob lock passou em sessão única (X1–X3).
+- **P8.3** performance: **FEITO, com defeito (D1).**
+
+  | Notes | Plano (check) | Cópia | Resultado |
+  |---|---|---|---|
+  | 500 | 0,22 s | 1,35 s | 500 copiadas |
+  | 1000 | 0,41 s | 3,73 s | 1000 copiadas |
+  | 2000 | 0,84 s | 10,81 s | 2000 copiadas |
+  | 2001 | — | — | `deck_too_large` no plano e na cópia (10 ms), nada criado |
+
+  Atribuição correta em todas as Notes copiadas. Os testes não usaram mídia.
+- **P8.4**: registrado (Staging na 066, sem reaplicação).
+- **P8.5** fluxo real de mídia ponta a ponta (manifest → `storage.copy` → cópia → independência física → recuperação): **BLOQUEADO** (precisa de JWT real e API do Storage). A lógica SQL de mapeamento/compensação passou na suíte de mídia.
+- **P8.6**: **nada a limpar.** Todas as execuções foram revertidas; baseline conferido (0 Decks, 0 Notes, 0 objetos, 3 perfis inalterados).
+
+#### D. Local × Staging
+
+| Onde | O que foi validado |
+|---|---|
+| Postgres real do Staging | RPCs, RLS, triggers, assinaturas e performance |
+| Só localmente | UI e Playwright (Rota, renderers, Reports, regressão de app) |
+| Em nenhum dos dois | JWT real + Storage via API (P8.1/P8.5) e duas sessões reais (P8.2) |
+
+#### E. Defeitos
+
+**D1 — `copy_public_deck` é quadrática e a cópia grande estoura o timeout da API.**
+- **Causa:** no laço de Notes (062, função `copy_public_deck`), cada Note faz `jsonb_to_recordset(v_plan) … where p.f_id = f.id`, ou seja, varre o plano inteiro a cada Note. Custo O(n²). Tempo medido (P8.3): ×2,8 a cada vez que o tamanho dobra.
+- **Impacto:** o papel `authenticated` no Staging tem `statement_timeout=8s` (a produção usa o padrão Supabase; não conferido nesta etapa). Reproduzido: cópia de 2000 Notes com `statement_timeout=8s` → `57014 canceling statement due to statement timeout`, apontando para essa linha. Rollback total, nada parcial.
+- **Limite efetivo:** estimado em ~1.600 Notes (extrapolado, não medido) — abaixo do guardrail documentado de 2000.
+- **Por que não apareceu antes:** localmente 2000 levou 3,4 s.
+- **Correção:** exige migration (resolver o plano por `f_id` uma vez, por exemplo um objeto jsonb indexado). **Não feita: aguardando autorização.**
+
+Nenhum outro defeito encontrado.
+
+#### F. Os 4 achados de baixo risco da 062
+
+Continuam abertos e não viraram bloqueio: host não ancorado, manifest sem teto, mensagem com `cls` ausente, comentário de rollback.
+
+Relação com D1: o manifest sem teto tem a mesma natureza de tempo. Vale decidir junto com D1, mas não bloqueia nenhuma garantia testada.
+
+#### G. Estado
+
+**Homologado no Staging (SQL real):**
+- A–M, exceto H/J parciais e K não testado;
+- §15.1, 15.2, 15.4–15.9 no nível do banco;
+- P8.3 (com D1);
+- P8.4 e P8.6.
+
+**Pendente:**
+- D1;
+- P8.1, P8.2, P8.5 (precisam da autora);
+- H/J/K;
+- §15.3, 15.10, 15.11 no Staging (UI).
+
+**Staging ≠ autorização para produção.**
+
+#### H. Decisões da autora antes da produção
+
+1. Autorizar a migration de correção de D1, testada localmente e depois aplicada via MCP no Staging (067), com nova rodada de P8.3. Alternativas: baixar o guardrail para ~1000, ou aumentar o timeout do papel (não recomendado).
+2. Rodar P8.1, P8.2 e P8.5 com as contas de teste (senhas só no terminal ou em variáveis de ambiente).
+3. Decidir sobre os 4 achados de baixo risco.
+4. Decidir se H/J/K precisam de teste antes da produção.
+5. Ordem de aplicação na produção: 063 → 066 junto com 059–062 e a correção de D1.
