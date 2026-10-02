@@ -1,0 +1,26 @@
+# Lote de 80 expressões (Desafios) — importação por JSON
+
+Conteúdo: 80 expressões do francês cotidiano (A2–B2), com registro marcado
+(familiar / muito familiar / vulgar) dentro de `meaning.pt` e `explanation`.
+Seleção por frequência de uso (OpenSubtitles fr 2018) + valor pedagógico.
+
+| Arquivo | O que é |
+|---|---|
+| `lote-expressoes-content.json` | Fonte editável (um objeto por expressão, com `register`, `lote`, textos). |
+| `build_lote_expressoes.py` | Valida e gera o JSON importável. Sem rede. |
+| `lote-expressoes-80.json` | JSON pronto para o painel admin. Tudo `needs_review`. |
+| `generate_challenge_audio.py` | Gera os 240 mp3 (expressão + 2 exemplos) em `fr/audio/challenges/`. |
+
+## Passo a passo
+1. **Gerar o áudio** (GitHub > Actions > "Áudio TTS" > Run workflow, branch `main`,
+   modo `desafios-expressoes`). Usa o Secret `GCP_TTS_KEY`, commita os mp3 e
+   dispara o deploy. Textos que o Speech-to-Text recusar caem num fallback com
+   checagem física do mp3; o que mesmo assim falhar aparece como "SEM ÁUDIO" no log.
+2. **Ouvir** os áudios dos palavrões e interjeições (`ta gueule`, `putain`, `bordel`…).
+3. **Importar**: painel de admin > Desafios > importar JSON > colar o conteúdo de
+   `lote-expressoes-80.json`. Entra como `needs_review`; ids duplicados são recusados.
+4. **Revisar e publicar** no painel (o checklist bloqueia item sem áudio).
+
+Para mudar um texto: edite `lote-expressoes-content.json`, rode
+`python3 fr/scripts/challenges_import/build_lote_expressoes.py` e gere o áudio de novo
+(o nome do mp3 é o hash do texto; textos novos geram arquivos novos).
