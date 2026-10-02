@@ -56,6 +56,8 @@ Itens marcados **DECISÃO NECESSÁRIA** continuam sem decisão (listados em §P.
 
 
 ## C. Matriz A–L (revisada)
+Importação padrão: EXACT/EXACT arquivada = não importar; VARIANT = não importar (selecionável); cross‑family = não é
+candidato (só seção informativa); NONE = importar.
 Semântica v1: **EXACT existente → não cria outra Note; VARIANT → sem merge automático; cross‑family → só informa;
 NONE → coexiste.** "Inserir o que falta" = não recriar o que já existe; **nunca** fundir Fields de Notes existentes.
 Nenhuma Note local existente é alterada em nenhum caso (Fields, Card Type, mídia, Tags, attribution, Deck,
@@ -67,10 +69,10 @@ Nenhuma Note local existente é alterada em nenhum caso (Fields, Card Type, míd
 | B | Equivalente, Tags diferentes | EXACT | idem; Tags não participam; local intocada |
 | C | Equivalente, **em outro Deck** | EXACT | idem; informa em qual Deck está; **não move** de B para A; a Note não entra no Deck importado |
 | C2 | Equivalente **arquivada** | EXACT (arquivada) | sinalizada "existe, arquivada"; **não cria, não desarquiva**, não mexe em FSRS/Tags/Deck |
-| D | Equivalente, outro Card Type | VARIANT (cross‑family) | só informa; coexiste; criada se selecionada; sem merge |
-| E | Mesma frente, verso diferente | VARIANT | informa; **criada** se selecionada (padrão: selecionada); nunca altera a local |
+| D | Equivalente, outro Card Type | cross‑family | **só informativo** ("conteúdos relacionados"); não é candidato à importação, sem checkbox; sem merge |
+| E | Mesma frente, verso diferente | VARIANT | informa; **desmarcada por padrão**, selecionável explicitamente; se criada, nunca altera a local |
 | F | Mesmos Fields, conteúdo diferente | NONE (ou VARIANT se a face de pergunta bate) | coexiste |
-| G | Normal × Normal‑reverso | VARIANT (cross‑family) | não são duplicatas; coexistem; reverso (2 CardInstances) = 1 Note = 1 comparação |
+| G | Normal × Normal‑reverso | cross‑family | só informativo, fora da seleção; não são duplicatas; reverso (2 CardInstances) = 1 Note = 1 comparação |
 | H | Cloze | EXACT/VARIANT só dentro de `cloze` | mesma frase+marcas = EXACT; marcas diferentes = VARIANT; cada marca segue com CardInstance/FSRS próprios |
 | I | Multiple Choice | idem, dentro de `mc` | prompt+resposta+conjunto de distratores (sem ordem) = EXACT; resto = VARIANT |
 | J | Type Answer | família `pair` | EXACT só contra Type Answer |
@@ -79,8 +81,8 @@ Nenhuma Note local existente é alterada em nenhum caso (Fields, Card Type, míd
 | M | Tem `criado-por-*` / attribution | irrelevante | attribution não é chave; Notes criadas recebem a regra atual; existentes não são tocadas |
 
 Consequência assumida (documentada): a árvore importada pode ficar **estruturalmente diferente** da pública, pois
-Notes EXACT existentes em outros Decks do usuário não são recriadas nem movidas. Decks sem nenhuma Note a criar:
-**DECISÃO NECESSÁRIA** (criar a casca vazia da estrutura ou omitir) — ver §P.B.
+Notes EXACT existentes em outros Decks do usuário não são recriadas nem movidas.
+**Decks sem Note nova são omitidos** (§F).
 
 ## D. Implementação única (anti‑paralelismo)
 Uma só função SQL `note_content_signature(own_flashcards)` + `note_variant_key(...)`. O JS **nunca** calcula
@@ -100,11 +102,14 @@ duplicado aqui**. Migrar o Anki para `note_content_signature` é fase posterior 
   limite 19+1).
 
 ## F. Deck
-- **Dois modos, não confundir:**
-  - **A. Importar como nova árvore** (padrão atual): conflito de nome no destino (case‑fold) ⇒ sufixo `Nome`,
-    `Nome (2)`, `Nome (3)`… resolvido **por nome**, nunca só por id; subdecks seguem a mesma regra dentro da árvore nova.
-  - **B. Adicionar a um Deck existente escolhido explicitamente pelo usuário**: **não é conflito de nome** — o usuário
-    escolheu aquele Deck; as Notes a criar entram nele (subdecks da origem casam por nome+pai, sem par criam‑se).
+- **v1 tem um único modo: importar como NOVA árvore independente**, aplicando as regras de duplicata. Conflito de
+  nome no destino (case‑fold) ⇒ sufixo `Nome`, `Nome (2)`, `Nome (3)`… resolvido **por nome**, nunca só por id; vale
+  também para subdecks dentro da árvore nova.
+- **Omissão de Decks vazios:** Deck/subdeck com ≥1 Note nova é criado; com 0 Notes novas **não é criado**, exceto se
+  algum descendente tiver Note nova (então existe para preservar a hierarquia). Árvore inteira sem Notes novas ⇒ nenhum Deck.
+- **Modo "adicionar a Deck existente" fica para a v1.1** (operação distinta, RPC/intenção própria). Registrado o
+  motivo: casamento por nome+pai é ambíguo (nomes iguais em pais diferentes, renomeações locais, estruturas
+  divergentes, Notes já espalhadas). Quando existir, não será tratado como conflito de nome.
 - A detecção de duplicata é na **coleção inteira** e **nunca move** Note existente para o Deck importado.
 - Destino só `personal_root`/`personal`; nunca Course/Teacher (inalterado).
 - Irmãos (reverso, Cloze) ficam juntos (Deck é da Note).
@@ -161,7 +166,7 @@ recriada nem movida**; **EXACT arquivada detectada, não recriada, não desarqui
 Tag**; pular não cria nem toca nada (hash da Note local idêntico, `revision`/FSRS iguais, 0 CardInstances novas);
 reimportação do mesmo Deck ⇒ tudo EXACT, 0 criadas; após editar local ⇒ VARIANT, 0 sobrescritas; despublicar/excluir/
 trocar `display_name` do autor não afeta a detecção; Course/Teacher/trilha não comparados; **nome de Deck repetido:
-`Nome (2)`, `(3)`; modo B (Deck escolhido) não sufixa e não move Notes**; seleção parcial (só as marcadas criadas;
+`Nome (2)`, `(3)`; Decks sem Note nova omitidos, ancestrais preservados; nenhuma Note existente movida**; seleção parcial (só as marcadas criadas;
 irmãos juntos; limite); contagem 2000 sobre a origem; contagem de CardInstances; **concorrência: duas sessões do mesmo
 usuário (1 cria, 2º `duplicates_changed`), dois imports de Decks distintos com a mesma Note**; manifest filtrado (sem
 mídia de Notes não criadas); mídia local existente nunca substituída. Cliente (Playwright fr+zh): fluxo completo do §Q,
@@ -183,7 +188,7 @@ armazenada + índice **não** é proposta. **Não aplicar sem aprovação.**
 1. v1 **sem merge** de conteúdo existente; nenhuma Note local é alterada.
 2. EXACT existente sem attribution: só informar.
 3. EXACT em outro Deck: não recriar, não mover; identidade independe do Deck.
-4. Nome de Deck repetido: sufixo `(2)`…; distinguir modo A (nova árvore) de modo B (Deck escolhido).
+4. Nome de Deck repetido: sufixo `(2)`… (v1 só nova árvore; "adicionar a Deck existente" = v1.1).
 5. Importação parcial por Note: aprovada; seleção simples, Note como unidade, irmãos juntos, respeita limite/atomicidade.
 6. Arquivadas participam da detecção; sinalizadas; não desarquivar/alterar.
 7. Guardrail 2000 sobre a árvore de origem + UX mostra Notes novas a criar; limite Free é regra separada.
@@ -197,11 +202,13 @@ armazenada + índice **não** é proposta. **Não aplicar sem aprovação.**
 14. "Criar mesmo assim" para EXACT: **removido da v1** (EXACT existente nunca gera segunda Note; reutilização é ação
     explícita futura).
 
-### P.B Ainda sem decisão
-- Deck da árvore sem nenhuma Note a criar: criar casca vazia ou omitir?
-- VARIANT/cross‑family: padrão **selecionada** (proposto) ou **desmarcada** na tela de seleção?
-- Modo B (inserir em Deck existente) entra já na v1 ou só o modo A com sufixo (modo B numa v1.1)?
-- Casamento de subdecks no modo B por nome+pai (proposto): confirmar.
+### P.B Decisões fechadas nesta revisão
+15. Deck sem Note nova: **omitir** (mantendo ancestrais necessários à hierarquia).
+16. VARIANT: **desmarcada por padrão**, selecionável. Cross‑family: **apenas informativa**, fora da seleção.
+17. Adicionar a Deck existente: **v1.1**; a v1 só cria nova árvore.
+18. Lacuna de concorrência (editor manual/Anki sem lock): **aceita e documentada** (§J).
+
+Não resta decisão de produto bloqueando a implementação da v1.
 
 ## Q. Fluxo de importação (lógico)
 1. Usuário seleciona o Public Deck (`#/deck/<id>`).
@@ -211,9 +218,9 @@ armazenada + índice **não** é proposta. **Não aplicar sem aprovação.**
 5. Compara com a coleção local do usuário (mesmo idioma, ativas+arquivadas, qualquer Deck pessoal).
 6. Classifica cada Note: EXACT (ativa/arquivada) / VARIANT / cross‑family / NONE / não comparável.
 7. Apresenta o resultado: total, já existentes, arquivadas, variantes, **Notes que serão criadas** e CardInstances.
-8. Usuário escolhe modo de destino (A nova árvore / B Deck existente, §F) e seleciona as Notes criáveis.
+8. Destino = nova árvore (único modo da v1). Usuário vê as informativas (cross‑family) e seleciona entre as criáveis (NONE marcadas, VARIANT desmarcadas).
 9. Valida limites (guardrail 2000 na origem; limite Free não se aplica a Premium).
-10. Resolve nome do Deck (sufixo `(2)`… no modo A).
+10. Resolve nome do Deck (sufixo `(2)`…) e poda Decks sem Note nova.
 11. Novo manifest de mídia **somente** das Notes a criar.
 12. Cópia física da mídia (`storage.copy` para a pasta do copiador).
 13. RPC transacional `copy_public_deck`: toma o lock do copiador, **recalcula a equivalência sob o lock** (único ponto de
@@ -222,4 +229,4 @@ armazenada + índice **não** é proposta. **Não aplicar sem aprovação.**
 15. Resultado final: criadas / já existentes / puladas, com avisos.
 
 ## O. Estado
-Decisões relevantes fechadas (§P.A). Restam 4 pontos menores (§P.B), todos de UX e nenhum altera arquitetura/schema.
+Contrato fechado para a v1 (§P). Pronto para implementação (migration 062 ainda não criada/aplicada).
