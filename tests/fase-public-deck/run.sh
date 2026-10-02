@@ -9,6 +9,7 @@ psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/share
 psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/shared/supabase_migrations/064_version_progress_table.sql" >/dev/null 2>&1
 psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/shared/supabase_migrations/065_grant_table_privileges_parity.sql" >/dev/null 2>&1
 psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/shared/supabase_migrations/066_profiles_protect_plan_role_insert.sql" >/dev/null 2>&1
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/shared/supabase_migrations/067_public_deck_copy_linear_plan.sql" >/dev/null 2>&1
 psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -f "$HERE/test_public_deck.sql" 2>&1 | grep -v '^\s*$'
 echo "--- P7 independência de mídia ---"
 psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -f "$HERE/test_media_independence.sql" 2>&1 | grep -v '^\s*$'
