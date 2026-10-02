@@ -1,7 +1,7 @@
 #!/bin/bash
 # P7 -- concorrência e performance contra o Postgres local (db pubdeck, preparado por run.sh).
 # 1) 8 publicações simultâneas do MESMO Deck → um único public_id estável.
-# 2) 4 cópias simultâneas (Premium) → 4 cópias independentes, sem erro/duplicação de atribuição.
+# 2) 4 cópias simultâneas (Premium) do MESMO usuário → (062) serializadas por lock; só a 1ª cria, as demais veem tudo EXACT (1 Deck, N Notes). Os "criadas=" do benchmark abaixo refletem a deduplicação (Notes f1..fN se repetem entre Decks).
 # 3) Deck com 2000 Notes: tempo de metadado, conteúdo e cópia.
 P="psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -At"
 OWN=00000000-0000-0000-0000-0000000000e1; PREM=00000000-0000-0000-0000-0000000000e3

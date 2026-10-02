@@ -47,6 +47,14 @@ const notesFor = (lang) => ({ language: lang, total: 4, notes: [
     { id: 'b', lang: 'pt-BR', role: null, content: { value: 'gato' }, audio: null, image: null, pinyinFieldId: null }] },
 ] });
 
+
+const PLAN_NOTE = (i, cls, extra) => Object.assign({ pos: i, sig: 'sig' + i, cls, mode: 'normal', deck: 8000, instances: 1, selectable: cls === 'none' || cls === 'variant', selected_default: cls === 'none', local_deck_id: null, local_archived: false, preview: 'nota ' + i }, extra || {});
+const planOf = (notes, extra) => Object.assign({ language: 'x', source_total: notes.length, incompatible: 0, counts: notes.reduce((a, n) => (a[n.cls] = (a[n.cls] || 0) + 1, a), {}),
+  create_default: notes.filter(n => n.cls === 'none').length, instances_default: notes.filter(n => n.cls === 'none').reduce((a, n) => a + n.instances, 0),
+  root_final_name: 'Verbos <b>do dia</b> (2)', root_id: 8000, decks: [{ id: 8000, parent_id: null, name: 'Verbos' }, { id: 8001, parent_id: 8000, name: 'Sub vazio' }], notes }, extra || {});
+
+const CHECK_DEFAULT = "if (name === 'check_public_deck_duplicates') return { data: (window.__PLAN || { language: 'x', source_total: 1, incompatible: 0, counts: { none: 1 }, create_default: 1, instances_default: 1, root_final_name: 'Verbos', root_id: 8000, decks: [{ id: 8000, parent_id: null, name: 'Verbos' }], notes: [{ pos: 1, sig: 'sigA', cls: 'none', mode: 'normal', deck: 8000, instances: 1, selectable: true, selected_default: true, preview: 'bonjour' }] }), error: null };";
+
 let passed = 0, failed = 0;
 const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? JSON.stringify(x) : ''); } };
 
@@ -136,7 +144,8 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
     }
     {
       // Premium: abre conteúdo, vê com os renderers reais, importa
-      const copyHandler = `if (name === 'get_public_deck_media_manifest') return { data: { count: 0, items: [] }, error: null };
+      const copyHandler = `if (name === 'check_public_deck_duplicates') return { data: (window.__PLAN || { language: 'x', source_total: 1, incompatible: 0, counts: { none: 1 }, create_default: 1, instances_default: 1, root_final_name: 'Verbos', root_id: 8000, decks: [{ id: 8000, parent_id: null, name: 'Verbos' }], notes: [{ pos: 1, sig: 'sigA', cls: 'none', mode: 'normal', deck: 8000, instances: 1, selectable: true, selected_default: true, preview: 'bonjour' }] }), error: null };
+      if (name === 'get_public_deck_media_manifest') return { data: { count: 0, items: [] }, error: null };
         if (name === 'copy_public_deck'){ window.__DB.own_flashcards.push({ id: 9001, owner_id: 'U', language_app_key: '${appKey}', status: 'active', revision: 0, deck_id: 8001, back_trans: 'olá', front: 'bonjour', card_generation_mode: 'normal', tags: ['criado-por-u0123456789'], fields: [{ id: 'a', lang: null, role: null, content: { value: 'bonjour' }, audio: null, image: null, pinyinFieldId: null }, { id: 'b', lang: 'pt-BR', role: null, content: { value: 'olá' }, audio: null, image: null, pinyinFieldId: null }] });
         window.__DB.decks.push({ id: 8001, kind: 'personal', owner_id: 'U', language_app_key: '${appKey}', parent_deck_id: 7000, name: 'Verbos' });
         return { data: { deck_id: 8001, notes_copied: 4, skipped_incompatible: 1, media_remapped: 0 }, error: null }; }`;
@@ -163,9 +172,13 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
       // Importar
       L('Premium não-dono vê Importar', await page.locator('#public-deck-import-btn').count() === 1);
       await page.click('#public-deck-import-btn');
+      await page.waitForSelector('#public-deck-import-confirm:not([disabled])');
+      L('importar abre o PLANO antes de copiar (nenhum copy_public_deck ainda)', !(await page.evaluate(() => window.__rpcLog.map(x => x[0]))).includes('copy_public_deck') && (await page.evaluate(() => window.__rpcLog.map(x => x[0]))).includes('check_public_deck_duplicates'));
+      await page.click('#public-deck-import-confirm');
       await page.waitForFunction(() => window.__rpcLog.some(x => x[0] === 'copy_public_deck'), null, { timeout: 8000 });
       const args = await page.evaluate(() => window.__rpcLog.find(x => x[0] === 'copy_public_deck')[1]);
       L('import chama copy_public_deck com o public_id (destino padrão = Meus Decks)', args.p_public_id === PID && args.p_dest_deck_id === null && JSON.stringify(args.p_media_map) === '{}', args);
+      L('RPC recebe a SELEÇÃO confirmada [{sig,cls}] (o JS não calcula assinatura)', JSON.stringify(args.p_selection) === JSON.stringify([{ sig: 'sigA', cls: 'none' }]), args.p_selection);
       await page.waitForFunction(() => STATE.cards.some(c => c.origin === 'self' && c.rowId === 9001), null, { timeout: 8000 });
       const imp = await page.evaluate(() => { const c = STATE.cards.find(x => x.origin === 'self' && x.rowId === 9001); return { deck: c.deckId, reps: c.reps, tags: c.tags, decks: STATE.decks.some(d => d.id === 8001) }; });
       L('cópia entra na sessão com deckId, FSRS zerado, atribuição na Tag e Deck na árvore', imp.deck === 8001 && imp.reps === 0 && imp.tags.includes('criado-por-u0123456789') && imp.decks, imp);
@@ -179,7 +192,8 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
       const U = (p) => 'https://proj.supabase.co/storage/v1/object/public/flashcard-media/' + UID_A + '/' + p;
       const ITEMS = [{ url: U('audio-1.mp3'), path: UID_A + '/audio-1.mp3' }, { url: U('image-1.png'), path: UID_A + '/image-1.png' }, { url: U('tts-3.mp3'), path: UID_A + '/tts-3.mp3' }];
       const mediaHandler = `
-        if (name === 'get_public_deck_media_manifest'){ window.__manifestCalls = (window.__manifestCalls || 0) + 1; const items = window.__SCEN.items; return { data: { count: items.length, items }, error: null }; }
+        if (name === 'check_public_deck_duplicates') return { data: (window.__PLAN || { language: 'x', source_total: 1, incompatible: 0, counts: { none: 1 }, create_default: 1, instances_default: 1, root_final_name: 'Verbos', root_id: 8000, decks: [{ id: 8000, parent_id: null, name: 'Verbos' }], notes: [{ pos: 1, sig: 'sigA', cls: 'none', mode: 'normal', deck: 8000, instances: 1, selectable: true, selected_default: true, preview: 'bonjour' }] }), error: null };
+      if (name === 'get_public_deck_media_manifest'){ window.__manifestCalls = (window.__manifestCalls || 0) + 1; const items = window.__SCEN.items; return { data: { count: items.length, items }, error: null }; }
         if (name === 'copy_public_deck'){ const sc = window.__SCEN; sc.copyCalls = (sc.copyCalls || 0) + 1; window.__copyArgs = args;
           if (sc.failFirstWith && sc.copyCalls === 1) return { data: null, error: { message: sc.failFirstWith } };
           if (sc.failAlways) return { data: null, error: { message: sc.failAlways } };
@@ -192,6 +206,8 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
         await r.page.evaluate((id) => openPublicDeckPage(id), PID);
         await r.page.waitForSelector('#public-deck-import-btn');
         await r.page.click('#public-deck-import-btn');
+        await r.page.waitForSelector('#public-deck-import-confirm:not([disabled])');
+        await r.page.click('#public-deck-import-confirm');
         await r.page.waitForFunction(() => { const b = document.getElementById('public-deck-import-btn'); return b && !b.disabled; }, null, { timeout: 8000 });
         await r.page.waitForTimeout(250);
         const out = await r.page.evaluate(() => ({ log: window.__STORAGE.log, args: window.__copyArgs || null, copyCalls: window.__SCEN.copyCalls || 0, manifest: window.__manifestCalls || 0,
@@ -294,6 +310,85 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
       const rc2 = await page.evaluate(() => REPORT_MODAL_CONTEXT);
       L('report de Card público usa source public_deck_note com idx', rc2.source === 'public_deck_note' && rc2.note_idx === 1, rc2);
       await ctx.close();
+    }
+
+
+    // ===== V1 (062): plano de importação, classes, seleção, re-análise =====
+    {
+      const notes = [PLAN_NOTE(1, 'none', { preview: 'maison <img src=x onerror=alert(1)>', deck: 8001 }), PLAN_NOTE(2, 'none', { mode: 'cloze', instances: 2, preview: 'Je {{c1::mange}}' }),
+        PLAN_NOTE(3, 'variant', { preview: 'pomme' }), PLAN_NOTE(4, 'exact', { preview: 'chat', local_deck_id: 55 }), PLAN_NOTE(5, 'exact_archived', { preview: 'chien', local_archived: true }),
+        PLAN_NOTE(6, 'cross_family', { mode: 'normal_reversed', instances: 2, preview: 'livre' }), PLAN_NOTE(7, 'source_duplicate', { preview: 'maison' })];
+      const plan = planOf(notes, { incompatible: 1 });
+      const h = `${CHECK_DEFAULT}
+        if (name === 'get_public_deck_media_manifest'){ window.__manifestArgs = args; return { data: { count: 0, items: [] }, error: null }; }
+        if (name === 'copy_public_deck'){ window.__copyArgs = args; window.__copyN = (window.__copyN || 0) + 1;
+          if (window.__chg && window.__copyN === 1) return { data: null, error: { message: 'duplicates_changed', code: '40001' } };
+          return { data: { deck_id: 8200, notes_copied: 2, skipped_exact: 1, skipped_exact_archived: 1, skipped_incompatible: 1, root_name: 'S (2)' }, error: null }; }`;
+      const r = await bootApp({ authenticated: true, premium: true, is_owner: false, can_open: true, can_import: true }, null, h);
+      await r.page.evaluate(([pl, uid]) => { window.__PLAN = pl; CURRENT_USER = { id: uid }; }, [plan, 'U']);
+      await r.page.evaluate((id) => openPublicDeckPage(id), PID);
+      await r.page.waitForSelector('#public-deck-import-btn'); await r.page.click('#public-deck-import-btn');
+      await r.page.waitForSelector('#public-deck-import-confirm');
+      const txt = await r.page.locator('#public-deck-import-plan').innerText();
+      L('plano: resumo (origem, já existem, arquivadas, a adicionar)', /contém 7 Notes/.test(txt) && /2 já existem na sua coleção \(1 arquivadas\)/.test(txt) && (await r.page.locator('[data-plan-create-count]').innerText()) === '2', txt.slice(0, 200));
+      L('plano: Novas marcadas, VARIANT desmarcada por padrão', await r.page.locator('[data-plan-sig="sig1"]').isChecked() && await r.page.locator('[data-plan-sig="sig2"]').isChecked() && !(await r.page.locator('[data-plan-sig="sig3"]').isChecked()));
+      L('plano: EXACT, EXACT arquivada, cross-family e duplicata da origem NÃO têm checkbox', await r.page.locator('[data-plan-sig="sig4"], [data-plan-sig="sig5"], [data-plan-sig="sig6"], [data-plan-sig="sig7"]').count() === 0);
+      L('plano: cross-family só informativo ("Conteúdos relacionados encontrados")', await r.page.locator('[data-plan-related]').count() === 1 && /Conteúdos relacionados encontrados/i.test(txt));
+      L('plano: conflito de nome mostrado ("já existe um Deck com este nome")', await r.page.locator('[data-plan-rename]').count() === 1);
+      L('plano: HTML do conteúdo escapado (sem <img> real)', await r.page.locator('#public-deck-import-plan img').count() === 0);
+      L('plano: Deck sem Notes novas omitido na descrição (Sub vazio só aparece se tiver Note)', /Decks criados: Verbos/.test(await r.page.locator('[data-plan-decks]').innerText()) && /Sub vazio/.test(await r.page.locator('[data-plan-decks]').innerText()) === true);
+      await r.page.check('[data-plan-sig="sig3"]');
+      L('marcar VARIANT atualiza a contagem (3) e o texto do botão', (await r.page.locator('[data-plan-create-count]').innerText()) === '3' && /Importar 3 Notes/.test(await r.page.locator('#public-deck-import-confirm').innerText()));
+      await r.page.uncheck('[data-plan-sig="sig1"]'); await r.page.uncheck('[data-plan-sig="sig2"]'); await r.page.uncheck('[data-plan-sig="sig3"]');
+      L('nada marcado: botão desabilitado ("Nada novo para importar")', await r.page.locator('#public-deck-import-confirm').isDisabled());
+      await r.page.check('[data-plan-sig="sig2"]'); await r.page.check('[data-plan-sig="sig3"]');
+      await r.page.click('#public-deck-import-confirm');
+      await r.page.waitForFunction(() => window.__copyArgs, null, { timeout: 8000 });
+      const a = await r.page.evaluate(() => ({ copy: window.__copyArgs, man: window.__manifestArgs }));
+      L('seleção parcial: manifest e RPC recebem a MESMA seleção (sig2 none + sig3 variant)', JSON.stringify(a.copy.p_selection) === JSON.stringify([{ sig: 'sig2', cls: 'none' }, { sig: 'sig3', cls: 'variant' }]) && JSON.stringify(a.man.p_selection) === JSON.stringify(a.copy.p_selection), a);
+      await r.page.waitForTimeout(300);
+      L('após importar: painel fecha e erros de página ausentes', (await r.page.locator('#public-deck-import-plan').innerText()) === '' && r.errors.length === 0, r.errors);
+      await r.ctx.close();
+    }
+    {
+      // duplicates_changed: nada foi criado; o cliente reanalisa (novo check) em vez de insistir
+      const plan = planOf([PLAN_NOTE(1, 'none')]);
+      const h = `${CHECK_DEFAULT}
+        if (name === 'get_public_deck_media_manifest') return { data: { count: 0, items: [] }, error: null };
+        if (name === 'copy_public_deck'){ window.__copyN = (window.__copyN || 0) + 1; return { data: null, error: { message: 'duplicates_changed', code: '40001' } }; }`;
+      const r = await bootApp({ authenticated: true, premium: true, is_owner: false, can_open: true, can_import: true }, null, h);
+      await r.page.evaluate(([pl, uid]) => { window.__PLAN = pl; CURRENT_USER = { id: uid }; }, [plan, 'U']);
+      await r.page.evaluate((id) => openPublicDeckPage(id), PID);
+      await r.page.waitForSelector('#public-deck-import-btn'); await r.page.click('#public-deck-import-btn');
+      await r.page.waitForSelector('#public-deck-import-confirm:not([disabled])'); await r.page.click('#public-deck-import-confirm');
+      await r.page.waitForFunction(() => window.__rpcLog.filter(x => x[0] === 'check_public_deck_duplicates').length === 2, null, { timeout: 8000 });
+      L('duplicates_changed: 1 só RPC de cópia, plano refeito (2º check), nada importado', (await r.page.evaluate(() => window.__copyN)) === 1 && !(await r.page.evaluate(() => STATE.cards.some(c => c.origin === 'self'))));
+      await r.ctx.close();
+    }
+    {
+      // Nada novo (tudo EXACT): botão desabilitado, nenhuma chamada de cópia/mídia
+      const plan = planOf([PLAN_NOTE(1, 'exact'), PLAN_NOTE(2, 'exact_archived', { local_archived: true })]);
+      const r = await bootApp({ authenticated: true, premium: true, is_owner: false, can_open: true, can_import: true }, null, CHECK_DEFAULT);
+      await r.page.evaluate(([pl, uid]) => { window.__PLAN = pl; CURRENT_USER = { id: uid }; }, [plan, 'U']);
+      await r.page.evaluate((id) => openPublicDeckPage(id), PID);
+      await r.page.waitForSelector('#public-deck-import-btn'); await r.page.click('#public-deck-import-btn');
+      await r.page.waitForSelector('#public-deck-import-confirm');
+      L('tudo EXACT: "Nada novo para importar", botão desabilitado, sem cópia nem manifest', await r.page.locator('#public-deck-import-confirm').isDisabled() && /Nada novo/.test(await r.page.locator('#public-deck-import-confirm').innerText())
+        && !(await r.page.evaluate(() => window.__rpcLog.map(x => x[0]))).some(n => ['copy_public_deck', 'get_public_deck_media_manifest'].includes(n)));
+      await r.ctx.close();
+    }
+    {
+      // Pura: seleção e estatísticas (hierarquia: pai necessário preservado, Deck sem Notes novas omitido)
+      const r = await bootApp({ authenticated: true, premium: true, is_owner: false, can_open: true, can_import: true });
+      const out = await r.page.evaluate(() => {
+        const plan = { decks: [{ id: 1, parent_id: null, name: 'R' }, { id: 2, parent_id: 1, name: 'Meio' }, { id: 3, parent_id: 2, name: 'Folha' }, { id: 4, parent_id: 1, name: 'Vazio' }],
+          notes: [{ sig: 'a', cls: 'none', deck: 3, instances: 2, selectable: true }, { sig: 'b', cls: 'exact', deck: 4, instances: 1, selectable: false }, { sig: 'c', cls: 'cross_family', deck: 1, selectable: false }] };
+        return { st: publicDeckPlanStats(plan, ['a', 'b', 'c']), sel: publicDeckPlanSelection(plan, ['a', 'b', 'c']) };
+      });
+      L('hierarquia: Folha cria Meio e R (ancestrais); Vazio omitido', JSON.stringify(out.st.decksCreated) === JSON.stringify(['R', 'Meio', 'Folha']) && out.st.decksOmitted === 1 && out.st.instances === 2, out.st);
+      L('seleção ignora EXACT e cross-family mesmo se o cliente os marcar', JSON.stringify(out.sel) === JSON.stringify([{ sig: 'a', cls: 'none' }]), out.sel);
+      L('JS não calcula identidade (nenhuma normalização/hash de conteúdo em public-deck.js)', await r.page.evaluate(() => !/normalize\(|crypto\.subtle|sha256|toLowerCase\(\)\.trim/.test(fetchPublicDeckImportPlan.toString() + publicDeckPlanSelection.toString() + publicDeckPlanStats.toString())));
+      await r.ctx.close();
     }
 
     // ===== Dono: publicar / despublicar em Meus Decks =====

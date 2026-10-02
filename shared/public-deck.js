@@ -119,8 +119,43 @@ function publicDeckMediaPathFromUrl(url){
   return m && !m[1].includes('..') ? m[1] : null;
 }
 
-async function fetchPublicDeckMediaManifest(publicId){
-  const { data, error } = await supabaseClient.rpc('get_public_deck_media_manifest', { p_public_id: publicId });
+// Plano de importação (062): classificação das Notes contra a coleção do usuário. SOMENTE LEITURA.
+// A assinatura/classe é calculada no servidor; o JS trata `sig` como string opaca (nunca calcula identidade).
+async function fetchPublicDeckImportPlan(publicId, destDeckId){
+  const { data, error } = await supabaseClient.rpc('check_public_deck_duplicates', { p_public_id: publicId, p_dest_deck_id: destDeckId || null });
+  if (error) return { ok: false, code: publicDeckErrorCode(error.message), error: publicDeckErrorMessage(error.message) };
+  return { ok: true, plan: data };
+}
+
+// Seleção confirmada = [{sig, cls}] das Notes marcadas. EXACT/cross-family nunca são selecionáveis.
+function publicDeckPlanSelection(plan, checkedSigs){
+  const set = new Set(checkedSigs || []);
+  return ((plan && plan.notes) || []).filter(n => n.selectable && set.has(n.sig)).map(n => ({ sig: n.sig, cls: n.cls }));
+}
+
+// Estatísticas de exibição (derivadas do plano; o servidor é a autoridade na criação).
+function publicDeckPlanStats(plan, checkedSigs){
+  const set = new Set(checkedSigs || []);
+  const notes = ((plan && plan.notes) || []).filter(n => n.selectable && set.has(n.sig));
+  const decks = (plan && plan.decks) || [];
+  const byId = new Map(decks.map(d => [d.id, d]));
+  const needed = new Set();
+  for (const n of notes){
+    let id = n.deck, guard = 0;
+    while (id != null && byId.has(id) && !needed.has(id) && guard++ < 200){ needed.add(id); id = byId.get(id).parent_id; }
+  }
+  return {
+    create: notes.length,
+    instances: notes.reduce((a, n) => a + (n.instances || 0), 0),
+    decksCreated: decks.filter(d => needed.has(d.id)).map(d => d.name),
+    decksOmitted: decks.length - needed.size,
+  };
+}
+
+async function fetchPublicDeckMediaManifest(publicId, selection){
+  const args = { p_public_id: publicId };
+  if (selection) args.p_selection = selection;
+  const { data, error } = await supabaseClient.rpc('get_public_deck_media_manifest', args);
   if (error) return { ok: false, code: publicDeckErrorCode(error.message), error: publicDeckErrorMessage(error.message) };
   return { ok: true, items: (data && data.items) || [] };
 }
@@ -165,10 +200,10 @@ async function duplicatePublicDeckMedia(rawItems, uid, onProgress){
   return { ok: true, created, map };
 }
 
-async function copyPublicDeckRpc(publicId, destDeckId, mediaMap){
-  const { data, error } = await supabaseClient.rpc('copy_public_deck', {
-    p_public_id: publicId, p_dest_deck_id: destDeckId || null, p_media_map: mediaMap || {},
-  });
+async function copyPublicDeckRpc(publicId, destDeckId, mediaMap, selection){
+  const args = { p_public_id: publicId, p_dest_deck_id: destDeckId || null, p_media_map: mediaMap || {} };
+  if (selection) args.p_selection = selection;
+  const { data, error } = await supabaseClient.rpc('copy_public_deck', args);
   if (error){
     const code = publicDeckErrorCode(error.message);
     // Só é DEFINITIVO (a transação SQL foi revertida) quando o servidor respondeu com erro:
@@ -183,19 +218,19 @@ async function copyPublicDeckRpc(publicId, destDeckId, mediaMap){
 // Fluxo completo: manifest -> duplicar mídia -> RPC atômica. Se a RPC falhar, remove o que duplicou.
 // Se o Deck mudou entre o manifest e a cópia (media_map_incomplete), tenta de novo uma vez.
 const PUBLIC_DECK_IMPORTS_IN_FLIGHT = new Set();
-async function copyPublicDeckWithMedia(publicId, destDeckId, onProgress){
+async function copyPublicDeckWithMedia(publicId, destDeckId, onProgress, selection){
   // duplo clique / chamada repetida da MESMA importação enquanto ela roda: ignora (cópias
   // intencionais separadas continuam possíveis depois que esta termina).
   if (PUBLIC_DECK_IMPORTS_IN_FLIGHT.has(publicId)) return { ok: false, error: 'Esta importação já está em andamento.' };
   PUBLIC_DECK_IMPORTS_IN_FLIGHT.add(publicId);
-  try { return await copyPublicDeckWithMediaInner(publicId, destDeckId, onProgress); }
+  try { return await copyPublicDeckWithMediaInner(publicId, destDeckId, onProgress, selection); }
   finally { PUBLIC_DECK_IMPORTS_IN_FLIGHT.delete(publicId); }
 }
-async function copyPublicDeckWithMediaInner(publicId, destDeckId, onProgress){
+async function copyPublicDeckWithMediaInner(publicId, destDeckId, onProgress, selection){
   const uid = (typeof CURRENT_USER !== 'undefined' && CURRENT_USER && CURRENT_USER.id) || null;
   if (!uid) return { ok: false, error: 'Entre na sua conta para importar.' };
   for (let attempt = 0; attempt < 2; attempt++){
-    const man = await fetchPublicDeckMediaManifest(publicId);
+    const man = await fetchPublicDeckMediaManifest(publicId, selection);
     if (!man.ok) return man;
     let map = {}, created = [];
     if (man.items.length){
@@ -204,7 +239,7 @@ async function copyPublicDeckWithMediaInner(publicId, destDeckId, onProgress){
       if (!dup.ok){ await removeCopiedPublicDeckMedia(created); return dup; }
       map = dup.map;
     }
-    const res = await copyPublicDeckRpc(publicId, destDeckId, map);
+    const res = await copyPublicDeckRpc(publicId, destDeckId, map, selection);
     if (res.ok) return res;
     // Erro definitivo = nada foi criado no banco: não deixa órfãos. Erro AMBÍGUO (rede/timeout):
     // a cópia pode ter sido confirmada, então NUNCA apagar a mídia (Notes ficariam apontando para
@@ -217,7 +252,7 @@ async function copyPublicDeckWithMediaInner(publicId, destDeckId, onProgress){
 }
 
 function publicDeckErrorCode(msg){
-  const m = /(premium_required|unavailable|deck_too_large|deck_media_too_large|cannot_copy_own_deck|invalid_destination|media_map_incomplete|invalid_media_map|description_too_long|public_deck_kind_forbidden|deck_not_found)/.exec(String(msg || ''));
+  const m = /(premium_required|unavailable|duplicates_changed|invalid_selection|deck_too_large|deck_media_too_large|cannot_copy_own_deck|invalid_destination|media_map_incomplete|invalid_media_map|description_too_long|public_deck_kind_forbidden|deck_not_found)/.exec(String(msg || ''));
   return m ? m[1] : null;
 }
 
@@ -225,6 +260,8 @@ function publicDeckErrorMessage(msg){
   const m = String(msg || '');
   if (/premium_required/.test(m)) return 'Importar Decks públicos é um recurso Premium.';
   if (/unavailable/.test(m)) return 'Este Deck não está mais disponível.';
+  if (/duplicates_changed/.test(m)) return 'Sua coleção ou o Deck mudou desde a análise. Nada foi importado; revise o novo plano.';
+  if (/invalid_selection/.test(m)) return 'A seleção não é válida. Nada foi importado; revise o plano.';
   if (/deck_too_large/.test(m)) return 'Este Deck é grande demais para importar de uma vez.';
   if (/deck_media_too_large/.test(m)) return 'Este Deck tem arquivos de mídia demais para importar de uma vez.';
   if (/media_copy_failed/.test(m)) return 'Não foi possível copiar os arquivos de mídia. Nada foi importado; tente novamente.';
@@ -394,22 +431,100 @@ function reportPublicDeck(d){
   openReportModal({ source: 'public_deck', public_id: d.public_id, deck_name: d.name, owner_username: d.owner.username });
 }
 
+// ---------- Importação (V1, 062): plano -> seleção -> mídia filtrada -> RPC transacional ----------
+// V1 tem UMA operação: importar como NOVA árvore independente. Nada existente é alterado ou movido.
+function publicDeckImportPlanHTML(d, plan){
+  const notes = plan.notes || [];
+  const counts = plan.counts || {};
+  const by = (c) => notes.filter(n => n.cls === c);
+  const exactN = (counts.exact || 0) + (counts.exact_archived || 0);
+  const label = (n) => `${escapeHTML(n.preview || '…')} <span class="profile-edit-hint">${escapeHTML(PUBLIC_DECK_MODE_LABELS[n.mode] || n.mode)}${n.instances > 1 ? ` · ${n.instances} cartões` : ''}</span>`;
+  const checkRow = (n, checked) => `<label class="admin-badge-row" style="display:flex; gap:8px; align-items:center;">
+      <input type="checkbox" data-plan-sig="${escapeHTML(n.sig)}" ${checked ? 'checked' : ''}><span style="flex:1;">${label(n)}</span></label>`;
+  const novas = by('none'), variantes = by('variant'), related = by('cross_family');
+  return `
+    <div class="section-label">Importar “${escapeHTML(d.name)}”</div>
+    <p class="profile-edit-hint" data-plan-summary>Este Deck contém ${plan.source_total} Notes.
+      ${exactN ? `${exactN} já existem na sua coleção${counts.exact_archived ? ` (${counts.exact_archived} arquivadas)` : ''}. ` : ''}
+      <strong data-plan-create-count>${plan.create_default}</strong> serão adicionadas.</p>
+    ${plan.root_final_name && plan.root_final_name !== d.name ? `<p class="profile-edit-hint" data-plan-rename>Já existe um Deck com este nome: ele será criado como “${escapeHTML(plan.root_final_name)}”.</p>` : ''}
+    ${novas.length ? `<div class="section-label">Novas</div>${novas.map(n => checkRow(n, true)).join('')}` : ''}
+    ${variantes.length ? `<div class="section-label">Parecidas com algo seu (desmarcadas)</div>
+      <p class="profile-edit-hint">Têm o mesmo início de uma Note sua, mas conteúdo diferente. Marque só as que quiser como Notes novas e independentes; as suas não são alteradas.</p>
+      ${variantes.map(n => checkRow(n, false)).join('')}` : ''}
+    ${related.length ? `<div class="section-label" data-plan-related>Conteúdos relacionados encontrados</div>
+      <p class="profile-edit-hint">${related.length} conteúdo(s) têm o mesmo par em outro tipo de cartão na sua coleção. Não são importados.</p>` : ''}
+    ${exactN ? `<details data-plan-existing><summary class="profile-edit-hint">${exactN} já existem na sua coleção — não serão importadas</summary>
+      ${[...by('exact'), ...by('exact_archived')].map(n => `<div class="admin-badge-row"><span style="flex:1;">${label(n)}</span><span class="profile-edit-hint">${n.local_archived ? 'arquivada' : 'já existe'}</span></div>`).join('')}</details>` : ''}
+    ${counts.source_duplicate ? `<p class="profile-edit-hint">${counts.source_duplicate} repetida(s) dentro do próprio Deck: importada(s) uma única vez.</p>` : ''}
+    ${plan.incompatible ? `<p class="profile-edit-hint">${plan.incompatible} Note(s) não puderam ser importadas (formato incompatível).</p>` : ''}
+    <p class="profile-edit-hint" data-plan-decks></p>
+    <div style="display:flex; gap:8px; margin-top:10px;">
+      <button type="button" class="btn btn-primary" id="public-deck-import-confirm">Importar</button>
+      <button type="button" class="btn btn-secondary" id="public-deck-import-cancel">Cancelar</button>
+    </div>`;
+}
+
+async function openPublicDeckImportPlan(d, panel){
+  panel.style.display = 'block';
+  panel.innerHTML = loadingHTML('Analisando sua coleção...');
+  const res = await fetchPublicDeckImportPlan(d.public_id, null);
+  if (!res.ok){ panel.innerHTML = `<p class="profile-empty-note">${escapeHTML(res.error)}</p>`; return; }
+  const plan = res.plan;
+  panel.innerHTML = publicDeckImportPlanHTML(d, plan);
+  const confirmBtn = panel.querySelector('#public-deck-import-confirm');
+  const checked = () => Array.from(panel.querySelectorAll('[data-plan-sig]')).filter(i => i.checked).map(i => i.dataset.planSig);
+  const refresh = () => {
+    const st = publicDeckPlanStats(plan, checked());
+    panel.querySelector('[data-plan-create-count]').textContent = String(st.create);
+    panel.querySelector('[data-plan-decks]').textContent = st.create
+      ? `${st.instances} cartão(ões) a estudar. Decks criados: ${st.decksCreated.join(', ')}${st.decksOmitted ? ` (${st.decksOmitted} sem Notes novas, omitidos)` : ''}.`
+      : 'Nada novo para importar.';
+    confirmBtn.disabled = st.create === 0;
+    confirmBtn.textContent = st.create ? `Importar ${st.create} Note${st.create > 1 ? 's' : ''}` : 'Nada novo para importar';
+  };
+  panel.querySelectorAll('[data-plan-sig]').forEach(i => i.addEventListener('change', refresh));
+  refresh();
+  panel.querySelector('#public-deck-import-cancel').addEventListener('click', () => { panel.style.display = 'none'; panel.innerHTML = ''; });
+  confirmBtn.addEventListener('click', async () => {
+    const selection = publicDeckPlanSelection(plan, checked());
+    if (!selection.length) return;
+    confirmBtn.disabled = true;
+    const btn = document.getElementById('public-deck-import-btn');
+    const label0 = btn ? btn.textContent : '';
+    if (btn) btn.disabled = true;
+    const r = await copyPublicDeckWithMedia(d.public_id, null, (done, total) => { if (btn) btn.textContent = `Copiando mídia ${done}/${total}...`; }, selection);
+    if (btn){ btn.disabled = false; btn.textContent = label0; }
+    if (!r.ok){
+      showToast(r.error);
+      // O estado mudou entre o plano e o commit: nada foi criado; reanalisa em vez de insistir.
+      if (r.code === 'duplicates_changed') await openPublicDeckImportPlan(d, panel); else confirmBtn.disabled = false;
+      return;
+    }
+    // Traz as cópias para a sessão atual (mesmo caminho do boot) e atualiza a árvore de Decks.
+    try {
+      if (typeof mergeSelfFlashcardsIntoState === 'function') await mergeSelfFlashcardsIntoState();
+      if (typeof fetchDecksForLanguage === 'function' && typeof STATE !== 'undefined') STATE.decks = await fetchDecksForLanguage(APP_KEY);
+    } catch (e) { console.error('Erro ao atualizar a sessão depois da importação:', e); }
+    const out = r.result || {};
+    panel.style.display = 'none'; panel.innerHTML = '';
+    showToast(out.notes_copied
+      ? `✅ ${out.notes_copied} Notes importadas${out.root_name ? ` para “${out.root_name}”` : ''}.${out.skipped_exact || out.skipped_exact_archived ? ` ${(out.skipped_exact || 0) + (out.skipped_exact_archived || 0)} já existiam.` : ''}${out.skipped_incompatible ? ` (${out.skipped_incompatible} não puderam ser importadas)` : ''}`
+      : 'Nada novo para importar: esse conteúdo já existe na sua coleção.');
+  });
+}
+
 async function importPublicDeck(d){
-  const ok = window.confirm(`Importar "${d.name}" (${d.notes_count} Notes) para Meus Decks? Será uma cópia independente, com atribuição a @${d.owner.username}.`);
-  if (!ok) return;
-  const btn = document.getElementById('public-deck-import-btn');
-  if (btn) btn.disabled = true;
-  const label = btn ? btn.textContent : '';
-  const res = await copyPublicDeckWithMedia(d.public_id, null, (done, total) => { if (btn) btn.textContent = `Copiando mídia ${done}/${total}...`; });
-  if (btn){ btn.disabled = false; btn.textContent = label; }
-  if (!res.ok){ showToast(res.error); return; }
-  // Traz as cópias para a sessão atual (mesmo caminho do boot) e atualiza a árvore de Decks.
-  try {
-    if (typeof mergeSelfFlashcardsIntoState === 'function') await mergeSelfFlashcardsIntoState();
-    if (typeof fetchDecksForLanguage === 'function' && typeof STATE !== 'undefined') STATE.decks = await fetchDecksForLanguage(APP_KEY);
-  } catch (e) { console.error('Erro ao atualizar a sessão depois da importação:', e); }
-  const r = res.result || {};
-  showToast(`✅ ${r.notes_copied} Notes importadas para Meus Decks.${r.skipped_incompatible ? ` (${r.skipped_incompatible} não puderam ser importadas)` : ''}`);
+  let panel = document.getElementById('public-deck-import-plan');
+  if (!panel){
+    const btn = document.getElementById('public-deck-import-btn');
+    panel = document.createElement('div');
+    panel.id = 'public-deck-import-plan';
+    panel.style.cssText = 'margin-top:10px;';
+    if (btn && btn.parentNode) btn.insertAdjacentElement('afterend', panel);
+    else return;
+  }
+  await openPublicDeckImportPlan(d, panel);
 }
 
 // ---------- Superfícies: modal (dentro do app) e página standalone (anônimo) ----------

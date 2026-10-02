@@ -104,8 +104,9 @@ select pg_temp.chk('H10 cópia: link externo permanece externo', (select count(*
 insert into storage.objects(bucket_id,name) select 'flashcard-media','00000000-0000-0000-0000-0000000000d2/e'||g||'.mp3' from generate_series(1,3) g;
 create temp table c2 as select pg_temp.run_as('authenticated','00000000-0000-0000-0000-0000000000d2','prem4@example.com', format($$ select public.copy_public_deck(%L::uuid,null,%L::jsonb) $$,(select public_id from hp),
   (select jsonb_build_object(pg_temp.u3('shared.mp3'),'https://proj.supabase.co/storage/v1/object/public/flashcard-media/00000000-0000-0000-0000-0000000000d2/e1.mp3',pg_temp.u3('img-y.png'),'https://proj.supabase.co/storage/v1/object/public/flashcard-media/00000000-0000-0000-0000-0000000000d2/e2.mp3')))) r; grant all on c2 to public;
-select pg_temp.chk('H11 2ª cópia intencional (novos destinos) é aceita', (select r is null from c2), (select r from c2));
-select pg_temp.chk('H11b ...e cria árvore independente (8 Notes, 8 ids; 2 raízes de Deck)', (select count(*)=8 and count(distinct id)=8 from own_flashcards where owner_id='00000000-0000-0000-0000-0000000000d2') and (select count(*)=2 from decks where owner_id='00000000-0000-0000-0000-0000000000d2' and name='H'));
+-- V1 (062): reimportar o MESMO Deck => tudo EXACT, nenhuma cópia nova, nenhum Deck vazio (antes da 062 criava 2ª árvore)
+select pg_temp.chk('H11 2ª importação do mesmo Deck é aceita (sem erro)', (select r is null from c2), (select r from c2));
+select pg_temp.chk('H11b ...e NÃO cria nada: 4 Notes, 1 raiz de Deck (tudo EXACT, sem casca vazia)', (select count(*)=4 from own_flashcards where owner_id='00000000-0000-0000-0000-0000000000d2') and (select count(*)=1 from decks where owner_id='00000000-0000-0000-0000-0000000000d2' and name='H' and kind='personal'));
 -- ciclo de publicação
 create temp table pidbefore as select public_id from hp; grant all on pidbefore to public;
 select pg_temp.run_as('authenticated','00000000-0000-0000-0000-0000000000d1','own3@example.com', format($$ select public.unpublish_deck(%s) $$,(select id from decks where name='H' and owner_id='00000000-0000-0000-0000-0000000000d1')));

@@ -230,3 +230,21 @@ Não resta decisão de produto bloqueando a implementação da v1.
 
 ## O. Estado
 Contrato fechado para a v1 (§P). Pronto para implementação (migration 062 ainda não criada/aplicada).
+
+## R. Implementação V1 (migration 062 — local, NÃO aplicada)
+**Banco (só funções):** `_note_norm`, `_note_field_component`, `_note_dup_parts` (família, modo, `sig`, `vkey`, `pkey` — SHA‑256 sobre a forma nativa), `note_content_signature(own_flashcards)`,
+`note_variant_key(own_flashcards)`, `_note_instance_count`, `_public_deck_plan(_json)` (classifica a árvore pública contra a coleção do copiador, ativas+arquivadas, qualquer Deck),
+`_public_deck_resolve_selection`, `_unique_deck_name`, `check_public_deck_duplicates(public_id, dest)` (somente leitura, Premium), e as versões novas de
+`get_public_deck_media_manifest(public_id, p_selection)` e `copy_public_deck(public_id, dest, media_map, p_selection)`. Nenhuma tabela/coluna/índice/backfill.
+**Seleção:** `p_selection = [{sig, cls}]` (plano confirmado). `NULL` = padrão (só `none`). Sob o lock a classificação é recalculada e comparada com `cls`;
+qualquer divergência (EXACT surgiu, VARIANT virou EXACT, NONE virou VARIANT/cross) ⇒ `duplicates_changed`, nada criado. `cross_family`/`exact*` na seleção ⇒ `duplicates_changed`/`invalid_selection`.
+**Classes retornadas:** `exact`, `exact_archived`, `variant`, `cross_family`, `none`, `source_duplicate` (mesma assinatura repetida dentro do próprio Public Deck: só a 1ª é candidata).
+**Decks:** só os que têm Note criada + ancestrais; nome único entre irmãos (`Nome (2)`, `(3)`…); sem casca vazia. **Cliente:** painel de plano inline (`shared/public-deck.js`), o JS só repassa `sig` opaca.
+**Divergências em relação ao texto do contrato (todas deliberadas):**
+1. `p_decisions`/`p_skip_signatures` viraram um único `p_selection` com `cls` (mais forte: compara a classe, não só a assinatura).
+2. Limite Free de 20 CardInstances: Free não importa Public Deck (`premium_required`, inalterado), então o limite não se aplica; o custo em CardInstances é calculado no plano (`instances`).
+3. `lower()` (case‑fold v1) depende do `lc_ctype` UTF‑8 do banco (produção: UTF‑8); `\s` ampliado para NBSP/espaços Unicode.
+4. O plano usa `pos` (ordem por criação) e `preview`, não o `idx` de `get_public_deck_notes` (que só cobre a raiz).
+5. Custo de CPU: plano de 2000 Notes contra 2000 locais ≈ 1,7 s (benchmark local); importação de 2000 Notes ≈ 4,4 s.
+6. Teste H11 da fase de hardening foi atualizado: reimportar o mesmo Deck agora **não** cria 2ª árvore (tudo EXACT).
+**Lacuna aceita (inalterada):** editor manual e import Anki não tomam o lock; numa corrida pode surgir 1 duplicata extra, sem perda de dado.

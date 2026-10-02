@@ -427,3 +427,8 @@ Postgres local: 87 + 48 + **20 novos** (`test_hardening.sql`); Playwright 118 (f
 verificando erro ambíguo, dedupe e reentrância — falham sem a correção); paridade Legacy 17/17;
 concorrência/perf (8 publish simultâneos ⇒ 1 `public_id`; 4 cópias simultâneas independentes; 2000 ok /
 2001 recusado). Pendente: `test_real_storage_integration.js` (staging).
+
+## v8 — Duplicatas / reimportação V1 (062, local)
+Ver `docs/public-decks-duplicatas-contrato.md` §R. `copy_public_deck` agora cria só Notes novas/selecionadas (assinatura nativa no servidor), omite Decks sem Note nova,
+sufixa nomes de Deck, serializa por copiador (`pg_advisory_xact_lock`) e valida o plano sob o lock (`duplicates_changed`). O manifest de mídia cobre só as Notes a criar.
+Testes: `tests/fase-public-deck/test_duplicates.sql` (72), `test_duplicates_concurrency.sh` (7, duas conexões reais), Playwright (152). Nada aplicado em produção.
