@@ -1,5 +1,5 @@
 /* ============================================================
-   Mandarim do Zero — lógica do app
+   Chinês com Prof. Brune — lógica do app
    - Estado persistido em memória (sessão) + localStorage indisponível
      em artifacts, então usamos window.storage se existir, senão
      memória pura (variável global) para a sessão atual.
@@ -1183,7 +1183,7 @@ const LANG_ID = 'zh';
 
 // Hook chamado por loadState() (shared/auth.js) quando não encontra
 // data.data[APP_KEY] -- reconhece o formato salvo ANTES do namespacing por
-// idioma existir (estado do Mandarim do Zero direto na raiz do JSON), pra
+// idioma existir (estado do app de chinês direto na raiz do JSON), pra
 // quem já tinha conta antes disso não perder o progresso.
 function loadLegacyState(data){
   if (data.hanziCards || data.cards) applySerializedState(data);

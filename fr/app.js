@@ -1,6 +1,6 @@
 /* ============================================================
    Francês do Zero — lógica do app
-   Adaptado do motor do Mandarim do Zero: SRS (SM-2), TTS via Web Speech API,
+   Adaptado do motor do app de chinês: SRS (SM-2), TTS via Web Speech API,
    gamificação, persistência via Supabase, exportação para Anki (.apkg).
    Diferenças principais em relação ao original:
    - Sem par pinyin/hanzi: cada item de conteúdo é só { f: francês, t: português }.
