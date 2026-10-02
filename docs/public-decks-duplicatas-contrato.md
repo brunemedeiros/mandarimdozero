@@ -248,3 +248,18 @@ qualquer divergência (EXACT surgiu, VARIANT virou EXACT, NONE virou VARIANT/cro
 5. Custo de CPU: plano de 2000 Notes contra 2000 locais ≈ 1,7 s (benchmark local); importação de 2000 Notes ≈ 4,4 s.
 6. Teste H11 da fase de hardening foi atualizado: reimportar o mesmo Deck agora **não** cria 2ª árvore (tudo EXACT).
 **Lacuna aceita (inalterada):** editor manual e import Anki não tomam o lock; numa corrida pode surgir 1 duplicata extra, sem perda de dado.
+
+## §S — P8: validação pré-produção (2026-10-02)
+
+**Estado**: Public Deck + P7 + duplicatas V1 continuam **NÃO validados em staging**. Não existe staging (o único projeto Supabase, `mandarim-do-zero`, é produção; sem branches). Criar branch/projeto gera custo e não foi autorizado.
+
+**Bloqueio pré-produção: Storage real ainda não validado.** Pendentes em staging: `test_real_storage_integration.js` (JWT real, policies de `storage.objects`, `storage.copy`), fluxo A–U, concorrência com duas sessões reais, performance, sequência 059→063 num banco Supabase real.
+
+**Feito localmente (Postgres 16 + Playwright)**: cadeia 059→063 aplicada em ordem sem erro; uma única assinatura por função (sem overload órfão); `SECURITY DEFINER` com `search_path=public`. Suítes: Public Deck 87/87, P7 48/48, hardening 20/20, duplicatas 72/72, concorrência 7/7, Legacy parity 17/17, Playwright 152/152, Identity 60/60 (banco novo), K1 86, Tags 67, G 134, E 75, F 68, H 78, J 85. Performance local (não é SLA): 500/1000/2000 Notes ≈ 0,56/1,4/3,4 s; 2001 → `deck_too_large`. Case-fold: caixa e espaços/NBSP normalizados; acentos e pontuação continuam distinguindo; NFC sem falso negativo.
+
+**Auditoria estática da 062** (subagente + verificação no banco vivo, só leitura):
+- **Achado real, corrigido: auto-promoção a Premium.** `profiles_owner_update` permite UPDATE da própria linha e nada protegia `plan_tier`/`role` (confirmado em produção: sem trigger de proteção e com UPDATE de coluna para `authenticated`). Qualquer usuário contornava o gate Premium das 3 RPCs. Falha **anterior** à V1 (039/024). Correção: migration **063** (trigger; só o admin por e-mail do JWT ou papéis internos alteram `plan_tier`/`role`). Testada local: usuário comum barrado, admin e outras colunas livres. **063 NÃO aplicada em produção** — deve ser aplicada antes ou junto das demais, por decisão da autora.
+- Baixo, não corrigido (sem escalada de privilégio): host da URL não ancorado em `flashcard_media_path`/`_validate_media_map`; manifesto sem teto `deck_too_large` (só timeout para o chamador); `p_selection` com `cls` ausente dá mensagem enganosa; rollback comentado na 061 obsoleto.
+- Sem problemas: `auth.uid()`, ids de terceiros, nenhuma sobrescrita de Note, atribuição obrigatória, sem SQL dinâmico, lock por copiador sem ciclo, grants.
+
+**Semântica V1 (inalterada)**: sem merge; EXACT (inclusive arquivada) não é recriada; VARIANT opcional e desmarcada; cross-family informativa; destino em Deck existente é V1.1; árvore sem Note nova é omitida; atribuição permanente; mídia independente; reimportação só acrescenta; lock cobre imports do mesmo usuário (editor manual/Anki fora); 2000 é guardrail técnico; 20 CardInstances é regra Free separada.
