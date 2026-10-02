@@ -17271,3 +17271,23 @@ Sem renderer novo (Preview com os 4 renderers). Lista solta de cartões público
 Pendências registradas lá: duplicatas, proxy de mídia (uid no caminho do Storage), cleanup da lista solta. Testes em `tests/fase-public-deck/`.
 Duplicatas V1 (062, local, não aplicada): assinatura nativa no servidor, EXACT não recriada, VARIANT opt-in, cross-family só informativa, Decks sem Note nova omitidos, lock por copiador + duplicates_changed (ver docs/public-decks-duplicatas-contrato.md §R).
 P7: cópia de Public Deck duplica a mídia no Storage do copiador (manifest → storage.copy → RPC com `p_media_map`, compensação em falha); limites 2000 Notes/mídias são guardas técnicas configuráveis.
+
+## Fluxo de migrations no Staging via MCP (caminho A, decidido em 2026-10-02)
+
+- Staging = `ilfjzizjfcmhibkhwber` ("Idiomas com Prof. Brune — Staging"). Produção = `eigjocalzwamisgqilhg`.
+- 001→066 aplicadas no Staging pelo CLI (`supabase db push`), versões `20250101000001`…`20250101000066`.
+- **A partir da migration lógica 067**, o fluxo normal do Staging é `mcp__Supabase__apply_migration` com
+  `project_id` literal `ilfjzizjfcmhibkhwber`. Antes de cada escrita: `get_project` (ref e nome "Staging")
+  + `list_migrations` (aplicar só o que estiver pendente; nunca reaplicar/alterar o que já existe).
+  Depois: confirmar a migration aplicada, se houve erro e o último registro do histórico.
+- O MCP grava a versão com o horário da aplicação (ex.: `2026…`), não `20250101000NNN`. **Nunca editar
+  `supabase_migrations.schema_migrations` à mão** para "corrigir" isso. Registrar abaixo a correspondência.
+  O CLI não foi abandonado definitivamente, mas um `db push` futuro precisa considerar essas versões.
+- Cada migration é testada no Postgres local antes; migrations destrutivas ou de risco elevado exigem
+  confirmação da autora antes de aplicar.
+- Produção: nada é aplicado sem autorização explícita naquela etapa (existir no repositório não autoriza).
+  Sem push/PR/deploy como parte da aplicação.
+
+| Migration lógica (arquivo) | Versão registrada no Staging | Data |
+|---|---|---|
+| (nenhuma ainda pelo MCP) | | |
