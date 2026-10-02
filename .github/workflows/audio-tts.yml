@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       modo:
-        description: "laboratorio = gera variantes pra ouvir | regenerar = refaz os mp3 afetados pelas regras | gerar-faltantes = cria mp3 para textos sem áudio (zh e fr)"
+        description: "laboratorio = gera variantes pra ouvir | regenerar = refaz os mp3 afetados pelas regras | gerar-faltantes = cria mp3 para textos sem áudio (zh e fr) | desafios-expressoes = gera os mp3 das 80 expressões novas dos Desafios (fr/scripts/challenges_import)"
         type: choice
-        options: [laboratorio, regenerar, gerar-faltantes]
+        options: [laboratorio, regenerar, gerar-faltantes, desafios-expressoes]
         default: laboratorio
 
 permissions:
@@ -45,13 +45,16 @@ jobs:
       - name: Gerar faltantes (fr)
         if: always() && inputs.modo == 'gerar-faltantes'
         run: node fr/scripts/list_missing_audio.js fr | python3 fr/scripts/generate_missing_audio.py fr
+      - name: Gerar áudio das expressões dos Desafios
+        if: inputs.modo == 'desafios-expressoes'
+        run: python3 fr/scripts/challenges_import/generate_challenge_audio.py
       - name: Commitar
         if: always() && inputs.modo != 'laboratorio'
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add fr/audio fr/audio-manifest.js zh/audio zh/audio-manifest.js
-          git diff --cached --quiet || git commit -m "Regenera áudios com a camada de texto falado (Chirp 3 HD)"
+          git diff --cached --quiet || git commit -m "Áudio TTS (${{ inputs.modo }}): mp3 gerados com Chirp 3 HD"
           git push
       # Commits feitos pelo próprio workflow (GITHUB_TOKEN) NÃO disparam a
       # publicação do site sozinhos -- pede explicitamente.
