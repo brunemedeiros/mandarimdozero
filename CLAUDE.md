@@ -17291,3 +17291,34 @@ P7: cópia de Public Deck duplica a mídia no Storage do copiador (manifest → 
 | Migration lógica (arquivo) | Versão registrada no Staging | Data |
 |---|---|---|
 | (nenhuma ainda pelo MCP) | | |
+
+## Checkpoint -- etapa de segurança (grants + proteção de plan/role) validada no Staging (2026-10-02)
+
+Registro formal, sem nenhuma migration nova, sem alteração de banco, sem push/PR/deploy.
+
+**Estado confirmado do Staging**: project_ref `ilfjzizjfcmhibkhwber` ("Idiomas com Prof. Brune — Staging");
+migrations 001–066 aplicadas, sem buracos; última: `20250101000066_profiles_protect_plan_role_insert`.
+Produção `eigjocalzwamisgqilhg` NÃO foi alterada nesta etapa.
+
+**Migration 065** (paridade de GRANTs): aplicada no Staging e validada pelo SQL Editor -- 21 tabelas públicas
+× 3 roles (`anon`, `authenticated`, `service_role`) → 252/252 grants DML esperados presentes; nenhum dado alterado.
+
+**Migration 066** (`profiles_protect_plan_role_insert`): aplicada com sucesso no Staging (dry-run mostrou
+somente a 066 antes da aplicação). Objetivo: impedir a criação inicial de `profiles` com `role=admin` /
+`plan_tier=premium`. Junto com a 063, protege tanto a alteração de um perfil existente quanto a criação inicial.
+
+**Teste real de autenticação** (`tests/fase-grants/staging_auth_test.js`, login real no Staging):
+- A1 Free → `plan_tier=premium`: 403 / 42501 / `plan_role_protected` — PASSOU
+- A2 Free → `role=admin`: 403 / 42501 / `plan_role_protected` — PASSOU
+- B1 Premium → `role=admin`: 403 / 42501 / `plan_role_protected` — PASSOU
+- B2 Premium → `plan_tier=free`: 403 / 42501 / `plan_role_protected` — PASSOU
+- C conta sem profile → INSERT `role=admin`, `plan_tier=premium`: 403 / 42501 / `plan_role_protected` — PASSOU
+- Após C, `profiles` permaneceu vazio para essa conta; nenhuma reversão/neutralização foi necessária;
+  nenhuma senha ou token foi exposto; o script não usou produção.
+
+**Fluxo futuro de migrations no Staging**: caminho A (seção "Fluxo de migrations no Staging via MCP" acima),
+registrado no commit local `098dd96` -- da migration lógica 067 em diante, MCP direto no Staging, com
+confirmação de `project_id`/nome "Staging" antes de escrever, consulta de migrations antes e depois, só
+pendentes, nunca editar `supabase_migrations.schema_migrations`, correspondência número lógico ↔ versão MCP
+registrada na tabela acima, produção só com autorização explícita, migrations destrutivas/de risco exigem
+confirmação da autora, sem push/PR/deploy como parte da aplicação.
