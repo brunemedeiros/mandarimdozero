@@ -1,0 +1,310 @@
+{
+  "moduleId": "A1-m3",
+  "level": "A1",
+  "listenTranslate": [
+    {
+      "unitId": "A1-8",
+      "theme": "Lugares e orientação",
+      "fr": "Le musée est loin d'ici.",
+      "hide": [
+        "musée",
+        "loin"
+      ],
+      "refs": [
+        "O museu fica longe daqui.",
+        "O museu é longe daqui.",
+        "O museu está longe daqui."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-8",
+      "theme": "Lugares e orientação",
+      "fr": "Tournez à droite, puis tout droit.",
+      "hide": [
+        "droite",
+        "droit"
+      ],
+      "refs": [
+        "Vire à direita e depois siga em frente.",
+        "Vire à direita, depois siga reto.",
+        "Vire à direita, depois em frente."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-9",
+      "theme": "Nacionalidades",
+      "fr": "Je viens du Brésil, et toi ?",
+      "hide": [
+        "viens",
+        "toi"
+      ],
+      "refs": [
+        "Eu venho do Brasil, e você?",
+        "Sou do Brasil, e você?",
+        "Eu venho do Brasil, e tu?"
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-9",
+      "theme": "Nacionalidades",
+      "fr": "Elle est américaine.",
+      "hide": [
+        "américaine"
+      ],
+      "refs": [
+        "Ela é americana.",
+        "Ela é norte-americana."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-10",
+      "theme": "Compras",
+      "fr": "Le pantalon coûte cinquante euros.",
+      "hide": [
+        "pantalon",
+        "cinquante"
+      ],
+      "refs": [
+        "A calça custa cinquenta euros.",
+        "A calça é cinquenta euros.",
+        "A calça sai por cinquenta euros."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-10",
+      "theme": "Compras",
+      "fr": "Je cherche une robe.",
+      "hide": [
+        "cherche",
+        "robe"
+      ],
+      "refs": [
+        "Estou procurando um vestido.",
+        "Eu procuro um vestido.",
+        "Procuro um vestido."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-11",
+      "theme": "Compras de mercado",
+      "fr": "J'achète des légumes et du riz.",
+      "hide": [
+        "légumes",
+        "riz"
+      ],
+      "refs": [
+        "Eu compro legumes e arroz.",
+        "Compro legumes e arroz.",
+        "Estou comprando legumes e arroz."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-11",
+      "theme": "Compras de mercado",
+      "fr": "Tu veux du sucre ?",
+      "hide": [
+        "veux",
+        "sucre"
+      ],
+      "refs": [
+        "Você quer açúcar?",
+        "Tu queres açúcar?",
+        "Quer açúcar?"
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-12",
+      "theme": "Pesos e quantidades",
+      "fr": "Je prends un kilo de pommes.",
+      "hide": [
+        "kilo",
+        "pommes"
+      ],
+      "refs": [
+        "Eu levo um quilo de maçãs.",
+        "Eu pego um quilo de maçãs.",
+        "Levo um quilo de maçãs."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-12",
+      "theme": "Pesos e quantidades",
+      "fr": "Une bouteille d'eau, s'il vous plaît.",
+      "hide": [
+        "bouteille",
+        "eau"
+      ],
+      "refs": [
+        "Uma garrafa de água, por favor.",
+        "Uma garrafa d'água, por favor."
+      ],
+      "explanation": ""
+    }
+  ],
+  "accent": [
+    {
+      "unitId": "A1-8",
+      "theme": "Lugares e orientação",
+      "text": "près",
+      "explanation": "\"e\" tem acento grave."
+    },
+    {
+      "unitId": "A1-8",
+      "theme": "Lugares e orientação",
+      "text": "hôpital",
+      "explanation": "\"o\" tem acento circunflexo."
+    },
+    {
+      "unitId": "A1-9",
+      "theme": "Nacionalidades",
+      "text": "nationalité",
+      "explanation": "\"e\" tem acento agudo."
+    },
+    {
+      "unitId": "A1-9",
+      "theme": "Nacionalidades",
+      "text": "où",
+      "explanation": "\"u\" tem acento grave: \"où\" = onde; \"ou\" (sem acento) = ou."
+    },
+    {
+      "unitId": "A1-10",
+      "theme": "Compras",
+      "text": "coûte",
+      "explanation": "\"u\" tem acento circunflexo."
+    },
+    {
+      "unitId": "A1-11",
+      "theme": "Compras de mercado",
+      "text": "légumes",
+      "explanation": "\"e\" tem acento agudo."
+    },
+    {
+      "unitId": "A1-11",
+      "theme": "Compras de mercado",
+      "text": "pâtes",
+      "explanation": "\"a\" tem acento circunflexo."
+    },
+    {
+      "unitId": "A1-12",
+      "theme": "Pesos e quantidades",
+      "text": "très",
+      "explanation": "\"e\" tem acento grave."
+    }
+  ],
+  "expression": [
+    {
+      "unitId": "A1-8",
+      "theme": "Lugares e orientação",
+      "expression": "Excusez-moi !",
+      "register": "neutre",
+      "meaningFr": "On l'utilise pour attirer l'attention ou s'excuser poliment.",
+      "meaningPt": "Com licença! Desculpe!",
+      "exampleText": "Excusez-moi, où est la gare ?",
+      "secondExampleText": "Excusez-moi, je suis en retard.",
+      "question": "Quand dit-on « Excusez-moi ! » ?",
+      "options": [
+        "Pour attirer l'attention poliment",
+        "Pour dire au revoir",
+        "Pour remercier",
+        "Pour refuser"
+      ],
+      "correctAnswer": "Pour attirer l'attention poliment",
+      "explanationFr": "On dit « Excusez-moi » avant de poser une question à un inconnu.",
+      "microPrompt": "__________, où est le musée ?",
+      "microAnswer": "Excusez-moi"
+    },
+    {
+      "unitId": "A1-8",
+      "theme": "Lugares e orientação",
+      "expression": "Je vous en prie",
+      "register": "neutre",
+      "meaningFr": "C'est la réponse polie à « merci » (« de rien », en plus formel).",
+      "meaningPt": "De nada; por favor, fique à vontade.",
+      "exampleText": "Merci beaucoup ! — Je vous en prie.",
+      "secondExampleText": "Je vous en prie, entrez.",
+      "question": "Que veut dire « Je vous en prie » après « Merci » ?",
+      "options": [
+        "De rien",
+        "Au revoir",
+        "Je ne sais pas",
+        "Pardon"
+      ],
+      "correctAnswer": "De rien",
+      "explanationFr": "C'est la forme polie de « de rien ». Entre amis : « Je t'en prie » ou « De rien ».",
+      "microPrompt": "Merci ! — Je vous en __________.",
+      "microAnswer": "prie"
+    },
+    {
+      "unitId": "A1-10",
+      "theme": "Compras",
+      "expression": "Ça fait combien ?",
+      "register": "neutre",
+      "meaningFr": "On demande le prix total.",
+      "meaningPt": "Quanto fica? Quanto dá?",
+      "exampleText": "Ça fait combien, s'il vous plaît ?",
+      "secondExampleText": "Ça fait combien pour les deux ?",
+      "question": "Que veut dire « Ça fait combien ? » ?",
+      "options": [
+        "Quel est le prix ?",
+        "Quelle heure est-il ?",
+        "Où est-ce ?",
+        "Qui est-ce ?"
+      ],
+      "correctAnswer": "Quel est le prix ?",
+      "explanationFr": "On l'utilise à la caisse pour connaître le total à payer.",
+      "microPrompt": "__________ combien, s'il vous plaît ?",
+      "microAnswer": "Ça fait"
+    },
+    {
+      "unitId": "A1-10",
+      "theme": "Compras",
+      "expression": "C'est trop cher !",
+      "register": "neutre",
+      "meaningFr": "Le prix est trop élevé.",
+      "meaningPt": "É caro demais!",
+      "exampleText": "Cent euros ? C'est trop cher !",
+      "secondExampleText": "Ce sac est joli, mais c'est trop cher.",
+      "question": "Que veut dire « C'est trop cher ! » ?",
+      "options": [
+        "Le prix est trop élevé",
+        "Le prix est parfait",
+        "C'est gratuit",
+        "C'est très petit"
+      ],
+      "correctAnswer": "Le prix est trop élevé",
+      "explanationFr": "« Trop » veut dire « plus que nécessaire » : c'est un prix trop haut.",
+      "microPrompt": "Quatre-vingts euros ? C'est __________ cher !",
+      "microAnswer": "trop"
+    },
+    {
+      "unitId": "A1-12",
+      "theme": "Pesos e quantidades",
+      "expression": "Et avec ça ?",
+      "register": "neutre",
+      "meaningFr": "Le vendeur demande si vous voulez autre chose.",
+      "meaningPt": "Mais alguma coisa?",
+      "exampleText": "Un kilo de pommes. — Et avec ça ?",
+      "secondExampleText": "Et avec ça ? — Une bouteille d'eau.",
+      "question": "Qui dit « Et avec ça ? » ?",
+      "options": [
+        "Le vendeur",
+        "Le client",
+        "Le médecin",
+        "Le professeur"
+      ],
+      "correctAnswer": "Le vendeur",
+      "explanationFr": "Le commerçant le dit pour proposer un autre produit.",
+      "microPrompt": "Un litre de lait. — Et avec __________ ?",
+      "microAnswer": "ça"
+    }
+  ]
+}

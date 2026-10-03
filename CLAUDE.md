@@ -17110,3 +17110,13 @@ Fecha a experiência funcional sobre B–G (Deck Engine, 053, 054, Review por De
 - **Resíduo zero:** nenhum usuário temporário (`tmp-fase-h@example.invalid`: 0), nenhum Deck, nenhum vínculo criado. Os 5 Teacher Cards históricos seguem sem alteração e nenhum `deck_id` foi criado ou modificado.
 - **Testes já executados:** unit G 134/134; unit H 78/78; Playwright filtro de origem 52/52 (fr+zh); Playwright G 68/68 e H 68/68 (sessão anterior); regressões F (68/68, 46/46) e E (75/75, 38/38).
 - Working tree limpa. Sem migration nova, sem mudança de RLS. Próxima fase do roadmap apenas em nova tarefa (Tags NÃO iniciadas).
+
+## Desafios do Módulo (Premium) na trilha -- piloto Módulo 1 do A1 (2026-10-03)
+
+**Decisões da autora**: a aba Desafios continua aberta a todos; desafios COM `moduleId` aparecem trancados (cadeado + aviso de Premium, estilo lingua.com) para conta Free, desafios sem `moduleId` seguem abertos. Cada módulo da trilha ganha uma unidade opcional "Desafios do Módulo N" no fim (depois do Ponto de verificação), liberada junto com o módulo para Premium. Tatoeba descartado para o A1 (não alcançável do sandbox e genérico demais; a fonte é o vocabulário da própria trilha).
+
+**Dado**: `moduleId`/`unitId`/`theme` são campos extras dentro de `challenges.data` (jsonb) -- sem migration. Conteúdo do pilot: `fr/scripts/challenges_import/modulo-a1-m1-content.json` -> `build_modulo.py` -> `lote-a1-m1.json` (48 desafios: 32 Ouça e traduza, 11 Acentuação, 5 Expressões; áudio via Actions "Áudio TTS", modo `desafios-a1-m1`). O builder avisa palavras fora do vocabulário do módulo (teto de vocabulário) e evita duplicar o que já está no banco.
+
+**Código (só `fr/app.js` + `fr/index.html`; zh não tem Desafios)**: `challengesPremiumUnlocked()` (= `isPremium()` ou admin), `isChallengeLocked(c)`, `listedChallenges()`/`playableChallenges()`, `openModuleChallenges(moduleId)` (recorta a aba Desafios por módulo via `challengesModuleFilter`), `fillModuleChallengeRows()`/`buildModuleChallengesRow()` (a linha só aparece para módulos com desafios publicados; carrega os desafios do banco sob demanda), modal `#premium-challenges-modal` (aviso + contato, sem checkout: o app ainda não tem pagamento). Ditados: já têm `moduleId` e `free`; os atuais (`free:true`) continuam abertos a todos, `free:false` passaria a trancar.
+
+**Limitação**: trava só de UI -- os desafios publicados continuam legíveis via API do Supabase (mesmo nível de rigor de outros limites de UX). Teste: `tests/desafios-modulo/test_playwright.js` (30/30).

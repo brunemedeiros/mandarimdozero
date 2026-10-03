@@ -1,0 +1,451 @@
+[
+  {
+    "id": "lt-a1m2-001",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m2",
+    "unitId": "A1-5",
+    "theme": "Comida e bebida",
+    "sentenceFr": "Je voudrais du fromage, s'il vous plaît.",
+    "audioFile": "a97438162e11.mp3",
+    "hintText": "Je ______ du ______, s'il vous plaît.",
+    "referenceTranslations": [
+      "Eu gostaria de queijo, por favor.",
+      "Eu queria queijo, por favor.",
+      "Queria queijo, por favor."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m2-002",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m2",
+    "unitId": "A1-5",
+    "theme": "Comida e bebida",
+    "sentenceFr": "Tu bois du lait le matin ?",
+    "audioFile": "001778061ff6.mp3",
+    "hintText": "Tu ______ du ______ le matin ?",
+    "referenceTranslations": [
+      "Você bebe leite de manhã?",
+      "Tu bebes leite de manhã?",
+      "Você toma leite de manhã?"
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m2-003",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m2",
+    "unitId": "A1-6",
+    "theme": "Horas e rotina",
+    "sentenceFr": "Je me lève à six heures.",
+    "audioFile": "e2cb16a4698b.mp3",
+    "hintText": "Je me ______ à ______ heures.",
+    "referenceTranslations": [
+      "Eu me levanto às seis horas.",
+      "Levanto às seis horas.",
+      "Eu levanto às seis."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m2-004",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m2",
+    "unitId": "A1-6",
+    "theme": "Horas e rotina",
+    "sentenceFr": "Il est sept heures du soir.",
+    "audioFile": "181de4d1369a.mp3",
+    "hintText": "Il est ______ heures du ______.",
+    "referenceTranslations": [
+      "São sete horas da noite.",
+      "São sete da noite.",
+      "São 19 horas."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m2-005",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m2",
+    "unitId": "A1-7",
+    "theme": "Dias e meses",
+    "sentenceFr": "Aujourd'hui, nous sommes mardi.",
+    "audioFile": "435368189df0.mp3",
+    "hintText": "Aujourd'hui, nous ______ ______.",
+    "referenceTranslations": [
+      "Hoje é terça-feira.",
+      "Hoje estamos em terça-feira.",
+      "Hoje é terça."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m2-006",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m2",
+    "unitId": "A1-7",
+    "theme": "Dias e meses",
+    "sentenceFr": "Je travaille demain matin.",
+    "audioFile": "ebbf2e93ba44.mp3",
+    "hintText": "Je ______ ______ matin.",
+    "referenceTranslations": [
+      "Eu trabalho amanhã de manhã.",
+      "Trabalho amanhã de manhã.",
+      "Vou trabalhar amanhã de manhã."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m2-001",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m2",
+    "unitId": "A1-5",
+    "theme": "Comida e bebida",
+    "targetText": "café",
+    "audioFile": "07117fe4a1eb.mp3",
+    "explanation": "\"e\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m2-002",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m2",
+    "unitId": "A1-5",
+    "theme": "Comida e bebida",
+    "targetText": "détester",
+    "audioFile": "8642ea01b388.mp3",
+    "explanation": "\"e\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m2-003",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m2",
+    "unitId": "A1-6",
+    "theme": "Horas e rotina",
+    "targetText": "se réveiller",
+    "audioFile": "b563890399e1.mp3",
+    "explanation": "Os dois \"e\" têm acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m2-004",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m2",
+    "unitId": "A1-6",
+    "theme": "Horas e rotina",
+    "targetText": "tôt",
+    "audioFile": "e1f318fbd1ac.mp3",
+    "explanation": "\"o\" tem acento circunflexo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m2-005",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m2",
+    "unitId": "A1-7",
+    "theme": "Dias e meses",
+    "targetText": "décembre",
+    "audioFile": "6a671d451097.mp3",
+    "explanation": "\"e\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m2-006",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m2",
+    "unitId": "A1-7",
+    "theme": "Dias e meses",
+    "targetText": "février",
+    "audioFile": "c83e04d194b0.mp3",
+    "explanation": "\"e\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m2-007",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m2",
+    "unitId": "A1-7",
+    "theme": "Dias e meses",
+    "targetText": "août",
+    "audioFile": "3daa4c8b1f4c.mp3",
+    "explanation": "\"o\" tem acento circunflexo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m2-008",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m2",
+    "unitId": "A1-7",
+    "theme": "Dias e meses",
+    "targetText": "à demain",
+    "audioFile": "febf42b9071f.mp3",
+    "explanation": "\"à\" tem acento grave.",
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-a1m2-001",
+    "type": "expression",
+    "canonicalExpression": "Bon appétit !",
+    "level": "A1",
+    "expressionAudioFile": "9e42796cd2c7.mp3",
+    "meaning": {
+      "fr": "On le dit avant de manger.",
+      "pt": "Bom apetite!"
+    },
+    "example": {
+      "text": "Voilà ton plat. — Bon appétit !",
+      "audioFile": "4bf475719b32.mp3"
+    },
+    "question": "Quand dit-on « Bon appétit ! » ?",
+    "options": [
+      "Avant de manger",
+      "En se réveillant",
+      "En quittant la maison",
+      "Quand on est malade"
+    ],
+    "correctAnswer": "Avant de manger",
+    "explanation": "« Bon appétit ! » se dit avant le repas, à table.",
+    "secondExample": {
+      "text": "Bon appétit, tout le monde !",
+      "audioFile": "a4ac0b76850f.mp3"
+    },
+    "microActivity": {
+      "prompt": "Le dîner est prêt. — __________ !",
+      "answer": "Bon appétit"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Bon%20app%C3%A9tit%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m2",
+    "unitId": "A1-5",
+    "theme": "Comida e bebida"
+  },
+  {
+    "id": "expr-a1m2-002",
+    "type": "expression",
+    "canonicalExpression": "À table !",
+    "level": "A1",
+    "expressionAudioFile": "c09e3e44cb3a.mp3",
+    "meaning": {
+      "fr": "On appelle tout le monde pour manger.",
+      "pt": "Hora de comer! Para a mesa!"
+    },
+    "example": {
+      "text": "Les enfants, à table !",
+      "audioFile": "20de7bcf8b02.mp3"
+    },
+    "question": "Que veut dire « À table ! » ?",
+    "options": [
+      "Venez manger",
+      "Allez dormir",
+      "Allez travailler",
+      "Rangez la table"
+    ],
+    "correctAnswer": "Venez manger",
+    "explanation": "On crie « À table ! » pour dire que le repas est prêt.",
+    "secondExample": {
+      "text": "À table ! Le dîner est prêt.",
+      "audioFile": "3165a6c147ca.mp3"
+    },
+    "microActivity": {
+      "prompt": "Maman appelle : « __________ ! »",
+      "answer": "À table"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%80%20table%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m2",
+    "unitId": "A1-5",
+    "theme": "Comida e bebida"
+  },
+  {
+    "id": "expr-a1m2-003",
+    "type": "expression",
+    "canonicalExpression": "À tout à l'heure !",
+    "level": "A1",
+    "expressionAudioFile": "b1b7d0b34625.mp3",
+    "meaning": {
+      "fr": "Au revoir, on se voit bientôt dans la journée.",
+      "pt": "Até daqui a pouco!"
+    },
+    "example": {
+      "text": "Je vais au marché. — À tout à l'heure !",
+      "audioFile": "3d7d49e4b417.mp3"
+    },
+    "question": "Quand dit-on « À tout à l'heure ! » ?",
+    "options": [
+      "Quand on va se revoir bientôt",
+      "Quand on ne se revoit jamais",
+      "Quand on se voit la semaine prochaine",
+      "Quand on arrive"
+    ],
+    "correctAnswer": "Quand on va se revoir bientôt",
+    "explanation": "Cette expression dit qu'on va se revoir le même jour.",
+    "secondExample": {
+      "text": "Je pars à midi. À tout à l'heure !",
+      "audioFile": "b5edcf1bfd9a.mp3"
+    },
+    "microActivity": {
+      "prompt": "Je pars au travail. — À tout à __________ !",
+      "answer": "l'heure"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%80%20tout%20%C3%A0%20l%27heure%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m2",
+    "unitId": "A1-6",
+    "theme": "Horas e rotina"
+  },
+  {
+    "id": "expr-a1m2-004",
+    "type": "expression",
+    "canonicalExpression": "Tout de suite",
+    "level": "A1",
+    "expressionAudioFile": "255d806872f5.mp3",
+    "meaning": {
+      "fr": "Immédiatement, sans attendre.",
+      "pt": "Agora mesmo; já."
+    },
+    "example": {
+      "text": "Tu viens ? — Oui, tout de suite !",
+      "audioFile": "d5a70baf7f21.mp3"
+    },
+    "question": "Que veut dire « tout de suite » ?",
+    "options": [
+      "Immédiatement",
+      "Beaucoup plus tard",
+      "Jamais",
+      "Le soir"
+    ],
+    "correctAnswer": "Immédiatement",
+    "explanation": "« Tout de suite » veut dire « maintenant, sans attendre ».",
+    "secondExample": {
+      "text": "Je viens tout de suite.",
+      "audioFile": "dcbcfe8abe08.mp3"
+    },
+    "microActivity": {
+      "prompt": "Tu viens manger ? — Oui, __________ !",
+      "answer": "tout de suite"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Tout%20de%20suite/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m2",
+    "unitId": "A1-6",
+    "theme": "Horas e rotina"
+  },
+  {
+    "id": "expr-a1m2-005",
+    "type": "expression",
+    "canonicalExpression": "Bonne journée !",
+    "level": "A1",
+    "expressionAudioFile": "616c24576bac.mp3",
+    "meaning": {
+      "fr": "On le dit pour se quitter pendant la journée.",
+      "pt": "Tenha um bom dia!"
+    },
+    "example": {
+      "text": "Au revoir et bonne journée !",
+      "audioFile": "31557936a846.mp3"
+    },
+    "question": "Quand dit-on « Bonne journée ! » ?",
+    "options": [
+      "En se quittant le matin ou l'après-midi",
+      "En se couchant",
+      "Avant de manger",
+      "En arrivant"
+    ],
+    "correctAnswer": "En se quittant le matin ou l'après-midi",
+    "explanation": "Le soir, on dit plutôt « Bonne soirée ! ».",
+    "secondExample": {
+      "text": "Merci, bonne journée !",
+      "audioFile": "15d18935198c.mp3"
+    },
+    "microActivity": {
+      "prompt": "Au revoir, __________ !",
+      "answer": "bonne journée"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Bonne%20journ%C3%A9e%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m2",
+    "unitId": "A1-7",
+    "theme": "Dias e meses"
+  }
+]

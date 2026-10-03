@@ -2276,6 +2276,18 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .challenge-card.completed{ opacity:.55; }
 .challenge-card-check{ position:absolute; top:12px; right:12px; font-size:16px; color: var(--jade); }
 .challenge-card{ position:relative; }
+.dictation-card{ position:relative; }
+/* Desafios do Módulo (Premium): trancado = mesmo cartão, só mais discreto e com
+   cadeado; tokens neutros já calibrados nos dois temas (sem cor nova). */
+.challenge-card.locked, .dictation-card.locked{ opacity:.7; }
+.challenge-card.locked .challenge-card-check, .dictation-card.locked .challenge-card-check{ color: var(--ink-soft); }
+.unit-block.module-challenges{ border-style:dashed; }
+.unit-block.module-challenges .ub-icon{ background: var(--paper-warm); }
+.unit-block.premium-locked .ub-title{ color: var(--ink-soft); }
+.ub-badge-premium{
+  font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.03em;
+  color: var(--ink-soft); border:1px solid var(--paper-line); border-radius:999px; padding:2px 8px;
+}
 
 .challenges-level-tabs{ display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
 .challenge-level-tab{
@@ -3641,9 +3653,10 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <!-- ===== DESAFIOS ===== -->
   <div class="view" id="view-challenges">
     <div id="challenges-categories-wrap">
+      <button class="back-link" id="challenges-module-back" style="display:none;">← Voltar à trilha</button>
       <div class="path-header">
-        <h2>Desafios</h2>
-        <p>Pratique francês de verdade: expressões, compreensão auditiva e ortografia.</p>
+        <h2 id="challenges-categories-title">Desafios</h2>
+        <p id="challenges-categories-sub">Pratique francês de verdade: expressões, compreensão auditiva e ortografia.</p>
       </div>
       <div class="challenges-admin-bar" id="challenges-admin-bar" style="display:none;">
         <button class="btn btn-secondary" id="challenges-admin-import-btn">📥 Importar JSON</button>
@@ -3990,6 +4003,22 @@ footer.app-footer img{ height:40px; opacity:.85; }
      mostrado quando a aluna (sem vínculo ativo com uma professora) bate o
      teto de cartões próprios do plano grátis. Aberto/fechado por
      shared/my-flashcards.js. -->
+<!-- Desafios do Módulo (Premium) -- aberto pelo cadeado da Trilha e da aba
+     Desafios. Sem checkout (o app ainda não tem pagamento): só explica e
+     aponta o contato, no mesmo padrão do aviso de Meus Cartões. -->
+<div id="premium-challenges-modal" class="app-modal-overlay" style="display:none;">
+  <div class="app-modal">
+    <div class="app-modal-header">
+      <h3>🔒 Recurso Premium</h3>
+      <button class="app-modal-close" id="premium-challenges-modal-close" aria-label="Fechar">✕</button>
+    </div>
+    <div class="app-modal-body">
+      <p>Os <strong>Desafios do Módulo</strong> reforçam cada tema da trilha com Expressões, Ouça e traduza, Acentuação e Ditados extras.</p>
+      <p>Eles fazem parte do plano Premium. Para ativar, fale com a administração (profbrune).</p>
+    </div>
+  </div>
+</div>
+
 <div id="flashcard-limit-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">

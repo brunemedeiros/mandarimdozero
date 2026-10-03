@@ -1,0 +1,500 @@
+[
+  {
+    "id": "lt-a1m1-001",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m1",
+    "unitId": "A1-1",
+    "theme": "Cumprimentos",
+    "sentenceFr": "Bonsoir, ça va ?",
+    "audioFile": "43a81d2287cb.mp3",
+    "hintText": "Bonsoir, ça ______ ?",
+    "referenceTranslations": [
+      "Boa noite, tudo bem?",
+      "Boa noite, tudo bom?",
+      "Boa noite, como vai?"
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m1-002",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m1",
+    "unitId": "A1-1",
+    "theme": "Cumprimentos",
+    "sentenceFr": "Un café, s'il vous plaît.",
+    "audioFile": "906544828e6d.mp3",
+    "hintText": "Un ______, s'il vous ______.",
+    "referenceTranslations": [
+      "Um café, por favor.",
+      "Um cafezinho, por favor.",
+      "Um café, por gentileza."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m1-003",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m1",
+    "unitId": "A1-2",
+    "theme": "Apresentação",
+    "sentenceFr": "Comment tu t'appelles ?",
+    "audioFile": "4b6584dbf1f5.mp3",
+    "hintText": "______ tu t'______ ?",
+    "referenceTranslations": [
+      "Qual é o seu nome?",
+      "Como você se chama?",
+      "Qual é o teu nome?",
+      "Como é que você se chama?"
+    ],
+    "explanation": "Em francês se diz \"como você se chama\"; em português é comum \"qual é o seu nome\".",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m1-004",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m1",
+    "unitId": "A1-2",
+    "theme": "Apresentação",
+    "sentenceFr": "Je suis brésilienne.",
+    "audioFile": "df0946303efd.mp3",
+    "hintText": "Je suis ______.",
+    "referenceTranslations": [
+      "Eu sou brasileira.",
+      "Sou brasileira."
+    ],
+    "explanation": "\"Brésilienne\" é o feminino de \"brésilien\".",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m1-005",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m1",
+    "unitId": "A1-3",
+    "theme": "Números e idade",
+    "sentenceFr": "J'ai vingt ans.",
+    "audioFile": "f88befb470c6.mp3",
+    "hintText": "J'ai ______ ans.",
+    "referenceTranslations": [
+      "Eu tenho vinte anos.",
+      "Tenho vinte anos.",
+      "Eu tenho 20 anos.",
+      "Tenho 20 anos."
+    ],
+    "explanation": "Para a idade, o francês usa \"avoir\" (ter), como o português.",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m1-006",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m1",
+    "unitId": "A1-3",
+    "theme": "Números e idade",
+    "sentenceFr": "Quel âge as-tu ?",
+    "audioFile": "04c0fda1ed82.mp3",
+    "hintText": "Quel ______ ______ ?",
+    "referenceTranslations": [
+      "Quantos anos você tem?",
+      "Qual é a sua idade?",
+      "Qual a sua idade?",
+      "Que idade você tem?"
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m1-007",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m1",
+    "unitId": "A1-4",
+    "theme": "Família",
+    "sentenceFr": "Mon père s'appelle Marc.",
+    "audioFile": "a4b17bf28120.mp3",
+    "hintText": "Mon ______ s'appelle Marc.",
+    "referenceTranslations": [
+      "Meu pai se chama Marc.",
+      "O nome do meu pai é Marc.",
+      "O meu pai se chama Marc."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m1-008",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m1",
+    "unitId": "A1-4",
+    "theme": "Família",
+    "sentenceFr": "J'ai un frère et une sœur.",
+    "audioFile": "5e24d11eac59.mp3",
+    "hintText": "J'ai un ______ et une ______.",
+    "referenceTranslations": [
+      "Eu tenho um irmão e uma irmã.",
+      "Tenho um irmão e uma irmã."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m1-001",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m1",
+    "unitId": "A1-1",
+    "theme": "Cumprimentos",
+    "targetText": "s'il vous plaît",
+    "audioFile": "d3aa362aa1cd.mp3",
+    "explanation": "\"i\" de \"plaît\" tem acento circunflexo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m1-002",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m1",
+    "unitId": "A1-2",
+    "theme": "Apresentação",
+    "targetText": "brésilien",
+    "audioFile": "eca428ccd6de.mp3",
+    "explanation": "\"e\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m1-003",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m1",
+    "unitId": "A1-2",
+    "theme": "Apresentação",
+    "targetText": "brésilienne",
+    "audioFile": "b35eb33d68f1.mp3",
+    "explanation": "\"e\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m1-004",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m1",
+    "unitId": "A1-2",
+    "theme": "Apresentação",
+    "targetText": "être",
+    "audioFile": "1e529d658f24.mp3",
+    "explanation": "O primeiro \"e\" tem acento circunflexo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m1-005",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m1",
+    "unitId": "A1-3",
+    "theme": "Números e idade",
+    "targetText": "zéro",
+    "audioFile": "9b9a0295d321.mp3",
+    "explanation": "\"e\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m1-006",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m1",
+    "unitId": "A1-3",
+    "theme": "Números e idade",
+    "targetText": "âge",
+    "audioFile": "bfb7c7a07bec.mp3",
+    "explanation": "\"a\" tem acento circunflexo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m1-007",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m1",
+    "unitId": "A1-4",
+    "theme": "Família",
+    "targetText": "père",
+    "audioFile": "9a0dcfcb9b8b.mp3",
+    "explanation": "\"e\" tem acento grave.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m1-008",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m1",
+    "unitId": "A1-4",
+    "theme": "Família",
+    "targetText": "mère",
+    "audioFile": "de5c0352bc6e.mp3",
+    "explanation": "\"e\" tem acento grave.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m1-009",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m1",
+    "unitId": "A1-4",
+    "theme": "Família",
+    "targetText": "frère",
+    "audioFile": "824bd24da2c2.mp3",
+    "explanation": "\"e\" tem acento grave.",
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-a1m1-001",
+    "type": "expression",
+    "canonicalExpression": "Enchanté !",
+    "level": "A1",
+    "expressionAudioFile": "b7da9c0935be.mp3",
+    "meaning": {
+      "fr": "On le dit quand on rencontre quelqu'un pour la première fois.",
+      "pt": "Prazer em conhecer. (Mulheres dizem \"enchantée\"; a pronúncia é a mesma.)"
+    },
+    "example": {
+      "text": "Bonjour, je m'appelle Léo. — Enchanté !",
+      "audioFile": "8d9dd0f5e589.mp3"
+    },
+    "question": "Quand dit-on « Enchanté ! » ?",
+    "options": [
+      "Quand on rencontre quelqu'un",
+      "Quand on dit au revoir",
+      "Quand on a faim",
+      "Quand on est fatigué"
+    ],
+    "correctAnswer": "Quand on rencontre quelqu'un",
+    "explanation": "Un homme dit « enchanté », une femme dit « enchantée ». On le dit en général après « je m'appelle... ».",
+    "secondExample": {
+      "text": "Je suis Ana. Enchantée !",
+      "audioFile": "0118c398c685.mp3"
+    },
+    "microActivity": {
+      "prompt": "Bonjour, je m'appelle Ana. — __________ !",
+      "answer": "Enchanté"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Enchant%C3%A9%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m1",
+    "unitId": "A1-2",
+    "theme": "Apresentação"
+  },
+  {
+    "id": "expr-a1m1-002",
+    "type": "expression",
+    "canonicalExpression": "Comme ci, comme ça",
+    "level": "A1",
+    "expressionAudioFile": "26aa37d63ee5.mp3",
+    "meaning": {
+      "fr": "Ni bien ni mal ; moyen.",
+      "pt": "Mais ou menos; assim, assim."
+    },
+    "example": {
+      "text": "Ça va ? — Comme ci, comme ça.",
+      "audioFile": "6503c1a8cbac.mp3"
+    },
+    "question": "Que veut dire « comme ci, comme ça » ?",
+    "options": [
+      "Moyen, ni bien ni mal",
+      "Très bien",
+      "Très mal",
+      "Tout de suite"
+    ],
+    "correctAnswer": "Moyen, ni bien ni mal",
+    "explanation": "On répond « comme ci, comme ça » à la question « Ça va ? » quand ça ne va ni bien ni mal.",
+    "secondExample": {
+      "text": "Mon français ? Comme ci, comme ça.",
+      "audioFile": "cf6aa1b0fd0e.mp3"
+    },
+    "microActivity": {
+      "prompt": "Ça va ? — __________.",
+      "answer": "comme ci, comme ça"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Comme%20ci%2C%20comme%20%C3%A7a/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m1",
+    "unitId": "A1-1",
+    "theme": "Cumprimentos"
+  },
+  {
+    "id": "expr-a1m1-003",
+    "type": "expression",
+    "canonicalExpression": "Pas mal",
+    "level": "A1",
+    "expressionAudioFile": "a99b9b60a92c.mp3",
+    "meaning": {
+      "fr": "Plutôt bien.",
+      "pt": "Nada mal; até que está bem."
+    },
+    "example": {
+      "text": "Ça va ? — Pas mal, merci !",
+      "audioFile": "64377caf1685.mp3"
+    },
+    "question": "Que veut dire « pas mal » ?",
+    "options": [
+      "Plutôt bien",
+      "Très mauvais",
+      "Très cher",
+      "Très tard"
+    ],
+    "correctAnswer": "Plutôt bien",
+    "explanation": "« Pas mal » veut dire « plutôt bien ». C'est une réponse courante à « Ça va ? ».",
+    "secondExample": {
+      "text": "Ce café est pas mal.",
+      "audioFile": "21057eeaedab.mp3"
+    },
+    "microActivity": {
+      "prompt": "Ça va ? — __________, merci !",
+      "answer": "pas mal"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Pas%20mal/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m1",
+    "unitId": "A1-1",
+    "theme": "Cumprimentos"
+  },
+  {
+    "id": "expr-a1m1-004",
+    "type": "expression",
+    "canonicalExpression": "Ça marche !",
+    "level": "A1",
+    "expressionAudioFile": "c912135ddbc0.mp3",
+    "meaning": {
+      "fr": "D'accord ; c'est bon.",
+      "pt": "Combinado! Fechado! Beleza! Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Un café ensemble ? — Ça marche !",
+      "audioFile": "6c1c1422dfec.mp3"
+    },
+    "question": "Que veut dire « Ça marche ! » ?",
+    "options": [
+      "D'accord, c'est bon",
+      "Je ne comprends pas",
+      "J'ai faim",
+      "Au revoir"
+    ],
+    "correctAnswer": "D'accord, c'est bon",
+    "explanation": "On dit « Ça marche ! » pour accepter une proposition, entre amis ou collègues. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Je t'appelle ce soir. — Ça marche !",
+      "audioFile": "30072ddedf62.mp3"
+    },
+    "microActivity": {
+      "prompt": "Un café ? — __________ !",
+      "answer": "Ça marche"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%87a%20marche%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m1",
+    "unitId": "A1-1",
+    "theme": "Cumprimentos"
+  },
+  {
+    "id": "expr-a1m1-005",
+    "type": "expression",
+    "canonicalExpression": "Pas de problème !",
+    "level": "A1",
+    "expressionAudioFile": "2f6c2c8b7e72.mp3",
+    "meaning": {
+      "fr": "Ce n'est pas grave ; d'accord.",
+      "pt": "Sem problema! Tranquilo!"
+    },
+    "example": {
+      "text": "Pardon ! — Pas de problème !",
+      "audioFile": "ba4702061969.mp3"
+    },
+    "question": "Que veut dire « Pas de problème ! » ?",
+    "options": [
+      "Ce n'est pas grave",
+      "C'est très difficile",
+      "Je suis fatigué",
+      "Je ne sais pas"
+    ],
+    "correctAnswer": "Ce n'est pas grave",
+    "explanation": "On répond « Pas de problème ! » à un « Pardon ! » ou à une demande d'aide.",
+    "secondExample": {
+      "text": "Tu peux m'aider ? — Pas de problème.",
+      "audioFile": "52a3a4254d76.mp3"
+    },
+    "microActivity": {
+      "prompt": "Pardon ! — Pas de __________ !",
+      "answer": "problème"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Pas%20de%20probl%C3%A8me%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m1",
+    "unitId": "A1-1",
+    "theme": "Cumprimentos"
+  }
+]

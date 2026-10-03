@@ -2185,6 +2185,64 @@ function buildCheckpointRow(module, unlocked){
   return block;
 }
 
+// ---------- Unidade opcional "Desafios do Módulo N" (Premium) ----------
+let moduleChallengesLoadAttempted = false;
+
+// Preenche os slots da Trilha. Roda depois do render síncrono: carrega os
+// desafios do banco (uma vez) e o plano da conta; módulos sem nenhum
+// desafio publicado simplesmente não ganham a linha.
+async function fillModuleChallengeRows(){
+  const slots = document.querySelectorAll('.module-challenges-slot');
+  if (!slots.length) return;
+  if (!CHALLENGES.length && !moduleChallengesLoadAttempted){
+    moduleChallengesLoadAttempted = true;
+    await loadChallengesFromDB();
+  }
+  await ensureChallengesPlanLoaded();
+  // A Trilha pode ter sido redesenhada enquanto carregava: usa só os slots que ainda estão na tela.
+  document.querySelectorAll('.module-challenges-slot').forEach(slot => {
+    const module = MODULES.find(m => m.id === slot.dataset.moduleId);
+    if (!module) return;
+    const row = buildModuleChallengesRow(module);
+    slot.innerHTML = '';
+    if (row) slot.appendChild(row);
+  });
+}
+
+function buildModuleChallengesRow(module){
+  const items = publishedChallenges().filter(c => challengeModuleId(c) === module.id);
+  // Só ganha a linha quem tem desafios publicados: um módulo que só tem ditado
+  // (já aberto a todos na aba Ditados) não vira uma unidade Premium vazia.
+  if (!items.length) return null;
+  const mIdx = modulesOfLevel(module.level).findIndex(m => m.id === module.id);
+  const premium = challengesPremiumUnlocked();
+  const moduleOpen = moduleUnlocked(module);
+  const done = items.filter(c => isChallengeCompleted(c.id)).length;
+  const block = document.createElement('div');
+  block.className = 'unit-block module-challenges'
+    + (premium ? '' : ' premium-locked')
+    + (premium && !moduleOpen ? ' locked' : '')
+    + (premium && items.length && done === items.length ? ' done' : '');
+  block.innerHTML = `
+    <div class="ub-header">
+      <div class="ub-icon">${premium ? '🧩' : '🔒'}</div>
+      <div class="ub-info">
+        <div class="ub-title-row">
+          <span class="ub-title">Desafios do Módulo ${mIdx + 1}</span>
+          ${premium ? (items.length ? `<span class="ub-badge">${done}/${items.length}</span>` : '') : '<span class="ub-badge ub-badge-premium">Premium</span>'}
+        </div>
+        <div class="ub-goal">Pratique o que você estudou de novas formas. Opcional.</div>
+      </div>
+    </div>
+  `;
+  if (!premium){
+    wireHeaderActivation(block.querySelector('.ub-header'), openPremiumChallengesModal);
+  } else if (moduleOpen){
+    wireHeaderActivation(block.querySelector('.ub-header'), () => openModuleChallenges(module.id));
+  }
+  return block;
+}
+
 // Estado (recolhida/expandida) da faixa de Desafios de hoje -- lembrado
 // entre sessões, mesmo padrão de STATE.dailyMinutesLog etc: preferência de
 // interface, não progresso, então localStorage puro (nunca precisa
@@ -2295,8 +2353,16 @@ function renderUnitsGrid(){
       list.appendChild(buildUnitBlock(UNITS.find(u => u.id === id)));
     });
     list.appendChild(buildCheckpointRow(module, unlocked));
+    // Unidade opcional "Desafios do Módulo N" (Premium): o slot nasce vazio e
+    // só vira uma linha se o módulo tiver desafios publicados -- os
+    // desafios vêm do banco, que a Trilha não carrega por conta própria.
+    const challengesSlot = document.createElement('div');
+    challengesSlot.className = 'module-challenges-slot';
+    challengesSlot.dataset.moduleId = module.id;
+    list.appendChild(challengesSlot);
     grid.appendChild(list);
   });
+  fillModuleChallengeRows();
 
   levelTestsOfLevel(STATE.currentLevel).forEach(test => {
     grid.appendChild(buildLevelTestCard(test));
@@ -7605,8 +7671,16 @@ const switchTab = createTabSwitcher({
     'support-materials': renderSupportMaterialsView,
     leaderboard: renderLeaderboardView,
     path: renderUnitsGrid,
-    dictation: renderDictationList,
-    challenges: renderChallengeCategories,
+    dictation: () => {
+      dictationModuleFilter = pendingDictationModuleFilter;
+      pendingDictationModuleFilter = null;
+      renderDictationList();
+    },
+    challenges: () => {
+      challengesModuleFilter = pendingChallengesModuleFilter;
+      pendingChallengesModuleFilter = null;
+      return renderChallengeCategories();
+    },
   }
 });
 
@@ -8353,8 +8427,10 @@ function renderDictationList(){
   document.getElementById('dictation-player-wrap').style.display = 'none';
 
   const cardsWrap = document.getElementById('dictation-cards');
-  cardsWrap.innerHTML = DICTATIONS.map(d => `
-    <button class="dictation-card" data-dict-id="${d.id}">
+  const dictationsShown = dictationModuleFilter ? DICTATIONS.filter(d => d.moduleId === dictationModuleFilter) : DICTATIONS;
+  cardsWrap.innerHTML = dictationsShown.map(d => `
+    <button class="dictation-card ${isDictationLocked(d) ? 'locked' : ''}" data-dict-id="${d.id}">
+      ${isDictationLocked(d) ? '<span class="challenge-card-check" title="Premium">🔒</span>' : ''}
       <div class="dictation-card-level">${d.level}</div>
       <div class="dictation-card-task">${escapeHtmlDictation(d.task)}</div>
       <div class="dictation-card-module">${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</div>
@@ -8362,7 +8438,11 @@ function renderDictationList(){
   `).join('');
 
   cardsWrap.querySelectorAll('.dictation-card').forEach(card => {
-    card.addEventListener('click', () => openDictationPlayer(card.dataset.dictId));
+    card.addEventListener('click', () => {
+      const d = DICTATIONS.find(x => x.id === card.dataset.dictId);
+      if (d && isDictationLocked(d)) return openPremiumChallengesModal();
+      openDictationPlayer(card.dataset.dictId);
+    });
   });
 }
 
@@ -8372,7 +8452,15 @@ document.getElementById('dictation-explainer-toggle').addEventListener('click', 
 });
 
 document.getElementById('dictation-back-to-list').addEventListener('click', renderDictationList);
-document.getElementById('dictation-back-to-challenges').addEventListener('click', () => switchTab('challenges'));
+document.getElementById('dictation-back-to-challenges').addEventListener('click', () => {
+  // Veio da unidade "Desafios do Módulo N"? Volta pro mesmo recorte.
+  pendingChallengesModuleFilter = dictationModuleFilter;
+  switchTab('challenges');
+});
+document.getElementById('challenges-module-back').addEventListener('click', () => {
+  challengesModuleFilter = null;
+  switchTab('path');
+});
 
 function openDictationPlayer(id){
   const d = DICTATIONS.find(x => x.id === id);
@@ -8857,6 +8945,56 @@ function publishedChallenges(){
 function pendingChallenges(){
   return CHALLENGES.filter(c => c.status === 'needs_review');
 }
+
+// ---------- Desafios do Módulo (Premium) ----------
+// Um desafio "da trilha" é qualquer desafio com `moduleId` (campo extra dentro
+// de `data`, sem coluna nova no banco -- ver challengeDataPayload). Esses
+// aparecem (1) numa unidade opcional no fim de cada módulo da Trilha
+// ("Desafios do Módulo N") e (2) na aba Desafios, onde a conta Free os vê
+// TRANCADOS (cadeado + aviso de Premium) em vez de escondidos. Desafios sem
+// moduleId continuam abertos a todos, como sempre foram. É uma trava de UI,
+// não fronteira de segurança: a leitura dos desafios publicados continua
+// pública no banco (mesmo nível de rigor de outros limites de UX do app).
+let challengesModuleFilter = null;        // moduleId enquanto a pessoa navega pela unidade do módulo
+let pendingChallengesModuleFilter = null; // repassado de openModuleChallenges() ao handler da aba
+let dictationModuleFilter = null;
+let pendingDictationModuleFilter = null;
+
+function challengeModuleId(c){ return (c && c.moduleId) || null; }
+function challengesPremiumUnlocked(){
+  return (typeof isPremium === 'function' && isPremium()) || isChallengesAdmin();
+}
+function isChallengeLocked(c){
+  return !!challengeModuleId(c) && !challengesPremiumUnlocked();
+}
+function isDictationLocked(d){
+  return d.free === false && !challengesPremiumUnlocked();
+}
+// Tudo que a lista pode MOSTRAR (inclui os trancados) / só o que dá pra JOGAR.
+function listedChallenges(){
+  const all = publishedChallenges();
+  return challengesModuleFilter ? all.filter(c => challengeModuleId(c) === challengesModuleFilter) : all;
+}
+function playableChallenges(){
+  return listedChallenges().filter(c => !isChallengeLocked(c));
+}
+async function ensureChallengesPlanLoaded(){
+  try { if (typeof ensureProfileLoaded === 'function' && CURRENT_USER) await ensureProfileLoaded(); } catch (e) { /* conta sem perfil carregado = Free */ }
+}
+function openPremiumChallengesModal(){
+  document.getElementById('premium-challenges-modal').style.display = 'flex';
+}
+document.getElementById('premium-challenges-modal-close').addEventListener('click', () => {
+  document.getElementById('premium-challenges-modal').style.display = 'none';
+});
+document.getElementById('premium-challenges-modal').addEventListener('click', (e) => {
+  if (e.target.id === 'premium-challenges-modal') document.getElementById('premium-challenges-modal').style.display = 'none';
+});
+function openModuleChallenges(moduleId){
+  pendingChallengesModuleFilter = moduleId;
+  pendingDictationModuleFilter = null;
+  switchTab('challenges');
+}
 // "Prontos, mas fora do ar" -- desafios que já foram aprovados/publicados
 // alguma vez mas não estão visíveis pro aluno agora (despublicados). Só a
 // admin enxerga essas linhas (a RLS de leitura pública só devolve
@@ -8948,6 +9086,24 @@ async function renderChallengeCategories(){
     wrap.innerHTML = `<p class="challenges-empty">Não foi possível carregar os desafios agora. Verifique sua conexão e tente novamente.</p>`;
     return;
   }
+  await ensureChallengesPlanLoaded();
+
+  // Cabeçalho muda quando a pessoa chegou pela unidade "Desafios do Módulo N"
+  // da Trilha (challengesModuleFilter): mesmo menu, só recortado pro módulo.
+  const moduleBack = document.getElementById('challenges-module-back');
+  const titleEl = document.getElementById('challenges-categories-title');
+  const subEl = document.getElementById('challenges-categories-sub');
+  const filterModule = challengesModuleFilter ? MODULES.find(m => m.id === challengesModuleFilter) : null;
+  if (filterModule){
+    const idx = modulesOfLevel(filterModule.level).findIndex(m => m.id === filterModule.id);
+    moduleBack.style.display = 'inline-flex';
+    titleEl.textContent = `Desafios do Módulo ${idx + 1}`;
+    subEl.textContent = `${filterModule.title} · agora que você estudou esse tema, pratique de novas formas.`;
+  } else {
+    moduleBack.style.display = 'none';
+    titleEl.textContent = 'Desafios';
+    subEl.textContent = 'Pratique francês de verdade: expressões, compreensão auditiva e ortografia.';
+  }
 
   const adminBar = document.getElementById('challenges-admin-bar');
   adminBar.style.display = isChallengesAdmin() ? 'flex' : 'none';
@@ -8959,23 +9115,33 @@ async function renderChallengeCategories(){
   // view-dictation) -- entra como um card à parte que leva pra lá em vez de
   // renderChallengesList(). Passou a viver dentro de Desafios porque não
   // fazia sentido como aba própria no menu principal (pedido explícito).
-  wrap.innerHTML = CHALLENGE_CATEGORIES.map(cat => `
+  const listedNow = listedChallenges();
+  const dictationsHere = challengesModuleFilter ? DICTATIONS.filter(d => d.moduleId === challengesModuleFilter) : DICTATIONS;
+  const visibleCats = challengesModuleFilter ? CHALLENGE_CATEGORIES.filter(cat => listedNow.some(c => c.type === cat.type)) : CHALLENGE_CATEGORIES;
+  const catSubtitle = (cat) => challengesModuleFilter
+    ? `${listedNow.filter(c => c.type === cat.type).length} desafio${listedNow.filter(c => c.type === cat.type).length === 1 ? '' : 's'}`
+    : cat.subtitle;
+  wrap.innerHTML = visibleCats.map(cat => `
     <button class="challenge-category-card" data-category="${cat.type}">
       <div class="challenge-category-emoji">${cat.emoji}</div>
       <div class="challenge-category-title">${cat.title}</div>
-      <div class="challenge-category-subtitle">${cat.subtitle}</div>
+      <div class="challenge-category-subtitle">${catSubtitle(cat)}</div>
     </button>
-  `).join('') + `
+  `).join('') + (dictationsHere.length ? `
     <button class="challenge-category-card" id="challenges-dictation-card">
       <div class="challenge-category-emoji">🎧</div>
       <div class="challenge-category-title">Ditados</div>
-      <div class="challenge-category-subtitle">Ouça e escreva</div>
+      <div class="challenge-category-subtitle">${challengesModuleFilter ? `${dictationsHere.length} ditado${dictationsHere.length === 1 ? '' : 's'}` : 'Ouça e escreva'}</div>
     </button>
-  `;
+  ` : '');
   wrap.querySelectorAll('.challenge-category-card[data-category]').forEach(card => {
     card.addEventListener('click', () => renderChallengesList(card.dataset.category));
   });
-  document.getElementById('challenges-dictation-card').addEventListener('click', () => switchTab('dictation'));
+  const dictCard = document.getElementById('challenges-dictation-card');
+  if (dictCard) dictCard.addEventListener('click', () => {
+    pendingDictationModuleFilter = challengesModuleFilter;
+    switchTab('dictation');
+  });
 }
 
 function challengeCardLabelHTML(c){
@@ -8996,9 +9162,10 @@ const collapsedChallengeLevels = new Set();
 
 function challengeCardHTML(c){
   const done = isChallengeCompleted(c.id);
+  const locked = isChallengeLocked(c);
   return `
-    <button class="challenge-card ${done ? 'completed' : ''}" data-challenge-id="${c.id}">
-      ${done ? '<span class="challenge-card-check">✅</span>' : ''}
+    <button class="challenge-card ${done ? 'completed' : ''} ${locked ? 'locked' : ''}" data-challenge-id="${c.id}">
+      ${locked ? '<span class="challenge-card-check" title="Premium">🔒</span>' : (done ? '<span class="challenge-card-check">✅</span>' : '')}
       <div class="challenge-card-level">${c.level}</div>
       ${challengeCardLabelHTML(c)}
     </button>
@@ -9014,11 +9181,11 @@ function renderChallengesList(type){
   CURRENT_CHALLENGE_PLAYER = null;
 
   const cat = CHALLENGE_CATEGORIES.find(c => c.type === type);
-  document.getElementById('challenges-list-title').textContent = cat ? cat.title : 'Desafios';
+  document.getElementById('challenges-list-title').textContent = (cat ? cat.title : 'Desafios') + (challengesModuleFilter ? ' · do módulo' : '');
   document.getElementById('challenges-level-tabs').style.display = 'none';
 
   const cardsWrap = document.getElementById('challenges-cards');
-  const published = publishedChallenges().filter(c => c.type === type);
+  const published = listedChallenges().filter(c => c.type === type);
   const groupByLevel = type === 'expression';
 
   if (published.length === 0){
@@ -9042,7 +9209,23 @@ function renderChallengesList(type){
     cardsWrap.className = 'challenges-queue-levels';
     const levelsPresent = CHALLENGE_LEVELS_ORDER.filter(lvl => published.some(c => c.level === lvl));
     cardsWrap.innerHTML = levelsPresent.map(level => {
-      const levelChallenges = published.filter(c => c.level === level);
+      const levelAll = published.filter(c => c.level === level);
+      const levelChallenges = levelAll.filter(c => !isChallengeLocked(c));
+      const lockedCount = levelAll.length - levelChallenges.length;
+      const lockedNote = lockedCount > 0
+        ? `<div class="challenge-queue-level-progress">🔒 +${lockedCount} desafio${lockedCount === 1 ? '' : 's'} de módulo no Premium</div>`
+        : '';
+      if (!levelChallenges.length){
+        return `
+          <div class="challenge-queue-level-card">
+            <div class="challenge-queue-level-info">
+              <div class="challenge-queue-level-name">Nível ${level}</div>
+              ${lockedNote}
+            </div>
+            <button class="btn btn-secondary" data-premium-lock="1">🔒 Premium</button>
+          </div>
+        `;
+      }
       const doneCount = levelChallenges.filter(c => isChallengeCompleted(c.id)).length;
       const allDone = doneCount === levelChallenges.length;
       return `
@@ -9050,6 +9233,7 @@ function renderChallengesList(type){
           <div class="challenge-queue-level-info">
             <div class="challenge-queue-level-name">Nível ${level}</div>
             <div class="challenge-queue-level-progress">${doneCount}/${levelChallenges.length} concluído${levelChallenges.length === 1 ? '' : 's'}</div>
+            ${lockedNote}
           </div>
           <button class="btn ${allDone ? 'btn-secondary' : 'btn-primary'}" data-level="${level}">
             ${allDone ? '🎉 Revisar' : (doneCount > 0 ? 'Continuar' : 'Começar')}
@@ -9059,6 +9243,9 @@ function renderChallengesList(type){
     }).join('');
     cardsWrap.querySelectorAll('[data-level]').forEach(btn => {
       btn.addEventListener('click', () => openChallengeQueueLevel(type, btn.dataset.level));
+    });
+    cardsWrap.querySelectorAll('[data-premium-lock]').forEach(btn => {
+      btn.addEventListener('click', openPremiumChallengesModal);
     });
     return;
   }
@@ -9105,17 +9292,17 @@ function renderChallengesList(type){
 let challengeQueueContext = null;
 
 function nextQueueChallenge(type, level){
-  return publishedChallenges().find(c => c.type === type && c.level === level && !isChallengeCompleted(c.id)) || null;
+  return playableChallenges().find(c => c.type === type && c.level === level && !isChallengeCompleted(c.id)) || null;
 }
 
 function openChallengeQueueLevel(type, level){
   challengeQueueContext = { type, level };
-  const next = nextQueueChallenge(type, level) || publishedChallenges().find(c => c.type === type && c.level === level);
+  const next = nextQueueChallenge(type, level) || playableChallenges().find(c => c.type === type && c.level === level);
   if (next) openChallengePlayer(next.id);
 }
 
 function queueLevelProgressLabel(type, level){
-  const all = publishedChallenges().filter(c => c.type === type && c.level === level);
+  const all = playableChallenges().filter(c => c.type === type && c.level === level);
   const done = all.filter(c => isChallengeCompleted(c.id)).length;
   return `${done}/${all.length} concluído${all.length === 1 ? '' : 's'}`;
 }
@@ -9223,6 +9410,7 @@ document.getElementById('challenges-import-submit-btn').addEventListener('click'
 function openChallengePlayer(id){
   const c = CHALLENGES.find(x => x.id === id);
   if (!c) return;
+  if (isChallengeLocked(c)){ openPremiumChallengesModal(); return; }
 
   document.getElementById('challenges-list-wrap').style.display = 'none';
   document.getElementById('challenge-player-wrap').style.display = 'block';
