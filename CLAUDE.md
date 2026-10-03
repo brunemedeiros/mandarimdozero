@@ -16967,8 +16967,8 @@ acima.**
   desejo: mostrar a frase chinesa correta com áudio e depois a tradução,
   diferenciadas visualmente (mudança só nessa tela de `zh/app.js`; precisa do
   print e do layout preferido); (2) segurança -- a chave de API foi colada em
-  chat: restringir a TTS/STT e rotacionar (nova chave no Google Cloud,
-  trocar o Secret `GCP_TTS_KEY`, apagar a antiga); (3) camada de "texto
+  chat; a autora JÁ rotacionou a chave em 29/09/2026 (confirmado por ela em
+  03/10/2026), então não é mais pendência; (3) camada de "texto
   falado" para português e outros idiomas entra como nova lista em
   `RULES_BY_LANG`, sem misturar regras (ex.: sandhi de "os carros azuis").
 
@@ -17137,3 +17137,12 @@ Pedido da autora, verbatim: "ao criar um novo nível, módulo, unidade ou liçã
 - "Revisão do A1": 3 ditados `moduleId:"A1-revisao"` (r1 Free, r2/r3 Premium) juntando 2 módulos cada, em unidade própria no fim do nível. Campo `opening` troca o anúncio falado.
 - Paywall desligado (`CHALLENGE_PAYWALL_ENABLED=false` em `fr/app.js`): tudo abre, só há selos Free/Premium. Bloqueio, paywall e Stripe vêm depois.
 - Áudio: Actions > "Áudio TTS" > modo `ditados` refaz todos (abertura fr + instruções em pt-BR + corpo fr). Limite de 5000 bytes de SSML por pedido.
+
+### Ditados (fr) -- correção do campo de digitar (Fatia 1, 2026-10-03)
+- Lógica pura em `fr/app.js`, bloco `dictation-answer-logic` (`evaluateDictation`), testada por `fr/scripts/test_answer_validation.js` (44 casos) e `tests/ditado/test_playwright.js`.
+- Nota: acerto exato = 1; erro leve (falta de acento, hífen, apóstrofo, `œ` como `oe`) = 0,5 e vira "quase" com explicação; palavra a mais (não troca) = -0,5. Colar o texto 2 vezes não dá mais 100.
+- Pontuação NÃO desconta: o que faltou é marcado (sublinhado) com aviso. Se o aluno escreve "virgule"/"point" por extenso, é erro leve (-0,5) e o sinal é mostrado.
+- Número em dígito ("25") é aceito sem erro; a resposta sempre mostra a escrita por extenso (`frenchNumberWords`, 0 a 100).
+- Pré-limpeza do texto do aluno: apóstrofos/hífens do celular, espaços invisíveis, "j' ai", ponto sem espaço depois.
+- Campo sem autocorreção/capitalização, com `maxlength` e `aria-label`; teclas de acento não roubam o foco e quebram linha; Verificar vazio não corrige; mp3 ausente desabilita o botão; o resultado rola até a tela.
+- Fica para as Fatias 2 e 3: salvar melhor nota/palavras erradas, explicar tipo de erro (concordância, homófonos), áudio por frase, versionar mp3 por hash, trava Premium dentro do player, chinês.

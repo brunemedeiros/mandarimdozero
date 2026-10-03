@@ -1217,12 +1217,12 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
    mesmo espírito do .pinyin-tone-picker em zh/index.html, adaptado pro
    alfabeto francês (ver FR_ACCENT_GROUPS em fr/app.js). */
 .fr-accent-picker{
-  display:flex; gap:10px; overflow-x:auto; justify-content:flex-start;
-  padding:2px 2px 6px; margin:-6px 0 14px; -webkit-overflow-scrolling:touch;
+  display:flex; gap:6px 10px; flex-wrap:wrap; justify-content:flex-start;
+  padding:2px 2px 6px; margin:8px 0 14px;
 }
 .fr-accent-group{ display:flex; gap:4px; flex-shrink:0; }
 .fr-accent-key{
-  flex-shrink:0; min-width:32px; height:34px; padding:0 6px; border-radius:8px;
+  flex-shrink:0; min-width:40px; height:40px; padding:0 8px; border-radius:8px;
   border:1px solid var(--paper-line); background: var(--paper); color: var(--ink);
   font-size:16px; font-weight:700; font-family: var(--font-body); cursor:pointer;
 }
@@ -2170,6 +2170,9 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .dictation-card-level{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.03em; color: var(--seal-red-dark); }
 .dictation-card-task{ font-size:15px; font-weight:800; color: var(--ink); }
 .dictation-card-module{ font-size:12.5px; color: var(--ink-soft); }
+.dictation-card-progress{ font-size:12px; font-weight:700; color: var(--ink-soft); }
+.dictation-record-line{ margin:10px 0 0; font-size:14px; color: var(--ink-soft); }
+.dictation-review-words{ margin:12px 0 0; font-size:14px; line-height:1.6; color: var(--ink); }
 
 .dictation-player-task{ font-size:20px; font-weight:800; margin:0 0 4px; }
 .dictation-player-module{ font-size:13px; color: var(--ink-soft); margin:0 0 18px; }
@@ -2243,6 +2246,38 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   background: rgba(59,130,246,0.14); color: var(--ink); font-weight:700;
   padding:1px 5px; border-radius:5px;
 }
+.dictation-word-near{
+  background: rgba(224,165,38,0.22); color: var(--ink); font-weight:700;
+  padding:1px 5px; border-radius:5px; border-bottom:2px solid var(--imperial-gold);
+}
+.dictation-punct-missing{ text-decoration: underline dotted var(--imperial-gold); text-underline-offset:4px; color: var(--ink); }
+.dictation-notes{ margin:14px 0 0; padding:12px 0 0 18px; border-top:1px dashed var(--paper-line); font-size:14px; line-height:1.6; color: var(--ink); }
+.dictation-notes li{ margin-bottom:4px; }
+/* Fatia 3: texto certo frase por frase, com áudio de cada frase. */
+.dictation-sentences{ margin:14px 0 0; padding-top:12px; border-top:1px dashed var(--paper-line); }
+.dictation-sentences-title{ margin:0 0 8px; font-size:14px; color: var(--ink); }
+.dictation-sentence-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.dictation-sentence{
+  display:flex; align-items:center; gap:10px; padding:6px 8px;
+  border:1px solid var(--paper-line); border-left:3px solid var(--paper-line); border-radius:10px;
+  background: var(--paper);
+}
+.dictation-sentence.has-error{ border-left-color: var(--error-red); }
+.dictation-sentence-text{ flex:1; min-width:0; font-size:15px; line-height:1.5; color: var(--ink); overflow-wrap:anywhere; }
+.dictation-sentence-flag{ font-weight:800; font-size:13px; color: var(--error-red); }
+.dictation-sentence-play{
+  flex-shrink:0; min-height:40px; min-width:40px; padding:6px 12px;
+  background: var(--paper-warm); border:1px solid var(--paper-line); border-radius:999px;
+  font-family: var(--font-body); font-weight:700; font-size:13px; color: var(--ink); cursor:pointer;
+}
+.dictation-sentence-play:hover:not(:disabled){ border-color: var(--imperial-gold); }
+.dictation-sentence-play:focus-visible{ outline:2px solid var(--seal-red); outline-offset:2px; }
+.dictation-sentence-play.speaking{ border-color: var(--seal-red); }
+.dictation-sentence-play:disabled{ cursor:default; color: var(--ink-soft); }
+@media (max-width: 480px){
+  .dictation-sentence{ align-items:flex-start; flex-direction:column; gap:6px; }
+}
+.dictation-result:focus{ outline:none; }
 .dictation-word-wrong{ color: var(--seal-red-dark); text-decoration: line-through; text-decoration-color: var(--seal-red); }
 .dictation-result-summary{ display:flex; align-items:center; gap:14px; padding-top:16px; border-top:1px dashed var(--paper-line); }
 .dictation-score-badge{
