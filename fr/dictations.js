@@ -39,8 +39,8 @@ const DICTATIONS = [
     id: "d2",
     moduleId: "A1-m2",
     level: "A1",
-    task: "Fazendo um pedido completo em uma padaria (boulangerie)",
-    text: "Bonjour, je voudrais du pain, s'il vous plaît. Je voudrais aussi un croissant. C'est combien ? Merci beaucoup, au revoir !",
+    task: "Pedindo pão na padaria (boulangerie)",
+    text: "Il est huit heures du matin. Je vais à la boulangerie. Bonjour, je voudrais du pain, s'il vous plaît, et un croissant. C'est combien ? Merci, au revoir !",
     free: true
   },
   {
@@ -63,8 +63,8 @@ const DICTATIONS = [
     id: "d5",
     moduleId: "A1-m5",
     level: "A1",
-    task: "Descrevendo sua irmã",
-    text: "Ma sœur est grande et gentille. Son pull est rouge, et son sac est sur la chaise.",
+    task: "Apresentando a irmã e a casa dela",
+    text: "Ma sœur s'appelle Clara. Elle est grande et gentille. Son appartement est petit. Dans sa chambre, il y a un lit, une table et une lampe.",
     free: true
   },
   {
@@ -79,96 +79,96 @@ const DICTATIONS = [
     id: "d1-p1",
     moduleId: "A1-m1",
     level: "A1",
-    task: "Encontrando um colega",
-    text: "Bonsoir, Marc ! Ça va ? Moi, ça va bien, merci. Je m'appelle Julie, et toi, comment tu t'appelles ?",
+    task: "Apresentando um colega e uma amiga",
+    text: "Bonsoir ! Je m'appelle Marc. Je suis français et j'ai vingt-deux ans. Mon amie s'appelle Julie. Elle est brésilienne. Au revoir, à bientôt !",
     free: false
   },
   {
     id: "d1-p2",
     moduleId: "A1-m1",
     level: "A1",
-    task: "Dizendo idade e nacionalidade",
-    text: "Bonjour, je m'appelle Ana. Je suis brésilienne et j'ai vingt ans. Et toi, quel âge as-tu ?",
+    task: "Apresentando dois amigos",
+    text: "Ana est brésilienne. Elle a vingt ans. Elle s'appelle Ana Silva. Paul est français. Il a vingt et un ans. Bonsoir, Paul !",
     free: false
   },
   {
     id: "d2-p1",
     moduleId: "A1-m2",
     level: "A1",
-    task: "Descrevendo a manhã",
-    text: "Aujourd'hui, nous sommes mardi. Je me lève à six heures, je bois du lait. Je travaille à huit heures.",
+    task: "A manhã de uma terça-feira",
+    text: "Aujourd'hui, nous sommes mardi. Je me lève à six heures. Je bois du lait et je mange du pain. Je travaille à huit heures. Le soir, je mange du fromage.",
     free: false
   },
   {
     id: "d2-p2",
     moduleId: "A1-m2",
     level: "A1",
-    task: "Comprando comida à noite",
-    text: "Il est sept heures du soir. Je voudrais du fromage et du pain, s'il vous plaît. C'est combien ?",
+    task: "Um dia de descanso",
+    text: "Le matin, je me lève à sept heures. Je bois du café et je mange du pain. À midi, je mange du fromage. Il est sept heures du soir, c'est l'heure du dîner.",
     free: false
   },
   {
     id: "d3-p1",
     moduleId: "A1-m3",
     level: "A1",
-    task: "Falando de origem",
-    text: "Je viens du Brésil, et toi ? Elle est américaine, elle habite à Paris. Nous sommes français.",
+    task: "Uma brasileira em Paris",
+    text: "Je m'appelle Sofia et je viens du Brésil. Tom est américain. Il habite à Paris. Je cherche un pantalon. Il coûte cinquante euros.",
     free: false
   },
   {
     id: "d3-p2",
     moduleId: "A1-m3",
     level: "A1",
-    task: "Comprando roupa",
-    text: "Je cherche une robe, s'il vous plaît. Le pantalon coûte cinquante euros. C'est combien, la robe ?",
+    task: "Comprando uma roupa",
+    text: "Je cherche une robe, s'il vous plaît. La robe rouge coûte quarante euros. Le pantalon coûte cinquante euros. Je prends la robe, merci !",
     free: false
   },
   {
     id: "d4-p1",
     moduleId: "A1-m4",
     level: "A1",
-    task: "Na farmácia",
-    text: "Je ne vais pas bien, j'ai mal au ventre. Je vais à la pharmacie, s'il vous plaît. Merci, au revoir !",
+    task: "Léa na farmácia",
+    text: "Aujourd'hui, Léa ne va pas bien. Elle a mal au ventre. Elle va à la pharmacie. La pharmacie n'est pas loin de la station de métro.",
     free: false
   },
   {
     id: "d4-p2",
     moduleId: "A1-m4",
     level: "A1",
-    task: "Falando do tempo",
-    text: "En hiver, il fait froid. Aujourd'hui, il pleut. Je prends le bus, et je vais au travail.",
+    task: "Um dia de inverno",
+    text: "En hiver, il fait froid. Tous les jours, je prends le bus. Aujourd'hui, il pleut, alors je prends le métro. La station est près de la maison.",
     free: false
   },
   {
     id: "d5-p1",
     moduleId: "A1-m5",
     level: "A1",
-    task: "Descrevendo a casa",
-    text: "Il y a une fenêtre dans la chambre. La lampe est sur la table. La cuisine est à côté du salon.",
+    task: "Passeando pela casa",
+    text: "Voici ma maison. Il y a une cuisine et un salon. La cuisine est à côté du salon. Ma chambre est grande, il y a une fenêtre.",
     free: false
   },
   {
     id: "d5-p2",
     moduleId: "A1-m5",
     level: "A1",
-    task: "Descrevendo um quarto",
-    text: "Dans ma chambre, il y a un lit et une table. Le sac est sous la chaise, et la lampe est sur la table.",
+    task: "O quarto e as coisas dele",
+    text: "Dans ma chambre, il y a un lit et une table. La lampe est sur la table. Mon sac est sous la chaise. Mon pull est rouge.",
     free: false
   },
   {
     id: "d6-p1",
     moduleId: "A1-m6",
     level: "A1",
-    task: "Contando o dia de ontem",
-    text: "Hier, j'ai mangé au restaurant. Ce matin, j'ai pris le bus. Et toi, tu as travaillé hier ?",
+    task: "O que fiz ontem e hoje",
+    text: "Hier, j'ai travaillé le matin. Le soir, j'ai mangé au restaurant avec ma sœur. Ce matin, j'ai pris le bus.",
     free: false
   },
   {
     id: "d6-p2",
     moduleId: "A1-m6",
     level: "A1",
-    task: "Convidando para o cinema",
-    text: "On va au cinéma samedi soir ? Oui, avec plaisir ! Le week-end, j'aime le cinéma, et toi ?",
+    task: "Convidando um amigo para o fim de semana",
+    text: "Samedi soir, on va au cinéma avec Paul. Le week-end, j'aime le cinéma et j'aime lire. Dimanche, je mange au restaurant. J'adore le week-end !",
     free: false
   }
 ];
