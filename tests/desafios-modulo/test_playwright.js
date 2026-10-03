@@ -66,106 +66,67 @@ async function boot(browser, port, theme){
   const port = server.address().port;
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined });
 
-  // ---------------- FREE ----------------
-  {
-    const { page, errors, ctx } = await boot(browser, port);
-    const ev = (fn, a) => page.evaluate(fn, a);
-    await ev(async () => { renderUnitsGrid(); await fillModuleChallengeRows(); });
-    let r = await ev(() => ({
-      rows: [...document.querySelectorAll('.module-challenges')].map(e => e.textContent.replace(/\s+/g, ' ').trim()),
-      inModule1: !!document.querySelector('.module-challenges-slot[data-module-id="A1-m1"] .module-challenges'),
-      locked: !!document.querySelector('.module-challenges.premium-locked'),
-      icon: (document.querySelector('.module-challenges .ub-icon') || {}).textContent,
-      badge: (document.querySelector('.module-challenges .ub-badge-premium') || {}).textContent,
-    }));
-    check('Free: só o Módulo 1 tem a unidade de desafios', r.rows.length === 1 && r.inModule1, r);
-    check('Free: título, cadeado e selo Premium', /Desafios do Módulo 1/.test(r.rows[0]) && r.locked && r.icon.trim() === '🔒' && r.badge === 'Premium', r);
-    // posição: depois do Ponto de verificação
-    r = await ev(() => { const list = document.querySelector('.module-challenges-slot[data-module-id="A1-m1"]').parentElement; const kids = [...list.children]; const cp = kids.findIndex(k => k.classList.contains('checkpoint')); const sl = kids.findIndex(k => k.classList.contains('module-challenges-slot')); return { cp, sl }; });
-    check('unidade extra vem depois do Ponto de verificação', r.sl === r.cp + 1, r);
-    await ev(() => document.querySelector('.module-challenges .ub-header').click());
-    r = await ev(() => ({ modal: getComputedStyle(document.getElementById('premium-challenges-modal')).display, tab: STATE.currentTab || null, filter: challengesModuleFilter }));
-    check('Free: clicar abre o aviso Premium (sem navegar)', r.modal === 'flex' && r.filter === null, r);
-    await ev(() => document.getElementById('premium-challenges-modal-close').click());
-
-    // aba Desafios, expressões
-    await ev(async () => { switchTab('challenges'); await renderChallengeCategories(); renderChallengesList('expression'); });
-    r = await ev(() => ({ total: document.querySelectorAll('.challenge-card').length, locked: document.querySelectorAll('.challenge-card.locked').length }));
-    check('Free: expressões do módulo aparecem trancadas, a antiga não', r.total === 1 + 5 + 0 && r.locked === 5, r);
-    await ev(() => document.querySelector('.challenge-card.locked').click());
-    r = await ev(() => ({ modal: getComputedStyle(document.getElementById('premium-challenges-modal')).display, player: getComputedStyle(document.getElementById('challenge-player-wrap')).display }));
-    check('Free: clicar no trancado abre o aviso e não abre o jogo', r.modal === 'flex' && r.player === 'none', r);
-    await ev(() => document.getElementById('premium-challenges-modal-close').click());
-    await ev(() => document.querySelector('.challenge-card:not(.locked)').click());
-    r = await ev(() => getComputedStyle(document.getElementById('challenge-player-wrap')).display);
-    check('Free: expressão sem módulo continua jogável', r === 'block', r);
-
-    // fila Ouça e traduza
-    await ev(async () => { renderChallengesList('listen_translate'); });
-    r = await ev(() => document.getElementById('challenges-cards').textContent.replace(/\s+/g, ' '));
-    check('Free: fila A1 só conta o desafio antigo e avisa dos trancados', /0\/1 concluído/.test(r) && /\+32 desafios de módulo no Premium/.test(r), r);
-    r = await ev(() => { openChallengeQueueLevel('listen_translate', 'A1'); return CURRENT_CHALLENGE_PLAYER && CURRENT_CHALLENGE_PLAYER.id; });
-    check('Free: a fila só entrega o desafio liberado', r === 'lt-old-001', r);
-    // ditados: d1 é free -> segue aberto
-    r = await ev(() => { dictationModuleFilter = null; renderDictationList(); return { locked: document.querySelectorAll('.dictation-card.locked').length, total: document.querySelectorAll('.dictation-card').length }; });
-    check('Free: ditados existentes (free:true) seguem abertos', r.locked === 0 && r.total >= 2, r);
-    check('Free: nenhum pageerror', errors.length === 0, errors.slice(0, 3));
-    await ctx.close();
-  }
-
-  // ---------------- PREMIUM ----------------
-  for (const theme of ['light', 'dark']){
-    const { page, errors, ctx } = await boot(browser, port, theme);
-    const ev = (fn, a) => page.evaluate(fn, a);
-    await ev(() => { PROFILE_CACHE = { plan_tier: 'premium' }; });
-    await ev(async () => { renderUnitsGrid(); await fillModuleChallengeRows(); });
-    let r = await ev(() => ({ icon: (document.querySelector('.module-challenges .ub-icon') || {}).textContent, badge: (document.querySelector('.module-challenges .ub-badge') || {}).textContent, locked: !!document.querySelector('.module-challenges.premium-locked') }));
-    check(`Premium(${theme}): sem cadeado, progresso 0/${lote.length}`, r.icon.trim() === '🧩' && r.badge === `0/${lote.length}` && !r.locked, r);
-    if (theme === 'dark'){
-      const colors = await ev(() => { const g = document.querySelector('.module-challenges'); const cs = getComputedStyle(g.querySelector('.ub-title')); return { fg: cs.color, bg: getComputedStyle(g).backgroundColor }; });
-      check('dark: título legível (cor ≠ fundo)', colors.fg !== colors.bg, colors);
+  // Paywall DESLIGADO (CHALLENGE_PAYWALL_ENABLED=false): Free e Premium veem tudo
+  // aberto; o que muda é só o rótulo Free x Premium em cada item.
+  for (const who of ['free', 'premium']){
+    for (const theme of ['light', 'dark']){
+      const { page, errors, ctx } = await boot(browser, port, theme);
+      const ev = (fn, a) => page.evaluate(fn, a);
+      const tag = `${who}/${theme}`;
+      if (who === 'premium') await ev(() => { PROFILE_CACHE = { plan_tier: 'premium' }; });
+      check(`${tag}: paywall desligado`, await ev(() => CHALLENGE_PAYWALL_ENABLED === false));
+      await ev(async () => { renderUnitsGrid(); await fillModuleChallengeRows(); });
+      let r = await ev(() => ({
+        rows: [...document.querySelectorAll('.module-challenges')].map(e => e.textContent.replace(/\s+/g, ' ').trim()),
+        locked: document.querySelectorAll('.module-challenges.premium-locked').length,
+        icons: [...document.querySelectorAll('.module-challenges .ub-icon')].map(e => e.textContent.trim()),
+      }));
+      check(`${tag}: os 6 módulos têm a unidade, sem cadeado`, r.rows.length === 6 && r.locked === 0 && r.icons.every(i => i === '🧩'), r);
+      check(`${tag}: módulo 1 diz 1 ditado Free + 2 ditados e 22 desafios Premium`, /1 ditado Free · 2 ditados e 22 desafios Premium/.test(r.rows[0]), r.rows[0]);
+      check(`${tag}: módulo 2 diz 1 Free + 2 ditados e 0 desafios Premium`, /1 ditado Free · 2 ditados e 0 desafios Premium/.test(r.rows[1]), r.rows[1]);
+      r = await ev(() => { const list = document.querySelector('.module-challenges-slot[data-module-id="A1-m1"]').parentElement; const kids = [...list.children]; return { cp: kids.findIndex(k => k.classList.contains('checkpoint')), sl: kids.findIndex(k => k.classList.contains('module-challenges-slot')) }; });
+      check(`${tag}: unidade vem depois do Ponto de verificação`, r.sl === r.cp + 1, r);
+      // clicar abre o módulo (nunca o aviso)
+      await ev(() => document.querySelector('.module-challenges .ub-header').click());
+      await page.waitForFunction(() => challengesModuleFilter === 'A1-m1' && document.querySelectorAll('.challenge-category-card').length > 0);
+      r = await ev(() => ({ modal: getComputedStyle(document.getElementById('premium-challenges-modal')).display, title: document.getElementById('challenges-categories-title').textContent,
+        cats: [...document.querySelectorAll('.challenge-category-card')].map(c => c.textContent.replace(/\s+/g, ' ').trim()) }));
+      check(`${tag}: abre a visão do módulo sem aviso de bloqueio`, r.modal !== 'flex' && r.title === 'Desafios do Módulo 1', r);
+      check(`${tag}: visão do módulo lista Ditados com 3 ditados`, r.cats.some(c => /Ditados 3 ditados/.test(c)), r.cats);
+      // ditados do módulo: 1 Free + 2 Premium, todos abertos
+      await ev(() => document.getElementById('challenges-dictation-card').click());
+      await page.waitForFunction(() => dictationModuleFilter === 'A1-m1');
+      r = await ev(() => ({ cards: [...document.querySelectorAll('.dictation-card')].map(c => c.querySelector('.tier-badge').textContent), locked: document.querySelectorAll('.dictation-card.locked').length }));
+      check(`${tag}: ditados do módulo = Free, Premium, Premium, nenhum trancado`, JSON.stringify(r.cards) === '["Free","Premium","Premium"]' && r.locked === 0, r);
+      r = await ev(() => { document.querySelectorAll('.dictation-card')[1].click(); return getComputedStyle(document.getElementById('dictation-player-wrap')).display; });
+      check(`${tag}: ditado Premium abre (sem paywall)`, r === 'block', r);
+      // lista geral de ditados: só os 6 Free
+      r = await ev(() => { dictationModuleFilter = null; renderDictationList(); return [...document.querySelectorAll('.dictation-card')].map(c => c.querySelector('.tier-badge').textContent); });
+      check(`${tag}: Desafios > Ditados mostra só os 6 Free (nenhum Premium)`, r.length === 6 && r.every(b => b === 'Free'), r);
+      // aba Desafios geral: card Ditados diz "Ouça e escreva"
+      await ev(async () => { challengesModuleFilter = null; switchTab('challenges'); await renderChallengeCategories(); });
+      r = await ev(() => { renderChallengesList('expression'); return [...document.querySelectorAll('.challenge-card')].map(c => ({ b: c.querySelector('.tier-badge').textContent, lock: c.classList.contains('locked') })); });
+      check(`${tag}: expressões: 5 do módulo Premium, a antiga Free, nada trancado`, r.length === 6 && r.filter(x => x.b === 'Premium').length === 5 && r.filter(x => x.b === 'Free').length === 1 && r.every(x => !x.lock), r);
+      await ev(() => document.querySelector('.challenge-card').click());
+      r = await ev(() => getComputedStyle(document.getElementById('challenge-player-wrap')).display);
+      check(`${tag}: desafio de módulo abre sem aviso`, r === 'block', r);
+      r = await ev(() => { renderChallengesList('listen_translate'); return document.getElementById('challenges-cards').textContent.replace(/\s+/g, ' '); });
+      check(`${tag}: fila Ouça e traduza conta todos (sem aviso de trancados)`, /0\/9 concluído/.test(r) && !/no Premium/.test(r), r);
+      check(`${tag}: nenhum pageerror`, errors.length === 0, errors.slice(0, 3));
+      await ctx.close();
     }
-    await ev(() => document.querySelector('.module-challenges .ub-header').click());
-    await page.waitForFunction(() => challengesModuleFilter === 'A1-m1' && document.querySelectorAll('.challenge-category-card').length > 0);
-    r = await ev(() => ({ title: document.getElementById('challenges-categories-title').textContent, back: getComputedStyle(document.getElementById('challenges-module-back')).display,
-      cats: [...document.querySelectorAll('.challenge-category-card')].map(c => c.textContent.replace(/\s+/g, ' ').trim()) }));
-    check(`Premium(${theme}): visão do módulo com 4 categorias recortadas`, r.title === 'Desafios do Módulo 1' && r.back !== 'none' && r.cats.length === 4
-      && r.cats.some(c => /Expressões 5 desafios/.test(c)) && r.cats.some(c => /Ouça e traduza 32 desafios/.test(c)) && r.cats.some(c => /Acentuação 11 desafios/.test(c)) && r.cats.some(c => /Ditados 1 ditado/.test(c)), r);
-    // entra em Ouça e traduza e abre o primeiro do módulo
-    r = await ev(async () => { renderChallengesList('listen_translate'); const t = document.getElementById('challenges-cards').textContent.replace(/\s+/g, ' '); openChallengeQueueLevel('listen_translate', 'A1'); return { t, id: CURRENT_CHALLENGE_PLAYER && CURRENT_CHALLENGE_PLAYER.id, moduleOnly: !/old/.test(CURRENT_CHALLENGE_PLAYER.id) }; });
-    check(`Premium(${theme}): fila recortada (0/32) e abre desafio do módulo`, /0\/32 concluído/.test(r.t) && r.id === 'lt-a1m1-001' && r.moduleOnly, r);
-    // ditados recortados e volta
-    await ev(async () => { await renderChallengeCategories(); document.getElementById('challenges-dictation-card').click(); });
-    await page.waitForFunction(() => dictationModuleFilter === 'A1-m1');
-    r = await ev(() => ({ cards: document.querySelectorAll('.dictation-card').length, locked: document.querySelectorAll('.dictation-card.locked').length }));
-    check(`Premium(${theme}): ditados do módulo (1) sem cadeado`, r.cards === 1 && r.locked === 0, r);
-    await ev(() => document.getElementById('dictation-back-to-challenges').click());
-    await page.waitForFunction(() => challengesModuleFilter === 'A1-m1' && document.querySelectorAll('.challenge-category-card').length > 0);
-    check(`Premium(${theme}): voltar do ditado mantém o recorte do módulo`, true);
-    // voltar à trilha
-    await ev(() => document.getElementById('challenges-module-back').click());
-    r = await ev(() => ({ filter: challengesModuleFilter, trail: getComputedStyle(document.getElementById('view-path')).display !== 'none' }));
-    check(`Premium(${theme}): "Voltar à trilha" limpa o recorte`, r.filter === null, r);
-    // aba Desafios aberta direto = sem recorte
-    await ev(async () => { switchTab('challenges'); });
-    await page.waitForFunction(() => document.querySelectorAll('.challenge-category-card').length === 4 && challengesModuleFilter === null);
-    r = await ev(() => document.getElementById('challenges-categories-title').textContent);
-    check(`Premium(${theme}): aba Desafios direta continua geral`, r === 'Desafios', r);
-    r = await ev(() => { renderChallengesList('expression'); return { total: document.querySelectorAll('.challenge-card').length, locked: document.querySelectorAll('.challenge-card.locked').length }; });
-    check(`Premium(${theme}): na aba geral nada trancado`, r.total === 6 && r.locked === 0, r);
-    check(`Premium(${theme}): nenhum pageerror`, errors.length === 0, errors.slice(0, 3));
-    if (theme === 'light'){ await ev(async () => { switchTab('path'); renderUnitsGrid(); await fillModuleChallengeRows(); }); }
-    await ctx.close();
   }
 
-  // screenshots (trilha Free, 4 cenários: claro/escuro)
-  for (const theme of ['light', 'dark']){
-    const { page, ctx } = await boot(browser, port, theme);
-    await page.evaluate(async () => { renderUnitsGrid(); await fillModuleChallengeRows(); });
-    const el = await page.$('.module-challenges');
-    await el.scrollIntoViewIfNeeded();
-    await page.screenshot({ path: `/tmp/claude-0/-home-user-mandarimdozero/4c1eb048-5257-5fef-a1a8-50fce44b465c/scratchpad/trilha-free-${theme}.png`, clip: await (async () => { const b = await el.boundingBox(); return { x: Math.max(0, b.x - 20), y: Math.max(0, b.y - 60), width: Math.min(b.width + 40, 1100), height: b.height + 120 }; })() });
-    await ctx.close();
+  // ditados: dados consistentes com o áudio esperado
+  {
+    const D = await (async () => { const src = fs.readFileSync(path.join(ROOT, 'fr/dictations.js'), 'utf8').replace('const DICTATIONS', 'global.__D'); eval(src); return global.__D; })();
+    const ids = D.map(d => d.id);
+    check('18 ditados: 6 Free (1 por módulo) + 12 Premium', D.length === 18 && D.filter(d => d.free).length === 6 && D.filter(d => !d.free).length === 12, ids);
+    check('exatamente 1 Free por módulo', ['A1-m1','A1-m2','A1-m3','A1-m4','A1-m5','A1-m6'].every(m => D.filter(d => d.moduleId === m && d.free).length === 1));
+    check('2 Premium por módulo', ['A1-m1','A1-m2','A1-m3','A1-m4','A1-m5','A1-m6'].every(m => D.filter(d => d.moduleId === m && !d.free).length === 2));
+    check('ids únicos', new Set(ids).size === ids.length);
+    check('d1 e d2 mantêm a posição 1 e 2 (áudio já existente diz "dictée 1/2")', ids[0] === 'd1' && ids[1] === 'd2');
+    check('só pontuação suportada pelo gerador (. , ? !)', D.every(d => /[.!?]$/.test(d.text) && !/[;:…()«»]/.test(d.text)));
   }
 
   await browser.close(); server.close();

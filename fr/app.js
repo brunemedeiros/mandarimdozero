@@ -2211,11 +2211,14 @@ async function fillModuleChallengeRows(){
 
 function buildModuleChallengesRow(module){
   const items = publishedChallenges().filter(c => challengeModuleId(c) === module.id);
-  // Só ganha a linha quem tem desafios publicados: um módulo que só tem ditado
-  // (já aberto a todos na aba Ditados) não vira uma unidade Premium vazia.
-  if (!items.length) return null;
+  const dictations = dictationsVisible(module.id);
+  const dictFree = dictations.filter(d => d.free !== false).length;
+  const dictPremium = dictations.length - dictFree;
+  // A unidade existe se o módulo tem desafios publicados OU ditados (1 Free +
+  // vários Premium por módulo).
+  if (!items.length && !dictations.length) return null;
   const mIdx = modulesOfLevel(module.level).findIndex(m => m.id === module.id);
-  const premium = challengesPremiumUnlocked();
+  const premium = !CHALLENGE_PAYWALL_ENABLED || challengesPremiumUnlocked();
   const moduleOpen = moduleUnlocked(module);
   const done = items.filter(c => isChallengeCompleted(c.id)).length;
   const block = document.createElement('div');
@@ -2232,6 +2235,7 @@ function buildModuleChallengesRow(module){
           ${premium ? (items.length ? `<span class="ub-badge">${done}/${items.length}</span>` : '') : '<span class="ub-badge ub-badge-premium">Premium</span>'}
         </div>
         <div class="ub-goal">Pratique o que você estudou de novas formas. Opcional.</div>
+        <div class="ub-goal">${dictFree ? `${dictFree} ditado Free` : ''}${dictFree && (dictPremium || items.length) ? ' · ' : ''}${(dictPremium || items.length) ? `${dictPremium} ditado${dictPremium === 1 ? '' : 's'} e ${items.length} desafio${items.length === 1 ? '' : 's'} Premium` : ''}</div>
       </div>
     </div>
   `;
@@ -8427,13 +8431,14 @@ function renderDictationList(){
   document.getElementById('dictation-player-wrap').style.display = 'none';
 
   const cardsWrap = document.getElementById('dictation-cards');
-  const dictationsShown = dictationModuleFilter ? DICTATIONS.filter(d => d.moduleId === dictationModuleFilter) : DICTATIONS;
+  const dictationsShown = dictationsVisible(dictationModuleFilter);
   cardsWrap.innerHTML = dictationsShown.map(d => `
     <button class="dictation-card ${isDictationLocked(d) ? 'locked' : ''}" data-dict-id="${d.id}">
       ${isDictationLocked(d) ? '<span class="challenge-card-check" title="Premium">🔒</span>' : ''}
       <div class="dictation-card-level">${d.level}</div>
       <div class="dictation-card-task">${escapeHtmlDictation(d.task)}</div>
       <div class="dictation-card-module">${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</div>
+      ${tierBadgeHTML(dictationTier(d))}
     </button>
   `).join('');
 
@@ -8964,11 +8969,27 @@ function challengeModuleId(c){ return (c && c.moduleId) || null; }
 function challengesPremiumUnlocked(){
   return (typeof isPremium === 'function' && isPremium()) || isChallengesAdmin();
 }
+// Paywall DESLIGADO por enquanto (decisão da autora): interface de bloqueio,
+// paywall e Stripe entram depois. Hoje só ROTULAMOS cada item como Free ou
+// Premium (tierBadgeHTML); quando o paywall existir, basta ligar esta flag.
+const CHALLENGE_PAYWALL_ENABLED = false;
+// Free x Premium: desafios de módulo (Ouça e traduza, Acentuação, Expressões)
+// são Premium; ditado é Free só quando d.free === true (1 por módulo).
+function challengeTier(c){ return challengeModuleId(c) ? 'premium' : 'free'; }
+function dictationTier(d){ return d.free === false ? 'premium' : 'free'; }
+function tierBadgeHTML(tier){
+  return `<span class="tier-badge tier-${tier}">${tier === 'premium' ? 'Premium' : 'Free'}</span>`;
+}
+// Ditados Premium só existem dentro da unidade do módulo -- nunca na lista
+// geral de Desafios > Ditados (nem na trilha).
+function dictationsVisible(moduleId){
+  return moduleId ? DICTATIONS.filter(d => d.moduleId === moduleId) : DICTATIONS.filter(d => d.free !== false);
+}
 function isChallengeLocked(c){
-  return !!challengeModuleId(c) && !challengesPremiumUnlocked();
+  return CHALLENGE_PAYWALL_ENABLED && !!challengeModuleId(c) && !challengesPremiumUnlocked();
 }
 function isDictationLocked(d){
-  return d.free === false && !challengesPremiumUnlocked();
+  return CHALLENGE_PAYWALL_ENABLED && d.free === false && !challengesPremiumUnlocked();
 }
 // Tudo que a lista pode MOSTRAR (inclui os trancados) / só o que dá pra JOGAR.
 function listedChallenges(){
@@ -9116,7 +9137,7 @@ async function renderChallengeCategories(){
   // renderChallengesList(). Passou a viver dentro de Desafios porque não
   // fazia sentido como aba própria no menu principal (pedido explícito).
   const listedNow = listedChallenges();
-  const dictationsHere = challengesModuleFilter ? DICTATIONS.filter(d => d.moduleId === challengesModuleFilter) : DICTATIONS;
+  const dictationsHere = dictationsVisible(challengesModuleFilter);
   const visibleCats = challengesModuleFilter ? CHALLENGE_CATEGORIES.filter(cat => listedNow.some(c => c.type === cat.type)) : CHALLENGE_CATEGORIES;
   const catSubtitle = (cat) => challengesModuleFilter
     ? `${listedNow.filter(c => c.type === cat.type).length} desafio${listedNow.filter(c => c.type === cat.type).length === 1 ? '' : 's'}`
@@ -9168,6 +9189,7 @@ function challengeCardHTML(c){
       ${locked ? '<span class="challenge-card-check" title="Premium">🔒</span>' : (done ? '<span class="challenge-card-check">✅</span>' : '')}
       <div class="challenge-card-level">${c.level}</div>
       ${challengeCardLabelHTML(c)}
+      ${tierBadgeHTML(challengeTier(c))}
     </button>
   `;
 }
