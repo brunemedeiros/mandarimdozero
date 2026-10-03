@@ -23,7 +23,7 @@ Interpretação adotada: "próximas etapas" = as Fatias 2 e 3 listadas no CLAUDE
 ## 3. Pendências que precisam de você
 1. **Gerar os áudios por frase** (95 frases, 2.960 caracteres, cerca de 0,3% da cota grátis de 1M/mês): Actions > "Áudio TTS" > modo `ditados-frases`. Não rodei por usar a chave `GCP_TTS_KEY` e gerar custo. Ele refaz todas as frases (usa `DICTATION_FORCE=1`).
 2. **Abrir o PR e fazer o merge**, se aprovar. Não abri por iniciativa própria (regra do projeto).
-3. **Rotacionar a chave de TTS** (pendência antiga do CLAUDE.md: a chave foi colada em chat).
+3. ~~Rotacionar a chave de TTS~~ — já feito por você em 29/09/2026 (a pendência no CLAUDE.md estava desatualizada e foi corrigida).
 4. Depois de gerar os mp3, conferir ouvindo uma frase no celular. O caso "mp3 existe e toca" só pode ser testado após a geração.
 
 ## 4. O que foi alterado

@@ -16967,8 +16967,8 @@ acima.**
   desejo: mostrar a frase chinesa correta com áudio e depois a tradução,
   diferenciadas visualmente (mudança só nessa tela de `zh/app.js`; precisa do
   print e do layout preferido); (2) segurança -- a chave de API foi colada em
-  chat: restringir a TTS/STT e rotacionar (nova chave no Google Cloud,
-  trocar o Secret `GCP_TTS_KEY`, apagar a antiga); (3) camada de "texto
+  chat; a autora JÁ rotacionou a chave em 29/09/2026 (confirmado por ela em
+  03/10/2026), então não é mais pendência; (3) camada de "texto
   falado" para português e outros idiomas entra como nova lista em
   `RULES_BY_LANG`, sem misturar regras (ex.: sandhi de "os carros azuis").
 
