@@ -183,7 +183,9 @@ async function boot(browser, port, theme){
     check(`${tag}: após reabrir, 1 clique = 1 reprodução`, r === 1, r);
     await page.waitForTimeout(400);
     if (process.env.SHOT_DIR) await page.screenshot({ path: `${process.env.SHOT_DIR}/ditado-${vp.width}-${theme}.png`, fullPage: true });
-    // áudio inexistente (d3 sem mp3 no repo) desabilita o botão
+    // áudio inexistente desabilita o botão. Não depende de o repo ter ou não o
+    // mp3 do d3 (o robô de áudio já gerou): o pedido é abortado na rede.
+    await page.route('**/audio/dictation-d3-guided.mp3', r => r.abort());
     await ev(() => { openDictationPlayer('d3'); });
     await page.waitForFunction(() => document.getElementById('dictation-play-btn').disabled, null, { timeout: 5000 }).catch(() => {});
     r = await ev(() => document.getElementById('dictation-play-btn').disabled);
