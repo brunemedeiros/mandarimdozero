@@ -17359,3 +17359,12 @@ confirmação da autora, sem push/PR/deploy como parte da aplicação.
   (~29% da cópia local). Só se o Staging com 068 não tiver margem.
 
 **Atualização (2026-10-03): 068 aplicada no Staging (`20261003015924`) e D2 RESOLVIDO.** Definições idênticas às locais (md5), grants/owner/`SECURITY DEFINER`/`search_path` corretos, schema/dados intocados. Homologação real (mesmo script da 067, seleção explícita, cada RPC sob 8 s): cópia de 2000 com áudio 4,61 s / 4,73 s (antes: cancelada); 1000 com áudio 1,92 s; 2000 sem mídia 3,76 s. 2001 → `deck_too_large`, nada criado. Atomicidade: mapa sem a última mídia → `media_map_incomplete`, destino inexistente → `invalid_media_map`, 0 Notes/Decks extras. Independência lógica: 0 URLs na pasta do autor, `storagePath`/`generationKey` removidos. Limpeza: estado igual ao snapshot pré-068. Detalhes: `docs/public-decks-duplicatas-contrato.md` §S.3. Produção não tocada; P8.1/P8.2/P8.5, H/J/K e os 4 achados de baixo risco continuam pendentes.
+
+## Checkpoint -- homologação real P8.1/P8.2/P8.5 do Public Deck no Staging APROVADA (2026-10-03)
+
+- Script `tests/fase-public-deck/staging_storage_test.js` (versão de `fb5c159`, que confere existência pela listagem do Storage e não pelo link público) rodado pela autora contra o Staging `ilfjzizjfcmhibkhwber`, RUN `p82610031328034369`, com 067/068/069 aplicadas.
+- Resultado: **P8.1 16/16, P8.5 44/44, P8.2 13/13 (parcial), LIMPEZA 16/16.** P8.2b (2 usuários Premium distintos em paralelo) NÃO executado: exige uma 2ª conta Premium.
+- A rodada anterior (RUN `p8261003130827316c`) falhou em 3 checks ("autor apaga o PRÓPRIO original", "autor apaga as origens", objetos removidos na limpeza) por FALSO NEGATIVO de uma cópia antiga do script: os logs do Staging mostram DELETE 200 e GETs públicos servidos do cache da CDN (`HIT` 200) já depois de o objeto ter sido apagado. Não era bug do app/policies (`flashcard_media_owner_delete` existe e funciona).
+- Conferido ao vivo depois da rodada aprovada: 0 Notes, 0 Decks pessoais, 0 Decks públicos, 0 objetos em `flashcard-media`. Nenhum resíduo.
+- Achado de baixo risco, NÃO corrigido: o conteúdo público do Deck (`get_public_deck_notes`) ainda inclui `storagePath` em `image` (o `public_note_native` só remove de `audio`). A cópia já remove dos dois. O caminho só repete o que a própria URL pública já mostra (a pasta do autor), mas por coerência deveria sair também de `image`.
+- Produção não tocada. Pendentes: P8.2b, o achado acima, H/J/K e os 4 achados de baixo risco já registrados.
