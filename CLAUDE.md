@@ -17291,6 +17291,7 @@ P7: cópia de Public Deck duplica a mídia no Storage do copiador (manifest → 
 | Migration lógica (arquivo) | Versão registrada no Staging | Data |
 |---|---|---|
 | 067 (`067_public_deck_copy_linear_plan.sql`, commit `69cad4c`) | `20261003000046` (`public_deck_copy_linear_plan`) | 2026-10-03 |
+| 068 (`068_public_deck_copy_media_linear.sql`, commit `c97222e`) | `20261003015924` (`public_deck_copy_media_linear`) | 2026-10-03 |
 
 ## Checkpoint -- etapa de segurança (grants + proteção de plan/role) validada no Staging (2026-10-02)
 
@@ -17338,7 +17339,7 @@ confirmação da autora, sem push/PR/deploy como parte da aplicação.
 - Atomicidade: falha forçada no último item de 2000 (`media_map_incomplete`) → 0 Notes e 0 Decks extras do copiador.
 - Limpeza: 0 Decks/Cards/objetos, 3 perfis com hash idêntico, 067 segue aplicada. Produção não tocada. Sem push/PR/deploy.
 
-## D2 -- migration 068 (mídia da cópia de Public Deck com custo linear) -- LOCAL, NÃO aplicada (2026-10-03)
+## D2 -- migration 068 (mídia da cópia de Public Deck com custo linear) -- aplicada no Staging (2026-10-03)
 
 - **Causa**: a regex de `flashcard_media_path` (~32 µs/URL local; a `substring` não ancorada ~21 µs) rodava ~8000×
   numa cópia de 2000 Notes com áudio: `_validate_media_map` (laço, 2 regex + EXISTS por entrada) e, por Note,
@@ -17355,3 +17356,5 @@ confirmação da autora, sem push/PR/deploy como parte da aplicação.
   mídias já existente, mantido).
 - **Próxima alavanca (não feita)**: `own_flashcards_touch_deck` atualiza a mesma linha de `decks` a cada INSERT
   (~29% da cópia local). Só se o Staging com 068 não tiver margem.
+
+**Atualização (2026-10-03): 068 aplicada no Staging (`20261003015924`) e D2 RESOLVIDO.** Definições idênticas às locais (md5), grants/owner/`SECURITY DEFINER`/`search_path` corretos, schema/dados intocados. Homologação real (mesmo script da 067, seleção explícita, cada RPC sob 8 s): cópia de 2000 com áudio 4,61 s / 4,73 s (antes: cancelada); 1000 com áudio 1,92 s; 2000 sem mídia 3,76 s. 2001 → `deck_too_large`, nada criado. Atomicidade: mapa sem a última mídia → `media_map_incomplete`, destino inexistente → `invalid_media_map`, 0 Notes/Decks extras. Independência lógica: 0 URLs na pasta do autor, `storagePath`/`generationKey` removidos. Limpeza: estado igual ao snapshot pré-068. Detalhes: `docs/public-decks-duplicatas-contrato.md` §S.3. Produção não tocada; P8.1/P8.2/P8.5, H/J/K e os 4 achados de baixo risco continuam pendentes.

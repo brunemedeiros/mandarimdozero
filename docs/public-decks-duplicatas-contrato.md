@@ -393,3 +393,105 @@ Relação com D1: o manifest sem teto tem a mesma natureza de tempo. Vale decidi
 3. Decidir sobre os 4 achados de baixo risco.
 4. Decidir se H/J/K precisam de teste antes da produção.
 5. Ordem de aplicação na produção: 063 → 066 junto com 059–062 e a correção de D1.
+
+### §S.3 — Staging: 067 e 068 aplicadas; D1 e D2 resolvidos (2026-10-03)
+
+**Correção do estado (substitui o "Staging na 066" de §S.2).** Desde 2026-10-03 o Staging (`ilfjzizjfcmhibkhwber`) está na **068**. 067 e 068 foram aplicadas via MCP (fluxo do caminho A, ver CLAUDE.md):
+
+| Migration lógica | Versão no Staging | Arquivo |
+|---|---|---|
+| 067 `public_deck_copy_linear_plan` | `20261003000046` | commit `69cad4c` |
+| 068 `public_deck_copy_media_linear` | `20261003015924` | commit `c97222e` (md5 `c7b4052f76abede91ed86cb656e0fc6b`, idêntico byte a byte ao aplicado) |
+
+A produção (`eigjocalzwamisgqilhg`) continua sem nenhuma migration desta série.
+
+#### A. Migration 068 — integridade
+
+Antes da aplicação:
+- confirmado projeto "Idiomas com Prof. Brune — Staging";
+- última migration era a 067;
+- não havia nenhuma 068;
+- o arquivo era idêntico ao de `c97222e`.
+
+Depois da aplicação:
+- `pg_get_functiondef` de `_validate_media_map`, `get_public_deck_media_manifest` e `copy_public_deck` tem md5 **idêntico** ao do Postgres local com a 068;
+- uma assinatura por função, sem overload;
+- owner `postgres`, `SECURITY DEFINER` e `search_path=public` nas três;
+- volatilidade: STABLE, STABLE e VOLATILE, respectivamente;
+- grants: EXECUTE só para `authenticated` nas duas RPCs; `_validate_media_map` sem EXECUTE para public, anon e authenticated;
+- `_public_deck_plan`, `check_public_deck_duplicates` e `flashcard_media_path` inalteradas (mesmo md5 de antes);
+- schema e dados inalterados: hash de colunas `cceaae4a…`, 0 Decks/Notes/objetos e 3 perfis (hash `fa3a12ad…`) antes e depois;
+- `authenticated` continua com `statement_timeout=8s`.
+
+#### B. D1 (cópia quadrática) — RESOLVIDO no Staging pela 067
+
+Sem mídia, 2000 Notes copiam bem abaixo de 8 s, tanto com a 067 (4,57 s) quanto com a 068 (3,76 s).
+
+#### C. D2 (mídia na cópia) — RESOLVIDO no Staging pela 068
+
+**Método.** O mesmo script SQL da rodada da 067 (`stg_perf`), só com N e mídia parametrizados:
+- seed com 10% de Cloze (2 marcas) e 90% Normal;
+- seleção explícita igual a `publicDeckPlanSelection` (`[{sig, cls}]` das Notes `selectable` e `none`), nunca o caminho default;
+- cada RPC numa instrução própria, com `statement_timeout=8s` e sessão `role authenticated` simulada;
+- o mapa de mídia aponta para objetos reais na pasta do copiador (o `storage.copy` é simulado com INSERT em `storage.objects`);
+- cada execução numa transação única que termina em `RAISE` (rollback).
+
+| Cenário | Check | Manifest | Cópia | Total | Notes | CardInstances | Timeout |
+|---|---|---|---|---|---|---|---|
+| A 500 sem mídia | 0,21 s | 0,19 s | 0,68 s | 1,08 s | 500 | 550 | não |
+| B 1000 sem mídia | 0,41 s | 0,40 s | 1,63 s | 2,44 s | 1000 | 1100 | não |
+| C 2000 sem mídia | 0,79 s | 0,84 s | 3,76 s | 5,40 s | 2000 | 2200 | não |
+| D 500 com áudio | 0,22 s | 0,26 s | 0,87 s | 1,35 s | 500 | 550 | não |
+| E 1000 com áudio | 0,44 s | 0,54 s | 1,92 s | 2,90 s | 1000 | 1100 | não |
+| **F 2000 com áudio** | 0,90 s | 1,12 s | **4,61 s** | 6,63 s | 2000 | 2200 | **não** |
+| F, 2ª rodada | 0,94 s | 1,24 s | 4,73 s | 6,91 s | 2000 | 2200 | não |
+
+Em F: 2000 mídias remapeadas, 2000 objetos distintos referenciados. Cada RPC é uma requisição separada, com o seu próprio limite de 8 s; a cópia, a mais lenta, usa cerca de 59% do limite. Nenhum erro.
+
+**067 → 068 no Staging:**
+- 2000 com áudio: cópia **cancelada (57014)** → **4,61–4,73 s**;
+- 1000 com áudio: 3,97 s → 1,92 s;
+- manifest a 2000: 1,44 s → 1,12–1,24 s;
+- sem mídia, a 068 também ficou mais rápida (2000: 4,57 → 3,76 s), porque deixou de chamar as funções de mídia por Note.
+
+#### D. 2001 Notes
+
+- Check e cópia: `deck_too_large` (54000) em 7–8 ms.
+- Manifest: `deck_media_too_large`, porque são 2001 mídias acima do teto de 2000. Mesma regra de antes; a função é só leitura.
+- Nada foi criado: o copiador ficou com 0 Notes e os mesmos 2 Decks (raiz e Meus Decks).
+
+#### E. Atomicidade (2000 Notes com áudio)
+
+1. Mapa completo **sem** o áudio da última Note na ordem de cópia (`perf-audio-2000`, 1999 entradas): `media_map_incomplete` (22023) em 1,29 s.
+2. Destino da última mídia apontando para um objeto inexistente: `invalid_media_map` (22023).
+
+Nos dois casos o copiador ficou com 0 Notes e 0 Decks extras, e as 2000 Notes do autor ficaram intactas. Na 068 a falha de mapa é detectada **antes** do laço (nada chega a ser inserido); na 067 era detectada dentro dele, com rollback. O resultado observável é o mesmo.
+
+#### F. Independência da mídia (lógica, no banco)
+
+- Em A–F: todas as URLs das cópias apontam para a pasta do copiador e para objetos existentes; 0 apontam para a pasta do autor.
+- No smoke de 10 Notes, cujas fontes tinham `storagePath` e `generationKey` em 10 de 10, as cópias ficaram com **0** desses campos.
+- **Isto não é P8.1/P8.5**: a cópia física via API do Storage com JWT real continua pendente.
+
+#### G. Limpeza
+
+Todas as execuções foram revertidas. Estado final idêntico ao snapshot anterior à 068:
+- 0 Decks, 0 Notes, 0 Teacher Cards e 0 objetos;
+- 3 perfis com o mesmo hash;
+- schema com o mesmo hash;
+- 068 continua aplicada.
+
+#### H. Estado dos itens P8
+
+| Item | Estado |
+|---|---|
+| D1 | **Resolvido** (067) |
+| D2 | **Resolvido** (068), medido no Staging |
+| P8.1 Storage real | Pendente: precisa da autora com login real |
+| P8.2 duas sessões reais | Pendente: mesmo motivo |
+| P8.5 mídia ponta a ponta | Pendente: mesmo motivo |
+| H/J (Cloze/Type Answer EXACT/VARIANT) | Pendente (não testado) |
+| K (Teacher/Course na coleção) | Pendente (não testado) |
+| 4 achados de baixo risco da 062 | Abertos: host não ancorado; manifest sem teto (custo por mídia agora linear); mensagem com `cls` ausente; comentário de rollback |
+
+**Staging ≠ autorização para produção.**
