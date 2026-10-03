@@ -17337,3 +17337,21 @@ confirmação da autora, sem push/PR/deploy como parte da aplicação.
   Timeout e limite NÃO alterados; não corrigido. Independência da mídia confirmada a 1000 (0 refs à pasta do autor).
 - Atomicidade: falha forçada no último item de 2000 (`media_map_incomplete`) → 0 Notes e 0 Decks extras do copiador.
 - Limpeza: 0 Decks/Cards/objetos, 3 perfis com hash idêntico, 067 segue aplicada. Produção não tocada. Sem push/PR/deploy.
+
+## D2 -- migration 068 (mídia da cópia de Public Deck com custo linear) -- LOCAL, NÃO aplicada (2026-10-03)
+
+- **Causa**: a regex de `flashcard_media_path` (~32 µs/URL local; a `substring` não ancorada ~21 µs) rodava ~8000×
+  numa cópia de 2000 Notes com áudio: `_validate_media_map` (laço, 2 regex + EXISTS por entrada) e, por Note,
+  `native_fields_media_urls` + `native_fields_remap_media`→`_remap_media_obj`. Manifest filtrava `sig = any(v_sel)` por Note.
+- **068** (`068_public_deck_copy_media_linear.sql`): validação do mapa em uma consulta (`MATERIALIZED`, caminho 1×
+  por chave/valor, mesmas 5 regras); cópia resolve a mídia de todas as Notes a criar numa passada antes do laço
+  (mesmas regras de remap/contagem); manifest com seleção por chave e caminho 1× por URL. Plano de duplicatas
+  (067), `flashcard_media_path`, limites (2000/2000), erros e atomicidade inalterados.
+- **Local (antes 067 → depois 068)**: 2000 sem mídia 1,39 → 1,05 s; 2000 com áudio 2,02 → 1,28 s (diferença de
+  mídia 0,63 → ~0,2 s). Falhas de mapa agora abortam cedo (0,08–0,44 s), antes de criar qualquer coisa.
+- **Testes** (`tests/fase-public-deck/`): run.sh completo verde, `d2/differential.sh` (068 = 062 = 067 em 28
+  cenários, + escala 2000/600 por hash), `d2/atomicity_scale.sh` (6/6), `bench_media.sh`, legacy parity 17/17,
+  Playwright 152/152. 2000 Notes com áudio+imagem (4000 mídias) é recusado por `deck_media_too_large` (teto de
+  mídias já existente, mantido).
+- **Próxima alavanca (não feita)**: `own_flashcards_touch_deck` atualiza a mesma linha de `decks` a cada INSERT
+  (~29% da cópia local). Só se o Staging com 068 não tiver margem.
