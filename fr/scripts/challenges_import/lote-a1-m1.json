@@ -24,81 +24,6 @@
     "moduleId": "A1-m1",
     "unitId": "A1-1",
     "theme": "Cumprimentos",
-    "sentenceFr": "Merci beaucoup, au revoir !",
-    "audioFile": "f969272efe10.mp3",
-    "hintText": "Merci ______, au ______ !",
-    "referenceTranslations": [
-      "Muito obrigado, tchau!",
-      "Muito obrigada, tchau!",
-      "Muito obrigado, até logo!",
-      "Muito obrigada, até logo!"
-    ],
-    "explanation": "\"Merci\" serve para homem e mulher: em português, obrigado ou obrigada.",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-003",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-1",
-    "theme": "Cumprimentos",
-    "sentenceFr": "De rien, à bientôt !",
-    "audioFile": "e9907086d8b8.mp3",
-    "hintText": "De ______, à ______ !",
-    "referenceTranslations": [
-      "De nada, até breve!",
-      "De nada, até logo!",
-      "De nada, até mais!"
-    ],
-    "explanation": "",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-004",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-1",
-    "theme": "Cumprimentos",
-    "sentenceFr": "Pardon, je ne comprends pas.",
-    "audioFile": "3dd70fc29aaa.mp3",
-    "hintText": "Pardon, je ne ______ pas.",
-    "referenceTranslations": [
-      "Desculpe, eu não entendo.",
-      "Desculpe, não entendo.",
-      "Perdão, eu não entendo.",
-      "Com licença, não entendo."
-    ],
-    "explanation": "\"Pardon\" pode ser \"desculpe\" ou \"com licença\", conforme a situação.",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-005",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-1",
-    "theme": "Cumprimentos",
-    "sentenceFr": "Salut ! Ça va bien, et toi ?",
-    "audioFile": "89258c101fd6.mp3",
-    "hintText": "Salut ! Ça va ______, et ______ ?",
-    "referenceTranslations": [
-      "Oi! Vou bem, e você?",
-      "Oi! Estou bem, e você?",
-      "Oi! Tudo bem, e você?",
-      "Oi! Tudo bom, e você?"
-    ],
-    "explanation": "\"Salut\" é informal, como \"oi\".",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-006",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-1",
-    "theme": "Cumprimentos",
     "sentenceFr": "Un café, s'il vous plaît.",
     "audioFile": "906544828e6d.mp3",
     "hintText": "Un ______, s'il vous ______.",
@@ -111,42 +36,7 @@
     "status": "needs_review"
   },
   {
-    "id": "lt-a1m1-007",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-1",
-    "theme": "Cumprimentos",
-    "sentenceFr": "Au revoir, à demain !",
-    "audioFile": "eb078a6c9de2.mp3",
-    "hintText": "Au revoir, à ______ !",
-    "referenceTranslations": [
-      "Tchau, até amanhã!",
-      "Até logo, até amanhã!"
-    ],
-    "explanation": "",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-008",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-2",
-    "theme": "Apresentação",
-    "sentenceFr": "Je m'appelle Léo.",
-    "audioFile": "a7bbded4ea21.mp3",
-    "hintText": "Je m'______ Léo.",
-    "referenceTranslations": [
-      "Eu me chamo Léo.",
-      "Me chamo Léo.",
-      "Meu nome é Léo."
-    ],
-    "explanation": "",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-009",
+    "id": "lt-a1m1-003",
     "type": "listen_translate",
     "level": "A1",
     "moduleId": "A1-m1",
@@ -165,7 +55,7 @@
     "status": "needs_review"
   },
   {
-    "id": "lt-a1m1-010",
+    "id": "lt-a1m1-004",
     "type": "listen_translate",
     "level": "A1",
     "moduleId": "A1-m1",
@@ -182,96 +72,7 @@
     "status": "needs_review"
   },
   {
-    "id": "lt-a1m1-011",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-2",
-    "theme": "Apresentação",
-    "sentenceFr": "Tu es français ?",
-    "audioFile": "09a97e7b12dc.mp3",
-    "hintText": "Tu es ______ ?",
-    "referenceTranslations": [
-      "Você é francês?",
-      "Você é da França?"
-    ],
-    "explanation": "",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-012",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-2",
-    "theme": "Apresentação",
-    "sentenceFr": "Moi aussi, je suis française !",
-    "audioFile": "e904c9673748.mp3",
-    "hintText": "Moi ______, je suis ______ !",
-    "referenceTranslations": [
-      "Eu também sou francesa!",
-      "Eu também, eu sou francesa!",
-      "Eu também sou da França!"
-    ],
-    "explanation": "",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-013",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-2",
-    "theme": "Apresentação",
-    "sentenceFr": "Le Brésil est très grand.",
-    "audioFile": "f814e236ea23.mp3",
-    "hintText": "Le Brésil est ______ ______.",
-    "referenceTranslations": [
-      "O Brasil é muito grande.",
-      "O Brasil é bem grande.",
-      "O Brasil é bastante grande."
-    ],
-    "explanation": "",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-014",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-2",
-    "theme": "Apresentação",
-    "sentenceFr": "J'aime la France.",
-    "audioFile": "e7cb7390bc6d.mp3",
-    "hintText": "J'______ la France.",
-    "referenceTranslations": [
-      "Eu amo a França.",
-      "Eu adoro a França.",
-      "Eu gosto da França."
-    ],
-    "explanation": "\"Aimer\" pode ser \"amar\" ou \"gostar\", conforme o contexto.",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-015",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-2",
-    "theme": "Apresentação",
-    "sentenceFr": "Le pays est magnifique.",
-    "audioFile": "e0169c026a4e.mp3",
-    "hintText": "Le ______ est ______.",
-    "referenceTranslations": [
-      "O país é magnífico.",
-      "O país é lindo.",
-      "O país é maravilhoso."
-    ],
-    "explanation": "",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-016",
+    "id": "lt-a1m1-005",
     "type": "listen_translate",
     "level": "A1",
     "moduleId": "A1-m1",
@@ -290,41 +91,7 @@
     "status": "needs_review"
   },
   {
-    "id": "lt-a1m1-017",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-3",
-    "theme": "Números e idade",
-    "sentenceFr": "Il a dix ans.",
-    "audioFile": "e79ca64543a9.mp3",
-    "hintText": "Il a ______ ans.",
-    "referenceTranslations": [
-      "Ele tem dez anos.",
-      "Ele tem 10 anos."
-    ],
-    "explanation": "",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-018",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-3",
-    "theme": "Números e idade",
-    "sentenceFr": "Elle a huit ans.",
-    "audioFile": "781b930087b3.mp3",
-    "hintText": "Elle a ______ ans.",
-    "referenceTranslations": [
-      "Ela tem oito anos.",
-      "Ela tem 8 anos."
-    ],
-    "explanation": "",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-019",
+    "id": "lt-a1m1-006",
     "type": "listen_translate",
     "level": "A1",
     "moduleId": "A1-m1",
@@ -343,78 +110,7 @@
     "status": "needs_review"
   },
   {
-    "id": "lt-a1m1-020",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-3",
-    "theme": "Números e idade",
-    "sentenceFr": "Nous sommes dix.",
-    "audioFile": "95fe67d5408b.mp3",
-    "hintText": "Nous ______ ______.",
-    "referenceTranslations": [
-      "Somos dez.",
-      "Nós somos dez.",
-      "Somos dez pessoas."
-    ],
-    "explanation": "",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-021",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-3",
-    "theme": "Números e idade",
-    "sentenceFr": "J'ai deux frères et trois sœurs.",
-    "audioFile": "24cad7b3079b.mp3",
-    "hintText": "J'ai ______ frères et ______ sœurs.",
-    "referenceTranslations": [
-      "Eu tenho dois irmãos e três irmãs.",
-      "Tenho dois irmãos e três irmãs."
-    ],
-    "explanation": "",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-022",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-3",
-    "theme": "Números e idade",
-    "sentenceFr": "Combien ça coûte ?",
-    "audioFile": "6b24e6025e34.mp3",
-    "hintText": "______ ça coûte ?",
-    "referenceTranslations": [
-      "Quanto custa isso?",
-      "Quanto custa?",
-      "Quanto é?"
-    ],
-    "explanation": "",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-023",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-4",
-    "theme": "Família",
-    "sentenceFr": "Voici ma famille.",
-    "audioFile": "61e3ebd543cb.mp3",
-    "hintText": "______ ma ______.",
-    "referenceTranslations": [
-      "Aqui está minha família.",
-      "Esta é a minha família.",
-      "Esta é minha família."
-    ],
-    "explanation": "",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-024",
+    "id": "lt-a1m1-007",
     "type": "listen_translate",
     "level": "A1",
     "moduleId": "A1-m1",
@@ -432,25 +128,7 @@
     "status": "needs_review"
   },
   {
-    "id": "lt-a1m1-025",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-4",
-    "theme": "Família",
-    "sentenceFr": "Ma mère prépare le dîner.",
-    "audioFile": "c54dbf645b16.mp3",
-    "hintText": "Ma ______ prépare le ______.",
-    "referenceTranslations": [
-      "Minha mãe prepara o jantar.",
-      "Minha mãe está fazendo o jantar.",
-      "Minha mãe faz o jantar."
-    ],
-    "explanation": "",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-026",
+    "id": "lt-a1m1-008",
     "type": "listen_translate",
     "level": "A1",
     "moduleId": "A1-m1",
@@ -464,110 +142,6 @@
       "Tenho um irmão e uma irmã."
     ],
     "explanation": "",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-027",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-4",
-    "theme": "Família",
-    "sentenceFr": "Elle est ma sœur.",
-    "audioFile": "45706c7d4f96.mp3",
-    "hintText": "Elle est ma ______.",
-    "referenceTranslations": [
-      "Ela é minha irmã.",
-      "Ela é a minha irmã."
-    ],
-    "explanation": "",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-028",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-4",
-    "theme": "Família",
-    "sentenceFr": "Tu as des frères et sœurs ?",
-    "audioFile": "d509a5f85448.mp3",
-    "hintText": "Tu as des ______ et sœurs ?",
-    "referenceTranslations": [
-      "Você tem irmãos?",
-      "Você tem irmãos e irmãs?",
-      "Tem irmãos?"
-    ],
-    "explanation": "\"Frères et sœurs\" (irmãos e irmãs) é o jeito de dizer \"irmãos\" em geral.",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-029",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-4",
-    "theme": "Família",
-    "sentenceFr": "Il s'appelle Paul.",
-    "audioFile": "9bed9f1500d4.mp3",
-    "hintText": "Il s'______ Paul.",
-    "referenceTranslations": [
-      "Ele se chama Paul.",
-      "O nome dele é Paul."
-    ],
-    "explanation": "",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-030",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-4",
-    "theme": "Família",
-    "sentenceFr": "Le mari et la femme habitent à Paris.",
-    "audioFile": "07501c015f5f.mp3",
-    "hintText": "Le ______ et la ______ habitent à Paris.",
-    "referenceTranslations": [
-      "O marido e a esposa moram em Paris.",
-      "O marido e a mulher moram em Paris.",
-      "O marido e a esposa vivem em Paris."
-    ],
-    "explanation": "\"La femme\" pode ser \"a mulher\" ou \"a esposa\".",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-031",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-4",
-    "theme": "Família",
-    "sentenceFr": "La famille est très importante.",
-    "audioFile": "18fd568c8e9f.mp3",
-    "hintText": "La ______ est très ______.",
-    "referenceTranslations": [
-      "A família é muito importante.",
-      "A família é bem importante."
-    ],
-    "explanation": "",
-    "status": "needs_review"
-  },
-  {
-    "id": "lt-a1m1-032",
-    "type": "listen_translate",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-4",
-    "theme": "Família",
-    "sentenceFr": "Mes parents habitent à Paris.",
-    "audioFile": "b58c8acb9662.mp3",
-    "hintText": "Mes ______ habitent à ______.",
-    "referenceTranslations": [
-      "Meus pais moram em Paris.",
-      "Meus pais vivem em Paris."
-    ],
-    "explanation": "\"Les parents\" são os pais (pai e mãe), não os parentes.",
     "status": "needs_review"
   },
   {
@@ -587,30 +161,6 @@
     "type": "accent",
     "level": "A1",
     "moduleId": "A1-m1",
-    "unitId": "A1-1",
-    "theme": "Cumprimentos",
-    "targetText": "ça va",
-    "audioFile": "5f9fcdcdf60f.mp3",
-    "explanation": "\"c\" tem cedilha (ç): sem ela, soaria como /k/.",
-    "status": "needs_review"
-  },
-  {
-    "id": "accent-a1m1-003",
-    "type": "accent",
-    "level": "A1",
-    "moduleId": "A1-m1",
-    "unitId": "A1-2",
-    "theme": "Apresentação",
-    "targetText": "française",
-    "audioFile": "e7d2d8752ac2.mp3",
-    "explanation": "\"c\" tem cedilha (ç).",
-    "status": "needs_review"
-  },
-  {
-    "id": "accent-a1m1-004",
-    "type": "accent",
-    "level": "A1",
-    "moduleId": "A1-m1",
     "unitId": "A1-2",
     "theme": "Apresentação",
     "targetText": "brésilien",
@@ -619,7 +169,7 @@
     "status": "needs_review"
   },
   {
-    "id": "accent-a1m1-005",
+    "id": "accent-a1m1-003",
     "type": "accent",
     "level": "A1",
     "moduleId": "A1-m1",
@@ -631,7 +181,7 @@
     "status": "needs_review"
   },
   {
-    "id": "accent-a1m1-006",
+    "id": "accent-a1m1-004",
     "type": "accent",
     "level": "A1",
     "moduleId": "A1-m1",
@@ -643,7 +193,7 @@
     "status": "needs_review"
   },
   {
-    "id": "accent-a1m1-007",
+    "id": "accent-a1m1-005",
     "type": "accent",
     "level": "A1",
     "moduleId": "A1-m1",
@@ -655,7 +205,7 @@
     "status": "needs_review"
   },
   {
-    "id": "accent-a1m1-008",
+    "id": "accent-a1m1-006",
     "type": "accent",
     "level": "A1",
     "moduleId": "A1-m1",
@@ -667,7 +217,7 @@
     "status": "needs_review"
   },
   {
-    "id": "accent-a1m1-009",
+    "id": "accent-a1m1-007",
     "type": "accent",
     "level": "A1",
     "moduleId": "A1-m1",
@@ -679,7 +229,7 @@
     "status": "needs_review"
   },
   {
-    "id": "accent-a1m1-010",
+    "id": "accent-a1m1-008",
     "type": "accent",
     "level": "A1",
     "moduleId": "A1-m1",
@@ -691,7 +241,7 @@
     "status": "needs_review"
   },
   {
-    "id": "accent-a1m1-011",
+    "id": "accent-a1m1-009",
     "type": "accent",
     "level": "A1",
     "moduleId": "A1-m1",

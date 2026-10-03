@@ -124,6 +124,8 @@ def main():
 
     for n, s in enumerate(src["accent"], 1):
         cid = f"accent-{short}-{n:03d}"
+        if not re.search(r"[áàâãäéèêëíìîïóòôõöúùûü]", s["text"].lower()):
+            errors.append(f"{cid}: sem acento (´ ` ^ ~ ¨); 'ç' não conta como acento")
         if s["text"] in EXISTING_ACCENT:
             errors.append(f"{cid}: palavra já existe no banco ({s['text']})")
         items.append({
@@ -140,6 +142,10 @@ def main():
         item = bexpr.build_item({**s, "id": cid, "level": level})
         item.update({"moduleId": module_id, "unitId": s["unitId"], "theme": s["theme"]})
         items.append(item)
+
+    for typ, cap in (("listen_translate", 10), ("accent", 12), ("expression", 6)):
+        if sum(1 for i in items if i["type"] == typ) > cap:
+            errors.append(f"{typ}: mais de {cap} por módulo (mantenha o conjunto leve)")
 
     ids = [i["id"] for i in items]
     if len(ids) != len(set(ids)):
