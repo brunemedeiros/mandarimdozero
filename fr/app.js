@@ -8745,16 +8745,21 @@ function openDictationPlayer(id){
     playBtn.textContent = '▶️ Ouvir o ditado';
     playBtn.classList.remove('speaking');
   });
-  dictationAudioEl.addEventListener('loadedmetadata', () => {
-    timeTotalEl.textContent = formatDictationTime(dictationAudioEl.duration);
+  // Usa o próprio elemento do evento (e.target), não a variável global: ao
+  // sair do ditado, stopDictationAudio() faz pause() e zera a global, mas o
+  // navegador ainda dispara 'timeupdate' depois do pause -- ler a global
+  // aí dava "Cannot read properties of null (reading 'duration')".
+  dictationAudioEl.addEventListener('loadedmetadata', (e) => {
+    timeTotalEl.textContent = formatDictationTime(e.target.duration);
   });
-  dictationAudioEl.addEventListener('timeupdate', () => {
-    if (dictationAudioEl.duration){
-      const pct = (dictationAudioEl.currentTime / dictationAudioEl.duration) * 100;
+  dictationAudioEl.addEventListener('timeupdate', (e) => {
+    const a = e.target;
+    if (a.duration){
+      const pct = (a.currentTime / a.duration) * 100;
       progressFill.style.width = `${pct}%`;
       progressHandle.style.left = `${pct}%`;
     }
-    timeCurrentEl.textContent = formatDictationTime(dictationAudioEl.currentTime);
+    timeCurrentEl.textContent = formatDictationTime(a.currentTime);
   });
   dictationAudioEl.addEventListener('error', () => {
     showToast('Não foi possível reproduzir o áudio');

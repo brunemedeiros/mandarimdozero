@@ -65,6 +65,7 @@ async function boot(browser, port, theme){
 }
 
 
+const SENTENCE_MP3_RE = /\/audio\/dictation-.*-s\d+\.mp3/;
 (async () => {
   await new Promise(r => server.listen(0, '127.0.0.1', r));
   const port = server.address().port;
@@ -150,7 +151,10 @@ async function boot(browser, port, theme){
     check(`${tag}: um botão "ouvir frase" por frase`, r.n > 1 && r.n === r.expected && r.aria, r);
     check(`${tag}: frases com erro marcadas (classe + texto)`, r.errs > 0 && r.errs === r.flags && r.errs <= r.n, r);
     check(`${tag}: alvo de toque >= 40px`, r.h >= 40 && r.w >= 40, r);
-    // mp3 por frase ainda não existe (404): cai no speakFrench, sem erro de página.
+    // Cenário "mp3 por frase ausente": o pedido é abortado na rede, para não
+    // depender de o robô de áudio já ter gerado os mp3 por frase no repo.
+    await page.route(SENTENCE_MP3_RE, r => r.abort());
+    // mp3 por frase ausente: cai no speakFrench, sem erro de página.
     await ev(() => {
       window.__spoken = []; window.__guidedPaused = 0; window.__exPaused = 0;
       speakFrench = (t) => window.__spoken.push(t);
@@ -183,7 +187,18 @@ async function boot(browser, port, theme){
     check(`${tag}: após reabrir, 1 clique = 1 reprodução`, r === 1, r);
     await page.waitForTimeout(400);
     if (process.env.SHOT_DIR) await page.screenshot({ path: `${process.env.SHOT_DIR}/ditado-${vp.width}-${theme}.png`, fullPage: true });
-    // áudio inexistente (d3 sem mp3 no repo) desabilita o botão
+    // Cenário com mp3 por frase REAL (o que o robô gerou): toca o mp3, sem speakFrench.
+    await page.unroute(SENTENCE_MP3_RE);
+    await ev(() => { window.__spoken = []; speakFrench = (t) => window.__spoken.push(t); canSpeakFrench = () => true; dictationSentenceMissing.clear(); openDictationPlayer('d1'); });
+    await page.fill('#dictation-input', 'bonjour');
+    await ev(() => { document.getElementById('dictation-check-btn').click(); document.querySelector('.dictation-sentence-play[data-sentence="2"]').click(); });
+    await page.waitForTimeout(800);
+    r = await ev(() => ({ spoken: window.__spoken.length, missing: dictationSentenceMissing.size,
+      hasEl: !!dictationSentenceAudioEl || document.querySelector('.dictation-sentence-play[data-sentence="2"]').disabled === false }));
+    check(`${tag}: com mp3 por frase real toca o mp3 (sem speakFrench, sem marcar ausente)`, r.spoken === 0 && r.missing === 0 && r.hasEl, r);
+    // áudio inexistente desabilita o botão. Não depende de o repo ter ou não o
+    // mp3 do d3 (o robô de áudio já gerou): o pedido é abortado na rede.
+    await page.route('**/audio/dictation-d3-guided.mp3', r => r.abort());
     await ev(() => { openDictationPlayer('d3'); });
     await page.waitForFunction(() => document.getElementById('dictation-play-btn').disabled, null, { timeout: 5000 }).catch(() => {});
     r = await ev(() => document.getElementById('dictation-play-btn').disabled);
