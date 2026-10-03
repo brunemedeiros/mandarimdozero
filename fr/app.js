@@ -1147,6 +1147,7 @@ function applySerializedState(data){
   // saneados pela mesma função que atualiza (bestScore nunca diminui).
   if (data.dictations && typeof data.dictations === 'object'){
     Object.keys(data.dictations).forEach(id => {
+      if (id === '__proto__' || id === 'constructor' || id === 'prototype') return;
       const cur = STATE.dictations[id], inc = sanitizeDictationRecord(data.dictations[id]);
       STATE.dictations[id] = cur ? Object.assign({}, inc, { bestScore: Math.max(inc.bestScore, cur.bestScore || 0) }) : inc;
     });
@@ -8474,6 +8475,7 @@ function stopDictationSentenceAudio(){
     dictationSentenceAudioEl = null;
   }
   if (dictationSentenceBtn){ dictationSentenceBtn.classList.remove('speaking'); dictationSentenceBtn = null; }
+  try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch(e){}
 }
 
 function playDictationSentence(d, n, sentence, btn){
@@ -9033,6 +9035,7 @@ function dictBareWord(w){
 }
 // Devolve { kind: 'homophone'|'agreement'|'other', noteText } para uma troca
 // (token "sub"): refWord = palavra do texto, userWord = o que o aluno digitou.
+function dictBareWordRaw(w){ return String(w || '').replace(/^[^\p{L}]+/u, ''); }
 function classifyDictationError(refWord, userWord){
   const r = dictBareWord(refWord), u = dictBareWord(userWord);
   const shown = String(refWord || '').replace(/[.,!?;:…«»"()]+/g, '');
@@ -9042,8 +9045,8 @@ function classifyDictationError(refWord, userWord){
     if (g) return { kind: 'homophone', noteText: `«${shown}» (você escreveu «${typed}»): palavras que soam parecido. ${g.note}` };
     const [shorter, longer] = r.length <= u.length ? [r, u] : [u, r];
     const suffix = longer.slice(shorter.length);
-    if (shorter.length >= 3 && longer.startsWith(shorter) && ['e', 's', 'es', 'x'].includes(suffix) && /^\p{L}+$/u.test(longer)){
-      return { kind: 'agreement', noteText: `«${shown}» (você escreveu «${typed}»): a palavra é a mesma, muda só a terminação (-${suffix}). Confira a concordância com o resto da frase (gênero, número ou conjugação do verbo).` };
+    if (shorter.length >= 3 && longer.startsWith(shorter) && ['e', 's', 'es', 'x'].includes(suffix) && /^\p{L}+$/u.test(longer) && !/^\p{Lu}/u.test(dictBareWordRaw(refWord))){
+      return { kind: 'agreement', noteText: `«${shown}» (você escreveu «${typed}»): a diferença está só na terminação (-${suffix}). Se for uma palavra que concorda, confira gênero, número ou conjugação com o resto da frase; senão, pode ser só um deslize de digitação.` };
     }
   }
   return { kind: 'other', noteText: `«${shown}»: palavra diferente da esperada (você escreveu «${typed}»).` };
