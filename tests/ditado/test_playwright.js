@@ -136,6 +136,51 @@ async function boot(browser, port, theme){
     await ev(() => document.getElementById('dictation-check-btn').click());
     const inView = await ev(() => { const b = document.querySelector('.dictation-result').getBoundingClientRect(); return b.top < innerHeight; });
     check(`${tag}: resultado entra na tela depois de verificar`, inView);
+    // Fatia 3: áudio por frase
+    r = await ev(() => {
+      const d = DICTATIONS.find(x => x.id === 'd1');
+      const btns = [...document.querySelectorAll('.dictation-sentence-play')];
+      const b = btns[0] && btns[0].getBoundingClientRect();
+      return { n: btns.length, expected: splitDictationSentences(d.text).length,
+               aria: btns.every(x => /Ouvir a frase \d+/.test(x.getAttribute('aria-label') || '')),
+               errs: document.querySelectorAll('.dictation-sentence.has-error').length,
+               flags: document.querySelectorAll('.dictation-sentence-flag').length,
+               h: b ? b.height : 0, w: b ? b.width : 0 };
+    });
+    check(`${tag}: um botão "ouvir frase" por frase`, r.n > 1 && r.n === r.expected && r.aria, r);
+    check(`${tag}: frases com erro marcadas (classe + texto)`, r.errs > 0 && r.errs === r.flags && r.errs <= r.n, r);
+    check(`${tag}: alvo de toque >= 40px`, r.h >= 40 && r.w >= 40, r);
+    // mp3 por frase ainda não existe (404): cai no speakFrench, sem erro de página.
+    await ev(() => {
+      window.__spoken = []; window.__guidedPaused = 0; window.__exPaused = 0;
+      speakFrench = (t) => window.__spoken.push(t);
+      canSpeakFrench = () => true;
+      const g = dictationAudioEl; const op = g.pause.bind(g); g.pause = () => { window.__guidedPaused++; op(); };
+      exerciseAudioEl = { pause(){ window.__exPaused++; }, currentTime: 0 };
+      document.querySelector('.dictation-sentence-play[data-sentence="2"]').click();
+    });
+    await page.waitForFunction(() => window.__spoken.length > 0, null, { timeout: 5000 }).catch(() => {});
+    r = await ev(() => ({ spoken: window.__spoken, guided: window.__guidedPaused, ex: window.__exPaused,
+      expected: splitDictationSentences(DICTATIONS.find(x => x.id === 'd1').text)[1] }));
+    check(`${tag}: mp3 da frase ausente cai no speakFrench com a frase certa`, r.spoken.length === 1 && r.spoken[0] === r.expected, r);
+    check(`${tag}: tocar a frase para o áudio guiado e outros áudios`, r.guided >= 1 && r.ex >= 1, r);
+    // 2º clique: já sabe que o mp3 falta, vai direto ao fallback (1 chamada por clique)
+    await ev(() => document.querySelector('.dictation-sentence-play[data-sentence="2"]').click());
+    r = await ev(() => window.__spoken.length);
+    check(`${tag}: 2º clique = 1 nova chamada (sem listeners duplicados)`, r === 2, r);
+    // sem voz nem mp3: botão desabilitado com aviso, sem quebrar
+    await ev(() => { canSpeakFrench = () => false; document.querySelector('.dictation-sentence-play[data-sentence="1"]').click(); });
+    await page.waitForFunction(() => document.querySelector('.dictation-sentence-play[data-sentence="1"]').disabled, null, { timeout: 5000 }).catch(() => {});
+    r = await ev(() => { const b = document.querySelector('.dictation-sentence-play[data-sentence="1"]'); return { dis: b.disabled, aria: b.getAttribute('aria-label') }; });
+    check(`${tag}: sem voz nem mp3 o botão fica desabilitado com aviso`, r.dis && /indisponível/.test(r.aria), r);
+    // reabrir o player e corrigir de novo não acumula listeners
+    await ev(() => { canSpeakFrench = () => true; window.__spoken = []; openDictationPlayer('d1'); });
+    await page.fill('#dictation-input', 'bonjour');
+    await ev(() => { document.getElementById('dictation-check-btn').click(); document.querySelector('.dictation-sentence-play[data-sentence="3"]').click(); });
+    await page.waitForFunction(() => window.__spoken.length > 0, null, { timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(200);
+    r = await ev(() => window.__spoken.length);
+    check(`${tag}: após reabrir, 1 clique = 1 reprodução`, r === 1, r);
     await page.waitForTimeout(400);
     if (process.env.SHOT_DIR) await page.screenshot({ path: `${process.env.SHOT_DIR}/ditado-${vp.width}-${theme}.png`, fullPage: true });
     // áudio inexistente (d3 sem mp3 no repo) desabilita o botão

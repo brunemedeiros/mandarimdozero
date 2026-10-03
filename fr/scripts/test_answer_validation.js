@@ -42,9 +42,9 @@ const { normalizeLoose, acceptedForms } = runBlockAndExport(
   extractBlock('// BEGIN accent-answer-logic', '// END accent-answer-logic'),
   ['normalizeLoose', 'acceptedForms']
 );
-const { normalizeDictationWord, evaluateDictation, frenchNumberWords, classifyDictationError, updateDictationRecord, sanitizeDictationRecord, dictationWrongWords } = runBlockAndExport(
+const { normalizeDictationWord, evaluateDictation, frenchNumberWords, classifyDictationError, updateDictationRecord, sanitizeDictationRecord, dictationWrongWords, splitDictationSentences, dictationSentenceErrorFlags } = runBlockAndExport(
   extractBlock('// BEGIN dictation-answer-logic', '// END dictation-answer-logic'),
-  ['normalizeDictationWord', 'evaluateDictation', 'frenchNumberWords', 'classifyDictationError', 'updateDictationRecord', 'sanitizeDictationRecord', 'dictationWrongWords']
+  ['normalizeDictationWord', 'evaluateDictation', 'frenchNumberWords', 'classifyDictationError', 'updateDictationRecord', 'sanitizeDictationRecord', 'dictationWrongWords', 'splitDictationSentences', 'dictationSentenceErrorFlags']
 );
 const { isAccentAnswerCorrect } = runBlockAndExport(
   extractBlock('// BEGIN accent-challenge-logic', '// END accent-challenge-logic'),
@@ -158,6 +158,49 @@ check('registro malformado é saneado', (r => r.bestScore === 0 && r.attempts ==
 check('update sobre registro malformado não gera NaN', updateDictationRecord({ bestScore: NaN, attempts: 'a' }, ev70, 0).attempts, 1);
 check('wrongWords deduplicado (sem diferenciar maiúscula)', dictationWrongWords(evaluateDictation('Le chat et le chat.', 'x x x x x')).filter(w => w.toLowerCase() === 'chat').length, 1);
 check('wrongWords limitado a 30', dictationWrongWords(evaluateDictation(Array.from({ length: 50 }, (_, i) => 'mot' + i).join(' '), 'zzz')).length, 30);
+
+console.log('\n=== Ditado (Fatia 3) -- divisão em frases igual ao Python (dictation_sentences.py) ===\n');
+const J = x => JSON.stringify(x);
+check('split: simples', J(splitDictationSentences('Bonjour ! Comment ça va ?')), J(['Bonjour !', 'Comment ça va ?']));
+check('split: M. não encerra', J(splitDictationSentences('M. Dupont habite à Lyon. Il rit.')), J(['M. Dupont habite à Lyon.', 'Il rit.']));
+check('split: Mme e inicial J.', J(splitDictationSentences('Mme Martin et J. Dupont parlent.')), J(['Mme Martin et J. Dupont parlent.']));
+check('split: reticências', J(splitDictationSentences('Alors... je pars. Salut')), J(['Alors...', 'je pars.', 'Salut']));
+check('split: reticência unicode', J(splitDictationSentences('Alors… je pars.')), J(['Alors…', 'je pars.']));
+check('split: aspas fechando anexadas', J(splitDictationSentences('Il dit : « Oui. » Puis il part.')), J(['Il dit : « Oui. »', 'Puis il part.']));
+check('split: número decimal', J(splitDictationSentences('Il a 3.5 euros. Merci')), J(['Il a 3.5 euros.', 'Merci']));
+check('split: vazio', J(splitDictationSentences('   ')), J([]));
+{
+  const flags = dictationSentenceErrorFlags('Bonjour ! Je suis Paul. Il rit.', evaluateDictation('Bonjour ! Je suis Paul. Il rit.', 'Bonjour ! Je sui Paul. Il rit.'));
+  check('flags: só a frase com erro é marcada', J(flags), J([false, true, false]));
+  const ok = dictationSentenceErrorFlags('Bonjour ! Il rit.', evaluateDictation('Bonjour ! Il rit.', 'Bonjour ! Il rit.'));
+  check('flags: sem erro, nenhuma marcada', J(ok), J([false, false]));
+  const miss = dictationSentenceErrorFlags('Bonjour ! Il rit.', evaluateDictation('Bonjour ! Il rit.', 'Bonjour !'));
+  check('flags: palavras faltando na 2ª frase', J(miss), J([false, true]));
+}
+{
+  // Todos os ditados reais: mesma divisão que o Python.
+  const dsSrc = fs.readFileSync(path.join(__dirname, '..', 'dictations.js'), 'utf8');
+  const box = {}; vm.createContext(box);
+  vm.runInContext(dsSrc + '\n;this.__d = DICTATIONS;', box);
+  const ds = box.__d.map(d => ({ id: d.id, text: d.text }));
+  const jsSplit = Object.fromEntries(ds.map(d => [d.id, splitDictationSentences(d.text)]));
+  const jsTotal = Object.values(jsSplit).reduce((a, s) => a + s.length, 0);
+  let py = null;
+  try {
+    const { execFileSync } = require('child_process');
+    py = JSON.parse(execFileSync('python3', ['-c',
+      'import json,sys; sys.path.insert(0, sys.argv[1]); from dictation_sentences import split_sentences; ' +
+      'd = json.loads(sys.stdin.read()); print(json.dumps({x["id"]: split_sentences(x["text"]) for x in d}))',
+      __dirname], { input: JSON.stringify(ds), encoding: 'utf8' }));
+  } catch (e){ console.log('  (python3 indisponível -- comparação com o Python pulada)'); }
+  if (py){
+    const pyTotal = Object.values(py).reduce((a, s) => a + s.length, 0);
+    check(`ditados reais: total de frases JS (${jsTotal}) = Python (${pyTotal})`, jsTotal, pyTotal);
+    const diffIds = ds.filter(d => J(jsSplit[d.id]) !== J(py[d.id])).map(d => d.id);
+    check('ditados reais: frases idênticas JS x Python em todos os ditados', J(diffIds), J([]));
+  }
+  check('ditados reais: total de frases = 95', jsTotal, 95);
+}
 
 console.log('\n=== Desafio "Acentuação\" -- deve continuar EXIGINDO acento correto (isAccentAnswerCorrect nunca removeu diacrítico) ===\n');
 check('"étudiant" vs "etudiant" (sem acento) → incorreto (é literalmente o que o desafio testa)', isAccentAnswerCorrect('etudiant', 'étudiant'), false);

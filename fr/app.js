@@ -8458,7 +8458,67 @@ function dictationAudioPath(d){
 // Áudio do ditado em reprodução no momento (só um por vez).
 let dictationAudioEl = null;
 
+// ---- Fatia 3: áudio por frase (tela de resultado) ----
+// mp3 por frase gerado pelo workflow "ditados-frases"; enquanto não existir
+// (ou se der 404), cai para speakFrench (voz do navegador / manifest).
+function dictationSentenceAudioPath(d, n){
+  return `audio/dictation-${d.id}-s${n}.mp3`;
+}
+let dictationSentenceAudioEl = null;
+let dictationSentenceBtn = null;
+const dictationSentenceMissing = new Set(); // caminhos que já deram erro nesta sessão
+
+function stopDictationSentenceAudio(){
+  if (dictationSentenceAudioEl){
+    dictationSentenceAudioEl.pause();
+    dictationSentenceAudioEl = null;
+  }
+  if (dictationSentenceBtn){ dictationSentenceBtn.classList.remove('speaking'); dictationSentenceBtn = null; }
+}
+
+function playDictationSentence(d, n, sentence, btn){
+  // Para o áudio guiado (sem desmontar o player, que continua na tela),
+  // outros áudios de exercício/voz do navegador e a frase anterior.
+  if (dictationAudioEl) dictationAudioEl.pause();
+  stopExerciseAudio();
+  stopDictationSentenceAudio();
+
+  const fallback = () => {
+    if (canSpeakFrench(sentence)){
+      speakFrench(sentence, btn);
+      return;
+    }
+    btn.disabled = true;
+    btn.classList.remove('speaking');
+    btn.textContent = '🔇 sem áudio';
+    btn.setAttribute('aria-label', `Áudio da frase ${n} indisponível neste dispositivo`);
+    btn.title = 'Áudio indisponível neste dispositivo';
+  };
+  const path = dictationSentenceAudioPath(d, n);
+  if (dictationSentenceMissing.has(path)) return fallback();
+
+  const audio = new Audio(path);
+  dictationSentenceAudioEl = audio;
+  dictationSentenceBtn = btn;
+  btn.classList.add('speaking');
+  let failedOnce = false;
+  const fail = () => {
+    if (failedOnce || dictationSentenceAudioEl !== audio) return;
+    failedOnce = true;
+    dictationSentenceMissing.add(path);
+    dictationSentenceAudioEl = null;
+    dictationSentenceBtn = null;
+    btn.classList.remove('speaking');
+    if (btn.isConnected) fallback();
+  };
+  const done = () => { if (dictationSentenceAudioEl === audio){ btn.classList.remove('speaking'); dictationSentenceAudioEl = null; dictationSentenceBtn = null; } };
+  audio.addEventListener('error', fail);
+  audio.addEventListener('ended', done);
+  audio.play().catch(err => { if (err && err.name === 'NotAllowedError') done(); else fail(); });
+}
+
 function stopDictationAudio(){
+  stopDictationSentenceAudio();
   if (dictationAudioEl){
     dictationAudioEl.pause();
     dictationAudioEl = null;
@@ -8598,6 +8658,7 @@ function openDictationPlayer(id){
 
   playBtn.addEventListener('click', () => {
     if (dictationAudioEl.paused){
+      stopDictationSentenceAudio();
       dictationAudioEl.play().catch(() => showToast('Não foi possível reproduzir o áudio'));
     } else {
       dictationAudioEl.pause();
@@ -8706,6 +8767,7 @@ function openDictationPlayer(id){
   });
 
   document.getElementById('dictation-retry-btn').addEventListener('click', () => {
+    stopDictationSentenceAudio();
     document.getElementById('dictation-input').value = '';
     document.getElementById('dictation-result-wrap').innerHTML = '';
     document.getElementById('dictation-retry-btn').style.display = 'none';
@@ -9034,6 +9096,60 @@ function updateDictationRecord(prev, evaluation, now){
     wrongWords: dictationWrongWords(evaluation)
   };
 }
+
+// ---- Fatia 3: divisão em frases (áudio por frase) ----
+// MESMA regra de fr/scripts/dictation_sentences.py (o gerador dos mp3
+// audio/dictation-<id>-s<N>.mp3). Se mudar uma, mude a outra: o N do mp3 é a
+// posição da frase nesta lista (começa em 1).
+const DICT_SENT_END_RE = /[.!?…]+["'»”)\]]*$/;
+const DICT_SENT_CLOSERS_RE = /["'»”)\]]+$/;
+const DICT_SENT_ONLY_CLOSERS_RE = /^["'»”)\]]+$/;
+const DICT_SENT_INITIAL_RE = /^[A-Z]\.$/;
+const DICT_SENT_ABBREVIATIONS = new Set(['M.', 'Mme.', 'Mmes.', 'Mlle.', 'Mlles.', 'Dr.', 'Pr.', 'St.', 'Ste.', 'etc.', 'p.', 'n°.']);
+function dictIsAbbreviation(token){
+  const core = token.replace(DICT_SENT_CLOSERS_RE, '');
+  return DICT_SENT_ABBREVIATIONS.has(core) || DICT_SENT_INITIAL_RE.test(core);
+}
+function splitDictationSentences(text){
+  const sentences = [];
+  let current = [];
+  for (const tok of String(text || '').split(/\s+/)){
+    if (!tok) continue;
+    if (!current.length && sentences.length && DICT_SENT_ONLY_CLOSERS_RE.test(tok)){
+      sentences[sentences.length - 1] += ' ' + tok;
+      continue;
+    }
+    current.push(tok);
+    if (DICT_SENT_END_RE.test(tok) && !dictIsAbbreviation(tok)){
+      sentences.push(current.join(' '));
+      current = [];
+    }
+  }
+  if (current.length) sentences.push(current.join(' '));
+  return sentences.filter(s => s.trim());
+}
+// Para cada frase do texto, true se o aluno errou alguma palavra dela
+// (troca, palavra faltando, erro leve) ou digitou palavra a mais ali.
+// Só explicativo: NÃO muda a nota.
+function dictationSentenceErrorFlags(refText, evaluation){
+  const sentences = splitDictationSentences(refText);
+  const sentenceOfWord = [];
+  sentences.forEach((s, si) => {
+    const n = tokenizeDictationText(s).words.length;
+    for (let k = 0; k < n; k++) sentenceOfWord.push(si);
+  });
+  const flags = sentences.map(() => false);
+  if (!sentences.length) return flags;
+  const at = c => sentenceOfWord[Math.max(0, Math.min(c, sentenceOfWord.length - 1))];
+  let c = 0;
+  for (const x of (evaluation && evaluation.merged) || []){
+    if (x.type === 'extra'){ const s = at(c - 1); if (s !== undefined) flags[s] = true; continue; }
+    const s = sentenceOfWord[c];
+    if (s !== undefined && (x.type === 'miss' || x.type === 'sub' || (x.type === 'match' && x.light))) flags[s] = true;
+    c++;
+  }
+  return flags;
+}
 // END dictation-answer-logic
 
 function dictationScoreColorVar(score){
@@ -9100,6 +9216,23 @@ function renderDictationResult(d, userText){
     : '';
   const hit = ev.exact + ev.light;
 
+  // Fatia 3: o texto certo frase por frase, cada uma com seu áudio; as frases
+  // em que o aluno errou ficam marcadas (texto + borda, não só cor).
+  stopDictationSentenceAudio();
+  const sentences = splitDictationSentences(d.text);
+  const sentenceFlags = dictationSentenceErrorFlags(d.text, ev);
+  const sentencesHtml = sentences.length ? `
+      <div class="dictation-sentences">
+        <p class="dictation-sentences-title"><strong>Ouça frase por frase</strong>${sentenceFlags.some(Boolean) ? ' · as marcadas com ⚠ têm erro seu' : ''}</p>
+        <ol class="dictation-sentence-list">
+          ${sentences.map((s, i) => `
+          <li class="dictation-sentence${sentenceFlags[i] ? ' has-error' : ''}">
+            <button type="button" class="dictation-sentence-play" data-sentence="${i + 1}" aria-label="Ouvir a frase ${i + 1}${sentenceFlags[i] ? ' (você errou nesta frase)' : ''}">▶ ouvir frase</button>
+            <span class="dictation-sentence-text">${sentenceFlags[i] ? '<span class="dictation-sentence-flag">⚠ você errou aqui:</span> ' : ''}${escapeHtmlDictation(s)}</span>
+          </li>`).join('')}
+        </ol>
+      </div>` : '';
+
   const wrap = document.getElementById('dictation-result-wrap');
   wrap.innerHTML = `
     <div class="dictation-result" tabindex="-1">
@@ -9111,8 +9244,15 @@ function renderDictationResult(d, userText){
       <p class="dictation-record-line">Melhor nota: <strong>${rec.bestScore}</strong> · ${rec.attempts} ${rec.attempts === 1 ? 'tentativa' : 'tentativas'}</p>
       ${notesHtml}
       ${rec.wrongWords.length ? `<p class="dictation-review-words"><strong>Palavras para revisar:</strong> ${rec.wrongWords.map(escapeHtmlDictation).join(', ')}</p>` : ''}
+      ${sentencesHtml}
     </div>
   `;
+  wrap.querySelectorAll('.dictation-sentence-play').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const n = parseInt(btn.dataset.sentence, 10);
+      playDictationSentence(d, n, sentences[n - 1], btn);
+    });
+  });
 
   document.getElementById('dictation-check-btn').style.display = 'none';
   document.getElementById('dictation-retry-btn').style.display = 'inline-flex';
