@@ -17368,3 +17368,37 @@ confirmação da autora, sem push/PR/deploy como parte da aplicação.
 - Conferido ao vivo depois da rodada aprovada: 0 Notes, 0 Decks pessoais, 0 Decks públicos, 0 objetos em `flashcard-media`. Nenhum resíduo.
 - Achado de baixo risco, NÃO corrigido: o conteúdo público do Deck (`get_public_deck_notes`) ainda inclui `storagePath` em `image` (o `public_note_native` só remove de `audio`). A cópia já remove dos dois. O caminho só repete o que a própria URL pública já mostra (a pasta do autor), mas por coerência deveria sair também de `image`.
 - Produção não tocada. Pendentes: P8.2b, o achado acima, H/J/K e os 4 achados de baixo risco já registrados.
+
+## Checkpoint final P8 -- auditoria de fechamento do Public Deck (2026-10-03, só leitura)
+
+Checkpoint pedido pela autora: só documentação. Nenhuma migration, nenhuma mudança de banco, nenhum push/PR.
+
+**1. Homologado no Staging (`ilfjzizjfcmhibkhwber`)**
+- Segurança: 065 (paridade de GRANTs, 252/252) e 063/066 (`plan_tier`/`role` protegidos; 5/5 tentativas com login real bloqueadas).
+- D1 (067): cópia de 2000 Notes em 4,6 s; 2001 é recusado (`deck_too_large`) sem criar nada.
+- D2 (068): cópia de 2000 Notes com áudio em 4,6–4,7 s (antes era cancelada no limite de 8 s).
+- 069 (`20261003124403`): `duplicates_changed` com SQLSTATE PT409, validada pela rodada real.
+- P8.1 16/16, P8.2 13/13 (mesmo copiador em duas sessões = escopo do advisory lock), P8.5 44/44, limpeza 16/16 (RUN `p82610031328034369`). Depois: 0 Notes, 0 Decks, 0 objetos.
+- Também passaram em SQL real no Staging: cenários A–M de duplicatas (H/J parciais, K não testado), P8.3, P8.4 e P8.6.
+
+**2. Pendências explícitas (não bloqueiam a produção)**
+- **P8.2b** (duas contas Premium DISTINTAS copiando em paralelo): não executado; só rodar se surgir motivo concreto (exige uma 2ª conta Premium).
+- **Hardening pós-P8** (futura migration 070, NÃO aberta): tirar `storagePath` de `image` em `get_public_deck_notes`/`public_note_native` (hoje só sai de `audio`; a cópia já remove dos dois), junto com os 4 achados de baixo risco da 062:
+  - host não ancorado na regex de caminho de mídia -> corrigir;
+  - manifest sem teto -> custo já linear desde a 068 e teto de 2000 mídias já existe; aceitar ou incluir;
+  - mensagem de erro sem `cls` -> cosmético;
+  - comentário de rollback desatualizado -> documentação.
+- **H/J/K**: duplicatas entre Clozes, Type Answer x Type Answer, Teacher/Course na coleção do copiador -- parciais ou sem teste; decidir se testa antes da produção.
+
+**3. Staging x Produção (conferido via `list_migrations` em 2026-10-03)**
+- Staging: 001–069 aplicadas.
+- Produção (`eigjocalzwamisgqilhg`): última = `fix_teacher_metrics_card_selection` (058, 2026-10-01). **059–069 existem SÓ no Staging** (11 migrations: 059 teacher_metrics_note_level, 060 identity_generated_username_and_attribution_tag, 061 public_decks, 062 public_deck_duplicates, 063 profiles_protect_plan_tier_role, 064 version_progress_table, 065 grant_table_privileges_parity, 066 profiles_protect_plan_role_insert, 067, 068, 069).
+- O histórico da produção tem versões e nomes diferentes dos do Staging (ex.: `protect_teacher_decks_delete_definer` separada) -> aplicar uma a uma via MCP, em ordem numérica, nunca `db push` cego, e só com autorização explícita da autora naquela etapa.
+- Antes de aplicar, conferir o `statement_timeout` do papel `authenticated` na produção (no Staging é 8 s, e os tempos acima valem para esse limite).
+
+**4. Trabalho paralelo (outras conversas) -- considerar antes de PR/merge/produção**
+- Esta branch (`claude/fervent-noether-9f1ya7`) está 63 commits à frente do `main` e 8 atrás. Desde o último merge dela (#277), o `main` recebeu #278–#281 (páginas /contrato, Desafios do Módulo Premium, áudios TTS e Ditados do A1), que tocam `fr/app.js`, `fr/index.html` e o fim deste CLAUDE.md. Há também uma branch paralela ativa, `claude/friendly-hamilton-u4ssl2` (Ditados). Nenhum PR aberto no momento.
+- **Risco de ordem, NÃO ignorar**: esta branch tem código de cliente (Public Deck, Tags, Decks, FSRS/Review K1, `shared/*.js`, `fr/zh app.js`/`index.html`) que depende de 059–069. O `main` é publicado automaticamente (GitHub Pages). Mergear esta branch no `main` ANTES de aplicar 059–069 na produção quebraria o app em produção. Ordem: (1) aplicar as migrations na produção com autorização; (2) depois merge/deploy do cliente -- ou manter as features novas desligadas até lá.
+- Ao trazer o `main` para esta branch (ou abrir PR), haverá conflito no fim do CLAUDE.md (as duas pontas acrescentaram seções no final): resolver mantendo os dois blocos, nunca descartar. Em `fr/app.js`/`fr/index.html`, resolver preservando o trabalho de Desafios/Ditados das outras conversas.
+
+**5. Próximo bloco (decisão da autora)**: (a) rollout 059–069 na produção, uma por uma, com autorização; (b) decidir sobre H/J/K antes ou junto; (c) depois, hardening 070 e, se houver motivo, P8.2b.
