@@ -1,8 +1,11 @@
-// Desafios do Módulo (Premium) -- Playwright (Chromium real), só fr (o zh não
-// tem Desafios). Supabase do CDN trocado por um stub em memória; a tabela
-// `challenges` devolve o lote real (fr/scripts/challenges_import/lote-a1-m1.json)
-// + 3 desafios "antigos" sem moduleId. Free = convidado; Premium = PROFILE_CACHE.
-// Rodar: node tests/desafios-modulo/test_playwright.js
+// Ditados (fr) -- Playwright (Chromium real). Fatia 1: campo de digitar e
+// correção. Fatia 2: progresso por ditado (STATE.dictations, melhor nota,
+// tentativas, palavras para revisar) e explicação do tipo de erro.
+// Supabase do CDN trocado por um stub em memória; boot em modo convidado
+// (saveState() não grava nada pra convidado, então a "recarga" é simulada
+// com serializeState() -> JSON -> applySerializedState(), o mesmo caminho do
+// save/load real).
+// Rodar: node tests/ditado/test_playwright.js  (NODE_PATH e CHROMIUM_PATH opcionais)
 const { chromium } = require(require.resolve('playwright', { paths: [process.env.NODE_PATH || '/opt/node22/lib/node_modules'] }));
 const http = require('http'), fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -85,7 +88,7 @@ async function boot(browser, port, theme){
     r = await ev(() => { const p = document.querySelector('.fr-accent-picker'); return { sw: p.scrollWidth, cw: p.clientWidth }; });
     check(`${tag}: seletor de acentos sem rolagem horizontal`, r.sw <= r.cw + 1, r);
     // digita com vários desvios
-    await page.fill('#dictation-input', "bonjour a tous ! Je m'appelle Sophie. J'ai 25 ans et je suis francaise virgule J'habite a Lyon. Et vous comment vous appelez vous");
+    await page.fill('#dictation-input', "bonjour a tous ! Je m'appelle Sophie. J'ai 25 ans est je suis francaise virgule J'habite a Lyon. Et vous comment vous appelez vous");
     await ev(() => document.getElementById('dictation-check-btn').click());
     r = await ev(() => ({
       near: document.querySelectorAll('.dictation-word-near').length,
@@ -98,10 +101,43 @@ async function boot(browser, port, theme){
     check(`${tag}: "virgule" por extenso é avisado`, r.notes.some(n => n.includes('virgule')), r.notes);
     check(`${tag}: pontuação faltando é marcada`, r.missing > 0 && r.notes.some(n => n.startsWith('Pontuação')), r);
     check(`${tag}: nota entre 0 e 100`, r.score > 0 && r.score < 100, r);
+    // Fatia 2: explicação do tipo de erro (et/est = homófono)
+    check(`${tag}: troca et/est explicada como homófono`, r.notes.some(n => n.includes('soam parecido') && n.includes('verbo être')), r.notes);
+    r = await ev(() => ({
+      rec: STATE.dictations.d1,
+      line: (document.querySelector('.dictation-record-line') || {}).textContent || '',
+      review: (document.querySelector('.dictation-review-words') || {}).textContent || '',
+    }));
+    check(`${tag}: tentativa gravada em STATE.dictations`, r.rec && r.rec.attempts === 1 && r.rec.bestScore > 0 && r.rec.lastScore === r.rec.bestScore && typeof r.rec.lastAt === 'string', r.rec);
+    check(`${tag}: resultado mostra "Melhor nota"`, r.line.includes('Melhor nota') && r.line.includes(String(r.rec.bestScore)), r.line);
+    check(`${tag}: resultado mostra "Palavras para revisar"`, r.review.includes('Palavras para revisar') && r.rec.wrongWords.length > 0 && r.review.includes('et'), r.review);
+    const best1 = r.rec.bestScore;
+    // 2ª tentativa pior: bestScore não cai
+    await ev(() => document.getElementById('dictation-retry-btn').click());
+    await page.fill('#dictation-input', 'bonjour');
+    await ev(() => document.getElementById('dictation-check-btn').click());
+    r = await ev(() => STATE.dictations.d1);
+    check(`${tag}: 2ª tentativa pior não reduz a melhor nota`, r.attempts === 2 && r.bestScore === best1 && r.lastScore < best1, r);
+    // "recarga": serializa, zera e restaura (mesmo caminho do save/load)
+    r = await ev(() => {
+      const saved = JSON.parse(JSON.stringify(serializeState()));
+      STATE.dictations = {};
+      applySerializedState(saved);
+      let oldOk = true;
+      try { applySerializedState({ xp: STATE.xp }); } catch (e){ oldOk = false; } // save antigo sem o campo
+      return { rec: STATE.dictations.d1, oldOk };
+    });
+    check(`${tag}: progresso do ditado sobrevive à recarga`, r.rec && r.rec.attempts === 2 && r.rec.bestScore === best1, r);
+    check(`${tag}: save antigo sem "dictations" não quebra nem apaga`, r.oldOk && r.rec.attempts === 2, r);
+    r = await ev(() => { renderDictationList(); const c = document.querySelector('.dictation-card[data-dict-id="d1"] .dictation-card-progress'); const o = document.querySelector('.dictation-card[data-dict-id="d2"] .dictation-card-progress'); return { t: c && c.textContent, other: !!o }; });
+    check(`${tag}: lista mostra melhor nota e tentativas`, r.t && r.t.includes('Melhor nota: ' + best1) && r.t.includes('2 tentativas') && !r.other, r);
+    await ev(() => openDictationPlayer('d1'));
+    await page.fill('#dictation-input', "bonjour a tous ! Je m'appelle Sophie. J'ai 25 ans est je suis francaise virgule J'habite a Lyon. Et vous comment vous appelez vous");
+    await ev(() => document.getElementById('dictation-check-btn').click());
     const inView = await ev(() => { const b = document.querySelector('.dictation-result').getBoundingClientRect(); return b.top < innerHeight; });
     check(`${tag}: resultado entra na tela depois de verificar`, inView);
     await page.waitForTimeout(400);
-    await page.screenshot({ path: process.env.SHOT_DIR ? `${process.env.SHOT_DIR}/ditado-${vp.width}-${theme}.png` : '/dev/null', fullPage: true });
+    if (process.env.SHOT_DIR) await page.screenshot({ path: `${process.env.SHOT_DIR}/ditado-${vp.width}-${theme}.png`, fullPage: true });
     // áudio inexistente (d3 sem mp3 no repo) desabilita o botão
     await ev(() => { openDictationPlayer('d3'); });
     await page.waitForFunction(() => document.getElementById('dictation-play-btn').disabled, null, { timeout: 5000 }).catch(() => {});

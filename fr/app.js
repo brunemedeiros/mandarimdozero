@@ -902,7 +902,10 @@ const STATE = {
     grammarLessons: 0, conjugationSessions: 0, conjugationCorrect: 0,
     conjugationTenses: [], reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0
   },
-  completedChallenges: {} // challengeId -> true -- "Desafios" concluídos, ver challenges_do_aluno
+  completedChallenges: {}, // challengeId -> true -- "Desafios" concluídos, ver challenges_do_aluno
+  // Ditados (Fatia 2): dictationId -> { bestScore, attempts, lastScore, lastAt, wrongWords }.
+  // Atualizado só por updateDictationRecord() (bloco dictation-answer-logic).
+  dictations: {}
 };
 
 // Cada nível é acessível livremente (o aluno escolhe o nível quando quiser);
@@ -1088,6 +1091,7 @@ function serializeState(){
     checkpointProgress: STATE.checkpointProgress,
     levelTestProgress: STATE.levelTestProgress,
     completedChallenges: STATE.completedChallenges,
+    dictations: STATE.dictations,
     // Só leitura pro Perfil (ver computeProgressSummary) -- nunca restaurado
     // de volta em applySerializedState, é recalculado a cada save.
     progressSummary: computeProgressSummary()
@@ -1139,6 +1143,14 @@ function applySerializedState(data){
   if (data.checkpointProgress) Object.assign(STATE.checkpointProgress, data.checkpointProgress);
   if (data.levelTestProgress) Object.assign(STATE.levelTestProgress, data.levelTestProgress);
   if (data.completedChallenges) Object.assign(STATE.completedChallenges, data.completedChallenges);
+  // Save antigo não tem o campo (nada a fazer); registros malformados são
+  // saneados pela mesma função que atualiza (bestScore nunca diminui).
+  if (data.dictations && typeof data.dictations === 'object'){
+    Object.keys(data.dictations).forEach(id => {
+      const cur = STATE.dictations[id], inc = sanitizeDictationRecord(data.dictations[id]);
+      STATE.dictations[id] = cur ? Object.assign({}, inc, { bestScore: Math.max(inc.bestScore, cur.bestScore || 0) }) : inc;
+    });
+  }
 }
 
 // registerExerciseCorrect, cardsDueNow, newCards, XP_PER_GRADE, todayStr e
@@ -8469,6 +8481,13 @@ function escapeHtmlDictation(str){
   return str.replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
 }
 
+// Linha discreta no card: melhor nota e nº de tentativas (só se já tentou).
+function dictationCardProgressHTML(id){
+  const rec = STATE.dictations && STATE.dictations[id];
+  if (!rec || !rec.attempts) return '';
+  return `<div class="dictation-card-progress">Melhor nota: ${rec.bestScore} · ${rec.attempts} ${rec.attempts === 1 ? 'tentativa' : 'tentativas'}</div>`;
+}
+
 function renderDictationList(){
   stopDictationAudio();
   document.getElementById('dictation-list-wrap').style.display = 'block';
@@ -8484,6 +8503,7 @@ function renderDictationList(){
       <div class="dictation-card-level">${d.level}</div>
       <div class="dictation-card-task">${escapeHtmlDictation(d.task)}</div>
       <div class="dictation-card-module">${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</div>
+      ${dictationCardProgressHTML(d.id)}
       ${tierBadgeHTML(dictationTier(d))}
     </button>
   `).join('');
@@ -8928,6 +8948,92 @@ function evaluateDictation(refText, userText){
   return { merged, total, exact, light, extras, missingMarks, score,
            spokenPunct: prep.spokenPunct, digitNotes: prep.digitNotes };
 }
+
+// ---- Fatia 2: explicar o tipo de erro (só explicativo, NÃO muda a nota) ----
+// Conservador de propósito: só nomeia o erro quando há alta confiança.
+// Homófonos clássicos do francês (soam igual ou quase, escrita diferente).
+const DICT_HOMOPHONE_GROUPS = [
+  { words: ['a', 'à'], note: '«a» é o verbo avoir (il a); «à» é preposição (à Paris).' },
+  { words: ['et', 'est'], note: '«et» quer dizer "e"; «est» é o verbo être (il est).' },
+  { words: ['son', 'sont'], note: '«son» quer dizer "seu/sua"; «sont» é o verbo être (ils sont).' },
+  { words: ['ou', 'où'], note: '«ou» quer dizer "ou"; «où» quer dizer "onde".' },
+  { words: ['on', 'ont'], note: '«on» é pronome ("a gente"); «ont» é o verbo avoir (ils ont).' },
+  { words: ['la', 'là'], note: '«la» é artigo ou pronome; «là» quer dizer "lá/aí".' },
+  { words: ['ce', 'se'], note: '«ce» é demonstrativo ("isto/este"); «se» é pronome reflexivo (il se lève).' },
+  { words: ['ces', 'ses', "c'est", "s'est"], note: '«ces» = "estes/estas"; «ses» = "seus/suas"; «c\'est» = "é/isto é"; «s\'est» = pronome + être (il s\'est levé).' },
+  { words: ['mes', 'mais'], note: '«mes» quer dizer "meus/minhas"; «mais» quer dizer "mas".' },
+  { words: ['peu', 'peux', 'peut'], note: '«peu» quer dizer "pouco"; «peux»/«peut» são do verbo pouvoir (je peux, il peut).' },
+  { words: ['leur', 'leurs'], note: '«leurs» vai antes de substantivo no plural; «leur» antes de singular ou como pronome (je leur parle).' },
+  { words: ['quel', 'quelle', 'quels', 'quelles'], note: 'Mesma pronúncia: «quel» muda conforme o gênero e o número do substantivo.' }
+];
+function dictBareWord(w){
+  return normalizeDictationWord(String(w || '')).replace(/[«»"()\[\]]/g, '').trim();
+}
+// Devolve { kind: 'homophone'|'agreement'|'other', noteText } para uma troca
+// (token "sub"): refWord = palavra do texto, userWord = o que o aluno digitou.
+function classifyDictationError(refWord, userWord){
+  const r = dictBareWord(refWord), u = dictBareWord(userWord);
+  const shown = String(refWord || '').replace(/[.,!?;:…«»"()]+/g, '');
+  const typed = String(userWord || '').replace(/[.,!?;:…«»"()]+/g, '');
+  if (r && u && r !== u){
+    const g = DICT_HOMOPHONE_GROUPS.find(gr => gr.words.includes(r) && gr.words.includes(u));
+    if (g) return { kind: 'homophone', noteText: `«${shown}» (você escreveu «${typed}»): palavras que soam parecido. ${g.note}` };
+    const [shorter, longer] = r.length <= u.length ? [r, u] : [u, r];
+    const suffix = longer.slice(shorter.length);
+    if (shorter.length >= 3 && longer.startsWith(shorter) && ['e', 's', 'es', 'x'].includes(suffix) && /^\p{L}+$/u.test(longer)){
+      return { kind: 'agreement', noteText: `«${shown}» (você escreveu «${typed}»): a palavra é a mesma, muda só a terminação (-${suffix}). Confira a concordância com o resto da frase (gênero, número ou conjugação do verbo).` };
+    }
+  }
+  return { kind: 'other', noteText: `«${shown}»: palavra diferente da esperada (você escreveu «${typed}»).` };
+}
+
+// ---- Fatia 2: progresso por ditado (puro, sem STATE) ----
+const DICT_WRONG_WORDS_MAX = 30;
+function dictDisplayWord(w){
+  return String(w || '').replace(/^[«"(\s]+|[.,!?;:…»")\s]+$/g, '').trim();
+}
+// Palavras do TEXTO que o aluno errou, faltou ou escreveu com desvio leve
+// nesta tentativa (deduplicadas sem diferenciar maiúscula, no máx. 30).
+function dictationWrongWords(evaluation){
+  const out = [], seen = new Set();
+  for (const x of (evaluation && evaluation.merged) || []){
+    let w = null;
+    if (x.type === 'sub') w = x.correct;
+    else if (x.type === 'miss') w = x.word;
+    else if (x.type === 'match' && x.light) w = x.word;
+    w = dictDisplayWord(w);
+    if (!w) continue;
+    const key = w.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key); out.push(w);
+    if (out.length >= DICT_WRONG_WORDS_MAX) break;
+  }
+  return out;
+}
+function sanitizeDictationRecord(rec){
+  const r = rec && typeof rec === 'object' ? rec : {};
+  const num = v => (typeof v === 'number' && isFinite(v)) ? Math.max(0, Math.min(100, Math.round(v))) : 0;
+  return {
+    bestScore: num(r.bestScore),
+    attempts: (typeof r.attempts === 'number' && isFinite(r.attempts) && r.attempts > 0) ? Math.floor(r.attempts) : 0,
+    lastScore: num(r.lastScore),
+    lastAt: typeof r.lastAt === 'string' ? r.lastAt : null,
+    wrongWords: Array.isArray(r.wrongWords) ? r.wrongWords.filter(w => typeof w === 'string' && w).slice(0, DICT_WRONG_WORDS_MAX) : []
+  };
+}
+// Registro novo depois de uma correção. bestScore nunca diminui.
+function updateDictationRecord(prev, evaluation, now){
+  const p = sanitizeDictationRecord(prev);
+  const score = (evaluation && typeof evaluation.score === 'number') ? Math.max(0, Math.min(100, Math.round(evaluation.score))) : 0;
+  const when = now instanceof Date ? now : new Date(now === undefined ? Date.now() : now);
+  return {
+    bestScore: Math.max(p.bestScore, score),
+    attempts: p.attempts + 1,
+    lastScore: score,
+    lastAt: isNaN(when.getTime()) ? null : when.toISOString(),
+    wrongWords: dictationWrongWords(evaluation)
+  };
+}
 // END dictation-answer-logic
 
 function dictationScoreColorVar(score){
@@ -8954,7 +9060,10 @@ function dictationLightNoteText(x){
     case 'hyphen': return `«${core}» leva hífen (${you}).`;
     case 'apostrophe': return `«${core}» leva apóstrofo (${you}).`;
     case 'ligature': return `«${core}» usa a letra «œ», que é uma só (${you}).`;
-    case 'accent': return `«${core}»: confira os acentos (${you}).`;
+    case 'accent': {
+      const h = classifyDictationError(x.word, x.userWord);
+      return `«${core}»: confira os acentos (${you}).` + (h.kind === 'homophone' ? ' ' + h.noteText.replace(/^.*?parecido\. /, '') : '');
+    }
     default: return `«${core}»: pequena diferença de grafia (${you}).`;
   }
 }
@@ -8963,6 +9072,10 @@ function renderDictationResult(d, userText){
   const ev = evaluateDictation(d.text, userText);
   const { merged, total, score } = ev;
   trackEvent('lesson_complete', 'dictation', { dictationId: d.id, score });
+  // Fatia 2: grava a tentativa (melhor nota nunca diminui).
+  const rec = updateDictationRecord(STATE.dictations[d.id], ev, new Date());
+  STATE.dictations[d.id] = rec;
+  saveState();
 
   const wordsHtml = merged.map(x => {
     if (x.type === 'match'){
@@ -8971,13 +9084,14 @@ function renderDictationResult(d, userText){
         : dictationWordHtml(x.word, x.punctAfter, x.missingMarks, 'dictation-word', '');
     }
     const punct = x.punctAfter ? ` ${escapeHtmlDictation(x.punctAfter)}` : '';
-    if (x.type === 'sub') return `<span class="dictation-word-wrong">${escapeHtmlDictation(x.wrong)}</span> <span class="dictation-word-correct">${escapeHtmlDictation(x.correct)}</span>${punct}`;
+    if (x.type === 'sub') return `<span class="dictation-word-wrong" title="${escapeHtmlDictation(classifyDictationError(x.correct, x.wrong).noteText)}">${escapeHtmlDictation(x.wrong)}</span> <span class="dictation-word-correct">${escapeHtmlDictation(x.correct)}</span>${punct}`;
     if (x.type === 'miss') return `<span class="dictation-word-correct">${escapeHtmlDictation(x.word)}</span>${punct}`;
     return `<span class="dictation-word-wrong">${escapeHtmlDictation(x.word)}</span>`;
   }).join(' ');
 
   const notes = [];
   merged.filter(x => x.type === 'match' && x.light).forEach(x => notes.push(dictationLightNoteText(x)));
+  merged.filter(x => x.type === 'sub').forEach(x => notes.push(classifyDictationError(x.correct, x.wrong).noteText));
   ev.digitNotes.forEach(n => notes.push(`Por extenso: ${n.digits} → <strong>${escapeHtmlDictation(n.words)}</strong>. Numa escrita de ditado, o número vai por extenso (sem desconto).`));
   ev.spokenPunct.forEach(p => notes.push(`Você escreveu «${escapeHtmlDictation(p.said)}» por extenso. No ditado, escreva o sinal (${escapeHtmlDictation(p.symbol)}). Pequeno desconto.`));
   if (ev.missingMarks > 0) notes.push(`Pontuação: faltou em ${ev.missingMarks} ${ev.missingMarks === 1 ? 'lugar' : 'lugares'} (sublinhado acima). Não desconta pontos.`);
@@ -8994,7 +9108,9 @@ function renderDictationResult(d, userText){
         <div class="dictation-score-badge" style="background:${dictationScoreColorVar(score)};">${score}</div>
         <p class="dictation-score-text">Você escreveu <strong>${hit} de ${total}</strong> palavras corretamente${ev.light ? ` (${ev.light} com pequeno desvio de grafia, valem meio ponto)` : ''}. Você atingiu uma pontuação de ${score} pontos (${score}%).</p>
       </div>
+      <p class="dictation-record-line">Melhor nota: <strong>${rec.bestScore}</strong> · ${rec.attempts} ${rec.attempts === 1 ? 'tentativa' : 'tentativas'}</p>
       ${notesHtml}
+      ${rec.wrongWords.length ? `<p class="dictation-review-words"><strong>Palavras para revisar:</strong> ${rec.wrongWords.map(escapeHtmlDictation).join(', ')}</p>` : ''}
     </div>
   `;
 

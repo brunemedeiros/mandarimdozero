@@ -42,9 +42,9 @@ const { normalizeLoose, acceptedForms } = runBlockAndExport(
   extractBlock('// BEGIN accent-answer-logic', '// END accent-answer-logic'),
   ['normalizeLoose', 'acceptedForms']
 );
-const { normalizeDictationWord, evaluateDictation, frenchNumberWords } = runBlockAndExport(
+const { normalizeDictationWord, evaluateDictation, frenchNumberWords, classifyDictationError, updateDictationRecord, sanitizeDictationRecord, dictationWrongWords } = runBlockAndExport(
   extractBlock('// BEGIN dictation-answer-logic', '// END dictation-answer-logic'),
-  ['normalizeDictationWord', 'evaluateDictation', 'frenchNumberWords']
+  ['normalizeDictationWord', 'evaluateDictation', 'frenchNumberWords', 'classifyDictationError', 'updateDictationRecord', 'sanitizeDictationRecord', 'dictationWrongWords']
 );
 const { isAccentAnswerCorrect } = runBlockAndExport(
   extractBlock('// BEGIN accent-challenge-logic', '// END accent-challenge-logic'),
@@ -122,7 +122,44 @@ check('números: 97 = quatre-vingt-dix-sept', frenchNumberWords(97), 'quatre-vin
 check('números: 16 = seize / 17 = dix-sept', frenchNumberWords(16) + '/' + frenchNumberWords(17), 'seize/dix-sept');
 check('"21" no lugar de "vingt et un" → 100', evaluateDictation('Il a vingt et un ans.', 'Il a 21 ans.').score, 100);
 
-console.log('\n=== Desafio "Acentuação" -- deve continuar EXIGINDO acento correto (isAccentAnswerCorrect nunca removeu diacrítico) ===\n');
+console.log('\n=== Ditado (Fatia 2) -- tipo de erro (só explicativo) ===\n');
+const kind = (a, b) => classifyDictationError(a, b).kind;
+check('et/est → homófono', kind('est', 'et'), 'homophone');
+check('son/sont → homófono', kind('sont', 'son'), 'homophone');
+check("c'est/ses → homófono (com pontuação colada)", kind("c'est,", 'ses'), 'homophone');
+check('a/à → homófono', kind('à', 'a'), 'homophone');
+check('mes/mais → homófono', kind('mais', 'mes'), 'homophone');
+check('quel/quelle → homófono', kind('quelle', 'quel'), 'homophone');
+check('petit/petite → concordância', kind('petite', 'petit'), 'agreement');
+check('ami/amis → concordância', kind('amis.', 'ami'), 'agreement');
+check('beau/beaux → concordância', kind('beaux', 'beau'), 'agreement');
+check('française/français → concordância', kind('française', 'français'), 'agreement');
+check('le/les → NÃO inventa concordância (curta demais)', kind('les', 'le'), 'other');
+check('de/des → outro', kind('des', 'de'), 'other');
+check('Sophie/Marie → outro', kind('Sophie', 'Marie'), 'other');
+check('outro: texto genérico, sem regra gramatical inventada', /palavra diferente da esperada/.test(classifyDictationError('chat', 'chien').noteText), true);
+check('classificação não muda a nota (sub continua errado)', evaluateDictation('Il est ici.', 'Il et ici.').score < 100, true);
+
+console.log('\n=== Ditado (Fatia 2) -- registro de progresso ===\n');
+const ev70 = evaluateDictation('Il est petit et gentil.', 'Il et petite et gentil');
+const r1 = updateDictationRecord(undefined, ev70, new Date('2026-10-03T10:00:00Z'));
+check('1ª tentativa: attempts = 1', r1.attempts, 1);
+check('1ª tentativa: bestScore = lastScore = nota', r1.bestScore === ev70.score && r1.lastScore === ev70.score, true);
+check('lastAt em ISO', r1.lastAt, '2026-10-03T10:00:00.000Z');
+check('wrongWords lista as palavras do texto erradas', JSON.stringify(r1.wrongWords), JSON.stringify(['est', 'petit']));
+const r2 = updateDictationRecord(r1, evaluateDictation('Il est petit.', 'abc'), Date.UTC(2026, 9, 4));
+check('nota pior não reduz bestScore', r2.bestScore, r1.bestScore);
+check('lastScore reflete a última', r2.lastScore < r1.bestScore, true);
+check('attempts soma', r2.attempts, 2);
+const r3 = updateDictationRecord(r2, evaluateDictation('Il est petit.', 'Il est petit.'), new Date());
+check('nota 100 sobe bestScore e limpa wrongWords', r3.bestScore === 100 && r3.wrongWords.length === 0, true);
+check('save antigo / registro ausente não quebra', JSON.stringify(sanitizeDictationRecord(undefined)), JSON.stringify({ bestScore: 0, attempts: 0, lastScore: 0, lastAt: null, wrongWords: [] }));
+check('registro malformado é saneado', (r => r.bestScore === 0 && r.attempts === 0 && r.wrongWords.length === 1)(sanitizeDictationRecord({ bestScore: 'x', attempts: -3, wrongWords: ['ok', 5, null] })), true);
+check('update sobre registro malformado não gera NaN', updateDictationRecord({ bestScore: NaN, attempts: 'a' }, ev70, 0).attempts, 1);
+check('wrongWords deduplicado (sem diferenciar maiúscula)', dictationWrongWords(evaluateDictation('Le chat et le chat.', 'x x x x x')).filter(w => w.toLowerCase() === 'chat').length, 1);
+check('wrongWords limitado a 30', dictationWrongWords(evaluateDictation(Array.from({ length: 50 }, (_, i) => 'mot' + i).join(' '), 'zzz')).length, 30);
+
+console.log('\n=== Desafio "Acentuação\" -- deve continuar EXIGINDO acento correto (isAccentAnswerCorrect nunca removeu diacrítico) ===\n');
 check('"étudiant" vs "etudiant" (sem acento) → incorreto (é literalmente o que o desafio testa)', isAccentAnswerCorrect('etudiant', 'étudiant'), false);
 check('"étudiant" vs "étudiant" → correto', isAccentAnswerCorrect('étudiant', 'étudiant'), true);
 check('espaço extra não afeta: " étudiant " vs "étudiant" → correto', isAccentAnswerCorrect(' étudiant ', 'étudiant'), true);
