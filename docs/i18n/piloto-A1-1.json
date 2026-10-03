@@ -42,7 +42,7 @@
    },
    "vocab.ca-va": {
     "text": "how are you? / I'm fine",
-    "status": "approved"
+    "status": "needs_review"
    },
    "vocab.a-bientot": {
     "text": "see you soon",
@@ -66,7 +66,7 @@
    },
    "phrases.4": {
     "text": "Good evening! How are you? (formal)",
-    "status": "approved"
+    "status": "needs_review"
    },
    "phrases.5": {
     "text": "Goodbye, see you tomorrow!",
@@ -138,7 +138,7 @@
    },
    "lessons.cortesia-e-como-vai.title": {
     "text": "Saying please and asking how someone is",
-    "status": "approved"
+    "status": "needs_review"
    },
    "lessons.checkpoint.title": {
     "text": "Checkpoint",
@@ -682,7 +682,7 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/%C3%A7a%20va",
     "es": "https://context.reverso.net/traducao/frances-espanhol/%C3%A7a%20va"
    },
-   "status": "approved",
+   "status": "needs_review",
    "status_es": "frozen"
   },
   {
@@ -847,7 +847,7 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/bonsoir%20%21%20comment%20allez-vous%20%3F",
     "es": "https://context.reverso.net/traducao/frances-espanhol/bonsoir%20%21%20comment%20allez-vous%20%3F"
    },
-   "status": "approved",
+   "status": "needs_review",
    "status_es": "frozen"
   },
   {
@@ -1332,7 +1332,7 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/comment%20%C3%A7a%20va",
     "es": "https://context.reverso.net/traducao/frances-espanhol/comment%20%C3%A7a%20va"
    },
-   "status": "approved",
+   "status": "needs_review",
    "status_es": "frozen"
   },
   {
@@ -1833,7 +1833,7 @@
   "en_variant": "EN-US apenas",
   "bonjour_en": "hi, hello / good morning",
   "tu_vous_en": "manter os rótulos (formal)/(informal)",
-  "low_confidence_en": "aprovados como estão",
+  "low_confidence_en": "NÃO aprovados ainda: a aprovação foi dada sem ver as variações; aguardando escolha entre as variantes (ça va, phrases.4, título da lição de cortesia)",
   "scope": "Foco só na interface em inglês; espanhol congelado até nova decisão"
  }
 }

@@ -129,4 +129,4 @@ Divergências só de forma/registro (sinônimos, tú/usted, Espanha/AL): ver col
 - Inglês: **EN-US** apenas.
 - "bonjour" em inglês: **hi, hello / good morning** (`vocab.bonjour` e o exemplo em `concept.bonjour-vs-bonsoir`).
 - tu/vous em inglês: manter os rótulos "(formal)" e "(informal)".
-- Itens de confiança baixa em inglês: **aprovados como estão** (status `approved` no JSON). Os demais itens em inglês continuam `needs_review`.
+- Itens de confiança baixa em inglês (`vocab.ca-va`, `phrases.4`, título da lição de cortesia): **aprovação ainda pendente**. A aprovação foi dada sem as variações estarem à vista; aguardando escolha. Os demais itens em inglês continuam `needs_review`.
