@@ -8,7 +8,7 @@ Teste feito em 2026-10-03 com trechos reais da unidade A1-1 (francês).
 |---|---|---|---|
 | **Claude** | Entende o contexto pedagógico (registro formal/informal, "tu/vous", notas de realidade e culturais); dá variações e explica a escolha; respeita as regras do `CLAUDE.md` | Pode ser confiante demais sozinho; precisa de uma segunda opinião independente | Tradutor principal e autor das variações |
 | **DeepL (plano Free)** | Rápido, preserva tags HTML (`<strong>`), bom em frases completas | **Plano Free: não aceita `context`, glossário, estilo nem instruções** (dá erro). Itens curtos e isolados perdem nuance. Traduzir a partir do português (a glosa) em vez do francês gera deriva (ver abaixo). Maiúsculas inconsistentes ("Thank you", "All right") | Segunda opinião independente, para medir concordância |
-| **Reverso Context** | Mostra a tradução com frases reais e a frequência de cada tradução; muito útil para o ser humano decidir | Não tem API oficial pública, e os termos de uso do site (conferir antes de qualquer uso automatizado) proíbem raspagem. Não foi acessado nesta noite | Conferência **manual** dos itens de confiança média/baixa, por link |
+| **Reverso Context** | Mostra a tradução com frases reais e a frequência de cada tradução; muito útil para o ser humano decidir | Não encontrei API oficial pública (não verifiquei no site). Os termos de uso provavelmente restringem acesso automatizado; é preciso conferi-los antes de qualquer uso desse tipo. Não foi acessado nesta noite | Conferência **manual** dos itens de confiança média/baixa, por link |
 
 ## O que o teste mostrou
 
