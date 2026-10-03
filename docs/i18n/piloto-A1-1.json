@@ -1,0 +1,1779 @@
+{
+ "unit": "A1-1",
+ "status": "needs_review",
+ "method": "Tradução própria (FR como fonte; PT como pista) + segunda tradução DeepL Free (FR→EN-US/ES para vocab/frases; PT→EN-US/ES para explicações). Confiança = concordância entre as duas + risco de registro/cultura.",
+ "defaults": {
+  "en": "EN-US (EN-GB citado quando difere)",
+  "es": "espanhol neutro / América Latina (Espanha citada quando difere)"
+ },
+ "locales": {
+  "en": {
+   "vocab.bonjour": {
+    "text": "hello / good morning",
+    "status": "needs_review"
+   },
+   "vocab.bonsoir": {
+    "text": "good evening (greeting)",
+    "status": "needs_review"
+   },
+   "vocab.au-revoir": {
+    "text": "goodbye",
+    "status": "needs_review"
+   },
+   "vocab.salut": {
+    "text": "hi / bye (informal)",
+    "status": "needs_review"
+   },
+   "vocab.merci": {
+    "text": "thank you / thanks",
+    "status": "needs_review"
+   },
+   "vocab.de-rien": {
+    "text": "you're welcome",
+    "status": "needs_review"
+   },
+   "vocab.sil-vous-plait": {
+    "text": "please (formal)",
+    "status": "needs_review"
+   },
+   "vocab.pardon": {
+    "text": "sorry / excuse me",
+    "status": "needs_review"
+   },
+   "vocab.ca-va": {
+    "text": "how are you? / I'm fine",
+    "status": "needs_review"
+   },
+   "vocab.a-bientot": {
+    "text": "see you soon",
+    "status": "needs_review"
+   },
+   "phrases.0": {
+    "text": "Hello! My name is Brune.",
+    "status": "needs_review"
+   },
+   "phrases.1": {
+    "text": "Thank you very much!",
+    "status": "needs_review"
+   },
+   "phrases.2": {
+    "text": "Sorry, I don't understand.",
+    "status": "needs_review"
+   },
+   "phrases.3": {
+    "text": "I'm doing well, and you?",
+    "status": "needs_review"
+   },
+   "phrases.4": {
+    "text": "Good evening! How are you? (formal)",
+    "status": "needs_review"
+   },
+   "phrases.5": {
+    "text": "Goodbye, see you tomorrow!",
+    "status": "needs_review"
+   },
+   "phrases.6": {
+    "text": "Hi! Are you doing well?",
+    "status": "needs_review"
+   },
+   "phrases.7": {
+    "text": "You're welcome, it's nothing.",
+    "status": "needs_review"
+   },
+   "phrases.8": {
+    "text": "A coffee, please.",
+    "status": "needs_review"
+   },
+   "phrases.0.scenario": {
+    "text": "You meet someone new at a party and want to introduce yourself. What do you say?",
+    "status": "needs_review"
+   },
+   "phrases.1.scenario": {
+    "text": "A friend helps you carry your groceries. How do you thank them?",
+    "status": "needs_review"
+   },
+   "phrases.2.scenario": {
+    "text": "Someone is speaking French very fast and you didn't understand a thing. What do you say?",
+    "status": "needs_review"
+   },
+   "phrases.3.scenario": {
+    "text": "A friend asks \"Ça va ?\". You want to say you're fine and ask back. What do you say?",
+    "status": "needs_review"
+   },
+   "dialogue.title": {
+    "text": "Meeting on the street",
+    "status": "needs_review"
+   },
+   "dialogue.0": {
+    "text": "Hello!",
+    "status": "needs_review"
+   },
+   "dialogue.1": {
+    "text": "Hello! How are you?",
+    "status": "needs_review"
+   },
+   "dialogue.2": {
+    "text": "I'm doing well, thanks! And you?",
+    "status": "needs_review"
+   },
+   "dialogue.3": {
+    "text": "I'm fine. See you soon!",
+    "status": "needs_review"
+   },
+   "title": {
+    "text": "Greeting and saying goodbye",
+    "status": "needs_review"
+   },
+   "goal": {
+    "text": "Greet someone, say goodbye and say thank you in a basic interaction.",
+    "status": "needs_review"
+   },
+   "lessons.ola-e-tchau.title": {
+    "text": "Saying hello and goodbye",
+    "status": "needs_review"
+   },
+   "lessons.informal-agradecer.title": {
+    "text": "Greeting informally and saying thank you",
+    "status": "needs_review"
+   },
+   "lessons.cortesia-e-como-vai.title": {
+    "text": "Saying please and asking how someone is",
+    "status": "needs_review"
+   },
+   "lessons.checkpoint.title": {
+    "text": "Checkpoint",
+    "status": "needs_review"
+   },
+   "concept.bonjour-vs-bonsoir.block0.title": {
+    "text": "\"Bonjour\" or \"Bonsoir\"?",
+    "status": "needs_review"
+   },
+   "concept.bonjour-vs-bonsoir.block0.body": {
+    "text": "We use <strong>bonjour</strong> from morning until late afternoon — it's the standard greeting of the day. In the evening, when arriving somewhere, we switch to <strong>bonsoir</strong>. <strong>Salut</strong>, on the other hand, works at any time of day, but only with friends or people you're close to — never with strangers or in formal settings.",
+    "status": "needs_review"
+   },
+   "concept.svp-informal.block0.title": {
+    "text": "\"S'il vous plaît\" in everyday life",
+    "status": "needs_review"
+   },
+   "concept.svp-informal.block0.body": {
+    "text": "In casual speech or text messages, <strong>s'il vous plaît</strong> almost always gets shorter: with friends it becomes <strong>s'il te plaît</strong> (the \"tu\" form — the informal \"you\" — not \"vous\", the polite or plural \"you\"), and in writing you'll often see just <strong>STP</strong>. The full \"vous\" form is still the safest choice with strangers.",
+    "status": "needs_review"
+   },
+   "concept.svp-informal.block0.examples.0": {
+    "text": "please (informal, among friends)",
+    "status": "needs_review"
+   },
+   "concept.svp-informal.block0.examples.1": {
+    "text": "text abbreviation for \"s'il te plaît\"",
+    "status": "needs_review"
+   },
+   "concept.a-bientot-informal.block0.title": {
+    "text": "Among friends, \"à bientôt\" becomes \"à plus\"",
+    "status": "needs_review"
+   },
+   "concept.a-bientot-informal.block0.body": {
+    "text": "With friends, <strong>à bientôt</strong> is common, but in everyday speech (and almost always in text messages) the most common goodbye is <strong>à plus</strong> — and in writing it usually becomes just <strong>A+</strong>. With strangers or in formal settings, \"à bientôt\" is still the right choice.",
+    "status": "needs_review"
+   },
+   "concept.a-bientot-informal.block0.examples.0": {
+    "text": "see you later / later (informal)",
+    "status": "needs_review"
+   },
+   "concept.a-bientot-informal.block0.examples.1": {
+    "text": "text abbreviation for \"à plus\"",
+    "status": "needs_review"
+   },
+   "concept.la-bise-cumprimento.block0.title": {
+    "text": "Why do French people greet each other with kisses on the cheek?",
+    "status": "needs_review"
+   },
+   "concept.la-bise-cumprimento.block0.body": {
+    "text": "Besides saying \"bonjour\", it's very common to greet friends and family with <strong>la bise</strong> — one or more light kisses on the cheek (the number varies by region: 2 is the most common, but in some regions it's 3 or even 4!). With strangers or in formal/professional settings, people shake hands instead.",
+    "status": "needs_review"
+   },
+   "concept.la-bise-cumprimento.block0.examples.0": {
+    "text": "to greet with a kiss (or kisses) on the cheek",
+    "status": "needs_review"
+   },
+   "concept.bonjour-vs-bonsoir.block0.examples.0": {
+    "text": "hello / good morning",
+    "status": "needs_review"
+   },
+   "concept.bonjour-vs-bonsoir.block0.examples.1": {
+    "text": "good evening (greeting)",
+    "status": "needs_review"
+   },
+   "trueFalse.0.claim": {
+    "text": "This is what we say when someone helps us a lot.",
+    "status": "needs_review"
+   },
+   "trueFalse.0.whyNote": {
+    "text": "Correct — <strong>merci beaucoup</strong> means \"thank you very much\"; it's exactly what you say to thank someone for their help.",
+    "status": "needs_review"
+   }
+  },
+  "es": {
+   "vocab.bonjour": {
+    "text": "hola / buenos días",
+    "status": "needs_review"
+   },
+   "vocab.bonsoir": {
+    "text": "buenas noches (saludo)",
+    "status": "needs_review"
+   },
+   "vocab.au-revoir": {
+    "text": "adiós / hasta luego",
+    "status": "needs_review"
+   },
+   "vocab.salut": {
+    "text": "hola / chao (informal)",
+    "status": "needs_review"
+   },
+   "vocab.merci": {
+    "text": "gracias",
+    "status": "needs_review"
+   },
+   "vocab.de-rien": {
+    "text": "de nada",
+    "status": "needs_review"
+   },
+   "vocab.sil-vous-plait": {
+    "text": "por favor (formal)",
+    "status": "needs_review"
+   },
+   "vocab.pardon": {
+    "text": "perdón / disculpe",
+    "status": "needs_review"
+   },
+   "vocab.ca-va": {
+    "text": "¿qué tal? / bien",
+    "status": "needs_review"
+   },
+   "vocab.a-bientot": {
+    "text": "hasta pronto",
+    "status": "needs_review"
+   },
+   "phrases.0": {
+    "text": "¡Hola! Me llamo Brune.",
+    "status": "needs_review"
+   },
+   "phrases.1": {
+    "text": "¡Muchas gracias!",
+    "status": "needs_review"
+   },
+   "phrases.2": {
+    "text": "Perdón, no entiendo.",
+    "status": "needs_review"
+   },
+   "phrases.3": {
+    "text": "Estoy bien, ¿y tú?",
+    "status": "needs_review"
+   },
+   "phrases.4": {
+    "text": "¡Buenas noches! ¿Cómo está usted?",
+    "status": "needs_review"
+   },
+   "phrases.5": {
+    "text": "¡Adiós, hasta mañana!",
+    "status": "needs_review"
+   },
+   "phrases.6": {
+    "text": "¡Hola! ¿Todo bien?",
+    "status": "needs_review"
+   },
+   "phrases.7": {
+    "text": "De nada, no es nada.",
+    "status": "needs_review"
+   },
+   "phrases.8": {
+    "text": "Un café, por favor.",
+    "status": "needs_review"
+   },
+   "phrases.0.scenario": {
+    "text": "Conoces a alguien nuevo en una fiesta y quieres presentarte. ¿Qué dices?",
+    "status": "needs_review"
+   },
+   "phrases.1.scenario": {
+    "text": "Un amigo te ayuda a llevar las compras. ¿Cómo le das las gracias?",
+    "status": "needs_review"
+   },
+   "phrases.2.scenario": {
+    "text": "Alguien habla muy rápido en francés y no entendiste nada. ¿Qué dices?",
+    "status": "needs_review"
+   },
+   "phrases.3.scenario": {
+    "text": "Una amiga te pregunta \"¿Ça va?\". Quieres responder que estás bien y preguntarle lo mismo. ¿Qué dices?",
+    "status": "needs_review"
+   },
+   "dialogue.title": {
+    "text": "Encuentro en la calle",
+    "status": "needs_review"
+   },
+   "dialogue.0": {
+    "text": "¡Hola!",
+    "status": "needs_review"
+   },
+   "dialogue.1": {
+    "text": "¡Hola! ¿Qué tal?",
+    "status": "needs_review"
+   },
+   "dialogue.2": {
+    "text": "¡Estoy bien, gracias! ¿Y tú?",
+    "status": "needs_review"
+   },
+   "dialogue.3": {
+    "text": "Bien. ¡Hasta pronto!",
+    "status": "needs_review"
+   },
+   "title": {
+    "text": "Saludar y despedirse",
+    "status": "needs_review"
+   },
+   "goal": {
+    "text": "Saludar a alguien, despedirse y dar las gracias en una interacción básica.",
+    "status": "needs_review"
+   },
+   "lessons.ola-e-tchau.title": {
+    "text": "Decir hola y hasta luego",
+    "status": "needs_review"
+   },
+   "lessons.informal-agradecer.title": {
+    "text": "Saludar de manera informal y dar las gracias",
+    "status": "needs_review"
+   },
+   "lessons.cortesia-e-como-vai.title": {
+    "text": "Pedir por favor y preguntar cómo está alguien",
+    "status": "needs_review"
+   },
+   "lessons.checkpoint.title": {
+    "text": "Punto de control",
+    "status": "needs_review"
+   },
+   "concept.bonjour-vs-bonsoir.block0.title": {
+    "text": "¿\"Bonjour\" o \"Bonsoir\"?",
+    "status": "needs_review"
+   },
+   "concept.bonjour-vs-bonsoir.block0.body": {
+    "text": "Usamos <strong>bonjour</strong> desde la mañana hasta el final de la tarde: es el saludo estándar del día. Por la noche, al llegar a un lugar, cambiamos a <strong>bonsoir</strong>. En cambio, <strong>salut</strong> sirve a cualquier hora, pero solo entre amigos o personas cercanas, nunca con desconocidos ni en contextos formales.",
+    "status": "needs_review"
+   },
+   "concept.svp-informal.block0.title": {
+    "text": "\"S'il vous plaît\" en el día a día",
+    "status": "needs_review"
+   },
+   "concept.svp-informal.block0.body": {
+    "text": "En el habla informal o en mensajes de texto, <strong>s'il vous plaît</strong> casi siempre se acorta: con amigos se convierte en <strong>s'il te plaît</strong> (la forma de \"tu\", como el \"tú\" español, no de \"vous\", como \"usted\"), y por escrito es habitual ver solo <strong>STP</strong>. La forma completa con \"vous\" sigue siendo la más segura con desconocidos.",
+    "status": "needs_review"
+   },
+   "concept.svp-informal.block0.examples.0": {
+    "text": "por favor (informal, entre amigos)",
+    "status": "needs_review"
+   },
+   "concept.svp-informal.block0.examples.1": {
+    "text": "abreviatura de texto de \"s'il te plaît\"",
+    "status": "needs_review"
+   },
+   "concept.a-bientot-informal.block0.title": {
+    "text": "Entre amigos, \"à bientôt\" se convierte en \"à plus\"",
+    "status": "needs_review"
+   },
+   "concept.a-bientot-informal.block0.body": {
+    "text": "Con amigos, <strong>à bientôt</strong> es común, pero en el día a día (y casi siempre en mensajes de texto) la despedida más usada es <strong>à plus</strong>, que por escrito suele quedar solo en <strong>A+</strong>. Con desconocidos o en contextos formales, \"à bientôt\" sigue siendo la opción correcta.",
+    "status": "needs_review"
+   },
+   "concept.a-bientot-informal.block0.examples.0": {
+    "text": "nos vemos / chao (informal)",
+    "status": "needs_review"
+   },
+   "concept.a-bientot-informal.block0.examples.1": {
+    "text": "abreviatura de texto de \"à plus\"",
+    "status": "needs_review"
+   },
+   "concept.la-bise-cumprimento.block0.title": {
+    "text": "¿Por qué los franceses se saludan con besos en la mejilla?",
+    "status": "needs_review"
+   },
+   "concept.la-bise-cumprimento.block0.body": {
+    "text": "Además de decir \"bonjour\", es muy común saludar a amigos y familiares con <strong>la bise</strong>: uno o más besos suaves en la mejilla (el número varía según la región: lo más común son 2, ¡pero en algunas regiones son 3 o incluso 4!). Entre desconocidos o en contextos formales o profesionales, se da la mano.",
+    "status": "needs_review"
+   },
+   "concept.la-bise-cumprimento.block0.examples.0": {
+    "text": "saludar con beso(s) en la mejilla",
+    "status": "needs_review"
+   },
+   "concept.bonjour-vs-bonsoir.block0.examples.0": {
+    "text": "hola / buenos días",
+    "status": "needs_review"
+   },
+   "concept.bonjour-vs-bonsoir.block0.examples.1": {
+    "text": "buenas noches (saludo)",
+    "status": "needs_review"
+   },
+   "trueFalse.0.claim": {
+    "text": "Esto es lo que decimos cuando alguien nos ayuda mucho.",
+    "status": "needs_review"
+   },
+   "trueFalse.0.whyNote": {
+    "text": "Correcto: <strong>merci beaucoup</strong> significa \"muchas gracias\"; es exactamente lo que se dice para agradecer una ayuda.",
+    "status": "needs_review"
+   }
+  }
+ },
+ "review": [
+  {
+   "key": "vocab.bonjour",
+   "section": "Vocabulário",
+   "fr": "bonjour",
+   "pt": "olá / bom dia",
+   "confidence": {
+    "en": "MÉDIA",
+    "es": "MÉDIA"
+   },
+   "deepl": {
+    "en": "Hello",
+    "es": "hola"
+   },
+   "variants": {
+    "en": [
+     "\"hello\" — mais seguro: bonjour vale o dia todo",
+     "\"good morning\" — só de manhã em inglês; pode induzir o aluno a achar que bonjour é só de manhã",
+     "\"good day\" (EN-GB/AU) — formal/datado"
+    ],
+    "es": [
+     "\"hola\" — neutro",
+     "\"buenos días\" — em espanhol só até o meio-dia; bonjour vai até o fim da tarde",
+     "\"buen día\" (Argentina/Uruguai)"
+    ]
+   },
+   "notes": "Concordância no núcleo (\"hello\"/\"hola\"). A glosa dupla PT (\"olá / bom dia\") cria falsa equivalência com \"good morning\"/\"buenos días\", que têm faixa horária menor que bonjour.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/bonjour",
+    "es": "https://context.reverso.net/traducao/frances-espanhol/bonjour"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "vocab.bonsoir",
+   "section": "Vocabulário",
+   "fr": "bonsoir",
+   "pt": "boa noite (saudação)",
+   "confidence": {
+    "en": "ALTA",
+    "es": "MÉDIA"
+   },
+   "deepl": {
+    "en": "Good evening",
+    "es": "Buenas noches"
+   },
+   "variants": {
+    "en": [],
+    "es": [
+     "\"buenas noches\" — mas em espanhol também é despedida/antes de dormir, bonsoir não",
+     "\"buenas tardes\" — em espanhol cobre o fim de tarde até escurecer, faixa em que o francês já usa bonsoir"
+    ]
+   },
+   "notes": "EN concordam. ES: \"buenas noches\" serve como saudação e despedida; bonsoir é saudação de chegada (despedida noturna seria \"bonne soirée\"/\"bonne nuit\").",
+   "reverso": {
+    "en": null,
+    "es": "https://context.reverso.net/traducao/frances-espanhol/bonsoir"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "vocab.au-revoir",
+   "section": "Vocabulário",
+   "fr": "au revoir",
+   "pt": "tchau / até logo",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "Goodbye",
+    "es": "adiós"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "vocab.salut",
+   "section": "Vocabulário",
+   "fr": "salut",
+   "pt": "oi / tchau (informal)",
+   "confidence": {
+    "en": "MÉDIA",
+    "es": "MÉDIA"
+   },
+   "deepl": {
+    "en": "Hi",
+    "es": "hola"
+   },
+   "variants": {
+    "en": [
+     "\"hi / bye\" — padrão",
+     "\"hey\" (EN-US muito casual)",
+     "\"hiya\" / \"cheers\" (EN-GB, despedida informal)"
+    ],
+    "es": [
+     "\"hola / chao\" — América Latina",
+     "\"hola / adiós\" — Espanha (\"chao\" existe mas é menos usado)",
+     "\"chau\" — Argentina/Uruguai"
+    ]
+   },
+   "notes": "DeepL deu só \"Hi\"/\"hola\", perdendo o uso como despedida, que é parte do ensino.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/salut",
+    "es": "https://context.reverso.net/traducao/frances-espanhol/salut"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "vocab.merci",
+   "section": "Vocabulário",
+   "fr": "merci",
+   "pt": "obrigado(a)",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "Thank you",
+    "es": "gracias"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância. Gênero (obrigado/obrigada) some em EN/ES, sem perda.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "vocab.de-rien",
+   "section": "Vocabulário",
+   "fr": "de rien",
+   "pt": "de nada",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "You're welcome",
+    "es": "de nada"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "vocab.sil-vous-plait",
+   "section": "Vocabulário",
+   "fr": "s'il vous plaît",
+   "pt": "por favor (formal)",
+   "confidence": {
+    "en": "MÉDIA",
+    "es": "MÉDIA"
+   },
+   "deepl": {
+    "en": "please",
+    "es": "por favor"
+   },
+   "variants": {
+    "en": [
+     "\"please\" + rótulo \"(formal, vous)\" — inglês não tem marca de formalidade na palavra; o rótulo é obrigatório"
+    ],
+    "es": [
+     "\"por favor (formal, de usted)\" — explicitar a ligação vous ≈ usted ajuda o hispanofalante"
+    ]
+   },
+   "notes": "A palavra concorda; o que se perde é o registro (vous). Manter o rótulo de formalidade.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/s%27il%20vous%20pla%C3%AEt",
+    "es": "https://context.reverso.net/traducao/frances-espanhol/s%27il%20vous%20pla%C3%AEt"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "vocab.pardon",
+   "section": "Vocabulário",
+   "fr": "pardon",
+   "pt": "desculpe / com licença",
+   "confidence": {
+    "en": "MÉDIA",
+    "es": "MÉDIA"
+   },
+   "deepl": {
+    "en": "sorry",
+    "es": "perdón"
+   },
+   "variants": {
+    "en": [
+     "\"sorry\" — pedir desculpas",
+     "\"excuse me\" — chamar atenção/passar",
+     "\"pardon?\" (EN-GB) — pedir para repetir, uso também presente em francês"
+    ],
+    "es": [
+     "\"perdón\" — neutro",
+     "\"disculpe\" — formal (usted)",
+     "\"con permiso\" — passar por alguém (América Latina)"
+    ]
+   },
+   "notes": "DeepL deu um único sentido; o francês cobre os dois da glosa PT.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/pardon",
+    "es": "https://context.reverso.net/traducao/frances-espanhol/pardon"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "vocab.ca-va",
+   "section": "Vocabulário",
+   "fr": "ça va",
+   "pt": "tudo bem",
+   "confidence": {
+    "en": "BAIXA",
+    "es": "BAIXA"
+   },
+   "deepl": {
+    "en": "I'm fine (FR) · \"All right\" (PT)",
+    "es": "¿Qué tal? (FR) · \"No pasa nada\" (PT)"
+   },
+   "variants": {
+    "en": [
+     "\"How's it going? / Fine.\" — funciona como pergunta E resposta, como \"ça va\"",
+     "\"all good?\" / \"all good.\" — coloquial, preserva a simetria pergunta/resposta",
+     "\"How are you?\" — mais neutro, perde o tom casual"
+    ],
+    "es": [
+     "\"¿qué tal? / bien\" — Espanha e geral",
+     "\"¿todo bien? / todo bien\" — América Latina, preserva a simetria pergunta/resposta",
+     "\"¿cómo estás? / bien\" — mais neutro"
+    ]
+   },
+   "notes": "DERIVA CONFIRMADA: a partir da glosa PT \"tudo bem\" o DeepL produziu \"All right\" e \"No pasa nada\" (sentido de \"não tem problema\"), errados para ça va. A partir do francês, DeepL deu só a resposta (EN) ou só a pergunta (ES). \"ça va\" é pergunta e resposta; a tradução precisa mostrar os dois usos.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/%C3%A7a%20va",
+    "es": "https://context.reverso.net/traducao/frances-espanhol/%C3%A7a%20va"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "vocab.a-bientot",
+   "section": "Vocabulário",
+   "fr": "à bientôt",
+   "pt": "até breve",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "See you soon",
+    "es": "Hasta pronto"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "phrases.0",
+   "section": "Frases",
+   "fr": "Bonjour ! Je m'appelle Brune.",
+   "pt": "Olá! Eu me chamo Brune.",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "Hello! My name is Brune.",
+    "es": "¡Hola! Me llamo Brune."
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância total.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "phrases.1",
+   "section": "Frases",
+   "fr": "Merci beaucoup !",
+   "pt": "Muito obrigada!",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "Thank you very much!",
+    "es": "¡Muchas gracias!"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "phrases.2",
+   "section": "Frases",
+   "fr": "Pardon, je ne comprends pas.",
+   "pt": "Desculpe, eu não entendo.",
+   "confidence": {
+    "en": "ALTA",
+    "es": "MÉDIA"
+   },
+   "deepl": {
+    "en": "Sorry, I don't understand.",
+    "es": "Perdona, no lo entiendo."
+   },
+   "variants": {
+    "en": [],
+    "es": [
+     "\"Perdón, no entiendo.\" — neutro",
+     "\"Perdona, no lo entiendo.\" — Espanha, tuteo",
+     "\"Disculpe, no entiendo.\" — formal (usted)"
+    ]
+   },
+   "notes": "ES: DeepL escolheu \"perdona\" (tú). Como o interlocutor é desconhecido, a forma neutra ou \"disculpe\" é mais coerente.",
+   "reverso": {
+    "en": null,
+    "es": "https://context.reverso.net/traducao/frances-espanhol/pardon%2C%20je%20ne%20comprends%20pas."
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "phrases.3",
+   "section": "Frases",
+   "fr": "Ça va bien, et toi ?",
+   "pt": "Vou bem, e você?",
+   "confidence": {
+    "en": "MÉDIA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "I'm doing fine. How about you?",
+    "es": "Estoy bien, ¿y tú?"
+   },
+   "variants": {
+    "en": [
+     "\"I'm good, and you?\" — EN-US coloquial",
+     "\"Fine, and you?\" — curto",
+     "A marca informal \"toi\" some em inglês; considerar nota \"(informal, tu)\""
+    ],
+    "es": []
+   },
+   "notes": "Sentido concorda. EN não distingue toi/vous.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/%C3%A7a%20va%20bien%2C%20et%20toi%20%3F",
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "phrases.4",
+   "section": "Frases",
+   "fr": "Bonsoir ! Comment allez-vous ?",
+   "pt": "Boa noite! Como vai o senhor/a senhora?",
+   "confidence": {
+    "en": "BAIXA",
+    "es": "BAIXA"
+   },
+   "deepl": {
+    "en": "Good evening! How are you?",
+    "es": "¡Buenas noches! ¿Cómo estáis?"
+   },
+   "variants": {
+    "en": [
+     "\"How are you?\" + rótulo \"(formal, vous)\" — o inglês não tem forma formal; o rótulo carrega a lição",
+     "\"How do you do?\" (EN-GB) — formal, mas hoje soa antiquado e não é pergunta real"
+    ],
+    "es": [
+     "\"¿Cómo está usted?\" — formal singular, equivale à glosa PT",
+     "\"¿Cómo están (ustedes)?\" — se \"vous\" for plural (América Latina e Espanha formal)",
+     "\"¿Cómo estáis?\" — vosotros, plural INFORMAL só da Espanha; não corresponde ao vous de cortesia"
+    ]
+   },
+   "notes": "DIVERGÊNCIA RELEVANTE: DeepL ES deu \"¿Cómo estáis?\" (plural informal), contrário ao registro formal ensinado. Em EN a formalidade é invisível.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/bonsoir%20%21%20comment%20allez-vous%20%3F",
+    "es": "https://context.reverso.net/traducao/frances-espanhol/bonsoir%20%21%20comment%20allez-vous%20%3F"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "phrases.5",
+   "section": "Frases",
+   "fr": "Au revoir, à demain !",
+   "pt": "Tchau, até amanhã!",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "Goodbye, see you tomorrow!",
+    "es": "¡Adiós, hasta mañana!"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância total.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "phrases.6",
+   "section": "Frases",
+   "fr": "Salut ! Ça va bien ?",
+   "pt": "Oi! Tudo bem?",
+   "confidence": {
+    "en": "MÉDIA",
+    "es": "MÉDIA"
+   },
+   "deepl": {
+    "en": "Hi! How are you?",
+    "es": "¡Hola! ¿Qué tal?"
+   },
+   "variants": {
+    "en": [
+     "\"Hi! How are you?\" — natural",
+     "\"Hi! You doing OK?\" — mais casual, mais próximo de \"ça va bien ?\""
+    ],
+    "es": [
+     "\"¡Hola! ¿Qué tal?\" — geral",
+     "\"¡Hola! ¿Todo bien?\" — América Latina",
+     "\"¡Hola! ¿Estás bien?\" — mais literal"
+    ]
+   },
+   "notes": "Mesmo sentido, forma diferente.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/salut%20%21%20%C3%A7a%20va%20bien%20%3F",
+    "es": "https://context.reverso.net/traducao/frances-espanhol/salut%20%21%20%C3%A7a%20va%20bien%20%3F"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "phrases.7",
+   "section": "Frases",
+   "fr": "De rien, c'est normal.",
+   "pt": "De nada, é o de menos.",
+   "confidence": {
+    "en": "MÉDIA",
+    "es": "BAIXA"
+   },
+   "deepl": {
+    "en": "You're welcome—it's no big deal.",
+    "es": "De nada, es lo normal."
+   },
+   "variants": {
+    "en": [
+     "\"You're welcome, it's nothing.\" ",
+     "\"No problem, of course!\" — mais natural em EN-US",
+     "\"Don't mention it.\" — mais idiomático, EN-GB e EN-US"
+    ],
+    "es": [
+     "\"De nada, no hay de qué.\" — idiomático, neutro",
+     "\"De nada, faltaría más.\" — Espanha",
+     "\"¡De nada, para eso estamos!\" — próximo do sentido de \"c'est normal\""
+    ]
+   },
+   "notes": "Idiomático: \"c'est normal\" = \"é o mínimo/não precisa agradecer\". DeepL ES \"es lo normal\" é calque literal e soa estranho.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/de%20rien%2C%20c%27est%20normal.",
+    "es": "https://context.reverso.net/traducao/frances-espanhol/de%20rien%2C%20c%27est%20normal."
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "phrases.8",
+   "section": "Frases",
+   "fr": "Un café, s'il vous plaît.",
+   "pt": "Um café, por favor.",
+   "confidence": {
+    "en": "MÉDIA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "A cup of coffee, please.",
+    "es": "Un café, por favor."
+   },
+   "variants": {
+    "en": [
+     "\"A coffee, please.\" — neutro",
+     "\"An espresso, please.\" — mais fiel ao que se recebe na França ao pedir \"un café\""
+    ],
+    "es": []
+   },
+   "notes": "Nota cultural: na França \"un café\" é um expresso; anglófonos tendem a imaginar café coado.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/un%20caf%C3%A9%2C%20s%27il%20vous%20pla%C3%AEt.",
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "phrases.0.scenario",
+   "section": "Frases — cenários",
+   "fr": null,
+   "pt": "Você encontra alguém novo numa festa e quer se apresentar. O que você diz?",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "You meet someone new at a party and want to introduce yourself. What do you say?",
+    "es": "Conoces a alguien nuevo en una fiesta y quieres presentarte. ¿Qué le dices?"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "phrases.1.scenario",
+   "section": "Frases — cenários",
+   "fr": null,
+   "pt": "Um amigo te ajuda a carregar as compras. Como você agradece?",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "A friend helps you carry your groceries. How do you thank them?",
+    "es": "Un amigo te ayuda a llevar las compras. ¿Cómo se lo agradeces?"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "phrases.2.scenario",
+   "section": "Frases — cenários",
+   "fr": null,
+   "pt": "Alguém fala muito rápido em francês e você não entendeu nada. O que você diz?",
+   "confidence": {
+    "en": "ALTA",
+    "es": "MÉDIA"
+   },
+   "deepl": {
+    "en": "Someone is speaking French very fast, and you didn't understand a thing. What do you say?",
+    "es": "Alguien habla muy rápido en francés y no has entendido nada. ¿Qué dices?"
+   },
+   "variants": {
+    "en": [],
+    "es": [
+     "\"no entendiste nada\" — América Latina (pretérito simples)",
+     "\"no has entendido nada\" — Espanha (pretérito perfeito composto)"
+    ]
+   },
+   "notes": "Diferença regional de tempo verbal.",
+   "reverso": {
+    "en": null,
+    "es": "https://context.reverso.net/traducao/frances-espanhol/je%20ne%20comprends%20pas"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "phrases.3.scenario",
+   "section": "Frases — cenários",
+   "fr": null,
+   "pt": "Uma amiga pergunta \"Ça va?\". Você quer responder que está bem e perguntar de volta. O que você diz?",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "A friend asks, \"Ça va?\" You want to say you're fine and ask back. What do you say?",
+    "es": "Una amiga te pregunta: «¿Ça va?». Quieres responderle que estás bien y preguntarle lo mismo. ¿Qué le dices?"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância. Atenção ES: não pôr \"¿\" de abertura dentro da citação em francês (\"Ça va ?\"); DeepL escreveu «¿Ça va?» — corrigido na nossa versão.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "dialogue.title",
+   "section": "Diálogo",
+   "fr": null,
+   "pt": "Encontro na rua",
+   "confidence": {
+    "en": "MÉDIA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "Encounter on the Street",
+    "es": "Encuentro en la calle"
+   },
+   "variants": {
+    "en": [
+     "\"Meeting on the street\" — natural",
+     "\"Running into each other on the street\" — mais coloquial"
+    ],
+    "es": []
+   },
+   "notes": "\"Encounter\" é correto mas formal/estranho como título de lição.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/dans%20la%20rue",
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "dialogue.0",
+   "section": "Diálogo",
+   "fr": "Bonjour !",
+   "pt": "Olá!",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "Hello",
+    "es": "hola"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "dialogue.1",
+   "section": "Diálogo",
+   "fr": "Bonjour ! Ça va ?",
+   "pt": "Olá! Tudo bem?",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "Hello! How are you?",
+    "es": "¡Hola! ¿Qué tal?"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância (ça va como pergunta).",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "dialogue.2",
+   "section": "Diálogo",
+   "fr": "Ça va bien, merci ! Et toi ?",
+   "pt": "Vou bem, obrigada! E você?",
+   "confidence": {
+    "en": "MÉDIA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "I'm doing well, thanks! How about you?",
+    "es": "¡Estoy bien, gracias! ¿Y tú?"
+   },
+   "variants": {
+    "en": [
+     "\"And you?\" vs \"How about you?\" — equivalentes; EN não mostra o \"toi\" informal"
+    ],
+    "es": []
+   },
+   "notes": "Concordância de sentido; registro tu invisível em EN.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/%C3%A7a%20va%20bien%2C%20merci%20%21%20et%20toi%20%3F",
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "dialogue.3",
+   "section": "Diálogo",
+   "fr": "Ça va. À bientôt !",
+   "pt": "Tudo bem. Até breve!",
+   "confidence": {
+    "en": "ALTA",
+    "es": "BAIXA"
+   },
+   "deepl": {
+    "en": "I'm fine. See you soon!",
+    "es": "¿Qué tal? ¡Hasta pronto!"
+   },
+   "variants": {
+    "en": [],
+    "es": [
+     "\"Bien. ¡Hasta pronto!\" — resposta",
+     "\"Todo bien. ¡Hasta pronto!\" — América Latina, espelha \"tudo bem\""
+    ]
+   },
+   "notes": "DIVERGÊNCIA RELEVANTE: DeepL ES transformou a RESPOSTA \"Ça va.\" em pergunta \"¿Qué tal?\", invertendo o sentido da fala.",
+   "reverso": {
+    "en": null,
+    "es": "https://context.reverso.net/traducao/frances-espanhol/%C3%A7a%20va.%20%C3%A0%20bient%C3%B4t%20%21"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "title",
+   "section": "Títulos e objetivo",
+   "fr": null,
+   "pt": "Cumprimentar e se despedir",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "Greeting and Saying Goodbye",
+    "es": "Saludar y despedirse"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "goal",
+   "section": "Títulos e objetivo",
+   "fr": null,
+   "pt": "Cumprimentar alguém, se despedir e agradecer numa interação básica.",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "Greeting someone, saying goodbye, and expressing gratitude in a basic interaction.",
+    "es": "Saludar a alguien, despedirse y dar las gracias en una interacción básica."
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "lessons.ola-e-tchau.title",
+   "section": "Títulos e objetivo",
+   "fr": null,
+   "pt": "Dizer olá e até logo",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "Say hello and goodbye",
+    "es": "Decir «hola» y «hasta luego»"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "lessons.informal-agradecer.title",
+   "section": "Títulos e objetivo",
+   "fr": null,
+   "pt": "Cumprimentar informalmente e agradecer",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "Greeting Someone Casually and Saying Thank You",
+    "es": "Saludar de manera informal y dar las gracias"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "lessons.cortesia-e-como-vai.title",
+   "section": "Títulos e objetivo",
+   "fr": null,
+   "pt": "Pedir por favor e perguntar como vai",
+   "confidence": {
+    "en": "BAIXA",
+    "es": "MÉDIA"
+   },
+   "deepl": {
+    "en": "Please ask and see how things are going",
+    "es": "Decir «por favor» y preguntar «¿qué tal estás?»"
+   },
+   "variants": {
+    "en": [
+     "\"Saying please and asking how someone is\"",
+     "\"Being polite and asking how someone's doing\""
+    ],
+    "es": [
+     "\"Decir por favor y preguntar cómo está alguien\"",
+     "\"Pedir por favor y preguntar qué tal\""
+    ]
+   },
+   "notes": "DERIVA DeepL EN: \"Please ask and see how things are going\" leu \"pedir por favor\" como imperativo educado (\"please ask\") — sentido errado. ES ok, só mais longo.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/comment%20%C3%A7a%20va",
+    "es": "https://context.reverso.net/traducao/frances-espanhol/comment%20%C3%A7a%20va"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "lessons.checkpoint.title",
+   "section": "Títulos e objetivo",
+   "fr": null,
+   "pt": "Ponto de verificação",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "Checkpoint",
+    "es": "Punto de control"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "concept.bonjour-vs-bonsoir.block0.title",
+   "section": "Conceitos",
+   "fr": null,
+   "pt": "\"Bonjour\" ou \"Bonsoir\"?",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "\"Bonjour\" or \"Bonsoir\"?",
+    "es": "¿«Bonjour» o «Bonsoir»?"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância. ES: definir padrão de aspas (\" \" ou « »).",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "concept.bonjour-vs-bonsoir.block0.body",
+   "section": "Conceitos",
+   "fr": null,
+   "pt": "Usamos <strong>bonjour</strong> de manhã até o fim da tarde — é a saudação padrão do dia. À noite, ao chegar num lugar, trocamos para <strong>bonsoir</strong>. Já <strong>salut</strong> funciona a qualquer hora, mas só entre amigos ou pessoas próximas — nunca com desconhecidos ou em contextos formais.",
+   "confidence": {
+    "en": "ALTA",
+    "es": "MÉDIA"
+   },
+   "deepl": {
+    "en": "We use <strong>bonjour</strong> from morning until late afternoon—it's the standard greeting for the day. In the evening, when we arrive somewhere, we switch to <strong>bonsoir</strong>. <strong>salut</strong>, on the other hand, can be used at any time, but only among friends or close acquaintances—never with strangers or in formal settings.",
+    "es": "Utilizamos <strong>bonjour</strong> desde por la mañana hasta última hora de la tarde; es el saludo habitual del día. Por la noche, al llegar a algún sitio, cambiamos a <strong>bonsoir</strong>. Por su parte, <strong>salut</strong> se puede usar a cualquier hora, pero solo entre amigos o personas cercanas; nunca con desconocidos ni en contextos formales."
+   },
+   "variants": {
+    "en": [],
+    "es": [
+     "Para hispanofalantes vale acrescentar: \"buenos días\" acaba ao meio-dia, bonjour não; e \"buenas noches\" também é despedida, bonsoir não."
+    ]
+   },
+   "notes": "Concordância. ES: o texto explica bem, mas não antecipa a interferência buenos días/buenas noches típica do aluno hispanofalante.",
+   "reverso": {
+    "en": null,
+    "es": "https://context.reverso.net/traducao/frances-espanhol/bonsoir"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "concept.svp-informal.block0.title",
+   "section": "Conceitos",
+   "fr": null,
+   "pt": "\"S'il vous plaît\" no dia a dia",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "\"S'il vous plaît\" in Everyday Life",
+    "es": "«S'il vous plaît» en el día a día"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "concept.svp-informal.block0.body",
+   "section": "Conceitos",
+   "fr": null,
+   "pt": "Na fala informal ou em mensagens de texto, <strong>s'il vous plaît</strong> quase sempre encolhe: com amigos vira <strong>s'il te plaît</strong> (a forma \"tu\", não \"vous\"), e por escrito é comum ver só <strong>STP</strong>. A forma completa com \"vous\" continua sendo a mais segura com desconhecidos.",
+   "confidence": {
+    "en": "MÉDIA",
+    "es": "MÉDIA"
+   },
+   "deepl": {
+    "en": "In casual speech or text messages, <strong>s'il vous plaît</strong> is almost always shortened: with friends, it becomes <strong>s'il te plaît</strong> (using \"tu\" instead of \"vous\"), and in writing, it's common to see just <strong>STP</strong>. The full form with \"vous\" remains the safest option when speaking to strangers.",
+    "es": "En el lenguaje coloquial o en los mensajes de texto, <strong>s'il vous plaît</strong> casi siempre se abrevia: con los amigos se convierte en <strong>s'il te plaît</strong> (la forma «tu», no «vous»), y por escrito es habitual ver solo <strong>STP</strong>. La forma completa con «vous» sigue siendo la más segura con desconocidos."
+   },
+   "variants": {
+    "en": [
+     "Sem explicar tu/vous, o anglófono não entende a nota (inglês tem só \"you\"); minha versão acrescenta a explicação entre parênteses."
+    ],
+    "es": [
+     "tu≈tú e vous≈usted é uma ponte útil para hispanofalantes; mas \"vous\" também é plural (\"vosotros/ustedes\")."
+    ]
+   },
+   "notes": "Nota de realidade (registro). Concordância de sentido; a adaptação pedagógica ao leitor é decisão da professora. DeepL usou \"abrevia/shortened\" — mais preciso dizer que muda de forma (vous→te) e só por escrito vira sigla.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/s%27il%20te%20pla%C3%AEt",
+    "es": "https://context.reverso.net/traducao/frances-espanhol/s%27il%20te%20pla%C3%AEt"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "concept.svp-informal.block0.examples.0",
+   "section": "Conceitos",
+   "fr": "s'il te plaît",
+   "pt": "por favor (informal, entre amigos)",
+   "confidence": {
+    "en": "MÉDIA",
+    "es": "MÉDIA"
+   },
+   "deepl": {
+    "en": "please",
+    "es": "por favor"
+   },
+   "variants": {
+    "en": [
+     "EN: a palavra é a mesma de \"s'il vous plaît\"; o rótulo \"(informal, tu)\" é o único diferenciador"
+    ],
+    "es": [
+     "ES: idem; considerar \"(informal, de tú)\""
+    ]
+   },
+   "notes": "Registro invisível na tradução da palavra.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/s%27il%20te%20pla%C3%AEt",
+    "es": "https://context.reverso.net/traducao/frances-espanhol/s%27il%20te%20pla%C3%AEt"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "concept.svp-informal.block0.examples.1",
+   "section": "Conceitos",
+   "fr": "STP",
+   "pt": "abreviação de texto pra \"s'il te plaît\"",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "text abbreviation for \"s'il te plaît\"",
+    "es": "abreviatura de «s'il te plaît»"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância. Equivalente EN: \"pls\"/\"plz\"; ES: \"porfa/xfa\" (informativo).",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "concept.a-bientot-informal.block0.title",
+   "section": "Conceitos",
+   "fr": null,
+   "pt": "\"À bientôt\" entre amigos vira \"à plus\"",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "\"À bientôt\" among friends becomes \"à plus\"",
+    "es": "El «À bientôt» entre amigos se convierte en «à plus»"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "concept.a-bientot-informal.block0.body",
+   "section": "Conceitos",
+   "fr": null,
+   "pt": "Com amigos, <strong>à bientôt</strong> é comum, mas no dia a dia (e quase sempre em mensagem de texto) a despedida mais usada é <strong>à plus</strong> — e por escrito costuma virar só <strong>A+</strong>. Com desconhecidos ou em contexto formal, \"à bientôt\" continua sendo a escolha certa.",
+   "confidence": {
+    "en": "MÉDIA",
+    "es": "MÉDIA"
+   },
+   "deepl": {
+    "en": "With friends, <strong>à bientôt</strong> is common, but in everyday conversation (and almost always in text messages), the most commonly used farewell is <strong>à plus</strong>—and in writing, it's usually shortened to just <strong>A+</strong>. With strangers or in a formal context, \"à bientôt\" remains the right choice.",
+    "es": "Entre amigos, <strong>à bientôt</strong> es habitual, pero en el día a día (y casi siempre en mensajes de texto) la despedida más utilizada es <strong>à plus</strong> — y, por escrito, suele reducirse simplemente a <strong>A+</strong>. Con desconocidos o en un contexto formal, «à bientôt» sigue siendo la opción más adecuada."
+   },
+   "variants": {
+    "en": [
+     "Equivalente de registro em EN: \"see ya / later\" — pode ser citado para dar a sensação de informalidade"
+    ],
+    "es": [
+     "Equivalente ES: \"nos vemos\" / \"chao\" (AL), \"hasta luego\" (Espanha) — note que \"hasta luego\" não é marcadamente informal"
+    ]
+   },
+   "notes": "Nota de realidade; concordância de sentido. Escolha de equivalente coloquial é decisão de estilo.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/%C3%A0%20plus",
+    "es": "https://context.reverso.net/traducao/frances-espanhol/%C3%A0%20plus"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "concept.a-bientot-informal.block0.examples.0",
+   "section": "Conceitos",
+   "fr": "à plus",
+   "pt": "até mais (informal, entre amigos)",
+   "confidence": {
+    "en": "MÉDIA",
+    "es": "MÉDIA"
+   },
+   "deepl": {
+    "en": "See you later",
+    "es": "Hasta luego"
+   },
+   "variants": {
+    "en": [
+     "\"see you later\" — neutro",
+     "\"later!\" / \"see ya!\" — mais próximo do tom de \"à plus\"",
+     "\"cheers\" / \"laters\" (EN-GB coloquial)"
+    ],
+    "es": [
+     "\"nos vemos\" — neutro informal",
+     "\"chao\" — América Latina",
+     "\"hasta luego\" — Espanha; muito usado mas não marca informalidade"
+    ]
+   },
+   "notes": "DeepL ES \"hasta luego\" é aceitável, mas perde a nuance informal que é o ponto da nota.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/%C3%A0%20plus",
+    "es": "https://context.reverso.net/traducao/frances-espanhol/%C3%A0%20plus"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "concept.a-bientot-informal.block0.examples.1",
+   "section": "Conceitos",
+   "fr": "A+",
+   "pt": "abreviação de texto pra \"à plus\"",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "text abbreviation for \"à plus\"",
+    "es": "abreviatura de «à plus»"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "concept.la-bise-cumprimento.block0.title",
+   "section": "Conceitos",
+   "fr": null,
+   "pt": "Por que os franceses se cumprimentam com beijinhos no rosto?",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "Why do the French greet each other with kisses on the cheek?",
+    "es": "¿Por qué los franceses se saludan con besitos en la mejilla?"
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "concept.la-bise-cumprimento.block0.body",
+   "section": "Conceitos",
+   "fr": null,
+   "pt": "Além de dizer \"bonjour\", é muito comum cumprimentar amigos e familiares com <strong>la bise</strong> — um ou mais beijinhos leves no rosto (o número varia por região: 2 é o mais comum, mas em algumas regiões são 3 ou até 4!). Entre desconhecidos ou em contexto formal/profissional, aperta-se a mão em vez disso.",
+   "confidence": {
+    "en": "MÉDIA",
+    "es": "MÉDIA"
+   },
+   "deepl": {
+    "en": "In addition to saying \"bonjour,\" it's very common to greet friends and family with <strong>la bise</strong>—one or more light kisses on the cheek (the number varies by region: 2 is the most common, but in some regions it's 3 or even 4!). Among strangers or in formal/professional settings, people shake hands instead.",
+    "es": "Además de decir «bonjour», es muy habitual saludar a amigos y familiares con <strong>la bise</strong> —uno o varios besos ligeros en la mejilla (el número varía según la región: lo más habitual son dos, ¡pero en algunas regiones son tres o incluso cuatro!). Entre desconocidos o en un contexto formal o profesional, se da la mano en su lugar."
+   },
+   "variants": {
+    "en": [
+     "Para anglófonos a bise é surpreendente (cultura sem beijo social); talvez valha uma frase explicando que é um encostar de bochechas com som de beijo, não um beijo de fato."
+    ],
+    "es": [
+     "Na Espanha \"dos besos\" é norma também; na América Latina, geralmente um só. O contraste implícito do texto original (com o Brasil) muda conforme o leitor."
+    ]
+   },
+   "notes": "Nota cultural: o texto traduz bem, mas o \"choque cultural\" pretendido depende do país do leitor — decisão editorial.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/faire%20la%20bise",
+    "es": "https://context.reverso.net/traducao/frances-espanhol/faire%20la%20bise"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "concept.la-bise-cumprimento.block0.examples.0",
+   "section": "Conceitos",
+   "fr": "faire la bise",
+   "pt": "cumprimentar com beijinho(s) no rosto",
+   "confidence": {
+    "en": "MÉDIA",
+    "es": "MÉDIA"
+   },
+   "deepl": {
+    "en": "to kiss on the cheek (FR) · greet someone with a kiss or two on the cheek (PT)",
+    "es": "dar un beso en la mejilla (FR) · saludar con un beso o varios besos (PT)"
+   },
+   "variants": {
+    "en": [
+     "\"to kiss on the cheek\" — mais curto, perde o \"cumprimento\"",
+     "\"to greet with a cheek kiss\" — mais compacto"
+    ],
+    "es": [
+     "\"dar dos besos\" — Espanha",
+     "\"saludar con un beso\" — América Latina"
+    ]
+   },
+   "notes": "Concordância de sentido; o número de beijos é cultural.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/faire%20la%20bise",
+    "es": "https://context.reverso.net/traducao/frances-espanhol/faire%20la%20bise"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "concept.bonjour-vs-bonsoir.block0.examples.0",
+   "section": "Conceitos",
+   "fr": "bonjour",
+   "pt": "olá / bom dia",
+   "confidence": {
+    "en": "MÉDIA",
+    "es": "MÉDIA"
+   },
+   "deepl": {
+    "en": "Hello",
+    "es": "hola"
+   },
+   "variants": {
+    "en": [
+     "Mesma questão de vocab.bonjour"
+    ],
+    "es": [
+     "Mesma questão de vocab.bonjour"
+    ]
+   },
+   "notes": "Mesmo texto de vocab.bonjour — manter idêntico.",
+   "reverso": {
+    "en": "https://context.reverso.net/traducao/frances-ingles/bonjour",
+    "es": "https://context.reverso.net/traducao/frances-espanhol/bonjour"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "concept.bonjour-vs-bonsoir.block0.examples.1",
+   "section": "Conceitos",
+   "fr": "bonsoir",
+   "pt": "boa noite (saudação)",
+   "confidence": {
+    "en": "ALTA",
+    "es": "MÉDIA"
+   },
+   "deepl": {
+    "en": "Good evening",
+    "es": "Buenas noches"
+   },
+   "variants": {
+    "en": [],
+    "es": [
+     "Mesma questão de vocab.bonsoir"
+    ]
+   },
+   "notes": "Mesmo texto de vocab.bonsoir — manter idêntico.",
+   "reverso": {
+    "en": null,
+    "es": "https://context.reverso.net/traducao/frances-espanhol/bonsoir"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "trueFalse.0.claim",
+   "section": "Verdadeiro/Falso",
+   "fr": "Merci beaucoup !",
+   "pt": "Isso é o que dizemos quando alguém nos ajuda muito.",
+   "confidence": {
+    "en": "ALTA",
+    "es": "MÉDIA"
+   },
+   "deepl": {
+    "en": "That's what we say when someone helps us a lot.",
+    "es": "Eso es lo que decimos cuando alguien nos echa una gran mano."
+   },
+   "variants": {
+    "en": [],
+    "es": [
+     "\"nos ayuda mucho\" — neutro",
+     "\"nos echa una (gran) mano\" — coloquial, Espanha principalmente"
+    ]
+   },
+   "notes": "ES: DeepL usou expressão coloquial peninsular.",
+   "reverso": {
+    "en": null,
+    "es": "https://context.reverso.net/traducao/frances-espanhol/merci%20beaucoup%20%21"
+   },
+   "status": "needs_review"
+  },
+  {
+   "key": "trueFalse.0.whyNote",
+   "section": "Verdadeiro/Falso",
+   "fr": null,
+   "pt": "Correto — <strong>merci beaucoup</strong> significa \"muito obrigado(a)\", é exatamente isso que se diz para agradecer por uma ajuda.",
+   "confidence": {
+    "en": "ALTA",
+    "es": "ALTA"
+   },
+   "deepl": {
+    "en": "Correct — <strong>merci beaucoup</strong> means \"thank you very much\"; that's exactly what you say to thank someone for their help.",
+    "es": "Correcto: <strong>merci beaucoup</strong> significa «muchas gracias», que es exactamente lo que se dice para agradecer una ayuda."
+   },
+   "variants": {
+    "en": [],
+    "es": []
+   },
+   "notes": "Concordância.",
+   "reverso": {
+    "en": null,
+    "es": null
+   },
+   "status": "needs_review"
+  }
+ ]
+}
