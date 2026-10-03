@@ -738,7 +738,11 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
       limit: FREE_OWN_FLASHCARD_LIMIT,
     });
     if (!pre.ok){
-      errorEl.textContent = `Este cartão geraria ${pre.requested} cartão(ões) de estudo, mas restam só ${pre.remaining} no plano grátis.`;
+      // i18n: em pt-BR o texto é idêntico ao original; {n} recebe o número
+      // cru (sem fmtNumber) para não mudar nada no português.
+      errorEl.textContent = (typeof window.tp === 'function')
+        ? window.tp('flashcardLimit.wouldGenerate', pre.requested, { n: pre.requested, remaining: pre.remaining })
+        : `Este cartão geraria ${pre.requested} cartão(ões) de estudo, mas restam só ${pre.remaining} no plano grátis.`;
       document.getElementById('flashcard-limit-modal').style.display = 'flex';
       return;
     }

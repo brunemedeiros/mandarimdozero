@@ -1,6 +1,9 @@
 // Catálogo ES (neutro / América Latina) (i18n, Etapa 2 -- piloto). Carregado
 // sob demanda. Chave faltando aqui cai em pt-BR. Comentário ao lado =
 // confiança (ALTA/MÉDIA/BAIXA, mesmo critério do piloto A1-1). Registro: tú.
+// CONGELADO (decisão da autora): só as chaves do piloto do Report. Não
+// adicionar chaves novas; o que faltar cai em pt-BR. O seletor de idioma não
+// oferece espanhol (só ?ui=es, para teste).
 window.I18N_CATALOG = window.I18N_CATALOG || {};
 window.I18N_CATALOG['es'] = {
   'common.close': 'Cerrar', // ALTA

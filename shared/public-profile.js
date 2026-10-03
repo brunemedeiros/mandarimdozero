@@ -520,7 +520,7 @@ async function importSelectedPublicFlashcards(box){
   if (!pre.ok){
     const modal = document.getElementById('flashcard-limit-modal');
     if (modal) modal.style.display = 'flex';
-    else if (errorEl) errorEl.textContent = 'Você atingiu o limite de cartões do plano grátis.';
+    else if (errorEl) errorEl.textContent = (typeof window.t === 'function') ? window.t('flashcardLimit.fallbackError') : 'Você atingiu o limite de cartões do plano grátis.';
     return;
   }
 

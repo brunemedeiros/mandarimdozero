@@ -48,4 +48,21 @@ window.I18N_CATALOG['en'] = {
   'report.error.duplicate': 'You just sent this a moment ago -- thank you!', // ALTA
   'report.error.sendFailed': "Couldn't send. Check your connection and try again.", // ALTA
   'report.toast.success': '✓ Report sent. Thanks for helping!', // ALTA
+
+  'premium.challenges.title': '🔒 Premium feature', // ALTA
+  'premium.challenges.bodyHtml': '<strong>Module Challenges</strong> reinforce each topic in the course with Expressions, Listen and Translate, Accents, and extra Dictations.', // MÉDIA -- nomes das categorias de desafio ainda não traduzidos na aba Desafios; alinhar quando ela for migrada
+  'premium.challenges.howToActivate': 'They\'re part of the Premium plan. To activate it, contact the admin (profbrune).', // MÉDIA -- política de plano/ativação manual
+
+  'flashcardLimit.modal.title': '🔒 Free plan limit', // ALTA
+  'flashcardLimit.modal.bodyHtml': 'You\'ve reached the free plan\'s limit of <strong>20 active cards of your own</strong>. To create more, archive a card you no longer use, or ask your teacher to link your account -- students linked to a teacher get unlimited cards of their own.', // MÉDIA -- política Free; o PT ainda fala em "arquivar", ação que a interface não oferece mais (CONSOLIDAÇÃO-3)
+  'flashcardLimit.fallbackError': 'You\'ve reached the free plan\'s card limit.', // MÉDIA -- política Free
+  'flashcardLimit.wouldGenerate': { one: 'This card would create {n} study card, but you only have {remaining} left on the free plan.', other: 'This card would create {n} study cards, but you only have {remaining} left on the free plan.' }, // MÉDIA -- política Free; plural real em EN (o PT usa "cartão(ões)")
+
+  'flashcardReset.modal.title': '⚠️ Confirm edit', // ALTA
+  'flashcardReset.modal.body': 'This edit will reset the review progress for this card. Do you want to continue?', // MÉDIA -- aviso de reinício de progresso
+  'flashcardReset.modal.discard': 'Discard changes', // ALTA
+  'flashcardReset.modal.confirm': 'Yes', // ALTA
+
+  'settings.uiLanguage.title': 'Interface language', // ALTA
+  'settings.uiLanguage.sub': 'Changes only the app\'s text (menus, buttons, and messages). It doesn\'t change the language you\'re studying.', // ALTA
 };

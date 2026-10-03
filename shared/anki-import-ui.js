@@ -286,7 +286,7 @@ async function confirmAnkiImport(body){
   if (!pre.ok){
     const limitModal = document.getElementById('flashcard-limit-modal');
     if (limitModal) limitModal.style.display = 'flex';
-    else if (errorEl) errorEl.textContent = 'Você atingiu o limite de cartões do plano grátis.';
+    else if (errorEl) errorEl.textContent = (typeof window.t === 'function') ? window.t('flashcardLimit.fallbackError') : 'Você atingiu o limite de cartões do plano grátis.';
     return;
   }
 

@@ -2,7 +2,10 @@
 // t nunca lança, paridade de chaves, e REGRESSÃO: cada string pt-BR existe
 // byte a byte no texto ORIGINAL (git show <baseline>:<arquivo>).
 // Baseline padrão = e88fabb (último commit antes da Etapa 2); I18N_BASELINE
-// sobrescreve. Rodar: node tests/i18n/test_i18n_unit.js
+// sobrescreve. Passo "modais pequenos + seletor": I18N_PREV (padrão 96558b7,
+// último commit antes desse passo) é a referência byte a byte do HTML/JS.
+// Espanhol CONGELADO: só exigimos que es não tenha órfãs; en == pt-BR.
+// Rodar: node tests/i18n/test_i18n_unit.js
 const fs = require('fs'), path = require('path'), vm = require('vm'), { execSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..', '..');
 const I18N = path.join(ROOT, 'shared', 'i18n');
@@ -120,33 +123,74 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   const cat = (lang) => { const s = { window: {} }; vm.createContext(s); vm.runInContext(fs.readFileSync(path.join(I18N, lang + '.js'), 'utf8'), s); return s.window.I18N_CATALOG[lang]; };
   const pt = cat('pt-BR'), en = cat('en'), es = cat('es');
   const ptKeys = Object.keys(pt).sort();
-  check('en tem as mesmas chaves de pt-BR', JSON.stringify(Object.keys(en).sort()) === JSON.stringify(ptKeys));
-  check('es tem as mesmas chaves de pt-BR', JSON.stringify(Object.keys(es).sort()) === JSON.stringify(ptKeys));
-  check('nenhum valor vazio', [pt, en, es].every(c => Object.values(c).every(v => typeof v === 'string' && v.trim() !== '')));
-  check('en/es diferem de pt-BR (traduzido)', ptKeys.filter(k => en[k] === pt[k]).length === 0, ptKeys.filter(k => en[k] === pt[k]));
+  check('en tem as mesmas chaves de pt-BR', JSON.stringify(Object.keys(en).sort()) === JSON.stringify(ptKeys), ptKeys.filter(k => !(k in en)));
+  check('es (congelado) não tem chaves órfãs', Object.keys(es).every(k => k in pt), Object.keys(es).filter(k => !(k in pt)));
+  const nonEmpty = (v) => typeof v === 'string' ? v.trim() !== '' : (v && typeof v === 'object' && Object.values(v).length > 0 && Object.values(v).every(x => typeof x === 'string' && x.trim() !== ''));
+  check('nenhum valor vazio', [pt, en, es].every(c => Object.values(c).every(nonEmpty)));
+  check('en difere de pt-BR (traduzido)', ptKeys.filter(k => JSON.stringify(en[k]) === JSON.stringify(pt[k])).length === 0, ptKeys.filter(k => JSON.stringify(en[k]) === JSON.stringify(pt[k])));
   // comentário de confiança em cada linha de chave de en/es
   for (const lang of ['en', 'es']){
     const lines = fs.readFileSync(path.join(I18N, lang + '.js'), 'utf8').split('\n').filter(l => /^\s*'[\w.]+':/.test(l));
-    check(`${lang}: toda chave tem comentário de confiança`, lines.length === ptKeys.length && lines.every(l => /\/\/ (ALTA|MÉDIA|BAIXA)/.test(l)));
+    const expected = lang === 'en' ? ptKeys.length : Object.keys(es).length;
+    check(`${lang}: toda chave tem comentário de confiança`, lines.length === expected && lines.every(l => /\/\/ (ALTA|MÉDIA|BAIXA)/.test(l)), [lines.length, expected]);
   }
+  check('seletor oferece só pt-BR e en (es congelado)', JSON.stringify(W.I18N_SELECTABLE_UI_LANGS) === JSON.stringify(['pt-BR', 'en']));
+  // es congelado: chave nova cai em pt-BR
+  { const ee = makeEnv(); await ee.w.setUiLang('es');
+    check('es: chave sem tradução cai em pt-BR', ee.w.t('flashcardReset.modal.confirm') === 'Sim' && ee.w.t('common.close') === 'Cerrar'); }
+  // plural real em en; pt-BR idêntico ao template original com n cru
+  { const pe = makeEnv();
+    check('pt-BR wouldGenerate idêntico ao original', pe.w.tp('flashcardLimit.wouldGenerate', 1234, { n: 1234, remaining: 2 }) === 'Este cartão geraria 1234 cartão(ões) de estudo, mas restam só 2 no plano grátis.');
+    await pe.w.setUiLang('en');
+    check('en wouldGenerate n=1 (singular)', pe.w.tp('flashcardLimit.wouldGenerate', 1, { n: 1, remaining: 0 }) === 'This card would create 1 study card, but you only have 0 left on the free plan.');
+    check('en wouldGenerate n=3 (plural)', pe.w.tp('flashcardLimit.wouldGenerate', 3, { n: 3, remaining: 2 }) === 'This card would create 3 study cards, but you only have 2 left on the free plan.'); }
 
   // ---- REGRESSÃO contra o texto original ----
   const BASE = process.env.I18N_BASELINE || 'e88fabb';
   const orig = (f) => execSync(`git show ${BASE}:${f}`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 });
   const origFr = orig('fr/index.html'), origZh = orig('zh/index.html'), origRep = orig('shared/reports.js');
-  const all = origFr + origZh + origRep;
+  const PREV = process.env.I18N_PREV || '96558b7';
+  const prev = (f) => execSync(`git show ${PREV}:${f}`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 });
+  const prevFr = prev('fr/index.html'), prevZh = prev('zh/index.html');
+  const prevJs = ['shared/my-flashcards.js', 'shared/public-profile.js', 'shared/anki-import-ui.js', 'fr/app.js'].map(prev).join('\n');
+  const all = origFr + origZh + origRep + prevFr + prevZh + prevJs;
+  // Textos NOVOS (não existiam antes): só o seletor de idioma.
+  const NEW_KEYS = ['settings.uiLanguage.title', 'settings.uiLanguage.sub'];
+  const escRe = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   for (const k of ptKeys){
-    check(`regressão: pt-BR '${k}' existe byte a byte no original`, all.includes(pt[k]), pt[k]);
+    if (NEW_KEYS.includes(k)) continue;
+    const v = pt[k];
+    if (/\{\w+\}/.test(v)){
+      // placeholder {x} <-> ${...} do template literal original
+      const re = new RegExp(v.split(/\{\w+\}/).map(escRe).join('\\$\\{[^}]+\\}'));
+      check(`regressão: pt-BR '${k}' (template) existe no original`, re.test(all), v);
+    } else {
+      check(`regressão: pt-BR '${k}' existe byte a byte no original`, all.includes(v), v);
+    }
   }
   // HTML atual: o texto padrão continua escrito (data-i18n não removeu texto)
   for (const lang of ['fr', 'zh']){
     const cur = fs.readFileSync(path.join(ROOT, lang, 'index.html'), 'utf8');
     const o = lang === 'fr' ? origFr : origZh;
-    const strip = (s) => s.replace(/ data-i18n(-attr)?="[^"]*"/g, '');
+    const strip = (s) => s.replace(/ data-i18n(-attr|-html)?="[^"]*"/g, '');
     const modal = (s) => s.slice(s.indexOf('<!-- ===== MODAL: REPORTAR'), s.indexOf('<div id="streak-modal-overlay"'));
     check(`${lang}: modal atual sem data-i18n == modal original`, strip(modal(cur)) === modal(o));
-    check(`${lang}: HTML inteiro sem data-i18n e sem scripts i18n == original`,
-      strip(cur).replace('<script src="../shared/i18n/i18n.js"></script>\n<script src="../shared/i18n/pt-BR.js"></script>\n', '') === o);
+    // Passo "modais pequenos + seletor": contra o commit anterior (PREV), a
+    // única diferença além dos atributos data-i18n* é o bloco do seletor.
+    const p = lang === 'fr' ? prevFr : prevZh;
+    const selStart = cur.indexOf('      <div class="pref-row">\n        <div class="pref-row-text">\n          <div class="pref-row-title" data-i18n="settings.uiLanguage.title">');
+    const selEnd = cur.indexOf('</select>\n      </div>\n', selStart) + '</select>\n      </div>\n'.length;
+    check(`${lang}: bloco do seletor encontrado`, selStart > 0 && selEnd > selStart);
+    const curNoSel = cur.slice(0, selStart) + cur.slice(selEnd);
+    check(`${lang}: HTML inteiro sem data-i18n* e sem o seletor == commit anterior (${PREV})`, strip(curNoSel) === strip(p));
+    check(`${lang}: seletor só oferece pt-BR e English`, /<option value="pt-BR" lang="pt-BR">Português \(Brasil\)<\/option>\s*<option value="en" lang="en">English<\/option>\s*<\/select>/.test(cur.slice(selStart, selEnd)));
+    const usedHtml = [...cur.matchAll(/data-i18n-html="([^"]+)"/g)].map(m => m[1]);
+    check(`${lang}: todo data-i18n-html existe em pt-BR`, usedHtml.every(k => k in pt));
+    // o innerHTML original do elemento == valor pt-BR (byte a byte)
+    for (const k of usedHtml){
+      const m = cur.match(new RegExp('data-i18n-html="' + escRe(k) + '">([\\s\\S]*?)</p>'));
+      check(`${lang}: innerHTML de ${k} == pt-BR`, m && m[1] === pt[k]);
+    }
     const used = [...cur.matchAll(/data-i18n="([^"]+)"/g)].map(m => m[1]);
     check(`${lang}: todo data-i18n existe em pt-BR`, used.every(k => k in pt), used.filter(k => !(k in pt)));
   }

@@ -3,7 +3,8 @@
 // tests/i18n/test_i18n_unit.js, teste de regressão contra git). Nunca editar
 // o texto aqui sem editar o HTML junto (o HTML continua com o português
 // escrito como valor padrão).
-// Recorte piloto: modal "Reportar problema ou sugestão" + pontos de entrada.
+// Recortes: modal "Reportar problema ou sugestão" + pontos de entrada (piloto);
+// modais de limite/reinício de cartão, Recurso Premium e seletor de idioma.
 window.I18N_CATALOG = window.I18N_CATALOG || {};
 window.I18N_CATALOG['pt-BR'] = {
   // ---- comuns ----
@@ -57,4 +58,27 @@ window.I18N_CATALOG['pt-BR'] = {
   'report.error.duplicate': 'Você já enviou isso agora há pouco -- obrigada!',
   'report.error.sendFailed': 'Não foi possível enviar. Verifique sua conexão e tente de novo.',
   'report.toast.success': '✓ Report enviado. Obrigada por ajudar!',
+
+  // ---- modal "Recurso Premium" dos Desafios do Módulo (só fr) ----
+  'premium.challenges.title': '🔒 Recurso Premium',
+  'premium.challenges.bodyHtml': 'Os <strong>Desafios do Módulo</strong> reforçam cada tema da trilha com Expressões, Ouça e traduza, Acentuação e Ditados extras.',
+  'premium.challenges.howToActivate': 'Eles fazem parte do plano Premium. Para ativar, fale com a administração (profbrune).',
+
+  // ---- modal de limite de cartões próprios (plano grátis) ----
+  'flashcardLimit.modal.title': '🔒 Limite do plano grátis',
+  'flashcardLimit.modal.bodyHtml': 'Você atingiu o limite de <strong>20 cartões próprios ativos</strong> do plano grátis. Pra criar mais, arquive algum cartão que já não usa, ou peça pra sua professora te vincular -- alunos vinculados a uma professora têm cartões próprios ilimitados.',
+  'flashcardLimit.fallbackError': 'Você atingiu o limite de cartões do plano grátis.',
+  // tp(): em pt-BR é uma string só (o texto original usa "cartão(ões)");
+  // {n} = cartões de estudo que seriam criados, {remaining} = vagas restantes.
+  'flashcardLimit.wouldGenerate': 'Este cartão geraria {n} cartão(ões) de estudo, mas restam só {remaining} no plano grátis.',
+
+  // ---- modal de confirmação: editar reinicia o progresso ----
+  'flashcardReset.modal.title': '⚠️ Confirmar edição',
+  'flashcardReset.modal.body': 'Esta edição irá reiniciar o progresso de revisão deste cartão. Deseja continuar?',
+  'flashcardReset.modal.discard': 'Descartar edições',
+  'flashcardReset.modal.confirm': 'Sim',
+
+  // ---- Configurações > Idioma da interface (texto NOVO, não existia antes) ----
+  'settings.uiLanguage.title': 'Idioma da interface',
+  'settings.uiLanguage.sub': 'Muda só os textos do app (menus, botões e avisos). Não muda o idioma que você estuda.',
 };

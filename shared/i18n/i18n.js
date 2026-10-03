@@ -175,21 +175,34 @@
     el.insertBefore(document.createTextNode(text + ' '), el.firstChild);
   }
 
-  // data-i18n="chave"  e  data-i18n-attr="placeholder:chave;aria-label:chave2"
+  // Marcação mínima permitida em data-i18n-html: o texto é escapado e só
+  // <strong>/<b>/<em> (sem atributos) voltam a ser tags. O catálogo é
+  // código estático do próprio app, mas a lista curta evita que uma
+  // tradução futura injete HTML arbitrário.
+  var ALLOWED_INLINE_TAGS = /&lt;(\/?)(strong|b|em)&gt;/g;
+  function safeInlineHtml(str){
+    var esc = String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return esc.replace(ALLOWED_INLINE_TAGS, '<$1$2>');
+  }
+
+  // data-i18n="chave", data-i18n-html="chave" (texto com <strong>/<b>/<em>)
+  // e data-i18n-attr="placeholder:chave;aria-label:chave2".
   // Enquanto o idioma for pt-BR, só toca em elementos que já foram
   // traduzidos antes (para voltar ao português depois de um setUiLang).
   function applyDomI18n(root){
     try {
       root = root || document;
       var nodes = [];
-      if (root.nodeType === 1 && (root.hasAttribute('data-i18n') || root.hasAttribute('data-i18n-attr'))) nodes.push(root);
-      var found = root.querySelectorAll ? root.querySelectorAll('[data-i18n],[data-i18n-attr]') : [];
+      if (root.nodeType === 1 && (root.hasAttribute('data-i18n') || root.hasAttribute('data-i18n-attr') || root.hasAttribute('data-i18n-html'))) nodes.push(root);
+      var found = root.querySelectorAll ? root.querySelectorAll('[data-i18n],[data-i18n-attr],[data-i18n-html]') : [];
       for (var i = 0; i < found.length; i++) nodes.push(found[i]);
       var isDefault = currentLang === DEFAULT_UI_LANG;
       nodes.forEach(function(el){
         if (isDefault && !el.hasAttribute('data-i18n-applied')) return;
         var key = el.getAttribute('data-i18n');
         if (key) setElementText(el, t(key));
+        var htmlKey = el.getAttribute('data-i18n-html');
+        if (htmlKey) el.innerHTML = safeInlineHtml(t(htmlKey));
         var attrSpec = el.getAttribute('data-i18n-attr');
         if (attrSpec){
           attrSpec.split(';').forEach(function(pair){
@@ -251,7 +264,39 @@
     });
   })();
 
+  // Seletor "Idioma da interface" (Configurações, fr/zh index.html,
+  // #ui-language-select). Só existe no navegador: setUiLang() grava em
+  // localStorage['ui-language']; NUNCA toca em APP_KEY, no idioma estudado
+  // nem na conta (TODO acima: progress.data._meta.uiLanguage).
+  // Espanhol está congelado: o núcleo ainda entende ?ui=es, mas o seletor
+  // só oferece pt-BR e en.
+  var SELECTABLE_UI_LANGS = ['pt-BR', 'en'];
+  function syncUiLanguageSelect(){
+    try {
+      var sel = document.getElementById('ui-language-select');
+      if (!sel) return;
+      if (SELECTABLE_UI_LANGS.indexOf(currentLang) >= 0) sel.value = currentLang;
+    } catch (e) {}
+  }
+  function wireUiLanguageSelect(){
+    try {
+      var sel = document.getElementById('ui-language-select');
+      if (!sel || sel.getAttribute('data-i18n-wired')) return;
+      sel.setAttribute('data-i18n-wired', '1');
+      syncUiLanguageSelect();
+      sel.addEventListener('change', function(){
+        if (SELECTABLE_UI_LANGS.indexOf(sel.value) >= 0) setUiLang(sel.value);
+      });
+    } catch (e) {}
+  }
+  try {
+    window.addEventListener('i18n:change', syncUiLanguageSelect);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wireUiLanguageSelect);
+    else wireUiLanguageSelect();
+  } catch (e) {}
+
   window.I18N_UI_LANGS = UI_LANGS.slice();
+  window.I18N_SELECTABLE_UI_LANGS = SELECTABLE_UI_LANGS.slice();
   window.getUiLang = getUiLang;
   window.setUiLang = setUiLang;
   window.t = t;
