@@ -44,7 +44,7 @@ je tu il elle on nous vous ils elles me m te t se s ne n pas ça c ce cet cette 
 notre nos votre vos leur leurs moi toi lui eux oui non très aussi bien mal plus que qui quoi où comment quel quelle
 quels quelles combien voici voilà pour avec sans sur dans par chez ici là
 zéro un deux trois quatre cinq six sept huit neuf dix onze douze treize quatorze quinze seize vingt
-léo ana marc paul sophie brune paris lyon
+léo ana marc paul sophie brune paris lyon brésil france
 """.split())
 
 

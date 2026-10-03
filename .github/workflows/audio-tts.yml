@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       modo:
-        description: "laboratorio = gera variantes pra ouvir | regenerar = refaz os mp3 afetados pelas regras | gerar-faltantes = cria mp3 para textos sem áudio (zh e fr) | desafios-expressoes = gera os mp3 das 80 expressões novas dos Desafios | desafios-a1-m1 = gera os mp3 dos desafios do Módulo 1 do A1 (fr/scripts/challenges_import)"
+        description: "laboratorio = gera variantes pra ouvir | regenerar = refaz os mp3 afetados pelas regras | gerar-faltantes = cria mp3 para textos sem áudio (zh e fr) | desafios-expressoes = gera os mp3 das 80 expressões novas dos Desafios | desafios-a1-m1 = gera os mp3 dos desafios do Módulo 1 do A1 | desafios-a1-todos = gera os mp3 dos desafios dos Módulos 1 a 6 do A1 (fr/scripts/challenges_import)"
         type: choice
-        options: [laboratorio, regenerar, gerar-faltantes, desafios-expressoes, desafios-a1-m1]
+        options: [laboratorio, regenerar, gerar-faltantes, desafios-expressoes, desafios-a1-m1, desafios-a1-todos]
         default: laboratorio
 
 permissions:
@@ -51,6 +51,12 @@ jobs:
       - name: Gerar áudio dos desafios do Módulo 1 (A1)
         if: inputs.modo == 'desafios-a1-m1'
         run: python3 fr/scripts/challenges_import/generate_challenge_audio.py fr/scripts/challenges_import/lote-a1-m1.json
+      - name: Gerar áudio dos desafios dos Módulos 1 a 6 (A1)
+        if: inputs.modo == 'desafios-a1-todos'
+        run: |
+          for m in 1 2 3 4 5 6; do
+            python3 fr/scripts/challenges_import/generate_challenge_audio.py fr/scripts/challenges_import/lote-a1-m$m.json
+          done
       - name: Commitar
         if: always() && inputs.modo != 'laboratorio'
         run: |

@@ -1,0 +1,450 @@
+[
+  {
+    "id": "lt-a1m4-001",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m4",
+    "unitId": "A1-13",
+    "theme": "Clima e estações",
+    "sentenceFr": "Il fait froid en hiver.",
+    "audioFile": "33babc2d8cbb.mp3",
+    "hintText": "Il fait ______ en ______.",
+    "referenceTranslations": [
+      "Faz frio no inverno.",
+      "Está frio no inverno.",
+      "Fica frio no inverno."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m4-002",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m4",
+    "unitId": "A1-13",
+    "theme": "Clima e estações",
+    "sentenceFr": "Aujourd'hui, il pleut.",
+    "audioFile": "49bdf708d21b.mp3",
+    "hintText": "Aujourd'hui, il ______.",
+    "referenceTranslations": [
+      "Hoje está chovendo.",
+      "Hoje chove.",
+      "Hoje está chuvoso."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m4-003",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m4",
+    "unitId": "A1-14",
+    "theme": "Transporte",
+    "sentenceFr": "Je prends le bus tous les jours.",
+    "audioFile": "2fa5f7116924.mp3",
+    "hintText": "Je ______ le ______ tous les jours.",
+    "referenceTranslations": [
+      "Eu pego o ônibus todos os dias.",
+      "Pego o ônibus todo dia.",
+      "Eu pego o ônibus diariamente."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m4-004",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m4",
+    "unitId": "A1-14",
+    "theme": "Transporte",
+    "sentenceFr": "Où est la station de métro ?",
+    "audioFile": "5b2f5beae931.mp3",
+    "hintText": "Où est la ______ de ______ ?",
+    "referenceTranslations": [
+      "Onde fica a estação de metrô?",
+      "Onde é a estação de metrô?"
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m4-005",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m4",
+    "unitId": "A1-15",
+    "theme": "Corpo e saúde",
+    "sentenceFr": "Il a mal au ventre.",
+    "audioFile": "21311524144f.mp3",
+    "hintText": "Il a ______ au ______.",
+    "referenceTranslations": [
+      "Ele está com dor de barriga.",
+      "Ele tem dor de barriga.",
+      "Ele está com dor na barriga."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m4-006",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m4",
+    "unitId": "A1-15",
+    "theme": "Corpo e saúde",
+    "sentenceFr": "Je vais à la pharmacie.",
+    "audioFile": "5e1c26b8820e.mp3",
+    "hintText": "Je ______ à la ______.",
+    "referenceTranslations": [
+      "Eu vou à farmácia.",
+      "Vou à farmácia.",
+      "Eu vou na farmácia."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m4-001",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m4",
+    "unitId": "A1-13",
+    "theme": "Clima e estações",
+    "targetText": "été",
+    "audioFile": "deaf6a1e9612.mp3",
+    "explanation": "Os dois \"é\" têm acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m4-002",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m4",
+    "unitId": "A1-14",
+    "theme": "Transporte",
+    "targetText": "métro",
+    "audioFile": "b0ce1f0708db.mp3",
+    "explanation": "\"e\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m4-003",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m4",
+    "unitId": "A1-14",
+    "theme": "Transporte",
+    "targetText": "vélo",
+    "audioFile": "7438d2b6ca7f.mp3",
+    "explanation": "\"e\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m4-004",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m4",
+    "unitId": "A1-14",
+    "theme": "Transporte",
+    "targetText": "arrêt",
+    "audioFile": "a32eff224ca8.mp3",
+    "explanation": "\"e\" tem acento circunflexo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m4-005",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m4",
+    "unitId": "A1-14",
+    "theme": "Transporte",
+    "targetText": "à pied",
+    "audioFile": "4b8d304f13a3.mp3",
+    "explanation": "\"à\" tem acento grave.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m4-006",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m4",
+    "unitId": "A1-15",
+    "theme": "Corpo e saúde",
+    "targetText": "tête",
+    "audioFile": "85f2a45915bd.mp3",
+    "explanation": "\"e\" tem acento circunflexo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m4-007",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m4",
+    "unitId": "A1-15",
+    "theme": "Corpo e saúde",
+    "targetText": "médecin",
+    "audioFile": "cfda885e1460.mp3",
+    "explanation": "\"e\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m4-008",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m4",
+    "unitId": "A1-15",
+    "theme": "Corpo e saúde",
+    "targetText": "fièvre",
+    "audioFile": "096c120265a1.mp3",
+    "explanation": "\"e\" tem acento grave.",
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-a1m4-001",
+    "type": "expression",
+    "canonicalExpression": "Il pleut des cordes",
+    "level": "A1",
+    "expressionAudioFile": "8239559bf59d.mp3",
+    "meaning": {
+      "fr": "Il pleut très fort.",
+      "pt": "Está chovendo canivetes; chove muito."
+    },
+    "example": {
+      "text": "Prends un parapluie, il pleut des cordes !",
+      "audioFile": "dafc0d87aeba.mp3"
+    },
+    "question": "Que veut dire « Il pleut des cordes » ?",
+    "options": [
+      "Il pleut très fort",
+      "Il ne pleut pas",
+      "Il neige",
+      "Il fait beau"
+    ],
+    "correctAnswer": "Il pleut très fort",
+    "explanation": "C'est une image : la pluie tombe comme des cordes, en lignes serrées.",
+    "secondExample": {
+      "text": "Il pleut des cordes depuis ce matin.",
+      "audioFile": "cf75a56348dc.mp3"
+    },
+    "microActivity": {
+      "prompt": "Dehors, il pleut des __________ !",
+      "answer": "cordes"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Il%20pleut%20des%20cordes/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m4",
+    "unitId": "A1-13",
+    "theme": "Clima e estações"
+  },
+  {
+    "id": "expr-a1m4-002",
+    "type": "expression",
+    "canonicalExpression": "Bon voyage !",
+    "level": "A1",
+    "expressionAudioFile": "ec3401ed870f.mp3",
+    "meaning": {
+      "fr": "On le dit à quelqu'un qui part en voyage.",
+      "pt": "Boa viagem!"
+    },
+    "example": {
+      "text": "Tu pars demain ? Bon voyage !",
+      "audioFile": "d82e442d9476.mp3"
+    },
+    "question": "Quand dit-on « Bon voyage ! » ?",
+    "options": [
+      "À quelqu'un qui part",
+      "À quelqu'un qui arrive",
+      "À quelqu'un qui mange",
+      "À quelqu'un qui dort"
+    ],
+    "correctAnswer": "À quelqu'un qui part",
+    "explanation": "On souhaite un bon trajet à la personne qui voyage.",
+    "secondExample": {
+      "text": "Bon voyage et à bientôt !",
+      "audioFile": "16a92e3f6625.mp3"
+    },
+    "microActivity": {
+      "prompt": "Au revoir, __________ voyage !",
+      "answer": "bon"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Bon%20voyage%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m4",
+    "unitId": "A1-14",
+    "theme": "Transporte"
+  },
+  {
+    "id": "expr-a1m4-003",
+    "type": "expression",
+    "canonicalExpression": "Bon rétablissement !",
+    "level": "A1",
+    "expressionAudioFile": "51bd4e31cd4b.mp3",
+    "meaning": {
+      "fr": "On le dit à quelqu'un de malade.",
+      "pt": "Melhoras! Boa recuperação!"
+    },
+    "example": {
+      "text": "Tu es malade ? Bon rétablissement !",
+      "audioFile": "fc55c53364d3.mp3"
+    },
+    "question": "À qui dit-on « Bon rétablissement ! » ?",
+    "options": [
+      "À une personne malade",
+      "À une personne en vacances",
+      "À une personne qui part",
+      "À une personne qui mange"
+    ],
+    "correctAnswer": "À une personne malade",
+    "explanation": "« Rétablissement » vient de « se rétablir » : retrouver la santé.",
+    "secondExample": {
+      "text": "Bon rétablissement, à bientôt !",
+      "audioFile": "6177d501306f.mp3"
+    },
+    "microActivity": {
+      "prompt": "Il a de la fièvre. — Bon __________ !",
+      "answer": "rétablissement"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Bon%20r%C3%A9tablissement%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m4",
+    "unitId": "A1-15",
+    "theme": "Corpo e saúde"
+  },
+  {
+    "id": "expr-a1m4-004",
+    "type": "expression",
+    "canonicalExpression": "À tes souhaits !",
+    "level": "A1",
+    "expressionAudioFile": "64cd7c816813.mp3",
+    "meaning": {
+      "fr": "On le dit quand quelqu'un éternue.",
+      "pt": "Saúde! (quando alguém espirra)"
+    },
+    "example": {
+      "text": "Atchoum ! — À tes souhaits !",
+      "audioFile": "4218170e7109.mp3"
+    },
+    "question": "Quand dit-on « À tes souhaits ! » ?",
+    "options": [
+      "Quand quelqu'un éternue",
+      "Quand quelqu'un mange",
+      "Quand quelqu'un part",
+      "Quand quelqu'un arrive"
+    ],
+    "correctAnswer": "Quand quelqu'un éternue",
+    "explanation": "Avec « vous », on dit « À vos souhaits ! ».",
+    "secondExample": {
+      "text": "À vos souhaits, madame !",
+      "audioFile": "6aee1af8c367.mp3"
+    },
+    "microActivity": {
+      "prompt": "Atchoum ! — À tes __________ !",
+      "answer": "souhaits"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%80%20tes%20souhaits%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m4",
+    "unitId": "A1-15",
+    "theme": "Corpo e saúde"
+  },
+  {
+    "id": "expr-a1m4-005",
+    "type": "expression",
+    "canonicalExpression": "Quel temps !",
+    "level": "A1",
+    "expressionAudioFile": "bad91f69d120.mp3",
+    "meaning": {
+      "fr": "On commente le temps qu'il fait (souvent pour se plaindre).",
+      "pt": "Que tempo! (comentando o clima)"
+    },
+    "example": {
+      "text": "Quel temps ! Il pleut encore.",
+      "audioFile": "9db3f633db75.mp3"
+    },
+    "question": "Que veut dire « Quel temps ! » ?",
+    "options": [
+      "On commente le temps qu'il fait",
+      "On demande l'heure",
+      "On dit au revoir",
+      "On remercie"
+    ],
+    "correctAnswer": "On commente le temps qu'il fait",
+    "explanation": "L'expression est une exclamation, pas une question.",
+    "secondExample": {
+      "text": "Quel temps ! Il fait très froid.",
+      "audioFile": "c4b8bcef5c99.mp3"
+    },
+    "microActivity": {
+      "prompt": "__________ temps ! Il neige !",
+      "answer": "Quel"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Quel%20temps%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m4",
+    "unitId": "A1-13",
+    "theme": "Clima e estações"
+  }
+]

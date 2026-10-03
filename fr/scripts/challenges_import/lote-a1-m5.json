@@ -1,0 +1,427 @@
+[
+  {
+    "id": "lt-a1m5-001",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m5",
+    "unitId": "A1-16",
+    "theme": "Cores e descrições",
+    "sentenceFr": "Ma sœur est grande et gentille.",
+    "audioFile": "377989502d6e.mp3",
+    "hintText": "Ma sœur est ______ et ______.",
+    "referenceTranslations": [
+      "Minha irmã é alta e gentil.",
+      "Minha irmã é alta e simpática.",
+      "Minha irmã é grande e gentil."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m5-002",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m5",
+    "unitId": "A1-16",
+    "theme": "Cores e descrições",
+    "sentenceFr": "Son pull est rouge.",
+    "audioFile": "65e29b20f8f8.mp3",
+    "hintText": "Son ______ est ______.",
+    "referenceTranslations": [
+      "O suéter dele é vermelho.",
+      "O suéter dela é vermelho.",
+      "A blusa dele é vermelha."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m5-003",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m5",
+    "unitId": "A1-17",
+    "theme": "A casa e os cômodos",
+    "sentenceFr": "La cuisine est à côté du salon.",
+    "audioFile": "ff49b2c5d5c7.mp3",
+    "hintText": "La ______ est à côté du ______.",
+    "referenceTranslations": [
+      "A cozinha fica ao lado da sala.",
+      "A cozinha é ao lado da sala.",
+      "A cozinha está ao lado da sala de estar."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m5-004",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m5",
+    "unitId": "A1-17",
+    "theme": "A casa e os cômodos",
+    "sentenceFr": "Il y a une fenêtre dans la chambre.",
+    "audioFile": "ef9229535c0a.mp3",
+    "hintText": "Il y a une ______ dans la ______.",
+    "referenceTranslations": [
+      "Tem uma janela no quarto.",
+      "Há uma janela no quarto.",
+      "Existe uma janela no quarto."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m5-005",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m5",
+    "unitId": "A1-18",
+    "theme": "Onde as coisas estão",
+    "sentenceFr": "La lampe est sur la table.",
+    "audioFile": "40534114d86d.mp3",
+    "hintText": "La ______ est sur la ______.",
+    "referenceTranslations": [
+      "A luminária está em cima da mesa.",
+      "O abajur está em cima da mesa.",
+      "A lâmpada está em cima da mesa."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m5-006",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m5",
+    "unitId": "A1-18",
+    "theme": "Onde as coisas estão",
+    "sentenceFr": "Le sac est sous la chaise.",
+    "audioFile": "fda0d200015e.mp3",
+    "hintText": "Le sac est ______ la ______.",
+    "referenceTranslations": [
+      "A bolsa está embaixo da cadeira.",
+      "A mochila está embaixo da cadeira.",
+      "A bolsa está debaixo da cadeira."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m5-001",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m5",
+    "unitId": "A1-16",
+    "theme": "Cores e descrições",
+    "targetText": "très",
+    "audioFile": "9a2a9615552a.mp3",
+    "explanation": "\"e\" tem acento grave.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m5-002",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m5",
+    "unitId": "A1-17",
+    "theme": "A casa e os cômodos",
+    "targetText": "fenêtre",
+    "audioFile": "d822a2561909.mp3",
+    "explanation": "\"e\" tem acento circunflexo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m5-003",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m5",
+    "unitId": "A1-17",
+    "theme": "A casa e os cômodos",
+    "targetText": "étage",
+    "audioFile": "2efa6a80abec.mp3",
+    "explanation": "\"e\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m5-004",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m5",
+    "unitId": "A1-18",
+    "theme": "Onde as coisas estão",
+    "targetText": "derrière",
+    "audioFile": "58baef8addca.mp3",
+    "explanation": "\"e\" tem acento grave.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m5-005",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m5",
+    "unitId": "A1-18",
+    "theme": "Onde as coisas estão",
+    "targetText": "canapé",
+    "audioFile": "8ec877183107.mp3",
+    "explanation": "\"e\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m5-006",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m5",
+    "unitId": "A1-18",
+    "theme": "Onde as coisas estão",
+    "targetText": "à côté de",
+    "audioFile": "81b92edabd8f.mp3",
+    "explanation": "\"à\" tem acento grave e \"ô\" tem acento circunflexo; \"é\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-a1m5-001",
+    "type": "expression",
+    "canonicalExpression": "Fais comme chez toi",
+    "level": "A1",
+    "expressionAudioFile": "697c5f906460.mp3",
+    "meaning": {
+      "fr": "On dit à un invité de se sentir à l'aise.",
+      "pt": "Fique à vontade; faça como se fosse a sua casa."
+    },
+    "example": {
+      "text": "Entre, fais comme chez toi !",
+      "audioFile": "5a6a5da8cc11.mp3"
+    },
+    "question": "Quand dit-on « Fais comme chez toi » ?",
+    "options": [
+      "À un invité, pour qu'il soit à l'aise",
+      "À un voisin qui part",
+      "À un ami malade",
+      "À un client"
+    ],
+    "correctAnswer": "À un invité, pour qu'il soit à l'aise",
+    "explanation": "Avec « vous », on dit « Faites comme chez vous ».",
+    "secondExample": {
+      "text": "Voilà le salon. Fais comme chez toi.",
+      "audioFile": "1de79f95e123.mp3"
+    },
+    "microActivity": {
+      "prompt": "Entre ! Fais comme __________ toi !",
+      "answer": "chez"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Fais%20comme%20chez%20toi/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m5",
+    "unitId": "A1-17",
+    "theme": "A casa e os cômodos"
+  },
+  {
+    "id": "expr-a1m5-002",
+    "type": "expression",
+    "canonicalExpression": "Chez moi",
+    "level": "A1",
+    "expressionAudioFile": "5efcc25cd4d0.mp3",
+    "meaning": {
+      "fr": "À la maison ; dans mon logement.",
+      "pt": "Na minha casa; em casa."
+    },
+    "example": {
+      "text": "Viens chez moi ce soir !",
+      "audioFile": "8b63b1c2c8bf.mp3"
+    },
+    "question": "Que veut dire « chez moi » ?",
+    "options": [
+      "Dans ma maison",
+      "Dans ton école",
+      "Au restaurant",
+      "À la gare"
+    ],
+    "correctAnswer": "Dans ma maison",
+    "explanation": "« Chez » + personne = la maison de cette personne : chez moi, chez toi, chez elle.",
+    "secondExample": {
+      "text": "Chez moi, il y a deux chambres.",
+      "audioFile": "cca2372546af.mp3"
+    },
+    "microActivity": {
+      "prompt": "On mange __________ moi ce soir.",
+      "answer": "chez"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Chez%20moi/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m5",
+    "unitId": "A1-17",
+    "theme": "A casa e os cômodos"
+  },
+  {
+    "id": "expr-a1m5-003",
+    "type": "expression",
+    "canonicalExpression": "Bienvenue !",
+    "level": "A1",
+    "expressionAudioFile": "5c00d1f8c26a.mp3",
+    "meaning": {
+      "fr": "On accueille quelqu'un.",
+      "pt": "Bem-vindo(a)!"
+    },
+    "example": {
+      "text": "Bienvenue chez moi !",
+      "audioFile": "937fa74ca734.mp3"
+    },
+    "question": "Quand dit-on « Bienvenue ! » ?",
+    "options": [
+      "Quand on accueille quelqu'un",
+      "Quand on part",
+      "Quand on mange",
+      "Quand on dort"
+    ],
+    "correctAnswer": "Quand on accueille quelqu'un",
+    "explanation": "« Bienvenue » = « bien » + « venue » : arrivée bienvenue.",
+    "secondExample": {
+      "text": "Bienvenue à Paris !",
+      "audioFile": "e48317216a2b.mp3"
+    },
+    "microActivity": {
+      "prompt": "__________ chez moi !",
+      "answer": "Bienvenue"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Bienvenue%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m5",
+    "unitId": "A1-17",
+    "theme": "A casa e os cômodos"
+  },
+  {
+    "id": "expr-a1m5-004",
+    "type": "expression",
+    "canonicalExpression": "Ça te va bien !",
+    "level": "A1",
+    "expressionAudioFile": "7ffb44fa9de1.mp3",
+    "meaning": {
+      "fr": "Ce vêtement ou cette couleur te va bien.",
+      "pt": "Fica bem em você! Combina com você!"
+    },
+    "example": {
+      "text": "Cette robe rouge, ça te va bien !",
+      "audioFile": "d67da62eb504.mp3"
+    },
+    "question": "Que veut dire « Ça te va bien ! » ?",
+    "options": [
+      "C'est joli sur toi",
+      "C'est trop petit",
+      "C'est trop cher",
+      "C'est sale"
+    ],
+    "correctAnswer": "C'est joli sur toi",
+    "explanation": "On complimente un vêtement ou une couleur.",
+    "secondExample": {
+      "text": "Ça te va bien, le bleu.",
+      "audioFile": "19b7c604847d.mp3"
+    },
+    "microActivity": {
+      "prompt": "Ce pull vert, ça te __________ bien !",
+      "answer": "va"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%87a%20te%20va%20bien%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m5",
+    "unitId": "A1-16",
+    "theme": "Cores e descrições"
+  },
+  {
+    "id": "expr-a1m5-005",
+    "type": "expression",
+    "canonicalExpression": "Ça te plaît ?",
+    "level": "A1",
+    "expressionAudioFile": "9366d2c6cb03.mp3",
+    "meaning": {
+      "fr": "On demande si quelqu'un aime quelque chose.",
+      "pt": "Você gostou? Gostou disso?"
+    },
+    "example": {
+      "text": "Ma nouvelle maison, ça te plaît ?",
+      "audioFile": "641dcaf28e7f.mp3"
+    },
+    "question": "Que veut dire « Ça te plaît ? » ?",
+    "options": [
+      "Tu aimes ça ?",
+      "Tu as faim ?",
+      "Tu es fatigué ?",
+      "Tu viens ?"
+    ],
+    "correctAnswer": "Tu aimes ça ?",
+    "explanation": "« Plaire » = être agréable : « Ça te plaît » = « Tu aimes ça ? ».",
+    "secondExample": {
+      "text": "Ça te plaît, cette couleur ?",
+      "audioFile": "ba360659673a.mp3"
+    },
+    "microActivity": {
+      "prompt": "Cette robe, ça te __________ ?",
+      "answer": "plaît"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%87a%20te%20pla%C3%AEt%20%3F/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m5",
+    "unitId": "A1-16",
+    "theme": "Cores e descrições"
+  }
+]

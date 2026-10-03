@@ -1,0 +1,521 @@
+[
+  {
+    "id": "lt-a1m3-001",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-8",
+    "theme": "Lugares e orientação",
+    "sentenceFr": "Le musée est loin d'ici.",
+    "audioFile": "e19385777230.mp3",
+    "hintText": "Le ______ est ______ d'ici.",
+    "referenceTranslations": [
+      "O museu fica longe daqui.",
+      "O museu é longe daqui.",
+      "O museu está longe daqui."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m3-002",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-8",
+    "theme": "Lugares e orientação",
+    "sentenceFr": "Tournez à droite, puis tout droit.",
+    "audioFile": "49966e9c21be.mp3",
+    "hintText": "Tournez à ______, puis tout ______.",
+    "referenceTranslations": [
+      "Vire à direita e depois siga em frente.",
+      "Vire à direita, depois siga reto.",
+      "Vire à direita, depois em frente."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m3-003",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-9",
+    "theme": "Nacionalidades",
+    "sentenceFr": "Je viens du Brésil, et toi ?",
+    "audioFile": "b9e6fddb08d2.mp3",
+    "hintText": "Je ______ du Brésil, et ______ ?",
+    "referenceTranslations": [
+      "Eu venho do Brasil, e você?",
+      "Sou do Brasil, e você?",
+      "Eu venho do Brasil, e tu?"
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m3-004",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-9",
+    "theme": "Nacionalidades",
+    "sentenceFr": "Elle est américaine.",
+    "audioFile": "545537bb2c85.mp3",
+    "hintText": "Elle est ______.",
+    "referenceTranslations": [
+      "Ela é americana.",
+      "Ela é norte-americana."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m3-005",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-10",
+    "theme": "Compras",
+    "sentenceFr": "Le pantalon coûte cinquante euros.",
+    "audioFile": "efa27c3ace8f.mp3",
+    "hintText": "Le ______ coûte ______ euros.",
+    "referenceTranslations": [
+      "A calça custa cinquenta euros.",
+      "A calça é cinquenta euros.",
+      "A calça sai por cinquenta euros."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m3-006",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-10",
+    "theme": "Compras",
+    "sentenceFr": "Je cherche une robe.",
+    "audioFile": "c21fa36cb886.mp3",
+    "hintText": "Je ______ une ______.",
+    "referenceTranslations": [
+      "Estou procurando um vestido.",
+      "Eu procuro um vestido.",
+      "Procuro um vestido."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m3-007",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-11",
+    "theme": "Compras de mercado",
+    "sentenceFr": "J'achète des légumes et du riz.",
+    "audioFile": "5f2b532775ed.mp3",
+    "hintText": "J'achète des ______ et du ______.",
+    "referenceTranslations": [
+      "Eu compro legumes e arroz.",
+      "Compro legumes e arroz.",
+      "Estou comprando legumes e arroz."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m3-008",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-11",
+    "theme": "Compras de mercado",
+    "sentenceFr": "Tu veux du sucre ?",
+    "audioFile": "883eb45d48b4.mp3",
+    "hintText": "Tu ______ du ______ ?",
+    "referenceTranslations": [
+      "Você quer açúcar?",
+      "Tu queres açúcar?",
+      "Quer açúcar?"
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m3-009",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-12",
+    "theme": "Pesos e quantidades",
+    "sentenceFr": "Je prends un kilo de pommes.",
+    "audioFile": "680e335ec855.mp3",
+    "hintText": "Je prends un ______ de ______.",
+    "referenceTranslations": [
+      "Eu levo um quilo de maçãs.",
+      "Eu pego um quilo de maçãs.",
+      "Levo um quilo de maçãs."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m3-010",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-12",
+    "theme": "Pesos e quantidades",
+    "sentenceFr": "Une bouteille d'eau, s'il vous plaît.",
+    "audioFile": "0d1f3fa74ea6.mp3",
+    "hintText": "Une ______ d'______, s'il vous plaît.",
+    "referenceTranslations": [
+      "Uma garrafa de água, por favor.",
+      "Uma garrafa d'água, por favor."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m3-001",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-8",
+    "theme": "Lugares e orientação",
+    "targetText": "près",
+    "audioFile": "1e318a4f060d.mp3",
+    "explanation": "\"e\" tem acento grave.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m3-002",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-8",
+    "theme": "Lugares e orientação",
+    "targetText": "hôpital",
+    "audioFile": "ddf37ccf18a3.mp3",
+    "explanation": "\"o\" tem acento circunflexo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m3-003",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-9",
+    "theme": "Nacionalidades",
+    "targetText": "nationalité",
+    "audioFile": "17e35ef4b4db.mp3",
+    "explanation": "\"e\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m3-004",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-9",
+    "theme": "Nacionalidades",
+    "targetText": "où",
+    "audioFile": "5ac527522f4d.mp3",
+    "explanation": "\"u\" tem acento grave: \"où\" = onde; \"ou\" (sem acento) = ou.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m3-005",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-10",
+    "theme": "Compras",
+    "targetText": "coûte",
+    "audioFile": "4bfdd643965f.mp3",
+    "explanation": "\"u\" tem acento circunflexo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m3-006",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-11",
+    "theme": "Compras de mercado",
+    "targetText": "légumes",
+    "audioFile": "963b3d2b050e.mp3",
+    "explanation": "\"e\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m3-007",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-11",
+    "theme": "Compras de mercado",
+    "targetText": "pâtes",
+    "audioFile": "505cab7a0160.mp3",
+    "explanation": "\"a\" tem acento circunflexo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m3-008",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m3",
+    "unitId": "A1-12",
+    "theme": "Pesos e quantidades",
+    "targetText": "très",
+    "audioFile": "9a2a9615552a.mp3",
+    "explanation": "\"e\" tem acento grave.",
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-a1m3-001",
+    "type": "expression",
+    "canonicalExpression": "Excusez-moi !",
+    "level": "A1",
+    "expressionAudioFile": "358e82d5d131.mp3",
+    "meaning": {
+      "fr": "On l'utilise pour attirer l'attention ou s'excuser poliment.",
+      "pt": "Com licença! Desculpe!"
+    },
+    "example": {
+      "text": "Excusez-moi, où est la gare ?",
+      "audioFile": "be45758f73d4.mp3"
+    },
+    "question": "Quand dit-on « Excusez-moi ! » ?",
+    "options": [
+      "Pour attirer l'attention poliment",
+      "Pour dire au revoir",
+      "Pour remercier",
+      "Pour refuser"
+    ],
+    "correctAnswer": "Pour attirer l'attention poliment",
+    "explanation": "On dit « Excusez-moi » avant de poser une question à un inconnu.",
+    "secondExample": {
+      "text": "Excusez-moi, je suis en retard.",
+      "audioFile": "e0dcbd0000c9.mp3"
+    },
+    "microActivity": {
+      "prompt": "__________, où est le musée ?",
+      "answer": "Excusez-moi"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Excusez-moi%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m3",
+    "unitId": "A1-8",
+    "theme": "Lugares e orientação"
+  },
+  {
+    "id": "expr-a1m3-002",
+    "type": "expression",
+    "canonicalExpression": "Je vous en prie",
+    "level": "A1",
+    "expressionAudioFile": "998a30c1edd7.mp3",
+    "meaning": {
+      "fr": "C'est la réponse polie à « merci » (« de rien », en plus formel).",
+      "pt": "De nada; por favor, fique à vontade."
+    },
+    "example": {
+      "text": "Merci beaucoup ! — Je vous en prie.",
+      "audioFile": "a08270d9e559.mp3"
+    },
+    "question": "Que veut dire « Je vous en prie » après « Merci » ?",
+    "options": [
+      "De rien",
+      "Au revoir",
+      "Je ne sais pas",
+      "Pardon"
+    ],
+    "correctAnswer": "De rien",
+    "explanation": "C'est la forme polie de « de rien ». Entre amis : « Je t'en prie » ou « De rien ».",
+    "secondExample": {
+      "text": "Je vous en prie, entrez.",
+      "audioFile": "1141ffa58bd3.mp3"
+    },
+    "microActivity": {
+      "prompt": "Merci ! — Je vous en __________.",
+      "answer": "prie"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Je%20vous%20en%20prie/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m3",
+    "unitId": "A1-8",
+    "theme": "Lugares e orientação"
+  },
+  {
+    "id": "expr-a1m3-003",
+    "type": "expression",
+    "canonicalExpression": "Ça fait combien ?",
+    "level": "A1",
+    "expressionAudioFile": "1cb7cd552e39.mp3",
+    "meaning": {
+      "fr": "On demande le prix total.",
+      "pt": "Quanto fica? Quanto dá?"
+    },
+    "example": {
+      "text": "Ça fait combien, s'il vous plaît ?",
+      "audioFile": "05e8c3c9af85.mp3"
+    },
+    "question": "Que veut dire « Ça fait combien ? » ?",
+    "options": [
+      "Quel est le prix ?",
+      "Quelle heure est-il ?",
+      "Où est-ce ?",
+      "Qui est-ce ?"
+    ],
+    "correctAnswer": "Quel est le prix ?",
+    "explanation": "On l'utilise à la caisse pour connaître le total à payer.",
+    "secondExample": {
+      "text": "Ça fait combien pour les deux ?",
+      "audioFile": "2442367f5b08.mp3"
+    },
+    "microActivity": {
+      "prompt": "__________ combien, s'il vous plaît ?",
+      "answer": "Ça fait"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%87a%20fait%20combien%20%3F/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m3",
+    "unitId": "A1-10",
+    "theme": "Compras"
+  },
+  {
+    "id": "expr-a1m3-004",
+    "type": "expression",
+    "canonicalExpression": "C'est trop cher !",
+    "level": "A1",
+    "expressionAudioFile": "3c42e392d8b3.mp3",
+    "meaning": {
+      "fr": "Le prix est trop élevé.",
+      "pt": "É caro demais!"
+    },
+    "example": {
+      "text": "Cent euros ? C'est trop cher !",
+      "audioFile": "b89b075e591a.mp3"
+    },
+    "question": "Que veut dire « C'est trop cher ! » ?",
+    "options": [
+      "Le prix est trop élevé",
+      "Le prix est parfait",
+      "C'est gratuit",
+      "C'est très petit"
+    ],
+    "correctAnswer": "Le prix est trop élevé",
+    "explanation": "« Trop » veut dire « plus que nécessaire » : c'est un prix trop haut.",
+    "secondExample": {
+      "text": "Ce sac est joli, mais c'est trop cher.",
+      "audioFile": "ef28879f0150.mp3"
+    },
+    "microActivity": {
+      "prompt": "Quatre-vingts euros ? C'est __________ cher !",
+      "answer": "trop"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/C%27est%20trop%20cher%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m3",
+    "unitId": "A1-10",
+    "theme": "Compras"
+  },
+  {
+    "id": "expr-a1m3-005",
+    "type": "expression",
+    "canonicalExpression": "Et avec ça ?",
+    "level": "A1",
+    "expressionAudioFile": "179fb9cbabe5.mp3",
+    "meaning": {
+      "fr": "Le vendeur demande si vous voulez autre chose.",
+      "pt": "Mais alguma coisa?"
+    },
+    "example": {
+      "text": "Un kilo de pommes. — Et avec ça ?",
+      "audioFile": "14b2eb10e355.mp3"
+    },
+    "question": "Qui dit « Et avec ça ? » ?",
+    "options": [
+      "Le vendeur",
+      "Le client",
+      "Le médecin",
+      "Le professeur"
+    ],
+    "correctAnswer": "Le vendeur",
+    "explanation": "Le commerçant le dit pour proposer un autre produit.",
+    "secondExample": {
+      "text": "Et avec ça ? — Une bouteille d'eau.",
+      "audioFile": "ac1e91f7164f.mp3"
+    },
+    "microActivity": {
+      "prompt": "Un litre de lait. — Et avec __________ ?",
+      "answer": "ça"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Et%20avec%20%C3%A7a%20%3F/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m3",
+    "unitId": "A1-12",
+    "theme": "Pesos e quantidades"
+  }
+]

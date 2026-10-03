@@ -1,0 +1,379 @@
+[
+  {
+    "id": "lt-a1m6-001",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m6",
+    "unitId": "A1-19",
+    "theme": "Lazer e atividades",
+    "sentenceFr": "Le week-end, j'aime lire.",
+    "audioFile": "74822c9cac32.mp3",
+    "hintText": "Le ______, j'aime ______.",
+    "referenceTranslations": [
+      "No fim de semana, eu gosto de ler.",
+      "No fim de semana, gosto de ler.",
+      "Aos fins de semana, eu gosto de ler."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m6-002",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m6",
+    "unitId": "A1-19",
+    "theme": "Lazer e atividades",
+    "sentenceFr": "On va au cinéma samedi soir ?",
+    "audioFile": "51808c5bfe7c.mp3",
+    "hintText": "On va au ______ samedi ______ ?",
+    "referenceTranslations": [
+      "A gente vai ao cinema no sábado à noite?",
+      "Vamos ao cinema sábado à noite?",
+      "A gente vai ao cinema sábado à noite?"
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m6-003",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m6",
+    "unitId": "A1-20",
+    "theme": "Passado",
+    "sentenceFr": "Hier, j'ai mangé au restaurant.",
+    "audioFile": "956ec4e9b951.mp3",
+    "hintText": "______, j'ai ______ au restaurant.",
+    "referenceTranslations": [
+      "Ontem eu comi no restaurante.",
+      "Ontem comi no restaurante.",
+      "Ontem eu almocei no restaurante."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m6-004",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m6",
+    "unitId": "A1-20",
+    "theme": "Passado",
+    "sentenceFr": "Ce matin, j'ai pris le bus.",
+    "audioFile": "615cc0726b3e.mp3",
+    "hintText": "Ce ______, j'ai ______ le bus.",
+    "referenceTranslations": [
+      "Hoje de manhã eu peguei o ônibus.",
+      "Esta manhã peguei o ônibus.",
+      "Hoje cedo eu peguei o ônibus."
+    ],
+    "explanation": "",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m6-001",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m6",
+    "unitId": "A1-19",
+    "theme": "Lazer e atividades",
+    "targetText": "cinéma",
+    "audioFile": "f727a716898b.mp3",
+    "explanation": "\"e\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m6-002",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m6",
+    "unitId": "A1-19",
+    "theme": "Lazer e atividades",
+    "targetText": "écouter",
+    "audioFile": "170290f5ca1e.mp3",
+    "explanation": "\"e\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m6-003",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m6",
+    "unitId": "A1-20",
+    "theme": "Passado",
+    "targetText": "dernière",
+    "audioFile": "1c0a979a3f83.mp3",
+    "explanation": "\"e\" tem acento grave.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m6-004",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m6",
+    "unitId": "A1-20",
+    "theme": "Passado",
+    "targetText": "récemment",
+    "audioFile": "3b1e97adabe9.mp3",
+    "explanation": "\"e\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m6-005",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m6",
+    "unitId": "A1-20",
+    "theme": "Passado",
+    "targetText": "année",
+    "audioFile": "c63b2d99c650.mp3",
+    "explanation": "\"e\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-a1m6-001",
+    "type": "expression",
+    "canonicalExpression": "Bon week-end !",
+    "level": "A1",
+    "expressionAudioFile": "2154f1f02c72.mp3",
+    "meaning": {
+      "fr": "On le dit pour se quitter avant le week-end.",
+      "pt": "Bom fim de semana!"
+    },
+    "example": {
+      "text": "Au revoir, bon week-end !",
+      "audioFile": "e2e6d0ba1288.mp3"
+    },
+    "question": "Quand dit-on « Bon week-end ! » ?",
+    "options": [
+      "Avant le week-end",
+      "Le lundi matin",
+      "Le soir de Noël",
+      "À l'anniversaire"
+    ],
+    "correctAnswer": "Avant le week-end",
+    "explanation": "On le dit en général le vendredi.",
+    "secondExample": {
+      "text": "Merci, bon week-end à toi aussi !",
+      "audioFile": "dbe1e38201a2.mp3"
+    },
+    "microActivity": {
+      "prompt": "À lundi ! __________ week-end !",
+      "answer": "Bon"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Bon%20week-end%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m6",
+    "unitId": "A1-19",
+    "theme": "Lazer e atividades"
+  },
+  {
+    "id": "expr-a1m6-002",
+    "type": "expression",
+    "canonicalExpression": "Bonne soirée !",
+    "level": "A1",
+    "expressionAudioFile": "3264b642d72d.mp3",
+    "meaning": {
+      "fr": "On le dit pour se quitter le soir.",
+      "pt": "Boa noite! Tenha uma boa noite!"
+    },
+    "example": {
+      "text": "Au revoir, bonne soirée !",
+      "audioFile": "ee8a6ee47d7b.mp3"
+    },
+    "question": "Quand dit-on « Bonne soirée ! » ?",
+    "options": [
+      "Le soir, en se quittant",
+      "Le matin, en arrivant",
+      "À midi, avant de manger",
+      "À minuit, en se réveillant"
+    ],
+    "correctAnswer": "Le soir, en se quittant",
+    "explanation": "Le matin ou l'après-midi, on dit plutôt « Bonne journée ! ».",
+    "secondExample": {
+      "text": "Merci, bonne soirée à vous aussi !",
+      "audioFile": "c413770a5d17.mp3"
+    },
+    "microActivity": {
+      "prompt": "Au revoir, __________ soirée !",
+      "answer": "bonne"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Bonne%20soir%C3%A9e%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m6",
+    "unitId": "A1-19",
+    "theme": "Lazer e atividades"
+  },
+  {
+    "id": "expr-a1m6-003",
+    "type": "expression",
+    "canonicalExpression": "C'est parti !",
+    "level": "A1",
+    "expressionAudioFile": "f261befcc6d1.mp3",
+    "meaning": {
+      "fr": "On commence quelque chose.",
+      "pt": "Vamos lá! Começou!"
+    },
+    "example": {
+      "text": "Le film commence. C'est parti !",
+      "audioFile": "ead92227fc75.mp3"
+    },
+    "question": "Que veut dire « C'est parti ! » ?",
+    "options": [
+      "On commence",
+      "On arrête",
+      "On rentre",
+      "On dort"
+    ],
+    "correctAnswer": "On commence",
+    "explanation": "On le dit au début d'une activité, d'un voyage ou d'un jeu.",
+    "secondExample": {
+      "text": "On a tout ? Alors, c'est parti !",
+      "audioFile": "695eefda6660.mp3"
+    },
+    "microActivity": {
+      "prompt": "3, 2, 1... __________ parti !",
+      "answer": "C'est"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/C%27est%20parti%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m6",
+    "unitId": "A1-19",
+    "theme": "Lazer e atividades"
+  },
+  {
+    "id": "expr-a1m6-004",
+    "type": "expression",
+    "canonicalExpression": "Quoi de neuf ?",
+    "level": "A1",
+    "expressionAudioFile": "0444934e8af7.mp3",
+    "meaning": {
+      "fr": "On demande des nouvelles récentes à un ami.",
+      "pt": "Quais as novidades? E aí, novidades? Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Salut ! Quoi de neuf ?",
+      "audioFile": "8c6c5b751449.mp3"
+    },
+    "question": "Que veut dire « Quoi de neuf ? » ?",
+    "options": [
+      "Il y a des nouvelles ?",
+      "Il est quelle heure ?",
+      "Tu viens d'où ?",
+      "Tu as quel âge ?"
+    ],
+    "correctAnswer": "Il y a des nouvelles ?",
+    "explanation": "Entre amis, pour commencer la conversation. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Quoi de neuf depuis la semaine dernière ?",
+      "audioFile": "96fcef9a9254.mp3"
+    },
+    "microActivity": {
+      "prompt": "Salut ! Quoi de __________ ?",
+      "answer": "neuf"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/Quoi%20de%20neuf%20%3F/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m6",
+    "unitId": "A1-20",
+    "theme": "Passado"
+  },
+  {
+    "id": "expr-a1m6-005",
+    "type": "expression",
+    "canonicalExpression": "Ça fait longtemps !",
+    "level": "A1",
+    "expressionAudioFile": "b07b8893bc75.mp3",
+    "meaning": {
+      "fr": "On dit à quelqu'un qu'on ne l'a pas vu depuis longtemps.",
+      "pt": "Quanto tempo! Faz tempo!"
+    },
+    "example": {
+      "text": "Salut Marc ! Ça fait longtemps !",
+      "audioFile": "351141303ed5.mp3"
+    },
+    "question": "Que veut dire « Ça fait longtemps ! » ?",
+    "options": [
+      "On ne s'est pas vus depuis longtemps",
+      "On se voit demain",
+      "On est en retard",
+      "On a faim"
+    ],
+    "correctAnswer": "On ne s'est pas vus depuis longtemps",
+    "explanation": "« Ça fait » + durée = depuis combien de temps quelque chose arrive.",
+    "secondExample": {
+      "text": "Ça fait longtemps que je ne t'ai pas vu !",
+      "audioFile": "a533ecea4418.mp3"
+    },
+    "microActivity": {
+      "prompt": "Salut ! Ça fait __________ !",
+      "answer": "longtemps"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%87a%20fait%20longtemps%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review",
+    "moduleId": "A1-m6",
+    "unitId": "A1-20",
+    "theme": "Passado"
+  }
+]

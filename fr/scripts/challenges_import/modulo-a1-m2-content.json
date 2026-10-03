@@ -1,0 +1,253 @@
+{
+  "moduleId": "A1-m2",
+  "level": "A1",
+  "listenTranslate": [
+    {
+      "unitId": "A1-5",
+      "theme": "Comida e bebida",
+      "fr": "Je voudrais du fromage, s'il vous plaît.",
+      "hide": [
+        "fromage",
+        "voudrais"
+      ],
+      "refs": [
+        "Eu gostaria de queijo, por favor.",
+        "Eu queria queijo, por favor.",
+        "Queria queijo, por favor."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-5",
+      "theme": "Comida e bebida",
+      "fr": "Tu bois du lait le matin ?",
+      "hide": [
+        "bois",
+        "lait"
+      ],
+      "refs": [
+        "Você bebe leite de manhã?",
+        "Tu bebes leite de manhã?",
+        "Você toma leite de manhã?"
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-6",
+      "theme": "Horas e rotina",
+      "fr": "Je me lève à six heures.",
+      "hide": [
+        "lève",
+        "six"
+      ],
+      "refs": [
+        "Eu me levanto às seis horas.",
+        "Levanto às seis horas.",
+        "Eu levanto às seis."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-6",
+      "theme": "Horas e rotina",
+      "fr": "Il est sept heures du soir.",
+      "hide": [
+        "sept",
+        "soir"
+      ],
+      "refs": [
+        "São sete horas da noite.",
+        "São sete da noite.",
+        "São 19 horas."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-7",
+      "theme": "Dias e meses",
+      "fr": "Aujourd'hui, nous sommes mardi.",
+      "hide": [
+        "sommes",
+        "mardi"
+      ],
+      "refs": [
+        "Hoje é terça-feira.",
+        "Hoje estamos em terça-feira.",
+        "Hoje é terça."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-7",
+      "theme": "Dias e meses",
+      "fr": "Je travaille demain matin.",
+      "hide": [
+        "travaille",
+        "demain"
+      ],
+      "refs": [
+        "Eu trabalho amanhã de manhã.",
+        "Trabalho amanhã de manhã.",
+        "Vou trabalhar amanhã de manhã."
+      ],
+      "explanation": ""
+    }
+  ],
+  "accent": [
+    {
+      "unitId": "A1-5",
+      "theme": "Comida e bebida",
+      "text": "café",
+      "explanation": "\"e\" tem acento agudo."
+    },
+    {
+      "unitId": "A1-5",
+      "theme": "Comida e bebida",
+      "text": "détester",
+      "explanation": "\"e\" tem acento agudo."
+    },
+    {
+      "unitId": "A1-6",
+      "theme": "Horas e rotina",
+      "text": "se réveiller",
+      "explanation": "Os dois \"e\" têm acento agudo."
+    },
+    {
+      "unitId": "A1-6",
+      "theme": "Horas e rotina",
+      "text": "tôt",
+      "explanation": "\"o\" tem acento circunflexo."
+    },
+    {
+      "unitId": "A1-7",
+      "theme": "Dias e meses",
+      "text": "décembre",
+      "explanation": "\"e\" tem acento agudo."
+    },
+    {
+      "unitId": "A1-7",
+      "theme": "Dias e meses",
+      "text": "février",
+      "explanation": "\"e\" tem acento agudo."
+    },
+    {
+      "unitId": "A1-7",
+      "theme": "Dias e meses",
+      "text": "août",
+      "explanation": "\"o\" tem acento circunflexo."
+    },
+    {
+      "unitId": "A1-7",
+      "theme": "Dias e meses",
+      "text": "à demain",
+      "explanation": "\"à\" tem acento grave."
+    }
+  ],
+  "expression": [
+    {
+      "unitId": "A1-5",
+      "theme": "Comida e bebida",
+      "expression": "Bon appétit !",
+      "register": "neutre",
+      "meaningFr": "On le dit avant de manger.",
+      "meaningPt": "Bom apetite!",
+      "exampleText": "Voilà ton plat. — Bon appétit !",
+      "secondExampleText": "Bon appétit, tout le monde !",
+      "question": "Quand dit-on « Bon appétit ! » ?",
+      "options": [
+        "Avant de manger",
+        "En se réveillant",
+        "En quittant la maison",
+        "Quand on est malade"
+      ],
+      "correctAnswer": "Avant de manger",
+      "explanationFr": "« Bon appétit ! » se dit avant le repas, à table.",
+      "microPrompt": "Le dîner est prêt. — __________ !",
+      "microAnswer": "Bon appétit"
+    },
+    {
+      "unitId": "A1-5",
+      "theme": "Comida e bebida",
+      "expression": "À table !",
+      "register": "neutre",
+      "meaningFr": "On appelle tout le monde pour manger.",
+      "meaningPt": "Hora de comer! Para a mesa!",
+      "exampleText": "Les enfants, à table !",
+      "secondExampleText": "À table ! Le dîner est prêt.",
+      "question": "Que veut dire « À table ! » ?",
+      "options": [
+        "Venez manger",
+        "Allez dormir",
+        "Allez travailler",
+        "Rangez la table"
+      ],
+      "correctAnswer": "Venez manger",
+      "explanationFr": "On crie « À table ! » pour dire que le repas est prêt.",
+      "microPrompt": "Maman appelle : « __________ ! »",
+      "microAnswer": "À table"
+    },
+    {
+      "unitId": "A1-6",
+      "theme": "Horas e rotina",
+      "expression": "À tout à l'heure !",
+      "register": "neutre",
+      "meaningFr": "Au revoir, on se voit bientôt dans la journée.",
+      "meaningPt": "Até daqui a pouco!",
+      "exampleText": "Je vais au marché. — À tout à l'heure !",
+      "secondExampleText": "Je pars à midi. À tout à l'heure !",
+      "question": "Quand dit-on « À tout à l'heure ! » ?",
+      "options": [
+        "Quand on va se revoir bientôt",
+        "Quand on ne se revoit jamais",
+        "Quand on se voit la semaine prochaine",
+        "Quand on arrive"
+      ],
+      "correctAnswer": "Quand on va se revoir bientôt",
+      "explanationFr": "Cette expression dit qu'on va se revoir le même jour.",
+      "microPrompt": "Je pars au travail. — À tout à __________ !",
+      "microAnswer": "l'heure"
+    },
+    {
+      "unitId": "A1-6",
+      "theme": "Horas e rotina",
+      "expression": "Tout de suite",
+      "register": "neutre",
+      "meaningFr": "Immédiatement, sans attendre.",
+      "meaningPt": "Agora mesmo; já.",
+      "exampleText": "Tu viens ? — Oui, tout de suite !",
+      "secondExampleText": "Je viens tout de suite.",
+      "question": "Que veut dire « tout de suite » ?",
+      "options": [
+        "Immédiatement",
+        "Beaucoup plus tard",
+        "Jamais",
+        "Le soir"
+      ],
+      "correctAnswer": "Immédiatement",
+      "explanationFr": "« Tout de suite » veut dire « maintenant, sans attendre ».",
+      "microPrompt": "Tu viens manger ? — Oui, __________ !",
+      "microAnswer": "tout de suite"
+    },
+    {
+      "unitId": "A1-7",
+      "theme": "Dias e meses",
+      "expression": "Bonne journée !",
+      "register": "neutre",
+      "meaningFr": "On le dit pour se quitter pendant la journée.",
+      "meaningPt": "Tenha um bom dia!",
+      "exampleText": "Au revoir et bonne journée !",
+      "secondExampleText": "Merci, bonne journée !",
+      "question": "Quand dit-on « Bonne journée ! » ?",
+      "options": [
+        "En se quittant le matin ou l'après-midi",
+        "En se couchant",
+        "Avant de manger",
+        "En arrivant"
+      ],
+      "correctAnswer": "En se quittant le matin ou l'après-midi",
+      "explanationFr": "Le soir, on dit plutôt « Bonne soirée ! ».",
+      "microPrompt": "Au revoir, __________ !",
+      "microAnswer": "bonne journée"
+    }
+  ]
+}

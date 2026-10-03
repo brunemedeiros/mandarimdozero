@@ -31,3 +31,7 @@ Para mudar um texto: edite `lote-expressoes-content.json`, rode
 - Áudio: Actions > **Áudio TTS** > modo `desafios-a1-m1` (branch `main`).
 - Importar: painel admin > Desafios > **📥 Importar JSON** (colar o conteúdo de `lote-a1-m1.json`), depois revisar e publicar.
 - Na app: o módulo ganha a unidade opcional "Desafios do Módulo 1" (fim do módulo, depois do Ponto de verificação); contas Free veem o cadeado, contas Premium e o admin abrem os desafios do módulo.
+
+### Módulos 2 a 6 (A1)
+
+Mesmo formato do Módulo 1: `modulo-a1-mN-content.json` -> `python3 fr/scripts/challenges_import/build_modulo.py fr/scripts/challenges_import/modulo-a1-mN-content.json` gera `lote-a1-mN.json` + `lote-a1-mN.md` (resumo legível). Áudio de todos de uma vez: Actions > Áudio TTS > modo `desafios-a1-todos`.

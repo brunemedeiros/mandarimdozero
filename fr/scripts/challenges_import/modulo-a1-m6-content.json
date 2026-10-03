@@ -1,0 +1,205 @@
+{
+  "moduleId": "A1-m6",
+  "level": "A1",
+  "listenTranslate": [
+    {
+      "unitId": "A1-19",
+      "theme": "Lazer e atividades",
+      "fr": "Le week-end, j'aime lire.",
+      "hide": [
+        "week-end",
+        "lire"
+      ],
+      "refs": [
+        "No fim de semana, eu gosto de ler.",
+        "No fim de semana, gosto de ler.",
+        "Aos fins de semana, eu gosto de ler."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-19",
+      "theme": "Lazer e atividades",
+      "fr": "On va au cinéma samedi soir ?",
+      "hide": [
+        "cinéma",
+        "soir"
+      ],
+      "refs": [
+        "A gente vai ao cinema no sábado à noite?",
+        "Vamos ao cinema sábado à noite?",
+        "A gente vai ao cinema sábado à noite?"
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-20",
+      "theme": "Passado",
+      "fr": "Hier, j'ai mangé au restaurant.",
+      "hide": [
+        "Hier",
+        "mangé"
+      ],
+      "refs": [
+        "Ontem eu comi no restaurante.",
+        "Ontem comi no restaurante.",
+        "Ontem eu almocei no restaurante."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-20",
+      "theme": "Passado",
+      "fr": "Ce matin, j'ai pris le bus.",
+      "hide": [
+        "matin",
+        "pris"
+      ],
+      "refs": [
+        "Hoje de manhã eu peguei o ônibus.",
+        "Esta manhã peguei o ônibus.",
+        "Hoje cedo eu peguei o ônibus."
+      ],
+      "explanation": ""
+    }
+  ],
+  "accent": [
+    {
+      "unitId": "A1-19",
+      "theme": "Lazer e atividades",
+      "text": "cinéma",
+      "explanation": "\"e\" tem acento agudo."
+    },
+    {
+      "unitId": "A1-19",
+      "theme": "Lazer e atividades",
+      "text": "écouter",
+      "explanation": "\"e\" tem acento agudo."
+    },
+    {
+      "unitId": "A1-20",
+      "theme": "Passado",
+      "text": "dernière",
+      "explanation": "\"e\" tem acento grave."
+    },
+    {
+      "unitId": "A1-20",
+      "theme": "Passado",
+      "text": "récemment",
+      "explanation": "\"e\" tem acento agudo."
+    },
+    {
+      "unitId": "A1-20",
+      "theme": "Passado",
+      "text": "année",
+      "explanation": "\"e\" tem acento agudo."
+    }
+  ],
+  "expression": [
+    {
+      "unitId": "A1-19",
+      "theme": "Lazer e atividades",
+      "expression": "Bon week-end !",
+      "register": "neutre",
+      "meaningFr": "On le dit pour se quitter avant le week-end.",
+      "meaningPt": "Bom fim de semana!",
+      "exampleText": "Au revoir, bon week-end !",
+      "secondExampleText": "Merci, bon week-end à toi aussi !",
+      "question": "Quand dit-on « Bon week-end ! » ?",
+      "options": [
+        "Avant le week-end",
+        "Le lundi matin",
+        "Le soir de Noël",
+        "À l'anniversaire"
+      ],
+      "correctAnswer": "Avant le week-end",
+      "explanationFr": "On le dit en général le vendredi.",
+      "microPrompt": "À lundi ! __________ week-end !",
+      "microAnswer": "Bon"
+    },
+    {
+      "unitId": "A1-19",
+      "theme": "Lazer e atividades",
+      "expression": "Bonne soirée !",
+      "register": "neutre",
+      "meaningFr": "On le dit pour se quitter le soir.",
+      "meaningPt": "Boa noite! Tenha uma boa noite!",
+      "exampleText": "Au revoir, bonne soirée !",
+      "secondExampleText": "Merci, bonne soirée à vous aussi !",
+      "question": "Quand dit-on « Bonne soirée ! » ?",
+      "options": [
+        "Le soir, en se quittant",
+        "Le matin, en arrivant",
+        "À midi, avant de manger",
+        "À minuit, en se réveillant"
+      ],
+      "correctAnswer": "Le soir, en se quittant",
+      "explanationFr": "Le matin ou l'après-midi, on dit plutôt « Bonne journée ! ».",
+      "microPrompt": "Au revoir, __________ soirée !",
+      "microAnswer": "bonne"
+    },
+    {
+      "unitId": "A1-19",
+      "theme": "Lazer e atividades",
+      "expression": "C'est parti !",
+      "register": "neutre",
+      "meaningFr": "On commence quelque chose.",
+      "meaningPt": "Vamos lá! Começou!",
+      "exampleText": "Le film commence. C'est parti !",
+      "secondExampleText": "On a tout ? Alors, c'est parti !",
+      "question": "Que veut dire « C'est parti ! » ?",
+      "options": [
+        "On commence",
+        "On arrête",
+        "On rentre",
+        "On dort"
+      ],
+      "correctAnswer": "On commence",
+      "explanationFr": "On le dit au début d'une activité, d'un voyage ou d'un jeu.",
+      "microPrompt": "3, 2, 1... __________ parti !",
+      "microAnswer": "C'est"
+    },
+    {
+      "unitId": "A1-20",
+      "theme": "Passado",
+      "expression": "Quoi de neuf ?",
+      "register": "familier",
+      "meaningFr": "On demande des nouvelles récentes à un ami.",
+      "meaningPt": "Quais as novidades? E aí, novidades?",
+      "exampleText": "Salut ! Quoi de neuf ?",
+      "secondExampleText": "Quoi de neuf depuis la semaine dernière ?",
+      "question": "Que veut dire « Quoi de neuf ? » ?",
+      "options": [
+        "Il y a des nouvelles ?",
+        "Il est quelle heure ?",
+        "Tu viens d'où ?",
+        "Tu as quel âge ?"
+      ],
+      "correctAnswer": "Il y a des nouvelles ?",
+      "explanationFr": "Entre amis, pour commencer la conversation.",
+      "microPrompt": "Salut ! Quoi de __________ ?",
+      "microAnswer": "neuf"
+    },
+    {
+      "unitId": "A1-20",
+      "theme": "Passado",
+      "expression": "Ça fait longtemps !",
+      "register": "neutre",
+      "meaningFr": "On dit à quelqu'un qu'on ne l'a pas vu depuis longtemps.",
+      "meaningPt": "Quanto tempo! Faz tempo!",
+      "exampleText": "Salut Marc ! Ça fait longtemps !",
+      "secondExampleText": "Ça fait longtemps que je ne t'ai pas vu !",
+      "question": "Que veut dire « Ça fait longtemps ! » ?",
+      "options": [
+        "On ne s'est pas vus depuis longtemps",
+        "On se voit demain",
+        "On est en retard",
+        "On a faim"
+      ],
+      "correctAnswer": "On ne s'est pas vus depuis longtemps",
+      "explanationFr": "« Ça fait » + durée = depuis combien de temps quelque chose arrive.",
+      "microPrompt": "Salut ! Ça fait __________ !",
+      "microAnswer": "longtemps"
+    }
+  ]
+}
