@@ -4712,6 +4712,9 @@ function frAccentPickerHTML(){
 function wireFrAccentPicker(pickerEl, inputEl){
   if (!pickerEl || !inputEl) return;
   pickerEl.querySelectorAll('.fr-accent-key').forEach(btn => {
+    // Não deixa o toque na tecla tirar o foco/cursor do campo (no celular
+    // isso fechava e reabria o teclado).
+    btn.addEventListener('mousedown', e => e.preventDefault());
     btn.addEventListener('click', () => {
       const start = inputEl.selectionStart ?? inputEl.value.length;
       const end = inputEl.selectionEnd ?? inputEl.value.length;
@@ -8553,7 +8556,7 @@ function openDictationPlayer(id){
         </div>
       </div>
     </div>
-    <textarea class="dictation-textarea" id="dictation-input" placeholder="Digite aqui o que você ouviu..."></textarea>
+    <textarea class="dictation-textarea" id="dictation-input" placeholder="Digite aqui o que você ouviu..." aria-label="Texto do ditado" lang="fr" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="${Math.max(400, d.text.length * 3)}"></textarea>
     ${frAccentPickerHTML()}
     <div class="dictation-actions">
       <button class="btn btn-primary" id="dictation-check-btn">Verificar</button>
@@ -8670,10 +8673,15 @@ function openDictationPlayer(id){
     }
     timeCurrentEl.textContent = formatDictationTime(dictationAudioEl.currentTime);
   });
-  dictationAudioEl.addEventListener('error', () => showToast('Não foi possível reproduzir o áudio'));
+  dictationAudioEl.addEventListener('error', () => {
+    showToast('Não foi possível reproduzir o áudio');
+    playBtn.disabled = true;
+    playBtn.textContent = '⚠️ Áudio indisponível';
+  });
 
   document.getElementById('dictation-check-btn').addEventListener('click', () => {
     const userText = document.getElementById('dictation-input').value;
+    if (!userText.trim()){ showToast('Escreva o que você ouviu antes de verificar.'); return; }
     renderDictationResult(d, userText);
   });
 
@@ -8686,54 +8694,164 @@ function openDictationPlayer(id){
 }
 
 // BEGIN dictation-answer-logic (extraído literalmente por fr/scripts/test_answer_validation.js -- não mover/renomear estes marcadores sem atualizar o teste)
+// Correção do ditado, em 2 níveis de comparação:
+//  - ESTRITA (normalizeDictationWord): exige a grafia exata -- acento, hífen e
+//    apóstrofo contam. Só ignora maiúscula, pontuação e variantes tipográficas
+//    (aspas curvas, hífen especial do celular).
+//  - FROUXA (dictLooseNorm): tira acento, hífen, apóstrofo e œ->oe. Serve pra
+//    ALINHAR as palavras. Se alinham só pela forma frouxa, é "erro leve":
+//    vale meio ponto e a tela explica o que faltou.
+// Pontuação não desconta ponto (só é marcada); número em dígito é aceito e a
+// tela mostra a escrita por extenso.
 function normalizeDictationWord(w){
   return w
     .toLowerCase()
     .normalize('NFC') // acentos digitados como sequência decomposta (a + ` )
                        // via alguns teclados/IMEs viram a mesma forma que os
                        // do texto original, em vez de "diferentes" por baixo.
-    .replace(/[‘’]/g, "'") // aspas curvas do autocorretor do celular
-    .replace(/[.,!?;:'"()«»]/g, '');
+    .replace(/[‘’ʼ´`′]/g, "'") // apóstrofos/aspas do autocorretor do celular
+    .replace(/[‐‑‒]/g, '-')    // hífens especiais do teclado do celular
+    .replace(/[.,!?;:"()«»…—–]/g, '');
 }
-// END dictation-answer-logic
+function dictLooseNorm(w){
+  return normalizeDictationWord(w)
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/œ/g, 'oe').replace(/æ/g, 'ae')
+    .replace(/['-]/g, '');
+}
+function dictLightReason(cs, us){
+  const nh = s => s.replace(/-/g, ''), na = s => s.replace(/'/g, '');
+  const lig = s => s.replace(/œ/g, 'oe').replace(/æ/g, 'ae');
+  const nd = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '');
+  if (nh(cs) === nh(us)) return 'hyphen';
+  if (na(cs) === na(us)) return 'apostrophe';
+  if (lig(cs) === lig(us)) return 'ligature';
+  if (nd(cs) === nd(us)) return 'accent';
+  return 'spelling';
+}
+
+const DICT_FR_UNITS = ['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize'];
+function frenchNumberWords(n){
+  if (!Number.isInteger(n) || n < 0 || n > 100) return null;
+  if (n <= 16) return DICT_FR_UNITS[n];
+  if (n < 20) return 'dix-' + DICT_FR_UNITS[n - 10];
+  if (n === 100) return 'cent';
+  const tens = { 2:'vingt', 3:'trente', 4:'quarante', 5:'cinquante', 6:'soixante' };
+  if (n < 70){
+    const t = Math.floor(n / 10), u = n % 10;
+    if (u === 0) return tens[t];
+    if (u === 1) return tens[t] + ' et un';
+    return tens[t] + '-' + DICT_FR_UNITS[u];
+  }
+  if (n < 80){
+    const r = n - 60;
+    if (r === 11) return 'soixante et onze';
+    return 'soixante-' + (r < 17 ? DICT_FR_UNITS[r] : 'dix-' + DICT_FR_UNITS[r - 10]);
+  }
+  const r = n - 80;
+  if (r === 0) return 'quatre-vingts';
+  return 'quatre-vingt-' + (r < 17 ? DICT_FR_UNITS[r] : 'dix-' + DICT_FR_UNITS[r - 10]);
+}
+
+// A áudio dita a pontuação por extenso ("virgule", "point"...). Quem escreve
+// a palavra em vez do sinal comete um erro leve (a tela avisa).
+const DICT_SPOKEN_PUNCT = [
+  [/point[\s-]+d'\s*interrogation/gi, '?', "point d'interrogation"],
+  [/point[\s-]+d'\s*exclamation/gi, '!', "point d'exclamation"],
+  [/point[\s-]*virgule/gi, ';', 'point-virgule'],
+  [/deux[\s-]+points/gi, ':', 'deux points'],
+  [/\bvirgule\b/gi, ',', 'virgule'],
+  [/\bpoint\b/gi, '.', 'point']
+];
+
+// Limpa o que o teclado do celular costuma bagunçar, antes de comparar.
+function prepareDictationUserText(text, refText){
+  let t = String(text || '')
+    .replace(/[​-‍⁠﻿]/g, '')
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
+    .replace(/[‘’ʼ´`′]/g, "'")
+    .replace(/[‐‑‒]/g, '-')
+    .replace(/'\s+(?=\p{L})/gu, "'")                // "j' ai" -> "j'ai"
+    .replace(/(\p{L})([.!?;,])(?=\p{L})/gu, '$1$2 '); // "Sophie.J'ai" -> "Sophie. J'ai"
+  const refLower = String(refText || '').toLowerCase();
+  const spokenPunct = [];
+  for (const [re, symbol, said] of DICT_SPOKEN_PUNCT){
+    if (new RegExp(said.replace(/[-\s']+/g, '[-\\s\']+'), 'i').test(refLower)) continue; // palavra faz parte do texto
+    t = t.replace(re, () => { spokenPunct.push({ said, symbol }); return ' ' + symbol + ' '; });
+  }
+  const digitNotes = [];
+  t = t.replace(/(^|[\s(«"])(\d{1,3})(?=$|[\s.,!?;:)»"])/g, (m, pre, digits) => {
+    const words = frenchNumberWords(parseInt(digits, 10));
+    if (!words) return m;
+    digitNotes.push({ digits, words });
+    return pre + words;
+  });
+  return { text: t, spokenPunct, digitNotes };
+}
 
 // Separa as palavras reais da pontuação "solta" (ex: "!" ou "?" digitados
-// com espaço antes, como manda a tipografia francesa). A pontuação continua
-// fazendo parte do texto exibido — igual ao original, como palavra própria
-// — mas não entra no alinhamento/pontuação do ditado: quase nenhum aluno
-// digita um "!" sozinho como token separado, e contar isso como erro
-// garantido podia empurrar o resto da comparação pro lugar errado.
+// com espaço antes, como manda a tipografia francesa). A pontuação solta
+// não participa do alinhamento: fica anexada à palavra anterior.
 function tokenizeDictationText(text){
   const rawWords = text.trim().split(/\s+/).filter(w => w.length);
-  const words = [];       // só as palavras com conteúdo real, na ordem
-  const normWords = [];   // normalizadas, mesmo índice de `words`
-  const punctAfter = [];  // pontuação solta que vem logo depois de cada palavra (ou '')
+  const words = [], strictWords = [], looseWords = [], punctAfter = [];
   for (const w of rawWords){
-    const norm = normalizeDictationWord(w);
-    if (norm === ''){
+    const loose = dictLooseNorm(w);
+    if (loose === ''){
       if (words.length > 0){
         punctAfter[words.length - 1] = (punctAfter[words.length - 1] ? punctAfter[words.length - 1] + ' ' : '') + w;
       }
       continue;
     }
     words.push(w);
-    normWords.push(norm);
+    strictWords.push(normalizeDictationWord(w));
+    looseWords.push(loose);
     punctAfter.push('');
   }
-  return { words, normWords, punctAfter };
+  return { words, strictWords, looseWords, normWords: looseWords, punctAfter };
 }
+
+// "vingt cinq" digitado no lugar de "vingt-cinq": junta as palavras do aluno
+// (sem hífen, então conta como erro leve de hífen e não como 2 erros).
+function mergeSplitCompoundWords(userTok, refTok){
+  const targets = new Set();
+  refTok.words.forEach((w, i) => { if (refTok.strictWords[i].includes('-')) targets.add(refTok.looseWords[i]); });
+  if (!targets.size) return userTok;
+  const out = { words: [], strictWords: [], looseWords: [], punctAfter: [] };
+  let i = 0;
+  while (i < userTok.words.length){
+    let merged = false;
+    for (let k = 4; k >= 2 && !merged; k--){
+      if (i + k > userTok.words.length) continue;
+      if (!targets.has(userTok.looseWords.slice(i, i + k).join(''))) continue;
+      let ok = true;
+      for (let t = i; t < i + k - 1; t++) if (userTok.punctAfter[t]) ok = false;
+      if (!ok) continue;
+      out.words.push(userTok.words.slice(i, i + k).join(''));
+      out.strictWords.push(userTok.strictWords.slice(i, i + k).join(''));
+      out.looseWords.push(userTok.looseWords.slice(i, i + k).join(''));
+      out.punctAfter.push(userTok.punctAfter[i + k - 1]);
+      i += k; merged = true;
+    }
+    if (merged) continue;
+    out.words.push(userTok.words[i]); out.strictWords.push(userTok.strictWords[i]);
+    out.looseWords.push(userTok.looseWords[i]); out.punctAfter.push(userTok.punctAfter[i]);
+    i++;
+  }
+  out.normWords = out.looseWords;
+  return out;
+}
+
+const DICT_MARKS_RE = /[.,!?;:…]/g;
+function dictMarksOf(s){ return ((s || '').match(DICT_MARKS_RE) || []).join(''); }
 
 // Alinha as palavras do texto certo com as que o aluno digitou via LCS
 // (mesma ideia de um diff de texto), pra marcar acertos/erros mesmo quando
 // o aluno pula ou adianta uma palavra, sem desalinhar o resto da frase.
-// Pontuação solta (ver tokenizeDictationText) não participa do alinhamento,
-// mas é reanexada a cada palavra certa no resultado, pra manter o texto
-// exibido idêntico ao original.
 function diffDictationWords(correctText, userText){
   const correctTok = tokenizeDictationText(correctText);
-  const userTok = tokenizeDictationText(userText);
-  const correctWords = correctTok.words, cn = correctTok.normWords;
-  const userWords = userTok.words, un = userTok.normWords;
+  const userTok = mergeSplitCompoundWords(tokenizeDictationText(userText), correctTok);
+  const cn = correctTok.looseWords, un = userTok.looseWords;
   const n = cn.length, m = un.length;
   const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
   for (let i = n - 1; i >= 0; i--){
@@ -8741,22 +8859,38 @@ function diffDictationWords(correctText, userText){
       dp[i][j] = cn[i] === un[j] ? dp[i+1][j+1] + 1 : Math.max(dp[i+1][j], dp[i][j+1]);
     }
   }
+  const missingMarksFor = (i, j) => {
+    const pool = (dictMarksOf(userTok.words[j]) + dictMarksOf(userTok.punctAfter[j])).split('');
+    let missing = '';
+    for (const ch of (dictMarksOf(correctTok.words[i]) + dictMarksOf(correctTok.punctAfter[i]))){
+      const at = pool.indexOf(ch);
+      if (at >= 0) pool.splice(at, 1); else missing += ch;
+    }
+    return missing;
+  };
+  const matchItem = (i, j) => {
+    const light = correctTok.strictWords[i] !== userTok.strictWords[j];
+    return {
+      type: 'match', word: correctTok.words[i], punctAfter: correctTok.punctAfter[i],
+      light, userWord: userTok.words[j],
+      reason: light ? dictLightReason(correctTok.strictWords[i], userTok.strictWords[j]) : null,
+      missingMarks: missingMarksFor(i, j)
+    };
+  };
   let i = 0, j = 0;
   const result = [];
   while (i < n && j < m){
-    if (cn[i] === un[j]){ result.push({ type: 'match', word: correctWords[i], punctAfter: correctTok.punctAfter[i] }); i++; j++; }
-    else if (dp[i+1][j] >= dp[i][j+1]){ result.push({ type: 'miss', word: correctWords[i], punctAfter: correctTok.punctAfter[i] }); i++; }
-    else { result.push({ type: 'extra', word: userWords[j] }); j++; }
+    if (cn[i] === un[j]){ result.push(matchItem(i, j)); i++; j++; }
+    else if (dp[i+1][j] >= dp[i][j+1]){ result.push({ type: 'miss', word: correctTok.words[i], punctAfter: correctTok.punctAfter[i] }); i++; }
+    else { result.push({ type: 'extra', word: userTok.words[j] }); j++; }
   }
-  while (i < n){ result.push({ type: 'miss', word: correctWords[i], punctAfter: correctTok.punctAfter[i] }); i++; }
-  while (j < m){ result.push({ type: 'extra', word: userWords[j] }); j++; }
+  while (i < n){ result.push({ type: 'miss', word: correctTok.words[i], punctAfter: correctTok.punctAfter[i] }); i++; }
+  while (j < m){ result.push({ type: 'extra', word: userTok.words[j] }); j++; }
   return result;
 }
 
 // Junta um "miss" (palavra certa que faltou) adjacente a um "extra" (palavra
-// errada que o aluno digitou) numa única substituição — pra mostrar a
-// palavra errada riscada seguida da palavra certa destacada, como no
-// lingua.com, em vez de duas entradas soltas em ordens variáveis.
+// errada que o aluno digitou) numa única substituição.
 function mergeDictationDiff(diff){
   const merged = [];
   let i = 0;
@@ -8777,40 +8911,97 @@ function mergeDictationDiff(diff){
   return merged;
 }
 
+// Corrige um ditado inteiro. Nota: acerto exato = 1 ponto; erro leve = 0,5;
+// palavra a mais (que não é troca) e pontuação escrita por extenso = -0,5.
+// Pontuação faltando e número em dígito não descontam nada.
+function evaluateDictation(refText, userText){
+  const prep = prepareDictationUserText(userText, refText);
+  const diff = diffDictationWords(refText, prep.text);
+  const merged = mergeDictationDiff(diff);
+  const total = tokenizeDictationText(refText).words.length;
+  const exact = diff.filter(x => x.type === 'match' && !x.light).length;
+  const light = diff.filter(x => x.type === 'match' && x.light).length;
+  const extras = merged.filter(x => x.type === 'extra').length;
+  const missingMarks = diff.filter(x => x.type === 'match' && x.missingMarks).length;
+  const points = exact + 0.5 * light - 0.5 * extras - 0.5 * prep.spokenPunct.length;
+  const score = total > 0 ? Math.max(0, Math.min(100, Math.round((points / total) * 100))) : 0;
+  return { merged, total, exact, light, extras, missingMarks, score,
+           spokenPunct: prep.spokenPunct, digitNotes: prep.digitNotes };
+}
+// END dictation-answer-logic
+
 function dictationScoreColorVar(score){
   if (score >= 80) return 'var(--jade)';
   if (score >= 60) return 'var(--imperial-gold)';
   return 'var(--seal-red-dark)';
 }
 
+function dictationWordHtml(word, punctAfter, missingMarks, cls, title){
+  const esc = escapeHtmlDictation;
+  const t = title ? ` title="${esc(title)}"` : '';
+  if (!missingMarks){
+    return `<span class="${cls}"${t}>${esc(word)}</span>${punctAfter ? ' ' + esc(punctAfter) : ''}`;
+  }
+  const m = word.match(/^(.*?)([.,!?;:…]+)$/);
+  const core = m ? m[1] : word, trail = m ? m[2] : '';
+  return `<span class="${cls}"${t}>${esc(core)}</span><span class="dictation-punct-missing" title="Faltou este sinal (não desconta pontos)">${esc(trail)}${punctAfter ? ' ' + esc(punctAfter) : ''}</span>`;
+}
+
+function dictationLightNoteText(x){
+  const core = x.word.replace(/[.,!?;:…]+$/, '');
+  const you = `você escreveu «${x.userWord.replace(/[.,!?;:…]+$/, '')}»`;
+  switch (x.reason){
+    case 'hyphen': return `«${core}» leva hífen (${you}).`;
+    case 'apostrophe': return `«${core}» leva apóstrofo (${you}).`;
+    case 'ligature': return `«${core}» usa a letra «œ», que é uma só (${you}).`;
+    case 'accent': return `«${core}»: confira os acentos (${you}).`;
+    default: return `«${core}»: pequena diferença de grafia (${you}).`;
+  }
+}
+
 function renderDictationResult(d, userText){
-  const diff = diffDictationWords(d.text, userText);
-  const merged = mergeDictationDiff(diff);
-  const totalCorrectWords = tokenizeDictationText(d.text).words.length;
-  const matches = diff.filter(x => x.type === 'match').length;
-  const score = Math.round((matches / totalCorrectWords) * 100);
+  const ev = evaluateDictation(d.text, userText);
+  const { merged, total, score } = ev;
   trackEvent('lesson_complete', 'dictation', { dictationId: d.id, score });
 
   const wordsHtml = merged.map(x => {
+    if (x.type === 'match'){
+      return x.light
+        ? dictationWordHtml(x.word, x.punctAfter, x.missingMarks, 'dictation-word-near', 'Quase: ' + dictationLightNoteText(x))
+        : dictationWordHtml(x.word, x.punctAfter, x.missingMarks, 'dictation-word', '');
+    }
     const punct = x.punctAfter ? ` ${escapeHtmlDictation(x.punctAfter)}` : '';
-    if (x.type === 'match') return `<span class="dictation-word">${escapeHtmlDictation(x.word)}</span>${punct}`;
     if (x.type === 'sub') return `<span class="dictation-word-wrong">${escapeHtmlDictation(x.wrong)}</span> <span class="dictation-word-correct">${escapeHtmlDictation(x.correct)}</span>${punct}`;
     if (x.type === 'miss') return `<span class="dictation-word-correct">${escapeHtmlDictation(x.word)}</span>${punct}`;
     return `<span class="dictation-word-wrong">${escapeHtmlDictation(x.word)}</span>`;
   }).join(' ');
 
-  document.getElementById('dictation-result-wrap').innerHTML = `
-    <div class="dictation-result">
+  const notes = [];
+  merged.filter(x => x.type === 'match' && x.light).forEach(x => notes.push(dictationLightNoteText(x)));
+  ev.digitNotes.forEach(n => notes.push(`Por extenso: ${n.digits} → <strong>${escapeHtmlDictation(n.words)}</strong>. Numa escrita de ditado, o número vai por extenso (sem desconto).`));
+  ev.spokenPunct.forEach(p => notes.push(`Você escreveu «${escapeHtmlDictation(p.said)}» por extenso. No ditado, escreva o sinal (${escapeHtmlDictation(p.symbol)}). Pequeno desconto.`));
+  if (ev.missingMarks > 0) notes.push(`Pontuação: faltou em ${ev.missingMarks} ${ev.missingMarks === 1 ? 'lugar' : 'lugares'} (sublinhado acima). Não desconta pontos.`);
+  const notesHtml = notes.length
+    ? `<ul class="dictation-notes">${notes.map(n => `<li>${n.startsWith('Por extenso') || n.startsWith('Você escreveu') || n.startsWith('Pontuação') ? n : escapeHtmlDictation(n)}</li>`).join('')}</ul>`
+    : '';
+  const hit = ev.exact + ev.light;
+
+  const wrap = document.getElementById('dictation-result-wrap');
+  wrap.innerHTML = `
+    <div class="dictation-result" tabindex="-1">
       <div class="dictation-result-text">${wordsHtml}</div>
       <div class="dictation-result-summary">
         <div class="dictation-score-badge" style="background:${dictationScoreColorVar(score)};">${score}</div>
-        <p class="dictation-score-text">Você escreveu <strong>${matches} de ${totalCorrectWords}</strong> palavras corretamente. Você atingiu uma pontuação de ${score} pontos (${score}%).</p>
+        <p class="dictation-score-text">Você escreveu <strong>${hit} de ${total}</strong> palavras corretamente${ev.light ? ` (${ev.light} com pequeno desvio de grafia, valem meio ponto)` : ''}. Você atingiu uma pontuação de ${score} pontos (${score}%).</p>
       </div>
+      ${notesHtml}
     </div>
   `;
 
   document.getElementById('dictation-check-btn').style.display = 'none';
   document.getElementById('dictation-retry-btn').style.display = 'inline-flex';
+  const box = wrap.firstElementChild;
+  if (box){ box.scrollIntoView({ behavior: 'smooth', block: 'start' }); try { box.focus({ preventScroll: true }); } catch(e){} }
 }
 
 // ============================================================
