@@ -17290,7 +17290,7 @@ P7: cópia de Public Deck duplica a mídia no Storage do copiador (manifest → 
 
 | Migration lógica (arquivo) | Versão registrada no Staging | Data |
 |---|---|---|
-| (nenhuma ainda pelo MCP) | | |
+| 067 (`067_public_deck_copy_linear_plan.sql`, commit `69cad4c`) | `20261003000046` (`public_deck_copy_linear_plan`) | 2026-10-03 |
 
 ## Checkpoint -- etapa de segurança (grants + proteção de plan/role) validada no Staging (2026-10-02)
 
@@ -17322,3 +17322,18 @@ confirmação de `project_id`/nome "Staging" antes de escrever, consulta de migr
 pendentes, nunca editar `supabase_migrations.schema_migrations`, correspondência número lógico ↔ versão MCP
 registrada na tabela acima, produção só com autorização explícita, migrations destrutivas/de risco exigem
 confirmação da autora, sem push/PR/deploy como parte da aplicação.
+
+## Checkpoint -- migration 067 aplicada no Staging + homologação real de performance (2026-10-03)
+
+- 067 aplicada via MCP no Staging (`ilfjzizjfcmhibkhwber`), versão `20261003000046`. Arquivo idêntico ao de `69cad4c`
+  (md5 `589277c1…`). `_public_deck_plan` (STABLE, invoker, só owner) e `copy_public_deck` (SECURITY DEFINER, VOLATILE,
+  `search_path=public`, EXECUTE só `authenticated`) confirmados na versão 067. Schema/dados inalterados (hashes iguais).
+- Caminho real do app (seleção explícita `[{sig, cls}]` como `publicDeckPlanSelection`), cada RPC sob `statement_timeout=8s`:
+  500 → check 0,23 s / cópia 0,98 s; 1000 → 0,39 / 1,97 s; 2000 → 0,81 / 4,57 s (2000 Notes, 2200 CardInstances, sem timeout);
+  2001 → `deck_too_large` em 5–13 ms, nada criado. D1 (062: 10,8 s e cancelamento) resolvido para cópia sem mídia.
+- **Novo blocker D2**: 2000 Notes com áudio em todas → cópia CANCELADA pelo limite de 8 s (57014, no laço de inserção).
+  1000 com áudio: cópia 3,97 s (vs 1,97 s sem áudio). A 2000: `_validate_media_map` 1,32 s, manifest (RPC separado) 1,44 s;
+  o remap em SQL puro custa ~2 ms, então o custo extra está nas chamadas de mídia por Note dentro do laço PL/pgSQL.
+  Timeout e limite NÃO alterados; não corrigido. Independência da mídia confirmada a 1000 (0 refs à pasta do autor).
+- Atomicidade: falha forçada no último item de 2000 (`media_map_incomplete`) → 0 Notes e 0 Decks extras do copiador.
+- Limpeza: 0 Decks/Cards/objetos, 3 perfis com hash idêntico, 067 segue aplicada. Produção não tocada. Sem push/PR/deploy.
