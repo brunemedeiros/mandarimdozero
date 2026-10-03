@@ -322,7 +322,7 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
       const h = `${CHECK_DEFAULT}
         if (name === 'get_public_deck_media_manifest'){ window.__manifestArgs = args; return { data: { count: 0, items: [] }, error: null }; }
         if (name === 'copy_public_deck'){ window.__copyArgs = args; window.__copyN = (window.__copyN || 0) + 1;
-          if (window.__chg && window.__copyN === 1) return { data: null, error: { message: 'duplicates_changed', code: '40001' } };
+          if (window.__chg && window.__copyN === 1) return { data: null, error: { message: 'duplicates_changed', code: 'PT409' } };
           return { data: { deck_id: 8200, notes_copied: 2, skipped_exact: 1, skipped_exact_archived: 1, skipped_incompatible: 1, root_name: 'S (2)' }, error: null }; }`;
       const r = await bootApp({ authenticated: true, premium: true, is_owner: false, can_open: true, can_import: true }, null, h);
       await r.page.evaluate(([pl, uid]) => { window.__PLAN = pl; CURRENT_USER = { id: uid }; }, [plan, 'U']);
@@ -355,7 +355,7 @@ async function newPage(browser, port, lang, { guest, session, hash, handlerSrc }
       const plan = planOf([PLAN_NOTE(1, 'none')]);
       const h = `${CHECK_DEFAULT}
         if (name === 'get_public_deck_media_manifest') return { data: { count: 0, items: [] }, error: null };
-        if (name === 'copy_public_deck'){ window.__copyN = (window.__copyN || 0) + 1; return { data: null, error: { message: 'duplicates_changed', code: '40001' } }; }`;
+        if (name === 'copy_public_deck'){ window.__copyN = (window.__copyN || 0) + 1; return { data: null, error: { message: 'duplicates_changed', code: 'PT409' } }; }`;
       const r = await bootApp({ authenticated: true, premium: true, is_owner: false, can_open: true, can_import: true }, null, h);
       await r.page.evaluate(([pl, uid]) => { window.__PLAN = pl; CURRENT_USER = { id: uid }; }, [plan, 'U']);
       await r.page.evaluate((id) => openPublicDeckPage(id), PID);

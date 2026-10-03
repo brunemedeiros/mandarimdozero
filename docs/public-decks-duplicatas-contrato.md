@@ -495,3 +495,44 @@ Todas as execuções foram revertidas. Estado final idêntico ao snapshot anteri
 | 4 achados de baixo risco da 062 | Abertos: host não ancorado; manifest sem teto (custo por mídia agora linear); mensagem com `cls` ausente; comentário de rollback |
 
 **Staging ≠ autorização para produção.**
+
+### §S.4 — D3: `duplicates_changed` em retry infinito; migration 069 e correção do script (2026-10-03, LOCAL)
+
+**Homologação real (autora, Staging, RUN `p826100311325253ce`)**: P8.1 14/15, P8.2 9/12, P8.5 40/44, LIMPEZA 13/14.
+Diagnóstico por consulta só de leitura no Staging (autorizada):
+
+- **D3 (defeito real):** `_public_deck_resolve_selection` (062) levanta `duplicates_changed` com SQLSTATE `40001`.
+  O PostgREST repete automaticamente transações com 40001; como a recusa é determinística, repete sem fim.
+  No Staging: ~16.000 execuções em ~7 min (uma a cada ~10 ms), só pararam quando a limpeza despublicou o Deck.
+  O cliente recebeu HTTP 504, tratou como incerto e, de propósito, não apagou a mídia já copiada.
+  Isso explica os órfãos do F4 e do tab perdedor da P8.2c. O perdedor nunca criou Note/Deck.
+- **Falsos negativos do script:** a exclusão era conferida pelo link público, que continua servido por cache depois do
+  delete. Os arquivos foram de fato apagados (Staging: 0 objetos nas duas contas depois do teste).
+- **Cascata:** F5 e "4 objetos novos" comparavam com a linha de base anterior ao F1 e herdavam os órfãos do F4.
+
+**Reprodução local com o PostgREST 12.2.12 real** (não simulado): com 40001, uma única chamada fica em loop e o
+loop continua depois que o cliente desiste. Medido por código, numa chamada: `40001` ≈ 25.500 execuções;
+`40P01`, `P0001`, `PT409`, `22023` e `55P03` executam 1 vez cada.
+
+**Migration 069** (`069_public_deck_duplicates_changed_not_retryable.sql`, aplicada SÓ no Postgres local):
+troca o errcode das 2 ocorrências para `PT409`. É o mecanismo documentado do PostgREST para escolher o status HTTP,
+então a resposta vira **409 Conflict**. A mensagem continua `duplicates_changed`, que é o que o cliente lê.
+Corpo, assinatura, `immutable`, `search_path` e grants são idênticos à 062 (diff = só as 2 linhas).
+
+| Verificação local (PostgREST real) | 068 | 069 |
+|---|---|---|
+| F4 (classe trocada) | loop, cliente desiste | HTTP 409 em 13 ms, 1 execução, 0 Notes |
+| Corrida de 2 sessões, 400 Notes | — | sobrepostas; 1 vence com 400; outra 409 em 244 ms; 400 Notes, 1 Deck |
+| Script corrigido, cache quente | P8.2 13/16, P8.5 42/44 (o defeito) | **97/97** |
+| Script antigo, cache quente | — | falsos negativos de cache em P8.1, P8.5 e LIMPEZA |
+| Script corrigido, lock removido (mutação) | — | P8.2 FAIL (800 e 240 Notes) — o teste continua sensível |
+
+Suíte do banco (`run.sh`, agora com a 069): 242 ok, 0 falha. Playwright 152/152. Paridade legado 17/17.
+
+**Script corrigido** (`staging_storage_test.js`): existência só pela listagem do Storage (`storageStat`, lê
+`storage.objects`); sobrescrita conferida por eTag/updated_at; o link público só lê conteúdo e gera diagnóstico de
+cache. F1–F5 e o caminho feliz têm linha de base própria, tirada imediatamente antes; um cenário que deixa órfãos
+continua reprovado mesmo que a limpeza final os remova.
+
+**Estado:** 069 NÃO aplicada no Staging; Staging sem dado alterado por esta etapa; produção intocada; sem push/PR.
+Próximo passo depende da autora: aplicar 069 no Staging e repetir o teste real.

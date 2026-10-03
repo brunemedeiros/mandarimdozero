@@ -164,6 +164,27 @@ async function listFolder(s, uid){
   }
   return out;
 }
+// Existência de UM objeto SEM depender do cache HTTP do link público: a listagem do Storage
+// (POST /object/list) lê a tabela storage.objects. O link público pode continuar servindo um
+// objeto já apagado por um tempo (cache) — por isso NUNCA é usado para decidir existência.
+async function storageStat(s, p){
+  const i = p.lastIndexOf('/'); const dir = p.slice(0, i), name = p.slice(i + 1);
+  const r = await fetch(`${SB_URL}/storage/v1/object/list/${BUCKET}`, {
+    method: 'POST', headers: H(s, { 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ prefix: dir, search: name, limit: 100, offset: 0, sortBy: { column: 'name', order: 'asc' } }) });
+  const b = await readBody(r);
+  if (!r.ok || !Array.isArray(b)) throw new Error(`consulta ao Storage falhou (HTTP ${r.status})`);
+  const o = b.find(x => x && x.id && x.name === name);
+  if (!o) return { exists: false };
+  const md = o.metadata || {};
+  return { exists: true, etag: md.eTag || null, size: md.size == null ? null : md.size, updated: o.updated_at || null };
+}
+const storageExists = async (s, p) => (await storageStat(s, p)).exists;
+// Diagnóstico (não decide nada): objeto inexistente no Storage cujo link público ainda responde.
+async function noteIfCached(s, p){
+  if (await storageExists(s, p)) return;
+  if ((await publicGet(p)).ok) note(`diagnóstico: ${path.basename(p)} já não existe no Storage, mas o link público ainda é servido (cache HTTP).`);
+}
 
 // ============================================================================
 // Cliente REAL do app (shared/public-deck.js) sobre um supabaseClient mínimo via fetch.
@@ -410,19 +431,24 @@ async function p81(A, B1){
   const g = await publicGet(dst);
   check('cópia física tem o MESMO conteúdo da origem', g.ok && Buffer.compare(g.bytes, bytes) === 0, { status: g.status });
 
+  // Existência sempre pela listagem do Storage (storageStat), nunca pelo link público em cache.
+  check('pré-condição: origem e cópia existem no Storage', (await storageExists(A, src)) && (await storageExists(B1, dst)));
   await storageRemove(B1, [src]);
-  check('copiador NÃO apaga objeto do autor (continua existindo)', (await publicGet(src)).ok);
+  check('copiador NÃO apaga objeto do autor (continua existindo no Storage)', await storageExists(A, src));
   await storageRemove(A, [dst]);
-  check('autor NÃO apaga objeto do copiador (continua existindo)', (await publicGet(dst)).ok);
+  check('autor NÃO apaga objeto do copiador (continua existindo no Storage)', await storageExists(B1, dst));
+  const st0 = await storageStat(B1, dst);
   const ow = await upload(A, dst, Buffer.from('sobrescrita'), 'audio/mpeg');
-  check('autor NÃO sobrescreve objeto do copiador', !ow.ok && Buffer.compare((await publicGet(dst)).bytes, bytes) === 0, ow);
+  const st1 = await storageStat(B1, dst);
+  check('autor NÃO sobrescreve objeto do copiador (eTag/updated_at inalterados no Storage)', !ow.ok && st1.exists && st1.etag === st0.etag && st1.updated === st0.updated, { ow, antes: st0, depois: st1 });
 
   const delSrc = await storageRemove(A, [src]);
-  const gone = !(await publicGet(src)).ok;
+  const gone = !(await storageExists(A, src));
   if (gone) acct(A).objects.delete(src);
-  check('autor apaga o PRÓPRIO original', delSrc.ok && gone, delSrc);
+  check('autor apaga o PRÓPRIO original (inexistente no Storage)', delSrc.ok && gone, delSrc);
+  await noteIfCached(A, src);
   const surv = await publicGet(dst);
-  check('a cópia do copiador sobrevive à remoção do original (objeto físico independente)', surv.ok && Buffer.compare(surv.bytes, bytes) === 0, { status: surv.status });
+  check('a cópia do copiador sobrevive à remoção do original (objeto físico independente)', (await storageExists(B1, dst)) && surv.ok && Buffer.compare(surv.bytes, bytes) === 0, { status: surv.status });
   note('Leitura do bucket é pública por desenho (032): o autor pode LER a URL do copiador; o que se exige é que não possa escrever/apagar — verificado acima.');
 }
 
@@ -470,19 +496,23 @@ async function p85(A, B1, authorUsername){
   note(`observação: storagePath em image no conteúdo público: ${imgLeak ? 'PRESENTE (public_note_native só remove de audio)' : 'ausente'}`);
 
   // 2. origens existem fisicamente
-  for (const m of [mA, mB, mT, mI]) check(`origem existe no Storage: ${path.basename(m.path)}`, (await publicGet(m.path)).ok);
+  for (const m of [mA, mB, mT, mI]) check(`origem existe no Storage: ${path.basename(m.path)}`, await storageExists(A, m.path));
 
   // ---- falhas ANTES do caminho feliz (cada uma não pode deixar nada) ----
+  // Cada cenário tem a SUA linha de base, tirada imediatamente antes dele: um órfão deixado por um
+  // cenário reprova ESSE cenário e não contamina a contagem do seguinte. A limpeza final remove os
+  // órfãos (registrados abaixo), mas isso nunca transforma em PASS o cenário que os deixou.
   const app = makeAppContext(B1);
-  const before = { notes: await countRows('own_flashcards', `owner_id=eq.${B1.id}`, B1), decks: (await rest('GET', `decks?select=id&owner_id=eq.${B1.id}`, B1)).body.length, objs: await listFolder(B1, B1.id) };
-  const unchanged = async (label) => {
+  const copierState = async () => ({ notes: await countRows('own_flashcards', `owner_id=eq.${B1.id}`, B1), decks: (await rest('GET', `decks?select=id&owner_id=eq.${B1.id}`, B1)).body.length, objs: await listFolder(B1, B1.id) });
+  const unchanged = async (label, base) => {
     const n = await countRows('own_flashcards', `owner_id=eq.${B1.id}`, B1);
     const d = (await rest('GET', `decks?select=id&owner_id=eq.${B1.id}`, B1)).body.length;
     const o = await listFolder(B1, B1.id);
-    const extra = [...o].filter(p => !before.objs.has(p));
+    const extra = [...o].filter(p => !base.objs.has(p));
     extra.forEach(p => { if (/\/pubcopy-/.test(p)) acct(B1).objects.add(p); });
-    check(`${label}: copiador sem Note/Deck novo (atomicidade)`, n === before.notes && d === before.decks, { notes: n - before.notes, decks: d - before.decks });
-    check(`${label}: nenhum objeto órfão deixado na pasta do copiador`, extra.length === 0, extra);
+    check(`${label}: copiador sem Note/Deck novo (atomicidade)`, n === base.notes && d === base.decks, { notes: n - base.notes, decks: d - base.decks });
+    check(`${label}: nenhum objeto órfão deixado na pasta do copiador (só o que ESTE cenário criou)`, extra.length === 0, extra);
+    if (extra.length) note(`${label} deixou ${extra.length} objeto(s) órfão(s); a limpeza final os remove, mas este cenário continua reprovado.`);
   };
 
   const plan = await app.call('fetchPublicDeckImportPlan', PUBID, null);
@@ -497,27 +527,31 @@ async function p85(A, B1, authorUsername){
   check('manifest: exatamente as 4 URLs distintas do bucket (dedup; link externo fora)', man.ok && manUrls.size === 4 && [...expUrls].every(u => manUrls.has(u)) && man.items.length === 4, man.items);
 
   // F1: RPC com mapa vazio -> media_map_incomplete
+  const b1 = await copierState();
   const f1 = await rpc('copy_public_deck', { p_public_id: PUBID, p_dest_deck_id: null, p_media_map: {}, p_selection: selection }, B1);
   check('F1 mapa vazio → media_map_incomplete', !f1.ok && errCode(f1) === 'media_map_incomplete', f1.body);
-  await unchanged('F1');
+  await unchanged('F1', b1);
 
   // F2: destino inexistente na pasta do copiador -> invalid_media_map
   const ghost = {}; for (const u of manUrls) ghost[u] = publicUrl(`${B1.id}/pubcopy-p8test-${RUN}-nao-existe-${shortHash(u)}.mp3`);
+  const b2 = await copierState();
   const f2 = await rpc('copy_public_deck', { p_public_id: PUBID, p_dest_deck_id: null, p_media_map: ghost, p_selection: selection }, B1);
   check('F2 destino inexistente → invalid_media_map', !f2.ok && errCode(f2) === 'invalid_media_map', f2.body);
-  await unchanged('F2');
+  await unchanged('F2', b2);
 
   // F3: destino na pasta do AUTOR (objeto real) -> invalid_media_map
   const steal = {}; for (const u of manUrls) steal[u] = mB.url;
+  const b3 = await copierState();
   const f3 = await rpc('copy_public_deck', { p_public_id: PUBID, p_dest_deck_id: null, p_media_map: steal, p_selection: selection }, B1);
   check('F3 destino na pasta do autor → invalid_media_map (cópia nunca aponta para o autor)', !f3.ok && errCode(f3) === 'invalid_media_map', f3.body);
-  await unchanged('F3');
+  await unchanged('F3', b3);
 
   // F4: fluxo do cliente real com falha DEFINITIVA da RPC depois da mídia copiada -> compensação
   const badSel = selection.map((x, i) => i === 0 ? { sig: x.sig, cls: 'variant' } : x);
+  const b4 = await copierState();
   const f4 = await app.call('copyPublicDeckWithMedia', PUBID, null, null, badSel);
   check('F4 cliente real: RPC falha (duplicates_changed) depois do storage.copy', !f4.ok && f4.code === 'duplicates_changed', f4);
-  await unchanged('F4 (compensação do cliente removeu as cópias)');
+  await unchanged('F4 (compensação do cliente removeu as cópias)', b4);
 
   // F5: Deck com mídia de origem AUSENTE -> storage.copy falha no cliente, nada criado
   const missDeck = await authorDeck(A, `P8 E2E Ausente ${RUN}`, pr);
@@ -528,11 +562,13 @@ async function p85(A, B1, authorUsername){
     noteRow(A.id, missDeck, 'normal', [F('fr', `miss-${RUN}-deux`, { audio: uploadAudio(missingUrl) }), F('pt-BR', `miss-${RUN}-dois`)], `miss-${RUN}-deux`, `miss-${RUN}-dois`),
   ]);
   const missPub = await publish(A, missDeck);
+  const b5 = await copierState();
   const f5 = await app.call('copyPublicDeckWithMedia', missPub.public_id, null, null, null);
   check('F5 mídia de origem ausente → cliente aborta antes da RPC', !f5.ok, f5);
-  await unchanged('F5');
+  await unchanged('F5', b5);
 
   // ---- caminho feliz ----
+  const bOk = await copierState();
   const res = await app.call('copyPublicDeckWithMedia', PUBID, null, null, selection);
   registerCopy(B1, res.ok && res.result);
   check('cópia real (manifest → storage.copy → copy_public_deck) concluída', res.ok, res);
@@ -540,7 +576,7 @@ async function p85(A, B1, authorUsername){
   const R = res.result;
   check('resultado: 8 Notes, 2 Decks, 5 referências de mídia remapeadas', R.notes_copied === 8 && R.decks_created === 2 && R.media_remapped === 5, R);
   const nowObjs = await registerNewCopierObjects(B1);
-  const newObjs = [...nowObjs].filter(p => !before.objs.has(p));
+  const newObjs = [...nowObjs].filter(p => !bOk.objs.has(p));
   check('exatamente 4 objetos novos na pasta do copiador (1 por mídia distinta)', newObjs.length === 4, newObjs);
 
   const copied = await copierNotesByRunTag(B1);
@@ -562,7 +598,8 @@ async function p85(A, B1, authorUsername){
     const g = await publicGet(pathFromUrl(u));
     srcByDest[u] = g;
   }
-  check('todo objeto referenciado pela cópia existe fisicamente', Object.values(srcByDest).every(g => g.ok));
+  const destExist = await Promise.all(bucketUrls.map(u => storageExists(B1, pathFromUrl(u))));
+  check('todo objeto referenciado pela cópia existe fisicamente (Storage)', destExist.every(Boolean) && Object.values(srcByDest).every(g => g.ok));
   const srcBytes = new Set([mA, mB, mT, mI].map(m => m.bytes.toString('hex')));
   check('conteúdo dos objetos copiados = conteúdo das origens', Object.values(srcByDest).every(g => srcBytes.has(g.bytes.toString('hex'))));
 
@@ -571,16 +608,18 @@ async function p85(A, B1, authorUsername){
   check('autor NÃO lê as Notes do copiador (RLS)', peek.ok && peek.body.length === 0, peek.body);
   const someDest = pathFromUrl(bucketUrls[0]);
   await storageRemove(A, [someDest]);
-  check('autor NÃO apaga mídia do copiador', (await publicGet(someDest)).ok);
+  check('autor NÃO apaga mídia do copiador (continua existindo no Storage)', await storageExists(B1, someDest));
 
   // independência física: autor apaga as origens; a cópia continua tocável
   const origins = [mA.path, mB.path, mT.path, mI.path];
   const del = await storageRemove(A, origins);
-  const allGone = (await Promise.all(origins.map(p => publicGet(p)))).every(g => !g.ok);
+  const allGone = (await Promise.all(origins.map(p => storageExists(A, p)))).every(e => !e);
   if (allGone) origins.forEach(p => a.objects.delete(p));
-  check('autor apaga as origens', del.ok && allGone, del);
+  check('autor apaga as origens (inexistentes no Storage)', del.ok && allGone, del);
+  for (const p of origins) await noteIfCached(A, p);
+  const afterExist = await Promise.all(bucketUrls.map(u => storageExists(B1, pathFromUrl(u))));
   const after = await Promise.all(bucketUrls.map(u => publicGet(pathFromUrl(u))));
-  check('depois de apagadas as origens, toda mídia da cópia continua acessível', after.every(g => g.ok));
+  check('depois de apagadas as origens, toda mídia da cópia continua existindo e acessível', afterExist.every(Boolean) && after.every(g => g.ok));
   return { PUBID };
 }
 
@@ -628,7 +667,8 @@ async function p82(A, B1, B2, C2){
     // a compensação de mídia deste caso direto-RPC é do script (o cliente real é testado em P8.2c)
     const rm = await storageRemove(B1, loserMap.created);
     check('P8.2a objetos da sessão perdedora removidos (compensação)', rm.ok);
-    const removedOk = (await Promise.all(loserMap.created.map(p => publicGet(p)))).every(g => !g.ok);
+    const removedOk = (await Promise.all(loserMap.created.map(p => storageExists(B1, p)))).every(e => !e);
+    check('P8.2a objetos da sessão perdedora inexistentes no Storage', removedOk);
     if (removedOk) loserMap.created.forEach(p => acct(B1).objects.delete(p));
   }
 
@@ -715,7 +755,7 @@ async function cleanup(){
       if (objs.length){
         const rm = await storageRemove(s, objs);
         const left = [];
-        for (const p of objs) if ((await publicGet(p)).ok) left.push(p);
+        for (const p of objs) if (await storageExists(s, p)) left.push(p);   // listagem do Storage, não o link público (cache)
         check(`${a.label}: ${objs.length} objeto(s) do teste removidos do Storage`, rm.ok && left.length === 0, { status: rm.status, restantes: left });
       }
     } catch (e){ check(`${a.label}: limpeza sem erro`, false, e.message); }
