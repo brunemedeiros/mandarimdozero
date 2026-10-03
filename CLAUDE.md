@@ -16967,8 +16967,8 @@ acima.**
   desejo: mostrar a frase chinesa correta com áudio e depois a tradução,
   diferenciadas visualmente (mudança só nessa tela de `zh/app.js`; precisa do
   print e do layout preferido); (2) segurança -- a chave de API foi colada em
-  chat: restringir a TTS/STT e rotacionar (nova chave no Google Cloud,
-  trocar o Secret `GCP_TTS_KEY`, apagar a antiga); (3) camada de "texto
+  chat; a autora JÁ rotacionou a chave em 29/09/2026 (confirmado por ela em
+  03/10/2026), então não é mais pendência; (3) camada de "texto
   falado" para português e outros idiomas entra como nova lista em
   `RULES_BY_LANG`, sem misturar regras (ex.: sandhi de "os carros azuis").
 
@@ -17414,3 +17414,39 @@ Checkpoint pedido pela autora: só documentação. Nenhuma migration, nenhuma mu
 - **Ordem operacional**: 060 → 061 → 062 → 063 → 064 → 065 → 066 → 067 → 068 → 069 → 059 (059 por último encurta a quebra do painel de métricas do `main`). Validada localmente: as 11 rodam isoladas em transação nas duas ordens (planejada e numérica) com esquema final idêntico; a 061 só depois de a 060 passar nas verificações (o corpo plpgsql não valida dependência na criação).
 - **Janela de incompatibilidade com o `main` 7697541**: após a 059 o painel 📊 Métricas fica vazio; após a 060 trocar username dá `username_immutable` e contas novas recebem username automático. Durante a janela, não criar contas novas nem testar alteração de username até o deploy do código novo.
 - **Backup**: feito via SELECT e conferido por md5, guardado FORA do repositório (dados pessoais).
+
+## Desafios do Módulo (Premium) na trilha -- piloto Módulo 1 do A1 (2026-10-03)
+
+**Decisões da autora**: a aba Desafios continua aberta a todos; desafios COM `moduleId` aparecem trancados (cadeado + aviso de Premium, estilo lingua.com) para conta Free, desafios sem `moduleId` seguem abertos. Cada módulo da trilha ganha uma unidade opcional "Desafios do Módulo N" no fim (depois do Ponto de verificação), liberada junto com o módulo para Premium. Tatoeba descartado para o A1 (não alcançável do sandbox e genérico demais; a fonte é o vocabulário da própria trilha).
+
+**Dado**: `moduleId`/`unitId`/`theme` são campos extras dentro de `challenges.data` (jsonb) -- sem migration. Conteúdo do pilot: `fr/scripts/challenges_import/modulo-a1-m1-content.json` -> `build_modulo.py` -> `lote-a1-m1.json` (48 desafios: 32 Ouça e traduza, 11 Acentuação, 5 Expressões; áudio via Actions "Áudio TTS", modo `desafios-a1-m1`). O builder avisa palavras fora do vocabulário do módulo (teto de vocabulário) e evita duplicar o que já está no banco.
+
+**Código (só `fr/app.js` + `fr/index.html`; zh não tem Desafios)**: `challengesPremiumUnlocked()` (= `isPremium()` ou admin), `isChallengeLocked(c)`, `listedChallenges()`/`playableChallenges()`, `openModuleChallenges(moduleId)` (recorta a aba Desafios por módulo via `challengesModuleFilter`), `fillModuleChallengeRows()`/`buildModuleChallengesRow()` (a linha só aparece para módulos com desafios publicados; carrega os desafios do banco sob demanda), modal `#premium-challenges-modal` (aviso + contato, sem checkout: o app ainda não tem pagamento). Ditados: já têm `moduleId` e `free`; os atuais (`free:true`) continuam abertos a todos, `free:false` passaria a trancar.
+
+**Limitação**: trava só de UI -- os desafios publicados continuam legíveis via API do Supabase (mesmo nível de rigor de outros limites de UX). Teste: `tests/desafios-modulo/test_playwright.js` (30/30).
+
+## Regra de Desafios ao criar conteúdo novo (qualquer idioma, 2026-10-03)
+
+Pedido da autora, verbatim: "ao criar um novo nível, módulo, unidade ou lição de QUALQUER idioma (atual e futuro) verificar quais desafios (em cada categoria) podem ser criados estabelecendo uma diferenciação entre: desafios que vão para a trilha de estudos e desafios que serão apenas acessíveis aos usuários premium."
+
+- **Quando**: sempre que um nível, módulo, unidade ou lição novo for criado, em fr, zh ou idioma futuro. Faz parte de "pronto", como a nota de realidade e o plano grátis x premium.
+- **O que fazer**: passar pelo checklist de `shared/challenge-policy.js` (`challengeChecklist(idioma, escopo)`) e, para CADA categoria (Ditado, Ouça e traduza, Acentuação/tons, Expressões, e as que surgirem), registrar uma decisão: `trail` (aberto a todos, dentro da trilha), `premium` (só Premium) ou `n/a` com motivo. Não deixar em branco.
+- **Padrão atual**: Ditado = trail (free); Ouça e traduza, Acentuação/tons e Expressões = premium, agrupados na unidade opcional "Desafios do Módulo N" no fim do módulo (cadeado para Free).
+- **Critério de conteúdo** (aprendido no piloto do A1): leve, não um tipo em excesso. Ouça e traduza ~2 por unidade (nunca 32 de uma vez); Expressões ~5 por módulo; Acentuação só com acentos reais (fr: ´ ` ^ ~ ¨, "ç" NÃO é acento; zh: tons do pinyin); frases só com vocabulário já visto no módulo.
+- **Todo lote vem informativo**: o builder gera, além do JSON importável, um `.md` com TODO o conteúdo para revisão (ex.: `fr/scripts/challenges_import/lote-a1-m1.md`). A autora revisa o `.md` antes de áudio/importação. Desafios entram como `needs_review`; a unidade na trilha só aparece para desafios PUBLICADOS.
+- **Estado por idioma**: francês tem a aba Desafios e os lotes A1 (módulos 1 a 6). Chinês ainda NÃO tem aba Desafios nem módulos (18 unidades soltas do HSK1; os "desafios" do zh são missões do dia) -- a regra vale, mas os desafios do chinês dependem de decidir módulos e criar a aba (tarefa à parte).
+
+### Ditados (fr) -- estrutura atual (2026-10-03)
+- `fr/dictations.js`: por módulo, 1 ditado Free (`free:true`, aparece também em Desafios > Ditados) + 2 Premium (`free:false`, só na unidade "Desafios do Módulo N"; nunca no menu geral nem na trilha). Texto = mini-história coerente (uma pessoa/situação), só com vocabulário até o módulo (`python3 fr/scripts/check_dictation_vocab.py`).
+- "Revisão do A1": 3 ditados `moduleId:"A1-revisao"` (r1 Free, r2/r3 Premium) juntando 2 módulos cada, em unidade própria no fim do nível. Campo `opening` troca o anúncio falado.
+- Paywall desligado (`CHALLENGE_PAYWALL_ENABLED=false` em `fr/app.js`): tudo abre, só há selos Free/Premium. Bloqueio, paywall e Stripe vêm depois.
+- Áudio: Actions > "Áudio TTS" > modo `ditados` refaz todos (abertura fr + instruções em pt-BR + corpo fr). Limite de 5000 bytes de SSML por pedido.
+
+### Ditados (fr) -- correção do campo de digitar (Fatia 1, 2026-10-03)
+- Lógica pura em `fr/app.js`, bloco `dictation-answer-logic` (`evaluateDictation`), testada por `fr/scripts/test_answer_validation.js` (44 casos) e `tests/ditado/test_playwright.js`.
+- Nota: acerto exato = 1; erro leve (falta de acento, hífen, apóstrofo, `œ` como `oe`) = 0,5 e vira "quase" com explicação; palavra a mais (não troca) = -0,5. Colar o texto 2 vezes não dá mais 100.
+- Pontuação NÃO desconta: o que faltou é marcado (sublinhado) com aviso. Se o aluno escreve "virgule"/"point" por extenso, é erro leve (-0,5) e o sinal é mostrado.
+- Número em dígito ("25") é aceito sem erro; a resposta sempre mostra a escrita por extenso (`frenchNumberWords`, 0 a 100).
+- Pré-limpeza do texto do aluno: apóstrofos/hífens do celular, espaços invisíveis, "j' ai", ponto sem espaço depois.
+- Campo sem autocorreção/capitalização, com `maxlength` e `aria-label`; teclas de acento não roubam o foco e quebram linha; Verificar vazio não corrige; mp3 ausente desabilita o botão; o resultado rola até a tela.
+- Fica para as Fatias 2 e 3: salvar melhor nota/palavras erradas, explicar tipo de erro (concordância, homófonos), áudio por frase, versionar mp3 por hash, trava Premium dentro do player, chinês.

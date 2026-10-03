@@ -1,0 +1,286 @@
+{
+  "moduleId": "A1-m1",
+  "level": "A1",
+  "listenTranslate": [
+    {
+      "unitId": "A1-1",
+      "theme": "Cumprimentos",
+      "fr": "Bonsoir, ça va ?",
+      "hide": [
+        "va"
+      ],
+      "refs": [
+        "Boa noite, tudo bem?",
+        "Boa noite, tudo bom?",
+        "Boa noite, como vai?"
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-1",
+      "theme": "Cumprimentos",
+      "fr": "Un café, s'il vous plaît.",
+      "hide": [
+        "café",
+        "plaît"
+      ],
+      "refs": [
+        "Um café, por favor.",
+        "Um cafezinho, por favor.",
+        "Um café, por gentileza."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-2",
+      "theme": "Apresentação",
+      "fr": "Comment tu t'appelles ?",
+      "hide": [
+        "Comment",
+        "appelles"
+      ],
+      "refs": [
+        "Qual é o seu nome?",
+        "Como você se chama?",
+        "Qual é o teu nome?",
+        "Como é que você se chama?"
+      ],
+      "explanation": "Em francês se diz \"como você se chama\"; em português é comum \"qual é o seu nome\"."
+    },
+    {
+      "unitId": "A1-2",
+      "theme": "Apresentação",
+      "fr": "Je suis brésilienne.",
+      "hide": [
+        "brésilienne"
+      ],
+      "refs": [
+        "Eu sou brasileira.",
+        "Sou brasileira."
+      ],
+      "explanation": "\"Brésilienne\" é o feminino de \"brésilien\"."
+    },
+    {
+      "unitId": "A1-3",
+      "theme": "Números e idade",
+      "fr": "J'ai vingt ans.",
+      "hide": [
+        "vingt"
+      ],
+      "refs": [
+        "Eu tenho vinte anos.",
+        "Tenho vinte anos.",
+        "Eu tenho 20 anos.",
+        "Tenho 20 anos."
+      ],
+      "explanation": "Para a idade, o francês usa \"avoir\" (ter), como o português."
+    },
+    {
+      "unitId": "A1-3",
+      "theme": "Números e idade",
+      "fr": "Quel âge as-tu ?",
+      "hide": [
+        "âge",
+        "as-tu"
+      ],
+      "refs": [
+        "Quantos anos você tem?",
+        "Qual é a sua idade?",
+        "Qual a sua idade?",
+        "Que idade você tem?"
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-4",
+      "theme": "Família",
+      "fr": "Mon père s'appelle Marc.",
+      "hide": [
+        "père"
+      ],
+      "refs": [
+        "Meu pai se chama Marc.",
+        "O nome do meu pai é Marc.",
+        "O meu pai se chama Marc."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-4",
+      "theme": "Família",
+      "fr": "J'ai un frère et une sœur.",
+      "hide": [
+        "frère",
+        "sœur"
+      ],
+      "refs": [
+        "Eu tenho um irmão e uma irmã.",
+        "Tenho um irmão e uma irmã."
+      ],
+      "explanation": ""
+    }
+  ],
+  "accent": [
+    {
+      "unitId": "A1-1",
+      "theme": "Cumprimentos",
+      "text": "s'il vous plaît",
+      "explanation": "\"i\" de \"plaît\" tem acento circunflexo."
+    },
+    {
+      "unitId": "A1-2",
+      "theme": "Apresentação",
+      "text": "brésilien",
+      "explanation": "\"e\" tem acento agudo."
+    },
+    {
+      "unitId": "A1-2",
+      "theme": "Apresentação",
+      "text": "brésilienne",
+      "explanation": "\"e\" tem acento agudo."
+    },
+    {
+      "unitId": "A1-2",
+      "theme": "Apresentação",
+      "text": "être",
+      "explanation": "O primeiro \"e\" tem acento circunflexo."
+    },
+    {
+      "unitId": "A1-3",
+      "theme": "Números e idade",
+      "text": "zéro",
+      "explanation": "\"e\" tem acento agudo."
+    },
+    {
+      "unitId": "A1-3",
+      "theme": "Números e idade",
+      "text": "âge",
+      "explanation": "\"a\" tem acento circunflexo."
+    },
+    {
+      "unitId": "A1-4",
+      "theme": "Família",
+      "text": "père",
+      "explanation": "\"e\" tem acento grave."
+    },
+    {
+      "unitId": "A1-4",
+      "theme": "Família",
+      "text": "mère",
+      "explanation": "\"e\" tem acento grave."
+    },
+    {
+      "unitId": "A1-4",
+      "theme": "Família",
+      "text": "frère",
+      "explanation": "\"e\" tem acento grave."
+    }
+  ],
+  "expression": [
+    {
+      "unitId": "A1-2",
+      "theme": "Apresentação",
+      "expression": "Enchanté !",
+      "register": "neutre",
+      "meaningFr": "On le dit quand on rencontre quelqu'un pour la première fois.",
+      "meaningPt": "Prazer em conhecer. (Mulheres dizem \"enchantée\"; a pronúncia é a mesma.)",
+      "exampleText": "Bonjour, je m'appelle Léo. — Enchanté !",
+      "secondExampleText": "Je suis Ana. Enchantée !",
+      "question": "Quand dit-on « Enchanté ! » ?",
+      "options": [
+        "Quand on rencontre quelqu'un",
+        "Quand on dit au revoir",
+        "Quand on a faim",
+        "Quand on est fatigué"
+      ],
+      "correctAnswer": "Quand on rencontre quelqu'un",
+      "explanationFr": "Un homme dit « enchanté », une femme dit « enchantée ». On le dit en général après « je m'appelle... ».",
+      "microPrompt": "Bonjour, je m'appelle Ana. — __________ !",
+      "microAnswer": "Enchanté"
+    },
+    {
+      "unitId": "A1-1",
+      "theme": "Cumprimentos",
+      "expression": "Comme ci, comme ça",
+      "register": "neutre",
+      "meaningFr": "Ni bien ni mal ; moyen.",
+      "meaningPt": "Mais ou menos; assim, assim.",
+      "exampleText": "Ça va ? — Comme ci, comme ça.",
+      "secondExampleText": "Mon français ? Comme ci, comme ça.",
+      "question": "Que veut dire « comme ci, comme ça » ?",
+      "options": [
+        "Moyen, ni bien ni mal",
+        "Très bien",
+        "Très mal",
+        "Tout de suite"
+      ],
+      "correctAnswer": "Moyen, ni bien ni mal",
+      "explanationFr": "On répond « comme ci, comme ça » à la question « Ça va ? » quand ça ne va ni bien ni mal.",
+      "microPrompt": "Ça va ? — __________.",
+      "microAnswer": "comme ci, comme ça"
+    },
+    {
+      "unitId": "A1-1",
+      "theme": "Cumprimentos",
+      "expression": "Pas mal",
+      "register": "neutre",
+      "meaningFr": "Plutôt bien.",
+      "meaningPt": "Nada mal; até que está bem.",
+      "exampleText": "Ça va ? — Pas mal, merci !",
+      "secondExampleText": "Ce café est pas mal.",
+      "question": "Que veut dire « pas mal » ?",
+      "options": [
+        "Plutôt bien",
+        "Très mauvais",
+        "Très cher",
+        "Très tard"
+      ],
+      "correctAnswer": "Plutôt bien",
+      "explanationFr": "« Pas mal » veut dire « plutôt bien ». C'est une réponse courante à « Ça va ? ».",
+      "microPrompt": "Ça va ? — __________, merci !",
+      "microAnswer": "pas mal"
+    },
+    {
+      "unitId": "A1-1",
+      "theme": "Cumprimentos",
+      "expression": "Ça marche !",
+      "register": "familier",
+      "meaningFr": "D'accord ; c'est bon.",
+      "meaningPt": "Combinado! Fechado! Beleza!",
+      "exampleText": "Un café ensemble ? — Ça marche !",
+      "secondExampleText": "Je t'appelle ce soir. — Ça marche !",
+      "question": "Que veut dire « Ça marche ! » ?",
+      "options": [
+        "D'accord, c'est bon",
+        "Je ne comprends pas",
+        "J'ai faim",
+        "Au revoir"
+      ],
+      "correctAnswer": "D'accord, c'est bon",
+      "explanationFr": "On dit « Ça marche ! » pour accepter une proposition, entre amis ou collègues.",
+      "microPrompt": "Un café ? — __________ !",
+      "microAnswer": "Ça marche"
+    },
+    {
+      "unitId": "A1-1",
+      "theme": "Cumprimentos",
+      "expression": "Pas de problème !",
+      "register": "neutre",
+      "meaningFr": "Ce n'est pas grave ; d'accord.",
+      "meaningPt": "Sem problema! Tranquilo!",
+      "exampleText": "Pardon ! — Pas de problème !",
+      "secondExampleText": "Tu peux m'aider ? — Pas de problème.",
+      "question": "Que veut dire « Pas de problème ! » ?",
+      "options": [
+        "Ce n'est pas grave",
+        "C'est très difficile",
+        "Je suis fatigué",
+        "Je ne sais pas"
+      ],
+      "correctAnswer": "Ce n'est pas grave",
+      "explanationFr": "On répond « Pas de problème ! » à un « Pardon ! » ou à une demande d'aide.",
+      "microPrompt": "Pardon ! — Pas de __________ !",
+      "microAnswer": "problème"
+    }
+  ]
+}

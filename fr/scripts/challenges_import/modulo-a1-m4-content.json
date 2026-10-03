@@ -1,0 +1,251 @@
+{
+  "moduleId": "A1-m4",
+  "level": "A1",
+  "listenTranslate": [
+    {
+      "unitId": "A1-13",
+      "theme": "Clima e estações",
+      "fr": "Il fait froid en hiver.",
+      "hide": [
+        "froid",
+        "hiver"
+      ],
+      "refs": [
+        "Faz frio no inverno.",
+        "Está frio no inverno.",
+        "Fica frio no inverno."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-13",
+      "theme": "Clima e estações",
+      "fr": "Aujourd'hui, il pleut.",
+      "hide": [
+        "pleut"
+      ],
+      "refs": [
+        "Hoje está chovendo.",
+        "Hoje chove.",
+        "Hoje está chuvoso."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-14",
+      "theme": "Transporte",
+      "fr": "Je prends le bus tous les jours.",
+      "hide": [
+        "prends",
+        "bus"
+      ],
+      "refs": [
+        "Eu pego o ônibus todos os dias.",
+        "Pego o ônibus todo dia.",
+        "Eu pego o ônibus diariamente."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-14",
+      "theme": "Transporte",
+      "fr": "Où est la station de métro ?",
+      "hide": [
+        "station",
+        "métro"
+      ],
+      "refs": [
+        "Onde fica a estação de metrô?",
+        "Onde é a estação de metrô?"
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-15",
+      "theme": "Corpo e saúde",
+      "fr": "Il a mal au ventre.",
+      "hide": [
+        "mal",
+        "ventre"
+      ],
+      "refs": [
+        "Ele está com dor de barriga.",
+        "Ele tem dor de barriga.",
+        "Ele está com dor na barriga."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-15",
+      "theme": "Corpo e saúde",
+      "fr": "Je vais à la pharmacie.",
+      "hide": [
+        "vais",
+        "pharmacie"
+      ],
+      "refs": [
+        "Eu vou à farmácia.",
+        "Vou à farmácia.",
+        "Eu vou na farmácia."
+      ],
+      "explanation": ""
+    }
+  ],
+  "accent": [
+    {
+      "unitId": "A1-13",
+      "theme": "Clima e estações",
+      "text": "été",
+      "explanation": "Os dois \"é\" têm acento agudo."
+    },
+    {
+      "unitId": "A1-14",
+      "theme": "Transporte",
+      "text": "métro",
+      "explanation": "\"e\" tem acento agudo."
+    },
+    {
+      "unitId": "A1-14",
+      "theme": "Transporte",
+      "text": "vélo",
+      "explanation": "\"e\" tem acento agudo."
+    },
+    {
+      "unitId": "A1-14",
+      "theme": "Transporte",
+      "text": "arrêt",
+      "explanation": "\"e\" tem acento circunflexo."
+    },
+    {
+      "unitId": "A1-14",
+      "theme": "Transporte",
+      "text": "à pied",
+      "explanation": "\"à\" tem acento grave."
+    },
+    {
+      "unitId": "A1-15",
+      "theme": "Corpo e saúde",
+      "text": "tête",
+      "explanation": "\"e\" tem acento circunflexo."
+    },
+    {
+      "unitId": "A1-15",
+      "theme": "Corpo e saúde",
+      "text": "médecin",
+      "explanation": "\"e\" tem acento agudo."
+    },
+    {
+      "unitId": "A1-15",
+      "theme": "Corpo e saúde",
+      "text": "fièvre",
+      "explanation": "\"e\" tem acento grave."
+    }
+  ],
+  "expression": [
+    {
+      "unitId": "A1-13",
+      "theme": "Clima e estações",
+      "expression": "Il pleut des cordes",
+      "register": "neutre",
+      "meaningFr": "Il pleut très fort.",
+      "meaningPt": "Está chovendo canivetes; chove muito.",
+      "exampleText": "Prends un parapluie, il pleut des cordes !",
+      "secondExampleText": "Il pleut des cordes depuis ce matin.",
+      "question": "Que veut dire « Il pleut des cordes » ?",
+      "options": [
+        "Il pleut très fort",
+        "Il ne pleut pas",
+        "Il neige",
+        "Il fait beau"
+      ],
+      "correctAnswer": "Il pleut très fort",
+      "explanationFr": "C'est une image : la pluie tombe comme des cordes, en lignes serrées.",
+      "microPrompt": "Dehors, il pleut des __________ !",
+      "microAnswer": "cordes"
+    },
+    {
+      "unitId": "A1-14",
+      "theme": "Transporte",
+      "expression": "Bon voyage !",
+      "register": "neutre",
+      "meaningFr": "On le dit à quelqu'un qui part en voyage.",
+      "meaningPt": "Boa viagem!",
+      "exampleText": "Tu pars demain ? Bon voyage !",
+      "secondExampleText": "Bon voyage et à bientôt !",
+      "question": "Quand dit-on « Bon voyage ! » ?",
+      "options": [
+        "À quelqu'un qui part",
+        "À quelqu'un qui arrive",
+        "À quelqu'un qui mange",
+        "À quelqu'un qui dort"
+      ],
+      "correctAnswer": "À quelqu'un qui part",
+      "explanationFr": "On souhaite un bon trajet à la personne qui voyage.",
+      "microPrompt": "Au revoir, __________ voyage !",
+      "microAnswer": "bon"
+    },
+    {
+      "unitId": "A1-15",
+      "theme": "Corpo e saúde",
+      "expression": "Bon rétablissement !",
+      "register": "neutre",
+      "meaningFr": "On le dit à quelqu'un de malade.",
+      "meaningPt": "Melhoras! Boa recuperação!",
+      "exampleText": "Tu es malade ? Bon rétablissement !",
+      "secondExampleText": "Bon rétablissement, à bientôt !",
+      "question": "À qui dit-on « Bon rétablissement ! » ?",
+      "options": [
+        "À une personne malade",
+        "À une personne en vacances",
+        "À une personne qui part",
+        "À une personne qui mange"
+      ],
+      "correctAnswer": "À une personne malade",
+      "explanationFr": "« Rétablissement » vient de « se rétablir » : retrouver la santé.",
+      "microPrompt": "Il a de la fièvre. — Bon __________ !",
+      "microAnswer": "rétablissement"
+    },
+    {
+      "unitId": "A1-15",
+      "theme": "Corpo e saúde",
+      "expression": "À tes souhaits !",
+      "register": "neutre",
+      "meaningFr": "On le dit quand quelqu'un éternue.",
+      "meaningPt": "Saúde! (quando alguém espirra)",
+      "exampleText": "Atchoum ! — À tes souhaits !",
+      "secondExampleText": "À vos souhaits, madame !",
+      "question": "Quand dit-on « À tes souhaits ! » ?",
+      "options": [
+        "Quand quelqu'un éternue",
+        "Quand quelqu'un mange",
+        "Quand quelqu'un part",
+        "Quand quelqu'un arrive"
+      ],
+      "correctAnswer": "Quand quelqu'un éternue",
+      "explanationFr": "Avec « vous », on dit « À vos souhaits ! ».",
+      "microPrompt": "Atchoum ! — À tes __________ !",
+      "microAnswer": "souhaits"
+    },
+    {
+      "unitId": "A1-13",
+      "theme": "Clima e estações",
+      "expression": "Quel temps !",
+      "register": "neutre",
+      "meaningFr": "On commente le temps qu'il fait (souvent pour se plaindre).",
+      "meaningPt": "Que tempo! (comentando o clima)",
+      "exampleText": "Quel temps ! Il pleut encore.",
+      "secondExampleText": "Quel temps ! Il fait très froid.",
+      "question": "Que veut dire « Quel temps ! » ?",
+      "options": [
+        "On commente le temps qu'il fait",
+        "On demande l'heure",
+        "On dit au revoir",
+        "On remercie"
+      ],
+      "correctAnswer": "On commente le temps qu'il fait",
+      "explanationFr": "L'expression est une exclamation, pas une question.",
+      "microPrompt": "__________ temps ! Il neige !",
+      "microAnswer": "Quel"
+    }
+  ]
+}

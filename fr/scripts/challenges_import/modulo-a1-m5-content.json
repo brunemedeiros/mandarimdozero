@@ -1,0 +1,241 @@
+{
+  "moduleId": "A1-m5",
+  "level": "A1",
+  "listenTranslate": [
+    {
+      "unitId": "A1-16",
+      "theme": "Cores e descrições",
+      "fr": "Ma sœur est grande et gentille.",
+      "hide": [
+        "grande",
+        "gentille"
+      ],
+      "refs": [
+        "Minha irmã é alta e gentil.",
+        "Minha irmã é alta e simpática.",
+        "Minha irmã é grande e gentil."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-16",
+      "theme": "Cores e descrições",
+      "fr": "Son pull est rouge.",
+      "hide": [
+        "pull",
+        "rouge"
+      ],
+      "refs": [
+        "O suéter dele é vermelho.",
+        "O suéter dela é vermelho.",
+        "A blusa dele é vermelha."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-17",
+      "theme": "A casa e os cômodos",
+      "fr": "La cuisine est à côté du salon.",
+      "hide": [
+        "cuisine",
+        "salon"
+      ],
+      "refs": [
+        "A cozinha fica ao lado da sala.",
+        "A cozinha é ao lado da sala.",
+        "A cozinha está ao lado da sala de estar."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-17",
+      "theme": "A casa e os cômodos",
+      "fr": "Il y a une fenêtre dans la chambre.",
+      "hide": [
+        "fenêtre",
+        "chambre"
+      ],
+      "refs": [
+        "Tem uma janela no quarto.",
+        "Há uma janela no quarto.",
+        "Existe uma janela no quarto."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-18",
+      "theme": "Onde as coisas estão",
+      "fr": "La lampe est sur la table.",
+      "hide": [
+        "lampe",
+        "table"
+      ],
+      "refs": [
+        "A luminária está em cima da mesa.",
+        "O abajur está em cima da mesa.",
+        "A lâmpada está em cima da mesa."
+      ],
+      "explanation": ""
+    },
+    {
+      "unitId": "A1-18",
+      "theme": "Onde as coisas estão",
+      "fr": "Le sac est sous la chaise.",
+      "hide": [
+        "sous",
+        "chaise"
+      ],
+      "refs": [
+        "A bolsa está embaixo da cadeira.",
+        "A mochila está embaixo da cadeira.",
+        "A bolsa está debaixo da cadeira."
+      ],
+      "explanation": ""
+    }
+  ],
+  "accent": [
+    {
+      "unitId": "A1-16",
+      "theme": "Cores e descrições",
+      "text": "très",
+      "explanation": "\"e\" tem acento grave."
+    },
+    {
+      "unitId": "A1-17",
+      "theme": "A casa e os cômodos",
+      "text": "fenêtre",
+      "explanation": "\"e\" tem acento circunflexo."
+    },
+    {
+      "unitId": "A1-17",
+      "theme": "A casa e os cômodos",
+      "text": "étage",
+      "explanation": "\"e\" tem acento agudo."
+    },
+    {
+      "unitId": "A1-18",
+      "theme": "Onde as coisas estão",
+      "text": "derrière",
+      "explanation": "\"e\" tem acento grave."
+    },
+    {
+      "unitId": "A1-18",
+      "theme": "Onde as coisas estão",
+      "text": "canapé",
+      "explanation": "\"e\" tem acento agudo."
+    },
+    {
+      "unitId": "A1-18",
+      "theme": "Onde as coisas estão",
+      "text": "à côté de",
+      "explanation": "\"à\" tem acento grave e \"ô\" tem acento circunflexo; \"é\" tem acento agudo."
+    }
+  ],
+  "expression": [
+    {
+      "unitId": "A1-17",
+      "theme": "A casa e os cômodos",
+      "expression": "Fais comme chez toi",
+      "register": "neutre",
+      "meaningFr": "On dit à un invité de se sentir à l'aise.",
+      "meaningPt": "Fique à vontade; faça como se fosse a sua casa.",
+      "exampleText": "Entre, fais comme chez toi !",
+      "secondExampleText": "Voilà le salon. Fais comme chez toi.",
+      "question": "Quand dit-on « Fais comme chez toi » ?",
+      "options": [
+        "À un invité, pour qu'il soit à l'aise",
+        "À un voisin qui part",
+        "À un ami malade",
+        "À un client"
+      ],
+      "correctAnswer": "À un invité, pour qu'il soit à l'aise",
+      "explanationFr": "Avec « vous », on dit « Faites comme chez vous ».",
+      "microPrompt": "Entre ! Fais comme __________ toi !",
+      "microAnswer": "chez"
+    },
+    {
+      "unitId": "A1-17",
+      "theme": "A casa e os cômodos",
+      "expression": "Chez moi",
+      "register": "neutre",
+      "meaningFr": "À la maison ; dans mon logement.",
+      "meaningPt": "Na minha casa; em casa.",
+      "exampleText": "Viens chez moi ce soir !",
+      "secondExampleText": "Chez moi, il y a deux chambres.",
+      "question": "Que veut dire « chez moi » ?",
+      "options": [
+        "Dans ma maison",
+        "Dans ton école",
+        "Au restaurant",
+        "À la gare"
+      ],
+      "correctAnswer": "Dans ma maison",
+      "explanationFr": "« Chez » + personne = la maison de cette personne : chez moi, chez toi, chez elle.",
+      "microPrompt": "On mange __________ moi ce soir.",
+      "microAnswer": "chez"
+    },
+    {
+      "unitId": "A1-17",
+      "theme": "A casa e os cômodos",
+      "expression": "Bienvenue !",
+      "register": "neutre",
+      "meaningFr": "On accueille quelqu'un.",
+      "meaningPt": "Bem-vindo(a)!",
+      "exampleText": "Bienvenue chez moi !",
+      "secondExampleText": "Bienvenue à Paris !",
+      "question": "Quand dit-on « Bienvenue ! » ?",
+      "options": [
+        "Quand on accueille quelqu'un",
+        "Quand on part",
+        "Quand on mange",
+        "Quand on dort"
+      ],
+      "correctAnswer": "Quand on accueille quelqu'un",
+      "explanationFr": "« Bienvenue » = « bien » + « venue » : arrivée bienvenue.",
+      "microPrompt": "__________ chez moi !",
+      "microAnswer": "Bienvenue"
+    },
+    {
+      "unitId": "A1-16",
+      "theme": "Cores e descrições",
+      "expression": "Ça te va bien !",
+      "register": "neutre",
+      "meaningFr": "Ce vêtement ou cette couleur te va bien.",
+      "meaningPt": "Fica bem em você! Combina com você!",
+      "exampleText": "Cette robe rouge, ça te va bien !",
+      "secondExampleText": "Ça te va bien, le bleu.",
+      "question": "Que veut dire « Ça te va bien ! » ?",
+      "options": [
+        "C'est joli sur toi",
+        "C'est trop petit",
+        "C'est trop cher",
+        "C'est sale"
+      ],
+      "correctAnswer": "C'est joli sur toi",
+      "explanationFr": "On complimente un vêtement ou une couleur.",
+      "microPrompt": "Ce pull vert, ça te __________ bien !",
+      "microAnswer": "va"
+    },
+    {
+      "unitId": "A1-16",
+      "theme": "Cores e descrições",
+      "expression": "Ça te plaît ?",
+      "register": "neutre",
+      "meaningFr": "On demande si quelqu'un aime quelque chose.",
+      "meaningPt": "Você gostou? Gostou disso?",
+      "exampleText": "Ma nouvelle maison, ça te plaît ?",
+      "secondExampleText": "Ça te plaît, cette couleur ?",
+      "question": "Que veut dire « Ça te plaît ? » ?",
+      "options": [
+        "Tu aimes ça ?",
+        "Tu as faim ?",
+        "Tu es fatigué ?",
+        "Tu viens ?"
+      ],
+      "correctAnswer": "Tu aimes ça ?",
+      "explanationFr": "« Plaire » = être agréable : « Ça te plaît » = « Tu aimes ça ? ».",
+      "microPrompt": "Cette robe, ça te __________ ?",
+      "microAnswer": "plaît"
+    }
+  ]
+}

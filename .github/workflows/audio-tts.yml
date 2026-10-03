@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       modo:
-        description: "laboratorio = gera variantes pra ouvir | regenerar = refaz os mp3 afetados pelas regras | gerar-faltantes = cria mp3 para textos sem áudio (zh e fr)"
+        description: "laboratorio = gera variantes pra ouvir | regenerar = refaz os mp3 afetados pelas regras | gerar-faltantes = cria mp3 para textos sem áudio (zh e fr) | desafios-expressoes = gera os mp3 das 80 expressões novas dos Desafios | desafios-a1-m1 = gera os mp3 dos desafios do Módulo 1 do A1 | desafios-a1-todos = gera os mp3 dos desafios dos Módulos 1 a 6 do A1 (fr/scripts/challenges_import) | ditados-frases = gera 1 mp3 por FRASE de cada ditado (dictation-<id>-s<N>.mp3) | ditados = refaz o áudio guiado de TODOS os ditados de fr/dictations.js (com a locução de instruções em português)"
         type: choice
-        options: [laboratorio, regenerar, gerar-faltantes]
+        options: [laboratorio, regenerar, gerar-faltantes, desafios-expressoes, desafios-a1-m1, desafios-a1-todos, ditados, ditados-frases]
         default: laboratorio
 
 permissions:
@@ -45,13 +45,37 @@ jobs:
       - name: Gerar faltantes (fr)
         if: always() && inputs.modo == 'gerar-faltantes'
         run: node fr/scripts/list_missing_audio.js fr | python3 fr/scripts/generate_missing_audio.py fr
+      - name: Gerar áudio das expressões dos Desafios
+        if: inputs.modo == 'desafios-expressoes'
+        run: python3 fr/scripts/challenges_import/generate_challenge_audio.py
+      - name: Gerar áudio dos desafios do Módulo 1 (A1)
+        if: inputs.modo == 'desafios-a1-m1'
+        run: python3 fr/scripts/challenges_import/generate_challenge_audio.py fr/scripts/challenges_import/lote-a1-m1.json
+      - name: Gerar áudio dos desafios dos Módulos 1 a 6 (A1)
+        if: inputs.modo == 'desafios-a1-todos'
+        run: |
+          for m in 1 2 3 4 5 6; do
+            python3 fr/scripts/challenges_import/generate_challenge_audio.py fr/scripts/challenges_import/lote-a1-m$m.json
+          done
+      - name: Gerar áudio guiado dos ditados
+        if: inputs.modo == 'ditados'
+        env:
+          DICTATION_FORCE: "1"
+        run: python3 fr/scripts/gen_guided_dictation_audio.py
+
+      - name: Gerar áudio por frase dos ditados
+        if: inputs.modo == 'ditados-frases'
+        env:
+          DICTATION_FORCE: "1"
+        run: python3 fr/scripts/gen_dictation_sentence_audio.py
+
       - name: Commitar
         if: always() && inputs.modo != 'laboratorio'
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add fr/audio fr/audio-manifest.js zh/audio zh/audio-manifest.js
-          git diff --cached --quiet || git commit -m "Regenera áudios com a camada de texto falado (Chirp 3 HD)"
+          git diff --cached --quiet || git commit -m "Áudio TTS (${{ inputs.modo }}): mp3 gerados com Chirp 3 HD"
           git push
       # Commits feitos pelo próprio workflow (GITHUB_TOKEN) NÃO disparam a
       # publicação do site sozinhos -- pede explicitamente.
