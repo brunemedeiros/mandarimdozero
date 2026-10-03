@@ -48,7 +48,7 @@ const ADMIN_EMAIL = 'brunemed1310@gmail.com';
 // scripts/generate_pwa_assets.py, mas repetido aqui porque Edge Functions
 // rodam isoladas (Deno, sem bundler) e não importam os arquivos JS do
 // front-end (ver Bloco 6/Fase B6 da tarefa de rebranding -- antes o texto
-// era fixo "Francês/Mandarim do Zero" pros dois idiomas ao mesmo tempo).
+// era fixo "Francês/Chinês" pros dois idiomas ao mesmo tempo).
 const LANGUAGE_APP_KEY_TO_COURSE_NAME: Record<string, string> = {
   frances: 'Francês com Prof. Brune',
   mandarim: 'Chinês com Prof. Brune',

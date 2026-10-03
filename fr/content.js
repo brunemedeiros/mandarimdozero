@@ -1,7 +1,7 @@
 // Banco de conteúdo — Francês do Zero (Nível A1)
 // Cada unidade tem objetivo comunicacional, vocabulário, frases-modelo e diálogo.
 //
-// Schema (mais simples que o do Mandarim do Zero: francês usa alfabeto latino,
+// Schema (mais simples que o do app de chinês: francês usa alfabeto latino,
 // não existe separação pinyin/caractere — um único campo "f" carrega a palavra
 // ou frase em francês, e "t" a tradução em português):
 //   vocab:    [{ f: "bonjour", t: "olá" }, ...]

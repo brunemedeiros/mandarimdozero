@@ -645,6 +645,24 @@ function buildAnkiImportPlan(parseResult, { languageAppKey, existingRows }){
       return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: mapped.reason, warning: mapped.warning, deckName, deckPath, tags: note.tags, normalizedTags };
     }
 
+    // Fase I (Tags): limites (20 por Note / 50 caracteres por tag). Numa
+    // importação em lote, recusar a Note inteira por causa de tags seria
+    // pior; então mantém as tags válidas e AVISA (nunca silencioso) o que
+    // ficou de fora e por quê -- o aviso aparece no resumo antes de confirmar.
+    const tagLimitWarnings = [];
+    if (typeof partitionNoteTagsByLimits === 'function'){
+      const part = partitionNoteTagsByLimits(mapped.editorState.tags);
+      if (part.dropped.length){
+        mapped.editorState.tags = part.tags;
+        const sysTags = part.dropped.filter(d => d.reason === 'system_tag').map(d => d.tag);
+        if (sysTags.length) tagLimitWarnings.push(`${sysTags.length} tag(s) de sistema (${sysTags.join(', ')}) não podem ser importadas: a atribuição de autoria só é criada pelo próprio app.`);
+        const tooLong = part.dropped.filter(d => d.reason === 'too_long').map(d => d.tag);
+        const overLimit = part.dropped.filter(d => d.reason === 'over_limit').map(d => d.tag);
+        if (tooLong.length) tagLimitWarnings.push(`${tooLong.length} tag(s) acima de ${TAG_MAX_LENGTH} caracteres não foram importadas: ${tooLong.map(t => t.slice(0, 20) + '…').join(', ')}.`);
+        if (overLimit.length) tagLimitWarnings.push(`Limite de ${TAG_MAX_PER_NOTE} tags por cartão: ${overLimit.length} tag(s) não foram importadas: ${overLimit.join(', ')}.`);
+      }
+    }
+
     const validation = validateNoteEditorStateForSave(mapped.editorState);
     if (!validation.ok){
       return { ankiNoteId: note.id, ankiGuid: note.guid, ok: false, reason: 'validation_failed', warning: `Cartão inválido depois de mapeado: ${validation.error}`, deckName, deckPath, tags: note.tags, normalizedTags };
@@ -663,7 +681,7 @@ function buildAnkiImportPlan(parseResult, { languageAppKey, existingRows }){
         : classification.kind,
       editorState: mapped.editorState,
       mediaRefs: mapped.mediaRefs,
-      warnings: mapped.warnings.concat(classification.extraTemplatesDropped ? [`${classification.extraTemplatesDropped} template(s) extra deste tipo de cartão não foram preservados (só o 1º foi importado).`] : []),
+      warnings: mapped.warnings.concat(tagLimitWarnings).concat(classification.extraTemplatesDropped ? [`${classification.extraTemplatesDropped} template(s) extra deste tipo de cartão não foram preservados (só o 1º foi importado).`] : []),
       hasMedia: mapped.mediaRefs.some(r => r.audioFilename || r.imageFilename),
       isDuplicate: isDuplicateOfExisting || isDuplicateWithinBatch,
       deckName,

@@ -26,7 +26,7 @@
 // Painel de Admin > Analytics (shared/admin-analytics.js). Se essa
 // preferência for desligada, o evento AINDA assim é marcado
 // actor_type='admin' -- só deixa de ser descartado -- então o dashboard
-// (que só lê actor_type='student') continua sem contar essa atividade.
+// (que só lê actor_type IN ('user','student')) continua sem contar essa atividade.
 // Um id por carregamento de página -- agrupa os eventos da mesma "visita"
 // (ver comentário da migration 008). Gerado uma vez no load do script, não
 // por chamada de trackEvent().
@@ -75,7 +75,7 @@ function trackEvent(eventType, eventName, meta){
   // exatamente no cenário que o tracking de erro técnico deveria cobrir.
   if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER) return;
 
-  const actorType = (typeof isAdminUser === 'function' && isAdminUser()) ? 'admin' : 'student';
+  const actorType = (typeof isAdminUser === 'function' && isAdminUser()) ? 'admin' : 'user';
   if (actorType === 'admin'){
     // PROFILE_CACHE só existe depois de ensureProfileLoaded() (chamado no
     // login, ver onUserLoggedIn em shared/auth.js). Se por algum motivo

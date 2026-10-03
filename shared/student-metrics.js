@@ -2,7 +2,7 @@
 // alunas particulares (ver CLAUDE.md) ----------
 // Único ponto de acesso a QUALQUER dado de progresso de uma aluna do lado
 // da professora -- chama a function SECURITY DEFINER
-// get_teacher_student_metrics (migration 029), que já faz a checagem de
+// get_teacher_student_metrics (migrations 029/058/059), que já faz a checagem de
 // vínculo ativo e devolve só agregados sobre os cartões que a PRÓPRIA
 // professora autorou pra essa aluna (teacher_flashcards), nunca dado bruto.
 // Nunca ler `progress` diretamente daqui nem de nenhum outro lugar do lado

@@ -219,10 +219,10 @@ async function renderLeaderboardView(){
 
   const rowsHTML = rows.length ? rows.map(r => {
     const isMe = !!(CURRENT_USER && r.user_id === CURRENT_USER.id);
-    // Sem @username na linha -- o username é gerado a partir do e-mail
-    // (ver createInitialProfile) e não é o que a pessoa reconhece de si
-    // mesma; o nome exibido (ou o próprio username como texto simples, se
-    // ela nunca tiver escolhido um nome) já é suficiente.
+    // Sem @username na linha -- o username é um identificador gerado pelo
+    // sistema (ver createInitialProfile / migration 060), não o nome pelo
+    // qual a pessoa se reconhece; o nome exibido (ou o próprio identificador
+    // como texto simples, se ela nunca tiver definido um nome) basta.
     const name = r.profile?.display_name || r.profile?.username || 'Aluno(a)';
     const initials = avatarInitials(name);
     const color = avatarColor(r.user_id);
