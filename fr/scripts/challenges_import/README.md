@@ -27,7 +27,7 @@ Para mudar um texto: edite `lote-expressoes-content.json`, rode
 
 ## Desafios do Módulo 1 (A1) -- trilha Premium
 
-- Conteúdo-fonte: `modulo-a1-m1-content.json`. Montar o JSON importável: `python3 fr/scripts/challenges_import/build_modulo.py` (gera `lote-a1-m1.json`: 32 Ouça e traduza, 11 Acentuação, 5 Expressões, todos com `moduleId`/`unitId`/`theme`, status `needs_review`).
+- Conteúdo-fonte: `modulo-a1-m1-content.json`. Montar o JSON importável: `python3 fr/scripts/challenges_import/build_modulo.py` (gera `lote-a1-m1.json` e o resumo legível `lote-a1-m1.md`, com todo o conteúdo: 8 Ouça e traduza, 9 Acentuação, 5 Expressões; teto por tipo no builder; "ç" não conta como acento, todos com `moduleId`/`unitId`/`theme`, status `needs_review`).
 - Áudio: Actions > **Áudio TTS** > modo `desafios-a1-m1` (branch `main`).
 - Importar: painel admin > Desafios > **📥 Importar JSON** (colar o conteúdo de `lote-a1-m1.json`), depois revisar e publicar.
 - Na app: o módulo ganha a unidade opcional "Desafios do Módulo 1" (fim do módulo, depois do Ponto de verificação); contas Free veem o cadeado, contas Premium e o admin abrem os desafios do módulo.

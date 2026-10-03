@@ -88,6 +88,25 @@ def make_hint(fr, hide):
     return out
 
 
+def write_summary(items, path, module_id):
+    """Resumo legível do lote (conteúdo dentro dele), gerado do mesmo JSON."""
+    by = lambda t: [i for i in items if i["type"] == t]
+    L = [f"# Desafios do módulo {module_id}", "",
+         f"{len(items)} desafios: {len(by('listen_translate'))} Ouça e traduza, "
+         f"{len(by('accent'))} Acentuação, {len(by('expression'))} Expressões.", ""]
+    L += ["## Ouça e traduza", "", "| Unidade | Frase | Lacunas | Traduções aceitas |", "|---|---|---|---|"]
+    for i in by("listen_translate"):
+        L.append(f"| {i['unitId']} | {i['sentenceFr']} | {i['hintText']} | {' / '.join(i['referenceTranslations'])} |")
+    L += ["", "## Acentuação", "", "| Unidade | Palavra | Explicação |", "|---|---|---|"]
+    for i in by("accent"):
+        L.append(f"| {i['unitId']} | {i['targetText']} | {i['explanation']} |")
+    L += ["", "## Expressões", "", "| Unidade | Expressão | Significado | Exemplo |", "|---|---|---|---|"]
+    for i in by("expression"):
+        L.append(f"| {i['unitId']} | {i['expression']} | {i['meaningPt']} | {i['exampleText']} |")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(L) + "\n")
+
+
 def main():
     src_path = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_SRC
     with open(src_path, encoding="utf-8") as f:
@@ -164,6 +183,7 @@ def main():
     with open(out, "w", encoding="utf-8") as f:
         json.dump(items, f, ensure_ascii=False, indent=2)
         f.write("\n")
+    write_summary(items, os.path.join(HERE, f"lote-{module_id.lower()}.md"), module_id)
     by_type = {}
     for i in items:
         by_type[i["type"]] = by_type.get(i["type"], 0) + 1
