@@ -3211,7 +3211,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
            acessíveis pela conta, só saem da navegação normal). -->
       <button class="pill admin-mode-toggle-btn" id="admin-mode-toggle-btn" aria-label="Ativar/desativar Admin Mode" title="Admin Mode: OFF simula a experiência de um aluno comum" style="display:none;">🔒 Admin: <span id="admin-mode-state-label">ON</span></button>
       <button class="pill notifications-pill" id="notifications-topbar-btn" aria-label="Notificações" title="Notificações">🔔<span class="notifications-badge" id="notifications-badge" style="display:none;"></span></button>
-      <button class="pill report-topbar-pill" id="report-topbar-btn" aria-label="Reportar problema" title="Reportar problema">⚑</button>
+      <button class="pill report-topbar-pill" id="report-topbar-btn" aria-label="Reportar problema" title="Reportar problema" data-i18n-attr="aria-label:report.entry.label;title:report.entry.label">⚑</button>
       <div class="lang-switcher">
         <button class="lang-switcher-btn" id="lang-switcher-btn" type="button" aria-label="Trocar idioma" title="Trocar idioma"></button>
         <div class="lang-switcher-dropdown" id="lang-switcher-dropdown"></div>
@@ -3340,7 +3340,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <div class="lesson-progress-track" id="step-progress-wrap">
           <div class="lesson-progress-fill" id="step-progress-fill"></div>
         </div>
-        <button class="lesson-close-btn" id="report-flag-lesson-btn" data-report-flag aria-label="Reportar problema" title="Reportar problema">⚑</button>
+        <button class="lesson-close-btn" id="report-flag-lesson-btn" data-report-flag aria-label="Reportar problema" title="Reportar problema" data-i18n-attr="aria-label:report.entry.label;title:report.entry.label">⚑</button>
         <button class="lesson-close-btn" id="lesson-kbd-btn" aria-label="Atalhos do teclado" title="Atalhos do teclado">⌨️</button>
         <button class="lesson-close-btn" id="back-to-path" aria-label="Sair da lição" title="Sair da lição">✕</button>
       </div>
@@ -3744,7 +3744,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <button class="user-dropdown-item" id="support-materials-btn">📚 Material de apoio</button>
   <button class="user-dropdown-item mais-extra-tab" id="user-settings-btn">⚙️ Configurações</button>
   <button class="user-dropdown-item admin-only-nav mais-extra-tab" id="admin-badges-btn" style="display:none;">🛠️ Painel de Admin</button>
-  <button class="user-dropdown-item" id="report-menu-btn">⚑ Reportar problema</button>
+  <button class="user-dropdown-item" id="report-menu-btn" data-i18n="report.entry.menuItem">⚑ Reportar problema</button>
   <div class="user-dropdown-sep"></div>
   <button class="user-dropdown-item danger" id="logout-btn">Sair da conta</button>
 </div>
@@ -4106,42 +4106,42 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="report-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>⚑ Reportar problema ou sugestão</h3>
-      <button class="app-modal-close" id="report-modal-close" aria-label="Fechar">✕</button>
+      <h3 data-i18n="report.modal.title">⚑ Reportar problema ou sugestão</h3>
+      <button class="app-modal-close" id="report-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
       <div id="report-form-view">
-        <p class="report-modal-label">O que aconteceu?</p>
+        <p class="report-modal-label" data-i18n="report.modal.whatHappened">O que aconteceu?</p>
         <div class="report-option-grid" id="report-category-options"></div>
 
-        <p class="report-modal-label">Quanto isso atrapalhou? <span class="report-modal-optional">(opcional)</span></p>
+        <p class="report-modal-label" data-i18n="report.modal.howMuch">Quanto isso atrapalhou? <span class="report-modal-optional" data-i18n="report.modal.optional">(opcional)</span></p>
         <div class="report-severity-row" id="report-severity-options"></div>
 
-        <label class="profile-edit-label" for="report-description">Descreva o que você viu</label>
-        <textarea id="report-description" class="profile-edit-textarea" maxlength="600" rows="3" placeholder="O que aconteceu, exatamente?"></textarea>
+        <label class="profile-edit-label" for="report-description" data-i18n="report.modal.describeLabel">Descreva o que você viu</label>
+        <textarea id="report-description" class="profile-edit-textarea" maxlength="600" rows="3" placeholder="O que aconteceu, exatamente?" data-i18n-attr="placeholder:report.modal.describePlaceholder"></textarea>
 
-        <label class="profile-edit-label" for="report-expected">O que você esperava que acontecesse? <span class="report-modal-optional">(opcional)</span></label>
+        <label class="profile-edit-label" for="report-expected" data-i18n="report.modal.expectedLabel">O que você esperava que acontecesse? <span class="report-modal-optional" data-i18n="report.modal.optional">(opcional)</span></label>
         <textarea id="report-expected" class="profile-edit-textarea" maxlength="300" rows="2"></textarea>
 
         <div id="report-guest-email-wrap">
-          <label class="profile-edit-label" for="report-guest-email">Seu e-mail <span class="report-modal-optional">(opcional, só se quiser receber uma resposta)</span></label>
-          <input type="email" id="report-guest-email" class="profile-edit-input" maxlength="200" placeholder="seuemail@exemplo.com">
+          <label class="profile-edit-label" for="report-guest-email" data-i18n="report.modal.guestEmailLabel">Seu e-mail <span class="report-modal-optional" data-i18n="report.modal.guestEmailOptional">(opcional, só se quiser receber uma resposta)</span></label>
+          <input type="email" id="report-guest-email" class="profile-edit-input" maxlength="200" placeholder="seuemail@exemplo.com" data-i18n-attr="placeholder:report.modal.guestEmailPlaceholder">
         </div>
 
         <div class="report-screenshot-row">
-          <button type="button" class="report-screenshot-btn" id="report-screenshot-btn">📎 Anexar captura de tela (opcional)</button>
+          <button type="button" class="report-screenshot-btn" id="report-screenshot-btn" data-i18n="report.modal.attachButton">📎 Anexar captura de tela (opcional)</button>
           <input type="file" id="report-screenshot-input" accept="image/*" style="display:none;">
           <span class="report-screenshot-name" id="report-screenshot-name"></span>
         </div>
-        <p class="report-modal-privacy-note">A captura, se anexada, fica visível só para a equipe -- nada é enviado automaticamente.</p>
+        <p class="report-modal-privacy-note" data-i18n="report.modal.privacyNote">A captura, se anexada, fica visível só para a equipe -- nada é enviado automaticamente.</p>
 
         <p class="profile-edit-error" id="report-error"></p>
-        <button type="button" class="btn btn-primary btn-block" id="report-submit-btn">Enviar</button>
+        <button type="button" class="btn btn-primary btn-block" id="report-submit-btn" data-i18n="report.modal.submit">Enviar</button>
       </div>
       <div id="report-success-view" style="display:none;">
         <div class="report-success-check">✓</div>
-        <p class="report-success-text">Report enviado. Obrigada por ajudar a melhorar o app!</p>
-        <button type="button" class="btn btn-primary btn-block" id="report-success-close-btn">Fechar</button>
+        <p class="report-success-text" data-i18n="report.modal.successText">Report enviado. Obrigada por ajudar a melhorar o app!</p>
+        <button type="button" class="btn btn-primary btn-block" id="report-success-close-btn" data-i18n="common.close">Fechar</button>
       </div>
     </div>
   </div>
@@ -4183,6 +4183,8 @@ footer.app-footer img{ height:40px; opacity:.85; }
   </div>
 </div>
 
+<script src="../shared/i18n/i18n.js"></script>
+<script src="../shared/i18n/pt-BR.js"></script>
 <script src="content.js"></script>
 <script src="conjugation-data.js"></script>
 <script src="dictations.js"></script>
