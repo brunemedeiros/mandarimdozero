@@ -17131,3 +17131,9 @@ Pedido da autora, verbatim: "ao criar um novo nível, módulo, unidade ou liçã
 - **Critério de conteúdo** (aprendido no piloto do A1): leve, não um tipo em excesso. Ouça e traduza ~2 por unidade (nunca 32 de uma vez); Expressões ~5 por módulo; Acentuação só com acentos reais (fr: ´ ` ^ ~ ¨, "ç" NÃO é acento; zh: tons do pinyin); frases só com vocabulário já visto no módulo.
 - **Todo lote vem informativo**: o builder gera, além do JSON importável, um `.md` com TODO o conteúdo para revisão (ex.: `fr/scripts/challenges_import/lote-a1-m1.md`). A autora revisa o `.md` antes de áudio/importação. Desafios entram como `needs_review`; a unidade na trilha só aparece para desafios PUBLICADOS.
 - **Estado por idioma**: francês tem a aba Desafios e os lotes A1 (módulos 1 a 6). Chinês ainda NÃO tem aba Desafios nem módulos (18 unidades soltas do HSK1; os "desafios" do zh são missões do dia) -- a regra vale, mas os desafios do chinês dependem de decidir módulos e criar a aba (tarefa à parte).
+
+### Ditados (fr) -- estrutura atual (2026-10-03)
+- `fr/dictations.js`: por módulo, 1 ditado Free (`free:true`, aparece também em Desafios > Ditados) + 2 Premium (`free:false`, só na unidade "Desafios do Módulo N"; nunca no menu geral nem na trilha). Texto = mini-história coerente (uma pessoa/situação), só com vocabulário até o módulo (`python3 fr/scripts/check_dictation_vocab.py`).
+- "Revisão do A1": 3 ditados `moduleId:"A1-revisao"` (r1 Free, r2/r3 Premium) juntando 2 módulos cada, em unidade própria no fim do nível. Campo `opening` troca o anúncio falado.
+- Paywall desligado (`CHALLENGE_PAYWALL_ENABLED=false` em `fr/app.js`): tudo abre, só há selos Free/Premium. Bloqueio, paywall e Stripe vêm depois.
+- Áudio: Actions > "Áudio TTS" > modo `ditados` refaz todos (abertura fr + instruções em pt-BR + corpo fr). Limite de 5000 bytes de SSML por pedido.

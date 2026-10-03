@@ -2247,6 +2247,41 @@ function buildModuleChallengesRow(module){
   return block;
 }
 
+// Unidade "Revisão do A1" no fim do nível: ditados que juntam o conteúdo de
+// 2 módulos (1 Free + 2 Premium, só rotulados por enquanto). Não depende do
+// banco: os ditados vivem em dictations.js.
+function buildLevelReviewRow(level){
+  const moduleId = `${level}-revisao`;
+  const items = dictationsVisible(moduleId);
+  if (!items.length) return null;
+  const mods = modulesOfLevel(level);
+  const lastModule = mods[mods.length - 1];
+  const open = !CHALLENGE_PAYWALL_ENABLED || challengesPremiumUnlocked();
+  const reachable = lastModule && moduleUnlocked(lastModule);
+  const free = items.filter(d => d.free !== false).length;
+  const premium = items.length - free;
+  const block = document.createElement('div');
+  block.className = 'unit-block module-challenges level-review' + (open && reachable ? '' : ' locked');
+  block.innerHTML = `
+    <div class="ub-header">
+      <div class="ub-icon">✍️</div>
+      <div class="ub-info">
+        <div class="ub-title-row"><span class="ub-title">Revisão do ${level}</span></div>
+        <div class="ub-goal">Ditados que juntam o que você aprendeu em todo o nível. Opcional.</div>
+        <div class="ub-goal">${free} ditado Free${premium ? ` · ${premium} ditado${premium === 1 ? '' : 's'} Premium` : ''}</div>
+      </div>
+    </div>
+  `;
+  if (open && reachable){
+    wireHeaderActivation(block.querySelector('.ub-header'), () => {
+      pendingDictationModuleFilter = moduleId;
+      pendingChallengesModuleFilter = null;
+      switchTab('dictation');
+    });
+  }
+  return block;
+}
+
 // Estado (recolhida/expandida) da faixa de Desafios de hoje -- lembrado
 // entre sessões, mesmo padrão de STATE.dailyMinutesLog etc: preferência de
 // interface, não progresso, então localStorage puro (nunca precisa
@@ -2367,6 +2402,9 @@ function renderUnitsGrid(){
     grid.appendChild(list);
   });
   fillModuleChallengeRows();
+
+  const reviewRow = buildLevelReviewRow(STATE.currentLevel);
+  if (reviewRow) grid.appendChild(reviewRow);
 
   levelTestsOfLevel(STATE.currentLevel).forEach(test => {
     grid.appendChild(buildLevelTestCard(test));
@@ -8390,7 +8428,10 @@ function renderConjPracticeStep(){
 // estrutura real de um ditado DELF A1. Scoring por alinhamento
 // palavra-a-palavra (LCS) entre o texto certo e o que o aluno digitou.
 // ============================================================
+// Ditados de revisão do nível usam moduleId "<nível>-revisao" (não é um módulo).
+function isLevelReviewId(id){ return typeof id === 'string' && id.endsWith('-revisao'); }
 function moduleTitleFor(moduleId){
+  if (isLevelReviewId(moduleId)) return `Revisão do nível ${moduleId.split('-')[0]}`;
   const mod = MODULES.find(m => m.id === moduleId);
   return mod ? mod.title : '';
 }
@@ -8432,6 +8473,8 @@ function renderDictationList(){
 
   const cardsWrap = document.getElementById('dictation-cards');
   const dictationsShown = dictationsVisible(dictationModuleFilter);
+  // Vindo da unidade "Revisão do A1" da trilha, o "voltar" leva de volta pra trilha.
+  document.getElementById('dictation-back-to-challenges').textContent = isLevelReviewId(dictationModuleFilter) ? '← Voltar à trilha' : '← Voltar aos desafios';
   cardsWrap.innerHTML = dictationsShown.map(d => `
     <button class="dictation-card ${isDictationLocked(d) ? 'locked' : ''}" data-dict-id="${d.id}">
       ${isDictationLocked(d) ? '<span class="challenge-card-check" title="Premium">🔒</span>' : ''}
@@ -8458,6 +8501,7 @@ document.getElementById('dictation-explainer-toggle').addEventListener('click', 
 
 document.getElementById('dictation-back-to-list').addEventListener('click', renderDictationList);
 document.getElementById('dictation-back-to-challenges').addEventListener('click', () => {
+  if (isLevelReviewId(dictationModuleFilter)){ dictationModuleFilter = null; switchTab('path'); return; }
   // Veio da unidade "Desafios do Módulo N"? Volta pro mesmo recorte.
   pendingChallengesModuleFilter = dictationModuleFilter;
   switchTab('challenges');

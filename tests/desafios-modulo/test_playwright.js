@@ -77,9 +77,9 @@ async function boot(browser, port, theme){
       check(`${tag}: paywall desligado`, await ev(() => CHALLENGE_PAYWALL_ENABLED === false));
       await ev(async () => { renderUnitsGrid(); await fillModuleChallengeRows(); });
       let r = await ev(() => ({
-        rows: [...document.querySelectorAll('.module-challenges')].map(e => e.textContent.replace(/\s+/g, ' ').trim()),
+        rows: [...document.querySelectorAll('.module-challenges:not(.level-review)')].map(e => e.textContent.replace(/\s+/g, ' ').trim()),
         locked: document.querySelectorAll('.module-challenges.premium-locked').length,
-        icons: [...document.querySelectorAll('.module-challenges .ub-icon')].map(e => e.textContent.trim()),
+        icons: [...document.querySelectorAll('.module-challenges:not(.level-review) .ub-icon')].map(e => e.textContent.trim()),
       }));
       check(`${tag}: os 6 módulos têm a unidade, sem cadeado`, r.rows.length === 6 && r.locked === 0 && r.icons.every(i => i === '🧩'), r);
       check(`${tag}: módulo 1 diz 1 ditado Free + 2 ditados e 22 desafios Premium`, /1 ditado Free · 2 ditados e 22 desafios Premium/.test(r.rows[0]), r.rows[0]);
@@ -102,7 +102,18 @@ async function boot(browser, port, theme){
       check(`${tag}: ditado Premium abre (sem paywall)`, r === 'block', r);
       // lista geral de ditados: só os 6 Free
       r = await ev(() => { dictationModuleFilter = null; renderDictationList(); return [...document.querySelectorAll('.dictation-card')].map(c => c.querySelector('.tier-badge').textContent); });
-      check(`${tag}: Desafios > Ditados mostra só os 6 Free (nenhum Premium)`, r.length === 6 && r.every(b => b === 'Free'), r);
+      check(`${tag}: Desafios > Ditados mostra só os 7 Free (6 dos módulos + 1 da revisão), nenhum Premium`, r.length === 7 && r.every(b => b === 'Free'), r);
+      // Revisão do A1: unidade no fim do nível, 1 Free + 2 Premium
+      await ev(async () => { STATE.unitProgress[MODULES.find(m => m.id === 'A1-m6').unitIds[0]].unlocked = true; switchTab('path'); renderUnitsGrid(); });
+      r = await ev(() => { const e = document.querySelector('.level-review'); return e ? { t: e.textContent.replace(/\s+/g, ' ').trim(), locked: e.classList.contains('locked') } : null; });
+      check(`${tag}: unidade Revisão do A1 existe e está aberta`, r && /Revisão do A1/.test(r.t) && /1 ditado Free · 2 ditados Premium/.test(r.t) && !r.locked, r);
+      await ev(() => document.querySelector('.level-review .ub-header').click());
+      await page.waitForFunction(() => dictationModuleFilter === 'A1-revisao');
+      r = await ev(() => ({ cards: [...document.querySelectorAll('.dictation-card')].map(c => c.querySelector('.tier-badge').textContent), mod: document.querySelector('.dictation-card-module').textContent, back: document.getElementById('dictation-back-to-challenges').textContent }));
+      check(`${tag}: revisão lista Free, Premium, Premium; voltar leva à trilha`, JSON.stringify(r.cards) === '["Free","Premium","Premium"]' && /Revisão do nível A1/.test(r.mod) && /trilha/.test(r.back), r);
+      await ev(() => document.getElementById('dictation-back-to-challenges').click());
+      r = await ev(() => ({ f: dictationModuleFilter, path: getComputedStyle(document.getElementById('view-path')).display !== 'none' }));
+      check(`${tag}: voltar da revisão cai na trilha`, r.f === null && r.path, r);
       // aba Desafios geral: card Ditados diz "Ouça e escreva"
       await ev(async () => { challengesModuleFilter = null; switchTab('challenges'); await renderChallengeCategories(); });
       r = await ev(() => { renderChallengesList('expression'); return [...document.querySelectorAll('.challenge-card')].map(c => ({ b: c.querySelector('.tier-badge').textContent, lock: c.classList.contains('locked') })); });
@@ -121,7 +132,8 @@ async function boot(browser, port, theme){
   {
     const D = await (async () => { const src = fs.readFileSync(path.join(ROOT, 'fr/dictations.js'), 'utf8').replace('const DICTATIONS', 'global.__D'); eval(src); return global.__D; })();
     const ids = D.map(d => d.id);
-    check('18 ditados: 6 Free (1 por módulo) + 12 Premium', D.length === 18 && D.filter(d => d.free).length === 6 && D.filter(d => !d.free).length === 12, ids);
+    check('21 ditados: 7 Free (6 módulos + revisão) + 14 Premium', D.length === 21 && D.filter(d => d.free).length === 7 && D.filter(d => !d.free).length === 14, ids);
+    check('revisão do A1: 1 Free + 2 Premium', ['r1','r2','r3'].map(i => D.find(d => d.id === i).free).join() === 'true,false,false');
     check('exatamente 1 Free por módulo', ['A1-m1','A1-m2','A1-m3','A1-m4','A1-m5','A1-m6'].every(m => D.filter(d => d.moduleId === m && d.free).length === 1));
     check('2 Premium por módulo', ['A1-m1','A1-m2','A1-m3','A1-m4','A1-m5','A1-m6'].every(m => D.filter(d => d.moduleId === m && !d.free).length === 2));
     check('ids únicos', new Set(ids).size === ids.length);

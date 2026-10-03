@@ -26,6 +26,12 @@
 //                 Módulo N" -- nunca em Desafios > Ditados e nunca na trilha.
 // O id define o nome do áudio (audio/dictation-<id>-guided.mp3), gerado pela
 // Action "Áudio TTS" (modo ditados). A ordem do array define o "dictée N" falado.
+
+// ---------- Revisão do nível ----------
+// Ditados que juntam o conteúdo de 2 módulos, no estilo dos ditados do DELF
+// A1 (alguém fala de si, de onde mora, do dia, do passado). Ficam numa unidade
+// "Revisão do A1" no fim do nível (moduleId "A1-revisao"), não em um módulo.
+// `opening` troca o anúncio falado em francês antes das instruções.
 const DICTATIONS = [
   {
     id: "d1",
@@ -170,5 +176,32 @@ const DICTATIONS = [
     task: "Convidando um amigo para o fim de semana",
     text: "Samedi soir, on va au cinéma avec Paul. Le week-end, j'aime le cinéma et j'aime lire. Dimanche, je mange au restaurant. J'adore le week-end !",
     free: false
+  },
+  {
+    id: "r1",
+    moduleId: "A1-revisao",
+    level: "A1",
+    task: "Revisão do A1 · Eu e minha rotina",
+    text: "Bonjour, je m'appelle Sophie. Je suis brésilienne et j'ai vingt-cinq ans. Je me lève à sept heures. Le matin, je bois du café et je mange du pain. Je travaille à neuf heures. Le soir, je mange du fromage.",
+    free: true,
+    opening: "Français avec Prof. Brune, révision du niveau A1, dictée 1."
+  },
+  {
+    id: "r2",
+    moduleId: "A1-revisao",
+    level: "A1",
+    task: "Revisão do A1 · Cidade, compras e deslocamento",
+    text: "Je viens du Brésil, mais j'habite à Paris. Aujourd'hui, il pleut et je cherche une robe. Le magasin est loin, alors je prends le métro. La station est près de la maison. La robe coûte quarante euros. Je prends la robe, merci !",
+    free: false,
+    opening: "Français avec Prof. Brune, révision du niveau A1, dictée 2."
+  },
+  {
+    id: "r3",
+    moduleId: "A1-revisao",
+    level: "A1",
+    task: "Revisão do A1 · Casa, família e fim de semana",
+    text: "Ma sœur et moi, nous avons un appartement. Il y a une cuisine, un salon et deux chambres. Ma chambre est grande, la lampe est sur la table. Hier, j'ai mangé au restaurant avec ma sœur. Ce week-end, on va au cinéma.",
+    free: false,
+    opening: "Français avec Prof. Brune, révision du niveau A1, dictée 3."
   }
 ];

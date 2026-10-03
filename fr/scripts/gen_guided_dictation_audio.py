@@ -65,8 +65,8 @@ PT_INTRO_TEXT = (
 PT_VOICE = {"languageCode": "pt-BR", "name": "pt-BR-Chirp3-HD-Achernar"}
 FR_VOICE = {"languageCode": "fr-FR", "name": "fr-FR-Chirp3-HD-Achernar"}
 
-def build_ssml_opening(dictee_num):
-    return ("<speak>" + f"Français avec Prof. Brune, dictée {dictee_num}."
+def build_ssml_opening(dictee_num, opening=None):
+    return ("<speak>" + xml_escape(opening or f"Français avec Prof. Brune, dictée {dictee_num}.")
             + ' <break time="700ms"/></speak>')
 
 def build_ssml_pt_intro():
@@ -139,14 +139,14 @@ def synth_ssml_bytes(ssml, voice, retries=3):
         time.sleep(1.5 * (attempt + 1))
     return None, last
 
-def synth_dictation(dictee_num, text, out_path, force=False):
+def synth_dictation(dictee_num, text, out_path, force=False, opening=None):
     """3 pedaços (abertura fr + locução pt + corpo fr) emendados num mp3 só.
     Os mp3 do Google saem como quadros MP3 crus (sem cabeçalho Xing/ID3), então
     emendar os bytes é seguro. Só grava o arquivo se os 3 deram certo."""
     if not force and os.path.exists(out_path) and os.path.getsize(out_path) > 0:
         return "skip"
     pieces = [
-        (build_ssml_opening(dictee_num), FR_VOICE),
+        (build_ssml_opening(dictee_num, opening), FR_VOICE),
         (build_ssml_pt_intro(), PT_VOICE),
         (build_ssml(dictee_num, text), FR_VOICE),
     ]
@@ -187,5 +187,5 @@ if __name__ == "__main__":
         if only_ids and d["id"] not in only_ids:
             continue
         out_path = os.path.join(out_dir, f"dictation-{d['id']}-guided.mp3")
-        status = synth_dictation(i + 1, d["text"], out_path, force=FORCE)
+        status = synth_dictation(i + 1, d["text"], out_path, force=FORCE, opening=d.get("opening"))
         print(d["id"], status)

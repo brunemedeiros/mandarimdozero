@@ -15,7 +15,7 @@ def load():
 def main():
     bad = 0
     for d in load():
-        n = int(d["moduleId"].split("m")[-1])
+        n = 6 if d["moduleId"].endswith("revisao") else int(d["moduleId"].split("m")[-1])
         allowed = set()
         for m in range(1, n + 1):
             a, _ = bm.module_allowed_tokens(f"A1-m{m}")
