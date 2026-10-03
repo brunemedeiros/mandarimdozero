@@ -1,6 +1,8 @@
 """Gera os mp3 (fr/audio/challenges/<md5[:12]>.mp3) de um JSON de desafios
-de expressão já montado (lote-expressoes-80.json): áudio da expressão e dos
-dois exemplos. Roda pelo GitHub Actions (Áudio TTS > modo desafios-expressoes).
+já montado (lote-expressoes-80.json, lote-a1-m1.json ...): expressão = áudio
+da expressão e dos dois exemplos; Ouça e traduza = a frase; Acentuação = a
+palavra. Roda pelo GitHub Actions (Áudio TTS > modos desafios-expressoes e
+desafios-a1-m1).
 
     GCP_TTS_KEY=... python3 fr/scripts/challenges_import/generate_challenge_audio.py [arquivo.json]
 
@@ -27,6 +29,12 @@ DEFAULT_JSON = os.path.join(HERE, "lote-expressoes-80.json")
 
 
 def texts_of(item):
+    """Textos que precisam de mp3, por tipo de desafio."""
+    kind = item.get("type", "expression")
+    if kind == "listen_translate":
+        return [item["sentenceFr"]]
+    if kind == "accent":
+        return [item["targetText"]]
     return [
         item["canonicalExpression"],
         item["example"]["text"],

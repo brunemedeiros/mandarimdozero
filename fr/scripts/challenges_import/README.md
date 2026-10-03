@@ -24,3 +24,10 @@ Seleção por frequência de uso (OpenSubtitles fr 2018) + valor pedagógico.
 Para mudar um texto: edite `lote-expressoes-content.json`, rode
 `python3 fr/scripts/challenges_import/build_lote_expressoes.py` e gere o áudio de novo
 (o nome do mp3 é o hash do texto; textos novos geram arquivos novos).
+
+## Desafios do Módulo 1 (A1) -- trilha Premium
+
+- Conteúdo-fonte: `modulo-a1-m1-content.json`. Montar o JSON importável: `python3 fr/scripts/challenges_import/build_modulo.py` (gera `lote-a1-m1.json`: 32 Ouça e traduza, 11 Acentuação, 5 Expressões, todos com `moduleId`/`unitId`/`theme`, status `needs_review`).
+- Áudio: Actions > **Áudio TTS** > modo `desafios-a1-m1` (branch `main`).
+- Importar: painel admin > Desafios > **📥 Importar JSON** (colar o conteúdo de `lote-a1-m1.json`), depois revisar e publicar.
+- Na app: o módulo ganha a unidade opcional "Desafios do Módulo 1" (fim do módulo, depois do Ponto de verificação); contas Free veem o cadeado, contas Premium e o admin abrem os desafios do módulo.
