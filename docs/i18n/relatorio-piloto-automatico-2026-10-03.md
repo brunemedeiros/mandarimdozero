@@ -26,11 +26,11 @@ Interpretação adotada: "fazer as etapas" = auditoria completa, núcleo i18n co
 
 ## 3. Pendências que precisam de você
 
-1. **Revisar a tradução piloto:** `docs/i18n/piloto-A1-1.md`, seção "Perguntas para a professora" (9 perguntas, entre elas: tu/vous em inglês, tom do "tudo bem", espanhol da Espanha ou da América Latina, adaptar as notas sobre a bise e o "un café"). Os 20 itens de confiança média ou baixa têm link do Reverso Context.
+1. **Revisar a tradução piloto, só o essencial:** `docs/i18n/revisar-so-isto.md` (4 decisões de estilo e 5 itens de confiança baixa; não é preciso ler o arquivo inteiro). O `piloto-A1-1.md` completo, com 9 perguntas ( entre elas: tu/vous em inglês, tom do "tudo bem", espanhol da Espanha ou da América Latina, adaptar as notas sobre a bise e o "un café"). Os 20 itens de confiança média ou baixa têm link do Reverso Context.
 2. **Ajustes de tradução que o verificador sugeriu** (ainda não aplicados, todos já estão em `needs_review`):
    - `vocab.bonsoir` (ES): "buenas noches (saludo)" soa como despedida; preferir "buenas tardes/noches (saludo)".
    - `vocab.bonjour` (EN): "hello / good morning" repete a falsa equivalência que a nota critica; talvez só "hello".
-3. **DeepL Pro (pago)?** O plano gratuito não aceita glossário nem contexto. Só compensa se o volume crescer.
+3. **DeepL Pro:** decidido que **não** será usado; só ferramentas gratuitas (DeepL Free, Claude e links manuais do Reverso).
 4. **Reverso:** se quiser automatizar, conferir antes os termos de uso do site.
 5. **Seletor "Idioma da interface"** (na tela Configurações) e gravação na conta: não feitos; precisam da sua decisão de produto.
 6. **Conteúdo em EN/ES (`t_en`/`t_es`)** no currículo inteiro é um projeto à parte (≈865 strings no fr e ≈644 no zh).

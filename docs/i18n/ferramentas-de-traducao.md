@@ -33,5 +33,5 @@ Amostra: 12 itens (vocabulário, frase, título, trecho de explicação em HTML)
 
 ## Pendências de decisão (sua)
 
-- **DeepL Pro** (pago) liberaria glossário e contexto, o que melhoraria itens como "tudo bem". Não foi contratado; só vale a pena se o volume crescer.
+- **DeepL Pro** (pago) liberaria glossário e contexto, mas a decisão é **não usar**: só ferramentas gratuitas (DeepL Free, Claude e links manuais do Reverso).
 - **Reverso**: se você quiser automatizar, é preciso antes confirmar os termos de uso do site. Até lá, só links para conferência manual.
