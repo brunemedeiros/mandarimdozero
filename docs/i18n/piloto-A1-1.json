@@ -1,6 +1,6 @@
 {
  "unit": "A1-1",
- "status": "needs_review",
+ "status": "en_partially_approved",
  "method": "Tradução própria (FR como fonte; PT como pista) + segunda tradução DeepL Free (FR→EN-US/ES para vocab/frases; PT→EN-US/ES para explicações). Confiança = concordância entre as duas + risco de registro/cultura.",
  "defaults": {
   "en": "EN-US (EN-GB citado quando difere)",
@@ -9,8 +9,8 @@
  "locales": {
   "en": {
    "vocab.bonjour": {
-    "text": "hello / good morning",
-    "status": "needs_review"
+    "text": "hi, hello / good morning",
+    "status": "approved"
    },
    "vocab.bonsoir": {
     "text": "good evening (greeting)",
@@ -42,7 +42,7 @@
    },
    "vocab.ca-va": {
     "text": "how are you? / I'm fine",
-    "status": "needs_review"
+    "status": "approved"
    },
    "vocab.a-bientot": {
     "text": "see you soon",
@@ -66,7 +66,7 @@
    },
    "phrases.4": {
     "text": "Good evening! How are you? (formal)",
-    "status": "needs_review"
+    "status": "approved"
    },
    "phrases.5": {
     "text": "Goodbye, see you tomorrow!",
@@ -138,7 +138,7 @@
    },
    "lessons.cortesia-e-como-vai.title": {
     "text": "Saying please and asking how someone is",
-    "status": "needs_review"
+    "status": "approved"
    },
    "lessons.checkpoint.title": {
     "text": "Checkpoint",
@@ -197,8 +197,8 @@
     "status": "needs_review"
    },
    "concept.bonjour-vs-bonsoir.block0.examples.0": {
-    "text": "hello / good morning",
-    "status": "needs_review"
+    "text": "hi, hello / good morning",
+    "status": "approved"
    },
    "concept.bonjour-vs-bonsoir.block0.examples.1": {
     "text": "good evening (greeting)",
@@ -216,207 +216,207 @@
   "es": {
    "vocab.bonjour": {
     "text": "hola / buenos días",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "vocab.bonsoir": {
     "text": "buenas noches (saludo)",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "vocab.au-revoir": {
     "text": "adiós / hasta luego",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "vocab.salut": {
     "text": "hola / chao (informal)",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "vocab.merci": {
     "text": "gracias",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "vocab.de-rien": {
     "text": "de nada",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "vocab.sil-vous-plait": {
     "text": "por favor (formal)",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "vocab.pardon": {
     "text": "perdón / disculpe",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "vocab.ca-va": {
     "text": "¿qué tal? / bien",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "vocab.a-bientot": {
     "text": "hasta pronto",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "phrases.0": {
     "text": "¡Hola! Me llamo Brune.",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "phrases.1": {
     "text": "¡Muchas gracias!",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "phrases.2": {
     "text": "Perdón, no entiendo.",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "phrases.3": {
     "text": "Estoy bien, ¿y tú?",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "phrases.4": {
     "text": "¡Buenas noches! ¿Cómo está usted?",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "phrases.5": {
     "text": "¡Adiós, hasta mañana!",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "phrases.6": {
     "text": "¡Hola! ¿Todo bien?",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "phrases.7": {
     "text": "De nada, no es nada.",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "phrases.8": {
     "text": "Un café, por favor.",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "phrases.0.scenario": {
     "text": "Conoces a alguien nuevo en una fiesta y quieres presentarte. ¿Qué dices?",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "phrases.1.scenario": {
     "text": "Un amigo te ayuda a llevar las compras. ¿Cómo le das las gracias?",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "phrases.2.scenario": {
     "text": "Alguien habla muy rápido en francés y no entendiste nada. ¿Qué dices?",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "phrases.3.scenario": {
     "text": "Una amiga te pregunta \"¿Ça va?\". Quieres responder que estás bien y preguntarle lo mismo. ¿Qué dices?",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "dialogue.title": {
     "text": "Encuentro en la calle",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "dialogue.0": {
     "text": "¡Hola!",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "dialogue.1": {
     "text": "¡Hola! ¿Qué tal?",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "dialogue.2": {
     "text": "¡Estoy bien, gracias! ¿Y tú?",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "dialogue.3": {
     "text": "Bien. ¡Hasta pronto!",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "title": {
     "text": "Saludar y despedirse",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "goal": {
     "text": "Saludar a alguien, despedirse y dar las gracias en una interacción básica.",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "lessons.ola-e-tchau.title": {
     "text": "Decir hola y hasta luego",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "lessons.informal-agradecer.title": {
     "text": "Saludar de manera informal y dar las gracias",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "lessons.cortesia-e-como-vai.title": {
     "text": "Pedir por favor y preguntar cómo está alguien",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "lessons.checkpoint.title": {
     "text": "Punto de control",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "concept.bonjour-vs-bonsoir.block0.title": {
     "text": "¿\"Bonjour\" o \"Bonsoir\"?",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "concept.bonjour-vs-bonsoir.block0.body": {
     "text": "Usamos <strong>bonjour</strong> desde la mañana hasta el final de la tarde: es el saludo estándar del día. Por la noche, al llegar a un lugar, cambiamos a <strong>bonsoir</strong>. En cambio, <strong>salut</strong> sirve a cualquier hora, pero solo entre amigos o personas cercanas, nunca con desconocidos ni en contextos formales.",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "concept.svp-informal.block0.title": {
     "text": "\"S'il vous plaît\" en el día a día",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "concept.svp-informal.block0.body": {
     "text": "En el habla informal o en mensajes de texto, <strong>s'il vous plaît</strong> casi siempre se acorta: con amigos se convierte en <strong>s'il te plaît</strong> (la forma de \"tu\", como el \"tú\" español, no de \"vous\", como \"usted\"), y por escrito es habitual ver solo <strong>STP</strong>. La forma completa con \"vous\" sigue siendo la más segura con desconocidos.",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "concept.svp-informal.block0.examples.0": {
     "text": "por favor (informal, entre amigos)",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "concept.svp-informal.block0.examples.1": {
     "text": "abreviatura de texto de \"s'il te plaît\"",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "concept.a-bientot-informal.block0.title": {
     "text": "Entre amigos, \"à bientôt\" se convierte en \"à plus\"",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "concept.a-bientot-informal.block0.body": {
     "text": "Con amigos, <strong>à bientôt</strong> es común, pero en el día a día (y casi siempre en mensajes de texto) la despedida más usada es <strong>à plus</strong>, que por escrito suele quedar solo en <strong>A+</strong>. Con desconocidos o en contextos formales, \"à bientôt\" sigue siendo la opción correcta.",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "concept.a-bientot-informal.block0.examples.0": {
     "text": "nos vemos / chao (informal)",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "concept.a-bientot-informal.block0.examples.1": {
     "text": "abreviatura de texto de \"à plus\"",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "concept.la-bise-cumprimento.block0.title": {
     "text": "¿Por qué los franceses se saludan con besos en la mejilla?",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "concept.la-bise-cumprimento.block0.body": {
     "text": "Además de decir \"bonjour\", es muy común saludar a amigos y familiares con <strong>la bise</strong>: uno o más besos suaves en la mejilla (el número varía según la región: lo más común son 2, ¡pero en algunas regiones son 3 o incluso 4!). Entre desconocidos o en contextos formales o profesionales, se da la mano.",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "concept.la-bise-cumprimento.block0.examples.0": {
     "text": "saludar con beso(s) en la mejilla",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "concept.bonjour-vs-bonsoir.block0.examples.0": {
     "text": "hola / buenos días",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "concept.bonjour-vs-bonsoir.block0.examples.1": {
     "text": "buenas noches (saludo)",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "trueFalse.0.claim": {
     "text": "Esto es lo que decimos cuando alguien nos ayuda mucho.",
-    "status": "needs_review"
+    "status": "frozen"
    },
    "trueFalse.0.whyNote": {
     "text": "Correcto: <strong>merci beaucoup</strong> significa \"muchas gracias\"; es exactamente lo que se dice para agradecer una ayuda.",
-    "status": "needs_review"
+    "status": "frozen"
    }
   }
  },
@@ -451,7 +451,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/bonjour",
     "es": "https://context.reverso.net/traducao/frances-espanhol/bonjour"
    },
-   "status": "needs_review"
+   "status": "approved",
+   "status_es": "frozen"
   },
   {
    "key": "vocab.bonsoir",
@@ -478,7 +479,8 @@
     "en": null,
     "es": "https://context.reverso.net/traducao/frances-espanhol/bonsoir"
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "vocab.au-revoir",
@@ -502,7 +504,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "vocab.salut",
@@ -534,7 +537,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/salut",
     "es": "https://context.reverso.net/traducao/frances-espanhol/salut"
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "vocab.merci",
@@ -558,7 +562,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "vocab.de-rien",
@@ -582,7 +587,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "vocab.sil-vous-plait",
@@ -610,7 +616,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/s%27il%20vous%20pla%C3%AEt",
     "es": "https://context.reverso.net/traducao/frances-espanhol/s%27il%20vous%20pla%C3%AEt"
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "vocab.pardon",
@@ -642,7 +649,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/pardon",
     "es": "https://context.reverso.net/traducao/frances-espanhol/pardon"
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "vocab.ca-va",
@@ -674,7 +682,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/%C3%A7a%20va",
     "es": "https://context.reverso.net/traducao/frances-espanhol/%C3%A7a%20va"
    },
-   "status": "needs_review"
+   "status": "approved",
+   "status_es": "frozen"
   },
   {
    "key": "vocab.a-bientot",
@@ -698,7 +707,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "phrases.0",
@@ -722,7 +732,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "phrases.1",
@@ -746,7 +757,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "phrases.2",
@@ -774,7 +786,8 @@
     "en": null,
     "es": "https://context.reverso.net/traducao/frances-espanhol/pardon%2C%20je%20ne%20comprends%20pas."
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "phrases.3",
@@ -802,7 +815,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/%C3%A7a%20va%20bien%2C%20et%20toi%20%3F",
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "phrases.4",
@@ -833,7 +847,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/bonsoir%20%21%20comment%20allez-vous%20%3F",
     "es": "https://context.reverso.net/traducao/frances-espanhol/bonsoir%20%21%20comment%20allez-vous%20%3F"
    },
-   "status": "needs_review"
+   "status": "approved",
+   "status_es": "frozen"
   },
   {
    "key": "phrases.5",
@@ -857,7 +872,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "phrases.6",
@@ -888,7 +904,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/salut%20%21%20%C3%A7a%20va%20bien%20%3F",
     "es": "https://context.reverso.net/traducao/frances-espanhol/salut%20%21%20%C3%A7a%20va%20bien%20%3F"
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "phrases.7",
@@ -920,7 +937,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/de%20rien%2C%20c%27est%20normal.",
     "es": "https://context.reverso.net/traducao/frances-espanhol/de%20rien%2C%20c%27est%20normal."
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "phrases.8",
@@ -947,7 +965,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/un%20caf%C3%A9%2C%20s%27il%20vous%20pla%C3%AEt.",
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "phrases.0.scenario",
@@ -971,7 +990,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "phrases.1.scenario",
@@ -995,7 +1015,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "phrases.2.scenario",
@@ -1022,7 +1043,8 @@
     "en": null,
     "es": "https://context.reverso.net/traducao/frances-espanhol/je%20ne%20comprends%20pas"
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "phrases.3.scenario",
@@ -1046,7 +1068,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "dialogue.title",
@@ -1073,7 +1096,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/dans%20la%20rue",
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "dialogue.0",
@@ -1097,7 +1121,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "dialogue.1",
@@ -1121,7 +1146,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "dialogue.2",
@@ -1147,7 +1173,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/%C3%A7a%20va%20bien%2C%20merci%20%21%20et%20toi%20%3F",
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "dialogue.3",
@@ -1174,7 +1201,8 @@
     "en": null,
     "es": "https://context.reverso.net/traducao/frances-espanhol/%C3%A7a%20va.%20%C3%A0%20bient%C3%B4t%20%21"
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "title",
@@ -1198,7 +1226,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "goal",
@@ -1222,7 +1251,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "lessons.ola-e-tchau.title",
@@ -1246,7 +1276,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "lessons.informal-agradecer.title",
@@ -1270,7 +1301,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "lessons.cortesia-e-como-vai.title",
@@ -1300,7 +1332,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/comment%20%C3%A7a%20va",
     "es": "https://context.reverso.net/traducao/frances-espanhol/comment%20%C3%A7a%20va"
    },
-   "status": "needs_review"
+   "status": "approved",
+   "status_es": "frozen"
   },
   {
    "key": "lessons.checkpoint.title",
@@ -1324,7 +1357,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "concept.bonjour-vs-bonsoir.block0.title",
@@ -1348,7 +1382,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "concept.bonjour-vs-bonsoir.block0.body",
@@ -1374,7 +1409,8 @@
     "en": null,
     "es": "https://context.reverso.net/traducao/frances-espanhol/bonsoir"
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "concept.svp-informal.block0.title",
@@ -1398,7 +1434,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "concept.svp-informal.block0.body",
@@ -1426,7 +1463,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/s%27il%20te%20pla%C3%AEt",
     "es": "https://context.reverso.net/traducao/frances-espanhol/s%27il%20te%20pla%C3%AEt"
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "concept.svp-informal.block0.examples.0",
@@ -1454,7 +1492,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/s%27il%20te%20pla%C3%AEt",
     "es": "https://context.reverso.net/traducao/frances-espanhol/s%27il%20te%20pla%C3%AEt"
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "concept.svp-informal.block0.examples.1",
@@ -1478,7 +1517,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "concept.a-bientot-informal.block0.title",
@@ -1502,7 +1542,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "concept.a-bientot-informal.block0.body",
@@ -1530,7 +1571,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/%C3%A0%20plus",
     "es": "https://context.reverso.net/traducao/frances-espanhol/%C3%A0%20plus"
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "concept.a-bientot-informal.block0.examples.0",
@@ -1562,7 +1604,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/%C3%A0%20plus",
     "es": "https://context.reverso.net/traducao/frances-espanhol/%C3%A0%20plus"
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "concept.a-bientot-informal.block0.examples.1",
@@ -1586,7 +1629,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "concept.la-bise-cumprimento.block0.title",
@@ -1610,7 +1654,8 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "concept.la-bise-cumprimento.block0.body",
@@ -1638,7 +1683,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/faire%20la%20bise",
     "es": "https://context.reverso.net/traducao/frances-espanhol/faire%20la%20bise"
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "concept.la-bise-cumprimento.block0.examples.0",
@@ -1668,7 +1714,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/faire%20la%20bise",
     "es": "https://context.reverso.net/traducao/frances-espanhol/faire%20la%20bise"
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "concept.bonjour-vs-bonsoir.block0.examples.0",
@@ -1696,7 +1743,8 @@
     "en": "https://context.reverso.net/traducao/frances-ingles/bonjour",
     "es": "https://context.reverso.net/traducao/frances-espanhol/bonjour"
    },
-   "status": "needs_review"
+   "status": "approved",
+   "status_es": "frozen"
   },
   {
    "key": "concept.bonjour-vs-bonsoir.block0.examples.1",
@@ -1722,7 +1770,8 @@
     "en": null,
     "es": "https://context.reverso.net/traducao/frances-espanhol/bonsoir"
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "trueFalse.0.claim",
@@ -1749,7 +1798,8 @@
     "en": null,
     "es": "https://context.reverso.net/traducao/frances-espanhol/merci%20beaucoup%20%21"
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   },
   {
    "key": "trueFalse.0.whyNote",
@@ -1773,7 +1823,17 @@
     "en": null,
     "es": null
    },
-   "status": "needs_review"
+   "status": "needs_review",
+   "status_es": "frozen"
   }
- ]
+ ],
+ "decisions": {
+  "date": "2026-10-03",
+  "es_variant": "América Latina (ES congelado: nada de espanhol por enquanto)",
+  "en_variant": "EN-US apenas",
+  "bonjour_en": "hi, hello / good morning",
+  "tu_vous_en": "manter os rótulos (formal)/(informal)",
+  "low_confidence_en": "aprovados como estão",
+  "scope": "Foco só na interface em inglês; espanhol congelado até nova decisão"
+ }
 }
