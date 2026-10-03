@@ -17450,3 +17450,13 @@ Pedido da autora, verbatim: "ao criar um novo nível, módulo, unidade ou liçã
 - Pré-limpeza do texto do aluno: apóstrofos/hífens do celular, espaços invisíveis, "j' ai", ponto sem espaço depois.
 - Campo sem autocorreção/capitalização, com `maxlength` e `aria-label`; teclas de acento não roubam o foco e quebram linha; Verificar vazio não corrige; mp3 ausente desabilita o botão; o resultado rola até a tela.
 - Fica para as Fatias 2 e 3: salvar melhor nota/palavras erradas, explicar tipo de erro (concordância, homófonos), áudio por frase, versionar mp3 por hash, trava Premium dentro do player, chinês.
+
+## Rollout 059–069 em produção -- registro de aplicação
+
+| Ordem | Migration | Como | Data | Verificação |
+|---|---|---|---|---|
+| 1 | 060 `identity_generated_username_and_attribution_tag` | SQL Editor (autora), arquivo de `4b46602` entre `begin;`/`commit;` | 2026-10-03 | OK (abaixo) |
+
+- **060** (aplicada pela autora no SQL Editor da produção `eigjocalzwamisgqilhg`; não aparece em `schema_migrations`, que segue terminando em 058 -- não editar à mão). Verificação só leitura feita depois: 9 funções e 5 triggers presentes e ativos; `ensure_my_profile`/`copy_public_flashcard` com EXECUTE só para `authenticated` (anon = false); `rename_note_tag`/`delete_note_tag` recusam `criado-por-*`; funções puras corretas; corpo de todas as funções igual ao Staging ignorando espaços (diferença só de quebra de linha CRLF da colagem, sem efeito), e `copy_public_flashcard` igual à versão do arquivo da 060 (a do Staging já é a da 061). Dados: 26 profiles, nenhum username alterado nem duplicado, 0 tags não canônicas, 0 tags `criado-por-*`. A conferência prévia (passo C) não foi feita antes do Run; a migration não altera linhas, então não houve perda.
+- **Janela aberta:** até o deploy do PR #284, trocar username no site dá `username_immutable` e conta nova recebe username `u…` automático. Não criar contas nem testar troca de username nesse período.
+- **Próxima:** 061 (SQL Editor).
