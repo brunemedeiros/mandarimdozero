@@ -39,24 +39,24 @@ const DICTATIONS = [
     id: "d2",
     moduleId: "A1-m2",
     level: "A1",
-    task: "Fazendo um pedido completo em um bistrô",
-    text: "Bonjour, je voudrais un café, s'il vous plaît. Je voudrais aussi un croissant. C'est combien ? Merci beaucoup, au revoir !",
+    task: "Fazendo um pedido completo em uma padaria (boulangerie)",
+    text: "Bonjour, je voudrais du pain, s'il vous plaît. Je voudrais aussi un croissant. C'est combien ? Merci beaucoup, au revoir !",
     free: true
   },
   {
     id: "d3",
     moduleId: "A1-m3",
     level: "A1",
-    task: "Perguntando o caminho",
-    text: "Pardon, où est le musée ? Il est loin d'ici. Tournez à droite, puis tout droit.",
+    task: "Explicando o caminho para a Torre Eiffel",
+    text: "Ah, la tour Eiffel ? Elle est loin d'ici. Tournez à droite, puis allez tout droit. Le musée est à gauche, c'est très près.",
     free: true
   },
   {
     id: "d4",
     moduleId: "A1-m4",
     level: "A1",
-    task: "No ponto de ônibus",
-    text: "Aujourd'hui, il pleut. Je prends le bus tous les jours. Où est la station de métro, s'il vous plaît ?",
+    task: "Um dia de chuva e dor de barriga",
+    text: "Aujourd'hui, il pleut et il fait froid. J'ai mal au ventre, alors je vais à la pharmacie. Je prends le bus, puis le métro.",
     free: true
   },
   {
@@ -72,7 +72,7 @@ const DICTATIONS = [
     moduleId: "A1-m6",
     level: "A1",
     task: "Planejando o fim de semana",
-    text: "Le week-end, j'aime lire. Samedi soir, on va au cinéma. Et toi, tu aimes le cinéma ?",
+    text: "Le week-end, j'aime lire. Samedi matin, je vais au marché. Samedi soir, on va au cinéma. Dimanche, je mange au restaurant avec ma sœur.",
     free: true
   },
   {
@@ -112,7 +112,7 @@ const DICTATIONS = [
     moduleId: "A1-m3",
     level: "A1",
     task: "Falando de origem",
-    text: "Je viens du Brésil, et toi ? Elle est américaine, elle habite à Paris. Nous parlons français.",
+    text: "Je viens du Brésil, et toi ? Elle est américaine, elle habite à Paris. Nous sommes français.",
     free: false
   },
   {
@@ -168,7 +168,7 @@ const DICTATIONS = [
     moduleId: "A1-m6",
     level: "A1",
     task: "Convidando para o cinema",
-    text: "On va au cinéma samedi soir ? Oui, bonne idée ! Le week-end, j'aime le cinéma, et toi ?",
+    text: "On va au cinéma samedi soir ? Oui, avec plaisir ! Le week-end, j'aime le cinéma, et toi ?",
     free: false
   }
 ];

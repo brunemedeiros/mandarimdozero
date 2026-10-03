@@ -1,6 +1,7 @@
 import json, base64, subprocess, os, sys, re, time
 
-API_KEY = os.environ["GCP_TTS_KEY"]
+API_KEY = os.environ.get("GCP_TTS_KEY", "")
+FORCE = os.environ.get("DICTATION_FORCE") == "1"  # refaz mesmo se o mp3 já existir
 
 PUNCT_LABEL = {
     '.': 'point',
@@ -51,12 +52,30 @@ def word_by_word_ssml(clause, punct, pause_ms=550):
     parts.append(PUNCT_LABEL[punct] + '.')
     return ' '.join(parts)
 
+# Locução de comando em PORTUGUÊS, dita logo depois do anúncio em francês e
+# ANTES da leitura de reconhecimento: explica as 3 etapas pra quem ainda está
+# aprendendo. É uma voz/idioma diferente do resto, então vira um pedaço de áudio
+# próprio (3 pedaços no total) e os mp3 são emendados em seguida.
+PT_INTRO_TEXT = (
+    "Antes de começar, veja como funciona. "
+    "Primeiro, você vai ouvir o texto inteiro, em ritmo lento. Ainda não escreva nada. "
+    "Depois, cada frase será lida com pausas, e é aí que você escreve o que ouvir. "
+    "No fim, farei uma última leitura, em ritmo normal, para você conferir se deixou algo passar."
+)
+PT_VOICE = {"languageCode": "pt-BR", "name": "pt-BR-Chirp3-HD-Achernar"}
+FR_VOICE = {"languageCode": "fr-FR", "name": "fr-FR-Chirp3-HD-Achernar"}
+
+def build_ssml_opening(dictee_num):
+    return ("<speak>" + f"Français avec Prof. Brune, dictée {dictee_num}."
+            + ' <break time="700ms"/></speak>')
+
+def build_ssml_pt_intro():
+    return ("<speak>" + xml_escape(PT_INTRO_TEXT) + ' <break time="1000ms"/></speak>')
+
 def build_ssml(dictee_num, text):
+    """SSML do corpo em francês (sem a abertura nem a locução em português)."""
     clauses = split_clauses(text)
     parts = []
-
-    parts.append(f'Français avec Prof. Brune, dictée {dictee_num}.')
-    parts.append('<break time="700ms"/>')
 
     parts.append("Je vais d'abord lire la dictée. Écoutez.")
     parts.append('<break time="500ms"/>')
@@ -89,14 +108,18 @@ def build_ssml(dictee_num, text):
 
     return '<speak>' + ' '.join(parts) + '</speak>'
 
-def synth_ssml(ssml, out_path, retries=3):
-    if os.path.exists(out_path) and os.path.getsize(out_path) > 0:
-        return "skip"
+SSML_MAX_BYTES = 5000  # limite da API por requisição
+
+def synth_ssml_bytes(ssml, voice, retries=3):
+    """Devolve (mp3_bytes, None) ou (None, mensagem_de_erro)."""
+    if len(ssml.encode("utf-8")) > SSML_MAX_BYTES:
+        return None, f"SSML maior que {SSML_MAX_BYTES} bytes ({len(ssml.encode('utf-8'))}): encurte o texto"
     body = json.dumps({
         "input": {"ssml": ssml},
-        "voice": {"languageCode": "fr-FR", "name": "fr-FR-Chirp3-HD-Achernar"},
+        "voice": voice,
         "audioConfig": {"audioEncoding": "MP3"}
     })
+    last = "failed"
     for attempt in range(retries):
         try:
             r = subprocess.run(
@@ -109,19 +132,33 @@ def synth_ssml(ssml, out_path, retries=3):
             )
             resp = json.loads(r.stdout.decode("utf-8"))
             if "audioContent" in resp:
-                with open(out_path, "wb") as f:
-                    f.write(base64.b64decode(resp["audioContent"]))
-                return "ok"
-            else:
-                err = resp.get("error", {})
-                if attempt == retries - 1:
-                    return f"error: {err}"
-                time.sleep(1.5 * (attempt + 1))
+                return base64.b64decode(resp["audioContent"]), None
+            last = f"error: {resp.get('error', {})}"
         except Exception as e:
-            if attempt == retries - 1:
-                return f"exception: {e}"
-            time.sleep(1.5 * (attempt + 1))
-    return "failed"
+            last = f"exception: {e}"
+        time.sleep(1.5 * (attempt + 1))
+    return None, last
+
+def synth_dictation(dictee_num, text, out_path, force=False):
+    """3 pedaços (abertura fr + locução pt + corpo fr) emendados num mp3 só.
+    Os mp3 do Google saem como quadros MP3 crus (sem cabeçalho Xing/ID3), então
+    emendar os bytes é seguro. Só grava o arquivo se os 3 deram certo."""
+    if not force and os.path.exists(out_path) and os.path.getsize(out_path) > 0:
+        return "skip"
+    pieces = [
+        (build_ssml_opening(dictee_num), FR_VOICE),
+        (build_ssml_pt_intro(), PT_VOICE),
+        (build_ssml(dictee_num, text), FR_VOICE),
+    ]
+    blobs = []
+    for ssml, voice in pieces:
+        data, err = synth_ssml_bytes(ssml, voice)
+        if err:
+            return err
+        blobs.append(data)
+    with open(out_path, "wb") as f:
+        f.write(b"".join(blobs))
+    return "ok"
 
 def load_dictations(js_path):
     # dictations.js is plain JS (unquoted keys), not JSON — evaluate it with
@@ -138,7 +175,7 @@ def load_dictations(js_path):
     return json.loads(r.stdout)
 
 if __name__ == "__main__":
-    # Usage: GCP_TTS_KEY=... python3 gen_guided_dictation_audio.py [dictations.js] [audio_dir] [dictee_id ...]
+    # Usage: [DICTATION_FORCE=1] GCP_TTS_KEY=... python3 gen_guided_dictation_audio.py [dictations.js] [audio_dir] [dictee_id ...]
     # With no dictee_id args, (re)generates every dictation in the file.
     script_dir = os.path.dirname(os.path.abspath(__file__))
     js_path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(script_dir, "..", "dictations.js")
@@ -149,7 +186,6 @@ if __name__ == "__main__":
     for i, d in enumerate(DICTATIONS):
         if only_ids and d["id"] not in only_ids:
             continue
-        ssml = build_ssml(i + 1, d["text"])
         out_path = os.path.join(out_dir, f"dictation-{d['id']}-guided.mp3")
-        status = synth_ssml(ssml, out_path)
-        print(d["id"], status, f"(ssml len={len(ssml)})")
+        status = synth_dictation(i + 1, d["text"], out_path, force=FORCE)
+        print(d["id"], status)
