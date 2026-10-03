@@ -17292,6 +17292,7 @@ P7: cópia de Public Deck duplica a mídia no Storage do copiador (manifest → 
 |---|---|---|
 | 067 (`067_public_deck_copy_linear_plan.sql`, commit `69cad4c`) | `20261003000046` (`public_deck_copy_linear_plan`) | 2026-10-03 |
 | 068 (`068_public_deck_copy_media_linear.sql`, commit `c97222e`) | `20261003015924` (`public_deck_copy_media_linear`) | 2026-10-03 |
+| 069 (`069_public_deck_duplicates_changed_not_retryable.sql`, commit `fb5c159`) | `20261003124403` (`public_deck_duplicates_changed_not_retryable`) | 2026-10-03 |
 
 ## Checkpoint -- etapa de segurança (grants + proteção de plan/role) validada no Staging (2026-10-02)
 
