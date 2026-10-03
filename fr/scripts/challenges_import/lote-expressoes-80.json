@@ -1,0 +1,3682 @@
+[
+  {
+    "id": "expr-lote1-001",
+    "type": "expression",
+    "canonicalExpression": "n'importe quoi",
+    "level": "A2",
+    "expressionAudioFile": "967f00d93dc2.mp3",
+    "meaning": {
+      "fr": "Une chose stupide ou fausse ; quelque chose sans sens.",
+      "pt": "qualquer coisa / bobagem Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "« La Terre est plate. » — « Tu dis n'importe quoi ! »",
+      "audioFile": "23bb234d658e.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Une chose bête ou sans sens",
+      "Une chose très importante",
+      "Une chose très chère",
+      "Une chose très rapide"
+    ],
+    "correctAnswer": "Une chose bête ou sans sens",
+    "explanation": "On dit « n'importe quoi » quand une idée ou une action est stupide ou fausse. C'est très courant à l'oral. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Il a mangé n'importe quoi au dîner, et maintenant il a mal au ventre.",
+      "audioFile": "256e88e20e72.mp3"
+    },
+    "microActivity": {
+      "prompt": "Arrête de parler de ton chat qui parle anglais, tu racontes __________ !",
+      "answer": "n'importe quoi"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/n%27importe%20quoi/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote1-002",
+    "type": "expression",
+    "canonicalExpression": "en avoir marre",
+    "level": "A2",
+    "expressionAudioFile": "d63540365f43.mp3",
+    "meaning": {
+      "fr": "Être fatigué d'une situation, ne plus la supporter.",
+      "pt": "estar de saco cheio Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "J'en ai marre de la pluie, je veux du soleil !",
+      "audioFile": "7c2b96d120b3.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Avoir très faim",
+      "Ne plus supporter une situation",
+      "Être très content",
+      "Avoir beaucoup d'argent"
+    ],
+    "correctAnswer": "Ne plus supporter une situation",
+    "explanation": "« En avoir marre », c'est être fatigué de quelque chose qui dure trop. On l'utilise souvent avec « de ». Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Les enfants en avaient marre d'attendre dans la voiture.",
+      "audioFile": "600aabb6c8f3.mp3"
+    },
+    "microActivity": {
+      "prompt": "Ça fait trois heures que je fais mes devoirs, j'__________ !",
+      "answer": "en ai marre"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/en%20avoir%20marre/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote1-003",
+    "type": "expression",
+    "canonicalExpression": "s'en foutre",
+    "level": "B1",
+    "expressionAudioFile": "3c38a3d1e5aa.mp3",
+    "meaning": {
+      "fr": "Ne pas s'intéresser du tout à quelque chose, s'en moquer complètement.",
+      "pt": "não estar nem aí ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais."
+    },
+    "example": {
+      "text": "« Ton équipe a perdu ! » — « Je m'en fous, je n'aime pas le foot. »",
+      "audioFile": "25baf1c38633.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Être totalement indifférent à quelque chose",
+      "Être très fier de soi",
+      "Être très en colère contre quelqu'un",
+      "Avoir très peur de quelque chose"
+    ],
+    "correctAnswer": "Être totalement indifférent à quelque chose",
+    "explanation": "« S'en foutre », c'est montrer qu'une chose n'a aucune importance pour soi. C'est une façon très directe de dire « ça m'est égal ». Registre très familier : seulement avec des proches.",
+    "secondExample": {
+      "text": "Elle s'en fout complètement de ce que disent les gens.",
+      "audioFile": "7ad13cbc6821.mp3"
+    },
+    "microActivity": {
+      "prompt": "Il peut critiquer ma coupe de cheveux, je __________, elle me plaît.",
+      "answer": "m'en fous"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/s%27en%20foutre/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote1-004",
+    "type": "expression",
+    "canonicalExpression": "être dans la merde",
+    "level": "B1",
+    "expressionAudioFile": "9282cf13d31f.mp3",
+    "meaning": {
+      "fr": "Être dans une situation très difficile, avoir de gros problèmes.",
+      "pt": "estar ferrado / numa situação péssima ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos."
+    },
+    "example": {
+      "text": "J'ai raté mon train et j'ai un entretien dans vingt minutes : je suis dans la merde.",
+      "audioFile": "d77550e96484.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Travailler dans un jardin",
+      "Être de très bonne humeur",
+      "Avoir un très gros problème",
+      "Être très bien installé"
+    ],
+    "correctAnswer": "Avoir un très gros problème",
+    "explanation": "On utilise cette expression quand on a un gros problème difficile à résoudre. Elle exprime le découragement ou la panique. Registre vulgaire : peut choquer, à éviter dans un contexte formel ou avec des inconnus.",
+    "secondExample": {
+      "text": "Sans leurs clés ni leur téléphone, ils étaient vraiment dans la merde.",
+      "audioFile": "1050b22052f8.mp3"
+    },
+    "microActivity": {
+      "prompt": "Mon ordinateur est tombé en panne la veille de rendre mon mémoire : je suis __________ !",
+      "answer": "dans la merde"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%AAtre%20dans%20la%20merde/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote1-005",
+    "type": "expression",
+    "canonicalExpression": "ça craint",
+    "level": "B1",
+    "expressionAudioFile": "79cbc6bc2efd.mp3",
+    "meaning": {
+      "fr": "Se dit d'une situation mauvaise, nulle ou inquiétante.",
+      "pt": "que droga / que roubada Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Le concert est annulé ? Ça craint, j'avais déjà mes billets.",
+      "audioFile": "0279bcdc8e9b.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "C'est délicieux",
+      "C'est parfaitement normal",
+      "C'est nul ou inquiétant",
+      "C'est très facile"
+    ],
+    "correctAnswer": "C'est nul ou inquiétant",
+    "explanation": "« Ça craint » sert à dire qu'une chose est mauvaise, décevante ou un peu dangereuse. Les jeunes l'utilisent beaucoup. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Ce quartier la nuit, ça craignait un peu, alors on a pris un taxi.",
+      "audioFile": "ca18068f9bdb.mp3"
+    },
+    "microActivity": {
+      "prompt": "Il n'y a plus de batterie et on est perdus en forêt… __________ !",
+      "answer": "ça craint"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%A7a%20craint/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote1-006",
+    "type": "expression",
+    "canonicalExpression": "avoir la flemme",
+    "level": "B1",
+    "expressionAudioFile": "4b8d2dee7201.mp3",
+    "meaning": {
+      "fr": "Ne pas avoir envie de faire un effort, être paresseux sur le moment.",
+      "pt": "estar com preguiça Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "J'ai la flemme de cuisiner ce soir, on commande une pizza ?",
+      "audioFile": "16671c468beb.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Avoir envie de faire du sport",
+      "Avoir de la fièvre",
+      "Être très pressé",
+      "Ne pas avoir envie de faire un effort"
+    ],
+    "correctAnswer": "Ne pas avoir envie de faire un effort",
+    "explanation": "« Avoir la flemme », c'est manquer d'énergie ou de motivation pour faire quelque chose. On ajoute souvent « de » + infinitif. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Dimanche, il avait la flemme de sortir, alors il est resté au lit.",
+      "audioFile": "56fc650cd19a.mp3"
+    },
+    "microActivity": {
+      "prompt": "Le linge est sec, mais j'__________ de le plier maintenant.",
+      "answer": "ai la flemme"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/avoir%20la%20flemme/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote1-007",
+    "type": "expression",
+    "canonicalExpression": "c'est dingue",
+    "level": "B1",
+    "expressionAudioFile": "d720d3d979c9.mp3",
+    "meaning": {
+      "fr": "Se dit de quelque chose d'incroyable, de surprenant ou d'absurde.",
+      "pt": "é loucura / que incrível Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Il a couru le marathon en moins de trois heures ? C'est dingue !",
+      "audioFile": "2496461ce370.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "C'est très ennuyeux",
+      "C'est incroyable ou surprenant",
+      "C'est très logique",
+      "C'est un peu triste"
+    ],
+    "correctAnswer": "C'est incroyable ou surprenant",
+    "explanation": "On dit « c'est dingue » pour exprimer une forte surprise, positive ou négative. C'est proche de « c'est fou ». Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "C'était dingue : il neigeait en plein mois de mai.",
+      "audioFile": "53c1a4a07c0c.mp3"
+    },
+    "microActivity": {
+      "prompt": "Elle parle six langues à seulement quinze ans, __________ !",
+      "answer": "c'est dingue"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/c%27est%20dingue/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote1-008",
+    "type": "expression",
+    "canonicalExpression": "foutre le camp",
+    "level": "B1",
+    "expressionAudioFile": "7a3dea55bc7e.mp3",
+    "meaning": {
+      "fr": "Partir vite, s'en aller (souvent sur un ton agressif).",
+      "pt": "cair fora / dar o fora ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais."
+    },
+    "example": {
+      "text": "Le voisin a crié : « Foutez le camp de mon jardin ! »",
+      "audioFile": "46799253733e.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Planter une tente",
+      "Faire la fête",
+      "Se mettre au travail",
+      "Partir rapidement, s'en aller"
+    ],
+    "correctAnswer": "Partir rapidement, s'en aller",
+    "explanation": "« Foutre le camp » veut dire partir, souvent vite. À l'impératif, c'est une manière très brutale de chasser quelqu'un. Registre très familier : seulement avec des proches.",
+    "secondExample": {
+      "text": "Quand la police est arrivée, les voleurs avaient déjà foutu le camp.",
+      "audioFile": "d41d733c3ba6.mp3"
+    },
+    "microActivity": {
+      "prompt": "Il en a eu assez de ce travail et il a décidé de __________ à l'étranger.",
+      "answer": "foutre le camp"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/foutre%20le%20camp/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote1-009",
+    "type": "expression",
+    "canonicalExpression": "ta gueule",
+    "level": "B1",
+    "expressionAudioFile": "fff50923cd0a.mp3",
+    "meaning": {
+      "fr": "Ordre très grossier pour faire taire quelqu'un.",
+      "pt": "cala a boca ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos."
+    },
+    "example": {
+      "text": "« Tu as encore perdu, hein ? » — « Oh, ta gueule ! »",
+      "audioFile": "309f961921b1.mp3"
+    },
+    "question": "Quand utilise-t-on cette expression ?",
+    "options": [
+      "Pour féliciter quelqu'un",
+      "Pour demander l'heure poliment",
+      "Pour dire bonjour à un ami",
+      "Pour dire à quelqu'un de se taire, grossièrement"
+    ],
+    "correctAnswer": "Pour dire à quelqu'un de se taire, grossièrement",
+    "explanation": "« Ta gueule » est une façon très impolie de dire « tais-toi ». On l'entend dans les disputes, ou entre amis proches qui se taquinent. Registre vulgaire : peut choquer, à éviter dans un contexte formel ou avec des inconnus.",
+    "secondExample": {
+      "text": "Énervé par les blagues de son frère, Paul lui a lancé : « Ta gueule, sérieux ! »",
+      "audioFile": "f5ccac32956d.mp3"
+    },
+    "microActivity": {
+      "prompt": "Arrête de chanter faux à deux heures du matin, __________ !",
+      "answer": "ta gueule"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/ta%20gueule/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote1-010",
+    "type": "expression",
+    "canonicalExpression": "faire chier",
+    "level": "B1",
+    "expressionAudioFile": "3d2a36f7a059.mp3",
+    "meaning": {
+      "fr": "Énerver beaucoup quelqu'un, l'ennuyer fortement.",
+      "pt": "encher o saco ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos."
+    },
+    "example": {
+      "text": "Ça me fait chier de travailler ce samedi.",
+      "audioFile": "8614a02dccbb.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Aider quelqu'un à dormir",
+      "Énerver ou ennuyer beaucoup",
+      "Rendre quelqu'un riche",
+      "Faire très plaisir"
+    ],
+    "correctAnswer": "Énerver ou ennuyer beaucoup",
+    "explanation": "« Faire chier » veut dire agacer ou ennuyer quelqu'un. « Ça me fait chier » exprime une forte contrariété. Registre vulgaire : peut choquer, à éviter dans un contexte formel ou avec des inconnus.",
+    "secondExample": {
+      "text": "Ton chien a encore aboyé toute la nuit, il nous a vraiment fait chier.",
+      "audioFile": "57178852ab78.mp3"
+    },
+    "microActivity": {
+      "prompt": "Arrête de me poser la même question toutes les cinq minutes, tu me __________ !",
+      "answer": "fais chier"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/faire%20chier/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote1-011",
+    "type": "expression",
+    "canonicalExpression": "se prendre la tête",
+    "level": "B1",
+    "expressionAudioFile": "d8e03517a5ee.mp3",
+    "meaning": {
+      "fr": "Se compliquer la vie, trop réfléchir, ou se disputer pour rien.",
+      "pt": "esquentar a cabeça / discutir à toa Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Ne te prends pas la tête, on choisira le restaurant sur place.",
+      "audioFile": "292cf1cf4d68.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Se compliquer la vie ou se disputer pour rien",
+      "Se reposer longtemps",
+      "Se laver les cheveux",
+      "Se faire un compliment"
+    ],
+    "correctAnswer": "Se compliquer la vie ou se disputer pour rien",
+    "explanation": "On utilise « se prendre la tête » quand quelqu'un s'inquiète trop ou se dispute pour un détail. « Ne te prends pas la tête » veut dire « relax ». Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Hier, mes parents se sont pris la tête pour une histoire de télécommande.",
+      "audioFile": "f8d1f5c8ae84.mp3"
+    },
+    "microActivity": {
+      "prompt": "Ça fait deux heures que vous discutez pour rien : arrêtez de vous __________ !",
+      "answer": "prendre la tête"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/se%20prendre%20la%20t%C3%AAte/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote1-012",
+    "type": "expression",
+    "canonicalExpression": "tu parles !",
+    "level": "B1",
+    "expressionAudioFile": "8da358140f9c.mp3",
+    "meaning": {
+      "fr": "Exclamation ironique pour dire que ce qui vient d'être dit est faux.",
+      "pt": "até parece! / imagina! Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "« Il va ranger sa chambre tout seul. » — « Tu parles ! Il ne l'a jamais fait. »",
+      "audioFile": "73ad8c6e832a.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Je suis tout à fait d'accord",
+      "Je n'y crois pas du tout (ironie)",
+      "Tu parles très bien français",
+      "Continue à parler, s'il te plaît"
+    ],
+    "correctAnswer": "Je n'y crois pas du tout (ironie)",
+    "explanation": "« Tu parles ! » montre qu'on ne croit pas du tout à ce que l'autre dit. Le ton est ironique, ce n'est pas une invitation à parler. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "« Le bus sera à l'heure aujourd'hui. » — « Tu parles, il a déjà vingt minutes de retard ! »",
+      "audioFile": "a6c8ea615b79.mp3"
+    },
+    "microActivity": {
+      "prompt": "« Paul a dit qu'il arrêterait de fumer demain. » — « __________ Il dit ça tous les mois. »",
+      "answer": "Tu parles !"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/tu%20parles%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote1-013",
+    "type": "expression",
+    "canonicalExpression": "c'est du gâteau",
+    "level": "B1",
+    "expressionAudioFile": "e2803e0b8978.mp3",
+    "meaning": {
+      "fr": "Se dit d'une chose très facile à faire.",
+      "pt": "é moleza Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Changer une ampoule ? C'est du gâteau !",
+      "audioFile": "0eaaf56bbca5.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "C'est très cher",
+      "C'est très facile",
+      "C'est une fête d'anniversaire",
+      "C'est très sucré"
+    ],
+    "correctAnswer": "C'est très facile",
+    "explanation": "On dit « c'est du gâteau » quand une tâche est très simple. L'expression n'a rien à voir avec la nourriture. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Pour elle, le premier examen, c'était du gâteau, mais le deuxième a été plus dur.",
+      "audioFile": "a1ea18fd7790.mp3"
+    },
+    "microActivity": {
+      "prompt": "Monter ce petit meuble avec la notice ? __________, il faut dix minutes.",
+      "answer": "C'est du gâteau"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/c%27est%20du%20g%C3%A2teau/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote1-014",
+    "type": "expression",
+    "canonicalExpression": "avoir le cafard",
+    "level": "B1",
+    "expressionAudioFile": "eb8a3a790623.mp3",
+    "meaning": {
+      "fr": "Se sentir triste, mélancolique, sans raison précise.",
+      "pt": "estar na fossa / estar pra baixo Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Le dimanche soir, j'ai souvent le cafard.",
+      "audioFile": "7dee754da6a4.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Avoir beaucoup de chance",
+      "Être très énergique",
+      "Avoir un insecte chez soi",
+      "Être triste et mélancolique"
+    ],
+    "correctAnswer": "Être triste et mélancolique",
+    "explanation": "« Avoir le cafard », c'est se sentir triste ou déprimé pour un moment. Le mot « cafard » désigne aussi un insecte, mais ici le sens est figuré. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Loin de sa famille, elle a eu le cafard pendant tout l'hiver.",
+      "audioFile": "d5cb74b70aa7.mp3"
+    },
+    "microActivity": {
+      "prompt": "Depuis que son meilleur ami a déménagé, il __________ et ne sort plus.",
+      "answer": "a le cafard"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/avoir%20le%20cafard/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote1-015",
+    "type": "expression",
+    "canonicalExpression": "passer un coup de fil",
+    "level": "A2",
+    "expressionAudioFile": "014daa280caf.mp3",
+    "meaning": {
+      "fr": "Téléphoner à quelqu'un.",
+      "pt": "dar uma ligada"
+    },
+    "example": {
+      "text": "Je vais passer un coup de fil à ma mère.",
+      "audioFile": "49c88b0be988.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Coudre un vêtement",
+      "Téléphoner à quelqu'un",
+      "Envoyer une lettre",
+      "Couper un câble"
+    ],
+    "correctAnswer": "Téléphoner à quelqu'un",
+    "explanation": "« Passer un coup de fil » veut dire téléphoner. On dit aussi « donner un coup de fil ».",
+    "secondExample": {
+      "text": "Hier, il a passé un coup de fil au médecin pour prendre rendez-vous.",
+      "audioFile": "b691fa8e0f61.mp3"
+    },
+    "microActivity": {
+      "prompt": "Attends deux minutes, je dois __________ à mon patron.",
+      "answer": "passer un coup de fil"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/passer%20un%20coup%20de%20fil/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote1-016",
+    "type": "expression",
+    "canonicalExpression": "faire la queue",
+    "level": "A2",
+    "expressionAudioFile": "a5392995e3a5.mp3",
+    "meaning": {
+      "fr": "Attendre son tour, les uns derrière les autres.",
+      "pt": "fazer fila / pegar fila"
+    },
+    "example": {
+      "text": "À la boulangerie, il faut faire la queue le dimanche.",
+      "audioFile": "280c124c03b1.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Fermer un magasin",
+      "Attendre son tour dans une file",
+      "Cuisiner un plat",
+      "Courir très vite"
+    ],
+    "correctAnswer": "Attendre son tour dans une file",
+    "explanation": "« Faire la queue », c'est attendre dans une file avec d'autres personnes, par exemple au supermarché ou au cinéma.",
+    "secondExample": {
+      "text": "Nous avons fait la queue une heure pour entrer au musée.",
+      "audioFile": "17b3579ba647.mp3"
+    },
+    "microActivity": {
+      "prompt": "Il y a beaucoup de monde à la poste, on va devoir __________.",
+      "answer": "faire la queue"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/faire%20la%20queue/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote1-017",
+    "type": "expression",
+    "canonicalExpression": "avoir hâte",
+    "level": "A2",
+    "expressionAudioFile": "f33bc67e747f.mp3",
+    "meaning": {
+      "fr": "Être impatient de faire quelque chose ou qu'une chose arrive.",
+      "pt": "estar ansioso / não ver a hora"
+    },
+    "example": {
+      "text": "J'ai hâte de partir en vacances !",
+      "audioFile": "a9b01d3571b8.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Avoir peur de quelque chose",
+      "Être très fatigué",
+      "Être impatient qu'une chose arrive",
+      "Être en retard"
+    ],
+    "correctAnswer": "Être impatient qu'une chose arrive",
+    "explanation": "« Avoir hâte » exprime l'impatience pour une chose agréable. On dit « avoir hâte de » + infinitif ou « avoir hâte que » + subjonctif.",
+    "secondExample": {
+      "text": "Les enfants avaient hâte d'ouvrir leurs cadeaux.",
+      "audioFile": "0fcc8ac9b539.mp3"
+    },
+    "microActivity": {
+      "prompt": "Mon frère arrive demain du Canada, j'__________ de le revoir !",
+      "answer": "ai hâte"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/avoir%20h%C3%A2te/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote1-018",
+    "type": "expression",
+    "canonicalExpression": "mon œil !",
+    "level": "B2",
+    "expressionAudioFile": "7bf7855a49be.mp3",
+    "meaning": {
+      "fr": "Exclamation ironique pour dire qu'on ne croit pas ce que l'autre raconte.",
+      "pt": "sei… / me engana que eu gosto Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "« J'ai fini tous mes devoirs en dix minutes. » — « Mon œil ! »",
+      "audioFile": "de4bb41afb0a.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Regarde attentivement",
+      "Je l'ai vu de mes propres yeux",
+      "J'ai mal à l'œil",
+      "Je ne te crois absolument pas"
+    ],
+    "correctAnswer": "Je ne te crois absolument pas",
+    "explanation": "« Mon œil ! » sert à exprimer, avec ironie, qu'on ne croit pas du tout ce qu'on entend. On l'accompagne parfois d'un doigt tirant la paupière. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "« Je n'ai mangé qu'un seul chocolat. » — « Mon œil, la boîte est vide ! »",
+      "audioFile": "9c34407ae7d4.mp3"
+    },
+    "microActivity": {
+      "prompt": "« Le chien a mangé mon devoir, madame. » — « __________ Trouve une meilleure excuse. »",
+      "answer": "Mon œil !"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/mon%20%C5%93il%20%21/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote1-019",
+    "type": "expression",
+    "canonicalExpression": "monter sur ses grands chevaux",
+    "level": "B2",
+    "expressionAudioFile": "4c55b82e08b9.mp3",
+    "meaning": {
+      "fr": "Se mettre en colère et réagir de manière excessive ou hautaine.",
+      "pt": "subir nas tamancas / se exaltar"
+    },
+    "example": {
+      "text": "Dès qu'on critique son projet, il monte sur ses grands chevaux.",
+      "audioFile": "c0445b8796e2.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Prendre une décision calme",
+      "S'emporter et réagir avec excès",
+      "Faire de l'équitation",
+      "Devenir très riche"
+    ],
+    "correctAnswer": "S'emporter et réagir avec excès",
+    "explanation": "On dit qu'une personne « monte sur ses grands chevaux » quand elle s'énerve vite et prend un ton supérieur, souvent pour pas grand-chose.",
+    "secondExample": {
+      "text": "Elle est montée sur ses grands chevaux quand le serveur s'est trompé de commande.",
+      "audioFile": "0fab9c144b18.mp3"
+    },
+    "microActivity": {
+      "prompt": "Je lui ai juste fait une petite remarque, inutile de __________ comme ça !",
+      "answer": "monter sur ses grands chevaux"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/monter%20sur%20ses%20grands%20chevaux/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote1-020",
+    "type": "expression",
+    "canonicalExpression": "avoir un coup de barre",
+    "level": "B2",
+    "expressionAudioFile": "30feb570e21a.mp3",
+    "meaning": {
+      "fr": "Ressentir une fatigue soudaine et forte.",
+      "pt": "bater um cansaço / dar uma moleza Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Après le déjeuner, j'ai toujours un coup de barre vers quinze heures.",
+      "audioFile": "f54816c0a4c9.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Recevoir un coup violent",
+      "Trouver une solution rapide",
+      "Boire un verre au bar",
+      "Ressentir une fatigue soudaine"
+    ],
+    "correctAnswer": "Ressentir une fatigue soudaine",
+    "explanation": "« Avoir un coup de barre », c'est sentir brusquement une grosse fatigue, souvent après un repas ou en fin de journée. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Il a eu un coup de barre au volant et s'est arrêté sur une aire de repos.",
+      "audioFile": "6a1afb4078a5.mp3"
+    },
+    "microActivity": {
+      "prompt": "Je vais faire une sieste, j'ai __________ après ce gros repas.",
+      "answer": "un coup de barre"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/avoir%20un%20coup%20de%20barre/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-001",
+    "type": "expression",
+    "canonicalExpression": "dégage",
+    "level": "B1",
+    "expressionAudioFile": "6b469f3af421.mp3",
+    "meaning": {
+      "fr": "Façon très directe et brutale de dire à quelqu'un de partir tout de suite.",
+      "pt": "cai fora / some daqui ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais."
+    },
+    "example": {
+      "text": "« Dégage, je ne veux plus te voir ! » a-t-elle crié à son ex.",
+      "audioFile": "0a163f2add88.mp3"
+    },
+    "question": "Quand utilise-t-on cette expression ?",
+    "options": [
+      "Pour remercier quelqu'un très chaleureusement",
+      "Pour demander poliment de l'aide à quelqu'un",
+      "Pour souhaiter bon voyage à un ami",
+      "Pour dire à quelqu'un de partir, de façon brutale"
+    ],
+    "correctAnswer": "Pour dire à quelqu'un de partir, de façon brutale",
+    "explanation": "On dit « dégage » pour chasser quelqu'un sans politesse. C'est agressif, on l'utilise quand on est en colère. Registre très familier : seulement avec des proches.",
+    "secondExample": {
+      "text": "Le chat est monté sur la table, alors je lui ai dit : « Allez, dégage ! »",
+      "audioFile": "06c1a81fac39.mp3"
+    },
+    "microActivity": {
+      "prompt": "Tu m'énerves, __________ de ma chambre !",
+      "answer": "dégage"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/d%C3%A9gage/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-002",
+    "type": "expression",
+    "canonicalExpression": "se casser",
+    "level": "B1",
+    "expressionAudioFile": "426ba1a9f40b.mp3",
+    "meaning": {
+      "fr": "Partir, s'en aller, souvent rapidement.",
+      "pt": "ir embora / vazar ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais."
+    },
+    "example": {
+      "text": "Il est tard, je me casse. À demain !",
+      "audioFile": "01aec5975ebb.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "S'endormir très vite",
+      "Se faire mal en tombant",
+      "Partir, s'en aller",
+      "Se fâcher contre quelqu'un"
+    ],
+    "correctAnswer": "Partir, s'en aller",
+    "explanation": "« Se casser » veut dire partir. On l'utilise entre amis, pour quitter un endroit rapidement. Registre très familier : seulement avec des proches.",
+    "secondExample": {
+      "text": "Quand la police est arrivée, ils se sont cassés en courant.",
+      "audioFile": "c312f3ef4400.mp3"
+    },
+    "microActivity": {
+      "prompt": "Cette fête est nulle, on __________ ?",
+      "answer": "se casse"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/se%20casser/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-003",
+    "type": "expression",
+    "canonicalExpression": "c'est chiant",
+    "level": "B1",
+    "expressionAudioFile": "5e7197a17f5d.mp3",
+    "meaning": {
+      "fr": "C'est très ennuyeux ou très pénible à supporter.",
+      "pt": "é um saco ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos."
+    },
+    "example": {
+      "text": "Encore une réunion d'une heure ? C'est chiant !",
+      "audioFile": "71fb3c716d87.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "C'est très drôle et amusant",
+      "C'est très ennuyeux ou pénible",
+      "C'est très cher à acheter",
+      "C'est très facile à faire"
+    ],
+    "correctAnswer": "C'est très ennuyeux ou pénible",
+    "explanation": "On dit « c'est chiant » quand une chose nous ennuie ou nous énerve, comme une tâche longue et répétitive. Registre vulgaire : peut choquer, à éviter dans un contexte formel ou avec des inconnus.",
+    "secondExample": {
+      "text": "Faire la queue à la préfecture, c'était vraiment chiant.",
+      "audioFile": "5f7e81e64f1a.mp3"
+    },
+    "microActivity": {
+      "prompt": "Remplir ces papiers pendant trois heures, __________ !",
+      "answer": "c'est chiant"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/c%27est%20chiant/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-004",
+    "type": "expression",
+    "canonicalExpression": "avoir la trouille",
+    "level": "B1",
+    "expressionAudioFile": "ab382e4bc959.mp3",
+    "meaning": {
+      "fr": "Avoir peur.",
+      "pt": "estar com medo / morrer de medo Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "J'ai la trouille de prendre l'avion.",
+      "audioFile": "6cba23fa31d6.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Avoir froid",
+      "Avoir honte",
+      "Avoir sommeil",
+      "Avoir peur"
+    ],
+    "correctAnswer": "Avoir peur",
+    "explanation": "« Avoir la trouille », c'est avoir peur. On l'utilise souvent pour parler d'une peur forte mais du quotidien. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Pendant le film d'horreur, on a eu la trouille toute la soirée.",
+      "audioFile": "5a487dca0921.mp3"
+    },
+    "microActivity": {
+      "prompt": "Mon petit frère refuse d'entrer dans la grotte : il __________.",
+      "answer": "a la trouille"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/avoir%20la%20trouille/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-005",
+    "type": "expression",
+    "canonicalExpression": "être crevé",
+    "level": "B1",
+    "expressionAudioFile": "8c7e9f7c1dc8.mp3",
+    "meaning": {
+      "fr": "Être très fatigué, ne plus avoir d'énergie.",
+      "pt": "estar morto de cansaço Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Je suis crevé, j'ai travaillé douze heures aujourd'hui.",
+      "audioFile": "e20baaf975a0.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Être très fatigué",
+      "Être très malade",
+      "Être très en colère",
+      "Être très content"
+    ],
+    "correctAnswer": "Être très fatigué",
+    "explanation": "« Être crevé » veut dire être épuisé. On le dit après une longue journée ou un gros effort. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Après le marathon, elles étaient complètement crevées.",
+      "audioFile": "0308b71aa28f.mp3"
+    },
+    "microActivity": {
+      "prompt": "J'ai déménagé toute la journée, je suis __________.",
+      "answer": "crevé"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%AAtre%20crev%C3%A9/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-006",
+    "type": "expression",
+    "canonicalExpression": "être bourré",
+    "level": "B1",
+    "expressionAudioFile": "7b014b2b0dc6.mp3",
+    "meaning": {
+      "fr": "Être ivre, avoir bu beaucoup trop d'alcool.",
+      "pt": "estar bêbado / de porre ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais."
+    },
+    "example": {
+      "text": "Il a bu six bières, il est complètement bourré.",
+      "audioFile": "f6ea472c4294.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Avoir trop bu d'alcool",
+      "Avoir trop mangé",
+      "Être plein d'argent",
+      "Être très pressé"
+    ],
+    "correctAnswer": "Avoir trop bu d'alcool",
+    "explanation": "« Être bourré », c'est être ivre. On l'entend surtout entre jeunes, après une soirée. Registre très familier : seulement avec des proches.",
+    "secondExample": {
+      "text": "Hier soir, on était tellement bourrés qu'on est rentrés en taxi.",
+      "audioFile": "05cf0090c566.mp3"
+    },
+    "microActivity": {
+      "prompt": "Après toutes ces bouteilles de vin, Marc était complètement __________.",
+      "answer": "bourré"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%AAtre%20bourr%C3%A9/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-007",
+    "type": "expression",
+    "canonicalExpression": "avoir la dalle",
+    "level": "B1",
+    "expressionAudioFile": "a9a581cfa1de.mp3",
+    "meaning": {
+      "fr": "Avoir très faim.",
+      "pt": "estar morrendo de fome ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais."
+    },
+    "example": {
+      "text": "J'ai la dalle, on mange quoi ce soir ?",
+      "audioFile": "9cd4de765620.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Avoir très soif",
+      "Avoir envie de dormir",
+      "Avoir très faim",
+      "Avoir mal au ventre"
+    ],
+    "correctAnswer": "Avoir très faim",
+    "explanation": "« Avoir la dalle » veut dire avoir très faim. On le dit entre amis ou en famille. Registre très familier : seulement avec des proches.",
+    "secondExample": {
+      "text": "Les enfants avaient la dalle en rentrant de l'école.",
+      "audioFile": "4777c17286ac.mp3"
+    },
+    "microActivity": {
+      "prompt": "Je n'ai rien mangé depuis ce matin, j'__________ !",
+      "answer": "ai la dalle"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/avoir%20la%20dalle/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-008",
+    "type": "expression",
+    "canonicalExpression": "casser les bonbons",
+    "level": "B1",
+    "expressionAudioFile": "3b8ce7fb7590.mp3",
+    "meaning": {
+      "fr": "Énerver quelqu'un, l'embêter sans arrêt.",
+      "pt": "encher o saco ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais."
+    },
+    "example": {
+      "text": "Arrête de me casser les bonbons avec tes questions !",
+      "audioFile": "d03ce0c60b90.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Énerver quelqu'un sans arrêt",
+      "Aider quelqu'un à cuisiner",
+      "Offrir des cadeaux à quelqu'un",
+      "Faire rire tout le monde"
+    ],
+    "correctAnswer": "Énerver quelqu'un sans arrêt",
+    "explanation": "« Casser les bonbons à quelqu'un », c'est l'embêter ou l'énerver. On l'utilise quand on en a marre. Registre très familier : seulement avec des proches.",
+    "secondExample": {
+      "text": "Mon voisin nous casse les bonbons avec sa musique tous les soirs.",
+      "audioFile": "0e2168c072a1.mp3"
+    },
+    "microActivity": {
+      "prompt": "Tu répètes la même chose depuis une heure, tu me __________ !",
+      "answer": "casses les bonbons"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/casser%20les%20bonbons/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-009",
+    "type": "expression",
+    "canonicalExpression": "arrête ton char",
+    "level": "B1",
+    "expressionAudioFile": "26d2e5857ecf.mp3",
+    "meaning": {
+      "fr": "Arrête d'exagérer ou de raconter des histoires.",
+      "pt": "para de exagerar / para de inventar Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "« J'ai mangé dix pizzas hier. » « Arrête ton char ! »",
+      "audioFile": "21d00c8b4441.mp3"
+    },
+    "question": "Quand utilise-t-on cette expression ?",
+    "options": [
+      "Quand quelqu'un parle trop bas",
+      "Quand quelqu'un exagère ou ment",
+      "Quand quelqu'un conduit trop vite",
+      "Quand quelqu'un part trop tôt"
+    ],
+    "correctAnswer": "Quand quelqu'un exagère ou ment",
+    "explanation": "On dit « arrête ton char » à quelqu'un qui raconte une histoire difficile à croire. Ça veut dire : je ne te crois pas. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Tu as gagné deux fois au loto ? Arrête ton char, je ne te crois pas !",
+      "audioFile": "93cdc2163d11.mp3"
+    },
+    "microActivity": {
+      "prompt": "Toi, tu parles dix langues ? __________ !",
+      "answer": "Arrête ton char"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/arr%C3%AAte%20ton%20char/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-010",
+    "type": "expression",
+    "canonicalExpression": "tomber dans les pommes",
+    "level": "B1",
+    "expressionAudioFile": "9e7871831e97.mp3",
+    "meaning": {
+      "fr": "S'évanouir, perdre connaissance pendant un moment.",
+      "pt": "desmaiar Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Il faisait si chaud dans le métro qu'une dame est tombée dans les pommes.",
+      "audioFile": "35883bb13355.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Être amoureux",
+      "Manger trop de fruits",
+      "S'évanouir",
+      "Faire une chute à vélo"
+    ],
+    "correctAnswer": "S'évanouir",
+    "explanation": "« Tomber dans les pommes », c'est perdre connaissance, par exemple à cause de la chaleur ou d'un choc. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Quand je vois du sang, je tombe dans les pommes.",
+      "audioFile": "d32c8ebeb98d.mp3"
+    },
+    "microActivity": {
+      "prompt": "Elle n'avait rien mangé et elle est __________ pendant le cours de sport.",
+      "answer": "tombée dans les pommes"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/tomber%20dans%20les%20pommes/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-011",
+    "type": "expression",
+    "canonicalExpression": "donner sa langue au chat",
+    "level": "B1",
+    "expressionAudioFile": "9e55cfa45a26.mp3",
+    "meaning": {
+      "fr": "Arrêter de chercher une réponse et demander la solution.",
+      "pt": "desistir de adivinhar / pedir a resposta Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Je ne trouve pas la réponse à ta devinette, je donne ma langue au chat.",
+      "audioFile": "34cf900baeaa.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Garder un secret",
+      "Parler trop longtemps",
+      "Nourrir son animal",
+      "Renoncer à trouver la réponse"
+    ],
+    "correctAnswer": "Renoncer à trouver la réponse",
+    "explanation": "On « donne sa langue au chat » quand on ne trouve pas la réponse à une devinette et qu'on demande la solution. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Après dix minutes, les élèves ont donné leur langue au chat.",
+      "audioFile": "12b9b91e50fd.mp3"
+    },
+    "microActivity": {
+      "prompt": "Alors, tu as deviné ? Non ? Tu __________ ?",
+      "answer": "donnes ta langue au chat"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/donner%20sa%20langue%20au%20chat/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-012",
+    "type": "expression",
+    "canonicalExpression": "coûter les yeux de la tête",
+    "level": "B1",
+    "expressionAudioFile": "c8f65484b89f.mp3",
+    "meaning": {
+      "fr": "Être très cher.",
+      "pt": "custar uma fortuna / custar os olhos da cara"
+    },
+    "example": {
+      "text": "Ce manteau coûte les yeux de la tête.",
+      "audioFile": "f84185a65a84.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Être très beau",
+      "Être gratuit",
+      "Coûter très cher",
+      "Faire très mal"
+    ],
+    "correctAnswer": "Coûter très cher",
+    "explanation": "Une chose qui « coûte les yeux de la tête » est beaucoup trop chère. On l'utilise pour parler d'un prix élevé.",
+    "secondExample": {
+      "text": "Nos vacances au Japon nous ont coûté les yeux de la tête.",
+      "audioFile": "c9179588906d.mp3"
+    },
+    "microActivity": {
+      "prompt": "On ne peut pas acheter cette voiture, elle __________.",
+      "answer": "coûte les yeux de la tête"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/co%C3%BBter%20les%20yeux%20de%20la%20t%C3%AAte/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-013",
+    "type": "expression",
+    "canonicalExpression": "nuit blanche",
+    "level": "A2",
+    "expressionAudioFile": "5e21293f7075.mp3",
+    "meaning": {
+      "fr": "Une nuit où on ne dort pas.",
+      "pt": "noite em claro / noite sem dormir"
+    },
+    "example": {
+      "text": "Le bébé a pleuré, j'ai passé une nuit blanche.",
+      "audioFile": "c16c6f865957.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Une nuit sans dormir",
+      "Une nuit très calme",
+      "Une nuit de fête de mariage",
+      "Une nuit avec de la neige"
+    ],
+    "correctAnswer": "Une nuit sans dormir",
+    "explanation": "Une « nuit blanche », c'est une nuit sans sommeil. On ne dort pas parce qu'on travaille, on s'inquiète ou on fait la fête.",
+    "secondExample": {
+      "text": "Avant les examens, beaucoup d'étudiants font des nuits blanches.",
+      "audioFile": "4c3b14a315e6.mp3"
+    },
+    "microActivity": {
+      "prompt": "Je n'ai pas dormi du tout : j'ai passé une __________.",
+      "answer": "nuit blanche"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/nuit%20blanche/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-014",
+    "type": "expression",
+    "canonicalExpression": "jeter l'éponge",
+    "level": "B1",
+    "expressionAudioFile": "ba258549ee3e.mp3",
+    "meaning": {
+      "fr": "Abandonner, arrêter d'essayer.",
+      "pt": "desistir / jogar a toalha"
+    },
+    "example": {
+      "text": "Ce sudoku est trop difficile, je jette l'éponge.",
+      "audioFile": "a829740297da.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Abandonner, renoncer",
+      "Faire le ménage",
+      "Se mettre en colère",
+      "Commencer un projet"
+    ],
+    "correctAnswer": "Abandonner, renoncer",
+    "explanation": "« Jeter l'éponge » veut dire abandonner après des efforts. L'expression vient de la boxe.",
+    "secondExample": {
+      "text": "Après trois ans de problèmes, ils ont jeté l'éponge et fermé le restaurant.",
+      "audioFile": "db46614e6b77.mp3"
+    },
+    "microActivity": {
+      "prompt": "Il a raté son permis cinq fois, puis il a __________.",
+      "answer": "jeté l'éponge"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/jeter%20l%27%C3%A9ponge/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-015",
+    "type": "expression",
+    "canonicalExpression": "avoir la tête dans les nuages",
+    "level": "B1",
+    "expressionAudioFile": "e4aa1e5d5e00.mp3",
+    "meaning": {
+      "fr": "Être distrait, rêver au lieu de faire attention.",
+      "pt": "viver no mundo da lua"
+    },
+    "example": {
+      "text": "Léa a encore oublié ses clés, elle a toujours la tête dans les nuages.",
+      "audioFile": "4d5b03250bff.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Avoir mal à la tête",
+      "Être distrait, rêveur",
+      "Avoir peur de l'avion",
+      "Être très intelligent"
+    ],
+    "correctAnswer": "Être distrait, rêveur",
+    "explanation": "Quelqu'un qui « a la tête dans les nuages » pense à autre chose et n'est pas attentif à ce qui se passe.",
+    "secondExample": {
+      "text": "Pendant la réunion, j'avais la tête dans les nuages.",
+      "audioFile": "494a344ecf97.mp3"
+    },
+    "microActivity": {
+      "prompt": "Tu n'écoutes jamais ce que je dis, tu __________ !",
+      "answer": "as la tête dans les nuages"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/avoir%20la%20t%C3%AAte%20dans%20les%20nuages/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-016",
+    "type": "expression",
+    "canonicalExpression": "avoir le cœur sur la main",
+    "level": "B1",
+    "expressionAudioFile": "a2c765a0bff9.mp3",
+    "meaning": {
+      "fr": "Être très généreux, aimer aider les autres.",
+      "pt": "ser generoso / ser mão aberta"
+    },
+    "example": {
+      "text": "Ma grand-mère a le cœur sur la main : elle aide tout le quartier.",
+      "audioFile": "2ed16d439711.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Être très généreux",
+      "Être très malade",
+      "Être très amoureux",
+      "Être très timide"
+    ],
+    "correctAnswer": "Être très généreux",
+    "explanation": "Une personne qui « a le cœur sur la main » donne facilement son temps ou son argent pour aider.",
+    "secondExample": {
+      "text": "Nos voisins ont toujours eu le cœur sur la main avec nous.",
+      "audioFile": "35577b84ece9.mp3"
+    },
+    "microActivity": {
+      "prompt": "Paul donne souvent son temps aux personnes dans le besoin : il __________.",
+      "answer": "a le cœur sur la main"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/avoir%20le%20c%C5%93ur%20sur%20la%20main/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-017",
+    "type": "expression",
+    "canonicalExpression": "avoir un verre dans le nez",
+    "level": "B2",
+    "expressionAudioFile": "30b75d90ced7.mp3",
+    "meaning": {
+      "fr": "Avoir un peu trop bu, être légèrement ivre.",
+      "pt": "estar alto / estar alegrinho (de bebida) Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "À la fin du mariage, l'oncle Bernard avait un verre dans le nez et chantait faux.",
+      "audioFile": "9f808094b034.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Être un peu ivre",
+      "Être enrhumé",
+      "Être très curieux",
+      "Avoir le nez cassé"
+    ],
+    "correctAnswer": "Être un peu ivre",
+    "explanation": "« Avoir un verre dans le nez », c'est avoir un peu trop bu. L'expression est plus douce et plus amusée que « être bourré ». Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Ne la laisse pas conduire, elle a un verre dans le nez.",
+      "audioFile": "76a8b8ffb8fa.mp3"
+    },
+    "microActivity": {
+      "prompt": "Il riait trop fort et parlait à tout le monde : visiblement, il __________.",
+      "answer": "avait un verre dans le nez"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/avoir%20un%20verre%20dans%20le%20nez/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-018",
+    "type": "expression",
+    "canonicalExpression": "coûter la peau des fesses",
+    "level": "B2",
+    "expressionAudioFile": "63b6961989a0.mp3",
+    "meaning": {
+      "fr": "Coûter extrêmement cher.",
+      "pt": "custar os olhos da cara Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Les billets pour la finale coûtent la peau des fesses.",
+      "audioFile": "b68c0390c365.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Coûter extrêmement cher",
+      "Faire mal en tombant",
+      "Être très inconfortable",
+      "Ne rien coûter du tout"
+    ],
+    "correctAnswer": "Coûter extrêmement cher",
+    "explanation": "Ce qui « coûte la peau des fesses » est hors de prix. C'est une version plus familière de « coûter les yeux de la tête ». Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "La réparation de ma moto m'a coûté la peau des fesses.",
+      "audioFile": "d249498fbe74.mp3"
+    },
+    "microActivity": {
+      "prompt": "Avec tous ces frais cachés, mon abonnement de téléphone me coûte la peau des __________ !",
+      "answer": "fesses"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/co%C3%BBter%20la%20peau%20des%20fesses/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-019",
+    "type": "expression",
+    "canonicalExpression": "en faire tout un fromage",
+    "level": "B2",
+    "expressionAudioFile": "e16d8f769d9e.mp3",
+    "meaning": {
+      "fr": "Donner trop d'importance à un petit problème.",
+      "pt": "fazer tempestade em copo d'água Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "J'ai cinq minutes de retard, ne va pas en faire tout un fromage !",
+      "audioFile": "845258377ba5.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Exagérer un petit problème",
+      "Raconter une histoire drôle",
+      "Préparer un grand repas",
+      "Oublier un rendez-vous"
+    ],
+    "correctAnswer": "Exagérer un petit problème",
+    "explanation": "On dit qu'on « en fait tout un fromage » quand on réagit beaucoup trop fort à quelque chose de petit. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Elle a renversé un peu de café et il en a fait tout un fromage.",
+      "audioFile": "65e60ce367cd.mp3"
+    },
+    "microActivity": {
+      "prompt": "C'est juste une petite rayure sur la voiture, pas la peine d'en __________.",
+      "answer": "faire tout un fromage"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/en%20faire%20tout%20un%20fromage/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote2-020",
+    "type": "expression",
+    "canonicalExpression": "rire jaune",
+    "level": "B2",
+    "expressionAudioFile": "ac8cb126374c.mp3",
+    "meaning": {
+      "fr": "Rire sans en avoir envie, pour cacher sa gêne ou sa déception.",
+      "pt": "rir amarelo / rir sem graça"
+    },
+    "example": {
+      "text": "Quand son chef s'est moqué de sa cravate devant tout le monde, Thomas a ri jaune.",
+      "audioFile": "a56932bc35fe.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Rire en regardant un film",
+      "Rire sans en avoir vraiment envie",
+      "Rire très fort et longtemps",
+      "Rire pour se moquer des autres"
+    ],
+    "correctAnswer": "Rire sans en avoir vraiment envie",
+    "explanation": "« Rire jaune », c'est faire semblant de rire alors qu'on est gêné, vexé ou déçu.",
+    "secondExample": {
+      "text": "Je ris jaune chaque fois qu'on me rappelle mon échec à l'examen.",
+      "audioFile": "81c22f93f516.mp3"
+    },
+    "microActivity": {
+      "prompt": "La blague sur son âge ne lui a pas plu : elle a __________.",
+      "answer": "ri jaune"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/rire%20jaune/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-001",
+    "type": "expression",
+    "canonicalExpression": "ça vaut le coup",
+    "level": "B1",
+    "expressionAudioFile": "02111e996b37.mp3",
+    "meaning": {
+      "fr": "Ça mérite l'effort, le temps ou l'argent qu'on y met.",
+      "pt": "vale a pena Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Le musée est un peu cher, mais ça vaut le coup.",
+      "audioFile": "c7372feee5b7.mp3"
+    },
+    "question": "Que veut dire « ça vaut le coup » ?",
+    "options": [
+      "Ça mérite l'effort ou l'argent",
+      "Ça coûte beaucoup trop cher",
+      "Ça fait mal comme un coup",
+      "Ça arrive tout d'un coup"
+    ],
+    "correctAnswer": "Ça mérite l'effort ou l'argent",
+    "explanation": "On dit « ça vaut le coup » quand une chose mérite le temps, l'effort ou l'argent qu'elle demande. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "« Tu crois que ça valait le coup de se lever à cinq heures ? » « Oui, regarde ce lever de soleil ! »",
+      "audioFile": "15f6c978a7a2.mp3"
+    },
+    "microActivity": {
+      "prompt": "Ce film dure trois heures, mais crois-moi, ça __________ !",
+      "answer": "vaut le coup"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%A7a%20vaut%20le%20coup/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-002",
+    "type": "expression",
+    "canonicalExpression": "pas de bol",
+    "level": "B1",
+    "expressionAudioFile": "aa7c2454eb35.mp3",
+    "meaning": {
+      "fr": "On le dit quand quelqu'un n'a pas de chance.",
+      "pt": "que azar Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "« J'ai raté le bus de deux minutes. » « Ah, pas de bol ! »",
+      "audioFile": "06e4ba2b38d3.mp3"
+    },
+    "question": "Quand utilise-t-on « pas de bol » ?",
+    "options": [
+      "Quand quelqu'un n'a pas de chance",
+      "Quand on n'a plus rien à manger",
+      "Quand on refuse une invitation",
+      "Quand quelqu'un a très faim"
+    ],
+    "correctAnswer": "Quand quelqu'un n'a pas de chance",
+    "explanation": "« Pas de bol » veut dire « pas de chance ». On le dit après un petit malheur, à soi ou à quelqu'un d'autre. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Il pleut tout le week-end de nos vacances, vraiment pas de bol.",
+      "audioFile": "0a836be0f413.mp3"
+    },
+    "microActivity": {
+      "prompt": "Le magasin a fermé juste quand on arrivait. __________ !",
+      "answer": "Pas de bol"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/pas%20de%20bol/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-003",
+    "type": "expression",
+    "canonicalExpression": "avoir du bol",
+    "level": "B1",
+    "expressionAudioFile": "b8fe2ba7c960.mp3",
+    "meaning": {
+      "fr": "Avoir de la chance.",
+      "pt": "ter sorte Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Il a trouvé une place pour se garer juste devant, il a du bol !",
+      "audioFile": "aa5535ce1eae.mp3"
+    },
+    "question": "Que veut dire « avoir du bol » ?",
+    "options": [
+      "Avoir de la chance",
+      "Avoir très soif",
+      "Avoir beaucoup d'argent",
+      "Avoir mauvais caractère"
+    ],
+    "correctAnswer": "Avoir de la chance",
+    "explanation": "« Avoir du bol » signifie avoir de la chance. On l'utilise souvent quand quelque chose de bien arrive par hasard. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "On a eu du bol : le dernier train nous a attendus.",
+      "audioFile": "0c9abc8100cf.mp3"
+    },
+    "microActivity": {
+      "prompt": "Elle a gagné au loto du premier coup, elle __________ !",
+      "answer": "a du bol"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/avoir%20du%20bol/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-004",
+    "type": "expression",
+    "canonicalExpression": "faire gaffe",
+    "level": "B1",
+    "expressionAudioFile": "1aa5b38ad17a.mp3",
+    "meaning": {
+      "fr": "Faire attention.",
+      "pt": "tomar cuidado / prestar atenção Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Fais gaffe, le sol est mouillé !",
+      "audioFile": "6ce27c45a743.mp3"
+    },
+    "question": "Que veut dire « faire gaffe » ?",
+    "options": [
+      "Faire attention",
+      "Faire une blague",
+      "Faire du bruit",
+      "Faire la fête"
+    ],
+    "correctAnswer": "Faire attention",
+    "explanation": "« Faire gaffe » veut dire faire attention. On l'utilise souvent pour prévenir quelqu'un d'un danger. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "On a fait gaffe à ne pas réveiller le bébé en rentrant.",
+      "audioFile": "1afe74a46123.mp3"
+    },
+    "microActivity": {
+      "prompt": "__________ en traversant, les voitures roulent vite ici !",
+      "answer": "Fais gaffe"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/faire%20gaffe/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-005",
+    "type": "expression",
+    "canonicalExpression": "se planter",
+    "level": "B1",
+    "expressionAudioFile": "9bd034853cec.mp3",
+    "meaning": {
+      "fr": "Se tromper complètement ou échouer.",
+      "pt": "errar feio / fracassar Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "J'ai mal révisé et je me suis planté à l'examen.",
+      "audioFile": "621abfd3839c.mp3"
+    },
+    "question": "Que veut dire « se planter » ?",
+    "options": [
+      "Se tromper ou échouer",
+      "S'installer dans un jardin",
+      "S'arrêter pour se reposer",
+      "Se lever très tôt"
+    ],
+    "correctAnswer": "Se tromper ou échouer",
+    "explanation": "« Se planter » signifie faire une grosse erreur ou rater quelque chose, comme un examen ou un chemin. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "« Tu as pris la bonne route ? » « Non, on s'est plantés, il faut faire demi-tour. »",
+      "audioFile": "e24edc16f51f.mp3"
+    },
+    "microActivity": {
+      "prompt": "Je n'ai pas compris la question et je __________ : zéro sur vingt !",
+      "answer": "me suis planté"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/se%20planter/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-006",
+    "type": "expression",
+    "canonicalExpression": "c'est nul",
+    "level": "A2",
+    "expressionAudioFile": "7d48b3f1e914.mp3",
+    "meaning": {
+      "fr": "C'est très mauvais.",
+      "pt": "é péssimo Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Ce jeu est trop difficile et pas drôle, c'est nul.",
+      "audioFile": "dabe1862c5e5.mp3"
+    },
+    "question": "Que veut dire « c'est nul » ?",
+    "options": [
+      "C'est très mauvais",
+      "C'est gratuit",
+      "C'est très facile",
+      "C'est terminé"
+    ],
+    "correctAnswer": "C'est très mauvais",
+    "explanation": "« C'est nul » veut dire que quelque chose est très mauvais ou décevant. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "« Le concert est annulé ? » « Oui, c'est nul ! »",
+      "audioFile": "dd76ef8f4961.mp3"
+    },
+    "microActivity": {
+      "prompt": "Ce film est ennuyeux et les acteurs jouent mal. __________ !",
+      "answer": "C'est nul"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/c%27est%20nul/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-007",
+    "type": "expression",
+    "canonicalExpression": "c'est génial",
+    "level": "A2",
+    "expressionAudioFile": "f65ec28a488c.mp3",
+    "meaning": {
+      "fr": "C'est très bien, c'est super.",
+      "pt": "é demais Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Tu as eu ton permis ? C'est génial !",
+      "audioFile": "84cdbedc5cd9.mp3"
+    },
+    "question": "Que veut dire « c'est génial » ?",
+    "options": [
+      "C'est super",
+      "C'est bizarre",
+      "C'est difficile",
+      "C'est dommage"
+    ],
+    "correctAnswer": "C'est super",
+    "explanation": "« C'est génial » veut dire que quelque chose est super. On le dit quand on est content. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "On part à la plage demain, c'est génial !",
+      "audioFile": "994b22957c7d.mp3"
+    },
+    "microActivity": {
+      "prompt": "Mes parents m'offrent un chien pour mon anniversaire, __________ !",
+      "answer": "c'est génial"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/c%27est%20g%C3%A9nial/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-008",
+    "type": "expression",
+    "canonicalExpression": "mince alors",
+    "level": "A2",
+    "expressionAudioFile": "70f5d6ccb6a6.mp3",
+    "meaning": {
+      "fr": "On le dit quand on est surpris ou un peu énervé.",
+      "pt": "puxa / droga (interjeição suave) Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Mince alors, j'ai oublié mes clés !",
+      "audioFile": "2911836ce1a0.mp3"
+    },
+    "question": "Quand utilise-t-on « mince alors » ?",
+    "options": [
+      "Quand on est surpris ou déçu",
+      "Quand on dit bonjour",
+      "Quand on parle d'une personne maigre",
+      "Quand on remercie quelqu'un"
+    ],
+    "correctAnswer": "Quand on est surpris ou déçu",
+    "explanation": "« Mince alors » exprime la surprise ou une petite déception. C'est une façon douce de dire qu'on est contrarié. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "« Le magasin ferme à midi aujourd'hui. » « Mince alors ! »",
+      "audioFile": "0b843e1e46ea.mp3"
+    },
+    "microActivity": {
+      "prompt": "__________, il n'y a plus de lait pour le café !",
+      "answer": "Mince alors"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/mince%20alors/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-009",
+    "type": "expression",
+    "canonicalExpression": "mort de rire",
+    "level": "B1",
+    "expressionAudioFile": "49d97724cd05.mp3",
+    "meaning": {
+      "fr": "On rit beaucoup, très fort.",
+      "pt": "morrendo de rir (mdr) Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Sa blague était trop drôle, j'étais mort de rire.",
+      "audioFile": "bed4a1096ff0.mp3"
+    },
+    "question": "Que veut dire « mort de rire » ?",
+    "options": [
+      "Qui rit énormément",
+      "Qui est très fatigué",
+      "Qui a très peur",
+      "Qui est très triste"
+    ],
+    "correctAnswer": "Qui rit énormément",
+    "explanation": "« Être mort de rire » veut dire rire très fort. Dans les messages, on l'écrit souvent « mdr ». Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Regarde cette vidéo de chat, on était morts de rire avec ma sœur !",
+      "audioFile": "0b8b2d8d0796.mp3"
+    },
+    "microActivity": {
+      "prompt": "Quand il est tombé dans la piscine tout habillé, tout le monde était __________.",
+      "answer": "mort de rire"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/mort%20de%20rire/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-010",
+    "type": "expression",
+    "canonicalExpression": "être au top",
+    "level": "B1",
+    "expressionAudioFile": "c7a32ec5f870.mp3",
+    "meaning": {
+      "fr": "Être excellent, au meilleur niveau.",
+      "pt": "estar ótimo Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Ce restaurant est vraiment au top, je te le conseille.",
+      "audioFile": "99483f5cfdf6.mp3"
+    },
+    "question": "Que veut dire « être au top » ?",
+    "options": [
+      "Être excellent",
+      "Être en haut d'un immeuble",
+      "Être en retard",
+      "Être très occupé"
+    ],
+    "correctAnswer": "Être excellent",
+    "explanation": "« Être au top » signifie être excellent, en très bonne forme ou de très bonne qualité. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Après une bonne nuit de sommeil, je suis au top !",
+      "audioFile": "81172190a408.mp3"
+    },
+    "microActivity": {
+      "prompt": "L'hôtel était propre, le personnel gentil : tout était __________.",
+      "answer": "au top"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%AAtre%20au%20top/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-011",
+    "type": "expression",
+    "canonicalExpression": "perdre patience",
+    "level": "B1",
+    "expressionAudioFile": "254945c10c4c.mp3",
+    "meaning": {
+      "fr": "Ne plus réussir à attendre calmement, commencer à s'énerver.",
+      "pt": "perder a paciência"
+    },
+    "example": {
+      "text": "Le bus a une heure de retard et les gens commencent à perdre patience.",
+      "audioFile": "b036248ec1b8.mp3"
+    },
+    "question": "Que veut dire « perdre patience » ?",
+    "options": [
+      "Ne plus réussir à rester calme",
+      "Perdre un objet important",
+      "Attendre avec plaisir",
+      "Oublier un rendez-vous"
+    ],
+    "correctAnswer": "Ne plus réussir à rester calme",
+    "explanation": "« Perdre patience » veut dire qu'on n'arrive plus à attendre ou à rester calme, et qu'on commence à s'énerver.",
+    "secondExample": {
+      "text": "Le professeur a perdu patience quand les élèves ont continué à bavarder.",
+      "audioFile": "9298d2350365.mp3"
+    },
+    "microActivity": {
+      "prompt": "Ça fait trente minutes que j'attends au téléphone, je commence à __________.",
+      "answer": "perdre patience"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/perdre%20patience/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-012",
+    "type": "expression",
+    "canonicalExpression": "tomber amoureux",
+    "level": "A2",
+    "expressionAudioFile": "117627317efa.mp3",
+    "meaning": {
+      "fr": "Commencer à aimer quelqu'un.",
+      "pt": "apaixonar-se"
+    },
+    "example": {
+      "text": "Il a rencontré Julie en vacances et il est tombé amoureux.",
+      "audioFile": "e676c898944e.mp3"
+    },
+    "question": "Que veut dire « tomber amoureux » ?",
+    "options": [
+      "Commencer à aimer quelqu'un",
+      "Tomber par terre",
+      "Se disputer avec quelqu'un",
+      "Quitter quelqu'un"
+    ],
+    "correctAnswer": "Commencer à aimer quelqu'un",
+    "explanation": "« Tomber amoureux » veut dire commencer à aimer quelqu'un. On peut aussi le dire pour une ville ou un pays.",
+    "secondExample": {
+      "text": "Je crois que je tombe amoureux de cette ville !",
+      "audioFile": "b91e2887a08c.mp3"
+    },
+    "microActivity": {
+      "prompt": "Mes grands-parents se sont rencontrés au bal et ils sont __________ tout de suite.",
+      "answer": "tombés amoureux"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/tomber%20amoureux/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-013",
+    "type": "expression",
+    "canonicalExpression": "ferme-la",
+    "level": "B1",
+    "expressionAudioFile": "028cba4d1368.mp3",
+    "meaning": {
+      "fr": "Ordre impoli pour dire à quelqu'un de se taire.",
+      "pt": "cala a boca (mais suave que 'ta gueule') Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Arrête de raconter mes secrets à tout le monde ! Ferme-la !",
+      "audioFile": "9c9b12df1d9d.mp3"
+    },
+    "question": "Que veut dire « ferme-la » ?",
+    "options": [
+      "Tais-toi",
+      "Ferme la porte",
+      "Va te coucher",
+      "Arrête de manger"
+    ],
+    "correctAnswer": "Tais-toi",
+    "explanation": "« Ferme-la » veut dire « tais-toi », de façon impolie. « La », c'est la bouche. On le dit quand on est agacé. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "« Fermez-la un peu, j'essaie d'écouter le match ! »",
+      "audioFile": "9e89139c96c8.mp3"
+    },
+    "microActivity": {
+      "prompt": "Tu dis toujours n'importe quoi. __________ une seconde et écoute-moi !",
+      "answer": "Ferme-la"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/ferme-la/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-014",
+    "type": "expression",
+    "canonicalExpression": "fous-moi la paix",
+    "level": "B1",
+    "expressionAudioFile": "2ecdf55de052.mp3",
+    "meaning": {
+      "fr": "Façon très impolie de demander à quelqu'un de nous laisser tranquille.",
+      "pt": "me deixa em paz ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais."
+    },
+    "example": {
+      "text": "Arrête de me suivre partout et fous-moi la paix !",
+      "audioFile": "13ae7abe14b7.mp3"
+    },
+    "question": "Que veut dire « fous-moi la paix » ?",
+    "options": [
+      "Laisse-moi tranquille",
+      "Viens m'aider",
+      "Fais la paix avec moi",
+      "Parle-moi plus fort"
+    ],
+    "correctAnswer": "Laisse-moi tranquille",
+    "explanation": "« Fous-moi la paix » veut dire « laisse-moi tranquille ». C'est une façon énervée et impolie de demander qu'on nous laisse seul. Registre très familier : seulement avec des proches.",
+    "secondExample": {
+      "text": "« Foutez-moi la paix, je travaille ! » a crié le voisin.",
+      "audioFile": "638c21453c4f.mp3"
+    },
+    "microActivity": {
+      "prompt": "Ça fait dix fois que tu me poses la même question, __________ !",
+      "answer": "fous-moi la paix"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/fous-moi%20la%20paix/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-015",
+    "type": "expression",
+    "canonicalExpression": "tu te fous de moi ?",
+    "level": "B1",
+    "expressionAudioFile": "7bb905f2e6a5.mp3",
+    "meaning": {
+      "fr": "Question pour dire qu'on pense que l'autre se moque de nous ou plaisante.",
+      "pt": "tá de brincadeira comigo? ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais."
+    },
+    "example": {
+      "text": "Tu me demandes encore cent euros ? Tu te fous de moi ?",
+      "audioFile": "3a307c996b4f.mp3"
+    },
+    "question": "Que veut dire « tu te fous de moi ? » ?",
+    "options": [
+      "Tu te moques de moi ?",
+      "Tu as peur de moi ?",
+      "Tu penses à moi ?",
+      "Tu viens avec moi ?"
+    ],
+    "correctAnswer": "Tu te moques de moi ?",
+    "explanation": "« Tu te fous de moi ? » veut dire « tu te moques de moi ? ». On le dit quand on n'arrive pas à croire ce que l'autre dit ou fait. Registre très familier : seulement avec des proches.",
+    "secondExample": {
+      "text": "« Le plombier a dit qu'il viendrait mardi prochain. » « Il se fout de nous ou quoi ? »",
+      "audioFile": "2db0ee687cb5.mp3"
+    },
+    "microActivity": {
+      "prompt": "Tu arrives avec deux heures de retard et tu me dis « je suis en avance » ? __________",
+      "answer": "Tu te fous de moi ?"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/tu%20te%20fous%20de%20moi%20%3F/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-016",
+    "type": "expression",
+    "canonicalExpression": "bordel",
+    "level": "B1",
+    "expressionAudioFile": "e60c7e248086.mp3",
+    "meaning": {
+      "fr": "Mot très grossier pour exprimer la colère ou l'agacement.",
+      "pt": "caramba / droga (interjeição forte) ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos."
+    },
+    "example": {
+      "text": "Bordel, encore un bouchon sur l'autoroute !",
+      "audioFile": "33ab9731f545.mp3"
+    },
+    "question": "Quand utilise-t-on « bordel » comme interjection ?",
+    "options": [
+      "Quand on est très énervé",
+      "Quand on dit merci",
+      "Quand on est calme et content",
+      "Quand on salue un ami"
+    ],
+    "correctAnswer": "Quand on est très énervé",
+    "explanation": "« Bordel » s'utilise pour montrer qu'on est énervé ou agacé. « C'est quoi ce bordel ? » veut dire « qu'est-ce qui se passe ici ? ». Registre vulgaire : peut choquer, à éviter dans un contexte formel ou avec des inconnus.",
+    "secondExample": {
+      "text": "« Mais c'est quoi ce bordel ? » a demandé le prof en voyant la salle.",
+      "audioFile": "c3d87aebb6a2.mp3"
+    },
+    "microActivity": {
+      "prompt": "C'est quoi ce __________ ? Tout le monde crie dans le couloir !",
+      "answer": "bordel"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/bordel/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-017",
+    "type": "expression",
+    "canonicalExpression": "putain",
+    "level": "B1",
+    "expressionAudioFile": "49d59d36342d.mp3",
+    "meaning": {
+      "fr": "Mot très grossier pour exprimer une forte surprise, la colère ou l'admiration.",
+      "pt": "interjeição forte (espanto, raiva) ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos."
+    },
+    "example": {
+      "text": "Putain, j'ai encore raté le train !",
+      "audioFile": "d6b1c25e3633.mp3"
+    },
+    "question": "Quand utilise-t-on « putain » comme interjection ?",
+    "options": [
+      "Pour exprimer une émotion forte",
+      "Pour demander poliment",
+      "Pour dire au revoir",
+      "Pour remercier quelqu'un"
+    ],
+    "correctAnswer": "Pour exprimer une émotion forte",
+    "explanation": "« Putain » sert à exprimer une émotion forte : colère, surprise ou admiration. On l'entend souvent dans la rue, mais il est grossier. Registre vulgaire : peut choquer, à éviter dans un contexte formel ou avec des inconnus.",
+    "secondExample": {
+      "text": "« Putain, c'est beau ! » a dit Marc devant la mer.",
+      "audioFile": "6a21ba48c598.mp3"
+    },
+    "microActivity": {
+      "prompt": "Ce __________ de réveil n'a pas sonné ce matin !",
+      "answer": "putain"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/putain/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-018",
+    "type": "expression",
+    "canonicalExpression": "espèce de con",
+    "level": "B1",
+    "expressionAudioFile": "fb7c9dcadee6.mp3",
+    "meaning": {
+      "fr": "Insulte pour traiter quelqu'un d'idiot.",
+      "pt": "seu idiota (insulto) ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos."
+    },
+    "example": {
+      "text": "« Espèce de con, regarde où tu marches ! »",
+      "audioFile": "c642921ae3c1.mp3"
+    },
+    "question": "Que veut dire « espèce de con » ?",
+    "options": [
+      "C'est une insulte : « idiot »",
+      "C'est un compliment",
+      "C'est une façon de saluer",
+      "C'est un mot pour s'excuser"
+    ],
+    "correctAnswer": "C'est une insulte : « idiot »",
+    "explanation": "« Espèce de con » est une insulte qui veut dire « idiot ». « Espèce de » renforce l'insulte. Registre vulgaire : peut choquer, à éviter dans un contexte formel ou avec des inconnus.",
+    "secondExample": {
+      "text": "Il a crié « espèce de con ! » au conducteur qui ne s'était pas arrêté.",
+      "audioFile": "10584625d3f7.mp3"
+    },
+    "microActivity": {
+      "prompt": "Espèce de __________ (3 lettres), tu as cassé mon vélo !",
+      "answer": "con"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/esp%C3%A8ce%20de%20con/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-019",
+    "type": "expression",
+    "canonicalExpression": "connard",
+    "level": "B1",
+    "expressionAudioFile": "d944c282ee6e.mp3",
+    "meaning": {
+      "fr": "Insulte pour un homme méchant ou désagréable.",
+      "pt": "babaca (insulto) ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos."
+    },
+    "example": {
+      "text": "Ce connard m'a doublé dans la file sans rien dire.",
+      "audioFile": "e0fc624e3bfe.mp3"
+    },
+    "question": "Que veut dire « connard » ?",
+    "options": [
+      "C'est une insulte : « homme méchant »",
+      "C'est un mot pour un ami",
+      "C'est un métier",
+      "C'est un mot gentil"
+    ],
+    "correctAnswer": "C'est une insulte : « homme méchant »",
+    "explanation": "« Connard » est une insulte pour un homme qui se comporte mal, de façon égoïste ou méchante. Registre vulgaire : peut choquer, à éviter dans un contexte formel ou avec des inconnus.",
+    "secondExample": {
+      "text": "« Quel connard, il ne m'a même pas dit merci ! »",
+      "audioFile": "4de939be1b8a.mp3"
+    },
+    "microActivity": {
+      "prompt": "Ce mec n'est pas juste un peu bête, c'est un vrai __________ : il fait du mal exprès.",
+      "answer": "connard"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/connard/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote3-020",
+    "type": "expression",
+    "canonicalExpression": "être à côté de la plaque",
+    "level": "B2",
+    "expressionAudioFile": "0a11b28e8379.mp3",
+    "meaning": {
+      "fr": "Se tromper complètement, ne pas comprendre la situation.",
+      "pt": "estar totalmente errado Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Sa réponse n'a aucun rapport avec la question, il est complètement à côté de la plaque.",
+      "audioFile": "d15bd45af5ed.mp3"
+    },
+    "question": "Que veut dire « être à côté de la plaque » ?",
+    "options": [
+      "Se tromper complètement",
+      "Être assis à côté de quelqu'un",
+      "Être en retard au dîner",
+      "Être très attentif"
+    ],
+    "correctAnswer": "Se tromper complètement",
+    "explanation": "« Être à côté de la plaque » signifie se tromper complètement ou ne rien comprendre à ce qui se passe. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "J'étais à côté de la plaque : je pensais que la réunion était demain.",
+      "audioFile": "00e05e3460fb.mp3"
+    },
+    "microActivity": {
+      "prompt": "Tu parles de vacances alors qu'on cherche une solution au problème ? Tu es totalement __________ !",
+      "answer": "à côté de la plaque"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%AAtre%20%C3%A0%20c%C3%B4t%C3%A9%20de%20la%20plaque/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-001",
+    "type": "expression",
+    "canonicalExpression": "faire semblant",
+    "level": "A2",
+    "expressionAudioFile": "c186b5d9419d.mp3",
+    "meaning": {
+      "fr": "Montrer une chose qui n'est pas vraie.",
+      "pt": "fingir"
+    },
+    "example": {
+      "text": "Il fait semblant de dormir quand sa mère entre.",
+      "audioFile": "5101f72791bf.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Faire comme si c'était vrai",
+      "Faire quelque chose très vite",
+      "Dire toujours la vérité",
+      "Faire la même chose qu'un ami"
+    ],
+    "correctAnswer": "Faire comme si c'était vrai",
+    "explanation": "« Faire semblant », c'est agir comme si quelque chose était vrai alors que ce n'est pas vrai.",
+    "secondExample": {
+      "text": "J'ai fait semblant d'aimer le gâteau pour être poli.",
+      "audioFile": "0cbf8e67c965.mp3"
+    },
+    "microActivity": {
+      "prompt": "Le petit garçon ne dort pas, il __________ de dormir.",
+      "answer": "fait semblant"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/faire%20semblant/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-002",
+    "type": "expression",
+    "canonicalExpression": "faire exprès",
+    "level": "A2",
+    "expressionAudioFile": "462996e4fc59.mp3",
+    "meaning": {
+      "fr": "Faire une chose volontairement, pas par accident.",
+      "pt": "fazer de propósito"
+    },
+    "example": {
+      "text": "« Pardon, je n'ai pas fait exprès ! » dit Léa après avoir cassé le verre.",
+      "audioFile": "a6c9feb326d4.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Faire une chose volontairement",
+      "Faire une chose trop tard",
+      "Faire une chose avec un ami",
+      "Faire une chose très bien"
+    ],
+    "correctAnswer": "Faire une chose volontairement",
+    "explanation": "« Faire exprès », c'est faire quelque chose avec intention. On dit souvent « je n'ai pas fait exprès » pour s'excuser.",
+    "secondExample": {
+      "text": "Mon frère fait exprès de chanter fort pour m'énerver.",
+      "audioFile": "3bc3a2649b3a.mp3"
+    },
+    "microActivity": {
+      "prompt": "Désolé de t'avoir poussé, je n'ai pas __________ !",
+      "answer": "fait exprès"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/faire%20expr%C3%A8s/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-003",
+    "type": "expression",
+    "canonicalExpression": "tourner la page",
+    "level": "B1",
+    "expressionAudioFile": "1c54c0530e4e.mp3",
+    "meaning": {
+      "fr": "Oublier une période difficile et passer à autre chose.",
+      "pt": "virar a página, seguir em frente"
+    },
+    "example": {
+      "text": "Après son divorce, Paul a décidé de tourner la page et de déménager.",
+      "audioFile": "9edb0a034911.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Laisser le passé derrière soi",
+      "Lire un livre très rapidement",
+      "Revenir sur une vieille dispute",
+      "Changer souvent d'avis"
+    ],
+    "correctAnswer": "Laisser le passé derrière soi",
+    "explanation": "« Tourner la page » veut dire arrêter de penser à un moment difficile et commencer une nouvelle étape.",
+    "secondExample": {
+      "text": "On s'est disputés il y a longtemps, maintenant il faut tourner la page.",
+      "audioFile": "4f9d686e2dad.mp3"
+    },
+    "microActivity": {
+      "prompt": "Ce travail m'a rendu malheureux pendant des années, mais j'ai enfin __________.",
+      "answer": "tourné la page"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/tourner%20la%20page/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-004",
+    "type": "expression",
+    "canonicalExpression": "en vouloir à quelqu'un",
+    "level": "B1",
+    "expressionAudioFile": "f6f3b8e05fd7.mp3",
+    "meaning": {
+      "fr": "Être fâché contre quelqu'un à cause de ce qu'il a fait.",
+      "pt": "guardar mágoa de alguém"
+    },
+    "example": {
+      "text": "Elle en veut encore à son amie d'avoir oublié son anniversaire.",
+      "audioFile": "95208f65ed2f.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Garder de la rancune contre quelqu'un",
+      "Avoir envie de voir quelqu'un",
+      "Demander un service à quelqu'un",
+      "Être jaloux de quelqu'un"
+    ],
+    "correctAnswer": "Garder de la rancune contre quelqu'un",
+    "explanation": "« En vouloir à quelqu'un », c'est rester fâché contre une personne parce qu'elle nous a fait du mal.",
+    "secondExample": {
+      "text": "« Tu m'en veux ? » — « Non, c'est oublié. »",
+      "audioFile": "3627fa19e6e6.mp3"
+    },
+    "microActivity": {
+      "prompt": "Il m'a menti, alors je lui __________ encore un peu.",
+      "answer": "en veux"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/en%20vouloir%20%C3%A0%20quelqu%27un/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-005",
+    "type": "expression",
+    "canonicalExpression": "c'est foutu",
+    "level": "B1",
+    "expressionAudioFile": "a04d7e6e294d.mp3",
+    "meaning": {
+      "fr": "Il n'y a plus rien à faire, c'est raté.",
+      "pt": "já era, está perdido Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "On a raté le dernier train, c'est foutu pour ce soir.",
+      "audioFile": "dd635338137b.mp3"
+    },
+    "question": "Quand utilise-t-on cette expression ?",
+    "options": [
+      "Quand il n'y a plus d'espoir",
+      "Quand tout se passe très bien",
+      "Quand on veut remercier quelqu'un",
+      "Quand on commence un projet"
+    ],
+    "correctAnswer": "Quand il n'y a plus d'espoir",
+    "explanation": "On dit « c'est foutu » quand une situation est perdue et qu'on ne peut plus la sauver. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Le projet est tombé à l'eau, tout est foutu.",
+      "audioFile": "26e0edcd14da.mp3"
+    },
+    "microActivity": {
+      "prompt": "Il reste deux minutes et on perd trois à zéro : __________.",
+      "answer": "c'est foutu"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/c%27est%20foutu/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-006",
+    "type": "expression",
+    "canonicalExpression": "être fauché",
+    "level": "B1",
+    "expressionAudioFile": "d6928082daea.mp3",
+    "meaning": {
+      "fr": "Ne plus avoir d'argent.",
+      "pt": "estar sem dinheiro / duro Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Je ne peux pas sortir ce week-end, je suis complètement fauché.",
+      "audioFile": "940466318164.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Ne pas avoir d'argent",
+      "Être très fatigué",
+      "Avoir trop de travail",
+      "Être malade"
+    ],
+    "correctAnswer": "Ne pas avoir d'argent",
+    "explanation": "« Être fauché » veut dire ne plus avoir d'argent, souvent pour un moment. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Quand on était étudiants, on était toujours fauchés à la fin du mois.",
+      "audioFile": "74d28eab1af8.mp3"
+    },
+    "microActivity": {
+      "prompt": "Tu peux payer le café ? Je n'ai plus un euro, je suis __________.",
+      "answer": "fauché"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%AAtre%20fauch%C3%A9/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-007",
+    "type": "expression",
+    "canonicalExpression": "avoir les boules",
+    "level": "B1",
+    "expressionAudioFile": "435f5964761e.mp3",
+    "meaning": {
+      "fr": "Être très déçu, énervé ou triste.",
+      "pt": "ficar chateado, com raiva ou decepcionado Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "J'ai les boules, mon concert préféré est annulé.",
+      "audioFile": "8c11fcc6acb3.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Être déçu ou énervé",
+      "Être très content",
+      "Avoir froid",
+      "Avoir faim"
+    ],
+    "correctAnswer": "Être déçu ou énervé",
+    "explanation": "« Avoir les boules », c'est être déçu, frustré ou en colère après quelque chose de désagréable. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Elle a eu les boules quand elle a raté son permis pour un point.",
+      "audioFile": "774eb7437c0f.mp3"
+    },
+    "microActivity": {
+      "prompt": "On a perdu le match à la dernière seconde, j'__________ !",
+      "answer": "ai les boules"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/avoir%20les%20boules/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-008",
+    "type": "expression",
+    "canonicalExpression": "avoir la pêche",
+    "level": "B1",
+    "expressionAudioFile": "5380e1ed22f2.mp3",
+    "meaning": {
+      "fr": "Être en pleine forme, plein d'énergie.",
+      "pt": "estar cheio de energia / com a corda toda Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Ce matin, j'ai la pêche : je vais courir avant le travail.",
+      "audioFile": "db3ee58b7406.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Être en pleine forme",
+      "Avoir envie de manger un fruit",
+      "Être de mauvaise humeur",
+      "Avoir sommeil"
+    ],
+    "correctAnswer": "Être en pleine forme",
+    "explanation": "« Avoir la pêche » veut dire se sentir plein d'énergie et de bonne humeur. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Après ses vacances, ma grand-mère avait vraiment la pêche.",
+      "audioFile": "101f947d455f.mp3"
+    },
+    "microActivity": {
+      "prompt": "J'ai bien dormi, aujourd'hui j'__________ !",
+      "answer": "ai la pêche"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/avoir%20la%20p%C3%AAche/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-009",
+    "type": "expression",
+    "canonicalExpression": "galérer",
+    "level": "B1",
+    "expressionAudioFile": "f14168565997.mp3",
+    "meaning": {
+      "fr": "Avoir beaucoup de difficultés pour faire quelque chose.",
+      "pt": "passar perrengue / ralar Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "J'ai galéré pour trouver un appartement à Paris.",
+      "audioFile": "fbe1958922c3.mp3"
+    },
+    "question": "Que veut dire ce verbe ?",
+    "options": [
+      "Avoir beaucoup de mal à faire quelque chose",
+      "Voyager en bateau",
+      "Réussir très facilement",
+      "Refuser de travailler"
+    ],
+    "correctAnswer": "Avoir beaucoup de mal à faire quelque chose",
+    "explanation": "« Galérer », c'est avoir beaucoup de problèmes ou d'efforts à faire pour réussir quelque chose. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Les nouveaux élèves galèrent un peu avec les maths.",
+      "audioFile": "5cf6ed0992b0.mp3"
+    },
+    "microActivity": {
+      "prompt": "Sans GPS, on a __________ pendant une heure pour trouver l'hôtel.",
+      "answer": "galéré"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/gal%C3%A9rer/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-010",
+    "type": "expression",
+    "canonicalExpression": "avoir du fric",
+    "level": "B1",
+    "expressionAudioFile": "c7bb7b392437.mp3",
+    "meaning": {
+      "fr": "Avoir de l'argent, souvent beaucoup.",
+      "pt": "ter grana Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Ses parents ont du fric, ils partent en vacances trois fois par an.",
+      "audioFile": "86137163b2e3.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Avoir de l'argent",
+      "Avoir froid",
+      "Avoir de la chance",
+      "Avoir des amis"
+    ],
+    "correctAnswer": "Avoir de l'argent",
+    "explanation": "« Le fric » est un mot familier pour l'argent. « Avoir du fric », c'est donc avoir de l'argent. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Si j'avais du fric, j'achèterais une maison à la mer.",
+      "audioFile": "4c2470c62262.mp3"
+    },
+    "microActivity": {
+      "prompt": "Il roule en voiture de luxe, il doit __________.",
+      "answer": "avoir du fric"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/avoir%20du%20fric/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-011",
+    "type": "expression",
+    "canonicalExpression": "tu m'emmerdes",
+    "level": "B1",
+    "expressionAudioFile": "b8da9a1e18f0.mp3",
+    "meaning": {
+      "fr": "Tu m'énerves beaucoup, tu me déranges.",
+      "pt": "você me enche o saco ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos."
+    },
+    "example": {
+      "text": "« Arrête de me poser la même question, tu m'emmerdes ! »",
+      "audioFile": "8fdd2f9fb0d9.mp3"
+    },
+    "question": "Quand utilise-t-on cette expression ?",
+    "options": [
+      "Quand quelqu'un nous énerve beaucoup",
+      "Quand on veut féliciter quelqu'un",
+      "Quand on dit au revoir poliment",
+      "Quand on demande de l'aide"
+    ],
+    "correctAnswer": "Quand quelqu'un nous énerve beaucoup",
+    "explanation": "On dit « tu m'emmerdes » à quelqu'un qui nous agace beaucoup. C'est une phrase forte, à éviter avec des inconnus. Registre vulgaire : peut choquer, à éviter dans un contexte formel ou avec des inconnus.",
+    "secondExample": {
+      "text": "Ses blagues nulles, ça m'emmerde vraiment.",
+      "audioFile": "68e79df8def6.mp3"
+    },
+    "microActivity": {
+      "prompt": "Ça fait dix fois que tu frappes à ma porte, __________ !",
+      "answer": "tu m'emmerdes"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/tu%20m%27emmerdes/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-012",
+    "type": "expression",
+    "canonicalExpression": "va te faire voir",
+    "level": "B2",
+    "expressionAudioFile": "a73f5f155b56.mp3",
+    "meaning": {
+      "fr": "Phrase pour envoyer promener quelqu'un avec colère.",
+      "pt": "vai se danar / vai pastar ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais."
+    },
+    "example": {
+      "text": "Il m'a demandé de faire son travail à sa place ; je lui ai dit « va te faire voir ».",
+      "audioFile": "0a73d28955d9.mp3"
+    },
+    "question": "Quand utilise-t-on cette expression ?",
+    "options": [
+      "Pour rejeter quelqu'un avec colère",
+      "Pour inviter quelqu'un à une fête",
+      "Pour proposer une visite guidée",
+      "Pour remercier un ami"
+    ],
+    "correctAnswer": "Pour rejeter quelqu'un avec colère",
+    "explanation": "« Va te faire voir » sert à dire à quelqu'un, avec colère, qu'on ne veut plus l'écouter ni l'aider. Registre très familier : seulement avec des proches.",
+    "secondExample": {
+      "text": "« Allez vous faire voir avec vos conseils ! » a crié le voisin.",
+      "audioFile": "72ff1ccfda91.mp3"
+    },
+    "microActivity": {
+      "prompt": "Tu veux encore que je te prête de l'argent ? Non, __________ !",
+      "answer": "va te faire voir"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/va%20te%20faire%20voir/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-013",
+    "type": "expression",
+    "canonicalExpression": "tirer la gueule",
+    "level": "B2",
+    "expressionAudioFile": "8ce0248ce218.mp3",
+    "meaning": {
+      "fr": "Montrer sa mauvaise humeur par un visage fermé, bouder.",
+      "pt": "ficar de cara fechada / emburrar ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos."
+    },
+    "example": {
+      "text": "Depuis qu'on a refusé d'aller au resto, Julien tire la gueule.",
+      "audioFile": "e7744b7e1bee.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Faire une tête fâchée et bouder",
+      "Rire très fort",
+      "Parler sans arrêt",
+      "Faire des grimaces pour amuser"
+    ],
+    "correctAnswer": "Faire une tête fâchée et bouder",
+    "explanation": "« Tirer la gueule », c'est montrer qu'on est mécontent en faisant une tête fermée, sans parler beaucoup. Registre vulgaire : peut choquer, à éviter dans un contexte formel ou avec des inconnus.",
+    "secondExample": {
+      "text": "Elle a tiré la gueule toute la soirée parce qu'on avait oublié de l'inviter.",
+      "audioFile": "9e7f2f0eec50.mp3"
+    },
+    "microActivity": {
+      "prompt": "Il n'a pas eu le cadeau qu'il voulait, alors il __________ depuis ce matin.",
+      "answer": "tire la gueule"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/tirer%20la%20gueule/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-014",
+    "type": "expression",
+    "canonicalExpression": "se foutre de la gueule de quelqu'un",
+    "level": "B2",
+    "expressionAudioFile": "f424a5d9f4ed.mp3",
+    "meaning": {
+      "fr": "Se moquer de quelqu'un, le prendre pour un idiot.",
+      "pt": "zombar de alguém / tirar sarro ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais."
+    },
+    "example": {
+      "text": "Tu as vu le prix de ce sandwich ? Ils se foutent de notre gueule !",
+      "audioFile": "48389b20fd3e.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Se moquer de quelqu'un",
+      "Admirer quelqu'un",
+      "Aider quelqu'un en secret",
+      "Ignorer quelqu'un poliment"
+    ],
+    "correctAnswer": "Se moquer de quelqu'un",
+    "explanation": "Cette expression veut dire se moquer de quelqu'un ou le traiter comme s'il était naïf. On l'utilise souvent face à une injustice ou à un prix abusif. Registre très familier : seulement avec des proches.",
+    "secondExample": {
+      "text": "Arrête de te foutre de ma gueule, je sais que tu mens.",
+      "audioFile": "9c34418ac223.mp3"
+    },
+    "microActivity": {
+      "prompt": "Trois heures de retard et aucune excuse ? Ils __________ !",
+      "answer": "se foutent de notre gueule"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/se%20foutre%20de%20la%20gueule%20de%20quelqu%27un/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-015",
+    "type": "expression",
+    "canonicalExpression": "être sur les nerfs",
+    "level": "B2",
+    "expressionAudioFile": "eb2b8fd98610.mp3",
+    "meaning": {
+      "fr": "Être très tendu, stressé et prêt à s'énerver.",
+      "pt": "estar com os nervos à flor da pele Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Avec les examens qui approchent, tout le monde est sur les nerfs.",
+      "audioFile": "01c712a7bcdc.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Être très tendu et irritable",
+      "Être parfaitement calme",
+      "Être en train de faire du sport",
+      "Être très amoureux"
+    ],
+    "correctAnswer": "Être très tendu et irritable",
+    "explanation": "« Être sur les nerfs », c'est être stressé ou nerveux au point de s'énerver facilement. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Ne lui parle pas de la facture maintenant, il est déjà sur les nerfs.",
+      "audioFile": "9061b9ae4083.mp3"
+    },
+    "microActivity": {
+      "prompt": "Elle n'a pas dormi depuis deux jours à cause du déménagement, elle est __________.",
+      "answer": "sur les nerfs"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%AAtre%20sur%20les%20nerfs/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-016",
+    "type": "expression",
+    "canonicalExpression": "il pleut des cordes",
+    "level": "B2",
+    "expressionAudioFile": "77651eea9407.mp3",
+    "meaning": {
+      "fr": "Il pleut très fort.",
+      "pt": "está chovendo canivete Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Prends un parapluie, il pleut des cordes dehors !",
+      "audioFile": "72c7d3b10040.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Il pleut très fort",
+      "Il fait très chaud",
+      "Il y a beaucoup de vent",
+      "Il commence à neiger"
+    ],
+    "correctAnswer": "Il pleut très fort",
+    "explanation": "« Il pleut des cordes » décrit une pluie très forte, comme si l'eau tombait en lignes continues. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Hier, il pleuvait des cordes et le match a été annulé.",
+      "audioFile": "294def9082f0.mp3"
+    },
+    "microActivity": {
+      "prompt": "Je suis trempé : en sortant du métro, __________ !",
+      "answer": "il pleuvait des cordes"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/il%20pleut%20des%20cordes/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-017",
+    "type": "expression",
+    "canonicalExpression": "mettre le paquet",
+    "level": "B2",
+    "expressionAudioFile": "b6206a8f1b82.mp3",
+    "meaning": {
+      "fr": "Faire tous les efforts possibles ou dépenser beaucoup pour quelque chose.",
+      "pt": "caprichar / dar tudo Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Pour le mariage de sa fille, il a mis le paquet : orchestre, feu d'artifice, tout.",
+      "audioFile": "8f386b50e291.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Donner le maximum",
+      "Envoyer un colis par la poste",
+      "Faire le strict minimum",
+      "Abandonner un projet"
+    ],
+    "correctAnswer": "Donner le maximum",
+    "explanation": "« Mettre le paquet », c'est donner tout ce qu'on peut : beaucoup d'efforts, de temps ou d'argent. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Si on veut gagner la finale, il va falloir mettre le paquet.",
+      "audioFile": "577b737e1730.mp3"
+    },
+    "microActivity": {
+      "prompt": "L'entretien est demain : ce soir, je révise tout, je vais __________ !",
+      "answer": "mettre le paquet"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/mettre%20le%20paquet/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-018",
+    "type": "expression",
+    "canonicalExpression": "à fond la caisse",
+    "level": "B2",
+    "expressionAudioFile": "439a5be717ec.mp3",
+    "meaning": {
+      "fr": "À toute vitesse, très vite.",
+      "pt": "a toda velocidade / a mil Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Une moto est passée à fond la caisse devant l'école.",
+      "audioFile": "00585f40751e.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "À toute vitesse",
+      "Très lentement",
+      "En silence",
+      "Avec beaucoup de prudence"
+    ],
+    "correctAnswer": "À toute vitesse",
+    "explanation": "« À fond la caisse » veut dire à très grande vitesse, surtout en voiture ou à moto. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "On était en retard, alors on a traversé la ville à fond la caisse.",
+      "audioFile": "793b5252d879.mp3"
+    },
+    "microActivity": {
+      "prompt": "Le livreur a démarré __________ et il a failli renverser un piéton.",
+      "answer": "à fond la caisse"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%A0%20fond%20la%20caisse/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-019",
+    "type": "expression",
+    "canonicalExpression": "ça ne casse pas des briques",
+    "level": "B2",
+    "expressionAudioFile": "0052e4521638.mp3",
+    "meaning": {
+      "fr": "Ce n'est pas extraordinaire, c'est assez moyen.",
+      "pt": "não é nada de especial Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Le film se laisse regarder, mais ça ne casse pas des briques.",
+      "audioFile": "0d6490eebada.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Ce n'est rien d'exceptionnel",
+      "C'est vraiment génial",
+      "C'est très dangereux",
+      "C'est en train de se casser"
+    ],
+    "correctAnswer": "Ce n'est rien d'exceptionnel",
+    "explanation": "On dit « ça ne casse pas des briques » pour quelque chose de correct mais sans rien de spécial. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Son nouvel album ne cassait pas des briques, les critiques étaient tièdes.",
+      "audioFile": "ce056e2b4a36.mp3"
+    },
+    "microActivity": {
+      "prompt": "Ce resto est correct, mais franchement, __________.",
+      "answer": "ça ne casse pas des briques"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%A7a%20ne%20casse%20pas%20des%20briques/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  },
+  {
+    "id": "expr-lote4-020",
+    "type": "expression",
+    "canonicalExpression": "être cinglé",
+    "level": "B1",
+    "expressionAudioFile": "eb3a771041c9.mp3",
+    "meaning": {
+      "fr": "Être fou, faire des choses bizarres ou dangereuses.",
+      "pt": "ser doido / pirado Registro: familiar — use com amigos e pessoas próximas, evite em contextos formais."
+    },
+    "example": {
+      "text": "Tu veux te baigner dans la mer en janvier ? Tu es cinglé !",
+      "audioFile": "a71c0c793503.mp3"
+    },
+    "question": "Que veut dire cette expression ?",
+    "options": [
+      "Être fou",
+      "Être très intelligent",
+      "Être fatigué",
+      "Être timide"
+    ],
+    "correctAnswer": "Être fou",
+    "explanation": "« Être cinglé » veut dire être fou. On le dit souvent pour une idée ou un comportement étrange. Registre familier : à utiliser entre amis, pas dans un contexte formel.",
+    "secondExample": {
+      "text": "Mon voisin est un peu cinglé : il parle à ses plantes toute la journée.",
+      "audioFile": "2d053897c313.mp3"
+    },
+    "microActivity": {
+      "prompt": "Traverser l'autoroute à pied ? Il faut être __________ !",
+      "answer": "cinglé"
+    },
+    "externalResources": [
+      {
+        "type": "youglish",
+        "url": "https://youglish.com/pronounce/%C3%AAtre%20cingl%C3%A9/french",
+        "title": "YouGlish",
+        "sourceName": "YouGlish",
+        "description": "Ouça a expressão sendo usada por falantes reais em vários vídeos.",
+        "quality": "high",
+        "buttonLabel": "Voir en contexte",
+        "approved": true,
+        "lastChecked": null
+      }
+    ],
+    "status": "needs_review"
+  }
+]
