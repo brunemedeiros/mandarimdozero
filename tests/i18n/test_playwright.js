@@ -24,6 +24,12 @@ execSync(`git archive ${BASE} fr zh shared languages icons | tar -x -C ${BASE_DI
 const PREV = process.env.I18N_PREV || '96558b7';
 const PREV_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'i18n-prev-'));
 execSync(`git archive ${PREV} fr zh shared languages icons | tar -x -C ${PREV_DIR}`, { cwd: ROOT });
+// Mudança DELIBERADA de texto em português (aprovada pela dona do projeto) desde PREV:
+// aplicada aos arquivos antigos servidos como referência. Qualquer outra diferença falha.
+for (const rel of ['fr/index.html', 'zh/index.html', 'shared/i18n/pt-BR.js']) {
+  const p = path.join(PREV_DIR, rel);
+  if (fs.existsSync(p)) fs.writeFileSync(p, fs.readFileSync(p, 'utf8').split('arquive algum cartão que já não usa, ou peça').join('apague algum cartão, ou peça'));
+}
 
 const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.mp3': 'audio/mpeg', '.svg': 'image/svg+xml' };
 function makeServer(root){
