@@ -1,90 +1,106 @@
-# Roadmap: idioma da interface e L1 nos sites /fr e /zh
+# Roadmap: idioma do site (interface + conteúdo) nos sites de estudo
 
-Data: 2026-10-04. Só planejamento: nenhum código foi alterado ao escrever este documento.
+Data: 2026-10-04 (atualizado com as suas decisões). Só planejamento: nenhum código de produto muda por causa deste documento.
 
-## 1. Os três eixos (a arquitetura em uma tabela)
+## 1. O objetivo
 
-Hoje o app mistura, na prática, três coisas diferentes. O projeto inteiro é separá-las.
+Quem estuda escolhe **o idioma que quer estudar** (o site: `/fr`, `/zh`, no futuro `/ptbr`) e, separadamente, **o idioma do site**: botões, menus, avisos, traduções, explicações, respostas, tudo que aparece para o aluno.
 
-| Eixo | O que é | Exemplo hoje | Onde vive | Estado |
+- Um aluno americano estuda francês com o site em inglês.
+- Um aluno russo, que não fala português mas fala inglês, estuda francês escolhendo "English".
+- O site `/ptbr` ensina português para falantes de inglês (segundo público, além dos brasileiros que aprendem francês e mandarim).
+
+**Simplificação decidida por você:** não existe "L1" separada. O idioma do site (interface) **é** a língua pela qual o aluno aprende. Uma escolha só.
+
+## 2. Arquitetura: dois eixos
+
+| Eixo | O que é | Exemplo | Onde vive | Estado |
 |---|---|---|---|---|
-| **L2** (idioma estudado) | O que a pessoa aprende | francês (`/fr`), mandarim (`/zh`) | `APP_KEY`, `Field.lang`, namespace `progress.data[idioma]` | Pronto, já independente |
-| **Interface** | Menus, botões, avisos, toasts | português do Brasil | `shared/i18n/*` (`t()`, catálogos) | Núcleo pronto; inglês em ~53 chaves; só no navegador |
-| **L1** (língua pela qual aprende) | Traduções, explicações, exemplos, correção de respostas | português (campo `t` dos dados) | espalhado em `content.js`, validadores, banco | **Não existe como conceito no código** |
+| **Idioma estudado** | O que a pessoa aprende | francês, mandarim; depois português | `APP_KEY`, `Field.lang`, `progress.data[idioma]` | Pronto e independente |
+| **Idioma do site** | Interface **e** conteúdo (traduções, explicações, exercícios) | português do Brasil hoje; inglês a seguir | `uiLanguage` | Interface: núcleo pronto, ~53 chaves em inglês. Conteúdo: ainda não existe |
 
-Regras que valem para os três:
-- Eixos nunca derivam um do outro por código (decisão já travada: nada de `APP_KEY` decidir idioma de interface).
-- Português do Brasil continua sendo a fonte de verdade e **não muda byte a byte** (regra de ouro, testada por regressão).
-- Falta de tradução cai sempre em português (inglês -> pt-BR -> a própria chave), nunca em tela vazia.
+Regras que valem sempre:
+- Os dois eixos nunca derivam um do outro por código.
+- Português do Brasil é a fonte de verdade e **não muda byte a byte** (regra de ouro, testada por regressão). Mudança de texto em português só quando você aprovar (como a de hoje, "apague").
+- Falta de tradução cai em português, nunca em tela vazia (fallback já existe na interface; para conteúdo, ver decisão A abaixo).
+- Novos idiomas estudados **entram no ar já com todos os idiomas de site disponíveis** (decisão sua). Espanhol segue congelado.
 
-### Modelo de dados proposto (sem migration)
-Dentro de `progress.data._meta` (mesma linha e RLS que já guarda `currentLearningLanguage`):
-- `uiLanguage`: `pt-BR` | `en` (es congelado).
-- `l1Language`: `pt-BR` | `en`. **Padrão: igual a `uiLanguage` até a pessoa escolher outro.**
-- Navegador e convidado: `localStorage['ui-language']` e `['l1-language']`. Ordem de leitura: conta > navegador > `pt-BR`.
-- Nunca dentro de `serializeState()` (isso seria por idioma estudado). Escritas reaproveitam o helper de merge de `shared/language-pref.js` e só ocorrem depois do progresso estar carregado (evita sobrescrever progresso).
+### Modelo de dados (sem migration)
+- `progress.data._meta.uiLanguage`: `pt-BR` | `en`. Guardado na conta (decisão sua: sim). Navegador/convidado: `localStorage['ui-language']`. Leitura: conta > navegador > `pt-BR`.
+- Nunca dentro de `serializeState()` (isso seria por idioma estudado). Escrita reaproveita o helper de merge de `shared/language-pref.js` e só depois de o progresso estar carregado, com leitura fresca da linha (evita corrida com o salvar do progresso).
 
 ### Camadas de código
-1. **Interface**: `t()`/`tp()`/`fmtDate()`/`applyDomI18n()` + catálogos. Já existe.
-2. **Acessor de L1** (novo): `tr(item, campo)` lê `item.t_en` quando L1 = inglês e cai em `item.t`. Cobre os ~25 pontos que hoje leem `.t`, `.goal`, `.title`, `back_trans`.
-3. **Pacotes de conteúdo por L1** (novo): textos de aula longos (gramática, notas de realidade e cultura, verdadeiro/falso). São autoria, não tradução palavra a palavra.
-4. **Lógica por L1** (novo): comparador de "Ouça e traduza", traduções de referência dos desafios, áudio de introdução dos ditados.
-5. **Servidor**: `notification_templates` com `ui_language`, Edge Functions, e-mails, manifest PWA.
+1. **Interface**: `t()`, `tp()`, `fmtDate()`, `applyDomI18n()` + catálogos por idioma. Existe.
+2. **Conteúdo curto** (novo): acessor `tr(item)` lê `item.t_en` quando o site está em inglês e cai em `item.t`. Cobre os ~25 pontos que hoje leem `.t`, `.goal`, `.title`, `back_trans`.
+3. **Conteúdo de aula por idioma** (novo): gramática, notas de realidade e cultura, verdadeiro/falso. É autoria: notas que comparam com o português ("ser/estar", "meu = mon/ma/mes") são **reescritas** em função do inglês, não traduzidas.
+4. **Lógica por idioma do site** (novo): comparador de "Ouça e traduza", traduções de referência dos desafios, áudio de introdução dos ditados.
+5. **Servidor**: templates de notificação, e-mails, badges, manifest PWA.
 
-## 2. Fases
+## 3. Fases
 
 ### Concluídas
 | Fase | Entrega | Evidência |
 |---|---|---|
-| 0 | Método de tradução: Claude + DeepL gratuito, confiança alta/média/baixa, Reverso só como conferência manual; DeepL Pro descartado | `ferramentas-de-traducao.md` |
-| 1 | Auditoria só-leitura de textos fixos (~590 no HTML, ~1.530 no JS, ~1.500 de conteúdo) | `auditoria-textos.md` |
-| 2 | Núcleo i18n + modal "Reportar problema" (fr+zh) | `b49d444`, `etapa2-notas.md` |
-| 3 | Tradução piloto da unidade A1-1 (51 itens, EN) com níveis de confiança | `piloto-A1-1.md/.json` |
-| 4 | 3 modais pequenos + seletor "Idioma da interface" (só navegador), verificado de forma independente | `701f158` |
+| 0 | Método de tradução: Claude + DeepL gratuito, confiança alta/média/baixa, Reverso só para conferência manual | `ferramentas-de-traducao.md` |
+| 1 | Auditoria de textos (~590 no HTML, ~1.530 no JS, ~1.500 de conteúdo) | `auditoria-textos.md` |
+| 2 | Núcleo i18n + modal "Reportar problema" | `b49d444` |
+| 3 | Tradução piloto da unidade A1-1 (51 itens, EN) | `piloto-A1-1.md/.json` |
+| 4 | 3 modais pequenos + seletor "Idioma da interface" (só navegador) | `701f158` |
+| 4b | Aviso de limite diz "apague" (PT e EN) e "administrator" no aviso Premium | `fc3f383`, `91c0813` |
 
-Testes atuais: 126 unitários, 209 de navegador (fr e zh), lint de chaves, regressões das fases F e H.
+Testes: 126 unitários e 209 de navegador (fr e zh), lint de chaves.
 
-### Em andamento (fase 4b, aguardando a sua decisão)
-- Texto do aviso de limite de cartões: o português ainda diz "arquive" e o app não arquiva mais. A ação real é **apagar** (🗑, definitivo). Opções: "apague um cartão que você não usa mais (isso é definitivo)" ou tirar a frase e deixar só a opção de pedir vínculo à professora.
-- Ajustes de inglês aprovados: "contact the administrator"; "student(s)" = alunos **vinculados** a uma professora (não o usuário comum).
-- Itens do inglês ainda em `needs_review` (cerca de 17 de confiança média no piloto e 6 textos de modal).
-
-### Próximas (ordem sugerida)
+### Próximas, em ordem
 | # | Fase | Conteúdo | Tamanho | Depende de |
 |---|---|---|---|---|
-| 5 | Fundação da interface | Gravar `uiLanguage` na conta; `<html lang>` e manifest; helpers de plural, data e número; regra de gênero ("aluno") | pequeno | decisão 3 abaixo |
-| 6 | Migrar telas da interface | Ordem: Configurações, menu/topbar, toasts, Meus Cartões, Decks, Revisão, chrome da Trilha, Painel de admin por último. Cada tela: catálogo pt-BR idêntico, inglês com confiança, teste de regressão | grande (~1.250 strings únicas de JS + ~245 de HTML) | fase 5 |
-| 7 | Desatar o português usado como lógica | Nomes de campo do Anki ("Caractere", "Tradução"), `unitTitle` no cartão, `kind` do report, títulos de Course Deck gravados em PT, `lang:'pt-BR'` fixo no modelo de flashcard | médio, **bloqueia** fases 8 e 9 | nenhuma |
-| 8 | Camada L1 curta (`t_en`) | Acessor `tr()`, depois vocabulário, frases, diálogos, títulos e metas. Módulo a módulo, começando pelo A1-1 que já tem piloto. Fallback em português | grande (fr ~865 strings, zh ~644) | fase 7, decisão 1 |
-| 9 | Pacotes de aula por L1 | Gramática, notas de realidade e cultura, verdadeiro/falso. Notas que comparam com o português (ex.: "ser/estar", "meu = mon/ma/mes") são reescritas, não traduzidas | muito grande, autoria | fase 8 |
-| 10 | Lógica por L1 | Comparador de "Ouça e traduza" por L1 (hoje é gramática do português), `referenceTranslations` por L1 nos desafios e no banco, mp3 de introdução dos ditados por L1 (via GitHub Actions) | médio, **sem testes hoje** | fase 8 |
-| 11 | Servidor | `notification_templates.ui_language`, escolha no `notification-cron` (exige novo deploy), e-mails, badges, manifest dinâmico ou por idioma | médio | fase 5 |
-| 12 | Outros idiomas | Espanhol (congelado), português como L2 de aprendizado | adiado | decisão da dona |
+| 5 | Fundação | Gravar `uiLanguage` na conta; `<html lang>` e manifest; helpers de plural, data, número; regra de gênero ("aluno") | pequeno | — |
+| 6 | Interface completa | Ordem: Configurações, menu/topbar, toasts, Meus Cartões, Decks, Revisão, chrome da Trilha, Painel de admin por último | grande (~1.250 strings únicas no JS + ~245 no HTML) | 5 |
+| 7 | Desatar o português usado como lógica | Nomes de campo do Anki ("Caractere", "Tradução"), `unitTitle` no cartão, `kind` do report, títulos de Course Deck gravados em PT, `lang:'pt-BR'` fixo no modelo de flashcard | médio, **bloqueia 8 e 9** | — |
+| 8 | Conteúdo do **francês inteiro** em inglês | Acessor `tr()`; vocabulário, frases, diálogos, títulos e metas; depois gramática, notas de realidade e cultura, verdadeiro/falso. Módulo a módulo (A1-1 primeiro, que já tem piloto). Tudo `needs_review` até aprovar, com confiança por item | muito grande (fr ~865 strings) | 7 |
+| 9 | Lógica por idioma do site | Comparador de "Ouça e traduza" para inglês (hoje é gramática do português e **não tem teste**), `referenceTranslations` por idioma (arquivo e banco), mp3 de introdução dos ditados em inglês (GitHub Actions) | médio | 8 |
+| 10 | Conteúdo do **mandarim** em inglês | Mesmo caminho da fase 8. Histórias (`stories.js`) e `hanzi-data.js` entram aqui | muito grande (zh ~644 strings + histórias e hanzi) | 8 e 9 |
+| 11 | Servidor | `notification_templates.ui_language` (hoje escolhe por idioma estudado), `notification-cron` com novo deploy, e-mails, badges | médio | 5 |
+| 12 | Site `/ptbr` (português para falantes de inglês) | Ver seção 4 | muito grande, projeto próprio | 5 a 11 |
+| 13 | Planos por idioma estudado | Decisão futura (seção 5) | a definir | 12 |
 
-Observação: as fases 5, 6 e 7 podem andar em paralelo com a 8, mas a 8 só abre depois da 7.
+As fases 5, 6 e 7 podem andar em paralelo. Espanhol e outros idiomas de site: adiados.
 
-## 3. O que mais falta (resposta curta)
-1. Persistir o idioma na conta e terminar de migrar a interface (fases 5 e 6). Hoje só ~53 chaves de ~2.800 candidatas estão migradas.
-2. Tratar a L1 como conceito próprio. Hoje o português está **dentro** dos dados e da lógica, não só nas telas.
-3. Reescrever, não traduzir, as notas que se apoiam no português.
-4. Criar testes para o comparador de "Ouça e traduza", que hoje não tem nenhum.
-5. Lado servidor: notificações, e-mails, mp3 de instrução em português, manifest.
+## 4. O que o site `/ptbr` exige (para dimensionar já)
+É um **novo idioma estudado**, não só uma nova interface. Itens do checklist de idioma novo:
+- Trilha completa autorada em inglês desde o início (níveis, módulos, unidades, vocabulário, diálogos, notas de realidade e cultura sobre o Brasil).
+- Áudio em português do Brasil (já existe voz `pt-BR` no pipeline de áudio, usada hoje só nas instruções dos ditados).
+- Validadores da língua-alvo para o português: acentuação, ditado, conjugação, tons/pronúncia.
+- Course Decks do idioma, Anki (nome dos campos), desafios por categoria seguindo a regra de `shared/challenge-policy.js`.
+- Notas sobre a pronúncia e os erros típicos de quem fala inglês.
+- Todos os idiomas de site disponíveis no lançamento (hoje: pt-BR e en). Para `/ptbr`, oferecer pt-BR como idioma do site provavelmente não faz sentido (brasileiro não estuda português aqui); proponho oferecer só inglês. **Confirmar.**
 
-## 4. Riscos conhecidos
-- Só adicionar `t_en` **não basta** (a análise do código mostrou 7 pontos que quebram): textos longos de aula, comparador PT, `back_trans`/`lang:'pt-BR'` fixos em cartões do usuário, títulos de Course Deck em PT no banco, áudio de instrução em PT, comparações com o português, falta de testes.
-- Condição de corrida ao gravar `_meta` junto com o salvar do progresso (último vence). Mitigação: mesmo helper de merge, leitura fresca, só após o progresso carregar.
-- Mudar L1 sem mudar o conteúdo deixa o aluno com explicação em português por baixo de interface em inglês. Por isso a decisão 2.
-- Qualidade da tradução: tudo entra como `needs_review` e vira publicado só com aprovação, com nível de confiança relatado.
+## 5. Decisões
+
+### Já tomadas por você
+1. Idioma do site e L1 são a mesma coisa; uma escolha só.
+2. Conteúdo também migra para o idioma do site.
+3. Guardar na conta já.
+4. Francês inteiro antes do mandarim. Idiomas novos entram com todos os idiomas de site.
+5. **Trocar o idioma do site nunca será premium.**
+6. Espanhol continua congelado.
+7. Aviso de limite diz só "apague" (feito).
+
+### Em aberto (com recomendação)
+A. **Enquanto uma lição ainda não tem inglês:** recomendo mostrar o português daquela lição com um aviso em inglês ("This lesson isn't available in English yet. Showing Portuguese.") em vez de esconder a lição. A alternativa é só liberar o inglês no `/fr` quando a trilha toda estiver traduzida.
+B. **Idiomas de site que cada site oferece:** `/fr` e `/zh`: pt-BR e en. `/ptbr`: só en (proposta acima).
+C. **Quem revisa o inglês:** o fluxo atual (confiança por item, links do Reverso, você aprova) continua?
+D. **Nomes das categorias de desafios** ("Listen and Translate", "Accents"): traduzir quando a aba Desafios for migrada (você aprovou a direção; o texto sai na fase 6).
+
+### Futura (não decidir agora)
+**Planos por idioma estudado**, a sua proposta: Free = 1 idioma de estudo; Basic = premium em 1 idioma; Pro = premium em todos. Hoje não há infraestrutura de assinatura/pagamento no código (só ativação manual no painel), então isso entra depois da fase 12.
+
+## 6. Riscos
+- Só adicionar `t_en` **não basta**. A análise do código achou 7 pontos que quebram: textos longos de aula, comparador PT, `back_trans` e `lang:'pt-BR'` fixos em cartões do usuário, títulos de Course Deck em PT no banco, áudio de instrução em PT, comparações com o português, falta de testes.
+- Corrida ao gravar `_meta` junto com o salvar do progresso (mitigação na seção 2).
+- Qualidade: tudo entra como `needs_review`; nada publicado sem sua aprovação.
 - Edge Function: commit não basta, precisa de `deploy_edge_function`.
+- Volume: a fase 8 sozinha tem ~865 strings; a 12 é um curso novo inteiro.
+- Cada lote novo de conteúdo precisa passar pelo checklist de desafios (`shared/challenge-policy.js`) e relatar nível de confiança.
 
-## 5. Decisões que dependem de você
-1. **L1 separada ou junta da interface?** Recomendo: dois campos no dado, uma única escolha na tela no começo ("Idioma do app"); o campo "Traduções em" aparece só quando houver conteúdo em inglês suficiente. Reversível.
-2. **Enquanto o conteúdo não tem inglês**: mostrar português nas traduções (padrão) ou avisar "conteúdo ainda em português" quando a pessoa escolher inglês?
-3. **Persistir na conta já** (fase 5)? É mudança de dado, sem migration, reversível.
-4. **Ordem do conteúdo**: recomendo A1 inteiro do francês antes do mandarim, módulo a módulo (o francês já tem o piloto A1-1 e a trilha organizada em 6 módulos; o mandarim tem 18 unidades soltas). Volume de gramática medido nos dados: fr 20 notas gramaticais em `concepts` + 41 blocos em unidades `grammar` (61); zh 57 notas gramaticais com 66 blocos. Ou seja, o volume é parecido; a contagem de strings (fr ~865, zh ~644) vem da auditoria.
-5. **Free x Premium**: pergunta aberta. Provisório: idioma da interface e L1 grátis (sem custo marginal). Se um dia pacotes de L1 virarem produto, reavaliar.
-6. **Quem revisa o inglês**: o fluxo atual (confiança por item + link do Reverso) continua?
-7. **Espanhol**: continua congelado.
-
-## 6. Critério de "pronto" deste planejamento
-Todo o escopo definido e apresentado: eixos, arquitetura, fases feitas/em andamento/próximas, riscos e decisões pendentes. Nada do plano foi executado.
+## 7. Critério de "pronto" deste planejamento
+Escopo definido e apresentado: eixos, arquitetura, fases feitas e próximas, `/ptbr`, riscos e decisões. A execução começa pela fase 5, quando você mandar.

@@ -17137,3 +17137,16 @@ Pedido da autora, verbatim: "ao criar um novo nível, módulo, unidade ou liçã
 - "Revisão do A1": 3 ditados `moduleId:"A1-revisao"` (r1 Free, r2/r3 Premium) juntando 2 módulos cada, em unidade própria no fim do nível. Campo `opening` troca o anúncio falado.
 - Paywall desligado (`CHALLENGE_PAYWALL_ENABLED=false` em `fr/app.js`): tudo abre, só há selos Free/Premium. Bloqueio, paywall e Stripe vêm depois.
 - Áudio: Actions > "Áudio TTS" > modo `ditados` refaz todos (abertura fr + instruções em pt-BR + corpo fr). Limite de 5000 bytes de SSML por pedido.
+
+## Idioma do site (interface + conteúdo) -- decisões da dona do projeto (2026-10-04)
+
+Plano completo: `docs/i18n/roadmap-i18n-l1.md`. Núcleo em `shared/i18n/` (`t()`, `tp()`, catálogos `pt-BR`/`en`; `es` congelado).
+
+- **Dois eixos só**: idioma estudado (`/fr`, `/zh`, futuro `/ptbr`) e **idioma do site** (`uiLanguage`). Não existe "L1" separada: o idioma do site é a língua pela qual o aluno aprende, e vale para botões, avisos, traduções, explicações e correção de respostas. Ex.: aluno russo estuda francês com o site em inglês.
+- **Conteúdo também migra** para o idioma do site (não só a interface). Ordem: francês inteiro, depois mandarim. Fallback para português enquanto não houver tradução.
+- **Idioma do site nunca é Premium.** Futuro (não decidido, sem infraestrutura): planos por idioma estudado (Free = 1 idioma; Basic = premium em 1; Pro = premium em todos).
+- **Novos idiomas estudados entram já com todos os idiomas de site disponíveis.** `/ptbr` = português para falantes de inglês (projeto próprio, depois das fases de conteúdo).
+- Guardar o idioma na conta em `progress.data._meta.uiLanguage` (nunca em `serializeState()`), com `localStorage['ui-language']` para convidado.
+- Regra de ouro: texto em português não muda byte a byte; só muda com aprovação explícita (testes têm a lista `DELIBERATE_PT_CHANGES`). O aviso de limite de cartões diz "apague" (a ação real; arquivar foi removido na CONSOLIDAÇÃO-3).
+- Toda tradução nova relatada com nível de confiança (alta/média/baixa) e entra como `needs_review` até a dona aprovar. Espanhol segue congelado.
+- Bloqueios antes de traduzir conteúdo: texto em português usado como lógica (nomes de campo do Anki "Caractere"/"Tradução", `unitTitle` no cartão, `lang:'pt-BR'` em `shared/flashcard-model.js`, títulos de Course Deck em PT no banco, comparador de "Ouça e traduza" sem testes).
