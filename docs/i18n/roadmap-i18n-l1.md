@@ -81,7 +81,7 @@ Observação: as fases 5, 6 e 7 podem andar em paralelo com a 8, mas a 8 só abr
 1. **L1 separada ou junta da interface?** Recomendo: dois campos no dado, uma única escolha na tela no começo ("Idioma do app"); o campo "Traduções em" aparece só quando houver conteúdo em inglês suficiente. Reversível.
 2. **Enquanto o conteúdo não tem inglês**: mostrar português nas traduções (padrão) ou avisar "conteúdo ainda em português" quando a pessoa escolher inglês?
 3. **Persistir na conta já** (fase 5)? É mudança de dado, sem migration, reversível.
-4. **Ordem do conteúdo**: recomendo A1 inteiro do francês antes do mandarim, módulo a módulo. O mandarim tem conteúdo de gramática mais denso (219 blocos de gramática contra 70).
+4. **Ordem do conteúdo**: recomendo A1 inteiro do francês antes do mandarim, módulo a módulo (o francês já tem o piloto A1-1 e a trilha organizada em 6 módulos; o mandarim tem 18 unidades soltas). Volume de gramática medido nos dados: fr 20 notas gramaticais em `concepts` + 41 blocos em unidades `grammar` (61); zh 57 notas gramaticais com 66 blocos. Ou seja, o volume é parecido; a contagem de strings (fr ~865, zh ~644) vem da auditoria.
 5. **Free x Premium**: pergunta aberta. Provisório: idioma da interface e L1 grátis (sem custo marginal). Se um dia pacotes de L1 virarem produto, reavaliar.
 6. **Quem revisa o inglês**: o fluxo atual (confiança por item + link do Reverso) continua?
 7. **Espanhol**: continua congelado.
