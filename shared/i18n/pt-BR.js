@@ -66,7 +66,7 @@ window.I18N_CATALOG['pt-BR'] = {
 
   // ---- modal de limite de cartões próprios (plano grátis) ----
   'flashcardLimit.modal.title': '🔒 Limite do plano grátis',
-  'flashcardLimit.modal.bodyHtml': 'Você atingiu o limite de <strong>20 cartões próprios ativos</strong> do plano grátis. Pra criar mais, arquive algum cartão que já não usa, ou peça pra sua professora te vincular -- alunos vinculados a uma professora têm cartões próprios ilimitados.',
+  'flashcardLimit.modal.bodyHtml': 'Você atingiu o limite de <strong>20 cartões próprios ativos</strong> do plano grátis. Pra criar mais, apague algum cartão, ou peça pra sua professora te vincular -- alunos vinculados a uma professora têm cartões próprios ilimitados.',
   'flashcardLimit.fallbackError': 'Você atingiu o limite de cartões do plano grátis.',
   // tp(): em pt-BR é uma string só (o texto original usa "cartão(ões)");
   // {n} = cartões de estudo que seriam criados, {remaining} = vagas restantes.
