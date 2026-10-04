@@ -519,6 +519,87 @@ function normalizeNoteTags(rawTags){
   return out;
 }
 
+// ---------- Fase I (Tags): limites, validação e filtro ----------
+//
+// Tags pertencem à NOTE (nunca ao CardInstance: irmãos -- Normal reverso,
+// Cloze multi-marca -- compartilham a MESMA lista). Globais na conta, sem
+// namespace por idioma, sem hierarquia. Estas funções são o ÚNICO ponto de
+// limite/validação/filtro de tag do app -- editor, Anki, cópias e Review
+// chamam daqui, nunca reimplementam.
+const TAG_MAX_PER_NOTE = 20;
+const TAG_MAX_LENGTH = 50;
+
+// Valida uma coleção crua (após normalizeNoteTags). NUNCA trunca nem
+// descarta em silêncio por limite: acima do limite devolve ok:false com a
+// mensagem que a UI mostra. (O que normalizeNoteTags já fazia --
+// deduplicar e descartar o que normaliza pra vazio -- continua sendo
+// normalização, não "descarte por limite".)
+function validateNoteTags(rawTags){
+  const tags = normalizeNoteTags(rawTags);
+  const tooLong = tags.filter(t => t.length > TAG_MAX_LENGTH);
+  if (tooLong.length){
+    return { ok: false, tags, errorCode: 'tag_too_long',
+      error: `Tag muito longa (máximo ${TAG_MAX_LENGTH} caracteres): "${tooLong[0].slice(0, 20)}…".` };
+  }
+  if (tags.length > TAG_MAX_PER_NOTE){
+    return { ok: false, tags, errorCode: 'too_many_tags',
+      error: `Máximo de ${TAG_MAX_PER_NOTE} tags por cartão (foram informadas ${tags.length}).` };
+  }
+  return { ok: true, tags };
+}
+
+// ---------- Identity/Attribution: tag de SISTEMA `criado-por-*` ----------
+// A tag de atribuição (`criado-por-[username]`, AT §10.3) é emitida SÓ pelo
+// servidor (RPC copy_public_flashcard, migration 060) e protegida por
+// trigger: o usuário não a cria, renomeia, apaga nem forja. NÃO é a fonte de
+// verdade de identidade (isso é user_id): é a representação persistente
+// exigida pela arquitetura. Estas funções são o espelho de UX dessa regra;
+// a autoridade é o banco. O cliente NUNCA interpreta a tag para decidir
+// identidade/permissão.
+const ATTRIBUTION_TAG_PREFIX = 'criado-por';
+function isAttributionTag(tag){
+  const t = String(tag || '').trim().toLowerCase();
+  return t === ATTRIBUTION_TAG_PREFIX || t.startsWith(ATTRIBUTION_TAG_PREFIX + '-');
+}
+// Remove tags de sistema de uma lista vinda de FORA (arquivo/link/Anki/
+// payload colado): quem importa nunca recebe nem fabrica atribuição.
+function stripSystemTags(rawTags){
+  return (Array.isArray(rawTags) ? rawTags : []).filter(t => !isAttributionTag(normalizeTagSlug(t)));
+}
+
+// Para fluxos EM LOTE (importação do Anki, onde recusar a Note inteira
+// seria pior que importar: mantém as tags válidas (na ordem, até o limite)
+// e devolve EXPLICITAMENTE o que ficou de fora e por quê -- quem chama
+// mostra isso ao usuário (nunca silencioso).
+function partitionNoteTagsByLimits(rawTags){
+  const all = normalizeNoteTags(rawTags);
+  const kept = [];
+  const dropped = [];
+  all.forEach(t => {
+    // Tag de sistema vinda de fora é DESCARTADA (e informada), nunca mantida.
+    if (isAttributionTag(t)) dropped.push({ tag: t, reason: 'system_tag' });
+    else if (t.length > TAG_MAX_LENGTH) dropped.push({ tag: t, reason: 'too_long' });
+    else if (kept.length >= TAG_MAX_PER_NOTE) dropped.push({ tag: t, reason: 'over_limit' });
+    else kept.push(t);
+  });
+  return { tags: kept, dropped };
+}
+
+// Filtro de Review por Tag: OR (pelo menos uma). Filtro vazio = sem
+// restrição. Card sem tags (ex.: Study Trail) só passa com filtro vazio.
+function cardMatchesTagFilter(card, filterTags){
+  if (!Array.isArray(filterTags) || filterTags.length === 0) return true;
+  const own = Array.isArray(card && card.tags) ? card.tags : [];
+  return filterTags.some(t => own.includes(t));
+}
+
+// Tags distintas presentes num conjunto de cards, ordem alfabética.
+function collectTagsFromCards(cards){
+  const set = new Set();
+  (cards || []).forEach(c => (Array.isArray(c.tags) ? c.tags : []).forEach(t => set.add(t)));
+  return Array.from(set).sort();
+}
+
 // Cardinalidade de múltipla escolha nativa -- o motor valida, nunca confia
 // só na UI (restrição explícita da autora: "não confie apenas na validação
 // da UI"). Exatamente 1 Field role:'prompt', exatamente 1 role:'answer'
@@ -1310,7 +1391,6 @@ function resolveCardContentView(card){
 // Devolve { front, back } -- cada um `null` (sem mídia nesse lado) ou
 // `{ audioUrl, imageUrl }` (qualquer um dos 2 pode ser `null` individualmente).
 function resolveCardExportMedia(card){
-  if (!card.cardInstance) return { front: null, back: null };
   const view = resolveCardContentView(card);
   if (view.kind === CARD_TYPE_IDS.MULTIPLE_CHOICE){
     return {

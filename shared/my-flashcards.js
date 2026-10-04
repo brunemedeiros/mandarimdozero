@@ -115,14 +115,19 @@ function personalDeckOptionsHTML(decks){
 }
 
 function personalDecksListHTML(decks){
+  // K.5: mesmo universo e mesmas contagens do Teacher Deck / de "Estudar este
+  // Deck": pool ELEGÍVEL (arquivado fora), subárvore, CardInstances.
   const cards = (typeof STATE !== 'undefined' && STATE.cards) || [];
+  const pool = (typeof eligibleDeckReviewPool === 'function') ? eligibleDeckReviewPool() : cards;
   return orderedPersonalDecks(decks).map(d => {
     const pad = Math.max(0, personalDeckDepth(decks, d) - 1) * 16;
-    const n = getStudyScopeForDeck(decks, d.id, cards).length;
-    return `<div class="admin-badge-row" style="padding-left:${pad}px;">
-      <span style="flex:1;">${escapeHTML(d.kind === 'personal_root' ? 'Meus Decks' : d.name)} <span class="profile-edit-hint">(${n} cartões)</span></span>
+    const c = getDeckCounts(decks, d.id, pool);
+    return `<div class="admin-badge-row" style="padding-left:${pad}px;" data-personal-deck-row="${d.id}">
+      <span style="flex:1;">${escapeHTML(d.kind === 'personal_root' ? 'Meus Decks' : d.name)} <span class="profile-edit-hint">(${c.total} cartões · ${c.new} novos · ${c.learning} aprendendo · ${c.review} para revisar · ${c.due} devidos)</span></span>
       <button type="button" class="btn btn-secondary" data-study-deck="${d.id}">Estudar este Deck</button>
-    </div>`;
+      ${d.kind === 'personal' && typeof publishBoxHTML === 'function' ? `<button type="button" class="btn btn-secondary" data-publish-deck="${d.id}">${d.is_public ? '🌐 Público' : 'Publicar'}</button>` : ''}
+    </div>
+    ${d.kind === 'personal' ? `<div data-publish-box="${d.id}" style="display:none; padding-left:${pad}px;"></div>` : ''}`;
   }).join('');
 }
 
@@ -139,6 +144,25 @@ function teacherReceivedDecks(decks){
   return (decks || []).filter(d => ['teacher_root', 'teacher'].includes(d.kind) && d.owner_id === CURRENT_USER.id);
 }
 
+// Fase I (Tags): tags dos Teacher Cards são da NOTE/da professora -- a aluna
+// só VÊ (chips sem botão de remover) e pode filtrar a Revisão por elas;
+// nenhuma cópia editável do lado dela (RLS de teacher_flashcards já é
+// somente-leitura pra aluna).
+function teacherTagsReadOnlyHTML(cards){
+  const tags = collectTagsFromCards((cards || []).filter(c => c.origin === 'teacher'));
+  if (!tags.length) return '';
+  return `<div data-teacher-tags style="margin:6px 0;"><span class="profile-edit-hint">Tags dos cartões da professora:</span> ${noteTagChipsHTML(tags)}</div>`;
+}
+
+// Fase I (Tags): o filtro de tag do Review vale também para "Estudar este
+// Deck" (Deck AND Tag). Aviso visível + atalho para limpar, pra o filtro
+// nunca parecer um "Deck vazio" inexplicável.
+function tagFilterNoticeHTML(){
+  const f = (typeof STATE !== 'undefined' && STATE.studySettings && Array.isArray(STATE.studySettings.reviewTagFilter)) ? STATE.studySettings.reviewTagFilter : [];
+  if (!f.length) return '';
+  return `<p class="profile-edit-hint" data-tag-filter-notice>Filtro de tags ativo na Revisão: ${noteTagChipsHTML(f)} — vale também para "Estudar este Deck". <button type="button" class="admin-select-link" data-clear-review-tag-filter style="background:none;border:none;cursor:pointer;padding:0;">Limpar</button></p>`;
+}
+
 function teacherDecksReadOnlyHTML(decks){
   const mine = teacherReceivedDecks(decks);
   if (!mine.length) return '';
@@ -147,26 +171,33 @@ function teacherDecksReadOnlyHTML(decks){
     // Fase H (H10) -- contagens do MESMO Deck Engine (getDeckCounts: New/
     // Learning/Review sobre CardInstances elegíveis do Deck + descendentes),
     // nunca uma contagem paralela. `n` = CardInstances no escopo do Deck.
-    const n = getStudyScopeForDeck(decks, deck.id, cards).length;
+    // K.5: `n` = CardInstances ELEGÍVEIS no escopo (antes contava também os
+    // arquivados); vem de getDeckCounts, junto das demais contagens.
     // Fase H (hardening) -- pool de elegibilidade SEM o filtro de origem: as
     // contagens da árvore têm que bater com o que 'Estudar este Deck' vai
     // de fato estudar (Deck é o escopo autoritativo da sessão).
     const pool = (typeof eligibleDeckReviewPool === 'function') ? eligibleDeckReviewPool() : cards;
     const c = getDeckCounts(decks, deck.id, pool);
+    const n = c.total;
     const label = deck.kind === 'teacher_root' ? 'Cartões da professora' : deck.name;
     return `<div class="admin-badge-row" style="padding-left:${depth * 16}px;" data-teacher-deck-row="${deck.id}">
-      <span style="flex:1;">${escapeHTML(label)} <span class="profile-edit-hint">(${n} cartões · ${c.new} novos · ${c.learning} aprendendo · ${c.review} para revisar)</span></span>
+      <span style="flex:1;">${escapeHTML(label)} <span class="profile-edit-hint">(${n} cartões · ${c.new} novos · ${c.learning} aprendendo · ${c.review} para revisar · ${c.due} devidos)</span></span>
       <button type="button" class="btn btn-secondary" data-study-deck="${deck.id}" ${n ? '' : 'disabled'}>Estudar este Deck</button>
     </div>`;
   }).join('');
   return `<div class="profile-section" id="teacher-decks-section">
       <div class="section-label">Cartões da professora</div>
       <p class="profile-edit-hint">Decks organizados pela sua professora. Aqui você só estuda; ela cuida da organização.</p>
+      ${teacherTagsReadOnlyHTML(cards)}
       <div id="teacher-decks-list">${rows}</div>
     </div>`;
 }
 
 function wireMyDecksSection(wrap){
+  wrap.querySelectorAll('[data-clear-review-tag-filter]').forEach(btn => btn.addEventListener('click', () => {
+    if (typeof updateStudySetting === 'function') updateStudySetting({ reviewTagFilter: [] });
+    renderMyFlashcardsView();
+  }));
   wrap.querySelectorAll('[data-study-deck]').forEach(btn => {
     btn.addEventListener('click', () => {
       // Único caminho de estudo por Deck: startDeckReviewSession (fr/zh
@@ -174,6 +205,15 @@ function wireMyDecksSection(wrap){
       if (typeof startDeckReviewSession === 'function') startDeckReviewSession(Number(btn.dataset.studyDeck));
     });
   });
+  wrap.querySelectorAll('[data-publish-deck]').forEach(btn => btn.addEventListener('click', () => {
+    const id = Number(btn.dataset.publishDeck);
+    const deck = (MY_FLASHCARDS_STATE._decks || []).find(x => x.id === id);
+    const box = wrap.querySelector(`[data-publish-box="${id}"]`);
+    if (!deck || !box) return;
+    const opening = box.style.display === 'none';
+    box.style.display = opening ? 'block' : 'none';
+    if (opening) openPublishBox(deck, box, (d) => { btn.textContent = d.is_public ? '🌐 Público' : 'Publicar'; });
+  }));
   document.getElementById('my-deck-new-btn')?.addEventListener('click', async () => {
     const errEl = document.getElementById('my-deck-error');
     errEl.textContent = '';
@@ -279,6 +319,7 @@ async function renderMyFlashcardsView(opts){
         <div class="section-label" style="margin:14px 0 4px;">Campos</div>
         <p class="profile-edit-hint" style="margin-top:-2px;">Adicione os campos deste cartão -- por exemplo, Frente e Verso pra um cartão Normal. Cada campo tem seu próprio idioma e seus próprios recursos de áudio.</p>
         <div id="my-flashcard-native-fields"></div>
+        <div id="my-flashcard-tags"></div>
         <button type="button" class="admin-select-link" id="my-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; margin:6px 0 0;">👁️ Pré-visualizar</button>
         <label class="profile-edit-label" for="my-flashcard-deck" style="margin-top:14px;">Deck de destino</label>
         <select id="my-flashcard-deck" class="profile-edit-input">${personalDeckOptionsHTML(decks)}</select>
@@ -291,6 +332,7 @@ async function renderMyFlashcardsView(opts){
 
     <div class="profile-section" id="my-decks-section">
       <div class="section-label">Meus Decks</div>
+      ${tagFilterNoticeHTML()}
       <div id="my-decks-list">${personalDecksListHTML(decks)}</div>
       <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
         <input type="text" id="my-deck-new-name" class="profile-edit-input" placeholder="Nome do novo Deck" maxlength="60" style="flex:1; min-width:140px;">
@@ -301,6 +343,13 @@ async function renderMyFlashcardsView(opts){
     </div>
 
     ${teacherDecksReadOnlyHTML(decks)}
+
+    <!-- Fase J: gerenciamento global das PRÓPRIAS tags (own_flashcards). Tags de
+         Teacher Cards nunca entram aqui (outra propriedade; somente leitura). -->
+    <div class="profile-section" id="my-tags-section">
+      <div class="section-label">🏷️ Gerenciar tags</div>
+      <div id="my-tag-manager"></div>
+    </div>
 
     <div class="profile-section">
       <div class="section-label" style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
@@ -337,6 +386,8 @@ async function renderMyFlashcardsView(opts){
   wireMyFlashcardsForm(wrap, atLimit, premium);
   wireMyFlashcardsCardButtons(wrap, premium);
   wireMyDecksSection(wrap);
+  // Fase J: rename/delete re-renderiza a view (chips das linhas e contagens frescas).
+  renderTagManagerInto(document.getElementById('my-tag-manager'), { scope: 'own', onChanged: () => renderMyFlashcardsView() });
   document.getElementById('anki-import-file')?.addEventListener('change', (e) => {
     if (typeof handleAnkiImportFileSelected === 'function') handleAnkiImportFileSelected(e.target.files[0]);
     e.target.value = '';
@@ -384,6 +435,7 @@ function myFlashcardRowHTML(c, premium){
       <div class="admin-badge-info">
         <div class="admin-badge-name">${escapeHTML(c.front)}${c.front_pinyin ? ` (${escapeHTML(c.front_pinyin)})` : ''} → ${escapeHTML(c.back_trans)}</div>
         <div class="admin-badge-desc">${c.note ? escapeHTML(c.note) + ' · ' : ''}criado em ${new Date(c.created_at).toLocaleDateString('pt-BR')}</div>
+        ${(c.tags && c.tags.length) ? `<div data-row-tags style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">${noteTagChipsHTML(c.tags)}</div>` : ''}
       </div>
       <div style="display:flex; gap:6px;">
         <button class="admin-badge-delete-btn" data-preview-own-flashcard="${c.id}" title="Pré-visualizar como vai aparecer na Revisão">🔎</button>
@@ -535,6 +587,7 @@ function myFlashcardNativeEditFormHTML(c, editorState){
         ${CARD_TYPE_UI_META.map(t => `<option value="${t.id}" ${t.id === editorState.cardGenerationMode ? 'selected' : ''}>${t.label}</option>`).join('')}
       </select>
       <div id="edit-my-native-flashcard-fields"></div>
+      <div id="edit-my-native-flashcard-tags"></div>
       <button type="button" class="admin-select-link" id="edit-my-native-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; align-self:flex-start; padding:0;">👁️ Pré-visualizar</button>
       <label class="profile-edit-label">Nota (opcional)</label>
       <textarea id="edit-my-native-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(editorState.privateNote || '')}</textarea>
@@ -557,6 +610,7 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap){
   const nativeFieldOpts = { namePrefix: 'edit-my-native', uploadFn: uploadOwnFlashcardMedia, deleteFn: deleteOwnFlashcardMedia, ttsFn: requestOwnFieldAudioTTS, noteId: editorState.noteId };
   const boxEl = document.getElementById('edit-my-native-flashcard-fields');
   refreshNativeCardTypeBox(boxEl, editorState, nativeFieldOpts);
+  mountNoteTagsEditor(document.getElementById('edit-my-native-flashcard-tags'), editorState);
 
   document.getElementById('edit-my-native-flashcard-card-type').addEventListener('change', (e) => {
     const newMode = e.target.value;
@@ -691,6 +745,7 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
   // rascunho ainda não foi salvo) habilitam "Gerar áudio" (Premium only,
   // via allowedAudioOrigins acima).
   refreshNativeCardTypeBox(document.getElementById('my-flashcard-native-fields'), MY_FLASHCARDS_STATE.nativeCardState, nativeFieldOpts);
+  mountNoteTagsEditor(document.getElementById('my-flashcard-tags'), MY_FLASHCARDS_STATE.nativeCardState);
 
   // Fase 6D.7 (ver CLAUDE.md) -- Preview do rascunho atual (não salvo).
   // languageAppKey aqui é sempre APP_KEY (o site fixa o idioma pra
@@ -863,6 +918,7 @@ function myFlashcardsExportPayload(cardsToExport){
       backTrans: c.back_trans,
       note: c.note || null,
       frontIsTargetLanguage: c.front_is_target_language !== false,
+      tags: Array.isArray(c.tags) ? c.tags : [],
     })),
   };
 }
@@ -995,7 +1051,7 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
       if (typeof addSelfFlashcardToState === 'function') addSelfFlashcardToState(result.card);
     }
   }
-  showToast(`✓ ${importedCount} cartão(ões) importado(s).`);
+  showToast(`✓ ${importedCount} cartão(ões) importado(s). ${summarizeDroppedImportTags(importStates)}`.trim());
   renderMyFlashcardsView();
 }
 

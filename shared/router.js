@@ -54,7 +54,7 @@ function routeToHash(route){
       if (route.tab === 'review' && route.unitFilter != null) return `#/review/unit/${route.unitFilter}`;
       return `#/${route.tab}`;
     case 'reviewSession':
-      return `#/review/${route.mode}`;
+      return route.deckId != null ? `#/review/deck/${route.deckId}` : `#/review/${route.mode}`;
     case 'unit':
       return `#/unit/${route.unitId}`;
     case 'unitResult':
@@ -63,6 +63,8 @@ function routeToHash(route){
       return `#/unit/${route.unitId}/complete`;
     case 'publicProfile':
       return `#/user/${route.username}`;
+    case 'publicDeck':
+      return `#/deck/${route.publicId}`;
     default:
       return '';
   }
@@ -84,6 +86,7 @@ function hashToRoute(hash){
   if (!parts.length) return { type: 'tab', tab: 'path' };
   if (parts[0] === 'review'){
     if (parts[1] === 'unit' && parts[2]) return { type: 'tab', tab: 'review', unitFilter: parseUnitIdFromHash(parts[2]) };
+    if (parts[1] === 'deck' && /^\d+$/.test(parts[2] || '')) return { type: 'reviewSession', mode: 'flashcard', deckId: parseInt(parts[2], 10) };
     if (['flashcard', 'speed', 'hard', 'match'].includes(parts[1])) return { type: 'reviewSession', mode: parts[1] };
     return { type: 'tab', tab: 'review' };
   }
@@ -100,6 +103,12 @@ function hashToRoute(hash){
   // (shared/profile.js) -- sem sanitização extra aqui, mesmo nível de
   // confiança que parseUnitIdFromHash já tem pro id de unidade.
   if (parts[0] === 'user' && parts[1]) return { type: 'publicProfile', username: parts[1] };
+  // Public Deck -- #/deck/<public_id uuid opaco>. Id fora do formato cai na aba
+  // desconhecida (nunca chega à RPC); o public_id não autoriza nada, só identifica.
+  if (parts[0] === 'deck' && typeof publicDeckIdFromHash === 'function'){
+    const publicId = publicDeckIdFromHash(clean);
+    if (publicId) return { type: 'publicDeck', publicId };
+  }
   return { type: 'tab', tab: parts[0] };
 }
 
@@ -143,6 +152,10 @@ function renderRoute(route){
         break;
       }
       case 'reviewSession': {
+        if (route.deckId != null && typeof startDeckReviewSession === 'function'){
+          startDeckReviewSession(route.deckId, { restore: true }); // K2-H: restaura a sessão COM o escopo do Deck
+          break;
+        }
         if (typeof switchTab === 'function') switchTab('review');
         if (typeof openReviewSession === 'function') openReviewSession(route.mode);
         break;
@@ -206,6 +219,10 @@ function renderRoute(route){
         // Sem isso, um F5 em cima de #/user/x reabriria a Trilha por baixo
         // do modal em vez de restaurar exatamente onde a pessoa estava.
         if (typeof openPublicProfilePage === 'function') openPublicProfilePage(route.username);
+        break;
+      }
+      case 'publicDeck': {
+        if (typeof openPublicDeckPage === 'function') openPublicDeckPage(route.publicId);
         break;
       }
       default:

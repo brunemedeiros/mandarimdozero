@@ -9,14 +9,14 @@ window.APP_IDENTITY = {
   },
   "apps": {
     "fr": {
-      "description": "Estudo pessoal de francês com a Prof. Brune",
+      "description": "Aprenda francês com Prof. Brune",
       "themeColor": "#3498D6",
       "backgroundColor": "#FAF5EA",
       "name": "Francês com Prof. Brune",
       "shortName": "Francês"
     },
     "zh": {
-      "description": "Estudo pessoal de chinês (mandarim) com a Prof. Brune",
+      "description": "Aprenda chinês (mandarim) com Prof. Brune",
       "themeColor": "#C0231F",
       "backgroundColor": "#FBF4E8",
       "name": "Chinês com Prof. Brune",

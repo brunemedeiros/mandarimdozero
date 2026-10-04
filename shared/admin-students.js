@@ -174,15 +174,22 @@ async function toggleStudentMetrics(btn){
   panel.innerHTML = renderStudentMetricsHTML(STUDENT_METRICS_CACHE[linkId]);
 }
 
-// Renderiza só o que a function get_teacher_student_metrics devolve --
-// tudo agregado, nada de resposta/cartão individual (ver comentário na
-// migration 029). `weak`/`medium`/`strong` usam a MESMA classificação de
-// vocabStrengthBuckets() (fr/zh app.js) -- não um critério novo.
+// Renderiza só o que a function get_teacher_student_metrics devolve (migration
+// 059, K.6) -- tudo agregado, nada de resposta/cartão individual. Duas unidades,
+// nunca misturadas (docs/K-analytics-contrato.md):
+//   CONTEÚDOS = Notes (contentsX): 1 conteúdo pode gerar vários cartões
+//     (Reverso = 2, Cloze = N). Força é por conteúdo.
+//   CARTÕES = CardInstances (cardsX): Novos/Aprendendo/Para revisar (estado
+//     Review)/Devidos (vencidos, não-Novos).
+// Arquivados são informativos e nunca entram nos totais ativos.
 function renderStudentMetricsHTML(m){
   if (!m){
     return '<p class="profile-empty-note">Não foi possível carregar as métricas agora.</p>';
   }
-  if (!m.teacherCardsTotal){
+  if (typeof m.contentsTotal !== 'number'){
+    return '<p class="profile-empty-note">Não foi possível carregar as métricas agora.</p>';
+  }
+  if (!m.contentsTotal && !m.archivedNotes){
     return '<p class="profile-empty-note">Você ainda não criou nenhum cartão pra este aluno, na aba "📇 Flashcards".</p>';
   }
   const daysAgo = m.lastStudyDay
@@ -192,10 +199,15 @@ function renderStudentMetricsHTML(m){
     : daysAgo <= 0 ? 'hoje'
     : daysAgo === 1 ? 'ontem'
     : `${daysAgo} dias atrás`;
+  const archivedLine = m.archivedNotes
+    ? `<div>Arquivados (fora das contagens acima): <strong>${m.archivedNotes} conteúdos</strong> · ${m.archivedCards} cartões</div>`
+    : '';
   return `
-    <div>Última atividade geral: <strong>${lastActivityLabel}</strong></div>
-    <div>Cartões que você criou pra ele: <strong>${m.teacherCardsActive} ativos</strong>${m.teacherCardsArchived ? `, ${m.teacherCardsArchived} arquivados` : ''}</div>
-    <div>Ainda nunca revisados: <strong>${m.teacherCardsNeverReviewed}</strong></div>
-    <div>Memória: <strong>${m.teacherCardsWeak} fracas</strong> · ${m.teacherCardsMedium} medianas · ${m.teacherCardsStrong} fortes</div>
+    <div>Última atividade geral da conta: <strong>${lastActivityLabel}</strong></div>
+    <div>Conteúdos que você criou pra ele: <strong>${m.contentsTotal} ativos</strong></div>
+    <div>Conteúdos estudados: <strong>${m.contentsStudied} de ${m.contentsTotal}</strong> · ${m.contentsNotStarted} não iniciados</div>
+    <div>Força dos conteúdos: ${m.contentsStrengthNotStarted} não iniciados · <strong>${m.contentsStrengthWeak} fracos</strong> · ${m.contentsStrengthMedium} médios · ${m.contentsStrengthStrong} fortes</div>
+    <div>Cartões gerados desses conteúdos: <strong>${m.cardsTotal}</strong> · ${m.cardsNew} novos · ${m.cardsLearning} aprendendo · ${m.cardsReview} para revisar · ${m.cardsDue} devidos</div>
+    ${archivedLine}
   `;
 }

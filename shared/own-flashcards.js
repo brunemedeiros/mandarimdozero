@@ -105,6 +105,29 @@ async function createOwnFlashcard({ languageAppKey, nativeState, deckId, decks }
   return { ok: true, card: data };
 }
 
+// Identity/Attribution (migration 060): cópia de um cartão do PERFIL PÚBLICO
+// de outra conta. Diferente de createOwnFlashcard(), a atribuição
+// (`criado-por-[username]`) é emitida pelo SERVIDOR (RPC copy_public_flashcard)
+// a partir do user_id do autor da fonte -- o cliente envia só o conteúdo
+// (colunas nativas) e NUNCA tags: qualquer tag de sistema que viesse no
+// payload seria ignorada/recusada. Sem vínculo vivo com a fonte (cópia
+// independente); copiar uma cópia mantém só a atribuição do autor original.
+// O Deck de destino é resolvido/validado como em createOwnFlashcard().
+async function copyPublicFlashcard({ sourceId, languageAppKey, nativeState, deckId, decks }){
+  const dest = await resolveOwnCreationDeck({ languageAppKey, deckId, decks });
+  if (!dest.ok) return { ok: false, error: dest.error };
+  const cols = nativeContentColumnsFromEditorState(nativeState);
+  const columns = { card_generation_mode: cols.card_generation_mode, fields: cols.fields, front_is_target_language: cols.front_is_target_language };
+  const { data, error } = await supabaseClient.rpc('copy_public_flashcard', {
+    p_source_id: sourceId,
+    p_language_app_key: languageAppKey,
+    p_columns: columns,
+    p_deck_id: dest.deckId,
+  });
+  if (error){ console.error('Erro ao copiar flashcard público:', error); return { ok: false, error: 'Não foi possível copiar o cartão agora.' }; }
+  return { ok: true, card: data };
+}
+
 // Upload de mídia (imagem/áudio) pro bucket `flashcard-media` -- mesmo
 // bucket já usado por teacher-flashcards.js (uploadFlashcardMedia): a
 // policy de escrita já é "qualquer autenticado, restrito à própria pasta

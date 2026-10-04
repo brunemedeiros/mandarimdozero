@@ -585,6 +585,7 @@ function flashcardNativeEditFormHTML(c, editorState){
         ${CARD_TYPE_UI_META.map(t => `<option value="${t.id}" ${t.id === editorState.cardGenerationMode ? 'selected' : ''}>${t.label}</option>`).join('')}
       </select>
       <div id="edit-native-flashcard-fields"></div>
+      <div id="edit-native-flashcard-tags"></div>
       <button type="button" class="admin-select-link" id="edit-native-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; align-self:flex-start; padding:0;">👁️ Pré-visualizar</button>
       <label class="profile-edit-label">Nota (privada -- o aluno nunca vê)</label>
       <textarea id="edit-native-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(editorState.privateNote || '')}</textarea>
@@ -609,6 +610,8 @@ function wireFlashcardNativeEditForm(c, editorState, container){
   const nativeFieldOpts = { namePrefix: 'edit-native', uploadFn: uploadFlashcardMedia, deleteFn: deleteFlashcardMedia, ttsFn: requestFieldAudioTTS, noteId: editorState.noteId };
   const boxEl = document.getElementById('edit-native-flashcard-fields');
   refreshNativeCardTypeBox(boxEl, editorState, nativeFieldOpts);
+  // Fase I (Tags): mount PRÓPRIO, irmão da caixa de Campos (sobrevive a troca de Card Type).
+  mountNoteTagsEditor(document.getElementById('edit-native-flashcard-tags'), editorState);
 
   document.getElementById('edit-native-flashcard-card-type').addEventListener('change', (e) => {
     const newMode = e.target.value;
@@ -913,6 +916,7 @@ function flashcardCardRowHTML(c, showUsername){
       <div class="admin-badge-info">
         <div class="admin-badge-name">${showUsername ? `<span style="opacity:.6">@${escapeHTML(c.__studentUsername || '?')}</span> · ` : ''}${flashcardFrontSummaryHTML(c)} → ${escapeHTML(c.back_trans)}</div>
         <div class="admin-badge-desc">${teacherCardDeckLabelHTML(c)}${c.note ? escapeHTML(c.note) + ' · ' : ''}criado em ${new Date(c.created_at).toLocaleDateString('pt-BR')}${flashcardFormatBadgesHTML(c) ? ' · ' + flashcardFormatBadgesHTML(c) : ''}</div>
+        ${(c.tags && c.tags.length) ? `<div data-row-tags style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">${noteTagChipsHTML(c.tags)}</div>` : ''}
       </div>
       <div style="display:flex; gap:6px; align-items:center;">
         ${teacherCardMoveSelectHTML(c)}
@@ -1256,6 +1260,7 @@ async function renderAdminFlashcardsView(){
         <div class="section-label" style="margin:14px 0 4px;">Campos</div>
         <p class="profile-edit-hint" style="margin-top:-2px;">Adicione os campos deste cartão -- por exemplo, Frente e Verso pra um cartão Normal. Cada campo tem seu próprio idioma e seus próprios recursos de áudio.</p>
         <div id="admin-flashcard-native-fields"></div>
+        <div id="admin-flashcard-tags"></div>
         <button type="button" class="admin-select-link" id="admin-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; margin:6px 0 0;">👁️ Pré-visualizar</button>
 
         <label class="profile-edit-label" for="admin-flashcard-note" style="margin-top:14px;">Nota (privada -- o aluno nunca vê)</label>
@@ -1378,6 +1383,8 @@ async function renderAdminFlashcardsView(){
   // (mesmo motivo do upload real só existir depois de um Field ter um
   // `rowId` real pra a Edge Function checar autorização contra).
   refreshNativeCardTypeBox(document.getElementById('admin-flashcard-native-fields'), ADMIN_FLASHCARDS_STATE.nativeCardState, { namePrefix: 'admin-native', uploadFn: uploadFlashcardMedia, deleteFn: deleteFlashcardMedia, ttsFn: requestFieldAudioTTS, noteId: ADMIN_FLASHCARDS_STATE.nativeCardState.noteId });
+
+  mountNoteTagsEditor(document.getElementById('admin-flashcard-tags'), ADMIN_FLASHCARDS_STATE.nativeCardState);
 
   refreshTeacherDestinationsUI();
 
