@@ -199,6 +199,8 @@ async function collectExportMediaAssets(exportCards){
   return { mediaForCard, manifest, zipFiles, failedCount };
 }
 
+const ANKI_CLOZE_TRANSLATION_FIELD_DEFAULT = "Tradução";
+
 async function generateApkg(config){
   const statusEl = document.getElementById('export-status');
   statusEl.textContent = 'Gerando arquivo...';
@@ -291,18 +293,23 @@ async function generateApkg(config){
       }
     };
     if (hasClozeCards){
+      // i18n Fase 7 -- nome do campo de tradução do modelo Cloze vem do
+      // config do idioma quando definido; default "Tradução" (export idêntico).
+      // O import nunca depende deste nome (Cloze é reconhecido por
+      // model.type===1 e a tradução pela posição -- ver anki-import.js).
+      const clozeTranslationFieldName = config.clozeTranslationFieldName || ANKI_CLOZE_TRANSLATION_FIELD_DEFAULT;
       model[clozeModelId] = {
         id: clozeModelId, name: `${config.modelName} - Cloze`, type: 1, mod: now, usn: -1,
         sortf: 0, did: deckId,
         flds: [
           { name: "Text", ord:0, font: "Arial", size: 22 },
-          { name: "Tradução", ord:1, font: "Arial", size: 18 },
+          { name: clozeTranslationFieldName, ord:1, font: "Arial", size: 18 },
         ],
         tmpls: [
           {
             name: "Cloze", ord:0,
             qfmt: "{{cloze:Text}}",
-            afmt: "{{cloze:Text}}<hr id='answer'><div style='text-align:center;font-size:18px;'>{{Tradução}}</div>",
+            afmt: `{{cloze:Text}}<hr id='answer'><div style='text-align:center;font-size:18px;'>{{${clozeTranslationFieldName}}}</div>`,
             bqfmt:"", bafmt:"", did: null
           }
         ],

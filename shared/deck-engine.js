@@ -428,6 +428,21 @@ function courseUnitsForDecks(units){
     .map(u => ({ unit_id: String(u.id), title: u.title }));
 }
 
+// i18n Fase 7 -- nome de EXIBIÇÃO de um Course Deck resolvido no cliente pela
+// identidade estável (course_unit_id), nunca pelo `decks.name` gravado no
+// banco (que é o título em português de quando ensure_course_decks rodou, e
+// é compartilhado por todas as contas do idioma). `units` deve ser a lista
+// de Units já no idioma do site (quando o conteúdo for traduzido); sem Unit
+// correspondente, cai pro `decks.name` (comportamento atual). Raiz de curso
+// e Decks não-curso devolvem `deck.name` intocado. Não usado em lógica --
+// só exibição.
+function courseDeckDisplayName(deck, units){
+  if (!deck) return '';
+  if (!isCourseDeck(deck) || deck.course_unit_id == null) return deck.name;
+  const u = (units || []).find(x => x && String(x.id) === String(deck.course_unit_id));
+  return (u && u.title) || deck.name;
+}
+
 function isCourseDeck(deck){
   return !!deck && deck.kind === 'course';
 }

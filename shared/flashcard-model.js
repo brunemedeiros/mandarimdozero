@@ -31,6 +31,25 @@
 
 const STUDY_LANG_FOR_APP_KEY = { frances: 'fr', mandarim: 'zh' };
 
+// i18n Fase 7 -- idioma da TRADUÇÃO (back_trans) de uma linha LEGADA.
+// Todo cartão legado existente foi escrito com a tradução em português, então
+// o default é e continua 'pt-BR' (comportamento idêntico). NUNCA derivado do
+// idioma do site no momento da leitura: o idioma é do DADO, não de quem lê
+// (um aluno com o site em inglês continua vendo um back_trans em português).
+// Quem um dia gravar linhas legadas com tradução em outro idioma passa
+// `opts.nativeLang` explicitamente.
+const LEGACY_TRANSLATION_LANG_DEFAULT = 'pt-BR';
+function legacyTranslationLang(opts){
+  return (opts && typeof opts.nativeLang === 'string' && opts.nativeLang) || LEGACY_TRANSLATION_LANG_DEFAULT;
+}
+
+// i18n Fase 7 -- unitTitle de cartão de professora/aluna. A string em PT é só
+// EXIBIÇÃO (tag do flashcard), nunca comparada em lógica (confirmado por grep).
+// O card ganha também `unitTitleKey` (chave estável) pra a fase de interface
+// (fase 6) resolver por catálogo; `unitTitle` continua idêntico.
+const FLASHCARD_ORIGIN_TITLE_KEYS = { teacher: 'flashcards.origin.teacherTitle', self: 'flashcards.origin.selfTitle' };
+const FLASHCARD_ORIGIN_TITLES_PT = { teacher: 'Da sua professora', self: 'Meus cartões' };
+
 // Fase 2 v2, ressalva da autora: helper de idioma, nunca de direção/áudio/
 // apresentação. Único uso nesta fase: heurística de interpretação do
 // audio_url legado (ver interpretNoteFromRow).
@@ -750,6 +769,7 @@ function interpretNoteFromRow(row, opts){
   const { origin, appKey, idPrefix } = opts;
   const isZh = appKey === 'mandarim';
   const studyLang = STUDY_LANG_FOR_APP_KEY[appKey];
+  const translationLang = legacyTranslationLang(opts);
   const cardId = flashcardIdForRow(idPrefix, row);
 
   // Fase 6B (ver CLAUDE.md) -- Note NATIVA: fields+card_generation_mode
@@ -824,7 +844,7 @@ function interpretNoteFromRow(row, opts){
         ...noteBase,
         fields: [
           textField,
-          { lang: 'pt-BR', text: row.back_trans },
+          { lang: translationLang, text: row.back_trans },
         ],
         fieldOrder: [0, 1],
       };
@@ -861,7 +881,7 @@ function interpretNoteFromRow(row, opts){
       ...noteBase,
       fields: [
         textField,
-        { lang: 'pt-BR', text: row.back_trans },
+        { lang: translationLang, text: row.back_trans },
       ],
       fieldOrder: [0, 1],
     };
@@ -884,7 +904,7 @@ function interpretNoteFromRow(row, opts){
     fields = [
       { lang: 'zh', text: row.front, pinyinFieldIndex: 1 },
       { lang: 'zh-pinyin', text: row.front_pinyin || '' },
-      { lang: 'pt-BR', text: row.back_trans },
+      { lang: translationLang, text: row.back_trans },
     ];
     frontFieldIndex = 0; backFieldIndex = 2;
   } else {
@@ -895,11 +915,11 @@ function interpretNoteFromRow(row, opts){
     // como a coluna do banco já era).
     fields = [
       { lang: studyLang, text: row.front },
-      { lang: 'pt-BR', text: row.back_trans },
+      { lang: translationLang, text: row.back_trans },
     ];
     frontFieldIndex = 0; backFieldIndex = 1;
     if (row.front_is_target_language === false){
-      fields[0].lang = 'pt-BR';
+      fields[0].lang = translationLang;
       fields[1].lang = studyLang;
     }
   }
@@ -1198,7 +1218,9 @@ function buildReversedCardInstancePair(noteId, frontFieldIndex, backFieldIndex){
 // existir (Fase 6+).
 function buildEngineCardsFromRow(row, opts){
   const { note, cards } = interpretNoteFromRow(row, opts);
-  const unitTitle = note.origin === 'teacher' ? 'Da sua professora' : 'Meus cartões';
+  const originTitleKey = note.origin === 'teacher' ? 'teacher' : 'self';
+  const unitTitle = FLASHCARD_ORIGIN_TITLES_PT[originTitleKey];
+  const unitTitleKey = FLASHCARD_ORIGIN_TITLE_KEYS[originTitleKey];
   // Tags (CONSOLIDAÇÃO-5) -- pertencem à Note, nunca à CardInstance.
   // Lidas direto de `row` (nunca via interpretNoteFromRow()/
   // interpretNativeNoteFromRow(), que continuam sem ler tags -- essa
@@ -1222,6 +1244,7 @@ function buildEngineCardsFromRow(row, opts){
       rowId: note.legacyRowId,
       unitId: null,
       unitTitle,
+      unitTitleKey,
       vocabIdx: null,
       type: 'vocab',
       origin: note.origin,

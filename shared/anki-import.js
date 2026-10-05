@@ -185,22 +185,41 @@ function classifyAnkiTemplate(model, tmpl){
 // não é uma adivinhação, é reconhecimento por rótulo explícito.
 const ZH_PINYIN_CHAR_TRANSLATION_FIELD_NAMES = ['Pinyin', 'Caractere', 'Tradução'];
 
+// i18n Fase 7 -- o reconhecimento não pode depender SÓ dos nomes em
+// português: quando o export zh passar a nomear os campos no idioma do site
+// (ex.: "Character"/"Translation"), um .apkg exportado por este mesmo app
+// precisa continuar reconhecido. Cada POSIÇÃO do model tem um PAPEL fixo
+// (0 = pinyin, 1 = caractere, 2 = tradução) e aceita um conjunto FECHADO de
+// rótulos explícitos -- nunca "qualquer nome" (isso reabriria a adivinhação
+// sobre decks de terceiros que o bugfix de classifyAnkiTemplate() fechou).
+// .apkg antigos (nomes em PT) continuam batendo com a 1ª alternativa de cada
+// papel; o export atual não muda.
+const ZH_PINYIN_CHAR_TRANSLATION_FIELD_ALIASES = [
+  ['Pinyin'],
+  ['Caractere', 'Character', 'Characters', 'Hanzi', 'Carácter'],
+  ['Tradução', 'Translation', 'Traducción'],
+];
+
+function zhFieldNameMatchesRole(name, roleIdx){
+  const want = String(name || '').trim().toLowerCase();
+  return ZH_PINYIN_CHAR_TRANSLATION_FIELD_ALIASES[roleIdx].some(a => a.toLowerCase() === want);
+}
+
 function classifyKnownZhPinyinCharTranslationModel(model){
   if (model.type === 1) return null; // nunca compete com a detecção de Cloze (model.type===1)
   const flds = (model.flds || []).slice().sort((a, b) => a.ord - b.ord);
   const fieldNames = flds.map(f => f.name);
   if (fieldNames.length !== 3) return null;
-  if (fieldNames[0] !== ZH_PINYIN_CHAR_TRANSLATION_FIELD_NAMES[0]
-      || fieldNames[1] !== ZH_PINYIN_CHAR_TRANSLATION_FIELD_NAMES[1]
-      || fieldNames[2] !== ZH_PINYIN_CHAR_TRANSLATION_FIELD_NAMES[2]) return null;
+  if (!fieldNames.every((name, i) => zhFieldNameMatchesRole(name, i))) return null;
+  const [pinyinName, hanziName, translationName] = fieldNames;
   const tmpls = model.tmpls || [];
   if (tmpls.length !== 1) return null;
   const tmpl = tmpls[0];
   const qfmtRefs = ankiTemplateFieldRefs(tmpl.qfmt);
-  if (qfmtRefs.length !== 1 || qfmtRefs[0] !== 'Pinyin') return null;
-  const afmtRefs = ankiTemplateFieldRefs(tmpl.afmt).filter(name => name !== 'Pinyin');
-  if (afmtRefs.length !== 2 || !afmtRefs.includes('Caractere') || !afmtRefs.includes('Tradução')) return null;
-  return { kind: 'zh_pinyin_normal', pinyinFieldName: 'Pinyin', hanziFieldName: 'Caractere', translationFieldName: 'Tradução' };
+  if (qfmtRefs.length !== 1 || qfmtRefs[0] !== pinyinName) return null;
+  const afmtRefs = ankiTemplateFieldRefs(tmpl.afmt).filter(name => name !== pinyinName);
+  if (afmtRefs.length !== 2 || !afmtRefs.includes(hanziName) || !afmtRefs.includes(translationName)) return null;
+  return { kind: 'zh_pinyin_normal', pinyinFieldName: pinyinName, hanziFieldName: hanziName, translationFieldName: translationName };
 }
 
 // Classifica um MODEL inteiro (todos os templates juntos) -- combina os
@@ -385,7 +404,7 @@ function mapAnkiNoteToNativeEditorState(note, model, classification, languageApp
     }
     const hanziField = createFieldState({ lang: 'zh', content: { value: hanziRaw.text } });
     const pinyinField = createFieldState({ lang: 'zh-pinyin', content: { value: pinyinRaw.text } });
-    const translationField = createFieldState({ lang: 'pt-BR', content: { value: translationRaw.text } });
+    const translationField = createFieldState({ lang: legacyTranslationLang(), content: { value: translationRaw.text } });
     hanziField.pinyinFieldId = pinyinField.id;
     return {
       ok: true,
