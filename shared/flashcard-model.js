@@ -280,7 +280,7 @@ function validateFieldAudioUrl(url){
 // provedor/algoritmo no futuro = mudar as 2 constantes nos DOIS lugares --
 // invalida o cache de TODO Field TTS já gerado (generationKey muda pra
 // todo mundo), sem nenhuma migração de dado.
-const TTS_PROVIDER_MODEL_ID = 'unconfigured'; // trocar quando um provedor real for contratado (ver Edge Function tts-generate)
+const TTS_PROVIDER_MODEL_ID = 'google-chirp3-hd'; // Google Cloud TTS, Chirp 3 HD (ver Edge Function tts-generate)
 const TTS_CONFIG_VERSION = 1;
 
 // Limite de caracteres por geração -- controle de custo (auditoria Fase
@@ -366,9 +366,15 @@ function validateTtsGenerationRequest({ text, language }){
 // duplicado no mesmo escopo global de documento (mesmo problema já
 // corrigido na Fase 6D.2 pra CARD_TYPE_UI_META).
 const TTS_GENERATION_ERROR_LABELS = {
-  provider_not_configured: 'Geração de áudio por TTS ainda não está configurada no servidor (nenhum provedor de voz contratado).',
-  provider_not_implemented: 'Geração de áudio por TTS ainda não está disponível -- infraestrutura em construção.',
+  provider_not_configured: 'Geração de áudio por texto ainda não está ativada no servidor.',
+  provider_not_implemented: 'Geração de áudio por texto ainda não está disponível.',
+  provider_error: 'O serviço de voz não conseguiu gerar o áudio agora -- tente de novo em instantes.',
+  provider_rate_limited: 'O serviço de voz está sobrecarregado -- tente de novo em alguns minutos.',
   rate_limited: 'Muitas gerações de áudio em pouco tempo -- espere alguns minutos e tente de novo.',
+  monthly_quota_exceeded: 'Você atingiu o limite mensal de áudios gerados. Tente de novo no próximo mês.',
+  quota_check_failed: 'Não foi possível conferir seu limite de áudios agora -- tente de novo em instantes.',
+  unsupported_language: 'Este idioma ainda não tem voz para gerar áudio.',
+  invalid_voice: 'Voz inválida para este idioma -- deixe o campo "Voz" em branco para usar a voz padrão.',
   not_authorized: 'Sem permissão para gerar áudio para este cartão.',
   invalid_session: 'Sessão expirada -- faça login de novo.',
   text_too_long: `Texto muito longo (máximo ${TTS_TEXT_MAX_LENGTH} caracteres).`,
