@@ -116,112 +116,112 @@ Observações: "Leaderboard" (ranking) e "Study materials" (material de apoio) t
 
 | Chave | PT | EN | Confiança | Status |
 |---|---|---|---|---|
-| toast.audioPlayFailed | Não foi possível reproduzir o áudio | Couldn't play the audio | alta | needs_review |
-| toast.audioTapSpeaker | 🔇 Toque no alto-falante pra ouvir | 🔇 Tap the speaker to listen | alta | needs_review |
-| toast.audioUnsupported | Áudio não suportado neste navegador | Audio isn't supported in this browser | alta | needs_review |
-| toast.voiceMissingFr | 🔇 Voz em francês não encontrada neste navegador/SO | 🔇 No French voice found in this browser/OS | alta | needs_review |
-| toast.audioPlayFailedThis | 🔇 Não foi possível reproduzir este áudio | 🔇 Couldn't play this audio | alta | needs_review |
-| toast.audioPlayFailedDot | Não foi possível tocar o áudio. | Couldn't play the audio. | alta | needs_review |
-| toast.markedKnown | Marcado como já sabido ⭐ | Marked as already known ⭐ | alta | needs_review |
-| toast.dailyMissionsAllDone | 🎯 Todas as missões do dia concluídas! +30 XP | 🎯 All of today's missions complete! +30 XP | alta | needs_review |
-| toast.xpGain | +{amount} XP | +{amount} XP | alta | needs_review |
-| toast.pointsGain | +{n} pts | +{n} pts | alta | needs_review |
-| toast.extraLife | ❤️ Vida extra! | ❤️ Extra life! | alta | needs_review |
-| toast.unitComplete | Unidade concluída! 🥐 | Unit complete! 🥐 | alta | needs_review |
-| toast.checkpointPassed | Ponto de verificação aprovado! 🏆 | Checkpoint passed! 🏆 | alta | needs_review |
-| toast.levelComplete | Nível {level} concluído! 🎓 | Level {level} complete! 🎓 | alta | needs_review |
-| toast.conjPickOne | Escolha ao menos 1 tempo e 1 categoria de verbo | Choose at least 1 tense and 1 verb category | alta | needs_review |
-| toast.conjNoVerbs | Nenhum verbo nessa seleção | No verbs in this selection | alta | needs_review |
-| settings.account.guest | Modo convidado | Guest mode | alta | needs_review |
-| settings.account.emailPassword | E-mail e senha | Email and password | alta | needs_review |
-| flashcards.origin.teacherTitle | Da sua professora | From your teacher | alta | needs_review |
-| flashcards.origin.selfTitle | Meus cartões | My cards | alta | needs_review |
-| review.origin.all | Todas | All | alta | needs_review |
-| review.origin.study | Da trilha | From the course path | média | needs_review |
-| review.origin.teacher | Da professora | From the teacher | alta | needs_review |
-| review.origin.self | Meus cartões | My cards | alta | needs_review |
-| review.today.label | Revisões pendentes | Reviews due | alta | needs_review |
-| review.strength.title | Suas palavras | Your words | alta | needs_review |
-| review.strength.weak | Fracas | Weak | alta | needs_review |
-| review.strength.medium | Medianas | Medium | alta | needs_review |
-| review.strength.strong | Fortes | Strong | alta | needs_review |
-| review.strength.hint | Fraca = ainda não firmou; Forte = já sabe bem há tempos; Mediana = no meio do caminho. Isso é o vocabulário TODO, não as revisões de hoje (acima) -- por isso pode ter palavras medianas aqui mesmo sem nenhuma revisão pendente agora. | Weak = not solid yet; Strong = known well for a while; Medium = somewhere in between. This is ALL your vocabulary, not today's reviews (above) -- so you can have medium words here even with no reviews due right now. | média | needs_review |
-| review.mode.reviewLabel | Revisar | Review | alta | needs_review |
-| review.empty.noneYetTitle | Ainda não há revisões | No reviews yet | alta | needs_review |
-| review.empty.upToDateTitle | Você está em dia! | You're all caught up! | alta | needs_review |
-| review.empty.noneYetDesc | Complete uma lição no Estudo pra começar a ter palavras pra revisar. | Complete a lesson in Study to start having words to review. | média | needs_review |
-| review.empty.upToDateDesc | Praticar continua disponível logo abaixo, quando quiser. | Practice is still available right below, whenever you like. | alta | needs_review |
-| review.mode.flashcard.name | Flashcard | Flashcard | alta | needs_review |
-| review.mode.flashcard.desc | Revisão completa | Full review | alta | needs_review |
-| review.mode.speed.name | Speed Review | Speed Review | alta | needs_review |
-| review.mode.speed.desc | Revisão rápida | Quick review | alta | needs_review |
-| review.mode.hard.name | Palavras difíceis | Hard words | alta | needs_review |
-| review.mode.hard.desc | As que você mais erra | The ones you miss most | alta | needs_review |
-| review.mode.match.name | Combinar | Match | média | needs_review |
-| review.mode.match.desc | Jogo de pares | Pairs game | alta | needs_review |
-| review.insufficientTitle | Vocabulário insuficiente ainda | Not enough vocabulary yet | alta | needs_review |
-| review.match.insufficientMin | O jogo de Combinar precisa de pelo menos {n} palavras já vistas em lições concluídas. | The Match game needs at least {n} words already seen in completed lessons. | alta | needs_review |
-| review.match.insufficientSome | O jogo de Combinar precisa de pelo menos algumas palavras já estudadas com sucesso no Estudo. | The Match game needs at least a few words you have already studied successfully in Study. | alta | needs_review |
-| review.match.pickTitle | Quantos pares você quer jogar? | How many pairs do you want to play? | alta | needs_review |
-| review.match.pairsLabel | pares<br>({cards} cartas) | pairs<br>({cards} cards) | alta | needs_review |
-| review.match.start | Começar → | Start → | alta | needs_review |
-| review.match.allMatched | Todos os pares combinados! | All pairs matched! | alta | needs_review |
-| review.match.attempts | {n} tentativa(s) | {n} attempt(s) | alta | needs_review |
-| review.match.playAgain | Jogar de novo | Play again | alta | needs_review |
-| review.speed.insufficientBody | O Speed Review precisa de palavras já estudadas com sucesso pelo menos uma vez. Continue estudando unidades no Estudo. | Speed Review needs words you have already studied successfully at least once. Keep studying units in Study. | alta | needs_review |
-| review.speed.upToDateBody | Nenhuma revisão pendente agora. Praticar continua disponível quando quiser. | No reviews due right now. Practice is still available whenever you like. | alta | needs_review |
-| review.practice | Praticar | Practice | alta | needs_review |
-| review.speed.gameOver | Fim de jogo! | Game over! | alta | needs_review |
-| review.speed.points | {n} pts | {n} pts | alta | needs_review |
-| review.speed.answered | Você respondeu {n} palavra(s) nesta rodada. | You answered {n} word(s) this round. | alta | needs_review |
-| review.back | Voltar | Back | alta | needs_review |
-| review.practiceMore | Praticar mais | Practice more | alta | needs_review |
-| review.complete.title | Revisão concluída! | Review complete! | alta | needs_review |
-| review.complete.reviewed | Você revisou {n} cartão(s) nesta sessão. | You reviewed {n} card(s) this session. | alta | needs_review |
-| review.session.deckEmptyTitle | Nenhum cartão neste Deck ainda | No cards in this Deck yet | alta | needs_review |
-| review.session.unitEmptyTitle | Nenhum cartão nesta unidade ainda | No cards in this unit yet | alta | needs_review |
-| review.session.allDoneTitle | Tudo em dia! | All caught up! | alta | needs_review |
-| review.session.pendingOverall | Você ainda tem {n} cartão(s) pendente(s) no geral. | You still have {n} card(s) due overall. | alta | needs_review |
-| review.session.comeBackLater | Volte mais tarde para sua próxima revisão, ou comece uma nova unidade na trilha. | Come back later for your next review, or start a new unit on the course path. | alta | needs_review |
-| review.session.reviewAllAvailable | Revisar tudo disponível | Review everything available | alta | needs_review |
-| review.previewLabel | 👁️ Pré-visualização | 👁️ Preview | alta | needs_review |
-| review.cloze.placeholder | Digite a palavra que falta | Type the missing word | alta | needs_review |
-| review.typeAnswer.placeholder | Digite a resposta | Type the answer | alta | needs_review |
-| review.tapToReveal | toque para ver a resposta | tap to see the answer | alta | needs_review |
-| review.reviewMore | 🔁 Rever mais (não conta como resposta) | 🔁 Review more (doesn't count as an answer) | alta | needs_review |
-| review.grade.again | Errei | Again | média | needs_review |
-| review.grade.hard | Difícil | Hard | alta | needs_review |
-| review.grade.good | Bom | Good | alta | needs_review |
-| review.grade.easy | Fácil | Easy | alta | needs_review |
-| common.continue | Continuar | Continue | alta | needs_review |
-| common.continueArrow | Continuar → | Continue → | alta | needs_review |
-| common.verify | Verificar | Check | alta | needs_review |
-| common.dontKnow | Não sei | I don't know | alta | needs_review |
-| exercise.completeSentence | Complete a frase | Complete the sentence | alta | needs_review |
-| trail.moduleCount | {n} módulo / {n} módulos | {n} module / {n} modules | alta | needs_review |
-| trail.comingSoon | Em breve | Coming soon | alta | needs_review |
-| trail.skipChip | 🎓 Pular | 🎓 Skip | alta | needs_review |
-| trail.levelTest.donePill | Concluído ✓ | Completed ✓ | alta | needs_review |
-| trail.levelTest.sub | Já sabe francês nível {level}? Faça esse teste e avance direto pro {next} — não precisa completar as unidades antes. | Already know French at level {level}? Take this test and go straight to {next} — no need to complete the units first. | alta | needs_review |
-| trail.levelTest.redo | Refazer → | Retake → | alta | needs_review |
-| trail.levelTest.start | Começar → | Start → | alta | needs_review |
-| trail.unit.done | Concluído | Completed | alta | needs_review |
-| trail.unit.lessonsProgress | {done} de {total} lições | {done} of {total} lessons | alta | needs_review |
-| trail.checkpoint.title | Ponto de verificação | Checkpoint | alta | needs_review |
-| trail.checkpoint.goal | Teste o módulo inteiro de uma vez e pule as unidades que já souber. | Test the whole module at once and skip the units you already know. | alta | needs_review |
-| trail.moduleChallenges.title | Desafios do Módulo {n} | Module {n} Challenges | alta | needs_review |
-| trail.premiumBadge | Premium | Premium | alta | needs_review |
-| trail.moduleChallenges.goal | Pratique o que você estudou de novas formas. Opcional. | Practice what you studied in new ways. Optional. | alta | needs_review |
-| trail.levelReview.title | Revisão do {level} | {level} Review | alta | needs_review |
-| trail.levelReview.goal | Ditados que juntam o que você aprendeu em todo o nível. Opcional. | Dictations that bring together everything you learned across the level. Optional. | alta | needs_review |
-| trail.dailyMissions.caption | 🎯 Missões do dia | 🎯 Daily missions | alta | needs_review |
-| trail.levelPreparing | O conteúdo do nível {level} ainda está sendo preparado. | The content for level {level} is still being prepared. | alta | needs_review |
-| trail.module.label | Módulo {n} · {title} | Module {n} · {title} | alta | needs_review |
-| trail.levelTest.eyebrow | Teste de nível | Level test | alta | needs_review |
-| trail.checkpoint.intro | Teste o que você já sabe desta seção. Se for bem, todas as unidades dela são marcadas como concluídas — não precisa fazer uma por uma. | Test what you already know in this section. If you do well, all its units are marked as completed — no need to do them one by one. | alta | needs_review |
-| trail.levelTest.intro | Já sabe francês nível {level}? Faça esse teste — se for bem, todo o nível é marcado como concluído e você já pode seguir direto pro {next}. | Already know French at level {level}? Take this test — if you do well, the whole level is marked as completed and you can go straight to {next}. | alta | needs_review |
-| trail.eyebrow.grammar | Gramática | Grammar | alta | needs_review |
-| trail.eyebrow.unit | Unidade {num} de {total} | Unit {num} of {total} | alta | needs_review |
+| toast.audioPlayFailed | Não foi possível reproduzir o áudio | Couldn't play the audio | alta | aprovado (2026-10-05) |
+| toast.audioTapSpeaker | 🔇 Toque no alto-falante pra ouvir | 🔇 Tap the speaker to listen | alta | aprovado (2026-10-05) |
+| toast.audioUnsupported | Áudio não suportado neste navegador | Audio isn't supported in this browser | alta | aprovado (2026-10-05) |
+| toast.voiceMissingFr | 🔇 Voz em francês não encontrada neste navegador/SO | 🔇 No French voice found in this browser/OS | alta | aprovado (2026-10-05) |
+| toast.audioPlayFailedThis | 🔇 Não foi possível reproduzir este áudio | 🔇 Couldn't play this audio | alta | aprovado (2026-10-05) |
+| toast.audioPlayFailedDot | Não foi possível tocar o áudio. | Couldn't play the audio. | alta | aprovado (2026-10-05) |
+| toast.markedKnown | Marcado como já sabido ⭐ | Marked as already known ⭐ | alta | aprovado (2026-10-05) |
+| toast.dailyMissionsAllDone | 🎯 Todas as missões do dia concluídas! +30 XP | 🎯 All of today's missions complete! +30 XP | alta | aprovado (2026-10-05) |
+| toast.xpGain | +{amount} XP | +{amount} XP | alta | aprovado (2026-10-05) |
+| toast.pointsGain | +{n} pts | +{n} pts | alta | aprovado (2026-10-05) |
+| toast.extraLife | ❤️ Vida extra! | ❤️ Extra life! | alta | aprovado (2026-10-05) |
+| toast.unitComplete | Unidade concluída! 🥐 | Unit complete! 🥐 | alta | aprovado (2026-10-05) |
+| toast.checkpointPassed | Ponto de verificação aprovado! 🏆 | Checkpoint passed! 🏆 | alta | aprovado (2026-10-05) |
+| toast.levelComplete | Nível {level} concluído! 🎓 | Level {level} complete! 🎓 | alta | aprovado (2026-10-05) |
+| toast.conjPickOne | Escolha ao menos 1 tempo e 1 categoria de verbo | Choose at least 1 tense and 1 verb category | alta | aprovado (2026-10-05) |
+| toast.conjNoVerbs | Nenhum verbo nessa seleção | No verbs in this selection | alta | aprovado (2026-10-05) |
+| settings.account.guest | Modo convidado | Guest mode | alta | aprovado (2026-10-05) |
+| settings.account.emailPassword | E-mail e senha | Email and password | alta | aprovado (2026-10-05) |
+| flashcards.origin.teacherTitle | Da sua professora | From your teacher | alta | aprovado (2026-10-05) |
+| flashcards.origin.selfTitle | Meus cartões | My cards | alta | aprovado (2026-10-05) |
+| review.origin.all | Todas | All | alta | aprovado (2026-10-05) |
+| review.origin.study | Da trilha | From the course path | média | aprovado (2026-10-05) |
+| review.origin.teacher | Da professora | From the teacher | alta | aprovado (2026-10-05) |
+| review.origin.self | Meus cartões | My cards | alta | aprovado (2026-10-05) |
+| review.today.label | Revisões pendentes | Reviews due | alta | aprovado (2026-10-05) |
+| review.strength.title | Suas palavras | Your words | alta | aprovado (2026-10-05) |
+| review.strength.weak | Fracas | Weak | alta | aprovado (2026-10-05) |
+| review.strength.medium | Medianas | Medium | alta | aprovado (2026-10-05) |
+| review.strength.strong | Fortes | Strong | alta | aprovado (2026-10-05) |
+| review.strength.hint | Fraca = ainda não firmou; Forte = já sabe bem há tempos; Mediana = no meio do caminho. Isso é o vocabulário TODO, não as revisões de hoje (acima) -- por isso pode ter palavras medianas aqui mesmo sem nenhuma revisão pendente agora. | Weak = not solid yet; Strong = known well for a while; Medium = somewhere in between. This is ALL your vocabulary, not today's reviews (above) -- so you can have medium words here even with no reviews due right now. | média | aprovado (2026-10-05) |
+| review.mode.reviewLabel | Revisar | Review | alta | aprovado (2026-10-05) |
+| review.empty.noneYetTitle | Ainda não há revisões | No reviews yet | alta | aprovado (2026-10-05) |
+| review.empty.upToDateTitle | Você está em dia! | You're all caught up! | alta | aprovado (2026-10-05) |
+| review.empty.noneYetDesc | Complete uma lição no Estudo pra começar a ter palavras pra revisar. | Complete a lesson in Study to start having words to review. | média | aprovado (2026-10-05) |
+| review.empty.upToDateDesc | Praticar continua disponível logo abaixo, quando quiser. | Practice is still available right below, whenever you like. | alta | aprovado (2026-10-05) |
+| review.mode.flashcard.name | Flashcard | Flashcard | alta | aprovado (2026-10-05) |
+| review.mode.flashcard.desc | Revisão completa | Full review | alta | aprovado (2026-10-05) |
+| review.mode.speed.name | Speed Review | Speed Review | alta | aprovado (2026-10-05) |
+| review.mode.speed.desc | Revisão rápida | Quick review | alta | aprovado (2026-10-05) |
+| review.mode.hard.name | Palavras difíceis | Hard words | alta | aprovado (2026-10-05) |
+| review.mode.hard.desc | As que você mais erra | The ones you miss most | alta | aprovado (2026-10-05) |
+| review.mode.match.name | Combinar | Match | média | aprovado (2026-10-05) |
+| review.mode.match.desc | Jogo de pares | Pairs game | alta | aprovado (2026-10-05) |
+| review.insufficientTitle | Vocabulário insuficiente ainda | Not enough vocabulary yet | alta | aprovado (2026-10-05) |
+| review.match.insufficientMin | O jogo de Combinar precisa de pelo menos {n} palavras já vistas em lições concluídas. | The Match game needs at least {n} words already seen in completed lessons. | alta | aprovado (2026-10-05) |
+| review.match.insufficientSome | O jogo de Combinar precisa de pelo menos algumas palavras já estudadas com sucesso no Estudo. | The Match game needs at least a few words you have already studied successfully in Study. | alta | aprovado (2026-10-05) |
+| review.match.pickTitle | Quantos pares você quer jogar? | How many pairs do you want to play? | alta | aprovado (2026-10-05) |
+| review.match.pairsLabel | pares<br>({cards} cartas) | pairs<br>({cards} cards) | alta | aprovado (2026-10-05) |
+| review.match.start | Começar → | Start → | alta | aprovado (2026-10-05) |
+| review.match.allMatched | Todos os pares combinados! | All pairs matched! | alta | aprovado (2026-10-05) |
+| review.match.attempts | {n} tentativa(s) | {n} attempt(s) | alta | aprovado (2026-10-05) |
+| review.match.playAgain | Jogar de novo | Play again | alta | aprovado (2026-10-05) |
+| review.speed.insufficientBody | O Speed Review precisa de palavras já estudadas com sucesso pelo menos uma vez. Continue estudando unidades no Estudo. | Speed Review needs words you have already studied successfully at least once. Keep studying units in Study. | alta | aprovado (2026-10-05) |
+| review.speed.upToDateBody | Nenhuma revisão pendente agora. Praticar continua disponível quando quiser. | No reviews due right now. Practice is still available whenever you like. | alta | aprovado (2026-10-05) |
+| review.practice | Praticar | Practice | alta | aprovado (2026-10-05) |
+| review.speed.gameOver | Fim de jogo! | Game over! | alta | aprovado (2026-10-05) |
+| review.speed.points | {n} pts | {n} pts | alta | aprovado (2026-10-05) |
+| review.speed.answered | Você respondeu {n} palavra(s) nesta rodada. | You answered {n} word(s) this round. | alta | aprovado (2026-10-05) |
+| review.back | Voltar | Back | alta | aprovado (2026-10-05) |
+| review.practiceMore | Praticar mais | Practice more | alta | aprovado (2026-10-05) |
+| review.complete.title | Revisão concluída! | Review complete! | alta | aprovado (2026-10-05) |
+| review.complete.reviewed | Você revisou {n} cartão(s) nesta sessão. | You reviewed {n} card(s) this session. | alta | aprovado (2026-10-05) |
+| review.session.deckEmptyTitle | Nenhum cartão neste Deck ainda | No cards in this Deck yet | alta | aprovado (2026-10-05) |
+| review.session.unitEmptyTitle | Nenhum cartão nesta unidade ainda | No cards in this unit yet | alta | aprovado (2026-10-05) |
+| review.session.allDoneTitle | Tudo em dia! | All caught up! | alta | aprovado (2026-10-05) |
+| review.session.pendingOverall | Você ainda tem {n} cartão(s) pendente(s) no geral. | You still have {n} card(s) due overall. | alta | aprovado (2026-10-05) |
+| review.session.comeBackLater | Volte mais tarde para sua próxima revisão, ou comece uma nova unidade na trilha. | Come back later for your next review, or start a new unit on the course path. | alta | aprovado (2026-10-05) |
+| review.session.reviewAllAvailable | Revisar tudo disponível | Review everything available | alta | aprovado (2026-10-05) |
+| review.previewLabel | 👁️ Pré-visualização | 👁️ Preview | alta | aprovado (2026-10-05) |
+| review.cloze.placeholder | Digite a palavra que falta | Type the missing word | alta | aprovado (2026-10-05) |
+| review.typeAnswer.placeholder | Digite a resposta | Type the answer | alta | aprovado (2026-10-05) |
+| review.tapToReveal | toque para ver a resposta | tap to see the answer | alta | aprovado (2026-10-05) |
+| review.reviewMore | 🔁 Rever mais (não conta como resposta) | 🔁 Review more (doesn't count as an answer) | alta | aprovado (2026-10-05) |
+| review.grade.again | Errei | Again | média | aprovado (2026-10-05) |
+| review.grade.hard | Difícil | Hard | alta | aprovado (2026-10-05) |
+| review.grade.good | Bom | Good | alta | aprovado (2026-10-05) |
+| review.grade.easy | Fácil | Easy | alta | aprovado (2026-10-05) |
+| common.continue | Continuar | Continue | alta | aprovado (2026-10-05) |
+| common.continueArrow | Continuar → | Continue → | alta | aprovado (2026-10-05) |
+| common.verify | Verificar | Check | alta | aprovado (2026-10-05) |
+| common.dontKnow | Não sei | I don't know | alta | aprovado (2026-10-05) |
+| exercise.completeSentence | Complete a frase | Complete the sentence | alta | aprovado (2026-10-05) |
+| trail.moduleCount | {n} módulo / {n} módulos | {n} module / {n} modules | alta | aprovado (2026-10-05) |
+| trail.comingSoon | Em breve | Coming soon | alta | aprovado (2026-10-05) |
+| trail.skipChip | 🎓 Pular | 🎓 Skip | alta | aprovado (2026-10-05) |
+| trail.levelTest.donePill | Concluído ✓ | Completed ✓ | alta | aprovado (2026-10-05) |
+| trail.levelTest.sub | Já sabe francês nível {level}? Faça esse teste e avance direto pro {next} — não precisa completar as unidades antes. | Already know French at level {level}? Take this test and go straight to {next} — no need to complete the units first. | alta | aprovado (2026-10-05) |
+| trail.levelTest.redo | Refazer → | Retake → | alta | aprovado (2026-10-05) |
+| trail.levelTest.start | Começar → | Start → | alta | aprovado (2026-10-05) |
+| trail.unit.done | Concluído | Completed | alta | aprovado (2026-10-05) |
+| trail.unit.lessonsProgress | {done} de {total} lições | {done} of {total} lessons | alta | aprovado (2026-10-05) |
+| trail.checkpoint.title | Ponto de verificação | Checkpoint | alta | aprovado (2026-10-05) |
+| trail.checkpoint.goal | Teste o módulo inteiro de uma vez e pule as unidades que já souber. | Test the whole module at once and skip the units you already know. | alta | aprovado (2026-10-05) |
+| trail.moduleChallenges.title | Desafios do Módulo {n} | Module {n} Challenges | alta | aprovado (2026-10-05) |
+| trail.premiumBadge | Premium | Premium | alta | aprovado (2026-10-05) |
+| trail.moduleChallenges.goal | Pratique o que você estudou de novas formas. Opcional. | Practice what you studied in new ways. Optional. | alta | aprovado (2026-10-05) |
+| trail.levelReview.title | Revisão do {level} | {level} Review | alta | aprovado (2026-10-05) |
+| trail.levelReview.goal | Ditados que juntam o que você aprendeu em todo o nível. Opcional. | Dictations that bring together everything you learned across the level. Optional. | alta | aprovado (2026-10-05) |
+| trail.dailyMissions.caption | 🎯 Missões do dia | 🎯 Daily missions | alta | aprovado (2026-10-05) |
+| trail.levelPreparing | O conteúdo do nível {level} ainda está sendo preparado. | The content for level {level} is still being prepared. | alta | aprovado (2026-10-05) |
+| trail.module.label | Módulo {n} · {title} | Module {n} · {title} | alta | aprovado (2026-10-05) |
+| trail.levelTest.eyebrow | Teste de nível | Level test | alta | aprovado (2026-10-05) |
+| trail.checkpoint.intro | Teste o que você já sabe desta seção. Se for bem, todas as unidades dela são marcadas como concluídas — não precisa fazer uma por uma. | Test what you already know in this section. If you do well, all its units are marked as completed — no need to do them one by one. | alta | aprovado (2026-10-05) |
+| trail.levelTest.intro | Já sabe francês nível {level}? Faça esse teste — se for bem, todo o nível é marcado como concluído e você já pode seguir direto pro {next}. | Already know French at level {level}? Take this test — if you do well, the whole level is marked as completed and you can go straight to {next}. | alta | aprovado (2026-10-05) |
+| trail.eyebrow.grammar | Gramática | Grammar | alta | aprovado (2026-10-05) |
+| trail.eyebrow.unit | Unidade {num} de {total} | Unit {num} of {total} | alta | aprovado (2026-10-05) |
 
 ## Fase 6, lote 2
 
@@ -311,51 +311,51 @@ Observações: "Leaderboard" (ranking) e "Study materials" (material de apoio) t
 
 | Chave | PT | EN | Confiança | Status |
 |---|---|---|---|---|
-| zh.toast.chineseVoiceMissing | 🔇 Voz em chinês não encontrada — veja o guia de configuração | 🔇 No Chinese voice found — see the setup guide | média | needs_review |
-| zh.toast.operaAudioFailed | 🔇 O Opera não conseguiu reproduzir este áudio | 🔇 Opera couldn't play this audio | alta | needs_review |
-| zh.toast.storyDone | História concluída! 🎉 | Story completed! 🎉 | alta | needs_review |
-| zh.toast.unitDone | Unidade concluída! 🏮 | Unit completed! 🏮 | alta | needs_review |
-| zh.toast.hanziLessonDone | Lição de Hanzi concluída! 🈺 | Hanzi lesson completed! 🈺 | alta | needs_review |
-| zh.review.cloze.placeholder | Digite o pinyin que falta | Type the missing pinyin | alta | needs_review |
-| zh.review.typeAnswer.placeholder | Digite a resposta em pinyin | Type the answer in pinyin | alta | needs_review |
-| zh.review.match.pairs | Pares: {done}/{total} | Pairs: {done}/{total} | alta | needs_review |
-| zh.review.match.attempts | Tentativas: {n} | Attempts: {n} | alta | needs_review |
-| zh.path.unit.expandLessons | Expandir lições | Expand lessons | alta | needs_review |
-| zh.path.story.done | ✓ Concluída | ✓ Completed | alta | needs_review |
-| zh.path.story.unlocked | Checkpoint desbloqueado | Checkpoint unlocked | alta | needs_review |
-| zh.path.story.locked | 🔒 Complete a unidade acima | 🔒 Complete the unit above | alta | needs_review |
-| zh.path.unit.eyebrow | Unidade {id} de {total} | Unit {id} of {total} | alta | needs_review |
-| zh.path.summary.vocabulary | Vocabulário | Vocabulary | alta | needs_review |
-| zh.path.summary.phrases | Frases-modelo | Model phrases | alta | needs_review |
-| zh.path.summary.dialogue | Diálogo | Dialogue | alta | needs_review |
-| zh.path.gotItArrow | Entendi → | Got it → | alta | needs_review |
-| zh.path.reviewNowArrow | Revisar agora ({n}) → | Review now ({n}) → | alta | needs_review |
-| zh.path.continueStoryArrow | Continuar história → | Continue story → | alta | needs_review |
-| zh.path.nextWordArrow | Próxima palavra → | Next word → | alta | needs_review |
-| zh.path.seeWhatLearnedArrow | Ver o que você aprendeu → | See what you learned → | alta | needs_review |
-| zh.hanzi.nowWriteArrow | Agora escreva → | Now write → | alta | needs_review |
-| zh.hanzi.backToLessons | Voltar às lições | Back to lessons | alta | needs_review |
-| zh.path.knownAsk | Já sei? | Already know it? | alta | needs_review |
-| zh.path.knownDone | ✓ Já sei | ✓ I know it | alta | needs_review |
-| zh.path.lessonDone.recapVocab | Vocabulário desta lição | Vocabulary from this lesson | alta | needs_review |
-| zh.path.lessonDone.recapMissed | Palavras que você errou no Ponto de verificação | Words you missed in the Checkpoint | média | needs_review |
-| zh.path.lessonDone.checkpointTitle | Ponto de verificação concluído! | Checkpoint completed! | média | needs_review |
-| zh.path.lessonDone.lessonTitle | Lição concluída! | Lesson completed! | alta | needs_review |
-| zh.path.lessonDone.xpEarned | XP ganho | XP earned | alta | needs_review |
-| zh.path.lessonDone.score | Pontuação | Score | alta | needs_review |
-| zh.path.lessonDone.cardsWaiting | 📇 {n} cartão esperando por revisão / 📇 {n} cartões esperando por revisão | 📇 {n} card waiting for review / 📇 {n} cards waiting for review | alta | needs_review |
-| zh.path.missionDonePrefix | Missão concluída:  | Mission completed:  | alta | needs_review |
-| zh.path.missionDayPrefix | Missão do dia:  | Daily mission:  | alta | needs_review |
-| zh.path.unitDone.congrats | Parabéns, {name}! | Congratulations, {name}! | alta | needs_review |
-| zh.path.unitDone.skills | Competências desenvolvidas | Skills developed | alta | needs_review |
-| zh.path.unitDone.goalReached | Objetivo comunicacional atingido | Communication goal achieved | alta | needs_review |
-| zh.path.banner.quickCheck | 🧠 Checagem rápida | 🧠 Quick check | alta | needs_review |
-| zh.path.banner.practice | ✏️ Praticando o que você acabou de ver | ✏️ Practicing what you just saw | alta | needs_review |
-| zh.path.banner.mixed | 🔀 Misturando com o que você já viu | 🔀 Mixing in what you've already seen | alta | needs_review |
-| zh.path.banner.recall | 👋 Lembrando da lição anterior | 👋 Recalling the previous lesson | alta | needs_review |
-| zh.path.banner.consolidation | 🧩 Consolidação da unidade | 🧩 Unit consolidation | alta | needs_review |
-| zh.path.banner.errorsReview | 🔁 Revisão dos erros | 🔁 Reviewing your mistakes | alta | needs_review |
-| zh.path.banner.checkpoint | 🧩 Ponto de verificação | 🧩 Checkpoint | média | needs_review |
+| zh.toast.chineseVoiceMissing | 🔇 Voz em chinês não encontrada — veja o guia de configuração | 🔇 No Chinese voice found — see the setup guide | média | aprovado (2026-10-05) |
+| zh.toast.operaAudioFailed | 🔇 O Opera não conseguiu reproduzir este áudio | 🔇 Opera couldn't play this audio | alta | aprovado (2026-10-05) |
+| zh.toast.storyDone | História concluída! 🎉 | Story completed! 🎉 | alta | aprovado (2026-10-05) |
+| zh.toast.unitDone | Unidade concluída! 🏮 | Unit completed! 🏮 | alta | aprovado (2026-10-05) |
+| zh.toast.hanziLessonDone | Lição de Hanzi concluída! 🈺 | Hanzi lesson completed! 🈺 | alta | aprovado (2026-10-05) |
+| zh.review.cloze.placeholder | Digite o pinyin que falta | Type the missing pinyin | alta | aprovado (2026-10-05) |
+| zh.review.typeAnswer.placeholder | Digite a resposta em pinyin | Type the answer in pinyin | alta | aprovado (2026-10-05) |
+| zh.review.match.pairs | Pares: {done}/{total} | Pairs: {done}/{total} | alta | aprovado (2026-10-05) |
+| zh.review.match.attempts | Tentativas: {n} | Attempts: {n} | alta | aprovado (2026-10-05) |
+| zh.path.unit.expandLessons | Expandir lições | Expand lessons | alta | aprovado (2026-10-05) |
+| zh.path.story.done | ✓ Concluída | ✓ Completed | alta | aprovado (2026-10-05) |
+| zh.path.story.unlocked | Checkpoint desbloqueado | Checkpoint unlocked | alta | aprovado (2026-10-05) |
+| zh.path.story.locked | 🔒 Complete a unidade acima | 🔒 Complete the unit above | alta | aprovado (2026-10-05) |
+| zh.path.unit.eyebrow | Unidade {id} de {total} | Unit {id} of {total} | alta | aprovado (2026-10-05) |
+| zh.path.summary.vocabulary | Vocabulário | Vocabulary | alta | aprovado (2026-10-05) |
+| zh.path.summary.phrases | Frases-modelo | Model phrases | alta | aprovado (2026-10-05) |
+| zh.path.summary.dialogue | Diálogo | Dialogue | alta | aprovado (2026-10-05) |
+| zh.path.gotItArrow | Entendi → | Got it → | alta | aprovado (2026-10-05) |
+| zh.path.reviewNowArrow | Revisar agora ({n}) → | Review now ({n}) → | alta | aprovado (2026-10-05) |
+| zh.path.continueStoryArrow | Continuar história → | Continue story → | alta | aprovado (2026-10-05) |
+| zh.path.nextWordArrow | Próxima palavra → | Next word → | alta | aprovado (2026-10-05) |
+| zh.path.seeWhatLearnedArrow | Ver o que você aprendeu → | See what you learned → | alta | aprovado (2026-10-05) |
+| zh.hanzi.nowWriteArrow | Agora escreva → | Now write → | alta | aprovado (2026-10-05) |
+| zh.hanzi.backToLessons | Voltar às lições | Back to lessons | alta | aprovado (2026-10-05) |
+| zh.path.knownAsk | Já sei? | Already know it? | alta | aprovado (2026-10-05) |
+| zh.path.knownDone | ✓ Já sei | ✓ I know it | alta | aprovado (2026-10-05) |
+| zh.path.lessonDone.recapVocab | Vocabulário desta lição | Vocabulary from this lesson | alta | aprovado (2026-10-05) |
+| zh.path.lessonDone.recapMissed | Palavras que você errou no Ponto de verificação | Words you missed in the Checkpoint | média | aprovado (2026-10-05) |
+| zh.path.lessonDone.checkpointTitle | Ponto de verificação concluído! | Checkpoint completed! | média | aprovado (2026-10-05) |
+| zh.path.lessonDone.lessonTitle | Lição concluída! | Lesson completed! | alta | aprovado (2026-10-05) |
+| zh.path.lessonDone.xpEarned | XP ganho | XP earned | alta | aprovado (2026-10-05) |
+| zh.path.lessonDone.score | Pontuação | Score | alta | aprovado (2026-10-05) |
+| zh.path.lessonDone.cardsWaiting | 📇 {n} cartão esperando por revisão / 📇 {n} cartões esperando por revisão | 📇 {n} card waiting for review / 📇 {n} cards waiting for review | alta | aprovado (2026-10-05) |
+| zh.path.missionDonePrefix | Missão concluída:  | Mission completed:  | alta | aprovado (2026-10-05) |
+| zh.path.missionDayPrefix | Missão do dia:  | Daily mission:  | alta | aprovado (2026-10-05) |
+| zh.path.unitDone.congrats | Parabéns, {name}! | Congratulations, {name}! | alta | aprovado (2026-10-05) |
+| zh.path.unitDone.skills | Competências desenvolvidas | Skills developed | alta | aprovado (2026-10-05) |
+| zh.path.unitDone.goalReached | Objetivo comunicacional atingido | Communication goal achieved | alta | aprovado (2026-10-05) |
+| zh.path.banner.quickCheck | 🧠 Checagem rápida | 🧠 Quick check | alta | aprovado (2026-10-05) |
+| zh.path.banner.practice | ✏️ Praticando o que você acabou de ver | ✏️ Practicing what you just saw | alta | aprovado (2026-10-05) |
+| zh.path.banner.mixed | 🔀 Misturando com o que você já viu | 🔀 Mixing in what you've already seen | alta | aprovado (2026-10-05) |
+| zh.path.banner.recall | 👋 Lembrando da lição anterior | 👋 Recalling the previous lesson | alta | aprovado (2026-10-05) |
+| zh.path.banner.consolidation | 🧩 Consolidação da unidade | 🧩 Unit consolidation | alta | aprovado (2026-10-05) |
+| zh.path.banner.errorsReview | 🔁 Revisão dos erros | 🔁 Reviewing your mistakes | alta | aprovado (2026-10-05) |
+| zh.path.banner.checkpoint | 🧩 Ponto de verificação | 🧩 Checkpoint | média | aprovado (2026-10-05) |
 
 ## Fase 6, lote 2
 
