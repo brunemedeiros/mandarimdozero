@@ -397,7 +397,7 @@ async function renderPublicProfileCardsBox(bodyEl, username){
 
   const [cardsRes, hasLink, myCards] = await Promise.all([
     fetchPublicFlashcardsByUsername(username, APP_KEY),
-    (typeof hasActiveTeacherLink === 'function') ? hasActiveTeacherLink() : Promise.resolve(false),
+    (typeof hasUnlimitedOwnCards === 'function') ? hasUnlimitedOwnCards() : Promise.resolve(false),
     (typeof fetchMyOwnFlashcards === 'function') ? fetchMyOwnFlashcards(APP_KEY) : Promise.resolve([]),
   ]);
 

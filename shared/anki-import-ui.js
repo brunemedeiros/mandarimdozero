@@ -112,7 +112,7 @@ async function handleAnkiImportFileSelected(file){
   body.innerHTML = loadingHTML('Analisando os cartões...');
   const [existingRows, hasLink] = await Promise.all([
     fetchMyOwnFlashcards(APP_KEY),
-    hasActiveTeacherLink(),
+    hasUnlimitedOwnCards(),
   ]);
   ANKI_IMPORT_STATE.existingRows = existingRows;
   ANKI_IMPORT_STATE.hasLink = hasLink;
