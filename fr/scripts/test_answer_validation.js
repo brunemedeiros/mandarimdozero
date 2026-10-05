@@ -240,6 +240,39 @@ check('palavras faltantes listadas', analyzeTranslation('Eu como maçã', ['Eu c
 check('acerto limpo continua ok', listenTranslateOutcome('Hoje está chovendo', refs, null, {}), 'ok');
 check('frase sem relação continua fail', listenTranslateOutcome('Gosto de gatos azuis', refs, null), 'fail');
 
+console.log('\n=== Fase 6: revisão espaçada dos erros (caixas Leitner 1/3/7/14 dias) ===\n');
+const { updateChallengeReviewEntry, isChallengeReviewDue, dueChallengeReviewIds, sanitizeChallengeReviewEntry, CHALLENGE_REVIEW_BOX_DAYS } = runBlockAndExport(
+  extractBlock('// BEGIN challenge-review-logic', '// END challenge-review-logic'),
+  ['updateChallengeReviewEntry', 'isChallengeReviewDue', 'dueChallengeReviewIds', 'sanitizeChallengeReviewEntry', 'CHALLENGE_REVIEW_BOX_DAYS']
+);
+const DAY0 = new Date(2026, 9, 5, 10, 0, 0).getTime();
+const at = (days, hour = 10) => new Date(2026, 9, 5 + days, hour, 0, 0).getTime();
+check('caixas = 1,3,7,14 dias', CHALLENGE_REVIEW_BOX_DAYS.join(','), '1,3,7,14');
+check('acerto sem entrada → não entra na revisão', updateChallengeReviewEntry(undefined, 'x', 'ok', DAY0), null);
+const e1 = updateChallengeReviewEntry(undefined, 'x', 'fail', DAY0);
+check('fail → caixa 1', e1.box, 1);
+check('partial → caixa 1', updateChallengeReviewEntry(undefined, 'x', 'partial', DAY0).box, 1);
+check('caixa 1: não devido no mesmo dia', isChallengeReviewDue(e1, at(0, 23)), false);
+check('caixa 1: devido no dia seguinte (mesmo de madrugada)', isChallengeReviewDue(e1, at(1, 0)), true);
+check('acerto fora do prazo não muda a caixa', updateChallengeReviewEntry(e1, 'x', 'ok', at(0, 20)), e1);
+const e2 = updateChallengeReviewEntry(e1, 'x', 'ok', at(1));
+check('acerto devido sobe para caixa 2', e2.box, 2);
+check('caixa 2: não devido 2 dias depois', isChallengeReviewDue(e2, at(3)), false);
+check('caixa 2: devido 3 dias depois', isChallengeReviewDue(e2, at(4)), true);
+const e3 = updateChallengeReviewEntry(e2, 'x', 'ok', at(4));
+check('caixa 3', e3.box, 3);
+const e4 = updateChallengeReviewEntry(e3, 'x', 'ok', at(11));
+check('caixa 4 (devido 7 dias depois)', e4 && e4.box, 4);
+check('caixa 4: devido 14 dias depois', isChallengeReviewDue(e4, at(25)) && !isChallengeReviewDue(e4, at(24)), true);
+check('acerto na caixa 4 forma o desafio (sai da revisão)', updateChallengeReviewEntry(e4, 'x', 'ok', at(25)), null);
+check('errar numa revisão volta à caixa 1', updateChallengeReviewEntry(e3, 'x', 'fail', at(11)).box, 1);
+check('partial numa revisão volta à caixa 1', updateChallengeReviewEntry(e3, 'x', 'partial', at(11)).box, 1);
+check('lastErrorAt preservado ao subir', e3.lastErrorAt, DAY0);
+const reviews = { a: { id: 'a', lastErrorAt: at(-3), lastSeenAt: at(-3), box: 1 }, b: { id: 'b', lastErrorAt: at(-5), lastSeenAt: at(-5), box: 1 }, c: { id: 'c', lastErrorAt: at(0), lastSeenAt: at(0), box: 1 } };
+check('fila de devidos: só os vencidos, erro mais antigo primeiro', dueChallengeReviewIds(reviews, at(0)).join(','), 'b,a');
+check('sanitize: lixo vira null', sanitizeChallengeReviewEntry({ box: 2 }, 'z'), null);
+check('sanitize: caixa fora do intervalo é limitada', sanitizeChallengeReviewEntry({ lastErrorAt: DAY0, box: 9 }, 'z').box, 4);
+
 console.log(`\n${passed} passaram, ${failed} falharam.`);
 if (failed > 0){
   console.log('\nFalhas:');

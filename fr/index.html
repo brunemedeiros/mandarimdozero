@@ -2340,6 +2340,15 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   color: var(--ink-soft); border:1px solid var(--paper-line); border-radius:999px; padding:1px 7px; margin-top:6px; align-self:flex-start;
 }
 .tier-badge.tier-free{ color: var(--seal-red-dark); border-color: var(--seal-red-dark); }
+/* Fase 6: progresso por categoria ("X de Y concluídos") + barra fina.
+   Só tokens já calibrados nos dois temas (texto --ink-soft, trilho
+   --paper-warm, preenchimento --jade). */
+.challenge-progress{ width:100%; max-width:220px; margin:6px auto 0; }
+#challenges-list-progress .challenge-progress, #dictation-list-progress .challenge-progress{ margin:0 0 14px; max-width:320px; }
+.challenge-progress-label{ font-size:12px; font-weight:700; color: var(--ink-soft); margin-bottom:4px; }
+.challenge-progress-track{ height:5px; border-radius:999px; background: var(--paper-warm); border:1px solid var(--paper-line); overflow:hidden; }
+.challenge-progress-fill{ height:100%; background: var(--jade); border-radius:999px; transition: width .3s ease; }
+.challenge-review-card{ border-color: var(--jade); }
 .ub-badge-premium{
   font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.03em;
   color: var(--ink-soft); border:1px solid var(--paper-line); border-radius:999px; padding:2px 8px;
@@ -3707,6 +3716,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
         </ol>
       </div>
 
+      <div id="dictation-list-progress"></div>
       <div class="dictation-cards" id="dictation-cards"></div>
     </div>
 
@@ -3736,6 +3746,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
       <div class="path-header">
         <h2 id="challenges-list-title">Desafios</h2>
       </div>
+      <div id="challenges-list-progress"></div>
       <div class="challenges-level-tabs" id="challenges-level-tabs" style="display:none;"></div>
       <div class="challenges-cards" id="challenges-cards"></div>
     </div>

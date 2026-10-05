@@ -889,7 +889,11 @@ const STATE = {
   completedChallenges: {}, // challengeId -> true -- "Desafios" concluídos, ver challenges_do_aluno
   // Ditados (Fatia 2): dictationId -> { bestScore, attempts, lastScore, lastAt, wrongWords }.
   // Atualizado só por updateDictationRecord() (bloco dictation-answer-logic).
-  dictations: {}
+  dictations: {},
+  // Fase 6: revisão espaçada dos desafios errados (fail/partial). challengeId ->
+  // { id, lastErrorAt, lastSeenAt, box } -- caixas Leitner 1/3/7/14 dias.
+  // Atualizado só por updateChallengeReviewEntry() (bloco challenge-review-logic).
+  challengeReviews: {}
 };
 
 // Cada nível é acessível livremente (o aluno escolhe o nível quando quiser);
@@ -1076,6 +1080,7 @@ function serializeState(){
     levelTestProgress: STATE.levelTestProgress,
     completedChallenges: STATE.completedChallenges,
     dictations: STATE.dictations,
+    challengeReviews: STATE.challengeReviews,
     // Só leitura pro Perfil (ver computeProgressSummary) -- nunca restaurado
     // de volta em applySerializedState, é recalculado a cada save.
     progressSummary: computeProgressSummary()
@@ -1119,6 +1124,12 @@ function applySerializedState(data){
   if (data.checkpointProgress) Object.assign(STATE.checkpointProgress, data.checkpointProgress);
   if (data.levelTestProgress) Object.assign(STATE.levelTestProgress, data.levelTestProgress);
   if (data.completedChallenges) Object.assign(STATE.completedChallenges, data.completedChallenges);
+  if (data.challengeReviews && typeof data.challengeReviews === 'object'){
+    Object.keys(data.challengeReviews).forEach(id => {
+      const e = sanitizeChallengeReviewEntry(data.challengeReviews[id], id);
+      if (e) STATE.challengeReviews[id] = e;
+    });
+  }
   // Save antigo não tem o campo (nada a fazer); registros malformados são
   // saneados pela mesma função que atualiza (bestScore nunca diminui).
   if (data.dictations && typeof data.dictations === 'object'){
@@ -8629,6 +8640,8 @@ function renderDictationList(){
   const dictationsShown = dictationsVisible(dictationModuleFilter);
   // Vindo da unidade "Revisão do A1" da trilha, o "voltar" leva de volta pra trilha.
   document.getElementById('dictation-back-to-challenges').textContent = isLevelReviewId(dictationModuleFilter) ? chT('dict.back.trail') : chT('dict.back.challenges');
+  const dictProgressEl = document.getElementById('dictation-list-progress');
+  if (dictProgressEl) dictProgressEl.innerHTML = challengeProgressHTML(dictationsShown.filter(d => isDictationDone(d.id)).length, dictationsShown.length);
   cardsWrap.innerHTML = dictationsShown.map(d => `
     <button class="dictation-card ${isDictationLocked(d) ? 'locked' : ''}" data-dict-id="${d.id}">
       ${isDictationLocked(d) ? `<span class="challenge-card-check" title="${chT('tier.premium')}">🔒</span>` : ''}
@@ -9576,6 +9589,13 @@ const CHALLENGE_I18N = {
     'dict.count.one': '{n} ditado',
     'dict.count.many': '{n} ditados',
     'ch.retryNow': '🔁 Tentar de novo',
+    'ch.catProgress.one': '{done} de {total} concluído',
+    'ch.catProgress.many': '{done} de {total} concluídos',
+    'ch.review.title': 'Revisar erros ({n})',
+    'ch.review.subtitle': 'Desafios que você errou, na hora de rever',
+    'ch.review.doneTitle': 'Revisão do dia concluída!',
+    'ch.review.doneSub': 'Os desafios que você acertou voltam mais tarde, cada vez mais espaçados.',
+    'ch.review.back': 'Voltar aos desafios',
     'ch.retryLater': 'Tentar mais tarde',
     'ch.complete': '✅ Concluir',
     'ch.knowMore': 'En savoir plus',
@@ -9757,6 +9777,106 @@ function unpublishedButApprovedChallenges(){
 function isChallengeCompleted(id){
   return !!STATE.completedChallenges[id];
 }
+// BEGIN challenge-review-logic (extraído por fr/scripts/test_answer_validation.js)
+// Revisão espaçada dos desafios errados (Fase 6). Caixas Leitner: depois de
+// um erro (fail ou partial) o desafio volta na caixa 1 (1 dia); cada acerto
+// numa revisão DEVIDA sobe uma caixa (3, 7, 14 dias); acertar na caixa 4
+// "forma" o desafio (sai da revisão). Errar a qualquer momento volta à 1.
+// Acerto fora do prazo não muda nada (ainda não era revisão). Contagem por
+// DIA do calendário local, não por 24h exatas.
+const CHALLENGE_REVIEW_BOX_DAYS = [1, 3, 7, 14];
+function challengeReviewDayNumber(ms){
+  const d = new Date(ms);
+  return Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+}
+function sanitizeChallengeReviewEntry(raw, id){
+  if (!raw || typeof raw !== 'object') return null;
+  const box = Math.min(CHALLENGE_REVIEW_BOX_DAYS.length, Math.max(1, Math.floor(Number(raw.box)) || 1));
+  const lastErrorAt = Number(raw.lastErrorAt);
+  if (!isFinite(lastErrorAt) || lastErrorAt <= 0) return null;
+  const lastSeenAt = isFinite(Number(raw.lastSeenAt)) && Number(raw.lastSeenAt) > 0 ? Number(raw.lastSeenAt) : lastErrorAt;
+  return { id: String(raw.id || id), lastErrorAt, lastSeenAt, box };
+}
+function challengeReviewDueDay(entry){
+  return challengeReviewDayNumber(entry.lastSeenAt || entry.lastErrorAt) + CHALLENGE_REVIEW_BOX_DAYS[entry.box - 1];
+}
+function isChallengeReviewDue(entry, nowMs){
+  if (!entry) return false;
+  return challengeReviewDayNumber(nowMs) >= challengeReviewDueDay(entry);
+}
+// Devolve a nova entrada (ou null = sair da revisão / nunca entrou).
+function updateChallengeReviewEntry(entry, id, outcome, nowMs){
+  if (outcome === 'fail' || outcome === 'partial'){
+    return { id, lastErrorAt: nowMs, lastSeenAt: nowMs, box: 1 };
+  }
+  if (outcome !== 'ok' || !entry) return entry || null;
+  if (!isChallengeReviewDue(entry, nowMs)) return entry;
+  if (entry.box >= CHALLENGE_REVIEW_BOX_DAYS.length) return null;
+  return { id: entry.id || id, lastErrorAt: entry.lastErrorAt, lastSeenAt: nowMs, box: entry.box + 1 };
+}
+// ids devidos hoje, os erros mais antigos primeiro.
+function dueChallengeReviewIds(reviews, nowMs){
+  return Object.values(reviews || {})
+    .filter(e => e && isChallengeReviewDue(e, nowMs))
+    .sort((a, b) => a.lastErrorAt - b.lastErrorAt)
+    .map(e => e.id);
+}
+// END challenge-review-logic
+
+// Fila "Revisar erros" ativa (true enquanto o aluno percorre os devidos de hoje).
+let challengeReviewQueueActive = false;
+function recordChallengeReviewOutcome(c, outcome){
+  if (!c || challengePreviewMode) return;
+  const next = updateChallengeReviewEntry(STATE.challengeReviews[c.id], c.id, outcome, Date.now());
+  if (next) STATE.challengeReviews[c.id] = next; else delete STATE.challengeReviews[c.id];
+  saveState();
+}
+// Só os que existem e dá pra jogar no recorte atual (módulo / paywall).
+function dueChallengeReviews(){
+  const playableIds = new Set(playableChallenges().map(c => c.id));
+  return dueChallengeReviewIds(STATE.challengeReviews, Date.now()).filter(id => playableIds.has(id));
+}
+function openChallengeReviewQueue(){
+  const due = dueChallengeReviews();
+  if (!due.length){ challengeReviewQueueActive = false; renderChallengeCategories(); return; }
+  challengeReviewQueueActive = true;
+  challengeQueueContext = null;
+  openChallengePlayer(due[0]);
+}
+function renderChallengeReviewDoneScreen(){
+  const content = document.getElementById('challenge-player-content');
+  content.innerHTML = `
+    <div class="challenge-queue-interstitial">
+      <div class="big-emoji">🎉</div>
+      <h3>${chT('ch.review.doneTitle')}</h3>
+      <p>${chT('ch.review.doneSub')}</p>
+      <button class="btn btn-primary btn-block" id="review-queue-back-btn">${chT('ch.review.back')}</button>
+    </div>
+  `;
+  document.getElementById('review-queue-back-btn').addEventListener('click', () => {
+    challengeReviewQueueActive = false;
+    renderChallengeCategories();
+  });
+}
+// Volta "para a lista": na fila de revisão, a lista é a tela de categorias.
+function backToChallengesListOrCategories(){
+  if (challengeReviewQueueActive){ challengeReviewQueueActive = false; renderChallengeCategories(); return; }
+  renderChallengesList(currentChallengesCategory);
+}
+// "X de Y concluídos" + barra fina (cards de categoria e topo das listas).
+function challengeProgressHTML(done, total){
+  if (!total) return '';
+  const pct = Math.round((done / total) * 100);
+  return `<div class="challenge-progress" data-done="${done}" data-total="${total}">
+    <div class="challenge-progress-label">${chT(total === 1 ? 'ch.catProgress.one' : 'ch.catProgress.many', { done, total })}</div>
+    <div class="challenge-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}"><div class="challenge-progress-fill" style="width:${pct}%"></div></div>
+  </div>`;
+}
+function isDictationDone(id){
+  const rec = STATE.dictations && STATE.dictations[id];
+  return !!(rec && rec.attempts);
+}
+
 function markChallengeCompleted(id){
   STATE.completedChallenges[id] = true;
   trackEvent('lesson_complete', 'challenge', { challengeId: id });
@@ -9803,7 +9923,7 @@ function wireChallengeCompleteButton(c){
     if (later) later.addEventListener('click', () => {
       // Sai sem concluir: o desafio continua pendente.
       challengeQueueContext = null;
-      renderChallengesList(currentChallengesCategory);
+      backToChallengesListOrCategories();
     });
     return;
   }
@@ -9811,6 +9931,12 @@ function wireChallengeCompleteButton(c){
   if (!btn) return;
   btn.addEventListener('click', () => {
     markChallengeCompleted(c.id);
+    if (challengeReviewQueueActive){
+      const nextId = dueChallengeReviews()[0];
+      if (nextId) openChallengePlayer(nextId);
+      else renderChallengeReviewDoneScreen();
+      return;
+    }
     if (challengeQueueContext && challengeQueueContext.type === c.type && challengeQueueContext.level === c.level){
       const next = nextQueueChallenge(c.type, c.level);
       if (next) renderChallengeQueueContinueScreen(c, next);
@@ -9848,6 +9974,7 @@ function challengeExternalResourcesHTML(c){
 }
 
 async function renderChallengeCategories(){
+  challengeReviewQueueActive = false;
   document.getElementById('challenges-categories-wrap').style.display = 'block';
   document.getElementById('challenges-list-wrap').style.display = 'none';
   document.getElementById('challenge-player-wrap').style.display = 'none';
@@ -9898,19 +10025,34 @@ async function renderChallengeCategories(){
   const catSubtitle = (cat) => challengesModuleFilter
     ? chT(listedNow.filter(c => c.type === cat.type).length === 1 ? 'ch.count.one' : 'ch.count.many', { n: listedNow.filter(c => c.type === cat.type).length })
     : chT('ch.cat.' + cat.type + '.subtitle');
-  wrap.innerHTML = visibleCats.map(cat => `
+  const catProgress = (cat) => {
+    const ofType = listedNow.filter(c => c.type === cat.type);
+    return challengeProgressHTML(ofType.filter(c => isChallengeCompleted(c.id)).length, ofType.length);
+  };
+  const dueReviews = dueChallengeReviews();
+  wrap.innerHTML = (dueReviews.length ? `
+    <button class="challenge-category-card challenge-review-card" id="challenges-review-card">
+      <div class="challenge-category-emoji">🔁</div>
+      <div class="challenge-category-title">${chT('ch.review.title', { n: dueReviews.length })}</div>
+      <div class="challenge-category-subtitle">${chT('ch.review.subtitle')}</div>
+    </button>
+  ` : '') + visibleCats.map(cat => `
     <button class="challenge-category-card" data-category="${cat.type}">
       <div class="challenge-category-emoji">${cat.emoji}</div>
       <div class="challenge-category-title">${chT('ch.cat.' + cat.type + '.title')}</div>
       <div class="challenge-category-subtitle">${catSubtitle(cat)}</div>
+      ${catProgress(cat)}
     </button>
   `).join('') + (dictationsHere.length ? `
     <button class="challenge-category-card" id="challenges-dictation-card">
       <div class="challenge-category-emoji">📝</div>
       <div class="challenge-category-title">${chT('ch.cat.dictation.title')}</div>
       <div class="challenge-category-subtitle">${challengesModuleFilter ? chT(dictationsHere.length === 1 ? 'dict.count.one' : 'dict.count.many', { n: dictationsHere.length }) : chT('ch.cat.dictation.subtitle')}</div>
+      ${challengeProgressHTML(dictationsHere.filter(d => isDictationDone(d.id)).length, dictationsHere.length)}
     </button>
   ` : '');
+  const reviewCard = document.getElementById('challenges-review-card');
+  if (reviewCard) reviewCard.addEventListener('click', openChallengeReviewQueue);
   wrap.querySelectorAll('.challenge-category-card[data-category]').forEach(card => {
     card.addEventListener('click', () => renderChallengesList(card.dataset.category));
   });
@@ -9952,6 +10094,7 @@ function challengeCardHTML(c){
 
 function renderChallengesList(type){
   currentChallengesCategory = type;
+  challengeReviewQueueActive = false;
   document.getElementById('challenges-categories-wrap').style.display = 'none';
   document.getElementById('challenges-list-wrap').style.display = 'block';
   document.getElementById('challenge-player-wrap').style.display = 'none';
@@ -9965,6 +10108,7 @@ function renderChallengesList(type){
   const cardsWrap = document.getElementById('challenges-cards');
   const published = listedChallenges().filter(c => c.type === type);
   const groupByLevel = type === 'expression';
+  document.getElementById('challenges-list-progress').innerHTML = challengeProgressHTML(published.filter(c => isChallengeCompleted(c.id)).length, published.length);
 
   if (published.length === 0){
     cardsWrap.className = 'challenges-cards';
@@ -10012,6 +10156,7 @@ function renderChallengesList(type){
             <div class="challenge-queue-level-name">${chT('ch.level', { level })}</div>
             <div class="challenge-queue-level-progress">${chT(levelChallenges.length === 1 ? 'ch.progress.one' : 'ch.progress.many', { done: doneCount, total: levelChallenges.length })}</div>
             ${lockedNote}
+            ${[...new Set(levelAll.map(challengeTier))].sort().map(tierBadgeHTML).join(' ')}
           </div>
           <button class="btn ${allDone ? 'btn-secondary' : 'btn-primary'}" data-level="${level}">
             ${allDone ? chT('ch.btn.review') : (doneCount > 0 ? chT('ch.btn.continue') : chT('ch.btn.start'))}
@@ -10128,7 +10273,7 @@ document.getElementById('challenge-back-to-list').addEventListener('click', () =
     renderChallengesAdmin();
   } else {
     challengeQueueContext = null;
-    renderChallengesList(currentChallengesCategory);
+    backToChallengesListOrCategories();
   }
 });
 document.getElementById('challenges-admin-back-btn').addEventListener('click', renderChallengeCategories);
@@ -10296,6 +10441,7 @@ function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
       ${challengeExternalResourcesHTML(c)}
   `;
   content.innerHTML = challengeFeedbackWrapperHTML('challenge', isCorrect, isCorrect ? chT('ch.expr.right') : chT('ch.notQuite'), bodyHTML);
+  recordChallengeReviewOutcome(c, isCorrect ? 'ok' : 'fail');
 
   if (c.example.audioFile){
     document.getElementById('challenge-example-play-btn').addEventListener('click', (e) => {
@@ -10620,6 +10766,7 @@ function checkListenTranslateAnswer(c){
   `;
   document.getElementById('lt-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('listen-translate', isCorrect, outcome === 'ok' ? chT('ch.lt.right') : outcome === 'partial' ? chT('ch.lt.partial') : chT('ch.notQuite'), ltBodyHTML, outcome);
   document.getElementById('lt-verify-btn').style.display = 'none';
+  recordChallengeReviewOutcome(c, outcome);
   document.getElementById('lt-replay-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
   });
@@ -10705,6 +10852,7 @@ function checkAccentAnswer(c){
   `;
   document.getElementById('accent-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('accent', isCorrect, outcome === 'ok' ? chT('ch.accent.right') : outcome === 'partial' ? chT('ch.accent.partial') : chT('ch.accent.wrong'), accentBodyHTML, outcome);
   document.getElementById('accent-verify-btn').style.display = 'none';
+  recordChallengeReviewOutcome(c, outcome);
   document.getElementById('accent-replay-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
   });
