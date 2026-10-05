@@ -1,0 +1,152 @@
+{
+ "unit": "A1-17",
+ "en": {
+  "title": "The house and its rooms",
+  "goal": "Describe a house and say what there is (and isn't) in it.",
+  "lessons": {
+   "casa-apartamento-quarto": "House, apartment and bedroom",
+   "cozinha-banheiro-sala": "Kitchen, bathroom and living room",
+   "porta-janela-tem-nao-tem": "Door, window and saying what there is or isn't",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "the house",
+   "the apartment",
+   "the bedroom",
+   "the kitchen",
+   "the bathroom",
+   "the living room",
+   "the door",
+   "the window",
+   "there is / there are",
+   "there isn't / there aren't any"
+  ],
+  "phrases": [
+   {
+    "t": "There is a bedroom.",
+    "scenario": "Someone asks how many bedrooms your small apartment has, and it has only one. What do you say?"
+   },
+   {
+    "t": "There are two bathrooms.",
+    "scenario": "You're describing your house, which has two bathrooms. What do you say?"
+   },
+   {
+    "t": "There isn't a garden.",
+    "scenario": "Someone asks if your apartment has a garden, and it doesn't. What do you answer?"
+   },
+   {
+    "t": "It's a big house.",
+    "scenario": "You're describing your parents' new house, which is quite big. What do you say?"
+   },
+   {
+    "t": "The house is very big."
+   },
+   {
+    "t": "The apartment has two bedrooms."
+   },
+   {
+    "t": "The bedroom is on the first floor."
+   },
+   {
+    "t": "The kitchen is very clean."
+   },
+   {
+    "t": "The bathroom is next to the bedroom."
+   },
+   {
+    "t": "The living room is comfortable."
+   },
+   {
+    "t": "The door is locked."
+   },
+   {
+    "t": "The window looks out onto the garden."
+   }
+  ],
+  "dialogue": {
+   "title": "Viewing an apartment",
+   "lines": [
+    "How many bedrooms are there?",
+    "There are two bedrooms and a kitchen.",
+    "Is there a balcony?",
+    "No, there isn't a balcony, but there's a nice living room."
+   ]
+  },
+  "concepts": {
+   "il-y-a-vs-negation": [
+    {
+     "title": "\"Il y a\" or \"il n'y a pas de\"?",
+     "body": "<strong>Il y a</strong> (there is / there are) introduces something that exists: il y a <strong>une</strong> chambre (there is a bedroom). In the negative, the article becomes <strong>de</strong>, just like in the \"food\" and \"quantities\" units: il n'y a <strong>pas de</strong> jardin (there isn't a garden) — never \"il n'y a pas un jardin\".",
+     "examples": [
+      "there is / there are",
+      "there isn't / there aren't any"
+     ]
+    }
+   ],
+   "il-y-a-ya": [
+    {
+     "title": "In everyday speech, \"il y a\" becomes \"y'a\"",
+     "body": "In fast speech, the \"il\" in <strong>il y a</strong> almost disappears — only <strong>y'a</strong> is left: \"y'a une chambre\", \"y'a pas de jardin\". It's so common that it even shows up in informal written messages. In the exercises here, keep writing the full \"il y a\" — it's the form the exercises ask for.",
+     "examples": [
+      "there's a bedroom (everyday speech)"
+     ]
+    }
+   ],
+   "andar-terreo-premier-etage": [
+    {
+     "title": "\"1er étage\" is not the ground floor",
+     "body": "In France, the ground floor has its own name: <strong>le rez-de-chaussée</strong>. The counting only starts after it — <strong>le premier étage</strong> is what, in the US, we would call the \"second floor\" (one floor above the ground floor). It's worth paying attention to this when looking for an address or taking the elevator.",
+     "examples": [
+      "the ground floor",
+      "the 1st floor (above the ground floor)"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "concepts.andar-terreo-premier-etage[0].body",
+   "pt": "o que, no Brasil, chamaríamos de \"segundo andar\"",
+   "en": "what, in the US, we would call the \"second floor\"",
+   "conf": "media",
+   "why": "Adapted from Brazil to the US (EN-US); in the UK/Commonwealth the French 'first floor' matches 'first floor'. Source text was Brazil-specific."
+  },
+  {
+   "path": "vocab[9]",
+   "pt": "não tem / não há",
+   "en": "there isn't / there aren't any",
+   "conf": "media",
+   "why": "Fragment 'il n'y a pas de' needs the 'any' to reflect 'de' after negation; 'there is no' is an alternative."
+  },
+  {
+   "path": "phrases[2].t",
+   "pt": "Não tem jardim.",
+   "en": "There isn't a garden.",
+   "conf": "media",
+   "why": "'There's no garden.' also correct; kept parallel with the grammar note."
+  },
+  {
+   "path": "phrases[6].t",
+   "pt": "O quarto fica no primeiro andar.",
+   "en": "The bedroom is on the first floor.",
+   "conf": "media",
+   "why": "In EN-US 'first floor' = ground floor, which clashes with the cultural note (premier étage = one above ground). 'second floor' would be US-accurate but loses the literal match; flag for the teacher."
+  },
+  {
+   "path": "phrases[11].t",
+   "pt": "A janela dá para o jardim.",
+   "en": "The window looks out onto the garden.",
+   "conf": "media",
+   "why": "'overlooks the garden' also fine."
+  },
+  {
+   "path": "concepts.il-y-a-ya[0].examples[0]",
+   "pt": "tem um quarto (fala cotidiana)",
+   "en": "there's a bedroom (everyday speech)",
+   "conf": "media",
+   "why": "Contraction chosen to mirror the colloquial reduction."
+  }
+ ]
+}
