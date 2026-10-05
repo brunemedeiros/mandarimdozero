@@ -10218,7 +10218,7 @@ function isTranslationAcceptable(studentAnswer, referenceTranslations){
 // conjugado numa pessoa incompatível.
 const PT_SUBJECT_PRONOUN_PERSON = {
   'eu': '1s', 'tu': '2s', 'voce': '3s', 'ele': '3s', 'ela': '3s',
-  'nos': '1p', 'a gente': '1s', 'voces': '3p', 'eles': '3p', 'elas': '3p'
+  'nos': '1p', 'a gente': '3s', 'voces': '3p', 'eles': '3p', 'elas': '3p'
 };
 
 // Formas dos verbos irregulares mais comuns -- chaves já sem acento
@@ -10280,7 +10280,9 @@ function ptVerbPersonTags(word){
     [/ou$|eu$|iu$/, '3s'],
     [/aste$|este$|iste$/, '2s'],
     [/ei$/, '1s'],
-    [/as$|es$/, '2s'],
+    // (sem a terminação genérica -as/-es da 2ª pess.: colide com plurais
+    //  como "legumes" e com o artigo "as"; "tu" quase não é usado e os
+    //  irregulares comuns já estão no dicionário acima)
   ];
   for (const [re, tag] of rules){
     if (re.test(word)) return [tag];
@@ -10303,6 +10305,7 @@ function translationHasPersonMismatch(text){
     for (let lookahead = 0; lookahead < 3 && j + lookahead < words.length; lookahead++){
       const candidate = words[j + lookahead];
       if (PT_SUBJECT_PRONOUN_PERSON[candidate]) break;
+      if (TRANSLATION_STOPWORDS_PT.has(candidate) && !PT_IRREGULAR_VERB_FORMS[candidate]) continue;
       const tags = ptVerbPersonTags(candidate);
       if (tags.length){
         if (!tags.includes(expected)) return { pronoun, verb: candidate, expected, got: tags };
@@ -10313,15 +10316,76 @@ function translationHasPersonMismatch(text){
   return null;
 }
 
+// ---- Análise da tradução (Fase 3, 05/10/2026) ----
+// Além da sobreposição de palavras, a análise acusa 3 tipos de alerta contra
+// a referência de MELHOR similaridade: negação trocada ("não" presente só
+// de um lado), número diferente ("dois" x "três", dígitos incluídos) e, se o
+// desafio trouxer, `mustInclude` (lista de grupos de alternativas: pelo
+// menos uma de cada grupo precisa aparecer) e `mustExclude` (palavras que
+// não podem aparecer). Também devolve as palavras da referência que
+// faltaram na resposta (diferença palavra a palavra).
+const PT_NEGATION_WORDS = new Set(['nao','nunca','jamais','nem','nada','ninguem','nenhum','nenhuma','sem']);
+const PT_NUMBER_WORDS = {
+  zero:0, dois:2, duas:2, tres:3, quatro:4, cinco:5, seis:6, sete:7, oito:8, nove:9, dez:10,
+  onze:11, doze:12, treze:13, catorze:14, quatorze:14, quinze:15, dezesseis:16, dezessete:17,
+  dezoito:18, dezenove:19, vinte:20, trinta:30, quarenta:40, cinquenta:50, sessenta:60,
+  setenta:70, oitenta:80, noventa:90, cem:100, cento:100
+};
+
+function translationNumbers(text){
+  const nums = new Set();
+  normalizeForTranslationCompare(text).split(' ').forEach(w => {
+    if (/^\d+$/.test(w)){ if (w !== '1') nums.add(Number(w)); }
+    else if (Object.prototype.hasOwnProperty.call(PT_NUMBER_WORDS, w)) nums.add(PT_NUMBER_WORDS[w]);
+  });
+  return nums;
+}
+function translationHasNegation(text){
+  return normalizeForTranslationCompare(text).split(' ').some(w => PT_NEGATION_WORDS.has(w));
+}
+
+function analyzeTranslation(studentAnswer, referenceTranslations, extra){
+  const refs = referenceTranslations || [];
+  let best = 0, bestRef = refs[0] || '';
+  refs.forEach(ref => {
+    const sim = translationSimilarity(studentAnswer, ref);
+    if (sim > best){ best = sim; bestRef = ref; }
+  });
+  const alerts = [];
+  if (best > 0){
+    if (translationHasNegation(studentAnswer) !== translationHasNegation(bestRef)) alerts.push({ type: 'negation' });
+    const sn = translationNumbers(studentAnswer), rn = translationNumbers(bestRef);
+    if (sn.size !== rn.size || [...sn].some(n => !rn.has(n))) alerts.push({ type: 'number' });
+  }
+  const studentTokens = new Set(normalizeForTranslationCompare(studentAnswer).split(' '));
+  const norm = w => normalizeForTranslationCompare(w);
+  if (extra && Array.isArray(extra.mustInclude)){
+    extra.mustInclude.forEach(group => {
+      const alts = (Array.isArray(group) ? group : [group]).map(norm).filter(Boolean);
+      if (alts.length && !alts.some(w => studentTokens.has(w) || normalizeForTranslationCompare(studentAnswer).includes(w))){
+        alerts.push({ type: 'mustInclude', word: alts[0] });
+      }
+    });
+  }
+  if (extra && Array.isArray(extra.mustExclude)){
+    extra.mustExclude.map(norm).filter(Boolean).forEach(w => {
+      if (studentTokens.has(w)) alerts.push({ type: 'mustExclude', word: w });
+    });
+  }
+  const missingWords = translationTokenSet(bestRef).filter(w => !studentTokens.has(w));
+  return { similarity: best, bestRef, alerts, missingWords };
+}
+
 // Resultado em 3 níveis (regra de conclusão dos Desafios, 04/10/2026):
-// 'ok' = acerto (similaridade >= 0,8 e sem alerta de concordância);
-// 'partial' = erro leve (0,55 a 0,8, ou alerta de concordância) -- conclui
-// com explicação; 'fail' = erro total (< 0,55 ou vazio) -- não conclui.
-function listenTranslateOutcome(studentAnswer, referenceTranslations, personMismatch){
+// 'ok' = acerto (similaridade >= 0,8 e sem alerta); 'partial' = erro leve
+// (0,55 a 0,8, ou qualquer alerta -- concordância, negação, número,
+// mustInclude/mustExclude) -- conclui com explicação; 'fail' = erro total
+// (< 0,55 ou vazio) -- não conclui.
+function listenTranslateOutcome(studentAnswer, referenceTranslations, personMismatch, extra){
   if (!studentAnswer || !studentAnswer.trim()) return 'fail';
-  const best = (referenceTranslations || []).reduce((m, ref) => Math.max(m, translationSimilarity(studentAnswer, ref)), 0);
-  if (best < 0.55) return 'fail';
-  if (personMismatch || best < 0.8) return 'partial';
+  const an = analyzeTranslation(studentAnswer, referenceTranslations, extra);
+  if (an.similarity < 0.55) return 'fail';
+  if (personMismatch || an.alerts.length || an.similarity < 0.8) return 'partial';
   return 'ok';
 }
 // END challenge-translation-logic
@@ -10360,17 +10424,35 @@ function openListenTranslatePlayer(c){
   document.getElementById('lt-verify-btn').addEventListener('click', () => checkListenTranslateAnswer(c));
 }
 
+function translationAlertsHTML(an, outcome){
+  if (outcome === 'fail') return '';
+  const msgs = [];
+  an.alerts.forEach(a => {
+    if (a.type === 'negation') msgs.push('Atenção à negação: a frase original e a sua não concordam em "não/nunca/nada".');
+    else if (a.type === 'number') msgs.push('Atenção aos números: confira a quantidade na frase original.');
+    else if (a.type === 'mustInclude') msgs.push(`Faltou uma ideia importante: "${escapeHtmlChallenge(a.word)}".`);
+    else if (a.type === 'mustExclude') msgs.push(`A palavra "${escapeHtmlChallenge(a.word)}" não se encaixa nesta frase.`);
+  });
+  const parts = msgs.map(m => `<p class="listen-translate-feedback-warning">⚠ ${m}</p>`);
+  if (outcome === 'partial' && an.missingWords.length){
+    parts.push(`<p class="listen-translate-feedback-row"><strong>Palavras que faltaram</strong>${an.missingWords.map(escapeHtmlChallenge).join(', ')}</p>`);
+  }
+  return parts.join('');
+}
+
 function checkListenTranslateAnswer(c){
   const input = document.getElementById('lt-answer-input');
   const studentAnswer = input.value.trim();
   const personMismatch = translationHasPersonMismatch(studentAnswer);
-  const outcome = listenTranslateOutcome(studentAnswer, c.referenceTranslations, personMismatch);
+  const outcome = listenTranslateOutcome(studentAnswer, c.referenceTranslations, personMismatch, c);
+  const analysis = analyzeTranslation(studentAnswer, c.referenceTranslations, c);
   const isCorrect = outcome === 'ok';
   // Desafio de conteúdo continua clicável mesmo já concluído -- não dá XP
   // (mesma decisão de answerChallenge, ver auditoria do sistema de XP).
 
   const ltBodyHTML = `
       ${personMismatch ? `<p class="listen-translate-feedback-warning">⚠ Repare na concordância: depois de "${escapeHtmlChallenge(personMismatch.pronoun)}", "${escapeHtmlChallenge(personMismatch.verb)}" não é a conjugação certa.</p>` : ''}
+      ${translationAlertsHTML(analysis, outcome)}
       <p class="listen-translate-feedback-row"><strong>Sua resposta</strong>${escapeHtmlChallenge(studentAnswer || '—')}</p>
       <p class="listen-translate-feedback-row"><strong>Resposta esperada</strong>${escapeHtmlChallenge(c.referenceTranslations[0])}</p>
       <p class="listen-translate-feedback-row"><strong>Frase original</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>

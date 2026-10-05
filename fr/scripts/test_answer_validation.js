@@ -50,9 +50,9 @@ const { isAccentAnswerCorrect, accentAnswerOutcome } = runBlockAndExport(
   extractBlock('// BEGIN accent-challenge-logic', '// END accent-challenge-logic'),
   ['isAccentAnswerCorrect', 'accentAnswerOutcome']
 );
-const { listenTranslateOutcome, translationHasPersonMismatch } = runBlockAndExport(
+const { listenTranslateOutcome, translationHasPersonMismatch, analyzeTranslation } = runBlockAndExport(
   extractBlock('// BEGIN challenge-translation-logic', '// END challenge-translation-logic'),
-  ['listenTranslateOutcome', 'translationHasPersonMismatch']
+  ['listenTranslateOutcome', 'translationHasPersonMismatch', 'analyzeTranslation']
 );
 
 let passed = 0;
@@ -224,6 +224,21 @@ check('Traduzir: vazio → fail', listenTranslateOutcome('  ', refs, null), 'fai
 check('Traduzir: sem relação → fail', listenTranslateOutcome('Eu gosto de café', refs, null), 'fail');
 check('Traduzir: alerta de concordância força partial', listenTranslateOutcome('Hoje está chovendo', refs, { pronoun: 'eu', verb: 'comprou' }), 'partial');
 check('Traduzir: similaridade média (0,55 a 0,8) → partial', listenTranslateOutcome('Hoje chove muito forte aqui', ['Hoje está chovendo forte aqui'] , null) !== 'ok', true);
+
+console.log('\n=== Fase 3: negação, número, mustInclude/mustExclude, palavras faltantes ===\n');
+const types = an => an.alerts.map(a => a.type).join(',');
+check('negação: "Hoje não está chovendo" vs "Hoje está chovendo" → partial', listenTranslateOutcome('Hoje não está chovendo', refs, null), 'partial');
+check('negação: alerta registrado', types(analyzeTranslation('Hoje não está chovendo', refs)), 'negation');
+check('negação nos dois lados não alerta', types(analyzeTranslation('Eu não gosto de café', ['Eu não gosto de café.'])), '');
+check('número: "três maçãs" vs "duas maçãs" → partial', listenTranslateOutcome('Eu como três maçãs', ['Eu como duas maçãs.'], null), 'partial');
+check('número: dígito equivale à palavra (2 = duas)', types(analyzeTranslation('Eu como 2 maçãs', ['Eu como duas maçãs.'])), '');
+check('número: "um"/"uma" não conta (artigo)', types(analyzeTranslation('Eu como uma maçã', ['Eu como 1 maçã.'])), '');
+check('mustInclude ausente → partial', listenTranslateOutcome('Eu como uma maçã vermelha', ['Eu como uma maçã vermelha.'], null, { mustInclude: [['maçã', 'maca']] }), 'ok');
+check('mustInclude: grupo não atendido → alerta', types(analyzeTranslation('Eu como uma laranja vermelha', ['Eu como uma maçã vermelha.'], { mustInclude: [['maçã']] })), 'mustInclude');
+check('mustExclude presente → alerta', types(analyzeTranslation('Eu como uma pera vermelha', ['Eu como uma maçã vermelha.'], { mustExclude: ['pera'] })), 'mustExclude');
+check('palavras faltantes listadas', analyzeTranslation('Eu como maçã', ['Eu como uma maçã vermelha.']).missingWords.join(','), 'vermelha');
+check('acerto limpo continua ok', listenTranslateOutcome('Hoje está chovendo', refs, null, {}), 'ok');
+check('frase sem relação continua fail', listenTranslateOutcome('Gosto de gatos azuis', refs, null), 'fail');
 
 console.log(`\n${passed} passaram, ${failed} falharam.`);
 if (failed > 0){
