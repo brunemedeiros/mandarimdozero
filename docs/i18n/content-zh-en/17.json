@@ -1,0 +1,204 @@
+{
+ "unit": 17,
+ "en": {
+  "title": "What has already happened",
+  "goal": "Talk about completed actions, changes of state, and what hasn't happened yet.",
+  "lessons": {
+   "ja-comeu": "Saying what you've already eaten",
+   "ainda-nao": "Saying what hasn't happened yet",
+   "nao-aconteceu": "Talking about what didn't happen yesterday",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "particle of completion/change",
+   "to eat (a meal)",
+   "apple",
+   "not yet",
+   "yesterday",
+   "to finish, to end",
+   "work / to work",
+   "bar"
+  ],
+  "phrases": [
+   {
+    "t": "I ate two apples."
+   },
+   {
+    "t": "I don't want to eat anymore."
+   },
+   {
+    "t": "I didn't go to work yesterday."
+   },
+   {
+    "t": "Have you eaten yet?"
+   },
+   {
+    "t": "I haven't eaten yet."
+   },
+   {
+    "t": "I'm not drinking alcohol tonight."
+   }
+  ],
+  "dialogue": {
+   "title": "Have you eaten?",
+   "lines": [
+    "Have you eaten yet?",
+    "Not yet, I'm still working.",
+    "I've eaten, I ate two apples.",
+    "I didn't have dinner yesterday, so I'm very hungry today."
+   ]
+  },
+  "concepts": {
+   "le-completion": [
+    {
+     "title": "了 (le) — marking completion",
+     "body": "了 (le) after a verb shows that the action was completed — it works somewhat like the English simple past (\"I ate\"). The structure is: Verb + 了 + Object.",
+     "examples": [
+      "I ate two apples"
+     ]
+    }
+   ],
+   "buxiang-le": [
+    {
+     "title": "不想...了 — \"don't want anymore\"",
+     "body": "When 不 (or 没) is combined with 了 at the end of the sentence, the meaning becomes \"no longer\" — showing that something that was happening or was true has stopped.",
+     "examples": [
+      "I don't want to eat anymore"
+     ]
+    }
+   ],
+   "le-question": [
+    {
+     "title": "了...吗 — asking whether something has already happened",
+     "body": "To ask whether an action has already been completed, you combine 了 (marking completion) with 吗 (marking a question) at the end of the sentence — together they ask \"has that happened yet?\".",
+     "examples": [
+      "have you eaten yet?"
+     ]
+    }
+   ],
+   "chifanle-greeting": [
+    {
+     "title": "\"你吃饭了吗？\" is sometimes not a real question",
+     "body": "Besides literally asking whether someone has eaten, <strong>你吃了吗？</strong> (the short version, without 饭) is traditionally used as a greeting — something like \"how are you?\" in English, without expecting a detailed answer about food. It's a more cultural/traditional use than a universal one today, but it's worth recognizing when you hear it.",
+     "examples": [
+      "how are you? (traditional greeting, not a literal question)"
+     ]
+    }
+   ],
+   "haimei": [
+    {
+     "title": "Why does \"wǒ hái méi chī\" never take \"le\"?",
+     "body": "了 marks a completed action. But in the negative with <strong>hái méi</strong> (还没, not yet), the le <strong>disappears</strong> — never \"wǒ hái méi chī le\". It makes sense: if the action hasn't happened yet, there's nothing to mark as completed.",
+     "examples": [
+      "I haven't eaten yet"
+     ]
+    }
+   ],
+   "meiyou-past": [
+    {
+     "title": "没有 + verb — negating the past",
+     "body": "To say that something didn't happen in the past, Chinese puts 没有 (or just 没) before the verb — never 不, which is reserved for negating the present or the future.",
+     "examples": [
+      "I didn't go to work yesterday"
+     ]
+    }
+   ],
+   "bu-vs-mei": [
+    {
+     "title": "不 vs. 没 — two negations, two times",
+     "body": "不 (bù) negates the present and the future — what isn't or won't be. 没 (méi) negates the past — what didn't happen. One important exception: the verb 是 is never negated with 没, always with 不, even when talking about the past.",
+     "examples": [
+      "I'm not drinking alcohol tonight (present/future)",
+      "I didn't go to work yesterday (past)"
+     ]
+    }
+   ],
+   "le-bridge": [
+    {
+     "title": "The same 了 again, with a different role",
+     "body": "Remember \"你怎么了？\" (what's wrong with you?) back in Unit 11? There, 了 marked a <strong>change of state</strong>. Here, 了 after the verb marks a <strong>completed action</strong>. It's the same particle with two different roles — the context (end of the sentence vs. right after the verb) tells you which is which.",
+     "examples": [
+      "what's wrong with you? (change of state)",
+      "I ate two apples (completed action)"
+     ]
+    }
+   ],
+   "shide-deferred": [
+    {
+     "title": "是...的 — emphasizing how something happened",
+     "body": "Remember \"Nǐ shì zěnme lái de?\" (how did you come?) back in Unit 10? Now that you know Chinese marks completed actions, this construction makes more sense: 是...的 emphasizes a specific detail (manner, place or time) of an action that has <strong>already been completed</strong> — which is why the question uses this structure and not an ordinary question.",
+     "examples": [
+      "how did you come? (emphasis on the manner)",
+      "I came by subway"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "vocab[0]",
+   "pt": "partícula de conclusão/mudança",
+   "en": "particle of completion/change",
+   "conf": "media",
+   "why": "termo gramatical; várias glosas"
+  },
+  {
+   "path": "vocab[1]",
+   "pt": "comer (uma refeição)",
+   "en": "to eat (a meal)",
+   "conf": "media",
+   "why": "吃饭 = eat a meal / have a meal"
+  },
+  {
+   "path": "vocab[5]",
+   "pt": "terminar, acabar",
+   "en": "to finish, to end",
+   "conf": "media",
+   "why": "várias traduções"
+  },
+  {
+   "path": "concepts.le-completion[0].body",
+   "pt": "parecido com o passado simples em português (\"comi\")",
+   "en": "somewhat like the English simple past (\"I ate\")",
+   "conf": "media",
+   "why": "adaptado: comparação refeita com o inglês; 了 não é exatamente passado, mantive 'somewhat'"
+  },
+  {
+   "path": "concepts.chifanle-greeting[0]",
+   "pt": "parecido com \"tudo bem?\"",
+   "en": "something like \"how are you?\"",
+   "conf": "media",
+   "why": "nota cultural/idiomática, adaptada ao inglês; conteúdo cultural mantido fiel"
+  },
+  {
+   "path": "phrases[3]/dialogue[0]",
+   "pt": "Você já comeu?",
+   "en": "Have you eaten yet?",
+   "conf": "media",
+   "why": "várias traduções (Have you eaten? / Did you eat?)"
+  },
+  {
+   "path": "dialogue.lines[3]",
+   "pt": "Ontem eu não jantei, hoje estou com muita fome.",
+   "en": "I didn't have dinner yesterday, so I'm very hungry today.",
+   "conf": "media",
+   "why": "acrescentei 'so' para fluência; o chinês só justapõe as frases"
+  },
+  {
+   "path": "phrases[5]",
+   "pt": "Hoje à noite eu não vou beber.",
+   "en": "I'm not drinking alcohol tonight.",
+   "conf": "media",
+   "why": "喝酒 = beber (álcool); PT omite 'álcool'"
+  },
+  {
+   "path": "concepts.shide-deferred[0].body",
+   "pt": "...essa construção faz mais sentido...",
+   "en": "...this construction makes more sense...",
+   "conf": "media",
+   "why": "explicação gramatical longa; fiel"
+  }
+ ]
+}
