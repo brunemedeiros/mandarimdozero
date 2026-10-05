@@ -32,6 +32,10 @@
 // A1 (alguém fala de si, de onde mora, do dia, do passado). Ficam numa unidade
 // "Revisão do A1" no fim do nível (moduleId "A1-revisao"), não em um módulo.
 // `opening` troca o anúncio falado em francês antes das instruções.
+// Vira true depois de rodar a Action "Áudio TTS" no modo ditados-en (gera os
+// dictation-<id>-guided.en.mp3 com as instruções em inglês).
+const DICTATION_AUDIO_EN_READY = false;
+
 const DICTATIONS = [
   {
     id: "d1",

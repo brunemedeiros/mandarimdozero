@@ -63,6 +63,20 @@ PT_INTRO_TEXT = (
     "No fim, farei uma última leitura, em ritmo normal, para você conferir se deixou algo passar."
 )
 PT_VOICE = {"languageCode": "pt-BR", "name": "pt-BR-Chirp3-HD-Achernar"}
+# Fase 9 (i18n): versão da locução de comando em INGLÊS, para o site em inglês.
+# Ativada com DICTATION_UI_LANG=en (saída: dictation-<id>-guided.en.mp3). O resto
+# (abertura e corpo do ditado) continua em francês.
+EN_INTRO_TEXT = (
+    "Before we start, here is how it works. "
+    "First, you will hear the whole text at a slow pace. Don't write anything yet. "
+    "Then each sentence will be read with pauses, and that is when you write what you hear. "
+    "At the end, I will read it one last time at a normal pace, so you can check that you didn't miss anything."
+)
+EN_VOICE = {"languageCode": "en-US", "name": "en-US-Chirp3-HD-Achernar"}
+UI_LANG = os.environ.get("DICTATION_UI_LANG", "pt-BR")
+INTRO_TEXT = EN_INTRO_TEXT if UI_LANG == "en" else PT_INTRO_TEXT
+INTRO_VOICE = EN_VOICE if UI_LANG == "en" else PT_VOICE
+OUT_SUFFIX = ".en" if UI_LANG == "en" else ""
 FR_VOICE = {"languageCode": "fr-FR", "name": "fr-FR-Chirp3-HD-Achernar"}
 
 def build_ssml_opening(dictee_num, opening=None):
@@ -70,7 +84,7 @@ def build_ssml_opening(dictee_num, opening=None):
             + ' <break time="700ms"/></speak>')
 
 def build_ssml_pt_intro():
-    return ("<speak>" + xml_escape(PT_INTRO_TEXT) + ' <break time="1000ms"/></speak>')
+    return ("<speak>" + xml_escape(INTRO_TEXT) + ' <break time="1000ms"/></speak>')
 
 def build_ssml(dictee_num, text):
     """SSML do corpo em francês (sem a abertura nem a locução em português)."""
@@ -147,7 +161,7 @@ def synth_dictation(dictee_num, text, out_path, force=False, opening=None):
         return "skip"
     pieces = [
         (build_ssml_opening(dictee_num, opening), FR_VOICE),
-        (build_ssml_pt_intro(), PT_VOICE),
+        (build_ssml_pt_intro(), INTRO_VOICE),
         (build_ssml(dictee_num, text), FR_VOICE),
     ]
     blobs = []
@@ -186,6 +200,6 @@ if __name__ == "__main__":
     for i, d in enumerate(DICTATIONS):
         if only_ids and d["id"] not in only_ids:
             continue
-        out_path = os.path.join(out_dir, f"dictation-{d['id']}-guided.mp3")
+        out_path = os.path.join(out_dir, f"dictation-{d['id']}-guided{OUT_SUFFIX}.mp3")
         status = synth_dictation(i + 1, d["text"], out_path, force=FORCE, opening=d.get("opening"))
         print(d["id"], status)

@@ -942,6 +942,7 @@ LEVEL_TESTS.forEach((t) => {
 const CONTENT_I18N = ContentI18n.create({
   units: UNITS, modules: MODULES, levels: LEVELS, levelTests: LEVEL_TESTS,
   overlayUrl: (lang) => `content.${lang}.js`,
+  extraUrls: (lang) => [`challenges.${lang}.js`],
   getLang: () => (typeof getUiLang === 'function' ? getUiLang() : 'pt-BR'),
   onApplied: () => {
     // Cartões da trilha guardam cópia do texto na criação; só o texto exibido
@@ -8489,8 +8490,12 @@ function moduleTitleFor(moduleId){
   return mod ? mod.title : '';
 }
 
+// Fase 9: com o site em inglês, usa a versão com as instruções em inglês
+// (gerada pela Action "Áudio TTS" > ditados-en) -- só depois que os mp3 existirem
+// (DICTATION_AUDIO_EN_READY em dictations.js). Até lá, toca o de sempre.
 function dictationAudioPath(d){
-  return `audio/dictation-${d.id}-guided.mp3`;
+  const en = typeof getUiLang === 'function' && getUiLang() === 'en' && DICTATION_AUDIO_EN_READY;
+  return `audio/dictation-${d.id}-guided${en ? '.en' : ''}.mp3`;
 }
 
 // Áudio do ditado em reprodução no momento (só um por vez).
@@ -9669,146 +9674,27 @@ function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
 // (não há chamada de IA em tempo de execução do aluno) — por isso o
 // feedback sempre mostra a resposta do aluno ao lado da esperada, pra ele
 // mesmo julgar nuances que o comparador não capta.
-function normalizeForTranslationCompare(s){
-  return String(s || '')
-    .toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/[.,!?;:'"()]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+// Fase 9: o comparador mora em shared/translation-compare.js (um por idioma da
+// TRADUÇÃO, que é o idioma do site). Em português o comportamento é idêntico
+// ao antigo (teste diferencial em tests/i18n/test_translation_compare.js).
+// Se o site está em inglês mas o desafio ainda não tem referências em inglês,
+// o aluno traduz para o português como antes (com o aviso do desafio).
+function challengeOverlay(c){
+  const lang = typeof getUiLang === 'function' ? getUiLang() : 'pt-BR';
+  return (lang !== 'pt-BR' && window.CHALLENGES_I18N && window.CHALLENGES_I18N[lang] && window.CHALLENGES_I18N[lang][c.id]) || null;
 }
-
-const TRANSLATION_STOPWORDS_PT = new Set([
-  'o','a','os','as','um','uma','uns','umas','de','do','da','dos','das','em','no','na','nos','nas',
-  'que','e','é','ele','ela','eles','elas','eu','tu','voce','você','nos','nós','voces','vocês',
-  'para','por','com','se','ao','aos','a','as','à','às','sao','são','esta','está','isso','isto'
-]);
-
-function translationTokenSet(s){
-  return normalizeForTranslationCompare(s).split(' ').filter(w => w && !TRANSLATION_STOPWORDS_PT.has(w));
+function listenTranslateSetup(c){
+  const ov = challengeOverlay(c);
+  const hasEn = !!(ov && Array.isArray(ov.referenceTranslations) && ov.referenceTranslations.length);
+  const lang = hasEn ? getUiLang() : 'pt-BR';
+  return {
+    lang,
+    translated: hasEn || lang === getUiLang(),
+    cmp: TranslationCompare.forLang(lang),
+    refs: hasEn ? ov.referenceTranslations : (c.referenceTranslations || []),
+    explanation: (hasEn && ov.explanation) ? ov.explanation : c.explanation
+  };
 }
-
-function translationSimilarity(a, b){
-  const ta = translationTokenSet(a);
-  const tb = translationTokenSet(b);
-  if (!ta.length || !tb.length) return 0;
-  const setB = new Set(tb);
-  const overlap = ta.filter(w => setB.has(w)).length;
-  return overlap / Math.max(ta.length, tb.length);
-}
-
-function isTranslationAcceptable(studentAnswer, referenceTranslations){
-  if (!studentAnswer || !studentAnswer.trim()) return false;
-  return (referenceTranslations || []).some(ref => translationSimilarity(studentAnswer, ref) >= 0.55);
-}
-
-// A sobreposição de palavras acima não pega troca de sujeito ("eu comprou"
-// em vez de "eu comprei") -- "comprou" e "comprei" contam como palavras
-// completamente diferentes pro comparador, então em geral esse erro já
-// reduz a sobreposição sozinho, mas quando o resto da frase é longo o
-// score ainda passa do limiar. Esta checagem olha só o par PRONOME +
-// VERBO SEGUINTE dentro da própria resposta do aluno (não compara com a
-// referência) -- não é um parser gramatical completo (não cobre sujeito
-// oculto, verbos compostos, oração relativa etc.), só pega o par mais
-// comum de erro: um pronome-sujeito explícito seguido de um verbo
-// conjugado numa pessoa incompatível.
-const PT_SUBJECT_PRONOUN_PERSON = {
-  'eu': '1s', 'tu': '2s', 'voce': '3s', 'ele': '3s', 'ela': '3s',
-  'nos': '1p', 'a gente': '1s', 'voces': '3p', 'eles': '3p', 'elas': '3p'
-};
-
-// Formas dos verbos irregulares mais comuns -- chaves já sem acento
-// (mesma normalização usada pra comparar a resposta, ver
-// normalizeForTranslationCompare) nos tempos presente/pretérito perfeito/
-// imperfeito. Onde a forma sem acento colide entre pessoas diferentes
-// (ex: "tem"/"têm", "vimos" de ver/vir), listamos as duas -- e onde colide
-// com outra palavra comum não-verbal (ex: "da" de "dá" vs. a contração
-// "da"), preferimos omitir a forma a arriscar falso positivo.
-const PT_IRREGULAR_VERB_FORMS = {
-  sou:'1s', es:'2s', e:'3s', somos:'1p', sao:'3p',
-  era:['1s','3s'], eras:'2s', eramos:'1p', eram:'3p',
-  fui:'1s', foi:'3s', fomos:'1p', foram:'3p',
-  estou:'1s', estas:'2s', esta:'3s', estamos:'1p', estao:'3p',
-  estava:['1s','3s'], estavas:'2s', estavamos:'1p', estavam:'3p',
-  estive:'1s', esteve:'3s', estivemos:'1p', estiveram:'3p',
-  tenho:'1s', tens:'2s', tem:['3s','3p'], temos:'1p',
-  tinha:['1s','3s'], tinhas:'2s', tinhamos:'1p', tinham:'3p',
-  tive:'1s', teve:'3s', tivemos:'1p', tiveram:'3p',
-  vou:'1s', vais:'2s', vai:'3s', vamos:'1p', vao:'3p',
-  faco:'1s', fazes:'2s', faz:'3s', fazemos:'1p', fazem:'3p',
-  fiz:'1s', fez:'3s', fizemos:'1p', fizeram:'3p',
-  posso:'1s', podes:'2s', pode:'3s', podemos:'1p', podem:'3p',
-  pude:'1s', pudemos:'1p', puderam:'3p',
-  quero:'1s', queres:'2s', quer:'3s', queremos:'1p', querem:'3p',
-  quis:['1s','3s'], quisemos:'1p', quiseram:'3p',
-  digo:'1s', dizes:'2s', diz:'3s', dizemos:'1p', dizem:'3p',
-  disse:['1s','3s'], dissemos:'1p', disseram:'3p',
-  vejo:'1s', ves:'2s', ve:'3s', vemos:'1p', veem:'3p',
-  vi:'1s', viu:'3s', vimos:'1p', viram:'3p',
-  dou:'1s', damos:'1p',
-  dei:'1s', deu:'3s', demos:'1p', deram:'3p',
-  venho:'1s', vens:'2s', vem:'3s', vim:'1s', veio:'3s', viemos:'1p', vieram:'3p',
-  sei:'1s', sabes:'2s', sabe:'3s', sabemos:'1p', sabem:'3p',
-  soube:['1s','3s'], soubemos:'1p', souberam:'3p',
-  ponho:'1s', poes:'2s', poe:'3s', pomos:'1p', poem:'3p',
-  pus:'1s', pos:'3s', pusemos:'1p', puseram:'3p',
-};
-
-function ptVerbPersonTags(word){
-  if (PT_IRREGULAR_VERB_FORMS[word]){
-    const v = PT_IRREGULAR_VERB_FORMS[word];
-    return Array.isArray(v) ? v : [v];
-  }
-  // Só terminações que são um sinal razoavelmente seguro de VERBO conjugado
-  // -- de propósito SEM as terminações genéricas -o (1ª pess. sing. do
-  // presente) e -a/-e (3ª pess. sing. do presente), que colidem com a
-  // imensa maioria dos substantivos/adjetivos/advérbios do português
-  // (livro, filme, já, noite...) e geravam falsos positivos constantes:
-  // qualquer palavra comum terminada em -a/-e/-o virava "erro de
-  // concordância" mesmo quando a resposta do aluno estava certa. Mesmo
-  // princípio já usado no dicionário de irregulares acima (comentário
-  // "preferimos omitir a forma a arriscar falso positivo").
-  const rules = [
-    [/amos$|emos$|imos$/, '1p'],
-    [/astes$|estes$|istes$/, '2p'],
-    [/aram$|eram$|iram$/, '3p'],
-    [/am$|em$/, '3p'],
-    [/ou$|eu$|iu$/, '3s'],
-    [/aste$|este$|iste$/, '2s'],
-    [/ei$/, '1s'],
-    [/as$|es$/, '2s'],
-  ];
-  for (const [re, tag] of rules){
-    if (re.test(word)) return [tag];
-  }
-  return [];
-}
-
-// Procura pronome-sujeito seguido (até 2 palavras de distância, pra
-// tolerar advérbios como "já"/"não" no meio) de um verbo conjugado numa
-// pessoa incompatível. Para de procurar ao encontrar outro pronome antes
-// de achar um verbo reconhecível (não atribui o erro à oração seguinte).
-function translationHasPersonMismatch(text){
-  const words = normalizeForTranslationCompare(text).split(' ').filter(Boolean);
-  for (let i = 0; i < words.length; i++){
-    let pronoun = words[i];
-    let j = i + 1;
-    if (pronoun === 'a' && words[i + 1] === 'gente'){ pronoun = 'a gente'; j = i + 2; }
-    const expected = PT_SUBJECT_PRONOUN_PERSON[pronoun];
-    if (!expected) continue;
-    for (let lookahead = 0; lookahead < 3 && j + lookahead < words.length; lookahead++){
-      const candidate = words[j + lookahead];
-      if (PT_SUBJECT_PRONOUN_PERSON[candidate]) break;
-      const tags = ptVerbPersonTags(candidate);
-      if (tags.length){
-        if (!tags.includes(expected)) return { pronoun, verb: candidate, expected, got: tags };
-        break;
-      }
-    }
-  }
-  return null;
-}
-
 function openListenTranslatePlayer(c){
   const content = document.getElementById('challenge-player-content');
   content.innerHTML = `
@@ -9846,17 +9732,18 @@ function openListenTranslatePlayer(c){
 function checkListenTranslateAnswer(c){
   const input = document.getElementById('lt-answer-input');
   const studentAnswer = input.value.trim();
-  const personMismatch = translationHasPersonMismatch(studentAnswer);
-  const isCorrect = !personMismatch && isTranslationAcceptable(studentAnswer, c.referenceTranslations);
+  const lt = listenTranslateSetup(c);
+  const personMismatch = lt.cmp.personMismatch(studentAnswer);
+  const isCorrect = !personMismatch && lt.cmp.isAcceptable(studentAnswer, lt.refs);
   // Desafio de conteúdo continua clicável mesmo já concluído -- não dá XP
   // (mesma decisão de answerChallenge, ver auditoria do sistema de XP).
 
   const ltBodyHTML = `
       ${personMismatch ? `<p class="listen-translate-feedback-warning">⚠ Repare na concordância: depois de "${escapeHtmlChallenge(personMismatch.pronoun)}", "${escapeHtmlChallenge(personMismatch.verb)}" não é a conjugação certa.</p>` : ''}
       <p class="listen-translate-feedback-row"><strong>Sua resposta</strong>${escapeHtmlChallenge(studentAnswer || '—')}</p>
-      <p class="listen-translate-feedback-row"><strong>Resposta esperada</strong>${escapeHtmlChallenge(c.referenceTranslations[0])}</p>
+      <p class="listen-translate-feedback-row"><strong>Resposta esperada</strong>${escapeHtmlChallenge(lt.refs[0])}</p>
       <p class="listen-translate-feedback-row"><strong>Frase original</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
-      ${c.explanation ? `<p class="listen-translate-feedback-row"><strong>Explicação</strong>${escapeHtmlChallenge(c.explanation)}</p>` : ''}
+      ${lt.explanation ? `<p class="listen-translate-feedback-row"><strong>Explicação</strong>${escapeHtmlChallenge(lt.explanation)}</p>` : ''}
       <div class="audio-btn-row">
         <button class="dictation-play-btn" id="lt-replay-btn">▶ Écouter encore</button>
         ${slowAudioBtnHTML('lt-replay-slow-btn')}

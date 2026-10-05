@@ -140,18 +140,29 @@
       return (window.CONTENT_OVERLAYS && window.CONTENT_OVERLAYS[lang]) || null;
     }
 
-    function load(lang){
-      if (lang === DEFAULT_LANG || overlayFor(lang)) return Promise.resolve(true);
-      if (loading[lang]) return loading[lang];
-      loading[lang] = new Promise(function(resolve){
+    function loadScript(url){
+      return new Promise(function(resolve){
         try {
-          var s = document.createElement('script');
-          s.src = cfg.overlayUrl(lang);
-          s.async = true;
-          s.onload = function(){ resolve(true); };
-          s.onerror = function(){ delete loading[lang]; resolve(false); };
-          (document.head || document.documentElement).appendChild(s);
+          var sc = document.createElement('script');
+          sc.src = url;
+          sc.async = true;
+          sc.onload = function(){ resolve(true); };
+          sc.onerror = function(){ resolve(false); };
+          (document.head || document.documentElement).appendChild(sc);
         } catch (e) { resolve(false); }
+      });
+    }
+
+    // Carrega o overlay principal e os extras (cfg.extraUrls(lang): ex. desafios).
+    function load(lang){
+      if (lang === DEFAULT_LANG) return Promise.resolve(true);
+      if (loading[lang]) return loading[lang];
+      var urls = [cfg.overlayUrl(lang)].concat(typeof cfg.extraUrls === 'function' ? cfg.extraUrls(lang) : []);
+      var todo = overlayFor(lang) ? urls.slice(1) : urls;
+      loading[lang] = Promise.all(todo.map(loadScript)).then(function(r){
+        var ok = r.every(Boolean);
+        if (!ok) delete loading[lang];
+        return ok;
       });
       return loading[lang];
     }
