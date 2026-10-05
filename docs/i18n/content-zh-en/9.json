@@ -1,0 +1,137 @@
+{
+ "unit": 9,
+ "en": {
+  "title": "Weather",
+  "goal": "Describe the weather and react to it.",
+  "lessons": {
+   "quente-frio": "Describing whether it's hot or cold",
+   "clima-geral": "Talking about rain, sun and wind",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "weather",
+   "hot",
+   "cold",
+   "to rain",
+   "sunny day",
+   "cloudy day",
+   "wind"
+  ],
+  "phrases": [
+   {
+    "t": "How's the weather today?"
+   },
+   {
+    "t": "It's very hot today."
+   },
+   {
+    "t": "It will rain tomorrow."
+   },
+   {
+    "t": "It's not very cold today."
+   }
+  ],
+  "dialogue": {
+   "title": "Talking about the weather",
+   "lines": [
+    "How's the weather today?",
+    "It's very hot today, and sunny.",
+    "What about tomorrow?",
+    "Tomorrow it will rain, and it'll be a bit cold."
+   ]
+  },
+  "concepts": {
+   "adjective-predicate": [
+    {
+     "title": "Why \"jīntiān hěn rè\" and not \"jīntiān shì rè\"?",
+     "body": "Adjectives in Chinese (rè, lěng, guì, piányi...) work as the verb of the sentence themselves — they don't need the verb <strong>shì</strong> (to be) in front. The <strong>hěn</strong> here hardly means \"very\" — it is just a linking word that is required before the adjective.",
+     "examples": [
+      "it's very hot today"
+     ]
+    }
+   ],
+   "buta-not-very": [
+    {
+     "title": "不太 (bú tài) — \"not very\"",
+     "body": "不太 (bú tài) softens a negation, working like \"not very\" in English — instead of denying something completely, it says it isn't quite so, without being absolute.",
+     "examples": [
+      "it's not very cold today"
+     ]
+    }
+   ],
+   "hui-future-prediction": [
+    {
+     "title": "会 (huì) — predicting the future",
+     "body": "Besides meaning \"to know how to\" (a learned skill, which you will see in Unit 15), 会 (huì) is also used to make predictions about what will happen — similar to \"will\" or \"going to\" in English.",
+     "examples": [
+      "it will rain tomorrow"
+     ]
+    }
+   ]
+  },
+  "trueFalse": [
+   {
+    "claim": "This sentence describes how a person is feeling.",
+    "whyNote": "Wrong — <strong>今天很热</strong> describes the WEATHER (it is hot today), not how a person feels. \"I'm hot\" would be \"我很热\"."
+   }
+  ]
+ },
+ "review": [
+  {
+   "path": "vocab[0]",
+   "pt": "clima/tempo",
+   "en": "weather",
+   "conf": "media",
+   "why": "天气 covers 'weather/climate'; chose 'weather'"
+  },
+  {
+   "path": "vocab[3]",
+   "pt": "chover",
+   "en": "to rain",
+   "conf": "media",
+   "why": "下雨 is 'rain falls'; verb gloss simplified"
+  },
+  {
+   "path": "phrases[0].t",
+   "pt": "Como está o tempo hoje?",
+   "en": "How's the weather today?",
+   "conf": "media",
+   "why": "idiomatic rendering of 怎么样"
+  },
+  {
+   "path": "phrases[3].t",
+   "pt": "Hoje não está muito frio.",
+   "en": "It's not very cold today.",
+   "conf": "media",
+   "why": "不太 = 'not very'"
+  },
+  {
+   "path": "dialogue.lines[3]",
+   "pt": "Amanhã vai chover, vai estar meio frio.",
+   "en": "Tomorrow it will rain, and it'll be a bit cold.",
+   "conf": "media",
+   "why": "有点冷 = 'a bit cold'"
+  },
+  {
+   "path": "concepts.buta-not-very[0].body",
+   "pt": "funcionando como 'não muito' em português",
+   "en": "working like \"not very\" in English",
+   "conf": "baixa",
+   "why": "adapted: PT reference replaced by English equivalent"
+  },
+  {
+   "path": "concepts.hui-future-prediction[0].body",
+   "pt": "parecido com 'vai' no futuro do português",
+   "en": "similar to \"will\" or \"going to\" in English",
+   "conf": "baixa",
+   "why": "adapted: PT 'vai' + infinitive replaced by English 'will/going to'"
+  },
+  {
+   "path": "trueFalse[0].whyNote",
+   "pt": "'Estou com calor' seria 我很热",
+   "en": "\"I'm hot\" would be \"我很热\"",
+   "conf": "media",
+   "why": "'I'm hot' means feeling warm; fine in English"
+  }
+ ]
+}

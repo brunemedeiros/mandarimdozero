@@ -1,0 +1,155 @@
+{
+ "unit": 5,
+ "en": {
+  "title": "Food and drink",
+  "goal": "Order food and drink at a restaurant and express simple preferences.",
+  "lessons": {
+   "comer-beber": "Eating and drinking",
+   "pedir-comida": "Ordering noodles, water and tea",
+   "gostoso": "Saying something is tasty",
+   "pedir-o-que-quer": "Asking for what you want",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "to eat",
+   "to drink",
+   "rice",
+   "noodles",
+   "water",
+   "tea",
+   "coffee",
+   "tasty (food)",
+   "to like",
+   "to want",
+   "a cup of tea (杯 in context)"
+  ],
+  "phrases": [
+   {
+    "t": "I'd like a cup of tea."
+   },
+   {
+    "t": "This is really tasty!"
+   },
+   {
+    "t": "I like drinking coffee."
+   }
+  ],
+  "dialogue": {
+   "title": "At the restaurant",
+   "lines": [
+    "Hello, what would you like to eat?",
+    "I'd like rice and tea.",
+    "Okay. Would you like some coffee?",
+    "No, thank you. I like drinking tea."
+   ]
+  },
+  "concepts": {
+   "hen-adjective": [
+    {
+     "title": "很 (hěn) before an adjective",
+     "body": "In Chinese, simple sentences with an adjective almost always put 很 (hěn) before it — even when you don't mean \"very\". Without 很, the sentence sounds like an implied comparison or is grammatically odd.",
+     "examples": [
+      "this is tasty"
+     ]
+    }
+   ],
+   "yao-xihuan": [
+    {
+     "title": "要 (yào) — \"to want\"",
+     "body": "要 (yào) expresses want or need, both before a noun (\"I want tea\") and before a verb (\"I want to go\"). It is one of the most common words in everyday Chinese, especially for ordering.",
+     "examples": [
+      "I'd like a cup of tea"
+     ]
+    },
+    {
+     "title": "\"Xǐhuan\" or \"yào\"?",
+     "body": "<strong>Xǐhuan</strong> (喜欢) means to like something in general, a preference — it is followed directly by what you like (a noun or another verb). <strong>Yào</strong> (要) means to want something specific, right now. One talks about taste, the other about a request.",
+     "examples": [
+      "I like drinking coffee (habit)",
+      "I'd like a cup of tea (right now)"
+     ]
+    }
+   ],
+   "cha-origem-china": [
+    {
+     "title": "China is the birthplace of tea",
+     "body": "Tea comes from China — it has been drunk there for thousands of years, and the very word \"tea\"/\"chá\" in many languages comes from Chinese words (chá 茶, depending on the trade route). Serving tea to guests is an important part of Chinese hospitality to this day.",
+     "examples": [
+      "tea"
+     ]
+    }
+   ]
+  },
+  "trueFalse": [
+   {
+    "claim": "This phrase is used to order something at a restaurant or café.",
+    "whyNote": "Correct — <strong>我要...(wǒ yào)</strong> means \"I want\", used to order something at a restaurant or café; here, \"a cup of tea\"."
+   }
+  ]
+ },
+ "review": [
+  {
+   "path": "vocab[7]",
+   "pt": "gostoso (comida)",
+   "en": "tasty (food)",
+   "conf": "media",
+   "why": "'delicious' or 'good (to eat)' also fit; 好吃 is literally 'good to eat'"
+  },
+  {
+   "path": "vocab[10]",
+   "pt": "uma xícara de chá (杯 em contexto)",
+   "en": "a cup of tea (杯 in context)",
+   "conf": "media",
+   "why": "'cup' vs 'glass' for 杯; kept 'cup' with tea"
+  },
+  {
+   "path": "phrases[0].t",
+   "pt": "Eu quero uma xícara de chá.",
+   "en": "I'd like a cup of tea.",
+   "conf": "media",
+   "why": "register: 'I want' is blunt in English, used 'I'd like'"
+  },
+  {
+   "path": "phrases[1].t",
+   "pt": "Isso está muito gostoso!",
+   "en": "This is really tasty!",
+   "conf": "media",
+   "why": "'delicious' also correct"
+  },
+  {
+   "path": "dialogue.lines[0]",
+   "pt": "Olá, o que você quer comer?",
+   "en": "Hello, what would you like to eat?",
+   "conf": "media",
+   "why": "register softened to 'would you like'"
+  },
+  {
+   "path": "concepts.hen-adjective[0].body",
+   "pt": "(PT comparava ao português)",
+   "en": "…the sentence sounds like an implied comparison or is grammatically odd.",
+   "conf": "media",
+   "why": "kept Chinese-only fact; no PT comparison to adapt"
+  },
+  {
+   "path": "concepts.yao-xihuan[1].body",
+   "pt": "sem preposição como o 'de' do português",
+   "en": "followed directly by what you like",
+   "conf": "baixa",
+   "why": "adapted: PT contrast with 'gostar DE' removed (English 'like' takes no preposition, so no contrast is made)"
+  },
+  {
+   "path": "concepts.cha-origem-china[0].body",
+   "pt": "a palavra 'chá'/'tea' ... vem de palavras chinesas",
+   "en": "the word \"tea\"/\"chá\" ... comes from Chinese words",
+   "conf": "media",
+   "why": "cultural/etymology claim kept as in PT; 'tea' is not Portuguese so 'chá' is an unusual mention for English readers"
+  },
+  {
+   "path": "trueFalse[0].claim",
+   "pt": "Essa frase é usada pra pedir algo num restaurante ou café.",
+   "en": "This phrase is used to order something at a restaurant or café.",
+   "conf": "media",
+   "why": "'phrase' vs 'sentence'; 'tea' translation of 茶"
+  }
+ ]
+}

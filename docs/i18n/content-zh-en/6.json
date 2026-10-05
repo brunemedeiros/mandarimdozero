@@ -1,0 +1,150 @@
+{
+ "unit": 6,
+ "en": {
+  "title": "Daily routine",
+  "goal": "Describe everyday activities and tell the time.",
+  "lessons": {
+   "horas": "Telling the time",
+   "rotina": "Talking about your routine",
+   "presente": "What is happening right now",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "o'clock / hour(s)",
+   "to get up",
+   "to go to work",
+   "to get off work",
+   "to sleep",
+   "every day",
+   "now",
+   "today",
+   "not to have / there isn't"
+  ],
+  "phrases": [
+   {
+    "t": "I get up at seven o'clock every day."
+   },
+   {
+    "t": "What time is it now?"
+   },
+   {
+    "t": "I'm eating right now."
+   }
+  ],
+  "dialogue": {
+   "title": "Asking about routine",
+   "lines": [
+    "What time do you get up every day?",
+    "I get up at 7 and go to work at 8 every day.",
+    "What time do you get off work today?",
+    "Today I get off at 5."
+   ]
+  },
+  "concepts": {
+   "dian-hours": [
+    {
+     "title": "Telling time with 点",
+     "body": "To tell the time in Chinese, the number is followed by 点 (diǎn), which works like \"o'clock\". It is a simple, direct structure: number + 点.",
+     "examples": [
+      "7 o'clock",
+      "what time is it now?"
+     ]
+    }
+   ],
+   "fuso-horario-unico": [
+    {
+     "title": "All of China uses the same time",
+     "body": "Although China's territory is wide enough to span 5 geographic time zones, the whole country uses a single official time: <strong>Beijing time</strong> (北京时间). This means that in the far west of the country the sun can rise much later on the clock than in the east — but everyone tells the time the same way.",
+     "examples": [
+      "Beijing time (the official time for the whole country)"
+     ]
+    }
+   ],
+   "time-before-verb": [
+    {
+     "title": "Time words before the verb",
+     "body": "Unlike English, where \"every day\" can go at the end of the sentence, in Chinese time expressions always come before the verb, usually right after the subject.",
+     "examples": [
+      "I get up at 7 every day"
+     ]
+    }
+   ],
+   "zai-progressive": [
+    {
+     "title": "(正)在 + verb — an action in progress",
+     "body": "To say that an action is happening right now, Chinese uses 在 (zài) or 正在 (zhèngzài) before the verb — it works like English \"to be + -ing\".",
+     "examples": [
+      "I'm eating right now"
+     ]
+    },
+    {
+     "title": "\"Měitiān\" or \"xiànzài\"?",
+     "body": "<strong>Měitiān</strong> (每天, every day) marks a habit. <strong>Xiànzài</strong> (现在, now) marks the present moment, often used with this <strong>zài</strong> of action in progress — different from the \"zài\" of location that you will see in the next unit.",
+     "examples": [
+      "I get up at 7 every day (habit)",
+      "what time is it now? (present moment)"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "vocab[0]",
+   "pt": "hora(s)",
+   "en": "o'clock / hour(s)",
+   "conf": "media",
+   "why": "点 is 'o'clock' in time expressions; 'hour(s)' as the PT gloss"
+  },
+  {
+   "path": "vocab[8]",
+   "pt": "não ter / não há",
+   "en": "not to have / there isn't",
+   "conf": "media",
+   "why": "two usages glossed in PT; kept both"
+  },
+  {
+   "path": "phrases[2].t",
+   "pt": "Eu estou comendo agora.",
+   "en": "I'm eating right now.",
+   "conf": "media",
+   "why": "'agora' comes from 正在, rendered 'right now'"
+  },
+  {
+   "path": "dialogue.lines[2]",
+   "pt": "Que horas você sai do trabalho hoje?",
+   "en": "What time do you get off work today?",
+   "conf": "media",
+   "why": "'get off work' is US idiom for 下班"
+  },
+  {
+   "path": "concepts.dian-hours[0].body",
+   "pt": "funciona como 'hora(s)'",
+   "en": "works like \"o'clock\"",
+   "conf": "media",
+   "why": "'hora(s)' replaced by 'o'clock' as the natural English counterpart"
+  },
+  {
+   "path": "concepts.fuso-horario-unico[0].body",
+   "pt": "cobrir 5 fusos horários geográficos",
+   "en": "span 5 geographic time zones",
+   "conf": "media",
+   "why": "factual claim kept as in PT; not independently checked"
+  },
+  {
+   "path": "concepts.time-before-verb[0].body",
+   "pt": "Diferente do português, onde 'todos os dias' pode vir no fim",
+   "en": "Unlike English, where \"every day\" can go at the end",
+   "conf": "baixa",
+   "why": "adapted: comparison rewritten for English (also true there)"
+  },
+  {
+   "path": "concepts.zai-progressive[0].body",
+   "pt": "estar + gerúndio do português",
+   "en": "\"to be + -ing\"",
+   "conf": "baixa",
+   "why": "adapted: Portuguese gerund compared with English -ing"
+  }
+ ]
+}
