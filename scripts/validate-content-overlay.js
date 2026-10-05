@@ -22,8 +22,28 @@ fs.readdirSync(dir).filter(f => f.endsWith('.json') && f !== '_meta.json').sort(
   const u = c.UNITS.find(x => x.id === id); const e = d[lang];
   if (!u) return err(id, 'unidade inexistente em content.js');
   if (!e) return err(id, 'sem objeto "' + lang + '"');
-  if (u.type === 'grammar') return err(id, 'unidades de gramática ainda não suportadas pelo overlay');
   str(id, 'title', e.title, u.title); str(id, 'goal', e.goal, u.goal);
+  if (u.type === 'grammar'){
+    const g = e.grammar || {}, bs = g.blocks || [];
+    if (bs.length !== u.grammar.blocks.length) err(id, 'grammar.blocks: ' + bs.length + ' vs ' + u.grammar.blocks.length);
+    u.grammar.blocks.forEach((b, bi) => {
+      const o = bs[bi] || {}; const L = 'grammar.blocks[' + bi + ']';
+      str(id, L + '.title', o.title, b.title); str(id, L + '.body', o.body, b.body);
+      const ex = o.examples || [];
+      if (ex.length !== (b.examples || []).length) err(id, L + '.examples: ' + ex.length + ' vs ' + (b.examples || []).length);
+      (b.examples || []).forEach((x, xi) => str(id, L + '.examples[' + xi + ']', ex[xi], x.t));
+      if (b.table){
+        const keys = Object.keys(b.table); const tb = o.table || [];
+        if (tb.length !== keys.length) err(id, L + '.table: ' + tb.length + ' colunas vs ' + keys.length);
+        keys.forEach((k, ci) => { const col = tb[ci] || {}; str(id, L + '.table[' + ci + '].label', col.label, k);
+          if ((col.pronouns || []).length !== b.table[k].length) err(id, L + '.table[' + ci + '].pronouns: ' + (col.pronouns || []).length + ' vs ' + b.table[k].length);
+          b.table[k].forEach((r, ri) => str(id, L + '.table[' + ci + '].pronouns[' + ri + ']', (col.pronouns || [])[ri], r.pronoun)); });
+      } else if (o.table) err(id, L + ' tem table sem original');
+    });
+    const xs = g.exercises || [];
+    if (xs.length !== u.grammar.exercises.length) err(id, 'grammar.exercises: ' + xs.length + ' vs ' + u.grammar.exercises.length);
+    u.grammar.exercises.forEach((x, i) => { if (x.hint) str(id, 'grammar.exercises[' + i + '].hint', (xs[i] || {}).hint, x.hint); if ((xs[i] || {}).prompt) str(id, 'grammar.exercises[' + i + '].prompt', xs[i].prompt, x.prompt); });
+  }
   (u.lessons || []).forEach(l => str(id, 'lessons.' + l.id, e.lessons && e.lessons[l.id], l.title));
   if ((e.vocab || []).length !== (u.vocab || []).length) err(id, 'vocab: ' + (e.vocab || []).length + ' vs ' + (u.vocab || []).length);
   (u.vocab || []).forEach((v, i) => str(id, 'vocab[' + i + ']', e.vocab && e.vocab[i], v.t));

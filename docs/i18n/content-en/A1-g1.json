@@ -1,0 +1,107 @@
+{
+ "unit": "A1-g1",
+ "en": {
+  "title": "The verbs avoir and être",
+  "goal": "Conjugate avoir and être in the present tense and recognize how they are used in sentences.",
+  "grammar": {
+   "blocks": [
+    {
+     "title": "Avoir and être",
+     "body": "Avoir (to have) and être (to be) are the two most-used verbs in French — and the only ones that are completely irregular in the present tense. You've already seen several of their forms in the last few units (je suis, j'ai, il a...) without stopping to think about the full conjugation.",
+     "examples": [
+      "I am Brazilian. (être)",
+      "I am twenty years old. (avoir)"
+     ]
+    },
+    {
+     "title": "No pattern to work out",
+     "body": "Notice that neither conjugation follows a regular pattern — you can't \"work out\" the form from the infinitive, so it's worth memorizing the whole table, not just the isolated forms you've already seen.",
+     "examples": [
+      "He is ten years old. (avoir)",
+      "She is my sister. (être)"
+     ]
+    },
+    {
+     "title": "A common trap",
+     "body": "French uses avoir (to have) in several expressions where English uses \"to be\" — avoir faim (to be hungry), avoir soif (to be thirsty), avoir peur (to be afraid), avoir raison (to be right). If the English sentence uses \"to be\" with a feeling or state like these, chances are French uses avoir.",
+     "examples": [
+      "I am hungry.",
+      "She is right."
+     ]
+    },
+    {
+     "title": "Très bien! 🎉",
+     "body": "Être also works as an auxiliary verb in other tenses you'll see in A2 — the foundation you're building now will make that much easier later on. Here is the full conjugation of both verbs before you practice:",
+     "examples": [],
+     "table": [
+      {
+       "label": "être",
+       "pronouns": [
+        "je",
+        "tu",
+        "il / elle / on",
+        "nous",
+        "vous",
+        "ils / elles"
+       ]
+      },
+      {
+       "label": "avoir",
+       "pronouns": [
+        "je (j')",
+        "tu",
+        "il / elle / on",
+        "nous",
+        "vous",
+        "ils / elles"
+       ]
+      }
+     ]
+    }
+   ],
+   "exercises": [
+    {
+     "hint": "être"
+    },
+    {
+     "hint": "avoir"
+    },
+    {
+     "hint": "être"
+    },
+    {
+     "hint": "avoir"
+    },
+    {
+     "hint": "être"
+    },
+    {
+     "hint": "avoir"
+    }
+   ]
+  }
+ },
+ "review": [
+  {
+   "path": "grammar.blocks[2].body",
+   "pt": "O francês usa avoir (ter) em várias expressões onde o português usa \"estar\" ou \"ser\" ... Se em português a frase usa \"estar com/ter\", muito provavelmente em francês é avoir.",
+   "en": "French uses avoir (to have) in several expressions where English uses \"to be\" ... if the English sentence uses \"to be\" with a feeling or state, chances are French uses avoir.",
+   "conf": "media",
+   "why": "Comparison adapted from Portuguese to English (\"estar com/ter\" -> \"to be\"); the French facts are unchanged."
+  },
+  {
+   "path": "grammar.blocks[0].examples[1]",
+   "pt": "Eu tenho vinte anos. (avoir)",
+   "en": "I am twenty years old. (avoir)",
+   "conf": "media",
+   "why": "English says \"am ... years old\" while French uses avoir; translated naturally rather than literally (\"I have twenty years\")."
+  },
+  {
+   "path": "grammar.blocks[1].examples[0]",
+   "pt": "Ele tem dez anos. (avoir)",
+   "en": "He is ten years old. (avoir)",
+   "conf": "media",
+   "why": "Same as above: natural English instead of \"has ten years\"."
+  }
+ ]
+}

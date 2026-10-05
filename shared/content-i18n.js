@@ -14,6 +14,7 @@
 //       title, goal, lessons:{lessonId:"título"},
 //       vocab:["t",...], phrases:[{t, scenario}], dialogue:{title, lines:["t",...]},
 //       concepts:{conceptId:[{title, body, examples:["t",...], variants:["região",...]}]},
+//       grammar:{blocks:[{title, body, examples:["t"], table:[{label, pronouns:["..."]}]}], exercises:[{hint, prompt?}]} (só unidades type:"grammar"),
 //       trueFalse:[{claim, whyNote}]
 //     } } }
 // O texto do aluno nunca passa por aqui: só o conteúdo do curso.
@@ -41,6 +42,16 @@
           variants: (b.variants || []).map(function(v){ return v.region; }) };
       });
     });
+    if (u.grammar){
+      s.grammar = {
+        blocks: (u.grammar.blocks || []).map(function(b){
+          return { title: b.title, body: b.body, examples: (b.examples || []).map(function(e){ return e.t; }),
+            table: b.table ? Object.keys(b.table).map(function(k){ return { label: k, pronouns: b.table[k].map(function(r){ return r.pronoun; }) }; }) : null,
+            tableForms: b.table ? Object.keys(b.table).map(function(k){ return b.table[k].map(function(r){ return r.form; }); }) : null };
+        }),
+        exercises: (u.grammar.exercises || []).map(function(x){ return { prompt: x.prompt, hint: x.hint }; })
+      };
+    }
     s.trueFalse = (u.trueFalseExercises || []).map(function(x){ return { claim: x.claim, whyNote: x.whyNote }; });
     return s;
   }
@@ -82,6 +93,29 @@
         });
       });
     });
+    if (u.grammar && snap.grammar){
+      var og = o.grammar || {};
+      (u.grammar.blocks || []).forEach(function(b, bi){
+        var sb = snap.grammar.blocks[bi], ob = (og.blocks && og.blocks[bi]) || {};
+        b.title = pick(ob.title, sb.title);
+        b.body = pick(ob.body, sb.body);
+        (b.examples || []).forEach(function(e, ei){ e.t = pick(ob.examples && ob.examples[ei], sb.examples[ei]); });
+        if (sb.table){
+          // Recria a tabela mantendo a ordem das colunas; rótulo traduzido vira a chave.
+          var nt = {};
+          sb.table.forEach(function(col, ci){
+            var oc = (ob.table && ob.table[ci]) || {};
+            nt[pick(oc.label, col.label)] = col.pronouns.map(function(pr, ri){ return { pronoun: pick(oc.pronouns && oc.pronouns[ri], pr), form: sb.tableForms[ci][ri] }; });
+          });
+          b.table = nt;
+        }
+      });
+      (u.grammar.exercises || []).forEach(function(x, i){
+        var oe = (og.exercises && og.exercises[i]) || {};
+        x.prompt = pick(oe.prompt, snap.grammar.exercises[i].prompt);
+        x.hint = pick(oe.hint, snap.grammar.exercises[i].hint);
+      });
+    }
     (u.trueFalseExercises || []).forEach(function(x, i){
       var ot = (o.trueFalse && o.trueFalse[i]) || {};
       x.claim = pick(ot.claim, snap.trueFalse[i].claim);

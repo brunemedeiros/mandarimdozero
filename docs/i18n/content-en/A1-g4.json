@@ -1,0 +1,89 @@
+{
+ "unit": "A1-g4",
+ "en": {
+  "title": "Prepositions with countries and cities",
+  "goal": "Use à, en, au and aux correctly with the names of cities and countries.",
+  "grammar": {
+   "blocks": [
+    {
+     "title": "à + city",
+     "body": "To say that something happens in a city, you always use à — with no article before the city name, and no need to worry about gender.",
+     "examples": [
+      "I live in Paris.",
+      "She is traveling to Tokyo."
+     ]
+    },
+    {
+     "title": "en + feminine country / au + masculine country",
+     "body": "Most countries whose name ends in -e are feminine and use en. The others (masculine) use au.",
+     "examples": [
+      "I am going to France. (la France, feminine)",
+      "He works in Brazil. (le Brésil, masculine)"
+     ]
+    },
+    {
+     "title": "aux + plural country",
+     "body": "Some countries have a plural name — like les États-Unis (the United States). In that case, the preposition becomes aux.",
+     "examples": [
+      "They live in the United States.",
+      "She is in the Netherlands."
+     ]
+    },
+    {
+     "title": "Très bien! 🎉",
+     "body": "To sum up: a city always takes à; a country depends on its gender (en/au) or on being plural (aux). Here is a table with a few examples:",
+     "examples": [],
+     "table": [
+      {
+       "label": "Prepositions",
+       "pronouns": [
+        "city",
+        "feminine country (most)",
+        "masculine country",
+        "plural country"
+       ]
+      },
+      {
+       "label": "Examples",
+       "pronouns": [
+        "la France (fem.)",
+        "le Brésil (masc.)",
+        "le Portugal (masc.)",
+        "les États-Unis (plural)"
+       ]
+      }
+     ]
+    }
+   ],
+   "exercises": [
+    {
+     "hint": "city"
+    },
+    {
+     "hint": "masculine country"
+    },
+    {
+     "hint": "feminine country"
+    },
+    {
+     "hint": "plural country"
+    },
+    {
+     "hint": "city"
+    },
+    {
+     "hint": "masculine country"
+    }
+   ]
+  }
+ },
+ "review": [
+  {
+   "path": "grammar.blocks[0].examples[1]",
+   "pt": "Ela está viajando pra Tóquio.",
+   "en": "She is traveling to Tokyo.",
+   "conf": "media",
+   "why": "English uses \"to\" for direction and \"in\" for location; the French à covers both. Translated to match the French meaning."
+  }
+ ]
+}

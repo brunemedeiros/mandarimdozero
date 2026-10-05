@@ -1,0 +1,55 @@
+{
+ "unit": "A1-g8",
+ "en": {
+  "title": "Adverbs of frequency",
+  "goal": "Use toujours, souvent, parfois, rarement and jamais to say how often you do something.",
+  "grammar": {
+   "blocks": [
+    {
+     "title": "Adverbs of frequency",
+     "body": "From most to least frequent: toujours (always), souvent (often), parfois (sometimes), rarement (rarely) and jamais (never). In French, the adverb usually comes right after the conjugated verb — unlike English, where it usually goes before the verb.",
+     "examples": [
+      "I always read in the evening.",
+      "She sometimes plays the guitar."
+     ]
+    },
+    {
+     "title": "Where to put the adverb",
+     "body": "Placing it right after the verb works for any everyday verb — including the leisure verbs you just learned.",
+     "examples": [
+      "We often go out on the weekend.",
+      "He rarely sings."
+     ]
+    },
+    {
+     "title": "Jamais needs ne",
+     "body": "Jamais (never) works as a negation — so it needs ne before the verb, just like in ne...pas. The full structure is ne...jamais.",
+     "examples": [
+      "I never dance.",
+      "He never goes out on Mondays."
+     ]
+    },
+    {
+     "title": "Très bien! 🎉",
+     "body": "Here is the full scale, from most to least frequent — worth coming back to whenever you need to describe a habit:",
+     "examples": [],
+     "table": [
+      {"label": "Adverbs (most to least frequent)", "pronouns": ["always", "often", "sometimes", "rarely", "never (+ ne)"]}
+     ]
+    }
+   ],
+   "exercises": [
+    {"hint": "always"},
+    {"hint": "sometimes"},
+    {"hint": "often"},
+    {"hint": "never"},
+    {"hint": "rarely"},
+    {"hint": "always"}
+   ]
+  }
+ },
+ "review": [
+  {"path": "grammar.blocks[0].body", "pt": "...não antes, como em inglês.", "en": "...unlike English, where it usually goes before the verb.", "conf": "media", "why": "comparison adapted: original contrasted with English for Portuguese speakers; here it is stated from the English reader's point of view (true for simple tenses: 'I always read' vs 'je lis toujours')"},
+  {"path": "grammar.blocks[1].examples[0]", "pt": "Nós saímos frequentemente no fim de semana.", "en": "We often go out on the weekend.", "conf": "media", "why": "EN-US 'on the weekend' (EN-GB 'at the weekend')"}
+ ]
+}
