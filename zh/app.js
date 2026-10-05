@@ -6380,6 +6380,7 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
   // -- Combinar continua NÃO fazendo isso (reconhecimento, não revisão;
   // só promove cartão nunca estudado, ver onMatchTileClick).
   applyMemoryGrade(card, isCorrect ? 2 : 0);
+  trackReviewAnswer('speed_review', card, isCorrect ? 2 : 0);
 
   if (isCorrect){
     // Pontuação recompensa velocidade: quanto menos tempo passou, mais pontos.
@@ -7314,6 +7315,7 @@ function gradeCurrentCard(grade){
   // Fase 5: Flashcard agora usa o motor FSRS (shared/fsrs.js) -- due deixa
   // de ser calculado por regras SM-2 fixas.
   applyMemoryGrade(card, grade);
+  trackReviewAnswer('flashcard', card, grade);
   STATE.totalReviews += 1;
   // Streak só conta quando a SESSÃO inteira termina (ver renderReviewView),
   // não a cada cartão avaliado -- senão avaliar 1 carta isolada já bastava
@@ -8098,6 +8100,7 @@ function gradeHanziCard(grade){
   const intervalBefore = card.interval;
   // Fase 5: mesmo motor novo do Flashcard de vocabulário.
   applyMemoryGrade(card, grade);
+  trackReviewAnswer('hanzi', card, grade);
   STATE.totalReviews += 1;
   // Streak só conta no fim da SESSÃO inteira (ver renderHanziReviewView),
   // mesmo raciocínio do Flashcard de vocabulário.
