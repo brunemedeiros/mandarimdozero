@@ -17523,3 +17523,9 @@ Decisão da autora: TTS explícito por Field usa o **Google Cloud TTS com a chav
 4. Conferir se a chave do Google não tem restrição de origem HTTP (referrer) que bloqueie chamadas de servidor; ela precisa poder chamar a Text-to-Speech API.
 
 **Incertezas**: o `speakingRate` com vozes Chirp 3 HD não foi testado ao vivo (sem rede/chave nesta sessão); se o Google recusar o parâmetro, a função devolve `provider_error` e basta remover `speakingRate` do corpo em `buildGoogleSynthesizeBody`. A existência da voz `pt-BR-Chirp3-HD-Achernar` também não foi confirmada ao vivo.
+
+## Painel ampliado + TTS Google -- aplicação (2026-10-05)
+- Migration 070 aplicada via `apply_migration`: Staging (`ilfjzizjfcmhibkhwber`) e produção (`eigjocalzwamisgqilhg`), nome `teacher_student_overview`. Verificado: `security definer`, `search_path=public`, EXECUTE só authenticated, índice criado, chamada sem vínculo devolve `not_authorized`; em produção, simulando a professora, a função responde para os 13 vínculos ativos sem erro.
+- Secret `TTS_PROVIDER_API_KEY` configurada pela autora no Supabase (produção) e alerta de orçamento de R$ 1/mês criado no Google Cloud (2026-10-05).
+- `tts-generate` publicada em produção (versão 3, `verify_jwt:true`). A cópia publicada tem a MESMA lógica do arquivo do repositório, só com os comentários longos encurtados e um helper `json()` para as respostas.
+- Pendente: primeiro teste real de geração pelo app (feito pela autora ou na próxima sessão com login).
