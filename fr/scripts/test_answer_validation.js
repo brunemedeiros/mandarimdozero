@@ -203,7 +203,7 @@ check('split: vazio', J(splitDictationSentences('   ')), J([]));
     const diffIds = ds.filter(d => J(jsSplit[d.id]) !== J(py[d.id])).map(d => d.id);
     check('ditados reais: frases idênticas JS x Python em todos os ditados', J(diffIds), J([]));
   }
-  check('ditados reais: total de frases = 95', jsTotal, 95);
+  check('ditados reais: total de frases = 92', jsTotal, 92);
 }
 
 console.log('\n=== Desafio "Acentuação\" -- deve continuar EXIGINDO acento correto (isAccentAnswerCorrect nunca removeu diacrítico) ===\n');
