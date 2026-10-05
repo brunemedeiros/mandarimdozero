@@ -273,6 +273,34 @@ check('fila de devidos: só os vencidos, erro mais antigo primeiro', dueChalleng
 check('sanitize: lixo vira null', sanitizeChallengeReviewEntry({ box: 2 }, 'z'), null);
 check('sanitize: caixa fora do intervalo é limitada', sanitizeChallengeReviewEntry({ lastErrorAt: DAY0, box: 9 }, 'z').box, 4);
 
+console.log('\n=== Complete a frase (cloze_grammar, Fase 7) ===\n');
+const { clozeGrammarParts, validateClozeGrammarItem, clozeGrammarOutcome, clozeGrammarFilled } = runBlockAndExport(
+  extractBlock('// BEGIN cloze-grammar-logic', '// END cloze-grammar-logic'),
+  ['clozeGrammarParts', 'validateClozeGrammarItem', 'clozeGrammarOutcome', 'clozeGrammarFilled']
+);
+const CG1 = { sentenceFr: 'Hier, nous ___ mangé au restaurant.', blanks: [{ options: ['avons', 'sommes'], answer: 'avons' }], explanation: 'manger usa avoir' };
+const CG2 = { sentenceFr: 'Nous ___ ___ au cinéma.', blanks: [{ options: ['sommes', 'avons'], answer: 'sommes' }, { options: ['allés', 'allé', 'aller'], answer: 'allés' }], explanation: 'aller usa être' };
+check('cloze: frase com 1 lacuna tem 2 partes', clozeGrammarParts(CG1.sentenceFr).length, 2);
+check('cloze: item válido não tem problemas', validateClozeGrammarItem(CG1).length, 0);
+check('cloze: item com 2 lacunas válido', validateClozeGrammarItem(CG2).length, 0);
+check('cloze: lacunas ≠ grupos de opções é problema', validateClozeGrammarItem({ ...CG1, sentenceFr: 'Sans lacune.' }).length > 0, true);
+check('cloze: 1 opção só é problema', validateClozeGrammarItem({ ...CG1, blanks: [{ options: ['avons'], answer: 'avons' }] }).length > 0, true);
+check('cloze: 5 opções é problema', validateClozeGrammarItem({ ...CG1, blanks: [{ options: ['a','b','c','d','avons'], answer: 'avons' }] }).length > 0, true);
+check('cloze: resposta fora das opções é problema', validateClozeGrammarItem({ ...CG1, blanks: [{ options: ['a', 'b'], answer: 'avons' }] }).length > 0, true);
+check('cloze: explicação vazia é problema', validateClozeGrammarItem({ ...CG1, explanation: ' ' }).length > 0, true);
+check('cloze: opções repetidas é problema', validateClozeGrammarItem({ ...CG1, blanks: [{ options: ['avons', 'Avons'], answer: 'avons' }] }).length > 0, true);
+check('cloze: escolha certa = ok', clozeGrammarOutcome(CG1, ['avons']).outcome, 'ok');
+check('cloze: escolha errada = fail', clozeGrammarOutcome(CG1, ['sommes']).outcome, 'fail');
+check('cloze: sem escolha = incompleto', clozeGrammarOutcome(CG1, [null]).complete, false);
+check('cloze: 2 lacunas, 1 errada = fail', clozeGrammarOutcome(CG2, ['sommes', 'allé']).outcome, 'fail');
+check('cloze: 2 lacunas, por lacuna', clozeGrammarOutcome(CG2, ['sommes', 'allé']).perBlank.join(','), 'true,false');
+check('cloze: 2 lacunas certas = ok', clozeGrammarOutcome(CG2, ['sommes', 'allés']).outcome, 'ok');
+check('cloze: frase preenchida com a resposta certa', clozeGrammarFilled(CG2), 'Nous sommes allés au cinéma.');
+check('cloze: frase preenchida com a escolha', clozeGrammarFilled(CG1, ['sommes']), 'Hier, nous sommes mangé au restaurant.');
+const lote6 = JSON.parse(fs.readFileSync(path.join(__dirname, 'challenges_import', 'lote-a1-m6-cloze.json'), 'utf8'));
+check('cloze: lote A1-m6 -- todos os itens válidos', lote6.every(c => c.type === 'cloze_grammar' && validateClozeGrammarItem(c).length === 0), true);
+check('cloze: lote A1-m6 -- resposta certa dá ok em todos', lote6.every(c => clozeGrammarOutcome(c, c.blanks.map(b => b.answer)).outcome === 'ok'), true);
+
 console.log(`\n${passed} passaram, ${failed} falharam.`);
 if (failed > 0){
   console.log('\nFalhas:');

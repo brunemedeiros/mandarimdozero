@@ -22,10 +22,11 @@ const CHALLENGE_CATEGORIES = {
   listen_translate: { label: 'Ouça e traduza',        scope: 'unit',   defaultAudience: 'premium', note: 'Poucos por unidade (hoje 2), frases só com vocabulário já visto no módulo.' },
   writing_marks:    { label: 'Acentuação / tons',     scope: 'unit',   defaultAudience: 'premium', note: 'fr: só ´ ` ^ ~ ¨ ("ç" NÃO é acento). zh: marcas de tom do pinyin.' },
   expression:       { label: 'Expressões',            scope: 'unit',   defaultAudience: 'premium', note: 'Leve: ~5 por módulo, no fim da unidade.' },
+  cloze_grammar:    { label: 'Complete a frase (gramática)', scope: 'module', defaultAudience: 'premium', note: 'Múltipla escolha (2-4 opções) por lacuna ___, só com vocabulário visto até o módulo; explicação pt-BR obrigatória. fr: python3 fr/scripts/challenges_import/build_cloze.py. Avaliar quando o módulo ensina um ponto de gramática.' },
 };
 
 // Tetos por módulo (o builder do francês aplica; outros idiomas devem respeitar).
-const CHALLENGE_MODULE_CAPS = { listen_translate: 10, writing_marks: 12, expression: 6 };
+const CHALLENGE_MODULE_CAPS = { listen_translate: 10, writing_marks: 12, expression: 6, cloze_grammar: 8 };
 
 // Devolve a lista de decisões a tomar para um conteúdo novo.
 function challengeChecklist(languageAppKey, scope){

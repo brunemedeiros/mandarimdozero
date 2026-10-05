@@ -9400,7 +9400,7 @@ function challengeDataPayload(c){
   return data;
 }
 
-const CHALLENGE_VALID_TYPES = ['expression', 'listen_translate', 'accent'];
+const CHALLENGE_VALID_TYPES = ['expression', 'listen_translate', 'accent', 'cloze_grammar'];
 const CHALLENGE_VALID_STATUSES = ['needs_review', 'approved', 'published', 'rejected'];
 
 // Aceita tanto um array de desafios quanto a saída direta do pipeline
@@ -9517,6 +9517,7 @@ const CHALLENGE_CATEGORIES = [
   { type: 'expression', emoji: '🧩', title: 'Expressões', subtitle: 'Descubra o sentido' },
   { type: 'listen_translate', emoji: '🎧', title: 'Ouça e traduza', subtitle: 'Escute e traduza' },
   { type: 'accent', emoji: '✍️', title: 'Acentuação', subtitle: 'Escreva corretamente' },
+  { type: 'cloze_grammar', emoji: '🧠', title: 'Complete a frase', subtitle: 'Gramática na prática' },
 ];
 
 let currentChallengesCategory = 'expression';
@@ -9615,6 +9616,16 @@ const CHALLENGE_I18N = {
     'ch.cat.listen_translate.subtitle': 'Escute e traduza',
     'ch.cat.accent.title': 'Acentuação',
     'ch.cat.accent.subtitle': 'Escreva corretamente',
+    'ch.cat.cloze_grammar.title': 'Complete a frase',
+    'ch.cat.cloze_grammar.subtitle': 'Gramática na prática',
+    'ch.label.cloze': '🧠 Complete a frase',
+    'ch.cloze.instruction': 'Escolha a forma certa para cada lacuna:',
+    'ch.cloze.blank': 'Lacuna {n}',
+    'ch.cloze.chooseAll': 'Escolha uma opção para cada lacuna antes de verificar.',
+    'ch.cloze.right': '✅ Bonne réponse.',
+    'ch.cloze.yourAnswer': 'Sua resposta',
+    'ch.cloze.correct': 'Resposta certa',
+    'ch.cloze.translation': 'Tradução',
     'ch.cat.dictation.title': 'Ditados',
     'ch.cat.dictation.subtitle': 'Ouça e escreva',
     'ch.label.listen': '🎧 Ouça e traduza',
@@ -10067,6 +10078,7 @@ function challengeCardLabelHTML(c){
   if (c.type === 'expression') return `<div class="challenge-card-expr">${escapeHtmlChallenge(c.canonicalExpression)}</div>`;
   if (c.type === 'listen_translate') return `<div class="challenge-card-expr">${chT('ch.label.listen')}</div>`;
   if (c.type === 'accent') return `<div class="challenge-card-expr">${chT('ch.label.accent')}</div>`;
+  if (c.type === 'cloze_grammar') return `<div class="challenge-card-expr">${chT('ch.label.cloze')}</div>`;
   return '';
 }
 
@@ -10345,6 +10357,7 @@ function openChallengePlayer(id){
 
   if (c.type === 'listen_translate') return openListenTranslatePlayer(c);
   if (c.type === 'accent') return openAccentPlayer(c);
+  if (c.type === 'cloze_grammar') return openClozeGrammarPlayer(c);
   return openExpressionPlayer(c);
 }
 
@@ -10862,6 +10875,121 @@ function checkAccentAnswer(c){
   wireChallengeCompleteButton(c);
 }
 
+// ---------- Complete a frase (gramática) -- type 'cloze_grammar' ----------
+// Uma frase em francês com 1+ lacunas "___"; cada lacuna tem 2 a 4 opções
+// (múltipla escolha). Primeiro tema: passé composé (auxiliar être/avoir e
+// particípio). Dado no banco (dentro de `data`):
+//   sentenceFr: "Hier, nous ___ mangé au restaurant."
+//   blanks: [{ options: ["avons", "sommes"], answer: "avons" }]
+//   translationPt, explanation (pt-BR, obrigatória), topic (ex. "passe-compose")
+// Conclusão: todas as lacunas certas = ok; qualquer erro = fail (binário,
+// como Expressões). Sem áudio.
+// BEGIN cloze-grammar-logic (extraído por fr/scripts/test_answer_validation.js)
+const CLOZE_GRAMMAR_BLANK = '___';
+function clozeGrammarParts(sentence){
+  return String(sentence || '').split(CLOZE_GRAMMAR_BLANK);
+}
+// Lista de problemas do item (vazia = válido). Usada pelo checklist do admin.
+function validateClozeGrammarItem(c){
+  const problems = [];
+  if (!c || !c.sentenceFr) { problems.push('frase vazia'); return problems; }
+  const nBlanks = clozeGrammarParts(c.sentenceFr).length - 1;
+  const blanks = Array.isArray(c.blanks) ? c.blanks : [];
+  if (nBlanks < 1) problems.push('a frase não tem lacuna ___');
+  if (nBlanks !== blanks.length) problems.push(`a frase tem ${nBlanks} lacuna(s) e ${blanks.length} grupo(s) de opções`);
+  blanks.forEach((b, i) => {
+    const opts = (b && Array.isArray(b.options)) ? b.options : [];
+    if (opts.length < 2 || opts.length > 4) problems.push(`lacuna ${i + 1}: precisa de 2 a 4 opções`);
+    if (new Set(opts.map(o => String(o).trim().toLowerCase())).size !== opts.length) problems.push(`lacuna ${i + 1}: opções repetidas`);
+    if (!b || !opts.includes(b.answer)) problems.push(`lacuna ${i + 1}: a resposta certa não está entre as opções`);
+  });
+  if (!c.explanation || !String(c.explanation).trim()) problems.push('explicação vazia');
+  return problems;
+}
+// chosen: array com a opção escolhida em cada lacuna (null = não respondida).
+function clozeGrammarOutcome(c, chosen){
+  const blanks = (c && c.blanks) || [];
+  const perBlank = blanks.map((b, i) => !!chosen && chosen[i] != null && chosen[i] === b.answer);
+  const complete = !!chosen && blanks.every((b, i) => chosen[i] != null);
+  const outcome = complete && perBlank.length > 0 && perBlank.every(Boolean) ? 'ok' : 'fail';
+  return { outcome, perBlank, complete };
+}
+// Frase com as lacunas preenchidas (pelas escolhas ou, sem escolhas, pelas respostas certas).
+function clozeGrammarFilled(c, chosen){
+  const parts = clozeGrammarParts(c.sentenceFr);
+  const blanks = c.blanks || [];
+  return parts.map((p, i) => i < parts.length - 1
+    ? p + ((chosen && chosen[i] != null) ? chosen[i] : (blanks[i] ? blanks[i].answer : CLOZE_GRAMMAR_BLANK))
+    : p).join('');
+}
+// END cloze-grammar-logic
+
+function openClozeGrammarPlayer(c){
+  stopExerciseAudio();
+  const blanks = c.blanks || [];
+  const chosen = blanks.map(() => null);
+  const parts = clozeGrammarParts(c.sentenceFr);
+  const content = document.getElementById('challenge-player-content');
+  const sentenceHTML = parts.map((p, i) => escapeHtmlChallenge(p) +
+    (i < parts.length - 1 ? `<span class="cloze-grammar-slot" data-slot="${i}">${CLOZE_GRAMMAR_BLANK}</span>` : '')).join('');
+  content.innerHTML = `
+    <div class="cloze-grammar">
+      <p class="challenge-question">${chT('ch.cloze.instruction')}</p>
+      <div class="cloze-grammar-sentence" id="cloze-grammar-sentence">${sentenceHTML}</div>
+      ${blanks.map((b, i) => `
+        <div class="cloze-grammar-group" data-blank="${i}">
+          ${blanks.length > 1 ? `<div class="cloze-grammar-group-label">${chT('ch.cloze.blank', { n: i + 1 })}</div>` : ''}
+          <div class="challenge-choices">
+            ${shuffle(b.options.slice()).map(o => `<button class="challenge-choice-btn" data-blank="${i}" data-value="${escapeHtmlChallenge(o)}">${escapeHtmlChallenge(o)}</button>`).join('')}
+          </div>
+        </div>`).join('')}
+      <p class="cloze-grammar-msg" id="cloze-grammar-msg"></p>
+      <button class="btn btn-primary btn-block" id="cloze-grammar-verify-btn">${chT('ch.verify')}</button>
+      <div id="cloze-grammar-feedback-wrap"></div>
+    </div>
+  `;
+  content.querySelectorAll('.cloze-grammar-group .challenge-choice-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = Number(btn.dataset.blank);
+      chosen[i] = btn.dataset.value;
+      content.querySelectorAll(`.challenge-choice-btn[data-blank="${i}"]`).forEach(b => b.classList.toggle('selected', b === btn));
+      const slot = content.querySelector(`.cloze-grammar-slot[data-slot="${i}"]`);
+      if (slot){ slot.textContent = chosen[i]; slot.classList.add('filled'); }
+      document.getElementById('cloze-grammar-msg').textContent = '';
+    });
+  });
+  document.getElementById('cloze-grammar-verify-btn').addEventListener('click', () => {
+    const res = clozeGrammarOutcome(c, chosen);
+    if (!res.complete){ document.getElementById('cloze-grammar-msg').textContent = chT('ch.cloze.chooseAll'); return; }
+    renderClozeGrammarFeedback(c, chosen, res);
+  });
+}
+
+function renderClozeGrammarFeedback(c, chosen, res){
+  const content = document.getElementById('challenge-player-content');
+  content.querySelectorAll('.cloze-grammar-group .challenge-choice-btn').forEach(b => {
+    const i = Number(b.dataset.blank);
+    b.classList.add('disabled');
+    if (b.dataset.value === c.blanks[i].answer) b.classList.add('correct');
+    else if (b.dataset.value === chosen[i]) b.classList.add('incorrect');
+  });
+  content.querySelectorAll('.cloze-grammar-slot').forEach(s => {
+    const i = Number(s.dataset.slot);
+    s.classList.add(res.perBlank[i] ? 'correct' : 'incorrect');
+  });
+  document.getElementById('cloze-grammar-verify-btn').style.display = 'none';
+  const isCorrect = res.outcome === 'ok';
+  const bodyHTML = `
+    ${isCorrect ? '' : `<p class="challenge-feedback-chosen">${chT('ch.cloze.yourAnswer')}: ${escapeHtmlChallenge(clozeGrammarFilled(c, chosen))}<br>${chT('ch.cloze.correct')}: <strong>${escapeHtmlChallenge(clozeGrammarFilled(c))}</strong></p>`}
+    ${isCorrect ? `<p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(clozeGrammarFilled(c))}</strong></p>` : ''}
+    ${c.translationPt ? `<p class="challenge-feedback-meaning">${chT('ch.cloze.translation')}: ${escapeHtmlChallenge(c.translationPt)}</p>` : ''}
+    <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation || '')}</p>
+  `;
+  document.getElementById('cloze-grammar-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('challenge', isCorrect, isCorrect ? chT('ch.cloze.right') : chT('ch.notQuite'), bodyHTML, res.outcome);
+  recordChallengeReviewOutcome(c, res.outcome);
+  wireChallengeCompleteButton(c);
+}
+
 // ---------- Revisão do admin ----------
 // Aprovar/Editar/Rejeitar/Publicar/Despublicar gravam de verdade na
 // tabela `challenges` do Supabase (protegida por RLS) -- ver
@@ -10985,6 +11113,10 @@ function challengeQualityChecklist(c){
   } else if (c.type === 'accent'){
     items.push({ label: 'Palavra/expressão preenchida', ok: !!c.targetText, blocking: true });
     items.push({ label: 'Explicação preenchida', ok: !!c.explanation, blocking: false });
+  } else if (c.type === 'cloze_grammar'){
+    const problems = validateClozeGrammarItem(c);
+    items.push({ label: problems.length ? 'Lacunas/opções: ' + problems.join('; ') : 'Lacunas, opções e explicação válidas', ok: !problems.length, blocking: true });
+    items.push({ label: 'Tradução preenchida', ok: !!c.translationPt, blocking: false });
   }
 
   return items;
@@ -11145,13 +11277,49 @@ function challengeAdminEditViewAccent(c){
   `;
 }
 
+function clozeGrammarBlanksText(c){
+  return (c.blanks || []).map(b => (b.options || []).map(o => (o === b.answer ? '*' : '') + o).join(' | ')).join('\n');
+}
+
+function challengeAdminReadViewClozeGrammar(c){
+  return `
+    <p class="challenges-admin-field"><strong>Frase:</strong> ${escapeHtmlChallenge(c.sentenceFr || '')}</p>
+    <p class="challenges-admin-field"><strong>Opções por lacuna:</strong></p>
+    <ul class="challenges-admin-choices">
+      ${(c.blanks || []).map((b, i) => `<li>Lacuna ${i + 1}: ${(b.options || []).map(o => o === b.answer ? `<strong>${escapeHtmlChallenge(o)}</strong>` : escapeHtmlChallenge(o)).join(' · ')}</li>`).join('')}
+    </ul>
+    <p class="challenges-admin-field"><strong>Tradução:</strong> ${escapeHtmlChallenge(c.translationPt || '—')}</p>
+    <p class="challenges-admin-field"><strong>Explicação:</strong> ${escapeHtmlChallenge(c.explanation || '—')}</p>
+    ${challengeQualityChecklistHTML(c)}
+  `;
+}
+
+function challengeAdminEditViewClozeGrammar(c){
+  return `
+    <label class="challenges-admin-edit-label">Frase (use ___ para cada lacuna)
+      <textarea class="challenges-admin-edit-input" data-field="sentenceFr" rows="2">${escapeHtmlChallenge(c.sentenceFr || '')}</textarea>
+    </label>
+    <label class="challenges-admin-edit-label">Opções (uma linha por lacuna, separadas por " | " — marque a certa com * no início)
+      <textarea class="challenges-admin-edit-input" data-field="blanks" rows="3">${escapeHtmlChallenge(clozeGrammarBlanksText(c))}</textarea>
+    </label>
+    <label class="challenges-admin-edit-label">Tradução (pt-BR)
+      <input class="challenges-admin-edit-input" data-field="translationPt" value="${escapeHtmlChallenge(c.translationPt || '')}">
+    </label>
+    <label class="challenges-admin-edit-label">Explicação (pt-BR)
+      <textarea class="challenges-admin-edit-input" data-field="explanation" rows="2">${escapeHtmlChallenge(c.explanation || '')}</textarea>
+    </label>
+  `;
+}
+
 function challengeAdminReadView(c){
+  if (c.type === 'cloze_grammar') return challengeAdminReadViewClozeGrammar(c);
   if (c.type === 'listen_translate') return challengeAdminReadViewListenTranslate(c);
   if (c.type === 'accent') return challengeAdminReadViewAccent(c);
   return challengeAdminReadViewExpression(c);
 }
 
 function challengeAdminEditView(c){
+  if (c.type === 'cloze_grammar') return challengeAdminEditViewClozeGrammar(c);
   if (c.type === 'listen_translate') return challengeAdminEditViewListenTranslate(c);
   if (c.type === 'accent') return challengeAdminEditViewAccent(c);
   return challengeAdminEditViewExpression(c);
@@ -11167,6 +11335,7 @@ function challengeAdminCardTitle(c){
     return `🎧 ${escapeHtmlChallenge(snippet)}`;
   }
   if (c.type === 'accent') return `✍️ Acentuação — ${escapeHtmlChallenge(c.targetText)}`;
+  if (c.type === 'cloze_grammar') return `🧠 ${escapeHtmlChallenge(c.sentenceFr || '')}`;
   return '';
 }
 
@@ -11294,7 +11463,7 @@ function renderChallengePreviewBanner(c){
   const showAnswerBtn = document.getElementById('preview-show-answer-btn');
   if (showAnswerBtn){
     showAnswerBtn.addEventListener('click', () => {
-      const answer = c.type === 'listen_translate' ? (c.referenceTranslations || [])[0] : c.targetText;
+      const answer = c.type === 'listen_translate' ? (c.referenceTranslations || [])[0] : c.type === 'cloze_grammar' ? clozeGrammarFilled(c) : c.targetText;
       alert('Resposta esperada: ' + answer);
     });
   }
@@ -11347,10 +11516,10 @@ function challengeAdminPublishedCardHTML(c){
 const challengesAdminFilterState = { search: '', type: 'all', level: 'all' };
 const CHALLENGES_ADMIN_PAGE_SIZE = 15;
 const challengesAdminVisibleCount = { pending: CHALLENGES_ADMIN_PAGE_SIZE, published: CHALLENGES_ADMIN_PAGE_SIZE, unpublished: CHALLENGES_ADMIN_PAGE_SIZE };
-const CHALLENGE_TYPE_LABELS = { expression: 'Expressões', listen_translate: 'Ouça e traduza', accent: 'Acentuação' };
+const CHALLENGE_TYPE_LABELS = { expression: 'Expressões', listen_translate: 'Ouça e traduza', accent: 'Acentuação', cloze_grammar: 'Complete a frase' };
 
 function challengeSearchableText(c){
-  return [c.canonicalExpression, c.sentenceFr, c.targetText, c.question, c.explanation]
+  return [c.canonicalExpression, c.sentenceFr, c.targetText, c.question, c.explanation, c.translationPt]
     .filter(Boolean).join(' ').toLowerCase();
 }
 
@@ -11643,6 +11812,12 @@ function renderChallengesAdminList(){
           c.options = lines.map(l => l.replace(/^\*/, '').trim());
           const starred = lines.find(l => l.startsWith('*'));
           if (starred) c.correctAnswer = starred.replace(/^\*/, '').trim();
+        } else if (field === 'blanks'){
+          c.blanks = value.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+            const opts = line.split('|').map(o => o.trim()).filter(Boolean);
+            const starred = opts.find(o => o.startsWith('*'));
+            return { options: opts.map(o => o.replace(/^\*/, '').trim()), answer: starred ? starred.replace(/^\*/, '').trim() : '' };
+          });
         } else if (field === 'referenceTranslations'){
           c.referenceTranslations = value.split('\n').map(l => l.trim()).filter(Boolean);
         } else if (field.includes('.')){
