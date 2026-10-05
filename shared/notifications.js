@@ -104,15 +104,22 @@ function fillNotificationPlaceholders(text, payload){
 }
 
 async function pickNotificationTemplate(eventType){
-  const { data, error } = await supabaseClient
-    .from('notification_templates')
-    .select('*')
-    .eq('event_type', eventType)
-    .eq('channel', 'in_app')
-    .eq('language_app_key', APP_KEY)
-    .eq('active', true);
-  if (error || !data?.length) return null;
-  return data[Math.floor(Math.random() * data.length)];
+  // Idioma do SITE (Fase 11 i18n): tenta a variante nesse idioma; sem variante
+  // ATIVA cai no português (mesma regra do notification-cron).
+  const uiLang = (typeof getUiLang === 'function') ? getUiLang() : 'pt-BR';
+  for (const lang of uiLang === 'en' ? ['en', 'pt-BR'] : ['pt-BR']) {
+    const { data, error } = await supabaseClient
+      .from('notification_templates')
+      .select('*')
+      .eq('event_type', eventType)
+      .eq('channel', 'in_app')
+      .eq('language_app_key', APP_KEY)
+      .eq('ui_language', lang)
+      .eq('active', true);
+    if (error) return null;
+    if (data?.length) return data[Math.floor(Math.random() * data.length)];
+  }
+  return null;
 }
 
 // Anti-spam básico da Fase 1 (seção 5/16): cooldown por categoria (minutos

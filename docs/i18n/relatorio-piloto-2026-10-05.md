@@ -70,3 +70,13 @@ Mecanismo: o mesmo overlay do francês (`shared/content-i18n.js`), agora também
 Testes: `tests/i18n/test_content_zh_en.js` (16: pt-BR idêntico, en, aviso, progresso salvo, volta ao português byte a byte), fr 30, i18n unit 1833, lint OK, Playwright i18n 209, fases E/H ok.
 Pendência para você: aprovar as traduções em `traducoes-en-pendentes.md` (seção "Fase 10"): 208 itens de confiança média e 12 de baixa, incluindo comparações com o português reescritas para o inglês, nota cultural de pechinchar e etimologia de "chá" mantidas como no português sem conferência, e o radical de 冷. Erro no original em português: a unidade 16 (hao-vs-ri) diz que 日 aparece em 今天/明天, mas ali é 天 (o inglês mantém só 星期日); decida se corrijo o português também.
 Ainda em português no site em inglês: nomes de conquistas e textos de notificação (fase 11, servidor), "Ouça e traduza" não existe no zh. Próximas: 11 (servidor), 12 (/ptbr), 13 (planos).
+
+
+## Fase 11 -- servidor (notificações, e-mails, conquistas)
+
+- Migration 056 (aplicada ao vivo): `notification_templates.ui_language` (padrão pt-BR) + 78 templates em inglês, **inativos** até aprovação.
+- `notification-cron` v19 (deploy ao vivo): escolhe o template pelo idioma do site da conta (`progress.data._meta.uiLanguage`); sem variante ativa no idioma, cai no português. Rodapé do e-mail, título padrão do push e lista de alunas do alerta da professora também seguem o idioma de quem recebe.
+- Cliente (`shared/notifications.js`): mesma regra para notificações imediatas.
+- Conquistas: nomes/descrições viram chaves i18n (`badge.*`); as do catálogo do banco usam tradução se existir, senão o texto do banco.
+- Testes: i18n unit 1869, Playwright i18n 209, conquistas 12 (pt-BR idêntico ao commit anterior), lint, fases E/F/G/H.
+- Fora desta fase: nomes de campo do Anki e mensagens de validação de cartões (ainda em português).

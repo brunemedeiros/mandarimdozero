@@ -163,7 +163,7 @@ function resolveFeaturedBadge(badgeId, catalog){
   const special = SPECIAL_BADGES.find(b => b.id === badgeId);
   if (special) return { icon: special.icon, name: special.name, desc: special.desc };
   const custom = (catalog || []).find(b => b.id === badgeId);
-  if (custom) return { icon: custom.icon, name: custom.name, desc: custom.description };
+  if (custom) return { icon: custom.icon, name: catalogBadgeText(custom.id, 'name', custom.name), desc: catalogBadgeText(custom.id, 'desc', custom.description) };
   return null;
 }
 

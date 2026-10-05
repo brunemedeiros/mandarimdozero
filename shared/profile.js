@@ -49,9 +49,18 @@ const FOUNDER_CROWN_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/200
 const BETA_TESTER_CUTOFF = '2026-09-05T00:00:00Z';
 
 const SPECIAL_BADGES = [
-  { id: 'founder', name: 'Fundadora', icon: FOUNDER_CROWN_SVG, desc: 'Criadora da plataforma' },
-  { id: 'beta_tester', name: 'Beta Tester', icon: '🧪', desc: 'Ajudou a testar o app antes do lançamento oficial' },
+  { id: 'founder', get name(){ return t('badge.founder.name'); }, icon: FOUNDER_CROWN_SVG, get desc(){ return t('badge.founder.desc'); } },
+  { id: 'beta_tester', get name(){ return t('badge.beta_tester.name'); }, icon: '🧪', get desc(){ return t('badge.beta_tester.desc'); } },
 ];
+
+// Badges do catálogo da admin (tabela badge_catalog, texto em português):
+// se existir tradução 'badge.catalog.<id>.<campo>' no idioma do site usa ela;
+// senão (badge criado depois, sem tradução) mostra o texto do banco.
+function catalogBadgeText(id, field, fallback){
+  const key = 'badge.catalog.' + id + '.' + field;
+  const v = t(key);
+  return v === key ? fallback : v;
+}
 
 function isFounder(){
   return !!(CURRENT_USER && typeof ADMIN_EMAIL !== 'undefined' && CURRENT_USER.email === ADMIN_EMAIL);
@@ -101,7 +110,7 @@ async function computeEarnedSpecialBadges(){
     const catalog = await fetchBadgeCatalog();
     catalog.forEach(cb => {
       if (granted.has(cb.id) && !earned.some(e => e.id === cb.id)){
-        earned.push({ id: cb.id, name: cb.name, icon: cb.icon, desc: cb.description });
+        earned.push({ id: cb.id, name: catalogBadgeText(cb.id, 'name', cb.name), icon: cb.icon, desc: catalogBadgeText(cb.id, 'desc', cb.description) });
       }
     });
   }

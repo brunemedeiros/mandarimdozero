@@ -1878,22 +1878,22 @@ function addXP(amount){
 // showToast agora vem de shared/toast.js.
 
 const BADGES = [
-  { id:'first_step', name:'Primeiro Passo', icon:'🌱', desc:'Fez sua primeira revisão', check: s => s.totalReviews >= 1 },
-  { id:'streak_3', name:'3 Dias Seguidos', icon:'🔥', desc:'Estudou 3 dias seguidos', check: s => s.streak >= 3 },
-  { id:'streak_7', name:'Uma Semana!', icon:'⛩️', desc:'Estudou 7 dias seguidos', check: s => s.streak >= 7 },
-  { id:'unit_1', name:'Unidade 1 Completa', icon:'📖', desc:'Completou a primeira unidade', check: s => s.unitProgress[1]?.completed },
-  { id:'unit_7', name:'Metade do Caminho', icon:'🏮', desc:'Completou metade do HSK1', check: s => Object.values(s.unitProgress).filter(u=>u.completed).length >= Math.ceil(UNITS.length/2) },
-  { id:'unit_14', name:'HSK 1 Completo', icon:'🐉', desc:'Completou o HSK1 inteiro', check: s => Object.values(s.unitProgress).filter(u=>u.completed).length >= UNITS.length },
-  { id:'xp_100', name:'100 XP', icon:'⭐', desc:'Acumulou 100 XP', check: s => s.xp >= 100 },
-  { id:'xp_500', name:'500 XP', icon:'🌟', desc:'Acumulou 500 XP', check: s => s.xp >= 500 },
-  { id:'reviews_100', name:'100 Revisões', icon:'💪', desc:'Fez 100 revisões', check: s => s.totalReviews >= 100 },
+  { id:'first_step', get name(){ return t('badge.first_step.name'); }, icon:'🌱', get desc(){ return t('badge.first_step.desc'); }, check: s => s.totalReviews >= 1 },
+  { id:'streak_3', get name(){ return t('badge.streak_3.name'); }, icon:'🔥', get desc(){ return t('badge.streak_3.desc'); }, check: s => s.streak >= 3 },
+  { id:'streak_7', get name(){ return t('badge.streak_7.name'); }, icon:'⛩️', get desc(){ return t('badge.streak_7.desc'); }, check: s => s.streak >= 7 },
+  { id:'unit_1', get name(){ return t('badge.unit_1.name'); }, icon:'📖', get desc(){ return t('badge.unit_1.desc'); }, check: s => s.unitProgress[1]?.completed },
+  { id:'unit_7', get name(){ return t('badge.unit_7.name'); }, icon:'🏮', get desc(){ return t('badge.unit_7.desc'); }, check: s => Object.values(s.unitProgress).filter(u=>u.completed).length >= Math.ceil(UNITS.length/2) },
+  { id:'unit_14', get name(){ return t('badge.unit_14.name'); }, icon:'🐉', get desc(){ return t('badge.unit_14.desc'); }, check: s => Object.values(s.unitProgress).filter(u=>u.completed).length >= UNITS.length },
+  { id:'xp_100', get name(){ return t('badge.xp_100.name'); }, icon:'⭐', get desc(){ return t('badge.xp_100.desc'); }, check: s => s.xp >= 100 },
+  { id:'xp_500', get name(){ return t('badge.xp_500.name'); }, icon:'🌟', get desc(){ return t('badge.xp_500.desc'); }, check: s => s.xp >= 500 },
+  { id:'reviews_100', get name(){ return t('badge.reviews_100.name'); }, icon:'💪', get desc(){ return t('badge.reviews_100.desc'); }, check: s => s.totalReviews >= 100 },
   // ---- Fase 4 (artefato §8): badges novos, cada um ligado a um
   // comportamento específico -- não "badge por badge" genérico. ----
-  { id:'explorer', name:'Exploradora', icon:'🧭', desc:'Usou revisão, revisão rápida e jogo da memória', check: s => s.totalReviews >= 1 && s.everUsedSpeedReview && s.everUsedMatchGame },
-  { id:'trained_ear', name:'Ouvido Treinado', icon:'🎧', desc:'Tocou o áudio 100 vezes', check: s => (s.totalAudioPlays || 0) >= 100 },
-  { id:'comeback', name:'De Volta ao Jogo', icon:'🔄', desc:'Retomou a sequência em até 3 dias', check: s => !!s.hadStreakComeback },
-  { id:'multitasker', name:'Multitarefa', icon:'🧩', desc:'Praticou 5 formatos de exercício diferentes no mesmo dia', check: s => (s.daily?.exerciseFormatsSeen?.length || 0) >= 5 },
-  { id:'weekend', name:'Fim de Semana', icon:'🌙', desc:'Estudou sábado e domingo na mesma semana', check: s => {
+  { id:'explorer', get name(){ return t('badge.explorer.name'); }, icon:'🧭', get desc(){ return t('badge.explorer.desc'); }, check: s => s.totalReviews >= 1 && s.everUsedSpeedReview && s.everUsedMatchGame },
+  { id:'trained_ear', get name(){ return t('badge.trained_ear.name'); }, icon:'🎧', get desc(){ return t('badge.trained_ear.desc'); }, check: s => (s.totalAudioPlays || 0) >= 100 },
+  { id:'comeback', get name(){ return t('badge.comeback.name'); }, icon:'🔄', get desc(){ return t('badge.comeback.desc'); }, check: s => !!s.hadStreakComeback },
+  { id:'multitasker', get name(){ return t('badge.multitasker.name'); }, icon:'🧩', get desc(){ return t('badge.multitasker.desc'); }, check: s => (s.daily?.exerciseFormatsSeen?.length || 0) >= 5 },
+  { id:'weekend', get name(){ return t('badge.weekend.name'); }, icon:'🌙', get desc(){ return t('badge.weekend.desc'); }, check: s => {
       for (let i = 0; i < 14; i++){
         const d = new Date(Date.now() - i*86400000);
         if (d.getDay() !== 6) continue;

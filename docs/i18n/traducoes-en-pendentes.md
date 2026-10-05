@@ -2263,3 +2263,63 @@ Unidades 1–18 (docs/i18n/content-zh-en/<n>.json), histórias (_stories.json) e
 | hanzi | 男.mnemonic | Um campo de cultivo (田) sobre força/vigor físico (力) — na sociedade agrícola tradicional, o homem era quem trabalhava a terra com sua força. | A farm field (田) above physical strength/vigor (力) — in traditional agricultural society, the man was the one who worked the land with his strength. | media | Mnemônico narrativo; conferir fidelidade |
 | hanzi | 冷.radicals[1] | ordem (fonético) | order (phonetic) | baixa | Pista fonética (令 lìng); glosa do português incerta |
 | hanzi | 钱.radicals[1] | pequeno (fonético) | small (phonetic) | media | 戋 |
+
+
+## Fase 11 -- notificações e conquistas em inglês (servidor)
+
+Todas com confiança ALTA, exceto onde indicado. As linhas em inglês de `notification_templates` estão **inativas** (`active=false`, `ui_language='en'`): enquanto não forem ativadas, quem usa o site em inglês continua recebendo o texto em português. Para ativar depois de aprovar: `update notification_templates set active=true where ui_language='en';`
+
+**Nível MÉDIA** (tom coloquial, sem equivalente exato): "cara de cachorro pidão" -> "puppy-dog eyes"; "guardadinho" -> "safely stored"; "no bolso" -> "in the bag"; "Seu streak tá dormindo" -> "Your streak is sleeping".
+
+| id (pt) | EN título | EN corpo |
+|---|---|---|
+| 69 | Your French is waiting for you | 15 days away -- that's okay, life happens. Just a reminder that your progress is safely stored here, ready for whenever you want to pick it back up. |
+| 71 | Still there? Your French is waiting | 20 days already! No pressure at all -- just stopping by to remind you that you can pick up right where you left off, at your own pace. |
+| 73 | A month without French -- everything okay? | It's been a month since you last stopped by. Your progress is still saved, just the way you left it. Whenever you feel like coming back, we're here. |
+| 67 | We miss you in French 👋 | It's been 9 days since you studied here. No rush at all -- your progress is still saved, exactly as you left it. Whenever you want, just come back. |
+| 31 | New achievement! 🏅 | You unlocked the badge "{{badge_name}}" {{badge_icon}} |
+| 57 | Almost there for today's missions | You've already started today -- {{missing}} daily missions left to finish everything 🎯 |
+| 58 | Almost there! | {{missing}} of today's missions are still waiting for you. |
+| 63 | Show off your achievement! 🏅 | You've already earned a special badge, but you haven't picked one to show next to your name on the Ranking yet. How about choosing one now? |
+| 64 | Don't forget! | Your featured badge on the Ranking is still empty -- turn one on in Edit profile. |
+| 33 | Mission complete! 🎯 | {{mission_label}} — done! Ready for the next one? |
+| 34 | Nice! | {{mission_icon}} Mission complete: {{mission_label}} |
+| 53 | Someone passed you | You dropped to No. {{newRank}} in the overall ranking. Let's win it back? 💪 |
+| 51 | 📈 You moved up in the ranking! | You're now No. {{newRank}} in this week's overall ranking 🎉 |
+| 55 | 🏆 This week's result | You finished the week at No. {{rank}} of {{totalParticipants}} in the overall ranking. A new week has already started! |
+| 39 | Reviews waiting | {{dueCount}} words are waiting for review -- some for a few days now 📚 |
+| 40 | Time to review | You have {{dueCount}} words ready to review. Shall we? |
+| 43 | 🔥 Your streak is at risk! | You haven't studied today yet -- {{days}} days of streak waiting for 5 little minutes from you. |
+| 44 | Don't let it go out! | Only today is missing to keep your {{days}}-day streak. There's still time! |
+| 35 | 🔥 Streak kept! | You've been studying for {{days}} days in a row. Don't let it cool down! |
+| 36 | 🔥 You studied today! | {{days}}-day streak. You're flying! |
+| 75 |  | Haven't shown up in a few days: {{studentList}}. Maybe it's time to say hi 👋 |
+| 76 |  | A few days without practice over there: {{studentList}}. A reminder from you might help them get back into rhythm. |
+| 47 | Almost at today's goal | {{lessonsRemaining}} lessons left to hit your daily goal today. |
+| 48 | Almost there! | You've already done part of today's goal -- only {{lessonsRemaining}} lessons left. |
+| 1 |  | Hey, did you forget about me? 🥺 Just five little minutes and your daily study is done. |
+| 2 |  | Your French is right here, waiting for you (with puppy-dog eyes) 🐶 |
+| 21 |  | No rush at all -- but if you feel like it, your progress is waiting for you here. |
+| 23 |  | Your French is still safely stored, just the way you left it. Come back whenever you like 🙂 |
+| 5 |  | 3 days without showing up... I already miss you! Come say a quick hi? 👋 |
+| 6 |  | Psst. Your French is missing being practiced. |
+| 25 |  | Your progress is still safely stored here, just the way you left it. |
+| 9 |  | Where are you? Your French is still here, on the same page you left it 📖 |
+| 10 |  | 5 days! How about just one quick exercise to keep the rhythm? |
+| 13 |  | A whole week... is everything okay over there? Come on, we'll pick it back up together 🫶 |
+| 14 |  | Your streak is sleeping. How about waking it up with 5 little minutes? |
+| 17 |  | It's been a little while! No rush -- just reminding you that your progress is waiting 🙂 |
+| 18 |  | Want to pick up where you left off? We'll help you remember quickly. |
+| 27 | Points earned! | You earned +{{amount}} XP ⭐ Keep it up! |
+| 28 | Nice! | +{{amount}} XP in the bag 💪 |
+| 70 | Your Mandarin is waiting for you | 15 days away -- that's okay, life happens. Just a reminder that your progress is safely stored here, ready for whenever you want to pick it back up. |
+| 72 | Still there? Your Mandarin is waiting | 20 days already! No pressure at all -- just stopping by to remind you that you can pick up right where you left off, at your own pace. |
+| 74 | A month without Mandarin -- everything okay? | It's been a month since you last stopped by. Your progress is still saved, just the way you left it. Whenever you feel like coming back, we're here. |
+| 68 | We miss you in Mandarin 👋 | It's been 9 days since you studied here. No rush at all -- your progress is still saved, exactly as you left it. Whenever you want, just come back. |
+| 3 |  | Hey, did you forget about me? 🥺 Just five little minutes and your daily Mandarin is done. |
+| 4 |  | Your Chinese is right here, waiting for you (with kitten eyes) 🐱 |
+| 24 |  | Your Mandarin is still safely stored, just the way you left it. Come back whenever you like 🙂 |
+| 8 |  | Psst. Your 谢谢 is missing being practiced. |
+| 11 |  | Where are you? Your Mandarin is still here, on the same page you left it 📖 |
+
+**Conquistas** (`badge.*` em `shared/i18n/en.js`): 16 do app + Fundadora/Beta Tester, ALTA. As 3 do catálogo do banco (Embaixador/a, Pioneiro/a, Aluno/a da Prof. Brune), MÉDIA: "Ambassador", "Pioneer", "Prof. Brune's student".

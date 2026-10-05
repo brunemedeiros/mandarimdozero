@@ -1784,4 +1784,48 @@ window.I18N_CATALOG['en'] = {
   'nav.challenges': 'Challenges', // ALTA
   'nav.profile': 'Profile', // ALTA
   'side.streakDays': 'day streak', // ALTA
+
+  // Fase 11: nomes/descrições de conquistas.
+  'badge.first_step.name': 'First Step', // ALTA
+  'badge.first_step.desc': 'Did your first review', // ALTA
+  'badge.streak_3.name': '3 Days in a Row', // ALTA
+  'badge.streak_3.desc': 'Studied 3 days in a row', // ALTA
+  'badge.streak_7.name': 'One Week!', // ALTA
+  'badge.streak_7.desc': 'Studied 7 days in a row', // ALTA
+  'badge.unit_1.name': 'Unit 1 Complete', // ALTA
+  'badge.unit_1.desc': 'Completed the first unit', // ALTA
+  'badge.unit_half.name': 'Halfway There', // ALTA
+  'badge.unit_half.desc': 'Completed half of level A1', // ALTA
+  'badge.unit_all.name': 'Level A1 Complete', // ALTA
+  'badge.unit_all.desc': 'Completed the whole of level A1', // ALTA
+  'badge.xp_100.name': '100 XP', // ALTA
+  'badge.xp_100.desc': 'Earned 100 XP', // ALTA
+  'badge.xp_500.name': '500 XP', // ALTA
+  'badge.xp_500.desc': 'Earned 500 XP', // ALTA
+  'badge.reviews_100.name': '100 Reviews', // ALTA
+  'badge.reviews_100.desc': 'Did 100 reviews', // ALTA
+  'badge.explorer.name': 'Explorer', // ALTA
+  'badge.explorer.desc': 'Used review, speed review and the memory game', // ALTA
+  'badge.trained_ear.name': 'Trained Ear', // ALTA
+  'badge.trained_ear.desc': 'Played audio 100 times', // ALTA
+  'badge.comeback.name': 'Back in the Game', // ALTA
+  'badge.comeback.desc': 'Picked the streak back up within 3 days', // ALTA
+  'badge.multitasker.name': 'Multitasker', // ALTA
+  'badge.multitasker.desc': 'Practiced 5 different exercise formats on the same day', // ALTA
+  'badge.weekend.name': 'Weekend', // ALTA
+  'badge.weekend.desc': 'Studied on Saturday and Sunday in the same week', // ALTA
+  'badge.unit_7.name': 'Halfway There', // ALTA
+  'badge.unit_7.desc': 'Completed half of HSK1', // ALTA
+  'badge.unit_14.name': 'HSK 1 Complete', // ALTA
+  'badge.unit_14.desc': 'Completed the whole of HSK1', // ALTA
+  'badge.founder.name': 'Founder', // ALTA
+  'badge.founder.desc': 'Creator of the platform', // ALTA
+  'badge.beta_tester.name': 'Beta Tester', // ALTA
+  'badge.beta_tester.desc': 'Helped test the app before the official launch', // ALTA
+  'badge.catalog.ambassador.name': 'Ambassador', // MÉDIA
+  'badge.catalog.ambassador.desc': 'Spread the word about the app to other people', // MÉDIA
+  'badge.catalog.pioneer.name': 'Pioneer', // MÉDIA
+  'badge.catalog.pioneer.desc': 'Among the first people to use the app in its early phase', // MÉDIA
+  'badge.catalog.student.name': 'Prof. Brune\'s student', // MÉDIA
+  'badge.catalog.student.desc': 'Prof. Brune\'s student', // MÉDIA
 };
