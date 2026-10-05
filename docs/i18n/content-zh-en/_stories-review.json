@@ -1,0 +1,11 @@
+[
+{"path":"1.beats[1].lines[2]","pt":"Brasil! Legal!","en":"Brazil! Great!","conf":"media","why":"Informal reaction; \"Great!\" vs \"Cool!\" is a tone choice."},
+{"path":"1.beats[2].lines[1]","pt":"Olá! Quantos anos você tem?","en":"Hello! How old are you?","conf":"media","why":"Chinese 你多大 is a casual, direct question; asking age this directly can sound blunt in English."},
+{"path":"2.beats[2].lines[2]","pt":"Está muito caro! Faz mais barato.","en":"That's too expensive! Make it cheaper.","conf":"media","why":"Bargaining phrase; more idiomatic alternatives: \"Can you lower the price a bit?\""},
+{"path":"2.beats[2].lines[1]","pt":"30 yuans.","en":"Thirty yuan.","conf":"media","why":"Source says 块 (kuai, colloquial yuan); \"yuan\" plural in English is usually unchanged."},
+{"path":"3.beats[2].lines[2]","pt":"Eu gosto de fazer exercício, mas agora não está bom (pra isso).","en":"I like sports, but I'm not well enough for that right now.","conf":"media","why":"Chinese 现在不好 is vague; sense inferred as \"not in good shape for it now\"."},
+{"path":"3.beats[3].lines[3]","pt":"Quero! Fazer exercício é ainda melhor que assistir filme.","en":"Yes! Exercising is even better than watching movies.","conf":"media","why":"Comparative 更好 rendered as \"even better\"."},
+{"path":"4.beats[1].lines[2]","pt":"Ótimo, eu tenho tempo livre em ambos os dias!","en":"Good, I'm free on both days!","conf":"media","why":"Chinese 都 (both/all) with Friday and Sunday implied; kept as \"both days\"."},
+{"path":"4.beats[2].lines[3]","pt":"Ontem eu não jantei, hoje estou com muita fome.","en":"Yesterday I didn't eat dinner, so I'm very hungry today.","conf":"media","why":"Added \"so\" to make the cause-effect natural; source just lists both facts."},
+{"path":"4.beats[3].options[3]","pt":"Trabalha na escola","en":"Works at the school","conf":"media","why":"Distractor; must stay clearly wrong versus \"Is a student\" (and unlike the hospital option)."}
+]
