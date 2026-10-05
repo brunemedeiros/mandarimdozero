@@ -1657,3 +1657,165 @@ Abas do Painel de Admin e modais de preview de flashcard. Texto em português id
 | admin.panel.tab.premium | ⭐ Premium | ⭐ Premium | alta | needs_review |
 | flashcardPreview.modal.hint | Isto é só uma pré-visualização de como o cartão vai aparecer na Revisão -- nada é salvo ou avaliado aqui. | This is only a preview of how the card will look in Review -- nothing is saved or graded here. | alta | needs_review |
 | publicFlashcard.modal.title | 👁 Cartão | 👁 Card | alta | needs_review |
+
+## Fase 8 — Conteúdo do francês em inglês, unidades A1-2 a A1-20 (needs_review)
+
+A1-1 vem do piloto (docs/i18n/piloto-A1-1.json). Itens abaixo: só os de confiança média/baixa; o que não está listado é confiança alta. Arquivos: docs/i18n/content-en/<unidade>.json.
+
+| Unidade | Caminho | PT | EN | Confiança | Motivo |
+|---|---|---|---|---|---|
+| A1-2 | vocab[2] | chamar-se | to be called | media | s'appeler is reflexive; 'to be called' vs 'to be named' both fine |
+| A1-2 | vocab[4] | ser / estar | to be | media | PT gloss has two verbs; EN has just one |
+| A1-2 | vocab[7] | francês / francesa | French (m. / f.) | media | gender-marking convention for the pair |
+| A1-2 | vocab[8] | brasileiro / brasileira | Brazilian (m. / f.) | media | gender-marking convention for the pair |
+| A1-2 | phrases[0].t | Qual é o seu nome? | What's your name? | media | FR is 'comment tu t'appelles', informal; EN 'what's your name' loses the literal 'how do you call yourself' |
+| A1-2 | phrases[2].t | De que país você é? | What country are you from? | media | 'what country are you from' vs 'which country' |
+| A1-2 | phrases[3].t | Eu também, eu sou francesa! | Me too, I'm French! | media | 'Moi aussi' stressed pronoun; 'Me too' is the natural EN |
+| A1-2 | dialogue.lines[2] | Eu sou a Ana. Você é francês? | I'm Ana. Are you French? | media | FR 'Moi, c'est Ana' is idiomatic/emphatic; EN simplified |
+| A1-2 | concepts.tu-es-contraction[0].examples[0] | você é francês? (fala corrida) | are you French? (fast speech) | media | register note |
+| A1-2 | concepts.comment-tappelles-wh-in-situ[0].examples[0] | qual é o seu nome? (fala cotidiana) | what's your name? (everyday speech) | media | register note |
+| A1-3 | vocab[1] | um / uma | one (m. / f.) | media | un/une gender pair; also the article 'a/an' |
+| A1-3 | vocab[8] | anos | years (old) | media | 'ans' only appears with age |
+| A1-3 | vocab[9] | quanto / quantos | how much / how many | media | EN splits by countable/uncountable |
+| A1-3 | phrases[3].t | Somos dez (pessoas). | There are ten of us. | media | FR 'Nous sommes dix' ('we are ten'); EN idiomatic form |
+| A1-3 | phrases[3].scenario | O garçom pergunta quantas pessoas são no seu grupo, que tem dez pessoas. O que você diz? | The waiter asks how many people are in your group, which has ten people. What do you say? | media | fine, but PT 'garçom' -> 'waiter' (gender-neutral 'server' also possible) |
+| A1-3 | phrases[5].t | Está zero grau lá fora. | It's zero degrees outside. | media | 'degrees' (zero degrees) vs singular; Celsius assumed, EN-US users think Fahrenheit |
+| A1-3 | dialogue.lines[3] | Eles estão grandes! | They're so big! | baixa | FR 'Ils sont grands' is plain; PT 'estão grandes' means they've grown; EN 'so big' adds emphasis for naturalness |
+| A1-3 | concepts.vingt-to-quatrevingts[0].body | ...soixante-dez ("sessenta-dez")... | ...("sixty-ten")... | media | literal translations of number names, verified |
+| A1-3 | concepts.vingt-to-quatrevingts[0].variants | França / Bélgica e Suíça / Suíça (só lá) | France / Belgium and Switzerland / Switzerland (only there) | media | region labels only; sentence-case labels |
+| A1-3 | concepts.avoir-age[0].body | Em português dizemos 'eu sou/tenho vinte anos' | In English we say 'I am twenty years old' | media | PT contrast (sou/tenho) does not map to EN; I adapted it to EN contrast (am vs have), which changes the teaching point slightly |
+| A1-3 | concepts.quel-age-wh-in-situ[0].examples[0] | quantos anos você tem? (fala cotidiana) | how old are you? (everyday speech) | media | register note |
+| A1-4 | vocab[9] | a esposa / a mulher | wife / woman | media | 'la femme' means both; EN needs context |
+| A1-4 | phrases[0].t | Aqui está minha família. | This is my family. | media | FR 'Voici' ('here is/this is'); EN 'This is' natural for introducing |
+| A1-4 | phrases[0].scenario | ...quer apresentar sua família | ...introduce your family | media | fine |
+| A1-4 | phrases[8].t | Os pais adoram seus filhos. | The parents adore their children. | media | FR 'les parents' = parents; EN 'The parents' reads oddly without context but follows the source |
+| A1-4 | dialogue.lines[3] | Quantos anos ele tem? | How old is he? | media | FR 'Il a quel âge ?'; fine |
+| A1-4 | concepts.mon-vs-ma[0].body | ...possessivo concorda com o gênero... | ...possessive agrees with the gender... | media | EN possessives (my) have no gender, so the contrast is shown through the French forms only |
+| A1-4 | concepts.pere-mere-papa-maman[0].examples | pai / papai; mãe / mamãe (uso familiar) | dad / mom (familiar use) | media | PT diminutive papai/mamãe has no EN equivalent; chose dad/mom (EN-GB: mum) |
+| A1-4 | concepts.repas-dominical[0].examples[0] | o almoço de domingo em família | Sunday family lunch | media | 'almoço' = lunch; in some regions 'Sunday dinner' is the equivalent term |
+| A1-5 | vocab[9] | odiar / detestar | to hate / to detest | media | 'détester' is milder than 'hate' in some uses |
+| A1-5 | phrases[1].t | Eu gosto de queijo, mas odeio peixe. | I like cheese, but I hate fish. | media | FR 'je déteste'; fine |
+| A1-5 | phrases[3].t | A conta, por favor. | The check, please. | media | EN-US 'check' vs EN-GB 'bill' |
+| A1-5 | phrases[3].scenario | ...pedir a conta... | ...ask for the check... | media | EN-US 'check' vs EN-GB 'bill' |
+| A1-5 | phrases[5].t | Eu gostaria de água, por favor. | I'd like some water, please. | media | FR 'de l'eau' partitive; 'some' reflects it |
+| A1-5 | phrases[10].t | Você quer beber alguma coisa? | Do you want something to drink? | media | FR 'Tu veux boire quelque chose ?', informal; fine |
+| A1-5 | phrases[11].t | Acho que vou detestar esse prato. | I think I'm going to hate this dish. | media | 'prato' = dish (food); also could be 'plate' |
+| A1-5 | dialogue.lines[0] | Olá, o que deseja? | Hello, what would you like? | media | FR 'vous désirez ?' formal service register |
+| A1-5 | dialogue.lines[3] | Não, obrigado(a), é só isso. | No thanks, that's all. | media | FR 'c'est tout'; gendered 'obrigado(a)' has no EN equivalent |
+| A1-5 | concepts.aime-le-vs-bois-du[0].body | ...o português não tem... | ...English doesn't make... | media | PT/EN contrast adapted; EN also lacks the distinction |
+| A1-5 | concepts.croissant-nao-e-diario[0].body | pão com manteiga/geleia | bread with butter/jam | media | EN 'jam' vs 'jelly' regional; cultural claim translated faithfully |
+| A1-5 | concepts.croissant-nao-e-diario[0].examples[0] | pão com manteiga/geleia — o café da manhã mais comum | bread with butter/jam — the most common breakfast | media | tartine has no exact EN equivalent |
+| A1-6 | vocab[0] | a hora | time / hour | media | 'l'heure' = both 'hour' and 'time (of day)' |
+| A1-6 | vocab[3] | a noite (à noite) | evening (in the evening) | media | 'le soir' = evening; 'night' also possible in PT gloss |
+| A1-6 | phrases[2].t | Eu acordo às sete horas. | I wake up at seven o'clock. | media | fine; EN 'at seven' also common |
+| A1-6 | phrases[3].t | À noite, eu assisto TV. | In the evening, I watch TV. | media | PT 'à noite' = evening/night; FR 'le soir' |
+| A1-6 | phrases[4].t | Ele olha as horas no celular. | He's checking the time on his phone. | media | FR 'regarde l'heure'; EN idiom 'checks the time' |
+| A1-6 | phrases[7].t | Ela vai se levantar às sete horas. | She's going to get up at seven o'clock. | media | fine |
+| A1-6 | dialogue.lines[1] | Eu levanto às seis e meia. | I get up at six thirty. | media | FR 'six heures et demie'; EN 'six thirty' / 'half past six' |
+| A1-6 | dialogue.lines[3] | Eu trabalho de manhã e à tarde. | I work in the morning and in the afternoon. | media | fine |
+| A1-6 | concepts.etre-heures[0].title | "Il est huit heures" — de novo, nada de "être"... ou melhor, só "être"! | "Il est huit heures" — again, no "avoir"... or rather, just "être"! | media | PT title is a playful aside; I mirrored the playfulness but changed 'être' to 'avoir' for the joke to make sense in EN context (age uses avoir) |
+| A1-6 | concepts.etre-heures[0].body | ..."está" de "está chovendo" | ...the "it" in "it's raining" | media | PT analogy adapted to the English impersonal 'it' |
+| A1-6 | concepts.le-midi-almoco-longo[0].title | "Le midi"...hora de sentar pra comer de verdade | "Le midi"... time to sit down and really eat | media | idiomatic |
+| A1-6 | concepts.le-midi-almoco-longo[0].body | por volta de meio-dia às treze horas | from around noon to 1 p.m. | media | PT source is a bit ambiguous (noon to thirteen hours); interpreted as noon-1 p.m. |
+| A1-7 | phrases[0].t | Que dia é hoje? | What day is it today? | media | FR 'Quel jour sommes-nous ?' is formal-ish; EN also 'What day is today?' |
+| A1-7 | phrases[4].t | Hoje está bonito. | Today the weather is nice. | media | FR 'il fait beau' = the weather is nice; PT 'está bonito' is vague, so I made the weather explicit |
+| A1-7 | concepts.nous-sommes-on-est[0].examples[0] | hoje é segunda (fala cotidiana) | it's Monday (everyday speech) | media | 'on est lundi' also fits 'we're on Monday'; chose the natural 'it's Monday' |
+| A1-7 | concepts.nous-sommes-on-est[0].body | "a gente"/"nós" | "we" | media | PT 'a gente' has no EN equivalent; collapsed to 'we' |
+| A1-7 | concepts.dias-semana-deuses-romanos[0].body | dia do Senhor | the Lord's day | media | Latin 'dies Dominicus'; 'the Lord's day' is the standard rendering |
+| A1-8 | vocab[1] | a praça | the square | media | 'la place' = town square / plaza; 'square' is the usual EN word |
+| A1-8 | vocab[6] | à esquerda | to the left | media | also 'on the left'; 'to the left' fits both turning and location |
+| A1-8 | vocab[5] | sempre em frente | straight ahead | media | also 'straight on' (EN-GB) |
+| A1-8 | dialogue.lines[1] | É sempre em frente, depois à direita. | Straight ahead, then to the right. | media | dropped 'It's' for natural spoken directions; 'It's straight ahead, then to the right' also works |
+| A1-8 | dialogue.lines[3] | Não, é a cinco minutos. | No, it's five minutes away. | media | 'à cinq minutes' = 5 minutes away (on foot implied); mode of travel not stated |
+| A1-9 | vocab[0] | francês / francesa | French (m.) / French (f.) | media | EN adjectives have no gender, so I kept the (m.)/(f.) labels to preserve the masculine/feminine pair the lesson teaches (same for vocab[1]-[7]) |
+| A1-9 | vocab[3] | inglês / inglesa | English (m.) / English (f.) | media | FR 'anglais' = English (language/nationality), not British |
+| A1-9 | phrases[2].t | De onde você vem? | Where do you come from? | media | literal 'venir de'; 'Where are you from?' is more natural but is used for 'Tu es d'où ?' to keep the lesson's contrast |
+| A1-9 | phrases[0].t | Eu sou brasileira. | I'm Brazilian. | media | feminine form of the FR sentence (brésilienne) is lost in EN |
+| A1-9 | phrases[4].t | A nacionalidade está escrita no passaporte. | Nationality is written on the passport. | media | EN would normally say 'Your nationality'; kept impersonal like the FR |
+| A1-9 | concepts.dou-viens-tu-wh-in-situ[0].body | jogar a palavra de pergunta pro fim | move the question word to the end | media | colloquial PT; EN 'in situ' phrasing neutral |
+| A1-10 | vocab[3] | barato | cheap / inexpensive | media | FR 'pas cher' is neutral ('not expensive'); EN 'cheap' can sound negative, so I added 'inexpensive' |
+| A1-10 | vocab[0] | a calça | the pants | media | EN-US 'pants' (EN-GB 'trousers'); FR 'pantalon' is singular but EN is plural |
+| A1-10 | phrases[0].t | Quanto custa isso? | How much is this? | media | FR 'ça' is generic 'it/this' |
+| A1-10 | phrases[3].t | São cem euros, por favor. | That's one hundred euros, please. | media | 'Ça fait' = 'that makes/comes to'; formal 'vous' register (salesperson) |
+| A1-10 | phrases[8].t | A loja fecha às dezenove horas. | The store closes at 7 p.m. | media | FR uses 24h 'dix-neuf heures'; converted to 7 p.m. for natural EN-US |
+| A1-10 | dialogue.lines[1] | Qual é o seu tamanho? | What size are you? | media | FR 'Quelle taille faites-vous ?' is formal (vous); EN 'What size do you wear?' also works |
+| A1-10 | dialogue.lines[2] | Eu uso 38. | I'm a 38. | media | 'Je fais du 38' = 'I wear a 38'; European sizing |
+| A1-10 | dialogue.lines[4] | Perfeito, vou levar! | Perfect, I'll take it! | media | 'Je la prends' = 'I'll take it' (feminine 'robe') |
+| A1-10 | concepts.voudrais-vs-peux[0].body | Posso...? | Can I...? | media | 'May I...?' is more formal and also correct |
+| A1-11 | vocab[2] | os legumes / as verduras | the vegetables | media | PT gives two glosses; EN 'vegetables' covers both |
+| A1-11 | vocab[5] | a massa | the pasta | media | PT 'massa' = pasta; phrase[7] PT says 'macarrão' (also pasta) |
+| A1-11 | phrases[3].t | Eu levo arroz e massa. | I'll take rice and pasta. | media | 'Je prends' = I'll take/get (shopping context), not 'I'm taking' |
+| A1-11 | phrases[5].t | Os vegetais são bons para a saúde. | Vegetables are good for your health. | media | FR 'les légumes' (PT says 'vegetais') |
+| A1-11 | phrases[7].t | O arroz e o macarrão são meus pratos favoritos. | Rice and pasta are my favorite dishes. | media | 'plats préférés' = favorite dishes/foods |
+| A1-11 | phrases[9].t | O ovo está cozido. | The egg is cooked. | media | FR 'cuit' = cooked; PT 'cozido' suggests boiled, but FR is generic |
+| A1-11 | phrases[2].t | Eu não como carne. | I don't eat meat. | media | scenario says vegetarian; FR/EN statement is just about meat |
+| A1-11 | dialogue.lines[3] | Sim, com açúcar, por favor! | Yes, with sugar, please! | media | FR 's'il te plaît' = informal please; EN has no tu/vous distinction |
+| A1-11 | concepts.le-marche-tradicao[0].examples[0] | a feira / o mercado ao ar livre | the market / the open-air market | media | EN 'street market' also fits |
+| A1-12 | vocab[5] | muito / bastante | a lot (of) / plenty (of) | media | Two PT glosses; EN equivalents depend on countable/uncountable. |
+| A1-12 | vocab[7] | demais / em excesso | too much (of) / too many (of) | media | EN splits by countable vs uncountable. |
+| A1-12 | vocab[6] | o suficiente de | enough (of) | media | Fine, but the PT gloss is awkward. |
+| A1-12 | phrases[2] | É açúcar demais pra mim. | That's too much sugar for me. | media | Natural EN may be 'That's too much sugar for me.'; literal 'It's' also fine. |
+| A1-12 | dialogue.lines[2] | E mais alguma coisa? | Anything else? | media | 'Et avec ça ?' is a shop idiom; 'Anything else?' is the natural equivalent. |
+| A1-12 | dialogue.lines[0] | Quantas maçãs você quer? | How many apples would you like? | media | Formal 'vous voulez' rendered as polite 'would you like'. |
+| A1-13 | vocab[0] | está bonito (tempo) | the weather is nice | media | 'il fait beau' = 'it's nice out'; chose full phrase. |
+| A1-13 | vocab[8] | o outono | autumn / fall | media | EN-US 'fall' vs EN-GB 'autumn'. |
+| A1-13 | phrases[0] | Como está o tempo? | What's the weather like? | media | Also 'How's the weather?'. |
+| A1-13 | phrases[2].scenario | estação preferida | favorite season | media | EN-US spelling. |
+| A1-13 | dialogue.lines[3] | Eu prefiro o verão, está quente. | I prefer summer, it's hot. | media | Informal 'tu' dialogue; reason clause rendered loosely. |
+| A1-13 | dialogue.lines[1] | Está bonito, mas está frio. | It's nice, but it's cold. | media | 'beau' = nice/fine weather. |
+| A1-14 | vocab[6] | pegar (um transporte) | to take (a transport) | media | 'prendre' = take/catch. |
+| A1-14 | vocab[7] | o ponto (de ônibus) | the stop (bus stop) | media | 'arrêt' generic stop. |
+| A1-14 | vocab[2] | o metrô | the metro / subway | media | EN-US subway vs EN-GB metro/underground. |
+| A1-14 | phrases[3] | Eu vou ao trabalho a pé. | I walk to work. | media | Natural EN; literal 'I go to work on foot'. |
+| A1-14 | dialogue.lines[1] | Sim, é a direção certa. | Yes, it's the right direction. | media | Also 'the right way'. |
+| A1-14 | dialogue.lines[0] | Com licença, esse trem vai pro centro? | Excuse me, does this train go downtown? | media | 'centre-ville' = downtown (US) / city centre (UK). |
+| A1-14 | concepts.metro-paris-historia.body | Exposição Universal | World's Fair | media | Standard EN term for Exposition Universelle. |
+| A1-14 | phrases[6] | estacionado | parked | media | 'garée' fine; high-ish. |
+| A1-15 | vocab[1] | a barriga | the belly / stomach | media | 'ventre' = belly/abdomen; EN 'stomach' used for pain. |
+| A1-15 | vocab[7] | estar com dor | to be in pain / to hurt | media | 'avoir mal' = to hurt/ache. |
+| A1-15 | vocab[9] | sentir-se | to feel | media | Reflexive 'se sentir' = to feel (a state). |
+| A1-15 | phrases[1] | Eu me sinto doente. | I feel sick. | media | 'sick' (US) vs 'ill' (UK). |
+| A1-15 | phrases[4] | Minha barriga dói. | My stomach hurts. | media | Literal 'The belly hurts me'; natural EN. |
+| A1-15 | phrases[5] | A mão está machucada. | The hand is injured. | media | 'blessée' = hurt/injured. |
+| A1-15 | dialogue.lines[0] | O que não vai bem? | What's wrong? | media | Natural equivalent of 'Qu'est-ce qui ne va pas ?'. |
+| A1-15 | dialogue.lines[4] | Você precisa descansar. | You need to rest. | media | 'vous devez' formal; 'must' too strong. |
+| A1-15 | concepts.quest-ce-qui-ne-va-pas-ca-va-pas.examples[0] | o que foi? / tá tudo bem? (fala cotidiana) | what's wrong? / you OK? (everyday speech) | media | Informal register; no exact EN equivalent. |
+| A1-15 | concepts.quest-ce-qui-ne-va-pas-ca-va-pas.body | tá tudo bem? | you OK? | media | Colloquial PT comparison replaced with an EN colloquial equivalent. |
+| A1-16 | vocab[6] | grande / alto | big / tall | media | 'grand' covers both. |
+| A1-16 | vocab[7] | pequeno / baixo | small / short | media | 'petit' covers both. |
+| A1-16 | vocab[9] | gentil / legal | kind / nice | media | PT gloss 'gentil / legal' ambiguous. |
+| A1-16 | phrases[3] | É um vestido vermelho bonito. | It's a pretty red dress. | media | PT gives 'bonito'; EN 'pretty/nice'. |
+| A1-16 | dialogue.lines[2] | Ele é legal? | Is he nice? | media | 'sympa' informal; 'cool/nice'. |
+| A1-16 | concepts.gentil-sympa.examples[0] | legal / gente boa (informal) | nice / a good guy (informal) | media | PT slang 'gente boa'; EN approximation. |
+| A1-16 | concepts.bandeira-tricolor-historia.body | junta as duas | combines the two | media | Content kept faithful to source; ambiguous 'the two'. |
+| A1-16 | concepts.adjective-placement.body | diferente do português, mas parecido também | unlike English, where adjectives come before the noun | baixa | PT sentence compares with Portuguese; adapted to English, which changes meaning (reviewer should approve). |
+| A1-17 | concepts.andar-terreo-premier-etage[0].body | o que, no Brasil, chamaríamos de "segundo andar" | what, in the US, we would call the "second floor" | media | Adapted from Brazil to the US (EN-US); in the UK/Commonwealth the French 'first floor' matches 'first floor'. Source text was Brazil-specific. |
+| A1-17 | vocab[9] | não tem / não há | there isn't / there aren't any | media | Fragment 'il n'y a pas de' needs the 'any' to reflect 'de' after negation; 'there is no' is an alternative. |
+| A1-17 | phrases[2].t | Não tem jardim. | There isn't a garden. | media | 'There's no garden.' also correct; kept parallel with the grammar note. |
+| A1-17 | phrases[6].t | O quarto fica no primeiro andar. | The bedroom is on the first floor. | media | In EN-US 'first floor' = ground floor, which clashes with the cultural note (premier étage = one above ground). 'second floor' would be US-accurate but loses the literal match; flag for the teacher. |
+| A1-17 | phrases[11].t | A janela dá para o jardim. | The window looks out onto the garden. | media | 'overlooks the garden' also fine. |
+| A1-17 | concepts.il-y-a-ya[0].examples[0] | tem um quarto (fala cotidiana) | there's a bedroom (everyday speech) | media | Contraction chosen to mirror the colloquial reduction. |
+| A1-18 | concepts.sur-vs-dans[0].body | já que às vezes usamos "em" pras duas situações | since we sometimes use "em" for both situations | media | Note is addressed to Portuguese speakers; for an English-speaking learner the comparison is to Portuguese, not English. Kept faithful; teacher may want an English-based comparison ('on' vs 'in' are distinct in English, so this confusion is less likely). |
+| A1-18 | vocab[5] | em cima de | on / on top of | media | 'sur' covers both 'on' and 'on top of'; PT gloss is only 'em cima de'. |
+| A1-18 | phrases[0].t | A cama fica ao lado da janela. | The bed is next to the window. | media | 'by the window' also possible. |
+| A1-18 | dialogue.lines[1] | Está embaixo da cama. | It's under the bed. | media | 'sac' translated as backpack following PT 'mochila'; French 'sac' is a generic bag. |
+| A1-18 | dialogue.lines[3] | Estão em cima da mesa, do lado da luminária. | They're on the table, next to the lamp. | media | 'lamp' for 'lampe' (PT 'luminária'); could be 'light'. |
+| A1-19 | vocab[4] | jogar / tocar (instrumento) | to play (a game) / to play (an instrument) | media | English uses 'play' for both; the French distinction (jouer à / jouer de) is the lesson point, kept in the concept note. |
+| A1-19 | vocab[0] | o cinema | the movies / the cinema | media | EN-US 'the movies' (activity) vs 'cinema' (building/art); both shown. |
+| A1-19 | phrases[2].t | A gente vai ao cinema hoje à noite? | Shall we go to the movies tonight? | media | 'on' = informal 'we'; 'Are we going to the movies tonight?' is the literal alternative. 'Shall we' is more of a suggestion, chosen for the invitation sense. |
+| A1-19 | phrases[7].t | As crianças gostam de brincar lá fora. | Children like to play outside. | media | 'Les enfants' generic; 'The children like...' also possible. |
+| A1-19 | phrases[9].t | Vamos sair no sábado à noite. | We're going out on Saturday night. | media | 'On va sortir' = informal near future; 'Let's go out' is a possible reading but PT says 'Vamos sair' as statement. |
+| A1-19 | phrases[10].t | O filme começa às vinte horas. | The movie starts at eight o'clock. | media | French 24-hour 'vingt heures' = 8 PM; English would say 8 p.m. Kept 'eight o'clock' (PM implied). Could be '8 p.m.'. |
+| A1-19 | phrases[4].t | O cinema está fechado hoje à noite. | The movie theater is closed tonight. | media | EN-US 'movie theater' for the building. |
+| A1-19 | concepts.cinema-nasceu-na-franca[0].title | O cinema nasceu na França | Cinema was born in France | media | Cultural note translated faithfully; 'birthplace of cinema' wording follows PT. |
+| A1-19 | concepts.ne-drop-on-sait-pas[0].body | A gente ainda não sabe | we don't know yet (everyday speech) | media | Reality note; 'a gente' = informal 'we' lost in English. |
+| A1-19 | trueFalse[0].claim | Essa é uma forma de convidar alguém pra sair. | This is a way of inviting someone out. | media | 'pra sair' = to go out/hang out; 'inviting someone out' natural. |
+| A1-20 | vocab[8] | já | already / ever | media | 'déjà' = 'already' in statements, 'ever' in questions ('Tu as déjà visité Paris ?'); PT gloss is only 'já'. |
+| A1-20 | phrases[3].t | Você já visitou Paris? | Have you ever visited Paris? | media | Present perfect with 'ever' is the natural English equivalent of 'Tu as déjà...'; 'Have you already visited Paris?' is also possible. |
+| A1-20 | phrases[1].t | Semana passada eu comi num restaurante. | Last week, I ate at a restaurant. | media | 'at' vs 'in' a restaurant both fine. |
+| A1-20 | phrases[4].t | Anteontem, eu visitei Paris. | The day before yesterday, I visited Paris. | media | 'avant-hier' has no short EN equivalent; 'the day before yesterday' is the standard. |
+| A1-20 | phrases[8].t | Hoje de manhã, eu tomei um café. | This morning, I had a coffee. | media | 'j'ai bu' = drank; 'had a coffee' is more natural. |
+| A1-20 | phrases[9].t | Recentemente, eu mudei de emprego. | Recently, I changed jobs. | media | 'changé de travail' = changed jobs. |
+| A1-20 | dialogue.lines[1] | Eu trabalhei de manhã, e à tarde eu fiz esporte. | I worked in the morning, and in the afternoon I played sports. | media | 'faire du sport' = 'play sports / exercise'; 'exercised' also fine. |
+| A1-20 | dialogue.lines[3] | A gente foi ao cinema com amigos. | We went to the movies with friends. | media | 'On' = informal 'we'. |
+| A1-20 | concepts.quest-ce-que-tu-as-fait-wh-in-situ[0].examples[0] | o que você fez ontem? (fala bem cotidiana) | what did you do yesterday? (very everyday speech) | media | Reality note; register labelled. |

@@ -161,7 +161,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   const prevJs = ['shared/my-flashcards.js', 'shared/public-profile.js', 'shared/anki-import-ui.js', 'fr/app.js', 'zh/app.js', 'shared/flashcard-model.js', 'shared/own-flashcards.js', 'shared/flashcard-preview.js', 'shared/notifications.js', 'shared/notification-preferences.js', 'shared/deck-data.js', 'shared/admin-students.js', 'shared/profile.js', 'shared/leaderboard.js', 'shared/auth.js', 'shared/support-materials-view.js', 'shared/anki-export.js', 'shared/flashcard-field-editor.js', 'shared/flashcard-mc-editor.js', 'shared/flashcard-typeanswer-editor.js', 'shared/flashcard-cloze-editor.js', 'shared/admin-flashcards.js', 'shared/admin-class-logs.js', 'shared/admin-support-materials.js', 'shared/admin-premium.js', 'shared/teacher-flashcards.js', 'shared/teacher-class-logs.js', 'shared/teacher-support-materials.js', 'shared/admin-analytics.js', 'shared/admin-badges.js', 'shared/admin-notifications.js', 'shared/admin-reports.js', 'shared/flashcard-field-audio-recorder.js', 'shared/wizard.js', 'shared/language-switcher.js', 'shared/fsrs.js'].map(prev).join('\n');
   const all = origFr + origZh + origRep + prevFr + prevZh + prevJs;
   // Textos NOVOS (não existiam antes): só o seletor de idioma.
-  const NEW_KEYS = ['settings.uiLanguage.title', 'settings.uiLanguage.sub'];
+  const NEW_KEYS = ['settings.uiLanguage.title', 'settings.uiLanguage.sub', 'content.untranslatedNotice']; // Fase 8: aviso novo (só aparece fora do pt-BR)
   const NESTED_TEMPLATE_KEYS = ['admin.reports.reply.lastSent', 'admin.reports.reply.lastSentTo'];
   const escRe = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   for (const k of ptKeys){
@@ -185,7 +185,8 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   for (const lang of ['fr', 'zh']){
     const cur = fs.readFileSync(path.join(ROOT, lang, 'index.html'), 'utf8');
     const o = lang === 'fr' ? origFr : origZh;
-    const strip = (s) => s.replace(/ data-i18n(-attr|-html)?="[^"]*"/g, '');
+    // Fase 8: linhas novas deliberadas (aviso de lição sem tradução + script do overlay).
+    const strip = (s) => s.replace(/ data-i18n(-attr|-html)?="[^"]*"/g, '').replace(/\n[ ]*<p class="lesson-unit-goal" id="ud-lang-notice"[^\n]*<\/p>/, '').replace(/<script src="..\/shared\/content-i18n.js"><\/script>\n/, '');
     const modal = (s) => s.slice(s.indexOf('<!-- ===== MODAL: REPORTAR'), s.indexOf('<div id="streak-modal-overlay"'));
     check(`${lang}: modal atual sem data-i18n == modal original`, strip(modal(cur)) === modal(o));
     // Passo "modais pequenos + seletor": contra o commit anterior (PREV), a
