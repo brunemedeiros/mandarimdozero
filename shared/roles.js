@@ -146,6 +146,16 @@ function isPremium(){
   return effectivePlanTier(PROFILE_CACHE) === 'premium';
 }
 
+// Teto de cartões próprios (FREE_OWN_FLASHCARD_LIMIT): é o limite do PLANO
+// GRÁTIS (docs/arquitetura-total-decks-tags-painel.md, seção 17 -- "CTA de
+// upgrade Premium"). Isento: aluna vinculada a uma professora (Fase 5.1) OU
+// plano efetivo Premium. Único ponto que decide isso -- criação manual,
+// import de arquivo/link, Anki e perfil público usam esta função.
+async function hasUnlimitedOwnCards(){
+  const [hasLink, tier] = await Promise.all([hasActiveTeacherLink(), fetchMyPlanTier()]);
+  return hasLink || tier === 'premium';
+}
+
 // Ativação/remoção manual do Premium -- sem checkout Stripe real nesta
 // entrega (escopo travado no grilling: "só infraestrutura por enquanto").
 // Só quem já é admin pode chamar isto (gate de UI em shared/admin-users.js,

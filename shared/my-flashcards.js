@@ -276,22 +276,26 @@ async function renderMyFlashcardsView(opts){
   const premium = planTier === 'premium';
   MY_FLASHCARDS_STATE._cardsCache = cards;
   MY_FLASHCARDS_STATE._decks = decks;
-  MY_FLASHCARDS_STATE._hasLink = hasLink;
+  // Teto do plano grátis não vale pra aluna vinculada nem pra Premium
+  // (mesma regra de hasUnlimitedOwnCards, shared/roles.js).
+  const unlimited = hasLink || premium;
+  MY_FLASHCARDS_STATE._hasLink = unlimited;
   if (typeof STATE !== 'undefined') STATE.decks = decks;
   const activeCards = cards.filter(c => c.status === 'active');
   const archivedCards = cards.filter(c => c.status === 'archived');
   // Fase F -- o teto conta CardInstances (regra única em shared/deck-engine.js),
   // nunca linhas.
   const usedInstances = ownCardInstanceUsage(cards);
-  const atLimit = !hasLink && usedInstances >= FREE_OWN_FLASHCARD_LIMIT;
+  const atLimit = !unlimited && usedInstances >= FREE_OWN_FLASHCARD_LIMIT;
 
   // Selo de tier -- eixo de QUANTIDADE (vínculo com professora) continua
   // separado do eixo de PREMIUM (formatos ricos) -- ver comentário em
   // shared/roles.js. Uma conta pode mostrar os dois selos juntos.
-  const tierBadgeHTML = (hasLink
-    ? `<span class="pill">✨ Aluno vinculado — cartões ilimitados</span>`
-    : `<span class="pill">🔒 Plano grátis — ${usedInstances}/${FREE_OWN_FLASHCARD_LIMIT} cartões</span>`)
-    + (premium ? `<span class="pill">⭐ Premium</span>` : '');
+  const tierBadgeHTML = premium
+    ? `<span class="pill">⭐ Premium — cartões ilimitados</span>`
+    : (hasLink
+      ? `<span class="pill">✨ Aluno vinculado — cartões ilimitados</span>`
+      : `<span class="pill">🔒 Plano grátis — ${usedInstances}/${FREE_OWN_FLASHCARD_LIMIT} cartões</span>`);
 
   wrap.innerHTML = `
     <div class="profile-section">
