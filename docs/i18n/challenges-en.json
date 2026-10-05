@@ -1,0 +1,794 @@
+{
+ "expr-001": {
+  "meaning": "To feel sick and have a headache after drinking too much alcohol; to be hungover."
+ },
+ "expr-002": {
+  "meaning": "Means to bother or really irritate someone; to get on someone's nerves."
+ },
+ "expr-003": {
+  "meaning": "To stand someone up; to not show up to an appointment."
+ },
+ "lt-auto-001": {
+  "referenceTranslations": [
+   "I bought a new book yesterday and I've already finished it.",
+   "I bought a new book yesterday and I already finished it.",
+   "Yesterday I bought a new book and I've already finished it."
+  ]
+ },
+ "lt-auto-002": {
+  "referenceTranslations": [
+   "This weekend, we're going to visit a museum downtown.",
+   "This weekend we are going to visit a museum in the city center.",
+   "We're going to visit a museum downtown this weekend."
+  ]
+ },
+ "lt-auto-003": {
+  "referenceTranslations": [
+   "She's a little tired because she worked a lot today.",
+   "She is a bit tired because she worked a lot today.",
+   "Because she worked so much today, she's a little tired."
+  ]
+ },
+ "accent-auto-001": {
+  "explanation": "\"e\" has an acute accent."
+ },
+ "accent-auto-002": {
+  "explanation": "\"e\" has a circumflex accent."
+ },
+ "accent-auto-003": {
+  "explanation": "\"a\" has a grave accent."
+ },
+ "accent-auto-004": {
+  "explanation": "\"e\" has an acute accent, \"a\" has a grave accent."
+ },
+ "accent-auto-005": {
+  "explanation": "\"e\" has a grave accent."
+ },
+ "accent-auto-006": {
+  "explanation": "\"c\" has a cedilla."
+ },
+ "lt-a1m1-001": {
+  "referenceTranslations": [
+   "Good evening, how are you?",
+   "Good evening, how's it going?",
+   "Good evening, how are you doing?"
+  ]
+ },
+ "lt-a1m1-002": {
+  "referenceTranslations": [
+   "A coffee, please.",
+   "One coffee, please.",
+   "A coffee, if you please."
+  ]
+ },
+ "lt-a1m1-003": {
+  "referenceTranslations": [
+   "What's your name?",
+   "What is your name?",
+   "What do you call yourself?"
+  ],
+  "explanation": "In French you say \"comment tu t'appelles\" (literally \"how do you call yourself\"); in English the natural way is \"what's your name?\"."
+ },
+ "lt-a1m1-004": {
+  "referenceTranslations": [
+   "I am Brazilian.",
+   "I'm Brazilian.",
+   "I'm a Brazilian woman."
+  ],
+  "explanation": "\"Brésilienne\" is the feminine form of \"brésilien\"."
+ },
+ "lt-a1m1-005": {
+  "referenceTranslations": [
+   "I am twenty years old.",
+   "I'm twenty years old.",
+   "I'm 20 years old.",
+   "I am 20."
+  ],
+  "explanation": "To give your age, French uses \"avoir\" (to have), not \"être\" (to be) as English does."
+ },
+ "lt-a1m1-006": {
+  "referenceTranslations": [
+   "How old are you?",
+   "What is your age?",
+   "What's your age?"
+  ]
+ },
+ "lt-a1m1-007": {
+  "referenceTranslations": [
+   "My father's name is Marc.",
+   "My dad's name is Marc.",
+   "My father is called Marc."
+  ]
+ },
+ "lt-a1m1-008": {
+  "referenceTranslations": [
+   "I have a brother and a sister.",
+   "I've got a brother and a sister."
+  ]
+ },
+ "accent-a1m1-001": {
+  "explanation": "The \"i\" in \"plaît\" has a circumflex accent."
+ },
+ "accent-a1m1-002": {
+  "explanation": "\"e\" has an acute accent."
+ },
+ "accent-a1m1-003": {
+  "explanation": "\"e\" has an acute accent."
+ },
+ "accent-a1m1-004": {
+  "explanation": "The first \"e\" has a circumflex accent."
+ },
+ "accent-a1m1-005": {
+  "explanation": "\"e\" has an acute accent."
+ },
+ "accent-a1m1-006": {
+  "explanation": "\"a\" has a circumflex accent."
+ },
+ "accent-a1m1-007": {
+  "explanation": "\"e\" has a grave accent."
+ },
+ "accent-a1m1-008": {
+  "explanation": "\"e\" has a grave accent."
+ },
+ "accent-a1m1-009": {
+  "explanation": "\"e\" has a grave accent."
+ },
+ "expr-a1m1-001": {
+  "meaning": "Nice to meet you. (Women say \"enchantée\"; it sounds the same.)"
+ },
+ "expr-a1m1-002": {
+  "meaning": "So-so; not great, not bad."
+ },
+ "expr-a1m1-003": {
+  "meaning": "Not bad; pretty good."
+ },
+ "expr-a1m1-004": {
+  "meaning": "Deal! Sounds good! Great! Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-a1m1-005": {
+  "meaning": "No problem! No worries!"
+ },
+ "lt-a1m2-001": {
+  "referenceTranslations": [
+   "I would like some cheese, please.",
+   "I'd like some cheese, please.",
+   "I would like cheese, please."
+  ]
+ },
+ "lt-a1m2-002": {
+  "referenceTranslations": [
+   "Do you drink milk in the morning?",
+   "Do you have milk in the morning?",
+   "Do you drink milk every morning?"
+  ]
+ },
+ "lt-a1m2-003": {
+  "referenceTranslations": [
+   "I get up at six o'clock.",
+   "I get up at six.",
+   "I wake up at six o'clock."
+  ]
+ },
+ "lt-a1m2-004": {
+  "referenceTranslations": [
+   "It's seven o'clock in the evening.",
+   "It is seven in the evening.",
+   "It's seven p.m.",
+   "It's 7 p.m."
+  ]
+ },
+ "lt-a1m2-005": {
+  "referenceTranslations": [
+   "Today is Tuesday.",
+   "Today it's Tuesday.",
+   "It's Tuesday today."
+  ]
+ },
+ "lt-a1m2-006": {
+  "referenceTranslations": [
+   "I work tomorrow morning.",
+   "I'm working tomorrow morning.",
+   "I am working tomorrow morning."
+  ]
+ },
+ "accent-a1m2-001": {
+  "explanation": "\"e\" has an acute accent."
+ },
+ "accent-a1m2-002": {
+  "explanation": "\"e\" has an acute accent."
+ },
+ "accent-a1m2-003": {
+  "explanation": "Both \"e\"s have an acute accent."
+ },
+ "accent-a1m2-004": {
+  "explanation": "\"o\" has a circumflex accent."
+ },
+ "accent-a1m2-005": {
+  "explanation": "\"e\" has an acute accent."
+ },
+ "accent-a1m2-006": {
+  "explanation": "\"e\" has an acute accent."
+ },
+ "accent-a1m2-007": {
+  "explanation": "\"o\" has a circumflex accent."
+ },
+ "accent-a1m2-008": {
+  "explanation": "\"à\" has a grave accent."
+ },
+ "expr-a1m2-001": {
+  "meaning": "Enjoy your meal!"
+ },
+ "expr-a1m2-002": {
+  "meaning": "Time to eat! Come to the table!"
+ },
+ "expr-a1m2-003": {
+  "meaning": "See you in a bit!"
+ },
+ "expr-a1m2-004": {
+  "meaning": "Right now; right away."
+ },
+ "expr-a1m2-005": {
+  "meaning": "Have a good day!"
+ },
+ "lt-a1m3-001": {
+  "referenceTranslations": [
+   "The museum is far from here.",
+   "The museum is far away from here.",
+   "The museum is a long way from here."
+  ]
+ },
+ "lt-a1m3-002": {
+  "referenceTranslations": [
+   "Turn right, then go straight.",
+   "Turn right and then go straight ahead.",
+   "Turn right, then straight ahead."
+  ]
+ },
+ "lt-a1m3-003": {
+  "referenceTranslations": [
+   "I come from Brazil, and you?",
+   "I'm from Brazil, and you?",
+   "I am from Brazil, and you?"
+  ]
+ },
+ "lt-a1m3-004": {
+  "referenceTranslations": [
+   "She is American.",
+   "She's American."
+  ]
+ },
+ "lt-a1m3-005": {
+  "referenceTranslations": [
+   "The pants cost fifty euros.",
+   "The pants are fifty euros.",
+   "The trousers cost fifty euros."
+  ]
+ },
+ "lt-a1m3-006": {
+  "referenceTranslations": [
+   "I'm looking for a dress.",
+   "I am looking for a dress.",
+   "I look for a dress."
+  ]
+ },
+ "lt-a1m3-007": {
+  "referenceTranslations": [
+   "I buy vegetables and rice.",
+   "I'm buying vegetables and rice.",
+   "I am buying vegetables and rice."
+  ]
+ },
+ "lt-a1m3-008": {
+  "referenceTranslations": [
+   "Do you want sugar?",
+   "Do you want some sugar?",
+   "Would you like sugar?"
+  ]
+ },
+ "lt-a1m3-009": {
+  "referenceTranslations": [
+   "I'll take a kilo of apples.",
+   "I take a kilo of apples.",
+   "I'll take one kilo of apples."
+  ]
+ },
+ "lt-a1m3-010": {
+  "referenceTranslations": [
+   "A bottle of water, please.",
+   "One bottle of water, please."
+  ]
+ },
+ "accent-a1m3-001": {
+  "explanation": "\"e\" has a grave accent."
+ },
+ "accent-a1m3-002": {
+  "explanation": "\"o\" has a circumflex accent."
+ },
+ "accent-a1m3-003": {
+  "explanation": "\"e\" has an acute accent."
+ },
+ "accent-a1m3-004": {
+  "explanation": "\"u\" has a grave accent: \"où\" = where; \"ou\" (no accent) = or."
+ },
+ "accent-a1m3-005": {
+  "explanation": "\"u\" has a circumflex accent."
+ },
+ "accent-a1m3-006": {
+  "explanation": "\"e\" has an acute accent."
+ },
+ "accent-a1m3-007": {
+  "explanation": "\"a\" has a circumflex accent."
+ },
+ "accent-a1m3-008": {
+  "explanation": "\"e\" has a grave accent."
+ },
+ "expr-a1m3-001": {
+  "meaning": "Excuse me! Sorry!"
+ },
+ "expr-a1m3-002": {
+  "meaning": "You're welcome; please, make yourself at home."
+ },
+ "expr-a1m3-003": {
+  "meaning": "How much is it? How much does that come to?"
+ },
+ "expr-a1m3-004": {
+  "meaning": "It's too expensive!"
+ },
+ "expr-a1m3-005": {
+  "meaning": "Anything else?"
+ },
+ "lt-a1m4-001": {
+  "referenceTranslations": [
+   "It's cold in winter.",
+   "It is cold in the winter.",
+   "It gets cold in winter."
+  ]
+ },
+ "lt-a1m4-002": {
+  "referenceTranslations": [
+   "Today it's raining.",
+   "It's raining today.",
+   "Today it is raining."
+  ]
+ },
+ "lt-a1m4-003": {
+  "referenceTranslations": [
+   "I take the bus every day.",
+   "I take the bus daily.",
+   "Every day I take the bus."
+  ]
+ },
+ "lt-a1m4-004": {
+  "referenceTranslations": [
+   "Where is the metro station?",
+   "Where's the subway station?",
+   "Where is the subway station?"
+  ]
+ },
+ "lt-a1m4-005": {
+  "referenceTranslations": [
+   "He has a stomachache.",
+   "His stomach hurts.",
+   "He has a bellyache."
+  ]
+ },
+ "lt-a1m4-006": {
+  "referenceTranslations": [
+   "I'm going to the pharmacy.",
+   "I am going to the pharmacy.",
+   "I go to the pharmacy."
+  ]
+ },
+ "accent-a1m4-001": {
+  "explanation": "Both \"é\"s have an acute accent."
+ },
+ "accent-a1m4-002": {
+  "explanation": "\"e\" has an acute accent."
+ },
+ "accent-a1m4-003": {
+  "explanation": "\"e\" has an acute accent."
+ },
+ "accent-a1m4-004": {
+  "explanation": "\"e\" has a circumflex accent."
+ },
+ "accent-a1m4-005": {
+  "explanation": "\"à\" has a grave accent."
+ },
+ "accent-a1m4-006": {
+  "explanation": "\"e\" has a circumflex accent."
+ },
+ "accent-a1m4-007": {
+  "explanation": "\"e\" has an acute accent."
+ },
+ "accent-a1m4-008": {
+  "explanation": "\"e\" has a grave accent."
+ },
+ "expr-a1m4-001": {
+  "meaning": "It's raining cats and dogs; it's pouring."
+ },
+ "expr-a1m4-002": {
+  "meaning": "Have a good trip!"
+ },
+ "expr-a1m4-003": {
+  "meaning": "Get well soon!"
+ },
+ "expr-a1m4-004": {
+  "meaning": "Bless you! (when someone sneezes)"
+ },
+ "expr-a1m4-005": {
+  "meaning": "What weather! (commenting on the weather)"
+ },
+ "lt-a1m5-001": {
+  "referenceTranslations": [
+   "My sister is tall and kind.",
+   "My sister is tall and nice.",
+   "My sister is tall and friendly."
+  ]
+ },
+ "lt-a1m5-002": {
+  "referenceTranslations": [
+   "His sweater is red.",
+   "Her sweater is red.",
+   "Her pullover is red."
+  ]
+ },
+ "lt-a1m5-003": {
+  "referenceTranslations": [
+   "The kitchen is next to the living room.",
+   "The kitchen is beside the living room.",
+   "The kitchen is adjacent to the living room."
+  ]
+ },
+ "lt-a1m5-004": {
+  "referenceTranslations": [
+   "There is a window in the bedroom.",
+   "There's a window in the bedroom.",
+   "There is a window in the room."
+  ]
+ },
+ "lt-a1m5-005": {
+  "referenceTranslations": [
+   "The lamp is on the table.",
+   "The lamp is on top of the table.",
+   "The lamp is sitting on the table."
+  ]
+ },
+ "lt-a1m5-006": {
+  "referenceTranslations": [
+   "The bag is under the chair.",
+   "The bag is underneath the chair.",
+   "The bag is below the chair."
+  ]
+ },
+ "accent-a1m5-001": {
+  "explanation": "\"e\" has a grave accent."
+ },
+ "accent-a1m5-002": {
+  "explanation": "\"e\" has a circumflex accent."
+ },
+ "accent-a1m5-003": {
+  "explanation": "\"e\" has an acute accent."
+ },
+ "accent-a1m5-004": {
+  "explanation": "\"e\" has a grave accent."
+ },
+ "accent-a1m5-005": {
+  "explanation": "\"e\" has an acute accent."
+ },
+ "accent-a1m5-006": {
+  "explanation": "\"à\" has a grave accent, \"ô\" has a circumflex accent, and \"é\" has an acute accent."
+ },
+ "expr-a1m5-001": {
+  "meaning": "Make yourself at home."
+ },
+ "expr-a1m5-002": {
+  "meaning": "At my place; at home."
+ },
+ "expr-a1m5-003": {
+  "meaning": "Welcome!"
+ },
+ "expr-a1m5-004": {
+  "meaning": "It looks good on you! It suits you!"
+ },
+ "expr-a1m5-005": {
+  "meaning": "Do you like it? Do you like that?"
+ },
+ "lt-a1m6-001": {
+  "referenceTranslations": [
+   "On weekends, I like to read.",
+   "On the weekend, I like to read.",
+   "I like to read on weekends."
+  ]
+ },
+ "lt-a1m6-002": {
+  "referenceTranslations": [
+   "Are we going to the movies on Saturday night?",
+   "Shall we go to the movies Saturday night?",
+   "Are we going to the cinema on Saturday night?"
+  ]
+ },
+ "lt-a1m6-003": {
+  "referenceTranslations": [
+   "Yesterday I ate at the restaurant.",
+   "Yesterday I ate at a restaurant.",
+   "I ate at the restaurant yesterday."
+  ]
+ },
+ "lt-a1m6-004": {
+  "referenceTranslations": [
+   "This morning I took the bus.",
+   "This morning, I took the bus.",
+   "I took the bus this morning."
+  ]
+ },
+ "accent-a1m6-001": {
+  "explanation": "\"e\" has an acute accent."
+ },
+ "accent-a1m6-002": {
+  "explanation": "\"e\" has an acute accent."
+ },
+ "accent-a1m6-003": {
+  "explanation": "\"e\" has a grave accent."
+ },
+ "accent-a1m6-004": {
+  "explanation": "\"e\" has an acute accent."
+ },
+ "accent-a1m6-005": {
+  "explanation": "\"e\" has an acute accent."
+ },
+ "expr-a1m6-001": {
+  "meaning": "Have a good weekend!"
+ },
+ "expr-a1m6-002": {
+  "meaning": "Have a good evening!"
+ },
+ "expr-a1m6-003": {
+  "meaning": "Let's go! Here we go!"
+ },
+ "expr-a1m6-004": {
+  "meaning": "What's new? What's up, any news? Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-a1m6-005": {
+  "meaning": "Long time no see! It's been a while!"
+ },
+ "expr-lote1-001": {
+  "meaning": "anything / nonsense Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote1-002": {
+  "meaning": "to be fed up Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote1-003": {
+  "meaning": "to not give a damn ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+ },
+ "expr-lote1-004": {
+  "meaning": "to be in deep trouble / in a terrible situation ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+ },
+ "expr-lote1-005": {
+  "meaning": "that sucks / what a mess Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote1-006": {
+  "meaning": "to feel lazy / can't be bothered Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote1-007": {
+  "meaning": "that's crazy / that's incredible Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote1-008": {
+  "meaning": "to get out / to clear off ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+ },
+ "expr-lote1-009": {
+  "meaning": "shut up ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+ },
+ "expr-lote1-010": {
+  "meaning": "to be a pain in the neck / to piss someone off ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+ },
+ "expr-lote1-011": {
+  "meaning": "to stress out / to argue over nothing Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote1-012": {
+  "meaning": "yeah right! / no way! Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote1-013": {
+  "meaning": "it's a piece of cake Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote1-014": {
+  "meaning": "to feel down / to have the blues Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote1-015": {
+  "meaning": "to give someone a call"
+ },
+ "expr-lote1-016": {
+  "meaning": "to stand in line / to wait in line"
+ },
+ "expr-lote1-017": {
+  "meaning": "to be looking forward to it / can't wait"
+ },
+ "expr-lote1-018": {
+  "meaning": "yeah, sure... / tell me another one Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote1-019": {
+  "meaning": "to get on one's high horse / to fly off the handle"
+ },
+ "expr-lote1-020": {
+  "meaning": "to hit a wall of tiredness / to feel suddenly drained Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote2-001": {
+  "meaning": "get lost / beat it ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+ },
+ "expr-lote2-002": {
+  "meaning": "to leave / to take off ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+ },
+ "expr-lote2-003": {
+  "meaning": "it's a pain / it's a drag ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+ },
+ "expr-lote2-004": {
+  "meaning": "to be scared / to be scared to death Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote2-005": {
+  "meaning": "to be dead tired Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote2-006": {
+  "meaning": "to be drunk / to be wasted ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+ },
+ "expr-lote2-007": {
+  "meaning": "to be starving ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+ },
+ "expr-lote2-008": {
+  "meaning": "to be a pain in the neck / to bug someone ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+ },
+ "expr-lote2-009": {
+  "meaning": "stop exaggerating / stop making things up Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote2-010": {
+  "meaning": "to pass out Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote2-011": {
+  "meaning": "to give up guessing / to ask for the answer Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote2-012": {
+  "meaning": "to cost a fortune / to cost an arm and a leg"
+ },
+ "expr-lote2-013": {
+  "meaning": "a sleepless night / a night without sleep"
+ },
+ "expr-lote2-014": {
+  "meaning": "to give up / to throw in the towel"
+ },
+ "expr-lote2-015": {
+  "meaning": "to have your head in the clouds"
+ },
+ "expr-lote2-016": {
+  "meaning": "to be generous / to have a heart of gold"
+ },
+ "expr-lote2-017": {
+  "meaning": "to be tipsy / to be a little drunk Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote2-018": {
+  "meaning": "to cost an arm and a leg Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote2-019": {
+  "meaning": "to make a mountain out of a molehill Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote2-020": {
+  "meaning": "to give a forced laugh / to laugh it off awkwardly"
+ },
+ "expr-lote3-001": {
+  "meaning": "it's worth it Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote3-002": {
+  "meaning": "bad luck / what a shame Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote3-003": {
+  "meaning": "to be lucky Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote3-004": {
+  "meaning": "to be careful / to watch out Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote3-005": {
+  "meaning": "to mess up badly / to fail Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote3-006": {
+  "meaning": "it's terrible / it sucks Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote3-007": {
+  "meaning": "it's awesome Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote3-008": {
+  "meaning": "oh dear / darn (mild exclamation) Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote3-009": {
+  "meaning": "dying of laughter (lol) Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote3-010": {
+  "meaning": "to be on top form Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote3-011": {
+  "meaning": "to lose patience"
+ },
+ "expr-lote3-012": {
+  "meaning": "to fall in love"
+ },
+ "expr-lote3-013": {
+  "meaning": "shut up (milder than 'ta gueule') Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote3-014": {
+  "meaning": "leave me alone ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+ },
+ "expr-lote3-015": {
+  "meaning": "are you kidding me? ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+ },
+ "expr-lote3-016": {
+  "meaning": "damn / hell (strong exclamation) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+ },
+ "expr-lote3-017": {
+  "meaning": "strong exclamation (surprise, anger) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+ },
+ "expr-lote3-018": {
+  "meaning": "you idiot (insult) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+ },
+ "expr-lote3-019": {
+  "meaning": "jerk (insult) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+ },
+ "expr-lote3-020": {
+  "meaning": "to be completely off the mark Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote4-001": {
+  "meaning": "to pretend"
+ },
+ "expr-lote4-002": {
+  "meaning": "to do on purpose"
+ },
+ "expr-lote4-003": {
+  "meaning": "to turn the page, to move on"
+ },
+ "expr-lote4-004": {
+  "meaning": "to hold a grudge against someone"
+ },
+ "expr-lote4-005": {
+  "meaning": "it's over, it's lost Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote4-006": {
+  "meaning": "to be broke Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote4-007": {
+  "meaning": "to be upset, angry or disappointed Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote4-008": {
+  "meaning": "to be full of energy / to be in high spirits Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote4-009": {
+  "meaning": "to struggle / to have a hard time Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote4-010": {
+  "meaning": "to have money / to have cash Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote4-011": {
+  "meaning": "you're driving me crazy / you're a pain in the neck ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+ },
+ "expr-lote4-012": {
+  "meaning": "get lost / go to hell ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+ },
+ "expr-lote4-013": {
+  "meaning": "to sulk / to wear a sour face ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers."
+ },
+ "expr-lote4-014": {
+  "meaning": "to make fun of someone / to mess with someone ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings."
+ },
+ "expr-lote4-015": {
+  "meaning": "to be on edge / to be all keyed up Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote4-016": {
+  "meaning": "it's raining cats and dogs Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote4-017": {
+  "meaning": "to go all out / to pull out all the stops Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote4-018": {
+  "meaning": "at full speed / flat out Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote4-019": {
+  "meaning": "it's nothing special Register: informal — use with friends and people you're close to; avoid in formal settings."
+ },
+ "expr-lote4-020": {
+  "meaning": "to be crazy / to be nuts Register: informal — use with friends and people you're close to; avoid in formal settings."
+ }
+}
