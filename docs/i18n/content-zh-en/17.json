@@ -52,7 +52,7 @@
    "le-completion": [
     {
      "title": "了 (le) — marking completion",
-     "body": "了 (le) after a verb shows that the action was completed — it works somewhat like the English simple past (\"I ate\"). The structure is: Verb + 了 + Object.",
+     "body": "了 (le) after a verb marks a completed action. It is not exactly the English simple past: 了 can also appear in sentences about the future or habits. The structure is: Verb + 了 + Object.",
      "examples": [
       "I ate two apples"
      ]
@@ -161,9 +161,9 @@
   {
    "path": "concepts.le-completion[0].body",
    "pt": "parecido com o passado simples em português (\"comi\")",
-   "en": "somewhat like the English simple past (\"I ate\")",
+   "en": "marks a completed action; not exactly the simple past (can appear in future/habit sentences)",
    "conf": "media",
-   "why": "adaptado: comparação refeita com o inglês; 了 não é exatamente passado, mantive 'somewhat'"
+   "why": "Stopped equating 了 with the simple past; it marks completion. Wording about future/habit use is well documented (e.g. 明天吃了饭就走)."
   },
   {
    "path": "concepts.chifanle-greeting[0]",

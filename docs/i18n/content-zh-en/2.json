@@ -62,7 +62,7 @@
    "svo-order": [
     {
      "title": "Basic sentence order: Subject + Verb + Object",
-     "body": "The most common sentence structure in Chinese follows the same order as English: subject, then verb, then object. Unlike English, Chinese has little flexibility in this order — changing the position of the words changes the meaning of the sentence.",
+     "body": "The most common sentence structure in Chinese follows the same order as English: subject, then verb, then object. Changing the position of the words changes the meaning of the sentence.",
      "examples": [
       "what country are you from?"
      ]
@@ -161,9 +161,9 @@
   {
    "path": "concepts.svo-order[0].body",
    "pt": "mesma ordem do português... Diferente do português",
-   "en": "same order as English... Unlike English",
+   "en": "same order as English; changing word order changes the meaning",
    "conf": "media",
-   "why": "comparação adaptada PT->EN; conferir se a afirmação vale para o inglês (vale)"
+   "why": "Removed the false \"unlike English\" contrast (it came from the Portuguese text); the order is simply the same as English."
   },
   {
    "path": "concepts.shi-drop-casual[0].body",

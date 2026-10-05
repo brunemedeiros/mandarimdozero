@@ -64,7 +64,7 @@
    "il-fait-vs-jai": [
     {
      "title": "\"Il fait chaud\" or \"j'ai chaud\"?",
-     "body": "To talk about the <strong>weather</strong>, French uses the verb faire: <strong>il fait chaud</strong> (it's hot outside). To talk about a <strong>feeling of your own</strong>, it uses avoir: <strong>j'ai chaud</strong> (I'm hot, I feel hot). They're similar sentences but with very different subjects — impersonal \"il\" for the weather, \"je\" for yourself.",
+     "body": "To talk about the <strong>weather</strong>, French uses the verb faire: <strong>il fait chaud</strong> (it's hot outside). To talk about a <strong>feeling of your own</strong>, it uses avoir: <strong>j'ai chaud</strong> (I'm hot, I feel hot). Watch out: \"I am hot/cold\" must not become je suis chaud/froid, which means something else; say j'ai chaud / j'ai froid. Impersonal \"il\" is for the weather, \"je\" for yourself.",
      "examples": [
       "it's hot"
      ]
@@ -120,6 +120,13 @@
    "en": "It's nice, but it's cold.",
    "conf": "media",
    "why": "'beau' = nice/fine weather."
+  },
+  {
+   "path": "concepts.il-fait-vs-jai[0].body",
+   "pt": "(sem equivalente no texto PT: aviso adicionado para falantes de inglês)",
+   "en": "Watch out: \"I am hot/cold\" must not become je suis chaud/froid ... say j'ai chaud / j'ai froid",
+   "conf": "media",
+   "why": "Added a warning aimed at English speakers (literal \"I am hot/cold\" is the classic error)."
   }
  ]
 }

@@ -73,7 +73,7 @@
    "cha-origem-china": [
     {
      "title": "China is the birthplace of tea",
-     "body": "Tea comes from China — it has been drunk there for thousands of years, and the very word \"tea\"/\"chá\" in many languages comes from Chinese words (chá 茶, depending on the trade route). Serving tea to guests is an important part of Chinese hospitality to this day.",
+     "body": "Tea comes from China — it has been drunk there for thousands of years. The English word \"tea\" itself comes from a Chinese word (Min Chinese tê, via the sea trade), while \"chai\"/\"cha\" in other languages come from Mandarin chá 茶 (via the overland route). Serving tea to guests is an important part of Chinese hospitality to this day.",
      "examples": [
       "tea"
      ]
@@ -140,9 +140,9 @@
   {
    "path": "concepts.cha-origem-china[0].body",
    "pt": "a palavra 'chá'/'tea' ... vem de palavras chinesas",
-   "en": "the word \"tea\"/\"chá\" ... comes from Chinese words",
+   "en": "the English word \"tea\" comes from Min Chinese tê (sea trade); \"chai\"/\"cha\" come from Mandarin chá (overland route)",
    "conf": "media",
-   "why": "cultural/etymology claim kept as in PT; 'tea' is not Portuguese so 'chá' is an unusual mention for English readers"
+   "why": "Replaced the PT-oriented \"chá\" mention with English-centred etymology. Fact check: tea from Hokkien/Min via maritime trade, chai/cha via land routes - correct. Suggest teacher verify."
   },
   {
    "path": "trueFalse[0].claim",

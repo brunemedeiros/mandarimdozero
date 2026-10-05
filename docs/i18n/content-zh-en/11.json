@@ -43,7 +43,7 @@
    "teng": [
     {
      "title": "疼 (téng) — describing pain",
-     "body": "To say a part of the body hurts, the structure in Chinese is very direct: Body part + 疼 (téng) — with no need for a separate verb and subject like \"it hurts\" in English.",
+     "body": "To say a part of the body hurts, the structure in Chinese is very direct: Body part + 疼 (téng). 疼 already carries the idea of pain, so no separate verb is needed, as in \"I have a headache\".",
      "examples": [
       "my head hurts"
      ]
@@ -122,9 +122,9 @@
   {
    "path": "concepts.teng[0].body",
    "pt": "sem precisar de um verbo equivalente a 'doer' com sujeito separado como em português",
-   "en": "no need for a separate verb and subject like 'it hurts' in English",
-   "conf": "baixa",
-   "why": "adapted PT->EN; English comparison is loose (English also says 'my head hurts')"
+   "en": "疼 already carries the idea of pain, no separate verb (cf. \"I have a headache\")",
+   "conf": "media",
+   "why": "Removed the PT-based comparison; English already says \"my head hurts\", so the note only explains that 疼 itself means pain."
   },
   {
    "path": "concepts.le-change-of-state[0].body",

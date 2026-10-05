@@ -1763,6 +1763,7 @@ A1-1 vem do piloto (docs/i18n/piloto-A1-1.json). Itens abaixo: só os de confian
 | A1-13 | phrases[2].scenario | estação preferida | favorite season | media | EN-US spelling. |
 | A1-13 | dialogue.lines[3] | Eu prefiro o verão, está quente. | I prefer summer, it's hot. | media | Informal 'tu' dialogue; reason clause rendered loosely. |
 | A1-13 | dialogue.lines[1] | Está bonito, mas está frio. | It's nice, but it's cold. | media | 'beau' = nice/fine weather. |
+| A1-13 | concepts.il-fait-vs-jai[0].body | (sem equivalente no texto PT: aviso adicionado para falantes de inglês) | Watch out: "I am hot/cold" must not become je suis chaud/froid ... say j'ai chaud / j'ai froid | media | Added a warning aimed at English speakers (literal "I am hot/cold" is the classic error). |
 | A1-14 | vocab[6] | pegar (um transporte) | to take (a transport) | media | 'prendre' = take/catch. |
 | A1-14 | vocab[7] | o ponto (de ônibus) | the stop (bus stop) | media | 'arrêt' generic stop. |
 | A1-14 | vocab[2] | o metrô | the metro / subway | media | EN-US subway vs EN-GB metro/underground. |
@@ -1789,13 +1790,13 @@ A1-1 vem do piloto (docs/i18n/piloto-A1-1.json). Itens abaixo: só os de confian
 | A1-16 | concepts.gentil-sympa.examples[0] | legal / gente boa (informal) | nice / a good guy (informal) | media | PT slang 'gente boa'; EN approximation. |
 | A1-16 | concepts.bandeira-tricolor-historia.body | junta as duas | combines the two | media | Content kept faithful to source; ambiguous 'the two'. |
 | A1-16 | concepts.adjective-placement.body | diferente do português, mas parecido também | unlike English, where adjectives come before the noun | baixa | PT sentence compares with Portuguese; adapted to English, which changes meaning (reviewer should approve). |
-| A1-17 | concepts.andar-terreo-premier-etage[0].body | o que, no Brasil, chamaríamos de "segundo andar" | what, in the US, we would call the "second floor" | media | Adapted from Brazil to the US (EN-US); in the UK/Commonwealth the French 'first floor' matches 'first floor'. Source text was Brazil-specific. |
+| A1-17 | concepts.andar-terreo-premier-etage[0].body | o que, no Brasil, chamaríamos de "segundo andar" | what Americans call the second floor ... (In the UK, "first floor" already matches.) | media | Source said "in Brazil, we would call"; rewritten as a neutral fact about US usage (no "we"). US second floor / UK first floor is correct. |
 | A1-17 | vocab[9] | não tem / não há | there isn't / there aren't any | media | Fragment 'il n'y a pas de' needs the 'any' to reflect 'de' after negation; 'there is no' is an alternative. |
 | A1-17 | phrases[2].t | Não tem jardim. | There isn't a garden. | media | 'There's no garden.' also correct; kept parallel with the grammar note. |
 | A1-17 | phrases[6].t | O quarto fica no primeiro andar. | The bedroom is on the first floor. | media | In EN-US 'first floor' = ground floor, which clashes with the cultural note (premier étage = one above ground). 'second floor' would be US-accurate but loses the literal match; flag for the teacher. |
 | A1-17 | phrases[11].t | A janela dá para o jardim. | The window looks out onto the garden. | media | 'overlooks the garden' also fine. |
 | A1-17 | concepts.il-y-a-ya[0].examples[0] | tem um quarto (fala cotidiana) | there's a bedroom (everyday speech) | media | Contraction chosen to mirror the colloquial reduction. |
-| A1-18 | concepts.sur-vs-dans[0].body | já que às vezes usamos "em" pras duas situações | since we sometimes use "em" for both situations | media | Note is addressed to Portuguese speakers; for an English-speaking learner the comparison is to Portuguese, not English. Kept faithful; teacher may want an English-based comparison ('on' vs 'in' are distinct in English, so this confusion is less likely). |
+| A1-18 | concepts.sur-vs-dans[0].body | já que às vezes usamos "em" pras duas situações | The distinction is the same as English on vs. in. | media | Original PT note compared with Portuguese "em"; an English learner needs no such comparison. Replaced with an English-based remark (on/in map onto sur/dans here). Exceptions (on the wall, on the bus) deliberately omitted because not verified. |
 | A1-18 | vocab[5] | em cima de | on / on top of | media | 'sur' covers both 'on' and 'on top of'; PT gloss is only 'em cima de'. |
 | A1-18 | phrases[0].t | A cama fica ao lado da janela. | The bed is next to the window. | media | 'by the window' also possible. |
 | A1-18 | dialogue.lines[1] | Está embaixo da cama. | It's under the bed. | media | 'sac' translated as backpack following PT 'mochila'; French 'sac' is a generic bag. |
@@ -2053,7 +2054,7 @@ Unidades 1–18 (docs/i18n/content-zh-en/<n>.json), histórias (_stories.json) e
 | HSK1-1 | phrases[3] | Ah, sim! Eu também. | Oh, yes! Me too. | media | 是啊 = 'yes, indeed'; várias traduções |
 | HSK1-1 | concepts.duibuqi-buhaoyisi[0].examples[0] | foi mal / com licença | my bad / excuse me | media | idiomático; 'foi mal' -> 'my bad' (informal) |
 | HSK1-1 | concepts.duibuqi-buhaoyisi[0].body | quase como 'foi mal' | a bit like 'my bad' or 'excuse me' | media | adaptado do português |
-| HSK1-1 | concepts.bu-negation[0].body | Diferente do português, não muda de forma... | Like English 'not', it doesn't change its form... | media | comparação adaptada PT->EN; comparação 'quem fala/quando' retirada |
+| HSK1-1 | concepts.bu-negation[0].body | Diferente do português, não muda de forma... | 不 never changes form and needs no helper verb (no don't/doesn't/didn't) | media | Removed the PT-based contrast ("different from Portuguese"); English-based note about helper verbs instead. |
 | HSK1-1 | concepts.zaoshang-hao-zao[0].examples[0] | bom dia (informal, curto) | good morning (informal, short) | media | cultural/registro |
 | HSK1-2 | vocab[0] | eu | I / me | media | inglês distingue I/me |
 | HSK1-2 | vocab[2] | chamar-se | to be called | media | várias traduções corretas |
@@ -2064,7 +2065,7 @@ Unidades 1–18 (docs/i18n/content-zh-en/<n>.json), histórias (_stories.json) e
 | HSK1-2 | dialogue.lines[2] | Eu me chamo Xiao Li. | My name is Xiao Li. | media | idiomático |
 | HSK1-2 | concepts.shi[0].body | equivale ao verbo 'ser'... só liga substantivos | is like the verb 'to be'... only links nouns | media | afirmação sobre a língua mantida; PT 'ser' -> 'to be' |
 | HSK1-2 | concepts.shi[1].body | 'eu me chamo' nunca usa shì | 'my name is' never uses shì | media | adaptado do português |
-| HSK1-2 | concepts.svo-order[0].body | mesma ordem do português... Diferente do português | same order as English... Unlike English | media | comparação adaptada PT->EN; conferir se a afirmação vale para o inglês (vale) |
+| HSK1-2 | concepts.svo-order[0].body | mesma ordem do português... Diferente do português | same order as English; changing word order changes the meaning | media | Removed the false "unlike English" contrast (it came from the Portuguese text); the order is simply the same as English. |
 | HSK1-2 | concepts.shi-drop-casual[0].body | fala rápida e bem casual | fast, very casual speech | media | registro; afirmação sociolinguística preservada do PT |
 | HSK1-2 | concepts.ordem-nomes-sobrenome-primeiro[0].body | o oposto da ordem em português | the opposite of the usual English order | media | adaptado do português; 'usual' porque há exceções (listas, formulários) |
 | HSK1-2 | concepts.ordem-nomes-sobrenome-primeiro[0].examples[0] | (apelido carinhoso) 'Li'... | (affectionate nickname) 'Li'... | media | cultural |
@@ -2099,7 +2100,7 @@ Unidades 1–18 (docs/i18n/content-zh-en/<n>.json), histórias (_stories.json) e
 | HSK1-5 | dialogue.lines[0] | Olá, o que você quer comer? | Hello, what would you like to eat? | media | register softened to 'would you like' |
 | HSK1-5 | concepts.hen-adjective[0].body | (PT comparava ao português) | …the sentence sounds like an implied comparison or is grammatically odd. | media | kept Chinese-only fact; no PT comparison to adapt |
 | HSK1-5 | concepts.yao-xihuan[1].body | sem preposição como o 'de' do português | followed directly by what you like | baixa | adapted: PT contrast with 'gostar DE' removed (English 'like' takes no preposition, so no contrast is made) |
-| HSK1-5 | concepts.cha-origem-china[0].body | a palavra 'chá'/'tea' ... vem de palavras chinesas | the word "tea"/"chá" ... comes from Chinese words | media | cultural/etymology claim kept as in PT; 'tea' is not Portuguese so 'chá' is an unusual mention for English readers |
+| HSK1-5 | concepts.cha-origem-china[0].body | a palavra 'chá'/'tea' ... vem de palavras chinesas | the English word "tea" comes from Min Chinese tê (sea trade); "chai"/"cha" come from Mandarin chá (overland route) | media | Replaced the PT-oriented "chá" mention with English-centred etymology. Fact check: tea from Hokkien/Min via maritime trade, chai/cha via land routes - correct. Suggest teacher verify. |
 | HSK1-5 | trueFalse[0].claim | Essa frase é usada pra pedir algo num restaurante ou café. | This phrase is used to order something at a restaurant or café. | media | 'phrase' vs 'sentence'; 'tea' translation of 茶 |
 | HSK1-6 | vocab[0] | hora(s) | o'clock / hour(s) | media | 点 is 'o'clock' in time expressions; 'hour(s)' as the PT gloss |
 | HSK1-6 | vocab[8] | não ter / não há | not to have / there isn't | media | two usages glossed in PT; kept both |
@@ -2148,7 +2149,7 @@ Unidades 1–18 (docs/i18n/content-zh-en/<n>.json), histórias (_stories.json) e
 | HSK1-11 | vocab[7] | não estar bem/mal-estar | to not feel well / be unwell | media | PT gloss mixes verb and noun |
 | HSK1-11 | phrases[0] | Minha cabeça está doendo. | My head hurts. | media | alternative 'I have a headache' |
 | HSK1-11 | dialogue.lines[0] | O que houve com você? | What's wrong? | media | idiomatic; literal 'What happened to you?' |
-| HSK1-11 | concepts.teng[0].body | sem precisar de um verbo equivalente a 'doer' com sujeito separado como em português | no need for a separate verb and subject like 'it hurts' in English | baixa | adapted PT->EN; English comparison is loose (English also says 'my head hurts') |
+| HSK1-11 | concepts.teng[0].body | sem precisar de um verbo equivalente a 'doer' com sujeito separado como em português | 疼 already carries the idea of pain, no separate verb (cf. "I have a headache") | media | Removed the PT-based comparison; English already says "my head hurts", so the note only explains that 疼 itself means pain. |
 | HSK1-11 | concepts.le-change-of-state[0].body | como 'o que houve com você?' | as in 'what's wrong?' | media | idiomatic rendering |
 | HSK1-11 | trueFalse[0].claim | Essa frase é usada quando alguém está com dor de cabeça. | This sentence is used when someone has a headache. | media | idiomatic |
 | HSK1-12 | vocab[0] | hobby | hobby | media | PT uses the English loan; 爱好 = hobby/interest |
@@ -2157,7 +2158,7 @@ Unidades 1–18 (docs/i18n/content-zh-en/<n>.json), histórias (_stories.json) e
 | HSK1-12 | dialogue.title | Combinando um programa | Making plans | media | idiomatic; PT 'combinar um programa' = arrange an outing |
 | HSK1-12 | dialogue.lines[3] | Tenho! Vamos assistir um filme. | I am! Let's go see a movie. | media | 有空 answered as 'I am (free)'; alt 'Yes!' |
 | HSK1-12 | lessons.dancar-tempo-livre | Convidar alguém pra dançar | Inviting someone to dance | media | lesson title |
-| HSK1-12 | concepts.de-posse[0].body | parecido com o "'s" do inglês, mas mais simples | similar to the English "'s", but simpler | media | PT text already compares with English; kept as-is, wording adapted ('similar to English' kept for EN reader) |
+| HSK1-12 | concepts.de-posse[0].body | parecido com o "'s" do inglês, mas mais simples | works like English 's / "of": 我的书 = my book, no separate possessive forms | media | Reworded to drop the "but simpler" contrast that came from the PT word-order comparison. |
 | HSK1-12 | concepts.kan-vs-ting[0].body | igual soariam em português | just as it would in English | media | comparison adapted PT->EN |
 | HSK1-12 | concepts.guangchangwu-danca-praca[0] | dança de praça | square dancing | media | cultural note; 'square dance' also names a US folk dance, so kept the chinese term alongside |
 | HSK1-12 | trueFalse[0].claim | Essa é uma forma de convidar alguém pra fazer algo. | This is a way of inviting someone to do something. | media | idiomatic |
@@ -2198,7 +2199,7 @@ Unidades 1–18 (docs/i18n/content-zh-en/<n>.json), histórias (_stories.json) e
 | HSK1-17 | vocab[0] | partícula de conclusão/mudança | particle of completion/change | media | termo gramatical; várias glosas |
 | HSK1-17 | vocab[1] | comer (uma refeição) | to eat (a meal) | media | 吃饭 = eat a meal / have a meal |
 | HSK1-17 | vocab[5] | terminar, acabar | to finish, to end | media | várias traduções |
-| HSK1-17 | concepts.le-completion[0].body | parecido com o passado simples em português ("comi") | somewhat like the English simple past ("I ate") | media | adaptado: comparação refeita com o inglês; 了 não é exatamente passado, mantive 'somewhat' |
+| HSK1-17 | concepts.le-completion[0].body | parecido com o passado simples em português ("comi") | marks a completed action; not exactly the simple past (can appear in future/habit sentences) | media | Stopped equating 了 with the simple past; it marks completion. Wording about future/habit use is well documented (e.g. 明天吃了饭就走). |
 | HSK1-17 | concepts.chifanle-greeting[0] | parecido com "tudo bem?" | something like "how are you?" | media | nota cultural/idiomática, adaptada ao inglês; conteúdo cultural mantido fiel |
 | HSK1-17 | phrases[3]/dialogue[0] | Você já comeu? | Have you eaten yet? | media | várias traduções (Have you eaten? / Did you eat?) |
 | HSK1-17 | dialogue.lines[3] | Ontem eu não jantei, hoje estou com muita fome. | I didn't have dinner yesterday, so I'm very hungry today. | media | acrescentei 'so' para fluência; o chinês só justapõe as frases |

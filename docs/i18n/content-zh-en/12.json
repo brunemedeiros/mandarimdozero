@@ -43,7 +43,7 @@
    "de-posse": [
     {
      "title": "的 (de) — showing possession",
-     "body": "的 (de) is used to show possession, like \"my\", \"your\", \"someone's\" — similar to the English \"'s\", but simpler: it always goes between the owner and the thing owned. The structure is: Owner + 的 + Thing.",
+     "body": "的 (de) is used to show possession, like \"my\", \"your\", \"someone's\". It works like English 's / \"of\": 我的书 = my book, with no separate possessive forms. It always goes between the owner and the thing owned. The structure is: Owner + 的 + Thing.",
      "examples": [
       "what is your hobby?"
      ]
@@ -122,9 +122,9 @@
   {
    "path": "concepts.de-posse[0].body",
    "pt": "parecido com o \"'s\" do inglês, mas mais simples",
-   "en": "similar to the English \"'s\", but simpler",
+   "en": "works like English 's / \"of\": 我的书 = my book, no separate possessive forms",
    "conf": "media",
-   "why": "PT text already compares with English; kept as-is, wording adapted ('similar to English' kept for EN reader)"
+   "why": "Reworded to drop the \"but simpler\" contrast that came from the PT word-order comparison."
   },
   {
    "path": "concepts.kan-vs-ting[0].body",

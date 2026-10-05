@@ -55,7 +55,7 @@
    "sur-vs-dans": [
     {
      "title": "\"Sur\" or \"dans\"?",
-     "body": "<strong>Sur</strong> means \"on top of\", a surface: il y a une lampe <strong>sur</strong> la table. <strong>Dans</strong> means \"inside\", an enclosed space: il y a des vêtements <strong>dans</strong> l'armoire. The two are often confused by speakers of Portuguese, since we sometimes use \"em\" for both situations.",
+     "body": "<strong>Sur</strong> means \"on top of\", a surface: il y a une lampe <strong>sur</strong> la table. <strong>Dans</strong> means \"inside\", an enclosed space: il y a des vêtements <strong>dans</strong> l'armoire. The distinction is the same as English on vs. in.",
      "examples": [
       "on top of"
      ]
@@ -68,9 +68,9 @@
   {
    "path": "concepts.sur-vs-dans[0].body",
    "pt": "já que às vezes usamos \"em\" pras duas situações",
-   "en": "since we sometimes use \"em\" for both situations",
+   "en": "The distinction is the same as English on vs. in.",
    "conf": "media",
-   "why": "Note is addressed to Portuguese speakers; for an English-speaking learner the comparison is to Portuguese, not English. Kept faithful; teacher may want an English-based comparison ('on' vs 'in' are distinct in English, so this confusion is less likely)."
+   "why": "Original PT note compared with Portuguese \"em\"; an English learner needs no such comparison. Replaced with an English-based remark (on/in map onto sur/dans here). Exceptions (on the wall, on the bus) deliberately omitted because not verified."
   },
   {
    "path": "vocab[5]",

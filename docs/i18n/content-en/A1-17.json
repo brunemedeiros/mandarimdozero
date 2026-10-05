@@ -95,7 +95,7 @@
    "andar-terreo-premier-etage": [
     {
      "title": "\"1er étage\" is not the ground floor",
-     "body": "In France, the ground floor has its own name: <strong>le rez-de-chaussée</strong>. The counting only starts after it — <strong>le premier étage</strong> is what, in the US, we would call the \"second floor\" (one floor above the ground floor). It's worth paying attention to this when looking for an address or taking the elevator.",
+     "body": "In France, the ground floor has its own name: <strong>le rez-de-chaussée</strong>. The counting only starts after it — <strong>le premier étage</strong> is what Americans call the second floor (one floor above the ground floor). (In the UK, \"first floor\" already matches.) It's worth paying attention to this when looking for an address or taking the elevator.",
      "examples": [
       "the ground floor",
       "the 1st floor (above the ground floor)"
@@ -109,9 +109,9 @@
   {
    "path": "concepts.andar-terreo-premier-etage[0].body",
    "pt": "o que, no Brasil, chamaríamos de \"segundo andar\"",
-   "en": "what, in the US, we would call the \"second floor\"",
+   "en": "what Americans call the second floor ... (In the UK, \"first floor\" already matches.)",
    "conf": "media",
-   "why": "Adapted from Brazil to the US (EN-US); in the UK/Commonwealth the French 'first floor' matches 'first floor'. Source text was Brazil-specific."
+   "why": "Source said \"in Brazil, we would call\"; rewritten as a neutral fact about US usage (no \"we\"). US second floor / UK first floor is correct."
   },
   {
    "path": "vocab[9]",
