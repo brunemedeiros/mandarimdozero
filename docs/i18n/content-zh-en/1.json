@@ -56,7 +56,7 @@
    "bu-negation": [
     {
      "title": "不 (bù) — the standard negation",
-     "body": "不 (bù) is the most common negation in Chinese — it always comes before the verb or adjective you want to negate. 不 never changes form and needs no helper verb (no don't/doesn't/didn't): simply put 不 before the verb or adjective.",
+     "body": "不 (bù) is the most common negation in Chinese — it always comes before the verb or adjective you want to negate. 不 doesn't change with person or tense and needs no helper verb (no don't/doesn't): simply put 不 before the verb or adjective.",
      "examples": [
       "I don't understand",
       "not expensive"
@@ -172,7 +172,7 @@
   {
    "path": "concepts.bu-negation[0].body",
    "pt": "Diferente do português, não muda de forma...",
-   "en": "不 never changes form and needs no helper verb (no don't/doesn't/didn't)",
+   "en": "不 doesn't change with person or tense and needs no helper verb (no don't/doesn't)",
    "conf": "media",
    "why": "Removed the PT-based contrast (\"different from Portuguese\"); English-based note about helper verbs instead."
   },

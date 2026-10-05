@@ -85,7 +85,7 @@ window.I18N_CATALOG['en'] = {
   'settings.export.title': 'Choose what to export', // ALTA
   'settings.export.button': 'Generate .apkg file', // ALTA
   'settings.pref.cloze.subFr': 'Instead of choosing from options, type the missing word (Clozemaster style).', // ALTA
-  'settings.export.descFr': 'The exported deck includes the French word/phrase (with audio you can set up in Anki) and the Portuguese translation, using the same question/answer pair as in the app.', // MÉDIA
+  'settings.export.descFr': 'The exported deck includes the French word/phrase (with audio you can set up in Anki) and its translation, using the same question/answer pair as in the app.', // MÉDIA
   'settings.aria.section': 'Settings section', // ALTA
   'menu.profile': '👤 My profile', // ALTA
   'menu.ranking': '🏆 Leaderboard', // MÉDIA
@@ -496,7 +496,7 @@ window.I18N_CATALOG['en'] = {
   'zh.hint.listenAgain': 'Listen again, paying attention to the sounds -- it is an expression from this unit\'s topic.', // MÉDIA
   'zh.hint.thinkContext': 'Think about the context of this unit\'s topic ("{title}"): in what situation would you use this word?', // ALTA
   'zh.hint.reorder': 'First identify who performs the action, then the action itself -- build the sentence following that line of thought, ignoring the blocks that do not belong to it.', // ALTA
-  'zh.hint.fullsentence': 'Reread the sentence in Portuguese and think about how each part of it is normally said in Chinese, before comparing the options.', // MÉDIA
+  'zh.hint.fullsentence': 'Reread the sentence and think about how each part of it is normally said in Chinese, before comparing the options.', // MÉDIA
   'zh.hint.cloze': 'Reread the whole sentence, together with the translation, and think about which word gives the blank its grammatical and communicative meaning.', // ALTA
   'zh.hint.trueFalseUsage': 'Think about the explanation: "{title}"', // ALTA
   'zh.hint.trueFalseDefault': 'Reread the statement carefully: does it describe exactly the situation in which this expression is used?', // ALTA
