@@ -149,7 +149,7 @@ function applyPendingLevelTestOffer(){
       setTimeout(() => card.classList.remove('level-test-highlight'), 3000);
     }
     if (typeof showToast === 'function' && test){
-      showToast(`🎓 Você disse que já sabe o básico — dá uma olhada no "${test.title}" aqui embaixo pra pular pro próximo nível.`);
+      showToast(t('auth.levelTestHint', { title: test.title }));
     }
   });
 }
@@ -163,7 +163,7 @@ function enterGuestMode(){
   // sidebar/cards, Fase 3) -- setar 'block' aqui travaria isso pra sempre,
   // em qualquer largura de tela.
   document.getElementById('app').style.removeProperty('display');
-  document.getElementById('user-label').textContent = 'Convidado';
+  document.getElementById('user-label').textContent = t('auth.guestLabel');
   // .then() (não await -- enterGuestMode não é async) garante que o
   // redirecionamento de notificação (se houver) só rode DEPOIS do
   // render padrão terminar, senão a aba padrão do carregamento sobrescreve
@@ -193,7 +193,7 @@ async function onUserLoggedIn(user){
   // sidebar/cards, Fase 3) -- setar 'block' aqui travaria isso pra sempre,
   // em qualquer largura de tela.
   document.getElementById('app').style.removeProperty('display');
-  const label = user.user_metadata?.full_name || user.email || 'Minha conta';
+  const label = user.user_metadata?.full_name || user.email || t('auth.myAccount');
   document.getElementById('user-label').textContent = label;
   document.getElementById('user-dropdown-email').textContent = user.email || '';
   // isAdminUser()/isAdminModeOn() vêm de languages/<lang>/app.js e
@@ -387,7 +387,7 @@ function notifySaveFailure(){
   const now = Date.now();
   if (now - lastSaveErrorToastAt < SAVE_ERROR_TOAST_COOLDOWN_MS) return;
   lastSaveErrorToastAt = now;
-  showToast('⚠ Não foi possível salvar seu progresso agora. Verifique sua conexão.');
+  showToast(t('auth.saveFailed'));
 }
 
 // Mesmo cooldown do aviso acima, contador PRÓPRIO -- este dispara num
@@ -400,7 +400,7 @@ function notifyProgressNotLoadedYet(){
   const now = Date.now();
   if (now - lastLoadGuardToastAt < SAVE_ERROR_TOAST_COOLDOWN_MS) return;
   lastLoadGuardToastAt = now;
-  showToast('⏳ Ainda confirmando seu progresso salvo -- espere um instante antes de continuar.');
+  showToast(t('auth.notLoadedYet'));
 }
 
 // Cooldown/contador PRÓPRIO de novo -- mensagem diferente de propósito das
@@ -415,7 +415,7 @@ function notifyStaleLocalProgress(){
   const now = Date.now();
   if (now - lastStaleLocalToastAt < SAVE_ERROR_TOAST_COOLDOWN_MS) return;
   lastStaleLocalToastAt = now;
-  showToast('⚠ Seu progresso aqui parece desatualizado em relação ao que já foi salvo -- recarregue a página se isto persistir.');
+  showToast(t('auth.staleLocal'));
 }
 
 async function saveState(){

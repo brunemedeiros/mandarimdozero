@@ -220,16 +220,16 @@ function previewNextIntervalDays(card, sm2Grade, now){
 // assim (min/h/dia/dias/sem.) por robustez, caso o piso mínimo mude no
 // futuro, e porque é o formato que a Fase 8 do projeto pede.
 function formatReviewInterval(days){
-  if (days < 1/24) return `${Math.max(1, Math.round(days*24*60))} min`;
-  if (days < 1) return `${Math.round(days*24)} h`;
-  if (days < 7) return days === 1 ? '1 dia' : `${Math.round(days)} dias`;
+  if (days < 1/24) return tp('review.interval.min', Math.max(1, Math.round(days*24*60)));
+  if (days < 1) return tp('review.interval.hour', Math.round(days*24));
+  if (days < 7) return tp('review.interval.day', days === 1 ? 1 : Math.round(days));
   if (days < 30){
     const weeks = Math.round(days/7);
-    return weeks <= 1 ? '1 sem.' : `${weeks} sem.`;
+    return tp('review.interval.week', weeks <= 1 ? 1 : weeks);
   }
   if (days < 365){
     const months = Math.round(days/30);
-    return months <= 1 ? '1 mês' : `${months} meses`;
+    return tp('review.interval.month', months <= 1 ? 1 : months);
   }
   // Cartões muito maduros (stability de anos) podem ter Difícil/Bom/Fácil
   // razoavelmente próximos em dias mas ainda claramente diferentes em
@@ -241,11 +241,11 @@ function formatReviewInterval(days){
   const years = days / 365;
   if (years < 10){
     const rounded = Math.round(years * 10) / 10;
-    if (Number.isInteger(rounded)) return rounded <= 1 ? '1 ano' : `${rounded} anos`;
-    return `${String(rounded).replace('.', ',')} anos`;
+    if (Number.isInteger(rounded)) return tp('review.interval.year', rounded <= 1 ? 1 : rounded);
+    return tp('review.interval.yearsFrac', rounded);
   }
   const roundedYears = Math.round(years);
-  return `${roundedYears} anos`;
+  return tp('review.interval.yearsFrac', roundedYears);
 }
 
 // ---------- Funil único de mutação de memória, escala SM-2 (Fase 5) ----------

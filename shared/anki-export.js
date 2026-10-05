@@ -203,7 +203,7 @@ const ANKI_CLOZE_TRANSLATION_FIELD_DEFAULT = "Tradução";
 
 async function generateApkg(config){
   const statusEl = document.getElementById('export-status');
-  statusEl.textContent = 'Gerando arquivo...';
+  statusEl.textContent = t('ankiExport.generating');
   statusEl.className = 'export-status';
 
   try{
@@ -250,7 +250,7 @@ async function generateApkg(config){
     const exportCards = config.cards(exportSelectedUnit);
 
     if (!exportCards.length){
-      statusEl.textContent = 'Nenhum cartão para exportar nessa seleção.';
+      statusEl.textContent = t('ankiExport.empty');
       statusEl.className = 'export-status err';
       return;
     }
@@ -389,14 +389,14 @@ async function generateApkg(config){
     setTimeout(() => URL.revokeObjectURL(url), 4000);
 
     const mediaNote = media.failedCount > 0
-      ? ` (${media.failedCount} arquivo(s) de mídia não puderam ser incluídos -- os cartões foram exportados mesmo assim, só sem esse áudio/imagem específico.)`
+      ? tp('ankiExport.mediaNote', media.failedCount)
       : '';
-    statusEl.textContent = `Exportado! ${exportCards.length} cartão(ões) no arquivo .apkg — importe direto no Anki.${mediaNote}`;
+    statusEl.textContent = tp('ankiExport.done', exportCards.length, { mediaNote });
     statusEl.className = `export-status ${media.failedCount > 0 ? 'err' : 'ok'}`;
 
   }catch(err){
     console.error(err);
-    statusEl.textContent = 'Não foi possível gerar o arquivo agora. Tente novamente.';
+    statusEl.textContent = t('ankiExport.failed');
     statusEl.className = 'export-status err';
   }
 }

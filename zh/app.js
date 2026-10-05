@@ -341,7 +341,7 @@ if (TTS.supported){
 // problemas de aspas dentro do atributo onclick ao usar addEventListener depois)
 function audioBtnHTML(hanziText, extraClass){
   const safe = hanziText.replace(/"/g, '&quot;');
-  return `<button class="audio-btn ${extraClass||''}" data-speak="${safe}" aria-label="Ouvir pronúncia" title="Ouvir pronúncia">🔊</button>`;
+  return `<button class="audio-btn ${extraClass||''}" data-speak="${safe}" aria-label="${t('zh.audio.listenPronunciation')}" title="${t('zh.audio.listenPronunciation')}">🔊</button>`;
 }
 
 // Ativa todos os .audio-btn dentro de um container (delegação simples por escopo)
@@ -368,7 +368,7 @@ function wireAudioButtons(container, isPreview){
 // -- wireAudioButtons() casa por `.audio-btn` e chamaria speakChinese()
 // com data-speak indefinido se este botão compartilhasse a classe.
 function customAudioBtnHTML(url){
-  return `<button class="custom-audio-btn" data-audio-url="${url}" aria-label="Ouvir áudio" title="Ouvir áudio">🎧</button>`;
+  return `<button class="custom-audio-btn" data-audio-url="${url}" aria-label="${t('zh.audio.listenAudio')}" title="${t('zh.audio.listenAudio')}">🎧</button>`;
 }
 function wireCustomAudioButtons(container){
   container.querySelectorAll('.custom-audio-btn').forEach(btn => {
@@ -384,7 +384,7 @@ const HANZI_WRITER_SUPPORTED = typeof HanziWriter !== 'undefined';
 
 function strokeBtnHTML(hanziText){
   const safe = hanziText.replace(/"/g, '&quot;');
-  return `<button class="stroke-btn" data-hanzi="${safe}" aria-label="Ver ordem dos traços" title="Ver ordem dos traços">✍️</button>`;
+  return `<button class="stroke-btn" data-hanzi="${safe}" aria-label="${t('zh.stroke.view')}" title="${t('zh.stroke.view')}">✍️</button>`;
 }
 
 function wireStrokeButtons(container){
@@ -458,16 +458,16 @@ function openStrokeModal(hanziText){
   const titleEl = document.getElementById('stroke-modal-title');
   const bodyEl = document.getElementById('stroke-modal-body');
 
-  titleEl.textContent = `Ordem dos traços — ${hanziText}`;
+  titleEl.textContent = t('zh.stroke.title', { hanzi: hanziText });
 
   if (!HANZI_WRITER_SUPPORTED){
-    bodyEl.innerHTML = `<p class="stroke-unavailable">Não foi possível carregar o recurso de traços agora. Verifique sua conexão e tente novamente.</p>`;
+    bodyEl.innerHTML = `<p class="stroke-unavailable">${t('zh.stroke.loadFailed')}</p>`;
     modal.style.display = 'flex';
     return;
   }
 
   if (!chars.length){
-    bodyEl.innerHTML = `<p class="stroke-unavailable">Esta palavra não tem caracteres chineses para desenhar.</p>`;
+    bodyEl.innerHTML = `<p class="stroke-unavailable">${t('zh.stroke.noChars')}</p>`;
     modal.style.display = 'flex';
     return;
   }
@@ -477,7 +477,7 @@ function openStrokeModal(hanziText){
   bodyEl.innerHTML = chars.map((ch, i) => `
     <div class="stroke-char-block">
       <div class="stroke-char-target" id="stroke-target-${i}"></div>
-      <button class="btn btn-secondary stroke-replay-btn" data-idx="${i}">🔄 Repetir animação</button>
+      <button class="btn btn-secondary stroke-replay-btn" data-idx="${i}">${t('zh.stroke.replay')}</button>
     </div>
   `).join('');
 
@@ -498,7 +498,7 @@ function openStrokeModal(hanziText){
       writer.animateCharacter();
     }catch(e){
       document.getElementById(`stroke-target-${i}`).innerHTML =
-        `<p class="stroke-unavailable">Não foi possível desenhar "${ch}".</p>`;
+        `<p class="stroke-unavailable">${t('zh.stroke.drawFailed', { ch })}</p>`;
     }
   });
 
@@ -891,10 +891,11 @@ function isRealityNoteCategoryAllowedAtLevel(category, level){
 // sobre --on-vivid vs --on-seal-red -- não reaproveitar o badge de
 // 'informal' pra um registro mais marcado).
 const REALITY_NOTE_BANNER_TEXT = {
-  [REALITY_NOTE_CATEGORY.INFORMAL]: '🗣️ Na vida real',
-  [REALITY_NOTE_CATEGORY.FAMILIAR_GIRIA]: '🗣️ Registro informal',
-  [REALITY_NOTE_CATEGORY.REGIONAL]: '📍 Variação regional',
-  [REALITY_NOTE_CATEGORY.GRAMATICA_COLOQUIAL]: '✍️ Assim também se fala',
+  // Getters (i18n): avaliados a cada leitura, não congelados no load.
+  get [REALITY_NOTE_CATEGORY.INFORMAL]() { return t('concept.banner.reality.informal'); },
+  get [REALITY_NOTE_CATEGORY.FAMILIAR_GIRIA]() { return t('concept.banner.reality.familiar'); },
+  get [REALITY_NOTE_CATEGORY.REGIONAL]() { return t('concept.banner.reality.regional'); },
+  get [REALITY_NOTE_CATEGORY.GRAMATICA_COLOQUIAL]() { return t('concept.banner.reality.colloquialGrammar'); },
 };
 
 // ---------- Taxonomia de "notas culturais" (grilling 2026-09-17) ----------
@@ -923,9 +924,9 @@ const CULTURE_NOTE_CATEGORY = {
 // "curiosidade" que o de `reality` (que soa mais "cuidado, isso pode te
 // confundir"), já que aqui não há nenhum contraste de forma pra alertar.
 const CULTURE_NOTE_BANNER_TEXT = {
-  [CULTURE_NOTE_CATEGORY.HISTORIA]: '📜 Você sabia?',
-  [CULTURE_NOTE_CATEGORY.COSTUME]: '🎭 Costume real',
-  [CULTURE_NOTE_CATEGORY.FESTIVIDADE]: '🎉 Data especial',
+  get [CULTURE_NOTE_CATEGORY.HISTORIA]() { return t('concept.banner.culture.history'); },
+  get [CULTURE_NOTE_CATEGORY.COSTUME]() { return t('concept.banner.culture.custom'); },
+  get [CULTURE_NOTE_CATEGORY.FESTIVIDADE]() { return t('concept.banner.culture.festivity'); },
 };
 
 // ---------- Estado global ----------
@@ -1430,8 +1431,8 @@ function maybeSendStudyReminder(){
   if (diffMin < 0 || diffMin > 30) return;
 
   if (localStorageSafeGet('mandarim_last_study_notif') === todayStr()) return;
-  new Notification('Hora de estudar mandarim! 🇨🇳', {
-    body: `Sua meta de hoje: ${goal.dailyLessonsGoal} lição${goal.dailyLessonsGoal > 1 ? 'ões' : ''}.`,
+  new Notification(t('zh.reminder.title'), {
+    body: tp('zh.reminder.body', goal.dailyLessonsGoal),
     icon: 'icons/icon-192.png'
   });
   localStorageSafeSet('mandarim_last_study_notif', todayStr());
@@ -1563,21 +1564,21 @@ function registerDailyExerciseFormat(format){
 }
 
 const EASY_CHALLENGES = [
-  { id:'streak', icon:'🔥', label:'Mantenha sua sequência de dias viva hoje', target:1, get: () => STATE.lastStudyDay === todayStr() ? 1 : 0 },
-  { id:'firstLesson', icon:'🌅', label:'Complete sua primeira lição do dia', target:1, get: d => d.lessons }
+  { id:'streak', icon:'🔥', get label(){ return t('fr.mission.streak'); }, target:1, get: () => STATE.lastStudyDay === todayStr() ? 1 : 0 },
+  { id:'firstLesson', icon:'🌅', get label(){ return t('fr.mission.firstLesson'); }, target:1, get: d => d.lessons }
 ];
 const REVISAO_HANZI_CHALLENGES = [
-  { id:'hanzi1', icon:'🈺', label:'Estude 1 lição de Hanzi', target:1, get: d => d.hanziLessons },
+  { id:'hanzi1', icon:'🈺', get label(){ return t('zh.mission.hanzi1'); }, target:1, get: d => d.hanziLessons },
   // labelForTarget: usado só quando resolveRevisaoMission() escala a meta
   // pra baixo (estoque real menor que o alvo original) -- sem isso o texto
   // continuaria dizendo "15"/"3" enquanto a barra de progresso mostra um
   // teto diferente (ver grilling "missões do dia").
-  { id:'reviews15', icon:'🔁', label:'Revise 15 cartões', labelForTarget: n => `Revise ${n} cartões`, target:15, get: d => d.reviewsDone },
-  { id:'speedReview1', icon:'⚡', label:'Complete uma sessão de Revisão Rápida', target:1, get: d => d.speedReviewSessions },
-  { id:'matchGame1', icon:'🧩', label:'Jogue o jogo de Combinar 1 vez', target:1, get: d => d.matchGamesPlayed },
+  { id:'reviews15', icon:'🔁', get label(){ return tp('fr.mission.reviews', 15); }, labelForTarget: n => tp('fr.mission.reviews', n), target:15, get: d => d.reviewsDone },
+  { id:'speedReview1', icon:'⚡', get label(){ return t('fr.mission.speedReview1'); }, target:1, get: d => d.speedReviewSessions },
+  { id:'matchGame1', icon:'🧩', get label(){ return t('zh.mission.matchGame1'); }, target:1, get: d => d.matchGamesPlayed },
   // Fase 4 (artefato §3): prioriza SRS de verdade atrasado, não qualquer
   // revisão dentro do prazo normal -- puxa quem tem cartas acumuladas.
-  { id:'overdue3', icon:'⏰', label:'Revise 3 cartas em atraso', labelForTarget: n => `Revise ${n} cartas em atraso`, target:3, get: d => d.overdueReviewsDone }
+  { id:'overdue3', icon:'⏰', get label(){ return tp('fr.mission.overdue', 3); }, labelForTarget: n => tp('fr.mission.overdue', n), target:3, get: d => d.overdueReviewsDone }
 ];
 // "Complete N lições" saiu daqui na Fase 3 -- virou redundante depois que a
 // meta diária (plano de estudo) passou a ser medida em lições também: as
@@ -1588,14 +1589,14 @@ const GENERAL_CHALLENGES = [
   // (estrelas -- sistema paralelo de pontuação retirado, ver lessonStars/
   // registerDailyStars removidos) por um desafio ligado ao XP real, a
   // única moeda que o app de fato usa em todo o resto da interface.
-  { id:'xp50', icon:'⚡', label:'Ganhe 50 XP hoje', target:50, get: d => d.xp },
-  { id:'highscore2', icon:'📈', label:'Pontue mais de 80% em 2 lições', target:2, get: d => d.highScoreLessons },
-  { id:'perfect1', icon:'🎯', label:'Complete uma lição sem errar', target:1, get: d => d.perfectLessons },
-  { id:'hanzi2', icon:'🈺', label:'Estude 2 lições de Hanzi', target:2, get: d => d.hanziLessons },
+  { id:'xp50', icon:'⚡', get label(){ return t('fr.mission.xp50'); }, target:50, get: d => d.xp },
+  { id:'highscore2', icon:'📈', get label(){ return t('fr.mission.highscore2'); }, target:2, get: d => d.highScoreLessons },
+  { id:'perfect1', icon:'🎯', get label(){ return t('fr.mission.perfect1'); }, target:1, get: d => d.perfectLessons },
+  { id:'hanzi2', icon:'🈺', get label(){ return t('zh.mission.hanzi2'); }, target:2, get: d => d.hanziLessons },
   // Fase 4 (artefato §3): ligados a recursos reais do produto (ouvir,
   // traduzir por blocos), não só contadores genéricos de progresso.
-  { id:'listen10', icon:'🎧', label:'Toque o áudio 10 vezes', target:10, get: d => d.audioPlaysToday },
-  { id:'translateBlocks2', icon:'🧱', label:'Complete 2 exercícios de "Traduza a frase"', target:2, get: d => d.exerciseFormatCounts?.reorder || 0 }
+  { id:'listen10', icon:'🎧', get label(){ return t('fr.mission.listen10'); }, target:10, get: d => d.audioPlaysToday },
+  { id:'translateBlocks2', icon:'🧱', get label(){ return t('fr.mission.translateBlocks2'); }, target:2, get: d => d.exerciseFormatCounts?.reorder || 0 }
 ];
 
 function dailySeed(str){
@@ -1745,7 +1746,7 @@ function renderDailyChallengesScreen(){
 
   contentEl.innerHTML = `
     <div class="challenges-screen">
-      <h2>🎯 Missões do dia</h2>
+      <h2>${t('trail.dailyMissions.caption')}</h2>
       ${todaysChallenges().map((c, i) => {
         // Number(...)||0: um campo ausente nunca mais vira NaN silencioso
         // (ver auditoria "O problema dos 100%") -- current fica sempre um
@@ -2077,7 +2078,7 @@ function renderSearchResults(query){
     : index;
 
   if (!filtered.length){
-    resultsEl.innerHTML = `<div class="search-empty">Nenhum resultado para "${query}".</div>`;
+    resultsEl.innerHTML = `<div class="search-empty">${t('zh.search.noResults', { q: query })}</div>`;
     return;
   }
 
@@ -2088,11 +2089,11 @@ function renderSearchResults(query){
     const unlocked = STATE.unitProgress[item.unitId]?.unlocked;
     let tagHTML;
     if (item.completed){
-      tagHTML = `<span class="search-unit-tag done">✓ Unidade ${item.unitId}</span>`;
+      tagHTML = `<span class="search-unit-tag done">${t('zh.search.unitDone', { id: item.unitId })}</span>`;
     } else if (unlocked){
-      tagHTML = `<button class="search-unit-tag pending" data-unit-id="${item.unitId}">Estudar Unidade ${item.unitId}</button>`;
+      tagHTML = `<button class="search-unit-tag pending" data-unit-id="${item.unitId}">${t('zh.search.studyUnit', { id: item.unitId })}</button>`;
     } else {
-      tagHTML = `<span class="search-unit-tag locked">🔒 Unidade ${item.unitId}: ${item.unitTitle}</span>`;
+      tagHTML = `<span class="search-unit-tag locked">${t('zh.search.unitLocked', { id: item.unitId, title: item.unitTitle })}</span>`;
     }
     return `
       <div class="search-result-row">
@@ -2104,7 +2105,7 @@ function renderSearchResults(query){
     `;
   }).join('') + (hasMore ? `
     <button class="search-load-more-btn" id="search-load-more-btn">
-      Carregar mais (${toShow.length} de ${filtered.length})
+      ${t('zh.search.loadMore', { shown: toShow.length, total: filtered.length })}
     </button>
   ` : '');
 
@@ -2446,9 +2447,9 @@ function renderNextStoryBeat(){
     contentEl.insertAdjacentHTML('beforeend', `
       <div class="story-complete">
         <div class="big-emoji">🎉</div>
-        <h3>História concluída!</h3>
-        <p>Você revisou o vocabulário das Unidades ${story.coversUnits[0]}–${story.coversUnits[story.coversUnits.length-1]} numa situação nova.</p>
-        <button class="btn btn-primary" id="story-finish-btn">Voltar à trilha</button>
+        <h3>${t('zh.story.doneTitle')}</h3>
+        <p>${t('zh.story.doneBody', { from: story.coversUnits[0], to: story.coversUnits[story.coversUnits.length-1] })}</p>
+        <button class="btn btn-primary" id="story-finish-btn">${t('zh.story.backToPath')}</button>
       </div>
     `);
     document.getElementById('story-finish-btn').addEventListener('click', () => {
@@ -2546,11 +2547,12 @@ document.getElementById('story-back-to-path').addEventListener('click', () => {
 // ============================================================
 // LIÇÃO EM PASSOS (Vocabulário → Exercícios → Frases → Diálogo)
 // ============================================================
+// Getters (i18n): o rótulo é resolvido a cada leitura, não congelado no load.
 const STEP_DEFS = [
-  { key: 'vocab', label: 'Vocabulário' },
-  { key: 'dialogue', label: 'Diálogo' },
-  { key: 'usage', label: 'Dica de uso' },
-  { key: 'exercises', label: 'Exercícios' }
+  { key: 'vocab', get label() { return t('fr.step.vocab'); } },
+  { key: 'dialogue', get label() { return t('fr.step.dialogue'); } },
+  { key: 'usage', get label() { return t('fr.step.usage'); } },
+  { key: 'exercises', get label() { return t('fr.step.exercises'); } }
 ];
 
 // Unidades migradas pra explicação contextual (`unit.concepts`, ver
@@ -2562,10 +2564,10 @@ const STEP_DEFS = [
 function currentStepDefs(u){
   if (isLessonUnit(u)){
     const lesson = currentLesson(u);
-    if (lesson.isCheckpoint) return [{ key: 'checkpointExercises', label: 'Ponto de verificação' }];
+    if (lesson.isCheckpoint) return [{ key: 'checkpointExercises', label: t('trail.checkpoint.title') }];
     const steps = [];
-    if (lesson.vocabIdx && lesson.vocabIdx.length) steps.push({ key: 'vocab', label: 'Vocabulário' });
-    if (lesson.includesDialogue) steps.push({ key: 'dialogue', label: 'Diálogo' });
+    if (lesson.vocabIdx && lesson.vocabIdx.length) steps.push({ key: 'vocab', label: t('fr.step.vocab') });
+    if (lesson.includesDialogue) steps.push({ key: 'dialogue', label: t('fr.step.dialogue') });
     return steps;
   }
   return STEP_DEFS.filter(s => s.key !== 'usage' || (u && u.usageNote));
@@ -2875,7 +2877,7 @@ function renderUnitSummaryHTML(u){
 // ---------- Modal: manual da unidade atual ----------
 document.getElementById('unit-manual-btn').addEventListener('click', () => {
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
-  document.getElementById('unit-manual-title').textContent = `Manual — Unidade ${u.id}: ${u.title}`;
+  document.getElementById('unit-manual-title').textContent = t('zh.manual.title', { id: u.id, title: u.title });
   const bodyEl = document.getElementById('unit-manual-body');
   bodyEl.innerHTML = renderUnitSummaryHTML(u);
   wireAudioButtons(bodyEl);
@@ -2989,26 +2991,26 @@ function buildExerciseHint(ex, unit){
     const phrase = findMatchingPhrase(item, unit);
     if (phrase){
       const masked = maskWordInText(phrase.c, item.c) || phrase.c;
-      return `Pense em quando você usaria essa expressão. Ela aparece nesta frase que você já estudou: "${masked}"`;
+      return t('zh.hint.thinkWhenUse', { masked });
     }
     if (ex.format === 'type'){
-      return 'Ouça de novo com atenção aos sons -- é uma expressão do tema desta unidade.';
+      return t('zh.hint.listenAgain');
     }
-    return `Pense no contexto do tema desta unidade ("${unit.title}"): em que situação você usaria essa palavra?`;
+    return t('zh.hint.thinkContext', { title: unit.title });
   }
   if (ex.format === 'reorder'){
-    return 'Identifique primeiro quem realiza a ação e depois a ação em si -- monte a frase seguindo essa ordem de raciocínio, ignorando os blocos que não pertencem a ela.';
+    return t('zh.hint.reorder');
   }
   if (ex.format === 'fullsentence'){
-    return 'Releia a frase em português e pense em como cada parte dela normalmente é dita em chinês, antes de comparar as opções.';
+    return t('zh.hint.fullsentence');
   }
   if (ex.format === 'cloze'){
-    return 'Releia a frase inteira, junto da tradução, e pense em qual palavra dá sentido gramatical e comunicativo ao espaço.';
+    return t('zh.hint.cloze');
   }
   if (ex.format === 'trueFalse'){
     return unit.usageNote
-      ? `Pense na explicação: "${unit.usageNote.title}"`
-      : 'Releia a afirmação com atenção: ela descreve exatamente a situação em que essa expressão é usada?';
+      ? t('zh.hint.trueFalseUsage', { title: unit.usageNote.title })
+      : t('zh.hint.trueFalseDefault');
   }
   return null;
 }
@@ -3036,12 +3038,12 @@ function wireDontKnowButton(contentEl, ex, onRevealAnswer){
     btn.outerHTML = `
       <div class="inline-hint-block" id="inline-hint-block">
         ${hintText ? `
-          <div class="inline-hint-label">💡 Dica</div>
+          <div class="inline-hint-label">${t('zh.hint.label')}</div>
           <p class="inline-hint-text">${hintText}</p>
         ` : ''}
         <div class="inline-hint-actions">
-          <button class="btn btn-secondary inline-hint-retry-btn" id="inline-hint-retry-btn">Tentar novamente</button>
-          <button class="btn btn-secondary exercise-reveal-btn" id="exercise-reveal-btn">Ver resposta</button>
+          <button class="btn btn-secondary inline-hint-retry-btn" id="inline-hint-retry-btn">${t('zh.hint.retry')}</button>
+          <button class="btn btn-secondary exercise-reveal-btn" id="exercise-reveal-btn">${t('zh.hint.reveal')}</button>
         </div>
       </div>
     `;
@@ -3126,7 +3128,7 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
 
   const phraseHTML = matchingPhrase ? `
     <div class="vocab-phrase-example">
-      <div class="vocab-phrase-label">Na frase</div>
+      <div class="vocab-phrase-label">${t('fr.blockIntro.inPhrase')}</div>
       <div class="vocab-phrase-pinyin">${matchingPhrase.p}</div>
       <div class="vocab-phrase-hanzi">${matchingPhrase.c} ${audioBtnHTML(matchingPhrase.c)}</div>
       <div class="vocab-phrase-trans">${matchingPhrase.t}</div>
@@ -3134,13 +3136,13 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
   ` : '';
 
   contentEl.innerHTML = `
-    <div class="vocab-card-counter">Bloco ${acq.blockIdx + 1} de ${acq.blocks.length} · Palavra ${posInBlock + 1} de ${block.length}</div>
+    <div class="vocab-card-counter">${t('fr.blockIntro.counter', { block: acq.blockIdx + 1, blocks: acq.blocks.length, pos: posInBlock + 1, total: block.length })}</div>
     <div class="vocab-card">
       <div class="vocab-card-pinyin">${v.p}</div>
       <div class="vocab-card-hanzi">${v.c} ${audioBtnHTML(v.c)} ${strokeBtnHTML(v.c)}</div>
       <div class="vocab-card-trans">${v.t}</div>
-      <button class="know-btn ${alreadyKnown ? 'known' : ''}" data-card-id="${cardId}" title="Marcar como já sei">
-        ${alreadyKnown ? '✓ Já sei' : 'Já sei?'}
+      <button class="know-btn ${alreadyKnown ? 'known' : ''}" data-card-id="${cardId}" title="${t('fr.blockIntro.markKnownTitle')}">
+        ${alreadyKnown ? t('zh.path.knownDone') : t('zh.path.knownAsk')}
       </button>
     </div>
     ${phraseHTML}
@@ -3284,9 +3286,9 @@ function renderConceptStep(){
   const isReality = concept.kind === 'reality';
   const isCulture = concept.kind === 'culture';
   setAcqPhaseBanner(
-    isReality ? (REALITY_NOTE_BANNER_TEXT[concept.category] || '🌍 Nota de realidade') :
-    isCulture ? (CULTURE_NOTE_BANNER_TEXT[concept.category] || '📜 Nota cultural') :
-    '💡 Vale entender isso'
+    isReality ? (REALITY_NOTE_BANNER_TEXT[concept.category] || t('concept.banner.reality.default')) :
+    isCulture ? (CULTURE_NOTE_BANNER_TEXT[concept.category] || t('concept.banner.culture.default')) :
+    t('concept.banner.understand')
   );
   const isLastBlockOfConcept = STEP_STATE.conceptBlockIdx === concept.blocks.length - 1;
   const isLastConcept = STEP_STATE.conceptIdx === STEP_STATE.conceptQueue.length - 1;
@@ -3316,7 +3318,7 @@ function renderConceptStep(){
     </ul>` : '';
 
   contentEl.innerHTML = `
-    <div class="gram-block-counter">${concept.blocks.length > 1 ? `${STEP_STATE.conceptBlockIdx + 1} de ${concept.blocks.length}` : (isReality ? 'Nota de realidade' : isCulture ? 'Nota cultural' : 'Vale entender')}</div>
+    <div class="gram-block-counter">${concept.blocks.length > 1 ? t('concept.counter.of', { i: STEP_STATE.conceptBlockIdx + 1, n: concept.blocks.length }) : (isReality ? t('concept.counter.reality') : isCulture ? t('concept.counter.culture') : t('concept.counter.understand'))}</div>
     <div class="gram-block ${block.wrapup ? 'wrapup' : ''}">
       <h3 class="gram-block-title">${block.title}</h3>
       <p class="gram-block-body">${block.body}</p>
@@ -4743,7 +4745,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
   let promptHTML = '';
   if (ex.format === 'meaning'){
     promptHTML = `
-      <div class="exercise-prompt-label">O que significa?</div>
+      <div class="exercise-prompt-label">${t('zh.exercise.whatMeans')}</div>
       <div class="exercise-prompt">
         <div class="prompt-hanzi">${ex.item.c}</div>
         <div class="prompt-pinyin">${ex.item.p}</div>
@@ -4752,10 +4754,10 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
     `;
   } else if (ex.format === 'listen'){
     promptHTML = `
-      <div class="exercise-prompt-label">Ouça e escolha o significado certo</div>
+      <div class="exercise-prompt-label">${t('zh.exercise.listenChoose')}</div>
       <div class="exercise-prompt">
         ${audioBtnHTML(ex.item.c, 'audio-btn-lg')}
-        <div class="prompt-audio-hint">toque para ouvir de novo</div>
+        <div class="prompt-audio-hint">${t('zh.exercise.tapToListenAgain')}</div>
       </div>
     `;
   }
@@ -4769,10 +4771,10 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-counter">${t('zh.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
       ${promptHTML}
       <div class="exercise-options">${optionsHTML}</div>
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
   `;
 
@@ -4836,18 +4838,18 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
 function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
-      <div class="exercise-prompt-label">Digite o pinyin do que ouviu</div>
+      <div class="exercise-counter">${t('zh.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
+      <div class="exercise-prompt-label">${t('zh.exercise.typePinyinHeard')}</div>
       <div class="exercise-prompt">
         ${audioBtnHTML(ex.item.c, 'audio-btn-lg')}
-        <div class="prompt-audio-hint">toque para ouvir de novo</div>
+        <div class="prompt-audio-hint">${t('zh.exercise.tapToListenAgain')}</div>
       </div>
       <div class="cloze-type-wrap">
-        <input type="text" id="vocab-type-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite o pinyin">
+        <input type="text" id="vocab-type-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('zh.exercise.typePinyinPlaceholder')}">
         ${pinyinTonePickerHTML()}
-        <button class="btn btn-primary btn-block" id="vocab-type-verify-btn">Verificar</button>
+        <button class="btn btn-primary btn-block" id="vocab-type-verify-btn">${t('common.verify')}</button>
       </div>
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
   `;
 
@@ -4915,7 +4917,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
 function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-counter">${t('zh.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
       <div class="tf-scene">
         <div class="tf-scene-emoji">${ex.emoji || '💬'}</div>
         <div class="tf-subject">${ex.subject}</div>
@@ -4924,10 +4926,10 @@ function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
       </div>
       <div class="tf-claim">${ex.claim}</div>
       <div class="tf-options">
-        <button class="tf-option" data-val="true">✅ Verdadeiro</button>
-        <button class="tf-option" data-val="false">❌ Falso</button>
+        <button class="tf-option" data-val="true">${t('zh.exercise.true')}</button>
+        <button class="tf-option" data-val="false">${t('zh.exercise.false')}</button>
       </div>
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
   `;
 
@@ -5117,8 +5119,8 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
-      <div class="exercise-prompt-label">Complete a frase</div>
+      <div class="exercise-counter">${t('zh.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
+      <div class="exercise-prompt-label">${t('exercise.completeSentence')}</div>
       <div class="cloze-sentence">
         <div class="cloze-hanzi">${hanziHTML}</div>
         <div class="cloze-pinyin">${pinyinHTML}</div>
@@ -5129,7 +5131,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
         <div class="cloze-type-wrap">
           <input type="text" id="cloze-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('zh.review.cloze.placeholder')}">
           ${pinyinTonePickerHTML()}
-          <button class="btn btn-primary btn-block" id="cloze-verify-btn">Verificar</button>
+          <button class="btn btn-primary btn-block" id="cloze-verify-btn">${t('common.verify')}</button>
         </div>
       ` : `
         <div class="cloze-options">${ex.options.map((opt, i) => `
@@ -5139,7 +5141,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
           </button>
         `).join('')}</div>
       `}
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
   `;
 
@@ -5251,13 +5253,13 @@ function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
-      <div class="exercise-prompt-label">Selecione a frase correta</div>
+      <div class="exercise-counter">${t('zh.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
+      <div class="exercise-prompt-label">${t('zh.exercise.selectSentence')}</div>
       <div class="exercise-prompt">
         <div class="prompt-trans-sentence">${ex.phrase.t}</div>
       </div>
       <div class="exercise-options exercise-options-sentence">${optionsHTML}</div>
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
   `;
 
@@ -5346,11 +5348,11 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
-      <div class="exercise-prompt-label">Ordene a frase</div>
+      <div class="exercise-counter">${t('zh.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
+      <div class="exercise-prompt-label">${t('zh.exercise.orderSentence')}</div>
       <div class="reorder-answer-slots" id="reorder-answer-slots"></div>
       <div class="reorder-blocks" id="reorder-blocks"></div>
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
   `;
 
@@ -6130,13 +6132,13 @@ function onMatchTileClick(btn){
 
   const isMatch = first.dataset.cardId === second.dataset.cardId && first.dataset.side !== second.dataset.side;
   MATCH_STATE.attempts += 1;
-  document.querySelector('.match-attempts').textContent = `Tentativas: ${MATCH_STATE.attempts}`;
+  document.querySelector('.match-attempts').textContent = t('zh.review.match.attempts', { n: MATCH_STATE.attempts });
 
   if (isMatch){
     first.classList.add('match-ok');
     second.classList.add('match-ok');
     MATCH_STATE.matchedCount += 1;
-    document.querySelector('.match-pairs').textContent = `Pares: ${MATCH_STATE.matchedCount}/${MATCH_STATE.pairs.length}`;
+    document.querySelector('.match-pairs').textContent = t('zh.review.match.pairs', { done: MATCH_STATE.matchedCount, total: MATCH_STATE.pairs.length });
     addXP(2);
     // Fase 8: mesma regra explícita da Fase 6 (Speed Review) -- um par
     // certo num cartão NUNCA estudado é evidência suficiente pra promovê-lo
@@ -7432,18 +7434,18 @@ function renderProgressView(){
 
   const guestWarning = !CURRENT_USER ? `
     <div class="guest-warning">
-      ⚠️ Você está no modo convidado — seu progresso <strong>não</strong> será salvo ao fechar a aba.
-      <button class="guest-warning-link" id="guest-login-prompt">Entrar com Google para salvar</button>
+      ${t('zh.progress.guestWarning')}
+      <button class="guest-warning-link" id="guest-login-prompt">${t('zh.progress.guestLogin')}</button>
     </div>
   ` : '';
 
   document.getElementById('stat-cards').innerHTML = guestWarning + `
-    <div class="stat-card"><div class="num">${completedUnits}/${UNITS.length}</div><div class="label">Unidades completas</div></div>
-    <div class="stat-card"><div class="num">${learnedCards}/${totalCards}</div><div class="label">Palavras aprendidas</div></div>
-    <div class="stat-card"><div class="num">${effectiveStreak()}</div><div class="label">Dias seguidos</div></div>
-    <div class="stat-card"><div class="num">${STATE.totalReviews}</div><div class="label">Revisões totais</div></div>
-    <div class="stat-card"><div class="num">${dueCount}</div><div class="label">Pendentes agora</div></div>
-    <div class="stat-card"><div class="num">${STATE.xp}</div><div class="label">XP acumulado</div></div>
+    <div class="stat-card"><div class="num">${completedUnits}/${UNITS.length}</div><div class="label">${t('zh.progress.statUnits')}</div></div>
+    <div class="stat-card"><div class="num">${learnedCards}/${totalCards}</div><div class="label">${t('zh.progress.statWords')}</div></div>
+    <div class="stat-card"><div class="num">${effectiveStreak()}</div><div class="label">${t('zh.progress.statStreak')}</div></div>
+    <div class="stat-card"><div class="num">${STATE.totalReviews}</div><div class="label">${t('zh.progress.statReviews')}</div></div>
+    <div class="stat-card"><div class="num">${dueCount}</div><div class="label">${t('zh.progress.statDue')}</div></div>
+    <div class="stat-card"><div class="num">${STATE.xp}</div><div class="label">${t('zh.progress.statXp')}</div></div>
   `;
 
   if (!CURRENT_USER){
@@ -7490,7 +7492,7 @@ function renderProgressLineChart(){
   const learnedDates = allCards.filter(c => c.firstLearnedDate).map(c => c.firstLearnedDate);
 
   if (!learnedDates.length){
-    wrap.innerHTML = `<div class="manual-empty" style="padding:30px 20px;"><p>Comece a estudar para ver seu progresso ao longo do tempo aqui.</p></div>`;
+    wrap.innerHTML = `<div class="manual-empty" style="padding:30px 20px;"><p>${t('zh.progress.chartEmpty')}</p></div>`;
     return;
   }
 
@@ -7534,10 +7536,10 @@ function renderProgressLineChart(){
       <line x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}" class="chart-axis"/>
       <path d="${areaD}" class="chart-area"/>
       <path d="${pathD}" class="chart-line"/>
-      ${points.map((p,i) => `<circle cx="${(PAD + i*xStep).toFixed(1)}" cy="${yScale(p.total).toFixed(1)}" r="3" class="chart-dot"><title>${p.date}: ${p.total} palavras</title></circle>`).join('')}
+      ${points.map((p,i) => `<circle cx="${(PAD + i*xStep).toFixed(1)}" cy="${yScale(p.total).toFixed(1)}" r="3" class="chart-dot"><title>${t('zh.progress.chartPoint', { date: p.date, n: p.total })}</title></circle>`).join('')}
       ${dateLabels.map(l => `<text x="${l.x.toFixed(1)}" y="${H-10}" class="chart-label" text-anchor="middle">${l.text}</text>`).join('')}
     </svg>
-    <div class="chart-total">Total acumulado: <strong>${maxVal}</strong> palavras e caracteres aprendidos</div>
+    <div class="chart-total">${t('zh.progress.chartTotal')} <strong>${maxVal}</strong> ${t('zh.progress.chartTotalSuffix')}</div>
   `;
 }
 
@@ -7590,7 +7592,7 @@ function renderActivityHeatmap(){
     if (firstRealDay){
       const m = firstRealDay.date.getMonth();
       if (m !== lastMonth){
-        monthLabels.push({ weekIndex: wi, label: firstRealDay.date.toLocaleDateString('pt-BR', { month:'short' }) });
+        monthLabels.push({ weekIndex: wi, label: fmtDate(firstRealDay.date, { month:'short' }) });
         lastMonth = m;
       }
     }
@@ -7600,7 +7602,7 @@ function renderActivityHeatmap(){
     <div class="heatmap-col">
       ${week.map(day => day === null
         ? `<div class="heatmap-cell lvl-0 empty"></div>`
-        : `<div class="heatmap-cell ${intensityClass(day.count)}" title="${day.count} atividade(s) em ${day.date.toLocaleDateString('pt-BR')}"></div>`
+        : `<div class="heatmap-cell ${intensityClass(day.count)}" title="${tp('zh.progress.heatCell', day.count, { date: fmtDate(day.date) })}"></div>`
       ).join('')}
     </div>
   `).join('');
@@ -7613,13 +7615,13 @@ function renderActivityHeatmap(){
     <div class="heatmap-months" style="grid-template-columns: repeat(${weeks.length}, 1fr);">${labelsHTML}</div>
     <div class="heatmap-grid">${gridHTML}</div>
     <div class="heatmap-legend">
-      <span>Menos</span>
+      <span>${t('zh.progress.heatLess')}</span>
       <div class="heatmap-cell lvl-0"></div>
       <div class="heatmap-cell lvl-1"></div>
       <div class="heatmap-cell lvl-2"></div>
       <div class="heatmap-cell lvl-3"></div>
       <div class="heatmap-cell lvl-4"></div>
-      <span>Mais</span>
+      <span>${t('zh.progress.heatMore')}</span>
     </div>
   `;
 }
@@ -7970,8 +7972,8 @@ function renderHanziReviewView(){
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🈺</div>
-        <h3>Tudo em dia!</h3>
-        <p>${allDue > 0 ? `Você ainda tem ${allDue} caractere(s) pendente(s).` : 'Volte mais tarde para sua próxima revisão, ou avance para uma nova lição.'}</p>
+        <h3>${t('zh.hanzi.allCaughtUp')}</h3>
+        <p>${allDue > 0 ? t('zh.hanzi.pendingChars', { n: allDue }) : t('zh.hanzi.comeBackLater')}</p>
       </div>
     `;
     return;
@@ -7984,9 +7986,9 @@ function renderHanziReviewView(){
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🎉</div>
-        <h3>Sessão concluída!</h3>
-        <p>Você revisou ${STATE.hanziReviewQueue.length} caractere(s) nesta sessão.</p>
-        <button class="btn btn-primary" id="hanzi-review-again">Voltar às lições</button>
+        <h3>${t('zh.hanzi.sessionDone')}</h3>
+        <p>${t('zh.hanzi.sessionReviewed', { n: STATE.hanziReviewQueue.length })}</p>
+        <button class="btn btn-primary" id="hanzi-review-again">${t('zh.hanzi.backToLessons')}</button>
       </div>
     `;
     document.getElementById('hanzi-review-again').addEventListener('click', () => {
@@ -8011,14 +8013,14 @@ function renderHanziReviewView(){
       <div class="review-progress-count">${STATE.hanziReviewIndex+1} / ${STATE.hanziReviewQueue.length}</div>
     </div>
     <div class="flashcard" id="hanzi-flashcard">
-      <div class="flashcard-tag">Lição ${card.lessonIndex + 1}</div>
+      <div class="flashcard-tag">${t('zh.hanzi.lessonTag', { n: card.lessonIndex + 1 })}</div>
       <div class="flashcard-hanzi">${card.char} ${audioBtnHTML(card.char, 'audio-btn-lg')}</div>
       ${STATE.hanziReviewShowingAnswer ? `
         <div class="divider-line"></div>
         <div class="flashcard-pinyin">${card.pinyin}</div>
         <div class="flashcard-trans">${card.meaning}</div>
         ${radicalsHTML}
-      ` : `<div class="flashcard-hint">toque para ver pinyin e significado</div>`}
+      ` : `<div class="flashcard-hint">${t('zh.hanzi.tapToReveal')}</div>`}
     </div>
     ${STATE.hanziReviewShowingAnswer ? gradeButtonsHTML(card) : ''}
   `;
@@ -8134,12 +8136,12 @@ function renderRadicalsGrid(){
 function openRadicalDetail(radicalData){
   const contentEl = document.getElementById('hanzi-radicals-content');
   contentEl.innerHTML = `
-    <button class="back-link" id="radical-detail-back-btn">← Voltar aos radicais</button>
+    <button class="back-link" id="radical-detail-back-btn">${t('zh.hanzi.backToRadicals')}</button>
     <div class="radical-detail-header">
       <div class="r">${radicalData.radical}</div>
       <div class="m">${radicalData.meaning}</div>
     </div>
-    <div class="section-label">Aparece em ${radicalData.chars.length} caractere(s) que você já estudou</div>
+    <div class="section-label">${t('zh.hanzi.appearsInCount', { n: radicalData.chars.length })}</div>
     <div class="radical-chars-grid">
       ${radicalData.chars.map(h => `
         <div class="radical-char-item">
@@ -8173,7 +8175,7 @@ function renderHanziLessonsGrid(){
 
   const countLabel = document.getElementById('hanzi-count-label');
   if (countLabel){
-    countLabel.textContent = `${HANZI_ALL.length} caracteres em ${HANZI_LESSONS.length} lições. Veja, escreva e teste sua memória.`;
+    countLabel.textContent = t('zh.hanzi.countLabel', { chars: HANZI_ALL.length, lessons: HANZI_LESSONS.length });
   }
 
   const grid = document.getElementById('hanzi-lessons-grid');
@@ -8187,7 +8189,7 @@ function renderHanziLessonsGrid(){
     card.innerHTML = `
       <div class="hanzi-lesson-num">${prog.completed ? '✓' : i+1}</div>
       <div class="hanzi-lesson-preview">${preview}</div>
-      <div class="hanzi-lesson-status">${prog.completed ? 'Concluída' : (prog.unlocked ? `${lesson.length} caracteres` : '🔒')}</div>
+      <div class="hanzi-lesson-status">${prog.completed ? t('zh.hanzi.lessonCompleted') : (prog.unlocked ? t('zh.hanzi.charCount', { n: lesson.length }) : '🔒')}</div>
     `;
     if (prog.unlocked){
       card.addEventListener('click', () => openHanziLesson(i));
@@ -8249,11 +8251,11 @@ function renderHanziProgress(){
   if (HANZI_STUDY_STATE.phase === 'char'){
     const pct = (HANZI_STUDY_STATE.charIndex / lesson.length) * 60; // fase 'char' ocupa até 60% da barra
     fillEl.style.width = `${pct}%`;
-    labelEl.textContent = `Caractere ${HANZI_STUDY_STATE.charIndex + 1} de ${lesson.length}`;
+    labelEl.textContent = t('zh.hanzi.charOf', { i: HANZI_STUDY_STATE.charIndex + 1, n: lesson.length });
   } else {
     const pct = 60 + (HANZI_STUDY_STATE.testIndex / HANZI_STUDY_STATE.testQueue.length) * 40;
     fillEl.style.width = `${pct}%`;
-    labelEl.textContent = `Teste final: ${HANZI_STUDY_STATE.testIndex + 1} de ${HANZI_STUDY_STATE.testQueue.length}`;
+    labelEl.textContent = t('zh.hanzi.finalTest', { i: HANZI_STUDY_STATE.testIndex + 1, n: HANZI_STUDY_STATE.testQueue.length });
   }
 }
 
@@ -8288,7 +8290,7 @@ function renderHanziViewCard(char, contentEl, nextBtn){
 
   const appearancesHTML = appearances.length
     ? `<div class="hanzi-appears-in">
-        <div class="hanzi-appears-in-label">Aparece em</div>
+        <div class="hanzi-appears-in-label">${t('zh.hanzi.appearsIn')}</div>
         ${appearances.map(a => `
           <div class="hanzi-appears-item">
             <span class="hanzi">${a.c}</span>
@@ -8301,7 +8303,7 @@ function renderHanziViewCard(char, contentEl, nextBtn){
 
   contentEl.innerHTML = `
     <div class="hanzi-study-card">
-      <div class="hanzi-study-phase-label">Veja o caractere</div>
+      <div class="hanzi-study-phase-label">${t('zh.hanzi.seeChar')}</div>
       <div class="hanzi-big-char">${char.char} ${audioBtnHTML(char.char)}</div>
       <div class="hanzi-big-pinyin">${char.pinyin}</div>
       <div class="hanzi-big-meaning">${char.meaning}</div>
@@ -8330,20 +8332,20 @@ function renderHanziViewCard(char, contentEl, nextBtn){
 function renderHanziWriteCard(char, contentEl, nextBtn){
   contentEl.innerHTML = `
     <div class="hanzi-study-card">
-      <div class="hanzi-study-phase-label">Escreva: ${char.pinyin} (${char.meaning})</div>
+      <div class="hanzi-study-phase-label">${t('zh.hanzi.write', { pinyin: char.pinyin, meaning: char.meaning })}</div>
       <div class="hanzi-write-target" id="hanzi-write-target"></div>
       <div class="hanzi-write-feedback" id="hanzi-write-feedback"></div>
       <div class="hanzi-write-actions">
-        <button class="btn btn-secondary" id="hanzi-write-reset-btn">🔄 Recomeçar</button>
+        <button class="btn btn-secondary" id="hanzi-write-reset-btn">${t('zh.hanzi.restart')}</button>
       </div>
-      <p class="hanzi-write-hint-note">Errar o mesmo traço 2 vezes revela automaticamente o traço certo.</p>
+      <p class="hanzi-write-hint-note">${t('zh.hanzi.writeHintNote')}</p>
     </div>
   `;
   nextBtn.style.display = 'none'; // avança automaticamente ao completar o desenho
 
   if (typeof HanziWriter === 'undefined'){
     document.getElementById('hanzi-write-target').innerHTML =
-      `<p class="stroke-unavailable">Recurso de escrita não carregou. Verifique sua conexão.</p>`;
+      `<p class="stroke-unavailable">${t('zh.hanzi.writerNotLoaded')}</p>`;
     // Sem o recurso, permite seguir em frente mesmo assim pra não travar o app.
     nextBtn.style.display = 'flex';
     nextBtn.textContent = t('common.continueArrow');
@@ -8379,12 +8381,12 @@ function renderHanziWriteCard(char, contentEl, nextBtn){
       },
       onMistake: (strokeData) => {
         feedbackEl.textContent = strokeData.mistakesOnStroke >= 2
-          ? 'Traço certo destacado — siga o guia 👆'
-          : 'Traço incorreto — tente de novo';
+          ? t('zh.hanzi.strokeHighlighted')
+          : t('zh.hanzi.strokeWrong');
         feedbackEl.className = 'hanzi-write-feedback retry';
       },
       onComplete: () => {
-        feedbackEl.textContent = '✓ Muito bem!';
+        feedbackEl.textContent = t('zh.hanzi.writeDone');
         feedbackEl.className = 'hanzi-write-feedback ok';
         addXP(3);
         setTimeout(() => advanceHanziAfterWrite(), 900);
@@ -8441,9 +8443,9 @@ function renderHanziTestStep(contentEl, nextBtn){
     contentEl.innerHTML = `
       <div class="exercise-result">
         <div class="big-emoji">${pct >= 70 ? '🎉' : '💪'}</div>
-        <h3>Lição concluída!</h3>
+        <h3>${t('zh.path.lessonDone.lessonTitle')}</h3>
         <div class="score-num">${HANZI_STUDY_STATE.testScore}/${total}</div>
-        <p>${pct >= 70 ? 'Ótima retenção!' : 'Vale revisar esses caracteres de novo em breve.'}</p>
+        <p>${pct >= 70 ? t('zh.hanzi.retentionGood') : t('zh.hanzi.retentionReview')}</p>
       </div>
     `;
     nextBtn.textContent = t('zh.hanzi.backToLessons');
@@ -8460,8 +8462,8 @@ function renderHanziTestStep(contentEl, nextBtn){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="hanzi-test-counter">Teste da lição — ${HANZI_STUDY_STATE.testIndex + 1} de ${total}</div>
-      <div class="exercise-prompt-label">O que significa?</div>
+      <div class="hanzi-test-counter">${t('zh.hanzi.lessonTest', { i: HANZI_STUDY_STATE.testIndex + 1, n: total })}</div>
+      <div class="exercise-prompt-label">${t('zh.exercise.whatMeans')}</div>
       <div class="exercise-prompt">
         <div class="prompt-hanzi">${item.char.char}</div>
         <div class="prompt-pinyin">${item.char.pinyin}</div>

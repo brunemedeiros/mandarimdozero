@@ -19,7 +19,7 @@ async function renderSupportMaterialsView(){
   const wrap = document.getElementById('support-materials-content');
   if (!wrap) return;
   if (!CURRENT_USER){
-    wrap.innerHTML = `<p class="profile-empty-note">Entre na sua conta pra ver seu material de apoio.</p>`;
+    wrap.innerHTML = `<p class="profile-empty-note">${t('supportMaterials.loginRequired')}</p>`;
     return;
   }
   wrap.innerHTML = loadingHTML();
@@ -32,9 +32,9 @@ async function renderSupportMaterialsView(){
         <div class="admin-badge-name">${escapeHTML(m.title)}</div>
         <div class="admin-badge-desc">
           ${m.description ? `<span style="white-space:pre-wrap;">${escapeHTML(m.description)}</span><br>` : ''}
-          ${m.link_url ? `<a href="${escapeHTML(m.link_url)}" target="_blank" rel="noopener noreferrer">🔗 Abrir link</a><br>` : ''}
-          ${m.file_url ? `<a href="${escapeHTML(m.file_url)}" target="_blank" rel="noopener noreferrer">📎 ${escapeHTML(m.file_name || 'Baixar arquivo')}</a><br>` : ''}
-          enviado em ${new Date(m.created_at).toLocaleDateString('pt-BR')}
+          ${m.link_url ? `<a href="${escapeHTML(m.link_url)}" target="_blank" rel="noopener noreferrer">${t('supportMaterials.openLink')}</a><br>` : ''}
+          ${m.file_url ? `<a href="${escapeHTML(m.file_url)}" target="_blank" rel="noopener noreferrer">📎 ${escapeHTML(m.file_name || t('supportMaterials.downloadFile'))}</a><br>` : ''}
+          ${t('supportMaterials.sentOn', { date: fmtDate(m.created_at) })}
         </div>
       </div>
     </div>
@@ -42,5 +42,5 @@ async function renderSupportMaterialsView(){
 
   wrap.innerHTML = materials.length
     ? materials.map(materialCardHTML).join('')
-    : `<p class="profile-empty-note">Sua professora ainda não enviou nenhum material de apoio. Quando ela enviar algo (um resumo, um link, um arquivo), ele aparece aqui.</p>`;
+    : `<p class="profile-empty-note">${t('supportMaterials.empty')}</p>`;
 }

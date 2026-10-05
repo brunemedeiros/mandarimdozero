@@ -62,10 +62,10 @@ const MC_MIN_DISTRACTORS = 1;
 //     com uma opção em branco não faz sentido pedagógico nenhum.
 function validateNativeMultipleChoiceStructure(editorState){
   if (!editorState || editorState.kind !== 'native'){
-    return { ok: false, error: 'Este Note não é nativo.' };
+    return { ok: false, error: t('mcEditor.err.notNative') };
   }
   if (editorState.cardGenerationMode !== 'multiple_choice'){
-    return { ok: false, error: 'Este Note não está no modo Múltipla escolha.' };
+    return { ok: false, error: t('mcEditor.err.notMcMode') };
   }
 
   const row = noteEditorStateToRow(editorState);
@@ -84,12 +84,12 @@ function validateNativeMultipleChoiceStructure(editorState){
   // fieldIsPinyinSatellite já existe pras transições).
   const unrecognized = fields.filter(f => !MC_ROLES.includes(f.role) && !fieldIsPinyinSatellite(f, fields));
   if (unrecognized.length){
-    return { ok: false, error: `Múltipla escolha não aceita Field sem papel definido (${unrecognized.length} campo(s) sem prompt/resposta/distrator) -- atribua um papel ou remova.` };
+    return { ok: false, error: tp('mcEditor.err.unrecognized', unrecognized.length) };
   }
 
   const isEmptyField = f => !(f.content && (f.content.value || '').trim());
   if (fields.some(isEmptyField)){
-    return { ok: false, error: 'Todo campo de múltipla escolha (pergunta, resposta certa, distratores) precisa ter conteúdo.' };
+    return { ok: false, error: t('mcEditor.err.emptyField') };
   }
 
   return { ok: true };
@@ -186,44 +186,44 @@ function renderMultipleChoiceEditorHTML(editorState, opts){
   const validation = validateNativeMultipleChoiceStructure(editorState);
 
   const promptHTML = promptField
-    ? renderFieldEditorHTML(promptField, 0, { namePrefix, label: 'Pergunta/Prompt', removable: false })
-    : `<p class="profile-edit-hint">Nenhum campo de pergunta ainda.</p><button type="button" class="admin-select-link" data-mc-add-prompt>+ Criar campo de pergunta</button>`;
+    ? renderFieldEditorHTML(promptField, 0, { namePrefix, label: t('mcEditor.promptLabel'), removable: false })
+    : `<p class="profile-edit-hint">${t('mcEditor.noPrompt')}</p><button type="button" class="admin-select-link" data-mc-add-prompt>${t('mcEditor.addPrompt')}</button>`;
 
   const answerHTML = answerField
-    ? renderFieldEditorHTML(answerField, 0, { namePrefix, label: 'Resposta correta', removable: false })
-    : `<p class="profile-edit-hint">Nenhum campo de resposta certa ainda.</p><button type="button" class="admin-select-link" data-mc-add-answer>+ Criar campo de resposta certa</button>`;
+    ? renderFieldEditorHTML(answerField, 0, { namePrefix, label: t('mcEditor.answerLabel'), removable: false })
+    : `<p class="profile-edit-hint">${t('mcEditor.noAnswer')}</p><button type="button" class="admin-select-link" data-mc-add-answer>${t('mcEditor.addAnswer')}</button>`;
 
   const distractorsHTML = distractorFields.length
     ? distractorFields.map((f, i) => `
-        ${renderFieldEditorHTML(f, i, { namePrefix, label: `Distrator ${i + 1}`, removable: false })}
+        ${renderFieldEditorHTML(f, i, { namePrefix, label: t('mcEditor.distractorLabel', { n: i + 1 }), removable: false })}
         <div style="display:flex; gap:14px; margin:-6px 0 10px;">
-          <button type="button" class="admin-select-link" data-mc-promote-distractor="${f.id}">✓ Marcar como resposta certa</button>
-          <button type="button" class="admin-select-link" data-mc-remove-distractor="${f.id}">🗑 Remover distrator</button>
+          <button type="button" class="admin-select-link" data-mc-promote-distractor="${f.id}">${t('mcEditor.promote')}</button>
+          <button type="button" class="admin-select-link" data-mc-remove-distractor="${f.id}">${t('mcEditor.removeDistractor')}</button>
         </div>
       `).join('')
-    : `<p class="profile-edit-hint">Nenhum distrator ainda -- adicione pelo menos 1.</p>`;
+    : `<p class="profile-edit-hint">${t('mcEditor.noDistractors')}</p>`;
 
   const addDistractorHTML = distractorFields.length < MC_MAX_DISTRACTORS
-    ? `<button type="button" class="admin-select-link" data-mc-add-distractor>+ Adicionar distrator</button>`
-    : `<p class="profile-edit-hint">Máximo de ${MC_MAX_DISTRACTORS} distratores atingido.</p>`;
+    ? `<button type="button" class="admin-select-link" data-mc-add-distractor>${t('mcEditor.addDistractor')}</button>`
+    : `<p class="profile-edit-hint">${t('mcEditor.maxDistractors', { n: MC_MAX_DISTRACTORS })}</p>`;
 
   const otherFieldsHTML = otherFields.length ? `
-    <div class="section-label" style="margin:14px 0 4px;">Outros campos (sem papel definido nesta múltipla escolha)</div>
-    <p class="profile-edit-hint">Estes campos vieram de outro modo e ainda não têm função aqui -- remova-os ou atribua um papel pra estrutura ficar válida.</p>
-    ${otherFields.map((f, i) => renderFieldEditorHTML(f, i, { namePrefix, label: `Campo sem papel ${i + 1}`, removable: true })).join('')}
+    <div class="section-label" style="margin:14px 0 4px;">${t('mcEditor.othersTitle')}</div>
+    <p class="profile-edit-hint">${t('mcEditor.othersHint')}</p>
+    ${otherFields.map((f, i) => renderFieldEditorHTML(f, i, { namePrefix, label: t('mcEditor.noRoleField', { n: i + 1 }), removable: true })).join('')}
   ` : '';
 
   const validationHTML = validation.ok
-    ? `<p class="profile-edit-hint" style="margin-top:10px; color:var(--jade);">✓ Estrutura de múltipla escolha completa.</p>`
+    ? `<p class="profile-edit-hint" style="margin-top:10px; color:var(--jade);">${t('mcEditor.valid')}</p>`
     : `<p class="profile-edit-error" style="margin-top:10px;">${escapeHTML(validation.error)}</p>`;
 
   return `
     <div data-mc-editor>
-      <div class="section-label" style="margin:0 0 4px;">Pergunta/Prompt</div>
+      <div class="section-label" style="margin:0 0 4px;">${t('mcEditor.promptLabel')}</div>
       ${promptHTML}
-      <div class="section-label" style="margin:14px 0 4px;">Resposta correta</div>
+      <div class="section-label" style="margin:14px 0 4px;">${t('mcEditor.answerLabel')}</div>
       ${answerHTML}
-      <div class="section-label" style="margin:14px 0 4px;">Distratores (${distractorFields.length}/${MC_MAX_DISTRACTORS})</div>
+      <div class="section-label" style="margin:14px 0 4px;">${t('mcEditor.distractorsTitle', { n: distractorFields.length, max: MC_MAX_DISTRACTORS })}</div>
       ${distractorsHTML}
       ${addDistractorHTML}
       ${otherFieldsHTML}

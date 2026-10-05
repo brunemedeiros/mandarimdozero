@@ -327,9 +327,16 @@ if (TTS.supported){
   }, 10000);
 }
 
+// Plural com contagem zero: em pt-BR o Intl.PluralRules trata 0 como 'one',
+// mas o texto original sempre dizia "0 ditados" (plural). Preserva o texto
+// em português byte a byte; em inglês 0 já é 'other'.
+function tpZero(key, n, params){
+  return tp(key, n === 0 ? 2 : n, Object.assign({ n: 0 === n ? 0 : n }, params || {}));
+}
+
 function audioBtnHTML(text, extraClass){
   const safe = text.replace(/"/g, '&quot;');
-  return `<button class="audio-btn ${extraClass||''}" data-speak="${safe}" aria-label="Ouvir pronúncia" title="Ouvir pronúncia">🔊</button>`;
+  return `<button class="audio-btn ${extraClass||''}" data-speak="${safe}" aria-label="${t('fr.audio.listenPronunciation')}" title="${t('fr.audio.listenPronunciation')}">🔊</button>`;
 }
 
 // Fase 8a (ver CLAUDE.md) -- áudio PRÓPRIO enviado pela professora
@@ -338,7 +345,7 @@ function audioBtnHTML(text, extraClass){
 // -- wireAudioButtons() casa por `.audio-btn` e chamaria speakFrench()
 // com data-speak indefinido se este botão compartilhasse a classe.
 function customAudioBtnHTML(url){
-  return `<button class="custom-audio-btn" data-audio-url="${url}" aria-label="Ouvir áudio" title="Ouvir áudio">🎧</button>`;
+  return `<button class="custom-audio-btn" data-audio-url="${url}" aria-label="${t('fr.audio.listen')}" title="${t('fr.audio.listen')}">🎧</button>`;
 }
 function wireCustomAudioButtons(container){
   container.querySelectorAll('.custom-audio-btn').forEach(btn => {
@@ -358,10 +365,10 @@ function wireCustomAudioButtons(container){
 // então não ganha este botão extra.
 const SLOW_AUDIO_RATE = 0.65;
 function slowAudioBtnHTML(id){
-  return `<button class="dictation-play-btn dictation-play-btn-slow" id="${id}" title="Ouvir mais devagar">🐢 Lentement</button>`;
+  return `<button class="dictation-play-btn dictation-play-btn-slow" id="${id}" title="${t('fr.audio.listenSlower')}">🐢 Lentement</button>`;
 }
 function slowAudioIconBtnHTML(id){
-  return `<button class="audio-btn audio-btn-slow" id="${id}" aria-label="Ouvir devagar" title="Ouvir devagar">🐢</button>`;
+  return `<button class="audio-btn audio-btn-slow" id="${id}" aria-label="${t('fr.audio.listenSlowly')}" title="${t('fr.audio.listenSlowly')}">🐢</button>`;
 }
 
 // Emoji de bandeira (🇧🇷 🇫🇷 🇵🇹 etc.) não renderiza em todo sistema — no
@@ -778,11 +785,13 @@ function isRealityNoteCategoryAllowedAtLevel(category, level){
 // dar a ela uma cor própria vira obrigatório (mesma regra já registrada
 // sobre --on-vivid vs --on-seal-red -- não reaproveitar o badge de
 // 'informal' pra um registro mais marcado).
+// Getters (não valores fixos): o texto precisa seguir o idioma do site no
+// momento do render, não o do load do script.
 const REALITY_NOTE_BANNER_TEXT = {
-  [REALITY_NOTE_CATEGORY.INFORMAL]: '🗣️ Na vida real',
-  [REALITY_NOTE_CATEGORY.FAMILIAR_GIRIA]: '🗣️ Registro informal',
-  [REALITY_NOTE_CATEGORY.REGIONAL]: '📍 Variação regional',
-  [REALITY_NOTE_CATEGORY.GRAMATICA_COLOQUIAL]: '✍️ Assim também se fala',
+  get [REALITY_NOTE_CATEGORY.INFORMAL]() { return t('concept.banner.reality.informal'); },
+  get [REALITY_NOTE_CATEGORY.FAMILIAR_GIRIA]() { return t('concept.banner.reality.familiar'); },
+  get [REALITY_NOTE_CATEGORY.REGIONAL]() { return t('concept.banner.reality.regional'); },
+  get [REALITY_NOTE_CATEGORY.GRAMATICA_COLOQUIAL]() { return t('concept.banner.reality.colloquialGrammar'); },
 };
 
 // ---------- Taxonomia de "notas culturais" (grilling 2026-09-17) ----------
@@ -811,9 +820,9 @@ const CULTURE_NOTE_CATEGORY = {
 // "curiosidade" que o de `reality` (que soa mais "cuidado, isso pode te
 // confundir"), já que aqui não há nenhum contraste de forma pra alertar.
 const CULTURE_NOTE_BANNER_TEXT = {
-  [CULTURE_NOTE_CATEGORY.HISTORIA]: '📜 Você sabia?',
-  [CULTURE_NOTE_CATEGORY.COSTUME]: '🎭 Costume real',
-  [CULTURE_NOTE_CATEGORY.FESTIVIDADE]: '🎉 Data especial',
+  get [CULTURE_NOTE_CATEGORY.HISTORIA]() { return t('concept.banner.culture.history'); },
+  get [CULTURE_NOTE_CATEGORY.COSTUME]() { return t('concept.banner.culture.custom'); },
+  get [CULTURE_NOTE_CATEGORY.FESTIVIDADE]() { return t('concept.banner.culture.festivity'); },
 };
 
 // ---------- Estado global ----------
@@ -1425,23 +1434,23 @@ function registerDailyExerciseFormat(format){
 }
 
 const EASY_CHALLENGES = [
-  { id:'streak', icon:'🔥', label:'Mantenha sua sequência de dias viva hoje', target:1, get: () => STATE.lastStudyDay === todayStr() ? 1 : 0 },
-  { id:'firstLesson', icon:'🌅', label:'Complete sua primeira lição do dia', target:1, get: d => d.lessons }
+  { id:'streak', icon:'🔥', get label(){ return t('fr.mission.streak'); }, target:1, get: () => STATE.lastStudyDay === todayStr() ? 1 : 0 },
+  { id:'firstLesson', icon:'🌅', get label(){ return t('fr.mission.firstLesson'); }, target:1, get: d => d.lessons }
 ];
 const REVISAO_CONJ_CHALLENGES = [
-  { id:'conj1', icon:'🗣️', label:'Pratique conjugação 1 vez', target:1, get: d => d.conjugationSessions },
-  { id:'conjCorrect10', icon:'✅', label:'Acerte 10 formas verbais numa sessão de conjugação', target:10, get: d => d.conjugationCorrect },
-  { id:'conjTenses2', icon:'🔤', label:'Pratique conjugação em 2 tempos verbais diferentes', target:2, get: d => d.conjugationTenses.length },
+  { id:'conj1', icon:'🗣️', get label(){ return t('fr.mission.conj1'); }, target:1, get: d => d.conjugationSessions },
+  { id:'conjCorrect10', icon:'✅', get label(){ return t('fr.mission.conjCorrect10'); }, target:10, get: d => d.conjugationCorrect },
+  { id:'conjTenses2', icon:'🔤', get label(){ return t('fr.mission.conjTenses2'); }, target:2, get: d => d.conjugationTenses.length },
   // labelForTarget: usado só quando resolveRevisaoMission() escala a meta
   // pra baixo (estoque real menor que o alvo original) -- sem isso o texto
   // continuaria dizendo "15"/"3" enquanto a barra de progresso mostra um
   // teto diferente (ver grilling "missões do dia").
-  { id:'reviews15', icon:'🔁', label:'Revise 15 cartões', labelForTarget: n => `Revise ${n} cartões`, target:15, get: d => d.reviewsDone },
-  { id:'speedReview1', icon:'⚡', label:'Complete uma sessão de Revisão Rápida', target:1, get: d => d.speedReviewSessions },
-  { id:'matchGame1', icon:'🎴', label:'Jogue o jogo da memória 1 vez', target:1, get: d => d.matchGamesPlayed },
+  { id:'reviews15', icon:'🔁', get label(){ return tp('fr.mission.reviews', 15); }, labelForTarget: n => tp('fr.mission.reviews', n), target:15, get: d => d.reviewsDone },
+  { id:'speedReview1', icon:'⚡', get label(){ return t('fr.mission.speedReview1'); }, target:1, get: d => d.speedReviewSessions },
+  { id:'matchGame1', icon:'🎴', get label(){ return t('fr.mission.matchGame1'); }, target:1, get: d => d.matchGamesPlayed },
   // Fase 4 (artefato §3): prioriza SRS de verdade atrasado, não qualquer
   // revisão dentro do prazo normal -- puxa quem tem cartas acumuladas.
-  { id:'overdue3', icon:'⏰', label:'Revise 3 cartas em atraso', labelForTarget: n => `Revise ${n} cartas em atraso`, target:3, get: d => d.overdueReviewsDone }
+  { id:'overdue3', icon:'⏰', get label(){ return tp('fr.mission.overdue', 3); }, labelForTarget: n => tp('fr.mission.overdue', n), target:3, get: d => d.overdueReviewsDone }
 ];
 // "Complete N lições" saiu daqui na Fase 3 -- virou redundante depois que a
 // meta diária (plano de estudo) passou a ser medida em lições também: as
@@ -1452,14 +1461,14 @@ const GENERAL_CHALLENGES = [
   // (estrelas -- sistema paralelo de pontuação retirado do fluxo de unidade,
   // ver registerDailyStars) por um desafio ligado ao XP real, a única
   // moeda que o app de fato usa em todo o resto da interface.
-  { id:'xp50', icon:'⚡', label:'Ganhe 50 XP hoje', target:50, get: d => d.xp },
-  { id:'highscore2', icon:'📈', label:'Pontue mais de 80% em 2 lições', target:2, get: d => d.highScoreLessons },
-  { id:'perfect1', icon:'🎯', label:'Complete uma lição sem errar', target:1, get: d => d.perfectLessons },
-  { id:'grammar1', icon:'🧠', label:'Complete 1 unidade de gramática', target:1, get: d => d.grammarLessons },
+  { id:'xp50', icon:'⚡', get label(){ return t('fr.mission.xp50'); }, target:50, get: d => d.xp },
+  { id:'highscore2', icon:'📈', get label(){ return t('fr.mission.highscore2'); }, target:2, get: d => d.highScoreLessons },
+  { id:'perfect1', icon:'🎯', get label(){ return t('fr.mission.perfect1'); }, target:1, get: d => d.perfectLessons },
+  { id:'grammar1', icon:'🧠', get label(){ return t('fr.mission.grammar1'); }, target:1, get: d => d.grammarLessons },
   // Fase 4 (artefato §3): ligados a recursos reais do produto (ouvir,
   // traduzir por blocos), não só contadores genéricos de progresso.
-  { id:'listen10', icon:'🎧', label:'Toque o áudio 10 vezes', target:10, get: d => d.audioPlaysToday },
-  { id:'translateBlocks2', icon:'🧱', label:'Complete 2 exercícios de "Traduza a frase"', target:2, get: d => d.exerciseFormatCounts?.reorder || 0 }
+  { id:'listen10', icon:'🎧', get label(){ return t('fr.mission.listen10'); }, target:10, get: d => d.audioPlaysToday },
+  { id:'translateBlocks2', icon:'🧱', get label(){ return t('fr.mission.translateBlocks2'); }, target:2, get: d => d.exerciseFormatCounts?.reorder || 0 }
 ];
 
 function dailySeed(str){
@@ -1610,7 +1619,7 @@ function renderDailyChallengesScreen(){
 
   contentEl.innerHTML = `
     <div class="challenges-screen">
-      <h2>🎯 Missões do dia</h2>
+      <h2>${t('trail.dailyMissions.caption')}</h2>
       ${todaysChallenges().map((c, i) => {
         // Number(...)||0: um campo ausente nunca mais vira NaN silencioso
         // (ver auditoria "O problema dos 100%") -- current fica sempre um
@@ -1632,7 +1641,7 @@ function renderDailyChallengesScreen(){
       }).join('')}
     </div>
   `;
-  nextBtn.textContent = 'Continuar →';
+  nextBtn.textContent = t('common.continueArrow');
   nextBtn.style.display = 'flex';
 
   // BUG real corrigido aqui (relatado pela autora, 2026-09-15): esta tela é
@@ -2106,7 +2115,7 @@ function buildUnitBlock(u){
     + (expanded ? ' expanded' : '');
 
   const badgeHTML = state === 'done' ? `<span class="ub-badge">✓</span>` : '';
-  const chevronHTML = hasLessons ? `<button class="ub-chevron" type="button" aria-label="Expandir lições">▾</button>` : '';
+  const chevronHTML = hasLessons ? `<button class="ub-chevron" type="button" aria-label="${t('fr.trail.expandLessons')}">▾</button>` : '';
   // Só lições JÁ concluídas (e que não são o Ponto de verificação, cujo
   // reteste tem efeitos colaterais bem mais pesados -- desbloqueio de
   // módulo/nível -- fora do escopo desta revisão leve) ficam clicáveis pra
@@ -2235,7 +2244,7 @@ function buildModuleChallengesRow(module){
           ${premium ? (items.length ? `<span class="ub-badge">${done}/${items.length}</span>` : '') : `<span class="ub-badge ub-badge-premium">${t('trail.premiumBadge')}</span>`}
         </div>
         <div class="ub-goal">${t('trail.moduleChallenges.goal')}</div>
-        <div class="ub-goal">${dictFree ? `${dictFree} ditado Free` : ''}${dictFree && (dictPremium || items.length) ? ' · ' : ''}${(dictPremium || items.length) ? `${dictPremium} ditado${dictPremium === 1 ? '' : 's'} e ${items.length} desafio${items.length === 1 ? '' : 's'} Premium` : ''}</div>
+        <div class="ub-goal">${dictFree ? tp('fr.trail.freeDictation', dictFree) : ''}${dictFree && (dictPremium || items.length) ? ' · ' : ''}${(dictPremium || items.length) ? tpZero('fr.trail.dictationsAnd', dictPremium) + ' ' + tpZero('fr.trail.premiumChallengesSuffix', items.length) : ''}</div>
       </div>
     </div>
   `;
@@ -2268,7 +2277,7 @@ function buildLevelReviewRow(level){
       <div class="ub-info">
         <div class="ub-title-row"><span class="ub-title">${t('trail.levelReview.title', { level })}</span></div>
         <div class="ub-goal">${t('trail.levelReview.goal')}</div>
-        <div class="ub-goal">${free} ditado Free${premium ? ` · ${premium} ditado${premium === 1 ? '' : 's'} Premium` : ''}</div>
+        <div class="ub-goal">${tp('fr.trail.freeDictation', free)}${premium ? ` · ${tpZero('fr.trail.premiumDictationsOnly', premium)}` : ''}</div>
       </div>
     </div>
   `;
@@ -2414,20 +2423,24 @@ function renderUnitsGrid(){
 // ============================================================
 // LIÇÃO EM PASSOS (Vocabulário → Diálogo → Exercícios)
 // ============================================================
-const STEP_DEFS = [
-  { key: 'vocab', label: 'Vocabulário' },
-  { key: 'dialogue', label: 'Diálogo' },
-  { key: 'usage', label: 'Dica de uso' },
-  { key: 'exercises', label: 'Exercícios' }
-];
+function getStepDefs(){
+  return [
+    { key: 'vocab', label: t('fr.step.vocab') },
+    { key: 'dialogue', label: t('fr.step.dialogue') },
+    { key: 'usage', label: t('fr.step.usage') },
+    { key: 'exercises', label: t('fr.step.exercises') }
+  ];
+}
 
 // Unidades de gramática (type: "grammar") seguem um fluxo próprio, no estilo
 // Busuu: uma sequência de telas de explicação (paginadas bloco por bloco,
 // como o vocabulário palavra-por-palavra) e depois os exercícios de uso.
-const STEP_DEFS_GRAMMAR = [
-  { key: 'explanation', label: 'Explicação' },
-  { key: 'gramExercises', label: 'Exercícios' }
-];
+function getStepDefsGrammar(){
+  return [
+    { key: 'explanation', label: t('fr.step.explanation') },
+    { key: 'gramExercises', label: t('fr.step.exercises') }
+  ];
+}
 
 // Unidades migradas pra explicação contextual (`unit.concepts`, ver
 // content.js) não têm mais `usageNote` -- a teoria dele já foi incorporada
@@ -2436,16 +2449,16 @@ const STEP_DEFS_GRAMMAR = [
 // um passo "Dica de uso" vazio.
 function currentStepDefs(){
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
-  if (u && u.type === 'grammar') return STEP_DEFS_GRAMMAR;
+  if (u && u.type === 'grammar') return getStepDefsGrammar();
   if (isLessonUnit(u)){
     const lesson = currentLesson(u);
-    if (lesson.isCheckpoint) return [{ key: 'checkpointExercises', label: 'Ponto de verificação' }];
+    if (lesson.isCheckpoint) return [{ key: 'checkpointExercises', label: t('trail.checkpoint.title') }];
     const steps = [];
-    if (lesson.vocabIdx && lesson.vocabIdx.length) steps.push({ key: 'vocab', label: 'Vocabulário' });
-    if (lesson.includesDialogue) steps.push({ key: 'dialogue', label: 'Diálogo' });
+    if (lesson.vocabIdx && lesson.vocabIdx.length) steps.push({ key: 'vocab', label: t('fr.step.vocab') });
+    if (lesson.includesDialogue) steps.push({ key: 'dialogue', label: t('fr.step.dialogue') });
     return steps;
   }
-  return STEP_DEFS.filter(s => s.key !== 'usage' || (u && u.usageNote));
+  return getStepDefs().filter(s => s.key !== 'usage' || (u && u.usageNote));
 }
 
 // ---------- Lições (Modelo B) ----------
@@ -2804,12 +2817,12 @@ function buildExerciseHint(ex, unit){
     const phrase = findMatchingPhrase(item, unit);
     if (phrase){
       const masked = maskWordInText(phrase.f, item.f) || phrase.f;
-      return `Pense em quando você usaria essa expressão. Ela aparece nesta frase que você já estudou: "${masked}"`;
+      return t('fr.hint.thinkWhen', { masked });
     }
     if (ex.format === 'type'){
-      return 'Ouça de novo com atenção aos sons -- é uma expressão do tema desta unidade.';
+      return t('fr.hint.listenAgain');
     }
-    return `Pense no contexto do tema desta unidade ("${unit.title}"): em que situação você usaria essa palavra?`;
+    return t('fr.hint.thinkContext', { title: unit.title });
   }
   if (ex.format === 'reorder'){
     // "traduzir": o desafio principal é lembrar o vocabulário certo em meio
@@ -2817,20 +2830,20 @@ function buildExerciseHint(ex, unit){
     // "ordenar", que já mostra a frase certa embaralhada) viria em segundo
     // lugar aqui.
     return ex.mode === 'translate'
-      ? 'Primeiro descarte os blocos que não pertencem a esta frase -- só depois pense na ordem das palavras que sobraram.'
-      : 'Identifique primeiro quem realiza a ação e depois a ação em si -- monte a frase seguindo essa ordem de raciocínio, ignorando os blocos que não pertencem a ela.';
+      ? t('fr.hint.reorderTranslate')
+      : t('fr.hint.reorderOrder');
   }
   if (ex.format === 'scenario'){
-    return 'Releia a situação com atenção: pense no que você diria nesse momento, não apenas no significado de cada frase.';
+    return t('fr.hint.scenario');
   }
   if (ex.format === 'cloze'){
-    return 'Releia a frase inteira, junto da tradução, e pense em qual palavra dá sentido gramatical e comunicativo ao espaço.';
+    return t('fr.hint.cloze');
   }
   if (ex.format === 'trueFalse'){
     const shown = unit.concepts && unit.concepts.find(c => STEP_STATE.conceptsShown.has(c.id));
     return shown
-      ? `Pense na explicação: "${shown.blocks[0].title}"`
-      : 'Releia a afirmação com atenção: ela descreve exatamente a situação em que essa expressão é usada?';
+      ? t('fr.hint.trueFalseExplanation', { title: shown.blocks[0].title })
+      : t('fr.hint.trueFalseGeneric');
   }
   return null;
 }
@@ -2858,12 +2871,12 @@ function wireDontKnowButton(contentEl, ex, onRevealAnswer){
     btn.outerHTML = `
       <div class="inline-hint-block" id="inline-hint-block">
         ${hintText ? `
-          <div class="inline-hint-label">💡 Dica</div>
+          <div class="inline-hint-label">${t('fr.hint.label')}</div>
           <p class="inline-hint-text">${hintText}</p>
         ` : ''}
         <div class="inline-hint-actions">
-          <button class="btn btn-secondary inline-hint-retry-btn" id="inline-hint-retry-btn">Tentar novamente</button>
-          <button class="btn btn-secondary exercise-reveal-btn" id="exercise-reveal-btn">Ver resposta</button>
+          <button class="btn btn-secondary inline-hint-retry-btn" id="inline-hint-retry-btn">${t('fr.hint.retry')}</button>
+          <button class="btn btn-secondary exercise-reveal-btn" id="exercise-reveal-btn">${t('fr.hint.reveal')}</button>
         </div>
       </div>
     `;
@@ -2950,19 +2963,19 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
 
   const phraseHTML = matchingPhrase ? `
     <div class="vocab-phrase-example">
-      <div class="vocab-phrase-label">Na frase</div>
+      <div class="vocab-phrase-label">${t('fr.blockIntro.inPhrase')}</div>
       <div class="vocab-phrase-french">${matchingPhrase.f} ${audioBtnHTML(matchingPhrase.f)}</div>
       <div class="vocab-phrase-trans">${matchingPhrase.t}</div>
     </div>
   ` : '';
 
   contentEl.innerHTML = `
-    <div class="vocab-card-counter">Bloco ${acq.blockIdx + 1} de ${acq.blocks.length} · Palavra ${posInBlock + 1} de ${block.length}</div>
+    <div class="vocab-card-counter">${t('fr.blockIntro.counter', { block: acq.blockIdx + 1, blocks: acq.blocks.length, pos: posInBlock + 1, total: block.length })}</div>
     <div class="vocab-card">
       <div class="vocab-card-word">${v.f} ${audioBtnHTML(v.f)}</div>
       <div class="vocab-card-trans">${v.t}</div>
-      <button class="know-btn ${alreadyKnown ? 'known' : ''}" data-card-id="${cardId}" title="Marcar como já sei">
-        ${alreadyKnown ? '✓ Já sei' : 'Já sei?'}
+      <button class="know-btn ${alreadyKnown ? 'known' : ''}" data-card-id="${cardId}" title="${t('fr.blockIntro.markKnownTitle')}">
+        ${alreadyKnown ? t('zh.path.knownDone') : t('zh.path.knownAsk')}
       </button>
     </div>
     ${phraseHTML}
@@ -2977,7 +2990,7 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
   }
 
   nextBtn.style.display = 'flex';
-  nextBtn.textContent = posInBlock < block.length - 1 ? 'Próxima palavra →' : 'Ver o que você aprendeu →';
+  nextBtn.textContent = posInBlock < block.length - 1 ? t('zh.path.nextWordArrow') : t('zh.path.seeWhatLearnedArrow');
 }
 
 // ---------- Construção das filas de exercício da sessão de aquisição ----------
@@ -3097,9 +3110,9 @@ function renderConceptStep(){
   const isReality = concept.kind === 'reality';
   const isCulture = concept.kind === 'culture';
   setAcqPhaseBanner(
-    isReality ? (REALITY_NOTE_BANNER_TEXT[concept.category] || '🌍 Nota de realidade') :
-    isCulture ? (CULTURE_NOTE_BANNER_TEXT[concept.category] || '📜 Nota cultural') :
-    '💡 Vale entender isso'
+    isReality ? (REALITY_NOTE_BANNER_TEXT[concept.category] || t('concept.banner.reality.default')) :
+    isCulture ? (CULTURE_NOTE_BANNER_TEXT[concept.category] || t('concept.banner.culture.default')) :
+    t('concept.banner.understand')
   );
   const isLastBlockOfConcept = STEP_STATE.conceptBlockIdx === concept.blocks.length - 1;
   const isLastConcept = STEP_STATE.conceptIdx === STEP_STATE.conceptQueue.length - 1;
@@ -3125,7 +3138,7 @@ function renderConceptStep(){
     </ul>` : '';
 
   contentEl.innerHTML = `
-    <div class="gram-block-counter">${concept.blocks.length > 1 ? `${STEP_STATE.conceptBlockIdx + 1} de ${concept.blocks.length}` : (isReality ? 'Nota de realidade' : isCulture ? 'Nota cultural' : 'Vale entender')}</div>
+    <div class="gram-block-counter">${concept.blocks.length > 1 ? t('concept.counter.of', { i: STEP_STATE.conceptBlockIdx + 1, n: concept.blocks.length }) : (isReality ? t('concept.counter.reality') : isCulture ? t('concept.counter.culture') : t('concept.counter.understand'))}</div>
     <div class="gram-block ${block.wrapup ? 'wrapup' : ''}">
       <h3 class="gram-block-title">${block.title}</h3>
       <p class="gram-block-body">${block.body}</p>
@@ -3135,7 +3148,7 @@ function renderConceptStep(){
   `;
   wireAudioButtons(contentEl);
   nextBtn.style.display = 'flex';
-  nextBtn.textContent = (isLastBlockOfConcept && isLastConcept) ? 'Continuar →' : 'Entendi →';
+  nextBtn.textContent = (isLastBlockOfConcept && isLastConcept) ? t('common.continueArrow') : t('zh.path.gotItArrow');
 }
 
 function advanceConceptStep(){
@@ -3184,7 +3197,7 @@ function startBridgeQueue(u){
   STEP_STATE.exerciseList = buildBlockCheckpointQueue(u, bridgeVocab);
   STEP_STATE.exerciseIndex = 0;
   STEP_STATE.exerciseScore = 0;
-  setAcqPhaseBanner('👋 Lembrando da lição anterior');
+  setAcqPhaseBanner(t('zh.path.banner.recall'));
   renderExerciseStep();
 }
 
@@ -3428,7 +3441,7 @@ function renderChallengeChipHTML(before){
     return `
       <div class="lesson-boundary-challenge-chip ${justCompleted ? 'done' : ''}">
         <span class="lbc-chip-icon">${c.icon}</span>
-        <span class="lbc-chip-label">${justCompleted ? 'Missão concluída: ' : 'Missão do dia: '}${c.label}</span>
+        <span class="lbc-chip-label">${justCompleted ? t('zh.path.missionDonePrefix') : t('zh.path.missionDayPrefix')}${c.label}</span>
         ${justCompleted ? '<span class="lbc-chip-check">✓</span>' : `<span class="lbc-chip-count">${afterVal}/${c.target}</span>`}
       </div>
     `;
@@ -3504,8 +3517,8 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
 
   const recapItems = lessonRecapItems(u, lesson);
   const recapLabel = (lesson && lesson.vocabIdx && lesson.vocabIdx.length)
-    ? 'Vocabulário desta lição'
-    : 'Palavras que você errou no Ponto de verificação';
+    ? t('zh.path.lessonDone.recapVocab')
+    : t('zh.path.lessonDone.recapMissed');
 
   // reps > 0 exclui as palavras que a PRÓPRIA lição acabou de ensinar --
   // todo cartão nasce com due=0, então cardsDueNow() sozinho as contaria
@@ -3518,13 +3531,13 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
   contentEl.innerHTML = `
     <div class="lesson-complete">
       <div class="lesson-complete-icon tier-pop">✅</div>
-      <h2>${isCheckpoint ? 'Ponto de verificação concluído!' : 'Lição concluída!'}</h2>
+      <h2>${isCheckpoint ? t('zh.path.lessonDone.checkpointTitle') : t('zh.path.lessonDone.lessonTitle')}</h2>
       <p class="lesson-boundary-title">${(!isCheckpoint && lesson) ? lesson.title : ''}</p>
       <div class="lesson-complete-stats">
-        <div class="lc-stat"><div class="lc-stat-label">XP ganho</div><div class="lc-stat-value">+${xpEarned} ⚡</div></div>
-        ${scorePct !== undefined && scorePct !== null ? `<div class="lc-stat"><div class="lc-stat-label">Pontuação</div><div class="lc-stat-value">${scorePct}%</div></div>` : ''}
+        <div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.xpEarned')}</div><div class="lc-stat-value">+${xpEarned} ⚡</div></div>
+        ${scorePct !== undefined && scorePct !== null ? `<div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.score')}</div><div class="lc-stat-value">${scorePct}%</div></div>` : ''}
       </div>
-      ${dueCount > 0 ? `<p class="lesson-boundary-due">📇 ${dueCount} ${dueCount > 1 ? 'cartões' : 'cartão'} esperando por revisão</p>` : ''}
+      ${dueCount > 0 ? `<p class="lesson-boundary-due">${tp('zh.path.lessonDone.cardsWaiting', dueCount)}</p>` : ''}
       ${challengesBefore ? renderChallengeChipHTML(challengesBefore) : ''}
       ${recapItems.length ? `
         <div class="lesson-recap">
@@ -3542,7 +3555,7 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
   wireAudioButtons(contentEl);
 
   if (!trackHistory){
-    nextBtn.textContent = 'Continuar →';
+    nextBtn.textContent = t('common.continueArrow');
     nextBtn.style.display = 'flex';
     return;
   }
@@ -3556,7 +3569,7 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
   // (nunca reexecuta finishCurrentLesson nem mexe em XP/progresso -- só
   // repete este render com os mesmos insumos).
   STEP_STATE.lastUnitResultCache = { unitId: u.id, lesson, challengesBefore, xpEarned, scorePct, trackHistory };
-  nextBtn.textContent = dueCount > 0 ? `Revisar agora (${dueCount}) →` : 'Continuar →';
+  nextBtn.textContent = dueCount > 0 ? t('zh.path.reviewNowArrow', { n: dueCount }) : t('common.continueArrow');
   nextBtn.style.display = 'flex';
 
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'unitResult', unitId: u.id });
@@ -3590,20 +3603,20 @@ function renderUnitCompleteScreen(u, xpEarned){
   contentEl.innerHTML = `
     <div class="lesson-complete tier-bounce">
       <div class="lesson-complete-icon">🎉</div>
-      <h2>Parabéns, ${currentStudentName()}!</h2>
+      <h2>${t('zh.path.unitDone.congrats', { name: currentStudentName() })}</h2>
       <p class="lesson-boundary-title">${u.title}</p>
       <div class="lesson-complete-stats">
-        <div class="lc-stat"><div class="lc-stat-label">XP ganho</div><div class="lc-stat-value" id="uc-stat-xp">+0 ⚡</div></div>
+        <div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.xpEarned')}</div><div class="lc-stat-value" id="uc-stat-xp">+0 ⚡</div></div>
       </div>
       ${competencies.length ? `
         <div class="unit-skills">
-          <div class="unit-skills-label">Competências desenvolvidas</div>
+          <div class="unit-skills-label">${t('zh.path.unitDone.skills')}</div>
           ${competencies.map(c => `<div class="unit-skill-item"><span class="unit-skill-check">✓</span><span>${c}</span></div>`).join('')}
         </div>
       ` : ''}
       ${u.goal ? `
         <div class="unit-skills">
-          <div class="unit-skills-label">Objetivo comunicacional atingido</div>
+          <div class="unit-skills-label">${t('zh.path.unitDone.goalReached')}</div>
           <div class="unit-skill-item"><span class="unit-skill-check">✓</span><span>${u.goal}</span></div>
         </div>
       ` : ''}
@@ -3619,7 +3632,7 @@ function renderUnitCompleteScreen(u, xpEarned){
   // Cache pra restaurar via Voltar/Avançar (mesmo padrão de lastUnitResultCache)
   // -- nunca reexecuta markUnitCompleted nem recalcula XP.
   STEP_STATE.lastUnitCompleteCache = { unitId: u.id, xpEarned };
-  nextBtn.textContent = 'Continuar →';
+  nextBtn.textContent = t('common.continueArrow');
   nextBtn.style.display = 'flex';
 
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'unitComplete', unitId: u.id });
@@ -3659,7 +3672,7 @@ function renderGrammarExplanationStep(u, contentEl, nextBtn){
     </div>` : '';
 
   contentEl.innerHTML = `
-    <div class="gram-block-counter">Passo ${idx + 1} de ${blocks.length}</div>
+    <div class="gram-block-counter">${t('fr.grammar.stepCounter', { i: idx + 1, n: blocks.length })}</div>
     <div class="gram-block ${block.wrapup ? 'wrapup' : ''}">
       <h3 class="gram-block-title">${block.title}</h3>
       <p class="gram-block-body">${block.body}</p>
@@ -3669,14 +3682,14 @@ function renderGrammarExplanationStep(u, contentEl, nextBtn){
   `;
   wireAudioButtons(contentEl);
   nextBtn.style.display = 'flex';
-  nextBtn.textContent = isLast ? 'Ir para os exercícios →' : 'Continuar →';
+  nextBtn.textContent = isLast ? t('fr.grammar.goToExercises') : t('common.continueArrow');
 }
 
 // ---------- Tela final "Parabéns" (estilo Busuu): estrelas, pontuação e
 // recapitulação do vocabulário/frases vistos pela primeira vez na lição ----------
 function currentStudentName(){
-  if (!CURRENT_USER) return 'Convidado';
-  const full = CURRENT_USER.user_metadata?.full_name || CURRENT_USER.email || 'Convidado';
+  if (!CURRENT_USER) return t('common.guest');
+  const full = CURRENT_USER.user_metadata?.full_name || CURRENT_USER.email || t('common.guest');
   return full.split(' ')[0].split('@')[0];
 }
 
@@ -3713,9 +3726,9 @@ function hideAcqPhaseBanner(){
 }
 function acqPhaseBannerText(phase){
   return {
-    checkpoint: '🧠 Checagem rápida',
-    practice: '✏️ Praticando o que você acabou de ver',
-    mixed: '🔀 Misturando com o que você já viu'
+    checkpoint: t('zh.path.banner.quickCheck'),
+    practice: t('zh.path.banner.practice'),
+    mixed: t('zh.path.banner.mixed')
   }[phase] || null;
 }
 
@@ -3729,15 +3742,15 @@ function renderModuleCompleteScreen(contentEl, nextBtn, { passed, title, subtitl
     contentEl.innerHTML = `
       <div class="lesson-complete">
         <div class="lesson-complete-icon">💪</div>
-        <h2>Quase lá!</h2>
+        <h2>${t('fr.moduleDone.almostThere')}</h2>
         <p class="module-complete-sub">${subtitle}</p>
         <div class="lesson-complete-stats">
-          <div class="lc-stat"><div class="lc-stat-label">Pontuação</div><div class="lc-stat-value">${scorePct}%</div></div>
+          <div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.score')}</div><div class="lc-stat-value">${scorePct}%</div></div>
         </div>
-        <p class="module-retry-note">Você precisa de pelo menos ${passThreshold}% pra ser aprovado. Continue estudando as unidades desta seção e tente de novo quando quiser — sem pressa.</p>
+        <p class="module-retry-note">${t('fr.moduleDone.retryNote', { pct: passThreshold })}</p>
       </div>
     `;
-    nextBtn.textContent = nextLabel || 'Voltar à trilha';
+    nextBtn.textContent = nextLabel || t('trail.backToTrail');
     nextBtn.style.display = 'flex';
     return;
   }
@@ -3751,11 +3764,11 @@ function renderModuleCompleteScreen(contentEl, nextBtn, { passed, title, subtitl
       <h2>${title}</h2>
       <p class="module-complete-sub">${subtitle}</p>
       <div class="lesson-complete-stats">
-        <div class="lc-stat"><div class="lc-stat-label">Estrelas</div><div class="lc-stat-value" id="lc-stat-stars">0 ⭐</div></div>
-        <div class="lc-stat"><div class="lc-stat-label">Pontuação</div><div class="lc-stat-value" id="lc-stat-pct">0%</div></div>
+        <div class="lc-stat"><div class="lc-stat-label">${t('fr.moduleDone.stars')}</div><div class="lc-stat-value" id="lc-stat-stars">0 ⭐</div></div>
+        <div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.score')}</div><div class="lc-stat-value" id="lc-stat-pct">0%</div></div>
       </div>
       <div class="module-skills">
-        <div class="module-skills-label">Agora você já sabe, na vida real:</div>
+        <div class="module-skills-label">${t('fr.moduleDone.nowYouKnow')}</div>
         ${goals.map(g => `
           <div class="module-skill-item"><span class="module-skill-check">✓</span><span>${g}</span></div>
         `).join('')}
@@ -3769,7 +3782,7 @@ function renderModuleCompleteScreen(contentEl, nextBtn, { passed, title, subtitl
   spawnConfetti(isLevel ? 34 : 24, isLevel ? 2600 : 2000);
   animateCount(document.getElementById('lc-stat-stars'), stars, { prefix: '+', suffix: ' ⭐', duration: isLevel ? 900 : 750 });
   animateCount(document.getElementById('lc-stat-pct'), scorePct, { suffix: '%', duration: isLevel ? 900 : 750 });
-  nextBtn.textContent = nextLabel || 'Continuar →';
+  nextBtn.textContent = nextLabel || t('common.continueArrow');
   nextBtn.style.display = 'flex';
 }
 
@@ -3794,14 +3807,14 @@ function renderGrammarExerciseStep(u, contentEl, nextBtn){
   nextBtn.style.display = 'none';
 
   contentEl.innerHTML = `
-    <div class="conj-progress">Frase ${STEP_STATE.gramExerciseIndex + 1} de ${total}</div>
+    <div class="conj-progress">${t('fr.grammar.sentenceCounter', { i: STEP_STATE.gramExerciseIndex + 1, n: total })}</div>
     <div class="gram-exercise">
       <div class="gram-exercise-prompt">${ex.prompt}</div>
       ${ex.hint ? `<div class="gram-exercise-hint">${ex.hint}</div>` : ''}
-      <input type="text" id="gram-exercise-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a forma correta">
+      <input type="text" id="gram-exercise-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('fr.grammar.typeCorrectForm')}">
       <div class="expected" id="gram-exercise-expected"></div>
     </div>
-    <button class="btn btn-primary btn-block" id="gram-exercise-verify-btn">Verificar</button>
+    <button class="btn btn-primary btn-block" id="gram-exercise-verify-btn">${t('common.verify')}</button>
   `;
 
   const inputEl = document.getElementById('gram-exercise-input');
@@ -3843,7 +3856,7 @@ function renderGrammarExerciseStep(u, contentEl, nextBtn){
     document.getElementById('gram-exercise-verify-btn').style.display = 'none';
     const goNextBtn = document.createElement('button');
     goNextBtn.className = 'btn btn-secondary btn-block';
-    goNextBtn.textContent = STEP_STATE.gramExerciseIndex < total - 1 ? 'Próxima frase →' : 'Ver resultado →';
+    goNextBtn.textContent = STEP_STATE.gramExerciseIndex < total - 1 ? t('fr.grammar.nextSentenceArrow') : t('common.seeResultArrow');
     goNextBtn.addEventListener('click', () => {
       STEP_STATE.gramExerciseIndex += 1;
       renderGrammarExerciseStep(u, contentEl, nextBtn);
@@ -3917,7 +3930,7 @@ function renderStep(){
       // sessão de consolidação.
       STEP_STATE.checkpointXpAtStart = STATE.xp;
     }
-    setAcqPhaseBanner('🧩 Consolidação da unidade');
+    setAcqPhaseBanner(t('zh.path.banner.consolidation'));
     renderExerciseStep();
 
   } else if (stepKey === 'checkpointExercises'){
@@ -3947,12 +3960,12 @@ function renderStep(){
       STEP_STATE.exerciseIndex = 0;
       STEP_STATE.exerciseScore = 0;
     }
-    setAcqPhaseBanner(STEP_STATE.checkpointPhase === 'errors' ? '🔁 Revisão dos erros' : '🧩 Ponto de verificação');
+    setAcqPhaseBanner(STEP_STATE.checkpointPhase === 'errors' ? t('zh.path.banner.errorsReview') : t('zh.path.banner.checkpoint'));
     renderExerciseStep();
 
   } else if (stepKey === 'dialogue'){
     contentEl.innerHTML = `
-      <div class="section-label">Diálogo</div>
+      <div class="section-label">${t('fr.step.dialogue')}</div>
       <div class="dialogue-box" id="ud-dialogue"></div>
     `;
     const dialogueEl = document.getElementById('ud-dialogue');
@@ -3967,7 +3980,7 @@ function renderStep(){
         </div>
       `).join('');
     wireAudioButtons(dialogueEl);
-    nextBtn.textContent = 'Continuar →';
+    nextBtn.textContent = t('common.continueArrow');
     nextBtn.style.display = 'flex';
 
   }
@@ -4416,7 +4429,7 @@ function renderExerciseStep(){
       STEP_STATE.exerciseList = buildExerciseSet(u);
       STEP_STATE.exerciseIndex = 0;
       STEP_STATE.exerciseScore = 0;
-      setAcqPhaseBanner('🧩 Ponto de verificação');
+      setAcqPhaseBanner(t('zh.path.banner.checkpoint'));
       renderExerciseStep();
       return;
     }
@@ -4578,7 +4591,7 @@ function showAnswerPanel(contentEl, ex, opts = {}){
           <div class="feedback-inner-box">${explanation}</div>
         </div>
       ` : ''}
-      <button class="btn btn-primary btn-block wrong-feedback-continue" id="wrong-continue-btn">Continuar →</button>
+      <button class="btn btn-primary btn-block wrong-feedback-continue" id="wrong-continue-btn">${t('common.continueArrow')}</button>
     </div>
   `;
   wrap.appendChild(panel);
@@ -4601,7 +4614,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
   let promptHTML = '';
   if (ex.format === 'meaning'){
     promptHTML = `
-      <div class="exercise-prompt-label">O que significa?</div>
+      <div class="exercise-prompt-label">${t('fr.exercise.whatMeans')}</div>
       <div class="exercise-prompt">
         <div class="prompt-french">${ex.item.f}</div>
         ${audioBtnHTML(ex.item.f)}
@@ -4609,10 +4622,10 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
     `;
   } else if (ex.format === 'listen'){
     promptHTML = `
-      <div class="exercise-prompt-label">Ouça e escolha o significado certo</div>
+      <div class="exercise-prompt-label">${t('fr.exercise.listenChooseMeaning')}</div>
       <div class="exercise-prompt">
         ${audioBtnHTML(ex.item.f, 'audio-btn-lg')}
-        <div class="prompt-audio-hint">toque para ouvir de novo</div>
+        <div class="prompt-audio-hint">${t('fr.exercise.tapToHearAgain')}</div>
       </div>
     `;
   }
@@ -4623,7 +4636,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-counter">${t('fr.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
       ${promptHTML}
       <div class="exercise-options">${optionsHTML}</div>
       <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
@@ -4726,16 +4739,16 @@ function wireFrAccentPicker(pickerEl, inputEl){
 function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
-      <div class="exercise-prompt-label">Digite o que ouviu</div>
+      <div class="exercise-counter">${t('fr.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
+      <div class="exercise-prompt-label">${t('fr.exercise.typeWhatYouHeard')}</div>
       <div class="exercise-prompt">
         ${audioBtnHTML(ex.item.f, 'audio-btn-lg')}
-        <div class="prompt-audio-hint">toque para ouvir de novo</div>
+        <div class="prompt-audio-hint">${t('fr.exercise.tapToHearAgain')}</div>
       </div>
       <div class="cloze-type-wrap">
-        <input type="text" id="vocab-type-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite em francês">
+        <input type="text" id="vocab-type-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('fr.exercise.typeInFrench')}">
         ${frAccentPickerHTML()}
-        <button class="btn btn-primary btn-block" id="vocab-type-verify-btn">Verificar</button>
+        <button class="btn btn-primary btn-block" id="vocab-type-verify-btn">${t('common.verify')}</button>
       </div>
       <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
@@ -4810,7 +4823,7 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-counter">${t('fr.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
       <div class="scenario-question">${ex.phrase.scenario}</div>
       <div class="scenario-scene">${scenarioSceneHTML(ex.phrase.scenarioEmoji)}</div>
       <div class="scenario-options">${optionsHTML}</div>
@@ -4869,7 +4882,7 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
 function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-counter">${t('fr.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
       <div class="tf-scene">
         <div class="tf-scene-emoji">${ex.emoji || '💬'}</div>
         <div class="tf-subject">${ex.subject}</div>
@@ -4877,8 +4890,8 @@ function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
       </div>
       <div class="tf-claim">${ex.claim}</div>
       <div class="tf-options">
-        <button class="tf-option" data-val="true">✅ Verdadeiro</button>
-        <button class="tf-option" data-val="false">❌ Falso</button>
+        <button class="tf-option" data-val="true">${t('fr.exercise.true')}</button>
+        <button class="tf-option" data-val="false">${t('fr.exercise.false')}</button>
       </div>
       <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
@@ -4939,7 +4952,7 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-counter">${t('fr.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
       <div class="exercise-prompt-label">${t('exercise.completeSentence')}</div>
       <div class="cloze-sentence">${sentenceHTML}</div>
       <div class="cloze-audio-row" id="cloze-audio-row"></div>
@@ -5087,8 +5100,8 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
-      <div class="exercise-prompt-label">${isTranslate ? 'Traduza para o francês' : 'Ordene a frase'}</div>
+      <div class="exercise-counter">${t('fr.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
+      <div class="exercise-prompt-label">${isTranslate ? t('fr.exercise.translateToFrench') : t('fr.exercise.orderSentence')}</div>
       ${isTranslate ? `
         <div class="exercise-prompt">
           <div class="prompt-translation">${ex.phrase.t}</div>
@@ -7191,7 +7204,7 @@ function buildCheckpointQueue(module){
       // Ignora entradas com forma dupla (ex: "français / française") — não
       // dá pra cobrar digitação exata de uma tradução com duas respostas.
       u.vocab.filter(v => !v.f.includes(' / ')).forEach(v => {
-        queue.push({ prompt: `Como se diz "${v.t}" em francês?`, hint: null, answer: v.f });
+        queue.push({ prompt: t('fr.checkpoint.howToSay', { t: v.t }), hint: null, answer: v.f });
       });
     }
   });
@@ -7274,12 +7287,12 @@ function renderCheckpointQuizStep(){
     const moduleUnits = module.unitIds.map(id => UNITS.find(u => u.id === id));
     renderModuleCompleteScreen(contentEl, nextBtn, {
       passed,
-      title: 'Módulo concluído! 🏆',
+      title: t('fr.checkpoint.moduleDone'),
       subtitle: module.title,
       units: moduleUnits,
       scorePct: pct,
       passThreshold: CHECKPOINT_PASS_THRESHOLD,
-      nextLabel: passed ? 'Concluir seção ✓' : 'Voltar à trilha',
+      nextLabel: passed ? t('fr.checkpoint.finishSection') : t('trail.backToTrail'),
       tier: 'module'
     });
     return;
@@ -7289,7 +7302,7 @@ function renderCheckpointQuizStep(){
   nextBtn.style.display = 'none';
 
   contentEl.innerHTML = `
-    <div class="conj-progress">Pergunta ${CHECKPOINT_STATE.index + 1} de ${total}</div>
+    <div class="conj-progress">${t('fr.checkpoint.question', { i: CHECKPOINT_STATE.index + 1, n: total })}</div>
     <div class="gram-exercise">
       <div class="gram-exercise-prompt">${ex.prompt}</div>
       ${ex.hint ? `<div class="gram-exercise-hint">${ex.hint}</div>` : ''}
@@ -7330,7 +7343,7 @@ function renderCheckpointQuizStep(){
     document.getElementById('checkpoint-verify-btn').style.display = 'none';
     const goNextBtn = document.createElement('button');
     goNextBtn.className = 'btn btn-secondary btn-block';
-    goNextBtn.textContent = CHECKPOINT_STATE.index < total - 1 ? 'Próxima →' : 'Ver resultado →';
+    goNextBtn.textContent = CHECKPOINT_STATE.index < total - 1 ? t('common.nextArrow') : t('common.seeResultArrow');
     goNextBtn.addEventListener('click', () => {
       CHECKPOINT_STATE.index += 1;
       renderCheckpointQuizStep();
@@ -7429,12 +7442,12 @@ function renderLevelTestQuizStep(){
       .map(id => UNITS.find(u => u.id === id));
     renderModuleCompleteScreen(contentEl, nextBtn, {
       passed,
-      title: `Nível ${test.level} concluído! 🎓`,
-      subtitle: `Você já pode seguir direto pro ${test.nextLevel}`,
+      title: t('toast.levelComplete', { level: test.level }),
+      subtitle: t('fr.levelTest.goStraightTo', { next: test.nextLevel }),
       units: levelUnits,
       scorePct: pct,
       passThreshold: LEVEL_TEST_PASS_THRESHOLD,
-      nextLabel: passed ? `Concluir nível ${test.level} ✓` : 'Voltar à trilha',
+      nextLabel: passed ? t('fr.levelTest.finishLevel', { level: test.level }) : t('trail.backToTrail'),
       tier: 'level'
     });
     return;
@@ -7444,14 +7457,14 @@ function renderLevelTestQuizStep(){
   nextBtn.style.display = 'none';
 
   contentEl.innerHTML = `
-    <div class="conj-progress">Pergunta ${LEVEL_TEST_STATE.index + 1} de ${total}</div>
+    <div class="conj-progress">${t('fr.checkpoint.question', { i: LEVEL_TEST_STATE.index + 1, n: total })}</div>
     <div class="gram-exercise">
       <div class="gram-exercise-prompt">${ex.prompt}</div>
       ${ex.hint ? `<div class="gram-exercise-hint">${ex.hint}</div>` : ''}
       <input type="text" id="leveltest-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('review.typeAnswer.placeholder')}">
       <div class="expected" id="leveltest-expected"></div>
     </div>
-    <button class="btn btn-primary btn-block" id="leveltest-verify-btn">Verificar</button>
+    <button class="btn btn-primary btn-block" id="leveltest-verify-btn">${t('common.verify')}</button>
   `;
 
   const inputEl = document.getElementById('leveltest-input');
@@ -7485,7 +7498,7 @@ function renderLevelTestQuizStep(){
     document.getElementById('leveltest-verify-btn').style.display = 'none';
     const goNextBtn = document.createElement('button');
     goNextBtn.className = 'btn btn-secondary btn-block';
-    goNextBtn.textContent = LEVEL_TEST_STATE.index < total - 1 ? 'Próxima →' : 'Ver resultado →';
+    goNextBtn.textContent = LEVEL_TEST_STATE.index < total - 1 ? t('common.nextArrow') : t('common.seeResultArrow');
     goNextBtn.addEventListener('click', () => {
       LEVEL_TEST_STATE.index += 1;
       renderLevelTestQuizStep();
@@ -7519,18 +7532,18 @@ function renderProgressView(){
 
   const guestWarning = !CURRENT_USER ? `
     <div class="guest-warning">
-      ⚠️ Você está no modo convidado — seu progresso <strong>não</strong> será salvo ao fechar a aba.
-      <button class="guest-warning-link" id="guest-login-prompt">Entrar com Google para salvar</button>
+      ${t('zh.progress.guestWarning')}
+      <button class="guest-warning-link" id="guest-login-prompt">${t('zh.progress.guestLogin')}</button>
     </div>
   ` : '';
 
   document.getElementById('stat-cards').innerHTML = guestWarning + `
-    <div class="stat-card"><div class="num">${completedUnits}/${UNITS.length}</div><div class="label">Unidades completas</div></div>
-    <div class="stat-card"><div class="num">${learnedCards}/${totalCards}</div><div class="label">Palavras aprendidas</div></div>
-    <div class="stat-card"><div class="num">${effectiveStreak()}</div><div class="label">Dias seguidos</div></div>
-    <div class="stat-card"><div class="num">${STATE.totalReviews}</div><div class="label">Revisões totais</div></div>
-    <div class="stat-card"><div class="num">${dueCount}</div><div class="label">Pendentes agora</div></div>
-    <div class="stat-card"><div class="num">${STATE.xp}</div><div class="label">XP acumulado</div></div>
+    <div class="stat-card"><div class="num">${completedUnits}/${UNITS.length}</div><div class="label">${t('zh.progress.statUnits')}</div></div>
+    <div class="stat-card"><div class="num">${learnedCards}/${totalCards}</div><div class="label">${t('zh.progress.statWords')}</div></div>
+    <div class="stat-card"><div class="num">${effectiveStreak()}</div><div class="label">${t('zh.progress.statStreak')}</div></div>
+    <div class="stat-card"><div class="num">${STATE.totalReviews}</div><div class="label">${t('zh.progress.statReviews')}</div></div>
+    <div class="stat-card"><div class="num">${dueCount}</div><div class="label">${t('zh.progress.statDue')}</div></div>
+    <div class="stat-card"><div class="num">${STATE.xp}</div><div class="label">${t('zh.progress.statXp')}</div></div>
   `;
 
   if (!CURRENT_USER){
@@ -7574,7 +7587,7 @@ function renderProgressLineChart(){
   const learnedDates = STATE.cards.filter(c => c.firstLearnedDate).map(c => c.firstLearnedDate);
 
   if (!learnedDates.length){
-    wrap.innerHTML = `<div style="text-align:center; padding:30px 20px; color:var(--ink-soft);"><p>Comece a estudar para ver seu progresso ao longo do tempo aqui.</p></div>`;
+    wrap.innerHTML = `<div style="text-align:center; padding:30px 20px; color:var(--ink-soft);"><p>${t('zh.progress.chartEmpty')}</p></div>`;
     return;
   }
 
@@ -7614,10 +7627,10 @@ function renderProgressLineChart(){
       <line x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}" class="chart-axis"/>
       <path d="${areaD}" class="chart-area"/>
       <path d="${pathD}" class="chart-line"/>
-      ${points.map((p,i) => `<circle cx="${(PAD + i*xStep).toFixed(1)}" cy="${yScale(p.total).toFixed(1)}" r="3" class="chart-dot"><title>${p.date}: ${p.total} palavras</title></circle>`).join('')}
+      ${points.map((p,i) => `<circle cx="${(PAD + i*xStep).toFixed(1)}" cy="${yScale(p.total).toFixed(1)}" r="3" class="chart-dot"><title>${t('zh.progress.chartPoint', { date: p.date, n: p.total })}</title></circle>`).join('')}
       ${dateLabels.map(l => `<text x="${l.x.toFixed(1)}" y="${H-10}" class="chart-label" text-anchor="middle">${l.text}</text>`).join('')}
     </svg>
-    <div class="chart-total">Total acumulado: <strong>${maxVal}</strong> palavras aprendidas</div>
+    <div class="chart-total">${t('zh.progress.chartTotal')} <strong>${maxVal}</strong> ${t('fr.progress.chartTotalSuffix')}</div>
   `;
 }
 
@@ -7662,7 +7675,7 @@ function renderActivityHeatmap(){
     if (firstRealDay){
       const m = firstRealDay.date.getMonth();
       if (m !== lastMonth){
-        monthLabels.push({ weekIndex: wi, label: firstRealDay.date.toLocaleDateString('pt-BR', { month:'short' }) });
+        monthLabels.push({ weekIndex: wi, label: fmtDate(firstRealDay.date, { month:'short' }) });
         lastMonth = m;
       }
     }
@@ -7672,7 +7685,7 @@ function renderActivityHeatmap(){
     <div class="heatmap-col">
       ${week.map(day => day === null
         ? `<div class="heatmap-cell lvl-0 empty"></div>`
-        : `<div class="heatmap-cell ${intensityClass(day.count)}" title="${day.count} atividade(s) em ${day.date.toLocaleDateString('pt-BR')}"></div>`
+        : `<div class="heatmap-cell ${intensityClass(day.count)}" title="${tp('zh.progress.heatCell', day.count, { date: fmtDate(day.date) })}"></div>`
       ).join('')}
     </div>
   `).join('');
@@ -7685,13 +7698,13 @@ function renderActivityHeatmap(){
     <div class="heatmap-months" style="grid-template-columns: repeat(${weeks.length}, 1fr);">${labelsHTML}</div>
     <div class="heatmap-grid">${gridHTML}</div>
     <div class="heatmap-legend">
-      <span>Menos</span>
+      <span>${t('zh.progress.heatLess')}</span>
       <div class="heatmap-cell lvl-0"></div>
       <div class="heatmap-cell lvl-1"></div>
       <div class="heatmap-cell lvl-2"></div>
       <div class="heatmap-cell lvl-3"></div>
       <div class="heatmap-cell lvl-4"></div>
-      <span>Mais</span>
+      <span>${t('zh.progress.heatMore')}</span>
     </div>
   `;
 }
@@ -8073,7 +8086,7 @@ function renderConjSelectScreen(){
 
   const topnSelectEl = document.getElementById('conj-topn-select');
   topnSelectEl.innerHTML = CONJ_TOPN_OPTIONS.map(n =>
-    `<option value="${n}" ${CONJ_STATE.topN === n ? 'selected' : ''}>${n === CONJ_TOTAL_VERBS ? `Todos (${n})` : `Top ${n}`}</option>`
+    `<option value="${n}" ${CONJ_STATE.topN === n ? 'selected' : ''}>${n === CONJ_TOTAL_VERBS ? t('fr.conj.topAll', { n }) : `Top ${n}`}</option>`
   ).join('');
 
   const regularToggleEl = document.getElementById('conj-toggle-regular');
@@ -8238,10 +8251,10 @@ function renderConjPracticeStep(){
     contentEl.innerHTML = `
       <div class="conj-session-result">
         <div class="big-emoji">${pct >= 70 ? '🎉' : '💪'}</div>
-        <h3>Sessão concluída!</h3>
+        <h3>${t('fr.conj.sessionDone')}</h3>
         <div class="score-num">${Math.round(CONJ_STATE.score)}/${CONJ_STATE.totalFields}</div>
-        <p>${pct >= 70 ? 'Muito bem!' : 'Continue praticando essas conjugações.'}</p>
-        <button class="btn btn-primary" id="conj-restart-btn">Nova sessão</button>
+        <p>${pct >= 70 ? t('fr.conj.wellDone') : t('fr.conj.keepPracticing')}</p>
+        <button class="btn btn-primary" id="conj-restart-btn">${t('fr.conj.newSession')}</button>
       </div>
     `;
     document.getElementById('conj-restart-btn').addEventListener('click', () => {
@@ -8260,17 +8273,17 @@ function renderConjPracticeStep(){
   CONJ_STATE.hintLevel = 0;
 
   contentEl.innerHTML = `
-    <div class="conj-progress">Verbo ${CONJ_STATE.verbIndex + 1} de ${CONJ_STATE.verbQueue.length}</div>
+    <div class="conj-progress">${t('fr.conj.verbCounter', { i: CONJ_STATE.verbIndex + 1, n: CONJ_STATE.verbQueue.length })}</div>
     <div class="conj-verb-nav">
       <div class="conj-verb-header">
-        <div class="conj-verb-label">Verbo atual</div>
+        <div class="conj-verb-label">${t('fr.conj.currentVerb')}</div>
         <div class="infinitif">${verb} ${audioBtnHTML(verb)}</div>
         <div class="conj-verb-translation">${VERB_TRANSLATIONS[verb] || ''}</div>
-        <div class="tempo">${CONJ_REGULAR_GROUPS.includes(verbInfo.g) ? 'Regular' : 'Irregular'}</div>
+        <div class="tempo">${CONJ_REGULAR_GROUPS.includes(verbInfo.g) ? t('fr.conj.regular') : t('fr.conj.irregular')}</div>
       </div>
       ${nextVerb ? `
         <div class="conj-verb-header next">
-          <div class="conj-verb-label">Próximo verbo</div>
+          <div class="conj-verb-label">${t('fr.conj.nextVerbLabel')}</div>
           <div class="infinitif">${nextVerb}</div>
           <div class="conj-verb-translation">${VERB_TRANSLATIONS[nextVerb] || ''}</div>
         </div>
@@ -8321,13 +8334,13 @@ function renderConjPracticeStep(){
     </div>
     ${alreadyChecked ? '' : `
       <div class="conj-actions">
-        <button class="btn btn-primary btn-block" id="conj-verify-btn">Verificar respostas</button>
-        <button class="btn btn-secondary" id="conj-hint-btn" title="Mostrar contagem de letras e terminação">💡 Mostrar dica</button>
+        <button class="btn btn-primary btn-block" id="conj-verify-btn">${t('fr.conj.checkAnswers')}</button>
+        <button class="btn btn-secondary" id="conj-hint-btn" title="${t('fr.conj.hintTitle')}">${t('fr.conj.hintShow')}</button>
       </div>
     `}
     <div class="conj-verb-pager">
-      <button class="btn btn-secondary" id="conj-prev-verb-btn" ${CONJ_STATE.verbIndex === 0 ? 'disabled' : ''}>← Verbo anterior</button>
-      <button class="btn btn-secondary" id="conj-next-verb-btn">${CONJ_STATE.verbIndex < CONJ_STATE.verbQueue.length - 1 ? 'Próximo verbo →' : 'Ver resultado →'}</button>
+      <button class="btn btn-secondary" id="conj-prev-verb-btn" ${CONJ_STATE.verbIndex === 0 ? 'disabled' : ''}>${t('fr.conj.prevVerb')}</button>
+      <button class="btn btn-secondary" id="conj-next-verb-btn">${CONJ_STATE.verbIndex < CONJ_STATE.verbQueue.length - 1 ? t('fr.conj.nextVerbArrow') : t('common.seeResultArrow')}</button>
     </div>
   `;
 
@@ -8346,11 +8359,11 @@ function renderConjPracticeStep(){
       });
     });
     if (CONJ_STATE.hintLevel === 1){
-      this.textContent = '💡 Mais ajuda';
-      this.title = 'Revelar a maior parte das letras';
+      this.textContent = t('fr.conj.hintMore');
+      this.title = t('fr.conj.hintMoreTitle');
     } else {
       this.disabled = true;
-      this.textContent = '💡 Dica máxima';
+      this.textContent = t('fr.conj.hintMax');
     }
   });
 
@@ -8443,7 +8456,7 @@ function renderConjPracticeStep(){
 // Ditados de revisão do nível usam moduleId "<nível>-revisao" (não é um módulo).
 function isLevelReviewId(id){ return typeof id === 'string' && id.endsWith('-revisao'); }
 function moduleTitleFor(moduleId){
-  if (isLevelReviewId(moduleId)) return `Revisão do nível ${moduleId.split('-')[0]}`;
+  if (isLevelReviewId(moduleId)) return t('fr.dictation.levelReviewTitle', { level: moduleId.split('-')[0] });
   const mod = MODULES.find(m => m.id === moduleId);
   return mod ? mod.title : '';
 }
@@ -8486,7 +8499,7 @@ function renderDictationList(){
   const cardsWrap = document.getElementById('dictation-cards');
   const dictationsShown = dictationsVisible(dictationModuleFilter);
   // Vindo da unidade "Revisão do A1" da trilha, o "voltar" leva de volta pra trilha.
-  document.getElementById('dictation-back-to-challenges').textContent = isLevelReviewId(dictationModuleFilter) ? '← Voltar à trilha' : '← Voltar aos desafios';
+  document.getElementById('dictation-back-to-challenges').textContent = isLevelReviewId(dictationModuleFilter) ? t('fr.dictation.backToTrail') : t('fr.dictation.backToChallenges');
   cardsWrap.innerHTML = dictationsShown.map(d => `
     <button class="dictation-card ${isDictationLocked(d) ? 'locked' : ''}" data-dict-id="${d.id}">
       ${isDictationLocked(d) ? '<span class="challenge-card-check" title="Premium">🔒</span>' : ''}
@@ -8538,8 +8551,8 @@ function openDictationPlayer(id){
     <p class="dictation-player-module">${d.level} · ${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</p>
     <div class="dictation-audio-player">
       <div class="dictation-transport">
-        <button class="dictation-play-btn" id="dictation-play-btn">▶️ Ouvir o ditado</button>
-        <button class="dictation-icon-btn" id="dictation-restart-btn" aria-label="Reiniciar" title="Reiniciar">↺</button>
+        <button class="dictation-play-btn" id="dictation-play-btn">${t('fr.dictation.listen')}</button>
+        <button class="dictation-icon-btn" id="dictation-restart-btn" aria-label="${t('fr.dictation.restart')}" title="${t('fr.dictation.restart')}">↺</button>
       </div>
       <div class="dictation-scrub-row">
         <span class="dictation-time" id="dictation-time-current">00:00</span>
@@ -8551,11 +8564,11 @@ function openDictationPlayer(id){
       </div>
       <div class="dictation-secondary-controls">
         <div class="dictation-skip-controls">
-          <button class="dictation-skip-btn" id="dictation-skip-back" title="Voltar 15s">-15s</button>
-          <button class="dictation-skip-btn" id="dictation-skip-fwd" title="Avançar 15s">+15s</button>
+          <button class="dictation-skip-btn" id="dictation-skip-back" title="${t('fr.dictation.skipBack')}">-15s</button>
+          <button class="dictation-skip-btn" id="dictation-skip-fwd" title="${t('fr.dictation.skipForward')}">+15s</button>
         </div>
         <div class="dictation-volume-control">
-          <button class="dictation-icon-btn" id="dictation-mute-btn" aria-label="Mudo" title="Mudo">🔊</button>
+          <button class="dictation-icon-btn" id="dictation-mute-btn" aria-label="${t('fr.dictation.mute')}" title="${t('fr.dictation.mute')}">🔊</button>
           <input type="range" class="dictation-volume-slider" id="dictation-volume-slider" min="0" max="100" value="100">
         </div>
         <div class="dictation-speed-controls">
@@ -8565,11 +8578,11 @@ function openDictationPlayer(id){
         </div>
       </div>
     </div>
-    <textarea class="dictation-textarea" id="dictation-input" placeholder="Digite aqui o que você ouviu..."></textarea>
+    <textarea class="dictation-textarea" id="dictation-input" placeholder="${t('fr.dictation.placeholder')}"></textarea>
     ${frAccentPickerHTML()}
     <div class="dictation-actions">
-      <button class="btn btn-primary" id="dictation-check-btn">Verificar</button>
-      <button class="btn btn-secondary" id="dictation-retry-btn" style="display:none;">Tentar novamente</button>
+      <button class="btn btn-primary" id="dictation-check-btn">${t('common.verify')}</button>
+      <button class="btn btn-secondary" id="dictation-retry-btn" style="display:none;">${t('fr.hint.retry')}</button>
     </div>
     <div id="dictation-result-wrap"></div>
   `;
@@ -8617,8 +8630,8 @@ function openDictationPlayer(id){
     dictationAudioEl.volume = v;
     dictationAudioEl.muted = false;
     muteBtn.textContent = v === 0 ? '🔇' : '🔊';
-    muteBtn.setAttribute('aria-label', v === 0 ? 'Ativar som' : 'Mudo');
-    muteBtn.title = v === 0 ? 'Ativar som' : 'Mudo';
+    muteBtn.setAttribute('aria-label', v === 0 ? t('fr.dictation.unmute') : t('fr.dictation.mute'));
+    muteBtn.title = v === 0 ? t('fr.dictation.unmute') : t('fr.dictation.mute');
   });
   muteBtn.addEventListener('click', () => {
     if (dictationAudioEl.muted || dictationAudioEl.volume === 0){
@@ -8626,15 +8639,15 @@ function openDictationPlayer(id){
       dictationAudioEl.volume = volumeBeforeMute || 1;
       volumeSlider.value = Math.round(dictationAudioEl.volume * 100);
       muteBtn.textContent = '🔊';
-      muteBtn.setAttribute('aria-label', 'Mudo');
-      muteBtn.title = 'Mudo';
+      muteBtn.setAttribute('aria-label', t('fr.dictation.mute'));
+      muteBtn.title = t('fr.dictation.mute');
     } else {
       volumeBeforeMute = dictationAudioEl.volume;
       dictationAudioEl.muted = true;
       volumeSlider.value = 0;
       muteBtn.textContent = '🔇';
-      muteBtn.setAttribute('aria-label', 'Ativar som');
-      muteBtn.title = 'Ativar som';
+      muteBtn.setAttribute('aria-label', t('fr.dictation.unmute'));
+      muteBtn.title = t('fr.dictation.unmute');
     }
   });
 
@@ -8660,15 +8673,15 @@ function openDictationPlayer(id){
   }
 
   dictationAudioEl.addEventListener('play', () => {
-    playBtn.textContent = '⏸ Pausar';
+    playBtn.textContent = t('fr.dictation.pause');
     playBtn.classList.add('speaking');
   });
   dictationAudioEl.addEventListener('pause', () => {
-    playBtn.textContent = '▶️ Ouvir o ditado';
+    playBtn.textContent = t('fr.dictation.listen');
     playBtn.classList.remove('speaking');
   });
   dictationAudioEl.addEventListener('ended', () => {
-    playBtn.textContent = '▶️ Ouvir o ditado';
+    playBtn.textContent = t('fr.dictation.listen');
     playBtn.classList.remove('speaking');
   });
   dictationAudioEl.addEventListener('loadedmetadata', () => {
@@ -8816,7 +8829,7 @@ function renderDictationResult(d, userText){
       <div class="dictation-result-text">${wordsHtml}</div>
       <div class="dictation-result-summary">
         <div class="dictation-score-badge" style="background:${dictationScoreColorVar(score)};">${score}</div>
-        <p class="dictation-score-text">Você escreveu <strong>${matches} de ${totalCorrectWords}</strong> palavras corretamente. Você atingiu uma pontuação de ${score} pontos (${score}%).</p>
+        <p class="dictation-score-text">${t('fr.dictation.scoreTextHtml', { matches, total: totalCorrectWords, score })}</p>
       </div>
     </div>
   `;
@@ -8981,9 +8994,9 @@ async function persistChallenge(c, extraColumns = {}){
 }
 
 const CHALLENGE_CATEGORIES = [
-  { type: 'expression', emoji: '🧩', title: 'Expressões', subtitle: 'Descubra o sentido' },
-  { type: 'listen_translate', emoji: '🎧', title: 'Ouça e traduza', subtitle: 'Escute e traduza' },
-  { type: 'accent', emoji: '✍️', title: 'Acentuação', subtitle: 'Escreva corretamente' },
+  { type: 'expression', emoji: '🧩', get title(){ return t('fr.challenges.cat.expression.title'); }, get subtitle(){ return t('fr.challenges.cat.expression.subtitle'); } },
+  { type: 'listen_translate', emoji: '🎧', get title(){ return t('fr.challenges.cat.listenTranslate.title'); }, get subtitle(){ return t('fr.challenges.cat.listenTranslate.subtitle'); } },
+  { type: 'accent', emoji: '✍️', get title(){ return t('fr.challenges.cat.accent.title'); }, get subtitle(){ return t('fr.challenges.cat.accent.subtitle'); } },
 ];
 
 let currentChallengesCategory = 'expression';
@@ -9174,12 +9187,12 @@ async function renderChallengeCategories(){
   if (filterModule){
     const idx = modulesOfLevel(filterModule.level).findIndex(m => m.id === filterModule.id);
     moduleBack.style.display = 'inline-flex';
-    titleEl.textContent = `Desafios do Módulo ${idx + 1}`;
-    subEl.textContent = `${filterModule.title} · agora que você estudou esse tema, pratique de novas formas.`;
+    titleEl.textContent = t('trail.moduleChallenges.title', { n: idx + 1 });
+    subEl.textContent = t('fr.challenges.moduleSub', { title: filterModule.title });
   } else {
     moduleBack.style.display = 'none';
-    titleEl.textContent = 'Desafios';
-    subEl.textContent = 'Pratique francês de verdade: expressões, compreensão auditiva e ortografia.';
+    titleEl.textContent = t('fr.challenges.title');
+    subEl.textContent = t('fr.challenges.sub');
   }
 
   const adminBar = document.getElementById('challenges-admin-bar');
@@ -9207,8 +9220,8 @@ async function renderChallengeCategories(){
   `).join('') + (dictationsHere.length ? `
     <button class="challenge-category-card" id="challenges-dictation-card">
       <div class="challenge-category-emoji">🎧</div>
-      <div class="challenge-category-title">Ditados</div>
-      <div class="challenge-category-subtitle">${challengesModuleFilter ? `${dictationsHere.length} ditado${dictationsHere.length === 1 ? '' : 's'}` : 'Ouça e escreva'}</div>
+      <div class="challenge-category-title">${t('fr.challenges.dictations')}</div>
+      <div class="challenge-category-subtitle">${challengesModuleFilter ? tpZero('fr.trail.premiumDictations', dictationsHere.length) : t('fr.challenges.listenAndWrite')}</div>
     </button>
   ` : '');
   wrap.querySelectorAll('.challenge-category-card[data-category]').forEach(card => {
@@ -9223,8 +9236,8 @@ async function renderChallengeCategories(){
 
 function challengeCardLabelHTML(c){
   if (c.type === 'expression') return `<div class="challenge-card-expr">${escapeHtmlChallenge(c.canonicalExpression)}</div>`;
-  if (c.type === 'listen_translate') return `<div class="challenge-card-expr">🎧 Ouça e traduza</div>`;
-  if (c.type === 'accent') return `<div class="challenge-card-expr">✍️ Acentuação</div>`;
+  if (c.type === 'listen_translate') return `<div class="challenge-card-expr">🎧 ${t('fr.challenges.cat.listenTranslate.title')}</div>`;
+  if (c.type === 'accent') return `<div class="challenge-card-expr">✍️ ${t('fr.challenges.cat.accent.title')}</div>`;
   return '';
 }
 
@@ -9259,7 +9272,7 @@ function renderChallengesList(type){
   CURRENT_CHALLENGE_PLAYER = null;
 
   const cat = CHALLENGE_CATEGORIES.find(c => c.type === type);
-  document.getElementById('challenges-list-title').textContent = (cat ? cat.title : 'Desafios') + (challengesModuleFilter ? ' · do módulo' : '');
+  document.getElementById('challenges-list-title').textContent = (cat ? cat.title : t('fr.challenges.title')) + (challengesModuleFilter ? t('fr.challenges.fromModuleSuffix') : '');
   document.getElementById('challenges-level-tabs').style.display = 'none';
 
   const cardsWrap = document.getElementById('challenges-cards');
@@ -9291,16 +9304,16 @@ function renderChallengesList(type){
       const levelChallenges = levelAll.filter(c => !isChallengeLocked(c));
       const lockedCount = levelAll.length - levelChallenges.length;
       const lockedNote = lockedCount > 0
-        ? `<div class="challenge-queue-level-progress">🔒 +${lockedCount} desafio${lockedCount === 1 ? '' : 's'} de módulo no Premium</div>`
+        ? `<div class="challenge-queue-level-progress">${tpZero('fr.challenges.lockedModuleChallenges', lockedCount)}</div>`
         : '';
       if (!levelChallenges.length){
         return `
           <div class="challenge-queue-level-card">
             <div class="challenge-queue-level-info">
-              <div class="challenge-queue-level-name">Nível ${level}</div>
+              <div class="challenge-queue-level-name">${t('fr.challenges.levelName', { level })}</div>
               ${lockedNote}
             </div>
-            <button class="btn btn-secondary" data-premium-lock="1">🔒 Premium</button>
+            <button class="btn btn-secondary" data-premium-lock="1">${t('fr.challenges.lockedPremiumBtn')}</button>
           </div>
         `;
       }
@@ -9309,12 +9322,12 @@ function renderChallengesList(type){
       return `
         <div class="challenge-queue-level-card">
           <div class="challenge-queue-level-info">
-            <div class="challenge-queue-level-name">Nível ${level}</div>
-            <div class="challenge-queue-level-progress">${doneCount}/${levelChallenges.length} concluído${levelChallenges.length === 1 ? '' : 's'}</div>
+            <div class="challenge-queue-level-name">${t('fr.challenges.levelName', { level })}</div>
+            <div class="challenge-queue-level-progress">${tp('fr.challenges.doneCount', levelChallenges.length, { done: doneCount })}</div>
             ${lockedNote}
           </div>
           <button class="btn ${allDone ? 'btn-secondary' : 'btn-primary'}" data-level="${level}">
-            ${allDone ? '🎉 Revisar' : (doneCount > 0 ? 'Continuar' : 'Começar')}
+            ${allDone ? t('fr.challenges.review') : (doneCount > 0 ? t('fr.challenges.continue') : t('fr.challenges.start'))}
           </button>
         </div>
       `;
@@ -9339,7 +9352,7 @@ function renderChallengesList(type){
       <div class="challenges-level-section">
         <button class="challenges-level-heading" data-level="${level}">
           <span class="challenges-level-chevron ${collapsed ? 'collapsed' : ''}">▾</span>
-          Nível ${level}
+          ${t('fr.challenges.levelName', { level })}
           <span class="challenges-level-count">${levelCards.length}</span>
         </button>
         <div class="challenges-cards" ${collapsed ? 'style="display:none;"' : ''}>
@@ -9382,7 +9395,7 @@ function openChallengeQueueLevel(type, level){
 function queueLevelProgressLabel(type, level){
   const all = playableChallenges().filter(c => c.type === type && c.level === level);
   const done = all.filter(c => isChallengeCompleted(c.id)).length;
-  return `${done}/${all.length} concluído${all.length === 1 ? '' : 's'}`;
+  return tp('fr.challenges.doneCount', all.length, { done });
 }
 
 function renderChallengeQueueContinueScreen(c, next){
@@ -9390,9 +9403,9 @@ function renderChallengeQueueContinueScreen(c, next){
   content.innerHTML = `
     <div class="challenge-queue-interstitial">
       <div class="big-emoji">✅</div>
-      <h3>Exercício concluído!</h3>
-      <p>Nível ${escapeHtmlChallenge(c.level)} — ${queueLevelProgressLabel(c.type, c.level)}</p>
-      <button class="btn btn-primary btn-block" id="queue-continue-btn">Continuar →</button>
+      <h3>${t('fr.challenges.exerciseDone')}</h3>
+      <p>${t('fr.challenges.levelName', { level: escapeHtmlChallenge(c.level) })} — ${queueLevelProgressLabel(c.type, c.level)}</p>
+      <button class="btn btn-primary btn-block" id="queue-continue-btn">${t('common.continueArrow')}</button>
     </div>
   `;
   document.getElementById('queue-continue-btn').addEventListener('click', () => openChallengePlayer(next.id));
@@ -9403,9 +9416,9 @@ function renderChallengeQueueLevelDoneScreen(c){
   content.innerHTML = `
     <div class="challenge-queue-interstitial">
       <div class="big-emoji">🎉</div>
-      <h3>Nível ${escapeHtmlChallenge(c.level)} concluído!</h3>
-      <p>Você terminou todos os exercícios desse nível.</p>
-      <button class="btn btn-primary btn-block" id="queue-back-btn">Voltar aos níveis</button>
+      <h3>${t('fr.challenges.levelDone', { level: escapeHtmlChallenge(c.level) })}</h3>
+      <p>${t('fr.challenges.levelDoneBody')}</p>
+      <button class="btn btn-primary btn-block" id="queue-back-btn">${t('fr.challenges.backToLevels')}</button>
     </div>
   `;
   document.getElementById('queue-back-btn').addEventListener('click', () => {
@@ -9519,7 +9532,7 @@ function renderExpressionQuestionScreen(c){
   content.innerHTML = `
     <div class="challenge-expression">
       ${escapeHtmlChallenge(c.canonicalExpression)}
-      <button class="audio-btn audio-btn-lg" id="challenge-expression-play-btn" aria-label="Ouvir pronúncia" title="Ouvir pronúncia">🔊</button>
+      <button class="audio-btn audio-btn-lg" id="challenge-expression-play-btn" aria-label="${t('fr.audio.listenPronunciation')}" title="${t('fr.audio.listenPronunciation')}">🔊</button>
       ${c.expressionAudioFile ? slowAudioIconBtnHTML('challenge-expression-play-slow-btn') : ''}
     </div>
     <div class="challenge-hypothesis">

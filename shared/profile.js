@@ -186,11 +186,11 @@ async function isUsernameAvailable(candidate){
 async function saveProfileEdits({ displayName, username, bio, featuredBadgeId, publicProfile }){
   const cleanUsername = slugifyUsername(username);
   if (cleanUsername.length < 3){
-    return { ok: false, error: 'Nome de usuário precisa ter pelo menos 3 caracteres (letras, números, ponto, traço ou _).' };
+    return { ok: false, error: t('profile.err.usernameShort') };
   }
   if (cleanUsername !== PROFILE_CACHE?.username){
     const available = await isUsernameAvailable(cleanUsername);
-    if (!available) return { ok: false, error: 'Esse nome de usuário já está em uso.' };
+    if (!available) return { ok: false, error: t('profile.err.usernameTaken') };
   }
   const payload = {
     display_name: (displayName || '').trim().slice(0, 60) || null,
@@ -220,7 +220,7 @@ async function saveProfileEdits({ displayName, username, bio, featuredBadgeId, p
     .single();
   if (error){
     console.error('Erro ao salvar perfil:', error);
-    return { ok: false, error: 'Não foi possível salvar agora. Verifique sua conexão e tente de novo.' };
+    return { ok: false, error: t('profile.err.saveFailed') };
   }
   PROFILE_CACHE = data;
   return { ok: true, profile: data };
@@ -298,7 +298,7 @@ function resizeImageToSquareBlob(file){
       ctx.drawImage(img, sx, sy, side, side, 0, 0, AVATAR_MAX_DIMENSION, AVATAR_MAX_DIMENSION);
       canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Falha ao processar imagem.')), 'image/jpeg', 0.86);
     };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Não foi possível ler essa imagem.')); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error(t('profile.err.imageRead'))); };
     img.src = url;
   });
 }
@@ -312,14 +312,14 @@ function avatarStoragePath(){
 async function uploadAvatar(file){
   if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta pra salvar uma foto.' };
   if (!file.type.startsWith('image/')) return { ok: false, error: 'Escolha um arquivo de imagem (JPG, PNG...).' };
-  if (file.size > AVATAR_MAX_UPLOAD_BYTES) return { ok: false, error: 'Imagem muito grande (máx. 8MB).' };
+  if (file.size > AVATAR_MAX_UPLOAD_BYTES) return { ok: false, error: t('profile.err.imageTooBig') };
 
   let blob;
   try{
     blob = await resizeImageToSquareBlob(file);
   }catch(e){
     console.error('Erro ao processar imagem:', e);
-    return { ok: false, error: 'Não foi possível processar essa imagem. Tente outra.' };
+    return { ok: false, error: t('profile.err.imageProcess') };
   }
 
   const path = avatarStoragePath();
@@ -328,7 +328,7 @@ async function uploadAvatar(file){
     .upload(path, blob, { upsert: true, contentType: 'image/jpeg', cacheControl: '3600' });
   if (uploadError){
     console.error('Erro ao subir avatar:', uploadError);
-    return { ok: false, error: 'Não foi possível enviar a foto agora. Tente de novo.' };
+    return { ok: false, error: t('profile.err.photoUpload') };
   }
 
   const { data: pub } = supabaseClient.storage.from('avatars').getPublicUrl(path);
@@ -344,7 +344,7 @@ async function uploadAvatar(file){
     .single();
   if (error){
     console.error('Erro ao salvar avatar no perfil:', error);
-    return { ok: false, error: 'Foto enviada, mas não foi possível salvar no perfil. Tente de novo.' };
+    return { ok: false, error: t('profile.err.photoSaveProfile') };
   }
   PROFILE_CACHE = data;
   return { ok: true, profile: data };
@@ -364,7 +364,7 @@ async function removeAvatar(){
     .single();
   if (error){
     console.error('Erro ao remover avatar:', error);
-    return { ok: false, error: 'Não foi possível remover a foto agora.' };
+    return { ok: false, error: t('profile.err.photoRemove') };
   }
   PROFILE_CACHE = data;
   return { ok: true, profile: data };
@@ -434,13 +434,13 @@ function fallbackSummaryFromUnitProgress(unitProgress){
 }
 
 function profileDisplayName(profile){
-  return profile?.display_name || CURRENT_USER?.user_metadata?.full_name || (CURRENT_USER ? CURRENT_USER.email?.split('@')[0] : 'Convidado');
+  return profile?.display_name || CURRENT_USER?.user_metadata?.full_name || (CURRENT_USER ? CURRENT_USER.email?.split('@')[0] : t('profile.guestName'));
 }
 
 async function renderProfileView(){
   const wrap = document.getElementById('profile-content');
   if (!wrap) return;
-  wrap.innerHTML = loadingHTML('Carregando perfil...');
+  wrap.innerHTML = loadingHTML(t('profile.loading'));
 
   const langs = await buildLanguagesSummary();
   const earnedBadges = BADGES.filter(b => earnedBadgeIds.has(b.id));
@@ -465,8 +465,8 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
 
   const guestNote = isGuest ? `
     <div class="guest-warning">
-      ⚠️ Modo convidado — crie uma conta pra ter um perfil salvo (username, bio) e visível entre sessões.
-      <button class="guest-warning-link" id="profile-guest-login-prompt">Entrar com Google para salvar</button>
+      ${t('profile.guestNote')}
+      <button class="guest-warning-link" id="profile-guest-login-prompt">${t('profile.guestLogin')}</button>
     </div>
   ` : '';
 
@@ -497,7 +497,7 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
         </div>
       `).join('')}
     </div>
-  ` : `<p class="profile-empty-note">Nenhuma conquista ainda — sua primeira lição já desbloqueia uma.</p>`;
+  ` : `<p class="profile-empty-note">${t('profile.noBadges')}</p>`;
 
   // Badges especiais (Fundadora, Beta Tester...) ficam junto da identidade,
   // não misturados com a grade de conquistas por gameplay -- são sobre
@@ -514,14 +514,14 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
   ` : '';
 
   const avatarHTML = profile?.avatar_url
-    ? `<img class="profile-avatar" src="${profile.avatar_url}" alt="Foto de perfil">`
+    ? `<img class="profile-avatar" src="${profile.avatar_url}" alt="${t('profile.avatarAlt')}">`
     : `<div class="profile-avatar" style="background:${color};">${initials}</div>`;
 
   wrap.innerHTML = `
-    <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil">
-      <button class="leaderboard-tab active" data-tab="profile">Visão geral</button>
-      <button class="leaderboard-tab" data-tab="goals">Metas</button>
-      <button class="leaderboard-tab" data-tab="progress">Progresso</button>
+    <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="${t('profile.subnavAria')}">
+      <button class="leaderboard-tab active" data-tab="profile">${t('profile.tabOverview')}</button>
+      <button class="leaderboard-tab" data-tab="goals">${t('profile.tabGoals')}</button>
+      <button class="leaderboard-tab" data-tab="progress">${t('profile.tabProgress')}</button>
     </div>
     ${guestNote}
     <div class="profile-identity">
@@ -530,23 +530,23 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
       ${profile ? `<div class="profile-username">@${profile.username}</div>` : ''}
       ${bio ? `<p class="profile-bio">${escapeHTML(bio)}</p>` : ''}
       ${specialBadgesHTML}
-      ${profile ? `<button class="profile-edit-btn" id="profile-edit-btn">Editar perfil</button>` : ''}
+      ${profile ? `<button class="profile-edit-btn" id="profile-edit-btn">${t('profile.editBtn')}</button>` : ''}
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Idiomas &amp; progresso</div>
+      <div class="section-label">${t('profile.sectionLangs')}</div>
       <div class="profile-langs-row">${langsHTML}</div>
       <div class="profile-nums-row">
-        <div class="profile-num"><div class="v">🔥 ${effectiveStreak()}</div><div class="l">dias seguidos</div></div>
-        <div class="profile-num"><div class="v">${STATE.xp}</div><div class="l">XP acumulado</div></div>
+        <div class="profile-num"><div class="v">🔥 ${effectiveStreak()}</div><div class="l">${t('profile.streakLabel')}</div></div>
+        <div class="profile-num"><div class="v">${STATE.xp}</div><div class="l">${t('profile.xpLabel')}</div></div>
       </div>
-      <button class="profile-stats-link" id="profile-stats-link">Ver estatísticas completas →</button>
+      <button class="profile-stats-link" id="profile-stats-link">${t('profile.statsLink')}</button>
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Conquistas <span class="conquests-count">${earnedBadges.length}/${BADGES.length}</span></div>
+      <div class="section-label">${t('profile.sectionBadges')} <span class="conquests-count">${earnedBadges.length}/${BADGES.length}</span></div>
       ${badgesHTML}
-      <button class="profile-stats-link" id="profile-badges-link">Ver todas →</button>
+      <button class="profile-stats-link" id="profile-badges-link">${t('profile.badgesLink')}</button>
     </div>
   `;
 
@@ -592,7 +592,7 @@ function renderAvatarPreview(profile){
   const removeBtn = document.getElementById('profile-edit-avatar-remove-btn');
   if (!preview) return;
   if (profile?.avatar_url){
-    preview.innerHTML = `<img src="${profile.avatar_url}" alt="Foto de perfil">`;
+    preview.innerHTML = `<img src="${profile.avatar_url}" alt="${t('profile.avatarAlt')}">`;
     if (removeBtn) removeBtn.style.display = '';
   } else {
     const name = profileDisplayName(profile);
@@ -625,7 +625,7 @@ function renderFeaturedBadgeSelect(specialBadges, currentId){
     const iconText = (b.icon && !b.icon.startsWith('<')) ? `${b.icon} ` : '';
     return `<option value="${b.id}" ${b.id === currentId ? 'selected' : ''}>${iconText}${b.name}</option>`;
   }).join('');
-  select.innerHTML = `<option value="">Nenhum</option>${options}`;
+  select.innerHTML = `<option value="">${t('profile.featuredNone')}</option>${options}`;
 }
 
 function openEditProfileModal(specialBadges){
@@ -670,17 +670,17 @@ function wireProfileEditModal(){
     if (!file) return;
     avatarError.textContent = '';
     changeBtn.disabled = true;
-    changeBtn.textContent = 'Enviando...';
+    changeBtn.textContent = t('profile.uploading');
     const result = await uploadAvatar(file);
     changeBtn.disabled = false;
-    changeBtn.textContent = 'Alterar foto';
+    changeBtn.textContent = t('profile.changePhoto');
     if (!result.ok){
       avatarError.textContent = result.error;
       return;
     }
     renderAvatarPreview(result.profile);
     renderProfileView();
-    showToast('✓ Foto atualizada.');
+    showToast(t('profile.toast.photoUpdated'));
   });
 
   removeBtn.addEventListener('click', async () => {
@@ -694,7 +694,7 @@ function wireProfileEditModal(){
     }
     renderAvatarPreview(result.profile);
     renderProfileView();
-    showToast('✓ Foto removida.');
+    showToast(t('profile.toast.photoRemoved'));
   });
 
   const bioInput = document.getElementById('profile-edit-bio');
@@ -718,7 +718,7 @@ function wireProfileEditModal(){
     const errorEl = document.getElementById('profile-edit-error');
     errorEl.textContent = '';
     saveBtn.disabled = true;
-    saveBtn.textContent = 'Salvando...';
+    saveBtn.textContent = t('profile.saving');
 
     const result = await saveProfileEdits({
       displayName: document.getElementById('profile-edit-display-name').value,
@@ -729,7 +729,7 @@ function wireProfileEditModal(){
     });
 
     saveBtn.disabled = false;
-    saveBtn.textContent = 'Salvar';
+    saveBtn.textContent = t('profile.save');
 
     if (!result.ok){
       errorEl.textContent = result.error;
@@ -737,7 +737,7 @@ function wireProfileEditModal(){
     }
     closeEditProfileModal();
     renderProfileView();
-    showToast('✓ Perfil atualizado.');
+    showToast(t('profile.toast.updated'));
   });
 }
 

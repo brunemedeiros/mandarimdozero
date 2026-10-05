@@ -414,4 +414,596 @@ window.I18N_CATALOG['en'] = {
   'deck.err.hasNotes': 'This Deck has cards. Move the cards to another Deck before deleting.', // ALTA
   'deck.err.notDeletable': 'This Deck cannot be deleted.', // ALTA
   'deck.err.deleteFailed': 'Could not delete the Deck right now.', // ALTA
+  'fr.step.vocab': 'Vocabulary', // ALTA
+  'fr.step.dialogue': 'Dialogue', // ALTA
+  'fr.step.usage': 'Usage tip', // ALTA
+  'fr.step.exercises': 'Exercises', // ALTA
+  'fr.step.explanation': 'Explanation', // ALTA
+  'concept.banner.reality.informal': '🗣️ In real life', // ALTA
+  'concept.banner.reality.familiar': '🗣️ Informal register', // ALTA
+  'concept.banner.reality.regional': '📍 Regional variation', // ALTA
+  'concept.banner.reality.colloquialGrammar': '✍️ This is also how people say it', // MÉDIA
+  'concept.banner.culture.history': '📜 Did you know?', // ALTA
+  'concept.banner.culture.custom': '🎭 Real-life custom', // MÉDIA
+  'concept.banner.culture.festivity': '🎉 Special date', // ALTA
+  'concept.banner.reality.default': '🌍 Real-life note', // ALTA
+  'concept.banner.culture.default': '📜 Cultural note', // ALTA
+  'concept.banner.understand': '💡 Worth understanding', // ALTA
+  'concept.counter.reality': 'Real-life note', // ALTA
+  'concept.counter.culture': 'Cultural note', // ALTA
+  'concept.counter.understand': 'Worth understanding', // ALTA
+  'concept.counter.of': '{i} of {n}', // ALTA
+  'fr.blockIntro.inPhrase': 'In a sentence', // ALTA
+  'fr.blockIntro.counter': 'Block {block} of {blocks} · Word {pos} of {total}', // ALTA
+  'fr.blockIntro.markKnownTitle': 'Mark as already known', // ALTA
+  'fr.mission.streak': 'Keep your daily streak alive today', // ALTA
+  'fr.mission.firstLesson': 'Complete your first lesson of the day', // ALTA
+  'fr.mission.conj1': 'Practice conjugation once', // ALTA
+  'fr.mission.conjCorrect10': 'Get 10 verb forms right in one conjugation session', // ALTA
+  'fr.mission.conjTenses2': 'Practice conjugation in 2 different tenses', // ALTA
+  'fr.mission.reviews': { one: 'Review {n} card', other: 'Review {n} cards' }, // ALTA
+  'fr.mission.speedReview1': 'Complete a Speed Review session', // ALTA
+  'fr.mission.matchGame1': 'Play the memory game once', // ALTA
+  'fr.mission.overdue': { one: 'Review {n} overdue card', other: 'Review {n} overdue cards' }, // ALTA
+  'fr.mission.xp50': 'Earn 50 XP today', // ALTA
+  'fr.mission.highscore2': 'Score above 80% in 2 lessons', // ALTA
+  'fr.mission.perfect1': 'Complete a lesson without any mistakes', // ALTA
+  'fr.mission.grammar1': 'Complete 1 grammar unit', // ALTA
+  'fr.mission.listen10': 'Play audio 10 times', // ALTA
+  'fr.mission.translateBlocks2': 'Complete 2 "Translate the sentence" exercises', // ALTA
+  'fr.moduleDone.almostThere': 'Almost there!', // ALTA
+  'fr.moduleDone.stars': 'Stars', // ALTA
+  'fr.moduleDone.retryNote': 'You need at least {pct}% to pass. Keep studying the units in this section and try again whenever you like — no rush.', // ALTA
+  'fr.moduleDone.nowYouKnow': 'Now you can do this in real life:', // MÉDIA
+  'trail.backToTrail': 'Back to the trail', // ALTA
+  'common.guest': 'Guest', // ALTA
+  'fr.grammar.stepCounter': 'Step {i} of {n}', // ALTA
+  'fr.grammar.goToExercises': 'Go to the exercises →', // ALTA
+  'fr.grammar.sentenceCounter': 'Sentence {i} of {n}', // ALTA
+  'fr.grammar.typeCorrectForm': 'Type the correct form', // ALTA
+  'fr.grammar.nextSentenceArrow': 'Next sentence →', // ALTA
+  'common.seeResultArrow': 'See result →', // ALTA
+  'common.nextArrow': 'Next →', // ALTA
+  'fr.checkpoint.question': 'Question {i} of {n}', // ALTA
+  'fr.checkpoint.howToSay': 'How do you say "{t}" in French?', // ALTA
+  'fr.checkpoint.moduleDone': 'Module complete! 🏆', // ALTA
+  'fr.checkpoint.finishSection': 'Finish section ✓', // ALTA
+  'fr.levelTest.goStraightTo': 'You can move straight on to {next}', // ALTA
+  'fr.levelTest.finishLevel': 'Finish level {level} ✓', // ALTA
+  'zh.audio.listenPronunciation': 'Listen to pronunciation', // ALTA
+  'zh.audio.listenAudio': 'Listen to audio', // ALTA
+  'zh.stroke.view': 'See stroke order', // ALTA
+  'zh.stroke.title': 'Stroke order — {hanzi}', // ALTA
+  'zh.stroke.loadFailed': 'Could not load the stroke feature right now. Check your connection and try again.', // ALTA
+  'zh.stroke.noChars': 'This word has no Chinese characters to draw.', // ALTA
+  'zh.stroke.replay': '🔄 Replay animation', // ALTA
+  'zh.stroke.drawFailed': 'Could not draw "{ch}".', // ALTA
+  'zh.mission.hanzi1': 'Study 1 Hanzi lesson', // ALTA
+  'zh.mission.hanzi2': 'Study 2 Hanzi lessons', // ALTA
+  'zh.mission.matchGame1': 'Play the Match game once', // ALTA
+  'zh.reminder.title': 'Time to study Mandarin! 🇨🇳', // ALTA
+  'zh.reminder.body': { one: 'Today\'s goal: {n} lesson.', other: 'Today\'s goal: {n} lessons.' }, // ALTA
+  'zh.story.doneTitle': 'Story complete!', // ALTA
+  'zh.story.doneBody': 'You reviewed the vocabulary of Units {from}–{to} in a new situation.', // ALTA
+  'zh.story.backToPath': 'Back to the path', // ALTA
+  'zh.search.noResults': 'No results for "{q}".', // ALTA
+  'zh.search.unitDone': '✓ Unit {id}', // ALTA
+  'zh.search.studyUnit': 'Study Unit {id}', // ALTA
+  'zh.search.unitLocked': '🔒 Unit {id}: {title}', // ALTA
+  'zh.search.loadMore': 'Load more ({shown} of {total})', // ALTA
+  'zh.manual.title': 'Manual — Unit {id}: {title}', // ALTA
+  'zh.hint.thinkWhenUse': 'Think about when you would use this expression. It appears in this sentence you already studied: "{masked}"', // ALTA
+  'zh.hint.listenAgain': 'Listen again, paying attention to the sounds -- it is an expression from this unit\'s topic.', // MÉDIA
+  'zh.hint.thinkContext': 'Think about the context of this unit\'s topic ("{title}"): in what situation would you use this word?', // ALTA
+  'zh.hint.reorder': 'First identify who performs the action, then the action itself -- build the sentence following that line of thought, ignoring the blocks that do not belong to it.', // ALTA
+  'zh.hint.fullsentence': 'Reread the sentence in Portuguese and think about how each part of it is normally said in Chinese, before comparing the options.', // MÉDIA
+  'zh.hint.cloze': 'Reread the whole sentence, together with the translation, and think about which word gives the blank its grammatical and communicative meaning.', // ALTA
+  'zh.hint.trueFalseUsage': 'Think about the explanation: "{title}"', // ALTA
+  'zh.hint.trueFalseDefault': 'Reread the statement carefully: does it describe exactly the situation in which this expression is used?', // ALTA
+  'zh.hint.label': '💡 Hint', // ALTA
+  'zh.hint.retry': 'Try again', // ALTA
+  'zh.hint.reveal': 'Show answer', // ALTA
+  'zh.exercise.counter': 'Exercise {i} of {n}', // ALTA
+  'zh.exercise.whatMeans': 'What does it mean?', // ALTA
+  'zh.exercise.listenChoose': 'Listen and choose the right meaning', // ALTA
+  'zh.exercise.tapToListenAgain': 'tap to listen again', // ALTA
+  'zh.exercise.typePinyinHeard': 'Type the pinyin of what you heard', // ALTA
+  'zh.exercise.typePinyinPlaceholder': 'Type the pinyin', // ALTA
+  'zh.exercise.true': '✅ True', // ALTA
+  'zh.exercise.false': '❌ False', // ALTA
+  'zh.exercise.selectSentence': 'Select the correct sentence', // ALTA
+  'zh.exercise.orderSentence': 'Put the sentence in order', // ALTA
+  'zh.progress.guestWarning': '⚠️ You are in guest mode — your progress will <strong>not</strong> be saved when you close the tab.', // ALTA
+  'zh.progress.guestLogin': 'Sign in with Google to save', // ALTA
+  'zh.progress.statUnits': 'Units completed', // ALTA
+  'zh.progress.statWords': 'Words learned', // ALTA
+  'zh.progress.statStreak': 'Days in a row', // ALTA
+  'zh.progress.statReviews': 'Total reviews', // ALTA
+  'zh.progress.statDue': 'Due now', // ALTA
+  'zh.progress.statXp': 'Total XP', // ALTA
+  'zh.progress.chartEmpty': 'Start studying to see your progress over time here.', // ALTA
+  'zh.progress.chartPoint': '{date}: {n} words', // ALTA
+  'zh.progress.chartTotal': 'Total so far:', // ALTA
+  'zh.progress.chartTotalSuffix': 'words and characters learned', // ALTA
+  'zh.progress.heatCell': { one: '{n} activity on {date}', other: '{n} activities on {date}' }, // ALTA
+  'zh.progress.heatLess': 'Less', // ALTA
+  'zh.progress.heatMore': 'More', // ALTA
+  'zh.hanzi.allCaughtUp': 'All caught up!', // ALTA
+  'zh.hanzi.pendingChars': 'You still have {n} character(s) due.', // ALTA
+  'zh.hanzi.comeBackLater': 'Come back later for your next review, or move on to a new lesson.', // ALTA
+  'zh.hanzi.sessionDone': 'Session complete!', // ALTA
+  'zh.hanzi.sessionReviewed': 'You reviewed {n} character(s) in this session.', // ALTA
+  'zh.hanzi.lessonTag': 'Lesson {n}', // ALTA
+  'zh.hanzi.tapToReveal': 'tap to see the pinyin and meaning', // ALTA
+  'zh.hanzi.backToRadicals': '← Back to radicals', // ALTA
+  'zh.hanzi.appearsInCount': 'Appears in {n} character(s) you have already studied', // ALTA
+  'zh.hanzi.countLabel': '{chars} characters in {lessons} lessons. See them, write them and test your memory.', // ALTA
+  'zh.hanzi.lessonCompleted': 'Completed', // ALTA
+  'zh.hanzi.charCount': '{n} characters', // ALTA
+  'zh.hanzi.charOf': 'Character {i} of {n}', // ALTA
+  'zh.hanzi.finalTest': 'Final test: {i} of {n}', // ALTA
+  'zh.hanzi.appearsIn': 'Appears in', // ALTA
+  'zh.hanzi.seeChar': 'Look at the character', // ALTA
+  'zh.hanzi.write': 'Write: {pinyin} ({meaning})', // ALTA
+  'zh.hanzi.restart': '🔄 Start over', // ALTA
+  'zh.hanzi.writeHintNote': 'Getting the same stroke wrong twice automatically reveals the correct stroke.', // ALTA
+  'zh.hanzi.writerNotLoaded': 'The writing feature did not load. Check your connection.', // ALTA
+  'zh.hanzi.strokeHighlighted': 'Correct stroke highlighted — follow the guide 👆', // ALTA
+  'zh.hanzi.strokeWrong': 'Wrong stroke — try again', // ALTA
+  'zh.hanzi.writeDone': '✓ Well done!', // ALTA
+  'zh.hanzi.retentionGood': 'Great retention!', // ALTA
+  'zh.hanzi.retentionReview': 'It is worth reviewing these characters again soon.', // ALTA
+  'zh.hanzi.lessonTest': 'Lesson test — {i} of {n}', // ALTA
+  'fr.exercise.counter': 'Exercise {i} of {n}', // ALTA
+  'fr.exercise.whatMeans': 'What does it mean?', // ALTA
+  'fr.exercise.listenChooseMeaning': 'Listen and choose the right meaning', // ALTA
+  'fr.exercise.tapToHearAgain': 'tap to listen again', // ALTA
+  'fr.exercise.typeWhatYouHeard': 'Type what you heard', // ALTA
+  'fr.exercise.typeInFrench': 'Type in French', // ALTA
+  'fr.exercise.translateToFrench': 'Translate into French', // ALTA
+  'fr.exercise.orderSentence': 'Put the sentence in order', // ALTA
+  'fr.exercise.true': '✅ True', // ALTA
+  'fr.exercise.false': '❌ False', // ALTA
+  'fr.hint.label': '💡 Hint', // ALTA
+  'fr.hint.retry': 'Try again', // ALTA
+  'fr.hint.reveal': 'Show answer', // ALTA
+  'fr.hint.thinkWhen': 'Think about when you would use this expression. It appears in this sentence you have already studied: "{masked}"', // ALTA
+  'fr.hint.listenAgain': 'Listen again, paying close attention to the sounds -- it is an expression from this unit\'s topic.', // ALTA
+  'fr.hint.thinkContext': 'Think about the context of this unit\'s topic ("{title}"): in what situation would you use this word?', // ALTA
+  'fr.hint.reorderTranslate': 'First discard the blocks that don\'t belong to this sentence -- only then think about the order of the remaining words.', // ALTA
+  'fr.hint.reorderOrder': 'First identify who performs the action and then the action itself -- build the sentence following that line of reasoning, ignoring the blocks that don\'t belong to it.', // ALTA
+  'fr.hint.scenario': 'Reread the situation carefully: think about what you would say at that moment, not just the meaning of each sentence.', // ALTA
+  'fr.hint.cloze': 'Reread the whole sentence, together with the translation, and think about which word gives the blank its grammatical and communicative sense.', // ALTA
+  'fr.hint.trueFalseExplanation': 'Think about the explanation: "{title}"', // ALTA
+  'fr.hint.trueFalseGeneric': 'Reread the statement carefully: does it describe exactly the situation in which this expression is used?', // ALTA
+  'fr.audio.listenPronunciation': 'Listen to pronunciation', // ALTA
+  'fr.audio.listen': 'Listen to audio', // ALTA
+  'fr.audio.listenSlower': 'Listen more slowly', // ALTA
+  'fr.audio.listenSlowly': 'Listen slowly', // ALTA
+  'fr.trail.expandLessons': 'Expand lessons', // ALTA
+  'fr.trail.freeDictation': { one: '{n} Free dictation', other: '{n} Free dictations' }, // ALTA
+  'fr.trail.premiumDictationsOnly': { one: '{n} Premium dictation', other: '{n} Premium dictations' }, // ALTA
+  'fr.progress.chartTotalSuffix': 'words learned', // ALTA
+  'fr.conj.topAll': 'All ({n})', // ALTA
+  'fr.conj.sessionDone': 'Session complete!', // ALTA
+  'fr.conj.wellDone': 'Great job!', // ALTA
+  'fr.conj.keepPracticing': 'Keep practicing these conjugations.', // ALTA
+  'fr.conj.newSession': 'New session', // ALTA
+  'fr.conj.verbCounter': 'Verb {i} of {n}', // ALTA
+  'fr.conj.currentVerb': 'Current verb', // ALTA
+  'fr.conj.regular': 'Regular verb', // ALTA
+  'fr.conj.irregular': 'Irregular verb', // ALTA
+  'fr.conj.nextVerbLabel': 'Next verb', // ALTA
+  'fr.conj.checkAnswers': 'Check answers', // ALTA
+  'fr.conj.hintTitle': 'Show letter count and ending', // ALTA
+  'fr.conj.hintShow': '💡 Show hint', // ALTA
+  'fr.conj.prevVerb': '← Previous verb', // ALTA
+  'fr.conj.nextVerbArrow': 'Next verb →', // ALTA
+  'fr.conj.hintMore': '💡 More help', // ALTA
+  'fr.conj.hintMoreTitle': 'Reveal most of the letters', // ALTA
+  'fr.conj.hintMax': '💡 Maximum hint', // ALTA
+  'fr.dictation.levelReviewTitle': 'Level {level} review', // ALTA
+  'fr.challenges.moduleSub': '{title} · now that you have studied this topic, practice in new ways.', // ALTA
+  'fr.challenges.title': 'Challenges', // ALTA
+  'fr.challenges.sub': 'Practice real French: expressions, listening comprehension and spelling.', // ALTA
+  'fr.challenges.dictations': 'Dictations', // ALTA
+  'fr.challenges.listenAndWrite': 'Listen and write', // ALTA
+  'fr.challenges.levelName': 'Level {level}', // ALTA
+  'fr.challenges.lockedModuleChallenges': { one: '🔒 +{n} module challenge in Premium', other: '🔒 +{n} module challenges in Premium' }, // ALTA
+  'fr.challenges.lockedPremiumBtn': '🔒 Premium feature', // MÉDIA
+  'fr.challenges.doneCount': { one: '{done}/{n} completed', other: '{done}/{n} completed' }, // ALTA
+  'fr.challenges.review': '🎉 Review', // ALTA
+  'fr.challenges.continue': 'Continue', // ALTA
+  'fr.challenges.start': 'Start', // ALTA
+  'fr.challenges.fromModuleSuffix': ' · from the module', // ALTA
+  'fr.challenges.cat.expression.title': 'Expressions', // ALTA
+  'fr.challenges.cat.expression.subtitle': 'Discover the meaning', // ALTA
+  'fr.challenges.cat.listenTranslate.title': 'Listen and translate', // ALTA
+  'fr.challenges.cat.listenTranslate.subtitle': 'Listen and translate', // MÉDIA
+  'fr.challenges.cat.accent.title': 'Accents', // ALTA
+  'fr.challenges.cat.accent.subtitle': 'Write it correctly', // ALTA
+  'fr.challenges.exerciseDone': 'Exercise complete!', // ALTA
+  'fr.challenges.levelDone': 'Level {level} complete!', // ALTA
+  'fr.challenges.levelDoneBody': 'You have finished all the exercises in this level.', // ALTA
+  'fr.challenges.backToLevels': 'Back to levels', // ALTA
+  'fr.trail.premiumDictations': { one: '{n} dictation', other: '{n} dictations' }, // ALTA
+  'fr.trail.dictationsAnd': { one: '{n} dictation and', other: '{n} dictations and' }, // ALTA
+  'fr.trail.premiumChallengesSuffix': { one: '{n} Premium challenge', other: '{n} Premium challenges' }, // ALTA
+  'review.interval.min': '{n} min', // ALTA
+  'review.interval.hour': '{n} h', // ALTA
+  'review.interval.day': { one: '{n} day', other: '{n} days' }, // ALTA
+  'review.interval.week': '{n} wk', // ALTA
+  'review.interval.month': { one: '{n} month', other: '{n} months' }, // ALTA
+  'review.interval.year': { one: '{n} year', other: '{n} years' }, // ALTA
+  'review.interval.yearsFrac': '{n} years', // ALTA
+  'langSwitcher.ariaCurrent': 'Current language: {name}. Click to switch language.', // ALTA
+  'langSwitcher.ariaSwitch': 'Switch language', // ALTA
+  'langSwitcher.studying': 'You are studying', // ALTA
+  'langSwitcher.learnOther': 'Learn another language', // ALTA
+  'langSwitcher.ariaSwitchTo': 'Switch to {name}', // ALTA
+  'langSwitcher.saveFailed': "⚠ Couldn't save the language change right now, but you're about to enter {name}.", // ALTA
+  'supportMaterials.loginRequired': 'Sign in to your account to see your support material.', // ALTA
+  'supportMaterials.openLink': '🔗 Open link', // ALTA
+  'supportMaterials.downloadFile': 'Download file', // ALTA
+  'supportMaterials.sentOn': 'sent on {date}', // ALTA
+  'supportMaterials.empty': "Your teacher hasn't sent any support material yet. When she sends something (a summary, a link, a file), it will show up here.", // ALTA
+  'wizard.day.mon': 'Mon', // ALTA
+  'wizard.day.tue': 'Tue', // ALTA
+  'wizard.day.wed': 'Wed', // ALTA
+  'wizard.day.thu': 'Thu', // ALTA
+  'wizard.day.fri': 'Fri', // ALTA
+  'wizard.day.sat': 'Sat', // ALTA
+  'wizard.day.sun': 'Sun', // ALTA
+  'wizard.month.jan': 'January', // ALTA
+  'wizard.month.feb': 'February', // ALTA
+  'wizard.month.mar': 'March', // ALTA
+  'wizard.month.apr': 'April', // ALTA
+  'wizard.month.may': 'May', // ALTA
+  'wizard.month.jun': 'June', // ALTA
+  'wizard.month.jul': 'July', // ALTA
+  'wizard.month.aug': 'August', // ALTA
+  'wizard.month.sep': 'September', // ALTA
+  'wizard.month.oct': 'October', // ALTA
+  'wizard.month.nov': 'November', // ALTA
+  'wizard.month.dec': 'December', // ALTA
+  'wizard.date': '{month} {day}, {year}', // ALTA
+  'wizard.obj.fun': 'Fun and culture', // ALTA
+  'wizard.obj.travel': 'Travel', // ALTA
+  'wizard.obj.friends': 'Friends and family', // ALTA
+  'wizard.obj.work': 'Work', // ALTA
+  'wizard.obj.education': 'Education', // ALTA
+  'wizard.tier.1.label': 'Light', // MÉDIA
+  'wizard.tier.2.label': 'Steady', // MÉDIA
+  'wizard.tier.3.label': 'Intense', // ALTA
+  'wizard.tier.1.desc': '1 lesson per day', // ALTA
+  'wizard.tier.2.desc': '2 lessons per day', // ALTA
+  'wizard.tier.3.desc': '3+ lessons per day', // ALTA
+  'wizard.q.objective': 'What is your main goal in learning {language}?', // ALTA
+  'wizard.q.level': 'What level do you want to reach?', // ALTA
+  'wizard.q.days': 'Which days of the week do you want to study?', // ALTA
+  'wizard.q.time': 'What time of day do you want to study?', // ALTA
+  'wizard.q.lessons': 'How many lessons per day do you want to do?', // ALTA
+  'wizard.notif.title': 'Notifications', // ALTA
+  'wizard.notif.sub': "Get reminders for when you should study — only works with the browser open (we don't have a push notification server).", // ALTA
+  'wizard.summary.noDays': 'set at least 1 day of the week', // ALTA
+  'wizard.summary.title': 'You will reach your goal by <strong>{date}</strong>', // ALTA
+  'wizard.summary.goalLabel': 'Your goal', // ALTA
+  'wizard.summary.planTitle': 'Your personalized Study Plan', // ALTA
+  'wizard.summary.edit': 'Edit', // ALTA
+  'wizard.summary.rhythm': 'Pace', // ALTA
+  'wizard.summary.time': 'Time', // ALTA
+  'wizard.summary.save': 'Save Study Plan', // ALTA
+  'wizard.card.setSub': 'Set how many lessons per day you want to do', // ALTA
+  'wizard.card.setCta': 'Set my goal', // ALTA
+  'wizard.card.subUntil': 'Goal by {date}', // ALTA
+  'wizard.card.subSet': 'Goal set', // ALTA
+  'wizard.card.lessonsThisWeek': 'lessons this week', // ALTA
+  'wizard.card.dailyGoal': 'Daily goal', // ALTA
+  'wizard.card.todayLessons': { one: '{done} / {goal} lesson', other: '{done} / {goal} lessons' }, // ALTA
+  'wizard.card.estimate': 'At this pace, you will reach your goal by <strong>{date}</strong>.', // ALTA
+  'wizard.card.estimateNone': 'Select at least one day of the week so we can calculate your goal.', // ALTA
+  'wizard.chip.label': { one: 'Daily goal · {done}/{goal} lesson', other: 'Daily goal · {done}/{goal} lessons' }, // ALTA
+  'auth.levelTestHint': '🎓 You said you already know the basics — check out "{title}" below to skip ahead to the next level.', // ALTA
+  'auth.guestLabel': 'Guest', // ALTA
+  'auth.myAccount': 'My account', // ALTA
+  'auth.saveFailed': "⚠ We couldn't save your progress right now. Check your connection.", // ALTA
+  'auth.notLoadedYet': '⏳ Still confirming your saved progress -- wait a moment before continuing.', // ALTA
+  'auth.staleLocal': '⚠ Your progress here looks out of date compared to what was already saved -- reload the page if this persists.', // ALTA
+  'leaderboard.daysLeft': { one: '{n} day left', other: '{n} days left' }, // ALTA
+  'leaderboard.sideEmpty': 'Nobody has scored this week yet.', // ALTA
+  'leaderboard.anonymous': 'Student', // ALTA
+  'leaderboard.viewFull': 'View full leaderboard →', // ALTA
+  'leaderboard.loading': 'Loading leaderboard...', // ALTA
+  'leaderboard.tabAll': 'Overall', // ALTA
+  'leaderboard.avatarAlt': 'Profile photo', // ALTA
+  'leaderboard.rowPosition': 'Rank {rank}', // ALTA
+  'leaderboard.rowYou': 'you', // ALTA
+  'leaderboard.rowBadge': 'badge {name}', // ALTA
+  'leaderboard.youTag': '(you)', // ALTA
+  'leaderboard.emptyTitle': 'Be the first person on the leaderboard', // ALTA
+  'leaderboard.emptyText': 'Nobody has scored in this category yet this week.', // ALTA
+  'leaderboard.scopeAria': 'Leaderboard scope', // ALTA
+  'leaderboard.footnote': 'The leaderboard resets every Monday. Only people who have earned XP this week appear.', // ALTA
+  'profile.err.usernameShort': 'Username must be at least 3 characters (letters, numbers, dot, dash or _).', // ALTA
+  'profile.err.usernameTaken': 'That username is already taken.', // ALTA
+  'profile.err.saveFailed': "We couldn't save right now. Check your connection and try again.", // ALTA
+  'profile.err.imageRead': "We couldn't read that image.", // ALTA
+  'profile.err.imageTooBig': 'Image too large (max 8MB).', // ALTA
+  'profile.err.imageProcess': "We couldn't process that image. Try another one.", // ALTA
+  'profile.err.photoUpload': "We couldn't upload the photo right now. Try again.", // ALTA
+  'profile.err.photoSaveProfile': "Photo uploaded, but we couldn't save it to your profile. Try again.", // ALTA
+  'profile.err.photoRemove': "We couldn't remove the photo right now.", // ALTA
+  'profile.loading': 'Loading profile...', // ALTA
+  'profile.guestNote': '⚠️ Guest mode — create an account to have a saved profile (username, bio) that stays visible across sessions.', // ALTA
+  'profile.guestLogin': 'Sign in with Google to save', // ALTA
+  'profile.noBadges': 'No achievements yet — your first lesson unlocks one.', // ALTA
+  'profile.avatarAlt': 'Profile photo', // ALTA
+  'profile.subnavAria': 'Profile section', // ALTA
+  'profile.tabOverview': 'Overview', // ALTA
+  'profile.tabGoals': 'Goals', // ALTA
+  'profile.tabProgress': 'Progress', // ALTA
+  'profile.editBtn': 'Edit profile', // ALTA
+  'profile.sectionLangs': 'Languages &amp; progress', // ALTA
+  'profile.streakLabel': 'day streak', // ALTA
+  'profile.xpLabel': 'Total XP', // ALTA
+  'profile.statsLink': 'View full statistics →', // ALTA
+  'profile.sectionBadges': 'Achievements', // ALTA
+  'profile.badgesLink': 'View all →', // ALTA
+  'profile.featuredNone': 'None', // ALTA
+  'profile.guestName': 'Guest', // ALTA
+  'profile.uploading': 'Uploading...', // ALTA
+  'profile.changePhoto': 'Change photo', // ALTA
+  'profile.toast.photoUpdated': '✓ Photo updated.', // ALTA
+  'profile.toast.photoRemoved': '✓ Photo removed.', // ALTA
+  'profile.saving': 'Saving...', // ALTA
+  'profile.save': 'Save', // ALTA
+  'profile.toast.updated': '✓ Profile updated.', // ALTA
+  'publicProfile.streakLabel': 'day streak', // ALTA
+  'publicProfile.xpLabel': 'Total XP', // ALTA
+  'publicProfile.loading': 'Loading profile...', // ALTA
+  'publicProfile.notFoundTitle': 'Profile not found', // ALTA
+  'publicProfile.notFoundText': 'There is no account with the username @{username}.', // ALTA
+  'publicProfile.anonymous': 'Student', // ALTA
+  'publicProfile.avatarAlt': 'Profile photo', // ALTA
+  'publicProfile.private': '🔒 This person chose to keep their progress private.', // ALTA
+  'publicProfile.noProgress': 'No progress recorded in any language yet.', // ALTA
+  'publicProfile.noBadges': 'No achievements yet.', // ALTA
+  'publicProfile.sectionFlashcards': 'Flashcards', // ALTA
+  'publicProfile.viewCards': '📇 View cards created by @{username}', // ALTA
+  'publicProfile.sectionProgress': 'Progress', // ALTA
+  'publicProfile.sectionBadges': 'Achievements', // ALTA
+  'publicProfile.gateText': '🔒 Sign in to see the cards and add them to your profile.', // ALTA
+  'publicProfile.gateLogin': 'Sign in →', // ALTA
+  'publicProfile.previewTitle': 'View details, no editing', // ALTA
+  'publicProfile.reportTitle': 'Report this card', // ALTA
+  'publicProfile.noCards': 'This user has no public cards yet.', // ALTA
+  'publicProfile.counterNone': 'No cards selected', // ALTA
+  'publicProfile.counter': { one: '{n} card selected', other: '{n} cards selected' }, // ALTA
+  'publicProfile.selectAll': 'Select all', // ALTA
+  'publicProfile.clear': 'Clear selection', // ALTA
+  'publicProfile.importBtn': 'Add to my cards', // ALTA
+  'publicProfile.dirReversed': 'Front in the translation, back in the studied language', // ALTA
+  'publicProfile.dirNormal': 'Front in the studied language, back in the translation', // ALTA
+  'publicProfile.labelFront': 'Front', // ALTA
+  'publicProfile.labelPinyin': 'Pinyin', // ALTA
+  'publicProfile.labelBack': 'Back', // ALTA
+  'publicProfile.labelNote': 'Note', // ALTA
+  'publicProfile.labelDirection': 'Direction', // ALTA
+  'publicProfile.adding': 'Adding...', // ALTA
+  'publicProfile.imported': { one: '✓ {n} card added to your account.', other: '✓ {n} cards added to your account.' }, // ALTA
+  'publicProfile.importPartial': "Some cards couldn't be added. Try again.", // ALTA
+  'ankiImport.title': '📥 Import from Anki', // ALTA
+  'ankiImport.loadingFile': 'Reading the .apkg file...', // ALTA
+  'ankiImport.err.readFile': "We couldn't read the chosen file.", // ALTA
+  'ankiImport.err.loadDb': "We couldn't load the database reader right now. Try again in a moment.", // ALTA
+  'ankiImport.err.loadZip': "We couldn't load the .zip reader right now. Try again in a moment.", // ALTA
+  'ankiImport.loadingPlan': 'Analyzing the cards...', // ALTA
+  'ankiImport.noDeck': 'No deck', // ALTA
+  'ankiImport.pillMedia': '🎧🖼️ media', // ALTA
+  'ankiImport.pillDuplicate': '⚠️ possible duplicate', // ALTA
+  'ankiImport.decks.title': '📚 Decks found in Anki:', // ALTA
+  'ankiImport.decks.note': 'This app does not have Decks yet -- all confirmed cards go straight into "My Cards", without this organization for now. Once Decks exist, this hierarchy (already recognized and saved) will be able to recreate the same structure automatically.', // MÉDIA
+  'ankiImport.tags.title': '🏷️ Tags found ({n}):', // ALTA
+  'ankiImport.tags.note': 'Tags will be saved on each card (Note) exactly as in Anki (normalized -- lowercase, no accents, spaces become "-") and will be available for filtering once the Dashboard exists.', // MÉDIA
+  'ankiImport.summary.found': { one: '<strong>{n}</strong> card found in the file --', other: '<strong>{n}</strong> cards found in the file --' }, // ALTA
+  'ankiImport.summary.ok': '<strong>{n}</strong> can be imported natively,', // ALTA
+  'ankiImport.summary.skipped': "<strong>{n}</strong> couldn't be recognized safely (see the warnings below; they're left out).", // ALTA
+  'ankiImport.summary.duplicates': '⚠️ {n} seem to already exist in your account (unchecked by default, but you can check them anyway).', // ALTA
+  'ankiImport.summary.media': '🎧🖼️ {n} have audio/image -- it is only downloaded/uploaded for the cards you actually confirm.', // ALTA
+  'ankiImport.counterNone': 'No cards selected', // ALTA
+  'ankiImport.counter': { one: '{n} card selected', other: '{n} cards selected' }, // ALTA
+  'ankiImport.selectAll': 'Select all', // ALTA
+  'ankiImport.clear': 'Clear selection', // ALTA
+  'ankiImport.truncated': { one: '+ {n} more card not shown here (the "Select all" selection includes all of them anyway).', other: '+ {n} more cards not shown here (the "Select all" selection includes all of them anyway).' }, // ALTA
+  'ankiImport.confirm': 'Confirm import', // ALTA
+  'ankiImport.importing': 'Importing...', // ALTA
+  'ankiImport.importingProgress': 'Importing {done}/{total}...', // ALTA
+  'ankiImport.savingBatches': 'Saving... ({n} batch(es) ok)', // ALTA
+  'ankiImport.saveError': 'Error saving.', // ALTA
+  'ankiImport.skippedFallback': 'Card skipped.', // ALTA
+  'ankiImport.result.ok': { one: '✓ <strong>{imported}</strong> of {n} selected card was imported successfully to "My Cards".', other: '✓ <strong>{imported}</strong> of {n} selected cards were imported successfully to "My Cards".' }, // ALTA
+  'ankiImport.result.partial': '⚠️ The import stopped halfway -- <strong>{imported}</strong> of {requested} cards were already saved successfully before the failure. Those already imported will NOT be duplicated if you try again (that attempt will detect the ones that already exist).', // ALTA
+  'ankiImport.result.mediaWarn': { one: '⚠️ {n} media file could not be included (the card text was imported normally): {list}{more}', other: '⚠️ {n} media files could not be included (the card text was imported normally): {list}{more}' }, // ALTA
+  'ankiImport.result.skippedTitle': 'Skipped cards ({n})', // ALTA
+  'ankiExport.generating': 'Generating file...', // ALTA
+  'ankiExport.empty': 'No cards to export in this selection.', // ALTA
+  'ankiExport.mediaNote': { one: ' ({n} media file could not be included -- the cards were exported anyway, just without that specific audio/image.)', other: ' ({n} media files could not be included -- the cards were exported anyway, just without those specific audio/image files.)' }, // ALTA
+  'ankiExport.done': { one: 'Exported! {n} card in the .apkg file — import it straight into Anki.{mediaNote}', other: 'Exported! {n} cards in the .apkg file — import them straight into Anki.{mediaNote}' }, // ALTA
+  'ankiExport.failed': "We couldn't generate the file right now. Try again.", // ALTA
+  'fieldEditor.lang.fr': 'French', // ALTA
+  'fieldEditor.lang.zh': 'Mandarin (Chinese)', // ALTA
+  'fieldEditor.lang.zhPinyin': 'Pinyin', // ALTA
+  'fieldEditor.lang.ptBR': 'Portuguese', // ALTA
+  'fieldEditor.lang.undefinedLabel': '(language not set)', // ALTA
+  'fieldEditor.lang.notSet': '(not set)', // ALTA
+  'fieldEditor.audio.status.ttsDone': '🎧 TTS audio generated', // ALTA
+  'fieldEditor.audio.status.ttsPending': '🎧 TTS configured (audio not generated yet)', // ALTA
+  'fieldEditor.audio.status.recDone': '🎙️ recording attached', // ALTA
+  'fieldEditor.audio.status.recPending': '🎙️ recording configured (no file yet)', // ALTA
+  'fieldEditor.audio.status.url': '🎧 audio (external link)', // ALTA
+  'fieldEditor.audio.status.upload': '🎧 audio (upload)', // ALTA
+  'fieldEditor.audio.status.generic': '🎧 has attached audio', // ALTA
+  'fieldEditor.audio.origin.none': 'No audio', // ALTA
+  'fieldEditor.audio.origin.url': 'External URL', // ALTA
+  'fieldEditor.audio.origin.upload': 'File (upload)', // ALTA
+  'fieldEditor.audio.origin.tts': 'Text to speech', // ALTA
+  'fieldEditor.audio.origin.recording': 'Recording', // ALTA
+  'fieldEditor.audio.method.upload': '📁 Upload a file', // ALTA
+  'fieldEditor.audio.method.url': '🔗 Use a link', // ALTA
+  'fieldEditor.audio.method.tts': '🔊 Text to speech', // ALTA
+  'fieldEditor.audio.method.recording': '🎙️ Record audio', // ALTA
+  'fieldEditor.audio.ttsLang.choose': '-- choose the language --', // ALTA
+  'fieldEditor.audio.ttsLang.fr': 'French (fr-FR)', // ALTA
+  'fieldEditor.audio.ttsLang.zh': 'Mandarin (zh-CN)', // ALTA
+  'fieldEditor.audio.ttsLang.pt': 'Portuguese (pt-BR)', // ALTA
+  'fieldEditor.audio.rate.slow': 'Slow', // ALTA
+  'fieldEditor.audio.rate.normal': 'Normal', // ALTA
+  'fieldEditor.audio.rate.fast': 'Fast', // ALTA
+  'fieldEditor.audio.rec.requesting': 'Waiting for microphone permission...', // ALTA
+  'fieldEditor.audio.rec.recording': '🔴 Recording...', // ALTA
+  'fieldEditor.audio.rec.stopping': 'Finishing recording...', // ALTA
+  'fieldEditor.audio.rec.uploading': 'Uploading recording...', // ALTA
+  'fieldEditor.audio.rec.ready': 'Recording saved.', // ALTA
+  'fieldEditor.audio.rec.error': "We couldn't record.", // ALTA
+  'fieldEditor.audio.rec.idle': 'Click "🎙️ Record" to start.', // ALTA
+  'fieldEditor.audio.title': 'Audio', // ALTA
+  'fieldEditor.audio.noAudio': 'No audio.', // ALTA
+  'fieldEditor.audio.replace': 'Replace', // ALTA
+  'fieldEditor.audio.remove': '🗑 Remove', // ALTA
+  'fieldEditor.audio.add': '+ Add audio', // ALTA
+  'fieldEditor.audio.pickerQuestion': 'How do you want to add the audio?', // ALTA
+  'fieldEditor.audio.cancel': 'Cancel', // ALTA
+  'fieldEditor.audio.back': '← Back', // ALTA
+  'fieldEditor.audio.urlLabel': 'Audio link (https://...)', // ALTA
+  'fieldEditor.audio.urlPlaceholder': 'https://example.com/audio.mp3', // ALTA
+  'fieldEditor.audio.urlApply': '🔗 Use this link', // ALTA
+  'fieldEditor.audio.ttsText': 'Text to synthesize', // ALTA
+  'fieldEditor.audio.ttsLangLabel': 'Synthesis language', // ALTA
+  'fieldEditor.audio.ttsVoice': 'Voice (optional)', // ALTA
+  'fieldEditor.audio.ttsVoicePlaceholder': 'e.g. provider default', // ALTA
+  'fieldEditor.audio.ttsRate': 'Speed', // ALTA
+  'fieldEditor.audio.saveFirst': 'Save the card first so you can generate audio from text.', // ALTA
+  'fieldEditor.audio.regenerate': '🔊 Regenerate audio', // ALTA
+  'fieldEditor.audio.generate': '🔊 Generate audio', // ALTA
+  'fieldEditor.audio.record': '🎙️ Record', // ALTA
+  'fieldEditor.audio.rerecord': '🎙️ Re-record', // ALTA
+  'fieldEditor.audio.stop': '⏹ Stop', // ALTA
+  'fieldEditor.audio.duration': 'Duration: {s}s', // ALTA
+  'fieldEditor.audio.err.urlValidatorMissing': 'URL validation is not available on this screen.', // ALTA
+  'fieldEditor.audio.err.uploadUnavailable': 'Audio upload is not available on this screen.', // ALTA
+  'fieldEditor.audio.uploading': 'Uploading audio...', // ALTA
+  'fieldEditor.audio.err.uploadFailed': "We couldn't upload the audio right now.", // ALTA
+  'fieldEditor.audio.discardedUpload': 'Another audio source was used while this file was uploading -- the result was discarded.', // ALTA
+  'fieldEditor.audio.stale': '⚠️ Outdated audio -- the text or settings changed since the last generation. Click "Generate again" to update.', // ALTA
+  'fieldEditor.audio.generateAgain': '🔄 Generate again', // ALTA
+  'fieldEditor.audio.err.genUnavailable': 'Audio generation is not available on this screen.', // ALTA
+  'fieldEditor.audio.alreadyUpToDate': 'The audio is already up to date for these settings -- no new generation was requested.', // ALTA
+  'fieldEditor.audio.generating': 'Generating audio...', // ALTA
+  'fieldEditor.audio.err.genFailed': "We couldn't generate the audio right now.", // ALTA
+  'fieldEditor.audio.discardedGen': 'Another audio source was used while this one was being generated -- the result was discarded.', // ALTA
+  'fieldEditor.audio.configChanged': 'The settings changed while the audio was being generated -- click Generate again.', // ALTA
+  'fieldEditor.field.removeTitle': 'Remove field', // ALTA
+  'fieldEditor.field.content': 'Content', // ALTA
+  'fieldEditor.field.language': 'Language', // ALTA
+  'fieldEditor.field.hasImage': '🖼️ has an attached image', // ALTA
+  'fieldEditor.field.hasPinyin': '🔤 has a linked pinyin field', // ALTA
+  'fieldEditor.field.mediaNotes': '{notes} (editing is not implemented yet at this stage -- preserved as they are).', // ALTA
+  'fieldEditor.field.defaultLabel': 'Field {n}', // ALTA
+  'fieldEditor.list.empty': 'No fields yet -- use "Add field" below.', // ALTA
+  'fieldEditor.list.add': '+ Add field', // ALTA
+  'mcEditor.err.notNative': 'This Note is not native.', // ALTA
+  'mcEditor.err.notMcMode': 'This Note is not in Multiple choice mode.', // ALTA
+  'mcEditor.err.unrecognized': { one: 'Multiple choice does not accept a Field with no role ({n} field without prompt/answer/distractor) -- assign a role or remove it.', other: 'Multiple choice does not accept Fields with no role ({n} fields without prompt/answer/distractor) -- assign a role or remove them.' }, // ALTA
+  'mcEditor.err.emptyField': 'Every multiple choice field (question, correct answer, distractors) must have content.', // ALTA
+  'mcEditor.promptLabel': 'Question/Prompt', // ALTA
+  'mcEditor.answerLabel': 'Correct answer', // ALTA
+  'mcEditor.noPrompt': 'No question field yet.', // ALTA
+  'mcEditor.addPrompt': '+ Create question field', // ALTA
+  'mcEditor.noAnswer': 'No correct answer field yet.', // ALTA
+  'mcEditor.addAnswer': '+ Create correct answer field', // ALTA
+  'mcEditor.distractorLabel': 'Distractor {n}', // ALTA
+  'mcEditor.promote': '✓ Mark as correct answer', // ALTA
+  'mcEditor.removeDistractor': '🗑 Remove distractor', // ALTA
+  'mcEditor.noDistractors': 'No distractors yet -- add at least 1.', // ALTA
+  'mcEditor.addDistractor': '+ Add distractor', // ALTA
+  'mcEditor.maxDistractors': 'Maximum of {n} distractors reached.', // ALTA
+  'mcEditor.othersTitle': 'Other fields (no role defined in this multiple choice)', // ALTA
+  'mcEditor.othersHint': "These fields came from another mode and don't have a role here yet -- remove them or assign a role so the structure becomes valid.", // ALTA
+  'mcEditor.noRoleField': 'Field with no role {n}', // ALTA
+  'mcEditor.valid': '✓ Multiple choice structure complete.', // ALTA
+  'mcEditor.distractorsTitle': 'Distractors ({n}/{max})', // ALTA
+  'taEditor.err.notNative': 'This Note is not native.', // ALTA
+  'taEditor.err.notTaMode': 'This Note is not in Type the answer mode.', // ALTA
+  'taEditor.err.selfPinyin': "A field can't point to itself as pinyin.", // ALTA
+  'taEditor.err.unrecognized': { one: 'Type the answer does not accept a Field with no role ({n} field without prompt/answer) -- assign a role or remove it.', other: 'Type the answer does not accept Fields with no role ({n} fields without prompt/answer) -- assign a role or remove them.' }, // ALTA
+  'taEditor.err.missingPrompt': 'The question field is missing.', // ALTA
+  'taEditor.err.multiPrompt': 'There can be only 1 question field.', // ALTA
+  'taEditor.err.missingAnswer': 'The answer field is missing.', // ALTA
+  'taEditor.err.multiAnswer': 'There can be only 1 answer field.', // ALTA
+  'taEditor.err.emptyField': 'Question and answer must have content.', // ALTA
+  'taEditor.promptLabel': 'Question/Prompt', // ALTA
+  'taEditor.answerLabel': 'Expected answer', // ALTA
+  'taEditor.noPrompt': 'No question field yet.', // ALTA
+  'taEditor.addPrompt': '+ Create question field', // ALTA
+  'taEditor.noAnswer': 'No answer field yet.', // ALTA
+  'taEditor.addAnswer': '+ Create answer field', // ALTA
+  'taEditor.pinyinTitle': 'Pinyin (satellite of another field)', // ALTA
+  'taEditor.pinyinHint': 'Linked to another field via pinyinFieldId -- editable as usual, never counts as a 3rd question/answer field.', // MÉDIA
+  'taEditor.pinyinLabel': 'Pinyin {n}', // ALTA
+  'taEditor.othersTitle': 'Other fields (no role defined in Type the answer)', // ALTA
+  'taEditor.othersHint': "These fields came from another mode and don't have a role here yet -- remove them or assign a role so the structure becomes valid.", // ALTA
+  'taEditor.noRoleField': 'Field with no role {n}', // ALTA
+  'taEditor.valid': '✓ Type the answer structure complete.', // ALTA
+  'recorder.err.permissionDenied': "Microphone permission denied -- we couldn't record. You can allow microphone access in your browser settings and try again.", // ALTA
+  'recorder.err.noDevice': 'No microphone available in this browser/device.', // ALTA
+  'recorder.err.recordingError': 'An error occurred during recording -- try again.', // ALTA
+  'recorder.err.uploadError': "Recording finished, but we couldn't save it -- try again.", // ALTA
+  'recorder.err.finishFailed': "We couldn't finish the recording.", // ALTA
+  'recorder.err.uploadUnavailable': 'Recording upload is not available on this screen.', // ALTA
+  'recorder.err.saveFailed': "We couldn't save the recording right now.", // ALTA
+  'clozeEditor.err.notNative': 'This Note is not native.', // ALTA
+  'clozeEditor.err.notClozeMode': 'This Note is not in Fill in the blank mode.', // ALTA
+  'clozeEditor.err.emptySentence': 'The sentence with blanks cannot be empty.', // ALTA
+  'clozeEditor.err.emptyTranslation': 'The translation cannot be empty.', // ALTA
+  'clozeEditor.err.malformed': 'The sentence has a malformed blank marker -- remove it and mark again.', // ALTA
+  'clozeEditor.err.noMarks': 'Select at least one part of the sentence and mark it as a blank.', // ALTA
+  'clozeEditor.err.duplicateIds': 'Duplicate blank IDs -- inconsistent state.', // ALTA
+  'clozeEditor.err.emptyMark': 'One of the blanks has no text.', // ALTA
+  'clozeEditor.err.missingPinyin': 'Missing pinyin for the blank "{answer}" (required for Mandarin) -- click it to complete.', // ALTA
+  'clozeEditor.panel.answerLabel': 'Blank text', // ALTA
+  'clozeEditor.panel.compareLabel': 'Expected answer (pinyin)', // ALTA
+  'clozeEditor.panel.save': 'Save', // ALTA
+  'clozeEditor.panel.remove': '🗑 Remove blank', // ALTA
+  'clozeEditor.panel.cancel': 'Cancel', // ALTA
+  'clozeEditor.markBtn': '✂️ Mark selection as blank', // ALTA
+  'clozeEditor.noSentence': 'No sentence yet.', // ALTA
+  'clozeEditor.addSentence': '+ Create sentence', // ALTA
+  'clozeEditor.translationLabel': 'Translation (shown after answering)', // ALTA
+  'clozeEditor.noTranslation': 'No translation yet.', // ALTA
+  'clozeEditor.addTranslation': '+ Create translation', // ALTA
+  'clozeEditor.othersTitle': 'Other fields (no role defined in Fill in the blank)', // ALTA
+  'clozeEditor.othersHint': "These fields came from another mode and don't have a role here yet -- remove them.", // ALTA
+  'clozeEditor.noRoleField': 'Field with no role {n}', // ALTA
+  'clozeEditor.valid': '✓ Fill in the blank structure complete.', // ALTA
+  'clozeEditor.sentenceTitle': 'Sentence with blanks', // ALTA
+  'clozeEditor.sentenceHint': 'Select a word or part of the sentence and click "Mark selection as blank" -- you can mark more than one part.', // ALTA
+  'clozeEditor.translationTitle': 'Translation', // ALTA
+  'clozeEditor.sel.selectFirst': 'Select a part of the sentence first.', // ALTA
+  'clozeEditor.sel.outside': 'Select a part INSIDE the sentence.', // ALTA
+  'clozeEditor.sel.whitespace': 'The selection must contain some text, not just spaces.', // ALTA
+  'clozeEditor.sel.overlaps': 'That selection already includes (fully or partially) an existing blank -- mark a part outside the blanks already created.', // ALTA
+  'clozeEditor.sel.outOfRange': 'Invalid selection.', // ALTA
+  'clozeEditor.sel.failed': "We couldn't mark that selection.", // ALTA
+  'clozeEditor.panel.emptyAnswer': 'The blank text cannot be empty.', // ALTA
+  'fr.dictation.backToTrail': '← Back to the trail', // ALTA
+  'fr.dictation.backToChallenges': '← Back to challenges', // ALTA
+  'fr.dictation.listen': '▶️ Listen to the dictation', // ALTA
+  'fr.dictation.pause': '⏸ Pause', // ALTA
+  'fr.dictation.restart': 'Restart', // ALTA
+  'fr.dictation.skipBack': 'Back 15s', // ALTA
+  'fr.dictation.skipForward': 'Forward 15s', // ALTA
+  'fr.dictation.mute': 'Mute', // ALTA
+  'fr.dictation.unmute': 'Unmute', // ALTA
+  'fr.dictation.placeholder': 'Type what you heard here...', // ALTA
+  'fr.dictation.scoreTextHtml': 'You wrote <strong>{matches} of {total}</strong> words correctly. You scored {score} points ({score}%).', // ALTA
 };

@@ -15,7 +15,7 @@
 //   - languages/<lang>/app.js   (LANG_ID) -- por isso este script vem por
 //     último no <body>, depois de app.js.
 
-function renderLanguageSwitcher(){
+function paintLanguageSwitcher(){
   const btn = document.getElementById('lang-switcher-btn');
   const dropdown = document.getElementById('lang-switcher-dropdown');
   if (!btn || !dropdown) return;
@@ -25,22 +25,29 @@ function renderLanguageSwitcher(){
   // Chrome em vários SOs/navegadores, só como texto "FR"/"CN").
   const current = AVAILABLE_LANGUAGES.find(l => l.id === LANG_ID);
   btn.innerHTML = current ? current.flagSvg : '🌐';
-  btn.setAttribute('aria-label', current ? `Idioma atual: ${current.name}. Clique para trocar de idioma.` : 'Trocar idioma');
+  btn.setAttribute('aria-label', current ? t('langSwitcher.ariaCurrent', { name: current.name }) : t('langSwitcher.ariaSwitch'));
 
   const others = AVAILABLE_LANGUAGES.filter(l => l.enabled && l.id !== LANG_ID);
   dropdown.innerHTML = `
-    <div class="lang-switcher-label">Você está estudando</div>
+    <div class="lang-switcher-label">${t('langSwitcher.studying')}</div>
     <div class="lang-switcher-current">${current ? current.flagSvg : ''} ${current ? current.name : ''}</div>
     ${others.length ? `
       <div class="lang-switcher-sep"></div>
-      <div class="lang-switcher-label">Aprender outro idioma</div>
-      ${others.map(l => `<button type="button" class="lang-switcher-item" data-lang="${l.id}" aria-label="Trocar para ${l.name}">${l.flagSvg} ${l.name}</button>`).join('')}
+      <div class="lang-switcher-label">${t('langSwitcher.learnOther')}</div>
+      ${others.map(l => `<button type="button" class="lang-switcher-item" data-lang="${l.id}" aria-label="${t('langSwitcher.ariaSwitchTo', { name: l.name })}">${l.flagSvg} ${l.name}</button>`).join('')}
     ` : ''}
   `;
 
   dropdown.querySelectorAll('.lang-switcher-item').forEach(item => {
     item.addEventListener('click', () => switchLanguage(item.dataset.lang));
   });
+}
+
+function renderLanguageSwitcher(){
+  const btn = document.getElementById('lang-switcher-btn');
+  const dropdown = document.getElementById('lang-switcher-dropdown');
+  if (!btn || !dropdown) return;
+  paintLanguageSwitcher();
 
   function closeDropdown(){
     dropdown.classList.remove('open');
@@ -69,7 +76,7 @@ async function switchLanguage(newLangId){
     try{
       await setCurrentLearningLanguage(CURRENT_USER.id, newLangId);
     }catch(e){
-      showToast(`⚠ Não deu pra salvar a troca de idioma agora, mas você já vai entrar em ${target.name}.`);
+      showToast(t('langSwitcher.saveFailed', { name: target.name }));
     }
   } else if (CURRENT_USER === false){
     // Modo convidado: sem conta pra persistir no Supabase. Mantém o modo
@@ -82,3 +89,5 @@ async function switchLanguage(newLangId){
 }
 
 renderLanguageSwitcher();
+// Textos do seletor acompanham o idioma do site (catálogo pode chegar depois).
+window.addEventListener('i18n:change', paintLanguageSwitcher);

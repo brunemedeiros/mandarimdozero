@@ -58,8 +58,8 @@ function ensureAnkiImportModal(){
   modal.innerHTML = `
     <div class="app-modal">
       <div class="app-modal-header">
-        <h3>📥 Importar do Anki</h3>
-        <button class="app-modal-close" id="anki-import-close" aria-label="Fechar">✕</button>
+        <h3>${t('ankiImport.title')}</h3>
+        <button class="app-modal-close" id="anki-import-close" aria-label="${t('common.close')}">✕</button>
       </div>
       <div class="app-modal-body" id="anki-import-body"></div>
     </div>
@@ -75,7 +75,7 @@ async function handleAnkiImportFileSelected(file){
   const modal = ensureAnkiImportModal();
   const body = document.getElementById('anki-import-body');
   modal.style.display = 'flex';
-  body.innerHTML = loadingHTML('Lendo o arquivo .apkg...');
+  body.innerHTML = loadingHTML(t('ankiImport.loadingFile'));
 
   ANKI_IMPORT_STATE.plan = null;
   ANKI_IMPORT_STATE.parseResult = null;
@@ -86,7 +86,7 @@ async function handleAnkiImportFileSelected(file){
   try {
     arrayBuffer = await file.arrayBuffer();
   } catch (e) {
-    body.innerHTML = ankiImportErrorHTML('Não foi possível ler o arquivo escolhido.');
+    body.innerHTML = ankiImportErrorHTML(t('ankiImport.err.readFile'));
     return;
   }
 
@@ -94,11 +94,11 @@ async function handleAnkiImportFileSelected(file){
   try {
     SQL = await initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}` });
   } catch (e) {
-    body.innerHTML = ankiImportErrorHTML('Não foi possível carregar o leitor de banco de dados agora. Tente novamente em instantes.');
+    body.innerHTML = ankiImportErrorHTML(t('ankiImport.err.loadDb'));
     return;
   }
   if (typeof JSZip === 'undefined'){
-    body.innerHTML = ankiImportErrorHTML('Não foi possível carregar o leitor de .zip agora. Tente novamente em instantes.');
+    body.innerHTML = ankiImportErrorHTML(t('ankiImport.err.loadZip'));
     return;
   }
 
@@ -109,7 +109,7 @@ async function handleAnkiImportFileSelected(file){
   }
   ANKI_IMPORT_STATE.parseResult = parseResult;
 
-  body.innerHTML = loadingHTML('Analisando os cartões...');
+  body.innerHTML = loadingHTML(t('ankiImport.loadingPlan'));
   const [existingRows, hasLink] = await Promise.all([
     fetchMyOwnFlashcards(APP_KEY),
     hasActiveTeacherLink(),
@@ -140,17 +140,17 @@ function ankiImportNoteRowHTML(note){
       <label class="admin-badge-row" data-anki-note-row="${note.ankiNoteId}" style="opacity:.65;">
         <input type="checkbox" disabled>
         <div class="admin-badge-info">
-          <div class="admin-badge-name">🚫 ${escapeHTML(note.deckName || 'Sem baralho')}</div>
+          <div class="admin-badge-name">🚫 ${escapeHTML(note.deckName || t('ankiImport.noDeck'))}</div>
           <div class="admin-badge-desc">${escapeHTML(note.warning)}</div>
         </div>
       </label>`;
   }
   const typeLabel = ANKI_IMPORT_CARD_TYPE_LABELS[note.cardTypeLabel] || note.cardTypeLabel;
-  const tagPills = (note.normalizedTags || []).map(t => `<span class="pill" style="font-size:10px;">#${escapeHTML(t)}</span>`).join(' ');
+  const tagPills = (note.normalizedTags || []).map(tag => `<span class="pill" style="font-size:10px;">#${escapeHTML(tag)}</span>`).join(' ');
   const badges = [
     `<span class="pill" style="font-size:11px;">${escapeHTML(typeLabel)}</span>`,
-    note.hasMedia ? `<span class="pill" style="font-size:11px;">🎧🖼️ mídia</span>` : '',
-    note.isDuplicate ? `<span class="pill" style="font-size:11px;">⚠️ possível duplicata</span>` : '',
+    note.hasMedia ? `<span class="pill" style="font-size:11px;">${t('ankiImport.pillMedia')}</span>` : '',
+    note.isDuplicate ? `<span class="pill" style="font-size:11px;">${t('ankiImport.pillDuplicate')}</span>` : '',
     tagPills,
   ].filter(Boolean).join(' ');
   const preview = (note.editorState.fields[0].content.value || '').slice(0, 80);
@@ -183,21 +183,21 @@ function ankiImportDeckSummaryHTML(plan){
   if (!tree || !tree.children.length) return '';
   return `
     <div class="profile-edit-hint" style="margin-top:8px;">
-      <strong>📚 Baralhos (Decks) encontrados no Anki:</strong>
+      <strong>${t('ankiImport.decks.title')}</strong>
       <div style="margin-top:4px; max-height:120px; overflow-y:auto;">${ankiDeckTreeRowsHTML(tree, 0)}</div>
-      Este app ainda não tem Decks -- todos os cartões confirmados entram direto em "Meus Cartões", sem essa organização por enquanto. Assim que os Decks existirem, esta hierarquia (já reconhecida e guardada) poderá recriar a mesma estrutura automaticamente.
+      ${t('ankiImport.decks.note')}
     </div>`;
 }
 
 function ankiImportTagsSummaryHTML(plan){
   if (!plan.tagsPresent) return '';
   const shown = plan.uniqueTags.slice(0, 20);
-  const pills = shown.map(t => `<span class="pill" style="font-size:11px;">#${escapeHTML(t)}</span>`).join(' ');
+  const pills = shown.map(tag => `<span class="pill" style="font-size:11px;">#${escapeHTML(tag)}</span>`).join(' ');
   return `
     <div class="profile-edit-hint" style="margin-top:8px;">
-      <strong>🏷️ Tags encontradas (${plan.uniqueTags.length}):</strong>
+      <strong>${t('ankiImport.tags.title', { n: plan.uniqueTags.length })}</strong>
       <div style="margin-top:4px;">${pills}${plan.uniqueTags.length > shown.length ? ' …' : ''}</div>
-      As tags serão salvas em cada cartão (Note) exatamente como no Anki (normalizadas -- minúsculas, sem acento, espaços viram "-") e ficarão disponíveis pra filtro quando o Painel existir.
+      ${t('ankiImport.tags.note')}
     </div>`;
 }
 
@@ -208,26 +208,26 @@ function renderAnkiImportSummary(body){
 
   body.innerHTML = `
     <p class="profile-edit-hint">
-      <strong>${plan.totalNotes}</strong> cartão(ões) encontrado(s) no arquivo --
-      <strong>${plan.okCount}</strong> podem ser importados nativamente,
-      <strong>${plan.skippedCount}</strong> não puderam ser reconhecidos com segurança (ver avisos abaixo, ficam de fora).
-      ${plan.duplicateCount ? `<br>⚠️ ${plan.duplicateCount} parecem já existir na sua conta (desmarcados por padrão, mas você pode marcar mesmo assim).` : ''}
-      ${plan.mediaCount ? `<br>🎧🖼️ ${plan.mediaCount} têm áudio/imagem -- só é baixado/enviado dos cartões que você de fato confirmar.` : ''}
+      ${tp('ankiImport.summary.found', plan.totalNotes)}
+      ${t('ankiImport.summary.ok', { n: plan.okCount })}
+      ${t('ankiImport.summary.skipped', { n: plan.skippedCount })}
+      ${plan.duplicateCount ? `<br>${t('ankiImport.summary.duplicates', { n: plan.duplicateCount })}` : ''}
+      ${plan.mediaCount ? `<br>${t('ankiImport.summary.media', { n: plan.mediaCount })}` : ''}
     </p>
     ${ankiImportDeckSummaryHTML(plan)}
     ${ankiImportTagsSummaryHTML(plan)}
     <div class="admin-recipients-summary">
-      <span class="pill" id="anki-import-counter">Nenhum cartão selecionado</span>
+      <span class="pill" id="anki-import-counter">${t('ankiImport.counterNone')}</span>
       <div class="admin-recipients-actions">
-        <a href="#" class="admin-select-link" id="anki-import-select-all">Selecionar todos</a>
-        <a href="#" class="admin-select-link" id="anki-import-clear">Limpar seleção</a>
+        <a href="#" class="admin-select-link" id="anki-import-select-all">${t('ankiImport.selectAll')}</a>
+        <a href="#" class="admin-select-link" id="anki-import-clear">${t('ankiImport.clear')}</a>
       </div>
     </div>
     <div id="anki-import-list" style="max-height:320px; overflow-y:auto;">
       ${visibleNotes.map(ankiImportNoteRowHTML).join('')}
-      ${truncatedCount > 0 ? `<p class="profile-edit-hint">+ ${truncatedCount} outro(s) cartão(ões) não mostrados aqui (a seleção "Selecionar todos" inclui todos mesmo assim).</p>` : ''}
+      ${truncatedCount > 0 ? `<p class="profile-edit-hint">${tp('ankiImport.truncated', truncatedCount)}</p>` : ''}
     </div>
-    <button type="button" class="btn btn-primary btn-block" id="anki-import-confirm-btn" style="margin-top:10px;">Confirmar importação</button>
+    <button type="button" class="btn btn-primary btn-block" id="anki-import-confirm-btn" style="margin-top:10px;">${t('ankiImport.confirm')}</button>
     <p class="profile-edit-error" id="anki-import-confirm-error"></p>
   `;
   wireAnkiImportSummary(body);
@@ -237,7 +237,7 @@ function renderAnkiImportSummary(body){
 function updateAnkiImportCounter(body){
   const n = ANKI_IMPORT_STATE.selectedIds.size;
   const counter = body.querySelector('#anki-import-counter');
-  if (counter) counter.textContent = n === 0 ? 'Nenhum cartão selecionado' : `${n} cartão(ões) selecionado(s)`;
+  if (counter) counter.textContent = n === 0 ? t('ankiImport.counterNone') : tp('ankiImport.counter', n);
   const btn = body.querySelector('#anki-import-confirm-btn');
   if (btn) btn.disabled = n === 0;
 }
@@ -291,21 +291,21 @@ async function confirmAnkiImport(body){
   }
 
   const btn = body.querySelector('#anki-import-confirm-btn');
-  if (btn){ btn.disabled = true; btn.textContent = 'Importando...'; }
+  if (btn){ btn.disabled = true; btn.textContent = t('ankiImport.importing'); }
 
   // Fase F -- Deck padrão (personal_root) resolvido antes de qualquer
   // escrita; sem destino válido nada é criado (nem mídia enviada).
   const dest = await resolveOwnCreationDeck({ languageAppKey: APP_KEY });
   if (!dest.ok){
     if (errorEl) errorEl.textContent = dest.error;
-    if (btn){ btn.disabled = false; btn.textContent = 'Confirmar importação'; }
+    if (btn){ btn.disabled = false; btn.textContent = t('ankiImport.confirm'); }
     return;
   }
   const mediaWarnings = [];
   let doneCount = 0;
   for (const note of selectedNotes){
     doneCount++;
-    if (btn) btn.textContent = `Importando ${doneCount}/${selectedNotes.length}...`;
+    if (btn) btn.textContent = t('ankiImport.importingProgress', { done: doneCount, total: selectedNotes.length });
     if (note.hasMedia){
       const { warnings } = await resolveAndAttachAnkiMedia(note.mediaRefs, {
         parseResult: ANKI_IMPORT_STATE.parseResult,
@@ -320,7 +320,7 @@ async function confirmAnkiImport(body){
   const persistResult = await persistAnkiImportBatches(selectedNotes, {
     identity,
     onBatchDone: (info) => {
-      if (btn) btn.textContent = info.ok ? `Salvando... (${info.batchIndex + 1} lote(s) ok)` : 'Erro ao salvar.';
+      if (btn) btn.textContent = info.ok ? t('ankiImport.savingBatches', { n: info.batchIndex + 1 }) : t('ankiImport.saveError');
     },
   });
 
@@ -339,16 +339,16 @@ async function confirmAnkiImport(body){
 }
 
 function renderAnkiImportResult(body, result){
-  const skippedList = result.skippedNotes.slice(0, 50).map(n => `<li>${escapeHTML(n.warning || 'Cartão pulado.')}</li>`).join('');
+  const skippedList = result.skippedNotes.slice(0, 50).map(n => `<li>${escapeHTML(n.warning || t('ankiImport.skippedFallback'))}</li>`).join('');
   body.innerHTML = `
     <p class="profile-edit-hint">
       ${result.ok
-        ? `✓ <strong>${result.imported}</strong> de ${result.requested} cartão(ões) selecionados foram importados com sucesso pra "Meus Cartões".`
-        : `⚠️ A importação parou no meio -- <strong>${result.imported}</strong> de ${result.requested} cartões já foram salvos com sucesso antes da falha. Os já importados NÃO serão duplicados se você tentar de novo (essa mesma tentativa vai detectar os que já existem).`}
+        ? tp('ankiImport.result.ok', result.requested, { imported: result.imported })
+        : t('ankiImport.result.partial', { imported: result.imported, requested: result.requested })}
     </p>
-    ${result.mediaWarnings.length ? `<p class="profile-edit-hint">⚠️ ${result.mediaWarnings.length} mídia(s) não puderam ser incluídas (o texto do cartão foi importado normalmente): ${result.mediaWarnings.slice(0, 5).map(escapeHTML).join('; ')}${result.mediaWarnings.length > 5 ? '...' : ''}</p>` : ''}
-    ${skippedList ? `<div class="section-label" style="margin-top:10px;">Cartões pulados (${result.skippedNotes.length})</div><ul class="profile-edit-hint" style="padding-left:18px;">${skippedList}</ul>` : ''}
-    <button type="button" class="btn btn-secondary btn-block" id="anki-import-done-btn" style="margin-top:10px;">Fechar</button>
+    ${result.mediaWarnings.length ? `<p class="profile-edit-hint">${tp('ankiImport.result.mediaWarn', result.mediaWarnings.length, { list: result.mediaWarnings.slice(0, 5).map(escapeHTML).join('; '), more: result.mediaWarnings.length > 5 ? '...' : '' })}</p>` : ''}
+    ${skippedList ? `<div class="section-label" style="margin-top:10px;">${t('ankiImport.result.skippedTitle', { n: result.skippedNotes.length })}</div><ul class="profile-edit-hint" style="padding-left:18px;">${skippedList}</ul>` : ''}
+    <button type="button" class="btn btn-secondary btn-block" id="anki-import-done-btn" style="margin-top:10px;">${t('common.close')}</button>
   `;
   body.querySelector('#anki-import-done-btn')?.addEventListener('click', () => {
     document.getElementById('anki-import-modal').style.display = 'none';
