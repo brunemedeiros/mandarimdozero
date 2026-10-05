@@ -14,7 +14,7 @@
       "Boa noite, tudo bom?",
       "Boa noite, como vai?"
     ],
-    "explanation": "",
+    "explanation": "\"Bonsoir\" é o cumprimento da noite; \"ça va ?\" é a pergunta informal \"tudo bem?\".",
     "status": "needs_review"
   },
   {
@@ -32,7 +32,7 @@
       "Um cafezinho, por favor.",
       "Um café, por gentileza."
     ],
-    "explanation": "",
+    "explanation": "\"S'il vous plaît\" é o \"por favor\" educado; \"un café\" já pede o item sem verbo.",
     "status": "needs_review"
   },
   {
@@ -106,7 +106,7 @@
       "Qual a sua idade?",
       "Que idade você tem?"
     ],
-    "explanation": "",
+    "explanation": "Na inversão \"as-tu\", o verbo vem antes do sujeito: \"quel âge as-tu ?\" = \"quantos anos você tem?\".",
     "status": "needs_review"
   },
   {
@@ -124,7 +124,7 @@
       "O nome do meu pai é Marc.",
       "O meu pai se chama Marc."
     ],
-    "explanation": "",
+    "explanation": "\"Mon\" é o possessivo masculino; \"s'appelle\" é \"se chama\" (verbo reflexivo).",
     "status": "needs_review"
   },
   {
@@ -141,7 +141,7 @@
       "Eu tenho um irmão e uma irmã.",
       "Tenho um irmão e uma irmã."
     ],
-    "explanation": "",
+    "explanation": "\"Un\" é masculino (frère) e \"une\" é feminino (sœur): o artigo concorda com o gênero.",
     "status": "needs_review"
   },
   {

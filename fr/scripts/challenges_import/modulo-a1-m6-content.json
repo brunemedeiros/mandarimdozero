@@ -15,7 +15,7 @@
         "No fim de semana, gosto de ler.",
         "Aos fins de semana, eu gosto de ler."
       ],
-      "explanation": ""
+      "explanation": "\"Le week-end\" sem preposição indica algo habitual; \"j'aime lire\" = \"eu gosto de ler\" (infinitivo)."
     },
     {
       "unitId": "A1-19",
@@ -30,7 +30,7 @@
         "Vamos ao cinema sábado à noite?",
         "A gente vai ao cinema sábado à noite?"
       ],
-      "explanation": ""
+      "explanation": "\"On\" no francês falado vale \"nós/a gente\"; \"au cinéma\" = à + le cinéma."
     },
     {
       "unitId": "A1-20",
@@ -45,7 +45,7 @@
         "Ontem comi no restaurante.",
         "Ontem eu almocei no restaurante."
       ],
-      "explanation": ""
+      "explanation": "\"Hier\" pede o passado composto: \"j'ai mangé\" (avoir + particípio)."
     },
     {
       "unitId": "A1-20",
@@ -60,7 +60,37 @@
         "Esta manhã peguei o ônibus.",
         "Hoje cedo eu peguei o ônibus."
       ],
-      "explanation": ""
+      "explanation": "\"Ce matin\" é o dia de hoje; \"j'ai pris\" é o passado composto de \"prendre\"."
+    },
+    {
+      "unitId": "A1-19",
+      "theme": "Lazer e atividades",
+      "fr": "J'aime écouter de la musique.",
+      "hide": [
+        "aime",
+        "musique"
+      ],
+      "refs": [
+        "Eu gosto de ouvir música.",
+        "Gosto de escutar música.",
+        "Eu adoro ouvir música."
+      ],
+      "explanation": "\"Aimer\" + infinitivo expressa gosto; \"de la musique\" é partitivo (música em geral)."
+    },
+    {
+      "unitId": "A1-20",
+      "theme": "Passado",
+      "fr": "Hier soir, j'ai mangé une pomme.",
+      "hide": [
+        "mangé",
+        "pomme"
+      ],
+      "refs": [
+        "Ontem à noite eu comi uma maçã.",
+        "Ontem à noite comi uma maçã.",
+        "Ontem à noite eu comi uma maçã"
+      ],
+      "explanation": "\"Hier soir\" pede o passado composto: \"j'ai mangé\" (avoir + particípio de \"manger\")."
     }
   ],
   "accent": [
@@ -93,6 +123,18 @@
       "theme": "Passado",
       "text": "année",
       "explanation": "\"e\" tem acento agudo."
+    },
+    {
+      "unitId": "A1-19",
+      "theme": "Lazer e atividades",
+      "text": "été",
+      "explanation": "Os dois \"e\" têm acento agudo."
+    },
+    {
+      "unitId": "A1-20",
+      "theme": "Passado",
+      "text": "préféré",
+      "explanation": "Os dois últimos \"e\" têm acento agudo."
     }
   ],
   "expression": [

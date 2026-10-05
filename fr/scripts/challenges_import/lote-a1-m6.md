@@ -1,6 +1,6 @@
 # Desafios do módulo A1-m6
 
-14 desafios: 4 Ouça e traduza, 5 Acentuação, 5 Expressões.
+18 desafios: 6 Ouça e traduza, 7 Acentuação, 5 Expressões.
 
 ## Ouça e traduza
 
@@ -10,6 +10,8 @@
 | A1-19 | On va au cinéma samedi soir ? | On va au ______ samedi ______ ? | A gente vai ao cinema no sábado à noite? / Vamos ao cinema sábado à noite? / A gente vai ao cinema sábado à noite? |
 | A1-20 | Hier, j'ai mangé au restaurant. | ______, j'ai ______ au restaurant. | Ontem eu comi no restaurante. / Ontem comi no restaurante. / Ontem eu almocei no restaurante. |
 | A1-20 | Ce matin, j'ai pris le bus. | Ce ______, j'ai ______ le bus. | Hoje de manhã eu peguei o ônibus. / Esta manhã peguei o ônibus. / Hoje cedo eu peguei o ônibus. |
+| A1-19 | J'aime écouter de la musique. | J'______ écouter de la ______. | Eu gosto de ouvir música. / Gosto de escutar música. / Eu adoro ouvir música. |
+| A1-20 | Hier soir, j'ai mangé une pomme. | Hier soir, j'ai ______ une ______. | Ontem à noite eu comi uma maçã. / Ontem à noite comi uma maçã. / Ontem à noite eu comi uma maçã |
 
 ## Acentuação
 
@@ -20,6 +22,8 @@
 | A1-20 | dernière | "e" tem acento grave. |
 | A1-20 | récemment | "e" tem acento agudo. |
 | A1-20 | année | "e" tem acento agudo. |
+| A1-19 | été | Os dois "e" têm acento agudo. |
+| A1-20 | préféré | Os dois últimos "e" têm acento agudo. |
 
 ## Expressões
 
