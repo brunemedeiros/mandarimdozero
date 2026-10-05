@@ -123,13 +123,27 @@ async function hasActiveTeacherLink(){
 // professora (Fase 8a/8c). Uma conta pode ter as duas isenções, uma só, ou
 // nenhuma -- não são a mesma coisa, mesmo que as duas acabem "desbloqueando
 // coisa" pra quantidade/qualidade de Meus Cartões.
-async function fetchMyPlanTier(){
-  const profile = await ensureProfileLoaded();
+// Plano EFETIVO da conta logada (o que a interface usa). Para a autora
+// (isAdminUser), o Admin Mode decide: ON = Premium (todos os privilégios);
+// OFF = plano grátis, pra ela ver o site como uma aluna Free. Para qualquer
+// outra conta é sempre o plan_tier real do banco. Os gates do SERVIDOR (ex.:
+// Decks públicos) leem o plan_tier real -- por isso a conta da autora fica
+// com plan_tier='premium' no banco; com Admin Mode OFF só a interface muda.
+function effectivePlanTier(profile){
+  if (typeof isAdminUser === 'function' && isAdminUser()){
+    if (!profile) return 'premium';
+    return profile.admin_mode !== false ? 'premium' : 'free';
+  }
   return profile?.plan_tier || 'free';
 }
 
+async function fetchMyPlanTier(){
+  const profile = await ensureProfileLoaded();
+  return effectivePlanTier(profile);
+}
+
 function isPremium(){
-  return PROFILE_CACHE?.plan_tier === 'premium';
+  return effectivePlanTier(PROFILE_CACHE) === 'premium';
 }
 
 // Ativação/remoção manual do Premium -- sem checkout Stripe real nesta

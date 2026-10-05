@@ -399,7 +399,7 @@ async function renderMyFlashcardsView(opts){
     const editingCard = MY_FLASHCARDS_STATE._cardsCache.find(c => c.id === MY_FLASHCARDS_STATE.editingCardId);
     if (editingCard){
       if (MY_FLASHCARDS_STATE.editingNativeState){
-        wireMyFlashcardNativeEditForm(editingCard, MY_FLASHCARDS_STATE.editingNativeState, wrap);
+        wireMyFlashcardNativeEditForm(editingCard, MY_FLASHCARDS_STATE.editingNativeState, wrap, premium);
       } else {
         wireMyFlashcardEditForm(editingCard, wrap, premium);
       }
@@ -427,7 +427,22 @@ function myFlashcardRowHTML(c, premium){
     if (!MY_FLASHCARDS_STATE.editingNativeState && classifyFlashcardRowModel(c) === 'native'){
       MY_FLASHCARDS_STATE.editingNativeState = createNativeNoteEditorStateFromRow(c);
     }
-    if (MY_FLASHCARDS_STATE.editingNativeState) return myFlashcardNativeEditFormHTML(c, MY_FLASHCARDS_STATE.editingNativeState);
+    // Decisão da autora (2026-10-05): "ninguém usa o formato antigo de
+    // cartão". Cartão LEGADO abre direto no editor novo, para qualquer
+    // plano -- é só um rascunho em memória (mesmo caminho do antigo botão
+    // "Usar o novo editor"); nada é gravado até "Salvar edição", e
+    // Cancelar descarta. O formulário antigo só sobra como recurso quando
+    // o conteúdo não pode ser convertido com segurança (preflight).
+    if (!MY_FLASHCARDS_STATE.editingNativeState && classifyFlashcardRowModel(c) === 'legacy'){
+      const preflight = legacyFlashcardConversionPreflight(c);
+      if (preflight.ok){
+        MY_FLASHCARDS_STATE.editingNativeState = nativeNoteEditorStateFromLegacyRow(c);
+        MY_FLASHCARDS_STATE.editingNativeConversionBaseline = cloneNoteEditorState(MY_FLASHCARDS_STATE.editingNativeState);
+      } else {
+        MY_FLASHCARDS_STATE._legacyConversionError = preflight.error;
+      }
+    }
+    if (MY_FLASHCARDS_STATE.editingNativeState) return myFlashcardNativeEditFormHTML(c, MY_FLASHCARDS_STATE.editingNativeState, premium);
     return myFlashcardEditFormHTML(c, premium);
   }
   return `
@@ -459,8 +474,7 @@ function myFlashcardEditFormHTML(c, premium){
   const direction = c.front_is_target_language === false ? 'target-back' : 'target-front';
   return `
     <div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:10px;">
-      ${premium ? `<button type="button" class="admin-select-link" id="edit-my-flashcard-use-native" style="align-self:flex-start; background:none; border:none; cursor:pointer; padding:0;">🧪 Usar o novo editor de campos (nativo) -- preserva o conteúdo já digitado</button>
-      <p class="profile-edit-error" id="edit-my-flashcard-use-native-error"></p>` : ''}
+      ${MY_FLASHCARDS_STATE._legacyConversionError ? `<p class="profile-edit-error" style="margin:0;">Este cartão não pôde abrir no editor novo: ${escapeHTML(MY_FLASHCARDS_STATE._legacyConversionError)}</p>` : ''}
       ${!isMandarim ? `
       <div>
         <div class="section-label" style="margin:0 0 4px;">Idioma de cada lado</div>
@@ -577,14 +591,21 @@ function wireMyFlashcardEditForm(c, wrap, premium){
 // (refreshNativeCardTypeBox/transitionToXxx/CARD_TYPE_UI_META), só
 // chamando createOwnFlashcard()/updateOwnFlashcardContent() em vez das
 // versões teacher_flashcards.
-function myFlashcardNativeEditFormHTML(c, editorState){
+function myFlashcardNativeEditFormHTML(c, editorState, premium){
+  // Plano grátis só escolhe Normal; um tipo Premium já salvo continua
+  // aparecendo (selecionado) pra não ser trocado sem querer.
+  const typeOptions = cardTypeUIMetaForEntitlement(premium).slice();
+  if (!typeOptions.some(t => t.id === editorState.cardGenerationMode)){
+    const current = CARD_TYPE_UI_META.find(t => t.id === editorState.cardGenerationMode);
+    if (current) typeOptions.push(current);
+  }
   return `
     <div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:10px;">
       <div class="section-label" style="margin:0;">Editar cartão (editor nativo)</div>
       <p class="profile-edit-hint" style="margin:0;">Este cartão usa o novo modelo de campos -- editando aqui, o conteúdo é gravado em fields/card_generation_mode, nunca nas colunas antigas.</p>
       <div class="section-label" style="margin:6px 0 4px;">Card Type</div>
       <select id="edit-my-native-flashcard-card-type" class="profile-edit-input">
-        ${CARD_TYPE_UI_META.map(t => `<option value="${t.id}" ${t.id === editorState.cardGenerationMode ? 'selected' : ''}>${t.label}</option>`).join('')}
+        ${typeOptions.map(t => `<option value="${t.id}" ${t.id === editorState.cardGenerationMode ? 'selected' : ''}>${t.label}</option>`).join('')}
       </select>
       <div id="edit-my-native-flashcard-fields"></div>
       <div id="edit-my-native-flashcard-tags"></div>
@@ -600,14 +621,16 @@ function myFlashcardNativeEditFormHTML(c, editorState){
   `;
 }
 
-function wireMyFlashcardNativeEditForm(c, editorState, wrap){
+function wireMyFlashcardNativeEditForm(c, editorState, wrap, premium){
   // Fase 7e (ver CLAUDE.md) -- mesmo par uploadFn/deleteFn de
   // shared/admin-flashcards.js, só que as versões "own" (aluna é dona do
   // conteúdo) -- shared/flashcard-field-editor.js nunca chama
   // supabaseClient/Storage direto, só através destas 2 funções.
   // Fase 7f (implementação -- ver CLAUDE.md) -- ttsFn/noteId (linha JÁ
   // existe de verdade nesta tela de EDIÇÃO) habilitam "Gerar áudio".
-  const nativeFieldOpts = { namePrefix: 'edit-my-native', uploadFn: uploadOwnFlashcardMedia, deleteFn: deleteOwnFlashcardMedia, ttsFn: requestOwnFieldAudioTTS, noteId: editorState.noteId };
+  const nativeFieldOpts = { namePrefix: 'edit-my-native', uploadFn: uploadOwnFlashcardMedia, deleteFn: deleteOwnFlashcardMedia, ttsFn: requestOwnFieldAudioTTS, noteId: editorState.noteId,
+    // Mesma matriz do formulário de criação: grátis = sem áudio/upload/link.
+    allowedAudioOrigins: premium ? undefined : ['none', 'upload', 'url'] };
   const boxEl = document.getElementById('edit-my-native-flashcard-fields');
   refreshNativeCardTypeBox(boxEl, editorState, nativeFieldOpts);
   mountNoteTagsEditor(document.getElementById('edit-my-native-flashcard-tags'), editorState);
@@ -880,6 +903,7 @@ function wireMyFlashcardsCardButtons(wrap){
       // novo editor" ser clicado.
       MY_FLASHCARDS_STATE.editingNativeState = null;
       MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
+      MY_FLASHCARDS_STATE._legacyConversionError = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
       renderMyFlashcardsView();
     });
