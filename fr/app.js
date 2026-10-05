@@ -936,6 +936,28 @@ LEVEL_TESTS.forEach((t) => {
   STATE.levelTestProgress[t.id] = { completed: false, bestScore: 0 };
 });
 
+// Fase 8 (i18n): conteúdo do curso no idioma do site. Overlay em
+// fr/content.<lang>.js (carregado sob demanda). O português continua sendo a
+// fonte; unidade sem tradução aparece em português com aviso na lição.
+const CONTENT_I18N = ContentI18n.create({
+  units: UNITS, modules: MODULES, levels: LEVELS, levelTests: LEVEL_TESTS,
+  overlayUrl: (lang) => `content.${lang}.js`,
+  getLang: () => (typeof getUiLang === 'function' ? getUiLang() : 'pt-BR'),
+  onApplied: () => {
+    // Cartões da trilha guardam cópia do texto na criação; só o texto exibido
+    // muda (id/FSRS intactos).
+    STATE.cards.forEach((c) => {
+      if (c.origin !== 'study') return;
+      const u = UNITS.find((x) => x.id === c.unitId);
+      if (!u || !u.vocab || !u.vocab[c.vocabIdx]) return;
+      c.back_trans = u.vocab[c.vocabIdx].t;
+      c.unitTitle = u.title;
+    });
+  }
+});
+window.addEventListener('i18n:change', () => { CONTENT_I18N.sync(); });
+CONTENT_I18N.sync();
+
 // Conexão com o Supabase (supabaseClient, cleanRedirectURL) agora vem de
 // shared/supabase-client.js -- mesmo projeto/tabela `progress` de sempre,
 // compartilhado com os outros idiomas da plataforma.
@@ -2669,6 +2691,12 @@ function openUnitDetail(unitId){
   document.getElementById('ud-eyebrow').textContent = `${eyebrowLabel} · ${u.level}`;
   document.getElementById('ud-title').textContent = u.title;
   document.getElementById('ud-goal').textContent = u.goal;
+  const langNotice = document.getElementById('ud-lang-notice');
+  if (langNotice){
+    const untranslated = !CONTENT_I18N.isUnitTranslated(u.id);
+    langNotice.hidden = !untranslated;
+    langNotice.textContent = untranslated ? t('content.untranslatedNotice') : '';
+  }
 
   STEP_STATE.currentStep = 0;
   renderStep();

@@ -1655,4 +1655,5 @@ window.I18N_CATALOG['en'] = {
   'admin.panel.tab.premium': '⭐ Premium', // ALTA
   'flashcardPreview.modal.hint': 'This is only a preview of how the card will look in Review -- nothing is saved or graded here.', // ALTA
   'publicFlashcard.modal.title': '👁 Card', // ALTA
+  'content.untranslatedNotice': 'This lesson isn\'t available in English yet. Showing Portuguese.', // ALTA
 };

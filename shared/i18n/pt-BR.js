@@ -1671,4 +1671,5 @@ window.I18N_CATALOG['pt-BR'] = {
   'admin.panel.tab.premium': '⭐ Premium',
   'flashcardPreview.modal.hint': 'Isto é só uma pré-visualização de como o cartão vai aparecer na Revisão -- nada é salvo ou avaliado aqui.',
   'publicFlashcard.modal.title': '👁 Cartão',
+  'content.untranslatedNotice': 'Esta lição ainda não está disponível neste idioma. Mostrando em português.',
 };
