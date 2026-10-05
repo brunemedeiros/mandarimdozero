@@ -10,9 +10,12 @@
 //   (1) query ?ui=en|es|pt-BR (salva em localStorage 'ui-language');
 //   (2) localStorage 'ui-language';
 //   (3) padrão 'pt-BR'.
-// TODO (fase seguinte): persistir na conta em progress.data._meta.uiLanguage
-// (mesma linha/RLS de _meta.currentLearningLanguage, sem migração), lido
-// antes do localStorage. NÃO gravamos em Supabase/progress neste piloto.
+// Fase 5: com conta, o idioma também fica em progress.data._meta.uiLanguage
+// (shared/language-pref.js + shared/auth.js). Ordem final: conta >
+// navegador (localStorage) > pt-BR. A conta é aplicada por auth.js, via
+// setUiLang(), depois de o progresso carregar; este arquivo nunca toca em
+// Supabase. Troca explícita no seletor chama persistUiLanguageToAccount()
+// (auth.js) quando existe.
 //
 // Regras:
 //   - t() nunca lança e nunca devolve vazio: en/es -> pt-BR -> a própria chave.
@@ -265,9 +268,10 @@
   })();
 
   // Seletor "Idioma da interface" (Configurações, fr/zh index.html,
-  // #ui-language-select). Só existe no navegador: setUiLang() grava em
-  // localStorage['ui-language']; NUNCA toca em APP_KEY, no idioma estudado
-  // nem na conta (TODO acima: progress.data._meta.uiLanguage).
+  // #ui-language-select). setUiLang() grava em localStorage['ui-language'];
+  // com conta, persistUiLanguageToAccount() (auth.js) grava também em
+  // progress.data._meta.uiLanguage. NUNCA toca em APP_KEY nem no idioma
+  // estudado.
   // Espanhol está congelado: o núcleo ainda entende ?ui=es, mas o seletor
   // só oferece pt-BR e en.
   var SELECTABLE_UI_LANGS = ['pt-BR', 'en'];
@@ -285,7 +289,13 @@
       sel.setAttribute('data-i18n-wired', '1');
       syncUiLanguageSelect();
       sel.addEventListener('change', function(){
-        if (SELECTABLE_UI_LANGS.indexOf(sel.value) >= 0) setUiLang(sel.value);
+        if (SELECTABLE_UI_LANGS.indexOf(sel.value) >= 0){
+          var chosen = sel.value;
+          setUiLang(chosen);
+          try {
+            if (typeof window.persistUiLanguageToAccount === 'function') window.persistUiLanguageToAccount(chosen);
+          } catch (e) {}
+        }
       });
     } catch (e) {}
   }

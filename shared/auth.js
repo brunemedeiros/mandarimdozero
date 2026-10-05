@@ -99,6 +99,8 @@ async function initAuth(){
       await onUserLoggedIn(session.user);
     } else if (event === 'SIGNED_OUT'){
       CURRENT_USER = null;
+      pendingAccountUiLanguage = null;
+      progressAccountUiLanguage = null;
       goToNeutralGate();
     }
   });
@@ -211,7 +213,12 @@ async function onUserLoggedIn(user){
   if (typeof ensureProfileLoaded === 'function') ensureProfileLoaded().catch(() => {});
   if (typeof refreshNotificationUnreadCount === 'function') refreshNotificationUnreadCount();
   if (typeof ensureNotificationPreferencesLoaded === 'function') ensureNotificationPreferencesLoaded();
+  progressAccountUiLanguage = null;
   await loadStateAndRender();
+  // Idioma do site da conta (data._meta.uiLanguage): só depois de o
+  // progresso estar carregado (reaproveita a leitura de loadState(), sem
+  // ida extra à rede) e grava qualquer escolha pendente feita antes disso.
+  await applyAccountUiLanguage();
   // Depois do render padrão (ver comentário equivalente em enterGuestMode)
   // -- só assim a navegação forçada por uma notificação clicada vence a
   // aba default do carregamento normal.
@@ -310,6 +317,61 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 // ---------- Persistência: Supabase (usuário logado) ou memória local (convidado) ----------
 let saveInFlight = false;
 let savePending = false;
+
+// ---------- Idioma do site na conta (data._meta.uiLanguage) ----------
+// Nunca dentro de serializeState() (que é por idioma estudado). Ordem de
+// leitura: conta > navegador (localStorage 'ui-language') > pt-BR.
+// progressAccountUiLanguage: valor lido por loadState() (mesma leitura do
+// progresso). pendingAccountUiLanguage: escolha feita no seletor que ainda
+// não foi confirmada no servidor -- saveState() também a inclui no _meta
+// que grava, então nenhuma das duas escritas apaga a outra (corrida).
+let progressAccountUiLanguage = null;
+let pendingAccountUiLanguage = null;
+
+function accountUiLangFromQuery(){
+  try { return !!new URLSearchParams(window.location.search).get('ui'); } catch (e) { return false; }
+}
+
+async function applyAccountUiLanguage(){
+  if (!CURRENT_USER || !progressLoadedOk) return;
+  if (pendingAccountUiLanguage){ await flushAccountUiLanguage(); return; }
+  const acct = progressAccountUiLanguage;
+  // ?ui= na URL (ferramenta de teste) vence a conta nesta aba.
+  if (!acct || accountUiLangFromQuery()) return;
+  if (typeof getUiLang === 'function' && typeof setUiLang === 'function' && getUiLang() !== acct){
+    await setUiLang(acct);
+  }
+}
+
+async function flushAccountUiLanguage(){
+  if (!CURRENT_USER || !pendingAccountUiLanguage || !progressLoadedOk) return false;
+  // Espera um saveState() em andamento terminar (ele também carrega o
+  // pendente no _meta, mas evitar duas escritas simultâneas é mais limpo).
+  for (let i = 0; i < 100 && saveInFlight; i++) await sleepMs(50);
+  const lang = pendingAccountUiLanguage;
+  try{
+    const saved = await setAccountUiLanguage(CURRENT_USER.id, lang);
+    progressAccountUiLanguage = saved;
+    if (pendingAccountUiLanguage === lang) pendingAccountUiLanguage = null;
+    return true;
+  }catch(e){
+    console.error('Erro ao salvar idioma do site na conta:', e);
+    return false;
+  }
+}
+
+// Chamado pelo seletor "Idioma da interface" (shared/i18n/i18n.js) depois
+// de uma troca EXPLÍCITA. Convidado: só localStorage (já feito por
+// setUiLang). Conta: grava em _meta.uiLanguage assim que o progresso
+// estiver carregado (antes disso fica pendente e applyAccountUiLanguage()
+// grava logo após loadState()).
+function persistUiLanguageToAccount(lang){
+  if (!CURRENT_USER || typeof normalizeAccountUiLanguage !== 'function') return Promise.resolve(false);
+  const norm = normalizeAccountUiLanguage(lang);
+  if (!norm) return Promise.resolve(false);
+  pendingAccountUiLanguage = norm;
+  return flushAccountUiLanguage();
+}
 
 // Se uma tentativa de salvar falhar (rede caiu, Supabase fora do ar), quem
 // está estudando precisa saber -- antes só era um console.error, sem
@@ -419,6 +481,9 @@ async function saveState(){
     }
 
     const merged = Object.assign({}, existing && existing.data, { [APP_KEY]: payload });
+    if (pendingAccountUiLanguage){
+      merged._meta = Object.assign({}, merged._meta, { uiLanguage: pendingAccountUiLanguage });
+    }
     const { error } = await supabaseClient
       .from('progress')
       .upsert({ user_id: CURRENT_USER.id, data: merged }, { onConflict: 'user_id' });
@@ -500,6 +565,8 @@ async function loadState(){
         return; // progressLoadedOk continua false -- saveState() se recusa a gravar até a próxima tentativa de load
       }
 
+      progressAccountUiLanguage = (typeof uiLanguageFromProgressData === 'function' && data)
+        ? uiLanguageFromProgressData(data.data) : null;
       if (data && data.data && data.data[APP_KEY]){
         applySerializedState(data.data[APP_KEY]);
       } else if (typeof loadLegacyState === 'function' && data && data.data){
