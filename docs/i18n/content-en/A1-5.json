@@ -1,0 +1,190 @@
+{
+ "unit": "A1-5",
+ "en": {
+  "title": "Food and drink",
+  "goal": "Order food and drink at a café or restaurant, and say what you like or don't like to eat.",
+  "lessons": {
+   "pao-agua-cafe": "Ordering bread, water and coffee",
+   "leite-queijo-maca": "Talking about milk, cheese and apples",
+   "comer-beber-detestar": "Eating, drinking and saying what you hate",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "bread",
+   "water",
+   "coffee",
+   "milk",
+   "cheese",
+   "apple",
+   "fish",
+   "to eat",
+   "to drink",
+   "to hate / to detest"
+  ],
+  "phrases": [
+   {
+    "t": "I eat bread in the morning.",
+    "scenario": "Someone asks what you eat in the morning. What do you answer?"
+   },
+   {
+    "t": "I like cheese, but I hate fish.",
+    "scenario": "You want to say you like cheese but really don't like fish. What do you say?"
+   },
+   {
+    "t": "Do you drink coffee or milk?",
+    "scenario": "You're serving breakfast to a friend and want to know what they drink. What do you ask?"
+   },
+   {
+    "t": "The check, please.",
+    "scenario": "You've finished eating at the restaurant and want to ask for the check. What do you say to the waiter?"
+   },
+   {
+    "t": "The bread is delicious."
+   },
+   {
+    "t": "I'd like some water, please."
+   },
+   {
+    "t": "The coffee is very hot."
+   },
+   {
+    "t": "The milk is in the fridge."
+   },
+   {
+    "t": "The apple is red and sweet."
+   },
+   {
+    "t": "I like eating in the morning."
+   },
+   {
+    "t": "Do you want something to drink?"
+   },
+   {
+    "t": "I think I'm going to hate this dish."
+   }
+  ],
+  "dialogue": {
+   "title": "At the café",
+   "lines": [
+    "Hello, what would you like?",
+    "A coffee and a croissant, please.",
+    "Anything else?",
+    "No thanks, that's all.",
+    "Here you go, that's five euros."
+   ]
+  },
+  "concepts": {
+   "aime-le-vs-bois-du": [
+    {
+     "title": "\"J'aime LE café\" or \"je bois DU café\"?",
+     "body": "With verbs of liking (<strong>aimer</strong>, détester), you use the definite article to talk about the thing in general: <strong>j'aime le café</strong> (I like coffee, in general). But when you're talking about an amount — drinking, eating, buying — you use the partitive article: <strong>je bois du café</strong> (I drink [some] coffee). It's a distinction English doesn't make, but it's essential in French.",
+     "examples": [
+      "to drink",
+      "to hate / to detest"
+     ]
+    }
+   ],
+   "croissant-nao-e-diario": [
+    {
+     "title": "Croissants every day? Not for most French people",
+     "body": "There's an idea that French people eat croissants for breakfast every day — but in practice it's more common to save croissants for weekends or special occasions. Day to day, French breakfast is usually simpler: bread with butter/jam (tartine), or just coffee.",
+     "examples": [
+      "bread with butter/jam — the most common breakfast"
+     ]
+    }
+   ]
+  },
+  "trueFalse": [
+   {
+    "claim": "We say this to ask for the check in a restaurant.",
+    "whyNote": "Correct — <strong>l'addition</strong> is \"the check\" in French; this phrase is exactly how you ask for the check in a restaurant."
+   }
+  ]
+ },
+ "review": [
+  {
+   "path": "vocab[9]",
+   "pt": "odiar / detestar",
+   "en": "to hate / to detest",
+   "conf": "media",
+   "why": "'détester' is milder than 'hate' in some uses"
+  },
+  {
+   "path": "phrases[1].t",
+   "pt": "Eu gosto de queijo, mas odeio peixe.",
+   "en": "I like cheese, but I hate fish.",
+   "conf": "media",
+   "why": "FR 'je déteste'; fine"
+  },
+  {
+   "path": "phrases[3].t",
+   "pt": "A conta, por favor.",
+   "en": "The check, please.",
+   "conf": "media",
+   "why": "EN-US 'check' vs EN-GB 'bill'"
+  },
+  {
+   "path": "phrases[3].scenario",
+   "pt": "...pedir a conta...",
+   "en": "...ask for the check...",
+   "conf": "media",
+   "why": "EN-US 'check' vs EN-GB 'bill'"
+  },
+  {
+   "path": "phrases[5].t",
+   "pt": "Eu gostaria de água, por favor.",
+   "en": "I'd like some water, please.",
+   "conf": "media",
+   "why": "FR 'de l'eau' partitive; 'some' reflects it"
+  },
+  {
+   "path": "phrases[10].t",
+   "pt": "Você quer beber alguma coisa?",
+   "en": "Do you want something to drink?",
+   "conf": "media",
+   "why": "FR 'Tu veux boire quelque chose ?', informal; fine"
+  },
+  {
+   "path": "phrases[11].t",
+   "pt": "Acho que vou detestar esse prato.",
+   "en": "I think I'm going to hate this dish.",
+   "conf": "media",
+   "why": "'prato' = dish (food); also could be 'plate'"
+  },
+  {
+   "path": "dialogue.lines[0]",
+   "pt": "Olá, o que deseja?",
+   "en": "Hello, what would you like?",
+   "conf": "media",
+   "why": "FR 'vous désirez ?' formal service register"
+  },
+  {
+   "path": "dialogue.lines[3]",
+   "pt": "Não, obrigado(a), é só isso.",
+   "en": "No thanks, that's all.",
+   "conf": "media",
+   "why": "FR 'c'est tout'; gendered 'obrigado(a)' has no EN equivalent"
+  },
+  {
+   "path": "concepts.aime-le-vs-bois-du[0].body",
+   "pt": "...o português não tem...",
+   "en": "...English doesn't make...",
+   "conf": "media",
+   "why": "PT/EN contrast adapted; EN also lacks the distinction"
+  },
+  {
+   "path": "concepts.croissant-nao-e-diario[0].body",
+   "pt": "pão com manteiga/geleia",
+   "en": "bread with butter/jam",
+   "conf": "media",
+   "why": "EN 'jam' vs 'jelly' regional; cultural claim translated faithfully"
+  },
+  {
+   "path": "concepts.croissant-nao-e-diario[0].examples[0]",
+   "pt": "pão com manteiga/geleia — o café da manhã mais comum",
+   "en": "bread with butter/jam — the most common breakfast",
+   "conf": "media",
+   "why": "tartine has no exact EN equivalent"
+  }
+ ]
+}

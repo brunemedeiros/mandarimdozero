@@ -1,0 +1,173 @@
+{
+ "unit": "A1-2",
+ "en": {
+  "title": "Introducing yourself",
+  "goal": "Say your name and nationality, and ask the other person the same.",
+  "lessons": {
+   "pronomes-e-nome": "I, you and saying your name",
+   "nome-e-ser": "Your name and the verb être",
+   "nacionalidades": "Talking about nationality and country",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "I",
+   "you (informal)",
+   "to be called",
+   "name",
+   "to be",
+   "France",
+   "Brazil",
+   "French (m. / f.)",
+   "Brazilian (m. / f.)",
+   "country"
+  ],
+  "phrases": [
+   {
+    "t": "What's your name?",
+    "scenario": "You meet someone new and want to know their name. What do you ask?"
+   },
+   {
+    "t": "I'm Brazilian.",
+    "scenario": "Someone asks where you're from. You want to say you're Brazilian. What do you say?"
+   },
+   {
+    "t": "What country are you from?",
+    "scenario": "You want to know which country a new person comes from. What do you ask?"
+   },
+   {
+    "t": "Me too, I'm French!",
+    "scenario": "Someone says they're French, and so are you! How do you react?"
+   },
+   {
+    "t": "What's the name of the city?"
+   },
+   {
+    "t": "I love France."
+   },
+   {
+    "t": "Brazil is very big."
+   },
+   {
+    "t": "The country is magnificent."
+   }
+  ],
+  "dialogue": {
+   "title": "First meeting",
+   "lines": [
+    "Hello, what's your name?",
+    "My name is Léo. And you?",
+    "I'm Ana. Are you French?",
+    "Yes, I'm French. And you, are you Brazilian?",
+    "Yes, I'm Brazilian!"
+   ]
+  },
+  "concepts": {
+   "tu-vs-vous": [
+    {
+     "title": "\"Tu\" or \"vous\"?",
+     "body": "<strong>Tu</strong> is informal — used with friends, family and people your own age. <strong>Vous</strong> is formal (used with strangers, superiors, older people) and is also the plural \"you\". When in doubt, always start with <strong>vous</strong> — it's safer than sounding too familiar.",
+     "examples": [
+      "you (informal)",
+      "you (formal or plural)"
+     ]
+    }
+   ],
+   "tu-es-contraction": [
+    {
+     "title": "\"Tu es\" becomes \"t'es\" in speech",
+     "body": "It would be \"Tu es français ?\", but in fast speech almost nobody pronounces the two words separately — <strong>tu es</strong> becomes <strong>t'es</strong>. It's so common that it even shows up in informal written messages: \"T'es français ?\". In the exercises here, keep writing the standard form <strong>tu es</strong> — the contraction is just for recognizing it when you hear or read it.",
+     "examples": [
+      "are you French? (fast speech)"
+     ]
+    }
+   ],
+   "comment-tappelles-wh-in-situ": [
+    {
+     "title": "\"Comment tu t'appelles ?\" also becomes \"Tu t'appelles comment ?\"",
+     "body": "In everyday speech it's just as common, or even more so, to leave the question word (\"comment\") at the END of the sentence, keeping the normal subject-verb order — <strong>tu t'appelles comment ?</strong> instead of \"comment tu t'appelles ?\". In the exercises here, keep using the order with \"comment\" at the start — it's the form both exercises here ask for.",
+     "examples": [
+      "what's your name? (everyday speech)"
+     ]
+    }
+   ]
+  },
+  "trueFalse": [
+   {
+    "claim": "This question is used to find out someone's age.",
+    "whyNote": "Wrong — <strong>comment tu t'appelles ?</strong> asks for the NAME (appeler = to be called), not the age. For age you'd say \"quel âge as-tu ?\"."
+   }
+  ]
+ },
+ "review": [
+  {
+   "path": "vocab[2]",
+   "pt": "chamar-se",
+   "en": "to be called",
+   "conf": "media",
+   "why": "s'appeler is reflexive; 'to be called' vs 'to be named' both fine"
+  },
+  {
+   "path": "vocab[4]",
+   "pt": "ser / estar",
+   "en": "to be",
+   "conf": "media",
+   "why": "PT gloss has two verbs; EN has just one"
+  },
+  {
+   "path": "vocab[7]",
+   "pt": "francês / francesa",
+   "en": "French (m. / f.)",
+   "conf": "media",
+   "why": "gender-marking convention for the pair"
+  },
+  {
+   "path": "vocab[8]",
+   "pt": "brasileiro / brasileira",
+   "en": "Brazilian (m. / f.)",
+   "conf": "media",
+   "why": "gender-marking convention for the pair"
+  },
+  {
+   "path": "phrases[0].t",
+   "pt": "Qual é o seu nome?",
+   "en": "What's your name?",
+   "conf": "media",
+   "why": "FR is 'comment tu t'appelles', informal; EN 'what's your name' loses the literal 'how do you call yourself'"
+  },
+  {
+   "path": "phrases[2].t",
+   "pt": "De que país você é?",
+   "en": "What country are you from?",
+   "conf": "media",
+   "why": "'what country are you from' vs 'which country'"
+  },
+  {
+   "path": "phrases[3].t",
+   "pt": "Eu também, eu sou francesa!",
+   "en": "Me too, I'm French!",
+   "conf": "media",
+   "why": "'Moi aussi' stressed pronoun; 'Me too' is the natural EN"
+  },
+  {
+   "path": "dialogue.lines[2]",
+   "pt": "Eu sou a Ana. Você é francês?",
+   "en": "I'm Ana. Are you French?",
+   "conf": "media",
+   "why": "FR 'Moi, c'est Ana' is idiomatic/emphatic; EN simplified"
+  },
+  {
+   "path": "concepts.tu-es-contraction[0].examples[0]",
+   "pt": "você é francês? (fala corrida)",
+   "en": "are you French? (fast speech)",
+   "conf": "media",
+   "why": "register note"
+  },
+  {
+   "path": "concepts.comment-tappelles-wh-in-situ[0].examples[0]",
+   "pt": "qual é o seu nome? (fala cotidiana)",
+   "en": "what's your name? (everyday speech)",
+   "conf": "media",
+   "why": "register note"
+  }
+ ]
+}
