@@ -36,3 +36,8 @@ Sem migrations nem mudança no banco.
 
 ## Próximos passos sugeridos
 Fase 6 restante (toasts, topbar, Meus Cartões, Decks, Revisão, trilha, Admin), depois fase 8 (conteúdo do francês em inglês).
+
+## Atualização — Fase 6, lote 2 (commit a9ba114)
+Migrados: toasts, Revisão, chrome da Trilha, Meus Cartões, Decks, notificações (shared/*.js, fr/app.js, zh/app.js). 314 chaves novas (pt-BR byte a byte conferido por script; EN needs_review, 19+ de confiança média, 0 baixa), todas em `traducoes-en-pendentes.md`. Verificador independente: aprovado, 0 bloqueantes.
+Pendências: aprovar as traduções do lote 2; nota menor: tp() formata n>=1000 como "1.000" (sem impacto prático hoje).
+Faltam na Fase 6: passos da lição, Conceito, exercícios, Estatísticas/Conjugação/Perfil/Histórias, painel de Hanzi, rótulos de Card Type, intervalos de shared/fsrs.js e Painel de Admin (por último). Feedback de correção fica para a fase 9.
