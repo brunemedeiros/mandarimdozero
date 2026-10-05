@@ -257,11 +257,11 @@ function renderNotificationBellBadge(){
 function notificationTimeAgoLabel(iso){
   const diffMs = Date.now() - new Date(iso).getTime();
   const min = Math.floor(diffMs / 60000);
-  if (min < 1) return 'agora';
-  if (min < 60) return `${min}min`;
+  if (min < 1) return t('notif.time.now');
+  if (min < 60) return t('notif.time.min', { n: min });
   const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr}h`;
-  return `${Math.floor(hr / 24)}d`;
+  if (hr < 24) return t('notif.time.hour', { n: hr });
+  return t('notif.time.day', { n: Math.floor(hr / 24) });
 }
 
 async function renderNotificationDropdown(){
@@ -270,7 +270,7 @@ async function renderNotificationDropdown(){
   list.innerHTML = loadingHTML();
   const items = await fetchRecentNotifications();
   if (!items.length){
-    list.innerHTML = `<p class="notifications-empty">Nenhuma notificação ainda. Continue estudando! 📚</p>`;
+    list.innerHTML = `<p class="notifications-empty">${t('notif.empty')}</p>`;
     return;
   }
   list.innerHTML = items.map(n => `

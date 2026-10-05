@@ -127,7 +127,10 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   check('es (congelado) não tem chaves órfãs', Object.keys(es).every(k => k in pt), Object.keys(es).filter(k => !(k in pt)));
   const nonEmpty = (v) => typeof v === 'string' ? v.trim() !== '' : (v && typeof v === 'object' && Object.values(v).length > 0 && Object.values(v).every(x => typeof x === 'string' && x.trim() !== ''));
   check('nenhum valor vazio', [pt, en, es].every(c => Object.values(c).every(nonEmpty)));
-  check('en difere de pt-BR (traduzido)', ptKeys.filter(k => JSON.stringify(en[k]) === JSON.stringify(pt[k])).length === 0, ptKeys.filter(k => JSON.stringify(en[k]) === JSON.stringify(pt[k])));
+  // Valores legitimamente iguais nos dois idiomas (nomes próprios, abreviações, números).
+  const EN_SAME_AS_PT_OK = ['myFlashcards.badge.premium', 'myFlashcards.edit.pinyin', 'myFlashcards.native.cardType', 'notif.pref.matrix.app', 'notif.pref.matrix.push', 'notif.pref.titleMatrixPush', 'notif.time.day', 'notif.time.hour', 'notif.time.min', 'review.mode.flashcard.name', 'review.mode.speed.name', 'review.speed.points', 'toast.pointsGain', 'toast.xpGain', 'trail.premiumBadge', 'preview.err.detail'];
+  const sameKeys = ptKeys.filter(k => !EN_SAME_AS_PT_OK.includes(k) && JSON.stringify(en[k]) === JSON.stringify(pt[k]));
+  check('en difere de pt-BR (traduzido)', sameKeys.length === 0, sameKeys);
   // comentário de confiança em cada linha de chave de en/es
   for (const lang of ['en', 'es']){
     const lines = fs.readFileSync(path.join(I18N, lang + '.js'), 'utf8').split('\n').filter(l => /^\s*'[\w.]+':/.test(l));
@@ -155,7 +158,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   const DELIBERATE_PT_CHANGES = [['arquive algum cartão que já não usa, ou peça', 'apague algum cartão, ou peça']];
   const prev = (f) => DELIBERATE_PT_CHANGES.reduce((acc, [o, n]) => acc.split(o).join(n), execSync(`git show ${PREV}:${f}`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 }));
   const prevFr = prev('fr/index.html'), prevZh = prev('zh/index.html');
-  const prevJs = ['shared/my-flashcards.js', 'shared/public-profile.js', 'shared/anki-import-ui.js', 'fr/app.js'].map(prev).join('\n');
+  const prevJs = ['shared/my-flashcards.js', 'shared/public-profile.js', 'shared/anki-import-ui.js', 'fr/app.js', 'zh/app.js', 'shared/flashcard-model.js', 'shared/own-flashcards.js', 'shared/flashcard-preview.js', 'shared/notifications.js', 'shared/notification-preferences.js', 'shared/deck-data.js', 'shared/admin-students.js'].map(prev).join('\n');
   const all = origFr + origZh + origRep + prevFr + prevZh + prevJs;
   // Textos NOVOS (não existiam antes): só o seletor de idioma.
   const NEW_KEYS = ['settings.uiLanguage.title', 'settings.uiLanguage.sub'];
@@ -163,6 +166,8 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   for (const k of ptKeys){
     if (NEW_KEYS.includes(k)) continue;
     const v = pt[k];
+    // Plural por categoria ({one, other}): no original o plural era montado por código (módulo${n===1?'':'s'}).
+    if (v && typeof v === 'object'){ check(`regressão: pt-BR '${k}' (plural) tem one e other`, typeof v.one === 'string' && typeof v.other === 'string'); continue; }
     if (/\{\w+\}/.test(v)){
       // placeholder {x} <-> ${...} do template literal original
       const re = new RegExp(v.split(/\{\w+\}/).map(escRe).join('\\$\\{[^}]+\\}'));

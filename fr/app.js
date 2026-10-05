@@ -198,7 +198,7 @@ function playPregeneratedAudio(file, btnEl, isAutoplay, rate){
   audio.addEventListener('ended', clear);
   audio.addEventListener('error', () => {
     clear();
-    showToast('Não foi possível reproduzir o áudio');
+    showToast(t('toast.audioPlayFailed'));
     trackTechnicalError('audio_load_failed', { file });
   });
   audio.play().catch(() => {
@@ -212,7 +212,7 @@ function playPregeneratedAudio(file, btnEl, isAutoplay, rate){
     // inesperado; autoplay bloqueado é comportamento normal do navegador,
     // não um bug, e contá-lo inflaria "erros" com algo que acontece toda
     // sessão em boa parte dos celulares.
-    if (isAutoplay) showToast('🔇 Toque no alto-falante pra ouvir');
+    if (isAutoplay) showToast(t('toast.audioTapSpeaker'));
     else trackTechnicalError('audio_play_failed', { file });
   });
 }
@@ -243,7 +243,7 @@ function speakFrenchAudioOnly(text, btnEl, isAutoplay){
   }
 
   if (!TTS.supported){
-    showToast('Áudio não suportado neste navegador');
+    showToast(t('toast.audioUnsupported'));
     return;
   }
 
@@ -251,7 +251,7 @@ function speakFrenchAudioOnly(text, btnEl, isAutoplay){
     loadFrenchVoice();
   }
   if (!TTS.voice){
-    showToast('🔇 Voz em francês não encontrada neste navegador/SO');
+    showToast(t('toast.voiceMissingFr'));
     return;
   }
 
@@ -276,7 +276,7 @@ function speakFrenchAudioOnly(text, btnEl, isAutoplay){
   utter.onend = () => { if (btnEl) btnEl.classList.remove('speaking'); };
   utter.onerror = () => {
     if (btnEl) btnEl.classList.remove('speaking');
-    showToast('Não foi possível reproduzir o áudio');
+    showToast(t('toast.audioPlayFailed'));
   };
 
   window.speechSynthesis.speak(utter);
@@ -294,7 +294,7 @@ function speakFrenchAudioOnly(text, btnEl, isAutoplay){
       setTimeout(() => {
         if (!retryStarted){
           if (btnEl) btnEl.classList.remove('speaking');
-          showToast('🔇 Não foi possível reproduzir este áudio');
+          showToast(t('toast.audioPlayFailedThis'));
         }
       }, 800);
     }
@@ -344,7 +344,7 @@ function wireCustomAudioButtons(container){
   container.querySelectorAll('.custom-audio-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      new Audio(btn.dataset.audioUrl).play().catch(() => showToast('Não foi possível tocar o áudio.'));
+      new Audio(btn.dataset.audioUrl).play().catch(() => showToast(t('toast.audioPlayFailedDot')));
     });
   });
 }
@@ -430,7 +430,7 @@ function wireKnowButtons(container){
         applyMemoryGrade(card, 3); // grade 3 = "Fácil" -- Fase 5: motor novo
         btn.classList.add('known');
         btn.textContent = '✓ Já sei';
-        showToast('Marcado como já sabido ⭐');
+        showToast(t('toast.markedKnown'));
       }
 
       saveState();
@@ -1581,7 +1581,7 @@ function checkDailyMissionsBonus(){
   if (!allDone) return;
   STATE.daily.missionsBonusAwarded = true;
   addXP(30);
-  showToast('🎯 Todas as missões do dia concluídas! +30 XP');
+  showToast(t('toast.dailyMissionsAllDone'));
 }
 
 // Notificação "Missão concluída" -- uma por Missão do dia individual (não
@@ -1680,7 +1680,7 @@ function addXP(amount){
   // diário 'xp50' (GENERAL_CHALLENGES), que substituiu 'stars40'.
   ensureDailyBucket();
   STATE.daily.xp += amount;
-  showToast(`+${amount} XP`);
+  showToast(t('toast.xpGain', { amount }));
   // Fase 1 do sistema de notificações (evento "Cliente" -- ver
   // shared/notifications.js): fire-and-forget, o anti-spam (cooldown/
   // daily_cap da categoria "gamificacao") já evita virar spam a cada
@@ -1895,14 +1895,14 @@ function renderLevelModalList(){
   const wrap = document.getElementById('level-modal-list');
   wrap.innerHTML = LEVELS.map(lvl => {
     const moduleCount = modulesOfLevel(lvl.id).length;
-    const sub = moduleCount ? `${moduleCount} módulo${moduleCount === 1 ? '' : 's'}` : 'Em breve';
+    const sub = moduleCount ? tp('trail.moduleCount', moduleCount) : t('trail.comingSoon');
     // Se existe um teste de nível que credita ESTE nível ao ser aprovado
     // (ex: o Teste de Nível A1 libera o A2), mostra um chip de atalho embutido
     // na própria linha do nível, pra quem quer pular direto sem passar pelo
     // nível anterior.
     const skipTest = LEVEL_TESTS.find(t => t.nextLevel === lvl.id);
     const skipHTML = skipTest ? `
-      <button class="level-skip-chip" data-test="${skipTest.id}" title="${skipTest.title}">🎓 Pular</button>
+      <button class="level-skip-chip" data-test="${skipTest.id}" title="${skipTest.title}">${t('trail.skipChip')}</button>
     ` : '';
     return `
       <div class="level-list-row">
@@ -2006,10 +2006,10 @@ function buildLevelTestCard(test){
   card.innerHTML = `
     <div class="level-test-icon">🎓</div>
     <div class="level-test-body">
-      <div class="level-test-title">${test.title}${lt.completed ? ' <span class="level-test-done-pill">Concluído ✓</span>' : ''}</div>
-      <div class="level-test-sub">Já sabe francês nível ${test.level}? Faça esse teste e avance direto pro ${test.nextLevel} — não precisa completar as unidades antes.</div>
+      <div class="level-test-title">${test.title}${lt.completed ? ` <span class="level-test-done-pill">${t('trail.levelTest.donePill')}</span>` : ''}</div>
+      <div class="level-test-sub">${t('trail.levelTest.sub', { level: test.level, next: test.nextLevel })}</div>
     </div>
-    <div class="level-test-cta">${lt.completed ? 'Refazer' : 'Começar'} →</div>
+    <div class="level-test-cta">${lt.completed ? t('trail.levelTest.redo') : t('trail.levelTest.start')}</div>
   `;
   card.addEventListener('click', () => openLevelTest(test.id));
   return card;
@@ -2089,10 +2089,10 @@ function buildUnitBlock(u){
 
   const pct = Math.round(unitProgressFraction(u) * 100);
   let fracLabel;
-  if (isGrammar) fracLabel = state === 'done' ? 'Concluído' : '';
+  if (isGrammar) fracLabel = state === 'done' ? t('trail.unit.done') : '';
   else if (hasLessons){
     const doneLessons = state === 'done' ? u.lessons.length : currentLessonIdx(u.id);
-    fracLabel = `${doneLessons} de ${u.lessons.length} lições`;
+    fracLabel = t('trail.unit.lessonsProgress', { done: doneLessons, total: u.lessons.length });
   }
   else fracLabel = `${pct}%`;
   if (dueForReview > 0) fracLabel += ` · 🔁 ${dueForReview}`;
@@ -2174,8 +2174,8 @@ function buildCheckpointRow(module, unlocked){
     <div class="ub-header">
       <div class="ub-icon">🏆</div>
       <div class="ub-info">
-        <div class="ub-title-row"><span class="ub-title">Ponto de verificação</span>${cp.completed ? `<span class="ub-badge">✓</span>` : ''}</div>
-        <div class="ub-goal">Teste o módulo inteiro de uma vez e pule as unidades que já souber.</div>
+        <div class="ub-title-row"><span class="ub-title">${t('trail.checkpoint.title')}</span>${cp.completed ? `<span class="ub-badge">✓</span>` : ''}</div>
+        <div class="ub-goal">${t('trail.checkpoint.goal')}</div>
       </div>
     </div>
   `;
@@ -2231,10 +2231,10 @@ function buildModuleChallengesRow(module){
       <div class="ub-icon">${premium ? '🧩' : '🔒'}</div>
       <div class="ub-info">
         <div class="ub-title-row">
-          <span class="ub-title">Desafios do Módulo ${mIdx + 1}</span>
-          ${premium ? (items.length ? `<span class="ub-badge">${done}/${items.length}</span>` : '') : '<span class="ub-badge ub-badge-premium">Premium</span>'}
+          <span class="ub-title">${t('trail.moduleChallenges.title', { n: mIdx + 1 })}</span>
+          ${premium ? (items.length ? `<span class="ub-badge">${done}/${items.length}</span>` : '') : `<span class="ub-badge ub-badge-premium">${t('trail.premiumBadge')}</span>`}
         </div>
-        <div class="ub-goal">Pratique o que você estudou de novas formas. Opcional.</div>
+        <div class="ub-goal">${t('trail.moduleChallenges.goal')}</div>
         <div class="ub-goal">${dictFree ? `${dictFree} ditado Free` : ''}${dictFree && (dictPremium || items.length) ? ' · ' : ''}${(dictPremium || items.length) ? `${dictPremium} ditado${dictPremium === 1 ? '' : 's'} e ${items.length} desafio${items.length === 1 ? '' : 's'} Premium` : ''}</div>
       </div>
     </div>
@@ -2266,8 +2266,8 @@ function buildLevelReviewRow(level){
     <div class="ub-header">
       <div class="ub-icon">✍️</div>
       <div class="ub-info">
-        <div class="ub-title-row"><span class="ub-title">Revisão do ${level}</span></div>
-        <div class="ub-goal">Ditados que juntam o que você aprendeu em todo o nível. Opcional.</div>
+        <div class="ub-title-row"><span class="ub-title">${t('trail.levelReview.title', { level })}</span></div>
+        <div class="ub-goal">${t('trail.levelReview.goal')}</div>
         <div class="ub-goal">${free} ditado Free${premium ? ` · ${premium} ditado${premium === 1 ? '' : 's'} Premium` : ''}</div>
       </div>
     </div>
@@ -2329,7 +2329,7 @@ function renderDailyChallengesStrip(){
   }).join('');
   const html = `
     <button class="dcs-caption-btn" type="button" aria-expanded="${collapsed ? 'false' : 'true'}">
-      <span class="dcs-caption">🎯 Missões do dia</span>
+      <span class="dcs-caption">${t('trail.dailyMissions.caption')}</span>
       <span class="dcs-caption-chevron">▾</span>
     </button>
     <div class="dcs-cards" ${collapsed ? 'style="display:none;"' : ''}>${cardsHTML}</div>
@@ -2357,8 +2357,8 @@ function renderUnitsGrid(){
     grid.innerHTML = `
       <div class="level-empty" style="grid-column: 1 / -1;">
         <div class="big-emoji">🚧</div>
-        <h3>Em breve</h3>
-        <p>O conteúdo do nível ${STATE.currentLevel} ainda está sendo preparado.</p>
+        <h3>${t('trail.comingSoon')}</h3>
+        <p>${t('trail.levelPreparing', { level: STATE.currentLevel })}</p>
       </div>
     `;
     return;
@@ -2380,7 +2380,7 @@ function renderUnitsGrid(){
     const label = document.createElement('div');
     label.className = 'module-label';
     label.innerHTML = `
-      <span class="ml-text">Módulo ${mIdx + 1} · ${module.title}</span>
+      <span class="ml-text">${t('trail.module.label', { n: mIdx + 1, title: module.title })}</span>
       ${doneBadge}
       <div class="ml-track"><div class="ml-fill" style="width:${pct}%"></div></div>
     `;
@@ -2651,8 +2651,8 @@ function openUnitDetail(unitId){
   // sem "X de Y" (o cálculo interno via unitOrdinalInfo continua existindo,
   // só não é mais renderizado aqui).
   const eyebrowLabel = u.type === 'grammar'
-    ? 'Gramática'
-    : `Unidade ${unitOrdinalInfo(u, levelUnits).num} de ${unitOrdinalInfo(u, levelUnits).total}`;
+    ? t('trail.eyebrow.grammar')
+    : t('trail.eyebrow.unit', { num: unitOrdinalInfo(u, levelUnits).num, total: unitOrdinalInfo(u, levelUnits).total });
   document.getElementById('ud-eyebrow').textContent = `${eyebrowLabel} · ${u.level}`;
   document.getElementById('ud-title').textContent = u.title;
   document.getElementById('ud-goal').textContent = u.goal;
@@ -4626,7 +4626,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
       <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
       ${promptHTML}
       <div class="exercise-options">${optionsHTML}</div>
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
   `;
 
@@ -4737,7 +4737,7 @@ function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
         ${frAccentPickerHTML()}
         <button class="btn btn-primary btn-block" id="vocab-type-verify-btn">Verificar</button>
       </div>
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
   `;
 
@@ -4814,7 +4814,7 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
       <div class="scenario-question">${ex.phrase.scenario}</div>
       <div class="scenario-scene">${scenarioSceneHTML(ex.phrase.scenarioEmoji)}</div>
       <div class="scenario-options">${optionsHTML}</div>
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
   `;
 
@@ -4880,7 +4880,7 @@ function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
         <button class="tf-option" data-val="true">✅ Verdadeiro</button>
         <button class="tf-option" data-val="false">❌ Falso</button>
       </div>
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
   `;
 
@@ -4940,20 +4940,20 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
   contentEl.innerHTML = `
     <div class="exercise-wrap">
       <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
-      <div class="exercise-prompt-label">Complete a frase</div>
+      <div class="exercise-prompt-label">${t('exercise.completeSentence')}</div>
       <div class="cloze-sentence">${sentenceHTML}</div>
       <div class="cloze-audio-row" id="cloze-audio-row"></div>
       <div class="cloze-trans" id="cloze-trans"></div>
       ${mode === 'type' ? `
         <div class="cloze-type-wrap">
-          <input type="text" id="cloze-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a palavra que falta">
+          <input type="text" id="cloze-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('review.cloze.placeholder')}">
           ${frAccentPickerHTML()}
-          <button class="btn btn-primary btn-block" id="cloze-verify-btn">Verificar</button>
+          <button class="btn btn-primary btn-block" id="cloze-verify-btn">${t('common.verify')}</button>
         </div>
       ` : `
         <div class="cloze-options">${ex.options.map((opt, i) => `<button class="cloze-option" data-idx="${i}">${opt.f}</button>`).join('')}</div>
       `}
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
   `;
 
@@ -5096,7 +5096,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
       ` : ''}
       <div class="reorder-answer-slots" id="reorder-answer-slots"></div>
       <div class="reorder-blocks" id="reorder-blocks"></div>
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
   `;
 
@@ -5267,7 +5267,7 @@ function showCorrectFeedbackPanel(contentEl, detail){
     <div class="feedback-card-body">
       <div class="correct-feedback-header">${comboBadgeHTML}✅ ${headerText}</div>
       ${detail ? `<div class="correct-feedback-trans feedback-inner-box">${detail}</div>` : ''}
-      <button class="btn btn-primary btn-block correct-feedback-continue" id="correct-continue-btn">Continuar →</button>
+      <button class="btn btn-primary btn-block correct-feedback-continue" id="correct-continue-btn">${t('common.continueArrow')}</button>
     </div>
   `;
   wrap.appendChild(panel);
@@ -5558,7 +5558,19 @@ const REVIEW_FILTER_LABELS = { all: 'Todas', hard: 'Mais difíceis primeiro', ol
 // Fase 4 do sistema de alunas particulares (ver CLAUDE.md): rótulos do
 // filtro de ORIGEM -- diferente de REVIEW_FILTER_LABELS (que decide COMO
 // consumir a fila), este decide DE ONDE vêm os cartões.
-const REVIEW_ORIGIN_LABELS = { all: 'Todas', study: 'Da trilha', teacher: 'Da professora', self: 'Meus cartões' };
+// Getters: resolvem no idioma do site NO MOMENTO do uso (i18n fase 6).
+const REVIEW_ORIGIN_LABELS = {
+  get all(){ return t('review.origin.all'); },
+  get study(){ return t('review.origin.study'); },
+  get teacher(){ return t('review.origin.teacher'); },
+  get self(){ return t('review.origin.self'); }
+};
+
+// Título (tag) do cartão: cartão de professora/aluna traz `unitTitleKey`
+// (shared/flashcard-model.js); cartão de trilha usa o título da unidade (conteúdo).
+function flashcardUnitTitleText(card){
+  return card.unitTitleKey ? t(card.unitTitleKey) : card.unitTitle;
+}
 
 // Bloco hero (topo da Revisão): número grande = trueCount, sempre o total
 // real pendente, nunca o cortado pela sessão -- fixo, não muda com nenhum
@@ -5575,7 +5587,7 @@ function renderReviewTodayWidget(){
   if (pool.length === 0 || trueCount === 0){ wrap.innerHTML = ''; return; }
 
   wrap.innerHTML = `
-    <div class="review-today-label">Revisões pendentes</div>
+    <div class="review-today-label">${t('review.today.label')}</div>
     <div class="review-today-count">${trueCount}</div>
   `;
 }
@@ -5597,13 +5609,13 @@ function renderVocabStrengthWidget(){
     </div>
   `;
   wrap.innerHTML = `
-    <div class="section-label">Suas palavras</div>
+    <div class="section-label">${t('review.strength.title')}</div>
     <div class="vocab-strength-row">
-      ${item('weak', weak, 'Fracas')}
-      ${item('mid', medium, 'Medianas')}
-      ${item('strong', strong, 'Fortes')}
+      ${item('weak', weak, t('review.strength.weak'))}
+      ${item('mid', medium, t('review.strength.medium'))}
+      ${item('strong', strong, t('review.strength.strong'))}
     </div>
-    <p class="profile-edit-hint">Fraca = ainda não firmou; Forte = já sabe bem há tempos; Mediana = no meio do caminho. Isso é o vocabulário TODO, não as revisões de hoje (acima) -- por isso pode ter palavras medianas aqui mesmo sem nenhuma revisão pendente agora.</p>
+    <p class="profile-edit-hint">${t('review.strength.hint')}</p>
   `;
 }
 
@@ -5628,14 +5640,14 @@ function renderReviewModeSelect(){
   renderReviewTodayWidget();
 
   const revisarLabel = document.getElementById('review-mode-revisar-label');
-  if (revisarLabel) revisarLabel.textContent = 'Revisar';
+  if (revisarLabel) revisarLabel.textContent = t('review.mode.reviewLabel');
 
   const revisarEl = document.getElementById('review-mode-cards-revisar');
   if (trueCount === 0){
-    const emptyTitle = pool.length === 0 ? 'Ainda não há revisões' : 'Você está em dia!';
+    const emptyTitle = pool.length === 0 ? t('review.empty.noneYetTitle') : t('review.empty.upToDateTitle');
     const emptyDesc = pool.length === 0
-      ? 'Complete uma lição no Estudo pra começar a ter palavras pra revisar.'
-      : 'Praticar continua disponível logo abaixo, quando quiser.';
+      ? t('review.empty.noneYetDesc')
+      : t('review.empty.upToDateDesc');
     revisarEl.innerHTML = `
       <div class="review-mode-empty">
         <div class="icon">🍵</div>
@@ -5650,13 +5662,13 @@ function renderReviewModeSelect(){
     revisarEl.innerHTML = `
       <button class="review-mode-card" id="mode-card-flashcard">
         <div class="icon">📇</div>
-        <div class="name">Flashcard</div>
-        <div class="desc">Revisão completa</div>
+        <div class="name">${t('review.mode.flashcard.name')}</div>
+        <div class="desc">${t('review.mode.flashcard.desc')}</div>
       </button>
       <button class="review-mode-card" id="mode-card-speed">
         <div class="icon">⚡</div>
-        <div class="name">Speed Review</div>
-        <div class="desc">Revisão rápida</div>
+        <div class="name">${t('review.mode.speed.name')}</div>
+        <div class="desc">${t('review.mode.speed.desc')}</div>
       </button>
     `;
     document.getElementById('mode-card-flashcard').addEventListener('click', () => openReviewSession('flashcard'));
@@ -5668,14 +5680,14 @@ function renderReviewModeSelect(){
     <button class="review-mode-card" id="mode-card-hard" ${hardCount === 0 ? 'disabled' : ''}>
       <div class="icon">🔥</div>
       <div class="count">${hardCount}</div>
-      <div class="name">Palavras difíceis</div>
-      <div class="desc">As que você mais erra</div>
+      <div class="name">${t('review.mode.hard.name')}</div>
+      <div class="desc">${t('review.mode.hard.desc')}</div>
     </button>
     <button class="review-mode-card" id="mode-card-match" ${pool.length < 10 ? 'disabled' : ''}>
       <div class="icon">🧩</div>
       <div class="count">${pool.length}</div>
-      <div class="name">Combinar</div>
-      <div class="desc">Jogo de pares</div>
+      <div class="name">${t('review.mode.match.name')}</div>
+      <div class="desc">${t('review.mode.match.desc')}</div>
     </button>
   `;
   document.getElementById('mode-card-hard').addEventListener('click', () => openReviewSession('hard'));
@@ -5764,8 +5776,8 @@ function renderMatchSizePicker(){
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🧩</div>
-        <h3>Vocabulário insuficiente ainda</h3>
-        <p>O jogo de Combinar precisa de pelo menos ${minPairs * 2} palavras já vistas em lições concluídas.</p>
+        <h3>${t('review.insufficientTitle')}</h3>
+        <p>${t('review.match.insufficientMin', { n: minPairs * 2 })}</p>
       </div>
     `;
     return;
@@ -5773,16 +5785,16 @@ function renderMatchSizePicker(){
   el.innerHTML = `
     <div class="match-size-picker">
       <div class="big-emoji">🧩</div>
-      <h3>Quantos pares você quer jogar?</h3>
+      <h3>${t('review.match.pickTitle')}</h3>
       <div class="match-size-options">
         ${MATCH_SIZE_OPTIONS.map(n => `
           <button class="match-size-btn ${MATCH_STATE.pairSize === n ? 'selected' : ''}" data-pairs="${n}" ${poolLen < n * 2 ? 'disabled' : ''}>
             <div class="match-size-num">${n}</div>
-            <div class="match-size-label">pares<br>(${n * 2} cartas)</div>
+            <div class="match-size-label">${t('review.match.pairsLabel', { cards: n * 2 })}</div>
           </button>
         `).join('')}
       </div>
-      <button class="btn btn-primary" id="match-size-start-btn">Começar →</button>
+      <button class="btn btn-primary" id="match-size-start-btn">${t('review.match.start')}</button>
     </div>
   `;
   el.querySelectorAll('.match-size-btn:not([disabled])').forEach(btn => {
@@ -5820,8 +5832,8 @@ function renderMatchGame(){
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🧩</div>
-        <h3>Vocabulário insuficiente ainda</h3>
-        <p>O jogo de Combinar precisa de pelo menos algumas palavras já estudadas com sucesso no Estudo.</p>
+        <h3>${t('review.insufficientTitle')}</h3>
+        <p>${t('review.match.insufficientSome')}</p>
       </div>
     `;
     return;
@@ -5907,9 +5919,9 @@ function onMatchTileClick(btn){
           document.getElementById('match-review-content').innerHTML = `
             <div class="match-complete">
               <div class="big-emoji">🎉</div>
-              <h3>Todos os pares combinados!</h3>
-              <div class="score-num">${MATCH_STATE.attempts} tentativa(s)</div>
-              <button class="btn btn-primary" id="match-restart-btn">Jogar de novo</button>
+              <h3>${t('review.match.allMatched')}</h3>
+              <div class="score-num">${t('review.match.attempts', { n: MATCH_STATE.attempts })}</div>
+              <button class="btn btn-primary" id="match-restart-btn">${t('review.match.playAgain')}</button>
             </div>
           `;
           document.getElementById('match-restart-btn').addEventListener('click', startMatchGame);
@@ -5962,15 +5974,15 @@ function renderSpeedReview(){
     el.innerHTML = pool.length < 4 ? `
       <div class="review-empty">
         <div class="big-emoji">⚡</div>
-        <h3>Vocabulário insuficiente ainda</h3>
-        <p>O Speed Review precisa de palavras já estudadas com sucesso pelo menos uma vez. Continue estudando unidades no Estudo.</p>
+        <h3>${t('review.insufficientTitle')}</h3>
+        <p>${t('review.speed.insufficientBody')}</p>
       </div>
     ` : `
       <div class="review-empty">
         <div class="big-emoji">☕</div>
-        <h3>Você está em dia!</h3>
-        <p>Nenhuma revisão pendente agora. Praticar continua disponível quando quiser.</p>
-        <button class="btn btn-primary" id="speed-go-practice">Praticar</button>
+        <h3>${t('review.empty.upToDateTitle')}</h3>
+        <p>${t('review.speed.upToDateBody')}</p>
+        <button class="btn btn-primary" id="speed-go-practice">${t('review.practice')}</button>
       </div>
     `;
     document.getElementById('speed-go-practice')?.addEventListener('click', backToReviewModeSelect);
@@ -6005,12 +6017,12 @@ function renderSpeedReview(){
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">💔</div>
-        <h3>Fim de jogo!</h3>
-        <div class="score-num">${SPEED_STATE.score} pts</div>
-        <p>Você respondeu ${SPEED_STATE.index} palavra(s) nesta rodada.</p>
+        <h3>${t('review.speed.gameOver')}</h3>
+        <div class="score-num">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
+        <p>${t('review.speed.answered', { n: SPEED_STATE.index })}</p>
         <div class="review-complete-actions">
-          <button class="btn btn-secondary" id="speed-back-btn">Voltar</button>
-          <button class="btn btn-primary" id="speed-practice-btn">Praticar mais</button>
+          <button class="btn btn-secondary" id="speed-back-btn">${t('review.back')}</button>
+          <button class="btn btn-primary" id="speed-practice-btn">${t('review.practiceMore')}</button>
         </div>
       </div>
     `;
@@ -6046,11 +6058,11 @@ function renderSpeedReview(){
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">🏆</div>
-        <h3>Revisão concluída!</h3>
-        <div class="score-num">${SPEED_STATE.score} pts</div>
+        <h3>${t('review.complete.title')}</h3>
+        <div class="score-num">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
         <div class="review-complete-actions">
-          <button class="btn btn-secondary" id="speed-back-btn">Voltar</button>
-          <button class="btn btn-primary" id="speed-practice-btn">Praticar mais</button>
+          <button class="btn btn-secondary" id="speed-back-btn">${t('review.back')}</button>
+          <button class="btn btn-primary" id="speed-practice-btn">${t('review.practiceMore')}</button>
         </div>
       </div>
     `;
@@ -6141,9 +6153,9 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
     SPEED_STATE.streak += 1;
     if (SPEED_STATE.streak > 0 && SPEED_STATE.streak % 15 === 0 && SPEED_STATE.hearts < 3){
       SPEED_STATE.hearts += 1;
-      showToast('❤️ Vida extra!');
+      showToast(t('toast.extraLife'));
     }
-    showToast(`+${speedBonus} pts`);
+    showToast(t('toast.pointsGain', { n: speedBonus }));
   } else {
     SPEED_STATE.hearts -= 1;
     SPEED_STATE.streak = 0;
@@ -6398,10 +6410,10 @@ function shuffle(arr){
 function gradeButtonsHTML(card){
   const now = Date.now();
   const GRADES = [
-    { grade: 0, label: 'Errei', cls: 'grade-again' },
-    { grade: 1, label: 'Difícil', cls: 'grade-hard' },
-    { grade: 2, label: 'Bom', cls: 'grade-good' },
-    { grade: 3, label: 'Fácil', cls: 'grade-easy' },
+    { grade: 0, label: t('review.grade.again'), cls: 'grade-again' },
+    { grade: 1, label: t('review.grade.hard'), cls: 'grade-hard' },
+    { grade: 2, label: t('review.grade.good'), cls: 'grade-good' },
+    { grade: 3, label: t('review.grade.easy'), cls: 'grade-easy' },
   ];
   return `
     <div class="grade-buttons">
@@ -6427,7 +6439,7 @@ function gradeButtonsHTML(card){
 // desta fase.
 function reviewProgressBarHTML(card){
   if (card.__isPreviewCard){
-    return `<div class="review-progress"><div class="review-progress-count">👁️ Pré-visualização</div></div>`;
+    return `<div class="review-progress"><div class="review-progress-count">${t('review.previewLabel')}</div></div>`;
   }
   const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
   return `
@@ -6500,7 +6512,7 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
-      <div class="flashcard-tag">${card.unitTitle}</div>
+      <div class="flashcard-tag">${flashcardUnitTitleText(card)}</div>
       ${promptImageUrl ? `<img src="${promptImageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="flashcard-french">${escapeHTML(view.prompt.text)}${promptSpeakable ? ` ${audioBtnHTML(view.prompt.text, 'audio-btn-lg')}` : ''}${customAudioUrl ? customAudioBtnHTML(customAudioUrl) : ''}</div>
     </div>
@@ -6515,7 +6527,7 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
         return `<button class="${cls}" data-idx="${i}"${answered ? ' disabled' : ''}>${escapeHTML(opt.text)}</button>`;
       }).join('')}
     </div>
-    ${answered ? `<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">Continuar</button>` : ''}
+    ${answered ? `<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">${t('common.continue')}</button>` : ''}
   `;
 
   wireAudioButtons(mountEl, card.__isPreviewCard);
@@ -6603,7 +6615,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
-      <div class="flashcard-tag">${card.unitTitle}</div>
+      <div class="flashcard-tag">${flashcardUnitTitleText(card)}</div>
       ${clozeImageUrl ? `<img src="${clozeImageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="cloze-sentence">${sentenceHTML}</div>
       ${view.audioUrl ? customAudioBtnHTML(view.audioUrl) : ''}
@@ -6611,11 +6623,11 @@ function renderClozeCard(mountEl, card, localState, callbacks){
     </div>
     ${!answered ? `
       <div class="cloze-type-wrap">
-        <input type="text" id="cloze-review-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a palavra que falta">
+        <input type="text" id="cloze-review-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('review.cloze.placeholder')}">
         ${frAccentPickerHTML()}
-        <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">Verificar</button>
+        <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
+    ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
   `;
 
   wireCustomAudioButtons(mountEl);
@@ -6679,7 +6691,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
-      <div class="flashcard-tag">${card.unitTitle}</div>
+      <div class="flashcard-tag">${flashcardUnitTitleText(card)}</div>
       ${promptImageUrl ? `<img src="${promptImageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="flashcard-french">${escapeHTML(view.prompt.text)}${promptSpeakable ? ` ${audioBtnHTML(view.prompt.text, 'audio-btn-lg')}` : ''}${view.prompt.audioUrl ? customAudioBtnHTML(view.prompt.audioUrl) : ''}</div>
       ${answered ? `
@@ -6691,11 +6703,11 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
     </div>
     ${!answered ? `
       <div class="cloze-type-wrap">
-        <input type="text" id="cloze-review-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a resposta">
+        <input type="text" id="cloze-review-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('review.typeAnswer.placeholder')}">
         ${frAccentPickerHTML()}
-        <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">Verificar</button>
+        <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
+    ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
   `;
 
   wireAudioButtons(mountEl, card.__isPreviewCard);
@@ -6748,9 +6760,9 @@ function renderReviewView(){
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">☕</div>
-        <h3>${STATE.reviewSessionDeckId ? 'Nenhum cartão neste Deck ainda' : (STATE.reviewSessionUnitFilter ? 'Nenhum cartão nesta unidade ainda' : 'Tudo em dia!')}</h3>
-        <p>${allDue > 0 ? `Você ainda tem ${allDue} cartão(s) pendente(s) no geral.` : 'Volte mais tarde para sua próxima revisão, ou comece uma nova unidade na trilha.'}</p>
-        ${allDue > 0 ? `<button class="btn btn-primary" id="review-start-all">Revisar tudo disponível</button>` : ''}
+        <h3>${STATE.reviewSessionDeckId ? t('review.session.deckEmptyTitle') : (STATE.reviewSessionUnitFilter ? t('review.session.unitEmptyTitle') : t('review.session.allDoneTitle'))}</h3>
+        <p>${allDue > 0 ? t('review.session.pendingOverall', { n: allDue }) : t('review.session.comeBackLater')}</p>
+        ${allDue > 0 ? `<button class="btn btn-primary" id="review-start-all">${t('review.session.reviewAllAvailable')}</button>` : ''}
       </div>
     `;
     if (allDue > 0){
@@ -6777,11 +6789,11 @@ function renderReviewView(){
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🎉</div>
-        <h3>Revisão concluída!</h3>
-        <p>Você revisou ${STATE.reviewQueue.length} cartão(s) nesta sessão.</p>
+        <h3>${t('review.complete.title')}</h3>
+        <p>${t('review.complete.reviewed', { n: STATE.reviewQueue.length })}</p>
         <div class="review-complete-actions">
-          <button class="btn btn-secondary" id="review-again">Voltar</button>
-          <button class="btn btn-primary" id="review-go-practice">Praticar mais</button>
+          <button class="btn btn-secondary" id="review-again">${t('review.back')}</button>
+          <button class="btn btn-primary" id="review-go-practice">${t('review.practiceMore')}</button>
         </div>
       </div>
     `;
@@ -6976,18 +6988,18 @@ function renderNormalCard(mountEl, card, localState, callbacks){
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
-      <div class="flashcard-tag">${card.unitTitle}</div>
+      <div class="flashcard-tag">${flashcardUnitTitleText(card)}</div>
       ${resolvedFrontImageUrl ? `<img src="${resolvedFrontImageUrl}" class="flashcard-image" alt="">` : ''}
       ${frontHTML}
       ${localState.revealed ? `
         <div class="divider-line"></div>
         ${resolvedBackImageUrl ? `<img src="${resolvedBackImageUrl}" class="flashcard-image" alt="">` : ''}
         ${backHTML}
-      ` : `<div class="flashcard-hint">toque para ver a resposta</div>`}
+      ` : `<div class="flashcard-hint">${t('review.tapToReveal')}</div>`}
     </div>
     ${localState.revealed ? `
       ${gradeButtonsHTML(card)}
-      <button class="review-more-link" id="review-more-btn">🔁 Rever mais (não conta como resposta)</button>
+      <button class="review-more-link" id="review-more-btn">${t('review.reviewMore')}</button>
     ` : ''}
   `;
 
@@ -7147,7 +7159,7 @@ function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
   if (!skipToast){
     // Pequeno atraso pra ler como sequência ("+25 XP" ... "Unidade concluída!")
     // em vez de dois toasts aparecendo ao mesmo tempo, empilhados sem ordem.
-    setTimeout(() => showToast(`Unidade concluída! 🥐`), 450);
+    setTimeout(() => showToast(t('toast.unitComplete')), 450);
   }
   saveState();
 }
@@ -7218,7 +7230,7 @@ function completeModuleUnits(module, scorePct){
     registerDailyLessonCompleted(scorePct, false);
   }
   recalculateUnlockedUnits();
-  showToast('Ponto de verificação aprovado! 🏆');
+  showToast(t('toast.checkpointPassed'));
   saveState();
 }
 
@@ -7232,9 +7244,9 @@ function openCheckpoint(moduleId){
   document.getElementById('unit-detail-wrap').style.display = 'block';
   document.getElementById('step-back-btn').style.display = 'none';
 
-  document.getElementById('ud-eyebrow').textContent = 'Ponto de verificação';
+  document.getElementById('ud-eyebrow').textContent = t('trail.checkpoint.title');
   document.getElementById('ud-title').textContent = module.title;
-  document.getElementById('ud-goal').textContent = 'Teste o que você já sabe desta seção. Se for bem, todas as unidades dela são marcadas como concluídas — não precisa fazer uma por uma.';
+  document.getElementById('ud-goal').textContent = t('trail.checkpoint.intro');
 
   CHECKPOINT_STATE.moduleId = moduleId;
   CHECKPOINT_STATE.queue = buildCheckpointQueue(module);
@@ -7281,10 +7293,10 @@ function renderCheckpointQuizStep(){
     <div class="gram-exercise">
       <div class="gram-exercise-prompt">${ex.prompt}</div>
       ${ex.hint ? `<div class="gram-exercise-hint">${ex.hint}</div>` : ''}
-      <input type="text" id="checkpoint-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a resposta">
+      <input type="text" id="checkpoint-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('review.typeAnswer.placeholder')}">
       <div class="expected" id="checkpoint-expected"></div>
     </div>
-    <button class="btn btn-primary btn-block" id="checkpoint-verify-btn">Verificar</button>
+    <button class="btn btn-primary btn-block" id="checkpoint-verify-btn">${t('common.verify')}</button>
   `;
 
   const inputEl = document.getElementById('checkpoint-input');
@@ -7370,7 +7382,7 @@ function completeLevelTest(test, scorePct){
   STATE.levelTestProgress[test.id].completed = true;
   STATE.levelTestProgress[test.id].bestScore = Math.max(STATE.levelTestProgress[test.id].bestScore || 0, scorePct);
   if (!alreadyCompleted) addXP(150);
-  showToast(`Nível ${test.level} concluído! 🎓`);
+  showToast(t('toast.levelComplete', { level: test.level }));
   saveState();
 }
 
@@ -7385,9 +7397,9 @@ function openLevelTest(testId){
   document.getElementById('unit-detail-wrap').style.display = 'block';
   document.getElementById('step-back-btn').style.display = 'none';
 
-  document.getElementById('ud-eyebrow').textContent = 'Teste de nível';
+  document.getElementById('ud-eyebrow').textContent = t('trail.levelTest.eyebrow');
   document.getElementById('ud-title').textContent = test.title;
-  document.getElementById('ud-goal').textContent = `Já sabe francês nível ${test.level}? Faça esse teste — se for bem, todo o nível é marcado como concluído e você já pode seguir direto pro ${test.nextLevel}.`;
+  document.getElementById('ud-goal').textContent = t('trail.levelTest.intro', { level: test.level, next: test.nextLevel });
 
   LEVEL_TEST_STATE.testId = testId;
   LEVEL_TEST_STATE.queue = buildLevelTestQueue(test);
@@ -7436,7 +7448,7 @@ function renderLevelTestQuizStep(){
     <div class="gram-exercise">
       <div class="gram-exercise-prompt">${ex.prompt}</div>
       ${ex.hint ? `<div class="gram-exercise-hint">${ex.hint}</div>` : ''}
-      <input type="text" id="leveltest-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a resposta">
+      <input type="text" id="leveltest-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('review.typeAnswer.placeholder')}">
       <div class="expected" id="leveltest-expected"></div>
     </div>
     <button class="btn btn-primary btn-block" id="leveltest-verify-btn">Verificar</button>
@@ -7750,8 +7762,8 @@ document.getElementById('sidebar-toggle-btn').addEventListener('click', () => {
 // (sidebar desktop ou o item "Configurações" do menu do avatar), não só
 // quando o menu era o único caminho até aqui.
 function renderSettingsView(){
-  document.getElementById('settings-email').textContent = CURRENT_USER?.email || 'Modo convidado';
-  document.getElementById('settings-provider').textContent = CURRENT_USER?.app_metadata?.provider === 'google' ? 'Google' : (CURRENT_USER ? 'E-mail e senha' : '—');
+  document.getElementById('settings-email').textContent = CURRENT_USER?.email || t('settings.account.guest');
+  document.getElementById('settings-provider').textContent = CURRENT_USER?.app_metadata?.provider === 'google' ? 'Google' : (CURRENT_USER ? t('settings.account.emailPassword') : '—');
   switchSettingsSection(SETTINGS_SECTION);
 }
 
@@ -8122,7 +8134,7 @@ document.getElementById('conj-toggle-irregular').addEventListener('click', () =>
 
 document.getElementById('conj-start-btn').addEventListener('click', () => {
   if (!CONJ_STATE.selectedTenses.length || !CONJ_STATE.selectedGroups.length){
-    showToast('Escolha ao menos 1 tempo e 1 categoria de verbo');
+    showToast(t('toast.conjPickOne'));
     return;
   }
 
@@ -8137,7 +8149,7 @@ document.getElementById('conj-start-btn').addEventListener('click', () => {
     .map(([name]) => name);
 
   if (!eligibleVerbs.length){
-    showToast('Nenhum verbo nessa seleção');
+    showToast(t('toast.conjNoVerbs'));
     return;
   }
 
@@ -8575,7 +8587,7 @@ function openDictationPlayer(id){
 
   playBtn.addEventListener('click', () => {
     if (dictationAudioEl.paused){
-      dictationAudioEl.play().catch(() => showToast('Não foi possível reproduzir o áudio'));
+      dictationAudioEl.play().catch(() => showToast(t('toast.audioPlayFailed')));
     } else {
       dictationAudioEl.pause();
     }
@@ -8670,7 +8682,7 @@ function openDictationPlayer(id){
     }
     timeCurrentEl.textContent = formatDictationTime(dictationAudioEl.currentTime);
   });
-  dictationAudioEl.addEventListener('error', () => showToast('Não foi possível reproduzir o áudio'));
+  dictationAudioEl.addEventListener('error', () => showToast(t('toast.audioPlayFailed')));
 
   document.getElementById('dictation-check-btn').addEventListener('click', () => {
     const userText = document.getElementById('dictation-input').value;
