@@ -12,13 +12,18 @@ psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/share
 psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/shared/supabase_migrations/067_public_deck_copy_linear_plan.sql" >/dev/null 2>&1
 psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/shared/supabase_migrations/068_public_deck_copy_media_linear.sql" >/dev/null 2>&1
 psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/shared/supabase_migrations/069_public_deck_duplicates_changed_not_retryable.sql" >/dev/null 2>&1
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/shared/supabase_migrations/071_public_deck_hardening.sql" >/dev/null 2>&1
 psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -f "$HERE/test_public_deck.sql" 2>&1 | grep -v '^\s*$'
 echo "--- P7 independência de mídia ---"
 psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -f "$HERE/test_media_independence.sql" 2>&1 | grep -v '^\s*$'
 echo "--- Hardening final ---"
 psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -f "$HERE/test_hardening.sql" 2>&1 | grep -v '^\s*$'
+echo "--- 071 hardening ---"
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -f "$HERE/test_071.sql" 2>&1 | grep -v '^\s*$'
 echo "--- Duplicatas / reimportação (062) ---"
 psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -f "$HERE/test_duplicates.sql" 2>&1 | grep -v '^\s*$'
+echo "--- Duplicatas H/J/K ---"
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -f "$HERE/test_duplicates_hjk.sql" 2>&1 | grep -v '^\s*$'
 echo "--- Concorrência real (062) ---"
 bash "$HERE/test_duplicates_concurrency.sh"
 echo "--- D2: diferencial 062/067/068 (mídia) ---"
