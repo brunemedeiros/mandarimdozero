@@ -10305,7 +10305,7 @@ function translationHasPersonMismatch(text){
     for (let lookahead = 0; lookahead < 3 && j + lookahead < words.length; lookahead++){
       const candidate = words[j + lookahead];
       if (PT_SUBJECT_PRONOUN_PERSON[candidate]) break;
-      if (TRANSLATION_STOPWORDS_PT.has(candidate) && !PT_IRREGULAR_VERB_FORMS[candidate]) continue;
+      if (candidate === 'e' || (TRANSLATION_STOPWORDS_PT.has(candidate) && !PT_IRREGULAR_VERB_FORMS[candidate])) continue; // "e" normalizado colide com a conjunção
       const tags = ptVerbPersonTags(candidate);
       if (tags.length){
         if (!tags.includes(expected)) return { pronoun, verb: candidate, expected, got: tags };
