@@ -3524,46 +3524,46 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <!-- ===== CONFIGURAÇÕES ===== -->
   <div class="view" id="view-settings">
     <div class="path-header">
-      <h2>Configurações</h2>
-      <p>Sua conta, preferências e exportação de dados.</p>
+      <h2 data-i18n="settings.title">Configurações</h2>
+      <p data-i18n="settings.subtitle">Sua conta, preferências e exportação de dados.</p>
     </div>
-    <div class="leaderboard-tabs" role="tablist" aria-label="Seção de Configurações">
-      <button class="leaderboard-tab active" role="tab" aria-selected="true" data-settings-section="geral">Geral</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="notifications">🔔 Notificações</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="export">📦 Exportar</button>
+    <div class="leaderboard-tabs" role="tablist" aria-label="Seção de Configurações" data-i18n-attr="aria-label:settings.aria.section">
+      <button class="leaderboard-tab active" role="tab" aria-selected="true" data-settings-section="geral" data-i18n="settings.tab.general">Geral</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="notifications" data-i18n="settings.tab.notifications">🔔 Notificações</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-settings-section="export" data-i18n="settings.tab.export">📦 Exportar</button>
     </div>
     <div id="settings-geral-content">
-      <div class="section-label">Conta</div>
+      <div class="section-label" data-i18n="settings.section.account">Conta</div>
       <div class="settings-card">
         <div class="settings-row">
-          <div class="settings-row-label">E-mail</div>
+          <div class="settings-row-label" data-i18n="settings.account.email">E-mail</div>
           <div class="settings-row-value" id="settings-email">—</div>
         </div>
         <div class="settings-row">
-          <div class="settings-row-label">Conectado com</div>
+          <div class="settings-row-label" data-i18n="settings.account.provider">Conectado com</div>
           <div class="settings-row-value" id="settings-provider">—</div>
         </div>
       </div>
-      <p class="settings-more-note">Mais opções de conta em breve.</p>
-      <div class="section-label">Preferências</div>
+      <p class="settings-more-note" data-i18n="settings.account.moreSoon">Mais opções de conta em breve.</p>
+      <div class="section-label" data-i18n="settings.section.preferences">Preferências</div>
       <div class="pref-row">
         <div class="pref-row-text">
-          <div class="pref-row-title">Modo escuro</div>
-          <div class="pref-row-sub">Usa o tema escuro em vez do claro, independente do sistema.</div>
+          <div class="pref-row-title" data-i18n="settings.pref.dark.title">Modo escuro</div>
+          <div class="pref-row-sub" data-i18n="settings.pref.dark.sub">Usa o tema escuro em vez do claro, independente do sistema.</div>
         </div>
         <button class="pref-switch" id="theme-pref-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
       </div>
       <div class="pref-row">
         <div class="pref-row-text">
-          <div class="pref-row-title">Sempre digitar no exercício de completar frase</div>
-          <div class="pref-row-sub">Em vez de escolher entre opções, digite a palavra que falta (estilo Clozemaster).</div>
+          <div class="pref-row-title" data-i18n="settings.pref.cloze.title">Sempre digitar no exercício de completar frase</div>
+          <div class="pref-row-sub" data-i18n="settings.pref.cloze.subFr">Em vez de escolher entre opções, digite a palavra que falta (estilo Clozemaster).</div>
         </div>
         <button class="pref-switch" id="cloze-mode-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
       </div>
       <div class="pref-row">
         <div class="pref-row-text">
-          <div class="pref-row-title">Som de acerto/erro nos exercícios</div>
-          <div class="pref-row-sub">Toca um som curto ao responder cada exercício, além da cor de certo/errado.</div>
+          <div class="pref-row-title" data-i18n="settings.pref.sound.title">Som de acerto/erro nos exercícios</div>
+          <div class="pref-row-sub" data-i18n="settings.pref.sound.sub">Toca um som curto ao responder cada exercício, além da cor de certo/errado.</div>
         </div>
         <button class="pref-switch" id="feedback-sound-switch" role="switch" aria-checked="true"><span class="pref-switch-knob"></span></button>
       </div>
@@ -3582,10 +3582,10 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <div id="settings-export-content" style="display:none;">
       <div class="export-box">
         <div class="icon">📦</div>
-        <h3>Escolha o que exportar</h3>
+        <h3 data-i18n="settings.export.title">Escolha o que exportar</h3>
         <div class="deck-select" id="export-deck-select"></div>
-        <p>O baralho exportado inclui a palavra/frase em francês (com áudio configurável no Anki) e a tradução em português, com o mesmo par pergunta/resposta usado aqui no app.</p>
-        <button class="btn btn-gold btn-block" id="export-btn" style="max-width:320px; margin:0 auto;">Gerar arquivo .apkg</button>
+        <p data-i18n="settings.export.descFr">O baralho exportado inclui a palavra/frase em francês (com áudio configurável no Anki) e a tradução em português, com o mesmo par pergunta/resposta usado aqui no app.</p>
+        <button class="btn btn-gold btn-block" id="export-btn" style="max-width:320px; margin:0 auto;" data-i18n="settings.export.button">Gerar arquivo .apkg</button>
         <div class="export-status" id="export-status"></div>
       </div>
     </div>
@@ -3747,16 +3747,16 @@ footer.app-footer img{ height:40px; opacity:.85; }
        #user-profile-btn{display:none} mobile -- ver bloco de tema mobile;
        os outros 3 não têm aba fixa própria na barra inferior, então
        continuam só alcançáveis via "Mais" lá). -->
-  <button class="user-dropdown-item mais-extra-tab" id="user-profile-btn">👤 Meu perfil</button>
-  <button class="user-dropdown-item mais-extra-tab" id="mais-conjugaison-btn" data-tab="conjugaison">✍️ Conjugação</button>
-  <button class="user-dropdown-item mais-extra-tab" id="mais-challenges-btn" data-tab="challenges">🎯 Desafios</button>
-  <button class="user-dropdown-item mais-extra-tab" id="leaderboard-btn">🏆 Ranking</button>
-  <button class="user-dropdown-item" id="support-materials-btn">📚 Material de apoio</button>
-  <button class="user-dropdown-item mais-extra-tab" id="user-settings-btn">⚙️ Configurações</button>
-  <button class="user-dropdown-item admin-only-nav mais-extra-tab" id="admin-badges-btn" style="display:none;">🛠️ Painel de Admin</button>
+  <button class="user-dropdown-item mais-extra-tab" id="user-profile-btn" data-i18n="menu.profile">👤 Meu perfil</button>
+  <button class="user-dropdown-item mais-extra-tab" id="mais-conjugaison-btn" data-tab="conjugaison" data-i18n="menu.conjugation">✍️ Conjugação</button>
+  <button class="user-dropdown-item mais-extra-tab" id="mais-challenges-btn" data-tab="challenges" data-i18n="menu.challenges">🎯 Desafios</button>
+  <button class="user-dropdown-item mais-extra-tab" id="leaderboard-btn" data-i18n="menu.ranking">🏆 Ranking</button>
+  <button class="user-dropdown-item" id="support-materials-btn" data-i18n="menu.supportMaterials">📚 Material de apoio</button>
+  <button class="user-dropdown-item mais-extra-tab" id="user-settings-btn" data-i18n="menu.settings">⚙️ Configurações</button>
+  <button class="user-dropdown-item admin-only-nav mais-extra-tab" id="admin-badges-btn" style="display:none;" data-i18n="menu.admin">🛠️ Painel de Admin</button>
   <button class="user-dropdown-item" id="report-menu-btn" data-i18n="report.entry.menuItem">⚑ Reportar problema</button>
   <div class="user-dropdown-sep"></div>
-  <button class="user-dropdown-item danger" id="logout-btn">Sair da conta</button>
+  <button class="user-dropdown-item danger" id="logout-btn" data-i18n="menu.logout">Sair da conta</button>
 </div>
 
 <!-- ===== MODAL: IMPORTAR DESAFIOS VIA JSON (admin) ===== -->

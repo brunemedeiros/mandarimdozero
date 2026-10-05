@@ -65,4 +65,36 @@ window.I18N_CATALOG['en'] = {
 
   'settings.uiLanguage.title': 'Interface language', // ALTA
   'settings.uiLanguage.sub': 'Changes only the app\'s text (menus, buttons, and messages). It doesn\'t change the language you\'re studying.', // ALTA
+
+  // Fase 6 lote 1
+  'settings.title': 'Settings', // ALTA
+  'settings.subtitle': 'Your account, preferences, and data export.', // ALTA
+  'settings.tab.general': 'General', // ALTA
+  'settings.tab.notifications': '🔔 Notifications', // ALTA
+  'settings.tab.export': '📦 Export', // ALTA
+  'settings.section.account': 'Account', // ALTA
+  'settings.account.email': 'Email', // ALTA
+  'settings.account.provider': 'Signed in with', // ALTA
+  'settings.account.moreSoon': 'More account options coming soon.', // ALTA
+  'settings.section.preferences': 'Preferences', // ALTA
+  'settings.pref.dark.title': 'Dark mode', // ALTA
+  'settings.pref.dark.sub': 'Uses the dark theme instead of the light one, regardless of your system setting.', // ALTA
+  'settings.pref.cloze.title': 'Always type in the fill-in-the-blank exercise', // MÉDIA
+  'settings.pref.sound.title': 'Correct/incorrect sound in exercises', // ALTA
+  'settings.pref.sound.sub': 'Plays a short sound after each answer, in addition to the correct/incorrect color.', // ALTA
+  'settings.export.title': 'Choose what to export', // ALTA
+  'settings.export.button': 'Generate .apkg file', // ALTA
+  'settings.pref.cloze.subFr': 'Instead of choosing from options, type the missing word (Clozemaster style).', // ALTA
+  'settings.export.descFr': 'The exported deck includes the French word/phrase (with audio you can set up in Anki) and the Portuguese translation, using the same question/answer pair as in the app.', // MÉDIA
+  'settings.aria.section': 'Settings section', // ALTA
+  'menu.profile': '👤 My profile', // ALTA
+  'menu.ranking': '🏆 Leaderboard', // MÉDIA
+  'menu.supportMaterials': '📚 Study materials', // MÉDIA
+  'menu.settings': '⚙️ Settings', // ALTA
+  'menu.admin': '🛠️ Admin panel', // ALTA
+  'menu.logout': 'Sign out', // ALTA
+  'menu.conjugation': '✍️ Conjugation', // ALTA
+  'menu.challenges': '🎯 Challenges', // ALTA
+  'settings.pref.cloze.subZh': 'Instead of choosing from options, type the missing pinyin (Clozemaster style).', // ALTA
+  'settings.export.descZh': 'The exported deck includes pinyin, characters, and translation on each card, using the same question/answer pair as in the app.', // ALTA
 };
