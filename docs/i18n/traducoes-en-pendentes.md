@@ -991,3 +991,655 @@ Observações: "Leaderboard" (ranking) e "Study materials" (material de apoio) t
 | fr.dictation.unmute | Ativar som | Unmute | alta | aprovado (2026-10-05) |
 | fr.dictation.placeholder | Digite aqui o que você ouviu... | Type what you heard here... | alta | aprovado (2026-10-05) |
 | fr.dictation.scoreTextHtml | Você escreveu <strong>{matches} de {total}</strong> palavras corretamente. Você atingiu uma pontuação de {score} pontos ({score}%). | You wrote <strong>{matches} of {total}</strong> words correctly. You scored {score} points ({score}%). | alta | aprovado (2026-10-05) |
+
+## Fase 6, lote 4 (Admin A)
+
+| Chave | PT | EN | Confiança | Status |
+|---|---|---|---|---|
+| admin.common.adminOnly | Esta tela é só pra administração da plataforma. | This screen is for the platform administration only. | alta | needs_review |
+| admin.common.removedUser | (usuário removido) | (user removed) | alta | needs_review |
+| admin.common.noneSelected | Nenhum aluno selecionado | No student selected | alta | needs_review |
+| admin.common.selectedCount | {n} aluno selecionado / {n} alunos selecionados | {n} student selected / {n} students selected | alta | needs_review |
+| admin.common.searchPlaceholder | Buscar por nome ou @usuário... | Search by name or @username... | alta | needs_review |
+| admin.common.langFilterAria | Filtrar por idioma | Filter by language | alta | needs_review |
+| admin.common.all | Todos | All | alta | needs_review |
+| admin.common.forNStudents |  pra {n} alunos |  for {n} students | alta | needs_review |
+| admin.common.forTheseStudents |  esses alunos |  these students | alta | needs_review |
+| admin.common.forThisStudent |  este aluno |  this student | alta | needs_review |
+| admin.common.forNoStudent |  nenhum aluno selecionado |  no student selected | alta | needs_review |
+| admin.common.selectAtLeastOne | Selecione ao menos um aluno. | Select at least one student. | alta | needs_review |
+| admin.common.students | Alunos | Students | alta | needs_review |
+| admin.common.date | Data | Date | alta | needs_review |
+| admin.common.delete | Apagar | Delete | alta | needs_review |
+| admin.students.lang.mandarim | Chinês | Chinese | alta | needs_review |
+| admin.students.lang.portugues | Português (em breve) | Portuguese (coming soon) | alta | needs_review |
+| admin.students.linkedOn | vinculado em {date} | linked on {date} | alta | needs_review |
+| admin.students.metricsTitle | Ver métricas | View metrics | alta | needs_review |
+| admin.students.removeLinkTitle | Remover vínculo | Remove link | alta | needs_review |
+| admin.students.none | Nenhum aluno vinculado ainda. | No student linked yet. | alta | needs_review |
+| admin.students.linkTitle | Vincular aluno | Link a student | alta | needs_review |
+| admin.students.accountLabel | Conta do aluno | Student account | alta | needs_review |
+| admin.students.selectAccount | Selecione uma conta... | Select an account... | alta | needs_review |
+| admin.students.link | Vincular | Link | alta | needs_review |
+| admin.students.yourStudents | Seus alunos ({n}) | Your students ({n}) | alta | needs_review |
+| admin.students.linkedToast | ✓ @{username} vinculado como aluno. | ✓ @{username} linked as a student. | alta | needs_review |
+| admin.students.removeConfirm | Remover este vínculo? O progresso e histórico do aluno continuam preservados -- ele só deixa de aparecer na sua lista. | Remove this link? The student's progress and history are preserved -- they just stop appearing in your list. | alta | needs_review |
+| admin.students.metrics.loading | Carregando métricas... | Loading metrics... | alta | needs_review |
+| admin.students.metrics.failed | Não foi possível carregar as métricas agora. | We couldn't load the metrics right now. | alta | needs_review |
+| admin.students.metrics.noCards | Você ainda não criou nenhum cartão pra este aluno, na aba "📇 Flashcards". | You haven't created any cards for this student yet, in the "📇 Flashcards" tab. | alta | needs_review |
+| admin.students.metrics.noRecord | sem registro | no record | alta | needs_review |
+| admin.students.metrics.today | hoje | today | alta | needs_review |
+| admin.students.metrics.yesterday | ontem | yesterday | alta | needs_review |
+| admin.students.metrics.daysAgo | {n} dias atrás | {n} days ago | alta | needs_review |
+| admin.students.metrics.lastActivity | Última atividade geral: <strong>{label}</strong> | Last overall activity: <strong>{label}</strong> | alta | needs_review |
+| admin.students.metrics.cardsCreated | Cartões que você criou pra ele: <strong>{n} ativos</strong> | Cards you created for them: <strong>{n} active</strong> | alta | needs_review |
+| admin.students.metrics.archivedSuffix | , {n} arquivados | , {n} archived | alta | needs_review |
+| admin.students.metrics.neverReviewed | Ainda nunca revisados: <strong>{n}</strong> | Never reviewed yet: <strong>{n}</strong> | alta | needs_review |
+| admin.students.metrics.memory | Memória: <strong>{weak} fracas</strong> · {medium} medianas · {strong} fortes | Memory: <strong>{weak} weak</strong> · {medium} medium · {strong} strong | alta | needs_review |
+| admin.premium.adminOnly | Só a administração pode acessar esta seção. | Only the administration can access this section. | alta | needs_review |
+| admin.premium.title | ⭐ Ativar/remover Premium | ⭐ Activate/remove Premium | alta | needs_review |
+| admin.premium.hint | Busque uma conta por @username e ative o plano Premium pra ela -- funciona pra QUALQUER conta registrada, vinculada a você como aluno ou não. Sem cobrança real ainda (sem checkout configurado) -- é uma concessão manual, reversível a qualquer momento. | Search for an account by @username and activate the Premium plan for it -- it works for ANY registered account, whether linked to you as a student or not. No real billing yet (no checkout set up) -- it is a manual grant, reversible at any time. | alta | needs_review |
+| admin.premium.usernamePlaceholder | ex: joaosilva | e.g. johnsmith | alta | needs_review |
+| admin.premium.search | Buscar conta | Find account | alta | needs_review |
+| admin.premium.notFound | Não achei ninguém com esse @username. Confira a grafia. | I couldn't find anyone with that @username. Check the spelling. | alta | needs_review |
+| admin.premium.currentPlan | Plano atual:  | Current plan:  | alta | needs_review |
+| admin.premium.planFree | 🔒 Grátis | 🔒 Free | alta | needs_review |
+| admin.premium.remove | Remover Premium | Remove Premium | alta | needs_review |
+| admin.premium.make | Tornar Premium | Make Premium | alta | needs_review |
+| admin.premium.nowPremium | ✓ @{username} agora é Premium. | ✓ @{username} is now Premium. | alta | needs_review |
+| admin.premium.removed | ✓ Premium removido de @{username}. | ✓ Premium removed from @{username}. | alta | needs_review |
+| admin.classLogs.fieldTopic | 📌 Tópico | 📌 Topic | alta | needs_review |
+| admin.classLogs.fieldHomework | 📝 Lição de casa | 📝 Homework | alta | needs_review |
+| admin.classLogs.fieldObservations | 🔎 Observações | 🔎 Observations | alta | needs_review |
+| admin.classLogs.fieldNotes | 💬 Notas | 💬 Notes | alta | needs_review |
+| admin.classLogs.topicOpt | Tópico (opcional) | Topic (optional) | alta | needs_review |
+| admin.classLogs.homeworkOpt | Lição de casa (opcional) | Homework (optional) | alta | needs_review |
+| admin.classLogs.observationsOpt | Observações (opcional) | Observations (optional) | alta | needs_review |
+| admin.classLogs.notesOpt | Notas / texto livre (opcional) | Notes / free text (optional) | alta | needs_review |
+| admin.classLogs.noFields | (sem campos preenchidos) | (no fields filled in) | alta | needs_review |
+| admin.classLogs.listTitle | Aulas registradas ({n}) | Recorded classes ({n}) | alta | needs_review |
+| admin.classLogs.emptyFor | Nenhuma aula registrada ainda pra | No class recorded yet for | alta | needs_review |
+| admin.classLogs.deleteConfirm | Apagar este registro de aula? Essa ação não pode ser desfeita. | Delete this class record? This action cannot be undone. | alta | needs_review |
+| admin.classLogs.deleted | ✓ Registro apagado. | ✓ Record deleted. | alta | needs_review |
+| admin.classLogs.updated | ✓ Aula atualizada. | ✓ Class updated. | alta | needs_review |
+| admin.classLogs.register | Registrar aula | Record class | alta | needs_review |
+| admin.classLogs.pickStudentsHint | Selecione os alunos desta aula. | Select this class's students. | alta | needs_review |
+| admin.classLogs.newTitle | Nova aula | New class | alta | needs_review |
+| admin.classLogs.needStudent | Selecione ao menos um aluno acima pra poder registrar a aula. | Select at least one student above to be able to record the class. | alta | needs_review |
+| admin.classLogs.linkFirst | Vincule um aluno primeiro, na aba "🎓 Alunos", pra poder registrar aulas pra ele. | Link a student first, in the "🎓 Students" tab, to be able to record classes for them. | alta | needs_review |
+| admin.classLogs.topicPlaceholder | ex: passé composé | e.g. passé composé | alta | needs_review |
+| admin.classLogs.homeworkPlaceholder | ex: exercícios 1-3 da página 24 | e.g. exercises 1-3 on page 24 | alta | needs_review |
+| admin.classLogs.observationsPlaceholder | material usado, página do livro... | material used, book page... | alta | needs_review |
+| admin.classLogs.notesPlaceholder | vocabulário e gramática trabalhados na aula... | vocabulary and grammar covered in class... | alta | needs_review |
+| admin.classLogs.registeredN | ✓ Aula registrada pra {n} alunos. | ✓ Class recorded for {n} students. | alta | needs_review |
+| admin.classLogs.registered | ✓ Aula registrada. | ✓ Class recorded. | alta | needs_review |
+| admin.materials.badgeLink | 🔗 link | 🔗 link | alta | needs_review |
+| admin.materials.badgeFile | 📎 arquivo | 📎 file | alta | needs_review |
+| admin.materials.titleLabel | Título | Title | alta | needs_review |
+| admin.materials.descOpt | Descrição (opcional) | Description (optional) | alta | needs_review |
+| admin.materials.linkOpt | Link (opcional) | Link (optional) | alta | needs_review |
+| admin.materials.fileOpt | Arquivo (opcional) | File (optional) | alta | needs_review |
+| admin.materials.listTitle | Materiais enviados ({n}) | Materials sent ({n}) | alta | needs_review |
+| admin.materials.emptyFor | Nenhum material ainda pra | No material yet for | alta | needs_review |
+| admin.materials.deleteConfirm | Apagar este material de apoio? Essa ação não pode ser desfeita. | Delete this support material? This action cannot be undone. | alta | needs_review |
+| admin.materials.deleted | ✓ Material apagado. | ✓ Material deleted. | alta | needs_review |
+| admin.materials.updated | ✓ Material atualizado. | ✓ Material updated. | alta | needs_review |
+| admin.materials.pickStudentsHint | Selecione os alunos que vão receber este material. | Select the students who will receive this material. | alta | needs_review |
+| admin.materials.newTitle | Novo material | New material | alta | needs_review |
+| admin.materials.needStudent | Selecione ao menos um aluno acima pra poder enviar o material. | Select at least one student above to be able to send the material. | alta | needs_review |
+| admin.materials.linkFirst | Vincule um aluno primeiro, na aba "🎓 Alunos", pra poder enviar material de apoio pra ele. | Link a student first, in the "🎓 Students" tab, to be able to send support material to them. | alta | needs_review |
+| admin.materials.titlePlaceholder | ex: Resumo do passé composé | e.g. Passé composé summary | alta | needs_review |
+| admin.materials.descPlaceholder | explicação, contexto de uso... | explanation, context of use... | alta | needs_review |
+| admin.materials.send | Enviar material | Send material | alta | needs_review |
+| admin.materials.sentN | ✓ Material enviado pra {n} alunos. | ✓ Material sent to {n} students. | alta | needs_review |
+| admin.materials.sent | ✓ Material enviado. | ✓ Material sent. | alta | needs_review |
+| teacherLogs.err.needOneField | Preencha pelo menos um campo (tópico, lição de casa, observações ou texto livre). | Fill in at least one field (topic, homework, observations or free text). | alta | needs_review |
+| teacherLogs.err.saveFailed | Não foi possível salvar o registro agora. | We couldn't save the record right now. | alta | needs_review |
+| teacherMaterials.err.titleRequired | Digite um título pro material. | Enter a title for the material. | alta | needs_review |
+| teacherMaterials.err.needContent | Preencha ao menos a descrição, um link ou um arquivo. | Fill in at least the description, a link or a file. | alta | needs_review |
+| teacherMaterials.err.createFailed | Não foi possível criar o material agora. | We couldn't create the material right now. | alta | needs_review |
+| teacherMaterials.err.saveFailed | Não foi possível salvar agora. | We couldn't save right now. | alta | needs_review |
+| teacherFlashcards.err.clozePinyinRequired | Digite o pinyin da resposta (é o que o aluno vai digitar). | Enter the pinyin of the answer (it is what the student will type). | alta | needs_review |
+| flashcardModel.tts.providerNotConfigured | Geração de áudio por TTS ainda não está configurada no servidor (nenhum provedor de voz contratado). | Text-to-speech audio generation is not set up on the server yet (no voice provider contracted). | alta | needs_review |
+| flashcardModel.tts.providerNotImplemented | Geração de áudio por TTS ainda não está disponível -- infraestrutura em construção. | Text-to-speech audio generation is not available yet -- infrastructure under construction. | alta | needs_review |
+| flashcardModel.tts.rateLimited | Muitas gerações de áudio em pouco tempo -- espere alguns minutos e tente de novo. | Too many audio generations in a short time -- wait a few minutes and try again. | alta | needs_review |
+| flashcardModel.tts.notAuthorized | Sem permissão para gerar áudio para este cartão. | You don't have permission to generate audio for this card. | alta | needs_review |
+| flashcardModel.tts.invalidSession | Sessão expirada -- faça login de novo. | Session expired -- log in again. | alta | needs_review |
+| flashcardModel.tts.textTooLong | Texto muito longo (máximo {max} caracteres). | Text too long (maximum {max} characters). | alta | needs_review |
+| flashcardModel.tts.missingText | Digite o texto a sintetizar. | Enter the text to synthesize. | alta | needs_review |
+| flashcardModel.tts.missingLanguage | Escolha o idioma da síntese. | Choose the synthesis language. | alta | needs_review |
+| flashcardModel.tts.uploadFailed | Áudio gerado, mas não foi possível salvá-lo -- tente de novo. | Audio generated, but it could not be saved -- try again. | alta | needs_review |
+| admin.flashcards.hint.flip | Imagem e áudio aparecem junto da frente do cartão. Nota é um lembrete só seu -- o aluno nunca vê. | Image and audio appear next to the front of the card. Note is a reminder just for you -- the student never sees it. | alta | needs_review |
+| admin.flashcards.hint.mc | Imagem e áudio aparecem junto da pergunta, acima das opções de múltipla escolha. Nota é um lembrete só seu -- o aluno nunca vê. | Image and audio appear next to the question, above the multiple-choice options. Note is a reminder just for you -- the student never sees it. | alta | needs_review |
+| admin.flashcards.hint.cloze | Imagem e áudio aparecem junto da frase com a lacuna. Nota é um lembrete só seu -- o aluno nunca vê. | Image and audio appear next to the sentence with the blank. Note is a reminder just for you -- the student never sees it. | alta | needs_review |
+| admin.flashcards.cardType.normal | Normal | Normal | alta | needs_review |
+| admin.flashcards.cardType.normalReversed | Normal com reverso | Normal with reverse | alta | needs_review |
+| admin.flashcards.cardType.multipleChoice | Múltipla escolha | Multiple choice | alta | needs_review |
+| admin.flashcards.cardType.typeAnswer | Digite a resposta | Type the answer | alta | needs_review |
+| admin.flashcards.cardType.cloze | Completar a frase (Cloze) | Fill in the blank (Cloze) | alta | needs_review |
+| admin.flashcards.badge.image | 🖼️ imagem | 🖼️ image | alta | needs_review |
+| admin.flashcards.badge.audio | 🎧 áudio | 🎧 audio | alta | needs_review |
+| admin.flashcards.badge.mc | 🔤 múltipla escolha | 🔤 multiple choice | alta | needs_review |
+| admin.flashcards.badge.cloze | 📝 completar frase | 📝 fill in the blank | alta | needs_review |
+| admin.flashcards.edit.title | Editar cartão | Edit card | alta | needs_review |
+| admin.flashcards.edit.modeFlip |  Flashcard normal |  Normal flashcard | alta | needs_review |
+| admin.flashcards.edit.modeMc |  Múltipla escolha |  Multiple choice | alta | needs_review |
+| admin.flashcards.edit.modeCloze |  Completar a frase |  Fill in the blank | alta | needs_review |
+| admin.flashcards.edit.question | Pergunta/termo | Question/term | alta | needs_review |
+| admin.flashcards.edit.mc1 | Outras opções -- opção errada 1 | Other options -- wrong option 1 | alta | needs_review |
+| admin.flashcards.edit.mc2 | Opção errada 2 (opcional) | Wrong option 2 (optional) | alta | needs_review |
+| admin.flashcards.edit.mc3 | Opção errada 3 (opcional) | Wrong option 3 (optional) | alta | needs_review |
+| admin.flashcards.edit.clozeSentence | Frase com lacuna (use ___ pra marcar o espaço) | Sentence with a blank (use ___ to mark the space) | alta | needs_review |
+| admin.flashcards.edit.clozeAnswer | Resposta certa | Correct answer | alta | needs_review |
+| admin.flashcards.edit.clozePinyin | Pinyin da resposta | Answer pinyin | alta | needs_review |
+| admin.flashcards.edit.image | Imagem | Image | alta | needs_review |
+| admin.flashcards.edit.hasOne |  (já tem uma -- escolha um arquivo só pra trocar) |  (it already has one -- choose a file only to replace it) | alta | needs_review |
+| admin.flashcards.edit.ownAudio | Áudio próprio | Own audio | alta | needs_review |
+| admin.flashcards.edit.hasOneAudio |  (já tem um -- escolha um arquivo só pra trocar) |  (it already has one -- choose a file only to replace it) | alta | needs_review |
+| admin.flashcards.edit.err.front | Digite a frente. | Enter the front. | alta | needs_review |
+| admin.flashcards.edit.err.back | Digite o verso. | Enter the back. | alta | needs_review |
+| admin.flashcards.edit.err.oneWrongOption | Digite pelo menos 1 opção errada. | Enter at least 1 wrong option. | alta | needs_review |
+| admin.flashcards.edit.err.oneBlank | A frase precisa ter exatamente um espaço marcado com ___. | The sentence must have exactly one space marked with ___. | alta | needs_review |
+| admin.flashcards.edit.err.answer | Digite a resposta certa. | Enter the correct answer. | alta | needs_review |
+| admin.flashcards.edit.err.pinyin | Digite o pinyin da resposta. | Enter the answer pinyin. | alta | needs_review |
+| admin.flashcards.edit.err.trans | Digite a tradução. | Enter the translation. | alta | needs_review |
+| admin.flashcards.native.privateNote | Nota (privada -- o aluno nunca vê) | Note (private -- the student never sees it) | alta | needs_review |
+| admin.flashcards.dest.rootDefault | Cartões da professora (padrão) | Teacher cards (default) | alta | needs_review |
+| admin.flashcards.dest.noDeck | 📂 <em>sem Deck (cartão anterior aos Decks)</em> ·  | 📂 <em>no Deck (card created before Decks)</em> ·  | alta | needs_review |
+| admin.flashcards.dest.deckFallback | Deck | Deck | alta | needs_review |
+| admin.flashcards.dest.moveTitle | Mover este cartão para outro Deck deste aluno | Move this card to another of this student's Decks | alta | needs_review |
+| admin.flashcards.dest.moveTo | Mover para… | Move to… | alta | needs_review |
+| admin.flashcards.dest.deleteTitle | Apagar este Deck (vazio) | Delete this Deck (empty) | alta | needs_review |
+| admin.flashcards.dest.deleteDisabledTitle | Só é possível apagar um Deck sem subdecks e sem cartões | You can only delete a Deck with no subdecks and no cards | alta | needs_review |
+| admin.flashcards.dest.countCards | ({n} cartão(ões) | ({n} card(s) | alta | needs_review |
+| admin.flashcards.dest.countSubdecks | , {n} subdeck(s) | , {n} subdeck(s) | alta | needs_review |
+| admin.flashcards.dest.treeTitle | Árvore de Decks | Deck tree | alta | needs_review |
+| admin.flashcards.dest.deleteConfirm | Apagar o Deck "{name}"? Ele está vazio. | Delete the Deck "{name}"? It is empty. | alta | needs_review |
+| admin.flashcards.dest.deleteFailed | Não foi possível apagar o Deck. | We couldn't delete the Deck. | alta | needs_review |
+| admin.flashcards.dest.deleted | ✓ Deck apagado. | ✓ Deck deleted. | alta | needs_review |
+| admin.flashcards.dest.destAria | Deck de destino de {username} | Destination Deck of {username} | alta | needs_review |
+| admin.flashcards.dest.subnamePlaceholder | Nome do novo subdeck (dentro do Deck escolhido) | New subdeck name (inside the chosen Deck) | alta | needs_review |
+| admin.flashcards.dest.newSub | + Subdeck | + Subdeck | alta | needs_review |
+| admin.flashcards.dest.treeAria | Árvore de Decks de {username} | Deck tree of {username} | alta | needs_review |
+| admin.flashcards.dest.subCreated | ✓ Subdeck criado. | ✓ Subdeck created. | alta | needs_review |
+| admin.flashcards.dest.pickStudent | Selecione ao menos um aluno para escolher o Deck de destino. | Select at least one student to choose the destination Deck. | alta | needs_review |
+| admin.flashcards.dest.preparing | Preparando os Decks… | Preparing the Decks… | alta | needs_review |
+| admin.flashcards.row.previewTitle | Pré-visualizar como o aluno vai ver na Revisão | Preview how the student will see it in Review | alta | needs_review |
+| admin.flashcards.list.activeTitle | Cartões ativos ({n}) | Active cards ({n}) | alta | needs_review |
+| admin.flashcards.list.emptyFor | Nenhum cartão ainda pra | No cards yet for | alta | needs_review |
+| admin.flashcards.move.notFound | Cartão não encontrado. | Card not found. | alta | needs_review |
+| admin.flashcards.move.failed | Não foi possível mover o cartão. | We couldn't move the card. | alta | needs_review |
+| admin.flashcards.move.moved | ✓ Cartão movido. | ✓ Card moved. | alta | needs_review |
+| admin.flashcards.delete.deleted | Cartão apagado. | Card deleted. | alta | needs_review |
+| admin.flashcards.linkFirst | Vincule um aluno primeiro, na aba "🎓 Alunos", pra poder criar flashcards pra ele. | Link a student first, in the "🎓 Students" tab, to be able to create flashcards for them. | alta | needs_review |
+| admin.flashcards.pickStudentsHint | Selecione os alunos que vão receber este cartão. | Select the students who will receive this card. | alta | needs_review |
+| admin.flashcards.destTitle | Destino (Deck de cada aluno) | Destination (each student's Deck) | alta | needs_review |
+| admin.flashcards.destHint | Cada aluno tem a sua própria árvore de Decks. Por padrão o cartão vai para "Cartões da professora" do aluno; escolha um subdeck se quiser organizar. | Each student has their own Deck tree. By default the card goes to the student's "Teacher cards"; choose a subdeck if you want to organize it. | alta | needs_review |
+| admin.flashcards.cardTitle | Cartão | Card | alta | needs_review |
+| admin.flashcards.needStudent | Selecione ao menos um aluno acima pra poder criar o cartão. | Select at least one student above to be able to create the card. | alta | needs_review |
+| admin.flashcards.createdPartial | ✓ {ok} cartão(ões) criado(s); falhou pra: {failed}. | ✓ {ok} card(s) created; failed for: {failed}. | alta | needs_review |
+| admin.flashcards.createdN | ✓ {n} cartões criados. | ✓ {n} cards created. | alta | needs_review |
+| admin.flashcards.created | ✓ Cartão criado. | ✓ Card created. | alta | needs_review |
+
+## Fase 6, lote 4 (Admin B)
+
+| Chave | PT | EN | Confiança | Status |
+|---|---|---|---|---|
+| admin.reports.status.novo | Novo | New | alta | needs_review |
+| admin.reports.status.em_analise | Em análise | In review | alta | needs_review |
+| admin.reports.status.confirmado | Confirmado | Confirmed | alta | needs_review |
+| admin.reports.status.em_desenvolvimento | Em desenvolvimento | In development | alta | needs_review |
+| admin.reports.status.resolvido | Resolvido | Resolved | alta | needs_review |
+| admin.reports.status.nao_reproduzido | Não reproduzido | Not reproduced | alta | needs_review |
+| admin.reports.status.recusado | Recusado | Declined | alta | needs_review |
+| admin.reports.status.duplicado | Duplicado | Duplicate | alta | needs_review |
+| admin.reports.priority.baixa | Baixa | Low | alta | needs_review |
+| admin.reports.priority.media | Média | Medium | alta | needs_review |
+| admin.reports.priority.alta | Alta | High | alta | needs_review |
+| admin.reports.priority.critica | Crítica | Critical | alta | needs_review |
+| admin.reports.lang.frances | Francês | French | alta | needs_review |
+| admin.reports.lang.mandarim | Chinês | Chinese | alta | needs_review |
+| admin.reports.screen.path | Estudo | Study | alta | needs_review |
+| admin.reports.screen.review | Revisão | Review | alta | needs_review |
+| admin.reports.screen.conjugaison | Conjugação | Conjugation | alta | needs_review |
+| admin.reports.screen.challenges | Desafios | Challenges | alta | needs_review |
+| admin.reports.screen.dictation | Ditado | Dictation | alta | needs_review |
+| admin.reports.screen.profile | Perfil | Profile | alta | needs_review |
+| admin.reports.screen.progress | Progresso | Progress | alta | needs_review |
+| admin.reports.screen.goals | Metas | Goals | alta | needs_review |
+| admin.reports.screen.leaderboard | Ranking | Leaderboard | alta | needs_review |
+| admin.reports.screen.settings | Configurações | Settings | alta | needs_review |
+| admin.reports.screen.admin_badges | Painel de Admin | Admin panel | alta | needs_review |
+| admin.reports.reporter.loggedNoProfile | conta logada (perfil não encontrado) | logged-in account (profile not found) | alta | needs_review |
+| admin.reports.reporter.guest | convidada | guest | média | needs_review |
+| admin.reports.ctx.none | (sem contexto adicional) | (no additional context) | alta | needs_review |
+| admin.reports.filter.allStatus | Todos os status | All statuses | alta | needs_review |
+| admin.reports.filter.kindAll | Problemas e sugestões | Problems and suggestions | alta | needs_review |
+| admin.reports.filter.kindProblems | Só problemas | Problems only | alta | needs_review |
+| admin.reports.filter.kindSuggestions | Só sugestões | Suggestions only | alta | needs_review |
+| admin.reports.filter.allLanguages | Todos os idiomas | All languages | alta | needs_review |
+| admin.reports.row.details | Ver detalhes | View details | alta | needs_review |
+| admin.reports.empty | Nenhum report encontrado com esse filtro. | No reports found with this filter. | alta | needs_review |
+| admin.reports.title | ⚑ Reports de bugs e sugestões | ⚑ Bug reports and suggestions | alta | needs_review |
+| admin.reports.hint | Enviados pela bandeira ⚑ (topbar, menu do usuário ou dentro dos exercícios). Convidados também podem reportar -- reports sem conta e sem e-mail informado aparecem como "convidada". | Sent through the ⚑ flag (top bar, user menu or inside exercises). Guests can report too -- reports with no account and no email appear as "guest". | alta | needs_review |
+| admin.reports.detail.suggestion | 💡 Sugestão | 💡 Suggestion | alta | needs_review |
+| admin.reports.detail.problem | ⚑ Problema | ⚑ Problem | alta | needs_review |
+| admin.reports.detail.notInformed | (não informado) | (not provided) | alta | needs_review |
+| admin.reports.detail.screenshotView | 📎 Ver captura de tela anexada | 📎 View attached screenshot | alta | needs_review |
+| admin.reports.detail.screenshotNone | (sem captura anexada) | (no screenshot attached) | alta | needs_review |
+| admin.reports.reply.lastSentTo | Última resposta enviada em {date} para {email}: | Last reply sent on {date} to {email}: | alta | needs_review |
+| admin.reports.reply.lastSent | Última resposta enviada em {date}: | Last reply sent on {date}: | alta | needs_review |
+| admin.reports.reply.err.forbidden | Sessão sem permissão de admin -- faça login de novo. | Session without admin permission -- sign in again. | alta | needs_review |
+| admin.reports.reply.err.report_not_found | Este report não foi encontrado. | This report was not found. | alta | needs_review |
+| admin.reports.reply.err.no_email | Sem e-mail associado a este report. | No email associated with this report. | alta | needs_review |
+| admin.reports.reply.err.email_not_configured | Envio de e-mail ainda não configurado no servidor (RESEND_API_KEY/RESEND_FROM_EMAIL). | Email sending is not yet configured on the server (RESEND_API_KEY/RESEND_FROM_EMAIL). | alta | needs_review |
+| admin.reports.reply.err.resend_failed | Não foi possível enviar o e-mail agora. Tente de novo em instantes. | We couldn't send the email right now. Try again in a moment. | alta | needs_review |
+| admin.reports.reply.err.missing_fields | Preencha assunto e mensagem. | Fill in the subject and message. | alta | needs_review |
+| admin.reports.reply.err.generic | Não foi possível enviar a resposta agora. | We couldn't send the reply right now. | alta | needs_review |
+| admin.reports.toast.updated | ✓ Report atualizado. | ✓ Report updated. | alta | needs_review |
+| admin.reports.reply.send | Enviar resposta | Send reply | alta | needs_review |
+| admin.reports.toast.replySent | ✓ Resposta enviada para {to}. | ✓ Reply sent to {to}. | alta | needs_review |
+| admin.notifications.event.xp_earned | ⭐ XP ganho | ⭐ XP earned | alta | needs_review |
+| admin.notifications.event.achievement_unlocked | 🏅 Badge desbloqueado | 🏅 Badge unlocked | alta | needs_review |
+| admin.notifications.event.mission_completed | 🎯 Missão concluída | 🎯 Mission completed | alta | needs_review |
+| admin.notifications.event.streak_completed | 🔥 Sequência mantida | 🔥 Streak kept | alta | needs_review |
+| admin.notifications.event.featured_badge_reminder | 🏅 Lembrete de badge em destaque | 🏅 Featured badge reminder | alta | needs_review |
+| admin.notifications.event.user_inactive_1 | 👋 Reengajamento -- 1 dia sumida | 👋 Re-engagement -- 1 day inactive | média | needs_review |
+| admin.notifications.event.user_inactive_3 | 👋 Reengajamento -- 3 dias sumida | 👋 Re-engagement -- 3 days inactive | média | needs_review |
+| admin.notifications.event.user_inactive_5 | 👋 Reengajamento -- 5 dias sumida | 👋 Re-engagement -- 5 days inactive | média | needs_review |
+| admin.notifications.event.user_inactive_7 | 👋 Reengajamento -- 7 dias sumida | 👋 Re-engagement -- 7 days inactive | média | needs_review |
+| admin.notifications.event.user_inactive_9 | 👋 Reengajamento -- 9 dias sumida | 👋 Re-engagement -- 9 days inactive | média | needs_review |
+| admin.notifications.event.user_inactive_15 | 👋 Reengajamento -- 15 dias sumida | 👋 Re-engagement -- 15 days inactive | média | needs_review |
+| admin.notifications.event.user_inactive_20 | 👋 Reengajamento -- 20 dias sumida | 👋 Re-engagement -- 20 days inactive | média | needs_review |
+| admin.notifications.event.user_inactive_30 | 👋 Reengajamento -- 30 dias sumida | 👋 Re-engagement -- 30 days inactive | média | needs_review |
+| admin.notifications.hint.xp_earned | quantidade de XP ganho | amount of XP earned | alta | needs_review |
+| admin.notifications.hint.achievement_unlocked | nome e emoji do badge | badge name and emoji | alta | needs_review |
+| admin.notifications.hint.mission_completed | texto e ícone da Missão do dia concluída | text and icon of the completed Daily Mission | alta | needs_review |
+| admin.notifications.hint.streak_completed | dias de sequência | streak days | alta | needs_review |
+| admin.notifications.hint.none | (sem placeholders) | (no placeholders) | alta | needs_review |
+| admin.notifications.err.duplicate | Já existe uma variante idêntica (mesmo evento/canal/idioma/texto). | An identical variant already exists (same event/channel/language/text). | alta | needs_review |
+| admin.notifications.err.eventId | Dê um identificador de evento válido (ex: xp_earned). | Give a valid event identifier (e.g. xp_earned). | alta | needs_review |
+| admin.notifications.err.bodyRequired | Escreva o texto da notificação. | Write the notification text. | alta | needs_review |
+| admin.notifications.err.createFailed | Não foi possível criar agora. | We couldn't create it right now. | alta | needs_review |
+| admin.notifications.channel.emailLower | e-mail | email | alta | needs_review |
+| admin.notifications.channel.inAppLower | no app | in the app | alta | needs_review |
+| admin.notifications.status.active | ativa | active | alta | needs_review |
+| admin.notifications.status.inactive | desativada | disabled | alta | needs_review |
+| admin.notifications.btn.deactivate | Desativar | Disable | alta | needs_review |
+| admin.notifications.btn.activate | Ativar | Enable | alta | needs_review |
+| admin.notifications.btn.edit | Editar | Edit | alta | needs_review |
+| admin.notifications.btn.delete | Excluir | Delete | alta | needs_review |
+| admin.notifications.rule.title | ⭐ Regra de "XP ganho" | ⭐ "XP earned" rule | alta | needs_review |
+| admin.notifications.rule.hint | Controla quando a notificação de XP dispara -- não o texto dela (isso fica nas variantes abaixo). Revisões de palavras já bem sabidas dão XP bem baixo de propósito; abaixo do mínimo, a notificação nem é criada. | Controls when the XP notification fires -- not its text (that is in the variants below). Reviews of well-known words give very low XP on purpose; below the minimum, the notification is not even created. | alta | needs_review |
+| admin.notifications.rule.minXp | XP mínimo pra notificar | Minimum XP to notify | alta | needs_review |
+| admin.notifications.rule.minXpPh | ex: 5 (0 ou vazio = sem piso) | e.g. 5 (0 or empty = no minimum) | alta | needs_review |
+| admin.notifications.rule.cooldown | Intervalo mínimo entre notificações (minutos) | Minimum interval between notifications (minutes) | alta | needs_review |
+| admin.notifications.rule.dailyCap | Máximo por dia | Maximum per day | alta | needs_review |
+| admin.notifications.rule.save | Salvar regra | Save rule | alta | needs_review |
+| admin.notifications.new.title | Nova variante | New variant | alta | needs_review |
+| admin.notifications.new.event | Evento | Event | alta | needs_review |
+| admin.notifications.new.eventPh | ex: xp_earned | e.g. xp_earned | alta | needs_review |
+| admin.notifications.new.lang | Idioma do app | App language | alta | needs_review |
+| admin.notifications.new.langFr | 🇫🇷 Francês | 🇫🇷 French | alta | needs_review |
+| admin.notifications.new.langZh | 🇨🇳 Chinês | 🇨🇳 Chinese | alta | needs_review |
+| admin.notifications.new.channel | Canal | Channel | alta | needs_review |
+| admin.notifications.new.channelInApp | 📱 No app | 📱 In the app | alta | needs_review |
+| admin.notifications.new.channelEmail | 📧 E-mail | 📧 Email | alta | needs_review |
+| admin.notifications.new.hint | Push não aparece aqui -- ele reaproveita o texto da variante "No app" do mesmo evento, sem pool próprio. No e-mail, o título vira o assunto. Placeholders tipo {{amount}}/{{days}} são substituídos pelo dado real do evento -- veja a dica de cada evento acima. | Push does not appear here -- it reuses the text of the "In the app" variant of the same event, with no pool of its own. In email, the title becomes the subject. Placeholders like {{amount}}/{{days}} are replaced with the real event data -- see the hint for each event above. | alta | needs_review |
+| admin.notifications.new.titleLabel | Título (opcional) | Title (optional) | alta | needs_review |
+| admin.notifications.new.titlePh | ex: Nova conquista! | e.g. New achievement! | alta | needs_review |
+| admin.notifications.new.icon | Emoji (opcional) | Emoji (optional) | alta | needs_review |
+| admin.notifications.new.body | Texto | Text | alta | needs_review |
+| admin.notifications.new.bodyPh | Ei, você esqueceu de mim? 🥺 | Hey, did you forget about me? 🥺 | alta | needs_review |
+| admin.notifications.new.create | Criar variante | Create variant | alta | needs_review |
+| admin.notifications.empty | Nenhuma variante criada ainda. | No variants created yet. | alta | needs_review |
+| admin.notifications.toast.ruleSaved | ✓ Regra salva. | ✓ Rule saved. | alta | needs_review |
+| admin.notifications.toast.created | ✓ Variante criada. | ✓ Variant created. | alta | needs_review |
+| admin.notifications.toast.updated | ✓ Variante atualizada. | ✓ Variant updated. | alta | needs_review |
+| admin.notifications.confirm.delete | Excluir esta variante de notificação? | Delete this notification variant? | alta | needs_review |
+| admin.badges.err.idShort | ID do badge precisa ter pelo menos 2 caracteres (letras minúsculas, números ou _). | Badge ID must have at least 2 characters (lowercase letters, numbers or _). | alta | needs_review |
+| admin.badges.err.name | Dê um nome pro badge. | Give the badge a name. | alta | needs_review |
+| admin.badges.err.icon | Escolha um emoji pro badge. | Choose an emoji for the badge. | alta | needs_review |
+| admin.badges.err.idExists | Já existe um badge com o id "{id}". | A badge with the id "{id}" already exists. | alta | needs_review |
+| admin.badges.err.createFailed | Não foi possível criar o badge agora. | We couldn't create the badge right now. | alta | needs_review |
+| admin.badges.err.idChangeFailed | Não foi possível trocar o id agora. | We couldn't change the id right now. | alta | needs_review |
+| admin.badges.err.migrateFailed | O badge novo foi criado, mas as concessões antigas não puderam ser migradas. Tente de novo. | The new badge was created, but the old grants couldn't be migrated. Try again. | alta | needs_review |
+| admin.badges.err.alreadyHas | @{username} já tem esse badge. | @{username} already has this badge. | alta | needs_review |
+| admin.badges.err.grantFailed | Não foi possível conceder agora. | We couldn't grant it right now. | alta | needs_review |
+| admin.badges.grant.createFirst | Crie um badge primeiro | Create a badge first | alta | needs_review |
+| admin.badges.builtin.auto | automático, não editável aqui | automatic, not editable here | alta | needs_review |
+| admin.badges.members | one: {n} pessoa / other: {n} pessoas | one: {n} person / other: {n} people | alta | needs_review |
+| admin.badges.catalog.clickManage | clique pra gerenciar | click to manage | alta | needs_review |
+| admin.badges.catalog.editTitle | Editar badge | Edit badge | alta | needs_review |
+| admin.badges.catalog.deleteTitle | Excluir badge (e todas as concessões dele) | Delete badge (and all its grants) | alta | needs_review |
+| admin.badges.catalog.empty | Nenhum badge criado ainda. | No badges created yet. | alta | needs_review |
+| admin.badges.grants.grantedOn | concedido em {date} | granted on {date} | alta | needs_review |
+| admin.badges.grants.revoke | Revogar | Revoke | alta | needs_review |
+| admin.badges.grants.empty | Nenhum badge concedido ainda. | No badges granted yet. | alta | needs_review |
+| admin.badges.create.title | Criar novo badge | Create new badge | alta | needs_review |
+| admin.badges.create.id | ID (só letras minúsculas/números/_) | ID (lowercase letters/numbers/_ only) | alta | needs_review |
+| admin.badges.create.idPh | ex: colaboradora | e.g. contributor | alta | needs_review |
+| admin.badges.create.name | Nome | Name | alta | needs_review |
+| admin.badges.create.namePh | ex: Colaboradora | e.g. Contributor | alta | needs_review |
+| admin.badges.create.icon | Emoji | Emoji | alta | needs_review |
+| admin.badges.create.descPh | ex: Ajudou a sugerir melhorias no app | e.g. Helped suggest improvements to the app | alta | needs_review |
+| admin.badges.create.btn | Criar badge | Create badge | alta | needs_review |
+| admin.badges.grant.title | Conceder badge | Grant badge | alta | needs_review |
+| admin.badges.grant.badge | Badge | Badge | alta | needs_review |
+| admin.badges.grant.username | @username de quem vai receber | @username of the recipient | alta | needs_review |
+| admin.badges.grant.usernamePh | username | username | alta | needs_review |
+| admin.badges.grant.note | Nota (opcional, só pra você) | Note (optional, only for you) | alta | needs_review |
+| admin.badges.grant.notePh | ex: reportou o bug do streak | e.g. reported the streak bug | alta | needs_review |
+| admin.badges.grant.btn | Conceder | Grant | alta | needs_review |
+| admin.badges.builtin.title | Badges automáticos | Automatic badges | alta | needs_review |
+| admin.badges.catalog.title | Catálogo (criados por você) | Catalog (created by you) | alta | needs_review |
+| admin.badges.grants.title | Concessões atuais | Current grants | alta | needs_review |
+| admin.badges.toast.created | ✓ Badge "{name}" criado. | ✓ Badge "{name}" created. | alta | needs_review |
+| admin.badges.grant.createBefore | Crie um badge antes de conceder. | Create a badge before granting. | alta | needs_review |
+| admin.badges.toast.granted | ✓ Badge concedido a @{username}. | ✓ Badge granted to @{username}. | alta | needs_review |
+| admin.badges.confirm.delete | Excluir este badge e todas as concessões dele? | Delete this badge and all its grants? | alta | needs_review |
+| admin.badges.manage.empty | Ninguém criou um perfil ainda. | Nobody has created a profile yet. | alta | needs_review |
+| admin.badges.manage.notePh | nota | note | alta | needs_review |
+| admin.badges.toast.members | ✓ Membros do badge atualizados. | ✓ Badge members updated. | alta | needs_review |
+| admin.badges.toast.updated | ✓ Badge "{name}" atualizado. | ✓ Badge "{name}" updated. | alta | needs_review |
+| admin.analytics.tab.path | 🗺️ Trilha | 🗺️ Trail | alta | needs_review |
+| admin.analytics.tab.review | 🔁 Revisão | 🔁 Review | alta | needs_review |
+| admin.analytics.tab.conjugaison | 📝 Conjugação | 📝 Conjugation | alta | needs_review |
+| admin.analytics.tab.dictation | 🎧 Ditados | 🎧 Dictations | alta | needs_review |
+| admin.analytics.tab.challenges | 🎯 Desafios | 🎯 Challenges | alta | needs_review |
+| admin.analytics.tab.leaderboard | 🏆 Ranking | 🏆 Leaderboard | alta | needs_review |
+| admin.analytics.tab.profile | 👤 Meu perfil | 👤 My profile | alta | needs_review |
+| admin.analytics.tab.progress | 📈 Progresso | 📈 Progress | alta | needs_review |
+| admin.analytics.tab.settings | ⚙️ Configurações | ⚙️ Settings | alta | needs_review |
+| admin.analytics.tab.admin_badges | 🛠️ Painel de admin | 🛠️ Admin panel | alta | needs_review |
+| admin.analytics.lesson.vocab_lesson | 📘 Lição de vocabulário | 📘 Vocabulary lesson | alta | needs_review |
+| admin.analytics.lesson.unit_checkpoint | ✅ Checkpoint de unidade | ✅ Unit checkpoint | alta | needs_review |
+| admin.analytics.lesson.flashcard_review | 🔁 Sessão de flashcards | 🔁 Flashcard session | alta | needs_review |
+| admin.analytics.lesson.speed_review | ⚡ Revisão rápida | ⚡ Speed review | alta | needs_review |
+| admin.analytics.lesson.match_game | 🧩 Jogo da memória | 🧩 Memory game | alta | needs_review |
+| admin.analytics.lesson.hanzi_lesson | 汉 Lição de hanzi | 汉 Hanzi lesson | alta | needs_review |
+| admin.analytics.lesson.hanzi_review | 汉 Revisão de hanzi | 汉 Hanzi review | alta | needs_review |
+| admin.analytics.lesson.dictation | 🎧 Ditado | 🎧 Dictation | alta | needs_review |
+| admin.analytics.lesson.conjugation_session | 📝 Sessão de conjugação | 📝 Conjugation session | alta | needs_review |
+| admin.analytics.lesson.challenge | 🎯 Desafio concluído | 🎯 Challenge completed | alta | needs_review |
+| admin.analytics.device.mobile | 📱 Celular | 📱 Mobile | alta | needs_review |
+| admin.analytics.techErr.js_error | 🐞 Erro de JavaScript | 🐞 JavaScript error | alta | needs_review |
+| admin.analytics.techErr.unhandled_rejection | 🐞 Promise rejeitada sem tratamento | 🐞 Unhandled promise rejection | alta | needs_review |
+| admin.analytics.techErr.audio_load_failed | 🔇 Falha ao carregar áudio | 🔇 Audio failed to load | alta | needs_review |
+| admin.analytics.techErr.audio_play_failed | 🔇 Falha ao tocar áudio (clique manual) | 🔇 Audio failed to play (manual click) | alta | needs_review |
+| admin.analytics.techErr.save_failed | 💾 Falha ao salvar progresso | 💾 Failed to save progress | alta | needs_review |
+| admin.analytics.period.today | Hoje | Today | alta | needs_review |
+| admin.analytics.period.yesterday | Ontem | Yesterday | alta | needs_review |
+| admin.analytics.period.last7 | Últimos 7 dias | Last 7 days | alta | needs_review |
+| admin.analytics.period.last30 | Últimos 30 dias | Last 30 days | alta | needs_review |
+| admin.analytics.period.thisMonth | Este mês | This month | alta | needs_review |
+| admin.analytics.period.lastMonth | Mês passado | Last month | alta | needs_review |
+| admin.analytics.period.last90 | Últimos 90 dias | Last 90 days | alta | needs_review |
+| admin.analytics.period.custom | Personalizado | Custom | alta | needs_review |
+| admin.analytics.levelUnknown | Nível desconhecido | Unknown level | alta | needs_review |
+| admin.analytics.unknown | desconhecido | unknown | alta | needs_review |
+| admin.analytics.freq.1 | 1 dia | 1 day | alta | needs_review |
+| admin.analytics.freq.2_4 | 2–4 dias | 2–4 days | alta | needs_review |
+| admin.analytics.freq.5_9 | 5–9 dias | 5–9 days | alta | needs_review |
+| admin.analytics.freq.10 | 10+ dias | 10+ days | alta | needs_review |
+| admin.analytics.delta.new | novo | new | alta | needs_review |
+| admin.analytics.students | one: {n} aluno(a) / other: {n} alunos(as) | one: {n} student / other: {n} students | alta | needs_review |
+| admin.analytics.noData | Sem dados no período selecionado. | No data in the selected period. | alta | needs_review |
+| admin.analytics.compareWith | comparando com {since} – {until} | comparing with {since} – {until} | alta | needs_review |
+| admin.analytics.filter.period | Período | Period | alta | needs_review |
+| admin.analytics.filter.device | Dispositivo | Device | alta | needs_review |
+| admin.analytics.filter.allDevices | Todos os dispositivos | All devices | alta | needs_review |
+| admin.analytics.filter.compare | Comparar com período anterior | Compare with previous period | alta | needs_review |
+| admin.analytics.filter.periodLine | Período: {range} | Period: {range} | alta | needs_review |
+| admin.analytics.exclude.toastOn | ✓ Sua atividade não vai mais ser registrada no Analytics. | ✓ Your activity will no longer be recorded in Analytics. | alta | needs_review |
+| admin.analytics.exclude.toastOff | ✓ Sua atividade passa a ser registrada no Analytics (marcada como admin). | ✓ Your activity will now be recorded in Analytics (marked as admin). | alta | needs_review |
+| admin.mode.toastOn | 🔒 Admin Mode ligado — privilégios de admin restaurados. | 🔒 Admin Mode on — admin privileges restored. | alta | needs_review |
+| admin.mode.toastOff | 🔒 Admin Mode desligado — navegando como um aluno comum. | 🔒 Admin Mode off — browsing as a regular student. | alta | needs_review |
+| admin.analytics.exclude.title | Excluir minha atividade dos Analytics | Exclude my activity from Analytics | alta | needs_review |
+| admin.analytics.exclude.sub | Sua navegação e lições como admin não entram nas métricas dos alunos. Desligue só se quiser gerar dados de teste de propósito, usando sua própria conta. | Your browsing and lessons as admin are not counted in student metrics. Turn it off only if you want to generate test data on purpose, using your own account. | alta | needs_review |
+| admin.mode.title | Admin Mode | Admin Mode | alta | needs_review |
+| admin.mode.sub | Desligado, sua conta navega e conclui lições exatamente como um aluno comum (mesmo continuando reconhecida como admin) -- útil pra testar a experiência real sem os atalhos de admin. Mesmo controle do pill 🔒 Admin na tela principal. | When off, your account browses and completes lessons exactly like a regular student (while still recognized as admin) -- useful to test the real experience without admin shortcuts. Same control as the 🔒 Admin pill on the main screen. | alta | needs_review |
+| admin.analytics.noEvents | Nenhum evento de aluno registrado no período selecionado. | No student events recorded in the selected period. | alta | needs_review |
+| admin.analytics.subtab.resumo | Resumo | Summary | alta | needs_review |
+| admin.analytics.subtab.atividade | Atividade | Activity | alta | needs_review |
+| admin.analytics.subtab.retencao | Retenção | Retention | alta | needs_review |
+| admin.analytics.subtab.navegacao | Navegação | Navigation | alta | needs_review |
+| admin.analytics.subtab.exercicios | Exercícios | Exercises | alta | needs_review |
+| admin.analytics.subtab.progressao | Progressão | Progression | alta | needs_review |
+| admin.analytics.subtab.engajamento | Engajamento | Engagement | alta | needs_review |
+| admin.analytics.subtab.idioma | Idioma | Language | alta | needs_review |
+| admin.analytics.subtab.dispositivos | Dispositivos | Devices | alta | needs_review |
+| admin.analytics.subtab.tecnologia | Tecnologia | Technology | alta | needs_review |
+| admin.analytics.subnav.aria | Seção do Analytics | Analytics section | alta | needs_review |
+| admin.analytics.resumo.rateNA | Taxa de conclusão indisponível: ninguém começou um exercício dos tipos contados aqui (flashcards, revisão rápida, jogo da memória, hanzi, ditado, conjugação) neste período. | Completion rate unavailable: nobody started an exercise of the types counted here (flashcards, speed review, memory game, hanzi, dictation, conjugation) in this period. | alta | needs_review |
+| admin.analytics.resumo.rateNote | A taxa de conclusão só usa os exercícios que têm um "começo" registrado (flashcards, revisão rápida, jogo da memória, hanzi, ditado, conjugação). Lições de vocabulário e checkpoints de unidade não entram nessa conta porque só sabemos quando terminam, não quando começam -- por isso "Exercícios concluídos" (acima) é maior que "Exercícios iniciados": ele soma TODOS os tipos, os com início e os sem. Pra ver cada tipo separado, veja a aba Exercícios. | The completion rate only uses exercises that have a recorded "start" (flashcards, speed review, memory game, hanzi, dictation, conjugation). Vocabulary lessons and unit checkpoints are not part of this calculation because we only know when they end, not when they start -- that is why "Exercises completed" (above) is larger than "Exercises started": it adds up ALL types, those with a start and those without. To see each type separately, check the Exercises tab. | alta | needs_review |
+| admin.analytics.kpi.activeStudents | Alunos ativos | Active students | alta | needs_review |
+| admin.analytics.kpi.activeStudentsNote | alunos diferentes que usaram o app no período | different students who used the app in the period | alta | needs_review |
+| admin.analytics.kpi.newStudents | Novos alunos | New students | alta | needs_review |
+| admin.analytics.kpi.newStudentsNote | contas criadas dentro do período | accounts created within the period | alta | needs_review |
+| admin.analytics.kpi.sessions | Sessões | Sessions | alta | needs_review |
+| admin.analytics.kpi.sessionsNote | cada visita ao app conta como 1 sessão (o mesmo aluno abrindo 3x no dia = 3 sessões) | each visit to the app counts as 1 session (the same student opening it 3 times a day = 3 sessions) | alta | needs_review |
+| admin.analytics.kpi.started | Exercícios iniciados | Exercises started | alta | needs_review |
+| admin.analytics.kpi.startedNote | só os tipos que registram quando o aluno começa (ver nota abaixo) | only the types that record when the student starts (see note below) | alta | needs_review |
+| admin.analytics.kpi.completed | Exercícios concluídos | Exercises completed | alta | needs_review |
+| admin.analytics.kpi.completedNote | qualquer tipo de exercício ou lição terminado | any type of exercise or lesson finished | alta | needs_review |
+| admin.analytics.kpi.rate | Taxa de conclusão | Completion rate | alta | needs_review |
+| admin.analytics.kpi.rateNote | de quem começou um exercício, quantos % terminaram | of those who started an exercise, what % finished | alta | needs_review |
+| admin.analytics.kpi.time | Tempo de estudo (estimado) | Study time (estimated) | alta | needs_review |
+| admin.analytics.kpi.timeNote | estimativa aproximada, não o tempo real gasto -- ver nota abaixo | rough estimate, not the actual time spent -- see note below | alta | needs_review |
+| admin.analytics.resumo.timeNote | "Tempo de estudo" é uma aproximação: para cada sessão, medimos do primeiro ao último evento registrado e somamos tudo. Se um aluno ficar parado no meio (ex: sai pra fazer outra coisa e volta), esse tempo parado também entra na conta -- não é um cronômetro de uso ativo. | "Study time" is an approximation: for each session, we measure from the first to the last recorded event and add everything up. If a student stays idle in the middle (e.g. leaves to do something else and comes back), that idle time is also counted -- it is not an active-use stopwatch. | alta | needs_review |
+| admin.analytics.resumo.xpNote | Quer ver XP total e sequência de dias (streak)? Isso está na aba Engajamento, não aqui no Resumo. | Want to see total XP and streak? That is in the Engagement tab, not here in the Summary. | alta | needs_review |
+| admin.analytics.ativ.newActive | Novos (ativos no período) | New (active in the period) | alta | needs_review |
+| admin.analytics.ativ.returning | Recorrentes | Returning | alta | needs_review |
+| admin.analytics.ativ.note | "Novo" = conta criada dentro do período selecionado (via profiles.created_at); "recorrente" = já existia antes disso. Ver limitações sobre contas anteriores à criação automática de perfil. | "New" = account created within the selected period (via profiles.created_at); "returning" = already existed before that. See limitations about accounts created before automatic profile creation. | alta | needs_review |
+| admin.analytics.ativ.activeByDay | Alunos ativos por dia | Active students per day | alta | needs_review |
+| admin.analytics.ativ.sessionsByDay | Sessões por dia | Sessions per day | alta | needs_review |
+| admin.analytics.ativ.frequency | Frequência de estudo (dias ativos no período) | Study frequency (active days in the period) | alta | needs_review |
+| admin.analytics.nav.areas | Áreas (abas) | Areas (tabs) | alta | needs_review |
+| admin.analytics.nav.features | Funcionalidades (tipos de exercício) | Features (exercise types) | alta | needs_review |
+| admin.analytics.nav.featuresNote | Conta início + conclusão somados (uso total), não só conclusões. | Counts start + completion together (total use), not just completions. | alta | needs_review |
+| admin.analytics.ex.col.exercise | Exercício | Exercise | alta | needs_review |
+| admin.analytics.ex.col.started | Iníc. | Start. | alta | needs_review |
+| admin.analytics.ex.col.done | Feitos | Done | alta | needs_review |
+| admin.analytics.ex.col.rate | Taxa | Rate | alta | needs_review |
+| admin.analytics.ex.col.score | Nota | Score | alta | needs_review |
+| admin.analytics.ex.byType | Exercícios por tipo | Exercises by type | alta | needs_review |
+| admin.analytics.ex.note | "—" = sem evento de início (vocab_lesson/unit_checkpoint/challenge) ou sem conceito de nota pra esse tipo. Popularidade (concluídos) e desempenho (nota média) são colunas separadas de propósito -- um exercício muito feito não é necessariamente um exercício com nota alta. | "—" = no start event (vocab_lesson/unit_checkpoint/challenge) or no score concept for that type. Popularity (completed) and performance (average score) are separate columns on purpose -- a heavily done exercise is not necessarily an exercise with a high score. | alta | needs_review |
+| admin.analytics.funnel.started | Iniciou | Started | alta | needs_review |
+| admin.analytics.funnel.completed | Concluiu | Completed | alta | needs_review |
+| admin.analytics.funnel.goodScore | Acertou bem ✓ | Scored well ✓ | alta | needs_review |
+| admin.analytics.funnel.avgScore | Nota média | Average score | alta | needs_review |
+| admin.analytics.funnel.title | Funil: iniciou → concluiu → acertou bem | Funnel: started → completed → scored well | alta | needs_review |
+| admin.analytics.funnel.note | Só os tipos com evento de início entram no funil (mesma limitação da taxa de conclusão geral). "Respondeu" (por pergunta individual) não existe como evento -- o funil vai direto de "iniciou" pra "concluiu". "Acertou bem" = nota média ≥ 80%, mesmo corte do desafio "Pontue mais de 80%". | Only types with a start event enter the funnel (same limitation as the overall completion rate). "Answered" (per individual question) does not exist as an event -- the funnel goes straight from "started" to "completed". "Scored well" = average score ≥ 80%, same cutoff as the "Score over 80%" challenge. | alta | needs_review |
+| admin.analytics.funnel.empty | Nenhum tipo com evento de início teve atividade no período. | No type with a start event had activity in the period. | alta | needs_review |
+| admin.analytics.lang.events | Eventos por idioma | Events by language | alta | needs_review |
+| admin.analytics.lang.filterActive | Filtro de idioma ativo ({lang}) -- pra comparar idiomas lado a lado, selecione "Todos os idiomas" no filtro acima. | Language filter active ({lang}) -- to compare languages side by side, select "All languages" in the filter above. | alta | needs_review |
+| admin.analytics.lang.note | Segmentação por nível/funcionalidade/exercício/coorte/tipo de usuário já existe nas abas Progressão, Exercícios, Retenção e no toggle "Excluir minha atividade" -- não repetidas aqui como filtros globais pra não criar combinações sem sentido (ex: nível não se aplica a um "tab_switch"). | Segmentation by level/feature/exercise/cohort/user type already exists in the Progression, Exercises and Retention tabs and in the "Exclude my activity" toggle -- not repeated here as global filters to avoid meaningless combinations (e.g. level does not apply to a "tab_switch"). | alta | needs_review |
+| admin.analytics.prog.byLevel | Alunos por nível | Students by level | alta | needs_review |
+| admin.analytics.prog.levelNote | Só cobre unidades do idioma do app em que este Painel está aberto agora -- eventos do outro idioma caem em "Nível desconhecido" (cada site só carrega o conteúdo do próprio idioma). | Only covers units of the app language in which this Panel is open now -- events from the other language fall under "Unknown level" (each site only loads its own language content). | alta | needs_review |
+| admin.analytics.prog.units | Unidades concluídas por aluno (checkpoints) | Units completed per student (checkpoints) | alta | needs_review |
+| admin.analytics.prog.unitsNote | Nem toda unidade tem lições internas (ex: unidades de gramática no francês) -- essas pontuam como um bloco único de exercícios, e concluí-las gera um checkpoint sem nenhuma "lição concluída" correspondente. Já unidades com lições só geram o checkpoint depois de passar por todas elas. Por isso um aluno pode aparecer aqui com mais unidades concluídas do que lições concluídas. | Not every unit has internal lessons (e.g. grammar units in French) -- those count as a single block of exercises, and completing them generates a checkpoint with no matching "lesson completed". Units with lessons only generate the checkpoint after going through all of them. That is why a student can appear here with more completed units than completed lessons. | alta | needs_review |
+| admin.analytics.prog.lessons | Lições concluídas por aluno | Lessons completed per student | alta | needs_review |
+| admin.analytics.prog.lessonsNote | "Avanço de nível" (velocidade de progressão entre níveis ao longo do tempo) fica pra uma etapa futura -- exigiria acompanhar a mesma conta em vários períodos, não só um recorte. | "Level advancement" (speed of progression between levels over time) is left for a future stage -- it would require tracking the same account across several periods, not just one slice. | alta | needs_review |
+| admin.analytics.dev.noData | Todos os eventos no período são de antes da coleta de dispositivo existir (migration 009) -- por isso caem em "desconhecido". Dados novos já vêm classificados. | All events in the period are from before device collection existed (migration 009) -- that is why they fall under "unknown". New data is already classified. | alta | needs_review |
+| admin.analytics.dev.type | Tipo de dispositivo | Device type | alta | needs_review |
+| admin.analytics.dev.browser | Navegador | Browser | alta | needs_review |
+| admin.analytics.dev.os | Sistema operacional | Operating system | alta | needs_review |
+| admin.analytics.dev.osNote | Classificação por navigator.userAgent (heurística simples, sem biblioteca) -- não é 100% precisa, mas é o padrão aceitável sem telemetria de terceiros. | Classification by navigator.userAgent (simple heuristic, no library) -- not 100% accurate, but it is the acceptable standard without third-party telemetry. | alta | needs_review |
+| admin.analytics.eng.perSession | Exercícios/sessão | Exercises/session | alta | needs_review |
+| admin.analytics.eng.reviewsDone | Revisões concluídas | Reviews completed | alta | needs_review |
+| admin.analytics.eng.challengesDone | Desafios concluídos | Challenges completed | alta | needs_review |
+| admin.analytics.eng.freqNote | Frequência de estudo (dias ativos por aluno) já está na aba Atividade -- não repetida aqui. | Study frequency (active days per student) is already in the Activity tab -- not repeated here. | alta | needs_review |
+| admin.analytics.eng.gamification | Gamificação | Gamification | alta | needs_review |
+| admin.analytics.eng.xpTotal | XP total (semana atual) | Total XP (current week) | alta | needs_review |
+| admin.analytics.eng.xpAvg | XP médio/aluno (semana atual) | Average XP/student (current week) | alta | needs_review |
+| admin.analytics.eng.streakAvg | Sequência média (dias) | Average streak (days) | alta | needs_review |
+| admin.analytics.eng.streakNote | proxy calculado a partir dos eventos | proxy calculated from events | alta | needs_review |
+| admin.analytics.eng.streakMax | Maior sequência (dias) | Longest streak (days) | alta | needs_review |
+| admin.analytics.eng.badges | Conquistas concedidas | Achievements granted | alta | needs_review |
+| admin.analytics.eng.leaderboardViews | Visualizações do Ranking | Leaderboard views | alta | needs_review |
+| admin.analytics.eng.badgedStudents | one: {n} aluno(a) recebeu / other: {n} alunos(as) receberam | one: {n} student received / other: {n} students received | alta | needs_review |
+| admin.analytics.eng.xpNote2 | Sequência é uma aproximação calculada a partir dos dias com atividade registrada, não o streak "oficial" do app (que tem regras próprias como dias de folga e mora fora do alcance deste painel). | Streak is an approximation calculated from the days with recorded activity, not the app's "official" streak (which has its own rules such as rest days and lives outside the reach of this panel). | alta | needs_review |
+| admin.analytics.eng.badgedSuffix | pelo menos uma conquista no período. | at least one achievement in the period. | alta | needs_review |
+| admin.analytics.eng.xpNote1 | XP usa a mesma semana (segunda a domingo) já mostrada no Ranking -- não é "XP gerado no período selecionado acima", é sempre a semana corrente. "XP médio/aluno" divide pelo total de alunos ativos no período (não só por quem já ganhou XP essa semana específica) -- um aluno ativo sem XP essa semana ainda entra na conta, com 0. | XP uses the same week (Monday to Sunday) already shown in the Leaderboard -- it is not "XP earned in the period selected above", it is always the current week. "Average XP/student" divides by the total of active students in the period (not just those who already earned XP this specific week) -- an active student with no XP this week still counts, with 0. | alta | needs_review |
+| admin.analytics.tech.errors | Erros e falhas | Errors and failures | alta | needs_review |
+| admin.analytics.tech.total | Erros registrados | Recorded errors | alta | needs_review |
+| admin.analytics.tech.affected | Alunos(as) afetados(as) | Affected students | alta | needs_review |
+| admin.analytics.tech.noErrors | Nenhum erro técnico registrado no período. | No technical errors recorded in the period. | alta | needs_review |
+| admin.analytics.tech.note | Cobre erro de JavaScript, promise rejeitada, falha ao carregar/tocar áudio e falha ao salvar progresso -- todos com deduplicação por sessão (um erro que se repete não infla a contagem). Não há categoria de vídeo: o app não tem conteúdo em vídeo. | Covers JavaScript errors, rejected promises, audio load/play failures and progress save failures -- all deduplicated per session (a repeating error does not inflate the count). There is no video category: the app has no video content. | alta | needs_review |
+| admin.analytics.tech.perf | Performance | Performance | alta | needs_review |
+| admin.analytics.tech.loadAvg | Carregamento médio | Average load time | alta | needs_review |
+| admin.analytics.tech.loadMedian | Carregamento mediano | Median load time | alta | needs_review |
+| admin.analytics.tech.samples | one: {n} sessão medida (Navigation Timing API, um registro por carregamento de página). / other: {n} sessões medidas (Navigation Timing API, um registro por carregamento de página). | one: {n} session measured (Navigation Timing API, one record per page load). / other: {n} sessions measured (Navigation Timing API, one record per page load). | alta | needs_review |
+| admin.analytics.tech.noPerf | Nenhuma medição de performance no período. | No performance measurements in the period. | alta | needs_review |
+| admin.analytics.tech.separateNote | Esta aba é conceitualmente separada de Aprendizagem/Produto -- nunca soma erros técnicos junto com taxa de conclusão, nota média etc. Uma nota TÉCNICA baixa aqui não significa que o conteúdo é difícil, e o contrário também vale. | This tab is conceptually separate from Learning/Product -- it never adds technical errors together with completion rate, average score, etc. A low TECHNICAL score here does not mean the content is hard, and the opposite also holds. | alta | needs_review |
+| admin.analytics.ret.empty | Nenhuma conta encontrada pra montar coortes. | No accounts found to build cohorts. | alta | needs_review |
+| admin.analytics.ret.title | Retenção por coorte (semana de cadastro) | Retention by cohort (signup week) | alta | needs_review |
+| admin.analytics.ret.col.cohort | Coorte | Cohort | alta | needs_review |
+| admin.analytics.ret.col.d1 | Dia 1 | Day 1 | alta | needs_review |
+| admin.analytics.ret.col.d7 | Dia 7 | Day 7 | alta | needs_review |
+| admin.analytics.ret.col.d14 | Dia 14 | Day 14 | alta | needs_review |
+| admin.analytics.ret.col.d30 | Dia 30 | Day 30 | alta | needs_review |
+| admin.analytics.ret.note | Coorte = alunos cuja conta foi criada na mesma semana (segunda a domingo). "Dia N" = teve pelo menos uma atividade registrada no dia civil que cai exatamente N dias após a criação da conta -- "—" quando a coorte ainda não completou esse número de dias (nunca mostrado como 0%). Usa todo o histórico disponível (até 5000 eventos mais recentes), não o filtro de período dos controles acima -- retenção é uma pergunta sobre o tempo todo, não uma janela. | Cohort = students whose account was created in the same week (Monday to Sunday). "Day N" = had at least one recorded activity on the calendar day that falls exactly N days after account creation -- "—" when the cohort has not yet completed that number of days (never shown as 0%). Uses the full available history (up to the 5000 most recent events), not the period filter in the controls above -- retention is a question about all time, not a window. | alta | needs_review |
+| adminChallenges.import.invalidJson | JSON inválido:  | Invalid JSON:  | alta | needs_review |
+| adminChallenges.import.expectedArray | Esperava um array de desafios, ou um objeto com "accepted" (saída direta do pipeline). | Expected an array of challenges, or an object with "accepted" (direct pipeline output). | alta | needs_review |
+| adminChallenges.import.itemN | item #{n} | item #{n} | alta | needs_review |
+| adminChallenges.import.missing | {label}: faltando id/type/level | {label}: missing id/type/level | alta | needs_review |
+| adminChallenges.import.badType | {id}: type inválido ("{type}") | {id}: invalid type ("{type}") | alta | needs_review |
+| adminChallenges.import.badLevel | {id}: level inválido ("{level}") | {id}: invalid level ("{level}") | alta | needs_review |
+| adminChallenges.import.dupId | {id}: id já existe (duplicado) | {id}: id already exists (duplicate) | alta | needs_review |
+| adminChallenges.persist.failed | Não foi possível salvar no banco de dados:  | Could not save to the database:  | alta | needs_review |
+| adminChallenges.import.importing | Importando… | Importing… | alta | needs_review |
+| adminChallenges.import.btn | Importar | Import | alta | needs_review |
+| adminChallenges.import.dbFail | ❌ Falha ao gravar no banco: {error} | ❌ Failed to write to the database: {error} | alta | needs_review |
+| adminChallenges.import.ok | ✅ {n} desafio(s) importado(s) como pendente(s) de revisão. | ✅ {n} challenge(s) imported as pending review. | alta | needs_review |
+| adminChallenges.import.skipped | ⚠ {n} pulado(s): | ⚠ {n} skipped: | alta | needs_review |
+| adminChallenges.audio.target | Áudio da expressão-alvo | Target expression audio | alta | needs_review |
+| adminChallenges.audio.ex1 | Áudio do Exemple 1 | Audio of Exemple 1 | alta | needs_review |
+| adminChallenges.audio.ex2 | Áudio do Exemple 2 | Audio of Exemple 2 | alta | needs_review |
+| adminChallenges.audio.sentence | Áudio da frase | Sentence audio | alta | needs_review |
+| adminChallenges.audio.word | Áudio da palavra | Word audio | alta | needs_review |
+| adminChallenges.qa.audioMissing | {label}: ausente | {label}: missing | alta | needs_review |
+| adminChallenges.qa.audioStale | {label}: desatualizado (texto mudou depois do áudio ser gerado) | {label}: outdated (text changed after the audio was generated) | alta | needs_review |
+| adminChallenges.qa.audioOk | {label}: disponível e atualizado | {label}: available and up to date | alta | needs_review |
+| adminChallenges.qa.correctSet | Resposta correta definida | Correct answer set | alta | needs_review |
+| adminChallenges.qa.fourOptions | 4 alternativas | 4 options | alta | needs_review |
+| adminChallenges.qa.explanationFilled | Explicação preenchida | Explanation filled in | alta | needs_review |
+| adminChallenges.qa.microValid | Microatividade válida | Valid micro-activity | alta | needs_review |
+| adminChallenges.qa.sentenceFilled | Frase preenchida | Sentence filled in | alta | needs_review |
+| adminChallenges.qa.hintFilled | Dica preenchida | Hint filled in | alta | needs_review |
+| adminChallenges.qa.oneTranslation | Ao menos 1 tradução aceita | At least 1 accepted translation | alta | needs_review |
+| adminChallenges.qa.wordFilled | Palavra/expressão preenchida | Word/expression filled in | alta | needs_review |
+| adminChallenges.qa.title | Controle de qualidade | Quality control | alta | needs_review |
+| adminChallenges.qa.loadingDuration | carregando duração… | loading duration… | alta | needs_review |
+| adminChallenges.qa.loadFail | · não foi possível carregar | · could not load | alta | needs_review |
+| adminChallenges.res.dictionary | Dicionário | Dictionary | alta | needs_review |
+| adminChallenges.res.article | Artigo linguístico | Linguistics article | alta | needs_review |
+| adminChallenges.res.youtube | Vídeo | Video | alta | needs_review |
+| adminChallenges.res.youglish | Exemplos autênticos | Authentic examples | alta | needs_review |
+| adminChallenges.res.qHigh | Alta | High | alta | needs_review |
+| adminChallenges.res.qMedium | Média | Medium | alta | needs_review |
+| adminChallenges.res.qLow | Baixa | Low | alta | needs_review |
+| adminChallenges.res.type | Tipo: {type} | Type: {type} | alta | needs_review |
+| adminChallenges.res.quality | Qualidade: {quality} | Quality: {quality} | alta | needs_review |
+| adminChallenges.res.checked | Link verificado em {date} | Link checked on {date} | alta | needs_review |
+| adminChallenges.res.unchecked | Link não verificado automaticamente — confira antes de aprovar | Link not checked automatically — check before approving | alta | needs_review |
+| adminChallenges.res.open | Abrir | Open | alta | needs_review |
+| adminChallenges.res.approve | ✅ Aprovar | ✅ Approve | alta | needs_review |
+| adminChallenges.btn.reject | ❌ Rejeitar | ❌ Reject | alta | needs_review |
+| adminChallenges.res.none | Nenhum recurso externo encontrado | No external resources found | alta | needs_review |
+| adminChallenges.view.audioAvailable | 🔊 disponível | 🔊 available | alta | needs_review |
+| adminChallenges.view.absent | ausente | missing | alta | needs_review |
+| adminChallenges.view.targetAudioNote | este é o áudio tocado no início do desafio, não o exemplo contextual | this is the audio played at the start of the challenge, not the contextual example | alta | needs_review |
+| adminChallenges.view.example | Exemplo (contexto escrito, sem áudio automático) | Example (written context, no automatic audio) | alta | needs_review |
+| adminChallenges.view.question | Pergunta | Question | alta | needs_review |
+| adminChallenges.view.secondExample | 2º exemplo | 2nd example | alta | needs_review |
+| adminChallenges.view.noAudio | (sem áudio) | (no audio) | alta | needs_review |
+| adminChallenges.view.micro | Microatividade | Micro-activity | alta | needs_review |
+| adminChallenges.view.resources | Recursos encontrados (Pour aller plus loin) | Resources found (Pour aller plus loin) | alta | needs_review |
+| adminChallenges.view.sentenceFr | Frase (francês) | Sentence (French) | alta | needs_review |
+| adminChallenges.view.hint | Dica (cloze) | Hint (cloze) | alta | needs_review |
+| adminChallenges.view.translations | Traduções aceitas | Accepted translations | alta | needs_review |
+| adminChallenges.view.word | Palavra/expressão | Word/expression | alta | needs_review |
+| adminChallenges.edit.example | Exemplo | Example | alta | needs_review |
+| adminChallenges.edit.options | Alternativas (uma por linha — marque a correta com * no início) | Options (one per line — mark the correct one with * at the start) | alta | needs_review |
+| adminChallenges.edit.microPrompt | Microatividade — frase | Micro-activity — sentence | alta | needs_review |
+| adminChallenges.edit.microAnswer | Microatividade — resposta | Micro-activity — answer | alta | needs_review |
+| adminChallenges.edit.exampleHint | Editar o texto de um exemplo não regenera o áudio automaticamente — me avise se algum áudio precisar ser refeito. | Editing the text of an example does not regenerate the audio automatically — let me know if any audio needs to be redone. | alta | needs_review |
+| adminChallenges.edit.hint | Dica (cloze, com ______ pra parte oculta) | Hint (cloze, with ______ for the hidden part) | alta | needs_review |
+| adminChallenges.edit.translations | Traduções aceitas (uma por linha, a primeira é a "resposta esperada" mostrada no feedback) | Accepted translations (one per line, the first is the "expected answer" shown in the feedback) | alta | needs_review |
+| adminChallenges.edit.sentenceHint | Editar a frase não regenera o áudio automaticamente — me avise se precisar ser refeito. | Editing the sentence does not regenerate the audio automatically — let me know if it needs to be redone. | alta | needs_review |
+| adminChallenges.edit.word | Palavra/expressão (com acentos corretos) | Word/expression (with correct accents) | alta | needs_review |
+| adminChallenges.edit.wordHint | Editar a palavra não regenera o áudio automaticamente — me avise se precisar ser refeito. | Editing the word does not regenerate the audio automatically — let me know if it needs to be redone. | alta | needs_review |
+| adminChallenges.card.accentTitle | ✍️ Acentuação — {word} | ✍️ Accent — {word} | alta | needs_review |
+| adminChallenges.approve.blocked | Não é possível aprovar — corrija antes: | Cannot approve — fix first: | alta | needs_review |
+| adminChallenges.approve.warnings | Atenção, encontrei possíveis problemas: | Attention, I found possible problems: | alta | needs_review |
+| adminChallenges.approve.anyway | Aprovar mesmo assim? | Approve anyway? | alta | needs_review |
+| adminChallenges.toast.published | Desafio publicado — já está visível pro aluno. | Challenge published — now visible to students. | alta | needs_review |
+| adminChallenges.toast.unpublished | Desafio despublicado — não aparece mais pro aluno. | Challenge unpublished — no longer shown to students. | alta | needs_review |
+| adminChallenges.preview.label | 🔍 Pré-visualização — versão do aluno | 🔍 Preview — student version | alta | needs_review |
+| adminChallenges.preview.showAnswer | Mostrar resposta esperada | Show expected answer | alta | needs_review |
+| adminChallenges.preview.backToEdit | ← Voltar para edição | ← Back to editing | alta | needs_review |
+| adminChallenges.preview.approve | ✅ Aprovar desafio | ✅ Approve challenge | alta | needs_review |
+| adminChallenges.preview.expected | Resposta esperada:  | Expected answer:  | alta | needs_review |
+| adminChallenges.btn.save | 💾 Salvar | 💾 Save | alta | needs_review |
+| adminChallenges.btn.preview | 👁️ Ver versão do aluno | 👁️ View student version | alta | needs_review |
+| adminChallenges.btn.edit | ✏️ Editar | ✏️ Edit | alta | needs_review |
+| adminChallenges.btn.unpublish | 🚫 Despublicar | 🚫 Unpublish | alta | needs_review |
+| adminChallenges.btn.approvePublish | ✅ Aprovar e publicar | ✅ Approve and publish | alta | needs_review |
+| adminChallenges.bulk.checkboxAria | Selecionar pra aprovação em lote | Select for bulk approval | alta | needs_review |
+| adminChallenges.filter.searchPh | Buscar por expressão, frase, palavra... | Search by expression, sentence, word... | alta | needs_review |
+| adminChallenges.filter.allTypes | Todas as categorias | All categories | alta | needs_review |
+| adminChallenges.filter.allLevels | Todos os níveis | All levels | alta | needs_review |
+| adminChallenges.section.loadMore | Carregar mais {n} ({remaining} restantes) | Load {n} more ({remaining} remaining) | alta | needs_review |
+| adminChallenges.bulk.selectAll | Selecionar todos ({n}) | Select all ({n}) | alta | needs_review |
+| adminChallenges.bulk.approveSelected | ✅ Aprovar selecionados ({n}) | ✅ Approve selected ({n}) | alta | needs_review |
+| adminChallenges.loadFailed | ⚠ Não foi possível carregar os desafios agora. Verifique sua conexão e tente novamente -- isto NÃO significa que a fila está vazia. | ⚠ We could not load the challenges right now. Check your connection and try again -- this does NOT mean the queue is empty. | alta | needs_review |
+| adminChallenges.section.noResults | Nenhum resultado nesta seção com o filtro atual. | No results in this section with the current filter. | alta | needs_review |
+| adminChallenges.section.pending | Pendentes de revisão | Pending review | alta | needs_review |
+| adminChallenges.section.pendingEmpty | Nenhum desafio pendente de revisão. | No challenges pending review. | alta | needs_review |
+| adminChallenges.section.published | Publicados | Published | alta | needs_review |
+| adminChallenges.section.publishedEmpty | Nenhum desafio publicado ainda. | No challenges published yet. | alta | needs_review |
+| adminChallenges.section.unpublished | Despublicados | Unpublished | alta | needs_review |
+| adminChallenges.section.unpublishedEmpty | Nenhum desafio despublicado. | No unpublished challenges. | alta | needs_review |
+| adminChallenges.bulk.confirm | Aprovar e publicar {n} desafio(s) selecionado(s)? Só quem não tiver nenhum problema no checklist de qualidade é publicado automaticamente -- o resto continua pendente pra revisão individual. | Approve and publish {n} selected challenge(s)? Only those with no problem in the quality checklist are published automatically -- the rest stay pending for individual review. | alta | needs_review |
+| adminChallenges.bulk.approving | Aprovando… | Approving… | alta | needs_review |
+| adminChallenges.bulk.published | {published} desafio(s) publicado(s). | {published} challenge(s) published. | alta | needs_review |
+| adminChallenges.bulk.publishedSkipped | {published} publicado(s). {skipped} pulado(s) por ter algum problema no checklist -- revise um por um: {list} | {published} published. {skipped} skipped because of a problem in the checklist -- review one by one: {list} | alta | needs_review |
+| adminChallenges.confirm.unpublish | Despublicar este desafio? Ele deixa de aparecer pro aluno imediatamente. | Unpublish this challenge? It stops being shown to students immediately. | alta | needs_review |
+| adminChallenges.toast.rejected | Desafio rejeitado. | Challenge rejected. | alta | needs_review |
+| adminChallenges.toast.savedBackToReview | Edição salva — desafio voltou para revisão (estava publicado/aprovado, precisa ser aprovado de novo). | Edit saved — challenge went back to review (it was published/approved and needs to be approved again). | alta | needs_review |
+| adminChallenges.toast.saved | Edição salva. | Edit saved. | alta | needs_review |
+| admin.panel.sub | Badges especiais e métricas de uso da plataforma. | Special badges and platform usage metrics. | alta | needs_review |
+| admin.panel.aria | Seção do painel de admin | Admin panel section | alta | needs_review |
+| admin.panel.tab.badges | 🎖️ Badges | 🎖️ Badges | alta | needs_review |
+| admin.panel.tab.analytics | 📊 Analytics | 📊 Analytics | alta | needs_review |
+| admin.panel.tab.reports | ⚑ Reports | ⚑ Reports | alta | needs_review |
+| admin.mode.pillAria | Ativar/desativar Admin Mode | Turn Admin Mode on/off | alta | needs_review |
+| admin.mode.pillTitle | Admin Mode: OFF simula a experiência de um aluno comum | Admin Mode: OFF simulates the experience of a regular student | alta | needs_review |
+| admin.mode.pillLabel | 🔒 Admin: | 🔒 Admin: | alta | needs_review |
+| admin.modal.manageBadge.title | Gerenciar badge | Manage badge | alta | needs_review |
+| admin.modal.manageBadge.hint | Marque quem deve ter este badge. Desmarcar remove. | Check who should have this badge. Unchecking removes it. | alta | needs_review |
+| admin.modal.saveChanges | Salvar alterações | Save changes | alta | needs_review |
+| admin.modal.editTemplate.title | Editar variante | Edit variant | alta | needs_review |
+| admin.modal.report.title | Report | Report | alta | needs_review |
+| admin.modal.report.sentBy | Enviado por | Sent by | alta | needs_review |
+| admin.modal.report.description | Descrição | Description | alta | needs_review |
+| admin.modal.report.expected | O que a pessoa esperava | What the person expected | alta | needs_review |
+| admin.modal.report.severity | Gravidade percebida | Perceived severity | alta | needs_review |
+| admin.modal.report.context | Contexto capturado automaticamente | Context captured automatically | alta | needs_review |
+| admin.modal.report.status | Status | Status | alta | needs_review |
+| admin.modal.report.priority | Prioridade técnica | Technical priority | alta | needs_review |
+| admin.modal.report.note | Nota interna | Internal note | alta | needs_review |
+| admin.modal.report.subject | Assunto | Subject | alta | needs_review |
+| admin.modal.report.message | Mensagem | Message | alta | needs_review |
+| admin.modal.report.priorityNone | (não definida) | (not set) | alta | needs_review |
+| admin.modal.report.notePh | Só a equipe vê isso | Only the team sees this | alta | needs_review |
+| admin.modal.report.replyByEmail | Responder por e-mail | Reply by email | alta | needs_review |
+| admin.modal.report.replyPh | Obrigada por avisar! ... | Thank you for letting us know! ... | alta | needs_review |
+| admin.modal.report.noEmail | Sem e-mail associado a este report (convidado que não informou e-mail) -- não é possível responder. | No email associated with this report (guest who did not provide an email) -- it is not possible to reply. | alta | needs_review |
+| adminChallenges.bar.import | 📥 Importar JSON | 📥 Import JSON | alta | needs_review |
+| adminChallenges.bar.review | 🛠️ Revisar pendentes ( | 🛠️ Review pending ( | alta | needs_review |
+| adminChallenges.modal.title | Importar desafios via JSON | Import challenges via JSON | alta | needs_review |
+| admin.mode.on | ON | ON | alta | needs_review |
+| admin.mode.off | OFF | OFF | alta | needs_review |

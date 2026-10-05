@@ -34,29 +34,29 @@ let ADMIN_MATERIALS_STATE = { studentIds: new Set(), langFilter: 'all', editingI
 function materialStudentLabel(s){
   return s.display_name
     ? `${escapeHTML(s.display_name)} (@${escapeHTML(s.username || '?')})`
-    : `@${escapeHTML(s.username || '(usuário removido)')}`;
+    : `@${escapeHTML(s.username || t('admin.common.removedUser'))}`;
 }
 
 function materialFormatBadgesHTML(m){
   return [
-    m.link_url ? '🔗 link' : '',
-    m.file_url ? '📎 arquivo' : '',
+    m.link_url ? t('admin.materials.badgeLink') : '',
+    m.file_url ? t('admin.materials.badgeFile') : '',
   ].filter(Boolean).join(' · ');
 }
 
 function materialEditFormHTML(m){
   return `
     <form class="profile-edit-form" data-edit-material-form="${m.id}" style="margin-top:8px;">
-      <label class="profile-edit-label" for="edit-material-title-${m.id}">Título</label>
+      <label class="profile-edit-label" for="edit-material-title-${m.id}">${t('admin.materials.titleLabel')}</label>
       <input type="text" id="edit-material-title-${m.id}" class="profile-edit-input" value="${escapeHTML(m.title)}">
-      <label class="profile-edit-label" for="edit-material-desc-${m.id}">Descrição (opcional)</label>
+      <label class="profile-edit-label" for="edit-material-desc-${m.id}">${t('admin.materials.descOpt')}</label>
       <textarea id="edit-material-desc-${m.id}" class="profile-edit-input" rows="3">${escapeHTML(m.description || '')}</textarea>
-      <label class="profile-edit-label" for="edit-material-link-${m.id}">Link (opcional)</label>
+      <label class="profile-edit-label" for="edit-material-link-${m.id}">${t('admin.materials.linkOpt')}</label>
       <input type="url" id="edit-material-link-${m.id}" class="profile-edit-input" value="${escapeHTML(m.link_url || '')}">
       <p class="profile-edit-error" data-edit-material-error="${m.id}"></p>
       <div style="display:flex; gap:8px;">
-        <button type="submit" class="btn btn-primary">Salvar</button>
-        <button type="button" class="btn" data-cancel-edit-material="${m.id}">Cancelar</button>
+        <button type="submit" class="btn btn-primary">${t('profile.save')}</button>
+        <button type="button" class="btn" data-cancel-edit-material="${m.id}">${t('myFlashcards.edit.cancel')}</button>
       </div>
     </form>
   `;
@@ -71,12 +71,12 @@ function materialRowHTML(m, showUsername){
         ${!isEditing ? `
         <div class="admin-badge-desc">
           ${m.description ? `<span style="white-space:pre-wrap;">${escapeHTML(m.description)}</span><br>` : ''}
-          criado em ${new Date(m.created_at).toLocaleDateString('pt-BR')}${materialFormatBadgesHTML(m) ? ' · ' + materialFormatBadgesHTML(m) : ''}
+          ${t('myFlashcards.row.createdOn', { date: fmtDate(m.created_at) })}${materialFormatBadgesHTML(m) ? ' · ' + materialFormatBadgesHTML(m) : ''}
         </div>` : materialEditFormHTML(m)}
       </div>
       ${!isEditing ? `
-      <button class="admin-badge-delete-btn" data-edit-material="${m.id}" title="Editar">✏️</button>
-      <button class="admin-badge-delete-btn" data-delete-material="${m.id}" title="Apagar">✕</button>
+      <button class="admin-badge-delete-btn" data-edit-material="${m.id}" title="${t('myFlashcards.row.editTitle')}">✏️</button>
+      <button class="admin-badge-delete-btn" data-delete-material="${m.id}" title="${t('admin.common.delete')}">✕</button>
       ` : ''}
     </div>
   `;
@@ -89,8 +89,8 @@ async function buildMaterialsListBoxHTML(selectedStudents){
   const showUsername = selectedStudents.length > 1;
 
   return `
-    <div class="section-label">Materiais enviados (${materials.length})</div>
-    ${materials.length ? materials.map(m => materialRowHTML(m, showUsername)).join('') : `<p class="profile-empty-note">Nenhum material ainda pra${selectedStudents.length > 1 ? ' esses alunos' : selectedStudents.length === 1 ? ' este aluno' : ' nenhum aluno selecionado'}.</p>`}
+    <div class="section-label">${t('admin.materials.listTitle', { n: materials.length })}</div>
+    ${materials.length ? materials.map(m => materialRowHTML(m, showUsername)).join('') : `<p class="profile-empty-note">${t('admin.materials.emptyFor')}${adminEmptyForSuffix(selectedStudents.length)}.</p>`}
   `;
 }
 
@@ -109,9 +109,9 @@ function wireMaterialsListBox(listBox){
   });
   listBox.querySelectorAll('[data-delete-material]').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm('Apagar este material de apoio? Essa ação não pode ser desfeita.')) return;
+      if (!confirm(t('admin.materials.deleteConfirm'))) return;
       await deleteSupportMaterial(btn.dataset.deleteMaterial);
-      showToast('✓ Material apagado.');
+      showToast(t('admin.materials.deleted'));
       await refreshMaterialsListBox(listBox);
     });
   });
@@ -128,7 +128,7 @@ function wireMaterialsListBox(listBox){
       });
       if (!result.ok){ errorEl.textContent = result.error; return; }
       ADMIN_MATERIALS_STATE.editingId = null;
-      showToast('✓ Material atualizado.');
+      showToast(t('admin.materials.updated'));
       await refreshMaterialsListBox(listBox);
     });
   });
@@ -147,11 +147,7 @@ async function refreshMaterialsListBox(listBox){
 async function updateMaterialsSelectionDependentUI(){
   const students = ADMIN_MATERIALS_STATE._studentsCache;
   const selectedStudents = students.filter(s => ADMIN_MATERIALS_STATE.studentIds.has(s.student_id));
-  const selectionCountLabel = selectedStudents.length === 0
-    ? 'Nenhum aluno selecionado'
-    : selectedStudents.length === 1
-      ? '1 aluno selecionado'
-      : `${selectedStudents.length} alunos selecionados`;
+  const selectionCountLabel = adminSelectionCountLabel(selectedStudents.length);
 
   const counterEl = document.getElementById('admin-material-selection-counter');
   if (counterEl) counterEl.textContent = selectionCountLabel;
@@ -159,7 +155,7 @@ async function updateMaterialsSelectionDependentUI(){
   const subtitleEl = document.getElementById('admin-material-content-subtitle');
   if (subtitleEl) subtitleEl.textContent = selectedStudents.length === 1
     ? ` -- ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
-    : selectedStudents.length > 1 ? ` -- ${selectedStudents.length} alunos selecionados` : '';
+    : selectedStudents.length > 1 ? ` -- ${tp('admin.common.selectedCount', selectedStudents.length)}` : '';
 
   const contentHint = document.getElementById('admin-material-content-hint');
   if (contentHint) contentHint.style.display = selectedStudents.length ? 'none' : '';
@@ -167,7 +163,7 @@ async function updateMaterialsSelectionDependentUI(){
   const btn = document.getElementById('admin-create-material-btn');
   if (btn){
     btn.disabled = !selectedStudents.length;
-    btn.textContent = `Enviar material${selectedStudents.length > 1 ? ` pra ${selectedStudents.length} alunos` : ''}`;
+    btn.textContent = `${t('admin.materials.send')}${adminForStudentsSuffix(selectedStudents.length)}`;
   }
 
   const listBox = document.getElementById('admin-materials-list-box');
@@ -190,14 +186,14 @@ async function renderAdminSupportMaterialsView(){
   const wrap = document.getElementById('admin-materials-content');
   if (!wrap) return;
   if (!isAdminUser()){
-    wrap.innerHTML = `<p class="profile-empty-note">Esta tela é só pra administração da plataforma.</p>`;
+    wrap.innerHTML = `<p class="profile-empty-note">${t('admin.common.adminOnly')}</p>`;
     return;
   }
   wrap.innerHTML = loadingHTML();
 
   const students = await fetchMyStudents();
   if (!students.length){
-    wrap.innerHTML = `<p class="profile-empty-note">Vincule um aluno primeiro, na aba "🎓 Alunos", pra poder enviar material de apoio pra ele.</p>`;
+    wrap.innerHTML = `<p class="profile-empty-note">${t('admin.materials.linkFirst')}</p>`;
     return;
   }
   ADMIN_MATERIALS_STATE._studentsCache = students;
@@ -206,16 +202,12 @@ async function renderAdminSupportMaterialsView(){
   ADMIN_MATERIALS_STATE.studentIds = new Set([...ADMIN_MATERIALS_STATE.studentIds].filter(id => validIds.has(id)));
 
   const selectedStudents = students.filter(s => ADMIN_MATERIALS_STATE.studentIds.has(s.student_id));
-  const selectionCountLabel = selectedStudents.length === 0
-    ? 'Nenhum aluno selecionado'
-    : selectedStudents.length === 1
-      ? '1 aluno selecionado'
-      : `${selectedStudents.length} alunos selecionados`;
+  const selectionCountLabel = adminSelectionCountLabel(selectedStudents.length);
 
   const langsPresent = [...new Set(students.map(s => s.language_app_key))];
   const langFilterHTML = langsPresent.length > 1 ? `
-    <div class="leaderboard-tabs" role="tablist" aria-label="Filtrar por idioma" style="justify-content:flex-start; margin-bottom:8px;">
-      <button type="button" class="leaderboard-tab ${ADMIN_MATERIALS_STATE.langFilter === 'all' ? 'active' : ''}" data-lang-filter="all">Todos (${students.length})</button>
+    <div class="leaderboard-tabs" role="tablist" aria-label="${t('admin.common.langFilterAria')}" style="justify-content:flex-start; margin-bottom:8px;">
+      <button type="button" class="leaderboard-tab ${ADMIN_MATERIALS_STATE.langFilter === 'all' ? 'active' : ''}" data-lang-filter="all">${t('admin.common.all')} (${students.length})</button>
       ${langsPresent.map(key => `<button type="button" class="leaderboard-tab ${ADMIN_MATERIALS_STATE.langFilter === key ? 'active' : ''}" data-lang-filter="${key}">${STUDENT_LANGUAGE_LABELS[key] || key} (${students.filter(s => s.language_app_key === key).length})</button>`).join('')}
     </div>
   ` : '';
@@ -231,18 +223,18 @@ async function renderAdminSupportMaterialsView(){
   const newMaterialSubtitle = selectedStudents.length === 1
     ? ` -- ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
     : selectedStudents.length > 1
-      ? ` -- ${selectedStudents.length} alunos selecionados`
+      ? ` -- ${tp('admin.common.selectedCount', selectedStudents.length)}`
       : '';
 
   wrap.innerHTML = `
     <div class="profile-section">
-      <div class="section-label">Alunos</div>
-      <p class="profile-edit-hint">Selecione os alunos que vão receber este material.</p>
+      <div class="section-label">${t('admin.common.students')}</div>
+      <p class="profile-edit-hint">${t('admin.materials.pickStudentsHint')}</p>
       ${langFilterHTML}
-      <input type="text" id="admin-material-search" class="profile-edit-input" placeholder="Buscar por nome ou @usuário..." autocomplete="off" style="margin-bottom:8px;">
+      <input type="text" id="admin-material-search" class="profile-edit-input" placeholder="${t('admin.common.searchPlaceholder')}" autocomplete="off" style="margin-bottom:8px;">
       <div style="display:flex; gap:12px; margin-bottom:4px;">
-        <a href="#" id="admin-material-select-all" style="font-size:13px;">Selecionar todos</a>
-        <a href="#" id="admin-material-select-none" style="font-size:13px;">Limpar seleção</a>
+        <a href="#" id="admin-material-select-all" style="font-size:13px;">${t('publicProfile.selectAll')}</a>
+        <a href="#" id="admin-material-select-none" style="font-size:13px;">${t('publicProfile.clear')}</a>
       </div>
       <div class="profile-edit-input" style="height:auto; max-height:180px; overflow-y:auto; display:flex; flex-direction:column;">
         ${studentCheckboxesHTML}
@@ -251,19 +243,19 @@ async function renderAdminSupportMaterialsView(){
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Novo material<span id="admin-material-content-subtitle">${newMaterialSubtitle}</span></div>
-      <p class="profile-edit-hint" id="admin-material-content-hint" style="${selectedStudents.length ? 'display:none;' : ''}">Selecione ao menos um aluno acima pra poder enviar o material.</p>
+      <div class="section-label">${t('admin.materials.newTitle')}<span id="admin-material-content-subtitle">${newMaterialSubtitle}</span></div>
+      <p class="profile-edit-hint" id="admin-material-content-hint" style="${selectedStudents.length ? 'display:none;' : ''}">${t('admin.materials.needStudent')}</p>
       <form id="admin-create-material-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-material-title">Título</label>
-        <input type="text" id="admin-material-title" class="profile-edit-input" placeholder="ex: Resumo do passé composé" autocomplete="off">
-        <label class="profile-edit-label" for="admin-material-desc">Descrição (opcional)</label>
-        <textarea id="admin-material-desc" class="profile-edit-input" rows="3" placeholder="explicação, contexto de uso..."></textarea>
-        <label class="profile-edit-label" for="admin-material-link">Link (opcional)</label>
+        <label class="profile-edit-label" for="admin-material-title">${t('admin.materials.titleLabel')}</label>
+        <input type="text" id="admin-material-title" class="profile-edit-input" placeholder="${t('admin.materials.titlePlaceholder')}" autocomplete="off">
+        <label class="profile-edit-label" for="admin-material-desc">${t('admin.materials.descOpt')}</label>
+        <textarea id="admin-material-desc" class="profile-edit-input" rows="3" placeholder="${t('admin.materials.descPlaceholder')}"></textarea>
+        <label class="profile-edit-label" for="admin-material-link">${t('admin.materials.linkOpt')}</label>
         <input type="url" id="admin-material-link" class="profile-edit-input" placeholder="https://..." autocomplete="off">
-        <label class="profile-edit-label" for="admin-material-file">Arquivo (opcional)</label>
+        <label class="profile-edit-label" for="admin-material-file">${t('admin.materials.fileOpt')}</label>
         <input type="file" id="admin-material-file" class="profile-edit-input">
         <p class="profile-edit-error" id="admin-create-material-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-create-material-btn" ${selectedStudents.length ? '' : 'disabled'}>Enviar material${selectedStudents.length > 1 ? ` pra ${selectedStudents.length} alunos` : ''}</button>
+        <button type="submit" class="btn btn-primary btn-block" id="admin-create-material-btn" ${selectedStudents.length ? '' : 'disabled'}>${t('admin.materials.send')}${adminForStudentsSuffix(selectedStudents.length)}</button>
       </form>
     </div>
 
@@ -313,7 +305,7 @@ async function renderAdminSupportMaterialsView(){
 
     const selectedNow = ADMIN_MATERIALS_STATE._studentsCache.filter(s => ADMIN_MATERIALS_STATE.studentIds.has(s.student_id));
     if (!selectedNow.length){
-      errorEl.textContent = 'Selecione ao menos um aluno.';
+      errorEl.textContent = t('admin.common.selectAtLeastOne');
       return;
     }
     btn.disabled = true;
@@ -347,7 +339,7 @@ async function renderAdminSupportMaterialsView(){
       errorEl.textContent = failed[0].error;
       return;
     }
-    showToast(results.length > 1 ? `✓ Material enviado pra ${results.length - failed.length} alunos.` : '✓ Material enviado.');
+    showToast(results.length > 1 ? t('admin.materials.sentN', { n: results.length - failed.length }) : t('admin.materials.sent'));
     // Único ponto de re-render COMPLETO por causa da seleção -- intencional
     // aqui, um submit bem sucedido deve mesmo limpar o formulário.
     renderAdminSupportMaterialsView();

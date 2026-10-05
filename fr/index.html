@@ -3209,7 +3209,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
            comum na navegação/conclusão de lição, sem revogar privilégios
            administrativos reais (Painel de Admin etc. continuam
            acessíveis pela conta, só saem da navegação normal). -->
-      <button class="pill admin-mode-toggle-btn" id="admin-mode-toggle-btn" aria-label="Ativar/desativar Admin Mode" title="Admin Mode: OFF simula a experiência de um aluno comum" style="display:none;">🔒 Admin: <span id="admin-mode-state-label">ON</span></button>
+      <button class="pill admin-mode-toggle-btn" id="admin-mode-toggle-btn" data-i18n="admin.mode.pillLabel" data-i18n-attr="aria-label:admin.mode.pillAria;title:admin.mode.pillTitle" aria-label="Ativar/desativar Admin Mode" title="Admin Mode: OFF simula a experiência de um aluno comum" style="display:none;">🔒 Admin: <span id="admin-mode-state-label">ON</span></button>
       <button class="pill notifications-pill" id="notifications-topbar-btn" aria-label="Notificações" title="Notificações">🔔<span class="notifications-badge" id="notifications-badge" style="display:none;"></span></button>
       <button class="pill report-topbar-pill" id="report-topbar-btn" aria-label="Reportar problema" title="Reportar problema" data-i18n-attr="aria-label:report.entry.label;title:report.entry.label">⚑</button>
       <div class="lang-switcher">
@@ -3594,14 +3594,14 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <!-- ===== PAINEL DE ADMIN ===== -->
   <div class="view" id="view-admin-badges">
     <div class="path-header">
-      <h2>Painel de Admin</h2>
-      <p>Badges especiais e métricas de uso da plataforma.</p>
+      <h2 data-i18n="admin.reports.screen.admin_badges">Painel de Admin</h2>
+      <p data-i18n="admin.panel.sub">Badges especiais e métricas de uso da plataforma.</p>
     </div>
-    <div class="leaderboard-tabs" role="tablist" aria-label="Seção do painel de admin">
-      <button class="leaderboard-tab active" role="tab" aria-selected="true" data-admin-section="badges">🎖️ Badges</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="analytics">📊 Analytics</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="notifications">🔔 Notificações</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="reports">⚑ Reports</button>
+    <div class="leaderboard-tabs" role="tablist" aria-label="Seção do painel de admin" data-i18n-attr="aria-label:admin.panel.aria">
+      <button class="leaderboard-tab active" role="tab" aria-selected="true" data-admin-section="badges" data-i18n="admin.panel.tab.badges">🎖️ Badges</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="analytics" data-i18n="admin.panel.tab.analytics">📊 Analytics</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="notifications" data-i18n="settings.tab.notifications">🔔 Notificações</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="reports" data-i18n="admin.panel.tab.reports">⚑ Reports</button>
       <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="students">🎓 Alunos</button>
       <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="flashcards">📇 Flashcards</button>
       <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="classlogs">📝 Aulas</button>
@@ -3675,8 +3675,8 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <p id="challenges-categories-sub">Pratique francês de verdade: expressões, compreensão auditiva e ortografia.</p>
       </div>
       <div class="challenges-admin-bar" id="challenges-admin-bar" style="display:none;">
-        <button class="btn btn-secondary" id="challenges-admin-import-btn">📥 Importar JSON</button>
-        <button class="btn btn-secondary" id="challenges-admin-review-btn">🛠️ Revisar pendentes (<span id="challenges-pending-count">0</span>)</button>
+        <button class="btn btn-secondary" id="challenges-admin-import-btn" data-i18n="adminChallenges.bar.import">📥 Importar JSON</button>
+        <button class="btn btn-secondary" id="challenges-admin-review-btn" data-i18n="adminChallenges.bar.review">🛠️ Revisar pendentes (<span id="challenges-pending-count">0</span>)</button>
       </div>
       <div class="challenges-categories" id="challenges-categories"></div>
     </div>
@@ -3697,7 +3697,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
     </div>
 
     <div id="challenges-admin-wrap" style="display:none;">
-      <button class="back-link" id="challenges-admin-back-btn">← Voltar aos desafios</button>
+      <button class="back-link" id="challenges-admin-back-btn" data-i18n="fr.dictation.backToChallenges">← Voltar aos desafios</button>
       <div id="challenges-admin-content"></div>
     </div>
   </div>
@@ -3763,13 +3763,13 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="challenges-import-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>Importar desafios via JSON</h3>
-      <button class="app-modal-close" id="challenges-import-modal-close" aria-label="Fechar">✕</button>
+      <h3 data-i18n="adminChallenges.modal.title">Importar desafios via JSON</h3>
+      <button class="app-modal-close" id="challenges-import-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
       <p>Cole aqui a saída do pipeline de geração (<code>challenges_pipeline_output.json</code>, ou só o array de <code>accepted</code>) -- vai direto pro banco, sem precisar rodar SQL manualmente no Supabase.</p>
       <textarea id="challenges-import-textarea" class="challenges-import-textarea" placeholder='[{"id": "expr-auto-001", "type": "expression", "level": "B1", ...}, ...]' rows="12"></textarea>
-      <button class="btn btn-primary btn-block" id="challenges-import-submit-btn" style="max-width:320px; margin:12px auto 0;">Importar</button>
+      <button class="btn btn-primary btn-block" id="challenges-import-submit-btn" style="max-width:320px; margin:12px auto 0;" data-i18n="adminChallenges.import.btn">Importar</button>
       <div class="challenges-import-status" id="challenges-import-status"></div>
     </div>
   </div>
@@ -3791,13 +3791,13 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="admin-manage-badge-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3 id="admin-manage-badge-title">Gerenciar badge</h3>
-      <button class="app-modal-close" id="admin-manage-badge-modal-close" aria-label="Fechar">✕</button>
+      <h3 id="admin-manage-badge-title" data-i18n="admin.modal.manageBadge.title">Gerenciar badge</h3>
+      <button class="app-modal-close" id="admin-manage-badge-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
-      <p class="admin-manage-badge-hint">Marque quem deve ter este badge. Desmarcar remove.</p>
+      <p class="admin-manage-badge-hint" data-i18n="admin.modal.manageBadge.hint">Marque quem deve ter este badge. Desmarcar remove.</p>
       <div id="admin-manage-badge-list" class="admin-member-list"></div>
-      <button class="btn btn-primary btn-block" id="admin-manage-badge-save-btn" style="margin-top:14px;">Salvar</button>
+      <button class="btn btn-primary btn-block" id="admin-manage-badge-save-btn" style="margin-top:14px;" data-i18n="profile.save">Salvar</button>
     </div>
   </div>
 </div>
@@ -3805,21 +3805,21 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="admin-edit-badge-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>Editar badge</h3>
-      <button class="app-modal-close" id="admin-edit-badge-modal-close" aria-label="Fechar">✕</button>
+      <h3 data-i18n="admin.badges.catalog.editTitle">Editar badge</h3>
+      <button class="app-modal-close" id="admin-edit-badge-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
       <form id="admin-edit-badge-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-edit-badge-id">ID (só letras minúsculas/números/_)</label>
+        <label class="profile-edit-label" for="admin-edit-badge-id" data-i18n="admin.badges.create.id">ID (só letras minúsculas/números/_)</label>
         <input type="text" id="admin-edit-badge-id" class="profile-edit-input" maxlength="32">
-        <label class="profile-edit-label" for="admin-edit-badge-name">Nome</label>
+        <label class="profile-edit-label" for="admin-edit-badge-name" data-i18n="admin.badges.create.name">Nome</label>
         <input type="text" id="admin-edit-badge-name" class="profile-edit-input" maxlength="40">
-        <label class="profile-edit-label" for="admin-edit-badge-icon">Emoji</label>
+        <label class="profile-edit-label" for="admin-edit-badge-icon" data-i18n="admin.badges.create.icon">Emoji</label>
         <input type="text" id="admin-edit-badge-icon" class="profile-edit-input" maxlength="8">
-        <label class="profile-edit-label" for="admin-edit-badge-desc">Descrição (opcional)</label>
+        <label class="profile-edit-label" for="admin-edit-badge-desc" data-i18n="admin.materials.descOpt">Descrição (opcional)</label>
         <input type="text" id="admin-edit-badge-desc" class="profile-edit-input" maxlength="120">
         <p class="profile-edit-error" id="admin-edit-badge-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-edit-badge-save-btn">Salvar alterações</button>
+        <button type="submit" class="btn btn-primary btn-block" id="admin-edit-badge-save-btn" data-i18n="admin.modal.saveChanges">Salvar alterações</button>
       </form>
     </div>
   </div>
@@ -3828,19 +3828,19 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="admin-edit-template-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>Editar variante</h3>
-      <button class="app-modal-close" id="admin-edit-template-modal-close" aria-label="Fechar">✕</button>
+      <h3 data-i18n="admin.modal.editTemplate.title">Editar variante</h3>
+      <button class="app-modal-close" id="admin-edit-template-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
       <form id="admin-edit-template-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-edit-template-title">Título (opcional)</label>
+        <label class="profile-edit-label" for="admin-edit-template-title" data-i18n="admin.notifications.new.titleLabel">Título (opcional)</label>
         <input type="text" id="admin-edit-template-title" class="profile-edit-input" maxlength="60">
-        <label class="profile-edit-label" for="admin-edit-template-icon">Emoji (opcional)</label>
+        <label class="profile-edit-label" for="admin-edit-template-icon" data-i18n="admin.notifications.new.icon">Emoji (opcional)</label>
         <input type="text" id="admin-edit-template-icon" class="profile-edit-input" maxlength="8">
-        <label class="profile-edit-label" for="admin-edit-template-body">Texto</label>
+        <label class="profile-edit-label" for="admin-edit-template-body" data-i18n="admin.notifications.new.body">Texto</label>
         <textarea id="admin-edit-template-body" class="profile-edit-textarea" maxlength="300" rows="2"></textarea>
         <p class="profile-edit-error" id="admin-edit-template-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-edit-template-save-btn">Salvar alterações</button>
+        <button type="submit" class="btn btn-primary btn-block" id="admin-edit-template-save-btn" data-i18n="admin.modal.saveChanges">Salvar alterações</button>
       </form>
     </div>
   </div>
@@ -3849,71 +3849,71 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="admin-report-detail-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3 id="admin-report-detail-category">Report</h3>
-      <button class="app-modal-close" id="admin-report-detail-modal-close" aria-label="Fechar">✕</button>
+      <h3 id="admin-report-detail-category" data-i18n="admin.modal.report.title">Report</h3>
+      <button class="app-modal-close" id="admin-report-detail-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
       <div class="admin-report-detail-block">
-        <div class="admin-report-detail-label">Enviado por</div>
+        <div class="admin-report-detail-label" data-i18n="admin.modal.report.sentBy">Enviado por</div>
         <div id="admin-report-detail-reporter" class="admin-report-detail-text"></div>
       </div>
       <div class="admin-report-detail-block">
-        <div class="admin-report-detail-label">Descrição</div>
+        <div class="admin-report-detail-label" data-i18n="admin.modal.report.description">Descrição</div>
         <div id="admin-report-detail-description" class="admin-report-detail-text"></div>
       </div>
       <div class="admin-report-detail-block">
-        <div class="admin-report-detail-label">O que a pessoa esperava</div>
+        <div class="admin-report-detail-label" data-i18n="admin.modal.report.expected">O que a pessoa esperava</div>
         <div id="admin-report-detail-expected" class="admin-report-detail-text"></div>
       </div>
       <div class="admin-report-detail-block">
-        <div class="admin-report-detail-label">Gravidade percebida</div>
+        <div class="admin-report-detail-label" data-i18n="admin.modal.report.severity">Gravidade percebida</div>
         <div id="admin-report-detail-severity" class="admin-report-detail-text"></div>
       </div>
       <div class="admin-report-detail-block">
-        <div class="admin-report-detail-label">Contexto capturado automaticamente</div>
+        <div class="admin-report-detail-label" data-i18n="admin.modal.report.context">Contexto capturado automaticamente</div>
         <div id="admin-report-detail-context" class="admin-report-detail-context"></div>
       </div>
       <div class="admin-report-detail-block admin-report-detail-text" id="admin-report-detail-screenshot"></div>
 
-      <label class="profile-edit-label" for="admin-report-detail-status">Status</label>
+      <label class="profile-edit-label" for="admin-report-detail-status" data-i18n="admin.modal.report.status">Status</label>
       <select id="admin-report-detail-status" class="profile-edit-input">
-        <option value="novo">Novo</option>
-        <option value="em_analise">Em análise</option>
-        <option value="confirmado">Confirmado</option>
-        <option value="em_desenvolvimento">Em desenvolvimento</option>
-        <option value="resolvido">Resolvido</option>
-        <option value="nao_reproduzido">Não reproduzido</option>
-        <option value="recusado">Recusado</option>
-        <option value="duplicado">Duplicado</option>
+        <option value="novo" data-i18n="admin.reports.status.novo">Novo</option>
+        <option value="em_analise" data-i18n="admin.reports.status.em_analise">Em análise</option>
+        <option value="confirmado" data-i18n="admin.reports.status.confirmado">Confirmado</option>
+        <option value="em_desenvolvimento" data-i18n="admin.reports.status.em_desenvolvimento">Em desenvolvimento</option>
+        <option value="resolvido" data-i18n="admin.reports.status.resolvido">Resolvido</option>
+        <option value="nao_reproduzido" data-i18n="admin.reports.status.nao_reproduzido">Não reproduzido</option>
+        <option value="recusado" data-i18n="admin.reports.status.recusado">Recusado</option>
+        <option value="duplicado" data-i18n="admin.reports.status.duplicado">Duplicado</option>
       </select>
 
-      <label class="profile-edit-label" for="admin-report-detail-priority">Prioridade técnica</label>
+      <label class="profile-edit-label" for="admin-report-detail-priority" data-i18n="admin.modal.report.priority">Prioridade técnica</label>
       <select id="admin-report-detail-priority" class="profile-edit-input">
-        <option value="">(não definida)</option>
-        <option value="baixa">Baixa</option>
-        <option value="media">Média</option>
-        <option value="alta">Alta</option>
-        <option value="critica">Crítica</option>
+        <option value="" data-i18n="admin.modal.report.priorityNone">(não definida)</option>
+        <option value="baixa" data-i18n="admin.reports.priority.baixa">Baixa</option>
+        <option value="media" data-i18n="admin.reports.priority.media">Média</option>
+        <option value="alta" data-i18n="admin.reports.priority.alta">Alta</option>
+        <option value="critica" data-i18n="admin.reports.priority.critica">Crítica</option>
       </select>
 
-      <label class="profile-edit-label" for="admin-report-detail-note">Nota interna</label>
-      <textarea id="admin-report-detail-note" class="profile-edit-textarea" rows="3" placeholder="Só a equipe vê isso"></textarea>
+      <label class="profile-edit-label" for="admin-report-detail-note" data-i18n="admin.modal.report.note">Nota interna</label>
+      <textarea id="admin-report-detail-note" class="profile-edit-textarea" rows="3" placeholder="Só a equipe vê isso" data-i18n-attr="placeholder:admin.modal.report.notePh"></textarea>
 
       <p class="profile-edit-error" id="admin-report-detail-error"></p>
-      <button type="button" class="btn btn-primary btn-block" id="admin-report-detail-save-btn">Salvar</button>
+      <button type="button" class="btn btn-primary btn-block" id="admin-report-detail-save-btn" data-i18n="profile.save">Salvar</button>
 
       <div class="admin-report-detail-block admin-report-reply-block">
-        <div class="admin-report-detail-label">Responder por e-mail</div>
+        <div class="admin-report-detail-label" data-i18n="admin.modal.report.replyByEmail">Responder por e-mail</div>
         <div id="admin-report-reply-history" class="admin-report-detail-text"></div>
         <div id="admin-report-reply-composer">
-          <label class="profile-edit-label" for="admin-report-reply-subject">Assunto</label>
+          <label class="profile-edit-label" for="admin-report-reply-subject" data-i18n="admin.modal.report.subject">Assunto</label>
           <input type="text" id="admin-report-reply-subject" class="profile-edit-input" maxlength="150">
-          <label class="profile-edit-label" for="admin-report-reply-body">Mensagem</label>
-          <textarea id="admin-report-reply-body" class="profile-edit-textarea" rows="5" placeholder="Obrigada por avisar! ..."></textarea>
+          <label class="profile-edit-label" for="admin-report-reply-body" data-i18n="admin.modal.report.message">Mensagem</label>
+          <textarea id="admin-report-reply-body" class="profile-edit-textarea" rows="5" placeholder="Obrigada por avisar! ..." data-i18n-attr="placeholder:admin.modal.report.replyPh"></textarea>
           <p class="profile-edit-error" id="admin-report-reply-error"></p>
-          <button type="button" class="btn btn-primary btn-block" id="admin-report-reply-send-btn">Enviar resposta</button>
+          <button type="button" class="btn btn-primary btn-block" id="admin-report-reply-send-btn" data-i18n="admin.reports.reply.send">Enviar resposta</button>
         </div>
-        <p id="admin-report-reply-noemail" class="profile-edit-hint" style="display:none;">Sem e-mail associado a este report (convidado que não informou e-mail) -- não é possível responder.</p>
+        <p id="admin-report-reply-noemail" class="profile-edit-hint" style="display:none;" data-i18n="admin.modal.report.noEmail">Sem e-mail associado a este report (convidado que não informou e-mail) -- não é possível responder.</p>
       </div>
     </div>
   </div>

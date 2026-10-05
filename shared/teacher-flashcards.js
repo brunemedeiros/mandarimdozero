@@ -94,16 +94,16 @@ function _validateFlashcardContent({ languageAppKey, front, backTrans, choices, 
   // front só é exigido fora do modo cloze -- ver migration 035/comentário
   // acima. Nunca inventamos um valor substituto quando ausente: gravamos
   // `null` de verdade, não uma cópia da frase-cloze nem da tradução.
-  if (!isCloze && !cleanFront) return { ok: false, error: 'Digite o texto da frente do cartão.' };
-  if (!cleanBack) return { ok: false, error: 'Digite a tradução (verso do cartão).' };
+  if (!isCloze && !cleanFront) return { ok: false, error: t('ownFlashcards.err.frontRequired') };
+  if (!cleanBack) return { ok: false, error: t('ownFlashcards.err.backRequired') };
   const cleanChoices = (choices || []).map(c => (c || '').trim()).filter(Boolean);
   if (cleanClozeSentence){
     if ((cleanClozeSentence.match(/___/g) || []).length !== 1){
-      return { ok: false, error: 'A frase precisa ter exatamente um espaço marcado com ___ (3 underscores).' };
+      return { ok: false, error: t('ownFlashcards.err.clozeOneBlank') };
     }
-    if (!cleanClozeAnswer) return { ok: false, error: 'Digite a resposta certa pro espaço em branco.' };
+    if (!cleanClozeAnswer) return { ok: false, error: t('ownFlashcards.err.clozeAnswerRequired') };
     if (languageAppKey === 'mandarim' && !(clozeAnswerPinyin || '').trim()){
-      return { ok: false, error: 'Digite o pinyin da resposta (é o que o aluno vai digitar).' };
+      return { ok: false, error: t('teacherFlashcards.err.clozePinyinRequired') };
     }
   }
   return { ok: true, cleanFront, cleanBack, cleanChoices, cleanClozeSentence, cleanClozeAnswer };
@@ -142,7 +142,7 @@ async function createFlashcard({ studentId, languageAppKey, nativeState, deckId 
   if (deckId != null) identity.deck_id = deckId;
   const payload = Object.assign({}, identity, nativeContentColumnsFromEditorState(nativeState));
   const { data, error } = await supabaseClient.from('teacher_flashcards').insert(payload).select().single();
-  if (error){ console.error('Erro ao criar flashcard:', error); return { ok: false, error: 'Não foi possível criar o cartão agora.' }; }
+  if (error){ console.error('Erro ao criar flashcard:', error); return { ok: false, error: t('ownFlashcards.err.createFailed') }; }
   return { ok: true, card: data };
 }
 
@@ -171,7 +171,7 @@ async function updateFlashcardContent(id, { languageAppKey, front, backTrans, no
   if (nativeState){
     const patch = Object.assign({ revision }, nativeContentColumnsFromEditorState(nativeState));
     const { error } = await supabaseClient.from('teacher_flashcards').update(patch).eq('id', id);
-    if (error){ console.error('Erro ao editar flashcard (nativo):', error); return { ok: false, error: 'Não foi possível salvar a edição agora.' }; }
+    if (error){ console.error('Erro ao editar flashcard (nativo):', error); return { ok: false, error: t('ownFlashcards.err.saveEditFailed') }; }
     return { ok: true };
   }
   const v = _validateFlashcardContent({ languageAppKey, front, backTrans, choices, clozeSentence, clozeAnswer, clozeAnswerPinyin });
@@ -191,7 +191,7 @@ async function updateFlashcardContent(id, { languageAppKey, front, backTrans, no
   if (imageUrl !== undefined) patch.image_url = imageUrl;
   if (audioUrl !== undefined) patch.audio_url = audioUrl;
   const { error } = await supabaseClient.from('teacher_flashcards').update(patch).eq('id', id);
-  if (error){ console.error('Erro ao editar flashcard:', error); return { ok: false, error: 'Não foi possível salvar a edição agora.' }; }
+  if (error){ console.error('Erro ao editar flashcard:', error); return { ok: false, error: t('ownFlashcards.err.saveEditFailed') }; }
   return { ok: true };
 }
 
@@ -234,7 +234,7 @@ async function deleteFlashcardPermanently(id){
 //    app (nunca confiáveis por padrão, Seção 15 -- nunca deixar o
 //    usuário escolher um path arbitrário).
 async function uploadFlashcardMedia(file, kind, resourceId){
-  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  if (!CURRENT_USER) return { ok: false, error: t('ownFlashcards.err.loginRequired') };
   // Fase 7g (ver CLAUDE.md) -- `kind==='recording'` (gravação por
   // microfone, shared/flashcard-field-audio-recorder.js) passa pela MESMA
   // validação de MIME/tamanho que `kind==='audio'` (upload manual, Fase
@@ -257,7 +257,7 @@ async function uploadFlashcardMedia(file, kind, resourceId){
   const { error } = await supabaseClient.storage
     .from('flashcard-media')
     .upload(path, file, { contentType: file.type || undefined, cacheControl: '3600' });
-  if (error){ console.error(`Erro ao subir ${kind} do flashcard:`, error); return { ok: false, error: 'Não foi possível enviar o arquivo agora.' }; }
+  if (error){ console.error(`Erro ao subir ${kind} do flashcard:`, error); return { ok: false, error: t('ownFlashcards.err.uploadFailed') }; }
   const { data: pub } = supabaseClient.storage.from('flashcard-media').getPublicUrl(path);
   return { ok: true, url: pub.publicUrl, path };
 }
@@ -294,7 +294,7 @@ async function deleteFlashcardMedia(path){
 // rede (validateTtsGenerationRequest, shared/flashcard-model.js) -- a
 // Edge Function valida de novo do lado do servidor, 2ª camada real.
 async function requestFieldAudioTTS({ rowId, fieldId, text, language, voiceId, rate }){
-  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  if (!CURRENT_USER) return { ok: false, error: t('ownFlashcards.err.loginRequired') };
   const v = validateTtsGenerationRequest({ text, language });
   if (!v.ok) return v;
   const { data, error } = await supabaseClient.functions.invoke('tts-generate', {
@@ -302,7 +302,7 @@ async function requestFieldAudioTTS({ rowId, fieldId, text, language, voiceId, r
   });
   if (error || !data?.ok){
     const code = data?.error || error?.context?.error || null;
-    return { ok: false, error: TTS_GENERATION_ERROR_LABELS[code] || 'Não foi possível gerar o áudio agora.' };
+    return { ok: false, error: TTS_GENERATION_ERROR_LABELS[code] || t('ownFlashcards.err.ttsFailed') };
   }
   return { ok: true, url: data.url, path: data.path, generationKey: data.generationKey, generatedAt: data.generatedAt };
 }

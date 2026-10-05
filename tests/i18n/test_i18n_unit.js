@@ -128,7 +128,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   const nonEmpty = (v) => typeof v === 'string' ? v.trim() !== '' : (v && typeof v === 'object' && Object.values(v).length > 0 && Object.values(v).every(x => typeof x === 'string' && x.trim() !== ''));
   check('nenhum valor vazio', [pt, en, es].every(c => Object.values(c).every(nonEmpty)));
   // Valores legitimamente iguais nos dois idiomas (nomes próprios, abreviações, números).
-  const EN_SAME_AS_PT_OK = ['myFlashcards.badge.premium', 'myFlashcards.edit.pinyin', 'myFlashcards.native.cardType', 'notif.pref.matrix.app', 'notif.pref.matrix.push', 'notif.pref.titleMatrixPush', 'notif.time.day', 'notif.time.hour', 'notif.time.min', 'review.mode.flashcard.name', 'review.mode.speed.name', 'review.speed.points', 'toast.pointsGain', 'toast.xpGain', 'trail.premiumBadge', 'preview.err.detail', 'review.interval.min', 'review.interval.hour', 'leaderboard.rowBadge', 'publicProfile.labelPinyin', 'publicProfile.sectionFlashcards', 'fieldEditor.lang.zhPinyin', 'fieldEditor.audio.rate.normal', 'taEditor.pinyinLabel'];
+  const EN_SAME_AS_PT_OK = ['myFlashcards.badge.premium', 'myFlashcards.edit.pinyin', 'myFlashcards.native.cardType', 'notif.pref.matrix.app', 'notif.pref.matrix.push', 'notif.pref.titleMatrixPush', 'notif.time.day', 'notif.time.hour', 'notif.time.min', 'review.mode.flashcard.name', 'review.mode.speed.name', 'review.speed.points', 'toast.pointsGain', 'toast.xpGain', 'trail.premiumBadge', 'preview.err.detail', 'review.interval.min', 'review.interval.hour', 'leaderboard.rowBadge', 'publicProfile.labelPinyin', 'publicProfile.sectionFlashcards', 'fieldEditor.lang.zhPinyin', 'fieldEditor.audio.rate.normal', 'taEditor.pinyinLabel', 'admin.analytics.tech.perf', 'admin.badges.create.icon', 'admin.badges.grant.badge', 'admin.badges.grant.usernamePh', 'admin.modal.report.status', 'admin.modal.report.title', 'admin.mode.off', 'admin.mode.on', 'admin.mode.pillLabel', 'admin.mode.title', 'admin.panel.tab.analytics', 'admin.panel.tab.badges', 'admin.panel.tab.reports', 'adminChallenges.import.itemN', 'admin.flashcards.cardType.normal', 'admin.flashcards.dest.countSubdecks', 'admin.flashcards.dest.deckFallback', 'admin.flashcards.dest.newSub', 'admin.materials.badgeLink'];
   const sameKeys = ptKeys.filter(k => !EN_SAME_AS_PT_OK.includes(k) && JSON.stringify(en[k]) === JSON.stringify(pt[k]));
   check('en difere de pt-BR (traduzido)', sameKeys.length === 0, sameKeys);
   // comentário de confiança em cada linha de chave de en/es
@@ -158,16 +158,21 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   const DELIBERATE_PT_CHANGES = [['arquive algum cartão que já não usa, ou peça', 'apague algum cartão, ou peça']];
   const prev = (f) => DELIBERATE_PT_CHANGES.reduce((acc, [o, n]) => acc.split(o).join(n), execSync(`git show ${PREV}:${f}`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 }));
   const prevFr = prev('fr/index.html'), prevZh = prev('zh/index.html');
-  const prevJs = ['shared/my-flashcards.js', 'shared/public-profile.js', 'shared/anki-import-ui.js', 'fr/app.js', 'zh/app.js', 'shared/flashcard-model.js', 'shared/own-flashcards.js', 'shared/flashcard-preview.js', 'shared/notifications.js', 'shared/notification-preferences.js', 'shared/deck-data.js', 'shared/admin-students.js', 'shared/profile.js', 'shared/leaderboard.js', 'shared/auth.js', 'shared/support-materials-view.js', 'shared/anki-export.js', 'shared/flashcard-field-editor.js', 'shared/flashcard-mc-editor.js', 'shared/flashcard-typeanswer-editor.js', 'shared/flashcard-cloze-editor.js', 'shared/flashcard-field-audio-recorder.js', 'shared/wizard.js', 'shared/language-switcher.js', 'shared/fsrs.js'].map(prev).join('\n');
+  const prevJs = ['shared/my-flashcards.js', 'shared/public-profile.js', 'shared/anki-import-ui.js', 'fr/app.js', 'zh/app.js', 'shared/flashcard-model.js', 'shared/own-flashcards.js', 'shared/flashcard-preview.js', 'shared/notifications.js', 'shared/notification-preferences.js', 'shared/deck-data.js', 'shared/admin-students.js', 'shared/profile.js', 'shared/leaderboard.js', 'shared/auth.js', 'shared/support-materials-view.js', 'shared/anki-export.js', 'shared/flashcard-field-editor.js', 'shared/flashcard-mc-editor.js', 'shared/flashcard-typeanswer-editor.js', 'shared/flashcard-cloze-editor.js', 'shared/admin-flashcards.js', 'shared/admin-class-logs.js', 'shared/admin-support-materials.js', 'shared/admin-premium.js', 'shared/teacher-flashcards.js', 'shared/teacher-class-logs.js', 'shared/teacher-support-materials.js', 'shared/admin-analytics.js', 'shared/admin-badges.js', 'shared/admin-notifications.js', 'shared/admin-reports.js', 'shared/flashcard-field-audio-recorder.js', 'shared/wizard.js', 'shared/language-switcher.js', 'shared/fsrs.js'].map(prev).join('\n');
   const all = origFr + origZh + origRep + prevFr + prevZh + prevJs;
   // Textos NOVOS (não existiam antes): só o seletor de idioma.
   const NEW_KEYS = ['settings.uiLanguage.title', 'settings.uiLanguage.sub'];
+  const NESTED_TEMPLATE_KEYS = ['admin.reports.reply.lastSent', 'admin.reports.reply.lastSentTo'];
   const escRe = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   for (const k of ptKeys){
     if (NEW_KEYS.includes(k)) continue;
     const v = pt[k];
     // Plural por categoria ({one, other}): no original o plural era montado por código (módulo${n===1?'':'s'}).
     if (v && typeof v === 'object'){ check(`regressão: pt-BR '${k}' (plural) tem one e other`, typeof v.one === 'string' && typeof v.other === 'string'); continue; }
+    // Mustache literal ({{amount}}) é texto, não placeholder: byte a byte. Templates com
+    // expressão aninhada no original (`${a}${b ? `...${c}` : ''}`) checam cada fragmento.
+    if (/\{\{\w+\}\}/.test(v)){ check(`regressão: pt-BR '${k}' (mustache literal) existe byte a byte no original`, all.includes(v), v); continue; }
+    if (NESTED_TEMPLATE_KEYS.includes(k)){ check(`regressão: pt-BR '${k}' (template aninhado) fragmentos existem no original`, v.split(/\{\w+\}/).map(x => x.trim()).filter(Boolean).every(x => all.includes(x)), v); continue; }
     if (/\{\w+\}/.test(v)){
       // placeholder {x} <-> ${...} do template literal original
       const re = new RegExp(v.split(/\{\w+\}/).map(escRe).join('\\$\\{[^}]+\\}'));

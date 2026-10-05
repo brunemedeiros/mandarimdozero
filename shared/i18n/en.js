@@ -1006,4 +1006,646 @@ window.I18N_CATALOG['en'] = {
   'fr.dictation.unmute': 'Unmute', // ALTA
   'fr.dictation.placeholder': 'Type what you heard here...', // ALTA
   'fr.dictation.scoreTextHtml': 'You wrote <strong>{matches} of {total}</strong> words correctly. You scored {score} points ({score}%).', // ALTA
+  'admin.common.adminOnly': 'This screen is for the platform administration only.', // ALTA
+  'admin.common.removedUser': '(user removed)', // ALTA
+  'admin.common.noneSelected': 'No student selected', // ALTA
+  'admin.common.selectedCount': { one: '{n} student selected', other: '{n} students selected' }, // ALTA
+  'admin.common.searchPlaceholder': 'Search by name or @username...', // ALTA
+  'admin.common.langFilterAria': 'Filter by language', // ALTA
+  'admin.common.all': 'All', // ALTA
+  'admin.common.forNStudents': ' for {n} students', // ALTA
+  'admin.common.forTheseStudents': ' these students', // ALTA
+  'admin.common.forThisStudent': ' this student', // ALTA
+  'admin.common.forNoStudent': ' no student selected', // ALTA
+  'admin.common.selectAtLeastOne': 'Select at least one student.', // ALTA
+  'admin.common.students': 'Students', // ALTA
+  'admin.common.date': 'Date', // ALTA
+  'admin.common.delete': 'Delete', // ALTA
+  'admin.students.lang.mandarim': 'Chinese', // ALTA
+  'admin.students.lang.portugues': 'Portuguese (coming soon)', // ALTA
+  'admin.students.linkedOn': 'linked on {date}', // ALTA
+  'admin.students.metricsTitle': 'View metrics', // ALTA
+  'admin.students.removeLinkTitle': 'Remove link', // ALTA
+  'admin.students.none': 'No student linked yet.', // ALTA
+  'admin.students.linkTitle': 'Link a student', // ALTA
+  'admin.students.accountLabel': 'Student account', // ALTA
+  'admin.students.selectAccount': 'Select an account...', // ALTA
+  'admin.students.link': 'Link', // ALTA
+  'admin.students.yourStudents': 'Your students ({n})', // ALTA
+  'admin.students.linkedToast': '✓ @{username} linked as a student.', // ALTA
+  'admin.students.removeConfirm': 'Remove this link? The student\'s progress and history are preserved -- they just stop appearing in your list.', // ALTA
+  'admin.students.metrics.loading': 'Loading metrics...', // ALTA
+  'admin.students.metrics.failed': 'We couldn\'t load the metrics right now.', // ALTA
+  'admin.students.metrics.noCards': 'You haven\'t created any cards for this student yet, in the "📇 Flashcards" tab.', // ALTA
+  'admin.students.metrics.noRecord': 'no record', // ALTA
+  'admin.students.metrics.today': 'today', // ALTA
+  'admin.students.metrics.yesterday': 'yesterday', // ALTA
+  'admin.students.metrics.daysAgo': '{n} days ago', // ALTA
+  'admin.students.metrics.lastActivity': 'Last overall activity: <strong>{label}</strong>', // ALTA
+  'admin.students.metrics.cardsCreated': 'Cards you created for them: <strong>{n} active</strong>', // ALTA
+  'admin.students.metrics.archivedSuffix': ', {n} archived', // ALTA
+  'admin.students.metrics.neverReviewed': 'Never reviewed yet: <strong>{n}</strong>', // ALTA
+  'admin.students.metrics.memory': 'Memory: <strong>{weak} weak</strong> · {medium} medium · {strong} strong', // ALTA
+  'admin.premium.adminOnly': 'Only the administration can access this section.', // ALTA
+  'admin.premium.title': '⭐ Activate/remove Premium', // ALTA
+  'admin.premium.hint': 'Search for an account by @username and activate the Premium plan for it -- it works for ANY registered account, whether linked to you as a student or not. No real billing yet (no checkout set up) -- it is a manual grant, reversible at any time.', // ALTA
+  'admin.premium.usernamePlaceholder': 'e.g. johnsmith', // ALTA
+  'admin.premium.search': 'Find account', // ALTA
+  'admin.premium.notFound': 'I couldn\'t find anyone with that @username. Check the spelling.', // ALTA
+  'admin.premium.currentPlan': 'Current plan: ', // ALTA
+  'admin.premium.planFree': '🔒 Free', // ALTA
+  'admin.premium.remove': 'Remove Premium', // ALTA
+  'admin.premium.make': 'Make Premium', // ALTA
+  'admin.premium.nowPremium': '✓ @{username} is now Premium.', // ALTA
+  'admin.premium.removed': '✓ Premium removed from @{username}.', // ALTA
+  'admin.classLogs.fieldTopic': '📌 Topic', // ALTA
+  'admin.classLogs.fieldHomework': '📝 Homework', // ALTA
+  'admin.classLogs.fieldObservations': '🔎 Observations', // ALTA
+  'admin.classLogs.fieldNotes': '💬 Notes', // ALTA
+  'admin.classLogs.topicOpt': 'Topic (optional)', // ALTA
+  'admin.classLogs.homeworkOpt': 'Homework (optional)', // ALTA
+  'admin.classLogs.observationsOpt': 'Observations (optional)', // ALTA
+  'admin.classLogs.notesOpt': 'Notes / free text (optional)', // ALTA
+  'admin.classLogs.noFields': '(no fields filled in)', // ALTA
+  'admin.classLogs.listTitle': 'Recorded classes ({n})', // ALTA
+  'admin.classLogs.emptyFor': 'No class recorded yet for', // ALTA
+  'admin.classLogs.deleteConfirm': 'Delete this class record? This action cannot be undone.', // ALTA
+  'admin.classLogs.deleted': '✓ Record deleted.', // ALTA
+  'admin.classLogs.updated': '✓ Class updated.', // ALTA
+  'admin.classLogs.register': 'Record class', // ALTA
+  'admin.classLogs.pickStudentsHint': 'Select this class\'s students.', // ALTA
+  'admin.classLogs.newTitle': 'New class', // ALTA
+  'admin.classLogs.needStudent': 'Select at least one student above to be able to record the class.', // ALTA
+  'admin.classLogs.linkFirst': 'Link a student first, in the "🎓 Students" tab, to be able to record classes for them.', // ALTA
+  'admin.classLogs.topicPlaceholder': 'e.g. passé composé', // ALTA
+  'admin.classLogs.homeworkPlaceholder': 'e.g. exercises 1-3 on page 24', // ALTA
+  'admin.classLogs.observationsPlaceholder': 'material used, book page...', // ALTA
+  'admin.classLogs.notesPlaceholder': 'vocabulary and grammar covered in class...', // ALTA
+  'admin.classLogs.registeredN': '✓ Class recorded for {n} students.', // ALTA
+  'admin.classLogs.registered': '✓ Class recorded.', // ALTA
+  'admin.materials.badgeLink': '🔗 link', // ALTA
+  'admin.materials.badgeFile': '📎 file', // ALTA
+  'admin.materials.titleLabel': 'Title', // ALTA
+  'admin.materials.descOpt': 'Description (optional)', // ALTA
+  'admin.materials.linkOpt': 'Link (optional)', // ALTA
+  'admin.materials.fileOpt': 'File (optional)', // ALTA
+  'admin.materials.listTitle': 'Materials sent ({n})', // ALTA
+  'admin.materials.emptyFor': 'No material yet for', // ALTA
+  'admin.materials.deleteConfirm': 'Delete this support material? This action cannot be undone.', // ALTA
+  'admin.materials.deleted': '✓ Material deleted.', // ALTA
+  'admin.materials.updated': '✓ Material updated.', // ALTA
+  'admin.materials.pickStudentsHint': 'Select the students who will receive this material.', // ALTA
+  'admin.materials.newTitle': 'New material', // ALTA
+  'admin.materials.needStudent': 'Select at least one student above to be able to send the material.', // ALTA
+  'admin.materials.linkFirst': 'Link a student first, in the "🎓 Students" tab, to be able to send support material to them.', // ALTA
+  'admin.materials.titlePlaceholder': 'e.g. Passé composé summary', // ALTA
+  'admin.materials.descPlaceholder': 'explanation, context of use...', // ALTA
+  'admin.materials.send': 'Send material', // ALTA
+  'admin.materials.sentN': '✓ Material sent to {n} students.', // ALTA
+  'admin.materials.sent': '✓ Material sent.', // ALTA
+  'teacherLogs.err.needOneField': 'Fill in at least one field (topic, homework, observations or free text).', // ALTA
+  'teacherLogs.err.saveFailed': 'We couldn\'t save the record right now.', // ALTA
+  'teacherMaterials.err.titleRequired': 'Enter a title for the material.', // ALTA
+  'teacherMaterials.err.needContent': 'Fill in at least the description, a link or a file.', // ALTA
+  'teacherMaterials.err.createFailed': 'We couldn\'t create the material right now.', // ALTA
+  'teacherMaterials.err.saveFailed': 'We couldn\'t save right now.', // ALTA
+  'teacherFlashcards.err.clozePinyinRequired': 'Enter the pinyin of the answer (it is what the student will type).', // ALTA
+  'flashcardModel.tts.providerNotConfigured': 'Text-to-speech audio generation is not set up on the server yet (no voice provider contracted).', // ALTA
+  'flashcardModel.tts.providerNotImplemented': 'Text-to-speech audio generation is not available yet -- infrastructure under construction.', // ALTA
+  'flashcardModel.tts.rateLimited': 'Too many audio generations in a short time -- wait a few minutes and try again.', // ALTA
+  'flashcardModel.tts.notAuthorized': 'You don\'t have permission to generate audio for this card.', // ALTA
+  'flashcardModel.tts.invalidSession': 'Session expired -- log in again.', // ALTA
+  'flashcardModel.tts.textTooLong': 'Text too long (maximum {max} characters).', // ALTA
+  'flashcardModel.tts.missingText': 'Enter the text to synthesize.', // ALTA
+  'flashcardModel.tts.missingLanguage': 'Choose the synthesis language.', // ALTA
+  'flashcardModel.tts.uploadFailed': 'Audio generated, but it could not be saved -- try again.', // ALTA
+  'admin.flashcards.hint.flip': 'Image and audio appear next to the front of the card. Note is a reminder just for you -- the student never sees it.', // ALTA
+  'admin.flashcards.hint.mc': 'Image and audio appear next to the question, above the multiple-choice options. Note is a reminder just for you -- the student never sees it.', // ALTA
+  'admin.flashcards.hint.cloze': 'Image and audio appear next to the sentence with the blank. Note is a reminder just for you -- the student never sees it.', // ALTA
+  'admin.flashcards.cardType.normal': 'Normal', // ALTA
+  'admin.flashcards.cardType.normalReversed': 'Normal with reverse', // ALTA
+  'admin.flashcards.cardType.multipleChoice': 'Multiple choice', // ALTA
+  'admin.flashcards.cardType.typeAnswer': 'Type the answer', // ALTA
+  'admin.flashcards.cardType.cloze': 'Fill in the blank (Cloze)', // ALTA
+  'admin.flashcards.badge.image': '🖼️ image', // ALTA
+  'admin.flashcards.badge.audio': '🎧 audio', // ALTA
+  'admin.flashcards.badge.mc': '🔤 multiple choice', // ALTA
+  'admin.flashcards.badge.cloze': '📝 fill in the blank', // ALTA
+  'admin.flashcards.edit.title': 'Edit card', // ALTA
+  'admin.flashcards.edit.modeFlip': ' Normal flashcard', // ALTA
+  'admin.flashcards.edit.modeMc': ' Multiple choice', // ALTA
+  'admin.flashcards.edit.modeCloze': ' Fill in the blank', // ALTA
+  'admin.flashcards.edit.question': 'Question/term', // ALTA
+  'admin.flashcards.edit.mc1': 'Other options -- wrong option 1', // ALTA
+  'admin.flashcards.edit.mc2': 'Wrong option 2 (optional)', // ALTA
+  'admin.flashcards.edit.mc3': 'Wrong option 3 (optional)', // ALTA
+  'admin.flashcards.edit.clozeSentence': 'Sentence with a blank (use ___ to mark the space)', // ALTA
+  'admin.flashcards.edit.clozeAnswer': 'Correct answer', // ALTA
+  'admin.flashcards.edit.clozePinyin': 'Answer pinyin', // ALTA
+  'admin.flashcards.edit.image': 'Image', // ALTA
+  'admin.flashcards.edit.hasOne': ' (it already has one -- choose a file only to replace it)', // ALTA
+  'admin.flashcards.edit.ownAudio': 'Own audio', // ALTA
+  'admin.flashcards.edit.hasOneAudio': ' (it already has one -- choose a file only to replace it)', // ALTA
+  'admin.flashcards.edit.err.front': 'Enter the front.', // ALTA
+  'admin.flashcards.edit.err.back': 'Enter the back.', // ALTA
+  'admin.flashcards.edit.err.oneWrongOption': 'Enter at least 1 wrong option.', // ALTA
+  'admin.flashcards.edit.err.oneBlank': 'The sentence must have exactly one space marked with ___.', // ALTA
+  'admin.flashcards.edit.err.answer': 'Enter the correct answer.', // ALTA
+  'admin.flashcards.edit.err.pinyin': 'Enter the answer pinyin.', // ALTA
+  'admin.flashcards.edit.err.trans': 'Enter the translation.', // ALTA
+  'admin.flashcards.native.privateNote': 'Note (private -- the student never sees it)', // ALTA
+  'admin.flashcards.dest.rootDefault': 'Teacher cards (default)', // ALTA
+  'admin.flashcards.dest.noDeck': '📂 <em>no Deck (card created before Decks)</em> · ', // ALTA
+  'admin.flashcards.dest.deckFallback': 'Deck', // ALTA
+  'admin.flashcards.dest.moveTitle': 'Move this card to another of this student\'s Decks', // ALTA
+  'admin.flashcards.dest.moveTo': 'Move to…', // ALTA
+  'admin.flashcards.dest.deleteTitle': 'Delete this Deck (empty)', // ALTA
+  'admin.flashcards.dest.deleteDisabledTitle': 'You can only delete a Deck with no subdecks and no cards', // ALTA
+  'admin.flashcards.dest.countCards': '({n} card(s)', // ALTA
+  'admin.flashcards.dest.countSubdecks': ', {n} subdeck(s)', // ALTA
+  'admin.flashcards.dest.treeTitle': 'Deck tree', // ALTA
+  'admin.flashcards.dest.deleteConfirm': 'Delete the Deck "{name}"? It is empty.', // ALTA
+  'admin.flashcards.dest.deleteFailed': 'We couldn\'t delete the Deck.', // ALTA
+  'admin.flashcards.dest.deleted': '✓ Deck deleted.', // ALTA
+  'admin.flashcards.dest.destAria': 'Destination Deck of {username}', // ALTA
+  'admin.flashcards.dest.subnamePlaceholder': 'New subdeck name (inside the chosen Deck)', // ALTA
+  'admin.flashcards.dest.newSub': '+ Subdeck', // ALTA
+  'admin.flashcards.dest.treeAria': 'Deck tree of {username}', // ALTA
+  'admin.flashcards.dest.subCreated': '✓ Subdeck created.', // ALTA
+  'admin.flashcards.dest.pickStudent': 'Select at least one student to choose the destination Deck.', // ALTA
+  'admin.flashcards.dest.preparing': 'Preparing the Decks…', // ALTA
+  'admin.flashcards.row.previewTitle': 'Preview how the student will see it in Review', // ALTA
+  'admin.flashcards.list.activeTitle': 'Active cards ({n})', // ALTA
+  'admin.flashcards.list.emptyFor': 'No cards yet for', // ALTA
+  'admin.flashcards.move.notFound': 'Card not found.', // ALTA
+  'admin.flashcards.move.failed': 'We couldn\'t move the card.', // ALTA
+  'admin.flashcards.move.moved': '✓ Card moved.', // ALTA
+  'admin.flashcards.delete.deleted': 'Card deleted.', // ALTA
+  'admin.flashcards.linkFirst': 'Link a student first, in the "🎓 Students" tab, to be able to create flashcards for them.', // ALTA
+  'admin.flashcards.pickStudentsHint': 'Select the students who will receive this card.', // ALTA
+  'admin.flashcards.destTitle': 'Destination (each student\'s Deck)', // ALTA
+  'admin.flashcards.destHint': 'Each student has their own Deck tree. By default the card goes to the student\'s "Teacher cards"; choose a subdeck if you want to organize it.', // ALTA
+  'admin.flashcards.cardTitle': 'Card', // ALTA
+  'admin.flashcards.needStudent': 'Select at least one student above to be able to create the card.', // ALTA
+  'admin.flashcards.createdPartial': '✓ {ok} card(s) created; failed for: {failed}.', // ALTA
+  'admin.flashcards.createdN': '✓ {n} cards created.', // ALTA
+  'admin.flashcards.created': '✓ Card created.', // ALTA
+  'admin.reports.status.novo': 'New', // ALTA
+  'admin.reports.status.em_analise': 'In review', // ALTA
+  'admin.reports.status.confirmado': 'Confirmed', // ALTA
+  'admin.reports.status.em_desenvolvimento': 'In development', // ALTA
+  'admin.reports.status.resolvido': 'Resolved', // ALTA
+  'admin.reports.status.nao_reproduzido': 'Not reproduced', // ALTA
+  'admin.reports.status.recusado': 'Declined', // ALTA
+  'admin.reports.status.duplicado': 'Duplicate', // ALTA
+  'admin.reports.priority.baixa': 'Low', // ALTA
+  'admin.reports.priority.media': 'Medium', // ALTA
+  'admin.reports.priority.alta': 'High', // ALTA
+  'admin.reports.priority.critica': 'Critical', // ALTA
+  'admin.reports.lang.frances': 'French', // ALTA
+  'admin.reports.lang.mandarim': 'Chinese', // ALTA
+  'admin.reports.screen.path': 'Study', // ALTA
+  'admin.reports.screen.review': 'Review', // ALTA
+  'admin.reports.screen.conjugaison': 'Conjugation', // ALTA
+  'admin.reports.screen.challenges': 'Challenges', // ALTA
+  'admin.reports.screen.dictation': 'Dictation', // ALTA
+  'admin.reports.screen.profile': 'Profile', // ALTA
+  'admin.reports.screen.progress': 'Progress', // ALTA
+  'admin.reports.screen.goals': 'Goals', // ALTA
+  'admin.reports.screen.leaderboard': 'Leaderboard', // ALTA
+  'admin.reports.screen.settings': 'Settings', // ALTA
+  'admin.reports.screen.admin_badges': 'Admin panel', // ALTA
+  'admin.reports.reporter.loggedNoProfile': 'logged-in account (profile not found)', // ALTA
+  'admin.reports.reporter.guest': 'guest', // MÉDIA
+  'admin.reports.ctx.none': '(no additional context)', // ALTA
+  'admin.reports.filter.allStatus': 'All statuses', // ALTA
+  'admin.reports.filter.kindAll': 'Problems and suggestions', // ALTA
+  'admin.reports.filter.kindProblems': 'Problems only', // ALTA
+  'admin.reports.filter.kindSuggestions': 'Suggestions only', // ALTA
+  'admin.reports.filter.allLanguages': 'All languages', // ALTA
+  'admin.reports.row.details': 'View details', // ALTA
+  'admin.reports.empty': 'No reports found with this filter.', // ALTA
+  'admin.reports.title': '⚑ Bug reports and suggestions', // ALTA
+  'admin.reports.hint': 'Sent through the ⚑ flag (top bar, user menu or inside exercises). Guests can report too -- reports with no account and no email appear as "guest".', // ALTA
+  'admin.reports.detail.suggestion': '💡 Suggestion', // ALTA
+  'admin.reports.detail.problem': '⚑ Problem', // ALTA
+  'admin.reports.detail.notInformed': '(not provided)', // ALTA
+  'admin.reports.detail.screenshotView': '📎 View attached screenshot', // ALTA
+  'admin.reports.detail.screenshotNone': '(no screenshot attached)', // ALTA
+  'admin.reports.reply.lastSentTo': 'Last reply sent on {date} to {email}:', // ALTA
+  'admin.reports.reply.lastSent': 'Last reply sent on {date}:', // ALTA
+  'admin.reports.reply.err.forbidden': 'Session without admin permission -- sign in again.', // ALTA
+  'admin.reports.reply.err.report_not_found': 'This report was not found.', // ALTA
+  'admin.reports.reply.err.no_email': 'No email associated with this report.', // ALTA
+  'admin.reports.reply.err.email_not_configured': 'Email sending is not yet configured on the server (RESEND_API_KEY/RESEND_FROM_EMAIL).', // ALTA
+  'admin.reports.reply.err.resend_failed': 'We couldn\'t send the email right now. Try again in a moment.', // ALTA
+  'admin.reports.reply.err.missing_fields': 'Fill in the subject and message.', // ALTA
+  'admin.reports.reply.err.generic': 'We couldn\'t send the reply right now.', // ALTA
+  'admin.reports.toast.updated': '✓ Report updated.', // ALTA
+  'admin.reports.reply.send': 'Send reply', // ALTA
+  'admin.reports.toast.replySent': '✓ Reply sent to {to}.', // ALTA
+  'admin.notifications.event.xp_earned': '⭐ XP earned', // ALTA
+  'admin.notifications.event.achievement_unlocked': '🏅 Badge unlocked', // ALTA
+  'admin.notifications.event.mission_completed': '🎯 Mission completed', // ALTA
+  'admin.notifications.event.streak_completed': '🔥 Streak kept', // ALTA
+  'admin.notifications.event.featured_badge_reminder': '🏅 Featured badge reminder', // ALTA
+  'admin.notifications.event.user_inactive_1': '👋 Re-engagement -- 1 day inactive', // MÉDIA
+  'admin.notifications.event.user_inactive_3': '👋 Re-engagement -- 3 days inactive', // MÉDIA
+  'admin.notifications.event.user_inactive_5': '👋 Re-engagement -- 5 days inactive', // MÉDIA
+  'admin.notifications.event.user_inactive_7': '👋 Re-engagement -- 7 days inactive', // MÉDIA
+  'admin.notifications.event.user_inactive_9': '👋 Re-engagement -- 9 days inactive', // MÉDIA
+  'admin.notifications.event.user_inactive_15': '👋 Re-engagement -- 15 days inactive', // MÉDIA
+  'admin.notifications.event.user_inactive_20': '👋 Re-engagement -- 20 days inactive', // MÉDIA
+  'admin.notifications.event.user_inactive_30': '👋 Re-engagement -- 30 days inactive', // MÉDIA
+  'admin.notifications.hint.xp_earned': 'amount of XP earned', // ALTA
+  'admin.notifications.hint.achievement_unlocked': 'badge name and emoji', // ALTA
+  'admin.notifications.hint.mission_completed': 'text and icon of the completed Daily Mission', // ALTA
+  'admin.notifications.hint.streak_completed': 'streak days', // ALTA
+  'admin.notifications.hint.none': '(no placeholders)', // ALTA
+  'admin.notifications.err.duplicate': 'An identical variant already exists (same event/channel/language/text).', // ALTA
+  'admin.notifications.err.eventId': 'Give a valid event identifier (e.g. xp_earned).', // ALTA
+  'admin.notifications.err.bodyRequired': 'Write the notification text.', // ALTA
+  'admin.notifications.err.createFailed': 'We couldn\'t create it right now.', // ALTA
+  'admin.notifications.channel.emailLower': 'email', // ALTA
+  'admin.notifications.channel.inAppLower': 'in the app', // ALTA
+  'admin.notifications.status.active': 'active', // ALTA
+  'admin.notifications.status.inactive': 'disabled', // ALTA
+  'admin.notifications.btn.deactivate': 'Disable', // ALTA
+  'admin.notifications.btn.activate': 'Enable', // ALTA
+  'admin.notifications.btn.edit': 'Edit', // ALTA
+  'admin.notifications.btn.delete': 'Delete', // ALTA
+  'admin.notifications.rule.title': '⭐ "XP earned" rule', // ALTA
+  'admin.notifications.rule.hint': 'Controls when the XP notification fires -- not its text (that is in the variants below). Reviews of well-known words give very low XP on purpose; below the minimum, the notification is not even created.', // ALTA
+  'admin.notifications.rule.minXp': 'Minimum XP to notify', // ALTA
+  'admin.notifications.rule.minXpPh': 'e.g. 5 (0 or empty = no minimum)', // ALTA
+  'admin.notifications.rule.cooldown': 'Minimum interval between notifications (minutes)', // ALTA
+  'admin.notifications.rule.dailyCap': 'Maximum per day', // ALTA
+  'admin.notifications.rule.save': 'Save rule', // ALTA
+  'admin.notifications.new.title': 'New variant', // ALTA
+  'admin.notifications.new.event': 'Event', // ALTA
+  'admin.notifications.new.eventPh': 'e.g. xp_earned', // ALTA
+  'admin.notifications.new.lang': 'App language', // ALTA
+  'admin.notifications.new.langFr': '🇫🇷 French', // ALTA
+  'admin.notifications.new.langZh': '🇨🇳 Chinese', // ALTA
+  'admin.notifications.new.channel': 'Channel', // ALTA
+  'admin.notifications.new.channelInApp': '📱 In the app', // ALTA
+  'admin.notifications.new.channelEmail': '📧 Email', // ALTA
+  'admin.notifications.new.hint': 'Push does not appear here -- it reuses the text of the "In the app" variant of the same event, with no pool of its own. In email, the title becomes the subject. Placeholders like {{amount}}/{{days}} are replaced with the real event data -- see the hint for each event above.', // ALTA
+  'admin.notifications.new.titleLabel': 'Title (optional)', // ALTA
+  'admin.notifications.new.titlePh': 'e.g. New achievement!', // ALTA
+  'admin.notifications.new.icon': 'Emoji (optional)', // ALTA
+  'admin.notifications.new.body': 'Text', // ALTA
+  'admin.notifications.new.bodyPh': 'Hey, did you forget about me? 🥺', // ALTA
+  'admin.notifications.new.create': 'Create variant', // ALTA
+  'admin.notifications.empty': 'No variants created yet.', // ALTA
+  'admin.notifications.toast.ruleSaved': '✓ Rule saved.', // ALTA
+  'admin.notifications.toast.created': '✓ Variant created.', // ALTA
+  'admin.notifications.toast.updated': '✓ Variant updated.', // ALTA
+  'admin.notifications.confirm.delete': 'Delete this notification variant?', // ALTA
+  'admin.badges.err.idShort': 'Badge ID must have at least 2 characters (lowercase letters, numbers or _).', // ALTA
+  'admin.badges.err.name': 'Give the badge a name.', // ALTA
+  'admin.badges.err.icon': 'Choose an emoji for the badge.', // ALTA
+  'admin.badges.err.idExists': 'A badge with the id "{id}" already exists.', // ALTA
+  'admin.badges.err.createFailed': 'We couldn\'t create the badge right now.', // ALTA
+  'admin.badges.err.idChangeFailed': 'We couldn\'t change the id right now.', // ALTA
+  'admin.badges.err.migrateFailed': 'The new badge was created, but the old grants couldn\'t be migrated. Try again.', // ALTA
+  'admin.badges.err.alreadyHas': '@{username} already has this badge.', // ALTA
+  'admin.badges.err.grantFailed': 'We couldn\'t grant it right now.', // ALTA
+  'admin.badges.grant.createFirst': 'Create a badge first', // ALTA
+  'admin.badges.builtin.auto': 'automatic, not editable here', // ALTA
+  'admin.badges.members': { one: '{n} person', other: '{n} people' }, // ALTA
+  'admin.badges.catalog.clickManage': 'click to manage', // ALTA
+  'admin.badges.catalog.editTitle': 'Edit badge', // ALTA
+  'admin.badges.catalog.deleteTitle': 'Delete badge (and all its grants)', // ALTA
+  'admin.badges.catalog.empty': 'No badges created yet.', // ALTA
+  'admin.badges.grants.grantedOn': 'granted on {date}', // ALTA
+  'admin.badges.grants.revoke': 'Revoke', // ALTA
+  'admin.badges.grants.empty': 'No badges granted yet.', // ALTA
+  'admin.badges.create.title': 'Create new badge', // ALTA
+  'admin.badges.create.id': 'ID (lowercase letters/numbers/_ only)', // ALTA
+  'admin.badges.create.idPh': 'e.g. contributor', // ALTA
+  'admin.badges.create.name': 'Name', // ALTA
+  'admin.badges.create.namePh': 'e.g. Contributor', // ALTA
+  'admin.badges.create.icon': 'Emoji', // ALTA
+  'admin.badges.create.descPh': 'e.g. Helped suggest improvements to the app', // ALTA
+  'admin.badges.create.btn': 'Create badge', // ALTA
+  'admin.badges.grant.title': 'Grant badge', // ALTA
+  'admin.badges.grant.badge': 'Badge', // ALTA
+  'admin.badges.grant.username': '@username of the recipient', // ALTA
+  'admin.badges.grant.usernamePh': 'username', // ALTA
+  'admin.badges.grant.note': 'Note (optional, only for you)', // ALTA
+  'admin.badges.grant.notePh': 'e.g. reported the streak bug', // ALTA
+  'admin.badges.grant.btn': 'Grant', // ALTA
+  'admin.badges.builtin.title': 'Automatic badges', // ALTA
+  'admin.badges.catalog.title': 'Catalog (created by you)', // ALTA
+  'admin.badges.grants.title': 'Current grants', // ALTA
+  'admin.badges.toast.created': '✓ Badge "{name}" created.', // ALTA
+  'admin.badges.grant.createBefore': 'Create a badge before granting.', // ALTA
+  'admin.badges.toast.granted': '✓ Badge granted to @{username}.', // ALTA
+  'admin.badges.confirm.delete': 'Delete this badge and all its grants?', // ALTA
+  'admin.badges.manage.empty': 'Nobody has created a profile yet.', // ALTA
+  'admin.badges.manage.notePh': 'note', // ALTA
+  'admin.badges.toast.members': '✓ Badge members updated.', // ALTA
+  'admin.badges.toast.updated': '✓ Badge "{name}" updated.', // ALTA
+  'admin.analytics.tab.path': '🗺️ Trail', // ALTA
+  'admin.analytics.tab.review': '🔁 Review', // ALTA
+  'admin.analytics.tab.conjugaison': '📝 Conjugation', // ALTA
+  'admin.analytics.tab.dictation': '🎧 Dictations', // ALTA
+  'admin.analytics.tab.challenges': '🎯 Challenges', // ALTA
+  'admin.analytics.tab.leaderboard': '🏆 Leaderboard', // ALTA
+  'admin.analytics.tab.profile': '👤 My profile', // ALTA
+  'admin.analytics.tab.progress': '📈 Progress', // ALTA
+  'admin.analytics.tab.settings': '⚙️ Settings', // ALTA
+  'admin.analytics.tab.admin_badges': '🛠️ Admin panel', // ALTA
+  'admin.analytics.lesson.vocab_lesson': '📘 Vocabulary lesson', // ALTA
+  'admin.analytics.lesson.unit_checkpoint': '✅ Unit checkpoint', // ALTA
+  'admin.analytics.lesson.flashcard_review': '🔁 Flashcard session', // ALTA
+  'admin.analytics.lesson.speed_review': '⚡ Speed review', // ALTA
+  'admin.analytics.lesson.match_game': '🧩 Memory game', // ALTA
+  'admin.analytics.lesson.hanzi_lesson': '汉 Hanzi lesson', // ALTA
+  'admin.analytics.lesson.hanzi_review': '汉 Hanzi review', // ALTA
+  'admin.analytics.lesson.dictation': '🎧 Dictation', // ALTA
+  'admin.analytics.lesson.conjugation_session': '📝 Conjugation session', // ALTA
+  'admin.analytics.lesson.challenge': '🎯 Challenge completed', // ALTA
+  'admin.analytics.device.mobile': '📱 Mobile', // ALTA
+  'admin.analytics.techErr.js_error': '🐞 JavaScript error', // ALTA
+  'admin.analytics.techErr.unhandled_rejection': '🐞 Unhandled promise rejection', // ALTA
+  'admin.analytics.techErr.audio_load_failed': '🔇 Audio failed to load', // ALTA
+  'admin.analytics.techErr.audio_play_failed': '🔇 Audio failed to play (manual click)', // ALTA
+  'admin.analytics.techErr.save_failed': '💾 Failed to save progress', // ALTA
+  'admin.analytics.period.today': 'Today', // ALTA
+  'admin.analytics.period.yesterday': 'Yesterday', // ALTA
+  'admin.analytics.period.last7': 'Last 7 days', // ALTA
+  'admin.analytics.period.last30': 'Last 30 days', // ALTA
+  'admin.analytics.period.thisMonth': 'This month', // ALTA
+  'admin.analytics.period.lastMonth': 'Last month', // ALTA
+  'admin.analytics.period.last90': 'Last 90 days', // ALTA
+  'admin.analytics.period.custom': 'Custom', // ALTA
+  'admin.analytics.levelUnknown': 'Unknown level', // ALTA
+  'admin.analytics.unknown': 'unknown', // ALTA
+  'admin.analytics.freq.1': '1 day', // ALTA
+  'admin.analytics.freq.2_4': '2–4 days', // ALTA
+  'admin.analytics.freq.5_9': '5–9 days', // ALTA
+  'admin.analytics.freq.10': '10+ days', // ALTA
+  'admin.analytics.delta.new': 'new', // ALTA
+  'admin.analytics.students': { one: '{n} student', other: '{n} students' }, // ALTA
+  'admin.analytics.noData': 'No data in the selected period.', // ALTA
+  'admin.analytics.compareWith': 'comparing with {since} – {until}', // ALTA
+  'admin.analytics.filter.period': 'Period', // ALTA
+  'admin.analytics.filter.device': 'Device', // ALTA
+  'admin.analytics.filter.allDevices': 'All devices', // ALTA
+  'admin.analytics.filter.compare': 'Compare with previous period', // ALTA
+  'admin.analytics.filter.periodLine': 'Period: {range}', // ALTA
+  'admin.analytics.exclude.toastOn': '✓ Your activity will no longer be recorded in Analytics.', // ALTA
+  'admin.analytics.exclude.toastOff': '✓ Your activity will now be recorded in Analytics (marked as admin).', // ALTA
+  'admin.mode.toastOn': '🔒 Admin Mode on — admin privileges restored.', // ALTA
+  'admin.mode.toastOff': '🔒 Admin Mode off — browsing as a regular student.', // ALTA
+  'admin.analytics.exclude.title': 'Exclude my activity from Analytics', // ALTA
+  'admin.analytics.exclude.sub': 'Your browsing and lessons as admin are not counted in student metrics. Turn it off only if you want to generate test data on purpose, using your own account.', // ALTA
+  'admin.mode.title': 'Admin Mode', // ALTA
+  'admin.mode.sub': 'When off, your account browses and completes lessons exactly like a regular student (while still recognized as admin) -- useful to test the real experience without admin shortcuts. Same control as the 🔒 Admin pill on the main screen.', // ALTA
+  'admin.analytics.noEvents': 'No student events recorded in the selected period.', // ALTA
+  'admin.analytics.subtab.resumo': 'Summary', // ALTA
+  'admin.analytics.subtab.atividade': 'Activity', // ALTA
+  'admin.analytics.subtab.retencao': 'Retention', // ALTA
+  'admin.analytics.subtab.navegacao': 'Navigation', // ALTA
+  'admin.analytics.subtab.exercicios': 'Exercises', // ALTA
+  'admin.analytics.subtab.progressao': 'Progression', // ALTA
+  'admin.analytics.subtab.engajamento': 'Engagement', // ALTA
+  'admin.analytics.subtab.idioma': 'Language', // ALTA
+  'admin.analytics.subtab.dispositivos': 'Devices', // ALTA
+  'admin.analytics.subtab.tecnologia': 'Technology', // ALTA
+  'admin.analytics.subnav.aria': 'Analytics section', // ALTA
+  'admin.analytics.resumo.rateNA': 'Completion rate unavailable: nobody started an exercise of the types counted here (flashcards, speed review, memory game, hanzi, dictation, conjugation) in this period.', // ALTA
+  'admin.analytics.resumo.rateNote': 'The completion rate only uses exercises that have a recorded "start" (flashcards, speed review, memory game, hanzi, dictation, conjugation). Vocabulary lessons and unit checkpoints are not part of this calculation because we only know when they end, not when they start -- that is why "Exercises completed" (above) is larger than "Exercises started": it adds up ALL types, those with a start and those without. To see each type separately, check the Exercises tab.', // ALTA
+  'admin.analytics.kpi.activeStudents': 'Active students', // ALTA
+  'admin.analytics.kpi.activeStudentsNote': 'different students who used the app in the period', // ALTA
+  'admin.analytics.kpi.newStudents': 'New students', // ALTA
+  'admin.analytics.kpi.newStudentsNote': 'accounts created within the period', // ALTA
+  'admin.analytics.kpi.sessions': 'Sessions', // ALTA
+  'admin.analytics.kpi.sessionsNote': 'each visit to the app counts as 1 session (the same student opening it 3 times a day = 3 sessions)', // ALTA
+  'admin.analytics.kpi.started': 'Exercises started', // ALTA
+  'admin.analytics.kpi.startedNote': 'only the types that record when the student starts (see note below)', // ALTA
+  'admin.analytics.kpi.completed': 'Exercises completed', // ALTA
+  'admin.analytics.kpi.completedNote': 'any type of exercise or lesson finished', // ALTA
+  'admin.analytics.kpi.rate': 'Completion rate', // ALTA
+  'admin.analytics.kpi.rateNote': 'of those who started an exercise, what % finished', // ALTA
+  'admin.analytics.kpi.time': 'Study time (estimated)', // ALTA
+  'admin.analytics.kpi.timeNote': 'rough estimate, not the actual time spent -- see note below', // ALTA
+  'admin.analytics.resumo.timeNote': '"Study time" is an approximation: for each session, we measure from the first to the last recorded event and add everything up. If a student stays idle in the middle (e.g. leaves to do something else and comes back), that idle time is also counted -- it is not an active-use stopwatch.', // ALTA
+  'admin.analytics.resumo.xpNote': 'Want to see total XP and streak? That is in the Engagement tab, not here in the Summary.', // ALTA
+  'admin.analytics.ativ.newActive': 'New (active in the period)', // ALTA
+  'admin.analytics.ativ.returning': 'Returning', // ALTA
+  'admin.analytics.ativ.note': '"New" = account created within the selected period (via profiles.created_at); "returning" = already existed before that. See limitations about accounts created before automatic profile creation.', // ALTA
+  'admin.analytics.ativ.activeByDay': 'Active students per day', // ALTA
+  'admin.analytics.ativ.sessionsByDay': 'Sessions per day', // ALTA
+  'admin.analytics.ativ.frequency': 'Study frequency (active days in the period)', // ALTA
+  'admin.analytics.nav.areas': 'Areas (tabs)', // ALTA
+  'admin.analytics.nav.features': 'Features (exercise types)', // ALTA
+  'admin.analytics.nav.featuresNote': 'Counts start + completion together (total use), not just completions.', // ALTA
+  'admin.analytics.ex.col.exercise': 'Exercise', // ALTA
+  'admin.analytics.ex.col.started': 'Start.', // ALTA
+  'admin.analytics.ex.col.done': 'Done', // ALTA
+  'admin.analytics.ex.col.rate': 'Rate', // ALTA
+  'admin.analytics.ex.col.score': 'Score', // ALTA
+  'admin.analytics.ex.byType': 'Exercises by type', // ALTA
+  'admin.analytics.ex.note': '"—" = no start event (vocab_lesson/unit_checkpoint/challenge) or no score concept for that type. Popularity (completed) and performance (average score) are separate columns on purpose -- a heavily done exercise is not necessarily an exercise with a high score.', // ALTA
+  'admin.analytics.funnel.started': 'Started', // ALTA
+  'admin.analytics.funnel.completed': 'Completed', // ALTA
+  'admin.analytics.funnel.goodScore': 'Scored well ✓', // ALTA
+  'admin.analytics.funnel.avgScore': 'Average score', // ALTA
+  'admin.analytics.funnel.title': 'Funnel: started → completed → scored well', // ALTA
+  'admin.analytics.funnel.note': 'Only types with a start event enter the funnel (same limitation as the overall completion rate). "Answered" (per individual question) does not exist as an event -- the funnel goes straight from "started" to "completed". "Scored well" = average score ≥ 80%, same cutoff as the "Score over 80%" challenge.', // ALTA
+  'admin.analytics.funnel.empty': 'No type with a start event had activity in the period.', // ALTA
+  'admin.analytics.lang.events': 'Events by language', // ALTA
+  'admin.analytics.lang.filterActive': 'Language filter active ({lang}) -- to compare languages side by side, select "All languages" in the filter above.', // ALTA
+  'admin.analytics.lang.note': 'Segmentation by level/feature/exercise/cohort/user type already exists in the Progression, Exercises and Retention tabs and in the "Exclude my activity" toggle -- not repeated here as global filters to avoid meaningless combinations (e.g. level does not apply to a "tab_switch").', // ALTA
+  'admin.analytics.prog.byLevel': 'Students by level', // ALTA
+  'admin.analytics.prog.levelNote': 'Only covers units of the app language in which this Panel is open now -- events from the other language fall under "Unknown level" (each site only loads its own language content).', // ALTA
+  'admin.analytics.prog.units': 'Units completed per student (checkpoints)', // ALTA
+  'admin.analytics.prog.unitsNote': 'Not every unit has internal lessons (e.g. grammar units in French) -- those count as a single block of exercises, and completing them generates a checkpoint with no matching "lesson completed". Units with lessons only generate the checkpoint after going through all of them. That is why a student can appear here with more completed units than completed lessons.', // ALTA
+  'admin.analytics.prog.lessons': 'Lessons completed per student', // ALTA
+  'admin.analytics.prog.lessonsNote': '"Level advancement" (speed of progression between levels over time) is left for a future stage -- it would require tracking the same account across several periods, not just one slice.', // ALTA
+  'admin.analytics.dev.noData': 'All events in the period are from before device collection existed (migration 009) -- that is why they fall under "unknown". New data is already classified.', // ALTA
+  'admin.analytics.dev.type': 'Device type', // ALTA
+  'admin.analytics.dev.browser': 'Browser', // ALTA
+  'admin.analytics.dev.os': 'Operating system', // ALTA
+  'admin.analytics.dev.osNote': 'Classification by navigator.userAgent (simple heuristic, no library) -- not 100% accurate, but it is the acceptable standard without third-party telemetry.', // ALTA
+  'admin.analytics.eng.perSession': 'Exercises/session', // ALTA
+  'admin.analytics.eng.reviewsDone': 'Reviews completed', // ALTA
+  'admin.analytics.eng.challengesDone': 'Challenges completed', // ALTA
+  'admin.analytics.eng.freqNote': 'Study frequency (active days per student) is already in the Activity tab -- not repeated here.', // ALTA
+  'admin.analytics.eng.gamification': 'Gamification', // ALTA
+  'admin.analytics.eng.xpTotal': 'Total XP (current week)', // ALTA
+  'admin.analytics.eng.xpAvg': 'Average XP/student (current week)', // ALTA
+  'admin.analytics.eng.streakAvg': 'Average streak (days)', // ALTA
+  'admin.analytics.eng.streakNote': 'proxy calculated from events', // ALTA
+  'admin.analytics.eng.streakMax': 'Longest streak (days)', // ALTA
+  'admin.analytics.eng.badges': 'Achievements granted', // ALTA
+  'admin.analytics.eng.leaderboardViews': 'Leaderboard views', // ALTA
+  'admin.analytics.eng.badgedStudents': { one: '{n} student received', other: '{n} students received' }, // ALTA
+  'admin.analytics.eng.xpNote2': 'Streak is an approximation calculated from the days with recorded activity, not the app\'s "official" streak (which has its own rules such as rest days and lives outside the reach of this panel).', // ALTA
+  'admin.analytics.eng.badgedSuffix': 'at least one achievement in the period.', // ALTA
+  'admin.analytics.eng.xpNote1': 'XP uses the same week (Monday to Sunday) already shown in the Leaderboard -- it is not "XP earned in the period selected above", it is always the current week. "Average XP/student" divides by the total of active students in the period (not just those who already earned XP this specific week) -- an active student with no XP this week still counts, with 0.', // ALTA
+  'admin.analytics.tech.errors': 'Errors and failures', // ALTA
+  'admin.analytics.tech.total': 'Recorded errors', // ALTA
+  'admin.analytics.tech.affected': 'Affected students', // ALTA
+  'admin.analytics.tech.noErrors': 'No technical errors recorded in the period.', // ALTA
+  'admin.analytics.tech.note': 'Covers JavaScript errors, rejected promises, audio load/play failures and progress save failures -- all deduplicated per session (a repeating error does not inflate the count). There is no video category: the app has no video content.', // ALTA
+  'admin.analytics.tech.perf': 'Performance', // ALTA
+  'admin.analytics.tech.loadAvg': 'Average load time', // ALTA
+  'admin.analytics.tech.loadMedian': 'Median load time', // ALTA
+  'admin.analytics.tech.samples': { one: '{n} session measured (Navigation Timing API, one record per page load).', other: '{n} sessions measured (Navigation Timing API, one record per page load).' }, // ALTA
+  'admin.analytics.tech.noPerf': 'No performance measurements in the period.', // ALTA
+  'admin.analytics.tech.separateNote': 'This tab is conceptually separate from Learning/Product -- it never adds technical errors together with completion rate, average score, etc. A low TECHNICAL score here does not mean the content is hard, and the opposite also holds.', // ALTA
+  'admin.analytics.ret.empty': 'No accounts found to build cohorts.', // ALTA
+  'admin.analytics.ret.title': 'Retention by cohort (signup week)', // ALTA
+  'admin.analytics.ret.col.cohort': 'Cohort', // ALTA
+  'admin.analytics.ret.col.d1': 'Day 1', // ALTA
+  'admin.analytics.ret.col.d7': 'Day 7', // ALTA
+  'admin.analytics.ret.col.d14': 'Day 14', // ALTA
+  'admin.analytics.ret.col.d30': 'Day 30', // ALTA
+  'admin.analytics.ret.note': 'Cohort = students whose account was created in the same week (Monday to Sunday). "Day N" = had at least one recorded activity on the calendar day that falls exactly N days after account creation -- "—" when the cohort has not yet completed that number of days (never shown as 0%). Uses the full available history (up to the 5000 most recent events), not the period filter in the controls above -- retention is a question about all time, not a window.', // ALTA
+  'adminChallenges.import.invalidJson': 'Invalid JSON: ', // ALTA
+  'adminChallenges.import.expectedArray': 'Expected an array of challenges, or an object with "accepted" (direct pipeline output).', // ALTA
+  'adminChallenges.import.itemN': 'item #{n}', // ALTA
+  'adminChallenges.import.missing': '{label}: missing id/type/level', // ALTA
+  'adminChallenges.import.badType': '{id}: invalid type ("{type}")', // ALTA
+  'adminChallenges.import.badLevel': '{id}: invalid level ("{level}")', // ALTA
+  'adminChallenges.import.dupId': '{id}: id already exists (duplicate)', // ALTA
+  'adminChallenges.persist.failed': 'Could not save to the database: ', // ALTA
+  'adminChallenges.import.importing': 'Importing…', // ALTA
+  'adminChallenges.import.btn': 'Import', // ALTA
+  'adminChallenges.import.dbFail': '❌ Failed to write to the database: {error}', // ALTA
+  'adminChallenges.import.ok': '✅ {n} challenge(s) imported as pending review.', // ALTA
+  'adminChallenges.import.skipped': '⚠ {n} skipped:', // ALTA
+  'adminChallenges.audio.target': 'Target expression audio', // ALTA
+  'adminChallenges.audio.ex1': 'Audio of Exemple 1', // ALTA
+  'adminChallenges.audio.ex2': 'Audio of Exemple 2', // ALTA
+  'adminChallenges.audio.sentence': 'Sentence audio', // ALTA
+  'adminChallenges.audio.word': 'Word audio', // ALTA
+  'adminChallenges.qa.audioMissing': '{label}: missing', // ALTA
+  'adminChallenges.qa.audioStale': '{label}: outdated (text changed after the audio was generated)', // ALTA
+  'adminChallenges.qa.audioOk': '{label}: available and up to date', // ALTA
+  'adminChallenges.qa.correctSet': 'Correct answer set', // ALTA
+  'adminChallenges.qa.fourOptions': '4 options', // ALTA
+  'adminChallenges.qa.explanationFilled': 'Explanation filled in', // ALTA
+  'adminChallenges.qa.microValid': 'Valid micro-activity', // ALTA
+  'adminChallenges.qa.sentenceFilled': 'Sentence filled in', // ALTA
+  'adminChallenges.qa.hintFilled': 'Hint filled in', // ALTA
+  'adminChallenges.qa.oneTranslation': 'At least 1 accepted translation', // ALTA
+  'adminChallenges.qa.wordFilled': 'Word/expression filled in', // ALTA
+  'adminChallenges.qa.title': 'Quality control', // ALTA
+  'adminChallenges.qa.loadingDuration': 'loading duration…', // ALTA
+  'adminChallenges.qa.loadFail': '· could not load', // ALTA
+  'adminChallenges.res.dictionary': 'Dictionary', // ALTA
+  'adminChallenges.res.article': 'Linguistics article', // ALTA
+  'adminChallenges.res.youtube': 'Video', // ALTA
+  'adminChallenges.res.youglish': 'Authentic examples', // ALTA
+  'adminChallenges.res.qHigh': 'High', // ALTA
+  'adminChallenges.res.qMedium': 'Medium', // ALTA
+  'adminChallenges.res.qLow': 'Low', // ALTA
+  'adminChallenges.res.type': 'Type: {type}', // ALTA
+  'adminChallenges.res.quality': 'Quality: {quality}', // ALTA
+  'adminChallenges.res.checked': 'Link checked on {date}', // ALTA
+  'adminChallenges.res.unchecked': 'Link not checked automatically — check before approving', // ALTA
+  'adminChallenges.res.open': 'Open', // ALTA
+  'adminChallenges.res.approve': '✅ Approve', // ALTA
+  'adminChallenges.btn.reject': '❌ Reject', // ALTA
+  'adminChallenges.res.none': 'No external resources found', // ALTA
+  'adminChallenges.view.audioAvailable': '🔊 available', // ALTA
+  'adminChallenges.view.absent': 'missing', // ALTA
+  'adminChallenges.view.targetAudioNote': 'this is the audio played at the start of the challenge, not the contextual example', // ALTA
+  'adminChallenges.view.example': 'Example (written context, no automatic audio)', // ALTA
+  'adminChallenges.view.question': 'Question', // ALTA
+  'adminChallenges.view.secondExample': '2nd example', // ALTA
+  'adminChallenges.view.noAudio': '(no audio)', // ALTA
+  'adminChallenges.view.micro': 'Micro-activity', // ALTA
+  'adminChallenges.view.resources': 'Resources found (Pour aller plus loin)', // ALTA
+  'adminChallenges.view.sentenceFr': 'Sentence (French)', // ALTA
+  'adminChallenges.view.hint': 'Hint (cloze)', // ALTA
+  'adminChallenges.view.translations': 'Accepted translations', // ALTA
+  'adminChallenges.view.word': 'Word/expression', // ALTA
+  'adminChallenges.edit.example': 'Example', // ALTA
+  'adminChallenges.edit.options': 'Options (one per line — mark the correct one with * at the start)', // ALTA
+  'adminChallenges.edit.microPrompt': 'Micro-activity — sentence', // ALTA
+  'adminChallenges.edit.microAnswer': 'Micro-activity — answer', // ALTA
+  'adminChallenges.edit.exampleHint': 'Editing the text of an example does not regenerate the audio automatically — let me know if any audio needs to be redone.', // ALTA
+  'adminChallenges.edit.hint': 'Hint (cloze, with ______ for the hidden part)', // ALTA
+  'adminChallenges.edit.translations': 'Accepted translations (one per line, the first is the "expected answer" shown in the feedback)', // ALTA
+  'adminChallenges.edit.sentenceHint': 'Editing the sentence does not regenerate the audio automatically — let me know if it needs to be redone.', // ALTA
+  'adminChallenges.edit.word': 'Word/expression (with correct accents)', // ALTA
+  'adminChallenges.edit.wordHint': 'Editing the word does not regenerate the audio automatically — let me know if it needs to be redone.', // ALTA
+  'adminChallenges.card.accentTitle': '✍️ Accent — {word}', // ALTA
+  'adminChallenges.approve.blocked': 'Cannot approve — fix first:', // ALTA
+  'adminChallenges.approve.warnings': 'Attention, I found possible problems:', // ALTA
+  'adminChallenges.approve.anyway': 'Approve anyway?', // ALTA
+  'adminChallenges.toast.published': 'Challenge published — now visible to students.', // ALTA
+  'adminChallenges.toast.unpublished': 'Challenge unpublished — no longer shown to students.', // ALTA
+  'adminChallenges.preview.label': '🔍 Preview — student version', // ALTA
+  'adminChallenges.preview.showAnswer': 'Show expected answer', // ALTA
+  'adminChallenges.preview.backToEdit': '← Back to editing', // ALTA
+  'adminChallenges.preview.approve': '✅ Approve challenge', // ALTA
+  'adminChallenges.preview.expected': 'Expected answer: ', // ALTA
+  'adminChallenges.btn.save': '💾 Save', // ALTA
+  'adminChallenges.btn.preview': '👁️ View student version', // ALTA
+  'adminChallenges.btn.edit': '✏️ Edit', // ALTA
+  'adminChallenges.btn.unpublish': '🚫 Unpublish', // ALTA
+  'adminChallenges.btn.approvePublish': '✅ Approve and publish', // ALTA
+  'adminChallenges.bulk.checkboxAria': 'Select for bulk approval', // ALTA
+  'adminChallenges.filter.searchPh': 'Search by expression, sentence, word...', // ALTA
+  'adminChallenges.filter.allTypes': 'All categories', // ALTA
+  'adminChallenges.filter.allLevels': 'All levels', // ALTA
+  'adminChallenges.section.loadMore': 'Load {n} more ({remaining} remaining)', // ALTA
+  'adminChallenges.bulk.selectAll': 'Select all ({n})', // ALTA
+  'adminChallenges.bulk.approveSelected': '✅ Approve selected ({n})', // ALTA
+  'adminChallenges.loadFailed': '⚠ We could not load the challenges right now. Check your connection and try again -- this does NOT mean the queue is empty.', // ALTA
+  'adminChallenges.section.noResults': 'No results in this section with the current filter.', // ALTA
+  'adminChallenges.section.pending': 'Pending review', // ALTA
+  'adminChallenges.section.pendingEmpty': 'No challenges pending review.', // ALTA
+  'adminChallenges.section.published': 'Published', // ALTA
+  'adminChallenges.section.publishedEmpty': 'No challenges published yet.', // ALTA
+  'adminChallenges.section.unpublished': 'Unpublished', // ALTA
+  'adminChallenges.section.unpublishedEmpty': 'No unpublished challenges.', // ALTA
+  'adminChallenges.bulk.confirm': 'Approve and publish {n} selected challenge(s)? Only those with no problem in the quality checklist are published automatically -- the rest stay pending for individual review.', // ALTA
+  'adminChallenges.bulk.approving': 'Approving…', // ALTA
+  'adminChallenges.bulk.published': '{published} challenge(s) published.', // ALTA
+  'adminChallenges.bulk.publishedSkipped': '{published} published. {skipped} skipped because of a problem in the checklist -- review one by one: {list}', // ALTA
+  'adminChallenges.confirm.unpublish': 'Unpublish this challenge? It stops being shown to students immediately.', // ALTA
+  'adminChallenges.toast.rejected': 'Challenge rejected.', // ALTA
+  'adminChallenges.toast.savedBackToReview': 'Edit saved — challenge went back to review (it was published/approved and needs to be approved again).', // ALTA
+  'adminChallenges.toast.saved': 'Edit saved.', // ALTA
+  'admin.panel.sub': 'Special badges and platform usage metrics.', // ALTA
+  'admin.panel.aria': 'Admin panel section', // ALTA
+  'admin.panel.tab.badges': '🎖️ Badges', // ALTA
+  'admin.panel.tab.analytics': '📊 Analytics', // ALTA
+  'admin.panel.tab.reports': '⚑ Reports', // ALTA
+  'admin.mode.pillAria': 'Turn Admin Mode on/off', // ALTA
+  'admin.mode.pillTitle': 'Admin Mode: OFF simulates the experience of a regular student', // ALTA
+  'admin.mode.pillLabel': '🔒 Admin:', // ALTA
+  'admin.modal.manageBadge.title': 'Manage badge', // ALTA
+  'admin.modal.manageBadge.hint': 'Check who should have this badge. Unchecking removes it.', // ALTA
+  'admin.modal.saveChanges': 'Save changes', // ALTA
+  'admin.modal.editTemplate.title': 'Edit variant', // ALTA
+  'admin.modal.report.title': 'Report', // ALTA
+  'admin.modal.report.sentBy': 'Sent by', // ALTA
+  'admin.modal.report.description': 'Description', // ALTA
+  'admin.modal.report.expected': 'What the person expected', // ALTA
+  'admin.modal.report.severity': 'Perceived severity', // ALTA
+  'admin.modal.report.context': 'Context captured automatically', // ALTA
+  'admin.modal.report.status': 'Status', // ALTA
+  'admin.modal.report.priority': 'Technical priority', // ALTA
+  'admin.modal.report.note': 'Internal note', // ALTA
+  'admin.modal.report.subject': 'Subject', // ALTA
+  'admin.modal.report.message': 'Message', // ALTA
+  'admin.modal.report.priorityNone': '(not set)', // ALTA
+  'admin.modal.report.notePh': 'Only the team sees this', // ALTA
+  'admin.modal.report.replyByEmail': 'Reply by email', // ALTA
+  'admin.modal.report.replyPh': 'Thank you for letting us know! ...', // ALTA
+  'admin.modal.report.noEmail': 'No email associated with this report (guest who did not provide an email) -- it is not possible to reply.', // ALTA
+  'adminChallenges.bar.import': '📥 Import JSON', // ALTA
+  'adminChallenges.bar.review': '🛠️ Review pending (', // ALTA
+  'adminChallenges.modal.title': 'Import challenges via JSON', // ALTA
+  'admin.mode.on': 'ON', // ALTA
+  'admin.mode.off': 'OFF', // ALTA
 };

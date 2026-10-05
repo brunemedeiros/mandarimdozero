@@ -258,7 +258,7 @@ async function applyAdminModeUI(){
     pill.style.display = '';
     pill.classList.toggle('active', !on);
     const label = document.getElementById('admin-mode-state-label');
-    if (label) label.textContent = on ? 'ON' : 'OFF';
+    if (label) label.textContent = on ? t('admin.mode.on') : t('admin.mode.off');
   }
 }
 
@@ -273,8 +273,8 @@ document.getElementById('admin-mode-toggle-btn')?.addEventListener('click', asyn
   // imediata, não só na próxima navegação).
   if (typeof renderUnitsGrid === 'function') renderUnitsGrid();
   showToast(wasOn
-    ? '🔒 Admin Mode desligado — navegando como um aluno comum.'
-    : '🔒 Admin Mode ligado — privilégios de admin restaurados.');
+    ? t('admin.mode.toastOff')
+    : t('admin.mode.toastOn'));
 });
 
 // #mais-btn é o botão "Mais" da barra inferior mobile (Fase 6) -- abre o

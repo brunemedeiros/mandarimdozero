@@ -24,10 +24,23 @@ const STUDENT_METRICS_CACHE = {};
 // como opção de atribuição sem violar essa decisão -- é justamente o
 // "anexar a possibilidade" que a autora pediu.
 const STUDENT_LANGUAGE_LABELS = {
-  frances: 'Francês',
-  mandarim: 'Chinês',
-  portugues: 'Português (em breve)',
+  get frances(){ return t('fieldEditor.lang.fr'); },
+  get mandarim(){ return t('admin.students.lang.mandarim'); },
+  get portugues(){ return t('admin.students.lang.portugues'); },
 };
+
+// CONSOLIDAÇÃO i18n (Fase 6, Admin A) -- helpers de texto compartilhados
+// pelas telas de admin (flashcards/aulas/material). Funções (nunca
+// constantes de módulo) pra t()/tp() ser avaliado no idioma ATUAL.
+function adminSelectionCountLabel(n){
+  return n === 0 ? t('admin.common.noneSelected') : tp('admin.common.selectedCount', n);
+}
+function adminForStudentsSuffix(n){
+  return n > 1 ? t('admin.common.forNStudents', { n }) : '';
+}
+function adminEmptyForSuffix(n){
+  return n > 1 ? t('admin.common.forTheseStudents') : n === 1 ? t('admin.common.forThisStudent') : t('admin.common.forNoStudent');
+}
 
 // Grillado explicitamente com a autora (ver CLAUDE.md, "rótulo do
 // seletor de direção do cartão") -- pareamento idioma estudado/idioma
@@ -49,7 +62,7 @@ async function renderAdminStudentsView(){
   const wrap = document.getElementById('admin-students-content');
   if (!wrap) return;
   if (!isAdminUser()){
-    wrap.innerHTML = `<p class="profile-empty-note">Esta tela é só pra administração da plataforma.</p>`;
+    wrap.innerHTML = `<p class="profile-empty-note">${t('admin.common.adminOnly')}</p>`;
     return;
   }
   wrap.innerHTML = loadingHTML();
@@ -80,33 +93,33 @@ async function renderAdminStudentsView(){
   const studentsHTML = students.length ? students.map(s => `
     <div class="admin-badge-row">
       <div class="admin-badge-info">
-        <div class="admin-badge-name">@${s.username || '(usuário removido)'}${s.display_name ? ` <span class="admin-grant-badge-name">— ${escapeHTML(s.display_name)}</span>` : ''}</div>
-        <div class="admin-badge-desc">${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key} · vinculado em ${new Date(s.created_at).toLocaleDateString('pt-BR')}</div>
+        <div class="admin-badge-name">@${s.username || t('admin.common.removedUser')}${s.display_name ? ` <span class="admin-grant-badge-name">— ${escapeHTML(s.display_name)}</span>` : ''}</div>
+        <div class="admin-badge-desc">${STUDENT_LANGUAGE_LABELS[s.language_app_key] || s.language_app_key} · ${t('admin.students.linkedOn', { date: fmtDate(s.created_at) })}</div>
       </div>
-      <button class="admin-badge-delete-btn" data-toggle-metrics="${s.id}" data-metrics-student="${s.student_id}" data-metrics-lang="${s.language_app_key}" title="Ver métricas">📊</button>
-      <button class="admin-badge-delete-btn" data-remove-link="${s.id}" title="Remover vínculo">✕</button>
+      <button class="admin-badge-delete-btn" data-toggle-metrics="${s.id}" data-metrics-student="${s.student_id}" data-metrics-lang="${s.language_app_key}" title="${t('admin.students.metricsTitle')}">📊</button>
+      <button class="admin-badge-delete-btn" data-remove-link="${s.id}" title="${t('admin.students.removeLinkTitle')}">✕</button>
     </div>
     <div class="admin-badge-desc" id="metrics-link-${s.id}" style="display:none; padding:10px 0 14px;"></div>
-  `).join('') : `<p class="profile-empty-note">Nenhum aluno vinculado ainda.</p>`;
+  `).join('') : `<p class="profile-empty-note">${t('admin.students.none')}</p>`;
 
   wrap.innerHTML = `
     <div class="profile-section">
-      <div class="section-label">Vincular aluno</div>
+      <div class="section-label">${t('admin.students.linkTitle')}</div>
       <form id="admin-assign-student-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-student-username">Conta do aluno</label>
+        <label class="profile-edit-label" for="admin-student-username">${t('admin.students.accountLabel')}</label>
         <select id="admin-student-username" class="profile-edit-input">
-          <option value="" disabled selected>Selecione uma conta...</option>
+          <option value="" disabled selected>${t('admin.students.selectAccount')}</option>
           ${usernameOptionsHTMLForLang(defaultLang)}
         </select>
-        <label class="profile-edit-label" for="admin-student-language">Idioma</label>
+        <label class="profile-edit-label" for="admin-student-language">${t('fieldEditor.field.language')}</label>
         <select id="admin-student-language" class="profile-edit-input">${languageOptionsHTML}</select>
         <p class="profile-edit-error" id="admin-assign-student-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-assign-student-btn">Vincular</button>
+        <button type="submit" class="btn btn-primary btn-block" id="admin-assign-student-btn">${t('admin.students.link')}</button>
       </form>
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Seus alunos (${students.length})</div>
+      <div class="section-label">${t('admin.students.yourStudents', { n: students.length })}</div>
       ${studentsHTML}
     </div>
   `;
@@ -117,7 +130,7 @@ async function renderAdminStudentsView(){
   document.getElementById('admin-student-language').addEventListener('change', (e) => {
     const usernameSelect = document.getElementById('admin-student-username');
     const opts = usernameOptionsHTMLForLang(e.target.value);
-    usernameSelect.innerHTML = `<option value="" disabled selected>Selecione uma conta...</option>${opts}`;
+    usernameSelect.innerHTML = `<option value="" disabled selected>${t('admin.students.selectAccount')}</option>${opts}`;
   });
 
   document.getElementById('admin-assign-student-form').addEventListener('submit', async (e) => {
@@ -132,13 +145,13 @@ async function renderAdminStudentsView(){
     );
     btn.disabled = false;
     if (!result.ok){ errorEl.textContent = result.error; return; }
-    showToast(`✓ @${result.target.username} vinculado como aluno.`);
+    showToast(t('admin.students.linkedToast', { username: result.target.username }));
     renderAdminStudentsView();
   });
 
   wrap.querySelectorAll('[data-remove-link]').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm('Remover este vínculo? O progresso e histórico do aluno continuam preservados -- ele só deixa de aparecer na sua lista.')) return;
+      if (!confirm(t('admin.students.removeConfirm'))) return;
       await removeStudentLink(btn.dataset.removeLink);
       renderAdminStudentsView();
     });
@@ -166,7 +179,7 @@ async function toggleStudentMetrics(btn){
 
   if (!STUDENT_METRICS_CACHE[linkId]){
     panel.style.display = 'block';
-    panel.innerHTML = 'Carregando métricas...';
+    panel.innerHTML = t('admin.students.metrics.loading');
     STUDENT_METRICS_CACHE[linkId] = await fetchTeacherStudentMetrics(btn.dataset.metricsStudent, btn.dataset.metricsLang);
   }
 
@@ -180,22 +193,22 @@ async function toggleStudentMetrics(btn){
 // vocabStrengthBuckets() (fr/zh app.js) -- não um critério novo.
 function renderStudentMetricsHTML(m){
   if (!m){
-    return '<p class="profile-empty-note">Não foi possível carregar as métricas agora.</p>';
+    return `<p class="profile-empty-note">${t('admin.students.metrics.failed')}</p>`;
   }
   if (!m.teacherCardsTotal){
-    return '<p class="profile-empty-note">Você ainda não criou nenhum cartão pra este aluno, na aba "📇 Flashcards".</p>';
+    return `<p class="profile-empty-note">${t('admin.students.metrics.noCards')}</p>`;
   }
   const daysAgo = m.lastStudyDay
     ? Math.round((Date.parse(todayStr()) - Date.parse(m.lastStudyDay)) / 86400000)
     : null;
-  const lastActivityLabel = daysAgo === null ? 'sem registro'
-    : daysAgo <= 0 ? 'hoje'
-    : daysAgo === 1 ? 'ontem'
-    : `${daysAgo} dias atrás`;
+  const lastActivityLabel = daysAgo === null ? t('admin.students.metrics.noRecord')
+    : daysAgo <= 0 ? t('admin.students.metrics.today')
+    : daysAgo === 1 ? t('admin.students.metrics.yesterday')
+    : t('admin.students.metrics.daysAgo', { n: daysAgo });
   return `
-    <div>Última atividade geral: <strong>${lastActivityLabel}</strong></div>
-    <div>Cartões que você criou pra ele: <strong>${m.teacherCardsActive} ativos</strong>${m.teacherCardsArchived ? `, ${m.teacherCardsArchived} arquivados` : ''}</div>
-    <div>Ainda nunca revisados: <strong>${m.teacherCardsNeverReviewed}</strong></div>
-    <div>Memória: <strong>${m.teacherCardsWeak} fracas</strong> · ${m.teacherCardsMedium} medianas · ${m.teacherCardsStrong} fortes</div>
+    <div>${t('admin.students.metrics.lastActivity', { label: lastActivityLabel })}</div>
+    <div>${t('admin.students.metrics.cardsCreated', { n: m.teacherCardsActive })}${m.teacherCardsArchived ? t('admin.students.metrics.archivedSuffix', { n: m.teacherCardsArchived }) : ''}</div>
+    <div>${t('admin.students.metrics.neverReviewed', { n: m.teacherCardsNeverReviewed })}</div>
+    <div>${t('admin.students.metrics.memory', { weak: m.teacherCardsWeak, medium: m.teacherCardsMedium, strong: m.teacherCardsStrong })}</div>
   `;
 }

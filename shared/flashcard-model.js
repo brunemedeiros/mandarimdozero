@@ -367,12 +367,12 @@ async function isTtsAudioStale(field){
 // servidor (2ª camada real, nunca confia só nisto).
 function validateTtsGenerationRequest({ text, language }){
   const cleanText = (text || '').trim();
-  if (!cleanText) return { ok: false, error: 'Digite o texto a sintetizar.' };
+  if (!cleanText) return { ok: false, error: t('flashcardModel.tts.missingText') };
   if (cleanText.length > TTS_TEXT_MAX_LENGTH){
-    return { ok: false, error: `Texto muito longo (máximo ${TTS_TEXT_MAX_LENGTH} caracteres).` };
+    return { ok: false, error: t('flashcardModel.tts.textTooLong', { max: TTS_TEXT_MAX_LENGTH }) };
   }
   if (!language || typeof language !== 'string'){
-    return { ok: false, error: 'Escolha o idioma da síntese.' };
+    return { ok: false, error: t('flashcardModel.tts.missingLanguage') };
   }
   return { ok: true };
 }
@@ -385,15 +385,15 @@ function validateTtsGenerationRequest({ text, language }){
 // duplicado no mesmo escopo global de documento (mesmo problema já
 // corrigido na Fase 6D.2 pra CARD_TYPE_UI_META).
 const TTS_GENERATION_ERROR_LABELS = {
-  provider_not_configured: 'Geração de áudio por TTS ainda não está configurada no servidor (nenhum provedor de voz contratado).',
-  provider_not_implemented: 'Geração de áudio por TTS ainda não está disponível -- infraestrutura em construção.',
-  rate_limited: 'Muitas gerações de áudio em pouco tempo -- espere alguns minutos e tente de novo.',
-  not_authorized: 'Sem permissão para gerar áudio para este cartão.',
-  invalid_session: 'Sessão expirada -- faça login de novo.',
-  text_too_long: `Texto muito longo (máximo ${TTS_TEXT_MAX_LENGTH} caracteres).`,
-  missing_text: 'Digite o texto a sintetizar.',
-  missing_language: 'Escolha o idioma da síntese.',
-  upload_failed: 'Áudio gerado, mas não foi possível salvá-lo -- tente de novo.',
+  get provider_not_configured(){ return t('flashcardModel.tts.providerNotConfigured'); },
+  get provider_not_implemented(){ return t('flashcardModel.tts.providerNotImplemented'); },
+  get rate_limited(){ return t('flashcardModel.tts.rateLimited'); },
+  get not_authorized(){ return t('flashcardModel.tts.notAuthorized'); },
+  get invalid_session(){ return t('flashcardModel.tts.invalidSession'); },
+  get text_too_long(){ return t('flashcardModel.tts.textTooLong', { max: TTS_TEXT_MAX_LENGTH }); },
+  get missing_text(){ return t('flashcardModel.tts.missingText'); },
+  get missing_language(){ return t('flashcardModel.tts.missingLanguage'); },
+  get upload_failed(){ return t('flashcardModel.tts.uploadFailed'); },
 };
 
 const FLASHCARD_MODEL_FSRS_DEFAULTS = Object.freeze({

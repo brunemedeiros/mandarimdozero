@@ -50,13 +50,13 @@ async function fetchSupportMaterialsForCurrentStudent(languageAppKey){
 // anexo", o nome original fica salvo (`fileName`) pra exibir na lista já
 // que a URL pública é um path opaco.
 async function uploadSupportMaterialFile(file){
-  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  if (!CURRENT_USER) return { ok: false, error: t('ownFlashcards.err.loginRequired') };
   const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
   const path = `${CURRENT_USER.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
   const { error } = await supabaseClient.storage
     .from('support-materials')
     .upload(path, file, { contentType: file.type || undefined, cacheControl: '3600' });
-  if (error){ console.error('Erro ao subir material de apoio:', error); return { ok: false, error: 'Não foi possível enviar o arquivo agora.' }; }
+  if (error){ console.error('Erro ao subir material de apoio:', error); return { ok: false, error: t('ownFlashcards.err.uploadFailed') }; }
   const { data: pub } = supabaseClient.storage.from('support-materials').getPublicUrl(path);
   return { ok: true, url: pub.publicUrl, fileName: file.name };
 }
@@ -67,11 +67,11 @@ async function uploadSupportMaterialFile(file){
 // sem nenhum conteúdo não serve pra nada).
 async function createSupportMaterial({ studentId, languageAppKey, title, description, linkUrl, fileUrl, fileName }){
   const cleanTitle = (title || '').trim();
-  if (!cleanTitle) return { ok: false, error: 'Digite um título pro material.' };
+  if (!cleanTitle) return { ok: false, error: t('teacherMaterials.err.titleRequired') };
   const cleanDesc = (description || '').trim();
   const cleanLink = (linkUrl || '').trim();
   if (!cleanDesc && !cleanLink && !fileUrl){
-    return { ok: false, error: 'Preencha ao menos a descrição, um link ou um arquivo.' };
+    return { ok: false, error: t('teacherMaterials.err.needContent') };
   }
   const { data, error } = await supabaseClient
     .from('teacher_support_materials')
@@ -87,7 +87,7 @@ async function createSupportMaterial({ studentId, languageAppKey, title, descrip
     })
     .select()
     .single();
-  if (error){ console.error('Erro ao criar material de apoio:', error); return { ok: false, error: 'Não foi possível criar o material agora.' }; }
+  if (error){ console.error('Erro ao criar material de apoio:', error); return { ok: false, error: t('teacherMaterials.err.createFailed') }; }
   return { ok: true, material: data };
 }
 
@@ -96,7 +96,7 @@ async function createSupportMaterial({ studentId, languageAppKey, title, descrip
 // teacher_flashcards teve pra edição -- ver CLAUDE.md).
 async function updateSupportMaterial(id, { title, description, linkUrl }){
   const cleanTitle = (title || '').trim();
-  if (!cleanTitle) return { ok: false, error: 'Digite um título pro material.' };
+  if (!cleanTitle) return { ok: false, error: t('teacherMaterials.err.titleRequired') };
   const { error } = await supabaseClient
     .from('teacher_support_materials')
     .update({
@@ -105,7 +105,7 @@ async function updateSupportMaterial(id, { title, description, linkUrl }){
       link_url: (linkUrl || '').trim() || null,
     })
     .eq('id', id);
-  if (error){ console.error('Erro ao editar material de apoio:', error); return { ok: false, error: 'Não foi possível salvar agora.' }; }
+  if (error){ console.error('Erro ao editar material de apoio:', error); return { ok: false, error: t('teacherMaterials.err.saveFailed') }; }
   return { ok: true };
 }
 

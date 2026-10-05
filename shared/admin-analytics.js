@@ -63,33 +63,33 @@ const ANALYTICS_LAZY_CACHE = {};
 // ---------- Taxonomia de eventos (rótulos amigáveis + o que cada um é) ----------
 // Áreas = abas de topo (tab_switch) -- a "casa" de cada funcionalidade.
 const ANALYTICS_TAB_LABELS = {
-  path: '🗺️ Trilha',
-  review: '🔁 Revisão',
-  conjugaison: '📝 Conjugação',
-  dictation: '🎧 Ditados',
-  challenges: '🎯 Desafios',
+  get path(){ return t('admin.analytics.tab.path'); },
+  get review(){ return t('admin.analytics.tab.review'); },
+  get conjugaison(){ return t('admin.analytics.tab.conjugaison'); },
+  get dictation(){ return t('admin.analytics.tab.dictation'); },
+  get challenges(){ return t('admin.analytics.tab.challenges'); },
   hanzi: '汉 Hanzi',
-  leaderboard: '🏆 Ranking',
-  profile: '👤 Meu perfil',
-  progress: '📈 Progresso',
-  settings: '⚙️ Configurações',
-  'admin-badges': '🛠️ Painel de admin',
+  get leaderboard(){ return t('admin.analytics.tab.leaderboard'); },
+  get profile(){ return t('admin.analytics.tab.profile'); },
+  get progress(){ return t('admin.analytics.tab.progress'); },
+  get settings(){ return t('admin.analytics.tab.settings'); },
+  get 'admin-badges'(){ return t('admin.analytics.tab.admin_badges'); },
 };
 
 // Funcionalidades = os tipos de exercício/lição de fato (lesson_start/
 // lesson_complete) -- o que a pessoa efetivamente FAZ dentro de uma área,
 // não a área em si.
 const ANALYTICS_LESSON_EVENT_LABELS = {
-  vocab_lesson: '📘 Lição de vocabulário',
-  unit_checkpoint: '✅ Checkpoint de unidade',
-  flashcard_review: '🔁 Sessão de flashcards',
-  speed_review: '⚡ Revisão rápida',
-  match_game: '🧩 Jogo da memória',
-  hanzi_lesson: '汉 Lição de hanzi',
-  hanzi_review: '汉 Revisão de hanzi',
-  dictation: '🎧 Ditado',
-  conjugation_session: '📝 Sessão de conjugação',
-  challenge: '🎯 Desafio concluído',
+  get vocab_lesson(){ return t('admin.analytics.lesson.vocab_lesson'); },
+  get unit_checkpoint(){ return t('admin.analytics.lesson.unit_checkpoint'); },
+  get flashcard_review(){ return t('admin.analytics.lesson.flashcard_review'); },
+  get speed_review(){ return t('admin.analytics.lesson.speed_review'); },
+  get match_game(){ return t('admin.analytics.lesson.match_game'); },
+  get hanzi_lesson(){ return t('admin.analytics.lesson.hanzi_lesson'); },
+  get hanzi_review(){ return t('admin.analytics.lesson.hanzi_review'); },
+  get dictation(){ return t('admin.analytics.lesson.dictation'); },
+  get conjugation_session(){ return t('admin.analytics.lesson.conjugation_session'); },
+  get challenge(){ return t('admin.analytics.lesson.challenge'); },
 };
 
 // Nem todo tipo tem um evento de INÍCIO (lesson_start) ainda -- só onde
@@ -121,7 +121,11 @@ const ANALYTICS_SCORE_FIELD_BY_EVENT_NAME = {
   conjugation_session: 'pct',
 };
 
-const ANALYTICS_DEVICE_LABELS = { mobile: '📱 Celular', tablet: '📟 Tablet', desktop: '🖥️ Desktop' };
+const ANALYTICS_DEVICE_LABELS = {
+  get mobile(){ return t('admin.analytics.device.mobile'); },
+  tablet: '📟 Tablet',
+  desktop: '🖥️ Desktop',
+};
 
 // Erros técnicos (ver shared/analytics.js:trackTechnicalError() e os
 // pontos que chamam -- window.onerror/unhandledrejection globais,
@@ -130,11 +134,11 @@ const ANALYTICS_DEVICE_LABELS = { mobile: '📱 Celular', tablet: '📟 Tablet',
 // de vídeo -- o app não tem conteúdo em vídeo, então "falhas de vídeo" do
 // prompt-mestre não se aplica aqui (documentado, não fabricado).
 const ANALYTICS_TECHNICAL_ERROR_LABELS = {
-  js_error: '🐞 Erro de JavaScript',
-  unhandled_rejection: '🐞 Promise rejeitada sem tratamento',
-  audio_load_failed: '🔇 Falha ao carregar áudio',
-  audio_play_failed: '🔇 Falha ao tocar áudio (clique manual)',
-  save_failed: '💾 Falha ao salvar progresso',
+  get js_error(){ return t('admin.analytics.techErr.js_error'); },
+  get unhandled_rejection(){ return t('admin.analytics.techErr.unhandled_rejection'); },
+  get audio_load_failed(){ return t('admin.analytics.techErr.audio_load_failed'); },
+  get audio_play_failed(){ return t('admin.analytics.techErr.audio_play_failed'); },
+  get save_failed(){ return t('admin.analytics.techErr.save_failed'); },
 };
 
 // Abas que fazem uma consulta EXTRA (além da já feita pra Resumo/
@@ -150,14 +154,14 @@ function analyticsEndOfDay(d){ const x = new Date(d); x.setHours(23, 59, 59, 999
 function analyticsDaysAgo(n){ return new Date(Date.now() - n * 86400000); }
 
 const ANALYTICS_PERIOD_LABELS = {
-  today: 'Hoje',
-  yesterday: 'Ontem',
-  last7: 'Últimos 7 dias',
-  last30: 'Últimos 30 dias',
-  thisMonth: 'Este mês',
-  lastMonth: 'Mês passado',
-  last90: 'Últimos 90 dias',
-  custom: 'Personalizado',
+  get today(){ return t('admin.analytics.period.today'); },
+  get yesterday(){ return t('admin.analytics.period.yesterday'); },
+  get last7(){ return t('admin.analytics.period.last7'); },
+  get last30(){ return t('admin.analytics.period.last30'); },
+  get thisMonth(){ return t('admin.analytics.period.thisMonth'); },
+  get lastMonth(){ return t('admin.analytics.period.lastMonth'); },
+  get last90(){ return t('admin.analytics.period.last90'); },
+  get custom(){ return t('admin.analytics.period.custom'); },
 };
 
 const ANALYTICS_PERIOD_PRESETS = {
@@ -200,7 +204,7 @@ function analyticsPreviousPeriod(since, until){
 }
 
 function analyticsFormatDate(d){
-  return d.toLocaleDateString('pt-BR');
+  return fmtDate(d);
 }
 
 function analyticsDayKey(iso){
@@ -614,10 +618,10 @@ function computeAnalytics(events, newProfiles, activeProfiles, sinceIso){
   // ser uma semana exata.
   const activeUserIdsList = [...activeUserIds];
   const freqBuckets = analyticsBucketizeByUsers(activeUserIdsList, [
-    { label: '1 dia', min: 1, max: 1 },
-    { label: '2–4 dias', min: 2, max: 4 },
-    { label: '5–9 dias', min: 5, max: 9 },
-    { label: '10+ dias', min: 10, max: Infinity },
+    { label: t('admin.analytics.freq.1'), min: 1, max: 1 },
+    { label: t('admin.analytics.freq.2_4'), min: 2, max: 4 },
+    { label: t('admin.analytics.freq.5_9'), min: 5, max: 9 },
+    { label: t('admin.analytics.freq.10'), min: 10, max: Infinity },
   ], uid => daysByUser[uid]?.size || 0);
 
   // ---- Sessões / tempo estimado ----
@@ -641,7 +645,7 @@ function computeAnalytics(events, newProfiles, activeProfiles, sinceIso){
   // eventos de outro idioma caem em "nível desconhecido".
   const levelUsers = {};
   events.filter(e => e.event_type === 'lesson_complete').forEach(e => {
-    const level = analyticsUnitLevel(e) || 'Nível desconhecido';
+    const level = analyticsUnitLevel(e) || t('admin.analytics.levelUnknown');
     (levelUsers[level] ||= new Set()).add(e.user_id);
   });
   const levelRows = Object.entries(levelUsers)
@@ -696,9 +700,10 @@ function computeAnalytics(events, newProfiles, activeProfiles, sinceIso){
       .map(([name, count]) => ({ name, count, uniqueStudents: users[name].size }))
       .sort((a, b) => b.count - a.count);
   }
-  const deviceRows = analyticsGroupBy('device_type', 'desconhecido');
-  const browserRows = analyticsGroupBy('browser', 'desconhecido');
-  const osRows = analyticsGroupBy('os', 'desconhecido');
+  const unknownLabel = t('admin.analytics.unknown');
+  const deviceRows = analyticsGroupBy('device_type', unknownLabel);
+  const browserRows = analyticsGroupBy('browser', unknownLabel);
+  const osRows = analyticsGroupBy('os', unknownLabel);
 
   // ---- Engajamento: exercícios por sessão, streak (proxy) ----
   const totalCompleted = Object.values(completeCounts).reduce((a, b) => a + b, 0);
@@ -755,7 +760,7 @@ function analyticsDelta(current, previous){
 
 function analyticsDeltaBadgeHTML(delta){
   if (!delta) return '';
-  if (delta.kind === 'new') return `<span class="analytics-delta analytics-delta-new">novo</span>`;
+  if (delta.kind === 'new') return `<span class="analytics-delta analytics-delta-new">${t('admin.analytics.delta.new')}</span>`;
   if (delta.kind === 'flat') return `<span class="analytics-delta analytics-delta-flat">= </span>`;
   const arrow = delta.kind === 'up' ? '▲' : '▼';
   const cls = delta.kind === 'up' ? 'analytics-delta-up' : 'analytics-delta-down';
@@ -784,7 +789,7 @@ function analyticsBarRowsHTML(rows, labels, extraNote){
   return rows.map(row => {
     const pct = max ? Math.round((row.count / max) * 100) : 0;
     const label = labels[row.name] || row.name;
-    const usersNote = typeof row.uniqueStudents === 'number' ? ` · ${row.uniqueStudents} ${row.uniqueStudents === 1 ? 'aluno(a)' : 'alunos(as)'}` : '';
+    const usersNote = typeof row.uniqueStudents === 'number' ? ` · ${tp('admin.analytics.students', row.uniqueStudents)}` : '';
     return `
       <div class="analytics-bar-row">
         <div class="analytics-bar-top">
@@ -798,7 +803,7 @@ function analyticsBarRowsHTML(rows, labels, extraNote){
 }
 
 function analyticsEmptyNoteHTML(msg){
-  return `<p class="profile-empty-note">${msg || 'Sem dados no período selecionado.'}</p>`;
+  return `<p class="profile-empty-note">${msg || t('admin.analytics.noData')}</p>`;
 }
 
 function analyticsFormatMinutes(mins){
@@ -826,7 +831,7 @@ function analyticsControlsHTML(since, until){
 
   const previous = analyticsPreviousPeriod(since, until);
   const rangeLabel = `${analyticsFormatDate(since)} – ${analyticsFormatDate(until)}`;
-  const compareLabel = ANALYTICS_STATE.compare ? ` · comparando com ${analyticsFormatDate(previous.since)} – ${analyticsFormatDate(previous.until)}` : '';
+  const compareLabel = ANALYTICS_STATE.compare ? ` · ${t('admin.analytics.compareWith', { since: analyticsFormatDate(previous.since), until: analyticsFormatDate(previous.until) })}` : '';
 
   const deviceOptions = Object.entries(ANALYTICS_DEVICE_LABELS).map(([key, label]) =>
     `<option value="${key}" ${ANALYTICS_STATE.deviceFilter === key ? 'selected' : ''}>${label}</option>`
@@ -836,30 +841,30 @@ function analyticsControlsHTML(since, until){
     <div class="profile-section">
       <div class="analytics-filters-row">
         <div class="analytics-filter-item">
-          <label class="profile-edit-label" for="analytics-period-select">Período</label>
+          <label class="profile-edit-label" for="analytics-period-select">${t('admin.analytics.filter.period')}</label>
           <select id="analytics-period-select" class="profile-edit-input">${periodOptions}</select>
         </div>
         <div class="analytics-filter-item">
-          <label class="profile-edit-label" for="analytics-language-select">Idioma</label>
+          <label class="profile-edit-label" for="analytics-language-select">${t('fieldEditor.field.language')}</label>
           <select id="analytics-language-select" class="profile-edit-input">
-            <option value="all" ${ANALYTICS_STATE.languageFilter === 'all' ? 'selected' : ''}>Todos os idiomas</option>
+            <option value="all" ${ANALYTICS_STATE.languageFilter === 'all' ? 'selected' : ''}>${t('admin.reports.filter.allLanguages')}</option>
             ${langOptions}
           </select>
         </div>
         <div class="analytics-filter-item">
-          <label class="profile-edit-label" for="analytics-device-select">Dispositivo</label>
+          <label class="profile-edit-label" for="analytics-device-select">${t('admin.analytics.filter.device')}</label>
           <select id="analytics-device-select" class="profile-edit-input">
-            <option value="all" ${ANALYTICS_STATE.deviceFilter === 'all' ? 'selected' : ''}>Todos os dispositivos</option>
+            <option value="all" ${ANALYTICS_STATE.deviceFilter === 'all' ? 'selected' : ''}>${t('admin.analytics.filter.allDevices')}</option>
             ${deviceOptions}
           </select>
         </div>
       </div>
       ${customRangeHTML}
       <div class="analytics-compare-row">
-        <span class="pref-row-title">Comparar com período anterior</span>
+        <span class="pref-row-title">${t('admin.analytics.filter.compare')}</span>
         <button class="pref-switch" id="analytics-compare-switch" role="switch" aria-checked="${ANALYTICS_STATE.compare ? 'true' : 'false'}"><span class="pref-switch-knob"></span></button>
       </div>
-      <p class="admin-badge-desc">Período: ${rangeLabel}${compareLabel}</p>
+      <p class="admin-badge-desc">${t('admin.analytics.filter.periodLine', { range: rangeLabel })}${compareLabel}</p>
     </div>
   `;
 }
@@ -890,23 +895,23 @@ function wireAnalyticsControls(){
 function renderResumoSectionHTML(stats, prev){
   const d = (key) => prev ? analyticsDelta(stats[key], prev[key]) : null;
   const rateNote = stats.overallCompletionRate === null
-    ? '<p class="admin-badge-desc">Taxa de conclusão indisponível: ninguém começou um exercício dos tipos contados aqui (flashcards, revisão rápida, jogo da memória, hanzi, ditado, conjugação) neste período.</p>'
-    : `<p class="admin-badge-desc">A taxa de conclusão só usa os exercícios que têm um "começo" registrado (flashcards, revisão rápida, jogo da memória, hanzi, ditado, conjugação). Lições de vocabulário e checkpoints de unidade não entram nessa conta porque só sabemos quando terminam, não quando começam -- por isso "Exercícios concluídos" (acima) é maior que "Exercícios iniciados": ele soma TODOS os tipos, os com início e os sem. Pra ver cada tipo separado, veja a aba Exercícios.</p>`;
+    ? `<p class="admin-badge-desc">${t('admin.analytics.resumo.rateNA')}</p>`
+    : `<p class="admin-badge-desc">${t('admin.analytics.resumo.rateNote')}</p>`;
   return `
     <div class="profile-section">
-      <div class="section-label">Resumo</div>
+      <div class="section-label">${t('admin.analytics.subtab.resumo')}</div>
       <div class="analytics-kpi-grid">
-        ${analyticsKpiTileHTML(stats.activeStudents, 'Alunos ativos', 'alunos diferentes que usaram o app no período', d('activeStudents'))}
-        ${analyticsKpiTileHTML(stats.newStudents, 'Novos alunos', 'contas criadas dentro do período', d('newStudents'))}
-        ${analyticsKpiTileHTML(stats.sessions, 'Sessões', 'cada visita ao app conta como 1 sessão (o mesmo aluno abrindo 3x no dia = 3 sessões)', d('sessions'))}
-        ${analyticsKpiTileHTML(stats.exercisesStarted, 'Exercícios iniciados', 'só os tipos que registram quando o aluno começa (ver nota abaixo)', d('exercisesStarted'))}
-        ${analyticsKpiTileHTML(stats.exercisesCompleted, 'Exercícios concluídos', 'qualquer tipo de exercício ou lição terminado', d('exercisesCompleted'))}
-        ${analyticsKpiTileHTML(stats.overallCompletionRate === null ? '—' : `${stats.overallCompletionRate}%`, 'Taxa de conclusão', 'de quem começou um exercício, quantos % terminaram', stats.overallCompletionRate === null ? null : d('overallCompletionRate'))}
-        ${analyticsKpiTileHTML(analyticsFormatMinutes(stats.estimatedStudyMinutes), 'Tempo de estudo (estimado)', 'estimativa aproximada, não o tempo real gasto -- ver nota abaixo')}
+        ${analyticsKpiTileHTML(stats.activeStudents, t('admin.analytics.kpi.activeStudents'), t('admin.analytics.kpi.activeStudentsNote'), d('activeStudents'))}
+        ${analyticsKpiTileHTML(stats.newStudents, t('admin.analytics.kpi.newStudents'), t('admin.analytics.kpi.newStudentsNote'), d('newStudents'))}
+        ${analyticsKpiTileHTML(stats.sessions, t('admin.analytics.kpi.sessions'), t('admin.analytics.kpi.sessionsNote'), d('sessions'))}
+        ${analyticsKpiTileHTML(stats.exercisesStarted, t('admin.analytics.kpi.started'), t('admin.analytics.kpi.startedNote'), d('exercisesStarted'))}
+        ${analyticsKpiTileHTML(stats.exercisesCompleted, t('admin.analytics.kpi.completed'), t('admin.analytics.kpi.completedNote'), d('exercisesCompleted'))}
+        ${analyticsKpiTileHTML(stats.overallCompletionRate === null ? '—' : `${stats.overallCompletionRate}%`, t('admin.analytics.kpi.rate'), t('admin.analytics.kpi.rateNote'), stats.overallCompletionRate === null ? null : d('overallCompletionRate'))}
+        ${analyticsKpiTileHTML(analyticsFormatMinutes(stats.estimatedStudyMinutes), t('admin.analytics.kpi.time'), t('admin.analytics.kpi.timeNote'))}
       </div>
       ${rateNote}
-      <p class="admin-badge-desc">"Tempo de estudo" é uma aproximação: para cada sessão, medimos do primeiro ao último evento registrado e somamos tudo. Se um aluno ficar parado no meio (ex: sai pra fazer outra coisa e volta), esse tempo parado também entra na conta -- não é um cronômetro de uso ativo.</p>
-      <p class="admin-badge-desc">Quer ver XP total e sequência de dias (streak)? Isso está na aba Engajamento, não aqui no Resumo.</p>
+      <p class="admin-badge-desc">${t('admin.analytics.resumo.timeNote')}</p>
+      <p class="admin-badge-desc">${t('admin.analytics.resumo.xpNote')}</p>
     </div>
   `;
 }
@@ -915,26 +920,26 @@ function renderAtividadeSectionHTML(stats){
   const freqRows = stats.freqBuckets.map(b => ({ name: b.label, count: b.count }));
   return `
     <div class="profile-section">
-      <div class="section-label">Atividade</div>
+      <div class="section-label">${t('admin.analytics.subtab.atividade')}</div>
       <div class="analytics-kpi-grid">
-        ${analyticsKpiTileHTML(stats.newActiveCount, 'Novos (ativos no período)')}
-        ${analyticsKpiTileHTML(stats.returningActiveCount, 'Recorrentes')}
+        ${analyticsKpiTileHTML(stats.newActiveCount, t('admin.analytics.ativ.newActive'))}
+        ${analyticsKpiTileHTML(stats.returningActiveCount, t('admin.analytics.ativ.returning'))}
       </div>
-      <p class="admin-badge-desc">"Novo" = conta criada dentro do período selecionado (via profiles.created_at); "recorrente" = já existia antes disso. Ver limitações sobre contas anteriores à criação automática de perfil.</p>
+      <p class="admin-badge-desc">${t('admin.analytics.ativ.note')}</p>
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Alunos ativos por dia</div>
+      <div class="section-label">${t('admin.analytics.ativ.activeByDay')}</div>
       ${stats.activeByDayRows.length ? analyticsBarRowsHTML(stats.activeByDayRows.map(r => ({ name: r.day, count: r.count })), {}) : analyticsEmptyNoteHTML()}
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Sessões por dia</div>
+      <div class="section-label">${t('admin.analytics.ativ.sessionsByDay')}</div>
       ${stats.sessionsByDayRows.length ? analyticsBarRowsHTML(stats.sessionsByDayRows.map(r => ({ name: r.day, count: r.count })), {}) : analyticsEmptyNoteHTML()}
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Frequência de estudo (dias ativos no período)</div>
+      <div class="section-label">${t('admin.analytics.ativ.frequency')}</div>
       ${freqRows.some(r => r.count) ? analyticsBarRowsHTML(freqRows, {}) : analyticsEmptyNoteHTML()}
     </div>
   `;
@@ -943,14 +948,14 @@ function renderAtividadeSectionHTML(stats){
 function renderNavegacaoSectionHTML(stats){
   return `
     <div class="profile-section">
-      <div class="section-label">Áreas (abas)</div>
+      <div class="section-label">${t('admin.analytics.nav.areas')}</div>
       ${stats.areaRows.length ? analyticsBarRowsHTML(stats.areaRows, ANALYTICS_TAB_LABELS) : analyticsEmptyNoteHTML()}
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Funcionalidades (tipos de exercício)</div>
+      <div class="section-label">${t('admin.analytics.nav.features')}</div>
       ${stats.featureRows.length ? analyticsBarRowsHTML(stats.featureRows, ANALYTICS_LESSON_EVENT_LABELS) : analyticsEmptyNoteHTML()}
-      <p class="admin-badge-desc">Conta início + conclusão somados (uso total), não só conclusões.</p>
+      <p class="admin-badge-desc">${t('admin.analytics.nav.featuresNote')}</p>
     </div>
   `;
 }
@@ -983,11 +988,11 @@ function renderExerciciosSectionHTML(stats){
       <div class="analytics-funnel-row">
         <div class="analytics-funnel-label">${label}</div>
         <div class="analytics-funnel-stages">
-          <div class="analytics-funnel-stage"><span class="analytics-funnel-num">${r.started}</span><span class="analytics-funnel-stage-label">Iniciou</span></div>
+          <div class="analytics-funnel-stage"><span class="analytics-funnel-num">${r.started}</span><span class="analytics-funnel-stage-label">${t('admin.analytics.funnel.started')}</span></div>
           <div class="analytics-funnel-arrow">→</div>
-          <div class="analytics-funnel-stage"><span class="analytics-funnel-num">${r.completed}</span><span class="analytics-funnel-stage-label">Concluiu${r.completionRate !== null ? ` (${r.completionRate}%)` : ''}</span></div>
+          <div class="analytics-funnel-stage"><span class="analytics-funnel-num">${r.completed}</span><span class="analytics-funnel-stage-label">${t('admin.analytics.funnel.completed')}${r.completionRate !== null ? ` (${r.completionRate}%)` : ''}</span></div>
           <div class="analytics-funnel-arrow">→</div>
-          <div class="analytics-funnel-stage"><span class="analytics-funnel-num">${r.avgScore === null ? '—' : r.avgScore + '%'}</span><span class="analytics-funnel-stage-label">${highScore ? 'Acertou bem ✓' : 'Nota média'}</span></div>
+          <div class="analytics-funnel-stage"><span class="analytics-funnel-num">${r.avgScore === null ? '—' : r.avgScore + '%'}</span><span class="analytics-funnel-stage-label">${highScore ? t('admin.analytics.funnel.goodScore') : t('admin.analytics.funnel.avgScore')}</span></div>
         </div>
       </div>
     `;
@@ -995,21 +1000,21 @@ function renderExerciciosSectionHTML(stats){
 
   return `
     <div class="profile-section">
-      <div class="section-label">Exercícios por tipo</div>
+      <div class="section-label">${t('admin.analytics.ex.byType')}</div>
       ${stats.exerciseRows.length ? `
         <div class="analytics-table-wrap">
           <table class="analytics-table">
-            <thead><tr><th>Exercício</th><th>Iníc.</th><th>Feitos</th><th>Taxa</th><th>Nota</th></tr></thead>
+            <thead><tr><th>${t('admin.analytics.ex.col.exercise')}</th><th>${t('admin.analytics.ex.col.started')}</th><th>${t('admin.analytics.ex.col.done')}</th><th>${t('admin.analytics.ex.col.rate')}</th><th>${t('admin.analytics.ex.col.score')}</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
         </div>
-        <p class="admin-badge-desc">"—" = sem evento de início (vocab_lesson/unit_checkpoint/challenge) ou sem conceito de nota pra esse tipo. Popularidade (concluídos) e desempenho (nota média) são colunas separadas de propósito -- um exercício muito feito não é necessariamente um exercício com nota alta.</p>
+        <p class="admin-badge-desc">${t('admin.analytics.ex.note')}</p>
       ` : analyticsEmptyNoteHTML()}
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Funil: iniciou → concluiu → acertou bem</div>
-      ${funnelRows.length ? funnelHTML + `<p class="admin-badge-desc">Só os tipos com evento de início entram no funil (mesma limitação da taxa de conclusão geral). "Respondeu" (por pergunta individual) não existe como evento -- o funil vai direto de "iniciou" pra "concluiu". "Acertou bem" = nota média ≥ 80%, mesmo corte do desafio "Pontue mais de 80%".</p>` : analyticsEmptyNoteHTML('Nenhum tipo com evento de início teve atividade no período.')}
+      <div class="section-label">${t('admin.analytics.funnel.title')}</div>
+      ${funnelRows.length ? funnelHTML + `<p class="admin-badge-desc">${t('admin.analytics.funnel.note')}</p>` : analyticsEmptyNoteHTML(t('admin.analytics.funnel.empty'))}
     </div>
   `;
 }
@@ -1021,10 +1026,10 @@ function renderIdiomaSectionHTML(stats){
     .sort((a, b) => b.count - a.count);
   return `
     <div class="profile-section">
-      <div class="section-label">Eventos por idioma</div>
+      <div class="section-label">${t('admin.analytics.lang.events')}</div>
       ${rows.length ? analyticsBarRowsHTML(rows, Object.fromEntries(AVAILABLE_LANGUAGES.map(l => [l.appKey, l.name]))) : analyticsEmptyNoteHTML()}
-      ${ANALYTICS_STATE.languageFilter !== 'all' ? `<p class="admin-badge-desc">Filtro de idioma ativo (${langName(ANALYTICS_STATE.languageFilter)}) -- pra comparar idiomas lado a lado, selecione "Todos os idiomas" no filtro acima.</p>` : ''}
-      <p class="admin-badge-desc">Segmentação por nível/funcionalidade/exercício/coorte/tipo de usuário já existe nas abas Progressão, Exercícios, Retenção e no toggle "Excluir minha atividade" -- não repetidas aqui como filtros globais pra não criar combinações sem sentido (ex: nível não se aplica a um "tab_switch").</p>
+      ${ANALYTICS_STATE.languageFilter !== 'all' ? `<p class="admin-badge-desc">${t('admin.analytics.lang.filterActive', { lang: langName(ANALYTICS_STATE.languageFilter) })}</p>` : ''}
+      <p class="admin-badge-desc">${t('admin.analytics.lang.note')}</p>
     </div>
   `;
 }
@@ -1032,43 +1037,43 @@ function renderIdiomaSectionHTML(stats){
 function renderProgressaoSectionHTML(stats){
   return `
     <div class="profile-section">
-      <div class="section-label">Alunos por nível</div>
+      <div class="section-label">${t('admin.analytics.prog.byLevel')}</div>
       ${stats.levelRows.length ? analyticsBarRowsHTML(stats.levelRows, {}) : analyticsEmptyNoteHTML()}
-      <p class="admin-badge-desc">Só cobre unidades do idioma do app em que este Painel está aberto agora -- eventos do outro idioma caem em "Nível desconhecido" (cada site só carrega o conteúdo do próprio idioma).</p>
+      <p class="admin-badge-desc">${t('admin.analytics.prog.levelNote')}</p>
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Unidades concluídas por aluno (checkpoints)</div>
+      <div class="section-label">${t('admin.analytics.prog.units')}</div>
       ${stats.unitsCompletedBuckets.some(b => b.count) ? analyticsBarRowsHTML(stats.unitsCompletedBuckets.map(b => ({ name: b.label, count: b.count })), {}) : analyticsEmptyNoteHTML()}
-      <p class="admin-badge-desc">Nem toda unidade tem lições internas (ex: unidades de gramática no francês) -- essas pontuam como um bloco único de exercícios, e concluí-las gera um checkpoint sem nenhuma "lição concluída" correspondente. Já unidades com lições só geram o checkpoint depois de passar por todas elas. Por isso um aluno pode aparecer aqui com mais unidades concluídas do que lições concluídas.</p>
+      <p class="admin-badge-desc">${t('admin.analytics.prog.unitsNote')}</p>
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Lições concluídas por aluno</div>
+      <div class="section-label">${t('admin.analytics.prog.lessons')}</div>
       ${stats.lessonsCompletedBuckets.some(b => b.count) ? analyticsBarRowsHTML(stats.lessonsCompletedBuckets.map(b => ({ name: b.label, count: b.count })), {}) : analyticsEmptyNoteHTML()}
-      <p class="admin-badge-desc">"Avanço de nível" (velocidade de progressão entre níveis ao longo do tempo) fica pra uma etapa futura -- exigiria acompanhar a mesma conta em vários períodos, não só um recorte.</p>
+      <p class="admin-badge-desc">${t('admin.analytics.prog.lessonsNote')}</p>
     </div>
   `;
 }
 
 function renderDispositivosSectionHTML(stats){
-  const hasData = stats.deviceRows.some(r => r.name !== 'desconhecido');
+  const hasData = stats.deviceRows.some(r => r.name !== t('admin.analytics.unknown'));
   return `
     <div class="profile-section">
-      <div class="section-label">Tipo de dispositivo</div>
+      <div class="section-label">${t('admin.analytics.dev.type')}</div>
       ${stats.deviceRows.length ? analyticsBarRowsHTML(stats.deviceRows, ANALYTICS_DEVICE_LABELS) : analyticsEmptyNoteHTML()}
-      ${!hasData ? '<p class="admin-badge-desc">Todos os eventos no período são de antes da coleta de dispositivo existir (migration 009) -- por isso caem em "desconhecido". Dados novos já vêm classificados.</p>' : ''}
+      ${!hasData ? `<p class="admin-badge-desc">${t('admin.analytics.dev.noData')}</p>` : ''}
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Navegador</div>
+      <div class="section-label">${t('admin.analytics.dev.browser')}</div>
       ${stats.browserRows.length ? analyticsBarRowsHTML(stats.browserRows, {}) : analyticsEmptyNoteHTML()}
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Sistema operacional</div>
+      <div class="section-label">${t('admin.analytics.dev.os')}</div>
       ${stats.osRows.length ? analyticsBarRowsHTML(stats.osRows, {}) : analyticsEmptyNoteHTML()}
-      <p class="admin-badge-desc">Classificação por navigator.userAgent (heurística simples, sem biblioteca) -- não é 100% precisa, mas é o padrão aceitável sem telemetria de terceiros.</p>
+      <p class="admin-badge-desc">${t('admin.analytics.dev.osNote')}</p>
     </div>
   `;
 }
@@ -1097,27 +1102,27 @@ function renderEngajamentoSectionHTML(stats, weeklyXp, badgeGrants){
 
   return `
     <div class="profile-section">
-      <div class="section-label">Engajamento</div>
+      <div class="section-label">${t('admin.analytics.subtab.engajamento')}</div>
       <div class="analytics-kpi-grid">
-        ${analyticsKpiTileHTML(stats.sessions, 'Sessões')}
-        ${analyticsKpiTileHTML(stats.exercisesPerSession === null ? '—' : stats.exercisesPerSession, 'Exercícios/sessão')}
-        ${analyticsKpiTileHTML(revisoesTotal, 'Revisões concluídas')}
-        ${analyticsKpiTileHTML(desafiosTotal, 'Desafios concluídos')}
+        ${analyticsKpiTileHTML(stats.sessions, t('admin.analytics.kpi.sessions'))}
+        ${analyticsKpiTileHTML(stats.exercisesPerSession === null ? '—' : stats.exercisesPerSession, t('admin.analytics.eng.perSession'))}
+        ${analyticsKpiTileHTML(revisoesTotal, t('admin.analytics.eng.reviewsDone'))}
+        ${analyticsKpiTileHTML(desafiosTotal, t('admin.analytics.eng.challengesDone'))}
       </div>
-      <p class="admin-badge-desc">Frequência de estudo (dias ativos por aluno) já está na aba Atividade -- não repetida aqui.</p>
+      <p class="admin-badge-desc">${t('admin.analytics.eng.freqNote')}</p>
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Gamificação</div>
+      <div class="section-label">${t('admin.analytics.eng.gamification')}</div>
       <div class="analytics-kpi-grid">
-        ${analyticsKpiTileHTML(totalXpThisWeek, 'XP total (semana atual)')}
-        ${analyticsKpiTileHTML(avgXpThisWeek, 'XP médio/aluno (semana atual)')}
-        ${analyticsKpiTileHTML(stats.avgLongestStreak, 'Sequência média (dias)', 'proxy calculado a partir dos eventos')}
-        ${analyticsKpiTileHTML(stats.maxLongestStreak, 'Maior sequência (dias)')}
-        ${analyticsKpiTileHTML(badgeCount, 'Conquistas concedidas')}
-        ${analyticsKpiTileHTML(leaderboardViews, 'Visualizações do Ranking')}
+        ${analyticsKpiTileHTML(totalXpThisWeek, t('admin.analytics.eng.xpTotal'))}
+        ${analyticsKpiTileHTML(avgXpThisWeek, t('admin.analytics.eng.xpAvg'))}
+        ${analyticsKpiTileHTML(stats.avgLongestStreak, t('admin.analytics.eng.streakAvg'), t('admin.analytics.eng.streakNote'))}
+        ${analyticsKpiTileHTML(stats.maxLongestStreak, t('admin.analytics.eng.streakMax'))}
+        ${analyticsKpiTileHTML(badgeCount, t('admin.analytics.eng.badges'))}
+        ${analyticsKpiTileHTML(leaderboardViews, t('admin.analytics.eng.leaderboardViews'))}
       </div>
-      <p class="admin-badge-desc">XP usa a mesma semana (segunda a domingo) já mostrada no Ranking -- não é "XP gerado no período selecionado acima", é sempre a semana corrente. "XP médio/aluno" divide pelo total de alunos ativos no período (não só por quem já ganhou XP essa semana específica) -- um aluno ativo sem XP essa semana ainda entra na conta, com 0. Sequência é uma aproximação calculada a partir dos dias com atividade registrada, não o streak "oficial" do app (que tem regras próprias como dias de folga e mora fora do alcance deste painel). ${badgedStudents ? `${badgedStudents} ${badgedStudents === 1 ? 'aluno(a) recebeu' : 'alunos(as) receberam'} pelo menos uma conquista no período.` : ''}</p>
+      <p class="admin-badge-desc">${t('admin.analytics.eng.xpNote1')} ${t('admin.analytics.eng.xpNote2')} ${badgedStudents ? `${tp('admin.analytics.eng.badgedStudents', badgedStudents)} ${t('admin.analytics.eng.badgedSuffix')}` : ''}</p>
     </div>
   `;
 }
@@ -1125,32 +1130,32 @@ function renderEngajamentoSectionHTML(stats, weeklyXp, badgeGrants){
 function renderTecnologiaSectionHTML(tech){
   return `
     <div class="profile-section">
-      <div class="section-label">Erros e falhas</div>
+      <div class="section-label">${t('admin.analytics.tech.errors')}</div>
       <div class="analytics-kpi-grid">
-        ${analyticsKpiTileHTML(tech.totalErrors, 'Erros registrados')}
-        ${analyticsKpiTileHTML(tech.affectedStudents, 'Alunos(as) afetados(as)')}
+        ${analyticsKpiTileHTML(tech.totalErrors, t('admin.analytics.tech.total'))}
+        ${analyticsKpiTileHTML(tech.affectedStudents, t('admin.analytics.tech.affected'))}
       </div>
-      ${tech.errorRows.length ? analyticsBarRowsHTML(tech.errorRows, ANALYTICS_TECHNICAL_ERROR_LABELS) : analyticsEmptyNoteHTML('Nenhum erro técnico registrado no período.')}
-      <p class="admin-badge-desc">Cobre erro de JavaScript, promise rejeitada, falha ao carregar/tocar áudio e falha ao salvar progresso -- todos com deduplicação por sessão (um erro que se repete não infla a contagem). Não há categoria de vídeo: o app não tem conteúdo em vídeo.</p>
+      ${tech.errorRows.length ? analyticsBarRowsHTML(tech.errorRows, ANALYTICS_TECHNICAL_ERROR_LABELS) : analyticsEmptyNoteHTML(t('admin.analytics.tech.noErrors'))}
+      <p class="admin-badge-desc">${t('admin.analytics.tech.note')}</p>
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Performance</div>
+      <div class="section-label">${t('admin.analytics.tech.perf')}</div>
       ${tech.perfSampleCount ? `
         <div class="analytics-kpi-grid">
-          ${analyticsKpiTileHTML(`${tech.avgLoadMs}ms`, 'Carregamento médio')}
-          ${analyticsKpiTileHTML(`${tech.medianLoadMs}ms`, 'Carregamento mediano')}
+          ${analyticsKpiTileHTML(`${tech.avgLoadMs}ms`, t('admin.analytics.tech.loadAvg'))}
+          ${analyticsKpiTileHTML(`${tech.medianLoadMs}ms`, t('admin.analytics.tech.loadMedian'))}
         </div>
-        <p class="admin-badge-desc">${tech.perfSampleCount} ${tech.perfSampleCount === 1 ? 'sessão medida' : 'sessões medidas'} (Navigation Timing API, um registro por carregamento de página).</p>
-      ` : analyticsEmptyNoteHTML('Nenhuma medição de performance no período.')}
+        <p class="admin-badge-desc">${tp('admin.analytics.tech.samples', tech.perfSampleCount)}</p>
+      ` : analyticsEmptyNoteHTML(t('admin.analytics.tech.noPerf'))}
     </div>
 
-    <p class="admin-badge-desc">Esta aba é conceitualmente separada de Aprendizagem/Produto -- nunca soma erros técnicos junto com taxa de conclusão, nota média etc. Uma nota TÉCNICA baixa aqui não significa que o conteúdo é difícil, e o contrário também vale.</p>
+    <p class="admin-badge-desc">${t('admin.analytics.tech.separateNote')}</p>
   `;
 }
 
 function renderRetencaoSectionHTML(cohorts){
-  if (!cohorts.length) return analyticsEmptyNoteHTML('Nenhuma conta encontrada pra montar coortes.');
+  if (!cohorts.length) return analyticsEmptyNoteHTML(t('admin.analytics.ret.empty'));
   const rows = cohorts.map(c => {
     const cells = ANALYTICS_COHORT_OFFSETS.map(offset => {
       const r = c.retention[offset];
@@ -1160,14 +1165,14 @@ function renderRetencaoSectionHTML(cohorts){
   }).join('');
   return `
     <div class="profile-section">
-      <div class="section-label">Retenção por coorte (semana de cadastro)</div>
+      <div class="section-label">${t('admin.analytics.ret.title')}</div>
       <div class="analytics-table-wrap">
         <table class="analytics-table">
-          <thead><tr><th>Coorte</th><th>Alunos</th><th>Dia 1</th><th>Dia 7</th><th>Dia 14</th><th>Dia 30</th></tr></thead>
+          <thead><tr><th>${t('admin.analytics.ret.col.cohort')}</th><th>${t('admin.common.students')}</th><th>${t('admin.analytics.ret.col.d1')}</th><th>${t('admin.analytics.ret.col.d7')}</th><th>${t('admin.analytics.ret.col.d14')}</th><th>${t('admin.analytics.ret.col.d30')}</th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
-      <p class="admin-badge-desc">Coorte = alunos cuja conta foi criada na mesma semana (segunda a domingo). "Dia N" = teve pelo menos uma atividade registrada no dia civil que cai exatamente N dias após a criação da conta -- "—" quando a coorte ainda não completou esse número de dias (nunca mostrado como 0%). Usa todo o histórico disponível (até 5000 eventos mais recentes), não o filtro de período dos controles acima -- retenção é uma pergunta sobre o tempo todo, não uma janela.</p>
+      <p class="admin-badge-desc">${t('admin.analytics.ret.note')}</p>
     </div>
   `;
 }
@@ -1177,23 +1182,23 @@ function renderRetencaoSectionHTML(cohorts){
 // um botão no HTML gerado -- nenhuma outra parte do arquivo precisa saber
 // quantas abas existem.
 const ANALYTICS_TABS = [
-  { key: 'resumo', label: 'Resumo' },
-  { key: 'atividade', label: 'Atividade' },
-  { key: 'retencao', label: 'Retenção' },
-  { key: 'navegacao', label: 'Navegação' },
-  { key: 'exercicios', label: 'Exercícios' },
-  { key: 'progressao', label: 'Progressão' },
-  { key: 'engajamento', label: 'Engajamento' },
-  { key: 'idioma', label: 'Idioma' },
-  { key: 'dispositivos', label: 'Dispositivos' },
-  { key: 'tecnologia', label: 'Tecnologia' },
+  { key: 'resumo', get label(){ return t('admin.analytics.subtab.resumo'); } },
+  { key: 'atividade', get label(){ return t('admin.analytics.subtab.atividade'); } },
+  { key: 'retencao', get label(){ return t('admin.analytics.subtab.retencao'); } },
+  { key: 'navegacao', get label(){ return t('admin.analytics.subtab.navegacao'); } },
+  { key: 'exercicios', get label(){ return t('admin.analytics.subtab.exercicios'); } },
+  { key: 'progressao', get label(){ return t('admin.analytics.subtab.progressao'); } },
+  { key: 'engajamento', get label(){ return t('admin.analytics.subtab.engajamento'); } },
+  { key: 'idioma', get label(){ return t('admin.analytics.subtab.idioma'); } },
+  { key: 'dispositivos', get label(){ return t('admin.analytics.subtab.dispositivos'); } },
+  { key: 'tecnologia', get label(){ return t('admin.analytics.subtab.tecnologia'); } },
 ];
 
 function analyticsSubnavHTML(){
   const tabsHTML = ANALYTICS_TABS.map(t =>
     `<button class="leaderboard-tab ${ANALYTICS_STATE.tab === t.key ? 'active' : ''}" role="tab" aria-selected="${ANALYTICS_STATE.tab === t.key}" data-analytics-tab="${t.key}">${t.label}</button>`
   ).join('');
-  return `<div class="leaderboard-tabs" role="tablist" aria-label="Seção do Analytics">${tabsHTML}</div>`;
+  return `<div class="leaderboard-tabs" role="tablist" aria-label="${t('admin.analytics.subnav.aria')}">${tabsHTML}</div>`;
 }
 
 // Abas em ANALYTICS_LAZY_TABS (Retenção/Engajamento/Tecnologia) só buscam
@@ -1249,8 +1254,8 @@ function analyticsExcludeOwnToggleHTML(excludeOwn){
     <div class="profile-section">
       <div class="pref-row">
         <div class="pref-row-text">
-          <div class="pref-row-title">Excluir minha atividade dos Analytics</div>
-          <div class="pref-row-sub">Sua navegação e lições como admin não entram nas métricas dos alunos. Desligue só se quiser gerar dados de teste de propósito, usando sua própria conta.</div>
+          <div class="pref-row-title">${t('admin.analytics.exclude.title')}</div>
+          <div class="pref-row-sub">${t('admin.analytics.exclude.sub')}</div>
         </div>
         <button class="pref-switch" id="analytics-exclude-own-switch" role="switch" aria-checked="${excludeOwn ? 'true' : 'false'}"><span class="pref-switch-knob"></span></button>
       </div>
@@ -1267,8 +1272,8 @@ function wireAnalyticsExcludeOwnToggle(){
     const ok = await setExcludeOwnActivity(next);
     if (!ok){ btn.setAttribute('aria-checked', next ? 'false' : 'true'); return; }
     showToast(next
-      ? '✓ Sua atividade não vai mais ser registrada no Analytics.'
-      : '✓ Sua atividade passa a ser registrada no Analytics (marcada como admin).');
+      ? t('admin.analytics.exclude.toastOn')
+      : t('admin.analytics.exclude.toastOff'));
   });
 }
 
@@ -1283,8 +1288,8 @@ function adminModeToggleHTML(adminModeOn){
     <div class="profile-section">
       <div class="pref-row">
         <div class="pref-row-text">
-          <div class="pref-row-title">Admin Mode</div>
-          <div class="pref-row-sub">Desligado, sua conta navega e conclui lições exatamente como um aluno comum (mesmo continuando reconhecida como admin) -- útil pra testar a experiência real sem os atalhos de admin. Mesmo controle do pill 🔒 Admin na tela principal.</div>
+          <div class="pref-row-title">${t('admin.mode.title')}</div>
+          <div class="pref-row-sub">${t('admin.mode.sub')}</div>
         </div>
         <button class="pref-switch" id="admin-mode-analytics-switch" role="switch" aria-checked="${adminModeOn ? 'true' : 'false'}"><span class="pref-switch-knob"></span></button>
       </div>
@@ -1303,8 +1308,8 @@ function wireAdminModeAnalyticsToggle(){
     if (typeof applyAdminModeUI === 'function') await applyAdminModeUI();
     if (typeof renderUnitsGrid === 'function') renderUnitsGrid();
     showToast(next
-      ? '🔒 Admin Mode ligado — privilégios de admin restaurados.'
-      : '🔒 Admin Mode desligado — navegando como um aluno comum.');
+      ? t('admin.mode.toastOn')
+      : t('admin.mode.toastOff'));
   });
 }
 
@@ -1312,7 +1317,7 @@ async function renderAdminAnalyticsView(){
   const wrap = document.getElementById('admin-analytics-content');
   if (!wrap) return;
   if (!isAdminUser()){
-    wrap.innerHTML = `<p class="profile-empty-note">Esta tela é só pra administração da plataforma.</p>`;
+    wrap.innerHTML = `<p class="profile-empty-note">${t('admin.common.adminOnly')}</p>`;
     return;
   }
   wrap.innerHTML = loadingHTML();
@@ -1343,7 +1348,7 @@ async function renderAdminAnalyticsView(){
   Object.keys(ANALYTICS_LAZY_CACHE).forEach(k => delete ANALYTICS_LAZY_CACHE[k]);
 
   const emptyNote = stats.totalEvents === 0
-    ? `<p class="profile-empty-note">Nenhum evento de aluno registrado no período selecionado.</p>`
+    ? `<p class="profile-empty-note">${t('admin.analytics.noEvents')}</p>`
     : '';
 
   wrap.innerHTML = toggleHTML + controlsHTML + emptyNote + analyticsSubnavHTML()

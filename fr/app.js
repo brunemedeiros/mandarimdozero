@@ -8898,10 +8898,10 @@ function parseChallengesImportInput(rawText){
   try {
     parsed = JSON.parse(rawText);
   } catch (err) {
-    throw new Error('JSON inválido: ' + err.message);
+    throw new Error(t('adminChallenges.import.invalidJson') + err.message);
   }
   const items = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.accepted) ? parsed.accepted : null);
-  if (!items) throw new Error('Esperava um array de desafios, ou um objeto com "accepted" (saída direta do pipeline).');
+  if (!items) throw new Error(t('adminChallenges.import.expectedArray'));
   return items;
 }
 
@@ -8918,21 +8918,21 @@ async function importChallengesFromJSON(rawText){
   const skipped = [];
 
   items.forEach((item, idx) => {
-    const label = (item && item.id) ? item.id : `item #${idx + 1}`;
+    const label = (item && item.id) ? item.id : t('adminChallenges.import.itemN', { n: idx + 1 });
     if (!item || !item.id || !item.type || !item.level){
-      skipped.push(`${label}: faltando id/type/level`);
+      skipped.push(t('adminChallenges.import.missing', { label }));
       return;
     }
     if (!CHALLENGE_VALID_TYPES.includes(item.type)){
-      skipped.push(`${item.id}: type inválido ("${item.type}")`);
+      skipped.push(t('adminChallenges.import.badType', { id: item.id, type: item.type }));
       return;
     }
     if (!CHALLENGE_LEVELS_ORDER.includes(item.level)){
-      skipped.push(`${item.id}: level inválido ("${item.level}")`);
+      skipped.push(t('adminChallenges.import.badLevel', { id: item.id, level: item.level }));
       return;
     }
     if (existingIds.has(item.id) || seenInBatch.has(item.id)){
-      skipped.push(`${item.id}: id já existe (duplicado)`);
+      skipped.push(t('adminChallenges.import.dupId', { id: item.id }));
       return;
     }
     seenInBatch.add(item.id);
@@ -8987,7 +8987,7 @@ async function persistChallenge(c, extraColumns = {}){
   const { error } = await supabaseClient.from('challenges').update(payload).eq('id', c.id);
   if (error){
     console.error('Falha ao salvar desafio no Supabase:', error);
-    alert('Não foi possível salvar no banco de dados: ' + error.message);
+    alert(t('adminChallenges.persist.failed') + error.message);
     return false;
   }
   return true;
@@ -9470,26 +9470,26 @@ document.getElementById('challenges-import-submit-btn').addEventListener('click'
   let result;
   try {
     btn.disabled = true;
-    btn.textContent = 'Importando…';
+    btn.textContent = t('adminChallenges.import.importing');
     result = await importChallengesFromJSON(textarea.value);
   } catch (err) {
     btn.disabled = false;
-    btn.textContent = 'Importar';
+    btn.textContent = t('adminChallenges.import.btn');
     statusEl.className = 'challenges-import-status err';
     statusEl.textContent = '❌ ' + err.message;
     return;
   }
   btn.disabled = false;
-  btn.textContent = 'Importar';
+  btn.textContent = t('adminChallenges.import.btn');
 
   if (result.error){
     statusEl.className = 'challenges-import-status err';
-    statusEl.textContent = `❌ Falha ao gravar no banco: ${result.error}`;
+    statusEl.textContent = t('adminChallenges.import.dbFail', { error: result.error });
     return;
   }
   const lines = [];
-  if (result.insertedCount > 0) lines.push(`✅ ${result.insertedCount} desafio(s) importado(s) como pendente(s) de revisão.`);
-  if (result.skipped.length > 0) lines.push(`⚠ ${result.skipped.length} pulado(s):\n` + result.skipped.map(s => '  • ' + s).join('\n'));
+  if (result.insertedCount > 0) lines.push(t('adminChallenges.import.ok', { n: result.insertedCount }));
+  if (result.skipped.length > 0) lines.push(t('adminChallenges.import.skipped', { n: result.skipped.length }) + '\n' + result.skipped.map(s => '  • ' + s).join('\n'));
   statusEl.className = result.insertedCount > 0 ? 'challenges-import-status ok' : 'challenges-import-status err';
   statusEl.textContent = lines.join('\n\n');
   if (result.insertedCount > 0){
@@ -9997,16 +9997,16 @@ function challengeAudioIsFresh(text, audioFile){
 function challengeAudioFields(c){
   if (c.type === 'expression'){
     return [
-      { label: 'Áudio da expressão-alvo', text: c.canonicalExpression, audioFile: c.expressionAudioFile },
-      { label: 'Áudio do Exemple 1', text: c.example.text, audioFile: c.example.audioFile },
-      { label: 'Áudio do Exemple 2', text: c.secondExample.text, audioFile: c.secondExample.audioFile },
+      { label: t('adminChallenges.audio.target'), text: c.canonicalExpression, audioFile: c.expressionAudioFile },
+      { label: t('adminChallenges.audio.ex1'), text: c.example.text, audioFile: c.example.audioFile },
+      { label: t('adminChallenges.audio.ex2'), text: c.secondExample.text, audioFile: c.secondExample.audioFile },
     ];
   }
   if (c.type === 'listen_translate'){
-    return [{ label: 'Áudio da frase', text: c.sentenceFr, audioFile: c.audioFile }];
+    return [{ label: t('adminChallenges.audio.sentence'), text: c.sentenceFr, audioFile: c.audioFile }];
   }
   if (c.type === 'accent'){
-    return [{ label: 'Áudio da palavra', text: c.targetText, audioFile: c.audioFile }];
+    return [{ label: t('adminChallenges.audio.word'), text: c.targetText, audioFile: c.audioFile }];
   }
   return [];
 }
@@ -10019,26 +10019,26 @@ function challengeQualityChecklist(c){
 
   challengeAudioFields(c).forEach(f => {
     if (!f.audioFile){
-      items.push({ label: `${f.label}: ausente`, ok: false, blocking: true });
+      items.push({ label: t('adminChallenges.qa.audioMissing', { label: f.label }), ok: false, blocking: true });
     } else if (challengeAudioIsFresh(f.text, f.audioFile) === false){
-      items.push({ label: `${f.label}: desatualizado (texto mudou depois do áudio ser gerado)`, ok: false, blocking: false, audioFile: f.audioFile });
+      items.push({ label: t('adminChallenges.qa.audioStale', { label: f.label }), ok: false, blocking: false, audioFile: f.audioFile });
     } else {
-      items.push({ label: `${f.label}: disponível e atualizado`, ok: true, blocking: false, audioFile: f.audioFile });
+      items.push({ label: t('adminChallenges.qa.audioOk', { label: f.label }), ok: true, blocking: false, audioFile: f.audioFile });
     }
   });
 
   if (c.type === 'expression'){
-    items.push({ label: 'Resposta correta definida', ok: !!c.correctAnswer && c.options.includes(c.correctAnswer), blocking: true });
-    items.push({ label: '4 alternativas', ok: c.options.length === 4, blocking: true });
-    items.push({ label: 'Explicação preenchida', ok: !!c.explanation, blocking: false });
-    items.push({ label: 'Microatividade válida', ok: !!(c.microActivity.prompt && c.microActivity.answer), blocking: false });
+    items.push({ label: t('adminChallenges.qa.correctSet'), ok: !!c.correctAnswer && c.options.includes(c.correctAnswer), blocking: true });
+    items.push({ label: t('adminChallenges.qa.fourOptions'), ok: c.options.length === 4, blocking: true });
+    items.push({ label: t('adminChallenges.qa.explanationFilled'), ok: !!c.explanation, blocking: false });
+    items.push({ label: t('adminChallenges.qa.microValid'), ok: !!(c.microActivity.prompt && c.microActivity.answer), blocking: false });
   } else if (c.type === 'listen_translate'){
-    items.push({ label: 'Frase preenchida', ok: !!c.sentenceFr, blocking: true });
-    items.push({ label: 'Dica preenchida', ok: !!c.hintText, blocking: false });
-    items.push({ label: 'Ao menos 1 tradução aceita', ok: (c.referenceTranslations || []).length > 0, blocking: true });
+    items.push({ label: t('adminChallenges.qa.sentenceFilled'), ok: !!c.sentenceFr, blocking: true });
+    items.push({ label: t('adminChallenges.qa.hintFilled'), ok: !!c.hintText, blocking: false });
+    items.push({ label: t('adminChallenges.qa.oneTranslation'), ok: (c.referenceTranslations || []).length > 0, blocking: true });
   } else if (c.type === 'accent'){
-    items.push({ label: 'Palavra/expressão preenchida', ok: !!c.targetText, blocking: true });
-    items.push({ label: 'Explicação preenchida', ok: !!c.explanation, blocking: false });
+    items.push({ label: t('adminChallenges.qa.wordFilled'), ok: !!c.targetText, blocking: true });
+    items.push({ label: t('adminChallenges.qa.explanationFilled'), ok: !!c.explanation, blocking: false });
   }
 
   return items;
@@ -10048,11 +10048,11 @@ function challengeQualityChecklistHTML(c){
   const items = challengeQualityChecklist(c);
   return `
     <div class="challenges-admin-checklist">
-      <strong style="font-size:12px;">Controle de qualidade</strong>
+      <strong style="font-size:12px;">${t('adminChallenges.qa.title')}</strong>
       ${items.map(it => `
         <div class="challenges-admin-checklist-item ${it.ok ? 'ok' : 'warn'}">
           ${it.ok ? '✓' : '⚠'} ${escapeHtmlChallenge(it.label)}
-          ${it.audioFile ? `<span class="challenges-admin-audio-duration" data-audio-file="${escapeHtmlChallenge(it.audioFile)}">carregando duração…</span>` : ''}
+          ${it.audioFile ? `<span class="challenges-admin-audio-duration" data-audio-file="${escapeHtmlChallenge(it.audioFile)}">${t('adminChallenges.qa.loadingDuration')}</span>` : ''}
         </div>
       `).join('')}
     </div>
@@ -10069,29 +10069,36 @@ function wireChallengeAudioDurations(container){
       el.textContent = `· ${audio.duration.toFixed(1).replace('.', ',')} s`;
     });
     audio.addEventListener('error', () => {
-      el.textContent = '· não foi possível carregar';
+      el.textContent = t('adminChallenges.qa.loadFail');
     });
   });
 }
 
 const CHALLENGE_RESOURCE_TYPE_LABEL = {
-  dictionary: 'Dicionário', article: 'Artigo linguístico', youtube: 'Vídeo', youglish: 'Exemplos autênticos'
+  get dictionary(){ return t('adminChallenges.res.dictionary'); },
+  get article(){ return t('adminChallenges.res.article'); },
+  get youtube(){ return t('adminChallenges.res.youtube'); },
+  get youglish(){ return t('adminChallenges.res.youglish'); },
 };
-const CHALLENGE_RESOURCE_QUALITY_LABEL = { high: 'Alta', medium: 'Média', low: 'Baixa' };
+const CHALLENGE_RESOURCE_QUALITY_LABEL = {
+  get high(){ return t('adminChallenges.res.qHigh'); },
+  get medium(){ return t('adminChallenges.res.qMedium'); },
+  get low(){ return t('adminChallenges.res.qLow'); },
+};
 
 function challengeAdminResourceHTML(r, idx){
   return `
     <div class="challenges-admin-resource ${r.approved === false ? 'rejected' : ''}" data-resource-idx="${idx}">
       <div class="challenges-admin-resource-info">
         <strong>${escapeHtmlChallenge(r.sourceName || r.title)}</strong>
-        <span class="challenges-admin-hint">Tipo: ${escapeHtmlChallenge(CHALLENGE_RESOURCE_TYPE_LABEL[r.type] || r.type)}${r.quality ? ` · Qualidade: ${CHALLENGE_RESOURCE_QUALITY_LABEL[r.quality] || r.quality}` : ''}</span>
+        <span class="challenges-admin-hint">${t('adminChallenges.res.type', { type: escapeHtmlChallenge(CHALLENGE_RESOURCE_TYPE_LABEL[r.type] || r.type) })}${r.quality ? ` · ${t('adminChallenges.res.quality', { quality: CHALLENGE_RESOURCE_QUALITY_LABEL[r.quality] || r.quality })}` : ''}</span>
         <span class="challenges-admin-hint">${escapeHtmlChallenge(r.description || '')}</span>
-        <span class="challenges-admin-hint">${r.lastChecked ? `Link verificado em ${escapeHtmlChallenge(r.lastChecked)}` : 'Link não verificado automaticamente — confira antes de aprovar'}</span>
+        <span class="challenges-admin-hint">${r.lastChecked ? t('adminChallenges.res.checked', { date: escapeHtmlChallenge(r.lastChecked) }) : t('adminChallenges.res.unchecked')}</span>
       </div>
       <div class="challenges-admin-resource-actions">
-        <a class="btn btn-secondary btn-sm" href="${escapeHtmlChallenge(r.url)}" target="_blank" rel="noopener">Abrir</a>
-        <button class="btn btn-sm ${r.approved !== false ? 'btn-primary' : 'btn-secondary'}" data-resource-action="approve">✅ Aprovar</button>
-        <button class="btn btn-sm ${r.approved === false ? 'btn-primary' : 'btn-secondary'}" data-resource-action="reject">❌ Rejeitar</button>
+        <a class="btn btn-secondary btn-sm" href="${escapeHtmlChallenge(r.url)}" target="_blank" rel="noopener">${t('adminChallenges.res.open')}</a>
+        <button class="btn btn-sm ${r.approved !== false ? 'btn-primary' : 'btn-secondary'}" data-resource-action="approve">${t('adminChallenges.res.approve')}</button>
+        <button class="btn btn-sm ${r.approved === false ? 'btn-primary' : 'btn-secondary'}" data-resource-action="reject">${t('adminChallenges.btn.reject')}</button>
       </div>
     </div>
   `;
@@ -10100,19 +10107,19 @@ function challengeAdminResourceHTML(r, idx){
 function challengeAdminReadViewExpression(c){
   const resourcesHTML = (c.externalResources && c.externalResources.length)
     ? c.externalResources.map((r, idx) => challengeAdminResourceHTML(r, idx)).join('')
-    : `<p class="challenges-admin-hint">Nenhum recurso externo encontrado</p>`;
+    : `<p class="challenges-admin-hint">${t('adminChallenges.res.none')}</p>`;
 
   return `
-    <p class="challenges-admin-field"><strong>Áudio da expressão-alvo:</strong> ${c.expressionAudioFile ? `🔊 disponível — <span class="challenges-admin-hint">este é o áudio tocado no início do desafio, não o exemplo contextual</span>` : '<span class="challenges-admin-hint">ausente</span>'}</p>
-    <p class="challenges-admin-field"><strong>Exemplo (contexto escrito, sem áudio automático):</strong> ${escapeHtmlChallenge(c.example.text)}</p>
-    <p class="challenges-admin-field"><strong>Pergunta:</strong> ${escapeHtmlChallenge(c.question)}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.audio.target')}:</strong> ${c.expressionAudioFile ? `${t('adminChallenges.view.audioAvailable')} — <span class="challenges-admin-hint">${t('adminChallenges.view.targetAudioNote')}</span>` : `<span class="challenges-admin-hint">${t('adminChallenges.view.absent')}</span>`}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.view.example')}:</strong> ${escapeHtmlChallenge(c.example.text)}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.view.question')}:</strong> ${escapeHtmlChallenge(c.question)}</p>
     <ul class="challenges-admin-choices">
       ${c.options.map(opt => `<li class="${opt === c.correctAnswer ? 'correct' : ''}">${escapeHtmlChallenge(opt)}</li>`).join('')}
     </ul>
-    <p class="challenges-admin-field"><strong>Explicação:</strong> ${escapeHtmlChallenge(c.explanation)}</p>
-    <p class="challenges-admin-field"><strong>2º exemplo:</strong> ${escapeHtmlChallenge(c.secondExample.text)} ${c.secondExample.audioFile ? '🔊' : '<span class="challenges-admin-hint">(sem áudio)</span>'}</p>
-    <p class="challenges-admin-field"><strong>Microatividade:</strong> ${escapeHtmlChallenge(c.microActivity.prompt)} → ${escapeHtmlChallenge(c.microActivity.answer)}</p>
-    <p class="challenges-admin-field"><strong>Recursos encontrados (Pour aller plus loin):</strong></p>
+    <p class="challenges-admin-field"><strong>${t('fr.step.explanation')}:</strong> ${escapeHtmlChallenge(c.explanation)}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.view.secondExample')}:</strong> ${escapeHtmlChallenge(c.secondExample.text)} ${c.secondExample.audioFile ? '🔊' : `<span class="challenges-admin-hint">${t('adminChallenges.view.noAudio')}</span>`}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.view.micro')}:</strong> ${escapeHtmlChallenge(c.microActivity.prompt)} → ${escapeHtmlChallenge(c.microActivity.answer)}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.view.resources')}:</strong></p>
     <div class="challenges-admin-resources">${resourcesHTML}</div>
     ${challengeQualityChecklistHTML(c)}
   `;
@@ -10121,81 +10128,81 @@ function challengeAdminReadViewExpression(c){
 function challengeAdminEditViewExpression(c){
   const optionsText = c.options.map(o => (o === c.correctAnswer ? '*' : '') + o).join('\n');
   return `
-    <label class="challenges-admin-edit-label">Exemplo
+    <label class="challenges-admin-edit-label">${t('adminChallenges.edit.example')}
       <textarea class="challenges-admin-edit-input" data-field="example.text" rows="2">${escapeHtmlChallenge(c.example.text)}</textarea>
     </label>
-    <label class="challenges-admin-edit-label">Pergunta
+    <label class="challenges-admin-edit-label">${t('adminChallenges.view.question')}
       <input class="challenges-admin-edit-input" data-field="question" value="${escapeHtmlChallenge(c.question)}">
     </label>
-    <label class="challenges-admin-edit-label">Alternativas (uma por linha — marque a correta com * no início)
+    <label class="challenges-admin-edit-label">${t('adminChallenges.edit.options')}
       <textarea class="challenges-admin-edit-input" data-field="options" rows="4">${escapeHtmlChallenge(optionsText)}</textarea>
     </label>
-    <label class="challenges-admin-edit-label">Explicação
+    <label class="challenges-admin-edit-label">${t('fr.step.explanation')}
       <textarea class="challenges-admin-edit-input" data-field="explanation" rows="2">${escapeHtmlChallenge(c.explanation)}</textarea>
     </label>
-    <label class="challenges-admin-edit-label">2º exemplo
+    <label class="challenges-admin-edit-label">${t('adminChallenges.view.secondExample')}
       <textarea class="challenges-admin-edit-input" data-field="secondExample.text" rows="2">${escapeHtmlChallenge(c.secondExample.text)}</textarea>
     </label>
-    <label class="challenges-admin-edit-label">Microatividade — frase
+    <label class="challenges-admin-edit-label">${t('adminChallenges.edit.microPrompt')}
       <input class="challenges-admin-edit-input" data-field="microActivity.prompt" value="${escapeHtmlChallenge(c.microActivity.prompt)}">
     </label>
-    <label class="challenges-admin-edit-label">Microatividade — resposta
+    <label class="challenges-admin-edit-label">${t('adminChallenges.edit.microAnswer')}
       <input class="challenges-admin-edit-input" data-field="microActivity.answer" value="${escapeHtmlChallenge(c.microActivity.answer)}">
     </label>
-    <p class="challenges-admin-hint">Editar o texto de um exemplo não regenera o áudio automaticamente — me avise se algum áudio precisar ser refeito.</p>
+    <p class="challenges-admin-hint">${t('adminChallenges.edit.exampleHint')}</p>
   `;
 }
 
 function challengeAdminReadViewListenTranslate(c){
   return `
-    <p class="challenges-admin-field"><strong>Áudio:</strong> ${c.audioFile ? '🔊 disponível' : '<span class="challenges-admin-hint">ausente</span>'}</p>
-    <p class="challenges-admin-field"><strong>Frase (francês):</strong> ${escapeHtmlChallenge(c.sentenceFr)}</p>
-    <p class="challenges-admin-field"><strong>Dica (cloze):</strong> ${escapeHtmlChallenge(c.hintText)}</p>
-    <p class="challenges-admin-field"><strong>Traduções aceitas:</strong></p>
+    <p class="challenges-admin-field"><strong>${t('fieldEditor.audio.title')}:</strong> ${c.audioFile ? t('adminChallenges.view.audioAvailable') : `<span class="challenges-admin-hint">${t('adminChallenges.view.absent')}</span>`}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.view.sentenceFr')}:</strong> ${escapeHtmlChallenge(c.sentenceFr)}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.view.hint')}:</strong> ${escapeHtmlChallenge(c.hintText)}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.view.translations')}:</strong></p>
     <ul class="challenges-admin-choices">
       ${(c.referenceTranslations || []).map(t => `<li>${escapeHtmlChallenge(t)}</li>`).join('')}
     </ul>
-    <p class="challenges-admin-field"><strong>Explicação:</strong> ${escapeHtmlChallenge(c.explanation || '—')}</p>
+    <p class="challenges-admin-field"><strong>${t('fr.step.explanation')}:</strong> ${escapeHtmlChallenge(c.explanation || '—')}</p>
     ${challengeQualityChecklistHTML(c)}
   `;
 }
 
 function challengeAdminEditViewListenTranslate(c){
   return `
-    <label class="challenges-admin-edit-label">Frase (francês)
+    <label class="challenges-admin-edit-label">${t('adminChallenges.view.sentenceFr')}
       <textarea class="challenges-admin-edit-input" data-field="sentenceFr" rows="2">${escapeHtmlChallenge(c.sentenceFr)}</textarea>
     </label>
-    <label class="challenges-admin-edit-label">Dica (cloze, com ______ pra parte oculta)
+    <label class="challenges-admin-edit-label">${t('adminChallenges.edit.hint')}
       <input class="challenges-admin-edit-input" data-field="hintText" value="${escapeHtmlChallenge(c.hintText)}">
     </label>
-    <label class="challenges-admin-edit-label">Traduções aceitas (uma por linha, a primeira é a "resposta esperada" mostrada no feedback)
+    <label class="challenges-admin-edit-label">${t('adminChallenges.edit.translations')}
       <textarea class="challenges-admin-edit-input" data-field="referenceTranslations" rows="4">${escapeHtmlChallenge((c.referenceTranslations || []).join('\n'))}</textarea>
     </label>
-    <label class="challenges-admin-edit-label">Explicação
+    <label class="challenges-admin-edit-label">${t('fr.step.explanation')}
       <input class="challenges-admin-edit-input" data-field="explanation" value="${escapeHtmlChallenge(c.explanation || '')}">
     </label>
-    <p class="challenges-admin-hint">Editar a frase não regenera o áudio automaticamente — me avise se precisar ser refeito.</p>
+    <p class="challenges-admin-hint">${t('adminChallenges.edit.sentenceHint')}</p>
   `;
 }
 
 function challengeAdminReadViewAccent(c){
   return `
-    <p class="challenges-admin-field"><strong>Áudio:</strong> ${c.audioFile ? '🔊 disponível' : '<span class="challenges-admin-hint">ausente</span>'}</p>
-    <p class="challenges-admin-field"><strong>Palavra/expressão:</strong> ${escapeHtmlChallenge(c.targetText)}</p>
-    <p class="challenges-admin-field"><strong>Explicação:</strong> ${escapeHtmlChallenge(c.explanation || '—')}</p>
+    <p class="challenges-admin-field"><strong>${t('fieldEditor.audio.title')}:</strong> ${c.audioFile ? t('adminChallenges.view.audioAvailable') : `<span class="challenges-admin-hint">${t('adminChallenges.view.absent')}</span>`}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.view.word')}:</strong> ${escapeHtmlChallenge(c.targetText)}</p>
+    <p class="challenges-admin-field"><strong>${t('fr.step.explanation')}:</strong> ${escapeHtmlChallenge(c.explanation || '—')}</p>
     ${challengeQualityChecklistHTML(c)}
   `;
 }
 
 function challengeAdminEditViewAccent(c){
   return `
-    <label class="challenges-admin-edit-label">Palavra/expressão (com acentos corretos)
+    <label class="challenges-admin-edit-label">${t('adminChallenges.edit.word')}
       <input class="challenges-admin-edit-input" data-field="targetText" value="${escapeHtmlChallenge(c.targetText)}">
     </label>
-    <label class="challenges-admin-edit-label">Explicação
+    <label class="challenges-admin-edit-label">${t('fr.step.explanation')}
       <input class="challenges-admin-edit-input" data-field="explanation" value="${escapeHtmlChallenge(c.explanation || '')}">
     </label>
-    <p class="challenges-admin-hint">Editar a palavra não regenera o áudio automaticamente — me avise se precisar ser refeito.</p>
+    <p class="challenges-admin-hint">${t('adminChallenges.edit.wordHint')}</p>
   `;
 }
 
@@ -10220,7 +10227,7 @@ function challengeAdminCardTitle(c){
     const snippet = (c.sentenceFr || '').length > 60 ? c.sentenceFr.slice(0, 57) + '…' : (c.sentenceFr || '');
     return `🎧 ${escapeHtmlChallenge(snippet)}`;
   }
-  if (c.type === 'accent') return `✍️ Acentuação — ${escapeHtmlChallenge(c.targetText)}`;
+  if (c.type === 'accent') return t('adminChallenges.card.accentTitle', { word: escapeHtmlChallenge(c.targetText) });
   return '';
 }
 
@@ -10235,11 +10242,11 @@ async function approveChallengeWithGate(c){
   const blocking = items.filter(it => !it.ok && it.blocking);
   const warnings = items.filter(it => !it.ok && !it.blocking);
   if (blocking.length){
-    alert('Não é possível aprovar — corrija antes:\n\n' + blocking.map(b => '• ' + b.label).join('\n'));
+    alert(t('adminChallenges.approve.blocked') + '\n\n' + blocking.map(b => '• ' + b.label).join('\n'));
     return false;
   }
   if (warnings.length){
-    const proceed = confirm('Atenção, encontrei possíveis problemas:\n\n' + warnings.map(w => '• ' + w.label).join('\n') + '\n\nAprovar mesmo assim?');
+    const proceed = confirm(t('adminChallenges.approve.warnings') + '\n\n' + warnings.map(w => '• ' + w.label).join('\n') + '\n\n' + t('adminChallenges.approve.anyway'));
     if (!proceed) return false;
   }
   const previousStatus = c.status;
@@ -10252,7 +10259,7 @@ async function approveChallengeWithGate(c){
     c.status = previousStatus;
     return false;
   }
-  showToast('Desafio publicado — já está visível pro aluno.');
+  showToast(t('adminChallenges.toast.published'));
   return true;
 }
 
@@ -10289,7 +10296,7 @@ async function unpublishChallenge(c){
     c.status = previousStatus;
     return false;
   }
-  showToast('Desafio despublicado — não aparece mais pro aluno.');
+  showToast(t('adminChallenges.toast.unpublished'));
   return true;
 }
 
@@ -10317,11 +10324,11 @@ function renderChallengePreviewBanner(c){
   banner.className = 'challenge-preview-banner';
   banner.style.display = 'flex';
   banner.innerHTML = `
-    <div class="challenge-preview-banner-label">🔍 Pré-visualização — versão do aluno</div>
+    <div class="challenge-preview-banner-label">${t('adminChallenges.preview.label')}</div>
     <div class="challenge-preview-banner-actions">
-      ${c.type !== 'expression' ? '<button class="btn btn-secondary btn-sm" id="preview-show-answer-btn">Mostrar resposta esperada</button>' : ''}
-      <button class="btn btn-secondary" id="preview-back-to-edit-btn">← Voltar para edição</button>
-      <button class="btn btn-primary" id="preview-approve-btn"${blocking.length ? ' disabled' : ''}>✅ Aprovar desafio</button>
+      ${c.type !== 'expression' ? `<button class="btn btn-secondary btn-sm" id="preview-show-answer-btn">${t('adminChallenges.preview.showAnswer')}</button>` : ''}
+      <button class="btn btn-secondary" id="preview-back-to-edit-btn">${t('adminChallenges.preview.backToEdit')}</button>
+      <button class="btn btn-primary" id="preview-approve-btn"${blocking.length ? ' disabled' : ''}>${t('adminChallenges.preview.approve')}</button>
     </div>
   `;
   if (blocking.length){
@@ -10349,7 +10356,7 @@ function renderChallengePreviewBanner(c){
   if (showAnswerBtn){
     showAnswerBtn.addEventListener('click', () => {
       const answer = c.type === 'listen_translate' ? (c.referenceTranslations || [])[0] : c.targetText;
-      alert('Resposta esperada: ' + answer);
+      alert(t('adminChallenges.preview.expected') + answer);
     });
   }
 }
@@ -10378,11 +10385,11 @@ function challengeAdminPublishedCardHTML(c){
       ${editing ? `<div class="challenges-admin-card-body">${challengeAdminEditView(c)}</div>` : ''}
       <div class="challenges-admin-actions">
         ${editing
-          ? `<button class="btn btn-primary" data-action="save">💾 Salvar</button>
-             <button class="btn btn-secondary" data-action="cancel-edit">Cancelar</button>`
-          : `<button class="btn btn-secondary" data-action="preview">👁️ Ver versão do aluno</button>
-             <button class="btn btn-secondary" data-action="edit">✏️ Editar</button>
-             <button class="btn btn-secondary" data-action="unpublish">🚫 Despublicar</button>`
+          ? `<button class="btn btn-primary" data-action="save">${t('adminChallenges.btn.save')}</button>
+             <button class="btn btn-secondary" data-action="cancel-edit">${t('myFlashcards.edit.cancel')}</button>`
+          : `<button class="btn btn-secondary" data-action="preview">${t('adminChallenges.btn.preview')}</button>
+             <button class="btn btn-secondary" data-action="edit">${t('adminChallenges.btn.edit')}</button>
+             <button class="btn btn-secondary" data-action="unpublish">${t('adminChallenges.btn.unpublish')}</button>`
         }
       </div>
     </div>
@@ -10401,7 +10408,11 @@ function challengeAdminPublishedCardHTML(c){
 const challengesAdminFilterState = { search: '', type: 'all', level: 'all' };
 const CHALLENGES_ADMIN_PAGE_SIZE = 15;
 const challengesAdminVisibleCount = { pending: CHALLENGES_ADMIN_PAGE_SIZE, published: CHALLENGES_ADMIN_PAGE_SIZE, unpublished: CHALLENGES_ADMIN_PAGE_SIZE };
-const CHALLENGE_TYPE_LABELS = { expression: 'Expressões', listen_translate: 'Ouça e traduza', accent: 'Acentuação' };
+const CHALLENGE_TYPE_LABELS = {
+  get expression(){ return t('fr.challenges.cat.expression.title'); },
+  get listen_translate(){ return t('fr.challenges.cat.listenTranslate.title'); },
+  get accent(){ return t('fr.challenges.cat.accent.title'); },
+};
 
 function challengeSearchableText(c){
   return [c.canonicalExpression, c.sentenceFr, c.targetText, c.question, c.explanation]
@@ -10424,13 +10435,13 @@ function challengesAdminFilterBarHTML(){
     `<option value="${val}" ${challengesAdminFilterState.type === val ? 'selected' : ''}>${label}</option>`).join('');
   return `
     <div class="challenges-admin-filters">
-      <input type="text" id="challenges-admin-search" placeholder="Buscar por expressão, frase, palavra..." value="${escapeHtmlChallenge(challengesAdminFilterState.search)}">
+      <input type="text" id="challenges-admin-search" placeholder="${t('adminChallenges.filter.searchPh')}" value="${escapeHtmlChallenge(challengesAdminFilterState.search)}">
       <select id="challenges-admin-filter-type">
-        <option value="all" ${challengesAdminFilterState.type === 'all' ? 'selected' : ''}>Todas as categorias</option>
+        <option value="all" ${challengesAdminFilterState.type === 'all' ? 'selected' : ''}>${t('adminChallenges.filter.allTypes')}</option>
         ${typeOptions}
       </select>
       <select id="challenges-admin-filter-level">
-        <option value="all" ${challengesAdminFilterState.level === 'all' ? 'selected' : ''}>Todos os níveis</option>
+        <option value="all" ${challengesAdminFilterState.level === 'all' ? 'selected' : ''}>${t('adminChallenges.filter.allLevels')}</option>
         ${levelOptions}
       </select>
     </div>
@@ -10483,7 +10494,7 @@ function challengesAdminSectionHTML(sectionKey, title, filteredList, cardHTMLFn,
     <h3 class="challenges-admin-section-title">${title} (${filteredList.length})</h3>
     ${toolbarHTML}
     ${visible.map(cardHTMLFn).join('')}
-    ${remaining > 0 ? `<button class="btn btn-secondary challenges-admin-load-more" data-section="${sectionKey}">Carregar mais ${Math.min(remaining, CHALLENGES_ADMIN_PAGE_SIZE)} (${remaining} restantes)</button>` : ''}
+    ${remaining > 0 ? `<button class="btn btn-secondary challenges-admin-load-more" data-section="${sectionKey}">${t('adminChallenges.section.loadMore', { n: Math.min(remaining, CHALLENGES_ADMIN_PAGE_SIZE), remaining })}</button>` : ''}
   `;
 }
 
@@ -10502,10 +10513,10 @@ function challengesAdminBulkToolbarHTML(filteredPending){
     <div class="challenges-admin-bulk-toolbar">
       <label class="challenges-admin-select-all">
         <input type="checkbox" id="challenges-admin-select-all" ${allSelected ? 'checked' : ''}>
-        Selecionar todos (${filteredPending.length})
+        ${t('adminChallenges.bulk.selectAll', { n: filteredPending.length })}
       </label>
       <button class="btn btn-primary btn-sm" id="challenges-admin-bulk-approve-btn" ${selectedCount === 0 ? 'disabled' : ''}>
-        ✅ Aprovar selecionados (${selectedCount})
+        ${t('adminChallenges.bulk.approveSelected', { n: selectedCount })}
       </button>
     </div>
   `;
@@ -10516,7 +10527,7 @@ function challengeAdminPendingCardHTML(c){
   return `
     <div class="challenges-admin-card" data-challenge-id="${c.id}">
       <div class="challenges-admin-card-header">
-        ${editing ? '' : `<input type="checkbox" class="challenges-admin-select-checkbox" data-id="${c.id}" ${challengesAdminSelectedIds.has(c.id) ? 'checked' : ''} aria-label="Selecionar pra aprovação em lote">`}
+        ${editing ? '' : `<input type="checkbox" class="challenges-admin-select-checkbox" data-id="${c.id}" ${challengesAdminSelectedIds.has(c.id) ? 'checked' : ''} aria-label="${t('adminChallenges.bulk.checkboxAria')}">`}
         <span class="challenge-card-level">${c.level}</span>
         <strong>${challengeAdminCardTitle(c)}</strong>
       </div>
@@ -10525,12 +10536,12 @@ function challengeAdminPendingCardHTML(c){
       </div>
       <div class="challenges-admin-actions">
         ${editing
-          ? `<button class="btn btn-primary" data-action="save">💾 Salvar</button>
-             <button class="btn btn-secondary" data-action="cancel-edit">Cancelar</button>`
-          : `<button class="btn btn-primary" data-action="approve">✅ Aprovar e publicar</button>
-             <button class="btn btn-secondary" data-action="preview">👁️ Ver versão do aluno</button>
-             <button class="btn btn-secondary" data-action="edit">✏️ Editar</button>
-             <button class="btn btn-secondary" data-action="reject">❌ Rejeitar</button>`
+          ? `<button class="btn btn-primary" data-action="save">${t('adminChallenges.btn.save')}</button>
+             <button class="btn btn-secondary" data-action="cancel-edit">${t('myFlashcards.edit.cancel')}</button>`
+          : `<button class="btn btn-primary" data-action="approve">${t('adminChallenges.btn.approvePublish')}</button>
+             <button class="btn btn-secondary" data-action="preview">${t('adminChallenges.btn.preview')}</button>
+             <button class="btn btn-secondary" data-action="edit">${t('adminChallenges.btn.edit')}</button>
+             <button class="btn btn-secondary" data-action="reject">${t('adminChallenges.btn.reject')}</button>`
         }
       </div>
     </div>
@@ -10547,7 +10558,7 @@ async function renderChallengesAdmin(){
   content.innerHTML = loadingHTML();
   const ok = await loadChallengesFromDB();
   if (!ok){
-    content.innerHTML = `<p class="challenges-admin-empty">⚠ Não foi possível carregar os desafios agora. Verifique sua conexão e tente novamente -- isto NÃO significa que a fila está vazia.</p>`;
+    content.innerHTML = `<p class="challenges-admin-empty">${t('adminChallenges.loadFailed')}</p>`;
     return;
   }
 
@@ -10572,15 +10583,15 @@ function renderChallengesAdminList(){
   // sempre "nenhum desafio [status]" mesmo quando na verdade existem,
   // só não bateram com a busca/filtro.
   const sectionEmptyMsg = (filtered, unfiltered, genuineMsg) =>
-    filtered.length === 0 && unfiltered.length > 0 ? 'Nenhum resultado nesta seção com o filtro atual.' : genuineMsg;
+    filtered.length === 0 && unfiltered.length > 0 ? t('adminChallenges.section.noResults') : genuineMsg;
 
-  const pendingHTML = challengesAdminSectionHTML('pending', 'Pendentes de revisão', pending, challengeAdminPendingCardHTML,
-    sectionEmptyMsg(pending, pendingUnfiltered, 'Nenhum desafio pendente de revisão.'),
+  const pendingHTML = challengesAdminSectionHTML('pending', t('adminChallenges.section.pending'), pending, challengeAdminPendingCardHTML,
+    sectionEmptyMsg(pending, pendingUnfiltered, t('adminChallenges.section.pendingEmpty')),
     pending.length > 0 ? challengesAdminBulkToolbarHTML(pending) : '');
-  const publishedHTML = challengesAdminSectionHTML('published', 'Publicados', published, challengeAdminPublishedCardHTML,
-    sectionEmptyMsg(published, publishedUnfiltered, 'Nenhum desafio publicado ainda.'));
-  const unpublishedHTML = challengesAdminSectionHTML('unpublished', 'Despublicados', unpublished, challengeAdminPublishedCardHTML,
-    sectionEmptyMsg(unpublished, unpublishedUnfiltered, 'Nenhum desafio despublicado.'));
+  const publishedHTML = challengesAdminSectionHTML('published', t('adminChallenges.section.published'), published, challengeAdminPublishedCardHTML,
+    sectionEmptyMsg(published, publishedUnfiltered, t('adminChallenges.section.publishedEmpty')));
+  const unpublishedHTML = challengesAdminSectionHTML('unpublished', t('adminChallenges.section.unpublished'), unpublished, challengeAdminPublishedCardHTML,
+    sectionEmptyMsg(unpublished, unpublishedUnfiltered, t('adminChallenges.section.unpublishedEmpty')));
 
   // Cada seção já mostra sua própria mensagem contextual quando vazia
   // (genuinamente vazia vs. vazia só por causa do filtro atual) --
@@ -10613,9 +10624,9 @@ function renderChallengesAdminList(){
   if (bulkApproveBtn) bulkApproveBtn.addEventListener('click', async () => {
     const targets = pending.filter(c => challengesAdminSelectedIds.has(c.id));
     if (targets.length === 0) return;
-    if (!confirm(`Aprovar e publicar ${targets.length} desafio(s) selecionado(s)? Só quem não tiver nenhum problema no checklist de qualidade é publicado automaticamente -- o resto continua pendente pra revisão individual.`)) return;
+    if (!confirm(t('adminChallenges.bulk.confirm', { n: targets.length }))) return;
     bulkApproveBtn.disabled = true;
-    bulkApproveBtn.textContent = 'Aprovando…';
+    bulkApproveBtn.textContent = t('adminChallenges.bulk.approving');
     let published = 0;
     const skipped = [];
     for (const c of targets){
@@ -10624,8 +10635,8 @@ function renderChallengesAdminList(){
       else if (result.skipped) skipped.push(challengeAdminCardTitle(c));
     }
     showToast(skipped.length === 0
-      ? `${published} desafio(s) publicado(s).`
-      : `${published} publicado(s). ${skipped.length} pulado(s) por ter algum problema no checklist -- revise um por um: ${skipped.join(', ')}`);
+      ? t('adminChallenges.bulk.published', { published })
+      : t('adminChallenges.bulk.publishedSkipped', { published, skipped: skipped.length, list: skipped.join(', ') }));
     renderChallengesAdmin();
   });
 
@@ -10651,7 +10662,7 @@ function renderChallengesAdminList(){
     });
     if (unpublishBtn) unpublishBtn.addEventListener('click', async () => {
       const c = CHALLENGES.find(x => x.id === id);
-      if (!confirm('Despublicar este desafio? Ele deixa de aparecer pro aluno imediatamente.')) return;
+      if (!confirm(t('adminChallenges.confirm.unpublish'))) return;
       if (await unpublishChallenge(c)) renderChallengesAdmin();
     });
     if (rejectBtn) rejectBtn.addEventListener('click', async () => {
@@ -10663,7 +10674,7 @@ function renderChallengesAdminList(){
         rejected_by: CURRENT_USER.email,
       });
       if (!ok){ c.status = previousStatus; return; }
-      showToast('Desafio rejeitado.');
+      showToast(t('adminChallenges.toast.rejected'));
       renderChallengesAdmin();
     });
     if (editBtn) editBtn.addEventListener('click', () => {
@@ -10716,8 +10727,8 @@ function renderChallengesAdminList(){
       if (!ok) return;
       challengesAdminEditingId = null;
       showToast(wasLive
-        ? 'Edição salva — desafio voltou para revisão (estava publicado/aprovado, precisa ser aprovado de novo).'
-        : 'Edição salva.');
+        ? t('adminChallenges.toast.savedBackToReview')
+        : t('adminChallenges.toast.saved'));
       renderChallengesAdmin();
     });
   });
