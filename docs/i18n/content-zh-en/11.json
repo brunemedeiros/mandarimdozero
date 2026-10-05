@@ -1,0 +1,144 @@
+{
+ "unit": 11,
+ "en": {
+  "title": "Health and the body",
+  "goal": "Describe simple symptoms and body parts, and ask for basic medical help.",
+  "lessons": {
+   "partes-corpo": "Naming body parts",
+   "dor": "Saying something hurts",
+   "ajuda-medica": "Asking for medical help",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "body",
+   "head",
+   "belly / stomach",
+   "to hurt / be sore",
+   "to get sick",
+   "doctor",
+   "hospital",
+   "to not feel well / be unwell"
+  ],
+  "phrases": [
+   {
+    "t": "My head hurts."
+   },
+   {
+    "t": "I don't feel well."
+   },
+   {
+    "t": "I need to see a doctor."
+   }
+  ],
+  "dialogue": {
+   "title": "I'm not feeling well",
+   "lines": [
+    "What's wrong?",
+    "I don't feel well, my head hurts a lot.",
+    "Do you need to see a doctor?",
+    "Yes, is the hospital far from here?"
+   ]
+  },
+  "concepts": {
+   "teng": [
+    {
+     "title": "疼 (téng) — describing pain",
+     "body": "To say a part of the body hurts, the structure in Chinese is very direct: Body part + 疼 (téng) — with no need for a separate verb and subject like \"it hurts\" in English.",
+     "examples": [
+      "my head hurts"
+     ]
+    }
+   ],
+   "teng-vs-bushufu": [
+    {
+     "title": "\"Tóu téng\" or \"bù shūfu\"?",
+     "body": "<strong>Téng</strong> (疼) describes a specific pain, in one part of the body. <strong>Bù shūfu</strong> (不舒服) is more general — feeling unwell without pointing to where it hurts. If you know exactly what hurts, use téng; if it's just a general feeling of \"I feel bad\", use bù shūfu.",
+     "examples": [
+      "my head hurts (specific pain)",
+      "I don't feel well (general discomfort)"
+     ]
+    }
+   ],
+   "le-change-of-state": [
+    {
+     "title": "了 (le) marking a change of state",
+     "body": "了 at the end of the sentence (not right after the verb) shows that a new situation has begun or changed — as in \"what's wrong?\", a change noticed now that wasn't there before.",
+     "examples": [
+      "what's wrong with you?"
+     ]
+    }
+   ]
+  },
+  "trueFalse": [
+   {
+    "claim": "This sentence is used when someone has a headache.",
+    "whyNote": "Correct — <strong>我头疼 (wǒ tóu téng)</strong> literally means \"my head hurts\", that is, a headache."
+   }
+  ]
+ },
+ "review": [
+  {
+   "path": "vocab[2]",
+   "pt": "barriga",
+   "en": "belly / stomach",
+   "conf": "media",
+   "why": "PT 'barriga' informal; two glosses"
+  },
+  {
+   "path": "vocab[3]",
+   "pt": "doer",
+   "en": "to hurt / be sore",
+   "conf": "media",
+   "why": "verb gloss, several options"
+  },
+  {
+   "path": "vocab[4]",
+   "pt": "ficar doente",
+   "en": "to get sick",
+   "conf": "media",
+   "why": "EN-US 'sick' vs UK 'ill'"
+  },
+  {
+   "path": "vocab[7]",
+   "pt": "não estar bem/mal-estar",
+   "en": "to not feel well / be unwell",
+   "conf": "media",
+   "why": "PT gloss mixes verb and noun"
+  },
+  {
+   "path": "phrases[0]",
+   "pt": "Minha cabeça está doendo.",
+   "en": "My head hurts.",
+   "conf": "media",
+   "why": "alternative 'I have a headache'"
+  },
+  {
+   "path": "dialogue.lines[0]",
+   "pt": "O que houve com você?",
+   "en": "What's wrong?",
+   "conf": "media",
+   "why": "idiomatic; literal 'What happened to you?'"
+  },
+  {
+   "path": "concepts.teng[0].body",
+   "pt": "sem precisar de um verbo equivalente a 'doer' com sujeito separado como em português",
+   "en": "no need for a separate verb and subject like 'it hurts' in English",
+   "conf": "baixa",
+   "why": "adapted PT->EN; English comparison is loose (English also says 'my head hurts')"
+  },
+  {
+   "path": "concepts.le-change-of-state[0].body",
+   "pt": "como 'o que houve com você?'",
+   "en": "as in 'what's wrong?'",
+   "conf": "media",
+   "why": "idiomatic rendering"
+  },
+  {
+   "path": "trueFalse[0].claim",
+   "pt": "Essa frase é usada quando alguém está com dor de cabeça.",
+   "en": "This sentence is used when someone has a headache.",
+   "conf": "media",
+   "why": "idiomatic"
+  }
+ ]
+}
