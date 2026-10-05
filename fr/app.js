@@ -9472,7 +9472,13 @@ const CHALLENGES_CACHE_MS = 5 * 60 * 1000;
 async function loadChallengesFromDB(force){
   if (!force && challengesLoadedAt && Date.now() - challengesLoadedAt < CHALLENGES_CACHE_MS) return true;
   try {
-    const { data, error } = await supabaseClient.from('challenges').select('*');
+    // Fase 8: com CHALLENGES_SERVER_GATING ligada, quem não é admin lê pela RPC
+    // get_published_challenges (008), que devolve só o esqueleto dos Premium
+    // para contas Free. Desligada (padrão), mantém o select direto de sempre.
+    const useRpc = CHALLENGES_SERVER_GATING && !isChallengesAdmin();
+    const { data, error } = useRpc
+      ? await supabaseClient.rpc('get_published_challenges')
+      : await supabaseClient.from('challenges').select('*');
     if (error) throw error;
     CHALLENGES = (data || []).map(row => ({
       id: row.id,
@@ -9733,6 +9739,9 @@ function challengesPremiumUnlocked(){
 // paywall e Stripe entram depois. Hoje só ROTULAMOS cada item como Free ou
 // Premium (tierBadgeHTML); quando o paywall existir, basta ligar esta flag.
 const CHALLENGE_PAYWALL_ENABLED = false;
+// Fase 8: leitura dos desafios pela RPC com trava no servidor. SÓ ligar depois de
+// aplicar fr/scripts/supabase_migrations/008 (passo 1 e 2) no banco correspondente.
+const CHALLENGES_SERVER_GATING = false;
 // Free x Premium: desafios de módulo (Ouça e traduza, Acentuação, Expressões)
 // são Premium; ditado é Free só quando d.free === true (1 por módulo).
 function challengeTier(c){ return challengeModuleId(c) ? 'premium' : 'free'; }
