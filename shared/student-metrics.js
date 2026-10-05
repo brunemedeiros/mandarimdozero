@@ -23,3 +23,20 @@ async function fetchTeacherStudentMetrics(studentId, languageAppKey){
   }
   return data;
 }
+
+// Painel do aluno ampliado (migration 070) -- visão geral do aluno em TODOS
+// os idiomas em que ele tem progresso (decisão da autora: como professora ela
+// vê uso, progresso, sequência, últimas atividades etc.). Mesma checagem de
+// vínculo ativo da 059, feita dentro da function. Devolve null em erro ou
+// not_authorized (a UI mostra um aviso genérico).
+async function fetchTeacherStudentOverview(studentId, languageAppKey){
+  const { data, error } = await supabaseClient.rpc('get_teacher_student_overview', {
+    p_student_id: studentId,
+    p_language_app_key: languageAppKey,
+  });
+  if (error || !data || data.error){
+    if (error) console.error('Erro ao carregar a visão geral do aluno:', error);
+    return null;
+  }
+  return data;
+}
