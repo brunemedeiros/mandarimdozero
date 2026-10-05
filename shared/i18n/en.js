@@ -1014,9 +1014,9 @@ window.I18N_CATALOG['en'] = {
   'admin.common.langFilterAria': 'Filter by language', // ALTA
   'admin.common.all': 'All', // ALTA
   'admin.common.forNStudents': ' for {n} students', // ALTA
-  'admin.common.forTheseStudents': ' these students', // ALTA
-  'admin.common.forThisStudent': ' this student', // ALTA
-  'admin.common.forNoStudent': ' no student selected', // ALTA
+  'admin.common.forTheseStudents': ' for these students', // ALTA
+  'admin.common.forThisStudent': ' for this student', // ALTA
+  'admin.common.forNoStudent': ' -- select a student first', // ALTA
   'admin.common.selectAtLeastOne': 'Select at least one student.', // ALTA
   'admin.common.students': 'Students', // ALTA
   'admin.common.date': 'Date', // ALTA
@@ -1068,7 +1068,7 @@ window.I18N_CATALOG['en'] = {
   'admin.classLogs.notesOpt': 'Notes / free text (optional)', // ALTA
   'admin.classLogs.noFields': '(no fields filled in)', // ALTA
   'admin.classLogs.listTitle': 'Recorded classes ({n})', // ALTA
-  'admin.classLogs.emptyFor': 'No class recorded yet for', // ALTA
+  'admin.classLogs.emptyFor': 'No class recorded yet', // ALTA
   'admin.classLogs.deleteConfirm': 'Delete this class record? This action cannot be undone.', // ALTA
   'admin.classLogs.deleted': '✓ Record deleted.', // ALTA
   'admin.classLogs.updated': '✓ Class updated.', // ALTA
@@ -1090,7 +1090,7 @@ window.I18N_CATALOG['en'] = {
   'admin.materials.linkOpt': 'Link (optional)', // ALTA
   'admin.materials.fileOpt': 'File (optional)', // ALTA
   'admin.materials.listTitle': 'Materials sent ({n})', // ALTA
-  'admin.materials.emptyFor': 'No material yet for', // ALTA
+  'admin.materials.emptyFor': 'No material yet', // ALTA
   'admin.materials.deleteConfirm': 'Delete this support material? This action cannot be undone.', // ALTA
   'admin.materials.deleted': '✓ Material deleted.', // ALTA
   'admin.materials.updated': '✓ Material updated.', // ALTA
@@ -1176,7 +1176,7 @@ window.I18N_CATALOG['en'] = {
   'admin.flashcards.dest.preparing': 'Preparing the Decks…', // ALTA
   'admin.flashcards.row.previewTitle': 'Preview how the student will see it in Review', // ALTA
   'admin.flashcards.list.activeTitle': 'Active cards ({n})', // ALTA
-  'admin.flashcards.list.emptyFor': 'No cards yet for', // ALTA
+  'admin.flashcards.list.emptyFor': 'No cards yet', // ALTA
   'admin.flashcards.move.notFound': 'Card not found.', // ALTA
   'admin.flashcards.move.failed': 'We couldn\'t move the card.', // ALTA
   'admin.flashcards.move.moved': '✓ Card moved.', // ALTA
@@ -1648,4 +1648,11 @@ window.I18N_CATALOG['en'] = {
   'adminChallenges.modal.title': 'Import challenges via JSON', // ALTA
   'admin.mode.on': 'ON', // ALTA
   'admin.mode.off': 'OFF', // ALTA
+  'admin.panel.tab.students': '🎓 Students', // ALTA
+  'admin.panel.tab.flashcards': '📇 Flashcards', // ALTA
+  'admin.panel.tab.classlogs': '📝 Classes', // ALTA
+  'admin.panel.tab.materials': '📚 Study materials', // ALTA
+  'admin.panel.tab.premium': '⭐ Premium', // ALTA
+  'flashcardPreview.modal.hint': 'This is only a preview of how the card will look in Review -- nothing is saved or graded here.', // ALTA
+  'publicFlashcard.modal.title': '👁 Card', // ALTA
 };

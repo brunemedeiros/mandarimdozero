@@ -1664,4 +1664,11 @@ window.I18N_CATALOG['pt-BR'] = {
   'adminChallenges.modal.title': 'Importar desafios via JSON',
   'admin.mode.on': 'ON',
   'admin.mode.off': 'OFF',
+  'admin.panel.tab.students': '🎓 Alunos',
+  'admin.panel.tab.flashcards': '📇 Flashcards',
+  'admin.panel.tab.classlogs': '📝 Aulas',
+  'admin.panel.tab.materials': '📚 Material de apoio',
+  'admin.panel.tab.premium': '⭐ Premium',
+  'flashcardPreview.modal.hint': 'Isto é só uma pré-visualização de como o cartão vai aparecer na Revisão -- nada é salvo ou avaliado aqui.',
+  'publicFlashcard.modal.title': '👁 Cartão',
 };

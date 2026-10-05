@@ -1004,9 +1004,9 @@ Observações: "Leaderboard" (ranking) e "Study materials" (material de apoio) t
 | admin.common.langFilterAria | Filtrar por idioma | Filter by language | alta | needs_review |
 | admin.common.all | Todos | All | alta | needs_review |
 | admin.common.forNStudents |  pra {n} alunos |  for {n} students | alta | needs_review |
-| admin.common.forTheseStudents |  esses alunos |  these students | alta | needs_review |
-| admin.common.forThisStudent |  este aluno |  this student | alta | needs_review |
-| admin.common.forNoStudent |  nenhum aluno selecionado |  no student selected | alta | needs_review |
+| admin.common.forTheseStudents |  esses alunos |  for these students | alta | needs_review |
+| admin.common.forThisStudent |  este aluno |  for this student | alta | needs_review |
+| admin.common.forNoStudent |  nenhum aluno selecionado |  -- select a student first | alta | needs_review |
 | admin.common.selectAtLeastOne | Selecione ao menos um aluno. | Select at least one student. | alta | needs_review |
 | admin.common.students | Alunos | Students | alta | needs_review |
 | admin.common.date | Data | Date | alta | needs_review |
@@ -1058,7 +1058,7 @@ Observações: "Leaderboard" (ranking) e "Study materials" (material de apoio) t
 | admin.classLogs.notesOpt | Notas / texto livre (opcional) | Notes / free text (optional) | alta | needs_review |
 | admin.classLogs.noFields | (sem campos preenchidos) | (no fields filled in) | alta | needs_review |
 | admin.classLogs.listTitle | Aulas registradas ({n}) | Recorded classes ({n}) | alta | needs_review |
-| admin.classLogs.emptyFor | Nenhuma aula registrada ainda pra | No class recorded yet for | alta | needs_review |
+| admin.classLogs.emptyFor | Nenhuma aula registrada ainda pra | No class recorded yet | alta | needs_review |
 | admin.classLogs.deleteConfirm | Apagar este registro de aula? Essa ação não pode ser desfeita. | Delete this class record? This action cannot be undone. | alta | needs_review |
 | admin.classLogs.deleted | ✓ Registro apagado. | ✓ Record deleted. | alta | needs_review |
 | admin.classLogs.updated | ✓ Aula atualizada. | ✓ Class updated. | alta | needs_review |
@@ -1080,7 +1080,7 @@ Observações: "Leaderboard" (ranking) e "Study materials" (material de apoio) t
 | admin.materials.linkOpt | Link (opcional) | Link (optional) | alta | needs_review |
 | admin.materials.fileOpt | Arquivo (opcional) | File (optional) | alta | needs_review |
 | admin.materials.listTitle | Materiais enviados ({n}) | Materials sent ({n}) | alta | needs_review |
-| admin.materials.emptyFor | Nenhum material ainda pra | No material yet for | alta | needs_review |
+| admin.materials.emptyFor | Nenhum material ainda pra | No material yet | alta | needs_review |
 | admin.materials.deleteConfirm | Apagar este material de apoio? Essa ação não pode ser desfeita. | Delete this support material? This action cannot be undone. | alta | needs_review |
 | admin.materials.deleted | ✓ Material apagado. | ✓ Material deleted. | alta | needs_review |
 | admin.materials.updated | ✓ Material atualizado. | ✓ Material updated. | alta | needs_review |
@@ -1166,7 +1166,7 @@ Observações: "Leaderboard" (ranking) e "Study materials" (material de apoio) t
 | admin.flashcards.dest.preparing | Preparando os Decks… | Preparing the Decks… | alta | needs_review |
 | admin.flashcards.row.previewTitle | Pré-visualizar como o aluno vai ver na Revisão | Preview how the student will see it in Review | alta | needs_review |
 | admin.flashcards.list.activeTitle | Cartões ativos ({n}) | Active cards ({n}) | alta | needs_review |
-| admin.flashcards.list.emptyFor | Nenhum cartão ainda pra | No cards yet for | alta | needs_review |
+| admin.flashcards.list.emptyFor | Nenhum cartão ainda pra | No cards yet | alta | needs_review |
 | admin.flashcards.move.notFound | Cartão não encontrado. | Card not found. | alta | needs_review |
 | admin.flashcards.move.failed | Não foi possível mover o cartão. | We couldn't move the card. | alta | needs_review |
 | admin.flashcards.move.moved | ✓ Cartão movido. | ✓ Card moved. | alta | needs_review |
@@ -1643,3 +1643,17 @@ Observações: "Leaderboard" (ranking) e "Study materials" (material de apoio) t
 | adminChallenges.modal.title | Importar desafios via JSON | Import challenges via JSON | alta | needs_review |
 | admin.mode.on | ON | ON | alta | needs_review |
 | admin.mode.off | OFF | OFF | alta | needs_review |
+
+## Fase 6, lote 4 (Admin C)
+
+Abas do Painel de Admin e modais de preview de flashcard. Texto em português idêntico ao HTML. Correção de EN: a frase composta "No cards yet for no student selected" (emptyFor + sufixo) passou a "No cards yet -- select a student first." (e equivalentes em Aulas/Material); o PT não mudou. As 6 linhas reescritas acima (emptyFor x3 e admin.common.for*Student*) são parte desta correção.
+
+| Chave | PT | EN | Confiança | Status |
+|---|---|---|---|---|
+| admin.panel.tab.students | 🎓 Alunos | 🎓 Students | alta | needs_review |
+| admin.panel.tab.flashcards | 📇 Flashcards | 📇 Flashcards | alta | needs_review |
+| admin.panel.tab.classlogs | 📝 Aulas | 📝 Classes | alta | needs_review |
+| admin.panel.tab.materials | 📚 Material de apoio | 📚 Study materials | alta | needs_review |
+| admin.panel.tab.premium | ⭐ Premium | ⭐ Premium | alta | needs_review |
+| flashcardPreview.modal.hint | Isto é só uma pré-visualização de como o cartão vai aparecer na Revisão -- nada é salvo ou avaliado aqui. | This is only a preview of how the card will look in Review -- nothing is saved or graded here. | alta | needs_review |
+| publicFlashcard.modal.title | 👁 Cartão | 👁 Card | alta | needs_review |

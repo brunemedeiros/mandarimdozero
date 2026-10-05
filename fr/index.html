@@ -3602,11 +3602,11 @@ footer.app-footer img{ height:40px; opacity:.85; }
       <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="analytics" data-i18n="admin.panel.tab.analytics">📊 Analytics</button>
       <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="notifications" data-i18n="settings.tab.notifications">🔔 Notificações</button>
       <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="reports" data-i18n="admin.panel.tab.reports">⚑ Reports</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="students">🎓 Alunos</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="flashcards">📇 Flashcards</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="classlogs">📝 Aulas</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="materials">📚 Material de apoio</button>
-      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="premium">⭐ Premium</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="students" data-i18n="admin.panel.tab.students">🎓 Alunos</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="flashcards" data-i18n="admin.panel.tab.flashcards">📇 Flashcards</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="classlogs" data-i18n="admin.panel.tab.classlogs">📝 Aulas</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="materials" data-i18n="admin.panel.tab.materials">📚 Material de apoio</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="premium" data-i18n="admin.panel.tab.premium">⭐ Premium</button>
     </div>
     <div id="admin-badges-content"></div>
     <div id="admin-analytics-content" style="display:none;"></div>
@@ -4077,11 +4077,11 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="flashcard-preview-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>👁️ Pré-visualização</h3>
-      <button class="app-modal-close" id="flashcard-preview-modal-close" aria-label="Fechar">✕</button>
+      <h3 data-i18n="review.previewLabel">👁️ Pré-visualização</h3>
+      <button class="app-modal-close" id="flashcard-preview-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body">
-      <p class="profile-edit-hint" style="margin-top:0;">Isto é só uma pré-visualização de como o cartão vai aparecer na Revisão -- nada é salvo ou avaliado aqui.</p>
+      <p class="profile-edit-hint" style="margin-top:0;" data-i18n="flashcardPreview.modal.hint">Isto é só uma pré-visualização de como o cartão vai aparecer na Revisão -- nada é salvo ou avaliado aqui.</p>
       <div id="flashcard-preview-modal-body"></div>
       <div id="flashcard-preview-modal-nav" style="display:flex; align-items:center; justify-content:center; margin-top:12px;"></div>
     </div>
@@ -4091,8 +4091,8 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="public-profile-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>Perfil</h3>
-      <button class="app-modal-close" id="public-profile-modal-close" aria-label="Fechar">✕</button>
+      <h3 data-i18n="admin.reports.screen.profile">Perfil</h3>
+      <button class="app-modal-close" id="public-profile-modal-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body" id="public-profile-modal-body"></div>
   </div>
@@ -4105,8 +4105,8 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="public-flashcard-preview-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>👁 Cartão</h3>
-      <button class="app-modal-close" id="public-flashcard-preview-close" aria-label="Fechar">✕</button>
+      <h3 data-i18n="publicFlashcard.modal.title">👁 Cartão</h3>
+      <button class="app-modal-close" id="public-flashcard-preview-close" aria-label="Fechar" data-i18n-attr="aria-label:common.close">✕</button>
     </div>
     <div class="app-modal-body" id="public-flashcard-preview-body"></div>
   </div>
