@@ -19,7 +19,7 @@ function str(u, label, v, ptv){
 }
 fs.readdirSync(dir).filter(f => f.endsWith('.json') && f !== '_meta.json' && !f.startsWith('_')).sort().forEach(f => {
   const d = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); const id = d.unit;
-  if (only.length && !only.includes(id)) return;
+  if (only.length && !only.map(String).includes(String(id))) return;
   const u = c.UNITS.find(x => x.id === id); const e = d[lang];
   if (!u) return err(id, 'unidade inexistente em content.js');
   if (!e) return err(id, 'sem objeto "' + lang + '"');

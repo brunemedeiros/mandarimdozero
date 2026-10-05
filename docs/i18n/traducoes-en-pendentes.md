@@ -2036,3 +2036,230 @@ Fora desta fase: BADGES e notificações do servidor (fase 11); dados de conteú
 | lang.name.pt-BR | português | Portuguese | alta | needs_review |
 | lang.name.en | inglês | English | alta | needs_review |
 | fr.challenge.accent.label | Digite o que você ouviu: | Type what you heard: | alta | needs_review |
+
+## Fase 10 — Conteúdo do mandarim em inglês (needs_review)
+
+Unidades 1–18 (docs/i18n/content-zh-en/<n>.json), histórias (_stories.json) e banco de hanzi (_hanzi.json). Só itens de confiança média/baixa; o resto é alta. Atenção: no original em português, a unidade 16 (hao-vs-ri) diz que 日 aparece em 今天/明天, mas esses contêm 天; o inglês manteve só 星期日.
+
+| Origem | Caminho | PT | EN | Confiança | Motivo |
+|---|---|---|---|---|---|
+| HSK1-1 | vocab[0] | olá | hello | media | nǐ hǎo; fine, listed for register check only |
+| HSK1-1 | vocab[1] | tchau / até logo | goodbye / see you later | media | duas glosas PT; ordem de registro |
+| HSK1-1 | vocab[2] | obrigado(a) | thank you | media | PT marca gênero; inglês não tem equivalente |
+| HSK1-1 | vocab[4] | desculpe | sorry / excuse me | media | várias traduções corretas |
+| HSK1-1 | vocab[5] | tudo bem / não tem problema | it's okay / no problem | media | várias traduções corretas |
+| HSK1-1 | vocab[7] | boa noite (saudação) | good evening (greeting) | media | PT 'boa noite' cobre evening; 'good night' seria despedida |
+| HSK1-1 | phrases[0] | Olá! Eu me chamo Brune. | Hello! My name is Brune. | media | idiomático |
+| HSK1-1 | phrases[3] | Ah, sim! Eu também. | Oh, yes! Me too. | media | 是啊 = 'yes, indeed'; várias traduções |
+| HSK1-1 | concepts.duibuqi-buhaoyisi[0].examples[0] | foi mal / com licença | my bad / excuse me | media | idiomático; 'foi mal' -> 'my bad' (informal) |
+| HSK1-1 | concepts.duibuqi-buhaoyisi[0].body | quase como 'foi mal' | a bit like 'my bad' or 'excuse me' | media | adaptado do português |
+| HSK1-1 | concepts.bu-negation[0].body | Diferente do português, não muda de forma... | Like English 'not', it doesn't change its form... | media | comparação adaptada PT->EN; comparação 'quem fala/quando' retirada |
+| HSK1-1 | concepts.zaoshang-hao-zao[0].examples[0] | bom dia (informal, curto) | good morning (informal, short) | media | cultural/registro |
+| HSK1-2 | vocab[0] | eu | I / me | media | inglês distingue I/me |
+| HSK1-2 | vocab[2] | chamar-se | to be called | media | várias traduções corretas |
+| HSK1-2 | vocab[4] | ser/estar | to be | media | PT ser/estar; inglês só 'to be' |
+| HSK1-2 | vocab[8] | qual | which | media | 哪 = which/where; 'which' escolhido pelo uso em 哪国人 |
+| HSK1-2 | phrases[1] | Eu sou brasileira. | I'm Brazilian. | media | PT marca gênero feminino; inglês não |
+| HSK1-2 | phrases[2] | De que país você é? | What country are you from? | media | várias traduções corretas |
+| HSK1-2 | dialogue.lines[2] | Eu me chamo Xiao Li. | My name is Xiao Li. | media | idiomático |
+| HSK1-2 | concepts.shi[0].body | equivale ao verbo 'ser'... só liga substantivos | is like the verb 'to be'... only links nouns | media | afirmação sobre a língua mantida; PT 'ser' -> 'to be' |
+| HSK1-2 | concepts.shi[1].body | 'eu me chamo' nunca usa shì | 'my name is' never uses shì | media | adaptado do português |
+| HSK1-2 | concepts.svo-order[0].body | mesma ordem do português... Diferente do português | same order as English... Unlike English | media | comparação adaptada PT->EN; conferir se a afirmação vale para o inglês (vale) |
+| HSK1-2 | concepts.shi-drop-casual[0].body | fala rápida e bem casual | fast, very casual speech | media | registro; afirmação sociolinguística preservada do PT |
+| HSK1-2 | concepts.ordem-nomes-sobrenome-primeiro[0].body | o oposto da ordem em português | the opposite of the usual English order | media | adaptado do português; 'usual' porque há exceções (listas, formulários) |
+| HSK1-2 | concepts.ordem-nomes-sobrenome-primeiro[0].examples[0] | (apelido carinhoso) 'Li'... | (affectionate nickname) 'Li'... | media | cultural |
+| HSK1-2 | trueFalse[0].whyNote | Errado — ... Nacionalidade seria... | Wrong — ... Nationality would be... | media | várias traduções corretas |
+| HSK1-3 | vocab[11] | anos (idade) | years old (age) | media | 岁 é unidade; 'years old' vs 'years of age' |
+| HSK1-3 | vocab[12] | quantos anos | how old | media | várias traduções corretas |
+| HSK1-3 | phrases[0] | Quantos anos você tem? | How old are you? | media | PT 'ter' vs EN 'be'; idiomático |
+| HSK1-3 | phrases[2] | Quão alto ele é? | How tall is he? | media | idiomático |
+| HSK1-3 | concepts.number-structure[0].body | É mais regular que o português nesse sentido. | It's more regular than English in this respect. | media | comparação adaptada PT->EN (inglês tem eleven/twelve/teens irregulares: afirmação válida) |
+| HSK1-3 | concepts.number-structure[1].body | sem usar o verbo 'ter' como em português | without using the verb 'to have' or 'to be' | media | adaptado: em inglês é 'to be'; acrescenta-se 'to be' para ficar correto |
+| HSK1-3 | concepts.ji-vs-duo[0].body | 几/多 | how many / how much | media | glosa PT 'quanto' ambígua |
+| HSK1-3 | concepts.ji-vs-duo[1].examples | quantos anos (criança)/(adulto) | how old are you? (child)/(adult) | media | reescrito como pergunta completa |
+| HSK1-3 | concepts.xusui-ano-novo[0].body | idade nominal / sistema ocidental | nominal age / Western system | media | fato cultural preservado; sem acrescentar |
+| HSK1-3 | concepts.si-numero-azarado[0].body | mesma superstição do 13 | same kind of superstition as 13 | media | cultural; preservado do PT |
+| HSK1-4 | vocab[0] | família / casa | family / home | media | 家 ambíguo |
+| HSK1-4 | vocab[7] | filho(a)/criança | child / son or daughter | media | glosa PT ambígua |
+| HSK1-4 | vocab[8] | ter/haver | to have / there is | media | várias traduções corretas |
+| HSK1-4 | vocab[10] | uma irmã mais velha (个 em contexto) | an older sister (个 in context) | media | termo técnico mantido |
+| HSK1-4 | vocab[3] | irmão mais velho | older brother | media | várias traduções corretas (elder/big brother) |
+| HSK1-4 | vocab[1] | pai | dad | media | EN-US 'dad' vs 'father'; 爸爸 é informal |
+| HSK1-4 | vocab[2] | mãe | mom | media | EN-US 'mom' vs EN-GB 'mum' |
+| HSK1-4 | concepts.classifiers[0].title | 一个人, não só 'um rén' | 一个人, not just 'one rén' | media | classificador -> measure word |
+| HSK1-4 | concepts.classifiers[0].body | classificador... 'medida' | measure word... 'unit word' | media | terminologia adaptada |
+| HSK1-4 | concepts.classifiers[1].body | literalmente 'boca' | literally 'mouth' | media | fato mantido do PT |
+| HSK1-4 | concepts.you[0].body | 'ter'/'haver' | 'to have'/'there is' | media | adaptado ao inglês |
+| HSK1-4 | concepts.he[0].body | equivale a 'e' | is like 'and' | media | afirmação sobre a língua mantida |
+| HSK1-4 | concepts.politica-filho-unico-historia[0].body | política do filho único 1979-2015 | one-child policy 1979-2015 | media | fato histórico; datas preservadas do PT, sem acrescentar |
+| HSK1-5 | vocab[7] | gostoso (comida) | tasty (food) | media | 'delicious' or 'good (to eat)' also fit; 好吃 is literally 'good to eat' |
+| HSK1-5 | vocab[10] | uma xícara de chá (杯 em contexto) | a cup of tea (杯 in context) | media | 'cup' vs 'glass' for 杯; kept 'cup' with tea |
+| HSK1-5 | phrases[0].t | Eu quero uma xícara de chá. | I'd like a cup of tea. | media | register: 'I want' is blunt in English, used 'I'd like' |
+| HSK1-5 | phrases[1].t | Isso está muito gostoso! | This is really tasty! | media | 'delicious' also correct |
+| HSK1-5 | dialogue.lines[0] | Olá, o que você quer comer? | Hello, what would you like to eat? | media | register softened to 'would you like' |
+| HSK1-5 | concepts.hen-adjective[0].body | (PT comparava ao português) | …the sentence sounds like an implied comparison or is grammatically odd. | media | kept Chinese-only fact; no PT comparison to adapt |
+| HSK1-5 | concepts.yao-xihuan[1].body | sem preposição como o 'de' do português | followed directly by what you like | baixa | adapted: PT contrast with 'gostar DE' removed (English 'like' takes no preposition, so no contrast is made) |
+| HSK1-5 | concepts.cha-origem-china[0].body | a palavra 'chá'/'tea' ... vem de palavras chinesas | the word "tea"/"chá" ... comes from Chinese words | media | cultural/etymology claim kept as in PT; 'tea' is not Portuguese so 'chá' is an unusual mention for English readers |
+| HSK1-5 | trueFalse[0].claim | Essa frase é usada pra pedir algo num restaurante ou café. | This phrase is used to order something at a restaurant or café. | media | 'phrase' vs 'sentence'; 'tea' translation of 茶 |
+| HSK1-6 | vocab[0] | hora(s) | o'clock / hour(s) | media | 点 is 'o'clock' in time expressions; 'hour(s)' as the PT gloss |
+| HSK1-6 | vocab[8] | não ter / não há | not to have / there isn't | media | two usages glossed in PT; kept both |
+| HSK1-6 | phrases[2].t | Eu estou comendo agora. | I'm eating right now. | media | 'agora' comes from 正在, rendered 'right now' |
+| HSK1-6 | dialogue.lines[2] | Que horas você sai do trabalho hoje? | What time do you get off work today? | media | 'get off work' is US idiom for 下班 |
+| HSK1-6 | concepts.dian-hours[0].body | funciona como 'hora(s)' | works like "o'clock" | media | 'hora(s)' replaced by 'o'clock' as the natural English counterpart |
+| HSK1-6 | concepts.fuso-horario-unico[0].body | cobrir 5 fusos horários geográficos | span 5 geographic time zones | media | factual claim kept as in PT; not independently checked |
+| HSK1-6 | concepts.time-before-verb[0].body | Diferente do português, onde 'todos os dias' pode vir no fim | Unlike English, where "every day" can go at the end | baixa | adapted: comparison rewritten for English (also true there) |
+| HSK1-6 | concepts.zai-progressive[0].body | estar + gerúndio do português | "to be + -ing" | baixa | adapted: Portuguese gerund compared with English -ing |
+| HSK1-7 | vocab[0] | estar (localização) | to be (at) (location) | media | PT 'estar'; English 'to be (at)' with location note |
+| HSK1-7 | vocab[6] | distância de | distance from / away from | media | 离 is a preposition-like verb; English gloss approximates |
+| HSK1-7 | phrases[0].t | Onde fica o banheiro? | Where is the restroom? | media | US 'restroom' vs 'bathroom'/'toilet'; 厕所 is plain 'toilet/restroom' |
+| HSK1-7 | dialogue.lines[1] | Fica na frente, do lado esquerdo. | It's up ahead, on the left. | media | 'in front' rendered 'up ahead' |
+| HSK1-7 | concepts.zai-location[0].body | funciona como o verbo 'ficar' ou 'estar' | works like the verb "to be" | baixa | adapted: PT 'ficar/estar' replaced by English 'to be' |
+| HSK1-7 | trueFalse[0].whyNote | Errado — ... Preço seria '多少钱？' | Wrong — ... Price would be "多少钱？". | media | kept PT note; 'restroom' term |
+| HSK1-8 | vocab[2] | quanto custa | how much (does it cost) | media | multi-word gloss; 多少钱 is literally 'how much money' |
+| HSK1-8 | vocab[3] | unidade monetária (coloquial) | kuài (unit of money, colloquial) | media | kept kuài since learners hear it; 'yuan' would be the written equivalent |
+| HSK1-8 | vocab[4] | centavo (1/10 do kuài) | máo (a tenth of a kuài) | media | 'cent' is imprecise (it is 1/10 of a kuài, not 1/100) |
+| HSK1-8 | phrases[1].t | Está muito caro! Faz mais barato. | That's too expensive! Make it a bit cheaper. | media | 'muito caro' for 太贵了 → 'too expensive'; register: haggling |
+| HSK1-8 | phrases[3].t | 5 yuans e 30 centavos. | 5 yuan and 30 cents. | media | 'cents' for 毛 is approximate; PT also used 'centavos' |
+| HSK1-8 | dialogue.lines[3] | Tá bom, 25 yuans. | Okay, 25 yuan. | media | informal register |
+| HSK1-8 | concepts.kuai-mao[0].body | equivalente a 'um real' / 'dez centavos' | like "a dollar" / "ten cents" | baixa | adapted: PT comparison with real/centavos replaced by dollar/cents; approximate, not exact |
+| HSK1-8 | concepts.ba-particle[0].body | parecido com 'né' ou 'tá' | similar to "okay?" or "come on" | baixa | adapted: Portuguese discourse particles replaced by English ones; approximate |
+| HSK1-8 | concepts.classifiers-more[0].title | Mais classificadores | More measure words | media | term: classificador → measure word |
+| HSK1-8 | concepts.pechinchar-mercado[0].body | pechinchar é normal em mercados | haggling is normal in markets | media | cultural note kept as in PT; not independently checked |
+| HSK1-9 | vocab[0] | clima/tempo | weather | media | 天气 covers 'weather/climate'; chose 'weather' |
+| HSK1-9 | vocab[3] | chover | to rain | media | 下雨 is 'rain falls'; verb gloss simplified |
+| HSK1-9 | phrases[0].t | Como está o tempo hoje? | How's the weather today? | media | idiomatic rendering of 怎么样 |
+| HSK1-9 | phrases[3].t | Hoje não está muito frio. | It's not very cold today. | media | 不太 = 'not very' |
+| HSK1-9 | dialogue.lines[3] | Amanhã vai chover, vai estar meio frio. | Tomorrow it will rain, and it'll be a bit cold. | media | 有点冷 = 'a bit cold' |
+| HSK1-9 | concepts.buta-not-very[0].body | funcionando como 'não muito' em português | working like "not very" in English | baixa | adapted: PT reference replaced by English equivalent |
+| HSK1-9 | concepts.hui-future-prediction[0].body | parecido com 'vai' no futuro do português | similar to "will" or "going to" in English | baixa | adapted: PT 'vai' + infinitive replaced by English 'will/going to' |
+| HSK1-9 | trueFalse[0].whyNote | 'Estou com calor' seria 我很热 | "I'm hot" would be "我很热" | media | 'I'm hot' means feeling warm; fine in English |
+| HSK1-10 | vocab[0] | ônibus | bus | media | EN-US 'bus' ok; city bus |
+| HSK1-10 | vocab[3] | ir a pé | to walk / go on foot | media | two glosses given |
+| HSK1-10 | vocab[5] | estação/parada | station / stop | media | PT gloss ambiguous |
+| HSK1-10 | vocab[6] | passagem/bilhete | ticket | media | EN-US 'ticket' covers both |
+| HSK1-10 | vocab[7] | uma passagem (张 em contexto) | one ticket (张 is the measure word here) | media | adapted note on measure word |
+| HSK1-10 | phrases[3] | Como você veio? | How did you get here? | media | alternative: 'How did you come?' |
+| HSK1-10 | concepts.zenme[0].body | equivale a 'como' em português | it's like 'how' in English | media | comparison adapted PT->EN |
+| HSK1-10 | concepts.zoulu-vs-zuo[0].body | o mesmo 'zuò' de sentar numa cadeira | the same 'zuò' as sitting on a chair | media | kept literal gloss; no comparison needed |
+| HSK1-10 | concepts.zuo-chuzuche-dache[0].body | bater carro | to hit a car | media | literal gloss of 打 as 'hit'; kept as in PT |
+| HSK1-11 | vocab[2] | barriga | belly / stomach | media | PT 'barriga' informal; two glosses |
+| HSK1-11 | vocab[3] | doer | to hurt / be sore | media | verb gloss, several options |
+| HSK1-11 | vocab[4] | ficar doente | to get sick | media | EN-US 'sick' vs UK 'ill' |
+| HSK1-11 | vocab[7] | não estar bem/mal-estar | to not feel well / be unwell | media | PT gloss mixes verb and noun |
+| HSK1-11 | phrases[0] | Minha cabeça está doendo. | My head hurts. | media | alternative 'I have a headache' |
+| HSK1-11 | dialogue.lines[0] | O que houve com você? | What's wrong? | media | idiomatic; literal 'What happened to you?' |
+| HSK1-11 | concepts.teng[0].body | sem precisar de um verbo equivalente a 'doer' com sujeito separado como em português | no need for a separate verb and subject like 'it hurts' in English | baixa | adapted PT->EN; English comparison is loose (English also says 'my head hurts') |
+| HSK1-11 | concepts.le-change-of-state[0].body | como 'o que houve com você?' | as in 'what's wrong?' | media | idiomatic rendering |
+| HSK1-11 | trueFalse[0].claim | Essa frase é usada quando alguém está com dor de cabeça. | This sentence is used when someone has a headache. | media | idiomatic |
+| HSK1-12 | vocab[0] | hobby | hobby | media | PT uses the English loan; 爱好 = hobby/interest |
+| HSK1-12 | vocab[4] | fazer exercício/esporte | to exercise / play sports | media | two glosses |
+| HSK1-12 | vocab[7] | ter tempo livre | to be free / have free time | media | two natural renderings |
+| HSK1-12 | dialogue.title | Combinando um programa | Making plans | media | idiomatic; PT 'combinar um programa' = arrange an outing |
+| HSK1-12 | dialogue.lines[3] | Tenho! Vamos assistir um filme. | I am! Let's go see a movie. | media | 有空 answered as 'I am (free)'; alt 'Yes!' |
+| HSK1-12 | lessons.dancar-tempo-livre | Convidar alguém pra dançar | Inviting someone to dance | media | lesson title |
+| HSK1-12 | concepts.de-posse[0].body | parecido com o "'s" do inglês, mas mais simples | similar to the English "'s", but simpler | media | PT text already compares with English; kept as-is, wording adapted ('similar to English' kept for EN reader) |
+| HSK1-12 | concepts.kan-vs-ting[0].body | igual soariam em português | just as it would in English | media | comparison adapted PT->EN |
+| HSK1-12 | concepts.guangchangwu-danca-praca[0] | dança de praça | square dancing | media | cultural note; 'square dance' also names a US folk dance, so kept the chinese term alongside |
+| HSK1-12 | trueFalse[0].claim | Essa é uma forma de convidar alguém pra fazer algo. | This is a way of inviting someone to do something. | media | idiomatic |
+| HSK1-13 | vocab[0] | planejar/pretender | to plan / intend | media | two glosses |
+| HSK1-13 | vocab[3] | viajar/turismo | to travel / tourism | media | verb and noun |
+| HSK1-13 | vocab[6] | depois/no futuro | later / in the future | media | two glosses |
+| HSK1-13 | phrases[2] | No futuro eu quero viajar para a China. | In the future I want to travel to China. | media | word order natural alternative: 'I want to travel to China in the future' |
+| HSK1-13 | dialogue.lines[3] | Quero! Eu quero viajar para a China. | Yes! I want to travel to China. | media | answer to 要 question; alt 'I do!' |
+| HSK1-13 | concepts.yihou[0].title | "depois de" | "after" | media | PT 'depois de' kept as 'after' |
+| HSK1-13 | concepts.yihou[1].body | vou fazer isso | I'm going to do it | media | idiomatic; yào ~ 'want to / going to' |
+| HSK1-13 | concepts.yihou[1].body | Dǎsuàn soa um pouco mais formal e deliberado que yào | Dǎsuàn sounds a bit more formal and deliberate than yào | baixa | register claim copied from PT source; not checked independently |
+| HSK1-14 | vocab[0] | comparado a / mais que | compared to / more than | media | 比 is a preposition; no single English word |
+| HSK1-14 | vocab[1] | ainda mais | even more | media | alt 'more' / 'still more' |
+| HSK1-14 | vocab[4] | o mais (superlativo) | the most (superlative) | media | grammar label |
+| HSK1-14 | vocab[5] | ou (em perguntas de escolha) | or (in choice questions) | media | grammar label |
+| HSK1-14 | dialogue.lines[1] | Chinês é ainda mais difícil que francês, mas é bem interessante. | Chinese is even harder than French, but it's really interesting. | media | 更 'even more'; 很有意思 = really interesting |
+| HSK1-14 | dialogue.lines[3] | Chinês, claro! | Chinese, of course! | media | alt 'Chinese, obviously!' |
+| HSK1-14 | concepts.bi-comparison[0].body | funcionando como 'mais... que' em português; bem mais direta que a construção em português | working like 'more... than' in English (comparison of directness removed) | media | adapted PT->EN; removed claim that it's more direct than the PT construction (no EN equivalent claim made) |
+| HSK1-14 | concepts.bi-comparison[1].body | são duas estruturas separadas, não se misturam | they are two separate structures and don't mix | media | kept |
+| HSK1-14 | concepts.haishi[0].body | diferente de 或者, que é usado fora de perguntas | unlike 或者, which is used outside of questions | media | usage claim carried from PT source; not independently checked |
+| HSK1-15 | lessons.saber-conseguir | Dizer o que você sabe ou consegue fazer | Saying what you know how to do or can do | media | sabe/consegue = know how to / can (huì/néng) |
+| HSK1-15 | vocab[0] | querer / pensar em fazer algo | to want / to be thinking of doing something | media | glosa dupla; 想 também é 'to miss'/'to think', mas o PT só dá esses sentidos |
+| HSK1-15 | vocab[1] | saber fazer (habilidade aprendida) | to know how to (a learned skill) | media | várias traduções possíveis (can / know how to) |
+| HSK1-15 | vocab[2] | conseguir, poder (capacidade/permissão) | can, to be able to (ability/permission in a situation) | media | várias traduções possíveis |
+| HSK1-15 | concepts.hui-vs-neng[0].body | ...habilidade aprendida... capacidade ou permissão... | ...English uses "can" for both, but Chinese keeps them apart. | media | adaptado: acrescentei comparação com o inglês (can cobre ambos) |
+| HSK1-15 | concepts.xiang-vs-yao[0].body | "gostaria de" ou "estou pensando em"... "quero" | "would like to" / "I'm thinking of" ... "I want" | media | nuance de registro suave x direto |
+| HSK1-15 | concepts.dou-all[0].body | sempre vem antes do verbo, nunca depois do substantivo como em português | it always comes right before the verb (after the subject) | media | adaptado: comparação com o português retirada (sem equivalente claro em inglês) |
+| HSK1-15 | concepts.ye-also[0].body | nunca no final da frase como costuma ficar em português | not at the end of the sentence the way "too" often does in English | media | adaptado: comparação refeita com o inglês ('too' no fim) |
+| HSK1-15 | phrases[0]/dialogue[3] | Combinado | Sounds good | media | 好的 tem várias traduções (OK / sounds good / deal) |
+| HSK1-16 | vocab[3] | dia do mês (uso falado) | day of the month (spoken) | media | glosa com rótulo de registro |
+| HSK1-16 | vocab[7]/vocab[8] | depois de / antes de | after / before | media | mantido 'after/before' (in English also 'afterwards') |
+| HSK1-16 | concepts.dates[0].body | o oposto da ordem mais comum em português (dia/mês/ano) | unlike English dates, which put the month or the day first | media | adaptado: comparação com o inglês (EUA mês/dia, outros dia/mês); evitei afirmar uma só ordem |
+| HSK1-16 | concepts.hao-vs-ri[0].body | mesmo caractere que aparece em 星期日 (domingo) e em 今天/明天 | the same character that appears in 星期日 (Sunday) | baixa | retirei 今天/明天: esses não contêm 日 (contêm 天), então a afirmação do PT parece incorreta; confira |
+| HSK1-16 | concepts.hao-vs-ri[0].title | é o que se FALA — é o que se ESCREVE | is what you SAY — is what you WRITE | media | nota de realidade (registro falado x escrito) |
+| HSK1-16 | concepts.yiqian-vs-yihou[0].body | nunca antes dela, diferente do português | in English, "before" and "after" come first | media | adaptado: comparação refeita com o inglês |
+| HSK1-16 | dialogue.lines[2] | Então a gente se vê no domingo, tá bom? | Then let's meet on Sunday, okay? | media | 那我们…见, 好吗 coloquial; várias traduções |
+| HSK1-16 | dialogue.lines[3] | Combinado! ... tenho tempo livre | Great! ... I'm free | media | 好 / 有空; registro informal |
+| HSK1-17 | vocab[0] | partícula de conclusão/mudança | particle of completion/change | media | termo gramatical; várias glosas |
+| HSK1-17 | vocab[1] | comer (uma refeição) | to eat (a meal) | media | 吃饭 = eat a meal / have a meal |
+| HSK1-17 | vocab[5] | terminar, acabar | to finish, to end | media | várias traduções |
+| HSK1-17 | concepts.le-completion[0].body | parecido com o passado simples em português ("comi") | somewhat like the English simple past ("I ate") | media | adaptado: comparação refeita com o inglês; 了 não é exatamente passado, mantive 'somewhat' |
+| HSK1-17 | concepts.chifanle-greeting[0] | parecido com "tudo bem?" | something like "how are you?" | media | nota cultural/idiomática, adaptada ao inglês; conteúdo cultural mantido fiel |
+| HSK1-17 | phrases[3]/dialogue[0] | Você já comeu? | Have you eaten yet? | media | várias traduções (Have you eaten? / Did you eat?) |
+| HSK1-17 | dialogue.lines[3] | Ontem eu não jantei, hoje estou com muita fome. | I didn't have dinner yesterday, so I'm very hungry today. | media | acrescentei 'so' para fluência; o chinês só justapõe as frases |
+| HSK1-17 | phrases[5] | Hoje à noite eu não vou beber. | I'm not drinking alcohol tonight. | media | 喝酒 = beber (álcool); PT omite 'álcool' |
+| HSK1-17 | concepts.shide-deferred[0].body | ...essa construção faz mais sentido... | ...this construction makes more sense... | media | explicação gramatical longa; fiel |
+| HSK1-18 | vocab[8] | alguns, um pouco de | some, a bit of | media | duas glosas (contável/incontável) |
+| HSK1-18 | vocab[9] | trabalhar (em um lugar) | to work (at a place) | media | glosa com rótulo |
+| HSK1-18 | vocab[6]/vocab[7] | namorada / namorado | girlfriend / boyfriend | media | 女朋友/男朋友; 'partner' seria neutro, mantive o sentido do PT |
+| HSK1-18 | concepts.difang-you[0].body | bem diferente da ordem em português, onde o lugar viria depois | the place comes first, whereas English often puts it at the end | media | adaptado: comparação refeita com o inglês; 'often' porque 'Here there's coffee' também é possível |
+| HSK1-18 | dialogue.lines[0] | Quem é essa? | Who is this? | media | 这是谁 não marca gênero; o PT 'essa' vem do contexto (namorada); mantido neutro |
+| HSK1-18 | dialogue.lines[2] | Onde ela trabalha ou estuda? | Where does she work or study? | media | 她在哪里工作或学习 — mantido |
+| HSK1-18 | dialogue.lines[3] | Ela estuda na escola, aqui tem alguns livros dela. | She studies at the school, and there are some of her books here. | media | acrescentei 'and' para fluência |
+| HSK1-18 | concepts.meiyou-de[0].body | família, namorado(a) | family, boyfriend/girlfriend | media | fiel ao PT; conferir se o fato linguístico está correto |
+| HSK1-18 | trueFalse[0].whyNote | Onde mora seria "你住在哪里？". | "Where do you live?" would be "你住在哪里？". | media | adaptado para inglês (pergunta explícita) |
+| história | 1.beats[1].lines[2] | Brasil! Legal! | Brazil! Great! | media | Informal reaction; "Great!" vs "Cool!" is a tone choice. |
+| história | 1.beats[2].lines[1] | Olá! Quantos anos você tem? | Hello! How old are you? | media | Chinese 你多大 is a casual, direct question; asking age this directly can sound blunt in English. |
+| história | 2.beats[2].lines[2] | Está muito caro! Faz mais barato. | That's too expensive! Make it cheaper. | media | Bargaining phrase; more idiomatic alternatives: "Can you lower the price a bit?" |
+| história | 2.beats[2].lines[1] | 30 yuans. | Thirty yuan. | media | Source says 块 (kuai, colloquial yuan); "yuan" plural in English is usually unchanged. |
+| história | 3.beats[2].lines[2] | Eu gosto de fazer exercício, mas agora não está bom (pra isso). | I like sports, but I'm not well enough for that right now. | media | Chinese 现在不好 is vague; sense inferred as "not in good shape for it now". |
+| história | 3.beats[3].lines[3] | Quero! Fazer exercício é ainda melhor que assistir filme. | Yes! Exercising is even better than watching movies. | media | Comparative 更好 rendered as "even better". |
+| história | 4.beats[1].lines[2] | Ótimo, eu tenho tempo livre em ambos os dias! | Good, I'm free on both days! | media | Chinese 都 (both/all) with Friday and Sunday implied; kept as "both days". |
+| história | 4.beats[2].lines[3] | Ontem eu não jantei, hoje estou com muita fome. | Yesterday I didn't eat dinner, so I'm very hungry today. | media | Added "so" to make the cause-effect natural; source just lists both facts. |
+| história | 4.beats[3].options[3] | Trabalha na escola | Works at the school | media | Distractor; must stay clearly wrong versus "Is a student" (and unlike the hospital option). |
+| hanzi | 对.meaning | certo, correto; em relação a | correct, right; toward | media | Duas acepções |
+| hanzi | 口.meaning | boca; (classificador p/ pessoas da família) | mouth; (measure word for family members) | media | Classificador de pessoas da família |
+| hanzi | 个.meaning | (classificador geral) | (general measure word) | media | Classificador geral |
+| hanzi | 点.meaning | hora; ponto | o'clock; dot | media | Hora / ponto |
+| hanzi | 块.meaning | pedaço; unidade monetária | piece; unit of currency | media | Peça / unidade monetária |
+| hanzi | 便.meaning | barato (em piányi) | cheap (in piányi) | media | Parte de piányi |
+| hanzi | 号.meaning | dia do mês (uso falado) | day of the month (spoken usage) | media | Dia do mês (falado) |
+| hanzi | 分.meaning | minuto; dividir | minute; to divide | media | Minuto / dividir |
+| hanzi | 了.meaning | partícula de conclusão/mudança de estado | particle of completion/change of state | media | Partícula; descrição gramatical |
+| hanzi | 还.meaning | ainda; ou (em háishi) | still; or (in háishi) | media | háishi; ainda / ou |
+| hanzi | 会.meaning | saber fazer (habilidade aprendida) | to know how to (learned skill) | media | Habilidade aprendida |
+| hanzi | 毛.meaning | pelo; centavo (1/10 do kuài) | fur; dime (1/10 of a kuài) | media | Pelo / centavo (jiao); "dime" é US |
+| hanzi | 地.meaning | terra, chão (em dìtiě, metrô) | earth, ground (in dìtiě, subway) | media | Parte de dìtiě |
+| hanzi | 么.meaning | (partícula interrogativa) | (interrogative particle) | media | Partícula |
+| hanzi | 吧.meaning | partícula de sugestão; bar (em jiǔbā) | suggestion particle; bar (in jiǔbā) | media | Partícula / bar |
+| hanzi | 为.meaning | para, por (em wèishénme, por quê) | for, because of (in wèishénme, why) | media | wèishénme |
+| hanzi | 生.meaning | nascer, vida (em shēngbìng, ficar doente) | to be born, life (in shēngbìng, to get sick) | media | Vida / nascer |
+| hanzi | 打.meaning | bater, fazer (em dǎsuàn, planejar) | to hit, to do (in dǎsuàn, to plan) | media | Verbo polissêmico |
+| hanzi | 空.meaning | vazio, tempo livre (em yǒu kòng) | empty, free time (in yǒu kòng) | media | Vazio / tempo livre |
+| hanzi | 起.meaning | levantar, começar | to get up, to start | media | Levantar / começar |
+| hanzi | 没.meaning | não ter, não há | not have, there is not | media | Negação de ter |
+| hanzi | 离.meaning | distância de, longe de | distance from, away from | media | Preposição |
+| hanzi | 以.meaning | com, por meio de (em yǐhòu, depois) | with, by means of (in yǐhòu, after) | media | Preposição |
+| hanzi | 你.radicals[1] | tu (fonético) | you (phonetic) | media | phonetic |
+| hanzi | 多.radicals[1] | anoitecer (repetido) | evening (repeated) | media | "evening (repeated)" tradução literal de repetido |
+| hanzi | 哥.radicals[1] | poder (repetido) | can (repeated) | media | "can (repeated)" |
+| hanzi | 爸.radicals[1] | (fonético) | (phonetic) | media | "father; (phonetic)" |
+| hanzi | 名.radicals[0] | anoitecer | evening | media | anoitecer = evening/dusk |
+| hanzi | 客.radicals[0] | teto/casa | roof/house | media | teto/casa -> roof/house |
+| hanzi | 疼.radicals[0] | doença | illness | media | doença -> illness |
+| hanzi | 国.radicals[1] | jade (tesouro) | jade (treasure) | media | jade (tesouro) -> jade (treasure) |
+| hanzi | 铁.radicals[1] | perder (fonético) | to lose (phonetic) | media | perder -> to lose |
+| hanzi | 好.mnemonic | Uma mulher (女) ao lado de um filho (子) — a imagem tradicional de uma família reunida, algo bom e completo. | A woman (女) beside a child (子) — the traditional image of a family together, something good and complete. | media | Mnemônico narrativo; conferir fidelidade |
+| hanzi | 早.mnemonic | O sol (日) nascendo bem acima da linha do horizonte (十, como as primeiras raias de luz) — a imagem do início da manhã. | The sun (日) rising just above the horizon line (十, like the first rays of light) — the image of the start of the morning. | media | Mnemônico narrativo; conferir fidelidade |
+| hanzi | 家.mnemonic | Um porco (豕) sob um teto (宀) — na China antiga, ter um porco dentro de casa era sinal de que a família tinha se estabelecido e tinha fartura. | A pig (豕) under a roof (宀) — in ancient China, having a pig at home was a sign that the family was settled and well off. | media | Mnemônico narrativo; conferir fidelidade |
+| hanzi | 看.mnemonic | Uma mão (手) protegendo o olho (目) do sol — o gesto de fazer uma pala com a mão para enxergar melhor algo à distância. | A hand (手) shielding the eye (目) from the sun — the gesture of shading your eyes with your hand to see something far away better. | media | Mnemônico narrativo; conferir fidelidade |
+| hanzi | 明.mnemonic | O sol (日) e a lua (月) lado a lado — juntos, os dois maiores astros do céu, iluminando tudo: daí o sentido de "claro" e "brilhante". | The sun (日) and the moon (月) side by side — together, the two greatest lights in the sky, illuminating everything: hence the meaning "bright" and "clear". | media | Mnemônico narrativo; conferir fidelidade |
+| hanzi | 坐.mnemonic | Duas pessoas (人, duplicado no traço) sentadas diretamente no chão (土) — a imagem mais simples possível de sentar-se. | Two people (人, doubled in the strokes) sitting directly on the ground (土) — the simplest possible image of sitting down. | media | Mnemônico narrativo; conferir fidelidade |
+| hanzi | 男.mnemonic | Um campo de cultivo (田) sobre força/vigor físico (力) — na sociedade agrícola tradicional, o homem era quem trabalhava a terra com sua força. | A farm field (田) above physical strength/vigor (力) — in traditional agricultural society, the man was the one who worked the land with his strength. | media | Mnemônico narrativo; conferir fidelidade |
+| hanzi | 冷.radicals[1] | ordem (fonético) | order (phonetic) | baixa | Pista fonética (令 lìng); glosa do português incerta |
+| hanzi | 钱.radicals[1] | pequeno (fonético) | small (phonetic) | media | 戋 |

@@ -16,14 +16,14 @@ const c={auth:{getSession:async()=>({data:{session:null}}),onAuthStateChange:()=
 window.supabase={createClient:()=>c};})();`;
 let passed = 0, failed = 0;
 const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FALHOU:', n, x !== undefined ? JSON.stringify(x).slice(0, 300) : ''); } };
-async function boot(browser, port, query){
+async function boot(browser, port, query, SITE = 'fr'){
   const ctx = await browser.newContext({ serviceWorkers: 'block' });
   const page = await ctx.newPage(); const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   await page.route(/^https?:\/\/(?!localhost|127\.0\.0\.1)/, r => r.abort());
   await page.route(/cdn\.jsdelivr\.net\/npm\/@supabase/, r => r.fulfill({ contentType: 'text/javascript', body: STUB }));
   await page.addInitScript(() => { try { sessionStorage.setItem('guest_mode', '1'); } catch (e) {} });
-  await page.goto(`http://127.0.0.1:${port}/fr/index.html${query}`);
+  await page.goto(`http://127.0.0.1:${port}/${SITE}/index.html${query}`);
   await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0 && CURRENT_USER === false, null, { timeout: 20000 });
   return { ctx, page, errors };
 }
