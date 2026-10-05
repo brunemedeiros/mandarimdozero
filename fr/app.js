@@ -9613,20 +9613,44 @@ function markChallengeCompleted(id){
 // Wrapper compartilhado pelas 3 telas de feedback (Expressões, Ouça e
 // traduza, Acentuação): mesmo invólucro (classe correct/incorrect + header)
 // e mesmo botão de concluir ao final -- só o corpo (bodyHTML) muda por tipo.
-function challengeFeedbackWrapperHTML(typeClass, isCorrect, headerText, bodyHTML){
+// outcome: 'ok' (acerto), 'partial' (erro leve -- conclui, com explicação)
+// ou 'fail' (erro total -- NÃO conclui: oferece "Tentar de novo" e
+// "Tentar mais tarde"). Se omitido, deriva de isCorrect (compatível com
+// chamadores antigos).
+function challengeFeedbackWrapperHTML(typeClass, isCorrect, headerText, bodyHTML, outcome){
+  const out = outcome || (isCorrect ? 'ok' : 'fail');
+  const cls = out === 'ok' ? 'correct' : out === 'partial' ? 'partial' : 'incorrect';
   return `
-    <div class="${typeClass}-feedback ${isCorrect ? 'correct' : 'incorrect'}">
+    <div class="${typeClass}-feedback ${cls}">
       <div class="${typeClass}-feedback-header">${headerText}</div>
       ${bodyHTML}
-      ${challengeCompleteButtonHTML()}
+      ${out === 'fail' ? challengeRetryButtonsHTML() : challengeCompleteButtonHTML()}
     </div>
   `;
+}
+
+function challengeRetryButtonsHTML(){
+  return `<div class="challenge-retry-actions">
+    <button class="btn btn-primary" id="challenge-retry-btn">🔁 Tentar de novo</button>
+    <button class="btn btn-secondary" id="challenge-later-btn">Tentar mais tarde</button>
+  </div>`;
 }
 
 function challengeCompleteButtonHTML(){
   return `<button class="btn btn-primary challenge-complete-btn" id="challenge-complete-btn" style="margin-top:16px;width:100%;">✅ Concluir</button>`;
 }
 function wireChallengeCompleteButton(c){
+  const retry = document.getElementById('challenge-retry-btn');
+  if (retry){
+    retry.addEventListener('click', () => openChallengePlayer(c.id));
+    const later = document.getElementById('challenge-later-btn');
+    if (later) later.addEventListener('click', () => {
+      // Sai sem concluir: o desafio continua pendente.
+      challengeQueueContext = null;
+      renderChallengesList(currentChallengesCategory);
+    });
+    return;
+  }
   const btn = document.getElementById('challenge-complete-btn');
   if (!btn) return;
   btn.addEventListener('click', () => {
@@ -10148,6 +10172,7 @@ function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
 // (não há chamada de IA em tempo de execução do aluno) — por isso o
 // feedback sempre mostra a resposta do aluno ao lado da esperada, pra ele
 // mesmo julgar nuances que o comparador não capta.
+// BEGIN challenge-translation-logic (extraído por fr/scripts/test_answer_validation.js)
 function normalizeForTranslationCompare(s){
   return String(s || '')
     .toLowerCase()
@@ -10288,6 +10313,19 @@ function translationHasPersonMismatch(text){
   return null;
 }
 
+// Resultado em 3 níveis (regra de conclusão dos Desafios, 04/10/2026):
+// 'ok' = acerto (similaridade >= 0,8 e sem alerta de concordância);
+// 'partial' = erro leve (0,55 a 0,8, ou alerta de concordância) -- conclui
+// com explicação; 'fail' = erro total (< 0,55 ou vazio) -- não conclui.
+function listenTranslateOutcome(studentAnswer, referenceTranslations, personMismatch){
+  if (!studentAnswer || !studentAnswer.trim()) return 'fail';
+  const best = (referenceTranslations || []).reduce((m, ref) => Math.max(m, translationSimilarity(studentAnswer, ref)), 0);
+  if (best < 0.55) return 'fail';
+  if (personMismatch || best < 0.8) return 'partial';
+  return 'ok';
+}
+// END challenge-translation-logic
+
 function openListenTranslatePlayer(c){
   const content = document.getElementById('challenge-player-content');
   content.innerHTML = `
@@ -10326,7 +10364,8 @@ function checkListenTranslateAnswer(c){
   const input = document.getElementById('lt-answer-input');
   const studentAnswer = input.value.trim();
   const personMismatch = translationHasPersonMismatch(studentAnswer);
-  const isCorrect = !personMismatch && isTranslationAcceptable(studentAnswer, c.referenceTranslations);
+  const outcome = listenTranslateOutcome(studentAnswer, c.referenceTranslations, personMismatch);
+  const isCorrect = outcome === 'ok';
   // Desafio de conteúdo continua clicável mesmo já concluído -- não dá XP
   // (mesma decisão de answerChallenge, ver auditoria do sistema de XP).
 
@@ -10341,7 +10380,7 @@ function checkListenTranslateAnswer(c){
         ${slowAudioBtnHTML('lt-replay-slow-btn')}
       </div>
   `;
-  document.getElementById('lt-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('listen-translate', isCorrect, isCorrect ? '✅ Bonne traduction.' : '❌ Pas tout à fait.', ltBodyHTML);
+  document.getElementById('lt-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('listen-translate', isCorrect, outcome === 'ok' ? '✅ Bonne traduction.' : outcome === 'partial' ? '🟡 Presque : bonne idée, mais vérifiez les détails.' : '❌ Pas tout à fait.', ltBodyHTML, outcome);
   document.getElementById('lt-verify-btn').style.display = 'none';
   document.getElementById('lt-replay-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
@@ -10363,6 +10402,19 @@ function normalizeForAccentCompare(s){
 
 function isAccentAnswerCorrect(studentAnswer, targetText){
   return normalizeForAccentCompare(studentAnswer) === normalizeForAccentCompare(targetText);
+}
+
+function stripDiacriticsForAccentCompare(s){
+  return normalizeForAccentCompare(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+// 'ok' = igual; 'partial' = só o acento/cedilha/trema difere (erro leve,
+// conclui); 'fail' = palavra diferente ou vazio (erro total, não conclui).
+function accentAnswerOutcome(studentAnswer, targetText){
+  if (isAccentAnswerCorrect(studentAnswer, targetText)) return 'ok';
+  const typed = stripDiacriticsForAccentCompare(studentAnswer);
+  if (typed && typed === stripDiacriticsForAccentCompare(targetText)) return 'partial';
+  return 'fail';
 }
 // END accent-challenge-logic
 
@@ -10399,7 +10451,8 @@ function openAccentPlayer(c){
 function checkAccentAnswer(c){
   const input = document.getElementById('accent-answer-input');
   const studentAnswer = input.value.trim();
-  const isCorrect = isAccentAnswerCorrect(studentAnswer, c.targetText);
+  const outcome = accentAnswerOutcome(studentAnswer, c.targetText);
+  const isCorrect = outcome === 'ok';
   // Desafio de conteúdo continua clicável mesmo já concluído -- não dá XP
   // (mesma decisão de answerChallenge, ver auditoria do sistema de XP).
 
@@ -10412,7 +10465,7 @@ function checkAccentAnswer(c){
       </div>
       ${c.explanation ? `<p class="accent-feedback-explanation">${escapeHtmlChallenge(c.explanation)}</p>` : ''}
   `;
-  document.getElementById('accent-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('accent', isCorrect, isCorrect ? '✅ Correct.' : '❌ Incorrect.', accentBodyHTML);
+  document.getElementById('accent-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('accent', isCorrect, outcome === 'ok' ? '✅ Correct.' : outcome === 'partial' ? '🟡 Presque : vérifiez les accents.' : '❌ Incorrect.', accentBodyHTML, outcome);
   document.getElementById('accent-verify-btn').style.display = 'none';
   document.getElementById('accent-replay-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);

@@ -46,9 +46,13 @@ const { normalizeDictationWord, evaluateDictation, frenchNumberWords, classifyDi
   extractBlock('// BEGIN dictation-answer-logic', '// END dictation-answer-logic'),
   ['normalizeDictationWord', 'evaluateDictation', 'frenchNumberWords', 'classifyDictationError', 'updateDictationRecord', 'sanitizeDictationRecord', 'dictationWrongWords', 'splitDictationSentences', 'dictationSentenceErrorFlags']
 );
-const { isAccentAnswerCorrect } = runBlockAndExport(
+const { isAccentAnswerCorrect, accentAnswerOutcome } = runBlockAndExport(
   extractBlock('// BEGIN accent-challenge-logic', '// END accent-challenge-logic'),
-  ['isAccentAnswerCorrect']
+  ['isAccentAnswerCorrect', 'accentAnswerOutcome']
+);
+const { listenTranslateOutcome, translationHasPersonMismatch } = runBlockAndExport(
+  extractBlock('// BEGIN challenge-translation-logic', '// END challenge-translation-logic'),
+  ['listenTranslateOutcome', 'translationHasPersonMismatch']
 );
 
 let passed = 0;
@@ -206,6 +210,20 @@ console.log('\n=== Desafio "Acentuação\" -- deve continuar EXIGINDO acento cor
 check('"étudiant" vs "etudiant" (sem acento) → incorreto (é literalmente o que o desafio testa)', isAccentAnswerCorrect('etudiant', 'étudiant'), false);
 check('"étudiant" vs "étudiant" → correto', isAccentAnswerCorrect('étudiant', 'étudiant'), true);
 check('espaço extra não afeta: " étudiant " vs "étudiant" → correto', isAccentAnswerCorrect(' étudiant ', 'étudiant'), true);
+
+console.log('\n=== Regra de conclusão dos Desafios (acerto / erro leve / erro total) ===\n');
+check('Acentuação: igual → ok', accentAnswerOutcome('étudiant', 'étudiant'), 'ok');
+check('Acentuação: sem acento → partial (erro leve, conclui)', accentAnswerOutcome('etudiant', 'étudiant'), 'partial');
+check('Acentuação: acento trocado → partial', accentAnswerOutcome('ètudiant', 'étudiant'), 'partial');
+check('Acentuação: cedilha faltando → partial', accentAnswerOutcome('francais', 'français'), 'partial');
+check('Acentuação: palavra diferente → fail (não conclui)', accentAnswerOutcome('professeur', 'étudiant'), 'fail');
+check('Acentuação: vazio → fail', accentAnswerOutcome('', 'étudiant'), 'fail');
+const refs = ['Hoje está chovendo.'];
+check('Traduzir: idêntico → ok', listenTranslateOutcome('Hoje está chovendo', refs, null), 'ok');
+check('Traduzir: vazio → fail', listenTranslateOutcome('  ', refs, null), 'fail');
+check('Traduzir: sem relação → fail', listenTranslateOutcome('Eu gosto de café', refs, null), 'fail');
+check('Traduzir: alerta de concordância força partial', listenTranslateOutcome('Hoje está chovendo', refs, { pronoun: 'eu', verb: 'comprou' }), 'partial');
+check('Traduzir: similaridade média (0,55 a 0,8) → partial', listenTranslateOutcome('Hoje chove muito forte aqui', ['Hoje está chovendo forte aqui'] , null) !== 'ok', true);
 
 console.log(`\n${passed} passaram, ${failed} falharam.`);
 if (failed > 0){
