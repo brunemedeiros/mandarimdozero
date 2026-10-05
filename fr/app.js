@@ -432,11 +432,11 @@ function wireKnowButtons(container){
         card.fsrsReps = 0;
         card.fsrsLapses = 0;
         btn.classList.remove('known');
-        btn.textContent = 'Já sei?';
+        btn.textContent = t('zh.path.knownAsk');
       } else {
         applyMemoryGrade(card, 3); // grade 3 = "Fácil" -- Fase 5: motor novo
         btn.classList.add('known');
-        btn.textContent = '✓ Já sei';
+        btn.textContent = t('zh.path.knownDone');
         showToast(t('toast.markedKnown'));
       }
 
@@ -1270,8 +1270,9 @@ document.getElementById('streak-modal-continue-btn').addEventListener('click', (
 // aqui -- é dado específico deste idioma (LEVELS igual, ver content.js),
 // exigido como hook por shared/wizard.js.
 const LEVEL_DESCRIPTIONS = {
-  A1: { tier: 'Iniciante', text: 'Fazer e responder a perguntas simples e se apresentar a outras pessoas' },
-  A2: { tier: 'Básico', text: 'Participar de conversas simples do dia a dia e falar sobre seus estudos' }
+  // Getters: resolvem no idioma do site NO MOMENTO do uso (i18n fase 9).
+  A1: { get tier(){ return t('level.tier.beginner'); }, get text(){ return t('fr.level.A1.text'); } },
+  A2: { get tier(){ return t('level.tier.basic'); }, get text(){ return t('fr.level.A2.text'); } }
 };
 
 // estimateCompletionDate, buildLessonsWeekData, remainingUnitsForLevels/
@@ -1297,8 +1298,8 @@ function maybeSendStudyReminder(){
   if (diffMin < 0 || diffMin > 30) return;
 
   if (localStorageSafeGet('frances_last_study_notif') === todayStr()) return;
-  new Notification('Hora de estudar francês! 🇫🇷', {
-    body: `Sua meta de hoje: ${goal.dailyLessonsGoal} lição${goal.dailyLessonsGoal > 1 ? 'ões' : ''}.`,
+  new Notification(t('fr.reminder.title'), {
+    body: tp('zh.reminder.body', goal.dailyLessonsGoal),
     icon: 'icons/icon-192.png'
   });
   localStorageSafeSet('frances_last_study_notif', todayStr());
@@ -3872,7 +3873,7 @@ function renderGrammarExerciseStep(u, contentEl, nextBtn){
       STEP_STATE.gramExerciseScore += 1;
     } else if (forms.some(f => looseSep(given) === looseSep(f))){
       wrapEl.classList.add('almost');
-      expectedEl.textContent = `Quase! → ${expected}`;
+      expectedEl.textContent = t('feedback.almostArrow', { expected });
       STEP_STATE.gramExerciseScore += 0.5;
     } else {
       wrapEl.classList.add('wrong');
@@ -4519,7 +4520,7 @@ function addStudyMinutes(){
 function clozeFeedbackDetailHTML(ex, withCorrect){
   const p = ex.phrase;
   const correct = withCorrect
-    ? `<div class="feedback-correct-line">Resposta certa: <strong>${ex.correctBlock.f}</strong></div>`
+    ? `<div class="feedback-correct-line">${t('feedback.correctAnswerColon')} <strong>${ex.correctBlock.f}</strong></div>`
     : '';
   return `${correct}<div class="feedback-phrase-zh"><strong>${p.f}</strong> ${audioBtnHTML(p.f)}</div><div class="feedback-phrase-trans">${p.t}</div>`;
 }
@@ -4547,7 +4548,7 @@ function answerExplanationHTML(ex){
     // porque está na mesma unidade (ex: nota sobre "avoir"/idade não
     // explica um erro em "un/une"). Ver CLAUDE.md, coerência pedagógica.
     const originHTML = origin
-      ? `<div class="usage-note-title">Onde você já viu isso</div><p class="usage-note-body"><strong>${origin.f}</strong><br>${origin.t}</p>`
+      ? `<div class="usage-note-title">${t('feedback.whereSeen')}</div><p class="usage-note-body"><strong>${origin.f}</strong><br>${origin.t}</p>`
       : (noteOrConceptReviewHTML(u, ex.vocabIdx, true) || '');
     return `<p class="usage-note-body"><strong>${ex.item.f}</strong> ${audioBtnHTML(ex.item.f)} = ${ex.item.t}</p>${originHTML}`;
   }
@@ -4613,10 +4614,10 @@ function showAnswerPanel(contentEl, ex, opts = {}){
   panel.className = 'wrong-feedback';
   panel.innerHTML = `
     <div class="feedback-card-body">
-      <div class="wrong-feedback-header">${revealed ? '👀 Resposta revelada' : '❌ Não foi dessa vez'}</div>
+      <div class="wrong-feedback-header">${revealed ? t('feedback.header.revealed') : t('feedback.header.notThisTime')}</div>
       ${explanation ? `
         <div class="wrong-feedback-why">
-          <div class="wrong-feedback-why-label">${ex && ex.format === 'cloze' ? 'Frase completa' : (revealed ? 'Resposta' : 'Por que não foi essa')}</div>
+          <div class="wrong-feedback-why-label">${ex && ex.format === 'cloze' ? t('feedback.label.fullSentence') : (revealed ? t('feedback.label.answer') : t('feedback.label.whyNot'))}</div>
           <div class="feedback-inner-box">${explanation}</div>
         </div>
       ` : ''}
@@ -5260,16 +5261,12 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
 // (múltipla escolha destaca a opção certa, cloze já revela a tradução),
 // repetir a mesma informação de novo dentro do painel não ajuda em nada --
 // passa null.
-const CORRECT_FEEDBACK_PHRASES = [
-  'Na mosca!', 'Mandou bem!', 'Isso aí!', 'Perfeito!', 'Muito bem!',
-  'Você arrasou!', 'Exato!', 'Boa!', 'Certeza absoluta!', 'Aí sim!',
-  'Continua assim!', 'Show de bola!', 'Isso mesmo!', 'Excelente!',
-  'Ótimo trabalho!', 'Maravilha!'
-];
+// Chaves do catálogo (i18n fase 9): o texto é resolvido no momento do uso.
+const CORRECT_FEEDBACK_PHRASES = Array.from({ length: 16 }, (_, i) => 'feedback.praise.' + (i + 1));
 let correctFeedbackQueue = [];
 function nextCorrectFeedbackPhrase(){
   if (!correctFeedbackQueue.length) correctFeedbackQueue = shuffle([...CORRECT_FEEDBACK_PHRASES]);
-  return correctFeedbackQueue.pop();
+  return t(correctFeedbackQueue.pop());
 }
 
 // ---------- Combo de acertos seguidos (estilo Duolingo) ----------
@@ -5279,13 +5276,11 @@ function nextCorrectFeedbackPhrase(){
 // COMBO_MILESTONE_STEP mostra o número explícito ("Uau, 5 seguidas!") em
 // vez de uma frase genérica, pra marcar só os marcos redondos, não toda
 // resposta certa da sequência.
-const COMBO_PHRASES = [
-  'Você está indo muito bem!', 'Que orgulho!', 'Maravilha, continue assim!'
-];
+const COMBO_PHRASES = ['feedback.combo.1', 'feedback.combo.2', 'feedback.combo.3'];
 let comboPhraseQueue = [];
 function nextComboPhrase(){
   if (!comboPhraseQueue.length) comboPhraseQueue = shuffle([...COMBO_PHRASES]);
-  return comboPhraseQueue.pop();
+  return t(comboPhraseQueue.pop());
 }
 const COMBO_MIN = 3;
 const COMBO_MILESTONE_STEP = 5;
@@ -5299,7 +5294,7 @@ function showCorrectFeedbackPanel(contentEl, detail){
   const combo = STEP_STATE.comboCount;
   const isMilestone = combo >= COMBO_MILESTONE_STEP && combo % COMBO_MILESTONE_STEP === 0;
   const inCombo = combo >= COMBO_MIN;
-  const headerText = isMilestone ? `Uau, ${combo} seguidas!` : (inCombo ? nextComboPhrase() : nextCorrectFeedbackPhrase());
+  const headerText = isMilestone ? t('feedback.combo.milestone', { n: combo }) : (inCombo ? nextComboPhrase() : nextCorrectFeedbackPhrase());
   const comboBadgeHTML = inCombo ? `<span class="correct-feedback-combo-badge">⚡ Combo x${combo}</span>` : '';
 
   const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
@@ -5595,7 +5590,11 @@ function reviewFilterQueue(filter, pool){
 // painel ⚙️ (com contagem entre parênteses) e o indicador discreto no
 // hero (sem contagem, só o nome do filtro ativo) -- texto-fonte único
 // pra nunca dessincronizar entre os dois.
-const REVIEW_FILTER_LABELS = { all: 'Todas', hard: 'Mais difíceis primeiro', oldest: 'Mais antigas primeiro' };
+const REVIEW_FILTER_LABELS = {
+  get all(){ return t('review.origin.all'); },
+  get hard(){ return t('review.filter.hard'); },
+  get oldest(){ return t('review.filter.oldest'); }
+};
 
 // Fase 4 do sistema de alunas particulares (ver CLAUDE.md): rótulos do
 // filtro de ORIGEM -- diferente de REVIEW_FILTER_LABELS (que decide COMO
@@ -5925,13 +5924,13 @@ function onMatchTileClick(btn){
 
   const isMatch = first.dataset.cardId === second.dataset.cardId && first.dataset.side !== second.dataset.side;
   MATCH_STATE.attempts += 1;
-  document.querySelector('.match-attempts').textContent = `Tentativas: ${MATCH_STATE.attempts}`;
+  document.querySelector('.match-attempts').textContent = t('zh.review.match.attempts', { n: MATCH_STATE.attempts });
 
   if (isMatch){
     first.classList.add('match-ok');
     second.classList.add('match-ok');
     MATCH_STATE.matchedCount += 1;
-    document.querySelector('.match-pairs').textContent = `Pares: ${MATCH_STATE.matchedCount}/${MATCH_STATE.pairs.length}`;
+    document.querySelector('.match-pairs').textContent = t('zh.review.match.pairs', { done: MATCH_STATE.matchedCount, total: MATCH_STATE.pairs.length });
     addXP(2);
     // Fase 8: mesma regra explícita da Fase 6 (Speed Review) -- um par
     // certo num cartão NUNCA estudado é evidência suficiente pra promovê-lo
@@ -7359,7 +7358,7 @@ function renderCheckpointQuizStep(){
       CHECKPOINT_STATE.score += 1;
     } else if (normalizeLoose(given) === normalizeLoose(expected)){
       wrapEl.classList.add('almost');
-      expectedEl.textContent = `Quase! → ${expected}`;
+      expectedEl.textContent = t('feedback.almostArrow', { expected });
       CHECKPOINT_STATE.score += 0.5;
     } else {
       wrapEl.classList.add('wrong');
@@ -7514,7 +7513,7 @@ function renderLevelTestQuizStep(){
       LEVEL_TEST_STATE.score += 1;
     } else if (normalizeLoose(given) === normalizeLoose(expected)){
       wrapEl.classList.add('almost');
-      expectedEl.textContent = `Quase! → ${expected}`;
+      expectedEl.textContent = t('feedback.almostArrow', { expected });
       LEVEL_TEST_STATE.score += 0.5;
     } else {
       wrapEl.classList.add('wrong');
@@ -8344,7 +8343,7 @@ function renderConjPracticeStep(){
                   const expected = expectedForms[i] || '';
                   const accepted = acceptedForms(expected);
                   if (accepted.includes(given.trim())){ statusClass = 'ok'; }
-                  else if (accepted.some(f => normalizeLoose(given) === normalizeLoose(f))){ statusClass = 'almost'; expectedText = `Quase! → ${expected}`; }
+                  else if (accepted.some(f => normalizeLoose(given) === normalizeLoose(f))){ statusClass = 'almost'; expectedText = t('feedback.almostArrow', { expected }); }
                   else { statusClass = 'wrong'; expectedText = `→ ${expected}`; }
                 }
                 return `
@@ -8433,7 +8432,7 @@ function renderConjPracticeStep(){
           earnedXP += isIrregular ? 2 : 1;
         } else if (accepted.some(f => normalizeLoose(given) === normalizeLoose(f))){
           fieldEl.classList.add('almost');
-          expectedEl.textContent = `Quase! → ${expected}`;
+          expectedEl.textContent = t('feedback.almostArrow', { expected });
           correctCount += 0.5; tenseCorrect += 0.5;
         } else {
           fieldEl.classList.add('wrong');
@@ -9152,7 +9151,7 @@ function challengeFeedbackWrapperHTML(typeClass, isCorrect, headerText, bodyHTML
 }
 
 function challengeCompleteButtonHTML(){
-  return `<button class="btn btn-primary challenge-complete-btn" id="challenge-complete-btn" style="margin-top:16px;width:100%;">✅ Concluir</button>`;
+  return `<button class="btn btn-primary challenge-complete-btn" id="challenge-complete-btn" style="margin-top:16px;width:100%;">${t('fr.challenge.complete')}</button>`;
 }
 function wireChallengeCompleteButton(c){
   const btn = document.getElementById('challenge-complete-btn');
@@ -9202,11 +9201,11 @@ async function renderChallengeCategories(){
   document.getElementById('challenges-admin-wrap').style.display = 'none';
 
   const wrap = document.getElementById('challenges-categories');
-  wrap.innerHTML = loadingHTML('Carregando desafios...');
+  wrap.innerHTML = loadingHTML(t('fr.challenges.loading'));
 
   const ok = await loadChallengesFromDB();
   if (!ok){
-    wrap.innerHTML = `<p class="challenges-empty">Não foi possível carregar os desafios agora. Verifique sua conexão e tente novamente.</p>`;
+    wrap.innerHTML = `<p class="challenges-empty">${t('fr.challenges.loadFailedList')}</p>`;
     return;
   }
   await ensureChallengesPlanLoaded();
@@ -9242,7 +9241,7 @@ async function renderChallengeCategories(){
   const dictationsHere = dictationsVisible(challengesModuleFilter);
   const visibleCats = challengesModuleFilter ? CHALLENGE_CATEGORIES.filter(cat => listedNow.some(c => c.type === cat.type)) : CHALLENGE_CATEGORIES;
   const catSubtitle = (cat) => challengesModuleFilter
-    ? `${listedNow.filter(c => c.type === cat.type).length} desafio${listedNow.filter(c => c.type === cat.type).length === 1 ? '' : 's'}`
+    ? tp('fr.challenges.countInCategory', listedNow.filter(c => c.type === cat.type).length)
     : cat.subtitle;
   wrap.innerHTML = visibleCats.map(cat => `
     <button class="challenge-category-card" data-category="${cat.type}">
@@ -9614,10 +9613,10 @@ function answerChallenge(c, chosenIdx){
 function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
   const content = document.getElementById('challenge-player-content');
   const bodyHTML = `
-      ${isCorrect ? '' : `<p class="challenge-feedback-chosen">Sua resposta: ${escapeHtmlChallenge(c.options[chosenIdx])}<br>Resposta certa: <strong>${escapeHtmlChallenge(c.correctAnswer)}</strong></p>`}
+      ${isCorrect ? '' : `<p class="challenge-feedback-chosen">${t('fr.challenge.yourAnswerColon')} ${escapeHtmlChallenge(c.options[chosenIdx])}<br>${t('feedback.correctAnswerColon')} <strong>${escapeHtmlChallenge(c.correctAnswer)}</strong></p>`}
       <p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong><br>
       signifie <strong>${escapeHtmlChallenge(c.meaning.fr)}</strong>.<br>
-      Em português: <strong>${escapeHtmlChallenge(c.meaning.pt)}</strong>.</p>
+      ${t('fr.challenge.inPortuguese')} <strong>${escapeHtmlChallenge(c.meaning.pt)}</strong>.</p>
       <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation)}</p>
 
       <div class="challenge-second-example">
@@ -9698,7 +9697,7 @@ function listenTranslateSetup(c){
 function openListenTranslatePlayer(c){
   const content = document.getElementById('challenge-player-content');
   content.innerHTML = `
-    <div class="challenge-expression">🎧 Ouça e traduza</div>
+    <div class="challenge-expression">🎧 ${t('fr.challenges.cat.listenTranslate.title')}</div>
     <div class="listen-translate-audio-wrap audio-btn-row">
       <button class="dictation-play-btn" id="lt-play-btn">▶ Écouter</button>
       ${slowAudioBtnHTML('lt-play-slow-btn')}
@@ -9707,8 +9706,8 @@ function openListenTranslatePlayer(c){
       <button class="btn btn-secondary" id="lt-hint-btn">Montrer un indice</button>
       <p class="listen-translate-hint-text" id="lt-hint-text" style="display:none;"></p>
     </div>
-    <label class="listen-translate-answer-label" for="lt-answer-input">Digite sua tradução:</label>
-    <textarea class="listen-translate-answer-input" id="lt-answer-input" rows="2" placeholder="Sua tradução em português..."></textarea>
+    <label class="listen-translate-answer-label" for="lt-answer-input">${t('fr.challenge.lt.label')}</label>
+    <textarea class="listen-translate-answer-input" id="lt-answer-input" rows="2" placeholder="${t('fr.challenge.lt.placeholder', { lang: (listenTranslateSetup(c).lang === 'en' ? t('lang.name.en') : t('lang.name.pt-BR')) })}"></textarea>
     <div class="listen-translate-actions">
       <button class="btn btn-primary" id="lt-verify-btn">Vérifier</button>
     </div>
@@ -9739,11 +9738,11 @@ function checkListenTranslateAnswer(c){
   // (mesma decisão de answerChallenge, ver auditoria do sistema de XP).
 
   const ltBodyHTML = `
-      ${personMismatch ? `<p class="listen-translate-feedback-warning">⚠ Repare na concordância: depois de "${escapeHtmlChallenge(personMismatch.pronoun)}", "${escapeHtmlChallenge(personMismatch.verb)}" não é a conjugação certa.</p>` : ''}
-      <p class="listen-translate-feedback-row"><strong>Sua resposta</strong>${escapeHtmlChallenge(studentAnswer || '—')}</p>
-      <p class="listen-translate-feedback-row"><strong>Resposta esperada</strong>${escapeHtmlChallenge(lt.refs[0])}</p>
-      <p class="listen-translate-feedback-row"><strong>Frase original</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
-      ${lt.explanation ? `<p class="listen-translate-feedback-row"><strong>Explicação</strong>${escapeHtmlChallenge(lt.explanation)}</p>` : ''}
+      ${personMismatch ? `<p class="listen-translate-feedback-warning">${t('fr.challenge.agreementWarn', { pronoun: escapeHtmlChallenge(personMismatch.pronoun), verb: escapeHtmlChallenge(personMismatch.verb) })}</p>` : ''}
+      <p class="listen-translate-feedback-row"><strong>${t('fr.challenge.row.yourAnswer')}</strong>${escapeHtmlChallenge(studentAnswer || '—')}</p>
+      <p class="listen-translate-feedback-row"><strong>${t('fr.challenge.row.expected')}</strong>${escapeHtmlChallenge(lt.refs[0])}</p>
+      <p class="listen-translate-feedback-row"><strong>${t('fr.challenge.row.original')}</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
+      ${lt.explanation ? `<p class="listen-translate-feedback-row"><strong>${t('fr.step.explanation')}</strong>${escapeHtmlChallenge(lt.explanation)}</p>` : ''}
       <div class="audio-btn-row">
         <button class="dictation-play-btn" id="lt-replay-btn">▶ Écouter encore</button>
         ${slowAudioBtnHTML('lt-replay-slow-btn')}
@@ -9777,12 +9776,12 @@ function isAccentAnswerCorrect(studentAnswer, targetText){
 function openAccentPlayer(c){
   const content = document.getElementById('challenge-player-content');
   content.innerHTML = `
-    <div class="challenge-expression">✍️ Acentuação</div>
+    <div class="challenge-expression">✍️ ${t('fr.challenges.cat.accent.title')}</div>
     <div class="accent-audio-wrap audio-btn-row">
       <button class="dictation-play-btn" id="accent-play-btn">▶ Écouter</button>
       ${slowAudioBtnHTML('accent-play-slow-btn')}
     </div>
-    <label class="listen-translate-answer-label" for="accent-answer-input">Digite o que você ouviu:</label>
+    <label class="listen-translate-answer-label" for="accent-answer-input">${t('fr.challenge.accent.label')}</label>
     <input type="text" class="accent-answer-input" id="accent-answer-input" autocomplete="off" autocapitalize="off" spellcheck="false">
     ${frAccentPickerHTML()}
     <div class="listen-translate-actions">
@@ -9812,7 +9811,7 @@ function checkAccentAnswer(c){
   // (mesma decisão de answerChallenge, ver auditoria do sistema de XP).
 
   const accentBodyHTML = `
-      ${!isCorrect ? `<p class="accent-feedback-answer">Sua resposta: <strong>${escapeHtmlChallenge(studentAnswer || '—')}</strong></p>` : ''}
+      ${!isCorrect ? `<p class="accent-feedback-answer">${t('fr.challenge.yourAnswerColon')} <strong>${escapeHtmlChallenge(studentAnswer || '—')}</strong></p>` : ''}
       <div class="accent-feedback-correct-word">${escapeHtmlChallenge(c.targetText)}</div>
       <div class="audio-btn-row">
         <button class="dictation-play-btn" id="accent-replay-btn">▶ Écouter</button>

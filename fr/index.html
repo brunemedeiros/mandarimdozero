@@ -3158,7 +3158,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 </head>
 <body>
 
-<a class="skip-link" href="#main-content">Pular para o conteúdo</a>
+<a data-i18n="ui.skipLink" class="skip-link" href="#main-content">Pular para o conteúdo</a>
 
 <div id="toast-layer"></div>
 <div id="badge-unlock-layer" aria-live="polite"></div>
@@ -3210,7 +3210,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
            administrativos reais (Painel de Admin etc. continuam
            acessíveis pela conta, só saem da navegação normal). -->
       <button class="pill admin-mode-toggle-btn" id="admin-mode-toggle-btn" data-i18n="admin.mode.pillLabel" data-i18n-attr="aria-label:admin.mode.pillAria;title:admin.mode.pillTitle" aria-label="Ativar/desativar Admin Mode" title="Admin Mode: OFF simula a experiência de um aluno comum" style="display:none;">🔒 Admin: <span id="admin-mode-state-label">ON</span></button>
-      <button class="pill notifications-pill" id="notifications-topbar-btn" aria-label="Notificações" title="Notificações">🔔<span class="notifications-badge" id="notifications-badge" style="display:none;"></span></button>
+      <button class="pill notifications-pill" id="notifications-topbar-btn" aria-label="Notificações" title="Notificações" data-i18n-attr="aria-label:notif.pref.sectionTitle;title:notif.pref.sectionTitle">🔔<span class="notifications-badge" id="notifications-badge" style="display:none;"></span></button>
       <button class="pill report-topbar-pill" id="report-topbar-btn" aria-label="Reportar problema" title="Reportar problema" data-i18n-attr="aria-label:report.entry.label;title:report.entry.label">⚑</button>
       <div class="lang-switcher">
         <button class="lang-switcher-btn" id="lang-switcher-btn" type="button" aria-label="Trocar idioma" title="Trocar idioma"></button>
@@ -3227,11 +3227,11 @@ footer.app-footer img{ height:40px; opacity:.85; }
     </button>
     <button class="tab-btn" data-tab="review">
       <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 13.3-6"/><path d="M17.3 3v4h-4"/><path d="M20 12a8 8 0 0 1-13.3 6"/><path d="M6.7 21v-4h4"/></svg>
-      <span>Revisão</span>
+      <span data-i18n="admin.reports.screen.review">Revisão</span>
     </button>
     <button class="tab-btn" data-tab="conjugaison">
       <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4.2L15.8 5c.8-.8 2-.8 2.8 0l.4.4c.8.8.8 2 0 2.8L8.2 19l-4.2 1z"/><path d="M13.5 6.5l4 4"/></svg>
-      <span>Conjugação</span>
+      <span data-i18n="admin.reports.screen.conjugaison">Conjugação</span>
     </button>
     <button class="tab-btn" data-tab="challenges">
       <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg>
@@ -3253,15 +3253,15 @@ footer.app-footer img{ height:40px; opacity:.85; }
     </button>
     <button class="tab-btn" data-tab="review">
       <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><rect x="3" y="7" width="14" height="10" rx="2.5" fill="#A78BFA" transform="rotate(-8 10 12)"/><rect x="7" y="7" width="14" height="10" rx="2.5" fill="#7C3AED"/></svg>
-      <span>Revisão</span>
+      <span data-i18n="admin.reports.screen.review">Revisão</span>
     </button>
     <button class="tab-btn" data-tab="profile">
       <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="#FBBF24"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6" fill="#7C3AED"/></svg>
       <span>Perfil</span>
     </button>
-    <button class="tab-btn" id="mais-btn" type="button" aria-haspopup="true" aria-controls="user-menu-dropdown" aria-label="Mais opções" title="Mais">
+    <button class="tab-btn" id="mais-btn" type="button" aria-haspopup="true" aria-controls="user-menu-dropdown" aria-label="Mais opções" title="Mais" data-i18n-attr="aria-label:ui.moreOptions;title:zh.progress.heatMore">
       <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.3" fill="#94A3B8"/><circle cx="12" cy="12" r="2.3" fill="#64748B"/><circle cx="19" cy="12" r="2.3" fill="#475569"/></svg>
-      <span>Mais</span>
+      <span data-i18n="zh.progress.heatMore">Mais</span>
     </button>
   </nav>
 
@@ -3280,11 +3280,11 @@ footer.app-footer img{ height:40px; opacity:.85; }
       </button>
       <button class="tab-btn" data-tab="review">
         <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><rect x="3" y="7" width="14" height="10" rx="2.5" fill="#A78BFA" transform="rotate(-8 10 12)"/><rect x="7" y="7" width="14" height="10" rx="2.5" fill="#7C3AED"/></svg>
-        <span class="sidebar-label">Revisão</span>
+        <span data-i18n="admin.reports.screen.review" class="sidebar-label">Revisão</span>
       </button>
       <button class="tab-btn" data-tab="conjugaison">
         <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><path d="M4 20l1-4.2L15.8 5c.8-.8 2-.8 2.8 0l.4.4c.8.8.8 2 0 2.8L8.2 19l-4.2 1z" fill="#FBBF24"/><path d="M13.5 6.5l4 4" stroke="#F97316" stroke-width="2.2" stroke-linecap="round"/><path d="M4 20l1-4.2 3.2 3.2z" fill="#EC4899"/></svg>
-        <span class="sidebar-label">Conjugação</span>
+        <span data-i18n="admin.reports.screen.conjugaison" class="sidebar-label">Conjugação</span>
       </button>
       <button class="tab-btn" data-tab="challenges">
         <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="#F87171"/><circle cx="12" cy="12" r="5" fill="#FEF2F2"/><circle cx="12" cy="12" r="2.3" fill="#DC2626"/></svg>
@@ -3303,7 +3303,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
       </button>
       <button class="tab-btn" data-tab="settings">
         <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.36a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.26.42.7.7 1.55 1H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z" fill="#14B8A6"/><circle cx="12" cy="12" r="3" fill="#0F766E"/></svg>
-        <span class="sidebar-label">Configurações</span>
+        <span data-i18n="settings.title" class="sidebar-label">Configurações</span>
       </button>
       <button class="tab-btn admin-only-nav" data-tab="admin-badges" style="display:none;">
         <svg class="tab-icon sidebar-icon" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3z" fill="#7C3AED"/><path d="M9 12l2 2 4-4" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
@@ -3322,7 +3322,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <span class="level-toggle-chevron">⌄</span>
       </button>
       <div class="path-header">
-        <p>Unidades organizadas por objetivo comunicacional. Complete uma unidade para desbloquear a próxima.</p>
+        <p data-i18n="ui.path.sub">Unidades organizadas por objetivo comunicacional. Complete uma unidade para desbloquear a próxima.</p>
       </div>
       <div class="daily-goal-chip" id="daily-goal-chip" style="display:none;"></div>
       <div class="daily-challenges-strip" id="daily-challenges-strip"></div>
@@ -3342,8 +3342,8 @@ footer.app-footer img{ height:40px; opacity:.85; }
           <div class="lesson-progress-fill" id="step-progress-fill"></div>
         </div>
         <button class="lesson-close-btn" id="report-flag-lesson-btn" data-report-flag aria-label="Reportar problema" title="Reportar problema" data-i18n-attr="aria-label:report.entry.label;title:report.entry.label">⚑</button>
-        <button class="lesson-close-btn" id="lesson-kbd-btn" aria-label="Atalhos do teclado" title="Atalhos do teclado">⌨️</button>
-        <button class="lesson-close-btn" id="back-to-path" aria-label="Sair da lição" title="Sair da lição">✕</button>
+        <button class="lesson-close-btn" id="lesson-kbd-btn" aria-label="Atalhos do teclado" title="Atalhos do teclado" data-i18n-attr="aria-label:ui.kbd.ariaTitle;title:ui.kbd.ariaTitle">⌨️</button>
+        <button class="lesson-close-btn" id="back-to-path" aria-label="Sair da lição" title="Sair da lição" data-i18n-attr="aria-label:ui.exitLesson;title:ui.exitLesson">✕</button>
       </div>
 
       <div class="acq-phase-banner" id="acq-phase-banner" style="display:none;"></div>
@@ -3360,8 +3360,8 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <div class="view" id="view-review">
     <div id="review-mode-select-wrap">
       <div class="path-header">
-        <h2>Revisão</h2>
-        <p>O que você deve fazer agora?</p>
+        <h2 data-i18n="admin.reports.screen.review">Revisão</h2>
+        <p data-i18n="ui.review.whatNow">O que você deve fazer agora?</p>
       </div>
 
       <!-- Prop 3 (ver CLAUDE.md, "7 propostas") -- "Meus Cartões" saiu do
@@ -3371,9 +3371,9 @@ footer.app-footer img{ height:40px; opacity:.85; }
            sub-abas do Painel de Admin/Perfil, logo abaixo de
            título+subtítulo, centralizado (mesmo .leaderboard-tabs sem
            override de alinhamento), zero CSS novo. -->
-      <div class="leaderboard-tabs" role="tablist" aria-label="Atalhos de Revisão">
-        <button type="button" class="leaderboard-tab" id="review-my-flashcards-btn">📇 Meus Cartões</button>
-        <button type="button" class="leaderboard-tab" id="review-header-settings-btn">⚙️ Configurar sessão</button>
+      <div class="leaderboard-tabs" role="tablist" aria-label="Atalhos de Revisão" data-i18n-attr="aria-label:ui.review.shortcutsAria">
+        <button data-i18n="ui.review.myCardsBtn" type="button" class="leaderboard-tab" id="review-my-flashcards-btn">📇 Meus Cartões</button>
+        <button data-i18n="ui.review.settingsBtn" type="button" class="leaderboard-tab" id="review-header-settings-btn">⚙️ Configurar sessão</button>
       </div>
 
       <div id="review-today-widget"></div>
@@ -3386,35 +3386,35 @@ footer.app-footer img{ height:40px; opacity:.85; }
           <div class="section-label">Origem</div>
           <select class="review-settings-select" id="review-origin-select"></select>
         </div>
-        <div class="section-label">Frequência de revisão</div>
+        <div data-i18n="ui.review.frequency" class="section-label">Frequência de revisão</div>
         <select class="review-settings-select" id="review-frequency-select">
-          <option value="frequent">Mais frequente (revisa mais cedo e mais vezes)</option>
+          <option data-i18n="ui.review.freq.frequent" value="frequent">Mais frequente (revisa mais cedo e mais vezes)</option>
           <option value="balanced">Equilibrada (recomendado)</option>
-          <option value="spaced">Mais espaçada (intervalos mais longos entre revisões)</option>
+          <option data-i18n="ui.review.freq.spaced" value="spaced">Mais espaçada (intervalos mais longos entre revisões)</option>
         </select>
-        <div class="section-label">Novas palavras por dia</div>
+        <div data-i18n="ui.review.newPerDay" class="section-label">Novas palavras por dia</div>
         <select class="review-settings-select" id="review-newcards-select">
-          <option value="0">0 (nenhuma, só revisar o que já viu)</option>
-          <option value="5">5 (ritmo mais lento)</option>
+          <option data-i18n="ui.review.newPerDay.0" value="0">0 (nenhuma, só revisar o que já viu)</option>
+          <option data-i18n="ui.review.newPerDay.5" value="5">5 (ritmo mais lento)</option>
           <option value="10">10 (recomendado)</option>
-          <option value="15">15 (ritmo mais rápido)</option>
-          <option value="20">20 (ritmo bem rápido)</option>
-          <option value="9999">Sem limite (todas as pendentes de uma vez)</option>
+          <option data-i18n="ui.review.newPerDay.15" value="15">15 (ritmo mais rápido)</option>
+          <option data-i18n="ui.review.newPerDay.20" value="20">20 (ritmo bem rápido)</option>
+          <option data-i18n="ui.review.newPerDay.unlimited" value="9999">Sem limite (todas as pendentes de uma vez)</option>
         </select>
-        <div class="section-label">Intensidade da sessão</div>
+        <div data-i18n="ui.review.intensity" class="section-label">Intensidade da sessão</div>
         <select class="review-settings-select" id="review-intensity-select">
-          <option value="light">Leve (sessões mais curtas)</option>
+          <option data-i18n="ui.review.intensity.light" value="light">Leve (sessões mais curtas)</option>
           <option value="normal">Normal (recomendado)</option>
-          <option value="intense">Intensa (sessões mais longas)</option>
+          <option data-i18n="ui.review.intensity.intense" value="intense">Intensa (sessões mais longas)</option>
         </select>
-        <p class="settings-more-note">Estes ajustes controlam o motor de revisão nos bastidores -- você não precisa entender os detalhes técnicos.</p>
+        <p data-i18n="ui.review.settingsNote" class="settings-more-note">Estes ajustes controlam o motor de revisão nos bastidores -- você não precisa entender os detalhes técnicos.</p>
       </div>
 
       <div class="section-label" id="review-mode-revisar-label">Revisar</div>
       <div class="review-mode-cards" id="review-mode-cards-revisar"></div>
 
       <div class="section-label">Praticar</div>
-      <p class="review-section-hint">Continue treinando quando quiser, mesmo sem revisões pendentes.</p>
+      <p data-i18n="ui.review.practiceHint" class="review-section-hint">Continue treinando quando quiser, mesmo sem revisões pendentes.</p>
       <div class="review-mode-cards" id="review-mode-cards-praticar"></div>
     </div>
 
@@ -3430,8 +3430,8 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <div class="view" id="view-conjugaison">
     <div id="conj-select-wrap">
       <div class="path-header">
-        <h2>Conjugação</h2>
-        <p>Escolha os tempos verbais e as categorias de verbo. Você sempre pratica as 6 pessoas.</p>
+        <h2 data-i18n="admin.reports.screen.conjugaison">Conjugação</h2>
+        <p data-i18n="ui.conj.sub">Escolha os tempos verbais e as categorias de verbo. Você sempre pratica as 6 pessoas.</p>
       </div>
       <div class="conj-select-grid">
         <div class="conj-select-col">
@@ -3441,7 +3441,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <div class="conj-select-col">
           <h3>Verbos</h3>
           <div class="conj-filter-row">
-            <label for="conj-topn-select">Número de verbos (mais comuns primeiro)</label>
+            <label data-i18n="ui.conj.topN" for="conj-topn-select">Número de verbos (mais comuns primeiro)</label>
             <select id="conj-topn-select"></select>
           </div>
           <div class="conj-toggle-item" id="conj-toggle-regular">
@@ -3455,11 +3455,11 @@ footer.app-footer img{ height:40px; opacity:.85; }
           <div class="conj-check-list" id="conj-verb-list"></div>
         </div>
       </div>
-      <button class="btn btn-primary btn-block" id="conj-start-btn" style="max-width:320px; margin:0 auto; display:flex;">Começar prática</button>
+      <button data-i18n="ui.conj.start" class="btn btn-primary btn-block" id="conj-start-btn" style="max-width:320px; margin:0 auto; display:flex;">Começar prática</button>
     </div>
 
     <div id="conj-practice-wrap" style="display:none;">
-      <button class="back-link" id="conj-back-to-select">← Voltar à seleção</button>
+      <button data-i18n="ui.conj.backToSelect" class="back-link" id="conj-back-to-select">← Voltar à seleção</button>
       <div id="conj-practice-content"></div>
     </div>
   </div>
@@ -3473,47 +3473,47 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <div class="view" id="view-leaderboard">
     <div class="path-header">
       <h2>Ranking semanal</h2>
-      <p>Quem ganhou mais XP essa semana, no geral e por idioma.</p>
+      <p data-i18n="ui.leaderboard.sub">Quem ganhou mais XP essa semana, no geral e por idioma.</p>
     </div>
     <div id="leaderboard-content"></div>
   </div>
 
   <!-- ===== PROGRESSO ===== -->
   <div class="view" id="view-progress">
-    <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil">
-      <button class="leaderboard-tab" data-tab="profile">Visão geral</button>
+    <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil" data-i18n-attr="aria-label:profile.subnavAria">
+      <button data-i18n="profile.tabOverview" class="leaderboard-tab" data-tab="profile">Visão geral</button>
       <button class="leaderboard-tab" data-tab="goals">Metas</button>
       <button class="leaderboard-tab active" data-tab="progress">Progresso</button>
     </div>
     <div class="path-header">
-      <h2>Seu progresso</h2>
-      <p>Acompanhe sua consistência e conquistas.</p>
+      <h2 data-i18n="ui.stats.title">Seu progresso</h2>
+      <p data-i18n="ui.stats.sub">Acompanhe sua consistência e conquistas.</p>
     </div>
     <div class="section-label conquests-label">Conquistas <span class="conquests-count" id="badge-grid-count"></span></div>
     <div class="badge-grid conquests-grid" id="badge-grid"></div>
     <div class="stat-cards" id="stat-cards"></div>
     <div id="vocab-strength-widget"></div>
-    <div class="section-label">Atividade diária</div>
+    <div data-i18n="ui.stats.dailyActivity" class="section-label">Atividade diária</div>
     <div class="heatmap-wrap" id="heatmap-wrap"></div>
-    <div class="section-label">Palavras aprendidas ao longo do tempo</div>
+    <div data-i18n="ui.stats.wordsOverTime" class="section-label">Palavras aprendidas ao longo do tempo</div>
     <div class="progress-line-wrap" id="progress-line-chart-wrap"></div>
   </div>
 
   <!-- ===== METAS ===== -->
   <div class="view" id="view-goals">
-    <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil">
-      <button class="leaderboard-tab" data-tab="profile">Visão geral</button>
+    <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil" data-i18n-attr="aria-label:profile.subnavAria">
+      <button data-i18n="profile.tabOverview" class="leaderboard-tab" data-tab="profile">Visão geral</button>
       <button class="leaderboard-tab active" data-tab="goals">Metas</button>
       <button class="leaderboard-tab" data-tab="progress">Progresso</button>
     </div>
     <div class="path-header">
       <h2>Minhas metas</h2>
-      <p>Defina quantas lições por dia você quer estudar.</p>
+      <p data-i18n="ui.goal.sub">Defina quantas lições por dia você quer estudar.</p>
     </div>
     <div class="study-plan-card" id="study-plan-card">
       <div class="study-plan-header">
         <div>
-          <div class="study-plan-title">Minha meta de estudo</div>
+          <div data-i18n="ui.goal.title" class="study-plan-title">Minha meta de estudo</div>
           <div class="study-plan-sub" id="study-plan-sub"></div>
         </div>
         <button class="study-plan-edit-btn" id="study-plan-edit-btn" aria-label="Editar meta" title="Editar meta">✏️</button>
@@ -3623,8 +3623,8 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <!-- ===== MEUS CARTÕES (Fase 5, aberta pra qualquer conta) ===== -->
   <div class="view" id="view-my-flashcards">
     <div class="path-header">
-      <h2>📇 Meus cartões</h2>
-      <p>Crie seus próprios flashcards -- palavras e frases que você quer memorizar, mesmo que não estejam na trilha.</p>
+      <h2 data-i18n="ui.myCards.title">📇 Meus cartões</h2>
+      <p data-i18n="ui.myCards.sub">Crie seus próprios flashcards -- palavras e frases que você quer memorizar, mesmo que não estejam na trilha.</p>
     </div>
     <div id="my-flashcards-content"></div>
   </div>
@@ -3633,8 +3633,8 @@ footer.app-footer img{ height:40px; opacity:.85; }
        leitura: quem envia é a professora, ver Painel de Admin) ===== -->
   <div class="view" id="view-support-materials">
     <div class="path-header">
-      <h2>📚 Material de apoio</h2>
-      <p>Resumos, links e arquivos que sua professora compartilhou com você.</p>
+      <h2 data-i18n="menu.supportMaterials">📚 Material de apoio</h2>
+      <p data-i18n="ui.materials.sub">Resumos, links e arquivos que sua professora compartilhou com você.</p>
     </div>
     <div id="support-materials-content"></div>
   </div>
@@ -3645,16 +3645,16 @@ footer.app-footer img{ height:40px; opacity:.85; }
       <button class="back-link" id="dictation-back-to-challenges">← Voltar aos desafios</button>
       <div class="path-header">
         <h2>Ditados</h2>
-        <p>Treine sua compreensão auditiva e sua ortografia com ditados baseados em tarefas reais de cada módulo.</p>
+        <p data-i18n="ui.dictation.sub">Treine sua compreensão auditiva e sua ortografia com ditados baseados em tarefas reais de cada módulo.</p>
       </div>
 
       <div class="dictation-explainer" id="dictation-explainer">
         <button class="dictation-explainer-toggle" id="dictation-explainer-toggle">🎧 Como funciona o ditado?</button>
         <ol class="dictation-explainer-steps" id="dictation-explainer-steps">
-          <li>Ouça o áudio — na velocidade normal ou devagar, quantas vezes quiser.</li>
-          <li>Digite exatamente o que você ouviu, com acentos e pontuação.</li>
-          <li>Clique em "Verificar" para comparar sua resposta com o texto original.</li>
-          <li>Veja o que acertou e o que precisa revisar, palavra por palavra.</li>
+          <li data-i18n="ui.dictation.step1">Ouça o áudio — na velocidade normal ou devagar, quantas vezes quiser.</li>
+          <li data-i18n="ui.dictation.step2">Digite exatamente o que você ouviu, com acentos e pontuação.</li>
+          <li data-i18n="ui.dictation.step3">Clique em "Verificar" para comparar sua resposta com o texto original.</li>
+          <li data-i18n="ui.dictation.step4">Veja o que acertou e o que precisa revisar, palavra por palavra.</li>
         </ol>
       </div>
 
@@ -3670,10 +3670,10 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <!-- ===== DESAFIOS ===== -->
   <div class="view" id="view-challenges">
     <div id="challenges-categories-wrap">
-      <button class="back-link" id="challenges-module-back" style="display:none;">← Voltar à trilha</button>
+      <button data-i18n="fr.dictation.backToTrail" class="back-link" id="challenges-module-back" style="display:none;">← Voltar à trilha</button>
       <div class="path-header">
         <h2 id="challenges-categories-title">Desafios</h2>
-        <p id="challenges-categories-sub">Pratique francês de verdade: expressões, compreensão auditiva e ortografia.</p>
+        <p data-i18n="fr.challenges.sub" id="challenges-categories-sub">Pratique francês de verdade: expressões, compreensão auditiva e ortografia.</p>
       </div>
       <div class="challenges-admin-bar" id="challenges-admin-bar" style="display:none;">
         <button class="btn btn-secondary" id="challenges-admin-import-btn" data-i18n="adminChallenges.bar.import">📥 Importar JSON</button>
@@ -3683,7 +3683,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
     </div>
 
     <div id="challenges-list-wrap" style="display:none;">
-      <button class="back-link" id="challenges-list-back-btn">← Voltar às categorias</button>
+      <button data-i18n="ui.challenges.backToCategories" class="back-link" id="challenges-list-back-btn">← Voltar às categorias</button>
       <div class="path-header">
         <h2 id="challenges-list-title">Desafios</h2>
       </div>
@@ -3731,7 +3731,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 
 <div id="notifications-dropdown" class="user-dropdown notifications-dropdown">
   <div class="notifications-dropdown-header">
-    <span>Notificações</span>
+    <span data-i18n="notif.pref.sectionTitle">Notificações</span>
     <button class="notifications-mark-all-btn" id="notifications-mark-all-btn">Ler todas</button>
   </div>
   <div id="notifications-list"></div>
@@ -3939,16 +3939,16 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <p class="profile-edit-avatar-error" id="profile-edit-avatar-error"></p>
 
         <label class="profile-edit-label" for="profile-edit-display-name">Nome exibido</label>
-        <input type="text" id="profile-edit-display-name" class="profile-edit-input" maxlength="60" placeholder="Como você quer ser chamada(o)">
+        <input type="text" id="profile-edit-display-name" class="profile-edit-input" maxlength="60" placeholder="Como você quer ser chamada(o)" data-i18n-attr="placeholder:ui.profileEdit.namePh">
 
-        <label class="profile-edit-label" for="profile-edit-username">Nome de usuário</label>
+        <label data-i18n="ui.profileEdit.username" class="profile-edit-label" for="profile-edit-username">Nome de usuário</label>
         <div class="profile-edit-username-wrap">
           <span class="profile-edit-at">@</span>
           <input type="text" id="profile-edit-username" class="profile-edit-input" maxlength="24" placeholder="seu_username">
         </div>
 
         <label class="profile-edit-label" for="profile-edit-bio">Sobre mim</label>
-        <textarea id="profile-edit-bio" class="profile-edit-textarea" maxlength="160" placeholder="Conte um pouco sobre você e por que está aprendendo francês"></textarea>
+        <textarea id="profile-edit-bio" class="profile-edit-textarea" maxlength="160" placeholder="Conte um pouco sobre você e por que está aprendendo francês" data-i18n-attr="placeholder:ui.profileEdit.bioPh.fr"></textarea>
         <div class="profile-edit-bio-count" id="profile-edit-bio-count">0/160</div>
 
         <!-- Fase 1 do perfil público (ver CLAUDE.md, grilling Q1) --
@@ -3962,14 +3962,14 @@ footer.app-footer img{ height:40px; opacity:.85; }
              dos outros campos deste modal (nome/username/bio). -->
         <div class="pref-row">
           <div class="pref-row-text">
-            <div class="pref-row-title">Perfil público</div>
-            <div class="pref-row-sub">Deixa seu nome, badges, progresso e cartões próprios visíveis a quem tiver o link do seu perfil.</div>
+            <div data-i18n="ui.profileEdit.publicProfile" class="pref-row-title">Perfil público</div>
+            <div data-i18n="ui.profileEdit.publicProfileSub" class="pref-row-sub">Deixa seu nome, badges, progresso e cartões próprios visíveis a quem tiver o link do seu perfil.</div>
           </div>
           <button type="button" class="pref-switch" id="profile-edit-public-switch" role="switch" aria-checked="false"><span class="pref-switch-knob"></span></button>
         </div>
 
         <div id="profile-edit-featured-badge-row" style="display:none;">
-          <label class="profile-edit-label" for="profile-edit-featured-badge">Badge em destaque (aparece no Ranking)</label>
+          <label data-i18n="ui.profileEdit.featuredBadge" class="profile-edit-label" for="profile-edit-featured-badge">Badge em destaque (aparece no Ranking)</label>
           <select id="profile-edit-featured-badge" class="profile-edit-input"></select>
         </div>
 
@@ -3983,7 +3983,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="study-plan-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal study-wizard-modal">
     <div class="app-modal-header">
-      <h3>Minha meta de estudo</h3>
+      <h3 data-i18n="ui.goal.title">Minha meta de estudo</h3>
       <button class="app-modal-close" id="study-plan-modal-close" aria-label="Fechar">✕</button>
     </div>
     <div class="app-modal-body" id="study-plan-wizard-body"></div>
@@ -3993,7 +3993,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="kbd-shortcuts-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>⌨️ Atalhos do teclado</h3>
+      <h3 data-i18n="ui.kbd.title">⌨️ Atalhos do teclado</h3>
       <button class="app-modal-close" id="kbd-shortcuts-modal-close" aria-label="Fechar">✕</button>
     </div>
     <div class="app-modal-body">
@@ -4001,17 +4001,17 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <div class="kbd-shortcuts-keys">
           <span class="kbd-key">1</span><span class="kbd-key">2</span><span class="kbd-key">3</span><span class="kbd-key">4</span>
         </div>
-        <div class="kbd-shortcuts-desc">Escolher uma alternativa, pela posição dela na tela</div>
+        <div data-i18n="ui.kbd.choose" class="kbd-shortcuts-desc">Escolher uma alternativa, pela posição dela na tela</div>
       </div>
       <div class="kbd-shortcuts-row">
         <div class="kbd-shortcuts-keys"><span class="kbd-key">Enter</span></div>
-        <div class="kbd-shortcuts-desc">Confirmar uma resposta digitada e avançar pra próxima</div>
+        <div data-i18n="ui.kbd.confirm" class="kbd-shortcuts-desc">Confirmar uma resposta digitada e avançar pra próxima</div>
       </div>
       <div class="kbd-shortcuts-row">
         <div class="kbd-shortcuts-keys"><span class="kbd-key">r</span></div>
-        <div class="kbd-shortcuts-desc">Tocar áudio novamente</div>
+        <div data-i18n="ui.kbd.replay" class="kbd-shortcuts-desc">Tocar áudio novamente</div>
       </div>
-      <p class="kbd-shortcuts-note">Os números só aparecem quando um exercício tem alternativas pra escolher -- nunca durante digitação ou o exercício de ordenar frase. "r" repete o último áudio que tocou na tela.</p>
+      <p data-i18n="ui.kbd.note" class="kbd-shortcuts-note">Os números só aparecem quando um exercício tem alternativas pra escolher -- nunca durante digitação ou o exercício de ordenar frase. "r" repete o último áudio que tocou na tela.</p>
     </div>
   </div>
 </div>
@@ -4163,7 +4163,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <div class="streak-flame">🔥</div>
     <div class="streak-week-row" id="streak-week-row"></div>
     <h2 class="streak-headline">Você está em uma sequência de <span id="streak-days-num">0</span> dias!</h2>
-    <p class="streak-subtext">Continue assim: sua série será zerada se você não estudar amanhã.</p>
+    <p data-i18n="ui.streak.sub" class="streak-subtext">Continue assim: sua série será zerada se você não estudar amanhã.</p>
   </div>
   <div class="streak-modal-footer">
     <button class="btn btn-primary" id="streak-modal-continue-btn">Continuar</button>
@@ -4173,11 +4173,11 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="review-reminder-banner" class="review-reminder-banner" style="display:none;">
   <div class="review-reminder-icon">🗂️</div>
   <div class="review-reminder-text">
-    <div class="review-reminder-title">Vamos fazer uma pequena revisão?</div>
+    <div data-i18n="ui.reviewReminder.title" class="review-reminder-title">Vamos fazer uma pequena revisão?</div>
     <div class="review-reminder-sub"><span id="review-reminder-count">0</span> palavras estão esperando por você — afie sua memória revisando o que já viu.</div>
   </div>
   <div class="review-reminder-actions">
-    <button class="review-reminder-dismiss" id="review-reminder-dismiss-btn">Agora não</button>
+    <button data-i18n="ui.notNow" class="review-reminder-dismiss" id="review-reminder-dismiss-btn">Agora não</button>
     <button class="btn btn-primary review-reminder-cta" id="review-reminder-cta-btn">Revisar agora</button>
   </div>
 </div>
@@ -4185,11 +4185,11 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="pwa-update-banner" class="pwa-update-banner" style="display:none;">
   <div class="pwa-update-icon">🔄</div>
   <div class="pwa-update-text">
-    <div class="pwa-update-title">Nova versão disponível</div>
-    <div class="pwa-update-sub">Atualizamos o app. Recarregue quando for conveniente para ver as novidades.</div>
+    <div data-i18n="ui.update.title" class="pwa-update-title">Nova versão disponível</div>
+    <div data-i18n="ui.update.body" class="pwa-update-sub">Atualizamos o app. Recarregue quando for conveniente para ver as novidades.</div>
   </div>
   <div class="pwa-update-actions">
-    <button class="pwa-update-dismiss" id="pwa-update-dismiss-btn">Agora não</button>
+    <button data-i18n="ui.notNow" class="pwa-update-dismiss" id="pwa-update-dismiss-btn">Agora não</button>
     <button class="btn btn-primary pwa-update-cta" id="pwa-update-reload-btn">Atualizar</button>
   </div>
 </div>

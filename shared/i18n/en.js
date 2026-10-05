@@ -1656,4 +1656,127 @@ window.I18N_CATALOG['en'] = {
   'flashcardPreview.modal.hint': 'This is only a preview of how the card will look in Review -- nothing is saved or graded here.', // ALTA
   'publicFlashcard.modal.title': '👁 Card', // ALTA
   'content.untranslatedNotice': 'This lesson isn\'t available in English yet. Showing Portuguese.', // ALTA
+  'ui.skipLink': 'Skip to content', // ALTA
+  'ui.path.sub': 'Units organized by communication goal. Complete one unit to unlock the next.', // ALTA
+  'ui.review.whatNow': 'What should you do now?', // ALTA
+  'ui.review.myCardsBtn': '📇 My Cards', // ALTA
+  'ui.review.settingsBtn': '⚙️ Session settings', // ALTA
+  'ui.review.frequency': 'Review frequency', // ALTA
+  'ui.review.freq.frequent': 'More frequent (reviews sooner and more often)', // ALTA
+  'ui.review.freq.spaced': 'More spaced out (longer intervals between reviews)', // ALTA
+  'ui.review.newPerDay': 'New words per day', // ALTA
+  'ui.review.newPerDay.0': '0 (none, just review what you\'ve already seen)', // ALTA
+  'ui.review.newPerDay.5': '5 (slower pace)', // ALTA
+  'ui.review.newPerDay.15': '15 (faster pace)', // ALTA
+  'ui.review.newPerDay.20': '20 (very fast pace)', // ALTA
+  'ui.review.newPerDay.unlimited': 'No limit (all pending at once)', // ALTA
+  'ui.review.intensity': 'Session intensity', // ALTA
+  'ui.review.intensity.light': 'Light (shorter sessions)', // ALTA
+  'ui.review.intensity.intense': 'Intense (longer sessions)', // ALTA
+  'ui.review.settingsNote': 'These settings control the review engine behind the scenes -- you don\'t need to understand the technical details.', // ALTA
+  'ui.review.practiceHint': 'Keep practicing whenever you like, even with no reviews due.', // ALTA
+  'ui.conj.sub': 'Choose the verb tenses and verb categories. You always practice all 6 persons.', // ALTA
+  'ui.conj.topN': 'Number of verbs (most common first)', // ALTA
+  'ui.conj.start': 'Start practice', // ALTA
+  'ui.conj.backToSelect': '← Back to selection', // ALTA
+  'ui.leaderboard.sub': 'Who earned the most XP this week, overall and by language.', // ALTA
+  'ui.stats.title': 'Your progress', // ALTA
+  'ui.stats.sub': 'Track your consistency and achievements.', // ALTA
+  'ui.stats.dailyActivity': 'Daily activity', // ALTA
+  'ui.stats.wordsOverTime': 'Words learned over time', // ALTA
+  'ui.goal.sub': 'Set how many lessons a day you want to study.', // ALTA
+  'ui.goal.title': 'My study goal', // ALTA
+  'ui.myCards.title': '📇 My cards', // ALTA
+  'ui.myCards.sub': 'Create your own flashcards -- words and phrases you want to memorize, even if they\'re not in the path.', // ALTA
+  'ui.materials.sub': 'Summaries, links and files your teacher shared with you.', // ALTA
+  'ui.dictation.sub': 'Train your listening and spelling with dictations based on real tasks from each module.', // ALTA
+  'ui.dictation.step1': 'Listen to the audio -- at normal speed or slowly, as many times as you like.', // ALTA
+  'ui.dictation.step2': 'Type exactly what you heard, with accents and punctuation.', // ALTA
+  'ui.dictation.step3': 'Click "Verificar" to compare your answer with the original text.', // MÉDIA
+  'ui.dictation.step4': 'See what you got right and what needs review, word by word.', // ALTA
+  'ui.challenges.backToCategories': '← Back to categories', // ALTA
+  'ui.profileEdit.username': 'Username', // ALTA
+  'ui.profileEdit.publicProfile': 'Public profile', // ALTA
+  'ui.profileEdit.publicProfileSub': 'Makes your name, badges, progress and your own cards visible to anyone with your profile link.', // ALTA
+  'ui.profileEdit.featuredBadge': 'Featured badge (shown in the Leaderboard)', // ALTA
+  'ui.kbd.title': '⌨️ Keyboard shortcuts', // ALTA
+  'ui.kbd.choose': 'Pick an option by its position on screen', // ALTA
+  'ui.kbd.confirm': 'Confirm a typed answer and move on to the next one', // ALTA
+  'ui.kbd.replay': 'Play audio again', // ALTA
+  'ui.kbd.note': 'The numbers only appear when an exercise has options to choose from -- never during typing or the sentence-ordering exercise. "r" repeats the last audio that played on screen.', // ALTA
+  'ui.streak.sub': 'Keep it up: your streak will reset if you don\'t study tomorrow.', // ALTA
+  'ui.reviewReminder.title': 'Shall we do a quick review?', // ALTA
+  'ui.notNow': 'Not now', // ALTA
+  'ui.update.title': 'New version available', // ALTA
+  'ui.update.body': 'We updated the app. Reload when it\'s convenient to see what\'s new.', // ALTA
+  'ui.path.sub14': '14 units organized by communication goal. Complete one unit to unlock the next.', // ALTA
+  'ui.zh.unitManualBtn': '📖 Unit manual', // ALTA
+  'ui.zh.unitManualTitle': 'Unit manual', // ALTA
+  'ui.zh.hanziBackToLessons': '← Back to lessons', // ALTA
+  'ui.zh.radicalsSub': 'The building blocks of the characters you\'ve already studied, sorted by frequency.', // ALTA
+  'ui.zh.strokeOrder': 'Stroke order', // ALTA
+  'ui.moreOptions': 'More options', // ALTA
+  'ui.kbd.ariaTitle': 'Keyboard shortcuts', // ALTA
+  'ui.exitLesson': 'Exit lesson', // ALTA
+  'ui.review.shortcutsAria': 'Review shortcuts', // ALTA
+  'ui.profileEdit.namePh': 'What would you like to be called', // ALTA
+  'ui.profileEdit.bioPh.fr': 'Tell us a little about yourself and why you\'re learning French', // ALTA
+  'ui.profileEdit.bioPh.zh': 'Tell us a little about yourself and why you\'re learning Mandarin', // ALTA
+  'ui.zh.searchAria': 'Search by pinyin, hanzi or translation', // ALTA
+  'ui.zh.searchPh': 'Search by pinyin, hanzi or translation...', // ALTA
+  'feedback.almostArrow': 'Almost! → {expected}', // ALTA
+  'feedback.correctAnswerColon': 'Correct answer:', // ALTA
+  'feedback.whereSeen': 'Where you saw this before', // ALTA
+  'feedback.header.revealed': '👀 Answer revealed', // ALTA
+  'feedback.header.notThisTime': '❌ Not this time', // ALTA
+  'feedback.label.fullSentence': 'Full sentence', // ALTA
+  'feedback.label.answer': 'Answer', // ALTA
+  'feedback.label.whyNot': 'Why it wasn\'t this one', // ALTA
+  'feedback.label.correctAnswer': 'Correct answer', // ALTA
+  'feedback.tone.wrong': '🎯 Almost! That\'s not the right tone', // ALTA
+  'feedback.tone.missing': '🎯 Almost! The tone is missing', // ALTA
+  'feedback.praise.1': 'Bullseye!', // MÉDIA
+  'feedback.praise.2': 'Nice one!', // MÉDIA
+  'feedback.praise.3': 'That\'s it!', // MÉDIA
+  'feedback.praise.4': 'Perfect!', // MÉDIA
+  'feedback.praise.5': 'Well done!', // MÉDIA
+  'feedback.praise.6': 'You nailed it!', // MÉDIA
+  'feedback.praise.7': 'Exactly!', // MÉDIA
+  'feedback.praise.8': 'Nice!', // MÉDIA
+  'feedback.praise.9': 'Absolutely!', // MÉDIA
+  'feedback.praise.10': 'There you go!', // MÉDIA
+  'feedback.praise.11': 'Keep it up!', // MÉDIA
+  'feedback.praise.12': 'Awesome!', // MÉDIA
+  'feedback.praise.13': 'Exactly right!', // MÉDIA
+  'feedback.praise.14': 'Excellent!', // MÉDIA
+  'feedback.praise.15': 'Great work!', // MÉDIA
+  'feedback.praise.16': 'Wonderful!', // MÉDIA
+  'feedback.combo.1': 'You\'re doing great!', // MÉDIA
+  'feedback.combo.2': 'So proud of you!', // MÉDIA
+  'feedback.combo.3': 'Wonderful, keep it up!', // MÉDIA
+  'feedback.combo.milestone': 'Wow, {n} in a row!', // ALTA
+  'review.filter.hard': 'Hardest first', // ALTA
+  'review.filter.oldest': 'Oldest first', // ALTA
+  'level.tier.beginner': 'Beginner', // ALTA
+  'level.tier.basic': 'Basic', // ALTA
+  'fr.level.A1.text': 'Ask and answer simple questions and introduce yourself to other people', // ALTA
+  'fr.level.A2.text': 'Take part in simple everyday conversations and talk about your studies', // ALTA
+  'zh.level.HSK1.text': 'Greet people, introduce yourself and hold basic everyday conversations in Mandarin', // ALTA
+  'fr.reminder.title': 'Time to study French! 🇫🇷', // ALTA
+  'zh.hanzi.inPhrase': '(in the phrase: "{phrase}")', // ALTA
+  'fr.challenges.loading': 'Loading challenges...', // ALTA
+  'fr.challenges.loadFailedList': 'Couldn\'t load the challenges right now. Check your connection and try again.', // ALTA
+  'fr.challenges.countInCategory': { one: '{n} challenge', other: '{n} challenges' }, // ALTA
+  'fr.challenge.complete': '✅ Complete', // ALTA
+  'fr.challenge.yourAnswerColon': 'Your answer:', // ALTA
+  'fr.challenge.inPortuguese': 'In Portuguese:', // ALTA
+  'fr.challenge.agreementWarn': '⚠ Mind the agreement: after "{pronoun}", "{verb}" is not the right conjugation.', // MÉDIA
+  'fr.challenge.row.yourAnswer': 'Your answer', // ALTA
+  'fr.challenge.row.expected': 'Expected answer', // ALTA
+  'fr.challenge.row.original': 'Original sentence', // ALTA
+  'fr.challenge.lt.label': 'Type your translation:', // ALTA
+  'fr.challenge.lt.placeholder': 'Your translation in {lang}...', // ALTA
+  'lang.name.pt-BR': 'Portuguese', // ALTA
+  'lang.name.en': 'English', // ALTA
+  'fr.challenge.accent.label': 'Type what you heard:', // ALTA
 };

@@ -1410,7 +1410,8 @@ document.getElementById('streak-modal-continue-btn').addEventListener('click', (
 // LEVEL_DESCRIPTIONS continua aqui (dado específico deste idioma, exigido
 // como hook por shared/wizard.js).
 const LEVEL_DESCRIPTIONS = {
-  HSK1: { tier: 'Iniciante', text: 'Cumprimentar, apresentar-se e ter conversas básicas do dia a dia em mandarim' }
+  // Getters: resolvem no idioma do site NO MOMENTO do uso (i18n fase 9).
+  HSK1: { get tier(){ return t('level.tier.beginner'); }, get text(){ return t('zh.level.HSK1.text'); } }
 };
 
 // Lembrete local best-effort: só dispara se a pessoa tiver o app aberto numa
@@ -2030,7 +2031,7 @@ function buildSearchIndex(){
         const cleanPinyin = b.p.replace(/[,.!?]/g, '').trim();
         if (cleanHanzi && cleanHanzi.length <= 2){
           index.push({
-            pinyin: cleanPinyin, hanzi: cleanHanzi, trans: `(na frase: "${p.t}")`,
+            pinyin: cleanPinyin, hanzi: cleanHanzi, trans: t('zh.hanzi.inPhrase', { phrase: p.t }),
             unitId: u.id, unitTitle: u.title, source: 'block',
             completed: !!STATE.unitProgress[u.id]?.completed
           });
@@ -4603,7 +4604,7 @@ function phraseFeedbackDetailHTML(phrase, translation, correctLine){
 
 function clozeFeedbackDetailHTML(ex, withCorrect){
   const correct = withCorrect
-    ? `Resposta certa: <strong>${ex.correctBlock.c}</strong> <span class="pinyin">(${ex.correctBlock.p})</span>`
+    ? `${t('feedback.correctAnswerColon')} <strong>${ex.correctBlock.c}</strong> <span class="pinyin">(${ex.correctBlock.p})</span>`
     : '';
   return phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t, correct);
 }
@@ -4627,7 +4628,7 @@ function answerExplanationHTML(ex){
     // (index.html) -- a preferência de esconder pinyin continua respeitada
     // aqui sem precisar de nenhuma regra de CSS nova.
     const originHTML = origin
-      ? `<div class="usage-note-title">Onde você já viu isso</div><p class="usage-note-body"><strong>${origin.c}</strong><br><span class="pinyin">${origin.p}</span><br>${origin.t}</p>`
+      ? `<div class="usage-note-title">${t('feedback.whereSeen')}</div><p class="usage-note-body"><strong>${origin.c}</strong><br><span class="pinyin">${origin.p}</span><br>${origin.t}</p>`
       : (noteOrConceptReviewHTML(ex.vocabIdx, true) || '');
     return itemHTML + originHTML;
   }
@@ -4694,10 +4695,10 @@ function showAnswerPanel(contentEl, ex, opts = {}){
   panel.className = 'wrong-feedback';
   panel.innerHTML = `
     <div class="feedback-card-body">
-      <div class="wrong-feedback-header">${revealed ? '👀 Resposta revelada' : (opts.toneOnly ? (opts.toneOnly === 'wrong' ? '🎯 Quase! O tom não é esse' : '🎯 Quase! Faltou o tom') : '❌ Não foi dessa vez')}</div>
+      <div class="wrong-feedback-header">${revealed ? t('feedback.header.revealed') : (opts.toneOnly ? (opts.toneOnly === 'wrong' ? t('feedback.tone.wrong') : t('feedback.tone.missing')) : t('feedback.header.notThisTime'))}</div>
       ${explanation ? `
         <div class="wrong-feedback-why">
-          <div class="wrong-feedback-why-label">${ex && (ex.format === 'cloze' || ex.format === 'fullsentence') ? (ex.format === 'cloze' ? 'Frase completa' : 'Resposta certa') : (revealed ? 'Resposta' : 'Por que não foi essa')}</div>
+          <div class="wrong-feedback-why-label">${ex && (ex.format === 'cloze' || ex.format === 'fullsentence') ? (ex.format === 'cloze' ? t('feedback.label.fullSentence') : t('feedback.label.correctAnswer')) : (revealed ? t('feedback.label.answer') : t('feedback.label.whyNot'))}</div>
           <div class="feedback-inner-box">${explanation}</div>
         </div>
       ` : ''}
@@ -4723,7 +4724,7 @@ function showWrongAnswerPanel(contentEl, ex, opts = {}){
 // isToneOnlyMiss) -- só aparece depois de responder, nunca antes.
 function toneHintHTML(localState){
   if (!localState.answered || localState.wasCorrect || !localState.toneOnly) return '';
-  return `<div class="wrong-feedback-header tone-hint">${localState.toneOnly === 'wrong' ? '🎯 Quase! O tom não é esse' : '🎯 Quase! Faltou o tom'}</div>`;
+  return `<div class="wrong-feedback-header tone-hint">${localState.toneOnly === 'wrong' ? t('feedback.tone.wrong') : t('feedback.tone.missing')}</div>`;
 }
 
 // Pinyin sem marcas de tom (mantém o trema do ü) -- usado só pra distinguir
@@ -5475,16 +5476,12 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
 // cloze já revela a tradução, digitar de ouvido nunca mostrou o hanzi antes
 // então esse sim ganha detail), repetir a mesma informação de novo dentro
 // do painel não ajuda em nada -- passa null.
-const CORRECT_FEEDBACK_PHRASES = [
-  'Na mosca!', 'Mandou bem!', 'Isso aí!', 'Perfeito!', 'Muito bem!',
-  'Você arrasou!', 'Exato!', 'Boa!', 'Certeza absoluta!', 'Aí sim!',
-  'Continua assim!', 'Show de bola!', 'Isso mesmo!', 'Excelente!',
-  'Ótimo trabalho!', 'Maravilha!'
-];
+// Chaves do catálogo (i18n fase 9): o texto é resolvido no momento do uso.
+const CORRECT_FEEDBACK_PHRASES = Array.from({ length: 16 }, (_, i) => 'feedback.praise.' + (i + 1));
 let correctFeedbackQueue = [];
 function nextCorrectFeedbackPhrase(){
   if (!correctFeedbackQueue.length) correctFeedbackQueue = shuffle([...CORRECT_FEEDBACK_PHRASES]);
-  return correctFeedbackQueue.pop();
+  return t(correctFeedbackQueue.pop());
 }
 
 // ---------- Combo de acertos seguidos (estilo Duolingo) ----------
@@ -5494,13 +5491,11 @@ function nextCorrectFeedbackPhrase(){
 // COMBO_MILESTONE_STEP mostra o número explícito ("Uau, 5 seguidas!") em
 // vez de uma frase genérica, pra marcar só os marcos redondos, não toda
 // resposta certa da sequência.
-const COMBO_PHRASES = [
-  'Você está indo muito bem!', 'Que orgulho!', 'Maravilha, continue assim!'
-];
+const COMBO_PHRASES = ['feedback.combo.1', 'feedback.combo.2', 'feedback.combo.3'];
 let comboPhraseQueue = [];
 function nextComboPhrase(){
   if (!comboPhraseQueue.length) comboPhraseQueue = shuffle([...COMBO_PHRASES]);
-  return comboPhraseQueue.pop();
+  return t(comboPhraseQueue.pop());
 }
 const COMBO_MIN = 3;
 const COMBO_MILESTONE_STEP = 5;
@@ -5514,7 +5509,7 @@ function showCorrectFeedbackPanel(contentEl, detail){
   const combo = STEP_STATE.comboCount;
   const isMilestone = combo >= COMBO_MILESTONE_STEP && combo % COMBO_MILESTONE_STEP === 0;
   const inCombo = combo >= COMBO_MIN;
-  const headerText = isMilestone ? `Uau, ${combo} seguidas!` : (inCombo ? nextComboPhrase() : nextCorrectFeedbackPhrase());
+  const headerText = isMilestone ? t('feedback.combo.milestone', { n: combo }) : (inCombo ? nextComboPhrase() : nextCorrectFeedbackPhrase());
   const comboBadgeHTML = inCombo ? `<span class="correct-feedback-combo-badge">⚡ Combo x${combo}</span>` : '';
 
   const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
@@ -5815,7 +5810,11 @@ function reviewFilterQueue(filter, pool){
 // painel ⚙️ (com contagem entre parênteses) e o indicador discreto no
 // hero (sem contagem, só o nome do filtro ativo) -- texto-fonte único
 // pra nunca dessincronizar entre os dois.
-const REVIEW_FILTER_LABELS = { all: 'Todas', hard: 'Mais difíceis primeiro', oldest: 'Mais antigas primeiro' };
+const REVIEW_FILTER_LABELS = {
+  get all(){ return t('review.origin.all'); },
+  get hard(){ return t('review.filter.hard'); },
+  get oldest(){ return t('review.filter.oldest'); }
+};
 
 // Fase 4 do sistema de alunas particulares (ver CLAUDE.md): rótulos do
 // filtro de ORIGEM -- diferente de REVIEW_FILTER_LABELS (que decide COMO

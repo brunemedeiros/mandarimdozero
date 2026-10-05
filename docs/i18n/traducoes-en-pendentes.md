@@ -1904,3 +1904,135 @@ Decisões editoriais: EN-US ("pants", "subway", "movies", "check"); contrações
 | expr-lote3-017 | putain | meaning | interjeição forte (espanto, raiva) ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos. | strong exclamation (surprise, anger) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers. | baixa | "putain" is a multi-purpose vulgar interjection with no single gloss; the English text is generic. |
 | expr-lote3-018 | espèce de con | meaning | seu idiota (insulto) ⚠️ Registro: vulgar — pode ofender. Evite em contextos formais ou com desconhecidos. | you idiot (insult) ⚠️ Register: vulgar — can be offensive. Avoid in formal settings or with strangers. | baixa | Insult; "idiot" is much milder than "con". |
 | expr-lote1-003 | s'en foutre | meaning | não estar nem aí ⚠️ Registro: muito familiar/gíria — só com pessoas próximas; evite em contextos formais. | to not give a damn ⚠️ Register: very informal/slang — only with people you're close to; avoid in formal settings. | baixa | "s'en foutre": "to not give a damn" is milder than the French; stronger option: "to not give a f***". |
+
+## Fase 9 — interface restante (needs_review)
+
+Mensagens de feedback de correção, player de Desafios (Expressões, Ouça e traduza, Acentuação), lembrete do navegador, descrições de nível e textos estáticos de fr/index.html e zh/index.html (Revisão, Conjugação, Perfil, Atalhos, modais). Chaves reaproveitadas (sem texto novo): zh.path.knownAsk/knownDone, zh.review.match.*, zh.reminder.body, review.origin.all, fr.step.explanation, fr.challenges.cat.*.title, e várias de Configurações/Admin.
+
+Fora desta fase: BADGES e notificações do servidor (fase 11); dados de conteúdo (desafios, ditados, histórias); mensagens de validação de flashcard/Anki; marca no cabeçalho (Francês/Chinês com Prof. Brune, <title>); nomes de idioma "Português (Brasil)"; texto do import de desafios do Admin (contém <code>); título de streak "Você está em uma sequência de N dias!" (texto misto com <span id>, exigiria mudar o HTML); "Nível 1 · Iniciante (HSK 1)" e contagem de caracteres do Hanzi (texto dinâmico/misto); explicação do desafio (c.explanation) e "Em português: meaning.pt" são dados do desafio.
+
+| Chave | PT | EN | Confiança | Status |
+|---|---|---|---|---|
+| ui.skipLink | Pular para o conteúdo | Skip to content | alta | needs_review |
+| ui.path.sub | Unidades organizadas por objetivo comunicacional. Complete uma unidade para desbloquear a próxima. | Units organized by communication goal. Complete one unit to unlock the next. | alta | needs_review |
+| ui.review.whatNow | O que você deve fazer agora? | What should you do now? | alta | needs_review |
+| ui.review.myCardsBtn | 📇 Meus Cartões | 📇 My Cards | alta | needs_review |
+| ui.review.settingsBtn | ⚙️ Configurar sessão | ⚙️ Session settings | alta | needs_review |
+| ui.review.frequency | Frequência de revisão | Review frequency | alta | needs_review |
+| ui.review.freq.frequent | Mais frequente (revisa mais cedo e mais vezes) | More frequent (reviews sooner and more often) | alta | needs_review |
+| ui.review.freq.spaced | Mais espaçada (intervalos mais longos entre revisões) | More spaced out (longer intervals between reviews) | alta | needs_review |
+| ui.review.newPerDay | Novas palavras por dia | New words per day | alta | needs_review |
+| ui.review.newPerDay.0 | 0 (nenhuma, só revisar o que já viu) | 0 (none, just review what you've already seen) | alta | needs_review |
+| ui.review.newPerDay.5 | 5 (ritmo mais lento) | 5 (slower pace) | alta | needs_review |
+| ui.review.newPerDay.15 | 15 (ritmo mais rápido) | 15 (faster pace) | alta | needs_review |
+| ui.review.newPerDay.20 | 20 (ritmo bem rápido) | 20 (very fast pace) | alta | needs_review |
+| ui.review.newPerDay.unlimited | Sem limite (todas as pendentes de uma vez) | No limit (all pending at once) | alta | needs_review |
+| ui.review.intensity | Intensidade da sessão | Session intensity | alta | needs_review |
+| ui.review.intensity.light | Leve (sessões mais curtas) | Light (shorter sessions) | alta | needs_review |
+| ui.review.intensity.intense | Intensa (sessões mais longas) | Intense (longer sessions) | alta | needs_review |
+| ui.review.settingsNote | Estes ajustes controlam o motor de revisão nos bastidores -- você não precisa entender os detalhes técnicos. | These settings control the review engine behind the scenes -- you don't need to understand the technical details. | alta | needs_review |
+| ui.review.practiceHint | Continue treinando quando quiser, mesmo sem revisões pendentes. | Keep practicing whenever you like, even with no reviews due. | alta | needs_review |
+| ui.conj.sub | Escolha os tempos verbais e as categorias de verbo. Você sempre pratica as 6 pessoas. | Choose the verb tenses and verb categories. You always practice all 6 persons. | alta | needs_review |
+| ui.conj.topN | Número de verbos (mais comuns primeiro) | Number of verbs (most common first) | alta | needs_review |
+| ui.conj.start | Começar prática | Start practice | alta | needs_review |
+| ui.conj.backToSelect | ← Voltar à seleção | ← Back to selection | alta | needs_review |
+| ui.leaderboard.sub | Quem ganhou mais XP essa semana, no geral e por idioma. | Who earned the most XP this week, overall and by language. | alta | needs_review |
+| ui.stats.title | Seu progresso | Your progress | alta | needs_review |
+| ui.stats.sub | Acompanhe sua consistência e conquistas. | Track your consistency and achievements. | alta | needs_review |
+| ui.stats.dailyActivity | Atividade diária | Daily activity | alta | needs_review |
+| ui.stats.wordsOverTime | Palavras aprendidas ao longo do tempo | Words learned over time | alta | needs_review |
+| ui.goal.sub | Defina quantas lições por dia você quer estudar. | Set how many lessons a day you want to study. | alta | needs_review |
+| ui.goal.title | Minha meta de estudo | My study goal | alta | needs_review |
+| ui.myCards.title | 📇 Meus cartões | 📇 My cards | alta | needs_review |
+| ui.myCards.sub | Crie seus próprios flashcards -- palavras e frases que você quer memorizar, mesmo que não estejam na trilha. | Create your own flashcards -- words and phrases you want to memorize, even if they're not in the path. | alta | needs_review |
+| ui.materials.sub | Resumos, links e arquivos que sua professora compartilhou com você. | Summaries, links and files your teacher shared with you. | alta | needs_review |
+| ui.dictation.sub | Treine sua compreensão auditiva e sua ortografia com ditados baseados em tarefas reais de cada módulo. | Train your listening and spelling with dictations based on real tasks from each module. | alta | needs_review |
+| ui.dictation.step1 | Ouça o áudio — na velocidade normal ou devagar, quantas vezes quiser. | Listen to the audio -- at normal speed or slowly, as many times as you like. | alta | needs_review |
+| ui.dictation.step2 | Digite exatamente o que você ouviu, com acentos e pontuação. | Type exactly what you heard, with accents and punctuation. | alta | needs_review |
+| ui.dictation.step3 | Clique em "Verificar" para comparar sua resposta com o texto original. | Click "Verificar" to compare your answer with the original text. | média | needs_review |
+| ui.dictation.step4 | Veja o que acertou e o que precisa revisar, palavra por palavra. | See what you got right and what needs review, word by word. | alta | needs_review |
+| ui.challenges.backToCategories | ← Voltar às categorias | ← Back to categories | alta | needs_review |
+| ui.profileEdit.username | Nome de usuário | Username | alta | needs_review |
+| ui.profileEdit.publicProfile | Perfil público | Public profile | alta | needs_review |
+| ui.profileEdit.publicProfileSub | Deixa seu nome, badges, progresso e cartões próprios visíveis a quem tiver o link do seu perfil. | Makes your name, badges, progress and your own cards visible to anyone with your profile link. | alta | needs_review |
+| ui.profileEdit.featuredBadge | Badge em destaque (aparece no Ranking) | Featured badge (shown in the Leaderboard) | alta | needs_review |
+| ui.kbd.title | ⌨️ Atalhos do teclado | ⌨️ Keyboard shortcuts | alta | needs_review |
+| ui.kbd.choose | Escolher uma alternativa, pela posição dela na tela | Pick an option by its position on screen | alta | needs_review |
+| ui.kbd.confirm | Confirmar uma resposta digitada e avançar pra próxima | Confirm a typed answer and move on to the next one | alta | needs_review |
+| ui.kbd.replay | Tocar áudio novamente | Play audio again | alta | needs_review |
+| ui.kbd.note | Os números só aparecem quando um exercício tem alternativas pra escolher -- nunca durante digitação ou o exercício de ordenar frase. "r" repete o último áudio que tocou na tela. | The numbers only appear when an exercise has options to choose from -- never during typing or the sentence-ordering exercise. "r" repeats the last audio that played on screen. | alta | needs_review |
+| ui.streak.sub | Continue assim: sua série será zerada se você não estudar amanhã. | Keep it up: your streak will reset if you don't study tomorrow. | alta | needs_review |
+| ui.reviewReminder.title | Vamos fazer uma pequena revisão? | Shall we do a quick review? | alta | needs_review |
+| ui.notNow | Agora não | Not now | alta | needs_review |
+| ui.update.title | Nova versão disponível | New version available | alta | needs_review |
+| ui.update.body | Atualizamos o app. Recarregue quando for conveniente para ver as novidades. | We updated the app. Reload when it's convenient to see what's new. | alta | needs_review |
+| ui.path.sub14 | 14 unidades organizadas por objetivo comunicacional. Complete uma unidade para desbloquear a próxima. | 14 units organized by communication goal. Complete one unit to unlock the next. | alta | needs_review |
+| ui.zh.unitManualBtn | 📖 Manual da unidade | 📖 Unit manual | alta | needs_review |
+| ui.zh.unitManualTitle | Manual da unidade | Unit manual | alta | needs_review |
+| ui.zh.hanziBackToLessons | ← Voltar às lições | ← Back to lessons | alta | needs_review |
+| ui.zh.radicalsSub | Os blocos de construção dos caracteres que você já estudou, organizados por frequência. | The building blocks of the characters you've already studied, sorted by frequency. | alta | needs_review |
+| ui.zh.strokeOrder | Ordem dos traços | Stroke order | alta | needs_review |
+| ui.moreOptions | Mais opções | More options | alta | needs_review |
+| ui.kbd.ariaTitle | Atalhos do teclado | Keyboard shortcuts | alta | needs_review |
+| ui.exitLesson | Sair da lição | Exit lesson | alta | needs_review |
+| ui.review.shortcutsAria | Atalhos de Revisão | Review shortcuts | alta | needs_review |
+| ui.profileEdit.namePh | Como você quer ser chamada(o) | What would you like to be called | alta | needs_review |
+| ui.profileEdit.bioPh.fr | Conte um pouco sobre você e por que está aprendendo francês | Tell us a little about yourself and why you're learning French | alta | needs_review |
+| ui.profileEdit.bioPh.zh | Conte um pouco sobre você e por que está aprendendo mandarim | Tell us a little about yourself and why you're learning Mandarin | alta | needs_review |
+| ui.zh.searchAria | Buscar por pinyin, hanzi ou tradução | Search by pinyin, hanzi or translation | alta | needs_review |
+| ui.zh.searchPh | Buscar por pinyin, hanzi ou tradução... | Search by pinyin, hanzi or translation... | alta | needs_review |
+| feedback.almostArrow | Quase! → {expected} | Almost! → {expected} | alta | needs_review |
+| feedback.correctAnswerColon | Resposta certa: | Correct answer: | alta | needs_review |
+| feedback.whereSeen | Onde você já viu isso | Where you saw this before | alta | needs_review |
+| feedback.header.revealed | 👀 Resposta revelada | 👀 Answer revealed | alta | needs_review |
+| feedback.header.notThisTime | ❌ Não foi dessa vez | ❌ Not this time | alta | needs_review |
+| feedback.label.fullSentence | Frase completa | Full sentence | alta | needs_review |
+| feedback.label.answer | Resposta | Answer | alta | needs_review |
+| feedback.label.whyNot | Por que não foi essa | Why it wasn't this one | alta | needs_review |
+| feedback.label.correctAnswer | Resposta certa | Correct answer | alta | needs_review |
+| feedback.tone.wrong | 🎯 Quase! O tom não é esse | 🎯 Almost! That's not the right tone | alta | needs_review |
+| feedback.tone.missing | 🎯 Quase! Faltou o tom | 🎯 Almost! The tone is missing | alta | needs_review |
+| feedback.praise.1 | Na mosca! | Bullseye! | média | needs_review |
+| feedback.praise.2 | Mandou bem! | Nice one! | média | needs_review |
+| feedback.praise.3 | Isso aí! | That's it! | média | needs_review |
+| feedback.praise.4 | Perfeito! | Perfect! | média | needs_review |
+| feedback.praise.5 | Muito bem! | Well done! | média | needs_review |
+| feedback.praise.6 | Você arrasou! | You nailed it! | média | needs_review |
+| feedback.praise.7 | Exato! | Exactly! | média | needs_review |
+| feedback.praise.8 | Boa! | Nice! | média | needs_review |
+| feedback.praise.9 | Certeza absoluta! | Absolutely! | média | needs_review |
+| feedback.praise.10 | Aí sim! | There you go! | média | needs_review |
+| feedback.praise.11 | Continua assim! | Keep it up! | média | needs_review |
+| feedback.praise.12 | Show de bola! | Awesome! | média | needs_review |
+| feedback.praise.13 | Isso mesmo! | Exactly right! | média | needs_review |
+| feedback.praise.14 | Excelente! | Excellent! | média | needs_review |
+| feedback.praise.15 | Ótimo trabalho! | Great work! | média | needs_review |
+| feedback.praise.16 | Maravilha! | Wonderful! | média | needs_review |
+| feedback.combo.1 | Você está indo muito bem! | You're doing great! | média | needs_review |
+| feedback.combo.2 | Que orgulho! | So proud of you! | média | needs_review |
+| feedback.combo.3 | Maravilha, continue assim! | Wonderful, keep it up! | média | needs_review |
+| feedback.combo.milestone | Uau, {n} seguidas! | Wow, {n} in a row! | alta | needs_review |
+| review.filter.hard | Mais difíceis primeiro | Hardest first | alta | needs_review |
+| review.filter.oldest | Mais antigas primeiro | Oldest first | alta | needs_review |
+| level.tier.beginner | Iniciante | Beginner | alta | needs_review |
+| level.tier.basic | Básico | Basic | alta | needs_review |
+| fr.level.A1.text | Fazer e responder a perguntas simples e se apresentar a outras pessoas | Ask and answer simple questions and introduce yourself to other people | alta | needs_review |
+| fr.level.A2.text | Participar de conversas simples do dia a dia e falar sobre seus estudos | Take part in simple everyday conversations and talk about your studies | alta | needs_review |
+| zh.level.HSK1.text | Cumprimentar, apresentar-se e ter conversas básicas do dia a dia em mandarim | Greet people, introduce yourself and hold basic everyday conversations in Mandarin | alta | needs_review |
+| fr.reminder.title | Hora de estudar francês! 🇫🇷 | Time to study French! 🇫🇷 | alta | needs_review |
+| zh.hanzi.inPhrase | (na frase: "{phrase}") | (in the phrase: "{phrase}") | alta | needs_review |
+| fr.challenges.loading | Carregando desafios... | Loading challenges... | alta | needs_review |
+| fr.challenges.loadFailedList | Não foi possível carregar os desafios agora. Verifique sua conexão e tente novamente. | Couldn't load the challenges right now. Check your connection and try again. | alta | needs_review |
+| fr.challenges.countInCategory | {n} desafio / {n} desafios | {n} challenge / {n} challenges | alta | needs_review |
+| fr.challenge.complete | ✅ Concluir | ✅ Complete | alta | needs_review |
+| fr.challenge.yourAnswerColon | Sua resposta: | Your answer: | alta | needs_review |
+| fr.challenge.inPortuguese | Em português: | In Portuguese: | alta | needs_review |
+| fr.challenge.agreementWarn | ⚠ Repare na concordância: depois de "{pronoun}", "{verb}" não é a conjugação certa. | ⚠ Mind the agreement: after "{pronoun}", "{verb}" is not the right conjugation. | média | needs_review |
+| fr.challenge.row.yourAnswer | Sua resposta | Your answer | alta | needs_review |
+| fr.challenge.row.expected | Resposta esperada | Expected answer | alta | needs_review |
+| fr.challenge.row.original | Frase original | Original sentence | alta | needs_review |
+| fr.challenge.lt.label | Digite sua tradução: | Type your translation: | alta | needs_review |
+| fr.challenge.lt.placeholder | Sua tradução em {lang}... | Your translation in {lang}... | alta | needs_review |
+| lang.name.pt-BR | português | Portuguese | alta | needs_review |
+| lang.name.en | inglês | English | alta | needs_review |
+| fr.challenge.accent.label | Digite o que você ouviu: | Type what you heard: | alta | needs_review |
