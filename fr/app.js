@@ -9450,7 +9450,12 @@ async function importChallengesFromJSON(rawText){
 // nunca depender de cache/estado de sessão -- uma publicação feita em
 // outra aba/navegador aparece assim que o site é reaberto ou a lista é
 // recarregada, sem precisar de nenhuma ação do Claude Code.
-async function loadChallengesFromDB(){
+// Cache em memória (5 min): reabrir a aba Desafios não baixa tudo de novo.
+// `force` (admin/edição) ou uma gravação (persistChallenge) ignoram o cache.
+let challengesLoadedAt = 0;
+const CHALLENGES_CACHE_MS = 5 * 60 * 1000;
+async function loadChallengesFromDB(force){
+  if (!force && challengesLoadedAt && Date.now() - challengesLoadedAt < CHALLENGES_CACHE_MS) return true;
   try {
     const { data, error } = await supabaseClient.from('challenges').select('*');
     if (error) throw error;
@@ -9469,6 +9474,7 @@ async function loadChallengesFromDB(){
       unpublished_by: row.unpublished_by,
       ...(row.data || {}),
     }));
+    challengesLoadedAt = Date.now();
     return true;
   } catch (err){
     console.error('Falha ao carregar desafios do Supabase:', err);
@@ -9483,6 +9489,7 @@ async function loadChallengesFromDB(){
 async function persistChallenge(c, extraColumns = {}){
   const payload = { status: c.status, data: challengeDataPayload(c), ...extraColumns };
   const { error } = await supabaseClient.from('challenges').update(payload).eq('id', c.id);
+  challengesLoadedAt = 0; // gravou: o cache deixa de valer
   if (error){
     console.error('Falha ao salvar desafio no Supabase:', error);
     alert('Não foi possível salvar no banco de dados: ' + error.message);
@@ -9671,7 +9678,9 @@ async function renderChallengeCategories(){
 
   const ok = await loadChallengesFromDB();
   if (!ok){
-    wrap.innerHTML = `<p class="challenges-empty">Não foi possível carregar os desafios agora. Verifique sua conexão e tente novamente.</p>`;
+    wrap.innerHTML = `<p class="challenges-empty">Não foi possível carregar os desafios agora. Verifique sua conexão e tente novamente.</p>
+      <button class="btn btn-secondary" id="challenges-retry-btn">Tentar de novo</button>`;
+    document.getElementById('challenges-retry-btn').addEventListener('click', () => renderChallengeCategories());
     return;
   }
   await ensureChallengesPlanLoaded();
@@ -9717,7 +9726,7 @@ async function renderChallengeCategories(){
     </button>
   `).join('') + (dictationsHere.length ? `
     <button class="challenge-category-card" id="challenges-dictation-card">
-      <div class="challenge-category-emoji">🎧</div>
+      <div class="challenge-category-emoji">📝</div>
       <div class="challenge-category-title">Ditados</div>
       <div class="challenge-category-subtitle">${challengesModuleFilter ? `${dictationsHere.length} ditado${dictationsHere.length === 1 ? '' : 's'}` : 'Ouça e escreva'}</div>
     </button>
@@ -11043,7 +11052,7 @@ async function renderChallengesAdmin(){
 
   const content = document.getElementById('challenges-admin-content');
   content.innerHTML = loadingHTML();
-  const ok = await loadChallengesFromDB();
+  const ok = await loadChallengesFromDB(true);
   if (!ok){
     content.innerHTML = `<p class="challenges-admin-empty">⚠ Não foi possível carregar os desafios agora. Verifique sua conexão e tente novamente -- isto NÃO significa que a fila está vazia.</p>`;
     return;
