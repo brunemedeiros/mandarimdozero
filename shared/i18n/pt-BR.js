@@ -1795,4 +1795,5 @@ window.I18N_CATALOG['pt-BR'] = {
   'lang.name.pt-BR': 'português',
   'lang.name.en': 'inglês',
   'fr.challenge.accent.label': 'Digite o que você ouviu:',
+  'fr.challenge.inEnglish': 'Em inglês:',
 };

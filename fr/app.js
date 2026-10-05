@@ -8536,7 +8536,7 @@ function renderDictationList(){
     <button class="dictation-card ${isDictationLocked(d) ? 'locked' : ''}" data-dict-id="${d.id}">
       ${isDictationLocked(d) ? '<span class="challenge-card-check" title="Premium">🔒</span>' : ''}
       <div class="dictation-card-level">${d.level}</div>
-      <div class="dictation-card-task">${escapeHtmlDictation(d.task)}</div>
+      <div class="dictation-card-task">${escapeHtmlDictation(dictationTask(d))}</div>
       <div class="dictation-card-module">${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</div>
       ${tierBadgeHTML(dictationTier(d))}
     </button>
@@ -8579,7 +8579,7 @@ function openDictationPlayer(id){
 
   const content = document.getElementById('dictation-player-content');
   content.innerHTML = `
-    <div class="dictation-player-task">${escapeHtmlDictation(d.task)}</div>
+    <div class="dictation-player-task">${escapeHtmlDictation(dictationTask(d))}</div>
     <p class="dictation-player-module">${d.level} · ${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</p>
     <div class="dictation-audio-player">
       <div class="dictation-transport">
@@ -9616,7 +9616,7 @@ function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
       ${isCorrect ? '' : `<p class="challenge-feedback-chosen">${t('fr.challenge.yourAnswerColon')} ${escapeHtmlChallenge(c.options[chosenIdx])}<br>${t('feedback.correctAnswerColon')} <strong>${escapeHtmlChallenge(c.correctAnswer)}</strong></p>`}
       <p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong><br>
       signifie <strong>${escapeHtmlChallenge(c.meaning.fr)}</strong>.<br>
-      ${t('fr.challenge.inPortuguese')} <strong>${escapeHtmlChallenge(c.meaning.pt)}</strong>.</p>
+      ${(challengeOverlay(c) && challengeOverlay(c).meaning) ? t('fr.challenge.inEnglish') : t('fr.challenge.inPortuguese')} <strong>${escapeHtmlChallenge((challengeOverlay(c) && challengeOverlay(c).meaning) || c.meaning.pt)}</strong>.</p>
       <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation)}</p>
 
       <div class="challenge-second-example">
@@ -9681,6 +9681,16 @@ function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
 function challengeOverlay(c){
   const lang = typeof getUiLang === 'function' ? getUiLang() : 'pt-BR';
   return (lang !== 'pt-BR' && window.CHALLENGES_I18N && window.CHALLENGES_I18N[lang] && window.CHALLENGES_I18N[lang][c.id]) || null;
+}
+// Texto do desafio no idioma do site (overlay) ou o original.
+function challengeText(c, field){
+  const ov = challengeOverlay(c);
+  return (ov && ov[field]) ? ov[field] : c[field];
+}
+function dictationTask(d){
+  const lang = typeof getUiLang === 'function' ? getUiLang() : 'pt-BR';
+  const ov = lang !== 'pt-BR' && window.DICTATIONS_I18N && window.DICTATIONS_I18N[lang] && window.DICTATIONS_I18N[lang][d.id];
+  return (ov && ov.task) ? ov.task : d.task;
 }
 function listenTranslateSetup(c){
   const ov = challengeOverlay(c);
@@ -9817,7 +9827,7 @@ function checkAccentAnswer(c){
         <button class="dictation-play-btn" id="accent-replay-btn">▶ Écouter</button>
         ${slowAudioBtnHTML('accent-replay-slow-btn')}
       </div>
-      ${c.explanation ? `<p class="accent-feedback-explanation">${escapeHtmlChallenge(c.explanation)}</p>` : ''}
+      ${(challengeText(c, 'explanation')) ? `<p class="accent-feedback-explanation">${escapeHtmlChallenge(challengeText(c, 'explanation'))}</p>` : ''}
   `;
   document.getElementById('accent-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('accent', isCorrect, isCorrect ? '✅ Correct.' : '❌ Incorrect.', accentBodyHTML);
   document.getElementById('accent-verify-btn').style.display = 'none';

@@ -75,10 +75,24 @@ const snap = (page, id) => page.evaluate((uid) => { const u = UNITS.find(x => x.
   await en.page.evaluate(() => openUnitDetail('A1-1'));
   check('en: sem aviso em A1-1', await en.page.evaluate(() => document.getElementById('ud-lang-notice').hidden));
   check('en: título na tela', await en.page.evaluate(() => document.getElementById('ud-title').textContent) === 'Greeting and saying goodbye');
+  // Fase 9: desafios e ditados no idioma do site
+  await en.page.waitForFunction(() => window.CHALLENGES_I18N && window.CHALLENGES_I18N.en, null, { timeout: 8000 });
+  const ph9 = await en.page.evaluate(() => {
+    const c = { id: 'lt-auto-001', referenceTranslations: ['Comprei um livro novo ontem e já terminei.'], explanation: '' };
+    const s = listenTranslateSetup(c);
+    const nov = listenTranslateSetup({ id: 'nao-existe-xyz', referenceTranslations: ['Olá'] });
+    return { lang: s.lang, refs: s.refs.length, ok: s.cmp.isAcceptable('I bought a new book yesterday and I already finished it.', s.refs), bad: s.cmp.isAcceptable('Comprei um livro novo ontem', s.refs),
+      mis: !!s.cmp.personMismatch('I is tired'), fbLang: nov.lang, fbOk: nov.cmp.isAcceptable('Olá', nov.refs),
+      task: dictationTask(DICTATIONS[0]), audio: dictationAudioPath(DICTATIONS[0]) };
+  });
+  check('en: Ouça e traduza compara em inglês', ph9.lang === 'en' && ph9.refs >= 2 && ph9.ok && !ph9.bad && ph9.mis, ph9);
+  check('en: desafio sem tradução cai em português', ph9.fbLang === 'pt-BR' && ph9.fbOk, ph9);
+  check('en: título do ditado em inglês e áudio ainda o de sempre', ph9.task === 'Introducing yourself in class' && ph9.audio === 'audio/dictation-d1-guided.mp3', ph9);
   // volta para pt-BR em tempo de execução: restaura byte a byte
   await en.page.evaluate(() => setUiLang('pt-BR'));
   await en.page.waitForFunction(() => UNITS[0].title === 'Cumprimentar e se despedir', null, { timeout: 8000 });
   check('volta pt-BR restaura A1-1 idêntico', await snap(en.page, 'A1-1') === ptA11);
+  check('volta pt-BR: ditado e comparador em português', await en.page.evaluate(() => dictationTask(DICTATIONS[0]) === 'Se apresentando em sala de aula' && listenTranslateSetup({ id: 'lt-auto-001', referenceTranslations: ['x'] }).lang === 'pt-BR'));
   check('volta pt-BR restaura cartão', await en.page.evaluate(() => STATE.cards.find(c => c.id === 'uA1-1-v0').back_trans) === 'olá / bom dia');
   check('en: sem erros', en.errors.length === 0, en.errors);
   await browser.close(); server.close();

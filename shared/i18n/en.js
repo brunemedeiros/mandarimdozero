@@ -1779,4 +1779,5 @@ window.I18N_CATALOG['en'] = {
   'lang.name.pt-BR': 'Portuguese', // ALTA
   'lang.name.en': 'English', // ALTA
   'fr.challenge.accent.label': 'Type what you heard:', // ALTA
+  'fr.challenge.inEnglish': 'In English:', // ALTA
 };
