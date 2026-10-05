@@ -1,0 +1,289 @@
+[
+ {
+  "path": "对.meaning",
+  "pt": "certo, correto; em relação a",
+  "en": "correct, right; toward",
+  "conf": "media",
+  "why": "Duas acepções"
+ },
+ {
+  "path": "口.meaning",
+  "pt": "boca; (classificador p/ pessoas da família)",
+  "en": "mouth; (measure word for family members)",
+  "conf": "media",
+  "why": "Classificador de pessoas da família"
+ },
+ {
+  "path": "个.meaning",
+  "pt": "(classificador geral)",
+  "en": "(general measure word)",
+  "conf": "media",
+  "why": "Classificador geral"
+ },
+ {
+  "path": "点.meaning",
+  "pt": "hora; ponto",
+  "en": "o'clock; dot",
+  "conf": "media",
+  "why": "Hora / ponto"
+ },
+ {
+  "path": "块.meaning",
+  "pt": "pedaço; unidade monetária",
+  "en": "piece; unit of currency",
+  "conf": "media",
+  "why": "Peça / unidade monetária"
+ },
+ {
+  "path": "便.meaning",
+  "pt": "barato (em piányi)",
+  "en": "cheap (in piányi)",
+  "conf": "media",
+  "why": "Parte de piányi"
+ },
+ {
+  "path": "号.meaning",
+  "pt": "dia do mês (uso falado)",
+  "en": "day of the month (spoken usage)",
+  "conf": "media",
+  "why": "Dia do mês (falado)"
+ },
+ {
+  "path": "分.meaning",
+  "pt": "minuto; dividir",
+  "en": "minute; to divide",
+  "conf": "media",
+  "why": "Minuto / dividir"
+ },
+ {
+  "path": "了.meaning",
+  "pt": "partícula de conclusão/mudança de estado",
+  "en": "particle of completion/change of state",
+  "conf": "media",
+  "why": "Partícula; descrição gramatical"
+ },
+ {
+  "path": "还.meaning",
+  "pt": "ainda; ou (em háishi)",
+  "en": "still; or (in háishi)",
+  "conf": "media",
+  "why": "háishi; ainda / ou"
+ },
+ {
+  "path": "会.meaning",
+  "pt": "saber fazer (habilidade aprendida)",
+  "en": "to know how to (learned skill)",
+  "conf": "media",
+  "why": "Habilidade aprendida"
+ },
+ {
+  "path": "毛.meaning",
+  "pt": "pelo; centavo (1/10 do kuài)",
+  "en": "fur; dime (1/10 of a kuài)",
+  "conf": "media",
+  "why": "Pelo / centavo (jiao); \"dime\" é US"
+ },
+ {
+  "path": "地.meaning",
+  "pt": "terra, chão (em dìtiě, metrô)",
+  "en": "earth, ground (in dìtiě, subway)",
+  "conf": "media",
+  "why": "Parte de dìtiě"
+ },
+ {
+  "path": "么.meaning",
+  "pt": "(partícula interrogativa)",
+  "en": "(interrogative particle)",
+  "conf": "media",
+  "why": "Partícula"
+ },
+ {
+  "path": "吧.meaning",
+  "pt": "partícula de sugestão; bar (em jiǔbā)",
+  "en": "suggestion particle; bar (in jiǔbā)",
+  "conf": "media",
+  "why": "Partícula / bar"
+ },
+ {
+  "path": "为.meaning",
+  "pt": "para, por (em wèishénme, por quê)",
+  "en": "for, because of (in wèishénme, why)",
+  "conf": "media",
+  "why": "wèishénme"
+ },
+ {
+  "path": "生.meaning",
+  "pt": "nascer, vida (em shēngbìng, ficar doente)",
+  "en": "to be born, life (in shēngbìng, to get sick)",
+  "conf": "media",
+  "why": "Vida / nascer"
+ },
+ {
+  "path": "打.meaning",
+  "pt": "bater, fazer (em dǎsuàn, planejar)",
+  "en": "to hit, to do (in dǎsuàn, to plan)",
+  "conf": "media",
+  "why": "Verbo polissêmico"
+ },
+ {
+  "path": "空.meaning",
+  "pt": "vazio, tempo livre (em yǒu kòng)",
+  "en": "empty, free time (in yǒu kòng)",
+  "conf": "media",
+  "why": "Vazio / tempo livre"
+ },
+ {
+  "path": "起.meaning",
+  "pt": "levantar, começar",
+  "en": "to get up, to start",
+  "conf": "media",
+  "why": "Levantar / começar"
+ },
+ {
+  "path": "没.meaning",
+  "pt": "não ter, não há",
+  "en": "not have, there is not",
+  "conf": "media",
+  "why": "Negação de ter"
+ },
+ {
+  "path": "离.meaning",
+  "pt": "distância de, longe de",
+  "en": "distance from, away from",
+  "conf": "media",
+  "why": "Preposição"
+ },
+ {
+  "path": "以.meaning",
+  "pt": "com, por meio de (em yǐhòu, depois)",
+  "en": "with, by means of (in yǐhòu, after)",
+  "conf": "media",
+  "why": "Preposição"
+ },
+ {
+  "path": "你.radicals[1]",
+  "pt": "tu (fonético)",
+  "en": "you (phonetic)",
+  "conf": "media",
+  "why": "phonetic"
+ },
+ {
+  "path": "多.radicals[1]",
+  "pt": "anoitecer (repetido)",
+  "en": "evening (repeated)",
+  "conf": "media",
+  "why": "\"evening (repeated)\" tradução literal de repetido"
+ },
+ {
+  "path": "哥.radicals[1]",
+  "pt": "poder (repetido)",
+  "en": "can (repeated)",
+  "conf": "media",
+  "why": "\"can (repeated)\""
+ },
+ {
+  "path": "爸.radicals[1]",
+  "pt": "(fonético)",
+  "en": "(phonetic)",
+  "conf": "media",
+  "why": "\"father; (phonetic)\""
+ },
+ {
+  "path": "名.radicals[0]",
+  "pt": "anoitecer",
+  "en": "evening",
+  "conf": "media",
+  "why": "anoitecer = evening/dusk"
+ },
+ {
+  "path": "客.radicals[0]",
+  "pt": "teto/casa",
+  "en": "roof/house",
+  "conf": "media",
+  "why": "teto/casa -> roof/house"
+ },
+ {
+  "path": "疼.radicals[0]",
+  "pt": "doença",
+  "en": "illness",
+  "conf": "media",
+  "why": "doença -> illness"
+ },
+ {
+  "path": "国.radicals[1]",
+  "pt": "jade (tesouro)",
+  "en": "jade (treasure)",
+  "conf": "media",
+  "why": "jade (tesouro) -> jade (treasure)"
+ },
+ {
+  "path": "铁.radicals[1]",
+  "pt": "perder (fonético)",
+  "en": "to lose (phonetic)",
+  "conf": "media",
+  "why": "perder -> to lose"
+ },
+ {
+  "path": "好.mnemonic",
+  "pt": "Uma mulher (女) ao lado de um filho (子) — a imagem tradicional de uma família reunida, algo bom e completo.",
+  "en": "A woman (女) beside a child (子) — the traditional image of a family together, something good and complete.",
+  "conf": "media",
+  "why": "Mnemônico narrativo; conferir fidelidade"
+ },
+ {
+  "path": "早.mnemonic",
+  "pt": "O sol (日) nascendo bem acima da linha do horizonte (十, como as primeiras raias de luz) — a imagem do início da manhã.",
+  "en": "The sun (日) rising just above the horizon line (十, like the first rays of light) — the image of the start of the morning.",
+  "conf": "media",
+  "why": "Mnemônico narrativo; conferir fidelidade"
+ },
+ {
+  "path": "家.mnemonic",
+  "pt": "Um porco (豕) sob um teto (宀) — na China antiga, ter um porco dentro de casa era sinal de que a família tinha se estabelecido e tinha fartura.",
+  "en": "A pig (豕) under a roof (宀) — in ancient China, having a pig at home was a sign that the family was settled and well off.",
+  "conf": "media",
+  "why": "Mnemônico narrativo; conferir fidelidade"
+ },
+ {
+  "path": "看.mnemonic",
+  "pt": "Uma mão (手) protegendo o olho (目) do sol — o gesto de fazer uma pala com a mão para enxergar melhor algo à distância.",
+  "en": "A hand (手) shielding the eye (目) from the sun — the gesture of shading your eyes with your hand to see something far away better.",
+  "conf": "media",
+  "why": "Mnemônico narrativo; conferir fidelidade"
+ },
+ {
+  "path": "明.mnemonic",
+  "pt": "O sol (日) e a lua (月) lado a lado — juntos, os dois maiores astros do céu, iluminando tudo: daí o sentido de \"claro\" e \"brilhante\".",
+  "en": "The sun (日) and the moon (月) side by side — together, the two greatest lights in the sky, illuminating everything: hence the meaning \"bright\" and \"clear\".",
+  "conf": "media",
+  "why": "Mnemônico narrativo; conferir fidelidade"
+ },
+ {
+  "path": "坐.mnemonic",
+  "pt": "Duas pessoas (人, duplicado no traço) sentadas diretamente no chão (土) — a imagem mais simples possível de sentar-se.",
+  "en": "Two people (人, doubled in the strokes) sitting directly on the ground (土) — the simplest possible image of sitting down.",
+  "conf": "media",
+  "why": "Mnemônico narrativo; conferir fidelidade"
+ },
+ {
+  "path": "男.mnemonic",
+  "pt": "Um campo de cultivo (田) sobre força/vigor físico (力) — na sociedade agrícola tradicional, o homem era quem trabalhava a terra com sua força.",
+  "en": "A farm field (田) above physical strength/vigor (力) — in traditional agricultural society, the man was the one who worked the land with his strength.",
+  "conf": "media",
+  "why": "Mnemônico narrativo; conferir fidelidade"
+ },
+ {
+  "path": "冷.radicals[1]",
+  "pt": "ordem (fonético)",
+  "en": "order (phonetic)",
+  "conf": "baixa",
+  "why": "Pista fonética (令 lìng); glosa do português incerta"
+ },
+ {
+  "path": "钱.radicals[1]",
+  "pt": "pequeno (fonético)",
+  "en": "small (phonetic)",
+  "conf": "media",
+  "why": "戋"
+ }
+]
