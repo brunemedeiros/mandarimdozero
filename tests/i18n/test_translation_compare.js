@@ -44,5 +44,7 @@ check('en: "she are" detecta', !!EN.personMismatch('She are ready'));
 check('en: subjuntivo "if I were" não é erro', EN.personMismatch('if I were you') === null);
 check('en: não atravessa outro pronome', EN.personMismatch('I think he is right') === null);
 check('en: "I does" detecta, "I do" não', !!EN.personMismatch('I does it') && EN.personMismatch('I do it') === null);
+check('en: perguntas invertidas não geram falso erro', EN.personMismatch('Does it have a pool?') === null && EN.personMismatch('What does she do for a living?') === null && EN.personMismatch('Did she do it') === null);
+check('en: cannot = can not', ok('I cannot go', ['I can not go']) && ok("I can't go", ['I cannot go']));
 check('forLang desconhecido cai em pt-BR', W.TranslationCompare.forLang('xx').lang === 'pt-BR');
 console.log(`${passed} ok, ${failed} falhas`); process.exit(failed ? 1 : 0);

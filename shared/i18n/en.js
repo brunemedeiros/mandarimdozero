@@ -1780,4 +1780,8 @@ window.I18N_CATALOG['en'] = {
   'lang.name.en': 'English', // ALTA
   'fr.challenge.accent.label': 'Type what you heard:', // ALTA
   'fr.challenge.inEnglish': 'In English:', // ALTA
+  'nav.study': 'Study', // ALTA
+  'nav.challenges': 'Challenges', // ALTA
+  'nav.profile': 'Profile', // ALTA
+  'side.streakDays': 'day streak', // ALTA
 };

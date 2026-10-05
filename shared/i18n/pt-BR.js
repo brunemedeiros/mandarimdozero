@@ -1796,4 +1796,12 @@ window.I18N_CATALOG['pt-BR'] = {
   'lang.name.en': 'inglês',
   'fr.challenge.accent.label': 'Digite o que você ouviu:',
   'fr.challenge.inEnglish': 'Em inglês:',
+  'nav.study': 'Study',
+  'nav.challenges': 'Challenges',
+  'nav.profile': 'Profile',
+  'side.streakDays': 'day streak',
+  'nav.study': 'Estudo',
+  'nav.challenges': 'Desafios',
+  'nav.profile': 'Perfil',
+  'side.streakDays': 'dias seguidos',
 };

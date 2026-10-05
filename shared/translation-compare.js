@@ -108,7 +108,7 @@
   function expandEnContractions(s){
     return String(s || '').toLowerCase()
       .replace(/[’‘]/g, "'")
-      .replace(/\bcan't\b/g, 'can not').replace(/\bwon't\b/g, 'will not').replace(/\blet's\b/g, 'let us')
+      .replace(/\bcannot\b/g, 'can not').replace(/\bcan't\b/g, 'can not').replace(/\bwon't\b/g, 'will not').replace(/\blet's\b/g, 'let us')
       .replace(/n't\b/g, ' not').replace(/'re\b/g, ' are').replace(/'m\b/g, ' am')
       .replace(/'ve\b/g, ' have').replace(/'ll\b/g, ' will').replace(/'d\b/g, ' would')
       .replace(/\b(he|she|it|that|there|what|who|here|where)'s\b/g, '$1 is');
@@ -128,6 +128,8 @@
     'they': { bad: ['am','is','has','does'] }
   };
   function enPersonMismatch(text){
+    // Perguntas têm inversão ("Does it have...?", "What does she do?"): não checa.
+    if (/\?/.test(String(text || ''))) return null;
     var words = normalizeEn(text).split(' ').filter(Boolean);
     for (var i = 0; i < words.length; i++){
       var spec = EN_SUBJECT_FORMS[words[i]];
@@ -135,6 +137,7 @@
       // O verbo precisa vir logo depois ("I never is" não é coberto, de propósito).
       var cand = words[i + 1];
       if (cand && EN_SUBJECT_FORMS[cand]) continue;
+      if (i > 0 && ['do','does','did','will','would','can','could','should','may','might','must'].indexOf(words[i - 1]) >= 0) continue; // inversão sem "?"
       if (cand && spec.bad.indexOf(cand) >= 0) return { pronoun: words[i], verb: cand, expected: null, got: [] };
     }
     return null;
