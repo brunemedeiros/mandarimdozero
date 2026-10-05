@@ -944,18 +944,20 @@ const CONTENT_I18N = ContentI18n.create({
   overlayUrl: (lang) => `content.${lang}.js`,
   extraUrls: (lang) => [`challenges.${lang}.js`],
   getLang: () => (typeof getUiLang === 'function' ? getUiLang() : 'pt-BR'),
-  onApplied: () => {
-    // Cartões da trilha guardam cópia do texto na criação; só o texto exibido
-    // muda (id/FSRS intactos).
-    STATE.cards.forEach((c) => {
-      if (c.origin !== 'study') return;
-      const u = UNITS.find((x) => x.id === c.unitId);
-      if (!u || !u.vocab || !u.vocab[c.vocabIdx]) return;
-      c.back_trans = u.vocab[c.vocabIdx].t;
-      c.unitTitle = u.title;
-    });
-  }
+  onApplied: () => refreshStudyCardTexts()
 });
+// Cartões da trilha guardam cópia do texto exibido; só o texto muda (id/FSRS
+// intactos). Também roda depois de carregar o progresso salvo, que traz o texto
+// do idioma em que foi salvo.
+function refreshStudyCardTexts(){
+  STATE.cards.forEach((c) => {
+    if (c.origin !== 'study') return;
+    const u = UNITS.find((x) => x.id === c.unitId);
+    if (!u || !u.vocab || !u.vocab[c.vocabIdx]) return;
+    c.back_trans = u.vocab[c.vocabIdx].t;
+    c.unitTitle = u.title;
+  });
+}
 window.addEventListener('i18n:change', () => { CONTENT_I18N.sync(); });
 CONTENT_I18N.sync();
 
@@ -1144,6 +1146,7 @@ function applySerializedState(data){
   // Fase 3 (reestruturação do motor de memória): migração SM2->FSRS,
   // idempotente (migrateCardToFSRS só age se `stability` ainda não existe).
   STATE.cards.forEach(migrateCardToFSRS);
+  if (typeof refreshStudyCardTexts === 'function') refreshStudyCardTexts();
   if (data.unitProgress) {
     Object.assign(STATE.unitProgress, data.unitProgress);
     // Saves de antes das lições (Modelo B) não têm lessonIdx/lessonMisses.

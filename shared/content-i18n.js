@@ -17,6 +17,9 @@
 //       grammar:{blocks:[{title, body, examples:["t"], table:[{label, pronouns:["..."]}]}], exercises:[{hint, prompt?}]} (só unidades type:"grammar"),
 //       trueFalse:[{claim, whyNote}]
 //     } } }
+// Fase 10 (mandarim): também aceita histórias e banco de hanzi:
+//   stories:{ "1": { title, subtitle, beats:[{lines:["t",...], question:{prompt, options:[...]}}] } }
+//   hanzi:{ "你": { meaning, radicals:["m",...], mnemonic } }   (chave = caractere)
 // O texto do aluno nunca passa por aqui: só o conteúdo do curso.
 (function(){
   'use strict';
@@ -132,6 +135,20 @@
     var modSnap = {}; (cfg.modules || []).forEach(function(m){ modSnap[m.id] = m.title; });
     var lvlSnap = {}; (cfg.levels || []).forEach(function(l){ lvlSnap[l.id] = l.label; });
     var ltSnap = {}; (cfg.levelTests || []).forEach(function(x){ ltSnap[x.id] = x.title; });
+    var stories = cfg.stories || [];
+    var storySnap = {};
+    stories.forEach(function(st){
+      storySnap[st.id] = { title: st.title, subtitle: st.subtitle, beats: (st.beats || []).map(function(b){
+        return { lines: (b.lines || []).map(function(l){ return l.t; }),
+          question: b.question ? { prompt: b.question.prompt, options: (b.question.options || []).slice() } : null };
+      }) };
+    });
+    var hanziAll = [];
+    (cfg.hanzi || []).forEach(function(lesson){ (lesson || []).forEach(function(h){ hanziAll.push(h); }); });
+    var hanziSnap = {};
+    hanziAll.forEach(function(h){
+      hanziSnap[h.char] = { meaning: h.meaning, radicals: (h.radicals || []).map(function(r){ return r.m; }), mnemonic: h.mnemonic };
+    });
     var activeLang = DEFAULT_LANG;
     var activeOverlay = null;
     var loading = {};
@@ -180,6 +197,27 @@
       });
       (cfg.levelTests || []).forEach(function(x){
         x.title = pick(activeOverlay && activeOverlay.levelTests && activeOverlay.levelTests[x.id], ltSnap[x.id]);
+      });
+      var os = (activeOverlay && activeOverlay.stories) || {};
+      stories.forEach(function(st){
+        var sn = storySnap[st.id], o = os[st.id] || {};
+        st.title = pick(o.title, sn.title);
+        st.subtitle = pick(o.subtitle, sn.subtitle);
+        (st.beats || []).forEach(function(b, bi){
+          var ob = (o.beats && o.beats[bi]) || {}, sb = sn.beats[bi];
+          (b.lines || []).forEach(function(l, li){ l.t = pick(ob.lines && ob.lines[li], sb.lines[li]); });
+          if (b.question && sb.question){
+            b.question.prompt = pick(ob.question && ob.question.prompt, sb.question.prompt);
+            b.question.options = sb.question.options.map(function(op, oi){ return pick(ob.question && ob.question.options && ob.question.options[oi], op); });
+          }
+        });
+      });
+      var oh = (activeOverlay && activeOverlay.hanzi) || {};
+      hanziAll.forEach(function(h){
+        var sn = hanziSnap[h.char], o = oh[h.char] || {};
+        h.meaning = pick(o.meaning, sn.meaning);
+        (h.radicals || []).forEach(function(r, ri){ r.m = pick(o.radicals && o.radicals[ri], sn.radicals[ri]); });
+        if (sn.mnemonic !== undefined) h.mnemonic = pick(o.mnemonic, sn.mnemonic);
       });
       if (typeof cfg.onApplied === 'function') cfg.onApplied(activeLang);
     }

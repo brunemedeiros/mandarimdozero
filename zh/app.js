@@ -1037,6 +1037,37 @@ HANZI_LESSONS.forEach((lesson, i) => {
   STATE.hanziLessonProgress[i] = { completed:false, unlocked: i===0 };
 });
 
+// Fase 10 (i18n): conteúdo do curso no idioma do site (unidades, histórias e
+// banco de hanzi). Overlay em zh/content.<lang>.js (carregado sob demanda); o
+// português continua sendo a fonte e unidade sem tradução aparece em português
+// com aviso na lição.
+const CONTENT_I18N = ContentI18n.create({
+  units: UNITS, levels: LEVELS, stories: STORIES, hanzi: HANZI_LESSONS,
+  overlayUrl: (lang) => `content.${lang}.js`,
+  getLang: () => (typeof getUiLang === 'function' ? getUiLang() : 'pt-BR'),
+  onApplied: () => refreshStudyCardTexts()
+});
+// Cartões guardam cópia do texto exibido; só o texto muda (id/FSRS intactos).
+// Também roda depois de carregar o progresso salvo (traz o texto do idioma em
+// que foi salvo).
+function refreshStudyCardTexts(){
+  STATE.cards.forEach((c) => {
+    if (c.origin !== 'study') return;
+    const u = UNITS.find((x) => x.id === c.unitId);
+    if (!u || !u.vocab || !u.vocab[c.vocabIdx]) return;
+    c.back_trans = u.vocab[c.vocabIdx].t;
+    c.unitTitle = u.title;
+  });
+  const byChar = {};
+  HANZI_LESSONS.forEach((lesson) => lesson.forEach((h) => { byChar[h.char] = h; }));
+  STATE.hanziCards.forEach((c) => {
+    const h = byChar[c.char];
+    if (h){ c.meaning = h.meaning; c.radicals = h.radicals; }
+  });
+}
+window.addEventListener('i18n:change', () => { CONTENT_I18N.sync(); });
+CONTENT_I18N.sync();
+
 // Conexão com o Supabase (supabaseClient, cleanRedirectURL) agora vem de
 // shared/supabase-client.js -- mesmo projeto/tabela `progress` de sempre,
 // compartilhado com os outros idiomas da plataforma.
@@ -1279,6 +1310,7 @@ function applySerializedState(data){
   // que os campos FSRS sempre existam a partir daqui.
   STATE.cards.forEach(migrateCardToFSRS);
   STATE.hanziCards.forEach(migrateCardToFSRS);
+  if (typeof refreshStudyCardTexts === 'function') refreshStudyCardTexts();
   if (data.unitProgress) {
     Object.assign(STATE.unitProgress, data.unitProgress);
     // Saves de antes das lições (Modelo B) não têm lessonIdx/lessonMisses --
@@ -2782,6 +2814,12 @@ function openUnitDetail(unitId){
   document.getElementById('ud-eyebrow').textContent = t('zh.path.unit.eyebrow', { id: u.id, total: UNITS.length });
   document.getElementById('ud-title').textContent = u.title;
   document.getElementById('ud-goal').textContent = u.goal;
+  const langNotice = document.getElementById('ud-lang-notice');
+  if (langNotice){
+    const untranslated = !CONTENT_I18N.isUnitTranslated(u.id);
+    langNotice.hidden = !untranslated;
+    langNotice.textContent = untranslated ? t('content.untranslatedNotice') : '';
+  }
 
   STEP_STATE.currentStep = 0;
   renderStep();

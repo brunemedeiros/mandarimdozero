@@ -2,13 +2,14 @@
 // Valida docs/i18n/content-<lang>/<unidade>.json contra fr/content.js:
 // mesmas dimensões (vocab, frases, linhas do diálogo, conceitos, blocos,
 // exemplos, verdadeiro/falso, lições), nenhum campo vazio, e as mesmas tags HTML
-// do português em cada texto com HTML. Uso: node scripts/validate-content-overlay.js [en] [A1-2 ...]
+// do português em cada texto com HTML. Para o mandarim: SITE=zh node scripts/validate-content-overlay.js en. Uso: node scripts/validate-content-overlay.js [en] [A1-2 ...]
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const ROOT = path.resolve(__dirname, '..');
 const lang = process.argv[2] || 'en';
+const site = process.env.SITE || 'fr';
 const only = process.argv.slice(3);
-const c = {}; vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'fr', 'content.js'), 'utf8') + ';this.UNITS=UNITS;', c);
-const dir = path.join(ROOT, 'docs', 'i18n', 'content-' + lang);
+const c = {}; vm.runInNewContext(fs.readFileSync(path.join(ROOT, site, 'content.js'), 'utf8') + ';this.UNITS=UNITS;', c);
+const dir = path.join(ROOT, 'docs', 'i18n', site === 'fr' ? 'content-' + lang : 'content-' + site + '-' + lang);
 let errors = 0;
 const err = (u, m) => { errors++; console.log('  ERRO [' + u + ']: ' + m); };
 const tags = s => (String(s).match(/<\/?[a-z][^>]*>/gi) || []).map(x => x.toLowerCase()).sort().join('');
@@ -16,7 +17,7 @@ function str(u, label, v, ptv){
   if (typeof v !== 'string' || !v.trim()) return err(u, label + ' vazio/ausente');
   if (ptv !== undefined && tags(v) !== tags(ptv)) err(u, label + ': tags HTML diferentes do português (' + tags(ptv) + ' vs ' + tags(v) + ')');
 }
-fs.readdirSync(dir).filter(f => f.endsWith('.json') && f !== '_meta.json').sort().forEach(f => {
+fs.readdirSync(dir).filter(f => f.endsWith('.json') && f !== '_meta.json' && !f.startsWith('_')).sort().forEach(f => {
   const d = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); const id = d.unit;
   if (only.length && !only.includes(id)) return;
   const u = c.UNITS.find(x => x.id === id); const e = d[lang];
@@ -73,4 +74,40 @@ fs.readdirSync(dir).filter(f => f.endsWith('.json') && f !== '_meta.json').sort(
   (u.trueFalseExercises || []).forEach((x, i) => { str(id, 'trueFalse[' + i + '].claim', tf[i] && tf[i].claim, x.claim); str(id, 'trueFalse[' + i + '].whyNote', tf[i] && tf[i].whyNote, x.whyNote); });
   console.log(id + ': validado');
 });
+// Mandarim: histórias e hanzi (arquivos _stories.json / _hanzi.json)
+if (site === 'zh' && !only.length){
+  const opt = (f) => { const q = path.join(dir, f); return fs.existsSync(q) ? JSON.parse(fs.readFileSync(q, 'utf8')) : null; };
+  const sx = {}; vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'zh', 'stories.js'), 'utf8') + ';this.S=STORIES', sx);
+  const st = opt('_stories.json');
+  if (!st) err('stories', '_stories.json ausente');
+  else sx.S.forEach(s0 => {
+    const o = st[s0.id]; const L = 'stories.' + s0.id;
+    if (!o) return err(L, 'sem tradução');
+    str(L, 'title', o.title); str(L, 'subtitle', o.subtitle);
+    if ((o.beats || []).length !== s0.beats.length) return err(L, 'beats: ' + (o.beats || []).length + ' vs ' + s0.beats.length);
+    s0.beats.forEach((b, bi) => {
+      const ob = o.beats[bi];
+      if ((ob.lines || []).length !== b.lines.length) err(L, 'beat ' + bi + ' lines: ' + (ob.lines || []).length + ' vs ' + b.lines.length);
+      b.lines.forEach((l, li) => str(L, 'beat ' + bi + ' line ' + li, (ob.lines || [])[li], l.t));
+      if (b.question){
+        str(L, 'beat ' + bi + ' prompt', ob.question && ob.question.prompt, b.question.prompt);
+        const oo = (ob.question && ob.question.options) || [];
+        if (oo.length !== b.question.options.length) err(L, 'beat ' + bi + ' options: ' + oo.length + ' vs ' + b.question.options.length);
+        b.question.options.forEach((x, xi) => str(L, 'beat ' + bi + ' option ' + xi, oo[xi], x));
+      } else if (ob.question) err(L, 'beat ' + bi + ' tem question sem original');
+    });
+  });
+  const hx = {}; vm.runInNewContext(fs.readFileSync(path.join(ROOT, 'zh', 'hanzi-data.js'), 'utf8') + ';this.L=HANZI_LESSONS', hx);
+  const hz = opt('_hanzi.json');
+  if (!hz) err('hanzi', '_hanzi.json ausente');
+  else hx.L.flat().forEach(h => {
+    const o = hz[h.char]; const L = 'hanzi.' + h.char;
+    if (!o) return err(L, 'sem tradução');
+    str(L, 'meaning', o.meaning, h.meaning);
+    if ((o.radicals || []).length !== (h.radicals || []).length) err(L, 'radicals: ' + (o.radicals || []).length + ' vs ' + (h.radicals || []).length);
+    (h.radicals || []).forEach((r, ri) => str(L, 'radicals[' + ri + ']', (o.radicals || [])[ri], r.m));
+    if (h.mnemonic) str(L, 'mnemonic', o.mnemonic, h.mnemonic); else if (o.mnemonic) err(L, 'mnemonic sem original');
+  });
+  console.log('stories/hanzi: validados');
+}
 console.log(errors ? errors + ' erro(s)' : 'OK'); process.exit(errors ? 1 : 0);
