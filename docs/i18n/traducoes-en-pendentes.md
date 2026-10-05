@@ -1819,3 +1819,37 @@ A1-1 vem do piloto (docs/i18n/piloto-A1-1.json). Itens abaixo: só os de confian
 | A1-20 | dialogue.lines[1] | Eu trabalhei de manhã, e à tarde eu fiz esporte. | I worked in the morning, and in the afternoon I played sports. | media | 'faire du sport' = 'play sports / exercise'; 'exercised' also fine. |
 | A1-20 | dialogue.lines[3] | A gente foi ao cinema com amigos. | We went to the movies with friends. | media | 'On' = informal 'we'. |
 | A1-20 | concepts.quest-ce-que-tu-as-fait-wh-in-situ[0].examples[0] | o que você fez ontem? (fala bem cotidiana) | what did you do yesterday? (very everyday speech) | media | Reality note; register labelled. |
+
+## Fase 8 — Gramática do A1 (A1-g1 a A1-g10), em inglês (needs_review)
+
+Explicações reescritas para comparar com o inglês onde o original comparava com o português (adaptações marcadas). Itens de confiança alta não listados.
+
+| Unidade | Caminho | PT | EN | Confiança | Motivo |
+|---|---|---|---|---|---|
+| A1-g1 | grammar.blocks[2].body | O francês usa avoir (ter) em várias expressões onde o português usa "estar" ou "ser" ... Se em português a frase usa "estar com/ter", muito provavelmente em francês é avoir. | French uses avoir (to have) in several expressions where English uses "to be" ... if the English sentence uses "to be" with a feeling or state, chances are French uses avoir. | media | Comparison adapted from Portuguese to English ("estar com/ter" -> "to be"); the French facts are unchanged. |
+| A1-g1 | grammar.blocks[0].examples[1] | Eu tenho vinte anos. (avoir) | I am twenty years old. (avoir) | media | English says "am ... years old" while French uses avoir; translated naturally rather than literally ("I have twenty years"). |
+| A1-g1 | grammar.blocks[1].examples[0] | Ele tem dez anos. (avoir) | He is ten years old. (avoir) | media | Same as above: natural English instead of "has ten years". |
+| A1-g2 | grammar.blocks[0].body | No francês, o adjetivo possessivo concorda com o gênero e número da coisa possuída — não com quem é o dono! ... | ... (English does the opposite: his/her depends on the owner.) | media | Added a one-sentence contrast with English (his/her follow the owner), which is true and helps English speakers; the original only compared to Portuguese. |
+| A1-g2 | grammar.blocks[3].table[2].pronouns | meus / minhas ... deles / delas (pl.) | my (plural) ... their (plural) | media | Portuguese gender/number distinctions (meus/minhas) do not exist in English; glossed as "(plural)". |
+| A1-g2 | grammar.blocks[3].table[0].pronouns | seu / dele / dela; vosso / de vocês | his / her / its; your (plural / formal) | media | English has no separate informal/formal "you" or Portuguese-style seu ambiguity; glosses adapted. Please check. |
+| A1-g3 | grammar.blocks[2].body | Alguns verbos vêm sempre acompanhados de um pronome que "reflete" de volta pro sujeito ... | Some verbs always come with a pronoun that "reflects" back to the subject ... | media | In English, "to get up/wake up" are not reflexive, so the idea may feel unfamiliar; kept the explanation as is without adding a comparison. Examples translated naturally ("I get up", not "I raise myself"). |
+| A1-g4 | grammar.blocks[0].examples[1] | Ela está viajando pra Tóquio. | She is traveling to Tokyo. | media | English uses "to" for direction and "in" for location; the French à covers both. Translated to match the French meaning. |
+| A1-g5 | grammar.blocks[0].examples[0] | Está fazendo 30 graus hoje. | It's 30 degrees today. | media | Celsius; US readers may expect Fahrenheit, kept faithful to the French |
+| A1-g5 | grammar.blocks[1].title | Prendre: pegar, tomar, comer | Prendre: to take, to catch, to have | media | adapted to English senses of prendre |
+| A1-g5 | grammar.blocks[1].examples[1] | Você vai tomar um café? | Are you having a coffee? | media | 'to have a coffee' is the natural English equivalent of 'prendre un café' |
+| A1-g5 | grammar.blocks[2].examples[1] | O que vocês fazem esse fim de semana? | What are you all doing this weekend? | media | 'you all' marks the plural 'vous'; adapted for English |
+| A1-g6 | grammar.blocks[0].body | pouvoir (poder) | pouvoir (can / to be able to) | media | English 'can' is a modal with no infinitive; glossed with both forms |
+| A1-g6 | grammar.blocks[1].body | devoir (dever/precisar) | devoir (must / to have to) | media | adapted to English modal senses |
+| A1-g6 | grammar.blocks[1].examples[0] | Você precisa descansar. | You need to rest. | media | FR 'vous' formal/plural; EN 'you' has no formal/plural distinction |
+| A1-g6 | grammar.blocks[2].examples[0] | É preciso dormir oito horas. | You have to sleep eight hours. | media | impersonal 'il faut' rendered with generic 'you' (more natural in English than 'one must') |
+| A1-g7 | grammar.blocks[1].examples[0] | Ela é menos alta que ele. | She is less tall than him. | media | kept literal to mirror 'moins grande'; natural English would be 'shorter than him' |
+| A1-g7 | grammar.blocks[1].examples[1] | Ele é tão gentil quanto o irmão. | He is as kind as his brother. | media | 'gentil' = kind |
+| A1-g7 | grammar.blocks[2].body | Assim como em português "bom" não vira "mais bom"... | Just like in English "good" doesn't become "more good"... | media | comparison with Portuguese adapted to English (same irregularity good → better); content adapted |
+| A1-g7 | grammar.blocks[3].table[0].pronouns | tão... quanto | as... as | media | PT 'tão... quanto' adapted to EN 'as... as' |
+| A1-g8 | grammar.blocks[0].body | ...não antes, como em inglês. | ...unlike English, where it usually goes before the verb. | media | comparison adapted: original contrasted with English for Portuguese speakers; here it is stated from the English reader's point of view (true for simple tenses: 'I always read' vs 'je lis toujours') |
+| A1-g8 | grammar.blocks[1].examples[0] | Nós saímos frequentemente no fim de semana. | We often go out on the weekend. | media | EN-US 'on the weekend' (EN-GB 'at the weekend') |
+| A1-g9 | grammar.blocks[1].examples[0] | Eu fiz esporte ontem. | I did some sports yesterday. | media | 'faire du sport' = 'to play/do sports'; EN has no exact single verb |
+| A1-g9 | grammar.blocks[2].examples[1] | Eu levantei cedo. | I got up early. | media | FR 'se lever' is pronominal; EN 'get up' is not, noted in the explanation |
+| A1-g10 | grammar.blocks[0].body | ... uma palavra pra cada dezena — igual em português. ... o francês simplesmente não tem uma palavra própria pra setenta, oitenta ou noventa. | ... one word for each ten — just like in English. ... unlike English, standard French simply has no word of its own for seventy, eighty or ninety. | media | Comparison adapted from Portuguese to English; "standard French" added because Belgium/Switzerland use septante/huitante/nonante (the exercises already accept those). |
+| A1-g10 | grammar.blocks[1].body | Setenta (soixante-dix) é literalmente "sessenta e dez". | Seventy (soixante-dix) is literally "sixty-ten". | media | Literal gloss in English; wording choice. |
+| A1-g10 | grammar.exercises[0].prompt | 70 em francês: | 70 in French: | media | Only the Portuguese part of the prompt was translated; answers unchanged. |

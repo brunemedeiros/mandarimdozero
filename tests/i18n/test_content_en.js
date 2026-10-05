@@ -54,12 +54,21 @@ const snap = (page, id) => page.evaluate((uid) => { const u = UNITS.find(x => x.
   check('en: A1-2 traduzida', u2.title !== JSON.parse(ptA12).title);
   check('en: módulo/nível', await en.page.evaluate(() => MODULES[0].title + '|' + LEVELS[0].label) === 'First contacts|Level 1 · Débutant');
   check('en: cartão da trilha traduzido, id/FSRS intactos', await en.page.evaluate(() => { const c = STATE.cards.find(x => x.id === 'uA1-1-v0'); return c.back_trans === 'hi, hello / good morning' && c.state === 'new' && c.reps === 0; }));
-  check('en: aviso só na unidade sem tradução', await en.page.evaluate(() => [CONTENT_I18N.isUnitTranslated('A1-1'), CONTENT_I18N.isUnitTranslated('A1-g1')].join()) === 'true,false');
+  check('en: A1-1 e A1-5 traduzidas', await en.page.evaluate(() => [CONTENT_I18N.isUnitTranslated('A1-1'), CONTENT_I18N.isUnitTranslated('A1-5')].join()) === 'true,true');
+  const allT = await en.page.evaluate(() => UNITS.filter(u => !CONTENT_I18N.isUnitTranslated(u.id)).map(u => u.id));
+  check('en: todas as 30 unidades do A1 com overlay', allT.length === 0, allT);
+  const g = await en.page.evaluate(() => { const u = UNITS.find(x => x.id === 'A1-g2'); const tb = u.grammar.blocks.find(b => b.table).table; return { keys: Object.keys(tb), forms: Object.values(tb)[0].map(r => r.form), ans: u.grammar.exercises.map(x => x.answer), hint: u.grammar.exercises[0].hint, prompt: u.grammar.exercises[0].prompt, title: u.title }; });
+  check('en: gramática traduzida, formas e respostas francesas intactas', g.forms.join() === 'mon,ton,son,notre,votre,leur' && g.ans[0] === 'mon' && g.prompt === "C'est ___ frère." && /my/i.test(g.hint) && g.title !== 'Adjetivos possessivos', g);
+  const gp = await en.page.evaluate(() => { openUnitDetail('A1-g2'); return document.getElementById('ud-title').textContent; });
+  check('en: título da gramática na tela', gp === g.title, gp);
+  await en.page.evaluate(() => exitToPath());
+  // simula unidade ainda sem tradução
+  await en.page.evaluate(() => { delete window.CONTENT_OVERLAYS.en.units['A1-5']; CONTENT_I18N.apply('en'); });
   const all = await en.page.evaluate(() => { const bad = []; UNITS.filter(u => u.type !== 'grammar').forEach(u => { if (!CONTENT_I18N.isUnitTranslated(u.id)) bad.push(u.id + ':sem overlay'); }); return bad; });
-  check('en: A1-1..A1-20 todas com overlay', all.length === 0, all);
+  check('en: só a unidade removida fica sem overlay', all.join() === 'A1-5:sem overlay', all);
   const same = await en.page.evaluate(() => { const bad = []; UNITS.filter(u => u.type !== 'grammar').forEach(u => u.vocab.forEach((v, i) => { if (/[ãõçáéíóúâêô]/i.test(v.t) && !/^[\x00-\x7F]*$/.test(v.t)) bad.push(u.id + ':v' + i + ':' + v.t); })); return bad; });
-  check('en: vocabulário sem acentos do português', same.length === 0, same.slice(0, 5));
-  await en.page.evaluate(() => openUnitDetail('A1-g1'));
+  check('en: vocabulário sem acentos do português (fora A1-5)', same.filter(x => !x.startsWith('A1-5')).length === 0, same.slice(0, 5));
+  await en.page.evaluate(() => openUnitDetail('A1-5'));
   const n2 = await en.page.evaluate(() => { const e = document.getElementById('ud-lang-notice'); return { hidden: e.hidden, text: e.textContent, disp: getComputedStyle(e).display }; });
   check('en: aviso visível em unidade de gramática', !n2.hidden && n2.text === "This lesson isn't available in English yet. Showing Portuguese." && n2.disp !== 'none', n2);
   await en.page.evaluate(() => exitToPath());
