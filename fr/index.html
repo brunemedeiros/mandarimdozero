@@ -1300,31 +1300,42 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .cloze-option.incorrect{ border-color: var(--error-red); background: rgba(214,38,25,0.10); animation: shakeWrong .4s ease; }
 .cloze-option.disabled{ pointer-events:none; opacity:.6; }
 .cloze-option.disabled.correct, .cloze-option.disabled.incorrect{ opacity:1; }
-.cloze-type-wrap{ text-align:center; }
+.cloze-type-wrap{ text-align:center; width:100%; max-width:360px; margin:0 auto; }
 .cloze-type-wrap input{
-  width:100%; max-width:260px; text-align:center; font-size:16px; font-weight:700;
+  width:100%; max-width:100%; box-sizing:border-box; min-height:48px; text-align:center; font-size:16px; font-weight:700;
   padding:10px 12px; border-radius:10px; border:2px solid var(--paper-line); background: var(--paper);
   font-family: var(--font-body); color: var(--ink); margin-bottom:14px;
 }
-.cloze-type-wrap input:focus{ outline:none; border-color: var(--imperial-gold); }
+.cloze-type-wrap input:focus{ outline:none; border-color: var(--seal-red-dark); }
 .cloze-type-wrap input:disabled{ opacity:.7; }
 /* Depois de responder, o botão Verificar não tem mais função (nem "clicável
    de novo", nem informação nova) -- some, em vez de ficar meio-apagado
    competindo com o painel de resultado logo abaixo. */
 .cloze-type-wrap button:disabled{ display:none; }
+.cloze-type-wrap .btn-block{ min-height:44px; }
+/* Onda 4: "Não sei" depois do campo de digitar vira botão secundário discreto,
+   na mesma largura do campo/Verificar (só neste contexto; os outros
+   exercícios continuam com o link). */
+.cloze-type-wrap ~ .exercise-dontknow{
+  display:block; width:100%; max-width:360px; margin:10px auto 0; min-height:44px;
+  border:1px solid var(--paper-line); border-radius:10px; text-decoration:none;
+  background: transparent; color: var(--ink-soft);
+}
+.cloze-type-wrap ~ .exercise-dontknow:hover{ border-color: var(--ink-soft); color: var(--ink); background: var(--paper-warm); }
+.cloze-type-wrap ~ .exercise-dontknow.disabled{ display:none; }
 
 /* Teclas de acento pros exercícios digitados (vocab-type/cloze-type) --
    mesmo espírito do .pinyin-tone-picker em zh/index.html, adaptado pro
    alfabeto francês (ver FR_ACCENT_GROUPS em fr/app.js). */
 .fr-accent-picker{
-  display:flex; gap:6px 10px; flex-wrap:wrap; justify-content:flex-start;
-  padding:2px 2px 6px; margin:8px 0 14px;
+  display:grid; grid-template-columns:repeat(7,1fr); gap:6px;
+  padding:0; margin:0 0 14px;
 }
-.fr-accent-group{ display:flex; gap:4px; flex-shrink:0; }
+.fr-accent-group{ display:contents; }
 .fr-accent-key{
-  flex-shrink:0; min-width:40px; height:40px; padding:0 8px; border-radius:8px;
+  min-width:0; height:44px; padding:0; border-radius:8px;
   border:1px solid var(--paper-line); background: var(--paper); color: var(--ink);
-  font-size:16px; font-weight:700; font-family: var(--font-body); cursor:pointer;
+  font-size:17px; font-weight:700; font-family: var(--font-body); cursor:pointer;
 }
 .fr-accent-key:hover{ border-color: var(--imperial-gold); }
 .fr-accent-key:active{ background: var(--paper-warm); }

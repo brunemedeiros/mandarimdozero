@@ -1386,13 +1386,13 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .cloze-option.incorrect{ border-color: var(--seal-red); background: rgba(192,35,31,0.10); animation: shakeWrong .4s ease; }
 .cloze-option.disabled{ pointer-events:none; opacity:.6; }
 .cloze-option.disabled.correct, .cloze-option.disabled.incorrect{ opacity:1; }
-.cloze-type-wrap{ text-align:center; }
+.cloze-type-wrap{ text-align:center; width:100%; max-width:360px; margin:0 auto; }
 .cloze-type-wrap input{
-  width:100%; max-width:260px; text-align:center; font-size:16px; font-weight:700;
+  width:100%; max-width:100%; box-sizing:border-box; min-height:48px; text-align:center; font-size:16px; font-weight:700;
   padding:10px 12px; border-radius:10px; border:2px solid var(--paper-line); background: var(--paper);
   font-family: var(--font-body); color: var(--ink); margin-bottom:14px;
 }
-.cloze-type-wrap input:focus{ outline:none; border-color: var(--imperial-gold); }
+.cloze-type-wrap input:focus{ outline:none; border-color: var(--seal-red-dark); }
 .cloze-type-wrap input:disabled{ opacity:.7; }
 /* Teclinha de tons -- ninguém tem teclado chinês pra digitar vogal com
    acento de tom, então isso insere o caractere certo no cursor do campo
@@ -1405,7 +1405,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 }
 .pinyin-tone-group{ display:flex; gap:4px; flex-shrink:0; }
 .pinyin-tone-key{
-  flex-shrink:0; min-width:32px; height:34px; padding:0 6px; border-radius:8px;
+  flex-shrink:0; min-width:40px; height:44px; padding:0 6px; border-radius:8px;
   border:1px solid var(--paper-line); background: var(--paper); color: var(--ink);
   font-size:16px; font-weight:700; font-family: var(--font-body); cursor:pointer;
 }
@@ -1416,6 +1416,17 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
    de novo", nem informação nova) -- some, em vez de ficar meio-apagado
    competindo com o painel de resultado logo abaixo. */
 .cloze-type-wrap button:disabled{ display:none; }
+.cloze-type-wrap .btn-block{ min-height:44px; }
+/* Onda 4: "Não sei" depois do campo de digitar vira botão secundário discreto,
+   na mesma largura do campo/Verificar (só neste contexto; os outros
+   exercícios continuam com o link). */
+.cloze-type-wrap ~ .exercise-dontknow{
+  display:block; width:100%; max-width:360px; margin:10px auto 0; min-height:44px;
+  border:1px solid var(--paper-line); border-radius:10px; text-decoration:none;
+  background: transparent; color: var(--ink-soft);
+}
+.cloze-type-wrap ~ .exercise-dontknow:hover{ border-color: var(--ink-soft); color: var(--ink); background: var(--paper-warm); }
+.cloze-type-wrap ~ .exercise-dontknow.disabled{ display:none; }
 
 .exercise-result{ text-align:center; padding: 40px 20px; }
 .exercise-result .big-emoji{ font-size:48px; margin-bottom:10px; }
