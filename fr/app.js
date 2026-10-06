@@ -7351,7 +7351,14 @@ function gradeCurrentCard(grade){
 }
 
 function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
-  if (STATE.unitProgress[unitId].completed) return;
+  const prog0 = STATE.unitProgress[unitId];
+  if (prog0.completed){
+    // Unidade pulada pelo Ponto de verificação que o aluno depois estuda de
+    // verdade: passa a valer como concluída por lições (selos, XP, etiqueta).
+    if (prog0.completedVia !== 'skip_test') return;
+    prog0.completedVia = 'lessons';
+    prog0.completedAt = todayStr();
+  }
   STATE.unitProgress[unitId].completed = true;
   stampUnitCompletion(STATE.unitProgress[unitId], 'lessons', todayStr());
   const u = UNITS.find(x => x.id === unitId);

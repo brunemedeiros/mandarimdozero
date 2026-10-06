@@ -123,6 +123,18 @@ async function runExam(page, correct){
     const r3 = await page.evaluate(() => { TRAIL_SKIP_PAYWALL_ENABLED = false; STEP_STATE.onCheckpoint = null; openCheckpoint('A1-m3'); return STEP_STATE.onCheckpoint; });
     check('openCheckpoint ignora módulo bloqueado', r3 !== 'A1-m3', r3);
   }
+
+  // ---- pulada que depois é estudada de verdade vira concluída por lições
+  {
+    const r4 = await page.evaluate(() => {
+      const id = 'A1-1'; const pr = STATE.unitProgress[id];
+      pr.completed = true; pr.completedVia = 'skip_test'; pr.completedAt = '2026-01-01';
+      const before = unitBlockState(UNITS.find(u => u.id === id));
+      markUnitCompleted(id, 90, { skipToast: true });
+      return { before, via: pr.completedVia, st: unitBlockState(UNITS.find(u => u.id === id)), date: pr.completedAt !== '2026-01-01' };
+    });
+    check('pulada estudada vira concluída por lições', r4.before === 'skipped' && r4.via === 'lessons' && r4.st === 'done' && r4.date, r4);
+  }
   check('sem erro de página', errors.length === 0, errors);
   await ctx.close(); await browser.close(); server.close();
   console.log(`${passed} ok, ${failed} falhas`); process.exit(failed ? 1 : 0);
