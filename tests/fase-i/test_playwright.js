@@ -147,7 +147,7 @@ async function bootPage(browser, lang, port){
     const L = (n, c, x) => check(lang + ' ' + n, c, x);
 
     // ===== Meus Cartões: editor de Tags (criar) =====
-    await ev(() => { CURRENT_USER = { id: 'U' }; window.__uid = 'U'; ensureProfileLoaded = async () => ({ plan_tier: 'free' }); switchTab('my-flashcards'); });
+    await ev(() => { CURRENT_USER = { id: 'U' }; window.__uid = 'U'; ensureProfileLoaded = async () => ({ plan_tier: 'free' }); switchTab('my-flashcards'); MY_FLASHCARDS_STATE.onChange = (o) => renderMyFlashcardsView(o); });
     await page.waitForSelector('#my-flashcard-tags [data-tags-input]');
     L('editor de Tags aparece no formulário de criação', true);
     await page.fill('#my-flashcard-tags [data-tags-input]', 'Saudação, A1, a1, meu deck');
@@ -244,7 +244,7 @@ async function bootPage(browser, lang, port){
     L('filtro persiste no estado salvo', await ev(() => { STATE.studySettings.reviewTagFilter = ['a1']; const s = JSON.stringify(serializeState()).includes('"reviewTagFilter":["a1"]'); STATE.studySettings.reviewTagFilter = []; return s; }));
 
     // ===== Aluno vê tags do Teacher Card mas sem controle de edição =====
-    await ev((a) => { window.__DB.decks.push({ id: 7100, kind: 'teacher_root', owner_id: 'U', teacher_id: 'T', language_app_key: a, parent_deck_id: null, name: 'T' }); switchTab('my-flashcards'); }, appKey);
+    await ev((a) => { window.__DB.decks.push({ id: 7100, kind: 'teacher_root', owner_id: 'U', teacher_id: 'T', language_app_key: a, parent_deck_id: null, name: 'T' }); switchTab('my-flashcards'); MY_FLASHCARDS_STATE.onChange = (o) => renderMyFlashcardsView(o); }, appKey);
     await page.waitForSelector('#teacher-decks-section');
     const ro = await ev(() => { const el = document.querySelector('[data-teacher-tags]'); return { shown: !!el && el.textContent.includes('prof'), removeBtns: document.querySelectorAll('#teacher-decks-section [data-tag-remove], #teacher-decks-section [data-tags-input]').length }; });
     L('aluno: vê as tags dos Teacher Cards (somente leitura, sem input/remover)', ro.shown && ro.removeBtns === 0, ro);

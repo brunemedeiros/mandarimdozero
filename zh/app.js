@@ -7831,12 +7831,6 @@ document.getElementById('review-tag-clear')?.addEventListener('click', () => {
 // antes era um botão de texto solto entre o dropdown e REVISAR, a autora
 // não gostou) -- recolhido por padrão, sincroniza ao abrir (4 controles
 // de sessão, ver renderReviewSettingsView).
-// Prop 3 (ver CLAUDE.md, "7 propostas") -- "Meus Cartões" ganhou um botão
-// de verdade no topo da tela de Revisão, substituindo a entrada que
-// existia (e foi removida) do menu do avatar.
-document.getElementById('review-my-flashcards-btn')?.addEventListener('click', () => {
-  switchTab('my-flashcards');
-});
 const reviewHeaderSettingsBtn = document.getElementById('review-header-settings-btn');
 if (reviewHeaderSettingsBtn){
   reviewHeaderSettingsBtn.addEventListener('click', () => {

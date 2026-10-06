@@ -1,6 +1,8 @@
-// Navegador de Decks (shared/deck-browser.js): tabela da Revisão, detalhe do
-// Deck, Painel (busca/filtro/mover/excluir) e exclusão de Deck pessoal
-// (mover ou excluir permanentemente). Playwright (Chromium real), FR + ZH.
+// Navegador de Decks (shared/deck-browser.js): barra do topo (Decks |
+// Adicionar | Painel), tabela da Revisão, tela do Deck no formato do Anki,
+// Painel em janela (filtros, lista, editor), Criar/Importar/Exportar,
+// exclusão de Deck pessoal e o fim de "Meus Cartões". Playwright (Chromium
+// real), FR + ZH.
 // Harness da Fase H: convidado + Supabase stubado em memória; "autenticado"
 // = CURRENT_USER setado depois do boot. O stub grava as escritas em
 // own_flashcards/decks para conferir o que foi enviado ao banco.
@@ -117,6 +119,41 @@ async function setup(page){
   });
 }
 
+
+const SHOTS = process.env.SHOT_DIR || require('os').tmpdir();
+const shot = (page, name) => page.screenshot({ path: path.join(SHOTS, name + '.png') });
+
+// Funções de rede dos cartões próprios trocadas por versões em memória.
+async function stubOwn(page){
+  await page.evaluate(() => {
+    fetchMyOwnFlashcards = async () => window.__DB.own_flashcards.map(r => Object.assign({}, r));
+    fetchDecksForLanguage = async () => STATE.decks.map(d => Object.assign({}, d));
+    ensureDecksForCurrentUser = async () => ({ ok: true, rootDeckId: 9000, personalRootDeckId: 9001 });
+    hasActiveTeacherLink = async () => false;
+    fetchMyPlanTier = async () => 'premium';
+    window.__created = []; window.__updated = [];
+    createOwnFlashcard = async ({ nativeState, deckId }) => {
+      const row = Object.assign({ id: 700 + window.__created.length, owner_id: CURRENT_USER.id, language_app_key: APP_KEY, status: 'active', revision: 0, deck_id: deckId },
+        nativeContentColumnsFromEditorState(nativeState));
+      window.__created.push(row); window.__DB.own_flashcards.push(Object.assign({}, row));
+      return { ok: true, card: row };
+    };
+    updateOwnFlashcardContent = async (id, payload) => {
+      window.__updated.push({ id, payload });
+      const r = window.__DB.own_flashcards.find(x => x.id === id);
+      if (r && payload.nativeState) Object.assign(r, nativeContentColumnsFromEditorState(payload.nativeState), { revision: payload.revision });
+      return { ok: true };
+    };
+    createPersonalDeck = async ({ name, parentDeckId }) => {
+      const deck = { id: 9500 + STATE.decks.length, kind: 'personal', name: name.trim(), owner_id: CURRENT_USER.id, language_app_key: APP_KEY, parent_deck_id: parentDeckId };
+      window.__DB.decks.push(Object.assign({}, deck));
+      return { ok: true, deck };
+    };
+  });
+}
+
+const listRows = page => page.evaluate(() => Array.from(document.querySelectorAll('#deck-panel-modal [data-panel-open-note]')).map(r => r.dataset.panelOpenNote));
+
 (async () => {
   await new Promise(r => server.listen(0, '127.0.0.1', r));
   const port = server.address().port;
@@ -125,9 +162,14 @@ async function setup(page){
     console.log('== ' + lang);
     const { page, errors, ctx } = await bootPage(browser, lang, port);
     const s = await setup(page);
+    await stubOwn(page);
     check(lang + ' setup: cartões da trilha no Course Deck da unidade', s.courseCards > 0, s);
 
-    // ---- 1) Tabela da Revisão ----
+    // ---- 0) Meus Cartões não existe mais ----
+    const gone = await page.evaluate(() => ({ btn: !!document.getElementById('review-my-flashcards-btn'), route: hashToRoute('#/my-flashcards'), imp: hashToRoute('#import=abc') }));
+    check(lang + ' sem botão Meus Cartões; endereço antigo abre a Revisão', !gone.btn && gone.route.tab === 'review' && gone.imp.tab === 'review', gone);
+
+    // ---- 1) Tabela + barra do topo ----
     await page.evaluate(() => switchTab('review'));
     await page.waitForSelector('#review-decks-table table.deck-table', { timeout: 8000 });
     const table = await page.evaluate(() => {
@@ -136,195 +178,223 @@ async function setup(page){
         nums: Array.from(tr.querySelectorAll('.deck-table-num')).map(td => Number(td.textContent)),
       }));
       const head = Array.from(document.querySelectorAll('#review-decks-table th')).map(th => th.textContent);
-      return { rows, head, studyBtns: document.querySelectorAll('#review-decks-table [data-study-deck], #review-decks-table .btn-primary').length };
+      const num = document.querySelector('#review-decks-table .deck-table-num'), th = document.querySelectorAll('#review-decks-table th')[1];
+      const bar = document.querySelector('#review-deck-topbar-home .deck-topbar');
+      const wrap = document.getElementById('review-mode-select-wrap').getBoundingClientRect();
+      const b = bar.getBoundingClientRect();
+      return { rows, head, studyBtns: document.querySelectorAll('#review-decks-table [data-study-deck], #review-decks-table .btn-primary').length,
+        align: [getComputedStyle(num).textAlign, getComputedStyle(th).textAlign],
+        bar: Array.from(bar.querySelectorAll('button')).map(x => x.textContent.trim()), barCenter: Math.abs((b.left + b.right) / 2 - (wrap.left + wrap.right) / 2),
+        homeBtns: Array.from(document.querySelectorAll('#review-decks-table .deck-home-actions button')).map(x => x.textContent.trim()) };
     });
     check(lang + ' cabeçalho Deck|Novo|Aprendendo|Revisar', table.head.join('|') === 'Deck|Novo|Aprendendo|Revisar', table.head);
-    check(lang + ' 1ª linha = raiz do idioma', table.rows[0] && table.rows[0].id === 'lang' && /Francês|Mandarim/.test(table.rows[0].name), table.rows[0]);
     const ids = table.rows.map(r => r.id);
-    check(lang + ' mostra Curso, Meus Decks, professora e subdecks pessoais', ['9200', '9001', '9100', '9002', '9003', '9004'].every(i => ids.includes(i)), ids);
-    check(lang + ' curso começa fechado (unidade não aparece)', !ids.includes('9201'), ids);
+    check(lang + ' sem linha da raiz do idioma; começa pela Trilha de Estudo', !ids.includes('lang') && ids[0] === '9200' && table.rows[0].name === 'Trilha de Estudo', table.rows[0]);
+    check(lang + ' mostra Meus Decks, professora e subdecks pessoais', ['9001', '9100', '9002', '9003', '9004'].every(i => ids.includes(i)), ids);
+    check(lang + ' Trilha começa fechada', !ids.includes('9201'), ids);
     check(lang + ' sem botão Estudar na tabela', table.studyBtns === 0, table.studyBtns);
-    const counts = await page.evaluate(() => {
-      const pool = eligibleDeckReviewPool();
-      return { lang: Math.min(structuralCounts(pool).new, STATE.studySettings.newCardsPerDay), meus: getDeckCounts(STATE.decks, 9001, pool).new };
-    });
-    const row = id => table.rows.find(r => r.id === id);
-    check(lang + ' Novo da raiz = pool elegível inteiro, limitado a Novas por dia', row('lang').nums[0] === counts.lang, { row: row('lang'), counts });
-    check(lang + ' Novo de Meus Decks = 4 Notes (4 cartões) com subdecks', row('9001').nums[0] === 4 && counts.meus === 4, row('9001'));
-    // abrir o curso
+    check(lang + ' números centralizados embaixo das colunas', table.align.join() === 'center,center', table.align);
+    check(lang + ' barra do topo: Decks | Adicionar | Painel, centralizada', table.bar.join('|') === 'Decks|Adicionar|Painel' && table.barCenter < 3, table);
+    check(lang + ' embaixo da tabela: Criar Deck, Importar arquivo, Exportar', table.homeBtns.join('|') === 'Criar Deck|Importar arquivo|Exportar', table.homeBtns);
+    const meus = await page.evaluate(() => getDeckCounts(STATE.decks, 9001, eligibleDeckReviewPool()).new);
+    check(lang + ' Novo de Meus Decks = 4', table.rows.find(r => r.id === '9001').nums[0] === 4 && meus === 4, table.rows.find(r => r.id === '9001'));
     await page.click('[data-deck-toggle="9200"]');
-    const afterToggle = await page.evaluate(() => Array.from(document.querySelectorAll('#review-decks-table tbody tr')).map(tr => tr.dataset.deckRow));
-    check(lang + ' abrir o curso mostra a unidade', afterToggle.includes('9201'), afterToggle);
+    check(lang + ' abrir a Trilha mostra a unidade', (await page.evaluate(() => Array.from(document.querySelectorAll('#review-decks-table tbody tr')).map(tr => tr.dataset.deckRow))).includes('9201'));
+    if (lang === 'fr') await shot(page, 'deck-home-fr');
 
-    // ---- 1b) Detalhe do Deck ----
+    // ---- 1b) Criar Deck ----
+    await page.click('[data-deck-create]');
+    await page.fill('#deck-create-name', 'Viagem');
+    await page.click('[data-deck-create-save]');
+    await page.waitForFunction(() => STATE.decks.some(d => d.name === 'Viagem'));
+    const created = await page.evaluate(() => Array.from(document.querySelectorAll('#review-decks-table .deck-table-link')).map(b => b.textContent));
+    check(lang + ' Criar Deck: aparece na tabela', created.includes('Viagem'), created);
+
+    // ---- 2) Tela do Deck ----
     await page.click('[data-deck-open="9002"]');
     const detail = await page.evaluate(() => {
       const w = document.getElementById('review-deck-wrap');
       return { visible: w.style.display !== 'none', modesHidden: document.getElementById('review-mode-select-wrap').style.display === 'none',
-        title: w.querySelector('.deck-detail-title').textContent, path: w.querySelector('.deck-detail-path').textContent,
-        buttons: Array.from(w.querySelectorAll('.deck-detail-actions button')).map(b => b.textContent.trim()),
-        nums: Array.from(w.querySelectorAll('.deck-detail-num')).map(n => Number(n.textContent)),
-        del: !!w.querySelector('[data-deck-delete]') };
+        title: w.querySelector('.deck-overview-title').textContent,
+        labels: Array.from(w.querySelectorAll('.deck-overview-counts dt')).map(n => n.textContent),
+        nums: Array.from(w.querySelectorAll('.deck-overview-counts dd')).map(n => Number(n.textContent)),
+        study: !!w.querySelector('[data-deck-study]'), bar: Array.from(w.querySelectorAll('.deck-topbar button')).map(b => b.textContent.trim()),
+        footer: Array.from(w.querySelectorAll('.deck-overview-footer button')).map(b => b.textContent.trim()), hash: location.hash };
     });
-    check(lang + ' detalhe abre no lugar da tela de modos', detail.visible && detail.modesHidden, detail);
-    check(lang + ' detalhe: título e caminho', detail.title === 'Verbos' && /Meus Decks/.test(detail.path), detail);
-    check(lang + ' detalhe: Estudar agora / Adicionar cartão / Painel', ['Estudar agora', 'Adicionar cartão', 'Painel'].every(b => detail.buttons.includes(b)), detail.buttons);
-    check(lang + ' detalhe: Novo = 2 (Verbos + Irregulares)', detail.nums[0] === 2, detail.nums);
-    check(lang + ' detalhe: Deck pessoal tem Excluir', detail.del, detail);
-    // Estudar agora -> sessão do Deck (subárvore)
+    check(lang + ' tela do Deck no lugar da tela de modos', detail.visible && detail.modesHidden, detail);
+    check(lang + ' tela do Deck: nome com caminho', detail.title === 'Meus Decks › Verbos', detail.title);
+    check(lang + ' tela do Deck: Novo/Aprendendo/Revisar + Estudar agora', detail.labels.join('|') === 'Novo:|Aprendendo:|Revisar:' && detail.nums[0] === 2 && detail.study, detail);
+    check(lang + ' tela do Deck: mesma barra do topo', detail.bar.join('|') === 'Decks|Adicionar|Painel', detail.bar);
+    check(lang + ' tela do Deck pessoal: Criar subdeck, Renomear, Publicar, Excluir', ['Criar subdeck', 'Renomear', 'Excluir'].every(b => detail.footer.includes(b)) && detail.footer.some(b => /Publicar|Público/.test(b)), detail.footer);
+    check(lang + ' tela do Deck tem endereço próprio', detail.hash === '#/review/decks/9002', detail.hash);
+    if (lang === 'fr') await shot(page, 'deck-detail-fr');
     await page.click('[data-deck-study]');
-    const sess = await page.evaluate(() => ({ deck: STATE.reviewSessionDeckId, n: STATE.reviewQueue.length, ids: STATE.reviewQueue.map(c => c.rowId).sort(), shown: document.getElementById('review-session-wrap').style.display, deckWrap: document.getElementById('review-deck-wrap').style.display }));
-    check(lang + ' Estudar agora usa startDeckReviewSession (Deck + subdecks)', sess.deck === 9002 && sess.n === 2 && sess.ids.join() === '501,502' && sess.shown === 'block' && sess.deckWrap === 'none', sess);
+    const sess = await page.evaluate(() => ({ deck: STATE.reviewSessionDeckId, n: STATE.reviewQueue.length, ids: STATE.reviewQueue.map(c => c.rowId).sort() }));
+    check(lang + ' Estudar agora: Deck + subdecks', sess.deck === 9002 && sess.n === 2 && sess.ids.join() === '501,502', sess);
     await page.evaluate(() => backToReviewModeSelect());
 
-    // Detalhe do curso: sem "Adicionar cartão" e sem Excluir
+    // Renomear
+    await page.evaluate(() => openDeckDetail(9002));
+    await page.evaluate(() => { renamePersonalDeck = async () => ({ ok: true }); });
+    await page.click('[data-deck-rename]');
+    await page.fill('#deck-rename-name', 'Verbos 2');
+    await page.click('[data-deck-rename-save]');
+    await page.waitForFunction(() => document.querySelector('.deck-overview-title').textContent.includes('Verbos 2'));
+    check(lang + ' Renomear muda o nome na tela', true);
+    await page.evaluate(() => { STATE.decks.find(d => d.id === 9002).name = 'Verbos'; });
+
+    // Trilha: sem rodapé de Deck pessoal, com aviso; Adicionar vai para Meus Decks
     await page.evaluate(() => openDeckDetail(9201));
-    const courseDetail = await page.evaluate(() => { const w = document.getElementById('review-deck-wrap'); return { add: !!w.querySelector('[data-deck-add]'), del: !!w.querySelector('[data-deck-delete]'), hint: w.textContent.includes('vêm das lições') }; });
-    check(lang + ' detalhe do curso: sem Adicionar/Excluir, com aviso', !courseDetail.add && !courseDetail.del && courseDetail.hint, courseDetail);
-    // Raiz do idioma: Estudar agora estuda o pool inteiro
-    await page.evaluate(() => openDeckDetail('lang'));
-    await page.click('[data-deck-study]');
-    const langSess = await page.evaluate(() => ({ n: STATE.reviewQueue.length, expected: reviewFilterQueue('oldest', eligibleDeckReviewPool().filter(matchesReviewTagFilter)).length, origins: [...new Set(eligibleDeckReviewPool().map(c => c.origin))].sort() }));
-    check(lang + ' raiz: Estudar agora = pool elegível inteiro (curso+pessoal+professora)', langSess.n === langSess.expected && langSess.n > 0 && ['self','study','teacher'].every(o => langSess.origins.includes(o)), langSess);
-    await page.evaluate(() => backToReviewModeSelect());
+    const course = await page.evaluate(() => { const w = document.getElementById('review-deck-wrap'); return { footer: !!w.querySelector('.deck-overview-footer'), hint: w.textContent.includes('vêm das lições'), title: w.querySelector('.deck-overview-title').textContent }; });
+    check(lang + ' tela da unidade da Trilha: sem botões de Deck pessoal, com aviso', !course.footer && course.hint && course.title.startsWith('Trilha de Estudo › '), course);
+    await page.click('#review-deck-wrap [data-topbar-add]');
+    await page.waitForSelector('#add-card-modal #my-flashcard-deck');
+    check(lang + ' Adicionar na Trilha usa Meus Decks', await page.evaluate(() => document.querySelector('#add-card-modal #my-flashcard-deck').value) === '9001');
+    await page.keyboard.press('Escape');
 
-    // Adicionar cartão -> JANELA por cima da Revisão, com o Deck escolhido
-    await page.evaluate(() => { openDeckDetail(9004); });
-    const addRes = await page.evaluate(async () => {
-      fetchMyOwnFlashcards = async () => window.__DB.own_flashcards.map(r => Object.assign({}, r));
-      fetchDecksForLanguage = async () => STATE.decks.map(d => Object.assign({}, d));
-      ensureDecksForCurrentUser = async () => ({ ok: true, rootDeckId: 9000, personalRootDeckId: 9001 });
-      window.__created = [];
-      createOwnFlashcard = async ({ nativeState, deckId }) => {
-        const row = Object.assign({ id: 700 + window.__created.length, owner_id: CURRENT_USER.id, language_app_key: APP_KEY, status: 'active', revision: 0, deck_id: deckId },
-          nativeContentColumnsFromEditorState(nativeState));
-        window.__created.push(row); window.__DB.own_flashcards.push(Object.assign({}, row));
-        return { ok: true, card: row };
-      };
-      document.querySelector('[data-deck-add]').click();
-      for (let i = 0; i < 60; i++){
-        const sel = document.querySelector('#add-card-modal #my-flashcard-deck');
-        if (sel && sel.value === '9004') break;
-        await new Promise(r => setTimeout(r, 100));
-      }
-      const sel = document.querySelector('#add-card-modal #my-flashcard-deck');
-      return { tab: document.getElementById('app').dataset.activeTab, modal: !!document.getElementById('add-card-modal'), value: sel ? sel.value : null,
-        detailStill: document.getElementById('review-deck-wrap').style.display !== 'none', hash: location.hash };
-    });
-    check(lang + ' Adicionar cartão abre uma janela (fica na Revisão) com o Deck selecionado', addRes.tab === 'review' && addRes.modal && addRes.value === '9004' && addRes.detailStill, addRes);
-    // cria um cartão pela janela
-    await page.click('#add-card-modal [data-field-add]');
-    await page.click('#add-card-modal [data-field-add]');
+    // ---- 3) Adicionar: janela com o Deck da tela, campos já com idioma ----
+    await page.evaluate(() => openDeckDetail(9004));
+    await page.click('#review-deck-wrap [data-topbar-add]');
+    await page.waitForFunction(() => { const s = document.querySelector('#add-card-modal #my-flashcard-deck'); return s && s.value === '9004'; });
+    const add = await page.evaluate(() => ({ tab: document.getElementById('app').dataset.activeTab, langs: Array.from(document.querySelectorAll('#add-card-modal [data-field-lang]')).map(s => s.value), study: STUDY_LANG_FOR_APP_KEY[APP_KEY] }));
+    check(lang + ' Adicionar: janela por cima, com o Deck da tela', add.tab === 'review', add);
+    check(lang + ' Adicionar: 2 campos, 1º no idioma estudado e 2º em português', add.langs.join() === add.study + ',pt-BR', add);
     const inputs = await page.$$('#add-card-modal [data-field-content]');
     await inputs[0].fill('fromage'); await inputs[1].fill('queijo');
+    if (lang === 'fr') await shot(page, 'deck-add-fr');
     await page.click('#add-card-modal #my-create-flashcard-btn');
     await page.waitForFunction(() => window.__created.length === 1 && document.querySelector('#add-card-modal .add-card-done'), null, { timeout: 8000 });
     const made = await page.evaluate(() => ({ row: window.__created[0], inState: STATE.cards.some(c => c.origin === 'self' && c.rowId === window.__created[0].id && c.deckId === 9004),
-      stillOpen: !!document.getElementById('add-card-modal'), fieldsReset: document.querySelectorAll('#add-card-modal [data-field-content]').length, deck: document.querySelector('#add-card-modal #my-flashcard-deck').value }));
-    check(lang + ' janela: cria no Deck escolhido e entra no STATE', made.row.deck_id === 9004 && made.inState, made);
-    check(lang + ' janela: continua aberta, limpa, no mesmo Deck (como no Anki)', made.stillOpen && made.fieldsReset === 0 && made.deck === '9004', made);
+      stillOpen: !!document.getElementById('add-card-modal'), empty: Array.from(document.querySelectorAll('#add-card-modal [data-field-content]')).every(i => !i.value), deck: document.querySelector('#add-card-modal #my-flashcard-deck').value }));
+    check(lang + ' Adicionar: cria no Deck e entra no STATE', made.row.deck_id === 9004 && made.inState, made);
+    check(lang + ' Adicionar: continua aberta, limpa, no mesmo Deck', made.stillOpen && made.empty && made.deck === '9004', made);
     await page.click('#add-card-modal [data-add-card-close]');
-    const afterClose = await page.evaluate(() => ({ modal: !!document.getElementById('add-card-modal'), novo: Number(document.querySelector('#review-deck-wrap .deck-detail-num').textContent) }));
-    check(lang + ' fechar a janela atualiza a contagem do Deck (Comida: 2 -> 3)', !afterClose.modal && afterClose.novo === 3, afterClose);
-    // Esc fecha
-    await page.click('[data-deck-add]');
-    await page.waitForSelector('#add-card-modal #my-create-flashcard-form');
-    await page.keyboard.press('Escape');
-    check(lang + ' Esc fecha a janela', await page.evaluate(() => !document.getElementById('add-card-modal')));
-    // remove o cartão criado para não alterar as contagens seguintes
-    await page.evaluate(() => {
-      STATE.cards = STATE.cards.filter(c => !(c.origin === 'self' && c.rowId === 700));
-      window.__DB.own_flashcards = window.__DB.own_flashcards.filter(r => r.id !== 700);
-    });
+    const afterClose = await page.evaluate(() => ({ modal: !!document.getElementById('add-card-modal'), novo: Number(document.querySelector('#review-deck-wrap .deck-overview-counts dd').textContent) }));
+    check(lang + ' fechar atualiza a contagem (Comida: 2 -> 3)', !afterClose.modal && afterClose.novo === 3, afterClose);
+    await page.evaluate(() => { STATE.cards = STATE.cards.filter(c => !(c.origin === 'self' && c.rowId === 700)); window.__DB.own_flashcards = window.__DB.own_flashcards.filter(r => r.id !== 700); });
 
-    // Tela principal: Adicionar e Painel também ficam ao lado da tabela
-    await page.evaluate(() => backToDeckTable());
-    await page.waitForSelector('#review-decks-table [data-deck-home-add]');
-    await page.click('#review-decks-table [data-deck-home-panel]');
-    const homePanel = await page.evaluate(() => ({ view: DECK_BROWSER.view, node: DECK_BROWSER.nodeId, hash: location.hash }));
-    check(lang + ' tela principal: Painel abre o Painel da raiz', homePanel.view === 'panel' && homePanel.node === 'lang' && homePanel.hash === '#/review/decks/lang/panel', homePanel);
-    await page.evaluate(() => backToDeckTable());
-    await page.click('#review-decks-table [data-deck-home-add]');
-    await page.waitForSelector('#add-card-modal #my-flashcard-deck');
-    const homeAdd = await page.evaluate(() => ({ value: document.querySelector('#add-card-modal #my-flashcard-deck').value }));
-    check(lang + ' tela principal: Adicionar abre a janela com Meus Decks', homeAdd.value === '9001', homeAdd);
-    await page.keyboard.press('Escape');
-
-    // Cores: Novo azul, Aprendendo vermelho, Revisar verde (3 cores diferentes)
-    const colors = await page.evaluate(() => {
-      const mk = cls => { const td = document.createElement('td'); td.className = 'deck-table-num ' + cls; document.querySelector('#review-decks-table tbody tr').appendChild(td); const c = getComputedStyle(td).color; td.remove(); return c; };
-      return [mk('is-new'), mk('is-learning'), mk('is-review'), mk('is-zero')];
-    });
-    check(lang + ' 3 cores diferentes nas colunas (+ zero apagado)', new Set(colors).size === 4, colors);
-
-    // Endereço próprio: recarregar no detalhe/Painel mantém a tela
-    await page.evaluate(() => openDeckDetail(9002));
-    check(lang + ' detalhe tem endereço próprio', await page.evaluate(() => location.hash) === '#/review/decks/9002');
-    await page.evaluate(() => { DECK_BROWSER.view = 'home'; renderRoute(hashToRoute('#/review/decks/9002/panel')); });
-    await page.waitForFunction(() => DECK_BROWSER.view === 'panel' && document.querySelector('#review-deck-wrap [data-panel-count]'), null, { timeout: 8000 });
-    check(lang + ' abrir #/review/decks/9002/panel restaura o Painel', await page.evaluate(() => DECK_BROWSER.nodeId === 9002 && document.getElementById('app').dataset.activeTab === 'review'));
-    await page.evaluate(() => renderRoute(hashToRoute('#/review/decks/99999')));
-    await page.waitForTimeout(300);
-    check(lang + ' Deck inexistente no endereço volta para a tabela', await page.evaluate(() => DECK_BROWSER.view === 'home'));
-    await page.evaluate(() => backToReviewModeSelect());
-
-    // ---- 2) Painel ----
-    await page.evaluate(() => switchTab('review'));
-    await page.evaluate(() => openDeckPanel(9001));
-    const panel = await page.evaluate(() => {
-      const w = document.getElementById('review-deck-wrap');
-      return { rows: w.querySelectorAll('[data-panel-note]').length, tags: Array.from(w.querySelectorAll('[data-panel-tag]')).map(b => b.dataset.panelTag).sort(), count: w.querySelector('[data-panel-count]').textContent };
-    });
-    check(lang + ' Painel lista as 4 Notes de Meus Decks (com subdecks)', panel.rows === 4, panel);
-    check(lang + ' Painel oferece filtro pelas tags existentes', panel.tags.join() === 'comida,irregular,verbo', panel.tags);
+    // ---- 4) Painel em janela ----
+    await page.evaluate(() => openDeckDetail(9001));
+    await page.click('#review-deck-wrap [data-topbar-panel]');
+    await page.waitForSelector('#deck-panel-modal [data-panel-open-note]');
+    await page.waitForFunction(() => DECK_BROWSER.panel && DECK_BROWSER.panel.ctx);
+    const panel = await page.evaluate(() => ({
+      overlay: !!document.querySelector('#deck-panel-modal.app-modal-overlay'), under: document.getElementById('review-deck-wrap').style.display === 'block',
+      hash: location.hash, side: Array.from(document.querySelectorAll('#deck-panel-modal [data-panel-scope]')).map(b => b.textContent),
+      active: document.querySelector('#deck-panel-modal [data-panel-scope].is-active').dataset.panelScope,
+      tags: Array.from(document.querySelectorAll('#deck-panel-modal [data-panel-tag]')).map(b => b.dataset.panelTag).sort(),
+      cols: getComputedStyle(document.querySelector('#deck-panel-modal [data-panel-grid]')).gridTemplateColumns.split(' ').length }));
+    check(lang + ' Painel abre em janela por cima da tela do Deck', panel.overlay && panel.under && panel.hash === '#/review/decks/9001/panel', panel);
+    check(lang + ' Painel: 3 colunas (filtros, lista, editor)', panel.cols === 3, panel.cols);
+    check(lang + ' Painel: lateral com os Decks, começando no Deck aberto', panel.side.includes('Todos os Decks') && panel.side.includes('Meus Decks') && panel.side.includes('Trilha de Estudo') && panel.active === '9001', panel);
+    check(lang + ' Painel: unidades da Trilha só aparecem com a Trilha selecionada', !panel.side.some(t => t === s.unitTitle), panel.side);
+    check(lang + ' Painel: tags do escopo na lateral', panel.tags.join() === 'comida,irregular,verbo', panel.tags);
+    check(lang + ' Painel: 4 Notes de Meus Decks', (await listRows(page)).length === 4);
     await page.fill('[data-panel-search]', 'pão');
-    let n = await page.evaluate(() => document.querySelectorAll('#review-deck-wrap [data-panel-note]').length);
-    check(lang + ' busca pelo verso filtra (pão -> 1)', n === 1, n);
+    check(lang + ' busca pelo verso (pão -> 1)', (await listRows(page)).length === 1);
     await page.fill('[data-panel-search]', '');
-    await page.click('[data-panel-tag="verbo"]');
-    n = await page.evaluate(() => document.querySelectorAll('#review-deck-wrap [data-panel-note]').length);
-    check(lang + ' filtro #verbo -> 2', n === 2, n);
-    await page.click('[data-panel-tag="comida"]');
-    n = await page.evaluate(() => document.querySelectorAll('#review-deck-wrap [data-panel-note]').length);
-    check(lang + ' 2 tags = OU (verbo ou comida) -> 3', n === 3, n);
-    await page.click('[data-panel-tag="verbo"]'); await page.click('[data-panel-tag="comida"]');
-    // Mover vários: seleciona 501 e 503 -> Comida
-    await page.check('[data-panel-select="self:501"]');
-    await page.check('[data-panel-select="self:503"]');
-    const bulkVisible = await page.evaluate(() => !document.querySelector('#review-deck-wrap [data-panel-bulk]').hidden);
-    check(lang + ' barra de ações aparece com seleção', bulkVisible);
-    await page.selectOption('[data-panel-move-target]', '9004');
+    await page.click('#deck-panel-modal [data-panel-tag="verbo"]');
+    check(lang + ' filtro #verbo -> 2', (await listRows(page)).length === 2);
+    await page.click('#deck-panel-modal [data-panel-tag="comida"]');
+    check(lang + ' 2 tags = OU -> 3', (await listRows(page)).length === 3);
+    await page.click('#deck-panel-modal [data-panel-tag="verbo"]'); await page.click('#deck-panel-modal [data-panel-tag="comida"]');
+    await page.click('#deck-panel-modal [data-panel-state="Aprendendo"]');
+    check(lang + ' filtro de estado Aprendendo -> 0', (await listRows(page)).length === 0);
+    await page.click('#deck-panel-modal [data-panel-state="all"]');
+    await page.click('#deck-panel-modal [data-panel-scope="9002"]');
+    check(lang + ' clicar num Deck da lateral muda o escopo (Verbos -> 2)', (await listRows(page)).length === 2);
+    await page.click('#deck-panel-modal [data-panel-scope="9001"]');
+
+    // Editor: clicar num cartão abre o editor à direita; salvar grava
+    await page.click('#deck-panel-modal [data-panel-open-note="self:501"]');
+    await page.waitForSelector('#deck-panel-modal #edit-my-native-flashcard-save');
+    if (lang === 'fr') await shot(page, 'deck-panel-fr');
+    const ed = await page.evaluate(() => ({ active: document.querySelector('#deck-panel-modal .deck-panel-item.is-active').dataset.panelOpenNote,
+      vals: Array.from(document.querySelectorAll('#deck-panel-modal [data-panel-editor] [data-field-content]')).map(i => i.value) }));
+    check(lang + ' editor mostra o cartão escolhido', ed.active === 'self:501' && ed.vals.includes('aller') && ed.vals.includes('ir'), ed);
+    const fields = await page.$$('#deck-panel-modal [data-panel-editor] [data-field-content]');
+    await fields[1].fill('ir (verbo)');
+    await page.click('#deck-panel-modal #edit-my-native-flashcard-save');
+    // Cartão antigo convertido ao editar: pede para confirmar o reinício do progresso.
+    await page.click('#flashcard-reset-confirm-yes');
+    await page.waitForFunction(() => window.__updated.length === 1);
+    await page.waitForFunction(() => document.querySelector('#deck-panel-modal [data-panel-open-note="self:501"] .deck-panel-back') && document.querySelector('#deck-panel-modal [data-panel-open-note="self:501"] .deck-panel-back').textContent === 'ir (verbo)', null, { timeout: 8000 });
+    const saved = await page.evaluate(() => ({ u: window.__updated[0], open: !!document.getElementById('deck-panel-modal'), still: !!document.querySelector('#deck-panel-modal #edit-my-native-flashcard-save') }));
+    check(lang + ' salvar no Painel grava a Note, atualiza a lista e mantém a janela', saved.u.id === 501 && saved.open && saved.still, saved);
+
+    // Cartão da professora: só leitura
+    await page.click('#deck-panel-modal [data-panel-scope="9100"]');
+    await page.click('#deck-panel-modal [data-panel-open-note="teacher:601"]');
+    const ro = await page.evaluate(() => { const p = document.querySelector('#deck-panel-modal [data-panel-editor]'); return { cbs: document.querySelectorAll('#deck-panel-modal [data-panel-select]').length, form: !!p.querySelector('textarea, input[type=text]'), text: p.textContent }; });
+    check(lang + ' cartão da professora: só leitura', ro.cbs === 0 && !ro.form && ro.text.includes('prof') && ro.text.includes('Somente') === false && ro.text.includes('só ela pode editar'), ro);
+
+    // Gerenciar tags abre no lado direito
+    await page.click('#deck-panel-modal [data-panel-manage-tags]');
+    check(lang + ' Gerenciar tags abre no Painel', await page.evaluate(() => !!document.querySelector('#deck-panel-modal [data-panel-tag-manager]')));
+
+    // Mover vários
+    await page.click('#deck-panel-modal [data-panel-scope="9001"]');
+    await page.check('#deck-panel-modal [data-panel-select="self:501"]');
+    await page.check('#deck-panel-modal [data-panel-select="self:503"]');
+    await page.selectOption('#deck-panel-modal [data-panel-move-target]', '9004');
     await page.evaluate(() => { window.__writes = []; });
-    await page.click('[data-panel-move]');
+    await page.click('#deck-panel-modal [data-panel-move]');
     await page.waitForFunction(() => window.__writes.length >= 2);
     const moved = await page.evaluate(() => ({ writes: window.__writes, state: STATE.cards.filter(c => c.origin === 'self' && [501, 503].includes(c.rowId)).map(c => c.deckId) }));
-    check(lang + ' mover: 1 UPDATE de deck_id por Note, só deck_id', moved.writes.length === 2 && moved.writes.every(w => w.table === 'own_flashcards' && Object.keys(w.patch).join() === 'deck_id' && w.patch.deck_id === 9004), moved.writes);
+    check(lang + ' mover: 1 UPDATE de deck_id por Note', moved.writes.length === 2 && moved.writes.every(w => w.table === 'own_flashcards' && Object.keys(w.patch).join() === 'deck_id' && w.patch.deck_id === 9004), moved.writes);
     check(lang + ' mover: STATE.cards atualizado', moved.state.every(d => d === 9004), moved.state);
-    // Painel da raiz: tags finas da trilha não viram botão; a busca acha licao-*
-    await page.evaluate(() => openDeckPanel('lang'));
-    const rootPanel = await page.evaluate(() => {
-      const w = document.getElementById('review-deck-wrap');
-      return { chips: Array.from(w.querySelectorAll('[data-panel-tag]')).map(b => b.dataset.panelTag) };
-    });
-    check(lang + ' Painel da raiz: sem botões unidade-*/licao-*', !rootPanel.chips.some(t => /^(unidade|licao)-/.test(t)) && rootPanel.chips.includes('verbo'), rootPanel.chips.slice(0, 40));
-    await page.fill('[data-panel-search]', 'licao-1');
-    const lic = await page.evaluate(() => document.querySelectorAll('#review-deck-wrap [data-panel-note]').length);
-    check(lang + ' Painel da raiz: busca por licao-1 encontra palavras da trilha', lic > 0, lic);
-    // Cartão da professora no Painel da raiz: somente leitura (sem checkbox)
-    await page.evaluate(() => openDeckPanel(9100));
-    const tro = await page.evaluate(() => ({ rows: document.querySelectorAll('#review-deck-wrap [data-panel-note]').length, cbs: document.querySelectorAll('#review-deck-wrap [data-panel-select]').length, edits: document.querySelectorAll('#review-deck-wrap [data-panel-edit]').length }));
-    check(lang + ' Painel da professora: só leitura', tro.rows === 1 && tro.cbs === 0 && tro.edits === 0, tro);
-    // Excluir vários no Painel
-    await page.evaluate(() => openDeckPanel(9004));
-    await page.check('[data-panel-select="self:504"]');
+    // Excluir vários
+    await page.check('#deck-panel-modal [data-panel-select="self:504"]');
     await page.evaluate(() => { window.__writes = []; });
-    await page.click('[data-panel-delete]');
-    await page.waitForFunction(() => window.__writes.length >= 1);
-    const del = await page.evaluate(() => ({ w: window.__writes, inState: STATE.cards.some(c => c.origin === 'self' && c.rowId === 504) }));
-    check(lang + ' Painel: excluir apaga a Note e tira da fila', del.w[0].table === 'own_flashcards' && del.w[0].op === 'delete' && !del.inState, del);
+    await page.click('#deck-panel-modal [data-panel-delete]');
+    await page.waitForFunction(() => window.__writes.some(w => w.op === 'delete'));
+    check(lang + ' excluir vários: apaga e tira da fila', await page.evaluate(() => !STATE.cards.some(c => c.origin === 'self' && c.rowId === 504)));
 
-    // ---- 3) Excluir Deck pessoal: mover ----
-    // Estado: Verbos(9002) tem 502 (em Irregulares 9003); 501 foi para Comida.
+    // Fechar volta à tela do Deck
+    await page.click('#deck-panel-modal [data-panel-close]');
+    const closed = await page.evaluate(() => ({ modal: !!document.getElementById('deck-panel-modal'), hash: location.hash, view: DECK_BROWSER.view }));
+    check(lang + ' fechar o Painel volta à tela do Deck', !closed.modal && closed.hash === '#/review/decks/9001' && closed.view === 'detail', closed);
+    // Esc também fecha
+    await page.click('#review-deck-wrap [data-topbar-panel]');
+    await page.waitForSelector('#deck-panel-modal');
+    await page.keyboard.press('Escape');
+    check(lang + ' Esc fecha o Painel', await page.evaluate(() => !document.getElementById('deck-panel-modal')));
+
+    // Painel da tela inicial: todos os Decks; tags finas da Trilha não viram botão
+    await page.evaluate(() => backToDeckTable());
+    await page.click('#review-deck-topbar-home [data-topbar-panel]');
+    await page.waitForSelector('#deck-panel-modal [data-panel-open-note]');
+    const root = await page.evaluate(() => ({ scope: DECK_BROWSER.panel.scopeId, hash: location.hash, chips: Array.from(document.querySelectorAll('#deck-panel-modal [data-panel-tag]')).map(b => b.dataset.panelTag) }));
+    check(lang + ' Painel da tela inicial: todos os Decks', root.scope === 'lang' && root.hash === '#/review/decks/lang/panel', root);
+    check(lang + ' sem botões unidade-*/licao-*', !root.chips.some(t => /^(unidade|licao)-/.test(t)), root.chips.slice(0, 30));
+    await page.fill('[data-panel-search]', 'licao-1');
+    check(lang + ' busca por licao-1 encontra a Trilha', (await listRows(page)).length > 0);
+    await page.click('#deck-panel-modal [data-panel-open-note^="study:"]');
+    check(lang + ' cartão da Trilha: só leitura', await page.evaluate(() => document.querySelector('#deck-panel-modal [data-panel-editor]').textContent.includes('vêm das lições')));
+    await page.click('#deck-panel-modal [data-panel-close]');
+    check(lang + ' fechar o Painel da tela inicial volta à tabela', await page.evaluate(() => DECK_BROWSER.view === 'home' && location.hash === '#/review'));
+
+    // ---- 5) Exportar e Importar ----
+    await page.click('#review-decks-table [data-deck-export]');
+    await page.waitForFunction(() => { const m = document.getElementById('my-flashcards-export-modal'); return m && getComputedStyle(m).display !== 'none'; });
+    check(lang + ' Exportar abre a janela de exportação', true);
+    await page.evaluate(() => { document.getElementById('my-flashcards-export-modal').style.display = 'none'; });
+    const payload = JSON.stringify({ languageAppKey: await page.evaluate(() => APP_KEY), cards: [{ front: 'chat', backTrans: 'gato', frontIsTargetLanguage: true }] });
+    await page.evaluate(() => { window.__created = []; resolveOwnCreationDeck = async () => ({ ok: true, deckId: 9001, decks: STATE.decks }); });
+    await page.setInputFiles('#review-decks-table [data-deck-import-file]', { name: 'cartoes.json', mimeType: 'application/json', buffer: Buffer.from(payload) });
+    await page.waitForFunction(() => window.__created.length === 1, null, { timeout: 8000 });
+    check(lang + ' Importar arquivo (.json) cria o cartão', await page.evaluate(() => window.__created[0].deck_id === 9001 && STATE.cards.some(c => c.origin === 'self' && c.rowId === window.__created[0].id)));
+
+    // ---- 6) Endereços ----
+    await page.evaluate(() => renderRoute(hashToRoute('#/review/decks/9002/panel')));
+    await page.waitForFunction(() => DECK_BROWSER.panelOpen && document.querySelector('#deck-panel-modal [data-panel-open-note]'), null, { timeout: 8000 });
+    check(lang + ' #/review/decks/9002/panel abre o Deck com o Painel por cima', await page.evaluate(() => DECK_BROWSER.view === 'detail' && DECK_BROWSER.nodeId === 9002 && DECK_BROWSER.panel.scopeId === 9002));
+    await page.evaluate(() => renderRoute(hashToRoute('#/review/decks/99999')));
+    await page.waitForTimeout(300);
+    check(lang + ' Deck inexistente volta para a tabela (e fecha o Painel)', await page.evaluate(() => DECK_BROWSER.view === 'home' && !document.getElementById('deck-panel-modal')));
+
+    // ---- 7) Excluir Deck pessoal ----
+    // Estado: Verbos(9002) tem 502 (em Irregulares); 501/503 foram para Comida.
     await page.evaluate(() => openDeckDetail(9002));
     await page.click('[data-deck-delete]');
     const dlg = await page.evaluate(() => {
@@ -338,20 +408,16 @@ async function setup(page){
     await page.click('[data-deck-delete-move]');
     await page.waitForFunction(() => document.getElementById('review-mode-select-wrap').style.display === 'block');
     const mv = await page.evaluate(() => ({ w: window.__writes, decks: STATE.decks.map(d => d.id), card502: STATE.cards.filter(c => c.origin === 'self' && c.rowId === 502).map(c => c.deckId) }));
-    check(lang + ' mover: UPDATE de deck_id na subárvore inteira, depois DELETE do Deck', mv.w[0].op === 'update' && mv.w[0].patch.deck_id === 9001 && mv.w[0].ids.join() === '502' && mv.w[1].table === 'decks' && mv.w[1].op === 'delete' && mv.w[1].ids.join() === '9002', mv.w);
-    check(lang + ' mover: Deck e subdeck saem do estado; cartão vai para Meus Decks', !mv.decks.includes(9002) && !mv.decks.includes(9003) && mv.card502.every(d => d === 9001), mv);
-
-    // ---- 3b) Excluir permanentemente: Comida (9004) com 501, 503 ----
+    check(lang + ' mover: UPDATE de deck_id na subárvore, depois DELETE do Deck', mv.w[0].op === 'update' && mv.w[0].patch.deck_id === 9001 && mv.w[0].ids.join() === '502' && mv.w[1].table === 'decks' && mv.w[1].op === 'delete' && mv.w[1].ids.join() === '9002', mv.w);
+    check(lang + ' mover: Deck e subdeck saem; cartão vai para Meus Decks', !mv.decks.includes(9002) && !mv.decks.includes(9003) && mv.card502.every(d => d === 9001), mv);
     await page.evaluate(() => openDeckDetail(9004));
     await page.click('[data-deck-delete]');
     await page.evaluate(() => { window.__writes = []; });
     await page.click('[data-deck-delete-perm]');
     await page.waitForFunction(() => document.getElementById('review-mode-select-wrap').style.display === 'block');
     const pd = await page.evaluate(() => ({ w: window.__writes, left: STATE.cards.filter(c => c.origin === 'self').map(c => c.rowId) }));
-    check(lang + ' excluir permanentemente: DELETE das Notes da subárvore + DELETE do Deck', pd.w[0].table === 'own_flashcards' && pd.w[0].op === 'delete' && pd.w[0].ids.sort().join() === '501,503' && pd.w[1].table === 'decks', pd.w);
+    check(lang + ' excluir permanentemente: DELETE das Notes + DELETE do Deck', pd.w[0].table === 'own_flashcards' && pd.w[0].op === 'delete' && pd.w[0].ids.sort().join() === '501,503' && pd.w[1].table === 'decks', pd.w);
     check(lang + ' excluir permanentemente: cartões saem do estado', !pd.left.includes(501) && !pd.left.includes(503), pd.left);
-
-    // Domínio: deletePersonalDeckTree recusa personal_root e destino dentro da subárvore
     const guard = await page.evaluate(async () => {
       const r1 = await deletePersonalDeckTree({ deck: STATE.decks.find(d => d.id === 9001), decks: STATE.decks, mode: 'delete' });
       STATE.decks.push({ id: 9300, kind: 'personal', name: 'X', owner_id: 'u-db', language_app_key: APP_KEY, parent_deck_id: 9001 });
@@ -359,11 +425,10 @@ async function setup(page){
       const r2 = await deletePersonalDeckTree({ deck: STATE.decks.find(d => d.id === 9300), decks: STATE.decks, mode: 'move', destination: STATE.decks.find(d => d.id === 9301) });
       return { r1: r1.ok, r2: r2.ok };
     });
-    check(lang + ' guarda: Meus Decks não é excluível; destino dentro da subárvore é recusado', guard.r1 === false && guard.r2 === false, guard);
+    check(lang + ' guarda: Meus Decks não é excluível; destino dentro da subárvore recusado', guard.r1 === false && guard.r2 === false, guard);
 
-    // XSS: nome de Deck e frente de cartão com aspas não viram atributo
-    const xss = await page.evaluate(() => {
-      window.__xss = 0;
+    // XSS: aspas no nome do Deck e na frente do cartão não viram atributo
+    const xss = await page.evaluate(async () => {
       STATE.decks.push({ id: 9400, kind: 'personal', name: 'x" onmouseover="window.__xss=1" y="', owner_id: 'u-db', language_app_key: APP_KEY, parent_deck_id: 9001 });
       STATE.decks.push({ id: 9401, kind: 'personal', name: 'filho', owner_id: 'u-db', language_app_key: APP_KEY, parent_deck_id: 9400 });
       buildCardFromSelfFlashcard({ id: 777, owner_id: 'u-db', language_app_key: APP_KEY, status: 'active', revision: 0, front: 'a" onfocus="window.__xss=2" b="', back_trans: 'z', front_is_target_language: true, tags: [], deck_id: 9400 }).forEach(c => STATE.cards.push(c));
@@ -371,10 +436,11 @@ async function setup(page){
       const t = document.querySelector('[data-deck-toggle="9400"]');
       openDeckPanel(9400);
       const cb = document.querySelector('[data-panel-select="self:777"]');
-      return { tAttrs: t ? t.getAttributeNames() : [], cbAttrs: cb ? cb.getAttributeNames() : [] };
+      const res = { tAttrs: t ? t.getAttributeNames() : [], cbAttrs: cb ? cb.getAttributeNames() : [] };
+      closeDeckPanel({ silent: true });
+      return res;
     });
-    check(lang + ' XSS: aspas no nome do Deck/frente não criam atributo', !xss.tAttrs.includes('onmouseover') && !xss.cbAttrs.includes('onfocus') && xss.tAttrs.length > 0 && xss.cbAttrs.length > 0, xss);
-    // Excluir com contagem divergente do banco: não altera nada
+    check(lang + ' XSS: aspas não criam atributo', !xss.tAttrs.includes('onmouseover') && !xss.cbAttrs.includes('onfocus') && xss.tAttrs.length > 0 && xss.cbAttrs.length > 0, xss);
     const mism = await page.evaluate(async () => {
       window.__writes = [];
       const r = await deletePersonalDeckTree({ deck: STATE.decks.find(d => d.id === 9400), decks: STATE.decks, mode: 'delete', expectedNotes: 1 });
@@ -382,44 +448,75 @@ async function setup(page){
     });
     check(lang + ' excluir: banco diverge da tela -> nada é alterado', mism.ok === false && mism.writes === 0, mism);
 
+    // Campos novos: idioma padrão
+    const defaults = await page.evaluate(() => {
+      const st = createNativeNoteEditorState({ cardGenerationMode: 'normal', languageAppKey: APP_KEY });
+      const a = addFieldToEditorState(st, {}), b = addFieldToEditorState(st, {}), p = addFieldToEditorState(st, { role: 'prompt' }), d = addFieldToEditorState(st, { role: 'distractor' });
+      const none = addFieldToEditorState(createNativeNoteEditorState({ cardGenerationMode: 'normal' }), {});
+      return [a.lang, b.lang, p.lang, d.lang, none.lang, STUDY_LANG_FOR_APP_KEY[APP_KEY]];
+    });
+    check(lang + ' idioma padrão: 1º estudado, 2º pt-BR, pergunta estudado, opção pt-BR, sem site = vazio', defaults[0] === defaults[5] && defaults[1] === 'pt-BR' && defaults[2] === defaults[5] && defaults[3] === 'pt-BR' && defaults[4] == null, defaults);
+
     check(lang + ' sem erros de página', errors.length === 0, errors);
-    // Recarregar de verdade (F5) com o endereço do Painel da raiz
+    // F5 com o Painel aberto (da tela inicial: depois do F5 a sessão de teste
+    // volta a ser convidada, sem os Decks pessoais montados no setup)
     await page.evaluate(() => { openDeckPanel('lang'); });
     await page.reload();
     await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0, null, { timeout: 15000 });
-    await page.waitForFunction(() => typeof DECK_BROWSER !== 'undefined' && DECK_BROWSER.view === 'panel', null, { timeout: 8000 }).catch(() => {});
-    const reloaded = await page.evaluate(() => ({ view: DECK_BROWSER.view, node: DECK_BROWSER.nodeId, hash: location.hash, tab: document.getElementById('app').dataset.activeTab, shown: document.getElementById('review-deck-wrap').style.display }));
-    check(lang + ' F5 no Painel: continua no Painel', reloaded.view === 'panel' && reloaded.node === 'lang' && reloaded.tab === 'review' && reloaded.shown === 'block', reloaded);
+    await page.waitForFunction(() => typeof DECK_BROWSER !== 'undefined' && DECK_BROWSER.panelOpen, null, { timeout: 8000 }).catch(() => {});
+    const reloaded = await page.evaluate(() => ({ open: DECK_BROWSER.panelOpen, node: DECK_BROWSER.panel && DECK_BROWSER.panel.nodeId, hash: location.hash, tab: document.getElementById('app').dataset.activeTab, modal: !!document.getElementById('deck-panel-modal') }));
+    check(lang + ' F5 com o Painel: reabre o Painel', reloaded.open && reloaded.node === 'lang' && reloaded.hash === '#/review/decks/lang/panel' && reloaded.tab === 'review' && reloaded.modal, reloaded);
     await ctx.close();
   }
 
-  // Tema escuro: números coloridos legíveis (só confere que o CSS carregou e a cor difere do fundo)
+  // Tema escuro
   for (const lang of ['fr', 'zh']){
     const { page, ctx } = await bootPage(browser, lang, port, 'dark');
-    await setup(page);
+    await setup(page); await stubOwn(page);
     await page.evaluate(() => switchTab('review'));
     await page.waitForSelector('#review-decks-table table.deck-table');
     const css = await page.evaluate(() => {
       const t = document.querySelector('.deck-table'); const td = document.querySelector('.deck-table-num');
       return { bg: getComputedStyle(t).backgroundColor, fg: getComputedStyle(td).color };
     });
-    check(lang + ' escuro: tabela com fundo e texto definidos e diferentes', css.bg !== 'rgba(0, 0, 0, 0)' && css.bg !== css.fg, css);
-    await page.screenshot({ path: path.join(process.env.SHOT_DIR || require('os').tmpdir(), `deck-browser-${lang}-dark.png`), fullPage: false });
+    check(lang + ' escuro: tabela com fundo e texto diferentes', css.bg !== 'rgba(0, 0, 0, 0)' && css.bg !== css.fg, css);
+    await shot(page, `deck-home-${lang}-dark`);
+    await page.evaluate(() => openDeckDetail(9002));
+    await shot(page, `deck-detail-${lang}-dark`);
+    await page.evaluate(() => openDeckPanel(9001));
+    await page.waitForSelector('#deck-panel-modal [data-panel-open-note]');
+    await page.click('#deck-panel-modal [data-panel-open-note="self:502"]');
+    await page.waitForSelector('#deck-panel-modal #edit-my-native-flashcard-save');
+    await shot(page, `deck-panel-${lang}-dark`);
     await ctx.close();
   }
 
-  // Celular (390px): sem rolagem horizontal na tabela nem no detalhe
+  // Celular (390px)
   for (const lang of ['fr', 'zh']){
     const { page, ctx } = await bootPage(browser, lang, port, 'light', { width: 390, height: 844 });
-    await setup(page);
+    await setup(page); await stubOwn(page);
     await page.evaluate(() => switchTab('review'));
     await page.waitForSelector('#review-decks-table table.deck-table');
-    const ov = await page.evaluate(() => ({ doc: document.documentElement.scrollWidth, win: window.innerWidth, table: document.querySelector('.deck-table').getBoundingClientRect().right }));
-    check(lang + ' celular: tabela cabe na tela', ov.doc <= ov.win + 1 && ov.table <= ov.win + 1, ov);
-    await page.screenshot({ path: path.join(process.env.SHOT_DIR || require('os').tmpdir(), `deck-browser-${lang}-mobile.png`) });
+    const ov = await page.evaluate(() => ({ doc: document.documentElement.scrollWidth, win: window.innerWidth }));
+    check(lang + ' celular: tela inicial sem rolagem horizontal', ov.doc <= ov.win + 1, ov);
+    await shot(page, `deck-home-${lang}-mobile`);
     await page.evaluate(() => openDeckDetail(9002));
     const ov2 = await page.evaluate(() => ({ doc: document.documentElement.scrollWidth, win: window.innerWidth }));
-    check(lang + ' celular: detalhe sem rolagem horizontal', ov2.doc <= ov2.win + 1, ov2);
+    check(lang + ' celular: tela do Deck sem rolagem horizontal', ov2.doc <= ov2.win + 1, ov2);
+    await shot(page, `deck-detail-${lang}-mobile`);
+    await page.evaluate(() => openDeckPanel(9001));
+    await page.waitForSelector('#deck-panel-modal [data-panel-open-note]');
+    const m1 = await page.evaluate(() => { const r = document.querySelector('#deck-panel-modal .app-modal').getBoundingClientRect(); return { w: r.width, side: document.querySelector('#deck-panel-modal [data-panel-side]').open, editor: getComputedStyle(document.querySelector('#deck-panel-modal [data-panel-editor]')).display }; });
+    check(lang + ' celular: Painel em tela cheia, filtros fechados, editor escondido', m1.w >= 389 && m1.side === false && m1.editor === 'none', m1);
+    await shot(page, `deck-panel-${lang}-mobile-list`);
+    await page.click('#deck-panel-modal [data-panel-open-note="self:501"]');
+    await page.waitForSelector('#deck-panel-modal #edit-my-native-flashcard-save');
+    const m2 = await page.evaluate(() => ({ list: getComputedStyle(document.querySelector('#deck-panel-modal .deck-panel-listpane')).display, back: getComputedStyle(document.querySelector('#deck-panel-modal [data-panel-back]')).display, doc: document.documentElement.scrollWidth, win: window.innerWidth,
+      modalOverflow: document.querySelector('#deck-panel-modal .deck-panel-editor').scrollWidth - document.querySelector('#deck-panel-modal .deck-panel-editor').clientWidth }));
+    check(lang + ' celular: ao escolher um cartão, editor no lugar da lista, com "← Lista"', m2.list === 'none' && m2.back !== 'none' && m2.modalOverflow <= 1, m2);
+    await shot(page, `deck-panel-${lang}-mobile-editor`);
+    await page.click('#deck-panel-modal [data-panel-back]');
+    check(lang + ' celular: "← Lista" volta para a lista', await page.evaluate(() => getComputedStyle(document.querySelector('#deck-panel-modal .deck-panel-listpane')).display !== 'none'));
     await ctx.close();
   }
 

@@ -477,6 +477,6 @@ function renderAnkiImportResult(body, result){
   `;
   body.querySelector('#anki-import-done-btn')?.addEventListener('click', () => {
     document.getElementById('anki-import-modal').style.display = 'none';
-    if (typeof renderMyFlashcardsView === 'function') renderMyFlashcardsView();
+    if (typeof myFlashcardsAfterChange === 'function') myFlashcardsAfterChange();
   });
 }

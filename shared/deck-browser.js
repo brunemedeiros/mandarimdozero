@@ -1,38 +1,55 @@
 // ============================================================
 // Navegador de Decks (doc de arquitetura total, seções 5.4, 12, 13, 14)
 //
+//   Barra no topo     -> "Decks | Adicionar | Painel", centralizada, igual
+//                        em todas as telas de Decks (como a barra do Anki).
+//                        Na tela de um Deck, Adicionar já vem com aquele
+//                        Deck e o Painel já abre filtrado nele.
 //   Revisão (início)  -> tabela "Deck | Novo | Aprendendo | Revisar",
-//                        começando pela raiz do idioma. Sem botão
-//                        "Estudar" na tabela (seção 12).
-//   Clique no Deck    -> Detalhe do Deck (seção 13): contagens +
-//                        "Estudar agora", "Adicionar cartão", "Painel".
-//   Painel            -> navegador de conteúdo (seção 14): lista de Notes
-//                        do Deck (e subdecks), busca, filtro por Tag,
-//                        editar, mover vários, excluir vários.
-//   Excluir Deck      -> diálogo da seção 5.4 (mover os cartões para outro
-//                        Deck ou excluir permanentemente, considerando a
-//                        subárvore inteira).
+//                        começando pelos Decks de topo (Trilha de Estudo,
+//                        Meus Decks, Cartões da professora). Sem botão
+//                        "Estudar" na tabela (seção 12). Embaixo: Criar
+//                        Deck, Importar arquivo, Exportar.
+//   Clique no Deck    -> tela do Deck (seção 13), no formato do Anki:
+//                        nome, Novo/Aprendendo/Revisar e "Estudar agora".
+//   Painel            -> JANELA por cima da tela (seção 14), no formato do
+//                        navegador do Anki: filtros à esquerda (Decks,
+//                        Estado, Tags), lista no meio, editor à direita.
+//   Adicionar         -> JANELA com o formulário de criação.
+//   Excluir Deck      -> diálogo da seção 5.4 (mover ou excluir, subárvore
+//                        inteira).
+//
+// Esta tela substitui a antiga "Meus Cartões" (pedido da autora,
+// 2026-10-06): criar/editar/excluir cartões, Decks, tags, importar e
+// exportar vivem aqui agora.
 //
 // Compartilhado entre fr e zh. Só COMPÕE peças que já existem:
-//   - contagens: getDeckCounts/structuralCounts (K1/K.5), sobre o pool
-//     elegível eligibleDeckReviewPool() (o mesmo de "Estudar este Deck");
-//   - estudo: startDeckReviewSession (Fase D); a raiz do idioma estuda o
-//     pool elegível inteiro (a raiz agrega curso + pessoais + professora);
-//   - escrita: setOwnFlashcardDeck / deleteOwnFlashcardPermanently /
-//     deletePersonalDeckTree (shared/deck-data.js). Nada de fila, FSRS,
-//     contagem ou permissão nova. RLS e triggers continuam a autoridade.
-//
-// Estado só de interface (qual tela, busca, seleção); nada é persistido
-// além da preferência de abrir/fechar ramos (localStorage, por idioma).
+//   - contagens: structuralCounts (K.5) sobre eligibleDeckReviewPool();
+//   - estudo: startDeckReviewSession (Fase D);
+//   - criação/edição: formulários de shared/my-flashcards.js (mesmo editor
+//     nativo, mesmo limite do plano);
+//   - escrita: shared/deck-data.js / shared/own-flashcards.js. RLS e
+//     triggers continuam a autoridade.
 // ============================================================
 
 const DECK_BROWSER = {
-  view: 'home',      // 'home' | 'detail' | 'panel'
-  nodeId: null,      // 'lang' (raiz do idioma) ou id numérico do Deck
-  panel: { query: '', tags: [], selected: new Set() },
+  view: 'home',      // 'home' | 'detail' (tela por baixo do Painel)
+  nodeId: null,      // id numérico do Deck aberto ('lang' = todos)
+  panelOpen: false,
+  panel: null,
 };
 
 const DECK_BROWSER_LANG_LABELS = { frances: 'Francês', mandarim: 'Mandarim', portugues: 'Português' };
+
+// Link de compartilhamento de cartões (#import=...) capturado no carregamento
+// da página, antes de o roteador trocar o endereço.
+const DECK_BROWSER_PENDING_IMPORT = (() => {
+  try {
+    const m = (location.hash || '').match(/[#&]import=([^&]+)/);
+    return m ? m[1] : null;
+  } catch (e) { return null; }
+})();
+let DECK_BROWSER_IMPORT_DONE = false;
 
 function deckBrowserCollapsedKey(){ return 'deckBrowserCollapsed:' + (typeof APP_KEY !== 'undefined' ? APP_KEY : ''); }
 function deckBrowserLoadCollapsed(){
@@ -62,22 +79,23 @@ function deckBrowserCourseRoot(decks){
   return decks.find(d => d.kind === 'course' && (d.course_unit_id == null) && d.parent_deck_id == null) || null;
 }
 
-// Rótulo de um Deck (personal_root aparece como "Meus Decks").
+// Rótulo de um Deck. A raiz do curso aparece como "Trilha de Estudo"
+// (pedido da autora); personal_root como "Meus Decks".
 function deckBrowserDeckLabel(deck){
   if (!deck) return '';
   if (deck.kind === 'personal_root') return 'Meus Decks';
   if (deck.kind === 'teacher_root') return 'Cartões da professora';
+  if (deck.kind === 'course' && deck.course_unit_id == null && deck.parent_deck_id == null) return 'Trilha de Estudo';
   return deck.name || '';
 }
-function deckBrowserLangLabel(decks){
-  const root = deckBrowserRootDeck(decks);
-  return (root && root.name) || DECK_BROWSER_LANG_LABELS[APP_KEY] || 'Idioma';
+function deckBrowserLangLabel(){
+  return DECK_BROWSER_LANG_LABELS[APP_KEY] || 'Idioma';
 }
 
-// Filhos exibidos. A raiz do idioma é virtual ('lang'): mostra o curso, os
-// filhos do Deck raiz (Meus Decks, Cartões da professora) e nada mais.
-// O curso NÃO é filho estrutural do Deck raiz (Course Decks são globais por
-// idioma, migration 051) -- a raiz é só o agregador da tela, como no Anki.
+// Filhos exibidos. 'lang' é a raiz virtual (todos os Decks do idioma): a
+// Trilha de Estudo + os filhos do Deck raiz da conta. Ela NÃO aparece como
+// linha na tabela (não há outro Deck do mesmo nível); continua existindo
+// para o Painel e o Adicionar da tela inicial.
 function deckBrowserChildren(decks, nodeId){
   const kindOrder = { course: 0, personal_root: 1, teacher_root: 2 };
   if (nodeId === 'lang'){
@@ -89,7 +107,7 @@ function deckBrowserChildren(decks, nodeId){
     return out.sort((a, b) => (kindOrder[a.kind] ?? 9) - (kindOrder[b.kind] ?? 9) || a.id - b.id);
   }
   return getDeckChildren(decks, nodeId).slice().sort((a, b) => {
-    // Unidades do curso seguem a ordem do currículo (UNITS); o resto por id.
+    // Unidades da Trilha seguem a ordem do currículo (UNITS); o resto por id.
     if (a.kind === 'course' && b.kind === 'course' && typeof UNITS !== 'undefined'){
       const ia = UNITS.findIndex(u => String(u.id) === String(a.course_unit_id));
       const ib = UNITS.findIndex(u => String(u.id) === String(b.course_unit_id));
@@ -104,19 +122,16 @@ function deckBrowserPool(){
   return ((typeof STATE !== 'undefined' && STATE.cards) || []).filter(c => typeof isCardLessonCompleted !== 'function' || isCardLessonCompleted(c));
 }
 
-// Cartões do escopo de um nó. A raiz do idioma = todo o pool elegível do
-// idioma (inclui cartões de trilha cujo Course Deck ainda não existe).
+// Cartões do escopo de um nó ('lang' = todo o pool do idioma).
 function deckBrowserScope(decks, nodeId, cards){
   if (nodeId === 'lang') return cards;
   return getStudyScopeForDeck(decks, nodeId, cards);
 }
 
-// Contagens da tabela: Novo / Aprendendo / Revisar (= revisões devidas
-// agora), como as colunas do Anki. Fonte única: structuralCounts (K.5).
-// Como no Anki, "Novo" mostra o que entra numa sessão: no máximo
-// "Novas palavras por dia" (STATE.studySettings.newCardsPerDay, o mesmo
-// newCardsLimit que a fila usa). O total de novos fica em `newTotal`.
-// Filtro de tag da Revisão não entra (contagem estrutural, decisão da Fase I).
+// Contagens: Novo / Aprendendo / Revisar (= revisões devidas agora), como
+// as colunas do Anki. Fonte única: structuralCounts (K.5). "Novo" mostra o
+// que entra numa sessão (no máximo "Novas palavras por dia"); o total de
+// novos fica em `newTotal`. Filtro de tag da Revisão não entra.
 function deckBrowserCounts(decks, nodeId, pool){
   const sc = structuralCounts(deckBrowserScope(decks, nodeId, pool));
   const cap = (typeof STATE !== 'undefined' && STATE.studySettings && Number.isFinite(Number(STATE.studySettings.newCardsPerDay)))
@@ -125,30 +140,61 @@ function deckBrowserCounts(decks, nodeId, pool){
 }
 
 function deckBrowserNodeLabel(decks, nodeId){
-  if (nodeId === 'lang') return deckBrowserLangLabel(decks);
+  if (nodeId === 'lang') return 'Todos os Decks';
   return deckBrowserDeckLabel(getDeckById(decks, nodeId));
 }
 
-// Caminho "Francês › Meus Decks › Verbos" para o cabeçalho do detalhe.
+// Caminho do Deck ("Meus Decks › Verbos"), sem a raiz da conta.
 function deckBrowserBreadcrumb(decks, nodeId){
-  const parts = [deckBrowserLangLabel(decks)];
-  if (nodeId !== 'lang'){
-    const chain = getDeckAncestors(decks, nodeId).slice().reverse()
-      .filter(d => d.kind !== 'root')
-      .map(deckBrowserDeckLabel);
-    parts.push(...chain, deckBrowserNodeLabel(decks, nodeId));
-  }
-  return parts;
+  if (nodeId === 'lang') return ['Todos os Decks'];
+  const chain = getDeckAncestors(decks, nodeId).slice().reverse()
+    .filter(d => d.kind !== 'root')
+    .map(deckBrowserDeckLabel);
+  return [...chain, deckBrowserNodeLabel(decks, nodeId)];
 }
 
-// Cartões próprios antigos (antes dos Decks) sem deck_id: contam na raiz do
-// idioma, mas em nenhum filho.
+// Cartões próprios antigos (antes dos Decks) sem deck_id.
 function deckBrowserOrphanCount(){
   const cards = (typeof STATE !== 'undefined' && STATE.cards) || [];
   return new Set(cards.filter(c => c.origin === 'self' && c.deckId == null && c.flashcardStatus !== 'archived').map(c => c.rowId)).size;
 }
 
-// ---------- Containers (o bloco de Revisão tem 3 telas irmãs) ----------
+// Contexto dos cartões próprios (linhas, plano, Decks). Mesmo carregamento
+// do formulário de criação; usado por Exportar, Importar e pelo Painel.
+async function deckBrowserLoadOwnContext(){
+  if (!deckBrowserUserId() || typeof loadMyFlashcardsContext !== 'function') return null;
+  try {
+    return await loadMyFlashcardsContext();
+  } catch (e) {
+    console.error('Erro ao carregar seus cartões:', e);
+    return null;
+  }
+}
+
+// ---------- Barra superior (Decks | Adicionar | Painel) ----------
+
+// Mesma barra em todas as telas de Decks. Na tela de um Deck, Adicionar
+// usa aquele Deck (se for seu) e o Painel abre filtrado nele.
+function deckTopbarHTML(nodeId){
+  const canAdd = !!deckBrowserUserId();
+  const onHome = nodeId === 'lang';
+  return `<nav class="deck-topbar" aria-label="Decks">
+      <button type="button" class="deck-topbar-btn ${onHome ? 'is-active' : ''}" data-topbar-decks ${onHome ? 'aria-current="page"' : ''}>Decks</button>
+      ${canAdd ? `<button type="button" class="deck-topbar-btn" data-topbar-add>Adicionar</button>` : ''}
+      <button type="button" class="deck-topbar-btn" data-topbar-panel>Painel</button>
+    </nav>`;
+}
+
+function wireDeckTopbar(container, nodeId){
+  container.querySelector('[data-topbar-decks]')?.addEventListener('click', () => { if (nodeId !== 'lang') backToDeckTable(); });
+  container.querySelector('[data-topbar-add]')?.addEventListener('click', () => {
+    const deck = nodeId === 'lang' ? null : getDeckById(deckBrowserDecks(), nodeId);
+    openAddCardModal({ deckId: deck && ['personal_root', 'personal'].includes(deck.kind) ? deck.id : null });
+  });
+  container.querySelector('[data-topbar-panel]')?.addEventListener('click', () => openDeckPanel(nodeId));
+}
+
+// ---------- Containers ----------
 
 function deckBrowserShow(which){
   const modes = document.getElementById('review-mode-select-wrap');
@@ -159,12 +205,22 @@ function deckBrowserShow(which){
   if (deckWrap) deckWrap.style.display = which === 'home' ? 'none' : 'block';
 }
 
+// Redesenha a tela que está aberta (depois de criar/importar/excluir).
+function deckBrowserRefresh(){
+  if (DECK_BROWSER.panelOpen){ deckPanelReload(); return; }
+  if (DECK_BROWSER.view === 'detail') renderDeckDetail();
+  else if (typeof renderReviewModeSelect === 'function') renderReviewModeSelect();
+  else renderReviewDeckTable();
+}
+
 // ---------- Tela inicial: tabela de Decks ----------
 
 let DECK_BROWSER_RENDER_TOKEN = 0;
 
 async function renderReviewDeckTable(){
   const box = document.getElementById('review-decks-table');
+  const top = document.getElementById('review-deck-topbar-home');
+  if (top){ top.innerHTML = deckTopbarHTML('lang'); wireDeckTopbar(top, 'lang'); }
   if (!box) return;
   const token = ++DECK_BROWSER_RENDER_TOKEN;
   if (!((STATE.decks || []).length)) box.innerHTML = `<p class="profile-edit-hint">Carregando seus Decks…</p>`;
@@ -176,73 +232,198 @@ async function renderReviewDeckTable(){
   if (token !== DECK_BROWSER_RENDER_TOKEN) return;
   box.innerHTML = deckBrowserTableHTML();
   wireDeckBrowserTable(box);
+  deckBrowserMaybeImportFromLink();
+}
+
+function deckBrowserDefaultCollapsed(decks){
+  // Padrão: a Trilha de Estudo começa fechada (dezenas de unidades).
+  const set = new Set();
+  const course = deckBrowserCourseRoot(decks);
+  if (course) set.add(String(course.id));
+  return set;
 }
 
 function deckBrowserTableHTML(){
   const decks = deckBrowserDecks();
   const pool = deckBrowserPool();
-  let collapsed = deckBrowserLoadCollapsed();
-  if (!collapsed){
-    // Padrão: o curso começa fechado (dezenas de unidades).
-    collapsed = new Set();
-    const course = deckBrowserCourseRoot(decks);
-    if (course) collapsed.add(String(course.id));
-  }
+  const collapsed = deckBrowserLoadCollapsed() || deckBrowserDefaultCollapsed(decks);
   const rows = [];
   const walk = (nodeId, depth) => {
     const kids = deckBrowserChildren(decks, nodeId);
     const c = deckBrowserCounts(decks, nodeId, pool);
     const isCollapsed = collapsed.has(String(nodeId));
+    const label = deckBrowserNodeLabel(decks, nodeId);
     const toggle = kids.length
-      ? `<button type="button" class="deck-table-toggle" data-deck-toggle="${nodeId}" aria-label="${isCollapsed ? 'Abrir' : 'Fechar'} ${escapeHTML(deckBrowserNodeLabel(decks, nodeId))}" aria-expanded="${isCollapsed ? 'false' : 'true'}">${isCollapsed ? '+' : '−'}</button>`
+      ? `<button type="button" class="deck-table-toggle" data-deck-toggle="${nodeId}" aria-label="${isCollapsed ? 'Abrir' : 'Fechar'} ${escapeHTML(label)}" aria-expanded="${isCollapsed ? 'false' : 'true'}">${isCollapsed ? '+' : '−'}</button>`
       : `<span class="deck-table-toggle-spacer"></span>`;
     const num = (n, cls) => `<td class="deck-table-num ${n ? cls : 'is-zero'}">${n}</td>`;
     rows.push(`<tr data-deck-row="${nodeId}">
-      <td class="deck-table-name" style="padding-left:${8 + depth * 18}px;">${toggle}<button type="button" class="deck-table-link" data-deck-open="${nodeId}">${escapeHTML(deckBrowserNodeLabel(decks, nodeId))}</button></td>
+      <td><div class="deck-table-name" style="padding-left:${depth * 18}px;">${toggle}<button type="button" class="deck-table-link" data-deck-open="${nodeId}">${escapeHTML(label)}</button></div></td>
       ${num(c.new, 'is-new')}${num(c.learning, 'is-learning')}${num(c.review, 'is-review')}
     </tr>`);
     if (!isCollapsed) kids.forEach(k => walk(k.id, depth + 1));
   };
-  walk('lang', 0);
-  const canAdd = !!deckBrowserUserId();
-  return `<div class="deck-table-toolbar">
-      ${canAdd ? `<button type="button" class="btn btn-secondary deck-table-tool-btn" data-deck-home-add>＋ Adicionar</button>` : ''}
-      <button type="button" class="btn btn-secondary deck-table-tool-btn" data-deck-home-panel>Painel</button>
-    </div>
-    <table class="deck-table">
+  deckBrowserChildren(decks, 'lang').forEach(d => walk(d.id, 0));
+  const logged = !!deckBrowserUserId();
+  const orphans = deckBrowserOrphanCount();
+  return `<table class="deck-table">
       <thead><tr><th scope="col">Deck</th><th scope="col">Novo</th><th scope="col">Aprendendo</th><th scope="col">Revisar</th></tr></thead>
-      <tbody>${rows.join('')}</tbody>
+      <tbody>${rows.length ? rows.join('') : `<tr><td colspan="4" class="profile-edit-hint">Nenhum Deck ainda. Conclua uma lição ou crie um Deck.</td></tr>`}</tbody>
     </table>
-    <p class="profile-edit-hint deck-table-hint">Toque no nome de um Deck para estudar, adicionar cartões ou abrir o Painel.</p>`;
+    ${orphans ? `<p class="profile-edit-hint deck-table-hint">${orphans} dos seus cartões antigos ainda não estão em nenhum Deck. Abra o Painel para vê-los e movê-los.</p>` : ''}
+    ${logged ? `<div class="deck-home-actions">
+      <button type="button" class="btn btn-secondary deck-home-btn" data-deck-create>Criar Deck</button>
+      <button type="button" class="btn btn-secondary deck-home-btn" data-deck-import>Importar arquivo</button>
+      <button type="button" class="btn btn-secondary deck-home-btn" data-deck-export>Exportar</button>
+      <input type="file" data-deck-import-file accept=".apkg,.json,application/json" hidden>
+    </div>
+    <div data-deck-create-box></div>` : ''}`;
 }
 
 function wireDeckBrowserTable(box){
   box.querySelectorAll('[data-deck-toggle]').forEach(btn => btn.addEventListener('click', () => {
     const id = btn.dataset.deckToggle;
-    let set = deckBrowserLoadCollapsed();
-    if (!set){
-      set = new Set();
-      const course = deckBrowserCourseRoot(deckBrowserDecks());
-      if (course) set.add(String(course.id));
-    }
+    const set = deckBrowserLoadCollapsed() || deckBrowserDefaultCollapsed(deckBrowserDecks());
     if (set.has(id)) set.delete(id); else set.add(id);
     deckBrowserSaveCollapsed(set);
     box.innerHTML = deckBrowserTableHTML();
     wireDeckBrowserTable(box);
   }));
-  box.querySelector('[data-deck-home-add]')?.addEventListener('click', () => openAddCardModal({ deckId: null }));
-  box.querySelector('[data-deck-home-panel]')?.addEventListener('click', () => openDeckPanel('lang'));
-  box.querySelectorAll('[data-deck-open]').forEach(btn => btn.addEventListener('click', () => {
-    const raw = btn.dataset.deckOpen;
-    openDeckDetail(raw === 'lang' ? 'lang' : Number(raw));
-  }));
+  box.querySelectorAll('[data-deck-open]').forEach(btn => btn.addEventListener('click', () => openDeckDetail(Number(btn.dataset.deckOpen))));
+  box.querySelector('[data-deck-create]')?.addEventListener('click', () => openCreateDeckForm(box.querySelector('[data-deck-create-box]'), null));
+  const fileInput = box.querySelector('[data-deck-import-file]');
+  box.querySelector('[data-deck-import]')?.addEventListener('click', () => fileInput && fileInput.click());
+  fileInput?.addEventListener('change', () => {
+    const file = fileInput.files && fileInput.files[0];
+    fileInput.value = '';
+    if (file) deckBrowserImportFile(file);
+  });
+  box.querySelector('[data-deck-export]')?.addEventListener('click', deckBrowserExport);
 }
 
-// ---------- Detalhe do Deck ----------
+// ---------- Criar Deck / Renomear ----------
 
-function deckBrowserCanAddCard(deck, nodeId){
+// Formulário curto (nome + onde fica). `parentId` já escolhido quando vem
+// da tela de um Deck ("Criar subdeck").
+function openCreateDeckForm(box, parentId){
+  if (!box) return;
+  const decks = deckBrowserDecks();
+  const options = (typeof orderedPersonalDecks === 'function' ? orderedPersonalDecks(decks) : []);
+  if (!options.length){ box.innerHTML = `<p class="profile-edit-error">Não foi possível carregar "Meus Decks". Recarregue a página.</p>`; return; }
+  box.innerHTML = `<div class="deck-inline-form" role="group" aria-label="Criar Deck">
+      <label class="profile-edit-label" for="deck-create-name">Nome do Deck</label>
+      <input type="text" id="deck-create-name" class="profile-edit-input" maxlength="60" placeholder="Ex.: Verbos">
+      <label class="profile-edit-label" for="deck-create-parent">Dentro de</label>
+      <select id="deck-create-parent" class="profile-edit-input">${options.map(d => `<option value="${d.id}" ${d.id === parentId ? 'selected' : ''}>${'  '.repeat(Math.max(0, personalDeckDepth(decks, d) - 1))}${escapeHTML(deckBrowserDeckLabel(d))}</option>`).join('')}</select>
+      <p class="profile-edit-error" data-deck-create-error></p>
+      <div class="deck-inline-actions">
+        <button type="button" class="btn btn-secondary" data-deck-create-cancel>Cancelar</button>
+        <button type="button" class="btn btn-primary" data-deck-create-save>Criar Deck</button>
+      </div>
+    </div>`;
+  const nameEl = box.querySelector('#deck-create-name');
+  nameEl.focus();
+  box.querySelector('[data-deck-create-cancel]').addEventListener('click', () => { box.innerHTML = ''; });
+  const save = async () => {
+    const errEl = box.querySelector('[data-deck-create-error]');
+    const btn = box.querySelector('[data-deck-create-save]');
+    errEl.textContent = '';
+    btn.disabled = true;
+    const res = await createPersonalDeck({ name: nameEl.value, parentDeckId: Number(box.querySelector('#deck-create-parent').value), languageAppKey: APP_KEY, decks });
+    btn.disabled = false;
+    if (!res.ok){ errEl.textContent = res.error; return; }
+    STATE.decks = (STATE.decks || []).concat([res.deck]);
+    if (typeof MY_FLASHCARDS_STATE !== 'undefined') MY_FLASHCARDS_STATE._decks = STATE.decks;
+    if (typeof showToast === 'function') showToast(`✓ Deck "${res.deck.name}" criado.`);
+    box.innerHTML = '';
+    deckBrowserRefresh();
+  };
+  box.querySelector('[data-deck-create-save]').addEventListener('click', save);
+  nameEl.addEventListener('keydown', (e) => { if (e.key === 'Enter'){ e.preventDefault(); save(); } });
+}
+
+function openRenameDeckForm(box, deck){
+  if (!box) return;
+  box.innerHTML = `<div class="deck-inline-form" role="group" aria-label="Renomear Deck">
+      <label class="profile-edit-label" for="deck-rename-name">Novo nome</label>
+      <input type="text" id="deck-rename-name" class="profile-edit-input" maxlength="60" value="${escapeHTML(deck.name || '')}">
+      <p class="profile-edit-error" data-deck-rename-error></p>
+      <div class="deck-inline-actions">
+        <button type="button" class="btn btn-secondary" data-deck-rename-cancel>Cancelar</button>
+        <button type="button" class="btn btn-primary" data-deck-rename-save>Salvar</button>
+      </div>
+    </div>`;
+  const nameEl = box.querySelector('#deck-rename-name');
+  nameEl.focus();
+  nameEl.select();
+  box.querySelector('[data-deck-rename-cancel]').addEventListener('click', () => { box.innerHTML = ''; });
+  const save = async () => {
+    const errEl = box.querySelector('[data-deck-rename-error]');
+    errEl.textContent = '';
+    const res = await renamePersonalDeck(deck.id, nameEl.value);
+    if (!res.ok){ errEl.textContent = res.error; return; }
+    deck.name = nameEl.value.trim();
+    renderDeckDetail();
+  };
+  box.querySelector('[data-deck-rename-save]').addEventListener('click', save);
+  nameEl.addEventListener('keydown', (e) => { if (e.key === 'Enter'){ e.preventDefault(); save(); } });
+}
+
+// ---------- Importar / Exportar ----------
+
+// Um botão só: .apkg vai para o importador do Anki; .json (arquivo
+// exportado por outra conta) para o importador de cartões.
+async function deckBrowserImportFile(file){
+  const name = (file.name || '').toLowerCase();
+  if (name.endsWith('.apkg')){
+    if (typeof handleAnkiImportFileSelected === 'function') handleAnkiImportFileSelected(file);
+    return;
+  }
+  let payload;
+  try {
+    payload = JSON.parse(await file.text());
+  } catch (e) {
+    if (typeof showToast === 'function') showToast('Não foi possível ler este arquivo. Use um .apkg do Anki ou um .json exportado por este site.');
+    return;
+  }
+  await deckBrowserImportPayload(payload);
+}
+
+async function deckBrowserImportPayload(payload){
+  const ctx = await deckBrowserLoadOwnContext();
+  if (!ctx){ if (typeof showToast === 'function') showToast('Entre na sua conta para importar cartões.'); return; }
+  const errorEl = { set textContent(v){ if (v && typeof showToast === 'function') showToast(v); } };
+  await confirmAndImportMyFlashcards(payload, errorEl);
+}
+
+// Link de compartilhamento (#import=...): importa uma vez, já logada.
+function deckBrowserMaybeImportFromLink(){
+  if (!DECK_BROWSER_PENDING_IMPORT || DECK_BROWSER_IMPORT_DONE || !deckBrowserUserId()) return;
+  DECK_BROWSER_IMPORT_DONE = true;
+  let payload = null;
+  try {
+    payload = JSON.parse(decodeURIComponent(escape(atob(DECK_BROWSER_PENDING_IMPORT))));
+  } catch (e) {
+    if (typeof showToast === 'function') showToast('O link de cartões compartilhados está incompleto ou corrompido.');
+    return;
+  }
+  deckBrowserImportPayload(payload);
+}
+
+async function deckBrowserExport(){
+  const ctx = await deckBrowserLoadOwnContext();
+  if (!ctx) return;
+  if (!ctx.activeCards.length){
+    if (typeof showToast === 'function') showToast('Você ainda não tem cartões próprios para exportar.');
+    return;
+  }
+  openMyFlashcardsExportModal(ctx.activeCards);
+}
+
+// ---------- Tela do Deck (formato do Anki) ----------
+
+function deckBrowserCanAddCard(deck){
   if (!deckBrowserUserId()) return false;
-  if (nodeId === 'lang') return true; // vai para "Meus Decks"
   return !!deck && (deck.kind === 'personal_root' || deck.kind === 'personal');
 }
 
@@ -251,6 +432,7 @@ function deckBrowserRoute(view, nodeId){
 }
 
 function openDeckDetail(nodeId){
+  if (nodeId === 'lang'){ backToDeckTable(); return; }
   DECK_BROWSER.view = 'detail';
   DECK_BROWSER.nodeId = nodeId;
   deckBrowserShow('detail');
@@ -260,7 +442,7 @@ function openDeckDetail(nodeId){
 
 // Recarregar a página (ou Voltar/Avançar) num endereço #/review/decks/...:
 // espera os Decks carregarem e reabre a mesma tela. Deck que não existe mais
-// (ou não é desta conta) volta para a tabela.
+// volta para a tabela.
 let DECK_BROWSER_RESTORE_TOKEN = 0;
 async function restoreDeckBrowserRoute(route){
   const token = ++DECK_BROWSER_RESTORE_TOKEN;
@@ -282,42 +464,49 @@ function renderDeckDetail(){
   if (!wrap) return;
   const decks = deckBrowserDecks();
   const nodeId = DECK_BROWSER.nodeId;
-  const deck = nodeId === 'lang' ? null : getDeckById(decks, nodeId);
-  if (nodeId !== 'lang' && !deck){ backToDeckTable(); return; }
+  const deck = getDeckById(decks, nodeId);
+  if (!deck){ backToDeckTable(); return; }
   const pool = deckBrowserPool();
   const c = deckBrowserCounts(decks, nodeId, pool);
-  const canAdd = deckBrowserCanAddCard(deck, nodeId);
-  const isPersonal = !!deck && deck.kind === 'personal';
-  let addHint = '';
-  if (!canAdd && deck && deck.kind === 'course') addHint = 'Os cartões do curso vêm das lições. Para criar os seus, use "Meus Decks".';
-  else if (!canAdd && deck && (deck.kind === 'teacher_root' || deck.kind === 'teacher')) addHint = 'Estes cartões são organizados pela sua professora.';
-  else if (!canAdd && !deckBrowserUserId()) addHint = 'Entre na sua conta para criar cartões.';
+  const isPersonal = deck.kind === 'personal';
+  const canHaveChildren = deck.kind === 'personal_root' || isPersonal;
+  let hint = '';
+  if (deck.kind === 'course') hint = 'Os cartões da Trilha de Estudo vêm das lições: cada lição concluída libera os cartões dela.';
+  else if (deck.kind === 'teacher_root' || deck.kind === 'teacher') hint = 'Estes cartões são organizados pela sua professora. Aqui você só estuda.';
   const crumbs = deckBrowserBreadcrumb(decks, nodeId);
+  const totalLine = `${c.total} ${c.total === 1 ? 'cartão' : 'cartões'}${getDeckChildren(decks, nodeId).length ? ' neste Deck e nos subdecks' : ''}${c.newTotal > c.new ? ` · ${c.newTotal} novos no total (entram até ${c.new} por dia, conforme "Novas palavras por dia")` : ''}`;
   wrap.innerHTML = `
-    <button class="back-link" data-deck-back>← Voltar aos Decks</button>
-    <div class="deck-detail">
-      <p class="deck-detail-path">${crumbs.slice(0, -1).map(escapeHTML).join(' › ')}</p>
-      <h2 class="deck-detail-title">${escapeHTML(crumbs[crumbs.length - 1])}</h2>
-      <div class="deck-detail-counts">
-        <div><span class="deck-detail-num ${c.new ? 'is-new' : 'is-zero'}">${c.new}</span><span class="deck-detail-label">Novo</span></div>
-        <div><span class="deck-detail-num ${c.learning ? 'is-learning' : 'is-zero'}">${c.learning}</span><span class="deck-detail-label">Aprendendo</span></div>
-        <div><span class="deck-detail-num ${c.review ? 'is-review' : 'is-zero'}">${c.review}</span><span class="deck-detail-label">Revisar</span></div>
+    ${deckTopbarHTML(nodeId)}
+    <div class="deck-overview">
+      <h2 class="deck-overview-title">${crumbs.map(escapeHTML).join(' › ')}</h2>
+      <div class="deck-overview-body">
+        <dl class="deck-overview-counts">
+          <dt>Novo:</dt><dd class="${c.new ? 'is-new' : 'is-zero'}">${c.new}</dd>
+          <dt>Aprendendo:</dt><dd class="${c.learning ? 'is-learning' : 'is-zero'}">${c.learning}</dd>
+          <dt>Revisar:</dt><dd class="${c.review ? 'is-review' : 'is-zero'}">${c.review}</dd>
+        </dl>
+        <button type="button" class="btn btn-primary deck-overview-study" data-deck-study ${c.total ? '' : 'disabled'}>Estudar agora</button>
       </div>
-      <p class="profile-edit-hint">${c.total} ${c.total === 1 ? 'cartão' : 'cartões'} neste Deck${nodeId === 'lang' ? '' : ' e nos subdecks'}${c.newTotal > c.new ? ` · ${c.newTotal} novos no total (entram até ${c.new} por sessão, conforme "Novas palavras por dia")` : ''}.</p>
-      <div class="deck-detail-actions">
-        <button type="button" class="btn btn-primary" data-deck-study ${c.total ? '' : 'disabled'}>Estudar agora</button>
-        ${canAdd ? `<button type="button" class="btn btn-secondary" data-deck-add>Adicionar cartão</button>` : ''}
-        <button type="button" class="btn btn-secondary" data-deck-panel>Painel</button>
-      </div>
-      ${addHint ? `<p class="profile-edit-hint">${escapeHTML(addHint)}</p>` : ''}
-      ${nodeId === 'lang' && deckBrowserOrphanCount() ? `<p class="profile-edit-hint">${deckBrowserOrphanCount()} dos seus cartões antigos ainda não estão em nenhum Deck. Eles aparecem só aqui, na raiz; no Painel você pode movê-los para um Deck.</p>` : ''}
-      ${isPersonal ? `<div class="deck-detail-danger"><button type="button" class="admin-select-link" data-deck-delete style="background:none;border:none;cursor:pointer;padding:0;">🗑 Excluir este Deck</button></div><div data-deck-delete-box></div>` : ''}
-    </div>`;
-  wrap.querySelector('[data-deck-back]').addEventListener('click', backToDeckTable);
+      <p class="deck-overview-total">${escapeHTML(totalLine)}.</p>
+      ${hint ? `<p class="profile-edit-hint deck-overview-hint">${escapeHTML(hint)}</p>` : ''}
+    </div>
+    ${canHaveChildren ? `<div class="deck-overview-footer">
+      <button type="button" class="btn btn-secondary deck-home-btn" data-deck-subdeck>Criar subdeck</button>
+      ${isPersonal ? `<button type="button" class="btn btn-secondary deck-home-btn" data-deck-rename>Renomear</button>` : ''}
+      ${isPersonal && typeof openPublishBox === 'function' ? `<button type="button" class="btn btn-secondary deck-home-btn" data-deck-publish>${deck.is_public ? '🌐 Público' : 'Publicar'}</button>` : ''}
+      ${isPersonal ? `<button type="button" class="btn btn-secondary deck-home-btn deck-overview-danger" data-deck-delete>Excluir</button>` : ''}
+    </div>
+    <div class="deck-overview-extra" data-deck-extra-box></div>` : ''}`;
+  wireDeckTopbar(wrap, nodeId);
+  const extra = wrap.querySelector('[data-deck-extra-box]');
   wrap.querySelector('[data-deck-study]').addEventListener('click', () => deckBrowserStudy(nodeId));
-  wrap.querySelector('[data-deck-add]')?.addEventListener('click', () => deckBrowserAddCard(deck, nodeId));
-  wrap.querySelector('[data-deck-panel]').addEventListener('click', () => openDeckPanel(nodeId));
-  wrap.querySelector('[data-deck-delete]')?.addEventListener('click', () => openDeckDeleteDialog(deck, wrap.querySelector('[data-deck-delete-box]')));
+  wrap.querySelector('[data-deck-subdeck]')?.addEventListener('click', () => openCreateDeckForm(extra, deck.id));
+  wrap.querySelector('[data-deck-rename]')?.addEventListener('click', () => openRenameDeckForm(extra, deck));
+  wrap.querySelector('[data-deck-publish]')?.addEventListener('click', (ev) => {
+    const btn = ev.currentTarget;
+    openPublishBox(deck, extra, (d) => { btn.textContent = d.is_public ? '🌐 Público' : 'Publicar'; });
+  });
+  wrap.querySelector('[data-deck-delete]')?.addEventListener('click', () => openDeckDeleteDialog(deck, extra));
 }
 
 function backToDeckTable(){
@@ -328,39 +517,12 @@ function backToDeckTable(){
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'tab', tab: 'review' });
 }
 
-// Estudar: Deck real -> startDeckReviewSession (Deck + subdecks, mesma fila
-// e FSRS de sempre). Raiz do idioma -> o mesmo fluxo, sobre o pool elegível
-// inteiro (curso + pessoais + professora), com o filtro de tag da Revisão.
+// Estudar: startDeckReviewSession (Deck + subdecks, mesma fila e FSRS).
 function deckBrowserStudy(nodeId){
-  if (nodeId !== 'lang'){
-    if (typeof startDeckReviewSession === 'function') startDeckReviewSession(nodeId);
-    return;
-  }
-  const pool = deckBrowserPool().filter(c => (typeof matchesReviewTagFilter === 'function') ? matchesReviewTagFilter(c) : true);
-  STATE.reviewSessionUnitFilter = null;
-  STATE.reviewSessionDeckId = null;
-  STATE.reviewActiveMode = 'flashcard';
-  STATE.reviewQueue = reviewFilterQueue('oldest', pool);
-  STATE.reviewIndex = 0;
-  STATE.reviewCardState = null;
-  const deckWrap = document.getElementById('review-deck-wrap');
-  if (deckWrap) deckWrap.style.display = 'none';
-  document.getElementById('review-mode-select-wrap').style.display = 'none';
-  document.getElementById('review-session-wrap').style.display = 'block';
-  document.getElementById('review-content').style.display = 'block';
-  document.getElementById('speed-review-content').style.display = 'none';
-  const match = document.getElementById('match-review-content');
-  if (match) match.style.display = 'none';
-  renderReviewView();
-  if (typeof routerNavigate === 'function') routerNavigate({ type: 'reviewSession', mode: 'flashcard' });
+  if (typeof startDeckReviewSession === 'function') startDeckReviewSession(nodeId);
 }
 
-// "Adicionar cartão": abre uma JANELA por cima da Revisão (nunca troca de
-// tela), com o mesmo formulário de Meus Cartões (editor nativo, limite do
-// plano, Deck de destino). Na raiz do idioma o destino padrão é "Meus Decks".
-function deckBrowserAddCard(deck, nodeId){
-  openAddCardModal({ deckId: nodeId === 'lang' || !deck ? null : deck.id });
-}
+// ---------- Adicionar (janela) ----------
 
 const ADD_CARD_MODAL_ID = 'add-card-modal';
 let ADD_CARD_MODAL_CREATED = 0;
@@ -371,19 +533,33 @@ function closeAddCardModal(){
   el.remove();
   document.removeEventListener('keydown', addCardModalOnKey);
   if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
-  // Atualiza as contagens da tela que ficou por baixo.
   if (ADD_CARD_MODAL_CREATED){
     ADD_CARD_MODAL_CREATED = 0;
-    if (DECK_BROWSER.view === 'detail') renderDeckDetail();
-    else if (DECK_BROWSER.view === 'panel') renderDeckPanel();
-    else if (typeof renderReviewModeSelect === 'function') renderReviewModeSelect();
+    deckBrowserRefresh();
   }
+}
+// A janela `id` é a de cima? (Esc só fecha a janela mais alta.) Overlays
+// são position:fixed (offsetParent é sempre null), por isso o display
+// calculado decide se está aberta.
+function deckBrowserTopModalIs(id){
+  const me = document.getElementById(id);
+  if (!me) return false;
+  const z = el => Number(getComputedStyle(el).zIndex) || 0;
+  const others = Array.from(document.querySelectorAll('.app-modal-overlay'))
+    .filter(o => o !== me && getComputedStyle(o).display !== 'none');
+  return others.every(o => z(o) < z(me));
 }
 function addCardModalOnKey(e){
   if (e.key !== 'Escape') return;
-  // Só fecha se nenhuma outra janela (pré-visualização, limite) estiver aberta por cima.
-  const others = Array.from(document.querySelectorAll('.app-modal-overlay')).filter(o => o.id !== ADD_CARD_MODAL_ID && o.style.display !== 'none' && o.offsetParent !== null);
-  if (!others.length) closeAddCardModal();
+  if (deckBrowserTopModalIs(ADD_CARD_MODAL_ID)) closeAddCardModal();
+}
+
+// Cria um campo de cada lado já com o idioma certo (1º = idioma estudado,
+// 2º = português), como a nota "Básico" do Anki já vem com Frente e Verso.
+function deckBrowserNewNoteState(){
+  const st = createNativeNoteEditorState({ cardGenerationMode: 'normal', languageAppKey: APP_KEY });
+  if (typeof addFieldToEditorState === 'function'){ addFieldToEditorState(st, {}); addFieldToEditorState(st, {}); }
+  return st;
 }
 
 async function openAddCardModal(opts){
@@ -394,15 +570,14 @@ async function openAddCardModal(opts){
   }
   closeAddCardModal();
   ADD_CARD_MODAL_CREATED = 0;
-  // O formulário usa ids fixos; a tela Meus Cartões (escondida) é limpa para
-  // não haver ids repetidos. Ela é redesenhada ao abrir a aba de novo.
+  // O formulário usa ids fixos: limpa qualquer cópia escondida.
   const mine = document.getElementById('my-flashcards-content');
   if (mine) mine.innerHTML = '';
   const overlay = document.createElement('div');
   overlay.id = ADD_CARD_MODAL_ID;
   overlay.className = 'app-modal-overlay';
-  // Um nível abaixo das janelas fixas (pré-visualização, limite, confirmação),
-  // que podem abrir por cima desta.
+  // Abaixo das janelas fixas (pré-visualização, limite, confirmação), que
+  // podem abrir por cima desta; acima do Painel.
   overlay.style.zIndex = 'calc(var(--z-modal-backdrop) - 1)';
   overlay.innerHTML = `
     <div class="app-modal add-card-modal" role="dialog" aria-modal="true" aria-labelledby="add-card-modal-title">
@@ -431,7 +606,7 @@ async function renderAddCardModalBody(deckId){
     return;
   }
   if (!document.getElementById('add-card-modal-body')) return; // fechou enquanto carregava
-  MY_FLASHCARDS_STATE.nativeCardState = createNativeNoteEditorState({ cardGenerationMode: 'normal', languageAppKey: APP_KEY });
+  MY_FLASHCARDS_STATE.nativeCardState = deckBrowserNewNoteState();
   body.innerHTML = myCreateFlashcardFormHTML(ctx);
   const sel = document.getElementById('my-flashcard-deck');
   if (sel && deckId != null && Array.from(sel.options).some(o => Number(o.value) === deckId)) sel.value = String(deckId);
@@ -473,7 +648,7 @@ function openDeckDeleteDialog(deck, box){
       <p class="profile-edit-hint">"${escapeHTML(deck.name)}" tem ${noteCount} ${noteCount === 1 ? 'cartão' : 'cartões'}${subdecks ? ` e ${subdecks} ${subdecks === 1 ? 'subdeck' : 'subdecks'} (que também serão excluídos)` : ''}. Se preferir guardar os cartões, mova-os antes.</p>
       ${noteCount ? `<label class="profile-edit-label" for="deck-delete-target">Mover os cartões para</label>
       <select id="deck-delete-target" class="profile-edit-input">${targets.map(d => `<option value="${d.id}">${escapeHTML(deckBrowserDeckLabel(d))}</option>`).join('')}</select>` : ''}
-      <div class="deck-detail-actions">
+      <div class="deck-inline-actions">
         ${noteCount ? `<button type="button" class="btn btn-secondary" data-deck-delete-move>Mover para outro deck</button>` : ''}
         <button type="button" class="btn btn-primary deck-delete-confirm" data-deck-delete-perm>Excluir permanentemente</button>
         <button type="button" class="btn btn-secondary" data-deck-delete-cancel>Cancelar</button>
@@ -481,8 +656,7 @@ function openDeckDeleteDialog(deck, box){
       <p class="profile-edit-error" data-deck-delete-error></p>
     </div>`;
   const errEl = box.querySelector('[data-deck-delete-error]');
-  const buttons = () => box.querySelectorAll('button');
-  const setBusy = (busy) => buttons().forEach(b => { b.disabled = busy; });
+  const setBusy = (busy) => box.querySelectorAll('button').forEach(b => { b.disabled = busy; });
   box.querySelector('[data-deck-delete-cancel]').addEventListener('click', () => { box.innerHTML = ''; });
   box.querySelector('[data-deck-delete-move]')?.addEventListener('click', async () => {
     const dest = getDeckById(decks, Number(box.querySelector('#deck-delete-target').value));
@@ -502,8 +676,7 @@ function openDeckDeleteDialog(deck, box){
   });
 }
 
-// Espelha a exclusão no estado já carregado (fila, contagens, Meus Cartões)
-// sem precisar recarregar a página.
+// Espelha a exclusão no estado já carregado (fila, contagens).
 function deckBrowserAfterDelete(subtree, res, destination){
   const removed = new Set(subtree);
   STATE.decks = (STATE.decks || []).filter(d => !removed.has(d.id));
@@ -522,7 +695,7 @@ function deckBrowserAfterDelete(subtree, res, destination){
   backToDeckTable();
 }
 
-// ---------- Painel (seção 14) ----------
+// ---------- Painel (seção 14), em janela ----------
 
 // Texto de exibição de um card, sem quebrar em nenhum Card Type.
 function deckBrowserCardTexts(card){
@@ -543,7 +716,7 @@ const DECK_BROWSER_CARD_TYPE_LABELS = {
   normal: 'Normal', normal_reversed: 'Normal com reverso', multiple_choice: 'Múltipla escolha',
   type_answer: 'Digite a resposta', cloze: 'Completar a frase',
 };
-const DECK_BROWSER_ORIGIN_LABELS = { study: 'Curso', self: 'Meus cartões', teacher: 'Professora' };
+const DECK_BROWSER_ORIGIN_LABELS = { study: 'Trilha de Estudo', self: 'Meus cartões', teacher: 'Professora' };
 
 // Agrupa CardInstances irmãs pela Note (mesmo objeto `note`): o Painel
 // trabalha no nível de Note (seção 14) e mostra os cartões dela juntos.
@@ -567,6 +740,7 @@ function deckBrowserNotes(cards){
       front: texts.front,
       back: texts.back,
       tags: first.tags || [],
+      archived: first.origin !== 'study' && siblings.every(c => c.flashcardStatus === 'archived'),
       typeLabel: DECK_BROWSER_CARD_TYPE_LABELS[mode] || DECK_BROWSER_CARD_TYPE_LABELS[first.cardInstance && first.cardInstance.cardTypeId] || 'Normal',
     };
   });
@@ -579,29 +753,151 @@ function deckBrowserNoteState(note){
   return 'Revisão';
 }
 
+const DECK_PANEL_ID = 'deck-panel-modal';
+const DECK_PANEL_PAGE = 200;
+const DECK_PANEL_STATES = [
+  { id: 'all', label: 'Todos' }, { id: 'Novo', label: 'Novo' },
+  { id: 'Aprendendo', label: 'Aprendendo' }, { id: 'Revisão', label: 'Revisão' },
+];
+
+function deckPanelIsMobile(){ return window.matchMedia ? window.matchMedia('(max-width: 760px)').matches : window.innerWidth <= 760; }
+
+// Abre o Painel por cima da tela atual. `nodeId` = Deck aberto (o Painel
+// começa filtrado nele) ou 'lang' (todos os Decks).
 function openDeckPanel(nodeId){
-  DECK_BROWSER.view = 'panel';
-  DECK_BROWSER.nodeId = nodeId;
-  DECK_BROWSER.panel = { query: '', tags: [], selected: new Set() };
-  deckBrowserShow('panel');
+  // A tela por baixo: a do Deck, ou a tabela.
+  if (nodeId === 'lang'){
+    if (DECK_BROWSER.view !== 'home'){
+      DECK_BROWSER.view = 'home';
+      DECK_BROWSER.nodeId = null;
+      deckBrowserShow('home');
+    }
+  } else if (DECK_BROWSER.view !== 'detail' || DECK_BROWSER.nodeId !== nodeId){
+    DECK_BROWSER.view = 'detail';
+    DECK_BROWSER.nodeId = nodeId;
+    deckBrowserShow('detail');
+    renderDeckDetail();
+  }
+  DECK_BROWSER.panel = { nodeId, scopeId: nodeId, query: '', tags: [], state: 'all', archived: false, selected: new Set(), activeKey: null, mode: 'note', ctx: null };
+  DECK_BROWSER.panelOpen = true;
+  deckPanelMount();
+  if (typeof routerNavigate === 'function') routerNavigate(deckBrowserRoute('panel', nodeId));
+  deckPanelLoadContext();
+}
+
+function deckPanelMount(){
+  document.getElementById(DECK_PANEL_ID)?.remove();
+  const overlay = document.createElement('div');
+  overlay.id = DECK_PANEL_ID;
+  overlay.className = 'app-modal-overlay deck-panel-overlay';
+  overlay.style.zIndex = 'calc(var(--z-modal-backdrop) - 2)';
+  overlay.innerHTML = `
+    <div class="app-modal deck-panel-modal" role="dialog" aria-modal="true" aria-labelledby="deck-panel-title">
+      <div class="deck-panel-head">
+        <h3 id="deck-panel-title">Painel</h3>
+        <input type="search" class="profile-edit-input deck-panel-search" data-panel-search placeholder="Buscar cartões e notas" aria-label="Buscar cartões">
+        <button type="button" class="app-modal-close" data-panel-close aria-label="Fechar">✕</button>
+      </div>
+      <div class="deck-panel-grid" data-panel-grid>
+        <details class="deck-panel-side" data-panel-side ${deckPanelIsMobile() ? '' : 'open'}>
+          <summary>Filtros</summary>
+          <div data-panel-side-body></div>
+        </details>
+        <section class="deck-panel-listpane" aria-label="Cartões">
+          <div class="deck-panel-bulk" data-panel-bulk hidden></div>
+          <div class="deck-panel-listhead"><span>Frente</span><span>Verso</span></div>
+          <div class="deck-panel-list" data-panel-list role="listbox" aria-label="Lista de cartões"></div>
+          <p class="profile-edit-hint deck-panel-count" data-panel-count></p>
+        </section>
+        <section class="deck-panel-editor" data-panel-editor aria-label="Editor"></section>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('[data-panel-close]').addEventListener('click', () => closeDeckPanel());
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeDeckPanel(); });
+  const search = overlay.querySelector('[data-panel-search]');
+  search.addEventListener('input', () => { DECK_BROWSER.panel.query = search.value; renderDeckPanelList(); });
+  document.addEventListener('keydown', deckPanelOnKey);
+  if (typeof MY_FLASHCARDS_STATE !== 'undefined') MY_FLASHCARDS_STATE.onChange = deckPanelAfterEdit;
   renderDeckPanel();
-  if (DECK_BROWSER.view === 'panel' && typeof routerNavigate === 'function') routerNavigate(deckBrowserRoute('panel', nodeId));
+  search.focus();
+}
+
+function deckPanelOnKey(e){
+  if (e.key !== 'Escape' || !DECK_BROWSER.panelOpen) return;
+  if (document.getElementById(ADD_CARD_MODAL_ID)) return;
+  if (deckBrowserTopModalIs(DECK_PANEL_ID)) closeDeckPanel();
+}
+
+function closeDeckPanel(opts){
+  const el = document.getElementById(DECK_PANEL_ID);
+  const wasOpen = DECK_BROWSER.panelOpen;
+  DECK_BROWSER.panelOpen = false;
+  document.removeEventListener('keydown', deckPanelOnKey);
+  if (typeof MY_FLASHCARDS_STATE !== 'undefined'){
+    MY_FLASHCARDS_STATE.onChange = null;
+    MY_FLASHCARDS_STATE.editingCardId = null;
+    MY_FLASHCARDS_STATE.editingNativeState = null;
+    MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
+  }
+  if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
+  if (el) el.remove();
+  if (!wasOpen || (opts && opts.silent)) return;
+  // Volta para a tela de baixo (com contagens atualizadas).
+  if (DECK_BROWSER.view === 'detail' && DECK_BROWSER.nodeId != null){
+    renderDeckDetail();
+    if (typeof routerNavigate === 'function') routerNavigate(deckBrowserRoute('detail', DECK_BROWSER.nodeId));
+  } else {
+    backToDeckTable();
+  }
+}
+
+// Cartões próprios (linhas do banco): o editor precisa da linha, do plano
+// e do "visível no perfil".
+async function deckPanelLoadContext(){
+  const ctx = await deckBrowserLoadOwnContext();
+  if (!DECK_BROWSER.panelOpen) return;
+  DECK_BROWSER.panel.ctx = ctx;
+  renderDeckPanel();
+}
+
+// Depois de salvar/cancelar/excluir no editor (MY_FLASHCARDS_STATE.onChange).
+async function deckPanelAfterEdit(opts){
+  if (!DECK_BROWSER.panelOpen) return;
+  if (opts && opts.preserveEditingNativeState){ renderDeckPanelEditor({ keepEditing: true }); return; }
+  await deckPanelReload();
+}
+
+async function deckPanelReload(){
+  if (!DECK_BROWSER.panelOpen) return;
+  const ctx = await deckBrowserLoadOwnContext();
+  if (!DECK_BROWSER.panelOpen) return;
+  DECK_BROWSER.panel.ctx = ctx;
+  if (typeof MY_FLASHCARDS_STATE !== 'undefined'){
+    MY_FLASHCARDS_STATE.editingCardId = null;
+    MY_FLASHCARDS_STATE.editingNativeState = null;
+    MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
+  }
+  renderDeckPanel();
 }
 
 // O Painel mostra TODAS as Notes do escopo (inclusive cartões de lições
-// ainda não estudadas), porque é uma tela de conteúdo, não de estudo.
+// ainda não estudadas e arquivados), porque é uma tela de conteúdo.
 function deckBrowserPanelNotes(){
   const decks = deckBrowserDecks();
   const all = (STATE && STATE.cards) || [];
-  const scoped = DECK_BROWSER.nodeId === 'lang' ? all : getStudyScopeForDeck(decks, DECK_BROWSER.nodeId, all);
+  const scopeId = DECK_BROWSER.panel.scopeId;
+  const scoped = scopeId === 'lang' ? all : getStudyScopeForDeck(decks, scopeId, all);
   return deckBrowserNotes(scoped);
 }
 
 function deckBrowserFilterNotes(notes){
-  const q = (DECK_BROWSER.panel.query || '').trim().toLowerCase();
-  const tags = DECK_BROWSER.panel.tags;
+  const p = DECK_BROWSER.panel;
+  const q = (p.query || '').trim().toLowerCase();
   return notes.filter(n => {
-    if (tags.length && !tags.some(t => n.tags.includes(t))) return false;
+    if (p.archived ? !n.archived : n.archived) return false;
+    if (p.state !== 'all' && deckBrowserNoteState(n) !== p.state) return false;
+    if (p.tags.length && !p.tags.some(t => n.tags.includes(t))) return false;
     if (!q) return true;
     const hay = (n.front + ' ' + n.back + ' ' + n.tags.join(' ')).toLowerCase();
     return hay.includes(q);
@@ -609,110 +905,240 @@ function deckBrowserFilterNotes(notes){
 }
 
 function renderDeckPanel(){
-  const wrap = document.getElementById('review-deck-wrap');
-  if (!wrap) return;
-  const decks = deckBrowserDecks();
-  const nodeId = DECK_BROWSER.nodeId;
-  if (nodeId !== 'lang' && !getDeckById(decks, nodeId)){ backToDeckTable(); return; }
-  const notes = deckBrowserPanelNotes();
-  // Tags como filtro (seção 14). Num escopo grande (ex.: a raiz do idioma,
-  // com todas as unidades do curso) as tags finas da trilha (unidade-*,
-  // licao-*, palavra, na-frase) virariam centenas de botões: aí mostramos só
-  // as gerais + as de cartões próprios/professora (mesma regra do filtro da
-  // Revisão). A busca continua encontrando qualquer tag pelo texto.
-  const scopeCards = notes.flatMap(n => n.cards);
-  let allTags = collectTagsFromCards(scopeCards);
-  if (allTags.length > 30 && typeof reviewFilterVisibleTags === 'function'){
-    allTags = Array.from(new Set(reviewFilterVisibleTags(scopeCards).concat(DECK_BROWSER.panel.tags))).sort();
-  }
-  const uid = deckBrowserUserId();
-  const moveTargets = decks.filter(d => ['personal_root', 'personal'].includes(d.kind) && d.owner_id === uid);
-  wrap.innerHTML = `
-    <button class="back-link" data-panel-back>← Voltar ao Deck</button>
-    <div class="deck-panel">
-      <h2 class="deck-detail-title">Painel · ${escapeHTML(deckBrowserNodeLabel(decks, nodeId))}</h2>
-      <input type="search" class="profile-edit-input" data-panel-search placeholder="Buscar na frente, no verso ou nas tags (ex.: licao-2)" aria-label="Buscar cartões" value="${escapeHTML(DECK_BROWSER.panel.query)}">
-      ${allTags.length ? `<div class="deck-panel-tags" data-panel-tags>
-        <span class="profile-edit-hint">Filtrar por tag:</span>
-        ${allTags.map(t => `<button type="button" class="leaderboard-tab ${DECK_BROWSER.panel.tags.includes(t) ? 'active' : ''}" data-panel-tag="${escapeHTML(t)}" aria-pressed="${DECK_BROWSER.panel.tags.includes(t) ? 'true' : 'false'}">#${escapeHTML(t)}</button>`).join('')}
-      </div>` : ''}
-      <div class="deck-panel-bulk" data-panel-bulk hidden>
-        <span data-panel-selcount></span>
-        ${moveTargets.length ? `<select class="profile-edit-input" data-panel-move-target aria-label="Mover para">${moveTargets.map(d => `<option value="${d.id}">${escapeHTML(deckBrowserDeckLabel(d))}</option>`).join('')}</select>
-        <button type="button" class="btn btn-secondary" data-panel-move>Mover</button>` : ''}
-        <button type="button" class="btn btn-secondary" data-panel-delete>Excluir</button>
-        <button type="button" class="admin-select-link" data-panel-clear style="background:none;border:none;cursor:pointer;padding:0;">Limpar seleção</button>
-      </div>
-      <p class="profile-edit-hint" data-panel-count></p>
-      <div class="deck-panel-list" data-panel-list></div>
-      <p class="profile-edit-error" data-panel-error></p>
-    </div>`;
-  wrap.querySelector('[data-panel-back]').addEventListener('click', () => openDeckDetail(nodeId));
-  const search = wrap.querySelector('[data-panel-search]');
-  search.addEventListener('input', () => { DECK_BROWSER.panel.query = search.value; renderDeckPanelList(); });
-  wrap.querySelectorAll('[data-panel-tag]').forEach(btn => btn.addEventListener('click', () => {
-    const t = btn.dataset.panelTag;
-    const set = DECK_BROWSER.panel.tags;
-    const i = set.indexOf(t);
-    if (i >= 0) set.splice(i, 1); else set.push(t);
-    btn.classList.toggle('active', i < 0);
-    btn.setAttribute('aria-pressed', i < 0 ? 'true' : 'false');
-    renderDeckPanelList();
-  }));
-  wrap.querySelector('[data-panel-clear]').addEventListener('click', () => { DECK_BROWSER.panel.selected.clear(); renderDeckPanelList(); });
-  wrap.querySelector('[data-panel-move]')?.addEventListener('click', deckPanelMoveSelected);
-  wrap.querySelector('[data-panel-delete]').addEventListener('click', deckPanelDeleteSelected);
+  if (!document.getElementById(DECK_PANEL_ID)) return;
+  renderDeckPanelSide();
   renderDeckPanelList();
+  renderDeckPanelEditor();
 }
 
-const DECK_PANEL_PAGE = 200;
+// Coluna da esquerda: Decks, Estado, Tags, Arquivados.
+function renderDeckPanelSide(){
+  const body = document.querySelector(`#${DECK_PANEL_ID} [data-panel-side-body]`);
+  if (!body) return;
+  const decks = deckBrowserDecks();
+  const p = DECK_BROWSER.panel;
+  const course = deckBrowserCourseRoot(decks);
+  const scopeInCourse = course && p.scopeId !== 'lang' && (p.scopeId === course.id || getDeckSubtreeIds(decks, course.id).includes(p.scopeId));
+  const deckItems = [];
+  const deckBtn = (id, label, depth) => `<button type="button" class="deck-panel-side-item ${p.scopeId === id ? 'is-active' : ''}" data-panel-scope="${id}" style="padding-left:${10 + depth * 14}px;" ${p.scopeId === id ? 'aria-current="true"' : ''}>${escapeHTML(label)}</button>`;
+  deckItems.push(deckBtn('lang', 'Todos os Decks', 0));
+  const walk = (deck, depth) => {
+    deckItems.push(deckBtn(deck.id, deckBrowserDeckLabel(deck), depth));
+    // Unidades da Trilha só aparecem quando a Trilha está selecionada.
+    if (course && deck.id === course.id && !scopeInCourse) return;
+    deckBrowserChildren(decks, deck.id).forEach(k => walk(k, depth + 1));
+  };
+  deckBrowserChildren(decks, 'lang').forEach(d => walk(d, 1));
+  // Tags: num escopo grande, só as gerais + as de cartões próprios/professora
+  // (as finas da Trilha viram centenas; a busca encontra qualquer uma).
+  const scopeCards = deckBrowserPanelNotes().flatMap(n => n.cards);
+  let tags = collectTagsFromCards(scopeCards);
+  if (tags.length > 30 && typeof reviewFilterVisibleTags === 'function'){
+    tags = Array.from(new Set(reviewFilterVisibleTags(scopeCards).concat(p.tags))).sort();
+  }
+  const archivedCount = deckBrowserPanelNotes().filter(n => n.archived).length;
+  const logged = !!deckBrowserUserId();
+  body.innerHTML = `
+    <div class="deck-panel-side-group"><div class="deck-panel-side-label">Decks</div>${deckItems.join('')}</div>
+    <div class="deck-panel-side-group"><div class="deck-panel-side-label">Estado</div>
+      ${DECK_PANEL_STATES.map(s => `<button type="button" class="deck-panel-side-item ${!p.archived && p.state === s.id ? 'is-active' : ''}" data-panel-state="${s.id}">${s.label}</button>`).join('')}
+      ${archivedCount ? `<button type="button" class="deck-panel-side-item ${p.archived ? 'is-active' : ''}" data-panel-archived>Arquivados (${archivedCount})</button>` : ''}
+    </div>
+    <div class="deck-panel-side-group"><div class="deck-panel-side-label">Tags</div>
+      ${tags.length ? tags.map(t => `<button type="button" class="deck-panel-side-item ${p.tags.includes(t) ? 'is-active' : ''}" data-panel-tag="${escapeHTML(t)}" aria-pressed="${p.tags.includes(t) ? 'true' : 'false'}">#${escapeHTML(t)}</button>`).join('') : `<p class="profile-edit-hint deck-panel-side-empty">Nenhuma tag.</p>`}
+      ${logged ? `<button type="button" class="deck-panel-side-item deck-panel-side-link ${p.mode === 'tags' ? 'is-active' : ''}" data-panel-manage-tags>Gerenciar tags</button>` : ''}
+    </div>`;
+  body.querySelectorAll('[data-panel-scope]').forEach(b => b.addEventListener('click', () => {
+    const raw = b.dataset.panelScope;
+    p.scopeId = raw === 'lang' ? 'lang' : Number(raw);
+    p.selected.clear();
+    renderDeckPanelSide(); renderDeckPanelList();
+  }));
+  body.querySelectorAll('[data-panel-state]').forEach(b => b.addEventListener('click', () => {
+    p.state = b.dataset.panelState; p.archived = false;
+    renderDeckPanelSide(); renderDeckPanelList();
+  }));
+  body.querySelector('[data-panel-archived]')?.addEventListener('click', () => {
+    p.archived = !p.archived; p.state = 'all';
+    renderDeckPanelSide(); renderDeckPanelList();
+  });
+  body.querySelectorAll('[data-panel-tag]').forEach(b => b.addEventListener('click', () => {
+    const t = b.dataset.panelTag;
+    const i = p.tags.indexOf(t);
+    if (i >= 0) p.tags.splice(i, 1); else p.tags.push(t);
+    renderDeckPanelSide(); renderDeckPanelList();
+  }));
+  body.querySelector('[data-panel-manage-tags]')?.addEventListener('click', () => {
+    p.mode = 'tags'; p.activeKey = null;
+    renderDeckPanelSide(); renderDeckPanelList(); renderDeckPanelEditor();
+  });
+}
 
 function renderDeckPanelList(){
-  const wrap = document.getElementById('review-deck-wrap');
-  const list = wrap && wrap.querySelector('[data-panel-list]');
+  const root = document.getElementById(DECK_PANEL_ID);
+  const list = root && root.querySelector('[data-panel-list]');
   if (!list) return;
-  const decks = deckBrowserDecks();
+  const p = DECK_BROWSER.panel;
   const notes = deckBrowserFilterNotes(deckBrowserPanelNotes());
-  const sel = DECK_BROWSER.panel.selected;
-  // Seleção só sobrevive para Notes ainda visíveis.
   const visibleKeys = new Set(notes.map(n => n.key));
-  Array.from(sel).forEach(k => { if (!visibleKeys.has(k)) sel.delete(k); });
-  wrap.querySelector('[data-panel-count]').textContent = notes.length
+  Array.from(p.selected).forEach(k => { if (!visibleKeys.has(k)) p.selected.delete(k); });
+  root.querySelector('[data-panel-count]').textContent = notes.length
     ? `${notes.length} ${notes.length === 1 ? 'conteúdo' : 'conteúdos'}${notes.length > DECK_PANEL_PAGE ? ` (mostrando os primeiros ${DECK_PANEL_PAGE}; use a busca para encontrar os demais)` : ''}.`
     : '';
   if (!notes.length){
-    list.innerHTML = `<p class="profile-empty-note">${DECK_BROWSER.panel.query || DECK_BROWSER.panel.tags.length ? 'Nenhum cartão encontrado com esse filtro.' : 'Este Deck ainda não tem cartões.'}</p>`;
+    const filtered = p.query || p.tags.length || p.state !== 'all' || p.archived;
+    list.innerHTML = `<p class="profile-empty-note">${filtered ? 'Nenhum cartão encontrado com esse filtro.' : 'Este Deck ainda não tem cartões.'}</p>`;
   } else {
     list.innerHTML = notes.slice(0, DECK_PANEL_PAGE).map(n => {
-      const editable = n.origin === 'self';
-      const deck = getDeckById(decks, n.deckId);
-      const cardsLabel = n.cards.length > 1 ? `${n.cards.length} cartões` : '1 cartão';
-      return `<div class="admin-badge-row deck-panel-row" data-panel-note="${escapeHTML(n.key)}">
-        ${editable ? `<input type="checkbox" data-panel-select="${escapeHTML(n.key)}" ${sel.has(n.key) ? 'checked' : ''} aria-label="Selecionar ${escapeHTML(n.front)}">` : `<span class="deck-panel-lock" title="Somente leitura">🔒</span>`}
-        <div class="deck-panel-main">
-          <div class="deck-panel-front">${escapeHTML(n.front)}</div>
-          <div class="deck-panel-back">${escapeHTML(n.back)}</div>
-          <div class="profile-edit-hint">${escapeHTML(n.typeLabel)} · ${cardsLabel} · ${deckBrowserNoteState(n)} · ${escapeHTML(DECK_BROWSER_ORIGIN_LABELS[n.origin] || '')}${deck ? ' · ' + escapeHTML(deckBrowserDeckLabel(deck)) : ''}${n.tags.length ? ' · ' + n.tags.map(t => '#' + escapeHTML(t)).join(' ') : ''}</div>
-        </div>
-        ${editable ? `<button type="button" class="admin-badge-delete-btn" data-panel-edit="${escapeHTML(String(n.rowId))}" title="Editar">✏️</button>` : ''}
+      const own = n.origin === 'self';
+      const active = p.mode === 'note' && p.activeKey === n.key;
+      return `<div class="deck-panel-item ${active ? 'is-active' : ''} ${n.archived ? 'is-archived' : ''}" role="option" aria-selected="${active ? 'true' : 'false'}" tabindex="0" data-panel-open-note="${escapeHTML(n.key)}">
+        ${own ? `<input type="checkbox" data-panel-select="${escapeHTML(n.key)}" ${p.selected.has(n.key) ? 'checked' : ''} aria-label="Selecionar ${escapeHTML(n.front)}">` : `<span class="deck-panel-lock" title="Somente leitura" aria-label="Somente leitura">🔒</span>`}
+        <span class="deck-panel-cell deck-panel-front">${escapeHTML(n.front)}</span>
+        <span class="deck-panel-cell deck-panel-back">${escapeHTML(n.back)}</span>
       </div>`;
     }).join('');
   }
-  list.querySelectorAll('[data-panel-select]').forEach(cb => cb.addEventListener('change', () => {
-    if (cb.checked) sel.add(cb.dataset.panelSelect); else sel.delete(cb.dataset.panelSelect);
-    deckPanelUpdateBulk();
-  }));
-  list.querySelectorAll('[data-panel-edit]').forEach(btn => btn.addEventListener('click', () => deckPanelEdit(btn.dataset.panelEdit)));
-  deckPanelUpdateBulk();
+  list.querySelectorAll('[data-panel-select]').forEach(cb => {
+    cb.addEventListener('click', (e) => e.stopPropagation());
+    cb.addEventListener('change', () => {
+      if (cb.checked) p.selected.add(cb.dataset.panelSelect); else p.selected.delete(cb.dataset.panelSelect);
+      renderDeckPanelBulk();
+    });
+  });
+  list.querySelectorAll('[data-panel-open-note]').forEach(row => {
+    const open = () => {
+      if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
+      p.mode = 'note';
+      p.activeKey = row.dataset.panelOpenNote;
+      list.querySelectorAll('.deck-panel-item').forEach(r => { const on = r === row; r.classList.toggle('is-active', on); r.setAttribute('aria-selected', on ? 'true' : 'false'); });
+      renderDeckPanelEditor();
+    };
+    row.addEventListener('click', open);
+    row.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target === row){ e.preventDefault(); open(); } });
+  });
+  renderDeckPanelBulk();
 }
 
-function deckPanelUpdateBulk(){
-  const wrap = document.getElementById('review-deck-wrap');
-  const bulk = wrap && wrap.querySelector('[data-panel-bulk]');
+function renderDeckPanelBulk(){
+  const root = document.getElementById(DECK_PANEL_ID);
+  const bulk = root && root.querySelector('[data-panel-bulk]');
   if (!bulk) return;
   const n = DECK_BROWSER.panel.selected.size;
   bulk.hidden = n === 0;
-  wrap.querySelector('[data-panel-selcount]').textContent = `${n} ${n === 1 ? 'selecionado' : 'selecionados'}`;
+  if (!n){ bulk.innerHTML = ''; return; }
+  const uid = deckBrowserUserId();
+  const targets = deckBrowserDecks().filter(d => ['personal_root', 'personal'].includes(d.kind) && d.owner_id === uid);
+  bulk.innerHTML = `<span>${n} ${n === 1 ? 'selecionado' : 'selecionados'}</span>
+    ${targets.length ? `<select class="profile-edit-input" data-panel-move-target aria-label="Mover para">${targets.map(d => `<option value="${d.id}">${escapeHTML(deckBrowserDeckLabel(d))}</option>`).join('')}</select>
+    <button type="button" class="btn btn-secondary btn-sm" data-panel-move>Mover</button>` : ''}
+    <button type="button" class="btn btn-secondary btn-sm" data-panel-delete>Excluir</button>
+    <button type="button" class="admin-select-link deck-panel-linkbtn" data-panel-clear>Limpar seleção</button>
+    <p class="profile-edit-error" data-panel-error></p>`;
+  bulk.querySelector('[data-panel-clear]').addEventListener('click', () => { DECK_BROWSER.panel.selected.clear(); renderDeckPanelList(); });
+  bulk.querySelector('[data-panel-move]')?.addEventListener('click', deckPanelMoveSelected);
+  bulk.querySelector('[data-panel-delete]').addEventListener('click', deckPanelDeleteSelected);
+}
+
+function deckPanelActiveNote(){
+  const key = DECK_BROWSER.panel.activeKey;
+  if (!key) return null;
+  return deckBrowserNotes((STATE && STATE.cards) || []).find(n => n.key === key) || null;
+}
+
+// Coluna da direita: editor do cartão selecionado (o mesmo editor de
+// sempre; cartões da Trilha e da professora ficam só para leitura), ou o
+// gerenciador de tags.
+function renderDeckPanelEditor(opts){
+  const root = document.getElementById(DECK_PANEL_ID);
+  const pane = root && root.querySelector('[data-panel-editor]');
+  if (!pane) return;
+  const p = DECK_BROWSER.panel;
+  const grid = root.querySelector('[data-panel-grid]');
+  const backBtn = `<button type="button" class="back-link deck-panel-backbtn" data-panel-back>← Lista</button>`;
+  grid.classList.toggle('has-editor', p.mode === 'tags' || !!p.activeKey);
+  if (p.mode === 'tags'){
+    pane.innerHTML = `${backBtn}<div class="section-label">Gerenciar tags</div><div data-panel-tag-manager></div>`;
+    pane.querySelector('[data-panel-back]').addEventListener('click', deckPanelBackToList);
+    renderTagManagerInto(pane.querySelector('[data-panel-tag-manager]'), { scope: 'own', onChanged: () => deckPanelReload() });
+    return;
+  }
+  const note = deckPanelActiveNote();
+  if (!note){
+    pane.innerHTML = `<p class="profile-empty-note deck-panel-editor-empty">Escolha um cartão na lista para ver ou editar.</p>`;
+    return;
+  }
+  const decks = deckBrowserDecks();
+  const deck = getDeckById(decks, note.deckId);
+  const meta = `${escapeHTML(note.typeLabel)} · ${note.cards.length > 1 ? `${note.cards.length} cartões` : '1 cartão'} · ${deckBrowserNoteState(note)}${deck ? ' · ' + escapeHTML(deckBrowserDeckLabel(deck)) : ''}${note.archived ? ' · arquivado' : ''}`;
+  if (note.origin !== 'self'){
+    const why = note.origin === 'study' ? 'Os cartões da Trilha de Estudo vêm das lições e não podem ser editados aqui.' : 'Cartões da professora: só ela pode editar.';
+    pane.innerHTML = `${backBtn}
+      <p class="deck-panel-meta">${meta}</p>
+      <div class="deck-panel-field"><div class="deck-panel-field-label">Frente</div><div class="deck-panel-field-value">${escapeHTML(note.front)}</div></div>
+      <div class="deck-panel-field"><div class="deck-panel-field-label">Verso</div><div class="deck-panel-field-value">${escapeHTML(note.back)}</div></div>
+      ${note.tags.length ? `<div class="deck-panel-field"><div class="deck-panel-field-label">Tags</div><div>${noteTagChipsHTML(note.tags)}</div></div>` : ''}
+      <p class="profile-edit-hint">🔒 ${escapeHTML(why)}</p>`;
+    pane.querySelector('[data-panel-back]').addEventListener('click', deckPanelBackToList);
+    return;
+  }
+  const ctx = p.ctx;
+  const row = ctx && ctx.cards.find(r => r.id === note.rowId);
+  if (!row){
+    pane.innerHTML = `${backBtn}<p class="deck-panel-meta">${meta}</p><p class="profile-edit-hint">${ctx ? 'Não foi possível carregar este cartão.' : 'Carregando…'}</p>`;
+    pane.querySelector('[data-panel-back]').addEventListener('click', deckPanelBackToList);
+    return;
+  }
+  if (!(opts && opts.keepEditing) || MY_FLASHCARDS_STATE.editingCardId !== row.id){
+    MY_FLASHCARDS_STATE.editingNativeState = null;
+    MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
+    MY_FLASHCARDS_STATE._legacyConversionError = null;
+  }
+  MY_FLASHCARDS_STATE.editingCardId = row.id;
+  const premium = !!ctx.premium;
+  pane.innerHTML = `${backBtn}
+    <p class="deck-panel-meta">${meta}</p>
+    <div class="deck-panel-editor-actions">
+      ${row.status === 'archived' ? `<button type="button" class="btn btn-secondary btn-sm" data-panel-reactivate>↺ Reativar</button>` : ''}
+      <button type="button" class="btn btn-secondary btn-sm" data-panel-visibility aria-pressed="${row.hidden_from_profile ? 'false' : 'true'}">${row.hidden_from_profile ? '🙈 Escondido do perfil' : '👁️ Visível no perfil'}</button>
+      <button type="button" class="btn btn-secondary btn-sm deck-overview-danger" data-panel-delete-one>🗑 Excluir</button>
+    </div>
+    <div class="deck-panel-editor-form">${myFlashcardRowHTML(row, premium)}</div>`;
+  pane.querySelector('[data-panel-back]').addEventListener('click', deckPanelBackToList);
+  pane.querySelector('[data-panel-reactivate]')?.addEventListener('click', async () => {
+    await setOwnFlashcardStatus(row.id, 'active');
+    if (typeof updateSelfFlashcardStatusInState === 'function') updateSelfFlashcardStatusInState(row.id, 'active');
+    if (typeof showToast === 'function') showToast('✓ Cartão reativado.');
+    DECK_BROWSER.panel.archived = false;
+    deckPanelReload();
+  });
+  pane.querySelector('[data-panel-visibility]').addEventListener('click', async () => {
+    const res = await setOwnFlashcardHidden(row.id, !row.hidden_from_profile);
+    if (res && res.ok === false){ if (typeof showToast === 'function') showToast('Não foi possível mudar agora.'); return; }
+    row.hidden_from_profile = !row.hidden_from_profile;
+    renderDeckPanelEditor();
+  });
+  pane.querySelector('[data-panel-delete-one]').addEventListener('click', async () => {
+    if (!window.confirm('Isso vai apagar o cartão e todo o histórico de revisão permanentemente. Não pode ser desfeito. Continuar?')) return;
+    const res = await deleteOwnFlashcardPermanently(row.id);
+    if (!res.ok){ if (typeof showToast === 'function') showToast('Não foi possível apagar o cartão agora.'); return; }
+    if (typeof removeSelfFlashcardFromState === 'function') removeSelfFlashcardFromState(row.id);
+    if (typeof saveState === 'function') saveState();
+    if (typeof showToast === 'function') showToast('✓ Cartão apagado.');
+    DECK_BROWSER.panel.activeKey = null;
+    deckPanelReload();
+  });
+  if (MY_FLASHCARDS_STATE.editingNativeState) wireMyFlashcardNativeEditForm(row, MY_FLASHCARDS_STATE.editingNativeState, pane, premium);
+  else wireMyFlashcardEditForm(row, pane, premium);
+}
+
+function deckPanelBackToList(){
+  const p = DECK_BROWSER.panel;
+  if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
+  p.activeKey = null;
+  p.mode = 'note';
+  if (typeof MY_FLASHCARDS_STATE !== 'undefined'){ MY_FLASHCARDS_STATE.editingCardId = null; MY_FLASHCARDS_STATE.editingNativeState = null; }
+  renderDeckPanelSide(); renderDeckPanelList(); renderDeckPanelEditor();
 }
 
 function deckPanelSelectedNotes(){
@@ -721,14 +1147,12 @@ function deckPanelSelectedNotes(){
 }
 
 async function deckPanelMoveSelected(){
-  const wrap = document.getElementById('review-deck-wrap');
-  const errEl = wrap.querySelector('[data-panel-error]');
-  errEl.textContent = '';
+  const root = document.getElementById(DECK_PANEL_ID);
   const decks = deckBrowserDecks();
-  const dest = getDeckById(decks, Number(wrap.querySelector('[data-panel-move-target]').value));
+  const dest = getDeckById(decks, Number(root.querySelector('[data-panel-move-target]').value));
   const notes = deckPanelSelectedNotes();
   if (!dest || !notes.length) return;
-  wrap.querySelectorAll('[data-panel-bulk] button').forEach(b => { b.disabled = true; });
+  root.querySelectorAll('[data-panel-bulk] button').forEach(b => { b.disabled = true; });
   let moved = 0; const failed = [];
   for (const n of notes){
     const res = await setOwnFlashcardDeck({ note: { id: n.rowId, owner_id: CURRENT_USER.id, language_app_key: APP_KEY }, destination: dest, decks });
@@ -740,18 +1164,17 @@ async function deckPanelMoveSelected(){
   DECK_BROWSER.panel.selected.clear();
   if (typeof saveState === 'function') saveState();
   if (typeof showToast === 'function' && moved) showToast(`${moved} ${moved === 1 ? 'conteúdo movido' : 'conteúdos movidos'} para "${deckBrowserDeckLabel(dest)}".`);
-  if (failed.length) errEl.textContent = `Não foi possível mover: ${failed.slice(0, 5).join(', ')}${failed.length > 5 ? '…' : ''}`;
   renderDeckPanel();
-  if (failed.length) document.getElementById('review-deck-wrap').querySelector('[data-panel-error]').textContent = errEl.textContent;
+  if (failed.length && typeof showToast === 'function') showToast(`Não foi possível mover: ${failed.slice(0, 5).join(', ')}${failed.length > 5 ? '…' : ''}`);
 }
 
 async function deckPanelDeleteSelected(){
-  const wrap = document.getElementById('review-deck-wrap');
+  const root = document.getElementById(DECK_PANEL_ID);
   const notes = deckPanelSelectedNotes();
   if (!notes.length) return;
   const total = notes.reduce((s, n) => s + n.cards.length, 0);
   if (!window.confirm(`Excluir ${notes.length} ${notes.length === 1 ? 'conteúdo' : 'conteúdos'} (${total} ${total === 1 ? 'cartão' : 'cartões'}) para sempre? O histórico de revisão também será apagado.`)) return;
-  wrap.querySelectorAll('[data-panel-bulk] button').forEach(b => { b.disabled = true; });
+  root.querySelectorAll('[data-panel-bulk] button').forEach(b => { b.disabled = true; });
   let deleted = 0;
   for (const n of notes){
     const res = await deleteOwnFlashcardPermanently(n.rowId);
@@ -761,19 +1184,8 @@ async function deckPanelDeleteSelected(){
     }
   }
   DECK_BROWSER.panel.selected.clear();
+  if (notes.some(n => n.key === DECK_BROWSER.panel.activeKey)) DECK_BROWSER.panel.activeKey = null;
   if (typeof saveState === 'function') saveState();
   if (typeof showToast === 'function') showToast(`${deleted} ${deleted === 1 ? 'conteúdo excluído' : 'conteúdos excluídos'}.`);
-  renderDeckPanel();
-}
-
-// Editar: usa o editor de sempre (Meus Cartões) -- nunca um 2º editor.
-function deckPanelEdit(rowId){
-  if (typeof switchTab === 'function') switchTab('my-flashcards');
-  let tries = 0;
-  const open = () => {
-    const btn = document.querySelector(`[data-edit-own-flashcard="${CSS.escape(String(rowId))}"]`);
-    if (btn){ btn.click(); setTimeout(() => btn.closest('.admin-badge-row, [data-own-flashcard-row]')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) || document.getElementById('my-flashcards-content')?.querySelector('form')?.scrollIntoView({ behavior: 'smooth' }), 50); return; }
-    if (++tries < 50) setTimeout(open, 100);
-  };
-  open();
+  deckPanelReload();
 }

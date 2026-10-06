@@ -115,6 +115,9 @@ function hashToRoute(hash){
     const publicId = publicDeckIdFromHash(clean);
     if (publicId) return { type: 'publicDeck', publicId };
   }
+  // "Meus Cartões" saiu do app (tudo mora na Revisão agora); endereços
+  // antigos e links de cartões compartilhados (#import=...) abrem a Revisão.
+  if (parts[0] === 'my-flashcards' || parts[0].startsWith('import=')) return { type: 'tab', tab: 'review' };
   return { type: 'tab', tab: parts[0] };
 }
 

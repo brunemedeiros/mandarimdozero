@@ -305,6 +305,14 @@ function myCreateFlashcardFormHTML({ premium, decks, atLimit, tierBadgeHTML }){
   </form>`;
 }
 
+// Depois de editar/apagar/importar: quem abriu o editor decide o que
+// redesenhar (o Painel da Revisão registra MY_FLASHCARDS_STATE.onChange).
+function myFlashcardsAfterChange(opts){
+  if (typeof MY_FLASHCARDS_STATE.onChange === 'function') return MY_FLASHCARDS_STATE.onChange(opts || {});
+  if (typeof deckBrowserRefresh === 'function') return deckBrowserRefresh();
+  return renderMyFlashcardsView(opts);
+}
+
 async function renderMyFlashcardsView(opts){
   const wrap = document.getElementById('my-flashcards-content');
   if (!wrap) return;
@@ -552,7 +560,7 @@ function wireMyFlashcardEditForm(c, wrap, premium){
     // zeraria de volta o editingNativeState que acabamos de setar, no
     // MESMO tick síncrono (ver comentário completo lá) -- a conversão
     // nunca chegaria a aparecer na tela.
-    renderMyFlashcardsView({ preserveEditingNativeState: true });
+    myFlashcardsAfterChange({ preserveEditingNativeState: true });
   });
 
   document.getElementById('edit-my-flashcard-cancel')?.addEventListener('click', () => {
@@ -560,7 +568,7 @@ function wireMyFlashcardEditForm(c, wrap, premium){
     MY_FLASHCARDS_STATE.editingNativeState = null;
     MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
-    renderMyFlashcardsView();
+    myFlashcardsAfterChange();
   });
   document.getElementById('edit-my-flashcard-save')?.addEventListener('click', () => {
     const errorEl = document.getElementById('edit-my-flashcard-error');
@@ -594,7 +602,7 @@ function wireMyFlashcardEditForm(c, wrap, premium){
       }
       showToast('✓ Cartão editado. O progresso de revisão foi reiniciado.');
       MY_FLASHCARDS_STATE.editingCardId = null;
-      renderMyFlashcardsView();
+      myFlashcardsAfterChange();
     });
   });
 }
@@ -618,9 +626,8 @@ function myFlashcardNativeEditFormHTML(c, editorState, premium){
   }
   return `
     <div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:10px;">
-      <div class="section-label" style="margin:0;">Editar cartão (editor nativo)</div>
-      <p class="profile-edit-hint" style="margin:0;">Este cartão usa o novo modelo de campos -- editando aqui, o conteúdo é gravado em fields/card_generation_mode, nunca nas colunas antigas.</p>
-      <div class="section-label" style="margin:6px 0 4px;">Card Type</div>
+      <div class="section-label" style="margin:0;">Editar cartão</div>
+      <div class="section-label" style="margin:6px 0 4px;">Tipo de cartão</div>
       <select id="edit-my-native-flashcard-card-type" class="profile-edit-input">
         ${typeOptions.map(t => `<option value="${t.id}" ${t.id === editorState.cardGenerationMode ? 'selected' : ''}>${t.label}</option>`).join('')}
       </select>
@@ -677,7 +684,7 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap, premium){
     MY_FLASHCARDS_STATE.editingNativeState = null;
     MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
-    renderMyFlashcardsView();
+    myFlashcardsAfterChange();
   });
 
   document.getElementById('edit-my-native-flashcard-save').addEventListener('click', () => {
@@ -719,7 +726,7 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap, premium){
       MY_FLASHCARDS_STATE.editingNativeState = null;
       MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
-      renderMyFlashcardsView();
+      myFlashcardsAfterChange();
     };
 
     if (nextRevision > (c.revision || 0)){
@@ -888,7 +895,7 @@ function wireMyFlashcardsCardButtons(wrap){
       // um cartão só sairia da fila de revisão (isCardLessonCompleted checa
       // flashcardStatus) no próximo carregamento, não nesta mesma sessão.
       if (typeof updateSelfFlashcardStatusInState === 'function') updateSelfFlashcardStatusInState(id, nextStatus);
-      renderMyFlashcardsView();
+      myFlashcardsAfterChange();
     });
   });
 
@@ -904,7 +911,7 @@ function wireMyFlashcardsCardButtons(wrap){
       const id = btn.dataset.toggleOwnFlashcardVisibility;
       const nextHidden = btn.dataset.nextHidden === 'true';
       await setOwnFlashcardHidden(id, nextHidden);
-      renderMyFlashcardsView();
+      myFlashcardsAfterChange();
     });
   });
 
@@ -923,7 +930,7 @@ function wireMyFlashcardsCardButtons(wrap){
       MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
       MY_FLASHCARDS_STATE._legacyConversionError = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
-      renderMyFlashcardsView();
+      myFlashcardsAfterChange();
     });
   });
 
@@ -938,7 +945,7 @@ function wireMyFlashcardsCardButtons(wrap){
       if (!result.ok){ showToast('Não foi possível apagar o cartão agora.'); return; }
       if (typeof removeSelfFlashcardFromState === 'function') removeSelfFlashcardFromState(id);
       showToast('✓ Cartão apagado.');
-      renderMyFlashcardsView();
+      myFlashcardsAfterChange();
     });
   });
 }
@@ -1151,7 +1158,7 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
     }
   }
   showToast(`✓ ${importedCount} cartão(ões) importado(s). ${summarizeDroppedImportTags(importStates.slice(0, cutPlan.keepCount))}`.trim());
-  await renderMyFlashcardsView();
+  await myFlashcardsAfterChange();
   if (cutMessage) openFlashcardLimitModal({ cutMessage });
 }
 
