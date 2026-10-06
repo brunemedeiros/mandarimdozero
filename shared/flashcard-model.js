@@ -246,6 +246,22 @@ function validateFieldAudioUploadFile(file){
   return { ok: true };
 }
 
+// Imagem por campo (botão discreto do editor, 2026-10-06). Mesmo bucket
+// `flashcard-media` e mesmo teto de 5 MB do áudio; a migration 072 libera
+// estes tipos no bucket.
+const FIELD_IMAGE_UPLOAD_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+function validateFieldImageUploadFile(file){
+  if (!file) return { ok: false, error: 'Nenhum arquivo selecionado.' };
+  if (typeof file.size === 'number' && file.size <= 0) return { ok: false, error: 'Arquivo vazio.' };
+  if (typeof file.size === 'number' && file.size > FIELD_AUDIO_UPLOAD_MAX_BYTES){
+    return { ok: false, error: 'Imagem maior que 5 MB. Escolha uma imagem menor.' };
+  }
+  if (!FIELD_IMAGE_UPLOAD_MIME_TYPES.includes(file.type || '')){
+    return { ok: false, error: 'Formato de imagem não suportado. Use JPG, PNG, WEBP ou GIF.' };
+  }
+  return { ok: true };
+}
+
 // ---------- Fase 7h.1 (UI completa de áudio por Field, ver CLAUDE.md) ----------
 //
 // Validação PURA de uma URL externa de áudio -- nunca faz I/O (nunca busca

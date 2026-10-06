@@ -286,6 +286,8 @@ function myCreateFlashcardFormHTML({ premium, decks, atLimit, tierBadgeHTML }){
          cartão LEGADO já existente continua no formulário legado de
          sempre (myFlashcardEditFormHTML, intocado) -- isto é só
          CRIAÇÃO de um cartão novo. -->
+    <label class="profile-edit-label" for="my-flashcard-deck" style="margin-top:0;">Deck de destino</label>
+    <select id="my-flashcard-deck" class="profile-edit-input">${personalDeckOptionsHTML(decks)}</select>
     ${premium ? '' : `<p class="profile-edit-hint">🔒 No plano grátis você cria cartões do tipo Normal, com upload de imagem/áudio por campo (URL externa também disponível). <strong>Premium</strong> desbloqueia Normal com reverso, Múltipla escolha, Completar a frase, Digite a resposta, além de gerar áudio por texto e gravar áudio pelo microfone.</p>`}
     <div class="section-label" style="margin:0 0 4px;">Tipo de cartão</div>
     <select id="my-flashcard-card-type-preview" class="profile-edit-input">
@@ -296,12 +298,12 @@ function myCreateFlashcardFormHTML({ premium, decks, atLimit, tierBadgeHTML }){
     <div id="my-flashcard-native-fields"></div>
     <div id="my-flashcard-tags"></div>
     <button type="button" class="admin-select-link" id="my-flashcard-preview-btn" data-touch44 style="background:none; border:none; cursor:pointer; margin:6px 0 0;">👁️ Pré-visualizar</button>
-    <label class="profile-edit-label" for="my-flashcard-deck" style="margin-top:14px;">Deck de destino</label>
-    <select id="my-flashcard-deck" class="profile-edit-input">${personalDeckOptionsHTML(decks)}</select>
     <label class="profile-edit-label" for="my-flashcard-note" style="margin-top:14px;">Nota (opcional)</label>
     <textarea id="my-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="contexto, dica de uso..."></textarea>
-    <p class="profile-edit-error" id="my-create-flashcard-error"></p>
-    <button type="submit" class="btn btn-primary btn-block" id="my-create-flashcard-btn" ${atLimit ? 'disabled' : ''}>${atLimit ? 'Limite atingido' : 'Criar cartão'}</button>
+    <div class="add-card-submit-bar">
+      <p class="profile-edit-error" id="my-create-flashcard-error"></p>
+      <button type="submit" class="btn btn-primary btn-block" id="my-create-flashcard-btn" ${atLimit ? 'disabled' : ''}>${atLimit ? 'Limite atingido' : 'Criar cartão'}</button>
+    </div>
   </form>`;
 }
 

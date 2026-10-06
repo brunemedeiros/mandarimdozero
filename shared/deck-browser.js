@@ -368,14 +368,33 @@ function deckBrowserTableHTML(){
     ${orphans ? `<p class="profile-edit-hint deck-table-hint">${orphans} dos seus cartões antigos ainda não estão em nenhum Deck. Abra o Painel para vê-los e movê-los.</p>` : ''}
     ${logged ? `<div class="deck-home-actions">
       <button type="button" class="btn btn-secondary deck-home-btn" data-deck-create>Criar Deck</button>
-      <button type="button" class="btn btn-secondary deck-home-btn" data-deck-import>Importar arquivo</button>
-      <button type="button" class="btn btn-secondary deck-home-btn" data-deck-export>Exportar</button>
+      <details class="deck-more-menu">
+        <summary class="btn btn-secondary deck-home-btn" aria-label="Mais opções: importar e exportar">⋯</summary>
+        <div class="deck-more-menu-list" role="menu">
+          <button type="button" role="menuitem" data-deck-import>Importar arquivo (.apkg ou .json)</button>
+          <button type="button" role="menuitem" data-deck-export>Exportar</button>
+        </div>
+      </details>
       <input type="file" data-deck-import-file accept=".apkg,.json,application/json" hidden>
     </div>
     <div data-deck-create-box></div>` : ''}`;
 }
 
+// Fecha o menu "⋯" ao clicar fora dele ou apertar Esc (1 listener só).
+let DECK_MORE_MENU_WIRED = false;
+function wireDeckMoreMenuGlobal(){
+  if (DECK_MORE_MENU_WIRED) return;
+  DECK_MORE_MENU_WIRED = true;
+  document.addEventListener('click', (e) => {
+    document.querySelectorAll('.deck-more-menu[open]').forEach(m => { if (!m.contains(e.target)) m.open = false; });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') document.querySelectorAll('.deck-more-menu[open]').forEach(m => { m.open = false; });
+  });
+}
+
 function wireDeckBrowserTable(box){
+  wireDeckMoreMenuGlobal();
   box.querySelectorAll('[data-deck-toggle]').forEach(btn => btn.addEventListener('click', () => {
     const id = btn.dataset.deckToggle;
     const set = deckBrowserLoadCollapsed() || deckBrowserDefaultCollapsed(deckBrowserDecks());
@@ -387,13 +406,14 @@ function wireDeckBrowserTable(box){
   box.querySelectorAll('[data-deck-open]').forEach(btn => btn.addEventListener('click', () => openDeckDetail(Number(btn.dataset.deckOpen))));
   box.querySelector('[data-deck-create]')?.addEventListener('click', () => openCreateDeckForm(box.querySelector('[data-deck-create-box]'), null));
   const fileInput = box.querySelector('[data-deck-import-file]');
-  box.querySelector('[data-deck-import]')?.addEventListener('click', () => fileInput && fileInput.click());
+  const closeMore = () => { const m = box.querySelector('.deck-more-menu'); if (m) m.open = false; };
+  box.querySelector('[data-deck-import]')?.addEventListener('click', () => { closeMore(); if (fileInput) fileInput.click(); });
   fileInput?.addEventListener('change', () => {
     const file = fileInput.files && fileInput.files[0];
     fileInput.value = '';
     if (file) deckBrowserImportFile(file);
   });
-  box.querySelector('[data-deck-export]')?.addEventListener('click', deckBrowserExport);
+  box.querySelector('[data-deck-export]')?.addEventListener('click', () => { closeMore(); deckBrowserExport(); });
 }
 
 // ---------- Criar Deck / Renomear ----------
@@ -1051,7 +1071,7 @@ function renderDeckPanelSide(){
       ${archivedCount ? `<button type="button" class="deck-panel-side-item ${p.archived ? 'is-active' : ''}" data-panel-archived>Arquivados (${archivedCount})</button>` : ''}
     </div>
     <div class="deck-panel-side-group"><div class="deck-panel-side-label">Tags</div>
-      ${tags.length ? tags.map(t => `<button type="button" class="deck-panel-side-item ${p.tags.includes(t) ? 'is-active' : ''}" data-panel-tag="${escapeHTML(t)}" aria-pressed="${p.tags.includes(t) ? 'true' : 'false'}">#${escapeHTML(t)}</button>`).join('') : `<p class="profile-edit-hint deck-panel-side-empty">Nenhuma tag.</p>`}
+      ${tags.length ? tags.map(t => `<button type="button" class="deck-panel-side-item ${p.tags.includes(t) ? 'is-active' : ''}" data-panel-tag="${escapeHTML(t)}" aria-pressed="${p.tags.includes(t) ? 'true' : 'false'}" title="#${escapeHTML(t)}">${escapeHTML(friendlyTagLabel(t))}</button>`).join('') : `<p class="profile-edit-hint deck-panel-side-empty">Nenhuma tag.</p>`}
       ${logged ? `<button type="button" class="deck-panel-side-item deck-panel-side-link ${p.mode === 'tags' ? 'is-active' : ''}" data-panel-manage-tags>Gerenciar tags</button>` : ''}
     </div>`;
   body.querySelectorAll('[data-panel-scope]').forEach(b => b.addEventListener('click', () => {

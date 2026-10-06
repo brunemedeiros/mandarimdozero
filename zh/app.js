@@ -5916,7 +5916,7 @@ function reviewSessionFilterSummary(){
   const origin = STATE.studySettings.reviewOriginFilter || 'all';
   if (origin !== 'all') parts.push(REVIEW_ORIGIN_LABELS[origin] || origin);
   const tags = activeReviewTagFilter();
-  if (tags.length) parts.push(tags.map(t => '#' + t).join(', '));
+  if (tags.length) parts.push(tags.map(t => friendlyTagLabel(t)).join(', '));
   return parts.join(' · ');
 }
 
@@ -7836,7 +7836,7 @@ function renderReviewTagFilter(){
   chipsEl.innerHTML = all.map(t => {
     const n = universe.filter(c => (c.tags || []).includes(t)).length;
     const on = selected.includes(t);
-    return `<button type="button" class="leaderboard-tab ${on ? 'active' : ''}" data-review-tag="${escapeHTML(t)}" aria-pressed="${on}">#${escapeHTML(t)} (${n})</button>`;
+    return `<button type="button" class="leaderboard-tab ${on ? 'active' : ''}" data-review-tag="${escapeHTML(t)}" aria-pressed="${on}" title="#${escapeHTML(t)}">${escapeHTML(friendlyTagLabel(t))} (${n})</button>`;
   }).join(' ');
   const clearBtn = document.getElementById('review-tag-clear');
   if (clearBtn) clearBtn.hidden = selected.length === 0;

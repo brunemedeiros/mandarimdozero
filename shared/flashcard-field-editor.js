@@ -849,6 +849,65 @@ function isValidFieldState(field){
 // indicador textual (não editável) de áudio/imagem/pinyin já vinculados,
 // se existirem. `opts.namePrefix` evita colisão de id quando o mesmo
 // componente aparece 2x na mesma página (admin + my-flashcards).
+// Imagem do campo: um link discreto ("🖼️ Imagem") que só abre o seletor
+// de arquivo quando clicado. Com imagem: miniatura + Trocar / Remover.
+// Sem uploadFn (ex.: Preview), mostra só a miniatura, sem botões.
+function renderFieldImageBlockHTML(field, opts){
+  opts = opts || {};
+  const url = field.image && typeof field.image.url === 'string' ? field.image.url : '';
+  const canUpload = typeof opts.uploadFn === 'function';
+  if (!url && !canUpload) return '';
+  return `
+    <div class="field-image-block" data-field-image-field="${field.id}">
+      ${url ? `<img class="field-image-thumb" src="${escapeHTML(url)}" alt="Imagem do campo">` : ''}
+      ${canUpload ? `<div class="field-image-actions">
+        <button type="button" class="field-image-link" data-field-image-pick>${url ? 'Trocar imagem' : '🖼️ Imagem'}</button>
+        ${url ? `<button type="button" class="field-image-link" data-field-image-remove>Remover</button>` : ''}
+        <span class="field-image-status" data-field-image-status></span>
+      </div>
+      <input type="file" accept="${FIELD_IMAGE_UPLOAD_MIME_TYPES.join(',')}" data-field-image-input hidden>
+      <p class="profile-edit-field-error" data-field-image-error></p>` : ''}
+    </div>`;
+}
+
+function wireFieldImageBlockFor(block, editorState, fieldId, onChange, opts){
+  opts = opts || {};
+  const input = block.querySelector('[data-field-image-input]');
+  const statusEl = block.querySelector('[data-field-image-status]');
+  const errorEl = block.querySelector('[data-field-image-error]');
+  block.querySelector('[data-field-image-pick]')?.addEventListener('click', () => input && input.click());
+  block.querySelector('[data-field-image-remove]')?.addEventListener('click', () => {
+    // Só tira a referência; nunca apaga o arquivo (pode ser de um campo clonado).
+    updateFieldInEditorState(editorState, fieldId, { image: null });
+    if (onChange) onChange('structure', fieldId);
+  });
+  input?.addEventListener('change', async () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    if (errorEl) errorEl.textContent = '';
+    const v = validateFieldImageUploadFile(file);
+    if (!v.ok){ if (errorEl) errorEl.textContent = v.error; input.value = ''; return; }
+    if (typeof opts.uploadFn !== 'function') return;
+    input.disabled = true;
+    if (statusEl) statusEl.textContent = 'Enviando imagem...';
+    const up = await opts.uploadFn(file, 'image', fieldId);
+    if (!block.isConnected) return;
+    input.disabled = false;
+    input.value = '';
+    if (statusEl) statusEl.textContent = '';
+    if (!up || !up.ok){
+      if (errorEl) errorEl.textContent = (up && up.error) || 'Não foi possível enviar a imagem agora.';
+      return; // a imagem anterior (se havia) continua
+    }
+    editorState.__freshMediaUploads = editorState.__freshMediaUploads || [];
+    editorState.__freshMediaUploads.push({ path: up.path, deleteFn: opts.deleteFn || null });
+    updateFieldInEditorState(editorState, fieldId, {
+      image: { url: up.url, uploadedAt: new Date().toISOString(), mimeType: file.type || null },
+    });
+    if (onChange) onChange('structure', fieldId);
+  });
+}
+
 function renderFieldEditorHTML(field, index, opts){
   opts = opts || {};
   const namePrefix = opts.namePrefix || 'field-editor';
@@ -860,7 +919,6 @@ function renderFieldEditorHTML(field, index, opts){
   // imagem/pinyin continuam só indicador textual, ainda fora do escopo
   // desta subfase (Seção 8/19 -- só upload de ÁUDIO é implementado agora).
   const mediaNotes = [];
-  if (field.image) mediaNotes.push('🖼️ tem imagem vinculada');
   if (field.pinyinFieldId) mediaNotes.push('🔤 tem um campo de pinyin vinculado');
   return `
     <div class="field-editor-row" data-field-editor data-field-id="${field.id}" data-field-index="${index}" style="border:1px solid var(--paper-line); border-radius:var(--radius); padding:10px; margin-bottom:8px;">
@@ -876,6 +934,7 @@ function renderFieldEditorHTML(field, index, opts){
         ${FIELD_LANG_OPTIONS.map(o => `<option value="${o.value}" ${field.lang === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
       </select>
       ${renderFieldAudioBlockHTML(field, opts)}
+      ${renderFieldImageBlockHTML(field, opts)}
       ${mediaNotes.length ? `<p class="profile-edit-hint" style="margin-top:6px;">${mediaNotes.join(' · ')} (edição ainda não implementada nesta fase -- preservados como estão).</p>` : ''}
     </div>
   `;
@@ -1045,6 +1104,9 @@ function wireFieldEditorList(container, editorState, onChange, opts){
   // upload/remoção nele).
   container.querySelectorAll('[data-field-editor] [data-field-audio-field]').forEach(block => {
     wireFieldAudioBlockFor(container, editorState, block.dataset.fieldAudioField, onChange, opts);
+  });
+  container.querySelectorAll('[data-field-editor] [data-field-image-field]').forEach(block => {
+    wireFieldImageBlockFor(block, editorState, block.dataset.fieldImageField, onChange, opts);
   });
 }
 

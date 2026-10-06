@@ -17632,3 +17632,12 @@ Auditoria completa da aba (144 prints, fr/zh × claro/escuro × celular/computad
 - Sessão: "Voltar ao Deck", nome do Deck na etiqueta, ✓/✗ na múltipla escolha, plural de dias. Textos sem "--"/"pra"; rodapé técnico do Configurar removido.
 - Aviso antigo "imagem não aparece na Revisão" removido (já aparecia desde a Fase 7a). Teste do Ditado segue o texto novo do d1.
 - Pendente de decisão da autora: rótulos "DECKS"/"OUTROS MODOS", "Excluir" como link, menu "⋯" para Criar/Importar/Exportar, Deck de destino no topo do Adicionar, lugar do toast de conquista (cobre o topo da sessão no celular), nomes amigáveis das tags no filtro. Stripe, botão de imagem por campo e regras de pt no TTS também aguardam decisão.
+
+## Revisão -- decisões da autora aplicadas (2026-10-06)
+- Título "DECKS" removido. "OUTROS MODOS" continua até a autora decidir se fica sem nada no lugar.
+- Embaixo da tabela: "Criar Deck" + menu "⋯" com Importar arquivo e Exportar (fecha ao clicar fora/Esc). "Excluir Deck" continua como estava (decisão da autora).
+- Janela Adicionar: "Deck de destino" é o 1º campo; "Criar cartão" fica num rodapé fixo (`.add-card-submit-bar`, sticky).
+- Nomes amigáveis das tags nos filtros (Configurar, Painel, aviso de filtro): `friendlyTagLabel` (shared/study-trail-model.js). Tags da trilha viram "Francês (geral)", "Módulo 1", "Nível A1", "Lição 3", "Trilha de Estudo"; tags do usuário continuam "#tag". O filtro continua usando o slug.
+- Imagem por campo: link discreto "🖼️ Imagem" no editor (`renderFieldImageBlockHTML`/`wireFieldImageBlockFor`, shared/flashcard-field-editor.js); depois de enviada, miniatura + "Trocar imagem"/"Remover" (Remover só tira a referência). `validateFieldImageUploadFile` (JPG/PNG/WEBP/GIF, 5 MB). Migration **072** (`flashcard-media` aceita imagens): aplicada no Staging (via MCP, 2026-10-06); **produção pendente de autorização** -- sem ela o upload de imagem falha em produção.
+- Regras de pronúncia em português (TTS): proposta e revisão em `docs/pt-tts-proposta.md` e `docs/pt-tts-revisao.md`. Nada implementado; aguarda a autora concordar/discordar de cada item.
+- Teste: `tests/revisao-ajustes/test_playwright.js` (48, FR+ZH, desktop/celular); deck-browser 190.

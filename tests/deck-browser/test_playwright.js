@@ -188,7 +188,9 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
       return { rows, head, studyBtns: document.querySelectorAll('#review-decks-table [data-study-deck], #review-decks-table .btn-primary').length,
         align: [getComputedStyle(num).textAlign, getComputedStyle(th).textAlign],
         bar: Array.from(bar.querySelectorAll('button')).map(x => x.textContent.trim()), barCenter: Math.abs((b.left + b.right) / 2 - (wrap.left + wrap.right) / 2),
-        homeBtns: Array.from(document.querySelectorAll('#review-decks-table .deck-home-actions button')).map(x => x.textContent.trim()) };
+        homeBtns: Array.from(document.querySelectorAll('#review-decks-table .deck-home-actions > button, #review-decks-table .deck-home-actions summary')).map(x => x.textContent.trim()),
+        moreItems: Array.from(document.querySelectorAll('#review-decks-table .deck-more-menu-list button')).map(x => x.textContent.trim()),
+        decksLabel: Array.from(document.querySelectorAll('#view-review .section-label')).some(x => x.textContent.trim() === 'Decks') };
     });
     check(lang + ' cabeçalho Deck|Novo|Aprendendo|Revisar', table.head.join('|') === 'Deck|Novo|Aprendendo|Revisar', table.head);
     const ids = table.rows.map(r => r.id);
@@ -238,7 +240,9 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     check(lang + ' sem vínculo ativo: Cartões da professora não aparece', !noLink.ids.includes('9100') && noLink.ids.includes('9001'), noLink);
     check(lang + ' com vínculo ativo: volta a aparecer', noLink.back.includes('9100'), noLink);
 
-    check(lang + ' embaixo da tabela: Criar Deck, Importar arquivo, Exportar', table.homeBtns.join('|') === 'Criar Deck|Importar arquivo|Exportar', table.homeBtns);
+    check(lang + ' embaixo da tabela: Criar Deck e menu ⋯', table.homeBtns.join('|') === 'Criar Deck|⋯', table.homeBtns);
+    check(lang + ' menu ⋯ tem Importar e Exportar', table.moreItems.length === 2 && /^Importar arquivo/.test(table.moreItems[0]) && table.moreItems[1] === 'Exportar', table.moreItems);
+    check(lang + ' sem o título DECKS', !table.decksLabel);
     const meus = await page.evaluate(() => getDeckCounts(STATE.decks, 9001, eligibleDeckReviewPool()).new);
     check(lang + ' Novo de Meus Decks = 4', table.rows.find(r => r.id === '9001').nums[0] === 4 && meus === 4, table.rows.find(r => r.id === '9001'));
     await page.click('[data-deck-toggle="9200"]');
@@ -421,6 +425,7 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     check(lang + ' fechar o Painel da tela inicial volta à tabela', await page.evaluate(() => DECK_BROWSER.view === 'home' && location.hash === '#/review'));
 
     // ---- 5) Exportar e Importar ----
+    await page.click('#review-decks-table .deck-more-menu summary');
     await page.click('#review-decks-table [data-deck-export]');
     await page.waitForFunction(() => { const m = document.getElementById('my-flashcards-export-modal'); return m && getComputedStyle(m).display !== 'none'; });
     check(lang + ' Exportar abre a janela de exportação', true);
