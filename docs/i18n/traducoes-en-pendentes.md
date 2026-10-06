@@ -1669,7 +1669,7 @@ A1-1 vem do piloto (docs/i18n/piloto-A1-1.json). Itens abaixo: só os de confian
 | A1-2 | vocab[7] | francês / francesa | French (m. / f.) | media | gender-marking convention for the pair |
 | A1-2 | vocab[8] | brasileiro / brasileira | American (m. / f.) | media | localizado: o site em inglês fala com americano, então a palavra em francês também troca (src.vocab[8].f = américain / américaine); troca o significado do cartão u-A1-2-v8 ao mudar de idioma |
 | A1-2 | src.phrases[1].f | Je suis brésilienne. | Je suis américaine. | media | frase em francês localizada (aluno americano, nunca presumir brasileiro); blocks e bandeira 🇺🇸 acompanham; mp3 novo necessário (voz do navegador enquanto isso) |
-| A1-2 | src.lines[3..4].f | Oui, je suis français. Et toi, tu es brésilienne ? / Oui, je suis brésilienne ! | Oui, je suis français. Et toi, tu es américaine ? / Oui, je suis américaine ! | media | falas do diálogo localizadas; 2 mp3 novos |
+| A1-2 | src.lines[3..4].f | Oui, je suis français. Et toi, tu es brésilienne ? / Oui, je suis brésilienne ! | Oui, je suis français. Et toi, tu es américaine ? / Oui, je suis américaine ! | media (aprovado 2026-10-06: inglês "And you, are you American? / Yes, I'm American!") | falas do diálogo localizadas; 2 mp3 novos |
 | A1-2 | phrases[0].t | Qual é o seu nome? | What's your name? | media | FR is 'comment tu t'appelles', informal; EN 'what's your name' loses the literal 'how do you call yourself' |
 | A1-2 | phrases[2].t | De que país você é? | What country are you from? | media | 'what country are you from' vs 'which country' |
 | A1-2 | phrases[3].t | Eu também, eu sou francesa! | Me too, I'm French! | media | 'Moi aussi' stressed pronoun; 'Me too' is the natural EN |
