@@ -17543,3 +17543,7 @@ Decisão da autora: TTS explícito por Field usa o **Google Cloud TTS com a chav
 - **H/J/K** testados localmente (`tests/fase-public-deck/test_duplicates_hjk.sql`, 9/9) e incluídos no `run.sh`, junto com `test_071.sql` (9/9). Suíte completa verde (87, 48, 20, 72, 7, D2) e paridade Legacy 17/17.
 - `ANSWER_HISTORY_START_LABEL` (05/10/2026) conferido: o painel foi publicado hoje, não precisa ajuste.
 - **Continuam com a autora**: (1) primeiro áudio TTS real pelo app (`tts_generation_log` ainda com 0 linhas; precisa de login); (2) P8.2b, que exige uma 2ª conta Premium.
+
+## TTS por Field -- correção do erro "Não foi possível gerar o áudio agora" (2026-10-06)
+- Causa: `tts-generate` não respondia ao preflight CORS (OPTIONS) nem mandava `Access-Control-Allow-*`; o navegador bloqueava a chamada antes de chegar à função (nenhum log de tts-generate). Corrigido no `index.ts` (OPTIONS + cabeçalhos CORS em toda resposta) e publicado em produção (versão 4, `verify_jwt:true`; a cópia publicada tem a mesma lógica, comentários encurtados e helper `json()`). Preflight conferido ao vivo (200 com os cabeçalhos).
+- Cliente (`requestFieldAudioTTS`/`requestOwnFieldAudioTTS`): em resposta não-2xx o supabase-js deixa o corpo em `error.context` (Response); agora o código lê esse corpo para mostrar o motivo real (cota, provedor etc.). Só vale no site depois do deploy desta branch.
