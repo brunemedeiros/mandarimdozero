@@ -1109,6 +1109,7 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
   display:flex; align-items:center; gap:8px; font-weight:800; font-size:16px; margin-bottom:14px;
 }
 .correct-feedback-header{ color: var(--jade); }
+.correct-feedback-header + .correct-feedback-continue{ margin-top:0; }
 .correct-feedback-trans{ font-size:14.5px; color: var(--ink); line-height:1.6; margin:0; }
 /* Badge de combo (respostas certas seguidas, ver STEP_STATE.comboCount em
    app.js) -- só o raio amarelo + "Combo xN", sem caixa/pílula de fundo
@@ -1141,11 +1142,20 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .wrong-feedback-continue, .correct-feedback-continue{
   display:block; width:100%; margin-top:18px;
 }
-button.correct-feedback-continue{ background: var(--jade); color: var(--paper); box-shadow: 0 3px 10px rgba(58,115,89,0.28); }
+/* zh não define --on-vivid no :root (e este bloco não toca :root): fallback --paper = branco-papel no claro, escuro no escuro. */
+button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid, var(--paper)); box-shadow: 0 3px 10px rgba(58,115,89,0.28); }
 /* Continuar do painel de erro: vermelho mais escuro e menos saturado que o
    .btn-primary padrão (par background+color revisado junto: texto branco
    fixo sobre fundo escuro, legível nos dois temas). */
-button.wrong-feedback-continue{ background: linear-gradient(135deg, #9A2C28, #7A211E); color:#fff; box-shadow: 0 3px 10px rgba(122,33,30,0.28); }
+/* zh: --seal-red É o vermelho de erro; --on-seal-red (branco no claro, escuro no escuro) é o par certo. */
+button.wrong-feedback-continue{ background: var(--seal-red); color: var(--on-seal-red); box-shadow: 0 3px 10px rgba(192,35,31,0.28); }
+/* Painel de erro: a palavra estudada não pode ficar "vermelha de erro" também; só o fundo/cabeçalho sinalizam o erro. */
+.wrong-feedback-why-label{ color: var(--ink-soft); }
+.wrong-feedback .feedback-inner-box .pinyin,
+.wrong-feedback .feedback-inner-box .audio-btn,
+.wrong-feedback .feedback-inner-box .custom-audio-btn,
+.wrong-feedback .usage-note-body strong{ color: var(--ink); }
+.wrong-feedback .feedback-inner-box .pinyin{ color: var(--ink-soft); }
 
 /* ---------- Audio button (TTS) ---------- */
 .audio-btn, .custom-audio-btn{
