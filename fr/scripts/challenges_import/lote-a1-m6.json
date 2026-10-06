@@ -14,7 +14,7 @@
       "No fim de semana, gosto de ler.",
       "Aos fins de semana, eu gosto de ler."
     ],
-    "explanation": "",
+    "explanation": "\"Le week-end\" sem preposição indica algo habitual; \"j'aime lire\" = \"eu gosto de ler\" (infinitivo).",
     "status": "needs_review"
   },
   {
@@ -32,7 +32,7 @@
       "Vamos ao cinema sábado à noite?",
       "A gente vai ao cinema sábado à noite?"
     ],
-    "explanation": "",
+    "explanation": "\"On\" no francês falado vale \"nós/a gente\"; \"au cinéma\" = à + le cinéma.",
     "status": "needs_review"
   },
   {
@@ -50,7 +50,7 @@
       "Ontem comi no restaurante.",
       "Ontem eu almocei no restaurante."
     ],
-    "explanation": "",
+    "explanation": "\"Hier\" pede o passado composto: \"j'ai mangé\" (avoir + particípio).",
     "status": "needs_review"
   },
   {
@@ -68,7 +68,43 @@
       "Esta manhã peguei o ônibus.",
       "Hoje cedo eu peguei o ônibus."
     ],
-    "explanation": "",
+    "explanation": "\"Ce matin\" é o dia de hoje; \"j'ai pris\" é o passado composto de \"prendre\".",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m6-005",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m6",
+    "unitId": "A1-19",
+    "theme": "Lazer e atividades",
+    "sentenceFr": "J'aime écouter de la musique.",
+    "audioFile": "92389128d64f.mp3",
+    "hintText": "J'______ écouter de la ______.",
+    "referenceTranslations": [
+      "Eu gosto de ouvir música.",
+      "Gosto de escutar música.",
+      "Eu adoro ouvir música."
+    ],
+    "explanation": "\"Aimer\" + infinitivo expressa gosto; \"de la musique\" é partitivo (música em geral).",
+    "status": "needs_review"
+  },
+  {
+    "id": "lt-a1m6-006",
+    "type": "listen_translate",
+    "level": "A1",
+    "moduleId": "A1-m6",
+    "unitId": "A1-20",
+    "theme": "Passado",
+    "sentenceFr": "Hier soir, j'ai mangé une pomme.",
+    "audioFile": "7be434508c54.mp3",
+    "hintText": "Hier soir, j'ai ______ une ______.",
+    "referenceTranslations": [
+      "Ontem à noite eu comi uma maçã.",
+      "Ontem à noite comi uma maçã.",
+      "Ontem à noite eu comi uma maçã"
+    ],
+    "explanation": "\"Hier soir\" pede o passado composto: \"j'ai mangé\" (avoir + particípio de \"manger\").",
     "status": "needs_review"
   },
   {
@@ -129,6 +165,30 @@
     "targetText": "année",
     "audioFile": "c63b2d99c650.mp3",
     "explanation": "\"e\" tem acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m6-006",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m6",
+    "unitId": "A1-19",
+    "theme": "Lazer e atividades",
+    "targetText": "été",
+    "audioFile": "deaf6a1e9612.mp3",
+    "explanation": "Os dois \"e\" têm acento agudo.",
+    "status": "needs_review"
+  },
+  {
+    "id": "accent-a1m6-007",
+    "type": "accent",
+    "level": "A1",
+    "moduleId": "A1-m6",
+    "unitId": "A1-20",
+    "theme": "Passado",
+    "targetText": "préféré",
+    "audioFile": "c81105cafc3a.mp3",
+    "explanation": "Os dois últimos \"e\" têm acento agudo.",
     "status": "needs_review"
   },
   {

@@ -2431,9 +2431,18 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 /* Rótulos Free x Premium (só informativos por enquanto; paywall vem depois). */
 .tier-badge{
   display:inline-block; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.03em;
-  color: var(--ink-soft); border:1px solid var(--paper-line); border-radius:999px; padding:1px 7px; margin-top:6px;
+  color: var(--ink-soft); border:1px solid var(--paper-line); border-radius:999px; padding:1px 7px; margin-top:6px; align-self:flex-start;
 }
 .tier-badge.tier-free{ color: var(--seal-red-dark); border-color: var(--seal-red-dark); }
+/* Fase 6: progresso por categoria ("X de Y concluídos") + barra fina.
+   Só tokens já calibrados nos dois temas (texto --ink-soft, trilho
+   --paper-warm, preenchimento --jade). */
+.challenge-progress{ width:100%; max-width:220px; margin:6px auto 0; }
+#challenges-list-progress .challenge-progress, #dictation-list-progress .challenge-progress{ margin:0 0 14px; max-width:320px; }
+.challenge-progress-label{ font-size:12px; font-weight:700; color: var(--ink-soft); margin-bottom:4px; }
+.challenge-progress-track{ height:5px; border-radius:999px; background: var(--paper-warm); border:1px solid var(--paper-line); overflow:hidden; }
+.challenge-progress-fill{ height:100%; background: var(--jade); border-radius:999px; transition: width .3s ease; }
+.challenge-review-card{ border-color: var(--jade); }
 .ub-badge-premium{
   font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.03em;
   color: var(--ink-soft); border:1px solid var(--paper-line); border-radius:999px; padding:2px 8px;
@@ -2530,6 +2539,18 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .challenge-external-link-label{ font-size:13.5px; font-weight:700; color: var(--seal-red-dark); }
 .challenge-external-link-source{ font-size:11.5px; color: var(--ink-soft); }
 
+/* ---------- Complete a frase (gramática) ---------- */
+.cloze-grammar-sentence{ font-size:20px; font-weight:700; text-align:center; line-height:1.6; margin:4px 0 18px; color: var(--ink); }
+.cloze-grammar-slot{ display:inline-block; min-width:56px; padding:0 8px; border-bottom:2px dashed var(--imperial-gold); color: var(--ink-soft); }
+.cloze-grammar-slot.filled{ color: var(--ink); }
+.cloze-grammar-slot.correct{ border-bottom:2px solid var(--jade); }
+.cloze-grammar-slot.incorrect{ border-bottom:2px solid var(--seal-red); }
+.cloze-grammar-group{ margin-bottom:14px; }
+.cloze-grammar-group .challenge-choices{ flex-direction:row; flex-wrap:wrap; justify-content:center; }
+.cloze-grammar-group-label{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color: var(--ink-soft); margin-bottom:6px; text-align:center; }
+.challenge-choice-btn.selected{ border-color: var(--imperial-gold); background: rgba(224,165,38,0.12); }
+.cloze-grammar-msg{ min-height:1em; font-size:13px; color: var(--seal-red-dark); text-align:center; margin:0 0 8px; }
+
 /* ---------- Ouça e traduza ---------- */
 .listen-translate-audio-wrap{ text-align:center; margin-bottom:20px; }
 .listen-translate-audio-wrap .dictation-play-btn{ font-size:16px; padding:14px 28px; }
@@ -2563,6 +2584,9 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .accent-feedback{ margin-top:10px; border-radius: var(--radius); padding:18px 20px; border:1px solid; text-align:center; }
 .accent-feedback.correct{ background: rgba(58,115,89,0.06); border-color: rgba(58,115,89,0.25); }
 .accent-feedback.incorrect{ background: rgba(192,35,31,0.06); border-color: rgba(192,35,31,0.25); }
+.challenge-feedback.partial, .listen-translate-feedback.partial, .accent-feedback.partial{ background: rgba(224,165,38,0.10); border-color: rgba(224,165,38,0.4); }
+.challenge-retry-actions{ display:flex; flex-direction:column; gap:8px; margin-top:16px; }
+.challenge-retry-actions .btn{ width:100%; }
 .accent-feedback-header{ font-weight:800; font-size:15px; margin-bottom:12px; }
 .accent-feedback-answer{ font-size:14px; margin:4px 0; }
 .accent-feedback-correct-word{ font-size:22px; font-weight:800; margin:8px 0; }
@@ -3800,25 +3824,26 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <div id="dictation-list-wrap">
       <button class="back-link" id="dictation-back-to-challenges">← Voltar aos desafios</button>
       <div class="path-header">
-        <h2>Ditados</h2>
-        <p>Treine sua compreensão auditiva e sua ortografia com ditados baseados em tarefas reais de cada módulo.</p>
+        <h2 data-ch-i18n="dict.static.title">Ditados</h2>
+        <p data-ch-i18n="dict.static.sub">Treine sua compreensão auditiva e sua ortografia com ditados baseados em tarefas reais de cada módulo.</p>
       </div>
 
       <div class="dictation-explainer" id="dictation-explainer">
-        <button class="dictation-explainer-toggle" id="dictation-explainer-toggle">🎧 Como funciona o ditado?</button>
+        <button class="dictation-explainer-toggle" id="dictation-explainer-toggle" data-ch-i18n="dict.static.how">🎧 Como funciona o ditado?</button>
         <ol class="dictation-explainer-steps" id="dictation-explainer-steps">
-          <li>Ouça o áudio — na velocidade normal ou devagar, quantas vezes quiser.</li>
-          <li>Digite exatamente o que você ouviu, com acentos e pontuação.</li>
-          <li>Clique em "Verificar" para comparar sua resposta com o texto original.</li>
-          <li>Veja o que acertou e o que precisa revisar, palavra por palavra.</li>
+          <li data-ch-i18n="dict.static.s1">Ouça o áudio — na velocidade normal ou devagar, quantas vezes quiser.</li>
+          <li data-ch-i18n="dict.static.s2">Digite exatamente o que você ouviu, com acentos e pontuação.</li>
+          <li data-ch-i18n="dict.static.s3">Clique em "Verificar" para comparar sua resposta com o texto original.</li>
+          <li data-ch-i18n="dict.static.s4">Veja o que acertou e o que precisa revisar, palavra por palavra.</li>
         </ol>
       </div>
 
+      <div id="dictation-list-progress"></div>
       <div class="dictation-cards" id="dictation-cards"></div>
     </div>
 
     <div id="dictation-player-wrap" style="display:none;">
-      <button class="back-link" id="dictation-back-to-list">← Voltar aos ditados</button>
+      <button class="back-link" id="dictation-back-to-list" data-ch-i18n="dict.static.backList">← Voltar aos ditados</button>
       <div id="dictation-player-content"></div>
     </div>
   </div>
@@ -3826,7 +3851,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <!-- ===== DESAFIOS ===== -->
   <div class="view" id="view-challenges">
     <div id="challenges-categories-wrap">
-      <button class="back-link" id="challenges-module-back" style="display:none;">← Voltar à trilha</button>
+      <button class="back-link" id="challenges-module-back" style="display:none;" data-ch-i18n="ch.static.backTrail">← Voltar à trilha</button>
       <div class="path-header">
         <h2 id="challenges-categories-title">Desafios</h2>
         <p id="challenges-categories-sub">Pratique francês de verdade: expressões, compreensão auditiva e ortografia.</p>
@@ -3839,16 +3864,17 @@ footer.app-footer img{ height:40px; opacity:.85; }
     </div>
 
     <div id="challenges-list-wrap" style="display:none;">
-      <button class="back-link" id="challenges-list-back-btn">← Voltar às categorias</button>
+      <button class="back-link" id="challenges-list-back-btn" data-ch-i18n="ch.static.back">← Voltar às categorias</button>
       <div class="path-header">
         <h2 id="challenges-list-title">Desafios</h2>
       </div>
+      <div id="challenges-list-progress"></div>
       <div class="challenges-level-tabs" id="challenges-level-tabs" style="display:none;"></div>
       <div class="challenges-cards" id="challenges-cards"></div>
     </div>
 
     <div id="challenge-player-wrap" style="display:none;">
-      <button class="back-link" id="challenge-back-to-list">← Voltar aos desafios</button>
+      <button class="back-link" id="challenge-back-to-list" data-ch-i18n="ch.static.backChallenges">← Voltar aos desafios</button>
       <div id="challenge-preview-banner" style="display:none;"></div>
       <div id="challenge-player-content" aria-live="polite" aria-atomic="true"></div>
     </div>
@@ -4182,12 +4208,12 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <div id="premium-challenges-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
-      <h3>🔒 Recurso Premium</h3>
+      <h3 data-ch-i18n="prem.modal.title">🔒 Recurso Premium</h3>
       <button class="app-modal-close" id="premium-challenges-modal-close" aria-label="Fechar">✕</button>
     </div>
     <div class="app-modal-body">
-      <p>Os <strong>Desafios do Módulo</strong> reforçam cada tema da trilha com Expressões, Ouça e traduza, Acentuação e Ditados extras.</p>
-      <p>Eles fazem parte do plano Premium. Para ativar, fale com a administração (profbrune).</p>
+      <p data-ch-i18n="prem.modal.p1">Os <strong>Desafios do Módulo</strong> reforçam cada tema da trilha com Expressões, Ouça e traduza, Acentuação e Ditados extras.</p>
+      <p data-ch-i18n="prem.modal.p2">Eles fazem parte do plano Premium. Para ativar, fale com a administração (profbrune).</p>
     </div>
   </div>
 </div>

@@ -894,7 +894,11 @@ const STATE = {
   completedChallenges: {}, // challengeId -> true -- "Desafios" concluídos, ver challenges_do_aluno
   // Ditados (Fatia 2): dictationId -> { bestScore, attempts, lastScore, lastAt, wrongWords }.
   // Atualizado só por updateDictationRecord() (bloco dictation-answer-logic).
-  dictations: {}
+  dictations: {},
+  // Fase 6: revisão espaçada dos desafios errados (fail/partial). challengeId ->
+  // { id, lastErrorAt, lastSeenAt, box } -- caixas Leitner 1/3/7/14 dias.
+  // Atualizado só por updateChallengeReviewEntry() (bloco challenge-review-logic).
+  challengeReviews: {}
 };
 
 // Cada nível é acessível livremente (o aluno escolhe o nível quando quiser);
@@ -1082,6 +1086,7 @@ function serializeState(){
     levelTestProgress: STATE.levelTestProgress,
     completedChallenges: STATE.completedChallenges,
     dictations: STATE.dictations,
+    challengeReviews: STATE.challengeReviews,
     // Só leitura pro Perfil (ver computeProgressSummary) -- nunca restaurado
     // de volta em applySerializedState, é recalculado a cada save.
     progressSummary: computeProgressSummary()
@@ -1126,6 +1131,12 @@ function applySerializedState(data){
   if (data.reviewMilestones) Object.assign(STATE.reviewMilestones, data.reviewMilestones);
   if (data.levelTestProgress) Object.assign(STATE.levelTestProgress, data.levelTestProgress);
   if (data.completedChallenges) Object.assign(STATE.completedChallenges, data.completedChallenges);
+  if (data.challengeReviews && typeof data.challengeReviews === 'object'){
+    Object.keys(data.challengeReviews).forEach(id => {
+      const e = sanitizeChallengeReviewEntry(data.challengeReviews[id], id);
+      if (e) STATE.challengeReviews[id] = e;
+    });
+  }
   // Save antigo não tem o campo (nada a fazer); registros malformados são
   // saneados pela mesma função que atualiza (bestScore nunca diminui).
   if (data.dictations && typeof data.dictations === 'object'){
@@ -7981,11 +7992,13 @@ const switchTab = createTabSwitcher({
     leaderboard: renderLeaderboardView,
     path: renderUnitsGrid,
     dictation: () => {
+      applyChallengeI18n();
       dictationModuleFilter = pendingDictationModuleFilter;
       pendingDictationModuleFilter = null;
       renderDictationList();
     },
     challenges: () => {
+      applyChallengeI18n();
       challengesModuleFilter = pendingChallengesModuleFilter;
       pendingChallengesModuleFilter = null;
       return renderChallengeCategories();
@@ -8847,7 +8860,7 @@ function escapeHtmlDictation(str){
 function dictationCardProgressHTML(id){
   const rec = STATE.dictations && STATE.dictations[id];
   if (!rec || !rec.attempts) return '';
-  return `<div class="dictation-card-progress">Melhor nota: ${rec.bestScore} · ${rec.attempts} ${rec.attempts === 1 ? 'tentativa' : 'tentativas'}</div>`;
+  return `<div class="dictation-card-progress">${chT('dict.bestAttempts', { best: rec.bestScore, n: rec.attempts, unit: chT(rec.attempts === 1 ? 'dict.attempt.one' : 'dict.attempt.many') })}</div>`;
 }
 
 function renderDictationList(){
@@ -8858,10 +8871,12 @@ function renderDictationList(){
   const cardsWrap = document.getElementById('dictation-cards');
   const dictationsShown = dictationsVisible(dictationModuleFilter);
   // Vindo da unidade "Revisão do A1" da trilha, o "voltar" leva de volta pra trilha.
-  document.getElementById('dictation-back-to-challenges').textContent = isLevelReviewId(dictationModuleFilter) ? '← Voltar à trilha' : '← Voltar aos desafios';
+  document.getElementById('dictation-back-to-challenges').textContent = isLevelReviewId(dictationModuleFilter) ? chT('dict.back.trail') : chT('dict.back.challenges');
+  const dictProgressEl = document.getElementById('dictation-list-progress');
+  if (dictProgressEl) dictProgressEl.innerHTML = challengeProgressHTML(dictationsShown.filter(d => isDictationDone(d.id)).length, dictationsShown.length);
   cardsWrap.innerHTML = dictationsShown.map(d => `
     <button class="dictation-card ${isDictationLocked(d) ? 'locked' : ''}" data-dict-id="${d.id}">
-      ${isDictationLocked(d) ? '<span class="challenge-card-check" title="Premium">🔒</span>' : ''}
+      ${isDictationLocked(d) ? `<span class="challenge-card-check" title="${chT('tier.premium')}">🔒</span>` : ''}
       <div class="dictation-card-level">${d.level}</div>
       <div class="dictation-card-task">${escapeHtmlDictation(d.task)}</div>
       <div class="dictation-card-module">${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</div>
@@ -8911,8 +8926,8 @@ function openDictationPlayer(id){
     <p class="dictation-player-module">${d.level} · ${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</p>
     <div class="dictation-audio-player">
       <div class="dictation-transport">
-        <button class="dictation-play-btn" id="dictation-play-btn">▶️ Ouvir o ditado</button>
-        <button class="dictation-icon-btn" id="dictation-restart-btn" aria-label="Reiniciar" title="Reiniciar">↺</button>
+        <button class="dictation-play-btn" id="dictation-play-btn">${chT('dict.play')}</button>
+        <button class="dictation-icon-btn" id="dictation-restart-btn" aria-label="${chT('dict.restart')}" title="${chT('dict.restart')}">↺</button>
       </div>
       <div class="dictation-scrub-row">
         <span class="dictation-time" id="dictation-time-current">00:00</span>
@@ -8924,11 +8939,11 @@ function openDictationPlayer(id){
       </div>
       <div class="dictation-secondary-controls">
         <div class="dictation-skip-controls">
-          <button class="dictation-skip-btn" id="dictation-skip-back" title="Voltar 15s">-15s</button>
-          <button class="dictation-skip-btn" id="dictation-skip-fwd" title="Avançar 15s">+15s</button>
+          <button class="dictation-skip-btn" id="dictation-skip-back" title="${chT('dict.back15')}">-15s</button>
+          <button class="dictation-skip-btn" id="dictation-skip-fwd" title="${chT('dict.fwd15')}">+15s</button>
         </div>
         <div class="dictation-volume-control">
-          <button class="dictation-icon-btn" id="dictation-mute-btn" aria-label="Mudo" title="Mudo">🔊</button>
+          <button class="dictation-icon-btn" id="dictation-mute-btn" aria-label="${chT('dict.mute')}" title="${chT('dict.mute')}">🔊</button>
           <input type="range" class="dictation-volume-slider" id="dictation-volume-slider" min="0" max="100" value="100">
         </div>
         <div class="dictation-speed-controls">
@@ -8938,11 +8953,11 @@ function openDictationPlayer(id){
         </div>
       </div>
     </div>
-    <textarea class="dictation-textarea" id="dictation-input" placeholder="Digite aqui o que você ouviu..." aria-label="Texto do ditado" lang="fr" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="${Math.max(400, d.text.length * 3)}"></textarea>
+    <textarea class="dictation-textarea" id="dictation-input" placeholder="${chT('dict.placeholder')}" aria-label="${chT('dict.textAria')}" lang="fr" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="${Math.max(400, d.text.length * 3)}"></textarea>
     ${frAccentPickerHTML()}
     <div class="dictation-actions">
-      <button class="btn btn-primary" id="dictation-check-btn">Verificar</button>
-      <button class="btn btn-secondary" id="dictation-retry-btn" style="display:none;">Tentar novamente</button>
+      <button class="btn btn-primary" id="dictation-check-btn">${chT('dict.check')}</button>
+      <button class="btn btn-secondary" id="dictation-retry-btn" style="display:none;">${chT('dict.retry')}</button>
     </div>
     <div id="dictation-result-wrap"></div>
   `;
@@ -8961,7 +8976,7 @@ function openDictationPlayer(id){
   playBtn.addEventListener('click', () => {
     if (dictationAudioEl.paused){
       stopDictationSentenceAudio();
-      dictationAudioEl.play().catch(() => showToast('Não foi possível reproduzir o áudio'));
+      dictationAudioEl.play().catch(() => showToast(chT('dict.audioFail')));
     } else {
       dictationAudioEl.pause();
     }
@@ -8991,8 +9006,8 @@ function openDictationPlayer(id){
     dictationAudioEl.volume = v;
     dictationAudioEl.muted = false;
     muteBtn.textContent = v === 0 ? '🔇' : '🔊';
-    muteBtn.setAttribute('aria-label', v === 0 ? 'Ativar som' : 'Mudo');
-    muteBtn.title = v === 0 ? 'Ativar som' : 'Mudo';
+    muteBtn.setAttribute('aria-label', v === 0 ? chT('dict.unmute') : chT('dict.mute'));
+    muteBtn.title = v === 0 ? chT('dict.unmute') : chT('dict.mute');
   });
   muteBtn.addEventListener('click', () => {
     if (dictationAudioEl.muted || dictationAudioEl.volume === 0){
@@ -9000,15 +9015,15 @@ function openDictationPlayer(id){
       dictationAudioEl.volume = volumeBeforeMute || 1;
       volumeSlider.value = Math.round(dictationAudioEl.volume * 100);
       muteBtn.textContent = '🔊';
-      muteBtn.setAttribute('aria-label', 'Mudo');
-      muteBtn.title = 'Mudo';
+      muteBtn.setAttribute('aria-label', chT('dict.mute'));
+      muteBtn.title = chT('dict.mute');
     } else {
       volumeBeforeMute = dictationAudioEl.volume;
       dictationAudioEl.muted = true;
       volumeSlider.value = 0;
       muteBtn.textContent = '🔇';
-      muteBtn.setAttribute('aria-label', 'Ativar som');
-      muteBtn.title = 'Ativar som';
+      muteBtn.setAttribute('aria-label', chT('dict.unmute'));
+      muteBtn.title = chT('dict.unmute');
     }
   });
 
@@ -9034,15 +9049,15 @@ function openDictationPlayer(id){
   }
 
   dictationAudioEl.addEventListener('play', () => {
-    playBtn.textContent = '⏸ Pausar';
+    playBtn.textContent = chT('dict.pause');
     playBtn.classList.add('speaking');
   });
   dictationAudioEl.addEventListener('pause', () => {
-    playBtn.textContent = '▶️ Ouvir o ditado';
+    playBtn.textContent = chT('dict.play');
     playBtn.classList.remove('speaking');
   });
   dictationAudioEl.addEventListener('ended', () => {
-    playBtn.textContent = '▶️ Ouvir o ditado';
+    playBtn.textContent = chT('dict.play');
     playBtn.classList.remove('speaking');
   });
   // Usa o próprio elemento do evento (e.target), não a variável global: ao
@@ -9062,14 +9077,14 @@ function openDictationPlayer(id){
     timeCurrentEl.textContent = formatDictationTime(a.currentTime);
   });
   dictationAudioEl.addEventListener('error', () => {
-    showToast('Não foi possível reproduzir o áudio');
+    showToast(chT('dict.audioFail'));
     playBtn.disabled = true;
-    playBtn.textContent = '⚠️ Áudio indisponível';
+    playBtn.textContent = chT('dict.audioUnavailable');
   });
 
   document.getElementById('dictation-check-btn').addEventListener('click', () => {
     const userText = document.getElementById('dictation-input').value;
-    if (!userText.trim()){ showToast('Escreva o que você ouviu antes de verificar.'); return; }
+    if (!userText.trim()){ showToast(chT('dict.writeFirst')); return; }
     renderDictationResult(d, userText);
   });
 
@@ -9504,7 +9519,7 @@ function renderDictationResult(d, userText){
   const wordsHtml = merged.map(x => {
     if (x.type === 'match'){
       return x.light
-        ? dictationWordHtml(x.word, x.punctAfter, x.missingMarks, 'dictation-word-near', 'Quase: ' + dictationLightNoteText(x))
+        ? dictationWordHtml(x.word, x.punctAfter, x.missingMarks, 'dictation-word-near', chT('dict.nearPrefix') + dictationLightNoteText(x))
         : dictationWordHtml(x.word, x.punctAfter, x.missingMarks, 'dictation-word', '');
     }
     const punct = x.punctAfter ? ` ${escapeHtmlDictation(x.punctAfter)}` : '';
@@ -9516,11 +9531,11 @@ function renderDictationResult(d, userText){
   const notes = [];
   merged.filter(x => x.type === 'match' && x.light).forEach(x => notes.push(dictationLightNoteText(x)));
   merged.filter(x => x.type === 'sub').forEach(x => notes.push(classifyDictationError(x.correct, x.wrong).noteText));
-  ev.digitNotes.forEach(n => notes.push(`Por extenso: ${n.digits} → <strong>${escapeHtmlDictation(n.words)}</strong>. Numa escrita de ditado, o número vai por extenso (sem desconto).`));
-  ev.spokenPunct.forEach(p => notes.push(`Você escreveu «${escapeHtmlDictation(p.said)}» por extenso. No ditado, escreva o sinal (${escapeHtmlDictation(p.symbol)}). Pequeno desconto.`));
-  if (ev.missingMarks > 0) notes.push(`Pontuação: faltou em ${ev.missingMarks} ${ev.missingMarks === 1 ? 'lugar' : 'lugares'} (sublinhado acima). Não desconta pontos.`);
+  ev.digitNotes.forEach(n => notes.push({ html: chT('dict.note.digits', { digits: n.digits, words: escapeHtmlDictation(n.words) }) }));
+  ev.spokenPunct.forEach(p => notes.push({ html: chT('dict.note.spoken', { said: escapeHtmlDictation(p.said), symbol: escapeHtmlDictation(p.symbol) }) }));
+  if (ev.missingMarks > 0) notes.push({ html: chT('dict.note.punct', { n: ev.missingMarks, places: chT(ev.missingMarks === 1 ? 'dict.place.one' : 'dict.place.many') }) });
   const notesHtml = notes.length
-    ? `<ul class="dictation-notes">${notes.map(n => `<li>${n.startsWith('Por extenso') || n.startsWith('Você escreveu') || n.startsWith('Pontuação') ? n : escapeHtmlDictation(n)}</li>`).join('')}</ul>`
+    ? `<ul class="dictation-notes">${notes.map(n => `<li>${n && n.html ? n.html : escapeHtmlDictation(n)}</li>`).join('')}</ul>`
     : '';
   const hit = ev.exact + ev.light;
 
@@ -9531,12 +9546,12 @@ function renderDictationResult(d, userText){
   const sentenceFlags = dictationSentenceErrorFlags(d.text, ev);
   const sentencesHtml = sentences.length ? `
       <div class="dictation-sentences">
-        <p class="dictation-sentences-title"><strong>Ouça frase por frase</strong>${sentenceFlags.some(Boolean) ? ' · as marcadas com ⚠ têm erro seu' : ''}</p>
+        <p class="dictation-sentences-title"><strong>${chT('dict.sent.title')}</strong>${sentenceFlags.some(Boolean) ? chT('dict.sent.flagHint') : ''}</p>
         <ol class="dictation-sentence-list">
           ${sentences.map((s, i) => `
           <li class="dictation-sentence${sentenceFlags[i] ? ' has-error' : ''}">
-            <button type="button" class="dictation-sentence-play" data-sentence="${i + 1}" aria-label="Ouvir a frase ${i + 1}${sentenceFlags[i] ? ' (você errou nesta frase)' : ''}">▶ ouvir frase</button>
-            <span class="dictation-sentence-text">${sentenceFlags[i] ? '<span class="dictation-sentence-flag">⚠ você errou aqui:</span> ' : ''}${escapeHtmlDictation(s)}</span>
+            <button type="button" class="dictation-sentence-play" data-sentence="${i + 1}" aria-label="${chT('dict.sent.listenN', { n: i + 1 })}${sentenceFlags[i] ? chT('dict.sent.errorAria') : ''}">${chT('dict.sent.listen')}</button>
+            <span class="dictation-sentence-text">${sentenceFlags[i] ? `<span class="dictation-sentence-flag">${chT('dict.sent.flag')}</span> ` : ''}${escapeHtmlDictation(s)}</span>
           </li>`).join('')}
         </ol>
       </div>` : '';
@@ -9547,11 +9562,11 @@ function renderDictationResult(d, userText){
       <div class="dictation-result-text">${wordsHtml}</div>
       <div class="dictation-result-summary">
         <div class="dictation-score-badge" style="background:${dictationScoreColorVar(score)};">${score}</div>
-        <p class="dictation-score-text">Você escreveu <strong>${hit} de ${total}</strong> palavras corretamente${ev.light ? ` (${ev.light} com pequeno desvio de grafia, valem meio ponto)` : ''}. Você atingiu uma pontuação de ${score} pontos (${score}%).</p>
+        <p class="dictation-score-text">${chT('dict.score', { hit, total, light: ev.light ? chT('dict.scoreLight', { n: ev.light }) : '', score })}</p>
       </div>
-      <p class="dictation-record-line">Melhor nota: <strong>${rec.bestScore}</strong> · ${rec.attempts} ${rec.attempts === 1 ? 'tentativa' : 'tentativas'}</p>
+      <p class="dictation-record-line">${chT('dict.record', { best: rec.bestScore, n: rec.attempts, unit: chT(rec.attempts === 1 ? 'dict.attempt.one' : 'dict.attempt.many') })}</p>
       ${notesHtml}
-      ${rec.wrongWords.length ? `<p class="dictation-review-words"><strong>Palavras para revisar:</strong> ${rec.wrongWords.map(escapeHtmlDictation).join(', ')}</p>` : ''}
+      ${rec.wrongWords.length ? `<p class="dictation-review-words"><strong>${chT('dict.reviewWords')}</strong> ${rec.wrongWords.map(escapeHtmlDictation).join(', ')}</p>` : ''}
       ${sentencesHtml}
     </div>
   `;
@@ -9617,7 +9632,7 @@ function challengeDataPayload(c){
   return data;
 }
 
-const CHALLENGE_VALID_TYPES = ['expression', 'listen_translate', 'accent'];
+const CHALLENGE_VALID_TYPES = ['expression', 'listen_translate', 'accent', 'cloze_grammar'];
 const CHALLENGE_VALID_STATUSES = ['needs_review', 'approved', 'published', 'rejected'];
 
 // Aceita tanto um array de desafios quanto a saída direta do pipeline
@@ -9682,9 +9697,20 @@ async function importChallengesFromJSON(rawText){
 // nunca depender de cache/estado de sessão -- uma publicação feita em
 // outra aba/navegador aparece assim que o site é reaberto ou a lista é
 // recarregada, sem precisar de nenhuma ação do Claude Code.
-async function loadChallengesFromDB(){
+// Cache em memória (5 min): reabrir a aba Desafios não baixa tudo de novo.
+// `force` (admin/edição) ou uma gravação (persistChallenge) ignoram o cache.
+let challengesLoadedAt = 0;
+const CHALLENGES_CACHE_MS = 5 * 60 * 1000;
+async function loadChallengesFromDB(force){
+  if (!force && challengesLoadedAt && Date.now() - challengesLoadedAt < CHALLENGES_CACHE_MS) return true;
   try {
-    const { data, error } = await supabaseClient.from('challenges').select('*');
+    // Fase 8: com CHALLENGES_SERVER_GATING ligada, quem não é admin lê pela RPC
+    // get_published_challenges (008), que devolve só o esqueleto dos Premium
+    // para contas Free. Desligada (padrão), mantém o select direto de sempre.
+    const useRpc = CHALLENGES_SERVER_GATING && !isChallengesAdmin();
+    const { data, error } = useRpc
+      ? await supabaseClient.rpc('get_published_challenges')
+      : await supabaseClient.from('challenges').select('*');
     if (error) throw error;
     CHALLENGES = (data || []).map(row => ({
       id: row.id,
@@ -9701,6 +9727,7 @@ async function loadChallengesFromDB(){
       unpublished_by: row.unpublished_by,
       ...(row.data || {}),
     }));
+    challengesLoadedAt = Date.now();
     return true;
   } catch (err){
     console.error('Falha ao carregar desafios do Supabase:', err);
@@ -9715,6 +9742,7 @@ async function loadChallengesFromDB(){
 async function persistChallenge(c, extraColumns = {}){
   const payload = { status: c.status, data: challengeDataPayload(c), ...extraColumns };
   const { error } = await supabaseClient.from('challenges').update(payload).eq('id', c.id);
+  challengesLoadedAt = 0; // gravou: o cache deixa de valer
   if (error){
     console.error('Falha ao salvar desafio no Supabase:', error);
     alert('Não foi possível salvar no banco de dados: ' + error.message);
@@ -9727,6 +9755,7 @@ const CHALLENGE_CATEGORIES = [
   { type: 'expression', emoji: '🧩', title: 'Expressões', subtitle: 'Descubra o sentido' },
   { type: 'listen_translate', emoji: '🎧', title: 'Ouça e traduza', subtitle: 'Escute e traduza' },
   { type: 'accent', emoji: '✍️', title: 'Acentuação', subtitle: 'Escreva corretamente' },
+  { type: 'cloze_grammar', emoji: '🧠', title: 'Complete a frase', subtitle: 'Gramática na prática' },
 ];
 
 let currentChallengesCategory = 'expression';
@@ -9748,6 +9777,176 @@ function publishedChallenges(){
 }
 function pendingChallenges(){
   return CHALLENGES.filter(c => c.status === 'needs_review');
+}
+
+
+// ---------- i18n dos textos de INTERFACE dos Desafios/Ditados ----------
+// Ainda não existe um mecanismo global de idioma da interface. Enquanto isso,
+// chT() lê window.UI_LANG (se algum dia for definido) e cai em pt-BR e, por
+// fim, na própria chave. Quando o mecanismo global chegar, basta ligar chT()
+// a ele (e mover CHALLENGE_I18N para os arquivos de idioma). O CONTEÚDO em
+// francês (frases, respostas, dados do banco) NÃO passa por aqui.
+const CHALLENGE_I18N = {
+  'pt-BR': {
+    'tier.premium': 'Premium',
+    'tier.free': 'Free',
+    'dict.back.trail': '← Voltar à trilha',
+    'dict.back.challenges': '← Voltar aos desafios',
+    'dict.bestAttempts': 'Melhor nota: {best} · {n} {unit}',
+    'dict.attempt.one': 'tentativa',
+    'dict.attempt.many': 'tentativas',
+    'dict.play': '▶️ Ouvir o ditado',
+    'dict.pause': '⏸ Pausar',
+    'dict.restart': 'Reiniciar',
+    'dict.back15': 'Voltar 15s',
+    'dict.fwd15': 'Avançar 15s',
+    'dict.mute': 'Mudo',
+    'dict.unmute': 'Ativar som',
+    'dict.placeholder': 'Digite aqui o que você ouviu...',
+    'dict.textAria': 'Texto do ditado',
+    'dict.check': 'Verificar',
+    'dict.retry': 'Tentar novamente',
+    'dict.audioFail': 'Não foi possível reproduzir o áudio',
+    'dict.audioUnavailable': '⚠️ Áudio indisponível',
+    'dict.writeFirst': 'Escreva o que você ouviu antes de verificar.',
+    'dict.nearPrefix': 'Quase: ',
+    'dict.note.digits': 'Por extenso: {digits} → <strong>{words}</strong>. Numa escrita de ditado, o número vai por extenso (sem desconto).',
+    'dict.note.spoken': 'Você escreveu «{said}» por extenso. No ditado, escreva o sinal ({symbol}). Pequeno desconto.',
+    'dict.note.punct': 'Pontuação: faltou em {n} {places} (sublinhado acima). Não desconta pontos.',
+    'dict.place.one': 'lugar',
+    'dict.place.many': 'lugares',
+    'dict.sent.title': 'Ouça frase por frase',
+    'dict.sent.flagHint': ' · as marcadas com ⚠ têm erro seu',
+    'dict.sent.listenN': 'Ouvir a frase {n}',
+    'dict.sent.errorAria': ' (você errou nesta frase)',
+    'dict.sent.listen': '▶ ouvir frase',
+    'dict.sent.flag': '⚠ você errou aqui:',
+    'dict.score': 'Você escreveu <strong>{hit} de {total}</strong> palavras corretamente{light}. Você atingiu uma pontuação de {score} pontos ({score}%).',
+    'dict.scoreLight': ' ({n} com pequeno desvio de grafia, valem meio ponto)',
+    'dict.record': 'Melhor nota: <strong>{best}</strong> · {n} {unit}',
+    'dict.reviewWords': 'Palavras para revisar:',
+    'dict.count.one': '{n} ditado',
+    'dict.count.many': '{n} ditados',
+    'ch.retryNow': '🔁 Tentar de novo',
+    'ch.catProgress.one': '{done} de {total} concluído',
+    'ch.catProgress.many': '{done} de {total} concluídos',
+    'ch.review.title': 'Revisar erros ({n})',
+    'ch.review.subtitle': 'Desafios que você errou, na hora de rever',
+    'ch.review.doneTitle': 'Revisão do dia concluída!',
+    'ch.review.doneSub': 'Os desafios que você acertou voltam mais tarde, cada vez mais espaçados.',
+    'ch.review.back': 'Voltar aos desafios',
+    'ch.retryLater': 'Tentar mais tarde',
+    'ch.complete': '✅ Concluir',
+    'ch.knowMore': 'En savoir plus',
+    'ch.goFurther': 'Pour aller plus loin',
+    'ch.loading': 'Carregando desafios...',
+    'ch.loadError': 'Não foi possível carregar os desafios agora. Verifique sua conexão e tente novamente.',
+    'ch.retry': 'Tentar de novo',
+    'ch.moduleTitle': 'Desafios do Módulo {n}',
+    'ch.moduleSub': '{title} · agora que você estudou esse tema, pratique de novas formas.',
+    'ch.title': 'Desafios',
+    'ch.sub': 'Pratique francês de verdade: expressões, compreensão auditiva e ortografia.',
+    'ch.count.one': '{n} desafio',
+    'ch.count.many': '{n} desafios',
+    'ch.cat.expression.title': 'Expressões',
+    'ch.cat.expression.subtitle': 'Descubra o sentido',
+    'ch.cat.listen_translate.title': 'Ouça e traduza',
+    'ch.cat.listen_translate.subtitle': 'Escute e traduza',
+    'ch.cat.accent.title': 'Acentuação',
+    'ch.cat.accent.subtitle': 'Escreva corretamente',
+    'ch.cat.cloze_grammar.title': 'Complete a frase',
+    'ch.cat.cloze_grammar.subtitle': 'Gramática na prática',
+    'ch.label.cloze': '🧠 Complete a frase',
+    'ch.cloze.instruction': 'Escolha a forma certa para cada lacuna:',
+    'ch.cloze.blank': 'Lacuna {n}',
+    'ch.cloze.chooseAll': 'Escolha uma opção para cada lacuna antes de verificar.',
+    'ch.cloze.right': '✅ Bonne réponse.',
+    'ch.cloze.yourAnswer': 'Sua resposta',
+    'ch.cloze.correct': 'Resposta certa',
+    'ch.cloze.translation': 'Tradução',
+    'ch.cat.dictation.title': 'Ditados',
+    'ch.cat.dictation.subtitle': 'Ouça e escreva',
+    'ch.label.listen': '🎧 Ouça e traduza',
+    'ch.label.accent': '✍️ Acentuação',
+    'ch.ofModule': ' · do módulo',
+    'ch.emptyTitle': 'Nenhum desafio publicado ainda',
+    'ch.emptySub': 'Em breve, novos desafios nesta categoria.',
+    'ch.lockedNote.one': '🔒 +{n} desafio de módulo no Premium',
+    'ch.lockedNote.many': '🔒 +{n} desafios de módulo no Premium',
+    'ch.level': 'Nível {level}',
+    'ch.btn.premiumLock': '🔒 Premium',
+    'ch.progress.one': '{done}/{total} concluído',
+    'ch.progress.many': '{done}/{total} concluídos',
+    'ch.btn.review': '🎉 Revisar',
+    'ch.btn.continue': 'Continuar',
+    'ch.btn.start': 'Começar',
+    'ch.queue.done': 'Exercício concluído!',
+    'ch.queue.levelProgress': 'Nível {level} — {progress}',
+    'ch.queue.continue': 'Continuar →',
+    'ch.queue.levelDone': 'Nível {level} concluído!',
+    'ch.queue.levelDoneSub': 'Você terminou todos os exercícios desse nível.',
+    'ch.queue.back': 'Voltar aos níveis',
+    'ch.listenPron': 'Ouvir pronúncia',
+    'ch.expr.reveal': 'Voir les réponses',
+    'ch.expr.yourAnswer': 'Sua resposta: {chosen}<br>Resposta certa: <strong>{correct}</strong>',
+    'ch.expr.signifies': 'signifie <strong>{fr}</strong>.',
+    'ch.expr.inPt': 'Em português: <strong>{pt}</strong>.',
+    'ch.expr.example1': 'Exemple 1',
+    'ch.expr.example2': 'Exemple 2',
+    'ch.listenFr': '▶ Écouter',
+    'ch.expr.yourTurn': 'À vous de jouer',
+    'ch.expr.showAnswer': 'Voir la réponse',
+    'ch.expr.right': '✅ Bonne réponse.',
+    'ch.notQuite': '❌ Pas tout à fait.',
+    'ch.lt.hint': 'Montrer un indice',
+    'ch.lt.label': 'Digite sua tradução:',
+    'ch.lt.placeholder': 'Sua tradução em português...',
+    'ch.verify': 'Vérifier',
+    'ch.lt.alert.negation': 'Atenção à negação: a frase original e a sua não concordam em "não/nunca/nada".',
+    'ch.lt.alert.number': 'Atenção aos números: confira a quantidade na frase original.',
+    'ch.lt.alert.mustInclude': 'Faltou uma ideia importante: "{word}".',
+    'ch.lt.alert.mustExclude': 'A palavra "{word}" não se encaixa nesta frase.',
+    'ch.lt.missing': 'Palavras que faltaram',
+    'ch.lt.agreement': '⚠ Repare na concordância: depois de "{pronoun}", "{verb}" não é a conjugação certa.',
+    'ch.lt.yours': 'Sua resposta',
+    'ch.lt.expected': 'Resposta esperada',
+    'ch.lt.original': 'Frase original',
+    'ch.lt.explanation': 'Explicação',
+    'ch.listenAgain': '▶ Écouter encore',
+    'ch.lt.right': '✅ Bonne traduction.',
+    'ch.lt.partial': '🟡 Presque : bonne idée, mais vérifiez les détails.',
+    'ch.accent.label': 'Digite o que você ouviu:',
+    'ch.accent.yours': 'Sua resposta: <strong>{answer}</strong>',
+    'ch.accent.right': '✅ Correct.',
+    'ch.accent.partial': '🟡 Presque : vérifiez les accents.',
+    'ch.accent.wrong': '❌ Incorrect.',
+    'ch.static.back': '← Voltar às categorias',
+    'ch.static.backChallenges': '← Voltar aos desafios',
+    'ch.static.backTrail': '← Voltar à trilha',
+    'dict.static.title': 'Ditados',
+    'dict.static.sub': 'Treine sua compreensão auditiva e sua ortografia com ditados baseados em tarefas reais de cada módulo.',
+    'dict.static.how': '🎧 Como funciona o ditado?',
+    'dict.static.s1': 'Ouça o áudio — na velocidade normal ou devagar, quantas vezes quiser.',
+    'dict.static.s2': 'Digite exatamente o que você ouviu, com acentos e pontuação.',
+    'dict.static.s3': 'Clique em "Verificar" para comparar sua resposta com o texto original.',
+    'dict.static.s4': 'Veja o que acertou e o que precisa revisar, palavra por palavra.',
+    'dict.static.backList': '← Voltar aos ditados',
+    'prem.modal.title': '🔒 Recurso Premium',
+    'prem.modal.p1': 'Os <strong>Desafios do Módulo</strong> reforçam cada tema da trilha com Expressões, Ouça e traduza, Acentuação e Ditados extras.',
+    'prem.modal.p2': 'Eles fazem parte do plano Premium. Para ativar, fale com a administração (profbrune).'
+  }
+};
+function chT(key, vars){
+  const lang = (typeof window !== 'undefined' && window.UI_LANG) || 'pt-BR';
+  let str = (CHALLENGE_I18N[lang] && CHALLENGE_I18N[lang][key]);
+  if (str == null) str = CHALLENGE_I18N['pt-BR'][key];
+  if (str == null) return key;
+  if (vars) str = str.replace(/\{(\w+)\}/g, (m, name) => (vars[name] != null ? vars[name] : m));
+  return str;
+}
+// Preenche textos estáticos do index.html marcados com data-ch-i18n="chave".
+function applyChallengeI18n(){
+  document.querySelectorAll('[data-ch-i18n]').forEach(el => { el.innerHTML = chT(el.dataset.chI18n); });
 }
 
 // ---------- Desafios do Módulo (Premium) ----------
@@ -9772,12 +9971,15 @@ function challengesPremiumUnlocked(){
 // paywall e Stripe entram depois. Hoje só ROTULAMOS cada item como Free ou
 // Premium (tierBadgeHTML); quando o paywall existir, basta ligar esta flag.
 const CHALLENGE_PAYWALL_ENABLED = false;
+// Fase 8: leitura dos desafios pela RPC com trava no servidor. SÓ ligar depois de
+// aplicar fr/scripts/supabase_migrations/008 (passo 1 e 2) no banco correspondente.
+const CHALLENGES_SERVER_GATING = false;
 // Free x Premium: desafios de módulo (Ouça e traduza, Acentuação, Expressões)
 // são Premium; ditado é Free só quando d.free === true (1 por módulo).
 function challengeTier(c){ return challengeModuleId(c) ? 'premium' : 'free'; }
 function dictationTier(d){ return d.free === false ? 'premium' : 'free'; }
 function tierBadgeHTML(tier){
-  return `<span class="tier-badge tier-${tier}">${tier === 'premium' ? 'Premium' : 'Free'}</span>`;
+  return `<span class="tier-badge tier-${tier}">${chT(tier === 'premium' ? 'tier.premium' : 'tier.free')}</span>`;
 }
 // Ditados Premium só existem dentro da unidade do módulo -- nunca na lista
 // geral de Desafios > Ditados (nem na trilha).
@@ -9802,6 +10004,7 @@ async function ensureChallengesPlanLoaded(){
   try { if (typeof ensureProfileLoaded === 'function' && CURRENT_USER) await ensureProfileLoaded(); } catch (e) { /* conta sem perfil carregado = Free */ }
 }
 function openPremiumChallengesModal(){
+  applyChallengeI18n();
   document.getElementById('premium-challenges-modal').style.display = 'flex';
 }
 document.getElementById('premium-challenges-modal-close').addEventListener('click', () => {
@@ -9826,6 +10029,106 @@ function unpublishedButApprovedChallenges(){
 function isChallengeCompleted(id){
   return !!STATE.completedChallenges[id];
 }
+// BEGIN challenge-review-logic (extraído por fr/scripts/test_answer_validation.js)
+// Revisão espaçada dos desafios errados (Fase 6). Caixas Leitner: depois de
+// um erro (fail ou partial) o desafio volta na caixa 1 (1 dia); cada acerto
+// numa revisão DEVIDA sobe uma caixa (3, 7, 14 dias); acertar na caixa 4
+// "forma" o desafio (sai da revisão). Errar a qualquer momento volta à 1.
+// Acerto fora do prazo não muda nada (ainda não era revisão). Contagem por
+// DIA do calendário local, não por 24h exatas.
+const CHALLENGE_REVIEW_BOX_DAYS = [1, 3, 7, 14];
+function challengeReviewDayNumber(ms){
+  const d = new Date(ms);
+  return Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+}
+function sanitizeChallengeReviewEntry(raw, id){
+  if (!raw || typeof raw !== 'object') return null;
+  const box = Math.min(CHALLENGE_REVIEW_BOX_DAYS.length, Math.max(1, Math.floor(Number(raw.box)) || 1));
+  const lastErrorAt = Number(raw.lastErrorAt);
+  if (!isFinite(lastErrorAt) || lastErrorAt <= 0) return null;
+  const lastSeenAt = isFinite(Number(raw.lastSeenAt)) && Number(raw.lastSeenAt) > 0 ? Number(raw.lastSeenAt) : lastErrorAt;
+  return { id: String(raw.id || id), lastErrorAt, lastSeenAt, box };
+}
+function challengeReviewDueDay(entry){
+  return challengeReviewDayNumber(entry.lastSeenAt || entry.lastErrorAt) + CHALLENGE_REVIEW_BOX_DAYS[entry.box - 1];
+}
+function isChallengeReviewDue(entry, nowMs){
+  if (!entry) return false;
+  return challengeReviewDayNumber(nowMs) >= challengeReviewDueDay(entry);
+}
+// Devolve a nova entrada (ou null = sair da revisão / nunca entrou).
+function updateChallengeReviewEntry(entry, id, outcome, nowMs){
+  if (outcome === 'fail' || outcome === 'partial'){
+    return { id, lastErrorAt: nowMs, lastSeenAt: nowMs, box: 1 };
+  }
+  if (outcome !== 'ok' || !entry) return entry || null;
+  if (!isChallengeReviewDue(entry, nowMs)) return entry;
+  if (entry.box >= CHALLENGE_REVIEW_BOX_DAYS.length) return null;
+  return { id: entry.id || id, lastErrorAt: entry.lastErrorAt, lastSeenAt: nowMs, box: entry.box + 1 };
+}
+// ids devidos hoje, os erros mais antigos primeiro.
+function dueChallengeReviewIds(reviews, nowMs){
+  return Object.values(reviews || {})
+    .filter(e => e && isChallengeReviewDue(e, nowMs))
+    .sort((a, b) => a.lastErrorAt - b.lastErrorAt)
+    .map(e => e.id);
+}
+// END challenge-review-logic
+
+// Fila "Revisar erros" ativa (true enquanto o aluno percorre os devidos de hoje).
+let challengeReviewQueueActive = false;
+function recordChallengeReviewOutcome(c, outcome){
+  if (!c || challengePreviewMode) return;
+  const next = updateChallengeReviewEntry(STATE.challengeReviews[c.id], c.id, outcome, Date.now());
+  if (next) STATE.challengeReviews[c.id] = next; else delete STATE.challengeReviews[c.id];
+  saveState();
+}
+// Só os que existem e dá pra jogar no recorte atual (módulo / paywall).
+function dueChallengeReviews(){
+  const playableIds = new Set(playableChallenges().map(c => c.id));
+  return dueChallengeReviewIds(STATE.challengeReviews, Date.now()).filter(id => playableIds.has(id));
+}
+function openChallengeReviewQueue(){
+  const due = dueChallengeReviews();
+  if (!due.length){ challengeReviewQueueActive = false; renderChallengeCategories(); return; }
+  challengeReviewQueueActive = true;
+  challengeQueueContext = null;
+  openChallengePlayer(due[0]);
+}
+function renderChallengeReviewDoneScreen(){
+  const content = document.getElementById('challenge-player-content');
+  content.innerHTML = `
+    <div class="challenge-queue-interstitial">
+      <div class="big-emoji">🎉</div>
+      <h3>${chT('ch.review.doneTitle')}</h3>
+      <p>${chT('ch.review.doneSub')}</p>
+      <button class="btn btn-primary btn-block" id="review-queue-back-btn">${chT('ch.review.back')}</button>
+    </div>
+  `;
+  document.getElementById('review-queue-back-btn').addEventListener('click', () => {
+    challengeReviewQueueActive = false;
+    renderChallengeCategories();
+  });
+}
+// Volta "para a lista": na fila de revisão, a lista é a tela de categorias.
+function backToChallengesListOrCategories(){
+  if (challengeReviewQueueActive){ challengeReviewQueueActive = false; renderChallengeCategories(); return; }
+  renderChallengesList(currentChallengesCategory);
+}
+// "X de Y concluídos" + barra fina (cards de categoria e topo das listas).
+function challengeProgressHTML(done, total){
+  if (!total) return '';
+  const pct = Math.round((done / total) * 100);
+  return `<div class="challenge-progress" data-done="${done}" data-total="${total}">
+    <div class="challenge-progress-label">${chT(total === 1 ? 'ch.catProgress.one' : 'ch.catProgress.many', { done, total })}</div>
+    <div class="challenge-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}"><div class="challenge-progress-fill" style="width:${pct}%"></div></div>
+  </div>`;
+}
+function isDictationDone(id){
+  const rec = STATE.dictations && STATE.dictations[id];
+  return !!(rec && rec.attempts);
+}
+
 function markChallengeCompleted(id){
   STATE.completedChallenges[id] = true;
   trackEvent('lesson_complete', 'challenge', { challengeId: id });
@@ -9838,24 +10141,54 @@ function markChallengeCompleted(id){
 // Wrapper compartilhado pelas 3 telas de feedback (Expressões, Ouça e
 // traduza, Acentuação): mesmo invólucro (classe correct/incorrect + header)
 // e mesmo botão de concluir ao final -- só o corpo (bodyHTML) muda por tipo.
-function challengeFeedbackWrapperHTML(typeClass, isCorrect, headerText, bodyHTML){
+// outcome: 'ok' (acerto), 'partial' (erro leve -- conclui, com explicação)
+// ou 'fail' (erro total -- NÃO conclui: oferece "Tentar de novo" e
+// "Tentar mais tarde"). Se omitido, deriva de isCorrect (compatível com
+// chamadores antigos).
+function challengeFeedbackWrapperHTML(typeClass, isCorrect, headerText, bodyHTML, outcome){
+  const out = outcome || (isCorrect ? 'ok' : 'fail');
+  const cls = out === 'ok' ? 'correct' : out === 'partial' ? 'partial' : 'incorrect';
   return `
-    <div class="${typeClass}-feedback ${isCorrect ? 'correct' : 'incorrect'}">
+    <div class="${typeClass}-feedback ${cls}">
       <div class="${typeClass}-feedback-header">${headerText}</div>
       ${bodyHTML}
-      ${challengeCompleteButtonHTML()}
+      ${out === 'fail' ? challengeRetryButtonsHTML() : challengeCompleteButtonHTML()}
     </div>
   `;
 }
 
+function challengeRetryButtonsHTML(){
+  return `<div class="challenge-retry-actions">
+    <button class="btn btn-primary" id="challenge-retry-btn">${chT('ch.retryNow')}</button>
+    <button class="btn btn-secondary" id="challenge-later-btn">${chT('ch.retryLater')}</button>
+  </div>`;
+}
+
 function challengeCompleteButtonHTML(){
-  return `<button class="btn btn-primary challenge-complete-btn" id="challenge-complete-btn" style="margin-top:16px;width:100%;">✅ Concluir</button>`;
+  return `<button class="btn btn-primary challenge-complete-btn" id="challenge-complete-btn" style="margin-top:16px;width:100%;">${chT('ch.complete')}</button>`;
 }
 function wireChallengeCompleteButton(c){
+  const retry = document.getElementById('challenge-retry-btn');
+  if (retry){
+    retry.addEventListener('click', () => openChallengePlayer(c.id));
+    const later = document.getElementById('challenge-later-btn');
+    if (later) later.addEventListener('click', () => {
+      // Sai sem concluir: o desafio continua pendente.
+      challengeQueueContext = null;
+      backToChallengesListOrCategories();
+    });
+    return;
+  }
   const btn = document.getElementById('challenge-complete-btn');
   if (!btn) return;
   btn.addEventListener('click', () => {
     markChallengeCompleted(c.id);
+    if (challengeReviewQueueActive){
+      const nextId = dueChallengeReviews()[0];
+      if (nextId) openChallengePlayer(nextId);
+      else renderChallengeReviewDoneScreen();
+      return;
+    }
     if (challengeQueueContext && challengeQueueContext.type === c.type && challengeQueueContext.level === c.level){
       const next = nextQueueChallenge(c.type, c.level);
       if (next) renderChallengeQueueContinueScreen(c, next);
@@ -9874,7 +10207,7 @@ function challengeResourceCardHTML(r){
     <a class="challenge-external-link" href="${escapeHtmlChallenge(r.url)}" target="_blank" rel="noopener">
       <span class="challenge-external-link-icon">${icon}</span>
       <span class="challenge-external-link-text">
-        <span class="challenge-external-link-label">${escapeHtmlChallenge(r.buttonLabel || 'En savoir plus')}</span>
+        <span class="challenge-external-link-label">${escapeHtmlChallenge(r.buttonLabel || chT('ch.knowMore'))}</span>
         <span class="challenge-external-link-source">${escapeHtmlChallenge(r.sourceName || r.title)}</span>
       </span>
     </a>
@@ -9886,24 +10219,27 @@ function challengeExternalResourcesHTML(c){
   if (!shown.length) return '';
   return `
     <div class="challenge-external-resources">
-      <div class="challenge-external-resources-label">Pour aller plus loin</div>
+      <div class="challenge-external-resources-label">${chT('ch.goFurther')}</div>
       ${shown.map(challengeResourceCardHTML).join('')}
     </div>
   `;
 }
 
 async function renderChallengeCategories(){
+  challengeReviewQueueActive = false;
   document.getElementById('challenges-categories-wrap').style.display = 'block';
   document.getElementById('challenges-list-wrap').style.display = 'none';
   document.getElementById('challenge-player-wrap').style.display = 'none';
   document.getElementById('challenges-admin-wrap').style.display = 'none';
 
   const wrap = document.getElementById('challenges-categories');
-  wrap.innerHTML = loadingHTML('Carregando desafios...');
+  wrap.innerHTML = loadingHTML(chT('ch.loading'));
 
   const ok = await loadChallengesFromDB();
   if (!ok){
-    wrap.innerHTML = `<p class="challenges-empty">Não foi possível carregar os desafios agora. Verifique sua conexão e tente novamente.</p>`;
+    wrap.innerHTML = `<p class="challenges-empty">${chT('ch.loadError')}</p>
+      <button class="btn btn-secondary" id="challenges-retry-btn">${chT('ch.retry')}</button>`;
+    document.getElementById('challenges-retry-btn').addEventListener('click', () => renderChallengeCategories());
     return;
   }
   await ensureChallengesPlanLoaded();
@@ -9917,12 +10253,12 @@ async function renderChallengeCategories(){
   if (filterModule){
     const idx = modulesOfLevel(filterModule.level).findIndex(m => m.id === filterModule.id);
     moduleBack.style.display = 'inline-flex';
-    titleEl.textContent = `Desafios do Módulo ${idx + 1}`;
-    subEl.textContent = `${filterModule.title} · agora que você estudou esse tema, pratique de novas formas.`;
+    titleEl.textContent = chT('ch.moduleTitle', { n: idx + 1 });
+    subEl.textContent = chT('ch.moduleSub', { title: filterModule.title });
   } else {
     moduleBack.style.display = 'none';
-    titleEl.textContent = 'Desafios';
-    subEl.textContent = 'Pratique francês de verdade: expressões, compreensão auditiva e ortografia.';
+    titleEl.textContent = chT('ch.title');
+    subEl.textContent = chT('ch.sub');
   }
 
   const adminBar = document.getElementById('challenges-admin-bar');
@@ -9939,21 +10275,36 @@ async function renderChallengeCategories(){
   const dictationsHere = dictationsVisible(challengesModuleFilter);
   const visibleCats = challengesModuleFilter ? CHALLENGE_CATEGORIES.filter(cat => listedNow.some(c => c.type === cat.type)) : CHALLENGE_CATEGORIES;
   const catSubtitle = (cat) => challengesModuleFilter
-    ? `${listedNow.filter(c => c.type === cat.type).length} desafio${listedNow.filter(c => c.type === cat.type).length === 1 ? '' : 's'}`
-    : cat.subtitle;
-  wrap.innerHTML = visibleCats.map(cat => `
+    ? chT(listedNow.filter(c => c.type === cat.type).length === 1 ? 'ch.count.one' : 'ch.count.many', { n: listedNow.filter(c => c.type === cat.type).length })
+    : chT('ch.cat.' + cat.type + '.subtitle');
+  const catProgress = (cat) => {
+    const ofType = listedNow.filter(c => c.type === cat.type);
+    return challengeProgressHTML(ofType.filter(c => isChallengeCompleted(c.id)).length, ofType.length);
+  };
+  const dueReviews = dueChallengeReviews();
+  wrap.innerHTML = (dueReviews.length ? `
+    <button class="challenge-category-card challenge-review-card" id="challenges-review-card">
+      <div class="challenge-category-emoji">🔁</div>
+      <div class="challenge-category-title">${chT('ch.review.title', { n: dueReviews.length })}</div>
+      <div class="challenge-category-subtitle">${chT('ch.review.subtitle')}</div>
+    </button>
+  ` : '') + visibleCats.map(cat => `
     <button class="challenge-category-card" data-category="${cat.type}">
       <div class="challenge-category-emoji">${cat.emoji}</div>
-      <div class="challenge-category-title">${cat.title}</div>
+      <div class="challenge-category-title">${chT('ch.cat.' + cat.type + '.title')}</div>
       <div class="challenge-category-subtitle">${catSubtitle(cat)}</div>
+      ${catProgress(cat)}
     </button>
   `).join('') + (dictationsHere.length ? `
     <button class="challenge-category-card" id="challenges-dictation-card">
-      <div class="challenge-category-emoji">🎧</div>
-      <div class="challenge-category-title">Ditados</div>
-      <div class="challenge-category-subtitle">${challengesModuleFilter ? `${dictationsHere.length} ditado${dictationsHere.length === 1 ? '' : 's'}` : 'Ouça e escreva'}</div>
+      <div class="challenge-category-emoji">📝</div>
+      <div class="challenge-category-title">${chT('ch.cat.dictation.title')}</div>
+      <div class="challenge-category-subtitle">${challengesModuleFilter ? chT(dictationsHere.length === 1 ? 'dict.count.one' : 'dict.count.many', { n: dictationsHere.length }) : chT('ch.cat.dictation.subtitle')}</div>
+      ${challengeProgressHTML(dictationsHere.filter(d => isDictationDone(d.id)).length, dictationsHere.length)}
     </button>
   ` : '');
+  const reviewCard = document.getElementById('challenges-review-card');
+  if (reviewCard) reviewCard.addEventListener('click', openChallengeReviewQueue);
   wrap.querySelectorAll('.challenge-category-card[data-category]').forEach(card => {
     card.addEventListener('click', () => renderChallengesList(card.dataset.category));
   });
@@ -9966,8 +10317,9 @@ async function renderChallengeCategories(){
 
 function challengeCardLabelHTML(c){
   if (c.type === 'expression') return `<div class="challenge-card-expr">${escapeHtmlChallenge(c.canonicalExpression)}</div>`;
-  if (c.type === 'listen_translate') return `<div class="challenge-card-expr">🎧 Ouça e traduza</div>`;
-  if (c.type === 'accent') return `<div class="challenge-card-expr">✍️ Acentuação</div>`;
+  if (c.type === 'listen_translate') return `<div class="challenge-card-expr">${chT('ch.label.listen')}</div>`;
+  if (c.type === 'accent') return `<div class="challenge-card-expr">${chT('ch.label.accent')}</div>`;
+  if (c.type === 'cloze_grammar') return `<div class="challenge-card-expr">${chT('ch.label.cloze')}</div>`;
   return '';
 }
 
@@ -9985,7 +10337,7 @@ function challengeCardHTML(c){
   const locked = isChallengeLocked(c);
   return `
     <button class="challenge-card ${done ? 'completed' : ''} ${locked ? 'locked' : ''}" data-challenge-id="${c.id}">
-      ${locked ? '<span class="challenge-card-check" title="Premium">🔒</span>' : (done ? '<span class="challenge-card-check">✅</span>' : '')}
+      ${locked ? `<span class="challenge-card-check" title="${chT('tier.premium')}">🔒</span>` : (done ? '<span class="challenge-card-check">✅</span>' : '')}
       <div class="challenge-card-level">${c.level}</div>
       ${challengeCardLabelHTML(c)}
       ${tierBadgeHTML(challengeTier(c))}
@@ -9995,6 +10347,7 @@ function challengeCardHTML(c){
 
 function renderChallengesList(type){
   currentChallengesCategory = type;
+  challengeReviewQueueActive = false;
   document.getElementById('challenges-categories-wrap').style.display = 'none';
   document.getElementById('challenges-list-wrap').style.display = 'block';
   document.getElementById('challenge-player-wrap').style.display = 'none';
@@ -10002,20 +10355,21 @@ function renderChallengesList(type){
   CURRENT_CHALLENGE_PLAYER = null;
 
   const cat = CHALLENGE_CATEGORIES.find(c => c.type === type);
-  document.getElementById('challenges-list-title').textContent = (cat ? cat.title : 'Desafios') + (challengesModuleFilter ? ' · do módulo' : '');
+  document.getElementById('challenges-list-title').textContent = (cat ? chT('ch.cat.' + cat.type + '.title') : chT('ch.title')) + (challengesModuleFilter ? chT('ch.ofModule') : '');
   document.getElementById('challenges-level-tabs').style.display = 'none';
 
   const cardsWrap = document.getElementById('challenges-cards');
   const published = listedChallenges().filter(c => c.type === type);
   const groupByLevel = type === 'expression';
+  document.getElementById('challenges-list-progress').innerHTML = challengeProgressHTML(published.filter(c => isChallengeCompleted(c.id)).length, published.length);
 
   if (published.length === 0){
     cardsWrap.className = 'challenges-cards';
     cardsWrap.innerHTML = `
       <div class="challenges-empty">
         <div class="big-emoji">${cat ? cat.emoji : '🧩'}</div>
-        <h3>Nenhum desafio publicado ainda</h3>
-        <p>Em breve, novos desafios nesta categoria.</p>
+        <h3>${chT('ch.emptyTitle')}</h3>
+        <p>${chT('ch.emptySub')}</p>
       </div>
     `;
     return;
@@ -10034,16 +10388,16 @@ function renderChallengesList(type){
       const levelChallenges = levelAll.filter(c => !isChallengeLocked(c));
       const lockedCount = levelAll.length - levelChallenges.length;
       const lockedNote = lockedCount > 0
-        ? `<div class="challenge-queue-level-progress">🔒 +${lockedCount} desafio${lockedCount === 1 ? '' : 's'} de módulo no Premium</div>`
+        ? `<div class="challenge-queue-level-progress">${chT(lockedCount === 1 ? 'ch.lockedNote.one' : 'ch.lockedNote.many', { n: lockedCount })}</div>`
         : '';
       if (!levelChallenges.length){
         return `
           <div class="challenge-queue-level-card">
             <div class="challenge-queue-level-info">
-              <div class="challenge-queue-level-name">Nível ${level}</div>
+              <div class="challenge-queue-level-name">${chT('ch.level', { level })}</div>
               ${lockedNote}
             </div>
-            <button class="btn btn-secondary" data-premium-lock="1">🔒 Premium</button>
+            <button class="btn btn-secondary" data-premium-lock="1">${chT('ch.btn.premiumLock')}</button>
           </div>
         `;
       }
@@ -10052,12 +10406,13 @@ function renderChallengesList(type){
       return `
         <div class="challenge-queue-level-card">
           <div class="challenge-queue-level-info">
-            <div class="challenge-queue-level-name">Nível ${level}</div>
-            <div class="challenge-queue-level-progress">${doneCount}/${levelChallenges.length} concluído${levelChallenges.length === 1 ? '' : 's'}</div>
+            <div class="challenge-queue-level-name">${chT('ch.level', { level })}</div>
+            <div class="challenge-queue-level-progress">${chT(levelChallenges.length === 1 ? 'ch.progress.one' : 'ch.progress.many', { done: doneCount, total: levelChallenges.length })}</div>
             ${lockedNote}
+            ${[...new Set(levelAll.map(challengeTier))].sort().map(tierBadgeHTML).join(' ')}
           </div>
           <button class="btn ${allDone ? 'btn-secondary' : 'btn-primary'}" data-level="${level}">
-            ${allDone ? '🎉 Revisar' : (doneCount > 0 ? 'Continuar' : 'Começar')}
+            ${allDone ? chT('ch.btn.review') : (doneCount > 0 ? chT('ch.btn.continue') : chT('ch.btn.start'))}
           </button>
         </div>
       `;
@@ -10125,7 +10480,7 @@ function openChallengeQueueLevel(type, level){
 function queueLevelProgressLabel(type, level){
   const all = playableChallenges().filter(c => c.type === type && c.level === level);
   const done = all.filter(c => isChallengeCompleted(c.id)).length;
-  return `${done}/${all.length} concluído${all.length === 1 ? '' : 's'}`;
+  return chT(all.length === 1 ? 'ch.progress.one' : 'ch.progress.many', { done, total: all.length });
 }
 
 function renderChallengeQueueContinueScreen(c, next){
@@ -10133,9 +10488,9 @@ function renderChallengeQueueContinueScreen(c, next){
   content.innerHTML = `
     <div class="challenge-queue-interstitial">
       <div class="big-emoji">✅</div>
-      <h3>Exercício concluído!</h3>
-      <p>Nível ${escapeHtmlChallenge(c.level)} — ${queueLevelProgressLabel(c.type, c.level)}</p>
-      <button class="btn btn-primary btn-block" id="queue-continue-btn">Continuar →</button>
+      <h3>${chT('ch.queue.done')}</h3>
+      <p>${chT('ch.queue.levelProgress', { level: escapeHtmlChallenge(c.level), progress: queueLevelProgressLabel(c.type, c.level) })}</p>
+      <button class="btn btn-primary btn-block" id="queue-continue-btn">${chT('ch.queue.continue')}</button>
     </div>
   `;
   document.getElementById('queue-continue-btn').addEventListener('click', () => openChallengePlayer(next.id));
@@ -10146,9 +10501,9 @@ function renderChallengeQueueLevelDoneScreen(c){
   content.innerHTML = `
     <div class="challenge-queue-interstitial">
       <div class="big-emoji">🎉</div>
-      <h3>Nível ${escapeHtmlChallenge(c.level)} concluído!</h3>
-      <p>Você terminou todos os exercícios desse nível.</p>
-      <button class="btn btn-primary btn-block" id="queue-back-btn">Voltar aos níveis</button>
+      <h3>${chT('ch.queue.levelDone', { level: escapeHtmlChallenge(c.level) })}</h3>
+      <p>${chT('ch.queue.levelDoneSub')}</p>
+      <button class="btn btn-primary btn-block" id="queue-back-btn">${chT('ch.queue.back')}</button>
     </div>
   `;
   document.getElementById('queue-back-btn').addEventListener('click', () => {
@@ -10171,7 +10526,7 @@ document.getElementById('challenge-back-to-list').addEventListener('click', () =
     renderChallengesAdmin();
   } else {
     challengeQueueContext = null;
-    renderChallengesList(currentChallengesCategory);
+    backToChallengesListOrCategories();
   }
 });
 document.getElementById('challenges-admin-back-btn').addEventListener('click', renderChallengeCategories);
@@ -10243,6 +10598,7 @@ function openChallengePlayer(id){
 
   if (c.type === 'listen_translate') return openListenTranslatePlayer(c);
   if (c.type === 'accent') return openAccentPlayer(c);
+  if (c.type === 'cloze_grammar') return openClozeGrammarPlayer(c);
   return openExpressionPlayer(c);
 }
 
@@ -10262,14 +10618,14 @@ function renderExpressionQuestionScreen(c){
   content.innerHTML = `
     <div class="challenge-expression">
       ${escapeHtmlChallenge(c.canonicalExpression)}
-      <button class="audio-btn audio-btn-lg" id="challenge-expression-play-btn" aria-label="Ouvir pronúncia" title="Ouvir pronúncia">🔊</button>
+      <button class="audio-btn audio-btn-lg" id="challenge-expression-play-btn" aria-label="${chT('ch.listenPron')}" title="${chT('ch.listenPron')}">🔊</button>
       ${c.expressionAudioFile ? slowAudioIconBtnHTML('challenge-expression-play-slow-btn') : ''}
     </div>
     <div class="challenge-hypothesis">
       <p class="challenge-question">${escapeHtmlChallenge(c.question)}</p>
       <div class="challenge-choices-wrap">
         <div class="challenge-choices blurred" id="challenge-choices"></div>
-        <button class="btn btn-secondary challenge-reveal-overlay-btn" id="challenge-reveal-btn">Voir les réponses</button>
+        <button class="btn btn-secondary challenge-reveal-overlay-btn" id="challenge-reveal-btn">${chT('ch.expr.reveal')}</button>
       </div>
     </div>
   `;
@@ -10311,34 +10667,35 @@ function answerChallenge(c, chosenIdx){
 function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
   const content = document.getElementById('challenge-player-content');
   const bodyHTML = `
-      ${isCorrect ? '' : `<p class="challenge-feedback-chosen">Sua resposta: ${escapeHtmlChallenge(c.options[chosenIdx])}<br>Resposta certa: <strong>${escapeHtmlChallenge(c.correctAnswer)}</strong></p>`}
+      ${isCorrect ? '' : `<p class="challenge-feedback-chosen">${chT('ch.expr.yourAnswer', { chosen: escapeHtmlChallenge(c.options[chosenIdx]), correct: escapeHtmlChallenge(c.correctAnswer) })}</p>`}
       <p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong><br>
-      signifie <strong>${escapeHtmlChallenge(c.meaning.fr)}</strong>.<br>
-      Em português: <strong>${escapeHtmlChallenge(c.meaning.pt)}</strong>.</p>
+      ${chT('ch.expr.signifies', { fr: escapeHtmlChallenge(c.meaning.fr) })}<br>
+      ${chT('ch.expr.inPt', { pt: escapeHtmlChallenge(c.meaning.pt) })}</p>
       <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation)}</p>
 
       <div class="challenge-second-example">
-        <div class="challenge-second-example-label">Exemple 1</div>
+        <div class="challenge-second-example-label">${chT('ch.expr.example1')}</div>
         <p class="challenge-second-example-text">${escapeHtmlChallenge(c.example.text)}</p>
-        ${c.example.audioFile ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="challenge-example-play-btn">▶ Écouter</button>${slowAudioBtnHTML('challenge-example-play-slow-btn')}</div>` : ''}
+        ${c.example.audioFile ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="challenge-example-play-btn">${chT('ch.listenFr')}</button>${slowAudioBtnHTML('challenge-example-play-slow-btn')}</div>` : ''}
       </div>
 
       <div class="challenge-second-example">
-        <div class="challenge-second-example-label">Exemple 2</div>
+        <div class="challenge-second-example-label">${chT('ch.expr.example2')}</div>
         <p class="challenge-second-example-text">${escapeHtmlChallenge(c.secondExample.text)}</p>
-        ${c.secondExample.audioFile ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="challenge-second-example-play-btn">▶ Écouter</button>${slowAudioBtnHTML('challenge-second-example-play-slow-btn')}</div>` : ''}
+        ${c.secondExample.audioFile ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="challenge-second-example-play-btn">${chT('ch.listenFr')}</button>${slowAudioBtnHTML('challenge-second-example-play-slow-btn')}</div>` : ''}
       </div>
 
       <div class="challenge-microactivity">
-        <div class="challenge-microactivity-label">À vous de jouer</div>
+        <div class="challenge-microactivity-label">${chT('ch.expr.yourTurn')}</div>
         <p class="challenge-microactivity-prompt">${escapeHtmlChallenge(c.microActivity.prompt)}</p>
-        <button class="btn btn-secondary" id="challenge-reveal-answer-btn">Voir la réponse</button>
+        <button class="btn btn-secondary" id="challenge-reveal-answer-btn">${chT('ch.expr.showAnswer')}</button>
         <p class="challenge-microactivity-answer" id="challenge-microactivity-answer" style="display:none;">${escapeHtmlChallenge(c.microActivity.answer)}</p>
       </div>
 
       ${challengeExternalResourcesHTML(c)}
   `;
-  content.innerHTML = challengeFeedbackWrapperHTML('challenge', isCorrect, isCorrect ? '✅ Bonne réponse.' : '❌ Pas tout à fait.', bodyHTML);
+  content.innerHTML = challengeFeedbackWrapperHTML('challenge', isCorrect, isCorrect ? chT('ch.expr.right') : chT('ch.notQuite'), bodyHTML);
+  recordChallengeReviewOutcome(c, isCorrect ? 'ok' : 'fail');
 
   if (c.example.audioFile){
     document.getElementById('challenge-example-play-btn').addEventListener('click', (e) => {
@@ -10371,6 +10728,7 @@ function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
 // (não há chamada de IA em tempo de execução do aluno) — por isso o
 // feedback sempre mostra a resposta do aluno ao lado da esperada, pra ele
 // mesmo julgar nuances que o comparador não capta.
+// BEGIN challenge-translation-logic (extraído por fr/scripts/test_answer_validation.js)
 function normalizeForTranslationCompare(s){
   return String(s || '')
     .toLowerCase()
@@ -10416,7 +10774,7 @@ function isTranslationAcceptable(studentAnswer, referenceTranslations){
 // conjugado numa pessoa incompatível.
 const PT_SUBJECT_PRONOUN_PERSON = {
   'eu': '1s', 'tu': '2s', 'voce': '3s', 'ele': '3s', 'ela': '3s',
-  'nos': '1p', 'a gente': '1s', 'voces': '3p', 'eles': '3p', 'elas': '3p'
+  'nos': '1p', 'a gente': '3s', 'voces': '3p', 'eles': '3p', 'elas': '3p'
 };
 
 // Formas dos verbos irregulares mais comuns -- chaves já sem acento
@@ -10478,7 +10836,9 @@ function ptVerbPersonTags(word){
     [/ou$|eu$|iu$/, '3s'],
     [/aste$|este$|iste$/, '2s'],
     [/ei$/, '1s'],
-    [/as$|es$/, '2s'],
+    // (sem a terminação genérica -as/-es da 2ª pess.: colide com plurais
+    //  como "legumes" e com o artigo "as"; "tu" quase não é usado e os
+    //  irregulares comuns já estão no dicionário acima)
   ];
   for (const [re, tag] of rules){
     if (re.test(word)) return [tag];
@@ -10501,6 +10861,7 @@ function translationHasPersonMismatch(text){
     for (let lookahead = 0; lookahead < 3 && j + lookahead < words.length; lookahead++){
       const candidate = words[j + lookahead];
       if (PT_SUBJECT_PRONOUN_PERSON[candidate]) break;
+      if (candidate === 'e' || (TRANSLATION_STOPWORDS_PT.has(candidate) && !PT_IRREGULAR_VERB_FORMS[candidate])) continue; // "e" normalizado colide com a conjunção
       const tags = ptVerbPersonTags(candidate);
       if (tags.length){
         if (!tags.includes(expected)) return { pronoun, verb: candidate, expected, got: tags };
@@ -10511,22 +10872,96 @@ function translationHasPersonMismatch(text){
   return null;
 }
 
+// ---- Análise da tradução (Fase 3, 05/10/2026) ----
+// Além da sobreposição de palavras, a análise acusa 3 tipos de alerta contra
+// a referência de MELHOR similaridade: negação trocada ("não" presente só
+// de um lado), número diferente ("dois" x "três", dígitos incluídos) e, se o
+// desafio trouxer, `mustInclude` (lista de grupos de alternativas: pelo
+// menos uma de cada grupo precisa aparecer) e `mustExclude` (palavras que
+// não podem aparecer). Também devolve as palavras da referência que
+// faltaram na resposta (diferença palavra a palavra).
+const PT_NEGATION_WORDS = new Set(['nao','nunca','jamais','nem','nada','ninguem','nenhum','nenhuma','sem']);
+const PT_NUMBER_WORDS = {
+  zero:0, dois:2, duas:2, tres:3, quatro:4, cinco:5, seis:6, sete:7, oito:8, nove:9, dez:10,
+  onze:11, doze:12, treze:13, catorze:14, quatorze:14, quinze:15, dezesseis:16, dezessete:17,
+  dezoito:18, dezenove:19, vinte:20, trinta:30, quarenta:40, cinquenta:50, sessenta:60,
+  setenta:70, oitenta:80, noventa:90, cem:100, cento:100
+};
+
+function translationNumbers(text){
+  const nums = new Set();
+  normalizeForTranslationCompare(text).split(' ').forEach(w => {
+    if (/^\d+$/.test(w)){ if (w !== '1') nums.add(Number(w)); }
+    else if (Object.prototype.hasOwnProperty.call(PT_NUMBER_WORDS, w)) nums.add(PT_NUMBER_WORDS[w]);
+  });
+  return nums;
+}
+function translationHasNegation(text){
+  return normalizeForTranslationCompare(text).split(' ').some(w => PT_NEGATION_WORDS.has(w));
+}
+
+function analyzeTranslation(studentAnswer, referenceTranslations, extra){
+  const refs = referenceTranslations || [];
+  let best = 0, bestRef = refs[0] || '';
+  refs.forEach(ref => {
+    const sim = translationSimilarity(studentAnswer, ref);
+    if (sim > best){ best = sim; bestRef = ref; }
+  });
+  const alerts = [];
+  if (best > 0){
+    if (translationHasNegation(studentAnswer) !== translationHasNegation(bestRef)) alerts.push({ type: 'negation' });
+    const sn = translationNumbers(studentAnswer), rn = translationNumbers(bestRef);
+    if (sn.size !== rn.size || [...sn].some(n => !rn.has(n))) alerts.push({ type: 'number' });
+  }
+  const studentTokens = new Set(normalizeForTranslationCompare(studentAnswer).split(' '));
+  const norm = w => normalizeForTranslationCompare(w);
+  if (extra && Array.isArray(extra.mustInclude)){
+    extra.mustInclude.forEach(group => {
+      const alts = (Array.isArray(group) ? group : [group]).map(norm).filter(Boolean);
+      if (alts.length && !alts.some(w => studentTokens.has(w) || normalizeForTranslationCompare(studentAnswer).includes(w))){
+        alerts.push({ type: 'mustInclude', word: alts[0] });
+      }
+    });
+  }
+  if (extra && Array.isArray(extra.mustExclude)){
+    extra.mustExclude.map(norm).filter(Boolean).forEach(w => {
+      if (studentTokens.has(w)) alerts.push({ type: 'mustExclude', word: w });
+    });
+  }
+  const missingWords = translationTokenSet(bestRef).filter(w => !studentTokens.has(w));
+  return { similarity: best, bestRef, alerts, missingWords };
+}
+
+// Resultado em 3 níveis (regra de conclusão dos Desafios, 04/10/2026):
+// 'ok' = acerto (similaridade >= 0,8 e sem alerta); 'partial' = erro leve
+// (0,55 a 0,8, ou qualquer alerta -- concordância, negação, número,
+// mustInclude/mustExclude) -- conclui com explicação; 'fail' = erro total
+// (< 0,55 ou vazio) -- não conclui.
+function listenTranslateOutcome(studentAnswer, referenceTranslations, personMismatch, extra){
+  if (!studentAnswer || !studentAnswer.trim()) return 'fail';
+  const an = analyzeTranslation(studentAnswer, referenceTranslations, extra);
+  if (an.similarity < 0.55) return 'fail';
+  if (personMismatch || an.alerts.length || an.similarity < 0.8) return 'partial';
+  return 'ok';
+}
+// END challenge-translation-logic
+
 function openListenTranslatePlayer(c){
   const content = document.getElementById('challenge-player-content');
   content.innerHTML = `
-    <div class="challenge-expression">🎧 Ouça e traduza</div>
+    <div class="challenge-expression">${chT('ch.label.listen')}</div>
     <div class="listen-translate-audio-wrap audio-btn-row">
-      <button class="dictation-play-btn" id="lt-play-btn">▶ Écouter</button>
+      <button class="dictation-play-btn" id="lt-play-btn">${chT('ch.listenFr')}</button>
       ${slowAudioBtnHTML('lt-play-slow-btn')}
     </div>
     <div class="listen-translate-hint-wrap">
-      <button class="btn btn-secondary" id="lt-hint-btn">Montrer un indice</button>
+      <button class="btn btn-secondary" id="lt-hint-btn">${chT('ch.lt.hint')}</button>
       <p class="listen-translate-hint-text" id="lt-hint-text" style="display:none;"></p>
     </div>
-    <label class="listen-translate-answer-label" for="lt-answer-input">Digite sua tradução:</label>
-    <textarea class="listen-translate-answer-input" id="lt-answer-input" rows="2" placeholder="Sua tradução em português..."></textarea>
+    <label class="listen-translate-answer-label" for="lt-answer-input">${chT('ch.lt.label')}</label>
+    <textarea class="listen-translate-answer-input" id="lt-answer-input" rows="2" placeholder="${chT('ch.lt.placeholder')}"></textarea>
     <div class="listen-translate-actions">
-      <button class="btn btn-primary" id="lt-verify-btn">Vérifier</button>
+      <button class="btn btn-primary" id="lt-verify-btn">${chT('ch.verify')}</button>
     </div>
     <div id="lt-feedback-wrap" aria-live="polite" aria-atomic="true"></div>
   `;
@@ -10545,27 +10980,47 @@ function openListenTranslatePlayer(c){
   document.getElementById('lt-verify-btn').addEventListener('click', () => checkListenTranslateAnswer(c));
 }
 
+function translationAlertsHTML(an, outcome){
+  if (outcome === 'fail') return '';
+  const msgs = [];
+  an.alerts.forEach(a => {
+    if (a.type === 'negation') msgs.push(chT('ch.lt.alert.negation'));
+    else if (a.type === 'number') msgs.push(chT('ch.lt.alert.number'));
+    else if (a.type === 'mustInclude') msgs.push(chT('ch.lt.alert.mustInclude', { word: escapeHtmlChallenge(a.word) }));
+    else if (a.type === 'mustExclude') msgs.push(chT('ch.lt.alert.mustExclude', { word: escapeHtmlChallenge(a.word) }));
+  });
+  const parts = msgs.map(m => `<p class="listen-translate-feedback-warning">⚠ ${m}</p>`);
+  if (outcome === 'partial' && an.missingWords.length){
+    parts.push(`<p class="listen-translate-feedback-row"><strong>${chT('ch.lt.missing')}</strong>${an.missingWords.map(escapeHtmlChallenge).join(', ')}</p>`);
+  }
+  return parts.join('');
+}
+
 function checkListenTranslateAnswer(c){
   const input = document.getElementById('lt-answer-input');
   const studentAnswer = input.value.trim();
   const personMismatch = translationHasPersonMismatch(studentAnswer);
-  const isCorrect = !personMismatch && isTranslationAcceptable(studentAnswer, c.referenceTranslations);
+  const outcome = listenTranslateOutcome(studentAnswer, c.referenceTranslations, personMismatch, c);
+  const analysis = analyzeTranslation(studentAnswer, c.referenceTranslations, c);
+  const isCorrect = outcome === 'ok';
   // Desafio de conteúdo continua clicável mesmo já concluído -- não dá XP
   // (mesma decisão de answerChallenge, ver auditoria do sistema de XP).
 
   const ltBodyHTML = `
-      ${personMismatch ? `<p class="listen-translate-feedback-warning">⚠ Repare na concordância: depois de "${escapeHtmlChallenge(personMismatch.pronoun)}", "${escapeHtmlChallenge(personMismatch.verb)}" não é a conjugação certa.</p>` : ''}
-      <p class="listen-translate-feedback-row"><strong>Sua resposta</strong>${escapeHtmlChallenge(studentAnswer || '—')}</p>
-      <p class="listen-translate-feedback-row"><strong>Resposta esperada</strong>${escapeHtmlChallenge(c.referenceTranslations[0])}</p>
-      <p class="listen-translate-feedback-row"><strong>Frase original</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
-      ${c.explanation ? `<p class="listen-translate-feedback-row"><strong>Explicação</strong>${escapeHtmlChallenge(c.explanation)}</p>` : ''}
+      ${personMismatch ? `<p class="listen-translate-feedback-warning">${chT('ch.lt.agreement', { pronoun: escapeHtmlChallenge(personMismatch.pronoun), verb: escapeHtmlChallenge(personMismatch.verb) })}</p>` : ''}
+      ${translationAlertsHTML(analysis, outcome)}
+      <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.yours')}</strong>${escapeHtmlChallenge(studentAnswer || '—')}</p>
+      <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.expected')}</strong>${escapeHtmlChallenge(c.referenceTranslations[0])}</p>
+      <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.original')}</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
+      ${c.explanation ? `<p class="listen-translate-feedback-row"><strong>${chT('ch.lt.explanation')}</strong>${escapeHtmlChallenge(c.explanation)}</p>` : ''}
       <div class="audio-btn-row">
-        <button class="dictation-play-btn" id="lt-replay-btn">▶ Écouter encore</button>
+        <button class="dictation-play-btn" id="lt-replay-btn">${chT('ch.listenAgain')}</button>
         ${slowAudioBtnHTML('lt-replay-slow-btn')}
       </div>
   `;
-  document.getElementById('lt-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('listen-translate', isCorrect, isCorrect ? '✅ Bonne traduction.' : '❌ Pas tout à fait.', ltBodyHTML);
+  document.getElementById('lt-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('listen-translate', isCorrect, outcome === 'ok' ? chT('ch.lt.right') : outcome === 'partial' ? chT('ch.lt.partial') : chT('ch.notQuite'), ltBodyHTML, outcome);
   document.getElementById('lt-verify-btn').style.display = 'none';
+  recordChallengeReviewOutcome(c, outcome);
   document.getElementById('lt-replay-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
   });
@@ -10587,21 +11042,34 @@ function normalizeForAccentCompare(s){
 function isAccentAnswerCorrect(studentAnswer, targetText){
   return normalizeForAccentCompare(studentAnswer) === normalizeForAccentCompare(targetText);
 }
+
+function stripDiacriticsForAccentCompare(s){
+  return normalizeForAccentCompare(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+// 'ok' = igual; 'partial' = só o acento/cedilha/trema difere (erro leve,
+// conclui); 'fail' = palavra diferente ou vazio (erro total, não conclui).
+function accentAnswerOutcome(studentAnswer, targetText){
+  if (isAccentAnswerCorrect(studentAnswer, targetText)) return 'ok';
+  const typed = stripDiacriticsForAccentCompare(studentAnswer);
+  if (typed && typed === stripDiacriticsForAccentCompare(targetText)) return 'partial';
+  return 'fail';
+}
 // END accent-challenge-logic
 
 function openAccentPlayer(c){
   const content = document.getElementById('challenge-player-content');
   content.innerHTML = `
-    <div class="challenge-expression">✍️ Acentuação</div>
+    <div class="challenge-expression">${chT('ch.label.accent')}</div>
     <div class="accent-audio-wrap audio-btn-row">
-      <button class="dictation-play-btn" id="accent-play-btn">▶ Écouter</button>
+      <button class="dictation-play-btn" id="accent-play-btn">${chT('ch.listenFr')}</button>
       ${slowAudioBtnHTML('accent-play-slow-btn')}
     </div>
-    <label class="listen-translate-answer-label" for="accent-answer-input">Digite o que você ouviu:</label>
+    <label class="listen-translate-answer-label" for="accent-answer-input">${chT('ch.accent.label')}</label>
     <input type="text" class="accent-answer-input" id="accent-answer-input" autocomplete="off" autocapitalize="off" spellcheck="false">
     ${frAccentPickerHTML()}
     <div class="listen-translate-actions">
-      <button class="btn btn-primary" id="accent-verify-btn">Vérifier</button>
+      <button class="btn btn-primary" id="accent-verify-btn">${chT('ch.verify')}</button>
     </div>
     <div id="accent-feedback-wrap" aria-live="polite" aria-atomic="true"></div>
   `;
@@ -10622,27 +11090,144 @@ function openAccentPlayer(c){
 function checkAccentAnswer(c){
   const input = document.getElementById('accent-answer-input');
   const studentAnswer = input.value.trim();
-  const isCorrect = isAccentAnswerCorrect(studentAnswer, c.targetText);
+  const outcome = accentAnswerOutcome(studentAnswer, c.targetText);
+  const isCorrect = outcome === 'ok';
   // Desafio de conteúdo continua clicável mesmo já concluído -- não dá XP
   // (mesma decisão de answerChallenge, ver auditoria do sistema de XP).
 
   const accentBodyHTML = `
-      ${!isCorrect ? `<p class="accent-feedback-answer">Sua resposta: <strong>${escapeHtmlChallenge(studentAnswer || '—')}</strong></p>` : ''}
+      ${!isCorrect ? `<p class="accent-feedback-answer">${chT('ch.accent.yours', { answer: escapeHtmlChallenge(studentAnswer || '—') })}</p>` : ''}
       <div class="accent-feedback-correct-word">${escapeHtmlChallenge(c.targetText)}</div>
       <div class="audio-btn-row">
-        <button class="dictation-play-btn" id="accent-replay-btn">▶ Écouter</button>
+        <button class="dictation-play-btn" id="accent-replay-btn">${chT('ch.listenFr')}</button>
         ${slowAudioBtnHTML('accent-replay-slow-btn')}
       </div>
       ${c.explanation ? `<p class="accent-feedback-explanation">${escapeHtmlChallenge(c.explanation)}</p>` : ''}
   `;
-  document.getElementById('accent-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('accent', isCorrect, isCorrect ? '✅ Correct.' : '❌ Incorrect.', accentBodyHTML);
+  document.getElementById('accent-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('accent', isCorrect, outcome === 'ok' ? chT('ch.accent.right') : outcome === 'partial' ? chT('ch.accent.partial') : chT('ch.accent.wrong'), accentBodyHTML, outcome);
   document.getElementById('accent-verify-btn').style.display = 'none';
+  recordChallengeReviewOutcome(c, outcome);
   document.getElementById('accent-replay-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
   });
   document.getElementById('accent-replay-slow-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
   });
+  wireChallengeCompleteButton(c);
+}
+
+// ---------- Complete a frase (gramática) -- type 'cloze_grammar' ----------
+// Uma frase em francês com 1+ lacunas "___"; cada lacuna tem 2 a 4 opções
+// (múltipla escolha). Primeiro tema: passé composé (auxiliar être/avoir e
+// particípio). Dado no banco (dentro de `data`):
+//   sentenceFr: "Hier, nous ___ mangé au restaurant."
+//   blanks: [{ options: ["avons", "sommes"], answer: "avons" }]
+//   translationPt, explanation (pt-BR, obrigatória), topic (ex. "passe-compose")
+// Conclusão: todas as lacunas certas = ok; qualquer erro = fail (binário,
+// como Expressões). Sem áudio.
+// BEGIN cloze-grammar-logic (extraído por fr/scripts/test_answer_validation.js)
+const CLOZE_GRAMMAR_BLANK = '___';
+function clozeGrammarParts(sentence){
+  return String(sentence || '').split(CLOZE_GRAMMAR_BLANK);
+}
+// Lista de problemas do item (vazia = válido). Usada pelo checklist do admin.
+function validateClozeGrammarItem(c){
+  const problems = [];
+  if (!c || !c.sentenceFr) { problems.push('frase vazia'); return problems; }
+  const nBlanks = clozeGrammarParts(c.sentenceFr).length - 1;
+  const blanks = Array.isArray(c.blanks) ? c.blanks : [];
+  if (nBlanks < 1) problems.push('a frase não tem lacuna ___');
+  if (nBlanks !== blanks.length) problems.push(`a frase tem ${nBlanks} lacuna(s) e ${blanks.length} grupo(s) de opções`);
+  blanks.forEach((b, i) => {
+    const opts = (b && Array.isArray(b.options)) ? b.options : [];
+    if (opts.length < 2 || opts.length > 4) problems.push(`lacuna ${i + 1}: precisa de 2 a 4 opções`);
+    if (new Set(opts.map(o => String(o).trim().toLowerCase())).size !== opts.length) problems.push(`lacuna ${i + 1}: opções repetidas`);
+    if (!b || !opts.includes(b.answer)) problems.push(`lacuna ${i + 1}: a resposta certa não está entre as opções`);
+  });
+  if (!c.explanation || !String(c.explanation).trim()) problems.push('explicação vazia');
+  return problems;
+}
+// chosen: array com a opção escolhida em cada lacuna (null = não respondida).
+function clozeGrammarOutcome(c, chosen){
+  const blanks = (c && c.blanks) || [];
+  const perBlank = blanks.map((b, i) => !!chosen && chosen[i] != null && chosen[i] === b.answer);
+  const complete = !!chosen && blanks.every((b, i) => chosen[i] != null);
+  const outcome = complete && perBlank.length > 0 && perBlank.every(Boolean) ? 'ok' : 'fail';
+  return { outcome, perBlank, complete };
+}
+// Frase com as lacunas preenchidas (pelas escolhas ou, sem escolhas, pelas respostas certas).
+function clozeGrammarFilled(c, chosen){
+  const parts = clozeGrammarParts(c.sentenceFr);
+  const blanks = c.blanks || [];
+  return parts.map((p, i) => i < parts.length - 1
+    ? p + ((chosen && chosen[i] != null) ? chosen[i] : (blanks[i] ? blanks[i].answer : CLOZE_GRAMMAR_BLANK))
+    : p).join('');
+}
+// END cloze-grammar-logic
+
+function openClozeGrammarPlayer(c){
+  stopExerciseAudio();
+  const blanks = c.blanks || [];
+  const chosen = blanks.map(() => null);
+  const parts = clozeGrammarParts(c.sentenceFr);
+  const content = document.getElementById('challenge-player-content');
+  const sentenceHTML = parts.map((p, i) => escapeHtmlChallenge(p) +
+    (i < parts.length - 1 ? `<span class="cloze-grammar-slot" data-slot="${i}">${CLOZE_GRAMMAR_BLANK}</span>` : '')).join('');
+  content.innerHTML = `
+    <div class="cloze-grammar">
+      <p class="challenge-question">${chT('ch.cloze.instruction')}</p>
+      <div class="cloze-grammar-sentence" id="cloze-grammar-sentence">${sentenceHTML}</div>
+      ${blanks.map((b, i) => `
+        <div class="cloze-grammar-group" data-blank="${i}">
+          ${blanks.length > 1 ? `<div class="cloze-grammar-group-label">${chT('ch.cloze.blank', { n: i + 1 })}</div>` : ''}
+          <div class="challenge-choices">
+            ${shuffle(b.options.slice()).map(o => `<button class="challenge-choice-btn" data-blank="${i}" data-value="${escapeHtmlChallenge(o)}">${escapeHtmlChallenge(o)}</button>`).join('')}
+          </div>
+        </div>`).join('')}
+      <p class="cloze-grammar-msg" id="cloze-grammar-msg"></p>
+      <button class="btn btn-primary btn-block" id="cloze-grammar-verify-btn">${chT('ch.verify')}</button>
+      <div id="cloze-grammar-feedback-wrap"></div>
+    </div>
+  `;
+  content.querySelectorAll('.cloze-grammar-group .challenge-choice-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = Number(btn.dataset.blank);
+      chosen[i] = btn.dataset.value;
+      content.querySelectorAll(`.challenge-choice-btn[data-blank="${i}"]`).forEach(b => b.classList.toggle('selected', b === btn));
+      const slot = content.querySelector(`.cloze-grammar-slot[data-slot="${i}"]`);
+      if (slot){ slot.textContent = chosen[i]; slot.classList.add('filled'); }
+      document.getElementById('cloze-grammar-msg').textContent = '';
+    });
+  });
+  document.getElementById('cloze-grammar-verify-btn').addEventListener('click', () => {
+    const res = clozeGrammarOutcome(c, chosen);
+    if (!res.complete){ document.getElementById('cloze-grammar-msg').textContent = chT('ch.cloze.chooseAll'); return; }
+    renderClozeGrammarFeedback(c, chosen, res);
+  });
+}
+
+function renderClozeGrammarFeedback(c, chosen, res){
+  const content = document.getElementById('challenge-player-content');
+  content.querySelectorAll('.cloze-grammar-group .challenge-choice-btn').forEach(b => {
+    const i = Number(b.dataset.blank);
+    b.classList.add('disabled');
+    if (b.dataset.value === c.blanks[i].answer) b.classList.add('correct');
+    else if (b.dataset.value === chosen[i]) b.classList.add('incorrect');
+  });
+  content.querySelectorAll('.cloze-grammar-slot').forEach(s => {
+    const i = Number(s.dataset.slot);
+    s.classList.add(res.perBlank[i] ? 'correct' : 'incorrect');
+  });
+  document.getElementById('cloze-grammar-verify-btn').style.display = 'none';
+  const isCorrect = res.outcome === 'ok';
+  const bodyHTML = `
+    ${isCorrect ? '' : `<p class="challenge-feedback-chosen">${chT('ch.cloze.yourAnswer')}: ${escapeHtmlChallenge(clozeGrammarFilled(c, chosen))}<br>${chT('ch.cloze.correct')}: <strong>${escapeHtmlChallenge(clozeGrammarFilled(c))}</strong></p>`}
+    ${isCorrect ? `<p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(clozeGrammarFilled(c))}</strong></p>` : ''}
+    ${c.translationPt ? `<p class="challenge-feedback-meaning">${chT('ch.cloze.translation')}: ${escapeHtmlChallenge(c.translationPt)}</p>` : ''}
+    <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation || '')}</p>
+  `;
+  document.getElementById('cloze-grammar-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('challenge', isCorrect, isCorrect ? chT('ch.cloze.right') : chT('ch.notQuite'), bodyHTML, res.outcome);
+  recordChallengeReviewOutcome(c, res.outcome);
   wireChallengeCompleteButton(c);
 }
 
@@ -10769,6 +11354,10 @@ function challengeQualityChecklist(c){
   } else if (c.type === 'accent'){
     items.push({ label: 'Palavra/expressão preenchida', ok: !!c.targetText, blocking: true });
     items.push({ label: 'Explicação preenchida', ok: !!c.explanation, blocking: false });
+  } else if (c.type === 'cloze_grammar'){
+    const problems = validateClozeGrammarItem(c);
+    items.push({ label: problems.length ? 'Lacunas/opções: ' + problems.join('; ') : 'Lacunas, opções e explicação válidas', ok: !problems.length, blocking: true });
+    items.push({ label: 'Tradução preenchida', ok: !!c.translationPt, blocking: false });
   }
 
   return items;
@@ -10929,13 +11518,49 @@ function challengeAdminEditViewAccent(c){
   `;
 }
 
+function clozeGrammarBlanksText(c){
+  return (c.blanks || []).map(b => (b.options || []).map(o => (o === b.answer ? '*' : '') + o).join(' | ')).join('\n');
+}
+
+function challengeAdminReadViewClozeGrammar(c){
+  return `
+    <p class="challenges-admin-field"><strong>Frase:</strong> ${escapeHtmlChallenge(c.sentenceFr || '')}</p>
+    <p class="challenges-admin-field"><strong>Opções por lacuna:</strong></p>
+    <ul class="challenges-admin-choices">
+      ${(c.blanks || []).map((b, i) => `<li>Lacuna ${i + 1}: ${(b.options || []).map(o => o === b.answer ? `<strong>${escapeHtmlChallenge(o)}</strong>` : escapeHtmlChallenge(o)).join(' · ')}</li>`).join('')}
+    </ul>
+    <p class="challenges-admin-field"><strong>Tradução:</strong> ${escapeHtmlChallenge(c.translationPt || '—')}</p>
+    <p class="challenges-admin-field"><strong>Explicação:</strong> ${escapeHtmlChallenge(c.explanation || '—')}</p>
+    ${challengeQualityChecklistHTML(c)}
+  `;
+}
+
+function challengeAdminEditViewClozeGrammar(c){
+  return `
+    <label class="challenges-admin-edit-label">Frase (use ___ para cada lacuna)
+      <textarea class="challenges-admin-edit-input" data-field="sentenceFr" rows="2">${escapeHtmlChallenge(c.sentenceFr || '')}</textarea>
+    </label>
+    <label class="challenges-admin-edit-label">Opções (uma linha por lacuna, separadas por " | " — marque a certa com * no início)
+      <textarea class="challenges-admin-edit-input" data-field="blanks" rows="3">${escapeHtmlChallenge(clozeGrammarBlanksText(c))}</textarea>
+    </label>
+    <label class="challenges-admin-edit-label">Tradução (pt-BR)
+      <input class="challenges-admin-edit-input" data-field="translationPt" value="${escapeHtmlChallenge(c.translationPt || '')}">
+    </label>
+    <label class="challenges-admin-edit-label">Explicação (pt-BR)
+      <textarea class="challenges-admin-edit-input" data-field="explanation" rows="2">${escapeHtmlChallenge(c.explanation || '')}</textarea>
+    </label>
+  `;
+}
+
 function challengeAdminReadView(c){
+  if (c.type === 'cloze_grammar') return challengeAdminReadViewClozeGrammar(c);
   if (c.type === 'listen_translate') return challengeAdminReadViewListenTranslate(c);
   if (c.type === 'accent') return challengeAdminReadViewAccent(c);
   return challengeAdminReadViewExpression(c);
 }
 
 function challengeAdminEditView(c){
+  if (c.type === 'cloze_grammar') return challengeAdminEditViewClozeGrammar(c);
   if (c.type === 'listen_translate') return challengeAdminEditViewListenTranslate(c);
   if (c.type === 'accent') return challengeAdminEditViewAccent(c);
   return challengeAdminEditViewExpression(c);
@@ -10951,6 +11576,7 @@ function challengeAdminCardTitle(c){
     return `🎧 ${escapeHtmlChallenge(snippet)}`;
   }
   if (c.type === 'accent') return `✍️ Acentuação — ${escapeHtmlChallenge(c.targetText)}`;
+  if (c.type === 'cloze_grammar') return `🧠 ${escapeHtmlChallenge(c.sentenceFr || '')}`;
   return '';
 }
 
@@ -11078,7 +11704,7 @@ function renderChallengePreviewBanner(c){
   const showAnswerBtn = document.getElementById('preview-show-answer-btn');
   if (showAnswerBtn){
     showAnswerBtn.addEventListener('click', () => {
-      const answer = c.type === 'listen_translate' ? (c.referenceTranslations || [])[0] : c.targetText;
+      const answer = c.type === 'listen_translate' ? (c.referenceTranslations || [])[0] : c.type === 'cloze_grammar' ? clozeGrammarFilled(c) : c.targetText;
       alert('Resposta esperada: ' + answer);
     });
   }
@@ -11131,10 +11757,10 @@ function challengeAdminPublishedCardHTML(c){
 const challengesAdminFilterState = { search: '', type: 'all', level: 'all' };
 const CHALLENGES_ADMIN_PAGE_SIZE = 15;
 const challengesAdminVisibleCount = { pending: CHALLENGES_ADMIN_PAGE_SIZE, published: CHALLENGES_ADMIN_PAGE_SIZE, unpublished: CHALLENGES_ADMIN_PAGE_SIZE };
-const CHALLENGE_TYPE_LABELS = { expression: 'Expressões', listen_translate: 'Ouça e traduza', accent: 'Acentuação' };
+const CHALLENGE_TYPE_LABELS = { expression: 'Expressões', listen_translate: 'Ouça e traduza', accent: 'Acentuação', cloze_grammar: 'Complete a frase' };
 
 function challengeSearchableText(c){
-  return [c.canonicalExpression, c.sentenceFr, c.targetText, c.question, c.explanation]
+  return [c.canonicalExpression, c.sentenceFr, c.targetText, c.question, c.explanation, c.translationPt]
     .filter(Boolean).join(' ').toLowerCase();
 }
 
@@ -11275,7 +11901,7 @@ async function renderChallengesAdmin(){
 
   const content = document.getElementById('challenges-admin-content');
   content.innerHTML = loadingHTML();
-  const ok = await loadChallengesFromDB();
+  const ok = await loadChallengesFromDB(true);
   if (!ok){
     content.innerHTML = `<p class="challenges-admin-empty">⚠ Não foi possível carregar os desafios agora. Verifique sua conexão e tente novamente -- isto NÃO significa que a fila está vazia.</p>`;
     return;
@@ -11427,6 +12053,12 @@ function renderChallengesAdminList(){
           c.options = lines.map(l => l.replace(/^\*/, '').trim());
           const starred = lines.find(l => l.startsWith('*'));
           if (starred) c.correctAnswer = starred.replace(/^\*/, '').trim();
+        } else if (field === 'blanks'){
+          c.blanks = value.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+            const opts = line.split('|').map(o => o.trim()).filter(Boolean);
+            const starred = opts.find(o => o.startsWith('*'));
+            return { options: opts.map(o => o.replace(/^\*/, '').trim()), answer: starred ? starred.replace(/^\*/, '').trim() : '' };
+          });
         } else if (field === 'referenceTranslations'){
           c.referenceTranslations = value.split('\n').map(l => l.trim()).filter(Boolean);
         } else if (field.includes('.')){

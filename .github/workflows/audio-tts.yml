@@ -76,7 +76,15 @@ jobs:
           git config user.email "actions@github.com"
           git add fr/audio fr/audio-manifest.js zh/audio zh/audio-manifest.js
           git diff --cached --quiet || git commit -m "Áudio TTS (${{ inputs.modo }}): mp3 gerados com Chirp 3 HD"
-          git push
+          # O main pode ter mudado durante a geração (merge de outro PR):
+          # atualiza por rebase antes de enviar, com algumas tentativas.
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && exit 0
+            git rebase --abort 2>/dev/null || true
+            sleep 5
+          done
+          echo "Não foi possível enviar após 3 tentativas" >&2
+          exit 1
       # Commits feitos pelo próprio workflow (GITHUB_TOKEN) NÃO disparam a
       # publicação do site sozinhos -- pede explicitamente.
       - name: Publicar o site

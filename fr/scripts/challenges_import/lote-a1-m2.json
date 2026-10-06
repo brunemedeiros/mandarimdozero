@@ -14,7 +14,7 @@
       "Eu queria queijo, por favor.",
       "Queria queijo, por favor."
     ],
-    "explanation": "",
+    "explanation": "\"Je voudrais\" é a forma educada de pedir; \"du\" (de + le) indica uma quantidade de queijo.",
     "status": "needs_review"
   },
   {
@@ -32,7 +32,7 @@
       "Tu bebes leite de manhã?",
       "Você toma leite de manhã?"
     ],
-    "explanation": "",
+    "explanation": "\"Du lait\" usa o artigo partitivo: leite não se conta, então \"du\" e não \"un\".",
     "status": "needs_review"
   },
   {
@@ -50,7 +50,7 @@
       "Levanto às seis horas.",
       "Eu levanto às seis."
     ],
-    "explanation": "",
+    "explanation": "Verbo reflexivo: \"je me lève\" é literalmente \"eu me levanto\"; a hora vem com \"à ... heures\".",
     "status": "needs_review"
   },
   {
@@ -68,7 +68,7 @@
       "São sete da noite.",
       "São 19 horas."
     ],
-    "explanation": "",
+    "explanation": "Para a hora, o francês diz \"il est sept heures\"; \"du soir\" indica a noite.",
     "status": "needs_review"
   },
   {
@@ -83,10 +83,10 @@
     "hintText": "Aujourd'hui, nous ______ ______.",
     "referenceTranslations": [
       "Hoje é terça-feira.",
-      "Hoje estamos em terça-feira.",
+      "Estamos em uma terça-feira.",
       "Hoje é terça."
     ],
-    "explanation": "",
+    "explanation": "Para o dia da semana, o francês diz \"nous sommes mardi\" (literalmente \"estamos terça\"); em português diz-se \"hoje é terça-feira\".",
     "status": "needs_review"
   },
   {
@@ -104,7 +104,7 @@
       "Trabalho amanhã de manhã.",
       "Vou trabalhar amanhã de manhã."
     ],
-    "explanation": "",
+    "explanation": "\"Demain matin\" é \"amanhã de manhã\"; o presente \"je travaille\" também pode indicar o futuro próximo.",
     "status": "needs_review"
   },
   {

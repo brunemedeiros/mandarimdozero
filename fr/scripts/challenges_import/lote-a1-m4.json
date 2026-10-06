@@ -14,7 +14,7 @@
       "Está frio no inverno.",
       "Fica frio no inverno."
     ],
-    "explanation": "",
+    "explanation": "O tempo usa \"il fait\" (il fait froid); em português, \"faz frio\".",
     "status": "needs_review"
   },
   {
@@ -32,7 +32,7 @@
       "Hoje chove.",
       "Hoje está chuvoso."
     ],
-    "explanation": "",
+    "explanation": "\"Il pleut\" é impessoal: o \"il\" não é uma pessoa, e o francês não usa \"estar\" para o clima.",
     "status": "needs_review"
   },
   {
@@ -50,7 +50,7 @@
       "Pego o ônibus todo dia.",
       "Eu pego o ônibus diariamente."
     ],
-    "explanation": "",
+    "explanation": "\"Prendre le bus\" é \"pegar o ônibus\"; \"tous les jours\" = \"todos os dias\".",
     "status": "needs_review"
   },
   {
@@ -67,7 +67,7 @@
       "Onde fica a estação de metrô?",
       "Onde é a estação de metrô?"
     ],
-    "explanation": "",
+    "explanation": "\"Où est\" pergunta onde algo fica; \"station de métro\" = \"estação de metrô\".",
     "status": "needs_review"
   },
   {
@@ -85,7 +85,7 @@
       "Ele tem dor de barriga.",
       "Ele está com dor na barriga."
     ],
-    "explanation": "",
+    "explanation": "A dor usa \"avoir mal à\": \"il a mal au ventre\" (à + le = au) = \"ele está com dor de barriga\".",
     "status": "needs_review"
   },
   {
@@ -103,7 +103,7 @@
       "Vou à farmácia.",
       "Eu vou na farmácia."
     ],
-    "explanation": "",
+    "explanation": "\"Aller à la\" indica destino; \"pharmacie\" é feminino, por isso \"à la\".",
     "status": "needs_review"
   },
   {
