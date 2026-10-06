@@ -1958,10 +1958,9 @@ function unitProgressFraction(u){
 }
 
 function recalculateUnlockedUnits(){
-  UNITS.forEach((u, i) => {
-    const prog = STATE.unitProgress[u.id];
-    prog.unlocked = i === 0 || STATE.unitProgress[UNITS[i-1].id]?.completed || prog.unlocked;
-  });
+  // Regra única em shared/trail-state-model.js (recalcUnlocked): trilha de um
+  // grupo só; a 1ª unidade liberada, as demais quando a anterior foi concluída.
+  recalcUnlocked([UNITS], STATE.unitProgress);
 }
 
 // Ícones temáticos por unidade — substituem o número na trilha, dando
@@ -7354,6 +7353,7 @@ function gradeCurrentCard(grade){
 function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
   if (STATE.unitProgress[unitId].completed) return;
   STATE.unitProgress[unitId].completed = true;
+  stampUnitCompletion(STATE.unitProgress[unitId], 'lessons', todayStr());
   const idx = UNITS.findIndex(u => u.id === unitId);
   if (idx >= 0 && idx+1 < UNITS.length){
     STATE.unitProgress[UNITS[idx+1].id].unlocked = true;

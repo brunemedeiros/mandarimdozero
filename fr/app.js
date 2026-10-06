@@ -1853,14 +1853,9 @@ function unitOrdinalInfo(u, levelUnits){
 }
 
 function recalculateUnlockedUnits(){
-  LEVELS.forEach(lvl => {
-    unitsOfLevel(lvl.id).forEach((u, i) => {
-      const prog = STATE.unitProgress[u.id];
-      if (i === 0){ prog.unlocked = true; return; }
-      const prevId = unitsOfLevel(lvl.id)[i-1].id;
-      prog.unlocked = STATE.unitProgress[prevId]?.completed || prog.unlocked;
-    });
-  });
+  // Regra única em shared/trail-state-model.js (recalcUnlocked): 1ª unidade de
+  // cada nível liberada; as demais quando a anterior do nível foi concluída.
+  recalcUnlocked(LEVELS.map(lvl => unitsOfLevel(lvl.id)), STATE.unitProgress);
 }
 
 const UNIT_ICONS = {
@@ -7136,6 +7131,7 @@ function gradeCurrentCard(grade){
 function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
   if (STATE.unitProgress[unitId].completed) return;
   STATE.unitProgress[unitId].completed = true;
+  stampUnitCompletion(STATE.unitProgress[unitId], 'lessons', todayStr());
   const u = UNITS.find(x => x.id === unitId);
   const levelUnits = unitsOfLevel(u.level);
   const idx = levelUnits.findIndex(x => x.id === unitId);
@@ -7216,6 +7212,10 @@ function completeModuleUnits(module, scorePct){
   // aprovação, sem limite (achado de auditoria).
   const alreadyCompleted = STATE.checkpointProgress[module.id].completed;
   module.unitIds.forEach(id => {
+    // Fase 1 da trilha: registra que esta unidade foi PULADA (só se ainda não
+    // estava concluída -- refazer o ponto nunca reclassifica o que o aluno
+    // concluiu estudando). Não muda XP/selos/FSRS nesta fase.
+    if (!STATE.unitProgress[id].completed) stampUnitCompletion(STATE.unitProgress[id], 'skip_test', todayStr());
     STATE.unitProgress[id].started = true;
     STATE.unitProgress[id].completed = true;
     // Passar no checkpoint/teste de nível é prova de que o aluno já sabe o
