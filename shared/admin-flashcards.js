@@ -470,14 +470,6 @@ function wireFlashcardEditForm(c, container){
     // mutar em seguida) -- é contra ISTO que o save compara pra decidir
     // se revision precisa incrementar (ver wireFlashcardNativeEditForm).
     ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = cloneNoteEditorState(ADMIN_FLASHCARDS_STATE.editingNativeState);
-    if (c.image_url){
-      // Seção 10 -- limitação conhecida (registrada em
-      // shared/flashcard-native-persistence.js, attachLegacyMediaToFields):
-      // a URL da imagem é preservada no Field, mas ainda não é exibida na
-      // Revisão pro caminho nativo (gap fora do escopo desta fase) --
-      // avisa em vez de deixar a professora achar que a imagem sumiu.
-      showToast('⚠️ A imagem deste cartão foi preservada nos dados, mas ainda não aparece na tela de Revisão pra cartões do novo editor.');
-    }
     const cardsBox = document.getElementById('admin-flashcards-cards-box');
     const selectedStudents = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
     cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);

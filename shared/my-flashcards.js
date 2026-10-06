@@ -552,9 +552,6 @@ function wireMyFlashcardEditForm(c, wrap, premium){
     // shared/admin-flashcards.js) -- é contra ISTO que o save compara pra
     // decidir se revision precisa incrementar.
     MY_FLASHCARDS_STATE.editingNativeConversionBaseline = cloneNoteEditorState(MY_FLASHCARDS_STATE.editingNativeState);
-    if (c.image_url){
-      showToast('⚠️ A imagem deste cartão foi preservada nos dados, mas ainda não aparece na tela de Revisão pra cartões do novo editor.');
-    }
     // CONSOLIDAÇÃO-2 (ver CLAUDE.md) -- `preserveEditingNativeState:true`
     // é obrigatório aqui: sem ele, o topo de renderMyFlashcardsView()
     // zeraria de volta o editingNativeState que acabamos de setar, no

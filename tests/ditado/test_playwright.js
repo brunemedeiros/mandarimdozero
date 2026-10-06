@@ -89,7 +89,7 @@ const SENTENCE_MP3_RE = /\/audio\/dictation-.*-s\d+\.mp3/;
     r = await ev(() => { const p = document.querySelector('.fr-accent-picker'); return { sw: p.scrollWidth, cw: p.clientWidth }; });
     check(`${tag}: seletor de acentos sem rolagem horizontal`, r.sw <= r.cw + 1, r);
     // digita com vários desvios
-    await page.fill('#dictation-input', "bonjour a tous ! Je m'appelle Sophie. J'ai 25 ans est je suis francaise virgule J'habite a Lyon. Et vous comment vous appelez vous");
+    await page.fill('#dictation-input', "bonjour ! Je m'appelle Sophie. J'ai 25 ans est je suis francaise virgule Et toi comment tu t'appelles");
     await ev(() => document.getElementById('dictation-check-btn').click());
     r = await ev(() => ({
       near: document.querySelectorAll('.dictation-word-near').length,
@@ -97,7 +97,7 @@ const SENTENCE_MP3_RE = /\/audio\/dictation-.*-s\d+\.mp3/;
       missing: document.querySelectorAll('.dictation-punct-missing').length,
       score: +document.querySelector('.dictation-score-badge').textContent,
     }));
-    check(`${tag}: erros leves aparecem como "quase"`, r.near >= 3, r);
+    check(`${tag}: erro leve (acento) aparece como "quase"`, r.near >= 1 && r.notes.some(n => n.includes('francaise')), r);
     check(`${tag}: dígito mostra a escrita por extenso`, r.notes.some(n => n.includes('vingt-cinq')), r.notes);
     check(`${tag}: "virgule" por extenso é avisado`, r.notes.some(n => n.includes('virgule')), r.notes);
     check(`${tag}: pontuação faltando é marcada`, r.missing > 0 && r.notes.some(n => n.startsWith('Pontuação')), r);
@@ -133,7 +133,7 @@ const SENTENCE_MP3_RE = /\/audio\/dictation-.*-s\d+\.mp3/;
     r = await ev(() => { renderDictationList(); const c = document.querySelector('.dictation-card[data-dict-id="d1"] .dictation-card-progress'); const o = document.querySelector('.dictation-card[data-dict-id="d2"] .dictation-card-progress'); return { t: c && c.textContent, other: !!o }; });
     check(`${tag}: lista mostra melhor nota e tentativas`, r.t && r.t.includes('Melhor nota: ' + best1) && r.t.includes('2 tentativas') && !r.other, r);
     await ev(() => openDictationPlayer('d1'));
-    await page.fill('#dictation-input', "bonjour a tous ! Je m'appelle Sophie. J'ai 25 ans est je suis francaise virgule J'habite a Lyon. Et vous comment vous appelez vous");
+    await page.fill('#dictation-input', "bonjour ! Je m'appelle Sophie. J'ai 25 ans est je suis francaise virgule Et toi comment tu t'appelles");
     await ev(() => document.getElementById('dictation-check-btn').click());
     const inView = await ev(() => { const b = document.querySelector('.dictation-result').getBoundingClientRect(); return b.top < innerHeight; });
     check(`${tag}: resultado entra na tela depois de verificar`, inView);
