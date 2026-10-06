@@ -154,6 +154,12 @@ async function createInitialProfile(){
   return data || null;
 }
 
+// Reaplica os placeholders de perfil ({nome}, {nacionalidade}...) no conteúdo
+// da trilha (shared/profile-placeholders.js). Best-effort, nunca lança.
+function refreshProfilePlaceholders(){
+  try { if (typeof applyProfilePlaceholders === 'function') applyProfilePlaceholders(); } catch (e) { console.error('placeholders de perfil:', e); }
+}
+
 async function ensureProfileLoaded(){
   if (!CURRENT_USER) return null;
   if (PROFILE_CACHE) return PROFILE_CACHE;
@@ -164,13 +170,14 @@ async function ensureProfileLoaded(){
     .maybeSingle();
   if (error){ console.error('Erro ao carregar perfil:', error); return null; }
   PROFILE_CACHE = data || await createInitialProfile();
+  refreshProfilePlaceholders();
   return PROFILE_CACHE;
 }
 
 // O username NÃO é editável (identificador público permanente, gerado pelo
 // sistema): este payload nunca o contém, e o servidor também recusa qualquer
 // UPDATE que o altere (trigger profiles_protect_identity, migration 060).
-async function saveProfileEdits({ displayName, bio, featuredBadgeId, publicProfile }){
+async function saveProfileEdits({ displayName, bio, featuredBadgeId, publicProfile, country }){
   const payload = {
     display_name: (displayName || '').trim().slice(0, 60) || null,
     bio: (bio || '').trim().slice(0, 160) || null,
@@ -190,6 +197,12 @@ async function saveProfileEdits({ displayName, bio, featuredBadgeId, publicProfi
     // ainda, mesmo cuidado que os outros campos deste payload já tomam).
     public_profile: !!publicProfile,
   };
+  // País de origem (migration 072). Só entra no UPDATE quando a coluna existe
+  // no perfil carregado -- sem a migration aplicada, salvar nome/bio continua
+  // funcionando em vez de falhar por coluna inexistente.
+  if (country !== undefined && PROFILE_CACHE && Object.prototype.hasOwnProperty.call(PROFILE_CACHE, 'country')){
+    payload.country = /^[A-Z]{2}$/.test(country || '') ? country : null;
+  }
   const { data, error } = await supabaseClient
     .from('profiles')
     .update(payload)
@@ -201,6 +214,7 @@ async function saveProfileEdits({ displayName, bio, featuredBadgeId, publicProfi
     return { ok: false, error: t('profile.err.saveFailed') };
   }
   PROFILE_CACHE = data;
+  refreshProfilePlaceholders();
   return { ok: true, profile: data };
 }
 
@@ -606,6 +620,21 @@ function renderFeaturedBadgeSelect(specialBadges, currentId){
   select.innerHTML = `<option value="">${t('profile.featuredNone')}</option>${options}`;
 }
 
+// País de origem: só aparece se a coluna existe no perfil (migration 072);
+// sem a migration o campo some e nada quebra.
+function renderProfileCountrySelect(p){
+  const sel = document.getElementById('profile-edit-country');
+  if (!sel) return;
+  const supported = !!p && Object.prototype.hasOwnProperty.call(p, 'country') && typeof PROFILE_COUNTRIES !== 'undefined';
+  const label = sel.previousElementSibling, hint = sel.nextElementSibling;
+  [label, sel, hint].forEach(el => { if (el) el.style.display = supported ? '' : 'none'; });
+  if (!supported) return;
+  const lang = (typeof getUiLang === 'function' && getUiLang() === 'en') ? 'en' : 'pt-BR';
+  sel.innerHTML = `<option value="">${t('ui.profileEdit.countryNone')}</option>` +
+    PROFILE_COUNTRIES.map(c => `<option value="${c.code}">${profileCountryName(c.code, lang)}</option>`).join('');
+  sel.value = p.country || '';
+}
+
 function openEditProfileModal(specialBadges){
   const modal = document.getElementById('profile-edit-modal');
   const p = PROFILE_CACHE;
@@ -613,6 +642,7 @@ function openEditProfileModal(specialBadges){
   document.getElementById('profile-edit-username').value = p?.username || '';
   document.getElementById('profile-edit-bio').value = p?.bio || '';
   document.getElementById('profile-edit-bio-count').textContent = `${(p?.bio || '').length}/160`;
+  renderProfileCountrySelect(p);
   document.getElementById('profile-edit-error').textContent = '';
   document.getElementById('profile-edit-avatar-error').textContent = '';
   document.getElementById('profile-edit-public-switch')?.setAttribute('aria-checked', p?.public_profile ? 'true' : 'false');
@@ -703,6 +733,7 @@ function wireProfileEditModal(){
       bio: bioInput.value,
       featuredBadgeId: document.getElementById('profile-edit-featured-badge')?.value,
       publicProfile: document.getElementById('profile-edit-public-switch')?.getAttribute('aria-checked') === 'true',
+      country: document.getElementById('profile-edit-country')?.value,
     });
 
     saveBtn.disabled = false;

@@ -1736,6 +1736,9 @@ window.I18N_CATALOG['en'] = {
   'ui.exitLesson': 'Exit lesson', // ALTA
   'ui.review.shortcutsAria': 'Review shortcuts', // ALTA
   'ui.profileEdit.namePh': 'What would you like to be called', // ALTA
+  'ui.profileEdit.country': 'Country of origin', // ALTA
+  'ui.profileEdit.countryHint': 'Used in the course examples (e.g. "I\'m Brazilian"). If you don\'t choose, we assume Brazil.', // ALTA
+  'ui.profileEdit.countryNone': 'Prefer not to say (Brazil)', // ALTA
   'ui.profileEdit.bioPh.fr': 'Tell us a little about yourself and why you\'re learning French', // ALTA
   'ui.profileEdit.bioPh.zh': 'Tell us a little about yourself and why you\'re learning Mandarin', // ALTA
   'ui.zh.searchAria': 'Search by pinyin, hanzi or translation', // ALTA

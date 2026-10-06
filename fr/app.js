@@ -936,7 +936,7 @@ const CONTENT_I18N = ContentI18n.create({
   overlayUrl: (lang) => `content.${lang}.js`,
   extraUrls: (lang) => [`challenges.${lang}.js`],
   getLang: () => (typeof getUiLang === 'function' ? getUiLang() : 'pt-BR'),
-  onApplied: () => refreshStudyCardTexts()
+  onApplied: () => { refreshStudyCardTexts(); if (typeof applyProfilePlaceholders === 'function') applyProfilePlaceholders(); }
 });
 // Cartões da trilha guardam cópia do texto exibido; só o texto muda (id/FSRS
 // intactos). Também roda depois de carregar o progresso salvo, que traz o texto

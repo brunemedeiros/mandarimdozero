@@ -44,8 +44,8 @@ const snap = (page, id) => page.evaluate((uid) => { const u = UNITS.find(x => x.
   const u1 = JSON.parse(await snap(en.page, 'A1-1'));
   check('en: título', u1.title === 'Greeting and saying goodbye', u1.title);
   check('en: vocab traduzido', u1.vocab[0].t === 'hi, hello / good morning' && u1.vocab[0].f === 'bonjour');
-  check('en: francês intacto', u1.phrases[0].f === 'Bonjour ! Je m\'appelle Brune.' && u1.dialogue.lines[0].f === 'Bonjour !');
-  check('en: frase/cenário', u1.phrases[0].t === 'Hello! My name is Brune.' && /^You meet someone new/.test(u1.phrases[0].scenario));
+  check('en: francês intacto', u1.phrases[0].f === 'Bonjour ! Je m\'appelle Guest.' && u1.dialogue.lines[0].f === 'Bonjour !');
+  check('en: frase/cenário', u1.phrases[0].t === 'Hello! My name is Guest.' && /^You meet someone new/.test(u1.phrases[0].scenario));
   check('en: diálogo', u1.dialogue.title === 'Meeting on the street' && u1.dialogue.lines[1].t === 'Hello! How are you?');
   check('en: conceito com HTML', /<strong>bonjour<\/strong>/.test(u1.concepts[0].blocks[0].body) && u1.concepts[0].blocks[0].title === '"Bonjour" or "Bonsoir"?');
   check('en: verdadeiro/falso', /^This is what we say/.test(u1.trueFalseExercises[0].claim));

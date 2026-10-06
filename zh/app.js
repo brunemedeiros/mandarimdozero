@@ -1028,7 +1028,7 @@ const CONTENT_I18N = ContentI18n.create({
   units: UNITS, levels: LEVELS, stories: STORIES, hanzi: HANZI_LESSONS,
   overlayUrl: (lang) => `content.${lang}.js`,
   getLang: () => (typeof getUiLang === 'function' ? getUiLang() : 'pt-BR'),
-  onApplied: () => refreshStudyCardTexts()
+  onApplied: () => { refreshStudyCardTexts(); if (typeof applyProfilePlaceholders === 'function') applyProfilePlaceholders(); }
 });
 // Cartões guardam cópia do texto exibido; só o texto muda (id/FSRS intactos).
 // Também roda depois de carregar o progresso salvo (traz o texto do idioma em

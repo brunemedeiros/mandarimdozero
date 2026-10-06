@@ -4024,6 +4024,10 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <label class="profile-edit-label" for="profile-edit-display-name">Nome exibido</label>
         <input type="text" id="profile-edit-display-name" class="profile-edit-input" maxlength="60" placeholder="Como você quer ser chamada(o)" data-i18n-attr="placeholder:ui.profileEdit.namePh">
 
+        <label data-i18n="ui.profileEdit.country" class="profile-edit-label" for="profile-edit-country">País de origem</label>
+        <select id="profile-edit-country" class="profile-edit-input"></select>
+        <p data-i18n="ui.profileEdit.countryHint" class="profile-edit-hint">Usado nos exemplos da trilha (ex.: "Eu sou brasileira"). Sem escolher, assumimos Brasil.</p>
+
         <label data-i18n="ui.profileEdit.username" class="profile-edit-label" for="profile-edit-username">Seu identificador público (permanente)</label>
         <div class="profile-edit-username-wrap">
           <span class="profile-edit-at">@</span>
@@ -4340,6 +4344,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <script src="../shared/study-queue.js"></script>
 <script src="../shared/wizard.js"></script>
 <script src="../shared/profile.js"></script>
+<script src="../shared/profile-placeholders.js"></script>
 <script src="../shared/reports.js"></script>
 <script src="../shared/notifications.js"></script>
 <script src="../shared/push.js"></script>
