@@ -113,9 +113,15 @@ function deckBrowserScope(decks, nodeId, cards){
 
 // Contagens da tabela: Novo / Aprendendo / Revisar (= revisões devidas
 // agora), como as colunas do Anki. Fonte única: structuralCounts (K.5).
+// Como no Anki, "Novo" mostra o que entra numa sessão: no máximo
+// "Novas palavras por dia" (STATE.studySettings.newCardsPerDay, o mesmo
+// newCardsLimit que a fila usa). O total de novos fica em `newTotal`.
+// Filtro de tag da Revisão não entra (contagem estrutural, decisão da Fase I).
 function deckBrowserCounts(decks, nodeId, pool){
   const sc = structuralCounts(deckBrowserScope(decks, nodeId, pool));
-  return { total: sc.cards, new: sc.new, learning: sc.learning, review: sc.reviewDue, due: sc.due };
+  const cap = (typeof STATE !== 'undefined' && STATE.studySettings && Number.isFinite(Number(STATE.studySettings.newCardsPerDay)))
+    ? Number(STATE.studySettings.newCardsPerDay) : Infinity;
+  return { total: sc.cards, new: Math.min(sc.new, cap), newTotal: sc.new, learning: sc.learning, review: sc.reviewDue, due: sc.due };
 }
 
 function deckBrowserNodeLabel(decks, nodeId){
@@ -133,6 +139,13 @@ function deckBrowserBreadcrumb(decks, nodeId){
     parts.push(...chain, deckBrowserNodeLabel(decks, nodeId));
   }
   return parts;
+}
+
+// Cartões próprios antigos (antes dos Decks) sem deck_id: contam na raiz do
+// idioma, mas em nenhum filho.
+function deckBrowserOrphanCount(){
+  const cards = (typeof STATE !== 'undefined' && STATE.cards) || [];
+  return new Set(cards.filter(c => c.origin === 'self' && c.deckId == null && c.flashcardStatus !== 'archived').map(c => c.rowId)).size;
 }
 
 // ---------- Containers (o bloco de Revisão tem 3 telas irmãs) ----------
@@ -259,13 +272,14 @@ function renderDeckDetail(){
         <div><span class="deck-detail-num ${c.learning ? 'is-learning' : 'is-zero'}">${c.learning}</span><span class="deck-detail-label">Aprendendo</span></div>
         <div><span class="deck-detail-num ${c.review ? 'is-review' : 'is-zero'}">${c.review}</span><span class="deck-detail-label">Revisar</span></div>
       </div>
-      <p class="profile-edit-hint">${c.total} ${c.total === 1 ? 'cartão' : 'cartões'} neste Deck${nodeId === 'lang' ? '' : ' e nos subdecks'}.</p>
+      <p class="profile-edit-hint">${c.total} ${c.total === 1 ? 'cartão' : 'cartões'} neste Deck${nodeId === 'lang' ? '' : ' e nos subdecks'}${c.newTotal > c.new ? ` · ${c.newTotal} novos no total (entram até ${c.new} por sessão, conforme "Novas palavras por dia")` : ''}.</p>
       <div class="deck-detail-actions">
         <button type="button" class="btn btn-primary" data-deck-study ${c.total ? '' : 'disabled'}>Estudar agora</button>
         ${canAdd ? `<button type="button" class="btn btn-secondary" data-deck-add>Adicionar cartão</button>` : ''}
         <button type="button" class="btn btn-secondary" data-deck-panel>Painel</button>
       </div>
       ${addHint ? `<p class="profile-edit-hint">${escapeHTML(addHint)}</p>` : ''}
+      ${nodeId === 'lang' && deckBrowserOrphanCount() ? `<p class="profile-edit-hint">${deckBrowserOrphanCount()} dos seus cartões antigos ainda não estão em nenhum Deck. Eles aparecem só aqui, na raiz; no Painel você pode movê-los para um Deck.</p>` : ''}
       ${isPersonal ? `<div class="deck-detail-danger"><button type="button" class="admin-select-link" data-deck-delete style="background:none;border:none;cursor:pointer;padding:0;">🗑 Excluir este Deck</button></div><div data-deck-delete-box></div>` : ''}
     </div>`;
   wrap.querySelector('[data-deck-back]').addEventListener('click', backToDeckTable);
@@ -367,7 +381,7 @@ function openDeckDeleteDialog(deck, box){
   box.querySelector('[data-deck-delete-move]')?.addEventListener('click', async () => {
     const dest = getDeckById(decks, Number(box.querySelector('#deck-delete-target').value));
     setBusy(true); errEl.textContent = '';
-    const res = await deletePersonalDeckTree({ deck, decks, mode: 'move', destination: dest });
+    const res = await deletePersonalDeckTree({ deck, decks, mode: 'move', destination: dest, expectedNotes: noteCount });
     setBusy(false);
     if (!res.ok){ errEl.textContent = res.error; return; }
     deckBrowserAfterDelete(subtree, res, dest);
@@ -375,7 +389,7 @@ function openDeckDeleteDialog(deck, box){
   box.querySelector('[data-deck-delete-perm]').addEventListener('click', async () => {
     if (!window.confirm(`Excluir "${deck.name}" e ${noteCount} ${noteCount === 1 ? 'cartão' : 'cartões'} para sempre? O histórico de revisão também será apagado. Isso não pode ser desfeito.`)) return;
     setBusy(true); errEl.textContent = '';
-    const res = await deletePersonalDeckTree({ deck, decks, mode: 'delete' });
+    const res = await deletePersonalDeckTree({ deck, decks, mode: 'delete', expectedNotes: noteCount });
     setBusy(false);
     if (!res.ok){ errEl.textContent = res.error; return; }
     deckBrowserAfterDelete(subtree, res, null);

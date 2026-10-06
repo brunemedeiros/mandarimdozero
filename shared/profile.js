@@ -546,10 +546,13 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
 
 // Escapa o campo "Sobre mim" antes de renderizar -- texto livre digitado
 // pelo aluno, nunca deve ser interpretado como HTML.
+// Também escapa aspas: o resultado é usado dentro de atributos HTML
+// (aria-label, value, data-*), e sem isto um texto com `"` (nome de Deck
+// vindo de um .apkg, frente de cartão importado) abriria um atributo novo.
 function escapeHTML(str){
   const div = document.createElement('div');
   div.textContent = str;
-  return div.innerHTML;
+  return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 // Preview do avatar dentro do modal de edição -- mesma regra de fallback

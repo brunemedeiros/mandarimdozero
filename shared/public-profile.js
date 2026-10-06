@@ -517,7 +517,8 @@ function reportPublicFlashcard(cardId){
 async function importSelectedPublicFlashcards(box){
   const errorEl = box.querySelector('#public-profile-cards-import-error');
   if (errorEl) errorEl.textContent = '';
-  const ids = [...PUBLIC_PROFILE_IMPORT_STATE.selectedIds];
+  // Ordem da lista (não a ordem de clique): o corte do plano grátis fica com "os primeiros N" da lista.
+  const ids = PUBLIC_PROFILE_IMPORT_STATE.cardsCache.map(c => c.id).filter(id => PUBLIC_PROFILE_IMPORT_STATE.selectedIds.has(id));
   if (!ids.length) return;
 
   const selectedCards = ids

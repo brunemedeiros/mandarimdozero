@@ -146,10 +146,10 @@ async function setup(page){
     check(lang + ' sem botão Estudar na tabela', table.studyBtns === 0, table.studyBtns);
     const counts = await page.evaluate(() => {
       const pool = eligibleDeckReviewPool();
-      return { lang: structuralCounts(pool).new, meus: getDeckCounts(STATE.decks, 9001, pool).new };
+      return { lang: Math.min(structuralCounts(pool).new, STATE.studySettings.newCardsPerDay), meus: getDeckCounts(STATE.decks, 9001, pool).new };
     });
     const row = id => table.rows.find(r => r.id === id);
-    check(lang + ' Novo da raiz = pool elegível inteiro', row('lang').nums[0] === counts.lang, { row: row('lang'), counts });
+    check(lang + ' Novo da raiz = pool elegível inteiro, limitado a Novas por dia', row('lang').nums[0] === counts.lang, { row: row('lang'), counts });
     check(lang + ' Novo de Meus Decks = 4 Notes (4 cartões) com subdecks', row('9001').nums[0] === 4 && counts.meus === 4, row('9001'));
     // abrir o curso
     await page.click('[data-deck-toggle="9200"]');
@@ -297,6 +297,27 @@ async function setup(page){
       return { r1: r1.ok, r2: r2.ok };
     });
     check(lang + ' guarda: Meus Decks não é excluível; destino dentro da subárvore é recusado', guard.r1 === false && guard.r2 === false, guard);
+
+    // XSS: nome de Deck e frente de cartão com aspas não viram atributo
+    const xss = await page.evaluate(() => {
+      window.__xss = 0;
+      STATE.decks.push({ id: 9400, kind: 'personal', name: 'x" onmouseover="window.__xss=1" y="', owner_id: 'u-db', language_app_key: APP_KEY, parent_deck_id: 9001 });
+      STATE.decks.push({ id: 9401, kind: 'personal', name: 'filho', owner_id: 'u-db', language_app_key: APP_KEY, parent_deck_id: 9400 });
+      buildCardFromSelfFlashcard({ id: 777, owner_id: 'u-db', language_app_key: APP_KEY, status: 'active', revision: 0, front: 'a" onfocus="window.__xss=2" b="', back_trans: 'z', front_is_target_language: true, tags: [], deck_id: 9400 }).forEach(c => STATE.cards.push(c));
+      document.getElementById('review-decks-table').innerHTML = deckBrowserTableHTML();
+      const t = document.querySelector('[data-deck-toggle="9400"]');
+      openDeckPanel(9400);
+      const cb = document.querySelector('[data-panel-select="self:777"]');
+      return { tAttrs: t ? t.getAttributeNames() : [], cbAttrs: cb ? cb.getAttributeNames() : [] };
+    });
+    check(lang + ' XSS: aspas no nome do Deck/frente não criam atributo', !xss.tAttrs.includes('onmouseover') && !xss.cbAttrs.includes('onfocus') && xss.tAttrs.length > 0 && xss.cbAttrs.length > 0, xss);
+    // Excluir com contagem divergente do banco: não altera nada
+    const mism = await page.evaluate(async () => {
+      window.__writes = [];
+      const r = await deletePersonalDeckTree({ deck: STATE.decks.find(d => d.id === 9400), decks: STATE.decks, mode: 'delete', expectedNotes: 1 });
+      return { ok: r.ok, writes: window.__writes.length };
+    });
+    check(lang + ' excluir: banco diverge da tela -> nada é alterado', mism.ok === false && mism.writes === 0, mism);
 
     check(lang + ' sem erros de página', errors.length === 0, errors);
     await ctx.close();

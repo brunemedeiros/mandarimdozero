@@ -336,13 +336,24 @@ async function deleteTeacherDeck({ deck, decks }){
 // Se o UPDATE/DELETE das Notes falhar, o Deck NÃO é apagado. Se o Deck não
 // puder ser apagado depois de mover, os cartões já estão no destino (nada
 // se perde) e o erro é devolvido.
-async function deletePersonalDeckTree({ deck, decks, mode, destination }){
+async function deletePersonalDeckTree({ deck, decks, mode, destination, expectedNotes }){
   if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
   if (!deck || deck.kind !== 'personal' || deck.owner_id !== CURRENT_USER.id){
     return { ok: false, error: 'Só é possível excluir um Deck pessoal seu.' };
   }
   const subtree = getDeckSubtreeIds(decks, deck.id);
   let notes = 0;
+  // A tela conta os cartões pelo que já está carregado. Antes de mexer,
+  // confere no banco: se o número for outro (carregamento incompleto, outra
+  // aba), não faz nada -- nunca apaga cartões que a pessoa não viu.
+  if (expectedNotes != null){
+    const { data: present, error: cntErr } = await supabaseClient.from('own_flashcards')
+      .select('id').eq('owner_id', CURRENT_USER.id).in('deck_id', subtree);
+    if (cntErr){ console.error('Erro ao conferir cartões do Deck:', cntErr); return { ok: false, error: 'Não foi possível conferir os cartões deste Deck agora. Nada foi alterado.' }; }
+    if ((present || []).length !== expectedNotes){
+      return { ok: false, error: 'Os cartões deste Deck não batem com o que está na tela. Recarregue a página e tente de novo. Nada foi alterado.' };
+    }
+  }
   if (mode === 'move'){
     if (!destination || !['personal_root', 'personal'].includes(destination.kind)
         || destination.owner_id !== CURRENT_USER.id

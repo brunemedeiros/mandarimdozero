@@ -384,9 +384,23 @@ async function confirmAnkiImport(body){
   // Pastas do Anki: planejadas só com as Notes que serão criadas e
   // criadas AGORA (depois da confirmação). Falha num Deck = as Notes
   // daquele ramo não são importadas.
+  // Política conservadora (seção 23): se houver Deck de mesmo nome e a
+  // pessoa ainda não escolheu "sufixo" ou "inserir" (ex.: o preview não
+  // conseguiu detectar o conflito), não decide por ela -- para e pergunta.
+  if (st.keepFolders && !st.conflictMode){
+    const check = planAnkiDeckDestinations({ decks: dest.decks, destDeckId: dest.deckId, notes: notesToCreate, keepFolders: true, conflictMode: null });
+    if (check.conflicts.length){
+      st.decks = dest.decks;
+      st.destDeckId = dest.deckId;
+      resetBtn();
+      refreshAnkiImportConflicts(body); // mostra a pergunta e trava o botão até a escolha
+      if (errorEl) errorEl.textContent = 'Já existem Decks com estes nomes. Escolha acima o que fazer antes de importar.';
+      return;
+    }
+  }
   const destPlan = planAnkiDeckDestinations({
     decks: dest.decks, destDeckId: dest.deckId, notes: notesToCreate,
-    keepFolders: st.keepFolders, conflictMode: st.conflictMode || 'merge',
+    keepFolders: st.keepFolders, conflictMode: st.conflictMode,
   });
   if (btn && destPlan.creations.length) btn.textContent = 'Criando Decks...';
   const deckExec = await executeAnkiDeckCreations(destPlan, {

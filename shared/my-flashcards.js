@@ -1165,7 +1165,7 @@ function openFlashcardLimitModal(opts){
       ? `<p data-limit-cut-message>${escapeHTML(cutMessage)}</p>
          <div data-limit-premium-cta style="margin-top:10px; padding:10px 12px; border:2px solid var(--seal-red); border-radius:var(--radius, 10px); background:var(--paper-warm);">
            <strong>⭐ Com o Premium, seus cartões próprios são ilimitados.</strong><br>
-           Para ativar, fale com a administração (profbrune). Você também pode arquivar cartões que já não usa para liberar espaço.
+           Para ativar, fale com a administração (profbrune). Você também pode excluir cartões que já não usa para liberar espaço.
          </div>`
       : body.dataset.defaultHtml;
   }
