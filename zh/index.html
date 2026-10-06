@@ -818,9 +818,12 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .tm-node.selected{ outline:3px solid var(--seal-red-dark); outline-offset:2px; }
 .tm-node:focus-visible, .tvt-btn:focus-visible{ outline:3px solid var(--seal-red-dark); outline-offset:2px; }
 .tm-panel{
-  width:300px; flex-shrink:0; position:sticky; top:8px; padding:18px 16px 16px; background: var(--paper);
+  /* Caixa sobreposta e centralizada (não empurra o mapa); no celular vira bottom sheet (regra abaixo). */
+  position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); width:min(380px, calc(100vw - 32px)); max-height:80vh; overflow-y:auto;
+  z-index:320; padding:18px 16px 16px; background: var(--paper);
   border:1px solid var(--paper-line); border-radius: var(--radius); box-shadow: var(--shadow-lift);
 }
+.tm-backdrop{ position:fixed; inset:0; z-index:310; background: rgba(33,23,20,.45); }
 .tm-panel[hidden], .tm-backdrop[hidden]{ display:none; }
 .tm-close{ position:absolute; top:6px; right:6px; width:44px; height:44px; border:none; background:transparent; font-size:18px; color: var(--ink-soft); cursor:pointer; }
 .tm-eyebrow{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); padding-right:40px; }
@@ -834,7 +837,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   .tm-nodes{ grid-template-columns:repeat(2, 1fr); gap:12px; }
   .tm-node{ min-height:132px; }
   .tm-panel{
-    position:fixed; left:0; right:0; top:auto; bottom:0; width:auto; z-index:320; max-height:70vh; overflow-y:auto;
+    position:fixed; left:0; right:0; top:auto; bottom:0; width:auto; transform:none; z-index:320; max-height:70vh; overflow-y:auto;
     border-radius:16px 16px 0 0; padding:18px 16px calc(16px + env(safe-area-inset-bottom));
   }
   .tm-backdrop{ position:fixed; inset:0; z-index:310; background: rgba(33,23,20,.45); }

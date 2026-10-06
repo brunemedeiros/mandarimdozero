@@ -34,7 +34,7 @@ function renderTrailMap(root, model, describe, opts){
   panel.className = 'tm-panel';
   panel.hidden = true;
   panel.setAttribute('role', 'dialog');
-  panel.setAttribute('aria-modal', 'false');
+  panel.setAttribute('aria-modal', 'true');
   panel.setAttribute('aria-labelledby', 'tm-panel-title');
   const backdrop = document.createElement('div');
   backdrop.className = 'tm-backdrop';
