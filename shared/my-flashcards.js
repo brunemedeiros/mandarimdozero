@@ -937,23 +937,68 @@ function wireMyFlashcardsCardButtons(wrap){
 // existentes). `languageAppKey` é checado na importação -- um cartão de
 // mandarim nunca pode ser importado numa conta logada em fr/, e vice-versa
 // (rejeição explícita, não silenciosa).
-function myFlashcardsExportPayload(cardsToExport){
-  return {
-    languageAppKey: APP_KEY,
-    cards: cardsToExport.map(c => ({
-      front: c.front,
-      frontPinyin: c.front_pinyin || null,
-      backTrans: c.back_trans,
-      note: c.note || null,
-      frontIsTargetLanguage: c.front_is_target_language !== false,
-      tags: Array.isArray(c.tags) ? c.tags : [],
-    })),
+// Cartão nativo: frente/verso/pinyin/direção vêm dos Fields (fonte de
+// verdade), nunca das colunas espelho (`front_is_target_language` é sempre
+// true numa linha nativa e `front_pinyin` fica null). Ordem dos slots =
+// mesma regra do motor (contentFieldIndices); Múltipla escolha usa
+// prompt/answer por role. Cloze não cabe neste formato (só frente/verso):
+// devolve null e o cartão é deixado de fora do arquivo.
+function myFlashcardExportSidesFromNativeRow(c){
+  const fields = Array.isArray(c.fields) ? c.fields : [];
+  const mode = c.card_generation_mode;
+  if (mode === 'cloze') return null;
+  let fi, bi;
+  if (mode === 'multiple_choice'){
+    fi = fieldIndexByRole(fields, 'prompt');
+    bi = fieldIndexByRole(fields, 'answer');
+  } else {
+    const slots = contentFieldIndices(fields);
+    fi = slots[0]; bi = slots[1];
+  }
+  const ff = fields[fi], bf = fields[bi];
+  if (!ff || !bf) return null;
+  const text = f => (f && f.content && typeof f.content.value === 'string') ? f.content.value : '';
+  const pinyinOf = f => {
+    if (!f || f.pinyinFieldId == null) return null;
+    const sat = fields.find(x => x.id === f.pinyinFieldId);
+    return sat ? (text(sat) || null) : null;
   };
+  const study = STUDY_LANG_FOR_APP_KEY[APP_KEY];
+  // lang desconhecido nos dois lados (ex.: importado do Anki) = padrão true.
+  const frontIsTargetLanguage = !(ff.lang !== study && bf.lang === study);
+  return {
+    front: text(ff),
+    frontPinyin: pinyinOf(ff) || pinyinOf(bf),
+    backTrans: text(bf),
+    frontIsTargetLanguage,
+  };
+}
+
+function myFlashcardsExportPayload(cardsToExport){
+  const cards = [];
+  cardsToExport.forEach(c => {
+    const isNative = classifyFlashcardRowModel(c) === 'native';
+    const sides = isNative
+      ? myFlashcardExportSidesFromNativeRow(c)
+      : { front: c.front, frontPinyin: c.front_pinyin || null, backTrans: c.back_trans,
+          frontIsTargetLanguage: c.front_is_target_language !== false };
+    if (!sides) return;
+    cards.push({
+      front: sides.front,
+      frontPinyin: sides.frontPinyin,
+      backTrans: sides.backTrans,
+      note: c.note || null,
+      frontIsTargetLanguage: sides.frontIsTargetLanguage,
+      tags: Array.isArray(c.tags) ? c.tags : [],
+    });
+  });
+  return { languageAppKey: APP_KEY, cards };
 }
 
 function openMyFlashcardsExportModal(cardsToExport){
   if (!cardsToExport.length){ showToast('Você não tem nenhum cartão ativo pra exportar.'); return; }
   const payload = myFlashcardsExportPayload(cardsToExport);
+  if (!payload.cards.length){ showToast('Nenhum dos cartões selecionados cabe neste formato (só frente e verso).'); return; }
   const json = JSON.stringify(payload, null, 2);
   const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
   const shareUrl = `${location.origin}${location.pathname}#import=${base64}`;
@@ -969,7 +1014,7 @@ function openMyFlashcardsExportModal(cardsToExport){
   modal.innerHTML = `
     <div class="app-modal">
       <div class="app-modal-header">
-        <h3>⬇️ Exportar cartões (${cardsToExport.length})</h3>
+        <h3>⬇️ Exportar cartões (${payload.cards.length})</h3>${payload.cards.length < cardsToExport.length ? `<p class="profile-edit-hint">${cardsToExport.length - payload.cards.length} cartão(ões) de Completar a frase ficaram de fora: este formato só leva frente e verso.</p>` : ''}
         <button class="app-modal-close" id="my-flashcards-export-close" aria-label="Fechar">✕</button>
       </div>
       <div class="app-modal-body">
