@@ -545,6 +545,8 @@ function buildCardsFromUnits(units, appKey = 'mandarim'){
     u.vocab.forEach((v, idx) => {
       buildStudyWordCards(u, v, idx, appKey).forEach(c => cards.push(c));
     });
+    // Cartões "Na frase" (opt-in: só frases com `studyable: true`).
+    buildStudyPhraseCards(u, appKey).forEach(c => cards.push(c));
   });
   return cards;
 }
@@ -5873,6 +5875,8 @@ function renderReviewModeSelect(){
   const hardCount = getStudyQueue(pool, { scope: 'hard' }).length;
 
   renderReviewTodayWidget();
+  // Navegador de Decks (shared/deck-browser.js): tabela Deck | Novo | Aprendendo | Revisar.
+  if (typeof renderReviewDeckTable === 'function') renderReviewDeckTable();
 
   const revisarLabel = document.getElementById('review-mode-revisar-label');
   if (revisarLabel) revisarLabel.textContent = 'Revisar';
@@ -5973,6 +5977,8 @@ function backToReviewModeSelect(){
   SPEED_STATE.active = false;
   document.getElementById('review-mode-select-wrap').style.display = 'block';
   document.getElementById('review-session-wrap').style.display = 'none';
+  const deckWrap = document.getElementById('review-deck-wrap');
+  if (deckWrap) deckWrap.style.display = 'none';
   STATE.reviewSessionDeckId = null; // K2-H: sair da sessão não deixa escopo de Deck stale
   renderReviewModeSelect();
 
@@ -7725,7 +7731,8 @@ function renderReviewTagFilter(){
   if (!wrap || !chipsEl) return;
   const selected = activeReviewTagFilter();
   const universe = reviewTagUniverse();
-  const available = collectTagsFromCards(universe);
+  // Tags finas da trilha (unidade/lição/palavra) ficam fora dos chips.
+  const available = reviewFilterVisibleTags(universe);
   const all = Array.from(new Set(available.concat(selected))).sort();
   wrap.hidden = all.length === 0;
   chipsEl.innerHTML = all.map(t => {

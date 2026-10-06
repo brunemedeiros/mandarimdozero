@@ -573,10 +573,10 @@ async function resolveAndAttachAnkiMedia(mediaRefs, { parseResult, uploadFn, med
 // substituto"), este importador só PREPARA a hierarquia como dado
 // estruturado (deckPath por Note + deckTree agregado) e NUNCA persiste
 // nada com ela -- todo cartão confirmado ainda entra plano em
-// own_flashcards, exatamente como antes desta entrega. Integração
-// pendente e documentada: quando o Deck Engine existir, mapear
-// plan.deckTree/plan.notes[i].deckPath pra Decks reais dentro de "Meus
-// Decks" (seção 5.3/22 da arquitetura consolidada).
+// own_flashcards, exatamente como antes desta entrega. ATUALIZAÇÃO: o
+// Deck Engine já existe -- planAnkiDeckDestinations/executeAnkiDeckCreations
+// (fim deste arquivo) mapeiam deckPath pra Decks reais dentro de "Meus
+// Decks" (seção 5.3/22 da arquitetura consolidada), só depois da confirmação.
 //
 // deckPath -- Anki usa "::" como separador de hierarquia dentro do
 // PRÓPRIO nome do deck (ex: "Vocabulário::Animais") -- split() é o
@@ -731,7 +731,11 @@ const ANKI_IMPORT_BATCH_SIZE = 40;
 // quem chama decide re-tentar só os lotes que faltam (nunca reimporta um
 // lote já confirmado, evita duplicar em retry -- Section 24).
 async function persistAnkiImportBatches(planEntries, { identity, onBatchDone }){
-  const rows = planEntries.map(entry => Object.assign({}, identity, nativeContentColumnsFromEditorState(entry.editorState)));
+  // `entry.deckId` (opcional) sobrepõe identity.deck_id por Note -- usado
+  // quando o import recria as pastas do Anki (cada Note no seu Deck).
+  const rows = planEntries.map(entry => Object.assign({}, identity,
+    entry.deckId != null ? { deck_id: entry.deckId } : null,
+    nativeContentColumnsFromEditorState(entry.editorState)));
   const batches = [];
   for (let i = 0; i < rows.length; i += ANKI_IMPORT_BATCH_SIZE) batches.push(rows.slice(i, i + ANKI_IMPORT_BATCH_SIZE));
 
@@ -753,3 +757,126 @@ async function persistAnkiImportBatches(planEntries, { identity, onBatchDone }){
 // só mais uma forma de criar cartões próprios, então usa a MESMA regra
 // canônica por CardInstance (preflightOwnCardInstanceCreation,
 // shared/deck-engine.js) que a criação manual e os outros imports.
+
+// ============================================================
+// Destino em Deck (docs/arquitetura-total-decks-tags-painel.md, seções
+// 5.3, 22 e 23) -- importar pra um Deck escolhido dentro de Meus Decks,
+// opcionalmente recriando as pastas do Anki abaixo dele.
+// ============================================================
+//
+// Funções PURAS (sem rede): o planejamento decide o que existe, o que será
+// criado e onde cada Note cai; a execução (executeAnkiDeckCreations)
+// recebe a função de criação injetada (createPersonalDeck, shared/deck-data.js)
+// e só roda DEPOIS da confirmação. Nunca existe um Deck global "Importado".
+//
+// Conflito de nome (mesmo nome no mesmo nível, sem diferenciar maiúsculas):
+// UMA escolha aplicada a todos os conflitos do import -- 'suffix' cria
+// "Nome (2)" (ou (3)... até achar livre) e 'merge' insere no Deck que já
+// existe (os subdecks do .apkg passam a ser procurados dentro dele também).
+// Escolha única em vez de uma por conflito: um .apkg costuma ter muitas
+// pastas, e perguntar uma a uma seria cansativo; a lista de conflitos é
+// mostrada na tela pra pessoa decidir sabendo quais são.
+
+function ankiDeckNameKey(name){
+  return String(name || '').trim().toLocaleLowerCase();
+}
+
+function ankiDeckPathKey(path){
+  return (path || []).join('::');
+}
+
+// Nome livre entre os irmãos: "Nome", senão "Nome (2)", "Nome (3)"...
+function ankiFreeDeckName(name, takenKeys){
+  if (!takenKeys.has(ankiDeckNameKey(name))) return name;
+  for (let i = 2; i < 1000; i++){
+    const candidate = `${name} (${i})`;
+    if (!takenKeys.has(ankiDeckNameKey(candidate))) return candidate;
+  }
+  return `${name} (${Date.now()})`;
+}
+
+// Planeja o destino. `decks`: lista de Decks do idioma (linhas cruas);
+// `destDeckId`: Deck pessoal escolhido (personal_root ou personal);
+// `notes`: Notes (do plano) que serão de fato criadas -- só as pastas que
+// têm Notes viram Deck; `keepFolders`: recriar a hierarquia do .apkg;
+// `conflictMode`: 'suffix' | 'merge' (sem escolha = trata como 'merge' só
+// pra DETECTAR conflitos em todos os níveis).
+// Retorno: { conflicts, creations, targetByKey } onde targetByKey mapeia
+// a chave do caminho ('' = destino) para { deckId } (já existe) ou
+// { createKey } (será criado), e creations vem com o pai antes do filho.
+function planAnkiDeckDestinations({ decks, destDeckId, notes, keepFolders, conflictMode }){
+  const targetByKey = new Map([['', { deckId: destDeckId }]]);
+  const conflicts = [];
+  const creations = [];
+  if (!keepFolders) return { conflicts, creations, targetByKey };
+  const mode = conflictMode === 'suffix' ? 'suffix' : 'merge';
+  const tree = buildAnkiDeckTree(notes || []);
+  const existingChildren = (parentId) => (decks || []).filter(d => d.parent_deck_id === parentId && d.kind === 'personal');
+  const walk = (node, parentKey) => {
+    const parentTarget = targetByKey.get(parentKey);
+    const siblingsExisting = parentTarget.deckId != null ? existingChildren(parentTarget.deckId) : [];
+    const taken = new Set(siblingsExisting.map(d => ankiDeckNameKey(d.name)));
+    node.children.forEach(child => {
+      const key = ankiDeckPathKey(child.path);
+      const existing = siblingsExisting.find(d => ankiDeckNameKey(d.name) === ankiDeckNameKey(child.name));
+      if (existing){
+        conflicts.push({ key, path: child.path.slice(), name: child.name, existingDeckId: existing.id });
+        if (mode === 'merge'){
+          targetByKey.set(key, { deckId: existing.id });
+          walk(child, key);
+          return;
+        }
+      }
+      const name = ankiFreeDeckName(child.name.trim() || 'Sem nome', taken);
+      taken.add(ankiDeckNameKey(name));
+      creations.push({ key, name, originalName: child.name, parentKey });
+      targetByKey.set(key, { createKey: key });
+      walk(child, key);
+    });
+  };
+  walk(tree, '');
+  return { conflicts, creations, targetByKey };
+}
+
+// Chave do Deck de uma Note: a pasta mais funda que existe no plano.
+function ankiNoteDeckKey(note, destPlan){
+  const path = note.deckPath || [];
+  for (let i = path.length; i > 0; i--){
+    const key = ankiDeckPathKey(path.slice(0, i));
+    if (destPlan.targetByKey.has(key)) return key;
+  }
+  return '';
+}
+
+// Cria os Decks planejados (pai antes do filho) e devolve o id de cada
+// chave. Falha num Deck marca ele E todos os descendentes como falhos --
+// as Notes desse ramo não são importadas (o chamador avisa). `createFn`
+// recebe { name, parentDeckId, languageAppKey, decks } (mesma assinatura
+// de createPersonalDeck) e devolve { ok, deck } | { ok:false, error }.
+async function executeAnkiDeckCreations(destPlan, { createFn, decks, languageAppKey }){
+  const idByKey = new Map();
+  const failedKeys = new Set();
+  const errors = [];
+  const createdDecks = [];
+  const list = (decks || []).slice();
+  destPlan.targetByKey.forEach((t, key) => { if (t.deckId != null) idByKey.set(key, t.deckId); });
+  for (const c of destPlan.creations){
+    if (failedKeys.has(c.parentKey)){ failedKeys.add(c.key); continue; }
+    const parentDeckId = idByKey.get(c.parentKey);
+    let res;
+    try {
+      res = await createFn({ name: c.name, parentDeckId, languageAppKey, decks: list });
+    } catch (e){
+      res = { ok: false, error: 'Não foi possível criar o Deck agora.' };
+    }
+    if (res && res.ok && res.deck){
+      idByKey.set(c.key, res.deck.id);
+      list.push(res.deck);
+      createdDecks.push(res.deck);
+    } else {
+      failedKeys.add(c.key);
+      errors.push(`Não foi possível criar o Deck "${c.name}"${res && res.error ? ` (${res.error})` : ''}. Os cartões dessa pasta não foram importados.`);
+    }
+  }
+  return { idByKey, failedKeys, errors, createdDecks, decks: list };
+}

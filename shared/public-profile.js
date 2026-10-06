@@ -520,23 +520,30 @@ async function importSelectedPublicFlashcards(box){
   const ids = [...PUBLIC_PROFILE_IMPORT_STATE.selectedIds];
   if (!ids.length) return;
 
-  const importStates = ids
+  const selectedCards = ids
     .map(id => PUBLIC_PROFILE_IMPORT_STATE.cardsCache.find(x => x.id === id))
-    .filter(Boolean)
-    .map(c => nativeNoteEditorStateFromImportPayload(c, APP_KEY));
-  const pre = preflightOwnCardInstanceCreation({
+    .filter(Boolean);
+  const importStates = selectedCards.map(c => nativeNoteEditorStateFromImportPayload(c, APP_KEY));
+  // "Corta e avisa" (arquitetura seção 17) -- mesma regra única dos outros
+  // imports (shared/deck-engine.js): só as primeiras Notes que cabem.
+  const limit = typeof FREE_OWN_FLASHCARD_LIMIT === 'number' ? FREE_OWN_FLASHCARD_LIMIT : 20;
+  const cutPlan = planOwnCardInstanceCut({
     activeRows: PUBLIC_PROFILE_IMPORT_STATE.myCards,
     hasTeacherLink: PUBLIC_PROFILE_IMPORT_STATE.hasLink,
     editorStates: importStates,
     languageAppKey: APP_KEY,
-    limit: typeof FREE_OWN_FLASHCARD_LIMIT === 'number' ? FREE_OWN_FLASHCARD_LIMIT : 20,
+    limit,
   });
-  if (!pre.ok){
-    const modal = document.getElementById('flashcard-limit-modal');
-    if (modal) modal.style.display = 'flex';
-    else if (errorEl) errorEl.textContent = 'Você atingiu o limite de cartões do plano grátis.';
-    return;
-  }
+  const cutMessage = cutPlan.cut ? ownCardInstanceCutMessage({
+    requested: cutPlan.requested, keptInstances: cutPlan.keptInstances,
+    limit, used: cutPlan.used, what: 'Esta seleção',
+  }) : null;
+  const showCut = () => {
+    if (typeof openFlashcardLimitModal === 'function' && openFlashcardLimitModal({ cutMessage })) return;
+    if (errorEl) errorEl.textContent = cutMessage;
+  };
+  if (cutPlan.keepCount === 0){ showCut(); return; }
+  const idsToCreate = selectedCards.slice(0, cutPlan.keepCount).map(c => c.id);
 
   // Deck padrão (personal_root) resolvido UMA vez pro lote inteiro; sem
   // destino válido, nada é criado.
@@ -547,7 +554,7 @@ async function importSelectedPublicFlashcards(box){
   if (btn){ btn.disabled = true; btn.textContent = 'Adicionando...'; }
 
   let importedCount = 0;
-  for (const id of ids){
+  for (const id of idsToCreate){
     const c = PUBLIC_PROFILE_IMPORT_STATE.cardsCache.find(x => x.id === id);
     if (!c) continue;
     // Q7 do grilling: SEMPRE uma cópia independente -- createOwnFlashcard()
@@ -572,9 +579,9 @@ async function importSelectedPublicFlashcards(box){
   }
 
   if (importedCount > 0 && typeof showToast === 'function'){
-    showToast(`✓ ${importedCount} cartão(ões) adicionado(s) à sua conta. ${summarizeDroppedImportTags(importStates, { ignoreSystem: true })}`.trim());
+    showToast(`✓ ${importedCount} cartão(ões) adicionado(s) à sua conta. ${summarizeDroppedImportTags(importStates.slice(0, cutPlan.keepCount), { ignoreSystem: true })}`.trim());
   }
-  if (importedCount < ids.length && errorEl){
+  if (importedCount < idsToCreate.length && errorEl){
     errorEl.textContent = 'Alguns cartões não puderam ser adicionados. Tente de novo.';
   }
   // Re-renderiza a caixa inteira -- reflete o espaço restante novo (pode
@@ -584,6 +591,7 @@ async function importSelectedPublicFlashcards(box){
   // (modal ou página standalone) -- estrutura fixa montada acima, nunca
   // varia por contexto.
   await renderPublicProfileCardsBox(box.parentElement.parentElement, PUBLIC_PROFILE_IMPORT_STATE.username);
+  if (cutMessage) showCut();
 }
 
 document.getElementById('public-flashcard-preview-close')?.addEventListener('click', () => {

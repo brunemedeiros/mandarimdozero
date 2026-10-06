@@ -2811,6 +2811,49 @@ body.hide-pinyin .prompt-pinyin{
   font-family:var(--font-body); font-weight:800; font-size:12px; cursor:pointer;
 }
 .guest-warning-link:hover{ filter:brightness(1.15); }
+
+/* ===== Navegador de Decks (shared/deck-browser.js; doc de arquitetura, seções 12-14 e 5.4) ===== */
+.deck-table-wrap{ margin: 4px 0 18px; }
+.deck-table{ width:100%; border-collapse:collapse; background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); overflow:hidden; }
+.deck-table th{ text-align:right; font-size:12px; font-weight:600; color:var(--ink-soft); padding:8px 10px; border-bottom:1px solid var(--paper-line); }
+.deck-table th:first-child{ text-align:left; }
+.deck-table td{ padding:6px 10px; border-bottom:1px solid var(--paper-line); color:var(--ink); }
+.deck-table tr:last-child td{ border-bottom:none; }
+.deck-table-name{ display:flex; align-items:center; gap:6px; min-width:0; }
+.deck-table-link{ background:none; border:none; padding:4px 0; cursor:pointer; color:var(--ink); font:inherit; text-align:left; overflow-wrap:anywhere; }
+.deck-table-link:hover, .deck-table-link:focus-visible{ text-decoration:underline; }
+.deck-table-toggle{ width:22px; height:22px; flex:0 0 22px; border:1px solid var(--paper-line); border-radius:4px; background:var(--paper-warm); color:var(--ink); cursor:pointer; line-height:1; padding:0; }
+.deck-table-toggle-spacer{ width:22px; flex:0 0 22px; }
+.deck-table-num{ text-align:right; width:64px; font-variant-numeric:tabular-nums; font-weight:600; }
+.deck-table-num.is-zero, .deck-detail-num.is-zero{ color:var(--ink-soft); font-weight:400; }
+.deck-table-num.is-learning, .deck-detail-num.is-learning{ color:var(--error-red, #A83A2E); }
+.deck-table-num.is-review, .deck-detail-num.is-review{ color:var(--jade); }
+.deck-table-hint{ margin-top:6px; }
+.deck-detail, .deck-panel{ background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); padding:16px; }
+.deck-detail-path{ margin:0; font-size:13px; color:var(--ink-soft); }
+.deck-detail-title{ margin:2px 0 12px; overflow-wrap:anywhere; }
+.deck-detail-counts{ display:flex; gap:24px; flex-wrap:wrap; margin-bottom:8px; }
+.deck-detail-counts > div{ display:flex; flex-direction:column; align-items:center; min-width:72px; }
+.deck-detail-num{ font-size:28px; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums; }
+.deck-detail-label{ font-size:12px; color:var(--ink-soft); }
+.deck-detail-actions{ display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 4px; }
+.deck-detail-danger{ margin-top:18px; padding-top:10px; border-top:1px solid var(--paper-line); }
+.deck-delete-dialog{ margin-top:10px; padding:12px; border:1px solid var(--error-red, #A83A2E); border-radius:var(--radius); background:var(--paper-warm); }
+.deck-panel-tags{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:10px 0; }
+.deck-panel-bulk{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0; padding:8px; border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper-warm); }
+.deck-panel-bulk select{ width:auto; max-width:100%; }
+.deck-panel-row{ align-items:flex-start; gap:10px; }
+.deck-panel-row input[type=checkbox]{ margin-top:4px; }
+.deck-panel-main{ flex:1; min-width:0; }
+.deck-panel-front{ font-weight:600; overflow-wrap:anywhere; }
+.deck-panel-back{ color:var(--ink-soft); overflow-wrap:anywhere; }
+.deck-panel-lock{ width:18px; text-align:center; }
+@media (max-width: 480px){
+  .deck-table th{ font-size:11px; padding:6px 4px; }
+  .deck-table td{ padding:6px 4px; }
+  .deck-table-num{ width:auto; min-width:34px; }
+  .deck-detail-counts{ gap:12px; }
+}
 </style>
 </head>
 <body>
@@ -3091,6 +3134,9 @@ body.hide-pinyin .prompt-pinyin{
         <p class="settings-more-note">Estes ajustes controlam o motor de revisão nos bastidores -- você não precisa entender os detalhes técnicos.</p>
       </div>
 
+      <div class="section-label">Decks</div>
+      <div class="deck-table-wrap" id="review-decks-table"></div>
+
       <div class="section-label" id="review-mode-revisar-label">Revisar</div>
       <div class="review-mode-cards" id="review-mode-cards-revisar"></div>
 
@@ -3098,6 +3144,8 @@ body.hide-pinyin .prompt-pinyin{
       <p class="review-section-hint">Continue treinando quando quiser, mesmo sem revisões pendentes.</p>
       <div class="review-mode-cards" id="review-mode-cards-praticar"></div>
     </div>
+
+    <div id="review-deck-wrap" style="display:none;"></div>
 
     <div id="review-session-wrap" style="display:none;">
       <button class="back-link" id="review-back-to-modes">← Voltar aos modos</button>
@@ -3857,6 +3905,7 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../shared/own-flashcards.js"></script>
 <script src="../shared/deck-data.js"></script>
 <script src="../shared/my-flashcards.js"></script>
+<script src="../shared/deck-browser.js"></script>
 <script src="../shared/anki-import-ui.js"></script>
 <script src="../shared/admin-analytics.js"></script>
 <script src="../shared/admin-notifications.js"></script>

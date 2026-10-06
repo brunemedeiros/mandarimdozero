@@ -41,9 +41,80 @@ function studyNoteRowForWord(unit, vocab, idx, appKey){
     fields = [f(0, 'fr', vocab.f), f(1, 'pt-BR', vocab.t)];
   }
   return {
-    id: idx, revision: 0, status: 'active', note: null, tags: [], deck_id: null,
+    id: idx, revision: 0, status: 'active', note: null,
+    tags: studyTrailTags(unit, appKey, { kind: 'palavra', vocabIdx: idx }), deck_id: null,
     fields, card_generation_mode: 'normal_reversed',
   };
+}
+
+// ============================================================
+// Tags automáticas da trilha (doc arquitetura §11.1). DERIVADAS do
+// currículo (content.js) a cada carregamento -- nunca persistidas (o save
+// da trilha guarda só id + progresso, ver STUDY_PROGRESS_FIELDS). Pertencem
+// à Note sintética, então A e B (irmãs) têm a MESMA lista. Normalizadas
+// pela função canônica normalizeNoteTags (shared/flashcard-model.js).
+//
+//   estudo, <idioma>-geral, nivel-<nível>, modulo-N, unidade-<título>,
+//   licao-N, palavra | na-frase
+//
+// - <idioma>-geral: 'frances-geral'/'mandarim-geral' (exemplo do doc §11.1;
+//   o Course Deck se chama "<Idioma> — Curso", mas a tag segue o doc).
+// - nivel-*: extra (não está no exemplo do doc): modulo-N é numerado DENTRO
+//   do nível (igual ao rótulo "Módulo N" da trilha), então sem o nível
+//   "modulo-1" do A1 e do A2 seriam a mesma tag.
+// - modulo-N: só quando existe MODULES (fr). zh não tem módulos -> omitido.
+// - unidade-<slug do título>; se o slug passar de 50 caracteres, usa o id.
+// - licao-N: posição (1-based) da lição que ensina a palavra em unit.lessons.
+//   Frase estudável não pertence a uma lição (lessons só listam vocabIdx),
+//   então não ganha licao-N.
+// Como reverter: devolver `tags: []` em studyNoteRowForWord.
+// ============================================================
+function studyTrailCourseTag(appKey){
+  return normalizeTagSlug(String(appKey || 'frances') + '-geral');
+}
+function studyTrailModuleTag(unit){
+  const mods = (typeof MODULES !== 'undefined' && Array.isArray(MODULES)) ? MODULES : null;
+  if (!mods) return null;
+  const mod = mods.find(m => (m.unitIds || []).some(id => String(id) === String(unit.id)));
+  if (!mod) return null;
+  const sameLevel = mods.filter(m => m.level === mod.level);
+  return 'modulo-' + (sameLevel.indexOf(mod) + 1);
+}
+function studyTrailUnitTag(unit){
+  const byTitle = 'unidade-' + normalizeTagSlug(unit.title);
+  if (byTitle !== 'unidade-' && byTitle.length <= TAG_MAX_LENGTH) return byTitle;
+  return 'unidade-' + normalizeTagSlug(unit.id);
+}
+// item: { kind: 'palavra', vocabIdx } | { kind: 'na-frase', phraseIdx }
+function studyTrailTags(unit, appKey, item){
+  const tags = ['estudo', studyTrailCourseTag(appKey)];
+  if (unit.level) tags.push('nivel-' + unit.level);
+  const mod = studyTrailModuleTag(unit);
+  if (mod) tags.push(mod);
+  tags.push(studyTrailUnitTag(unit));
+  if (item && item.kind === 'palavra'){
+    const li = (unit.lessons || []).findIndex(l => (l.vocabIdx || []).includes(item.vocabIdx));
+    if (li >= 0) tags.push('licao-' + (li + 1));
+  }
+  tags.push(item && item.kind === 'na-frase' ? 'na-frase' : 'palavra');
+  return normalizeNoteTags(tags);
+}
+
+// Tags "finas" da trilha (uma por unidade/lição + o tipo do item): úteis no
+// Painel/Anki, mas poluiriam os chips do filtro de Review (dezenas). O
+// filtro mostra só as tags "grossas" da trilha (estudo, curso, nível,
+// módulo) + todas as tags de cartões próprios/da professora.
+function isStudyTrailFineTag(tag){
+  return /^unidade-/.test(tag) || /^licao-\d+$/.test(tag) || tag === 'palavra' || tag === 'na-frase';
+}
+function reviewFilterVisibleTags(cards){
+  const set = new Set();
+  (cards || []).forEach(c => {
+    const own = Array.isArray(c && c.tags) ? c.tags : [];
+    const isTrail = c && c.origin === 'study';
+    own.forEach(t => { if (!isTrail || !isStudyTrailFineTag(t)) set.add(t); });
+  });
+  return Array.from(set).sort();
 }
 
 // Devolve [A, B] já com os metadados da trilha.
@@ -58,6 +129,65 @@ function buildStudyWordCards(unit, vocab, idx, appKey){
     c.deckId = null; // preenchido por assignCourseDeckIds (Course Deck da unidade)
   });
   return cards;
+}
+
+// ============================================================
+// Cartões "Na frase" (doc §11.1) -- OPT-IN por conteúdo.
+// Uma frase de unit.phrases[] só vira cartão quando o content.js marca
+// `studyable: true` nela. Hoje NENHUMA frase real está marcada, então
+// nenhum aluno ganha cartões novos (a fila de revisão de ninguém muda).
+//   1 frase estudável = 1 Note sintética `normal` (1 CardInstance,
+//   idioma estudado -> tradução), id `u{unit}-p{idx}` (nunca colide com
+//   `u{unit}-v{idx}`), tags da palavra trocando `palavra` por `na-frase`,
+//   mesmo Course Deck da unidade (assignCourseDeckIds usa unitId).
+//   vocabIdx = null (não é palavra: métricas por palavra, Speed/Combinar
+//   e a projeção A a ignoram); phraseIdx = idx.
+//   Gate (isCardLessonCompleted, sem mudança): sem vocabIdx não há lição
+//   -> só entra na revisão quando a UNIDADE inteira foi concluída.
+// Como reverter: remover a chamada buildStudyPhraseCards em
+// buildCardsFromUnits (fr/app.js e zh/app.js).
+// ============================================================
+function isStudyablePhrase(phrase){
+  return !!phrase && phrase.studyable === true;
+}
+function studyNoteRowForPhrase(unit, phrase, idx, appKey){
+  const base = `u${unit.id}-p${idx}`;
+  const f = (n, lang, value) => ({
+    id: `${base}-f${n}`, lang, role: null,
+    content: { value }, audio: null, image: null, pinyinFieldId: null,
+  });
+  let fields;
+  if (appKey === 'mandarim'){
+    fields = [f(0, 'zh', phrase.c), f(1, 'zh-pinyin', phrase.p), f(2, 'pt-BR', phrase.t)];
+    fields[0].pinyinFieldId = fields[1].id;
+  } else {
+    fields = [f(0, 'fr', phrase.f), f(1, 'pt-BR', phrase.t)];
+  }
+  return {
+    id: idx, revision: 0, status: 'active', note: null,
+    tags: studyTrailTags(unit, appKey, { kind: 'na-frase', phraseIdx: idx }), deck_id: null,
+    fields, card_generation_mode: 'normal',
+  };
+}
+function buildStudyPhraseCards(unit, appKey){
+  const cards = [];
+  (unit.phrases || []).forEach((phrase, idx) => {
+    if (!isStudyablePhrase(phrase)) return;
+    const row = studyNoteRowForPhrase(unit, phrase, idx, appKey);
+    buildEngineCardsFromRow(row, { origin: 'study', appKey, idPrefix: `u${unit.id}-p` }).forEach(c => {
+      c.origin = 'study';
+      c.unitId = unit.id;
+      c.vocabIdx = null;
+      c.phraseIdx = idx;
+      c.unitTitle = unit.title;
+      c.deckId = null;
+      cards.push(c);
+    });
+  });
+  return cards;
+}
+function isStudyTrailPhraseCard(c){
+  return !!c && c.origin === 'study' && c.phraseIdx != null;
 }
 
 // Save: card da trilha vira só {id, ...progresso}; demais origens
@@ -174,5 +304,7 @@ function isStudyWordProjectionCard(card){
   return card.cardInstance.frontFieldIndex < card.cardInstance.backFieldIndex;
 }
 function projectStudyWordsToA(cards){
-  return (cards || []).filter(isStudyWordProjectionCard);
+  // Cartões "Na frase" não são palavras: ficam fora dos exercícios de
+  // vocabulário (Speed/Combinar). Review/Deck/Anki continuam vendo-os.
+  return (cards || []).filter(c => !isStudyTrailPhraseCard(c) && isStudyWordProjectionCard(c));
 }

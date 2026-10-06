@@ -789,7 +789,7 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
     // mas este é o ponto único de verdade caso o botão seja reativado por
     // qualquer motivo (ex: DOM não re-renderizado a tempo).
     if (atLimit){
-      document.getElementById('flashcard-limit-modal').style.display = 'flex';
+      openFlashcardLimitModal();
       return;
     }
     const btn = document.getElementById('my-create-flashcard-btn');
@@ -821,7 +821,7 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
     });
     if (!pre.ok){
       errorEl.textContent = `Este cartão geraria ${pre.requested} cartão(ões) de estudo, mas restam só ${pre.remaining} no plano grátis.`;
-      document.getElementById('flashcard-limit-modal').style.display = 'flex';
+      openFlashcardLimitModal();
       return;
     }
     btn.disabled = true;
@@ -1096,22 +1096,33 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
   // Fase F -- preflight único (mesma regra canônica da criação manual) e
   // Deck padrão (personal_root) resolvido UMA vez pro lote inteiro.
   const importStates = payload.cards.map(c => nativeNoteEditorStateFromImportPayload(c, APP_KEY));
-  const pre = preflightOwnCardInstanceCreation({
+  // "Corta e avisa" (arquitetura seção 17): se o lote não cabe no teto do
+  // plano grátis, cria só as primeiras Notes que cabem (nunca uma pela
+  // metade) e avisa no fim. Regra única em shared/deck-engine.js.
+  const cutPlan = planOwnCardInstanceCut({
     activeRows: MY_FLASHCARDS_STATE._cardsCache,
     hasTeacherLink: !!MY_FLASHCARDS_STATE._hasLink,
     editorStates: importStates,
     languageAppKey: APP_KEY,
     limit: FREE_OWN_FLASHCARD_LIMIT,
   });
-  if (!pre.ok){
-    document.getElementById('flashcard-limit-modal').style.display = 'flex';
+  const cutMessage = cutPlan.cut ? ownCardInstanceCutMessage({
+    requested: cutPlan.requested, keptInstances: cutPlan.keptInstances,
+    limit: FREE_OWN_FLASHCARD_LIMIT, used: cutPlan.used, what: 'Esta importação',
+  }) : null;
+  if (cutPlan.keepCount === 0){
+    openFlashcardLimitModal({ cutMessage });
     return;
   }
+  const cardsToCreate = payload.cards.slice(0, cutPlan.keepCount);
   const dest = await resolveOwnCreationDeck({ languageAppKey: APP_KEY });
   if (!dest.ok){ if (errorEl) errorEl.textContent = dest.error; return; }
-  if (!confirm(`Importar ${payload.cards.length} cartão(ões) pra sua conta?`)) return;
+  const confirmText = cutPlan.cut
+    ? `O arquivo tem ${payload.cards.length} cartão(ões), mas só os primeiros ${cardsToCreate.length} cabem no plano grátis. Importar esses ${cardsToCreate.length}?`
+    : `Importar ${payload.cards.length} cartão(ões) pra sua conta?`;
+  if (!confirm(confirmText)) return;
   let importedCount = 0;
-  for (const card of payload.cards){
+  for (const card of cardsToCreate){
     // CONSOLIDAÇÃO-6 (ver CLAUDE.md) -- cartão importado agora nasce
     // NATIVO (fields/card_generation_mode), nunca mais o branch Legacy de
     // createOwnFlashcard(). Reaproveita nativeNoteEditorStateFromImportPayload()
@@ -1125,14 +1136,44 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
       if (typeof addSelfFlashcardToState === 'function') addSelfFlashcardToState(result.card);
     }
   }
-  showToast(`✓ ${importedCount} cartão(ões) importado(s). ${summarizeDroppedImportTags(importStates)}`.trim());
-  renderMyFlashcardsView();
+  showToast(`✓ ${importedCount} cartão(ões) importado(s). ${summarizeDroppedImportTags(importStates.slice(0, cutPlan.keepCount))}`.trim());
+  await renderMyFlashcardsView();
+  if (cutMessage) openFlashcardLimitModal({ cutMessage });
 }
 
 // Wiring do popup de limite (#flashcard-limit-modal, fr/zh index.html) --
 // mesmo padrão de abrir/fechar já usado em todo o app (ex: level-modal,
 // kbd-shortcuts-modal em fr/zh app.js): botão de fechar + clique no fundo.
 // Vive aqui (não em app.js) porque o modal só é aberto por este arquivo.
+// Abre o popup de limite (#flashcard-limit-modal, fr/zh index.html).
+// Sem `cutMessage`: texto padrão do HTML (criação manual bloqueada).
+// Com `cutMessage`: aviso de importação cortada ("corta e avisa",
+// arquitetura seção 17) + convite ao Premium em destaque. O texto padrão é
+// guardado na 1ª abertura e restaurado depois, então um aviso de corte
+// nunca "vaza" pra próxima abertura por criação manual. Usado também por
+// shared/anki-import-ui.js e shared/public-profile.js.
+function openFlashcardLimitModal(opts){
+  const modal = document.getElementById('flashcard-limit-modal');
+  if (!modal) return false;
+  const body = modal.querySelector('.app-modal-body');
+  const title = modal.querySelector('.app-modal-header h3');
+  if (body && body.dataset.defaultHtml === undefined) body.dataset.defaultHtml = body.innerHTML;
+  if (title && title.dataset.defaultText === undefined) title.dataset.defaultText = title.textContent;
+  const cutMessage = opts && opts.cutMessage;
+  if (body){
+    body.innerHTML = cutMessage
+      ? `<p data-limit-cut-message>${escapeHTML(cutMessage)}</p>
+         <div data-limit-premium-cta style="margin-top:10px; padding:10px 12px; border:2px solid var(--seal-red); border-radius:var(--radius, 10px); background:var(--paper-warm);">
+           <strong>⭐ Com o Premium, seus cartões próprios são ilimitados.</strong><br>
+           Para ativar, fale com a administração (profbrune). Você também pode arquivar cartões que já não usa para liberar espaço.
+         </div>`
+      : body.dataset.defaultHtml;
+  }
+  if (title) title.textContent = cutMessage ? '🔒 Importação limitada pelo plano grátis' : title.dataset.defaultText;
+  modal.style.display = 'flex';
+  return true;
+}
+
 document.getElementById('flashcard-limit-modal-close')?.addEventListener('click', () => {
   document.getElementById('flashcard-limit-modal').style.display = 'none';
 });
