@@ -2967,6 +2967,24 @@ footer.app-footer{
 }
 footer.app-footer img{ height:40px; opacity:.85; }
 
+/* Onda 1 (estrutura da lição): dentro de uma lição em andamento o conteúdo
+   precisa começar logo -- objetivo e eyebrow somem (o título da unidade
+   continua), paddings menores. Nenhum botão do topo é removido. */
+body.lesson-focus .lesson-unit-goal{ display:none; }
+body.lesson-focus .lesson-unit-context{ margin-bottom:8px; padding-bottom:6px; }
+body.lesson-focus .lesson-focus-bar{ margin-bottom:12px; }
+body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
+.vocab-card-counter{ display:flex; justify-content:center; align-items:center; gap:6px; margin-bottom:12px; }
+.vocab-card-counter .vc-dot{ width:8px; height:8px; border-radius:50%; background:var(--paper-line); }
+.vocab-card-counter .vc-dot.on{ background:var(--seal-red-dark); }
+@media (max-width:700px){
+  body.lesson-focus .lesson-hint-eyebrow{ display:none; }
+  body.lesson-focus .exercise-counter{ margin-bottom:8px; }
+  body.lesson-focus footer.app-footer{ display:none; }
+}
+/* atalhos 1-4 só fazem sentido com teclado físico */
+@media not all and (hover:hover) and (pointer:fine){ .kbd-hint{ display:none; } }
+
 /* toast for XP gain */
 /* top:18px fixo (via CSS) ficava por cima do próprio título da unidade
    durante a lição -- nenhum número fixo cobre topbar normal e breadcrumb

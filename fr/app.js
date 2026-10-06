@@ -3107,7 +3107,7 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
   ` : '';
 
   contentEl.innerHTML = `
-    <div class="vocab-card-counter">Bloco ${acq.blockIdx + 1} de ${acq.blocks.length} · Palavra ${posInBlock + 1} de ${block.length}</div>
+    <div class="vocab-card-counter" role="img" aria-label="Palavra ${posInBlock + 1} de ${block.length}">${block.map((_, i) => `<span class="vc-dot${i <= posInBlock ? ' on' : ''}"></span>`).join('')}</div>
     <div class="vocab-card">
       <div class="vocab-card-word">${v.f} ${audioBtnHTML(v.f)}</div>
       <div class="vocab-card-trans">${v.t}</div>
@@ -3275,7 +3275,7 @@ function renderConceptStep(){
     </ul>` : '';
 
   contentEl.innerHTML = `
-    <div class="gram-block-counter">${concept.blocks.length > 1 ? `${STEP_STATE.conceptBlockIdx + 1} de ${concept.blocks.length}` : (isReality ? 'Nota de realidade' : isCulture ? 'Nota cultural' : 'Vale entender')}</div>
+    ${concept.blocks.length > 1 ? `<div class="gram-block-counter">${STEP_STATE.conceptBlockIdx + 1} de ${concept.blocks.length}</div>` : ''}
     <div class="gram-block ${block.wrapup ? 'wrapup' : ''}">
       <h3 class="gram-block-title">${block.title}</h3>
       <p class="gram-block-body">${block.body}</p>
