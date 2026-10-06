@@ -79,6 +79,7 @@ try{
      escuro (essas cores ficam mais claras no escuro pra se destacar do
      fundo escuro, então precisam de texto escuro em cima). */
   --on-vivid: #FFFFFF;
+  --error-red-text: #B81F13; /* texto de erro sobre --paper-warm: 5.32:1 (o --error-red puro dá 4.15:1) */
   /* grade-hard/grade-good (botões Difícil/Bom da revisão) -- cor PRÓPRIA
      (não reaproveita --seal-red, a cor de MARCA, nem um hex solto) que seguem
      o MESMO padrão claro-escuro/on-vivid de --error-red/--jade acima, em vez
@@ -140,6 +141,7 @@ try{
     --jade: #52B487;
     --ink-soft: #C5B8D9;
     --on-vivid: #201335;
+    --error-red-text: #FF6B5C;
     /* Par escuro de grade-hard/grade-good (ver :root claro) -- mesmo padrão
        "mais claro/pastel no escuro" de --error-red/--jade, pra continuar
        passando com --on-vivid (que também vira texto escuro no escuro).
@@ -173,6 +175,7 @@ try{
   --jade: #52B487;
   --ink-soft: #C5B8D9;
   --on-vivid: #201335;
+  --error-red-text: #FF6B5C;
   --grade-hard-bg: #C9973A;
   --grade-good-bg: #5FA8D3;
   --dc-slot-0: #F7B84A;
@@ -1282,7 +1285,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   color: var(--seal-red-dark); font-weight:800;
 }
 .cloze-blank.correct{ border-color: var(--jade); color: var(--jade); }
-.cloze-blank.incorrect{ border-color: var(--error-red); color: var(--error-red); animation: shakeWrong .4s ease; }
+.cloze-blank.incorrect{ border-color: var(--error-red); color: var(--error-red-text); animation: shakeWrong .4s ease; }
 .cloze-trans{ text-align:center; font-size:13px; color: var(--ink-soft); margin-bottom:18px; }
 .cloze-audio-row{ display:flex; justify-content:center; margin-bottom:14px; }
 .cloze-options{ display:flex; flex-direction:column; gap:10px; }

@@ -64,6 +64,9 @@ try{
   --jade: #3A7359;          /* verde jade — sucesso/acerto, contraste intencional ao vermelho */
   --ink-soft: #5C4A3F;      /* texto secundário */
   --on-seal-red: #FFFFFF;   /* texto legível sobre fundo --seal-red — 6.0:1 no claro */
+  /* Botões de nota da revisão: fundo próprio + texto --on-vivid (mesmo padrão do fr). Branco no claro (>=5.0:1), escuro no escuro (>=6.8:1). */
+  --on-vivid: #FFFFFF;
+  --grade-again-bg: #A83A2E; --grade-hard-bg: #8C5F0E; --grade-good-bg: #3A7359; --grade-easy-bg: #2E7D4F;
   /* Selo colorido atrás do ícone de cada desafio diário -- 3 cores fixas
      por posição no card (não por desafio específico), pra manter a mesma
      assinatura visual todo dia mesmo quando o desafio sorteado muda. */
@@ -120,6 +123,8 @@ try{
     --jade: #52B487;
     --ink-soft: #C7B5A5;
     --on-seal-red: #1A0605; /* 5.14:1 sobre o --seal-red do modo escuro */
+    --on-vivid: #1B1512;
+    --grade-again-bg: #FF7B6E; --grade-hard-bg: #C9973A; --grade-good-bg: #52B487; --grade-easy-bg: #7CCBA0;
     --dc-slot-0: #F7B84A;
     --dc-slot-1: #9A85FF;
     --dc-slot-2: #5B9DFF;
@@ -145,6 +150,8 @@ try{
   --jade: #52B487;
   --ink-soft: #C7B5A5;
   --on-seal-red: #1A0605;
+  --on-vivid: #1B1512;
+  --grade-again-bg: #FF7B6E; --grade-hard-bg: #C9973A; --grade-good-bg: #52B487; --grade-easy-bg: #7CCBA0;
   --dc-slot-0: #F7B84A;
   --dc-slot-1: #9A85FF;
   --dc-slot-2: #5B9DFF;
@@ -1356,7 +1363,7 @@ body.hide-pinyin .cloze-pinyin{ display:none; }
   color: var(--seal-red-dark); font-weight:800;
 }
 .cloze-blank.correct{ border-color: var(--jade); color: var(--jade); }
-.cloze-blank.incorrect{ border-color: var(--seal-red); color: var(--seal-red); animation: shakeWrong .4s ease; }
+.cloze-blank.incorrect{ border-color: var(--seal-red); color: var(--seal-red-dark); animation: shakeWrong .4s ease; }
 .cloze-trans{ text-align:center; font-size:13px; color: var(--ink-soft); margin-bottom:18px; }
 .cloze-audio-row{ display:flex; justify-content:center; margin-bottom:14px; }
 .cloze-options{ display:flex; flex-direction:column; gap:10px; }
@@ -1853,15 +1860,15 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .grade-buttons{ display:grid; grid-template-columns: repeat(4,1fr); gap:8px; margin-top:18px; }
 .grade-btn{
   padding: 12px 6px; border-radius:12px; border:none; cursor:pointer; font-family:var(--font-body);
-  font-weight:800; font-size:13px; color:white; display:flex; flex-direction:column; gap:3px; align-items:center;
+  font-weight:800; font-size:13px; color:var(--on-vivid); display:flex; flex-direction:column; gap:3px; align-items:center;
   transition: transform .1s ease, filter .15s;
 }
 .grade-btn:active{ transform: scale(.96); }
 .grade-btn small{ font-weight:600; font-size:10.5px; opacity:.85; }
-.grade-again{ background: #A83A2E; }
-.grade-hard{ background: #C07A1F; }
-.grade-good{ background: var(--jade); }
-.grade-easy{ background: #2E7D4F; }
+.grade-again{ background: var(--grade-again-bg); color: var(--on-vivid); }
+.grade-hard{ background: var(--grade-hard-bg); color: var(--on-vivid); }
+.grade-good{ background: var(--grade-good-bg); color: var(--on-vivid); }
+.grade-easy{ background: var(--grade-easy-bg); color: var(--on-vivid); }
 
 /* ---------- Progress / gamification view ---------- */
 .stat-cards{ display:grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:26px; }
