@@ -219,6 +219,7 @@ async function onUserLoggedIn(user){
   // progresso estar carregado (reaproveita a leitura de loadState(), sem
   // ida extra à rede) e grava qualquer escolha pendente feita antes disso.
   await applyAccountUiLanguage();
+  askUiLanguageOnFirstAccess();
   // Depois do render padrão (ver comentário equivalente em enterGuestMode)
   // -- só assim a navegação forçada por uma notificação clicada vence a
   // aba default do carregamento normal.
@@ -327,6 +328,8 @@ let savePending = false;
 // que grava, então nenhuma das duas escritas apaga a outra (corrida).
 let progressAccountUiLanguage = null;
 let pendingAccountUiLanguage = null;
+// Conta sem nenhum progresso salvo ainda (primeiro acesso): só então o site pergunta o idioma.
+let progressAccountIsNew = false;
 
 function accountUiLangFromQuery(){
   try { return !!new URLSearchParams(window.location.search).get('ui'); } catch (e) { return false; }
@@ -358,6 +361,39 @@ async function flushAccountUiLanguage(){
     console.error('Erro ao salvar idioma do site na conta:', e);
     return false;
   }
+}
+
+// Primeiro acesso de uma conta nova: pergunta o idioma do site (menus, explicações
+// e traduções), com o idioma do navegador como sugestão. Conta que já tem
+// progresso ou idioma salvo, ?ui= na URL e navegador que já guardou uma escolha
+// nunca veem o aviso. Não trava o carregamento: a escolha é um toque.
+function uiLanguageSuggestionFromBrowser(){
+  try {
+    const langs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || ''];
+    return String(langs[0] || '').toLowerCase().startsWith('en') ? 'en' : 'pt-BR';
+  } catch (e) { return 'pt-BR'; }
+}
+
+function askUiLanguageOnFirstAccess(){
+  if (!CURRENT_USER || !progressLoadedOk || !progressAccountIsNew) return;
+  if (progressAccountUiLanguage || pendingAccountUiLanguage || accountUiLangFromQuery()) return;
+  try { if (window.localStorage.getItem('ui-language')) return; } catch (e) {}
+  const modal = document.getElementById('ui-language-first-modal');
+  if (!modal || typeof setUiLang !== 'function') return;
+  const suggested = uiLanguageSuggestionFromBrowser();
+  const btns = modal.querySelectorAll('button[data-lang]');
+  btns.forEach(btn => {
+    const isSuggested = btn.getAttribute('data-lang') === suggested;
+    btn.classList.toggle('btn-primary', isSuggested);
+    btn.classList.toggle('btn-secondary', !isSuggested);
+    btn.onclick = () => {
+      const lang = btn.getAttribute('data-lang');
+      modal.style.display = 'none';
+      setUiLang(lang);
+      persistUiLanguageToAccount(lang);
+    };
+  });
+  modal.style.display = 'flex';
 }
 
 // Chamado pelo seletor "Idioma da interface" (shared/i18n/i18n.js) depois
@@ -567,6 +603,7 @@ async function loadState(){
 
       progressAccountUiLanguage = (typeof uiLanguageFromProgressData === 'function' && data)
         ? uiLanguageFromProgressData(data.data) : null;
+      progressAccountIsNew = !(data && data.data && Object.keys(data.data).some(k => k !== '_meta'));
       if (data && data.data && data.data[APP_KEY]){
         applySerializedState(data.data[APP_KEY]);
       } else if (typeof loadLegacyState === 'function' && data && data.data){

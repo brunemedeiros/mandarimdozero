@@ -375,6 +375,7 @@ async function triggerWouldGenerate(page){
     L('seletor: só Português (Brasil) e English, nomes no próprio idioma', JSON.stringify(selInfo.opts) === JSON.stringify([['pt-BR', 'Português (Brasil)'], ['en', 'English']]), selInfo.opts);
     L('seletor: valor inicial pt-BR', selInfo.value === 'pt-BR');
     await a.page.selectOption('#ui-language-select', 'en');
+    await a.page.click('#ui-language-confirm-yes'); // aviso novo ao trocar o idioma do site
     await a.page.waitForFunction(() => getUiLang() === 'en' && !!I18N_CATALOG.en && document.querySelectorAll('[data-i18n-applied]').length > 0);
     const C = CAT.en;
     L('seletor -> en: html lang, localStorage', await ev(() => document.documentElement.lang === 'en' && localStorage.getItem('ui-language') === 'en'));
@@ -403,6 +404,7 @@ async function triggerWouldGenerate(page){
     L('reload: idioma en persiste (html lang, seletor, modal)', reload.lang === 'en' && reload.val === 'en' && reload.title === C['flashcardLimit.modal.title'] && reload.app === appKey, reload);
     // voltar para Português restaura o original
     await b2.page.selectOption('#ui-language-select', 'pt-BR');
+    await b2.page.click('#ui-language-confirm-yes');
     await b2.page.waitForFunction(() => getUiLang() === 'pt-BR' && document.documentElement.lang === 'pt-BR');
     const backSnap = await modalSnapshot(b2.page, lang);
     L('voltar para Português: modais idênticos ao commit anterior', JSON.stringify(backSnap) === JSON.stringify(prevSnap), backSnap);

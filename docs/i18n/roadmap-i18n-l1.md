@@ -104,3 +104,13 @@ D. **Nomes das categorias de desafios** ("Listen and Translate", "Accents"): tra
 
 ## 7. Critério de "pronto" deste planejamento
 Escopo definido e apresentado: eixos, arquitetura, fases feitas e próximas, `/ptbr`, riscos e decisões. A execução começa pela fase 5, quando você mandar.
+
+## Troca de idioma do site -- decisões aprovadas (2026-10-06)
+
+1. **Idioma do site é preferência da conta** (Configurações > "Idioma da interface"), livre a qualquer momento e válida para todos os idiomas estudados. Progresso NÃO é separado por idioma do site (isso dobraria cartões e o teto de 20 do plano grátis).
+2. **Aviso antes de trocar** (`#ui-language-confirm-modal`): o texto e as explicações mudam, o progresso continua salvo. Cancelar devolve o seletor.
+3. **Progresso segue a palavra, não a posição** (`shared/card-variants.js`, `STATE.cardVariants`, salvo na conta): quando o idioma do site troca a palavra estudada de um slot (país do aluno; hanzi 巴/美), o histórico vai para uma gaveta por palavra e o da palavra nova é restaurado ou começa do zero. Ids não mudam; só cartões que trocam de palavra são afetados.
+4. **Primeiro acesso de conta nova** (`#ui-language-first-modal`, `askUiLanguageOnFirstAccess` em `shared/auth.js`): pergunta o idioma, com o do navegador como sugestão. Não pergunta para conta que já tem progresso ou idioma salvo, nem com `?ui=` na URL, nem se o navegador já guardou uma escolha. Convidado não é perguntado.
+5. Notificações em inglês ativadas no banco (78 templates `ui_language='en'`), escolhidas pelo idioma do site de cada conta.
+
+Testes: `tests/i18n/test_card_variants.js`, `test_card_variants_browser.js`, `test_ui_language_confirm_browser.js`, `test_ui_language_first_access_browser.js`.
