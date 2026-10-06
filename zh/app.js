@@ -5908,32 +5908,38 @@ const REVIEW_ORIGIN_LABELS = { all: 'Todas', study: 'Da trilha', teacher: 'Da pr
 // filtro. Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila" (e o
 // indicador "Filtro: X" que ficava aqui embaixo do número) foi removido
 // da UI de propósito.
+// Filtros de sessão (origem/tag, em "Configurar") valem para "Estudar
+// tudo", mas não para a tabela de Decks. Resumo para avisar quando estão ativos.
+function reviewSessionFilterSummary(){
+  const parts = [];
+  const origin = STATE.studySettings.reviewOriginFilter || 'all';
+  if (origin !== 'all') parts.push(REVIEW_ORIGIN_LABELS[origin] || origin);
+  const tags = activeReviewTagFilter();
+  if (tags.length) parts.push(tags.map(t => '#' + t).join(', '));
+  return parts.join(' · ');
+}
+
+// "Estudar tudo" (todos os Decks juntos) fica embaixo da tabela de Decks; as
+// contagens por Deck já estão na tabela, então aqui não há números. Aviso
+// quando um filtro de sessão (origem/tag, em "Configurar") está ativo.
 function renderReviewTodayWidget(){
   const wrap = document.getElementById('review-today-widget');
   if (!wrap) return;
   const pool = eligibleReviewPool();
-  const trueCount = trueDueReviewCount(pool);
-  // Sem revisões: aviso curto no lugar do contador (o antigo bloco
-  // "Revisar" saiu -- ver renderReviewModeSelect).
-  if (trueCount === 0){
-    const title = pool.length === 0 ? 'Ainda não há revisões' : 'Você está em dia! 🍵';
-    const desc = pool.length === 0
-      ? 'Complete uma lição no Estudo pra começar a ter palavras pra revisar.'
-      : 'Palavras difíceis e Combinar continuam disponíveis logo abaixo.';
-    wrap.innerHTML = `
-      <div class="review-mode-empty-title">${title}</div>
-      <div class="review-mode-empty-desc">${desc}</div>
-    `;
-    return;
-  }
-  // "Estudar tudo" substitui o antigo bloco Flashcard: é a mesma sessão
-  // (todos os Decks juntos); estudar um Deck só é pela tabela de Decks.
+  const trueCount = getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay }).length;
+  const filterSummary = reviewSessionFilterSummary();
+  const filterNote = filterSummary
+    ? `<div class="review-today-filter">Filtro da sessão: ${escapeHTML(filterSummary)} · <button type="button" class="admin-select-link review-today-filter-clear" id="review-today-filter-clear">Limpar filtro</button></div>`
+    : '';
   wrap.innerHTML = `
-    <div class="review-today-label">Revisões pendentes</div>
-    <div class="review-today-count">${trueCount}</div>
-    <button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">▶ Estudar tudo</button>
+    ${trueCount ? `<button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">▶ Estudar todos os Decks</button>` : ''}
+    ${filterNote}
   `;
-  document.getElementById('review-study-all-btn').addEventListener('click', () => openReviewSession('flashcard'));
+  document.getElementById('review-study-all-btn')?.addEventListener('click', () => openReviewSession('flashcard'));
+  document.getElementById('review-today-filter-clear')?.addEventListener('click', () => {
+    updateStudySetting({ reviewOriginFilter: 'all', reviewTagFilter: [] });
+    renderReviewModeSelect();
+  });
 }
 
 // Altura do "pote" proporcional à maior das 3 categorias (não à contagem
@@ -7896,17 +7902,16 @@ document.getElementById('review-tag-clear')?.addEventListener('click', () => {
 // antes era um botão de texto solto entre o dropdown e REVISAR, a autora
 // não gostou) -- recolhido por padrão, sincroniza ao abrir (4 controles
 // de sessão, ver renderReviewSettingsView).
-const reviewHeaderSettingsBtn = document.getElementById('review-header-settings-btn');
-if (reviewHeaderSettingsBtn){
-  reviewHeaderSettingsBtn.addEventListener('click', () => {
-    const panel = document.getElementById('review-settings-panel');
-    if (panel.hasAttribute('hidden')){
-      panel.removeAttribute('hidden');
-      renderReviewSettingsView();
-    } else {
-      panel.setAttribute('hidden', '');
-    }
-  });
+// "Configurar" (barra Decks/Adicionar/Painel/Configurar, shared/deck-browser.js):
+// abre/fecha o painel de ajustes da sessão na tela inicial da Revisão.
+// Abre os ajustes numa janela por cima da tela atual (inclusive dentro
+// de um Deck), como Adicionar e Painel -- ver openReviewSettingsModal.
+function toggleReviewSettingsPanel(){
+  if (typeof openReviewSettingsModal === 'function'){ openReviewSettingsModal(); return; }
+  const panel = document.getElementById('review-settings-panel');
+  if (!panel) return;
+  panel.removeAttribute('hidden');
+  renderReviewSettingsView();
 }
 document.querySelectorAll('[data-settings-section]').forEach(btn => {
   btn.addEventListener('click', () => switchSettingsSection(btn.dataset.settingsSection));

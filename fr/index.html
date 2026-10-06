@@ -1612,9 +1612,18 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
   .review-mode-cards-row .review-mode-card .name{ font-size:12.5px; }
   .review-mode-cards-row .review-mode-card .desc{ font-size:10.5px; }
 }
-#review-today-widget{ text-align:center; margin-bottom:14px; }
+#review-today-widget{ text-align:center; margin:12px 0 14px; }
 .review-today-label{ font-size:12px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft); font-weight:800; margin-bottom:4px; }
 .review-today-count{ font-size:38px; font-weight:800; line-height:1; color:var(--seal-red-dark); font-variant-numeric:tabular-nums; }
+.review-today-split{ display:flex; justify-content:center; gap:22px; margin:2px 0 10px; }
+.review-today-col-label{ font-size:11px; color:var(--ink-soft); font-weight:700; margin-top:2px; }
+.review-today-count.is-new{ color:var(--count-new); }
+.review-today-count.is-learning{ color:var(--count-learning); }
+.review-today-count.is-review{ color:var(--count-review); }
+.review-today-count.is-zero{ color:var(--ink-soft); opacity:.55; }
+.review-today-filter{ font-size:12px; color:var(--ink-soft); margin:0 0 10px; }
+.review-today-filter-clear{ font-size:12px; }
+.review-today-split .review-today-count{ font-size:30px; }
 .review-active-filter{ margin-top:6px; font-size:13px; color:var(--ink-soft); }
 .review-settings-select{
   font-size:13px; font-weight:700; color:var(--ink); background:var(--paper);
@@ -1634,6 +1643,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
    por ser a decisão mais "de conteúdo" (o que entra na sessão) das 4,
    ficando à frente das 3 que ajustam o motor por trás dos panos. */
 .review-settings-panel{ margin-bottom:22px; }
+.review-settings-modal .review-settings-panel{ margin-bottom:0; }
 
 /* ---------- "Suas palavras" (resumo fracas/medianas/fortes) ----------
    SÓ uma contagem visual do vocabulário já revisável -- não é SRS novo, não
@@ -3661,24 +3671,11 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <!-- ===== REVISÃO (SRS) ===== -->
   <div class="view" id="view-review">
     <div id="review-mode-select-wrap">
-      <div id="review-deck-topbar-home"></div>
       <div class="path-header">
         <h2>Revisão</h2>
-        <p>O que você deve fazer agora?</p>
       </div>
+      <div id="review-deck-topbar-home"></div>
 
-      <!-- Prop 3 (ver CLAUDE.md, "7 propostas") -- "Meus Cartões" saiu do
-           menu do avatar (ninguém clicava lá) e ganhou este botão. 5ª
-           rodada de grilling: "⚙️ Configurar sessão" entrou nesta MESMA
-           fileira (saiu do ícone ao lado do título) -- pill igual às
-           sub-abas do Painel de Admin/Perfil, logo abaixo de
-           título+subtítulo, centralizado (mesmo .leaderboard-tabs sem
-           override de alinhamento), zero CSS novo. -->
-      <div class="leaderboard-tabs" role="tablist" aria-label="Atalhos de Revisão">
-        <button type="button" class="leaderboard-tab" id="review-header-settings-btn">⚙️ Configurar sessão</button>
-      </div>
-
-      <div id="review-today-widget"></div>
 
       <div class="review-settings-panel" id="review-settings-panel" hidden>
         <!-- Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila"
@@ -3719,6 +3716,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 
       <div class="section-label">Decks</div>
       <div class="deck-table-wrap" id="review-decks-table"></div>
+      <div id="review-today-widget"></div>
 
       <div class="section-label">Outros modos</div>
       <p class="review-section-hint">Speed Review usa a sessão de hoje (palavras novas e revisões); Palavras difíceis e Combinar funcionam a qualquer hora.</p>

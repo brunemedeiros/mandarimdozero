@@ -206,7 +206,7 @@ async function deckBrowserLoadOwnContext(){
   }
 }
 
-// ---------- Barra superior (Decks | Adicionar | Painel) ----------
+// ---------- Barra superior (Decks | Adicionar | Painel | Configurar) ----------
 
 // Mesma barra em todas as telas de Decks. Na tela de um Deck, Adicionar
 // usa aquele Deck (se for seu) e o Painel abre filtrado nele.
@@ -217,6 +217,7 @@ function deckTopbarHTML(nodeId){
       <button type="button" class="deck-topbar-btn ${onHome ? 'is-active' : ''}" data-topbar-decks ${onHome ? 'aria-current="page"' : ''}>Decks</button>
       ${canAdd ? `<button type="button" class="deck-topbar-btn" data-topbar-add>Adicionar</button>` : ''}
       <button type="button" class="deck-topbar-btn" data-topbar-panel>Painel</button>
+      ${typeof toggleReviewSettingsPanel === 'function' ? `<button type="button" class="deck-topbar-btn" data-topbar-settings>Configurar</button>` : ''}
     </nav>`;
 }
 
@@ -227,6 +228,63 @@ function wireDeckTopbar(container, nodeId){
     openAddCardModal({ deckId: deck && ['personal_root', 'personal'].includes(deck.kind) ? deck.id : null });
   });
   container.querySelector('[data-topbar-panel]')?.addEventListener('click', () => openDeckPanel(nodeId));
+  // Abre os ajustes numa janela, sem sair da tela atual.
+  container.querySelector('[data-topbar-settings]')?.addEventListener('click', () => openReviewSettingsModal());
+}
+
+// ---------- Configurar (janela) ----------
+
+// O painel de ajustes (#review-settings-panel, com os listeners do app)
+// é movido para dentro da janela ao abrir e devolvido ao lugar ao fechar
+// -- nunca duplicado. Ao fechar, as contagens são refeitas (o limite de
+// "Novas palavras por dia" muda os números dos Decks).
+const REVIEW_SETTINGS_MODAL_ID = 'review-settings-modal';
+let REVIEW_SETTINGS_HOME = null;
+
+function closeReviewSettingsModal(){
+  const el = document.getElementById(REVIEW_SETTINGS_MODAL_ID);
+  if (!el) return;
+  const panel = document.getElementById('review-settings-panel');
+  if (panel){
+    panel.setAttribute('hidden', '');
+    if (REVIEW_SETTINGS_HOME && REVIEW_SETTINGS_HOME.parentNode) REVIEW_SETTINGS_HOME.parentNode.insertBefore(panel, REVIEW_SETTINGS_HOME);
+  }
+  el.remove();
+  document.removeEventListener('keydown', reviewSettingsModalOnKey);
+  deckBrowserRefresh();
+}
+function reviewSettingsModalOnKey(e){
+  if (e.key !== 'Escape') return;
+  if (deckBrowserTopModalIs(REVIEW_SETTINGS_MODAL_ID)) closeReviewSettingsModal();
+}
+
+function openReviewSettingsModal(){
+  const panel = document.getElementById('review-settings-panel');
+  if (!panel) return;
+  if (document.getElementById(REVIEW_SETTINGS_MODAL_ID)) return;
+  if (!REVIEW_SETTINGS_HOME){
+    REVIEW_SETTINGS_HOME = document.createComment('review-settings-panel');
+    panel.parentNode.insertBefore(REVIEW_SETTINGS_HOME, panel);
+  }
+  const overlay = document.createElement('div');
+  overlay.id = REVIEW_SETTINGS_MODAL_ID;
+  overlay.className = 'app-modal-overlay';
+  overlay.style.zIndex = 'calc(var(--z-modal-backdrop) - 1)';
+  overlay.innerHTML = `
+    <div class="app-modal review-settings-modal" role="dialog" aria-modal="true" aria-labelledby="review-settings-modal-title">
+      <div class="app-modal-header">
+        <h3 id="review-settings-modal-title">Configurar</h3>
+        <button type="button" class="app-modal-close" data-review-settings-close aria-label="Fechar">✕</button>
+      </div>
+      <div class="app-modal-body" id="review-settings-modal-body"></div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#review-settings-modal-body').appendChild(panel);
+  panel.removeAttribute('hidden');
+  if (typeof renderReviewSettingsView === 'function') renderReviewSettingsView();
+  overlay.querySelector('[data-review-settings-close]').addEventListener('click', closeReviewSettingsModal);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeReviewSettingsModal(); });
+  document.addEventListener('keydown', reviewSettingsModalOnKey);
 }
 
 // ---------- Containers ----------
@@ -512,6 +570,7 @@ function renderDeckDetail(){
   const crumbs = deckBrowserBreadcrumb(decks, nodeId);
   const totalLine = `${c.total} ${c.total === 1 ? 'cartão' : 'cartões'}${getDeckChildren(decks, nodeId).length ? ' neste Deck e nos subdecks' : ''}${c.newTotal > c.new ? ` · ${c.newTotal} novos no total (entram até ${c.new} por dia, conforme "Novas palavras por dia")` : ''}`;
   wrap.innerHTML = `
+    <div class="path-header"><h2>Revisão</h2></div>
     ${deckTopbarHTML(nodeId)}
     <div class="deck-overview">
       <h2 class="deck-overview-title">${crumbs.map(escapeHTML).join(' › ')}</h2>
@@ -777,6 +836,8 @@ function deckBrowserNotes(cards){
       back: texts.back,
       tags: first.tags || [],
       archived: first.origin !== 'study' && siblings.every(c => c.flashcardStatus === 'archived'),
+      // Trilha: cartão de lição ainda não estudada (fica fora da Revisão).
+      locked: first.origin === 'study' && typeof isCardLessonCompleted === 'function' && !siblings.some(c => isCardLessonCompleted(c)),
       typeLabel: DECK_BROWSER_CARD_TYPE_LABELS[mode] || DECK_BROWSER_CARD_TYPE_LABELS[first.cardInstance && first.cardInstance.cardTypeId] || 'Normal',
     };
   });
@@ -790,7 +851,6 @@ function deckBrowserNoteState(note){
 }
 
 const DECK_PANEL_ID = 'deck-panel-modal';
-const DECK_PANEL_PAGE = 200;
 const DECK_PANEL_STATES = [
   { id: 'all', label: 'Todos' }, { id: 'Novo', label: 'Novo' },
   { id: 'Aprendendo', label: 'Aprendendo' }, { id: 'Revisão', label: 'Revisão' },
@@ -918,14 +978,15 @@ async function deckPanelReload(){
   renderDeckPanel();
 }
 
-// O Painel mostra TODAS as Notes do escopo (inclusive cartões de lições
-// ainda não estudadas e arquivados), porque é uma tela de conteúdo.
+// O Painel lista as Notes do escopo. Diferente do Anki, os cartões da Trilha
+// nascem do avanço do aluno: os de lições ainda não estudadas nunca aparecem
+// (nem em filtro). Arquivados só no filtro "Arquivados".
 function deckBrowserPanelNotes(){
   const decks = deckBrowserDecks();
   const all = (STATE && STATE.cards) || [];
   const scopeId = DECK_BROWSER.panel.scopeId;
   const scoped = scopeId === 'lang' ? all : getStudyScopeForDeck(decks, scopeId, all);
-  return deckBrowserNotes(scoped);
+  return deckBrowserNotes(scoped).filter(n => !n.locked);
 }
 
 function deckBrowserFilterNotes(notes){
@@ -966,13 +1027,13 @@ function renderDeckPanelSide(){
     deckBrowserChildren(decks, deck.id).forEach(k => walk(k, depth + 1));
   };
   deckBrowserChildren(decks, 'lang').forEach(d => walk(d, 1));
-  // Tags: num escopo grande, só as gerais + as de cartões próprios/professora
-  // (as finas da Trilha viram centenas; a busca encontra qualquer uma).
+  // Tags: as gerais + as de cartões próprios/professora (as finas da Trilha,
+  // unidade-*/licao-*, viram centenas; a busca encontra qualquer uma). Mesma
+  // regra dos chips de tag da Revisão.
   const scopeCards = deckBrowserPanelNotes().flatMap(n => n.cards);
-  let tags = collectTagsFromCards(scopeCards);
-  if (tags.length > 30 && typeof reviewFilterVisibleTags === 'function'){
-    tags = Array.from(new Set(reviewFilterVisibleTags(scopeCards).concat(p.tags))).sort();
-  }
+  const tags = typeof reviewFilterVisibleTags === 'function'
+    ? Array.from(new Set(reviewFilterVisibleTags(scopeCards).concat(p.tags))).sort()
+    : collectTagsFromCards(scopeCards);
   const archivedCount = deckBrowserPanelNotes().filter(n => n.archived).length;
   const logged = !!deckBrowserUserId();
   body.innerHTML = `
@@ -1020,13 +1081,13 @@ function renderDeckPanelList(){
   const visibleKeys = new Set(notes.map(n => n.key));
   Array.from(p.selected).forEach(k => { if (!visibleKeys.has(k)) p.selected.delete(k); });
   root.querySelector('[data-panel-count]').textContent = notes.length
-    ? `${notes.length} ${notes.length === 1 ? 'conteúdo' : 'conteúdos'}${notes.length > DECK_PANEL_PAGE ? ` (mostrando os primeiros ${DECK_PANEL_PAGE}; use a busca para encontrar os demais)` : ''}.`
+    ? `${notes.length} ${notes.length === 1 ? 'conteúdo' : 'conteúdos'}.`
     : '';
   if (!notes.length){
     const filtered = p.query || p.tags.length || p.state !== 'all' || p.archived;
-    list.innerHTML = `<p class="profile-empty-note">${filtered ? 'Nenhum cartão encontrado com esse filtro.' : 'Este Deck ainda não tem cartões.'}</p>`;
+    list.innerHTML = `<p class="profile-empty-note">${filtered ? 'Nenhum cartão encontrado com esse filtro.' : 'Nenhum cartão aqui ainda. Os cartões da Trilha aparecem conforme você conclui as lições.'}</p>`;
   } else {
-    list.innerHTML = notes.slice(0, DECK_PANEL_PAGE).map(n => {
+    list.innerHTML = notes.map(n => {
       const own = n.origin === 'self';
       const active = p.mode === 'note' && p.activeKey === n.key;
       return `<div class="deck-panel-item ${active ? 'is-active' : ''} ${n.archived ? 'is-archived' : ''}" role="option" aria-selected="${active ? 'true' : 'false'}" tabindex="0" data-panel-open-note="${escapeHTML(n.key)}">
