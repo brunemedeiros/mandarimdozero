@@ -277,6 +277,8 @@ const LESSON_VOCAB_MAP: Record<string, Record<string, number[][]>> = {
 // LESSON_VOCAB_MAP em vez de UNITS (indisponível aqui).
 function isCardLessonCompletedServer(card: any, unitProgress: any, languageAppKey: string): boolean {
   const prog = unitProgress?.[card?.unitId];
+  // A0 (06/10/2026): espelho do cliente -- unidade concluída libera tudo.
+  if (prog?.completed) return true;
   if (!prog?.started) return false;
   const lessons = LESSON_VOCAB_MAP[languageAppKey]?.[String(card.unitId)];
   const lessonIdx = lessons ? lessons.findIndex((vocabIdxList) => vocabIdxList.includes(card.vocabIdx)) : -1;

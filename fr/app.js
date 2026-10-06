@@ -6203,6 +6203,10 @@ function isCardLessonCompleted(card){
   // `own_flashcards.status`) como único critério de elegibilidade.
   if (card.origin === 'teacher' || card.origin === 'self') return card.flashcardStatus === 'active';
   const prog = STATE.unitProgress[card.unitId];
+  // A0 (Fase 0 da trilha, 06/10/2026): unidade CONCLUÍDA libera todos os
+  // cartões dela. Antes só `lessonIdx < prog.lessonIdx` decidia, mas
+  // `lessonIdx` volta a 0 ao concluir a unidade -- o cartão saía da Revisão.
+  if (prog?.completed) return true;
   if (!prog?.started) return false;
   const unit = UNITS.find(u => u.id === card.unitId);
   const lessonIdx = unit ? lessonIndexForVocabIdx(unit, card.vocabIdx) : -1;
