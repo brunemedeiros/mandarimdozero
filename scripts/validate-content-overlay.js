@@ -17,6 +17,49 @@ function str(u, label, v, ptv){
   if (typeof v !== 'string' || !v.trim()) return err(u, label + ' vazio/ausente');
   if (ptv !== undefined && tags(v) !== tags(ptv)) err(u, label + ': tags HTML diferentes do português (' + tags(ptv) + ' vs ' + tags(v) + ')');
 }
+
+const SRC_KEYS = ['f', 'c', 'p', 'blocks', 'scenarioEmoji'];
+const noSp = s => String(s).replace(/\s+/g, '');
+function checkSrcEntry(id, label, o, orig, isPhrase){
+  if (!o || typeof o !== 'object') return err(id, label + ' deve ser objeto');
+  Object.keys(o).forEach(k => {
+    if (!SRC_KEYS.includes(k)) return err(id, label + ': chave desconhecida "' + k + '"');
+    if (orig[k] === undefined) return err(id, label + ': "' + k + '" não existe no original');
+  });
+  ['f', 'c', 'p', 'scenarioEmoji'].forEach(k => { if (o[k] !== undefined && (typeof o[k] !== 'string' || !o[k].trim())) err(id, label + '.' + k + ' vazio'); });
+  if (o.blocks !== undefined){
+    if (!Array.isArray(o.blocks) || !o.blocks.length) return err(id, label + '.blocks inválido');
+    const field = o.c !== undefined || orig.c !== undefined ? 'c' : 'f';
+    const txt = o[field] !== undefined ? o[field] : orig[field];
+    const joined = o.blocks.map(b => (b && b[field]) || '').join('');
+    if (noSp(joined) !== noSp(txt)) err(id, label + '.blocks juntos (' + joined + ') não formam o texto (' + txt + ')');
+  } else if (isPhrase && orig.blocks && (o.f !== undefined || o.c !== undefined)) {
+    err(id, label + ': mudou o texto da frase mas não os blocks (reordenar quebraria)');
+  }
+}
+function validateSrc(id, src, u){
+  Object.keys(src).forEach(k => { if (!['vocab', 'phrases', 'lines', 'concepts', 'grammar'].includes(k)) err(id, 'src: chave desconhecida "' + k + '"'); });
+  const each = (map, arr, label, isPhrase) => Object.keys(map || {}).forEach(i => {
+    const it = (arr || [])[Number(i)];
+    if (!it) return err(id, 'src.' + label + '[' + i + '] fora do intervalo');
+    checkSrcEntry(id, 'src.' + label + '[' + i + ']', map[i], it, isPhrase);
+  });
+  each(src.vocab, u.vocab, 'vocab', false);
+  each(src.phrases, u.phrases, 'phrases', true);
+  each(src.lines, u.dialogue && u.dialogue.lines, 'lines', false);
+  Object.keys(src.concepts || {}).forEach(cid => {
+    const cn = (u.concepts || []).find(x => x.id === cid);
+    if (!cn) return err(id, 'src.concepts.' + cid + ' inexistente');
+    Object.keys(src.concepts[cid]).forEach(bi => {
+      const b = cn.blocks[Number(bi)]; if (!b) return err(id, 'src.concepts.' + cid + '[' + bi + '] fora do intervalo');
+      each(src.concepts[cid][bi], b.examples, 'concepts.' + cid + '[' + bi + '].examples', false);
+    });
+  });
+  Object.keys(src.grammar || {}).forEach(bi => {
+    const b = u.grammar && u.grammar.blocks[Number(bi)]; if (!b) return err(id, 'src.grammar[' + bi + '] fora do intervalo');
+    each(src.grammar[bi], b.examples, 'grammar[' + bi + '].examples', false);
+  });
+}
 fs.readdirSync(dir).filter(f => f.endsWith('.json') && f !== '_meta.json' && !f.startsWith('_')).sort().forEach(f => {
   const d = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); const id = d.unit;
   if (only.length && !only.map(String).includes(String(id))) return;
@@ -72,6 +115,8 @@ fs.readdirSync(dir).filter(f => f.endsWith('.json') && f !== '_meta.json' && !f.
   const tf = e.trueFalse || [];
   if (tf.length !== (u.trueFalseExercises || []).length) err(id, 'trueFalse: ' + tf.length + ' vs ' + (u.trueFalseExercises || []).length);
   (u.trueFalseExercises || []).forEach((x, i) => { str(id, 'trueFalse[' + i + '].claim', tf[i] && tf[i].claim, x.claim); str(id, 'trueFalse[' + i + '].whyNote', tf[i] && tf[i].whyNote, x.whyNote); });
+  // src: frases do idioma ESTUDADO localizadas para o idioma do site (opcional).
+  if (e.src) validateSrc(id, e.src, u);
   console.log(id + ': validado');
 });
 // Mandarim: histórias e hanzi (arquivos _stories.json / _hanzi.json)

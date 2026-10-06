@@ -1055,6 +1055,7 @@ function refreshStudyCardTexts(){
     if (c.origin !== 'study') return;
     const u = UNITS.find((x) => x.id === c.unitId);
     if (!u || !u.vocab || !u.vocab[c.vocabIdx]) return;
+    c.front_pinyin = u.vocab[c.vocabIdx].p; c.back_hanzi = u.vocab[c.vocabIdx].c; // o overlay `src` pode localizar a palavra estudada
     c.back_trans = u.vocab[c.vocabIdx].t;
     c.unitTitle = u.title;
   });

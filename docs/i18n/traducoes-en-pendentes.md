@@ -1667,7 +1667,9 @@ A1-1 vem do piloto (docs/i18n/piloto-A1-1.json). Itens abaixo: só os de confian
 | A1-2 | vocab[2] | chamar-se | to be called | media | s'appeler is reflexive; 'to be called' vs 'to be named' both fine |
 | A1-2 | vocab[4] | ser / estar | to be | media | PT gloss has two verbs; EN has just one |
 | A1-2 | vocab[7] | francês / francesa | French (m. / f.) | media | gender-marking convention for the pair |
-| A1-2 | vocab[8] | brasileiro / brasileira | Brazilian (m. / f.) | media | gender-marking convention for the pair |
+| A1-2 | vocab[8] | brasileiro / brasileira | American (m. / f.) | media | localizado: o site em inglês fala com americano, então a palavra em francês também troca (src.vocab[8].f = américain / américaine); troca o significado do cartão u-A1-2-v8 ao mudar de idioma |
+| A1-2 | src.phrases[1].f | Je suis brésilienne. | Je suis américaine. | media | frase em francês localizada (aluno americano, nunca presumir brasileiro); blocks e bandeira 🇺🇸 acompanham; mp3 novo necessário (voz do navegador enquanto isso) |
+| A1-2 | src.lines[3..4].f | Oui, je suis français. Et toi, tu es brésilienne ? / Oui, je suis brésilienne ! | Oui, je suis français. Et toi, tu es américaine ? / Oui, je suis américaine ! | media | falas do diálogo localizadas; 2 mp3 novos |
 | A1-2 | phrases[0].t | Qual é o seu nome? | What's your name? | media | FR is 'comment tu t'appelles', informal; EN 'what's your name' loses the literal 'how do you call yourself' |
 | A1-2 | phrases[2].t | De que país você é? | What country are you from? | media | 'what country are you from' vs 'which country' |
 | A1-2 | phrases[3].t | Eu também, eu sou francesa! | Me too, I'm French! | media | 'Moi aussi' stressed pronoun; 'Me too' is the natural EN |
@@ -1730,7 +1732,9 @@ A1-1 vem do piloto (docs/i18n/piloto-A1-1.json). Itens abaixo: só os de confian
 | A1-9 | vocab[0] | francês / francesa | French (m.) / French (f.) | media | EN adjectives have no gender, so I kept the (m.)/(f.) labels to preserve the masculine/feminine pair the lesson teaches (same for vocab[1]-[7]) |
 | A1-9 | vocab[3] | inglês / inglesa | English (m.) / English (f.) | media | FR 'anglais' = English (language/nationality), not British |
 | A1-9 | phrases[2].t | De onde você vem? | Where do you come from? | media | literal 'venir de'; 'Where are you from?' is more natural but is used for 'Tu es d'où ?' to keep the lesson's contrast |
-| A1-9 | phrases[0].t | Eu sou brasileira. | I'm Brazilian. | media | feminine form of the FR sentence (brésilienne) is lost in EN |
+| A1-9 | phrases[0].t | Eu sou brasileira. | I'm American. | media | localizado (src.phrases[0].f = Je suis américaine.); o feminino da frase em francês se perde no inglês |
+| A1-9 | src.phrases[0].f | Je suis brésilienne. | Je suis américaine. | media | frase em francês localizada; blocks e bandeira acompanham; mp3 novo (o mesmo de A1-2) |
+| A1-9 | concepts.etre-nationalite-vs-venir-de[0].title/body | "Je suis brésilienne" ou "je viens du Brésil"? | "Je suis américaine" or "je viens des États-Unis"? | media | exemplo localizado para o país do aluno; traz "des" (país plural) ao lado de de/d'/du, que a versão em português não menciona |
 | A1-9 | phrases[4].t | A nacionalidade está escrita no passaporte. | Nationality is written on the passport. | media | EN would normally say 'Your nationality'; kept impersonal like the FR |
 | A1-9 | concepts.dou-viens-tu-wh-in-situ[0].body | jogar a palavra de pergunta pro fim | move the question word to the end | media | colloquial PT; EN 'in situ' phrasing neutral |
 | A1-10 | vocab[3] | barato | cheap / inexpensive | media | FR 'pas cher' is neutral ('not expensive'); EN 'cheap' can sound negative, so I added 'inexpensive' |
@@ -1829,6 +1833,7 @@ Explicações reescritas para comparar com o inglês onde o original comparava c
 |---|---|---|---|---|---|
 | A1-g1 | grammar.blocks[2].body | O francês usa avoir (ter) em várias expressões onde o português usa "estar" ou "ser" ... Se em português a frase usa "estar com/ter", muito provavelmente em francês é avoir. | French uses avoir (to have) in several expressions where English uses "to be" ... if the English sentence uses "to be" with a feeling or state, chances are French uses avoir. | media | Comparison adapted from Portuguese to English ("estar com/ter" -> "to be"); the French facts are unchanged. |
 | A1-g1 | grammar.blocks[0].examples[1] | Eu tenho vinte anos. (avoir) | I am twenty years old. (avoir) | media | English says "am ... years old" while French uses avoir; translated naturally rather than literally ("I have twenty years"). |
+| A1-g1 | grammar.blocks[0].examples[0] (+ src.f) | Eu sou brasileira. (être) / Je suis brésilienne. | I am American. (être) / Je suis américaine. | media | exemplo localizado para o aluno americano, na frase em francês e na tradução; mesmo mp3 novo de A1-2 |
 | A1-g1 | grammar.blocks[1].examples[0] | Ele tem dez anos. (avoir) | He is ten years old. (avoir) | media | Same as above: natural English instead of "has ten years". |
 | A1-g2 | grammar.blocks[0].body | No francês, o adjetivo possessivo concorda com o gênero e número da coisa possuída — não com quem é o dono! ... | ... (English does the opposite: his/her depends on the owner.) | media | Added a one-sentence contrast with English (his/her follow the owner), which is true and helps English speakers; the original only compared to Portuguese. |
 | A1-g2 | grammar.blocks[3].table[2].pronouns | meus / minhas ... deles / delas (pl.) | my (plural) ... their (plural) | media | Portuguese gender/number distinctions (meus/minhas) do not exist in English; glossed as "(plural)". |

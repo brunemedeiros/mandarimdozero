@@ -18,7 +18,7 @@
    "France",
    "Brazil",
    "French (m. / f.)",
-   "Brazilian (m. / f.)",
+   "American (m. / f.)",
    "country"
   ],
   "phrases": [
@@ -27,8 +27,8 @@
     "scenario": "You meet someone new and want to know their name. What do you ask?"
    },
    {
-    "t": "I'm Brazilian.",
-    "scenario": "Someone asks where you're from. How do you say \"I'm Brazilian\" in French?"
+    "t": "I'm American.",
+    "scenario": "Someone asks where you're from. How do you say \"I'm American\" in French?"
    },
    {
     "t": "What country are you from?",
@@ -57,8 +57,8 @@
     "Hello, what's your name?",
     "My name is Léo. And you?",
     "I'm Ana. Are you French?",
-    "Yes, I'm French. And you, are you Brazilian?",
-    "Yes, I'm Brazilian!"
+    "Yes, I'm French. And you, are you American?",
+    "Yes, I'm American!"
    ]
   },
   "concepts": {
@@ -96,7 +96,39 @@
     "claim": "This question is used to find out someone's age.",
     "whyNote": "Wrong — <strong>comment tu t'appelles ?</strong> asks for the NAME (appeler = to be called), not the age. For age you'd say \"quel âge as-tu ?\"."
    }
-  ]
+  ],
+  "src": {
+   "vocab": {
+    "8": {
+     "f": "américain / américaine"
+    }
+   },
+   "phrases": {
+    "1": {
+     "f": "Je suis américaine.",
+     "blocks": [
+      {
+       "f": "Je"
+      },
+      {
+       "f": "suis"
+      },
+      {
+       "f": "américaine."
+      }
+     ],
+     "scenarioEmoji": "🇺🇸"
+    }
+   },
+   "lines": {
+    "3": {
+     "f": "Oui, je suis français. Et toi, tu es américaine ?"
+    },
+    "4": {
+     "f": "Oui, je suis américaine !"
+    }
+   }
+  }
  },
  "review": [
   {
@@ -117,13 +149,6 @@
    "path": "vocab[7]",
    "pt": "francês / francesa",
    "en": "French (m. / f.)",
-   "conf": "media",
-   "why": "gender-marking convention for the pair"
-  },
-  {
-   "path": "vocab[8]",
-   "pt": "brasileiro / brasileira",
-   "en": "Brazilian (m. / f.)",
    "conf": "media",
    "why": "gender-marking convention for the pair"
   },
@@ -168,6 +193,27 @@
    "en": "what's your name? (everyday speech)",
    "conf": "media",
    "why": "register note"
+  },
+  {
+   "path": "vocab[8]",
+   "pt": "brasileiro / brasileira",
+   "en": "American (m. / f.)",
+   "conf": "media",
+   "why": "localized: the EN site speaks to an American learner, so the French word is also swapped (src.vocab[8].f = américain / américaine)"
+  },
+  {
+   "path": "src.phrases[1].f",
+   "pt": "Je suis brésilienne.",
+   "en": "Je suis américaine.",
+   "conf": "media",
+   "why": "the French sentence itself is localized for the EN site (the learner is American, never assumed Brazilian); blocks and flag emoji follow; needs a new mp3 (falls back to browser voice meanwhile)"
+  },
+  {
+   "path": "src.lines[3..4].f",
+   "pt": "Oui, je suis français. Et toi, tu es brésilienne ? / Oui, je suis brésilienne !",
+   "en": "Oui, je suis français. Et toi, tu es américaine ? / Oui, je suis américaine !",
+   "conf": "media",
+   "why": "dialogue lines localized for the EN site; 2 new mp3 needed"
   }
  ]
 }

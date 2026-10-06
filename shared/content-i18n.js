@@ -15,7 +15,12 @@
 //       vocab:["t",...], phrases:[{t, scenario}], dialogue:{title, lines:["t",...]},
 //       concepts:{conceptId:[{title, body, examples:["t",...], variants:["região",...]}]},
 //       grammar:{blocks:[{title, body, examples:["t"], table:[{label, pronouns:["..."]}]}], exercises:[{hint, prompt?}]} (só unidades type:"grammar"),
-//       trueFalse:[{claim, whyNote}]
+//       trueFalse:[{claim, whyNote}],
+//       src: { vocab:{"8":{f}}, phrases:{"1":{f, blocks, scenarioEmoji}}, lines:{"3":{f}},
+//              concepts:{id:{"0":{"0":{f}}}}, grammar:{"0":{"0":{f}}} }
+//          (opcional) frase do IDIOMA ESTUDADO localizada para o idioma do site: no site em inglês
+//          o aluno é americano, então "Je suis brésilienne." vira "Je suis américaine."
+//          Mapas esparsos por índice. Chaves aceitas: f (fr), c/p (zh), blocks, scenarioEmoji.
 //     } } }
 // Fase 10 (mandarim): também aceita histórias e banco de hanzi:
 //   stories:{ "1": { title, subtitle, beats:[{lines:["t",...], question:{prompt, options:[...]}}] } }
@@ -27,6 +32,23 @@
 
   function pick(ov, orig){
     return (typeof ov === 'string' && ov !== '') ? ov : orig;
+  }
+
+  // Campos do idioma ESTUDADO que o overlay pode trocar (ver `src` no formato abaixo).
+  // Guardamos a referência original (não um clone) para restaurar o mesmo objeto.
+  var SRC_KEYS = ['f', 'c', 'p', 'blocks', 'scenarioEmoji'];
+  function snapSrc(o){
+    var s = {};
+    SRC_KEYS.forEach(function(k){ if (o && o[k] !== undefined) s[k] = o[k]; });
+    return s;
+  }
+  function applySrc(o, snap, ov){
+    if (!o || !snap) return;
+    SRC_KEYS.forEach(function(k){
+      if (snap[k] === undefined) return;
+      var v = ov && ov[k] !== undefined ? ov[k] : snap[k];
+      o[k] = v;
+    });
   }
 
   // Retrato do português de UMA unidade (só os campos traduzíveis).
@@ -56,6 +78,18 @@
       };
     }
     s.trueFalse = (u.trueFalseExercises || []).map(function(x){ return { claim: x.claim, whyNote: x.whyNote }; });
+    // Fonte localizada (idioma estudado): vocab/frases/falas/exemplos.
+    s.src = {
+      vocab: (u.vocab || []).map(snapSrc),
+      phrases: (u.phrases || []).map(snapSrc),
+      lines: u.dialogue ? (u.dialogue.lines || []).map(snapSrc) : [],
+      concepts: {},
+      grammar: []
+    };
+    (u.concepts || []).forEach(function(c){
+      s.src.concepts[c.id] = (c.blocks || []).map(function(b){ return (b.examples || []).map(snapSrc); });
+    });
+    if (u.grammar) s.src.grammar = (u.grammar.blocks || []).map(function(b){ return (b.examples || []).map(snapSrc); });
     return s;
   }
 
@@ -123,6 +157,28 @@
       var ot = (o.trueFalse && o.trueFalse[i]) || {};
       x.claim = pick(ot.claim, snap.trueFalse[i].claim);
       x.whyNote = pick(ot.whyNote, snap.trueFalse[i].whyNote);
+    });
+    // Frases do idioma estudado localizadas para o idioma do site
+    // (ex.: "Je suis brésilienne." -> "Je suis américaine." no site em inglês).
+    // Mapas esparsos por índice; ausente = mantém o original.
+    var os = o.src || {}, ss = snap.src || {};
+    (u.vocab || []).forEach(function(v, i){ applySrc(v, ss.vocab && ss.vocab[i], os.vocab && os.vocab[i]); });
+    (u.phrases || []).forEach(function(p, i){ applySrc(p, ss.phrases && ss.phrases[i], os.phrases && os.phrases[i]); });
+    if (u.dialogue) (u.dialogue.lines || []).forEach(function(l, i){ applySrc(l, ss.lines && ss.lines[i], os.lines && os.lines[i]); });
+    (u.concepts || []).forEach(function(c){
+      (c.blocks || []).forEach(function(b, bi){
+        (b.examples || []).forEach(function(e, ei){
+          var sb = ss.concepts && ss.concepts[c.id] && ss.concepts[c.id][bi];
+          var ob = os.concepts && os.concepts[c.id] && os.concepts[c.id][bi];
+          applySrc(e, sb && sb[ei], ob && ob[ei]);
+        });
+      });
+    });
+    if (u.grammar) (u.grammar.blocks || []).forEach(function(b, bi){
+      (b.examples || []).forEach(function(e, ei){
+        var sb = ss.grammar && ss.grammar[bi], ob = os.grammar && os.grammar[bi];
+        applySrc(e, sb && sb[ei], ob && ob[ei]);
+      });
     });
   }
 

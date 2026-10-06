@@ -9,7 +9,7 @@
      "title": "Avoir and être",
      "body": "Avoir (to have) and être (to be) are the two most-used verbs in French — and the only ones that are completely irregular in the present tense. You've already seen several of their forms in the last few units (je suis, j'ai, il a...) without stopping to think about the full conjugation.",
      "examples": [
-      "I am Brazilian. (être)",
+      "I am American. (être)",
       "I am twenty years old. (avoir)"
      ]
     },
@@ -79,6 +79,15 @@
      "hint": "avoir"
     }
    ]
+  },
+  "src": {
+   "grammar": {
+    "0": {
+     "0": {
+      "f": "Je suis américaine."
+     }
+    }
+   }
   }
  },
  "review": [
@@ -102,6 +111,13 @@
    "en": "He is ten years old. (avoir)",
    "conf": "media",
    "why": "Same as above: natural English instead of \"has ten years\"."
+  },
+  {
+   "path": "src.grammar.blocks[0].examples[0].f",
+   "pt": "Je suis brésilienne.",
+   "en": "Je suis américaine.",
+   "conf": "media",
+   "why": "example localized for the EN site; same new mp3 as A1-2"
   }
  ]
 }

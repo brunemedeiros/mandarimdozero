@@ -23,8 +23,8 @@
   ],
   "phrases": [
    {
-    "t": "I'm Brazilian.",
-    "scenario": "Someone asks your nationality in a job interview. How do you say \"I'm Brazilian\" in French?"
+    "t": "I'm American.",
+    "scenario": "Someone asks your nationality in a job interview. How do you say \"I'm American\" in French?"
    },
    {
     "t": "He is French, she is Spanish.",
@@ -55,8 +55,8 @@
   "concepts": {
    "etre-nationalite-vs-venir-de": [
     {
-     "title": "\"Je suis brésilienne\" or \"je viens du Brésil\"?",
-     "body": "<strong>Être + nationality</strong> talks about your identity (je suis brésilienne). <strong>Venir de + country</strong> talks about your origin / where you come from (je viens du Brésil). The two sentences say almost the same thing, but notice the preposition: <strong>du</strong> Brésil, <strong>de</strong> France, <strong>d'</strong>Espagne — it changes depending on the gender and the first letter of the country's name.",
+     "title": "\"Je suis américaine\" or \"je viens des États-Unis\"?",
+     "body": "<strong>Être + nationality</strong> talks about your identity (je suis américaine). <strong>Venir de + country</strong> talks about your origin / where you come from (je viens des États-Unis). The two sentences say almost the same thing, but notice the preposition: <strong>des</strong> États-Unis (plural), <strong>de</strong> France, <strong>d'</strong>Espagne, du Brésil — it changes depending on the number, the gender and the first letter of the country's name.",
      "examples": [
       "to come from (a place)",
       "nationality"
@@ -78,7 +78,23 @@
     "claim": "This question is used to find out someone's name.",
     "whyNote": "Wrong — <strong>d'où viens-tu ?</strong> asks where the person comes FROM (viens = come), not their name. For a name you'd say \"comment tu t'appelles ?\"."
    }
-  ]
+  ],
+  "src": {
+   "phrases": {
+    "0": {
+     "f": "Je suis américaine.",
+     "blocks": [
+      {
+       "f": "Je suis"
+      },
+      {
+       "f": "américaine."
+      }
+     ],
+     "scenarioEmoji": "🇺🇸"
+    }
+   }
+  }
  },
  "review": [
   {
@@ -103,13 +119,6 @@
    "why": "literal 'venir de'; 'Where are you from?' is more natural but is used for 'Tu es d'où ?' to keep the lesson's contrast"
   },
   {
-   "path": "phrases[0].t",
-   "pt": "Eu sou brasileira.",
-   "en": "I'm Brazilian.",
-   "conf": "media",
-   "why": "feminine form of the FR sentence (brésilienne) is lost in EN"
-  },
-  {
    "path": "phrases[4].t",
    "pt": "A nacionalidade está escrita no passaporte.",
    "en": "Nationality is written on the passport.",
@@ -122,6 +131,27 @@
    "en": "move the question word to the end",
    "conf": "media",
    "why": "colloquial PT; EN 'in situ' phrasing neutral"
+  },
+  {
+   "path": "phrases[0].t",
+   "pt": "Eu sou brasileira.",
+   "en": "I'm American.",
+   "conf": "media",
+   "why": "localized for the EN site (src.phrases[0].f = Je suis américaine.); feminine form of the FR sentence is lost in EN"
+  },
+  {
+   "path": "src.phrases[0].f",
+   "pt": "Je suis brésilienne.",
+   "en": "Je suis américaine.",
+   "conf": "media",
+   "why": "French sentence localized for the EN site; blocks and flag emoji follow; new mp3 needed"
+  },
+  {
+   "path": "concepts.*.title/body (nationality vs origin)",
+   "pt": "\"Je suis brésilienne\" ou \"je viens du Brésil\"?",
+   "en": "\"Je suis américaine\" or \"je viens des États-Unis\"?",
+   "conf": "media",
+   "why": "example localized to the learner's own country; this brings in 'des' (plural country) next to de/d'/du, which the PT version does not mention"
   }
  ]
 }
