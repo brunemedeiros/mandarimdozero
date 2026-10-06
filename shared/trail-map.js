@@ -92,6 +92,9 @@ function renderTrailMap(root, model, describe, opts){
     });
     panel.querySelector('.tm-close').addEventListener('click', close);
     panel.hidden = false; backdrop.hidden = false;
+    // Acessibilidade: o foco vai para o título do painel (leitor de tela anuncia o conteúdo).
+    const ttl = panel.querySelector('.tm-title');
+    if (ttl){ ttl.setAttribute('tabindex', '-1'); ttl.focus({ preventScroll: true }); }
     if (opts.onOpen) opts.onOpen(key);
   }
   backdrop.addEventListener('click', close);
@@ -122,4 +125,22 @@ function buildTrailViewToggle(storageKey, onChange){
     bar.appendChild(b);
   });
   return bar;
+}
+
+// Fase 8: o cartão "Continuar" só fica fixo no topo (desktop) quando a unidade/nó atual
+// SAIU da tela; enquanto ela está visível o cartão volta ao fluxo normal (não cobre nada).
+// No modo Mapa nunca fica fixo (o painel lateral usa o mesmo espaço).
+function watchTrailContinueCard(card){
+  if (!card || !card.isConnected || typeof IntersectionObserver === 'undefined') return;
+  const grid = card.parentElement;
+  if (!grid || grid.querySelector('.trail-map')) return;
+  const target = grid.querySelector('.unit-block.current');
+  if (!target) return;
+  if (card._tcObserver) card._tcObserver.disconnect();
+  const obs = new IntersectionObserver(entries => {
+    if (!card.isConnected){ obs.disconnect(); return; }
+    card.classList.toggle('tc-sticky', !entries[0].isIntersecting);
+  });
+  card._tcObserver = obs;
+  obs.observe(target);
 }

@@ -38,9 +38,9 @@ async function boot(browser, port, lang, scheme){
     const L = (n, c, x) => check(`fr/${scheme} ${n}`, c, x);
     const { ctx, page, errors } = await boot(browser, port, 'fr', scheme);
     let r = await page.evaluate(() => { renderUnitsGrid(); const rows = [...document.querySelectorAll('.review-milestone')];
-      return { n: rows.length, mods: MODULES.length, empty: rows[0].classList.contains('locked'), txt: rows[0].textContent }; });
+      return { n: rows.length, mods: MODULES.length, empty: rows[0].classList.contains('empty') && !rows[0].classList.contains('locked'), txt: rows[0].textContent }; });
     L('uma faixa de Revisão por módulo', r.n === r.mods, r);
-    L('sem cartões elegíveis: estado vazio, não clicável', r.empty && /Ainda não há cartões/.test(r.txt), r);
+    L('sem cartões elegíveis: estado vazio, não clicável', r.empty && /Nada para revisar ainda/.test(r.txt), r);
 
     // conclui a 1ª unidade do módulo 1 (pelo estado real) e deixa alguns cartões em estados diferentes
     r = await page.evaluate(() => {

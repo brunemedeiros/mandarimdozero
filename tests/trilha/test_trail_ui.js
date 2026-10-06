@@ -48,7 +48,18 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
       L('nova: botão "Começar"', r.cta === 'Começar', r);
       L('nova: exatamente 1 unidade atual', r.current === 1, r);
       L('nova: métrica em lições', /^0 de \d+ lições concluídas$/.test(r.sub), r.sub);
-      L('desktop: cartão fixo (sticky)', r.sticky === 'sticky', r.sticky);
+      // Fase 8: fica fixo só quando a unidade atual SAIU da tela; visível = fluxo normal.
+      await page.evaluate(() => { const g = document.getElementById('units-grid'); g.querySelector('.unit-block.current').scrollIntoView({ block: 'center' }); });
+      await page.waitForTimeout(400);
+      let pos = await page.evaluate(() => getComputedStyle(document.querySelector('#units-grid .trail-continue')).position);
+      L('desktop: atual visível -> cartão no fluxo (não fixo)', pos === 'static', pos);
+      await page.evaluate(() => { window.scrollTo(0, document.body.scrollHeight); const g = document.getElementById('units-grid'); const last = g.lastElementChild; if (last) last.scrollIntoView({ block: 'end' }); });
+      await page.waitForTimeout(400);
+      const offscreen = await page.evaluate(() => { const b = document.querySelector('#units-grid .unit-block.current'); const r = b.getBoundingClientRect(); return r.bottom < 0 || r.top > innerHeight; });
+      pos = await page.evaluate(() => getComputedStyle(document.querySelector('#units-grid .trail-continue')).position);
+      L('desktop: atual fora da tela -> cartão fixo (sticky)', !offscreen || pos === 'sticky', { offscreen, pos });
+      L('aria-current na unidade atual', await page.evaluate(() => document.querySelector('#units-grid .unit-block.current').getAttribute('aria-current') === 'step'));
+      await page.evaluate(() => window.scrollTo(0, 0));
 
       // --- em andamento: 1ª concluída, 2ª pulada, 3ª é a atual ---
       r = await page.evaluate(() => {

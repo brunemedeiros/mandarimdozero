@@ -53,6 +53,7 @@ async function boot(browser, port, lang, vp, dark){
       const first = page.locator('.tm-node.tm-unit').first();
       await first.click();
       check(tag + 'painel abre', await page.evaluate(() => !document.querySelector('.tm-panel').hidden && !!document.querySelector('.tm-title').textContent));
+      check(tag + 'foco vai para o título do painel (Fase 8)', await page.evaluate(() => document.activeElement === document.querySelector('.tm-title')));
       check(tag + 'botão de ação no painel', (await page.locator('.tm-actions button').count()) >= 1);
       if (vpName === 'mobile'){
         const pos = await page.evaluate(() => { const r = document.querySelector('.tm-panel').getBoundingClientRect(); return { position: getComputedStyle(document.querySelector('.tm-panel')).position, top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight, w: Math.round(r.width) }; });

@@ -2027,6 +2027,7 @@ function buildTrailContinueCard(){
     <button type="button" class="btn btn-primary tc-cta">${started ? 'Continuar' : 'Começar'}</button>
   `;
   card.querySelector('.tc-cta').addEventListener('click', () => openUnitDetail(u.id));
+  setTimeout(() => watchTrailContinueCard(card), 0);
   return card;
 }
 
@@ -2069,8 +2070,8 @@ function renderTrailMapView(container, levelModules){
     });
     const sel = moduleReviewSelection(module);
     const rst = milestoneState(sel.available, STATE.reviewMilestones[module.id]);
-    nodes.push({ key: 'r:' + module.id, kind: 'review', icon: '🔁', label: 'Revisão', state: rst === 'empty' ? 'locked' : (rst === 'done' ? 'done' : 'available'),
-      aria: `Revisão do módulo ${mIdx + 1}, opcional` });
+    nodes.push({ key: 'r:' + module.id, kind: 'review', icon: '🔁', label: 'Revisão', state: rst === 'empty' ? 'empty' : (rst === 'done' ? 'done' : 'available'),
+      aria: `Revisão do módulo ${mIdx + 1}, opcional${rst === 'empty' ? ', nada para revisar ainda' : ''}` });
     const cp = STATE.checkpointProgress[module.id];
     nodes.push({ key: 'c:' + module.id, kind: 'checkpoint', icon: '🏆', label: 'Ponto', state: cp.completed ? 'done' : (moduleUnlocked(module) ? 'available' : 'locked'),
       aria: `Ponto de verificação do módulo ${mIdx + 1}` });
@@ -2091,7 +2092,7 @@ function renderTrailMapView(container, levelModules){
       const why = milestoneReasonText(sel);
       return { eyebrow: 'Revisão', title: 'Revisão do módulo', status: st === 'done' ? 'Revisada' : (st === 'empty' ? 'Sem itens' : 'Recomendada'),
         goal: 'Opcional: uma sessão curta com o que mais precisa ser revisto neste módulo. Nunca bloqueia o avanço.',
-        lines: st === 'empty' ? ['Ainda não há cartões para revisar neste módulo.'] : [why].concat(rec && rec.lastDate ? [`Última sessão: ${rec.lastDate.split('-').reverse().join('/')}`] : []),
+        lines: st === 'empty' ? ['Nada para revisar ainda: estude as unidades deste módulo e volte aqui.'] : [why].concat(rec && rec.lastDate ? [`Última sessão: ${rec.lastDate.split('-').reverse().join('/')}`] : []),
         actions: st === 'empty' ? [] : [{ label: 'Revisar agora', primary: true, onClick: () => startModuleReviewSession(module.id) }] };
     }
     const cp = STATE.checkpointProgress[module.id];
@@ -2215,6 +2216,7 @@ function buildUnitBlock(u){
     + (state === 'current' ? ' current' : '')
     + (state === 'available' ? ' available' : '')
     + (expanded ? ' expanded' : '');
+  if (state === 'current') block.setAttribute('aria-current', 'step');
 
   const badgeHTML = state === 'done' ? `<span class="ub-badge">✓</span>`
     : state === 'skipped' ? `<span class="ub-badge ub-badge-skipped" title="Concluída pelo Ponto de verificação">⏭ Pulada</span>` : '';
@@ -6404,11 +6406,11 @@ function buildModuleReviewRow(module){
   const why = milestoneReasonText(sel);
   const dateBR = rec && rec.lastDate ? rec.lastDate.split('-').reverse().join('/') : '';
   let goal;
-  if (st === 'empty') goal = 'Ainda não há cartões para revisar neste módulo.';
+  if (st === 'empty') goal = 'Nada para revisar ainda: estude as unidades deste módulo e volte aqui.';
   else if (st === 'done') goal = `Revisada em ${dateBR}${why ? ' · de novo agora: ' + why : ''} (opcional)`;
   else goal = `Recomendado antes de seguir (opcional)${why ? ' · ' + why : ''}`;
   const block = document.createElement('div');
-  block.className = 'unit-block review-milestone' + (st === 'empty' ? ' locked' : '') + (st === 'done' ? ' done' : '');
+  block.className = 'unit-block review-milestone' + (st === 'empty' ? ' empty' : '') + (st === 'done' ? ' done' : '');
   block.innerHTML = `
     <div class="ub-header">
       <div class="ub-icon">🔁</div>

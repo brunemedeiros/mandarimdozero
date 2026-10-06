@@ -2203,6 +2203,7 @@ function buildUnitBlock(u){
     + (state === 'current' ? ' current' : '')
     + (state === 'available' ? ' available' : '')
     + (expanded ? ' expanded' : '');
+  if (state === 'current') block.setAttribute('aria-current', 'step');
 
   const badgeHTML = state === 'done' ? `<span class="ub-badge">✓</span>`
     : state === 'skipped' ? `<span class="ub-badge ub-badge-skipped" title="Concluída pelo Ponto de verificação">⏭ 跳过</span>` : '';
@@ -2396,6 +2397,7 @@ function buildTrailContinueCard(){
     <button type="button" class="btn btn-primary tc-cta">${started ? 'Continuar' : 'Começar'}</button>
   `;
   card.querySelector('.tc-cta').addEventListener('click', () => openUnitDetail(u.id));
+  setTimeout(() => watchTrailContinueCard(card), 0);
   return card;
 }
 
