@@ -292,10 +292,10 @@ function myCreateFlashcardFormHTML({ premium, decks, atLimit, tierBadgeHTML }){
       ${cardTypeUIMetaForEntitlement(premium).map(t => `<option value="${t.id}" ${t.id === 'normal' ? 'selected' : ''}>${t.label}</option>`).join('')}
     </select>
     <div class="section-label" style="margin:14px 0 4px;">Campos</div>
-    <p class="profile-edit-hint" style="margin-top:-2px;">Adicione os campos deste cartão -- por exemplo, Frente e Verso pra um cartão Normal. Cada campo tem seu próprio idioma e seus próprios recursos de áudio.</p>
+    <p class="profile-edit-hint" style="margin-top:-2px;">Adicione os campos deste cartão, por exemplo Frente e Verso para um cartão Normal. Cada campo tem seu próprio idioma e seus próprios recursos de áudio.</p>
     <div id="my-flashcard-native-fields"></div>
     <div id="my-flashcard-tags"></div>
-    <button type="button" class="admin-select-link" id="my-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; margin:6px 0 0;">👁️ Pré-visualizar</button>
+    <button type="button" class="admin-select-link" id="my-flashcard-preview-btn" data-touch44 style="background:none; border:none; cursor:pointer; margin:6px 0 0;">👁️ Pré-visualizar</button>
     <label class="profile-edit-label" for="my-flashcard-deck" style="margin-top:14px;">Deck de destino</label>
     <select id="my-flashcard-deck" class="profile-edit-input">${personalDeckOptionsHTML(decks)}</select>
     <label class="profile-edit-label" for="my-flashcard-note" style="margin-top:14px;">Nota (opcional)</label>
@@ -317,7 +317,7 @@ async function renderMyFlashcardsView(opts){
   const wrap = document.getElementById('my-flashcards-content');
   if (!wrap) return;
   if (!CURRENT_USER){
-    wrap.innerHTML = `<p class="profile-empty-note">Entre na sua conta pra criar seus próprios cartões.</p>`;
+    wrap.innerHTML = `<p class="profile-empty-note">Entre na sua conta para criar seus próprios cartões.</p>`;
     return;
   }
   // Fase 6D.2/6D.5 (ver CLAUDE.md) -- nativeCardState reinicia a cada
@@ -382,7 +382,7 @@ async function renderMyFlashcardsView(opts){
         ${cards.length ? `<button type="button" class="admin-select-link" id="my-flashcards-export-btn" style="background:none; border:none; cursor:pointer;">⬇️ Exportar / compartilhar</button>` : ''}
       </div>
       <div id="my-flashcards-active-box">
-        ${activeCards.length ? activeCards.map(c => myFlashcardRowHTML(c, premium)).join('') : `<p class="profile-empty-note">Você ainda não criou nenhum cartão. Use o formulário acima pra adicionar palavras/frases que quer memorizar, mesmo que não estejam na trilha.</p>`}
+        ${activeCards.length ? activeCards.map(c => myFlashcardRowHTML(c, premium)).join('') : `<p class="profile-empty-note">Você ainda não criou nenhum cartão. Use o formulário acima para adicionar palavras/frases que quer memorizar, mesmo que não estejam na trilha.</p>`}
       </div>
     </div>
 
@@ -396,14 +396,14 @@ async function renderMyFlashcardsView(opts){
 
     <div class="profile-section">
       <div class="section-label">Importar cartões</div>
-      <p class="profile-edit-hint">Recebeu um arquivo .json de outro aluno, ou um link de compartilhamento? Importe aqui -- só cartões do MESMO idioma que você está estudando (${isMandarim ? 'mandarim' : 'francês'}) podem ser importados.</p>
+      <p class="profile-edit-hint">Recebeu um arquivo .json de outro aluno, ou um link de compartilhamento? Importe aqui. Só cartões do MESMO idioma que você está estudando (${isMandarim ? 'mandarim' : 'francês'}) podem ser importados.</p>
       <input type="file" id="my-flashcards-import-file" accept="application/json" style="margin-top:6px;">
       <p class="profile-edit-error" id="my-flashcards-import-error"></p>
     </div>
 
     <div class="profile-section">
       <div class="section-label">📥 Importar do Anki (.apkg)</div>
-      <p class="profile-edit-hint">Tem um baralho do Anki? Escolha o arquivo .apkg exportado de lá -- você confere um resumo (quantos cartões, tipos, avisos) antes de confirmar, nada é importado sem sua confirmação.</p>
+      <p class="profile-edit-hint">Tem um baralho do Anki? Escolha o arquivo .apkg exportado de lá Você confere um resumo (quantos cartões, tipos, avisos) antes de confirmar; nada é importado sem sua confirmação.</p>
       <input type="file" id="anki-import-file" accept=".apkg" style="margin-top:6px;">
     </div>
   `;
@@ -481,7 +481,7 @@ function myFlashcardRowHTML(c, premium){
         <button class="admin-badge-delete-btn" data-preview-own-flashcard="${c.id}" title="Pré-visualizar como vai aparecer na Revisão">🔎</button>
         <button class="admin-badge-delete-btn" data-edit-own-flashcard="${c.id}" title="Editar">✏️</button>
         ${c.status === 'archived' ? `<button class="admin-badge-delete-btn" data-toggle-own-flashcard="${c.id}" data-next-status="active" title="Reativar (tirar do arquivo histórico)">↺</button>` : ''}
-        <button class="admin-badge-delete-btn" data-toggle-own-flashcard-visibility="${c.id}" data-next-hidden="${c.hidden_from_profile ? 'false' : 'true'}" title="${c.hidden_from_profile ? 'Escondido do perfil -- clique pra tornar visível' : 'Visível no perfil (se a conta for pública) -- clique pra esconder'}">${c.hidden_from_profile ? '🙈' : '👁️'}</button>
+        <button class="admin-badge-delete-btn" data-toggle-own-flashcard-visibility="${c.id}" data-next-hidden="${c.hidden_from_profile ? 'false' : 'true'}" title="${c.hidden_from_profile ? 'Escondido do perfil. Clique para tornar visível' : 'Visível no perfil (se a conta for pública). Clique para esconder'}">${c.hidden_from_profile ? '🙈' : '👁️'}</button>
         <button class="admin-badge-delete-btn" data-delete-own-flashcard="${c.id}" title="Apagar permanentemente">🗑</button>
       </div>
     </div>
@@ -553,7 +553,7 @@ function wireMyFlashcardEditForm(c, wrap, premium){
     // decidir se revision precisa incrementar.
     MY_FLASHCARDS_STATE.editingNativeConversionBaseline = cloneNoteEditorState(MY_FLASHCARDS_STATE.editingNativeState);
     if (c.image_url){
-      showToast('⚠️ A imagem deste cartão foi preservada nos dados, mas ainda não aparece na tela de Revisão pra cartões do novo editor.');
+      showToast('⚠️ A imagem deste cartão foi preservada nos dados, mas ainda não aparece na tela de Revisão para cartões do novo editor.');
     }
     // CONSOLIDAÇÃO-2 (ver CLAUDE.md) -- `preserveEditingNativeState:true`
     // é obrigatório aqui: sem ele, o topo de renderMyFlashcardsView()
@@ -633,7 +633,7 @@ function myFlashcardNativeEditFormHTML(c, editorState, premium){
       </select>
       <div id="edit-my-native-flashcard-fields"></div>
       <div id="edit-my-native-flashcard-tags"></div>
-      <button type="button" class="admin-select-link" id="edit-my-native-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; align-self:flex-start; padding:0;">👁️ Pré-visualizar</button>
+      <button type="button" class="admin-select-link" id="edit-my-native-flashcard-preview-btn" data-touch44 style="background:none; border:none; cursor:pointer; align-self:flex-start; padding:0;">👁️ Pré-visualizar</button>
       <label class="profile-edit-label">Nota (opcional)</label>
       <textarea id="edit-my-native-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(editorState.privateNote || '')}</textarea>
       <p class="profile-edit-error" id="edit-my-native-flashcard-error"></p>
@@ -881,7 +881,7 @@ function wireMyFlashcardsCardButtons(wrap){
     btn.addEventListener('click', () => {
       const id = Number(btn.dataset.previewOwnFlashcard);
       const card = MY_FLASHCARDS_STATE._cardsCache.find(c => c.id === id);
-      if (!card){ openFlashcardPreviewWithError('Não foi possível carregar este cartão pra pré-visualizar.'); return; }
+      if (!card){ openFlashcardPreviewWithError('Não foi possível carregar este cartão para pré-visualizar.'); return; }
       openFlashcardPreviewFromRow(card, { appKey: APP_KEY, origin: 'self' });
     });
   });
@@ -1017,7 +1017,7 @@ function myFlashcardsExportPayload(cardsToExport){
 }
 
 function openMyFlashcardsExportModal(cardsToExport){
-  if (!cardsToExport.length){ showToast('Você não tem nenhum cartão ativo pra exportar.'); return; }
+  if (!cardsToExport.length){ showToast('Você não tem nenhum cartão ativo para exportar.'); return; }
   const payload = myFlashcardsExportPayload(cardsToExport);
   if (!payload.cards.length){ showToast('Nenhum dos cartões selecionados cabe neste formato (só frente e verso).'); return; }
   const json = JSON.stringify(payload, null, 2);
@@ -1040,7 +1040,7 @@ function openMyFlashcardsExportModal(cardsToExport){
       </div>
       <div class="app-modal-body">
         ${payload.cards.length < cardsToExport.length ? `<p class="profile-edit-hint">${cardsToExport.length - payload.cards.length} cartão(ões) de Completar a frase ficaram de fora: este formato só leva frente e verso.</p>` : ''}
-        <p class="profile-edit-hint">Baixe um arquivo .json pra dar pra outro aluno importar, ou copie o link de compartilhamento -- os dois têm o mesmo conteúdo.</p>
+        <p class="profile-edit-hint">Baixe um arquivo .json para outro aluno importar, ou copie o link de compartilhamento. Os dois têm o mesmo conteúdo.</p>
         <div style="display:flex; gap:10px; margin:10px 0;">
           <button type="button" class="btn btn-secondary" id="my-flashcards-export-download" style="flex:1;">⬇️ Baixar .json</button>
           <button type="button" class="btn btn-secondary" id="my-flashcards-export-copy-link" style="flex:1;">🔗 Copiar link</button>
@@ -1111,7 +1111,7 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
     return;
   }
   if (payload.languageAppKey !== APP_KEY){
-    if (errorEl) errorEl.textContent = `Esses cartões são de outro idioma (${payload.languageAppKey}) -- não podem ser importados aqui.`;
+    if (errorEl) errorEl.textContent = `Esses cartões são de outro idioma (${payload.languageAppKey}) e não podem ser importados aqui.`;
     return;
   }
   // Fase F -- preflight único (mesma regra canônica da criação manual) e
@@ -1140,7 +1140,7 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
   if (!dest.ok){ if (errorEl) errorEl.textContent = dest.error; return; }
   const confirmText = cutPlan.cut
     ? `O arquivo tem ${payload.cards.length} cartão(ões), mas só os primeiros ${cardsToCreate.length} cabem no plano grátis. Importar esses ${cardsToCreate.length}?`
-    : `Importar ${payload.cards.length} cartão(ões) pra sua conta?`;
+    : `Importar ${payload.cards.length} cartão(ões) para a sua conta?`;
   if (!confirm(confirmText)) return;
   let importedCount = 0;
   for (const card of cardsToCreate){

@@ -547,7 +547,7 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
       if (myGeneration !== currentFieldAudioOpGeneration(fieldId)){
         // Outra origem já assumiu field.audio enquanto este upload estava
         // em voo (Fase 7h.2) -- descarta silenciosamente, nunca sobrescreve.
-        if (uploadStatusEl) uploadStatusEl.textContent = 'Outra origem de áudio foi usada enquanto este arquivo era enviado -- o resultado foi descartado.';
+        if (uploadStatusEl) uploadStatusEl.textContent = 'Outra origem de áudio foi usada enquanto este arquivo era enviado. O resultado foi descartado.';
         return;
       }
       // Só ATUALIZA field.audio depois do upload ter sucesso de verdade
@@ -596,7 +596,7 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
     if (!block.isConnected) return; // container abandonado enquanto o hash era calculado (mesmo guard já usado por upload/geração)
     if (stale){
       ttsStaleEl.style.display = '';
-      ttsStaleEl.textContent = '⚠️ Áudio desatualizado -- o texto ou a configuração mudou desde a última geração. Clique em "Gerar novamente" para atualizar.';
+      ttsStaleEl.textContent = '⚠️ Áudio desatualizado: o texto ou a configuração mudou desde a última geração. Clique em "Gerar novamente" para atualizar.';
       if (ttsGenerateBtn) ttsGenerateBtn.textContent = '🔄 Gerar novamente';
     } else {
       ttsStaleEl.style.display = 'none';
@@ -662,7 +662,7 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
       const existingAudio = fieldBeforeGen && fieldBeforeGen.audio;
       if (existingAudio && existingAudio.type === 'tts' && existingAudio.generatedUrl
         && myKey !== null && existingAudio.generationKey === myKey){
-        if (msgEl) msgEl.textContent = 'Áudio já está atualizado para esta configuração -- nenhuma geração nova foi solicitada.';
+        if (msgEl) msgEl.textContent = 'Áudio já está atualizado para esta configuração. Nenhuma geração nova foi solicitada.';
         return;
       }
 
@@ -689,7 +689,7 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
         // descarta o resultado silenciosamente, nunca sobrescreve o que já
         // é mais recente. O áudio devolvido continua salvo no Storage
         // (órfão, best-effort -- sem garbage collector nesta fase).
-        if (msgEl) msgEl.textContent = 'Outra origem de áudio foi usada enquanto este era gerado -- o resultado foi descartado.';
+        if (msgEl) msgEl.textContent = 'Outra origem de áudio foi usada enquanto este era gerado. O resultado foi descartado.';
         return;
       }
 
@@ -706,7 +706,7 @@ function wireFieldAudioBlockFor(container, editorState, fieldId, onChange, opts)
         // devolvido ainda ficou salvo no Storage (órfão) -- best-effort,
         // mesma categoria já documentada pra remoção/substituição (sem
         // garbage collector nesta fase).
-        if (msgEl) msgEl.textContent = 'A configuração mudou enquanto o áudio era gerado -- clique em Gerar de novo.';
+        if (msgEl) msgEl.textContent = 'A configuração mudou enquanto o áudio era gerado. Clique em Gerar de novo.';
         return;
       }
 
@@ -866,7 +866,7 @@ function renderFieldEditorHTML(field, index, opts){
     <div class="field-editor-row" data-field-editor data-field-id="${field.id}" data-field-index="${index}" style="border:1px solid var(--paper-line); border-radius:var(--radius); padding:10px; margin-bottom:8px;">
       <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;">
         <span class="section-label" style="margin:0;">${escapeHTML(label)}</span>
-        ${removable ? `<button type="button" class="admin-badge-delete-btn" data-field-remove="${field.id}" title="Remover campo">🗑</button>` : ''}
+        ${removable ? `<button type="button" class="admin-badge-delete-btn" data-field-remove="${field.id}" data-touch44 title="Remover campo">🗑</button>` : ''}
       </div>
       <label class="profile-edit-label" for="${namePrefix}-content-${field.id}">Conteúdo</label>
       <textarea id="${namePrefix}-content-${field.id}" class="profile-edit-input profile-edit-textarea" rows="2" data-field-content="${field.id}">${escapeHTML(contentValue)}</textarea>
@@ -889,9 +889,9 @@ function renderFieldEditorListHTML(editorState, opts){
   const fields = editorState.fields || [];
   return `
     <div data-field-editor-list>
-      ${fields.length ? fields.map((f, i) => renderFieldEditorHTML(f, i, opts)).join('') : `<p class="profile-edit-hint">Nenhum campo ainda -- use "Adicionar campo" abaixo.</p>`}
+      ${fields.length ? fields.map((f, i) => renderFieldEditorHTML(f, i, opts)).join('') : `<p class="profile-edit-hint">Nenhum campo ainda. Use "Adicionar campo" abaixo.</p>`}
     </div>
-    ${opts.allowAdd !== false ? `<button type="button" class="admin-select-link" data-field-add>+ Adicionar campo</button>` : ''}
+    ${opts.allowAdd !== false ? `<button type="button" class="admin-select-link" data-field-add data-touch44>+ Adicionar campo</button>` : ''}
   `;
 }
 

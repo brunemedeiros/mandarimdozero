@@ -342,7 +342,7 @@ function notifyProgressNotLoadedYet(){
   const now = Date.now();
   if (now - lastLoadGuardToastAt < SAVE_ERROR_TOAST_COOLDOWN_MS) return;
   lastLoadGuardToastAt = now;
-  showToast('⏳ Ainda confirmando seu progresso salvo -- espere um instante antes de continuar.');
+  showToast('⏳ Ainda confirmando seu progresso salvo. Espere um instante antes de continuar.');
 }
 
 // Cooldown/contador PRÓPRIO de novo -- mensagem diferente de propósito das
