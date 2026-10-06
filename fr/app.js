@@ -1710,14 +1710,14 @@ const BADGES = [
   { id:'first_step', name:'Primeiro Passo', icon:'🌱', desc:'Fez sua primeira revisão', check: s => s.totalReviews >= 1 },
   { id:'streak_3', name:'3 Dias Seguidos', icon:'🔥', desc:'Estudou 3 dias seguidos', check: s => s.streak >= 3 },
   { id:'streak_7', name:'Uma Semana!', icon:'🥐', desc:'Estudou 7 dias seguidos', check: s => s.streak >= 7 },
-  { id:'unit_1', name:'Unidade 1 Completa', icon:'📖', desc:'Completou a primeira unidade', check: s => s.unitProgress['A1-1']?.completed },
+  { id:'unit_1', name:'Unidade 1 Completa', icon:'📖', desc:'Completou a primeira unidade', check: s => s.unitProgress['A1-1']?.completed && unitCompletedVia(s.unitProgress['A1-1']) === 'lessons' },
   { id:'unit_half', name:'Metade do Caminho', icon:'🗼', desc:'Completou metade do nível A1', check: s => {
       const a1 = UNITS.filter(u => u.level === 'A1');
-      return a1.filter(u => s.unitProgress[u.id]?.completed).length >= Math.ceil(a1.length/2);
+      return a1.filter(u => unitCompletedVia(s.unitProgress[u.id]) === 'lessons').length >= Math.ceil(a1.length/2);
     } },
   { id:'unit_all', name:'Nível A1 Completo', icon:'🇫🇷', desc:'Completou o nível A1 inteiro', check: s => {
       const a1 = UNITS.filter(u => u.level === 'A1');
-      return a1.every(u => s.unitProgress[u.id]?.completed);
+      return a1.every(u => unitCompletedVia(s.unitProgress[u.id]) === 'lessons');
     } },
   { id:'xp_100', name:'100 XP', icon:'⭐', desc:'Acumulou 100 XP', check: s => s.xp >= 100 },
   { id:'xp_500', name:'500 XP', icon:'🌟', desc:'Acumulou 500 XP', check: s => s.xp >= 500 },
@@ -2206,18 +2206,19 @@ function buildUnitBlock(u){
 function buildCheckpointRow(module, unlocked){
   const cp = STATE.checkpointProgress[module.id];
   const block = document.createElement('div');
-  block.className = 'unit-block checkpoint' + (!unlocked ? ' locked' : '') + (cp.completed ? ' done' : '');
+  const skipLocked = !trailSkipAllowed();
+  block.className = 'unit-block checkpoint' + (!unlocked ? ' locked' : '') + (cp.completed ? ' done' : '') + (skipLocked ? ' skip-locked' : '');
   block.innerHTML = `
     <div class="ub-header">
       <div class="ub-icon">🏆</div>
       <div class="ub-info">
-        <div class="ub-title-row"><span class="ub-title">Ponto de verificação</span>${cp.completed ? `<span class="ub-badge">✓</span>` : ''}</div>
-        <div class="ub-goal">Teste o módulo inteiro de uma vez e pule as unidades que já souber.</div>
+        <div class="ub-title-row"><span class="ub-title">Ponto de verificação</span>${cp.completed ? `<span class="ub-badge">✓</span>` : ''}${skipLocked ? '<span class="ub-badge" title="Premium">🔒</span>' : ''}</div>
+        <div class="ub-goal">${skipLocked ? 'Pular unidades é do plano Premium (ou de alunos da professora).' : 'Teste o módulo inteiro de uma vez e pule as unidades que já souber.'}</div>
       </div>
     </div>
   `;
   if (unlocked){
-    wireHeaderActivation(block.querySelector('.ub-header'), () => openCheckpoint(module.id));
+    wireHeaderActivation(block.querySelector('.ub-header'), () => openCheckpoint(module.id)); // openCheckpoint já avisa se pular for Premium
   }
   return block;
 }
@@ -2386,6 +2387,7 @@ function renderDailyChallengesStrip(){
 
 function renderUnitsGrid(){
   recalculateUnlockedUnits();
+  ensureTrailTeacherLink();
   // Fase 2: enquanto o aluno não escolheu um nível à mão, a trilha abre no
   // nível da unidade atual (antes voltava ao A1 a cada carregamento).
   if (!STATE.levelUserPicked){
@@ -7308,6 +7310,27 @@ function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
 // sabe o conteúdo "pular" o módulo sem precisar abrir unidade por unidade.
 const CHECKPOINT_PASS_THRESHOLD = 70;
 
+// ---------- Fase 6: quem pode PULAR (Ponto de verificação / Teste de Nível) ----------
+// Decisão da professora: Free tem progressão linear; Premium e aluno vinculado
+// podem pular. Fica DESLIGADO por enquanto (mesmo padrão de CHALLENGE_PAYWALL_ENABLED):
+// hoje todos continuam podendo pular; ao ligar a flag a regra vale sem mexer em mais nada.
+// Trava só no cliente (decisão 10): o servidor não valida plano.
+let TRAIL_SKIP_PAYWALL_ENABLED = false; // let: os testes ligam a flag
+let TRAIL_TEACHER_LINK = null; // cache de hasActiveTeacherLink() (null = ainda não sabemos)
+function trailSkipAllowed(){
+  if (!TRAIL_SKIP_PAYWALL_ENABLED) return true;
+  return (typeof isPremium === 'function' && isPremium()) || isChallengesAdmin() || TRAIL_TEACHER_LINK === true;
+}
+function ensureTrailTeacherLink(){
+  if (!TRAIL_SKIP_PAYWALL_ENABLED || TRAIL_TEACHER_LINK !== null || !CURRENT_USER || typeof hasActiveTeacherLink !== 'function') return;
+  TRAIL_TEACHER_LINK = false; // evita chamadas repetidas enquanto a primeira não volta
+  hasActiveTeacherLink().then(v => { TRAIL_TEACHER_LINK = !!v; if (v) renderUnitsGrid(); }).catch(() => {});
+}
+function showTrailSkipLocked(){
+  showToast('Pular unidades é do plano Premium (ou de alunos da professora). Pelo plano grátis, siga as unidades em ordem. 🔒');
+}
+
+
 const CHECKPOINT_STATE = {
   moduleId: null,
   queue: [],
@@ -7317,22 +7340,9 @@ const CHECKPOINT_STATE = {
 };
 
 function buildCheckpointQueue(module){
+  // Fase 6: palavra + frase + escuta + gramática (shared/checkpoint-exam.js, puro).
   const moduleUnits = module.unitIds.map(id => UNITS.find(u => u.id === id));
-  let queue = [];
-  moduleUnits.forEach(u => {
-    if (u.type === 'grammar'){
-      u.grammar.exercises.forEach(ex => {
-        queue.push({ prompt: ex.prompt, hint: ex.hint, answer: ex.answer });
-      });
-    } else {
-      // Ignora entradas com forma dupla (ex: "français / française") — não
-      // dá pra cobrar digitação exata de uma tradução com duas respostas.
-      u.vocab.filter(v => !v.f.includes(' / ')).forEach(v => {
-        queue.push({ prompt: `Como se diz "${v.t}" em francês?`, hint: null, answer: v.f });
-      });
-    }
-  });
-  return shuffle(queue).slice(0, Math.min(12, queue.length));
+  return buildCheckpointExamQueue(moduleUnits, { shuffle, canSpeak: canSpeakFrench });
 }
 
 function recordCheckpointAttempt(module, scorePct){
@@ -7342,40 +7352,29 @@ function recordCheckpointAttempt(module, scorePct){
 }
 
 function completeModuleUnits(module, scorePct){
-  // O card do checkpoint nunca fica desabilitado depois de aprovado (só
-  // ganha um ✓ visual, ver buildCheckpointRow) -- sem esta checagem, um
-  // módulo já concluído podia ser refeito e pagar +50 XP de novo a cada
-  // aprovação, sem limite (achado de auditoria).
-  const alreadyCompleted = STATE.checkpointProgress[module.id].completed;
+  // Fase 6 (decisões da professora, 06/10/2026): passar no Ponto de verificação
+  // PULA as unidades que ainda não estavam concluídas. Pulada libera a próxima
+  // unidade e conta para o módulo/nível, mas NÃO dá XP, estrelas nem selos de
+  // unidade, e NÃO inventa evidência de estudo: nenhum cartão recebe nota "Bom"
+  // no FSRS (ficam New de verdade e entram pela cota de novas por sessão; a
+  // elegibilidade vem de prog.completed, ver isCardLessonCompleted). Refazer o
+  // ponto nunca reclassifica uma unidade já concluída estudando.
   module.unitIds.forEach(id => {
-    // Fase 1 da trilha: registra que esta unidade foi PULADA (só se ainda não
-    // estava concluída -- refazer o ponto nunca reclassifica o que o aluno
-    // concluiu estudando). Não muda XP/selos/FSRS nesta fase.
     if (!STATE.unitProgress[id].completed) stampUnitCompletion(STATE.unitProgress[id], 'skip_test', todayStr());
     STATE.unitProgress[id].started = true;
     STATE.unitProgress[id].completed = true;
-    // Passar no checkpoint/teste de nível é prova de que o aluno já sabe o
-    // vocabulário — sem isso, as unidades ficavam marcadas como concluídas
-    // mas o contador de palavras aprendidas (baseado no SRS) continuava zerado.
-    const u = UNITS.find(x => x.id === id);
-    if (u.type !== 'grammar'){
-      u.vocab.forEach(v => registerExerciseCorrect(u, v));
-    }
   });
+  const alreadyCompleted = STATE.checkpointProgress[module.id].completed;
   STATE.checkpointProgress[module.id].completed = true;
   STATE.checkpointProgress[module.id].bestScore = Math.max(STATE.checkpointProgress[module.id].bestScore || 0, scorePct);
-  if (!alreadyCompleted){
-    addXP(50);
-    registerStudyToday();
-    registerDailyStars(lessonStars(scorePct));
-    registerDailyLessonCompleted(scorePct, false);
-  }
+  if (!alreadyCompleted) registerStudyToday();
   recalculateUnlockedUnits();
   showToast('Ponto de verificação aprovado! 🏆');
   saveState();
 }
 
 function openCheckpoint(moduleId){
+  if (!trailSkipAllowed()){ showTrailSkipLocked(); return; }
   const module = MODULES.find(m => m.id === moduleId);
   STEP_STATE.onChallengesScreen = false;
   STEP_STATE.onCheckpoint = moduleId;
@@ -7429,16 +7428,21 @@ function renderCheckpointQuizStep(){
   const ex = CHECKPOINT_STATE.queue[CHECKPOINT_STATE.index];
   nextBtn.style.display = 'none';
 
+  const isListen = ex.kind === 'listen';
   contentEl.innerHTML = `
     <div class="conj-progress">Pergunta ${CHECKPOINT_STATE.index + 1} de ${total}</div>
     <div class="gram-exercise">
-      <div class="gram-exercise-prompt">${ex.prompt}</div>
+      <div class="gram-exercise-prompt">${ex.prompt}${isListen ? ' ' + audioBtnHTML(ex.audioText) : ''}</div>
       ${ex.hint ? `<div class="gram-exercise-hint">${ex.hint}</div>` : ''}
-      <input type="text" id="checkpoint-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a resposta">
+      <input type="text" id="checkpoint-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${isListen ? 'Escreva o que ouviu' : 'Digite a resposta'}">
       <div class="expected" id="checkpoint-expected"></div>
     </div>
     <button class="btn btn-primary btn-block" id="checkpoint-verify-btn">Verificar</button>
   `;
+  if (isListen){
+    wireAudioButtons(contentEl);
+    speakFrench(ex.audioText, contentEl.querySelector('.audio-btn'), true);
+  }
 
   const inputEl = document.getElementById('checkpoint-input');
   inputEl.focus();
@@ -7447,26 +7451,19 @@ function renderCheckpointQuizStep(){
   });
 
   document.getElementById('checkpoint-verify-btn').addEventListener('click', () => {
-    const given = inputEl.value;
     const expected = ex.answer;
     const wrapEl = contentEl.querySelector('.gram-exercise');
     const expectedEl = document.getElementById('checkpoint-expected');
     inputEl.disabled = true;
 
-    if (given.trim() === expected.trim()){
-      wrapEl.classList.add('ok');
-      CHECKPOINT_STATE.score += 1;
-    } else if (normalizeLoose(given) === normalizeLoose(expected)){
-      wrapEl.classList.add('almost');
-      expectedEl.textContent = `Quase! → ${expected}`;
-      CHECKPOINT_STATE.score += 0.5;
-    } else {
-      wrapEl.classList.add('wrong');
-      expectedEl.textContent = `→ ${expected}`;
-    }
+    const res = scoreCheckpointAnswer(inputEl.value, expected, ex.kind);
+    CHECKPOINT_STATE.score += res.score;
+    wrapEl.classList.add(res.status);
+    if (res.status === 'almost') expectedEl.textContent = `Quase! → ${expected}`;
+    else if (res.status === 'wrong') expectedEl.textContent = `→ ${expected}`;
     // "almost" (grafia quase certa, sem acento etc.) já dá 0.5 ponto -- toca
     // o mesmo som de acerto do "ok", só "wrong" de verdade toca o de erro.
-    playFeedbackSound(!wrapEl.classList.contains('wrong'));
+    playFeedbackSound(res.status !== 'wrong');
 
     document.getElementById('checkpoint-verify-btn').style.display = 'none';
     const goNextBtn = document.createElement('button');
@@ -7522,12 +7519,13 @@ function completeLevelTest(test, scorePct){
   levelModules.forEach(module => completeModuleUnits(module, scorePct));
   STATE.levelTestProgress[test.id].completed = true;
   STATE.levelTestProgress[test.id].bestScore = Math.max(STATE.levelTestProgress[test.id].bestScore || 0, scorePct);
-  if (!alreadyCompleted) addXP(150);
-  showToast(`Nível ${test.level} concluído! 🎓`);
+  showToast(`Nível ${test.level} concluído! 🎓`); // Fase 6: pulo não dá XP
+
   saveState();
 }
 
 function openLevelTest(testId){
+  if (!trailSkipAllowed()){ showTrailSkipLocked(); return; }
   const test = LEVEL_TESTS.find(t => t.id === testId);
   STEP_STATE.onChallengesScreen = false;
   STEP_STATE.onCheckpoint = null;

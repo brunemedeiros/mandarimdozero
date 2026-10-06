@@ -136,8 +136,8 @@ console.log('== fr: pular via Ponto de verificação');
   ctx.recalculateUnlockedUnits();
   const cur = G.flat().filter(u => ctx.trailItemState(u, G, P()) === 'current');
   check('fr: depois de pular o módulo 1, a atual é a 1ª unidade não concluída', cur.length === 1 && !ids.includes(cur[0].id), cur.map(u => u.id));
-  // Esta fase NÃO muda o comportamento de XP/FSRS do pulo (isso é a fase 6)
-  check('fr: comportamento do pulo atual preservado (XP +50, FSRS "Bom" ainda chamado)', ctx.calls.xp >= 50 && ctx.calls.fsrs > 0, ctx.calls);
+  // Fase 6: o pulo NÃO dá XP e NÃO inventa nota "Bom" no FSRS (decisão da professora)
+  check('fr: pulo sem XP e sem nota "Bom" no FSRS (fase 6)', ctx.calls.xp === 0 && ctx.calls.fsrs === 0, ctx.calls);
 }
 
 // --- Equivalência: nova recalcUnlocked == regra antiga, em muitos estados
