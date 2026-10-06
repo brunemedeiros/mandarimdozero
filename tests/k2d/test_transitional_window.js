@@ -68,7 +68,7 @@ for (const lang of ['fr', 'zh']){
   check(lang + ': B tem FSRS próprio após grade (reps 1, state != new)', B.reps === 1 && B.state !== 'new');
 
   // Nenhuma regra "B só depois de A" / cardinalidade preservada
-  const all = ctx.STATE.cards.filter(c => c.unitId === u0.id);
+  const all = ctx.STATE.cards.filter(c => c.unitId === u0.id && !ctx.isStudyTrailPhraseCard(c));
   check(lang + ': cardinalidade final 2 CardInstances por palavra', all.length === u0.vocab.length * 2);
 
   // Consumidores K2-E: identificados, NÃO corrigidos (o comportamento atual é o esperado hoje)

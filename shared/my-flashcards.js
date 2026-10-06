@@ -228,6 +228,91 @@ function wireMyDecksSection(wrap){
   });
 }
 
+// Contexto da criação de cartão (Meus Cartões e janela "Adicionar"):
+// cartões próprios, vínculo, plano e Decks. Mesmas regras de sempre.
+async function loadMyFlashcardsContext(){
+  // Fase F -- Decks pessoais carregados sob demanda (bootstrap idempotente
+  // + leitura); STATE.decks é atualizado pra "Estudar este Deck"
+  // (startDeckReviewSession) nunca enxergar uma lista velha.
+  const [cards, hasLink, planTier, decks] = await Promise.all([
+    fetchMyOwnFlashcards(APP_KEY),
+    hasActiveTeacherLink(),
+    fetchMyPlanTier(),
+    ensureDecksForCurrentUser(APP_KEY).then(() => fetchDecksForLanguage(APP_KEY)),
+  ]);
+  const premium = planTier === 'premium';
+  MY_FLASHCARDS_STATE._cardsCache = cards;
+  MY_FLASHCARDS_STATE._decks = decks;
+  // Teto do plano grátis não vale pra aluna vinculada nem pra Premium
+  // (mesma regra de hasUnlimitedOwnCards, shared/roles.js).
+  const unlimited = hasLink || premium;
+  MY_FLASHCARDS_STATE._hasLink = unlimited;
+  if (typeof STATE !== 'undefined') STATE.decks = decks;
+  const activeCards = cards.filter(c => c.status === 'active');
+  const archivedCards = cards.filter(c => c.status === 'archived');
+  // Fase F -- o teto conta CardInstances (regra única em shared/deck-engine.js),
+  // nunca linhas.
+  const usedInstances = ownCardInstanceUsage(cards);
+  const atLimit = !unlimited && usedInstances >= FREE_OWN_FLASHCARD_LIMIT;
+
+  // Selo de tier -- eixo de QUANTIDADE (vínculo com professora) continua
+  // separado do eixo de PREMIUM (formatos ricos) -- ver comentário em
+  // shared/roles.js. Uma conta pode mostrar os dois selos juntos.
+  const tierBadgeHTML = premium
+    ? `<span class="pill">⭐ Premium — cartões ilimitados</span>`
+    : (hasLink
+      ? `<span class="pill">✨ Aluno vinculado — cartões ilimitados</span>`
+      : `<span class="pill">🔒 Plano grátis — ${usedInstances}/${FREE_OWN_FLASHCARD_LIMIT} cartões</span>`);
+
+  return { cards, hasLink, premium, decks, activeCards, archivedCards, usedInstances, unlimited, atLimit, tierBadgeHTML };
+}
+
+// Formulário "Novo cartão" (mesmo HTML em Meus Cartões e na janela "Adicionar").
+function myCreateFlashcardFormHTML({ premium, decks, atLimit, tierBadgeHTML }){
+  return `
+  <div class="section-label" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+    <span>Novo cartão</span>
+    ${tierBadgeHTML}
+  </div>
+  <form id="my-create-flashcard-form" class="profile-edit-form">
+    <!-- CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- criação passou a ser SEMPRE
+         nativa, nos dois tiers: não existe mais formulário legado de
+         criação (Modo de prática/Idioma de cada lado/Frente-Verso
+         soltos/campo de imagem-áudio de cartão inteiro). Free/Premium
+         agora só decide QUAIS Card Types (cardTypeUIMetaForEntitlement)
+         e QUAIS origens de áudio por Field (allowedAudioOrigins,
+         threaded em wireMyFlashcardsForm) aparecem nos seletores --
+         nunca se o editor nativo em si está disponível. Editar um
+         cartão LEGADO já existente continua no formulário legado de
+         sempre (myFlashcardEditFormHTML, intocado) -- isto é só
+         CRIAÇÃO de um cartão novo. -->
+    ${premium ? '' : `<p class="profile-edit-hint">🔒 No plano grátis você cria cartões do tipo Normal, com upload de imagem/áudio por campo (URL externa também disponível). <strong>Premium</strong> desbloqueia Normal com reverso, Múltipla escolha, Completar a frase, Digite a resposta, além de gerar áudio por texto e gravar áudio pelo microfone.</p>`}
+    <div class="section-label" style="margin:0 0 4px;">Tipo de cartão</div>
+    <select id="my-flashcard-card-type-preview" class="profile-edit-input">
+      ${cardTypeUIMetaForEntitlement(premium).map(t => `<option value="${t.id}" ${t.id === 'normal' ? 'selected' : ''}>${t.label}</option>`).join('')}
+    </select>
+    <div class="section-label" style="margin:14px 0 4px;">Campos</div>
+    <p class="profile-edit-hint" style="margin-top:-2px;">Adicione os campos deste cartão -- por exemplo, Frente e Verso pra um cartão Normal. Cada campo tem seu próprio idioma e seus próprios recursos de áudio.</p>
+    <div id="my-flashcard-native-fields"></div>
+    <div id="my-flashcard-tags"></div>
+    <button type="button" class="admin-select-link" id="my-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; margin:6px 0 0;">👁️ Pré-visualizar</button>
+    <label class="profile-edit-label" for="my-flashcard-deck" style="margin-top:14px;">Deck de destino</label>
+    <select id="my-flashcard-deck" class="profile-edit-input">${personalDeckOptionsHTML(decks)}</select>
+    <label class="profile-edit-label" for="my-flashcard-note" style="margin-top:14px;">Nota (opcional)</label>
+    <textarea id="my-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="contexto, dica de uso..."></textarea>
+    <p class="profile-edit-error" id="my-create-flashcard-error"></p>
+    <button type="submit" class="btn btn-primary btn-block" id="my-create-flashcard-btn" ${atLimit ? 'disabled' : ''}>${atLimit ? 'Limite atingido' : 'Criar cartão'}</button>
+  </form>`;
+}
+
+// Depois de editar/apagar/importar: quem abriu o editor decide o que
+// redesenhar (o Painel da Revisão registra MY_FLASHCARDS_STATE.onChange).
+function myFlashcardsAfterChange(opts){
+  if (typeof MY_FLASHCARDS_STATE.onChange === 'function') return MY_FLASHCARDS_STATE.onChange(opts || {});
+  if (typeof deckBrowserRefresh === 'function') return deckBrowserRefresh();
+  return renderMyFlashcardsView(opts);
+}
+
 async function renderMyFlashcardsView(opts){
   const wrap = document.getElementById('my-flashcards-content');
   if (!wrap) return;
@@ -264,74 +349,10 @@ async function renderMyFlashcardsView(opts){
   wrap.innerHTML = loadingHTML();
 
   const isMandarim = APP_KEY === 'mandarim';
-  // Fase F -- Decks pessoais carregados sob demanda (bootstrap idempotente
-  // + leitura); STATE.decks é atualizado pra "Estudar este Deck"
-  // (startDeckReviewSession) nunca enxergar uma lista velha.
-  const [cards, hasLink, planTier, decks] = await Promise.all([
-    fetchMyOwnFlashcards(APP_KEY),
-    hasActiveTeacherLink(),
-    fetchMyPlanTier(),
-    ensureDecksForCurrentUser(APP_KEY).then(() => fetchDecksForLanguage(APP_KEY)),
-  ]);
-  const premium = planTier === 'premium';
-  MY_FLASHCARDS_STATE._cardsCache = cards;
-  MY_FLASHCARDS_STATE._decks = decks;
-  // Teto do plano grátis não vale pra aluna vinculada nem pra Premium
-  // (mesma regra de hasUnlimitedOwnCards, shared/roles.js).
-  const unlimited = hasLink || premium;
-  MY_FLASHCARDS_STATE._hasLink = unlimited;
-  if (typeof STATE !== 'undefined') STATE.decks = decks;
-  const activeCards = cards.filter(c => c.status === 'active');
-  const archivedCards = cards.filter(c => c.status === 'archived');
-  // Fase F -- o teto conta CardInstances (regra única em shared/deck-engine.js),
-  // nunca linhas.
-  const usedInstances = ownCardInstanceUsage(cards);
-  const atLimit = !unlimited && usedInstances >= FREE_OWN_FLASHCARD_LIMIT;
-
-  // Selo de tier -- eixo de QUANTIDADE (vínculo com professora) continua
-  // separado do eixo de PREMIUM (formatos ricos) -- ver comentário em
-  // shared/roles.js. Uma conta pode mostrar os dois selos juntos.
-  const tierBadgeHTML = premium
-    ? `<span class="pill">⭐ Premium — cartões ilimitados</span>`
-    : (hasLink
-      ? `<span class="pill">✨ Aluno vinculado — cartões ilimitados</span>`
-      : `<span class="pill">🔒 Plano grátis — ${usedInstances}/${FREE_OWN_FLASHCARD_LIMIT} cartões</span>`);
-
+  const { cards, hasLink, premium, decks, activeCards, archivedCards, atLimit, tierBadgeHTML } = await loadMyFlashcardsContext();
   wrap.innerHTML = `
     <div class="profile-section">
-      <div class="section-label" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-        <span>Novo cartão</span>
-        ${tierBadgeHTML}
-      </div>
-      <form id="my-create-flashcard-form" class="profile-edit-form">
-        <!-- CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- criação passou a ser SEMPRE
-             nativa, nos dois tiers: não existe mais formulário legado de
-             criação (Modo de prática/Idioma de cada lado/Frente-Verso
-             soltos/campo de imagem-áudio de cartão inteiro). Free/Premium
-             agora só decide QUAIS Card Types (cardTypeUIMetaForEntitlement)
-             e QUAIS origens de áudio por Field (allowedAudioOrigins,
-             threaded em wireMyFlashcardsForm) aparecem nos seletores --
-             nunca se o editor nativo em si está disponível. Editar um
-             cartão LEGADO já existente continua no formulário legado de
-             sempre (myFlashcardEditFormHTML, intocado) -- isto é só
-             CRIAÇÃO de um cartão novo. -->
-        ${premium ? '' : `<p class="profile-edit-hint">🔒 No plano grátis você cria cartões do tipo Normal, com upload de imagem/áudio por campo (URL externa também disponível). <strong>Premium</strong> desbloqueia Normal com reverso, Múltipla escolha, Completar a frase, Digite a resposta, além de gerar áudio por texto e gravar áudio pelo microfone.</p>`}
-        <div class="section-label" style="margin:0 0 4px;">Tipo de cartão</div>
-        <select id="my-flashcard-card-type-preview" class="profile-edit-input">
-          ${cardTypeUIMetaForEntitlement(premium).map(t => `<option value="${t.id}" ${t.id === 'normal' ? 'selected' : ''}>${t.label}</option>`).join('')}
-        </select>
-        <div class="section-label" style="margin:14px 0 4px;">Campos</div>
-        <p class="profile-edit-hint" style="margin-top:-2px;">Adicione os campos deste cartão -- por exemplo, Frente e Verso pra um cartão Normal. Cada campo tem seu próprio idioma e seus próprios recursos de áudio.</p>
-        <div id="my-flashcard-native-fields"></div>
-        <div id="my-flashcard-tags"></div>
-        <button type="button" class="admin-select-link" id="my-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; margin:6px 0 0;">👁️ Pré-visualizar</button>
-        <label class="profile-edit-label" for="my-flashcard-deck" style="margin-top:14px;">Deck de destino</label>
-        <select id="my-flashcard-deck" class="profile-edit-input">${personalDeckOptionsHTML(decks)}</select>
-        <label class="profile-edit-label" for="my-flashcard-note" style="margin-top:14px;">Nota (opcional)</label>
-        <textarea id="my-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="contexto, dica de uso..."></textarea>
-        <p class="profile-edit-error" id="my-create-flashcard-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="my-create-flashcard-btn" ${atLimit ? 'disabled' : ''}>${atLimit ? 'Limite atingido' : 'Criar cartão'}</button>
-      </form>
+      ${myCreateFlashcardFormHTML({ premium, decks, atLimit, tierBadgeHTML })}
     </div>
 
     <div class="profile-section" id="my-decks-section">
@@ -539,7 +560,7 @@ function wireMyFlashcardEditForm(c, wrap, premium){
     // zeraria de volta o editingNativeState que acabamos de setar, no
     // MESMO tick síncrono (ver comentário completo lá) -- a conversão
     // nunca chegaria a aparecer na tela.
-    renderMyFlashcardsView({ preserveEditingNativeState: true });
+    myFlashcardsAfterChange({ preserveEditingNativeState: true });
   });
 
   document.getElementById('edit-my-flashcard-cancel')?.addEventListener('click', () => {
@@ -547,7 +568,7 @@ function wireMyFlashcardEditForm(c, wrap, premium){
     MY_FLASHCARDS_STATE.editingNativeState = null;
     MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
-    renderMyFlashcardsView();
+    myFlashcardsAfterChange();
   });
   document.getElementById('edit-my-flashcard-save')?.addEventListener('click', () => {
     const errorEl = document.getElementById('edit-my-flashcard-error');
@@ -581,7 +602,7 @@ function wireMyFlashcardEditForm(c, wrap, premium){
       }
       showToast('✓ Cartão editado. O progresso de revisão foi reiniciado.');
       MY_FLASHCARDS_STATE.editingCardId = null;
-      renderMyFlashcardsView();
+      myFlashcardsAfterChange();
     });
   });
 }
@@ -605,9 +626,8 @@ function myFlashcardNativeEditFormHTML(c, editorState, premium){
   }
   return `
     <div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:10px;">
-      <div class="section-label" style="margin:0;">Editar cartão (editor nativo)</div>
-      <p class="profile-edit-hint" style="margin:0;">Este cartão usa o novo modelo de campos -- editando aqui, o conteúdo é gravado em fields/card_generation_mode, nunca nas colunas antigas.</p>
-      <div class="section-label" style="margin:6px 0 4px;">Card Type</div>
+      <div class="section-label" style="margin:0;">Editar cartão</div>
+      <div class="section-label" style="margin:6px 0 4px;">Tipo de cartão</div>
       <select id="edit-my-native-flashcard-card-type" class="profile-edit-input">
         ${typeOptions.map(t => `<option value="${t.id}" ${t.id === editorState.cardGenerationMode ? 'selected' : ''}>${t.label}</option>`).join('')}
       </select>
@@ -664,7 +684,7 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap, premium){
     MY_FLASHCARDS_STATE.editingNativeState = null;
     MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
-    renderMyFlashcardsView();
+    myFlashcardsAfterChange();
   });
 
   document.getElementById('edit-my-native-flashcard-save').addEventListener('click', () => {
@@ -706,7 +726,7 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap, premium){
       MY_FLASHCARDS_STATE.editingNativeState = null;
       MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
-      renderMyFlashcardsView();
+      myFlashcardsAfterChange();
     };
 
     if (nextRevision > (c.revision || 0)){
@@ -717,7 +737,7 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap, premium){
   });
 }
 
-function wireMyFlashcardsForm(wrap, atLimit, premium){
+function wireMyFlashcardsForm(wrap, atLimit, premium, onCreated){
   // CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- criação passou a ser sempre nativa,
   // nos dois tiers. Free/Premium só afeta quais Card Types
   // (cardTypeUIMetaForEntitlement, já refletido no <select> renderido em
@@ -789,7 +809,7 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
     // mas este é o ponto único de verdade caso o botão seja reativado por
     // qualquer motivo (ex: DOM não re-renderizado a tempo).
     if (atLimit){
-      document.getElementById('flashcard-limit-modal').style.display = 'flex';
+      openFlashcardLimitModal();
       return;
     }
     const btn = document.getElementById('my-create-flashcard-btn');
@@ -821,7 +841,7 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
     });
     if (!pre.ok){
       errorEl.textContent = `Este cartão geraria ${pre.requested} cartão(ões) de estudo, mas restam só ${pre.remaining} no plano grátis.`;
-      document.getElementById('flashcard-limit-modal').style.display = 'flex';
+      openFlashcardLimitModal();
       return;
     }
     btn.disabled = true;
@@ -848,7 +868,8 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
     // abaixo ser verdade AGORA, não só depois de recarregar a página.
     if (typeof addSelfFlashcardToState === 'function') addSelfFlashcardToState(result.card);
     showToast('✓ Cartão criado. Ele já entra na sua fila de revisão.');
-    renderMyFlashcardsView();
+    if (typeof onCreated === 'function') onCreated(result.card);
+    else renderMyFlashcardsView();
   });
 }
 
@@ -874,7 +895,7 @@ function wireMyFlashcardsCardButtons(wrap){
       // um cartão só sairia da fila de revisão (isCardLessonCompleted checa
       // flashcardStatus) no próximo carregamento, não nesta mesma sessão.
       if (typeof updateSelfFlashcardStatusInState === 'function') updateSelfFlashcardStatusInState(id, nextStatus);
-      renderMyFlashcardsView();
+      myFlashcardsAfterChange();
     });
   });
 
@@ -890,7 +911,7 @@ function wireMyFlashcardsCardButtons(wrap){
       const id = btn.dataset.toggleOwnFlashcardVisibility;
       const nextHidden = btn.dataset.nextHidden === 'true';
       await setOwnFlashcardHidden(id, nextHidden);
-      renderMyFlashcardsView();
+      myFlashcardsAfterChange();
     });
   });
 
@@ -909,7 +930,7 @@ function wireMyFlashcardsCardButtons(wrap){
       MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
       MY_FLASHCARDS_STATE._legacyConversionError = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
-      renderMyFlashcardsView();
+      myFlashcardsAfterChange();
     });
   });
 
@@ -924,7 +945,7 @@ function wireMyFlashcardsCardButtons(wrap){
       if (!result.ok){ showToast('Não foi possível apagar o cartão agora.'); return; }
       if (typeof removeSelfFlashcardFromState === 'function') removeSelfFlashcardFromState(id);
       showToast('✓ Cartão apagado.');
-      renderMyFlashcardsView();
+      myFlashcardsAfterChange();
     });
   });
 }
@@ -937,23 +958,68 @@ function wireMyFlashcardsCardButtons(wrap){
 // existentes). `languageAppKey` é checado na importação -- um cartão de
 // mandarim nunca pode ser importado numa conta logada em fr/, e vice-versa
 // (rejeição explícita, não silenciosa).
-function myFlashcardsExportPayload(cardsToExport){
-  return {
-    languageAppKey: APP_KEY,
-    cards: cardsToExport.map(c => ({
-      front: c.front,
-      frontPinyin: c.front_pinyin || null,
-      backTrans: c.back_trans,
-      note: c.note || null,
-      frontIsTargetLanguage: c.front_is_target_language !== false,
-      tags: Array.isArray(c.tags) ? c.tags : [],
-    })),
+// Cartão nativo: frente/verso/pinyin/direção vêm dos Fields (fonte de
+// verdade), nunca das colunas espelho (`front_is_target_language` é sempre
+// true numa linha nativa e `front_pinyin` fica null). Ordem dos slots =
+// mesma regra do motor (contentFieldIndices); Múltipla escolha usa
+// prompt/answer por role. Cloze não cabe neste formato (só frente/verso):
+// devolve null e o cartão é deixado de fora do arquivo.
+function myFlashcardExportSidesFromNativeRow(c){
+  const fields = Array.isArray(c.fields) ? c.fields : [];
+  const mode = c.card_generation_mode;
+  if (mode === 'cloze') return null;
+  let fi, bi;
+  if (mode === 'multiple_choice'){
+    fi = fieldIndexByRole(fields, 'prompt');
+    bi = fieldIndexByRole(fields, 'answer');
+  } else {
+    const slots = contentFieldIndices(fields);
+    fi = slots[0]; bi = slots[1];
+  }
+  const ff = fields[fi], bf = fields[bi];
+  if (!ff || !bf) return null;
+  const text = f => (f && f.content && typeof f.content.value === 'string') ? f.content.value : '';
+  const pinyinOf = f => {
+    if (!f || f.pinyinFieldId == null) return null;
+    const sat = fields.find(x => x.id === f.pinyinFieldId);
+    return sat ? (text(sat) || null) : null;
   };
+  const study = STUDY_LANG_FOR_APP_KEY[APP_KEY];
+  // lang desconhecido nos dois lados (ex.: importado do Anki) = padrão true.
+  const frontIsTargetLanguage = !(ff.lang !== study && bf.lang === study);
+  return {
+    front: text(ff),
+    frontPinyin: pinyinOf(ff) || pinyinOf(bf),
+    backTrans: text(bf),
+    frontIsTargetLanguage,
+  };
+}
+
+function myFlashcardsExportPayload(cardsToExport){
+  const cards = [];
+  cardsToExport.forEach(c => {
+    const isNative = classifyFlashcardRowModel(c) === 'native';
+    const sides = isNative
+      ? myFlashcardExportSidesFromNativeRow(c)
+      : { front: c.front, frontPinyin: c.front_pinyin || null, backTrans: c.back_trans,
+          frontIsTargetLanguage: c.front_is_target_language !== false };
+    if (!sides) return;
+    cards.push({
+      front: sides.front,
+      frontPinyin: sides.frontPinyin,
+      backTrans: sides.backTrans,
+      note: c.note || null,
+      frontIsTargetLanguage: sides.frontIsTargetLanguage,
+      tags: Array.isArray(c.tags) ? c.tags : [],
+    });
+  });
+  return { languageAppKey: APP_KEY, cards };
 }
 
 function openMyFlashcardsExportModal(cardsToExport){
   if (!cardsToExport.length){ showToast('Você não tem nenhum cartão ativo pra exportar.'); return; }
   const payload = myFlashcardsExportPayload(cardsToExport);
+  if (!payload.cards.length){ showToast('Nenhum dos cartões selecionados cabe neste formato (só frente e verso).'); return; }
   const json = JSON.stringify(payload, null, 2);
   const base64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
   const shareUrl = `${location.origin}${location.pathname}#import=${base64}`;
@@ -969,10 +1035,11 @@ function openMyFlashcardsExportModal(cardsToExport){
   modal.innerHTML = `
     <div class="app-modal">
       <div class="app-modal-header">
-        <h3>⬇️ Exportar cartões (${cardsToExport.length})</h3>
+        <h3>⬇️ Exportar cartões (${payload.cards.length})</h3>
         <button class="app-modal-close" id="my-flashcards-export-close" aria-label="Fechar">✕</button>
       </div>
       <div class="app-modal-body">
+        ${payload.cards.length < cardsToExport.length ? `<p class="profile-edit-hint">${cardsToExport.length - payload.cards.length} cartão(ões) de Completar a frase ficaram de fora: este formato só leva frente e verso.</p>` : ''}
         <p class="profile-edit-hint">Baixe um arquivo .json pra dar pra outro aluno importar, ou copie o link de compartilhamento -- os dois têm o mesmo conteúdo.</p>
         <div style="display:flex; gap:10px; margin:10px 0;">
           <button type="button" class="btn btn-secondary" id="my-flashcards-export-download" style="flex:1;">⬇️ Baixar .json</button>
@@ -1050,22 +1117,33 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
   // Fase F -- preflight único (mesma regra canônica da criação manual) e
   // Deck padrão (personal_root) resolvido UMA vez pro lote inteiro.
   const importStates = payload.cards.map(c => nativeNoteEditorStateFromImportPayload(c, APP_KEY));
-  const pre = preflightOwnCardInstanceCreation({
+  // "Corta e avisa" (arquitetura seção 17): se o lote não cabe no teto do
+  // plano grátis, cria só as primeiras Notes que cabem (nunca uma pela
+  // metade) e avisa no fim. Regra única em shared/deck-engine.js.
+  const cutPlan = planOwnCardInstanceCut({
     activeRows: MY_FLASHCARDS_STATE._cardsCache,
     hasTeacherLink: !!MY_FLASHCARDS_STATE._hasLink,
     editorStates: importStates,
     languageAppKey: APP_KEY,
     limit: FREE_OWN_FLASHCARD_LIMIT,
   });
-  if (!pre.ok){
-    document.getElementById('flashcard-limit-modal').style.display = 'flex';
+  const cutMessage = cutPlan.cut ? ownCardInstanceCutMessage({
+    requested: cutPlan.requested, keptInstances: cutPlan.keptInstances,
+    limit: FREE_OWN_FLASHCARD_LIMIT, used: cutPlan.used, what: 'Esta importação',
+  }) : null;
+  if (cutPlan.keepCount === 0){
+    openFlashcardLimitModal({ cutMessage });
     return;
   }
+  const cardsToCreate = payload.cards.slice(0, cutPlan.keepCount);
   const dest = await resolveOwnCreationDeck({ languageAppKey: APP_KEY });
   if (!dest.ok){ if (errorEl) errorEl.textContent = dest.error; return; }
-  if (!confirm(`Importar ${payload.cards.length} cartão(ões) pra sua conta?`)) return;
+  const confirmText = cutPlan.cut
+    ? `O arquivo tem ${payload.cards.length} cartão(ões), mas só os primeiros ${cardsToCreate.length} cabem no plano grátis. Importar esses ${cardsToCreate.length}?`
+    : `Importar ${payload.cards.length} cartão(ões) pra sua conta?`;
+  if (!confirm(confirmText)) return;
   let importedCount = 0;
-  for (const card of payload.cards){
+  for (const card of cardsToCreate){
     // CONSOLIDAÇÃO-6 (ver CLAUDE.md) -- cartão importado agora nasce
     // NATIVO (fields/card_generation_mode), nunca mais o branch Legacy de
     // createOwnFlashcard(). Reaproveita nativeNoteEditorStateFromImportPayload()
@@ -1079,14 +1157,44 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
       if (typeof addSelfFlashcardToState === 'function') addSelfFlashcardToState(result.card);
     }
   }
-  showToast(`✓ ${importedCount} cartão(ões) importado(s). ${summarizeDroppedImportTags(importStates)}`.trim());
-  renderMyFlashcardsView();
+  showToast(`✓ ${importedCount} cartão(ões) importado(s). ${summarizeDroppedImportTags(importStates.slice(0, cutPlan.keepCount))}`.trim());
+  await myFlashcardsAfterChange();
+  if (cutMessage) openFlashcardLimitModal({ cutMessage });
 }
 
 // Wiring do popup de limite (#flashcard-limit-modal, fr/zh index.html) --
 // mesmo padrão de abrir/fechar já usado em todo o app (ex: level-modal,
 // kbd-shortcuts-modal em fr/zh app.js): botão de fechar + clique no fundo.
 // Vive aqui (não em app.js) porque o modal só é aberto por este arquivo.
+// Abre o popup de limite (#flashcard-limit-modal, fr/zh index.html).
+// Sem `cutMessage`: texto padrão do HTML (criação manual bloqueada).
+// Com `cutMessage`: aviso de importação cortada ("corta e avisa",
+// arquitetura seção 17) + convite ao Premium em destaque. O texto padrão é
+// guardado na 1ª abertura e restaurado depois, então um aviso de corte
+// nunca "vaza" pra próxima abertura por criação manual. Usado também por
+// shared/anki-import-ui.js e shared/public-profile.js.
+function openFlashcardLimitModal(opts){
+  const modal = document.getElementById('flashcard-limit-modal');
+  if (!modal) return false;
+  const body = modal.querySelector('.app-modal-body');
+  const title = modal.querySelector('.app-modal-header h3');
+  if (body && body.dataset.defaultHtml === undefined) body.dataset.defaultHtml = body.innerHTML;
+  if (title && title.dataset.defaultText === undefined) title.dataset.defaultText = title.textContent;
+  const cutMessage = opts && opts.cutMessage;
+  if (body){
+    body.innerHTML = cutMessage
+      ? `<p data-limit-cut-message>${escapeHTML(cutMessage)}</p>
+         <div data-limit-premium-cta style="margin-top:10px; padding:10px 12px; border:2px solid var(--seal-red); border-radius:var(--radius, 10px); background:var(--paper-warm);">
+           <strong>⭐ Com o Premium, seus cartões próprios são ilimitados.</strong><br>
+           Para ativar, fale com a administração (profbrune). Você também pode excluir cartões que já não usa para liberar espaço.
+         </div>`
+      : body.dataset.defaultHtml;
+  }
+  if (title) title.textContent = cutMessage ? '🔒 Importação limitada pelo plano grátis' : title.dataset.defaultText;
+  modal.style.display = 'flex';
+  return true;
+}
+
 document.getElementById('flashcard-limit-modal-close')?.addEventListener('click', () => {
   document.getElementById('flashcard-limit-modal').style.display = 'none';
 });

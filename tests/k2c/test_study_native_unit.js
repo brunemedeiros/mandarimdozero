@@ -17,7 +17,7 @@ for (const lang of ['fr', 'zh']){
 
   // 1/2 Note + A + B; campos
   check(lang + ' 1: existe A e B', !!A && !!B);
-  check(lang + ' 1: 2 cards por palavra em todo o conteúdo', cards.length === totalWords * 2, [cards.length, totalWords]);
+  check(lang + ' 1: 2 cards por palavra em todo o conteúdo', cards.filter(c => !ctx.isStudyTrailPhraseCard(c)).length === totalWords * 2, [cards.length, totalWords]);
   const f = A.note.fields;
   if (isZh){
     check('zh 2: 3 Fields hanzi/pinyin/trad', f.length === 3 && f[0].lang === 'zh' && f[1].lang === 'zh-pinyin' && f[2].lang === 'pt-BR');
@@ -33,7 +33,7 @@ for (const lang of ['fr', 'zh']){
   check(lang + ' 3: ids sem aleatoriedade (mesmos em 2 builds)', JSON.stringify(cards.map(c => c.id)) === JSON.stringify(ctx.buildCardsFromUnits(ctx.UNITS).map(c => c.id)));
   // 4 note compartilhada
   check(lang + ' 4: A.note === B.note', A.note === B.note && A.cardInstance.noteId === B.cardInstance.noteId);
-  check(lang + ' 4: Note active, tags [], modo do motor normal_reversed', A.note.status === 'active' && A.tags.length === 0 && A.cardInstance.cardTypeId === 'normal' && B.cardInstance.cardTypeId === 'normal');
+  check(lang + ' 4: Note active, tags derivadas (trilha-tags) iguais em A/B, modo do motor normal_reversed', A.note.status === 'active' && A.tags.includes('estudo') && A.tags.includes('palavra') && JSON.stringify(A.tags) === JSON.stringify(B.tags) && A.cardInstance.cardTypeId === 'normal' && B.cardInstance.cardTypeId === 'normal');
   // 5 direções (pinyin nunca é frente)
   const backIdx = isZh ? 2 : 1;
   check(lang + ' 5: A frente=0 verso=' + backIdx, A.cardInstance.frontFieldIndex === 0 && A.cardInstance.backFieldIndex === backIdx);
@@ -56,7 +56,7 @@ for (const lang of ['fr', 'zh']){
   // 8/9
   check(lang + ' 8: origin study', A.origin === 'study' && B.origin === 'study');
   check(lang + ' 9: unitId/vocabIdx/unitTitle', [A, B].every(c => c.unitId === u0.id && c.vocabIdx === 0 && c.unitTitle === u0.title));
-  check(lang + ' 9: todos os cards têm unitId/vocabIdx coerentes com o id', cards.every(c => c.id.startsWith(`u${c.unitId}-v${c.vocabIdx}`)));
+  check(lang + ' 9: todos os cards têm unitId/vocabIdx coerentes com o id', cards.every(c => ctx.isStudyTrailPhraseCard(c) || c.id.startsWith(`u${c.unitId}-v${c.vocabIdx}`)));
 
   // ---- merge de save ----
   const legacySaved = (c, extra) => Object.assign({
@@ -75,7 +75,7 @@ for (const lang of ['fr', 'zh']){
   check(lang + ' 10: note/cardInstance não substituídos', a.note === before.note && JSON.stringify(a.cardInstance) === before.ci);
   check(lang + ' 11: unitId/vocabIdx/deckId/origin/unitTitle preservados', a.unitId === u0.id && a.vocabIdx === 0 && a.deckId === before.deckId && a.origin === 'study' && a.unitTitle === u0.title);
   check(lang + ' 12: lastDirection/reviewDirection do save ignorados', a.lastDirection === undefined && a.reviewDirection === undefined);
-  check(lang + ' 13: conteúdo do content.js vence', ctx.resolveCardContentView(a).front.text === (isZh ? v0.c : v0.f) && a.front === undefined && a.back_trans === undefined && a.tags.length === 0);
+  check(lang + ' 13: conteúdo do content.js vence', ctx.resolveCardContentView(a).front.text === (isZh ? v0.c : v0.f) && a.front === undefined && a.back_trans === undefined && !a.tags.includes('x') && a.tags.includes('estudo'));
   check(lang + ' 15: A preserva progresso', a.reps === 4 && a.lapses === 1 && a.stability === 7.5 && a.difficulty === 4.2 && a.due === 555555 && a.firstLearnedDate === '2026-01-02' && a.state === 'review' && a.interval === 6 && a.ef === 2.1);
   check(lang + ' 14: B (de card já estudado) começa New', b.reps === 0 && b.due === 0 && b.stability === 0 && b.difficulty === 0 && b.lapses === 0 && b.state === 'new' && !b.firstLearnedDate);
   // cards nunca estudados

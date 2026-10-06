@@ -121,7 +121,7 @@ async function readApkg(buf){
     const setup = await ev(() => {
       UNITS.forEach(x => { STATE.unitProgress[x.id] = { started: true, completed: true, lessonIdx: 99, lessonMisses: {} }; });
       STATE.studySettings.newCardsPerDay = 1000; STATE.studySettings.sessionIntensity = 'intense';
-      const words = new Set(STATE.cards.map(c => c.unitId + ':' + c.vocabIdx)).size;
+      const words = new Set(STATE.cards.filter(c => c.vocabIdx != null).map(c => c.unitId + ':' + c.vocabIdx)).size;
       // A estudado e B New numa palavra; ambos estudados noutra (B New continua na maioria)
       const u = UNITS.find(x => x.type !== 'grammar' && x.vocab.length >= 6);
       const mk = id => Object.assign(STATE.cards.find(c => c.id === id), { reps: 3, state: 'review', stability: 8, difficulty: 5, interval: 10, due: 1 });
@@ -168,7 +168,7 @@ async function readApkg(buf){
     const changed = JSON.parse(fsrsAfter).filter((r, i) => JSON.stringify(r) !== JSON.stringify(JSON.parse(fsrsBefore)[i])).map(r => r[0]);
     check(lang + ' FSRS: só cards A respondidos no Speed mudaram; nenhum B mudou', changed.every(id => !id.endsWith('-b')) , changed);
     // ---------- Review/Deck continuam por CardInstance
-    const rv = await ev(async () => { const n = STATE.cards.filter(c => c.unitId === STATE.cards[0].unitId).length; return { n, words: new Set(STATE.cards.filter(c => c.unitId === STATE.cards[0].unitId).map(c => c.vocabIdx)).size, revPool: eligibleReviewPool().length, cards: STATE.cards.length }; });
+    const rv = await ev(async () => { const n = STATE.cards.filter(c => c.unitId === STATE.cards[0].unitId && !isStudyTrailPhraseCard(c)).length; return { n, words: new Set(STATE.cards.filter(c => c.unitId === STATE.cards[0].unitId && c.vocabIdx != null).map(c => c.vocabIdx)).size, revPool: eligibleReviewPool().length, cards: STATE.cards.length }; });
     check(lang + ' Review/Deck: pool de Review segue com 2 CardInstances por palavra', rv.n === rv.words * 2 && rv.revPool === rv.cards, rv);
     // ---------- Anki (export real .apkg)
     await ev(() => { switchTab('settings'); switchSettingsSection('export'); });

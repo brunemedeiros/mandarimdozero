@@ -323,3 +323,68 @@ async function deleteTeacherDeck({ deck, decks }){
   if (error){ console.error('Erro ao apagar Deck da professora:', error); return { ok: false, error: 'Não foi possível apagar o Deck agora.' }; }
   return { ok: true };
 }
+
+// ---------- Excluir Deck pessoal (doc de arquitetura, seção 5.4) ----------
+//
+// Considera a subárvore inteira. mode 'move': todas as Notes próprias da
+// subárvore vão para `destination` (Meus Decks ou outro Deck pessoal FORA
+// da subárvore) num único UPDATE de deck_id -- os cartões irmãos andam
+// juntos porque o Deck é da Note. mode 'delete': apaga as Notes da
+// subárvore (histórico vai junto) num único DELETE. Depois, apaga o Deck;
+// os subdecks saem pela FK on delete cascade (migration 049). Só kind
+// 'personal' do próprio usuário (personal_root/raiz/curso/professora nunca).
+// Se o UPDATE/DELETE das Notes falhar, o Deck NÃO é apagado. Se o Deck não
+// puder ser apagado depois de mover, os cartões já estão no destino (nada
+// se perde) e o erro é devolvido.
+async function deletePersonalDeckTree({ deck, decks, mode, destination, expectedNotes }){
+  if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta.' };
+  if (!deck || deck.kind !== 'personal' || deck.owner_id !== CURRENT_USER.id){
+    return { ok: false, error: 'Só é possível excluir um Deck pessoal seu.' };
+  }
+  const subtree = getDeckSubtreeIds(decks, deck.id);
+  let notes = 0;
+  // A tela conta os cartões pelo que já está carregado. Antes de mexer,
+  // confere no banco: se o número for outro (carregamento incompleto, outra
+  // aba), não faz nada -- nunca apaga cartões que a pessoa não viu.
+  if (expectedNotes != null){
+    const { data: present, error: cntErr } = await supabaseClient.from('own_flashcards')
+      .select('id').eq('owner_id', CURRENT_USER.id).in('deck_id', subtree);
+    if (cntErr){ console.error('Erro ao conferir cartões do Deck:', cntErr); return { ok: false, error: 'Não foi possível conferir os cartões deste Deck agora. Nada foi alterado.' }; }
+    if ((present || []).length !== expectedNotes){
+      return { ok: false, error: 'Os cartões deste Deck não batem com o que está na tela. Recarregue a página e tente de novo. Nada foi alterado.' };
+    }
+  }
+  if (mode === 'move'){
+    if (!destination || !['personal_root', 'personal'].includes(destination.kind)
+        || destination.owner_id !== CURRENT_USER.id
+        || destination.language_app_key !== deck.language_app_key
+        || subtree.includes(destination.id)){
+      return { ok: false, error: 'Escolha um Deck pessoal fora deste para receber os cartões.' };
+    }
+    const { data, error } = await supabaseClient.from('own_flashcards')
+      .update({ deck_id: destination.id })
+      .eq('owner_id', CURRENT_USER.id).in('deck_id', subtree)
+      .select('id');
+    if (error){ console.error('Erro ao mover cartões do Deck:', error); return { ok: false, error: 'Não foi possível mover os cartões agora. Nada foi excluído.' }; }
+    notes = (data || []).length;
+  } else if (mode === 'delete'){
+    const { data, error } = await supabaseClient.from('own_flashcards')
+      .delete()
+      .eq('owner_id', CURRENT_USER.id).in('deck_id', subtree)
+      .select('id');
+    if (error){ console.error('Erro ao excluir cartões do Deck:', error); return { ok: false, error: 'Não foi possível excluir os cartões agora. Nada foi excluído.' }; }
+    notes = (data || []).length;
+  } else {
+    return { ok: false, error: 'Operação inválida.' };
+  }
+  const { error: delErr } = await supabaseClient.from('decks')
+    .delete()
+    .eq('id', deck.id).eq('owner_id', CURRENT_USER.id).eq('kind', 'personal');
+  if (delErr){
+    console.error('Erro ao excluir Deck:', delErr);
+    return { ok: false, error: mode === 'move'
+      ? 'Os cartões foram movidos, mas não foi possível excluir o Deck agora. Tente de novo.'
+      : 'Os cartões foram excluídos, mas não foi possível excluir o Deck agora. Tente de novo.' };
+  }
+  return { ok: true, notes, subtree };
+}

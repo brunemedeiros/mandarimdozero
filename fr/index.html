@@ -63,6 +63,7 @@ try{
   --error-red: #D62619;      /* vermelho — reservado para estados de erro/errado */
   --ink: #201335;            /* quase-preto com tom roxo, tipo tinta */
   --paper: #FAF5EA;          /* bege — fundo */
+  --count-new: #1D5A82; --count-learning: #B3261E; --count-review: #2E6B4F; /* colunas Novo/Aprendendo/Revisar (Decks) */
   --paper-warm: #F0E8D8;     /* fundo secundário, cards */
   --paper-line: #E1D6C0;     /* linhas/bordas sutis */
   --jade: #3A7359;           /* verde — sucesso/acerto (funcional, fora da paleta de marca) */
@@ -133,6 +134,7 @@ try{
     --error-red: #FF6B5C;
     --ink: #EDE6F5;
     --paper: #17121F;
+    --count-new: #6CB4E4; --count-learning: #FF7B6E; --count-review: #5CC497;
     --paper-warm: #201A2C;
     --paper-line: #362C42;
     --jade: #52B487;
@@ -165,6 +167,7 @@ try{
   --error-red: #FF6B5C;
   --ink: #EDE6F5;
   --paper: #17121F;
+  --count-new: #6CB4E4; --count-learning: #FF7B6E; --count-review: #5CC497;
   --paper-warm: #201A2C;
   --paper-line: #362C42;
   --jade: #52B487;
@@ -1573,6 +1576,12 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .review-mode-card:disabled:hover{ transform:none; box-shadow:var(--shadow-card); }
 .review-mode-card .icon{ font-size:32px; }
 .review-mode-card .count{ font-size:26px; font-weight:800; color: var(--seal-red-dark); }
+.review-mode-card .speed-split{ display:flex; justify-content:center; gap:10px; }
+.review-mode-card .speed-split .is-new{ color:var(--count-new); }
+.review-mode-card .speed-split .is-learning{ color:var(--count-learning); }
+.review-mode-card .speed-split .is-review{ color:var(--count-review); }
+.review-mode-card .speed-split .is-zero{ color:var(--ink-soft); opacity:.55; }
+.review-mode-card .speed-split-legend{ font-size:10px; color:var(--ink-soft); margin-top:-2px; }
 .review-mode-card .name{ font-size:14px; font-weight:700; color: var(--ink); }
 .review-mode-card .desc{ font-size:11.5px; color: var(--ink-soft); }
 
@@ -1592,6 +1601,17 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
    filtro ativo, pra não perder visibilidade total com o painel fechado
    por padrão. */
 #review-today-widget:empty{ display:none; }
+.review-study-all-btn{ margin-top:12px; min-width:200px; }
+/* Speed Review, Palavras difíceis e Combinar numa fileira só (3 colunas
+   inclusive no celular). */
+.review-mode-cards-row{ grid-template-columns: repeat(3, minmax(0,1fr)); gap:10px; }
+.review-mode-cards-row .review-mode-card{ padding-left:8px; padding-right:8px; min-width:0; }
+@media (max-width:480px){
+  .review-mode-cards-row .review-mode-card .icon{ font-size:26px; }
+  .review-mode-cards-row .review-mode-card .count{ font-size:22px; }
+  .review-mode-cards-row .review-mode-card .name{ font-size:12.5px; }
+  .review-mode-cards-row .review-mode-card .desc{ font-size:10.5px; }
+}
 #review-today-widget{ text-align:center; margin-bottom:14px; }
 .review-today-label{ font-size:12px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft); font-weight:800; margin-bottom:4px; }
 .review-today-count{ font-size:38px; font-weight:800; line-height:1; color:var(--seal-red-dark); font-variant-numeric:tabular-nums; }
@@ -1757,13 +1777,6 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 }
 .grade-btn:active{ transform: scale(.96); }
 .grade-btn small{ font-weight:600; font-size:10.5px; opacity:.85; }
-/* Fase 11: "Rever mais" -- PRATICAR (fora do agendamento) é visualmente
-   distinto de REVISAR (os 4 grade-btn acima, que seguem o motor). */
-.review-more-link{
-  display:block; width:100%; margin-top:10px; padding:6px; background:none; border:none;
-  color:var(--ink-soft); font-size:12.5px; font-weight:700; text-align:center; cursor:pointer;
-  font-family:var(--font-body); text-decoration:underline;
-}
 /* 4 botões unificados no MESMO par cor-de-fundo/on-vivid (antes hard/good
    usavam --on-seal-red -- texto escuro sempre, mesmo no claro, enquanto
    again/easy usavam on-vivid -- texto branco no claro. Ficava 2 brancos +
@@ -3334,6 +3347,112 @@ footer.app-footer img{ height:40px; opacity:.85; }
 .conj-session-result{ text-align:center; padding:40px 20px; }
 .conj-session-result .big-emoji{ font-size:48px; margin-bottom:10px; }
 .conj-session-result .score-num{ font-size:34px; font-weight:800; color: var(--seal-red-dark); margin:14px 0; }
+
+/* ===== Navegador de Decks (shared/deck-browser.js; doc de arquitetura, seções 12-14 e 5.4) ===== */
+.deck-table-wrap{ margin: 4px 0 18px; }
+.deck-table{ width:100%; border-collapse:collapse; background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); overflow:hidden; }
+.deck-table th{ text-align:center; font-size:12px; font-weight:600; color:var(--ink-soft); padding:8px 10px; border-bottom:1px solid var(--paper-line); }
+.deck-table th:first-child{ text-align:left; }
+.deck-table td{ padding:6px 10px; border-bottom:1px solid var(--paper-line); color:var(--ink); }
+.deck-table tr:last-child td{ border-bottom:none; }
+.deck-table-name{ display:flex; align-items:center; gap:6px; min-width:0; }
+.deck-table-link{ background:none; border:none; padding:4px 0; cursor:pointer; color:var(--ink); font:inherit; text-align:left; overflow-wrap:anywhere; }
+.deck-table-link:hover, .deck-table-link:focus-visible{ text-decoration:underline; }
+.deck-table-toggle{ width:22px; height:22px; flex:0 0 22px; border:1px solid var(--paper-line); border-radius:4px; background:var(--paper-warm); color:var(--ink); cursor:pointer; line-height:1; padding:0; }
+.deck-table-toggle-spacer{ width:22px; flex:0 0 22px; }
+.deck-table-num{ text-align:center; width:96px; font-variant-numeric:tabular-nums; font-weight:600; }
+.deck-table-num.is-zero, .deck-overview-counts dd.is-zero{ color:var(--ink-soft); font-weight:400; }
+.deck-table-num.is-new, .deck-overview-counts dd.is-new{ color:var(--count-new); }
+.deck-table-num.is-learning, .deck-overview-counts dd.is-learning{ color:var(--count-learning); }
+.deck-table-num.is-review, .deck-overview-counts dd.is-review{ color:var(--count-review); }
+.deck-table-hint{ margin-top:6px; }
+.deck-home-actions, .deck-overview-footer{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:12px 0 4px; }
+.deck-home-btn{ padding:8px 16px; font-size:13.5px; }
+.deck-inline-form{ max-width:420px; margin:10px auto 0; padding:12px; border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper); }
+.deck-inline-actions{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; margin-top:10px; }
+/* Barra do topo, como a do Anki: Decks | Adicionar | Painel. */
+.deck-topbar{ display:flex; justify-content:center; gap:4px; margin:0 auto 14px; padding:4px; width:max-content; max-width:100%; flex-wrap:wrap; background:var(--paper); border:1px solid var(--paper-line); border-radius:12px; }
+.deck-topbar-btn{ background:none; border:none; border-radius:9px; padding:8px 18px; font:inherit; font-weight:700; font-size:14px; color:var(--ink); cursor:pointer; }
+.deck-topbar-btn:hover, .deck-topbar-btn:focus-visible{ background:var(--paper-warm); }
+.deck-topbar-btn.is-active{ background:var(--paper-line); }
+/* Tela do Deck, no formato do Anki. */
+.deck-overview{ max-width:520px; margin:0 auto; text-align:center; padding:8px 4px; }
+.deck-overview-title{ margin:4px 0 18px; font-size:20px; overflow-wrap:anywhere; }
+.deck-overview-body{ display:flex; align-items:center; justify-content:center; gap:28px; flex-wrap:wrap; }
+.deck-overview-counts{ display:grid; grid-template-columns:auto auto; column-gap:18px; row-gap:6px; margin:0; text-align:left; font-size:16px; }
+.deck-overview-counts dt{ color:var(--ink); }
+.deck-overview-counts dd{ margin:0; font-weight:700; font-variant-numeric:tabular-nums; min-width:2ch; text-align:right; }
+.deck-overview-study{ border-radius:999px; padding:12px 26px; }
+.deck-overview-total{ margin:16px 0 0; font-size:13px; color:var(--ink-soft); }
+.deck-overview-hint{ margin-top:6px; }
+.deck-overview-footer{ margin-top:22px; padding-top:14px; border-top:1px solid var(--paper-line); max-width:520px; margin-left:auto; margin-right:auto; }
+.deck-overview-danger{ color:var(--error-red); }
+.deck-overview-extra{ max-width:520px; margin:0 auto; text-align:left; }
+.deck-delete-dialog{ margin-top:10px; padding:12px; border:1px solid var(--error-red); border-radius:var(--radius); background:var(--paper-warm); }
+.add-card-modal{ max-width:680px; }
+/* Painel em janela, no formato do navegador do Anki. */
+.deck-panel-modal{ max-width:1180px; width:100%; height:88vh; max-height:88vh; overflow:hidden; display:flex; flex-direction:column; }
+.deck-panel-head{ display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--paper-line); }
+.deck-panel-head h3{ margin:0; font-size:17px; }
+.deck-panel-search{ flex:1; min-width:0; margin:0; }
+.deck-panel-grid{ flex:1; min-height:0; display:grid; grid-template-columns:220px minmax(0,1fr) minmax(0,1.15fr); }
+.deck-panel-side{ border-right:1px solid var(--paper-line); overflow-y:auto; padding:8px 0; background:var(--paper-warm); }
+.deck-panel-side > summary{ display:none; }
+.deck-panel-side-group{ margin-bottom:12px; }
+.deck-panel-side-label{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); padding:4px 10px; }
+.deck-panel-side-item{ display:block; width:100%; text-align:left; background:none; border:none; padding:5px 10px; font:inherit; font-size:13.5px; color:var(--ink); cursor:pointer; overflow-wrap:anywhere; }
+.deck-panel-side-item:hover, .deck-panel-side-item:focus-visible{ background:var(--paper-line); }
+.deck-panel-side-item.is-active{ background:var(--paper); font-weight:700; box-shadow: inset 3px 0 0 var(--seal-red); }
+.deck-panel-side-link{ color:var(--seal-red-dark); text-decoration:underline; }
+.deck-panel-side-empty{ padding:0 10px; margin:0; }
+.deck-panel-listpane{ display:flex; flex-direction:column; min-height:0; border-right:1px solid var(--paper-line); }
+.deck-panel-listhead{ display:grid; grid-template-columns:26px 1fr 1fr; gap:8px; padding:6px 10px; font-size:12px; font-weight:700; color:var(--ink-soft); border-bottom:1px solid var(--paper-line); }
+.deck-panel-listhead span:first-child{ grid-column:2; }
+.deck-panel-list{ flex:1; min-height:0; overflow-y:auto; }
+.deck-panel-item{ display:grid; grid-template-columns:26px 1fr 1fr; gap:8px; align-items:center; padding:7px 10px; border-bottom:1px solid var(--paper-line); cursor:pointer; font-size:13.5px; }
+.deck-panel-item:hover{ background:var(--paper-warm); }
+.deck-panel-item.is-active{ background:var(--paper-line); }
+.deck-panel-item.is-archived .deck-panel-cell{ opacity:.6; }
+.deck-panel-item:focus-visible{ outline:2px solid var(--seal-red); outline-offset:-2px; }
+.deck-panel-cell{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.deck-panel-front{ font-weight:600; }
+.deck-panel-back{ color:var(--ink-soft); }
+.deck-panel-lock{ text-align:center; font-size:12px; }
+.deck-panel-count{ margin:0; padding:6px 10px; border-top:1px solid var(--paper-line); }
+.deck-panel-bulk{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:8px 10px; border-bottom:1px solid var(--paper-line); background:var(--paper-warm); font-size:13px; }
+.deck-panel-bulk select{ width:auto; max-width:100%; margin:0; padding:6px 8px; }
+.deck-panel-bulk .profile-edit-error{ flex-basis:100%; margin:0; }
+.deck-panel-linkbtn{ background:none; border:none; cursor:pointer; padding:0; }
+.deck-panel-editor{ overflow-y:auto; padding:12px 16px; min-height:0; }
+.deck-panel-editor-empty{ margin-top:40px; text-align:center; }
+.deck-panel-meta{ margin:0 0 8px; font-size:12.5px; color:var(--ink-soft); }
+.deck-panel-editor-actions{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+.deck-panel-editor-form > .admin-badge-row{ border:none; padding:0; background:none; }
+.deck-panel-field{ margin-bottom:12px; }
+.deck-panel-field-label{ font-size:12px; font-weight:700; color:var(--ink-soft); margin-bottom:4px; }
+.deck-panel-field-value{ padding:10px 12px; border:1px solid var(--paper-line); border-radius:10px; background:var(--paper-warm); overflow-wrap:anywhere; white-space:pre-wrap; }
+.deck-panel-backbtn{ display:none; }
+@media (max-width: 760px){
+  .deck-panel-overlay{ padding:0; }
+  .deck-panel-modal{ height:100vh; height:100dvh; max-height:none; border-radius:0; }
+  .deck-panel-grid{ display:flex; flex-direction:column; overflow-y:auto; }
+  .deck-panel-side{ border-right:none; border-bottom:1px solid var(--paper-line); padding:0; flex:0 0 auto; }
+  .deck-panel-side > summary{ display:list-item; cursor:pointer; padding:10px 12px; font-weight:700; font-size:14px; }
+  .deck-panel-side[open]{ max-height:45vh; overflow-y:auto; }
+  .deck-panel-listpane{ border-right:none; flex:1 0 auto; }
+  .deck-panel-list{ overflow:visible; }
+  .deck-panel-editor{ display:none; }
+  .deck-panel-grid.has-editor .deck-panel-side, .deck-panel-grid.has-editor .deck-panel-listpane{ display:none; }
+  .deck-panel-grid.has-editor .deck-panel-editor{ display:block; }
+  .deck-panel-backbtn{ display:inline-flex; margin-bottom:8px; }
+}
+@media (max-width: 480px){
+  .deck-table th{ font-size:11px; padding:6px 4px; }
+  .deck-table td{ padding:6px 4px; }
+  .deck-table-num{ width:auto; min-width:44px; }
+  .deck-overview-body{ gap:18px; }
+  .deck-topbar-btn{ padding:8px 12px; }
+}
 </style>
 </head>
 <body>
@@ -3542,6 +3661,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <!-- ===== REVISÃO (SRS) ===== -->
   <div class="view" id="view-review">
     <div id="review-mode-select-wrap">
+      <div id="review-deck-topbar-home"></div>
       <div class="path-header">
         <h2>Revisão</h2>
         <p>O que você deve fazer agora?</p>
@@ -3555,7 +3675,6 @@ footer.app-footer img{ height:40px; opacity:.85; }
            título+subtítulo, centralizado (mesmo .leaderboard-tabs sem
            override de alinhamento), zero CSS novo. -->
       <div class="leaderboard-tabs" role="tablist" aria-label="Atalhos de Revisão">
-        <button type="button" class="leaderboard-tab" id="review-my-flashcards-btn">📇 Meus Cartões</button>
         <button type="button" class="leaderboard-tab" id="review-header-settings-btn">⚙️ Configurar sessão</button>
       </div>
 
@@ -3598,13 +3717,15 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <p class="settings-more-note">Estes ajustes controlam o motor de revisão nos bastidores -- você não precisa entender os detalhes técnicos.</p>
       </div>
 
-      <div class="section-label" id="review-mode-revisar-label">Revisar</div>
-      <div class="review-mode-cards" id="review-mode-cards-revisar"></div>
+      <div class="section-label">Decks</div>
+      <div class="deck-table-wrap" id="review-decks-table"></div>
 
-      <div class="section-label">Praticar</div>
-      <p class="review-section-hint">Continue treinando quando quiser, mesmo sem revisões pendentes.</p>
-      <div class="review-mode-cards" id="review-mode-cards-praticar"></div>
+      <div class="section-label">Outros modos</div>
+      <p class="review-section-hint">Speed Review usa a sessão de hoje (palavras novas e revisões); Palavras difíceis e Combinar funcionam a qualquer hora.</p>
+      <div class="review-mode-cards review-mode-cards-row" id="review-mode-cards-praticar"></div>
     </div>
+
+    <div id="review-deck-wrap" style="display:none;"></div>
 
     <div id="review-session-wrap" style="display:none;">
       <button class="back-link" id="review-back-to-modes">← Voltar aos modos</button>
@@ -4442,6 +4563,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <script src="../shared/own-flashcards.js"></script>
 <script src="../shared/deck-data.js"></script>
 <script src="../shared/my-flashcards.js"></script>
+<script src="../shared/deck-browser.js"></script>
 <script src="../shared/anki-import-ui.js"></script>
 <script src="../shared/admin-analytics.js"></script>
 <script src="../shared/admin-notifications.js"></script>

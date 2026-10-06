@@ -283,6 +283,51 @@ function preflightOwnCardInstanceCreation({ activeRows, hasTeacherLink, editorSt
   return { ok: requested <= remaining, used, requested, remaining };
 }
 
+// Importações (arquivo/link, Anki, perfil público): "corta e avisa"
+// (docs/arquitetura-total-decks-tags-painel.md, seção 17). Em vez de
+// bloquear o lote inteiro quando não cabe, cria só as PRIMEIRAS Notes cujo
+// total acumulado de CardInstances cabe no espaço restante -- nunca uma
+// Note pela metade (uma Note de 2 CardInstances com 1 vaga não entra) e
+// nunca "pula" uma Note grande pra encaixar uma menor depois (ordem do
+// lote preservada: "os primeiros N"). Pura, nada é gravado.
+// Retorno: { used, remaining, requested, keepCount, keptInstances, cut }
+//  - keepCount: quantas Notes (do início da lista) podem ser criadas;
+//  - cut: true se alguma Note ficou de fora por causa do teto.
+// Criação manual de UM cartão continua usando preflightOwnCardInstanceCreation
+// (bloqueia, porque não dá pra cortar uma Note).
+function planOwnCardInstanceCut({ activeRows, hasTeacherLink, editorStates, languageAppKey, limit }){
+  const used = ownCardInstanceUsage(activeRows);
+  const counts = (editorStates || []).map(st => cardInstanceCountForEditorState(st, languageAppKey));
+  const requested = counts.reduce((a, b) => a + b, 0);
+  if (hasTeacherLink){
+    return { used, remaining: Infinity, requested, counts, keepCount: counts.length, keptInstances: requested, cut: false };
+  }
+  const remaining = Math.max(0, limit - used);
+  let keepCount = 0, keptInstances = 0;
+  for (const n of counts){
+    if (keptInstances + n > remaining) break;
+    keptInstances += n;
+    keepCount++;
+  }
+  return { used, remaining, requested, counts, keepCount, keptInstances, cut: keepCount < counts.length };
+}
+
+// Texto do aviso de corte (português do Brasil), reaproveitado pelos 3
+// pontos de importação. `what`: o que estava sendo importado ("Esta
+// importação", "Este Deck"...). Nunca promete checkout: não existe
+// pagamento no app -- o convite manda falar com a administração.
+function ownCardInstanceCutMessage({ requested, keptInstances, limit, used, what }){
+  const subject = what || 'Esta importação';
+  const plural = n => (n === 1 ? 'cartão' : 'cartões');
+  const already = used > 0 ? ` (você já tinha ${used} ${plural(used)})` : '';
+  const result = keptInstances > 1
+    ? `Por isso, apenas os primeiros ${keptInstances} cartões foram criados.`
+    : keptInstances === 1
+      ? 'Por isso, apenas o primeiro cartão foi criado.'
+      : 'Por isso, nenhum cartão foi criado.';
+  return `${subject} criaria ${requested} ${plural(requested)}, mas sua conta pode possuir apenas ${limit} no plano grátis${already}. ${result}`;
+}
+
 // ============================================================
 // 5/6) CONTAGENS -- New / Learning / Review + agregador de Deck
 // ============================================================

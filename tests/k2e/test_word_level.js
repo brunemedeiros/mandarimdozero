@@ -26,9 +26,9 @@ for (const lang of ['fr', 'zh']){
   // A. cardinalidade pedagógica x estrutural
   fresh();
   let uc = ctx.unitCardCounts(u0.id);
-  check(lang + ' A: N palavras = N Notes, 2N CardInstances', uc.total === N && uc.totalCards === 2 * N && uc.learned === 0, uc);
+  check(lang + ' A: N palavras = N Notes, 2N CardInstances', uc.total === N && uc.totalCards === 2 * N + ctx.STATE.cards.filter(c => c.unitId === u0.id && ctx.isStudyTrailPhraseCard(c)).length && uc.learned === 0, uc);
   check(lang + ' A: cada palavra tem exatamente 2 CardInstances irmãs', Array.from({ length: N }, (_, i) => ctx.studyWordCardsFor(ctx.STATE.cards, u0.id, i).length).every(n => n === 2));
-  check(lang + ' A: STATE.cards segue com 2 CardInstances por palavra (nada escondido)', ctx.STATE.cards.filter(c => c.unitId === u0.id).length === 2 * N);
+  check(lang + ' A: STATE.cards segue com 2 CardInstances por palavra (nada escondido)', ctx.STATE.cards.filter(c => c.unitId === u0.id && !ctx.isStudyTrailPhraseCard(c)).length === 2 * N);
 
   // B/D. estados A/B
   fresh(); study(A(0));
@@ -104,7 +104,7 @@ for (const lang of ['fr', 'zh']){
   check(lang + ' gráfico: 1 data por palavra (A+B não dobram), vale a mais antiga', dates.length === 2 && dates[0] === '2026-01-05' && dates[1] === '2026-01-07', dates);
   const lc = ctx.studyTrailWordProgress(ctx.STATE.cards);
   check(lang + ' "Palavras aprendidas": learned=2, total = nº de palavras da trilha', lc.learned === 2 && lc.total === totalWords, lc);
-  check(lang + ' total de CardInstances continua 2x palavras', ctx.STATE.cards.length === totalWords * 2);
+  check(lang + ' total de CardInstances continua 2x palavras', ctx.STATE.cards.filter(c => !ctx.isStudyTrailPhraseCard(c)).length === totalWords * 2);
   fresh(); ctx.STATE.cards.push({ id: 't1', origin: 'teacher', reps: 1, firstLearnedDate: '2026-02-01' });
   const lc2 = ctx.studyTrailWordProgress(ctx.STATE.cards);
   check(lang + ' K.4: teacher/self NÃO entram em palavras aprendidas nem no gráfico', lc2.total === totalWords && lc2.learned === 0 && ctx.wordLevelFirstLearnedDates(ctx.STATE.cards).length === 0, lc2);
