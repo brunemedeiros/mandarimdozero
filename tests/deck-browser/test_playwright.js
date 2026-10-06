@@ -111,6 +111,9 @@ async function setup(page){
     ].map(r => Object.assign({ owner_id: U, language_app_key: A, status: 'active', revision: 0, front_is_target_language: true }, r));
     window.__DB.own_flashcards = rows.map(r => Object.assign({}, r));
     window.__DB.decks = STATE.decks.map(d => Object.assign({}, d));
+    // Aluno vinculado à professora neste idioma (senão "Cartões da professora" some).
+    window.__DB.teacher_students = [{ id: 1, teacher_id: 't', student_id: U, language_app_key: A, status: 'active' }];
+    DECK_BROWSER.teacherLink = {};
     rows.forEach(r => buildCardFromSelfFlashcard(r).forEach(c => STATE.cards.push(c)));
     // 1 cartão da professora no teacher_root
     buildCardFromTeacherFlashcard({ id: 601, teacher_id: 't', student_id: U, language_app_key: A, status: 'active', revision: 0, front: 'prof', back_trans: 'p', front_is_target_language: true, tags: ['aula'], deck_id: 9100 }).forEach(c => STATE.cards.push(c));
@@ -195,6 +198,35 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     check(lang + ' sem botão Estudar na tabela', table.studyBtns === 0, table.studyBtns);
     check(lang + ' números centralizados embaixo das colunas', table.align.join() === 'center,center', table.align);
     check(lang + ' barra do topo: Decks | Adicionar | Painel, centralizada', table.bar.join('|') === 'Decks|Adicionar|Painel' && table.barCenter < 3, table);
+
+    // ---- 1b) Outros modos numa fileira só; sem bloco Flashcard ----
+    const modes = await page.evaluate(() => {
+      const row = document.getElementById('review-mode-cards-praticar');
+      const cards = Array.from(row.querySelectorAll('.review-mode-card'));
+      const tops = cards.map(c => Math.round(c.getBoundingClientRect().top));
+      return { ids: cards.map(c => c.id), sameRow: new Set(tops).size === 1, flash: !!document.getElementById('mode-card-flashcard'),
+        revisar: !!document.getElementById('review-mode-cards-revisar'), studyAll: !!document.getElementById('review-study-all-btn'),
+        widget: document.getElementById('review-today-widget').textContent };
+    });
+    check(lang + ' Speed Review, Palavras difíceis e Combinar na mesma fileira', modes.ids.join() === 'mode-card-speed,mode-card-hard,mode-card-match' && modes.sameRow, modes);
+    check(lang + ' sem bloco Flashcard nem seção Revisar', !modes.flash && !modes.revisar, modes);
+    check(lang + ' com revisões pendentes há "Estudar tudo"; sem elas, aviso de em dia', modes.studyAll || /em dia|Ainda não há/.test(modes.widget), modes);
+
+    // ---- 1c) Sem vínculo ativo com professora: "Cartões da professora" some ----
+    const noLink = await page.evaluate(async () => {
+      window.__DB.teacher_students[0].status = 'removed';
+      DECK_BROWSER.teacherLink = {};
+      await renderReviewDeckTable();
+      const ids = Array.from(document.querySelectorAll('#review-decks-table tbody tr')).map(tr => tr.dataset.deckRow);
+      window.__DB.teacher_students[0].status = 'active';
+      DECK_BROWSER.teacherLink = {};
+      await renderReviewDeckTable();
+      const back = Array.from(document.querySelectorAll('#review-decks-table tbody tr')).map(tr => tr.dataset.deckRow);
+      return { ids, back };
+    });
+    check(lang + ' sem vínculo ativo: Cartões da professora não aparece', !noLink.ids.includes('9100') && noLink.ids.includes('9001'), noLink);
+    check(lang + ' com vínculo ativo: volta a aparecer', noLink.back.includes('9100'), noLink);
+
     check(lang + ' embaixo da tabela: Criar Deck, Importar arquivo, Exportar', table.homeBtns.join('|') === 'Criar Deck|Importar arquivo|Exportar', table.homeBtns);
     const meus = await page.evaluate(() => getDeckCounts(STATE.decks, 9001, eligibleDeckReviewPool()).new);
     check(lang + ' Novo de Meus Decks = 4', table.rows.find(r => r.id === '9001').nums[0] === 4 && meus === 4, table.rows.find(r => r.id === '9001'));
@@ -231,6 +263,9 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     await page.click('[data-deck-study]');
     const sess = await page.evaluate(() => ({ deck: STATE.reviewSessionDeckId, n: STATE.reviewQueue.length, ids: STATE.reviewQueue.map(c => c.rowId).sort() }));
     check(lang + ' Estudar agora: Deck + subdecks', sess.deck === 9002 && sess.n === 2 && sess.ids.join() === '501,502', sess);
+    await page.click('#flashcard');
+    const reveal = await page.evaluate(() => ({ grades: document.querySelectorAll('#review-content .grade-btn').length, more: !!document.getElementById('review-more-btn'), txt: document.getElementById('review-content').textContent.includes('Rever mais') }));
+    check(lang + ' cartão revelado: 4 notas e sem "Rever mais"', reveal.grades === 4 && !reveal.more && !reveal.txt, reveal);
     await page.evaluate(() => backToReviewModeSelect());
 
     // Renomear
@@ -500,6 +535,9 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     const ov = await page.evaluate(() => ({ doc: document.documentElement.scrollWidth, win: window.innerWidth }));
     check(lang + ' celular: tela inicial sem rolagem horizontal', ov.doc <= ov.win + 1, ov);
     await shot(page, `deck-home-${lang}-mobile`);
+    const mr = await page.evaluate(() => { const row = document.getElementById('review-mode-cards-praticar'); row.scrollIntoView(); const cs = Array.from(row.querySelectorAll('.review-mode-card')).map(c => c.getBoundingClientRect()); return { n: cs.length, sameRow: new Set(cs.map(r => Math.round(r.top))).size === 1, fits: cs.every(r => r.right <= window.innerWidth) }; });
+    check(lang + ' celular: os 3 modos cabem numa fileira', mr.n === 3 && mr.sameRow && mr.fits, mr);
+    await shot(page, `review-modes-${lang}-mobile`);
     await page.evaluate(() => openDeckDetail(9002));
     const ov2 = await page.evaluate(() => ({ doc: document.documentElement.scrollWidth, win: window.innerWidth }));
     check(lang + ' celular: tela do Deck sem rolagem horizontal', ov2.doc <= ov2.win + 1, ov2);

@@ -17609,3 +17609,9 @@ Feito sem a autora acordada; decisões abaixo são reversíveis. Sem migration, 
 - **Idioma padrão dos campos novos** (`defaultLangForNewField`, flashcard-field-editor.js): 1º campo = idioma estudado (`STUDY_LANG_FOR_APP_KEY`), os demais = pt-BR; com role: prompt = estudado, answer/distractor = pt-BR. Pinyin não conta na posição.
 - Formulário de edição nativa sem texto técnico ("Editar cartão", "Tipo de cartão").
 - Teste: `tests/deck-browser/test_playwright.js` (150, FR+ZH, claro/escuro, 390px).
+
+## Revisão -- 3ª rodada (2026-10-06): sem "Rever mais", professora só com vínculo, modos numa fileira
+- **"Rever mais" removido** (fr/zh `renderNormalCard`, `reviewMoreCurrentCard` e o CSS `.review-more-link`). O cartão revelado mostra só os 4 graus. O Preview ainda passa `onReviewMore` (inofensivo, nada chama).
+- **"Cartões da professora" só para aluno vinculado**: `deckBrowserLoadTeacherLink()` (shared/deck-browser.js) consulta `teacher_students` (student_id = conta, idioma = APP_KEY, status `active`), em cache por conta+idioma; sem vínculo ativo, o `teacher_root` some da tabela e do Painel (`deckBrowserChildren('lang')`) e um endereço `#/review/decks/<teacher>` volta para a tabela. Um `teacher_root` antigo (vínculo removido) continua no banco (054 não deixa apagar) e os cartões continuam na revisão geral; só não aparecem como Deck.
+- **Bloco Flashcard saiu**: era a mesma sessão de "estudar tudo". Virou o botão "▶ Estudar tudo" no contador de revisões pendentes (`renderReviewTodayWidget`; sem revisões, mostra "Você está em dia!"/"Ainda não há revisões"). Estudar um Deck é pela tabela. Seção "Outros modos" com Speed Review, Palavras difíceis e Combinar numa fileira de 3 colunas (`.review-mode-cards-row`, cabe em 390px).
+- Teste: `tests/deck-browser/test_playwright.js` 164/164.

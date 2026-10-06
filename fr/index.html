@@ -1501,6 +1501,17 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
    filtro ativo, pra não perder visibilidade total com o painel fechado
    por padrão. */
 #review-today-widget:empty{ display:none; }
+.review-study-all-btn{ margin-top:12px; min-width:200px; }
+/* Speed Review, Palavras difíceis e Combinar numa fileira só (3 colunas
+   inclusive no celular). */
+.review-mode-cards-row{ grid-template-columns: repeat(3, minmax(0,1fr)); gap:10px; }
+.review-mode-cards-row .review-mode-card{ padding-left:8px; padding-right:8px; min-width:0; }
+@media (max-width:480px){
+  .review-mode-cards-row .review-mode-card .icon{ font-size:26px; }
+  .review-mode-cards-row .review-mode-card .count{ font-size:22px; }
+  .review-mode-cards-row .review-mode-card .name{ font-size:12.5px; }
+  .review-mode-cards-row .review-mode-card .desc{ font-size:10.5px; }
+}
 #review-today-widget{ text-align:center; margin-bottom:14px; }
 .review-today-label{ font-size:12px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft); font-weight:800; margin-bottom:4px; }
 .review-today-count{ font-size:38px; font-weight:800; line-height:1; color:var(--seal-red-dark); font-variant-numeric:tabular-nums; }
@@ -1666,13 +1677,6 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 }
 .grade-btn:active{ transform: scale(.96); }
 .grade-btn small{ font-weight:600; font-size:10.5px; opacity:.85; }
-/* Fase 11: "Rever mais" -- PRATICAR (fora do agendamento) é visualmente
-   distinto de REVISAR (os 4 grade-btn acima, que seguem o motor). */
-.review-more-link{
-  display:block; width:100%; margin-top:10px; padding:6px; background:none; border:none;
-  color:var(--ink-soft); font-size:12.5px; font-weight:700; text-align:center; cursor:pointer;
-  font-family:var(--font-body); text-decoration:underline;
-}
 /* 4 botões unificados no MESMO par cor-de-fundo/on-vivid (antes hard/good
    usavam --on-seal-red -- texto escuro sempre, mesmo no claro, enquanto
    again/easy usavam on-vivid -- texto branco no claro. Ficava 2 brancos +
@@ -3600,12 +3604,9 @@ footer.app-footer img{ height:40px; opacity:.85; }
       <div class="section-label">Decks</div>
       <div class="deck-table-wrap" id="review-decks-table"></div>
 
-      <div class="section-label" id="review-mode-revisar-label">Revisar</div>
-      <div class="review-mode-cards" id="review-mode-cards-revisar"></div>
-
-      <div class="section-label">Praticar</div>
-      <p class="review-section-hint">Continue treinando quando quiser, mesmo sem revisões pendentes.</p>
-      <div class="review-mode-cards" id="review-mode-cards-praticar"></div>
+      <div class="section-label">Outros modos</div>
+      <p class="review-section-hint">Speed Review usa as revisões pendentes; Palavras difíceis e Combinar funcionam a qualquer hora.</p>
+      <div class="review-mode-cards review-mode-cards-row" id="review-mode-cards-praticar"></div>
     </div>
 
     <div id="review-deck-wrap" style="display:none;"></div>

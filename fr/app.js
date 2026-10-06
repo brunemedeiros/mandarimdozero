@@ -5601,12 +5601,27 @@ function renderReviewTodayWidget(){
   if (!wrap) return;
   const pool = eligibleReviewPool();
   const trueCount = trueDueReviewCount(pool);
-  if (pool.length === 0 || trueCount === 0){ wrap.innerHTML = ''; return; }
-
+  // Sem revisões: aviso curto no lugar do contador (o antigo bloco
+  // "Revisar" saiu -- ver renderReviewModeSelect).
+  if (trueCount === 0){
+    const title = pool.length === 0 ? 'Ainda não há revisões' : 'Você está em dia! 🍵';
+    const desc = pool.length === 0
+      ? 'Complete uma lição no Estudo pra começar a ter palavras pra revisar.'
+      : 'Palavras difíceis e Combinar continuam disponíveis logo abaixo.';
+    wrap.innerHTML = `
+      <div class="review-mode-empty-title">${title}</div>
+      <div class="review-mode-empty-desc">${desc}</div>
+    `;
+    return;
+  }
+  // "Estudar tudo" substitui o antigo bloco Flashcard: é a mesma sessão
+  // (todos os Decks juntos); estudar um Deck só é pela tabela de Decks.
   wrap.innerHTML = `
     <div class="review-today-label">Revisões pendentes</div>
     <div class="review-today-count">${trueCount}</div>
+    <button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">▶ Estudar tudo</button>
   `;
+  document.getElementById('review-study-all-btn').addEventListener('click', () => openReviewSession('flashcard'));
 }
 
 // Altura do "pote" proporcional à maior das 3 categorias (não à contagem
@@ -5659,46 +5674,16 @@ function renderReviewModeSelect(){
   // Navegador de Decks (shared/deck-browser.js): tabela Deck | Novo | Aprendendo | Revisar.
   if (typeof renderReviewDeckTable === 'function') renderReviewDeckTable();
 
-  const revisarLabel = document.getElementById('review-mode-revisar-label');
-  if (revisarLabel) revisarLabel.textContent = 'Revisar';
-
-  const revisarEl = document.getElementById('review-mode-cards-revisar');
-  if (trueCount === 0){
-    const emptyTitle = pool.length === 0 ? 'Ainda não há revisões' : 'Você está em dia!';
-    const emptyDesc = pool.length === 0
-      ? 'Complete uma lição no Estudo pra começar a ter palavras pra revisar.'
-      : 'Praticar continua disponível logo abaixo, quando quiser.';
-    revisarEl.innerHTML = `
-      <div class="review-mode-empty">
-        <div class="icon">🍵</div>
-        <div class="review-mode-empty-title">${emptyTitle}</div>
-        <div class="review-mode-empty-desc">${emptyDesc}</div>
-      </div>
-    `;
-  } else {
-    // Sem .count aqui de propósito -- o número já está no bloco hero acima
-    // (Flashcard e Speed Review são a mesma fila filtrada, mostrar o mesmo
-    // valor duas vezes a mais era puramente decorativo).
-    revisarEl.innerHTML = `
-      <button class="review-mode-card" id="mode-card-flashcard">
-        <div class="icon">📇</div>
-        <div class="name">Flashcard</div>
-        <div class="desc">Revisão completa</div>
-      </button>
-      <button class="review-mode-card" id="mode-card-speed">
-        <div class="icon">⚡</div>
-        <div class="name">Speed Review</div>
-        <div class="desc">Revisão rápida</div>
-      </button>
-    `;
-    document.getElementById('mode-card-flashcard').addEventListener('click', () => openReviewSession('flashcard'));
-    document.getElementById('mode-card-speed').addEventListener('click', () => openReviewSession('speed'));
-  }
-
   // K2-F: Combinar é vocabulário -> conta palavras (projeção A na trilha), não CardInstances.
   const matchWordCount = projectStudyWordsToA(pool).length;
   const praticarEl = document.getElementById('review-mode-cards-praticar');
   praticarEl.innerHTML = `
+    <button class="review-mode-card" id="mode-card-speed" ${trueCount === 0 ? 'disabled' : ''}>
+      <div class="icon">⚡</div>
+      <div class="count">${trueCount}</div>
+      <div class="name">Speed Review</div>
+      <div class="desc">Revisão rápida</div>
+    </button>
     <button class="review-mode-card" id="mode-card-hard" ${hardCount === 0 ? 'disabled' : ''}>
       <div class="icon">🔥</div>
       <div class="count">${hardCount}</div>
@@ -5712,6 +5697,7 @@ function renderReviewModeSelect(){
       <div class="desc">Jogo de pares</div>
     </button>
   `;
+  document.getElementById('mode-card-speed').addEventListener('click', () => openReviewSession('speed'));
   document.getElementById('mode-card-hard').addEventListener('click', () => openReviewSession('hard'));
   document.getElementById('mode-card-match').addEventListener('click', () => openReviewSession('match'));
 }
@@ -6899,7 +6885,7 @@ function renderReviewView(){
   // callbacks). A SESSÃO (aqui) é quem cria/descarta STATE.reviewCardState
   // -- o renderer nunca lê/escreve STATE por nome, só recebe a referência
   // como parâmetro. Criação é preguiçosa (só quando ainda não existe --
-  // gradeCurrentCard()/reviewMoreCurrentCard() já o zeram ao avançar a
+  // gradeCurrentCard() já o zera ao avançar a
   // fila, então "ausente" aqui sempre significa "cartão novo, começar do
   // zero"; re-renderizações do MESMO cartão -- ex: depois de revelar --
   // reaproveitam a mesma referência, nunca recriam).
@@ -6908,7 +6894,6 @@ function renderReviewView(){
   }
   renderNormalCard(el, card, STATE.reviewCardState, {
     onAnswered: (wasCorrect, grade) => gradeCurrentCard(grade),
-    onReviewMore: () => reviewMoreCurrentCard(),
   });
 }
 
@@ -7026,7 +7011,6 @@ function renderNormalCard(mountEl, card, localState, callbacks){
     </div>
     ${localState.revealed ? `
       ${gradeButtonsHTML(card)}
-      <button class="review-more-link" id="review-more-btn">🔁 Rever mais (não conta como resposta)</button>
     ` : ''}
   `;
 
@@ -7059,15 +7043,6 @@ function renderNormalCard(mountEl, card, localState, callbacks){
   }
 
   if (localState.revealed){
-    // Fase 11: PRATICAR != REVISAR -- "Rever mais" só reinsere o cartão
-    // mais à frente na fila DESTA sessão (efêmero, nunca persistido). Não
-    // chama applyMemoryGrade nem addXP -- só ser mostrada de novo não é
-    // evidência de recuperação, então não pode alterar o agendamento
-    // (devido/stability) sem uma resposta real que justifique isso.
-    mountEl.querySelector('#review-more-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      callbacks.onReviewMore();
-    });
     mountEl.querySelectorAll('.grade-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -7087,24 +7062,6 @@ function reviewXP(intervalBefore, grade){
   if (intervalBefore >= 60) return Math.max(1, Math.round(base * 0.4));
   if (intervalBefore >= 21) return Math.max(1, Math.round(base * 0.7));
   return base;
-}
-
-// Fase 11 -- PRATICAR fora do agendamento: reinsere o cartão atual alguns
-// lugares à frente na fila DESTA sessão, sem tocar em due/stability/reps
-// nem conceder XP. Diferente de "Errei" (grade 0), que É uma resposta real
-// e reagenda de verdade -- "Rever mais" nunca é resposta, só pedido de
-// mais exposição. STATE.reviewQueue nunca é persistido (é sempre
-// reconstruído do zero por startReviewSession), então crescer a fila aqui
-// não vaza pra próxima sessão nem pro banco.
-function reviewMoreCurrentCard(){
-  const card = STATE.reviewQueue[STATE.reviewIndex];
-  const reinsertAt = Math.min(STATE.reviewQueue.length, STATE.reviewIndex + 4);
-  STATE.reviewQueue.splice(reinsertAt, 0, card);
-  STATE.reviewIndex += 1;
-  // Fase 6C.1 -- avançou a posição da fila, descarta o localState de
-  // Normal desta exibição (renderReviewView cria um novo pro próximo card).
-  STATE.reviewCardState = null;
-  renderReviewView();
 }
 
 function gradeCurrentCard(grade){

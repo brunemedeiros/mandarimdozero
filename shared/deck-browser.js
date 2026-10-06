@@ -37,7 +37,40 @@ const DECK_BROWSER = {
   nodeId: null,      // id numérico do Deck aberto ('lang' = todos)
   panelOpen: false,
   panel: null,
+  teacherLink: {},   // { 'uid:APP_KEY': true|false } -- vínculo ATIVO com professora neste idioma
 };
+
+// "Cartões da professora" só aparece para quem é aluno vinculado a uma
+// professora NESTE idioma (vínculo teacher_students ativo). Um teacher_root
+// antigo (vínculo removido; a migration 054 não deixa apagá-lo) fica
+// escondido da tabela e do Painel. Enquanto a checagem não volta, esconde.
+async function deckBrowserLoadTeacherLink(){
+  const uid = deckBrowserUserId();
+  if (!uid || typeof supabaseClient === 'undefined' || !supabaseClient) return false;
+  const key = uid + ':' + APP_KEY;
+  if (typeof DECK_BROWSER.teacherLink[key] === 'boolean') return DECK_BROWSER.teacherLink[key];
+  try {
+    const { data, error } = await supabaseClient
+      .from('teacher_students')
+      .select('id')
+      .eq('student_id', uid)
+      .eq('language_app_key', APP_KEY)
+      .eq('status', 'active');
+    if (error) throw error;
+    DECK_BROWSER.teacherLink[key] = (data || []).length > 0;
+  } catch (e) {
+    console.error('Erro ao checar vínculo com professora:', e);
+    return false; // não guarda: tenta de novo na próxima abertura
+  }
+  return DECK_BROWSER.teacherLink[key];
+}
+function deckBrowserIsTeacherDeck(deck){ return !!deck && (deck.kind === 'teacher_root' || deck.kind === 'teacher'); }
+function deckBrowserHasTeacherLink(){ const uid = deckBrowserUserId(); return !!uid && DECK_BROWSER.teacherLink[uid + ':' + APP_KEY] === true; }
+
+async function deckBrowserEnsureLoaded(){
+  if (typeof ensureDecksLoadedForReview === 'function') await ensureDecksLoadedForReview();
+  await deckBrowserLoadTeacherLink();
+}
 
 const DECK_BROWSER_LANG_LABELS = { frances: 'Francês', mandarim: 'Mandarim', portugues: 'Português' };
 
@@ -103,7 +136,9 @@ function deckBrowserChildren(decks, nodeId){
     const course = deckBrowserCourseRoot(decks);
     if (course) out.push(course);
     const root = deckBrowserRootDeck(decks);
-    if (root) getDeckChildren(decks, root.id).forEach(d => out.push(d));
+    if (root) getDeckChildren(decks, root.id)
+      .filter(d => d.kind !== 'teacher_root' || deckBrowserHasTeacherLink())
+      .forEach(d => out.push(d));
     return out.sort((a, b) => (kindOrder[a.kind] ?? 9) - (kindOrder[b.kind] ?? 9) || a.id - b.id);
   }
   return getDeckChildren(decks, nodeId).slice().sort((a, b) => {
@@ -225,7 +260,7 @@ async function renderReviewDeckTable(){
   const token = ++DECK_BROWSER_RENDER_TOKEN;
   if (!((STATE.decks || []).length)) box.innerHTML = `<p class="profile-edit-hint">Carregando seus Decks…</p>`;
   try {
-    if (typeof ensureDecksLoadedForReview === 'function') await ensureDecksLoadedForReview();
+    await deckBrowserEnsureLoaded();
   } catch (e) {
     console.error('Erro ao carregar Decks da Revisão:', e);
   }
@@ -447,14 +482,15 @@ let DECK_BROWSER_RESTORE_TOKEN = 0;
 async function restoreDeckBrowserRoute(route){
   const token = ++DECK_BROWSER_RESTORE_TOKEN;
   try {
-    if (typeof ensureDecksLoadedForReview === 'function') await ensureDecksLoadedForReview();
+    await deckBrowserEnsureLoaded();
   } catch (e) {
     console.error('Erro ao carregar Decks para restaurar a tela:', e);
   }
   if (token !== DECK_BROWSER_RESTORE_TOKEN) return;
   const app = document.getElementById('app');
   if (app && app.dataset.activeTab && app.dataset.activeTab !== 'review') return; // a pessoa já saiu da Revisão
-  if (route.nodeId !== 'lang' && !getDeckById(deckBrowserDecks(), route.nodeId)){ backToDeckTable(); return; }
+  const routeDeck = route.nodeId !== 'lang' ? getDeckById(deckBrowserDecks(), route.nodeId) : null;
+  if (route.nodeId !== 'lang' && (!routeDeck || (deckBrowserIsTeacherDeck(routeDeck) && !deckBrowserHasTeacherLink()))){ backToDeckTable(); return; }
   if (route.view === 'panel') openDeckPanel(route.nodeId);
   else openDeckDetail(route.nodeId);
 }
@@ -869,6 +905,7 @@ async function deckPanelAfterEdit(opts){
 }
 
 async function deckPanelReload(){
+  await deckBrowserLoadTeacherLink();
   if (!DECK_BROWSER.panelOpen) return;
   const ctx = await deckBrowserLoadOwnContext();
   if (!DECK_BROWSER.panelOpen) return;
