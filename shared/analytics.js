@@ -26,7 +26,7 @@
 // Painel de Admin > Analytics (shared/admin-analytics.js). Se essa
 // preferência for desligada, o evento AINDA assim é marcado
 // actor_type='admin' -- só deixa de ser descartado -- então o dashboard
-// (que só lê actor_type='student') continua sem contar essa atividade.
+// (que só lê actor_type IN ('user','student')) continua sem contar essa atividade.
 // Um id por carregamento de página -- agrupa os eventos da mesma "visita"
 // (ver comentário da migration 008). Gerado uma vez no load do script, não
 // por chamada de trackEvent().
@@ -75,7 +75,7 @@ function trackEvent(eventType, eventName, meta){
   // exatamente no cenário que o tracking de erro técnico deveria cobrir.
   if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER) return;
 
-  const actorType = (typeof isAdminUser === 'function' && isAdminUser()) ? 'admin' : 'student';
+  const actorType = (typeof isAdminUser === 'function' && isAdminUser()) ? 'admin' : 'user';
   if (actorType === 'admin'){
     // PROFILE_CACHE só existe depois de ensureProfileLoaded() (chamado no
     // login, ver onUserLoggedIn em shared/auth.js). Se por algum motivo
@@ -149,4 +149,21 @@ function maybeTrackPageLoadPerf(){
   if (!loadMs || loadMs <= 0) return; // página ainda carregando, ou API indisponível -- tenta de novo na próxima chamada
   ANALYTICS_PERF_SENT = true;
   trackEvent('technical_perf', 'page_load', { loadMs });
+}
+
+// ---------- Histórico de acertos (Painel do aluno ampliado, migration 070) ----------
+// Uma linha por cartão avaliado numa revisão REAL (nunca no Preview do editor:
+// card.__isPreviewCard pula). Lido só de forma agregada pela professora via
+// get_teacher_student_overview (acertos 7/30 dias). correct = grau > 0
+// ("Errei" = 0 é o único erro). Sem conteúdo do cartão -- só origem, grau e tipo.
+function trackReviewAnswer(mode, card, grade){
+  if (!card || card.__isPreviewCard) return;
+  const g = Number(grade);
+  if (!Number.isFinite(g)) return;
+  trackEvent('review_answer', mode, {
+    cardOrigin: card.origin || 'study',
+    grade: g,
+    correct: g > 0,
+    cardTypeId: (card.cardInstance && card.cardInstance.cardTypeId) || null,
+  });
 }

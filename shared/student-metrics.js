@@ -2,7 +2,7 @@
 // alunas particulares (ver CLAUDE.md) ----------
 // Único ponto de acesso a QUALQUER dado de progresso de uma aluna do lado
 // da professora -- chama a function SECURITY DEFINER
-// get_teacher_student_metrics (migration 029), que já faz a checagem de
+// get_teacher_student_metrics (migrations 029/058/059), que já faz a checagem de
 // vínculo ativo e devolve só agregados sobre os cartões que a PRÓPRIA
 // professora autorou pra essa aluna (teacher_flashcards), nunca dado bruto.
 // Nunca ler `progress` diretamente daqui nem de nenhum outro lugar do lado
@@ -19,6 +19,23 @@ async function fetchTeacherStudentMetrics(studentId, languageAppKey){
   });
   if (error || !data || data.error){
     if (error) console.error('Erro ao carregar métricas da aluna:', error);
+    return null;
+  }
+  return data;
+}
+
+// Painel do aluno ampliado (migration 070) -- visão geral do aluno em TODOS
+// os idiomas em que ele tem progresso (decisão da autora: como professora ela
+// vê uso, progresso, sequência, últimas atividades etc.). Mesma checagem de
+// vínculo ativo da 059, feita dentro da function. Devolve null em erro ou
+// not_authorized (a UI mostra um aviso genérico).
+async function fetchTeacherStudentOverview(studentId, languageAppKey){
+  const { data, error } = await supabaseClient.rpc('get_teacher_student_overview', {
+    p_student_id: studentId,
+    p_language_app_key: languageAppKey,
+  });
+  if (error || !data || data.error){
+    if (error) console.error('Erro ao carregar a visão geral do aluno:', error);
     return null;
   }
   return data;

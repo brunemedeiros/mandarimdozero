@@ -193,9 +193,10 @@ window.I18N_CATALOG['en'] = {
   'review.today.label': 'Reviews due', // ALTA
   'review.strength.title': 'Your words', // ALTA
   'review.strength.weak': 'Weak', // ALTA
+  'review.strength.notStarted': 'Not started', // ALTA
   'review.strength.medium': 'Medium', // ALTA
   'review.strength.strong': 'Strong', // ALTA
-  'review.strength.hint': 'Weak = not solid yet; Strong = known well for a while; Medium = somewhere in between. This is ALL your vocabulary, not today\'s reviews (above) -- so you can have medium words here even with no reviews due right now.', // MÉDIA -- texto longo; "firmou" sem equivalente direto
+  'review.strength.hint': 'Not started = no study yet; Weak = not solid yet; Strong = known well for a while; Medium = somewhere in between. This is ALL your vocabulary, not today\'s reviews (above) -- so you can have medium words here even with no reviews due right now.', // MÉDIA -- texto longo; "firmou" sem equivalente direto
   'review.mode.reviewLabel': 'Review', // ALTA
   'review.empty.noneYetTitle': 'No reviews yet', // ALTA
   'review.empty.upToDateTitle': 'You\'re all caught up!', // ALTA
@@ -229,6 +230,7 @@ window.I18N_CATALOG['en'] = {
   'review.complete.title': 'Review complete!', // ALTA
   'review.complete.reviewed': 'You reviewed {n} card(s) this session.', // ALTA
   'review.session.deckEmptyTitle': 'No cards in this Deck yet', // ALTA
+  'review.session.tagsEmptyTitle': 'No cards with the selected tags', // ALTA
   'review.session.unitEmptyTitle': 'No cards in this unit yet', // ALTA
   'review.session.allDoneTitle': 'All caught up!', // ALTA
   'review.session.pendingOverall': 'You still have {n} card(s) due overall.', // ALTA
@@ -275,6 +277,9 @@ window.I18N_CATALOG['en'] = {
   'deck.myDecks': 'My Decks', // ALTA
   'deck.teacherRoot': 'Teacher\'s cards', // MÉDIA
   'deck.studyThis': 'Study this Deck', // ALTA
+  'deck.countsFull': '{total} cards · {new} new · {learning} learning · {review} to review · {due} due', // ALTA
+  'deck.publicBadge': '🌐 Public', // ALTA
+  'deck.publish': 'Publish', // ALTA
   'deck.cardsCount': { one: '{n} card', other: '{n} cards' }, // ALTA
   'deck.countsDetail': { one: '{n} card · {new} new · {learning} learning · {review} to review', other: '{n} cards · {new} new · {learning} learning · {review} to review' }, // MÉDIA
   'myFlashcards.lang.fr': 'French', // ALTA
@@ -291,6 +296,8 @@ window.I18N_CATALOG['en'] = {
   'myFlashcards.badge.linked': '✨ Linked student — unlimited cards', // MÉDIA
   'myFlashcards.badge.free': '🔒 Free plan — {used}/{limit} cards', // ALTA
   'myFlashcards.badge.premium': '⭐ Premium', // ALTA
+  'myFlashcards.badge.premiumUnlimited': '⭐ Premium — unlimited cards', // ALTA
+  'myFlashcards.edit.legacyConversionError': 'This card couldn\'t open in the new editor: {reason}', // ALTA
   'myFlashcards.new.title': 'New card', // ALTA
   'myFlashcards.free.hint': '🔒 On the free plan you create Normal cards, with image/audio upload per field (external URL also available). <strong>Premium</strong> unlocks Normal with reverse, Multiple choice, Fill in the blank, Type the answer, plus generating audio from text and recording audio with the microphone.', // MÉDIA
   'myFlashcards.cardType': 'Card type', // ALTA
@@ -526,6 +533,12 @@ window.I18N_CATALOG['en'] = {
   'zh.progress.statReviews': 'Total reviews', // ALTA
   'zh.progress.statDue': 'Due now', // ALTA
   'zh.progress.statXp': 'Total XP', // ALTA
+  'progress.statNew': 'New', // ALTA
+  'progress.statLearning': 'Learning', // ALTA
+  'progress.statReview': 'To review', // ALTA
+  'progress.statDueNow': 'Due', // ALTA
+  'progress.statToday': 'To study today', // ALTA
+  'progress.statTodayTitle': "One session's queue: due + new cards limited by 'new per day'. Follows the Review origin/tag filters, so it can differ from New/Due.", // MÉDIA
   'zh.progress.chartEmpty': 'Start studying to see your progress over time here.', // ALTA
   'zh.progress.chartPoint': '{date}: {n} words', // ALTA
   'zh.progress.chartTotal': 'Total so far:', // ALTA
@@ -608,7 +621,6 @@ window.I18N_CATALOG['en'] = {
   'fr.conj.hintMoreTitle': 'Reveal most of the letters', // ALTA
   'fr.conj.hintMax': '💡 Maximum hint', // ALTA
   'fr.dictation.levelReviewTitle': 'Level {level} review', // ALTA
-  'fr.challenges.moduleSub': '{title} · now that you have studied this topic, practice in new ways.', // ALTA
   'fr.challenges.title': 'Challenges', // ALTA
   'fr.challenges.sub': 'Practice real French: expressions, listening comprehension and spelling.', // ALTA
   'fr.challenges.dictations': 'Dictations', // ALTA
@@ -626,6 +638,7 @@ window.I18N_CATALOG['en'] = {
   'fr.challenges.cat.listenTranslate.title': 'Listen and translate', // ALTA
   'fr.challenges.cat.listenTranslate.subtitle': 'Listen and translate', // MÉDIA
   'fr.challenges.cat.accent.title': 'Accents', // ALTA
+  'fr.challenges.cat.clozeGrammar.title': 'Complete the sentence', // ALTA
   'fr.challenges.cat.accent.subtitle': 'Write it correctly', // ALTA
   'fr.challenges.exerciseDone': 'Exercise complete!', // ALTA
   'fr.challenges.levelDone': 'Level {level} complete!', // ALTA
@@ -729,8 +742,6 @@ window.I18N_CATALOG['en'] = {
   'leaderboard.emptyText': 'Nobody has scored in this category yet this week.', // ALTA
   'leaderboard.scopeAria': 'Leaderboard scope', // ALTA
   'leaderboard.footnote': 'The leaderboard resets every Monday. Only people who have earned XP this week appear.', // ALTA
-  'profile.err.usernameShort': 'Username must be at least 3 characters (letters, numbers, dot, dash or _).', // ALTA
-  'profile.err.usernameTaken': 'That username is already taken.', // ALTA
   'profile.err.saveFailed': "We couldn't save right now. Check your connection and try again.", // ALTA
   'profile.err.imageRead': "We couldn't read that image.", // ALTA
   'profile.err.imageTooBig': 'Image too large (max 8MB).', // ALTA
@@ -885,7 +896,7 @@ window.I18N_CATALOG['en'] = {
   'fieldEditor.audio.ttsText': 'Text to synthesize', // ALTA
   'fieldEditor.audio.ttsLangLabel': 'Synthesis language', // ALTA
   'fieldEditor.audio.ttsVoice': 'Voice (optional)', // ALTA
-  'fieldEditor.audio.ttsVoicePlaceholder': 'e.g. provider default', // ALTA
+  'fieldEditor.audio.ttsVoicePlaceholder': 'blank = default voice (Chirp 3 HD)', // ALTA
   'fieldEditor.audio.ttsRate': 'Speed', // ALTA
   'fieldEditor.audio.saveFirst': 'Save the card first so you can generate audio from text.', // ALTA
   'fieldEditor.audio.regenerate': '🔊 Regenerate audio', // ALTA
@@ -1010,7 +1021,6 @@ window.I18N_CATALOG['en'] = {
   'fr.dictation.mute': 'Mute', // ALTA
   'fr.dictation.unmute': 'Unmute', // ALTA
   'fr.dictation.placeholder': 'Type what you heard here...', // ALTA
-  'fr.dictation.scoreTextHtml': 'You wrote <strong>{matches} of {total}</strong> words correctly. You scored {score} points ({score}%).', // ALTA
   'admin.common.adminOnly': 'This screen is for the platform administration only.', // ALTA
   'admin.common.removedUser': '(user removed)', // ALTA
   'admin.common.noneSelected': 'No student selected', // ALTA
@@ -1039,18 +1049,12 @@ window.I18N_CATALOG['en'] = {
   'admin.students.yourStudents': 'Your students ({n})', // ALTA
   'admin.students.linkedToast': '✓ @{username} linked as a student.', // ALTA
   'admin.students.removeConfirm': 'Remove this link? The student\'s progress and history are preserved -- they just stop appearing in your list.', // ALTA
-  'admin.students.metrics.loading': 'Loading metrics...', // ALTA
   'admin.students.metrics.failed': 'We couldn\'t load the metrics right now.', // ALTA
   'admin.students.metrics.noCards': 'You haven\'t created any cards for this student yet, in the "📇 Flashcards" tab.', // ALTA
   'admin.students.metrics.noRecord': 'no record', // ALTA
   'admin.students.metrics.today': 'today', // ALTA
   'admin.students.metrics.yesterday': 'yesterday', // ALTA
   'admin.students.metrics.daysAgo': '{n} days ago', // ALTA
-  'admin.students.metrics.lastActivity': 'Last overall activity: <strong>{label}</strong>', // ALTA
-  'admin.students.metrics.cardsCreated': 'Cards you created for them: <strong>{n} active</strong>', // ALTA
-  'admin.students.metrics.archivedSuffix': ', {n} archived', // ALTA
-  'admin.students.metrics.neverReviewed': 'Never reviewed yet: <strong>{n}</strong>', // ALTA
-  'admin.students.metrics.memory': 'Memory: <strong>{weak} weak</strong> · {medium} medium · {strong} strong', // ALTA
   'admin.premium.adminOnly': 'Only the administration can access this section.', // ALTA
   'admin.premium.title': '⭐ Activate/remove Premium', // ALTA
   'admin.premium.hint': 'Search for an account by @username and activate the Premium plan for it -- it works for ANY registered account, whether linked to you as a student or not. No real billing yet (no checkout set up) -- it is a manual grant, reversible at any time.', // ALTA
@@ -1115,8 +1119,14 @@ window.I18N_CATALOG['en'] = {
   'teacherMaterials.err.createFailed': 'We couldn\'t create the material right now.', // ALTA
   'teacherMaterials.err.saveFailed': 'We couldn\'t save right now.', // ALTA
   'teacherFlashcards.err.clozePinyinRequired': 'Enter the pinyin of the answer (it is what the student will type).', // ALTA
-  'flashcardModel.tts.providerNotConfigured': 'Text-to-speech audio generation is not set up on the server yet (no voice provider contracted).', // ALTA
-  'flashcardModel.tts.providerNotImplemented': 'Text-to-speech audio generation is not available yet -- infrastructure under construction.', // ALTA
+  'flashcardModel.tts.providerNotConfigured': 'Text-to-speech audio generation is not turned on on the server yet.', // ALTA
+  'flashcardModel.tts.providerNotImplemented': 'Text-to-speech audio generation is not available yet.', // ALTA
+  'flashcardModel.tts.providerError': 'The voice service couldn\'t generate the audio right now -- try again in a moment.', // ALTA
+  'flashcardModel.tts.providerRateLimited': 'The voice service is overloaded -- try again in a few minutes.', // ALTA
+  'flashcardModel.tts.monthlyQuotaExceeded': 'You\'ve reached the monthly limit of generated audio. Try again next month.', // ALTA
+  'flashcardModel.tts.quotaCheckFailed': 'We couldn\'t check your audio limit right now -- try again in a moment.', // ALTA
+  'flashcardModel.tts.unsupportedLanguage': 'This language doesn\'t have a voice for audio generation yet.', // ALTA
+  'flashcardModel.tts.invalidVoice': 'Invalid voice for this language -- leave the "Voice" field blank to use the default voice.', // ALTA
   'flashcardModel.tts.rateLimited': 'Too many audio generations in a short time -- wait a few minutes and try again.', // ALTA
   'flashcardModel.tts.notAuthorized': 'You don\'t have permission to generate audio for this card.', // ALTA
   'flashcardModel.tts.invalidSession': 'Session expired -- log in again.', // ALTA
@@ -1658,6 +1668,7 @@ window.I18N_CATALOG['en'] = {
   'admin.panel.tab.classlogs': '📝 Classes', // ALTA
   'admin.panel.tab.materials': '📚 Study materials', // ALTA
   'admin.panel.tab.premium': '⭐ Premium', // ALTA
+  'admin.panel.tab.tags': '🏷️ Tags', // ALTA
   'flashcardPreview.modal.hint': 'This is only a preview of how the card will look in Review -- nothing is saved or graded here.', // ALTA
   'publicFlashcard.modal.title': '👁 Card', // ALTA
   'content.untranslatedNotice': 'This lesson isn\'t available in English yet. Showing Portuguese.', // ALTA
@@ -1700,7 +1711,7 @@ window.I18N_CATALOG['en'] = {
   'ui.dictation.step3': 'Click "Verificar" to compare your answer with the original text.', // MÉDIA
   'ui.dictation.step4': 'See what you got right and what needs review, word by word.', // ALTA
   'ui.challenges.backToCategories': '← Back to categories', // ALTA
-  'ui.profileEdit.username': 'Username', // ALTA
+  'ui.profileEdit.username': 'Your public identifier (permanent)', // ALTA
   'ui.profileEdit.publicProfile': 'Public profile', // ALTA
   'ui.profileEdit.publicProfileSub': 'Makes your name, badges, progress and your own cards visible to anyone with your profile link.', // ALTA
   'ui.profileEdit.featuredBadge': 'Featured badge (shown in the Leaderboard)', // ALTA
@@ -1775,7 +1786,6 @@ window.I18N_CATALOG['en'] = {
   'fr.challenge.complete': '✅ Complete', // ALTA
   'fr.challenge.yourAnswerColon': 'Your answer:', // ALTA
   'fr.challenge.inPortuguese': 'In Portuguese:', // ALTA
-  'fr.challenge.agreementWarn': '⚠ Mind the agreement: after "{pronoun}", "{verb}" is not the right conjugation.', // MÉDIA
   'fr.challenge.row.yourAnswer': 'Your answer', // ALTA
   'fr.challenge.row.expected': 'Expected answer', // ALTA
   'fr.challenge.row.original': 'Original sentence', // ALTA

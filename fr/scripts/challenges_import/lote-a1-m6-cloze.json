@@ -1,0 +1,144 @@
+[
+  {
+    "id": "cloze-a1m6-001",
+    "type": "cloze_grammar",
+    "level": "A1",
+    "moduleId": "A1-m6",
+    "unitId": "A1-g9",
+    "theme": "O passé composé",
+    "topic": "passe-compose",
+    "sentenceFr": "Hier, nous ___ mangé au restaurant.",
+    "blanks": [
+      {
+        "options": [
+          "avons",
+          "sommes"
+        ],
+        "answer": "avons"
+      }
+    ],
+    "translationPt": "Ontem, nós comemos no restaurante.",
+    "explanation": "\"Manger\" forma o passé composé com avoir: nous avons mangé. A maioria dos verbos usa avoir.",
+    "status": "needs_review"
+  },
+  {
+    "id": "cloze-a1m6-002",
+    "type": "cloze_grammar",
+    "level": "A1",
+    "moduleId": "A1-m6",
+    "unitId": "A1-g9",
+    "theme": "O passé composé",
+    "topic": "passe-compose",
+    "sentenceFr": "Hier, elle ___ allée au cinéma.",
+    "blanks": [
+      {
+        "options": [
+          "est",
+          "a"
+        ],
+        "answer": "est"
+      }
+    ],
+    "translationPt": "Ontem, ela foi ao cinema.",
+    "explanation": "\"Aller\" é verbo de movimento e usa être: elle est allée. Com être, o particípio concorda com o sujeito (allée, feminino).",
+    "status": "needs_review"
+  },
+  {
+    "id": "cloze-a1m6-003",
+    "type": "cloze_grammar",
+    "level": "A1",
+    "moduleId": "A1-m6",
+    "unitId": "A1-g9",
+    "theme": "O passé composé",
+    "topic": "passe-compose",
+    "sentenceFr": "Le week-end dernier, j'ai ___ du sport.",
+    "blanks": [
+      {
+        "options": [
+          "fait",
+          "faire",
+          "faite"
+        ],
+        "answer": "fait"
+      }
+    ],
+    "translationPt": "No fim de semana passado, eu fiz esporte.",
+    "explanation": "O particípio de \"faire\" é irregular: fait. Com avoir, ele não concorda com o sujeito, então nada de -e.",
+    "status": "needs_review"
+  },
+  {
+    "id": "cloze-a1m6-004",
+    "type": "cloze_grammar",
+    "level": "A1",
+    "moduleId": "A1-m6",
+    "unitId": "A1-g9",
+    "theme": "O passé composé",
+    "topic": "passe-compose",
+    "sentenceFr": "Ce matin, Sophie est ___ au marché.",
+    "blanks": [
+      {
+        "options": [
+          "allée",
+          "allé",
+          "aller"
+        ],
+        "answer": "allée"
+      }
+    ],
+    "translationPt": "Hoje de manhã, a Sophie foi ao mercado.",
+    "explanation": "Com être, o particípio concorda com o sujeito: Sophie é feminino, então allée (com -e). \"Aller\" é o infinitivo, não o particípio.",
+    "status": "needs_review"
+  },
+  {
+    "id": "cloze-a1m6-005",
+    "type": "cloze_grammar",
+    "level": "A1",
+    "moduleId": "A1-m6",
+    "unitId": "A1-g9",
+    "theme": "O passé composé",
+    "topic": "passe-compose",
+    "sentenceFr": "Il ___ pris le train avant-hier.",
+    "blanks": [
+      {
+        "options": [
+          "a",
+          "est"
+        ],
+        "answer": "a"
+      }
+    ],
+    "translationPt": "Ele pegou o trem anteontem.",
+    "explanation": "\"Prendre\" usa avoir (il a pris), mesmo sendo uma viagem: só um grupo pequeno de verbos de movimento, como aller, usa être. O particípio é irregular: pris.",
+    "status": "needs_review"
+  },
+  {
+    "id": "cloze-a1m6-006",
+    "type": "cloze_grammar",
+    "level": "A1",
+    "moduleId": "A1-m6",
+    "unitId": "A1-g9",
+    "theme": "O passé composé",
+    "topic": "passe-compose",
+    "sentenceFr": "Le week-end dernier, nous ___ ___ au cinéma.",
+    "blanks": [
+      {
+        "options": [
+          "sommes",
+          "avons"
+        ],
+        "answer": "sommes"
+      },
+      {
+        "options": [
+          "allés",
+          "allé",
+          "aller"
+        ],
+        "answer": "allés"
+      }
+    ],
+    "translationPt": "No fim de semana passado, nós fomos ao cinema.",
+    "explanation": "\"Aller\" usa être (nous sommes) e o particípio concorda com o sujeito no plural: allés (com -s).",
+    "status": "needs_review"
+  }
+]

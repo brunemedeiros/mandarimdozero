@@ -5,21 +5,6 @@
     {
       "unitId": "A1-8",
       "theme": "Lugares e orientação",
-      "fr": "Le musée est loin d'ici.",
-      "hide": [
-        "musée",
-        "loin"
-      ],
-      "refs": [
-        "O museu fica longe daqui.",
-        "O museu é longe daqui.",
-        "O museu está longe daqui."
-      ],
-      "explanation": ""
-    },
-    {
-      "unitId": "A1-8",
-      "theme": "Lugares e orientação",
       "fr": "Tournez à droite, puis tout droit.",
       "hide": [
         "droite",
@@ -30,7 +15,7 @@
         "Vire à direita, depois siga reto.",
         "Vire à direita, depois em frente."
       ],
-      "explanation": ""
+      "explanation": "\"Tournez\" é o imperativo de cortesia (vous); \"tout droit\" = \"siga em frente\"."
     },
     {
       "unitId": "A1-9",
@@ -45,20 +30,7 @@
         "Sou do Brasil, e você?",
         "Eu venho do Brasil, e tu?"
       ],
-      "explanation": ""
-    },
-    {
-      "unitId": "A1-9",
-      "theme": "Nacionalidades",
-      "fr": "Elle est américaine.",
-      "hide": [
-        "américaine"
-      ],
-      "refs": [
-        "Ela é americana.",
-        "Ela é norte-americana."
-      ],
-      "explanation": ""
+      "explanation": "\"Je viens de\" indica origem: \"du\" = de + le (du Brésil); \"et toi ?\" devolve a pergunta."
     },
     {
       "unitId": "A1-10",
@@ -73,7 +45,7 @@
         "A calça é cinquenta euros.",
         "A calça sai por cinquenta euros."
       ],
-      "explanation": ""
+      "explanation": "\"Coûte\" é a forma do verbo \"coûter\" (custar) para uma coisa só; \"cinquante\" = 50."
     },
     {
       "unitId": "A1-10",
@@ -88,7 +60,7 @@
         "Eu procuro um vestido.",
         "Procuro um vestido."
       ],
-      "explanation": ""
+      "explanation": "\"Je cherche\" já significa \"estou procurando\": o francês usa o presente para a ação em curso."
     },
     {
       "unitId": "A1-11",
@@ -103,22 +75,7 @@
         "Compro legumes e arroz.",
         "Estou comprando legumes e arroz."
       ],
-      "explanation": ""
-    },
-    {
-      "unitId": "A1-11",
-      "theme": "Compras de mercado",
-      "fr": "Tu veux du sucre ?",
-      "hide": [
-        "veux",
-        "sucre"
-      ],
-      "refs": [
-        "Você quer açúcar?",
-        "Tu queres açúcar?",
-        "Quer açúcar?"
-      ],
-      "explanation": ""
+      "explanation": "\"Des\" é o plural indefinido (\"legumes\") e \"du\" é partitivo (\"arroz\", sem contar)."
     },
     {
       "unitId": "A1-12",
@@ -133,21 +90,7 @@
         "Eu pego um quilo de maçãs.",
         "Levo um quilo de maçãs."
       ],
-      "explanation": ""
-    },
-    {
-      "unitId": "A1-12",
-      "theme": "Pesos e quantidades",
-      "fr": "Une bouteille d'eau, s'il vous plaît.",
-      "hide": [
-        "bouteille",
-        "eau"
-      ],
-      "refs": [
-        "Uma garrafa de água, por favor.",
-        "Uma garrafa d'água, por favor."
-      ],
-      "explanation": ""
+      "explanation": "Depois de quantidade, o francês usa \"de\": \"un kilo de pommes\", sem artigo."
     }
   ],
   "accent": [

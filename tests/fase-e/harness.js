@@ -35,7 +35,7 @@ function extractFunction(src, name){
 
 const APP_FUNCTIONS = [
   'buildCardsFromUnits', 'flashcardIdForRow', 'lessonIndexForVocabIdx', 'isCardLessonCompleted',
-  'matchesReviewOriginFilter', 'eligibleReviewPool', 'eligibleDeckReviewPool', 'applySerializedState',
+  'matchesReviewOriginFilter', 'activeReviewTagFilter', 'matchesReviewTagFilter', 'eligibleReviewPool', 'eligibleDeckReviewPool', 'applySerializedState',
   'ensureCourseDecksLoaded', 'ensureDecksLoadedForReview',
   'deckReviewSummary', 'deckCountsForReview', 'reviewFilterQueue',
   'sessionIntensityToLimit',
@@ -51,6 +51,8 @@ function loadLang(lang, overrides){
   run(read('shared/fsrs.js'), 'shared/fsrs.js');
   run(read('shared/study-queue.js'), 'shared/study-queue.js');
   run(read('shared/flashcard-model.js'), 'shared/flashcard-model.js');
+  run(read('shared/study-trail-model.js'), 'shared/study-trail-model.js');
+  run(read('shared/analytics-metrics.js'), 'shared/analytics-metrics.js');
   run(read('shared/deck-engine.js'), 'shared/deck-engine.js');
   run(read('shared/deck-data.js'), 'shared/deck-data.js');
   run(read(lang + '/content.js') + '\n;this.UNITS = UNITS;', lang + '/content.js');

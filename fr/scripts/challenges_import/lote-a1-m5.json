@@ -14,7 +14,7 @@
       "Minha irmã é alta e simpática.",
       "Minha irmã é grande e gentil."
     ],
-    "explanation": "",
+    "explanation": "Os adjetivos concordam com \"sœur\" (feminino): \"grande\", \"gentille\" (masculino: gentil).",
     "status": "needs_review"
   },
   {
@@ -32,7 +32,7 @@
       "O suéter dela é vermelho.",
       "A blusa dele é vermelha."
     ],
-    "explanation": "",
+    "explanation": "\"Son\" é \"dele/dela\": concorda com \"pull\" (masculino), não com quem é o dono.",
     "status": "needs_review"
   },
   {
@@ -50,7 +50,7 @@
       "A cozinha é ao lado da sala.",
       "A cozinha está ao lado da sala de estar."
     ],
-    "explanation": "",
+    "explanation": "\"À côté de\" = \"ao lado de\"; \"de + le\" vira \"du\" (du salon).",
     "status": "needs_review"
   },
   {
@@ -68,7 +68,7 @@
       "Há uma janela no quarto.",
       "Existe uma janela no quarto."
     ],
-    "explanation": "",
+    "explanation": "\"Il y a\" = \"tem/há\"; \"dans\" indica o lugar onde algo está.",
     "status": "needs_review"
   },
   {
@@ -84,9 +84,9 @@
     "referenceTranslations": [
       "A luminária está em cima da mesa.",
       "O abajur está em cima da mesa.",
-      "A lâmpada está em cima da mesa."
+      "A lâmpada de mesa está em cima da mesa."
     ],
-    "explanation": "",
+    "explanation": "\"Lampe\" é a luminária ou o abajur; \"sur\" indica em cima de algo.",
     "status": "needs_review"
   },
   {
@@ -104,7 +104,7 @@
       "A mochila está embaixo da cadeira.",
       "A bolsa está debaixo da cadeira."
     ],
-    "explanation": "",
+    "explanation": "\"Sous\" é \"embaixo de\"; o oposto é \"sur\" (em cima de).",
     "status": "needs_review"
   },
   {

@@ -286,15 +286,19 @@ function applyMemoryGrade(card, sm2Grade, now){
   now = now || Date.now();
 
   if (sm2Grade === 0){
-    card.stability = 0;
-    card.difficulty = 0;
-    card.state = 'new';
-    card.fsrsReps = 0;
-    card.fsrsLapses = 0;
-    card.fsrsMigrated = true;
-    card.lastReview = now;
+    // K1.2: "Errei" NUNCA devolve um cartão com histórico a 'new'. Usa a
+    // semântica real do scheduler (grade 1/Again): 1ª resposta de um cartão
+    // nunca estudado -> 'learning'; cartão já estudado -> 'relearning'.
+    // stability/difficulty vêm das fórmulas de lapso do FSRS (não são
+    // zeradas), fsrsReps/fsrsLapses acumulam. Única regra de produto
+    // mantida da decisão anterior (PR #219): o due de "Errei" é sempre a
+    // meia-noite seguinte (previewNextIntervalDays já espelha isso).
+    // REGRA DE SCHEDULING DELIBERADAMENTE PRESERVADA -- não é efeito
+    // acidental da K1 nem "FSRS puro". Due real, preview do botão e testes
+    // (tests/fase-k1) devem continuar usando esta mesma regra.
+    scheduleReview(card, 1, now);
     card.due = nextMidnight(now);
-    card.interval = 0;
+    card.interval = Math.max(0, Math.round(card.stability));
     card.reps = (card.reps || 0) + 1;
     card.lapses = (card.lapses || 0) + 1;
     if (card.reps === 1 && !card.firstLearnedDate){

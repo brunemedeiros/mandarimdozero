@@ -144,28 +144,14 @@ function avatarColor(seed){
   return palette[h % palette.length];
 }
 
+// Identidade (CONSOLIDAÇÃO Identity): o username é gerado e atribuído PELO
+// SERVIDOR (trigger/RPC da migration 060) -- o cliente nunca o escolhe,
+// nunca o deriva de e-mail/nome, nunca tenta de novo com sufixo. A RPC é
+// idempotente e segura sob concorrência (várias abas/aparelhos).
 async function createInitialProfile(){
-  const localPart = (CURRENT_USER.email || 'aluno').split('@')[0];
-  const base = slugifyUsername(localPart) || 'aluno';
-  const displayName = CURRENT_USER.user_metadata?.full_name || null;
-  let candidate = base;
-  for (let attempt = 0; attempt < 30; attempt++){
-    const { data, error } = await supabaseClient
-      .from('profiles')
-      .insert({ user_id: CURRENT_USER.id, username: candidate, display_name: displayName })
-      .select()
-      .single();
-    if (!error) return data;
-    // 23505 = unique_violation (username já existe) -- tenta o próximo
-    // sufixo numérico até achar um livre.
-    if (error.code === '23505'){
-      candidate = `${base}${attempt + 2}`;
-      continue;
-    }
-    console.error('Erro ao criar perfil:', error);
-    return null;
-  }
-  return null;
+  const { data, error } = await supabaseClient.rpc('ensure_my_profile');
+  if (error){ console.error('Erro ao criar perfil:', error); return null; }
+  return data || null;
 }
 
 async function ensureProfileLoaded(){
@@ -181,29 +167,12 @@ async function ensureProfileLoaded(){
   return PROFILE_CACHE;
 }
 
-async function isUsernameAvailable(candidate){
-  const { data, error } = await supabaseClient
-    .from('profiles')
-    .select('user_id')
-    .eq('username', candidate)
-    .neq('user_id', CURRENT_USER.id)
-    .maybeSingle();
-  if (error){ console.error('Erro ao checar username:', error); return false; }
-  return !data;
-}
-
-async function saveProfileEdits({ displayName, username, bio, featuredBadgeId, publicProfile }){
-  const cleanUsername = slugifyUsername(username);
-  if (cleanUsername.length < 3){
-    return { ok: false, error: t('profile.err.usernameShort') };
-  }
-  if (cleanUsername !== PROFILE_CACHE?.username){
-    const available = await isUsernameAvailable(cleanUsername);
-    if (!available) return { ok: false, error: t('profile.err.usernameTaken') };
-  }
+// O username NÃO é editável (identificador público permanente, gerado pelo
+// sistema): este payload nunca o contém, e o servidor também recusa qualquer
+// UPDATE que o altere (trigger profiles_protect_identity, migration 060).
+async function saveProfileEdits({ displayName, bio, featuredBadgeId, publicProfile }){
   const payload = {
     display_name: (displayName || '').trim().slice(0, 60) || null,
-    username: cleanUsername,
     bio: (bio || '').trim().slice(0, 160) || null,
     // Badge que aparece junto do nome no Ranking (ver shared/leaderboard.js).
     // Só badges especiais (Fundadora/Beta Tester/premium quando existir/
@@ -731,7 +700,6 @@ function wireProfileEditModal(){
 
     const result = await saveProfileEdits({
       displayName: document.getElementById('profile-edit-display-name').value,
-      username: document.getElementById('profile-edit-username').value,
       bio: bioInput.value,
       featuredBadgeId: document.getElementById('profile-edit-featured-badge')?.value,
       publicProfile: document.getElementById('profile-edit-public-switch')?.getAttribute('aria-checked') === 'true',

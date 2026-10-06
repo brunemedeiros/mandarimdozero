@@ -301,7 +301,13 @@ async function requestFieldAudioTTS({ rowId, fieldId, text, language, voiceId, r
     body: { table: 'teacher_flashcards', rowId, fieldId, text, language, voiceId: voiceId || null, rate: (rate === undefined ? null : rate) },
   });
   if (error || !data?.ok){
-    const code = data?.error || error?.context?.error || null;
+    // Em resposta não-2xx o supabase-js devolve data=null e o corpo fica em
+    // error.context (um Response) -- sem ler o corpo, todo erro virava a
+    // mensagem genérica e o motivo real (cota, provedor etc.) se perdia.
+    let code = data?.error || null;
+    if (!code && error?.context && typeof error.context.json === 'function'){
+      try { code = (await error.context.json())?.error || null; } catch (_e) { code = null; }
+    }
     return { ok: false, error: TTS_GENERATION_ERROR_LABELS[code] || t('ownFlashcards.err.ttsFailed') };
   }
   return { ok: true, url: data.url, path: data.path, generationKey: data.generationKey, generatedAt: data.generatedAt };

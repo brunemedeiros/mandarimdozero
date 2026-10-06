@@ -42,23 +42,23 @@ const DICTATIONS = [
     moduleId: "A1-m1",
     level: "A1",
     task: "Se apresentando em sala de aula",
-    text: "Bonjour à tous ! Je m'appelle Sophie. J'ai vingt-cinq ans et je suis française. J'habite à Lyon. Et vous, comment vous appelez-vous ?",
+    text: "Bonjour ! Je m'appelle Sophie. J'ai vingt-cinq ans et je suis française. Et toi, comment tu t'appelles ?",
     free: true
   },
   {
     id: "d2",
     moduleId: "A1-m2",
     level: "A1",
-    task: "Pedindo pão na padaria (boulangerie)",
-    text: "Il est huit heures du matin. Je vais à la boulangerie. Bonjour, je voudrais du pain, s'il vous plaît, et un croissant. C'est combien ? Merci, au revoir !",
+    task: "Pedindo pão",
+    text: "Il est huit heures du matin. Bonjour, je voudrais du pain, s'il vous plaît, et un croissant. C'est combien ? Merci, au revoir !",
     free: true
   },
   {
     id: "d3",
     moduleId: "A1-m3",
     level: "A1",
-    task: "Explicando o caminho para a Torre Eiffel",
-    text: "Ah, la tour Eiffel ? Elle est loin d'ici. Tournez à droite, puis allez tout droit. Le musée est à gauche, c'est très près.",
+    task: "Explicando o caminho até o museu",
+    text: "Le musée est loin d'ici. Tournez à droite, puis allez tout droit. Le musée est à gauche, c'est très près.",
     free: true
   },
   {
@@ -186,7 +186,7 @@ const DICTATIONS = [
     moduleId: "A1-revisao",
     level: "A1",
     task: "Revisão do A1 · Eu e minha rotina",
-    text: "Bonjour, je m'appelle Sophie. Je suis brésilienne et j'ai vingt-cinq ans. Je me lève à sept heures. Le matin, je bois du café et je mange du pain. Je travaille à neuf heures. Le soir, je mange du fromage.",
+    text: "Bonjour, je m'appelle Julie. Je suis brésilienne et j'ai vingt-cinq ans. Je me lève à sept heures. Le matin, je bois du café et je mange du pain. Je travaille à neuf heures. Le soir, je mange du fromage.",
     free: true,
     opening: "Français avec Prof. Brune, révision du niveau A1, dictée 1."
   },

@@ -183,6 +183,10 @@ function publicProfileLangCardHTML(l){
 // primeiro clique sobrescrever o conteúdo do segundo, que já está na tela).
 const PUBLIC_PROFILE_RENDER_TOKENS = new WeakMap();
 
+// Transição: cartões soltos públicos aposentados em favor de Public Deck (decisão da
+// autora). true reativa a seção antiga (RPC get_public_flashcards continua existindo).
+const PUBLIC_FLAT_FLASHCARDS_ENABLED = false;
+
 async function renderPublicProfileInto(bodyEl, username){
   if (!bodyEl) return;
   const token = (PUBLIC_PROFILE_RENDER_TOKENS.get(bodyEl) || 0) + 1;
@@ -244,13 +248,18 @@ async function renderPublicProfileInto(bodyEl, username){
     </div>
   ` : `<p class="profile-empty-note">${t('publicProfile.noBadges')}</p>`;
 
-  // Fase 2 -- só existe o convite pra ver cartões quando o perfil É
-  // público (mesmo interruptor mestre de sempre, ver Q1 do grilling da
-  // Fase 1: conta privada esconde TUDO, cartões inclusive, não só as
-  // estatísticas). get_public_flashcards() confere isso de novo no
-  // servidor (defesa em profundidade), mas nem vale a pena mostrar o
-  // botão/gastar clique se já se sabe aqui que a resposta vai ser vazia.
-  const cardsHTML = isPublic ? `
+  // Public Deck: o mecanismo principal de publicação (substitui a lista de
+  // cartões soltos). Só quando o perfil É público; a RPC list_public_decks_for_user
+  // confere isso de novo no servidor. A lista solta (Fase 2 do perfil público) fica
+  // DESLIGADA por PUBLIC_FLAT_FLASHCARDS_ENABLED -- código/RPC preservados para a
+  // transição compatível, a remover na fase de cleanup.
+  const decksHTML = isPublic ? `
+    <div class="public-profile-decks-section">
+      <div class="section-label">Decks públicos</div>
+      <div id="public-profile-decks-box"><p class="profile-empty-note">Carregando...</p></div>
+    </div>
+  ` : '';
+  const cardsHTML = (isPublic && PUBLIC_FLAT_FLASHCARDS_ENABLED) ? `
     <div class="public-profile-cards-section">
       <div class="section-label">${t('publicProfile.sectionFlashcards')}</div>
       <button type="button" class="btn btn-secondary btn-block" id="public-profile-cards-toggle-btn">${t('publicProfile.viewCards', { username: escapeHTML(profile.username) })}</button>
@@ -274,6 +283,7 @@ async function renderPublicProfileInto(bodyEl, username){
       <div class="section-label">${t('publicProfile.sectionBadges')}</div>
       ${conquestsHTML}
     </div>
+    ${decksHTML}
     ${cardsHTML}
   `;
 
@@ -290,7 +300,11 @@ async function renderPublicProfileInto(bodyEl, username){
     });
   });
 
-  if (isPublic){
+  if (isPublic && typeof renderPublicDecksSection === 'function'){
+    renderPublicDecksSection(bodyEl.querySelector('#public-profile-decks-box'), profile.username);
+  }
+
+  if (isPublic && PUBLIC_FLAT_FLASHCARDS_ENABLED){
     const toggleBtn = bodyEl.querySelector('#public-profile-cards-toggle-btn');
     const box = bodyEl.querySelector('#public-profile-cards-box');
     toggleBtn?.addEventListener('click', () => {
@@ -383,7 +397,7 @@ async function renderPublicProfileCardsBox(bodyEl, username){
 
   const [cardsRes, hasLink, myCards] = await Promise.all([
     fetchPublicFlashcardsByUsername(username, APP_KEY),
-    (typeof hasActiveTeacherLink === 'function') ? hasActiveTeacherLink() : Promise.resolve(false),
+    (typeof hasUnlimitedOwnCards === 'function') ? hasUnlimitedOwnCards() : Promise.resolve(false),
     (typeof fetchMyOwnFlashcards === 'function') ? fetchMyOwnFlashcards(APP_KEY) : Promise.resolve([]),
   ]);
 
@@ -543,8 +557,11 @@ async function importSelectedPublicFlashcards(box){
     // CONSOLIDAÇÃO-6 (ver CLAUDE.md) -- mesma mudança de shared/my-flashcards.js:
     // a cópia importada nasce NATIVA (fields/card_generation_mode), nunca
     // mais o branch Legacy de createOwnFlashcard().
+    // Identity/Attribution (migration 060): a cópia passa pela RPC
+    // copy_public_flashcard -- o servidor valida a fonte pública, impede
+    // conteúdo fabricado e grava a tag `criado-por-[autor original]`.
     const nativeState = nativeNoteEditorStateFromImportPayload(c, APP_KEY);
-    const result = await createOwnFlashcard({ languageAppKey: APP_KEY, nativeState, deckId: dest.deckId, decks: dest.decks });
+    const result = await copyPublicFlashcard({ sourceId: c.id, languageAppKey: APP_KEY, nativeState, deckId: dest.deckId, decks: dest.decks });
     if (result.ok){
       importedCount++;
       // Mesmo motivo de sempre (ver comentário de addSelfFlashcardToState
@@ -555,7 +572,7 @@ async function importSelectedPublicFlashcards(box){
   }
 
   if (importedCount > 0 && typeof showToast === 'function'){
-    showToast(tp('publicProfile.imported', importedCount));
+    showToast(`${tp('publicProfile.imported', importedCount)} ${summarizeDroppedImportTags(importStates, { ignoreSystem: true })}`.trim());
   }
   if (importedCount < ids.length && errorEl){
     errorEl.textContent = t('publicProfile.importPartial');
@@ -615,5 +632,7 @@ async function renderStandalonePublicProfile(username){
   const body = document.getElementById('public-profile-page-body');
   if (loginScreen) loginScreen.style.display = 'none';
   if (wrap) wrap.style.display = 'block';
+  // Decks/links do perfil trocam o hash; a página standalone não tem roteador.
+  window.addEventListener('hashchange', () => window.location.reload());
   await renderPublicProfileInto(body, username);
 }

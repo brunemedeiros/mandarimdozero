@@ -55,7 +55,7 @@ const FLASHCARD_PREVIEW_SESSION = {
 // (Fases 6C.1-6C.3) -- reaproveitados aqui, nunca reinventados. Um
 // CardInstance de Cloze carrega seu próprio `markId` (ver renderClozeCard).
 function createFlashcardPreviewLocalState(card){
-  const cardTypeId = card.cardInstance ? card.cardInstance.cardTypeId : 'normal';
+  const cardTypeId = card.cardInstance.cardTypeId;
   if (cardTypeId === 'multiple_choice') return { kind: 'multiple_choice', shuffledOptions: null, selectedIndex: null, answered: false, wasCorrect: null };
   if (cardTypeId === 'type_answer') return { kind: 'type_answer', typedAnswer: '', answered: false, wasCorrect: null };
   if (cardTypeId === 'cloze') return { kind: 'cloze', markId: card.cardInstance.markId, typedAnswer: '', answered: false, wasCorrect: null };
@@ -198,7 +198,7 @@ function renderFlashcardPreviewCard(){
   if (!FLASHCARD_PREVIEW_SESSION.localState){
     FLASHCARD_PREVIEW_SESSION.localState = createFlashcardPreviewLocalState(card);
   }
-  const cardTypeId = card.cardInstance ? card.cardInstance.cardTypeId : 'normal';
+  const cardTypeId = card.cardInstance.cardTypeId;
   const callbacks = {
     onAnswered: () => {
       if (typeof showToast === 'function') showToast(t('preview.toast.noEffect'));

@@ -1,0 +1,32 @@
+#!/bin/bash
+# Reconstrói o Postgres local, aplica 061 e roda os testes do banco. Uso: run.sh
+set -e
+HERE=$(cd "$(dirname "$0")" && pwd); ROOT="$HERE/../.."
+bash "$ROOT/tests/fase-identity/build_db.sh" pubdeck >/dev/null 2>&1
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/shared/supabase_migrations/061_public_decks.sql" >/dev/null 2>&1
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/shared/supabase_migrations/062_public_deck_duplicates.sql" >/dev/null 2>&1
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/shared/supabase_migrations/063_profiles_protect_plan_tier_role.sql" >/dev/null 2>&1
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/shared/supabase_migrations/064_version_progress_table.sql" >/dev/null 2>&1
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/shared/supabase_migrations/065_grant_table_privileges_parity.sql" >/dev/null 2>&1
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/shared/supabase_migrations/066_profiles_protect_plan_role_insert.sql" >/dev/null 2>&1
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/shared/supabase_migrations/067_public_deck_copy_linear_plan.sql" >/dev/null 2>&1
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/shared/supabase_migrations/068_public_deck_copy_media_linear.sql" >/dev/null 2>&1
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/shared/supabase_migrations/069_public_deck_duplicates_changed_not_retryable.sql" >/dev/null 2>&1
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -v ON_ERROR_STOP=1 -f "$ROOT/shared/supabase_migrations/071_public_deck_hardening.sql" >/dev/null 2>&1
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -f "$HERE/test_public_deck.sql" 2>&1 | grep -v '^\s*$'
+echo "--- P7 independência de mídia ---"
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -f "$HERE/test_media_independence.sql" 2>&1 | grep -v '^\s*$'
+echo "--- Hardening final ---"
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -f "$HERE/test_hardening.sql" 2>&1 | grep -v '^\s*$'
+echo "--- 071 hardening ---"
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -f "$HERE/test_071.sql" 2>&1 | grep -v '^\s*$'
+echo "--- Duplicatas / reimportação (062) ---"
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -f "$HERE/test_duplicates.sql" 2>&1 | grep -v '^\s*$'
+echo "--- Duplicatas H/J/K ---"
+psql -h /tmp/pg -p 54329 -U pguser pubdeck -q -f "$HERE/test_duplicates_hjk.sql" 2>&1 | grep -v '^\s*$'
+echo "--- Concorrência real (062) ---"
+bash "$HERE/test_duplicates_concurrency.sh"
+echo "--- D2: diferencial 062/067/068 (mídia) ---"
+bash "$HERE/d2/differential.sh" | grep -E "^(ok|FALHA)\|"
+echo "--- D2: atomicidade em escala (2000 Notes com áudio) ---"
+bash "$HERE/d2/atomicity_scale.sh"

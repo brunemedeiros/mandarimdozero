@@ -125,14 +125,19 @@ function personalDeckOptionsHTML(decks){
 }
 
 function personalDecksListHTML(decks){
+  // K.5: mesmo universo e mesmas contagens do Teacher Deck / de "Estudar este
+  // Deck": pool ELEGÍVEL (arquivado fora), subárvore, CardInstances.
   const cards = (typeof STATE !== 'undefined' && STATE.cards) || [];
+  const pool = (typeof eligibleDeckReviewPool === 'function') ? eligibleDeckReviewPool() : cards;
   return orderedPersonalDecks(decks).map(d => {
     const pad = Math.max(0, personalDeckDepth(decks, d) - 1) * 16;
-    const n = getStudyScopeForDeck(decks, d.id, cards).length;
-    return `<div class="admin-badge-row" style="padding-left:${pad}px;">
-      <span style="flex:1;">${escapeHTML(d.kind === 'personal_root' ? t('deck.myDecks') : d.name)} <span class="profile-edit-hint">(${tp('deck.cardsCount', n)})</span></span>
+    const c = getDeckCounts(decks, d.id, pool);
+    return `<div class="admin-badge-row" style="padding-left:${pad}px;" data-personal-deck-row="${d.id}">
+      <span style="flex:1;">${escapeHTML(d.kind === 'personal_root' ? t('deck.myDecks') : d.name)} <span class="profile-edit-hint">(${t('deck.countsFull', { total: c.total, new: c.new, learning: c.learning, review: c.review, due: c.due })})</span></span>
       <button type="button" class="btn btn-secondary" data-study-deck="${d.id}">${t('deck.studyThis')}</button>
-    </div>`;
+      ${d.kind === 'personal' && typeof publishBoxHTML === 'function' ? `<button type="button" class="btn btn-secondary" data-publish-deck="${d.id}">${d.is_public ? t('deck.publicBadge') : t('deck.publish')}</button>` : ''}
+    </div>
+    ${d.kind === 'personal' ? `<div data-publish-box="${d.id}" style="display:none; padding-left:${pad}px;"></div>` : ''}`;
   }).join('');
 }
 
@@ -149,6 +154,25 @@ function teacherReceivedDecks(decks){
   return (decks || []).filter(d => ['teacher_root', 'teacher'].includes(d.kind) && d.owner_id === CURRENT_USER.id);
 }
 
+// Fase I (Tags): tags dos Teacher Cards são da NOTE/da professora -- a aluna
+// só VÊ (chips sem botão de remover) e pode filtrar a Revisão por elas;
+// nenhuma cópia editável do lado dela (RLS de teacher_flashcards já é
+// somente-leitura pra aluna).
+function teacherTagsReadOnlyHTML(cards){
+  const tags = collectTagsFromCards((cards || []).filter(c => c.origin === 'teacher'));
+  if (!tags.length) return '';
+  return `<div data-teacher-tags style="margin:6px 0;"><span class="profile-edit-hint">Tags dos cartões da professora:</span> ${noteTagChipsHTML(tags)}</div>`;
+}
+
+// Fase I (Tags): o filtro de tag do Review vale também para "Estudar este
+// Deck" (Deck AND Tag). Aviso visível + atalho para limpar, pra o filtro
+// nunca parecer um "Deck vazio" inexplicável.
+function tagFilterNoticeHTML(){
+  const f = (typeof STATE !== 'undefined' && STATE.studySettings && Array.isArray(STATE.studySettings.reviewTagFilter)) ? STATE.studySettings.reviewTagFilter : [];
+  if (!f.length) return '';
+  return `<p class="profile-edit-hint" data-tag-filter-notice>Filtro de tags ativo na Revisão: ${noteTagChipsHTML(f)} — vale também para "Estudar este Deck". <button type="button" class="admin-select-link" data-clear-review-tag-filter style="background:none;border:none;cursor:pointer;padding:0;">Limpar</button></p>`;
+}
+
 function teacherDecksReadOnlyHTML(decks){
   const mine = teacherReceivedDecks(decks);
   if (!mine.length) return '';
@@ -157,26 +181,33 @@ function teacherDecksReadOnlyHTML(decks){
     // Fase H (H10) -- contagens do MESMO Deck Engine (getDeckCounts: New/
     // Learning/Review sobre CardInstances elegíveis do Deck + descendentes),
     // nunca uma contagem paralela. `n` = CardInstances no escopo do Deck.
-    const n = getStudyScopeForDeck(decks, deck.id, cards).length;
+    // K.5: `n` = CardInstances ELEGÍVEIS no escopo (antes contava também os
+    // arquivados); vem de getDeckCounts, junto das demais contagens.
     // Fase H (hardening) -- pool de elegibilidade SEM o filtro de origem: as
     // contagens da árvore têm que bater com o que 'Estudar este Deck' vai
     // de fato estudar (Deck é o escopo autoritativo da sessão).
     const pool = (typeof eligibleDeckReviewPool === 'function') ? eligibleDeckReviewPool() : cards;
     const c = getDeckCounts(decks, deck.id, pool);
+    const n = c.total;
     const label = deck.kind === 'teacher_root' ? t('deck.teacherRoot') : deck.name;
     return `<div class="admin-badge-row" style="padding-left:${depth * 16}px;" data-teacher-deck-row="${deck.id}">
-      <span style="flex:1;">${escapeHTML(label)} <span class="profile-edit-hint">(${tp('deck.countsDetail', n, { new: c.new, learning: c.learning, review: c.review })})</span></span>
+      <span style="flex:1;">${escapeHTML(label)} <span class="profile-edit-hint">(${t('deck.countsFull', { total: n, new: c.new, learning: c.learning, review: c.review, due: c.due })})</span></span>
       <button type="button" class="btn btn-secondary" data-study-deck="${deck.id}" ${n ? '' : 'disabled'}>${t('deck.studyThis')}</button>
     </div>`;
   }).join('');
   return `<div class="profile-section" id="teacher-decks-section">
       <div class="section-label">${t('myFlashcards.teacherDecks.title')}</div>
       <p class="profile-edit-hint">${t('myFlashcards.teacherDecks.hint')}</p>
+      ${teacherTagsReadOnlyHTML(cards)}
       <div id="teacher-decks-list">${rows}</div>
     </div>`;
 }
 
 function wireMyDecksSection(wrap){
+  wrap.querySelectorAll('[data-clear-review-tag-filter]').forEach(btn => btn.addEventListener('click', () => {
+    if (typeof updateStudySetting === 'function') updateStudySetting({ reviewTagFilter: [] });
+    renderMyFlashcardsView();
+  }));
   wrap.querySelectorAll('[data-study-deck]').forEach(btn => {
     btn.addEventListener('click', () => {
       // Único caminho de estudo por Deck: startDeckReviewSession (fr/zh
@@ -184,6 +215,15 @@ function wireMyDecksSection(wrap){
       if (typeof startDeckReviewSession === 'function') startDeckReviewSession(Number(btn.dataset.studyDeck));
     });
   });
+  wrap.querySelectorAll('[data-publish-deck]').forEach(btn => btn.addEventListener('click', () => {
+    const id = Number(btn.dataset.publishDeck);
+    const deck = (MY_FLASHCARDS_STATE._decks || []).find(x => x.id === id);
+    const box = wrap.querySelector(`[data-publish-box="${id}"]`);
+    if (!deck || !box) return;
+    const opening = box.style.display === 'none';
+    box.style.display = opening ? 'block' : 'none';
+    if (opening) openPublishBox(deck, box, (d) => { btn.textContent = d.is_public ? '🌐 Público' : 'Publicar'; });
+  }));
   document.getElementById('my-deck-new-btn')?.addEventListener('click', async () => {
     const errEl = document.getElementById('my-deck-error');
     errEl.textContent = '';
@@ -246,22 +286,26 @@ async function renderMyFlashcardsView(opts){
   const premium = planTier === 'premium';
   MY_FLASHCARDS_STATE._cardsCache = cards;
   MY_FLASHCARDS_STATE._decks = decks;
-  MY_FLASHCARDS_STATE._hasLink = hasLink;
+  // Teto do plano grátis não vale pra aluna vinculada nem pra Premium
+  // (mesma regra de hasUnlimitedOwnCards, shared/roles.js).
+  const unlimited = hasLink || premium;
+  MY_FLASHCARDS_STATE._hasLink = unlimited;
   if (typeof STATE !== 'undefined') STATE.decks = decks;
   const activeCards = cards.filter(c => c.status === 'active');
   const archivedCards = cards.filter(c => c.status === 'archived');
   // Fase F -- o teto conta CardInstances (regra única em shared/deck-engine.js),
   // nunca linhas.
   const usedInstances = ownCardInstanceUsage(cards);
-  const atLimit = !hasLink && usedInstances >= FREE_OWN_FLASHCARD_LIMIT;
+  const atLimit = !unlimited && usedInstances >= FREE_OWN_FLASHCARD_LIMIT;
 
   // Selo de tier -- eixo de QUANTIDADE (vínculo com professora) continua
   // separado do eixo de PREMIUM (formatos ricos) -- ver comentário em
   // shared/roles.js. Uma conta pode mostrar os dois selos juntos.
-  const tierBadgeHTML = (hasLink
-    ? `<span class="pill">${t('myFlashcards.badge.linked')}</span>`
-    : `<span class="pill">${t('myFlashcards.badge.free', { used: usedInstances, limit: FREE_OWN_FLASHCARD_LIMIT })}</span>`)
-    + (premium ? `<span class="pill">${t('myFlashcards.badge.premium')}</span>` : '');
+  const tierBadgeHTML = premium
+    ? `<span class="pill">${t('myFlashcards.badge.premiumUnlimited')}</span>`
+    : (hasLink
+      ? `<span class="pill">${t('myFlashcards.badge.linked')}</span>`
+      : `<span class="pill">${t('myFlashcards.badge.free', { used: usedInstances, limit: FREE_OWN_FLASHCARD_LIMIT })}</span>`);
 
   wrap.innerHTML = `
     <div class="profile-section">
@@ -289,6 +333,7 @@ async function renderMyFlashcardsView(opts){
         <div class="section-label" style="margin:14px 0 4px;">${t('myFlashcards.fields.title')}</div>
         <p class="profile-edit-hint" style="margin-top:-2px;">${t('myFlashcards.fields.hint')}</p>
         <div id="my-flashcard-native-fields"></div>
+        <div id="my-flashcard-tags"></div>
         <button type="button" class="admin-select-link" id="my-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; margin:6px 0 0;">${t('myFlashcards.preview')}</button>
         <label class="profile-edit-label" for="my-flashcard-deck" style="margin-top:14px;">${t('myFlashcards.deckDest')}</label>
         <select id="my-flashcard-deck" class="profile-edit-input">${personalDeckOptionsHTML(decks)}</select>
@@ -301,6 +346,7 @@ async function renderMyFlashcardsView(opts){
 
     <div class="profile-section" id="my-decks-section">
       <div class="section-label">${t('myFlashcards.decks.title')}</div>
+      ${tagFilterNoticeHTML()}
       <div id="my-decks-list">${personalDecksListHTML(decks)}</div>
       <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
         <input type="text" id="my-deck-new-name" class="profile-edit-input" placeholder="${t('myFlashcards.decks.newNamePlaceholder')}" maxlength="60" style="flex:1; min-width:140px;">
@@ -311,6 +357,13 @@ async function renderMyFlashcardsView(opts){
     </div>
 
     ${teacherDecksReadOnlyHTML(decks)}
+
+    <!-- Fase J: gerenciamento global das PRÓPRIAS tags (own_flashcards). Tags de
+         Teacher Cards nunca entram aqui (outra propriedade; somente leitura). -->
+    <div class="profile-section" id="my-tags-section">
+      <div class="section-label">🏷️ Gerenciar tags</div>
+      <div id="my-tag-manager"></div>
+    </div>
 
     <div class="profile-section">
       <div class="section-label" style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
@@ -347,6 +400,8 @@ async function renderMyFlashcardsView(opts){
   wireMyFlashcardsForm(wrap, atLimit, premium);
   wireMyFlashcardsCardButtons(wrap, premium);
   wireMyDecksSection(wrap);
+  // Fase J: rename/delete re-renderiza a view (chips das linhas e contagens frescas).
+  renderTagManagerInto(document.getElementById('my-tag-manager'), { scope: 'own', onChanged: () => renderMyFlashcardsView() });
   document.getElementById('anki-import-file')?.addEventListener('change', (e) => {
     if (typeof handleAnkiImportFileSelected === 'function') handleAnkiImportFileSelected(e.target.files[0]);
     e.target.value = '';
@@ -358,7 +413,7 @@ async function renderMyFlashcardsView(opts){
     const editingCard = MY_FLASHCARDS_STATE._cardsCache.find(c => c.id === MY_FLASHCARDS_STATE.editingCardId);
     if (editingCard){
       if (MY_FLASHCARDS_STATE.editingNativeState){
-        wireMyFlashcardNativeEditForm(editingCard, MY_FLASHCARDS_STATE.editingNativeState, wrap);
+        wireMyFlashcardNativeEditForm(editingCard, MY_FLASHCARDS_STATE.editingNativeState, wrap, premium);
       } else {
         wireMyFlashcardEditForm(editingCard, wrap, premium);
       }
@@ -386,7 +441,22 @@ function myFlashcardRowHTML(c, premium){
     if (!MY_FLASHCARDS_STATE.editingNativeState && classifyFlashcardRowModel(c) === 'native'){
       MY_FLASHCARDS_STATE.editingNativeState = createNativeNoteEditorStateFromRow(c);
     }
-    if (MY_FLASHCARDS_STATE.editingNativeState) return myFlashcardNativeEditFormHTML(c, MY_FLASHCARDS_STATE.editingNativeState);
+    // Decisão da autora (2026-10-05): "ninguém usa o formato antigo de
+    // cartão". Cartão LEGADO abre direto no editor novo, para qualquer
+    // plano -- é só um rascunho em memória (mesmo caminho do antigo botão
+    // "Usar o novo editor"); nada é gravado até "Salvar edição", e
+    // Cancelar descarta. O formulário antigo só sobra como recurso quando
+    // o conteúdo não pode ser convertido com segurança (preflight).
+    if (!MY_FLASHCARDS_STATE.editingNativeState && classifyFlashcardRowModel(c) === 'legacy'){
+      const preflight = legacyFlashcardConversionPreflight(c);
+      if (preflight.ok){
+        MY_FLASHCARDS_STATE.editingNativeState = nativeNoteEditorStateFromLegacyRow(c);
+        MY_FLASHCARDS_STATE.editingNativeConversionBaseline = cloneNoteEditorState(MY_FLASHCARDS_STATE.editingNativeState);
+      } else {
+        MY_FLASHCARDS_STATE._legacyConversionError = preflight.error;
+      }
+    }
+    if (MY_FLASHCARDS_STATE.editingNativeState) return myFlashcardNativeEditFormHTML(c, MY_FLASHCARDS_STATE.editingNativeState, premium);
     return myFlashcardEditFormHTML(c, premium);
   }
   return `
@@ -394,6 +464,7 @@ function myFlashcardRowHTML(c, premium){
       <div class="admin-badge-info">
         <div class="admin-badge-name">${escapeHTML(c.front)}${c.front_pinyin ? ` (${escapeHTML(c.front_pinyin)})` : ''} → ${escapeHTML(c.back_trans)}</div>
         <div class="admin-badge-desc">${c.note ? escapeHTML(c.note) + ' · ' : ''}${t('myFlashcards.row.createdOn', { date: fmtDate(c.created_at) })}</div>
+        ${(c.tags && c.tags.length) ? `<div data-row-tags style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">${noteTagChipsHTML(c.tags)}</div>` : ''}
       </div>
       <div style="display:flex; gap:6px;">
         <button class="admin-badge-delete-btn" data-preview-own-flashcard="${c.id}" title="${t('myFlashcards.row.previewTitle')}">🔎</button>
@@ -417,8 +488,7 @@ function myFlashcardEditFormHTML(c, premium){
   const direction = c.front_is_target_language === false ? 'target-back' : 'target-front';
   return `
     <div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:10px;">
-      ${premium ? `<button type="button" class="admin-select-link" id="edit-my-flashcard-use-native" style="align-self:flex-start; background:none; border:none; cursor:pointer; padding:0;">${t('myFlashcards.edit.useNative')}</button>
-      <p class="profile-edit-error" id="edit-my-flashcard-use-native-error"></p>` : ''}
+      ${MY_FLASHCARDS_STATE._legacyConversionError ? `<p class="profile-edit-error" style="margin:0;">${t('myFlashcards.edit.legacyConversionError', { reason: escapeHTML(MY_FLASHCARDS_STATE._legacyConversionError) })}</p>` : ''}
       ${!isMandarim ? `
       <div>
         <div class="section-label" style="margin:0 0 4px;">${t('myFlashcards.edit.sideLanguage')}</div>
@@ -535,16 +605,24 @@ function wireMyFlashcardEditForm(c, wrap, premium){
 // (refreshNativeCardTypeBox/transitionToXxx/CARD_TYPE_UI_META), só
 // chamando createOwnFlashcard()/updateOwnFlashcardContent() em vez das
 // versões teacher_flashcards.
-function myFlashcardNativeEditFormHTML(c, editorState){
+function myFlashcardNativeEditFormHTML(c, editorState, premium){
+  // Plano grátis só escolhe Normal; um tipo Premium já salvo continua
+  // aparecendo (selecionado) pra não ser trocado sem querer.
+  const typeOptions = cardTypeUIMetaForEntitlement(premium).slice();
+  if (!typeOptions.some(t => t.id === editorState.cardGenerationMode)){
+    const current = CARD_TYPE_UI_META.find(t => t.id === editorState.cardGenerationMode);
+    if (current) typeOptions.push(current);
+  }
   return `
     <div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:10px;">
       <div class="section-label" style="margin:0;">${t('myFlashcards.native.title')}</div>
       <p class="profile-edit-hint" style="margin:0;">${t('myFlashcards.native.hint')}</p>
       <div class="section-label" style="margin:6px 0 4px;">${t('myFlashcards.native.cardType')}</div>
       <select id="edit-my-native-flashcard-card-type" class="profile-edit-input">
-        ${CARD_TYPE_UI_META.map(ct => `<option value="${ct.id}" ${ct.id === editorState.cardGenerationMode ? 'selected' : ''}>${ct.label}</option>`).join('')}
+        ${typeOptions.map(ct => `<option value="${ct.id}" ${ct.id === editorState.cardGenerationMode ? 'selected' : ''}>${ct.label}</option>`).join('')}
       </select>
       <div id="edit-my-native-flashcard-fields"></div>
+      <div id="edit-my-native-flashcard-tags"></div>
       <button type="button" class="admin-select-link" id="edit-my-native-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; align-self:flex-start; padding:0;">${t('myFlashcards.preview')}</button>
       <label class="profile-edit-label">${t('myFlashcards.note.label')}</label>
       <textarea id="edit-my-native-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(editorState.privateNote || '')}</textarea>
@@ -557,16 +635,19 @@ function myFlashcardNativeEditFormHTML(c, editorState){
   `;
 }
 
-function wireMyFlashcardNativeEditForm(c, editorState, wrap){
+function wireMyFlashcardNativeEditForm(c, editorState, wrap, premium){
   // Fase 7e (ver CLAUDE.md) -- mesmo par uploadFn/deleteFn de
   // shared/admin-flashcards.js, só que as versões "own" (aluna é dona do
   // conteúdo) -- shared/flashcard-field-editor.js nunca chama
   // supabaseClient/Storage direto, só através destas 2 funções.
   // Fase 7f (implementação -- ver CLAUDE.md) -- ttsFn/noteId (linha JÁ
   // existe de verdade nesta tela de EDIÇÃO) habilitam "Gerar áudio".
-  const nativeFieldOpts = { namePrefix: 'edit-my-native', uploadFn: uploadOwnFlashcardMedia, deleteFn: deleteOwnFlashcardMedia, ttsFn: requestOwnFieldAudioTTS, noteId: editorState.noteId };
+  const nativeFieldOpts = { namePrefix: 'edit-my-native', uploadFn: uploadOwnFlashcardMedia, deleteFn: deleteOwnFlashcardMedia, ttsFn: requestOwnFieldAudioTTS, noteId: editorState.noteId,
+    // Mesma matriz do formulário de criação: grátis = sem áudio/upload/link.
+    allowedAudioOrigins: premium ? undefined : ['none', 'upload', 'url'] };
   const boxEl = document.getElementById('edit-my-native-flashcard-fields');
   refreshNativeCardTypeBox(boxEl, editorState, nativeFieldOpts);
+  mountNoteTagsEditor(document.getElementById('edit-my-native-flashcard-tags'), editorState);
 
   document.getElementById('edit-my-native-flashcard-card-type').addEventListener('change', (e) => {
     const newMode = e.target.value;
@@ -701,6 +782,7 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
   // rascunho ainda não foi salvo) habilitam "Gerar áudio" (Premium only,
   // via allowedAudioOrigins acima).
   refreshNativeCardTypeBox(document.getElementById('my-flashcard-native-fields'), MY_FLASHCARDS_STATE.nativeCardState, nativeFieldOpts);
+  mountNoteTagsEditor(document.getElementById('my-flashcard-tags'), MY_FLASHCARDS_STATE.nativeCardState);
 
   // Fase 6D.7 (ver CLAUDE.md) -- Preview do rascunho atual (não salvo).
   // languageAppKey aqui é sempre APP_KEY (o site fixa o idioma pra
@@ -839,6 +921,7 @@ function wireMyFlashcardsCardButtons(wrap){
       // novo editor" ser clicado.
       MY_FLASHCARDS_STATE.editingNativeState = null;
       MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
+      MY_FLASHCARDS_STATE._legacyConversionError = null;
     if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
       renderMyFlashcardsView();
     });
@@ -877,6 +960,7 @@ function myFlashcardsExportPayload(cardsToExport){
       backTrans: c.back_trans,
       note: c.note || null,
       frontIsTargetLanguage: c.front_is_target_language !== false,
+      tags: Array.isArray(c.tags) ? c.tags : [],
     })),
   };
 }
@@ -1009,7 +1093,7 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
       if (typeof addSelfFlashcardToState === 'function') addSelfFlashcardToState(result.card);
     }
   }
-  showToast(tp('myFlashcards.import.done', importedCount));
+  showToast(`${tp('myFlashcards.import.done', importedCount)} ${summarizeDroppedImportTags(importStates)}`.trim());
   renderMyFlashcardsView();
 }
 

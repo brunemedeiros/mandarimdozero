@@ -18,7 +18,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Chinês">
-<meta name="description" content="Estudo pessoal de chinês (mandarim) com a Prof. Brune">
+<meta name="description" content="Aprenda chinês (mandarim) com Prof. Brune">
 <!-- Open Graph / Twitter Card -- precisam ser HTML estático (crawlers de
      redes sociais não executam JS), por isso os valores são digitados aqui
      em vez de vir de shared/app-identity.js como o manifest.json (ver Fase
@@ -27,13 +27,13 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Idiomas com Prof. Brune">
 <meta property="og:title" content="Chinês com Prof. Brune">
-<meta property="og:description" content="Estudo pessoal de chinês (mandarim) com a Prof. Brune">
+<meta property="og:description" content="Aprenda chinês (mandarim) com Prof. Brune">
 <meta property="og:url" content="https://app.profbrune.com.br/zh/">
 <meta property="og:image" content="https://app.profbrune.com.br/zh/icons/icon-512.png">
 <meta property="og:locale" content="pt_BR">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Chinês com Prof. Brune">
-<meta name="twitter:description" content="Estudo pessoal de chinês (mandarim) com a Prof. Brune">
+<meta name="twitter:description" content="Aprenda chinês (mandarim) com Prof. Brune">
 <meta name="twitter:image" content="https://app.profbrune.com.br/zh/icons/icon-512.png">
 <script>
 // Aplica o tema salvo antes do primeiro paint, pra não piscar claro->escuro.
@@ -1668,6 +1668,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
   background: var(--paper-warm); border:1px solid var(--paper-line); overflow:hidden;
 }
 .vs-fill{ position:absolute; left:0; right:0; bottom:0; }
+.vs-fill[data-tier="none"]{ background: var(--ink-soft); opacity:.45; }
 .vs-fill[data-tier="weak"]{ background: var(--seal-red); }
 .vs-fill[data-tier="mid"]{ background: var(--dc-slot-0); }
 .vs-fill[data-tier="strong"]{ background: var(--jade); }
@@ -2003,6 +2004,20 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .public-profile-lang-stat{ display:flex; flex-direction:column; align-items:center; flex:1; }
 .public-profile-lang-stat .v{ font-size:15px; font-weight:800; color:var(--seal-red-dark); }
 .public-profile-lang-stat .l{ font-size:10px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em; margin-top:2px; }
+
+/* Public Deck (ver CLAUDE.md / docs/public-decks-contrato-tecnico.md) -- só tokens
+   já calibrados (--paper*/--ink*/--seal-red-dark); cor do Deck vem de uma lista
+   fechada e é aplicada como borda + tinta clara, com o texto sempre em --ink. */
+.public-deck-title-row{ display:flex; align-items:center; gap:12px; margin:6px 0 8px; }
+.public-deck-badge{
+  display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px;
+  border-radius:12px; border:2px solid var(--paper-line); font-size:20px; flex:none; color:var(--ink);
+}
+.public-deck-meta{ display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 12px; }
+.public-deck-subs{ margin:12px 0; }
+.public-deck-sub{ display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--ink); }
+.public-deck-actions{ margin-top:10px; }
+.public-deck-publish-form{ display:flex; flex-direction:column; gap:8px; margin:8px 0 8px 0; }
 
 /* Página standalone -- usada quando quem visita #/user/username NÃO tem
    sessão nem modo convidado (ver shared/auth.js initAuth(), bypass de
@@ -3044,6 +3059,11 @@ body.hide-pinyin .prompt-pinyin{
         <!-- Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila"
              removido de vez; "Origem" (Fase 4 do sistema de alunas
              particulares) subiu pro topo do painel. -->
+        <div id="review-tag-filter-wrap" hidden>
+          <div class="section-label">Tags</div>
+          <div id="review-tag-chips" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px;"></div>
+          <button type="button" class="admin-select-link" id="review-tag-clear" hidden style="background:none; border:none; cursor:pointer; padding:0;">Limpar filtro de tags</button>
+        </div>
         <div id="review-origin-select-wrap" hidden>
           <div class="section-label">Origem</div>
           <select class="review-settings-select" id="review-origin-select"></select>
@@ -3232,6 +3252,7 @@ body.hide-pinyin .prompt-pinyin{
       <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="classlogs" data-i18n="admin.panel.tab.classlogs">📝 Aulas</button>
       <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="materials" data-i18n="admin.panel.tab.materials">📚 Material de apoio</button>
       <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="premium" data-i18n="admin.panel.tab.premium">⭐ Premium</button>
+      <button class="leaderboard-tab" role="tab" aria-selected="false" data-admin-section="tags" data-i18n="admin.panel.tab.tags">🏷️ Tags</button>
     </div>
     <div id="admin-badges-content"></div>
     <div id="admin-analytics-content" style="display:none;"></div>
@@ -3242,6 +3263,7 @@ body.hide-pinyin .prompt-pinyin{
     <div id="admin-classlogs-content" style="display:none;"></div>
     <div id="admin-materials-content" style="display:none;"></div>
     <div id="admin-premium-content" style="display:none;"></div>
+    <div id="admin-tags-content" style="display:none;"></div>
   </div>
 
   <!-- ===== MEUS CARTÕES (Fase 5, aberta pra qualquer conta) ===== -->
@@ -3552,10 +3574,10 @@ body.hide-pinyin .prompt-pinyin{
         <label class="profile-edit-label" for="profile-edit-display-name">Nome exibido</label>
         <input type="text" id="profile-edit-display-name" class="profile-edit-input" maxlength="60" placeholder="Como você quer ser chamada(o)" data-i18n-attr="placeholder:ui.profileEdit.namePh">
 
-        <label data-i18n="ui.profileEdit.username" class="profile-edit-label" for="profile-edit-username">Nome de usuário</label>
+        <label data-i18n="ui.profileEdit.username" class="profile-edit-label" for="profile-edit-username">Seu identificador público (permanente)</label>
         <div class="profile-edit-username-wrap">
           <span class="profile-edit-at">@</span>
-          <input type="text" id="profile-edit-username" class="profile-edit-input" maxlength="24" placeholder="seu_username">
+          <input type="text" id="profile-edit-username" class="profile-edit-input" maxlength="24" readonly aria-readonly="true" title="Gerado pelo sistema; não pode ser alterado">
         </div>
 
         <label class="profile-edit-label" for="profile-edit-bio">Sobre mim</label>
@@ -3715,6 +3737,16 @@ body.hide-pinyin .prompt-pinyin{
   </div>
 </div>
 
+<div id="public-deck-modal" class="app-modal-overlay" style="display:none;">
+  <div class="app-modal">
+    <div class="app-modal-header">
+      <h3>Deck público</h3>
+      <button class="app-modal-close" id="public-deck-modal-close" aria-label="Fechar">✕</button>
+    </div>
+    <div class="app-modal-body" id="public-deck-modal-body"></div>
+  </div>
+</div>
+
 <div id="public-profile-modal" class="app-modal-overlay" style="display:none;">
   <div class="app-modal">
     <div class="app-modal-header">
@@ -3800,7 +3832,7 @@ body.hide-pinyin .prompt-pinyin{
   <div class="review-reminder-icon">🗂️</div>
   <div class="review-reminder-text">
     <div data-i18n="ui.reviewReminder.title" class="review-reminder-title">Vamos fazer uma pequena revisão?</div>
-    <div class="review-reminder-sub"><span id="review-reminder-count">0</span> palavras estão esperando por você — afie sua memória revisando o que já viu.</div>
+    <div class="review-reminder-sub"><span id="review-reminder-count">0</span> cartões estão esperando por você — afie sua memória revisando o que já viu.</div>
   </div>
   <div class="review-reminder-actions">
     <button data-i18n="ui.notNow" class="review-reminder-dismiss" id="review-reminder-dismiss-btn">Agora não</button>
@@ -3846,6 +3878,8 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../shared/admin-students.js"></script>
 <script src="../shared/admin-premium.js"></script>
 <script src="../shared/flashcard-model.js"></script>
+<script src="../shared/study-trail-model.js"></script>
+<script src="../shared/analytics-metrics.js"></script>
 <script src="../shared/deck-engine.js"></script>
 <script src="../shared/flashcard-editor-state.js"></script>
 <script src="../shared/flashcard-field-audio-recorder.js"></script>
@@ -3853,6 +3887,8 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../shared/flashcard-mc-editor.js"></script>
 <script src="../shared/flashcard-typeanswer-editor.js"></script>
 <script src="../shared/flashcard-cloze-editor.js"></script>
+<script src="../shared/flashcard-tags-editor.js"></script>
+<script src="../shared/tag-manager.js"></script>
 <script src="../shared/flashcard-native-persistence.js"></script>
 <script src="../shared/anki-parser.js"></script>
 <script src="../shared/anki-import.js"></script>
@@ -3873,6 +3909,7 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../shared/admin-reports.js"></script>
 <script src="../shared/leaderboard.js"></script>
 <script src="../shared/public-profile.js"></script>
+<script src="../shared/public-deck.js"></script>
 <script src="../shared/topbar-stats.js"></script>
 <script src="../shared/analytics.js"></script>
 <script src="../shared/tabs.js"></script>

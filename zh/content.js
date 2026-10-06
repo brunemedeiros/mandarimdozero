@@ -1,4 +1,4 @@
-// Banco de conteúdo — Mandarim do Zero (Nível Iniciante / HSK 1)
+// Banco de conteúdo — Chinês com Prof. Brune (Nível Iniciante / HSK 1)
 // 14 unidades, cada uma com objetivo comunicacional, vocabulário, frases-modelo e diálogo.
 
 // Hoje só existe o Nível 1 -- preparado pra crescer quando os próximos

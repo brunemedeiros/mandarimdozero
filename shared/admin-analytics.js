@@ -9,7 +9,7 @@
 // 007_create_usage_events_table.sql), então o pior que acontece é a tela
 // ficar vazia.
 //
-// SEMPRE filtra actor_type='student' (ver migration 008 e trackEvent()):
+// SEMPRE filtra actor_type IN ANALYTICS_STUDENT_ACTOR_TYPES ('user'+'student' legado) (ver migration 008 e trackEvent()):
 // atividade da própria autora nunca aparece nestas métricas, por padrão
 // nem chega a ser gravada -- ver o toggle "Excluir minha atividade dos
 // Analytics" logo no topo da seção.
@@ -207,6 +207,13 @@ function analyticsFormatDate(d){
   return fmtDate(d);
 }
 
+// K.0-A: valores de usage_events.actor_type que contam como atividade de
+// aluno. 'user' é o valor atual (migration 044 renomeou 'student' -> 'user');
+// 'student' é aceito de propósito por compatibilidade com clientes antigos /
+// service worker em cache que ainda gravam o valor antigo. 'admin' fica de
+// fora. Uma linha tem UM actor_type, então o IN nunca duplica evento.
+const ANALYTICS_STUDENT_ACTOR_TYPES = ['user', 'student'];
+
 function analyticsDayKey(iso){
   return (iso || '').slice(0, 10); // "2026-09-07T..." -> "2026-09-07"
 }
@@ -221,7 +228,7 @@ async function fetchUsageEventsForWindow(sinceIso, untilIso){
   let q = supabaseClient
     .from('usage_events')
     .select('user_id, language_app_key, event_type, event_name, meta, created_at, session_id, device_type, browser, os')
-    .eq('actor_type', 'student')
+    .in('actor_type', ANALYTICS_STUDENT_ACTOR_TYPES)
     // technical_error/technical_perf são Technical Analytics, não Product/
     // Learning Analytics -- ficam de fora daqui pra não contaminar "Alunos
     // ativos", "Sessões", exercisesPerSession, etc. com eventos que não são
@@ -329,7 +336,7 @@ async function fetchAllStudentEventsForRetention(){
   let q = supabaseClient
     .from('usage_events')
     .select('user_id, created_at')
-    .eq('actor_type', 'student')
+    .in('actor_type', ANALYTICS_STUDENT_ACTOR_TYPES)
     // Mesma exclusão de fetchUsageEventsForWindow: "retornou" precisa
     // significar atividade de aprendizagem de verdade, não só um
     // page_load automático ou um erro técnico -- senão a definição de
@@ -421,13 +428,13 @@ async function fetchBadgeGrantsInWindow(sinceIso, untilIso){
 // Conceitualmente separado do Learning/Product Analytics: consulta
 // PRÓPRIA, filtrando só event_type IN ('technical_error','technical_perf')
 // -- nunca misturada com lesson_complete/tab_switch na mesma agregação.
-// Mesmo actor_type='student' (a atividade de teste da autora tampouco
+// Mesmo actor_type (user/student) (a atividade de teste da autora tampouco
 // deve contar como "alunos tendo problemas técnicos").
 async function fetchTechnicalEventsForWindow(sinceIso, untilIso){
   let q = supabaseClient
     .from('usage_events')
     .select('user_id, event_type, event_name, meta, created_at')
-    .eq('actor_type', 'student')
+    .in('actor_type', ANALYTICS_STUDENT_ACTOR_TYPES)
     .in('event_type', ['technical_error', 'technical_perf'])
     .gte('created_at', sinceIso)
     .lte('created_at', untilIso)
@@ -1386,6 +1393,7 @@ function switchAdminPanelSection(section){
   document.getElementById('admin-classlogs-content').style.display = section === 'classlogs' ? '' : 'none';
   document.getElementById('admin-materials-content').style.display = section === 'materials' ? '' : 'none';
   document.getElementById('admin-premium-content').style.display = section === 'premium' ? '' : 'none';
+  document.getElementById('admin-tags-content').style.display = section === 'tags' ? '' : 'none';
   if (section === 'badges') renderAdminBadgesView();
   else if (section === 'notifications') renderAdminNotificationsView();
   else if (section === 'reports') renderAdminReportsView();
@@ -1394,6 +1402,7 @@ function switchAdminPanelSection(section){
   else if (section === 'classlogs') renderAdminClassLogsView();
   else if (section === 'materials') renderAdminSupportMaterialsView();
   else if (section === 'premium') renderAdminPremiumView();
+  else if (section === 'tags') renderAdminTagsView();
   else renderAdminAnalyticsView();
 }
 

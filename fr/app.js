@@ -1,6 +1,6 @@
 /* ============================================================
    Francês do Zero — lógica do app
-   Adaptado do motor do Mandarim do Zero: SRS (SM-2), TTS via Web Speech API,
+   Adaptado do motor do app de chinês: SRS (SM-2), TTS via Web Speech API,
    gamificação, persistência via Supabase, exportação para Anki (.apkg).
    Diferenças principais em relação ao original:
    - Sem par pinyin/hanzi: cada item de conteúdo é só { f: francês, t: português }.
@@ -412,6 +412,14 @@ function wireKnowButtons(container){
       const cardId = btn.dataset.cardId;
       const card = STATE.cards.find(c => c.id === cardId);
       if (!card) return;
+      // K2-E: "já sei" é da PALAVRA. O botão grada/reseta o card A (o do id
+      // recebido); se a palavra só tem evidência via a irmã B, não há o que
+      // desmarcar em A -- avisa em vez de reescrever o histórico de B.
+      const siblings = studyWordCardsFor(STATE.cards, card.unitId, card.vocabIdx);
+      if (card.reps === 0 && studyWordHasEvidence(siblings)){
+        showToast('Esta palavra já foi estudada pelo cartão inverso.');
+        return;
+      }
 
       if (card.reps > 0){
         // já estava marcado — permite desmarcar caso tenha sido engano.
@@ -439,6 +447,10 @@ function wireKnowButtons(container){
         btn.textContent = t('zh.path.knownDone');
         showToast(t('toast.markedKnown'));
       }
+      // K2-E: o rótulo reflete a PALAVRA (A ou B com histórico).
+      const wordKnown = studyWordHasEvidence(siblings);
+      btn.classList.toggle('known', wordKnown);
+      btn.textContent = wordKnown ? '✓ Já sei' : 'Já sei?';
 
       saveState();
       checkUnitCompletion(STATE.currentUnitId);
@@ -449,46 +461,16 @@ function wireKnowButtons(container){
 
 // ---------- Construção do banco de cartões a partir do content.js ----------
 // Cada cartão SRS = 1 item de vocabulário (frente: francês, com áudio; verso: tradução)
-function buildCardsFromUnits(units){
+function buildCardsFromUnits(units, appKey = 'frances'){
+  // K2-C: cada palavra vira uma Note nativa `normal_reversed` com dois
+  // CardInstances (A = id legado, B = `-b`), montados por
+  // shared/study-trail-model.js sobre o motor existente. appKey tem default
+  // literal: este construtor roda no init de STATE, antes de `const APP_KEY`.
   const cards = [];
   units.forEach(u => {
     if (u.type === 'grammar') return; // unidades de gramática não têm vocabulário/flashcards
     u.vocab.forEach((v, idx) => {
-      cards.push({
-        id: `u${u.id}-v${idx}`,
-        unitId: u.id,
-        unitTitle: u.title,
-        vocabIdx: idx,
-        type: 'vocab',
-        front: v.f,
-        back_trans: v.t,
-        // Fase 3 do sistema de alunas particulares (ver CLAUDE.md):
-        // 'origin' é metadado de UM só motor de cartão -- distingue "de onde
-        // veio" (trilha vs. professora vs. futura auto-criação) sem nunca
-        // virar um sistema de revisão paralelo. Cartão de trilha = 'study'.
-        origin: 'study',
-        // Fase E: destino organizacional (Course Unit Deck). NUNCA substitui
-        // unitId (identidade pedagógica). null até os Course Decks serem
-        // carregados (ensureCourseDecksLoaded) -- Study Trail funciona igual.
-        deckId: null,
-        ef: 2.5,
-        interval: 0,
-        reps: 0,
-        due: 0,
-        lapses: 0,
-        // Estado FSRS (Fase 3) -- cartão novo nasce direto no novo modelo,
-        // sem precisar passar por migrateCardToFSRS().
-        stability: 0,
-        difficulty: 0,
-        state: 'new',
-        lastReview: null,
-        fsrsReps: 0,
-        fsrsLapses: 0
-        // (sem fsrsMigrated aqui de propósito -- ver comentário em
-        // migrateCardToFSRS() no shared/fsrs.js: setar isso já no
-        // nascimento do cartão faria o merge de um save antigo, que roda
-        // DEPOIS deste construtor, ser ignorado pelo guard da migração.)
-      });
+      buildStudyWordCards(u, v, idx, appKey).forEach(c => cards.push(c));
     });
   });
   return cards;
@@ -863,7 +845,9 @@ const STATE = {
     reviewFilter: 'oldest', // 'all' | 'hard' | 'oldest' (padrão) -- ver reviewFilterQueue()
     // Fase 4 do sistema de alunas particulares (ver CLAUDE.md): filtro por
     // origem do cartão -- ver matchesReviewOriginFilter/eligibleReviewPool.
-    reviewOriginFilter: 'all' // 'all' (padrão) | 'study' | 'teacher'
+    reviewOriginFilter: 'all', // 'all' (padrão) | 'study' | 'teacher'
+    // Fase I (Tags): filtro por Tag, OR entre as selecionadas ([] = sem filtro).
+    reviewTagFilter: []
   },
   dailyMinutesLog: {}, // legado -- não lido mais pra nada, só continua sendo escrito (addStudyMinutes) pra não perder histórico já salvo
   dailyLessonsLog: {}, // 'YYYY-MM-DD' -> lições (que contam pra meta) concluídas naquele dia
@@ -912,7 +896,14 @@ const STATE = {
     grammarLessons: 0, conjugationSessions: 0, conjugationCorrect: 0,
     conjugationTenses: [], reviewsDone: 0, speedReviewSessions: 0, matchGamesPlayed: 0
   },
-  completedChallenges: {} // challengeId -> true -- "Desafios" concluídos, ver challenges_do_aluno
+  completedChallenges: {}, // challengeId -> true -- "Desafios" concluídos, ver challenges_do_aluno
+  // Ditados (Fatia 2): dictationId -> { bestScore, attempts, lastScore, lastAt, wrongWords }.
+  // Atualizado só por updateDictationRecord() (bloco dictation-answer-logic).
+  dictations: {},
+  // Fase 6: revisão espaçada dos desafios errados (fail/partial). challengeId ->
+  // { id, lastErrorAt, lastSeenAt, box } -- caixas Leitner 1/3/7/14 dias.
+  // Atualizado só por updateChallengeReviewEntry() (bloco challenge-review-logic).
+  challengeReviews: {}
 };
 
 // Cada nível é acessível livremente (o aluno escolhe o nível quando quiser);
@@ -1106,7 +1097,7 @@ document.getElementById('report-menu-btn').addEventListener('click', () => {
 
 function serializeState(){
   return {
-    cards: STATE.cards,
+    cards: serializeCardsForSave(STATE.cards),
     cardVariants: STATE.cardVariants,
     unitProgress: STATE.unitProgress,
     xp: STATE.xp,
@@ -1128,6 +1119,8 @@ function serializeState(){
     checkpointProgress: STATE.checkpointProgress,
     levelTestProgress: STATE.levelTestProgress,
     completedChallenges: STATE.completedChallenges,
+    dictations: STATE.dictations,
+    challengeReviews: STATE.challengeReviews,
     // Só leitura pro Perfil (ver computeProgressSummary) -- nunca restaurado
     // de volta em applySerializedState, é recalculado a cada save.
     progressSummary: computeProgressSummary()
@@ -1137,17 +1130,9 @@ function serializeState(){
 function applySerializedState(data){
   if (!data) return;
   if (data.cards) {
-    const byId = {};
-    data.cards.forEach(c => byId[c.id] = c);
-    // Fase E: deckId é dado DERIVADO do banco (decks/deck_id), nunca progresso
-    // de memória -- um save antigo carrega o deckId de quando foi salvo, que
-    // pode estar defasado (Deck movido/recriado). O valor fresco vence.
-    STATE.cards.forEach(c => {
-      if (!byId[c.id]) return;
-      const freshDeckId = c.deckId;
-      Object.assign(c, byId[c.id]);
-      c.deckId = freshDeckId === undefined ? null : freshDeckId;
-    });
+    // K2-C: cards da trilha só recebem a whitelist de progresso; ver
+    // mergeSavedCards (shared/study-trail-model.js).
+    mergeSavedCards(STATE.cards, data.cards);
   }
   if (data.cardVariants) STATE.cardVariants = CardVariants.normalizeCardVariants(data.cardVariants);
   // Fase 3 (reestruturação do motor de memória): migração SM2->FSRS,
@@ -1181,6 +1166,21 @@ function applySerializedState(data){
   if (data.checkpointProgress) Object.assign(STATE.checkpointProgress, data.checkpointProgress);
   if (data.levelTestProgress) Object.assign(STATE.levelTestProgress, data.levelTestProgress);
   if (data.completedChallenges) Object.assign(STATE.completedChallenges, data.completedChallenges);
+  if (data.challengeReviews && typeof data.challengeReviews === 'object'){
+    Object.keys(data.challengeReviews).forEach(id => {
+      const e = sanitizeChallengeReviewEntry(data.challengeReviews[id], id);
+      if (e) STATE.challengeReviews[id] = e;
+    });
+  }
+  // Save antigo não tem o campo (nada a fazer); registros malformados são
+  // saneados pela mesma função que atualiza (bestScore nunca diminui).
+  if (data.dictations && typeof data.dictations === 'object'){
+    Object.keys(data.dictations).forEach(id => {
+      if (id === '__proto__' || id === 'constructor' || id === 'prototype') return;
+      const cur = STATE.dictations[id], inc = sanitizeDictationRecord(data.dictations[id]);
+      STATE.dictations[id] = cur ? Object.assign({}, inc, { bestScore: Math.max(inc.bestScore, cur.bestScore || 0) }) : inc;
+    });
+  }
 }
 
 // registerExerciseCorrect, cardsDueNow, newCards, XP_PER_GRADE, todayStr e
@@ -1326,7 +1326,9 @@ function maybeShowReviewReminder(){
   const today = todayStr();
   if (STATE.lastReviewReminderDay === today) return;
 
-  const dueCount = cardsDueNow(eligibleReviewPool()).length;
+  // K.7: Devido = não-New com due<=agora (structuralCounts). O antigo
+  // cardsDueNow() contava New (due=0) como pendente.
+  const dueCount = structuralCounts(eligibleReviewPool()).due;
   if (dueCount < REVIEW_REMINDER_THRESHOLD) return;
 
   STATE.lastReviewReminderDay = today;
@@ -1879,10 +1881,12 @@ function showBadgeUnlockCelebration(badge, onDone){
 // RENDER: Trilha (path)
 // ============================================================
 function unitCardCounts(unitId){
+  // K2-E: total/learned em PALAVRAS (Note = A+B contam 1); dueForReview
+  // continua por CardInstance (é fila de Review, A e B independentes).
   const pool = STATE.cards.filter(c => c.unitId === unitId);
-  const learned = pool.filter(c => c.reps > 0).length;
-  const dueForReview = cardsDueNow(pool.filter(c => c.reps > 0)).length;
-  return { total: pool.length, learned, dueForReview };
+  const { total, learned } = studyTrailWordProgress(pool); // mesma semântica de Progresso (Note, só trilha)
+  const dueForReview = structuralCounts(pool).due; // K.7: mesma definição de Devido (não-New vencido)
+  return { total, learned, dueForReview, totalCards: pool.length };
 }
 
 // Unidades de um nível, na ordem — usado tanto pro desbloqueio sequencial
@@ -2997,7 +3001,7 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
   const v = u.vocab[idx];
   const cardId = `u${u.id}-v${idx}`;
   const card = STATE.cards.find(c => c.id === cardId);
-  const alreadyKnown = card && card.reps > 0;
+  const alreadyKnown = studyWordHasEvidence(studyWordCardsFor(STATE.cards, u.id, idx)); // K2-E: nível de palavra
   const matchingPhrase = findMatchingPhrase(v, u);
   acq.introduced[idx] = true;
 
@@ -3051,7 +3055,7 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
 function pickVocabFormat(unit, idx, intent){
   const cardId = `u${unit.id}-v${idx}`;
   const card = STATE.cards.find(c => c.id === cardId);
-  const exposed = card && card.reps > 0;
+  const exposed = studyWordHasEvidence(studyWordCardsFor(STATE.cards, unit.id, idx)); // K2-E: nível de palavra
   const misses = (STEP_STATE.acq && STEP_STATE.acq.wordMisses[idx]) || 0;
 
   if (intent === 'mixed' || intent === 'consolidation'){
@@ -3567,7 +3571,7 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
   // há cartões pra revisar (e mandar direto pro Flashcard) depois de toda
   // lição com vocabulário novo -- mesmo critério já usado em
   // unitCardCounts() pra "dueForReview".
-  const dueCount = cardsDueNow(eligibleReviewPool().filter(c => c.reps > 0)).length;
+  const dueCount = structuralCounts(eligibleReviewPool()).due; // K.7: Devido estrutural (não-New vencido)
   contentEl.innerHTML = `
     <div class="lesson-complete">
       <div class="lesson-complete-icon tier-pop">✅</div>
@@ -4765,6 +4769,9 @@ function frAccentPickerHTML(){
 function wireFrAccentPicker(pickerEl, inputEl){
   if (!pickerEl || !inputEl) return;
   pickerEl.querySelectorAll('.fr-accent-key').forEach(btn => {
+    // Não deixa o toque na tecla tirar o foco/cursor do campo (no celular
+    // isso fechava e reabria o teclado).
+    btn.addEventListener('mousedown', e => e.preventDefault());
     btn.addEventListener('click', () => {
       const start = inputEl.selectionStart ?? inputEl.value.length;
       const end = inputEl.selectionEnd ?? inputEl.value.length;
@@ -5383,7 +5390,7 @@ const SPEED_STATE = {
 // "digite a resposta" ficam de fora (resposta aberta/digitada, sem texto
 // curto pronto pra virar tile/opção), mesmo critério de sempre.
 function hasPlainFrontBack(card){
-  if (!card.cardInstance) return true; // trilha (origin:'study') -- sempre foi par simples front/back
+  // K2-I: todo card de STATE.cards tem cardInstance (study/teacher/self nascem de buildEngineCardsFromRow).
   return card.cardInstance.cardTypeId === 'normal' || card.cardInstance.cardTypeId === 'multiple_choice';
 }
 
@@ -5396,19 +5403,13 @@ function hasPlainFrontBack(card){
 // abaixo) -- cardAnswerText() aceita os dois sem o chamador precisar saber
 // qual é qual.
 function cardPromptText(cardOrPseudo){
-  if (cardOrPseudo.cardInstance){
-    const view = resolveCardContentView(cardOrPseudo);
-    return (view.kind === 'multiple_choice' ? view.prompt : view.front).text;
-  }
-  return cardOrPseudo.front; // trilha
+  const view = resolveCardContentView(cardOrPseudo);
+  return (view.kind === 'multiple_choice' ? view.prompt : view.front).text;
 }
 function cardAnswerText(cardOrPseudo){
   if ('displayAnswerText' in cardOrPseudo) return cardOrPseudo.displayAnswerText;
-  if (cardOrPseudo.cardInstance){
-    const view = resolveCardContentView(cardOrPseudo);
-    return view.kind === 'multiple_choice' ? view.correctText : view.back.text;
-  }
-  return cardOrPseudo.back_trans; // trilha
+  const view = resolveCardContentView(cardOrPseudo);
+  return view.kind === 'multiple_choice' ? view.correctText : view.back.text;
 }
 
 function buildSpeedQueue(){
@@ -5420,7 +5421,9 @@ function buildSpeedQueue(){
   // esse teto e tornaria o controle de Intensidade sem efeito nenhum).
   // Valor salvo em STATE.studySettings.reviewFilter não é apagado (só
   // deixou de ser lido) -- ver reviewFilterQueue().
-  return reviewFilterQueue('oldest', eligibleReviewPool().filter(hasPlainFrontBack));
+  // K2-F: Speed é exercício de vocabulário -> projeção da palavra (A) para a
+  // trilha; B continua existindo para Review/FSRS/Deck, só não vira 2ª palavra.
+  return reviewFilterQueue('oldest', projectStudyWordsToA(eligibleReviewPool().filter(hasPlainFrontBack)));
 }
 
 function buildSpeedOptions(card){
@@ -5431,7 +5434,7 @@ function buildSpeedOptions(card){
   // lido por cardAnswerText() acima) -- o resto do fluxo (answerSpeedQuestion)
   // compara identidade com `card` pra saber se ACERTOU, e só usa o texto
   // pra exibição, então funciona sem mudança nenhuma lá.
-  if (card.cardInstance && card.cardInstance.cardTypeId === 'multiple_choice'){
+  if (card.cardInstance.cardTypeId === 'multiple_choice'){
     const view = resolveCardContentView(card);
     return shuffle([card, ...view.distractorTexts.map(text => ({ displayAnswerText: text }))]);
   }
@@ -5446,13 +5449,14 @@ function buildSpeedOptions(card){
   // view.back.text de um distrator desse tipo. Nunca oferecer um cloze/
   // "digite a resposta" como opção de múltipla escolha de qualquer forma
   // (não são pares prompt/resposta curtos, mesmo critério de sempre).
-  const pool = STATE.cards.filter(c => c !== card && c.unitId === card.unitId && hasPlainFrontBack(c));
+  // K2-F: distratores = 1 por palavra (projeção A); B nunca é distrator.
+  const pool = projectStudyWordsToA(STATE.cards.filter(c => c !== card && c.unitId === card.unitId && hasPlainFrontBack(c)));
   let distractors = shuffle(pool).slice(0, 3);
   if (distractors.length < 3){
     // Fallback só quando a unidade não tem 3 outras cartas -- puxa de
     // eligibleReviewPool() (não STATE.cards puro) pra não arriscar mostrar,
     // mesmo como alternativa errada, uma palavra de uma unidade nunca aberta.
-    const extra = shuffle(eligibleReviewPool().filter(c => c !== card && hasPlainFrontBack(c) && !distractors.includes(c))).slice(0, 3 - distractors.length);
+    const extra = shuffle(projectStudyWordsToA(eligibleReviewPool()).filter(c => c !== card && hasPlainFrontBack(c) && !distractors.includes(c))).slice(0, 3 - distractors.length);
     distractors = distractors.concat(extra);
   }
   return shuffle([card, ...distractors]);
@@ -5469,7 +5473,28 @@ function matchesReviewOriginFilter(card){
   return filter === 'all' || card.origin === filter;
 }
 
+// Fase I (Tags): filtro de Review por Tag -- estado PRÓPRIO
+// (STATE.studySettings.reviewTagFilter, lista de slugs), independente de
+// reviewOriginFilter. Semântica: vazio = sem restrição; 1+ tags = OR (o
+// card entra se a NOTE tiver pelo menos uma). A tag é da Note, então
+// CardInstances irmãos (reverso, Cloze) passam/ficam juntos. Só SELECIONA
+// cards elegíveis: nunca toca FSRS, Deck nem origem. cardMatchesTagFilter()
+// vive em shared/flashcard-model.js (fonte única).
+function activeReviewTagFilter(){
+  const f = STATE.studySettings.reviewTagFilter;
+  return Array.isArray(f) ? f : [];
+}
+function matchesReviewTagFilter(card){
+  return cardMatchesTagFilter(card, activeReviewTagFilter());
+}
+
 function eligibleReviewPool(){
+  return STATE.cards.filter(isCardLessonCompleted).filter(matchesReviewOriginFilter).filter(matchesReviewTagFilter);
+}
+
+// Universo de onde a UI tira as tags disponíveis: o pool do Review geral
+// SEM o próprio filtro de tag (senão selecionar uma tag esconderia as outras).
+function reviewTagUniverse(){
   return STATE.cards.filter(isCardLessonCompleted).filter(matchesReviewOriginFilter);
 }
 
@@ -5506,10 +5531,11 @@ function hardWordsPool(){
 //   Medianas = o resto do pool.
 function vocabStrengthBuckets(){
   const pool = eligibleReviewPool();
-  const weak = pool.filter(c => c.reps === 0 || c.lapses >= 2).length;
-  const strong = pool.filter(c => c.reps > 0 && c.lapses < 2 && c.interval >= 60).length;
-  const medium = pool.length - weak - strong;
-  return { weak, medium, strong };
+  // K.3: força é por NOTE (conteúdo) -- A+B da trilha, reverso e Cloze contam
+  // uma vez. Nenhuma irmã estudada = notStarted (nunca "fraca"); com estudadas
+  // = a mais fraca entre elas. Fonte: shared/analytics-metrics.js.
+  const st = contentMetrics(pool).strength;
+  return { notStarted: st.not_started, weak: st.weak, medium: st.medium, strong: st.strong };
 }
 
 // Fase 12: REVISÕES DE HOJE (o que o motor decidiu que é hora de revisar
@@ -5592,7 +5618,7 @@ function reviewFilterQueue(filter, pool){
   if (filter === 'hard') return getStudyQueue(pool, { scope: 'hard' });
   if (filter === 'all') return getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
   const queue = getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
-  queue.sort((a, b) => (a.reps > 0 ? a.due : Infinity) - (b.reps > 0 ? b.due : Infinity));
+  queue.sort((a, b) => (cardStudyBucket(a) !== 'new' ? a.due : Infinity) - (cardStudyBucket(b) !== 'new' ? b.due : Infinity));
   return queue.slice(0, sessionIntensityToLimit(STATE.studySettings.sessionIntensity));
 }
 
@@ -5649,9 +5675,9 @@ function renderReviewTodayWidget(){
 function renderVocabStrengthWidget(){
   const wrap = document.getElementById('vocab-strength-widget');
   if (!wrap) return;
-  const { weak, medium, strong } = vocabStrengthBuckets();
-  if (weak + medium + strong === 0){ wrap.innerHTML = ''; return; }
-  const max = Math.max(weak, medium, strong, 1);
+  const { notStarted, weak, medium, strong } = vocabStrengthBuckets();
+  if (notStarted + weak + medium + strong === 0){ wrap.innerHTML = ''; return; }
+  const max = Math.max(notStarted, weak, medium, strong, 1);
   const h = n => Math.max(10, Math.round(n / max * 100));
   const item = (tier, count, label) => `
     <div class="vs-item">
@@ -5662,6 +5688,7 @@ function renderVocabStrengthWidget(){
   wrap.innerHTML = `
     <div class="section-label">${t('review.strength.title')}</div>
     <div class="vocab-strength-row">
+      ${item('none', notStarted, t('review.strength.notStarted'))}
       ${item('weak', weak, t('review.strength.weak'))}
       ${item('mid', medium, t('review.strength.medium'))}
       ${item('strong', strong, t('review.strength.strong'))}
@@ -5726,6 +5753,8 @@ function renderReviewModeSelect(){
     document.getElementById('mode-card-speed').addEventListener('click', () => openReviewSession('speed'));
   }
 
+  // K2-F: Combinar é vocabulário -> conta palavras (projeção A na trilha), não CardInstances.
+  const matchWordCount = projectStudyWordsToA(pool).length;
   const praticarEl = document.getElementById('review-mode-cards-praticar');
   praticarEl.innerHTML = `
     <button class="review-mode-card" id="mode-card-hard" ${hardCount === 0 ? 'disabled' : ''}>
@@ -5734,9 +5763,9 @@ function renderReviewModeSelect(){
       <div class="name">${t('review.mode.hard.name')}</div>
       <div class="desc">${t('review.mode.hard.desc')}</div>
     </button>
-    <button class="review-mode-card" id="mode-card-match" ${pool.length < 10 ? 'disabled' : ''}>
+    <button class="review-mode-card" id="mode-card-match" ${matchWordCount < 10 ? 'disabled' : ''}>
       <div class="icon">🧩</div>
-      <div class="count">${pool.length}</div>
+      <div class="count">${matchWordCount}</div>
       <div class="name">${t('review.mode.match.name')}</div>
       <div class="desc">${t('review.mode.match.desc')}</div>
     </button>
@@ -5788,6 +5817,7 @@ function backToReviewModeSelect(){
   SPEED_STATE.active = false;
   document.getElementById('review-mode-select-wrap').style.display = 'block';
   document.getElementById('review-session-wrap').style.display = 'none';
+  STATE.reviewSessionDeckId = null; // K2-H: sair da sessão não deixa escopo de Deck stale
   renderReviewModeSelect();
 
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'tab', tab: 'review' });
@@ -5821,7 +5851,7 @@ function stopMatchTimer(){}
 // escolhido direto via startMatchGame).
 function renderMatchSizePicker(){
   const el = document.getElementById('match-review-content');
-  const poolLen = eligibleReviewPool().length;
+  const poolLen = projectStudyWordsToA(eligibleReviewPool()).length; // K2-F: palavras, não CardInstances da trilha
   const minPairs = Math.min(...MATCH_SIZE_OPTIONS);
   if (poolLen < minPairs * 2){
     el.innerHTML = `
@@ -5861,7 +5891,8 @@ function startMatchGame(){
   trackEvent('lesson_start', 'match_game', null);
   // Fase 4: seleção via getStudyQueue(scope:'all') -- mesmo pool de antes,
   // Combinar é prática de reconhecimento, não revisão SRS.
-  const pool = shuffle(getStudyQueue(eligibleReviewPool().filter(hasPlainFrontBack), { scope: 'all' }));
+  // K2-F: Combinar = vocabulário -> 1 par por palavra (projeção A na trilha).
+  const pool = shuffle(getStudyQueue(projectStudyWordsToA(eligibleReviewPool().filter(hasPlainFrontBack)), { scope: 'all' }));
   const pairCount = Math.min(MATCH_STATE.pairSize, pool.length);
   MATCH_STATE.pairs = pool.slice(0, pairCount);
   MATCH_STATE.tiles = shuffle([
@@ -6022,7 +6053,7 @@ function renderSpeedReview(){
   // aprendida no total). As duas mensagens não podem ser a mesma.
   if (SPEED_STATE.queue.length === 0){
     const pool = eligibleReviewPool();
-    el.innerHTML = pool.length < 4 ? `
+    el.innerHTML = projectStudyWordsToA(pool).length < 4 ? `
       <div class="review-empty">
         <div class="big-emoji">⚡</div>
         <h3>${t('review.insufficientTitle')}</h3>
@@ -6196,6 +6227,7 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
   // -- Combinar continua NÃO fazendo isso (reconhecimento, não revisão;
   // só promove cartão nunca estudado, ver onMatchTileClick).
   applyMemoryGrade(card, isCorrect ? 2 : 0);
+  trackReviewAnswer('speed_review', card, isCorrect ? 2 : 0);
 
   if (isCorrect){
     const speedBonus = Math.max(10, Math.round(100 * (1 - elapsed / SPEED_TIME_LIMIT)));
@@ -6285,16 +6317,8 @@ function startReviewSession(){
     ? getStudyQueue(pool, { scope: 'unit', newCardsLimit: STATE.studySettings.newCardsPerDay })
     : reviewFilterQueue('oldest', pool);
 
-  // Decide a direção de cada carta de TRILHA ANTES de embaralhar/mostrar --
-  // alterna a partir da última vez que essa carta foi revisada (ver
-  // nextCardDirection em shared/srs.js). Calculado 1x aqui, não a cada
-  // render. Fase 4 (motor de tipos/templates, ver CLAUDE.md): cartão nativo
-  // (Note/CardInstance, origin teacher/self) NUNCA recebe reviewDirection --
-  // a direção dele é 100% decidida pelo CardInstance (frontFieldIndex/
-  // backFieldIndex), a sessão nunca escolhe/alterna (restrição explícita da
-  // autora). "Normal com reverso" (2 CardInstance independentes, Fase 4a) é
-  // o único jeito de ver as 2 direções -- nunca um toggle de sessão.
-  queue.forEach(c => { if (!c.cardInstance) c.reviewDirection = nextCardDirection(c); });
+  // K2-G: a sessão só decide QUAL CardInstance é estudado; a direção (A/B) é
+  // estrutural do próprio CardInstance (frontFieldIndex/backFieldIndex).
 
   // "Mais antigas primeiro" só cumpre o que promete se a ordem sobreviver
   // até a tela -- embaralhar (como sempre foi) destruiria exatamente essa
@@ -6405,6 +6429,7 @@ function deckReviewSummary(deckId){
     new: counts.new,
     learning: counts.learning,
     review: counts.review,
+    due: counts.due,
   };
 }
 
@@ -6415,18 +6440,14 @@ function deckReviewSummary(deckId){
 // MESMA função que startReviewSession()/buildSpeedQueue() já usam pro fluxo
 // normal REVISAR, então newCardsPerDay/sessionIntensity/"mais antigas
 // primeiro" continuam valendo sem nenhum código de limite novo (D6). Direção
-// de carta de TRILHA (nextCardDirection) replicada aqui só por completude
-// defensiva -- getStudyScopeForDeck() já exclui 100% dos cards de trilha
-// (eles nunca têm deckId, D3), então este `if` nunca dispara na prática
-// hoje; mantido pra nunca reintroduzir isReverse/reviewDirection como
-// mecanismo de cartão nativo (nenhuma mudança de direção em relação ao que
-// startReviewSession() já faz, seção 11 -- "Direção").
-async function startDeckReviewSession(deckId){
+// (K2-G): estrutural do CardInstance -- a sessão de Deck só escolhe quais entram.
+async function startDeckReviewSession(deckId, opts){
+  const restore = !!(opts && opts.restore);
   trackEvent('lesson_start', 'flashcard_review', null);
   const decks = await ensureDecksLoadedForReview();
-  const pool = getStudyScopeForDeck(decks, deckId, eligibleDeckReviewPool());
+  // Fase I (Tags): Deck scope AND Tag filter -- o Deck decide o universo, a tag só reduz.
+  const pool = getStudyScopeForDeck(decks, deckId, eligibleDeckReviewPool()).filter(matchesReviewTagFilter);
   const queue = reviewFilterQueue('oldest', pool);
-  queue.forEach(c => { if (!c.cardInstance) c.reviewDirection = nextCardDirection(c); });
 
   STATE.reviewSessionUnitFilter = null;
   STATE.reviewSessionDeckId = deckId;
@@ -6435,6 +6456,17 @@ async function startDeckReviewSession(deckId){
   STATE.reviewIndex = 0;
   STATE.reviewCardState = null;
 
+  // K2-H: o botão vive fora da aba Review (ex.: "Meus Cartões"); sem trocar
+  // a view ativa a fila era montada numa tela invisível. switchTab('review')
+  // vem ANTES de mostrar a sessão (ele reseta os wrappers para o seletor de
+  // modos); reviewSessionUnitFilter já está nulo, então não dispara a sessão
+  // de unidade. A rota carrega o deckId para voltar/recarregar não perder o escopo.
+  // restore=true (Voltar/recarregar): a parte pós-await roda depois do fim de
+  // renderRoute(), então suprime o router aqui para não empilhar histórico.
+  const wasRestoring = (typeof ROUTER !== 'undefined') ? ROUTER.restoring : false;
+  if (restore && typeof ROUTER !== 'undefined') ROUTER.restoring = true;
+  try {
+  if (typeof switchTab === 'function') switchTab('review');
   document.getElementById('review-mode-select-wrap').style.display = 'none';
   document.getElementById('review-session-wrap').style.display = 'block';
   document.getElementById('review-content').style.display = 'block';
@@ -6442,7 +6474,10 @@ async function startDeckReviewSession(deckId){
   document.getElementById('match-review-content').style.display = 'none';
 
   renderReviewView();
-  if (typeof routerNavigate === 'function') routerNavigate({ type: 'reviewSession', mode: 'flashcard' });
+  if (typeof routerNavigate === 'function') routerNavigate({ type: 'reviewSession', mode: 'flashcard', deckId });
+  } finally {
+    if (restore && typeof ROUTER !== 'undefined') ROUTER.restoring = wasRestoring;
+  }
 }
 
 function shuffle(arr){
@@ -6811,7 +6846,7 @@ function renderReviewView(){
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">☕</div>
-        <h3>${STATE.reviewSessionDeckId ? t('review.session.deckEmptyTitle') : (STATE.reviewSessionUnitFilter ? t('review.session.unitEmptyTitle') : t('review.session.allDoneTitle'))}</h3>
+        <h3>${activeReviewTagFilter().length ? t('review.session.tagsEmptyTitle') : STATE.reviewSessionDeckId ? t('review.session.deckEmptyTitle') : (STATE.reviewSessionUnitFilter ? t('review.session.unitEmptyTitle') : t('review.session.allDoneTitle'))}</h3>
         <p>${allDue > 0 ? t('review.session.pendingOverall', { n: allDue }) : t('review.session.comeBackLater')}</p>
         ${allDue > 0 ? `<button class="btn btn-primary" id="review-start-all">${t('review.session.reviewAllAvailable')}</button>` : ''}
       </div>
@@ -6867,11 +6902,9 @@ function renderReviewView(){
 
   // Fase 4 (motor de tipos/templates, ver CLAUDE.md) -- despacho por
   // cardTypeId. Cartão nativo (Note/CardInstance, origin teacher/self)
-  // sempre tem `card.cardInstance`; trilha (origin:'study') nunca tem --
-  // nunca teve múltipla escolha/cloze/"digite a resposta" (buildCardsFromUnits
-  // só produz par front/back_trans simples), então cai direto no flip
-  // padrão abaixo sem checar nada.
-  if (card.cardInstance){
+  // K2-J: todo card da fila tem `card.cardInstance` (study/teacher/self nascem de
+  // buildStudyWordCards/buildEngineCardsFromRow); normal cai no flip abaixo.
+  {
     const cardTypeId = card.cardInstance.cardTypeId;
     // Fase 6C.2 -- Múltipla escolha/Digite a resposta seguem o mesmo
     // padrão de criação preguiçosa de STATE.reviewCardState já
@@ -6955,17 +6988,10 @@ function renderReviewView(){
 // "resposta", é só pedido de mais exposição) -- sinalizado aqui, não
 // decidido em silêncio.
 //
-// Direção: pra cartão nativo (card.cardInstance), SEMPRE false --
-// resolveNormalCardView() já devolve front/back na ordem certa
-// (frontFieldIndex/backFieldIndex do CardInstance); a direção nunca é
-// escolhida/alternada aqui. Pra cartão legado de trilha
-// (!card.cardInstance), o mecanismo de variedade de sessão que sempre
-// existiu (card.reviewDirection, setado 1x em startReviewSession() via
-// nextCardDirection()) continua 100% intocado -- fora do escopo desta
-// reestruturação (nunca ganhou CardInstance). Nem isReverse nem
-// reviewDirection nem nextCardDirection() foram reintroduzidos como
-// mecanismo NATIVO -- o `if (card.cardInstance)` abaixo é a mesma
-// checagem de sempre, só movida pra dentro da função extraída.
+// Direção (K2-G): sempre estrutural -- resolveNormalCardView() devolve
+// front/back na ordem certa (frontFieldIndex/backFieldIndex do CardInstance);
+// nenhuma variável de sessão escolhe ou alterna A/B. Todo card chega aqui com
+// CardInstance (Study Trail, Teacher e Self são todos nativos).
 //
 // Progresso (STATE.reviewIndex/reviewQueue.length): continua lido direto
 // de STATE aqui, igual aos outros 3 renderers (MC/Cloze/TypeAnswer,
@@ -6977,10 +7003,9 @@ function renderReviewView(){
 // extraídos juntos -- não resolvido isoladamente só pro Normal, pra não
 // introduzir um mecanismo que os outros 3 ainda não teriam.
 function renderNormalCard(mountEl, card, localState, callbacks){
-  let isReverse, targetText, nativeText, frontAudioUrl, backAudioUrl, frontImageUrl, backImageUrl, targetIsSpeakable;
-  if (card.cardInstance){
+  let targetText, nativeText, frontAudioUrl, backAudioUrl, frontImageUrl, backImageUrl, targetIsSpeakable;
+  {
     const view = resolveCardContentView(card); // kind: 'normal'
-    isReverse = false;
     targetText = view.front.text;
     nativeText = view.back.text;
     // Fase 7a (ver CLAUDE.md) -- áudio/imagem customizados resolvidos POR
@@ -7001,22 +7026,10 @@ function renderNormalCard(mountEl, card, localState, callbacks){
     // decide se o motor de pronúncia (que só fala UM idioma real) pode
     // tentar esse campo específico.
     targetIsSpeakable = isStudyLanguageField(view.front, APP_KEY);
-  } else {
-    isReverse = card.reviewDirection === 'back-to-front';
-    targetText = card.front;
-    nativeText = card.back_trans;
-    frontAudioUrl = null; backAudioUrl = null;
-    frontImageUrl = null; backImageUrl = null;
-    targetIsSpeakable = true;
   }
-  // Fase 7a -- `isReverse` só é `true` pra cartão de TRILHA
-  // (!card.cardInstance, mecanismo de variedade de sessão pré-existente,
-  // intocado) -- nesse caminho, front/back/imageUrl são sempre null (ver
-  // ramo `else` acima). Pra cartão com CardInstance (teacher/own
-  // flashcards, nativo ou legado), `isReverse` é sempre `false`, então
-  // `frontAudioUrl`/`frontImageUrl` sempre correspondem ao que
-  // `frenchSideHTML` de fato mostra, e `backAudioUrl`/`backImageUrl` ao
-  // que `transSideHTML` mostra -- nenhuma troca extra necessária aqui.
+  // Fase 7a/K2-G -- frontAudioUrl/frontImageUrl correspondem sempre ao que
+  // `frenchSideHTML` mostra e backAudioUrl/backImageUrl ao que `transSideHTML`
+  // mostra (a troca de lados de B é tratada abaixo, pela estrutura do CardInstance).
   //
   // Imagem LEGADA (`card.imageUrl`, nível de Note, populada só pelo
   // caminho `image_url` legado) nunca é duplicada no lado do verso --
@@ -7029,12 +7042,27 @@ function renderNormalCard(mountEl, card, localState, callbacks){
   const resolvedBackImageUrl = backImageUrl || null;
   const frenchSideHTML = `<div class="flashcard-french">${escapeHTML(targetText)} ${audioBtnHTML(targetText, 'audio-btn-lg')}${frontAudioUrl ? customAudioBtnHTML(frontAudioUrl) : ''}</div>`;
   const transSideHTML = `<div class="flashcard-trans">${escapeHTML(nativeText)}${backAudioUrl ? customAudioBtnHTML(backAudioUrl) : ''}</div>`;
-  const frontHTML = isReverse ? transSideHTML : frenchSideHTML;
-  const backHTML = isReverse ? frenchSideHTML : transSideHTML;
+  let frontHTML = frenchSideHTML;
+  let backHTML = transSideHTML;
   // Áudio automático só quando o idioma estudado está do lado JÁ visível --
   // no modo padrão isso é o front (toca ao entrar no cartão), no modo
   // invertido é o back (toca só ao revelar a resposta).
-  const frenchVisibleNow = isReverse ? localState.revealed : true;
+  let frenchVisibleNow = true;
+  let speakText = targetText;
+  // K2-D: CardInstance nativo cuja FRENTE é a tradução e cujo VERSO é o
+  // idioma estudado (ex.: Study Trail B): o botão de áudio/pronúncia acompanha
+  // o campo do idioma estudado (verso), nunca a tradução. Direção continua
+  // 100% do CardInstance; isto só decide de que lado fica o áudio.
+  {
+    const v = resolveCardContentView(card);
+    if (!isStudyLanguageField(v.front, APP_KEY) && isStudyLanguageField(v.back, APP_KEY)){
+      frontHTML = `<div class="flashcard-trans">${escapeHTML(v.front.text)}${frontAudioUrl ? customAudioBtnHTML(frontAudioUrl) : ''}</div>`;
+      backHTML = `<div class="flashcard-french">${escapeHTML(v.back.text)} ${audioBtnHTML(v.back.text, 'audio-btn-lg')}${backAudioUrl ? customAudioBtnHTML(backAudioUrl) : ''}</div>`;
+      frenchVisibleNow = localState.revealed;
+      targetIsSpeakable = true;
+      speakText = v.back.text;
+    }
+  }
 
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
@@ -7078,8 +7106,8 @@ function renderNormalCard(mountEl, card, localState, callbacks){
   // autoplay" já era o comportamento correto).
   wireAudioButtons(mountEl, card.__isPreviewCard);
   wireCustomAudioButtons(mountEl);
-  if (!card.__isPreviewCard && frenchVisibleNow && targetIsSpeakable && canSpeakFrench(targetText)){
-    speakFrench(targetText, mountEl.querySelector('.audio-btn-lg'), true);
+  if (!card.__isPreviewCard && frenchVisibleNow && targetIsSpeakable && canSpeakFrench(speakText)){
+    speakFrench(speakText, mountEl.querySelector('.audio-btn-lg'), true);
   }
 
   if (localState.revealed){
@@ -7138,16 +7166,12 @@ function gradeCurrentCard(grade){
   // ser lido antes de applyMemoryGrade/scheduleReview mutar card.due pra reavaliação.
   const wasOverdue = card.due > 0 && card.due < new Date().setHours(0, 0, 0, 0);
   const intervalBefore = card.interval;
-  // Grava a direção mostrada nesta revisão -- da próxima vez que essa carta
-  // ficar due, nextCardDirection() (shared/srs.js) alterna pra outra. Só
-  // tem efeito pra cartão de trilha (`card.reviewDirection` só é setado
-  // pra ele, ver startReviewSession) -- no-op inofensivo pra cartão nativo
-  // (Note/CardInstance), que nunca ganha reviewDirection (Fase 4: direção
-  // é do CardInstance, não da sessão).
-  card.lastDirection = card.reviewDirection;
+  // K2-G: nenhuma direção é gravada aqui -- A/B são CardInstances independentes
+  // e a direção é estrutural; a revisão só aplica o grau (FSRS) ao CardInstance mostrado.
   // Fase 5: Flashcard agora usa o motor FSRS (shared/fsrs.js) -- due deixa
   // de ser calculado por regras SM-2 fixas.
   applyMemoryGrade(card, grade);
+  trackReviewAnswer('flashcard', card, grade);
   STATE.totalReviews += 1;
   // Streak só conta quando a SESSÃO inteira termina (ver renderReviewView),
   // não a cada cartão avaliado -- senão avaliar 1 carta isolada já bastava
@@ -7548,8 +7572,10 @@ function renderLevelTestQuizStep(){
 function checkUnitCompletion(explicitUnitId){
   const unitId = explicitUnitId || STATE.reviewSessionUnitFilter;
   if (!unitId) return;
+  // K2-E: a unidade está aprendida quando TODA palavra tem evidência de
+  // estudo em alguma CardInstance irmã -- B New não bloqueia mais.
   const pool = STATE.cards.filter(c => c.unitId === unitId);
-  const allLearned = pool.every(c => c.reps > 0);
+  const allLearned = studyWordGroups(pool).every(studyWordHasEvidence);
   if (allLearned){
     markUnitCompleted(unitId);
   }
@@ -7564,9 +7590,25 @@ function renderGoalsView(){
 
 function renderProgressView(){
   const completedUnits = Object.values(STATE.unitProgress).filter(u=>u.completed).length;
-  const totalCards = STATE.cards.length;
-  const learnedCards = STATE.cards.filter(c => c.reps > 0).length;
-  const dueCount = cardsDueNow(STATE.cards).length;
+  // K.3: "Palavras aprendidas" = SÓ Study Trail, em palavras (Note), com o
+  // curso inteiro como denominador (Teacher/Self não entram aqui).
+  const { total: totalCards, learned: learnedCards } = studyTrailWordProgress(STATE.cards);
+  // K.3: o antigo "Pendentes agora" era cardsDueNow(STATE.cards) = qualquer card
+  // com due<=agora, inclusive New (due=0) e lições ainda não concluídas -- uma
+  // mistura. Agora: contagens ESTRUTURAIS (CardInstance) do universo estudável,
+  // sem os filtros de sessão (origem/tag), e "Para estudar hoje" = a fila que
+  // uma sessão entrega (mesma definição/número do hero da Revisão).
+  const sc = structuralCounts(eligibleDeckReviewPool());
+  const studyToday = trueDueReviewCount(eligibleReviewPool());
+
+  // K.7: "Conteúdos estudados" (Note) de Teacher e Self, SEMPRE separados e
+  // fora de "Palavras aprendidas"; só aparece a origem que tem conteúdo ativo.
+  const ownContentCards = ['teacher', 'self'].map(o => {
+    const m = ownContentProgress(STATE.cards, o);
+    if (!m.total) return '';
+    const label = o === 'teacher' ? 'Conteúdos da professora estudados' : 'Meus conteúdos estudados';
+    return `<div class="stat-card" data-stat="content-${o}"><div class="num">${m.studied}/${m.total}</div><div class="label">${label}</div></div>`;
+  }).join('');
 
   const guestWarning = !CURRENT_USER ? `
     <div class="guest-warning">
@@ -7580,7 +7622,12 @@ function renderProgressView(){
     <div class="stat-card"><div class="num">${learnedCards}/${totalCards}</div><div class="label">${t('zh.progress.statWords')}</div></div>
     <div class="stat-card"><div class="num">${effectiveStreak()}</div><div class="label">${t('zh.progress.statStreak')}</div></div>
     <div class="stat-card"><div class="num">${STATE.totalReviews}</div><div class="label">${t('zh.progress.statReviews')}</div></div>
-    <div class="stat-card"><div class="num">${dueCount}</div><div class="label">${t('zh.progress.statDue')}</div></div>
+    <div class="stat-card" data-stat="new"><div class="num">${sc.new}</div><div class="label">${t('progress.statNew')}</div></div>
+    <div class="stat-card" data-stat="learning"><div class="num">${sc.learning}</div><div class="label">${t('progress.statLearning')}</div></div>
+    <div class="stat-card" data-stat="review"><div class="num">${sc.review}</div><div class="label">${t('progress.statReview')}</div></div>
+    <div class="stat-card" data-stat="due"><div class="num">${sc.due}</div><div class="label">${t('progress.statDueNow')}</div></div>
+    <div class="stat-card" data-stat="today" title="${escapeHTML(t('progress.statTodayTitle'))}"><div class="num">${studyToday}</div><div class="label">${t('progress.statToday')}</div></div>
+    ${ownContentCards}
     <div class="stat-card"><div class="num">${STATE.xp}</div><div class="label">${t('zh.progress.statXp')}</div></div>
   `;
 
@@ -7622,7 +7669,8 @@ function renderProgressLineChart(){
   const wrap = document.getElementById('progress-line-chart-wrap');
   if (!wrap) return;
 
-  const learnedDates = STATE.cards.filter(c => c.firstLearnedDate).map(c => c.firstLearnedDate);
+  // K2-E: uma data por PALAVRA (A+B = 1; vale a mais antiga das irmãs).
+  const learnedDates = wordLevelFirstLearnedDates(STATE.cards);
 
   if (!learnedDates.length){
     wrap.innerHTML = `<div style="text-align:center; padding:30px 20px; color:var(--ink-soft);"><p>${t('zh.progress.chartEmpty')}</p></div>`;
@@ -7777,11 +7825,13 @@ const switchTab = createTabSwitcher({
     leaderboard: renderLeaderboardView,
     path: renderUnitsGrid,
     dictation: () => {
+      applyChallengeI18n();
       dictationModuleFilter = pendingDictationModuleFilter;
       pendingDictationModuleFilter = null;
       renderDictationList();
     },
     challenges: () => {
+      applyChallengeI18n();
       challengesModuleFilter = pendingChallengesModuleFilter;
       pendingChallengesModuleFilter = null;
       return renderChallengeCategories();
@@ -7861,6 +7911,27 @@ function normalizeNewCardsPerDay(n){
 // pro TOPO do painel -- sincroniza os 3 controles restantes + Origem com
 // STATE.studySettings, roda toda vez que o painel "⚙️ Configurar sessão"
 // é aberto ou qualquer um deles muda.
+// Fase I (Tags): chips de seleção múltipla (OR) + "Limpar". Mostra as tags do
+// universo do Review geral E as já selecionadas (mesmo que não existam mais),
+// pra nunca prender o usuário num filtro que ele não consegue desfazer.
+function renderReviewTagFilter(){
+  const wrap = document.getElementById('review-tag-filter-wrap');
+  const chipsEl = document.getElementById('review-tag-chips');
+  if (!wrap || !chipsEl) return;
+  const selected = activeReviewTagFilter();
+  const universe = reviewTagUniverse();
+  const available = collectTagsFromCards(universe);
+  const all = Array.from(new Set(available.concat(selected))).sort();
+  wrap.hidden = all.length === 0;
+  chipsEl.innerHTML = all.map(t => {
+    const n = universe.filter(c => (c.tags || []).includes(t)).length;
+    const on = selected.includes(t);
+    return `<button type="button" class="leaderboard-tab ${on ? 'active' : ''}" data-review-tag="${escapeHTML(t)}" aria-pressed="${on}">#${escapeHTML(t)} (${n})</button>`;
+  }).join(' ');
+  const clearBtn = document.getElementById('review-tag-clear');
+  if (clearBtn) clearBtn.hidden = selected.length === 0;
+}
+
 function renderReviewSettingsView(){
   const s = STATE.studySettings;
 
@@ -7893,6 +7964,8 @@ function renderReviewSettingsView(){
       ${hasSelfCards ? `<option value="self" ${currentOrigin === 'self' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.self} (${originCounts.self})</option>` : ''}
     `;
   }
+
+  renderReviewTagFilter();
 
   const freqSelect = document.getElementById('review-frequency-select');
   if (freqSelect) freqSelect.value = s.reviewFrequency;
@@ -7932,6 +8005,17 @@ document.getElementById('review-intensity-select').addEventListener('change', (e
 // selects opcionais desta tela).
 document.getElementById('review-origin-select')?.addEventListener('change', (e) => {
   updateStudySetting({ reviewOriginFilter: e.target.value });
+});
+// Fase I (Tags): alterna uma tag no filtro (OR); "Limpar" volta a [].
+document.getElementById('review-tag-chips')?.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-review-tag]');
+  if (!btn) return;
+  const tag = btn.dataset.reviewTag;
+  const cur = activeReviewTagFilter();
+  updateStudySetting({ reviewTagFilter: cur.includes(tag) ? cur.filter(t => t !== tag) : cur.concat(tag) });
+});
+document.getElementById('review-tag-clear')?.addEventListener('click', () => {
+  updateStudySetting({ reviewTagFilter: [] });
 });
 // Ícone "⚙️" no cabeçalho da tela de Revisão (3ª sessão de grilling --
 // antes era um botão de texto solto entre o dropdown e REVISAR, a autora
@@ -7980,6 +8064,10 @@ const ANKI_EXPORT_CONFIG = {
   afmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:18px;color:#5C4E73;'>{{Tradução}}</div>",
   css: ".card { font-family: 'Nunito', Arial, sans-serif; text-align: center; background-color: #FAF5EA; color:#201335; }",
   deckDesc: `Exportado do app ${APP_IDENTITY.apps.fr.name}`,
+  // K2-F: template do modelo "Reverso" (B da trilha): frente = Tradução,
+  // verso = Francês. Mesmos campos semânticos do Básico.
+  reverseQfmt: "<div style='text-align:center;font-size:22px;color:#5C4E73;font-weight:bold;'>{{Tradução}}</div>",
+  reverseAfmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:26px;color:#1D5A82;font-weight:bold;'>{{Francês}}</div>",
   guidPrefix: "fzc_",
   unitOptions(){
     return UNITS.filter(u => u.type !== 'grammar').map(u => {
@@ -8013,7 +8101,7 @@ const ANKI_EXPORT_CONFIG = {
   // pra esse tipo -- só sabem "front"/"back", e a view de type_answer não
   // tem esses campos) -- lê resolveCardContentView() direto.
   noteFields(card, media){
-    if (card.cardInstance && card.cardInstance.cardTypeId === 'type_answer'){
+    if (card.cardInstance.cardTypeId === 'type_answer'){
       const view = resolveCardContentView(card);
       return [
         ankiFieldHTML(view.prompt.text, media && media.front),
@@ -8032,6 +8120,16 @@ const ANKI_EXPORT_CONFIG = {
   // reimplementada aqui). Mídia da frase (áudio/imagem) vai junto do
   // campo Text -- a tradução nunca tem mídia própria (mesmo critério do
   // renderer de Revisão, Fase 7a).
+  // K2-F: B da trilha -- campos SEMÂNTICOS (Francês/Tradução), não a ordem
+  // frente/verso; a direção vem do template do modelo Reverso. Mídia: o lado
+  // "front" do CardInstance é a tradução, o "back" é o francês.
+  reverseFields(card, media){
+    const v = ankiExportSides(card);
+    return [
+      ankiFieldHTML(v.back.text, media && media.back),
+      ankiFieldHTML(v.front.text, media && media.front),
+    ];
+  },
   clozeFields(card, media){
     const view = resolveCardContentView(card);
     return [
@@ -8040,11 +8138,12 @@ const ANKI_EXPORT_CONFIG = {
     ];
   },
   sortField(card){
-    if (card.cardInstance && card.cardInstance.cardTypeId === 'cloze'){
+    if (ankiExportCardKind(card) === 'reverse') return ankiExportSides(card).back.text;
+    if (card.cardInstance.cardTypeId === 'cloze'){
       const view = resolveCardContentView(card);
       return renderClozeText(view.rawSentenceText, view.markId, { reveal: true });
     }
-    if (card.cardInstance && card.cardInstance.cardTypeId === 'type_answer'){
+    if (card.cardInstance.cardTypeId === 'type_answer'){
       return resolveCardContentView(card).prompt.text;
     }
     return cardPromptText(card);
@@ -8510,7 +8609,68 @@ function dictationAudioPath(d){
 // Áudio do ditado em reprodução no momento (só um por vez).
 let dictationAudioEl = null;
 
+// ---- Fatia 3: áudio por frase (tela de resultado) ----
+// mp3 por frase gerado pelo workflow "ditados-frases"; enquanto não existir
+// (ou se der 404), cai para speakFrench (voz do navegador / manifest).
+function dictationSentenceAudioPath(d, n){
+  return `audio/dictation-${d.id}-s${n}.mp3`;
+}
+let dictationSentenceAudioEl = null;
+let dictationSentenceBtn = null;
+const dictationSentenceMissing = new Set(); // caminhos que já deram erro nesta sessão
+
+function stopDictationSentenceAudio(){
+  if (dictationSentenceAudioEl){
+    dictationSentenceAudioEl.pause();
+    dictationSentenceAudioEl = null;
+  }
+  if (dictationSentenceBtn){ dictationSentenceBtn.classList.remove('speaking'); dictationSentenceBtn = null; }
+  try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch(e){}
+}
+
+function playDictationSentence(d, n, sentence, btn){
+  // Para o áudio guiado (sem desmontar o player, que continua na tela),
+  // outros áudios de exercício/voz do navegador e a frase anterior.
+  if (dictationAudioEl) dictationAudioEl.pause();
+  stopExerciseAudio();
+  stopDictationSentenceAudio();
+
+  const fallback = () => {
+    if (canSpeakFrench(sentence)){
+      speakFrench(sentence, btn);
+      return;
+    }
+    btn.disabled = true;
+    btn.classList.remove('speaking');
+    btn.textContent = '🔇 sem áudio';
+    btn.setAttribute('aria-label', `Áudio da frase ${n} indisponível neste dispositivo`);
+    btn.title = 'Áudio indisponível neste dispositivo';
+  };
+  const path = dictationSentenceAudioPath(d, n);
+  if (dictationSentenceMissing.has(path)) return fallback();
+
+  const audio = new Audio(path);
+  dictationSentenceAudioEl = audio;
+  dictationSentenceBtn = btn;
+  btn.classList.add('speaking');
+  let failedOnce = false;
+  const fail = () => {
+    if (failedOnce || dictationSentenceAudioEl !== audio) return;
+    failedOnce = true;
+    dictationSentenceMissing.add(path);
+    dictationSentenceAudioEl = null;
+    dictationSentenceBtn = null;
+    btn.classList.remove('speaking');
+    if (btn.isConnected) fallback();
+  };
+  const done = () => { if (dictationSentenceAudioEl === audio){ btn.classList.remove('speaking'); dictationSentenceAudioEl = null; dictationSentenceBtn = null; } };
+  audio.addEventListener('error', fail);
+  audio.addEventListener('ended', done);
+  audio.play().catch(err => { if (err && err.name === 'NotAllowedError') done(); else fail(); });
+}
+
 function stopDictationAudio(){
+  stopDictationSentenceAudio();
   if (dictationAudioEl){
     dictationAudioEl.pause();
     dictationAudioEl = null;
@@ -8533,6 +8693,13 @@ function escapeHtmlDictation(str){
   return str.replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
 }
 
+// Linha discreta no card: melhor nota e nº de tentativas (só se já tentou).
+function dictationCardProgressHTML(id){
+  const rec = STATE.dictations && STATE.dictations[id];
+  if (!rec || !rec.attempts) return '';
+  return `<div class="dictation-card-progress">${chT('dict.bestAttempts', { best: rec.bestScore, n: rec.attempts, unit: chT(rec.attempts === 1 ? 'dict.attempt.one' : 'dict.attempt.many') })}</div>`;
+}
+
 function renderDictationList(){
   stopDictationAudio();
   document.getElementById('dictation-list-wrap').style.display = 'block';
@@ -8541,13 +8708,16 @@ function renderDictationList(){
   const cardsWrap = document.getElementById('dictation-cards');
   const dictationsShown = dictationsVisible(dictationModuleFilter);
   // Vindo da unidade "Revisão do A1" da trilha, o "voltar" leva de volta pra trilha.
-  document.getElementById('dictation-back-to-challenges').textContent = isLevelReviewId(dictationModuleFilter) ? t('fr.dictation.backToTrail') : t('fr.dictation.backToChallenges');
+  document.getElementById('dictation-back-to-challenges').textContent = isLevelReviewId(dictationModuleFilter) ? chT('dict.back.trail') : chT('dict.back.challenges');
+  const dictProgressEl = document.getElementById('dictation-list-progress');
+  if (dictProgressEl) dictProgressEl.innerHTML = challengeProgressHTML(dictationsShown.filter(d => isDictationDone(d.id)).length, dictationsShown.length);
   cardsWrap.innerHTML = dictationsShown.map(d => `
     <button class="dictation-card ${isDictationLocked(d) ? 'locked' : ''}" data-dict-id="${d.id}">
-      ${isDictationLocked(d) ? '<span class="challenge-card-check" title="Premium">🔒</span>' : ''}
+      ${isDictationLocked(d) ? `<span class="challenge-card-check" title="${chT('tier.premium')}">🔒</span>` : ''}
       <div class="dictation-card-level">${d.level}</div>
       <div class="dictation-card-task">${escapeHtmlDictation(dictationTask(d))}</div>
       <div class="dictation-card-module">${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</div>
+      ${dictationCardProgressHTML(d.id)}
       ${tierBadgeHTML(dictationTier(d))}
     </button>
   `).join('');
@@ -8593,8 +8763,8 @@ function openDictationPlayer(id){
     <p class="dictation-player-module">${d.level} · ${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</p>
     <div class="dictation-audio-player">
       <div class="dictation-transport">
-        <button class="dictation-play-btn" id="dictation-play-btn">${t('fr.dictation.listen')}</button>
-        <button class="dictation-icon-btn" id="dictation-restart-btn" aria-label="${t('fr.dictation.restart')}" title="${t('fr.dictation.restart')}">↺</button>
+        <button class="dictation-play-btn" id="dictation-play-btn">${chT('dict.play')}</button>
+        <button class="dictation-icon-btn" id="dictation-restart-btn" aria-label="${chT('dict.restart')}" title="${chT('dict.restart')}">↺</button>
       </div>
       <div class="dictation-scrub-row">
         <span class="dictation-time" id="dictation-time-current">00:00</span>
@@ -8606,11 +8776,11 @@ function openDictationPlayer(id){
       </div>
       <div class="dictation-secondary-controls">
         <div class="dictation-skip-controls">
-          <button class="dictation-skip-btn" id="dictation-skip-back" title="${t('fr.dictation.skipBack')}">-15s</button>
-          <button class="dictation-skip-btn" id="dictation-skip-fwd" title="${t('fr.dictation.skipForward')}">+15s</button>
+          <button class="dictation-skip-btn" id="dictation-skip-back" title="${chT('dict.back15')}">-15s</button>
+          <button class="dictation-skip-btn" id="dictation-skip-fwd" title="${chT('dict.fwd15')}">+15s</button>
         </div>
         <div class="dictation-volume-control">
-          <button class="dictation-icon-btn" id="dictation-mute-btn" aria-label="${t('fr.dictation.mute')}" title="${t('fr.dictation.mute')}">🔊</button>
+          <button class="dictation-icon-btn" id="dictation-mute-btn" aria-label="${chT('dict.mute')}" title="${chT('dict.mute')}">🔊</button>
           <input type="range" class="dictation-volume-slider" id="dictation-volume-slider" min="0" max="100" value="100">
         </div>
         <div class="dictation-speed-controls">
@@ -8620,11 +8790,11 @@ function openDictationPlayer(id){
         </div>
       </div>
     </div>
-    <textarea class="dictation-textarea" id="dictation-input" placeholder="${t('fr.dictation.placeholder')}"></textarea>
+    <textarea class="dictation-textarea" id="dictation-input" placeholder="${chT('dict.placeholder')}" aria-label="${chT('dict.textAria')}" lang="fr" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="${Math.max(400, d.text.length * 3)}"></textarea>
     ${frAccentPickerHTML()}
     <div class="dictation-actions">
-      <button class="btn btn-primary" id="dictation-check-btn">${t('common.verify')}</button>
-      <button class="btn btn-secondary" id="dictation-retry-btn" style="display:none;">${t('fr.hint.retry')}</button>
+      <button class="btn btn-primary" id="dictation-check-btn">${chT('dict.check')}</button>
+      <button class="btn btn-secondary" id="dictation-retry-btn" style="display:none;">${chT('dict.retry')}</button>
     </div>
     <div id="dictation-result-wrap"></div>
   `;
@@ -8642,7 +8812,8 @@ function openDictationPlayer(id){
 
   playBtn.addEventListener('click', () => {
     if (dictationAudioEl.paused){
-      dictationAudioEl.play().catch(() => showToast(t('toast.audioPlayFailed')));
+      stopDictationSentenceAudio();
+      dictationAudioEl.play().catch(() => showToast(chT('dict.audioFail')));
     } else {
       dictationAudioEl.pause();
     }
@@ -8672,8 +8843,8 @@ function openDictationPlayer(id){
     dictationAudioEl.volume = v;
     dictationAudioEl.muted = false;
     muteBtn.textContent = v === 0 ? '🔇' : '🔊';
-    muteBtn.setAttribute('aria-label', v === 0 ? t('fr.dictation.unmute') : t('fr.dictation.mute'));
-    muteBtn.title = v === 0 ? t('fr.dictation.unmute') : t('fr.dictation.mute');
+    muteBtn.setAttribute('aria-label', v === 0 ? chT('dict.unmute') : chT('dict.mute'));
+    muteBtn.title = v === 0 ? chT('dict.unmute') : chT('dict.mute');
   });
   muteBtn.addEventListener('click', () => {
     if (dictationAudioEl.muted || dictationAudioEl.volume === 0){
@@ -8681,15 +8852,15 @@ function openDictationPlayer(id){
       dictationAudioEl.volume = volumeBeforeMute || 1;
       volumeSlider.value = Math.round(dictationAudioEl.volume * 100);
       muteBtn.textContent = '🔊';
-      muteBtn.setAttribute('aria-label', t('fr.dictation.mute'));
-      muteBtn.title = t('fr.dictation.mute');
+      muteBtn.setAttribute('aria-label', chT('dict.mute'));
+      muteBtn.title = chT('dict.mute');
     } else {
       volumeBeforeMute = dictationAudioEl.volume;
       dictationAudioEl.muted = true;
       volumeSlider.value = 0;
       muteBtn.textContent = '🔇';
-      muteBtn.setAttribute('aria-label', t('fr.dictation.unmute'));
-      muteBtn.title = t('fr.dictation.unmute');
+      muteBtn.setAttribute('aria-label', chT('dict.unmute'));
+      muteBtn.title = chT('dict.unmute');
     }
   });
 
@@ -8715,36 +8886,47 @@ function openDictationPlayer(id){
   }
 
   dictationAudioEl.addEventListener('play', () => {
-    playBtn.textContent = t('fr.dictation.pause');
+    playBtn.textContent = chT('dict.pause');
     playBtn.classList.add('speaking');
   });
   dictationAudioEl.addEventListener('pause', () => {
-    playBtn.textContent = t('fr.dictation.listen');
+    playBtn.textContent = chT('dict.play');
     playBtn.classList.remove('speaking');
   });
   dictationAudioEl.addEventListener('ended', () => {
-    playBtn.textContent = t('fr.dictation.listen');
+    playBtn.textContent = chT('dict.play');
     playBtn.classList.remove('speaking');
   });
-  dictationAudioEl.addEventListener('loadedmetadata', () => {
-    timeTotalEl.textContent = formatDictationTime(dictationAudioEl.duration);
+  // Usa o próprio elemento do evento (e.target), não a variável global: ao
+  // sair do ditado, stopDictationAudio() faz pause() e zera a global, mas o
+  // navegador ainda dispara 'timeupdate' depois do pause -- ler a global
+  // aí dava "Cannot read properties of null (reading 'duration')".
+  dictationAudioEl.addEventListener('loadedmetadata', (e) => {
+    timeTotalEl.textContent = formatDictationTime(e.target.duration);
   });
-  dictationAudioEl.addEventListener('timeupdate', () => {
-    if (dictationAudioEl.duration){
-      const pct = (dictationAudioEl.currentTime / dictationAudioEl.duration) * 100;
+  dictationAudioEl.addEventListener('timeupdate', (e) => {
+    const a = e.target;
+    if (a.duration){
+      const pct = (a.currentTime / a.duration) * 100;
       progressFill.style.width = `${pct}%`;
       progressHandle.style.left = `${pct}%`;
     }
-    timeCurrentEl.textContent = formatDictationTime(dictationAudioEl.currentTime);
+    timeCurrentEl.textContent = formatDictationTime(a.currentTime);
   });
-  dictationAudioEl.addEventListener('error', () => showToast(t('toast.audioPlayFailed')));
+  dictationAudioEl.addEventListener('error', () => {
+    showToast(chT('dict.audioFail'));
+    playBtn.disabled = true;
+    playBtn.textContent = chT('dict.audioUnavailable');
+  });
 
   document.getElementById('dictation-check-btn').addEventListener('click', () => {
     const userText = document.getElementById('dictation-input').value;
+    if (!userText.trim()){ showToast(chT('dict.writeFirst')); return; }
     renderDictationResult(d, userText);
   });
 
   document.getElementById('dictation-retry-btn').addEventListener('click', () => {
+    stopDictationSentenceAudio();
     document.getElementById('dictation-input').value = '';
     document.getElementById('dictation-result-wrap').innerHTML = '';
     document.getElementById('dictation-retry-btn').style.display = 'none';
@@ -8753,54 +8935,164 @@ function openDictationPlayer(id){
 }
 
 // BEGIN dictation-answer-logic (extraído literalmente por fr/scripts/test_answer_validation.js -- não mover/renomear estes marcadores sem atualizar o teste)
+// Correção do ditado, em 2 níveis de comparação:
+//  - ESTRITA (normalizeDictationWord): exige a grafia exata -- acento, hífen e
+//    apóstrofo contam. Só ignora maiúscula, pontuação e variantes tipográficas
+//    (aspas curvas, hífen especial do celular).
+//  - FROUXA (dictLooseNorm): tira acento, hífen, apóstrofo e œ->oe. Serve pra
+//    ALINHAR as palavras. Se alinham só pela forma frouxa, é "erro leve":
+//    vale meio ponto e a tela explica o que faltou.
+// Pontuação não desconta ponto (só é marcada); número em dígito é aceito e a
+// tela mostra a escrita por extenso.
 function normalizeDictationWord(w){
   return w
     .toLowerCase()
     .normalize('NFC') // acentos digitados como sequência decomposta (a + ` )
                        // via alguns teclados/IMEs viram a mesma forma que os
                        // do texto original, em vez de "diferentes" por baixo.
-    .replace(/[‘’]/g, "'") // aspas curvas do autocorretor do celular
-    .replace(/[.,!?;:'"()«»]/g, '');
+    .replace(/[‘’ʼ´`′]/g, "'") // apóstrofos/aspas do autocorretor do celular
+    .replace(/[‐‑‒]/g, '-')    // hífens especiais do teclado do celular
+    .replace(/[.,!?;:"()«»…—–]/g, '');
 }
-// END dictation-answer-logic
+function dictLooseNorm(w){
+  return normalizeDictationWord(w)
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/œ/g, 'oe').replace(/æ/g, 'ae')
+    .replace(/['-]/g, '');
+}
+function dictLightReason(cs, us){
+  const nh = s => s.replace(/-/g, ''), na = s => s.replace(/'/g, '');
+  const lig = s => s.replace(/œ/g, 'oe').replace(/æ/g, 'ae');
+  const nd = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '');
+  if (nh(cs) === nh(us)) return 'hyphen';
+  if (na(cs) === na(us)) return 'apostrophe';
+  if (lig(cs) === lig(us)) return 'ligature';
+  if (nd(cs) === nd(us)) return 'accent';
+  return 'spelling';
+}
+
+const DICT_FR_UNITS = ['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize'];
+function frenchNumberWords(n){
+  if (!Number.isInteger(n) || n < 0 || n > 100) return null;
+  if (n <= 16) return DICT_FR_UNITS[n];
+  if (n < 20) return 'dix-' + DICT_FR_UNITS[n - 10];
+  if (n === 100) return 'cent';
+  const tens = { 2:'vingt', 3:'trente', 4:'quarante', 5:'cinquante', 6:'soixante' };
+  if (n < 70){
+    const t = Math.floor(n / 10), u = n % 10;
+    if (u === 0) return tens[t];
+    if (u === 1) return tens[t] + ' et un';
+    return tens[t] + '-' + DICT_FR_UNITS[u];
+  }
+  if (n < 80){
+    const r = n - 60;
+    if (r === 11) return 'soixante et onze';
+    return 'soixante-' + (r < 17 ? DICT_FR_UNITS[r] : 'dix-' + DICT_FR_UNITS[r - 10]);
+  }
+  const r = n - 80;
+  if (r === 0) return 'quatre-vingts';
+  return 'quatre-vingt-' + (r < 17 ? DICT_FR_UNITS[r] : 'dix-' + DICT_FR_UNITS[r - 10]);
+}
+
+// A áudio dita a pontuação por extenso ("virgule", "point"...). Quem escreve
+// a palavra em vez do sinal comete um erro leve (a tela avisa).
+const DICT_SPOKEN_PUNCT = [
+  [/point[\s-]+d'\s*interrogation/gi, '?', "point d'interrogation"],
+  [/point[\s-]+d'\s*exclamation/gi, '!', "point d'exclamation"],
+  [/point[\s-]*virgule/gi, ';', 'point-virgule'],
+  [/deux[\s-]+points/gi, ':', 'deux points'],
+  [/\bvirgule\b/gi, ',', 'virgule'],
+  [/\bpoint\b/gi, '.', 'point']
+];
+
+// Limpa o que o teclado do celular costuma bagunçar, antes de comparar.
+function prepareDictationUserText(text, refText){
+  let t = String(text || '')
+    .replace(/[​-‍⁠﻿]/g, '')
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
+    .replace(/[‘’ʼ´`′]/g, "'")
+    .replace(/[‐‑‒]/g, '-')
+    .replace(/'\s+(?=\p{L})/gu, "'")                // "j' ai" -> "j'ai"
+    .replace(/(\p{L})([.!?;,])(?=\p{L})/gu, '$1$2 '); // "Sophie.J'ai" -> "Sophie. J'ai"
+  const refLower = String(refText || '').toLowerCase();
+  const spokenPunct = [];
+  for (const [re, symbol, said] of DICT_SPOKEN_PUNCT){
+    if (new RegExp(said.replace(/[-\s']+/g, '[-\\s\']+'), 'i').test(refLower)) continue; // palavra faz parte do texto
+    t = t.replace(re, () => { spokenPunct.push({ said, symbol }); return ' ' + symbol + ' '; });
+  }
+  const digitNotes = [];
+  t = t.replace(/(^|[\s(«"])(\d{1,3})(?=$|[\s.,!?;:)»"])/g, (m, pre, digits) => {
+    const words = frenchNumberWords(parseInt(digits, 10));
+    if (!words) return m;
+    digitNotes.push({ digits, words });
+    return pre + words;
+  });
+  return { text: t, spokenPunct, digitNotes };
+}
 
 // Separa as palavras reais da pontuação "solta" (ex: "!" ou "?" digitados
-// com espaço antes, como manda a tipografia francesa). A pontuação continua
-// fazendo parte do texto exibido — igual ao original, como palavra própria
-// — mas não entra no alinhamento/pontuação do ditado: quase nenhum aluno
-// digita um "!" sozinho como token separado, e contar isso como erro
-// garantido podia empurrar o resto da comparação pro lugar errado.
+// com espaço antes, como manda a tipografia francesa). A pontuação solta
+// não participa do alinhamento: fica anexada à palavra anterior.
 function tokenizeDictationText(text){
   const rawWords = text.trim().split(/\s+/).filter(w => w.length);
-  const words = [];       // só as palavras com conteúdo real, na ordem
-  const normWords = [];   // normalizadas, mesmo índice de `words`
-  const punctAfter = [];  // pontuação solta que vem logo depois de cada palavra (ou '')
+  const words = [], strictWords = [], looseWords = [], punctAfter = [];
   for (const w of rawWords){
-    const norm = normalizeDictationWord(w);
-    if (norm === ''){
+    const loose = dictLooseNorm(w);
+    if (loose === ''){
       if (words.length > 0){
         punctAfter[words.length - 1] = (punctAfter[words.length - 1] ? punctAfter[words.length - 1] + ' ' : '') + w;
       }
       continue;
     }
     words.push(w);
-    normWords.push(norm);
+    strictWords.push(normalizeDictationWord(w));
+    looseWords.push(loose);
     punctAfter.push('');
   }
-  return { words, normWords, punctAfter };
+  return { words, strictWords, looseWords, normWords: looseWords, punctAfter };
 }
+
+// "vingt cinq" digitado no lugar de "vingt-cinq": junta as palavras do aluno
+// (sem hífen, então conta como erro leve de hífen e não como 2 erros).
+function mergeSplitCompoundWords(userTok, refTok){
+  const targets = new Set();
+  refTok.words.forEach((w, i) => { if (refTok.strictWords[i].includes('-')) targets.add(refTok.looseWords[i]); });
+  if (!targets.size) return userTok;
+  const out = { words: [], strictWords: [], looseWords: [], punctAfter: [] };
+  let i = 0;
+  while (i < userTok.words.length){
+    let merged = false;
+    for (let k = 4; k >= 2 && !merged; k--){
+      if (i + k > userTok.words.length) continue;
+      if (!targets.has(userTok.looseWords.slice(i, i + k).join(''))) continue;
+      let ok = true;
+      for (let t = i; t < i + k - 1; t++) if (userTok.punctAfter[t]) ok = false;
+      if (!ok) continue;
+      out.words.push(userTok.words.slice(i, i + k).join(''));
+      out.strictWords.push(userTok.strictWords.slice(i, i + k).join(''));
+      out.looseWords.push(userTok.looseWords.slice(i, i + k).join(''));
+      out.punctAfter.push(userTok.punctAfter[i + k - 1]);
+      i += k; merged = true;
+    }
+    if (merged) continue;
+    out.words.push(userTok.words[i]); out.strictWords.push(userTok.strictWords[i]);
+    out.looseWords.push(userTok.looseWords[i]); out.punctAfter.push(userTok.punctAfter[i]);
+    i++;
+  }
+  out.normWords = out.looseWords;
+  return out;
+}
+
+const DICT_MARKS_RE = /[.,!?;:…]/g;
+function dictMarksOf(s){ return ((s || '').match(DICT_MARKS_RE) || []).join(''); }
 
 // Alinha as palavras do texto certo com as que o aluno digitou via LCS
 // (mesma ideia de um diff de texto), pra marcar acertos/erros mesmo quando
 // o aluno pula ou adianta uma palavra, sem desalinhar o resto da frase.
-// Pontuação solta (ver tokenizeDictationText) não participa do alinhamento,
-// mas é reanexada a cada palavra certa no resultado, pra manter o texto
-// exibido idêntico ao original.
 function diffDictationWords(correctText, userText){
   const correctTok = tokenizeDictationText(correctText);
-  const userTok = tokenizeDictationText(userText);
-  const correctWords = correctTok.words, cn = correctTok.normWords;
-  const userWords = userTok.words, un = userTok.normWords;
+  const userTok = mergeSplitCompoundWords(tokenizeDictationText(userText), correctTok);
+  const cn = correctTok.looseWords, un = userTok.looseWords;
   const n = cn.length, m = un.length;
   const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
   for (let i = n - 1; i >= 0; i--){
@@ -8808,22 +9100,38 @@ function diffDictationWords(correctText, userText){
       dp[i][j] = cn[i] === un[j] ? dp[i+1][j+1] + 1 : Math.max(dp[i+1][j], dp[i][j+1]);
     }
   }
+  const missingMarksFor = (i, j) => {
+    const pool = (dictMarksOf(userTok.words[j]) + dictMarksOf(userTok.punctAfter[j])).split('');
+    let missing = '';
+    for (const ch of (dictMarksOf(correctTok.words[i]) + dictMarksOf(correctTok.punctAfter[i]))){
+      const at = pool.indexOf(ch);
+      if (at >= 0) pool.splice(at, 1); else missing += ch;
+    }
+    return missing;
+  };
+  const matchItem = (i, j) => {
+    const light = correctTok.strictWords[i] !== userTok.strictWords[j];
+    return {
+      type: 'match', word: correctTok.words[i], punctAfter: correctTok.punctAfter[i],
+      light, userWord: userTok.words[j],
+      reason: light ? dictLightReason(correctTok.strictWords[i], userTok.strictWords[j]) : null,
+      missingMarks: missingMarksFor(i, j)
+    };
+  };
   let i = 0, j = 0;
   const result = [];
   while (i < n && j < m){
-    if (cn[i] === un[j]){ result.push({ type: 'match', word: correctWords[i], punctAfter: correctTok.punctAfter[i] }); i++; j++; }
-    else if (dp[i+1][j] >= dp[i][j+1]){ result.push({ type: 'miss', word: correctWords[i], punctAfter: correctTok.punctAfter[i] }); i++; }
-    else { result.push({ type: 'extra', word: userWords[j] }); j++; }
+    if (cn[i] === un[j]){ result.push(matchItem(i, j)); i++; j++; }
+    else if (dp[i+1][j] >= dp[i][j+1]){ result.push({ type: 'miss', word: correctTok.words[i], punctAfter: correctTok.punctAfter[i] }); i++; }
+    else { result.push({ type: 'extra', word: userTok.words[j] }); j++; }
   }
-  while (i < n){ result.push({ type: 'miss', word: correctWords[i], punctAfter: correctTok.punctAfter[i] }); i++; }
-  while (j < m){ result.push({ type: 'extra', word: userWords[j] }); j++; }
+  while (i < n){ result.push({ type: 'miss', word: correctTok.words[i], punctAfter: correctTok.punctAfter[i] }); i++; }
+  while (j < m){ result.push({ type: 'extra', word: userTok.words[j] }); j++; }
   return result;
 }
 
 // Junta um "miss" (palavra certa que faltou) adjacente a um "extra" (palavra
-// errada que o aluno digitou) numa única substituição — pra mostrar a
-// palavra errada riscada seguida da palavra certa destacada, como no
-// lingua.com, em vez de duas entradas soltas em ordens variáveis.
+// errada que o aluno digitou) numa única substituição.
 function mergeDictationDiff(diff){
   const merged = [];
   let i = 0;
@@ -8844,40 +9152,272 @@ function mergeDictationDiff(diff){
   return merged;
 }
 
+// Corrige um ditado inteiro. Nota: acerto exato = 1 ponto; erro leve = 0,5;
+// palavra a mais (que não é troca) e pontuação escrita por extenso = -0,5.
+// Pontuação faltando e número em dígito não descontam nada.
+function evaluateDictation(refText, userText){
+  const prep = prepareDictationUserText(userText, refText);
+  const diff = diffDictationWords(refText, prep.text);
+  const merged = mergeDictationDiff(diff);
+  const total = tokenizeDictationText(refText).words.length;
+  const exact = diff.filter(x => x.type === 'match' && !x.light).length;
+  const light = diff.filter(x => x.type === 'match' && x.light).length;
+  const extras = merged.filter(x => x.type === 'extra').length;
+  const missingMarks = diff.filter(x => x.type === 'match' && x.missingMarks).length;
+  const points = exact + 0.5 * light - 0.5 * extras - 0.5 * prep.spokenPunct.length;
+  const score = total > 0 ? Math.max(0, Math.min(100, Math.round((points / total) * 100))) : 0;
+  return { merged, total, exact, light, extras, missingMarks, score,
+           spokenPunct: prep.spokenPunct, digitNotes: prep.digitNotes };
+}
+
+// ---- Fatia 2: explicar o tipo de erro (só explicativo, NÃO muda a nota) ----
+// Conservador de propósito: só nomeia o erro quando há alta confiança.
+// Homófonos clássicos do francês (soam igual ou quase, escrita diferente).
+const DICT_HOMOPHONE_GROUPS = [
+  { words: ['a', 'à'], note: '«a» é o verbo avoir (il a); «à» é preposição (à Paris).' },
+  { words: ['et', 'est'], note: '«et» quer dizer "e"; «est» é o verbo être (il est).' },
+  { words: ['son', 'sont'], note: '«son» quer dizer "seu/sua"; «sont» é o verbo être (ils sont).' },
+  { words: ['ou', 'où'], note: '«ou» quer dizer "ou"; «où» quer dizer "onde".' },
+  { words: ['on', 'ont'], note: '«on» é pronome ("a gente"); «ont» é o verbo avoir (ils ont).' },
+  { words: ['la', 'là'], note: '«la» é artigo ou pronome; «là» quer dizer "lá/aí".' },
+  { words: ['ce', 'se'], note: '«ce» é demonstrativo ("isto/este"); «se» é pronome reflexivo (il se lève).' },
+  { words: ['ces', 'ses', "c'est", "s'est"], note: '«ces» = "estes/estas"; «ses» = "seus/suas"; «c\'est» = "é/isto é"; «s\'est» = pronome + être (il s\'est levé).' },
+  { words: ['mes', 'mais'], note: '«mes» quer dizer "meus/minhas"; «mais» quer dizer "mas".' },
+  { words: ['peu', 'peux', 'peut'], note: '«peu» quer dizer "pouco"; «peux»/«peut» são do verbo pouvoir (je peux, il peut).' },
+  { words: ['leur', 'leurs'], note: '«leurs» vai antes de substantivo no plural; «leur» antes de singular ou como pronome (je leur parle).' },
+  { words: ['quel', 'quelle', 'quels', 'quelles'], note: 'Mesma pronúncia: «quel» muda conforme o gênero e o número do substantivo.' }
+];
+function dictBareWord(w){
+  return normalizeDictationWord(String(w || '')).replace(/[«»"()\[\]]/g, '').trim();
+}
+// Devolve { kind: 'homophone'|'agreement'|'other', noteText } para uma troca
+// (token "sub"): refWord = palavra do texto, userWord = o que o aluno digitou.
+function dictBareWordRaw(w){ return String(w || '').replace(/^[^\p{L}]+/u, ''); }
+function classifyDictationError(refWord, userWord){
+  const r = dictBareWord(refWord), u = dictBareWord(userWord);
+  const shown = String(refWord || '').replace(/[.,!?;:…«»"()]+/g, '');
+  const typed = String(userWord || '').replace(/[.,!?;:…«»"()]+/g, '');
+  if (r && u && r !== u){
+    const g = DICT_HOMOPHONE_GROUPS.find(gr => gr.words.includes(r) && gr.words.includes(u));
+    if (g) return { kind: 'homophone', noteText: `«${shown}» (você escreveu «${typed}»): palavras que soam parecido. ${g.note}` };
+    const [shorter, longer] = r.length <= u.length ? [r, u] : [u, r];
+    const suffix = longer.slice(shorter.length);
+    if (shorter.length >= 3 && longer.startsWith(shorter) && ['e', 's', 'es', 'x'].includes(suffix) && /^\p{L}+$/u.test(longer) && !/^\p{Lu}/u.test(dictBareWordRaw(refWord))){
+      return { kind: 'agreement', noteText: `«${shown}» (você escreveu «${typed}»): a diferença está só na terminação (-${suffix}). Se for uma palavra que concorda, confira gênero, número ou conjugação com o resto da frase; senão, pode ser só um deslize de digitação.` };
+    }
+  }
+  return { kind: 'other', noteText: `«${shown}»: palavra diferente da esperada (você escreveu «${typed}»).` };
+}
+
+// ---- Fatia 2: progresso por ditado (puro, sem STATE) ----
+const DICT_WRONG_WORDS_MAX = 30;
+function dictDisplayWord(w){
+  return String(w || '').replace(/^[«"(\s]+|[.,!?;:…»")\s]+$/g, '').trim();
+}
+// Palavras do TEXTO que o aluno errou, faltou ou escreveu com desvio leve
+// nesta tentativa (deduplicadas sem diferenciar maiúscula, no máx. 30).
+function dictationWrongWords(evaluation){
+  const out = [], seen = new Set();
+  for (const x of (evaluation && evaluation.merged) || []){
+    let w = null;
+    if (x.type === 'sub') w = x.correct;
+    else if (x.type === 'miss') w = x.word;
+    else if (x.type === 'match' && x.light) w = x.word;
+    w = dictDisplayWord(w);
+    if (!w) continue;
+    const key = w.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key); out.push(w);
+    if (out.length >= DICT_WRONG_WORDS_MAX) break;
+  }
+  return out;
+}
+function sanitizeDictationRecord(rec){
+  const r = rec && typeof rec === 'object' ? rec : {};
+  const num = v => (typeof v === 'number' && isFinite(v)) ? Math.max(0, Math.min(100, Math.round(v))) : 0;
+  return {
+    bestScore: num(r.bestScore),
+    attempts: (typeof r.attempts === 'number' && isFinite(r.attempts) && r.attempts > 0) ? Math.floor(r.attempts) : 0,
+    lastScore: num(r.lastScore),
+    lastAt: typeof r.lastAt === 'string' ? r.lastAt : null,
+    wrongWords: Array.isArray(r.wrongWords) ? r.wrongWords.filter(w => typeof w === 'string' && w).slice(0, DICT_WRONG_WORDS_MAX) : []
+  };
+}
+// Registro novo depois de uma correção. bestScore nunca diminui.
+function updateDictationRecord(prev, evaluation, now){
+  const p = sanitizeDictationRecord(prev);
+  const score = (evaluation && typeof evaluation.score === 'number') ? Math.max(0, Math.min(100, Math.round(evaluation.score))) : 0;
+  const when = now instanceof Date ? now : new Date(now === undefined ? Date.now() : now);
+  return {
+    bestScore: Math.max(p.bestScore, score),
+    attempts: p.attempts + 1,
+    lastScore: score,
+    lastAt: isNaN(when.getTime()) ? null : when.toISOString(),
+    wrongWords: dictationWrongWords(evaluation)
+  };
+}
+
+// ---- Fatia 3: divisão em frases (áudio por frase) ----
+// MESMA regra de fr/scripts/dictation_sentences.py (o gerador dos mp3
+// audio/dictation-<id>-s<N>.mp3). Se mudar uma, mude a outra: o N do mp3 é a
+// posição da frase nesta lista (começa em 1).
+const DICT_SENT_END_RE = /[.!?…]+["'»”)\]]*$/;
+const DICT_SENT_CLOSERS_RE = /["'»”)\]]+$/;
+const DICT_SENT_ONLY_CLOSERS_RE = /^["'»”)\]]+$/;
+const DICT_SENT_INITIAL_RE = /^[A-Z]\.$/;
+const DICT_SENT_ABBREVIATIONS = new Set(['M.', 'Mme.', 'Mmes.', 'Mlle.', 'Mlles.', 'Dr.', 'Pr.', 'St.', 'Ste.', 'etc.', 'p.', 'n°.']);
+function dictIsAbbreviation(token){
+  const core = token.replace(DICT_SENT_CLOSERS_RE, '');
+  return DICT_SENT_ABBREVIATIONS.has(core) || DICT_SENT_INITIAL_RE.test(core);
+}
+function splitDictationSentences(text){
+  const sentences = [];
+  let current = [];
+  for (const tok of String(text || '').split(/\s+/)){
+    if (!tok) continue;
+    if (!current.length && sentences.length && DICT_SENT_ONLY_CLOSERS_RE.test(tok)){
+      sentences[sentences.length - 1] += ' ' + tok;
+      continue;
+    }
+    current.push(tok);
+    if (DICT_SENT_END_RE.test(tok) && !dictIsAbbreviation(tok)){
+      sentences.push(current.join(' '));
+      current = [];
+    }
+  }
+  if (current.length) sentences.push(current.join(' '));
+  return sentences.filter(s => s.trim());
+}
+// Para cada frase do texto, true se o aluno errou alguma palavra dela
+// (troca, palavra faltando, erro leve) ou digitou palavra a mais ali.
+// Só explicativo: NÃO muda a nota.
+function dictationSentenceErrorFlags(refText, evaluation){
+  const sentences = splitDictationSentences(refText);
+  const sentenceOfWord = [];
+  sentences.forEach((s, si) => {
+    const n = tokenizeDictationText(s).words.length;
+    for (let k = 0; k < n; k++) sentenceOfWord.push(si);
+  });
+  const flags = sentences.map(() => false);
+  if (!sentences.length) return flags;
+  const at = c => sentenceOfWord[Math.max(0, Math.min(c, sentenceOfWord.length - 1))];
+  let c = 0;
+  for (const x of (evaluation && evaluation.merged) || []){
+    if (x.type === 'extra'){ const s = at(c - 1); if (s !== undefined) flags[s] = true; continue; }
+    const s = sentenceOfWord[c];
+    if (s !== undefined && (x.type === 'miss' || x.type === 'sub' || (x.type === 'match' && x.light))) flags[s] = true;
+    c++;
+  }
+  return flags;
+}
+// END dictation-answer-logic
+
 function dictationScoreColorVar(score){
   if (score >= 80) return 'var(--jade)';
   if (score >= 60) return 'var(--imperial-gold)';
   return 'var(--seal-red-dark)';
 }
 
+function dictationWordHtml(word, punctAfter, missingMarks, cls, title){
+  const esc = escapeHtmlDictation;
+  const t = title ? ` title="${esc(title)}"` : '';
+  if (!missingMarks){
+    return `<span class="${cls}"${t}>${esc(word)}</span>${punctAfter ? ' ' + esc(punctAfter) : ''}`;
+  }
+  const m = word.match(/^(.*?)([.,!?;:…]+)$/);
+  const core = m ? m[1] : word, trail = m ? m[2] : '';
+  return `<span class="${cls}"${t}>${esc(core)}</span><span class="dictation-punct-missing" title="Faltou este sinal (não desconta pontos)">${esc(trail)}${punctAfter ? ' ' + esc(punctAfter) : ''}</span>`;
+}
+
+function dictationLightNoteText(x){
+  const core = x.word.replace(/[.,!?;:…]+$/, '');
+  const you = `você escreveu «${x.userWord.replace(/[.,!?;:…]+$/, '')}»`;
+  switch (x.reason){
+    case 'hyphen': return `«${core}» leva hífen (${you}).`;
+    case 'apostrophe': return `«${core}» leva apóstrofo (${you}).`;
+    case 'ligature': return `«${core}» usa a letra «œ», que é uma só (${you}).`;
+    case 'accent': {
+      const h = classifyDictationError(x.word, x.userWord);
+      return `«${core}»: confira os acentos (${you}).` + (h.kind === 'homophone' ? ' ' + h.noteText.replace(/^.*?parecido\. /, '') : '');
+    }
+    default: return `«${core}»: pequena diferença de grafia (${you}).`;
+  }
+}
+
 function renderDictationResult(d, userText){
-  const diff = diffDictationWords(d.text, userText);
-  const merged = mergeDictationDiff(diff);
-  const totalCorrectWords = tokenizeDictationText(d.text).words.length;
-  const matches = diff.filter(x => x.type === 'match').length;
-  const score = Math.round((matches / totalCorrectWords) * 100);
+  const ev = evaluateDictation(d.text, userText);
+  const { merged, total, score } = ev;
   trackEvent('lesson_complete', 'dictation', { dictationId: d.id, score });
+  // Fatia 2: grava a tentativa (melhor nota nunca diminui).
+  const rec = updateDictationRecord(STATE.dictations[d.id], ev, new Date());
+  STATE.dictations[d.id] = rec;
+  saveState();
 
   const wordsHtml = merged.map(x => {
+    if (x.type === 'match'){
+      return x.light
+        ? dictationWordHtml(x.word, x.punctAfter, x.missingMarks, 'dictation-word-near', chT('dict.nearPrefix') + dictationLightNoteText(x))
+        : dictationWordHtml(x.word, x.punctAfter, x.missingMarks, 'dictation-word', '');
+    }
     const punct = x.punctAfter ? ` ${escapeHtmlDictation(x.punctAfter)}` : '';
-    if (x.type === 'match') return `<span class="dictation-word">${escapeHtmlDictation(x.word)}</span>${punct}`;
-    if (x.type === 'sub') return `<span class="dictation-word-wrong">${escapeHtmlDictation(x.wrong)}</span> <span class="dictation-word-correct">${escapeHtmlDictation(x.correct)}</span>${punct}`;
+    if (x.type === 'sub') return `<span class="dictation-word-wrong" title="${escapeHtmlDictation(classifyDictationError(x.correct, x.wrong).noteText)}">${escapeHtmlDictation(x.wrong)}</span> <span class="dictation-word-correct">${escapeHtmlDictation(x.correct)}</span>${punct}`;
     if (x.type === 'miss') return `<span class="dictation-word-correct">${escapeHtmlDictation(x.word)}</span>${punct}`;
     return `<span class="dictation-word-wrong">${escapeHtmlDictation(x.word)}</span>`;
   }).join(' ');
 
-  document.getElementById('dictation-result-wrap').innerHTML = `
-    <div class="dictation-result">
+  const notes = [];
+  merged.filter(x => x.type === 'match' && x.light).forEach(x => notes.push(dictationLightNoteText(x)));
+  merged.filter(x => x.type === 'sub').forEach(x => notes.push(classifyDictationError(x.correct, x.wrong).noteText));
+  ev.digitNotes.forEach(n => notes.push({ html: chT('dict.note.digits', { digits: n.digits, words: escapeHtmlDictation(n.words) }) }));
+  ev.spokenPunct.forEach(p => notes.push({ html: chT('dict.note.spoken', { said: escapeHtmlDictation(p.said), symbol: escapeHtmlDictation(p.symbol) }) }));
+  if (ev.missingMarks > 0) notes.push({ html: chT('dict.note.punct', { n: ev.missingMarks, places: chT(ev.missingMarks === 1 ? 'dict.place.one' : 'dict.place.many') }) });
+  const notesHtml = notes.length
+    ? `<ul class="dictation-notes">${notes.map(n => `<li>${n && n.html ? n.html : escapeHtmlDictation(n)}</li>`).join('')}</ul>`
+    : '';
+  const hit = ev.exact + ev.light;
+
+  // Fatia 3: o texto certo frase por frase, cada uma com seu áudio; as frases
+  // em que o aluno errou ficam marcadas (texto + borda, não só cor).
+  stopDictationSentenceAudio();
+  const sentences = splitDictationSentences(d.text);
+  const sentenceFlags = dictationSentenceErrorFlags(d.text, ev);
+  const sentencesHtml = sentences.length ? `
+      <div class="dictation-sentences">
+        <p class="dictation-sentences-title"><strong>${chT('dict.sent.title')}</strong>${sentenceFlags.some(Boolean) ? chT('dict.sent.flagHint') : ''}</p>
+        <ol class="dictation-sentence-list">
+          ${sentences.map((s, i) => `
+          <li class="dictation-sentence${sentenceFlags[i] ? ' has-error' : ''}">
+            <button type="button" class="dictation-sentence-play" data-sentence="${i + 1}" aria-label="${chT('dict.sent.listenN', { n: i + 1 })}${sentenceFlags[i] ? chT('dict.sent.errorAria') : ''}">${chT('dict.sent.listen')}</button>
+            <span class="dictation-sentence-text">${sentenceFlags[i] ? `<span class="dictation-sentence-flag">${chT('dict.sent.flag')}</span> ` : ''}${escapeHtmlDictation(s)}</span>
+          </li>`).join('')}
+        </ol>
+      </div>` : '';
+
+  const wrap = document.getElementById('dictation-result-wrap');
+  wrap.innerHTML = `
+    <div class="dictation-result" tabindex="-1">
       <div class="dictation-result-text">${wordsHtml}</div>
       <div class="dictation-result-summary">
         <div class="dictation-score-badge" style="background:${dictationScoreColorVar(score)};">${score}</div>
-        <p class="dictation-score-text">${t('fr.dictation.scoreTextHtml', { matches, total: totalCorrectWords, score })}</p>
+        <p class="dictation-score-text">${chT('dict.score', { hit, total, light: ev.light ? chT('dict.scoreLight', { n: ev.light }) : '', score })}</p>
       </div>
+      <p class="dictation-record-line">${chT('dict.record', { best: rec.bestScore, n: rec.attempts, unit: chT(rec.attempts === 1 ? 'dict.attempt.one' : 'dict.attempt.many') })}</p>
+      ${notesHtml}
+      ${rec.wrongWords.length ? `<p class="dictation-review-words"><strong>${chT('dict.reviewWords')}</strong> ${rec.wrongWords.map(escapeHtmlDictation).join(', ')}</p>` : ''}
+      ${sentencesHtml}
     </div>
   `;
+  wrap.querySelectorAll('.dictation-sentence-play').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const n = parseInt(btn.dataset.sentence, 10);
+      playDictationSentence(d, n, sentences[n - 1], btn);
+    });
+  });
 
   document.getElementById('dictation-check-btn').style.display = 'none';
   document.getElementById('dictation-retry-btn').style.display = 'inline-flex';
+  const box = wrap.firstElementChild;
+  if (box){ box.scrollIntoView({ behavior: 'smooth', block: 'start' }); try { box.focus({ preventScroll: true }); } catch(e){} }
 }
 
 // ============================================================
@@ -8929,7 +9469,7 @@ function challengeDataPayload(c){
   return data;
 }
 
-const CHALLENGE_VALID_TYPES = ['expression', 'listen_translate', 'accent'];
+const CHALLENGE_VALID_TYPES = ['expression', 'listen_translate', 'accent', 'cloze_grammar'];
 const CHALLENGE_VALID_STATUSES = ['needs_review', 'approved', 'published', 'rejected'];
 
 // Aceita tanto um array de desafios quanto a saída direta do pipeline
@@ -8994,9 +9534,20 @@ async function importChallengesFromJSON(rawText){
 // nunca depender de cache/estado de sessão -- uma publicação feita em
 // outra aba/navegador aparece assim que o site é reaberto ou a lista é
 // recarregada, sem precisar de nenhuma ação do Claude Code.
-async function loadChallengesFromDB(){
+// Cache em memória (5 min): reabrir a aba Desafios não baixa tudo de novo.
+// `force` (admin/edição) ou uma gravação (persistChallenge) ignoram o cache.
+let challengesLoadedAt = 0;
+const CHALLENGES_CACHE_MS = 5 * 60 * 1000;
+async function loadChallengesFromDB(force){
+  if (!force && challengesLoadedAt && Date.now() - challengesLoadedAt < CHALLENGES_CACHE_MS) return true;
   try {
-    const { data, error } = await supabaseClient.from('challenges').select('*');
+    // Fase 8: com CHALLENGES_SERVER_GATING ligada, quem não é admin lê pela RPC
+    // get_published_challenges (008), que devolve só o esqueleto dos Premium
+    // para contas Free. Desligada (padrão), mantém o select direto de sempre.
+    const useRpc = CHALLENGES_SERVER_GATING && !isChallengesAdmin();
+    const { data, error } = useRpc
+      ? await supabaseClient.rpc('get_published_challenges')
+      : await supabaseClient.from('challenges').select('*');
     if (error) throw error;
     CHALLENGES = (data || []).map(row => ({
       id: row.id,
@@ -9013,6 +9564,7 @@ async function loadChallengesFromDB(){
       unpublished_by: row.unpublished_by,
       ...(row.data || {}),
     }));
+    challengesLoadedAt = Date.now();
     return true;
   } catch (err){
     console.error('Falha ao carregar desafios do Supabase:', err);
@@ -9027,6 +9579,7 @@ async function loadChallengesFromDB(){
 async function persistChallenge(c, extraColumns = {}){
   const payload = { status: c.status, data: challengeDataPayload(c), ...extraColumns };
   const { error } = await supabaseClient.from('challenges').update(payload).eq('id', c.id);
+  challengesLoadedAt = 0; // gravou: o cache deixa de valer
   if (error){
     console.error('Falha ao salvar desafio no Supabase:', error);
     alert(t('adminChallenges.persist.failed') + error.message);
@@ -9036,9 +9589,10 @@ async function persistChallenge(c, extraColumns = {}){
 }
 
 const CHALLENGE_CATEGORIES = [
-  { type: 'expression', emoji: '🧩', get title(){ return t('fr.challenges.cat.expression.title'); }, get subtitle(){ return t('fr.challenges.cat.expression.subtitle'); } },
-  { type: 'listen_translate', emoji: '🎧', get title(){ return t('fr.challenges.cat.listenTranslate.title'); }, get subtitle(){ return t('fr.challenges.cat.listenTranslate.subtitle'); } },
-  { type: 'accent', emoji: '✍️', get title(){ return t('fr.challenges.cat.accent.title'); }, get subtitle(){ return t('fr.challenges.cat.accent.subtitle'); } },
+  { type: 'expression', emoji: '🧩', title: 'Expressões', subtitle: 'Descubra o sentido' },
+  { type: 'listen_translate', emoji: '🎧', title: 'Ouça e traduza', subtitle: 'Escute e traduza' },
+  { type: 'accent', emoji: '✍️', title: 'Acentuação', subtitle: 'Escreva corretamente' },
+  { type: 'cloze_grammar', emoji: '🧠', title: 'Complete a frase', subtitle: 'Gramática na prática' },
 ];
 
 let currentChallengesCategory = 'expression';
@@ -9062,6 +9616,325 @@ function pendingChallenges(){
   return CHALLENGES.filter(c => c.status === 'needs_review');
 }
 
+
+// ---------- i18n dos textos de INTERFACE dos Desafios/Ditados ----------
+// chT() agora lê o idioma do site do mecanismo global (getUiLang, shared/i18n),
+// cai em pt-BR e, por fim, na própria chave. 'en' = inglês (reaproveita as
+// traduções do catálogo global onde o texto em português é idêntico). O CONTEÚDO em
+// francês (frases, respostas, dados do banco) NÃO passa por aqui.
+const CHALLENGE_I18N = {
+  'pt-BR': {
+    'tier.premium': 'Premium',
+    'tier.free': 'Free',
+    'dict.back.trail': '← Voltar à trilha',
+    'dict.back.challenges': '← Voltar aos desafios',
+    'dict.bestAttempts': 'Melhor nota: {best} · {n} {unit}',
+    'dict.attempt.one': 'tentativa',
+    'dict.attempt.many': 'tentativas',
+    'dict.play': '▶️ Ouvir o ditado',
+    'dict.pause': '⏸ Pausar',
+    'dict.restart': 'Reiniciar',
+    'dict.back15': 'Voltar 15s',
+    'dict.fwd15': 'Avançar 15s',
+    'dict.mute': 'Mudo',
+    'dict.unmute': 'Ativar som',
+    'dict.placeholder': 'Digite aqui o que você ouviu...',
+    'dict.textAria': 'Texto do ditado',
+    'dict.check': 'Verificar',
+    'dict.retry': 'Tentar novamente',
+    'dict.audioFail': 'Não foi possível reproduzir o áudio',
+    'dict.audioUnavailable': '⚠️ Áudio indisponível',
+    'dict.writeFirst': 'Escreva o que você ouviu antes de verificar.',
+    'dict.nearPrefix': 'Quase: ',
+    'dict.note.digits': 'Por extenso: {digits} → <strong>{words}</strong>. Numa escrita de ditado, o número vai por extenso (sem desconto).',
+    'dict.note.spoken': 'Você escreveu «{said}» por extenso. No ditado, escreva o sinal ({symbol}). Pequeno desconto.',
+    'dict.note.punct': 'Pontuação: faltou em {n} {places} (sublinhado acima). Não desconta pontos.',
+    'dict.place.one': 'lugar',
+    'dict.place.many': 'lugares',
+    'dict.sent.title': 'Ouça frase por frase',
+    'dict.sent.flagHint': ' · as marcadas com ⚠ têm erro seu',
+    'dict.sent.listenN': 'Ouvir a frase {n}',
+    'dict.sent.errorAria': ' (você errou nesta frase)',
+    'dict.sent.listen': '▶ ouvir frase',
+    'dict.sent.flag': '⚠ você errou aqui:',
+    'dict.score': 'Você escreveu <strong>{hit} de {total}</strong> palavras corretamente{light}. Você atingiu uma pontuação de {score} pontos ({score}%).',
+    'dict.scoreLight': ' ({n} com pequeno desvio de grafia, valem meio ponto)',
+    'dict.record': 'Melhor nota: <strong>{best}</strong> · {n} {unit}',
+    'dict.reviewWords': 'Palavras para revisar:',
+    'dict.count.one': '{n} ditado',
+    'dict.count.many': '{n} ditados',
+    'ch.retryNow': '🔁 Tentar de novo',
+    'ch.catProgress.one': '{done} de {total} concluído',
+    'ch.catProgress.many': '{done} de {total} concluídos',
+    'ch.review.title': 'Revisar erros ({n})',
+    'ch.review.subtitle': 'Desafios que você errou, na hora de rever',
+    'ch.review.doneTitle': 'Revisão do dia concluída!',
+    'ch.review.doneSub': 'Os desafios que você acertou voltam mais tarde, cada vez mais espaçados.',
+    'ch.review.back': 'Voltar aos desafios',
+    'ch.retryLater': 'Tentar mais tarde',
+    'ch.complete': '✅ Concluir',
+    'ch.knowMore': 'En savoir plus',
+    'ch.goFurther': 'Pour aller plus loin',
+    'ch.loading': 'Carregando desafios...',
+    'ch.loadError': 'Não foi possível carregar os desafios agora. Verifique sua conexão e tente novamente.',
+    'ch.retry': 'Tentar de novo',
+    'ch.moduleTitle': 'Desafios do Módulo {n}',
+    'ch.moduleSub': '{title} · agora que você estudou esse tema, pratique de novas formas.',
+    'ch.title': 'Desafios',
+    'ch.sub': 'Pratique francês de verdade: expressões, compreensão auditiva e ortografia.',
+    'ch.count.one': '{n} desafio',
+    'ch.count.many': '{n} desafios',
+    'ch.cat.expression.title': 'Expressões',
+    'ch.cat.expression.subtitle': 'Descubra o sentido',
+    'ch.cat.listen_translate.title': 'Ouça e traduza',
+    'ch.cat.listen_translate.subtitle': 'Escute e traduza',
+    'ch.cat.accent.title': 'Acentuação',
+    'ch.cat.accent.subtitle': 'Escreva corretamente',
+    'ch.cat.cloze_grammar.title': 'Complete a frase',
+    'ch.cat.cloze_grammar.subtitle': 'Gramática na prática',
+    'ch.label.cloze': '🧠 Complete a frase',
+    'ch.cloze.instruction': 'Escolha a forma certa para cada lacuna:',
+    'ch.cloze.blank': 'Lacuna {n}',
+    'ch.cloze.chooseAll': 'Escolha uma opção para cada lacuna antes de verificar.',
+    'ch.cloze.right': '✅ Bonne réponse.',
+    'ch.cloze.yourAnswer': 'Sua resposta',
+    'ch.cloze.correct': 'Resposta certa',
+    'ch.cloze.translation': 'Tradução',
+    'ch.cat.dictation.title': 'Ditados',
+    'ch.cat.dictation.subtitle': 'Ouça e escreva',
+    'ch.label.listen': '🎧 Ouça e traduza',
+    'ch.label.accent': '✍️ Acentuação',
+    'ch.ofModule': ' · do módulo',
+    'ch.emptyTitle': 'Nenhum desafio publicado ainda',
+    'ch.emptySub': 'Em breve, novos desafios nesta categoria.',
+    'ch.lockedNote.one': '🔒 +{n} desafio de módulo no Premium',
+    'ch.lockedNote.many': '🔒 +{n} desafios de módulo no Premium',
+    'ch.level': 'Nível {level}',
+    'ch.btn.premiumLock': '🔒 Premium',
+    'ch.progress.one': '{done}/{total} concluído',
+    'ch.progress.many': '{done}/{total} concluídos',
+    'ch.btn.review': '🎉 Revisar',
+    'ch.btn.continue': 'Continuar',
+    'ch.btn.start': 'Começar',
+    'ch.queue.done': 'Exercício concluído!',
+    'ch.queue.levelProgress': 'Nível {level} — {progress}',
+    'ch.queue.continue': 'Continuar →',
+    'ch.queue.levelDone': 'Nível {level} concluído!',
+    'ch.queue.levelDoneSub': 'Você terminou todos os exercícios desse nível.',
+    'ch.queue.back': 'Voltar aos níveis',
+    'ch.listenPron': 'Ouvir pronúncia',
+    'ch.expr.reveal': 'Voir les réponses',
+    'ch.expr.yourAnswer': 'Sua resposta: {chosen}<br>Resposta certa: <strong>{correct}</strong>',
+    'ch.expr.signifies': 'signifie <strong>{fr}</strong>.',
+    'ch.expr.inPt': 'Em português: <strong>{pt}</strong>.',
+    'ch.expr.example1': 'Exemple 1',
+    'ch.expr.example2': 'Exemple 2',
+    'ch.listenFr': '▶ Écouter',
+    'ch.expr.yourTurn': 'À vous de jouer',
+    'ch.expr.showAnswer': 'Voir la réponse',
+    'ch.expr.right': '✅ Bonne réponse.',
+    'ch.notQuite': '❌ Pas tout à fait.',
+    'ch.lt.hint': 'Montrer un indice',
+    'ch.lt.label': 'Digite sua tradução:',
+    'ch.lt.placeholder': 'Sua tradução em português...',
+    'ch.verify': 'Vérifier',
+    'ch.lt.alert.negation': 'Atenção à negação: a frase original e a sua não concordam em "não/nunca/nada".',
+    'ch.lt.alert.number': 'Atenção aos números: confira a quantidade na frase original.',
+    'ch.lt.alert.mustInclude': 'Faltou uma ideia importante: "{word}".',
+    'ch.lt.alert.mustExclude': 'A palavra "{word}" não se encaixa nesta frase.',
+    'ch.lt.missing': 'Palavras que faltaram',
+    'ch.lt.agreement': '⚠ Repare na concordância: depois de "{pronoun}", "{verb}" não é a conjugação certa.',
+    'ch.lt.yours': 'Sua resposta',
+    'ch.lt.expected': 'Resposta esperada',
+    'ch.lt.original': 'Frase original',
+    'ch.lt.explanation': 'Explicação',
+    'ch.listenAgain': '▶ Écouter encore',
+    'ch.lt.right': '✅ Bonne traduction.',
+    'ch.lt.partial': '🟡 Presque : bonne idée, mais vérifiez les détails.',
+    'ch.accent.label': 'Digite o que você ouviu:',
+    'ch.accent.yours': 'Sua resposta: <strong>{answer}</strong>',
+    'ch.accent.right': '✅ Correct.',
+    'ch.accent.partial': '🟡 Presque : vérifiez les accents.',
+    'ch.accent.wrong': '❌ Incorrect.',
+    'ch.static.back': '← Voltar às categorias',
+    'ch.static.backChallenges': '← Voltar aos desafios',
+    'ch.static.backTrail': '← Voltar à trilha',
+    'dict.static.title': 'Ditados',
+    'dict.static.sub': 'Treine sua compreensão auditiva e sua ortografia com ditados baseados em tarefas reais de cada módulo.',
+    'dict.static.how': '🎧 Como funciona o ditado?',
+    'dict.static.s1': 'Ouça o áudio — na velocidade normal ou devagar, quantas vezes quiser.',
+    'dict.static.s2': 'Digite exatamente o que você ouviu, com acentos e pontuação.',
+    'dict.static.s3': 'Clique em "Verificar" para comparar sua resposta com o texto original.',
+    'dict.static.s4': 'Veja o que acertou e o que precisa revisar, palavra por palavra.',
+    'dict.static.backList': '← Voltar aos ditados',
+    'prem.modal.title': '🔒 Recurso Premium',
+    'prem.modal.p1': 'Os <strong>Desafios do Módulo</strong> reforçam cada tema da trilha com Expressões, Ouça e traduza, Acentuação e Ditados extras.',
+    'prem.modal.p2': 'Eles fazem parte do plano Premium. Para ativar, fale com a administração (profbrune).'
+  },
+  'en': {
+    'tier.premium': "Premium",
+    'tier.free': "Free",
+    'dict.back.trail': "← Back to the trail",
+    'dict.back.challenges': "← Back to challenges",
+    'dict.bestAttempts': "Best score: {best} · {n} {unit}",
+    'dict.attempt.one': "attempt",
+    'dict.attempt.many': "attempts",
+    'dict.play': "▶️ Listen to the dictation",
+    'dict.pause': "⏸ Pause",
+    'dict.restart': "Restart",
+    'dict.back15': "Back 15s",
+    'dict.fwd15': "Forward 15s",
+    'dict.mute': "Mute",
+    'dict.unmute': "Unmute",
+    'dict.placeholder': "Type what you heard here...",
+    'dict.textAria': "Dictation text",
+    'dict.check': "Check",
+    'dict.retry': "Try again",
+    'dict.audioFail': "Couldn't play the audio",
+    'dict.audioUnavailable': "⚠️ Audio unavailable",
+    'dict.writeFirst': "Write what you heard before checking.",
+    'dict.nearPrefix': "Almost: ",
+    'dict.note.digits': "Spelled out: {digits} → <strong>{words}</strong>. In a dictation, write the number as words (no penalty).",
+    'dict.note.spoken': "You wrote “{said}” as a word. In a dictation, write the sign ({symbol}). Small penalty.",
+    'dict.note.punct': "Punctuation: missing in {n} {places} (underlined above). It doesn't cost points.",
+    'dict.place.one': "place",
+    'dict.place.many': "places",
+    'dict.sent.title': "Listen sentence by sentence",
+    'dict.sent.flagHint': " · the ones marked with ⚠ have a mistake of yours",
+    'dict.sent.listenN': "Listen to sentence {n}",
+    'dict.sent.errorAria': " (you made a mistake in this sentence)",
+    'dict.sent.listen': "▶ listen to sentence",
+    'dict.sent.flag': "⚠ you made a mistake here:",
+    'dict.score': "You wrote <strong>{hit} of {total}</strong> words correctly{light}. You scored {score} points ({score}%).",
+    'dict.scoreLight': " ({n} with a small spelling slip, worth half a point)",
+    'dict.record': "Best score: <strong>{best}</strong> · {n} {unit}",
+    'dict.reviewWords': "Words to review:",
+    'dict.count.one': "{n} dictation",
+    'dict.count.many': "{n} dictations",
+    'ch.retryNow': "🔁 Try again",
+    'ch.catProgress.one': "{done} of {total} completed",
+    'ch.catProgress.many': "{done} of {total} completed",
+    'ch.review.title': "Review mistakes ({n})",
+    'ch.review.subtitle': "Challenges you got wrong, time to review them",
+    'ch.review.doneTitle': "Today's review is done!",
+    'ch.review.doneSub': "The challenges you got right come back later, each time more spaced out.",
+    'ch.review.back': "Back to challenges",
+    'ch.retryLater': "Try later",
+    'ch.complete': "✅ Complete",
+    'ch.knowMore': "En savoir plus",
+    'ch.goFurther': "Pour aller plus loin",
+    'ch.loading': "Loading challenges...",
+    'ch.loadError': "Couldn't load the challenges right now. Check your connection and try again.",
+    'ch.retry': "Try again",
+    'ch.moduleTitle': "Module {n} Challenges",
+    'ch.moduleSub': "{title} · now that you have studied this topic, practice in new ways.",
+    'ch.title': "Challenges",
+    'ch.sub': "Practice real French: expressions, listening comprehension and spelling.",
+    'ch.count.one': "{n} challenge",
+    'ch.count.many': "{n} challenges",
+    'ch.cat.expression.title': "Expressions",
+    'ch.cat.expression.subtitle': "Discover the meaning",
+    'ch.cat.listen_translate.title': "Listen and translate",
+    'ch.cat.listen_translate.subtitle': "Listen and translate",
+    'ch.cat.accent.title': "Accents",
+    'ch.cat.accent.subtitle': "Write it correctly",
+    'ch.cat.cloze_grammar.title': "Complete the sentence",
+    'ch.cat.cloze_grammar.subtitle': "Grammar in practice",
+    'ch.label.cloze': "🧠 Complete the sentence",
+    'ch.cloze.instruction': "Choose the right form for each blank:",
+    'ch.cloze.blank': "Blank {n}",
+    'ch.cloze.chooseAll': "Choose an option for each blank before checking.",
+    'ch.cloze.right': "✅ Bonne réponse.",
+    'ch.cloze.yourAnswer': "Your answer",
+    'ch.cloze.correct': "Correct answer",
+    'ch.cloze.translation': "Translation",
+    'ch.cat.dictation.title': "Dictations",
+    'ch.cat.dictation.subtitle': "Listen and write",
+    'ch.label.listen': "🎧 Listen and translate",
+    'ch.label.accent': "✍️ Accents",
+    'ch.ofModule': " · from the module",
+    'ch.emptyTitle': "No challenges published yet",
+    'ch.emptySub': "New challenges in this category are coming soon.",
+    'ch.lockedNote.one': "🔒 +{n} module challenge on Premium",
+    'ch.lockedNote.many': "🔒 +{n} module challenges in Premium",
+    'ch.level': "Level {level}",
+    'ch.btn.premiumLock': "🔒 Premium feature",
+    'ch.progress.one': "{done}/{total} completed",
+    'ch.progress.many': "{done}/{total} completed",
+    'ch.btn.review': "🎉 Review",
+    'ch.btn.continue': "Continue",
+    'ch.btn.start': "Start",
+    'ch.queue.done': "Exercise complete!",
+    'ch.queue.levelProgress': "Level {level} — {progress}",
+    'ch.queue.continue': "Continue →",
+    'ch.queue.levelDone': "Level {level} complete!",
+    'ch.queue.levelDoneSub': "You have finished all the exercises in this level.",
+    'ch.queue.back': "Back to levels",
+    'ch.listenPron': "Listen to pronunciation",
+    'ch.expr.reveal': "Voir les réponses",
+    'ch.expr.yourAnswer': "Your answer: {chosen}<br>Correct answer: <strong>{correct}</strong>",
+    'ch.expr.signifies': "signifie <strong>{fr}</strong>.",
+    'ch.expr.inPt': "In English: <strong>{pt}</strong>.",
+    'ch.expr.example1': "Exemple 1",
+    'ch.expr.example2': "Exemple 2",
+    'ch.listenFr': "▶ Écouter",
+    'ch.expr.yourTurn': "À vous de jouer",
+    'ch.expr.showAnswer': "Voir la réponse",
+    'ch.expr.right': "✅ Bonne réponse.",
+    'ch.notQuite': "❌ Pas tout à fait.",
+    'ch.lt.hint': "Montrer un indice",
+    'ch.lt.label': "Type your translation:",
+    'ch.lt.placeholder': "Your translation in English...",
+    'ch.verify': "Vérifier",
+    'ch.lt.alert.negation': "Watch the negation: the original sentence and yours don't agree on \"not/never/nothing\".",
+    'ch.lt.alert.number': "Watch the numbers: check the quantity in the original sentence.",
+    'ch.lt.alert.mustInclude': "An important idea is missing: \"{word}\".",
+    'ch.lt.alert.mustExclude': "The word \"{word}\" doesn't fit this sentence.",
+    'ch.lt.missing': "Words that were missing",
+    'ch.lt.agreement': "⚠ Mind the agreement: after \"{pronoun}\", \"{verb}\" is not the right conjugation.",
+    'ch.lt.yours': "Your answer",
+    'ch.lt.expected': "Expected answer",
+    'ch.lt.original': "Original sentence",
+    'ch.lt.explanation': "Explanation",
+    'ch.listenAgain': "▶ Écouter encore",
+    'ch.lt.right': "✅ Bonne traduction.",
+    'ch.lt.partial': "🟡 Presque : bonne idée, mais vérifiez les détails.",
+    'ch.accent.label': "Type what you heard:",
+    'ch.accent.yours': "Your answer: <strong>{answer}</strong>",
+    'ch.accent.right': "✅ Correct.",
+    'ch.accent.partial': "🟡 Presque : vérifiez les accents.",
+    'ch.accent.wrong': "❌ Incorrect.",
+    'ch.static.back': "← Back to categories",
+    'ch.static.backChallenges': "← Back to challenges",
+    'ch.static.backTrail': "← Back to the trail",
+    'dict.static.title': "Dictations",
+    'dict.static.sub': "Train your listening and spelling with dictations based on real tasks from each module.",
+    'dict.static.how': "🎧 How does the dictation work?",
+    'dict.static.s1': "Listen to the audio -- at normal speed or slowly, as many times as you like.",
+    'dict.static.s2': "Type exactly what you heard, with accents and punctuation.",
+    'dict.static.s3': "Click \"Verificar\" to compare your answer with the original text.",
+    'dict.static.s4': "See what you got right and what needs review, word by word.",
+    'dict.static.backList': "← Back to dictations",
+    'prem.modal.title': "🔒 Premium feature",
+    'prem.modal.p1': "<strong>Module Challenges</strong> reinforce each topic in the course with Expressions, Listen and Translate, Accents, and extra Dictations.",
+    'prem.modal.p2': "They're part of the Premium plan. To activate it, contact the administrator (profbrune)."
+  }
+};
+function chT(key, vars){
+  // Idioma do site (mecanismo global, shared/i18n); cai em pt-BR e, por fim, na chave.
+  const lang = (typeof getUiLang === 'function' && getUiLang()) || 'pt-BR';
+  let str = (CHALLENGE_I18N[lang] && CHALLENGE_I18N[lang][key]);
+  if (str == null) str = CHALLENGE_I18N['pt-BR'][key];
+  if (str == null) return key;
+  if (vars) str = str.replace(/\{(\w+)\}/g, (m, name) => (vars[name] != null ? vars[name] : m));
+  return str;
+}
+// Preenche textos estáticos do index.html marcados com data-ch-i18n="chave".
+function applyChallengeI18n(){
+  document.querySelectorAll('[data-ch-i18n]').forEach(el => { el.innerHTML = chT(el.dataset.chI18n); });
+}
+window.addEventListener('i18n:change', () => { applyChallengeI18n(); });
+
 // ---------- Desafios do Módulo (Premium) ----------
 // Um desafio "da trilha" é qualquer desafio com `moduleId` (campo extra dentro
 // de `data`, sem coluna nova no banco -- ver challengeDataPayload). Esses
@@ -9084,12 +9957,15 @@ function challengesPremiumUnlocked(){
 // paywall e Stripe entram depois. Hoje só ROTULAMOS cada item como Free ou
 // Premium (tierBadgeHTML); quando o paywall existir, basta ligar esta flag.
 const CHALLENGE_PAYWALL_ENABLED = false;
+// Fase 8: leitura dos desafios pela RPC com trava no servidor. SÓ ligar depois de
+// aplicar fr/scripts/supabase_migrations/008 (passo 1 e 2) no banco correspondente.
+const CHALLENGES_SERVER_GATING = false;
 // Free x Premium: desafios de módulo (Ouça e traduza, Acentuação, Expressões)
 // são Premium; ditado é Free só quando d.free === true (1 por módulo).
 function challengeTier(c){ return challengeModuleId(c) ? 'premium' : 'free'; }
 function dictationTier(d){ return d.free === false ? 'premium' : 'free'; }
 function tierBadgeHTML(tier){
-  return `<span class="tier-badge tier-${tier}">${tier === 'premium' ? 'Premium' : 'Free'}</span>`;
+  return `<span class="tier-badge tier-${tier}">${chT(tier === 'premium' ? 'tier.premium' : 'tier.free')}</span>`;
 }
 // Ditados Premium só existem dentro da unidade do módulo -- nunca na lista
 // geral de Desafios > Ditados (nem na trilha).
@@ -9114,6 +9990,7 @@ async function ensureChallengesPlanLoaded(){
   try { if (typeof ensureProfileLoaded === 'function' && CURRENT_USER) await ensureProfileLoaded(); } catch (e) { /* conta sem perfil carregado = Free */ }
 }
 function openPremiumChallengesModal(){
+  applyChallengeI18n();
   document.getElementById('premium-challenges-modal').style.display = 'flex';
 }
 document.getElementById('premium-challenges-modal-close').addEventListener('click', () => {
@@ -9138,6 +10015,106 @@ function unpublishedButApprovedChallenges(){
 function isChallengeCompleted(id){
   return !!STATE.completedChallenges[id];
 }
+// BEGIN challenge-review-logic (extraído por fr/scripts/test_answer_validation.js)
+// Revisão espaçada dos desafios errados (Fase 6). Caixas Leitner: depois de
+// um erro (fail ou partial) o desafio volta na caixa 1 (1 dia); cada acerto
+// numa revisão DEVIDA sobe uma caixa (3, 7, 14 dias); acertar na caixa 4
+// "forma" o desafio (sai da revisão). Errar a qualquer momento volta à 1.
+// Acerto fora do prazo não muda nada (ainda não era revisão). Contagem por
+// DIA do calendário local, não por 24h exatas.
+const CHALLENGE_REVIEW_BOX_DAYS = [1, 3, 7, 14];
+function challengeReviewDayNumber(ms){
+  const d = new Date(ms);
+  return Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+}
+function sanitizeChallengeReviewEntry(raw, id){
+  if (!raw || typeof raw !== 'object') return null;
+  const box = Math.min(CHALLENGE_REVIEW_BOX_DAYS.length, Math.max(1, Math.floor(Number(raw.box)) || 1));
+  const lastErrorAt = Number(raw.lastErrorAt);
+  if (!isFinite(lastErrorAt) || lastErrorAt <= 0) return null;
+  const lastSeenAt = isFinite(Number(raw.lastSeenAt)) && Number(raw.lastSeenAt) > 0 ? Number(raw.lastSeenAt) : lastErrorAt;
+  return { id: String(raw.id || id), lastErrorAt, lastSeenAt, box };
+}
+function challengeReviewDueDay(entry){
+  return challengeReviewDayNumber(entry.lastSeenAt || entry.lastErrorAt) + CHALLENGE_REVIEW_BOX_DAYS[entry.box - 1];
+}
+function isChallengeReviewDue(entry, nowMs){
+  if (!entry) return false;
+  return challengeReviewDayNumber(nowMs) >= challengeReviewDueDay(entry);
+}
+// Devolve a nova entrada (ou null = sair da revisão / nunca entrou).
+function updateChallengeReviewEntry(entry, id, outcome, nowMs){
+  if (outcome === 'fail' || outcome === 'partial'){
+    return { id, lastErrorAt: nowMs, lastSeenAt: nowMs, box: 1 };
+  }
+  if (outcome !== 'ok' || !entry) return entry || null;
+  if (!isChallengeReviewDue(entry, nowMs)) return entry;
+  if (entry.box >= CHALLENGE_REVIEW_BOX_DAYS.length) return null;
+  return { id: entry.id || id, lastErrorAt: entry.lastErrorAt, lastSeenAt: nowMs, box: entry.box + 1 };
+}
+// ids devidos hoje, os erros mais antigos primeiro.
+function dueChallengeReviewIds(reviews, nowMs){
+  return Object.values(reviews || {})
+    .filter(e => e && isChallengeReviewDue(e, nowMs))
+    .sort((a, b) => a.lastErrorAt - b.lastErrorAt)
+    .map(e => e.id);
+}
+// END challenge-review-logic
+
+// Fila "Revisar erros" ativa (true enquanto o aluno percorre os devidos de hoje).
+let challengeReviewQueueActive = false;
+function recordChallengeReviewOutcome(c, outcome){
+  if (!c || challengePreviewMode) return;
+  const next = updateChallengeReviewEntry(STATE.challengeReviews[c.id], c.id, outcome, Date.now());
+  if (next) STATE.challengeReviews[c.id] = next; else delete STATE.challengeReviews[c.id];
+  saveState();
+}
+// Só os que existem e dá pra jogar no recorte atual (módulo / paywall).
+function dueChallengeReviews(){
+  const playableIds = new Set(playableChallenges().map(c => c.id));
+  return dueChallengeReviewIds(STATE.challengeReviews, Date.now()).filter(id => playableIds.has(id));
+}
+function openChallengeReviewQueue(){
+  const due = dueChallengeReviews();
+  if (!due.length){ challengeReviewQueueActive = false; renderChallengeCategories(); return; }
+  challengeReviewQueueActive = true;
+  challengeQueueContext = null;
+  openChallengePlayer(due[0]);
+}
+function renderChallengeReviewDoneScreen(){
+  const content = document.getElementById('challenge-player-content');
+  content.innerHTML = `
+    <div class="challenge-queue-interstitial">
+      <div class="big-emoji">🎉</div>
+      <h3>${chT('ch.review.doneTitle')}</h3>
+      <p>${chT('ch.review.doneSub')}</p>
+      <button class="btn btn-primary btn-block" id="review-queue-back-btn">${chT('ch.review.back')}</button>
+    </div>
+  `;
+  document.getElementById('review-queue-back-btn').addEventListener('click', () => {
+    challengeReviewQueueActive = false;
+    renderChallengeCategories();
+  });
+}
+// Volta "para a lista": na fila de revisão, a lista é a tela de categorias.
+function backToChallengesListOrCategories(){
+  if (challengeReviewQueueActive){ challengeReviewQueueActive = false; renderChallengeCategories(); return; }
+  renderChallengesList(currentChallengesCategory);
+}
+// "X de Y concluídos" + barra fina (cards de categoria e topo das listas).
+function challengeProgressHTML(done, total){
+  if (!total) return '';
+  const pct = Math.round((done / total) * 100);
+  return `<div class="challenge-progress" data-done="${done}" data-total="${total}">
+    <div class="challenge-progress-label">${chT(total === 1 ? 'ch.catProgress.one' : 'ch.catProgress.many', { done, total })}</div>
+    <div class="challenge-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}"><div class="challenge-progress-fill" style="width:${pct}%"></div></div>
+  </div>`;
+}
+function isDictationDone(id){
+  const rec = STATE.dictations && STATE.dictations[id];
+  return !!(rec && rec.attempts);
+}
+
 function markChallengeCompleted(id){
   STATE.completedChallenges[id] = true;
   trackEvent('lesson_complete', 'challenge', { challengeId: id });
@@ -9150,24 +10127,54 @@ function markChallengeCompleted(id){
 // Wrapper compartilhado pelas 3 telas de feedback (Expressões, Ouça e
 // traduza, Acentuação): mesmo invólucro (classe correct/incorrect + header)
 // e mesmo botão de concluir ao final -- só o corpo (bodyHTML) muda por tipo.
-function challengeFeedbackWrapperHTML(typeClass, isCorrect, headerText, bodyHTML){
+// outcome: 'ok' (acerto), 'partial' (erro leve -- conclui, com explicação)
+// ou 'fail' (erro total -- NÃO conclui: oferece "Tentar de novo" e
+// "Tentar mais tarde"). Se omitido, deriva de isCorrect (compatível com
+// chamadores antigos).
+function challengeFeedbackWrapperHTML(typeClass, isCorrect, headerText, bodyHTML, outcome){
+  const out = outcome || (isCorrect ? 'ok' : 'fail');
+  const cls = out === 'ok' ? 'correct' : out === 'partial' ? 'partial' : 'incorrect';
   return `
-    <div class="${typeClass}-feedback ${isCorrect ? 'correct' : 'incorrect'}">
+    <div class="${typeClass}-feedback ${cls}">
       <div class="${typeClass}-feedback-header">${headerText}</div>
       ${bodyHTML}
-      ${challengeCompleteButtonHTML()}
+      ${out === 'fail' ? challengeRetryButtonsHTML() : challengeCompleteButtonHTML()}
     </div>
   `;
 }
 
+function challengeRetryButtonsHTML(){
+  return `<div class="challenge-retry-actions">
+    <button class="btn btn-primary" id="challenge-retry-btn">${chT('ch.retryNow')}</button>
+    <button class="btn btn-secondary" id="challenge-later-btn">${chT('ch.retryLater')}</button>
+  </div>`;
+}
+
 function challengeCompleteButtonHTML(){
-  return `<button class="btn btn-primary challenge-complete-btn" id="challenge-complete-btn" style="margin-top:16px;width:100%;">${t('fr.challenge.complete')}</button>`;
+  return `<button class="btn btn-primary challenge-complete-btn" id="challenge-complete-btn" style="margin-top:16px;width:100%;">${chT('ch.complete')}</button>`;
 }
 function wireChallengeCompleteButton(c){
+  const retry = document.getElementById('challenge-retry-btn');
+  if (retry){
+    retry.addEventListener('click', () => openChallengePlayer(c.id));
+    const later = document.getElementById('challenge-later-btn');
+    if (later) later.addEventListener('click', () => {
+      // Sai sem concluir: o desafio continua pendente.
+      challengeQueueContext = null;
+      backToChallengesListOrCategories();
+    });
+    return;
+  }
   const btn = document.getElementById('challenge-complete-btn');
   if (!btn) return;
   btn.addEventListener('click', () => {
     markChallengeCompleted(c.id);
+    if (challengeReviewQueueActive){
+      const nextId = dueChallengeReviews()[0];
+      if (nextId) openChallengePlayer(nextId);
+      else renderChallengeReviewDoneScreen();
+      return;
+    }
     if (challengeQueueContext && challengeQueueContext.type === c.type && challengeQueueContext.level === c.level){
       const next = nextQueueChallenge(c.type, c.level);
       if (next) renderChallengeQueueContinueScreen(c, next);
@@ -9186,7 +10193,7 @@ function challengeResourceCardHTML(r){
     <a class="challenge-external-link" href="${escapeHtmlChallenge(r.url)}" target="_blank" rel="noopener">
       <span class="challenge-external-link-icon">${icon}</span>
       <span class="challenge-external-link-text">
-        <span class="challenge-external-link-label">${escapeHtmlChallenge(r.buttonLabel || 'En savoir plus')}</span>
+        <span class="challenge-external-link-label">${escapeHtmlChallenge(r.buttonLabel || chT('ch.knowMore'))}</span>
         <span class="challenge-external-link-source">${escapeHtmlChallenge(r.sourceName || r.title)}</span>
       </span>
     </a>
@@ -9198,24 +10205,27 @@ function challengeExternalResourcesHTML(c){
   if (!shown.length) return '';
   return `
     <div class="challenge-external-resources">
-      <div class="challenge-external-resources-label">Pour aller plus loin</div>
+      <div class="challenge-external-resources-label">${chT('ch.goFurther')}</div>
       ${shown.map(challengeResourceCardHTML).join('')}
     </div>
   `;
 }
 
 async function renderChallengeCategories(){
+  challengeReviewQueueActive = false;
   document.getElementById('challenges-categories-wrap').style.display = 'block';
   document.getElementById('challenges-list-wrap').style.display = 'none';
   document.getElementById('challenge-player-wrap').style.display = 'none';
   document.getElementById('challenges-admin-wrap').style.display = 'none';
 
   const wrap = document.getElementById('challenges-categories');
-  wrap.innerHTML = loadingHTML(t('fr.challenges.loading'));
+  wrap.innerHTML = loadingHTML(chT('ch.loading'));
 
   const ok = await loadChallengesFromDB();
   if (!ok){
-    wrap.innerHTML = `<p class="challenges-empty">${t('fr.challenges.loadFailedList')}</p>`;
+    wrap.innerHTML = `<p class="challenges-empty">${chT('ch.loadError')}</p>
+      <button class="btn btn-secondary" id="challenges-retry-btn">${chT('ch.retry')}</button>`;
+    document.getElementById('challenges-retry-btn').addEventListener('click', () => renderChallengeCategories());
     return;
   }
   await ensureChallengesPlanLoaded();
@@ -9229,12 +10239,12 @@ async function renderChallengeCategories(){
   if (filterModule){
     const idx = modulesOfLevel(filterModule.level).findIndex(m => m.id === filterModule.id);
     moduleBack.style.display = 'inline-flex';
-    titleEl.textContent = t('trail.moduleChallenges.title', { n: idx + 1 });
-    subEl.textContent = t('fr.challenges.moduleSub', { title: filterModule.title });
+    titleEl.textContent = chT('ch.moduleTitle', { n: idx + 1 });
+    subEl.textContent = chT('ch.moduleSub', { title: filterModule.title });
   } else {
     moduleBack.style.display = 'none';
-    titleEl.textContent = t('fr.challenges.title');
-    subEl.textContent = t('fr.challenges.sub');
+    titleEl.textContent = chT('ch.title');
+    subEl.textContent = chT('ch.sub');
   }
 
   const adminBar = document.getElementById('challenges-admin-bar');
@@ -9251,21 +10261,36 @@ async function renderChallengeCategories(){
   const dictationsHere = dictationsVisible(challengesModuleFilter);
   const visibleCats = challengesModuleFilter ? CHALLENGE_CATEGORIES.filter(cat => listedNow.some(c => c.type === cat.type)) : CHALLENGE_CATEGORIES;
   const catSubtitle = (cat) => challengesModuleFilter
-    ? tp('fr.challenges.countInCategory', listedNow.filter(c => c.type === cat.type).length)
-    : cat.subtitle;
-  wrap.innerHTML = visibleCats.map(cat => `
+    ? chT(listedNow.filter(c => c.type === cat.type).length === 1 ? 'ch.count.one' : 'ch.count.many', { n: listedNow.filter(c => c.type === cat.type).length })
+    : chT('ch.cat.' + cat.type + '.subtitle');
+  const catProgress = (cat) => {
+    const ofType = listedNow.filter(c => c.type === cat.type);
+    return challengeProgressHTML(ofType.filter(c => isChallengeCompleted(c.id)).length, ofType.length);
+  };
+  const dueReviews = dueChallengeReviews();
+  wrap.innerHTML = (dueReviews.length ? `
+    <button class="challenge-category-card challenge-review-card" id="challenges-review-card">
+      <div class="challenge-category-emoji">🔁</div>
+      <div class="challenge-category-title">${chT('ch.review.title', { n: dueReviews.length })}</div>
+      <div class="challenge-category-subtitle">${chT('ch.review.subtitle')}</div>
+    </button>
+  ` : '') + visibleCats.map(cat => `
     <button class="challenge-category-card" data-category="${cat.type}">
       <div class="challenge-category-emoji">${cat.emoji}</div>
-      <div class="challenge-category-title">${cat.title}</div>
+      <div class="challenge-category-title">${chT('ch.cat.' + cat.type + '.title')}</div>
       <div class="challenge-category-subtitle">${catSubtitle(cat)}</div>
+      ${catProgress(cat)}
     </button>
   `).join('') + (dictationsHere.length ? `
     <button class="challenge-category-card" id="challenges-dictation-card">
-      <div class="challenge-category-emoji">🎧</div>
-      <div class="challenge-category-title">${t('fr.challenges.dictations')}</div>
-      <div class="challenge-category-subtitle">${challengesModuleFilter ? tpZero('fr.trail.premiumDictations', dictationsHere.length) : t('fr.challenges.listenAndWrite')}</div>
+      <div class="challenge-category-emoji">📝</div>
+      <div class="challenge-category-title">${chT('ch.cat.dictation.title')}</div>
+      <div class="challenge-category-subtitle">${challengesModuleFilter ? chT(dictationsHere.length === 1 ? 'dict.count.one' : 'dict.count.many', { n: dictationsHere.length }) : chT('ch.cat.dictation.subtitle')}</div>
+      ${challengeProgressHTML(dictationsHere.filter(d => isDictationDone(d.id)).length, dictationsHere.length)}
     </button>
   ` : '');
+  const reviewCard = document.getElementById('challenges-review-card');
+  if (reviewCard) reviewCard.addEventListener('click', openChallengeReviewQueue);
   wrap.querySelectorAll('.challenge-category-card[data-category]').forEach(card => {
     card.addEventListener('click', () => renderChallengesList(card.dataset.category));
   });
@@ -9278,8 +10303,9 @@ async function renderChallengeCategories(){
 
 function challengeCardLabelHTML(c){
   if (c.type === 'expression') return `<div class="challenge-card-expr">${escapeHtmlChallenge(c.canonicalExpression)}</div>`;
-  if (c.type === 'listen_translate') return `<div class="challenge-card-expr">🎧 ${t('fr.challenges.cat.listenTranslate.title')}</div>`;
-  if (c.type === 'accent') return `<div class="challenge-card-expr">✍️ ${t('fr.challenges.cat.accent.title')}</div>`;
+  if (c.type === 'listen_translate') return `<div class="challenge-card-expr">${chT('ch.label.listen')}</div>`;
+  if (c.type === 'accent') return `<div class="challenge-card-expr">${chT('ch.label.accent')}</div>`;
+  if (c.type === 'cloze_grammar') return `<div class="challenge-card-expr">${chT('ch.label.cloze')}</div>`;
   return '';
 }
 
@@ -9297,7 +10323,7 @@ function challengeCardHTML(c){
   const locked = isChallengeLocked(c);
   return `
     <button class="challenge-card ${done ? 'completed' : ''} ${locked ? 'locked' : ''}" data-challenge-id="${c.id}">
-      ${locked ? '<span class="challenge-card-check" title="Premium">🔒</span>' : (done ? '<span class="challenge-card-check">✅</span>' : '')}
+      ${locked ? `<span class="challenge-card-check" title="${chT('tier.premium')}">🔒</span>` : (done ? '<span class="challenge-card-check">✅</span>' : '')}
       <div class="challenge-card-level">${c.level}</div>
       ${challengeCardLabelHTML(c)}
       ${tierBadgeHTML(challengeTier(c))}
@@ -9307,6 +10333,7 @@ function challengeCardHTML(c){
 
 function renderChallengesList(type){
   currentChallengesCategory = type;
+  challengeReviewQueueActive = false;
   document.getElementById('challenges-categories-wrap').style.display = 'none';
   document.getElementById('challenges-list-wrap').style.display = 'block';
   document.getElementById('challenge-player-wrap').style.display = 'none';
@@ -9314,20 +10341,21 @@ function renderChallengesList(type){
   CURRENT_CHALLENGE_PLAYER = null;
 
   const cat = CHALLENGE_CATEGORIES.find(c => c.type === type);
-  document.getElementById('challenges-list-title').textContent = (cat ? cat.title : t('fr.challenges.title')) + (challengesModuleFilter ? t('fr.challenges.fromModuleSuffix') : '');
+  document.getElementById('challenges-list-title').textContent = (cat ? chT('ch.cat.' + cat.type + '.title') : chT('ch.title')) + (challengesModuleFilter ? chT('ch.ofModule') : '');
   document.getElementById('challenges-level-tabs').style.display = 'none';
 
   const cardsWrap = document.getElementById('challenges-cards');
   const published = listedChallenges().filter(c => c.type === type);
   const groupByLevel = type === 'expression';
+  document.getElementById('challenges-list-progress').innerHTML = challengeProgressHTML(published.filter(c => isChallengeCompleted(c.id)).length, published.length);
 
   if (published.length === 0){
     cardsWrap.className = 'challenges-cards';
     cardsWrap.innerHTML = `
       <div class="challenges-empty">
         <div class="big-emoji">${cat ? cat.emoji : '🧩'}</div>
-        <h3>Nenhum desafio publicado ainda</h3>
-        <p>Em breve, novos desafios nesta categoria.</p>
+        <h3>${chT('ch.emptyTitle')}</h3>
+        <p>${chT('ch.emptySub')}</p>
       </div>
     `;
     return;
@@ -9346,16 +10374,16 @@ function renderChallengesList(type){
       const levelChallenges = levelAll.filter(c => !isChallengeLocked(c));
       const lockedCount = levelAll.length - levelChallenges.length;
       const lockedNote = lockedCount > 0
-        ? `<div class="challenge-queue-level-progress">${tpZero('fr.challenges.lockedModuleChallenges', lockedCount)}</div>`
+        ? `<div class="challenge-queue-level-progress">${chT(lockedCount === 1 ? 'ch.lockedNote.one' : 'ch.lockedNote.many', { n: lockedCount })}</div>`
         : '';
       if (!levelChallenges.length){
         return `
           <div class="challenge-queue-level-card">
             <div class="challenge-queue-level-info">
-              <div class="challenge-queue-level-name">${t('fr.challenges.levelName', { level })}</div>
+              <div class="challenge-queue-level-name">${chT('ch.level', { level })}</div>
               ${lockedNote}
             </div>
-            <button class="btn btn-secondary" data-premium-lock="1">${t('fr.challenges.lockedPremiumBtn')}</button>
+            <button class="btn btn-secondary" data-premium-lock="1">${chT('ch.btn.premiumLock')}</button>
           </div>
         `;
       }
@@ -9364,12 +10392,13 @@ function renderChallengesList(type){
       return `
         <div class="challenge-queue-level-card">
           <div class="challenge-queue-level-info">
-            <div class="challenge-queue-level-name">${t('fr.challenges.levelName', { level })}</div>
-            <div class="challenge-queue-level-progress">${tp('fr.challenges.doneCount', levelChallenges.length, { done: doneCount })}</div>
+            <div class="challenge-queue-level-name">${chT('ch.level', { level })}</div>
+            <div class="challenge-queue-level-progress">${chT(levelChallenges.length === 1 ? 'ch.progress.one' : 'ch.progress.many', { done: doneCount, total: levelChallenges.length })}</div>
             ${lockedNote}
+            ${[...new Set(levelAll.map(challengeTier))].sort().map(tierBadgeHTML).join(' ')}
           </div>
           <button class="btn ${allDone ? 'btn-secondary' : 'btn-primary'}" data-level="${level}">
-            ${allDone ? t('fr.challenges.review') : (doneCount > 0 ? t('fr.challenges.continue') : t('fr.challenges.start'))}
+            ${allDone ? chT('ch.btn.review') : (doneCount > 0 ? chT('ch.btn.continue') : chT('ch.btn.start'))}
           </button>
         </div>
       `;
@@ -9437,7 +10466,7 @@ function openChallengeQueueLevel(type, level){
 function queueLevelProgressLabel(type, level){
   const all = playableChallenges().filter(c => c.type === type && c.level === level);
   const done = all.filter(c => isChallengeCompleted(c.id)).length;
-  return tp('fr.challenges.doneCount', all.length, { done });
+  return chT(all.length === 1 ? 'ch.progress.one' : 'ch.progress.many', { done, total: all.length });
 }
 
 function renderChallengeQueueContinueScreen(c, next){
@@ -9445,9 +10474,9 @@ function renderChallengeQueueContinueScreen(c, next){
   content.innerHTML = `
     <div class="challenge-queue-interstitial">
       <div class="big-emoji">✅</div>
-      <h3>${t('fr.challenges.exerciseDone')}</h3>
-      <p>${t('fr.challenges.levelName', { level: escapeHtmlChallenge(c.level) })} — ${queueLevelProgressLabel(c.type, c.level)}</p>
-      <button class="btn btn-primary btn-block" id="queue-continue-btn">${t('common.continueArrow')}</button>
+      <h3>${chT('ch.queue.done')}</h3>
+      <p>${chT('ch.queue.levelProgress', { level: escapeHtmlChallenge(c.level), progress: queueLevelProgressLabel(c.type, c.level) })}</p>
+      <button class="btn btn-primary btn-block" id="queue-continue-btn">${chT('ch.queue.continue')}</button>
     </div>
   `;
   document.getElementById('queue-continue-btn').addEventListener('click', () => openChallengePlayer(next.id));
@@ -9458,9 +10487,9 @@ function renderChallengeQueueLevelDoneScreen(c){
   content.innerHTML = `
     <div class="challenge-queue-interstitial">
       <div class="big-emoji">🎉</div>
-      <h3>${t('fr.challenges.levelDone', { level: escapeHtmlChallenge(c.level) })}</h3>
-      <p>${t('fr.challenges.levelDoneBody')}</p>
-      <button class="btn btn-primary btn-block" id="queue-back-btn">${t('fr.challenges.backToLevels')}</button>
+      <h3>${chT('ch.queue.levelDone', { level: escapeHtmlChallenge(c.level) })}</h3>
+      <p>${chT('ch.queue.levelDoneSub')}</p>
+      <button class="btn btn-primary btn-block" id="queue-back-btn">${chT('ch.queue.back')}</button>
     </div>
   `;
   document.getElementById('queue-back-btn').addEventListener('click', () => {
@@ -9483,7 +10512,7 @@ document.getElementById('challenge-back-to-list').addEventListener('click', () =
     renderChallengesAdmin();
   } else {
     challengeQueueContext = null;
-    renderChallengesList(currentChallengesCategory);
+    backToChallengesListOrCategories();
   }
 });
 document.getElementById('challenges-admin-back-btn').addEventListener('click', renderChallengeCategories);
@@ -9555,6 +10584,7 @@ function openChallengePlayer(id){
 
   if (c.type === 'listen_translate') return openListenTranslatePlayer(c);
   if (c.type === 'accent') return openAccentPlayer(c);
+  if (c.type === 'cloze_grammar') return openClozeGrammarPlayer(c);
   return openExpressionPlayer(c);
 }
 
@@ -9574,14 +10604,14 @@ function renderExpressionQuestionScreen(c){
   content.innerHTML = `
     <div class="challenge-expression">
       ${escapeHtmlChallenge(c.canonicalExpression)}
-      <button class="audio-btn audio-btn-lg" id="challenge-expression-play-btn" aria-label="${t('fr.audio.listenPronunciation')}" title="${t('fr.audio.listenPronunciation')}">🔊</button>
+      <button class="audio-btn audio-btn-lg" id="challenge-expression-play-btn" aria-label="${chT('ch.listenPron')}" title="${chT('ch.listenPron')}">🔊</button>
       ${c.expressionAudioFile ? slowAudioIconBtnHTML('challenge-expression-play-slow-btn') : ''}
     </div>
     <div class="challenge-hypothesis">
       <p class="challenge-question">${escapeHtmlChallenge(c.question)}</p>
       <div class="challenge-choices-wrap">
         <div class="challenge-choices blurred" id="challenge-choices"></div>
-        <button class="btn btn-secondary challenge-reveal-overlay-btn" id="challenge-reveal-btn">Voir les réponses</button>
+        <button class="btn btn-secondary challenge-reveal-overlay-btn" id="challenge-reveal-btn">${chT('ch.expr.reveal')}</button>
       </div>
     </div>
   `;
@@ -9623,34 +10653,35 @@ function answerChallenge(c, chosenIdx){
 function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
   const content = document.getElementById('challenge-player-content');
   const bodyHTML = `
-      ${isCorrect ? '' : `<p class="challenge-feedback-chosen">${t('fr.challenge.yourAnswerColon')} ${escapeHtmlChallenge(c.options[chosenIdx])}<br>${t('feedback.correctAnswerColon')} <strong>${escapeHtmlChallenge(c.correctAnswer)}</strong></p>`}
+      ${isCorrect ? '' : `<p class="challenge-feedback-chosen">${chT('ch.expr.yourAnswer', { chosen: escapeHtmlChallenge(c.options[chosenIdx]), correct: escapeHtmlChallenge(c.correctAnswer) })}</p>`}
       <p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong><br>
-      signifie <strong>${escapeHtmlChallenge(c.meaning.fr)}</strong>.<br>
-      ${(challengeOverlay(c) && challengeOverlay(c).meaning) ? t('fr.challenge.inEnglish') : t('fr.challenge.inPortuguese')} <strong>${escapeHtmlChallenge((challengeOverlay(c) && challengeOverlay(c).meaning) || c.meaning.pt)}</strong>.</p>
+      ${chT('ch.expr.signifies', { fr: escapeHtmlChallenge(c.meaning.fr) })}<br>
+      ${chT('ch.expr.inPt', { pt: escapeHtmlChallenge(c.meaning.pt) })}</p>
       <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation)}</p>
 
       <div class="challenge-second-example">
-        <div class="challenge-second-example-label">Exemple 1</div>
+        <div class="challenge-second-example-label">${chT('ch.expr.example1')}</div>
         <p class="challenge-second-example-text">${escapeHtmlChallenge(c.example.text)}</p>
-        ${c.example.audioFile ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="challenge-example-play-btn">▶ Écouter</button>${slowAudioBtnHTML('challenge-example-play-slow-btn')}</div>` : ''}
+        ${c.example.audioFile ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="challenge-example-play-btn">${chT('ch.listenFr')}</button>${slowAudioBtnHTML('challenge-example-play-slow-btn')}</div>` : ''}
       </div>
 
       <div class="challenge-second-example">
-        <div class="challenge-second-example-label">Exemple 2</div>
+        <div class="challenge-second-example-label">${chT('ch.expr.example2')}</div>
         <p class="challenge-second-example-text">${escapeHtmlChallenge(c.secondExample.text)}</p>
-        ${c.secondExample.audioFile ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="challenge-second-example-play-btn">▶ Écouter</button>${slowAudioBtnHTML('challenge-second-example-play-slow-btn')}</div>` : ''}
+        ${c.secondExample.audioFile ? `<div class="audio-btn-row"><button class="dictation-play-btn" id="challenge-second-example-play-btn">${chT('ch.listenFr')}</button>${slowAudioBtnHTML('challenge-second-example-play-slow-btn')}</div>` : ''}
       </div>
 
       <div class="challenge-microactivity">
-        <div class="challenge-microactivity-label">À vous de jouer</div>
+        <div class="challenge-microactivity-label">${chT('ch.expr.yourTurn')}</div>
         <p class="challenge-microactivity-prompt">${escapeHtmlChallenge(c.microActivity.prompt)}</p>
-        <button class="btn btn-secondary" id="challenge-reveal-answer-btn">Voir la réponse</button>
+        <button class="btn btn-secondary" id="challenge-reveal-answer-btn">${chT('ch.expr.showAnswer')}</button>
         <p class="challenge-microactivity-answer" id="challenge-microactivity-answer" style="display:none;">${escapeHtmlChallenge(c.microActivity.answer)}</p>
       </div>
 
       ${challengeExternalResourcesHTML(c)}
   `;
-  content.innerHTML = challengeFeedbackWrapperHTML('challenge', isCorrect, isCorrect ? '✅ Bonne réponse.' : '❌ Pas tout à fait.', bodyHTML);
+  content.innerHTML = challengeFeedbackWrapperHTML('challenge', isCorrect, isCorrect ? chT('ch.expr.right') : chT('ch.notQuite'), bodyHTML);
+  recordChallengeReviewOutcome(c, isCorrect ? 'ok' : 'fail');
 
   if (c.example.audioFile){
     document.getElementById('challenge-example-play-btn').addEventListener('click', (e) => {
@@ -9683,6 +10714,41 @@ function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
 // (não há chamada de IA em tempo de execução do aluno) — por isso o
 // feedback sempre mostra a resposta do aluno ao lado da esperada, pra ele
 // mesmo julgar nuances que o comparador não capta.
+// BEGIN challenge-translation-logic (extraído por fr/scripts/test_answer_validation.js)
+function normalizeForTranslationCompare(s){
+  return String(s || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[.,!?;:'"()]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Comparador pt-BR usado pela análise de alertas (negação/número/mustInclude, Fase 3).
+const TRANSLATION_STOPWORDS_PT = new Set([
+  'o','a','os','as','um','uma','uns','umas','de','do','da','dos','das','em','no','na','nos','nas',
+  'que','e','é','ele','ela','eles','elas','eu','tu','voce','você','nos','nós','voces','vocês',
+  'para','por','com','se','ao','aos','a','as','à','às','sao','são','esta','está','isso','isto'
+]);
+
+function translationTokenSet(s){
+  return normalizeForTranslationCompare(s).split(' ').filter(w => w && !TRANSLATION_STOPWORDS_PT.has(w));
+}
+
+function translationSimilarity(a, b){
+  const ta = translationTokenSet(a);
+  const tb = translationTokenSet(b);
+  if (!ta.length || !tb.length) return 0;
+  const setB = new Set(tb);
+  const overlap = ta.filter(w => setB.has(w)).length;
+  return overlap / Math.max(ta.length, tb.length);
+}
+
+function isTranslationAcceptable(studentAnswer, referenceTranslations){
+  if (!studentAnswer || !studentAnswer.trim()) return false;
+  return (referenceTranslations || []).some(ref => translationSimilarity(studentAnswer, ref) >= 0.55);
+}
+
 // Fase 9: o comparador mora em shared/translation-compare.js (um por idioma da
 // TRADUÇÃO, que é o idioma do site). Em português o comportamento é idêntico
 // ao antigo (teste diferencial em tests/i18n/test_translation_compare.js).
@@ -9714,22 +10780,207 @@ function listenTranslateSetup(c){
     explanation: (hasEn && ov.explanation) ? ov.explanation : c.explanation
   };
 }
+
+// A sobreposição de palavras acima não pega troca de sujeito ("eu comprou"
+// em vez de "eu comprei") -- "comprou" e "comprei" contam como palavras
+// completamente diferentes pro comparador, então em geral esse erro já
+// reduz a sobreposição sozinho, mas quando o resto da frase é longo o
+// score ainda passa do limiar. Esta checagem olha só o par PRONOME +
+// VERBO SEGUINTE dentro da própria resposta do aluno (não compara com a
+// referência) -- não é um parser gramatical completo (não cobre sujeito
+// oculto, verbos compostos, oração relativa etc.), só pega o par mais
+// comum de erro: um pronome-sujeito explícito seguido de um verbo
+// conjugado numa pessoa incompatível.
+const PT_SUBJECT_PRONOUN_PERSON = {
+  'eu': '1s', 'tu': '2s', 'voce': '3s', 'ele': '3s', 'ela': '3s',
+  'nos': '1p', 'a gente': '3s', 'voces': '3p', 'eles': '3p', 'elas': '3p'
+};
+
+// Formas dos verbos irregulares mais comuns -- chaves já sem acento
+// (mesma normalização usada pra comparar a resposta, ver
+// normalizeForTranslationCompare) nos tempos presente/pretérito perfeito/
+// imperfeito. Onde a forma sem acento colide entre pessoas diferentes
+// (ex: "tem"/"têm", "vimos" de ver/vir), listamos as duas -- e onde colide
+// com outra palavra comum não-verbal (ex: "da" de "dá" vs. a contração
+// "da"), preferimos omitir a forma a arriscar falso positivo.
+const PT_IRREGULAR_VERB_FORMS = {
+  sou:'1s', es:'2s', e:'3s', somos:'1p', sao:'3p',
+  era:['1s','3s'], eras:'2s', eramos:'1p', eram:'3p',
+  fui:'1s', foi:'3s', fomos:'1p', foram:'3p',
+  estou:'1s', estas:'2s', esta:'3s', estamos:'1p', estao:'3p',
+  estava:['1s','3s'], estavas:'2s', estavamos:'1p', estavam:'3p',
+  estive:'1s', esteve:'3s', estivemos:'1p', estiveram:'3p',
+  tenho:'1s', tens:'2s', tem:['3s','3p'], temos:'1p',
+  tinha:['1s','3s'], tinhas:'2s', tinhamos:'1p', tinham:'3p',
+  tive:'1s', teve:'3s', tivemos:'1p', tiveram:'3p',
+  vou:'1s', vais:'2s', vai:'3s', vamos:'1p', vao:'3p',
+  faco:'1s', fazes:'2s', faz:'3s', fazemos:'1p', fazem:'3p',
+  fiz:'1s', fez:'3s', fizemos:'1p', fizeram:'3p',
+  posso:'1s', podes:'2s', pode:'3s', podemos:'1p', podem:'3p',
+  pude:'1s', pudemos:'1p', puderam:'3p',
+  quero:'1s', queres:'2s', quer:'3s', queremos:'1p', querem:'3p',
+  quis:['1s','3s'], quisemos:'1p', quiseram:'3p',
+  digo:'1s', dizes:'2s', diz:'3s', dizemos:'1p', dizem:'3p',
+  disse:['1s','3s'], dissemos:'1p', disseram:'3p',
+  vejo:'1s', ves:'2s', ve:'3s', vemos:'1p', veem:'3p',
+  vi:'1s', viu:'3s', vimos:'1p', viram:'3p',
+  dou:'1s', damos:'1p',
+  dei:'1s', deu:'3s', demos:'1p', deram:'3p',
+  venho:'1s', vens:'2s', vem:'3s', vim:'1s', veio:'3s', viemos:'1p', vieram:'3p',
+  sei:'1s', sabes:'2s', sabe:'3s', sabemos:'1p', sabem:'3p',
+  soube:['1s','3s'], soubemos:'1p', souberam:'3p',
+  ponho:'1s', poes:'2s', poe:'3s', pomos:'1p', poem:'3p',
+  pus:'1s', pos:'3s', pusemos:'1p', puseram:'3p',
+};
+
+function ptVerbPersonTags(word){
+  if (PT_IRREGULAR_VERB_FORMS[word]){
+    const v = PT_IRREGULAR_VERB_FORMS[word];
+    return Array.isArray(v) ? v : [v];
+  }
+  // Só terminações que são um sinal razoavelmente seguro de VERBO conjugado
+  // -- de propósito SEM as terminações genéricas -o (1ª pess. sing. do
+  // presente) e -a/-e (3ª pess. sing. do presente), que colidem com a
+  // imensa maioria dos substantivos/adjetivos/advérbios do português
+  // (livro, filme, já, noite...) e geravam falsos positivos constantes:
+  // qualquer palavra comum terminada em -a/-e/-o virava "erro de
+  // concordância" mesmo quando a resposta do aluno estava certa. Mesmo
+  // princípio já usado no dicionário de irregulares acima (comentário
+  // "preferimos omitir a forma a arriscar falso positivo").
+  const rules = [
+    [/amos$|emos$|imos$/, '1p'],
+    [/astes$|estes$|istes$/, '2p'],
+    [/aram$|eram$|iram$/, '3p'],
+    [/am$|em$/, '3p'],
+    [/ou$|eu$|iu$/, '3s'],
+    [/aste$|este$|iste$/, '2s'],
+    [/ei$/, '1s'],
+    // (sem a terminação genérica -as/-es da 2ª pess.: colide com plurais
+    //  como "legumes" e com o artigo "as"; "tu" quase não é usado e os
+    //  irregulares comuns já estão no dicionário acima)
+  ];
+  for (const [re, tag] of rules){
+    if (re.test(word)) return [tag];
+  }
+  return [];
+}
+
+// Procura pronome-sujeito seguido (até 2 palavras de distância, pra
+// tolerar advérbios como "já"/"não" no meio) de um verbo conjugado numa
+// pessoa incompatível. Para de procurar ao encontrar outro pronome antes
+// de achar um verbo reconhecível (não atribui o erro à oração seguinte).
+function translationHasPersonMismatch(text){
+  const words = normalizeForTranslationCompare(text).split(' ').filter(Boolean);
+  for (let i = 0; i < words.length; i++){
+    let pronoun = words[i];
+    let j = i + 1;
+    if (pronoun === 'a' && words[i + 1] === 'gente'){ pronoun = 'a gente'; j = i + 2; }
+    const expected = PT_SUBJECT_PRONOUN_PERSON[pronoun];
+    if (!expected) continue;
+    for (let lookahead = 0; lookahead < 3 && j + lookahead < words.length; lookahead++){
+      const candidate = words[j + lookahead];
+      if (PT_SUBJECT_PRONOUN_PERSON[candidate]) break;
+      if (candidate === 'e' || (TRANSLATION_STOPWORDS_PT.has(candidate) && !PT_IRREGULAR_VERB_FORMS[candidate])) continue; // "e" normalizado colide com a conjunção
+      const tags = ptVerbPersonTags(candidate);
+      if (tags.length){
+        if (!tags.includes(expected)) return { pronoun, verb: candidate, expected, got: tags };
+        break;
+      }
+    }
+  }
+  return null;
+}
+
+// ---- Análise da tradução (Fase 3, 05/10/2026) ----
+// Além da sobreposição de palavras, a análise acusa 3 tipos de alerta contra
+// a referência de MELHOR similaridade: negação trocada ("não" presente só
+// de um lado), número diferente ("dois" x "três", dígitos incluídos) e, se o
+// desafio trouxer, `mustInclude` (lista de grupos de alternativas: pelo
+// menos uma de cada grupo precisa aparecer) e `mustExclude` (palavras que
+// não podem aparecer). Também devolve as palavras da referência que
+// faltaram na resposta (diferença palavra a palavra).
+const PT_NEGATION_WORDS = new Set(['nao','nunca','jamais','nem','nada','ninguem','nenhum','nenhuma','sem']);
+const PT_NUMBER_WORDS = {
+  zero:0, dois:2, duas:2, tres:3, quatro:4, cinco:5, seis:6, sete:7, oito:8, nove:9, dez:10,
+  onze:11, doze:12, treze:13, catorze:14, quatorze:14, quinze:15, dezesseis:16, dezessete:17,
+  dezoito:18, dezenove:19, vinte:20, trinta:30, quarenta:40, cinquenta:50, sessenta:60,
+  setenta:70, oitenta:80, noventa:90, cem:100, cento:100
+};
+
+function translationNumbers(text){
+  const nums = new Set();
+  normalizeForTranslationCompare(text).split(' ').forEach(w => {
+    if (/^\d+$/.test(w)){ if (w !== '1') nums.add(Number(w)); }
+    else if (Object.prototype.hasOwnProperty.call(PT_NUMBER_WORDS, w)) nums.add(PT_NUMBER_WORDS[w]);
+  });
+  return nums;
+}
+function translationHasNegation(text){
+  return normalizeForTranslationCompare(text).split(' ').some(w => PT_NEGATION_WORDS.has(w));
+}
+
+function analyzeTranslation(studentAnswer, referenceTranslations, extra){
+  const refs = referenceTranslations || [];
+  let best = 0, bestRef = refs[0] || '';
+  refs.forEach(ref => {
+    const sim = translationSimilarity(studentAnswer, ref);
+    if (sim > best){ best = sim; bestRef = ref; }
+  });
+  const alerts = [];
+  if (best > 0){
+    if (translationHasNegation(studentAnswer) !== translationHasNegation(bestRef)) alerts.push({ type: 'negation' });
+    const sn = translationNumbers(studentAnswer), rn = translationNumbers(bestRef);
+    if (sn.size !== rn.size || [...sn].some(n => !rn.has(n))) alerts.push({ type: 'number' });
+  }
+  const studentTokens = new Set(normalizeForTranslationCompare(studentAnswer).split(' '));
+  const norm = w => normalizeForTranslationCompare(w);
+  if (extra && Array.isArray(extra.mustInclude)){
+    extra.mustInclude.forEach(group => {
+      const alts = (Array.isArray(group) ? group : [group]).map(norm).filter(Boolean);
+      if (alts.length && !alts.some(w => studentTokens.has(w) || normalizeForTranslationCompare(studentAnswer).includes(w))){
+        alerts.push({ type: 'mustInclude', word: alts[0] });
+      }
+    });
+  }
+  if (extra && Array.isArray(extra.mustExclude)){
+    extra.mustExclude.map(norm).filter(Boolean).forEach(w => {
+      if (studentTokens.has(w)) alerts.push({ type: 'mustExclude', word: w });
+    });
+  }
+  const missingWords = translationTokenSet(bestRef).filter(w => !studentTokens.has(w));
+  return { similarity: best, bestRef, alerts, missingWords };
+}
+
+// Resultado em 3 níveis (regra de conclusão dos Desafios, 04/10/2026):
+// 'ok' = acerto (similaridade >= 0,8 e sem alerta); 'partial' = erro leve
+// (0,55 a 0,8, ou qualquer alerta -- concordância, negação, número,
+// mustInclude/mustExclude) -- conclui com explicação; 'fail' = erro total
+// (< 0,55 ou vazio) -- não conclui.
+function listenTranslateOutcome(studentAnswer, referenceTranslations, personMismatch, extra){
+  if (!studentAnswer || !studentAnswer.trim()) return 'fail';
+  const an = analyzeTranslation(studentAnswer, referenceTranslations, extra);
+  if (an.similarity < 0.55) return 'fail';
+  if (personMismatch || an.alerts.length || an.similarity < 0.8) return 'partial';
+  return 'ok';
+}
+// END challenge-translation-logic
+
 function openListenTranslatePlayer(c){
   const content = document.getElementById('challenge-player-content');
   content.innerHTML = `
-    <div class="challenge-expression">🎧 ${t('fr.challenges.cat.listenTranslate.title')}</div>
+    <div class="challenge-expression">${chT('ch.label.listen')}</div>
     <div class="listen-translate-audio-wrap audio-btn-row">
-      <button class="dictation-play-btn" id="lt-play-btn">▶ Écouter</button>
+      <button class="dictation-play-btn" id="lt-play-btn">${chT('ch.listenFr')}</button>
       ${slowAudioBtnHTML('lt-play-slow-btn')}
     </div>
     <div class="listen-translate-hint-wrap">
-      <button class="btn btn-secondary" id="lt-hint-btn">Montrer un indice</button>
+      <button class="btn btn-secondary" id="lt-hint-btn">${chT('ch.lt.hint')}</button>
       <p class="listen-translate-hint-text" id="lt-hint-text" style="display:none;"></p>
     </div>
-    <label class="listen-translate-answer-label" for="lt-answer-input">${t('fr.challenge.lt.label')}</label>
-    <textarea class="listen-translate-answer-input" id="lt-answer-input" rows="2" placeholder="${t('fr.challenge.lt.placeholder', { lang: (listenTranslateSetup(c).lang === 'en' ? t('lang.name.en') : t('lang.name.pt-BR')) })}"></textarea>
+    <label class="listen-translate-answer-label" for="lt-answer-input">${chT('ch.lt.label')}</label>
+    <textarea class="listen-translate-answer-input" id="lt-answer-input" rows="2" placeholder="${chT('ch.lt.placeholder')}"></textarea>
     <div class="listen-translate-actions">
-      <button class="btn btn-primary" id="lt-verify-btn">Vérifier</button>
+      <button class="btn btn-primary" id="lt-verify-btn">${chT('ch.verify')}</button>
     </div>
     <div id="lt-feedback-wrap" aria-live="polite" aria-atomic="true"></div>
   `;
@@ -9748,28 +10999,58 @@ function openListenTranslatePlayer(c){
   document.getElementById('lt-verify-btn').addEventListener('click', () => checkListenTranslateAnswer(c));
 }
 
+function translationAlertsHTML(an, outcome){
+  if (outcome === 'fail') return '';
+  const msgs = [];
+  an.alerts.forEach(a => {
+    if (a.type === 'negation') msgs.push(chT('ch.lt.alert.negation'));
+    else if (a.type === 'number') msgs.push(chT('ch.lt.alert.number'));
+    else if (a.type === 'mustInclude') msgs.push(chT('ch.lt.alert.mustInclude', { word: escapeHtmlChallenge(a.word) }));
+    else if (a.type === 'mustExclude') msgs.push(chT('ch.lt.alert.mustExclude', { word: escapeHtmlChallenge(a.word) }));
+  });
+  const parts = msgs.map(m => `<p class="listen-translate-feedback-warning">⚠ ${m}</p>`);
+  if (outcome === 'partial' && an.missingWords.length){
+    parts.push(`<p class="listen-translate-feedback-row"><strong>${chT('ch.lt.missing')}</strong>${an.missingWords.map(escapeHtmlChallenge).join(', ')}</p>`);
+  }
+  return parts.join('');
+}
+
 function checkListenTranslateAnswer(c){
   const input = document.getElementById('lt-answer-input');
   const studentAnswer = input.value.trim();
+  // Site em inglês com referências em inglês (overlay): comparador do idioma da
+  // tradução (shared/translation-compare.js). Senão, a análise em português
+  // completa (alertas de negação/número/mustInclude, 3 níveis).
   const lt = listenTranslateSetup(c);
-  const personMismatch = lt.cmp.personMismatch(studentAnswer);
-  const isCorrect = !personMismatch && lt.cmp.isAcceptable(studentAnswer, lt.refs);
+  const i18nCmp = lt.lang !== 'pt-BR';
+  let personMismatch, outcome, analysis = null;
+  if (i18nCmp){
+    personMismatch = lt.cmp.personMismatch(studentAnswer);
+    outcome = (!personMismatch && lt.cmp.isAcceptable(studentAnswer, lt.refs)) ? 'ok' : 'fail';
+  } else {
+    personMismatch = translationHasPersonMismatch(studentAnswer);
+    outcome = listenTranslateOutcome(studentAnswer, c.referenceTranslations, personMismatch, c);
+    analysis = analyzeTranslation(studentAnswer, c.referenceTranslations, c);
+  }
+  const isCorrect = outcome === 'ok';
   // Desafio de conteúdo continua clicável mesmo já concluído -- não dá XP
   // (mesma decisão de answerChallenge, ver auditoria do sistema de XP).
 
   const ltBodyHTML = `
-      ${personMismatch ? `<p class="listen-translate-feedback-warning">${t('fr.challenge.agreementWarn', { pronoun: escapeHtmlChallenge(personMismatch.pronoun), verb: escapeHtmlChallenge(personMismatch.verb) })}</p>` : ''}
-      <p class="listen-translate-feedback-row"><strong>${t('fr.challenge.row.yourAnswer')}</strong>${escapeHtmlChallenge(studentAnswer || '—')}</p>
-      <p class="listen-translate-feedback-row"><strong>${t('fr.challenge.row.expected')}</strong>${escapeHtmlChallenge(lt.refs[0])}</p>
-      <p class="listen-translate-feedback-row"><strong>${t('fr.challenge.row.original')}</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
-      ${lt.explanation ? `<p class="listen-translate-feedback-row"><strong>${t('fr.step.explanation')}</strong>${escapeHtmlChallenge(lt.explanation)}</p>` : ''}
+      ${personMismatch ? `<p class="listen-translate-feedback-warning">${chT('ch.lt.agreement', { pronoun: escapeHtmlChallenge(personMismatch.pronoun), verb: escapeHtmlChallenge(personMismatch.verb) })}</p>` : ''}
+      ${analysis ? translationAlertsHTML(analysis, outcome) : ''}
+      <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.yours')}</strong>${escapeHtmlChallenge(studentAnswer || '—')}</p>
+      <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.expected')}</strong>${escapeHtmlChallenge(lt.refs[0])}</p>
+      <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.original')}</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
+      ${lt.explanation ? `<p class="listen-translate-feedback-row"><strong>${chT('ch.lt.explanation')}</strong>${escapeHtmlChallenge(lt.explanation)}</p>` : ''}
       <div class="audio-btn-row">
-        <button class="dictation-play-btn" id="lt-replay-btn">▶ Écouter encore</button>
+        <button class="dictation-play-btn" id="lt-replay-btn">${chT('ch.listenAgain')}</button>
         ${slowAudioBtnHTML('lt-replay-slow-btn')}
       </div>
   `;
-  document.getElementById('lt-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('listen-translate', isCorrect, isCorrect ? '✅ Bonne traduction.' : '❌ Pas tout à fait.', ltBodyHTML);
+  document.getElementById('lt-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('listen-translate', isCorrect, outcome === 'ok' ? chT('ch.lt.right') : outcome === 'partial' ? chT('ch.lt.partial') : chT('ch.notQuite'), ltBodyHTML, outcome);
   document.getElementById('lt-verify-btn').style.display = 'none';
+  recordChallengeReviewOutcome(c, outcome);
   document.getElementById('lt-replay-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
   });
@@ -9791,21 +11072,34 @@ function normalizeForAccentCompare(s){
 function isAccentAnswerCorrect(studentAnswer, targetText){
   return normalizeForAccentCompare(studentAnswer) === normalizeForAccentCompare(targetText);
 }
+
+function stripDiacriticsForAccentCompare(s){
+  return normalizeForAccentCompare(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+// 'ok' = igual; 'partial' = só o acento/cedilha/trema difere (erro leve,
+// conclui); 'fail' = palavra diferente ou vazio (erro total, não conclui).
+function accentAnswerOutcome(studentAnswer, targetText){
+  if (isAccentAnswerCorrect(studentAnswer, targetText)) return 'ok';
+  const typed = stripDiacriticsForAccentCompare(studentAnswer);
+  if (typed && typed === stripDiacriticsForAccentCompare(targetText)) return 'partial';
+  return 'fail';
+}
 // END accent-challenge-logic
 
 function openAccentPlayer(c){
   const content = document.getElementById('challenge-player-content');
   content.innerHTML = `
-    <div class="challenge-expression">✍️ ${t('fr.challenges.cat.accent.title')}</div>
+    <div class="challenge-expression">${chT('ch.label.accent')}</div>
     <div class="accent-audio-wrap audio-btn-row">
-      <button class="dictation-play-btn" id="accent-play-btn">▶ Écouter</button>
+      <button class="dictation-play-btn" id="accent-play-btn">${chT('ch.listenFr')}</button>
       ${slowAudioBtnHTML('accent-play-slow-btn')}
     </div>
-    <label class="listen-translate-answer-label" for="accent-answer-input">${t('fr.challenge.accent.label')}</label>
+    <label class="listen-translate-answer-label" for="accent-answer-input">${chT('ch.accent.label')}</label>
     <input type="text" class="accent-answer-input" id="accent-answer-input" autocomplete="off" autocapitalize="off" spellcheck="false">
     ${frAccentPickerHTML()}
     <div class="listen-translate-actions">
-      <button class="btn btn-primary" id="accent-verify-btn">Vérifier</button>
+      <button class="btn btn-primary" id="accent-verify-btn">${chT('ch.verify')}</button>
     </div>
     <div id="accent-feedback-wrap" aria-live="polite" aria-atomic="true"></div>
   `;
@@ -9826,27 +11120,144 @@ function openAccentPlayer(c){
 function checkAccentAnswer(c){
   const input = document.getElementById('accent-answer-input');
   const studentAnswer = input.value.trim();
-  const isCorrect = isAccentAnswerCorrect(studentAnswer, c.targetText);
+  const outcome = accentAnswerOutcome(studentAnswer, c.targetText);
+  const isCorrect = outcome === 'ok';
   // Desafio de conteúdo continua clicável mesmo já concluído -- não dá XP
   // (mesma decisão de answerChallenge, ver auditoria do sistema de XP).
 
   const accentBodyHTML = `
-      ${!isCorrect ? `<p class="accent-feedback-answer">${t('fr.challenge.yourAnswerColon')} <strong>${escapeHtmlChallenge(studentAnswer || '—')}</strong></p>` : ''}
+      ${!isCorrect ? `<p class="accent-feedback-answer">${chT('ch.accent.yours', { answer: escapeHtmlChallenge(studentAnswer || '—') })}</p>` : ''}
       <div class="accent-feedback-correct-word">${escapeHtmlChallenge(c.targetText)}</div>
       <div class="audio-btn-row">
-        <button class="dictation-play-btn" id="accent-replay-btn">▶ Écouter</button>
+        <button class="dictation-play-btn" id="accent-replay-btn">${chT('ch.listenFr')}</button>
         ${slowAudioBtnHTML('accent-replay-slow-btn')}
       </div>
       ${(challengeText(c, 'explanation')) ? `<p class="accent-feedback-explanation">${escapeHtmlChallenge(challengeText(c, 'explanation'))}</p>` : ''}
   `;
-  document.getElementById('accent-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('accent', isCorrect, isCorrect ? '✅ Correct.' : '❌ Incorrect.', accentBodyHTML);
+  document.getElementById('accent-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('accent', isCorrect, outcome === 'ok' ? chT('ch.accent.right') : outcome === 'partial' ? chT('ch.accent.partial') : chT('ch.accent.wrong'), accentBodyHTML, outcome);
   document.getElementById('accent-verify-btn').style.display = 'none';
+  recordChallengeReviewOutcome(c, outcome);
   document.getElementById('accent-replay-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget);
   });
   document.getElementById('accent-replay-slow-btn').addEventListener('click', (e) => {
     if (c.audioFile) playPregeneratedAudio(`challenges/${c.audioFile}`, e.currentTarget, false, SLOW_AUDIO_RATE);
   });
+  wireChallengeCompleteButton(c);
+}
+
+// ---------- Complete a frase (gramática) -- type 'cloze_grammar' ----------
+// Uma frase em francês com 1+ lacunas "___"; cada lacuna tem 2 a 4 opções
+// (múltipla escolha). Primeiro tema: passé composé (auxiliar être/avoir e
+// particípio). Dado no banco (dentro de `data`):
+//   sentenceFr: "Hier, nous ___ mangé au restaurant."
+//   blanks: [{ options: ["avons", "sommes"], answer: "avons" }]
+//   translationPt, explanation (pt-BR, obrigatória), topic (ex. "passe-compose")
+// Conclusão: todas as lacunas certas = ok; qualquer erro = fail (binário,
+// como Expressões). Sem áudio.
+// BEGIN cloze-grammar-logic (extraído por fr/scripts/test_answer_validation.js)
+const CLOZE_GRAMMAR_BLANK = '___';
+function clozeGrammarParts(sentence){
+  return String(sentence || '').split(CLOZE_GRAMMAR_BLANK);
+}
+// Lista de problemas do item (vazia = válido). Usada pelo checklist do admin.
+function validateClozeGrammarItem(c){
+  const problems = [];
+  if (!c || !c.sentenceFr) { problems.push('frase vazia'); return problems; }
+  const nBlanks = clozeGrammarParts(c.sentenceFr).length - 1;
+  const blanks = Array.isArray(c.blanks) ? c.blanks : [];
+  if (nBlanks < 1) problems.push('a frase não tem lacuna ___');
+  if (nBlanks !== blanks.length) problems.push(`a frase tem ${nBlanks} lacuna(s) e ${blanks.length} grupo(s) de opções`);
+  blanks.forEach((b, i) => {
+    const opts = (b && Array.isArray(b.options)) ? b.options : [];
+    if (opts.length < 2 || opts.length > 4) problems.push(`lacuna ${i + 1}: precisa de 2 a 4 opções`);
+    if (new Set(opts.map(o => String(o).trim().toLowerCase())).size !== opts.length) problems.push(`lacuna ${i + 1}: opções repetidas`);
+    if (!b || !opts.includes(b.answer)) problems.push(`lacuna ${i + 1}: a resposta certa não está entre as opções`);
+  });
+  if (!c.explanation || !String(c.explanation).trim()) problems.push('explicação vazia');
+  return problems;
+}
+// chosen: array com a opção escolhida em cada lacuna (null = não respondida).
+function clozeGrammarOutcome(c, chosen){
+  const blanks = (c && c.blanks) || [];
+  const perBlank = blanks.map((b, i) => !!chosen && chosen[i] != null && chosen[i] === b.answer);
+  const complete = !!chosen && blanks.every((b, i) => chosen[i] != null);
+  const outcome = complete && perBlank.length > 0 && perBlank.every(Boolean) ? 'ok' : 'fail';
+  return { outcome, perBlank, complete };
+}
+// Frase com as lacunas preenchidas (pelas escolhas ou, sem escolhas, pelas respostas certas).
+function clozeGrammarFilled(c, chosen){
+  const parts = clozeGrammarParts(c.sentenceFr);
+  const blanks = c.blanks || [];
+  return parts.map((p, i) => i < parts.length - 1
+    ? p + ((chosen && chosen[i] != null) ? chosen[i] : (blanks[i] ? blanks[i].answer : CLOZE_GRAMMAR_BLANK))
+    : p).join('');
+}
+// END cloze-grammar-logic
+
+function openClozeGrammarPlayer(c){
+  stopExerciseAudio();
+  const blanks = c.blanks || [];
+  const chosen = blanks.map(() => null);
+  const parts = clozeGrammarParts(c.sentenceFr);
+  const content = document.getElementById('challenge-player-content');
+  const sentenceHTML = parts.map((p, i) => escapeHtmlChallenge(p) +
+    (i < parts.length - 1 ? `<span class="cloze-grammar-slot" data-slot="${i}">${CLOZE_GRAMMAR_BLANK}</span>` : '')).join('');
+  content.innerHTML = `
+    <div class="cloze-grammar">
+      <p class="challenge-question">${chT('ch.cloze.instruction')}</p>
+      <div class="cloze-grammar-sentence" id="cloze-grammar-sentence">${sentenceHTML}</div>
+      ${blanks.map((b, i) => `
+        <div class="cloze-grammar-group" data-blank="${i}">
+          ${blanks.length > 1 ? `<div class="cloze-grammar-group-label">${chT('ch.cloze.blank', { n: i + 1 })}</div>` : ''}
+          <div class="challenge-choices">
+            ${shuffle(b.options.slice()).map(o => `<button class="challenge-choice-btn" data-blank="${i}" data-value="${escapeHtmlChallenge(o)}">${escapeHtmlChallenge(o)}</button>`).join('')}
+          </div>
+        </div>`).join('')}
+      <p class="cloze-grammar-msg" id="cloze-grammar-msg"></p>
+      <button class="btn btn-primary btn-block" id="cloze-grammar-verify-btn">${chT('ch.verify')}</button>
+      <div id="cloze-grammar-feedback-wrap"></div>
+    </div>
+  `;
+  content.querySelectorAll('.cloze-grammar-group .challenge-choice-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = Number(btn.dataset.blank);
+      chosen[i] = btn.dataset.value;
+      content.querySelectorAll(`.challenge-choice-btn[data-blank="${i}"]`).forEach(b => b.classList.toggle('selected', b === btn));
+      const slot = content.querySelector(`.cloze-grammar-slot[data-slot="${i}"]`);
+      if (slot){ slot.textContent = chosen[i]; slot.classList.add('filled'); }
+      document.getElementById('cloze-grammar-msg').textContent = '';
+    });
+  });
+  document.getElementById('cloze-grammar-verify-btn').addEventListener('click', () => {
+    const res = clozeGrammarOutcome(c, chosen);
+    if (!res.complete){ document.getElementById('cloze-grammar-msg').textContent = chT('ch.cloze.chooseAll'); return; }
+    renderClozeGrammarFeedback(c, chosen, res);
+  });
+}
+
+function renderClozeGrammarFeedback(c, chosen, res){
+  const content = document.getElementById('challenge-player-content');
+  content.querySelectorAll('.cloze-grammar-group .challenge-choice-btn').forEach(b => {
+    const i = Number(b.dataset.blank);
+    b.classList.add('disabled');
+    if (b.dataset.value === c.blanks[i].answer) b.classList.add('correct');
+    else if (b.dataset.value === chosen[i]) b.classList.add('incorrect');
+  });
+  content.querySelectorAll('.cloze-grammar-slot').forEach(s => {
+    const i = Number(s.dataset.slot);
+    s.classList.add(res.perBlank[i] ? 'correct' : 'incorrect');
+  });
+  document.getElementById('cloze-grammar-verify-btn').style.display = 'none';
+  const isCorrect = res.outcome === 'ok';
+  const bodyHTML = `
+    ${isCorrect ? '' : `<p class="challenge-feedback-chosen">${chT('ch.cloze.yourAnswer')}: ${escapeHtmlChallenge(clozeGrammarFilled(c, chosen))}<br>${chT('ch.cloze.correct')}: <strong>${escapeHtmlChallenge(clozeGrammarFilled(c))}</strong></p>`}
+    ${isCorrect ? `<p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(clozeGrammarFilled(c))}</strong></p>` : ''}
+    ${c.translationPt ? `<p class="challenge-feedback-meaning">${chT('ch.cloze.translation')}: ${escapeHtmlChallenge(c.translationPt)}</p>` : ''}
+    <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation || '')}</p>
+  `;
+  document.getElementById('cloze-grammar-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('challenge', isCorrect, isCorrect ? chT('ch.cloze.right') : chT('ch.notQuite'), bodyHTML, res.outcome);
+  recordChallengeReviewOutcome(c, res.outcome);
   wireChallengeCompleteButton(c);
 }
 
@@ -9973,6 +11384,10 @@ function challengeQualityChecklist(c){
   } else if (c.type === 'accent'){
     items.push({ label: t('adminChallenges.qa.wordFilled'), ok: !!c.targetText, blocking: true });
     items.push({ label: t('adminChallenges.qa.explanationFilled'), ok: !!c.explanation, blocking: false });
+  } else if (c.type === 'cloze_grammar'){
+    const problems = validateClozeGrammarItem(c);
+    items.push({ label: problems.length ? 'Lacunas/opções: ' + problems.join('; ') : 'Lacunas, opções e explicação válidas', ok: !problems.length, blocking: true });
+    items.push({ label: 'Tradução preenchida', ok: !!c.translationPt, blocking: false });
   }
 
   return items;
@@ -10140,13 +11555,49 @@ function challengeAdminEditViewAccent(c){
   `;
 }
 
+function clozeGrammarBlanksText(c){
+  return (c.blanks || []).map(b => (b.options || []).map(o => (o === b.answer ? '*' : '') + o).join(' | ')).join('\n');
+}
+
+function challengeAdminReadViewClozeGrammar(c){
+  return `
+    <p class="challenges-admin-field"><strong>Frase:</strong> ${escapeHtmlChallenge(c.sentenceFr || '')}</p>
+    <p class="challenges-admin-field"><strong>Opções por lacuna:</strong></p>
+    <ul class="challenges-admin-choices">
+      ${(c.blanks || []).map((b, i) => `<li>Lacuna ${i + 1}: ${(b.options || []).map(o => o === b.answer ? `<strong>${escapeHtmlChallenge(o)}</strong>` : escapeHtmlChallenge(o)).join(' · ')}</li>`).join('')}
+    </ul>
+    <p class="challenges-admin-field"><strong>Tradução:</strong> ${escapeHtmlChallenge(c.translationPt || '—')}</p>
+    <p class="challenges-admin-field"><strong>Explicação:</strong> ${escapeHtmlChallenge(c.explanation || '—')}</p>
+    ${challengeQualityChecklistHTML(c)}
+  `;
+}
+
+function challengeAdminEditViewClozeGrammar(c){
+  return `
+    <label class="challenges-admin-edit-label">Frase (use ___ para cada lacuna)
+      <textarea class="challenges-admin-edit-input" data-field="sentenceFr" rows="2">${escapeHtmlChallenge(c.sentenceFr || '')}</textarea>
+    </label>
+    <label class="challenges-admin-edit-label">Opções (uma linha por lacuna, separadas por " | " — marque a certa com * no início)
+      <textarea class="challenges-admin-edit-input" data-field="blanks" rows="3">${escapeHtmlChallenge(clozeGrammarBlanksText(c))}</textarea>
+    </label>
+    <label class="challenges-admin-edit-label">Tradução (pt-BR)
+      <input class="challenges-admin-edit-input" data-field="translationPt" value="${escapeHtmlChallenge(c.translationPt || '')}">
+    </label>
+    <label class="challenges-admin-edit-label">Explicação (pt-BR)
+      <textarea class="challenges-admin-edit-input" data-field="explanation" rows="2">${escapeHtmlChallenge(c.explanation || '')}</textarea>
+    </label>
+  `;
+}
+
 function challengeAdminReadView(c){
+  if (c.type === 'cloze_grammar') return challengeAdminReadViewClozeGrammar(c);
   if (c.type === 'listen_translate') return challengeAdminReadViewListenTranslate(c);
   if (c.type === 'accent') return challengeAdminReadViewAccent(c);
   return challengeAdminReadViewExpression(c);
 }
 
 function challengeAdminEditView(c){
+  if (c.type === 'cloze_grammar') return challengeAdminEditViewClozeGrammar(c);
   if (c.type === 'listen_translate') return challengeAdminEditViewListenTranslate(c);
   if (c.type === 'accent') return challengeAdminEditViewAccent(c);
   return challengeAdminEditViewExpression(c);
@@ -10162,6 +11613,7 @@ function challengeAdminCardTitle(c){
     return `🎧 ${escapeHtmlChallenge(snippet)}`;
   }
   if (c.type === 'accent') return t('adminChallenges.card.accentTitle', { word: escapeHtmlChallenge(c.targetText) });
+  if (c.type === 'cloze_grammar') return `🧠 ${escapeHtmlChallenge(c.sentenceFr || '')}`;
   return '';
 }
 
@@ -10289,7 +11741,7 @@ function renderChallengePreviewBanner(c){
   const showAnswerBtn = document.getElementById('preview-show-answer-btn');
   if (showAnswerBtn){
     showAnswerBtn.addEventListener('click', () => {
-      const answer = c.type === 'listen_translate' ? (c.referenceTranslations || [])[0] : c.targetText;
+      const answer = c.type === 'listen_translate' ? (c.referenceTranslations || [])[0] : c.type === 'cloze_grammar' ? clozeGrammarFilled(c) : c.targetText;
       alert(t('adminChallenges.preview.expected') + answer);
     });
   }
@@ -10346,10 +11798,11 @@ const CHALLENGE_TYPE_LABELS = {
   get expression(){ return t('fr.challenges.cat.expression.title'); },
   get listen_translate(){ return t('fr.challenges.cat.listenTranslate.title'); },
   get accent(){ return t('fr.challenges.cat.accent.title'); },
+  get cloze_grammar(){ return t('fr.challenges.cat.clozeGrammar.title'); },
 };
 
 function challengeSearchableText(c){
-  return [c.canonicalExpression, c.sentenceFr, c.targetText, c.question, c.explanation]
+  return [c.canonicalExpression, c.sentenceFr, c.targetText, c.question, c.explanation, c.translationPt]
     .filter(Boolean).join(' ').toLowerCase();
 }
 
@@ -10490,7 +11943,7 @@ async function renderChallengesAdmin(){
 
   const content = document.getElementById('challenges-admin-content');
   content.innerHTML = loadingHTML();
-  const ok = await loadChallengesFromDB();
+  const ok = await loadChallengesFromDB(true);
   if (!ok){
     content.innerHTML = `<p class="challenges-admin-empty">${t('adminChallenges.loadFailed')}</p>`;
     return;
@@ -10642,6 +12095,12 @@ function renderChallengesAdminList(){
           c.options = lines.map(l => l.replace(/^\*/, '').trim());
           const starred = lines.find(l => l.startsWith('*'));
           if (starred) c.correctAnswer = starred.replace(/^\*/, '').trim();
+        } else if (field === 'blanks'){
+          c.blanks = value.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+            const opts = line.split('|').map(o => o.trim()).filter(Boolean);
+            const starred = opts.find(o => o.startsWith('*'));
+            return { options: opts.map(o => o.replace(/^\*/, '').trim()), answer: starred ? starred.replace(/^\*/, '').trim() : '' };
+          });
         } else if (field === 'referenceTranslations'){
           c.referenceTranslations = value.split('\n').map(l => l.trim()).filter(Boolean);
         } else if (field.includes('.')){

@@ -10,7 +10,7 @@
 | A1-5 | Tu bois du lait le matin ? | Tu ______ du ______ le matin ? | Você bebe leite de manhã? / Tu bebes leite de manhã? / Você toma leite de manhã? |
 | A1-6 | Je me lève à six heures. | Je me ______ à ______ heures. | Eu me levanto às seis horas. / Levanto às seis horas. / Eu levanto às seis. |
 | A1-6 | Il est sept heures du soir. | Il est ______ heures du ______. | São sete horas da noite. / São sete da noite. / São 19 horas. |
-| A1-7 | Aujourd'hui, nous sommes mardi. | Aujourd'hui, nous ______ ______. | Hoje é terça-feira. / Hoje estamos em terça-feira. / Hoje é terça. |
+| A1-7 | Aujourd'hui, nous sommes mardi. | Aujourd'hui, nous ______ ______. | Hoje é terça-feira. / Estamos em uma terça-feira. / Hoje é terça. |
 | A1-7 | Je travaille demain matin. | Je ______ ______ matin. | Eu trabalho amanhã de manhã. / Trabalho amanhã de manhã. / Vou trabalhar amanhã de manhã. |
 
 ## Acentuação

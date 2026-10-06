@@ -1,5 +1,5 @@
 /* ============================================================
-   Mandarim do Zero — lógica do app
+   Chinês com Prof. Brune — lógica do app
    - Estado persistido em memória (sessão) + localStorage indisponível
      em artifacts, então usamos window.storage se existir, senão
      memória pura (variável global) para a sessão atual.
@@ -408,6 +408,14 @@ function wireKnowButtons(container){
       const cardId = btn.dataset.cardId;
       const card = STATE.cards.find(c => c.id === cardId);
       if (!card) return;
+      // K2-E: "já sei" é da PALAVRA. O botão grada/reseta o card A (o do id
+      // recebido); se a palavra só tem evidência via a irmã B, não há o que
+      // desmarcar em A -- avisa em vez de reescrever o histórico de B.
+      const siblings = studyWordCardsFor(STATE.cards, card.unitId, card.vocabIdx);
+      if (card.reps === 0 && studyWordHasEvidence(siblings)){
+        showToast('Esta palavra já foi estudada pelo cartão inverso.');
+        return;
+      }
 
       if (card.reps > 0){
         // já estava marcado — permite desmarcar caso tenha sido engano.
@@ -435,6 +443,10 @@ function wireKnowButtons(container){
         btn.textContent = t('zh.path.knownDone');
         showToast(t('toast.markedKnown'));
       }
+      // K2-E: o rótulo reflete a PALAVRA (A ou B com histórico).
+      const wordKnown = studyWordHasEvidence(siblings);
+      btn.classList.toggle('known', wordKnown);
+      btn.textContent = wordKnown ? '✓ Já sei' : 'Já sei?';
 
       saveState();
       checkUnitCompletion(STATE.currentUnitId);
@@ -523,47 +535,15 @@ document.getElementById('stroke-modal').addEventListener('click', (e) => {
 
 // ---------- Construção do banco de cartões a partir do content.js ----------
 // Cada cartão SRS = 1 item de vocabulário (frente: pinyin, verso: caractere + tradução)
-function buildCardsFromUnits(units){
+function buildCardsFromUnits(units, appKey = 'mandarim'){
+  // K2-C: cada palavra vira uma Note nativa `normal_reversed` com dois
+  // CardInstances (A = id legado, B = `-b`), montados por
+  // shared/study-trail-model.js sobre o motor existente. appKey tem default
+  // literal: este construtor roda no init de STATE, antes de `const APP_KEY`.
   const cards = [];
   units.forEach(u => {
     u.vocab.forEach((v, idx) => {
-      cards.push({
-        id: `u${u.id}-v${idx}`,
-        unitId: u.id,
-        unitTitle: u.title,
-        vocabIdx: idx,
-        type: 'vocab',
-        front_pinyin: v.p,
-        back_hanzi: v.c,
-        back_trans: v.t,
-        // Fase 3 do sistema de alunas particulares (ver CLAUDE.md):
-        // 'origin' é metadado de UM só motor de cartão -- distingue "de onde
-        // veio" (trilha vs. professora vs. futura auto-criação) sem nunca
-        // virar um sistema de revisão paralelo. Cartão de trilha = 'study'.
-        origin: 'study',
-        // Fase E: destino organizacional (Course Unit Deck). NUNCA substitui
-        // unitId (identidade pedagógica). null até os Course Decks serem
-        // carregados (ensureCourseDecksLoaded) -- Study Trail funciona igual.
-        deckId: null,
-        // SRS state (SM-2)
-        ef: 2.5,
-        interval: 0,
-        reps: 0,
-        due: 0, // timestamp; 0 = never studied, due immediately
-        lapses: 0,
-        // Estado FSRS (Fase 3) -- cartão novo nasce direto no novo modelo,
-        // sem precisar passar por migrateCardToFSRS().
-        stability: 0,
-        difficulty: 0,
-        state: 'new',
-        lastReview: null,
-        fsrsReps: 0,
-        fsrsLapses: 0
-        // (sem fsrsMigrated aqui de propósito -- ver comentário em
-        // migrateCardToFSRS() no shared/fsrs.js: setar isso já no
-        // nascimento do cartão faria o merge de um save antigo, que roda
-        // DEPOIS deste construtor, ser ignorado pelo guard da migração.)
-      });
+      buildStudyWordCards(u, v, idx, appKey).forEach(c => cards.push(c));
     });
   });
   return cards;
@@ -969,7 +949,9 @@ const STATE = {
     reviewFilter: 'oldest', // 'all' | 'hard' | 'oldest' (padrão) -- ver reviewFilterQueue()
     // Fase 4 do sistema de alunas particulares (ver CLAUDE.md): filtro por
     // origem do cartão -- ver matchesReviewOriginFilter/eligibleReviewPool.
-    reviewOriginFilter: 'all' // 'all' (padrão) | 'study' | 'teacher'
+    reviewOriginFilter: 'all', // 'all' (padrão) | 'study' | 'teacher'
+    // Fase I (Tags): filtro por Tag, OR entre as selecionadas ([] = sem filtro).
+    reviewTagFilter: []
   },
   dailyMinutesLog: {}, // legado -- não lido mais pra nada, só continua sendo escrito (addStudyMinutes) pra não perder histórico já salvo
   dailyLessonsLog: {}, // 'YYYY-MM-DD' -> lições (que contam pra meta) concluídas naquele dia
@@ -1239,7 +1221,7 @@ const LANG_ID = 'zh';
 
 // Hook chamado por loadState() (shared/auth.js) quando não encontra
 // data.data[APP_KEY] -- reconhece o formato salvo ANTES do namespacing por
-// idioma existir (estado do Mandarim do Zero direto na raiz do JSON), pra
+// idioma existir (estado do app de chinês direto na raiz do JSON), pra
 // quem já tinha conta antes disso não perder o progresso.
 function loadLegacyState(data){
   if (data.hanziCards || data.cards) applySerializedState(data);
@@ -1262,7 +1244,7 @@ function computeProgressSummary(){
 
 function serializeState(){
   return {
-    cards: STATE.cards,
+    cards: serializeCardsForSave(STATE.cards),
     hanziCards: STATE.hanziCards,
     cardVariants: STATE.cardVariants,
     unitProgress: STATE.unitProgress,
@@ -1293,23 +1275,9 @@ function serializeState(){
 function applySerializedState(data){
   if (!data) return;
   if (data.cards) {
-    // merge by id to survive content updates
-    const byId = {};
-    data.cards.forEach(c => byId[c.id] = c);
-    // Fase E: deckId é dado DERIVADO do banco (decks/deck_id), nunca progresso
-    // de memória -- um save antigo carrega o deckId de quando foi salvo, que
-    // pode estar defasado (Deck movido/recriado). O valor fresco vence.
-    STATE.cards.forEach(c => {
-      if (!byId[c.id]) return;
-      const freshDeckId = c.deckId;
-      Object.assign(c, byId[c.id]);
-      c.deckId = freshDeckId === undefined ? null : freshDeckId;
-    });
-  }
-  if (data.hanziCards) {
-    const byId = {};
-    data.hanziCards.forEach(c => byId[c.id] = c);
-    STATE.hanziCards.forEach(c => { if (byId[c.id]) Object.assign(c, byId[c.id]); });
+    // K2-C: cards da trilha só recebem a whitelist de progresso; ver
+    // mergeSavedCards (shared/study-trail-model.js).
+    mergeSavedCards(STATE.cards, data.cards);
   }
   if (data.cardVariants) STATE.cardVariants = CardVariants.normalizeCardVariants(data.cardVariants);
   // Fase 3 (reestruturação do motor de memória): migração SM2->FSRS,
@@ -1490,7 +1458,9 @@ function maybeShowReviewReminder(){
   const today = todayStr();
   if (STATE.lastReviewReminderDay === today) return;
 
-  const dueCount = cardsDueNow(eligibleReviewPool()).length;
+  // K.7: Devido = não-New com due<=agora (structuralCounts). O antigo
+  // cardsDueNow() contava New (due=0) como pendente.
+  const dueCount = structuralCounts(eligibleReviewPool()).due;
   if (dueCount < REVIEW_REMINDER_THRESHOLD) return;
 
   STATE.lastReviewReminderDay = today;
@@ -2007,10 +1977,12 @@ function showBadgeUnlockCelebration(badge, onDone){
 // RENDER: Trilha (path)
 // ============================================================
 function unitCardCounts(unitId){
+  // K2-E: total/learned em PALAVRAS (Note = A+B contam 1); dueForReview
+  // continua por CardInstance (é fila de Review, A e B independentes).
   const pool = STATE.cards.filter(c => c.unitId === unitId);
-  const learned = pool.filter(c => c.reps > 0).length;
-  const dueForReview = cardsDueNow(pool.filter(c => c.reps > 0)).length;
-  return { total: pool.length, learned, dueForReview };
+  const { total, learned } = studyTrailWordProgress(pool); // mesma semântica de Progresso (Note, só trilha)
+  const dueForReview = structuralCounts(pool).due; // K.7: mesma definição de Devido (não-New vencido)
+  return { total, learned, dueForReview, totalCards: pool.length };
 }
 
 // Progresso fracionário de 0 a 1: concluída conta 1 mesmo depois do reset de
@@ -3169,7 +3141,7 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
   const v = u.vocab[idx];
   const cardId = `u${u.id}-v${idx}`;
   const card = STATE.cards.find(c => c.id === cardId);
-  const alreadyKnown = card && card.reps > 0;
+  const alreadyKnown = studyWordHasEvidence(studyWordCardsFor(STATE.cards, u.id, idx)); // K2-E: nível de palavra
   const matchingPhrase = findMatchingPhrase(v, u);
   acq.introduced[idx] = true;
 
@@ -3234,7 +3206,7 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
 function pickVocabFormat(unit, idx, intent){
   const cardId = `u${unit.id}-v${idx}`;
   const card = STATE.cards.find(c => c.id === cardId);
-  const exposed = card && card.reps > 0;
+  const exposed = studyWordHasEvidence(studyWordCardsFor(STATE.cards, unit.id, idx)); // K2-E: nível de palavra
   const misses = (STEP_STATE.acq && STEP_STATE.acq.wordMisses[idx]) || 0;
 
   if (intent === 'mixed' || intent === 'consolidation'){
@@ -3765,7 +3737,7 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
   // há cartões pra revisar (e mandar direto pro Flashcard) depois de toda
   // lição com vocabulário novo -- mesmo critério já usado em
   // unitCardCounts() pra "dueForReview".
-  const dueCount = cardsDueNow(eligibleReviewPool().filter(c => c.reps > 0)).length;
+  const dueCount = structuralCounts(eligibleReviewPool()).due; // K.7: Devido estrutural (não-New vencido)
   contentEl.innerHTML = `
     <div class="lesson-complete">
       <div class="lesson-complete-icon tier-pop">✅</div>
@@ -5639,7 +5611,7 @@ const SPEED_STATE = {
 // "digite a resposta" ficam de fora (resposta aberta/digitada), mesmo
 // critério de sempre.
 function hasPlainFrontBack(card){
-  if (!card.cardInstance) return true; // trilha (origin:'study') -- sempre foi par simples hanzi/pinyin/trans
+  // K2-I: todo card de STATE.cards tem cardInstance (study/teacher/self nascem de buildEngineCardsFromRow).
   return card.cardInstance.cardTypeId === 'normal' || card.cardInstance.cardTypeId === 'multiple_choice';
 }
 
@@ -5651,34 +5623,27 @@ function hasPlainFrontBack(card){
 // também gera pseudo-objetos só com `displayAnswerText` pras opções erradas
 // de múltipla escolha.
 function cardPromptText(cardOrPseudo){
-  if (cardOrPseudo.cardInstance){
-    const view = resolveCardContentView(cardOrPseudo);
-    return (view.kind === 'multiple_choice' ? view.prompt : view.front).text;
-  }
-  return cardOrPseudo.back_hanzi; // trilha
+  const view = resolveCardContentView(cardOrPseudo);
+  return (view.kind === 'multiple_choice' ? view.prompt : view.front).text;
 }
 function cardPromptPinyinText(cardOrPseudo){
-  if (cardOrPseudo.cardInstance){
-    const view = resolveCardContentView(cardOrPseudo);
-    const field = view.kind === 'multiple_choice' ? view.prompt : view.front;
-    return (field && field.pinyinText) || '';
-  }
-  return cardOrPseudo.front_pinyin || ''; // trilha
+  const view = resolveCardContentView(cardOrPseudo);
+  const field = view.kind === 'multiple_choice' ? view.prompt : view.front;
+  return (field && field.pinyinText) || '';
 }
 function cardAnswerText(cardOrPseudo){
   if ('displayAnswerText' in cardOrPseudo) return cardOrPseudo.displayAnswerText;
-  if (cardOrPseudo.cardInstance){
-    const view = resolveCardContentView(cardOrPseudo);
-    return view.kind === 'multiple_choice' ? view.correctText : view.back.text;
-  }
-  return cardOrPseudo.back_trans; // trilha
+  const view = resolveCardContentView(cardOrPseudo);
+  return view.kind === 'multiple_choice' ? view.correctText : view.back.text;
 }
 
 function buildSpeedQueue(){
   // Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila" removido da
   // UI; comportamento travado em 'oldest' (mesmo raciocínio de fr/app.js:
   // é o único dos 3 que continua respeitando "Intensidade da sessão").
-  return reviewFilterQueue('oldest', eligibleReviewPool().filter(hasPlainFrontBack));
+  // K2-F: Speed é exercício de vocabulário -> projeção da palavra (A) para a
+  // trilha; B continua existindo para Review/FSRS/Deck, só não vira 2ª palavra.
+  return reviewFilterQueue('oldest', projectStudyWordsToA(eligibleReviewPool().filter(hasPlainFrontBack)));
 }
 
 function buildSpeedOptions(card){
@@ -5689,7 +5654,7 @@ function buildSpeedOptions(card){
   // lido por cardAnswerText() acima) -- o resto do fluxo (answerSpeedQuestion)
   // compara identidade com `card` pra saber se ACERTOU, e só usa o texto
   // pra exibição, então funciona sem mudança nenhuma lá.
-  if (card.cardInstance && card.cardInstance.cardTypeId === 'multiple_choice'){
+  if (card.cardInstance.cardTypeId === 'multiple_choice'){
     const view = resolveCardContentView(card);
     return shuffle([card, ...view.distractorTexts.map(text => ({ displayAnswerText: text }))]);
   }
@@ -5704,13 +5669,14 @@ function buildSpeedOptions(card){
   // view.back.text de um distrator desse tipo. Nunca oferecer um cloze/
   // "digite a resposta" como opção de múltipla escolha de qualquer forma
   // (não são pares prompt/resposta curtos, mesmo critério de sempre).
-  const pool = STATE.cards.filter(c => c !== card && c.unitId === card.unitId && hasPlainFrontBack(c));
+  // K2-F: distratores = 1 por palavra (projeção A); B nunca é distrator.
+  const pool = projectStudyWordsToA(STATE.cards.filter(c => c !== card && c.unitId === card.unitId && hasPlainFrontBack(c)));
   let distractors = shuffle(pool).slice(0, 3);
   if (distractors.length < 3){
     // Fallback só quando a unidade não tem 3 outras cartas -- puxa de
     // eligibleReviewPool() (não STATE.cards puro) pra não arriscar mostrar,
     // mesmo como alternativa errada, uma palavra de uma unidade nunca aberta.
-    const extra = shuffle(eligibleReviewPool().filter(c => c !== card && hasPlainFrontBack(c) && !distractors.includes(c))).slice(0, 3 - distractors.length);
+    const extra = shuffle(projectStudyWordsToA(eligibleReviewPool()).filter(c => c !== card && hasPlainFrontBack(c) && !distractors.includes(c))).slice(0, 3 - distractors.length);
     distractors = distractors.concat(extra);
   }
   return shuffle([card, ...distractors]);
@@ -5728,7 +5694,28 @@ function matchesReviewOriginFilter(card){
   return filter === 'all' || card.origin === filter;
 }
 
+// Fase I (Tags): filtro de Review por Tag -- estado PRÓPRIO
+// (STATE.studySettings.reviewTagFilter, lista de slugs), independente de
+// reviewOriginFilter. Semântica: vazio = sem restrição; 1+ tags = OR (o
+// card entra se a NOTE tiver pelo menos uma). A tag é da Note, então
+// CardInstances irmãos (reverso, Cloze) passam/ficam juntos. Só SELECIONA
+// cards elegíveis: nunca toca FSRS, Deck nem origem. cardMatchesTagFilter()
+// vive em shared/flashcard-model.js (fonte única).
+function activeReviewTagFilter(){
+  const f = STATE.studySettings.reviewTagFilter;
+  return Array.isArray(f) ? f : [];
+}
+function matchesReviewTagFilter(card){
+  return cardMatchesTagFilter(card, activeReviewTagFilter());
+}
+
 function eligibleReviewPool(){
+  return STATE.cards.filter(isCardLessonCompleted).filter(matchesReviewOriginFilter).filter(matchesReviewTagFilter);
+}
+
+// Universo de onde a UI tira as tags disponíveis: o pool do Review geral
+// SEM o próprio filtro de tag (senão selecionar uma tag esconderia as outras).
+function reviewTagUniverse(){
   return STATE.cards.filter(isCardLessonCompleted).filter(matchesReviewOriginFilter);
 }
 
@@ -5765,10 +5752,11 @@ function hardWordsPool(){
 //   Medianas = o resto do pool.
 function vocabStrengthBuckets(){
   const pool = eligibleReviewPool();
-  const weak = pool.filter(c => c.reps === 0 || c.lapses >= 2).length;
-  const strong = pool.filter(c => c.reps > 0 && c.lapses < 2 && c.interval >= 60).length;
-  const medium = pool.length - weak - strong;
-  return { weak, medium, strong };
+  // K.3: força é por NOTE (conteúdo) -- A+B da trilha, reverso e Cloze contam
+  // uma vez. Nenhuma irmã estudada = notStarted (nunca "fraca"); com estudadas
+  // = a mais fraca entre elas. Fonte: shared/analytics-metrics.js.
+  const st = contentMetrics(pool).strength;
+  return { notStarted: st.not_started, weak: st.weak, medium: st.medium, strong: st.strong };
 }
 
 // Fase 12: REVISÕES DE HOJE (o que o motor decidiu que é hora de revisar
@@ -5848,7 +5836,7 @@ function reviewFilterQueue(filter, pool){
   if (filter === 'hard') return getStudyQueue(pool, { scope: 'hard' });
   if (filter === 'all') return getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
   const queue = getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
-  queue.sort((a, b) => (a.reps > 0 ? a.due : Infinity) - (b.reps > 0 ? b.due : Infinity));
+  queue.sort((a, b) => (cardStudyBucket(a) !== 'new' ? a.due : Infinity) - (cardStudyBucket(b) !== 'new' ? b.due : Infinity));
   return queue.slice(0, sessionIntensityToLimit(STATE.studySettings.sessionIntensity));
 }
 
@@ -5897,9 +5885,9 @@ function renderReviewTodayWidget(){
 function renderVocabStrengthWidget(){
   const wrap = document.getElementById('vocab-strength-widget');
   if (!wrap) return;
-  const { weak, medium, strong } = vocabStrengthBuckets();
-  if (weak + medium + strong === 0){ wrap.innerHTML = ''; return; }
-  const max = Math.max(weak, medium, strong, 1);
+  const { notStarted, weak, medium, strong } = vocabStrengthBuckets();
+  if (notStarted + weak + medium + strong === 0){ wrap.innerHTML = ''; return; }
+  const max = Math.max(notStarted, weak, medium, strong, 1);
   const h = n => Math.max(10, Math.round(n / max * 100));
   const item = (tier, count, label) => `
     <div class="vs-item">
@@ -5910,6 +5898,7 @@ function renderVocabStrengthWidget(){
   wrap.innerHTML = `
     <div class="section-label">${t('review.strength.title')}</div>
     <div class="vocab-strength-row">
+      ${item('none', notStarted, t('review.strength.notStarted'))}
       ${item('weak', weak, t('review.strength.weak'))}
       ${item('mid', medium, t('review.strength.medium'))}
       ${item('strong', strong, t('review.strength.strong'))}
@@ -5974,6 +5963,8 @@ function renderReviewModeSelect(){
     document.getElementById('mode-card-speed').addEventListener('click', () => openReviewSession('speed'));
   }
 
+  // K2-F: Combinar é vocabulário -> conta palavras (projeção A na trilha), não CardInstances.
+  const matchWordCount = projectStudyWordsToA(pool).length;
   const praticarEl = document.getElementById('review-mode-cards-praticar');
   praticarEl.innerHTML = `
     <button class="review-mode-card" id="mode-card-hard" ${hardCount === 0 ? 'disabled' : ''}>
@@ -5982,9 +5973,9 @@ function renderReviewModeSelect(){
       <div class="name">${t('review.mode.hard.name')}</div>
       <div class="desc">${t('review.mode.hard.desc')}</div>
     </button>
-    <button class="review-mode-card" id="mode-card-match" ${pool.length < 10 ? 'disabled' : ''}>
+    <button class="review-mode-card" id="mode-card-match" ${matchWordCount < 10 ? 'disabled' : ''}>
       <div class="icon">🧩</div>
-      <div class="count">${pool.length}</div>
+      <div class="count">${matchWordCount}</div>
       <div class="name">${t('review.mode.match.name')}</div>
       <div class="desc">${t('review.mode.match.desc')}</div>
     </button>
@@ -6035,6 +6026,7 @@ function backToReviewModeSelect(){
   SPEED_STATE.active = false;
   document.getElementById('review-mode-select-wrap').style.display = 'block';
   document.getElementById('review-session-wrap').style.display = 'none';
+  STATE.reviewSessionDeckId = null; // K2-H: sair da sessão não deixa escopo de Deck stale
   renderReviewModeSelect();
 
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'tab', tab: 'review' });
@@ -6064,7 +6056,7 @@ const MATCH_STATE = {
 // escolhido direto via startMatchGame).
 function renderMatchSizePicker(){
   const el = document.getElementById('match-review-content');
-  const poolLen = eligibleReviewPool().length;
+  const poolLen = projectStudyWordsToA(eligibleReviewPool()).length; // K2-F: palavras, não CardInstances da trilha
   const minPairs = Math.min(...MATCH_SIZE_OPTIONS);
   if (poolLen < minPairs * 2){
     el.innerHTML = `
@@ -6104,7 +6096,8 @@ function startMatchGame(){
   trackEvent('lesson_start', 'match_game', null);
   // Fase 4: seleção via getStudyQueue(scope:'all') -- mesmo pool de antes,
   // Combinar é prática de reconhecimento, não revisão SRS.
-  const pool = shuffle(getStudyQueue(eligibleReviewPool().filter(hasPlainFrontBack), { scope: 'all' }));
+  // K2-F: Combinar = vocabulário -> 1 par por palavra (projeção A na trilha).
+  const pool = shuffle(getStudyQueue(projectStudyWordsToA(eligibleReviewPool().filter(hasPlainFrontBack)), { scope: 'all' }));
   const pairCount = Math.min(MATCH_STATE.pairSize, pool.length);
   MATCH_STATE.pairs = pool.slice(0, pairCount);
   MATCH_STATE.tiles = shuffle([
@@ -6265,7 +6258,7 @@ function renderSpeedReview(){
   // aprendida no total). As duas mensagens não podem ser a mesma.
   if (SPEED_STATE.queue.length === 0){
     const pool = eligibleReviewPool();
-    el.innerHTML = pool.length < 4 ? `
+    el.innerHTML = projectStudyWordsToA(pool).length < 4 ? `
       <div class="review-empty">
         <div class="big-emoji">⚡</div>
         <h3>${t('review.insufficientTitle')}</h3>
@@ -6440,6 +6433,7 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
   // -- Combinar continua NÃO fazendo isso (reconhecimento, não revisão;
   // só promove cartão nunca estudado, ver onMatchTileClick).
   applyMemoryGrade(card, isCorrect ? 2 : 0);
+  trackReviewAnswer('speed_review', card, isCorrect ? 2 : 0);
 
   if (isCorrect){
     // Pontuação recompensa velocidade: quanto menos tempo passou, mais pontos.
@@ -6529,16 +6523,8 @@ function startReviewSession(){
     ? getStudyQueue(pool, { scope: 'unit', newCardsLimit: STATE.studySettings.newCardsPerDay })
     : reviewFilterQueue('oldest', pool);
 
-  // Decide a direção de cada carta de TRILHA ANTES de embaralhar/mostrar --
-  // alterna a partir da última vez que essa carta foi revisada (ver
-  // nextCardDirection em shared/srs.js). Calculado 1x aqui, não a cada
-  // render. Fase 4 (motor de tipos/templates, ver CLAUDE.md): cartão nativo
-  // (Note/CardInstance, origin teacher/self) NUNCA recebe reviewDirection --
-  // a direção dele é 100% decidida pelo CardInstance (frontFieldIndex/
-  // backFieldIndex), a sessão nunca escolhe/alterna (restrição explícita da
-  // autora). "Normal com reverso" (2 CardInstance independentes, Fase 4a) é
-  // o único jeito de ver as 2 direções -- nunca um toggle de sessão.
-  queue.forEach(c => { if (!c.cardInstance) c.reviewDirection = nextCardDirection(c); });
+  // K2-G: a sessão só decide QUAL CardInstance é estudado; a direção (A/B) é
+  // estrutural do próprio CardInstance (frontFieldIndex/backFieldIndex).
 
   // "Mais antigas primeiro" só cumpre o que promete se a ordem sobreviver
   // até a tela -- embaralhar (como sempre foi) destruiria exatamente essa
@@ -6649,6 +6635,7 @@ function deckReviewSummary(deckId){
     new: counts.new,
     learning: counts.learning,
     review: counts.review,
+    due: counts.due,
   };
 }
 
@@ -6659,18 +6646,14 @@ function deckReviewSummary(deckId){
 // MESMA função que startReviewSession()/buildSpeedQueue() já usam pro fluxo
 // normal REVISAR, então newCardsPerDay/sessionIntensity/"mais antigas
 // primeiro" continuam valendo sem nenhum código de limite novo (D6). Direção
-// de carta de TRILHA (nextCardDirection) replicada aqui só por completude
-// defensiva -- getStudyScopeForDeck() já exclui 100% dos cards de trilha
-// (eles nunca têm deckId, D3), então este `if` nunca dispara na prática
-// hoje; mantido pra nunca reintroduzir isReverse/reviewDirection como
-// mecanismo de cartão nativo (nenhuma mudança de direção em relação ao que
-// startReviewSession() já faz, seção 11 -- "Direção").
-async function startDeckReviewSession(deckId){
+// (K2-G): estrutural do CardInstance -- a sessão de Deck só escolhe quais entram.
+async function startDeckReviewSession(deckId, opts){
+  const restore = !!(opts && opts.restore);
   trackEvent('lesson_start', 'flashcard_review', null);
   const decks = await ensureDecksLoadedForReview();
-  const pool = getStudyScopeForDeck(decks, deckId, eligibleDeckReviewPool());
+  // Fase I (Tags): Deck scope AND Tag filter -- o Deck decide o universo, a tag só reduz.
+  const pool = getStudyScopeForDeck(decks, deckId, eligibleDeckReviewPool()).filter(matchesReviewTagFilter);
   const queue = reviewFilterQueue('oldest', pool);
-  queue.forEach(c => { if (!c.cardInstance) c.reviewDirection = nextCardDirection(c); });
 
   STATE.reviewSessionUnitFilter = null;
   STATE.reviewSessionDeckId = deckId;
@@ -6679,6 +6662,17 @@ async function startDeckReviewSession(deckId){
   STATE.reviewIndex = 0;
   STATE.reviewCardState = null;
 
+  // K2-H: o botão vive fora da aba Review (ex.: "Meus Cartões"); sem trocar
+  // a view ativa a fila era montada numa tela invisível. switchTab('review')
+  // vem ANTES de mostrar a sessão (ele reseta os wrappers para o seletor de
+  // modos); reviewSessionUnitFilter já está nulo, então não dispara a sessão
+  // de unidade. A rota carrega o deckId para voltar/recarregar não perder o escopo.
+  // restore=true (Voltar/recarregar): a parte pós-await roda depois do fim de
+  // renderRoute(), então suprime o router aqui para não empilhar histórico.
+  const wasRestoring = (typeof ROUTER !== 'undefined') ? ROUTER.restoring : false;
+  if (restore && typeof ROUTER !== 'undefined') ROUTER.restoring = true;
+  try {
+  if (typeof switchTab === 'function') switchTab('review');
   document.getElementById('review-mode-select-wrap').style.display = 'none';
   document.getElementById('review-session-wrap').style.display = 'block';
   document.getElementById('review-content').style.display = 'block';
@@ -6686,7 +6680,10 @@ async function startDeckReviewSession(deckId){
   document.getElementById('match-review-content').style.display = 'none';
 
   renderReviewView();
-  if (typeof routerNavigate === 'function') routerNavigate({ type: 'reviewSession', mode: 'flashcard' });
+  if (typeof routerNavigate === 'function') routerNavigate({ type: 'reviewSession', mode: 'flashcard', deckId });
+  } finally {
+    if (restore && typeof ROUTER !== 'undefined') ROUTER.restoring = wasRestoring;
+  }
 }
 
 function shuffle(arr){
@@ -7062,7 +7059,7 @@ function renderReviewView(){
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🍵</div>
-        <h3>${STATE.reviewSessionDeckId ? t('review.session.deckEmptyTitle') : (STATE.reviewSessionUnitFilter ? t('review.session.unitEmptyTitle') : t('review.session.allDoneTitle'))}</h3>
+        <h3>${activeReviewTagFilter().length ? t('review.session.tagsEmptyTitle') : STATE.reviewSessionDeckId ? t('review.session.deckEmptyTitle') : (STATE.reviewSessionUnitFilter ? t('review.session.unitEmptyTitle') : t('review.session.allDoneTitle'))}</h3>
         <p>${allDue > 0 ? tp('review.session.pendingOverall', allDue) : t('review.session.comeBackLater')}</p>
         ${allDue > 0 ? `<button class="btn btn-primary" id="review-start-all">${t('review.session.reviewAllAvailable')}</button>` : ''}
       </div>
@@ -7118,11 +7115,9 @@ function renderReviewView(){
 
   // Fase 4 (motor de tipos/templates, ver CLAUDE.md) -- despacho por
   // cardTypeId. Cartão nativo (Note/CardInstance, origin teacher/self)
-  // sempre tem `card.cardInstance`; trilha (origin:'study') nunca tem --
-  // nunca teve múltipla escolha/cloze/"digite a resposta" (buildCardsFromUnits
-  // só produz par hanzi/pinyin/tradução simples), então cai direto no flip
-  // padrão abaixo sem checar nada.
-  if (card.cardInstance){
+  // K2-J: todo card da fila tem `card.cardInstance` (study/teacher/self nascem de
+  // buildStudyWordCards/buildEngineCardsFromRow); normal cai no flip abaixo.
+  {
     const cardTypeId = card.cardInstance.cardTypeId;
     // Fase 6C.2 -- Múltipla escolha/Digite a resposta seguem o mesmo
     // padrão de criação preguiçosa de STATE.reviewCardState já
@@ -7206,17 +7201,10 @@ function renderReviewView(){
 // "resposta", é só pedido de mais exposição) -- sinalizado aqui, não
 // decidido em silêncio.
 //
-// Direção: pra cartão nativo (card.cardInstance), SEMPRE false --
-// resolveNormalCardView() já devolve front/back na ordem certa
-// (frontFieldIndex/backFieldIndex do CardInstance); a direção nunca é
-// escolhida/alternada aqui. Pra cartão legado de trilha
-// (!card.cardInstance), o mecanismo de variedade de sessão que sempre
-// existiu (card.reviewDirection, setado 1x em startReviewSession() via
-// nextCardDirection()) continua 100% intocado -- fora do escopo desta
-// reestruturação (nunca ganhou CardInstance). Nem isReverse nem
-// reviewDirection nem nextCardDirection() foram reintroduzidos como
-// mecanismo NATIVO -- o `if (card.cardInstance)` abaixo é a mesma
-// checagem de sempre, só movida pra dentro da função extraída.
+// Direção (K2-G): sempre estrutural -- resolveNormalCardView() devolve
+// front/back na ordem certa (frontFieldIndex/backFieldIndex do CardInstance);
+// nenhuma variável de sessão escolhe ou alterna A/B. Todo card chega aqui com
+// CardInstance (Study Trail, Teacher e Self são todos nativos).
 //
 // Progresso (STATE.reviewIndex/reviewQueue.length): continua lido direto
 // de STATE aqui, igual aos outros 3 renderers (MC/Cloze/TypeAnswer,
@@ -7228,10 +7216,9 @@ function renderReviewView(){
 // extraídos juntos -- não resolvido isoladamente só pro Normal, pra não
 // introduzir um mecanismo que os outros 3 ainda não teriam.
 function renderNormalCard(mountEl, card, localState, callbacks){
-  let isReverse, hanziSideHTML, transSideHTML, frontImageUrl, backImageUrl, hanziIsSpeakable, hanziTextForSpeech;
-  if (card.cardInstance){
+  let hanziSideHTML, transSideHTML, frontImageUrl, backImageUrl, hanziIsSpeakable, hanziTextForSpeech;
+  {
     const view = resolveCardContentView(card); // kind: 'normal'
-    isReverse = false;
     // Fase 7a (ver CLAUDE.md) -- áudio/imagem customizados resolvidos POR
     // LADO, nunca mais por fallback entre os dois (`front.audioUrl ||
     // back.audioUrl`, como era antes desta fase). Esse fallback era o
@@ -7250,31 +7237,32 @@ function renderNormalCard(mountEl, card, localState, callbacks){
     backImageUrl = view.back.imageUrl;
     hanziIsSpeakable = isStudyLanguageField(view.front, APP_KEY);
     hanziTextForSpeech = view.front.text;
-  } else {
-    isReverse = card.reviewDirection === 'back-to-front';
-    hanziSideHTML = `
-      <div class="flashcard-hanzi">${escapeHTML(card.back_hanzi)} ${audioBtnHTML(card.back_hanzi, 'audio-btn-lg')}</div>
-      <div class="flashcard-pinyin pinyin">${escapeHTML(card.front_pinyin)}</div>
-    `;
-    transSideHTML = `<div class="flashcard-trans">${escapeHTML(card.back_trans)}</div>`;
-    frontImageUrl = null; backImageUrl = null;
-    hanziIsSpeakable = true;
-    hanziTextForSpeech = card.back_hanzi;
   }
-  const frontHTML = isReverse ? transSideHTML : hanziSideHTML;
-  const backHTML = isReverse ? hanziSideHTML : transSideHTML;
+  let frontHTML = hanziSideHTML;
+  let backHTML = transSideHTML;
   // Áudio automático só quando o hanzi está do lado JÁ visível nesse
   // instante -- no modo padrão isso é o front (toca ao entrar no cartão),
   // no modo invertido é o back (toca só ao revelar a resposta).
-  const hanziVisibleNow = isReverse ? localState.revealed : true;
-  // Fase 7a -- `isReverse` só é `true` pra cartão de TRILHA
-  // (!card.cardInstance) -- nesse caminho `frontImageUrl`/`backImageUrl`
-  // são sempre null. Pra cartão com CardInstance, `isReverse` é sempre
-  // `false`, então `frontImageUrl` sempre corresponde a `hanziSideHTML`
-  // (=frontHTML) e `backImageUrl` a `transSideHTML` (=backHTML) --
-  // nenhuma troca extra necessária. Imagem LEGADA (`card.imageUrl`,
-  // nível de Note) nunca é duplicada no lado do verso, exatamente como
-  // antes desta fase; pra cartão nativo `card.imageUrl` é sempre null.
+  let hanziVisibleNow = true;
+  // K2-D: CardInstance nativo cuja FRENTE é a tradução e cujo VERSO é o hanzi
+  // (ex.: Study Trail B): hanzi + pinyin + áudio acompanham o campo do idioma
+  // estudado (verso). Direção continua 100% do CardInstance.
+  {
+    const v = resolveCardContentView(card);
+    if (!isStudyLanguageField(v.front, APP_KEY) && isStudyLanguageField(v.back, APP_KEY)){
+      frontHTML = `<div class="flashcard-trans">${escapeHTML(v.front.text)}${v.front.audioUrl ? customAudioBtnHTML(v.front.audioUrl) : ''}</div>`;
+      backHTML = `
+      <div class="flashcard-hanzi">${escapeHTML(v.back.text)} ${audioBtnHTML(v.back.text, 'audio-btn-lg')}${v.back.audioUrl ? customAudioBtnHTML(v.back.audioUrl) : ''}</div>
+      <div class="flashcard-pinyin pinyin">${escapeHTML(v.back.pinyinText || '')}</div>`;
+      hanziVisibleNow = localState.revealed;
+      hanziIsSpeakable = true;
+      hanziTextForSpeech = v.back.text;
+    }
+  }
+  // Fase 7a/K2-G -- frontImageUrl corresponde sempre a hanziSideHTML e backImageUrl a
+  // transSideHTML (a troca de lados de B é tratada acima, pela estrutura do CardInstance).
+  // Imagem LEGADA (`card.imageUrl`, nível de Note) nunca é duplicada no lado do verso;
+  // pra cartão nativo `card.imageUrl` é sempre null.
   const resolvedFrontImageUrl = card.imageUrl || frontImageUrl || null;
   const resolvedBackImageUrl = backImageUrl || null;
 
@@ -7381,16 +7369,12 @@ function gradeCurrentCard(grade){
   // ser lido antes de applyMemoryGrade/scheduleReview mutar card.due pra reavaliação.
   const wasOverdue = card.due > 0 && card.due < new Date().setHours(0, 0, 0, 0);
   const intervalBefore = card.interval;
-  // Grava a direção mostrada nesta revisão -- da próxima vez que essa carta
-  // ficar due, nextCardDirection() (shared/srs.js) alterna pra outra. Só
-  // tem efeito pra cartão de trilha (`card.reviewDirection` só é setado
-  // pra ele, ver startReviewSession) -- no-op inofensivo pra cartão nativo
-  // (Note/CardInstance), que nunca ganha reviewDirection (Fase 4: direção
-  // é do CardInstance, não da sessão).
-  card.lastDirection = card.reviewDirection;
+  // K2-G: nenhuma direção é gravada aqui -- A/B são CardInstances independentes
+  // e a direção é estrutural; a revisão só aplica o grau (FSRS) ao CardInstance mostrado.
   // Fase 5: Flashcard agora usa o motor FSRS (shared/fsrs.js) -- due deixa
   // de ser calculado por regras SM-2 fixas.
   applyMemoryGrade(card, grade);
+  trackReviewAnswer('flashcard', card, grade);
   STATE.totalReviews += 1;
   // Streak só conta quando a SESSÃO inteira termina (ver renderReviewView),
   // não a cada cartão avaliado -- senão avaliar 1 carta isolada já bastava
@@ -7457,8 +7441,10 @@ function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
 function checkUnitCompletion(explicitUnitId){
   const unitId = explicitUnitId || STATE.reviewSessionUnitFilter;
   if (!unitId) return;
+  // K2-E: a unidade está aprendida quando TODA palavra tem evidência de
+  // estudo em alguma CardInstance irmã -- B New não bloqueia mais.
   const pool = STATE.cards.filter(c => c.unitId === unitId);
-  const allLearned = pool.every(c => c.reps > 0);
+  const allLearned = studyWordGroups(pool).every(studyWordHasEvidence);
   if (allLearned){
     markUnitCompleted(unitId);
   }
@@ -7473,9 +7459,25 @@ function renderGoalsView(){
 
 function renderProgressView(){
   const completedUnits = Object.values(STATE.unitProgress).filter(u=>u.completed).length;
-  const totalCards = STATE.cards.length;
-  const learnedCards = STATE.cards.filter(c => c.reps > 0).length;
-  const dueCount = cardsDueNow(STATE.cards).length;
+  // K.3: "Palavras aprendidas" = SÓ Study Trail, em palavras (Note), com o
+  // curso inteiro como denominador (Teacher/Self não entram aqui).
+  const { total: totalCards, learned: learnedCards } = studyTrailWordProgress(STATE.cards);
+  // K.3: o antigo "Pendentes agora" era cardsDueNow(STATE.cards) = qualquer card
+  // com due<=agora, inclusive New (due=0) e lições ainda não concluídas -- uma
+  // mistura. Agora: contagens ESTRUTURAIS (CardInstance) do universo estudável,
+  // sem os filtros de sessão (origem/tag), e "Para estudar hoje" = a fila que
+  // uma sessão entrega (mesma definição/número do hero da Revisão).
+  const sc = structuralCounts(eligibleDeckReviewPool());
+  const studyToday = trueDueReviewCount(eligibleReviewPool());
+
+  // K.7: "Conteúdos estudados" (Note) de Teacher e Self, SEMPRE separados e
+  // fora de "Palavras aprendidas"; só aparece a origem que tem conteúdo ativo.
+  const ownContentCards = ['teacher', 'self'].map(o => {
+    const m = ownContentProgress(STATE.cards, o);
+    if (!m.total) return '';
+    const label = o === 'teacher' ? 'Conteúdos da professora estudados' : 'Meus conteúdos estudados';
+    return `<div class="stat-card" data-stat="content-${o}"><div class="num">${m.studied}/${m.total}</div><div class="label">${label}</div></div>`;
+  }).join('');
 
   const guestWarning = !CURRENT_USER ? `
     <div class="guest-warning">
@@ -7489,7 +7491,12 @@ function renderProgressView(){
     <div class="stat-card"><div class="num">${learnedCards}/${totalCards}</div><div class="label">${t('zh.progress.statWords')}</div></div>
     <div class="stat-card"><div class="num">${effectiveStreak()}</div><div class="label">${t('zh.progress.statStreak')}</div></div>
     <div class="stat-card"><div class="num">${STATE.totalReviews}</div><div class="label">${t('zh.progress.statReviews')}</div></div>
-    <div class="stat-card"><div class="num">${dueCount}</div><div class="label">${t('zh.progress.statDue')}</div></div>
+    <div class="stat-card" data-stat="new"><div class="num">${sc.new}</div><div class="label">${t('progress.statNew')}</div></div>
+    <div class="stat-card" data-stat="learning"><div class="num">${sc.learning}</div><div class="label">${t('progress.statLearning')}</div></div>
+    <div class="stat-card" data-stat="review"><div class="num">${sc.review}</div><div class="label">${t('progress.statReview')}</div></div>
+    <div class="stat-card" data-stat="due"><div class="num">${sc.due}</div><div class="label">${t('progress.statDueNow')}</div></div>
+    <div class="stat-card" data-stat="today" title="${escapeHTML(t('progress.statTodayTitle'))}"><div class="num">${studyToday}</div><div class="label">${t('progress.statToday')}</div></div>
+    ${ownContentCards}
     <div class="stat-card"><div class="num">${STATE.xp}</div><div class="label">${t('zh.progress.statXp')}</div></div>
   `;
 
@@ -7534,7 +7541,8 @@ function renderProgressLineChart(){
   if (!wrap) return;
 
   const allCards = [...STATE.cards, ...STATE.hanziCards];
-  const learnedDates = allCards.filter(c => c.firstLearnedDate).map(c => c.firstLearnedDate);
+  // K2-E: vocabulário da trilha por PALAVRA (A+B = 1); hanzi seguem por card.
+  const learnedDates = [...wordLevelFirstLearnedDates(STATE.cards), ...STATE.hanziCards.filter(c => c.firstLearnedDate).map(c => c.firstLearnedDate)];
 
   if (!learnedDates.length){
     wrap.innerHTML = `<div class="manual-empty" style="padding:30px 20px;"><p>${t('zh.progress.chartEmpty')}</p></div>`;
@@ -7765,6 +7773,27 @@ function normalizeNewCardsPerDay(n){
 // #review-header-settings-btn/#review-settings-panel): sincroniza os 4
 // controles de sessão com STATE.studySettings -- roda toda vez que o
 // painel "⚙️ Configurar sessão" é aberto ou qualquer um dos 4 muda.
+// Fase I (Tags): chips de seleção múltipla (OR) + "Limpar". Mostra as tags do
+// universo do Review geral E as já selecionadas (mesmo que não existam mais),
+// pra nunca prender o usuário num filtro que ele não consegue desfazer.
+function renderReviewTagFilter(){
+  const wrap = document.getElementById('review-tag-filter-wrap');
+  const chipsEl = document.getElementById('review-tag-chips');
+  if (!wrap || !chipsEl) return;
+  const selected = activeReviewTagFilter();
+  const universe = reviewTagUniverse();
+  const available = collectTagsFromCards(universe);
+  const all = Array.from(new Set(available.concat(selected))).sort();
+  wrap.hidden = all.length === 0;
+  chipsEl.innerHTML = all.map(t => {
+    const n = universe.filter(c => (c.tags || []).includes(t)).length;
+    const on = selected.includes(t);
+    return `<button type="button" class="leaderboard-tab ${on ? 'active' : ''}" data-review-tag="${escapeHTML(t)}" aria-pressed="${on}">#${escapeHTML(t)} (${n})</button>`;
+  }).join(' ');
+  const clearBtn = document.getElementById('review-tag-clear');
+  if (clearBtn) clearBtn.hidden = selected.length === 0;
+}
+
 function renderReviewSettingsView(){
   const s = STATE.studySettings;
 
@@ -7792,6 +7821,8 @@ function renderReviewSettingsView(){
       ${hasSelfCards ? `<option value="self" ${currentOrigin === 'self' ? 'selected' : ''}>${REVIEW_ORIGIN_LABELS.self} (${originCounts.self})</option>` : ''}
     `;
   }
+
+  renderReviewTagFilter();
 
   const freqSelect = document.getElementById('review-frequency-select');
   if (freqSelect) freqSelect.value = s.reviewFrequency;
@@ -7831,6 +7862,17 @@ document.getElementById('review-intensity-select').addEventListener('change', (e
 // selects opcionais desta tela).
 document.getElementById('review-origin-select')?.addEventListener('change', (e) => {
   updateStudySetting({ reviewOriginFilter: e.target.value });
+});
+// Fase I (Tags): alterna uma tag no filtro (OR); "Limpar" volta a [].
+document.getElementById('review-tag-chips')?.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-review-tag]');
+  if (!btn) return;
+  const tag = btn.dataset.reviewTag;
+  const cur = activeReviewTagFilter();
+  updateStudySetting({ reviewTagFilter: cur.includes(tag) ? cur.filter(t => t !== tag) : cur.concat(tag) });
+});
+document.getElementById('review-tag-clear')?.addEventListener('click', () => {
+  updateStudySetting({ reviewTagFilter: [] });
 });
 // Ícone "⚙️" no cabeçalho da tela de Revisão (3ª sessão de grilling --
 // antes era um botão de texto solto entre o dropdown e REVISAR, a autora
@@ -7900,6 +7942,10 @@ const ANKI_EXPORT_CONFIG = {
   afmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:36px;'>{{Caractere}}</div><div style='text-align:center;font-size:18px;color:#5C4A3F;'>{{Tradução}}</div>",
   css: ".card { font-family: 'Nunito', Arial, sans-serif; text-align: center; background-color: #FBF4E8; color:#211714; }",
   deckDesc: `Exportado do app ${APP_IDENTITY.apps.zh.name}`,
+  // K2-F: template do modelo "Reverso" (B da trilha): frente = Tradução,
+  // verso = Pinyin + Caractere. Mesmos campos semânticos do Básico.
+  reverseQfmt: "<div style='text-align:center;font-size:22px;color:#5C4A3F;font-weight:bold;'>{{Tradução}}</div>",
+  reverseAfmt: "{{FrontSide}}<hr id='answer'><div style='text-align:center;font-size:22px;color:#8E1915;font-weight:bold;'>{{Pinyin}}</div><div style='text-align:center;font-size:36px;'>{{Caractere}}</div>",
   guidPrefix: "mzc_",
   unitOptions(){
     return UNITS.map(u => ({ id: String(u.id), label: `${u.id}. ${u.title}` }));
@@ -7925,7 +7971,7 @@ const ANKI_EXPORT_CONFIG = {
   // qual lado é o chinês (com pinyin) -- diferente de Normal/Múltipla
   // Escolha, aqui não há garantia de direção fixa.
   noteFields(card, media){
-    if (card.cardInstance && card.cardInstance.cardTypeId === 'type_answer'){
+    if (card.cardInstance.cardTypeId === 'type_answer'){
       const view = resolveCardContentView(card);
       const cols = zhTypeAnswerExportColumns(view);
       return [
@@ -7945,6 +7991,17 @@ const ANKI_EXPORT_CONFIG = {
   // de pinyin embutido via `|`, buildAnkiClozeFieldText() já converte
   // isso pro hint nativo do Anki `{{c1::hanzi::pinyin}}`, mostrado no
   // lugar da lacuna antes de revelar).
+  // K2-F: B da trilha -- campos SEMÂNTICOS (Pinyin/Caractere/Tradução); a
+  // direção vem do template do modelo Reverso. O pinyin acompanha o hanzi
+  // (lado "back" do CardInstance); mídia: front = tradução, back = hanzi.
+  reverseFields(card, media){
+    const v = ankiExportSides(card);
+    return [
+      v.back.pinyinText || '',
+      ankiFieldHTML(v.back.text, media && media.back),
+      ankiFieldHTML(v.front.text, media && media.front),
+    ];
+  },
   clozeFields(card, media){
     const view = resolveCardContentView(card);
     return [
@@ -7953,11 +8010,12 @@ const ANKI_EXPORT_CONFIG = {
     ];
   },
   sortField(card){
-    if (card.cardInstance && card.cardInstance.cardTypeId === 'cloze'){
+    if (ankiExportCardKind(card) === 'reverse'){ const b = ankiExportSides(card).back; return b.pinyinText || b.text; }
+    if (card.cardInstance.cardTypeId === 'cloze'){
       const view = resolveCardContentView(card);
       return renderClozeText(view.rawSentenceText, view.markId, { reveal: true });
     }
-    if (card.cardInstance && card.cardInstance.cardTypeId === 'type_answer'){
+    if (card.cardInstance.cardTypeId === 'type_answer'){
       const cols = zhTypeAnswerExportColumns(resolveCardContentView(card));
       return cols.pinyin || cols.hanzi;
     }
@@ -8101,6 +8159,7 @@ function gradeHanziCard(grade){
   const intervalBefore = card.interval;
   // Fase 5: mesmo motor novo do Flashcard de vocabulário.
   applyMemoryGrade(card, grade);
+  trackReviewAnswer('hanzi', card, grade);
   STATE.totalReviews += 1;
   // Streak só conta no fim da SESSÃO inteira (ver renderHanziReviewView),
   // mesmo raciocínio do Flashcard de vocabulário.
