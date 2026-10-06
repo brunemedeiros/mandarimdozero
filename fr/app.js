@@ -864,6 +864,9 @@ const STATE = {
   // multiple_choice/type_answer/cloze) usam exclusivamente este slot.
   reviewCardState: null,
   reviewSessionUnitFilter: null,
+  // Fase 5 da trilha: sessão do marco de Revisão do módulo ({moduleId, unitIds}).
+  // Nunca serializado; nulado nos mesmos pontos que reviewSessionDeckId.
+  reviewSessionMilestone: null,
   // Fase D ("Decks, Tags e Painel" -- Deck Engine, ver CLAUDE.md) -- mesmo
   // papel/ciclo de vida de reviewSessionUnitFilter acima, só que pra Deck em
   // vez de unidade: setado só por startDeckReviewSession(), lido só por
@@ -882,6 +885,8 @@ const STATE = {
   courseDecksLoaded: false,
   currentLevel: LEVELS[0].id,
   checkpointProgress: {},
+  // Fase 5: marco de Revisão por módulo -> { lastDate:'AAAA-MM-DD', lastCount } (opcional, só informativo).
+  reviewMilestones: {},
   levelTestProgress: {},
   daily: {
     date: null, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
@@ -1079,6 +1084,7 @@ function serializeState(){
     periodXp: STATE.periodXp,
     daily: STATE.daily,
     checkpointProgress: STATE.checkpointProgress,
+    reviewMilestones: STATE.reviewMilestones,
     levelTestProgress: STATE.levelTestProgress,
     completedChallenges: STATE.completedChallenges,
     dictations: STATE.dictations,
@@ -1124,6 +1130,7 @@ function applySerializedState(data){
   if (data.periodXp) Object.assign(STATE.periodXp, data.periodXp);
   if (data.daily) Object.assign(STATE.daily, data.daily);
   if (data.checkpointProgress) Object.assign(STATE.checkpointProgress, data.checkpointProgress);
+  if (data.reviewMilestones) Object.assign(STATE.reviewMilestones, data.reviewMilestones);
   if (data.levelTestProgress) Object.assign(STATE.levelTestProgress, data.levelTestProgress);
   if (data.completedChallenges) Object.assign(STATE.completedChallenges, data.completedChallenges);
   if (data.challengeReviews && typeof data.challengeReviews === 'object'){
@@ -1716,14 +1723,14 @@ const BADGES = [
   { id:'first_step', name:'Primeiro Passo', icon:'🌱', desc:'Fez sua primeira revisão', check: s => s.totalReviews >= 1 },
   { id:'streak_3', name:'3 Dias Seguidos', icon:'🔥', desc:'Estudou 3 dias seguidos', check: s => s.streak >= 3 },
   { id:'streak_7', name:'Uma Semana!', icon:'🥐', desc:'Estudou 7 dias seguidos', check: s => s.streak >= 7 },
-  { id:'unit_1', name:'Unidade 1 Completa', icon:'📖', desc:'Completou a primeira unidade', check: s => s.unitProgress['A1-1']?.completed },
+  { id:'unit_1', name:'Unidade 1 Completa', icon:'📖', desc:'Completou a primeira unidade', check: s => s.unitProgress['A1-1']?.completed && unitCompletedVia(s.unitProgress['A1-1']) === 'lessons' },
   { id:'unit_half', name:'Metade do Caminho', icon:'🗼', desc:'Completou metade do nível A1', check: s => {
       const a1 = UNITS.filter(u => u.level === 'A1');
-      return a1.filter(u => s.unitProgress[u.id]?.completed).length >= Math.ceil(a1.length/2);
+      return a1.filter(u => unitCompletedVia(s.unitProgress[u.id]) === 'lessons').length >= Math.ceil(a1.length/2);
     } },
   { id:'unit_all', name:'Nível A1 Completo', icon:'🇫🇷', desc:'Completou o nível A1 inteiro', check: s => {
       const a1 = UNITS.filter(u => u.level === 'A1');
-      return a1.every(u => s.unitProgress[u.id]?.completed);
+      return a1.every(u => unitCompletedVia(s.unitProgress[u.id]) === 'lessons');
     } },
   { id:'xp_100', name:'100 XP', icon:'⭐', desc:'Acumulou 100 XP', check: s => s.xp >= 100 },
   { id:'xp_500', name:'500 XP', icon:'🌟', desc:'Acumulou 500 XP', check: s => s.xp >= 500 },
@@ -1865,15 +1872,15 @@ function unitOrdinalInfo(u, levelUnits){
   return { num, total: sameType.length };
 }
 
+// Grupos da trilha na ordem de estudo (um por nível, vazios descartados).
+function trailGroups(){
+  return LEVELS.map(lvl => unitsOfLevel(lvl.id)).filter(g => g.length);
+}
+
 function recalculateUnlockedUnits(){
-  LEVELS.forEach(lvl => {
-    unitsOfLevel(lvl.id).forEach((u, i) => {
-      const prog = STATE.unitProgress[u.id];
-      if (i === 0){ prog.unlocked = true; return; }
-      const prevId = unitsOfLevel(lvl.id)[i-1].id;
-      prog.unlocked = STATE.unitProgress[prevId]?.completed || prog.unlocked;
-    });
-  });
+  // Regra única em shared/trail-state-model.js (recalcUnlocked): 1ª unidade de
+  // cada nível liberada; as demais quando a anterior do nível foi concluída.
+  recalcUnlocked(trailGroups(), STATE.unitProgress);
 }
 
 const UNIT_ICONS = {
@@ -1926,6 +1933,7 @@ function renderLevelModalList(){
   wrap.querySelectorAll('.level-list-item').forEach(btn => {
     btn.addEventListener('click', () => {
       STATE.currentLevel = btn.dataset.level;
+      STATE.levelUserPicked = true;
       document.getElementById('level-modal').style.display = 'none';
       renderUnitsGrid();
     });
@@ -2005,6 +2013,113 @@ function levelTestsOfLevel(level){
   return LEVEL_TESTS.filter(t => t.level === level);
 }
 
+// Fase 2 da trilha: cartão "Continuar" no topo. Fonte única = nextTrailItem
+// (shared/trail-state-model.js); aqui só desenha. A métrica mostrada é a
+// oficial: lições concluídas.
+function buildTrailContinueCard(){
+  const groups = trailGroups();
+  const next = nextTrailItem(groups, STATE.unitProgress);
+  const { done, total } = trailLessonCounts(groups, STATE.unitProgress);
+  const card = document.createElement('div');
+  card.className = 'trail-continue';
+  const metric = `${done} de ${total} lições concluídas`;
+  if (!next){
+    card.classList.add('complete');
+    card.innerHTML = `<div class="tc-info"><div class="tc-eyebrow">Sua trilha</div><div class="tc-title">Você concluiu toda a trilha 🎉</div><div class="tc-sub">${metric}</div></div>`;
+    return card;
+  }
+  const u = UNITS.find(x => x.id === next.unitId);
+  const lessonLabel = next.lessonCount ? ` · lição ${next.lessonIdx + 1} de ${next.lessonCount}` : '';
+  const started = done > 0 || !!(STATE.unitProgress[u.id] && STATE.unitProgress[u.id].started);
+  card.innerHTML = `
+    <div class="tc-info">
+      <div class="tc-eyebrow">${started ? 'Continue de onde parou' : 'Comece por aqui'}</div>
+      <div class="tc-title">${u.title}${lessonLabel}</div>
+      <div class="tc-sub">${metric}</div>
+    </div>
+    <button type="button" class="btn btn-primary tc-cta">${started ? 'Continuar' : 'Começar'}</button>
+  `;
+  card.querySelector('.tc-cta').addEventListener('click', () => openUnitDetail(u.id));
+  setTimeout(() => watchTrailContinueCard(card), 0);
+  return card;
+}
+
+// ---------- Fase 7 da trilha: modo Mapa ----------
+// DOM/seleção/painel em shared/trail-map.js; aqui só o modelo (estados reais) e o que cada botão faz.
+const TRAIL_VIEW_KEY = 'frances_trail_view';
+
+function mapUnitDescribe(u, moduleId){
+  const st = unitBlockState(u);
+  const hasLessons = isLessonUnit(u) && u.lessons.length > 0;
+  const lines = [];
+  if (hasLessons){
+    const done = (st === 'done' || st === 'skipped') ? u.lessons.length : currentLessonIdx(u.id);
+    lines.push(`${done} de ${u.lessons.length} lições concluídas`);
+  }
+  const { dueForReview } = unitCardCounts(u.id);
+  if (dueForReview > 0) lines.push(`🔁 ${dueForReview} para revisar`);
+  const actions = [];
+  if (st === 'locked'){
+    lines.push('Complete a unidade anterior para liberar esta.');
+    const modOpen = moduleId && moduleUnlocked(MODULES.find(m => m.id === moduleId));
+    if (modOpen && trailSkipAllowed()) actions.push({ label: 'Fazer Ponto de verificação para pular', primary: false, onClick: () => openCheckpoint(moduleId) });
+    else if (modOpen) lines.push('Pular unidades é do plano Premium (ou de alunos da professora).');
+  } else if (st === 'done' || st === 'skipped'){
+    actions.push({ label: 'Abrir de novo', primary: false, onClick: () => openUnitDetail(u.id) });
+  } else {
+    const started = !!(STATE.unitProgress[u.id] && STATE.unitProgress[u.id].started);
+    actions.push({ label: started ? 'Continuar' : 'Começar', primary: true, onClick: () => openUnitDetail(u.id) });
+  }
+  return { eyebrow: unitTypeOf(u) === 'grammar' ? 'Gramática' : 'Unidade', title: u.title, status: TRAIL_MAP_STATE_LABEL[st], goal: u.goal || '', lines, actions };
+}
+
+function renderTrailMapView(container, levelModules){
+  const sections = levelModules.map((module, mIdx) => {
+    const nodes = module.unitIds.map(id => {
+      const u = UNITS.find(x => x.id === id);
+      const st = unitBlockState(u);
+      return { key: 'u:' + id, kind: 'unit', icon: UNIT_ICONS[id] || '📖', label: u.title, state: st, current: st === 'current',
+        aria: `${u.title}, ${TRAIL_MAP_STATE_LABEL[st]}${unitTypeOf(u) === 'grammar' ? ', gramática' : ''}` };
+    });
+    const sel = moduleReviewSelection(module);
+    const rst = milestoneState(sel.available, STATE.reviewMilestones[module.id]);
+    nodes.push({ key: 'r:' + module.id, kind: 'review', icon: '🔁', label: 'Revisão', state: rst === 'empty' ? 'empty' : (rst === 'done' ? 'done' : 'available'),
+      aria: `Revisão do módulo ${mIdx + 1}, opcional${rst === 'empty' ? ', nada para revisar ainda' : ''}` });
+    const cp = STATE.checkpointProgress[module.id];
+    nodes.push({ key: 'c:' + module.id, kind: 'checkpoint', icon: '🏆', label: 'Ponto', state: cp.completed ? 'done' : (moduleUnlocked(module) ? 'available' : 'locked'),
+      aria: `Ponto de verificação do módulo ${mIdx + 1}` });
+    return { title: `Módulo ${mIdx + 1} · ${module.title}`, nodes };
+  });
+  const find = key => { const [k, id] = [key.slice(0, 1), key.slice(2)]; return { k, id }; };
+  const describe = (key) => {
+    const { k, id } = find(key);
+    if (k === 'u'){
+      const mod = MODULES.find(m => m.unitIds.includes(id));
+      return mapUnitDescribe(UNITS.find(u => u.id === id), mod && mod.id);
+    }
+    const module = MODULES.find(m => m.id === id);
+    if (k === 'r'){
+      const sel = moduleReviewSelection(module);
+      const rec = STATE.reviewMilestones[module.id];
+      const st = milestoneState(sel.available, rec);
+      const why = milestoneReasonText(sel);
+      return { eyebrow: 'Revisão', title: 'Revisão do módulo', status: st === 'done' ? 'Revisada' : (st === 'empty' ? 'Sem itens' : 'Recomendada'),
+        goal: 'Opcional: uma sessão curta com o que mais precisa ser revisto neste módulo. Nunca bloqueia o avanço.',
+        lines: st === 'empty' ? ['Nada para revisar ainda: estude as unidades deste módulo e volte aqui.'] : [why].concat(rec && rec.lastDate ? [`Última sessão: ${rec.lastDate.split('-').reverse().join('/')}`] : []),
+        actions: st === 'empty' ? [] : [{ label: 'Revisar agora', primary: true, onClick: () => startModuleReviewSession(module.id) }] };
+    }
+    const cp = STATE.checkpointProgress[module.id];
+    const lines = [];
+    const actions = [];
+    if (!moduleUnlocked(module)) lines.push('Libere o módulo (complete a unidade anterior) para fazer o Ponto de verificação.');
+    else if (!trailSkipAllowed()) lines.push('Pular unidades é do plano Premium (ou de alunos da professora).');
+    else actions.push({ label: cp.completed ? 'Refazer o ponto' : 'Fazer o Ponto de verificação', primary: !cp.completed, onClick: () => openCheckpoint(module.id) });
+    return { eyebrow: 'Ponto de verificação', title: module.title, status: cp.completed ? `Aprovado (melhor nota ${cp.bestScore || 0}%)` : (moduleUnlocked(module) ? 'Disponível' : 'Bloqueado'),
+      goal: 'Teste o módulo inteiro de uma vez. Se for bem (70% ou mais), as unidades dele são marcadas como puladas.', lines, actions };
+  };
+  renderTrailMap(container, { sections }, describe);
+}
+
 function buildLevelTestCard(test){
   const lt = STATE.levelTestProgress[test.id];
   const card = document.createElement('button');
@@ -2026,12 +2141,12 @@ function buildLevelTestCard(test){
 // olhar lessonIdx -- finishCurrentLesson zera lessonIdx ao fechar a unidade
 // (pra permitir reabrir do início como revisão), então lessonIdx sozinho
 // mentiria "0 de 4" numa unidade que na verdade já terminou.
+// Fase 2: agora vem de trailItemState (shared/trail-state-model.js) --
+// 'done' | 'skipped' | 'current' (só UMA por trilha) | 'available' | 'locked'.
 function unitBlockState(u){
-  const prog = STATE.unitProgress[u.id];
-  if (prog.completed) return 'done';
-  if (prog.unlocked) return 'current';
-  return 'locked';
+  return trailItemState(u, trailGroups(), STATE.unitProgress);
 }
+
 
 // Modo admin: só a conta da autora do curso -- deixa REVISAR qualquer lição
 // de qualquer unidade (mesmo travada pros demais usuários), sem nunca
@@ -2053,6 +2168,7 @@ function isAdminUser(){
 
 // Estado de UMA lição dentro do bloco expandido da unidade.
 function lessonRowState(u, idx){
+  if (unitBlockState(u) === 'skipped') return 'skipped';
   if (STATE.unitProgress[u.id].completed) return 'done';
   const cur = currentLessonIdx(u.id);
   if (idx < cur) return 'done';
@@ -2081,7 +2197,8 @@ function wireHeaderActivation(el, handler){
 function buildUnitBlock(u){
   const state = unitBlockState(u);
   const unlocked = state !== 'locked';
-  const isGrammar = u.type === 'grammar';
+  const isFinished = state === 'done' || state === 'skipped';
+  const isGrammar = unitTypeOf(u) === 'grammar';
   // Só unidades com 2+ lições (Modelo B) ganham a lista expansível -- uma
   // unidade do motor antigo não tem lições reais pra mostrar (ver "Hierarquia
   // da Trilha", seção 11), então vira uma linha só, sem seta.
@@ -2095,9 +2212,9 @@ function buildUnitBlock(u){
 
   const pct = Math.round(unitProgressFraction(u) * 100);
   let fracLabel;
-  if (isGrammar) fracLabel = state === 'done' ? 'Concluído' : '';
+  if (isGrammar) fracLabel = state === 'done' ? 'Concluído' : (state === 'skipped' ? 'Pulada' : '');
   else if (hasLessons){
-    const doneLessons = state === 'done' ? u.lessons.length : currentLessonIdx(u.id);
+    const doneLessons = isFinished ? u.lessons.length : currentLessonIdx(u.id);
     fracLabel = `${doneLessons} de ${u.lessons.length} lições`;
   }
   else fracLabel = `${pct}%`;
@@ -2108,10 +2225,15 @@ function buildUnitBlock(u){
     + (isGrammar ? ' grammar' : '')
     + (state === 'locked' ? ' locked' : '')
     + (state === 'done' ? ' done' : '')
+    + (state === 'skipped' ? ' skipped' : '')
     + (state === 'current' ? ' current' : '')
+    + (state === 'available' ? ' available' : '')
     + (expanded ? ' expanded' : '');
+  if (state === 'current') block.setAttribute('aria-current', 'step');
 
-  const badgeHTML = state === 'done' ? `<span class="ub-badge">✓</span>` : '';
+  const badgeHTML = state === 'done' ? `<span class="ub-badge">✓</span>`
+    : state === 'skipped' ? `<span class="ub-badge ub-badge-skipped" title="Concluída pelo Ponto de verificação">⏭ Pulada</span>` : '';
+  const typeChipHTML = isGrammar ? `<span class="ub-type-chip grammar">Gramática</span>` : '';
   const chevronHTML = hasLessons ? `<button class="ub-chevron" type="button" aria-label="Expandir lições">▾</button>` : '';
   // Só lições JÁ concluídas (e que não são o Ponto de verificação, cujo
   // reteste tem efeitos colaterais bem mais pesados -- desbloqueio de
@@ -2126,10 +2248,10 @@ function buildUnitBlock(u){
         // aplica com Admin Mode ON -- OFF cai exatamente na mesma regra
         // usada por qualquer aluno (unlocked && já concluída), sem
         // segunda implementação (Fase 11 da spec de Admin Mode).
-        const clickable = (isAdminUser() && isAdminModeOn()) || (unlocked && st === 'done' && !l.isCheckpoint);
+        const clickable = (isAdminUser() && isAdminModeOn()) || (unlocked && (st === 'done' || st === 'skipped') && !l.isCheckpoint);
         return `
           <div class="ub-lesson-row ${st}${clickable ? ' clickable' : ''}" ${clickable ? `data-lesson-idx="${i}"` : ''}>
-            <div class="ub-lesson-dot ${st}">${st === 'done' ? '✓' : i + 1}</div>
+            <div class="ub-lesson-dot ${st}">${st === 'done' ? '✓' : (st === 'skipped' ? '•' : i + 1)}</div>
             <div class="ub-lesson-title">${l.title}</div>
           </div>
         `;
@@ -2141,7 +2263,7 @@ function buildUnitBlock(u){
     <div class="ub-header">
       <div class="ub-icon">${UNIT_ICONS[u.id] || '📖'}</div>
       <div class="ub-info">
-        <div class="ub-title-row"><span class="ub-title">${u.title}</span>${badgeHTML}</div>
+        <div class="ub-title-row"><span class="ub-title">${u.title}</span>${typeChipHTML}${badgeHTML}</div>
         ${u.goal ? `<div class="ub-goal">${u.goal}</div>` : ''}
       </div>
       <div class="ub-frac">${fracLabel}</div>
@@ -2175,18 +2297,19 @@ function buildUnitBlock(u){
 function buildCheckpointRow(module, unlocked){
   const cp = STATE.checkpointProgress[module.id];
   const block = document.createElement('div');
-  block.className = 'unit-block checkpoint' + (!unlocked ? ' locked' : '') + (cp.completed ? ' done' : '');
+  const skipLocked = !trailSkipAllowed();
+  block.className = 'unit-block checkpoint' + (!unlocked ? ' locked' : '') + (cp.completed ? ' done' : '') + (skipLocked ? ' skip-locked' : '');
   block.innerHTML = `
     <div class="ub-header">
       <div class="ub-icon">🏆</div>
       <div class="ub-info">
-        <div class="ub-title-row"><span class="ub-title">Ponto de verificação</span>${cp.completed ? `<span class="ub-badge">✓</span>` : ''}</div>
-        <div class="ub-goal">Teste o módulo inteiro de uma vez e pule as unidades que já souber.</div>
+        <div class="ub-title-row"><span class="ub-title">Ponto de verificação</span>${cp.completed ? `<span class="ub-badge">✓</span>` : ''}${skipLocked ? '<span class="ub-badge" title="Premium">🔒</span>' : ''}</div>
+        <div class="ub-goal">${skipLocked ? 'Pular unidades é do plano Premium (ou de alunos da professora).' : 'Teste o módulo inteiro de uma vez e pule as unidades que já souber.'}</div>
       </div>
     </div>
   `;
   if (unlocked){
-    wireHeaderActivation(block.querySelector('.ub-header'), () => openCheckpoint(module.id));
+    wireHeaderActivation(block.querySelector('.ub-header'), () => openCheckpoint(module.id)); // openCheckpoint já avisa se pular for Premium
   }
   return block;
 }
@@ -2294,7 +2417,11 @@ function buildLevelReviewRow(level){
 // sincronizar entre dispositivos).
 const CHALLENGES_STRIP_COLLAPSE_KEY = 'frances_challenges_collapsed';
 function isDailyChallengesStripCollapsed(){
-  return localStorageSafeGet(CHALLENGES_STRIP_COLLAPSE_KEY) === '1';
+  const v = localStorageSafeGet(CHALLENGES_STRIP_COLLAPSE_KEY);
+  // Fase 3: sem preferência salva, a faixa começa recolhida no celular (ocupava
+  // ~208px antes da primeira unidade) e aberta no desktop.
+  if (v === null || v === undefined) return !!(window.matchMedia && window.matchMedia('(max-width: 899px)').matches);
+  return v === '1';
 }
 
 // Faixa compacta e SEMPRE visível com as 3 Missões do dia (ex-"Desafios de
@@ -2351,6 +2478,14 @@ function renderDailyChallengesStrip(){
 
 function renderUnitsGrid(){
   recalculateUnlockedUnits();
+  ensureTrailTeacherLink();
+  // Fase 2: enquanto o aluno não escolheu um nível à mão, a trilha abre no
+  // nível da unidade atual (antes voltava ao A1 a cada carregamento).
+  if (!STATE.levelUserPicked){
+    const nx = nextTrailItem(trailGroups(), STATE.unitProgress);
+    const nu = nx && UNITS.find(x => x.id === nx.unitId);
+    if (nu && nu.level) STATE.currentLevel = nu.level;
+  }
   renderLevelSelect();
   renderDailyGoalChip();
   renderDailyChallengesStrip();
@@ -2367,10 +2502,20 @@ function renderUnitsGrid(){
         <p>O conteúdo do nível ${STATE.currentLevel} ainda está sendo preparado.</p>
       </div>
     `;
+    grid.insertBefore(buildTrailContinueCard(), grid.firstChild);
     return;
   }
 
   grid.innerHTML = '';
+  grid.appendChild(buildTrailViewToggle(TRAIL_VIEW_KEY, () => renderUnitsGrid()));
+  grid.appendChild(buildTrailContinueCard());
+  if (trailViewPref(TRAIL_VIEW_KEY) === 'map'){
+    const mapRoot = document.createElement('div');
+    mapRoot.style.gridColumn = '1 / -1';
+    grid.appendChild(mapRoot);
+    renderTrailMapView(mapRoot, levelModules);
+    return;
+  }
 
   levelModules.forEach((module, mIdx) => {
     const unlocked = moduleUnlocked(module);
@@ -2397,6 +2542,7 @@ function renderUnitsGrid(){
     module.unitIds.forEach(id => {
       list.appendChild(buildUnitBlock(UNITS.find(u => u.id === id)));
     });
+    list.appendChild(buildModuleReviewRow(module));
     list.appendChild(buildCheckpointRow(module, unlocked));
     // Unidade opcional "Desafios do Módulo N" (Premium): o slot nasce vazio e
     // só vira uma linha se o módulo tiver desafios publicados -- os
@@ -5728,10 +5874,12 @@ function openReviewSession(mode){
   if (mode === 'flashcard'){
     STATE.reviewSessionUnitFilter = null;
     STATE.reviewSessionDeckId = null; // Fase D -- entrada normal (sem Deck) nunca herda escopo de uma sessão anterior
+    STATE.reviewSessionMilestone = null;
     startReviewSession();
   } else if (mode === 'hard'){
     STATE.reviewSessionUnitFilter = null;
     STATE.reviewSessionDeckId = null; // Fase D -- idem
+    STATE.reviewSessionMilestone = null;
     // Fase 4: getStudyQueue(scope:'hard') -- mesmo critério de hardWordsPool()
     STATE.reviewQueue = shuffle(getStudyQueue(eligibleReviewPool(), { scope: 'hard' }));
     STATE.reviewIndex = 0;
@@ -6218,6 +6366,10 @@ function isCardLessonCompleted(card){
   // `own_flashcards.status`) como único critério de elegibilidade.
   if (card.origin === 'teacher' || card.origin === 'self') return card.flashcardStatus === 'active';
   const prog = STATE.unitProgress[card.unitId];
+  // A0 (Fase 0 da trilha, 06/10/2026): unidade CONCLUÍDA libera todos os
+  // cartões dela. Antes só `lessonIdx < prog.lessonIdx` decidia, mas
+  // `lessonIdx` volta a 0 ao concluir a unidade -- o cartão saía da Revisão.
+  if (prog?.completed) return true;
   if (!prog?.started) return false;
   const unit = UNITS.find(u => u.id === card.unitId);
   // Cartão "Na frase": entra com a lição da palavra que o apresenta (gateVocabIdx).
@@ -6227,6 +6379,66 @@ function isCardLessonCompleted(card){
   // já foi concluída (mais seguro que arriscar mostrar algo nunca ensinado).
   if (lessonIdx === -1) return !!prog.completed;
   return lessonIdx < prog.lessonIdx;
+}
+
+// ---------- Fase 5 da trilha: marco de Revisão do módulo ----------
+// Seleção/ordem/teto em shared/review-milestone.js (puro). Aqui só liga à
+// Revisão existente (renderReviewView) e guarda a data da última sessão.
+function moduleReviewSelection(module){
+  const pool = milestonePool(STATE.cards, module.unitIds, isCardLessonCompleted);
+  return selectMilestoneCards(pool);
+}
+
+function recordModuleReviewDone(moduleId, count){
+  STATE.reviewMilestones[moduleId] = { lastDate: todayStr(), lastCount: count };
+  saveState();
+}
+
+function startModuleReviewSession(moduleId){
+  const module = MODULES.find(m => m.id === moduleId);
+  if (!module) return;
+  const sel = moduleReviewSelection(module);
+  if (!sel.cards.length) return;
+  trackEvent('lesson_start', 'flashcard_review', { moduleId });
+  STATE.reviewSessionUnitFilter = null;
+  STATE.reviewSessionDeckId = null;
+  STATE.reviewSessionMilestone = { moduleId, unitIds: module.unitIds.slice() };
+  STATE.reviewActiveMode = 'flashcard';
+  STATE.reviewQueue = shuffle(sel.cards);
+  STATE.reviewIndex = 0;
+  STATE.reviewCardState = null;
+  if (typeof switchTab === 'function') switchTab('review');
+  document.getElementById('review-mode-select-wrap').style.display = 'none';
+  document.getElementById('review-session-wrap').style.display = 'block';
+  document.getElementById('review-content').style.display = 'block';
+  document.getElementById('speed-review-content').style.display = 'none';
+  document.getElementById('match-review-content').style.display = 'none';
+  renderReviewView();
+}
+
+function buildModuleReviewRow(module){
+  const sel = moduleReviewSelection(module);
+  const rec = STATE.reviewMilestones[module.id];
+  const st = milestoneState(sel.available, rec);
+  const why = milestoneReasonText(sel);
+  const dateBR = rec && rec.lastDate ? rec.lastDate.split('-').reverse().join('/') : '';
+  let goal;
+  if (st === 'empty') goal = 'Nada para revisar ainda: estude as unidades deste módulo e volte aqui.';
+  else if (st === 'done') goal = `Revisada em ${dateBR}${why ? ' · de novo agora: ' + why : ''} (opcional)`;
+  else goal = `Recomendado antes de seguir (opcional)${why ? ' · ' + why : ''}`;
+  const block = document.createElement('div');
+  block.className = 'unit-block review-milestone' + (st === 'empty' ? ' empty' : '') + (st === 'done' ? ' done' : '');
+  block.innerHTML = `
+    <div class="ub-header">
+      <div class="ub-icon">🔁</div>
+      <div class="ub-info">
+        <div class="ub-title-row"><span class="ub-title">Revisão do módulo</span><span class="ub-type-chip review">Revisão</span>${st === 'done' ? '<span class="ub-badge">✓</span>' : ''}</div>
+        <div class="ub-goal">${goal}</div>
+      </div>
+    </div>
+  `;
+  if (st !== 'empty') wireHeaderActivation(block.querySelector('.ub-header'), () => startModuleReviewSession(module.id));
+  return block;
 }
 
 function startReviewSession(){
@@ -6393,6 +6605,7 @@ async function startDeckReviewSession(deckId, opts){
   const queue = reviewFilterQueue('oldest', pool);
 
   STATE.reviewSessionUnitFilter = null;
+  STATE.reviewSessionMilestone = null;
   STATE.reviewSessionDeckId = deckId;
   STATE.reviewActiveMode = 'flashcard';
   STATE.reviewQueue = queue;
@@ -6800,6 +7013,7 @@ function renderReviewView(){
       document.getElementById('review-start-all').addEventListener('click', () => {
         STATE.reviewSessionUnitFilter = null;
         STATE.reviewSessionDeckId = null; // Fase D -- mesmo fallback de "abandona o escopo estreito" já usado pra unidade
+        STATE.reviewSessionMilestone = null;
         startReviewSession();
       });
     }
@@ -6812,7 +7026,14 @@ function renderReviewView(){
     // a cada cartão avaliado (ver gradeCurrentCard).
     registerStudyToday();
     maybeShowStreakCelebration();
-    trackEvent('lesson_complete', 'flashcard_review', { count: STATE.reviewQueue.length });
+    // Fase 5: o marco de Revisão conta como realizado só quando a SESSÃO termina
+    // (sem nota mínima). A meta ganha moduleId/unitIds (sessão de marco) ou
+    // unitId (sessão de uma unidade) para o painel da professora derivar depois.
+    const msMeta = STATE.reviewSessionMilestone;
+    if (msMeta) recordModuleReviewDone(msMeta.moduleId, STATE.reviewQueue.length);
+    trackEvent('lesson_complete', 'flashcard_review', Object.assign({ count: STATE.reviewQueue.length },
+      msMeta ? { moduleId: msMeta.moduleId, unitIds: msMeta.unitIds } : {},
+      STATE.reviewSessionUnitFilter ? { unitId: STATE.reviewSessionUnitFilter } : {}));
     // Fase 6 do projeto de reorganização: terminar a revisão nunca deve
     // convidar a repetir a mesma bateria -- "Voltar" leva pra trilha,
     // "Praticar mais" leva pra PRATICAR (Combinar/Palavras difíceis), não
@@ -6832,11 +7053,13 @@ function renderReviewView(){
     document.getElementById('review-again').addEventListener('click', () => {
       STATE.reviewSessionUnitFilter = null;
       STATE.reviewSessionDeckId = null; // Fase D
+      STATE.reviewSessionMilestone = null;
       switchTab('path');
     });
     document.getElementById('review-go-practice').addEventListener('click', () => {
       STATE.reviewSessionUnitFilter = null;
       STATE.reviewSessionDeckId = null; // Fase D
+      STATE.reviewSessionMilestone = null;
       backToReviewModeSelect();
     });
     renderProgressView();
@@ -7120,8 +7343,16 @@ function gradeCurrentCard(grade){
 }
 
 function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
-  if (STATE.unitProgress[unitId].completed) return;
+  const prog0 = STATE.unitProgress[unitId];
+  if (prog0.completed){
+    // Unidade pulada pelo Ponto de verificação que o aluno depois estuda de
+    // verdade: passa a valer como concluída por lições (selos, XP, etiqueta).
+    if (prog0.completedVia !== 'skip_test') return;
+    prog0.completedVia = 'lessons';
+    prog0.completedAt = todayStr();
+  }
   STATE.unitProgress[unitId].completed = true;
+  stampUnitCompletion(STATE.unitProgress[unitId], 'lessons', todayStr());
   const u = UNITS.find(x => x.id === unitId);
   const levelUnits = unitsOfLevel(u.level);
   const idx = levelUnits.findIndex(x => x.id === unitId);
@@ -7162,6 +7393,27 @@ function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
 // sabe o conteúdo "pular" o módulo sem precisar abrir unidade por unidade.
 const CHECKPOINT_PASS_THRESHOLD = 70;
 
+// ---------- Fase 6: quem pode PULAR (Ponto de verificação / Teste de Nível) ----------
+// Decisão da professora: Free tem progressão linear; Premium e aluno vinculado
+// podem pular. Fica DESLIGADO por enquanto (mesmo padrão de CHALLENGE_PAYWALL_ENABLED):
+// hoje todos continuam podendo pular; ao ligar a flag a regra vale sem mexer em mais nada.
+// Trava só no cliente (decisão 10): o servidor não valida plano.
+let TRAIL_SKIP_PAYWALL_ENABLED = false; // let: os testes ligam a flag
+let TRAIL_TEACHER_LINK = null; // cache de hasActiveTeacherLink() (null = ainda não sabemos)
+function trailSkipAllowed(){
+  if (!TRAIL_SKIP_PAYWALL_ENABLED) return true;
+  return (typeof isPremium === 'function' && isPremium()) || isChallengesAdmin() || TRAIL_TEACHER_LINK === true;
+}
+function ensureTrailTeacherLink(){
+  if (!TRAIL_SKIP_PAYWALL_ENABLED || TRAIL_TEACHER_LINK !== null || !CURRENT_USER || typeof hasActiveTeacherLink !== 'function') return;
+  TRAIL_TEACHER_LINK = false; // evita chamadas repetidas enquanto a primeira não volta
+  hasActiveTeacherLink().then(v => { TRAIL_TEACHER_LINK = !!v; if (v) renderUnitsGrid(); }).catch(() => {});
+}
+function showTrailSkipLocked(){
+  showToast('Pular unidades é do plano Premium (ou de alunos da professora). Pelo plano grátis, siga as unidades em ordem. 🔒');
+}
+
+
 const CHECKPOINT_STATE = {
   moduleId: null,
   queue: [],
@@ -7171,22 +7423,9 @@ const CHECKPOINT_STATE = {
 };
 
 function buildCheckpointQueue(module){
+  // Fase 6: palavra + frase + escuta + gramática (shared/checkpoint-exam.js, puro).
   const moduleUnits = module.unitIds.map(id => UNITS.find(u => u.id === id));
-  let queue = [];
-  moduleUnits.forEach(u => {
-    if (u.type === 'grammar'){
-      u.grammar.exercises.forEach(ex => {
-        queue.push({ prompt: ex.prompt, hint: ex.hint, answer: ex.answer });
-      });
-    } else {
-      // Ignora entradas com forma dupla (ex: "français / française") — não
-      // dá pra cobrar digitação exata de uma tradução com duas respostas.
-      u.vocab.filter(v => !v.f.includes(' / ')).forEach(v => {
-        queue.push({ prompt: `Como se diz "${v.t}" em francês?`, hint: null, answer: v.f });
-      });
-    }
-  });
-  return shuffle(queue).slice(0, Math.min(12, queue.length));
+  return buildCheckpointExamQueue(moduleUnits, { shuffle, canSpeak: canSpeakFrench });
 }
 
 function recordCheckpointAttempt(module, scorePct){
@@ -7196,37 +7435,31 @@ function recordCheckpointAttempt(module, scorePct){
 }
 
 function completeModuleUnits(module, scorePct){
-  // O card do checkpoint nunca fica desabilitado depois de aprovado (só
-  // ganha um ✓ visual, ver buildCheckpointRow) -- sem esta checagem, um
-  // módulo já concluído podia ser refeito e pagar +50 XP de novo a cada
-  // aprovação, sem limite (achado de auditoria).
-  const alreadyCompleted = STATE.checkpointProgress[module.id].completed;
+  // Fase 6 (decisões da professora, 06/10/2026): passar no Ponto de verificação
+  // PULA as unidades que ainda não estavam concluídas. Pulada libera a próxima
+  // unidade e conta para o módulo/nível, mas NÃO dá XP, estrelas nem selos de
+  // unidade, e NÃO inventa evidência de estudo: nenhum cartão recebe nota "Bom"
+  // no FSRS (ficam New de verdade e entram pela cota de novas por sessão; a
+  // elegibilidade vem de prog.completed, ver isCardLessonCompleted). Refazer o
+  // ponto nunca reclassifica uma unidade já concluída estudando.
   module.unitIds.forEach(id => {
+    if (!STATE.unitProgress[id].completed) stampUnitCompletion(STATE.unitProgress[id], 'skip_test', todayStr());
     STATE.unitProgress[id].started = true;
     STATE.unitProgress[id].completed = true;
-    // Passar no checkpoint/teste de nível é prova de que o aluno já sabe o
-    // vocabulário — sem isso, as unidades ficavam marcadas como concluídas
-    // mas o contador de palavras aprendidas (baseado no SRS) continuava zerado.
-    const u = UNITS.find(x => x.id === id);
-    if (u.type !== 'grammar'){
-      u.vocab.forEach(v => registerExerciseCorrect(u, v));
-    }
   });
+  const alreadyCompleted = STATE.checkpointProgress[module.id].completed;
   STATE.checkpointProgress[module.id].completed = true;
   STATE.checkpointProgress[module.id].bestScore = Math.max(STATE.checkpointProgress[module.id].bestScore || 0, scorePct);
-  if (!alreadyCompleted){
-    addXP(50);
-    registerStudyToday();
-    registerDailyStars(lessonStars(scorePct));
-    registerDailyLessonCompleted(scorePct, false);
-  }
+  if (!alreadyCompleted) registerStudyToday();
   recalculateUnlockedUnits();
   showToast('Ponto de verificação aprovado! 🏆');
   saveState();
 }
 
 function openCheckpoint(moduleId){
+  if (!trailSkipAllowed()){ showTrailSkipLocked(); return; }
   const module = MODULES.find(m => m.id === moduleId);
+  if (!module || !moduleUnlocked(module)) return;
   STEP_STATE.onChallengesScreen = false;
   STEP_STATE.onCheckpoint = moduleId;
   setLessonFocusMode(true);
@@ -7279,16 +7512,21 @@ function renderCheckpointQuizStep(){
   const ex = CHECKPOINT_STATE.queue[CHECKPOINT_STATE.index];
   nextBtn.style.display = 'none';
 
+  const isListen = ex.kind === 'listen';
   contentEl.innerHTML = `
     <div class="conj-progress">Pergunta ${CHECKPOINT_STATE.index + 1} de ${total}</div>
     <div class="gram-exercise">
-      <div class="gram-exercise-prompt">${ex.prompt}</div>
+      <div class="gram-exercise-prompt">${ex.prompt}${isListen ? ' ' + audioBtnHTML(ex.audioText) : ''}</div>
       ${ex.hint ? `<div class="gram-exercise-hint">${ex.hint}</div>` : ''}
-      <input type="text" id="checkpoint-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a resposta">
+      <input type="text" id="checkpoint-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${isListen ? 'Escreva o que ouviu' : 'Digite a resposta'}">
       <div class="expected" id="checkpoint-expected"></div>
     </div>
     <button class="btn btn-primary btn-block" id="checkpoint-verify-btn">Verificar</button>
   `;
+  if (isListen){
+    wireAudioButtons(contentEl);
+    speakFrench(ex.audioText, contentEl.querySelector('.audio-btn'), true);
+  }
 
   const inputEl = document.getElementById('checkpoint-input');
   inputEl.focus();
@@ -7297,26 +7535,19 @@ function renderCheckpointQuizStep(){
   });
 
   document.getElementById('checkpoint-verify-btn').addEventListener('click', () => {
-    const given = inputEl.value;
     const expected = ex.answer;
     const wrapEl = contentEl.querySelector('.gram-exercise');
     const expectedEl = document.getElementById('checkpoint-expected');
     inputEl.disabled = true;
 
-    if (given.trim() === expected.trim()){
-      wrapEl.classList.add('ok');
-      CHECKPOINT_STATE.score += 1;
-    } else if (normalizeLoose(given) === normalizeLoose(expected)){
-      wrapEl.classList.add('almost');
-      expectedEl.textContent = `Quase! → ${expected}`;
-      CHECKPOINT_STATE.score += 0.5;
-    } else {
-      wrapEl.classList.add('wrong');
-      expectedEl.textContent = `→ ${expected}`;
-    }
+    const res = scoreCheckpointAnswer(inputEl.value, expected, ex.kind);
+    CHECKPOINT_STATE.score += res.score;
+    wrapEl.classList.add(res.status);
+    if (res.status === 'almost') expectedEl.textContent = `Quase! → ${expected}`;
+    else if (res.status === 'wrong') expectedEl.textContent = `→ ${expected}`;
     // "almost" (grafia quase certa, sem acento etc.) já dá 0.5 ponto -- toca
     // o mesmo som de acerto do "ok", só "wrong" de verdade toca o de erro.
-    playFeedbackSound(!wrapEl.classList.contains('wrong'));
+    playFeedbackSound(res.status !== 'wrong');
 
     document.getElementById('checkpoint-verify-btn').style.display = 'none';
     const goNextBtn = document.createElement('button');
@@ -7372,12 +7603,13 @@ function completeLevelTest(test, scorePct){
   levelModules.forEach(module => completeModuleUnits(module, scorePct));
   STATE.levelTestProgress[test.id].completed = true;
   STATE.levelTestProgress[test.id].bestScore = Math.max(STATE.levelTestProgress[test.id].bestScore || 0, scorePct);
-  if (!alreadyCompleted) addXP(150);
-  showToast(`Nível ${test.level} concluído! 🎓`);
+  showToast(`Nível ${test.level} concluído! 🎓`); // Fase 6: pulo não dá XP
+
   saveState();
 }
 
 function openLevelTest(testId){
+  if (!trailSkipAllowed()){ showTrailSkipLocked(); return; }
   const test = LEVEL_TESTS.find(t => t.id === testId);
   STEP_STATE.onChallengesScreen = false;
   STEP_STATE.onCheckpoint = null;
@@ -7437,14 +7669,18 @@ function renderLevelTestQuizStep(){
   contentEl.innerHTML = `
     <div class="conj-progress">Pergunta ${LEVEL_TEST_STATE.index + 1} de ${total}</div>
     <div class="gram-exercise">
-      <div class="gram-exercise-prompt">${ex.prompt}</div>
+      <div class="gram-exercise-prompt">${ex.prompt}${ex.kind === 'listen' ? ' ' + audioBtnHTML(ex.audioText) : ''}</div>
       ${ex.hint ? `<div class="gram-exercise-hint">${ex.hint}</div>` : ''}
-      <input type="text" id="leveltest-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a resposta">
+      <input type="text" id="leveltest-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${ex.kind === 'listen' ? 'Escreva o que ouviu' : 'Digite a resposta'}">
       <div class="expected" id="leveltest-expected"></div>
     </div>
     <button class="btn btn-primary btn-block" id="leveltest-verify-btn">Verificar</button>
   `;
 
+  if (ex.kind === 'listen'){
+    wireAudioButtons(contentEl);
+    speakFrench(ex.audioText, contentEl.querySelector('.audio-btn'), true);
+  }
   const inputEl = document.getElementById('leveltest-input');
   inputEl.focus();
   inputEl.addEventListener('keydown', e => {
@@ -7458,17 +7694,11 @@ function renderLevelTestQuizStep(){
     const expectedEl = document.getElementById('leveltest-expected');
     inputEl.disabled = true;
 
-    if (given.trim() === expected.trim()){
-      wrapEl.classList.add('ok');
-      LEVEL_TEST_STATE.score += 1;
-    } else if (normalizeLoose(given) === normalizeLoose(expected)){
-      wrapEl.classList.add('almost');
-      expectedEl.textContent = `Quase! → ${expected}`;
-      LEVEL_TEST_STATE.score += 0.5;
-    } else {
-      wrapEl.classList.add('wrong');
-      expectedEl.textContent = `→ ${expected}`;
-    }
+    const res = scoreCheckpointAnswer(given, expected, ex.kind);
+    LEVEL_TEST_STATE.score += res.score;
+    wrapEl.classList.add(res.status);
+    if (res.status === 'almost') expectedEl.textContent = `Quase! → ${expected}`;
+    else if (res.status === 'wrong') expectedEl.textContent = `→ ${expected}`;
     // "almost" (grafia quase certa, sem acento etc.) já dá 0.5 ponto -- toca
     // o mesmo som de acerto do "ok", só "wrong" de verdade toca o de erro.
     playFeedbackSound(!wrapEl.classList.contains('wrong'));

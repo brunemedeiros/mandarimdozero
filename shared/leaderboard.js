@@ -227,7 +227,7 @@ async function renderLeaderboardView(){
     const initials = avatarInitials(name);
     const color = avatarColor(r.user_id);
     const avatarHTML = r.profile?.avatar_url
-      ? `<img class="leaderboard-avatar" src="${r.profile.avatar_url}" alt="Foto de perfil">`
+      ? `<img class="leaderboard-avatar" src="${escapeAttr(r.profile.avatar_url)}" alt="Foto de perfil">`
       : `<div class="leaderboard-avatar" style="background:${color};">${initials}</div>`;
     const featured = resolveFeaturedBadge(r.profile?.featured_badge_id, catalog);
     const badgeHTML = featured

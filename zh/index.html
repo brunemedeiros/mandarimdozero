@@ -757,6 +757,91 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   cursor:pointer; transition: transform .15s ease;
 }
 .unit-block.expanded .ub-chevron{ transform: rotate(180deg); }
+
+/* ---------- Fase 2 da trilha: estados (atual/disponível/pulada), selos e "Continuar" ---------- */
+.unit-block.current{ border-color: var(--seal-red); }
+.unit-block.skipped{ border-style:dashed; border-color: var(--jade); }
+.unit-block.skipped .ub-header{ background: rgba(58,115,89,0.06); }
+.unit-block.skipped .ub-icon{ background: rgba(58,115,89,0.10); }
+.ub-badge-skipped{ font-size:11px; font-weight:700; color: var(--ink-soft); white-space:nowrap; }
+.ub-type-chip{
+  font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:.04em;
+  padding:1px 7px; border-radius:999px; border:1px solid var(--paper-line); color: var(--ink-soft); flex-shrink:0;
+}
+.ub-lesson-row.skipped .ub-lesson-title{ color: var(--ink-soft); }
+.ub-lesson-dot.skipped{ border:1.5px dashed var(--jade); color: var(--ink-soft); }
+.trail-continue{
+  grid-column: 1 / -1; display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  padding:14px 16px; background: var(--paper); border:1px solid var(--seal-red);
+  border-radius: var(--radius); box-shadow: var(--shadow-card); margin-bottom:6px;
+}
+.trail-continue.complete{ border-color: var(--jade); }
+.trail-continue .tc-info{ flex:1; min-width:180px; }
+.trail-continue .tc-eyebrow{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); }
+.trail-continue .tc-title{ font-weight:800; font-size:15px; line-height:1.3; margin-top:2px; }
+.trail-continue .tc-sub{ font-size:12px; color: var(--ink-soft); margin-top:2px; }
+.trail-continue .tc-cta{ min-height:44px; padding-left:22px; padding-right:22px; }
+@media (min-width: 900px){
+  .trail-continue.tc-sticky{ position: sticky; top: 8px; z-index: 5; }
+}
+/* ---------- Fase 7 da trilha: alternador Trilha/Mapa e modo Mapa ---------- */
+.trail-view-toggle{
+  grid-column: 1 / -1; display:inline-flex; gap:0; padding:3px; border-radius:999px;
+  background: var(--paper-warm); border:1px solid var(--paper-line); width:max-content; margin-bottom:10px;
+}
+.tvt-btn{
+  min-height:44px; min-width:84px; padding:0 18px; border:none; border-radius:999px; background:transparent;
+  font-family: var(--font-body); font-weight:700; font-size:13px; color: var(--ink-soft); cursor:pointer;
+}
+.tvt-btn.active{ background: var(--paper); color: var(--ink); box-shadow: var(--shadow-card); }
+.trail-map{ display:flex; gap:18px; align-items:flex-start; }
+.trail-map-body{ flex:1; min-width:0; }
+.trail-map-section{ margin-bottom:22px; }
+.tm-section-title{ font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); margin:0 0 10px; }
+.tm-nodes{ display:grid; grid-template-columns:repeat(auto-fill, minmax(148px, 1fr)); gap:14px; }
+.tm-node{
+  position:relative; min-height:128px; min-width:0; padding:12px 12px 10px; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:8px; text-align:left;
+  background: var(--paper); border:1.5px solid var(--paper-line); border-radius:18px; cursor:pointer;
+  font-family: var(--font-body); color: var(--ink);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.tm-node:hover{ transform: translateY(-2px); box-shadow: var(--shadow-lift, 0 6px 16px rgba(0,0,0,.08)); }
+.tm-node:active{ transform: scale(.98); }
+.tm-icon{ display:grid; place-items:center; width:48px; height:48px; border-radius:14px; background: var(--paper-warm, var(--paper-line)); font-size:28px; line-height:1; }
+.tm-label{ font-size:14px; font-weight:700; line-height:1.25; text-align:left; overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; max-width:100%; }
+.tm-note{ margin-top:auto; font-size:11.5px; font-weight:600; color: var(--ink-soft); }
+.tm-node.done .tm-note{ color: var(--jade); }
+.tm-node.current .tm-note{ color: var(--ink); }
+@media (prefers-reduced-motion: reduce){ .tm-node{ transition:none; } .tm-node:hover{ transform:none; } }
+.tm-node.done{ background: rgba(58,115,89,0.14); border-color: var(--jade); }
+.tm-node.skipped{ background: rgba(58,115,89,0.06); border-style:dashed; border-color: var(--jade); }
+.tm-node.current{ border-color: var(--seal-red); border-width:2.5px; box-shadow: 0 0 0 3px rgba(128,128,128,0.15); }
+.tm-node.locked{ opacity:.5; }
+.tm-node.tm-review, .tm-node.tm-checkpoint{ border-style:dashed; border-color: var(--imperial-gold); }
+.tm-node.selected{ outline:3px solid var(--seal-red-dark); outline-offset:2px; }
+.tm-node:focus-visible, .tvt-btn:focus-visible{ outline:3px solid var(--seal-red-dark); outline-offset:2px; }
+.tm-panel{
+  width:300px; flex-shrink:0; position:sticky; top:8px; padding:18px 16px 16px; background: var(--paper);
+  border:1px solid var(--paper-line); border-radius: var(--radius); box-shadow: var(--shadow-lift);
+}
+.tm-panel[hidden], .tm-backdrop[hidden]{ display:none; }
+.tm-close{ position:absolute; top:6px; right:6px; width:44px; height:44px; border:none; background:transparent; font-size:18px; color: var(--ink-soft); cursor:pointer; }
+.tm-eyebrow{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); padding-right:40px; }
+.tm-title{ font-size:17px; margin:4px 0 6px; padding-right:40px; line-height:1.3; }
+.tm-status{ display:inline-block; font-size:11.5px; font-weight:800; padding:2px 9px; border-radius:999px; border:1px solid var(--paper-line); color: var(--ink); margin-bottom:8px; }
+.tm-goal, .tm-line{ font-size:13px; color: var(--ink-soft); margin:6px 0; line-height:1.4; }
+.tm-actions{ display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+.tm-actions .btn{ min-height:44px; }
+@media (max-width: 899px){
+  .trail-map{ display:block; }
+  .tm-nodes{ grid-template-columns:repeat(2, 1fr); gap:12px; }
+  .tm-node{ min-height:132px; }
+  .tm-panel{
+    position:fixed; left:0; right:0; top:auto; bottom:0; width:auto; z-index:320; max-height:70vh; overflow-y:auto;
+    border-radius:16px 16px 0 0; padding:18px 16px calc(16px + env(safe-area-inset-bottom));
+  }
+  .tm-backdrop{ position:fixed; inset:0; z-index:310; background: rgba(33,23,20,.45); }
+}
 .ub-lessons{ border-top:1px solid var(--paper-line); }
 .ub-lesson-row{ display:flex; align-items:center; gap:10px; padding:10px 14px 10px 18px; }
 .ub-lesson-row + .ub-lesson-row{ border-top:1px solid var(--paper-line); }
@@ -2781,6 +2866,18 @@ body.hide-pinyin .prompt-pinyin{
   .mais-extra-tab{ display:none; }
 }
 
+/* ---------- Fase 3 (mobile): alvos de toque de 44px e "Prática" promovida ---------- */
+@media (max-width: 899px){
+  /* Área de toque ampliada sem mexer no visual: o círculo continua com o
+     tamanho original, o ::after estende a região clicável até 44px. */
+  .ub-chevron{ position:relative; }
+  .ub-chevron::after{ content:''; position:absolute; inset:-9px; }
+  .lang-switcher .lang-switcher-btn{ width:44px; height:44px; } /* tem overflow:hidden: ::after seria cortado */
+  .level-toggle-btn, .dcs-caption-btn{ min-height:44px; }
+  /* Item promovido para a barra inferior sai do "Mais" (não duplica). */
+  .mais-promoted-tab{ display:none; }
+}
+
 /* ---------- Seletor de idioma (topbar) ---------- */
 .lang-switcher{ position:relative; display:inline-flex; flex-shrink:0; }
 .lang-switcher-btn{
@@ -3038,6 +3135,10 @@ body.hide-pinyin .prompt-pinyin{
     <button class="tab-btn" data-tab="review">
       <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><rect x="3" y="7" width="14" height="10" rx="2.5" fill="#A78BFA" transform="rotate(-8 10 12)"/><rect x="7" y="7" width="14" height="10" rx="2.5" fill="#7C3AED"/></svg>
       <span>Revisão</span>
+    </button>
+    <button class="tab-btn" data-tab="hanzi">
+      <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#FCA5A5"/><circle cx="12" cy="12" r="5.5" fill="#EF4444"/><circle cx="12" cy="12" r="2" fill="#FFFFFF"/></svg>
+      <span>汉字</span>
     </button>
     <button class="tab-btn" data-tab="profile">
       <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="#FBBF24"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6" fill="#7C3AED"/></svg>
@@ -3489,7 +3590,7 @@ body.hide-pinyin .prompt-pinyin{
        os outros 3 não têm aba fixa própria na barra inferior, então
        continuam só alcançáveis via "Mais" lá). -->
   <button class="user-dropdown-item mais-extra-tab" id="user-profile-btn">👤 Meu perfil</button>
-  <button class="user-dropdown-item mais-extra-tab" id="mais-hanzi-btn" data-tab="hanzi">汉字</button>
+  <button class="user-dropdown-item mais-extra-tab mais-promoted-tab" id="mais-hanzi-btn" data-tab="hanzi">汉字</button>
   <button class="user-dropdown-item mais-extra-tab" id="leaderboard-btn">🏆 Ranking</button>
   <button class="user-dropdown-item" id="support-materials-btn">📚 Material de apoio</button>
   <button class="user-dropdown-item mais-extra-tab" id="user-settings-btn">⚙️ Configurações</button>
@@ -3954,6 +4055,8 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../shared/admin-premium.js"></script>
 <script src="../shared/flashcard-model.js"></script>
 <script src="../shared/study-trail-model.js"></script>
+<script src="../shared/trail-state-model.js"></script>
+<script src="../shared/trail-map.js"></script>
 <script src="../shared/analytics-metrics.js"></script>
 <script src="../shared/deck-engine.js"></script>
 <script src="../shared/flashcard-editor-state.js"></script>
