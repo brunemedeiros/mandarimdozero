@@ -35,3 +35,8 @@ Para mudar um texto: edite `lote-expressoes-content.json`, rode
 ### Módulos 2 a 6 (A1)
 
 Mesmo formato do Módulo 1: `modulo-a1-mN-content.json` -> `python3 fr/scripts/challenges_import/build_modulo.py fr/scripts/challenges_import/modulo-a1-mN-content.json` gera `lote-a1-mN.json` + `lote-a1-mN.md` (resumo legível). Áudio de todos de uma vez: Actions > Áudio TTS > modo `desafios-a1-todos`.
+
+### Complete a frase (gramática) -- type `cloze_grammar`
+
+- Fonte: `modulo-a1-m6-cloze.json` (passé composé: auxiliar être/avoir e particípio). Montar: `python3 fr/scripts/challenges_import/build_cloze.py` -> `lote-a1-m6-cloze.json` (importável) + `lote-a1-m6-cloze.md` (revisão). Valida 2 a 4 opções por lacuna `___`, resposta entre as opções, explicação e tradução pt-BR obrigatórias, e avisa palavras fora do vocabulário visto ATÉ o módulo (cumulativo no nível). Sem áudio.
+- **Antes de importar**: aplicar `fr/scripts/supabase_migrations/007_allow_cloze_grammar_type.sql` (amplia o CHECK de `type` da tabela `challenges`; tem DROP de constraint, então vai pelo SQL Editor, Staging e depois produção). Sem ela o INSERT falha.

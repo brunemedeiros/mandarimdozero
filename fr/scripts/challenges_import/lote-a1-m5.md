@@ -10,7 +10,7 @@
 | A1-16 | Son pull est rouge. | Son ______ est ______. | O suéter dele é vermelho. / O suéter dela é vermelho. / A blusa dele é vermelha. |
 | A1-17 | La cuisine est à côté du salon. | La ______ est à côté du ______. | A cozinha fica ao lado da sala. / A cozinha é ao lado da sala. / A cozinha está ao lado da sala de estar. |
 | A1-17 | Il y a une fenêtre dans la chambre. | Il y a une ______ dans la ______. | Tem uma janela no quarto. / Há uma janela no quarto. / Existe uma janela no quarto. |
-| A1-18 | La lampe est sur la table. | La ______ est sur la ______. | A luminária está em cima da mesa. / O abajur está em cima da mesa. / A lâmpada está em cima da mesa. |
+| A1-18 | La lampe est sur la table. | La ______ est sur la ______. | A luminária está em cima da mesa. / O abajur está em cima da mesa. / A lâmpada de mesa está em cima da mesa. |
 | A1-18 | Le sac est sous la chaise. | Le sac est ______ la ______. | A bolsa está embaixo da cadeira. / A mochila está embaixo da cadeira. / A bolsa está debaixo da cadeira. |
 
 ## Acentuação
