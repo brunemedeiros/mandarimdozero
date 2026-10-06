@@ -189,11 +189,24 @@ async function generateTTS(input: {
   return { ok: true, audioBytes: decodeBase64ToBytes(data.audioContent), mimeType: 'audio/mpeg' };
 }
 
+// CORS: o app chama esta função do navegador (outra origem). Sem responder ao
+// preflight OPTIONS e sem os cabeçalhos abaixo, o navegador bloqueia a chamada
+// antes de ela chegar aqui e o app só mostra "Não foi possível gerar o áudio agora."
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+const JSON_HEADERS = { ...CORS_HEADERS, 'Content-Type': 'application/json' };
+
 Deno.serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: CORS_HEADERS });
+  }
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ ok: false, error: 'method_not_allowed' }), {
       status: 405,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
 
@@ -201,7 +214,7 @@ Deno.serve(async (req: Request) => {
   if (!authHeader) {
     return new Response(JSON.stringify({ ok: false, error: 'missing_authorization' }), {
       status: 401,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
 
@@ -219,39 +232,39 @@ Deno.serve(async (req: Request) => {
   } catch {
     return new Response(JSON.stringify({ ok: false, error: 'invalid_json' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
 
   if (payload.table !== 'teacher_flashcards' && payload.table !== 'own_flashcards') {
     return new Response(JSON.stringify({ ok: false, error: 'invalid_table' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
   if (!payload.rowId || !payload.fieldId) {
     return new Response(JSON.stringify({ ok: false, error: 'missing_row_or_field' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
   const cleanText = (payload.text || '').trim();
   if (!cleanText) {
     return new Response(JSON.stringify({ ok: false, error: 'missing_text' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
   if (cleanText.length > TTS_TEXT_MAX_LENGTH) {
     return new Response(JSON.stringify({ ok: false, error: 'text_too_long' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
   if (!payload.language) {
     return new Response(JSON.stringify({ ok: false, error: 'missing_language' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
 
@@ -264,7 +277,7 @@ Deno.serve(async (req: Request) => {
   if (userError || !userData?.user) {
     return new Response(JSON.stringify({ ok: false, error: 'invalid_session' }), {
       status: 401,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
   const userId = userData.user.id;
@@ -282,13 +295,13 @@ Deno.serve(async (req: Request) => {
     console.error('tts-generate: falha ao checar autorização', rowError);
     return new Response(JSON.stringify({ ok: false, error: 'authorization_check_failed' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
   if (!row) {
     return new Response(JSON.stringify({ ok: false, error: 'not_authorized' }), {
       status: 403,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
 
@@ -309,7 +322,7 @@ Deno.serve(async (req: Request) => {
   } else if ((recentCount ?? 0) >= TTS_RATE_LIMIT) {
     return new Response(JSON.stringify({ ok: false, error: 'rate_limited' }), {
       status: 429,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
 
@@ -327,14 +340,14 @@ Deno.serve(async (req: Request) => {
       console.error('tts-generate: falha ao checar cota mensal', monthError);
       return new Response(JSON.stringify({ ok: false, error: 'quota_check_failed' }), {
         status: 503,
-        headers: { 'Content-Type': 'application/json' },
+        headers: JSON_HEADERS,
       });
     }
     const quota = decideMonthlyQuota({ count: monthCount ?? 0, limit: monthlyLimit, isAdmin });
     if (!quota.allowed) {
       return new Response(JSON.stringify({ ok: false, error: quota.error }), {
         status: 429,
-        headers: { 'Content-Type': 'application/json' },
+        headers: JSON_HEADERS,
       });
     }
   }
@@ -348,7 +361,7 @@ Deno.serve(async (req: Request) => {
     const clientSide = generated.error === 'unsupported_language' || generated.error === 'invalid_voice';
     return new Response(JSON.stringify({ ok: false, error: generated.error }), {
       status: clientSide ? 400 : 502,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
 
@@ -363,7 +376,7 @@ Deno.serve(async (req: Request) => {
     console.error('tts-generate: falha no upload', uploadError);
     return new Response(JSON.stringify({ ok: false, error: 'upload_failed' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
   const { data: pub } = supabase.storage.from('flashcard-media').getPublicUrl(path);
@@ -382,6 +395,6 @@ Deno.serve(async (req: Request) => {
       generationKey,
       generatedAt: new Date().toISOString(),
     }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } },
+    { status: 200, headers: JSON_HEADERS },
   );
 });

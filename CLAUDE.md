@@ -17293,6 +17293,8 @@ P7: cópia de Public Deck duplica a mídia no Storage do copiador (manifest → 
 | 067 (`067_public_deck_copy_linear_plan.sql`, commit `69cad4c`) | `20261003000046` (`public_deck_copy_linear_plan`) | 2026-10-03 |
 | 068 (`068_public_deck_copy_media_linear.sql`, commit `c97222e`) | `20261003015924` (`public_deck_copy_media_linear`) | 2026-10-03 |
 | 069 (`069_public_deck_duplicates_changed_not_retryable.sql`, commit `fb5c159`) | `20261003124403` (`public_deck_duplicates_changed_not_retryable`) | 2026-10-03 |
+| 070 (`070_teacher_student_overview.sql`) | `20261005121926` (`teacher_student_overview`) | 2026-10-05 |
+| 071 (`071_public_deck_hardening.sql`) | `20261005202012` (`public_deck_hardening`) | 2026-10-05 |
 
 ## Checkpoint -- etapa de segurança (grants + proteção de plan/role) validada no Staging (2026-10-02)
 
@@ -17535,3 +17537,14 @@ Decisão da autora: TTS explícito por Field usa o **Google Cloud TTS com a chav
 - **Cartão antigo abre direto no editor novo, em qualquer plano** (`shared/my-flashcards.js` e `shared/admin-flashcards.js`): ao clicar ✏️ num cartão legado, monta o rascunho nativo em memória (`nativeNoteEditorStateFromLegacyRow`, mesmo caminho do antigo botão "Usar o novo editor"). Nada é gravado até "Salvar edição"; Cancelar descarta. O formulário antigo só aparece se o conteúdo não puder ser convertido com segurança (preflight), com o motivo. A edição nativa em "Meus Cartões" agora respeita o plano: grátis = só Normal (um tipo Premium já salvo continua listado) e áudio só por arquivo/link.
 - Teste: `tests/plano-admin/test_playwright.js` (FR+ZH, 26). Regressão verde: fase-f/g/h/i, k1, k6, painel-alunos, public-deck (152), desafios-modulo.
 - **Premium não tem teto de cartões próprios** (2026-10-05): o limite de 20 CardInstances é do plano GRÁTIS (arquitetura total, seção 17). `hasUnlimitedOwnCards()` (`shared/roles.js`) = vínculo ativo com professora OU plano efetivo Premium; usada por Meus Cartões (criação manual e import de arquivo/link), import do Anki e cópia do perfil público. Selo: "⭐ Premium — cartões ilimitados" (antes mostrava "Plano grátis — N/20" junto do selo Premium). Teste E da Fase F atualizado.
+
+## Pendências fechadas em 2026-10-05 (pedido "faça o que está faltando")
+- **071 `public_deck_hardening`** aplicada via `apply_migration` no Staging (`20261005202012`) e na produção (`20261005202107`), só `create or replace`: `public_note_native` tira `storagePath`/`generationKey` também de `image` (antes só de `audio`; assinaturas de duplicata não mudam, usam só o texto) e `flashcard_media_path` só aceita host `https://*.supabase.co` (antes qualquer host). Produção não tinha nenhuma URL de mídia gravada. Verificado nos dois projetos; decks/own_flashcards inalterados.
+- **H/J/K** testados localmente (`tests/fase-public-deck/test_duplicates_hjk.sql`, 9/9) e incluídos no `run.sh`, junto com `test_071.sql` (9/9). Suíte completa verde (87, 48, 20, 72, 7, D2) e paridade Legacy 17/17.
+- `ANSWER_HISTORY_START_LABEL` (05/10/2026) conferido: o painel foi publicado hoje, não precisa ajuste.
+- **Continuam com a autora**: (1) primeiro áudio TTS real pelo app (`tts_generation_log` ainda com 0 linhas; precisa de login); (2) P8.2b, que exige uma 2ª conta Premium.
+
+## TTS por Field -- correção do erro "Não foi possível gerar o áudio agora" (2026-10-06)
+- Causa: `tts-generate` não respondia ao preflight CORS (OPTIONS) nem mandava `Access-Control-Allow-*`; o navegador bloqueava a chamada antes de chegar à função (nenhum log de tts-generate). Corrigido no `index.ts` (OPTIONS + cabeçalhos CORS em toda resposta) e publicado em produção (versão 4, `verify_jwt:true`; a cópia publicada tem a mesma lógica, comentários encurtados e helper `json()`). Preflight conferido ao vivo (200 com os cabeçalhos).
+- Cliente (`requestFieldAudioTTS`/`requestOwnFieldAudioTTS`): em resposta não-2xx o supabase-js deixa o corpo em `error.context` (Response); agora o código lê esse corpo para mostrar o motivo real (cota, provedor etc.). Só vale no site depois do deploy desta branch.
+- Primeiro áudio TTS real gerado pelo app confirmado pela autora em 2026-10-06 (depois da correção do CORS, função versão 4). A pendência "primeiro teste real" está fechada.
