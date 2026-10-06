@@ -293,6 +293,9 @@ body{
   color: var(--ink);
 }
 .pill.streak{ background: linear-gradient(120deg, #FFF3D6, var(--paper-warm)); color:#8A5A00; }
+/* Modo escuro: o degradê creme fixo virava um disco claro com texto apagado; usa o mesmo estilo dos outros pills (par fundo+texto revisado junto). */
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .pill.streak{ background: linear-gradient(120deg, rgba(227,178,60,0.16), var(--paper-warm)); color: var(--gold-bright); } }
+:root[data-theme="dark"] .pill.streak{ background: linear-gradient(120deg, rgba(227,178,60,0.16), var(--paper-warm)); color: var(--gold-bright); }
 .pill.xp{ background: linear-gradient(120deg, rgba(192,35,31,0.08), var(--paper-warm)); color: var(--seal-red-dark); }
 a.pill{ text-decoration:none; cursor:pointer; }
 /* Número dos pills de XP/streak (topbar + card "Status" da sidebar) --
@@ -1522,7 +1525,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
   padding: 13px 20px; cursor:pointer; transition: transform .1s ease, filter .15s ease; display:inline-flex; align-items:center; justify-content:center; gap:8px;
 }
 .btn:active{ transform: scale(.97); }
-.btn-primary{ background: linear-gradient(135deg, var(--seal-red), var(--seal-red-dark)); color: white; box-shadow: 0 4px 14px rgba(192,35,31,0.3); }
+.btn-primary{ background: linear-gradient(135deg, var(--seal-red), var(--seal-red-dark)); color: var(--on-seal-red); box-shadow: 0 4px 14px rgba(192,35,31,0.3); }
 .btn-primary:hover{ filter:brightness(1.06); }
 .btn-secondary{ background: var(--paper-warm); color: var(--ink); border:1px solid var(--paper-line); }
 .btn-secondary:hover{ background: var(--paper-line); }
@@ -2629,6 +2632,9 @@ footer.app-footer img{ height:40px; opacity:.85; }
    toast (auditoria de UX/UI, 2026-09, P3). */
 #toast-layer{ position:fixed; top:18px; left:50%; transform:translateX(-50%); z-index:var(--z-toast); display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
 .toast{ background: var(--ink); color: var(--gold-bright); font-weight:800; font-size:13px; padding:9px 16px; border-radius:999px; box-shadow: var(--shadow-lift); animation: toastIn .25s ease, toastOut .3s ease 1.7s forwards; }
+/* Modo escuro: --ink fica claro e --gold-bright também (ilegível); troca para fundo escuro com texto claro. */
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .toast{ background: var(--paper-warm); color: var(--ink); box-shadow: var(--shadow-lift), inset 0 0 0 1px var(--paper-line); } }
+:root[data-theme="dark"] .toast{ background: var(--paper-warm); color: var(--ink); box-shadow: var(--shadow-lift), inset 0 0 0 1px var(--paper-line); }
 @keyframes toastIn{ from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} }
 @keyframes toastOut{ to{opacity:0; transform:translateY(-8px);} }
 
@@ -2705,6 +2711,15 @@ footer.app-footer img{ height:40px; opacity:.85; }
   .stats-pills{ gap:6px; }
   .pill{ padding:5px 8px; font-size:12px; }
   .topbar{ padding-left:16px; padding-right:16px; }
+}
+
+/* Celular estreito (390px): sem isto a bandeira do idioma ficava cortada na borda direita. Reduz respiros do cabeçalho; os alvos de toque seguem com 44px de altura. */
+@media (max-width: 420px){
+  .topbar{ padding-left:12px; padding-right:12px; }
+  .brand{ gap:8px; }
+  .stats-pills{ gap:4px; }
+  .pill{ padding:5px 7px; }
+  .stats-pills-fade{ display:none; } /* tudo cabe agora; o degradê cobria a bandeira */
 }
 
 /* ---------- Login screen ---------- */
