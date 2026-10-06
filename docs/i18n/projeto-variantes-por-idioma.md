@@ -23,6 +23,26 @@ Isso é requisito de processo: ver seção 6.
    mesma palavra entre idiomas" da primeira proposta.)
 3. A Fase 0 (auditoria, sem mudar comportamento) foi autorizada.
 4. Outros slots de variante: deixar para depois; o mecanismo deve ser genérico (por categoria), não só país/hanzi.
+5. **(2026-10-06, 2ª rodada) Curso = idioma estudado × idioma do site. Trocar o idioma do site troca o curso**
+   (modelo Duolingo: histórico separado por curso, sem "compartilhar" entre idiomas do site). Isso **substitui
+   a Opção 2** (variante dormente na mesma conta de progresso) como direção: a separação passa a vir do curso, e
+   a gaveta deixa de ser necessária quando os cursos existirem. A Fase 1 do plano (seção 8) fica **suspensa até
+   uma auditoria nova** de "progresso por curso" (`progress.data` hoje só é separado por idioma estudado).
+   Ainda em aberto: o seletor (ver seção 9), e se streak/XP são por curso ou por conta.
+6. **Placeholders de perfil** (mecanismo à parte, independe do item 5): `{nome}`/`{primeiro_nome}` e
+   `{nacionalidade}` preenchidos a partir do perfil, para frases como "Je m'appelle {nome}" (hoje fixo "Brune") e
+   "Je suis {nacionalidade}". Convidado: nome vazio ou "Convidado". Falta criar "País de Origem" no perfil.
+   Preenchimento inicial feito pela dona do projeto: todos os alunos vinculados = Brasil, exceto Barae e Evan =
+   EUA; os demais ela informa quando listados. Valor padrão para quem não preencher: a definir (sugestão: Brasil
+   para o site em português; neutro em outros idiomas).
+
+## 9. Seletor de idioma/curso (a decidir)
+
+- (1) Seletor de idioma do site que troca interface e curso juntos.
+- (2) Seletor de curso "Meus cursos / My courses" (bandeira no topo, lista de cursos, "Adicionar curso"), com a
+  lista de cursos oferecida dependendo de "Eu falo X" (idioma do site), estilo Duolingo.
+- Recomendação: (2) como controle principal; (1) só no primeiro acesso/login ("Eu falo…") e nas configurações.
+  Só oferecer um curso (idioma estudado × idioma do site) quando o conteúdo existir traduzido.
 
 ## 3. Diferença real entre as opções (explicação simples)
 
