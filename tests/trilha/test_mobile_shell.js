@@ -1,5 +1,5 @@
 // Fase 3 da trilha (06/10/2026) -- shell mobile: barra inferior com 5 itens
-// (Estudo|Revisão|Prática|Perfil|Mais), alvos de toque de 44px, Missões
+// (Estudo|Revisão|Desafios|Perfil|Mais), alvos de toque de 44px, Missões
 // recolhidas por padrão no celular, sem overflow horizontal. FR + ZH, claro/escuro.
 const { chromium } = require(require.resolve('playwright', { paths: [process.env.NODE_PATH || '/opt/node22/lib/node_modules'] }));
 const http = require('http'), fs = require('fs'), path = require('path');
@@ -58,7 +58,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
             overflow: document.documentElement.scrollWidth > window.innerWidth, mais };
         });
         L(`${w}px: 5 itens na barra`, r.items.length === 5, r.items.map(i => i.label));
-        L(`${w}px: ordem Estudo|Revisão|Prática|Perfil|Mais`, r.items.map(i => i.label).join('|') === 'Estudo|Revisão|Prática|Perfil|Mais', r.items.map(i => i.label));
+        L(`${w}px: ordem Estudo|Revisão|Desafios|Perfil|Mais`, r.items.map(i => i.label).join('|') === (lang === 'zh' ? 'Estudo|Revisão|汉字|Perfil|Mais' : 'Estudo|Revisão|Desafios|Perfil|Mais'), r.items.map(i => i.label));
         L(`${w}px: cada item >= 44px de alto e >= 60 de largura`, r.items.every(i => i.h >= 44 && i.w >= 60), r.items);
         L(`${w}px: chevron tem área de toque ampliada`, lang === 'zh' || r.chevHit, r);
         L(`${w}px: seletor de idioma >= 44px`, r.langW >= 43.9 && r.langH >= 43.9, r);
@@ -67,10 +67,10 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
         L(`${w}px: Missões recolhidas por padrão`, r.stripCollapsed === true, r.stripCollapsed);
         L(`${w}px: item promovido some do Mais`, r.mais.length === 1 && r.mais.every(d => d === 'none'), r.mais);
         L(`${w}px: sem overflow horizontal`, !r.overflow);
-        // Prática navega e destaca
+        // Desafios navega e destaca
         const pr = await page.evaluate(() => { const b = document.querySelector('#app-bottom-nav .tab-btn:nth-child(3)'); b.click();
           return { tab: b.dataset.tab, active: b.classList.contains('active'), view: [...document.querySelectorAll('.view')].find(v => getComputedStyle(v).display !== 'none') && [...document.querySelectorAll('.view')].find(v => getComputedStyle(v).display !== 'none').id }; });
-        L(`${w}px: Prática abre a tela certa`, pr.active && pr.view === 'view-' + pr.tab, pr);
+        L(`${w}px: Desafios abre a tela certa`, pr.active && pr.view === 'view-' + pr.tab, pr);
         if (process.env.SHOTS && w === 390) await page.screenshot({ path: path.join(process.env.SHOTS, `mobile-${lang}-${scheme}.png`) });
         L(`${w}px: sem erro de página`, errors.length === 0, errors);
         await ctx.close();
