@@ -1611,6 +1611,12 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .review-mode-card:disabled:hover{ transform:none; box-shadow:var(--shadow-card); }
 .review-mode-card .icon{ font-size:32px; }
 .review-mode-card .count{ font-size:26px; font-weight:800; color: var(--seal-red-dark); }
+.review-mode-card .speed-split{ display:flex; justify-content:center; gap:10px; }
+.review-mode-card .speed-split .is-new{ color:var(--count-new); }
+.review-mode-card .speed-split .is-learning{ color:var(--count-learning); }
+.review-mode-card .speed-split .is-review{ color:var(--count-review); }
+.review-mode-card .speed-split .is-zero{ color:var(--ink-soft); opacity:.55; }
+.review-mode-card .speed-split-legend{ font-size:10px; color:var(--ink-soft); margin-top:-2px; }
 .review-mode-card .name{ font-size:14px; font-weight:700; color: var(--ink); }
 .review-mode-card .desc{ font-size:11.5px; color: var(--ink-soft); }
 
@@ -3208,7 +3214,7 @@ body.hide-pinyin .prompt-pinyin{
       <div class="deck-table-wrap" id="review-decks-table"></div>
 
       <div class="section-label">Outros modos</div>
-      <p class="review-section-hint">Speed Review usa as revisões pendentes; Palavras difíceis e Combinar funcionam a qualquer hora.</p>
+      <p class="review-section-hint">Speed Review usa a sessão de hoje (palavras novas e revisões); Palavras difíceis e Combinar funcionam a qualquer hora.</p>
       <div class="review-mode-cards review-mode-cards-row" id="review-mode-cards-praticar"></div>
     </div>
 

@@ -5664,6 +5664,12 @@ function renderReviewModeSelect(){
   // dueCount é só um subconjunto capado dele (2ª sessão de grilling: nunca
   // usar o número cortado pra decidir "tem ou não tem revisão").
   const trueCount = trueDueReviewCount(pool);
+  // Speed Review mostra a mesma divisão da tabela de Decks (Novo/Aprendendo/
+  // Revisar) em vez de um número só -- o total inclui as palavras novas do
+  // dia, e um número único parecia contradizer o "Revisar 0" da tabela.
+  const speedSplit = { new: 0, learning: 0, review: 0 };
+  getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay })
+    .forEach(c => { speedSplit[cardStudyBucket(c)]++; });
   // Fase 7 (projeto anterior): Palavras Difíceis NÃO depende de estar due
   // -- "precisa revisar agora" (REVISAR) e "é uma palavra difícil"
   // (PRATICAR) são perguntas diferentes. getStudyQueue(scope:'hard') usa
@@ -5680,7 +5686,12 @@ function renderReviewModeSelect(){
   praticarEl.innerHTML = `
     <button class="review-mode-card" id="mode-card-speed" ${trueCount === 0 ? 'disabled' : ''}>
       <div class="icon">⚡</div>
-      <div class="count">${trueCount}</div>
+      <div class="count speed-split" aria-label="Novo ${speedSplit.new}, Aprendendo ${speedSplit.learning}, Revisar ${speedSplit.review}">
+        <span class="${speedSplit.new ? 'is-new' : 'is-zero'}">${speedSplit.new}</span>
+        <span class="${speedSplit.learning ? 'is-learning' : 'is-zero'}">${speedSplit.learning}</span>
+        <span class="${speedSplit.review ? 'is-review' : 'is-zero'}">${speedSplit.review}</span>
+      </div>
+      <div class="speed-split-legend">novo · aprend. · revisar</div>
       <div class="name">Speed Review</div>
       <div class="desc">Revisão rápida</div>
     </button>

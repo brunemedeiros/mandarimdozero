@@ -209,6 +209,16 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
         widget: document.getElementById('review-today-widget').textContent };
     });
     check(lang + ' Speed Review, Palavras difíceis e Combinar na mesma fileira', modes.ids.join() === 'mode-card-speed,mode-card-hard,mode-card-match' && modes.sameRow, modes);
+    const speed = await page.evaluate(() => {
+      const spans = Array.from(document.querySelectorAll('#mode-card-speed .speed-split span')).map(s => Number(s.textContent));
+      const q = getStudyQueue(eligibleReviewPool(), { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
+      const exp = [0, 0, 0];
+      q.forEach(c => { exp[['new', 'learning', 'review'].indexOf(cardStudyBucket(c))]++; });
+      const sp = document.querySelector('#mode-card-speed .speed-split').getBoundingClientRect();
+      const card = document.getElementById('mode-card-speed').getBoundingClientRect();
+      return { spans, exp, fits: sp.width <= card.width, legend: (document.querySelector('#mode-card-speed .speed-split-legend') || {}).textContent };
+    });
+    check(lang + ' Speed Review mostra Novo/Aprendendo/Revisar da sessão, cabendo no card', speed.spans.join() === speed.exp.join() && speed.fits && /novo/.test(speed.legend || ''), speed);
     check(lang + ' sem bloco Flashcard nem seção Revisar', !modes.flash && !modes.revisar, modes);
     check(lang + ' com revisões pendentes há "Estudar tudo"; sem elas, aviso de em dia', modes.studyAll || /em dia|Ainda não há/.test(modes.widget), modes);
 
