@@ -5742,32 +5742,58 @@ const REVIEW_ORIGIN_LABELS = { all: 'Todas', study: 'Da trilha', teacher: 'Da pr
 // da UI de propósito; REVIEW_FILTER_LABELS continua existindo só porque
 // reviewFilterQueue()/getStudyQueue() ainda usam os 3 valores
 // internamente (o que mudou é que a aluna não escolhe mais entre eles).
+// Filtros de sessão (origem/tag, em "Configurar sessão") valem para "Estudar
+// tudo", mas não para a tabela de Decks. Resumo para avisar quando estão ativos.
+function reviewSessionFilterSummary(){
+  const parts = [];
+  const origin = STATE.studySettings.reviewOriginFilter || 'all';
+  if (origin !== 'all') parts.push(REVIEW_ORIGIN_LABELS[origin] || origin);
+  const tags = activeReviewTagFilter();
+  if (tags.length) parts.push(tags.map(t => '#' + t).join(', '));
+  return parts.join(' · ');
+}
+
 function renderReviewTodayWidget(){
   const wrap = document.getElementById('review-today-widget');
   if (!wrap) return;
   const pool = eligibleReviewPool();
-  const trueCount = trueDueReviewCount(pool);
-  // Sem revisões: aviso curto no lugar do contador (o antigo bloco
-  // "Revisar" saiu -- ver renderReviewModeSelect).
+  // Mesma fila de "Estudar tudo", separada como as colunas da tabela de Decks.
+  const split = { new: 0, learning: 0, review: 0 };
+  getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay })
+    .forEach(c => { split[cardStudyBucket(c)]++; });
+  const trueCount = split.new + split.learning + split.review;
+  const filterSummary = reviewSessionFilterSummary();
+  const filterNote = filterSummary
+    ? `<div class="review-today-filter">Filtro da sessão: ${escapeHTML(filterSummary)} · <button type="button" class="admin-select-link review-today-filter-clear" id="review-today-filter-clear">Limpar filtro</button></div>`
+    : '';
   if (trueCount === 0){
     const title = pool.length === 0 ? 'Ainda não há revisões' : 'Você está em dia! 🍵';
     const desc = pool.length === 0
-      ? 'Complete uma lição no Estudo pra começar a ter palavras pra revisar.'
+      ? (filterSummary ? 'Nenhum cartão com o filtro da sessão.' : 'Complete uma lição no Estudo pra começar a ter palavras pra revisar.')
       : 'Palavras difíceis e Combinar continuam disponíveis logo abaixo.';
     wrap.innerHTML = `
       <div class="review-mode-empty-title">${title}</div>
       <div class="review-mode-empty-desc">${desc}</div>
+      ${filterNote}
     `;
-    return;
+  } else {
+    const num = (n, cls, label) => `<div class="review-today-col"><div class="review-today-count ${n ? cls : 'is-zero'}">${n}</div><div class="review-today-col-label">${label}</div></div>`;
+    // "Estudar tudo" substitui o antigo bloco Flashcard: é a mesma sessão
+    // (todos os Decks juntos); estudar um Deck só é pela tabela de Decks.
+    wrap.innerHTML = `
+      <div class="review-today-label">Para estudar agora</div>
+      <div class="review-today-split" aria-label="Novo ${split.new}, Aprendendo ${split.learning}, Revisar ${split.review}">
+        ${num(split.new, 'is-new', 'Novo')}${num(split.learning, 'is-learning', 'Aprendendo')}${num(split.review, 'is-review', 'Revisar')}
+      </div>
+      ${filterNote}
+      <button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">▶ Estudar tudo</button>
+    `;
+    document.getElementById('review-study-all-btn').addEventListener('click', () => openReviewSession('flashcard'));
   }
-  // "Estudar tudo" substitui o antigo bloco Flashcard: é a mesma sessão
-  // (todos os Decks juntos); estudar um Deck só é pela tabela de Decks.
-  wrap.innerHTML = `
-    <div class="review-today-label">Revisões pendentes</div>
-    <div class="review-today-count">${trueCount}</div>
-    <button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">▶ Estudar tudo</button>
-  `;
-  document.getElementById('review-study-all-btn').addEventListener('click', () => openReviewSession('flashcard'));
+  document.getElementById('review-today-filter-clear')?.addEventListener('click', () => {
+    updateStudySetting({ reviewOriginFilter: 'all', reviewTagFilter: [] });
+    renderReviewModeSelect();
+  });
 }
 
 // Altura do "pote" proporcional à maior das 3 categorias (não à contagem

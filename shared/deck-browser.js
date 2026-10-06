@@ -777,6 +777,8 @@ function deckBrowserNotes(cards){
       back: texts.back,
       tags: first.tags || [],
       archived: first.origin !== 'study' && siblings.every(c => c.flashcardStatus === 'archived'),
+      // Trilha: cartão de lição ainda não estudada (fica fora da Revisão).
+      locked: first.origin === 'study' && typeof isCardLessonCompleted === 'function' && !siblings.some(c => isCardLessonCompleted(c)),
       typeLabel: DECK_BROWSER_CARD_TYPE_LABELS[mode] || DECK_BROWSER_CARD_TYPE_LABELS[first.cardInstance && first.cardInstance.cardTypeId] || 'Normal',
     };
   });
@@ -790,7 +792,6 @@ function deckBrowserNoteState(note){
 }
 
 const DECK_PANEL_ID = 'deck-panel-modal';
-const DECK_PANEL_PAGE = 200;
 const DECK_PANEL_STATES = [
   { id: 'all', label: 'Todos' }, { id: 'Novo', label: 'Novo' },
   { id: 'Aprendendo', label: 'Aprendendo' }, { id: 'Revisão', label: 'Revisão' },
@@ -814,7 +815,7 @@ function openDeckPanel(nodeId){
     deckBrowserShow('detail');
     renderDeckDetail();
   }
-  DECK_BROWSER.panel = { nodeId, scopeId: nodeId, query: '', tags: [], state: 'all', archived: false, selected: new Set(), activeKey: null, mode: 'note', ctx: null };
+  DECK_BROWSER.panel = { nodeId, scopeId: nodeId, query: '', tags: [], state: 'all', archived: false, locked: false, selected: new Set(), activeKey: null, mode: 'note', ctx: null };
   DECK_BROWSER.panelOpen = true;
   deckPanelMount();
   if (typeof routerNavigate === 'function') routerNavigate(deckBrowserRoute('panel', nodeId));
@@ -918,8 +919,9 @@ async function deckPanelReload(){
   renderDeckPanel();
 }
 
-// O Painel mostra TODAS as Notes do escopo (inclusive cartões de lições
-// ainda não estudadas e arquivados), porque é uma tela de conteúdo.
+// O Painel lista as Notes do escopo. Cartões de lições ainda não estudadas
+// ficam escondidos (só aparecem no filtro "Ainda não liberados"); arquivados
+// só no filtro "Arquivados".
 function deckBrowserPanelNotes(){
   const decks = deckBrowserDecks();
   const all = (STATE && STATE.cards) || [];
@@ -933,6 +935,7 @@ function deckBrowserFilterNotes(notes){
   const q = (p.query || '').trim().toLowerCase();
   return notes.filter(n => {
     if (p.archived ? !n.archived : n.archived) return false;
+    if (p.locked ? !n.locked : n.locked) return false;
     if (p.state !== 'all' && deckBrowserNoteState(n) !== p.state) return false;
     if (p.tags.length && !p.tags.some(t => n.tags.includes(t))) return false;
     if (!q) return true;
@@ -974,11 +977,13 @@ function renderDeckPanelSide(){
     tags = Array.from(new Set(reviewFilterVisibleTags(scopeCards).concat(p.tags))).sort();
   }
   const archivedCount = deckBrowserPanelNotes().filter(n => n.archived).length;
+  const lockedCount = deckBrowserPanelNotes().filter(n => n.locked).length;
   const logged = !!deckBrowserUserId();
   body.innerHTML = `
     <div class="deck-panel-side-group"><div class="deck-panel-side-label">Decks</div>${deckItems.join('')}</div>
     <div class="deck-panel-side-group"><div class="deck-panel-side-label">Estado</div>
-      ${DECK_PANEL_STATES.map(s => `<button type="button" class="deck-panel-side-item ${!p.archived && p.state === s.id ? 'is-active' : ''}" data-panel-state="${s.id}">${s.label}</button>`).join('')}
+      ${DECK_PANEL_STATES.map(s => `<button type="button" class="deck-panel-side-item ${!p.archived && !p.locked && p.state === s.id ? 'is-active' : ''}" data-panel-state="${s.id}">${s.label}</button>`).join('')}
+      ${lockedCount ? `<button type="button" class="deck-panel-side-item ${p.locked ? 'is-active' : ''}" data-panel-locked>Ainda não liberados (${lockedCount})</button>` : ''}
       ${archivedCount ? `<button type="button" class="deck-panel-side-item ${p.archived ? 'is-active' : ''}" data-panel-archived>Arquivados (${archivedCount})</button>` : ''}
     </div>
     <div class="deck-panel-side-group"><div class="deck-panel-side-label">Tags</div>
@@ -992,11 +997,15 @@ function renderDeckPanelSide(){
     renderDeckPanelSide(); renderDeckPanelList();
   }));
   body.querySelectorAll('[data-panel-state]').forEach(b => b.addEventListener('click', () => {
-    p.state = b.dataset.panelState; p.archived = false;
+    p.state = b.dataset.panelState; p.archived = false; p.locked = false;
     renderDeckPanelSide(); renderDeckPanelList();
   }));
   body.querySelector('[data-panel-archived]')?.addEventListener('click', () => {
-    p.archived = !p.archived; p.state = 'all';
+    p.archived = !p.archived; p.locked = false; p.state = 'all';
+    renderDeckPanelSide(); renderDeckPanelList();
+  });
+  body.querySelector('[data-panel-locked]')?.addEventListener('click', () => {
+    p.locked = !p.locked; p.archived = false; p.state = 'all';
     renderDeckPanelSide(); renderDeckPanelList();
   });
   body.querySelectorAll('[data-panel-tag]').forEach(b => b.addEventListener('click', () => {
@@ -1020,13 +1029,14 @@ function renderDeckPanelList(){
   const visibleKeys = new Set(notes.map(n => n.key));
   Array.from(p.selected).forEach(k => { if (!visibleKeys.has(k)) p.selected.delete(k); });
   root.querySelector('[data-panel-count]').textContent = notes.length
-    ? `${notes.length} ${notes.length === 1 ? 'conteúdo' : 'conteúdos'}${notes.length > DECK_PANEL_PAGE ? ` (mostrando os primeiros ${DECK_PANEL_PAGE}; use a busca para encontrar os demais)` : ''}.`
+    ? `${notes.length} ${notes.length === 1 ? 'conteúdo' : 'conteúdos'}${p.locked ? ' ainda não liberados (das lições que você ainda não estudou)' : ''}.`
     : '';
   if (!notes.length){
-    const filtered = p.query || p.tags.length || p.state !== 'all' || p.archived;
-    list.innerHTML = `<p class="profile-empty-note">${filtered ? 'Nenhum cartão encontrado com esse filtro.' : 'Este Deck ainda não tem cartões.'}</p>`;
+    const filtered = p.query || p.tags.length || p.state !== 'all' || p.archived || p.locked;
+    const hasLocked = !filtered && deckBrowserPanelNotes().some(n => n.locked);
+    list.innerHTML = `<p class="profile-empty-note">${filtered ? 'Nenhum cartão encontrado com esse filtro.' : hasLocked ? 'Nenhum cartão liberado ainda. Os das lições que você ainda não estudou estão em "Ainda não liberados".' : 'Este Deck ainda não tem cartões.'}</p>`;
   } else {
-    list.innerHTML = notes.slice(0, DECK_PANEL_PAGE).map(n => {
+    list.innerHTML = notes.map(n => {
       const own = n.origin === 'self';
       const active = p.mode === 'note' && p.activeKey === n.key;
       return `<div class="deck-panel-item ${active ? 'is-active' : ''} ${n.archived ? 'is-archived' : ''}" role="option" aria-selected="${active ? 'true' : 'false'}" tabindex="0" data-panel-open-note="${escapeHTML(n.key)}">

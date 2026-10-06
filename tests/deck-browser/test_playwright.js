@@ -502,6 +502,43 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     });
     check(lang + ' idioma padrão: 1º estudado, 2º pt-BR, pergunta estudado, opção pt-BR, sem site = vazio', defaults[0] === defaults[5] && defaults[1] === 'pt-BR' && defaults[2] === defaults[5] && defaults[3] === 'pt-BR' && defaults[4] == null, defaults);
 
+    // ---- Contador do topo = fila de "Estudar tudo", dividido como a tabela; filtro avisado ----
+    await page.evaluate(() => { closeDeckPanel && closeDeckPanel(); switchTab('review'); });
+    const w1 = await page.evaluate(() => {
+      const q = getStudyQueue(eligibleReviewPool(), { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
+      const exp = [0, 0, 0]; q.forEach(c => { exp[['new', 'learning', 'review'].indexOf(cardStudyBucket(c))]++; });
+      const nums = Array.from(document.querySelectorAll('#review-today-widget .review-today-count')).map(n => Number(n.textContent));
+      return { exp, nums, text: document.getElementById('review-today-widget').textContent };
+    });
+    check(lang + ' contador do topo: Novo/Aprendendo/Revisar da sessão, sem filtro avisado', (w1.exp.reduce((a, b) => a + b, 0) === 0 || w1.nums.join() === w1.exp.join()) && !/Filtro da sessão/.test(w1.text), w1);
+    await page.evaluate(() => { updateStudySetting({ reviewOriginFilter: 'self' }); renderReviewModeSelect(); });
+    const w2 = await page.evaluate(() => document.getElementById('review-today-widget').textContent);
+    check(lang + ' contador do topo avisa o filtro da sessão', /Filtro da sessão: Meus cartões/.test(w2), w2);
+    await page.click('#review-today-filter-clear');
+    const w3 = await page.evaluate(() => ({ origin: STATE.studySettings.reviewOriginFilter, text: document.getElementById('review-today-widget').textContent }));
+    check(lang + ' "Limpar filtro" volta para todos', w3.origin === 'all' && !/Filtro da sessão/.test(w3.text), w3);
+
+    // ---- Painel: lições não estudadas escondidas; lista sem corte em 200 ----
+    await page.evaluate(() => openDeckPanel('lang'));
+    await page.waitForSelector('#deck-panel-modal [data-panel-open-note]');
+    const pn = await page.evaluate(() => {
+      const notes = deckBrowserPanelNotes();
+      const rows = document.querySelectorAll('#deck-panel-modal [data-panel-open-note]').length;
+      const shown = deckBrowserFilterNotes(notes).length;
+      const listedLocked = Array.from(document.querySelectorAll('#deck-panel-modal [data-panel-open-note]')).some(r => (notes.find(n => n.key === r.dataset.panelOpenNote) || {}).locked);
+      return { locked: notes.filter(n => n.locked).length, rows, shown, listedLocked, count: document.querySelector('#deck-panel-modal [data-panel-count]').textContent, btn: !!document.querySelector('#deck-panel-modal [data-panel-locked]') };
+    });
+    check(lang + ' Painel: lições não estudadas ficam fora da lista', pn.locked > 0 && !pn.listedLocked && pn.btn, pn);
+    check(lang + ' Painel: lista inteira, sem "mostrando os primeiros"', pn.rows === pn.shown && !/primeiros/.test(pn.count), pn);
+    await page.click('#deck-panel-modal [data-panel-locked]');
+    const pl = await page.evaluate(() => {
+      const notes = deckBrowserPanelNotes();
+      const keys = Array.from(document.querySelectorAll('#deck-panel-modal [data-panel-open-note]')).map(r => r.dataset.panelOpenNote);
+      return { n: keys.length, allLocked: keys.every(k => (notes.find(n => n.key === k) || {}).locked), locked: notes.filter(n => n.locked).length, count: document.querySelector('#deck-panel-modal [data-panel-count]').textContent };
+    });
+    check(lang + ' Painel: "Ainda não liberados" mostra só eles, todos', pl.allLocked && pl.n === pl.locked && /não liberados/.test(pl.count), pl);
+    await page.evaluate(() => closeDeckPanel());
+
     check(lang + ' sem erros de página', errors.length === 0, errors);
     // F5 com o Painel aberto (da tela inicial: depois do F5 a sessão de teste
     // volta a ser convidada, sem os Decks pessoais montados no setup)
