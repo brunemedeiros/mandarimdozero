@@ -4,7 +4,7 @@
 // no aparelho (localStorage), como pediu a professora.
 //
 // model = { sections: [{ title, nodes: [{ key, kind, icon, label, state, aria, current? }] }] }
-//   kind  : 'unit' | 'review' | 'checkpoint'
+//   kind  : 'unit' | 'review' | 'checkpoint' | 'story'
 //   state : 'done' | 'skipped' | 'current' | 'available' | 'locked' | 'empty'
 // describe(key) -> { eyebrow, title, goal, status, lines:[texto], actions:[{label, primary, onClick}] }
 function trailViewPref(storageKey){

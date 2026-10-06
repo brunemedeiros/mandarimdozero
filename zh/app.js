@@ -2361,12 +2361,32 @@ function mapUnitDescribe(u, moduleId){
 }
 
 function renderTrailMapView(container){
-  const nodes = UNITS.map(u => {
+  const nodes = [];
+  UNITS.forEach(u => {
     const st = unitBlockState(u);
-    return { key: 'u:' + u.id, kind: 'unit', icon: UNIT_ICONS[u.id] || '📖', label: u.title, state: st, current: st === 'current',
-      aria: `${u.title}, ${TRAIL_MAP_STATE_LABEL[st]}` };
+    nodes.push({ key: 'u:' + u.id, kind: 'unit', icon: UNIT_ICONS[u.id] || '📖', label: u.title, state: st, current: st === 'current',
+      aria: `${u.title}, ${TRAIL_MAP_STATE_LABEL[st]}` });
+    // Histórias-checkpoint: mesmo marco que a Trilha mostra logo após a unidade.
+    const story = STORIES.find(s => s.afterUnit === u.id);
+    if (story){
+      const unlocked = !!STATE.unitProgress[u.id]?.completed;
+      const done = !!STATE.storyProgress?.[story.id]?.completed;
+      const sst = done ? 'done' : (unlocked ? 'available' : 'locked');
+      nodes.push({ key: 's:' + story.id, kind: 'story', icon: story.icon, label: story.title, state: sst,
+        aria: `História: ${story.title}, ${TRAIL_MAP_STATE_LABEL[sst]}` });
+    }
   });
-  const describe = (key) => mapUnitDescribe(UNITS.find(u => String(u.id) === key.slice(2)), null);
+  const describe = (key) => {
+    if (key.startsWith('s:')){
+      const story = STORIES.find(s => String(s.id) === key.slice(2));
+      const unlocked = !!STATE.unitProgress[story.afterUnit]?.completed;
+      const done = !!STATE.storyProgress?.[story.id]?.completed;
+      return { eyebrow: 'História', title: story.title, status: done ? 'Concluída' : (unlocked ? 'Disponível' : 'Bloqueada'), goal: story.subtitle || '',
+        lines: unlocked ? [] : ['Complete a unidade anterior para liberar esta história.'],
+        actions: unlocked ? [{ label: done ? 'Ler de novo' : 'Ler a história', primary: !done, onClick: () => openStory(story.id) }] : [] };
+    }
+    return mapUnitDescribe(UNITS.find(u => String(u.id) === key.slice(2)), null);
+  };
   renderTrailMap(container, { sections: [{ title: 'Unidades', nodes }] }, describe);
 }
 
