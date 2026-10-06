@@ -19,3 +19,24 @@ ci.apply('pt-BR');
 ok(JSON.stringify(ctx.U)===orig,'voltar a pt-BR restaura TUDO byte a byte (JSON)');
 ci.apply('en');ci.apply('pt-BR');ci.apply('en');ci.apply('pt-BR');
 ok(JSON.stringify(ctx.U)===orig,'ciclos repetidos ok');
+
+// ---- mandarim (zh)
+{
+const win2={CONTENT_OVERLAYS:{}};const c2={window:win2,document:{},console};vm.createContext(c2);
+vm.runInContext(fs.readFileSync(root+'shared/content-i18n.js','utf8'),c2);
+vm.runInContext(fs.readFileSync(root+'zh/content.js','utf8')+';globalThis.U=UNITS;',c2);
+vm.runInContext(fs.readFileSync(root+'zh/stories.js','utf8')+';globalThis.S=STORIES;',c2);
+vm.runInContext(fs.readFileSync(root+'zh/content.en.js','utf8'),c2);
+const o2=JSON.stringify(c2.U),os=JSON.stringify(c2.S);
+const ci2=c2.window.ContentI18n.create({units:c2.U,stories:c2.S,overlayUrl:()=>'x'});
+ci2.apply('en');
+const z=c2.U.find(u=>u.id===2);
+ok(z.vocab[6].c==='美国'&&z.vocab[6].p==='Měiguó'&&z.vocab[6].t==='United States','zh vocab');
+ok(z.phrases[1].c==='我是美国人。'&&z.phrases[1].blocks.map(b=>b.c).join('')==='我是美国人。','zh frase+blocks');
+ok(z.dialogue.lines[3].c==='我是美国人。','zh dialogo');
+const sh=z.concepts.find(c=>c.id==='shi'),dr=z.concepts.find(c=>c.id==='shi-drop-casual');
+ok(sh.blocks[0].examples[0].c==='我是美国人'&&sh.blocks[1].examples[1].p==='wǒ shì Měiguó rén'&&dr.blocks[0].examples[0].c==='我美国人','zh exemplos de conceito');
+ok(c2.S[0].beats[1].lines[1].c==='我是美国人。'&&c2.S[0].beats[1].lines[2].c==='美国！好！','zh historia');
+ci2.apply('pt-BR');
+ok(JSON.stringify(c2.U)===o2&&JSON.stringify(c2.S)===os,'zh voltar a pt-BR restaura tudo');
+}

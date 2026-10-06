@@ -23,7 +23,8 @@
 //          Mapas esparsos por índice. Chaves aceitas: f (fr), c/p (zh), blocks, scenarioEmoji.
 //     } } }
 // Fase 10 (mandarim): também aceita histórias e banco de hanzi:
-//   stories:{ "1": { title, subtitle, beats:[{lines:["t",...], question:{prompt, options:[...]}}] } }
+//   stories:{ "1": { title, subtitle, beats:[{lines:["t",...], question:{prompt, options:[...]}}],
+//              src:{ beats:{"1":{"1":{c,p}}} } } }   (src opcional: fala localizada, como em units[].src)
 //   hanzi:{ "你": { meaning, radicals:["m",...], mnemonic } }   (chave = caractere)
 // O texto do aluno nunca passa por aqui: só o conteúdo do curso.
 (function(){
@@ -196,6 +197,7 @@
     stories.forEach(function(st){
       storySnap[st.id] = { title: st.title, subtitle: st.subtitle, beats: (st.beats || []).map(function(b){
         return { lines: (b.lines || []).map(function(l){ return l.t; }),
+          srcLines: (b.lines || []).map(snapSrc),
           question: b.question ? { prompt: b.question.prompt, options: (b.question.options || []).slice() } : null };
       }) };
     });
@@ -261,7 +263,12 @@
         st.subtitle = pick(o.subtitle, sn.subtitle);
         (st.beats || []).forEach(function(b, bi){
           var ob = (o.beats && o.beats[bi]) || {}, sb = sn.beats[bi];
-          (b.lines || []).forEach(function(l, li){ l.t = pick(ob.lines && ob.lines[li], sb.lines[li]); });
+          (b.lines || []).forEach(function(l, li){
+            l.t = pick(ob.lines && ob.lines[li], sb.lines[li]);
+            // src: fala do idioma estudado localizada (mesma ideia de units[].src)
+            var osb = o.src && o.src.beats && o.src.beats[bi];
+            applySrc(l, sb.srcLines && sb.srcLines[li], osb && osb[li]);
+          });
           if (b.question && sb.question){
             b.question.prompt = pick(ob.question && ob.question.prompt, sb.question.prompt);
             b.question.options = sb.question.options.map(function(op, oi){ return pick(ob.question && ob.question.options && ob.question.options[oi], op); });

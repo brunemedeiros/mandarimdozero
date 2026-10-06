@@ -16,7 +16,7 @@
    "name",
    "to be",
    "person",
-   "Brazil",
+   "United States",
    "China",
    "which",
    "country"
@@ -26,7 +26,7 @@
     "t": "What's your name?"
    },
    {
-    "t": "I'm Brazilian."
+    "t": "I'm American."
    },
    {
     "t": "What country are you from?"
@@ -38,7 +38,7 @@
     "Hello, what's your name?",
     "My name is Brune. And you?",
     "My name is Xiao Li. What country are you from?",
-    "I'm Brazilian."
+    "I'm American."
    ]
   },
   "concepts": {
@@ -47,15 +47,15 @@
      "title": "是 (shì) — the verb \"to be\"",
      "body": "是 (shì) is like the verb \"to be,\" but with an important difference: it only links nouns to each other, never a noun to an adjective. And Chinese verbs are never conjugated — the form of 是 doesn't change in the present, past or future.",
      "examples": [
-      "I'm Brazilian"
+      "I'm American"
      ]
     },
     {
-     "title": "\"Wǒ shì Bāxī rén\" or \"wǒ jiào Brune\"?",
+     "title": "\"Wǒ shì Měiguó rén\" or \"wǒ jiào Brune\"?",
      "body": "<strong>Shì</strong> links you to a category — nationality, profession, identity. <strong>Jiào</strong> (叫) is used only to say your name. Notice that \"my name is\" never uses shì in Chinese — only jiào.",
      "examples": [
       "My name is Brune",
-      "I'm Brazilian"
+      "I'm American"
      ]
     }
    ],
@@ -70,10 +70,10 @@
    ],
    "shi-drop-casual": [
     {
-     "title": "\"Wǒ shì Bāxī rén\" sometimes drops the \"shì\"",
-     "body": "In fast, very casual speech, you may hear <strong>我巴西人 (wǒ Bāxī rén)</strong> without the 是 — the meaning is still clear from context. This is very informal and only works in short sentences like this. In the exercises here, keep writing the standard form with <strong>是</strong>, which always sounds correct.",
+     "title": "\"Wǒ shì Měiguó rén\" sometimes drops the \"shì\"",
+     "body": "In fast, very casual speech, you may hear <strong>我美国人 (wǒ Měiguó rén)</strong> without the 是 — the meaning is still clear from context. This is very informal and only works in short sentences like this. In the exercises here, keep writing the standard form with <strong>是</strong>, which always sounds correct.",
      "examples": [
-      "I'm (a) Brazilian (very casual speech)"
+      "I'm (an) American (very casual speech)"
      ]
     }
    ],
@@ -92,7 +92,65 @@
     "claim": "This question is used to find out someone's nationality.",
     "whyNote": "Wrong — <strong>你叫什么名字？</strong> asks for the NAME (叫 = to be called, 名字 = name), not the nationality. Nationality would be \"你是哪国人？\"."
    }
-  ]
+  ],
+  "src": {
+   "vocab": {
+    "6": {
+     "p": "Měiguó",
+     "c": "美国"
+    }
+   },
+   "phrases": {
+    "1": {
+     "p": "Wǒ shì Měiguó rén.",
+     "c": "我是美国人。",
+     "blocks": [
+      {
+       "p": "Wǒ",
+       "c": "我"
+      },
+      {
+       "p": "shì",
+       "c": "是"
+      },
+      {
+       "p": "Měiguó rén.",
+       "c": "美国人。"
+      }
+     ]
+    }
+   },
+   "lines": {
+    "3": {
+     "p": "Wǒ shì Měiguó rén.",
+     "c": "我是美国人。"
+    }
+   },
+   "concepts": {
+    "shi": {
+     "0": {
+      "0": {
+       "c": "我是美国人",
+       "p": "wǒ shì Měiguó rén"
+      }
+     },
+     "1": {
+      "1": {
+       "c": "我是美国人",
+       "p": "wǒ shì Měiguó rén"
+      }
+     }
+    },
+    "shi-drop-casual": {
+     "0": {
+      "0": {
+       "c": "我美国人",
+       "p": "wǒ Měiguó rén"
+      }
+     }
+    }
+   }
+  }
  },
  "review": [
   {
@@ -122,13 +180,6 @@
    "en": "which",
    "conf": "media",
    "why": "哪 = which/where; 'which' escolhido pelo uso em 哪国人"
-  },
-  {
-   "path": "phrases[1]",
-   "pt": "Eu sou brasileira.",
-   "en": "I'm Brazilian.",
-   "conf": "media",
-   "why": "PT marca gênero feminino; inglês não"
   },
   {
    "path": "phrases[2]",
@@ -192,6 +243,27 @@
    "en": "Wrong — ... Nationality would be...",
    "conf": "media",
    "why": "várias traduções corretas"
+  },
+  {
+   "path": "phrases[1]",
+   "pt": "Eu sou brasileira.",
+   "en": "I'm American.",
+   "conf": "media",
+   "why": "localizado: o site em inglês fala com americano (src.phrases[1] = 我是美国人。)"
+  },
+  {
+   "path": "src.vocab[6] (巴西 -> 美国)",
+   "pt": "Bāxī 巴西 (Brasil)",
+   "en": "Měiguó 美国 (United States)",
+   "conf": "media",
+   "why": "a palavra do país muda para o do aluno americano; o cartão u2-v6 passa a ser outra palavra ao trocar de idioma; 美 (měi) não está na lista de hanzi das lições"
+  },
+  {
+   "path": "src (dialogue.lines[3], concepts.shi, concepts.shi-drop-casual)",
+   "pt": "我是巴西人 / 我巴西人",
+   "en": "我是美国人 / 我美国人",
+   "conf": "media",
+   "why": "mesmas frases localizadas; áudios novos necessários (voz do navegador enquanto isso)"
   }
  ]
 }

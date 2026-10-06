@@ -1,5 +1,5 @@
 [
-{"path":"1.beats[1].lines[2]","pt":"Brasil! Legal!","en":"Brazil! Great!","conf":"media","why":"Informal reaction; \"Great!\" vs \"Cool!\" is a tone choice."},
+{"path":"1.beats[1].lines[2]","pt":"Brasil! Legal! (src: 美国！好！)","en":"America! Great!","conf":"media","why":"Informal reaction; \"Great!\" vs \"Cool!\" is a tone choice."},
 {"path":"1.beats[2].lines[1]","pt":"Olá! Quantos anos você tem?","en":"Hello! How old are you?","conf":"media","why":"Chinese 你多大 is a casual, direct question; asking age this directly can sound blunt in English."},
 {"path":"2.beats[2].lines[2]","pt":"Está muito caro! Faz mais barato.","en":"That's too expensive! Make it cheaper.","conf":"media","why":"Bargaining phrase; more idiomatic alternatives: \"Can you lower the price a bit?\""},
 {"path":"2.beats[2].lines[1]","pt":"30 yuans.","en":"Thirty yuan.","conf":"media","why":"Source says 块 (kuai, colloquial yuan); \"yuan\" plural in English is usually unchanged."},

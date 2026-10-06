@@ -2065,7 +2065,9 @@ Unidades 1–18 (docs/i18n/content-zh-en/<n>.json), histórias (_stories.json) e
 | HSK1-2 | vocab[2] | chamar-se | to be called | media | várias traduções corretas |
 | HSK1-2 | vocab[4] | ser/estar | to be | media | PT ser/estar; inglês só 'to be' |
 | HSK1-2 | vocab[8] | qual | which | media | 哪 = which/where; 'which' escolhido pelo uso em 哪国人 |
-| HSK1-2 | phrases[1] | Eu sou brasileira. | I'm Brazilian. | media | PT marca gênero feminino; inglês não |
+| HSK1-2 | phrases[1] | Eu sou brasileira. | I'm American. | media | localizado: o site em inglês fala com americano (src.phrases[1] = 我是美国人。) |
+| HSK1-2 | src.vocab[6] (巴西 -> 美国) | Bāxī 巴西 (Brasil) | Měiguó 美国 (United States) | media | a palavra do país muda; o cartão u2-v6 vira outra palavra ao trocar de idioma; 美 (měi) não está na lista de hanzi das lições |
+| HSK1-2 | src (dialogue.lines[3], concepts.shi, concepts.shi-drop-casual) | 我是巴西人 / 我巴西人 | 我是美国人 / 我美国人 | media | mesmas frases localizadas; áudios novos necessários (voz do navegador enquanto isso) |
 | HSK1-2 | phrases[2] | De que país você é? | What country are you from? | media | várias traduções corretas |
 | HSK1-2 | dialogue.lines[2] | Eu me chamo Xiao Li. | My name is Xiao Li. | media | idiomático |
 | HSK1-2 | concepts.shi[0].body | equivale ao verbo 'ser'... só liga substantivos | is like the verb 'to be'... only links nouns | media | afirmação sobre a língua mantida; PT 'ser' -> 'to be' |
@@ -2219,7 +2221,7 @@ Unidades 1–18 (docs/i18n/content-zh-en/<n>.json), histórias (_stories.json) e
 | HSK1-18 | dialogue.lines[3] | Ela estuda na escola, aqui tem alguns livros dela. | She studies at the school, and there are some of her books here. | media | acrescentei 'and' para fluência |
 | HSK1-18 | concepts.meiyou-de[0].body | família, namorado(a) | family, boyfriend/girlfriend | media | fiel ao PT; conferir se o fato linguístico está correto |
 | HSK1-18 | trueFalse[0].whyNote | Onde mora seria "你住在哪里？". | "Where do you live?" would be "你住在哪里？". | media | adaptado para inglês (pergunta explícita) |
-| história | 1.beats[1].lines[2] | Brasil! Legal! | Brazil! Great! | media | Informal reaction; "Great!" vs "Cool!" is a tone choice. |
+| história | 1.beats[1].lines[1..2] (+ src) | Eu sou brasileira. / Brasil! Legal! | I'm American. / America! Great! (美国人 / 美国！好！) | media | a fala de Brune e a reação do pai usam o país do aluno; "Great!" vs "Cool!" é escolha de tom |
 | história | 1.beats[2].lines[1] | Olá! Quantos anos você tem? | Hello! How old are you? | media | Chinese 你多大 is a casual, direct question; asking age this directly can sound blunt in English. |
 | história | 2.beats[2].lines[2] | Está muito caro! Faz mais barato. | That's too expensive! Make it cheaper. | media | Bargaining phrase; more idiomatic alternatives: "Can you lower the price a bit?" |
 | história | 2.beats[2].lines[1] | 30 yuans. | Thirty yuan. | media | Source says 块 (kuai, colloquial yuan); "yuan" plural in English is usually unchanged. |
@@ -2228,6 +2230,7 @@ Unidades 1–18 (docs/i18n/content-zh-en/<n>.json), histórias (_stories.json) e
 | história | 4.beats[1].lines[2] | Ótimo, eu tenho tempo livre em ambos os dias! | Good, I'm free on both days! | media | Chinese 都 (both/all) with Friday and Sunday implied; kept as "both days". |
 | história | 4.beats[2].lines[3] | Ontem eu não jantei, hoje estou com muita fome. | Yesterday I didn't eat dinner, so I'm very hungry today. | media | Added "so" to make the cause-effect natural; source just lists both facts. |
 | história | 4.beats[3].options[3] | Trabalha na escola | Works at the school | media | Distractor; must stay clearly wrong versus "Is a student" (and unlike the hospital option). |
+| hanzi | 巴 (meaning) | (parte de Bāxī, Brasil) | (a sound element, as in 爸 bà and 吧 ba) | media | a palavra 巴西 não aparece mais no curso em inglês, então o significado deixa de citá-la; 巴 continua sendo o elemento fonético de 爸/吧 |
 | hanzi | 对.meaning | certo, correto; em relação a | correct, right; toward | media | Duas acepções |
 | hanzi | 口.meaning | boca; (classificador p/ pessoas da família) | mouth; (measure word for family members) | media | Classificador de pessoas da família |
 | hanzi | 个.meaning | (classificador geral) | (general measure word) | media | Classificador geral |

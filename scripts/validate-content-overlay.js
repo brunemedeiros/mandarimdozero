@@ -129,6 +129,11 @@ if (site === 'zh' && !only.length){
     const o = st[s0.id]; const L = 'stories.' + s0.id;
     if (!o) return err(L, 'sem tradução');
     str(L, 'title', o.title); str(L, 'subtitle', o.subtitle);
+    Object.keys((o.src && o.src.beats) || {}).forEach(bi => Object.keys(o.src.beats[bi]).forEach(li => {
+      const ln = (s0.beats[Number(bi)] || {}).lines && s0.beats[Number(bi)].lines[Number(li)];
+      if (!ln) return err(L, 'src.beats[' + bi + '][' + li + '] fora do intervalo');
+      checkSrcEntry(L, 'src.beats[' + bi + '][' + li + ']', o.src.beats[bi][li], ln, false);
+    }));
     if ((o.beats || []).length !== s0.beats.length) return err(L, 'beats: ' + (o.beats || []).length + ' vs ' + s0.beats.length);
     s0.beats.forEach((b, bi) => {
       const ob = o.beats[bi];

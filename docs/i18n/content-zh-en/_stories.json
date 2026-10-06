@@ -1,34 +1,327 @@
 {
-"1":{"title":"Xiao Li's Family","subtitle":"Reviewing Units 1-5","beats":[
-{"lines":["Hello, Brune!","Hello! Good morning!","This is my dad."],"question":{"prompt":"Who is being introduced in this part?","options":["Xiao Li's mom","Xiao Li's dad","Xiao Li's older sister","Brune's friend"]}},
-{"lines":["Hello! What country are you from?","I'm Brazilian.","Brazil! Great!"]},
-{"lines":["This is my older sister.","Hello! How old are you?","I'm 30. And you?","I'm 28."],"question":{"prompt":"How old is Xiao Li's sister?","options":["28 years old","30 years old","18 years old","13 years old"]}},
-{"lines":["How many people are in your family, Brune?","My family has my dad, my mom, and me.","Do you have an older sister?","No. I have an older brother."]},
-{"lines":["Brune, what do you want to eat?","I want to eat rice. This is really tasty!","Would you like some tea?","Yes! I like drinking tea."],"question":{"prompt":"What does Brune want to eat?","options":["Noodles","Coffee","Rice","Water"]}},
-{"lines":["Thank you, Brune!","You're welcome! Bye!","Bye!"]}
-]},
-"2":{"title":"A Day in the City","subtitle":"Reviewing Units 6-10","beats":[
-{"lines":["Brune, what time do you get up every day?","I get up at 7 and start work at 9 every day.","What time do you get off work today?","Now! I've already finished work."],"question":{"prompt":"What time does Brune start work?","options":["7:00","8:00","9:00","5:00"]}},
-{"lines":["Do you want to buy clothes?","Yes! Where is it?","It's up ahead, on the left. It's very close to here."]},
-{"lines":["How much is this?","Thirty yuan.","That's too expensive! Make it cheaper.","All right, twenty yuan."],"question":{"prompt":"How much did Brune pay for the clothes?","options":["30 yuan","25 yuan","20 yuan","15 yuan"]}},
-{"lines":["How's the weather today?","It's very hot today, and sunny.","What about tomorrow?","Tomorrow it will rain, and it will be a bit cold."]},
-{"lines":["How do we get to the station now?","On foot?","No, it's too far. Let's take the subway.","OK! Where is the subway station?"],"question":{"prompt":"How do they decide to get to the station?","options":["On foot","By bus","By taxi","By subway"]}},
-{"lines":["It's up ahead, very close.","Great! Today was a good day.","Bye, Brune!","Bye!"]}
-]},
-"3":{"title":"Xiao Li Isn't Feeling Well","subtitle":"Reviewing Units 11-14","beats":[
-{"lines":["Xiao Li, what's wrong?","I don't feel well. My head hurts a lot.","Do you want to go to the hospital?","Yes. Is the hospital far from here?"],"question":{"prompt":"What hurts on Xiao Li?","options":["His stomach","His head","His back","His feet"]}},
-{"lines":["No, it's very close.","Thank you, Brune.","You're welcome! Do you feel a bit better now?"]},
-{"lines":["A bit better. What's your hobby?","I like watching movies and dancing. And you?","I like sports, but I'm not well enough for that right now."],"question":{"prompt":"What is Xiao Li's hobby?","options":["Watching movies","Dancing","Playing sports","Singing"]}},
-{"lines":["What are your plans for next week?","I plan to stay at home. I'm still not well.","OK. Do you want to go and exercise later?","Yes! Exercising is even better than watching movies."],"question":{"prompt":"Which does Xiao Li think is better: exercise or movies?","options":["Movies","Exercise","Both are the same","Neither"]}},
-{"lines":["Do you think Chinese is hard?","Not hard! And it's very interesting.","Right! I think Chinese is the most interesting."]},
-{"lines":["Thank you for coming to see me today.","You're welcome! Bye!","Thank you! Bye."]}
-]},
-"4":{"title":"An Invitation to the Movies","subtitle":"Reviewing Units 15-18 — the end of HSK 1!","beats":[
-{"lines":["Brune, I want to go see a movie. Can you come?","I can! What time?","Sunday at 7 in the evening, at the cinema."],"question":{"prompt":"What day of the week is the movie?","options":["Monday","Friday","Sunday","Today"]}},
-{"lines":["Great! What day of the week is it today?","Today is Friday.","Good, I'm free on both days!"]},
-{"lines":["Have you eaten yet?","Not yet, I'm still working.","I've eaten. I ate two apples.","Yesterday I didn't eat dinner, so I'm very hungry today."],"question":{"prompt":"What has Xiao Li already eaten?","options":["Rice","Two apples","Noodles","Nothing"]}},
-{"lines":["See you Sunday! This is my girlfriend, she's coming too.","Who is she?","Her name is Xiao Mei, and she's a student."],"question":{"prompt":"What does Xiao Mei do?","options":["Works at a hospital","Is a student","Is a doctor","Works at the school"]}},
-{"lines":["Where does she study?","She studies at school. Why?","Because I like studying too!"]},
-{"lines":["See you Sunday, Brune!","OK! Bye!","Bye!"]}
-]}
+ "1": {
+  "title": "Xiao Li's Family",
+  "subtitle": "Reviewing Units 1-5",
+  "beats": [
+   {
+    "lines": [
+     "Hello, Brune!",
+     "Hello! Good morning!",
+     "This is my dad."
+    ],
+    "question": {
+     "prompt": "Who is being introduced in this part?",
+     "options": [
+      "Xiao Li's mom",
+      "Xiao Li's dad",
+      "Xiao Li's older sister",
+      "Brune's friend"
+     ]
+    }
+   },
+   {
+    "lines": [
+     "Hello! What country are you from?",
+     "I'm American.",
+     "America! Great!"
+    ]
+   },
+   {
+    "lines": [
+     "This is my older sister.",
+     "Hello! How old are you?",
+     "I'm 30. And you?",
+     "I'm 28."
+    ],
+    "question": {
+     "prompt": "How old is Xiao Li's sister?",
+     "options": [
+      "28 years old",
+      "30 years old",
+      "18 years old",
+      "13 years old"
+     ]
+    }
+   },
+   {
+    "lines": [
+     "How many people are in your family, Brune?",
+     "My family has my dad, my mom, and me.",
+     "Do you have an older sister?",
+     "No. I have an older brother."
+    ]
+   },
+   {
+    "lines": [
+     "Brune, what do you want to eat?",
+     "I want to eat rice. This is really tasty!",
+     "Would you like some tea?",
+     "Yes! I like drinking tea."
+    ],
+    "question": {
+     "prompt": "What does Brune want to eat?",
+     "options": [
+      "Noodles",
+      "Coffee",
+      "Rice",
+      "Water"
+     ]
+    }
+   },
+   {
+    "lines": [
+     "Thank you, Brune!",
+     "You're welcome! Bye!",
+     "Bye!"
+    ]
+   }
+  ],
+  "src": {
+   "beats": {
+    "1": {
+     "1": {
+      "p": "Wǒ shì Měiguó rén.",
+      "c": "我是美国人。"
+     },
+     "2": {
+      "p": "Měiguó! Hǎo!",
+      "c": "美国！好！"
+     }
+    }
+   }
+  }
+ },
+ "2": {
+  "title": "A Day in the City",
+  "subtitle": "Reviewing Units 6-10",
+  "beats": [
+   {
+    "lines": [
+     "Brune, what time do you get up every day?",
+     "I get up at 7 and start work at 9 every day.",
+     "What time do you get off work today?",
+     "Now! I've already finished work."
+    ],
+    "question": {
+     "prompt": "What time does Brune start work?",
+     "options": [
+      "7:00",
+      "8:00",
+      "9:00",
+      "5:00"
+     ]
+    }
+   },
+   {
+    "lines": [
+     "Do you want to buy clothes?",
+     "Yes! Where is it?",
+     "It's up ahead, on the left. It's very close to here."
+    ]
+   },
+   {
+    "lines": [
+     "How much is this?",
+     "Thirty yuan.",
+     "That's too expensive! Make it cheaper.",
+     "All right, twenty yuan."
+    ],
+    "question": {
+     "prompt": "How much did Brune pay for the clothes?",
+     "options": [
+      "30 yuan",
+      "25 yuan",
+      "20 yuan",
+      "15 yuan"
+     ]
+    }
+   },
+   {
+    "lines": [
+     "How's the weather today?",
+     "It's very hot today, and sunny.",
+     "What about tomorrow?",
+     "Tomorrow it will rain, and it will be a bit cold."
+    ]
+   },
+   {
+    "lines": [
+     "How do we get to the station now?",
+     "On foot?",
+     "No, it's too far. Let's take the subway.",
+     "OK! Where is the subway station?"
+    ],
+    "question": {
+     "prompt": "How do they decide to get to the station?",
+     "options": [
+      "On foot",
+      "By bus",
+      "By taxi",
+      "By subway"
+     ]
+    }
+   },
+   {
+    "lines": [
+     "It's up ahead, very close.",
+     "Great! Today was a good day.",
+     "Bye, Brune!",
+     "Bye!"
+    ]
+   }
+  ]
+ },
+ "3": {
+  "title": "Xiao Li Isn't Feeling Well",
+  "subtitle": "Reviewing Units 11-14",
+  "beats": [
+   {
+    "lines": [
+     "Xiao Li, what's wrong?",
+     "I don't feel well. My head hurts a lot.",
+     "Do you want to go to the hospital?",
+     "Yes. Is the hospital far from here?"
+    ],
+    "question": {
+     "prompt": "What hurts on Xiao Li?",
+     "options": [
+      "His stomach",
+      "His head",
+      "His back",
+      "His feet"
+     ]
+    }
+   },
+   {
+    "lines": [
+     "No, it's very close.",
+     "Thank you, Brune.",
+     "You're welcome! Do you feel a bit better now?"
+    ]
+   },
+   {
+    "lines": [
+     "A bit better. What's your hobby?",
+     "I like watching movies and dancing. And you?",
+     "I like sports, but I'm not well enough for that right now."
+    ],
+    "question": {
+     "prompt": "What is Xiao Li's hobby?",
+     "options": [
+      "Watching movies",
+      "Dancing",
+      "Playing sports",
+      "Singing"
+     ]
+    }
+   },
+   {
+    "lines": [
+     "What are your plans for next week?",
+     "I plan to stay at home. I'm still not well.",
+     "OK. Do you want to go and exercise later?",
+     "Yes! Exercising is even better than watching movies."
+    ],
+    "question": {
+     "prompt": "Which does Xiao Li think is better: exercise or movies?",
+     "options": [
+      "Movies",
+      "Exercise",
+      "Both are the same",
+      "Neither"
+     ]
+    }
+   },
+   {
+    "lines": [
+     "Do you think Chinese is hard?",
+     "Not hard! And it's very interesting.",
+     "Right! I think Chinese is the most interesting."
+    ]
+   },
+   {
+    "lines": [
+     "Thank you for coming to see me today.",
+     "You're welcome! Bye!",
+     "Thank you! Bye."
+    ]
+   }
+  ]
+ },
+ "4": {
+  "title": "An Invitation to the Movies",
+  "subtitle": "Reviewing Units 15-18 — the end of HSK 1!",
+  "beats": [
+   {
+    "lines": [
+     "Brune, I want to go see a movie. Can you come?",
+     "I can! What time?",
+     "Sunday at 7 in the evening, at the cinema."
+    ],
+    "question": {
+     "prompt": "What day of the week is the movie?",
+     "options": [
+      "Monday",
+      "Friday",
+      "Sunday",
+      "Today"
+     ]
+    }
+   },
+   {
+    "lines": [
+     "Great! What day of the week is it today?",
+     "Today is Friday.",
+     "Good, I'm free on both days!"
+    ]
+   },
+   {
+    "lines": [
+     "Have you eaten yet?",
+     "Not yet, I'm still working.",
+     "I've eaten. I ate two apples.",
+     "Yesterday I didn't eat dinner, so I'm very hungry today."
+    ],
+    "question": {
+     "prompt": "What has Xiao Li already eaten?",
+     "options": [
+      "Rice",
+      "Two apples",
+      "Noodles",
+      "Nothing"
+     ]
+    }
+   },
+   {
+    "lines": [
+     "See you Sunday! This is my girlfriend, she's coming too.",
+     "Who is she?",
+     "Her name is Xiao Mei, and she's a student."
+    ],
+    "question": {
+     "prompt": "What does Xiao Mei do?",
+     "options": [
+      "Works at a hospital",
+      "Is a student",
+      "Is a doctor",
+      "Works at the school"
+     ]
+    }
+   },
+   {
+    "lines": [
+     "Where does she study?",
+     "She studies at school. Why?",
+     "Because I like studying too!"
+    ]
+   },
+   {
+    "lines": [
+     "See you Sunday, Brune!",
+     "OK! Bye!",
+     "Bye!"
+    ]
+   }
+  ]
+ }
 }
