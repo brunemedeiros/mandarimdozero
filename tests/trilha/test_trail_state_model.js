@@ -36,7 +36,7 @@ function load(lang){
   run(read('shared/trail-state-model.js'), 'trail-state-model.js');
   run(read(lang + '/content.js') + '\n;this.UNITS=UNITS;this.LEVELS=LEVELS;' + (lang === 'fr' ? 'this.MODULES=MODULES;' : ''), 'content.js');
   const src = read(lang + '/app.js');
-  const fns = ['recalculateUnlockedUnits', 'markUnitCompleted'].concat(lang === 'fr' ? ['unitsOfLevel', 'completeModuleUnits'] : []);
+  const fns = ['trailGroups', 'recalculateUnlockedUnits', 'markUnitCompleted'].concat(lang === 'fr' ? ['unitsOfLevel', 'completeModuleUnits'] : []);
   fns.forEach(f => run(extractFunction(src, f), lang + '/app.js#' + f));
   // dependências com efeitos colaterais: stubs que só contam chamadas
   run(`this.calls = { xp: 0, fsrs: 0 };

@@ -97,3 +97,32 @@ function nextTrailItem(groups, progress){
   const idx = Math.min(Math.max(raw, 0), count - 1);
   return { unitId: u.id, lessonIdx: idx, lessonCount: count };
 }
+
+// ---------- Fase 2 (UI da trilha): tipo da unidade e métrica de lições ----------
+
+// Tipo da unidade para o selo/cor na trilha. Hoje só existe `type:"grammar"`
+// em content.js (comunicativa = ausência de campo). Se um dia a unidade ganhar
+// um campo explícito `unitType`, ele vence; `type:"grammar"` continua valendo
+// por compatibilidade. Tipos conhecidos: 'communicative' | 'grammar'
+// (Revisão e Ponto de verificação entram nas fases seguintes).
+function unitTypeOf(unit){
+  if (unit && typeof unit.unitType === 'string' && unit.unitType) return unit.unitType;
+  return unit && unit.type === 'grammar' ? 'grammar' : 'communicative';
+}
+
+// Métrica oficial de progresso (decisão 7): LIÇÕES concluídas. Unidade com
+// lições conta cada uma; unidade sem lições (gramática) conta como 1.
+// Concluída (por lições ou pulada) conta inteira; senão usa lessonIdx.
+// Devolve { done, total } somando os grupos informados.
+function trailLessonCounts(groups, progress){
+  let done = 0, total = 0;
+  (groups || []).forEach(units => (units || []).forEach(u => {
+    const n = Array.isArray(u.lessons) && u.lessons.length ? u.lessons.length : 1;
+    total += n;
+    const prog = progress[u.id];
+    if (!prog) return;
+    if (prog.completed) done += n;
+    else if (Array.isArray(u.lessons) && u.lessons.length) done += Math.min(Math.max(prog.lessonIdx || 0, 0), n);
+  }));
+  return { done, total };
+}

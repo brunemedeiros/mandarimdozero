@@ -1852,10 +1852,15 @@ function unitOrdinalInfo(u, levelUnits){
   return { num, total: sameType.length };
 }
 
+// Grupos da trilha na ordem de estudo (um por nível, vazios descartados).
+function trailGroups(){
+  return LEVELS.map(lvl => unitsOfLevel(lvl.id)).filter(g => g.length);
+}
+
 function recalculateUnlockedUnits(){
   // Regra única em shared/trail-state-model.js (recalcUnlocked): 1ª unidade de
   // cada nível liberada; as demais quando a anterior do nível foi concluída.
-  recalcUnlocked(LEVELS.map(lvl => unitsOfLevel(lvl.id)), STATE.unitProgress);
+  recalcUnlocked(trailGroups(), STATE.unitProgress);
 }
 
 const UNIT_ICONS = {
@@ -1908,6 +1913,7 @@ function renderLevelModalList(){
   wrap.querySelectorAll('.level-list-item').forEach(btn => {
     btn.addEventListener('click', () => {
       STATE.currentLevel = btn.dataset.level;
+      STATE.levelUserPicked = true;
       document.getElementById('level-modal').style.display = 'none';
       renderUnitsGrid();
     });
@@ -1987,6 +1993,36 @@ function levelTestsOfLevel(level){
   return LEVEL_TESTS.filter(t => t.level === level);
 }
 
+// Fase 2 da trilha: cartão "Continuar" no topo. Fonte única = nextTrailItem
+// (shared/trail-state-model.js); aqui só desenha. A métrica mostrada é a
+// oficial: lições concluídas.
+function buildTrailContinueCard(){
+  const groups = trailGroups();
+  const next = nextTrailItem(groups, STATE.unitProgress);
+  const { done, total } = trailLessonCounts(groups, STATE.unitProgress);
+  const card = document.createElement('div');
+  card.className = 'trail-continue';
+  const metric = `${done} de ${total} lições concluídas`;
+  if (!next){
+    card.classList.add('complete');
+    card.innerHTML = `<div class="tc-info"><div class="tc-eyebrow">Sua trilha</div><div class="tc-title">Você concluiu toda a trilha 🎉</div><div class="tc-sub">${metric}</div></div>`;
+    return card;
+  }
+  const u = UNITS.find(x => x.id === next.unitId);
+  const lessonLabel = next.lessonCount ? ` · lição ${next.lessonIdx + 1} de ${next.lessonCount}` : '';
+  const started = done > 0 || !!(STATE.unitProgress[u.id] && STATE.unitProgress[u.id].started);
+  card.innerHTML = `
+    <div class="tc-info">
+      <div class="tc-eyebrow">${started ? 'Continue de onde parou' : 'Comece por aqui'}</div>
+      <div class="tc-title">${u.title}${lessonLabel}</div>
+      <div class="tc-sub">${metric}</div>
+    </div>
+    <button type="button" class="btn btn-primary tc-cta">${started ? 'Continuar' : 'Começar'}</button>
+  `;
+  card.querySelector('.tc-cta').addEventListener('click', () => openUnitDetail(u.id));
+  return card;
+}
+
 function buildLevelTestCard(test){
   const lt = STATE.levelTestProgress[test.id];
   const card = document.createElement('button');
@@ -2008,12 +2044,12 @@ function buildLevelTestCard(test){
 // olhar lessonIdx -- finishCurrentLesson zera lessonIdx ao fechar a unidade
 // (pra permitir reabrir do início como revisão), então lessonIdx sozinho
 // mentiria "0 de 4" numa unidade que na verdade já terminou.
+// Fase 2: agora vem de trailItemState (shared/trail-state-model.js) --
+// 'done' | 'skipped' | 'current' (só UMA por trilha) | 'available' | 'locked'.
 function unitBlockState(u){
-  const prog = STATE.unitProgress[u.id];
-  if (prog.completed) return 'done';
-  if (prog.unlocked) return 'current';
-  return 'locked';
+  return trailItemState(u, trailGroups(), STATE.unitProgress);
 }
+
 
 // Modo admin: só a conta da autora do curso -- deixa REVISAR qualquer lição
 // de qualquer unidade (mesmo travada pros demais usuários), sem nunca
@@ -2035,6 +2071,7 @@ function isAdminUser(){
 
 // Estado de UMA lição dentro do bloco expandido da unidade.
 function lessonRowState(u, idx){
+  if (unitBlockState(u) === 'skipped') return 'skipped';
   if (STATE.unitProgress[u.id].completed) return 'done';
   const cur = currentLessonIdx(u.id);
   if (idx < cur) return 'done';
@@ -2063,7 +2100,8 @@ function wireHeaderActivation(el, handler){
 function buildUnitBlock(u){
   const state = unitBlockState(u);
   const unlocked = state !== 'locked';
-  const isGrammar = u.type === 'grammar';
+  const isFinished = state === 'done' || state === 'skipped';
+  const isGrammar = unitTypeOf(u) === 'grammar';
   // Só unidades com 2+ lições (Modelo B) ganham a lista expansível -- uma
   // unidade do motor antigo não tem lições reais pra mostrar (ver "Hierarquia
   // da Trilha", seção 11), então vira uma linha só, sem seta.
@@ -2077,9 +2115,9 @@ function buildUnitBlock(u){
 
   const pct = Math.round(unitProgressFraction(u) * 100);
   let fracLabel;
-  if (isGrammar) fracLabel = state === 'done' ? 'Concluído' : '';
+  if (isGrammar) fracLabel = state === 'done' ? 'Concluído' : (state === 'skipped' ? 'Pulada' : '');
   else if (hasLessons){
-    const doneLessons = state === 'done' ? u.lessons.length : currentLessonIdx(u.id);
+    const doneLessons = isFinished ? u.lessons.length : currentLessonIdx(u.id);
     fracLabel = `${doneLessons} de ${u.lessons.length} lições`;
   }
   else fracLabel = `${pct}%`;
@@ -2090,10 +2128,14 @@ function buildUnitBlock(u){
     + (isGrammar ? ' grammar' : '')
     + (state === 'locked' ? ' locked' : '')
     + (state === 'done' ? ' done' : '')
+    + (state === 'skipped' ? ' skipped' : '')
     + (state === 'current' ? ' current' : '')
+    + (state === 'available' ? ' available' : '')
     + (expanded ? ' expanded' : '');
 
-  const badgeHTML = state === 'done' ? `<span class="ub-badge">✓</span>` : '';
+  const badgeHTML = state === 'done' ? `<span class="ub-badge">✓</span>`
+    : state === 'skipped' ? `<span class="ub-badge ub-badge-skipped" title="Concluída pelo Ponto de verificação">⏭ Pulada</span>` : '';
+  const typeChipHTML = isGrammar ? `<span class="ub-type-chip grammar">Gramática</span>` : '';
   const chevronHTML = hasLessons ? `<button class="ub-chevron" type="button" aria-label="Expandir lições">▾</button>` : '';
   // Só lições JÁ concluídas (e que não são o Ponto de verificação, cujo
   // reteste tem efeitos colaterais bem mais pesados -- desbloqueio de
@@ -2108,10 +2150,10 @@ function buildUnitBlock(u){
         // aplica com Admin Mode ON -- OFF cai exatamente na mesma regra
         // usada por qualquer aluno (unlocked && já concluída), sem
         // segunda implementação (Fase 11 da spec de Admin Mode).
-        const clickable = (isAdminUser() && isAdminModeOn()) || (unlocked && st === 'done' && !l.isCheckpoint);
+        const clickable = (isAdminUser() && isAdminModeOn()) || (unlocked && (st === 'done' || st === 'skipped') && !l.isCheckpoint);
         return `
           <div class="ub-lesson-row ${st}${clickable ? ' clickable' : ''}" ${clickable ? `data-lesson-idx="${i}"` : ''}>
-            <div class="ub-lesson-dot ${st}">${st === 'done' ? '✓' : i + 1}</div>
+            <div class="ub-lesson-dot ${st}">${st === 'done' ? '✓' : (st === 'skipped' ? '•' : i + 1)}</div>
             <div class="ub-lesson-title">${l.title}</div>
           </div>
         `;
@@ -2123,7 +2165,7 @@ function buildUnitBlock(u){
     <div class="ub-header">
       <div class="ub-icon">${UNIT_ICONS[u.id] || '📖'}</div>
       <div class="ub-info">
-        <div class="ub-title-row"><span class="ub-title">${u.title}</span>${badgeHTML}</div>
+        <div class="ub-title-row"><span class="ub-title">${u.title}</span>${typeChipHTML}${badgeHTML}</div>
         ${u.goal ? `<div class="ub-goal">${u.goal}</div>` : ''}
       </div>
       <div class="ub-frac">${fracLabel}</div>
@@ -2333,6 +2375,13 @@ function renderDailyChallengesStrip(){
 
 function renderUnitsGrid(){
   recalculateUnlockedUnits();
+  // Fase 2: enquanto o aluno não escolheu um nível à mão, a trilha abre no
+  // nível da unidade atual (antes voltava ao A1 a cada carregamento).
+  if (!STATE.levelUserPicked){
+    const nx = nextTrailItem(trailGroups(), STATE.unitProgress);
+    const nu = nx && UNITS.find(x => x.id === nx.unitId);
+    if (nu && nu.level) STATE.currentLevel = nu.level;
+  }
   renderLevelSelect();
   renderDailyGoalChip();
   renderDailyChallengesStrip();
@@ -2349,10 +2398,12 @@ function renderUnitsGrid(){
         <p>O conteúdo do nível ${STATE.currentLevel} ainda está sendo preparado.</p>
       </div>
     `;
+    grid.insertBefore(buildTrailContinueCard(), grid.firstChild);
     return;
   }
 
   grid.innerHTML = '';
+  grid.appendChild(buildTrailContinueCard());
 
   levelModules.forEach((module, mIdx) => {
     const unlocked = moduleUnlocked(module);
