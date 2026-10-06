@@ -2047,8 +2047,9 @@ function mapUnitDescribe(u, moduleId){
   const actions = [];
   if (st === 'locked'){
     lines.push('Complete a unidade anterior para liberar esta.');
-    if (moduleId && trailSkipAllowed()) actions.push({ label: 'Fazer Ponto de verificação para pular', primary: false, onClick: () => openCheckpoint(moduleId) });
-    else if (moduleId) lines.push('Pular unidades é do plano Premium (ou de alunos da professora).');
+    const modOpen = moduleId && moduleUnlocked(MODULES.find(m => m.id === moduleId));
+    if (modOpen && trailSkipAllowed()) actions.push({ label: 'Fazer Ponto de verificação para pular', primary: false, onClick: () => openCheckpoint(moduleId) });
+    else if (modOpen) lines.push('Pular unidades é do plano Premium (ou de alunos da professora).');
   } else if (st === 'done' || st === 'skipped'){
     actions.push({ label: 'Abrir de novo', primary: false, onClick: () => openUnitDetail(u.id) });
   } else {
@@ -2096,9 +2097,10 @@ function renderTrailMapView(container, levelModules){
     const cp = STATE.checkpointProgress[module.id];
     const lines = [];
     const actions = [];
-    if (!trailSkipAllowed()) lines.push('Pular unidades é do plano Premium (ou de alunos da professora).');
+    if (!moduleUnlocked(module)) lines.push('Libere o módulo (complete a unidade anterior) para fazer o Ponto de verificação.');
+    else if (!trailSkipAllowed()) lines.push('Pular unidades é do plano Premium (ou de alunos da professora).');
     else actions.push({ label: cp.completed ? 'Refazer o ponto' : 'Fazer o Ponto de verificação', primary: !cp.completed, onClick: () => openCheckpoint(module.id) });
-    return { eyebrow: 'Ponto de verificação', title: module.title, status: cp.completed ? `Aprovado (melhor nota ${cp.bestScore || 0}%)` : 'Disponível',
+    return { eyebrow: 'Ponto de verificação', title: module.title, status: cp.completed ? `Aprovado (melhor nota ${cp.bestScore || 0}%)` : (moduleUnlocked(module) ? 'Disponível' : 'Bloqueado'),
       goal: 'Teste o módulo inteiro de uma vez. Se for bem (70% ou mais), as unidades dele são marcadas como puladas.', lines, actions };
   };
   renderTrailMap(container, { sections }, describe);
@@ -7458,6 +7460,7 @@ function completeModuleUnits(module, scorePct){
 function openCheckpoint(moduleId){
   if (!trailSkipAllowed()){ showTrailSkipLocked(); return; }
   const module = MODULES.find(m => m.id === moduleId);
+  if (!module || !moduleUnlocked(module)) return;
   STEP_STATE.onChallengesScreen = false;
   STEP_STATE.onCheckpoint = moduleId;
   setLessonFocusMode(true);
@@ -7667,14 +7670,18 @@ function renderLevelTestQuizStep(){
   contentEl.innerHTML = `
     <div class="conj-progress">Pergunta ${LEVEL_TEST_STATE.index + 1} de ${total}</div>
     <div class="gram-exercise">
-      <div class="gram-exercise-prompt">${ex.prompt}</div>
+      <div class="gram-exercise-prompt">${ex.prompt}${ex.kind === 'listen' ? ' ' + audioBtnHTML(ex.audioText) : ''}</div>
       ${ex.hint ? `<div class="gram-exercise-hint">${ex.hint}</div>` : ''}
-      <input type="text" id="leveltest-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a resposta">
+      <input type="text" id="leveltest-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${ex.kind === 'listen' ? 'Escreva o que ouviu' : 'Digite a resposta'}">
       <div class="expected" id="leveltest-expected"></div>
     </div>
     <button class="btn btn-primary btn-block" id="leveltest-verify-btn">Verificar</button>
   `;
 
+  if (ex.kind === 'listen'){
+    wireAudioButtons(contentEl);
+    speakFrench(ex.audioText, contentEl.querySelector('.audio-btn'), true);
+  }
   const inputEl = document.getElementById('leveltest-input');
   inputEl.focus();
   inputEl.addEventListener('keydown', e => {
@@ -7688,17 +7695,11 @@ function renderLevelTestQuizStep(){
     const expectedEl = document.getElementById('leveltest-expected');
     inputEl.disabled = true;
 
-    if (given.trim() === expected.trim()){
-      wrapEl.classList.add('ok');
-      LEVEL_TEST_STATE.score += 1;
-    } else if (normalizeLoose(given) === normalizeLoose(expected)){
-      wrapEl.classList.add('almost');
-      expectedEl.textContent = `Quase! → ${expected}`;
-      LEVEL_TEST_STATE.score += 0.5;
-    } else {
-      wrapEl.classList.add('wrong');
-      expectedEl.textContent = `→ ${expected}`;
-    }
+    const res = scoreCheckpointAnswer(given, expected, ex.kind);
+    LEVEL_TEST_STATE.score += res.score;
+    wrapEl.classList.add(res.status);
+    if (res.status === 'almost') expectedEl.textContent = `Quase! → ${expected}`;
+    else if (res.status === 'wrong') expectedEl.textContent = `→ ${expected}`;
     // "almost" (grafia quase certa, sem acento etc.) já dá 0.5 ponto -- toca
     // o mesmo som de acerto do "ok", só "wrong" de verdade toca o de erro.
     playFeedbackSound(!wrapEl.classList.contains('wrong'));

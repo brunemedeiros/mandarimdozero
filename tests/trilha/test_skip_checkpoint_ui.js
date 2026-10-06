@@ -109,6 +109,20 @@ async function runExam(page, correct){
   check('free: pular bloqueado e sinalizado', g.freeAllowed === false && g.lockedClass && /Premium/.test(g.lockText), g);
   check('free: nem o ponto nem o teste de nível abrem', !g.freeOpened && !g.freeLevelOpened, g);
   check('premium e aluno vinculado podem pular', g.premiumAllowed && g.linkedAllowed && g.freeAgain === false, g);
+
+  // ---- verificador (fase 7): Teste de Nível com escuta e módulo bloqueado
+  {
+    const r2 = await page.evaluate(() => {
+      const lt = LEVEL_TESTS.find(t => t.id === 'A1-final') || LEVEL_TESTS[0]; LEVEL_TEST_STATE.queue = buildLevelTestQueue(lt); LEVEL_TEST_STATE.index = 0; LEVEL_TEST_STATE.score = 0; LEVEL_TEST_STATE.levelId = 'A1-final';
+      const i = LEVEL_TEST_STATE.queue.findIndex(x => x.kind === 'listen');
+      if (i < 0) return { noListen: true };
+      LEVEL_TEST_STATE.index = i; renderLevelTestQuizStep();
+      return { btn: !!document.querySelector('.gram-exercise-prompt .audio-btn'), ph: document.getElementById('leveltest-input').placeholder };
+    });
+    check('teste de nível: item de escuta tem áudio e placeholder', !r2.noListen && r2.btn && r2.ph === 'Escreva o que ouviu', r2);
+    const r3 = await page.evaluate(() => { TRAIL_SKIP_PAYWALL_ENABLED = false; STEP_STATE.onCheckpoint = null; openCheckpoint('A1-m3'); return STEP_STATE.onCheckpoint; });
+    check('openCheckpoint ignora módulo bloqueado', r3 !== 'A1-m3', r3);
+  }
   check('sem erro de página', errors.length === 0, errors);
   await ctx.close(); await browser.close(); server.close();
   console.log(`${passed} ok, ${failed} falhas`); process.exit(failed ? 1 : 0);
