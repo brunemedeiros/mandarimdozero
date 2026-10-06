@@ -213,7 +213,7 @@ async function renderPublicProfileInto(bodyEl, username){
   const initials = avatarInitials(name);
   const color = avatarColor(profile.user_id);
   const avatarHTML = profile.avatar_url
-    ? `<img class="public-profile-avatar" src="${profile.avatar_url}" alt="Foto de perfil">`
+    ? `<img class="public-profile-avatar" src="${escapeAttr(profile.avatar_url)}" alt="Foto de perfil">`
     : `<div class="public-profile-avatar" style="background:${color};">${initials}</div>`;
 
   const badgesHTML = badges.length ? `

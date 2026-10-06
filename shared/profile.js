@@ -483,7 +483,7 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
   ` : '';
 
   const avatarHTML = profile?.avatar_url
-    ? `<img class="profile-avatar" src="${profile.avatar_url}" alt="Foto de perfil">`
+    ? `<img class="profile-avatar" src="${escapeAttr(profile.avatar_url)}" alt="Foto de perfil">`
     : `<div class="profile-avatar" style="background:${color};">${initials}</div>`;
 
   wrap.innerHTML = `
@@ -552,6 +552,12 @@ function escapeHTML(str){
   return div.innerHTML;
 }
 
+// Escapa texto para uso DENTRO de um atributo HTML entre aspas (ex.: src="...").
+// escapeHTML acima não troca aspas, então não serve para atributos.
+function escapeAttr(str){
+  return String(str == null ? '' : str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
 // Preview do avatar dentro do modal de edição -- mesma regra de fallback
 // pra iniciais/cor do avatar principal (avatarInitials/avatarColor),
 // chamada tanto ao abrir o modal quanto depois de um upload/remoção bem-
@@ -561,7 +567,7 @@ function renderAvatarPreview(profile){
   const removeBtn = document.getElementById('profile-edit-avatar-remove-btn');
   if (!preview) return;
   if (profile?.avatar_url){
-    preview.innerHTML = `<img src="${profile.avatar_url}" alt="Foto de perfil">`;
+    preview.innerHTML = `<img src="${escapeAttr(profile.avatar_url)}" alt="Foto de perfil">`;
     if (removeBtn) removeBtn.style.display = '';
   } else {
     const name = profileDisplayName(profile);
