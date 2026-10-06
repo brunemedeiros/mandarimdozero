@@ -10282,6 +10282,14 @@ async function renderChallengeCategories(){
       ${challengeProgressHTML(dictationsHere.filter(d => isDictationDone(d.id)).length, dictationsHere.length)}
     </button>
   ` : '');
+  // Anel de progresso no ícone de cada categoria (CSS lê --p, 0 a 100).
+  wrap.querySelectorAll('.challenge-category-card').forEach(card => {
+    const pr = card.querySelector('.challenge-progress');
+    if (!pr) return;
+    const d = Number(pr.dataset.done), t = Number(pr.dataset.total);
+    card.style.setProperty('--p', t ? Math.round(d / t * 100) : 0);
+    if (t && d >= t) card.dataset.complete = '1';
+  });
   const reviewCard = document.getElementById('challenges-review-card');
   if (reviewCard) reviewCard.addEventListener('click', openChallengeReviewQueue);
   wrap.querySelectorAll('.challenge-category-card[data-category]').forEach(card => {
@@ -10648,8 +10656,8 @@ function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
   const bodyHTML = `
       ${isCorrect ? '' : `<p class="challenge-feedback-chosen">${chT('ch.expr.yourAnswer', { chosen: escapeHtmlChallenge(c.options[chosenIdx]), correct: escapeHtmlChallenge(c.correctAnswer) })}</p>`}
       <p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong><br>
-      ${chT('ch.expr.signifies', { fr: escapeHtmlChallenge(c.meaning.fr) })}<br>
-      ${chT('ch.expr.inPt', { pt: escapeHtmlChallenge(c.meaning.pt) })}</p>
+      ${chT('ch.expr.signifies', { fr: escapeHtmlChallenge(String(c.meaning.fr).replace(/[.\s]+$/, '')) })}<br>
+      ${chT('ch.expr.inPt', { pt: escapeHtmlChallenge(String(c.meaning.pt).replace(/[.\s]+$/, '')) })}</p>
       <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation)}</p>
 
       <div class="challenge-second-example">
