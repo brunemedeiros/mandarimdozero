@@ -862,6 +862,9 @@ const STATE = {
   // multiple_choice/type_answer/cloze) usam exclusivamente este slot.
   reviewCardState: null,
   reviewSessionUnitFilter: null,
+  // Fase 5 da trilha: sessão do marco de Revisão do módulo ({moduleId, unitIds}).
+  // Nunca serializado; nulado nos mesmos pontos que reviewSessionDeckId.
+  reviewSessionMilestone: null,
   // Fase D ("Decks, Tags e Painel" -- Deck Engine, ver CLAUDE.md) -- mesmo
   // papel/ciclo de vida de reviewSessionUnitFilter acima, só que pra Deck em
   // vez de unidade: setado só por startDeckReviewSession(), lido só por
@@ -880,6 +883,8 @@ const STATE = {
   courseDecksLoaded: false,
   currentLevel: LEVELS[0].id,
   checkpointProgress: {},
+  // Fase 5: marco de Revisão por módulo -> { lastDate:'AAAA-MM-DD', lastCount } (opcional, só informativo).
+  reviewMilestones: {},
   levelTestProgress: {},
   daily: {
     date: null, stars: 0, lessons: 0, highScoreLessons: 0, perfectLessons: 0,
@@ -1073,6 +1078,7 @@ function serializeState(){
     periodXp: STATE.periodXp,
     daily: STATE.daily,
     checkpointProgress: STATE.checkpointProgress,
+    reviewMilestones: STATE.reviewMilestones,
     levelTestProgress: STATE.levelTestProgress,
     completedChallenges: STATE.completedChallenges,
     dictations: STATE.dictations,
@@ -1117,6 +1123,7 @@ function applySerializedState(data){
   if (data.periodXp) Object.assign(STATE.periodXp, data.periodXp);
   if (data.daily) Object.assign(STATE.daily, data.daily);
   if (data.checkpointProgress) Object.assign(STATE.checkpointProgress, data.checkpointProgress);
+  if (data.reviewMilestones) Object.assign(STATE.reviewMilestones, data.reviewMilestones);
   if (data.levelTestProgress) Object.assign(STATE.levelTestProgress, data.levelTestProgress);
   if (data.completedChallenges) Object.assign(STATE.completedChallenges, data.completedChallenges);
   // Save antigo não tem o campo (nada a fazer); registros malformados são
@@ -2434,6 +2441,7 @@ function renderUnitsGrid(){
     module.unitIds.forEach(id => {
       list.appendChild(buildUnitBlock(UNITS.find(u => u.id === id)));
     });
+    list.appendChild(buildModuleReviewRow(module));
     list.appendChild(buildCheckpointRow(module, unlocked));
     // Unidade opcional "Desafios do Módulo N" (Premium): o slot nasce vazio e
     // só vira uma linha se o módulo tiver desafios publicados -- os
@@ -5765,10 +5773,12 @@ function openReviewSession(mode){
   if (mode === 'flashcard'){
     STATE.reviewSessionUnitFilter = null;
     STATE.reviewSessionDeckId = null; // Fase D -- entrada normal (sem Deck) nunca herda escopo de uma sessão anterior
+    STATE.reviewSessionMilestone = null;
     startReviewSession();
   } else if (mode === 'hard'){
     STATE.reviewSessionUnitFilter = null;
     STATE.reviewSessionDeckId = null; // Fase D -- idem
+    STATE.reviewSessionMilestone = null;
     // Fase 4: getStudyQueue(scope:'hard') -- mesmo critério de hardWordsPool()
     STATE.reviewQueue = shuffle(getStudyQueue(eligibleReviewPool(), { scope: 'hard' }));
     STATE.reviewIndex = 0;
@@ -6266,6 +6276,66 @@ function isCardLessonCompleted(card){
   return lessonIdx < prog.lessonIdx;
 }
 
+// ---------- Fase 5 da trilha: marco de Revisão do módulo ----------
+// Seleção/ordem/teto em shared/review-milestone.js (puro). Aqui só liga à
+// Revisão existente (renderReviewView) e guarda a data da última sessão.
+function moduleReviewSelection(module){
+  const pool = milestonePool(STATE.cards, module.unitIds, isCardLessonCompleted);
+  return selectMilestoneCards(pool);
+}
+
+function recordModuleReviewDone(moduleId, count){
+  STATE.reviewMilestones[moduleId] = { lastDate: todayStr(), lastCount: count };
+  saveState();
+}
+
+function startModuleReviewSession(moduleId){
+  const module = MODULES.find(m => m.id === moduleId);
+  if (!module) return;
+  const sel = moduleReviewSelection(module);
+  if (!sel.cards.length) return;
+  trackEvent('lesson_start', 'flashcard_review', { moduleId });
+  STATE.reviewSessionUnitFilter = null;
+  STATE.reviewSessionDeckId = null;
+  STATE.reviewSessionMilestone = { moduleId, unitIds: module.unitIds.slice() };
+  STATE.reviewActiveMode = 'flashcard';
+  STATE.reviewQueue = shuffle(sel.cards);
+  STATE.reviewIndex = 0;
+  STATE.reviewCardState = null;
+  if (typeof switchTab === 'function') switchTab('review');
+  document.getElementById('review-mode-select-wrap').style.display = 'none';
+  document.getElementById('review-session-wrap').style.display = 'block';
+  document.getElementById('review-content').style.display = 'block';
+  document.getElementById('speed-review-content').style.display = 'none';
+  document.getElementById('match-review-content').style.display = 'none';
+  renderReviewView();
+}
+
+function buildModuleReviewRow(module){
+  const sel = moduleReviewSelection(module);
+  const rec = STATE.reviewMilestones[module.id];
+  const st = milestoneState(sel.available, rec);
+  const why = milestoneReasonText(sel);
+  const dateBR = rec && rec.lastDate ? rec.lastDate.split('-').reverse().join('/') : '';
+  let goal;
+  if (st === 'empty') goal = 'Ainda não há cartões para revisar neste módulo.';
+  else if (st === 'done') goal = `Revisada em ${dateBR}${why ? ' · de novo agora: ' + why : ''} (opcional)`;
+  else goal = `Recomendado antes de seguir (opcional)${why ? ' · ' + why : ''}`;
+  const block = document.createElement('div');
+  block.className = 'unit-block review-milestone' + (st === 'empty' ? ' locked' : '') + (st === 'done' ? ' done' : '');
+  block.innerHTML = `
+    <div class="ub-header">
+      <div class="ub-icon">🔁</div>
+      <div class="ub-info">
+        <div class="ub-title-row"><span class="ub-title">Revisão do módulo</span><span class="ub-type-chip review">Revisão</span>${st === 'done' ? '<span class="ub-badge">✓</span>' : ''}</div>
+        <div class="ub-goal">${goal}</div>
+      </div>
+    </div>
+  `;
+  if (st !== 'empty') wireHeaderActivation(block.querySelector('.ub-header'), () => startModuleReviewSession(module.id));
+  return block;
+}
+
 function startReviewSession(){
   trackEvent('lesson_start', 'flashcard_review', null);
   // eligibleReviewPool() (não STATE.cards.filter(isCardLessonCompleted)
@@ -6430,6 +6500,7 @@ async function startDeckReviewSession(deckId, opts){
   const queue = reviewFilterQueue('oldest', pool);
 
   STATE.reviewSessionUnitFilter = null;
+  STATE.reviewSessionMilestone = null;
   STATE.reviewSessionDeckId = deckId;
   STATE.reviewActiveMode = 'flashcard';
   STATE.reviewQueue = queue;
@@ -6835,6 +6906,7 @@ function renderReviewView(){
       document.getElementById('review-start-all').addEventListener('click', () => {
         STATE.reviewSessionUnitFilter = null;
         STATE.reviewSessionDeckId = null; // Fase D -- mesmo fallback de "abandona o escopo estreito" já usado pra unidade
+        STATE.reviewSessionMilestone = null;
         startReviewSession();
       });
     }
@@ -6847,7 +6919,14 @@ function renderReviewView(){
     // a cada cartão avaliado (ver gradeCurrentCard).
     registerStudyToday();
     maybeShowStreakCelebration();
-    trackEvent('lesson_complete', 'flashcard_review', { count: STATE.reviewQueue.length });
+    // Fase 5: o marco de Revisão conta como realizado só quando a SESSÃO termina
+    // (sem nota mínima). A meta ganha moduleId/unitIds (sessão de marco) ou
+    // unitId (sessão de uma unidade) para o painel da professora derivar depois.
+    const msMeta = STATE.reviewSessionMilestone;
+    if (msMeta) recordModuleReviewDone(msMeta.moduleId, STATE.reviewQueue.length);
+    trackEvent('lesson_complete', 'flashcard_review', Object.assign({ count: STATE.reviewQueue.length },
+      msMeta ? { moduleId: msMeta.moduleId, unitIds: msMeta.unitIds } : {},
+      STATE.reviewSessionUnitFilter ? { unitId: STATE.reviewSessionUnitFilter } : {}));
     // Fase 6 do projeto de reorganização: terminar a revisão nunca deve
     // convidar a repetir a mesma bateria -- "Voltar" leva pra trilha,
     // "Praticar mais" leva pra PRATICAR (Combinar/Palavras difíceis), não
@@ -6867,11 +6946,13 @@ function renderReviewView(){
     document.getElementById('review-again').addEventListener('click', () => {
       STATE.reviewSessionUnitFilter = null;
       STATE.reviewSessionDeckId = null; // Fase D
+      STATE.reviewSessionMilestone = null;
       switchTab('path');
     });
     document.getElementById('review-go-practice').addEventListener('click', () => {
       STATE.reviewSessionUnitFilter = null;
       STATE.reviewSessionDeckId = null; // Fase D
+      STATE.reviewSessionMilestone = null;
       backToReviewModeSelect();
     });
     renderProgressView();
