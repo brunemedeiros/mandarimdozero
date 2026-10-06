@@ -206,7 +206,7 @@ async function deckBrowserLoadOwnContext(){
   }
 }
 
-// ---------- Barra superior (Decks | Adicionar | Painel) ----------
+// ---------- Barra superior (Decks | Adicionar | Painel | Configurar) ----------
 
 // Mesma barra em todas as telas de Decks. Na tela de um Deck, Adicionar
 // usa aquele Deck (se for seu) e o Painel abre filtrado nele.
@@ -217,6 +217,7 @@ function deckTopbarHTML(nodeId){
       <button type="button" class="deck-topbar-btn ${onHome ? 'is-active' : ''}" data-topbar-decks ${onHome ? 'aria-current="page"' : ''}>Decks</button>
       ${canAdd ? `<button type="button" class="deck-topbar-btn" data-topbar-add>Adicionar</button>` : ''}
       <button type="button" class="deck-topbar-btn" data-topbar-panel>Painel</button>
+      ${typeof toggleReviewSettingsPanel === 'function' ? `<button type="button" class="deck-topbar-btn" data-topbar-settings>Configurar</button>` : ''}
     </nav>`;
 }
 
@@ -227,6 +228,11 @@ function wireDeckTopbar(container, nodeId){
     openAddCardModal({ deckId: deck && ['personal_root', 'personal'].includes(deck.kind) ? deck.id : null });
   });
   container.querySelector('[data-topbar-panel]')?.addEventListener('click', () => openDeckPanel(nodeId));
+  // Os ajustes da sessão ficam na tela inicial: dentro de um Deck, volta para lá.
+  container.querySelector('[data-topbar-settings]')?.addEventListener('click', () => {
+    if (nodeId !== 'lang'){ backToDeckTable(); toggleReviewSettingsPanel(true); }
+    else toggleReviewSettingsPanel();
+  });
 }
 
 // ---------- Containers ----------
@@ -815,7 +821,7 @@ function openDeckPanel(nodeId){
     deckBrowserShow('detail');
     renderDeckDetail();
   }
-  DECK_BROWSER.panel = { nodeId, scopeId: nodeId, query: '', tags: [], state: 'all', archived: false, locked: false, selected: new Set(), activeKey: null, mode: 'note', ctx: null };
+  DECK_BROWSER.panel = { nodeId, scopeId: nodeId, query: '', tags: [], state: 'all', archived: false, selected: new Set(), activeKey: null, mode: 'note', ctx: null };
   DECK_BROWSER.panelOpen = true;
   deckPanelMount();
   if (typeof routerNavigate === 'function') routerNavigate(deckBrowserRoute('panel', nodeId));
@@ -919,15 +925,15 @@ async function deckPanelReload(){
   renderDeckPanel();
 }
 
-// O Painel lista as Notes do escopo. Cartões de lições ainda não estudadas
-// ficam escondidos (só aparecem no filtro "Ainda não liberados"); arquivados
-// só no filtro "Arquivados".
+// O Painel lista as Notes do escopo. Diferente do Anki, os cartões da Trilha
+// nascem do avanço do aluno: os de lições ainda não estudadas nunca aparecem
+// (nem em filtro). Arquivados só no filtro "Arquivados".
 function deckBrowserPanelNotes(){
   const decks = deckBrowserDecks();
   const all = (STATE && STATE.cards) || [];
   const scopeId = DECK_BROWSER.panel.scopeId;
   const scoped = scopeId === 'lang' ? all : getStudyScopeForDeck(decks, scopeId, all);
-  return deckBrowserNotes(scoped);
+  return deckBrowserNotes(scoped).filter(n => !n.locked);
 }
 
 function deckBrowserFilterNotes(notes){
@@ -935,7 +941,6 @@ function deckBrowserFilterNotes(notes){
   const q = (p.query || '').trim().toLowerCase();
   return notes.filter(n => {
     if (p.archived ? !n.archived : n.archived) return false;
-    if (p.locked ? !n.locked : n.locked) return false;
     if (p.state !== 'all' && deckBrowserNoteState(n) !== p.state) return false;
     if (p.tags.length && !p.tags.some(t => n.tags.includes(t))) return false;
     if (!q) return true;
@@ -969,21 +974,19 @@ function renderDeckPanelSide(){
     deckBrowserChildren(decks, deck.id).forEach(k => walk(k, depth + 1));
   };
   deckBrowserChildren(decks, 'lang').forEach(d => walk(d, 1));
-  // Tags: num escopo grande, só as gerais + as de cartões próprios/professora
-  // (as finas da Trilha viram centenas; a busca encontra qualquer uma).
+  // Tags: as gerais + as de cartões próprios/professora (as finas da Trilha,
+  // unidade-*/licao-*, viram centenas; a busca encontra qualquer uma). Mesma
+  // regra dos chips de tag da Revisão.
   const scopeCards = deckBrowserPanelNotes().flatMap(n => n.cards);
-  let tags = collectTagsFromCards(scopeCards);
-  if (tags.length > 30 && typeof reviewFilterVisibleTags === 'function'){
-    tags = Array.from(new Set(reviewFilterVisibleTags(scopeCards).concat(p.tags))).sort();
-  }
+  const tags = typeof reviewFilterVisibleTags === 'function'
+    ? Array.from(new Set(reviewFilterVisibleTags(scopeCards).concat(p.tags))).sort()
+    : collectTagsFromCards(scopeCards);
   const archivedCount = deckBrowserPanelNotes().filter(n => n.archived).length;
-  const lockedCount = deckBrowserPanelNotes().filter(n => n.locked).length;
   const logged = !!deckBrowserUserId();
   body.innerHTML = `
     <div class="deck-panel-side-group"><div class="deck-panel-side-label">Decks</div>${deckItems.join('')}</div>
     <div class="deck-panel-side-group"><div class="deck-panel-side-label">Estado</div>
-      ${DECK_PANEL_STATES.map(s => `<button type="button" class="deck-panel-side-item ${!p.archived && !p.locked && p.state === s.id ? 'is-active' : ''}" data-panel-state="${s.id}">${s.label}</button>`).join('')}
-      ${lockedCount ? `<button type="button" class="deck-panel-side-item ${p.locked ? 'is-active' : ''}" data-panel-locked>Ainda não liberados (${lockedCount})</button>` : ''}
+      ${DECK_PANEL_STATES.map(s => `<button type="button" class="deck-panel-side-item ${!p.archived && p.state === s.id ? 'is-active' : ''}" data-panel-state="${s.id}">${s.label}</button>`).join('')}
       ${archivedCount ? `<button type="button" class="deck-panel-side-item ${p.archived ? 'is-active' : ''}" data-panel-archived>Arquivados (${archivedCount})</button>` : ''}
     </div>
     <div class="deck-panel-side-group"><div class="deck-panel-side-label">Tags</div>
@@ -997,15 +1000,11 @@ function renderDeckPanelSide(){
     renderDeckPanelSide(); renderDeckPanelList();
   }));
   body.querySelectorAll('[data-panel-state]').forEach(b => b.addEventListener('click', () => {
-    p.state = b.dataset.panelState; p.archived = false; p.locked = false;
+    p.state = b.dataset.panelState; p.archived = false;
     renderDeckPanelSide(); renderDeckPanelList();
   }));
   body.querySelector('[data-panel-archived]')?.addEventListener('click', () => {
-    p.archived = !p.archived; p.locked = false; p.state = 'all';
-    renderDeckPanelSide(); renderDeckPanelList();
-  });
-  body.querySelector('[data-panel-locked]')?.addEventListener('click', () => {
-    p.locked = !p.locked; p.archived = false; p.state = 'all';
+    p.archived = !p.archived; p.state = 'all';
     renderDeckPanelSide(); renderDeckPanelList();
   });
   body.querySelectorAll('[data-panel-tag]').forEach(b => b.addEventListener('click', () => {
@@ -1029,12 +1028,11 @@ function renderDeckPanelList(){
   const visibleKeys = new Set(notes.map(n => n.key));
   Array.from(p.selected).forEach(k => { if (!visibleKeys.has(k)) p.selected.delete(k); });
   root.querySelector('[data-panel-count]').textContent = notes.length
-    ? `${notes.length} ${notes.length === 1 ? 'conteúdo' : 'conteúdos'}${p.locked ? ' ainda não liberados (das lições que você ainda não estudou)' : ''}.`
+    ? `${notes.length} ${notes.length === 1 ? 'conteúdo' : 'conteúdos'}.`
     : '';
   if (!notes.length){
-    const filtered = p.query || p.tags.length || p.state !== 'all' || p.archived || p.locked;
-    const hasLocked = !filtered && deckBrowserPanelNotes().some(n => n.locked);
-    list.innerHTML = `<p class="profile-empty-note">${filtered ? 'Nenhum cartão encontrado com esse filtro.' : hasLocked ? 'Nenhum cartão liberado ainda. Os das lições que você ainda não estudou estão em "Ainda não liberados".' : 'Este Deck ainda não tem cartões.'}</p>`;
+    const filtered = p.query || p.tags.length || p.state !== 'all' || p.archived;
+    list.innerHTML = `<p class="profile-empty-note">${filtered ? 'Nenhum cartão encontrado com esse filtro.' : 'Nenhum cartão aqui ainda. Os cartões da Trilha aparecem conforme você conclui as lições.'}</p>`;
   } else {
     list.innerHTML = notes.map(n => {
       const own = n.origin === 'self';

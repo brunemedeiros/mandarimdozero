@@ -197,7 +197,7 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     check(lang + ' Trilha começa fechada', !ids.includes('9201'), ids);
     check(lang + ' sem botão Estudar na tabela', table.studyBtns === 0, table.studyBtns);
     check(lang + ' números centralizados embaixo das colunas', table.align.join() === 'center,center', table.align);
-    check(lang + ' barra do topo: Decks | Adicionar | Painel, centralizada', table.bar.join('|') === 'Decks|Adicionar|Painel' && table.barCenter < 3, table);
+    check(lang + ' barra do topo: Decks | Adicionar | Painel | Configurar, centralizada', table.bar.join('|') === 'Decks|Adicionar|Painel|Configurar' && table.barCenter < 3, table);
 
     // ---- 1b) Outros modos numa fileira só; sem bloco Flashcard ----
     const modes = await page.evaluate(() => {
@@ -220,7 +220,8 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     });
     check(lang + ' Speed Review mostra Novo/Aprendendo/Revisar da sessão, cabendo no card', speed.spans.join() === speed.exp.join() && speed.fits && /novo/.test(speed.legend || ''), speed);
     check(lang + ' sem bloco Flashcard nem seção Revisar', !modes.flash && !modes.revisar, modes);
-    check(lang + ' com revisões pendentes há "Estudar tudo"; sem elas, aviso de em dia', modes.studyAll || /em dia|Ainda não há/.test(modes.widget), modes);
+    const queueLen = await page.evaluate(() => getStudyQueue(eligibleReviewPool(), { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay }).length);
+    check(lang + ' "Estudar todos os Decks" só quando há o que estudar', modes.studyAll === queueLen > 0, { modes, queueLen });
 
     // ---- 1c) Sem vínculo ativo com professora: "Cartões da professora" some ----
     const noLink = await page.evaluate(async () => {
@@ -266,7 +267,7 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     check(lang + ' tela do Deck no lugar da tela de modos', detail.visible && detail.modesHidden, detail);
     check(lang + ' tela do Deck: nome com caminho', detail.title === 'Meus Decks › Verbos', detail.title);
     check(lang + ' tela do Deck: Novo/Aprendendo/Revisar + Estudar agora', detail.labels.join('|') === 'Novo:|Aprendendo:|Revisar:' && detail.nums[0] === 2 && detail.study, detail);
-    check(lang + ' tela do Deck: mesma barra do topo', detail.bar.join('|') === 'Decks|Adicionar|Painel', detail.bar);
+    check(lang + ' tela do Deck: mesma barra do topo', detail.bar.join('|') === 'Decks|Adicionar|Painel|Configurar', detail.bar);
     check(lang + ' tela do Deck pessoal: Criar subdeck, Renomear, Publicar, Excluir', ['Criar subdeck', 'Renomear', 'Excluir'].every(b => detail.footer.includes(b)) && detail.footer.some(b => /Publicar|Público/.test(b)), detail.footer);
     check(lang + ' tela do Deck tem endereço próprio', detail.hash === '#/review/decks/9002', detail.hash);
     if (lang === 'fr') await shot(page, 'deck-detail-fr');
@@ -502,41 +503,41 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     });
     check(lang + ' idioma padrão: 1º estudado, 2º pt-BR, pergunta estudado, opção pt-BR, sem site = vazio', defaults[0] === defaults[5] && defaults[1] === 'pt-BR' && defaults[2] === defaults[5] && defaults[3] === 'pt-BR' && defaults[4] == null, defaults);
 
-    // ---- Contador do topo = fila de "Estudar tudo", dividido como a tabela; filtro avisado ----
+    // ---- Sem contador no topo; "Configurar" na barra; filtro de sessão avisado ----
     await page.evaluate(() => { closeDeckPanel && closeDeckPanel(); switchTab('review'); });
     const w1 = await page.evaluate(() => {
-      const q = getStudyQueue(eligibleReviewPool(), { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
-      const exp = [0, 0, 0]; q.forEach(c => { exp[['new', 'learning', 'review'].indexOf(cardStudyBucket(c))]++; });
-      const nums = Array.from(document.querySelectorAll('#review-today-widget .review-today-count')).map(n => Number(n.textContent));
-      return { exp, nums, text: document.getElementById('review-today-widget').textContent };
+      const w = document.getElementById('review-today-widget');
+      const table = document.getElementById('review-decks-table');
+      return { nums: w.querySelectorAll('.review-today-count').length, text: w.textContent,
+        afterTable: !!(table.compareDocumentPosition(w) & Node.DOCUMENT_POSITION_FOLLOWING),
+        oldBtn: !!document.getElementById('review-header-settings-btn'), oldLabel: /Configurar sessão|Revisões pendentes|Para estudar agora/.test(document.getElementById('review-mode-select-wrap').textContent) };
     });
-    check(lang + ' contador do topo: Novo/Aprendendo/Revisar da sessão, sem filtro avisado', (w1.exp.reduce((a, b) => a + b, 0) === 0 || w1.nums.join() === w1.exp.join()) && !/Filtro da sessão/.test(w1.text), w1);
+    check(lang + ' sem contador de revisões no topo; botão de estudar abaixo da tabela', w1.nums === 0 && w1.afterTable && !w1.oldBtn && !w1.oldLabel && !/Filtro da sessão/.test(w1.text), w1);
+    await page.click('#review-deck-topbar-home [data-topbar-settings]');
+    const cfg = await page.evaluate(() => !document.getElementById('review-settings-panel').hasAttribute('hidden'));
+    check(lang + ' "Configurar" abre os ajustes da sessão', cfg, cfg);
+    await page.click('#review-deck-topbar-home [data-topbar-settings]');
     await page.evaluate(() => { updateStudySetting({ reviewOriginFilter: 'self' }); renderReviewModeSelect(); });
     const w2 = await page.evaluate(() => document.getElementById('review-today-widget').textContent);
-    check(lang + ' contador do topo avisa o filtro da sessão', /Filtro da sessão: Meus cartões/.test(w2), w2);
+    check(lang + ' filtro da sessão é avisado', /Filtro da sessão: Meus cartões/.test(w2), w2);
     await page.click('#review-today-filter-clear');
     const w3 = await page.evaluate(() => ({ origin: STATE.studySettings.reviewOriginFilter, text: document.getElementById('review-today-widget').textContent }));
     check(lang + ' "Limpar filtro" volta para todos', w3.origin === 'all' && !/Filtro da sessão/.test(w3.text), w3);
 
-    // ---- Painel: lições não estudadas escondidas; lista sem corte em 200 ----
+    // ---- Painel: lições não estudadas nunca aparecem; lista sem corte em 200 ----
     await page.evaluate(() => openDeckPanel('lang'));
     await page.waitForSelector('#deck-panel-modal [data-panel-open-note]');
     const pn = await page.evaluate(() => {
-      const notes = deckBrowserPanelNotes();
-      const rows = document.querySelectorAll('#deck-panel-modal [data-panel-open-note]').length;
-      const shown = deckBrowserFilterNotes(notes).length;
-      const listedLocked = Array.from(document.querySelectorAll('#deck-panel-modal [data-panel-open-note]')).some(r => (notes.find(n => n.key === r.dataset.panelOpenNote) || {}).locked);
-      return { locked: notes.filter(n => n.locked).length, rows, shown, listedLocked, count: document.querySelector('#deck-panel-modal [data-panel-count]').textContent, btn: !!document.querySelector('#deck-panel-modal [data-panel-locked]') };
+      const lockedKeys = new Set(deckBrowserNotes(STATE.cards).filter(n => n.locked).map(n => n.key));
+      const rowEls = Array.from(document.querySelectorAll('#deck-panel-modal [data-panel-open-note]'));
+      return { lockedTotal: lockedKeys.size, rows: rowEls.length, shown: deckBrowserFilterNotes(deckBrowserPanelNotes()).length,
+        listedLocked: rowEls.some(r => lockedKeys.has(r.dataset.panelOpenNote)),
+        panelHasLocked: deckBrowserPanelNotes().some(n => n.locked),
+        count: document.querySelector('#deck-panel-modal [data-panel-count]').textContent,
+        side: document.querySelector('#deck-panel-modal [data-panel-side-body]').textContent };
     });
-    check(lang + ' Painel: lições não estudadas ficam fora da lista', pn.locked > 0 && !pn.listedLocked && pn.btn, pn);
+    check(lang + ' Painel: lições não estudadas nunca aparecem, nem em filtro', pn.lockedTotal > 0 && !pn.listedLocked && !pn.panelHasLocked && !/não liberados/.test(pn.side), pn);
     check(lang + ' Painel: lista inteira, sem "mostrando os primeiros"', pn.rows === pn.shown && !/primeiros/.test(pn.count), pn);
-    await page.click('#deck-panel-modal [data-panel-locked]');
-    const pl = await page.evaluate(() => {
-      const notes = deckBrowserPanelNotes();
-      const keys = Array.from(document.querySelectorAll('#deck-panel-modal [data-panel-open-note]')).map(r => r.dataset.panelOpenNote);
-      return { n: keys.length, allLocked: keys.every(k => (notes.find(n => n.key === k) || {}).locked), locked: notes.filter(n => n.locked).length, count: document.querySelector('#deck-panel-modal [data-panel-count]').textContent };
-    });
-    check(lang + ' Painel: "Ainda não liberados" mostra só eles, todos', pl.allLocked && pl.n === pl.locked && /não liberados/.test(pl.count), pl);
     await page.evaluate(() => closeDeckPanel());
 
     check(lang + ' sem erros de página', errors.length === 0, errors);

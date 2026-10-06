@@ -5742,7 +5742,7 @@ const REVIEW_ORIGIN_LABELS = { all: 'Todas', study: 'Da trilha', teacher: 'Da pr
 // da UI de propósito; REVIEW_FILTER_LABELS continua existindo só porque
 // reviewFilterQueue()/getStudyQueue() ainda usam os 3 valores
 // internamente (o que mudou é que a aluna não escolhe mais entre eles).
-// Filtros de sessão (origem/tag, em "Configurar sessão") valem para "Estudar
+// Filtros de sessão (origem/tag, em "Configurar") valem para "Estudar
 // tudo", mas não para a tabela de Decks. Resumo para avisar quando estão ativos.
 function reviewSessionFilterSummary(){
   const parts = [];
@@ -5753,43 +5753,23 @@ function reviewSessionFilterSummary(){
   return parts.join(' · ');
 }
 
+// "Estudar tudo" (todos os Decks juntos) fica embaixo da tabela de Decks; as
+// contagens por Deck já estão na tabela, então aqui não há números. Aviso
+// quando um filtro de sessão (origem/tag, em "Configurar") está ativo.
 function renderReviewTodayWidget(){
   const wrap = document.getElementById('review-today-widget');
   if (!wrap) return;
   const pool = eligibleReviewPool();
-  // Mesma fila de "Estudar tudo", separada como as colunas da tabela de Decks.
-  const split = { new: 0, learning: 0, review: 0 };
-  getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay })
-    .forEach(c => { split[cardStudyBucket(c)]++; });
-  const trueCount = split.new + split.learning + split.review;
+  const trueCount = getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay }).length;
   const filterSummary = reviewSessionFilterSummary();
   const filterNote = filterSummary
     ? `<div class="review-today-filter">Filtro da sessão: ${escapeHTML(filterSummary)} · <button type="button" class="admin-select-link review-today-filter-clear" id="review-today-filter-clear">Limpar filtro</button></div>`
     : '';
-  if (trueCount === 0){
-    const title = pool.length === 0 ? 'Ainda não há revisões' : 'Você está em dia! 🍵';
-    const desc = pool.length === 0
-      ? (filterSummary ? 'Nenhum cartão com o filtro da sessão.' : 'Complete uma lição no Estudo pra começar a ter palavras pra revisar.')
-      : 'Palavras difíceis e Combinar continuam disponíveis logo abaixo.';
-    wrap.innerHTML = `
-      <div class="review-mode-empty-title">${title}</div>
-      <div class="review-mode-empty-desc">${desc}</div>
-      ${filterNote}
-    `;
-  } else {
-    const num = (n, cls, label) => `<div class="review-today-col"><div class="review-today-count ${n ? cls : 'is-zero'}">${n}</div><div class="review-today-col-label">${label}</div></div>`;
-    // "Estudar tudo" substitui o antigo bloco Flashcard: é a mesma sessão
-    // (todos os Decks juntos); estudar um Deck só é pela tabela de Decks.
-    wrap.innerHTML = `
-      <div class="review-today-label">Para estudar agora</div>
-      <div class="review-today-split" aria-label="Novo ${split.new}, Aprendendo ${split.learning}, Revisar ${split.review}">
-        ${num(split.new, 'is-new', 'Novo')}${num(split.learning, 'is-learning', 'Aprendendo')}${num(split.review, 'is-review', 'Revisar')}
-      </div>
-      ${filterNote}
-      <button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">▶ Estudar tudo</button>
-    `;
-    document.getElementById('review-study-all-btn').addEventListener('click', () => openReviewSession('flashcard'));
-  }
+  wrap.innerHTML = `
+    ${trueCount ? `<button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">▶ Estudar todos os Decks</button>` : ''}
+    ${filterNote}
+  `;
+  document.getElementById('review-study-all-btn')?.addEventListener('click', () => openReviewSession('flashcard'));
   document.getElementById('review-today-filter-clear')?.addEventListener('click', () => {
     updateStudySetting({ reviewOriginFilter: 'all', reviewTagFilter: [] });
     renderReviewModeSelect();
@@ -8194,17 +8174,18 @@ document.getElementById('review-tag-clear')?.addEventListener('click', () => {
 // antes era um botão de texto solto entre o dropdown e REVISAR, a autora
 // não gostou) -- recolhido por padrão, sincroniza ao abrir (4 controles
 // de sessão, ver renderReviewSettingsView).
-const reviewHeaderSettingsBtn = document.getElementById('review-header-settings-btn');
-if (reviewHeaderSettingsBtn){
-  reviewHeaderSettingsBtn.addEventListener('click', () => {
-    const panel = document.getElementById('review-settings-panel');
-    if (panel.hasAttribute('hidden')){
-      panel.removeAttribute('hidden');
-      renderReviewSettingsView();
-    } else {
-      panel.setAttribute('hidden', '');
-    }
-  });
+// "Configurar" (barra Decks/Adicionar/Painel/Configurar, shared/deck-browser.js):
+// abre/fecha o painel de ajustes da sessão na tela inicial da Revisão.
+function toggleReviewSettingsPanel(forceOpen){
+  const panel = document.getElementById('review-settings-panel');
+  if (!panel) return;
+  if (forceOpen || panel.hasAttribute('hidden')){
+    panel.removeAttribute('hidden');
+    renderReviewSettingsView();
+    panel.scrollIntoView({ block: 'nearest' });
+  } else {
+    panel.setAttribute('hidden', '');
+  }
 }
 document.querySelectorAll('[data-settings-section]').forEach(btn => {
   btn.addEventListener('click', () => switchSettingsSection(btn.dataset.settingsSection));

@@ -1732,7 +1732,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
   .review-mode-cards-row .review-mode-card .name{ font-size:12.5px; }
   .review-mode-cards-row .review-mode-card .desc{ font-size:10.5px; }
 }
-#review-today-widget{ text-align:center; margin-bottom:14px; }
+#review-today-widget{ text-align:center; margin:12px 0 14px; }
 .review-today-label{ font-size:12px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft); font-weight:800; margin-bottom:4px; }
 .review-today-count{ font-size:38px; font-weight:800; line-height:1; color:var(--seal-red-dark); font-variant-numeric:tabular-nums; }
 .review-today-split{ display:flex; justify-content:center; gap:22px; margin:2px 0 10px; }
@@ -3270,18 +3270,6 @@ body.hide-pinyin .prompt-pinyin{
         <p>O que você deve fazer agora?</p>
       </div>
 
-      <!-- Prop 3 (ver CLAUDE.md, "7 propostas") -- "Meus Cartões" saiu do
-           menu do avatar (ninguém clicava lá) e ganhou este botão. 5ª
-           rodada de grilling: "⚙️ Configurar sessão" entrou nesta MESMA
-           fileira (saiu do ícone ao lado do título) -- pill igual às
-           sub-abas do Painel de Admin/Perfil, logo abaixo de
-           título+subtítulo, centralizado (mesmo .leaderboard-tabs sem
-           override de alinhamento), zero CSS novo. -->
-      <div class="leaderboard-tabs" role="tablist" aria-label="Atalhos de Revisão">
-        <button type="button" class="leaderboard-tab" id="review-header-settings-btn">⚙️ Configurar sessão</button>
-      </div>
-
-      <div id="review-today-widget"></div>
 
       <div class="review-settings-panel" id="review-settings-panel" hidden>
         <!-- Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila"
@@ -3322,6 +3310,7 @@ body.hide-pinyin .prompt-pinyin{
 
       <div class="section-label">Decks</div>
       <div class="deck-table-wrap" id="review-decks-table"></div>
+      <div id="review-today-widget"></div>
 
       <div class="section-label">Outros modos</div>
       <p class="review-section-hint">Speed Review usa a sessão de hoje (palavras novas e revisões); Palavras difíceis e Combinar funcionam a qualquer hora.</p>
