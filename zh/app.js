@@ -2331,6 +2331,44 @@ function renderDailyChallengesStrip(){
   });
 }
 
+// ---------- Fase 7 da trilha: modo Mapa ----------
+// DOM/seleção/painel em shared/trail-map.js; aqui só o modelo (estados reais) e o que cada botão faz.
+const TRAIL_VIEW_KEY = 'mandarim_trail_view';
+
+function mapUnitDescribe(u, moduleId){
+  const st = unitBlockState(u);
+  const hasLessons = isLessonUnit(u) && u.lessons.length > 0;
+  const lines = [];
+  if (hasLessons){
+    const done = (st === 'done' || st === 'skipped') ? u.lessons.length : currentLessonIdx(u.id);
+    lines.push(`${done} de ${u.lessons.length} lições concluídas`);
+  }
+  const { dueForReview } = unitCardCounts(u.id);
+  if (dueForReview > 0) lines.push(`🔁 ${dueForReview} para revisar`);
+  const actions = [];
+  if (st === 'locked'){
+    lines.push('Complete a unidade anterior para liberar esta.');
+    if (moduleId && trailSkipAllowed()) actions.push({ label: 'Fazer Ponto de verificação para pular', primary: false, onClick: () => openCheckpoint(moduleId) });
+    else if (moduleId) lines.push('Pular unidades é do plano Premium (ou de alunos da professora).');
+  } else if (st === 'done' || st === 'skipped'){
+    actions.push({ label: 'Abrir de novo', primary: false, onClick: () => openUnitDetail(u.id) });
+  } else {
+    const started = !!(STATE.unitProgress[u.id] && STATE.unitProgress[u.id].started);
+    actions.push({ label: started ? 'Continuar' : 'Começar', primary: true, onClick: () => openUnitDetail(u.id) });
+  }
+  return { eyebrow: unitTypeOf(u) === 'grammar' ? 'Gramática' : 'Unidade', title: u.title, status: TRAIL_MAP_STATE_LABEL[st], goal: u.goal || '', lines, actions };
+}
+
+function renderTrailMapView(container){
+  const nodes = UNITS.map(u => {
+    const st = unitBlockState(u);
+    return { key: 'u:' + u.id, kind: 'unit', icon: UNIT_ICONS[u.id] || '📖', label: u.title, state: st, current: st === 'current',
+      aria: `${u.title}, ${TRAIL_MAP_STATE_LABEL[st]}` };
+  });
+  const describe = (key) => mapUnitDescribe(UNITS.find(u => String(u.id) === key.slice(2)), null);
+  renderTrailMap(container, { sections: [{ title: 'Unidades', nodes }] }, describe);
+}
+
 // Fase 2 da trilha: cartão "Continuar" no topo. Fonte única = nextTrailItem
 // (shared/trail-state-model.js); aqui só desenha. A métrica mostrada é a
 // oficial: lições concluídas.
@@ -2373,7 +2411,15 @@ function renderUnitsGrid(){
   if (levelBadge) levelBadge.style.display = UNITS.every(u => STATE.unitProgress[u.id]?.completed) ? '' : 'none';
   const grid = document.getElementById('units-grid');
   grid.innerHTML = '';
+  grid.appendChild(buildTrailViewToggle(TRAIL_VIEW_KEY, () => renderUnitsGrid()));
   grid.appendChild(buildTrailContinueCard());
+  if (trailViewPref(TRAIL_VIEW_KEY) === 'map'){
+    const mapRoot = document.createElement('div');
+    mapRoot.style.gridColumn = '1 / -1';
+    grid.appendChild(mapRoot);
+    renderTrailMapView(mapRoot);
+    return;
+  }
   UNITS.forEach((u) => {
     const prog = STATE.unitProgress[u.id];
     grid.appendChild(buildUnitBlock(u));

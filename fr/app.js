@@ -2030,6 +2030,80 @@ function buildTrailContinueCard(){
   return card;
 }
 
+// ---------- Fase 7 da trilha: modo Mapa ----------
+// DOM/seleção/painel em shared/trail-map.js; aqui só o modelo (estados reais) e o que cada botão faz.
+const TRAIL_VIEW_KEY = 'frances_trail_view';
+
+function mapUnitDescribe(u, moduleId){
+  const st = unitBlockState(u);
+  const hasLessons = isLessonUnit(u) && u.lessons.length > 0;
+  const lines = [];
+  if (hasLessons){
+    const done = (st === 'done' || st === 'skipped') ? u.lessons.length : currentLessonIdx(u.id);
+    lines.push(`${done} de ${u.lessons.length} lições concluídas`);
+  }
+  const { dueForReview } = unitCardCounts(u.id);
+  if (dueForReview > 0) lines.push(`🔁 ${dueForReview} para revisar`);
+  const actions = [];
+  if (st === 'locked'){
+    lines.push('Complete a unidade anterior para liberar esta.');
+    if (moduleId && trailSkipAllowed()) actions.push({ label: 'Fazer Ponto de verificação para pular', primary: false, onClick: () => openCheckpoint(moduleId) });
+    else if (moduleId) lines.push('Pular unidades é do plano Premium (ou de alunos da professora).');
+  } else if (st === 'done' || st === 'skipped'){
+    actions.push({ label: 'Abrir de novo', primary: false, onClick: () => openUnitDetail(u.id) });
+  } else {
+    const started = !!(STATE.unitProgress[u.id] && STATE.unitProgress[u.id].started);
+    actions.push({ label: started ? 'Continuar' : 'Começar', primary: true, onClick: () => openUnitDetail(u.id) });
+  }
+  return { eyebrow: unitTypeOf(u) === 'grammar' ? 'Gramática' : 'Unidade', title: u.title, status: TRAIL_MAP_STATE_LABEL[st], goal: u.goal || '', lines, actions };
+}
+
+function renderTrailMapView(container, levelModules){
+  const sections = levelModules.map((module, mIdx) => {
+    const nodes = module.unitIds.map(id => {
+      const u = UNITS.find(x => x.id === id);
+      const st = unitBlockState(u);
+      return { key: 'u:' + id, kind: 'unit', icon: UNIT_ICONS[id] || '📖', label: u.title, state: st, current: st === 'current',
+        aria: `${u.title}, ${TRAIL_MAP_STATE_LABEL[st]}${unitTypeOf(u) === 'grammar' ? ', gramática' : ''}` };
+    });
+    const sel = moduleReviewSelection(module);
+    const rst = milestoneState(sel.available, STATE.reviewMilestones[module.id]);
+    nodes.push({ key: 'r:' + module.id, kind: 'review', icon: '🔁', label: 'Revisão', state: rst === 'empty' ? 'locked' : (rst === 'done' ? 'done' : 'available'),
+      aria: `Revisão do módulo ${mIdx + 1}, opcional` });
+    const cp = STATE.checkpointProgress[module.id];
+    nodes.push({ key: 'c:' + module.id, kind: 'checkpoint', icon: '🏆', label: 'Ponto', state: cp.completed ? 'done' : (moduleUnlocked(module) ? 'available' : 'locked'),
+      aria: `Ponto de verificação do módulo ${mIdx + 1}` });
+    return { title: `Módulo ${mIdx + 1} · ${module.title}`, nodes };
+  });
+  const find = key => { const [k, id] = [key.slice(0, 1), key.slice(2)]; return { k, id }; };
+  const describe = (key) => {
+    const { k, id } = find(key);
+    if (k === 'u'){
+      const mod = MODULES.find(m => m.unitIds.includes(id));
+      return mapUnitDescribe(UNITS.find(u => u.id === id), mod && mod.id);
+    }
+    const module = MODULES.find(m => m.id === id);
+    if (k === 'r'){
+      const sel = moduleReviewSelection(module);
+      const rec = STATE.reviewMilestones[module.id];
+      const st = milestoneState(sel.available, rec);
+      const why = milestoneReasonText(sel);
+      return { eyebrow: 'Revisão', title: 'Revisão do módulo', status: st === 'done' ? 'Revisada' : (st === 'empty' ? 'Sem itens' : 'Recomendada'),
+        goal: 'Opcional: uma sessão curta com o que mais precisa ser revisto neste módulo. Nunca bloqueia o avanço.',
+        lines: st === 'empty' ? ['Ainda não há cartões para revisar neste módulo.'] : [why].concat(rec && rec.lastDate ? [`Última sessão: ${rec.lastDate.split('-').reverse().join('/')}`] : []),
+        actions: st === 'empty' ? [] : [{ label: 'Revisar agora', primary: true, onClick: () => startModuleReviewSession(module.id) }] };
+    }
+    const cp = STATE.checkpointProgress[module.id];
+    const lines = [];
+    const actions = [];
+    if (!trailSkipAllowed()) lines.push('Pular unidades é do plano Premium (ou de alunos da professora).');
+    else actions.push({ label: cp.completed ? 'Refazer o ponto' : 'Fazer o Ponto de verificação', primary: !cp.completed, onClick: () => openCheckpoint(module.id) });
+    return { eyebrow: 'Ponto de verificação', title: module.title, status: cp.completed ? `Aprovado (melhor nota ${cp.bestScore || 0}%)` : 'Disponível',
+      goal: 'Teste o módulo inteiro de uma vez. Se for bem (70% ou mais), as unidades dele são marcadas como puladas.', lines, actions };
+  };
+  renderTrailMap(container, { sections }, describe);
+}
+
 function buildLevelTestCard(test){
   const lt = STATE.levelTestProgress[test.id];
   const card = document.createElement('button');
@@ -2416,7 +2490,15 @@ function renderUnitsGrid(){
   }
 
   grid.innerHTML = '';
+  grid.appendChild(buildTrailViewToggle(TRAIL_VIEW_KEY, () => renderUnitsGrid()));
   grid.appendChild(buildTrailContinueCard());
+  if (trailViewPref(TRAIL_VIEW_KEY) === 'map'){
+    const mapRoot = document.createElement('div');
+    mapRoot.style.gridColumn = '1 / -1';
+    grid.appendChild(mapRoot);
+    renderTrailMapView(mapRoot, levelModules);
+    return;
+  }
 
   levelModules.forEach((module, mIdx) => {
     const unlocked = moduleUnlocked(module);
