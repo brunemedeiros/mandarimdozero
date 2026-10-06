@@ -18,6 +18,8 @@ function trailEscape(s){
   return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+// Linha curta no rodapé do bloco (só o que ajuda a ler o estado de relance).
+const TRAIL_MAP_NOTE = { done: '✓ Concluída', skipped: '↷ Pulada', current: 'Você está aqui', locked: '🔒 Bloqueada', empty: 'Nada ainda' };
 const TRAIL_MAP_STATE_LABEL = { done: 'Concluída', skipped: 'Pulada', current: 'Atual', available: 'Disponível', locked: 'Bloqueada', empty: 'Sem itens' };
 
 // Constrói o mapa dentro de `root` (limpa o que havia). Devolve { select, close }.
@@ -54,7 +56,7 @@ function renderTrailMap(root, model, describe, opts){
       b.dataset.key = n.key;
       b.setAttribute('aria-label', n.aria || `${n.label}, ${TRAIL_MAP_STATE_LABEL[n.state] || n.state}`);
       if (n.current) b.setAttribute('aria-current', 'step');
-      b.innerHTML = `<span class="tm-icon" aria-hidden="true">${trailEscape(n.icon)}</span><span class="tm-label">${trailEscape(n.label)}</span>`;
+      b.innerHTML = `<span class="tm-icon" aria-hidden="true">${trailEscape(n.icon)}</span><span class="tm-label">${trailEscape(n.label)}</span>${TRAIL_MAP_NOTE[n.state] ? `<span class="tm-note" aria-hidden="true">${TRAIL_MAP_NOTE[n.state]}</span>` : ''}`;
       b.addEventListener('click', () => select(n.key, b));
       row.appendChild(b);
     });
