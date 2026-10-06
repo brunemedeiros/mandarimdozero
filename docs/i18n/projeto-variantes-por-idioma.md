@@ -126,3 +126,11 @@ Ao criar uma unidade/nível (A2, B1…), para cada item da trilha que **troque a
 | 3 | Persistir `dormant` e fazer as RPCs ignorarem | Sim (painel) |
 
 Gatilho: antes de entrar conteúdo do curso de Português ou um 3º idioma de site. Com 2 idiomas, a gaveta basta.
+
+## 10. Decisões da 3ª rodada (2026-10-06)
+
+- Personagens nomeados em diálogos (Ana/Léo, "B", Brune nas Units 5 e 8 do zh) NÃO são convertidos: não representam o usuário.
+- Países dos alunos vinculados: padrão Brasil; Barae (`hirschbarae`) e Evan (`evaneldemachki`) = EUA; demais a confirmar.
+- Gênero vira campo do perfil (Masculino, Feminino, Outro, Prefiro não dizer); tratamento de "Outro/Prefiro não dizer" em aberto (ver conversa).
+- Cursos: FSRS dos cartões da professora/próprios fica por idioma estudado; missões do dia por curso; ranking = "Todos" + cada idioma estudado (não é curso; francês pelo português ou pelo inglês soma igual); curso só disponível quando o A1 existir no idioma do site; não existe curso sem conteúdo/interface naquele idioma do site.
+- Migration 072 (`profiles.country`) aplicada no Staging em 2026-10-06 (produção pendente).
