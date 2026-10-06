@@ -30,6 +30,13 @@
 // por STATE/progresso.
 
 let PROFILE_CACHE = null;
+// Dados privados do perfil (migration 073, tabela profile_private: só o próprio
+// dono lê/escreve). Hoje só o gênero ({gender: 'masculine'|'feminine'|'other'|
+// 'undisclosed'|null}). null = ainda não carregado ou tabela indisponível;
+// PROFILE_PRIVATE_SUPPORTED só vira true se a leitura funcionou (sem a
+// migration, o campo some e nada quebra).
+let PROFILE_PRIVATE_CACHE = null;
+let PROFILE_PRIVATE_SUPPORTED = false;
 let OTHER_LANGUAGES_RAW_CACHE = null;
 
 // ---------- Badges especiais (identidade, não gameplay) ----------
@@ -170,14 +177,43 @@ async function ensureProfileLoaded(){
     .maybeSingle();
   if (error){ console.error('Erro ao carregar perfil:', error); return null; }
   PROFILE_CACHE = data || await createInitialProfile();
+  await loadProfilePrivate();
   refreshProfilePlaceholders();
   return PROFILE_CACHE;
+}
+
+// Lê o gênero de profile_private. Best-effort: qualquer falha (tabela
+// inexistente, rede) deixa o campo indisponível, nunca lança.
+async function loadProfilePrivate(){
+  PROFILE_PRIVATE_CACHE = null;
+  PROFILE_PRIVATE_SUPPORTED = false;
+  try {
+    const { data, error } = await supabaseClient
+      .from('profile_private')
+      .select('gender')
+      .eq('user_id', CURRENT_USER.id)
+      .maybeSingle();
+    if (error) return;
+    PROFILE_PRIVATE_SUPPORTED = true;
+    PROFILE_PRIVATE_CACHE = { gender: normalizeProfileGender(data && data.gender) };
+  } catch (e) { console.error('profile_private:', e); }
+}
+
+// Grava o gênero (upsert da própria linha). '' = não preenchido (null).
+async function saveProfileGender(gender){
+  const g = normalizeProfileGender(gender);
+  const { error } = await supabaseClient
+    .from('profile_private')
+    .upsert({ user_id: CURRENT_USER.id, gender: g }, { onConflict: 'user_id' });
+  if (error){ console.error('Erro ao salvar gênero:', error); return false; }
+  PROFILE_PRIVATE_CACHE = { gender: g };
+  return true;
 }
 
 // O username NÃO é editável (identificador público permanente, gerado pelo
 // sistema): este payload nunca o contém, e o servidor também recusa qualquer
 // UPDATE que o altere (trigger profiles_protect_identity, migration 060).
-async function saveProfileEdits({ displayName, bio, featuredBadgeId, publicProfile, country }){
+async function saveProfileEdits({ displayName, bio, featuredBadgeId, publicProfile, country, gender }){
   const payload = {
     display_name: (displayName || '').trim().slice(0, 60) || null,
     bio: (bio || '').trim().slice(0, 160) || null,
@@ -214,6 +250,15 @@ async function saveProfileEdits({ displayName, bio, featuredBadgeId, publicProfi
     return { ok: false, error: t('profile.err.saveFailed') };
   }
   PROFILE_CACHE = data;
+  // Gênero (profile_private, migration 073): só se a tabela existe e o campo
+  // foi enviado. Falha aqui não desfaz nome/bio já salvos, mas avisa.
+  if (gender !== undefined && PROFILE_PRIVATE_SUPPORTED){
+    const okGender = await saveProfileGender(gender);
+    if (!okGender){
+      refreshProfilePlaceholders();
+      return { ok: false, error: t('profile.err.saveFailed') };
+    }
+  }
   refreshProfilePlaceholders();
   return { ok: true, profile: data };
 }
@@ -635,6 +680,18 @@ function renderProfileCountrySelect(p){
   sel.value = p.country || '';
 }
 
+// Gênero (profile_private): só aparece se a tabela existe (migration 073).
+function renderProfileGenderSelect(){
+  const sel = document.getElementById('profile-edit-gender');
+  if (!sel) return;
+  const label = sel.previousElementSibling, hint = sel.nextElementSibling;
+  [label, sel, hint].forEach(el => { if (el) el.style.display = PROFILE_PRIVATE_SUPPORTED ? '' : 'none'; });
+  if (!PROFILE_PRIVATE_SUPPORTED) return;
+  sel.innerHTML = `<option value="">${t('ui.profileEdit.genderNone')}</option>` +
+    PROFILE_GENDERS.map(g => `<option value="${g}">${t('ui.profileEdit.gender.' + g)}</option>`).join('');
+  sel.value = (PROFILE_PRIVATE_CACHE && PROFILE_PRIVATE_CACHE.gender) || '';
+}
+
 function openEditProfileModal(specialBadges){
   const modal = document.getElementById('profile-edit-modal');
   const p = PROFILE_CACHE;
@@ -643,6 +700,7 @@ function openEditProfileModal(specialBadges){
   document.getElementById('profile-edit-bio').value = p?.bio || '';
   document.getElementById('profile-edit-bio-count').textContent = `${(p?.bio || '').length}/160`;
   renderProfileCountrySelect(p);
+  renderProfileGenderSelect();
   document.getElementById('profile-edit-error').textContent = '';
   document.getElementById('profile-edit-avatar-error').textContent = '';
   document.getElementById('profile-edit-public-switch')?.setAttribute('aria-checked', p?.public_profile ? 'true' : 'false');
@@ -734,6 +792,7 @@ function wireProfileEditModal(){
       featuredBadgeId: document.getElementById('profile-edit-featured-badge')?.value,
       publicProfile: document.getElementById('profile-edit-public-switch')?.getAttribute('aria-checked') === 'true',
       country: document.getElementById('profile-edit-country')?.value,
+      gender: document.getElementById('profile-edit-gender')?.value,
     });
 
     saveBtn.disabled = false;

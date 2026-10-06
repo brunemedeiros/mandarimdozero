@@ -259,7 +259,9 @@ function speakFrenchAudioOnly(text, btnEl, isAutoplay){
   window.speechSynthesis.resume();
 
   const buildUtterance = () => {
-    const u = new SpeechSynthesisUtterance(text);
+    // Forma neutra de gênero ("brésilien·ne") é lida como as duas formas
+    // ("brésilien, brésilienne"); texto exibido e manifest não mudam.
+    const u = new SpeechSynthesisUtterance(typeof speakableProfileText === 'function' ? speakableProfileText(text) : text);
     u.lang = 'fr-FR';
     u.voice = TTS.voice;
     u.rate = 0.9;

@@ -1739,6 +1739,13 @@ window.I18N_CATALOG['en'] = {
   'ui.profileEdit.country': 'Country of origin', // ALTA
   'ui.profileEdit.countryHint': 'Used in the course examples (e.g. "I\'m Brazilian"). If you don\'t choose, we assume Brazil.', // ALTA
   'ui.profileEdit.countryNone': 'Prefer not to say (Brazil)', // ALTA
+  'ui.profileEdit.gender': 'Gender', // MÉDIA
+  'ui.profileEdit.genderHint': 'Private: only you can see it. Used to pick the right word form in the course examples (e.g. French "brésilien" or "brésilienne"). If you don\'t choose, we show both forms (brésilien·ne).', // MÉDIA
+  'ui.profileEdit.genderNone': 'Not set', // ALTA
+  'ui.profileEdit.gender.masculine': 'Male', // ALTA
+  'ui.profileEdit.gender.feminine': 'Female', // ALTA
+  'ui.profileEdit.gender.other': 'Other', // ALTA
+  'ui.profileEdit.gender.undisclosed': 'Prefer not to say', // ALTA
   'ui.profileEdit.bioPh.fr': 'Tell us a little about yourself and why you\'re learning French', // ALTA
   'ui.profileEdit.bioPh.zh': 'Tell us a little about yourself and why you\'re learning Mandarin', // ALTA
   'ui.zh.searchAria': 'Search by pinyin, hanzi or translation', // ALTA

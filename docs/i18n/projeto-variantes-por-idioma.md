@@ -134,3 +134,12 @@ Gatilho: antes de entrar conteúdo do curso de Português ou um 3º idioma de si
 - Gênero vira campo do perfil (Masculino, Feminino, Outro, Prefiro não dizer); tratamento de "Outro/Prefiro não dizer" em aberto (ver conversa).
 - Cursos: FSRS dos cartões da professora/próprios fica por idioma estudado; missões do dia por curso; ranking = "Todos" + cada idioma estudado (não é curso; francês pelo português ou pelo inglês soma igual); curso só disponível quando o A1 existir no idioma do site; não existe curso sem conteúdo/interface naquele idioma do site.
 - Migration 072 (`profiles.country`) aplicada no Staging em 2026-10-06 (produção pendente).
+
+## 11. Decisões da 4ª rodada (2026-10-06): gênero e nacionalidade neutra
+
+- **Gênero** (Masculino, Feminino, Outro, Prefiro não dizer; opcional) é dado sensível e NÃO fica em `profiles` (legível publicamente). Mora em tabela separada `profile_private` (migration 073): `user_id` PK, `gender` com CHECK, RLS só do próprio dono (select/insert/update/delete), `anon` sem privilégio, `on delete cascade`. Professora/admin não leem. Valores internos: `masculine`, `feminine`, `other`, `undisclosed`, NULL.
+- **Placeholders**: `{nacionalidade}` (fr) e `{nacionalidade_t}` (pt) dependem do gênero. Masculino = forma masculina; Feminino = feminina; Outro, Prefiro não dizer, não preenchido e convidado = **forma neutra com duas terminações** no texto exibido (fr "brésilien·ne", pt "brasileiro·a"). Inglês ("Brazilian") e chinês não têm gênero, ficam como estavam. Tabela por país em `PROFILE_COUNTRIES` (`fr`/`frm`/`frn`, `pt`/`ptm`/`ptn`). Invariáveis (britannique, canadense) repetem a forma.
+- **Áudio**: a forma neutra é LIDA como as duas ("brésilien, brésilienne"), sem mudar o texto exibido nem chaves de manifest. Implementado em `speakableProfileText` (shared/profile-placeholders.js), chamado só no caminho Web Speech de `speakFrenchAudioOnly` (fr/app.js). Texto com placeholder quase nunca bate `AUDIO_MANIFEST` (chave = texto literal), então cai no Web Speech como já ocorria com nome/país; se algum dia bater (ex.: frase sem gênero), toca o mp3. O TTS por Field (Edge Function) não precisa disso: o conteúdo de Fields é digitado pelo usuário e não usa placeholders.
+- **Efeito visível**: quem não preencheu o gênero (todos hoje) passa a ver "brésilien·ne"/"brasileiro·a" onde antes aparecia a forma feminina. Decisão da dona.
+- Pendente: aplicar a 073 na produção; cada aluna(o) escolhe o próprio gênero (nada é preenchido por nós).
+

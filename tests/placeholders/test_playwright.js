@@ -40,13 +40,13 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     const p0 = await getTxt(unitId, 0);
     L('convidado: nome = Convidado', /Convidado/.test(p0.f) && /Convidado/.test(p0.t) && p0.blocks.some(b => /Convidado/.test(b)), p0);
     const p1 = await getTxt(unit2, 1);
-    L('convidado: nacionalidade padrão Brasil', lang === 'fr' ? (p1.f === 'Je suis brésilienne.' && /brasileira/.test(p1.t)) : (p1.f === '我是巴西人。' && /brasileira/.test(p1.t)), p1);
+    L('convidado: nacionalidade padrão Brasil', lang === 'fr' ? (p1.f === 'Je suis brésilien·ne.' && /brasileiro·a/.test(p1.t)) : (p1.f === '我是巴西人。' && /brasileiro·a/.test(p1.t)), p1);
 
     // perfil carregado depois: reescreve
     await ev(() => { CURRENT_USER = { id: 'U', email: 'a@b' }; PROFILE_CACHE = { display_name: 'José "Zé" <b>Ângelo', country: 'US', bio: null }; refreshProfilePlaceholders(); });
     const q0 = await getTxt(unitId, 0), q1 = await getTxt(unit2, 1);
     L('perfil: nome com aspas/acento, sem tag', /José "Zé" bÂngelo/.test(q0.f) && !/[<>]/.test(q0.f + q0.t), q0);
-    L('perfil: nacionalidade US', lang === 'fr' ? (q1.f === 'Je suis américaine.' && /americana/.test(q1.t)) : (q1.f === '我是美国人。' && /americana/.test(q1.t)), q1);
+    L('perfil: nacionalidade US', lang === 'fr' ? (q1.f === 'Je suis américain·e.' && /americano·a/.test(q1.t)) : (q1.f === '我是美国人。' && /americano·a/.test(q1.t)), q1);
 
     // exercício/áudio: botão de áudio com o texto preenchido não quebra (cai no Web Speech)
     const audio = await ev((lang) => {
@@ -98,7 +98,73 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     L('salvar: vazio vira null; lixo vira null', payloads.out[2].country === null && payloads.out[3].country === null, [payloads.out[2], payloads.out[3]]);
     // salvar reaplica os placeholders
     const after = await getTxt(unit2, 1);
-    L('salvar reaplica o conteúdo', lang === 'fr' ? after.f === 'Je suis américaine.' : after.f === '我是美国人。', after);
+    L('salvar reaplica o conteúdo', lang === 'fr' ? after.f === 'Je suis américain·e.' : after.f === '我是美国人。', after);
+
+    // ---- gênero (profile_private, migration 073) ----
+    // sem a tabela: campo some
+    await ev(() => { PROFILE_PRIVATE_SUPPORTED = false; PROFILE_PRIVATE_CACHE = null; PROFILE_CACHE = { display_name: 'Ana', country: 'BR', bio: null, username: 'u1' }; openEditProfileModal([]); });
+    L('gênero: sem a tabela o campo some', await ev(() => document.getElementById('profile-edit-gender').offsetParent === null));
+    // com a tabela: select visível, 5 opções, valor atual
+    await ev(() => { PROFILE_PRIVATE_SUPPORTED = true; PROFILE_PRIVATE_CACHE = { gender: 'feminine' }; openEditProfileModal([]); });
+    const gs = await ev(() => { const s = document.getElementById('profile-edit-gender'); return { visible: s.offsetParent !== null, value: s.value, opts: [...s.options].map(o => o.value) }; });
+    L('gênero: select visível com 5 opções e valor atual', gs.visible && gs.value === 'feminine' && JSON.stringify(gs.opts) === JSON.stringify(['', 'masculine', 'feminine', 'other', 'undisclosed']), gs);
+    // salvar: upsert só em profile_private; profiles NUNCA recebe gender
+    const gsave = await ev(async () => {
+      const out = { profilesPayloads: [], privateUpserts: [] };
+      const orig = supabaseClient.from;
+      supabaseClient.from = (t) => {
+        if (t === 'profiles') return { update: (p) => { out.profilesPayloads.push(p); return { eq: () => ({ select: () => ({ single: async () => ({ data: Object.assign({}, PROFILE_CACHE, p), error: null }) }) }) }; } };
+        if (t === 'profile_private') return { upsert: async (row) => { out.privateUpserts.push(row); return { error: null }; } };
+        return orig.call(supabaseClient, t);
+      };
+      CURRENT_USER = { id: 'U' };
+      PROFILE_PRIVATE_SUPPORTED = true; PROFILE_CACHE = { display_name: 'Ana', country: 'US', bio: null };
+      await saveProfileEdits({ displayName: 'Ana', bio: '', publicProfile: false, country: 'US', gender: 'masculine' });
+      const afterMasc = await new Promise(r => r(UNITS.find(u => u.id === (APP_KEY === 'mandarim' ? 2 : 'A1-2')).phrases[1]));
+      const mascText = afterMasc.c || afterMasc.f;
+      await saveProfileEdits({ displayName: 'Ana', bio: '', publicProfile: false, country: 'US', gender: '' });
+      await saveProfileEdits({ displayName: 'Ana', bio: '', publicProfile: false, country: 'US', gender: 'lixo' });
+      PROFILE_PRIVATE_SUPPORTED = false;
+      await saveProfileEdits({ displayName: 'Ana', bio: '', publicProfile: false, country: 'US', gender: 'masculine' });
+      supabaseClient.from = orig;
+      return Object.assign(out, { mascText });
+    });
+    L('gênero: upsert em profile_private com valor, null e lixo→null', gsave.privateUpserts.length === 3 && gsave.privateUpserts[0].gender === 'masculine' && gsave.privateUpserts[1].gender === null && gsave.privateUpserts[2].gender === null && gsave.privateUpserts[0].user_id === 'U', gsave.privateUpserts);
+    L('gênero: NUNCA vai para profiles', gsave.profilesPayloads.length === 4 && gsave.profilesPayloads.every(p => !('gender' in p)), gsave.profilesPayloads);
+    L('gênero: sem a tabela, nenhum upsert', gsave.privateUpserts.length === 3);
+    L('gênero: salvar masculino reescreve o conteúdo (fr: américain; zh: sem gênero)', lang === 'fr' ? gsave.mascText === 'Je suis américain.' : gsave.mascText === '我是美国人。', gsave.mascText);
+    // carregamento: loadProfilePrivate
+    const lp = await ev(async () => {
+      const orig = supabaseClient.from; CURRENT_USER = { id: 'U' };
+      const r = {};
+      supabaseClient.from = () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { gender: 'other' }, error: null }) }) }) });
+      await loadProfilePrivate(); r.ok = [PROFILE_PRIVATE_SUPPORTED, PROFILE_PRIVATE_CACHE.gender];
+      supabaseClient.from = () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: { message: 'relation does not exist' } }) }) }) });
+      await loadProfilePrivate(); r.err = [PROFILE_PRIVATE_SUPPORTED, PROFILE_PRIVATE_CACHE];
+      supabaseClient.from = () => { throw new Error('boom'); };
+      await loadProfilePrivate(); r.thrown = [PROFILE_PRIVATE_SUPPORTED, PROFILE_PRIVATE_CACHE];
+      supabaseClient.from = orig; return r;
+    });
+    L('gênero: carrega valor; erro/exceção = indisponível sem quebrar', lp.ok[0] === true && lp.ok[1] === 'other' && lp.err[0] === false && lp.err[1] === null && lp.thrown[0] === false, lp);
+    // convidado: neutro mesmo com cache
+    await ev(() => { CURRENT_USER = false; PROFILE_PRIVATE_CACHE = { gender: 'masculine' }; refreshProfilePlaceholders(); });
+    const guestN = await getTxt(unit2, 1);
+    L('gênero: convidado vê a forma neutra', lang === 'fr' ? /américain·e|brésilien·ne/.test(guestN.f) : /americano·a|brasileiro·a/.test(guestN.t), guestN);
+    if (lang === 'fr'){
+      // áudio: Web Speech recebe as duas formas; texto exibido não muda
+      const sp = await ev(() => {
+        const spoken = []; const origU = window.SpeechSynthesisUtterance;
+        window.SpeechSynthesisUtterance = function(t){ spoken.push(t); this.text = t; };
+        const origTTS = [TTS.supported, TTS.voice]; TTS.supported = true; TTS.voice = {};
+        const origSS = window.speechSynthesis; const fakeSS = { speak(){}, cancel(){}, resume(){}, speaking: false, getVoices(){ return []; } };
+        Object.defineProperty(window, 'speechSynthesis', { value: fakeSS, configurable: true });
+        speakFrench('Je suis brésilien·ne.', null, false);
+        speakFrench('Elle est brésilienne ici.', null, false);
+        window.SpeechSynthesisUtterance = origU; TTS.supported = origTTS[0]; TTS.voice = origTTS[1];
+        return spoken;
+      });
+      L('áudio: neutro lido como as duas formas; forma única inalterada', sp[0] === 'Je suis brésilien, brésilienne.' && sp[1] === 'Elle est brésilienne ici.', sp);
+    }
     L('sem erros de página', errors.length === 0, errors);
     await ctx.close();
   }

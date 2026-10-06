@@ -6,7 +6,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
 
 function load(globals){
   const ctx = vm.createContext(Object.assign({ console }, globals || {}));
-  vm.runInContext(fs.readFileSync(path.join(ROOT, 'shared/profile-placeholders.js'), 'utf8') + ';globalThis.__api={buildProfilePlaceholderContext,resolveProfilePlaceholders,applyProfilePlaceholders,sanitizeProfileName,hasProfilePlaceholder,PROFILE_COUNTRIES,profileCountryName};', ctx);
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'shared/profile-placeholders.js'), 'utf8') + ';globalThis.__api={buildProfilePlaceholderContext,resolveProfilePlaceholders,applyProfilePlaceholders,sanitizeProfileName,hasProfilePlaceholder,PROFILE_COUNTRIES,profileCountryName,speakableProfileText};', ctx);
   return ctx;
 }
 const { __api: A } = load();
@@ -15,10 +15,10 @@ const { __api: A } = load();
 const ctxBR = A.buildProfilePlaceholderContext({ profile: { display_name: 'Ana Souza', country: 'BR' }, studyLang: 'fr', uiLang: 'pt-BR' });
 check('nome completo', A.resolveProfilePlaceholders('Je m\'appelle {nome}.', ctxBR) === "Je m'appelle Ana Souza.");
 check('primeiro nome', A.resolveProfilePlaceholders('{primeiro_nome}', ctxBR) === 'Ana');
-check('nacionalidade fr BR', A.resolveProfilePlaceholders('Je suis {nacionalidade}.', ctxBR) === 'Je suis brésilienne.');
-check('nacionalidade_t pt BR', A.resolveProfilePlaceholders('Eu sou {nacionalidade_t}.', ctxBR) === 'Eu sou brasileira.');
+check('nacionalidade fr BR', A.resolveProfilePlaceholders('Je suis {nacionalidade}.', ctxBR) === 'Je suis brésilien·ne.'); // sem gênero = neutra
+check('nacionalidade_t pt BR', A.resolveProfilePlaceholders('Eu sou {nacionalidade_t}.', ctxBR) === 'Eu sou brasileiro·a.');
 const ctxUS = A.buildProfilePlaceholderContext({ profile: { display_name: 'John', country: 'US' }, studyLang: 'fr', uiLang: 'en' });
-check('US fr/en', A.resolveProfilePlaceholders('{nacionalidade}|{nacionalidade_t}', ctxUS) === 'américaine|American');
+check('US fr/en', A.resolveProfilePlaceholders('{nacionalidade}|{nacionalidade_t}', ctxUS) === 'américain·e|American');
 const ctxZH = A.buildProfilePlaceholderContext({ profile: { display_name: 'Li', country: 'US' }, studyLang: 'zh', uiLang: 'pt-BR' });
 check('zh hanzi + pinyin', A.resolveProfilePlaceholders('我是{nacionalidade}。 {nacionalidade_p}', ctxZH) === '我是美国人。 Měiguó rén');
 check('placeholder desconhecido fica', A.resolveProfilePlaceholders('{xyz} {nome}', ctxBR) === '{xyz} Ana Souza');
@@ -30,9 +30,9 @@ const g = A.buildProfilePlaceholderContext({ profile: null, guest: true, studyLa
 check('convidado = Convidado', g.nome === 'Convidado' && g.primeiro_nome === 'Convidado');
 check('convidado en = Guest', A.buildProfilePlaceholderContext({ guest: true, uiLang: 'en' }).nome === 'Guest');
 check('convidado ignora perfil', A.buildProfilePlaceholderContext({ profile: { display_name: 'X' }, guest: true }).nome === 'Convidado');
-check('sem país = Brasil', g.nacionalidade === 'brésilienne' && g.nacionalidade_t === 'brasileira');
-check('país desconhecido = Brasil', A.buildProfilePlaceholderContext({ profile: { country: 'ZZ' }, studyLang: 'fr' }).nacionalidade === 'brésilienne');
-check('país minúsculo aceito', A.buildProfilePlaceholderContext({ profile: { country: 'us' }, studyLang: 'fr' }).nacionalidade === 'américaine');
+check('sem país = Brasil', g.nacionalidade === 'brésilien·ne' && g.nacionalidade_t === 'brasileiro·a');
+check('país desconhecido = Brasil', A.buildProfilePlaceholderContext({ profile: { country: 'ZZ' }, studyLang: 'fr' }).nacionalidade === 'brésilien·ne');
+check('país minúsculo aceito', A.buildProfilePlaceholderContext({ profile: { country: 'us' }, studyLang: 'fr' }).nacionalidade === 'américain·e');
 check('conta sem display_name = Convidado', A.buildProfilePlaceholderContext({ profile: { display_name: '   ' }, studyLang: 'fr' }).nome === 'Convidado');
 
 // ---- nomes com acento, aspas, HTML ----
@@ -46,21 +46,62 @@ check('limite 60', A.sanitizeProfileName('x'.repeat(100)).length === 60);
 check('$& no nome é literal', A.resolveProfilePlaceholders('{nome}', A.buildProfilePlaceholderContext({ profile: { display_name: 'A$&B$1' } })) === 'A$&B$1');
 check('primeiro nome com acento', A.buildProfilePlaceholderContext({ profile: { display_name: 'Åsa Ñandú' } }).primeiro_nome === 'Åsa');
 
+
+// ---- gênero (decisão 2026-10-06) ----
+const gctx = (gender, country, lang, ui) => A.buildProfilePlaceholderContext({ profile: { country: country || 'BR' }, gender, studyLang: lang || 'fr', uiLang: ui || 'pt-BR' });
+check('masculino BR: fr e pt', gctx('masculine').nacionalidade === 'brésilien' && gctx('masculine').nacionalidade_t === 'brasileiro');
+check('feminino BR: fr e pt', gctx('feminine').nacionalidade === 'brésilienne' && gctx('feminine').nacionalidade_t === 'brasileira');
+for (const g of ['other', 'undisclosed', null, undefined, '', 'xyz']){
+  check('neutro para ' + JSON.stringify(g), gctx(g).nacionalidade === 'brésilien·ne' && gctx(g).nacionalidade_t === 'brasileiro·a');
+}
+check('convidado ignora gênero (neutro)', A.buildProfilePlaceholderContext({ guest: true, gender: 'masculine', studyLang: 'fr' }).nacionalidade === 'brésilien·ne');
+check('en não tem gênero', gctx('masculine', 'US', 'fr', 'en').nacionalidade_t === 'American' && gctx('feminine', 'US', 'fr', 'en').nacionalidade_t === 'American' && gctx(null, 'US', 'fr', 'en').nacionalidade_t === 'American');
+check('zh não tem gênero', ['masculine', 'feminine', 'other', null].every(g => gctx(g, 'US', 'zh').nacionalidade === '美国人'));
+check('zh pinyin e hanzi iguais com gênero', gctx('masculine', 'JP', 'zh').nacionalidade_p === 'Rìběn rén');
+// todos os países: masc/fem/neutro coerentes
+check('todo país: neutro = masc+terminação ou igual', A.PROFILE_COUNTRIES.every(c => c.frn === c.frm || c.frn.replace('\u00B7', '').startsWith(c.frm)) && A.PROFILE_COUNTRIES.every(c => c.ptn === c.ptm || c.ptn.indexOf('\u00B7') > 0));
+check('todo país: neutro com · só quando masc != fem', A.PROFILE_COUNTRIES.every(c => (c.frm === c.fr) === (c.frn.indexOf('\u00B7') === -1)) && A.PROFILE_COUNTRIES.every(c => (c.ptm === c.pt) === (c.ptn.indexOf('\u00B7') === -1)));
+// apply com gênero via PROFILE_PRIVATE_CACHE
+const GP = load({ UNITS: [{ phrases: [{ f: 'Je suis {nacionalidade}.', t: 'Sou {nacionalidade_t}.' }] }], APP_KEY: 'frances', CURRENT_USER: { id: 1 }, PROFILE_CACHE: { country: 'FR' }, PROFILE_PRIVATE_CACHE: { gender: 'masculine' }, getUiLang: () => 'pt-BR' });
+vm.runInContext('applyProfilePlaceholders()', GP);
+let gu = vm.runInContext('UNITS', GP);
+check('apply masculino', gu[0].phrases[0].f === 'Je suis français.' && gu[0].phrases[0].t === 'Sou francês.', gu[0].phrases[0]);
+vm.runInContext('PROFILE_PRIVATE_CACHE={gender:"feminine"}; applyProfilePlaceholders()', GP);
+check('apply feminino (reescreve)', gu[0].phrases[0].f === 'Je suis française.' && gu[0].phrases[0].t === 'Sou francesa.');
+vm.runInContext('PROFILE_PRIVATE_CACHE={gender:"undisclosed"}; applyProfilePlaceholders()', GP);
+check('apply prefiro não dizer = neutro', gu[0].phrases[0].f === 'Je suis français·e.' && gu[0].phrases[0].t === 'Sou francês·a.');
+vm.runInContext('PROFILE_PRIVATE_CACHE=null; applyProfilePlaceholders()', GP);
+check('apply sem cache = neutro', gu[0].phrases[0].f === 'Je suis français·e.');
+
+// ---- áudio: neutro lido com as duas formas ----
+const spk = load({}); vm.runInContext('globalThis.__s=speakableProfileText', spk);
+const speak = spk.__s;
+check('fala: brésilien·ne', speak('Je suis brésilien·ne.') === 'Je suis brésilien, brésilienne.', speak('Je suis brésilien·ne.'));
+check('fala: português·a', speak('Sou português·a.') === 'Sou português, portuguesa.');
+check('fala: alemão·ã', speak('Sou alemão·ã.') === 'Sou alemão, alemã.');
+check('fala: texto sem · passa direto', speak('Je suis brésilienne.') === 'Je suis brésilienne.' && speak(null) === null);
+check('fala: "·" que não é nacionalidade fica', speak('a·b') === 'a·b');
+check('fala: todo neutro com · do catálogo vira masc, fem', A.PROFILE_COUNTRIES.every(c => c.frn.indexOf('\u00B7') === -1 || speak(c.frn) === c.frm + ', ' + c.fr));
+check('fala: todo neutro pt do catálogo', A.PROFILE_COUNTRIES.every(c => c.ptn.indexOf('\u00B7') === -1 || speak(c.ptn) === c.ptm + ', ' + c.pt));
+// o texto exibido (placeholder resolvido) é o que vai para speak; o original não muda
+const shown = A.resolveProfilePlaceholders('Je suis {nacionalidade}.', gctx(null));
+check('exibido mantém ·; falado expande', shown === 'Je suis brésilien·ne.' && speak(shown) === 'Je suis brésilien, brésilienne.');
+
 // ---- applyProfilePlaceholders sobre UNITS (in place, reaplicável) ----
 const mk = () => [{ id: 'u', phrases: [{ f: "Je m'appelle {nome}.", t: 'Eu me chamo {nome}.', blocks: [{ f: '{nome}.' }, { f: 'Je suis {nacionalidade}.' }], scenario: 'Você é {nacionalidade_t}.' }], vocab: [{ f: 'brésilien / brésilienne' }] }];
 const C = load({ UNITS: mk(), APP_KEY: 'frances', CURRENT_USER: null, PROFILE_CACHE: null, getUiLang: () => 'pt-BR' });
 vm.runInContext('applyProfilePlaceholders()', C);
 let U = vm.runInContext('UNITS', C);
 check('convidado: frase', U[0].phrases[0].f === "Je m'appelle Convidado." && U[0].phrases[0].t === 'Eu me chamo Convidado.', U[0].phrases[0]);
-check('convidado: blocks', U[0].phrases[0].blocks[0].f === 'Convidado.' && U[0].phrases[0].blocks[1].f === 'Je suis brésilienne.');
+check('convidado: blocks', U[0].phrases[0].blocks[0].f === 'Convidado.' && U[0].phrases[0].blocks[1].f === 'Je suis brésilien·ne.');
 check('vocab sem placeholder intacto', U[0].vocab[0].f === 'brésilien / brésilienne');
 // perfil carrega depois: reescreve a partir do modelo
 vm.runInContext('CURRENT_USER={id:1}; PROFILE_CACHE={display_name:"Maria Clara",country:"US"}; applyProfilePlaceholders()', C);
 check('perfil: nome', U[0].phrases[0].f === "Je m'appelle Maria Clara." && U[0].phrases[0].blocks[0].f === 'Maria Clara.', U[0].phrases[0].f);
-check('perfil: país US', U[0].phrases[0].blocks[1].f === 'Je suis américaine.' && U[0].phrases[0].scenario === 'Você é americana.');
+check('perfil: país US', U[0].phrases[0].blocks[1].f === 'Je suis américain·e.' && U[0].phrases[0].scenario === 'Você é americano·a.');
 // troca de perfil de novo (modelo preservado)
 vm.runInContext('PROFILE_CACHE={display_name:"Zé",country:"BR"}; applyProfilePlaceholders()', C);
-check('troca de perfil reescreve', U[0].phrases[0].t === 'Eu me chamo Zé.' && U[0].phrases[0].scenario === 'Você é brasileira.');
+check('troca de perfil reescreve', U[0].phrases[0].t === 'Eu me chamo Zé.' && U[0].phrases[0].scenario === 'Você é brasileiro·a.');
 // overlay do content-i18n reaplicando texto novo com placeholder (inglês) vira novo modelo
 vm.runInContext('UNITS[0].phrases[0].t = "Hello! My name is {nome}."; applyProfilePlaceholders()', C);
 check('texto novo com placeholder vira modelo', U[0].phrases[0].t === 'Hello! My name is Zé.');
@@ -82,7 +123,7 @@ check('sem UNITS = null', load({}).__api.applyProfilePlaceholders() === null);
 
 // ---- tabela de países ----
 check('BR e US presentes', ['BR', 'US'].every(c => A.PROFILE_COUNTRIES.some(x => x.code === c)));
-check('toda entrada completa', A.PROFILE_COUNTRIES.every(c => c.fr && c.zh && c.zhp && c.pt && c.en && c.names['pt-BR'] && c.names.en && /^[A-Z]{2}$/.test(c.code)));
+check('toda entrada completa', A.PROFILE_COUNTRIES.every(c => c.fr && c.frm && c.frn && c.zh && c.zhp && c.pt && c.ptm && c.ptn && c.en && c.names['pt-BR'] && c.names.en && /^[A-Z]{2}$/.test(c.code)));
 check('códigos únicos', new Set(A.PROFILE_COUNTRIES.map(c => c.code)).size === A.PROFILE_COUNTRIES.length);
 check('nome do país por idioma', A.profileCountryName('US', 'en') === 'United States' && A.profileCountryName('US', 'pt-BR') === 'Estados Unidos');
 
