@@ -73,7 +73,7 @@ Tamanho da linha: cada curso novo acrescenta um bloco do tamanho do atual (o arr
 | Decks e Course Decks | `fr/app.js:6376-6393` | **Não** (por idioma estudado). |
 | Fala/áudio do campo | `fr/app.js:6583,6765,7028,7058` (`isStudyLanguageField(…, APP_KEY)`) | Não. |
 | Perfil público, Public Deck, Anki | `shared/public-profile.js:399-564`, `shared/public-deck.js:45,337,507`, `shared/anki-export.js:125` | Não. |
-| Preferências locais com prefixo do idioma | `fr/app.js:992` (`frances_cloze_mode`), `1315` (`frances_last_study_notif`); equivalentes em `zh/app.js:1118,1447` | Não (preferência do aparelho). |
+| Preferências locais com prefixo do idioma | `fr/app.js:985` (`frances_cloze_mode`), `1315` (`frances_last_study_notif`); equivalentes em `zh/app.js:1118,1447` | Não (preferência do aparelho). |
 | `LAST_LANGUAGE_KEY` e `currentLearningLanguage` | `languages/index.js:57`, `shared/language-switcher.js:69-89`, `index.html:273-325` | Viram "último curso" / `_meta.currentCourse`. |
 
 Contagem: `APP_KEY` aparece 16 vezes em `fr/app.js`, 16 em `zh/app.js` e em 18 arquivos de `shared/`. Só os 3 usos de `shared/auth.js` acima tocam a chave do progresso; o resto é idioma estudado de verdade.
@@ -124,7 +124,7 @@ Campos persistidos (lista de `serializeState`, `fr/app.js:1098-1128`; zh acresce
 
 Hoje:
 - Um site estático por idioma estudado: `fr/index.html`, `zh/index.html`, cada um com seu `app.js` e `APP_KEY`. Lista central em `languages/index.js:18-55` (`AVAILABLE_LANGUAGES`, com `id`, `appKey`, `path`).
-- Portão da raiz (`index.html`): login, depois `getCurrentLearningLanguage` → redireciona para `fr/` ou `zh/`; conta nova escolhe idioma estudado e nível (`index.html:255-325`). O portão é sempre em português.
+- Portão da raiz (`index.html`): login, depois `getCurrentLearningLanguage` → redireciona para `fr/` ou `zh/`; conta nova escolhe idioma estudado e nível (`index.html:272-325`). O portão é sempre em português.
 - Trocar idioma estudado: seletor do topo (`shared/language-switcher.js:69-89`) grava `currentLearningLanguage` e navega para `../<id>/`.
 - Trocar idioma do site: Configurações, `#ui-language-select` (`fr/index.html:3655`, `zh/index.html:3220`), com modal `#ui-language-confirm-modal` (`fr/index.html:4139`, `zh/index.html:3673`; lógica `shared/i18n/i18n.js:287-339`). Texto atual: "…Seu progresso continua salvo." (`shared/i18n/pt-BR.js:85-86`). Com cursos, esse texto fica **errado**.
 - Primeiro acesso da conta: `askUiLanguageOnFirstAccess()` pergunta o idioma do site dentro do app (`shared/auth.js:381-400`), depois da escolha do idioma estudado.
