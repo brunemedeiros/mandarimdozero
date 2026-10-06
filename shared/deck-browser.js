@@ -213,8 +213,10 @@ async function deckBrowserLoadOwnContext(){
 function deckTopbarHTML(nodeId){
   const canAdd = !!deckBrowserUserId();
   const onHome = nodeId === 'lang';
+  // "Decks" fica marcado também dentro de um Deck (a pessoa está na área de
+  // Decks); só a tela inicial é a "página atual".
   return `<nav class="deck-topbar" aria-label="Decks">
-      <button type="button" class="deck-topbar-btn ${onHome ? 'is-active' : ''}" data-topbar-decks ${onHome ? 'aria-current="page"' : ''}>Decks</button>
+      <button type="button" class="deck-topbar-btn is-active" data-topbar-decks aria-current="${onHome ? 'page' : 'location'}">Decks</button>
       ${canAdd ? `<button type="button" class="deck-topbar-btn" data-topbar-add>Adicionar</button>` : ''}
       <button type="button" class="deck-topbar-btn" data-topbar-panel>Painel</button>
       ${typeof toggleReviewSettingsPanel === 'function' ? `<button type="button" class="deck-topbar-btn" data-topbar-settings>Configurar</button>` : ''}
@@ -568,21 +570,25 @@ function renderDeckDetail(){
   if (deck.kind === 'course') hint = 'Os cartões da Trilha de Estudo vêm das lições: cada lição concluída libera os cartões dela.';
   else if (deck.kind === 'teacher_root' || deck.kind === 'teacher') hint = 'Estes cartões são organizados pela sua professora. Aqui você só estuda.';
   const crumbs = deckBrowserBreadcrumb(decks, nodeId);
-  const totalLine = `${c.total} ${c.total === 1 ? 'cartão' : 'cartões'}${getDeckChildren(decks, nodeId).length ? ' neste Deck e nos subdecks' : ''}${c.newTotal > c.new ? ` · ${c.newTotal} novos no total (entram até ${c.new} por dia, conforme "Novas palavras por dia")` : ''}`;
+  const totalLine = `${c.total} ${c.total === 1 ? 'cartão' : 'cartões'}${getDeckChildren(decks, nodeId).length ? ' neste Deck e nos subdecks' : ''}${c.newTotal > c.new ? ` · até ${c.new} ${c.new === 1 ? 'novo' : 'novos'} por dia` : ''}`;
+  const canAddHere = deckBrowserCanAddCard(deck);
+  const count = (n, cls, label) => `<div class="deck-overview-count"><dt>${label}</dt><dd class="${n ? cls : 'is-zero'}">${n}</dd></div>`;
+  const pathHTML = crumbs.length > 1 ? `<span class="deck-overview-path">${crumbs.slice(0, -1).map(escapeHTML).join(' › ')} › </span>` : '';
+  const studyHTML = c.total
+    ? `<button type="button" class="btn btn-primary deck-overview-study" data-deck-study>Estudar agora</button>`
+    : `<div class="deck-overview-empty"><p class="deck-overview-empty-msg">Este Deck ainda não tem cartões.</p>${canAddHere ? `<button type="button" class="btn btn-primary deck-overview-study" data-deck-empty-add>Adicionar cartão</button>` : ''}</div>`;
   wrap.innerHTML = `
     <div class="path-header"><h2>Revisão</h2></div>
     ${deckTopbarHTML(nodeId)}
     <div class="deck-overview">
-      <h2 class="deck-overview-title">${crumbs.map(escapeHTML).join(' › ')}</h2>
+      <h2 class="deck-overview-title">${pathHTML}<span class="deck-overview-name">${escapeHTML(crumbs[crumbs.length - 1] || '')}</span></h2>
       <div class="deck-overview-body">
         <dl class="deck-overview-counts">
-          <dt>Novo:</dt><dd class="${c.new ? 'is-new' : 'is-zero'}">${c.new}</dd>
-          <dt>Aprendendo:</dt><dd class="${c.learning ? 'is-learning' : 'is-zero'}">${c.learning}</dd>
-          <dt>Revisar:</dt><dd class="${c.review ? 'is-review' : 'is-zero'}">${c.review}</dd>
+          ${count(c.new, 'is-new', 'Novo')}${count(c.learning, 'is-learning', 'Aprendendo')}${count(c.review, 'is-review', 'Revisar')}
         </dl>
-        <button type="button" class="btn btn-primary deck-overview-study" data-deck-study ${c.total ? '' : 'disabled'}>Estudar agora</button>
+        ${studyHTML}
       </div>
-      <p class="deck-overview-total">${escapeHTML(totalLine)}.</p>
+      ${c.total ? `<p class="deck-overview-total">${escapeHTML(totalLine)}</p>` : ''}
       ${hint ? `<p class="profile-edit-hint deck-overview-hint">${escapeHTML(hint)}</p>` : ''}
     </div>
     ${canHaveChildren ? `<div class="deck-overview-footer">
@@ -594,7 +600,8 @@ function renderDeckDetail(){
     <div class="deck-overview-extra" data-deck-extra-box></div>` : ''}`;
   wireDeckTopbar(wrap, nodeId);
   const extra = wrap.querySelector('[data-deck-extra-box]');
-  wrap.querySelector('[data-deck-study]').addEventListener('click', () => deckBrowserStudy(nodeId));
+  wrap.querySelector('[data-deck-study]')?.addEventListener('click', () => deckBrowserStudy(nodeId));
+  wrap.querySelector('[data-deck-empty-add]')?.addEventListener('click', () => openAddCardModal({ deckId: deck.id }));
   wrap.querySelector('[data-deck-subdeck]')?.addEventListener('click', () => openCreateDeckForm(extra, deck.id));
   wrap.querySelector('[data-deck-rename]')?.addEventListener('click', () => openRenameDeckForm(extra, deck));
   wrap.querySelector('[data-deck-publish]')?.addEventListener('click', (ev) => {
@@ -847,13 +854,13 @@ function deckBrowserNoteState(note){
   const b = note.cards.map(c => cardStudyBucket(c));
   if (b.every(x => x === 'new')) return 'Novo';
   if (b.some(x => x === 'learning')) return 'Aprendendo';
-  return 'Revisão';
+  return 'Revisar';
 }
 
 const DECK_PANEL_ID = 'deck-panel-modal';
 const DECK_PANEL_STATES = [
   { id: 'all', label: 'Todos' }, { id: 'Novo', label: 'Novo' },
-  { id: 'Aprendendo', label: 'Aprendendo' }, { id: 'Revisão', label: 'Revisão' },
+  { id: 'Aprendendo', label: 'Aprendendo' }, { id: 'Revisar', label: 'Revisar' },
 ];
 
 function deckPanelIsMobile(){ return window.matchMedia ? window.matchMedia('(max-width: 760px)').matches : window.innerWidth <= 760; }
@@ -916,7 +923,8 @@ function deckPanelMount(){
   document.addEventListener('keydown', deckPanelOnKey);
   if (typeof MY_FLASHCARDS_STATE !== 'undefined') MY_FLASHCARDS_STATE.onChange = deckPanelAfterEdit;
   renderDeckPanel();
-  search.focus();
+  // No celular, não abre o teclado sozinho.
+  if (!window.matchMedia || !window.matchMedia('(max-width: 600px)').matches) search.focus();
 }
 
 function deckPanelOnKey(e){
@@ -1081,7 +1089,7 @@ function renderDeckPanelList(){
   const visibleKeys = new Set(notes.map(n => n.key));
   Array.from(p.selected).forEach(k => { if (!visibleKeys.has(k)) p.selected.delete(k); });
   root.querySelector('[data-panel-count]').textContent = notes.length
-    ? `${notes.length} ${notes.length === 1 ? 'conteúdo' : 'conteúdos'}.`
+    ? `${notes.length} ${notes.length === 1 ? 'cartão' : 'cartões'}`
     : '';
   if (!notes.length){
     const filtered = p.query || p.tags.length || p.state !== 'all' || p.archived;
