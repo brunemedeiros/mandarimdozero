@@ -24,11 +24,11 @@ for (const lang of ['fr', 'zh']){
   // ---- projeção A (estrutural)
   fresh();
   check(lang + ' projeção: A é projeção, B não (frontFieldIndex < backFieldIndex, sem olhar sufixo de id)', ctx.isStudyWordProjectionCard(A(0)) && !ctx.isStudyWordProjectionCard(B(0)));
-  const total = ctx.STATE.cards.length, words = ctx.studyWordGroups(ctx.STATE.cards).length;
+  const allCardsN = ctx.STATE.cards.length, total = ctx.STATE.cards.filter(c => !ctx.isStudyTrailPhraseCard(c)).length, words = ctx.studyWordGroups(ctx.STATE.cards).length;
   check(lang + ' A: N palavras / 2N CardInstances / projeção = N', total === 2 * words && ctx.projectStudyWordsToA(ctx.STATE.cards).length === words);
   check(lang + ' projeção só devolve direção A (nenhum B)', ctx.projectStudyWordsToA(ctx.STATE.cards).every(c => ctx.isStudyWordProjectionCard(c)));
   const snapFsrs = () => JSON.stringify(ctx.STATE.cards.map(c => [c.id, c.reps, c.due, c.stability, c.difficulty, c.lapses, c.state]));
-  const s0 = snapFsrs(); ctx.projectStudyWordsToA(ctx.STATE.cards); check(lang + ' projeção é somente leitura (FSRS intacto, STATE.cards com 2N)', s0 === snapFsrs() && ctx.STATE.cards.length === total);
+  const s0 = snapFsrs(); ctx.projectStudyWordsToA(ctx.STATE.cards); check(lang + ' projeção é somente leitura (FSRS intacto, STATE.cards com 2N)', s0 === snapFsrs() && ctx.STATE.cards.length === allCardsN);
 
   // ---- Speed
   fresh();
@@ -89,8 +89,8 @@ for (const lang of ['fr', 'zh']){
   fresh(); const cfg = ctx.ANKI_EXPORT_CONFIG;
   ctx.cardPromptPinyinText = (c) => { const v = ctx.resolveCardContentView(c); return v.front.pinyinText || ''; };
   const all = cfg.cards('all');
-  check(lang + ' Anki: exporta A e B (2N cartões), nada colapsado', all.length === total && all.filter(c => c.id.endsWith('-b')).length === words);
-  check(lang + ' Anki: ids/guids únicos, A e B distintos', new Set(all.map(c => cfg.guidPrefix + c.id)).size === total);
+  check(lang + ' Anki: exporta A e B (2N cartões), nada colapsado', all.length === allCardsN && all.filter(c => c.id.endsWith('-b')).length === words);
+  check(lang + ' Anki: ids/guids únicos, A e B distintos', new Set(all.map(c => cfg.guidPrefix + c.id)).size === allCardsN);
   check(lang + ' Anki: A = basic, B = reverse (modelo próprio)', ctx.ankiExportCardKind(A(0)) === 'basic' && ctx.ankiExportCardKind(B(0)) === 'reverse');
   const word = isZh ? u0.vocab[0].c : u0.vocab[0].f, tr = u0.vocab[0].t;
   const fa = cfg.noteFields(A(0), null), fb = cfg.reverseFields(B(0), null);

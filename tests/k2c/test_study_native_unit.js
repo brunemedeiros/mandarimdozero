@@ -17,7 +17,7 @@ for (const lang of ['fr', 'zh']){
 
   // 1/2 Note + A + B; campos
   check(lang + ' 1: existe A e B', !!A && !!B);
-  check(lang + ' 1: 2 cards por palavra em todo o conteúdo', cards.length === totalWords * 2, [cards.length, totalWords]);
+  check(lang + ' 1: 2 cards por palavra em todo o conteúdo', cards.filter(c => !ctx.isStudyTrailPhraseCard(c)).length === totalWords * 2, [cards.length, totalWords]);
   const f = A.note.fields;
   if (isZh){
     check('zh 2: 3 Fields hanzi/pinyin/trad', f.length === 3 && f[0].lang === 'zh' && f[1].lang === 'zh-pinyin' && f[2].lang === 'pt-BR');
@@ -56,7 +56,7 @@ for (const lang of ['fr', 'zh']){
   // 8/9
   check(lang + ' 8: origin study', A.origin === 'study' && B.origin === 'study');
   check(lang + ' 9: unitId/vocabIdx/unitTitle', [A, B].every(c => c.unitId === u0.id && c.vocabIdx === 0 && c.unitTitle === u0.title));
-  check(lang + ' 9: todos os cards têm unitId/vocabIdx coerentes com o id', cards.every(c => c.id.startsWith(`u${c.unitId}-v${c.vocabIdx}`)));
+  check(lang + ' 9: todos os cards têm unitId/vocabIdx coerentes com o id', cards.every(c => ctx.isStudyTrailPhraseCard(c) || c.id.startsWith(`u${c.unitId}-v${c.vocabIdx}`)));
 
   // ---- merge de save ----
   const legacySaved = (c, extra) => Object.assign({

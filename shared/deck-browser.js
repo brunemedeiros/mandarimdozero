@@ -204,7 +204,12 @@ function deckBrowserTableHTML(){
     if (!isCollapsed) kids.forEach(k => walk(k.id, depth + 1));
   };
   walk('lang', 0);
-  return `<table class="deck-table">
+  const canAdd = !!deckBrowserUserId();
+  return `<div class="deck-table-toolbar">
+      ${canAdd ? `<button type="button" class="btn btn-secondary deck-table-tool-btn" data-deck-home-add>＋ Adicionar</button>` : ''}
+      <button type="button" class="btn btn-secondary deck-table-tool-btn" data-deck-home-panel>Painel</button>
+    </div>
+    <table class="deck-table">
       <thead><tr><th scope="col">Deck</th><th scope="col">Novo</th><th scope="col">Aprendendo</th><th scope="col">Revisar</th></tr></thead>
       <tbody>${rows.join('')}</tbody>
     </table>
@@ -225,6 +230,8 @@ function wireDeckBrowserTable(box){
     box.innerHTML = deckBrowserTableHTML();
     wireDeckBrowserTable(box);
   }));
+  box.querySelector('[data-deck-home-add]')?.addEventListener('click', () => openAddCardModal({ deckId: null }));
+  box.querySelector('[data-deck-home-panel]')?.addEventListener('click', () => openDeckPanel('lang'));
   box.querySelectorAll('[data-deck-open]').forEach(btn => btn.addEventListener('click', () => {
     const raw = btn.dataset.deckOpen;
     openDeckDetail(raw === 'lang' ? 'lang' : Number(raw));
@@ -239,11 +246,35 @@ function deckBrowserCanAddCard(deck, nodeId){
   return !!deck && (deck.kind === 'personal_root' || deck.kind === 'personal');
 }
 
+function deckBrowserRoute(view, nodeId){
+  return { type: 'deckBrowser', view, nodeId };
+}
+
 function openDeckDetail(nodeId){
   DECK_BROWSER.view = 'detail';
   DECK_BROWSER.nodeId = nodeId;
   deckBrowserShow('detail');
   renderDeckDetail();
+  if (DECK_BROWSER.view === 'detail' && typeof routerNavigate === 'function') routerNavigate(deckBrowserRoute('detail', nodeId));
+}
+
+// Recarregar a página (ou Voltar/Avançar) num endereço #/review/decks/...:
+// espera os Decks carregarem e reabre a mesma tela. Deck que não existe mais
+// (ou não é desta conta) volta para a tabela.
+let DECK_BROWSER_RESTORE_TOKEN = 0;
+async function restoreDeckBrowserRoute(route){
+  const token = ++DECK_BROWSER_RESTORE_TOKEN;
+  try {
+    if (typeof ensureDecksLoadedForReview === 'function') await ensureDecksLoadedForReview();
+  } catch (e) {
+    console.error('Erro ao carregar Decks para restaurar a tela:', e);
+  }
+  if (token !== DECK_BROWSER_RESTORE_TOKEN) return;
+  const app = document.getElementById('app');
+  if (app && app.dataset.activeTab && app.dataset.activeTab !== 'review') return; // a pessoa já saiu da Revisão
+  if (route.nodeId !== 'lang' && !getDeckById(deckBrowserDecks(), route.nodeId)){ backToDeckTable(); return; }
+  if (route.view === 'panel') openDeckPanel(route.nodeId);
+  else openDeckDetail(route.nodeId);
 }
 
 function renderDeckDetail(){
@@ -294,6 +325,7 @@ function backToDeckTable(){
   DECK_BROWSER.nodeId = null;
   deckBrowserShow('home');
   if (typeof renderReviewModeSelect === 'function') renderReviewModeSelect();
+  if (typeof routerNavigate === 'function') routerNavigate({ type: 'tab', tab: 'review' });
 }
 
 // Estudar: Deck real -> startDeckReviewSession (Deck + subdecks, mesma fila
@@ -323,24 +355,98 @@ function deckBrowserStudy(nodeId){
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'reviewSession', mode: 'flashcard' });
 }
 
-// "Adicionar cartão": abre Meus Cartões com o Deck já escolhido no seletor
-// "Deck de destino" (raiz do idioma -> "Meus Decks").
+// "Adicionar cartão": abre uma JANELA por cima da Revisão (nunca troca de
+// tela), com o mesmo formulário de Meus Cartões (editor nativo, limite do
+// plano, Deck de destino). Na raiz do idioma o destino padrão é "Meus Decks".
 function deckBrowserAddCard(deck, nodeId){
-  const targetId = nodeId === 'lang' ? null : deck.id;
-  if (typeof switchTab === 'function') switchTab('my-flashcards');
-  if (targetId == null) return;
-  let tries = 0;
-  const pick = () => {
-    const sel = document.getElementById('my-flashcard-deck');
-    if (sel && Array.from(sel.options).some(o => Number(o.value) === targetId)){
-      sel.value = String(targetId);
-      sel.dispatchEvent(new Event('change'));
-      sel.closest('form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      return;
-    }
-    if (++tries < 40) setTimeout(pick, 100);
-  };
-  pick();
+  openAddCardModal({ deckId: nodeId === 'lang' || !deck ? null : deck.id });
+}
+
+const ADD_CARD_MODAL_ID = 'add-card-modal';
+let ADD_CARD_MODAL_CREATED = 0;
+
+function closeAddCardModal(){
+  const el = document.getElementById(ADD_CARD_MODAL_ID);
+  if (!el) return;
+  el.remove();
+  document.removeEventListener('keydown', addCardModalOnKey);
+  if (typeof releaseAllFieldAudioRecorders === 'function') releaseAllFieldAudioRecorders();
+  // Atualiza as contagens da tela que ficou por baixo.
+  if (ADD_CARD_MODAL_CREATED){
+    ADD_CARD_MODAL_CREATED = 0;
+    if (DECK_BROWSER.view === 'detail') renderDeckDetail();
+    else if (DECK_BROWSER.view === 'panel') renderDeckPanel();
+    else if (typeof renderReviewModeSelect === 'function') renderReviewModeSelect();
+  }
+}
+function addCardModalOnKey(e){
+  if (e.key !== 'Escape') return;
+  // Só fecha se nenhuma outra janela (pré-visualização, limite) estiver aberta por cima.
+  const others = Array.from(document.querySelectorAll('.app-modal-overlay')).filter(o => o.id !== ADD_CARD_MODAL_ID && o.style.display !== 'none' && o.offsetParent !== null);
+  if (!others.length) closeAddCardModal();
+}
+
+async function openAddCardModal(opts){
+  const deckId = opts && opts.deckId != null ? opts.deckId : null;
+  if (!deckBrowserUserId()){
+    if (typeof showToast === 'function') showToast('Entre na sua conta para criar cartões.');
+    return;
+  }
+  closeAddCardModal();
+  ADD_CARD_MODAL_CREATED = 0;
+  // O formulário usa ids fixos; a tela Meus Cartões (escondida) é limpa para
+  // não haver ids repetidos. Ela é redesenhada ao abrir a aba de novo.
+  const mine = document.getElementById('my-flashcards-content');
+  if (mine) mine.innerHTML = '';
+  const overlay = document.createElement('div');
+  overlay.id = ADD_CARD_MODAL_ID;
+  overlay.className = 'app-modal-overlay';
+  // Um nível abaixo das janelas fixas (pré-visualização, limite, confirmação),
+  // que podem abrir por cima desta.
+  overlay.style.zIndex = 'calc(var(--z-modal-backdrop) - 1)';
+  overlay.innerHTML = `
+    <div class="app-modal add-card-modal" role="dialog" aria-modal="true" aria-labelledby="add-card-modal-title">
+      <div class="app-modal-header">
+        <h3 id="add-card-modal-title">Adicionar cartão</h3>
+        <button type="button" class="app-modal-close" data-add-card-close aria-label="Fechar">✕</button>
+      </div>
+      <div class="app-modal-body" id="add-card-modal-body"><p class="profile-edit-hint">Carregando…</p></div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('[data-add-card-close]').addEventListener('click', closeAddCardModal);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeAddCardModal(); });
+  document.addEventListener('keydown', addCardModalOnKey);
+  await renderAddCardModalBody(deckId);
+}
+
+async function renderAddCardModalBody(deckId){
+  const body = document.getElementById('add-card-modal-body');
+  if (!body) return;
+  let ctx;
+  try {
+    ctx = await loadMyFlashcardsContext();
+  } catch (e) {
+    console.error('Erro ao abrir Adicionar cartão:', e);
+    if (document.getElementById('add-card-modal-body')) body.innerHTML = `<p class="profile-edit-error">Não foi possível carregar. Tente de novo.</p>`;
+    return;
+  }
+  if (!document.getElementById('add-card-modal-body')) return; // fechou enquanto carregava
+  MY_FLASHCARDS_STATE.nativeCardState = createNativeNoteEditorState({ cardGenerationMode: 'normal', languageAppKey: APP_KEY });
+  body.innerHTML = myCreateFlashcardFormHTML(ctx);
+  const sel = document.getElementById('my-flashcard-deck');
+  if (sel && deckId != null && Array.from(sel.options).some(o => Number(o.value) === deckId)) sel.value = String(deckId);
+  wireMyFlashcardsForm(body, ctx.atLimit, ctx.premium, () => {
+    // Como no Anki: depois de criar, a janela continua aberta e limpa,
+    // no mesmo Deck, para adicionar o próximo.
+    ADD_CARD_MODAL_CREATED++;
+    const keepDeck = document.getElementById('my-flashcard-deck');
+    renderAddCardModalBody(keepDeck && keepDeck.value ? Number(keepDeck.value) : deckId).then(() => {
+      if (ADD_CARD_MODAL_CREATED){
+        const h = document.querySelector('#add-card-modal-body .section-label');
+        if (h && !h.querySelector('.add-card-done')) h.insertAdjacentHTML('beforeend', `<span class="pill add-card-done">✓ ${ADD_CARD_MODAL_CREATED} criado${ADD_CARD_MODAL_CREATED === 1 ? '' : 's'}</span>`);
+      }
+    });
+  });
 }
 
 // ---------- Excluir Deck pessoal (seção 5.4) ----------
@@ -479,6 +585,7 @@ function openDeckPanel(nodeId){
   DECK_BROWSER.panel = { query: '', tags: [], selected: new Set() };
   deckBrowserShow('panel');
   renderDeckPanel();
+  if (DECK_BROWSER.view === 'panel' && typeof routerNavigate === 'function') routerNavigate(deckBrowserRoute('panel', nodeId));
 }
 
 // O Painel mostra TODAS as Notes do escopo (inclusive cartões de lições

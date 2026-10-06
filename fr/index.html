@@ -63,6 +63,7 @@ try{
   --error-red: #D62619;      /* vermelho — reservado para estados de erro/errado */
   --ink: #201335;            /* quase-preto com tom roxo, tipo tinta */
   --paper: #FAF5EA;          /* bege — fundo */
+  --count-new: #1D5A82; --count-learning: #B3261E; --count-review: #2E6B4F; /* colunas Novo/Aprendendo/Revisar (Decks) */
   --paper-warm: #F0E8D8;     /* fundo secundário, cards */
   --paper-line: #E1D6C0;     /* linhas/bordas sutis */
   --jade: #3A7359;           /* verde — sucesso/acerto (funcional, fora da paleta de marca) */
@@ -133,6 +134,7 @@ try{
     --error-red: #FF6B5C;
     --ink: #EDE6F5;
     --paper: #17121F;
+    --count-new: #6CB4E4; --count-learning: #FF7B6E; --count-review: #5CC497;
     --paper-warm: #201A2C;
     --paper-line: #362C42;
     --jade: #52B487;
@@ -165,6 +167,7 @@ try{
   --error-red: #FF6B5C;
   --ink: #EDE6F5;
   --paper: #17121F;
+  --count-new: #6CB4E4; --count-learning: #FF7B6E; --count-review: #5CC497;
   --paper-warm: #201A2C;
   --paper-line: #362C42;
   --jade: #52B487;
@@ -3243,9 +3246,13 @@ footer.app-footer img{ height:40px; opacity:.85; }
 .deck-table-toggle-spacer{ width:22px; flex:0 0 22px; }
 .deck-table-num{ text-align:right; width:64px; font-variant-numeric:tabular-nums; font-weight:600; }
 .deck-table-num.is-zero, .deck-detail-num.is-zero{ color:var(--ink-soft); font-weight:400; }
-.deck-table-num.is-learning, .deck-detail-num.is-learning{ color:var(--error-red); }
-.deck-table-num.is-review, .deck-detail-num.is-review{ color:var(--jade); }
+.deck-table-num.is-new, .deck-detail-num.is-new{ color:var(--count-new); }
+.deck-table-num.is-learning, .deck-detail-num.is-learning{ color:var(--count-learning); }
+.deck-table-num.is-review, .deck-detail-num.is-review{ color:var(--count-review); }
 .deck-table-hint{ margin-top:6px; }
+.deck-table-toolbar{ display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; margin:0 0 8px; }
+.deck-table-tool-btn{ padding:6px 14px; font-size:14px; }
+.add-card-modal{ max-width:680px; }
 .deck-detail, .deck-panel{ background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); padding:16px; }
 .deck-detail-path{ margin:0; font-size:13px; color:var(--ink-soft); }
 .deck-detail-title{ margin:2px 0 12px; overflow-wrap:anywhere; }

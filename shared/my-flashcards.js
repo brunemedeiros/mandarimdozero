@@ -228,6 +228,83 @@ function wireMyDecksSection(wrap){
   });
 }
 
+// Contexto da criação de cartão (Meus Cartões e janela "Adicionar"):
+// cartões próprios, vínculo, plano e Decks. Mesmas regras de sempre.
+async function loadMyFlashcardsContext(){
+  // Fase F -- Decks pessoais carregados sob demanda (bootstrap idempotente
+  // + leitura); STATE.decks é atualizado pra "Estudar este Deck"
+  // (startDeckReviewSession) nunca enxergar uma lista velha.
+  const [cards, hasLink, planTier, decks] = await Promise.all([
+    fetchMyOwnFlashcards(APP_KEY),
+    hasActiveTeacherLink(),
+    fetchMyPlanTier(),
+    ensureDecksForCurrentUser(APP_KEY).then(() => fetchDecksForLanguage(APP_KEY)),
+  ]);
+  const premium = planTier === 'premium';
+  MY_FLASHCARDS_STATE._cardsCache = cards;
+  MY_FLASHCARDS_STATE._decks = decks;
+  // Teto do plano grátis não vale pra aluna vinculada nem pra Premium
+  // (mesma regra de hasUnlimitedOwnCards, shared/roles.js).
+  const unlimited = hasLink || premium;
+  MY_FLASHCARDS_STATE._hasLink = unlimited;
+  if (typeof STATE !== 'undefined') STATE.decks = decks;
+  const activeCards = cards.filter(c => c.status === 'active');
+  const archivedCards = cards.filter(c => c.status === 'archived');
+  // Fase F -- o teto conta CardInstances (regra única em shared/deck-engine.js),
+  // nunca linhas.
+  const usedInstances = ownCardInstanceUsage(cards);
+  const atLimit = !unlimited && usedInstances >= FREE_OWN_FLASHCARD_LIMIT;
+
+  // Selo de tier -- eixo de QUANTIDADE (vínculo com professora) continua
+  // separado do eixo de PREMIUM (formatos ricos) -- ver comentário em
+  // shared/roles.js. Uma conta pode mostrar os dois selos juntos.
+  const tierBadgeHTML = premium
+    ? `<span class="pill">⭐ Premium — cartões ilimitados</span>`
+    : (hasLink
+      ? `<span class="pill">✨ Aluno vinculado — cartões ilimitados</span>`
+      : `<span class="pill">🔒 Plano grátis — ${usedInstances}/${FREE_OWN_FLASHCARD_LIMIT} cartões</span>`);
+
+  return { cards, hasLink, premium, decks, activeCards, archivedCards, usedInstances, unlimited, atLimit, tierBadgeHTML };
+}
+
+// Formulário "Novo cartão" (mesmo HTML em Meus Cartões e na janela "Adicionar").
+function myCreateFlashcardFormHTML({ premium, decks, atLimit, tierBadgeHTML }){
+  return `
+  <div class="section-label" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+    <span>Novo cartão</span>
+    ${tierBadgeHTML}
+  </div>
+  <form id="my-create-flashcard-form" class="profile-edit-form">
+    <!-- CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- criação passou a ser SEMPRE
+         nativa, nos dois tiers: não existe mais formulário legado de
+         criação (Modo de prática/Idioma de cada lado/Frente-Verso
+         soltos/campo de imagem-áudio de cartão inteiro). Free/Premium
+         agora só decide QUAIS Card Types (cardTypeUIMetaForEntitlement)
+         e QUAIS origens de áudio por Field (allowedAudioOrigins,
+         threaded em wireMyFlashcardsForm) aparecem nos seletores --
+         nunca se o editor nativo em si está disponível. Editar um
+         cartão LEGADO já existente continua no formulário legado de
+         sempre (myFlashcardEditFormHTML, intocado) -- isto é só
+         CRIAÇÃO de um cartão novo. -->
+    ${premium ? '' : `<p class="profile-edit-hint">🔒 No plano grátis você cria cartões do tipo Normal, com upload de imagem/áudio por campo (URL externa também disponível). <strong>Premium</strong> desbloqueia Normal com reverso, Múltipla escolha, Completar a frase, Digite a resposta, além de gerar áudio por texto e gravar áudio pelo microfone.</p>`}
+    <div class="section-label" style="margin:0 0 4px;">Tipo de cartão</div>
+    <select id="my-flashcard-card-type-preview" class="profile-edit-input">
+      ${cardTypeUIMetaForEntitlement(premium).map(t => `<option value="${t.id}" ${t.id === 'normal' ? 'selected' : ''}>${t.label}</option>`).join('')}
+    </select>
+    <div class="section-label" style="margin:14px 0 4px;">Campos</div>
+    <p class="profile-edit-hint" style="margin-top:-2px;">Adicione os campos deste cartão -- por exemplo, Frente e Verso pra um cartão Normal. Cada campo tem seu próprio idioma e seus próprios recursos de áudio.</p>
+    <div id="my-flashcard-native-fields"></div>
+    <div id="my-flashcard-tags"></div>
+    <button type="button" class="admin-select-link" id="my-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; margin:6px 0 0;">👁️ Pré-visualizar</button>
+    <label class="profile-edit-label" for="my-flashcard-deck" style="margin-top:14px;">Deck de destino</label>
+    <select id="my-flashcard-deck" class="profile-edit-input">${personalDeckOptionsHTML(decks)}</select>
+    <label class="profile-edit-label" for="my-flashcard-note" style="margin-top:14px;">Nota (opcional)</label>
+    <textarea id="my-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="contexto, dica de uso..."></textarea>
+    <p class="profile-edit-error" id="my-create-flashcard-error"></p>
+    <button type="submit" class="btn btn-primary btn-block" id="my-create-flashcard-btn" ${atLimit ? 'disabled' : ''}>${atLimit ? 'Limite atingido' : 'Criar cartão'}</button>
+  </form>`;
+}
+
 async function renderMyFlashcardsView(opts){
   const wrap = document.getElementById('my-flashcards-content');
   if (!wrap) return;
@@ -264,74 +341,10 @@ async function renderMyFlashcardsView(opts){
   wrap.innerHTML = loadingHTML();
 
   const isMandarim = APP_KEY === 'mandarim';
-  // Fase F -- Decks pessoais carregados sob demanda (bootstrap idempotente
-  // + leitura); STATE.decks é atualizado pra "Estudar este Deck"
-  // (startDeckReviewSession) nunca enxergar uma lista velha.
-  const [cards, hasLink, planTier, decks] = await Promise.all([
-    fetchMyOwnFlashcards(APP_KEY),
-    hasActiveTeacherLink(),
-    fetchMyPlanTier(),
-    ensureDecksForCurrentUser(APP_KEY).then(() => fetchDecksForLanguage(APP_KEY)),
-  ]);
-  const premium = planTier === 'premium';
-  MY_FLASHCARDS_STATE._cardsCache = cards;
-  MY_FLASHCARDS_STATE._decks = decks;
-  // Teto do plano grátis não vale pra aluna vinculada nem pra Premium
-  // (mesma regra de hasUnlimitedOwnCards, shared/roles.js).
-  const unlimited = hasLink || premium;
-  MY_FLASHCARDS_STATE._hasLink = unlimited;
-  if (typeof STATE !== 'undefined') STATE.decks = decks;
-  const activeCards = cards.filter(c => c.status === 'active');
-  const archivedCards = cards.filter(c => c.status === 'archived');
-  // Fase F -- o teto conta CardInstances (regra única em shared/deck-engine.js),
-  // nunca linhas.
-  const usedInstances = ownCardInstanceUsage(cards);
-  const atLimit = !unlimited && usedInstances >= FREE_OWN_FLASHCARD_LIMIT;
-
-  // Selo de tier -- eixo de QUANTIDADE (vínculo com professora) continua
-  // separado do eixo de PREMIUM (formatos ricos) -- ver comentário em
-  // shared/roles.js. Uma conta pode mostrar os dois selos juntos.
-  const tierBadgeHTML = premium
-    ? `<span class="pill">⭐ Premium — cartões ilimitados</span>`
-    : (hasLink
-      ? `<span class="pill">✨ Aluno vinculado — cartões ilimitados</span>`
-      : `<span class="pill">🔒 Plano grátis — ${usedInstances}/${FREE_OWN_FLASHCARD_LIMIT} cartões</span>`);
-
+  const { cards, hasLink, premium, decks, activeCards, archivedCards, atLimit, tierBadgeHTML } = await loadMyFlashcardsContext();
   wrap.innerHTML = `
     <div class="profile-section">
-      <div class="section-label" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-        <span>Novo cartão</span>
-        ${tierBadgeHTML}
-      </div>
-      <form id="my-create-flashcard-form" class="profile-edit-form">
-        <!-- CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- criação passou a ser SEMPRE
-             nativa, nos dois tiers: não existe mais formulário legado de
-             criação (Modo de prática/Idioma de cada lado/Frente-Verso
-             soltos/campo de imagem-áudio de cartão inteiro). Free/Premium
-             agora só decide QUAIS Card Types (cardTypeUIMetaForEntitlement)
-             e QUAIS origens de áudio por Field (allowedAudioOrigins,
-             threaded em wireMyFlashcardsForm) aparecem nos seletores --
-             nunca se o editor nativo em si está disponível. Editar um
-             cartão LEGADO já existente continua no formulário legado de
-             sempre (myFlashcardEditFormHTML, intocado) -- isto é só
-             CRIAÇÃO de um cartão novo. -->
-        ${premium ? '' : `<p class="profile-edit-hint">🔒 No plano grátis você cria cartões do tipo Normal, com upload de imagem/áudio por campo (URL externa também disponível). <strong>Premium</strong> desbloqueia Normal com reverso, Múltipla escolha, Completar a frase, Digite a resposta, além de gerar áudio por texto e gravar áudio pelo microfone.</p>`}
-        <div class="section-label" style="margin:0 0 4px;">Tipo de cartão</div>
-        <select id="my-flashcard-card-type-preview" class="profile-edit-input">
-          ${cardTypeUIMetaForEntitlement(premium).map(t => `<option value="${t.id}" ${t.id === 'normal' ? 'selected' : ''}>${t.label}</option>`).join('')}
-        </select>
-        <div class="section-label" style="margin:14px 0 4px;">Campos</div>
-        <p class="profile-edit-hint" style="margin-top:-2px;">Adicione os campos deste cartão -- por exemplo, Frente e Verso pra um cartão Normal. Cada campo tem seu próprio idioma e seus próprios recursos de áudio.</p>
-        <div id="my-flashcard-native-fields"></div>
-        <div id="my-flashcard-tags"></div>
-        <button type="button" class="admin-select-link" id="my-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; margin:6px 0 0;">👁️ Pré-visualizar</button>
-        <label class="profile-edit-label" for="my-flashcard-deck" style="margin-top:14px;">Deck de destino</label>
-        <select id="my-flashcard-deck" class="profile-edit-input">${personalDeckOptionsHTML(decks)}</select>
-        <label class="profile-edit-label" for="my-flashcard-note" style="margin-top:14px;">Nota (opcional)</label>
-        <textarea id="my-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="contexto, dica de uso..."></textarea>
-        <p class="profile-edit-error" id="my-create-flashcard-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="my-create-flashcard-btn" ${atLimit ? 'disabled' : ''}>${atLimit ? 'Limite atingido' : 'Criar cartão'}</button>
-      </form>
+      ${myCreateFlashcardFormHTML({ premium, decks, atLimit, tierBadgeHTML })}
     </div>
 
     <div class="profile-section" id="my-decks-section">
@@ -717,7 +730,7 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap, premium){
   });
 }
 
-function wireMyFlashcardsForm(wrap, atLimit, premium){
+function wireMyFlashcardsForm(wrap, atLimit, premium, onCreated){
   // CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- criação passou a ser sempre nativa,
   // nos dois tiers. Free/Premium só afeta quais Card Types
   // (cardTypeUIMetaForEntitlement, já refletido no <select> renderido em
@@ -848,7 +861,8 @@ function wireMyFlashcardsForm(wrap, atLimit, premium){
     // abaixo ser verdade AGORA, não só depois de recarregar a página.
     if (typeof addSelfFlashcardToState === 'function') addSelfFlashcardToState(result.card);
     showToast('✓ Cartão criado. Ele já entra na sua fila de revisão.');
-    renderMyFlashcardsView();
+    if (typeof onCreated === 'function') onCreated(result.card);
+    else renderMyFlashcardsView();
   });
 }
 

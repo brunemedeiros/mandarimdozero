@@ -188,22 +188,85 @@ async function setup(page){
     check(lang + ' raiz: Estudar agora = pool elegível inteiro (curso+pessoal+professora)', langSess.n === langSess.expected && langSess.n > 0 && ['self','study','teacher'].every(o => langSess.origins.includes(o)), langSess);
     await page.evaluate(() => backToReviewModeSelect());
 
-    // Adicionar cartão -> Meus Cartões com o Deck escolhido
+    // Adicionar cartão -> JANELA por cima da Revisão, com o Deck escolhido
     await page.evaluate(() => { openDeckDetail(9004); });
     const addRes = await page.evaluate(async () => {
       fetchMyOwnFlashcards = async () => window.__DB.own_flashcards.map(r => Object.assign({}, r));
       fetchDecksForLanguage = async () => STATE.decks.map(d => Object.assign({}, d));
       ensureDecksForCurrentUser = async () => ({ ok: true, rootDeckId: 9000, personalRootDeckId: 9001 });
+      window.__created = [];
+      createOwnFlashcard = async ({ nativeState, deckId }) => {
+        const row = Object.assign({ id: 700 + window.__created.length, owner_id: CURRENT_USER.id, language_app_key: APP_KEY, status: 'active', revision: 0, deck_id: deckId },
+          nativeContentColumnsFromEditorState(nativeState));
+        window.__created.push(row); window.__DB.own_flashcards.push(Object.assign({}, row));
+        return { ok: true, card: row };
+      };
       document.querySelector('[data-deck-add]').click();
       for (let i = 0; i < 60; i++){
-        const sel = document.getElementById('my-flashcard-deck');
-        if (sel && sel.value === '9004') return { tab: document.getElementById('app').dataset.activeTab, value: sel.value };
+        const sel = document.querySelector('#add-card-modal #my-flashcard-deck');
+        if (sel && sel.value === '9004') break;
         await new Promise(r => setTimeout(r, 100));
       }
-      const sel = document.getElementById('my-flashcard-deck');
-      return { tab: document.getElementById('app').dataset.activeTab, value: sel ? sel.value : null };
+      const sel = document.querySelector('#add-card-modal #my-flashcard-deck');
+      return { tab: document.getElementById('app').dataset.activeTab, modal: !!document.getElementById('add-card-modal'), value: sel ? sel.value : null,
+        detailStill: document.getElementById('review-deck-wrap').style.display !== 'none', hash: location.hash };
     });
-    check(lang + ' Adicionar cartão abre Meus Cartões com o Deck selecionado', addRes.tab === 'my-flashcards' && addRes.value === '9004', addRes);
+    check(lang + ' Adicionar cartão abre uma janela (fica na Revisão) com o Deck selecionado', addRes.tab === 'review' && addRes.modal && addRes.value === '9004' && addRes.detailStill, addRes);
+    // cria um cartão pela janela
+    await page.click('#add-card-modal [data-field-add]');
+    await page.click('#add-card-modal [data-field-add]');
+    const inputs = await page.$$('#add-card-modal [data-field-content]');
+    await inputs[0].fill('fromage'); await inputs[1].fill('queijo');
+    await page.click('#add-card-modal #my-create-flashcard-btn');
+    await page.waitForFunction(() => window.__created.length === 1 && document.querySelector('#add-card-modal .add-card-done'), null, { timeout: 8000 });
+    const made = await page.evaluate(() => ({ row: window.__created[0], inState: STATE.cards.some(c => c.origin === 'self' && c.rowId === window.__created[0].id && c.deckId === 9004),
+      stillOpen: !!document.getElementById('add-card-modal'), fieldsReset: document.querySelectorAll('#add-card-modal [data-field-content]').length, deck: document.querySelector('#add-card-modal #my-flashcard-deck').value }));
+    check(lang + ' janela: cria no Deck escolhido e entra no STATE', made.row.deck_id === 9004 && made.inState, made);
+    check(lang + ' janela: continua aberta, limpa, no mesmo Deck (como no Anki)', made.stillOpen && made.fieldsReset === 0 && made.deck === '9004', made);
+    await page.click('#add-card-modal [data-add-card-close]');
+    const afterClose = await page.evaluate(() => ({ modal: !!document.getElementById('add-card-modal'), novo: Number(document.querySelector('#review-deck-wrap .deck-detail-num').textContent) }));
+    check(lang + ' fechar a janela atualiza a contagem do Deck (Comida: 2 -> 3)', !afterClose.modal && afterClose.novo === 3, afterClose);
+    // Esc fecha
+    await page.click('[data-deck-add]');
+    await page.waitForSelector('#add-card-modal #my-create-flashcard-form');
+    await page.keyboard.press('Escape');
+    check(lang + ' Esc fecha a janela', await page.evaluate(() => !document.getElementById('add-card-modal')));
+    // remove o cartão criado para não alterar as contagens seguintes
+    await page.evaluate(() => {
+      STATE.cards = STATE.cards.filter(c => !(c.origin === 'self' && c.rowId === 700));
+      window.__DB.own_flashcards = window.__DB.own_flashcards.filter(r => r.id !== 700);
+    });
+
+    // Tela principal: Adicionar e Painel também ficam ao lado da tabela
+    await page.evaluate(() => backToDeckTable());
+    await page.waitForSelector('#review-decks-table [data-deck-home-add]');
+    await page.click('#review-decks-table [data-deck-home-panel]');
+    const homePanel = await page.evaluate(() => ({ view: DECK_BROWSER.view, node: DECK_BROWSER.nodeId, hash: location.hash }));
+    check(lang + ' tela principal: Painel abre o Painel da raiz', homePanel.view === 'panel' && homePanel.node === 'lang' && homePanel.hash === '#/review/decks/lang/panel', homePanel);
+    await page.evaluate(() => backToDeckTable());
+    await page.click('#review-decks-table [data-deck-home-add]');
+    await page.waitForSelector('#add-card-modal #my-flashcard-deck');
+    const homeAdd = await page.evaluate(() => ({ value: document.querySelector('#add-card-modal #my-flashcard-deck').value }));
+    check(lang + ' tela principal: Adicionar abre a janela com Meus Decks', homeAdd.value === '9001', homeAdd);
+    await page.keyboard.press('Escape');
+
+    // Cores: Novo azul, Aprendendo vermelho, Revisar verde (3 cores diferentes)
+    const colors = await page.evaluate(() => {
+      const mk = cls => { const td = document.createElement('td'); td.className = 'deck-table-num ' + cls; document.querySelector('#review-decks-table tbody tr').appendChild(td); const c = getComputedStyle(td).color; td.remove(); return c; };
+      return [mk('is-new'), mk('is-learning'), mk('is-review'), mk('is-zero')];
+    });
+    check(lang + ' 3 cores diferentes nas colunas (+ zero apagado)', new Set(colors).size === 4, colors);
+
+    // Endereço próprio: recarregar no detalhe/Painel mantém a tela
+    await page.evaluate(() => openDeckDetail(9002));
+    check(lang + ' detalhe tem endereço próprio', await page.evaluate(() => location.hash) === '#/review/decks/9002');
+    await page.evaluate(() => { DECK_BROWSER.view = 'home'; renderRoute(hashToRoute('#/review/decks/9002/panel')); });
+    await page.waitForFunction(() => DECK_BROWSER.view === 'panel' && document.querySelector('#review-deck-wrap [data-panel-count]'), null, { timeout: 8000 });
+    check(lang + ' abrir #/review/decks/9002/panel restaura o Painel', await page.evaluate(() => DECK_BROWSER.nodeId === 9002 && document.getElementById('app').dataset.activeTab === 'review'));
+    await page.evaluate(() => renderRoute(hashToRoute('#/review/decks/99999')));
+    await page.waitForTimeout(300);
+    check(lang + ' Deck inexistente no endereço volta para a tabela', await page.evaluate(() => DECK_BROWSER.view === 'home'));
+    await page.evaluate(() => backToReviewModeSelect());
 
     // ---- 2) Painel ----
     await page.evaluate(() => switchTab('review'));
@@ -320,6 +383,13 @@ async function setup(page){
     check(lang + ' excluir: banco diverge da tela -> nada é alterado', mism.ok === false && mism.writes === 0, mism);
 
     check(lang + ' sem erros de página', errors.length === 0, errors);
+    // Recarregar de verdade (F5) com o endereço do Painel da raiz
+    await page.evaluate(() => { openDeckPanel('lang'); });
+    await page.reload();
+    await page.waitForFunction(() => typeof STATE !== 'undefined' && STATE.cards && STATE.cards.length > 0, null, { timeout: 15000 });
+    await page.waitForFunction(() => typeof DECK_BROWSER !== 'undefined' && DECK_BROWSER.view === 'panel', null, { timeout: 8000 }).catch(() => {});
+    const reloaded = await page.evaluate(() => ({ view: DECK_BROWSER.view, node: DECK_BROWSER.nodeId, hash: location.hash, tab: document.getElementById('app').dataset.activeTab, shown: document.getElementById('review-deck-wrap').style.display }));
+    check(lang + ' F5 no Painel: continua no Painel', reloaded.view === 'panel' && reloaded.node === 'lang' && reloaded.tab === 'review' && reloaded.shown === 'block', reloaded);
     await ctx.close();
   }
 

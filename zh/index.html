@@ -58,6 +58,7 @@ try{
   --gold-bright: #F0C444;   /* dourado claro — destaques, XP */
   --ink: #211714;           /* quase-preto com calor, tipo tinta */
   --paper: #FBF4E8;         /* papel de arroz — fundo */
+  --count-new: #1D5A82; --count-learning: #B3261E; --count-review: #2E6B4F; /* colunas Novo/Aprendendo/Revisar (Decks) */
   --paper-warm: #F3E6CE;    /* fundo secundário, cards */
   --paper-line: #E2CFA6;    /* linhas/bordas sutis */
   --jade: #3A7359;          /* verde jade — sucesso/acerto, contraste intencional ao vermelho */
@@ -113,6 +114,7 @@ try{
     --gold-bright: #F5CE66;
     --ink: #F1E4D6;
     --paper: #1B1512;
+    --count-new: #6CB4E4; --count-learning: #FF7B6E; --count-review: #5CC497;
     --paper-warm: #251C17;
     --paper-line: #3C2F27;
     --jade: #52B487;
@@ -137,6 +139,7 @@ try{
   --gold-bright: #F5CE66;
   --ink: #F1E4D6;
   --paper: #1B1512;
+  --count-new: #6CB4E4; --count-learning: #FF7B6E; --count-review: #5CC497;
   --paper-warm: #251C17;
   --paper-line: #3C2F27;
   --jade: #52B487;
@@ -2826,9 +2829,13 @@ body.hide-pinyin .prompt-pinyin{
 .deck-table-toggle-spacer{ width:22px; flex:0 0 22px; }
 .deck-table-num{ text-align:right; width:64px; font-variant-numeric:tabular-nums; font-weight:600; }
 .deck-table-num.is-zero, .deck-detail-num.is-zero{ color:var(--ink-soft); font-weight:400; }
-.deck-table-num.is-learning, .deck-detail-num.is-learning{ color:var(--error-red, #A83A2E); }
-.deck-table-num.is-review, .deck-detail-num.is-review{ color:var(--jade); }
+.deck-table-num.is-new, .deck-detail-num.is-new{ color:var(--count-new); }
+.deck-table-num.is-learning, .deck-detail-num.is-learning{ color:var(--count-learning); }
+.deck-table-num.is-review, .deck-detail-num.is-review{ color:var(--count-review); }
 .deck-table-hint{ margin-top:6px; }
+.deck-table-toolbar{ display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; margin:0 0 8px; }
+.deck-table-tool-btn{ padding:6px 14px; font-size:14px; }
+.add-card-modal{ max-width:680px; }
 .deck-detail, .deck-panel{ background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); padding:16px; }
 .deck-detail-path{ margin:0; font-size:13px; color:var(--ink-soft); }
 .deck-detail-title{ margin:2px 0 12px; overflow-wrap:anywhere; }

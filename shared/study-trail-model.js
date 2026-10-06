@@ -65,8 +65,7 @@ function studyNoteRowForWord(unit, vocab, idx, appKey){
 // - modulo-N: só quando existe MODULES (fr). zh não tem módulos -> omitido.
 // - unidade-<slug do título>; se o slug passar de 50 caracteres, usa o id.
 // - licao-N: posição (1-based) da lição que ensina a palavra em unit.lessons.
-//   Frase estudável não pertence a uma lição (lessons só listam vocabIdx),
-//   então não ganha licao-N.
+//   "Na frase" ganha a licao-N da palavra que a apresenta primeiro.
 // Como reverter: devolver `tags: []` em studyNoteRowForWord.
 // ============================================================
 function studyTrailCourseTag(appKey){
@@ -92,8 +91,10 @@ function studyTrailTags(unit, appKey, item){
   const mod = studyTrailModuleTag(unit);
   if (mod) tags.push(mod);
   tags.push(studyTrailUnitTag(unit));
-  if (item && item.kind === 'palavra'){
-    const li = (unit.lessons || []).findIndex(l => (l.vocabIdx || []).includes(item.vocabIdx));
+  // "Na frase" usa a lição da palavra que a apresenta (gateVocabIdx).
+  const lessonVocabIdx = item ? (item.kind === 'palavra' ? item.vocabIdx : item.gateVocabIdx) : null;
+  if (lessonVocabIdx != null){
+    const li = (unit.lessons || []).findIndex(l => (l.vocabIdx || []).includes(lessonVocabIdx));
     if (li >= 0) tags.push('licao-' + (li + 1));
   }
   tags.push(item && item.kind === 'na-frase' ? 'na-frase' : 'palavra');
@@ -132,26 +133,54 @@ function buildStudyWordCards(unit, vocab, idx, appKey){
 }
 
 // ============================================================
-// Cartões "Na frase" (doc §11.1) -- OPT-IN por conteúdo.
-// Uma frase de unit.phrases[] só vira cartão quando o content.js marca
-// `studyable: true` nela. Hoje NENHUMA frase real está marcada, então
-// nenhum aluno ganha cartões novos (a fila de revisão de ninguém muda).
-//   1 frase estudável = 1 Note sintética `normal` (1 CardInstance,
-//   idioma estudado -> tradução), id `u{unit}-p{idx}` (nunca colide com
-//   `u{unit}-v{idx}`), tags da palavra trocando `palavra` por `na-frase`,
-//   mesmo Course Deck da unidade (assignCourseDeckIds usa unitId).
-//   vocabIdx = null (não é palavra: métricas por palavra, Speed/Combinar
-//   e a projeção A a ignoram); phraseIdx = idx.
-//   Gate (isCardLessonCompleted, sem mudança): sem vocabIdx não há lição
-//   -> só entra na revisão quando a UNIDADE inteira foi concluída.
-// Como reverter: remover a chamada buildStudyPhraseCards em
-// buildCardsFromUnits (fr/app.js e zh/app.js).
+// Cartões "Na frase" (doc §11.1; decisão da autora, 06/10/2026).
+// "Na frase" = a frase de exemplo mostrada no cartão de cada palavra nova
+// (mesma busca de findMatchingPhrase em fr/zh app.js: frases + falas do
+// diálogo da unidade, depois das unidades anteriores). Toda frase de
+// exemplo vira UM cartão (1 por frase, nunca 1 por palavra: a palavra já
+// tem os cartões A/B próprios; o objetivo aqui é lembrar o exemplo real).
+//   - id estável pela posição da frase no conteúdo: `u{unidade}-p{idx}`
+//     (unit.phrases) ou `u{unidade}-d{idx}` (dialogue.lines).
+//   - pertence à unidade da PRIMEIRA palavra (em ordem de curso) que usa a
+//     frase como exemplo: mesmo Course Deck dessa unidade.
+//   - gateVocabIdx = índice dessa palavra: entra na revisão quando a lição
+//     dela é concluída (isCardLessonCompleted).
+//   - vocabIdx = null: não é palavra (métricas por palavra, Speed/Combinar e
+//     a projeção A a ignoram); phraseIdx = posição na lista da unidade-fonte.
+//   - Note `normal` (1 CardInstance): frase no idioma estudado -> tradução.
 // ============================================================
-function isStudyablePhrase(phrase){
-  return !!phrase && phrase.studyable === true;
+function studyExamplePhraseKey(appKey){
+  return appKey === 'mandarim' ? 'c' : 'f';
 }
-function studyNoteRowForPhrase(unit, phrase, idx, appKey){
-  const base = `u${unit.id}-p${idx}`;
+// Espelho exato de findMatchingPhrase (fr/app.js e zh/app.js), mas sobre a
+// lista `units` recebida e devolvendo também a posição da frase.
+// fr: compara sem caixa e ignora "(de)" do vocabulário; zh: hanzi contido.
+function findStudyExamplePhrase(units, word, unit, appKey){
+  const key = studyExamplePhraseKey(appKey);
+  const needle = String((word && word[key]) || '').replace(/\s*\([^()]*\)/g, '').trim().toLowerCase();
+  if (!needle) return null;
+  const search = u2 => {
+    const phrases = u2.phrases || [];
+    for (let i = 0; i < phrases.length; i++){
+      if (String(phrases[i][key] || '').toLowerCase().includes(needle)) return { phrase: phrases[i], unitId: u2.id, kind: 'p', idx: i };
+    }
+    const lines = (u2.dialogue && u2.dialogue.lines) || [];
+    for (let i = 0; i < lines.length; i++){
+      if (String(lines[i][key] || '').toLowerCase().includes(needle)) return { phrase: lines[i], unitId: u2.id, kind: 'd', idx: i };
+    }
+    return null;
+  };
+  const own = search(unit);
+  if (own) return own;
+  const unitIdx = units.findIndex(u2 => u2.id === unit.id);
+  for (let i = 0; i < unitIdx; i++){
+    const m = search(units[i]);
+    if (m) return m;
+  }
+  return null;
+}
+function studyNoteRowForPhrase(unit, phrase, idx, appKey, gateVocabIdx){
+  const base = `ph${idx}`;
   const f = (n, lang, value) => ({
     id: `${base}-f${n}`, lang, role: null,
     content: { value }, audio: null, image: null, pinyinFieldId: null,
@@ -165,23 +194,38 @@ function studyNoteRowForPhrase(unit, phrase, idx, appKey){
   }
   return {
     id: idx, revision: 0, status: 'active', note: null,
-    tags: studyTrailTags(unit, appKey, { kind: 'na-frase', phraseIdx: idx }), deck_id: null,
+    tags: studyTrailTags(unit, appKey, { kind: 'na-frase', gateVocabIdx }), deck_id: null,
     fields, card_generation_mode: 'normal',
   };
 }
-function buildStudyPhraseCards(unit, appKey){
+// Cartões "Na frase" de TODO o curso (uma passada, em ordem de curso, para
+// cada frase ser atribuída à primeira palavra que a usa).
+function buildStudyPhraseCards(units, appKey){
   const cards = [];
-  (unit.phrases || []).forEach((phrase, idx) => {
-    if (!isStudyablePhrase(phrase)) return;
-    const row = studyNoteRowForPhrase(unit, phrase, idx, appKey);
-    buildEngineCardsFromRow(row, { origin: 'study', appKey, idPrefix: `u${unit.id}-p` }).forEach(c => {
-      c.origin = 'study';
-      c.unitId = unit.id;
-      c.vocabIdx = null;
-      c.phraseIdx = idx;
-      c.unitTitle = unit.title;
-      c.deckId = null;
-      cards.push(c);
+  const seen = new Set();
+  (units || []).forEach(unit => {
+    if (unit.type === 'grammar') return;
+    (unit.vocab || []).forEach((word, vIdx) => {
+      const m = findStudyExamplePhrase(units, word, unit, appKey);
+      if (!m) return;
+      const loc = `u${m.unitId}-${m.kind}`;
+      if (seen.has(loc + m.idx)) return;
+      seen.add(loc + m.idx);
+      const ph = m.phrase;
+      const hasText = appKey === 'mandarim' ? (ph.c && ph.t) : (ph.f && ph.t);
+      if (!hasText) return;
+      const row = studyNoteRowForPhrase(unit, ph, m.idx, appKey, vIdx);
+      buildEngineCardsFromRow(row, { origin: 'study', appKey, idPrefix: loc }).forEach(c => {
+        c.origin = 'study';
+        c.unitId = unit.id;
+        c.vocabIdx = null;
+        c.gateVocabIdx = vIdx;
+        c.phraseIdx = m.idx;
+        c.phraseSource = { unitId: m.unitId, kind: m.kind };
+        c.unitTitle = `Na frase · ${unit.title}`; // etiqueta do cartão na Revisão
+        c.deckId = null;
+        cards.push(c);
+      });
     });
   });
   return cards;

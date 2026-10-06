@@ -28,6 +28,7 @@ function createTabSwitcher({ onBeforeSwitch, tabHandlers }){
       // Navegador de Decks: detalhe/Painel ficam fechados ao (re)entrar na aba.
       const deckWrap = document.getElementById('review-deck-wrap');
       if (deckWrap) deckWrap.style.display = 'none';
+      if (typeof DECK_BROWSER !== 'undefined'){ DECK_BROWSER.view = 'home'; DECK_BROWSER.nodeId = null; }
       if (STATE.reviewSessionUnitFilter){
         // Veio de "Estudar esta unidade" na trilha — pula a tela de escolha,
         // vai direto pra sessão de flashcard filtrada por unidade.

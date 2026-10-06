@@ -34,7 +34,7 @@ function extractFunction(src, name){
 }
 
 const APP_FUNCTIONS = [
-  'buildCardsFromUnits', 'flashcardIdForRow', 'lessonIndexForVocabIdx', 'isCardLessonCompleted',
+  'buildCardsFromUnits', 'flashcardIdForRow', 'lessonIndexForVocabIdx', 'isCardLessonCompleted', 'findMatchingPhrase',
   'matchesReviewOriginFilter', 'activeReviewTagFilter', 'matchesReviewTagFilter', 'eligibleReviewPool', 'eligibleDeckReviewPool', 'applySerializedState',
   'ensureCourseDecksLoaded', 'ensureDecksLoadedForReview',
   'deckReviewSummary', 'deckCountsForReview', 'reviewFilterQueue',

@@ -545,9 +545,9 @@ function buildCardsFromUnits(units, appKey = 'mandarim'){
     u.vocab.forEach((v, idx) => {
       buildStudyWordCards(u, v, idx, appKey).forEach(c => cards.push(c));
     });
-    // Cartões "Na frase" (opt-in: só frases com `studyable: true`).
-    buildStudyPhraseCards(u, appKey).forEach(c => cards.push(c));
   });
+  // Cartões "Na frase": 1 por frase de exemplo do curso (shared/study-trail-model.js).
+  buildStudyPhraseCards(units, appKey).forEach(c => cards.push(c));
   return cards;
 }
 
@@ -5714,7 +5714,8 @@ function vocabStrengthBuckets(){
   // K.3: força é por NOTE (conteúdo) -- A+B da trilha, reverso e Cloze contam
   // uma vez. Nenhuma irmã estudada = notStarted (nunca "fraca"); com estudadas
   // = a mais fraca entre elas. Fonte: shared/analytics-metrics.js.
-  const st = contentMetrics(pool).strength;
+  // Cartões "Na frase" não são palavras: ficam fora de "Suas palavras".
+  const st = contentMetrics(pool.filter(c => !isStudyTrailPhraseCard(c))).strength;
   return { notStarted: st.not_started, weak: st.weak, medium: st.medium, strong: st.strong };
 }
 
@@ -6437,7 +6438,9 @@ function isCardLessonCompleted(card){
   const prog = STATE.unitProgress[card.unitId];
   if (!prog?.started) return false;
   const unit = UNITS.find(u => u.id === card.unitId);
-  const lessonIdx = unit ? lessonIndexForVocabIdx(unit, card.vocabIdx) : -1;
+  // Cartão "Na frase": entra com a lição da palavra que o apresenta (gateVocabIdx).
+  const gateIdx = card.vocabIdx != null ? card.vocabIdx : card.gateVocabIdx;
+  const lessonIdx = unit ? lessonIndexForVocabIdx(unit, gateIdx) : -1;
   // Sem lição conhecida pra esse vocabIdx: só libera se a unidade inteira
   // já foi concluída (mais seguro que arriscar mostrar algo nunca ensinado).
   if (lessonIdx === -1) return !!prog.completed;

@@ -98,10 +98,10 @@ async function bootPage(browser, lang, port){
     const ev = (fn, arg) => page.evaluate(fn, arg);
     const info = await ev(() => {
       const c = STATE.cards.find(x => x.origin === 'study');
-      return { tags: c.tags, phrases: STATE.cards.filter(x => /-p\d+$/.test(x.id)).length };
+      return { tags: c.tags, phrases: STATE.cards.filter(x => isStudyTrailPhraseCard(x)).length };
     });
     check(lang + ' boot: card da trilha com tags automáticas', ['estudo', course, 'palavra'].every(t => info.tags.includes(t)), info.tags);
-    check(lang + ' boot: nenhum card de frase (opt-in)', info.phrases === 0);
+    check(lang + ' boot: cartões "Na frase" existem (1 por frase de exemplo)', info.phrases > 0, info.phrases);
     // libera todas as unidades e abre o painel de configurar sessão
     await ev(() => { UNITS.forEach(x => { STATE.unitProgress[x.id] = { started: true, completed: true, lessonIdx: 99, lessonMisses: {} }; }); switchTab('review'); renderReviewSettingsView(); });
     const chips = await ev(() => [...document.querySelectorAll('#review-tag-chips [data-review-tag]')].map(b => b.dataset.reviewTag));
@@ -129,12 +129,10 @@ async function bootPage(browser, lang, port){
       return out;
     });
     check(lang + ' filtro por unidade-*: só a unidade, chip selecionado continua visível', unitF.n > 0 && unitF.same && unitF.chipShown, unitF);
-    // "Na frase": marca uma frase no conteúdo em memória e reconstrói
+    // "Na frase": cartão de frase de exemplo já existe para toda frase usada
     const ph = await ev(() => {
-      const u = UNITS.find(x => x.type !== 'grammar' && (x.phrases || []).length);
-      u.phrases[0].studyable = true;
-      STATE.cards = buildCardsFromUnits(UNITS, APP_KEY);
-      const p = STATE.cards.find(c => c.id === `u${u.id}-p0`);
+      const p = STATE.cards.find(c => isStudyTrailPhraseCard(c));
+      const u = UNITS.find(x => x.id === p.unitId);
       const groups = studyWordGroups(STATE.cards.filter(c => c.unitId === u.id)).length;
       const speedPool = projectStudyWordsToA(eligibleReviewPool()).includes(p);
       updateStudySetting({ reviewTagFilter: ['na-frase'] });
@@ -144,14 +142,13 @@ async function bootPage(browser, lang, port){
       // revisão real do card de frase
       STATE.reviewQueue = [p]; STATE.reviewIndex = 0; STATE.reviewCardState = null; switchTab('review'); renderReviewView();
       const html = document.getElementById('review-content').innerText;
-      delete u.phrases[0].studyable;
       return { ok: !!p, tags, groups, words: u.vocab.length, speedPool, naFrase, html: html.slice(0, 200), front: lang => 0 };
     });
-    check(lang + ' frase estudável vira card u{unit}-p0', ph.ok);
+    check(lang + ' cartão de frase existe', ph.ok);
     check(lang + ' tags da frase: na-frase sem palavra', ph.tags.includes('na-frase') && !ph.tags.includes('palavra'), ph.tags);
     check(lang + ' studyWordGroups ignora a frase', ph.groups === ph.words, ph);
     check(lang + ' Speed/Combinar não recebem a frase', ph.speedPool === false);
-    check(lang + ' filtro na-frase -> só a frase', ph.naFrase.length === 1 && /-p0$/.test(ph.naFrase[0]), ph.naFrase);
+    check(lang + ' filtro na-frase -> só cartões de frase', ph.naFrase.length > 1 && ph.naFrase.every(id => /-[pd]\d+$/.test(id)), ph.naFrase.length);
     check(lang + ' card de frase renderiza na Revisão', ph.html.length > 0, ph.html);
     check(lang + ' sem pageerror', errors.length === 0, errors);
   }
