@@ -1014,10 +1014,11 @@ function openMyFlashcardsExportModal(cardsToExport){
   modal.innerHTML = `
     <div class="app-modal">
       <div class="app-modal-header">
-        <h3>⬇️ Exportar cartões (${payload.cards.length})</h3>${payload.cards.length < cardsToExport.length ? `<p class="profile-edit-hint">${cardsToExport.length - payload.cards.length} cartão(ões) de Completar a frase ficaram de fora: este formato só leva frente e verso.</p>` : ''}
+        <h3>⬇️ Exportar cartões (${payload.cards.length})</h3>
         <button class="app-modal-close" id="my-flashcards-export-close" aria-label="Fechar">✕</button>
       </div>
       <div class="app-modal-body">
+        ${payload.cards.length < cardsToExport.length ? `<p class="profile-edit-hint">${cardsToExport.length - payload.cards.length} cartão(ões) de Completar a frase ficaram de fora: este formato só leva frente e verso.</p>` : ''}
         <p class="profile-edit-hint">Baixe um arquivo .json pra dar pra outro aluno importar, ou copie o link de compartilhamento -- os dois têm o mesmo conteúdo.</p>
         <div style="display:flex; gap:10px; margin:10px 0;">
           <button type="button" class="btn btn-secondary" id="my-flashcards-export-download" style="flex:1;">⬇️ Baixar .json</button>
