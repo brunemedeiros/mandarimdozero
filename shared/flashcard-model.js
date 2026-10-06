@@ -297,7 +297,16 @@ function validateFieldAudioUrl(url){
 // invalida o cache de TODO Field TTS já gerado (generationKey muda pra
 // todo mundo), sem nenhuma migração de dado.
 const TTS_PROVIDER_MODEL_ID = 'google-chirp3-hd'; // Google Cloud TTS, Chirp 3 HD (ver Edge Function tts-generate)
-const TTS_CONFIG_VERSION = 1;
+const TTS_CONFIG_VERSION = 2;
+// Versão das regras de "texto falado" POR IDIOMA (tts_core.mjs /
+// spoken_text.py). Entra no generationKey junto com TTS_CONFIG_VERSION:
+// mudar a regra de um idioma invalida só os áudios daquele idioma.
+const TTS_SPOKEN_RULES_VERSION_BY_LANG = { fr: 4, pt: 1, zh: 0 };
+function ttsConfigVersionFor(language){
+  const l = String(language || '').trim().toLowerCase();
+  const fam = l.startsWith('fr') ? 'fr' : l.startsWith('pt') ? 'pt' : (l.startsWith('zh') || l.startsWith('cmn')) ? 'zh' : 'x';
+  return `${TTS_CONFIG_VERSION}:${fam}${TTS_SPOKEN_RULES_VERSION_BY_LANG[fam] ?? 0}`;
+}
 
 // Limite de caracteres por geração -- controle de custo (auditoria Fase
 // 7f, Seção 14/15: "nunca gerar um texto absurdamente longo"). Mesmo
@@ -322,7 +331,7 @@ async function computeTtsGenerationKey(effectiveText, language, voiceId, rate){
     voiceId || '',
     (rate === null || rate === undefined) ? '' : String(rate),
     TTS_PROVIDER_MODEL_ID,
-    String(TTS_CONFIG_VERSION),
+    ttsConfigVersionFor(language),
   ];
   const input = parts.map(p => encodeURIComponent(p)).join('\u001F');
   const bytes = new TextEncoder().encode(input);

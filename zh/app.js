@@ -1863,6 +1863,16 @@ function seedEarnedBadges(){
 
 let badgeCelebrationQueue = [];
 let badgeCelebrationShowing = false;
+// Durante uma sessão de revisão (Flashcard/Palavras difíceis/Speed Review/
+// Deck), a conquista fica guardada e aparece só na tela de fim ("Revisão
+// concluída"), para não cobrir o cartão. Fora da sessão, aparece na hora.
+let badgeCelebrationHeld = false;
+function holdBadgeCelebrations(){ badgeCelebrationHeld = true; }
+function releaseBadgeCelebrations(){
+  if (!badgeCelebrationHeld) return;
+  badgeCelebrationHeld = false;
+  processBadgeCelebrationQueue();
+}
 
 function checkAndCelebrateBadges(){
   const newlyEarned = [];
@@ -1889,7 +1899,7 @@ function checkAndCelebrateBadges(){
 // cruza 500 no mesmo golpe que termina o nível), mostra um de cada vez --
 // nunca dois cartões sobrepostos brigando pela mesma área da tela.
 function processBadgeCelebrationQueue(){
-  if (badgeCelebrationShowing || !badgeCelebrationQueue.length) return;
+  if (badgeCelebrationHeld || badgeCelebrationShowing || !badgeCelebrationQueue.length) return;
   badgeCelebrationShowing = true;
   const badge = badgeCelebrationQueue.shift();
   showBadgeUnlockCelebration(badge, () => {
@@ -5753,9 +5763,12 @@ function matchesReviewOriginFilter(card){
 // CardInstances irmãos (reverso, Cloze) passam/ficam juntos. Só SELECIONA
 // cards elegíveis: nunca toca FSRS, Deck nem origem. cardMatchesTagFilter()
 // vive em shared/flashcard-model.js (fonte única).
+// 2026-10-06 (pedido da autora): o filtro de tags saiu de "Configurar" e
+// fica só no Painel. Sem tela para mudar o valor, um filtro salvo antes
+// restringiria a revisão sem a pessoa ver -- por isso a sessão não aplica
+// mais nenhum filtro de tag (o valor salvo é ignorado).
 function activeReviewTagFilter(){
-  const f = STATE.studySettings.reviewTagFilter;
-  return Array.isArray(f) ? f : [];
+  return [];
 }
 function matchesReviewTagFilter(card){
   return cardMatchesTagFilter(card, activeReviewTagFilter());
@@ -6049,6 +6062,7 @@ function openReviewSession(mode){
     STATE.reviewSessionDeckId = null; // Fase D -- entrada normal (sem Deck) nunca herda escopo de uma sessão anterior
     startReviewSession();
   } else if (mode === 'hard'){
+    holdBadgeCelebrations();
     STATE.reviewSessionUnitFilter = null;
     STATE.reviewSessionDeckId = null; // Fase D -- idem
     // Fase 4: getStudyQueue(scope:'hard') -- mesmo critério de hardWordsPool()
@@ -6085,6 +6099,7 @@ function syncReviewBackLink(){
 }
 
 function backToReviewModeSelect(){
+  releaseBadgeCelebrations();
   const returnDeckId = STATE.reviewSessionDeckId;
   stopSpeedTimer();
   SPEED_STATE.active = false;
@@ -6300,6 +6315,7 @@ function onMatchTileClick(btn){
 }
 
 function startSpeedReview(){
+  holdBadgeCelebrations();
   trackEvent('lesson_start', 'speed_review', null);
   SPEED_STATE.queue = buildSpeedQueue();
   SPEED_STATE.index = 0;
@@ -6372,6 +6388,7 @@ function renderSpeedReview(){
     // Fase 6 do projeto: nunca oferecer "Jogar de novo" repetindo a mesma
     // bateria de revisão -- Voltar/Praticar mais, igual à conclusão do
     // Flashcard (ver renderReviewView).
+    releaseBadgeCelebrations();
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">💔</div>
@@ -6413,6 +6430,7 @@ function renderSpeedReview(){
     // Fase 6 do projeto: idem -- sem "Jogar de novo" (a fila devida já foi
     // zerada de verdade nesta sessão; "de novo" mostraria vazio ou
     // reaproveitaria cartões que acabaram de ser respondidos).
+    releaseBadgeCelebrations();
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">🏆</div>
@@ -6569,6 +6587,7 @@ function isCardLessonCompleted(card){
 }
 
 function startReviewSession(){
+  holdBadgeCelebrations();
   trackEvent('lesson_start', 'flashcard_review', null);
   // eligibleReviewPool() (não STATE.cards.filter(isCardLessonCompleted)
   // solto): mesma função que a tela de modo/hero widget já usa pra contar
@@ -6725,6 +6744,7 @@ function deckReviewSummary(deckId){
 // primeiro" continuam valendo sem nenhum código de limite novo (D6). Direção
 // (K2-G): estrutural do CardInstance -- a sessão de Deck só escolhe quais entram.
 async function startDeckReviewSession(deckId, opts){
+  holdBadgeCelebrations();
   const restore = !!(opts && opts.restore);
   trackEvent('lesson_start', 'flashcard_review', null);
   const decks = await ensureDecksLoadedForReview();
@@ -7125,6 +7145,7 @@ function renderReviewView(){
   const el = document.getElementById('review-content');
 
   if (!STATE.reviewQueue.length){
+    releaseBadgeCelebrations();
     // Mesma fonte que startReviewSession()/Speed Review usam de verdade
     // (todaysReviewCount, com os mesmos tetos de novas/dia e intensidade)
     // -- senão esse número prometeria mais do que "Revisar tudo disponível"
@@ -7150,6 +7171,7 @@ function renderReviewView(){
   }
 
   if (STATE.reviewIndex >= STATE.reviewQueue.length){
+    releaseBadgeCelebrations();
     // Streak conta aqui -- fim da SESSÃO inteira de Flashcard/Palavras
     // difíceis (os dois usam esta mesma tela, ver openReviewSession) -- não
     // a cada cartão avaliado (ver gradeCurrentCard).

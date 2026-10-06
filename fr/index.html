@@ -3016,7 +3016,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
    full-screen: pode aparecer no meio de qualquer fluxo (um exercício, uma
    revisão), então precisa ficar por cima sem bloquear o que está por baixo.
    Fila em JS (processBadgeCelebrationQueue) garante só 1 por vez. */
-#badge-unlock-layer{ position:fixed; top:70px; left:50%; transform:translateX(-50%); z-index:var(--z-top); display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
+#badge-unlock-layer{ position:fixed; bottom:calc(84px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); z-index:var(--z-top); display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
 .badge-unlock-toast{
   pointer-events:auto; cursor:pointer; display:flex; align-items:center; gap:12px;
   background: var(--paper); border:2px solid var(--imperial-gold); border-radius:16px;
@@ -3027,8 +3027,10 @@ footer.app-footer img{ height:40px; opacity:.85; }
 .badge-unlock-label{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color: var(--seal-red-dark); }
 .badge-unlock-name{ font-size:14px; font-weight:800; color: var(--ink); }
 .badge-unlock-desc{ font-size:12px; color: var(--ink-soft); }
-@keyframes badgeUnlockIn{ from{opacity:0; transform:scale(.7) translateY(-14px);} to{opacity:1; transform:scale(1) translateY(0);} }
-@keyframes badgeUnlockOut{ to{opacity:0; transform:translateY(-10px);} }
+@keyframes badgeUnlockIn{ from{opacity:0; transform:scale(.7) translateY(14px);} to{opacity:1; transform:scale(1) translateY(0);} }
+@keyframes badgeUnlockOut{ to{opacity:0; transform:translateY(10px);} }
+/* Embaixo, logo acima da barra de abas do celular; no computador (sem barra), perto da borda. */
+@media (min-width: 900px){ #badge-unlock-layer{ bottom:24px; } }
 @keyframes badgeUnlockSpin{ from{transform:rotate(-25deg) scale(.5);} to{transform:rotate(0) scale(1);} }
 /* Confete (tiers 3/4/6) -- peças de papel caindo em CSS puro, sem
    biblioteca externa. spawnConfetti() (app.js) cria as peças aqui dentro e
@@ -3441,6 +3443,12 @@ footer.app-footer img{ height:40px; opacity:.85; }
 
 /* Menu "⋯" (Importar / Exportar) ao lado de Criar Deck. */
 .deck-more-menu{ position:relative; }
+.deck-topbar .deck-more-menu{ display:flex; }
+.deck-topbar .deck-more-menu > summary.deck-topbar-more{ padding:8px 12px; letter-spacing:.08em; font-weight:800; display:flex; align-items:center; }
+.deck-table-create-row td{ border-bottom:none; }
+.review-modes-spacer{ height:28px; }
+.deck-table-create-link{ background:none; border:none; padding:4px 0; cursor:pointer; color:var(--ink-soft); font:inherit; font-size:13.5px; text-align:left; }
+.deck-table-create-link:hover, .deck-table-create-link:focus-visible{ color:var(--ink); text-decoration:underline; }
 .deck-more-menu > summary{ list-style:none; cursor:pointer; min-width:44px; font-weight:800; letter-spacing:.08em; }
 .deck-more-menu > summary::-webkit-details-marker{ display:none; }
 .deck-more-menu-list{ position:absolute; right:0; top:calc(100% + 6px); z-index:5; min-width:230px; background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); box-shadow:var(--shadow-lift); padding:6px; display:flex; flex-direction:column; }
@@ -3514,6 +3522,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
   .deck-table-toggle{ position:relative; }
   .deck-table-toggle::after{ content:""; position:absolute; inset:-11px; }
   .deck-table-link{ min-height:44px; display:inline-flex; align-items:center; padding:0 4px 0 0; }
+  .deck-table-create-link{ min-height:44px; }
   .deck-topbar-btn, .deck-home-btn, .deck-overview-study{ min-height:44px; }
   .deck-panel-side-item{ min-height:44px; padding-top:10px; padding-bottom:10px; }
   .deck-panel-item{ min-height:44px; }
@@ -3526,7 +3535,9 @@ footer.app-footer img{ height:40px; opacity:.85; }
   .deck-table td{ padding:6px 4px; }
   .deck-table-num{ width:auto; min-width:44px; }
   .deck-overview-body{ gap:18px; }
-  .deck-topbar-btn{ padding:8px 12px; }
+  .deck-topbar{ gap:2px; flex-wrap:nowrap; }
+  .deck-topbar-btn{ padding:8px 9px; font-size:13.5px; }
+  .deck-topbar .deck-more-menu > summary.deck-topbar-more{ padding:8px 8px; }
 }
 </style>
 </head>
@@ -3746,11 +3757,6 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <!-- Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila"
              removido de vez; "Origem" (Fase 4 do sistema de alunas
              particulares) subiu pro topo do painel. -->
-        <div id="review-tag-filter-wrap" hidden>
-          <div class="section-label">Tags</div>
-          <div id="review-tag-chips" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px;"></div>
-          <button type="button" class="admin-select-link" id="review-tag-clear" hidden style="background:none; border:none; cursor:pointer; padding:0;">Limpar filtro de tags</button>
-        </div>
         <div id="review-origin-select-wrap" hidden>
           <div class="section-label">Origem</div>
           <select class="review-settings-select" id="review-origin-select"></select>
@@ -3781,7 +3787,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
       <div class="deck-table-wrap" id="review-decks-table"></div>
       <div id="review-today-widget"></div>
 
-      <div class="section-label">Outros modos</div>
+      <div class="review-modes-spacer" aria-hidden="true"></div>
       <p class="review-section-hint">Speed Review usa a sessão de hoje (palavras novas e revisões); Palavras difíceis e Combinar funcionam a qualquer hora.</p>
       <div class="review-mode-cards review-mode-cards-row" id="review-mode-cards-praticar"></div>
     </div>

@@ -11,6 +11,8 @@
 function createTabSwitcher({ onBeforeSwitch, tabHandlers }){
   return function switchTab(tab){
     if (onBeforeSwitch) onBeforeSwitch(tab);
+    // Saiu da revisão: conquistas guardadas durante a sessão aparecem agora.
+    if (typeof releaseBadgeCelebrations === 'function') releaseBadgeCelebrations();
     // Janelas da Revisão (Painel/Adicionar) nunca ficam abertas por cima de outra aba.
     if (typeof closeDeckPanel === 'function') closeDeckPanel({ silent: true });
     if (typeof closeAddCardModal === 'function') closeAddCardModal();

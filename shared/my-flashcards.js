@@ -158,7 +158,8 @@ function teacherTagsReadOnlyHTML(cards){
 // Deck" (Deck AND Tag). Aviso visível + atalho para limpar, pra o filtro
 // nunca parecer um "Deck vazio" inexplicável.
 function tagFilterNoticeHTML(){
-  const f = (typeof STATE !== 'undefined' && STATE.studySettings && Array.isArray(STATE.studySettings.reviewTagFilter)) ? STATE.studySettings.reviewTagFilter : [];
+  // A sessão não aplica mais filtro de tag (só o Painel filtra), ver activeReviewTagFilter().
+  const f = (typeof activeReviewTagFilter === 'function') ? activeReviewTagFilter() : [];
   if (!f.length) return '';
   return `<p class="profile-edit-hint" data-tag-filter-notice>Filtro de tags ativo na Revisão: ${noteTagChipsHTML(f)} — vale também para "Estudar este Deck". <button type="button" class="admin-select-link" data-clear-review-tag-filter style="background:none;border:none;cursor:pointer;padding:0;">Limpar</button></p>`;
 }

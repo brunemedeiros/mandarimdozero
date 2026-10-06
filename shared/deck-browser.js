@@ -8,8 +8,9 @@
 //   Revisão (início)  -> tabela "Deck | Novo | Aprendendo | Revisar",
 //                        começando pelos Decks de topo (Trilha de Estudo,
 //                        Meus Decks, Cartões da professora). Sem botão
-//                        "Estudar" na tabela (seção 12). Embaixo: Criar
-//                        Deck, Importar arquivo, Exportar.
+//                        "Estudar" na tabela (seção 12). "+ Criar Deck"
+//                        é um link discreto abaixo de Meus Decks; Importar
+//                        e Exportar ficam no "⋯" da barra do topo.
 //   Clique no Deck    -> tela do Deck (seção 13), no formato do Anki:
 //                        nome, Novo/Aprendendo/Revisar e "Estudar agora".
 //   Painel            -> JANELA por cima da tela (seção 14), no formato do
@@ -220,6 +221,14 @@ function deckTopbarHTML(nodeId){
       ${canAdd ? `<button type="button" class="deck-topbar-btn" data-topbar-add>Adicionar</button>` : ''}
       <button type="button" class="deck-topbar-btn" data-topbar-panel>Painel</button>
       ${typeof toggleReviewSettingsPanel === 'function' ? `<button type="button" class="deck-topbar-btn" data-topbar-settings>Configurar</button>` : ''}
+      ${canAdd ? `<details class="deck-more-menu">
+        <summary class="deck-topbar-btn deck-topbar-more" aria-label="Mais opções: importar e exportar">⋯</summary>
+        <div class="deck-more-menu-list" role="menu">
+          <button type="button" role="menuitem" data-deck-import>Importar arquivo (.apkg ou .json)</button>
+          <button type="button" role="menuitem" data-deck-export>Exportar</button>
+        </div>
+      </details>
+      <input type="file" data-deck-import-file accept=".apkg,.json,application/json" hidden>` : ''}
     </nav>`;
 }
 
@@ -232,6 +241,17 @@ function wireDeckTopbar(container, nodeId){
   container.querySelector('[data-topbar-panel]')?.addEventListener('click', () => openDeckPanel(nodeId));
   // Abre os ajustes numa janela, sem sair da tela atual.
   container.querySelector('[data-topbar-settings]')?.addEventListener('click', () => openReviewSettingsModal());
+  // Menu "⋯" (Importar / Exportar), ao lado de Configurar.
+  wireDeckMoreMenuGlobal();
+  const fileInput = container.querySelector('[data-deck-import-file]');
+  const closeMore = () => { const m = container.querySelector('.deck-more-menu'); if (m) m.open = false; };
+  container.querySelector('[data-deck-import]')?.addEventListener('click', () => { closeMore(); if (fileInput) fileInput.click(); });
+  fileInput?.addEventListener('change', () => {
+    const file = fileInput.files && fileInput.files[0];
+    fileInput.value = '';
+    if (file) deckBrowserImportFile(file);
+  });
+  container.querySelector('[data-deck-export]')?.addEventListener('click', () => { closeMore(); deckBrowserExport(); });
 }
 
 // ---------- Configurar (janela) ----------
@@ -343,6 +363,7 @@ function deckBrowserTableHTML(){
   const pool = deckBrowserPool();
   const collapsed = deckBrowserLoadCollapsed() || deckBrowserDefaultCollapsed(decks);
   const rows = [];
+  const logged = !!deckBrowserUserId();
   const walk = (nodeId, depth) => {
     const kids = deckBrowserChildren(decks, nodeId);
     const c = deckBrowserCounts(decks, nodeId, pool);
@@ -357,27 +378,20 @@ function deckBrowserTableHTML(){
       ${num(c.new, 'is-new')}${num(c.learning, 'is-learning')}${num(c.review, 'is-review')}
     </tr>`);
     if (!isCollapsed) kids.forEach(k => walk(k.id, depth + 1));
+    // "+ Criar Deck": link discreto logo abaixo do grupo "Meus Decks".
+    const node = typeof nodeId === 'number' ? getDeckById(decks, nodeId) : null;
+    if (logged && node && node.kind === 'personal_root'){
+      rows.push(`<tr class="deck-table-create-row"><td colspan="4"><div class="deck-table-name" style="padding-left:${(depth + 1) * 18}px;"><span class="deck-table-toggle-spacer"></span><button type="button" class="deck-table-create-link" data-deck-create>+ Criar Deck</button></div></td></tr>`);
+    }
   };
   deckBrowserChildren(decks, 'lang').forEach(d => walk(d.id, 0));
-  const logged = !!deckBrowserUserId();
   const orphans = deckBrowserOrphanCount();
   return `<table class="deck-table">
       <thead><tr><th scope="col">Deck</th><th scope="col">Novo</th><th scope="col">Aprendendo</th><th scope="col">Revisar</th></tr></thead>
       <tbody>${rows.length ? rows.join('') : `<tr><td colspan="4" class="profile-edit-hint">Nenhum Deck ainda. Conclua uma lição ou crie um Deck.</td></tr>`}</tbody>
     </table>
     ${orphans ? `<p class="profile-edit-hint deck-table-hint">${orphans} dos seus cartões antigos ainda não estão em nenhum Deck. Abra o Painel para vê-los e movê-los.</p>` : ''}
-    ${logged ? `<div class="deck-home-actions">
-      <button type="button" class="btn btn-secondary deck-home-btn" data-deck-create>Criar Deck</button>
-      <details class="deck-more-menu">
-        <summary class="btn btn-secondary deck-home-btn" aria-label="Mais opções: importar e exportar">⋯</summary>
-        <div class="deck-more-menu-list" role="menu">
-          <button type="button" role="menuitem" data-deck-import>Importar arquivo (.apkg ou .json)</button>
-          <button type="button" role="menuitem" data-deck-export>Exportar</button>
-        </div>
-      </details>
-      <input type="file" data-deck-import-file accept=".apkg,.json,application/json" hidden>
-    </div>
-    <div data-deck-create-box></div>` : ''}`;
+    ${logged ? `<div data-deck-create-box></div>` : ''}`;
 }
 
 // Fecha o menu "⋯" ao clicar fora dele ou apertar Esc (1 listener só).
@@ -394,7 +408,6 @@ function wireDeckMoreMenuGlobal(){
 }
 
 function wireDeckBrowserTable(box){
-  wireDeckMoreMenuGlobal();
   box.querySelectorAll('[data-deck-toggle]').forEach(btn => btn.addEventListener('click', () => {
     const id = btn.dataset.deckToggle;
     const set = deckBrowserLoadCollapsed() || deckBrowserDefaultCollapsed(deckBrowserDecks());
@@ -405,15 +418,6 @@ function wireDeckBrowserTable(box){
   }));
   box.querySelectorAll('[data-deck-open]').forEach(btn => btn.addEventListener('click', () => openDeckDetail(Number(btn.dataset.deckOpen))));
   box.querySelector('[data-deck-create]')?.addEventListener('click', () => openCreateDeckForm(box.querySelector('[data-deck-create-box]'), null));
-  const fileInput = box.querySelector('[data-deck-import-file]');
-  const closeMore = () => { const m = box.querySelector('.deck-more-menu'); if (m) m.open = false; };
-  box.querySelector('[data-deck-import]')?.addEventListener('click', () => { closeMore(); if (fileInput) fileInput.click(); });
-  fileInput?.addEventListener('change', () => {
-    const file = fileInput.files && fileInput.files[0];
-    fileInput.value = '';
-    if (file) deckBrowserImportFile(file);
-  });
-  box.querySelector('[data-deck-export]')?.addEventListener('click', () => { closeMore(); deckBrowserExport(); });
 }
 
 // ---------- Criar Deck / Renomear ----------

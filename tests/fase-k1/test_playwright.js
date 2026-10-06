@@ -193,7 +193,8 @@ async function bootPage(browser, lang, port){
       STATE.studySettings.reviewOriginFilter = 'all'; STATE.studySettings.reviewTagFilter = [];
       return { base, withFilters, sessionN, sum: { n: summary.new, l: summary.learning, r: summary.review } };
     });
-    check(lang + ' contagem estrutural independe de Tag/Origin; sessão com tag inexistente = 0', JSON.stringify(cnt.base) === JSON.stringify(cnt.withFilters) && cnt.sessionN === 0 && cnt.sum.n === cnt.base.new, cnt);
+    // 2026-10-06: a sessão não aplica mais filtro de tag (só o Painel filtra).
+    check(lang + ' contagem estrutural independe de Tag/Origin; filtro de tag salvo não esvazia a sessão', JSON.stringify(cnt.base) === JSON.stringify(cnt.withFilters) && cnt.sessionN > 0 && cnt.sum.n === cnt.base.new, cnt);
 
     // Regressão: Speed, Combinar, hasPlainFrontBack e pool geral
     const reg = await ev(() => {
