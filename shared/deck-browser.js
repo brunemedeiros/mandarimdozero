@@ -228,11 +228,63 @@ function wireDeckTopbar(container, nodeId){
     openAddCardModal({ deckId: deck && ['personal_root', 'personal'].includes(deck.kind) ? deck.id : null });
   });
   container.querySelector('[data-topbar-panel]')?.addEventListener('click', () => openDeckPanel(nodeId));
-  // Os ajustes da sessão ficam na tela inicial: dentro de um Deck, volta para lá.
-  container.querySelector('[data-topbar-settings]')?.addEventListener('click', () => {
-    if (nodeId !== 'lang'){ backToDeckTable(); toggleReviewSettingsPanel(true); }
-    else toggleReviewSettingsPanel();
-  });
+  // Abre os ajustes numa janela, sem sair da tela atual.
+  container.querySelector('[data-topbar-settings]')?.addEventListener('click', () => openReviewSettingsModal());
+}
+
+// ---------- Configurar (janela) ----------
+
+// O painel de ajustes (#review-settings-panel, com os listeners do app)
+// é movido para dentro da janela ao abrir e devolvido ao lugar ao fechar
+// -- nunca duplicado. Ao fechar, as contagens são refeitas (o limite de
+// "Novas palavras por dia" muda os números dos Decks).
+const REVIEW_SETTINGS_MODAL_ID = 'review-settings-modal';
+let REVIEW_SETTINGS_HOME = null;
+
+function closeReviewSettingsModal(){
+  const el = document.getElementById(REVIEW_SETTINGS_MODAL_ID);
+  if (!el) return;
+  const panel = document.getElementById('review-settings-panel');
+  if (panel){
+    panel.setAttribute('hidden', '');
+    if (REVIEW_SETTINGS_HOME && REVIEW_SETTINGS_HOME.parentNode) REVIEW_SETTINGS_HOME.parentNode.insertBefore(panel, REVIEW_SETTINGS_HOME);
+  }
+  el.remove();
+  document.removeEventListener('keydown', reviewSettingsModalOnKey);
+  deckBrowserRefresh();
+}
+function reviewSettingsModalOnKey(e){
+  if (e.key !== 'Escape') return;
+  if (deckBrowserTopModalIs(REVIEW_SETTINGS_MODAL_ID)) closeReviewSettingsModal();
+}
+
+function openReviewSettingsModal(){
+  const panel = document.getElementById('review-settings-panel');
+  if (!panel) return;
+  if (document.getElementById(REVIEW_SETTINGS_MODAL_ID)) return;
+  if (!REVIEW_SETTINGS_HOME){
+    REVIEW_SETTINGS_HOME = document.createComment('review-settings-panel');
+    panel.parentNode.insertBefore(REVIEW_SETTINGS_HOME, panel);
+  }
+  const overlay = document.createElement('div');
+  overlay.id = REVIEW_SETTINGS_MODAL_ID;
+  overlay.className = 'app-modal-overlay';
+  overlay.style.zIndex = 'calc(var(--z-modal-backdrop) - 1)';
+  overlay.innerHTML = `
+    <div class="app-modal review-settings-modal" role="dialog" aria-modal="true" aria-labelledby="review-settings-modal-title">
+      <div class="app-modal-header">
+        <h3 id="review-settings-modal-title">Configurar</h3>
+        <button type="button" class="app-modal-close" data-review-settings-close aria-label="Fechar">✕</button>
+      </div>
+      <div class="app-modal-body" id="review-settings-modal-body"></div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#review-settings-modal-body').appendChild(panel);
+  panel.removeAttribute('hidden');
+  if (typeof renderReviewSettingsView === 'function') renderReviewSettingsView();
+  overlay.querySelector('[data-review-settings-close]').addEventListener('click', closeReviewSettingsModal);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeReviewSettingsModal(); });
+  document.addEventListener('keydown', reviewSettingsModalOnKey);
 }
 
 // ---------- Containers ----------
@@ -518,6 +570,7 @@ function renderDeckDetail(){
   const crumbs = deckBrowserBreadcrumb(decks, nodeId);
   const totalLine = `${c.total} ${c.total === 1 ? 'cartão' : 'cartões'}${getDeckChildren(decks, nodeId).length ? ' neste Deck e nos subdecks' : ''}${c.newTotal > c.new ? ` · ${c.newTotal} novos no total (entram até ${c.new} por dia, conforme "Novas palavras por dia")` : ''}`;
   wrap.innerHTML = `
+    <div class="path-header"><h2>Revisão</h2></div>
     ${deckTopbarHTML(nodeId)}
     <div class="deck-overview">
       <h2 class="deck-overview-title">${crumbs.map(escapeHTML).join(' › ')}</h2>

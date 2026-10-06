@@ -1643,6 +1643,7 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
    por ser a decisão mais "de conteúdo" (o que entra na sessão) das 4,
    ficando à frente das 3 que ajustam o motor por trás dos panos. */
 .review-settings-panel{ margin-bottom:22px; }
+.review-settings-modal .review-settings-panel{ margin-bottom:0; }
 
 /* ---------- "Suas palavras" (resumo fracas/medianas/fortes) ----------
    SÓ uma contagem visual do vocabulário já revisável -- não é SRS novo, não
@@ -3670,11 +3671,10 @@ footer.app-footer img{ height:40px; opacity:.85; }
   <!-- ===== REVISÃO (SRS) ===== -->
   <div class="view" id="view-review">
     <div id="review-mode-select-wrap">
-      <div id="review-deck-topbar-home"></div>
       <div class="path-header">
         <h2>Revisão</h2>
-        <p>O que você deve fazer agora?</p>
       </div>
+      <div id="review-deck-topbar-home"></div>
 
 
       <div class="review-settings-panel" id="review-settings-panel" hidden>

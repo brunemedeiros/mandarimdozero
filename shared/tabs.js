@@ -14,6 +14,7 @@ function createTabSwitcher({ onBeforeSwitch, tabHandlers }){
     // Janelas da Revisão (Painel/Adicionar) nunca ficam abertas por cima de outra aba.
     if (typeof closeDeckPanel === 'function') closeDeckPanel({ silent: true });
     if (typeof closeAddCardModal === 'function') closeAddCardModal();
+    if (typeof closeReviewSettingsModal === 'function') closeReviewSettingsModal();
     trackEvent('tab_switch', tab);
 
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));

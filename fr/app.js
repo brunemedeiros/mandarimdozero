@@ -8176,16 +8176,14 @@ document.getElementById('review-tag-clear')?.addEventListener('click', () => {
 // de sessão, ver renderReviewSettingsView).
 // "Configurar" (barra Decks/Adicionar/Painel/Configurar, shared/deck-browser.js):
 // abre/fecha o painel de ajustes da sessão na tela inicial da Revisão.
-function toggleReviewSettingsPanel(forceOpen){
+// Abre os ajustes numa janela por cima da tela atual (inclusive dentro
+// de um Deck), como Adicionar e Painel -- ver openReviewSettingsModal.
+function toggleReviewSettingsPanel(){
+  if (typeof openReviewSettingsModal === 'function'){ openReviewSettingsModal(); return; }
   const panel = document.getElementById('review-settings-panel');
   if (!panel) return;
-  if (forceOpen || panel.hasAttribute('hidden')){
-    panel.removeAttribute('hidden');
-    renderReviewSettingsView();
-    panel.scrollIntoView({ block: 'nearest' });
-  } else {
-    panel.setAttribute('hidden', '');
-  }
+  panel.removeAttribute('hidden');
+  renderReviewSettingsView();
 }
 document.querySelectorAll('[data-settings-section]').forEach(btn => {
   btn.addEventListener('click', () => switchSettingsSection(btn.dataset.settingsSection));

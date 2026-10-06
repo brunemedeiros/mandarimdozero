@@ -270,7 +270,7 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     check(lang + ' tela do Deck: mesma barra do topo', detail.bar.join('|') === 'Decks|Adicionar|Painel|Configurar', detail.bar);
     check(lang + ' tela do Deck pessoal: Criar subdeck, Renomear, Publicar, Excluir', ['Criar subdeck', 'Renomear', 'Excluir'].every(b => detail.footer.includes(b)) && detail.footer.some(b => /Publicar|Público/.test(b)), detail.footer);
     check(lang + ' tela do Deck tem endereço próprio', detail.hash === '#/review/decks/9002', detail.hash);
-    if (lang === 'fr') await shot(page, 'deck-detail-fr');
+    if (lang === 'fr'){ await shot(page, 'deck-detail-fr'); await page.evaluate(() => openReviewSettingsModal()); await shot(page, 'deck-settings-fr'); await page.evaluate(() => closeReviewSettingsModal()); }
     await page.click('[data-deck-study]');
     const sess = await page.evaluate(() => ({ deck: STATE.reviewSessionDeckId, n: STATE.reviewQueue.length, ids: STATE.reviewQueue.map(c => c.rowId).sort() }));
     check(lang + ' Estudar agora: Deck + subdecks', sess.deck === 9002 && sess.n === 2 && sess.ids.join() === '501,502', sess);
@@ -513,10 +513,33 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
         oldBtn: !!document.getElementById('review-header-settings-btn'), oldLabel: /Configurar sessão|Revisões pendentes|Para estudar agora/.test(document.getElementById('review-mode-select-wrap').textContent) };
     });
     check(lang + ' sem contador de revisões no topo; botão de estudar abaixo da tabela', w1.nums === 0 && w1.afterTable && !w1.oldBtn && !w1.oldLabel && !/Filtro da sessão/.test(w1.text), w1);
+    const head = await page.evaluate(() => {
+      const wrap = document.getElementById('review-mode-select-wrap');
+      const h2 = wrap.querySelector('.path-header h2'), bar = document.getElementById('review-deck-topbar-home');
+      return { below: !!(h2.compareDocumentPosition(bar) & Node.DOCUMENT_POSITION_FOLLOWING), sub: /O que você deve fazer agora/.test(wrap.textContent) };
+    });
+    check(lang + ' barra abaixo do título, sem subtítulo', head.below && !head.sub, head);
     await page.click('#review-deck-topbar-home [data-topbar-settings]');
-    const cfg = await page.evaluate(() => !document.getElementById('review-settings-panel').hasAttribute('hidden'));
-    check(lang + ' "Configurar" abre os ajustes da sessão', cfg, cfg);
-    await page.click('#review-deck-topbar-home [data-topbar-settings]');
+    const cfg = await page.evaluate(() => {
+      const m = document.getElementById('review-settings-modal'); const p = document.getElementById('review-settings-panel');
+      return { modal: !!m, inside: !!(m && m.contains(p)), visible: !p.hasAttribute('hidden') };
+    });
+    check(lang + ' "Configurar" abre os ajustes numa janela', cfg.modal && cfg.inside && cfg.visible, cfg);
+    await page.click('#review-settings-modal [data-review-settings-close]');
+    const cfgClosed = await page.evaluate(() => ({ modal: !!document.getElementById('review-settings-modal'), back: !!document.getElementById('review-mode-select-wrap').contains(document.getElementById('review-settings-panel')) }));
+    check(lang + ' fechar a janela devolve o painel ao lugar', !cfgClosed.modal && cfgClosed.back, cfgClosed);
+    // Dentro de um Deck: abre por cima, sem voltar à tela inicial.
+    const someDeck = await page.evaluate(() => { const d = (STATE.decks||[]).find(x => x.kind === 'personal_root'); return d ? d.id : null; });
+    if (someDeck != null){
+      await page.evaluate((id) => openDeckDetail(id), someDeck);
+      await page.click('#review-deck-wrap [data-topbar-settings]');
+      const inDeck = await page.evaluate(() => ({ modal: !!document.getElementById('review-settings-modal'), deckShown: document.getElementById('review-deck-wrap').style.display !== 'none', title: /Revisão/.test(document.querySelector('#review-deck-wrap .path-header').textContent) }));
+      check(lang + ' "Configurar" dentro de um Deck abre janela sem sair do Deck', inDeck.modal && inDeck.deckShown && inDeck.title, inDeck);
+      await page.keyboard.press('Escape');
+      const esc = await page.evaluate(() => !!document.getElementById('review-settings-modal'));
+      check(lang + ' Esc fecha a janela de ajustes', !esc, esc);
+      await page.evaluate(() => backToDeckTable());
+    }
     await page.evaluate(() => { updateStudySetting({ reviewOriginFilter: 'self' }); renderReviewModeSelect(); });
     const w2 = await page.evaluate(() => document.getElementById('review-today-widget').textContent);
     check(lang + ' filtro da sessão é avisado', /Filtro da sessão: Meus cartões/.test(w2), w2);
@@ -566,6 +589,9 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     await shot(page, `deck-home-${lang}-dark`);
     await page.evaluate(() => openDeckDetail(9002));
     await shot(page, `deck-detail-${lang}-dark`);
+    await page.evaluate(() => openReviewSettingsModal());
+    await shot(page, `deck-settings-${lang}-dark`);
+    await page.evaluate(() => closeReviewSettingsModal());
     await page.evaluate(() => openDeckPanel(9001));
     await page.waitForSelector('#deck-panel-modal [data-panel-open-note]');
     await page.click('#deck-panel-modal [data-panel-open-note="self:502"]');
