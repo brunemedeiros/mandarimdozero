@@ -6619,10 +6619,12 @@ function renderClozeCard(mountEl, card, localState, callbacks){
   const view = resolveCardContentView(card);
   const answered = localState.answered;
   const blankHTML = answered
-    ? `<span class="cloze-blank ${localState.wasCorrect ? 'correct' : 'incorrect'}" id="cloze-blank">${view.displayAnswerText}</span>`
+    ? `<span class="cloze-blank ${localState.wasCorrect ? 'correct' : 'incorrect'}" id="cloze-blank">${escapeHTML(view.displayAnswerText)}</span>`
     : `<span class="cloze-blank" id="cloze-blank">___</span>`;
   const hiddenSentence = renderClozeText(view.rawSentenceText, view.markId, { reveal: false });
-  const sentenceHTML = hiddenSentence.replace('___', blankHTML);
+  // Texto autorado: escapado ANTES de inserir o HTML da lacuna (escapeHTML
+  // não altera '___').
+  const sentenceHTML = escapeHTML(hiddenSentence).replace('___', blankHTML);
   // Fase 7a (ver CLAUDE.md) -- imagem/áudio agora resolvidos via o MESMO
   // Field de texto que carrega a frase inteira (`resolveClozeCardView()`
   // usa resolveCardField() por baixo agora, nunca mais lia `.audio.url`
