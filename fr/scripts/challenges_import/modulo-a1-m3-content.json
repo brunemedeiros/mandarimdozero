@@ -5,21 +5,6 @@
     {
       "unitId": "A1-8",
       "theme": "Lugares e orientação",
-      "fr": "Le musée est loin d'ici.",
-      "hide": [
-        "musée",
-        "loin"
-      ],
-      "refs": [
-        "O museu fica longe daqui.",
-        "O museu é longe daqui.",
-        "O museu está longe daqui."
-      ],
-      "explanation": "\"Loin de\" pede \"de\" (loin d'ici = longe daqui); o oposto é \"près d'ici\"."
-    },
-    {
-      "unitId": "A1-8",
-      "theme": "Lugares e orientação",
       "fr": "Tournez à droite, puis tout droit.",
       "hide": [
         "droite",
@@ -46,19 +31,6 @@
         "Eu venho do Brasil, e tu?"
       ],
       "explanation": "\"Je viens de\" indica origem: \"du\" = de + le (du Brésil); \"et toi ?\" devolve a pergunta."
-    },
-    {
-      "unitId": "A1-9",
-      "theme": "Nacionalidades",
-      "fr": "Elle est américaine.",
-      "hide": [
-        "américaine"
-      ],
-      "refs": [
-        "Ela é americana.",
-        "Ela é norte-americana."
-      ],
-      "explanation": "\"Américaine\" tem -e final porque é feminino; concorda com \"elle\"."
     },
     {
       "unitId": "A1-10",
@@ -106,21 +78,6 @@
       "explanation": "\"Des\" é o plural indefinido (\"legumes\") e \"du\" é partitivo (\"arroz\", sem contar)."
     },
     {
-      "unitId": "A1-11",
-      "theme": "Compras de mercado",
-      "fr": "Tu veux du sucre ?",
-      "hide": [
-        "veux",
-        "sucre"
-      ],
-      "refs": [
-        "Você quer açúcar?",
-        "Tu queres açúcar?",
-        "Quer açúcar?"
-      ],
-      "explanation": "\"Tu veux du sucre ?\" usa \"du\" porque açúcar não se conta; \"tu\" é a forma informal."
-    },
-    {
       "unitId": "A1-12",
       "theme": "Pesos e quantidades",
       "fr": "Je prends un kilo de pommes.",
@@ -134,20 +91,6 @@
         "Levo um quilo de maçãs."
       ],
       "explanation": "Depois de quantidade, o francês usa \"de\": \"un kilo de pommes\", sem artigo."
-    },
-    {
-      "unitId": "A1-12",
-      "theme": "Pesos e quantidades",
-      "fr": "Une bouteille d'eau, s'il vous plaît.",
-      "hide": [
-        "bouteille",
-        "eau"
-      ],
-      "refs": [
-        "Uma garrafa de água, por favor.",
-        "Uma garrafa d'água, por favor."
-      ],
-      "explanation": "\"Une bouteille d'eau\": depois de recipiente, \"de\" + água, sem artigo (d' antes de vogal)."
     }
   ],
   "accent": [
