@@ -716,14 +716,14 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .trail-map-body{ flex:1; min-width:0; }
 .trail-map-section{ margin-bottom:22px; }
 .tm-section-title{ font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); margin:0 0 10px; }
-.tm-nodes{ display:flex; flex-wrap:wrap; gap:12px; }
+.tm-nodes{ display:flex; flex-wrap:wrap; gap:14px; }
 .tm-node{
-  width:84px; min-height:84px; padding:8px 4px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:4px;
+  width:132px; min-height:120px; padding:14px 8px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; gap:8px;
   background: var(--paper); border:1.5px solid var(--paper-line); border-radius:16px; cursor:pointer;
   font-family: var(--font-body); color: var(--ink);
 }
-.tm-icon{ font-size:24px; line-height:1; }
-.tm-label{ font-size:10.5px; font-weight:700; line-height:1.2; text-align:center; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; max-width:100%; }
+.tm-icon{ font-size:36px; line-height:1; }
+.tm-label{ font-size:13.5px; font-weight:700; line-height:1.25; text-align:center; overflow:hidden; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; max-width:100%; }
 .tm-node.done{ background: rgba(58,115,89,0.14); border-color: var(--jade); }
 .tm-node.skipped{ background: rgba(58,115,89,0.06); border-style:dashed; border-color: var(--jade); }
 .tm-node.current{ border-color: var(--seal-red); border-width:2.5px; box-shadow: 0 0 0 3px rgba(128,128,128,0.15); }
@@ -747,7 +747,8 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .tm-actions .btn{ min-height:44px; }
 @media (max-width: 899px){
   .trail-map{ display:block; }
-  .tm-node{ width:calc(33.333% - 8px); min-width:92px; }
+  .tm-nodes{ gap:12px; }
+  .tm-node{ width:calc(50% - 6px); min-width:0; min-height:124px; }
   .tm-panel{
     position:fixed; left:0; right:0; top:auto; bottom:0; width:auto; z-index:320; max-height:70vh; overflow-y:auto;
     border-radius:16px 16px 0 0; padding:18px 16px calc(16px + env(safe-area-inset-bottom));
