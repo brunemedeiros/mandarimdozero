@@ -2231,6 +2231,7 @@ Unidades 1–18 (docs/i18n/content-zh-en/<n>.json), histórias (_stories.json) e
 | história | 4.beats[2].lines[3] | Ontem eu não jantei, hoje estou com muita fome. | Yesterday I didn't eat dinner, so I'm very hungry today. | media | Added "so" to make the cause-effect natural; source just lists both facts. |
 | história | 4.beats[3].options[3] | Trabalha na escola | Works at the school | media | Distractor; must stay clearly wrong versus "Is a student" (and unlike the hospital option). |
 | hanzi | 巴 (meaning) | (parte de Bāxī, Brasil) | (a sound element, as in 爸 bà and 吧 ba) | media | a palavra 巴西 não aparece mais no curso em inglês, então o significado deixa de citá-la; 巴 continua sendo o elemento fonético de 爸/吧 |
+| hanzi | 巴 -> 美 (char, pinyin, meaning) | 巴 bā, (parte de Bāxī, Brasil) | 美 měi, beautiful (the 美 in Měiguó, United States) | media | no inglês o espaço do 巴 (lição 5) passa a ensinar 美, que está em 美国; o histórico desse cartão de hanzi fica associado ao caractere novo ao trocar de idioma |
 | hanzi | 对.meaning | certo, correto; em relação a | correct, right; toward | media | Duas acepções |
 | hanzi | 口.meaning | boca; (classificador p/ pessoas da família) | mouth; (measure word for family members) | media | Classificador de pessoas da família |
 | hanzi | 个.meaning | (classificador geral) | (general measure word) | media | Classificador geral |

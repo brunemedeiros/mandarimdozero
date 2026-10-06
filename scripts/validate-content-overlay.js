@@ -128,6 +128,8 @@ if (site === 'zh' && !only.length){
   else sx.S.forEach(s0 => {
     const o = st[s0.id]; const L = 'stories.' + s0.id;
     if (!o) return err(L, 'sem tradução');
+    if (o.char !== undefined && (typeof o.char !== 'string' || [...o.char].length !== 1)) err(L, 'char deve ser 1 caractere');
+    if (o.pinyin !== undefined && (typeof o.pinyin !== 'string' || !o.pinyin)) err(L, 'pinyin vazio');
     str(L, 'title', o.title); str(L, 'subtitle', o.subtitle);
     Object.keys((o.src && o.src.beats) || {}).forEach(bi => Object.keys(o.src.beats[bi]).forEach(li => {
       const ln = (s0.beats[Number(bi)] || {}).lines && s0.beats[Number(bi)].lines[Number(li)];
@@ -153,6 +155,8 @@ if (site === 'zh' && !only.length){
   else hx.L.flat().forEach(h => {
     const o = hz[h.char]; const L = 'hanzi.' + h.char;
     if (!o) return err(L, 'sem tradução');
+    if (o.char !== undefined && (typeof o.char !== 'string' || [...o.char].length !== 1)) err(L, 'char deve ser 1 caractere');
+    if (o.pinyin !== undefined && (typeof o.pinyin !== 'string' || !o.pinyin)) err(L, 'pinyin vazio');
     str(L, 'meaning', o.meaning, h.meaning);
     if ((o.radicals || []).length !== (h.radicals || []).length) err(L, 'radicals: ' + (o.radicals || []).length + ' vs ' + (h.radicals || []).length);
     (h.radicals || []).forEach((r, ri) => str(L, 'radicals[' + ri + ']', (o.radicals || [])[ri], r.m));

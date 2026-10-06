@@ -203,9 +203,10 @@
     });
     var hanziAll = [];
     (cfg.hanzi || []).forEach(function(lesson){ (lesson || []).forEach(function(h){ hanziAll.push(h); }); });
-    var hanziSnap = {};
-    hanziAll.forEach(function(h){
-      hanziSnap[h.char] = { meaning: h.meaning, radicals: (h.radicals || []).map(function(r){ return r.m; }), mnemonic: h.mnemonic };
+    // snap por objeto (a chave do overlay é o caractere ORIGINAL em português; um
+    // overlay pode trocar char/pinyin do caractere, ex.: 巴 -> 美 no inglês)
+    var hanziSnap = hanziAll.map(function(h){
+      return { char: h.char, pinyin: h.pinyin, meaning: h.meaning, radicals: (h.radicals || []).map(function(r){ return r.m; }), mnemonic: h.mnemonic };
     });
     var activeLang = DEFAULT_LANG;
     var activeOverlay = null;
@@ -276,8 +277,10 @@
         });
       });
       var oh = (activeOverlay && activeOverlay.hanzi) || {};
-      hanziAll.forEach(function(h){
-        var sn = hanziSnap[h.char], o = oh[h.char] || {};
+      hanziAll.forEach(function(h, hi){
+        var sn = hanziSnap[hi], o = oh[sn.char] || {};
+        h.char = pick(o.char, sn.char);
+        h.pinyin = pick(o.pinyin, sn.pinyin);
         h.meaning = pick(o.meaning, sn.meaning);
         (h.radicals || []).forEach(function(r, ri){ r.m = pick(o.radicals && o.radicals[ri], sn.radicals[ri]); });
         if (sn.mnemonic !== undefined) h.mnemonic = pick(o.mnemonic, sn.mnemonic);

@@ -1059,11 +1059,12 @@ function refreshStudyCardTexts(){
     c.back_trans = u.vocab[c.vocabIdx].t;
     c.unitTitle = u.title;
   });
-  const byChar = {};
-  HANZI_LESSONS.forEach((lesson) => lesson.forEach((h) => { byChar[h.char] = h; }));
+  // Por posição (id h<lição>-c<índice>): o overlay pode trocar o caractere do
+  // slot (巴 -> 美 no inglês), então casar por caractere não serve.
   STATE.hanziCards.forEach((c) => {
-    const h = byChar[c.char];
-    if (h){ c.meaning = h.meaning; c.radicals = h.radicals; }
+    const m = /^h(\d+)-c(\d+)$/.exec(c.id);
+    const h = m && HANZI_LESSONS[+m[1]] && HANZI_LESSONS[+m[1]][+m[2]];
+    if (h){ c.char = h.char; c.pinyin = h.pinyin; c.meaning = h.meaning; c.radicals = h.radicals; }
   });
 }
 window.addEventListener('i18n:change', () => { CONTENT_I18N.sync(); });
