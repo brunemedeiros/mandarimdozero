@@ -282,6 +282,35 @@
       if (SELECTABLE_UI_LANGS.indexOf(currentLang) >= 0) sel.value = currentLang;
     } catch (e) {}
   }
+  // Modal #ui-language-confirm-modal (fr/zh index.html). O texto fala do idioma
+  // de DESTINO, na língua em que o site está agora.
+  function confirmUiLanguageChange(target, onYes, onNo){
+    var modal = null;
+    try { modal = document.getElementById('ui-language-confirm-modal'); } catch (e) {}
+    if (!modal){ onYes(); return; }
+    var body = document.getElementById('ui-language-confirm-body');
+    var yes = document.getElementById('ui-language-confirm-yes');
+    var no = document.getElementById('ui-language-confirm-no');
+    var close = document.getElementById('ui-language-confirm-close');
+    if (!body || !yes || !no){ onYes(); return; }
+    body.textContent = t(target === 'en' ? 'settings.uiLanguage.confirm.toEn' : 'settings.uiLanguage.confirm.toPt');
+    function finish(accepted){
+      modal.style.display = 'none';
+      yes.removeEventListener('click', onYesClick);
+      no.removeEventListener('click', onNoClick);
+      if (close) close.removeEventListener('click', onNoClick);
+      modal.removeEventListener('click', onBackdrop);
+      if (accepted) onYes(); else onNo();
+    }
+    function onYesClick(){ finish(true); }
+    function onNoClick(){ finish(false); }
+    function onBackdrop(e){ if (e.target === modal) finish(false); }
+    yes.addEventListener('click', onYesClick);
+    no.addEventListener('click', onNoClick);
+    if (close) close.addEventListener('click', onNoClick);
+    modal.addEventListener('click', onBackdrop);
+    modal.style.display = 'flex';
+  }
   function wireUiLanguageSelect(){
     try {
       var sel = document.getElementById('ui-language-select');
@@ -289,13 +318,17 @@
       sel.setAttribute('data-i18n-wired', '1');
       syncUiLanguageSelect();
       sel.addEventListener('change', function(){
-        if (SELECTABLE_UI_LANGS.indexOf(sel.value) >= 0){
-          var chosen = sel.value;
+        if (SELECTABLE_UI_LANGS.indexOf(sel.value) < 0) return;
+        var chosen = sel.value;
+        if (chosen === currentLang) return;
+        // Antes de trocar, um aviso curto (progresso continua salvo). Sem o
+        // modal na página (ou se ele falhar), troca direto como antes.
+        confirmUiLanguageChange(chosen, function(){
           setUiLang(chosen);
           try {
             if (typeof window.persistUiLanguageToAccount === 'function') window.persistUiLanguageToAccount(chosen);
           } catch (e) {}
-        }
+        }, function(){ syncUiLanguageSelect(); });
       });
     } catch (e) {}
   }

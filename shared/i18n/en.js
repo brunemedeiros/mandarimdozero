@@ -65,6 +65,11 @@ window.I18N_CATALOG['en'] = {
 
   'settings.uiLanguage.title': 'Interface language', // ALTA
   'settings.uiLanguage.sub': 'Changes only the app\'s text (menus, buttons, and messages). It doesn\'t change the language you\'re studying.', // ALTA
+  'settings.uiLanguage.confirm.title': 'Change the site language?', // ALTA
+  'settings.uiLanguage.confirm.toEn': 'Text, explanations, and translations will now appear in English. Your progress stays saved.', // ALTA
+  'settings.uiLanguage.confirm.toPt': 'Text, explanations, and translations will now appear in Portuguese. Your progress stays saved.', // ALTA
+  'settings.uiLanguage.confirm.cancel': 'Cancel', // ALTA
+  'settings.uiLanguage.confirm.yes': 'Change', // ALTA
 
   // Fase 6 lote 1
   'settings.title': 'Settings', // ALTA

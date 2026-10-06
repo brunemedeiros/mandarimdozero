@@ -81,6 +81,11 @@ window.I18N_CATALOG['pt-BR'] = {
   // ---- Configurações > Idioma da interface (texto NOVO, não existia antes) ----
   'settings.uiLanguage.title': 'Idioma da interface',
   'settings.uiLanguage.sub': 'Muda só os textos do app (menus, botões e avisos). Não muda o idioma que você estuda.',
+  'settings.uiLanguage.confirm.title': 'Trocar o idioma do site?',
+  'settings.uiLanguage.confirm.toEn': 'Os textos, as explicações e as traduções passam a aparecer em inglês. Seu progresso continua salvo.',
+  'settings.uiLanguage.confirm.toPt': 'Os textos, as explicações e as traduções passam a aparecer em português. Seu progresso continua salvo.',
+  'settings.uiLanguage.confirm.cancel': 'Cancelar',
+  'settings.uiLanguage.confirm.yes': 'Trocar',
 
   // ---- Fase 6 lote 1: Configurações + menu da conta (fr e zh) ----
   'settings.title': 'Configurações',

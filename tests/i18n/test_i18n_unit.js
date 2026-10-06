@@ -161,7 +161,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   const prevJs = ['shared/my-flashcards.js', 'shared/public-profile.js', 'shared/anki-import-ui.js', 'fr/app.js', 'zh/app.js', 'shared/flashcard-model.js', 'shared/own-flashcards.js', 'shared/flashcard-preview.js', 'shared/notifications.js', 'shared/notification-preferences.js', 'shared/deck-data.js', 'shared/admin-students.js', 'shared/profile.js', 'shared/leaderboard.js', 'shared/auth.js', 'shared/support-materials-view.js', 'shared/anki-export.js', 'shared/flashcard-field-editor.js', 'shared/flashcard-mc-editor.js', 'shared/flashcard-typeanswer-editor.js', 'shared/flashcard-cloze-editor.js', 'shared/admin-flashcards.js', 'shared/admin-class-logs.js', 'shared/admin-support-materials.js', 'shared/admin-premium.js', 'shared/teacher-flashcards.js', 'shared/teacher-class-logs.js', 'shared/teacher-support-materials.js', 'shared/admin-analytics.js', 'shared/admin-badges.js', 'shared/admin-notifications.js', 'shared/admin-reports.js', 'shared/flashcard-field-audio-recorder.js', 'shared/wizard.js', 'shared/language-switcher.js', 'shared/fsrs.js'].map(prev).join('\n');
   const all = origFr + origZh + origRep + prevFr + prevZh + prevJs;
   // Textos NOVOS (não existiam antes): só o seletor de idioma.
-  const NEW_KEYS = ['settings.uiLanguage.title', 'settings.uiLanguage.sub', 'content.untranslatedNotice', 'fr.challenge.inEnglish', 'nav.study', 'nav.challenges', 'nav.profile', 'side.streakDays', 'fr.challenge.lt.placeholder' /* Fase 9: "{lang}" parametriza o idioma da tradução; com lang=português o texto final é idêntico ao original "Sua tradução em português..." */]; // Fase 8: aviso novo (só aparece fora do pt-BR)
+  const NEW_KEYS = ['settings.uiLanguage.title', 'settings.uiLanguage.sub', 'settings.uiLanguage.confirm.title', 'settings.uiLanguage.confirm.toEn', 'settings.uiLanguage.confirm.toPt' /* aviso novo ao trocar o idioma do site */, 'content.untranslatedNotice', 'fr.challenge.inEnglish', 'nav.study', 'nav.challenges', 'nav.profile', 'side.streakDays', 'fr.challenge.lt.placeholder' /* Fase 9: "{lang}" parametriza o idioma da tradução; com lang=português o texto final é idêntico ao original "Sua tradução em português..." */]; // Fase 8: aviso novo (só aparece fora do pt-BR)
   const NESTED_TEMPLATE_KEYS = ['admin.reports.reply.lastSent', 'admin.reports.reply.lastSentTo'];
   const escRe = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   for (const k of ptKeys){
@@ -196,7 +196,11 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
     const selEnd = cur.indexOf('</select>\n      </div>\n', selStart) + '</select>\n      </div>\n'.length;
     check(`${lang}: bloco do seletor encontrado`, selStart > 0 && selEnd > selStart);
     const curNoSel = cur.slice(0, selStart) + cur.slice(selEnd);
-    check(`${lang}: HTML inteiro sem data-i18n* e sem o seletor == commit anterior (${PREV})`, strip(curNoSel) === strip(p));
+    // Aviso novo ao trocar o idioma do site (modal inteiro, texto novo deliberado).
+    const cmS = curNoSel.indexOf('<div id="ui-language-confirm-modal"'), cmE = curNoSel.indexOf('<div id="flashcard-reset-confirm-modal"');
+    check(`${lang}: modal de confirmação do idioma encontrado`, cmS > 0 && cmE > cmS);
+    const curClean = curNoSel.slice(0, cmS) + curNoSel.slice(cmE);
+    check(`${lang}: HTML inteiro sem data-i18n* e sem o seletor == commit anterior (${PREV})`, strip(curClean) === strip(p));
     check(`${lang}: seletor só oferece pt-BR e English`, /<option value="pt-BR" lang="pt-BR">Português \(Brasil\)<\/option>\s*<option value="en" lang="en">English<\/option>\s*<\/select>/.test(cur.slice(selStart, selEnd)));
     const usedHtml = [...cur.matchAll(/data-i18n-html="([^"]+)"/g)].map(m => m[1]);
     check(`${lang}: todo data-i18n-html existe em pt-BR`, usedHtml.every(k => k in pt));
