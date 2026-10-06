@@ -3004,7 +3004,7 @@ body.lesson-focus .acq-phase-banner{ margin-bottom:10px; padding:4px 12px; }
    por JS antes de cada toast; o valor abaixo só vale antes do primeiro
    toast (auditoria de UX/UI, 2026-09, P3). */
 #toast-layer{ position:fixed; top:18px; left:50%; transform:translateX(-50%); z-index:var(--z-toast); display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
-.toast{ background: var(--ink); color: var(--gold-bright); font-weight:800; font-size:13px; padding:9px 16px; border-radius:999px; box-shadow: var(--shadow-lift); animation: toastIn .25s ease, toastOut .3s ease 1.7s forwards; }
+.toast{ background: var(--ink); color: var(--paper); font-weight:800; font-size:13px; padding:9px 16px; border-radius:999px; box-shadow: var(--shadow-lift); animation: toastIn .25s ease, toastOut .3s ease 1.7s forwards; }
 @keyframes toastIn{ from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} }
 @keyframes toastOut{ to{opacity:0; transform:translateY(-8px);} }
 
