@@ -17,12 +17,12 @@ permissions:
 
 jobs:
   audio:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       GCP_TTS_KEY: ${{ secrets.GCP_TTS_KEY }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - run: pip install requests miniaudio
@@ -31,7 +31,7 @@ jobs:
       - name: Laboratório
         if: inputs.modo == 'laboratorio'
         run: python3 fr/scripts/audio_lab.py
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: inputs.modo == 'laboratorio'
         with:
           name: laboratorio-audio
