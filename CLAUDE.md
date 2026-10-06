@@ -17576,3 +17576,8 @@ Decisão da autora: TTS explícito por Field usa o **Google Cloud TTS com a chav
 - **Exportação de Meus Cartões (arquivo/link)**: cartão nativo usa os Fields (`myFlashcardExportSidesFromNativeRow`): direção pelo `lang` de cada lado, pinyin pelo satélite, Múltipla escolha por role. Antes saía sempre `frontIsTargetLanguage:true` e sem pinyin (as colunas espelho não guardam isso). Cloze não cabe no formato (só frente/verso) e fica de fora, com aviso no modal. Teste: `node tests/export-cartoes/test_export_payload.js` (8).
 - `fieldHasAudio()` (código sem uso) foi mantida de propósito: não atrapalha e removê-la não muda nada para o aluno.
 - Continuam com a autora: P8.2b (2ª conta Premium); áudio nas opções do checkpoint do zh (precisa do print/layout); Desafios do chinês (decidir módulos); deploy/PR desta branch.
+
+## P8.2b homologado no Staging (2026-10-06)
+- Rodada real do `tests/fase-public-deck/staging_storage_test.js` com uma 2ª conta Premium (RUN `p8261006025808d35f`, Staging `ilfjzizjfcmhibkhwber`, sem migration, produção não usada): **P8.1 16/16, P8.2 16/16 (agora inclui P8.2b: dois usuários Premium distintos copiando em paralelo, cada um com exatamente K Notes e mídia só na própria pasta), P8.5 44/44, limpeza 23/23.**
+- Sobra esperada: 2 Decks estruturais (raiz e "Meus Decks", ids 26448/26449) do copiador-2, criados por `ensure_user_decks`; a RLS não deixa o usuário apagá-los e o app cria os mesmos no 1º uso. Inofensivos, não removidos.
+- Com isso a pendência P8.2b está fechada. Continuam com a autora: áudio nas opções do checkpoint do zh (print/layout), Desafios do chinês (módulos) e deploy/PR desta branch.
