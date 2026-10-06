@@ -1003,6 +1003,7 @@ const STATE = {
   // já nulam reviewSessionUnitFilter -- nunca os dois setados ao mesmo tempo.
   // Nunca serializado -- estado de SESSÃO, não progresso salvo.
   reviewSessionDeckId: null,
+  cardVariants: {}, // progresso das palavras que trocam por idioma do site (shared/card-variants.js)
   // Fase D -- cache em memória da árvore de Decks do idioma atual, carregada
   // sob demanda por ensureDecksLoadedForReview() (só quando uma sessão
   // Deck-scoped é de fato solicitada). Nunca serializado, nunca uma
@@ -1055,6 +1056,9 @@ function refreshStudyCardTexts(){
     if (c.origin !== 'study') return;
     const u = UNITS.find((x) => x.id === c.unitId);
     if (!u || !u.vocab || !u.vocab[c.vocabIdx]) return;
+    // Palavra diferente no slot (país do aluno etc.): o progresso segue a palavra,
+    // não a posição (shared/card-variants.js).
+    CardVariants.swapCardWordProgress(c, c.back_hanzi, u.vocab[c.vocabIdx].c, STATE.cardVariants);
     c.front_pinyin = u.vocab[c.vocabIdx].p; c.back_hanzi = u.vocab[c.vocabIdx].c; // o overlay `src` pode localizar a palavra estudada
     c.back_trans = u.vocab[c.vocabIdx].t;
     c.unitTitle = u.title;
@@ -1064,7 +1068,7 @@ function refreshStudyCardTexts(){
   STATE.hanziCards.forEach((c) => {
     const m = /^h(\d+)-c(\d+)$/.exec(c.id);
     const h = m && HANZI_LESSONS[+m[1]] && HANZI_LESSONS[+m[1]][+m[2]];
-    if (h){ c.char = h.char; c.pinyin = h.pinyin; c.meaning = h.meaning; c.radicals = h.radicals; }
+    if (h){ CardVariants.swapCardWordProgress(c, c.char, h.char, STATE.cardVariants); c.char = h.char; c.pinyin = h.pinyin; c.meaning = h.meaning; c.radicals = h.radicals; }
   });
 }
 window.addEventListener('i18n:change', () => { CONTENT_I18N.sync(); });
@@ -1260,6 +1264,7 @@ function serializeState(){
   return {
     cards: STATE.cards,
     hanziCards: STATE.hanziCards,
+    cardVariants: STATE.cardVariants,
     unitProgress: STATE.unitProgress,
     xp: STATE.xp,
     streak: STATE.streak,
@@ -1306,6 +1311,7 @@ function applySerializedState(data){
     data.hanziCards.forEach(c => byId[c.id] = c);
     STATE.hanziCards.forEach(c => { if (byId[c.id]) Object.assign(c, byId[c.id]); });
   }
+  if (data.cardVariants) STATE.cardVariants = CardVariants.normalizeCardVariants(data.cardVariants);
   // Fase 3 (reestruturação do motor de memória): migração SM2->FSRS,
   // idempotente (migrateCardToFSRS só age se `stability` ainda não existe).
   // Roda pra TODO cartão, vindo de save antigo ou recém-criado, garantindo

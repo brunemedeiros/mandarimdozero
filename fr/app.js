@@ -895,6 +895,7 @@ const STATE = {
   // Nunca serializado (ver serializeState() -- mesmo motivo de reviewQueue/
   // reviewIndex/reviewCardState: é estado de SESSÃO, não progresso salvo).
   reviewSessionDeckId: null,
+  cardVariants: {}, // progresso das palavras que trocam por idioma do site (shared/card-variants.js)
   // Fase D -- cache em memória da árvore de Decks do idioma atual, carregada
   // sob demanda por ensureDecksLoadedForReview() (só quando uma sessão
   // Deck-scoped é de fato solicitada -- nenhum boot automático, nenhum
@@ -954,6 +955,9 @@ function refreshStudyCardTexts(){
     if (c.origin !== 'study') return;
     const u = UNITS.find((x) => x.id === c.unitId);
     if (!u || !u.vocab || !u.vocab[c.vocabIdx]) return;
+    // Palavra diferente no slot (país do aluno etc.): o progresso segue a palavra,
+    // não a posição (shared/card-variants.js).
+    CardVariants.swapCardWordProgress(c, c.front, u.vocab[c.vocabIdx].f, STATE.cardVariants);
     c.front = u.vocab[c.vocabIdx].f; // o overlay `src` pode localizar a palavra estudada
     c.back_trans = u.vocab[c.vocabIdx].t;
     c.unitTitle = u.title;
@@ -1103,6 +1107,7 @@ document.getElementById('report-menu-btn').addEventListener('click', () => {
 function serializeState(){
   return {
     cards: STATE.cards,
+    cardVariants: STATE.cardVariants,
     unitProgress: STATE.unitProgress,
     xp: STATE.xp,
     streak: STATE.streak,
@@ -1144,6 +1149,7 @@ function applySerializedState(data){
       c.deckId = freshDeckId === undefined ? null : freshDeckId;
     });
   }
+  if (data.cardVariants) STATE.cardVariants = CardVariants.normalizeCardVariants(data.cardVariants);
   // Fase 3 (reestruturação do motor de memória): migração SM2->FSRS,
   // idempotente (migrateCardToFSRS só age se `stability` ainda não existe).
   STATE.cards.forEach(migrateCardToFSRS);

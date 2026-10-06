@@ -186,7 +186,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
     const cur = fs.readFileSync(path.join(ROOT, lang, 'index.html'), 'utf8');
     const o = lang === 'fr' ? origFr : origZh;
     // Fase 8: linhas novas deliberadas (aviso de lição sem tradução + script do overlay).
-    const strip = (s) => s.replace(/ data-i18n(-attr|-html)?="[^"]*"/g, '').replace(/\n[ ]*<p class="lesson-unit-goal" id="ud-lang-notice"[^\n]*<\/p>/, '').replace(/<script src="..\/shared\/content-i18n.js"><\/script>\n/, '').replace(/<script src="..\/shared\/translation-compare.js"><\/script>\n/, '');
+    const strip = (s) => s.replace(/ data-i18n(-attr|-html)?="[^"]*"/g, '').replace(/\n[ ]*<p class="lesson-unit-goal" id="ud-lang-notice"[^\n]*<\/p>/, '').replace(/<script src="..\/shared\/content-i18n.js"><\/script>\n/, '').replace(/<script src="..\/shared\/card-variants.js"><\/script>\n/, '').replace(/<script src="..\/shared\/translation-compare.js"><\/script>\n/, '');
     const modal = (s) => s.slice(s.indexOf('<!-- ===== MODAL: REPORTAR'), s.indexOf('<div id="streak-modal-overlay"'));
     check(`${lang}: modal atual sem data-i18n == modal original`, strip(modal(cur)) === modal(o));
     // Passo "modais pequenos + seletor": contra o commit anterior (PREV), a
