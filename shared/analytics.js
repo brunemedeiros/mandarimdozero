@@ -150,3 +150,20 @@ function maybeTrackPageLoadPerf(){
   ANALYTICS_PERF_SENT = true;
   trackEvent('technical_perf', 'page_load', { loadMs });
 }
+
+// ---------- Histórico de acertos (Painel do aluno ampliado, migration 070) ----------
+// Uma linha por cartão avaliado numa revisão REAL (nunca no Preview do editor:
+// card.__isPreviewCard pula). Lido só de forma agregada pela professora via
+// get_teacher_student_overview (acertos 7/30 dias). correct = grau > 0
+// ("Errei" = 0 é o único erro). Sem conteúdo do cartão -- só origem, grau e tipo.
+function trackReviewAnswer(mode, card, grade){
+  if (!card || card.__isPreviewCard) return;
+  const g = Number(grade);
+  if (!Number.isFinite(g)) return;
+  trackEvent('review_answer', mode, {
+    cardOrigin: card.origin || 'study',
+    grade: g,
+    correct: g > 0,
+    cardTypeId: (card.cardInstance && card.cardInstance.cardTypeId) || null,
+  });
+}

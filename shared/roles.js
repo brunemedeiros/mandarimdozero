@@ -123,13 +123,37 @@ async function hasActiveTeacherLink(){
 // professora (Fase 8a/8c). Uma conta pode ter as duas isenções, uma só, ou
 // nenhuma -- não são a mesma coisa, mesmo que as duas acabem "desbloqueando
 // coisa" pra quantidade/qualidade de Meus Cartões.
-async function fetchMyPlanTier(){
-  const profile = await ensureProfileLoaded();
+// Plano EFETIVO da conta logada (o que a interface usa). Para a autora
+// (isAdminUser), o Admin Mode decide: ON = Premium (todos os privilégios);
+// OFF = plano grátis, pra ela ver o site como uma aluna Free. Para qualquer
+// outra conta é sempre o plan_tier real do banco. Os gates do SERVIDOR (ex.:
+// Decks públicos) leem o plan_tier real -- por isso a conta da autora fica
+// com plan_tier='premium' no banco; com Admin Mode OFF só a interface muda.
+function effectivePlanTier(profile){
+  if (typeof isAdminUser === 'function' && isAdminUser()){
+    if (!profile) return 'premium';
+    return profile.admin_mode !== false ? 'premium' : 'free';
+  }
   return profile?.plan_tier || 'free';
 }
 
+async function fetchMyPlanTier(){
+  const profile = await ensureProfileLoaded();
+  return effectivePlanTier(profile);
+}
+
 function isPremium(){
-  return PROFILE_CACHE?.plan_tier === 'premium';
+  return effectivePlanTier(PROFILE_CACHE) === 'premium';
+}
+
+// Teto de cartões próprios (FREE_OWN_FLASHCARD_LIMIT): é o limite do PLANO
+// GRÁTIS (docs/arquitetura-total-decks-tags-painel.md, seção 17 -- "CTA de
+// upgrade Premium"). Isento: aluna vinculada a uma professora (Fase 5.1) OU
+// plano efetivo Premium. Único ponto que decide isso -- criação manual,
+// import de arquivo/link, Anki e perfil público usam esta função.
+async function hasUnlimitedOwnCards(){
+  const [hasLink, tier] = await Promise.all([hasActiveTeacherLink(), fetchMyPlanTier()]);
+  return hasLink || tier === 'premium';
 }
 
 // Ativação/remoção manual do Premium -- sem checkout Stripe real nesta

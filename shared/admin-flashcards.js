@@ -908,6 +908,16 @@ function flashcardCardRowHTML(c, showUsername){
     if (!ADMIN_FLASHCARDS_STATE.editingNativeState && classifyFlashcardRowModel(c) === 'native'){
       ADMIN_FLASHCARDS_STATE.editingNativeState = createNativeNoteEditorStateFromRow(c);
     }
+    // Decisão da autora (2026-10-05): cartão LEGADO abre direto no editor
+    // novo (rascunho em memória; nada é gravado até "Salvar edição"). O
+    // formulário antigo só sobra se o conteúdo não puder ser convertido
+    // com segurança (preflight) -- aí o botão "Usar o novo editor" mostra
+    // o motivo.
+    if (!ADMIN_FLASHCARDS_STATE.editingNativeState && classifyFlashcardRowModel(c) === 'legacy'
+        && legacyFlashcardConversionPreflight(c).ok){
+      ADMIN_FLASHCARDS_STATE.editingNativeState = nativeNoteEditorStateFromLegacyRow(c);
+      ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = cloneNoteEditorState(ADMIN_FLASHCARDS_STATE.editingNativeState);
+    }
     if (ADMIN_FLASHCARDS_STATE.editingNativeState) return flashcardNativeEditFormHTML(c, ADMIN_FLASHCARDS_STATE.editingNativeState);
     return flashcardEditFormHTML(c);
   }

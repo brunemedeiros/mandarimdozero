@@ -128,7 +128,7 @@ select pg_temp.chk('S9 MC: ordem de distratores e caixa não importam', (select 
 -- independência de autor/Deck/Tags/mídia/ids/revision/FSRS: mexer em tudo isso não muda a assinatura
 create temp table sg0 as select public.note_content_signature(f) s from own_flashcards f where owner_id=:'A' and fields->0->'content'->>'value'='maison'; grant all on sg0 to public;
 update own_flashcards set tags='{x,y,criado-por-fulano}', revision=7, deck_id=(select id from decks where name='SH' and owner_id=:'A'),
-   fields=jsonb_set(jsonb_set(fields,'{0,audio}','{"type":"upload","url":"https://p/storage/v1/object/public/flashcard-media/a/x.mp3"}'),'{0,lang}','"zh"')
+   fields=jsonb_set(jsonb_set(fields,'{0,audio}','{"type":"upload","url":"https://p.supabase.co/storage/v1/object/public/flashcard-media/a/x.mp3"}'),'{0,lang}','"zh"')
  where owner_id=:'A' and fields->0->'content'->>'value'='maison';
 select pg_temp.chk('S10 assinatura independe de Deck, Tags, attribution, mídia, lang e revision', (select public.note_content_signature(f)=(select s from sg0) from own_flashcards f where owner_id=:'A' and fields->0->'content'->>'value'='maison' limit 1));
 update own_flashcards set tags='{}', revision=0, deck_id=(select id from decks where name='S' and owner_id=:'A'), fields=jsonb_set(jsonb_set(fields,'{0,audio}','null'),'{0,lang}','"fr"') where owner_id=:'A' and fields->0->'content'->>'value'='maison';

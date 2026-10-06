@@ -329,7 +329,7 @@ function renderFieldAudioBlockHTML(field, opts){
               ${TTS_LANGUAGE_UI_OPTIONS.map(o => `<option value="${o.value}" ${ttsLanguage === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
             </select>
             <label class="profile-edit-label" for="${namePrefix}-audio-tts-voice-${field.id}">Voz (opcional)</label>
-            <input type="text" id="${namePrefix}-audio-tts-voice-${field.id}" class="profile-edit-input" placeholder="ex: padrão do provedor" value="${escapeHTML(ttsVoiceId)}" data-field-audio-tts-voice="${field.id}">
+            <input type="text" id="${namePrefix}-audio-tts-voice-${field.id}" class="profile-edit-input" placeholder="em branco = voz padrão (Chirp 3 HD)" value="${escapeHTML(ttsVoiceId)}" data-field-audio-tts-voice="${field.id}">
             <label class="profile-edit-label" for="${namePrefix}-audio-tts-rate-${field.id}">Velocidade</label>
             <select id="${namePrefix}-audio-tts-rate-${field.id}" class="profile-edit-input" data-field-audio-tts-rate="${field.id}">
               ${TTS_RATE_UI_OPTIONS.map(o => `<option value="${o.value}" ${ttsRate === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}

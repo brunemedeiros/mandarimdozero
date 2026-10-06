@@ -296,10 +296,10 @@ Ao portar as suítes, foram corrigidas verificações que passavam sem provar na
 | E | PASS | C7 desmarcada; V5/V6 seleção explícita cria Note independente, local `pomme/fruta` intacta; P1 |
 | F | PASS | C5: acento e pontuação distinguem (NONE) |
 | G | PASS | C6 (cross-family) e C8 (Reverse custa 2 CardInstances) |
-| H | PARCIAL | Cloze NONE com 2 instâncias (C8), marcas preservadas (I12), Z5. **EXACT/VARIANT entre Clozes não testado** (nem local) |
+| H | PASS (local, 2026-10-05) | C8/I12/Z5 + `test_duplicates_hjk.sql`: Cloze igual (caixa/espaços) = EXACT; mesma frase com marcas diferentes = VARIANT desmarcada; Cloze x Normal = NONE |
 | I | PASS | S9/C9: ordem de distratores e caixa irrelevantes → EXACT |
-| J | PARCIAL | Só Type Answer NONE (C11). **"EXACT só contra Type Answer" não testado** |
-| K | NÃO TESTADO | A suíte não tem Teacher/Course na coleção do copiador |
+| J | PASS (local, 2026-10-05) | C11 + `test_duplicates_hjk.sql`: Type Answer x Type Answer = EXACT; Type Answer x Normal (e o inverso) com o mesmo par = cross_family, não selecionável |
+| K | PASS (local, 2026-10-05) | `test_duplicates_hjk.sql`: cartão da professora com o mesmo conteúdo na coleção do copiador não conta (NONE) e a cópia não o toca. Course não tem Notes no banco |
 | L | PASS | S7/C10 Legacy compatível = Native; S8/C10 incompatível fora do plano |
 | M | PASS | S10 attribution não entra na assinatura; I6 Notes novas com a atribuição do autor; I5 existentes intocadas |
 
@@ -490,9 +490,9 @@ Todas as execuções foram revertidas. Estado final idêntico ao snapshot anteri
 | P8.1 Storage real | Pendente: precisa da autora com login real |
 | P8.2 duas sessões reais | Pendente: mesmo motivo |
 | P8.5 mídia ponta a ponta | Pendente: mesmo motivo |
-| H/J (Cloze/Type Answer EXACT/VARIANT) | Pendente (não testado) |
-| K (Teacher/Course na coleção) | Pendente (não testado) |
-| 4 achados de baixo risco da 062 | Abertos: host não ancorado; manifest sem teto (custo por mídia agora linear); mensagem com `cls` ausente; comentário de rollback |
+| H/J (Cloze/Type Answer EXACT/VARIANT) | Testado localmente (9/9, `test_duplicates_hjk.sql`) |
+| K (Teacher/Course na coleção) | Testado localmente (mesma suíte) |
+| 4 achados de baixo risco da 062 | Host ancorado em `*.supabase.co` pela 071 (Staging+produção, 2026-10-05). Manifest: custo linear e teto de 2000 mídias já existentes, aceito. Mensagem sem `cls` e comentário de rollback: cosméticos, não alterados |
 
 **Staging ≠ autorização para produção.**
 

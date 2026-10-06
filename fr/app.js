@@ -6164,6 +6164,7 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
   // -- Combinar continua NÃO fazendo isso (reconhecimento, não revisão;
   // só promove cartão nunca estudado, ver onMatchTileClick).
   applyMemoryGrade(card, isCorrect ? 2 : 0);
+  trackReviewAnswer('speed_review', card, isCorrect ? 2 : 0);
 
   if (isCorrect){
     const speedBonus = Math.max(10, Math.round(100 * (1 - elapsed / SPEED_TIME_LIMIT)));
@@ -7107,6 +7108,7 @@ function gradeCurrentCard(grade){
   // Fase 5: Flashcard agora usa o motor FSRS (shared/fsrs.js) -- due deixa
   // de ser calculado por regras SM-2 fixas.
   applyMemoryGrade(card, grade);
+  trackReviewAnswer('flashcard', card, grade);
   STATE.totalReviews += 1;
   // Streak só conta quando a SESSÃO inteira termina (ver renderReviewView),
   // não a cada cartão avaliado -- senão avaliar 1 carta isolada já bastava

@@ -40,17 +40,32 @@
 // BEM-SUCEDIDAS por conta a cada TTS_RATE_LIMIT_WINDOW_MINUTES minutos.
 //
 // Provider abstraction (generateTTS) -- isola TODA chamada a um provedor
-// de TTS específico. NENHUM provedor real está configurado hoje
-// (confirmado por grep no repositório inteiro antes desta implementação,
-// ver CLAUDE.md "Fase 7f -- auditoria") -- sem a secret
-// TTS_PROVIDER_API_KEY, esta function sempre devolve
+// de TTS específico. Provedor: Google Cloud TTS (Chirp 3 HD, mesmas vozes
+// da trilha), chave na secret TTS_PROVIDER_API_KEY (ver CLAUDE.md, "TTS por
+// Field -- provedor Google ativado"). Sem a secret, devolve
 // {ok:false, error:'provider_not_configured'}, nunca finge sucesso.
+//
+// Cota mensal -- além do limite curto, no máximo TTS_MONTHLY_LIMIT (padrão
+// 300, env TTS_MONTHLY_LIMIT) gerações bem-sucedidas por conta por mês
+// (UTC). A conta admin é isenta. Partes puras em ./tts_core.mjs.
 // TTS_MOCK_ENABLED (secret separada, só pra teste -- nunca setada em
 // produção real) troca generateTTS() por um mock que gera um WAV
 // minúsculo/silencioso, permitindo validar o pipeline inteiro (auth,
 // rate limit, upload, resposta) sem nenhuma credencial de provedor real.
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import {
+  buildGoogleSynthesizeBody,
+  decideMonthlyQuota,
+  decodeBase64ToBytes,
+  isTtsAdminEmail,
+  mapGoogleTtsError,
+  parseMonthlyLimit,
+  resolveSpeakingRate,
+  resolveTtsVoice,
+  startOfCurrentMonthUtcIso,
+  toSpokenTextForTts,
+} from './tts_core.mjs';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
@@ -62,7 +77,7 @@ const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 // TTS_PROVIDER_MODEL_ID/TTS_CONFIG_VERSION nos DOIS lugares -- invalida o
 // cache de TODO Field TTS já gerado, de propósito (áudio de um provedor
 // diferente É um resultado diferente).
-const TTS_PROVIDER_MODEL_ID = 'unconfigured';
+const TTS_PROVIDER_MODEL_ID = 'google-chirp3-hd';
 const TTS_CONFIG_VERSION = 1;
 const TTS_TEXT_MAX_LENGTH = 500;
 const TTS_RATE_LIMIT = 20;
@@ -139,20 +154,59 @@ async function generateTTS(input: {
   if (!apiKey) {
     return { ok: false, error: 'provider_not_configured' };
   }
-  // Nenhum provedor real foi contratado ainda (decisão em aberto #1 da
-  // auditoria da Fase 7f, ver CLAUDE.md) -- quando um existir, a chamada
-  // HTTP de verdade entra aqui, isolada, sem tocar em mais nada desta
-  // function. A presença de TTS_PROVIDER_API_KEY sozinha nunca basta pra
-  // "funcionar de verdade" -- esta função continua devolvendo um erro
-  // explícito e diagnosticável, nunca inventa sucesso.
-  return { ok: false, error: 'provider_not_implemented' };
+  // Google Cloud Text-to-Speech (REST v1), mesma voz Chirp 3 HD da trilha.
+  const voice = resolveTtsVoice(input.language, input.voiceId);
+  if (!voice.ok || !voice.languageCode || !voice.name) return { ok: false, error: voice.error || 'provider_error' };
+  const body = buildGoogleSynthesizeBody({
+    text: toSpokenTextForTts(input.text, voice.languageCode),
+    languageCode: voice.languageCode,
+    voiceName: voice.name,
+    speakingRate: resolveSpeakingRate(voice.baseRate, input.rate),
+  });
+  let resp: Response;
+  try {
+    resp = await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${encodeURIComponent(apiKey)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  } catch (err) {
+    // Só o NOME do erro -- a mensagem de um erro de rede pode repetir a URL,
+    // que contém a chave.
+    console.error('tts-generate: falha de rede ao chamar o Google TTS', (err as Error)?.name || 'Error');
+    return { ok: false, error: 'provider_error' };
+  }
+  let data: { audioContent?: string; error?: { status?: string; message?: string } } = {};
+  try {
+    data = await resp.json();
+  } catch {
+    data = {};
+  }
+  if (!resp.ok || !data.audioContent) {
+    console.error('tts-generate: Google TTS recusou', resp.status, data?.error?.status || '');
+    return { ok: false, error: mapGoogleTtsError(resp.status) };
+  }
+  return { ok: true, audioBytes: decodeBase64ToBytes(data.audioContent), mimeType: 'audio/mpeg' };
 }
 
+// CORS: o app chama esta função do navegador (outra origem). Sem responder ao
+// preflight OPTIONS e sem os cabeçalhos abaixo, o navegador bloqueia a chamada
+// antes de ela chegar aqui e o app só mostra "Não foi possível gerar o áudio agora."
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+const JSON_HEADERS = { ...CORS_HEADERS, 'Content-Type': 'application/json' };
+
 Deno.serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: CORS_HEADERS });
+  }
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ ok: false, error: 'method_not_allowed' }), {
       status: 405,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
 
@@ -160,7 +214,7 @@ Deno.serve(async (req: Request) => {
   if (!authHeader) {
     return new Response(JSON.stringify({ ok: false, error: 'missing_authorization' }), {
       status: 401,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
 
@@ -178,39 +232,39 @@ Deno.serve(async (req: Request) => {
   } catch {
     return new Response(JSON.stringify({ ok: false, error: 'invalid_json' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
 
   if (payload.table !== 'teacher_flashcards' && payload.table !== 'own_flashcards') {
     return new Response(JSON.stringify({ ok: false, error: 'invalid_table' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
   if (!payload.rowId || !payload.fieldId) {
     return new Response(JSON.stringify({ ok: false, error: 'missing_row_or_field' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
   const cleanText = (payload.text || '').trim();
   if (!cleanText) {
     return new Response(JSON.stringify({ ok: false, error: 'missing_text' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
   if (cleanText.length > TTS_TEXT_MAX_LENGTH) {
     return new Response(JSON.stringify({ ok: false, error: 'text_too_long' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
   if (!payload.language) {
     return new Response(JSON.stringify({ ok: false, error: 'missing_language' }), {
       status: 400,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
 
@@ -223,7 +277,7 @@ Deno.serve(async (req: Request) => {
   if (userError || !userData?.user) {
     return new Response(JSON.stringify({ ok: false, error: 'invalid_session' }), {
       status: 401,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
   const userId = userData.user.id;
@@ -241,13 +295,13 @@ Deno.serve(async (req: Request) => {
     console.error('tts-generate: falha ao checar autorização', rowError);
     return new Response(JSON.stringify({ ok: false, error: 'authorization_check_failed' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
   if (!row) {
     return new Response(JSON.stringify({ ok: false, error: 'not_authorized' }), {
       status: 403,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
 
@@ -268,8 +322,34 @@ Deno.serve(async (req: Request) => {
   } else if ((recentCount ?? 0) >= TTS_RATE_LIMIT) {
     return new Response(JSON.stringify({ ok: false, error: 'rate_limited' }), {
       status: 429,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
+  }
+
+  // Cota mensal -- controle de custo do provedor pago. Diferente do limite
+  // curto acima, aqui uma falha ao LER a contagem BLOQUEIA (fail-closed):
+  // sem saber o consumo do mês, não se gasta chamada paga.
+  const isAdmin = isTtsAdminEmail(userData.user.email);
+  if (!isAdmin) {
+    const monthlyLimit = parseMonthlyLimit(Deno.env.get('TTS_MONTHLY_LIMIT'));
+    const { count: monthCount, error: monthError } = await supabase
+      .from('tts_generation_log')
+      .select('id', { count: 'exact', head: true })
+      .gte('created_at', startOfCurrentMonthUtcIso(new Date()));
+    if (monthError) {
+      console.error('tts-generate: falha ao checar cota mensal', monthError);
+      return new Response(JSON.stringify({ ok: false, error: 'quota_check_failed' }), {
+        status: 503,
+        headers: JSON_HEADERS,
+      });
+    }
+    const quota = decideMonthlyQuota({ count: monthCount ?? 0, limit: monthlyLimit, isAdmin });
+    if (!quota.allowed) {
+      return new Response(JSON.stringify({ ok: false, error: quota.error }), {
+        status: 429,
+        headers: JSON_HEADERS,
+      });
+    }
   }
 
   const voiceId = payload.voiceId || null;
@@ -278,9 +358,10 @@ Deno.serve(async (req: Request) => {
 
   const generated = await generateTTS({ text: cleanText, language: payload.language, voiceId, rate });
   if (!generated.ok) {
+    const clientSide = generated.error === 'unsupported_language' || generated.error === 'invalid_voice';
     return new Response(JSON.stringify({ ok: false, error: generated.error }), {
-      status: 502,
-      headers: { 'Content-Type': 'application/json' },
+      status: clientSide ? 400 : 502,
+      headers: JSON_HEADERS,
     });
   }
 
@@ -295,7 +376,7 @@ Deno.serve(async (req: Request) => {
     console.error('tts-generate: falha no upload', uploadError);
     return new Response(JSON.stringify({ ok: false, error: 'upload_failed' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: JSON_HEADERS,
     });
   }
   const { data: pub } = supabase.storage.from('flashcard-media').getPublicUrl(path);
@@ -314,6 +395,6 @@ Deno.serve(async (req: Request) => {
       generationKey,
       generatedAt: new Date().toISOString(),
     }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } },
+    { status: 200, headers: JSON_HEADERS },
   );
 });
