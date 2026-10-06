@@ -1356,6 +1356,7 @@ function showStreakCelebration(){
   // Fase 1 do sistema de notificações.
   fireNotificationEvent('streak_completed', 'streak', { days: STATE.streak });
   document.getElementById('streak-days-num').textContent = STATE.streak;
+  { const u = document.getElementById('streak-days-unit'); if (u) u.textContent = STATE.streak === 1 ? 'dia' : 'dias'; }
   document.getElementById('streak-week-row').innerHTML = buildStreakWeekData().map(d => `
     <div class="streak-day-item ${d.done ? 'done' : ''} ${d.isToday ? 'today' : ''}">
       <div class="streak-day-circle">${d.done ? '✓' : ''}</div>
@@ -5932,7 +5933,7 @@ function renderReviewTodayWidget(){
     ? `<div class="review-today-filter">Filtro da sessão: ${escapeHTML(filterSummary)} · <button type="button" class="admin-select-link review-today-filter-clear" id="review-today-filter-clear">Limpar filtro</button></div>`
     : '';
   wrap.innerHTML = `
-    ${trueCount ? `<button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">▶ Estudar todos os Decks</button>` : ''}
+    ${trueCount ? `<button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">Estudar todos os Decks</button>` : ''}
     ${filterNote}
   `;
   document.getElementById('review-study-all-btn')?.addEventListener('click', () => openReviewSession('flashcard'));
@@ -6004,25 +6005,25 @@ function renderReviewModeSelect(){
   praticarEl.innerHTML = `
     <button class="review-mode-card" id="mode-card-speed" ${trueCount === 0 ? 'disabled' : ''}>
       <div class="icon">⚡</div>
+      <div class="name">Speed Review</div>
       <div class="count speed-split" aria-label="Novo ${speedSplit.new}, Aprendendo ${speedSplit.learning}, Revisar ${speedSplit.review}">
         <span class="${speedSplit.new ? 'is-new' : 'is-zero'}">${speedSplit.new}</span>
         <span class="${speedSplit.learning ? 'is-learning' : 'is-zero'}">${speedSplit.learning}</span>
         <span class="${speedSplit.review ? 'is-review' : 'is-zero'}">${speedSplit.review}</span>
       </div>
-      <div class="speed-split-legend">novo · aprend. · revisar</div>
-      <div class="name">Speed Review</div>
+      <div class="speed-split-legend">Novo · Aprendendo · Revisar</div>
       <div class="desc">Revisão rápida</div>
     </button>
     <button class="review-mode-card" id="mode-card-hard" ${hardCount === 0 ? 'disabled' : ''}>
       <div class="icon">🔥</div>
-      <div class="count">${hardCount}</div>
       <div class="name">Palavras difíceis</div>
+      <div class="count">${hardCount}</div>
       <div class="desc">As que você mais erra</div>
     </button>
     <button class="review-mode-card" id="mode-card-match" ${matchWordCount < 10 ? 'disabled' : ''}>
       <div class="icon">🧩</div>
-      <div class="count">${matchWordCount}</div>
       <div class="name">Combinar</div>
+      <div class="count">${matchWordCount}</div>
       <div class="desc">Jogo de pares</div>
     </button>
   `;
@@ -6068,7 +6069,23 @@ function openReviewSession(mode){
 // tela de escolha -- usada pelo link "← Voltar aos modos" e pelos botões
 // "Praticar mais" das telas de conclusão (Fase 6 do projeto: terminar uma
 // revisão leva pra PRATICAR, nunca repete a mesma bateria sozinha).
+// Rótulo do cartão: cartões próprios/da professora mostram o nome do Deck.
+function reviewCardTagLabel(card){
+  if (card && card.deckId != null && Array.isArray(STATE.decks)){
+    const d = STATE.decks.find(x => x.id === card.deckId);
+    if (d && d.name) return d.name;
+  }
+  return card.unitTitle;
+}
+
+// Link de voltar da sessão: "Voltar ao Deck" quando a sessão veio de um Deck.
+function syncReviewBackLink(){
+  const el = document.getElementById('review-back-to-modes');
+  if (el) el.textContent = STATE.reviewSessionDeckId != null ? '← Voltar ao Deck' : '← Voltar aos modos';
+}
+
 function backToReviewModeSelect(){
+  const returnDeckId = STATE.reviewSessionDeckId;
   stopSpeedTimer();
   SPEED_STATE.active = false;
   document.getElementById('review-mode-select-wrap').style.display = 'block';
@@ -6076,8 +6093,13 @@ function backToReviewModeSelect(){
   const deckWrap = document.getElementById('review-deck-wrap');
   if (deckWrap) deckWrap.style.display = 'none';
   STATE.reviewSessionDeckId = null; // K2-H: sair da sessão não deixa escopo de Deck stale
+  syncReviewBackLink();
   renderReviewModeSelect();
 
+  if (returnDeckId != null && typeof openDeckDetail === 'function'){
+    openDeckDetail(returnDeckId);
+    return;
+  }
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'tab', tab: 'review' });
 }
 
@@ -6855,7 +6877,7 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
-      <div class="flashcard-tag">${card.unitTitle}</div>
+      <div class="flashcard-tag">${escapeHTML(reviewCardTagLabel(card))}</div>
       ${promptImageUrl ? `<img src="${promptImageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="flashcard-hanzi">${escapeHTML(view.prompt.text)}${promptSpeakable ? ` ${audioBtnHTML(view.prompt.text, 'audio-btn-lg')}` : ''}${customAudioUrl ? customAudioBtnHTML(customAudioUrl) : ''}</div>
       <div class="flashcard-pinyin pinyin">${escapeHTML(view.prompt.pinyinText || '')}</div>
@@ -6868,7 +6890,8 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
           if (opt.correct) cls += ' correct';
           else if (i === localState.selectedIndex) cls += ' incorrect';
         }
-        return `<button class="${cls}" data-idx="${i}"${answered ? ' disabled' : ''}>${escapeHTML(opt.text)}</button>`;
+        const mark = answered ? (opt.correct ? '<span class="mc-mark" aria-hidden="true">✓ </span>' : (i === localState.selectedIndex ? '<span class="mc-mark" aria-hidden="true">✗ </span>' : '')) : '';
+        return `<button class="${cls}" data-idx="${i}"${answered ? ' disabled' : ''}>${mark}${escapeHTML(opt.text)}</button>`;
       }).join('')}
     </div>
     ${answered ? `<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">Continuar</button>` : ''}
@@ -6957,7 +6980,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
-      <div class="flashcard-tag">${card.unitTitle}</div>
+      <div class="flashcard-tag">${escapeHTML(reviewCardTagLabel(card))}</div>
       ${clozeImageUrl ? `<img src="${clozeImageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="cloze-sentence">
         <div class="cloze-hanzi">${sentenceHTML}</div>
@@ -7038,7 +7061,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
-      <div class="flashcard-tag">${card.unitTitle}</div>
+      <div class="flashcard-tag">${escapeHTML(reviewCardTagLabel(card))}</div>
       ${promptImageUrl ? `<img src="${promptImageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="flashcard-hanzi">${escapeHTML(view.prompt.text)}${promptSpeakable ? ` ${audioBtnHTML(view.prompt.text, 'audio-btn-lg')}` : ''}${view.prompt.audioUrl ? customAudioBtnHTML(view.prompt.audioUrl) : ''}</div>
       <div class="flashcard-pinyin pinyin">${escapeHTML(view.prompt.pinyinText || '')}</div>
@@ -7097,6 +7120,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
 }
 
 function renderReviewView(){
+  syncReviewBackLink();
   stopExerciseAudio();
   const el = document.getElementById('review-content');
 
@@ -7319,7 +7343,7 @@ function renderNormalCard(mountEl, card, localState, callbacks){
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
-      <div class="flashcard-tag">${card.unitTitle}</div>
+      <div class="flashcard-tag">${escapeHTML(reviewCardTagLabel(card))}</div>
       ${resolvedFrontImageUrl ? `<img src="${resolvedFrontImageUrl}" class="flashcard-image" alt="">` : ''}
       ${frontHTML}
       ${localState.revealed ? `

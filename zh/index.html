@@ -1708,7 +1708,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .review-mode-card .speed-split .is-learning{ color:var(--count-learning); }
 .review-mode-card .speed-split .is-review{ color:var(--count-review); }
 .review-mode-card .speed-split .is-zero{ color:var(--ink-soft); opacity:.55; }
-.review-mode-card .speed-split-legend{ font-size:10px; color:var(--ink-soft); margin-top:-2px; }
+.review-mode-card .speed-split-legend{ font-size:12px; color:var(--ink-soft); margin-top:-2px; }
 .review-mode-card .name{ font-size:14px; font-weight:700; color: var(--ink); }
 .review-mode-card .desc{ font-size:11.5px; color: var(--ink-soft); }
 
@@ -2242,6 +2242,13 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .admin-recipients-summary{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin:10px 0 10px; }
 .admin-recipients-actions{ display:flex; gap:12px; }
 .admin-select-link{ font-size:13px; font-weight:700; color:var(--seal-red-dark); }
+#review-tag-chips .leaderboard-tab{ min-height:36px; display:inline-flex; align-items:center; }
+@media (max-width:600px){
+  [data-touch44]{ min-height:44px; min-width:44px; display:inline-flex; align-items:center; justify-content:center; padding:10px 12px; }
+  #review-tag-chips .leaderboard-tab{ min-height:40px; }
+  #review-content .audio-btn, #review-content .custom-audio-btn{ min-width:44px; min-height:44px; }
+  #review-back-to-modes{ min-height:44px; display:inline-flex; align-items:center; }
+}
 .admin-select-link:hover{ text-decoration:underline; }
 
 /* ---------- Modal: reportar problema/sugestão (bandeira ⚑) ---------- */
@@ -3332,7 +3339,6 @@ body.hide-pinyin .prompt-pinyin{
           <option value="normal">Normal (recomendado)</option>
           <option value="intense">Intensa (sessões mais longas)</option>
         </select>
-        <p class="settings-more-note">Estes ajustes controlam o motor de revisão nos bastidores -- você não precisa entender os detalhes técnicos.</p>
       </div>
 
       <div class="section-label">Decks</div>
@@ -4025,7 +4031,7 @@ body.hide-pinyin .prompt-pinyin{
   <div class="streak-modal-body">
     <div class="streak-flame">🔥</div>
     <div class="streak-week-row" id="streak-week-row"></div>
-    <h2 class="streak-headline">Você está em uma sequência de <span id="streak-days-num">0</span> dias!</h2>
+    <h2 class="streak-headline">Você está em uma sequência de <span id="streak-days-num">0</span> <span id="streak-days-unit">dias</span>!</h2>
     <p class="streak-subtext">Continue assim: sua série será zerada se você não estudar amanhã.</p>
   </div>
   <div class="streak-modal-footer">

@@ -218,7 +218,7 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
       const card = document.getElementById('mode-card-speed').getBoundingClientRect();
       return { spans, exp, fits: sp.width <= card.width, legend: (document.querySelector('#mode-card-speed .speed-split-legend') || {}).textContent };
     });
-    check(lang + ' Speed Review mostra Novo/Aprendendo/Revisar da sessão, cabendo no card', speed.spans.join() === speed.exp.join() && speed.fits && /novo/.test(speed.legend || ''), speed);
+    check(lang + ' Speed Review mostra Novo/Aprendendo/Revisar da sessão, cabendo no card', speed.spans.join() === speed.exp.join() && speed.fits && /novo/i.test(speed.legend || ''), speed);
     check(lang + ' sem bloco Flashcard nem seção Revisar', !modes.flash && !modes.revisar, modes);
     const queueLen = await page.evaluate(() => getStudyQueue(eligibleReviewPool(), { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay }).length);
     check(lang + ' "Estudar todos os Decks" só quando há o que estudar', modes.studyAll === queueLen > 0, { modes, queueLen });
