@@ -3112,6 +3112,18 @@ footer.app-footer img{ height:40px; opacity:.85; }
   .mais-extra-tab{ display:none; }
 }
 
+/* ---------- Fase 3 (mobile): alvos de toque de 44px e "Prática" promovida ---------- */
+@media (max-width: 899px){
+  /* Área de toque ampliada sem mexer no visual: o círculo continua com o
+     tamanho original, o ::after estende a região clicável até 44px. */
+  .ub-chevron{ position:relative; }
+  .ub-chevron::after{ content:''; position:absolute; inset:-9px; }
+  .lang-switcher .lang-switcher-btn{ width:44px; height:44px; } /* tem overflow:hidden: ::after seria cortado */
+  .level-toggle-btn, .dcs-caption-btn{ min-height:44px; }
+  /* Item promovido para a barra inferior sai do "Mais" (não duplica). */
+  .mais-promoted-tab{ display:none; }
+}
+
 /* ---------- Seletor de idioma (topbar) ---------- */
 .lang-switcher{ position:relative; display:inline-flex; }
 .lang-switcher-btn{
@@ -3332,6 +3344,10 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <button class="tab-btn" data-tab="review">
       <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><rect x="3" y="7" width="14" height="10" rx="2.5" fill="#A78BFA" transform="rotate(-8 10 12)"/><rect x="7" y="7" width="14" height="10" rx="2.5" fill="#7C3AED"/></svg>
       <span>Revisão</span>
+    </button>
+    <button class="tab-btn" data-tab="challenges">
+      <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#FCA5A5"/><circle cx="12" cy="12" r="5.5" fill="#EF4444"/><circle cx="12" cy="12" r="2" fill="#FFFFFF"/></svg>
+      <span>Prática</span>
     </button>
     <button class="tab-btn" data-tab="profile">
       <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="#FBBF24"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6" fill="#7C3AED"/></svg>
@@ -3824,7 +3840,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
        continuam só alcançáveis via "Mais" lá). -->
   <button class="user-dropdown-item mais-extra-tab" id="user-profile-btn">👤 Meu perfil</button>
   <button class="user-dropdown-item mais-extra-tab" id="mais-conjugaison-btn" data-tab="conjugaison">✍️ Conjugação</button>
-  <button class="user-dropdown-item mais-extra-tab" id="mais-challenges-btn" data-tab="challenges">🎯 Desafios</button>
+  <button class="user-dropdown-item mais-extra-tab mais-promoted-tab" id="mais-challenges-btn" data-tab="challenges">🎯 Desafios</button>
   <button class="user-dropdown-item mais-extra-tab" id="leaderboard-btn">🏆 Ranking</button>
   <button class="user-dropdown-item" id="support-materials-btn">📚 Material de apoio</button>
   <button class="user-dropdown-item mais-extra-tab" id="user-settings-btn">⚙️ Configurações</button>

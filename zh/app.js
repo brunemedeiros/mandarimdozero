@@ -2272,7 +2272,11 @@ function buildUnitBlock(u){
 // sincronizar entre dispositivos).
 const CHALLENGES_STRIP_COLLAPSE_KEY = 'mandarim_challenges_collapsed';
 function isDailyChallengesStripCollapsed(){
-  return localStorageSafeGet(CHALLENGES_STRIP_COLLAPSE_KEY) === '1';
+  const v = localStorageSafeGet(CHALLENGES_STRIP_COLLAPSE_KEY);
+  // Fase 3: sem preferência salva, a faixa começa recolhida no celular (ocupava
+  // ~208px antes da primeira unidade) e aberta no desktop.
+  if (v === null || v === undefined) return !!(window.matchMedia && window.matchMedia('(max-width: 899px)').matches);
+  return v === '1';
 }
 
 // Faixa compacta e SEMPRE visível com as 3 Missões do dia (ex-"Desafios de
