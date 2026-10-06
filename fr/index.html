@@ -572,7 +572,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 /* ---------- Seletor de nível (toggle + modal, estilo Busuu) ---------- */
 .level-toggle-btn{
   display:flex; align-items:center; gap:6px; background:none; border:none; cursor:pointer;
-  padding:4px 0 12px; font-family: var(--font-heading); font-weight:800; font-size:20px; color: var(--ink);
+  padding:4px 0 12px; font-family: var(--font-display); font-weight:800; font-size:20px; color: var(--ink);
 }
 .level-toggle-chevron{ font-size:19px; color: var(--ink-soft); transition: transform .15s ease; }
 .level-toggle-btn:hover .level-toggle-chevron{ transform: translateY(2px); }
@@ -593,7 +593,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   padding:14px 16px; cursor:pointer; font-family: var(--font-body); transition: all .15s ease;
 }
 .level-list-item:hover{ border-color: var(--imperial-gold); }
-.level-list-item.active{ background: rgba(52,152,214,0.08); border-color: var(--seal-red); }
+.level-list-item.active{ background: color-mix(in srgb, var(--seal-red) 8%, var(--paper)); border-color: var(--seal-red); }
 .level-list-badge{
   flex-shrink:0; width:44px; height:44px; border-radius:12px; background: var(--paper-warm);
   display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; color: var(--ink-soft);
@@ -615,8 +615,8 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 }
 .module-label:first-child{ margin-top:0; padding-top:0; border-top:none; }
 .module-label .ml-text{
-  font-weight:800; font-size:11.5px; text-transform:uppercase; letter-spacing:.05em;
-  color:var(--ink-soft); white-space:nowrap;
+  font-family: var(--font-display); font-weight:800; font-size:15px; text-transform:none; letter-spacing:0;
+  color:var(--ink); white-space:nowrap;
 }
 .module-label .ml-track{ flex:1; height:4px; border-radius:2px; background:var(--paper-warm); overflow:hidden; }
 .module-label .ml-fill{ height:100%; border-radius:2px; background: linear-gradient(90deg, var(--seal-red), var(--imperial-gold)); transition: width .3s ease; }
@@ -644,7 +644,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   transition: background .15s ease;
 }
 .unit-block.done .ub-icon{ background: rgba(58,115,89,0.14); }
-.unit-block.current .ub-icon{ background: rgba(52,152,214,0.10); }
+.unit-block.current .ub-icon{ background: color-mix(in srgb, var(--seal-red) 12%, var(--paper)); }
 .ub-info{ flex:1; min-width:0; }
 .ub-title-row{ display:flex; align-items:center; gap:7px; }
 .ub-title{ font-weight:800; font-size:14.5px; line-height:1.25; }
@@ -671,7 +671,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .unit-block.expanded .ub-chevron{ transform: rotate(180deg); }
 
 /* ---------- Fase 2 da trilha: estados (atual/disponível/pulada), selos e "Continuar" ---------- */
-.unit-block.current{ border-color: var(--seal-red); }
+.unit-block.current{ border-color: var(--seal-red); border-width:2px; box-shadow: 0 0 0 4px color-mix(in srgb, var(--seal-red) 16%, transparent), var(--shadow-card); }
 .unit-block.skipped{ border-style:dashed; border-color: var(--jade); }
 .unit-block.skipped .ub-header{ background: rgba(58,115,89,0.06); }
 .unit-block.skipped .ub-icon{ background: rgba(58,115,89,0.10); }
@@ -685,7 +685,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .trail-continue{
   grid-column: 1 / -1; display:flex; align-items:center; gap:14px; flex-wrap:wrap;
   padding:14px 16px; background: var(--paper); border:1px solid var(--seal-red);
-  border-radius: var(--radius); box-shadow: var(--shadow-card); margin-bottom:6px;
+  border-radius: var(--radius); box-shadow: var(--shadow-card); margin-bottom:18px;
 }
 .trail-continue.complete{ border-color: var(--jade); }
 .trail-continue .tc-info{ flex:1; min-width:180px; }
@@ -715,7 +715,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .trail-map{ display:flex; gap:18px; align-items:flex-start; }
 .trail-map-body{ flex:1; min-width:0; }
 .trail-map-section{ margin-bottom:22px; }
-.tm-section-title{ font-size:11.5px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); margin:0 0 10px; }
+.tm-section-title{ font-family: var(--font-display); font-size:15px; font-weight:800; text-transform:none; letter-spacing:0; color: var(--ink); margin:0 0 12px; }
 .tm-nodes{ display:grid; grid-template-columns:repeat(auto-fill, minmax(148px, 1fr)); gap:14px; }
 .tm-node{
   position:relative; min-height:128px; min-width:0; padding:12px 12px 10px; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:8px; text-align:left;
@@ -733,7 +733,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 @media (prefers-reduced-motion: reduce){ .tm-node{ transition:none; } .tm-node:hover{ transform:none; } }
 .tm-node.done{ background: rgba(58,115,89,0.14); border-color: var(--jade); }
 .tm-node.skipped{ background: rgba(58,115,89,0.06); border-style:dashed; border-color: var(--jade); }
-.tm-node.current{ border-color: var(--seal-red); border-width:2.5px; box-shadow: 0 0 0 3px rgba(128,128,128,0.15); }
+.tm-node.current{ border-color: var(--seal-red); border-width:2.5px; box-shadow: 0 0 0 4px color-mix(in srgb, var(--seal-red) 18%, transparent); }
 .tm-node.locked{ opacity:.5; }
 .tm-node.tm-checkpoint{ border-style:dashed; border-color: var(--imperial-gold); }
 .tm-node.tm-review{ border-style:dashed; border-color: var(--ink-soft); }
@@ -750,6 +750,8 @@ a.pill:hover{ border-color: var(--imperial-gold); }
 .tm-panel[hidden], .tm-backdrop[hidden]{ display:none; }
 .tm-close{ position:absolute; top:6px; right:6px; width:44px; height:44px; border:none; background:transparent; font-size:18px; color: var(--ink-soft); cursor:pointer; }
 .tm-eyebrow{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color: var(--ink-soft); padding-right:40px; }
+.tm-title:focus{ outline:none; }
+.tm-title:focus-visible{ outline:3px solid var(--seal-red-dark); outline-offset:2px; border-radius:6px; }
 .tm-title{ font-size:17px; margin:4px 0 6px; padding-right:40px; line-height:1.3; }
 .tm-status{ display:inline-block; font-size:11.5px; font-weight:800; padding:2px 9px; border-radius:999px; border:1px solid var(--paper-line); color: var(--ink); margin-bottom:8px; }
 .tm-goal, .tm-line{ font-size:13px; color: var(--ink-soft); margin:6px 0; line-height:1.4; }
@@ -773,7 +775,7 @@ a.pill:hover{ border-color: var(--imperial-gold); }
    focar o olho na bolinha -- "quantas já venci" e "onde clico a seguir"
    nunca competem porque nunca dividem cor. */
 .ub-lesson-row.done{ background: rgba(58,115,89,0.14); }
-.ub-lesson-row.current{ background: rgba(52,152,214,0.10); }
+.ub-lesson-row.current{ background: color-mix(in srgb, var(--seal-red) 9%, var(--paper)); }
 /* Lições concluídas (exceto Ponto de verificação) reabrem em modo revisão
    -- ver openLessonReview em app.js. */
 .ub-lesson-row.clickable{ cursor:pointer; }
@@ -784,14 +786,14 @@ a.pill:hover{ border-color: var(--imperial-gold); }
   display:flex; align-items:center; justify-content:center;
 }
 .ub-lesson-dot.done{ background:var(--jade); color:white; }
-.ub-lesson-dot.current{ border:2px solid var(--seal-red); color:var(--seal-red-dark); background: rgba(52,152,214,0.08); }
+.ub-lesson-dot.current{ border:2px solid var(--seal-red); color:var(--seal-red-dark); background: color-mix(in srgb, var(--seal-red) 9%, var(--paper)); }
 .ub-lesson-dot.locked{ border:1.5px dashed var(--paper-line); color: var(--ink-soft); }
 .ub-lesson-title{ font-size:13px; font-weight:600; }
 .ub-lesson-row.locked .ub-lesson-title{ color:var(--ink-soft); font-weight:500; }
 
 /* ---------- Unidades de gramática (destaque roxo) ---------- */
 .unit-block.grammar{ border-color: var(--brand-purple); box-shadow: 0 0 0 1px rgba(61,22,123,0.16); }
-.unit-block.grammar.current{ border-color: var(--seal-red); }
+.unit-block.grammar.current{ border-color: var(--seal-red); box-shadow: 0 0 0 4px color-mix(in srgb, var(--seal-red) 16%, transparent), var(--shadow-card); }
 .unit-block.grammar .ub-icon{ background: rgba(61,22,123,0.12); }
 .unit-block.grammar.current .ub-icon{ background: rgba(61,22,123,0.2); }
 .unit-block.grammar.done .ub-icon{ background: rgba(58,115,89,0.14); }
