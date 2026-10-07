@@ -147,7 +147,7 @@ async function bootPage(browser, lang, port){
     const L = (n, c, x) => check(lang + ' ' + n, c, x);
 
     // ===== Meus Cartões: editor de Tags (criar) =====
-    await ev(() => { CURRENT_USER = { id: 'U' }; window.__uid = 'U'; ensureProfileLoaded = async () => ({ plan_tier: 'free' }); switchTab('my-flashcards'); });
+    await ev(() => { CURRENT_USER = { id: 'U' }; window.__uid = 'U'; ensureProfileLoaded = async () => ({ plan_tier: 'free' }); switchTab('my-flashcards'); MY_FLASHCARDS_STATE.onChange = (o) => renderMyFlashcardsView(o); });
     await page.waitForSelector('#my-flashcard-tags [data-tags-input]');
     L('editor de Tags aparece no formulário de criação', true);
     await page.fill('#my-flashcard-tags [data-tags-input]', 'Saudação, A1, a1, meu deck');
@@ -209,42 +209,26 @@ async function bootPage(browser, lang, port){
     const deckQ = (d) => ev(async (d) => { await startDeckReviewSession(d); return STATE.reviewQueue.map(c => c.rowId).sort((a, b) => a - b); }, d);
     const setF = (f) => ev((f) => { STATE.studySettings.reviewTagFilter = f; }, f);
     L('sem filtro: comportamento atual (todos)', JSON.stringify(await pool()) === '[1,2,3,4,5,5,6,7,8]', await pool());
-    await setF(['a1']); L('uma Tag', JSON.stringify(await pool()) === '[1,3,5,5,6]', await pool());
-    await setF(['b2', 'verbos']); L('múltiplas Tags = OR', JSON.stringify(await pool()) === '[2,4]', await pool());
-    await setF(['nao-existe']); L('Tag inexistente = vazio (sem quebrar)', (await pool()).length === 0);
-    await setF(['a1']);
-    L('irmãos do Normal reverso ambos entram (mesma Note)', (await pool()).filter(x => x === 5).length === 2);
-    L('Deck + Tag = AND (Deck P1 ∩ a1)', JSON.stringify(await deckQ(7001)) === '[1,5,5]', await deckQ(7001));
-    L('Tag nunca traz card de outro Deck (P2 tem a1 mas fica fora de P1)', !(await deckQ(7001)).includes(3));
-    L('Teacher Deck + Tag', JSON.stringify(await deckQ(7100)) === '[6]', await deckQ(7100));
-    await setF([]); L('limpar filtro volta a tudo (Deck P1)', JSON.stringify(await deckQ(7001)) === '[1,2,5,5,8]', await deckQ(7001));
-    // reviewOriginFilter independente + Fase H
-    const oh = await ev(async () => { STATE.studySettings.reviewOriginFilter = 'self'; STATE.studySettings.reviewTagFilter = ['prof']; await startDeckReviewSession(7100); const q = STATE.reviewQueue.map(c => c.rowId).sort(); const orig = STATE.studySettings.reviewOriginFilter; const gen = eligibleReviewPool().length; STATE.studySettings.reviewOriginFilter = 'all'; STATE.studySettings.reviewTagFilter = []; return { q, orig, gen }; });
-    L('Fase H: sessão de Deck ignora reviewOriginFilter mesmo com Tag; origem preservada; geral filtra por origem', JSON.stringify(oh.q) === '[6,7]' && oh.orig === 'self' && oh.gen === 0, oh);
-    // FSRS/contagens intactos pelo filtro
+    // 2026-10-06 (pedido da autora): o filtro de tags saiu de "Configurar" e só
+    // existe no Painel. A sessão de revisão ignora qualquer reviewTagFilter salvo.
+    await setF(['a1']); L('filtro salvo é ignorado na revisão geral', JSON.stringify(await pool()) === '[1,2,3,4,5,5,6,7,8]', await pool());
+    await setF(['nao-existe']); L('filtro inexistente salvo não esvazia a revisão', (await pool()).length === 9);
+    L('sessão de Deck ignora filtro de tag salvo (Deck P1 inteiro)', JSON.stringify(await deckQ(7001)) === '[1,2,5,5,8]', await deckQ(7001));
+    L('Deck nunca traz card de outro Deck', !(await deckQ(7001)).includes(3));
+    L('Teacher Deck inteiro', JSON.stringify(await deckQ(7100)) === '[6,7]', await deckQ(7100));
+    await setF([]);
+    const oh = await ev(async () => { STATE.studySettings.reviewOriginFilter = 'self'; await startDeckReviewSession(7100); const q = STATE.reviewQueue.map(c => c.rowId).sort(); const orig = STATE.studySettings.reviewOriginFilter; const gen = eligibleReviewPool().length; STATE.studySettings.reviewOriginFilter = 'all'; return { q, orig, gen }; });
+    L('Fase H: sessão de Deck ignora reviewOriginFilter; origem preservada; geral filtra por origem', JSON.stringify(oh.q) === '[6,7]' && oh.orig === 'self' && oh.gen === 7, oh);
     const fs = await ev(async () => { const before = deckCountsForReview(7001); STATE.studySettings.reviewTagFilter = ['a1']; const during = deckCountsForReview(7001); const c = STATE.cards.find(x => x.rowId === 1); const st = JSON.stringify([c.reps, c.due, c.state, c.deckId]); STATE.studySettings.reviewTagFilter = []; return { same: JSON.stringify(before) === JSON.stringify(during), st }; });
     L('contagens New/Learning/Review do Deck não dependem do filtro; FSRS/deck_id intactos', fs.same, fs);
-
-    // ===== UI de filtro no painel de Revisão =====
     await ev(() => { switchTab('review'); renderReviewSettingsView(); });
-    const chips = await ev(() => [...document.querySelectorAll('#review-tag-chips [data-review-tag]')].map(b => b.dataset.reviewTag));
-    L('UI: chips das tags do universo (a1, b2, ...)', chips.includes('a1') && chips.includes('b2'), chips);
-    L('UI: bloco de tags visível quando há tags', await ev(() => !document.getElementById('review-tag-filter-wrap').hidden));
-    await ev(() => document.querySelector('#review-tag-chips [data-review-tag="a1"]').click());
-    await ev(() => document.querySelector('#review-tag-chips [data-review-tag="b2"]').click());
-    L('UI: selecionar 2 tags ⇒ filtro OR', JSON.stringify(await ev(() => STATE.studySettings.reviewTagFilter)) === '["a1","b2"]');
-    L('UI: chips marcados (aria-pressed)', await ev(() => document.querySelectorAll('#review-tag-chips [aria-pressed="true"]').length === 2));
-    await ev(() => document.getElementById('review-tag-clear').click());
-    L('UI: limpar filtro', (await ev(() => STATE.studySettings.reviewTagFilter.length)) === 0);
-    // estado vazio não quebra
+    L('UI: Configurar não tem mais filtro de tags', await ev(() => !document.getElementById('review-tag-filter-wrap') && !document.getElementById('review-tag-chips')));
     await ev(() => { STATE.studySettings.reviewTagFilter = ['nao-existe']; startReviewSession(); });
-    L('estado vazio: Review não quebra e explica', (await ev(() => document.getElementById('review-content').textContent)).length > 0);
+    L('Review não quebra com filtro antigo salvo', (await ev(() => document.getElementById('review-content').textContent)).length > 0);
     await ev(() => { STATE.studySettings.reviewTagFilter = []; });
-    // filtro serializa
-    L('filtro persiste no estado salvo', await ev(() => { STATE.studySettings.reviewTagFilter = ['a1']; const s = JSON.stringify(serializeState()).includes('"reviewTagFilter":["a1"]'); STATE.studySettings.reviewTagFilter = []; return s; }));
 
     // ===== Aluno vê tags do Teacher Card mas sem controle de edição =====
-    await ev((a) => { window.__DB.decks.push({ id: 7100, kind: 'teacher_root', owner_id: 'U', teacher_id: 'T', language_app_key: a, parent_deck_id: null, name: 'T' }); switchTab('my-flashcards'); }, appKey);
+    await ev((a) => { window.__DB.decks.push({ id: 7100, kind: 'teacher_root', owner_id: 'U', teacher_id: 'T', language_app_key: a, parent_deck_id: null, name: 'T' }); switchTab('my-flashcards'); MY_FLASHCARDS_STATE.onChange = (o) => renderMyFlashcardsView(o); }, appKey);
     await page.waitForSelector('#teacher-decks-section');
     const ro = await ev(() => { const el = document.querySelector('[data-teacher-tags]'); return { shown: !!el && el.textContent.includes('prof'), removeBtns: document.querySelectorAll('#teacher-decks-section [data-tag-remove], #teacher-decks-section [data-tags-input]').length }; });
     L('aluno: vê as tags dos Teacher Cards (somente leitura, sem input/remover)', ro.shown && ro.removeBtns === 0, ro);

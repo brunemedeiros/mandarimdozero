@@ -788,5 +788,8 @@ const AUDIO_MANIFEST = {
  "on sait pas encore": "1ff46cf3dd9f.mp3",
  "t'es français ?": "76c5a55eafb8.mp3",
  "t'as quel âge ?": "6d11acb66461.mp3",
- "t'as fait quoi hier ?": "282164c2af36.mp3"
+ "t'as fait quoi hier ?": "282164c2af36.mp3",
+ "Je suis américaine.": "0accbfdba2c4.mp3",
+ "Oui, je suis français. Et toi, tu es américaine ?": "577995e21cf0.mp3",
+ "Oui, je suis américaine !": "b75f738f58f6.mp3"
 };

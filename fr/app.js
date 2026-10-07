@@ -198,7 +198,7 @@ function playPregeneratedAudio(file, btnEl, isAutoplay, rate){
   audio.addEventListener('ended', clear);
   audio.addEventListener('error', () => {
     clear();
-    showToast('Não foi possível reproduzir o áudio');
+    showToast(t('toast.audioPlayFailed'));
     trackTechnicalError('audio_load_failed', { file });
   });
   audio.play().catch(() => {
@@ -212,7 +212,7 @@ function playPregeneratedAudio(file, btnEl, isAutoplay, rate){
     // inesperado; autoplay bloqueado é comportamento normal do navegador,
     // não um bug, e contá-lo inflaria "erros" com algo que acontece toda
     // sessão em boa parte dos celulares.
-    if (isAutoplay) showToast('🔇 Toque no alto-falante pra ouvir');
+    if (isAutoplay) showToast(t('toast.audioTapSpeaker'));
     else trackTechnicalError('audio_play_failed', { file });
   });
 }
@@ -243,7 +243,7 @@ function speakFrenchAudioOnly(text, btnEl, isAutoplay){
   }
 
   if (!TTS.supported){
-    showToast('Áudio não suportado neste navegador');
+    showToast(t('toast.audioUnsupported'));
     return;
   }
 
@@ -251,7 +251,7 @@ function speakFrenchAudioOnly(text, btnEl, isAutoplay){
     loadFrenchVoice();
   }
   if (!TTS.voice){
-    showToast('🔇 Voz em francês não encontrada neste navegador/SO');
+    showToast(t('toast.voiceMissingFr'));
     return;
   }
 
@@ -259,7 +259,9 @@ function speakFrenchAudioOnly(text, btnEl, isAutoplay){
   window.speechSynthesis.resume();
 
   const buildUtterance = () => {
-    const u = new SpeechSynthesisUtterance(text);
+    // Forma neutra de gênero ("brésilien·ne") é lida como as duas formas
+    // ("brésilien, brésilienne"); texto exibido e manifest não mudam.
+    const u = new SpeechSynthesisUtterance(typeof speakableProfileText === 'function' ? speakableProfileText(text) : text);
     u.lang = 'fr-FR';
     u.voice = TTS.voice;
     u.rate = 0.9;
@@ -276,7 +278,7 @@ function speakFrenchAudioOnly(text, btnEl, isAutoplay){
   utter.onend = () => { if (btnEl) btnEl.classList.remove('speaking'); };
   utter.onerror = () => {
     if (btnEl) btnEl.classList.remove('speaking');
-    showToast('Não foi possível reproduzir o áudio');
+    showToast(t('toast.audioPlayFailed'));
   };
 
   window.speechSynthesis.speak(utter);
@@ -294,7 +296,7 @@ function speakFrenchAudioOnly(text, btnEl, isAutoplay){
       setTimeout(() => {
         if (!retryStarted){
           if (btnEl) btnEl.classList.remove('speaking');
-          showToast('🔇 Não foi possível reproduzir este áudio');
+          showToast(t('toast.audioPlayFailedThis'));
         }
       }, 800);
     }
@@ -327,9 +329,16 @@ if (TTS.supported){
   }, 10000);
 }
 
+// Plural com contagem zero: em pt-BR o Intl.PluralRules trata 0 como 'one',
+// mas o texto original sempre dizia "0 ditados" (plural). Preserva o texto
+// em português byte a byte; em inglês 0 já é 'other'.
+function tpZero(key, n, params){
+  return tp(key, n === 0 ? 2 : n, Object.assign({ n: 0 === n ? 0 : n }, params || {}));
+}
+
 function audioBtnHTML(text, extraClass){
   const safe = text.replace(/"/g, '&quot;');
-  return `<button class="audio-btn ${extraClass||''}" data-speak="${safe}" aria-label="Ouvir pronúncia" title="Ouvir pronúncia">🔊</button>`;
+  return `<button class="audio-btn ${extraClass||''}" data-speak="${safe}" aria-label="${t('fr.audio.listenPronunciation')}" title="${t('fr.audio.listenPronunciation')}">🔊</button>`;
 }
 
 // Fase 8a (ver CLAUDE.md) -- áudio PRÓPRIO enviado pela professora
@@ -338,13 +347,13 @@ function audioBtnHTML(text, extraClass){
 // -- wireAudioButtons() casa por `.audio-btn` e chamaria speakFrench()
 // com data-speak indefinido se este botão compartilhasse a classe.
 function customAudioBtnHTML(url){
-  return `<button class="custom-audio-btn" data-audio-url="${url}" aria-label="Ouvir áudio" title="Ouvir áudio">🎧</button>`;
+  return `<button class="custom-audio-btn" data-audio-url="${url}" aria-label="${t('fr.audio.listen')}" title="${t('fr.audio.listen')}">🎧</button>`;
 }
 function wireCustomAudioButtons(container){
   container.querySelectorAll('.custom-audio-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      new Audio(btn.dataset.audioUrl).play().catch(() => showToast('Não foi possível tocar o áudio.'));
+      new Audio(btn.dataset.audioUrl).play().catch(() => showToast(t('toast.audioPlayFailedDot')));
     });
   });
 }
@@ -358,10 +367,10 @@ function wireCustomAudioButtons(container){
 // então não ganha este botão extra.
 const SLOW_AUDIO_RATE = 0.65;
 function slowAudioBtnHTML(id){
-  return `<button class="dictation-play-btn dictation-play-btn-slow" id="${id}" title="Ouvir mais devagar">🐢 Lentement</button>`;
+  return `<button class="dictation-play-btn dictation-play-btn-slow" id="${id}" title="${t('fr.audio.listenSlower')}">🐢 Lentement</button>`;
 }
 function slowAudioIconBtnHTML(id){
-  return `<button class="audio-btn audio-btn-slow" id="${id}" aria-label="Ouvir devagar" title="Ouvir devagar">🐢</button>`;
+  return `<button class="audio-btn audio-btn-slow" id="${id}" aria-label="${t('fr.audio.listenSlowly')}" title="${t('fr.audio.listenSlowly')}">🐢</button>`;
 }
 
 // Emoji de bandeira (🇧🇷 🇫🇷 🇵🇹 etc.) não renderiza em todo sistema — no
@@ -433,12 +442,12 @@ function wireKnowButtons(container){
         card.fsrsReps = 0;
         card.fsrsLapses = 0;
         btn.classList.remove('known');
-        btn.textContent = 'Já sei?';
+        btn.textContent = t('zh.path.knownAsk');
       } else {
         applyMemoryGrade(card, 3); // grade 3 = "Fácil" -- Fase 5: motor novo
         btn.classList.add('known');
-        btn.textContent = '✓ Já sei';
-        showToast('Marcado como já sabido ⭐');
+        btn.textContent = t('zh.path.knownDone');
+        showToast(t('toast.markedKnown'));
       }
       // K2-E: o rótulo reflete a PALAVRA (A ou B com histórico).
       const wordKnown = studyWordHasEvidence(siblings);
@@ -466,6 +475,8 @@ function buildCardsFromUnits(units, appKey = 'frances'){
       buildStudyWordCards(u, v, idx, appKey).forEach(c => cards.push(c));
     });
   });
+  // Cartões "Na frase": 1 por frase de exemplo do curso (shared/study-trail-model.js).
+  buildStudyPhraseCards(units, appKey).forEach(c => cards.push(c));
   return cards;
 }
 
@@ -760,11 +771,13 @@ function isRealityNoteCategoryAllowedAtLevel(category, level){
 // dar a ela uma cor própria vira obrigatório (mesma regra já registrada
 // sobre --on-vivid vs --on-seal-red -- não reaproveitar o badge de
 // 'informal' pra um registro mais marcado).
+// Getters (não valores fixos): o texto precisa seguir o idioma do site no
+// momento do render, não o do load do script.
 const REALITY_NOTE_BANNER_TEXT = {
-  [REALITY_NOTE_CATEGORY.INFORMAL]: '🗣️ Na vida real',
-  [REALITY_NOTE_CATEGORY.FAMILIAR_GIRIA]: '🗣️ Registro informal',
-  [REALITY_NOTE_CATEGORY.REGIONAL]: '📍 Variação regional',
-  [REALITY_NOTE_CATEGORY.GRAMATICA_COLOQUIAL]: '✍️ Assim também se fala',
+  get [REALITY_NOTE_CATEGORY.INFORMAL]() { return t('concept.banner.reality.informal'); },
+  get [REALITY_NOTE_CATEGORY.FAMILIAR_GIRIA]() { return t('concept.banner.reality.familiar'); },
+  get [REALITY_NOTE_CATEGORY.REGIONAL]() { return t('concept.banner.reality.regional'); },
+  get [REALITY_NOTE_CATEGORY.GRAMATICA_COLOQUIAL]() { return t('concept.banner.reality.colloquialGrammar'); },
 };
 
 // ---------- Taxonomia de "notas culturais" (grilling 2026-09-17) ----------
@@ -793,9 +806,9 @@ const CULTURE_NOTE_CATEGORY = {
 // "curiosidade" que o de `reality` (que soa mais "cuidado, isso pode te
 // confundir"), já que aqui não há nenhum contraste de forma pra alertar.
 const CULTURE_NOTE_BANNER_TEXT = {
-  [CULTURE_NOTE_CATEGORY.HISTORIA]: '📜 Você sabia?',
-  [CULTURE_NOTE_CATEGORY.COSTUME]: '🎭 Costume real',
-  [CULTURE_NOTE_CATEGORY.FESTIVIDADE]: '🎉 Data especial',
+  get [CULTURE_NOTE_CATEGORY.HISTORIA]() { return t('concept.banner.culture.history'); },
+  get [CULTURE_NOTE_CATEGORY.COSTUME]() { return t('concept.banner.culture.custom'); },
+  get [CULTURE_NOTE_CATEGORY.FESTIVIDADE]() { return t('concept.banner.culture.festivity'); },
 };
 
 // ---------- Estado global ----------
@@ -818,6 +831,8 @@ const STATE = {
   // resetado por leitura (ensurePeriodXp), sem job/cron.
   periodXp: { weekStart: null, amount: 0 },
   activityLog: {},
+  reviewRecords: { speedBestScore: 0, speedBestStreak: 0, matchBestMs: null, hardSeenIds: [] }, // recordes dos modos (shared/review-extras.js)
+  reviewTimeStats: { cards: 0, ms: 0 }, // tempo por cartão (estimativa de minutos e sessão de 5 min)
   studyGoal: {
     objective: null, levels: [],
     days: { mon:true, tue:true, wed:true, thu:true, fri:true, sat:true, sun:true },
@@ -873,6 +888,7 @@ const STATE = {
   // Nunca serializado (ver serializeState() -- mesmo motivo de reviewQueue/
   // reviewIndex/reviewCardState: é estado de SESSÃO, não progresso salvo).
   reviewSessionDeckId: null,
+  cardVariants: {}, // progresso das palavras que trocam por idioma do site (shared/card-variants.js)
   // Fase D -- cache em memória da árvore de Decks do idioma atual, carregada
   // sob demanda por ensureDecksLoadedForReview() (só quando uma sessão
   // Deck-scoped é de fato solicitada -- nenhum boot automático, nenhum
@@ -922,6 +938,37 @@ MODULES.forEach((m) => {
 LEVEL_TESTS.forEach((t) => {
   STATE.levelTestProgress[t.id] = { completed: false, bestScore: 0 };
 });
+
+// Fase 8 (i18n): conteúdo do curso no idioma do site. Overlay em
+// fr/content.<lang>.js (carregado sob demanda). O português continua sendo a
+// fonte; unidade sem tradução aparece em português com aviso na lição.
+const CONTENT_I18N = ContentI18n.create({
+  units: UNITS, modules: MODULES, levels: LEVELS, levelTests: LEVEL_TESTS,
+  overlayUrl: (lang) => `content.${lang}.js`,
+  extraUrls: (lang) => [`challenges.${lang}.js`],
+  getLang: () => (typeof getUiLang === 'function' ? getUiLang() : 'pt-BR'),
+  onApplied: () => { refreshStudyCardTexts(); if (typeof applyProfilePlaceholders === 'function') applyProfilePlaceholders(); }
+});
+// Cartões da trilha guardam cópia do texto exibido; só o texto muda (id/FSRS
+// intactos). Também roda depois de carregar o progresso salvo, que traz o texto
+// do idioma em que foi salvo.
+function refreshStudyCardTexts(){
+  STATE.cards.forEach((c) => {
+    if (c.origin !== 'study') return;
+    const u = UNITS.find((x) => x.id === c.unitId);
+    // Cartão "Na frase": só a etiqueta muda com o idioma do site.
+    if (u && c.vocabIdx == null && c.gateVocabIdx != null){ c.unitTitle = studyPhraseCardTitle(u.title); return; }
+    if (!u || !u.vocab || !u.vocab[c.vocabIdx]) return;
+    // Palavra diferente no slot (país do aluno etc.): o progresso segue a palavra,
+    // não a posição (shared/card-variants.js).
+    CardVariants.swapCardWordProgress(c, c.front, u.vocab[c.vocabIdx].f, STATE.cardVariants);
+    c.front = u.vocab[c.vocabIdx].f; // o overlay `src` pode localizar a palavra estudada
+    c.back_trans = u.vocab[c.vocabIdx].t;
+    c.unitTitle = u.title;
+  });
+}
+window.addEventListener('i18n:change', () => { CONTENT_I18N.sync(); });
+CONTENT_I18N.sync();
 
 // Conexão com o Supabase (supabaseClient, cleanRedirectURL) agora vem de
 // shared/supabase-client.js -- mesmo projeto/tabela `progress` de sempre,
@@ -1064,12 +1111,15 @@ document.getElementById('report-menu-btn').addEventListener('click', () => {
 function serializeState(){
   return {
     cards: serializeCardsForSave(STATE.cards),
+    cardVariants: STATE.cardVariants,
     unitProgress: STATE.unitProgress,
     xp: STATE.xp,
     streak: STATE.streak,
     lastStudyDay: STATE.lastStudyDay,
     lastReviewReminderDay: STATE.lastReviewReminderDay,
     activityLog: STATE.activityLog,
+    reviewRecords: STATE.reviewRecords,
+    reviewTimeStats: STATE.reviewTimeStats,
     studyGoal: STATE.studyGoal,
     studySettings: STATE.studySettings,
     dailyMinutesLog: STATE.dailyMinutesLog,
@@ -1100,9 +1150,11 @@ function applySerializedState(data){
     // mergeSavedCards (shared/study-trail-model.js).
     mergeSavedCards(STATE.cards, data.cards);
   }
+  if (data.cardVariants) STATE.cardVariants = CardVariants.normalizeCardVariants(data.cardVariants);
   // Fase 3 (reestruturação do motor de memória): migração SM2->FSRS,
   // idempotente (migrateCardToFSRS só age se `stability` ainda não existe).
   STATE.cards.forEach(migrateCardToFSRS);
+  if (typeof refreshStudyCardTexts === 'function') refreshStudyCardTexts();
   if (data.unitProgress) {
     Object.assign(STATE.unitProgress, data.unitProgress);
     // Saves de antes das lições (Modelo B) não têm lessonIdx/lessonMisses.
@@ -1120,6 +1172,8 @@ function applySerializedState(data){
   if (data.dailyMinutesLog) Object.assign(STATE.dailyMinutesLog, data.dailyMinutesLog);
   if (data.dailyLessonsLog) Object.assign(STATE.dailyLessonsLog, data.dailyLessonsLog);
   if (data.activityLog) Object.assign(STATE.activityLog, data.activityLog);
+  if (data.reviewRecords && typeof data.reviewRecords === 'object') STATE.reviewRecords = Object.assign({ speedBestScore: 0, speedBestStreak: 0, matchBestMs: null, hardSeenIds: [] }, data.reviewRecords);
+  if (data.reviewTimeStats && typeof data.reviewTimeStats === 'object') STATE.reviewTimeStats = { cards: Number(data.reviewTimeStats.cards) || 0, ms: Number(data.reviewTimeStats.ms) || 0 };
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
   if (data.hadStreakComeback) STATE.hadStreakComeback = true;
   if (typeof data.totalAudioPlays === 'number') STATE.totalAudioPlays = data.totalAudioPlays;
@@ -1224,6 +1278,7 @@ function showStreakCelebration(){
   // Fase 1 do sistema de notificações.
   fireNotificationEvent('streak_completed', 'streak', { days: STATE.streak });
   document.getElementById('streak-days-num').textContent = STATE.streak;
+  { const u = document.getElementById('streak-days-unit'); if (u) u.textContent = STATE.streak === 1 ? 'dia' : 'dias'; }
   document.getElementById('streak-week-row').innerHTML = buildStreakWeekData().map(d => `
     <div class="streak-day-item ${d.done ? 'done' : ''} ${d.isToday ? 'today' : ''}">
       <div class="streak-day-circle">${d.done ? '✓' : ''}</div>
@@ -1245,8 +1300,9 @@ document.getElementById('streak-modal-continue-btn').addEventListener('click', (
 // aqui -- é dado específico deste idioma (LEVELS igual, ver content.js),
 // exigido como hook por shared/wizard.js.
 const LEVEL_DESCRIPTIONS = {
-  A1: { tier: 'Iniciante', text: 'Fazer e responder a perguntas simples e se apresentar a outras pessoas' },
-  A2: { tier: 'Básico', text: 'Participar de conversas simples do dia a dia e falar sobre seus estudos' }
+  // Getters: resolvem no idioma do site NO MOMENTO do uso (i18n fase 9).
+  A1: { get tier(){ return t('level.tier.beginner'); }, get text(){ return t('fr.level.A1.text'); } },
+  A2: { get tier(){ return t('level.tier.basic'); }, get text(){ return t('fr.level.A2.text'); } }
 };
 
 // estimateCompletionDate, buildLessonsWeekData, remainingUnitsForLevels/
@@ -1272,8 +1328,8 @@ function maybeSendStudyReminder(){
   if (diffMin < 0 || diffMin > 30) return;
 
   if (localStorageSafeGet('frances_last_study_notif') === todayStr()) return;
-  new Notification('Hora de estudar francês! 🇫🇷', {
-    body: `Sua meta de hoje: ${goal.dailyLessonsGoal} lição${goal.dailyLessonsGoal > 1 ? 'ões' : ''}.`,
+  new Notification(t('fr.reminder.title'), {
+    body: tp('zh.reminder.body', goal.dailyLessonsGoal),
     icon: 'icons/icon-192.png'
   });
   localStorageSafeSet('frances_last_study_notif', todayStr());
@@ -1434,23 +1490,23 @@ function registerDailyExerciseFormat(format){
 }
 
 const EASY_CHALLENGES = [
-  { id:'streak', icon:'🔥', label:'Mantenha sua sequência de dias viva hoje', target:1, get: () => STATE.lastStudyDay === todayStr() ? 1 : 0 },
-  { id:'firstLesson', icon:'🌅', label:'Complete sua primeira lição do dia', target:1, get: d => d.lessons }
+  { id:'streak', icon:'🔥', get label(){ return t('fr.mission.streak'); }, target:1, get: () => STATE.lastStudyDay === todayStr() ? 1 : 0 },
+  { id:'firstLesson', icon:'🌅', get label(){ return t('fr.mission.firstLesson'); }, target:1, get: d => d.lessons }
 ];
 const REVISAO_CONJ_CHALLENGES = [
-  { id:'conj1', icon:'🗣️', label:'Pratique conjugação 1 vez', target:1, get: d => d.conjugationSessions },
-  { id:'conjCorrect10', icon:'✅', label:'Acerte 10 formas verbais numa sessão de conjugação', target:10, get: d => d.conjugationCorrect },
-  { id:'conjTenses2', icon:'🔤', label:'Pratique conjugação em 2 tempos verbais diferentes', target:2, get: d => d.conjugationTenses.length },
+  { id:'conj1', icon:'🗣️', get label(){ return t('fr.mission.conj1'); }, target:1, get: d => d.conjugationSessions },
+  { id:'conjCorrect10', icon:'✅', get label(){ return t('fr.mission.conjCorrect10'); }, target:10, get: d => d.conjugationCorrect },
+  { id:'conjTenses2', icon:'🔤', get label(){ return t('fr.mission.conjTenses2'); }, target:2, get: d => d.conjugationTenses.length },
   // labelForTarget: usado só quando resolveRevisaoMission() escala a meta
   // pra baixo (estoque real menor que o alvo original) -- sem isso o texto
   // continuaria dizendo "15"/"3" enquanto a barra de progresso mostra um
   // teto diferente (ver grilling "missões do dia").
-  { id:'reviews15', icon:'🔁', label:'Revise 15 cartões', labelForTarget: n => `Revise ${n} cartões`, target:15, get: d => d.reviewsDone },
-  { id:'speedReview1', icon:'⚡', label:'Complete uma sessão de Revisão Rápida', target:1, get: d => d.speedReviewSessions },
-  { id:'matchGame1', icon:'🎴', label:'Jogue o jogo da memória 1 vez', target:1, get: d => d.matchGamesPlayed },
+  { id:'reviews15', icon:'🔁', get label(){ return tp('fr.mission.reviews', 15); }, labelForTarget: n => tp('fr.mission.reviews', n), target:15, get: d => d.reviewsDone },
+  { id:'speedReview1', icon:'⚡', get label(){ return t('fr.mission.speedReview1'); }, target:1, get: d => d.speedReviewSessions },
+  { id:'matchGame1', icon:'🎴', get label(){ return t('fr.mission.matchGame1'); }, target:1, get: d => d.matchGamesPlayed },
   // Fase 4 (artefato §3): prioriza SRS de verdade atrasado, não qualquer
   // revisão dentro do prazo normal -- puxa quem tem cartas acumuladas.
-  { id:'overdue3', icon:'⏰', label:'Revise 3 cartas em atraso', labelForTarget: n => `Revise ${n} cartas em atraso`, target:3, get: d => d.overdueReviewsDone }
+  { id:'overdue3', icon:'⏰', get label(){ return tp('fr.mission.overdue', 3); }, labelForTarget: n => tp('fr.mission.overdue', n), target:3, get: d => d.overdueReviewsDone }
 ];
 // "Complete N lições" saiu daqui na Fase 3 -- virou redundante depois que a
 // meta diária (plano de estudo) passou a ser medida em lições também: as
@@ -1461,14 +1517,14 @@ const GENERAL_CHALLENGES = [
   // (estrelas -- sistema paralelo de pontuação retirado do fluxo de unidade,
   // ver registerDailyStars) por um desafio ligado ao XP real, a única
   // moeda que o app de fato usa em todo o resto da interface.
-  { id:'xp50', icon:'⚡', label:'Ganhe 50 XP hoje', target:50, get: d => d.xp },
-  { id:'highscore2', icon:'📈', label:'Pontue mais de 80% em 2 lições', target:2, get: d => d.highScoreLessons },
-  { id:'perfect1', icon:'🎯', label:'Complete uma lição sem errar', target:1, get: d => d.perfectLessons },
-  { id:'grammar1', icon:'🧠', label:'Complete 1 unidade de gramática', target:1, get: d => d.grammarLessons },
+  { id:'xp50', icon:'⚡', get label(){ return t('fr.mission.xp50'); }, target:50, get: d => d.xp },
+  { id:'highscore2', icon:'📈', get label(){ return t('fr.mission.highscore2'); }, target:2, get: d => d.highScoreLessons },
+  { id:'perfect1', icon:'🎯', get label(){ return t('fr.mission.perfect1'); }, target:1, get: d => d.perfectLessons },
+  { id:'grammar1', icon:'🧠', get label(){ return t('fr.mission.grammar1'); }, target:1, get: d => d.grammarLessons },
   // Fase 4 (artefato §3): ligados a recursos reais do produto (ouvir,
   // traduzir por blocos), não só contadores genéricos de progresso.
-  { id:'listen10', icon:'🎧', label:'Toque o áudio 10 vezes', target:10, get: d => d.audioPlaysToday },
-  { id:'translateBlocks2', icon:'🧱', label:'Complete 2 exercícios de "Traduza a frase"', target:2, get: d => d.exerciseFormatCounts?.reorder || 0 }
+  { id:'listen10', icon:'🎧', get label(){ return t('fr.mission.listen10'); }, target:10, get: d => d.audioPlaysToday },
+  { id:'translateBlocks2', icon:'🧱', get label(){ return t('fr.mission.translateBlocks2'); }, target:2, get: d => d.exerciseFormatCounts?.reorder || 0 }
 ];
 
 function dailySeed(str){
@@ -1590,7 +1646,7 @@ function checkDailyMissionsBonus(){
   if (!allDone) return;
   STATE.daily.missionsBonusAwarded = true;
   addXP(30);
-  showToast('🎯 Todas as missões do dia concluídas! +30 XP');
+  showToast(t('toast.dailyMissionsAllDone'));
 }
 
 // Notificação "Missão concluída" -- uma por Missão do dia individual (não
@@ -1619,7 +1675,7 @@ function renderDailyChallengesScreen(){
 
   contentEl.innerHTML = `
     <div class="challenges-screen">
-      <h2>🎯 Missões do dia</h2>
+      <h2>${t('trail.dailyMissions.caption')}</h2>
       ${todaysChallenges().map((c, i) => {
         // Number(...)||0: um campo ausente nunca mais vira NaN silencioso
         // (ver auditoria "O problema dos 100%") -- current fica sempre um
@@ -1641,7 +1697,7 @@ function renderDailyChallengesScreen(){
       }).join('')}
     </div>
   `;
-  nextBtn.textContent = 'Continuar →';
+  nextBtn.textContent = t('common.continueArrow');
   nextBtn.style.display = 'flex';
 
   // BUG real corrigido aqui (relatado pela autora, 2026-09-15): esta tela é
@@ -1689,7 +1745,7 @@ function addXP(amount){
   // diário 'xp50' (GENERAL_CHALLENGES), que substituiu 'stars40'.
   ensureDailyBucket();
   STATE.daily.xp += amount;
-  showToast(`+${amount} XP`);
+  showToast(t('toast.xpGain', { amount }));
   // Fase 1 do sistema de notificações (evento "Cliente" -- ver
   // shared/notifications.js): fire-and-forget, o anti-spam (cooldown/
   // daily_cap da categoria "gamificacao") já evita virar spam a cada
@@ -1718,28 +1774,28 @@ function addXP(amount){
 // showToast agora vem de shared/toast.js.
 
 const BADGES = [
-  { id:'first_step', name:'Primeiro Passo', icon:'🌱', desc:'Fez sua primeira revisão', check: s => s.totalReviews >= 1 },
-  { id:'streak_3', name:'3 Dias Seguidos', icon:'🔥', desc:'Estudou 3 dias seguidos', check: s => s.streak >= 3 },
-  { id:'streak_7', name:'Uma Semana!', icon:'🥐', desc:'Estudou 7 dias seguidos', check: s => s.streak >= 7 },
-  { id:'unit_1', name:'Unidade 1 Completa', icon:'📖', desc:'Completou a primeira unidade', check: s => s.unitProgress['A1-1']?.completed && unitCompletedVia(s.unitProgress['A1-1']) === 'lessons' },
-  { id:'unit_half', name:'Metade do Caminho', icon:'🗼', desc:'Completou metade do nível A1', check: s => {
+  { id:'first_step', get name(){ return t('badge.first_step.name'); }, icon:'🌱', get desc(){ return t('badge.first_step.desc'); }, check: s => s.totalReviews >= 1 },
+  { id:'streak_3', get name(){ return t('badge.streak_3.name'); }, icon:'🔥', get desc(){ return t('badge.streak_3.desc'); }, check: s => s.streak >= 3 },
+  { id:'streak_7', get name(){ return t('badge.streak_7.name'); }, icon:'🥐', get desc(){ return t('badge.streak_7.desc'); }, check: s => s.streak >= 7 },
+  { id:'unit_1', get name(){ return t('badge.unit_1.name'); }, icon:'📖', get desc(){ return t('badge.unit_1.desc'); }, check: s => s.unitProgress['A1-1']?.completed && unitCompletedVia(s.unitProgress['A1-1']) === 'lessons' },
+  { id:'unit_half', get name(){ return t('badge.unit_half.name'); }, icon:'🗼', get desc(){ return t('badge.unit_half.desc'); }, check: s => {
       const a1 = UNITS.filter(u => u.level === 'A1');
       return a1.filter(u => unitCompletedVia(s.unitProgress[u.id]) === 'lessons').length >= Math.ceil(a1.length/2);
     } },
-  { id:'unit_all', name:'Nível A1 Completo', icon:'🇫🇷', desc:'Completou o nível A1 inteiro', check: s => {
+  { id:'unit_all', get name(){ return t('badge.unit_all.name'); }, icon:'🇫🇷', get desc(){ return t('badge.unit_all.desc'); }, check: s => {
       const a1 = UNITS.filter(u => u.level === 'A1');
       return a1.every(u => unitCompletedVia(s.unitProgress[u.id]) === 'lessons');
     } },
-  { id:'xp_100', name:'100 XP', icon:'⭐', desc:'Acumulou 100 XP', check: s => s.xp >= 100 },
-  { id:'xp_500', name:'500 XP', icon:'🌟', desc:'Acumulou 500 XP', check: s => s.xp >= 500 },
-  { id:'reviews_100', name:'100 Revisões', icon:'💪', desc:'Fez 100 revisões', check: s => s.totalReviews >= 100 },
+  { id:'xp_100', get name(){ return t('badge.xp_100.name'); }, icon:'⭐', get desc(){ return t('badge.xp_100.desc'); }, check: s => s.xp >= 100 },
+  { id:'xp_500', get name(){ return t('badge.xp_500.name'); }, icon:'🌟', get desc(){ return t('badge.xp_500.desc'); }, check: s => s.xp >= 500 },
+  { id:'reviews_100', get name(){ return t('badge.reviews_100.name'); }, icon:'💪', get desc(){ return t('badge.reviews_100.desc'); }, check: s => s.totalReviews >= 100 },
   // ---- Fase 4 (artefato §8): badges novos, cada um ligado a um
   // comportamento específico -- não "badge por badge" genérico. ----
-  { id:'explorer', name:'Exploradora', icon:'🧭', desc:'Usou revisão, revisão rápida e jogo da memória', check: s => s.totalReviews >= 1 && s.everUsedSpeedReview && s.everUsedMatchGame },
-  { id:'trained_ear', name:'Ouvido Treinado', icon:'🎧', desc:'Tocou o áudio 100 vezes', check: s => (s.totalAudioPlays || 0) >= 100 },
-  { id:'comeback', name:'De Volta ao Jogo', icon:'🔄', desc:'Retomou a sequência em até 3 dias', check: s => !!s.hadStreakComeback },
-  { id:'multitasker', name:'Multitarefa', icon:'🧩', desc:'Praticou 5 formatos de exercício diferentes no mesmo dia', check: s => (s.daily?.exerciseFormatsSeen?.length || 0) >= 5 },
-  { id:'weekend', name:'Fim de Semana', icon:'🌙', desc:'Estudou sábado e domingo na mesma semana', check: s => {
+  { id:'explorer', get name(){ return t('badge.explorer.name'); }, icon:'🧭', get desc(){ return t('badge.explorer.desc'); }, check: s => s.totalReviews >= 1 && s.everUsedSpeedReview && s.everUsedMatchGame },
+  { id:'trained_ear', get name(){ return t('badge.trained_ear.name'); }, icon:'🎧', get desc(){ return t('badge.trained_ear.desc'); }, check: s => (s.totalAudioPlays || 0) >= 100 },
+  { id:'comeback', get name(){ return t('badge.comeback.name'); }, icon:'🔄', get desc(){ return t('badge.comeback.desc'); }, check: s => !!s.hadStreakComeback },
+  { id:'multitasker', get name(){ return t('badge.multitasker.name'); }, icon:'🧩', get desc(){ return t('badge.multitasker.desc'); }, check: s => (s.daily?.exerciseFormatsSeen?.length || 0) >= 5 },
+  { id:'weekend', get name(){ return t('badge.weekend.name'); }, icon:'🌙', get desc(){ return t('badge.weekend.desc'); }, check: s => {
       for (let i = 0; i < 14; i++){
         const d = new Date(Date.now() - i*86400000);
         if (d.getDay() !== 6) continue;
@@ -1770,6 +1826,16 @@ function seedEarnedBadges(){
 
 let badgeCelebrationQueue = [];
 let badgeCelebrationShowing = false;
+// Durante uma sessão de revisão (Flashcard/Palavras difíceis/Speed Review/
+// Deck), a conquista fica guardada e aparece só na tela de fim ("Revisão
+// concluída"), para não cobrir o cartão. Fora da sessão, aparece na hora.
+let badgeCelebrationHeld = false;
+function holdBadgeCelebrations(){ badgeCelebrationHeld = true; }
+function releaseBadgeCelebrations(){
+  if (!badgeCelebrationHeld) return;
+  badgeCelebrationHeld = false;
+  processBadgeCelebrationQueue();
+}
 
 function checkAndCelebrateBadges(){
   const newlyEarned = [];
@@ -1796,7 +1862,7 @@ function checkAndCelebrateBadges(){
 // cruza 500 no mesmo golpe que termina o nível), mostra um de cada vez --
 // nunca dois cartões sobrepostos brigando pela mesma área da tela.
 function processBadgeCelebrationQueue(){
-  if (badgeCelebrationShowing || !badgeCelebrationQueue.length) return;
+  if (badgeCelebrationHeld || badgeCelebrationShowing || !badgeCelebrationQueue.length) return;
   badgeCelebrationShowing = true;
   const badge = badgeCelebrationQueue.shift();
   showBadgeUnlockCelebration(badge, () => {
@@ -1906,14 +1972,14 @@ function renderLevelModalList(){
   const wrap = document.getElementById('level-modal-list');
   wrap.innerHTML = LEVELS.map(lvl => {
     const moduleCount = modulesOfLevel(lvl.id).length;
-    const sub = moduleCount ? `${moduleCount} módulo${moduleCount === 1 ? '' : 's'}` : 'Em breve';
+    const sub = moduleCount ? tp('trail.moduleCount', moduleCount) : t('trail.comingSoon');
     // Se existe um teste de nível que credita ESTE nível ao ser aprovado
     // (ex: o Teste de Nível A1 libera o A2), mostra um chip de atalho embutido
     // na própria linha do nível, pra quem quer pular direto sem passar pelo
     // nível anterior.
     const skipTest = LEVEL_TESTS.find(t => t.nextLevel === lvl.id);
     const skipHTML = skipTest ? `
-      <button class="level-skip-chip" data-test="${skipTest.id}" title="${skipTest.title}">🎓 Pular</button>
+      <button class="level-skip-chip" data-test="${skipTest.id}" title="${skipTest.title}">${t('trail.skipChip')}</button>
     ` : '';
     return `
       <div class="level-list-row">
@@ -2125,10 +2191,10 @@ function buildLevelTestCard(test){
   card.innerHTML = `
     <div class="level-test-icon">🎓</div>
     <div class="level-test-body">
-      <div class="level-test-title">${test.title}${lt.completed ? ' <span class="level-test-done-pill">Concluído ✓</span>' : ''}</div>
-      <div class="level-test-sub">Já sabe francês nível ${test.level}? Faça esse teste e avance direto pro ${test.nextLevel} — não precisa completar as unidades antes.</div>
+      <div class="level-test-title">${test.title}${lt.completed ? ` <span class="level-test-done-pill">${t('trail.levelTest.donePill')}</span>` : ''}</div>
+      <div class="level-test-sub">${t('trail.levelTest.sub', { level: test.level, next: test.nextLevel })}</div>
     </div>
-    <div class="level-test-cta">${lt.completed ? 'Refazer' : 'Começar'} →</div>
+    <div class="level-test-cta">${lt.completed ? t('trail.levelTest.redo') : t('trail.levelTest.start')}</div>
   `;
   card.addEventListener('click', () => openLevelTest(test.id));
   return card;
@@ -2210,10 +2276,10 @@ function buildUnitBlock(u){
 
   const pct = Math.round(unitProgressFraction(u) * 100);
   let fracLabel;
-  if (isGrammar) fracLabel = state === 'done' ? 'Concluído' : (state === 'skipped' ? 'Pulada' : '');
+  if (isGrammar) fracLabel = state === 'done' ? t('trail.unit.done') : (state === 'skipped' ? t('trail.unit.skipped') : '');
   else if (hasLessons){
     const doneLessons = isFinished ? u.lessons.length : currentLessonIdx(u.id);
-    fracLabel = `${doneLessons} de ${u.lessons.length} lições`;
+    fracLabel = t('trail.unit.lessonsProgress', { done: doneLessons, total: u.lessons.length });
   }
   else fracLabel = `${pct}%`;
   if (dueForReview > 0) fracLabel += ` · 🔁 ${dueForReview}`;
@@ -2230,9 +2296,9 @@ function buildUnitBlock(u){
   if (state === 'current') block.setAttribute('aria-current', 'step');
 
   const badgeHTML = state === 'done' ? `<span class="ub-badge">✓</span>`
-    : state === 'skipped' ? `<span class="ub-badge ub-badge-skipped" title="Concluída pelo Ponto de verificação">⏭ Pulada</span>` : '';
-  const typeChipHTML = isGrammar ? `<span class="ub-type-chip grammar">Gramática</span>` : '';
-  const chevronHTML = hasLessons ? `<button class="ub-chevron" type="button" aria-label="Expandir lições">▾</button>` : '';
+    : state === 'skipped' ? `<span class="ub-badge ub-badge-skipped" title="${t('trail.unit.skippedTitle')}">${t('trail.unit.skippedBadge')}</span>` : '';
+  const typeChipHTML = isGrammar ? `<span class="ub-type-chip grammar">${t('trail.unit.grammarChip')}</span>` : '';
+  const chevronHTML = hasLessons ? `<button class="ub-chevron" type="button" aria-label="${t('fr.trail.expandLessons')}">▾</button>` : '';
   // Só lições JÁ concluídas (e que não são o Ponto de verificação, cujo
   // reteste tem efeitos colaterais bem mais pesados -- desbloqueio de
   // módulo/nível -- fora do escopo desta revisão leve) ficam clicáveis pra
@@ -2246,9 +2312,12 @@ function buildUnitBlock(u){
         // aplica com Admin Mode ON -- OFF cai exatamente na mesma regra
         // usada por qualquer aluno (unlocked && já concluída), sem
         // segunda implementação (Fase 11 da spec de Admin Mode).
-        const clickable = (isAdminUser() && isAdminModeOn()) || (unlocked && (st === 'done' || st === 'skipped') && !l.isCheckpoint);
+        // A lição atual (a próxima a fazer) abre de verdade pelo próprio título e
+        // conta progresso, igual a clicar no cabeçalho da unidade (2026-10-07).
+        const opensForReal = unlocked && st === 'current';
+        const clickable = opensForReal || (isAdminUser() && isAdminModeOn()) || (unlocked && (st === 'done' || st === 'skipped') && !l.isCheckpoint);
         return `
-          <div class="ub-lesson-row ${st}${clickable ? ' clickable' : ''}" ${clickable ? `data-lesson-idx="${i}"` : ''}>
+          <div class="ub-lesson-row ${st}${clickable ? ' clickable' : ''}" ${clickable ? `data-lesson-idx="${i}"${opensForReal ? ' data-lesson-open="1"' : ''} role="button" tabindex="0"` : ''}>
             <div class="ub-lesson-dot ${st}">${st === 'done' ? '✓' : (st === 'skipped' ? '•' : i + 1)}</div>
             <div class="ub-lesson-title">${l.title}</div>
           </div>
@@ -2286,7 +2355,11 @@ function buildUnitBlock(u){
     row.addEventListener('click', (e) => {
       e.stopPropagation();
       const idx = parseInt(row.dataset.lessonIdx, 10);
-      openLessonReview(u.id, idx);
+      if (row.dataset.lessonOpen) openUnitDetail(u.id);
+      else openLessonReview(u.id, idx);
+    });
+    row.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); row.click(); }
     });
   });
   return block;
@@ -2301,8 +2374,8 @@ function buildCheckpointRow(module, unlocked){
     <div class="ub-header">
       <div class="ub-icon">🏆</div>
       <div class="ub-info">
-        <div class="ub-title-row"><span class="ub-title">Ponto de verificação</span>${cp.completed ? `<span class="ub-badge">✓</span>` : ''}${skipLocked ? '<span class="ub-badge" title="Premium">🔒</span>' : ''}</div>
-        <div class="ub-goal">${skipLocked ? 'Pular unidades é do plano Premium (ou de alunos da professora).' : 'Teste o módulo inteiro de uma vez e pule as unidades que já souber.'}</div>
+        <div class="ub-title-row"><span class="ub-title">${t('trail.checkpoint.title')}</span>${cp.completed ? `<span class="ub-badge">✓</span>` : ''}${skipLocked ? '<span class="ub-badge" title="Premium">🔒</span>' : ''}</div>
+        <div class="ub-goal">${skipLocked ? t('trail.checkpoint.skipLocked') : t('trail.checkpoint.goal')}</div>
       </div>
     </div>
   `;
@@ -2358,11 +2431,11 @@ function buildModuleChallengesRow(module){
       <div class="ub-icon">${premium ? '🧩' : '🔒'}</div>
       <div class="ub-info">
         <div class="ub-title-row">
-          <span class="ub-title">Desafios do Módulo ${mIdx + 1}</span>
-          ${premium ? (items.length ? `<span class="ub-badge">${done}/${items.length}</span>` : '') : '<span class="ub-badge ub-badge-premium">Premium</span>'}
+          <span class="ub-title">${t('trail.moduleChallenges.title', { n: mIdx + 1 })}</span>
+          ${premium ? (items.length ? `<span class="ub-badge">${done}/${items.length}</span>` : '') : `<span class="ub-badge ub-badge-premium">${t('trail.premiumBadge')}</span>`}
         </div>
-        <div class="ub-goal">Pratique o que você estudou de novas formas. Opcional.</div>
-        <div class="ub-goal">${dictFree ? `${dictFree} ditado Free` : ''}${dictFree && (dictPremium || items.length) ? ' · ' : ''}${(dictPremium || items.length) ? `${dictPremium} ditado${dictPremium === 1 ? '' : 's'} e ${items.length} desafio${items.length === 1 ? '' : 's'} Premium` : ''}</div>
+        <div class="ub-goal">${t('trail.moduleChallenges.goal')}</div>
+        <div class="ub-goal">${dictFree ? tp('fr.trail.freeDictation', dictFree) : ''}${dictFree && (dictPremium || items.length) ? ' · ' : ''}${(dictPremium || items.length) ? tpZero('fr.trail.dictationsAnd', dictPremium) + ' ' + tpZero('fr.trail.premiumChallengesSuffix', items.length) : ''}</div>
       </div>
     </div>
   `;
@@ -2393,9 +2466,9 @@ function buildLevelReviewRow(level){
     <div class="ub-header">
       <div class="ub-icon">✍️</div>
       <div class="ub-info">
-        <div class="ub-title-row"><span class="ub-title">Revisão do ${level}</span></div>
-        <div class="ub-goal">Ditados que juntam o que você aprendeu em todo o nível. Opcional.</div>
-        <div class="ub-goal">${free} ditado Free${premium ? ` · ${premium} ditado${premium === 1 ? '' : 's'} Premium` : ''}</div>
+        <div class="ub-title-row"><span class="ub-title">${t('trail.levelReview.title', { level })}</span></div>
+        <div class="ub-goal">${t('trail.levelReview.goal')}</div>
+        <div class="ub-goal">${tp('fr.trail.freeDictation', free)}${premium ? ` · ${tpZero('fr.trail.premiumDictationsOnly', premium)}` : ''}</div>
       </div>
     </div>
   `;
@@ -2460,7 +2533,7 @@ function renderDailyChallengesStrip(){
   }).join('');
   const html = `
     <button class="dcs-caption-btn" type="button" aria-expanded="${collapsed ? 'false' : 'true'}">
-      <span class="dcs-caption">🎯 Missões do dia</span>
+      <span class="dcs-caption">${t('trail.dailyMissions.caption')}</span>
       <span class="dcs-caption-chevron">▾</span>
     </button>
     <div class="dcs-cards" ${collapsed ? 'style="display:none;"' : ''}>${cardsHTML}</div>
@@ -2496,8 +2569,8 @@ function renderUnitsGrid(){
     grid.innerHTML = `
       <div class="level-empty" style="grid-column: 1 / -1;">
         <div class="big-emoji">🚧</div>
-        <h3>Em breve</h3>
-        <p>O conteúdo do nível ${STATE.currentLevel} ainda está sendo preparado.</p>
+        <h3>${t('trail.comingSoon')}</h3>
+        <p>${t('trail.levelPreparing', { level: STATE.currentLevel })}</p>
       </div>
     `;
     grid.insertBefore(buildTrailContinueCard(), grid.firstChild);
@@ -2529,7 +2602,7 @@ function renderUnitsGrid(){
     const label = document.createElement('div');
     label.className = 'module-label';
     label.innerHTML = `
-      <span class="ml-text">Módulo ${mIdx + 1} · ${module.title}</span>
+      <span class="ml-text">${t('trail.module.label', { n: mIdx + 1, title: module.title })}</span>
       ${doneBadge}
       <div class="ml-track"><div class="ml-fill" style="width:${pct}%"></div></div>
     `;
@@ -2564,21 +2637,25 @@ function renderUnitsGrid(){
 // ============================================================
 // LIÇÃO EM PASSOS (Vocabulário → Diálogo → Exercícios)
 // ============================================================
-const STEP_DEFS = [
-  { key: 'vocab', label: 'Vocabulário' },
-  { key: 'dialogue', label: 'Diálogo' },
-  { key: 'dialogueCheck', label: 'Você entendeu?' },
-  { key: 'usage', label: 'Dica de uso' },
-  { key: 'exercises', label: 'Exercícios' }
-];
+function getStepDefs(){
+  return [
+    { key: 'vocab', label: t('fr.step.vocab') },
+    { key: 'dialogue', label: t('fr.step.dialogue') },
+    { key: 'dialogueCheck', label: t('lesson.step.dialogueCheck') },
+    { key: 'usage', label: t('fr.step.usage') },
+    { key: 'exercises', label: t('fr.step.exercises') }
+  ];
+}
 
 // Unidades de gramática (type: "grammar") seguem um fluxo próprio, no estilo
 // Busuu: uma sequência de telas de explicação (paginadas bloco por bloco,
 // como o vocabulário palavra-por-palavra) e depois os exercícios de uso.
-const STEP_DEFS_GRAMMAR = [
-  { key: 'explanation', label: 'Explicação' },
-  { key: 'gramExercises', label: 'Exercícios' }
-];
+function getStepDefsGrammar(){
+  return [
+    { key: 'explanation', label: t('fr.step.explanation') },
+    { key: 'gramExercises', label: t('fr.step.exercises') }
+  ];
+}
 
 // Unidades migradas pra explicação contextual (`unit.concepts`, ver
 // content.js) não têm mais `usageNote` -- a teoria dele já foi incorporada
@@ -2587,19 +2664,19 @@ const STEP_DEFS_GRAMMAR = [
 // um passo "Dica de uso" vazio.
 function currentStepDefs(){
   const u = UNITS.find(x => x.id === STATE.currentUnitId);
-  if (u && u.type === 'grammar') return STEP_DEFS_GRAMMAR;
+  if (u && u.type === 'grammar') return getStepDefsGrammar();
   if (isLessonUnit(u)){
     const lesson = currentLesson(u);
-    if (lesson.isCheckpoint) return [{ key: 'checkpointExercises', label: 'Ponto de verificação' }];
+    if (lesson.isCheckpoint) return [{ key: 'checkpointExercises', label: t('trail.checkpoint.title') }];
     const steps = [];
-    if (lesson.vocabIdx && lesson.vocabIdx.length) steps.push({ key: 'vocab', label: 'Vocabulário' });
+    if (lesson.vocabIdx && lesson.vocabIdx.length) steps.push({ key: 'vocab', label: t('fr.step.vocab') });
     if (lesson.includesDialogue){
-      steps.push({ key: 'dialogue', label: 'Diálogo' });
-      if (u.dialogue && Array.isArray(u.dialogue.check) && u.dialogue.check.length) steps.push({ key: 'dialogueCheck', label: 'Você entendeu?' });
+      steps.push({ key: 'dialogue', label: t('fr.step.dialogue') });
+      if (u.dialogue && Array.isArray(u.dialogue.check) && u.dialogue.check.length) steps.push({ key: 'dialogueCheck', label: t('lesson.step.dialogueCheck') });
     }
     return steps;
   }
-  return STEP_DEFS.filter(s => (s.key !== 'usage' || (u && u.usageNote)) && (s.key !== 'dialogueCheck' || (u && u.dialogue && Array.isArray(u.dialogue.check) && u.dialogue.check.length)));
+  return getStepDefs().filter(s => (s.key !== 'usage' || (u && u.usageNote)) && (s.key !== 'dialogueCheck' || (u && u.dialogue && Array.isArray(u.dialogue.check) && u.dialogue.check.length)));
 }
 
 // ---------- Lições (Modelo B) ----------
@@ -2805,11 +2882,17 @@ function openUnitDetail(unitId){
   // sem "X de Y" (o cálculo interno via unitOrdinalInfo continua existindo,
   // só não é mais renderizado aqui).
   const eyebrowLabel = u.type === 'grammar'
-    ? 'Gramática'
-    : `Unidade ${unitOrdinalInfo(u, levelUnits).num} de ${unitOrdinalInfo(u, levelUnits).total}`;
+    ? t('trail.eyebrow.grammar')
+    : t('trail.eyebrow.unit', { num: unitOrdinalInfo(u, levelUnits).num, total: unitOrdinalInfo(u, levelUnits).total });
   document.getElementById('ud-eyebrow').textContent = `${eyebrowLabel} · ${u.level}`;
   document.getElementById('ud-title').textContent = u.title;
   document.getElementById('ud-goal').textContent = u.goal;
+  const langNotice = document.getElementById('ud-lang-notice');
+  if (langNotice){
+    const untranslated = !CONTENT_I18N.isUnitTranslated(u.id);
+    langNotice.hidden = !untranslated;
+    langNotice.textContent = untranslated ? t('content.untranslatedNotice') : '';
+  }
 
   STEP_STATE.currentStep = 0;
   renderStep();
@@ -2958,12 +3041,12 @@ function buildExerciseHint(ex, unit){
     const phrase = findMatchingPhrase(item, unit);
     if (phrase){
       const masked = maskWordInText(phrase.f, item.f) || phrase.f;
-      return `Pense em quando você usaria essa expressão. Ela aparece nesta frase que você já estudou: "${masked}"`;
+      return t('fr.hint.thinkWhen', { masked });
     }
     if (ex.format === 'type'){
-      return 'Ouça de novo com atenção aos sons -- é uma expressão do tema desta unidade.';
+      return t('fr.hint.listenAgain');
     }
-    return `Pense no contexto do tema desta unidade ("${unit.title}"): em que situação você usaria essa palavra?`;
+    return t('fr.hint.thinkContext', { title: unit.title });
   }
   if (ex.format === 'reorder'){
     // "traduzir": o desafio principal é lembrar o vocabulário certo em meio
@@ -2971,20 +3054,20 @@ function buildExerciseHint(ex, unit){
     // "ordenar", que já mostra a frase certa embaralhada) viria em segundo
     // lugar aqui.
     return ex.mode === 'translate'
-      ? 'Primeiro descarte os blocos que não pertencem a esta frase -- só depois pense na ordem das palavras que sobraram.'
-      : 'Identifique primeiro quem realiza a ação e depois a ação em si -- monte a frase seguindo essa ordem de raciocínio, ignorando os blocos que não pertencem a ela.';
+      ? t('fr.hint.reorderTranslate')
+      : t('fr.hint.reorderOrder');
   }
   if (ex.format === 'scenario'){
-    return 'Releia a situação com atenção: pense no que você diria nesse momento, não apenas no significado de cada frase.';
+    return t('fr.hint.scenario');
   }
   if (ex.format === 'cloze'){
-    return 'Releia a frase inteira, junto da tradução, e pense em qual palavra dá sentido gramatical e comunicativo ao espaço.';
+    return t('fr.hint.cloze');
   }
   if (ex.format === 'trueFalse'){
     const shown = unit.concepts && unit.concepts.find(c => STEP_STATE.conceptsShown.has(c.id));
     return shown
-      ? `Pense na explicação: "${shown.blocks[0].title}"`
-      : 'Releia a afirmação com atenção: ela descreve exatamente a situação em que essa expressão é usada?';
+      ? t('fr.hint.trueFalseExplanation', { title: shown.blocks[0].title })
+      : t('fr.hint.trueFalseGeneric');
   }
   return null;
 }
@@ -3012,12 +3095,12 @@ function wireDontKnowButton(contentEl, ex, onRevealAnswer){
     btn.outerHTML = `
       <div class="inline-hint-block" id="inline-hint-block">
         ${hintText ? `
-          <div class="inline-hint-label">💡 Dica</div>
+          <div class="inline-hint-label">${t('fr.hint.label')}</div>
           <p class="inline-hint-text">${hintText}</p>
         ` : ''}
         <div class="inline-hint-actions">
-          <button class="btn btn-secondary inline-hint-retry-btn" id="inline-hint-retry-btn">Tentar novamente</button>
-          <button class="btn btn-secondary exercise-reveal-btn" id="exercise-reveal-btn">Ver resposta</button>
+          <button class="btn btn-secondary inline-hint-retry-btn" id="inline-hint-retry-btn">${t('fr.hint.retry')}</button>
+          <button class="btn btn-secondary exercise-reveal-btn" id="exercise-reveal-btn">${t('fr.hint.reveal')}</button>
         </div>
       </div>
     `;
@@ -3104,19 +3187,19 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
 
   const phraseHTML = matchingPhrase ? `
     <div class="vocab-phrase-example">
-      <div class="vocab-phrase-label">Na frase</div>
+      <div class="vocab-phrase-label">${t('fr.blockIntro.inPhrase')}</div>
       <div class="vocab-phrase-french">${matchingPhrase.f} ${audioBtnHTML(matchingPhrase.f)}</div>
       <div class="vocab-phrase-trans">${matchingPhrase.t}</div>
     </div>
   ` : '';
 
   contentEl.innerHTML = `
-    <div class="vocab-card-counter" role="img" aria-label="Palavra ${posInBlock + 1} de ${block.length}">${block.map((_, i) => `<span class="vc-dot${i <= posInBlock ? ' on' : ''}"></span>`).join('')}</div>
+    <div class="vocab-card-counter" role="img" aria-label="${t('lesson.vocabDots.aria', { pos: posInBlock + 1, total: block.length })}">${block.map((_, i) => `<span class="vc-dot${i <= posInBlock ? ' on' : ''}"></span>`).join('')}</div>
     <div class="vocab-card">
       <div class="vocab-card-word">${v.f} ${audioBtnHTML(v.f)}</div>
       <div class="vocab-card-trans">${v.t}</div>
-      <button class="know-btn ${alreadyKnown ? 'known' : ''}" data-card-id="${cardId}" title="Marcar como já sei">
-        ${alreadyKnown ? '✓ Já sei' : 'Já sei?'}
+      <button class="know-btn ${alreadyKnown ? 'known' : ''}" data-card-id="${cardId}" title="${t('fr.blockIntro.markKnownTitle')}">
+        ${alreadyKnown ? t('zh.path.knownDone') : t('zh.path.knownAsk')}
       </button>
     </div>
     ${phraseHTML}
@@ -3131,7 +3214,7 @@ function renderBlockIntroCard(u, contentEl, nextBtn){
   }
 
   nextBtn.style.display = 'flex';
-  nextBtn.textContent = posInBlock < block.length - 1 ? 'Próxima palavra →' : 'Ver o que você aprendeu →';
+  nextBtn.textContent = posInBlock < block.length - 1 ? t('zh.path.nextWordArrow') : t('zh.path.seeWhatLearnedArrow');
 }
 
 // ---------- Construção das filas de exercício da sessão de aquisição ----------
@@ -3251,9 +3334,9 @@ function renderConceptStep(){
   const isReality = concept.kind === 'reality';
   const isCulture = concept.kind === 'culture';
   setAcqPhaseBanner(
-    isReality ? (REALITY_NOTE_BANNER_TEXT[concept.category] || '🌍 Nota de realidade') :
-    isCulture ? (CULTURE_NOTE_BANNER_TEXT[concept.category] || '📜 Nota cultural') :
-    '💡 Vale entender isso'
+    isReality ? (REALITY_NOTE_BANNER_TEXT[concept.category] || t('concept.banner.reality.default')) :
+    isCulture ? (CULTURE_NOTE_BANNER_TEXT[concept.category] || t('concept.banner.culture.default')) :
+    t('concept.banner.understand')
   );
   const isLastBlockOfConcept = STEP_STATE.conceptBlockIdx === concept.blocks.length - 1;
   const isLastConcept = STEP_STATE.conceptIdx === STEP_STATE.conceptQueue.length - 1;
@@ -3279,7 +3362,7 @@ function renderConceptStep(){
     </ul>` : '';
 
   contentEl.innerHTML = `
-    ${concept.blocks.length > 1 ? `<div class="gram-block-counter">${STEP_STATE.conceptBlockIdx + 1} de ${concept.blocks.length}</div>` : ''}
+    ${concept.blocks.length > 1 ? `<div class="gram-block-counter">${t('concept.counter.of', { i: STEP_STATE.conceptBlockIdx + 1, n: concept.blocks.length })}</div>` : ''}
     <div class="gram-block ${block.wrapup ? 'wrapup' : ''}">
       <h3 class="gram-block-title">${block.title}</h3>
       <p class="gram-block-body">${block.body}</p>
@@ -3289,7 +3372,7 @@ function renderConceptStep(){
   `;
   wireAudioButtons(contentEl);
   nextBtn.style.display = 'flex';
-  nextBtn.textContent = (isLastBlockOfConcept && isLastConcept) ? 'Continuar →' : 'Entendi →';
+  nextBtn.textContent = (isLastBlockOfConcept && isLastConcept) ? t('common.continueArrow') : t('zh.path.gotItArrow');
 }
 
 function advanceConceptStep(){
@@ -3338,7 +3421,7 @@ function startBridgeQueue(u){
   STEP_STATE.exerciseList = buildBlockCheckpointQueue(u, bridgeVocab);
   STEP_STATE.exerciseIndex = 0;
   STEP_STATE.exerciseScore = 0;
-  setAcqPhaseBanner('👋 Lembrando da lição anterior');
+  setAcqPhaseBanner(t('zh.path.banner.recall'));
   renderExerciseStep();
 }
 
@@ -3582,7 +3665,7 @@ function renderChallengeChipHTML(before){
     return `
       <div class="lesson-boundary-challenge-chip ${justCompleted ? 'done' : ''}">
         <span class="lbc-chip-icon">${c.icon}</span>
-        <span class="lbc-chip-label">${justCompleted ? 'Missão concluída: ' : 'Missão do dia: '}${c.label}</span>
+        <span class="lbc-chip-label">${justCompleted ? t('zh.path.missionDonePrefix') : t('zh.path.missionDayPrefix')}${c.label}</span>
         ${justCompleted ? '<span class="lbc-chip-check">✓</span>' : `<span class="lbc-chip-count">${afterVal}/${c.target}</span>`}
       </div>
     `;
@@ -3658,8 +3741,8 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
 
   const recapItems = lessonRecapItems(u, lesson);
   const recapLabel = (lesson && lesson.vocabIdx && lesson.vocabIdx.length)
-    ? 'Vocabulário desta lição'
-    : 'Palavras que você errou no Ponto de verificação';
+    ? t('zh.path.lessonDone.recapVocab')
+    : t('zh.path.lessonDone.recapMissed');
 
   // reps > 0 exclui as palavras que a PRÓPRIA lição acabou de ensinar --
   // todo cartão nasce com due=0, então cardsDueNow() sozinho as contaria
@@ -3672,13 +3755,13 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
   contentEl.innerHTML = `
     <div class="lesson-complete">
       <div class="lesson-complete-icon tier-pop">✅</div>
-      <h2>${isCheckpoint ? 'Ponto de verificação concluído!' : 'Lição concluída!'}</h2>
+      <h2>${isCheckpoint ? t('zh.path.lessonDone.checkpointTitle') : t('zh.path.lessonDone.lessonTitle')}</h2>
       <p class="lesson-boundary-title">${(!isCheckpoint && lesson) ? lesson.title : ''}</p>
       <div class="lesson-complete-stats">
-        <div class="lc-stat"><div class="lc-stat-label">XP ganho</div><div class="lc-stat-value">+${xpEarned} ⚡</div></div>
-        ${scorePct !== undefined && scorePct !== null ? `<div class="lc-stat"><div class="lc-stat-label">Pontuação</div><div class="lc-stat-value">${scorePct}%</div></div>` : ''}
+        <div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.xpEarned')}</div><div class="lc-stat-value">+${xpEarned} ⚡</div></div>
+        ${scorePct !== undefined && scorePct !== null ? `<div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.score')}</div><div class="lc-stat-value">${scorePct}%</div></div>` : ''}
       </div>
-      ${dueCount > 0 ? `<p class="lesson-boundary-due">📇 ${dueCount} ${dueCount > 1 ? 'cartões' : 'cartão'} esperando por revisão</p>` : ''}
+      ${dueCount > 0 ? `<p class="lesson-boundary-due">${tp('zh.path.lessonDone.cardsWaiting', dueCount)}</p>` : ''}
       ${challengesBefore ? renderChallengeChipHTML(challengesBefore) : ''}
       ${recapItems.length ? `
         <div class="lesson-recap">
@@ -3696,7 +3779,7 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
   wireAudioButtons(contentEl);
 
   if (!trackHistory){
-    nextBtn.textContent = 'Continuar →';
+    nextBtn.textContent = t('common.continueArrow');
     nextBtn.style.display = 'flex';
     return;
   }
@@ -3710,7 +3793,7 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
   // (nunca reexecuta finishCurrentLesson nem mexe em XP/progresso -- só
   // repete este render com os mesmos insumos).
   STEP_STATE.lastUnitResultCache = { unitId: u.id, lesson, challengesBefore, xpEarned, scorePct, trackHistory };
-  nextBtn.textContent = dueCount > 0 ? `Revisar agora (${dueCount}) →` : 'Continuar →';
+  nextBtn.textContent = dueCount > 0 ? t('zh.path.reviewNowArrow', { n: dueCount }) : t('common.continueArrow');
   nextBtn.style.display = 'flex';
 
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'unitResult', unitId: u.id });
@@ -3753,14 +3836,14 @@ function renderUnitCompleteScreen(u, xpEarned){
   contentEl.innerHTML = `
     <div class="lesson-complete tier-bounce">
       <div class="lesson-complete-icon">🎉</div>
-      <h2>Parabéns, ${currentStudentName()}!</h2>
+      <h2>${t('zh.path.unitDone.congrats', { name: currentStudentName() })}</h2>
       <p class="lesson-boundary-title">${u.title}</p>
       <div class="lesson-complete-stats">
-        <div class="lc-stat"><div class="lc-stat-label">XP ganho</div><div class="lc-stat-value" id="uc-stat-xp">+0 ⚡</div></div>
+        <div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.xpEarned')}</div><div class="lc-stat-value" id="uc-stat-xp">+0 ⚡</div></div>
       </div>
       ${competencies.length ? `
         <div class="unit-skills">
-          <div class="unit-skills-label">Competências desenvolvidas</div>
+          <div class="unit-skills-label">${t('zh.path.unitDone.skills')}</div>
           ${competencies.map(c => `<div class="unit-skill-item"><span class="unit-skill-check">✓</span><span>${c}</span></div>`).join('')}
         </div>
       ` : ''}
@@ -3777,7 +3860,7 @@ function renderUnitCompleteScreen(u, xpEarned){
       ` : ''}
       ${u.goal ? `
         <div class="unit-skills">
-          <div class="unit-skills-label">Objetivo comunicacional atingido</div>
+          <div class="unit-skills-label">${t('zh.path.unitDone.goalReached')}</div>
           <div class="unit-skill-item"><span class="unit-skill-check">✓</span><span>${u.goal}</span></div>
         </div>
       ` : ''}
@@ -3794,7 +3877,7 @@ function renderUnitCompleteScreen(u, xpEarned){
   // Cache pra restaurar via Voltar/Avançar (mesmo padrão de lastUnitResultCache)
   // -- nunca reexecuta markUnitCompleted nem recalcula XP.
   STEP_STATE.lastUnitCompleteCache = { unitId: u.id, xpEarned };
-  nextBtn.textContent = 'Continuar →';
+  nextBtn.textContent = t('common.continueArrow');
   nextBtn.style.display = 'flex';
 
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'unitComplete', unitId: u.id });
@@ -3834,7 +3917,7 @@ function renderGrammarExplanationStep(u, contentEl, nextBtn){
     </div>` : '';
 
   contentEl.innerHTML = `
-    <div class="gram-block-counter">Passo ${idx + 1} de ${blocks.length}</div>
+    <div class="gram-block-counter">${t('fr.grammar.stepCounter', { i: idx + 1, n: blocks.length })}</div>
     <div class="gram-block ${block.wrapup ? 'wrapup' : ''}">
       <h3 class="gram-block-title">${block.title}</h3>
       <p class="gram-block-body">${block.body}</p>
@@ -3844,14 +3927,14 @@ function renderGrammarExplanationStep(u, contentEl, nextBtn){
   `;
   wireAudioButtons(contentEl);
   nextBtn.style.display = 'flex';
-  nextBtn.textContent = isLast ? 'Ir para os exercícios →' : 'Continuar →';
+  nextBtn.textContent = isLast ? t('fr.grammar.goToExercises') : t('common.continueArrow');
 }
 
 // ---------- Tela final "Parabéns" (estilo Busuu): estrelas, pontuação e
 // recapitulação do vocabulário/frases vistos pela primeira vez na lição ----------
 function currentStudentName(){
-  if (!CURRENT_USER) return 'Convidado';
-  const full = CURRENT_USER.user_metadata?.full_name || CURRENT_USER.email || 'Convidado';
+  if (!CURRENT_USER) return t('common.guest');
+  const full = CURRENT_USER.user_metadata?.full_name || CURRENT_USER.email || t('common.guest');
   return full.split(' ')[0].split('@')[0];
 }
 
@@ -3888,9 +3971,9 @@ function hideAcqPhaseBanner(){
 }
 function acqPhaseBannerText(phase){
   return {
-    checkpoint: '🧠 Checagem rápida',
-    practice: '✏️ Praticando o que você acabou de ver',
-    mixed: '🔀 Misturando com o que você já viu'
+    checkpoint: t('zh.path.banner.quickCheck'),
+    practice: t('zh.path.banner.practice'),
+    mixed: t('zh.path.banner.mixed')
   }[phase] || null;
 }
 
@@ -3904,15 +3987,15 @@ function renderModuleCompleteScreen(contentEl, nextBtn, { passed, title, subtitl
     contentEl.innerHTML = `
       <div class="lesson-complete">
         <div class="lesson-complete-icon">💪</div>
-        <h2>Quase lá!</h2>
+        <h2>${t('fr.moduleDone.almostThere')}</h2>
         <p class="module-complete-sub">${subtitle}</p>
         <div class="lesson-complete-stats">
-          <div class="lc-stat"><div class="lc-stat-label">Pontuação</div><div class="lc-stat-value">${scorePct}%</div></div>
+          <div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.score')}</div><div class="lc-stat-value">${scorePct}%</div></div>
         </div>
-        <p class="module-retry-note">Você precisa de pelo menos ${passThreshold}% pra ser aprovado. Continue estudando as unidades desta seção e tente de novo quando quiser — sem pressa.</p>
+        <p class="module-retry-note">${t('fr.moduleDone.retryNote', { pct: passThreshold })}</p>
       </div>
     `;
-    nextBtn.textContent = nextLabel || 'Voltar à trilha';
+    nextBtn.textContent = nextLabel || t('trail.backToTrail');
     nextBtn.style.display = 'flex';
     return;
   }
@@ -3926,11 +4009,11 @@ function renderModuleCompleteScreen(contentEl, nextBtn, { passed, title, subtitl
       <h2>${title}</h2>
       <p class="module-complete-sub">${subtitle}</p>
       <div class="lesson-complete-stats">
-        <div class="lc-stat"><div class="lc-stat-label">Estrelas</div><div class="lc-stat-value" id="lc-stat-stars">0 ⭐</div></div>
-        <div class="lc-stat"><div class="lc-stat-label">Pontuação</div><div class="lc-stat-value" id="lc-stat-pct">0%</div></div>
+        <div class="lc-stat"><div class="lc-stat-label">${t('fr.moduleDone.stars')}</div><div class="lc-stat-value" id="lc-stat-stars">0 ⭐</div></div>
+        <div class="lc-stat"><div class="lc-stat-label">${t('zh.path.lessonDone.score')}</div><div class="lc-stat-value" id="lc-stat-pct">0%</div></div>
       </div>
       <div class="module-skills">
-        <div class="module-skills-label">Agora você já sabe, na vida real:</div>
+        <div class="module-skills-label">${t('fr.moduleDone.nowYouKnow')}</div>
         ${goals.map(g => `
           <div class="module-skill-item"><span class="module-skill-check">✓</span><span>${g}</span></div>
         `).join('')}
@@ -3944,7 +4027,7 @@ function renderModuleCompleteScreen(contentEl, nextBtn, { passed, title, subtitl
   spawnConfetti(isLevel ? 34 : 24, isLevel ? 2600 : 2000);
   animateCount(document.getElementById('lc-stat-stars'), stars, { prefix: '+', suffix: ' ⭐', duration: isLevel ? 900 : 750 });
   animateCount(document.getElementById('lc-stat-pct'), scorePct, { suffix: '%', duration: isLevel ? 900 : 750 });
-  nextBtn.textContent = nextLabel || 'Continuar →';
+  nextBtn.textContent = nextLabel || t('common.continueArrow');
   nextBtn.style.display = 'flex';
 }
 
@@ -3969,14 +4052,14 @@ function renderGrammarExerciseStep(u, contentEl, nextBtn){
   nextBtn.style.display = 'none';
 
   contentEl.innerHTML = `
-    <div class="conj-progress">Frase ${STEP_STATE.gramExerciseIndex + 1} de ${total}</div>
+    <div class="conj-progress">${t('fr.grammar.sentenceCounter', { i: STEP_STATE.gramExerciseIndex + 1, n: total })}</div>
     <div class="gram-exercise">
       <div class="gram-exercise-prompt">${ex.prompt}</div>
       ${ex.hint ? `<div class="gram-exercise-hint">${ex.hint}</div>` : ''}
-      <input type="text" id="gram-exercise-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a forma correta">
+      <input type="text" id="gram-exercise-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('fr.grammar.typeCorrectForm')}">
       <div class="expected" id="gram-exercise-expected"></div>
     </div>
-    <button class="btn btn-primary btn-block" id="gram-exercise-verify-btn">Verificar</button>
+    <button class="btn btn-primary btn-block" id="gram-exercise-verify-btn">${t('common.verify')}</button>
   `;
 
   const inputEl = document.getElementById('gram-exercise-input');
@@ -4005,7 +4088,7 @@ function renderGrammarExerciseStep(u, contentEl, nextBtn){
       STEP_STATE.gramExerciseScore += 1;
     } else if (forms.some(f => looseSep(given) === looseSep(f))){
       wrapEl.classList.add('almost');
-      expectedEl.textContent = `Quase! → ${expected}`;
+      expectedEl.textContent = t('feedback.almostArrow', { expected });
       STEP_STATE.gramExerciseScore += 0.5;
     } else {
       wrapEl.classList.add('wrong');
@@ -4018,7 +4101,7 @@ function renderGrammarExerciseStep(u, contentEl, nextBtn){
     document.getElementById('gram-exercise-verify-btn').style.display = 'none';
     const goNextBtn = document.createElement('button');
     goNextBtn.className = 'btn btn-secondary btn-block';
-    goNextBtn.textContent = STEP_STATE.gramExerciseIndex < total - 1 ? 'Próxima frase →' : 'Ver resultado →';
+    goNextBtn.textContent = STEP_STATE.gramExerciseIndex < total - 1 ? t('fr.grammar.nextSentenceArrow') : t('common.seeResultArrow');
     goNextBtn.addEventListener('click', () => {
       STEP_STATE.gramExerciseIndex += 1;
       renderGrammarExerciseStep(u, contentEl, nextBtn);
@@ -4094,7 +4177,7 @@ function renderStep(){
       // sessão de consolidação.
       STEP_STATE.checkpointXpAtStart = STATE.xp;
     }
-    setAcqPhaseBanner('🧩 Consolidação da unidade');
+    setAcqPhaseBanner(t('zh.path.banner.consolidation'));
     renderExerciseStep();
 
   } else if (stepKey === 'checkpointExercises'){
@@ -4124,7 +4207,7 @@ function renderStep(){
       STEP_STATE.exerciseIndex = 0;
       STEP_STATE.exerciseScore = 0;
     }
-    setAcqPhaseBanner(STEP_STATE.checkpointPhase === 'errors' ? '🔁 Revisão dos erros' : '🧩 Ponto de verificação');
+    setAcqPhaseBanner(STEP_STATE.checkpointPhase === 'errors' ? t('zh.path.banner.errorsReview') : t('zh.path.banner.checkpoint'));
     renderExerciseStep();
 
   } else if (stepKey === 'dialogue'){
@@ -4848,6 +4931,12 @@ document.addEventListener('keydown', (e) => {
   if (anyAppModalOpen()) return;
 
   if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey){
+    // Enter digitado DENTRO de um campo de resposta é do próprio campo (ele
+    // chama Verificar). Sem isto, o mesmo Enter que mostra o painel de erro
+    // também clicava "Continuar" dele na hora, e o aluno nunca via o
+    // resultado (relato de 2026-10-07: "haizi" no ditado de pinyin).
+    const tgt = e.target;
+    if (tgt && (tgt.tagName === 'INPUT' || tgt.tagName === 'TEXTAREA' || tgt.isContentEditable)) return;
     const target = findEnterAdvanceTarget();
     if (target){
       e.preventDefault();
@@ -4905,7 +4994,7 @@ function renderExerciseStep(){
       STEP_STATE.exerciseList = buildExerciseSet(u);
       STEP_STATE.exerciseIndex = 0;
       STEP_STATE.exerciseScore = 0;
-      setAcqPhaseBanner('🧩 Ponto de verificação');
+      setAcqPhaseBanner(t('zh.path.banner.checkpoint'));
       renderExerciseStep();
       return;
     }
@@ -4966,7 +5055,7 @@ function addStudyMinutes(){
 function clozeFeedbackDetailHTML(ex, withCorrect){
   const p = ex.phrase;
   const correct = withCorrect
-    ? `<div class="feedback-correct-line">Resposta certa: <strong>${ex.correctBlock.f}</strong></div>`
+    ? `<div class="feedback-correct-line">${t('feedback.correctAnswerColon')} <strong>${ex.correctBlock.f}</strong></div>`
     : '';
   return `${correct}<div class="feedback-phrase-zh"><strong>${p.f}</strong> ${audioBtnHTML(p.f)}</div><div class="feedback-phrase-trans">${p.t}</div>`;
 }
@@ -4980,7 +5069,7 @@ function answerExplanationHTML(ex){
   if (ex && ex.format === 'scenario' && ex.phrase){
     // Mesmo padrão do "Complete a frase": resposta certa (com áudio) + tradução.
     // A frase vem da própria unidade, então ela mesma já é o "onde você viu".
-    return `<div class="feedback-correct-line">Resposta certa: <strong>${ex.phrase.f}</strong> ${audioBtnHTML(ex.phrase.f)}</div><div class="feedback-phrase-trans">${ex.phrase.t}</div>`;
+    return `<div class="feedback-correct-line">${t('feedback.correctAnswerColon')} <strong>${ex.phrase.f}</strong> ${audioBtnHTML(ex.phrase.f)}</div><div class="feedback-phrase-trans">${ex.phrase.t}</div>`;
   }
   if (ex && ex.phrase){
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
@@ -4995,9 +5084,9 @@ function answerExplanationHTML(ex){
     // porque está na mesma unidade (ex: nota sobre "avoir"/idade não
     // explica um erro em "un/une"). Ver CLAUDE.md, coerência pedagógica.
     const originHTML = origin
-      ? `<div class="usage-note-title">Onde você já viu isso</div><p class="usage-note-body"><strong>${origin.f}</strong><br>${origin.t}</p>`
+      ? `<div class="usage-note-title">${t('feedback.whereSeen')}</div><p class="usage-note-body"><strong>${origin.f}</strong><br>${origin.t}</p>`
       : (noteOrConceptReviewHTML(u, ex.vocabIdx, true) || '');
-    return `<div class="feedback-correct-line">Resposta certa: <strong>${ex.item.f}</strong> ${audioBtnHTML(ex.item.f)}</div><div class="feedback-phrase-trans">${ex.item.t}</div>${originHTML}`;
+    return `<div class="feedback-correct-line">${t('feedback.correctAnswerColon')} <strong>${ex.item.f}</strong> ${audioBtnHTML(ex.item.f)}</div><div class="feedback-phrase-trans">${ex.item.t}</div>${originHTML}`;
   }
   if (ex && ex.format === 'trueFalse' && ex.whyNote){
     return `<p class="usage-note-body">${ex.whyNote}</p>`;
@@ -5061,20 +5150,20 @@ function showAnswerPanel(contentEl, ex, opts = {}){
   panel.className = 'wrong-feedback';
   panel.innerHTML = `
     <div class="feedback-card-body">
-      <div class="wrong-feedback-header">${revealed ? '👀 Resposta revelada' : '❌ Não foi dessa vez'}</div>
+      <div class="wrong-feedback-header">${revealed ? t('feedback.header.revealed') : t('feedback.header.notThisTime')}</div>
       ${opts.attemptHTML ? `
         <div class="wrong-feedback-why">
-          <div class="wrong-feedback-why-label">Sua resposta</div>
+          <div class="wrong-feedback-why-label">${t('feedback.label.yourAnswer')}</div>
           <div class="feedback-inner-box">${opts.attemptHTML}</div>
         </div>
       ` : ''}
       ${explanation ? `
         <div class="wrong-feedback-why">
-          <div class="wrong-feedback-why-label">${ex && ex.format === 'cloze' ? 'Frase completa' : (revealed ? 'Resposta' : 'Por que não foi essa')}</div>
+          <div class="wrong-feedback-why-label">${ex && ex.format === 'cloze' ? t('feedback.label.fullSentence') : (revealed ? t('feedback.label.answer') : t('feedback.label.whyNot'))}</div>
           <div class="feedback-inner-box">${explanation}</div>
         </div>
       ` : ''}
-      <button class="btn btn-primary btn-block wrong-feedback-continue" id="wrong-continue-btn">Continuar →</button>
+      <button class="btn btn-primary btn-block wrong-feedback-continue" id="wrong-continue-btn">${t('common.continueArrow')}</button>
     </div>
   `;
   wrap.appendChild(panel);
@@ -5097,7 +5186,7 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
   let promptHTML = '';
   if (ex.format === 'meaning'){
     promptHTML = `
-      <div class="exercise-prompt-label">O que significa?</div>
+      <div class="exercise-prompt-label">${t('fr.exercise.whatMeans')}</div>
       <div class="exercise-prompt">
         <div class="prompt-french">${ex.item.f}</div>
         ${audioBtnHTML(ex.item.f)}
@@ -5105,10 +5194,10 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
     `;
   } else if (ex.format === 'listen'){
     promptHTML = `
-      <div class="exercise-prompt-label">Ouça e escolha o significado certo</div>
+      <div class="exercise-prompt-label">${t('fr.exercise.listenChooseMeaning')}</div>
       <div class="exercise-prompt">
         ${audioBtnHTML(ex.item.f, 'audio-btn-lg')}
-        <div class="prompt-audio-hint">toque para ouvir de novo</div>
+        <div class="prompt-audio-hint">${t('fr.exercise.tapToHearAgain')}</div>
       </div>
     `;
   }
@@ -5119,10 +5208,10 @@ function renderMultipleChoiceExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-counter">${t('fr.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
       ${promptHTML}
       <div class="exercise-options">${optionsHTML}</div>
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
   `;
 
@@ -5225,18 +5314,18 @@ function wireFrAccentPicker(pickerEl, inputEl){
 function renderVocabTypeExercise(ex, contentEl, nextBtn, total){
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
-      <div class="exercise-prompt-label">Digite o que ouviu</div>
+      <div class="exercise-counter">${t('fr.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
+      <div class="exercise-prompt-label">${t('fr.exercise.typeWhatYouHeard')}</div>
       <div class="exercise-prompt">
         ${audioBtnHTML(ex.item.f, 'audio-btn-lg')}
-        <div class="prompt-audio-hint">toque para ouvir de novo</div>
+        <div class="prompt-audio-hint">${t('fr.exercise.tapToHearAgain')}</div>
       </div>
       <div class="cloze-type-wrap">
-        <input type="text" id="vocab-type-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite em francês">
+        <input type="text" id="vocab-type-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('fr.exercise.typeInFrench')}">
         ${frAccentPickerHTML()}
-        <button class="btn btn-primary btn-block" id="vocab-type-verify-btn">Verificar</button>
+        <button class="btn btn-primary btn-block" id="vocab-type-verify-btn">${t('common.verify')}</button>
       </div>
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
   `;
 
@@ -5309,11 +5398,11 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-counter">${t('fr.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
       <div class="scenario-question">${ex.phrase.scenario}</div>
       <div class="scenario-scene">${scenarioSceneHTML(ex.phrase.scenarioEmoji)}</div>
       <div class="scenario-options">${optionsHTML}</div>
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
   `;
 
@@ -5368,7 +5457,7 @@ function renderScenarioExercise(ex, contentEl, nextBtn, total){
 function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
+      <div class="exercise-counter">${t('fr.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
       <div class="tf-scene">
         <div class="tf-scene-emoji">${ex.emoji || '💬'}</div>
         <div class="tf-subject">${ex.subject}</div>
@@ -5376,10 +5465,10 @@ function renderTrueFalseExercise(ex, contentEl, nextBtn, total){
       </div>
       <div class="tf-claim">${ex.claim}</div>
       <div class="tf-options">
-        <button class="tf-option" data-val="true">✅ Verdadeiro</button>
-        <button class="tf-option" data-val="false">❌ Falso</button>
+        <button class="tf-option" data-val="true">${t('fr.exercise.true')}</button>
+        <button class="tf-option" data-val="false">${t('fr.exercise.false')}</button>
       </div>
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
   `;
 
@@ -5438,21 +5527,21 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
-      <div class="exercise-prompt-label">Complete a frase</div>
+      <div class="exercise-counter">${t('fr.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
+      <div class="exercise-prompt-label">${t('exercise.completeSentence')}</div>
       <div class="cloze-sentence">${sentenceHTML}</div>
       <div class="cloze-audio-row" id="cloze-audio-row"></div>
       <div class="cloze-trans" id="cloze-trans"></div>
       ${mode === 'type' ? `
         <div class="cloze-type-wrap">
-          <input type="text" id="cloze-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a palavra que falta">
+          <input type="text" id="cloze-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('review.cloze.placeholder')}">
           ${frAccentPickerHTML()}
-          <button class="btn btn-primary btn-block" id="cloze-verify-btn">Verificar</button>
+          <button class="btn btn-primary btn-block" id="cloze-verify-btn">${t('common.verify')}</button>
         </div>
       ` : `
         <div class="cloze-options">${ex.options.map((opt, i) => `<button class="cloze-option" data-idx="${i}">${opt.f}</button>`).join('')}</div>
       `}
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
   `;
 
@@ -5586,8 +5675,8 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
 
   contentEl.innerHTML = `
     <div class="exercise-wrap">
-      <div class="exercise-counter">Exercício ${STEP_STATE.exerciseIndex + 1} de ${total}</div>
-      <div class="exercise-prompt-label">${isTranslate ? 'Traduza para o francês' : 'Ordene a frase'}</div>
+      <div class="exercise-counter">${t('fr.exercise.counter', { i: STEP_STATE.exerciseIndex + 1, n: total })}</div>
+      <div class="exercise-prompt-label">${isTranslate ? t('fr.exercise.translateToFrench') : t('fr.exercise.orderSentence')}</div>
       ${isTranslate ? `
         <div class="exercise-prompt">
           <div class="prompt-translation">${ex.phrase.t}</div>
@@ -5601,7 +5690,7 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
       `}
       <div class="reorder-answer-slots" id="reorder-answer-slots"></div>
       <div class="reorder-blocks" id="reorder-blocks"></div>
-      <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
+      <button class="exercise-dontknow" id="exercise-dontknow-btn">${t('common.dontKnow')}</button>
     </div>
   `;
 
@@ -5736,16 +5825,12 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
 // (múltipla escolha destaca a opção certa, cloze já revela a tradução),
 // repetir a mesma informação de novo dentro do painel não ajuda em nada --
 // passa null.
-const CORRECT_FEEDBACK_PHRASES = [
-  'Na mosca!', 'Mandou bem!', 'Isso aí!', 'Perfeito!', 'Muito bem!',
-  'Você arrasou!', 'Exato!', 'Boa!', 'Certeza absoluta!', 'Aí sim!',
-  'Continua assim!', 'Show de bola!', 'Isso mesmo!', 'Excelente!',
-  'Ótimo trabalho!', 'Maravilha!'
-];
+// Chaves do catálogo (i18n fase 9): o texto é resolvido no momento do uso.
+const CORRECT_FEEDBACK_PHRASES = Array.from({ length: 16 }, (_, i) => 'feedback.praise.' + (i + 1));
 let correctFeedbackQueue = [];
 function nextCorrectFeedbackPhrase(){
   if (!correctFeedbackQueue.length) correctFeedbackQueue = shuffle([...CORRECT_FEEDBACK_PHRASES]);
-  return correctFeedbackQueue.pop();
+  return t(correctFeedbackQueue.pop());
 }
 
 // ---------- Combo de acertos seguidos (estilo Duolingo) ----------
@@ -5755,13 +5840,11 @@ function nextCorrectFeedbackPhrase(){
 // COMBO_MILESTONE_STEP mostra o número explícito ("Uau, 5 seguidas!") em
 // vez de uma frase genérica, pra marcar só os marcos redondos, não toda
 // resposta certa da sequência.
-const COMBO_PHRASES = [
-  'Você está indo muito bem!', 'Que orgulho!', 'Maravilha, continue assim!'
-];
+const COMBO_PHRASES = ['feedback.combo.1', 'feedback.combo.2', 'feedback.combo.3'];
 let comboPhraseQueue = [];
 function nextComboPhrase(){
   if (!comboPhraseQueue.length) comboPhraseQueue = shuffle([...COMBO_PHRASES]);
-  return comboPhraseQueue.pop();
+  return t(comboPhraseQueue.pop());
 }
 const COMBO_MIN = 3;
 const COMBO_MILESTONE_STEP = 5;
@@ -5775,7 +5858,7 @@ function showCorrectFeedbackPanel(contentEl, detail){
   const combo = STEP_STATE.comboCount;
   const isMilestone = combo >= COMBO_MILESTONE_STEP && combo % COMBO_MILESTONE_STEP === 0;
   const inCombo = combo >= COMBO_MIN;
-  const headerText = isMilestone ? `Uau, ${combo} seguidas!` : (inCombo ? nextComboPhrase() : nextCorrectFeedbackPhrase());
+  const headerText = isMilestone ? t('feedback.combo.milestone', { n: combo }) : (inCombo ? nextComboPhrase() : nextCorrectFeedbackPhrase());
   const comboBadgeHTML = inCombo ? `<span class="correct-feedback-combo-badge">⚡ Combo x${combo}</span>` : '';
 
   const wrap = contentEl.querySelector('.exercise-wrap') || contentEl;
@@ -5785,7 +5868,7 @@ function showCorrectFeedbackPanel(contentEl, detail){
     <div class="feedback-card-body">
       <div class="correct-feedback-header">${comboBadgeHTML}✅ ${headerText}</div>
       ${detail ? `<div class="correct-feedback-trans feedback-inner-box">${detail}</div>` : ''}
-      <button class="btn btn-primary btn-block correct-feedback-continue" id="correct-continue-btn">Continuar →</button>
+      <button class="btn btn-primary btn-block correct-feedback-continue" id="correct-continue-btn">${t('common.continueArrow')}</button>
     </div>
   `;
   wrap.appendChild(panel);
@@ -5821,6 +5904,7 @@ const SPEED_STATE = {
   score: 0,
   correctCount: 0,
   streak: 0,
+  bestStreak: 0, // maior sequência de acertos da rodada (recorde do Speed Review)
   timerStart: 0,
   timerHandle: null,
   answered: false,
@@ -5944,9 +6028,12 @@ function matchesReviewOriginFilter(card){
 // CardInstances irmãos (reverso, Cloze) passam/ficam juntos. Só SELECIONA
 // cards elegíveis: nunca toca FSRS, Deck nem origem. cardMatchesTagFilter()
 // vive em shared/flashcard-model.js (fonte única).
+// 2026-10-06 (pedido da autora): o filtro de tags saiu de "Configurar" e
+// fica só no Painel. Sem tela para mudar o valor, um filtro salvo antes
+// restringiria a revisão sem a pessoa ver -- por isso a sessão não aplica
+// mais nenhum filtro de tag (o valor salvo é ignorado).
 function activeReviewTagFilter(){
-  const f = STATE.studySettings.reviewTagFilter;
-  return Array.isArray(f) ? f : [];
+  return [];
 }
 function matchesReviewTagFilter(card){
   return cardMatchesTagFilter(card, activeReviewTagFilter());
@@ -5998,7 +6085,8 @@ function vocabStrengthBuckets(){
   // K.3: força é por NOTE (conteúdo) -- A+B da trilha, reverso e Cloze contam
   // uma vez. Nenhuma irmã estudada = notStarted (nunca "fraca"); com estudadas
   // = a mais fraca entre elas. Fonte: shared/analytics-metrics.js.
-  const st = contentMetrics(pool).strength;
+  // Cartões "Na frase" não são palavras: ficam fora de "Suas palavras".
+  const st = contentMetrics(pool.filter(c => !isStudyTrailPhraseCard(c))).strength;
   return { notStarted: st.not_started, weak: st.weak, medium: st.medium, strong: st.strong };
 }
 
@@ -6090,12 +6178,28 @@ function reviewFilterQueue(filter, pool){
 // painel ⚙️ (com contagem entre parênteses) e o indicador discreto no
 // hero (sem contagem, só o nome do filtro ativo) -- texto-fonte único
 // pra nunca dessincronizar entre os dois.
-const REVIEW_FILTER_LABELS = { all: 'Todas', hard: 'Mais difíceis primeiro', oldest: 'Mais antigas primeiro' };
+const REVIEW_FILTER_LABELS = {
+  get all(){ return t('review.origin.all'); },
+  get hard(){ return t('review.filter.hard'); },
+  get oldest(){ return t('review.filter.oldest'); }
+};
 
 // Fase 4 do sistema de alunas particulares (ver CLAUDE.md): rótulos do
 // filtro de ORIGEM -- diferente de REVIEW_FILTER_LABELS (que decide COMO
 // consumir a fila), este decide DE ONDE vêm os cartões.
-const REVIEW_ORIGIN_LABELS = { all: 'Todas', study: 'Da trilha', teacher: 'Da professora', self: 'Meus cartões' };
+// Getters: resolvem no idioma do site NO MOMENTO do uso (i18n fase 6).
+const REVIEW_ORIGIN_LABELS = {
+  get all(){ return t('review.origin.all'); },
+  get study(){ return t('review.origin.study'); },
+  get teacher(){ return t('review.origin.teacher'); },
+  get self(){ return t('review.origin.self'); }
+};
+
+// Título (tag) do cartão: cartão de professora/aluna traz `unitTitleKey`
+// (shared/flashcard-model.js); cartão de trilha usa o título da unidade (conteúdo).
+function flashcardUnitTitleText(card){
+  return card.unitTitleKey ? t(card.unitTitleKey) : card.unitTitle;
+}
 
 // Bloco hero (topo da Revisão): número grande = trueCount, sempre o total
 // real pendente, nunca o cortado pela sessão -- fixo, não muda com nenhum
@@ -6104,17 +6208,52 @@ const REVIEW_ORIGIN_LABELS = { all: 'Todas', study: 'Da trilha', teacher: 'Da pr
 // da UI de propósito; REVIEW_FILTER_LABELS continua existindo só porque
 // reviewFilterQueue()/getStudyQueue() ainda usam os 3 valores
 // internamente (o que mudou é que a aluna não escolhe mais entre eles).
+// Filtros de sessão (origem/tag, em "Configurar") valem para "Estudar
+// tudo", mas não para a tabela de Decks. Resumo para avisar quando estão ativos.
+function reviewSessionFilterSummary(){
+  const parts = [];
+  const origin = STATE.studySettings.reviewOriginFilter || 'all';
+  if (origin !== 'all') parts.push(REVIEW_ORIGIN_LABELS[origin] || origin);
+  const tags = activeReviewTagFilter();
+  if (tags.length) parts.push(tags.map(t => friendlyTagLabel(t)).join(', '));
+  return parts.join(' · ');
+}
+
+// "Estudar tudo" (todos os Decks juntos) fica embaixo da tabela de Decks; as
+// contagens por Deck já estão na tabela, então aqui não há números. Aviso
+// quando um filtro de sessão (origem/tag, em "Configurar") está ativo.
 function renderReviewTodayWidget(){
   const wrap = document.getElementById('review-today-widget');
   if (!wrap) return;
   const pool = eligibleReviewPool();
-  const trueCount = trueDueReviewCount(pool);
-  if (pool.length === 0 || trueCount === 0){ wrap.innerHTML = ''; return; }
-
+  const queue = getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
+  const split = { new: 0, learning: 0, review: 0 };
+  queue.forEach(c => { split[cardStudyBucket(c)]++; });
+  const trueCount = queue.length;
+  const filterSummary = reviewSessionFilterSummary();
+  const filterNote = filterSummary
+    ? `<div class="review-today-filter">${t('review.today.filter', { filter: escapeHTML(filterSummary) })} · <button type="button" class="admin-select-link review-today-filter-clear" id="review-today-filter-clear">${escapeHTML(t('review.today.clearFilter'))}</button></div>`
+    : '';
+  const num = (n, cls, label) => `<div class="review-today-col"><div class="review-today-count ${n ? cls : 'is-zero'}">${n}</div><div class="review-today-col-label">${label}</div></div>`;
   wrap.innerHTML = `
-    <div class="review-today-label">Revisões pendentes</div>
-    <div class="review-today-count">${trueCount}</div>
+    <div class="review-today-strip">
+      <div class="review-today-split" aria-label="${escapeHTML(t('review.today.aria', { new: split.new, learning: split.learning, review: split.review }))}">
+        ${num(split.new, 'is-new', escapeHTML(t('review.count.new')))}${num(split.learning, 'is-learning', escapeHTML(t('review.count.learning')))}${num(split.review, 'is-review', escapeHTML(t('review.count.review')))}
+      </div>
+      <div class="review-today-go">
+        ${trueCount ? `<button class="btn btn-secondary review-short-btn" id="review-short-btn" title="${escapeHTML(t('review.today.shortTitle'))}">${escapeHTML(t('review.today.short'))}</button>
+        <button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">${escapeHTML(t('review.today.studyAll', { n: trueCount }))}</button>`
+        : `<span class="review-today-done">${escapeHTML(t('review.today.upToDate'))}</span>`}
+      </div>
+    </div>
+    ${filterNote}
   `;
+  document.getElementById('review-study-all-btn')?.addEventListener('click', () => openReviewSession('flashcard'));
+  document.getElementById('review-short-btn')?.addEventListener('click', () => openReviewSession('flashcard', { short: true }));
+  document.getElementById('review-today-filter-clear')?.addEventListener('click', () => {
+    updateStudySetting({ reviewOriginFilter: 'all', reviewTagFilter: [] });
+    renderReviewModeSelect();
+  });
 }
 
 // Altura do "pote" proporcional à maior das 3 categorias (não à contagem
@@ -6134,14 +6273,14 @@ function renderVocabStrengthWidget(){
     </div>
   `;
   wrap.innerHTML = `
-    <div class="section-label">Suas palavras</div>
+    <div class="section-label">${t('review.strength.title')}</div>
     <div class="vocab-strength-row">
-      ${item('none', notStarted, 'Não iniciadas')}
-      ${item('weak', weak, 'Fracas')}
-      ${item('mid', medium, 'Medianas')}
-      ${item('strong', strong, 'Fortes')}
+      ${item('none', notStarted, t('review.strength.notStarted'))}
+      ${item('weak', weak, t('review.strength.weak'))}
+      ${item('mid', medium, t('review.strength.medium'))}
+      ${item('strong', strong, t('review.strength.strong'))}
     </div>
-    <p class="profile-edit-hint">Não iniciada = ainda sem nenhum estudo; Fraca = ainda não firmou; Forte = já sabe bem há tempos; Mediana = no meio do caminho. Isso é o vocabulário TODO, não as revisões de hoje (acima) -- por isso pode ter palavras medianas aqui mesmo sem nenhuma revisão pendente agora.</p>
+    <p class="profile-edit-hint">${t('review.strength.hint')}</p>
   `;
 }
 
@@ -6157,72 +6296,63 @@ function renderReviewModeSelect(){
   // dueCount é só um subconjunto capado dele (2ª sessão de grilling: nunca
   // usar o número cortado pra decidir "tem ou não tem revisão").
   const trueCount = trueDueReviewCount(pool);
+  // Speed Review mostra a mesma divisão da tabela de Decks (Novo/Aprendendo/
+  // Revisar) em vez de um número só -- o total inclui as palavras novas do
+  // dia, e um número único parecia contradizer o "Revisar 0" da tabela.
+  const speedSplit = { new: 0, learning: 0, review: 0 };
+  getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay })
+    .forEach(c => { speedSplit[cardStudyBucket(c)]++; });
   // Fase 7 (projeto anterior): Palavras Difíceis NÃO depende de estar due
   // -- "precisa revisar agora" (REVISAR) e "é uma palavra difícil"
   // (PRATICAR) são perguntas diferentes. getStudyQueue(scope:'hard') usa
   // o difficulty do FSRS, nunca due.
-  const hardCount = getStudyQueue(pool, { scope: 'hard' }).length;
+  const hardCards = getStudyQueue(pool, { scope: 'hard' });
+  const hardCount = hardCards.length;
+  // Recordes (shared/review-extras.js). Ja saíram da lista = palavras que já
+  // estiveram em Palavras difíceis e hoje não estão mais.
+  if (updateHardSeen(hardCards)) saveState();
+  const hardLeft = hardLeftCount(pool, hardCards);
+  const rec = reviewRecords();
 
   renderReviewTodayWidget();
-
-  const revisarLabel = document.getElementById('review-mode-revisar-label');
-  if (revisarLabel) revisarLabel.textContent = 'Revisar';
-
-  const revisarEl = document.getElementById('review-mode-cards-revisar');
-  if (trueCount === 0){
-    const emptyTitle = pool.length === 0 ? 'Ainda não há revisões' : 'Você está em dia!';
-    const emptyDesc = pool.length === 0
-      ? 'Complete uma lição no Estudo pra começar a ter palavras pra revisar.'
-      : 'Praticar continua disponível logo abaixo, quando quiser.';
-    revisarEl.innerHTML = `
-      <div class="review-mode-empty">
-        <div class="icon">🍵</div>
-        <div class="review-mode-empty-title">${emptyTitle}</div>
-        <div class="review-mode-empty-desc">${emptyDesc}</div>
-      </div>
-    `;
-  } else {
-    // Sem .count aqui de propósito -- o número já está no bloco hero acima
-    // (Flashcard e Speed Review são a mesma fila filtrada, mostrar o mesmo
-    // valor duas vezes a mais era puramente decorativo).
-    revisarEl.innerHTML = `
-      <button class="review-mode-card" id="mode-card-flashcard">
-        <div class="icon">📇</div>
-        <div class="name">Flashcard</div>
-        <div class="desc">Revisão completa</div>
-      </button>
-      <button class="review-mode-card" id="mode-card-speed">
-        <div class="icon">⚡</div>
-        <div class="name">Speed Review</div>
-        <div class="desc">Revisão rápida</div>
-      </button>
-    `;
-    document.getElementById('mode-card-flashcard').addEventListener('click', () => openReviewSession('flashcard'));
-    document.getElementById('mode-card-speed').addEventListener('click', () => openReviewSession('speed'));
-  }
+  // Navegador de Decks (shared/deck-browser.js): tabela Deck | Novo | Aprendendo | Revisar.
+  if (typeof renderReviewDeckTable === 'function') renderReviewDeckTable();
 
   // K2-F: Combinar é vocabulário -> conta palavras (projeção A na trilha), não CardInstances.
   const matchWordCount = projectStudyWordsToA(pool).length;
   const praticarEl = document.getElementById('review-mode-cards-praticar');
   praticarEl.innerHTML = `
+    <button class="review-mode-card" id="mode-card-speed" ${trueCount === 0 ? 'disabled' : ''}>
+      <div class="icon">⚡</div>
+      <div class="name">${t('review.mode.speed.name')}</div>
+      <div class="count speed-split" aria-label="${escapeHTML(t('review.today.speedSplitAria', { new: speedSplit.new, learning: speedSplit.learning, review: speedSplit.review }))}">
+        <span class="${speedSplit.new ? 'is-new' : 'is-zero'}">${speedSplit.new}</span>
+        <span class="${speedSplit.learning ? 'is-learning' : 'is-zero'}">${speedSplit.learning}</span>
+        <span class="${speedSplit.review ? 'is-review' : 'is-zero'}">${speedSplit.review}</span>
+      </div>
+      <div class="desc">${rec.speedBestScore ? t('review.records.yourRecord', { record: speedRecordText(rec) }) : t('review.records.againstClock')}</div>
+    </button>
     <button class="review-mode-card" id="mode-card-hard" ${hardCount === 0 ? 'disabled' : ''}>
       <div class="icon">🔥</div>
+      <div class="name">${t('review.mode.hard.name')}</div>
       <div class="count">${hardCount}</div>
-      <div class="name">Palavras difíceis</div>
-      <div class="desc">As que você mais erra</div>
+      <div class="desc">${hardLeft ? t('review.records.leftList', { n: hardLeft }) : t('review.mode.hard.desc')}</div>
     </button>
     <button class="review-mode-card" id="mode-card-match" ${matchWordCount < 10 ? 'disabled' : ''}>
       <div class="icon">🧩</div>
+      <div class="name">${t('review.mode.match.name')}</div>
       <div class="count">${matchWordCount}</div>
-      <div class="name">Combinar</div>
-      <div class="desc">Jogo de pares</div>
+      <div class="desc">${rec.matchBestMs ? t('review.records.yourRecord', { record: formatRecordSeconds(rec.matchBestMs) }) : t('review.mode.match.desc')}</div>
     </button>
   `;
+  const weekEl = document.getElementById('review-week');
+  if (weekEl) weekEl.innerHTML = reviewWeekHTML(pool);
+  document.getElementById('mode-card-speed').addEventListener('click', () => openReviewSession('speed'));
   document.getElementById('mode-card-hard').addEventListener('click', () => openReviewSession('hard'));
   document.getElementById('mode-card-match').addEventListener('click', () => openReviewSession('match'));
 }
 
-function openReviewSession(mode){
+function openReviewSession(mode, opts){
   document.getElementById('review-mode-select-wrap').style.display = 'none';
   document.getElementById('review-session-wrap').style.display = 'block';
   document.getElementById('review-content').style.display = mode === 'speed' || mode === 'match' ? 'none' : 'block';
@@ -6238,8 +6368,9 @@ function openReviewSession(mode){
     STATE.reviewSessionUnitFilter = null;
     STATE.reviewSessionDeckId = null; // Fase D -- entrada normal (sem Deck) nunca herda escopo de uma sessão anterior
     STATE.reviewSessionMilestone = null;
-    startReviewSession();
+    startReviewSession(opts);
   } else if (mode === 'hard'){
+    holdBadgeCelebrations();
     STATE.reviewSessionUnitFilter = null;
     STATE.reviewSessionDeckId = null; // Fase D -- idem
     STATE.reviewSessionMilestone = null;
@@ -6247,6 +6378,7 @@ function openReviewSession(mode){
     STATE.reviewQueue = shuffle(getStudyQueue(eligibleReviewPool(), { scope: 'hard' }));
     STATE.reviewIndex = 0;
     STATE.reviewCardState = null;
+    STATE.reviewSessionStartedAt = Date.now(); // nunca herda o início de uma sessão anterior abandonada
     renderReviewView();
   } else if (mode === 'match'){
     renderMatchSizePicker();
@@ -6261,15 +6393,40 @@ function openReviewSession(mode){
 // tela de escolha -- usada pelo link "← Voltar aos modos" e pelos botões
 // "Praticar mais" das telas de conclusão (Fase 6 do projeto: terminar uma
 // revisão leva pra PRATICAR, nunca repete a mesma bateria sozinha).
+// Rótulo do cartão: cartões próprios/da professora mostram o nome do Deck.
+function reviewCardTagLabel(card){
+  if (card && card.deckId != null && Array.isArray(STATE.decks)){
+    const d = STATE.decks.find(x => x.id === card.deckId);
+    if (d && d.name) return d.name;
+  }
+  return flashcardUnitTitleText(card);
+}
+
+// Link de voltar da sessão: "Voltar ao Deck" quando a sessão veio de um Deck.
+function syncReviewBackLink(){
+  const el = document.getElementById('review-back-to-modes');
+  if (el) el.textContent = t(STATE.reviewSessionDeckId != null ? 'review.backToDeck' : 'review.backToModes');
+}
+
 function backToReviewModeSelect(){
+  releaseBadgeCelebrations();
+  const returnDeckId = STATE.reviewSessionDeckId;
   stopSpeedTimer();
   stopMatchTimer();
   SPEED_STATE.active = false;
   document.getElementById('review-mode-select-wrap').style.display = 'block';
   document.getElementById('review-session-wrap').style.display = 'none';
+  const deckWrap = document.getElementById('review-deck-wrap');
+  if (deckWrap) deckWrap.style.display = 'none';
   STATE.reviewSessionDeckId = null; // K2-H: sair da sessão não deixa escopo de Deck stale
+  STATE.reviewSessionStartedAt = null; // sessão abandonada não entra na média de tempo
+  syncReviewBackLink();
   renderReviewModeSelect();
 
+  if (returnDeckId != null && typeof openDeckDetail === 'function'){
+    openDeckDetail(returnDeckId);
+    return;
+  }
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'tab', tab: 'review' });
 }
 
@@ -6307,8 +6464,8 @@ function renderMatchSizePicker(){
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🧩</div>
-        <h3>Vocabulário insuficiente ainda</h3>
-        <p>O jogo de Combinar precisa de pelo menos ${minPairs * 2} palavras já vistas em lições concluídas.</p>
+        <h3>${t('review.insufficientTitle')}</h3>
+        <p>${t('review.match.insufficientMin', { n: minPairs * 2 })}</p>
       </div>
     `;
     return;
@@ -6316,16 +6473,16 @@ function renderMatchSizePicker(){
   el.innerHTML = `
     <div class="match-size-picker">
       <div class="big-emoji">🧩</div>
-      <h3>Quantos pares você quer jogar?</h3>
+      <h3>${t('review.match.pickTitle')}</h3>
       <div class="match-size-options">
         ${MATCH_SIZE_OPTIONS.map(n => `
           <button class="match-size-btn ${MATCH_STATE.pairSize === n ? 'selected' : ''}" data-pairs="${n}" ${poolLen < n * 2 ? 'disabled' : ''}>
             <div class="match-size-num">${n}</div>
-            <div class="match-size-label">pares<br>(${n * 2} cartas)</div>
+            <div class="match-size-label">${t('review.match.pairsLabel', { cards: n * 2 })}</div>
           </button>
         `).join('')}
       </div>
-      <button class="btn btn-primary" id="match-size-start-btn">Começar →</button>
+      <button class="btn btn-primary" id="match-size-start-btn">${t('review.match.start')}</button>
     </div>
   `;
   el.querySelectorAll('.match-size-btn:not([disabled])').forEach(btn => {
@@ -6353,6 +6510,7 @@ function startMatchGame(){
   MATCH_STATE.matchedCount = 0;
   MATCH_STATE.attempts = 0;
   MATCH_STATE.busy = false;
+  MATCH_STATE.startedAt = Date.now();
 
   renderMatchGame();
 }
@@ -6364,8 +6522,8 @@ function renderMatchGame(){
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🧩</div>
-        <h3>Vocabulário insuficiente ainda</h3>
-        <p>O jogo de Combinar precisa de pelo menos algumas palavras já estudadas com sucesso no Estudo.</p>
+        <h3>${t('review.insufficientTitle')}</h3>
+        <p>${t('review.match.insufficientSome')}</p>
       </div>
     `;
     return;
@@ -6415,13 +6573,13 @@ function onMatchTileClick(btn){
 
   const isMatch = first.dataset.cardId === second.dataset.cardId && first.dataset.side !== second.dataset.side;
   MATCH_STATE.attempts += 1;
-  document.querySelector('.match-attempts').textContent = `Tentativas: ${MATCH_STATE.attempts}`;
+  document.querySelector('.match-attempts').textContent = t('zh.review.match.attempts', { n: MATCH_STATE.attempts });
 
   if (isMatch){
     first.classList.add('match-ok');
     second.classList.add('match-ok');
     MATCH_STATE.matchedCount += 1;
-    document.querySelector('.match-pairs').textContent = `Pares: ${MATCH_STATE.matchedCount}/${MATCH_STATE.pairs.length}`;
+    document.querySelector('.match-pairs').textContent = t('zh.review.match.pairs', { done: MATCH_STATE.matchedCount, total: MATCH_STATE.pairs.length });
     addXP(2);
     // Fase 8: mesma regra explícita da Fase 6 (Speed Review) -- um par
     // certo num cartão NUNCA estudado é evidência suficiente pra promovê-lo
@@ -6444,6 +6602,8 @@ function onMatchTileClick(btn){
         STATE.totalReviews += MATCH_STATE.pairs.length;
         registerDailyMatchGame();
         trackEvent('lesson_complete', 'match_game', { pairs: MATCH_STATE.pairs.length });
+        const matchMs = MATCH_STATE.startedAt ? Date.now() - MATCH_STATE.startedAt : 0;
+        const matchIsRecord = recordMatchTime(matchMs);
         saveState();
         renderTopbarStats();
         setTimeout(() => {
@@ -6451,9 +6611,10 @@ function onMatchTileClick(btn){
           document.getElementById('match-review-content').innerHTML = `
             <div class="match-complete">
               <div class="big-emoji">🎉</div>
-              <h3>Todos os pares combinados!</h3>
-              <div class="score-num">${MATCH_STATE.attempts} tentativa(s)</div>
-              <button class="btn btn-primary" id="match-restart-btn">Jogar de novo</button>
+              <h3>${t('review.match.allMatched')}</h3>
+              <div class="score-num">${t('review.match.attempts', { n: MATCH_STATE.attempts })}</div>
+              ${matchMs ? `<p class="review-record-line">${t('review.records.time', { time: formatRecordSeconds(matchMs) })} · ${matchIsRecord ? t('review.records.newRecord') : t('review.records.yourRecord', { record: formatRecordSeconds(reviewRecords().matchBestMs) })}</p>` : ''}
+              <button class="btn btn-primary" id="match-restart-btn">${t('review.match.playAgain')}</button>
             </div>
           `;
           document.getElementById('match-restart-btn').addEventListener('click', startMatchGame);
@@ -6474,6 +6635,7 @@ function onMatchTileClick(btn){
 }
 
 function startSpeedReview(){
+  holdBadgeCelebrations();
   trackEvent('lesson_start', 'speed_review', null);
   SPEED_STATE.queue = buildSpeedQueue();
   SPEED_STATE.index = 0;
@@ -6481,6 +6643,7 @@ function startSpeedReview(){
   SPEED_STATE.score = 0;
   SPEED_STATE.correctCount = 0;
   SPEED_STATE.streak = 0;
+  SPEED_STATE.bestStreak = 0;
   SPEED_STATE.active = true;
   SPEED_STATE.dailyCounted = false;
   renderSpeedReview();
@@ -6506,15 +6669,15 @@ function renderSpeedReview(){
     el.innerHTML = projectStudyWordsToA(pool).length < 4 ? `
       <div class="review-empty">
         <div class="big-emoji">⚡</div>
-        <h3>Vocabulário insuficiente ainda</h3>
-        <p>O Speed Review precisa de palavras já estudadas com sucesso pelo menos uma vez. Continue estudando unidades no Estudo.</p>
+        <h3>${t('review.insufficientTitle')}</h3>
+        <p>${t('review.speed.insufficientBody')}</p>
       </div>
     ` : `
       <div class="review-empty">
         <div class="big-emoji">☕</div>
-        <h3>Você está em dia!</h3>
-        <p>Nenhuma revisão pendente agora. Praticar continua disponível quando quiser.</p>
-        <button class="btn btn-primary" id="speed-go-practice">Praticar</button>
+        <h3>${t('review.empty.upToDateTitle')}</h3>
+        <p>${t('review.speed.upToDateBody')}</p>
+        <button class="btn btn-primary" id="speed-go-practice">${t('review.practice')}</button>
       </div>
     `;
     document.getElementById('speed-go-practice')?.addEventListener('click', backToReviewModeSelect);
@@ -6543,18 +6706,24 @@ function renderSpeedReview(){
     }
     maybeShowStreakCelebration();
     trackEvent('lesson_complete', 'speed_review', { score: SPEED_STATE.score });
+    const speedScoreRecord = recordSpeedReviewScore(SPEED_STATE.score);
+    const speedStreakRecord = recordSpeedReviewStreak(SPEED_STATE.bestStreak || 0);
+    const speedIsRecord = speedScoreRecord || speedStreakRecord;
+    if (speedIsRecord) saveState();
     // Fase 6 do projeto: nunca oferecer "Jogar de novo" repetindo a mesma
     // bateria de revisão -- Voltar/Praticar mais, igual à conclusão do
     // Flashcard (ver renderReviewView).
+    releaseBadgeCelebrations();
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">💔</div>
-        <h3>Fim de jogo!</h3>
-        <div class="score-num">${SPEED_STATE.score} pts</div>
-        <p>Você respondeu ${SPEED_STATE.index} palavra(s) nesta rodada.</p>
+        <h3>${t('review.speed.gameOver')}</h3>
+        <div class="score-num">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
+        <p>${t('review.speed.answered', { n: SPEED_STATE.index })}</p>
+        <p class="review-record-line">${speedIsRecord ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) })}</p>
         <div class="review-complete-actions">
-          <button class="btn btn-secondary" id="speed-back-btn">Voltar</button>
-          <button class="btn btn-primary" id="speed-practice-btn">Praticar mais</button>
+          <button class="btn btn-secondary" id="speed-back-btn">${t('review.back')}</button>
+          <button class="btn btn-primary" id="speed-practice-btn">${t('review.practiceMore')}</button>
         </div>
       </div>
     `;
@@ -6587,14 +6756,19 @@ function renderSpeedReview(){
     // Fase 6 do projeto: idem -- sem "Jogar de novo" (a fila devida já foi
     // zerada de verdade nesta sessão; "de novo" mostraria vazio ou
     // reaproveitaria cartões que acabaram de ser respondidos).
+    const speedIsRecord2 = recordSpeedReviewScore(SPEED_STATE.score);
+    const speedStreakRecord2 = recordSpeedReviewStreak(SPEED_STATE.bestStreak || 0);
+    if (speedIsRecord2 || speedStreakRecord2) saveState();
+    releaseBadgeCelebrations();
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">🏆</div>
-        <h3>Revisão concluída!</h3>
-        <div class="score-num">${SPEED_STATE.score} pts</div>
+        <h3>${t('review.complete.title')}</h3>
+        <div class="score-num">${t('review.speed.points', { n: SPEED_STATE.score })}</div>
+        <p class="review-record-line">${speedIsRecord2 || speedStreakRecord2 ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) })}</p>
         <div class="review-complete-actions">
-          <button class="btn btn-secondary" id="speed-back-btn">Voltar</button>
-          <button class="btn btn-primary" id="speed-practice-btn">Praticar mais</button>
+          <button class="btn btn-secondary" id="speed-back-btn">${t('review.back')}</button>
+          <button class="btn btn-primary" id="speed-practice-btn">${t('review.practiceMore')}</button>
         </div>
       </div>
     `;
@@ -6684,11 +6858,12 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
     SPEED_STATE.score += speedBonus;
     SPEED_STATE.correctCount += 1;
     SPEED_STATE.streak += 1;
+    if (SPEED_STATE.streak > (SPEED_STATE.bestStreak || 0)) SPEED_STATE.bestStreak = SPEED_STATE.streak;
     if (SPEED_STATE.streak > 0 && SPEED_STATE.streak % 15 === 0 && SPEED_STATE.hearts < 3){
       SPEED_STATE.hearts += 1;
-      showToast('❤️ Vida extra!');
+      showToast(t('toast.extraLife'));
     }
-    showToast(`+${speedBonus} pts`);
+    showToast(t('toast.pointsGain', { n: speedBonus }));
   } else {
     SPEED_STATE.hearts -= 1;
     SPEED_STATE.streak = 0;
@@ -6733,7 +6908,9 @@ function isCardLessonCompleted(card){
   if (prog?.completed) return true;
   if (!prog?.started) return false;
   const unit = UNITS.find(u => u.id === card.unitId);
-  const lessonIdx = unit ? lessonIndexForVocabIdx(unit, card.vocabIdx) : -1;
+  // Cartão "Na frase": entra com a lição da palavra que o apresenta (gateVocabIdx).
+  const gateIdx = card.vocabIdx != null ? card.vocabIdx : card.gateVocabIdx;
+  const lessonIdx = unit ? lessonIndexForVocabIdx(unit, gateIdx) : -1;
   // Sem lição conhecida pra esse vocabIdx: só libera se a unidade inteira
   // já foi concluída (mais seguro que arriscar mostrar algo nunca ensinado).
   if (lessonIdx === -1) return !!prog.completed;
@@ -6801,7 +6978,8 @@ function buildModuleReviewRow(module, unlocked){
   return block;
 }
 
-function startReviewSession(){
+function startReviewSession(opts){
+  holdBadgeCelebrations();
   trackEvent('lesson_start', 'flashcard_review', null);
   // eligibleReviewPool() (não STATE.cards.filter(isCardLessonCompleted)
   // solto): mesma função que a tela de modo/hero widget já usa pra contar
@@ -6840,6 +7018,8 @@ function startReviewSession(){
   // ordem. Unidade específica continua embaralhada, como sempre.
   const shouldShuffle = !!STATE.reviewSessionUnitFilter;
   STATE.reviewQueue = shouldShuffle ? shuffle(queue) : queue;
+  // Sessão de 5 minutos (shared/review-extras.js): mesma fila, mais curta.
+  if (opts && opts.short && !STATE.reviewSessionUnitFilter) STATE.reviewQueue = shortReviewQueue(STATE.reviewQueue);
   STATE.reviewIndex = 0;
   // Fase 6C.1/6C.2/6C.3 -- descarta o localState (Normal/Múltipla escolha/
   // Digite a resposta/Cloze) da sessão anterior, se houver; renderReviewView()
@@ -6848,6 +7028,7 @@ function startReviewSession(){
   // eliminou STATE.reviewClozeAnswered (Cloze migrou 100% pra este slot
   // único, mesmo padrão dos outros 3 tipos) -- não há mais nenhum campo
   // solto de tipo pra zerar aqui.
+  STATE.reviewSessionStartedAt = Date.now();
   STATE.reviewCardState = null;
   renderReviewView();
 }
@@ -6957,6 +7138,7 @@ function deckReviewSummary(deckId){
 // primeiro" continuam valendo sem nenhum código de limite novo (D6). Direção
 // (K2-G): estrutural do CardInstance -- a sessão de Deck só escolhe quais entram.
 async function startDeckReviewSession(deckId, opts){
+  holdBadgeCelebrations();
   const restore = !!(opts && opts.restore);
   trackEvent('lesson_start', 'flashcard_review', null);
   const decks = await ensureDecksLoadedForReview();
@@ -6989,6 +7171,7 @@ async function startDeckReviewSession(deckId, opts){
   document.getElementById('speed-review-content').style.display = 'none';
   document.getElementById('match-review-content').style.display = 'none';
 
+  STATE.reviewSessionStartedAt = Date.now();
   renderReviewView();
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'reviewSession', mode: 'flashcard', deckId });
   } finally {
@@ -7012,10 +7195,10 @@ function shuffle(arr){
 function gradeButtonsHTML(card){
   const now = Date.now();
   const GRADES = [
-    { grade: 0, label: 'Errei', cls: 'grade-again' },
-    { grade: 1, label: 'Difícil', cls: 'grade-hard' },
-    { grade: 2, label: 'Bom', cls: 'grade-good' },
-    { grade: 3, label: 'Fácil', cls: 'grade-easy' },
+    { grade: 0, label: t('review.grade.again'), cls: 'grade-again' },
+    { grade: 1, label: t('review.grade.hard'), cls: 'grade-hard' },
+    { grade: 2, label: t('review.grade.good'), cls: 'grade-good' },
+    { grade: 3, label: t('review.grade.easy'), cls: 'grade-easy' },
   ];
   return `
     <div class="grade-buttons">
@@ -7041,7 +7224,7 @@ function gradeButtonsHTML(card){
 // desta fase.
 function reviewProgressBarHTML(card){
   if (card.__isPreviewCard){
-    return `<div class="review-progress"><div class="review-progress-count">👁️ Pré-visualização</div></div>`;
+    return `<div class="review-progress"><div class="review-progress-count">${t('review.previewLabel')}</div></div>`;
   }
   const pct = Math.round((STATE.reviewIndex / STATE.reviewQueue.length) * 100);
   return `
@@ -7114,7 +7297,7 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
-      <div class="flashcard-tag">${card.unitTitle}</div>
+      <div class="flashcard-tag">${escapeHTML(reviewCardTagLabel(card))}</div>
       ${promptImageUrl ? `<img src="${promptImageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="flashcard-french">${escapeHTML(view.prompt.text)}${promptSpeakable ? ` ${audioBtnHTML(view.prompt.text, 'audio-btn-lg')}` : ''}${customAudioUrl ? customAudioBtnHTML(customAudioUrl) : ''}</div>
     </div>
@@ -7126,10 +7309,11 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
           if (opt.correct) cls += ' correct';
           else if (i === localState.selectedIndex) cls += ' incorrect';
         }
-        return `<button class="${cls}" data-idx="${i}"${answered ? ' disabled' : ''}>${escapeHTML(opt.text)}</button>`;
+        const mark = answered ? (opt.correct ? '<span class="mc-mark" aria-hidden="true">✓ </span>' : (i === localState.selectedIndex ? '<span class="mc-mark" aria-hidden="true">✗ </span>' : '')) : '';
+        return `<button class="${cls}" data-idx="${i}"${answered ? ' disabled' : ''}>${mark}${escapeHTML(opt.text)}</button>`;
       }).join('')}
     </div>
-    ${answered ? `<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">Continuar</button>` : ''}
+    ${answered ? `<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">${t('common.continue')}</button>` : ''}
   `;
 
   wireAudioButtons(mountEl, card.__isPreviewCard);
@@ -7198,10 +7382,12 @@ function renderClozeCard(mountEl, card, localState, callbacks){
   const view = resolveCardContentView(card);
   const answered = localState.answered;
   const blankHTML = answered
-    ? `<span class="cloze-blank ${localState.wasCorrect ? 'correct' : 'incorrect'}" id="cloze-blank">${view.displayAnswerText}</span>`
+    ? `<span class="cloze-blank ${localState.wasCorrect ? 'correct' : 'incorrect'}" id="cloze-blank">${escapeHTML(view.displayAnswerText)}</span>`
     : `<span class="cloze-blank" id="cloze-blank">___</span>`;
   const hiddenSentence = renderClozeText(view.rawSentenceText, view.markId, { reveal: false });
-  const sentenceHTML = hiddenSentence.replace('___', blankHTML);
+  // Texto autorado: escapado ANTES de inserir o HTML da lacuna (escapeHTML
+  // não altera '___').
+  const sentenceHTML = escapeHTML(hiddenSentence).replace('___', () => blankHTML);
   // Fase 7a (ver CLAUDE.md) -- imagem/áudio agora resolvidos via o MESMO
   // Field de texto que carrega a frase inteira (`resolveClozeCardView()`
   // usa resolveCardField() por baixo agora, nunca mais lia `.audio.url`
@@ -7217,7 +7403,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
-      <div class="flashcard-tag">${card.unitTitle}</div>
+      <div class="flashcard-tag">${escapeHTML(reviewCardTagLabel(card))}</div>
       ${clozeImageUrl ? `<img src="${clozeImageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="cloze-sentence">${sentenceHTML}</div>
       ${view.audioUrl ? customAudioBtnHTML(view.audioUrl) : ''}
@@ -7225,11 +7411,11 @@ function renderClozeCard(mountEl, card, localState, callbacks){
     </div>
     ${!answered ? `
       <div class="cloze-type-wrap">
-        <input type="text" id="cloze-review-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a palavra que falta">
+        <input type="text" id="cloze-review-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('review.cloze.placeholder')}">
         ${frAccentPickerHTML()}
-        <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">Verificar</button>
+        <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
+    ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
   `;
 
   wireCustomAudioButtons(mountEl);
@@ -7293,7 +7479,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
-      <div class="flashcard-tag">${card.unitTitle}</div>
+      <div class="flashcard-tag">${escapeHTML(reviewCardTagLabel(card))}</div>
       ${promptImageUrl ? `<img src="${promptImageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="flashcard-french">${escapeHTML(view.prompt.text)}${promptSpeakable ? ` ${audioBtnHTML(view.prompt.text, 'audio-btn-lg')}` : ''}${view.prompt.audioUrl ? customAudioBtnHTML(view.prompt.audioUrl) : ''}</div>
       ${answered ? `
@@ -7305,11 +7491,11 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
     </div>
     ${!answered ? `
       <div class="cloze-type-wrap">
-        <input type="text" id="cloze-review-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Digite a resposta">
+        <input type="text" id="cloze-review-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t('review.typeAnswer.placeholder')}">
         ${frAccentPickerHTML()}
-        <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">Verificar</button>
+        <button class="btn btn-primary btn-block" id="cloze-review-verify-btn">${t('common.verify')}</button>
       </div>
-    ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">Continuar</button>`}
+    ` : `<button class="btn btn-primary btn-block mc-continue-btn" id="cloze-continue-btn">${t('common.continue')}</button>`}
   `;
 
   wireAudioButtons(mountEl, card.__isPreviewCard);
@@ -7349,10 +7535,12 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
 }
 
 function renderReviewView(){
+  syncReviewBackLink();
   stopExerciseAudio();
   const el = document.getElementById('review-content');
 
   if (!STATE.reviewQueue.length){
+    releaseBadgeCelebrations();
     // Mesma fonte que startReviewSession()/Speed Review usam de verdade
     // (todaysReviewCount, com os mesmos tetos de novas/dia e intensidade)
     // -- senão esse número prometeria mais do que "Revisar tudo disponível"
@@ -7362,9 +7550,9 @@ function renderReviewView(){
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">☕</div>
-        <h3>${activeReviewTagFilter().length ? 'Nenhum cartão com as tags selecionadas' : STATE.reviewSessionDeckId ? 'Nenhum cartão neste Deck ainda' : (STATE.reviewSessionUnitFilter ? 'Nenhum cartão nesta unidade ainda' : 'Tudo em dia!')}</h3>
-        <p>${allDue > 0 ? `Você ainda tem ${allDue} cartão(s) pendente(s) no geral.` : 'Volte mais tarde para sua próxima revisão, ou comece uma nova unidade na trilha.'}</p>
-        ${allDue > 0 ? `<button class="btn btn-primary" id="review-start-all">Revisar tudo disponível</button>` : ''}
+        <h3>${activeReviewTagFilter().length ? t('review.session.tagsEmptyTitle') : STATE.reviewSessionDeckId ? t('review.session.deckEmptyTitle') : (STATE.reviewSessionUnitFilter ? t('review.session.unitEmptyTitle') : t('review.session.allDoneTitle'))}</h3>
+        <p>${allDue > 0 ? t('review.session.pendingOverall', { n: allDue }) : t('review.session.comeBackLater')}</p>
+        ${allDue > 0 ? `<button class="btn btn-primary" id="review-start-all">${t('review.session.reviewAllAvailable')}</button>` : ''}
       </div>
     `;
     if (allDue > 0){
@@ -7379,10 +7567,16 @@ function renderReviewView(){
   }
 
   if (STATE.reviewIndex >= STATE.reviewQueue.length){
+    releaseBadgeCelebrations();
     // Streak conta aqui -- fim da SESSÃO inteira de Flashcard/Palavras
     // difíceis (os dois usam esta mesma tela, ver openReviewSession) -- não
     // a cada cartão avaliado (ver gradeCurrentCard).
     registerStudyToday();
+    if (STATE.reviewSessionStartedAt){
+      recordReviewSessionTime(STATE.reviewQueue.length, Date.now() - STATE.reviewSessionStartedAt);
+      STATE.reviewSessionStartedAt = null;
+      saveState();
+    }
     maybeShowStreakCelebration();
     // Fase 5: o marco de Revisão conta como realizado só quando a SESSÃO termina
     // (sem nota mínima). A meta ganha moduleId/unitIds (sessão de marco) ou
@@ -7399,11 +7593,11 @@ function renderReviewView(){
     el.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🎉</div>
-        <h3>Revisão concluída!</h3>
-        <p>Você revisou ${STATE.reviewQueue.length} cartão(s) nesta sessão.</p>
+        <h3>${t('review.complete.title')}</h3>
+        <p>${t('review.complete.reviewed', { n: STATE.reviewQueue.length })}</p>
         <div class="review-complete-actions">
-          <button class="btn btn-secondary" id="review-again">Voltar</button>
-          <button class="btn btn-primary" id="review-go-practice">Praticar mais</button>
+          <button class="btn btn-secondary" id="review-again">${t('review.back')}</button>
+          <button class="btn btn-primary" id="review-go-practice">${t('review.practiceMore')}</button>
         </div>
       </div>
     `;
@@ -7477,7 +7671,7 @@ function renderReviewView(){
   // callbacks). A SESSÃO (aqui) é quem cria/descarta STATE.reviewCardState
   // -- o renderer nunca lê/escreve STATE por nome, só recebe a referência
   // como parâmetro. Criação é preguiçosa (só quando ainda não existe --
-  // gradeCurrentCard()/reviewMoreCurrentCard() já o zeram ao avançar a
+  // gradeCurrentCard() já o zera ao avançar a
   // fila, então "ausente" aqui sempre significa "cartão novo, começar do
   // zero"; re-renderizações do MESMO cartão -- ex: depois de revelar --
   // reaproveitam a mesma referência, nunca recriam).
@@ -7486,7 +7680,6 @@ function renderReviewView(){
   }
   renderNormalCard(el, card, STATE.reviewCardState, {
     onAnswered: (wasCorrect, grade) => gradeCurrentCard(grade),
-    onReviewMore: () => reviewMoreCurrentCard(),
   });
 }
 
@@ -7593,18 +7786,17 @@ function renderNormalCard(mountEl, card, localState, callbacks){
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
-      <div class="flashcard-tag">${card.unitTitle}</div>
+      <div class="flashcard-tag">${escapeHTML(reviewCardTagLabel(card))}</div>
       ${resolvedFrontImageUrl ? `<img src="${resolvedFrontImageUrl}" class="flashcard-image" alt="">` : ''}
       ${frontHTML}
       ${localState.revealed ? `
         <div class="divider-line"></div>
         ${resolvedBackImageUrl ? `<img src="${resolvedBackImageUrl}" class="flashcard-image" alt="">` : ''}
         ${backHTML}
-      ` : `<div class="flashcard-hint">toque para ver a resposta</div>`}
+      ` : `<div class="flashcard-hint">${t('review.tapToReveal')}</div>`}
     </div>
     ${localState.revealed ? `
       ${gradeButtonsHTML(card)}
-      <button class="review-more-link" id="review-more-btn">🔁 Rever mais (não conta como resposta)</button>
     ` : ''}
   `;
 
@@ -7637,15 +7829,6 @@ function renderNormalCard(mountEl, card, localState, callbacks){
   }
 
   if (localState.revealed){
-    // Fase 11: PRATICAR != REVISAR -- "Rever mais" só reinsere o cartão
-    // mais à frente na fila DESTA sessão (efêmero, nunca persistido). Não
-    // chama applyMemoryGrade nem addXP -- só ser mostrada de novo não é
-    // evidência de recuperação, então não pode alterar o agendamento
-    // (devido/stability) sem uma resposta real que justifique isso.
-    mountEl.querySelector('#review-more-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      callbacks.onReviewMore();
-    });
     mountEl.querySelectorAll('.grade-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -7665,24 +7848,6 @@ function reviewXP(intervalBefore, grade){
   if (intervalBefore >= 60) return Math.max(1, Math.round(base * 0.4));
   if (intervalBefore >= 21) return Math.max(1, Math.round(base * 0.7));
   return base;
-}
-
-// Fase 11 -- PRATICAR fora do agendamento: reinsere o cartão atual alguns
-// lugares à frente na fila DESTA sessão, sem tocar em due/stability/reps
-// nem conceder XP. Diferente de "Errei" (grade 0), que É uma resposta real
-// e reagenda de verdade -- "Rever mais" nunca é resposta, só pedido de
-// mais exposição. STATE.reviewQueue nunca é persistido (é sempre
-// reconstruído do zero por startReviewSession), então crescer a fila aqui
-// não vaza pra próxima sessão nem pro banco.
-function reviewMoreCurrentCard(){
-  const card = STATE.reviewQueue[STATE.reviewIndex];
-  const reinsertAt = Math.min(STATE.reviewQueue.length, STATE.reviewIndex + 4);
-  STATE.reviewQueue.splice(reinsertAt, 0, card);
-  STATE.reviewIndex += 1;
-  // Fase 6C.1 -- avançou a posição da fila, descarta o localState de
-  // Normal desta exibição (renderReviewView cria um novo pro próximo card).
-  STATE.reviewCardState = null;
-  renderReviewView();
 }
 
 function gradeCurrentCard(grade){
@@ -7768,7 +7933,7 @@ function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
   if (!skipToast){
     // Pequeno atraso pra ler como sequência ("+25 XP" ... "Unidade concluída!")
     // em vez de dois toasts aparecendo ao mesmo tempo, empilhados sem ordem.
-    setTimeout(() => showToast(`Unidade concluída! 🥐`), 450);
+    setTimeout(() => showToast(t('toast.unitComplete')), 450);
   }
   saveState();
 }
@@ -7839,7 +8004,7 @@ function completeModuleUnits(module, scorePct){
   STATE.checkpointProgress[module.id].bestScore = Math.max(STATE.checkpointProgress[module.id].bestScore || 0, scorePct);
   if (!alreadyCompleted) registerStudyToday();
   recalculateUnlockedUnits();
-  showToast('Ponto de verificação aprovado! 🏆');
+  showToast(t('toast.checkpointPassed'));
   saveState();
 }
 
@@ -7855,9 +8020,9 @@ function openCheckpoint(moduleId){
   document.getElementById('unit-detail-wrap').style.display = 'block';
   document.getElementById('step-back-btn').style.display = 'none';
 
-  document.getElementById('ud-eyebrow').textContent = 'Ponto de verificação';
+  document.getElementById('ud-eyebrow').textContent = t('trail.checkpoint.title');
   document.getElementById('ud-title').textContent = module.title;
-  document.getElementById('ud-goal').textContent = 'Teste o que você já sabe desta seção. Se for bem, todas as unidades dela são marcadas como concluídas — não precisa fazer uma por uma.';
+  document.getElementById('ud-goal').textContent = t('trail.checkpoint.intro');
 
   CHECKPOINT_STATE.moduleId = moduleId;
   CHECKPOINT_STATE.queue = buildCheckpointQueue(module);
@@ -7885,12 +8050,12 @@ function renderCheckpointQuizStep(){
     const moduleUnits = module.unitIds.map(id => UNITS.find(u => u.id === id));
     renderModuleCompleteScreen(contentEl, nextBtn, {
       passed,
-      title: 'Módulo concluído! 🏆',
+      title: t('fr.checkpoint.moduleDone'),
       subtitle: module.title,
       units: moduleUnits,
       scorePct: pct,
       passThreshold: CHECKPOINT_PASS_THRESHOLD,
-      nextLabel: passed ? 'Concluir seção ✓' : 'Voltar à trilha',
+      nextLabel: passed ? t('fr.checkpoint.finishSection') : t('trail.backToTrail'),
       tier: 'module'
     });
     return;
@@ -7901,14 +8066,14 @@ function renderCheckpointQuizStep(){
 
   const isListen = ex.kind === 'listen';
   contentEl.innerHTML = `
-    <div class="conj-progress">Pergunta ${CHECKPOINT_STATE.index + 1} de ${total}</div>
+    <div class="conj-progress">${t('fr.checkpoint.question', { i: CHECKPOINT_STATE.index + 1, n: total })}</div>
     <div class="gram-exercise">
       <div class="gram-exercise-prompt">${ex.prompt}${isListen ? ' ' + audioBtnHTML(ex.audioText) : ''}</div>
       ${ex.hint ? `<div class="gram-exercise-hint">${ex.hint}</div>` : ''}
-      <input type="text" id="checkpoint-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${isListen ? 'Escreva o que ouviu' : 'Digite a resposta'}">
+      <input type="text" id="checkpoint-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${isListen ? t('review.listen.placeholder') : t('review.typeAnswer.placeholder')}">
       <div class="expected" id="checkpoint-expected"></div>
     </div>
-    <button class="btn btn-primary btn-block" id="checkpoint-verify-btn">Verificar</button>
+    <button class="btn btn-primary btn-block" id="checkpoint-verify-btn">${t('common.verify')}</button>
   `;
   if (isListen){
     wireAudioButtons(contentEl);
@@ -7930,7 +8095,7 @@ function renderCheckpointQuizStep(){
     const res = scoreCheckpointAnswer(inputEl.value, expected, ex.kind);
     CHECKPOINT_STATE.score += res.score;
     wrapEl.classList.add(res.status);
-    if (res.status === 'almost') expectedEl.textContent = `Quase! → ${expected}`;
+    if (res.status === 'almost') expectedEl.textContent = t('feedback.almostArrow', { expected });
     else if (res.status === 'wrong') expectedEl.textContent = `→ ${expected}`;
     // "almost" (grafia quase certa, sem acento etc.) já dá 0.5 ponto -- toca
     // o mesmo som de acerto do "ok", só "wrong" de verdade toca o de erro.
@@ -7939,7 +8104,7 @@ function renderCheckpointQuizStep(){
     document.getElementById('checkpoint-verify-btn').style.display = 'none';
     const goNextBtn = document.createElement('button');
     goNextBtn.className = 'btn btn-secondary btn-block';
-    goNextBtn.textContent = CHECKPOINT_STATE.index < total - 1 ? 'Próxima →' : 'Ver resultado →';
+    goNextBtn.textContent = CHECKPOINT_STATE.index < total - 1 ? t('common.nextArrow') : t('common.seeResultArrow');
     goNextBtn.addEventListener('click', () => {
       CHECKPOINT_STATE.index += 1;
       renderCheckpointQuizStep();
@@ -7990,7 +8155,7 @@ function completeLevelTest(test, scorePct){
   levelModules.forEach(module => completeModuleUnits(module, scorePct));
   STATE.levelTestProgress[test.id].completed = true;
   STATE.levelTestProgress[test.id].bestScore = Math.max(STATE.levelTestProgress[test.id].bestScore || 0, scorePct);
-  showToast(`Nível ${test.level} concluído! 🎓`); // Fase 6: pulo não dá XP
+  showToast(t('toast.levelComplete', { level: test.level })); // Fase 6: pulo não dá XP
 
   saveState();
 }
@@ -8007,9 +8172,9 @@ function openLevelTest(testId){
   document.getElementById('unit-detail-wrap').style.display = 'block';
   document.getElementById('step-back-btn').style.display = 'none';
 
-  document.getElementById('ud-eyebrow').textContent = 'Teste de nível';
+  document.getElementById('ud-eyebrow').textContent = t('trail.levelTest.eyebrow');
   document.getElementById('ud-title').textContent = test.title;
-  document.getElementById('ud-goal').textContent = `Já sabe francês nível ${test.level}? Faça esse teste — se for bem, todo o nível é marcado como concluído e você já pode seguir direto pro ${test.nextLevel}.`;
+  document.getElementById('ud-goal').textContent = t('trail.levelTest.intro', { level: test.level, next: test.nextLevel });
 
   LEVEL_TEST_STATE.testId = testId;
   LEVEL_TEST_STATE.queue = buildLevelTestQueue(test);
@@ -8039,12 +8204,12 @@ function renderLevelTestQuizStep(){
       .map(id => UNITS.find(u => u.id === id));
     renderModuleCompleteScreen(contentEl, nextBtn, {
       passed,
-      title: `Nível ${test.level} concluído! 🎓`,
-      subtitle: `Você já pode seguir direto pro ${test.nextLevel}`,
+      title: t('toast.levelComplete', { level: test.level }),
+      subtitle: t('fr.levelTest.goStraightTo', { next: test.nextLevel }),
       units: levelUnits,
       scorePct: pct,
       passThreshold: LEVEL_TEST_PASS_THRESHOLD,
-      nextLabel: passed ? `Concluir nível ${test.level} ✓` : 'Voltar à trilha',
+      nextLabel: passed ? t('fr.levelTest.finishLevel', { level: test.level }) : t('trail.backToTrail'),
       tier: 'level'
     });
     return;
@@ -8054,14 +8219,14 @@ function renderLevelTestQuizStep(){
   nextBtn.style.display = 'none';
 
   contentEl.innerHTML = `
-    <div class="conj-progress">Pergunta ${LEVEL_TEST_STATE.index + 1} de ${total}</div>
+    <div class="conj-progress">${t('fr.checkpoint.question', { i: LEVEL_TEST_STATE.index + 1, n: total })}</div>
     <div class="gram-exercise">
       <div class="gram-exercise-prompt">${ex.prompt}${ex.kind === 'listen' ? ' ' + audioBtnHTML(ex.audioText) : ''}</div>
       ${ex.hint ? `<div class="gram-exercise-hint">${ex.hint}</div>` : ''}
-      <input type="text" id="leveltest-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${ex.kind === 'listen' ? 'Escreva o que ouviu' : 'Digite a resposta'}">
+      <input type="text" id="leveltest-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${ex.kind === 'listen' ? t('review.listen.placeholder') : t('review.typeAnswer.placeholder')}">
       <div class="expected" id="leveltest-expected"></div>
     </div>
-    <button class="btn btn-primary btn-block" id="leveltest-verify-btn">Verificar</button>
+    <button class="btn btn-primary btn-block" id="leveltest-verify-btn">${t('common.verify')}</button>
   `;
 
   if (ex.kind === 'listen'){
@@ -8084,7 +8249,7 @@ function renderLevelTestQuizStep(){
     const res = scoreCheckpointAnswer(given, expected, ex.kind);
     LEVEL_TEST_STATE.score += res.score;
     wrapEl.classList.add(res.status);
-    if (res.status === 'almost') expectedEl.textContent = `Quase! → ${expected}`;
+    if (res.status === 'almost') expectedEl.textContent = t('feedback.almostArrow', { expected });
     else if (res.status === 'wrong') expectedEl.textContent = `→ ${expected}`;
     // "almost" (grafia quase certa, sem acento etc.) já dá 0.5 ponto -- toca
     // o mesmo som de acerto do "ok", só "wrong" de verdade toca o de erro.
@@ -8093,7 +8258,7 @@ function renderLevelTestQuizStep(){
     document.getElementById('leveltest-verify-btn').style.display = 'none';
     const goNextBtn = document.createElement('button');
     goNextBtn.className = 'btn btn-secondary btn-block';
-    goNextBtn.textContent = LEVEL_TEST_STATE.index < total - 1 ? 'Próxima →' : 'Ver resultado →';
+    goNextBtn.textContent = LEVEL_TEST_STATE.index < total - 1 ? t('common.nextArrow') : t('common.seeResultArrow');
     goNextBtn.addEventListener('click', () => {
       LEVEL_TEST_STATE.index += 1;
       renderLevelTestQuizStep();
@@ -8145,23 +8310,23 @@ function renderProgressView(){
 
   const guestWarning = !CURRENT_USER ? `
     <div class="guest-warning">
-      ⚠️ Você está no modo convidado — seu progresso <strong>não</strong> será salvo ao fechar a aba.
-      <button class="guest-warning-link" id="guest-login-prompt">Entrar com Google para salvar</button>
+      ${t('zh.progress.guestWarning')}
+      <button class="guest-warning-link" id="guest-login-prompt">${t('zh.progress.guestLogin')}</button>
     </div>
   ` : '';
 
   document.getElementById('stat-cards').innerHTML = guestWarning + `
-    <div class="stat-card"><div class="num">${completedUnits}/${UNITS.length}</div><div class="label">Unidades completas</div></div>
-    <div class="stat-card"><div class="num">${learnedCards}/${totalCards}</div><div class="label">Palavras aprendidas</div></div>
-    <div class="stat-card"><div class="num">${effectiveStreak()}</div><div class="label">Dias seguidos</div></div>
-    <div class="stat-card"><div class="num">${STATE.totalReviews}</div><div class="label">Revisões totais</div></div>
-    <div class="stat-card" data-stat="new"><div class="num">${sc.new}</div><div class="label">Novos</div></div>
-    <div class="stat-card" data-stat="learning"><div class="num">${sc.learning}</div><div class="label">Aprendendo</div></div>
-    <div class="stat-card" data-stat="review"><div class="num">${sc.review}</div><div class="label">Para revisar</div></div>
-    <div class="stat-card" data-stat="due"><div class="num">${sc.due}</div><div class="label">Devidos</div></div>
-    <div class="stat-card" data-stat="today" title="Fila de uma sessão: devidos + novos limitados por 'novas por dia'. Respeita os filtros de origem/tag da Revisão, por isso pode diferir de Novos/Devidos."><div class="num">${studyToday}</div><div class="label">Para estudar hoje</div></div>
+    <div class="stat-card"><div class="num">${completedUnits}/${UNITS.length}</div><div class="label">${t('zh.progress.statUnits')}</div></div>
+    <div class="stat-card"><div class="num">${learnedCards}/${totalCards}</div><div class="label">${t('zh.progress.statWords')}</div></div>
+    <div class="stat-card"><div class="num">${effectiveStreak()}</div><div class="label">${t('zh.progress.statStreak')}</div></div>
+    <div class="stat-card"><div class="num">${STATE.totalReviews}</div><div class="label">${t('zh.progress.statReviews')}</div></div>
+    <div class="stat-card" data-stat="new"><div class="num">${sc.new}</div><div class="label">${t('progress.statNew')}</div></div>
+    <div class="stat-card" data-stat="learning"><div class="num">${sc.learning}</div><div class="label">${t('progress.statLearning')}</div></div>
+    <div class="stat-card" data-stat="review"><div class="num">${sc.review}</div><div class="label">${t('progress.statReview')}</div></div>
+    <div class="stat-card" data-stat="due"><div class="num">${sc.due}</div><div class="label">${t('progress.statDueNow')}</div></div>
+    <div class="stat-card" data-stat="today" title="${escapeHTML(t('progress.statTodayTitle'))}"><div class="num">${studyToday}</div><div class="label">${t('progress.statToday')}</div></div>
     ${ownContentCards}
-    <div class="stat-card"><div class="num">${STATE.xp}</div><div class="label">XP acumulado</div></div>
+    <div class="stat-card"><div class="num">${STATE.xp}</div><div class="label">${t('zh.progress.statXp')}</div></div>
   `;
 
   if (!CURRENT_USER){
@@ -8206,7 +8371,7 @@ function renderProgressLineChart(){
   const learnedDates = wordLevelFirstLearnedDates(STATE.cards);
 
   if (!learnedDates.length){
-    wrap.innerHTML = `<div style="text-align:center; padding:30px 20px; color:var(--ink-soft);"><p>Comece a estudar para ver seu progresso ao longo do tempo aqui.</p></div>`;
+    wrap.innerHTML = `<div style="text-align:center; padding:30px 20px; color:var(--ink-soft);"><p>${t('zh.progress.chartEmpty')}</p></div>`;
     return;
   }
 
@@ -8246,10 +8411,10 @@ function renderProgressLineChart(){
       <line x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}" class="chart-axis"/>
       <path d="${areaD}" class="chart-area"/>
       <path d="${pathD}" class="chart-line"/>
-      ${points.map((p,i) => `<circle cx="${(PAD + i*xStep).toFixed(1)}" cy="${yScale(p.total).toFixed(1)}" r="3" class="chart-dot"><title>${p.date}: ${p.total} palavras</title></circle>`).join('')}
+      ${points.map((p,i) => `<circle cx="${(PAD + i*xStep).toFixed(1)}" cy="${yScale(p.total).toFixed(1)}" r="3" class="chart-dot"><title>${t('zh.progress.chartPoint', { date: p.date, n: p.total })}</title></circle>`).join('')}
       ${dateLabels.map(l => `<text x="${l.x.toFixed(1)}" y="${H-10}" class="chart-label" text-anchor="middle">${l.text}</text>`).join('')}
     </svg>
-    <div class="chart-total">Total acumulado: <strong>${maxVal}</strong> palavras aprendidas</div>
+    <div class="chart-total">${t('zh.progress.chartTotal')} <strong>${maxVal}</strong> ${t('fr.progress.chartTotalSuffix')}</div>
   `;
 }
 
@@ -8294,7 +8459,7 @@ function renderActivityHeatmap(){
     if (firstRealDay){
       const m = firstRealDay.date.getMonth();
       if (m !== lastMonth){
-        monthLabels.push({ weekIndex: wi, label: firstRealDay.date.toLocaleDateString('pt-BR', { month:'short' }) });
+        monthLabels.push({ weekIndex: wi, label: fmtDate(firstRealDay.date, { month:'short' }) });
         lastMonth = m;
       }
     }
@@ -8304,7 +8469,7 @@ function renderActivityHeatmap(){
     <div class="heatmap-col">
       ${week.map(day => day === null
         ? `<div class="heatmap-cell lvl-0 empty"></div>`
-        : `<div class="heatmap-cell ${intensityClass(day.count)}" title="${day.count} atividade(s) em ${day.date.toLocaleDateString('pt-BR')}"></div>`
+        : `<div class="heatmap-cell ${intensityClass(day.count)}" title="${tp('zh.progress.heatCell', day.count, { date: fmtDate(day.date) })}"></div>`
       ).join('')}
     </div>
   `).join('');
@@ -8317,13 +8482,13 @@ function renderActivityHeatmap(){
     <div class="heatmap-months" style="grid-template-columns: repeat(${weeks.length}, 1fr);">${labelsHTML}</div>
     <div class="heatmap-grid">${gridHTML}</div>
     <div class="heatmap-legend">
-      <span>Menos</span>
+      <span>${t('zh.progress.heatLess')}</span>
       <div class="heatmap-cell lvl-0"></div>
       <div class="heatmap-cell lvl-1"></div>
       <div class="heatmap-cell lvl-2"></div>
       <div class="heatmap-cell lvl-3"></div>
       <div class="heatmap-cell lvl-4"></div>
-      <span>Mais</span>
+      <span>${t('zh.progress.heatMore')}</span>
     </div>
   `;
 }
@@ -8355,7 +8520,8 @@ const switchTab = createTabSwitcher({
     'admin-badges': renderAdminPanelView,
     'my-flashcards': renderMyFlashcardsView,
     'support-materials': renderSupportMaterialsView,
-    leaderboard: renderLeaderboardView,
+    leaderboard: openLeaderboardView,
+    friends: renderFriendsView,
     path: renderUnitsGrid,
     dictation: () => {
       applyChallengeI18n();
@@ -8396,8 +8562,8 @@ document.getElementById('sidebar-toggle-btn').addEventListener('click', () => {
 // (sidebar desktop ou o item "Configurações" do menu do avatar), não só
 // quando o menu era o único caminho até aqui.
 function renderSettingsView(){
-  document.getElementById('settings-email').textContent = CURRENT_USER?.email || 'Modo convidado';
-  document.getElementById('settings-provider').textContent = CURRENT_USER?.app_metadata?.provider === 'google' ? 'Google' : (CURRENT_USER ? 'E-mail e senha' : '—');
+  document.getElementById('settings-email').textContent = CURRENT_USER?.email || t('settings.account.guest');
+  document.getElementById('settings-provider').textContent = CURRENT_USER?.app_metadata?.provider === 'google' ? 'Google' : (CURRENT_USER ? t('settings.account.emailPassword') : '—');
   switchSettingsSection(SETTINGS_SECTION);
 }
 
@@ -8453,13 +8619,14 @@ function renderReviewTagFilter(){
   if (!wrap || !chipsEl) return;
   const selected = activeReviewTagFilter();
   const universe = reviewTagUniverse();
-  const available = collectTagsFromCards(universe);
+  // Tags finas da trilha (unidade/lição/palavra) ficam fora dos chips.
+  const available = reviewFilterVisibleTags(universe);
   const all = Array.from(new Set(available.concat(selected))).sort();
   wrap.hidden = all.length === 0;
   chipsEl.innerHTML = all.map(t => {
     const n = universe.filter(c => (c.tags || []).includes(t)).length;
     const on = selected.includes(t);
-    return `<button type="button" class="leaderboard-tab ${on ? 'active' : ''}" data-review-tag="${escapeHTML(t)}" aria-pressed="${on}">#${escapeHTML(t)} (${n})</button>`;
+    return `<button type="button" class="leaderboard-tab ${on ? 'active' : ''}" data-review-tag="${escapeHTML(t)}" aria-pressed="${on}" title="#${escapeHTML(t)}">${escapeHTML(friendlyTagLabel(t))} (${n})</button>`;
   }).join(' ');
   const clearBtn = document.getElementById('review-tag-clear');
   if (clearBtn) clearBtn.hidden = selected.length === 0;
@@ -8554,24 +8721,17 @@ document.getElementById('review-tag-clear')?.addEventListener('click', () => {
 // antes era um botão de texto solto entre o dropdown e REVISAR, a autora
 // não gostou) -- recolhido por padrão, sincroniza ao abrir (4 controles
 // de sessão, ver renderReviewSettingsView).
-const reviewHeaderSettingsBtn = document.getElementById('review-header-settings-btn');
-if (reviewHeaderSettingsBtn){
-  reviewHeaderSettingsBtn.addEventListener('click', () => {
-    const panel = document.getElementById('review-settings-panel');
-    if (panel.hasAttribute('hidden')){
-      panel.removeAttribute('hidden');
-      renderReviewSettingsView();
-    } else {
-      panel.setAttribute('hidden', '');
-    }
-  });
+// "Configurar" (barra Decks/Adicionar/Painel/Configurar, shared/deck-browser.js):
+// abre/fecha o painel de ajustes da sessão na tela inicial da Revisão.
+// Abre os ajustes numa janela por cima da tela atual (inclusive dentro
+// de um Deck), como Adicionar e Painel -- ver openReviewSettingsModal.
+function toggleReviewSettingsPanel(){
+  if (typeof openReviewSettingsModal === 'function'){ openReviewSettingsModal(); return; }
+  const panel = document.getElementById('review-settings-panel');
+  if (!panel) return;
+  panel.removeAttribute('hidden');
+  renderReviewSettingsView();
 }
-// Prop 3 (ver CLAUDE.md, "7 propostas") -- "Meus Cartões" ganhou um botão
-// de verdade no topo da tela de Revisão, substituindo a entrada que
-// existia (e foi removida) do menu do avatar.
-document.getElementById('review-my-flashcards-btn')?.addEventListener('click', () => {
-  switchTab('my-flashcards');
-});
 document.querySelectorAll('[data-settings-section]').forEach(btn => {
   btn.addEventListener('click', () => switchSettingsSection(btn.dataset.settingsSection));
 });
@@ -8756,7 +8916,7 @@ function renderConjSelectScreen(){
 
   const topnSelectEl = document.getElementById('conj-topn-select');
   topnSelectEl.innerHTML = CONJ_TOPN_OPTIONS.map(n =>
-    `<option value="${n}" ${CONJ_STATE.topN === n ? 'selected' : ''}>${n === CONJ_TOTAL_VERBS ? `Todos (${n})` : `Top ${n}`}</option>`
+    `<option value="${n}" ${CONJ_STATE.topN === n ? 'selected' : ''}>${n === CONJ_TOTAL_VERBS ? t('fr.conj.topAll', { n }) : `Top ${n}`}</option>`
   ).join('');
 
   const regularToggleEl = document.getElementById('conj-toggle-regular');
@@ -8817,7 +8977,7 @@ document.getElementById('conj-toggle-irregular').addEventListener('click', () =>
 
 document.getElementById('conj-start-btn').addEventListener('click', () => {
   if (!CONJ_STATE.selectedTenses.length || !CONJ_STATE.selectedGroups.length){
-    showToast('Escolha ao menos 1 tempo e 1 categoria de verbo');
+    showToast(t('toast.conjPickOne'));
     return;
   }
 
@@ -8832,7 +8992,7 @@ document.getElementById('conj-start-btn').addEventListener('click', () => {
     .map(([name]) => name);
 
   if (!eligibleVerbs.length){
-    showToast('Nenhum verbo nessa seleção');
+    showToast(t('toast.conjNoVerbs'));
     return;
   }
 
@@ -8921,10 +9081,10 @@ function renderConjPracticeStep(){
     contentEl.innerHTML = `
       <div class="conj-session-result">
         <div class="big-emoji">${pct >= 70 ? '🎉' : '💪'}</div>
-        <h3>Sessão concluída!</h3>
+        <h3>${t('fr.conj.sessionDone')}</h3>
         <div class="score-num">${Math.round(CONJ_STATE.score)}/${CONJ_STATE.totalFields}</div>
-        <p>${pct >= 70 ? 'Muito bem!' : 'Continue praticando essas conjugações.'}</p>
-        <button class="btn btn-primary" id="conj-restart-btn">Nova sessão</button>
+        <p>${pct >= 70 ? t('fr.conj.wellDone') : t('fr.conj.keepPracticing')}</p>
+        <button class="btn btn-primary" id="conj-restart-btn">${t('fr.conj.newSession')}</button>
       </div>
     `;
     document.getElementById('conj-restart-btn').addEventListener('click', () => {
@@ -8943,17 +9103,17 @@ function renderConjPracticeStep(){
   CONJ_STATE.hintLevel = 0;
 
   contentEl.innerHTML = `
-    <div class="conj-progress">Verbo ${CONJ_STATE.verbIndex + 1} de ${CONJ_STATE.verbQueue.length}</div>
+    <div class="conj-progress">${t('fr.conj.verbCounter', { i: CONJ_STATE.verbIndex + 1, n: CONJ_STATE.verbQueue.length })}</div>
     <div class="conj-verb-nav">
       <div class="conj-verb-header">
-        <div class="conj-verb-label">Verbo atual</div>
+        <div class="conj-verb-label">${t('fr.conj.currentVerb')}</div>
         <div class="infinitif">${verb} ${audioBtnHTML(verb)}</div>
         <div class="conj-verb-translation">${VERB_TRANSLATIONS[verb] || ''}</div>
-        <div class="tempo">${CONJ_REGULAR_GROUPS.includes(verbInfo.g) ? 'Regular' : 'Irregular'}</div>
+        <div class="tempo">${CONJ_REGULAR_GROUPS.includes(verbInfo.g) ? t('fr.conj.regular') : t('fr.conj.irregular')}</div>
       </div>
       ${nextVerb ? `
         <div class="conj-verb-header next">
-          <div class="conj-verb-label">Próximo verbo</div>
+          <div class="conj-verb-label">${t('fr.conj.nextVerbLabel')}</div>
           <div class="infinitif">${nextVerb}</div>
           <div class="conj-verb-translation">${VERB_TRANSLATIONS[nextVerb] || ''}</div>
         </div>
@@ -8985,7 +9145,7 @@ function renderConjPracticeStep(){
                   const expected = expectedForms[i] || '';
                   const accepted = acceptedForms(expected);
                   if (accepted.includes(given.trim())){ statusClass = 'ok'; }
-                  else if (accepted.some(f => normalizeLoose(given) === normalizeLoose(f))){ statusClass = 'almost'; expectedText = `Quase! → ${expected}`; }
+                  else if (accepted.some(f => normalizeLoose(given) === normalizeLoose(f))){ statusClass = 'almost'; expectedText = t('feedback.almostArrow', { expected }); }
                   else { statusClass = 'wrong'; expectedText = `→ ${expected}`; }
                 }
                 return `
@@ -9004,13 +9164,13 @@ function renderConjPracticeStep(){
     </div>
     ${alreadyChecked ? '' : `
       <div class="conj-actions">
-        <button class="btn btn-primary btn-block" id="conj-verify-btn">Verificar respostas</button>
-        <button class="btn btn-secondary" id="conj-hint-btn" title="Mostrar contagem de letras e terminação">💡 Mostrar dica</button>
+        <button class="btn btn-primary btn-block" id="conj-verify-btn">${t('fr.conj.checkAnswers')}</button>
+        <button class="btn btn-secondary" id="conj-hint-btn" title="${t('fr.conj.hintTitle')}">${t('fr.conj.hintShow')}</button>
       </div>
     `}
     <div class="conj-verb-pager">
-      <button class="btn btn-secondary" id="conj-prev-verb-btn" ${CONJ_STATE.verbIndex === 0 ? 'disabled' : ''}>← Verbo anterior</button>
-      <button class="btn btn-secondary" id="conj-next-verb-btn">${CONJ_STATE.verbIndex < CONJ_STATE.verbQueue.length - 1 ? 'Próximo verbo →' : 'Ver resultado →'}</button>
+      <button class="btn btn-secondary" id="conj-prev-verb-btn" ${CONJ_STATE.verbIndex === 0 ? 'disabled' : ''}>${t('fr.conj.prevVerb')}</button>
+      <button class="btn btn-secondary" id="conj-next-verb-btn">${CONJ_STATE.verbIndex < CONJ_STATE.verbQueue.length - 1 ? t('fr.conj.nextVerbArrow') : t('common.seeResultArrow')}</button>
     </div>
   `;
 
@@ -9029,11 +9189,11 @@ function renderConjPracticeStep(){
       });
     });
     if (CONJ_STATE.hintLevel === 1){
-      this.textContent = '💡 Mais ajuda';
-      this.title = 'Revelar a maior parte das letras';
+      this.textContent = t('fr.conj.hintMore');
+      this.title = t('fr.conj.hintMoreTitle');
     } else {
       this.disabled = true;
-      this.textContent = '💡 Dica máxima';
+      this.textContent = t('fr.conj.hintMax');
     }
   });
 
@@ -9074,7 +9234,7 @@ function renderConjPracticeStep(){
           earnedXP += isIrregular ? 2 : 1;
         } else if (accepted.some(f => normalizeLoose(given) === normalizeLoose(f))){
           fieldEl.classList.add('almost');
-          expectedEl.textContent = `Quase! → ${expected}`;
+          expectedEl.textContent = t('feedback.almostArrow', { expected });
           correctCount += 0.5; tenseCorrect += 0.5;
         } else {
           fieldEl.classList.add('wrong');
@@ -9126,13 +9286,17 @@ function renderConjPracticeStep(){
 // Ditados de revisão do nível usam moduleId "<nível>-revisao" (não é um módulo).
 function isLevelReviewId(id){ return typeof id === 'string' && id.endsWith('-revisao'); }
 function moduleTitleFor(moduleId){
-  if (isLevelReviewId(moduleId)) return `Revisão do nível ${moduleId.split('-')[0]}`;
+  if (isLevelReviewId(moduleId)) return t('fr.dictation.levelReviewTitle', { level: moduleId.split('-')[0] });
   const mod = MODULES.find(m => m.id === moduleId);
   return mod ? mod.title : '';
 }
 
+// Fase 9: com o site em inglês, usa a versão com as instruções em inglês
+// (gerada pela Action "Áudio TTS" > ditados-en) -- só depois que os mp3 existirem
+// (DICTATION_AUDIO_EN_READY em dictations.js). Até lá, toca o de sempre.
 function dictationAudioPath(d){
-  return `audio/dictation-${d.id}-guided.mp3`;
+  const en = typeof getUiLang === 'function' && getUiLang() === 'en' && DICTATION_AUDIO_EN_READY;
+  return `audio/dictation-${d.id}-guided${en ? '.en' : ''}.mp3`;
 }
 
 // Áudio do ditado em reprodução no momento (só um por vez).
@@ -9244,7 +9408,7 @@ function renderDictationList(){
     <button class="dictation-card ${isDictationLocked(d) ? 'locked' : ''}" data-dict-id="${d.id}">
       ${isDictationLocked(d) ? `<span class="challenge-card-check" title="${chT('tier.premium')}">🔒</span>` : ''}
       <div class="dictation-card-level">${d.level}</div>
-      <div class="dictation-card-task">${escapeHtmlDictation(d.task)}</div>
+      <div class="dictation-card-task">${escapeHtmlDictation(dictationTask(d))}</div>
       <div class="dictation-card-module">${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</div>
       ${dictationCardProgressHTML(d.id)}
       ${tierBadgeHTML(dictationTier(d))}
@@ -9288,7 +9452,7 @@ function openDictationPlayer(id){
 
   const content = document.getElementById('dictation-player-content');
   content.innerHTML = `
-    <div class="dictation-player-task">${escapeHtmlDictation(d.task)}</div>
+    <div class="dictation-player-task">${escapeHtmlDictation(dictationTask(d))}</div>
     <p class="dictation-player-module">${d.level} · ${escapeHtmlDictation(moduleTitleFor(d.moduleId))}</p>
     <div class="dictation-audio-player">
       <div class="dictation-transport">
@@ -10009,10 +10173,10 @@ function parseChallengesImportInput(rawText){
   try {
     parsed = JSON.parse(rawText);
   } catch (err) {
-    throw new Error('JSON inválido: ' + err.message);
+    throw new Error(t('adminChallenges.import.invalidJson') + err.message);
   }
   const items = Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.accepted) ? parsed.accepted : null);
-  if (!items) throw new Error('Esperava um array de desafios, ou um objeto com "accepted" (saída direta do pipeline).');
+  if (!items) throw new Error(t('adminChallenges.import.expectedArray'));
   return items;
 }
 
@@ -10029,21 +10193,21 @@ async function importChallengesFromJSON(rawText){
   const skipped = [];
 
   items.forEach((item, idx) => {
-    const label = (item && item.id) ? item.id : `item #${idx + 1}`;
+    const label = (item && item.id) ? item.id : t('adminChallenges.import.itemN', { n: idx + 1 });
     if (!item || !item.id || !item.type || !item.level){
-      skipped.push(`${label}: faltando id/type/level`);
+      skipped.push(t('adminChallenges.import.missing', { label }));
       return;
     }
     if (!CHALLENGE_VALID_TYPES.includes(item.type)){
-      skipped.push(`${item.id}: type inválido ("${item.type}")`);
+      skipped.push(t('adminChallenges.import.badType', { id: item.id, type: item.type }));
       return;
     }
     if (!CHALLENGE_LEVELS_ORDER.includes(item.level)){
-      skipped.push(`${item.id}: level inválido ("${item.level}")`);
+      skipped.push(t('adminChallenges.import.badLevel', { id: item.id, level: item.level }));
       return;
     }
     if (existingIds.has(item.id) || seenInBatch.has(item.id)){
-      skipped.push(`${item.id}: id já existe (duplicado)`);
+      skipped.push(t('adminChallenges.import.dupId', { id: item.id }));
       return;
     }
     seenInBatch.add(item.id);
@@ -10111,7 +10275,7 @@ async function persistChallenge(c, extraColumns = {}){
   challengesLoadedAt = 0; // gravou: o cache deixa de valer
   if (error){
     console.error('Falha ao salvar desafio no Supabase:', error);
-    alert('Não foi possível salvar no banco de dados: ' + error.message);
+    alert(t('adminChallenges.persist.failed') + error.message);
     return false;
   }
   return true;
@@ -10147,10 +10311,9 @@ function pendingChallenges(){
 
 
 // ---------- i18n dos textos de INTERFACE dos Desafios/Ditados ----------
-// Ainda não existe um mecanismo global de idioma da interface. Enquanto isso,
-// chT() lê window.UI_LANG (se algum dia for definido) e cai em pt-BR e, por
-// fim, na própria chave. Quando o mecanismo global chegar, basta ligar chT()
-// a ele (e mover CHALLENGE_I18N para os arquivos de idioma). O CONTEÚDO em
+// chT() agora lê o idioma do site do mecanismo global (getUiLang, shared/i18n),
+// cai em pt-BR e, por fim, na própria chave. 'en' = inglês (reaproveita as
+// traduções do catálogo global onde o texto em português é idêntico). O CONTEÚDO em
 // francês (frases, respostas, dados do banco) NÃO passa por aqui.
 const CHALLENGE_I18N = {
   'pt-BR': {
@@ -10273,6 +10436,17 @@ const CHALLENGE_I18N = {
     'ch.lt.alert.mustInclude': 'Faltou uma ideia importante: "{word}".',
     'ch.lt.alert.mustExclude': 'A palavra "{word}" não se encaixa nesta frase.',
     'ch.lt.missing': 'Palavras que faltaram',
+    'ch.search.placeholder': 'Buscar expressão…',
+    'ch.search.label': 'Buscar nas expressões',
+    'ch.search.none': 'Nenhuma expressão encontrada.',
+    'ch.filter.label': 'Filtrar expressões',
+    'ch.filter.all': 'Todas',
+    'ch.filter.pending': 'Pendentes',
+    'ch.filter.done': 'Concluídas',
+    'ch.ring.aria': '{done} de {total} concluídas',
+    'ch.lt.legend.bad': 'palavra errada',
+    'ch.lt.legend.near': 'quase certa',
+    'ch.lt.legend.miss': 'faltou',
     'ch.lt.agreement': '⚠ Repare na concordância: depois de "{pronoun}", "{verb}" não é a conjugação certa.',
     'ch.lt.yours': 'Sua resposta',
     'ch.lt.expected': 'Resposta esperada',
@@ -10300,10 +10474,159 @@ const CHALLENGE_I18N = {
     'prem.modal.title': '🔒 Recurso Premium',
     'prem.modal.p1': 'Os <strong>Desafios do Módulo</strong> reforçam cada tema da trilha com Expressões, Ouça e traduza, Acentuação e Ditados extras.',
     'prem.modal.p2': 'Eles fazem parte do plano Premium. Para ativar, fale com a administração (profbrune).'
+  },
+  'en': {
+    'tier.premium': "Premium",
+    'tier.free': "Free",
+    'dict.back.trail': "← Back to the trail",
+    'dict.back.challenges': "← Back to challenges",
+    'dict.bestAttempts': "Best score: {best} · {n} {unit}",
+    'dict.attempt.one': "attempt",
+    'dict.attempt.many': "attempts",
+    'dict.play': "▶️ Listen to the dictation",
+    'dict.pause': "⏸ Pause",
+    'dict.restart': "Restart",
+    'dict.back15': "Back 15s",
+    'dict.fwd15': "Forward 15s",
+    'dict.mute': "Mute",
+    'dict.unmute': "Unmute",
+    'dict.placeholder': "Type what you heard here...",
+    'dict.textAria': "Dictation text",
+    'dict.check': "Check",
+    'dict.retry': "Try again",
+    'dict.audioFail': "Couldn't play the audio",
+    'dict.audioUnavailable': "⚠️ Audio unavailable",
+    'dict.writeFirst': "Write what you heard before checking.",
+    'dict.nearPrefix': "Almost: ",
+    'dict.note.digits': "Spelled out: {digits} → <strong>{words}</strong>. In a dictation, write the number as words (no penalty).",
+    'dict.note.spoken': "You wrote “{said}” as a word. In a dictation, write the sign ({symbol}). Small penalty.",
+    'dict.note.punct': "Punctuation: missing in {n} {places} (underlined above). It doesn't cost points.",
+    'dict.place.one': "place",
+    'dict.place.many': "places",
+    'dict.sent.title': "Listen sentence by sentence",
+    'dict.sent.flagHint': " · the ones marked with ⚠ have a mistake of yours",
+    'dict.sent.listenN': "Listen to sentence {n}",
+    'dict.sent.errorAria': " (you made a mistake in this sentence)",
+    'dict.sent.listen': "▶ listen to sentence",
+    'dict.sent.flag': "⚠ you made a mistake here:",
+    'dict.score': "You wrote <strong>{hit} of {total}</strong> words correctly{light}. You scored {score} points ({score}%).",
+    'dict.scoreLight': " ({n} with a small spelling slip, worth half a point)",
+    'dict.record': "Best score: <strong>{best}</strong> · {n} {unit}",
+    'dict.reviewWords': "Words to review:",
+    'dict.count.one': "{n} dictation",
+    'dict.count.many': "{n} dictations",
+    'ch.retryNow': "🔁 Try again",
+    'ch.catProgress.one': "{done} of {total} completed",
+    'ch.catProgress.many': "{done} of {total} completed",
+    'ch.review.title': "Review mistakes ({n})",
+    'ch.review.subtitle': "Challenges you got wrong, time to review them",
+    'ch.review.doneTitle': "Today's review is done!",
+    'ch.review.doneSub': "The challenges you got right come back later, each time more spaced out.",
+    'ch.review.back': "Back to challenges",
+    'ch.retryLater': "Try later",
+    'ch.complete': "✅ Complete",
+    'ch.knowMore': "En savoir plus",
+    'ch.goFurther': "Pour aller plus loin",
+    'ch.loading': "Loading challenges...",
+    'ch.loadError': "Couldn't load the challenges right now. Check your connection and try again.",
+    'ch.retry': "Try again",
+    'ch.moduleTitle': "Module {n} Challenges",
+    'ch.moduleSub': "{title} · now that you have studied this topic, practice in new ways.",
+    'ch.title': "Challenges",
+    'ch.sub': "Practice real French: expressions, listening comprehension and spelling.",
+    'ch.count.one': "{n} challenge",
+    'ch.count.many': "{n} challenges",
+    'ch.cat.expression.title': "Expressions",
+    'ch.cat.expression.subtitle': "Discover the meaning",
+    'ch.cat.listen_translate.title': "Listen and translate",
+    'ch.cat.listen_translate.subtitle': "Listen and translate",
+    'ch.cat.accent.title': "Accents",
+    'ch.cat.accent.subtitle': "Write it correctly",
+    'ch.cat.cloze_grammar.title': "Complete the sentence",
+    'ch.cat.cloze_grammar.subtitle': "Grammar in practice",
+    'ch.label.cloze': "🧠 Complete the sentence",
+    'ch.cloze.instruction': "Choose the right form for each blank:",
+    'ch.cloze.blank': "Blank {n}",
+    'ch.cloze.chooseAll': "Choose an option for each blank before checking.",
+    'ch.cloze.right': "✅ Bonne réponse.",
+    'ch.cloze.yourAnswer': "Your answer",
+    'ch.cloze.correct': "Correct answer",
+    'ch.cloze.translation': "Translation",
+    'ch.cat.dictation.title': "Dictations",
+    'ch.cat.dictation.subtitle': "Listen and write",
+    'ch.label.listen': "🎧 Listen and translate",
+    'ch.label.accent': "✍️ Accents",
+    'ch.ofModule': " · from the module",
+    'ch.emptyTitle': "No challenges published yet",
+    'ch.emptySub': "New challenges in this category are coming soon.",
+    'ch.lockedNote.one': "🔒 +{n} module challenge on Premium",
+    'ch.lockedNote.many': "🔒 +{n} module challenges in Premium",
+    'ch.level': "Level {level}",
+    'ch.btn.premiumLock': "🔒 Premium feature",
+    'ch.progress.one': "{done}/{total} completed",
+    'ch.progress.many': "{done}/{total} completed",
+    'ch.btn.review': "🎉 Review",
+    'ch.btn.continue': "Continue",
+    'ch.btn.start': "Start",
+    'ch.queue.done': "Exercise complete!",
+    'ch.queue.levelProgress': "Level {level} — {progress}",
+    'ch.queue.continue': "Continue →",
+    'ch.queue.levelDone': "Level {level} complete!",
+    'ch.queue.levelDoneSub': "You have finished all the exercises in this level.",
+    'ch.queue.back': "Back to levels",
+    'ch.listenPron': "Listen to pronunciation",
+    'ch.expr.reveal': "Voir les réponses",
+    'ch.expr.yourAnswer': "Your answer: {chosen}<br>Correct answer: <strong>{correct}</strong>",
+    'ch.expr.signifies': "signifie <strong>{fr}</strong>.",
+    'ch.expr.inPt': "In English: <strong>{pt}</strong>.",
+    'ch.expr.example1': "Exemple 1",
+    'ch.expr.example2': "Exemple 2",
+    'ch.listenFr': "▶ Écouter",
+    'ch.expr.yourTurn': "À vous de jouer",
+    'ch.expr.showAnswer': "Voir la réponse",
+    'ch.expr.right': "✅ Bonne réponse.",
+    'ch.notQuite': "❌ Pas tout à fait.",
+    'ch.lt.hint': "Montrer un indice",
+    'ch.lt.label': "Type your translation:",
+    'ch.lt.placeholder': "Your translation in English...",
+    'ch.verify': "Vérifier",
+    'ch.lt.alert.negation': "Watch the negation: the original sentence and yours don't agree on \"not/never/nothing\".",
+    'ch.lt.alert.number': "Watch the numbers: check the quantity in the original sentence.",
+    'ch.lt.alert.mustInclude': "An important idea is missing: \"{word}\".",
+    'ch.lt.alert.mustExclude': "The word \"{word}\" doesn't fit this sentence.",
+    'ch.lt.missing': "Words that were missing",
+    'ch.lt.agreement': "⚠ Mind the agreement: after \"{pronoun}\", \"{verb}\" is not the right conjugation.",
+    'ch.lt.yours': "Your answer",
+    'ch.lt.expected': "Expected answer",
+    'ch.lt.original': "Original sentence",
+    'ch.lt.explanation': "Explanation",
+    'ch.listenAgain': "▶ Écouter encore",
+    'ch.lt.right': "✅ Bonne traduction.",
+    'ch.lt.partial': "🟡 Presque : bonne idée, mais vérifiez les détails.",
+    'ch.accent.label': "Type what you heard:",
+    'ch.accent.yours': "Your answer: <strong>{answer}</strong>",
+    'ch.accent.right': "✅ Correct.",
+    'ch.accent.partial': "🟡 Presque : vérifiez les accents.",
+    'ch.accent.wrong': "❌ Incorrect.",
+    'ch.static.back': "← Back to categories",
+    'ch.static.backChallenges': "← Back to challenges",
+    'ch.static.backTrail': "← Back to the trail",
+    'dict.static.title': "Dictations",
+    'dict.static.sub': "Train your listening and spelling with dictations based on real tasks from each module.",
+    'dict.static.how': "🎧 How does the dictation work?",
+    'dict.static.s1': "Listen to the audio -- at normal speed or slowly, as many times as you like.",
+    'dict.static.s2': "Type exactly what you heard, with accents and punctuation.",
+    'dict.static.s3': "Click \"Verificar\" to compare your answer with the original text.",
+    'dict.static.s4': "See what you got right and what needs review, word by word.",
+    'dict.static.backList': "← Back to dictations",
+    'prem.modal.title': "🔒 Premium feature",
+    'prem.modal.p1': "<strong>Module Challenges</strong> reinforce each topic in the course with Expressions, Listen and Translate, Accents, and extra Dictations.",
+    'prem.modal.p2': "They're part of the Premium plan. To activate it, contact the administrator (profbrune)."
   }
 };
 function chT(key, vars){
-  const lang = (typeof window !== 'undefined' && window.UI_LANG) || 'pt-BR';
+  // Idioma do site (mecanismo global, shared/i18n); cai em pt-BR e, por fim, na chave.
+  const lang = (typeof getUiLang === 'function' && getUiLang()) || 'pt-BR';
   let str = (CHALLENGE_I18N[lang] && CHALLENGE_I18N[lang][key]);
   if (str == null) str = CHALLENGE_I18N['pt-BR'][key];
   if (str == null) return key;
@@ -10314,6 +10637,7 @@ function chT(key, vars){
 function applyChallengeI18n(){
   document.querySelectorAll('[data-ch-i18n]').forEach(el => { el.innerHTML = chT(el.dataset.chI18n); });
 }
+window.addEventListener('i18n:change', () => { applyChallengeI18n(); });
 
 // ---------- Desafios do Módulo (Premium) ----------
 // Um desafio "da trilha" é qualquer desafio com `moduleId` (campo extra dentro
@@ -10516,7 +10840,7 @@ function challengeFeedbackWrapperHTML(typeClass, isCorrect, headerText, bodyHTML
   const cls = out === 'ok' ? 'correct' : out === 'partial' ? 'partial' : 'incorrect';
   return `
     <div class="${typeClass}-feedback ${cls}">
-      <div class="${typeClass}-feedback-header">${headerText}</div>
+      <div class="${typeClass}-feedback-header"><span class="fb-ico" aria-hidden="true">${out === 'ok' ? '✓' : out === 'partial' ? '~' : '✕'}</span><span class="fb-title">${String(headerText).replace(/^[\u2705\u274C\u26A0\uFE0F\s]+/, '')}</span></div>
       ${bodyHTML}
       ${out === 'fail' ? challengeRetryButtonsHTML() : challengeCompleteButtonHTML()}
     </div>
@@ -10669,6 +10993,14 @@ async function renderChallengeCategories(){
       ${challengeProgressHTML(dictationsHere.filter(d => isDictationDone(d.id)).length, dictationsHere.length)}
     </button>
   ` : '');
+  // Anel de progresso no ícone de cada categoria (CSS lê --p, 0 a 100).
+  wrap.querySelectorAll('.challenge-category-card').forEach(card => {
+    const pr = card.querySelector('.challenge-progress');
+    if (!pr) return;
+    const d = Number(pr.dataset.done), t = Number(pr.dataset.total);
+    card.style.setProperty('--p', t ? Math.round(d / t * 100) : 0);
+    if (t && d >= t) card.dataset.complete = '1';
+  });
   const reviewCard = document.getElementById('challenges-review-card');
   if (reviewCard) reviewCard.addEventListener('click', openChallengeReviewQueue);
   wrap.querySelectorAll('.challenge-category-card[data-category]').forEach(card => {
@@ -10795,16 +11127,69 @@ function renderChallengesList(type){
   // Todos os níveis numa página só (estilo lingua.com), cada um com seus
   // próprios cards -- em vez de abas que escondem os outros níveis.
   cardsWrap.className = 'challenges-level-sections';
+  cardsWrap.innerHTML = `
+    <div class="challenges-toolbar">
+      <input type="search" class="challenges-search" id="challenges-search" placeholder="${chT('ch.search.placeholder')}" aria-label="${chT('ch.search.label')}" autocomplete="off" value="${escapeHtmlChallenge(challengesListSearch)}">
+      <div class="challenges-filter-chips" role="group" aria-label="${chT('ch.filter.label')}">
+        ${['all', 'pending', 'done'].map(f => `<button type="button" class="challenges-filter-chip ${challengesListFilter === f ? 'active' : ''}" data-filter="${f}" aria-pressed="${challengesListFilter === f}">${chT('ch.filter.' + f)}</button>`).join('')}
+      </div>
+    </div>
+    <div id="challenges-level-sections-inner"></div>
+  `;
+  const fillSections = () => fillExpressionLevelSections(type, published);
+  document.getElementById('challenges-search').addEventListener('input', e => {
+    challengesListSearch = e.target.value;
+    fillSections();
+  });
+  cardsWrap.querySelectorAll('.challenges-filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      challengesListFilter = chip.dataset.filter;
+      cardsWrap.querySelectorAll('.challenges-filter-chip').forEach(ch => {
+        const on = ch.dataset.filter === challengesListFilter;
+        ch.classList.toggle('active', on);
+        ch.setAttribute('aria-pressed', String(on));
+      });
+      fillSections();
+    });
+  });
+  fillSections();
+}
+
+// Busca/filtro da lista de Expressões (07/10/2026). Só filtram a exibição --
+// o anel de cada nível sempre mostra o progresso do nível inteiro (não do
+// que está filtrado), pra não parecer que o progresso mudou ao buscar.
+let challengesListSearch = '';
+let challengesListFilter = 'all';
+
+function challengeSearchHaystack(c){
+  return normalizeForTranslationCompare([c.canonicalExpression, c.level].join(' '));
+}
+
+function fillExpressionLevelSections(type, published){
+  const inner = document.getElementById('challenges-level-sections-inner');
+  if (!inner) return;
+  const q = normalizeForTranslationCompare(challengesListSearch);
+  const matches = c => {
+    if (challengesListFilter === 'pending' && isChallengeCompleted(c.id)) return false;
+    if (challengesListFilter === 'done' && !isChallengeCompleted(c.id)) return false;
+    return !q || challengeSearchHaystack(c).includes(q);
+  };
+  const filtering = challengesListFilter !== 'all' || !!q;
   const levelsPresent = CHALLENGE_LEVELS_ORDER.filter(lvl => published.some(c => c.level === lvl));
-  cardsWrap.innerHTML = levelsPresent.map(level => {
-    const levelCards = published.filter(c => c.level === level);
-    const collapsed = collapsedChallengeLevels.has(level);
+  const html = levelsPresent.map(level => {
+    const levelAll = published.filter(c => c.level === level);
+    const levelCards = levelAll.filter(matches);
+    if (filtering && !levelCards.length) return '';
+    const collapsed = collapsedChallengeLevels.has(level) && !filtering;
+    const doneN = levelAll.filter(c => isChallengeCompleted(c.id)).length;
+    const pct = levelAll.length ? Math.round(doneN / levelAll.length * 100) : 0;
     return `
       <div class="challenges-level-section">
         <button class="challenges-level-heading" data-level="${level}">
           <span class="challenges-level-chevron ${collapsed ? 'collapsed' : ''}">▾</span>
-          Nível ${level}
-          <span class="challenges-level-count">${levelCards.length}</span>
+          <span class="challenges-level-ring" style="--p:${pct}" data-complete="${pct === 100 ? 1 : 0}" role="img" aria-label="${chT('ch.ring.aria', { done: doneN, total: levelAll.length })}">${doneN}/${levelAll.length}</span>
+          ${t('fr.challenges.levelName', { level })}
+          <span class="challenges-level-count">${filtering ? `${levelCards.length}/${levelAll.length}` : levelAll.length}</span>
         </button>
         <div class="challenges-cards" ${collapsed ? 'style="display:none;"' : ''}>
           ${levelCards.map(challengeCardHTML).join('')}
@@ -10812,16 +11197,17 @@ function renderChallengesList(type){
       </div>
     `;
   }).join('');
+  inner.innerHTML = html || `<div class="challenges-empty"><p>${chT('ch.search.none')}</p></div>`;
 
-  cardsWrap.querySelectorAll('.challenge-card').forEach(card => {
+  inner.querySelectorAll('.challenge-card').forEach(card => {
     card.addEventListener('click', () => openChallengePlayer(card.dataset.challengeId));
   });
-  cardsWrap.querySelectorAll('.challenges-level-heading').forEach(btn => {
+  inner.querySelectorAll('.challenges-level-heading').forEach(btn => {
     btn.addEventListener('click', () => {
       const level = btn.dataset.level;
       if (collapsedChallengeLevels.has(level)) collapsedChallengeLevels.delete(level);
       else collapsedChallengeLevels.add(level);
-      renderChallengesList(type);
+      fillExpressionLevelSections(type, published);
     });
   });
 }
@@ -10921,26 +11307,26 @@ document.getElementById('challenges-import-submit-btn').addEventListener('click'
   let result;
   try {
     btn.disabled = true;
-    btn.textContent = 'Importando…';
+    btn.textContent = t('adminChallenges.import.importing');
     result = await importChallengesFromJSON(textarea.value);
   } catch (err) {
     btn.disabled = false;
-    btn.textContent = 'Importar';
+    btn.textContent = t('adminChallenges.import.btn');
     statusEl.className = 'challenges-import-status err';
     statusEl.textContent = '❌ ' + err.message;
     return;
   }
   btn.disabled = false;
-  btn.textContent = 'Importar';
+  btn.textContent = t('adminChallenges.import.btn');
 
   if (result.error){
     statusEl.className = 'challenges-import-status err';
-    statusEl.textContent = `❌ Falha ao gravar no banco: ${result.error}`;
+    statusEl.textContent = t('adminChallenges.import.dbFail', { error: result.error });
     return;
   }
   const lines = [];
-  if (result.insertedCount > 0) lines.push(`✅ ${result.insertedCount} desafio(s) importado(s) como pendente(s) de revisão.`);
-  if (result.skipped.length > 0) lines.push(`⚠ ${result.skipped.length} pulado(s):\n` + result.skipped.map(s => '  • ' + s).join('\n'));
+  if (result.insertedCount > 0) lines.push(t('adminChallenges.import.ok', { n: result.insertedCount }));
+  if (result.skipped.length > 0) lines.push(t('adminChallenges.import.skipped', { n: result.skipped.length }) + '\n' + result.skipped.map(s => '  • ' + s).join('\n'));
   statusEl.className = result.insertedCount > 0 ? 'challenges-import-status ok' : 'challenges-import-status err';
   statusEl.textContent = lines.join('\n\n');
   if (result.insertedCount > 0){
@@ -11035,8 +11421,8 @@ function renderExpressionFeedbackScreen(c, chosenIdx, isCorrect){
   const bodyHTML = `
       ${isCorrect ? '' : `<p class="challenge-feedback-chosen">${chT('ch.expr.yourAnswer', { chosen: escapeHtmlChallenge(c.options[chosenIdx]), correct: escapeHtmlChallenge(c.correctAnswer) })}</p>`}
       <p class="challenge-feedback-meaning"><strong>${escapeHtmlChallenge(c.canonicalExpression)}</strong><br>
-      ${chT('ch.expr.signifies', { fr: escapeHtmlChallenge(c.meaning.fr) })}<br>
-      ${chT('ch.expr.inPt', { pt: escapeHtmlChallenge(c.meaning.pt) })}</p>
+      ${chT('ch.expr.signifies', { fr: escapeHtmlChallenge(String(c.meaning.fr).replace(/[.\s]+$/, '')) })}<br>
+      ${chT('ch.expr.inPt', { pt: escapeHtmlChallenge(String(c.meaning.pt).replace(/[.\s]+$/, '')) })}</p>
       <p class="challenge-explanation">${escapeHtmlChallenge(c.explanation)}</p>
 
       <div class="challenge-second-example">
@@ -11104,6 +11490,7 @@ function normalizeForTranslationCompare(s){
     .trim();
 }
 
+// Comparador pt-BR usado pela análise de alertas (negação/número/mustInclude, Fase 3).
 const TRANSLATION_STOPWORDS_PT = new Set([
   'o','a','os','as','um','uma','uns','umas','de','do','da','dos','das','em','no','na','nos','nas',
   'que','e','é','ele','ela','eles','elas','eu','tu','voce','você','nos','nós','voces','vocês',
@@ -11126,6 +11513,38 @@ function translationSimilarity(a, b){
 function isTranslationAcceptable(studentAnswer, referenceTranslations){
   if (!studentAnswer || !studentAnswer.trim()) return false;
   return (referenceTranslations || []).some(ref => translationSimilarity(studentAnswer, ref) >= 0.55);
+}
+
+// Fase 9: o comparador mora em shared/translation-compare.js (um por idioma da
+// TRADUÇÃO, que é o idioma do site). Em português o comportamento é idêntico
+// ao antigo (teste diferencial em tests/i18n/test_translation_compare.js).
+// Se o site está em inglês mas o desafio ainda não tem referências em inglês,
+// o aluno traduz para o português como antes (com o aviso do desafio).
+function challengeOverlay(c){
+  const lang = typeof getUiLang === 'function' ? getUiLang() : 'pt-BR';
+  return (lang !== 'pt-BR' && window.CHALLENGES_I18N && window.CHALLENGES_I18N[lang] && window.CHALLENGES_I18N[lang][c.id]) || null;
+}
+// Texto do desafio no idioma do site (overlay) ou o original.
+function challengeText(c, field){
+  const ov = challengeOverlay(c);
+  return (ov && ov[field]) ? ov[field] : c[field];
+}
+function dictationTask(d){
+  const lang = typeof getUiLang === 'function' ? getUiLang() : 'pt-BR';
+  const ov = lang !== 'pt-BR' && window.DICTATIONS_I18N && window.DICTATIONS_I18N[lang] && window.DICTATIONS_I18N[lang][d.id];
+  return (ov && ov.task) ? ov.task : d.task;
+}
+function listenTranslateSetup(c){
+  const ov = challengeOverlay(c);
+  const hasEn = !!(ov && Array.isArray(ov.referenceTranslations) && ov.referenceTranslations.length);
+  const lang = hasEn ? getUiLang() : 'pt-BR';
+  return {
+    lang,
+    translated: hasEn || lang === getUiLang(),
+    cmp: TranslationCompare.forLang(lang),
+    refs: hasEn ? ov.referenceTranslations : (c.referenceTranslations || []),
+    explanation: (hasEn && ov.explanation) ? ov.explanation : c.explanation
+  };
 }
 
 // A sobreposição de palavras acima não pega troca de sujeito ("eu comprou"
@@ -11310,7 +11729,70 @@ function listenTranslateOutcome(studentAnswer, referenceTranslations, personMism
   if (personMismatch || an.alerts.length || an.similarity < 0.8) return 'partial';
   return 'ok';
 }
+
+// ---- Marcação palavra a palavra (07/10/2026) ----
+// Cada palavra da resposta do aluno vira 'ok' (está na referência), 'near'
+// (quase: mesma raiz/pequena diferença de grafia ou flexão, ex. comprou x
+// comprei) ou 'bad' (não está na referência). Palavras de ligação (artigos,
+// preposições) que sobram são neutras (null). Na referência, 'ok' = o aluno
+// escreveu, 'near' = foi a quase-acertada, 'miss' = faltou.
+function translationEditDistance(a, b){
+  const m = a.length, n = b.length;
+  if (!m) return n;
+  if (!n) return m;
+  let prev = Array.from({ length: n + 1 }, (_, j) => j);
+  for (let i = 1; i <= m; i++){
+    const cur = [i];
+    for (let j = 1; j <= n; j++){
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    prev = cur;
+  }
+  return prev[n];
+}
+function translationWordsAreNear(a, b){
+  if (a === b) return true;
+  if (Math.min(a.length, b.length) < 4) return false;
+  let p = 0;
+  while (p < a.length && p < b.length && a[p] === b[p]) p++;
+  if (p >= 4 && p >= Math.min(a.length, b.length) - 3) return true;
+  return translationEditDistance(a, b) <= Math.max(1, Math.floor(Math.max(a.length, b.length) / 4));
+}
+function markTranslationWords(studentAnswer, referenceText){
+  const toks = s => String(s || '').split(/\s+/).filter(Boolean)
+    .map(text => ({ text, norm: normalizeForTranslationCompare(text) }));
+  const stu = toks(studentAnswer), ref = toks(referenceText);
+  stu.forEach(t => { t.cls = null; });
+  ref.forEach(t => { t.cls = null; });
+  const free = t => t.norm && !t.cls;
+  // 1) iguais
+  stu.forEach(s => {
+    if (!s.norm) return;
+    const r = ref.find(r => free(r) && r.norm === s.norm);
+    if (r){ s.cls = 'ok'; r.cls = 'ok'; }
+  });
+  // 2) quase
+  stu.forEach(s => {
+    if (!s.norm || s.cls) return;
+    const r = ref.find(r => free(r) && !TRANSLATION_STOPWORDS_PT.has(r.norm) && translationWordsAreNear(s.norm, r.norm));
+    if (r){ s.cls = 'near'; r.cls = 'near'; }
+  });
+  // 3) o resto
+  stu.forEach(s => {
+    if (!s.norm || s.cls) return;
+    s.cls = TRANSLATION_STOPWORDS_PT.has(s.norm) ? null : 'bad';
+  });
+  ref.forEach(r => {
+    if (!r.norm || r.cls) return;
+    r.cls = TRANSLATION_STOPWORDS_PT.has(r.norm) ? null : 'miss';
+  });
+  return { student: stu.map(({ text, cls }) => ({ text, cls })), reference: ref.map(({ text, cls }) => ({ text, cls })) };
+}
 // END challenge-translation-logic
+
+function markedWordsHTML(parts){
+  return parts.map(p => p.cls ? `<span class="tw-${p.cls}">${escapeHtmlChallenge(p.text)}</span>` : escapeHtmlChallenge(p.text)).join(' ');
+}
 
 function openListenTranslatePlayer(c){
   const content = document.getElementById('challenge-player-content');
@@ -11365,20 +11847,39 @@ function translationAlertsHTML(an, outcome){
 function checkListenTranslateAnswer(c){
   const input = document.getElementById('lt-answer-input');
   const studentAnswer = input.value.trim();
-  const personMismatch = translationHasPersonMismatch(studentAnswer);
-  const outcome = listenTranslateOutcome(studentAnswer, c.referenceTranslations, personMismatch, c);
-  const analysis = analyzeTranslation(studentAnswer, c.referenceTranslations, c);
+  // Site em inglês com referências em inglês (overlay): comparador do idioma da
+  // tradução (shared/translation-compare.js). Senão, a análise em português
+  // completa (alertas de negação/número/mustInclude, 3 níveis).
+  const lt = listenTranslateSetup(c);
+  const i18nCmp = lt.lang !== 'pt-BR';
+  let personMismatch, outcome, analysis = null;
+  if (i18nCmp){
+    personMismatch = lt.cmp.personMismatch(studentAnswer);
+    outcome = (!personMismatch && lt.cmp.isAcceptable(studentAnswer, lt.refs)) ? 'ok' : 'fail';
+  } else {
+    personMismatch = translationHasPersonMismatch(studentAnswer);
+    outcome = listenTranslateOutcome(studentAnswer, c.referenceTranslations, personMismatch, c);
+    analysis = analyzeTranslation(studentAnswer, c.referenceTranslations, c);
+  }
   const isCorrect = outcome === 'ok';
   // Desafio de conteúdo continua clicável mesmo já concluído -- não dá XP
   // (mesma decisão de answerChallenge, ver auditoria do sistema de XP).
 
+  const marked = (outcome !== 'ok' && studentAnswer && analysis) ? markTranslationWords(studentAnswer, analysis.bestRef || c.referenceTranslations[0]) : null;
+  const yoursHTML = marked ? markedWordsHTML(marked.student) : escapeHtmlChallenge(studentAnswer || '—');
+  const expectedHTML = marked ? markedWordsHTML(marked.reference) : escapeHtmlChallenge((analysis && analysis.bestRef) || lt.refs[0]);
+  const legendHTML = marked && (marked.student.some(p => p.cls === 'bad' || p.cls === 'near') || marked.reference.some(p => p.cls === 'miss'))
+    ? `<p class="tw-legend"><span class="tw-bad">${chT('ch.lt.legend.bad')}</span> <span class="tw-near">${chT('ch.lt.legend.near')}</span> <span class="tw-miss">${chT('ch.lt.legend.miss')}</span></p>` : '';
   const ltBodyHTML = `
       ${personMismatch ? `<p class="listen-translate-feedback-warning">${chT('ch.lt.agreement', { pronoun: escapeHtmlChallenge(personMismatch.pronoun), verb: escapeHtmlChallenge(personMismatch.verb) })}</p>` : ''}
-      ${translationAlertsHTML(analysis, outcome)}
-      <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.yours')}</strong>${escapeHtmlChallenge(studentAnswer || '—')}</p>
-      <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.expected')}</strong>${escapeHtmlChallenge(c.referenceTranslations[0])}</p>
+      ${analysis ? translationAlertsHTML(analysis, outcome) : ''}
+      <div class="fb-cmp">
+        <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.yours')}</strong>${yoursHTML}</p>
+        <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.expected')}</strong>${expectedHTML}</p>
+      </div>
+      ${legendHTML}
       <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.original')}</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
-      ${c.explanation ? `<p class="listen-translate-feedback-row"><strong>${chT('ch.lt.explanation')}</strong>${escapeHtmlChallenge(c.explanation)}</p>` : ''}
+      ${lt.explanation ? `<p class="listen-translate-feedback-row"><strong>${chT('ch.lt.explanation')}</strong>${escapeHtmlChallenge(lt.explanation)}</p>` : ''}
       <div class="audio-btn-row">
         <button class="dictation-play-btn" id="lt-replay-btn">${chT('ch.listenAgain')}</button>
         ${slowAudioBtnHTML('lt-replay-slow-btn')}
@@ -11468,7 +11969,7 @@ function checkAccentAnswer(c){
         <button class="dictation-play-btn" id="accent-replay-btn">${chT('ch.listenFr')}</button>
         ${slowAudioBtnHTML('accent-replay-slow-btn')}
       </div>
-      ${c.explanation ? `<p class="accent-feedback-explanation">${escapeHtmlChallenge(c.explanation)}</p>` : ''}
+      ${(challengeText(c, 'explanation')) ? `<p class="accent-feedback-explanation">${escapeHtmlChallenge(challengeText(c, 'explanation'))}</p>` : ''}
   `;
   document.getElementById('accent-feedback-wrap').innerHTML = challengeFeedbackWrapperHTML('accent', isCorrect, outcome === 'ok' ? chT('ch.accent.right') : outcome === 'partial' ? chT('ch.accent.partial') : chT('ch.accent.wrong'), accentBodyHTML, outcome);
   document.getElementById('accent-verify-btn').style.display = 'none';
@@ -11678,16 +12179,16 @@ function challengeAudioIsFresh(text, audioFile){
 function challengeAudioFields(c){
   if (c.type === 'expression'){
     return [
-      { label: 'Áudio da expressão-alvo', text: c.canonicalExpression, audioFile: c.expressionAudioFile },
-      { label: 'Áudio do Exemple 1', text: c.example.text, audioFile: c.example.audioFile },
-      { label: 'Áudio do Exemple 2', text: c.secondExample.text, audioFile: c.secondExample.audioFile },
+      { label: t('adminChallenges.audio.target'), text: c.canonicalExpression, audioFile: c.expressionAudioFile },
+      { label: t('adminChallenges.audio.ex1'), text: c.example.text, audioFile: c.example.audioFile },
+      { label: t('adminChallenges.audio.ex2'), text: c.secondExample.text, audioFile: c.secondExample.audioFile },
     ];
   }
   if (c.type === 'listen_translate'){
-    return [{ label: 'Áudio da frase', text: c.sentenceFr, audioFile: c.audioFile }];
+    return [{ label: t('adminChallenges.audio.sentence'), text: c.sentenceFr, audioFile: c.audioFile }];
   }
   if (c.type === 'accent'){
-    return [{ label: 'Áudio da palavra', text: c.targetText, audioFile: c.audioFile }];
+    return [{ label: t('adminChallenges.audio.word'), text: c.targetText, audioFile: c.audioFile }];
   }
   return [];
 }
@@ -11700,26 +12201,26 @@ function challengeQualityChecklist(c){
 
   challengeAudioFields(c).forEach(f => {
     if (!f.audioFile){
-      items.push({ label: `${f.label}: ausente`, ok: false, blocking: true });
+      items.push({ label: t('adminChallenges.qa.audioMissing', { label: f.label }), ok: false, blocking: true });
     } else if (challengeAudioIsFresh(f.text, f.audioFile) === false){
-      items.push({ label: `${f.label}: desatualizado (texto mudou depois do áudio ser gerado)`, ok: false, blocking: false, audioFile: f.audioFile });
+      items.push({ label: t('adminChallenges.qa.audioStale', { label: f.label }), ok: false, blocking: false, audioFile: f.audioFile });
     } else {
-      items.push({ label: `${f.label}: disponível e atualizado`, ok: true, blocking: false, audioFile: f.audioFile });
+      items.push({ label: t('adminChallenges.qa.audioOk', { label: f.label }), ok: true, blocking: false, audioFile: f.audioFile });
     }
   });
 
   if (c.type === 'expression'){
-    items.push({ label: 'Resposta correta definida', ok: !!c.correctAnswer && c.options.includes(c.correctAnswer), blocking: true });
-    items.push({ label: '4 alternativas', ok: c.options.length === 4, blocking: true });
-    items.push({ label: 'Explicação preenchida', ok: !!c.explanation, blocking: false });
-    items.push({ label: 'Microatividade válida', ok: !!(c.microActivity.prompt && c.microActivity.answer), blocking: false });
+    items.push({ label: t('adminChallenges.qa.correctSet'), ok: !!c.correctAnswer && c.options.includes(c.correctAnswer), blocking: true });
+    items.push({ label: t('adminChallenges.qa.fourOptions'), ok: c.options.length === 4, blocking: true });
+    items.push({ label: t('adminChallenges.qa.explanationFilled'), ok: !!c.explanation, blocking: false });
+    items.push({ label: t('adminChallenges.qa.microValid'), ok: !!(c.microActivity.prompt && c.microActivity.answer), blocking: false });
   } else if (c.type === 'listen_translate'){
-    items.push({ label: 'Frase preenchida', ok: !!c.sentenceFr, blocking: true });
-    items.push({ label: 'Dica preenchida', ok: !!c.hintText, blocking: false });
-    items.push({ label: 'Ao menos 1 tradução aceita', ok: (c.referenceTranslations || []).length > 0, blocking: true });
+    items.push({ label: t('adminChallenges.qa.sentenceFilled'), ok: !!c.sentenceFr, blocking: true });
+    items.push({ label: t('adminChallenges.qa.hintFilled'), ok: !!c.hintText, blocking: false });
+    items.push({ label: t('adminChallenges.qa.oneTranslation'), ok: (c.referenceTranslations || []).length > 0, blocking: true });
   } else if (c.type === 'accent'){
-    items.push({ label: 'Palavra/expressão preenchida', ok: !!c.targetText, blocking: true });
-    items.push({ label: 'Explicação preenchida', ok: !!c.explanation, blocking: false });
+    items.push({ label: t('adminChallenges.qa.wordFilled'), ok: !!c.targetText, blocking: true });
+    items.push({ label: t('adminChallenges.qa.explanationFilled'), ok: !!c.explanation, blocking: false });
   } else if (c.type === 'cloze_grammar'){
     const problems = validateClozeGrammarItem(c);
     items.push({ label: problems.length ? 'Lacunas/opções: ' + problems.join('; ') : 'Lacunas, opções e explicação válidas', ok: !problems.length, blocking: true });
@@ -11733,11 +12234,11 @@ function challengeQualityChecklistHTML(c){
   const items = challengeQualityChecklist(c);
   return `
     <div class="challenges-admin-checklist">
-      <strong style="font-size:12px;">Controle de qualidade</strong>
+      <strong style="font-size:12px;">${t('adminChallenges.qa.title')}</strong>
       ${items.map(it => `
         <div class="challenges-admin-checklist-item ${it.ok ? 'ok' : 'warn'}">
           ${it.ok ? '✓' : '⚠'} ${escapeHtmlChallenge(it.label)}
-          ${it.audioFile ? `<span class="challenges-admin-audio-duration" data-audio-file="${escapeHtmlChallenge(it.audioFile)}">carregando duração…</span>` : ''}
+          ${it.audioFile ? `<span class="challenges-admin-audio-duration" data-audio-file="${escapeHtmlChallenge(it.audioFile)}">${t('adminChallenges.qa.loadingDuration')}</span>` : ''}
         </div>
       `).join('')}
     </div>
@@ -11754,29 +12255,36 @@ function wireChallengeAudioDurations(container){
       el.textContent = `· ${audio.duration.toFixed(1).replace('.', ',')} s`;
     });
     audio.addEventListener('error', () => {
-      el.textContent = '· não foi possível carregar';
+      el.textContent = t('adminChallenges.qa.loadFail');
     });
   });
 }
 
 const CHALLENGE_RESOURCE_TYPE_LABEL = {
-  dictionary: 'Dicionário', article: 'Artigo linguístico', youtube: 'Vídeo', youglish: 'Exemplos autênticos'
+  get dictionary(){ return t('adminChallenges.res.dictionary'); },
+  get article(){ return t('adminChallenges.res.article'); },
+  get youtube(){ return t('adminChallenges.res.youtube'); },
+  get youglish(){ return t('adminChallenges.res.youglish'); },
 };
-const CHALLENGE_RESOURCE_QUALITY_LABEL = { high: 'Alta', medium: 'Média', low: 'Baixa' };
+const CHALLENGE_RESOURCE_QUALITY_LABEL = {
+  get high(){ return t('adminChallenges.res.qHigh'); },
+  get medium(){ return t('adminChallenges.res.qMedium'); },
+  get low(){ return t('adminChallenges.res.qLow'); },
+};
 
 function challengeAdminResourceHTML(r, idx){
   return `
     <div class="challenges-admin-resource ${r.approved === false ? 'rejected' : ''}" data-resource-idx="${idx}">
       <div class="challenges-admin-resource-info">
         <strong>${escapeHtmlChallenge(r.sourceName || r.title)}</strong>
-        <span class="challenges-admin-hint">Tipo: ${escapeHtmlChallenge(CHALLENGE_RESOURCE_TYPE_LABEL[r.type] || r.type)}${r.quality ? ` · Qualidade: ${CHALLENGE_RESOURCE_QUALITY_LABEL[r.quality] || r.quality}` : ''}</span>
+        <span class="challenges-admin-hint">${t('adminChallenges.res.type', { type: escapeHtmlChallenge(CHALLENGE_RESOURCE_TYPE_LABEL[r.type] || r.type) })}${r.quality ? ` · ${t('adminChallenges.res.quality', { quality: CHALLENGE_RESOURCE_QUALITY_LABEL[r.quality] || r.quality })}` : ''}</span>
         <span class="challenges-admin-hint">${escapeHtmlChallenge(r.description || '')}</span>
-        <span class="challenges-admin-hint">${r.lastChecked ? `Link verificado em ${escapeHtmlChallenge(r.lastChecked)}` : 'Link não verificado automaticamente — confira antes de aprovar'}</span>
+        <span class="challenges-admin-hint">${r.lastChecked ? t('adminChallenges.res.checked', { date: escapeHtmlChallenge(r.lastChecked) }) : t('adminChallenges.res.unchecked')}</span>
       </div>
       <div class="challenges-admin-resource-actions">
-        <a class="btn btn-secondary btn-sm" href="${escapeHtmlChallenge(r.url)}" target="_blank" rel="noopener">Abrir</a>
-        <button class="btn btn-sm ${r.approved !== false ? 'btn-primary' : 'btn-secondary'}" data-resource-action="approve">✅ Aprovar</button>
-        <button class="btn btn-sm ${r.approved === false ? 'btn-primary' : 'btn-secondary'}" data-resource-action="reject">❌ Rejeitar</button>
+        <a class="btn btn-secondary btn-sm" href="${escapeHtmlChallenge(r.url)}" target="_blank" rel="noopener">${t('adminChallenges.res.open')}</a>
+        <button class="btn btn-sm ${r.approved !== false ? 'btn-primary' : 'btn-secondary'}" data-resource-action="approve">${t('adminChallenges.res.approve')}</button>
+        <button class="btn btn-sm ${r.approved === false ? 'btn-primary' : 'btn-secondary'}" data-resource-action="reject">${t('adminChallenges.btn.reject')}</button>
       </div>
     </div>
   `;
@@ -11785,19 +12293,19 @@ function challengeAdminResourceHTML(r, idx){
 function challengeAdminReadViewExpression(c){
   const resourcesHTML = (c.externalResources && c.externalResources.length)
     ? c.externalResources.map((r, idx) => challengeAdminResourceHTML(r, idx)).join('')
-    : `<p class="challenges-admin-hint">Nenhum recurso externo encontrado</p>`;
+    : `<p class="challenges-admin-hint">${t('adminChallenges.res.none')}</p>`;
 
   return `
-    <p class="challenges-admin-field"><strong>Áudio da expressão-alvo:</strong> ${c.expressionAudioFile ? `🔊 disponível — <span class="challenges-admin-hint">este é o áudio tocado no início do desafio, não o exemplo contextual</span>` : '<span class="challenges-admin-hint">ausente</span>'}</p>
-    <p class="challenges-admin-field"><strong>Exemplo (contexto escrito, sem áudio automático):</strong> ${escapeHtmlChallenge(c.example.text)}</p>
-    <p class="challenges-admin-field"><strong>Pergunta:</strong> ${escapeHtmlChallenge(c.question)}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.audio.target')}:</strong> ${c.expressionAudioFile ? `${t('adminChallenges.view.audioAvailable')} — <span class="challenges-admin-hint">${t('adminChallenges.view.targetAudioNote')}</span>` : `<span class="challenges-admin-hint">${t('adminChallenges.view.absent')}</span>`}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.view.example')}:</strong> ${escapeHtmlChallenge(c.example.text)}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.view.question')}:</strong> ${escapeHtmlChallenge(c.question)}</p>
     <ul class="challenges-admin-choices">
       ${c.options.map(opt => `<li class="${opt === c.correctAnswer ? 'correct' : ''}">${escapeHtmlChallenge(opt)}</li>`).join('')}
     </ul>
-    <p class="challenges-admin-field"><strong>Explicação:</strong> ${escapeHtmlChallenge(c.explanation)}</p>
-    <p class="challenges-admin-field"><strong>2º exemplo:</strong> ${escapeHtmlChallenge(c.secondExample.text)} ${c.secondExample.audioFile ? '🔊' : '<span class="challenges-admin-hint">(sem áudio)</span>'}</p>
-    <p class="challenges-admin-field"><strong>Microatividade:</strong> ${escapeHtmlChallenge(c.microActivity.prompt)} → ${escapeHtmlChallenge(c.microActivity.answer)}</p>
-    <p class="challenges-admin-field"><strong>Recursos encontrados (Pour aller plus loin):</strong></p>
+    <p class="challenges-admin-field"><strong>${t('fr.step.explanation')}:</strong> ${escapeHtmlChallenge(c.explanation)}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.view.secondExample')}:</strong> ${escapeHtmlChallenge(c.secondExample.text)} ${c.secondExample.audioFile ? '🔊' : `<span class="challenges-admin-hint">${t('adminChallenges.view.noAudio')}</span>`}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.view.micro')}:</strong> ${escapeHtmlChallenge(c.microActivity.prompt)} → ${escapeHtmlChallenge(c.microActivity.answer)}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.view.resources')}:</strong></p>
     <div class="challenges-admin-resources">${resourcesHTML}</div>
     ${challengeQualityChecklistHTML(c)}
   `;
@@ -11806,81 +12314,81 @@ function challengeAdminReadViewExpression(c){
 function challengeAdminEditViewExpression(c){
   const optionsText = c.options.map(o => (o === c.correctAnswer ? '*' : '') + o).join('\n');
   return `
-    <label class="challenges-admin-edit-label">Exemplo
+    <label class="challenges-admin-edit-label">${t('adminChallenges.edit.example')}
       <textarea class="challenges-admin-edit-input" data-field="example.text" rows="2">${escapeHtmlChallenge(c.example.text)}</textarea>
     </label>
-    <label class="challenges-admin-edit-label">Pergunta
+    <label class="challenges-admin-edit-label">${t('adminChallenges.view.question')}
       <input class="challenges-admin-edit-input" data-field="question" value="${escapeHtmlChallenge(c.question)}">
     </label>
-    <label class="challenges-admin-edit-label">Alternativas (uma por linha — marque a correta com * no início)
+    <label class="challenges-admin-edit-label">${t('adminChallenges.edit.options')}
       <textarea class="challenges-admin-edit-input" data-field="options" rows="4">${escapeHtmlChallenge(optionsText)}</textarea>
     </label>
-    <label class="challenges-admin-edit-label">Explicação
+    <label class="challenges-admin-edit-label">${t('fr.step.explanation')}
       <textarea class="challenges-admin-edit-input" data-field="explanation" rows="2">${escapeHtmlChallenge(c.explanation)}</textarea>
     </label>
-    <label class="challenges-admin-edit-label">2º exemplo
+    <label class="challenges-admin-edit-label">${t('adminChallenges.view.secondExample')}
       <textarea class="challenges-admin-edit-input" data-field="secondExample.text" rows="2">${escapeHtmlChallenge(c.secondExample.text)}</textarea>
     </label>
-    <label class="challenges-admin-edit-label">Microatividade — frase
+    <label class="challenges-admin-edit-label">${t('adminChallenges.edit.microPrompt')}
       <input class="challenges-admin-edit-input" data-field="microActivity.prompt" value="${escapeHtmlChallenge(c.microActivity.prompt)}">
     </label>
-    <label class="challenges-admin-edit-label">Microatividade — resposta
+    <label class="challenges-admin-edit-label">${t('adminChallenges.edit.microAnswer')}
       <input class="challenges-admin-edit-input" data-field="microActivity.answer" value="${escapeHtmlChallenge(c.microActivity.answer)}">
     </label>
-    <p class="challenges-admin-hint">Editar o texto de um exemplo não regenera o áudio automaticamente — me avise se algum áudio precisar ser refeito.</p>
+    <p class="challenges-admin-hint">${t('adminChallenges.edit.exampleHint')}</p>
   `;
 }
 
 function challengeAdminReadViewListenTranslate(c){
   return `
-    <p class="challenges-admin-field"><strong>Áudio:</strong> ${c.audioFile ? '🔊 disponível' : '<span class="challenges-admin-hint">ausente</span>'}</p>
-    <p class="challenges-admin-field"><strong>Frase (francês):</strong> ${escapeHtmlChallenge(c.sentenceFr)}</p>
-    <p class="challenges-admin-field"><strong>Dica (cloze):</strong> ${escapeHtmlChallenge(c.hintText)}</p>
-    <p class="challenges-admin-field"><strong>Traduções aceitas:</strong></p>
+    <p class="challenges-admin-field"><strong>${t('fieldEditor.audio.title')}:</strong> ${c.audioFile ? t('adminChallenges.view.audioAvailable') : `<span class="challenges-admin-hint">${t('adminChallenges.view.absent')}</span>`}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.view.sentenceFr')}:</strong> ${escapeHtmlChallenge(c.sentenceFr)}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.view.hint')}:</strong> ${escapeHtmlChallenge(c.hintText)}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.view.translations')}:</strong></p>
     <ul class="challenges-admin-choices">
       ${(c.referenceTranslations || []).map(t => `<li>${escapeHtmlChallenge(t)}</li>`).join('')}
     </ul>
-    <p class="challenges-admin-field"><strong>Explicação:</strong> ${escapeHtmlChallenge(c.explanation || '—')}</p>
+    <p class="challenges-admin-field"><strong>${t('fr.step.explanation')}:</strong> ${escapeHtmlChallenge(c.explanation || '—')}</p>
     ${challengeQualityChecklistHTML(c)}
   `;
 }
 
 function challengeAdminEditViewListenTranslate(c){
   return `
-    <label class="challenges-admin-edit-label">Frase (francês)
+    <label class="challenges-admin-edit-label">${t('adminChallenges.view.sentenceFr')}
       <textarea class="challenges-admin-edit-input" data-field="sentenceFr" rows="2">${escapeHtmlChallenge(c.sentenceFr)}</textarea>
     </label>
-    <label class="challenges-admin-edit-label">Dica (cloze, com ______ pra parte oculta)
+    <label class="challenges-admin-edit-label">${t('adminChallenges.edit.hint')}
       <input class="challenges-admin-edit-input" data-field="hintText" value="${escapeHtmlChallenge(c.hintText)}">
     </label>
-    <label class="challenges-admin-edit-label">Traduções aceitas (uma por linha, a primeira é a "resposta esperada" mostrada no feedback)
+    <label class="challenges-admin-edit-label">${t('adminChallenges.edit.translations')}
       <textarea class="challenges-admin-edit-input" data-field="referenceTranslations" rows="4">${escapeHtmlChallenge((c.referenceTranslations || []).join('\n'))}</textarea>
     </label>
-    <label class="challenges-admin-edit-label">Explicação
+    <label class="challenges-admin-edit-label">${t('fr.step.explanation')}
       <input class="challenges-admin-edit-input" data-field="explanation" value="${escapeHtmlChallenge(c.explanation || '')}">
     </label>
-    <p class="challenges-admin-hint">Editar a frase não regenera o áudio automaticamente — me avise se precisar ser refeito.</p>
+    <p class="challenges-admin-hint">${t('adminChallenges.edit.sentenceHint')}</p>
   `;
 }
 
 function challengeAdminReadViewAccent(c){
   return `
-    <p class="challenges-admin-field"><strong>Áudio:</strong> ${c.audioFile ? '🔊 disponível' : '<span class="challenges-admin-hint">ausente</span>'}</p>
-    <p class="challenges-admin-field"><strong>Palavra/expressão:</strong> ${escapeHtmlChallenge(c.targetText)}</p>
-    <p class="challenges-admin-field"><strong>Explicação:</strong> ${escapeHtmlChallenge(c.explanation || '—')}</p>
+    <p class="challenges-admin-field"><strong>${t('fieldEditor.audio.title')}:</strong> ${c.audioFile ? t('adminChallenges.view.audioAvailable') : `<span class="challenges-admin-hint">${t('adminChallenges.view.absent')}</span>`}</p>
+    <p class="challenges-admin-field"><strong>${t('adminChallenges.view.word')}:</strong> ${escapeHtmlChallenge(c.targetText)}</p>
+    <p class="challenges-admin-field"><strong>${t('fr.step.explanation')}:</strong> ${escapeHtmlChallenge(c.explanation || '—')}</p>
     ${challengeQualityChecklistHTML(c)}
   `;
 }
 
 function challengeAdminEditViewAccent(c){
   return `
-    <label class="challenges-admin-edit-label">Palavra/expressão (com acentos corretos)
+    <label class="challenges-admin-edit-label">${t('adminChallenges.edit.word')}
       <input class="challenges-admin-edit-input" data-field="targetText" value="${escapeHtmlChallenge(c.targetText)}">
     </label>
-    <label class="challenges-admin-edit-label">Explicação
+    <label class="challenges-admin-edit-label">${t('fr.step.explanation')}
       <input class="challenges-admin-edit-input" data-field="explanation" value="${escapeHtmlChallenge(c.explanation || '')}">
     </label>
-    <p class="challenges-admin-hint">Editar a palavra não regenera o áudio automaticamente — me avise se precisar ser refeito.</p>
+    <p class="challenges-admin-hint">${t('adminChallenges.edit.wordHint')}</p>
   `;
 }
 
@@ -11941,7 +12449,7 @@ function challengeAdminCardTitle(c){
     const snippet = (c.sentenceFr || '').length > 60 ? c.sentenceFr.slice(0, 57) + '…' : (c.sentenceFr || '');
     return `🎧 ${escapeHtmlChallenge(snippet)}`;
   }
-  if (c.type === 'accent') return `✍️ Acentuação — ${escapeHtmlChallenge(c.targetText)}`;
+  if (c.type === 'accent') return t('adminChallenges.card.accentTitle', { word: escapeHtmlChallenge(c.targetText) });
   if (c.type === 'cloze_grammar') return `🧠 ${escapeHtmlChallenge(c.sentenceFr || '')}`;
   return '';
 }
@@ -11957,11 +12465,11 @@ async function approveChallengeWithGate(c){
   const blocking = items.filter(it => !it.ok && it.blocking);
   const warnings = items.filter(it => !it.ok && !it.blocking);
   if (blocking.length){
-    alert('Não é possível aprovar — corrija antes:\n\n' + blocking.map(b => '• ' + b.label).join('\n'));
+    alert(t('adminChallenges.approve.blocked') + '\n\n' + blocking.map(b => '• ' + b.label).join('\n'));
     return false;
   }
   if (warnings.length){
-    const proceed = confirm('Atenção, encontrei possíveis problemas:\n\n' + warnings.map(w => '• ' + w.label).join('\n') + '\n\nAprovar mesmo assim?');
+    const proceed = confirm(t('adminChallenges.approve.warnings') + '\n\n' + warnings.map(w => '• ' + w.label).join('\n') + '\n\n' + t('adminChallenges.approve.anyway'));
     if (!proceed) return false;
   }
   const previousStatus = c.status;
@@ -11974,7 +12482,7 @@ async function approveChallengeWithGate(c){
     c.status = previousStatus;
     return false;
   }
-  showToast('Desafio publicado — já está visível pro aluno.');
+  showToast(t('adminChallenges.toast.published'));
   return true;
 }
 
@@ -12011,7 +12519,7 @@ async function unpublishChallenge(c){
     c.status = previousStatus;
     return false;
   }
-  showToast('Desafio despublicado — não aparece mais pro aluno.');
+  showToast(t('adminChallenges.toast.unpublished'));
   return true;
 }
 
@@ -12039,11 +12547,11 @@ function renderChallengePreviewBanner(c){
   banner.className = 'challenge-preview-banner';
   banner.style.display = 'flex';
   banner.innerHTML = `
-    <div class="challenge-preview-banner-label">🔍 Pré-visualização — versão do aluno</div>
+    <div class="challenge-preview-banner-label">${t('adminChallenges.preview.label')}</div>
     <div class="challenge-preview-banner-actions">
-      ${c.type !== 'expression' ? '<button class="btn btn-secondary btn-sm" id="preview-show-answer-btn">Mostrar resposta esperada</button>' : ''}
-      <button class="btn btn-secondary" id="preview-back-to-edit-btn">← Voltar para edição</button>
-      <button class="btn btn-primary" id="preview-approve-btn"${blocking.length ? ' disabled' : ''}>✅ Aprovar desafio</button>
+      ${c.type !== 'expression' ? `<button class="btn btn-secondary btn-sm" id="preview-show-answer-btn">${t('adminChallenges.preview.showAnswer')}</button>` : ''}
+      <button class="btn btn-secondary" id="preview-back-to-edit-btn">${t('adminChallenges.preview.backToEdit')}</button>
+      <button class="btn btn-primary" id="preview-approve-btn"${blocking.length ? ' disabled' : ''}>${t('adminChallenges.preview.approve')}</button>
     </div>
   `;
   if (blocking.length){
@@ -12071,7 +12579,7 @@ function renderChallengePreviewBanner(c){
   if (showAnswerBtn){
     showAnswerBtn.addEventListener('click', () => {
       const answer = c.type === 'listen_translate' ? (c.referenceTranslations || [])[0] : c.type === 'cloze_grammar' ? clozeGrammarFilled(c) : c.targetText;
-      alert('Resposta esperada: ' + answer);
+      alert(t('adminChallenges.preview.expected') + answer);
     });
   }
 }
@@ -12100,11 +12608,11 @@ function challengeAdminPublishedCardHTML(c){
       ${editing ? `<div class="challenges-admin-card-body">${challengeAdminEditView(c)}</div>` : ''}
       <div class="challenges-admin-actions">
         ${editing
-          ? `<button class="btn btn-primary" data-action="save">💾 Salvar</button>
-             <button class="btn btn-secondary" data-action="cancel-edit">Cancelar</button>`
-          : `<button class="btn btn-secondary" data-action="preview">👁️ Ver versão do aluno</button>
-             <button class="btn btn-secondary" data-action="edit">✏️ Editar</button>
-             <button class="btn btn-secondary" data-action="unpublish">🚫 Despublicar</button>`
+          ? `<button class="btn btn-primary" data-action="save">${t('adminChallenges.btn.save')}</button>
+             <button class="btn btn-secondary" data-action="cancel-edit">${t('myFlashcards.edit.cancel')}</button>`
+          : `<button class="btn btn-secondary" data-action="preview">${t('adminChallenges.btn.preview')}</button>
+             <button class="btn btn-secondary" data-action="edit">${t('adminChallenges.btn.edit')}</button>
+             <button class="btn btn-secondary" data-action="unpublish">${t('adminChallenges.btn.unpublish')}</button>`
         }
       </div>
     </div>
@@ -12123,7 +12631,12 @@ function challengeAdminPublishedCardHTML(c){
 const challengesAdminFilterState = { search: '', type: 'all', level: 'all' };
 const CHALLENGES_ADMIN_PAGE_SIZE = 15;
 const challengesAdminVisibleCount = { pending: CHALLENGES_ADMIN_PAGE_SIZE, published: CHALLENGES_ADMIN_PAGE_SIZE, unpublished: CHALLENGES_ADMIN_PAGE_SIZE };
-const CHALLENGE_TYPE_LABELS = { expression: 'Expressões', listen_translate: 'Ouça e traduza', accent: 'Acentuação', cloze_grammar: 'Complete a frase' };
+const CHALLENGE_TYPE_LABELS = {
+  get expression(){ return t('fr.challenges.cat.expression.title'); },
+  get listen_translate(){ return t('fr.challenges.cat.listenTranslate.title'); },
+  get accent(){ return t('fr.challenges.cat.accent.title'); },
+  get cloze_grammar(){ return t('fr.challenges.cat.clozeGrammar.title'); },
+};
 
 function challengeSearchableText(c){
   return [c.canonicalExpression, c.sentenceFr, c.targetText, c.question, c.explanation, c.translationPt]
@@ -12146,13 +12659,13 @@ function challengesAdminFilterBarHTML(){
     `<option value="${val}" ${challengesAdminFilterState.type === val ? 'selected' : ''}>${label}</option>`).join('');
   return `
     <div class="challenges-admin-filters">
-      <input type="text" id="challenges-admin-search" placeholder="Buscar por expressão, frase, palavra..." value="${escapeHtmlChallenge(challengesAdminFilterState.search)}">
+      <input type="text" id="challenges-admin-search" placeholder="${t('adminChallenges.filter.searchPh')}" value="${escapeHtmlChallenge(challengesAdminFilterState.search)}">
       <select id="challenges-admin-filter-type">
-        <option value="all" ${challengesAdminFilterState.type === 'all' ? 'selected' : ''}>Todas as categorias</option>
+        <option value="all" ${challengesAdminFilterState.type === 'all' ? 'selected' : ''}>${t('adminChallenges.filter.allTypes')}</option>
         ${typeOptions}
       </select>
       <select id="challenges-admin-filter-level">
-        <option value="all" ${challengesAdminFilterState.level === 'all' ? 'selected' : ''}>Todos os níveis</option>
+        <option value="all" ${challengesAdminFilterState.level === 'all' ? 'selected' : ''}>${t('adminChallenges.filter.allLevels')}</option>
         ${levelOptions}
       </select>
     </div>
@@ -12205,7 +12718,7 @@ function challengesAdminSectionHTML(sectionKey, title, filteredList, cardHTMLFn,
     <h3 class="challenges-admin-section-title">${title} (${filteredList.length})</h3>
     ${toolbarHTML}
     ${visible.map(cardHTMLFn).join('')}
-    ${remaining > 0 ? `<button class="btn btn-secondary challenges-admin-load-more" data-section="${sectionKey}">Carregar mais ${Math.min(remaining, CHALLENGES_ADMIN_PAGE_SIZE)} (${remaining} restantes)</button>` : ''}
+    ${remaining > 0 ? `<button class="btn btn-secondary challenges-admin-load-more" data-section="${sectionKey}">${t('adminChallenges.section.loadMore', { n: Math.min(remaining, CHALLENGES_ADMIN_PAGE_SIZE), remaining })}</button>` : ''}
   `;
 }
 
@@ -12224,10 +12737,10 @@ function challengesAdminBulkToolbarHTML(filteredPending){
     <div class="challenges-admin-bulk-toolbar">
       <label class="challenges-admin-select-all">
         <input type="checkbox" id="challenges-admin-select-all" ${allSelected ? 'checked' : ''}>
-        Selecionar todos (${filteredPending.length})
+        ${t('adminChallenges.bulk.selectAll', { n: filteredPending.length })}
       </label>
       <button class="btn btn-primary btn-sm" id="challenges-admin-bulk-approve-btn" ${selectedCount === 0 ? 'disabled' : ''}>
-        ✅ Aprovar selecionados (${selectedCount})
+        ${t('adminChallenges.bulk.approveSelected', { n: selectedCount })}
       </button>
     </div>
   `;
@@ -12238,7 +12751,7 @@ function challengeAdminPendingCardHTML(c){
   return `
     <div class="challenges-admin-card" data-challenge-id="${c.id}">
       <div class="challenges-admin-card-header">
-        ${editing ? '' : `<input type="checkbox" class="challenges-admin-select-checkbox" data-id="${c.id}" ${challengesAdminSelectedIds.has(c.id) ? 'checked' : ''} aria-label="Selecionar pra aprovação em lote">`}
+        ${editing ? '' : `<input type="checkbox" class="challenges-admin-select-checkbox" data-id="${c.id}" ${challengesAdminSelectedIds.has(c.id) ? 'checked' : ''} aria-label="${t('adminChallenges.bulk.checkboxAria')}">`}
         <span class="challenge-card-level">${c.level}</span>
         <strong>${challengeAdminCardTitle(c)}</strong>
       </div>
@@ -12247,12 +12760,12 @@ function challengeAdminPendingCardHTML(c){
       </div>
       <div class="challenges-admin-actions">
         ${editing
-          ? `<button class="btn btn-primary" data-action="save">💾 Salvar</button>
-             <button class="btn btn-secondary" data-action="cancel-edit">Cancelar</button>`
-          : `<button class="btn btn-primary" data-action="approve">✅ Aprovar e publicar</button>
-             <button class="btn btn-secondary" data-action="preview">👁️ Ver versão do aluno</button>
-             <button class="btn btn-secondary" data-action="edit">✏️ Editar</button>
-             <button class="btn btn-secondary" data-action="reject">❌ Rejeitar</button>`
+          ? `<button class="btn btn-primary" data-action="save">${t('adminChallenges.btn.save')}</button>
+             <button class="btn btn-secondary" data-action="cancel-edit">${t('myFlashcards.edit.cancel')}</button>`
+          : `<button class="btn btn-primary" data-action="approve">${t('adminChallenges.btn.approvePublish')}</button>
+             <button class="btn btn-secondary" data-action="preview">${t('adminChallenges.btn.preview')}</button>
+             <button class="btn btn-secondary" data-action="edit">${t('adminChallenges.btn.edit')}</button>
+             <button class="btn btn-secondary" data-action="reject">${t('adminChallenges.btn.reject')}</button>`
         }
       </div>
     </div>
@@ -12269,7 +12782,7 @@ async function renderChallengesAdmin(){
   content.innerHTML = loadingHTML();
   const ok = await loadChallengesFromDB(true);
   if (!ok){
-    content.innerHTML = `<p class="challenges-admin-empty">⚠ Não foi possível carregar os desafios agora. Verifique sua conexão e tente novamente -- isto NÃO significa que a fila está vazia.</p>`;
+    content.innerHTML = `<p class="challenges-admin-empty">${t('adminChallenges.loadFailed')}</p>`;
     return;
   }
 
@@ -12294,15 +12807,15 @@ function renderChallengesAdminList(){
   // sempre "nenhum desafio [status]" mesmo quando na verdade existem,
   // só não bateram com a busca/filtro.
   const sectionEmptyMsg = (filtered, unfiltered, genuineMsg) =>
-    filtered.length === 0 && unfiltered.length > 0 ? 'Nenhum resultado nesta seção com o filtro atual.' : genuineMsg;
+    filtered.length === 0 && unfiltered.length > 0 ? t('adminChallenges.section.noResults') : genuineMsg;
 
-  const pendingHTML = challengesAdminSectionHTML('pending', 'Pendentes de revisão', pending, challengeAdminPendingCardHTML,
-    sectionEmptyMsg(pending, pendingUnfiltered, 'Nenhum desafio pendente de revisão.'),
+  const pendingHTML = challengesAdminSectionHTML('pending', t('adminChallenges.section.pending'), pending, challengeAdminPendingCardHTML,
+    sectionEmptyMsg(pending, pendingUnfiltered, t('adminChallenges.section.pendingEmpty')),
     pending.length > 0 ? challengesAdminBulkToolbarHTML(pending) : '');
-  const publishedHTML = challengesAdminSectionHTML('published', 'Publicados', published, challengeAdminPublishedCardHTML,
-    sectionEmptyMsg(published, publishedUnfiltered, 'Nenhum desafio publicado ainda.'));
-  const unpublishedHTML = challengesAdminSectionHTML('unpublished', 'Despublicados', unpublished, challengeAdminPublishedCardHTML,
-    sectionEmptyMsg(unpublished, unpublishedUnfiltered, 'Nenhum desafio despublicado.'));
+  const publishedHTML = challengesAdminSectionHTML('published', t('adminChallenges.section.published'), published, challengeAdminPublishedCardHTML,
+    sectionEmptyMsg(published, publishedUnfiltered, t('adminChallenges.section.publishedEmpty')));
+  const unpublishedHTML = challengesAdminSectionHTML('unpublished', t('adminChallenges.section.unpublished'), unpublished, challengeAdminPublishedCardHTML,
+    sectionEmptyMsg(unpublished, unpublishedUnfiltered, t('adminChallenges.section.unpublishedEmpty')));
 
   // Cada seção já mostra sua própria mensagem contextual quando vazia
   // (genuinamente vazia vs. vazia só por causa do filtro atual) --
@@ -12335,9 +12848,9 @@ function renderChallengesAdminList(){
   if (bulkApproveBtn) bulkApproveBtn.addEventListener('click', async () => {
     const targets = pending.filter(c => challengesAdminSelectedIds.has(c.id));
     if (targets.length === 0) return;
-    if (!confirm(`Aprovar e publicar ${targets.length} desafio(s) selecionado(s)? Só quem não tiver nenhum problema no checklist de qualidade é publicado automaticamente -- o resto continua pendente pra revisão individual.`)) return;
+    if (!confirm(t('adminChallenges.bulk.confirm', { n: targets.length }))) return;
     bulkApproveBtn.disabled = true;
-    bulkApproveBtn.textContent = 'Aprovando…';
+    bulkApproveBtn.textContent = t('adminChallenges.bulk.approving');
     let published = 0;
     const skipped = [];
     for (const c of targets){
@@ -12346,8 +12859,8 @@ function renderChallengesAdminList(){
       else if (result.skipped) skipped.push(challengeAdminCardTitle(c));
     }
     showToast(skipped.length === 0
-      ? `${published} desafio(s) publicado(s).`
-      : `${published} publicado(s). ${skipped.length} pulado(s) por ter algum problema no checklist -- revise um por um: ${skipped.join(', ')}`);
+      ? t('adminChallenges.bulk.published', { published })
+      : t('adminChallenges.bulk.publishedSkipped', { published, skipped: skipped.length, list: skipped.join(', ') }));
     renderChallengesAdmin();
   });
 
@@ -12373,7 +12886,7 @@ function renderChallengesAdminList(){
     });
     if (unpublishBtn) unpublishBtn.addEventListener('click', async () => {
       const c = CHALLENGES.find(x => x.id === id);
-      if (!confirm('Despublicar este desafio? Ele deixa de aparecer pro aluno imediatamente.')) return;
+      if (!confirm(t('adminChallenges.confirm.unpublish'))) return;
       if (await unpublishChallenge(c)) renderChallengesAdmin();
     });
     if (rejectBtn) rejectBtn.addEventListener('click', async () => {
@@ -12385,7 +12898,7 @@ function renderChallengesAdminList(){
         rejected_by: CURRENT_USER.email,
       });
       if (!ok){ c.status = previousStatus; return; }
-      showToast('Desafio rejeitado.');
+      showToast(t('adminChallenges.toast.rejected'));
       renderChallengesAdmin();
     });
     if (editBtn) editBtn.addEventListener('click', () => {
@@ -12444,8 +12957,8 @@ function renderChallengesAdminList(){
       if (!ok) return;
       challengesAdminEditingId = null;
       showToast(wasLive
-        ? 'Edição salva — desafio voltou para revisão (estava publicado/aprovado, precisa ser aprovado de novo).'
-        : 'Edição salva.');
+        ? t('adminChallenges.toast.savedBackToReview')
+        : t('adminChallenges.toast.saved'));
       renderChallengesAdmin();
     });
   });

@@ -1,0 +1,157 @@
+{
+ "unit": "A1-20",
+ "en": {
+  "title": "Past time expressions",
+  "goal": "Learn time markers for talking about the past, as preparation for the passé composé.",
+  "lessons": {
+   "ontem-anteontem-semana-passada": "Yesterday, the day before yesterday and last week",
+   "fim-de-semana-mes-ano-passados": "Last weekend, last month and last year",
+   "dois-dias-atras-ja-recentemente": "Two days ago, this morning, already and recently",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "yesterday",
+   "the day before yesterday",
+   "last week",
+   "last weekend",
+   "last month",
+   "last year",
+   "two days ago",
+   "this morning",
+   "already / ever",
+   "recently"
+  ],
+  "phrases": [
+   {
+    "t": "Yesterday, I visited a museum.",
+    "scenario": "Someone asks what you did yesterday, and you visited a museum. What do you answer?"
+   },
+   {
+    "t": "Last week, I ate at a restaurant.",
+    "scenario": "Someone asks what you did that was special last week — you ate at a restaurant. What do you say?"
+   },
+   {
+    "t": "Last weekend, it rained.",
+    "scenario": "Someone asks what the weather was like last weekend — it rained a lot. What do you answer?"
+   },
+   {
+    "t": "Have you ever visited Paris?",
+    "scenario": "You want to know whether a friend has ever been to Paris. What do you ask?"
+   },
+   {
+    "t": "The day before yesterday, I visited Paris."
+   },
+   {
+    "t": "Last month, I traveled to France."
+   },
+   {
+    "t": "Last year, I learned French."
+   },
+   {
+    "t": "Two days ago, it rained."
+   },
+   {
+    "t": "This morning, I had a coffee."
+   },
+   {
+    "t": "Recently, I changed jobs."
+   }
+  ],
+  "dialogue": {
+   "title": "What did you do yesterday?",
+   "lines": [
+    "What did you do yesterday?",
+    "I worked in the morning, and in the afternoon I played sports.",
+    "And last weekend?",
+    "We went to the movies with friends."
+   ]
+  },
+  "concepts": {
+   "hier-vs-semaine-derniere": [
+    {
+     "title": "\"Hier\" or \"la semaine dernière\"?",
+     "body": "<strong>Hier</strong> points to a specific day (yesterday). <strong>La semaine/le week-end dernier(-ère)</strong> points to a wider period (last week or last weekend). They all go well with the passé composé you've already seen: <strong>hier, j'ai visité</strong> un musée / <strong>la semaine dernière, j'ai mangé</strong> au restaurant.",
+     "examples": [
+      "yesterday",
+      "last week"
+     ]
+    }
+   ],
+   "quest-ce-que-tu-as-fait-wh-in-situ": [
+    {
+     "title": "\"Qu'est-ce que tu as fait hier ?\" also becomes \"T'as fait quoi hier ?\"",
+     "body": "In very everyday speech, this question often comes out like this: <strong>t'as fait quoi hier ?</strong> — \"qu'est-ce que\" disappears, \"quoi\" moves to the end, and \"tu as\" contracts to \"t'as\". Three simplifications at once, all very common together. In the exercises here, keep using the full form — it's the one the exercises ask for.",
+     "examples": [
+      "what did you do yesterday? (very everyday speech)"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "vocab[8]",
+   "pt": "já",
+   "en": "already / ever",
+   "conf": "media",
+   "why": "'déjà' = 'already' in statements, 'ever' in questions ('Tu as déjà visité Paris ?'); PT gloss is only 'já'."
+  },
+  {
+   "path": "phrases[3].t",
+   "pt": "Você já visitou Paris?",
+   "en": "Have you ever visited Paris?",
+   "conf": "media",
+   "why": "Present perfect with 'ever' is the natural English equivalent of 'Tu as déjà...'; 'Have you already visited Paris?' is also possible."
+  },
+  {
+   "path": "phrases[1].t",
+   "pt": "Semana passada eu comi num restaurante.",
+   "en": "Last week, I ate at a restaurant.",
+   "conf": "media",
+   "why": "'at' vs 'in' a restaurant both fine."
+  },
+  {
+   "path": "phrases[4].t",
+   "pt": "Anteontem, eu visitei Paris.",
+   "en": "The day before yesterday, I visited Paris.",
+   "conf": "media",
+   "why": "'avant-hier' has no short EN equivalent; 'the day before yesterday' is the standard."
+  },
+  {
+   "path": "phrases[8].t",
+   "pt": "Hoje de manhã, eu tomei um café.",
+   "en": "This morning, I had a coffee.",
+   "conf": "media",
+   "why": "'j'ai bu' = drank; 'had a coffee' is more natural."
+  },
+  {
+   "path": "phrases[9].t",
+   "pt": "Recentemente, eu mudei de emprego.",
+   "en": "Recently, I changed jobs.",
+   "conf": "media",
+   "why": "'changé de travail' = changed jobs."
+  },
+  {
+   "path": "dialogue.lines[1]",
+   "pt": "Eu trabalhei de manhã, e à tarde eu fiz esporte.",
+   "en": "I worked in the morning, and in the afternoon I played sports.",
+   "conf": "media",
+   "why": "'faire du sport' = 'play sports / exercise'; 'exercised' also fine."
+  },
+  {
+   "path": "dialogue.lines[3]",
+   "pt": "A gente foi ao cinema com amigos.",
+   "en": "We went to the movies with friends.",
+   "conf": "media",
+   "why": "'On' = informal 'we'."
+  },
+  {
+   "path": "concepts.quest-ce-que-tu-as-fait-wh-in-situ[0].examples[0]",
+   "pt": "o que você fez ontem? (fala bem cotidiana)",
+   "en": "what did you do yesterday? (very everyday speech)",
+   "conf": "media",
+   "why": "Reality note; register labelled."
+  }
+ ]
+}

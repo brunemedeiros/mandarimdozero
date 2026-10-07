@@ -95,8 +95,8 @@ async function bootPage(browser, lang, port){
     const { page, errors } = await bootPage(browser, lang, port);
     const ev = (fn, arg) => page.evaluate(fn, arg);
     const info = await ev(() => {
-      const words = new Set(STATE.cards.filter(c => c.origin === 'study').map(c => c.unitId + ':' + c.vocabIdx)).size;
-      return { words, cards: STATE.cards.length };
+      const words = new Set(STATE.cards.filter(c => c.origin === 'study' && c.vocabIdx != null).map(c => c.unitId + ':' + c.vocabIdx)).size;
+      return { words, cards: STATE.cards.filter(c => !isStudyTrailPhraseCard(c)).length, allCards: STATE.cards.length };
     });
     check(lang + ' boot: palavras = cards/2 (1 Note = 2 CardInstances)', info.cards === info.words * 2, info);
     // estuda SÓ o card A de 3 palavras (B fica New) e o B de uma 4ª (A New)
@@ -128,7 +128,7 @@ async function bootPage(browser, lang, port){
     check(lang + ' UI: 1 palavra forte, 2 medianas', ui.vs[3] === 1 && ui.vs[2] === 2, ui.vs);
     check(lang + ' UI: "Pendentes agora" aposentado', ui.hasPend === false);
     check(lang + ' UI: rótulos Novos/Aprendendo/Para revisar/Devidos/Para estudar hoje', ['Novos','Aprendendo','Para revisar','Devidos','Para estudar hoje'].every((l, i) => ui.stat[['new','learning','review','due','today'][i]] && ui.stat[['new','learning','review','due','today'][i]].label === l), ui.stat);
-    check(lang + ' UI: Novos = cartões sem histórico (CardInstance), Para revisar = 4 cartões estudados', ui.stat.new && ui.stat.new.n === info.cards - 4 - 0 && ui.stat.review && ui.stat.review.n === 4, ui.stat);
+    check(lang + ' UI: Novos = cartões sem histórico (CardInstance), Para revisar = 4 cartões estudados', ui.stat.new && ui.stat.new.n === info.allCards - 4 - 0 && ui.stat.review && ui.stat.review.n === 4, ui.stat);
     // Deck/Review continuam por CardInstance
     const cs = await ev(async () => {
       UNITS.forEach(x => { STATE.unitProgress[x.id] = { started: true, completed: true, lessonIdx: 99, lessonMisses: {} }; });
@@ -137,7 +137,7 @@ async function bootPage(browser, lang, port){
       await ensureDecksLoadedForReview();
       const u = UNITS.find(x => x.type !== 'grammar' && x.vocab.length >= 5);
       const s = deckReviewSummary(STATE.cards.find(c => c.id === `u${u.id}-v0`).deckId);
-      return { total: s.totalCards, wordsInUnit: u.vocab.length };
+      return { total: s.totalCards - STATE.cards.filter(c => c.unitId === u.id && isStudyTrailPhraseCard(c)).length, wordsInUnit: u.vocab.length };
     });
     check(lang + ' Deck segue por CardInstance (unidade: 2 x palavras)', cs.total === cs.wordsInUnit * 2, cs);
     // conclusão da unidade (A estudado em todas as palavras, B New) e botão "Já sei" real

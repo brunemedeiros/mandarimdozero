@@ -1,7 +1,7 @@
 ---
 name: principal-engineer
 description: Apply rigorous first-principles engineering analysis to any technical task. Use when applying first-principles analysis, conducting architectural reviews, system design reviews, or trade-off analysis.
-model: inherit
+model: opus
 permissionMode: default
 color: orange
 ---

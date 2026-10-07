@@ -72,7 +72,7 @@ function createFlashcardPreviewLocalState(card){
 function buildPreviewCardsFromNativeEditorState(editorState, opts){
   opts = opts || {};
   if (!isNativeNoteEditorState(editorState)){
-    return { ok: false, error: 'Adicione pelo menos 1 campo em "Campos nativos" pra pré-visualizar.' };
+    return { ok: false, error: t('preview.err.noFields') };
   }
   const v = validateNoteEditorStateForSave(editorState);
   if (!v.ok) return { ok: false, error: v.error };
@@ -87,7 +87,7 @@ function buildPreviewCardsFromNativeEditorState(editorState, opts){
       status: 'active',
     });
   } catch (e){
-    return { ok: false, error: 'Não foi possível montar a pré-visualização.' };
+    return { ok: false, error: t('preview.err.buildFailed') };
   }
   return buildPreviewCardsFromRow(row, opts);
 }
@@ -110,10 +110,10 @@ function buildPreviewCardsFromRow(row, opts){
       idPrefix: 'preview-',
     });
   } catch (e){
-    return { ok: false, error: 'Não foi possível montar a pré-visualização' + (e && e.message ? ` (${e.message})` : '') + '.' };
+    return { ok: false, error: t('preview.err.buildFailedBase') + (e && e.message ? t('preview.err.detail', { detail: e.message }) : '') + '.' };
   }
   if (!cards || !cards.length){
-    return { ok: false, error: 'Nenhum cartão seria gerado por este conteúdo.' };
+    return { ok: false, error: t('preview.err.noCards') };
   }
   cards.forEach(c => { c.__isPreviewCard = true; });
   return { ok: true, cards };
@@ -163,9 +163,9 @@ function renderFlashcardPreviewChrome(){
   const { cards, index } = FLASHCARD_PREVIEW_SESSION;
   if (cards.length > 1){
     navEl.innerHTML = `
-      <button type="button" class="btn btn-secondary" id="flashcard-preview-prev-btn" ${index === 0 ? 'disabled' : ''} style="flex:1;">← Anterior</button>
-      <span class="profile-edit-hint" style="margin:0 12px; white-space:nowrap;">Cartão ${index + 1} de ${cards.length}</span>
-      <button type="button" class="btn btn-secondary" id="flashcard-preview-next-btn" ${index === cards.length - 1 ? 'disabled' : ''} style="flex:1;">Próximo →</button>
+      <button type="button" class="btn btn-secondary" id="flashcard-preview-prev-btn" ${index === 0 ? 'disabled' : ''} style="flex:1;">${t('preview.prev')}</button>
+      <span class="profile-edit-hint" style="margin:0 12px; white-space:nowrap;">${t('preview.cardOf', { n: index + 1, total: cards.length })}</span>
+      <button type="button" class="btn btn-secondary" id="flashcard-preview-next-btn" ${index === cards.length - 1 ? 'disabled' : ''} style="flex:1;">${t('preview.next')}</button>
     `;
     document.getElementById('flashcard-preview-prev-btn').addEventListener('click', () => {
       if (FLASHCARD_PREVIEW_SESSION.index <= 0) return;
@@ -201,10 +201,10 @@ function renderFlashcardPreviewCard(){
   const cardTypeId = card.cardInstance.cardTypeId;
   const callbacks = {
     onAnswered: () => {
-      if (typeof showToast === 'function') showToast('👁️ Pré-visualização -- nada foi salvo ou avaliado.');
+      if (typeof showToast === 'function') showToast(t('preview.toast.noEffect'));
     },
     onReviewMore: () => {
-      if (typeof showToast === 'function') showToast('👁️ Pré-visualização -- "Rever mais" não tem efeito aqui.');
+      if (typeof showToast === 'function') showToast(t('preview.toast.reviewMore'));
     },
   };
   if (cardTypeId === 'multiple_choice') renderMultipleChoiceCard(mountEl, card, FLASHCARD_PREVIEW_SESSION.localState, callbacks);

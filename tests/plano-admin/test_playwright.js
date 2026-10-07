@@ -55,7 +55,7 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
         { id: 901, owner_id: 'U', language_app_key: a, status: 'active', revision: 0, tags: [], front: 'la femme de ménage', back_trans: 'a empregada doméstica', front_is_target_language: true, note: null, fields: null, card_generation_mode: null, created_at: '2026-09-24T00:00:00Z' },
         { id: 902, owner_id: 'U', language_app_key: a, status: 'active', revision: 0, tags: [], front: null, back_trans: 'Eu sou', cloze_sentence: 'Je suis sem lacuna', cloze_answer: 'suis', fields: null, card_generation_mode: null, created_at: '2026-09-24T00:00:00Z' },
       ];
-      switchTab('my-flashcards');
+      switchTab('my-flashcards'); MY_FLASHCARDS_STATE.onChange = (o) => renderMyFlashcardsView(o);
     }, appKey);
     await page.waitForSelector('[data-edit-own-flashcard="901"]');
     const before = await ev(() => JSON.stringify(window.__DB.own_flashcards));
@@ -90,11 +90,11 @@ const check = (n, c, x) => { if (c) passed++; else { failed++; console.log('  FA
     await page.click('#edit-my-flashcard-cancel');
 
     // ---- admin com Admin Mode ON: Premium ----
-    await ev(() => { isAdminUser = () => true; PROFILE_CACHE = { plan_tier: 'free', admin_mode: true }; switchTab('my-flashcards'); });
+    await ev(() => { isAdminUser = () => true; PROFILE_CACHE = { plan_tier: 'free', admin_mode: true }; switchTab('my-flashcards'); MY_FLASHCARDS_STATE.onChange = (o) => renderMyFlashcardsView(o); });
     await page.waitForSelector('#my-flashcard-card-type-preview, [id$="card-type-preview"]');
     const adminOpts = await ev(() => [...document.querySelectorAll('[id$="card-type-preview"] option')].map(o => o.value));
     L('admin ON: todos os Card Types no criar', adminOpts.length === 5, adminOpts);
-    await ev(() => { PROFILE_CACHE = { plan_tier: 'free', admin_mode: false }; switchTab('my-flashcards'); });
+    await ev(() => { PROFILE_CACHE = { plan_tier: 'free', admin_mode: false }; switchTab('my-flashcards'); MY_FLASHCARDS_STATE.onChange = (o) => renderMyFlashcardsView(o); });
     await page.waitForFunction(() => !document.querySelector('.pill') || ![...document.querySelectorAll('.pill')].some(p => p.textContent.includes('⭐ Premium')), null, { timeout: 5000 }).catch(() => {});
     const offOpts = await ev(() => [...document.querySelectorAll('[id$="card-type-preview"] option')].map(o => o.value));
     L('admin OFF: só Normal (visão de aluna grátis)', JSON.stringify(offOpts) === '["normal"]', offOpts);

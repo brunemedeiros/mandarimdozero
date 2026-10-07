@@ -55,6 +55,8 @@ function routeToHash(route){
       return `#/${route.tab}`;
     case 'reviewSession':
       return route.deckId != null ? `#/review/deck/${route.deckId}` : `#/review/${route.mode}`;
+    case 'deckBrowser':
+      return `#/review/decks/${route.nodeId}${route.view === 'panel' ? '/panel' : ''}`;
     case 'unit':
       return `#/unit/${route.unitId}`;
     case 'unitResult':
@@ -86,6 +88,10 @@ function hashToRoute(hash){
   if (!parts.length) return { type: 'tab', tab: 'path' };
   if (parts[0] === 'review'){
     if (parts[1] === 'unit' && parts[2]) return { type: 'tab', tab: 'review', unitFilter: parseUnitIdFromHash(parts[2]) };
+    // Navegador de Decks (shared/deck-browser.js): detalhe e Painel têm endereço próprio.
+    if (parts[1] === 'decks' && (parts[2] === 'lang' || /^\d+$/.test(parts[2] || ''))){
+      return { type: 'deckBrowser', view: parts[3] === 'panel' ? 'panel' : 'detail', nodeId: parts[2] === 'lang' ? 'lang' : parseInt(parts[2], 10) };
+    }
     if (parts[1] === 'deck' && /^\d+$/.test(parts[2] || '')) return { type: 'reviewSession', mode: 'flashcard', deckId: parseInt(parts[2], 10) };
     if (['flashcard', 'speed', 'hard', 'match'].includes(parts[1])) return { type: 'reviewSession', mode: parts[1] };
     return { type: 'tab', tab: 'review' };
@@ -109,6 +115,9 @@ function hashToRoute(hash){
     const publicId = publicDeckIdFromHash(clean);
     if (publicId) return { type: 'publicDeck', publicId };
   }
+  // "Meus Cartões" saiu do app (tudo mora na Revisão agora); endereços
+  // antigos e links de cartões compartilhados (#import=...) abrem a Revisão.
+  if (parts[0] === 'my-flashcards' || parts[0].startsWith('import=')) return { type: 'tab', tab: 'review' };
   return { type: 'tab', tab: parts[0] };
 }
 
@@ -158,6 +167,11 @@ function renderRoute(route){
         }
         if (typeof switchTab === 'function') switchTab('review');
         if (typeof openReviewSession === 'function') openReviewSession(route.mode);
+        break;
+      }
+      case 'deckBrowser': {
+        if (typeof switchTab === 'function') switchTab('review');
+        if (typeof restoreDeckBrowserRoute === 'function') restoreDeckBrowserRoute(route);
         break;
       }
       case 'unit': {

@@ -1,0 +1,171 @@
+{
+ "unit": 8,
+ "en": {
+  "title": "Shopping",
+  "goal": "Ask prices, negotiate amounts and make a simple purchase.",
+  "lessons": {
+   "comprar-vender": "Buying, selling and asking the price",
+   "dinheiro": "Talking about money: kuài and máo",
+   "caro-desconto": "Saying it's expensive and asking for a discount",
+   "roupas-sapatos": "Buying clothes and shoes",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "to buy",
+   "to sell",
+   "how much (does it cost)",
+   "kuài (unit of money, colloquial)",
+   "máo (a tenth of a kuài)",
+   "cheap",
+   "expensive",
+   "this",
+   "that",
+   "clothes",
+   "shoes"
+  ],
+  "phrases": [
+   {
+    "t": "How much is this?"
+   },
+   {
+    "t": "That's too expensive! Make it a bit cheaper."
+   },
+   {
+    "t": "I want to buy this piece of clothing."
+   },
+   {
+    "t": "5 yuan and 30 cents."
+   }
+  ],
+  "dialogue": {
+   "title": "At the market",
+   "lines": [
+    "How much is this?",
+    "30 yuan.",
+    "That's too expensive! Make it a bit cheaper.",
+    "Okay, 25 yuan."
+   ]
+  },
+  "concepts": {
+   "kuai-mao": [
+    {
+     "title": "\"Kuài\" or \"máo\"?",
+     "body": "In spoken Chinese money, <strong>kuài</strong> (块) is the main unit (like \"a dollar\"), and <strong>máo</strong> (毛) is a tenth of a kuài (like \"ten cents\"). The structure simply puts the two numbers one after the other.",
+     "examples": [
+      "5 yuan and 30 cents"
+     ]
+    }
+   ],
+   "kuai-mao-yuan-jiao": [
+    {
+     "title": "\"Kuài\"/\"máo\" are what you SAY — \"yuán\"/\"jiǎo\" is what you WRITE",
+     "body": "<strong>Kuài</strong> and <strong>máo</strong> are the forms you will HEAR all the time in daily life. But on printed prices, receipts and in the news, you often see the formal/written forms: <strong>yuán</strong> (元, equivalent to kuài) and <strong>jiǎo</strong> (角, equivalent to máo). Nobody says \"yuán\" in casual conversation, but it is worth recognizing in writing.",
+     "examples": [
+      "yuán = unit of money (written/formal form of 块)",
+      "jiǎo = a tenth of a yuán (written/formal form of 毛)"
+     ]
+    }
+   ],
+   "ba-particle": [
+    {
+     "title": "吧 (ba) — softening a request or suggestion",
+     "body": "吧 (ba) at the end of a sentence turns a direct command into something softer, like a suggestion or polite request — similar to adding \"okay?\" or \"come on\" at the end of a sentence in English.",
+     "examples": [
+      "make it a bit cheaper, come on"
+     ]
+    }
+   ],
+   "classifiers-more": [
+    {
+     "title": "More measure words",
+     "body": "You have already seen that every number needs a measure word before the noun (个/口, back in Unit 4). Just as 口 is specific to counting family members, other categories of things have their own measure word — like 件 for clothes.",
+     "examples": [
+      "one piece of clothing"
+     ]
+    }
+   ],
+   "pechinchar-mercado": [
+    {
+     "title": "Haggling is normal — but only in certain places",
+     "body": "Notice how the price dropped from 30 to 25 kuài in the dialogue: in street markets, fairs and small neighborhood shops, haggling over the price is normal and even expected. But in malls, supermarkets and brand-name stores, prices are fixed and haggling feels out of place — the key is to recognize the type of place before trying.",
+     "examples": [
+      "make it a bit cheaper (a typical phrase when haggling)"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "vocab[2]",
+   "pt": "quanto custa",
+   "en": "how much (does it cost)",
+   "conf": "media",
+   "why": "multi-word gloss; 多少钱 is literally 'how much money'"
+  },
+  {
+   "path": "vocab[3]",
+   "pt": "unidade monetária (coloquial)",
+   "en": "kuài (unit of money, colloquial)",
+   "conf": "media",
+   "why": "kept kuài since learners hear it; 'yuan' would be the written equivalent"
+  },
+  {
+   "path": "vocab[4]",
+   "pt": "centavo (1/10 do kuài)",
+   "en": "máo (a tenth of a kuài)",
+   "conf": "media",
+   "why": "'cent' is imprecise (it is 1/10 of a kuài, not 1/100)"
+  },
+  {
+   "path": "phrases[1].t",
+   "pt": "Está muito caro! Faz mais barato.",
+   "en": "That's too expensive! Make it a bit cheaper.",
+   "conf": "media",
+   "why": "'muito caro' for 太贵了 → 'too expensive'; register: haggling"
+  },
+  {
+   "path": "phrases[3].t",
+   "pt": "5 yuans e 30 centavos.",
+   "en": "5 yuan and 30 cents.",
+   "conf": "media",
+   "why": "'cents' for 毛 is approximate; PT also used 'centavos'"
+  },
+  {
+   "path": "dialogue.lines[3]",
+   "pt": "Tá bom, 25 yuans.",
+   "en": "Okay, 25 yuan.",
+   "conf": "media",
+   "why": "informal register"
+  },
+  {
+   "path": "concepts.kuai-mao[0].body",
+   "pt": "equivalente a 'um real' / 'dez centavos'",
+   "en": "like \"a dollar\" / \"ten cents\"",
+   "conf": "baixa",
+   "why": "adapted: PT comparison with real/centavos replaced by dollar/cents; approximate, not exact"
+  },
+  {
+   "path": "concepts.ba-particle[0].body",
+   "pt": "parecido com 'né' ou 'tá'",
+   "en": "similar to \"okay?\" or \"come on\"",
+   "conf": "baixa",
+   "why": "adapted: Portuguese discourse particles replaced by English ones; approximate"
+  },
+  {
+   "path": "concepts.classifiers-more[0].title",
+   "pt": "Mais classificadores",
+   "en": "More measure words",
+   "conf": "media",
+   "why": "term: classificador → measure word"
+  },
+  {
+   "path": "concepts.pechinchar-mercado[0].body",
+   "pt": "pechinchar é normal em mercados",
+   "en": "haggling is normal in markets",
+   "conf": "media",
+   "why": "cultural note kept as in PT; not independently checked"
+  }
+ ]
+}

@@ -50,9 +50,9 @@ const { isAccentAnswerCorrect, accentAnswerOutcome } = runBlockAndExport(
   extractBlock('// BEGIN accent-challenge-logic', '// END accent-challenge-logic'),
   ['isAccentAnswerCorrect', 'accentAnswerOutcome']
 );
-const { listenTranslateOutcome, translationHasPersonMismatch, analyzeTranslation } = runBlockAndExport(
+const { listenTranslateOutcome, translationHasPersonMismatch, analyzeTranslation, markTranslationWords } = runBlockAndExport(
   extractBlock('// BEGIN challenge-translation-logic', '// END challenge-translation-logic'),
-  ['listenTranslateOutcome', 'translationHasPersonMismatch', 'analyzeTranslation']
+  ['listenTranslateOutcome', 'translationHasPersonMismatch', 'analyzeTranslation', 'markTranslationWords']
 );
 
 let passed = 0;
@@ -300,6 +300,15 @@ check('cloze: frase preenchida com a escolha', clozeGrammarFilled(CG1, ['sommes'
 const lote6 = JSON.parse(fs.readFileSync(path.join(__dirname, 'challenges_import', 'lote-a1-m6-cloze.json'), 'utf8'));
 check('cloze: lote A1-m6 -- todos os itens válidos', lote6.every(c => c.type === 'cloze_grammar' && validateClozeGrammarItem(c).length === 0), true);
 check('cloze: lote A1-m6 -- resposta certa dá ok em todos', lote6.every(c => clozeGrammarOutcome(c, c.blanks.map(b => b.answer)).outcome === 'ok'), true);
+
+const mk = markTranslationWords('Eu comprou o livro verde', 'Eu comprei o livro azul');
+const cl = (arr, w) => (arr.find(x => x.text === w) || {}).cls;
+check('marca: palavra igual = ok', cl(mk.student, 'livro'), 'ok');
+check('marca: flexão (comprou x comprei) = quase', cl(mk.student, 'comprou'), 'near');
+check('marca: quase também na referência', cl(mk.reference, 'comprei'), 'near');
+check('marca: palavra errada = bad', cl(mk.student, 'verde'), 'bad');
+check('marca: palavra que faltou = miss', cl(mk.reference, 'azul'), 'miss');
+check('marca: artigo sobrando é neutro', cl(markTranslationWords('o o livro', 'o livro').student, 'o'), 'ok');
 
 console.log(`\n${passed} passaram, ${failed} falharam.`);
 if (failed > 0){

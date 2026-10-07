@@ -283,6 +283,73 @@ function preflightOwnCardInstanceCreation({ activeRows, hasTeacherLink, editorSt
   return { ok: requested <= remaining, used, requested, remaining };
 }
 
+// Importações (arquivo/link, Anki, perfil público): "corta e avisa"
+// (docs/arquitetura-total-decks-tags-painel.md, seção 17). Em vez de
+// bloquear o lote inteiro quando não cabe, cria só as PRIMEIRAS Notes cujo
+// total acumulado de CardInstances cabe no espaço restante -- nunca uma
+// Note pela metade (uma Note de 2 CardInstances com 1 vaga não entra) e
+// nunca "pula" uma Note grande pra encaixar uma menor depois (ordem do
+// lote preservada: "os primeiros N"). Pura, nada é gravado.
+// Retorno: { used, remaining, requested, keepCount, keptInstances, cut }
+//  - keepCount: quantas Notes (do início da lista) podem ser criadas;
+//  - cut: true se alguma Note ficou de fora por causa do teto.
+// Criação manual de UM cartão continua usando preflightOwnCardInstanceCreation
+// (bloqueia, porque não dá pra cortar uma Note).
+function planOwnCardInstanceCut({ activeRows, hasTeacherLink, editorStates, languageAppKey, limit }){
+  const used = ownCardInstanceUsage(activeRows);
+  const counts = (editorStates || []).map(st => cardInstanceCountForEditorState(st, languageAppKey));
+  const requested = counts.reduce((a, b) => a + b, 0);
+  if (hasTeacherLink){
+    return { used, remaining: Infinity, requested, counts, keepCount: counts.length, keptInstances: requested, cut: false };
+  }
+  const remaining = Math.max(0, limit - used);
+  let keepCount = 0, keptInstances = 0;
+  for (const n of counts){
+    if (keptInstances + n > remaining) break;
+    keptInstances += n;
+    keepCount++;
+  }
+  return { used, remaining, requested, counts, keepCount, keptInstances, cut: keepCount < counts.length };
+}
+
+// Texto do aviso de corte (português do Brasil), reaproveitado pelos 3
+// pontos de importação. `what`: o que estava sendo importado ("Esta
+// importação", "Este Deck"...). Nunca promete checkout: não existe
+// pagamento no app -- o convite manda falar com a administração.
+function ownCardInstanceCutMessage({ requested, keptInstances, limit, used, what }){
+  // i18n: textos nas chaves limitCut.* (pt-BR/en). Sem t() (Node/testes), cai no
+  // português abaixo, idêntico ao catálogo pt-BR.
+  const PT = {
+    'limitCut.subject.deck': 'Este Deck',
+    'limitCut.subject.import': 'Esta importação',
+    'limitCut.subject.selection': 'Esta seleção',
+    'limitCut.cardOne': '{n} cartão',
+    'limitCut.cardMany': '{n} cartões',
+    'limitCut.already': ' (você já tinha {cards})',
+    'limitCut.resultMany': 'Por isso, apenas os primeiros {n} cartões foram criados.',
+    'limitCut.resultOne': 'Por isso, apenas o primeiro cartão foi criado.',
+    'limitCut.resultNone': 'Por isso, nenhum cartão foi criado.',
+    'limitCut.main': '{subject} criaria {requested}, mas sua conta pode possuir apenas {limit} no plano grátis{already}. {result}',
+  };
+  const tr = (key, params) => {
+    let str = PT[key];
+    if (typeof t === 'function'){
+      const v = t(key, params);
+      if (v && v !== key) return v;
+    }
+    return String(str).replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? params[k] : m));
+  };
+  const cards = n => tr(n === 1 ? 'limitCut.cardOne' : 'limitCut.cardMany', { n });
+  // `what`: 'deck' | 'import' | 'selection' (chaves) ou, por compatibilidade, um texto já pronto.
+  const subject = !what ? tr('limitCut.subject.import')
+    : PT['limitCut.subject.' + what] ? tr('limitCut.subject.' + what) : what;
+  const already = used > 0 ? tr('limitCut.already', { cards: cards(used) }) : '';
+  const result = keptInstances > 1
+    ? tr('limitCut.resultMany', { n: keptInstances })
+    : keptInstances === 1 ? tr('limitCut.resultOne') : tr('limitCut.resultNone');
+  return tr('limitCut.main', { subject, requested: cards(requested), limit, already, result });
+}
+
 // ============================================================
 // 5/6) CONTAGENS -- New / Learning / Review + agregador de Deck
 // ============================================================
@@ -403,6 +470,21 @@ function courseUnitsForDecks(units){
   return (units || [])
     .filter(u => u && u.type !== 'grammar' && Array.isArray(u.vocab) && u.vocab.length > 0)
     .map(u => ({ unit_id: String(u.id), title: u.title }));
+}
+
+// i18n Fase 7 -- nome de EXIBIÇÃO de um Course Deck resolvido no cliente pela
+// identidade estável (course_unit_id), nunca pelo `decks.name` gravado no
+// banco (que é o título em português de quando ensure_course_decks rodou, e
+// é compartilhado por todas as contas do idioma). `units` deve ser a lista
+// de Units já no idioma do site (quando o conteúdo for traduzido); sem Unit
+// correspondente, cai pro `decks.name` (comportamento atual). Raiz de curso
+// e Decks não-curso devolvem `deck.name` intocado. Não usado em lógica --
+// só exibição.
+function courseDeckDisplayName(deck, units){
+  if (!deck) return '';
+  if (!isCourseDeck(deck) || deck.course_unit_id == null) return deck.name;
+  const u = (units || []).find(x => x && String(x.id) === String(deck.course_unit_id));
+  return (u && u.title) || deck.name;
 }
 
 function isCourseDeck(deck){

@@ -161,8 +161,8 @@ function publicProfileLangCardHTML(l){
         </div>
       </div>
       <div class="public-profile-lang-stats">
-        <div class="public-profile-lang-stat"><span class="v">🔥 ${streak}</span><span class="l">dias seguidos</span></div>
-        <div class="public-profile-lang-stat"><span class="v">${l.xp}</span><span class="l">XP acumulado</span></div>
+        <div class="public-profile-lang-stat"><span class="v">🔥 ${streak}</span><span class="l">${t('publicProfile.streakLabel')}</span></div>
+        <div class="public-profile-lang-stat"><span class="v">${l.xp}</span><span class="l">${t('publicProfile.xpLabel')}</span></div>
       </div>
     </div>
   `;
@@ -192,7 +192,7 @@ async function renderPublicProfileInto(bodyEl, username){
   const token = (PUBLIC_PROFILE_RENDER_TOKENS.get(bodyEl) || 0) + 1;
   PUBLIC_PROFILE_RENDER_TOKENS.set(bodyEl, token);
 
-  bodyEl.innerHTML = loadingHTML('Carregando perfil...');
+  bodyEl.innerHTML = loadingHTML(t('publicProfile.loading'));
 
   const result = await fetchPublicProfileByUsername(username);
   if (PUBLIC_PROFILE_RENDER_TOKENS.get(bodyEl) !== token) return; // corrida perdida -- outro clique já assumiu este container
@@ -201,19 +201,19 @@ async function renderPublicProfileInto(bodyEl, username){
     bodyEl.innerHTML = `
       <div class="review-empty">
         <div class="big-emoji">🔍</div>
-        <h3>Perfil não encontrado</h3>
-        <p>Não existe nenhuma conta com o nome @${escapeHTML(username)}.</p>
+        <h3>${t('publicProfile.notFoundTitle')}</h3>
+        <p>${t('publicProfile.notFoundText', { username: escapeHTML(username) })}</p>
       </div>
     `;
     return;
   }
 
   const { profile, badges, earnedBadges, isPublic, languages } = result;
-  const name = profile.display_name || profile.username || 'Aluno(a)';
+  const name = profile.display_name || profile.username || t('publicProfile.anonymous');
   const initials = avatarInitials(name);
   const color = avatarColor(profile.user_id);
   const avatarHTML = profile.avatar_url
-    ? `<img class="public-profile-avatar" src="${escapeAttr(profile.avatar_url)}" alt="Foto de perfil">`
+    ? `<img class="public-profile-avatar" src="${escapeAttr(profile.avatar_url)}" alt="${t('publicProfile.avatarAlt')}">`
     : `<div class="public-profile-avatar" style="background:${color};">${initials}</div>`;
 
   const badgesHTML = badges.length ? `
@@ -232,10 +232,10 @@ async function renderPublicProfileInto(bodyEl, username){
   // dois primeiros -- "privado" e "zero progresso" são informações
   // diferentes, mensagens diferentes.
   const langsHTML = !isPublic
-    ? `<p class="profile-empty-note">🔒 Esta pessoa optou por manter o progresso privado.</p>`
+    ? `<p class="profile-empty-note">${t('publicProfile.private')}</p>`
     : (languages.length
         ? `<div class="public-profile-langs-row">${languages.map(publicProfileLangCardHTML).join('')}</div>`
-        : `<p class="profile-empty-note">Ainda sem progresso registrado em nenhum idioma.</p>`);
+        : `<p class="profile-empty-note">${t('publicProfile.noProgress')}</p>`);
 
   const conquestsHTML = earnedBadges.length ? `
     <div class="public-profile-conquests profile-badge-showcase">
@@ -246,7 +246,7 @@ async function renderPublicProfileInto(bodyEl, username){
         </div>
       `).join('')}
     </div>
-  ` : `<p class="profile-empty-note">Nenhuma conquista ainda.</p>`;
+  ` : `<p class="profile-empty-note">${t('publicProfile.noBadges')}</p>`;
 
   // Public Deck: o mecanismo principal de publicação (substitui a lista de
   // cartões soltos). Só quando o perfil É público; a RPC list_public_decks_for_user
@@ -261,8 +261,8 @@ async function renderPublicProfileInto(bodyEl, username){
   ` : '';
   const cardsHTML = (isPublic && PUBLIC_FLAT_FLASHCARDS_ENABLED) ? `
     <div class="public-profile-cards-section">
-      <div class="section-label">Flashcards</div>
-      <button type="button" class="btn btn-secondary btn-block" id="public-profile-cards-toggle-btn">📇 Ver cartões criados por @${escapeHTML(profile.username)}</button>
+      <div class="section-label">${t('publicProfile.sectionFlashcards')}</div>
+      <button type="button" class="btn btn-secondary btn-block" id="public-profile-cards-toggle-btn">${t('publicProfile.viewCards', { username: escapeHTML(profile.username) })}</button>
       <div id="public-profile-cards-box" style="display:none; margin-top:10px;"></div>
     </div>
   ` : '';
@@ -273,19 +273,23 @@ async function renderPublicProfileInto(bodyEl, username){
       <div class="public-profile-name">${escapeHTML(name)}</div>
       <div class="public-profile-username">@${escapeHTML(profile.username)}</div>
       ${profile.bio ? `<p class="public-profile-bio">${escapeHTML(profile.bio)}</p>` : ''}
+      <div id="public-profile-friend-slot"></div>
     </div>
     ${badgesHTML}
     <div class="public-profile-langs-section">
-      <div class="section-label">Progresso</div>
+      <div class="section-label">${t('publicProfile.sectionProgress')}</div>
       ${langsHTML}
     </div>
     <div class="public-profile-conquests-section">
-      <div class="section-label">Conquistas</div>
+      <div class="section-label">${t('publicProfile.sectionBadges')}</div>
       ${conquestsHTML}
     </div>
     ${decksHTML}
     ${cardsHTML}
   `;
+
+  // Amigos: botão Adicionar/Aceitar/etc. (só logada e nunca na própria pessoa).
+  if (typeof CURRENT_USER !== 'undefined' && CURRENT_USER && typeof renderFriendProfileAction === 'function') renderFriendProfileAction(bodyEl, profile);
 
   bodyEl.querySelectorAll('.public-profile-badge-chip').forEach(el => {
     el.addEventListener('click', () => {
@@ -357,8 +361,8 @@ function publicProfileCardsLoginGateHTML(){
       <div class="public-profile-cards-gate-skeleton">${fakeRow}${fakeRow}${fakeRow}</div>
       <div class="public-profile-cards-gate-overlay">
         <div class="public-profile-cards-gate-card">
-          <p>🔒 Faça login para ver os cartões e adicionar ao seu perfil.</p>
-          <a href="../" class="btn btn-primary btn-block">Fazer login →</a>
+          <p>${t('publicProfile.gateText')}</p>
+          <a href="../" class="btn btn-primary btn-block">${t('publicProfile.gateLogin')}</a>
         </div>
       </div>
     </div>
@@ -374,8 +378,8 @@ function publicProfileFlashcardRowHTML(c){
         ${c.note ? `<div class="admin-badge-desc">${escapeHTML(c.note)}</div>` : ''}
       </div>
       <div style="display:flex; gap:6px;">
-        <button type="button" class="admin-badge-delete-btn" data-preview-card="${c.id}" title="Ver detalhes, sem editar">👁</button>
-        <button type="button" class="admin-badge-delete-btn" data-report-card="${c.id}" title="Reportar este cartão">🚩</button>
+        <button type="button" class="admin-badge-delete-btn" data-preview-card="${c.id}" title="${t('publicProfile.previewTitle')}">👁</button>
+        <button type="button" class="admin-badge-delete-btn" data-report-card="${c.id}" title="${t('publicProfile.reportTitle')}">🚩</button>
       </div>
     </div>
   `;
@@ -414,20 +418,20 @@ async function renderPublicProfileCardsBox(bodyEl, username){
   PUBLIC_PROFILE_IMPORT_STATE.hasLink = hasLink;
 
   if (!cardsRes.cards.length){
-    box.innerHTML = `<p class="profile-empty-note">Este usuário ainda não tem nenhum cartão público.</p>`;
+    box.innerHTML = `<p class="profile-empty-note">${t('publicProfile.noCards')}</p>`;
     return;
   }
 
   box.innerHTML = `
     <div class="admin-recipients-summary">
-      <span class="pill" id="public-profile-cards-counter">Nenhum cartão selecionado</span>
+      <span class="pill" id="public-profile-cards-counter">${t('publicProfile.counterNone')}</span>
       <div class="admin-recipients-actions">
-        <a href="#" class="admin-select-link" id="public-profile-cards-select-all">Selecionar todos</a>
-        <a href="#" class="admin-select-link" id="public-profile-cards-clear">Limpar seleção</a>
+        <a href="#" class="admin-select-link" id="public-profile-cards-select-all">${t('publicProfile.selectAll')}</a>
+        <a href="#" class="admin-select-link" id="public-profile-cards-clear">${t('publicProfile.clear')}</a>
       </div>
     </div>
     <div id="public-profile-cards-list">${cardsRes.cards.map(publicProfileFlashcardRowHTML).join('')}</div>
-    <button type="button" class="btn btn-primary btn-block" id="public-profile-cards-import-btn" disabled style="margin-top:10px;">Adicionar aos meus cartões</button>
+    <button type="button" class="btn btn-primary btn-block" id="public-profile-cards-import-btn" disabled style="margin-top:10px;">${t('publicProfile.importBtn')}</button>
     <p class="profile-edit-error" id="public-profile-cards-import-error"></p>
   `;
 
@@ -437,7 +441,7 @@ async function renderPublicProfileCardsBox(bodyEl, username){
 function updatePublicProfileCardsCounter(box){
   const n = PUBLIC_PROFILE_IMPORT_STATE.selectedIds.size;
   const counter = box.querySelector('#public-profile-cards-counter');
-  if (counter) counter.textContent = n === 0 ? 'Nenhum cartão selecionado' : `${n} cartão(ões) selecionado(s)`;
+  if (counter) counter.textContent = n === 0 ? t('publicProfile.counterNone') : tp('publicProfile.counter', n);
   const importBtn = box.querySelector('#public-profile-cards-import-btn');
   if (importBtn) importBtn.disabled = n === 0;
 }
@@ -485,16 +489,16 @@ function openPublicFlashcardPreview(cardId){
   const body = document.getElementById('public-flashcard-preview-body');
   if (!c || !modal || !body) return;
   const direction = c.frontIsTargetLanguage === false
-    ? 'Frente na tradução, verso no idioma estudado'
-    : 'Frente no idioma estudado, verso na tradução';
+    ? t('publicProfile.dirReversed')
+    : t('publicProfile.dirNormal');
   body.innerHTML = `
-    <div class="profile-edit-label">Frente</div>
+    <div class="profile-edit-label">${t('publicProfile.labelFront')}</div>
     <p>${escapeHTML(c.front)}</p>
-    ${c.frontPinyin ? `<div class="profile-edit-label">Pinyin</div><p>${escapeHTML(c.frontPinyin)}</p>` : ''}
-    <div class="profile-edit-label">Verso</div>
+    ${c.frontPinyin ? `<div class="profile-edit-label">${t('publicProfile.labelPinyin')}</div><p>${escapeHTML(c.frontPinyin)}</p>` : ''}
+    <div class="profile-edit-label">${t('publicProfile.labelBack')}</div>
     <p>${escapeHTML(c.backTrans)}</p>
-    ${c.note ? `<div class="profile-edit-label">Nota</div><p>${escapeHTML(c.note)}</p>` : ''}
-    <div class="profile-edit-label">Direção</div>
+    ${c.note ? `<div class="profile-edit-label">${t('publicProfile.labelNote')}</div><p>${escapeHTML(c.note)}</p>` : ''}
+    <div class="profile-edit-label">${t('publicProfile.labelDirection')}</div>
     <p>${direction}</p>
   `;
   modal.style.display = 'flex';
@@ -517,26 +521,34 @@ function reportPublicFlashcard(cardId){
 async function importSelectedPublicFlashcards(box){
   const errorEl = box.querySelector('#public-profile-cards-import-error');
   if (errorEl) errorEl.textContent = '';
-  const ids = [...PUBLIC_PROFILE_IMPORT_STATE.selectedIds];
+  // Ordem da lista (não a ordem de clique): o corte do plano grátis fica com "os primeiros N" da lista.
+  const ids = PUBLIC_PROFILE_IMPORT_STATE.cardsCache.map(c => c.id).filter(id => PUBLIC_PROFILE_IMPORT_STATE.selectedIds.has(id));
   if (!ids.length) return;
 
-  const importStates = ids
+  const selectedCards = ids
     .map(id => PUBLIC_PROFILE_IMPORT_STATE.cardsCache.find(x => x.id === id))
-    .filter(Boolean)
-    .map(c => nativeNoteEditorStateFromImportPayload(c, APP_KEY));
-  const pre = preflightOwnCardInstanceCreation({
+    .filter(Boolean);
+  const importStates = selectedCards.map(c => nativeNoteEditorStateFromImportPayload(c, APP_KEY));
+  // "Corta e avisa" (arquitetura seção 17) -- mesma regra única dos outros
+  // imports (shared/deck-engine.js): só as primeiras Notes que cabem.
+  const limit = typeof FREE_OWN_FLASHCARD_LIMIT === 'number' ? FREE_OWN_FLASHCARD_LIMIT : 20;
+  const cutPlan = planOwnCardInstanceCut({
     activeRows: PUBLIC_PROFILE_IMPORT_STATE.myCards,
     hasTeacherLink: PUBLIC_PROFILE_IMPORT_STATE.hasLink,
     editorStates: importStates,
     languageAppKey: APP_KEY,
-    limit: typeof FREE_OWN_FLASHCARD_LIMIT === 'number' ? FREE_OWN_FLASHCARD_LIMIT : 20,
+    limit,
   });
-  if (!pre.ok){
-    const modal = document.getElementById('flashcard-limit-modal');
-    if (modal) modal.style.display = 'flex';
-    else if (errorEl) errorEl.textContent = 'Você atingiu o limite de cartões do plano grátis.';
-    return;
-  }
+  const cutMessage = cutPlan.cut ? ownCardInstanceCutMessage({
+    requested: cutPlan.requested, keptInstances: cutPlan.keptInstances,
+    limit, used: cutPlan.used, what: 'selection',
+  }) : null;
+  const showCut = () => {
+    if (typeof openFlashcardLimitModal === 'function' && openFlashcardLimitModal({ cutMessage })) return;
+    if (errorEl) errorEl.textContent = cutMessage;
+  };
+  if (cutPlan.keepCount === 0){ showCut(); return; }
+  const idsToCreate = selectedCards.slice(0, cutPlan.keepCount).map(c => c.id);
 
   // Deck padrão (personal_root) resolvido UMA vez pro lote inteiro; sem
   // destino válido, nada é criado.
@@ -544,10 +556,10 @@ async function importSelectedPublicFlashcards(box){
   if (!dest.ok){ if (errorEl) errorEl.textContent = dest.error; return; }
 
   const btn = box.querySelector('#public-profile-cards-import-btn');
-  if (btn){ btn.disabled = true; btn.textContent = 'Adicionando...'; }
+  if (btn){ btn.disabled = true; btn.textContent = t('publicProfile.adding'); }
 
   let importedCount = 0;
-  for (const id of ids){
+  for (const id of idsToCreate){
     const c = PUBLIC_PROFILE_IMPORT_STATE.cardsCache.find(x => x.id === id);
     if (!c) continue;
     // Q7 do grilling: SEMPRE uma cópia independente -- createOwnFlashcard()
@@ -572,10 +584,10 @@ async function importSelectedPublicFlashcards(box){
   }
 
   if (importedCount > 0 && typeof showToast === 'function'){
-    showToast(`✓ ${importedCount} cartão(ões) adicionado(s) à sua conta. ${summarizeDroppedImportTags(importStates, { ignoreSystem: true })}`.trim());
+    showToast(`${tp('publicProfile.imported', importedCount)} ${summarizeDroppedImportTags(importStates.slice(0, cutPlan.keepCount), { ignoreSystem: true })}`.trim());
   }
-  if (importedCount < ids.length && errorEl){
-    errorEl.textContent = 'Alguns cartões não puderam ser adicionados. Tente de novo.';
+  if (importedCount < idsToCreate.length && errorEl){
+    errorEl.textContent = t('publicProfile.importPartial');
   }
   // Re-renderiza a caixa inteira -- reflete o espaço restante novo (pode
   // ter zerado) e limpa a seleção, mesmo padrão de "só um submit
@@ -584,6 +596,7 @@ async function importSelectedPublicFlashcards(box){
   // (modal ou página standalone) -- estrutura fixa montada acima, nunca
   // varia por contexto.
   await renderPublicProfileCardsBox(box.parentElement.parentElement, PUBLIC_PROFILE_IMPORT_STATE.username);
+  if (cutMessage) showCut();
 }
 
 document.getElementById('public-flashcard-preview-close')?.addEventListener('click', () => {

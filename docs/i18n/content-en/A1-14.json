@@ -1,0 +1,147 @@
+{
+ "unit": "A1-14",
+ "en": {
+  "title": "Transport",
+  "goal": "Take public transport and buy a ticket.",
+  "lessons": {
+   "onibus-trem-metro": "Bus, train and metro",
+   "carro-bicicleta-pe": "Car, bicycle and on foot",
+   "pegar-transporte-passagem": "Taking transport, stop, ticket and station",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "the bus",
+   "the train",
+   "the metro / subway",
+   "the car",
+   "the bicycle",
+   "on foot",
+   "to take (a transport)",
+   "the stop (bus stop)",
+   "the ticket",
+   "the station (metro station)"
+  ],
+  "phrases": [
+   {
+    "t": "I take the metro every day.",
+    "scenario": "Someone asks how you get to work, and it's always by metro. What do you answer?"
+   },
+   {
+    "t": "Where is the bus stop?",
+    "scenario": "You're lost and need to find the bus stop. What do you ask?"
+   },
+   {
+    "t": "A ticket, please.",
+    "scenario": "You're at the station and want to buy a ticket. What do you say?"
+   },
+   {
+    "t": "I walk to work.",
+    "scenario": "Someone asks how you get to work, and you walk. What do you answer?"
+   },
+   {
+    "t": "I'm going to take the bus this morning."
+   },
+   {
+    "t": "The train leaves at eight o'clock."
+   },
+   {
+    "t": "The car is parked in front of the house."
+   },
+   {
+    "t": "The bicycle is faster in the city."
+   },
+   {
+    "t": "The station is closed today."
+   }
+  ],
+  "dialogue": {
+   "title": "At the metro station",
+   "lines": [
+    "Excuse me, does this train go downtown?",
+    "Yes, it's the right direction.",
+    "How much is the ticket?",
+    "It costs two euros."
+   ]
+  },
+  "concepts": {
+   "en-vs-a-transport": [
+    {
+     "title": "\"En métro\" or \"à pied\"?",
+     "body": "\"Closed\" means of transport (ones you get inside) use <strong>en</strong>: <strong>en</strong> métro, <strong>en</strong> voiture, <strong>en</strong> bus. \"Open\" ways of getting around, where you don't get inside anything — like walking or riding a bike by sitting on top of it — use <strong>à</strong>: <strong>à</strong> pied, <strong>à</strong> vélo. It's a small rule, but it comes up all the time in everyday life.",
+     "examples": [
+      "the metro / subway",
+      "on foot"
+     ]
+    }
+   ],
+   "metro-paris-historia": [
+    {
+     "title": "The Paris metro was born at a world's fair",
+     "body": "The Paris metro opened in <strong>1900</strong>, just in time for that year's World's Fair — a huge event that brought millions of visitors to the city. It's one of the oldest metros in the world, and many stations still keep the original cast-iron Art Nouveau entrance designed by Hector Guimard.",
+     "examples": [
+      "the metro / subway"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "vocab[6]",
+   "pt": "pegar (um transporte)",
+   "en": "to take (a transport)",
+   "conf": "media",
+   "why": "'prendre' = take/catch."
+  },
+  {
+   "path": "vocab[7]",
+   "pt": "o ponto (de ônibus)",
+   "en": "the stop (bus stop)",
+   "conf": "media",
+   "why": "'arrêt' generic stop."
+  },
+  {
+   "path": "vocab[2]",
+   "pt": "o metrô",
+   "en": "the metro / subway",
+   "conf": "media",
+   "why": "EN-US subway vs EN-GB metro/underground."
+  },
+  {
+   "path": "phrases[3]",
+   "pt": "Eu vou ao trabalho a pé.",
+   "en": "I walk to work.",
+   "conf": "media",
+   "why": "Natural EN; literal 'I go to work on foot'."
+  },
+  {
+   "path": "dialogue.lines[1]",
+   "pt": "Sim, é a direção certa.",
+   "en": "Yes, it's the right direction.",
+   "conf": "media",
+   "why": "Also 'the right way'."
+  },
+  {
+   "path": "dialogue.lines[0]",
+   "pt": "Com licença, esse trem vai pro centro?",
+   "en": "Excuse me, does this train go downtown?",
+   "conf": "media",
+   "why": "'centre-ville' = downtown (US) / city centre (UK)."
+  },
+  {
+   "path": "concepts.metro-paris-historia.body",
+   "pt": "Exposição Universal",
+   "en": "World's Fair",
+   "conf": "media",
+   "why": "Standard EN term for Exposition Universelle."
+  },
+  {
+   "path": "phrases[6]",
+   "pt": "estacionado",
+   "en": "parked",
+   "conf": "media",
+   "why": "'garée' fine; high-ish."
+  }
+ ]
+}

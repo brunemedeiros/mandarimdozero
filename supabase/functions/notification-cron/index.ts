@@ -415,7 +415,7 @@ async function sendEmailToUser(supabase: any, cache: Map<string, string | null>,
 
   const html = `<div style="font-family:-apple-system,sans-serif;max-width:480px;margin:0 auto;padding:24px;">
     <p style="font-size:15px;line-height:1.6;color:#241A15;">${body}</p>
-    <p style="font-size:12px;color:#93856F;margin-top:32px;">Você pode ajustar quais e-mails recebe em Configurações &gt; Notificações, dentro do app.</p>
+    <p style="font-size:12px;color:#93856F;margin-top:32px;">${uiLangFor(userId) === 'en' ? 'You can adjust which emails you receive in Settings &gt; Notifications, inside the app.' : 'Você pode ajustar quais e-mails recebe em Configurações &gt; Notificações, dentro do app.'}</p>
   </div>`;
 
   try {
@@ -477,13 +477,32 @@ async function passesAntiSpam(supabase: any, rules: Map<string, any>, userId: st
   return true;
 }
 
-async function pickTemplate(supabase: any, eventType: string, languageAppKey: string): Promise<any> {
-  const { data, error } = await supabase
-    .from('notification_templates')
-    .select('*')
-    .eq('event_type', eventType).eq('channel', 'in_app').eq('language_app_key', languageAppKey).eq('active', true);
-  if (error || !data?.length) return null;
-  return data[Math.floor(Math.random() * data.length)];
+// Idioma do SITE de cada conta (progress.data._meta.uiLanguage, Fase 11 i18n).
+// Preenchido no handler a partir da leitura de `progress`; conta sem valor
+// (ou valor desconhecido) usa 'pt-BR'. Nunca é Premium nem muda o idioma estudado.
+const UI_LANG_BY_USER = new Map<string, string>();
+function uiLangFor(userId: string): string {
+  return UI_LANG_BY_USER.get(userId) === 'en' ? 'en' : 'pt-BR';
+}
+
+// Escolhe a variante no idioma do site; se esse idioma não tiver variante
+// ATIVA para o evento (ex.: inglês ainda inativo/sem tradução), cai pro pt-BR.
+async function pickFromPool(supabase: any, channel: string, userId: string, eventType: string, languageAppKey: string): Promise<any> {
+  const uiLang = uiLangFor(userId);
+  for (const lang of uiLang === 'pt-BR' ? ['pt-BR'] : [uiLang, 'pt-BR']) {
+    const { data, error } = await supabase
+      .from('notification_templates')
+      .select('*')
+      .eq('event_type', eventType).eq('channel', channel).eq('language_app_key', languageAppKey)
+      .eq('ui_language', lang).eq('active', true);
+    if (error) return null;
+    if (data?.length) return data[Math.floor(Math.random() * data.length)];
+  }
+  return null;
+}
+
+async function pickTemplate(supabase: any, userId: string, eventType: string, languageAppKey: string): Promise<any> {
+  return pickFromPool(supabase, 'in_app', userId, eventType, languageAppKey);
 }
 
 // Igual a pickTemplate, mas no pool PRÓPRIO do canal 'email' (ver cabeçalho
@@ -491,13 +510,8 @@ async function pickTemplate(supabase: any, eventType: string, languageAppKey: st
 // in_app). Retorna null quando não há variante de e-mail pro evento --
 // maybeNotify trata isso como "sem e-mail pra esse evento", nunca cai de
 // volta pro texto do in_app.
-async function pickEmailTemplate(supabase: any, eventType: string, languageAppKey: string): Promise<any> {
-  const { data, error } = await supabase
-    .from('notification_templates')
-    .select('*')
-    .eq('event_type', eventType).eq('channel', 'email').eq('language_app_key', languageAppKey).eq('active', true);
-  if (error || !data?.length) return null;
-  return data[Math.floor(Math.random() * data.length)];
+async function pickEmailTemplate(supabase: any, userId: string, eventType: string, languageAppKey: string): Promise<any> {
+  return pickFromPool(supabase, 'email', userId, eventType, languageAppKey);
 }
 
 // Ponto único de disparo -- espelha fireNotificationEvent() do cliente
@@ -518,7 +532,7 @@ async function maybeNotify(
   if (isWithinQuietHours(prefs)) return false;
   if (!(await passesAntiSpam(supabase, rules, userId, category))) return false;
 
-  const template = await pickTemplate(supabase, eventType, languageAppKey);
+  const template = await pickTemplate(supabase, userId, eventType, languageAppKey);
   if (!template) return false;
 
   const title = fillPlaceholders(template.title, payload);
@@ -539,16 +553,16 @@ async function maybeNotify(
   // nenhum "waitUntil" que garanta uma promise solta terminar depois da
   // resposta -- e uma falha de push aqui já está isolada em try/catch
   // dentro de sendPushToUser, não derruba o resto da varredura.
-  if (categoryAllowsPush(prefs, category)) await sendPushToUser(supabase, userId, title || 'Notificação', body, actionTab);
+  if (categoryAllowsPush(prefs, category)) await sendPushToUser(supabase, userId, title || (uiLangFor(userId) === 'en' ? 'Notification' : 'Notificação'), body, actionTab);
 
   // E-mail (Fase 5) -- só dispara se existir uma variante PRÓPRIA pra esse
   // evento (ver pickEmailTemplate); a maioria dos eventos não tem uma ainda
   // (só o calendário de reengajamento, migration 015), então isto é um
   // no-op silencioso pra eles, não um erro.
   if (categoryAllowsEmail(prefs, category)) {
-    const emailTemplate = await pickEmailTemplate(supabase, eventType, languageAppKey);
+    const emailTemplate = await pickEmailTemplate(supabase, userId, eventType, languageAppKey);
     if (emailTemplate) {
-      const emailSubject = fillPlaceholders(emailTemplate.title, payload) || title || 'Notificação';
+      const emailSubject = fillPlaceholders(emailTemplate.title, payload) || title || (uiLangFor(userId) === 'en' ? 'Notification' : 'Notificação');
       const emailBody = fillPlaceholders(emailTemplate.body, payload);
       if (emailBody) await sendEmailToUser(supabase, emailCache, userId, emailSubject, emailBody);
     }
@@ -754,8 +768,9 @@ async function processTeacherStudentAlerts(
 
   let created = 0;
   for (const group of groups.values()) {
+    const en = uiLangFor(group.teacherId) === 'en'; // idioma do site de QUEM RECEBE (a professora)
     const studentList = group.hits
-      .map((h) => `${nameById.get(h.studentId) || 'aluna'} (${h.days} dias)`)
+      .map((h) => `${nameById.get(h.studentId) || (en ? 'student' : 'aluna')} (${h.days} ${en ? (h.days === 1 ? 'day' : 'days') : 'dias'})`)
       .join(', ');
     if (await maybeNotify(
       supabase, rules, prefsCache, emailCache, group.teacherId, group.languageAppKey,
@@ -790,6 +805,11 @@ Deno.serve(async (_req: Request) => {
   const errors: string[] = [];
 
   const progressByUserId = new Map<string, any>((progressResult.data ?? []).map((row: any) => [row.user_id, row.data]));
+  UI_LANG_BY_USER.clear();
+  for (const row of progressResult.data ?? []) {
+    const ul = row.data?._meta?.uiLanguage;
+    if (typeof ul === 'string') UI_LANG_BY_USER.set(row.user_id, ul);
+  }
 
   for (const row of progressResult.data ?? []) {
     for (const lang of LANGUAGES) {
@@ -822,8 +842,22 @@ Deno.serve(async (_req: Request) => {
     errors.push(`alerta de infrequência pra professora: ${String(e)}`);
   }
 
+  // Amigos: "um amigo te passou no ranking" (no máximo 1 por pessoa por dia). A
+  // lógica toda vive na função SQL process_friend_overtakes (migration 073), que
+  // grava as notificações direto; aqui só a disparamos. Só funciona depois da
+  // migration 073 aplicada -- sem ela o rpc falha e entra em errors, sem derrubar o resto.
+  let friendOvertakes = 0;
+  try {
+    const { data, error } = await supabase.rpc('process_friend_overtakes');
+    if (error) throw error;
+    friendOvertakes = Number((data as { notified?: number } | null)?.notified ?? 0);
+  } catch (e) {
+    errors.push(`amigos (te passou no ranking): ${String((e as Error)?.message ?? e)}`);
+  }
+
   const summary = {
     ok: true,
+    friendOvertakes,
     ranAt: new Date().toISOString(),
     phase: 'Fase 6b -- + student_inactive_alert (alerta de infrequência pra professora, categoria supervisao); demais eventos desde Fase 5: review_overdue, streak_at_risk, study_goal_remaining, reengajamento (calendário completo 1-30, 9/15/20/30 também por e-mail), daily_missions_reminder, ranking_weekly_result, featured_badge_reminder',
     usersScanned,

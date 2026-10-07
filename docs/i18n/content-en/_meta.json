@@ -1,0 +1,12 @@
+{
+ "levels": {"A1": "Level 1 · Débutant", "A2": "Level 2 · Élémentaire"},
+ "modules": {
+  "A1-m1": "First contacts",
+  "A1-m2": "Daily routine",
+  "A1-m3": "City and identity",
+  "A1-m4": "Getting around and taking care of yourself",
+  "A1-m5": "Describing the world around you",
+  "A1-m6": "Leisure and the past"
+ },
+ "levelTests": {"A1-final": "A1 Level Test"}
+}

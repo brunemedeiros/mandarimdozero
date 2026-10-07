@@ -15,4 +15,15 @@ ctx.U.forEach(u => {
   ((u.dialogue && u.dialogue.lines) || []).forEach(l => add(l[key]));
   (u.concepts || []).forEach(c => (c.blocks || []).forEach(b => (b.examples || []).forEach(e => add(e[key]))));
 });
+// Frases localizadas por idioma do site (overlay `src`): também precisam de áudio.
+fs.readdirSync(path.join(root, lang)).filter(f => /^content\.[a-z-]+\.js$/i.test(f) && f !== 'content.js').forEach(f => {
+  try {
+    const c2 = { window: {}, console }; vm.createContext(c2);
+    vm.runInContext(fs.readFileSync(path.join(root, lang, f), 'utf8'), c2);
+    Object.values(c2.window.CONTENT_OVERLAYS || {}).forEach(ov => Object.values(ov.units || {}).forEach(u => {
+      const walk = n => { if (n && typeof n === 'object') Object.entries(n).forEach(([k, v]) => { if (k === 'blocks') return; if (k === key && typeof v === 'string') add(v); else walk(v); }); };
+      walk(u.src);
+    }));
+  } catch (e) { /* overlay ausente/ilegível: ignora */ }
+});
 console.log(JSON.stringify([...out], null, 1));

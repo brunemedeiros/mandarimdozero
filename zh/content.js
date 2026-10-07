@@ -130,8 +130,8 @@ const UNITS = [
       { p: "wǎn shang hǎo", c: "晚上好", t: "boa noite (saudação)" }
     ],
     phrases: [
-      { p: "Nǐ hǎo! Wǒ jiào Brune.", c: "你好！我叫Brune。", t: "Olá! Eu me chamo Brune.",
-        blocks: [{p:"Nǐ hǎo!",c:"你好！"},{p:"Wǒ jiào",c:"我叫"},{p:"Brune.",c:"Brune。"}] },
+      { p: "Nǐ hǎo! Wǒ jiào {nome}.", c: "你好！我叫{nome}。", t: "Olá! Eu me chamo {nome}.",
+        blocks: [{p:"Nǐ hǎo!",c:"你好！"},{p:"Wǒ jiào",c:"我叫"},{p:"{nome}.",c:"{nome}。"}] },
       { p: "Xiè xiè nǐ!", c: "谢谢你！", t: "Obrigada!",
         blocks: [{p:"Xiè xiè",c:"谢谢"},{p:"nǐ!",c:"你！"}] },
       { p: "Duì bu qǐ, wǒ bù dǒng.", c: "对不起，我不懂。", t: "Desculpe, eu não entendo.",
@@ -266,8 +266,8 @@ const UNITS = [
     phrases: [
       { p: "Nǐ jiào shénme míngzi?", c: "你叫什么名字？", t: "Qual é o seu nome?",
         blocks: [{p:"Nǐ",c:"你"},{p:"jiào",c:"叫"},{p:"shénme míngzi?",c:"什么名字？"}] },
-      { p: "Wǒ shì Bāxī rén.", c: "我是巴西人。", t: "Eu sou brasileira.",
-        blocks: [{p:"Wǒ",c:"我"},{p:"shì",c:"是"},{p:"Bāxī rén.",c:"巴西人。"}] },
+      { p: "Wǒ shì {nacionalidade_p}.", c: "我是{nacionalidade}。", t: "Eu sou {nacionalidade_t}.",
+        blocks: [{p:"Wǒ",c:"我"},{p:"shì",c:"是"},{p:"{nacionalidade_p}.",c:"{nacionalidade}。"}] },
       { p: "Nǐ shì nǎ guó rén?", c: "你是哪国人？", t: "De que país você é?",
         blocks: [{p:"Nǐ",c:"你"},{p:"shì",c:"是"},{p:"nǎ guó rén?",c:"哪国人？"}] }
     ],

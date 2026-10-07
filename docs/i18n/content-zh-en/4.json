@@ -1,0 +1,193 @@
+{
+ "unit": 4,
+ "en": {
+  "title": "Family",
+  "goal": "Introduce family members and talk about how many people are in your family.",
+  "lessons": {
+   "pais": "Introducing your family: father and mother",
+   "irmaos": "Talking about siblings",
+   "ter-familia": "Saying who you have in your family",
+   "quantas-pessoas": "Asking how many people are in a family",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "family / home",
+   "dad",
+   "mom",
+   "older brother",
+   "younger brother",
+   "older sister",
+   "younger sister",
+   "child / son or daughter",
+   "to have / there is",
+   "how many",
+   "an older sister (个 in context)",
+   "how many people (口 in context)"
+  ],
+  "phrases": [
+   {
+    "t": "How many people are in your family?"
+   },
+   {
+    "t": "I have an older sister."
+   }
+  ],
+  "dialogue": {
+   "title": "Talking about family",
+   "lines": [
+    "How many people are in your family?",
+    "There are 4 people in my family: dad, mom, my older brother and me.",
+    "Do you have a younger sister?",
+    "No, I don't have a younger sister."
+   ]
+  },
+  "concepts": {
+   "classifiers": [
+    {
+     "title": "一个人, not just \"one rén\"",
+     "body": "In Chinese, a number almost never sits directly next to a noun — between the two comes a <strong>measure word</strong> (a kind of \"unit word\"). 个 (gè) is the most generic measure word, used for people and many other things.",
+     "examples": [
+      "one person",
+      "an older sister"
+     ]
+    },
+    {
+     "title": "个 (gè) or 口 (kǒu)?",
+     "body": "To count people in general, 个 does the job. But to count how many people live in the same household, Chinese has a specific measure word: <strong>kǒu</strong> (口, literally \"mouth\") — only in that family context.",
+     "examples": [
+      "how many people? (family context)"
+     ]
+    }
+   ],
+   "you": [
+    {
+     "title": "有 (yǒu) — \"to have\" / \"there is\"",
+     "body": "有 (yǒu) is the verb used both to say that someone has something and to say that something exists. Simple structure: Subject + 有 + Object.",
+     "examples": [
+      "I have an older sister."
+     ]
+    }
+   ],
+   "he": [
+    {
+     "title": "和 (hé) — joining nouns",
+     "body": "和 (hé) is like \"and,\" but it only joins nouns to each other — never whole sentences. To connect two complete sentences, Chinese usually uses no linking word at all.",
+     "examples": [
+      "dad and mom"
+     ]
+    }
+   ],
+   "meiyou": [
+    {
+     "title": "没(有) — negating \"to have\"",
+     "body": "To negate 有 (to have), Chinese doesn't use 不 — it uses 没 or 没有, specifically for this. It's one of the few exceptions to the general rule of negating with 不.",
+     "examples": [
+      "I don't have a younger sister."
+     ]
+    }
+   ],
+   "politica-filho-unico-historia": [
+    {
+     "title": "Why many people in the parents' generation have only one sibling (or none)",
+     "body": "From 1979 until the end of 2015, China had the <strong>one-child policy</strong> (一孩政策), which limited most urban families to having just one child, as a way to curb population growth. The policy was officially ended in 2016, replaced first by permission to have two children and later three — but its effect still shows today in the structure of many Chinese families.",
+     "examples": [
+      "child / son or daughter"
+     ]
+    }
+   ]
+  }
+ },
+ "review": [
+  {
+   "path": "vocab[0]",
+   "pt": "família / casa",
+   "en": "family / home",
+   "conf": "media",
+   "why": "家 ambíguo"
+  },
+  {
+   "path": "vocab[7]",
+   "pt": "filho(a)/criança",
+   "en": "child / son or daughter",
+   "conf": "media",
+   "why": "glosa PT ambígua"
+  },
+  {
+   "path": "vocab[8]",
+   "pt": "ter/haver",
+   "en": "to have / there is",
+   "conf": "media",
+   "why": "várias traduções corretas"
+  },
+  {
+   "path": "vocab[10]",
+   "pt": "uma irmã mais velha (个 em contexto)",
+   "en": "an older sister (个 in context)",
+   "conf": "media",
+   "why": "termo técnico mantido"
+  },
+  {
+   "path": "vocab[3]",
+   "pt": "irmão mais velho",
+   "en": "older brother",
+   "conf": "media",
+   "why": "várias traduções corretas (elder/big brother)"
+  },
+  {
+   "path": "vocab[1]",
+   "pt": "pai",
+   "en": "dad",
+   "conf": "media",
+   "why": "EN-US 'dad' vs 'father'; 爸爸 é informal"
+  },
+  {
+   "path": "vocab[2]",
+   "pt": "mãe",
+   "en": "mom",
+   "conf": "media",
+   "why": "EN-US 'mom' vs EN-GB 'mum'"
+  },
+  {
+   "path": "concepts.classifiers[0].title",
+   "pt": "一个人, não só 'um rén'",
+   "en": "一个人, not just 'one rén'",
+   "conf": "media",
+   "why": "classificador -> measure word"
+  },
+  {
+   "path": "concepts.classifiers[0].body",
+   "pt": "classificador... 'medida'",
+   "en": "measure word... 'unit word'",
+   "conf": "media",
+   "why": "terminologia adaptada"
+  },
+  {
+   "path": "concepts.classifiers[1].body",
+   "pt": "literalmente 'boca'",
+   "en": "literally 'mouth'",
+   "conf": "media",
+   "why": "fato mantido do PT"
+  },
+  {
+   "path": "concepts.you[0].body",
+   "pt": "'ter'/'haver'",
+   "en": "'to have'/'there is'",
+   "conf": "media",
+   "why": "adaptado ao inglês"
+  },
+  {
+   "path": "concepts.he[0].body",
+   "pt": "equivale a 'e'",
+   "en": "is like 'and'",
+   "conf": "media",
+   "why": "afirmação sobre a língua mantida"
+  },
+  {
+   "path": "concepts.politica-filho-unico-historia[0].body",
+   "pt": "política do filho único 1979-2015",
+   "en": "one-child policy 1979-2015",
+   "conf": "media",
+   "why": "fato histórico; datas preservadas do PT, sem acrescentar"
+  }
+ ]
+}

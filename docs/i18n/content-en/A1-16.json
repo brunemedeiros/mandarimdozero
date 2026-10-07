@@ -1,0 +1,147 @@
+{
+ "unit": "A1-16",
+ "en": {
+  "title": "Colors and descriptions",
+  "goal": "Describe colors, objects and people's characteristics.",
+  "lessons": {
+   "vermelho-azul-verde": "Red, blue and green",
+   "amarelo-preto-branco": "Yellow, black and white",
+   "tamanho-e-personalidade": "Describing size and personality",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "red",
+   "blue",
+   "green",
+   "yellow",
+   "black",
+   "white",
+   "big / tall",
+   "small / short",
+   "pretty",
+   "kind / nice"
+  ],
+  "phrases": [
+   {
+    "t": "I like the color blue.",
+    "scenario": "Someone asks your favorite color, which is blue. What do you say?"
+   },
+   {
+    "t": "She is very kind.",
+    "scenario": "Someone asks what your new colleague is like, and she is very kind. What do you say?"
+   },
+   {
+    "t": "My cat is black and white.",
+    "scenario": "Someone asks what your cat looks like, and it's black and white. What do you answer?"
+   },
+   {
+    "t": "It's a pretty red dress.",
+    "scenario": "You're describing a pretty red dress you saw in a shop. What do you say?"
+   },
+   {
+    "t": "The sweater is green and yellow."
+   },
+   {
+    "t": "The dog is small."
+   }
+  ],
+  "dialogue": {
+   "title": "Describing someone",
+   "lines": [
+    "What's your brother like?",
+    "He's tall and has black hair.",
+    "Is he nice?",
+    "Yes, he's very kind!"
+   ]
+  },
+  "concepts": {
+   "adjective-placement": [
+    {
+     "title": "Why \"une jolie robe rouge\" and not \"une rouge jolie robe\"?",
+     "body": "Most adjectives in French come <strong>after</strong> the noun (une robe <strong>rouge</strong>, un chat <strong>noir</strong>) — unlike English, where adjectives come before the noun. Only a small group of common, short adjectives (like jolie, grand, petit, bon) come <strong>before</strong>: une <strong>jolie</strong> robe. That's why \"a pretty red dress\" is <strong>une jolie robe rouge</strong> — jolie before, rouge after.",
+     "examples": [
+      "red",
+      "pretty"
+     ]
+    }
+   ],
+   "gentil-sympa": [
+    {
+     "title": "In everyday speech, \"gentil\" often becomes \"sympa\"",
+     "body": "Notice that the dialogue you just read already uses <strong>sympa</strong> (\"Il est sympa ?\") — a very common short form of <strong>sympathique</strong>, used all the time instead of <strong>gentil</strong> to say someone is nice / a good person.",
+     "examples": [
+      "nice / a good guy (informal)"
+     ]
+    }
+   ],
+   "bandeira-tricolor-historia": [
+    {
+     "title": "Bleu, blanc, rouge — the origin of the French flag",
+     "body": "The 3 colors you just learned are those of the French flag: <strong>bleu</strong> and <strong>rouge</strong> were the colors of Paris, and <strong>blanc</strong> was the traditional color of the monarchy — the flag, created during the French Revolution, combines the two.",
+     "examples": [
+      "the flag"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "vocab[6]",
+   "pt": "grande / alto",
+   "en": "big / tall",
+   "conf": "media",
+   "why": "'grand' covers both."
+  },
+  {
+   "path": "vocab[7]",
+   "pt": "pequeno / baixo",
+   "en": "small / short",
+   "conf": "media",
+   "why": "'petit' covers both."
+  },
+  {
+   "path": "vocab[9]",
+   "pt": "gentil / legal",
+   "en": "kind / nice",
+   "conf": "media",
+   "why": "PT gloss 'gentil / legal' ambiguous."
+  },
+  {
+   "path": "phrases[3]",
+   "pt": "É um vestido vermelho bonito.",
+   "en": "It's a pretty red dress.",
+   "conf": "media",
+   "why": "PT gives 'bonito'; EN 'pretty/nice'."
+  },
+  {
+   "path": "dialogue.lines[2]",
+   "pt": "Ele é legal?",
+   "en": "Is he nice?",
+   "conf": "media",
+   "why": "'sympa' informal; 'cool/nice'."
+  },
+  {
+   "path": "concepts.gentil-sympa.examples[0]",
+   "pt": "legal / gente boa (informal)",
+   "en": "nice / a good guy (informal)",
+   "conf": "media",
+   "why": "PT slang 'gente boa'; EN approximation."
+  },
+  {
+   "path": "concepts.bandeira-tricolor-historia.body",
+   "pt": "junta as duas",
+   "en": "combines the two",
+   "conf": "media",
+   "why": "Content kept faithful to source; ambiguous 'the two'."
+  },
+  {
+   "path": "concepts.adjective-placement.body",
+   "pt": "diferente do português, mas parecido também",
+   "en": "unlike English, where adjectives come before the noun",
+   "conf": "baixa",
+   "why": "PT sentence compares with Portuguese; adapted to English, which changes meaning (reviewer should approve)."
+  }
+ ]
+}

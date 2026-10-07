@@ -1,0 +1,118 @@
+{
+ "unit": "A1-g2",
+ "en": {
+  "title": "Possessive adjectives",
+  "goal": "Use mon/ma/mes, ton/ta/tes, son/sa/ses and the other possessive adjectives correctly.",
+  "grammar": {
+   "blocks": [
+    {
+     "title": "My, our, your...",
+     "body": "In French, the possessive adjective agrees with the gender and number of the thing owned — not with the owner! That is why \"my\" can be mon, ma or mes depending on the word that follows. (English does the opposite: his/her depends on the owner.)",
+     "examples": [
+      "This is my brother. (frère is masculine)",
+      "This is my sister. (sœur is feminine)"
+     ]
+    },
+    {
+     "title": "Our, your (plural), their...",
+     "body": "Notre/votre/leur (our, your (plural/formal), their), on the other hand, do not change with gender — they just get an \"s\" in the plural (nos/vos/leurs) whenever the thing owned is plural.",
+     "examples": [
+      "Our father is called Jean.",
+      "These are their parents."
+     ]
+    },
+    {
+     "title": "A sound-based exception",
+     "body": "Before a feminine word that starts with a vowel (or a silent \"h\"), mon/ton/son are used instead of ma/ta/sa — just to avoid an awkward clash of two vowel sounds in a row. The word is still feminine; only the written form changes.",
+     "examples": [
+      "This is my friend Sophie. (amie is feminine, but starts with a vowel)",
+      "Her school is far away."
+     ]
+    },
+    {
+     "title": "Très bien! 🎉",
+     "body": "Here is the complete table of possessives — organized by the gender/number of the thing owned, not by who the owner is:",
+     "examples": [],
+     "table": [
+      {
+       "label": "Masculine singular",
+       "pronouns": [
+        "my",
+        "your (informal)",
+        "his / her / its",
+        "our",
+        "your (plural / formal)",
+        "their"
+       ]
+      },
+      {
+       "label": "Feminine singular",
+       "pronouns": [
+        "my",
+        "your (informal)",
+        "his / her / its",
+        "our",
+        "your (plural / formal)",
+        "their"
+       ]
+      },
+      {
+       "label": "Plural (m/f)",
+       "pronouns": [
+        "my (plural)",
+        "your (informal, plural)",
+        "his / her / its (plural)",
+        "our (plural)",
+        "your (plural / formal, plural)",
+        "their (plural)"
+       ]
+      }
+     ]
+    }
+   ],
+   "exercises": [
+    {
+     "hint": "my (masc.)"
+    },
+    {
+     "hint": "my (fem.)"
+    },
+    {
+     "hint": "my (plural)"
+    },
+    {
+     "hint": "our"
+    },
+    {
+     "hint": "their (plural)"
+    },
+    {
+     "hint": "my — but amie starts with a vowel"
+    }
+   ]
+  }
+ },
+ "review": [
+  {
+   "path": "grammar.blocks[0].body",
+   "pt": "No francês, o adjetivo possessivo concorda com o gênero e número da coisa possuída — não com quem é o dono! ...",
+   "en": "... (English does the opposite: his/her depends on the owner.)",
+   "conf": "media",
+   "why": "Added a one-sentence contrast with English (his/her follow the owner), which is true and helps English speakers; the original only compared to Portuguese."
+  },
+  {
+   "path": "grammar.blocks[3].table[2].pronouns",
+   "pt": "meus / minhas ... deles / delas (pl.)",
+   "en": "my (plural) ... their (plural)",
+   "conf": "media",
+   "why": "Portuguese gender/number distinctions (meus/minhas) do not exist in English; glossed as \"(plural)\"."
+  },
+  {
+   "path": "grammar.blocks[3].table[0].pronouns",
+   "pt": "seu / dele / dela; vosso / de vocês",
+   "en": "his / her / its; your (plural / formal)",
+   "conf": "media",
+   "why": "English has no separate informal/formal \"you\" or Portuguese-style seu ambiguity; glosses adapted. Please check."
+  }
+ ]
+}

@@ -34,7 +34,7 @@ function extractFunction(src, name){
 }
 
 const APP_FUNCTIONS = [
-  'buildCardsFromUnits', 'flashcardIdForRow', 'lessonIndexForVocabIdx', 'isCardLessonCompleted',
+  'buildCardsFromUnits', 'flashcardIdForRow', 'lessonIndexForVocabIdx', 'isCardLessonCompleted', 'findMatchingPhrase',
   'matchesReviewOriginFilter', 'activeReviewTagFilter', 'matchesReviewTagFilter', 'eligibleReviewPool', 'eligibleDeckReviewPool', 'applySerializedState',
   'ensureCourseDecksLoaded', 'ensureDecksLoadedForReview',
   'deckReviewSummary', 'deckCountsForReview', 'reviewFilterQueue',
@@ -43,7 +43,7 @@ const APP_FUNCTIONS = [
 
 function loadLang(lang, overrides){
   const appKey = lang === 'fr' ? 'frances' : 'mandarim';
-  const ctx = vm.createContext({ console, Date, Math, JSON, Map, Set, Promise, Object, Array, String, Number });
+  const ctx = vm.createContext(require('../i18n/vm-t').installT({ console, Date, Math, JSON, Map, Set, Promise, Object, Array, String, Number }));
   ctx.APP_KEY = appKey;
   ctx.window = ctx;
   const run = (code, file) => vm.runInContext(code, ctx, { filename: file });

@@ -11,6 +11,15 @@
 const CHECKPOINT_EXAM_SIZE = 12;
 const CHECKPOINT_EXAM_QUOTAS = { listen: 3, phrase: 3, grammar: 2 }; // o resto é palavra
 
+// i18n: usa t() quando existe (navegador); sem ele (testes em Node) cai no português.
+function _ckT(key, params, fallback){
+  if (typeof t === 'function'){
+    const v = t(key, params);
+    if (v && v !== key) return v;
+  }
+  return fallback.replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? params[k] : m));
+}
+
 function buildCheckpointExamQueue(units, opts){
   opts = opts || {};
   const shuffleFn = opts.shuffle || (a => a.slice());
@@ -26,10 +35,10 @@ function buildCheckpointExamQueue(units, opts){
     }
     // Forma dupla ("français / française") não dá para cobrar por digitação exata.
     (u.vocab || []).filter(v => v.f && !v.f.includes(' / ')).forEach(v =>
-      take('word', { kind: 'word', prompt: `Como se diz "${v.t}" em francês?`, hint: null, answer: v.f }));
+      take('word', { kind: 'word', prompt: _ckT('fr.checkpoint.exam.word', { w: v.t }, 'Como se diz "{w}" em francês?'), hint: null, answer: v.f }));
     (u.phrases || []).filter(p => p.f && p.t && !p.f.includes(' / ')).forEach(p => {
-      take('phrase', { kind: 'phrase', prompt: `Escreva em francês: "${p.t}"`, hint: null, answer: p.f });
-      if (canSpeak(p.f)) take('listen', { kind: 'listen', prompt: 'Ouça e escreva o que você ouviu', hint: null, answer: p.f, audioText: p.f });
+      take('phrase', { kind: 'phrase', prompt: _ckT('fr.checkpoint.exam.phrase', { p: p.t }, 'Escreva em francês: "{p}"'), hint: null, answer: p.f });
+      if (canSpeak(p.f)) take('listen', { kind: 'listen', prompt: _ckT('fr.checkpoint.exam.listen', null, 'Ouça e escreva o que você ouviu'), hint: null, answer: p.f, audioText: p.f });
     });
   });
   Object.keys(pools).forEach(k => { pools[k] = shuffleFn(pools[k]); });

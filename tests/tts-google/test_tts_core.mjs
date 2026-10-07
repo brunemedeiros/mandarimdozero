@@ -46,19 +46,34 @@ ok(core.toSpokenTextForTts('un kilo (de)', 'fr-FR') === 'un kilo de…', 'parên
 ok(core.toSpokenTextForTts('un / une (de)', 'fr-FR') === 'un, une de…', 'as duas regras');
 ok(core.toSpokenTextForTts('a/b', 'fr-FR') === 'a/b', 'barra sem espaço intacta');
 ok(core.toSpokenTextForTts('你 / 好', 'cmn-CN') === '你 / 好', 'zh sem regras');
-ok(core.toSpokenTextForTts('um / uma', 'pt-BR') === 'um / uma', 'pt sem regras');
-// Paridade com spoken_text.py nas entradas fr que só usam essas 2 regras.
+ok(core.toSpokenTextForTts("l'œuf", 'fr-FR') === "l'oeuf", 'fr œuf (paridade completa com o Python)');
+ok(core.toSpokenTextForTts("l'âge", 'fr-FR') === "l'age", 'fr l\'âge');
+ok(core.toSpokenTextForTts('une bouteille (de)', 'fr-FR') === 'une bouteille (de)', 'fr override');
+ok(core.toSpokenTextForTts('bonito / bonita', 'pt-BR') === 'bonito, bonita', 'pt barra');
+ok(core.toSpokenTextForTts('o(a) aluno(a)', 'pt-BR') === 'o aluno, a aluna', 'pt gênero (vários)');
+ok(core.toSpokenTextForTts('Obrigado, Sra.', 'pt-BR') === 'Obrigado, Senhora.', 'pt título no fim');
+ok(core.toSpokenTextForTts('21º andar', 'pt-BR') === 'vigésimo primeiro andar', 'pt ordinal composto');
+ok(core.toSpokenTextForTts('obrigado(a)', 'cmn-CN') === 'obrigado(a)', 'zh sem regras de pt');
+// Paridade com spoken_text.py: TODAS as entradas do manifest fr e zh + os casos de pt.
 try {
-  const manifest = fs.readFileSync(path.join(root, 'fr/audio-manifest.js'), 'utf8');
-  const keys = [...manifest.matchAll(/"((?:[^"\\]|\\.)*)"\s*:/g)].map(m => JSON.parse('"' + m[1] + '"'))
-    .filter(k => (/ \/ |\(/.test(k)) && !/œ|âge/.test(k));
-  const py = `import sys,json; sys.path.insert(0, ${JSON.stringify(path.join(root, 'fr/scripts/challenges_pipeline'))})\nfrom spoken_text import to_spoken_text, SPOKEN_OVERRIDES\nov=SPOKEN_OVERRIDES.get('fr',{})\nprint(json.dumps([None if t in ov else to_spoken_text(t,'fr') for t in json.load(sys.stdin)]))`;
-  const out = JSON.parse(execFileSync('python3', ['-c', py], { input: JSON.stringify(keys) }).toString());
-  // Overrides manuais por texto exato (ex.: "une bouteille (de)") ficam de fora: são escolhas do
-  // manifest da trilha, não regras genéricas.
-  const mism = keys.filter((k, i) => out[i] !== null && core.toSpokenTextForTts(k, 'fr-FR') !== out[i]);
-  ok(keys.length > 0 && mism.length === 0, `paridade com spoken_text.py (${keys.length} entradas; divergências: ${JSON.stringify(mism)})`);
-  console.log(`paridade spoken_text.py: ${keys.length} entradas comparadas`);
+  const readKeys = (rel) => [...fs.readFileSync(path.join(root, rel), 'utf8').matchAll(/^ "((?:[^"\\]|\\.)*)"\s*:/gm)].map(m => JSON.parse('"' + m[1] + '"'));
+  const frKeys = readKeys('fr/audio-manifest.js');
+  const zhKeys = readKeys('zh/audio-manifest.js');
+  const ptKeys = ['bonito / bonita', 'km/h', 'e/ou', '24/7', 'obrigado(a)', 'Muito obrigado(a)!', 'professor(a)',
+    'bem-vindo(a)', 'livro(s)', 'o(a) aluno(a)', 'Caro(a) professor(a), bom dia.', 'professor(es)', 'os(as) alunos(as)',
+    'inglês(a)', 'alemão(ã)', 'gostar (de)', 'você (informal)', 'Bom dia, Sra. Silva!', 'Obrigado, Sra.', 'Sr. e Sra. Silva',
+    'Sr.(a) Silva', 'Sr(a).', 'Prof.ª Ana', 'Profª Maria', 'Dr Paulo chegou', 'Drs. Ana e Rui', 'a Sra. é daqui',
+    '1º andar', 'a 2ª aula', '21º andar', '1.º de maio', '25ª edição', '100º', '101º', '0º', '1° andar', 'nº 5', 'n.º 12',
+    'Nº 3', 'Oi 👋 → tudo ✓', '* item', '• um • dois', 'Os carros azuis.', 'Vou chamá-lo amanhã.', 'Tudo bem?',
+    'Moro nos EUA.', 'Tenho 25 anos.', 'você', 'R$ 5,00', '14h30', 'NÃO!', 'É a 3ª vez, Sra. Lima: o(a) aluno(a) / a turma (de) hoje'];
+  const groups = [['fr', 'fr-FR', frKeys], ['zh', 'cmn-CN', zhKeys], ['pt', 'pt-BR', ptKeys]];
+  const py = `import sys,json; sys.path.insert(0, ${JSON.stringify(path.join(root, 'fr/scripts/challenges_pipeline'))})\nfrom spoken_text import to_spoken_text\nd=json.load(sys.stdin)\nprint(json.dumps({k:[to_spoken_text(t,k) for t in v] for k,v in d.items()}))`;
+  const out = JSON.parse(execFileSync('python3', ['-c', py], { input: JSON.stringify(Object.fromEntries(groups.map(([k, , v]) => [k, v]))) }).toString());
+  for (const [k, code, keys] of groups) {
+    const mism = keys.filter((t, i) => core.toSpokenTextForTts(t, code) !== out[k][i]);
+    ok(keys.length > 0 && mism.length === 0, `paridade ${k} com spoken_text.py (${keys.length} entradas; divergências: ${JSON.stringify(mism)})`);
+    console.log(`paridade spoken_text.py ${k}: ${keys.length} entradas comparadas`);
+  }
 } catch (e) { ok(false, 'paridade spoken_text.py: ' + e.message); }
 
 // --- corpo da requisição / erros ---
@@ -87,14 +102,20 @@ const model = fs.readFileSync(path.join(root, 'shared/flashcard-model.js'), 'utf
 const pick = (src, name) => (src.match(new RegExp(`const ${name} = ([^;]+);`)) || [])[1];
 ok(pick(idx, 'TTS_PROVIDER_MODEL_ID') === "'google-chirp3-hd'" && pick(model, 'TTS_PROVIDER_MODEL_ID') === "'google-chirp3-hd'", 'model id nos 2 lados');
 ok(pick(idx, 'TTS_CONFIG_VERSION') === pick(model, 'TTS_CONFIG_VERSION'), 'config version igual');
+ok(pick(idx, 'TTS_SPOKEN_RULES_VERSION_BY_LANG: Record<string, number>') === pick(model, 'TTS_SPOKEN_RULES_VERSION_BY_LANG'), 'versão das regras por idioma igual');
 ok(pick(idx, 'TTS_TEXT_MAX_LENGTH') === pick(model, 'TTS_TEXT_MAX_LENGTH'), 'max length igual');
 const ctx = { console, TextEncoder, crypto: globalThis.crypto };
 vm.createContext(ctx);
 vm.runInContext(model + '\n;globalThis.__k = computeTtsGenerationKey; globalThis.__labels = TTS_GENERATION_ERROR_LABELS;', ctx);
 const clientKey = await ctx.__k('un / une', 'fr-FR', null, 1);
-const parts = ['un / une', 'fr-FR', '', '1', 'google-chirp3-hd', '1'].map(encodeURIComponent).join('\u001F');
+const parts = ['un / une', 'fr-FR', '', '1', 'google-chirp3-hd', '2:fr4'].map(encodeURIComponent).join('\u001F');
 const serverKey = Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(parts))).toString('hex');
-ok(clientKey === serverKey, 'generationKey inclui google-chirp3-hd');
+ok(clientKey === serverKey, 'generationKey inclui google-chirp3-hd e a versão por idioma');
+const ptKey = await ctx.__k('obrigado(a)', 'pt-BR', null, 1);
+const zhKey = await ctx.__k('obrigado(a)', 'zh-CN', null, 1);
+const ptParts = ['obrigado(a)', 'pt-BR', '', '1', 'google-chirp3-hd', '2:pt1'].map(encodeURIComponent).join('\u001F');
+ok(ptKey === Buffer.from(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ptParts))).toString('hex'), 'pt usa 2:pt1');
+ok(ptKey !== zhKey, 'versão por idioma separa pt de zh');
 for (const code of ['monthly_quota_exceeded', 'provider_error', 'provider_rate_limited', 'provider_not_configured', 'quota_check_failed', 'unsupported_language', 'invalid_voice', 'rate_limited']) {
   ok(typeof ctx.__labels[code] === 'string' && ctx.__labels[code].length > 0, 'rótulo ' + code);
 }

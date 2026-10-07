@@ -26,33 +26,50 @@
 //   - languages/<lang>/app.js   (isAdminUser)
 
 const REPORT_STATUS_LABELS = {
-  novo: 'Novo',
-  em_analise: 'Em análise',
-  confirmado: 'Confirmado',
-  em_desenvolvimento: 'Em desenvolvimento',
-  resolvido: 'Resolvido',
-  nao_reproduzido: 'Não reproduzido',
-  recusado: 'Recusado',
-  duplicado: 'Duplicado',
+  get novo(){ return t('admin.reports.status.novo'); },
+  get em_analise(){ return t('admin.reports.status.em_analise'); },
+  get confirmado(){ return t('admin.reports.status.confirmado'); },
+  get em_desenvolvimento(){ return t('admin.reports.status.em_desenvolvimento'); },
+  get resolvido(){ return t('admin.reports.status.resolvido'); },
+  get nao_reproduzido(){ return t('admin.reports.status.nao_reproduzido'); },
+  get recusado(){ return t('admin.reports.status.recusado'); },
+  get duplicado(){ return t('admin.reports.status.duplicado'); },
 };
-const REPORT_PRIORITY_LABELS = { baixa: 'Baixa', media: 'Média', alta: 'Alta', critica: 'Crítica' };
-const REPORT_CATEGORY_LABELS_BY_ID = Object.fromEntries(REPORT_CATEGORIES.map(c => [c.id, c.label]));
-const REPORT_SEVERITY_LABELS_BY_ID = Object.fromEntries(REPORT_SEVERITIES.map(s => [s.id, s.label]));
+const REPORT_PRIORITY_LABELS = {
+  get baixa(){ return t('admin.reports.priority.baixa'); },
+  get media(){ return t('admin.reports.priority.media'); },
+  get alta(){ return t('admin.reports.priority.alta'); },
+  get critica(){ return t('admin.reports.priority.critica'); },
+};
+function reportCategoryLabel(id){ const c = REPORT_CATEGORIES.find(x => x.id === id); return c ? t(c.labelKey) : undefined; }
+function reportSeverityLabel(id){ const s = REPORT_SEVERITIES.find(x => x.id === id); return s ? t(s.labelKey) : undefined; }
 
 // Fase 7 do projeto "Report global": idioma vem de `language_app_key`
 // (o APP_KEY de cada languages/<lang>/app.js) -- valores fixos hoje, mas
 // um idioma novo no futuro só cai no fallback abaixo (mostra a key crua),
 // nunca quebra a lista.
-const REPORT_LANGUAGE_LABELS = { frances: 'Francês', mandarim: 'Chinês' };
+const REPORT_LANGUAGE_LABELS = {
+  get frances(){ return t('admin.reports.lang.frances'); },
+  get mandarim(){ return t('admin.reports.lang.mandarim'); },
+};
 
 // Fase 7: rótulo amigável pra `context.screen` (a aba ativa no momento do
 // report, ver captureReportContext em shared/reports.js) -- cobre as abas
 // dos dois idiomas; uma tela nova cai no fallback (mostra o id cru) sem
 // quebrar a lista.
 const REPORT_SCREEN_LABELS = {
-  path: 'Estudo', review: 'Revisão', hanzi: '汉字', conjugaison: 'Conjugação',
-  challenges: 'Desafios', dictation: 'Ditado', profile: 'Perfil', progress: 'Progresso',
-  goals: 'Metas', leaderboard: 'Ranking', settings: 'Configurações', 'admin-badges': 'Painel de Admin',
+  get path(){ return t('admin.reports.screen.path'); },
+  get review(){ return t('admin.reports.screen.review'); },
+  hanzi: '汉字',
+  get conjugaison(){ return t('admin.reports.screen.conjugaison'); },
+  get challenges(){ return t('admin.reports.screen.challenges'); },
+  get dictation(){ return t('admin.reports.screen.dictation'); },
+  get profile(){ return t('admin.reports.screen.profile'); },
+  get progress(){ return t('admin.reports.screen.progress'); },
+  get goals(){ return t('admin.reports.screen.goals'); },
+  get leaderboard(){ return t('admin.reports.screen.leaderboard'); },
+  get settings(){ return t('admin.reports.screen.settings'); },
+  get 'admin-badges'(){ return t('admin.reports.screen.admin_badges'); },
 };
 
 const ADMIN_REPORTS_STATE = { statusFilter: 'all', kindFilter: 'all', languageFilter: 'all' };
@@ -88,9 +105,9 @@ function reporterLabel(report){
   if (report.user_id){
     const p = ADMIN_REPORTS_PROFILES[report.user_id];
     if (p) return p.display_name || p.username;
-    return 'conta logada (perfil não encontrado)';
+    return t('admin.reports.reporter.loggedNoProfile');
   }
-  return report.reporter_email || 'convidada';
+  return report.reporter_email || t('admin.reports.reporter.guest');
 }
 
 async function updateReportAdminFields(id, fields){
@@ -102,7 +119,7 @@ async function updateReportAdminFields(id, fields){
 function reportDetailContextLines(context){
   const ctx = context || {};
   const keys = Object.keys(ctx);
-  if (!keys.length) return '<div>(sem contexto adicional)</div>';
+  if (!keys.length) return `<div>${t('admin.reports.ctx.none')}</div>`;
   return keys.map(k => {
     const val = typeof ctx[k] === 'object' ? JSON.stringify(ctx[k]) : String(ctx[k]);
     return `<div><strong>${escapeHTML(k)}:</strong> ${escapeHTML(val)}</div>`;
@@ -113,7 +130,7 @@ async function renderAdminReportsView(){
   const wrap = document.getElementById('admin-reports-content');
   if (!wrap) return;
   if (!isAdminUser()){
-    wrap.innerHTML = `<p class="profile-empty-note">Esta tela é só pra administração da plataforma.</p>`;
+    wrap.innerHTML = `<p class="profile-empty-note">${t('admin.common.adminOnly')}</p>`;
     return;
   }
   wrap.innerHTML = loadingHTML();
@@ -122,21 +139,21 @@ async function renderAdminReportsView(){
   await fetchReporterProfiles(ADMIN_REPORTS_CACHE);
 
   const statusOptionsHTML = ['all', ...Object.keys(REPORT_STATUS_LABELS)].map(s =>
-    `<option value="${s}" ${ADMIN_REPORTS_STATE.statusFilter === s ? 'selected' : ''}>${s === 'all' ? 'Todos os status' : REPORT_STATUS_LABELS[s]}</option>`
+    `<option value="${s}" ${ADMIN_REPORTS_STATE.statusFilter === s ? 'selected' : ''}>${s === 'all' ? t('admin.reports.filter.allStatus') : REPORT_STATUS_LABELS[s]}</option>`
   ).join('');
   const kindOptionsHTML = [
-    ['all', 'Problemas e sugestões'], ['problema', 'Só problemas'], ['sugestao', 'Só sugestões'],
+    ['all', t('admin.reports.filter.kindAll')], ['problema', t('admin.reports.filter.kindProblems')], ['sugestao', t('admin.reports.filter.kindSuggestions')],
   ].map(([k, label]) => `<option value="${k}" ${ADMIN_REPORTS_STATE.kindFilter === k ? 'selected' : ''}>${label}</option>`).join('');
   // Fase 7: filtro de idioma -- a lista de opções vem do próprio mapa de
   // rótulos (nunca hardcoded em outro lugar), então um idioma novo só
   // precisa ser adicionado em REPORT_LANGUAGE_LABELS pra aparecer aqui.
   const languageOptionsHTML = ['all', ...Object.keys(REPORT_LANGUAGE_LABELS)].map(l =>
-    `<option value="${l}" ${ADMIN_REPORTS_STATE.languageFilter === l ? 'selected' : ''}>${l === 'all' ? 'Todos os idiomas' : REPORT_LANGUAGE_LABELS[l]}</option>`
+    `<option value="${l}" ${ADMIN_REPORTS_STATE.languageFilter === l ? 'selected' : ''}>${l === 'all' ? t('admin.reports.filter.allLanguages') : REPORT_LANGUAGE_LABELS[l]}</option>`
   ).join('');
 
   const rowsHTML = ADMIN_REPORTS_CACHE.length ? ADMIN_REPORTS_CACHE.map(r => {
-    const catLabel = REPORT_CATEGORY_LABELS_BY_ID[r.category] || r.category;
-    const dateLabel = new Date(r.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+    const catLabel = reportCategoryLabel(r.category) || r.category;
+    const dateLabel = fmtDate(r.created_at, { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
     const who = escapeHTML(reporterLabel(r));
     const snippet = (r.description || '').slice(0, 90) + ((r.description || '').length > 90 ? '…' : '');
     // Fase 7: idioma e origem/tela direto na linha da lista -- antes só
@@ -153,15 +170,15 @@ async function renderAdminReportsView(){
           <div class="admin-badge-name">${escapeHTML(catLabel)} -- ${escapeHTML(snippet)}</div>
           <div class="admin-badge-desc">${dateLabel} · ${who} · ${escapeHTML(langLabel)}${screenLabel ? ` · ${escapeHTML(screenLabel)}` : ''} · <span class="admin-report-status-pill" data-status="${r.status}">${REPORT_STATUS_LABELS[r.status] || r.status}</span></div>
         </div>
-        <button class="admin-badge-edit-btn" data-report-detail="${r.id}" title="Ver detalhes">✏️</button>
+        <button class="admin-badge-edit-btn" data-report-detail="${r.id}" title="${t('admin.reports.row.details')}">✏️</button>
       </div>
     `;
-  }).join('') : `<p class="profile-empty-note">Nenhum report encontrado com esse filtro.</p>`;
+  }).join('') : `<p class="profile-empty-note">${t('admin.reports.empty')}</p>`;
 
   wrap.innerHTML = `
     <div class="profile-section">
-      <div class="section-label">⚑ Reports de bugs e sugestões</div>
-      <p class="profile-edit-hint">Enviados pela bandeira ⚑ (topbar, menu do usuário ou dentro dos exercícios). Convidados também podem reportar -- reports sem conta e sem e-mail informado aparecem como "convidada".</p>
+      <div class="section-label">${t('admin.reports.title')}</div>
+      <p class="profile-edit-hint">${t('admin.reports.hint')}</p>
       <div class="admin-report-filters">
         <select id="admin-report-status-filter" class="profile-edit-input">${statusOptionsHTML}</select>
         <select id="admin-report-kind-filter" class="profile-edit-input">${kindOptionsHTML}</select>
@@ -195,17 +212,17 @@ function openAdminReportDetail(reportId){
   const modal = document.getElementById('admin-report-detail-modal');
   if (!report || !modal) return;
 
-  document.getElementById('admin-report-detail-category').textContent = `${report.kind === 'sugestao' ? '💡 Sugestão' : '⚑ Problema'} -- ${REPORT_CATEGORY_LABELS_BY_ID[report.category] || report.category}`;
+  document.getElementById('admin-report-detail-category').textContent = `${report.kind === 'sugestao' ? t('admin.reports.detail.suggestion') : t('admin.reports.detail.problem')} -- ${reportCategoryLabel(report.category) || report.category}`;
   document.getElementById('admin-report-detail-reporter').textContent = reporterLabel(report);
   document.getElementById('admin-report-detail-description').textContent = report.description || '';
-  document.getElementById('admin-report-detail-expected').textContent = report.expected_behavior || '(não informado)';
-  document.getElementById('admin-report-detail-severity').textContent = REPORT_SEVERITY_LABELS_BY_ID[report.severity_reported] || '(não informado)';
+  document.getElementById('admin-report-detail-expected').textContent = report.expected_behavior || t('admin.reports.detail.notInformed');
+  document.getElementById('admin-report-detail-severity').textContent = reportSeverityLabel(report.severity_reported) || t('admin.reports.detail.notInformed');
   document.getElementById('admin-report-detail-context').innerHTML = reportDetailContextLines(report.context);
 
   const screenshotWrap = document.getElementById('admin-report-detail-screenshot');
   screenshotWrap.innerHTML = report.screenshot_url
-    ? `<a href="${report.screenshot_url}" target="_blank" rel="noopener">📎 Ver captura de tela anexada</a>`
-    : '(sem captura anexada)';
+    ? `<a href="${report.screenshot_url}" target="_blank" rel="noopener">${t('admin.reports.detail.screenshotView')}</a>`
+    : t('admin.reports.detail.screenshotNone');
 
   document.getElementById('admin-report-detail-status').value = report.status || 'novo';
   document.getElementById('admin-report-detail-priority').value = report.priority || '';
@@ -230,8 +247,11 @@ function renderAdminReportReplySection(report){
 
   const historyEl = document.getElementById('admin-report-reply-history');
   if (report.admin_reply_sent_at){
-    const dateLabel = new Date(report.admin_reply_sent_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
-    historyEl.innerHTML = `<em>Última resposta enviada em ${dateLabel}${report.reporter_email ? ` para ${escapeHTML(report.reporter_email)}` : ''}:</em><br>"${escapeHTML(report.admin_reply_subject || '')}" -- ${escapeHTML(report.admin_reply || '')}`;
+    const dateLabel = fmtDate(report.admin_reply_sent_at, { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+    const lastSent = report.reporter_email
+      ? t('admin.reports.reply.lastSentTo', { date: dateLabel, email: escapeHTML(report.reporter_email) })
+      : t('admin.reports.reply.lastSent', { date: dateLabel });
+    historyEl.innerHTML = `<em>${lastSent}</em><br>"${escapeHTML(report.admin_reply_subject || '')}" -- ${escapeHTML(report.admin_reply || '')}`;
     historyEl.style.display = '';
   } else {
     historyEl.innerHTML = '';
@@ -253,12 +273,12 @@ function closeAdminReportDetail(){
 // pode devolver (ver supabase/functions/report-reply-send/index.ts) --
 // nunca mostra o código cru pra admin.
 const REPORT_REPLY_ERROR_LABELS = {
-  forbidden: 'Sessão sem permissão de admin -- faça login de novo.',
-  report_not_found: 'Este report não foi encontrado.',
-  no_email: 'Sem e-mail associado a este report.',
-  email_not_configured: 'Envio de e-mail ainda não configurado no servidor (RESEND_API_KEY/RESEND_FROM_EMAIL).',
-  resend_failed: 'Não foi possível enviar o e-mail agora. Tente de novo em instantes.',
-  missing_fields: 'Preencha assunto e mensagem.',
+  get forbidden(){ return t('admin.reports.reply.err.forbidden'); },
+  get report_not_found(){ return t('admin.reports.reply.err.report_not_found'); },
+  get no_email(){ return t('admin.reports.reply.err.no_email'); },
+  get email_not_configured(){ return t('admin.reports.reply.err.email_not_configured'); },
+  get resend_failed(){ return t('admin.reports.reply.err.resend_failed'); },
+  get missing_fields(){ return t('admin.reports.reply.err.missing_fields'); },
 };
 
 // Chama a Edge Function report-reply-send (ver comentário no topo do
@@ -272,7 +292,7 @@ async function sendAdminReportReply(reportId, subject, body){
   });
   if (error || !data?.ok){
     const code = data?.error || error?.context?.error || null;
-    return { ok: false, error: REPORT_REPLY_ERROR_LABELS[code] || 'Não foi possível enviar a resposta agora.' };
+    return { ok: false, error: REPORT_REPLY_ERROR_LABELS[code] || t('admin.reports.reply.err.generic') };
   }
   return { ok: true, to: data.to };
 }
@@ -295,8 +315,8 @@ function wireAdminReportDetailModal(){
       internal_note: document.getElementById('admin-report-detail-note').value.trim() || null,
     });
     btn.disabled = false;
-    if (!result.ok){ errorEl.textContent = 'Não foi possível salvar agora.'; return; }
-    showToast('✓ Report atualizado.');
+    if (!result.ok){ errorEl.textContent = t('teacherMaterials.err.saveFailed'); return; }
+    showToast(t('admin.reports.toast.updated'));
     closeAdminReportDetail();
     renderAdminReportsView();
   });
@@ -309,16 +329,16 @@ function wireAdminReportDetailModal(){
     const subject = document.getElementById('admin-report-reply-subject').value.trim();
     const body = document.getElementById('admin-report-reply-body').value.trim();
     if (!subject || !body){
-      errorEl.textContent = 'Preencha assunto e mensagem.';
+      errorEl.textContent = t('admin.reports.reply.err.missing_fields');
       return;
     }
     btn.disabled = true;
-    btn.textContent = 'Enviando...';
+    btn.textContent = t('report.modal.sending');
     const result = await sendAdminReportReply(id, subject, body);
     btn.disabled = false;
-    btn.textContent = 'Enviar resposta';
+    btn.textContent = t('admin.reports.reply.send');
     if (!result.ok){ errorEl.textContent = result.error; return; }
-    showToast(`✓ Resposta enviada para ${result.to}.`);
+    showToast(t('admin.reports.toast.replySent', { to: result.to }));
     closeAdminReportDetail();
     renderAdminReportsView();
   });

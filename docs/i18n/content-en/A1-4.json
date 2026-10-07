@@ -1,0 +1,164 @@
+{
+ "unit": "A1-4",
+ "en": {
+  "title": "Family",
+  "goal": "Introduce family members and say how many siblings you have.",
+  "lessons": {
+   "nuclear": "Immediate family",
+   "irmaos": "Talking about siblings",
+   "completa": "Extended family",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "family",
+   "father",
+   "mother",
+   "brother",
+   "sister",
+   "parents",
+   "son",
+   "daughter",
+   "husband",
+   "wife / woman"
+  ],
+  "phrases": [
+   {
+    "t": "This is my family.",
+    "scenario": "You're showing a photo and want to introduce your family. What do you say?"
+   },
+   {
+    "t": "I have two brothers.",
+    "scenario": "Someone asks if you have siblings, and you have two brothers. What do you answer?"
+   },
+   {
+    "t": "My father's name is Marc.",
+    "scenario": "You're telling someone your father's name, which is Marc. What do you say?"
+   },
+   {
+    "t": "She's my sister.",
+    "scenario": "Someone asks who that girl in the photo is — she's your sister. What do you answer?"
+   },
+   {
+    "t": "Family is very important."
+   },
+   {
+    "t": "The father works in the city."
+   },
+   {
+    "t": "The mother is making dinner."
+   },
+   {
+    "t": "The brother and sister play together."
+   },
+   {
+    "t": "The parents adore their children."
+   },
+   {
+    "t": "The son and daughter like school."
+   },
+   {
+    "t": "The husband and wife live in Paris."
+   }
+  ],
+  "dialogue": {
+   "title": "Talking about family",
+   "lines": [
+    "Do you have any brothers or sisters?",
+    "Yes, I have a sister. And you?",
+    "I have a brother. His name is Paul.",
+    "How old is he?",
+    "He's fifteen."
+   ]
+  },
+  "concepts": {
+   "mon-vs-ma": [
+    {
+     "title": "\"Mon frère\" or \"ma sœur\"?",
+     "body": "In French, the possessive agrees with the gender of the word that follows, not with the owner: <strong>mon</strong> père, <strong>mon</strong> frère (masculine), but <strong>ma</strong> mère, <strong>ma</strong> sœur (feminine) — even if you're the one speaking (man or woman). Who owns the thing doesn't matter for choosing mon/ma, only the gender of the word.",
+     "examples": [
+      "my brother",
+      "my sister"
+     ]
+    }
+   ],
+   "pere-mere-papa-maman": [
+    {
+     "title": "\"Le père\"/\"la mère\" in everyday life become \"papa\"/\"maman\"",
+     "body": "To talk ABOUT fathers/mothers in general, or in a more neutral way, you use <strong>le père</strong>/<strong>la mère</strong>. But when talking directly TO your own father/mother, or about your own family day to day, the normal words are <strong>papa</strong>/<strong>maman</strong> — even among adults.",
+     "examples": [
+      "dad (familiar use)",
+      "mom (familiar use)"
+     ]
+    }
+   ],
+   "repas-dominical": [
+    {
+     "title": "Sunday lunch with the family",
+     "body": "In France, it's traditional for the family to get together for a <strong>repas dominical</strong> — Sunday lunch — which is usually longer and more elaborate than meals during the rest of the week, with several courses (starter, main dish, cheese, dessert). It's one of the times when several generations of the family come together.",
+     "examples": [
+      "Sunday family lunch"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "vocab[9]",
+   "pt": "a esposa / a mulher",
+   "en": "wife / woman",
+   "conf": "media",
+   "why": "'la femme' means both; EN needs context"
+  },
+  {
+   "path": "phrases[0].t",
+   "pt": "Aqui está minha família.",
+   "en": "This is my family.",
+   "conf": "media",
+   "why": "FR 'Voici' ('here is/this is'); EN 'This is' natural for introducing"
+  },
+  {
+   "path": "phrases[0].scenario",
+   "pt": "...quer apresentar sua família",
+   "en": "...introduce your family",
+   "conf": "media",
+   "why": "fine"
+  },
+  {
+   "path": "phrases[8].t",
+   "pt": "Os pais adoram seus filhos.",
+   "en": "The parents adore their children.",
+   "conf": "media",
+   "why": "FR 'les parents' = parents; EN 'The parents' reads oddly without context but follows the source"
+  },
+  {
+   "path": "dialogue.lines[3]",
+   "pt": "Quantos anos ele tem?",
+   "en": "How old is he?",
+   "conf": "media",
+   "why": "FR 'Il a quel âge ?'; fine"
+  },
+  {
+   "path": "concepts.mon-vs-ma[0].body",
+   "pt": "...possessivo concorda com o gênero...",
+   "en": "...possessive agrees with the gender...",
+   "conf": "media",
+   "why": "EN possessives (my) have no gender, so the contrast is shown through the French forms only"
+  },
+  {
+   "path": "concepts.pere-mere-papa-maman[0].examples",
+   "pt": "pai / papai; mãe / mamãe (uso familiar)",
+   "en": "dad / mom (familiar use)",
+   "conf": "media",
+   "why": "PT diminutive papai/mamãe has no EN equivalent; chose dad/mom (EN-GB: mum)"
+  },
+  {
+   "path": "concepts.repas-dominical[0].examples[0]",
+   "pt": "o almoço de domingo em família",
+   "en": "Sunday family lunch",
+   "conf": "media",
+   "why": "'almoço' = lunch; in some regions 'Sunday dinner' is the equivalent term"
+  }
+ ]
+}

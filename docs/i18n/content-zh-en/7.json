@@ -1,0 +1,112 @@
+{
+ "unit": 7,
+ "en": {
+  "title": "Directions and location",
+  "goal": "Ask for and understand basic directions, locate places.",
+  "lessons": {
+   "onde-fica": "Asking where something is",
+   "direcoes": "Giving directions: right, front and back",
+   "perto-longe": "Saying whether it is near or far",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "to be (at) (location)",
+   "where",
+   "left",
+   "right",
+   "in front",
+   "behind",
+   "distance from / away from",
+   "near",
+   "far"
+  ],
+  "phrases": [
+   {
+    "t": "Where is the restroom?"
+   },
+   {
+    "t": "The hospital is near here."
+   }
+  ],
+  "dialogue": {
+   "title": "Asking for directions on the street",
+   "lines": [
+    "Excuse me, where is the restroom?",
+    "It's up ahead, on the left.",
+    "Is it far from here?",
+    "Not far, it's very close."
+   ]
+  },
+  "concepts": {
+   "zai-location": [
+    {
+     "title": "在 (zài) — location",
+     "body": "在 (zài) indicates where something or someone is — it works like the verb \"to be\" when talking about location. The structure is: Something/Someone + 在 + Place.",
+     "examples": [
+      "where is the restroom?"
+     ]
+    }
+   ],
+   "zai-vs-li": [
+    {
+     "title": "\"Zài\" or \"lí\"?",
+     "body": "<strong>Zài</strong> (在) says <strong>where something is</strong>. <strong>Lí</strong> (离) says the <strong>distance between two places</strong>, always comparing a reference point. Zài locates one place on its own; lí always compares two.",
+     "examples": [
+      "where is the restroom? (location)",
+      "the hospital is near here (distance)"
+     ]
+    }
+   ]
+  },
+  "trueFalse": [
+   {
+    "claim": "This question is about the price of a product.",
+    "whyNote": "Wrong — <strong>厕所在哪里？</strong> asks WHERE the restroom is (在哪里 = where is), not the price. Price would be \"多少钱？\"."
+   }
+  ]
+ },
+ "review": [
+  {
+   "path": "vocab[0]",
+   "pt": "estar (localização)",
+   "en": "to be (at) (location)",
+   "conf": "media",
+   "why": "PT 'estar'; English 'to be (at)' with location note"
+  },
+  {
+   "path": "vocab[6]",
+   "pt": "distância de",
+   "en": "distance from / away from",
+   "conf": "media",
+   "why": "离 is a preposition-like verb; English gloss approximates"
+  },
+  {
+   "path": "phrases[0].t",
+   "pt": "Onde fica o banheiro?",
+   "en": "Where is the restroom?",
+   "conf": "media",
+   "why": "US 'restroom' vs 'bathroom'/'toilet'; 厕所 is plain 'toilet/restroom'"
+  },
+  {
+   "path": "dialogue.lines[1]",
+   "pt": "Fica na frente, do lado esquerdo.",
+   "en": "It's up ahead, on the left.",
+   "conf": "media",
+   "why": "'in front' rendered 'up ahead'"
+  },
+  {
+   "path": "concepts.zai-location[0].body",
+   "pt": "funciona como o verbo 'ficar' ou 'estar'",
+   "en": "works like the verb \"to be\"",
+   "conf": "baixa",
+   "why": "adapted: PT 'ficar/estar' replaced by English 'to be'"
+  },
+  {
+   "path": "trueFalse[0].whyNote",
+   "pt": "Errado — ... Preço seria '多少钱？'",
+   "en": "Wrong — ... Price would be \"多少钱？\".",
+   "conf": "media",
+   "why": "kept PT note; 'restroom' term"
+  }
+ ]
+}

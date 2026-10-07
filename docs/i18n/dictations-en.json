@@ -1,0 +1,65 @@
+{
+ "d1": {
+  "task": "Introducing yourself in class"
+ },
+ "d2": {
+  "task": "Ordering bread at the bakery (boulangerie)"
+ },
+ "d3": {
+  "task": "Giving directions to the Eiffel Tower"
+ },
+ "d4": {
+  "task": "A rainy day and a stomachache"
+ },
+ "d5": {
+  "task": "Introducing your sister and her apartment"
+ },
+ "d6": {
+  "task": "Planning the weekend"
+ },
+ "d1-p1": {
+  "task": "Introducing a colleague and a friend"
+ },
+ "d1-p2": {
+  "task": "Introducing two friends"
+ },
+ "d2-p1": {
+  "task": "A Tuesday morning"
+ },
+ "d2-p2": {
+  "task": "A day off"
+ },
+ "d3-p1": {
+  "task": "A Brazilian woman in Paris"
+ },
+ "d3-p2": {
+  "task": "Buying clothes"
+ },
+ "d4-p1": {
+  "task": "Léa at the pharmacy"
+ },
+ "d4-p2": {
+  "task": "A winter day"
+ },
+ "d5-p1": {
+  "task": "Walking around the house"
+ },
+ "d5-p2": {
+  "task": "The bedroom and his things"
+ },
+ "d6-p1": {
+  "task": "What I did yesterday and today"
+ },
+ "d6-p2": {
+  "task": "Inviting a friend for the weekend"
+ },
+ "r1": {
+  "task": "A1 Review · Me and my routine"
+ },
+ "r2": {
+  "task": "A1 Review · City, shopping and getting around"
+ },
+ "r3": {
+  "task": "A1 Review · Home, family and weekend"
+ }
+}

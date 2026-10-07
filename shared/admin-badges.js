@@ -42,9 +42,9 @@ async function fetchAllProfiles(){
 
 async function createCatalogBadge({ id, name, icon, description }){
   const cleanId = String(id || '').toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 32);
-  if (cleanId.length < 2) return { ok: false, error: 'ID do badge precisa ter pelo menos 2 caracteres (letras minúsculas, números ou _).' };
-  if (!name?.trim()) return { ok: false, error: 'Dê um nome pro badge.' };
-  if (!icon?.trim()) return { ok: false, error: 'Escolha um emoji pro badge.' };
+  if (cleanId.length < 2) return { ok: false, error: t('admin.badges.err.idShort') };
+  if (!name?.trim()) return { ok: false, error: t('admin.badges.err.name') };
+  if (!icon?.trim()) return { ok: false, error: t('admin.badges.err.icon') };
   const { data, error } = await supabaseClient
     .from('badge_catalog')
     .insert({
@@ -57,9 +57,9 @@ async function createCatalogBadge({ id, name, icon, description }){
     .select()
     .single();
   if (error){
-    if (error.code === '23505') return { ok: false, error: `Já existe um badge com o id "${cleanId}".` };
+    if (error.code === '23505') return { ok: false, error: t('admin.badges.err.idExists', { id: cleanId }) };
     console.error('Erro ao criar badge:', error);
-    return { ok: false, error: 'Não foi possível criar o badge agora.' };
+    return { ok: false, error: t('admin.badges.err.createFailed') };
   }
   return { ok: true, badge: data };
 }
@@ -72,9 +72,9 @@ async function createCatalogBadge({ id, name, icon, description }){
 // ficar órfã mesmo se algo falhar no meio.
 async function updateCatalogBadge({ oldId, newId, name, icon, description }){
   const cleanId = String(newId || '').toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 32);
-  if (cleanId.length < 2) return { ok: false, error: 'ID do badge precisa ter pelo menos 2 caracteres (letras minúsculas, números ou _).' };
-  if (!name?.trim()) return { ok: false, error: 'Dê um nome pro badge.' };
-  if (!icon?.trim()) return { ok: false, error: 'Escolha um emoji pro badge.' };
+  if (cleanId.length < 2) return { ok: false, error: t('admin.badges.err.idShort') };
+  if (!name?.trim()) return { ok: false, error: t('admin.badges.err.name') };
+  if (!icon?.trim()) return { ok: false, error: t('admin.badges.err.icon') };
 
   const payload = {
     name: name.trim().slice(0, 40),
@@ -89,24 +89,24 @@ async function updateCatalogBadge({ oldId, newId, name, icon, description }){
       .eq('id', oldId)
       .select()
       .single();
-    if (error){ console.error('Erro ao editar badge:', error); return { ok: false, error: 'Não foi possível salvar agora.' }; }
+    if (error){ console.error('Erro ao editar badge:', error); return { ok: false, error: t('teacherMaterials.err.saveFailed') }; }
     return { ok: true, badge: data };
   }
 
   const { data: clash } = await supabaseClient.from('badge_catalog').select('id').eq('id', cleanId).maybeSingle();
-  if (clash) return { ok: false, error: `Já existe um badge com o id "${cleanId}".` };
+  if (clash) return { ok: false, error: t('admin.badges.err.idExists', { id: cleanId }) };
 
   const { data: created, error: insertError } = await supabaseClient
     .from('badge_catalog')
     .insert({ id: cleanId, ...payload, created_by: CURRENT_USER?.email || null })
     .select()
     .single();
-  if (insertError){ console.error('Erro ao trocar id do badge:', insertError); return { ok: false, error: 'Não foi possível trocar o id agora.' }; }
+  if (insertError){ console.error('Erro ao trocar id do badge:', insertError); return { ok: false, error: t('admin.badges.err.idChangeFailed') }; }
 
   const { error: migrateError } = await supabaseClient.from('badge_grants').update({ badge_id: cleanId }).eq('badge_id', oldId);
   if (migrateError){
     console.error('Erro ao migrar concessões pro novo id:', migrateError);
-    return { ok: false, error: 'O badge novo foi criado, mas as concessões antigas não puderam ser migradas. Tente de novo.' };
+    return { ok: false, error: t('admin.badges.err.migrateFailed') };
   }
 
   await supabaseClient.from('badge_catalog').delete().eq('id', oldId);
@@ -133,14 +133,14 @@ async function deleteCatalogBadge(badgeId){
 
 async function grantBadgeByUsername(badgeId, username, note){
   const target = await resolveProfileByUsername(username);
-  if (!target) return { ok: false, error: 'Não achei ninguém com esse @username. Confira a grafia.' };
+  if (!target) return { ok: false, error: t('admin.premium.notFound') };
   const { error } = await supabaseClient
     .from('badge_grants')
     .insert({ user_id: target.user_id, badge_id: badgeId, granted_by: CURRENT_USER?.email || null, note: note?.trim() || null });
   if (error){
-    if (error.code === '23505') return { ok: false, error: `@${target.username} já tem esse badge.` };
+    if (error.code === '23505') return { ok: false, error: t('admin.badges.err.alreadyHas', { username: target.username }) };
     console.error('Erro ao conceder badge:', error);
-    return { ok: false, error: 'Não foi possível conceder agora.' };
+    return { ok: false, error: t('admin.badges.err.grantFailed') };
   }
   return { ok: true, target };
 }
@@ -191,7 +191,7 @@ async function renderAdminBadgesView(){
   const wrap = document.getElementById('admin-badges-content');
   if (!wrap) return;
   if (!isAdminUser()){
-    wrap.innerHTML = `<p class="profile-empty-note">Esta tela é só pra administração da plataforma.</p>`;
+    wrap.innerHTML = `<p class="profile-empty-note">${t('admin.common.adminOnly')}</p>`;
     return;
   }
   wrap.innerHTML = loadingHTML();
@@ -209,7 +209,7 @@ async function renderAdminBadgesView(){
       <span class="admin-badge-icon">${b.icon}</span>
       <div class="admin-badge-info">
         <div class="admin-badge-name">${b.name}</div>
-        <div class="admin-badge-desc">${b.desc} · automático, não editável aqui</div>
+        <div class="admin-badge-desc">${b.desc} · ${t('admin.badges.builtin.auto')}</div>
       </div>
     </div>
   `).join('');
@@ -221,13 +221,13 @@ async function renderAdminBadgesView(){
       <span class="admin-badge-icon">${b.icon}</span>
       <div class="admin-badge-info">
         <div class="admin-badge-name">${b.name}</div>
-        <div class="admin-badge-desc">${b.description ? b.description + ' · ' : ''}${memberCount} ${memberCount === 1 ? 'pessoa' : 'pessoas'} · clique pra gerenciar</div>
+        <div class="admin-badge-desc">${b.description ? b.description + ' · ' : ''}${tp('admin.badges.members', memberCount)} · ${t('admin.badges.catalog.clickManage')}</div>
       </div>
-      <button class="admin-badge-edit-btn" data-edit-badge-id="${b.id}" title="Editar badge">✏️</button>
-      <button class="admin-badge-delete-btn" data-badge-id="${b.id}" title="Excluir badge (e todas as concessões dele)">🗑️</button>
+      <button class="admin-badge-edit-btn" data-edit-badge-id="${b.id}" title="${t('admin.badges.catalog.editTitle')}">✏️</button>
+      <button class="admin-badge-delete-btn" data-badge-id="${b.id}" title="${t('admin.badges.catalog.deleteTitle')}">🗑️</button>
     </div>
   `;
-  }).join('') : `<p class="profile-empty-note">Nenhum badge criado ainda.</p>`;
+  }).join('') : `<p class="profile-empty-note">${t('admin.badges.catalog.empty')}</p>`;
 
   const grantsHTML = grants.length ? grants.map(g => {
     const badge = catalog.find(b => b.id === g.badge_id) || SPECIAL_BADGES.find(b => b.id === g.badge_id);
@@ -235,61 +235,61 @@ async function renderAdminBadgesView(){
       <div class="admin-grant-row">
         <span class="admin-badge-icon">${badge?.icon || '🏅'}</span>
         <div class="admin-badge-info">
-          <div class="admin-badge-name">@${g.username || '(usuário removido)'} <span class="admin-grant-badge-name">— ${badge?.name || g.badge_id}</span></div>
-          <div class="admin-badge-desc">${g.note ? escapeHTML(g.note) + ' · ' : ''}concedido em ${new Date(g.granted_at).toLocaleDateString('pt-BR')}</div>
+          <div class="admin-badge-name">@${g.username || t('admin.common.removedUser')} <span class="admin-grant-badge-name">— ${badge?.name || g.badge_id}</span></div>
+          <div class="admin-badge-desc">${g.note ? escapeHTML(g.note) + ' · ' : ''}${t('admin.badges.grants.grantedOn', { date: fmtDate(g.granted_at) })}</div>
         </div>
-        <button class="admin-badge-delete-btn" data-revoke-user="${g.user_id}" data-revoke-badge="${g.badge_id}" title="Revogar">✕</button>
+        <button class="admin-badge-delete-btn" data-revoke-user="${g.user_id}" data-revoke-badge="${g.badge_id}" title="${t('admin.badges.grants.revoke')}">✕</button>
       </div>
     `;
-  }).join('') : `<p class="profile-empty-note">Nenhum badge concedido ainda.</p>`;
+  }).join('') : `<p class="profile-empty-note">${t('admin.badges.grants.empty')}</p>`;
 
   wrap.innerHTML = `
     <div class="profile-section">
-      <div class="section-label">Criar novo badge</div>
+      <div class="section-label">${t('admin.badges.create.title')}</div>
       <form id="admin-create-badge-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-badge-id">ID (só letras minúsculas/números/_)</label>
-        <input type="text" id="admin-badge-id" class="profile-edit-input" maxlength="32" placeholder="ex: colaboradora">
-        <label class="profile-edit-label" for="admin-badge-name">Nome</label>
-        <input type="text" id="admin-badge-name" class="profile-edit-input" maxlength="40" placeholder="ex: Colaboradora">
-        <label class="profile-edit-label" for="admin-badge-icon">Emoji</label>
+        <label class="profile-edit-label" for="admin-badge-id">${t('admin.badges.create.id')}</label>
+        <input type="text" id="admin-badge-id" class="profile-edit-input" maxlength="32" placeholder="${t('admin.badges.create.idPh')}">
+        <label class="profile-edit-label" for="admin-badge-name">${t('admin.badges.create.name')}</label>
+        <input type="text" id="admin-badge-name" class="profile-edit-input" maxlength="40" placeholder="${t('admin.badges.create.namePh')}">
+        <label class="profile-edit-label" for="admin-badge-icon">${t('admin.badges.create.icon')}</label>
         <input type="text" id="admin-badge-icon" class="profile-edit-input" maxlength="8" placeholder="🛠️">
-        <label class="profile-edit-label" for="admin-badge-desc">Descrição (opcional)</label>
-        <input type="text" id="admin-badge-desc" class="profile-edit-input" maxlength="120" placeholder="ex: Ajudou a sugerir melhorias no app">
+        <label class="profile-edit-label" for="admin-badge-desc">${t('admin.materials.descOpt')}</label>
+        <input type="text" id="admin-badge-desc" class="profile-edit-input" maxlength="120" placeholder="${t('admin.badges.create.descPh')}">
         <p class="profile-edit-error" id="admin-create-badge-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-create-badge-btn">Criar badge</button>
+        <button type="submit" class="btn btn-primary btn-block" id="admin-create-badge-btn">${t('admin.badges.create.btn')}</button>
       </form>
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Conceder badge</div>
+      <div class="section-label">${t('admin.badges.grant.title')}</div>
       <form id="admin-grant-badge-form" class="profile-edit-form">
-        <label class="profile-edit-label" for="admin-grant-badge-select">Badge</label>
-        <select id="admin-grant-badge-select" class="profile-edit-input">${catalogOptionsHTML || '<option value="">Crie um badge primeiro</option>'}</select>
-        <label class="profile-edit-label" for="admin-grant-username">@username de quem vai receber</label>
+        <label class="profile-edit-label" for="admin-grant-badge-select">${t('admin.badges.grant.badge')}</label>
+        <select id="admin-grant-badge-select" class="profile-edit-input">${catalogOptionsHTML || `<option value="">${t('admin.badges.grant.createFirst')}</option>`}</select>
+        <label class="profile-edit-label" for="admin-grant-username">${t('admin.badges.grant.username')}</label>
         <div class="profile-edit-username-wrap">
           <span class="profile-edit-at">@</span>
-          <input type="text" id="admin-grant-username" class="profile-edit-input" maxlength="24" placeholder="username" list="admin-username-datalist" autocomplete="off">
+          <input type="text" id="admin-grant-username" class="profile-edit-input" maxlength="24" placeholder="${t('admin.badges.grant.usernamePh')}" list="admin-username-datalist" autocomplete="off">
         </div>
         <datalist id="admin-username-datalist">${usernameDatalistHTML}</datalist>
-        <label class="profile-edit-label" for="admin-grant-note">Nota (opcional, só pra você)</label>
-        <input type="text" id="admin-grant-note" class="profile-edit-input" maxlength="120" placeholder="ex: reportou o bug do streak">
+        <label class="profile-edit-label" for="admin-grant-note">${t('admin.badges.grant.note')}</label>
+        <input type="text" id="admin-grant-note" class="profile-edit-input" maxlength="120" placeholder="${t('admin.badges.grant.notePh')}">
         <p class="profile-edit-error" id="admin-grant-badge-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-grant-badge-btn" ${catalog.length ? '' : 'disabled'}>Conceder</button>
+        <button type="submit" class="btn btn-primary btn-block" id="admin-grant-badge-btn" ${catalog.length ? '' : 'disabled'}>${t('admin.badges.grant.btn')}</button>
       </form>
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Badges automáticos</div>
+      <div class="section-label">${t('admin.badges.builtin.title')}</div>
       ${builtInHTML}
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Catálogo (criados por você)</div>
+      <div class="section-label">${t('admin.badges.catalog.title')}</div>
       ${catalogHTML}
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Concessões atuais</div>
+      <div class="section-label">${t('admin.badges.grants.title')}</div>
       ${grantsHTML}
     </div>
   `;
@@ -308,7 +308,7 @@ async function renderAdminBadgesView(){
     });
     btn.disabled = false;
     if (!result.ok){ errorEl.textContent = result.error; return; }
-    showToast(`✓ Badge "${result.badge.name}" criado.`);
+    showToast(t('admin.badges.toast.created', { name: result.badge.name }));
     renderAdminBadgesView();
   });
 
@@ -318,7 +318,7 @@ async function renderAdminBadgesView(){
     const errorEl = document.getElementById('admin-grant-badge-error');
     errorEl.textContent = '';
     const badgeId = document.getElementById('admin-grant-badge-select').value;
-    if (!badgeId){ errorEl.textContent = 'Crie um badge antes de conceder.'; return; }
+    if (!badgeId){ errorEl.textContent = t('admin.badges.grant.createBefore'); return; }
     btn.disabled = true;
     const result = await grantBadgeByUsername(
       badgeId,
@@ -327,7 +327,7 @@ async function renderAdminBadgesView(){
     );
     btn.disabled = false;
     if (!result.ok){ errorEl.textContent = result.error; return; }
-    showToast(`✓ Badge concedido a @${result.target.username}.`);
+    showToast(t('admin.badges.toast.granted', { username: result.target.username }));
     renderAdminBadgesView();
   });
 
@@ -342,7 +342,7 @@ async function renderAdminBadgesView(){
   wrap.querySelectorAll('[data-badge-id]').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation(); // não deixa o clique "vazar" pro data-manage-badge-id da linha por baixo
-      if (!confirm('Excluir este badge e todas as concessões dele?')) return;
+      if (!confirm(t('admin.badges.confirm.delete'))) return;
       await deleteCatalogBadge(btn.dataset.badgeId);
       renderAdminBadgesView();
     });
@@ -378,9 +378,9 @@ function openManageBadgeMembersModal(badgeId, catalog, profiles, grants){
         <input type="checkbox" data-user-id="${p.user_id}" ${holders.has(p.user_id) ? 'checked data-was-checked="1"' : ''}>
         <span>@${p.username}${p.display_name ? ` <span class="admin-member-name">${escapeHTML(p.display_name)}</span>` : ''}</span>
       </label>
-      <input type="text" class="admin-member-note-input" data-user-id="${p.user_id}" maxlength="120" placeholder="nota">
+      <input type="text" class="admin-member-note-input" data-user-id="${p.user_id}" maxlength="120" placeholder="${t('admin.badges.manage.notePh')}">
     </div>
-  `).join('') : `<p class="profile-empty-note">Ninguém criou um perfil ainda.</p>`;
+  `).join('') : `<p class="profile-empty-note">${t('admin.badges.manage.empty')}</p>`;
   // Valor da nota preenchido via JS (.value), não interpolado num atributo
   // HTML -- é texto livre digitado pela autora, e um "aspas dentro da nota"
   // quebraria o atributo se fosse por template string.
@@ -426,7 +426,7 @@ function wireManageBadgeMembersModal(){
     await applyBadgeMembership(badgeId, adds, removes, noteChanges);
     btn.disabled = false;
     closeManageBadgeMembersModal();
-    showToast('✓ Membros do badge atualizados.');
+    showToast(t('admin.badges.toast.members'));
     renderAdminBadgesView();
   });
 }
@@ -472,7 +472,7 @@ function wireEditBadgeModal(){
     btn.disabled = false;
     if (!result.ok){ errorEl.textContent = result.error; return; }
     closeEditBadgeModal();
-    showToast(`✓ Badge "${result.badge.name}" atualizado.`);
+    showToast(t('admin.badges.toast.updated', { name: result.badge.name }));
     renderAdminBadgesView();
   });
 }

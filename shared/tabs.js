@@ -11,6 +11,12 @@
 function createTabSwitcher({ onBeforeSwitch, tabHandlers }){
   return function switchTab(tab){
     if (onBeforeSwitch) onBeforeSwitch(tab);
+    // Saiu da revisão: conquistas guardadas durante a sessão aparecem agora.
+    if (typeof releaseBadgeCelebrations === 'function') releaseBadgeCelebrations();
+    // Janelas da Revisão (Painel/Adicionar) nunca ficam abertas por cima de outra aba.
+    if (typeof closeDeckPanel === 'function') closeDeckPanel({ silent: true });
+    if (typeof closeAddCardModal === 'function') closeAddCardModal();
+    if (typeof closeReviewSettingsModal === 'function') closeReviewSettingsModal();
     trackEvent('tab_switch', tab);
 
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
@@ -25,6 +31,10 @@ function createTabSwitcher({ onBeforeSwitch, tabHandlers }){
     document.getElementById('app').dataset.activeTab = tab;
 
     if (tab === 'review'){
+      // Navegador de Decks: detalhe/Painel ficam fechados ao (re)entrar na aba.
+      const deckWrap = document.getElementById('review-deck-wrap');
+      if (deckWrap) deckWrap.style.display = 'none';
+      if (typeof DECK_BROWSER !== 'undefined'){ DECK_BROWSER.view = 'home'; DECK_BROWSER.nodeId = null; }
       if (STATE.reviewSessionUnitFilter){
         // Veio de "Estudar esta unidade" na trilha — pula a tela de escolha,
         // vai direto pra sessão de flashcard filtrada por unidade.

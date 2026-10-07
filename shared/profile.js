@@ -30,6 +30,13 @@
 // por STATE/progresso.
 
 let PROFILE_CACHE = null;
+// Dados privados do perfil (migration 073, tabela profile_private: só o próprio
+// dono lê/escreve). Hoje só o gênero ({gender: 'masculine'|'feminine'|'other'|
+// 'undisclosed'|null}). null = ainda não carregado ou tabela indisponível;
+// PROFILE_PRIVATE_SUPPORTED só vira true se a leitura funcionou (sem a
+// migration, o campo some e nada quebra).
+let PROFILE_PRIVATE_CACHE = null;
+let PROFILE_PRIVATE_SUPPORTED = false;
 let OTHER_LANGUAGES_RAW_CACHE = null;
 
 // ---------- Badges especiais (identidade, não gameplay) ----------
@@ -49,9 +56,18 @@ const FOUNDER_CROWN_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/200
 const BETA_TESTER_CUTOFF = '2026-09-05T00:00:00Z';
 
 const SPECIAL_BADGES = [
-  { id: 'founder', name: 'Fundadora', icon: FOUNDER_CROWN_SVG, desc: 'Criadora da plataforma' },
-  { id: 'beta_tester', name: 'Beta Tester', icon: '🧪', desc: 'Ajudou a testar o app antes do lançamento oficial' },
+  { id: 'founder', get name(){ return t('badge.founder.name'); }, icon: FOUNDER_CROWN_SVG, get desc(){ return t('badge.founder.desc'); } },
+  { id: 'beta_tester', get name(){ return t('badge.beta_tester.name'); }, icon: '🧪', get desc(){ return t('badge.beta_tester.desc'); } },
 ];
+
+// Badges do catálogo da admin (tabela badge_catalog, texto em português):
+// se existir tradução 'badge.catalog.<id>.<campo>' no idioma do site usa ela;
+// senão (badge criado depois, sem tradução) mostra o texto do banco.
+function catalogBadgeText(id, field, fallback){
+  const key = 'badge.catalog.' + id + '.' + field;
+  const v = t(key);
+  return v === key ? fallback : v;
+}
 
 function isFounder(){
   return !!(CURRENT_USER && typeof ADMIN_EMAIL !== 'undefined' && CURRENT_USER.email === ADMIN_EMAIL);
@@ -101,7 +117,7 @@ async function computeEarnedSpecialBadges(){
     const catalog = await fetchBadgeCatalog();
     catalog.forEach(cb => {
       if (granted.has(cb.id) && !earned.some(e => e.id === cb.id)){
-        earned.push({ id: cb.id, name: cb.name, icon: cb.icon, desc: cb.description });
+        earned.push({ id: cb.id, name: catalogBadgeText(cb.id, 'name', cb.name), icon: cb.icon, desc: catalogBadgeText(cb.id, 'desc', cb.description) });
       }
     });
   }
@@ -145,6 +161,12 @@ async function createInitialProfile(){
   return data || null;
 }
 
+// Reaplica os placeholders de perfil ({nome}, {nacionalidade}...) no conteúdo
+// da trilha (shared/profile-placeholders.js). Best-effort, nunca lança.
+function refreshProfilePlaceholders(){
+  try { if (typeof applyProfilePlaceholders === 'function') applyProfilePlaceholders(); } catch (e) { console.error('placeholders de perfil:', e); }
+}
+
 async function ensureProfileLoaded(){
   if (!CURRENT_USER) return null;
   if (PROFILE_CACHE) return PROFILE_CACHE;
@@ -155,13 +177,43 @@ async function ensureProfileLoaded(){
     .maybeSingle();
   if (error){ console.error('Erro ao carregar perfil:', error); return null; }
   PROFILE_CACHE = data || await createInitialProfile();
+  await loadProfilePrivate();
+  refreshProfilePlaceholders();
   return PROFILE_CACHE;
+}
+
+// Lê o gênero de profile_private. Best-effort: qualquer falha (tabela
+// inexistente, rede) deixa o campo indisponível, nunca lança.
+async function loadProfilePrivate(){
+  PROFILE_PRIVATE_CACHE = null;
+  PROFILE_PRIVATE_SUPPORTED = false;
+  try {
+    const { data, error } = await supabaseClient
+      .from('profile_private')
+      .select('gender')
+      .eq('user_id', CURRENT_USER.id)
+      .maybeSingle();
+    if (error) return;
+    PROFILE_PRIVATE_SUPPORTED = true;
+    PROFILE_PRIVATE_CACHE = { gender: normalizeProfileGender(data && data.gender) };
+  } catch (e) { console.error('profile_private:', e); }
+}
+
+// Grava o gênero (upsert da própria linha). '' = não preenchido (null).
+async function saveProfileGender(gender){
+  const g = normalizeProfileGender(gender);
+  const { error } = await supabaseClient
+    .from('profile_private')
+    .upsert({ user_id: CURRENT_USER.id, gender: g }, { onConflict: 'user_id' });
+  if (error){ console.error('Erro ao salvar gênero:', error); return false; }
+  PROFILE_PRIVATE_CACHE = { gender: g };
+  return true;
 }
 
 // O username NÃO é editável (identificador público permanente, gerado pelo
 // sistema): este payload nunca o contém, e o servidor também recusa qualquer
 // UPDATE que o altere (trigger profiles_protect_identity, migration 060).
-async function saveProfileEdits({ displayName, bio, featuredBadgeId, publicProfile }){
+async function saveProfileEdits({ displayName, bio, featuredBadgeId, publicProfile, country, gender }){
   const payload = {
     display_name: (displayName || '').trim().slice(0, 60) || null,
     bio: (bio || '').trim().slice(0, 160) || null,
@@ -181,6 +233,12 @@ async function saveProfileEdits({ displayName, bio, featuredBadgeId, publicProfi
     // ainda, mesmo cuidado que os outros campos deste payload já tomam).
     public_profile: !!publicProfile,
   };
+  // País de origem (migration 072). Só entra no UPDATE quando a coluna existe
+  // no perfil carregado -- sem a migration aplicada, salvar nome/bio continua
+  // funcionando em vez de falhar por coluna inexistente.
+  if (country !== undefined && PROFILE_CACHE && Object.prototype.hasOwnProperty.call(PROFILE_CACHE, 'country')){
+    payload.country = /^[A-Z]{2}$/.test(country || '') ? country : null;
+  }
   const { data, error } = await supabaseClient
     .from('profiles')
     .update(payload)
@@ -189,9 +247,19 @@ async function saveProfileEdits({ displayName, bio, featuredBadgeId, publicProfi
     .single();
   if (error){
     console.error('Erro ao salvar perfil:', error);
-    return { ok: false, error: 'Não foi possível salvar agora. Verifique sua conexão e tente de novo.' };
+    return { ok: false, error: t('profile.err.saveFailed') };
   }
   PROFILE_CACHE = data;
+  // Gênero (profile_private, migration 073): só se a tabela existe e o campo
+  // foi enviado. Falha aqui não desfaz nome/bio já salvos, mas avisa.
+  if (gender !== undefined && PROFILE_PRIVATE_SUPPORTED){
+    const okGender = await saveProfileGender(gender);
+    if (!okGender){
+      refreshProfilePlaceholders();
+      return { ok: false, error: t('profile.err.saveFailed') };
+    }
+  }
+  refreshProfilePlaceholders();
   return { ok: true, profile: data };
 }
 
@@ -267,7 +335,7 @@ function resizeImageToSquareBlob(file){
       ctx.drawImage(img, sx, sy, side, side, 0, 0, AVATAR_MAX_DIMENSION, AVATAR_MAX_DIMENSION);
       canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Falha ao processar imagem.')), 'image/jpeg', 0.86);
     };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Não foi possível ler essa imagem.')); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error(t('profile.err.imageRead'))); };
     img.src = url;
   });
 }
@@ -281,14 +349,14 @@ function avatarStoragePath(){
 async function uploadAvatar(file){
   if (!CURRENT_USER) return { ok: false, error: 'Entre com sua conta pra salvar uma foto.' };
   if (!file.type.startsWith('image/')) return { ok: false, error: 'Escolha um arquivo de imagem (JPG, PNG...).' };
-  if (file.size > AVATAR_MAX_UPLOAD_BYTES) return { ok: false, error: 'Imagem muito grande (máx. 8MB).' };
+  if (file.size > AVATAR_MAX_UPLOAD_BYTES) return { ok: false, error: t('profile.err.imageTooBig') };
 
   let blob;
   try{
     blob = await resizeImageToSquareBlob(file);
   }catch(e){
     console.error('Erro ao processar imagem:', e);
-    return { ok: false, error: 'Não foi possível processar essa imagem. Tente outra.' };
+    return { ok: false, error: t('profile.err.imageProcess') };
   }
 
   const path = avatarStoragePath();
@@ -297,7 +365,7 @@ async function uploadAvatar(file){
     .upload(path, blob, { upsert: true, contentType: 'image/jpeg', cacheControl: '3600' });
   if (uploadError){
     console.error('Erro ao subir avatar:', uploadError);
-    return { ok: false, error: 'Não foi possível enviar a foto agora. Tente de novo.' };
+    return { ok: false, error: t('profile.err.photoUpload') };
   }
 
   const { data: pub } = supabaseClient.storage.from('avatars').getPublicUrl(path);
@@ -313,7 +381,7 @@ async function uploadAvatar(file){
     .single();
   if (error){
     console.error('Erro ao salvar avatar no perfil:', error);
-    return { ok: false, error: 'Foto enviada, mas não foi possível salvar no perfil. Tente de novo.' };
+    return { ok: false, error: t('profile.err.photoSaveProfile') };
   }
   PROFILE_CACHE = data;
   return { ok: true, profile: data };
@@ -333,7 +401,7 @@ async function removeAvatar(){
     .single();
   if (error){
     console.error('Erro ao remover avatar:', error);
-    return { ok: false, error: 'Não foi possível remover a foto agora.' };
+    return { ok: false, error: t('profile.err.photoRemove') };
   }
   PROFILE_CACHE = data;
   return { ok: true, profile: data };
@@ -403,13 +471,13 @@ function fallbackSummaryFromUnitProgress(unitProgress){
 }
 
 function profileDisplayName(profile){
-  return profile?.display_name || CURRENT_USER?.user_metadata?.full_name || (CURRENT_USER ? CURRENT_USER.email?.split('@')[0] : 'Convidado');
+  return profile?.display_name || CURRENT_USER?.user_metadata?.full_name || (CURRENT_USER ? CURRENT_USER.email?.split('@')[0] : t('profile.guestName'));
 }
 
 async function renderProfileView(){
   const wrap = document.getElementById('profile-content');
   if (!wrap) return;
-  wrap.innerHTML = loadingHTML('Carregando perfil...');
+  wrap.innerHTML = loadingHTML(t('profile.loading'));
 
   const langs = await buildLanguagesSummary();
   const earnedBadges = BADGES.filter(b => earnedBadgeIds.has(b.id));
@@ -424,6 +492,7 @@ async function renderProfileView(){
   const profile = await ensureProfileLoaded();
   renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, isGuest: false });
   renderSideRankingCard();
+  if (typeof refreshFriendRequestCount === 'function') refreshFriendRequestCount();
 }
 
 function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, isGuest }){
@@ -434,8 +503,8 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
 
   const guestNote = isGuest ? `
     <div class="guest-warning">
-      ⚠️ Modo convidado — crie uma conta pra ter um perfil salvo (username, bio) e visível entre sessões.
-      <button class="guest-warning-link" id="profile-guest-login-prompt">Entrar com Google para salvar</button>
+      ${t('profile.guestNote')}
+      <button class="guest-warning-link" id="profile-guest-login-prompt">${t('profile.guestLogin')}</button>
     </div>
   ` : '';
 
@@ -466,7 +535,7 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
         </div>
       `).join('')}
     </div>
-  ` : `<p class="profile-empty-note">Nenhuma conquista ainda — sua primeira lição já desbloqueia uma.</p>`;
+  ` : `<p class="profile-empty-note">${t('profile.noBadges')}</p>`;
 
   // Badges especiais (Fundadora, Beta Tester...) ficam junto da identidade,
   // não misturados com a grade de conquistas por gameplay -- são sobre
@@ -483,14 +552,15 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
   ` : '';
 
   const avatarHTML = profile?.avatar_url
-    ? `<img class="profile-avatar" src="${escapeAttr(profile.avatar_url)}" alt="Foto de perfil">`
+    ? `<img class="profile-avatar" src="${escapeAttr(profile.avatar_url)}" alt="${t('profile.avatarAlt')}">`
     : `<div class="profile-avatar" style="background:${color};">${initials}</div>`;
 
   wrap.innerHTML = `
-    <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil">
-      <button class="leaderboard-tab active" data-tab="profile">Visão geral</button>
-      <button class="leaderboard-tab" data-tab="goals">Metas</button>
-      <button class="leaderboard-tab" data-tab="progress">Progresso</button>
+    <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="${t('profile.subnavAria')}">
+      <button class="leaderboard-tab active" data-tab="profile">${t('profile.tabOverview')}</button>
+      <button class="leaderboard-tab" data-tab="goals">${t('profile.tabGoals')}</button>
+      <button class="leaderboard-tab" data-tab="progress">${t('profile.tabProgress')}</button>
+      <button class="leaderboard-tab" data-tab="friends">${t('profile.tabFriends')}</button>
     </div>
     ${guestNote}
     <div class="profile-identity">
@@ -499,23 +569,23 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
       ${profile ? `<div class="profile-username">@${profile.username}</div>` : ''}
       ${bio ? `<p class="profile-bio">${escapeHTML(bio)}</p>` : ''}
       ${specialBadgesHTML}
-      ${profile ? `<button class="profile-edit-btn" id="profile-edit-btn">Editar perfil</button>` : ''}
+      ${profile ? `<button class="profile-edit-btn" id="profile-edit-btn">${t('profile.editBtn')}</button>` : ''}
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Idiomas &amp; progresso</div>
+      <div class="section-label">${t('profile.sectionLangs')}</div>
       <div class="profile-langs-row">${langsHTML}</div>
       <div class="profile-nums-row">
-        <div class="profile-num"><div class="v">🔥 ${effectiveStreak()}</div><div class="l">dias seguidos</div></div>
-        <div class="profile-num"><div class="v">${STATE.xp}</div><div class="l">XP acumulado</div></div>
+        <div class="profile-num"><div class="v">🔥 ${effectiveStreak()}</div><div class="l">${t('profile.streakLabel')}</div></div>
+        <div class="profile-num"><div class="v">${STATE.xp}</div><div class="l">${t('profile.xpLabel')}</div></div>
       </div>
-      <button class="profile-stats-link" id="profile-stats-link">Ver estatísticas completas →</button>
+      <button class="profile-stats-link" id="profile-stats-link">${t('profile.statsLink')}</button>
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Conquistas <span class="conquests-count">${earnedBadges.length}/${BADGES.length}</span></div>
+      <div class="section-label">${t('profile.sectionBadges')} <span class="conquests-count">${earnedBadges.length}/${BADGES.length}</span></div>
       ${badgesHTML}
-      <button class="profile-stats-link" id="profile-badges-link">Ver todas →</button>
+      <button class="profile-stats-link" id="profile-badges-link">${t('profile.badgesLink')}</button>
     </div>
   `;
 
@@ -546,10 +616,13 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
 
 // Escapa o campo "Sobre mim" antes de renderizar -- texto livre digitado
 // pelo aluno, nunca deve ser interpretado como HTML.
+// Também escapa aspas: o resultado é usado dentro de atributos HTML
+// (aria-label, value, data-*), e sem isto um texto com `"` (nome de Deck
+// vindo de um .apkg, frente de cartão importado) abriria um atributo novo.
 function escapeHTML(str){
   const div = document.createElement('div');
   div.textContent = str;
-  return div.innerHTML;
+  return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 // Escapa texto para uso DENTRO de um atributo HTML entre aspas (ex.: src="...").
@@ -567,7 +640,7 @@ function renderAvatarPreview(profile){
   const removeBtn = document.getElementById('profile-edit-avatar-remove-btn');
   if (!preview) return;
   if (profile?.avatar_url){
-    preview.innerHTML = `<img src="${escapeAttr(profile.avatar_url)}" alt="Foto de perfil">`;
+    preview.innerHTML = `<img src="${escapeAttr(profile.avatar_url)}" alt="${t('profile.avatarAlt')}">`;
     if (removeBtn) removeBtn.style.display = '';
   } else {
     const name = profileDisplayName(profile);
@@ -600,7 +673,34 @@ function renderFeaturedBadgeSelect(specialBadges, currentId){
     const iconText = (b.icon && !b.icon.startsWith('<')) ? `${b.icon} ` : '';
     return `<option value="${b.id}" ${b.id === currentId ? 'selected' : ''}>${iconText}${b.name}</option>`;
   }).join('');
-  select.innerHTML = `<option value="">Nenhum</option>${options}`;
+  select.innerHTML = `<option value="">${t('profile.featuredNone')}</option>${options}`;
+}
+
+// País de origem: só aparece se a coluna existe no perfil (migration 072);
+// sem a migration o campo some e nada quebra.
+function renderProfileCountrySelect(p){
+  const sel = document.getElementById('profile-edit-country');
+  if (!sel) return;
+  const supported = !!p && Object.prototype.hasOwnProperty.call(p, 'country') && typeof PROFILE_COUNTRIES !== 'undefined';
+  const label = sel.previousElementSibling, hint = sel.nextElementSibling;
+  [label, sel, hint].forEach(el => { if (el) el.style.display = supported ? '' : 'none'; });
+  if (!supported) return;
+  const lang = (typeof getUiLang === 'function' && getUiLang() === 'en') ? 'en' : 'pt-BR';
+  sel.innerHTML = `<option value="">${t('ui.profileEdit.countryNone')}</option>` +
+    PROFILE_COUNTRIES.map(c => `<option value="${c.code}">${profileCountryName(c.code, lang)}</option>`).join('');
+  sel.value = p.country || '';
+}
+
+// Gênero (profile_private): só aparece se a tabela existe (migration 073).
+function renderProfileGenderSelect(){
+  const sel = document.getElementById('profile-edit-gender');
+  if (!sel) return;
+  const label = sel.previousElementSibling, hint = sel.nextElementSibling;
+  [label, sel, hint].forEach(el => { if (el) el.style.display = PROFILE_PRIVATE_SUPPORTED ? '' : 'none'; });
+  if (!PROFILE_PRIVATE_SUPPORTED) return;
+  sel.innerHTML = `<option value="">${t('ui.profileEdit.genderNone')}</option>` +
+    PROFILE_GENDERS.map(g => `<option value="${g}">${t('ui.profileEdit.gender.' + g)}</option>`).join('');
+  sel.value = (PROFILE_PRIVATE_CACHE && PROFILE_PRIVATE_CACHE.gender) || '';
 }
 
 function openEditProfileModal(specialBadges){
@@ -610,6 +710,8 @@ function openEditProfileModal(specialBadges){
   document.getElementById('profile-edit-username').value = p?.username || '';
   document.getElementById('profile-edit-bio').value = p?.bio || '';
   document.getElementById('profile-edit-bio-count').textContent = `${(p?.bio || '').length}/160`;
+  renderProfileCountrySelect(p);
+  renderProfileGenderSelect();
   document.getElementById('profile-edit-error').textContent = '';
   document.getElementById('profile-edit-avatar-error').textContent = '';
   document.getElementById('profile-edit-public-switch')?.setAttribute('aria-checked', p?.public_profile ? 'true' : 'false');
@@ -645,17 +747,17 @@ function wireProfileEditModal(){
     if (!file) return;
     avatarError.textContent = '';
     changeBtn.disabled = true;
-    changeBtn.textContent = 'Enviando...';
+    changeBtn.textContent = t('profile.uploading');
     const result = await uploadAvatar(file);
     changeBtn.disabled = false;
-    changeBtn.textContent = 'Alterar foto';
+    changeBtn.textContent = t('profile.changePhoto');
     if (!result.ok){
       avatarError.textContent = result.error;
       return;
     }
     renderAvatarPreview(result.profile);
     renderProfileView();
-    showToast('✓ Foto atualizada.');
+    showToast(t('profile.toast.photoUpdated'));
   });
 
   removeBtn.addEventListener('click', async () => {
@@ -669,7 +771,7 @@ function wireProfileEditModal(){
     }
     renderAvatarPreview(result.profile);
     renderProfileView();
-    showToast('✓ Foto removida.');
+    showToast(t('profile.toast.photoRemoved'));
   });
 
   const bioInput = document.getElementById('profile-edit-bio');
@@ -693,17 +795,19 @@ function wireProfileEditModal(){
     const errorEl = document.getElementById('profile-edit-error');
     errorEl.textContent = '';
     saveBtn.disabled = true;
-    saveBtn.textContent = 'Salvando...';
+    saveBtn.textContent = t('profile.saving');
 
     const result = await saveProfileEdits({
       displayName: document.getElementById('profile-edit-display-name').value,
       bio: bioInput.value,
       featuredBadgeId: document.getElementById('profile-edit-featured-badge')?.value,
       publicProfile: document.getElementById('profile-edit-public-switch')?.getAttribute('aria-checked') === 'true',
+      country: document.getElementById('profile-edit-country')?.value,
+      gender: document.getElementById('profile-edit-gender')?.value,
     });
 
     saveBtn.disabled = false;
-    saveBtn.textContent = 'Salvar';
+    saveBtn.textContent = t('profile.save');
 
     if (!result.ok){
       errorEl.textContent = result.error;
@@ -711,7 +815,7 @@ function wireProfileEditModal(){
     }
     closeEditProfileModal();
     renderProfileView();
-    showToast('✓ Perfil atualizado.');
+    showToast(t('profile.toast.updated'));
   });
 }
 

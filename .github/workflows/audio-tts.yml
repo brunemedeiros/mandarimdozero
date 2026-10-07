@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       modo:
-        description: "laboratorio = gera variantes pra ouvir | regenerar = refaz os mp3 afetados pelas regras | gerar-faltantes = cria mp3 para textos sem áudio (zh e fr) | desafios-expressoes = gera os mp3 das 80 expressões novas dos Desafios | desafios-a1-m1 = gera os mp3 dos desafios do Módulo 1 do A1 | desafios-a1-todos = gera os mp3 dos desafios dos Módulos 1 a 6 do A1 (fr/scripts/challenges_import) | ditados-frases = gera 1 mp3 por FRASE de cada ditado (dictation-<id>-s<N>.mp3) | ditados = refaz o áudio guiado de TODOS os ditados de fr/dictations.js (com a locução de instruções em português)"
+        description: "laboratorio = gera variantes pra ouvir | regenerar = refaz os mp3 afetados pelas regras | gerar-faltantes = cria mp3 para textos sem áudio (zh e fr) | desafios-expressoes = gera os mp3 das 80 expressões novas dos Desafios | desafios-a1-m1 = gera os mp3 dos desafios do Módulo 1 do A1 | desafios-a1-todos = gera os mp3 dos desafios dos Módulos 1 a 6 do A1 (fr/scripts/challenges_import) | ditados-frases = gera 1 mp3 por FRASE de cada ditado (dictation-<id>-s<N>.mp3) | ditados = refaz o áudio guiado de TODOS os ditados de fr/dictations.js (com a locução de instruções em português) | ditados-en = gera a versão com as instruções em INGLÊS (dictation-<id>-guided.en.mp3) para o site em inglês"
         type: choice
-        options: [laboratorio, regenerar, gerar-faltantes, desafios-expressoes, desafios-a1-m1, desafios-a1-todos, ditados, ditados-frases]
+        options: [laboratorio, regenerar, gerar-faltantes, desafios-expressoes, desafios-a1-m1, desafios-a1-todos, ditados, ditados-frases, ditados-en]
         default: laboratorio
 
 permissions:
@@ -17,12 +17,12 @@ permissions:
 
 jobs:
   audio:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       GCP_TTS_KEY: ${{ secrets.GCP_TTS_KEY }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - run: pip install requests miniaudio
@@ -31,7 +31,7 @@ jobs:
       - name: Laboratório
         if: inputs.modo == 'laboratorio'
         run: python3 fr/scripts/audio_lab.py
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: inputs.modo == 'laboratorio'
         with:
           name: laboratorio-audio
@@ -61,6 +61,12 @@ jobs:
         if: inputs.modo == 'ditados'
         env:
           DICTATION_FORCE: "1"
+        run: python3 fr/scripts/gen_guided_dictation_audio.py
+      - name: Gerar áudio guiado dos ditados (instruções em inglês)
+        if: inputs.modo == 'ditados-en'
+        env:
+          DICTATION_FORCE: "1"
+          DICTATION_UI_LANG: "en"
         run: python3 fr/scripts/gen_guided_dictation_audio.py
 
       - name: Gerar áudio por frase dos ditados

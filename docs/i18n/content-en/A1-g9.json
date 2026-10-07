@@ -1,0 +1,58 @@
+{
+ "unit": "A1-g9",
+ "en": {
+  "title": "The passé composé",
+  "goal": "Conjugate the passé composé with avoir and with être to talk about past actions.",
+  "grammar": {
+   "blocks": [
+    {
+     "title": "Passé composé with avoir",
+     "body": "The passé composé is the most common tense for talking about the past in French. Most verbs form it with the present tense of avoir + the past participle. Regular -er verbs form the participle by changing -er to -é.",
+     "examples": [
+      "I ate at the restaurant.",
+      "She worked all day."
+     ]
+    },
+    {
+     "title": "Some irregular participles",
+     "body": "Some very common verbs have an irregular participle that you have to memorize — like faire → fait and prendre → pris, two verbs you already know.",
+     "examples": [
+      "I did some sports yesterday.",
+      "He took the train."
+     ]
+    },
+    {
+     "title": "Passé composé with être",
+     "body": "A small group of verbs (mainly verbs of movement, like aller) and ALL pronominal verbs use être as the auxiliary, not avoir. When the auxiliary is être, the participle agrees in gender and number with the subject — it gets an -e for feminine and an -s for plural.",
+     "examples": [
+      "She went to the market. (être + feminine agreement)",
+      "I got up early. (pronominal verb, always with être)"
+     ]
+    },
+    {
+     "title": "Très bien! 🎉",
+     "body": "You've completed level A1! Here is a summary of the two auxiliaries — notice that most verbs use avoir, and être is reserved for movement and pronominal verbs:",
+     "examples": [],
+     "table": [
+      {"label": "With avoir (most verbs)", "pronouns": ["manger →", "faire →", "prendre →"]},
+      {"label": "With être (movement + pronominals)", "pronouns": ["aller →", "arriver →", "se lever →"]}
+     ]
+    }
+   ],
+   "exercises": [
+    {"hint": "avoir (manger)"},
+    {"hint": "avoir (faire)"},
+    {"hint": "avoir (prendre)"},
+    {"hint": "avoir (travailler)"},
+    {"hint": "être (aller)"},
+    {"hint": "être (se lever)"},
+    {"hint": "avoir (visiter)"},
+    {"hint": "être (arriver)"}
+   ]
+  }
+ },
+ "review": [
+  {"path": "grammar.blocks[1].examples[0]", "pt": "Eu fiz esporte ontem.", "en": "I did some sports yesterday.", "conf": "media", "why": "'faire du sport' = 'to play/do sports'; EN has no exact single verb"},
+  {"path": "grammar.blocks[2].examples[1]", "pt": "Eu levantei cedo.", "en": "I got up early.", "conf": "media", "why": "FR 'se lever' is pronominal; EN 'get up' is not, noted in the explanation"}
+ ]
+}

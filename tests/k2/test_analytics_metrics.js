@@ -56,7 +56,7 @@ for (const lang of ['fr', 'zh']){
   const cards = ctx.buildCardsFromUnits(ctx.UNITS);
   const u0 = ctx.UNITS.filter(u => u.type !== 'grammar' && u.vocab && u.vocab.length)[0];
   const sA = cards.find(c => c.id === `u${u0.id}-v0`), sB = cards.find(c => c.id === `u${u0.id}-v0-b`);
-  const courseWords = cards.length / 2;
+  const courseWords = cards.filter(c => !ctx.isStudyTrailPhraseCard(c)).length / 2;
   let wp = ctx.studyTrailWordProgress(cards);
   check(lang + ' 6 Study: nada estudado = 0 aprendidas; total = curso inteiro (palavras, nao cartoes)', wp.learned === 0 && wp.total === courseWords, wp);
   study(sA);

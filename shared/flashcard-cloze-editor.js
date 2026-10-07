@@ -386,10 +386,10 @@ function domRangeToLogicalOffsets(containerEl, range){
 
 function validateNativeClozeStructure(editorState){
   if (!editorState || editorState.kind !== 'native'){
-    return { ok: false, error: 'Este Note não é nativo.' };
+    return { ok: false, error: t('clozeEditor.err.notNative') };
   }
   if (editorState.cardGenerationMode !== 'cloze'){
-    return { ok: false, error: 'Este Note não está no modo Completar a frase.' };
+    return { ok: false, error: t('clozeEditor.err.notClozeMode') };
   }
 
   const row = noteEditorStateToRow(editorState);
@@ -402,34 +402,34 @@ function validateNativeClozeStructure(editorState){
   const translationField = fields[slots[1]];
 
   if (!textField || !((textField.content && textField.content.value) || '').trim()){
-    return { ok: false, error: 'A frase com as lacunas não pode ficar vazia.' };
+    return { ok: false, error: t('clozeEditor.err.emptySentence') };
   }
   if (!translationField || !((translationField.content && translationField.content.value) || '').trim()){
-    return { ok: false, error: 'A tradução não pode ficar vazia.' };
+    return { ok: false, error: t('clozeEditor.err.emptyTranslation') };
   }
 
   const text = textField.content.value;
   if (hasMalformedClozeSyntax(text)){
-    return { ok: false, error: 'A frase tem uma marcação de lacuna malformada -- remova e marque de novo.' };
+    return { ok: false, error: t('clozeEditor.err.malformed') };
   }
 
   const segments = parseClozeSegments(text);
   const marks = segments.filter(seg => seg.kind === 'mark');
   if (marks.length === 0){
-    return { ok: false, error: 'Selecione pelo menos um trecho da frase e marque como lacuna.' };
+    return { ok: false, error: t('clozeEditor.err.noMarks') };
   }
 
   const ids = marks.map(m => m.markId);
   if (new Set(ids).size !== ids.length){
-    return { ok: false, error: 'IDs de lacuna duplicados -- estado inconsistente.' };
+    return { ok: false, error: t('clozeEditor.err.duplicateIds') };
   }
 
   for (const mark of marks){
     if (!mark.answer || !mark.answer.trim()){
-      return { ok: false, error: 'Uma das lacunas ficou sem texto.' };
+      return { ok: false, error: t('clozeEditor.err.emptyMark') };
     }
     if (editorState.languageAppKey === 'mandarim' && (!mark.compareAnswer || !mark.compareAnswer.trim())){
-      return { ok: false, error: `Falta o pinyin da lacuna "${mark.answer}" (obrigatório pra mandarim) -- clique nela pra completar.` };
+      return { ok: false, error: t('clozeEditor.err.missingPinyin', { answer: mark.answer }) };
     }
   }
 
@@ -492,17 +492,17 @@ function addClozeTranslationField(editorState){
 function clozeMarkPanelHTML(mark, namePrefix, isMandarim){
   return `
     <div class="cloze-editor-mark-panel" data-cloze-mark-panel="${escapeHTML(mark.markId)}">
-      <label class="profile-edit-label" for="${namePrefix}-cloze-edit-answer">Texto da lacuna</label>
+      <label class="profile-edit-label" for="${namePrefix}-cloze-edit-answer">${t('clozeEditor.panel.answerLabel')}</label>
       <input type="text" id="${namePrefix}-cloze-edit-answer" class="profile-edit-input" value="${escapeHTML(mark.answer)}" data-cloze-edit-answer>
       ${isMandarim ? `
-      <label class="profile-edit-label" for="${namePrefix}-cloze-edit-compare">Resposta esperada (pinyin)</label>
+      <label class="profile-edit-label" for="${namePrefix}-cloze-edit-compare">${t('clozeEditor.panel.compareLabel')}</label>
       <input type="text" id="${namePrefix}-cloze-edit-compare" class="profile-edit-input" value="${escapeHTML(mark.compareAnswer || '')}" data-cloze-edit-compare>
       ` : ''}
       <p class="profile-edit-field-error" data-cloze-edit-error></p>
       <div class="cloze-editor-mark-panel-actions">
-        <button type="button" class="btn btn-primary" data-cloze-edit-save>Salvar</button>
-        <button type="button" class="admin-select-link" data-cloze-edit-remove>🗑 Remover lacuna</button>
-        <button type="button" class="admin-select-link" data-cloze-edit-cancel>Cancelar</button>
+        <button type="button" class="btn btn-primary" data-cloze-edit-save>${t('clozeEditor.panel.save')}</button>
+        <button type="button" class="admin-select-link" data-cloze-edit-remove>${t('clozeEditor.panel.remove')}</button>
+        <button type="button" class="admin-select-link" data-cloze-edit-cancel>${t('clozeEditor.panel.cancel')}</button>
       </div>
     </div>
   `;
@@ -535,36 +535,36 @@ function renderClozeEditorHTML(editorState, opts){
   const textHTML = textField
     ? `
       <div class="cloze-editor-toolbar">
-        <button type="button" class="admin-select-link" data-cloze-mark-btn>✂️ Marcar seleção como lacuna</button>
+        <button type="button" class="admin-select-link" data-cloze-mark-btn>${t('clozeEditor.markBtn')}</button>
       </div>
       <div class="cloze-editor-text" contenteditable="true" data-cloze-field-id="${escapeHTML(textField.id)}">${renderClozeSegmentsHTML(segments)}</div>
       <p class="profile-edit-field-error" data-cloze-mark-error></p>
       ${activeMark ? clozeMarkPanelHTML(activeMark, namePrefix, isMandarim) : ''}
       ${renderFieldAudioBlockHTML(textField, opts)}
     `
-    : `<p class="profile-edit-hint">Nenhuma frase ainda.</p><button type="button" class="admin-select-link" data-cloze-add-text>+ Criar frase</button>`;
+    : `<p class="profile-edit-hint">${t('clozeEditor.noSentence')}</p><button type="button" class="admin-select-link" data-cloze-add-text>${t('clozeEditor.addSentence')}</button>`;
 
   const translationHTML = translationField
-    ? renderFieldEditorHTML(translationField, 0, { namePrefix, label: 'Tradução (mostrada depois de responder)', removable: false })
-    : `<p class="profile-edit-hint">Nenhuma tradução ainda.</p><button type="button" class="admin-select-link" data-cloze-add-translation>+ Criar tradução</button>`;
+    ? renderFieldEditorHTML(translationField, 0, { namePrefix, label: t('clozeEditor.translationLabel'), removable: false })
+    : `<p class="profile-edit-hint">${t('clozeEditor.noTranslation')}</p><button type="button" class="admin-select-link" data-cloze-add-translation>${t('clozeEditor.addTranslation')}</button>`;
 
   const otherFieldsHTML = otherFields.length ? `
-    <div class="section-label" style="margin:14px 0 4px;">Outros campos (sem papel definido em Completar a frase)</div>
-    <p class="profile-edit-hint">Estes campos vieram de outro modo e ainda não têm função aqui -- remova-os.</p>
-    ${otherFields.map((f, i) => renderFieldEditorHTML(f, i, { namePrefix, label: `Campo sem papel ${i + 1}`, removable: true })).join('')}
+    <div class="section-label" style="margin:14px 0 4px;">${t('clozeEditor.othersTitle')}</div>
+    <p class="profile-edit-hint">${t('clozeEditor.othersHint')}</p>
+    ${otherFields.map((f, i) => renderFieldEditorHTML(f, i, { namePrefix, label: t('clozeEditor.noRoleField', { n: i + 1 }), removable: true })).join('')}
   ` : '';
 
   const validation = validateNativeClozeStructure(editorState);
   const validationHTML = validation.ok
-    ? `<p class="profile-edit-hint" style="margin-top:10px; color:var(--jade);">✓ Estrutura de Completar a frase completa.</p>`
+    ? `<p class="profile-edit-hint" style="margin-top:10px; color:var(--jade);">${t('clozeEditor.valid')}</p>`
     : `<p class="profile-edit-error" style="margin-top:10px;">${escapeHTML(validation.error)}</p>`;
 
   return `
     <div data-cloze-editor>
-      <div class="section-label" style="margin:0 0 4px;">Frase com lacunas</div>
-      <p class="profile-edit-hint">Selecione uma palavra ou trecho da frase e clique em "Marcar seleção como lacuna" -- pode marcar mais de um trecho.</p>
+      <div class="section-label" style="margin:0 0 4px;">${t('clozeEditor.sentenceTitle')}</div>
+      <p class="profile-edit-hint">${t('clozeEditor.sentenceHint')}</p>
       ${textHTML}
-      <div class="section-label" style="margin:14px 0 4px;">Tradução</div>
+      <div class="section-label" style="margin:14px 0 4px;">${t('clozeEditor.translationTitle')}</div>
       ${translationHTML}
       ${otherFieldsHTML}
       ${validationHTML}
@@ -651,12 +651,12 @@ function wireClozeEditor(container, editorState, onChange, opts){
       if (errorEl) errorEl.textContent = '';
       const sel = window.getSelection && window.getSelection();
       if (!sel || sel.rangeCount === 0){
-        if (errorEl) errorEl.textContent = 'Selecione um trecho da frase primeiro.';
+        if (errorEl) errorEl.textContent = t('clozeEditor.sel.selectFirst');
         return;
       }
       const range = sel.getRangeAt(0);
       if (!textEl.contains(range.commonAncestorContainer)){
-        if (errorEl) errorEl.textContent = 'Selecione um trecho DENTRO da frase.';
+        if (errorEl) errorEl.textContent = t('clozeEditor.sel.outside');
         return;
       }
       const segments = domToClozeSegments(textEl);
@@ -664,12 +664,12 @@ function wireClozeEditor(container, editorState, onChange, opts){
       const result = insertClozeMarkAtLogicalOffsets(segments, start, end, null);
       if (!result.ok){
         const messages = {
-          empty: 'Selecione um trecho da frase primeiro.',
-          whitespace: 'A seleção precisa conter algum texto, não só espaços.',
-          'overlaps-mark': 'Essa seleção já inclui (total ou parcialmente) uma lacuna existente -- marque um trecho fora das lacunas já criadas.',
-          'out-of-range': 'Seleção inválida.',
+          empty: t('clozeEditor.sel.selectFirst'),
+          whitespace: t('clozeEditor.sel.whitespace'),
+          'overlaps-mark': t('clozeEditor.sel.overlaps'),
+          'out-of-range': t('clozeEditor.sel.outOfRange'),
         };
-        if (errorEl) errorEl.textContent = messages[result.reason] || 'Não foi possível marcar essa seleção.';
+        if (errorEl) errorEl.textContent = messages[result.reason] || t('clozeEditor.sel.failed');
         return;
       }
       updateFieldInEditorState(editorState, fieldId, { content: { value: serializeClozeSegments(result.segments) } });
@@ -686,7 +686,7 @@ function wireClozeEditor(container, editorState, onChange, opts){
       let segments = domToClozeSegments(textEl);
       const textResult = updateClozeMarkText(segments, markId, answerInput ? answerInput.value : '');
       if (!textResult.ok){
-        if (panelErrorEl) panelErrorEl.textContent = 'O texto da lacuna não pode ficar vazio.';
+        if (panelErrorEl) panelErrorEl.textContent = t('clozeEditor.panel.emptyAnswer');
         return;
       }
       segments = textResult.segments;
