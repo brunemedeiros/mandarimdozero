@@ -842,8 +842,22 @@ Deno.serve(async (_req: Request) => {
     errors.push(`alerta de infrequência pra professora: ${String(e)}`);
   }
 
+  // Amigos: "um amigo te passou no ranking" (no máximo 1 por pessoa por dia). A
+  // lógica toda vive na função SQL process_friend_overtakes (migration 073), que
+  // grava as notificações direto; aqui só a disparamos. Só funciona depois da
+  // migration 073 aplicada -- sem ela o rpc falha e entra em errors, sem derrubar o resto.
+  let friendOvertakes = 0;
+  try {
+    const { data, error } = await supabase.rpc('process_friend_overtakes');
+    if (error) throw error;
+    friendOvertakes = Number((data as { notified?: number } | null)?.notified ?? 0);
+  } catch (e) {
+    errors.push(`amigos (te passou no ranking): ${String((e as Error)?.message ?? e)}`);
+  }
+
   const summary = {
     ok: true,
+    friendOvertakes,
     ranAt: new Date().toISOString(),
     phase: 'Fase 6b -- + student_inactive_alert (alerta de infrequência pra professora, categoria supervisao); demais eventos desde Fase 5: review_overdue, streak_at_risk, study_goal_remaining, reengajamento (calendário completo 1-30, 9/15/20/30 também por e-mail), daily_missions_reminder, ranking_weekly_result, featured_badge_reminder',
     usersScanned,

@@ -150,6 +150,10 @@ async function uploadOwnFlashcardMedia(file, kind, resourceId){
     const v = validateFieldAudioUploadFile(file);
     if (!v.ok) return { ok: false, error: v.error };
   }
+  if (kind === 'image'){
+    const v = validateFieldImageUploadFile(file);
+    if (!v.ok) return { ok: false, error: v.error };
+  }
   const extRaw = (file.name || '').split('.').pop() || 'bin';
   const ext = (extRaw.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().slice(0, 8)) || 'bin';
   const safeResourceId = (resourceId ? String(resourceId) : '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40);

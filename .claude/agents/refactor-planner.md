@@ -1,7 +1,7 @@
 ---
 name: refactor-planner
 description: Analyze code structure and create comprehensive refactoring plans with risk assessment. Use when planning refactoring, analyzing technical debt, identifying code smells, or creating restructuring plans.
-model: inherit
+model: opus
 permissionMode: default
 color: purple
 ---

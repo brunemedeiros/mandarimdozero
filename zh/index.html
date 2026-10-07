@@ -58,12 +58,15 @@ try{
   --gold-bright: #F0C444;   /* dourado claro — destaques, XP */
   --ink: #211714;           /* quase-preto com calor, tipo tinta */
   --paper: #FBF4E8;         /* papel de arroz — fundo */
-  --count-new: #1D5A82; --count-learning: #B3261E; --count-review: #2E6B4F; /* colunas Novo/Aprendendo/Revisar (Decks) */
+  --count-new: #1D5A82; --count-learning: #B3261E; --count-review: #2E6B4F; --mem-weak: #A9D3EE; --mem-mid: #3498D6; --mem-strong: #1D5A82; /* colunas Novo/Aprendendo/Revisar (Decks) */
   --paper-warm: #F3E6CE;    /* fundo secundário, cards */
   --paper-line: #E2CFA6;    /* linhas/bordas sutis */
   --jade: #3A7359;          /* verde jade — sucesso/acerto, contraste intencional ao vermelho */
   --ink-soft: #5C4A3F;      /* texto secundário */
   --on-seal-red: #FFFFFF;   /* texto legível sobre fundo --seal-red — 6.0:1 no claro */
+  /* Botões de nota da revisão: fundo próprio + texto --on-vivid (mesmo padrão do fr). Branco no claro (>=5.0:1), escuro no escuro (>=6.8:1). */
+  --on-vivid: #FFFFFF;
+  --grade-again-bg: #A83A2E; --grade-hard-bg: #8C5F0E; --grade-good-bg: #3A7359; --grade-easy-bg: #2E7D4F;
   /* Selo colorido atrás do ícone de cada desafio diário -- 3 cores fixas
      por posição no card (não por desafio específico), pra manter a mesma
      assinatura visual todo dia mesmo quando o desafio sorteado muda. */
@@ -114,12 +117,14 @@ try{
     --gold-bright: #F5CE66;
     --ink: #F1E4D6;
     --paper: #1B1512;
-    --count-new: #6CB4E4; --count-learning: #FF7B6E; --count-review: #5CC497;
+    --count-new: #6CB4E4; --count-learning: #FF7B6E; --count-review: #5CC497; --mem-weak: #2E5A78; --mem-mid: #4DA9E8; --mem-strong: #A8D8F8;
     --paper-warm: #251C17;
     --paper-line: #3C2F27;
     --jade: #52B487;
     --ink-soft: #C7B5A5;
     --on-seal-red: #1A0605; /* 5.14:1 sobre o --seal-red do modo escuro */
+    --on-vivid: #1B1512;
+    --grade-again-bg: #FF7B6E; --grade-hard-bg: #C9973A; --grade-good-bg: #52B487; --grade-easy-bg: #7CCBA0;
     --dc-slot-0: #F7B84A;
     --dc-slot-1: #9A85FF;
     --dc-slot-2: #5B9DFF;
@@ -139,12 +144,14 @@ try{
   --gold-bright: #F5CE66;
   --ink: #F1E4D6;
   --paper: #1B1512;
-  --count-new: #6CB4E4; --count-learning: #FF7B6E; --count-review: #5CC497;
+  --count-new: #6CB4E4; --count-learning: #FF7B6E; --count-review: #5CC497; --mem-weak: #2E5A78; --mem-mid: #4DA9E8; --mem-strong: #A8D8F8;
   --paper-warm: #251C17;
   --paper-line: #3C2F27;
   --jade: #52B487;
   --ink-soft: #C7B5A5;
   --on-seal-red: #1A0605;
+  --on-vivid: #1B1512;
+  --grade-again-bg: #FF7B6E; --grade-hard-bg: #C9973A; --grade-good-bg: #52B487; --grade-easy-bg: #7CCBA0;
   --dc-slot-0: #F7B84A;
   --dc-slot-1: #9A85FF;
   --dc-slot-2: #5B9DFF;
@@ -286,6 +293,9 @@ body{
   color: var(--ink);
 }
 .pill.streak{ background: linear-gradient(120deg, #FFF3D6, var(--paper-warm)); color:#8A5A00; }
+/* Modo escuro: o degradê creme fixo virava um disco claro com texto apagado; usa o mesmo estilo dos outros pills (par fundo+texto revisado junto). */
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .pill.streak{ background: linear-gradient(120deg, rgba(227,178,60,0.16), var(--paper-warm)); color: var(--gold-bright); } }
+:root[data-theme="dark"] .pill.streak{ background: linear-gradient(120deg, rgba(227,178,60,0.16), var(--paper-warm)); color: var(--gold-bright); }
 .pill.xp{ background: linear-gradient(120deg, rgba(192,35,31,0.08), var(--paper-warm)); color: var(--seal-red-dark); }
 a.pill{ text-decoration:none; cursor:pointer; }
 /* Número dos pills de XP/streak (topbar + card "Status" da sidebar) --
@@ -1356,20 +1366,21 @@ body.hide-pinyin .cloze-pinyin{ display:none; }
   color: var(--seal-red-dark); font-weight:800;
 }
 .cloze-blank.correct{ border-color: var(--jade); color: var(--jade); }
-.cloze-blank.incorrect{ border-color: var(--seal-red); color: var(--seal-red); animation: shakeWrong .4s ease; }
+.cloze-blank.incorrect{ border-color: var(--seal-red); color: var(--seal-red-dark); animation: shakeWrong .4s ease; }
 .cloze-trans{ text-align:center; font-size:13px; color: var(--ink-soft); margin-bottom:18px; }
 .cloze-audio-row{ display:flex; justify-content:center; margin-bottom:14px; }
 .cloze-options{ display:flex; flex-direction:column; gap:10px; }
 .cloze-option{
   position:relative;
-  display:flex; align-items:center; gap:10px; background: var(--paper); border:2px solid var(--paper-line);
-  border-radius:12px; padding:12px 16px 12px 40px; cursor:pointer; font-family: var(--font-body); font-size:15px;
+  /* pinyin em cima do hanzi, como nas opções de "Selecione a frase correta" (2026-10-07) */
+  display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:2px; background: var(--paper); border:2px solid var(--paper-line);
+  border-radius:12px; padding:10px 16px 10px 40px; cursor:pointer; font-family: var(--font-body); font-size:15px;
   font-weight:700; color: var(--ink); text-align:left; transition: all .12s ease;
 }
 .cloze-option:hover{ border-color: var(--imperial-gold); transform: translateY(-1px); }
-.cloze-option-pinyin{ font-size:12.5px; color: var(--seal-red-dark); font-weight:700; flex-shrink:0; min-width:76px; }
+.cloze-option-pinyin{ font-size:12.5px; color: var(--seal-red-dark); font-weight:700; line-height:1.2; }
 body.hide-pinyin .cloze-option-pinyin{ display:none; }
-.cloze-option-hanzi{ font-family: var(--font-hanzi); font-size:16px; }
+.cloze-option-hanzi{ font-family: var(--font-hanzi); font-size:18px; line-height:1.3; }
 .cloze-option.correct{ border-color: var(--jade); background: rgba(58,115,89,0.12); }
 .cloze-option.incorrect{ border-color: var(--seal-red); background: rgba(192,35,31,0.10); animation: shakeWrong .4s ease; }
 .cloze-option.disabled{ pointer-events:none; opacity:.6; }
@@ -1384,16 +1395,15 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .cloze-type-wrap input:disabled{ opacity:.7; }
 /* Teclinha de tons -- ninguém tem teclado chinês pra digitar vogal com
    acento de tom, então isso insere o caractere certo no cursor do campo
-   acima. Fileira horizontal com rolagem (25 botões não cabem numa tela de
-   celular de uma vez), agrupada por vogal com um respiro maior entre
-   grupos pra não virar uma parede de botões idênticos. */
+   acima. Os grupos (um por vogal) quebram linha, como as teclas de acento do
+   francês, em vez de uma fileira com rolagem lateral (2026-10-07). */
 .pinyin-tone-picker{
-  display:flex; gap:10px; overflow-x:auto; justify-content:flex-start;
-  padding:2px 2px 6px; margin:-6px 0 14px; -webkit-overflow-scrolling:touch;
+  display:flex; gap:6px 10px; flex-wrap:wrap; justify-content:flex-start;
+  padding:2px 2px 6px; margin:8px 0 14px;
 }
 .pinyin-tone-group{ display:flex; gap:4px; flex-shrink:0; }
 .pinyin-tone-key{
-  flex-shrink:0; min-width:32px; height:34px; padding:0 6px; border-radius:8px;
+  flex-shrink:0; min-width:40px; height:40px; padding:0 8px; border-radius:8px;
   border:1px solid var(--paper-line); background: var(--paper); color: var(--ink);
   font-size:16px; font-weight:700; font-family: var(--font-body); cursor:pointer;
 }
@@ -1515,7 +1525,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
   padding: 13px 20px; cursor:pointer; transition: transform .1s ease, filter .15s ease; display:inline-flex; align-items:center; justify-content:center; gap:8px;
 }
 .btn:active{ transform: scale(.97); }
-.btn-primary{ background: linear-gradient(135deg, var(--seal-red), var(--seal-red-dark)); color: white; box-shadow: 0 4px 14px rgba(192,35,31,0.3); }
+.btn-primary{ background: linear-gradient(135deg, var(--seal-red), var(--seal-red-dark)); color: var(--on-seal-red); box-shadow: 0 4px 14px rgba(192,35,31,0.3); }
 .btn-primary:hover{ filter:brightness(1.06); }
 .btn-secondary{ background: var(--paper-warm); color: var(--ink); border:1px solid var(--paper-line); }
 .btn-secondary:hover{ background: var(--paper-line); }
@@ -1701,7 +1711,7 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .review-mode-card .speed-split .is-learning{ color:var(--count-learning); }
 .review-mode-card .speed-split .is-review{ color:var(--count-review); }
 .review-mode-card .speed-split .is-zero{ color:var(--ink-soft); opacity:.55; }
-.review-mode-card .speed-split-legend{ font-size:10px; color:var(--ink-soft); margin-top:-2px; }
+.review-mode-card .speed-split-legend{ font-size:12px; color:var(--ink-soft); margin-top:-2px; }
 .review-mode-card .name{ font-size:14px; font-weight:700; color: var(--ink); }
 .review-mode-card .desc{ font-size:11.5px; color: var(--ink-soft); }
 
@@ -1853,15 +1863,15 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .grade-buttons{ display:grid; grid-template-columns: repeat(4,1fr); gap:8px; margin-top:18px; }
 .grade-btn{
   padding: 12px 6px; border-radius:12px; border:none; cursor:pointer; font-family:var(--font-body);
-  font-weight:800; font-size:13px; color:white; display:flex; flex-direction:column; gap:3px; align-items:center;
+  font-weight:800; font-size:13px; color:var(--on-vivid); display:flex; flex-direction:column; gap:3px; align-items:center;
   transition: transform .1s ease, filter .15s;
 }
 .grade-btn:active{ transform: scale(.96); }
 .grade-btn small{ font-weight:600; font-size:10.5px; opacity:.85; }
-.grade-again{ background: #A83A2E; }
-.grade-hard{ background: #C07A1F; }
-.grade-good{ background: var(--jade); }
-.grade-easy{ background: #2E7D4F; }
+.grade-again{ background: var(--grade-again-bg); color: var(--on-vivid); }
+.grade-hard{ background: var(--grade-hard-bg); color: var(--on-vivid); }
+.grade-good{ background: var(--grade-good-bg); color: var(--on-vivid); }
+.grade-easy{ background: var(--grade-easy-bg); color: var(--on-vivid); }
 
 /* ---------- Progress / gamification view ---------- */
 .stat-cards{ display:grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:26px; }
@@ -1913,6 +1923,45 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 }
 .profile-special-badge-icon{ display:flex; align-items:center; font-size:14px; line-height:1; }
 .profile-special-badge-icon svg{ width:16px; height:16px; display:block; }
+
+/* ---------- Amigos (Perfil > Amigos) + selo "+N" + ranking de amigos ---------- */
+.tab-btn{ position:relative; }
+.friends-badge{
+  display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:18px; padding:0 5px;
+  margin-left:6px; border-radius:999px; background:var(--error-red); color:var(--on-vivid);
+  font-size:11px; font-weight:800; line-height:1; flex-shrink:0;
+}
+.tab-btn > .friends-badge{ position:absolute; top:2px; right:4px; margin-left:0; border:2px solid var(--paper); box-sizing:content-box; }
+.friends-section{ margin-top:18px; }
+.friends-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 0; border-bottom:1px solid var(--paper-line); }
+.friends-row:last-child{ border-bottom:none; }
+.friends-person{ display:flex; align-items:center; gap:10px; flex:1; min-width:180px; background:none; border:none; padding:0; text-align:left; cursor:pointer; color:var(--ink); font:inherit; }
+.friends-person:disabled{ cursor:default; }
+.friends-avatar{ width:40px; height:40px; border-radius:50%; flex-shrink:0; object-fit:cover; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:15px; }
+.friends-person-text{ display:flex; flex-direction:column; min-width:0; }
+.friends-person-name{ font-weight:700; font-size:14px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.friends-person-user{ font-size:12px; color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.friends-row-actions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.friends-action{ padding:7px 14px; font-size:13px; width:auto; }
+.friends-chip{ font-size:12.5px; font-weight:700; color:var(--ink-soft); }
+.friends-profile-actions{ display:flex; justify-content:center; align-items:center; gap:8px; flex-wrap:wrap; margin-top:10px; }
+.leaderboard-mode-tabs{ margin-bottom:8px; }
+.leaderboard-empty-friends{ text-align:center; padding:22px 10px; }
+.leaderboard-empty-friends p{ color:var(--ink-soft); font-size:13.5px; margin:6px 0 12px; }
+.friends-rank-row{ gap:8px; }
+.friends-rank-row.is-me{ background:var(--paper-warm); border-radius:8px; padding-left:6px; padding-right:6px; }
+.friends-rank-pos{ width:26px; text-align:center; font-weight:800; font-size:14px; color:var(--ink-soft); flex-shrink:0; }
+.friends-rank-xp{ margin-left:auto; font-weight:800; font-size:13px; color:var(--ink); white-space:nowrap; }
+.friends-rank-scopes{ margin-bottom:6px; }
+.friends-rank-more{ margin-top:10px; }
+.friends-invite-banner{ background:var(--paper-warm); border:1px solid var(--paper-line); border-radius:8px; padding:10px 12px; font-size:13.5px; color:var(--ink); margin:0 0 10px; }
+.friends-invite-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+.friends-prefs summary{ cursor:pointer; font-weight:700; font-size:14px; color:var(--ink); padding:6px 0; }
+.friends-pref-row{ display:flex; align-items:center; gap:10px; padding:8px 0; font-size:14px; color:var(--ink); cursor:pointer; }
+.friends-pref-row input{ width:18px; height:18px; flex-shrink:0; }
+.side-ranking-tabs{ display:flex; gap:6px; margin-bottom:8px; }
+.side-ranking-tab{ flex:1; background:var(--paper-warm); border:1px solid var(--paper-line); color:var(--ink-soft); border-radius:999px; padding:4px 8px; font-size:12px; font-weight:700; cursor:pointer; }
+.side-ranking-tab.active{ background:var(--seal-red); border-color:var(--seal-red); color:#fff; }
 
 /* ---------- Ranking (Leaderboard) ---------- */
 .leaderboard-week-label{ font-size:12.5px; color:var(--ink-soft); font-weight:700; text-align:center; margin-bottom:10px; }
@@ -2235,6 +2284,13 @@ body.hide-pinyin .cloze-option-pinyin{ display:none; }
 .admin-recipients-summary{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin:10px 0 10px; }
 .admin-recipients-actions{ display:flex; gap:12px; }
 .admin-select-link{ font-size:13px; font-weight:700; color:var(--seal-red-dark); }
+#review-tag-chips .leaderboard-tab{ min-height:36px; display:inline-flex; align-items:center; }
+@media (max-width:600px){
+  [data-touch44]{ min-height:44px; min-width:44px; display:inline-flex; align-items:center; justify-content:center; padding:10px 12px; }
+  #review-tag-chips .leaderboard-tab{ min-height:40px; }
+  #review-content .audio-btn, #review-content .custom-audio-btn{ min-width:44px; min-height:44px; }
+  #review-back-to-modes{ min-height:44px; display:inline-flex; align-items:center; }
+}
 .admin-select-link:hover{ text-decoration:underline; }
 
 /* ---------- Modal: reportar problema/sugestão (bandeira ⚑) ---------- */
@@ -2615,6 +2671,9 @@ footer.app-footer img{ height:40px; opacity:.85; }
    toast (auditoria de UX/UI, 2026-09, P3). */
 #toast-layer{ position:fixed; top:18px; left:50%; transform:translateX(-50%); z-index:var(--z-toast); display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
 .toast{ background: var(--ink); color: var(--gold-bright); font-weight:800; font-size:13px; padding:9px 16px; border-radius:999px; box-shadow: var(--shadow-lift); animation: toastIn .25s ease, toastOut .3s ease 1.7s forwards; }
+/* Modo escuro: --ink fica claro e --gold-bright também (ilegível); troca para fundo escuro com texto claro. */
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .toast{ background: var(--paper-warm); color: var(--ink); box-shadow: var(--shadow-lift), inset 0 0 0 1px var(--paper-line); } }
+:root[data-theme="dark"] .toast{ background: var(--paper-warm); color: var(--ink); box-shadow: var(--shadow-lift), inset 0 0 0 1px var(--paper-line); }
 @keyframes toastIn{ from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} }
 @keyframes toastOut{ to{opacity:0; transform:translateY(-8px);} }
 
@@ -2622,7 +2681,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
    full-screen: pode aparecer no meio de qualquer fluxo (um exercício, uma
    revisão), então precisa ficar por cima sem bloquear o que está por baixo.
    Fila em JS (processBadgeCelebrationQueue) garante só 1 por vez. */
-#badge-unlock-layer{ position:fixed; top:70px; left:50%; transform:translateX(-50%); z-index:var(--z-top); display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
+#badge-unlock-layer{ position:fixed; bottom:calc(84px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); z-index:var(--z-top); display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
 .badge-unlock-toast{
   pointer-events:auto; cursor:pointer; display:flex; align-items:center; gap:12px;
   background: var(--paper); border:2px solid var(--imperial-gold); border-radius:16px;
@@ -2633,8 +2692,10 @@ footer.app-footer img{ height:40px; opacity:.85; }
 .badge-unlock-label{ font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; color: var(--seal-red-dark); }
 .badge-unlock-name{ font-size:14px; font-weight:800; color: var(--ink); }
 .badge-unlock-desc{ font-size:12px; color: var(--ink-soft); }
-@keyframes badgeUnlockIn{ from{opacity:0; transform:scale(.7) translateY(-14px);} to{opacity:1; transform:scale(1) translateY(0);} }
-@keyframes badgeUnlockOut{ to{opacity:0; transform:translateY(-10px);} }
+@keyframes badgeUnlockIn{ from{opacity:0; transform:scale(.7) translateY(14px);} to{opacity:1; transform:scale(1) translateY(0);} }
+@keyframes badgeUnlockOut{ to{opacity:0; transform:translateY(10px);} }
+/* Embaixo, logo acima da barra de abas do celular; no computador (sem barra), perto da borda. */
+@media (min-width: 900px){ #badge-unlock-layer{ bottom:24px; } }
 @keyframes badgeUnlockSpin{ from{transform:rotate(-25deg) scale(.5);} to{transform:rotate(0) scale(1);} }
 /* Confete (tiers 3/4/6) -- peças de papel caindo em CSS puro, sem
    biblioteca externa. spawnConfetti() (app.js) cria as peças aqui dentro e
@@ -2691,6 +2752,15 @@ footer.app-footer img{ height:40px; opacity:.85; }
   .stats-pills{ gap:6px; }
   .pill{ padding:5px 8px; font-size:12px; }
   .topbar{ padding-left:16px; padding-right:16px; }
+}
+
+/* Celular estreito (390px): sem isto a bandeira do idioma ficava cortada na borda direita. Reduz respiros do cabeçalho; os alvos de toque seguem com 44px de altura. */
+@media (max-width: 420px){
+  .topbar{ padding-left:12px; padding-right:12px; }
+  .brand{ gap:8px; }
+  .stats-pills{ gap:4px; }
+  .pill{ padding:5px 7px; }
+  .stats-pills-fade{ display:none; } /* tudo cabe agora; o degradê cobria a bandeira */
 }
 
 /* ---------- Login screen ---------- */
@@ -2932,6 +3002,67 @@ body.hide-pinyin .prompt-pinyin{
 }
 .guest-warning-link:hover{ filter:brightness(1.15); }
 
+/* ===== Revisão: total de hoje, recordes, semana e força da memória (shared/review-extras.js) ===== */
+#review-today-widget{ text-align:left; margin:14px 0 16px; }
+.review-today-strip{ display:flex; align-items:center; justify-content:space-between; gap:14px 18px; flex-wrap:wrap; padding:12px 16px; border:1px solid var(--paper-line); border-radius:14px; background:var(--paper-warm); }
+.review-today-strip .review-today-split{ display:flex; gap:20px; margin:0; justify-content:flex-start; }
+.review-today-strip .review-today-col{ display:grid; line-height:1.1; }
+.review-today-strip .review-today-count{ font-size:26px; }
+.review-today-go{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+.review-today-done{ font-size:14px; color:var(--ink-soft); font-weight:700; }
+.review-today-go .btn{ margin:0; min-width:0; width:auto; padding:10px 16px; white-space:nowrap; }
+.review-short-btn{ background:transparent; color:var(--ink); border:1.5px solid var(--paper-line); }
+.review-today-filter{ margin:8px 0 0; }
+.review-mode-cards-row .review-mode-card{ padding-top:12px; padding-bottom:12px; gap:2px; }
+.review-mode-cards-row .review-mode-card .icon{ font-size:24px; }
+.review-mode-cards-row .review-mode-card .count{ font-size:22px; }
+.review-record-line{ font-size:14px; color:var(--ink-soft); font-weight:700; margin:6px 0 0; }
+.review-week{ margin:6px 0 24px; padding:14px 16px 12px; border:1px solid var(--paper-line); border-radius:14px; background:var(--paper); }
+.review-week-head{ display:flex; justify-content:space-between; align-items:baseline; gap:6px 14px; flex-wrap:wrap; }
+.review-week-title{ font-weight:800; font-size:15px; color:var(--ink); }
+.review-week-goal{ font-size:13px; color:var(--ink-soft); }
+.review-week-goal b{ color:var(--ink); }
+.review-week-goal.is-done b{ color:var(--count-review); }
+.review-week-days{ list-style:none; margin:12px 0 6px; padding:0; display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; }
+.week-day{ display:grid; grid-template-rows:96px auto; text-align:center; }
+.week-day-body{ display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:3px; }
+.week-day-label{ font-size:12px; font-weight:700; color:var(--ink-soft); padding-top:4px; border-top:1px solid var(--paper-line); }
+.week-day.is-today .week-day-label{ color:var(--ink); font-weight:800; border-top:2px solid var(--count-new); }
+.week-check{ width:30px; height:30px; border-radius:50%; border:1.5px dashed var(--paper-line); display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; }
+.week-check.is-done{ border:0; background:var(--count-review); color:var(--paper); }
+.week-check-small{ width:20px; height:20px; font-size:11px; }
+.week-total{ font-size:12px; font-weight:800; color:var(--ink); font-variant-numeric:tabular-nums; }
+.week-total.is-zero{ color:var(--ink-soft); font-weight:600; }
+.week-bar{ display:flex; flex-direction:column-reverse; width:70%; max-width:34px; border-radius:6px 6px 3px 3px; overflow:hidden; }
+.week-bar-due{ background:var(--count-review); display:block; }
+.week-bar-new{ background:var(--count-new); display:block; }
+.review-week-legend{ font-size:12px; color:var(--ink-soft); margin:4px 0 0; line-height:1.5; }
+.week-key{ display:inline-block; width:10px; height:10px; border-radius:2px; margin:0 4px 0 2px; vertical-align:-1px; }
+.week-key-due{ background:var(--count-review); }
+.week-key-new{ background:var(--count-new); }
+.deck-memory{ margin:16px 0 4px; }
+.deck-memory-title{ font-size:13px; font-weight:800; color:var(--ink-soft); margin-bottom:6px; }
+.mem-bar{ display:flex; height:12px; border-radius:6px; overflow:hidden; background:var(--paper-line); gap:2px; }
+.mem-bar-seg{ display:block; flex-basis:0; min-width:4px; }
+.mem-bar-seg[data-tier="weak"], .mem-swatch[data-tier="weak"]{ background:var(--mem-weak); }
+.mem-bar-seg[data-tier="mid"], .mem-swatch[data-tier="mid"]{ background:var(--mem-mid); }
+.mem-bar-seg[data-tier="strong"], .mem-swatch[data-tier="strong"]{ background:var(--mem-strong); }
+.mem-legend{ display:flex; flex-wrap:wrap; gap:4px 16px; margin-top:6px; font-size:13px; color:var(--ink-soft); }
+.mem-legend b{ color:var(--ink); }
+.mem-swatch{ display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:-1px; }
+@media (max-width:600px){
+  .review-today-strip{ padding:10px 12px; }
+  .review-today-strip .review-today-split{ gap:14px; }
+  .review-today-strip .review-today-count{ font-size:22px; }
+  .review-today-go{ width:100%; justify-content:flex-start; }
+  .review-today-go .btn-primary{ flex:1; }
+  .review-today-go .btn{ min-height:44px; }
+  .review-week{ padding:12px 10px 10px; }
+  .review-week-days{ gap:3px; }
+  .week-day{ grid-template-rows:80px auto; }
+  .week-check{ width:24px; height:24px; font-size:13px; }
+}
+
 /* ===== Navegador de Decks (shared/deck-browser.js; doc de arquitetura, seções 12-14 e 5.4) ===== */
 .deck-table-wrap{ margin: 4px 0 18px; }
 .deck-table{ width:100%; border-collapse:collapse; background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); overflow:hidden; }
@@ -2962,11 +3093,16 @@ body.hide-pinyin .prompt-pinyin{
 /* Tela do Deck, no formato do Anki. */
 .deck-overview{ max-width:520px; margin:0 auto; text-align:center; padding:8px 4px; }
 .deck-overview-title{ margin:4px 0 18px; font-size:20px; overflow-wrap:anywhere; }
-.deck-overview-body{ display:flex; align-items:center; justify-content:center; gap:28px; flex-wrap:wrap; }
-.deck-overview-counts{ display:grid; grid-template-columns:auto auto; column-gap:18px; row-gap:6px; margin:0; text-align:left; font-size:16px; }
-.deck-overview-counts dt{ color:var(--ink); }
-.deck-overview-counts dd{ margin:0; font-weight:700; font-variant-numeric:tabular-nums; min-width:2ch; text-align:right; }
+.deck-overview-path{ display:block; font-size:13px; font-weight:600; color:var(--ink-soft); margin-bottom:2px; }
+.deck-overview-body{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; }
+/* Novo / Aprendendo / Revisar em 3 colunas: número grande, rótulo pequeno embaixo. */
+.deck-overview-counts{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; margin:0; width:100%; max-width:380px; }
+.deck-overview-count{ display:flex; flex-direction:column-reverse; align-items:center; gap:2px; padding:10px 4px; border:1px solid var(--paper-line); border-radius:var(--radius); background:var(--paper); }
+.deck-overview-counts dt{ color:var(--ink-soft); font-size:12.5px; }
+.deck-overview-counts dd{ margin:0; font-size:28px; line-height:1.1; font-weight:700; font-variant-numeric:tabular-nums; }
 .deck-overview-study{ border-radius:999px; padding:12px 26px; }
+.deck-overview-empty{ display:flex; flex-direction:column; align-items:center; gap:10px; }
+.deck-overview-empty-msg{ margin:0; color:var(--ink-soft); font-size:14.5px; }
 .deck-overview-total{ margin:16px 0 0; font-size:13px; color:var(--ink-soft); }
 .deck-overview-hint{ margin-top:6px; }
 .deck-overview-footer{ margin-top:22px; padding-top:14px; border-top:1px solid var(--paper-line); max-width:520px; margin-left:auto; margin-right:auto; }
@@ -2974,6 +3110,33 @@ body.hide-pinyin .prompt-pinyin{
 .deck-overview-extra{ max-width:520px; margin:0 auto; text-align:left; }
 .deck-delete-dialog{ margin-top:10px; padding:12px; border:1px solid var(--error-red); border-radius:var(--radius); background:var(--paper-warm); }
 .add-card-modal{ max-width:680px; }
+/* Imagem por campo: link discreto até ser usado. */
+.field-image-block{ margin-top:6px; }
+.field-image-thumb{ display:block; max-width:160px; max-height:110px; border-radius:8px; border:1px solid var(--paper-line); margin:4px 0; object-fit:contain; }
+.field-image-actions{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.field-image-link{ background:none; border:none; padding:6px 0; color:var(--ink-soft); font:inherit; font-size:12.5px; cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
+.field-image-link:hover, .field-image-link:focus-visible{ color:var(--ink); }
+.field-image-status{ font-size:12px; color:var(--ink-soft); }
+.field-image-block .profile-edit-field-error:empty{ display:none; }
+@media (max-width:720px){ .field-image-link{ min-height:44px; } }
+
+/* Menu "⋯" (Importar / Exportar) ao lado de Criar Deck. */
+.deck-more-menu{ position:relative; }
+.deck-topbar .deck-more-menu{ display:flex; }
+.deck-topbar .deck-more-menu > summary.deck-topbar-more{ padding:8px 12px; letter-spacing:.08em; font-weight:800; display:flex; align-items:center; }
+.deck-table-create-row td{ border-bottom:none; }
+.review-modes-spacer{ height:28px; }
+.deck-table-create-link{ background:none; border:none; padding:4px 0; cursor:pointer; color:var(--ink-soft); font:inherit; font-size:13.5px; text-align:left; }
+.deck-table-create-link:hover, .deck-table-create-link:focus-visible{ color:var(--ink); text-decoration:underline; }
+.deck-more-menu > summary{ list-style:none; cursor:pointer; min-width:44px; font-weight:800; letter-spacing:.08em; }
+.deck-more-menu > summary::-webkit-details-marker{ display:none; }
+.deck-more-menu-list{ position:absolute; right:0; top:calc(100% + 6px); z-index:5; min-width:230px; background:var(--paper); border:1px solid var(--paper-line); border-radius:var(--radius); box-shadow:var(--shadow-lift); padding:6px; display:flex; flex-direction:column; }
+.deck-more-menu-list button{ background:none; border:none; text-align:left; padding:10px 12px; min-height:44px; border-radius:8px; color:var(--ink); font:inherit; font-size:14px; cursor:pointer; }
+.deck-more-menu-list button:hover, .deck-more-menu-list button:focus-visible{ background:var(--paper-warm); }
+
+/* Adicionar: "Criar cartão" sempre visível no rodapé da janela. */
+.add-card-modal .add-card-submit-bar{ position:sticky; bottom:0; margin:14px -20px -20px; padding:10px 20px 14px; background:var(--paper); border-top:1px solid var(--paper-line); z-index:2; }
+.add-card-modal .add-card-submit-bar .profile-edit-error:empty{ display:none; }
 /* Painel em janela, no formato do navegador do Anki. */
 .deck-panel-modal{ max-width:1180px; width:100%; height:88vh; max-height:88vh; overflow:hidden; display:flex; flex-direction:column; }
 .deck-panel-head{ display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--paper-line); }
@@ -2995,7 +3158,8 @@ body.hide-pinyin .prompt-pinyin{
 .deck-panel-list{ flex:1; min-height:0; overflow-y:auto; }
 .deck-panel-item{ display:grid; grid-template-columns:26px 1fr 1fr; gap:8px; align-items:center; padding:7px 10px; border-bottom:1px solid var(--paper-line); cursor:pointer; font-size:13.5px; }
 .deck-panel-item:hover{ background:var(--paper-warm); }
-.deck-panel-item.is-active{ background:var(--paper-line); }
+.deck-panel-item.is-active{ background:var(--paper-line); box-shadow: inset 3px 0 0 var(--seal-red); }
+.deck-panel-item input[type="checkbox"]{ width:18px; height:18px; margin:0; accent-color:var(--seal-red); cursor:pointer; }
 .deck-panel-item.is-archived .deck-panel-cell{ opacity:.6; }
 .deck-panel-item:focus-visible{ outline:2px solid var(--seal-red); outline-offset:-2px; }
 .deck-panel-cell{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -3005,6 +3169,7 @@ body.hide-pinyin .prompt-pinyin{
 .deck-panel-count{ margin:0; padding:6px 10px; border-top:1px solid var(--paper-line); }
 .deck-panel-bulk{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:8px 10px; border-bottom:1px solid var(--paper-line); background:var(--paper-warm); font-size:13px; }
 .deck-panel-bulk select{ width:auto; max-width:100%; margin:0; padding:6px 8px; }
+.deck-panel-bulk[hidden]{ display:none; }
 .deck-panel-bulk .profile-edit-error{ flex-basis:100%; margin:0; }
 .deck-panel-linkbtn{ background:none; border:none; cursor:pointer; padding:0; }
 .deck-panel-editor{ overflow-y:auto; padding:12px 16px; min-height:0; }
@@ -3030,12 +3195,28 @@ body.hide-pinyin .prompt-pinyin{
   .deck-panel-grid.has-editor .deck-panel-editor{ display:block; }
   .deck-panel-backbtn{ display:inline-flex; margin-bottom:8px; }
 }
+@media (max-width: 600px){
+  /* Toque com folga no celular (>= 44px), sem mudar o visual no computador. */
+  .deck-table td{ height:44px; }
+  .deck-table-toggle{ position:relative; }
+  .deck-table-toggle::after{ content:""; position:absolute; inset:-11px; }
+  .deck-table-link{ min-height:44px; display:inline-flex; align-items:center; padding:0 4px 0 0; }
+  .deck-table-create-link{ min-height:44px; }
+  .deck-topbar-btn, .deck-home-btn, .deck-overview-study{ min-height:44px; }
+  .deck-panel-side-item{ min-height:44px; padding-top:10px; padding-bottom:10px; }
+  .deck-panel-item{ min-height:44px; }
+  .deck-panel-item input[type="checkbox"]{ width:20px; height:20px; }
+  .deck-panel-head .app-modal-close{ width:44px; height:44px; flex:0 0 44px; }
+  .deck-overview-title{ font-size:18px; }
+}
 @media (max-width: 480px){
   .deck-table th{ font-size:11px; padding:6px 4px; }
   .deck-table td{ padding:6px 4px; }
   .deck-table-num{ width:auto; min-width:44px; }
   .deck-overview-body{ gap:18px; }
-  .deck-topbar-btn{ padding:8px 12px; }
+  .deck-topbar{ gap:2px; flex-wrap:nowrap; }
+  .deck-topbar-btn{ padding:8px 9px; font-size:13.5px; }
+  .deck-topbar .deck-more-menu > summary.deck-topbar-more{ padding:8px 8px; }
 }
 </style>
 </head>
@@ -3080,8 +3261,8 @@ body.hide-pinyin .prompt-pinyin{
     <div class="brand">
       <div class="brand-seal"><svg viewBox="0 0 83.44 94.95" xmlns="http://www.w3.org/2000/svg"><path d="M82.19,54.16c-.25-.82-1.05-3.05-1.06-3.07-2.71-6.58-11.08-1.57-9.93,3.9.31,1.46.68,2.86.68,2.86,3.51,12.91-6.77,26.21-20.18,26.02,0,0-40.62,0-40.62,0L.83,94.12c.51.51,1.22.83,2,.83h48.7c9.66,0,18.32-4.29,24.17-11.08,6.81-7.58,9.57-19.61,6.49-29.71Z" style="fill:#e36bca;"/><path d="M45.92,31.12H11.08V11.07h0L.83.82C.32,1.34,0,2.04,0,2.83v36.55c0,1.56,1.27,2.83,2.83,2.83h44.95c2.8,0,10.09.14,12.52,1.15,0,0,2.62-1.92,4.67-9.26-4.14-1.95-14.19-2.97-19.05-2.97Z" style="fill:#e36bca;"/><path d="M69.7,11.08C64.22,4.32,55.86,0,46.48,0H2.83c-.78,0-1.49.32-2,.83l10.25,10.25h32.67c12.91,0,24.17,9.85,21.35,22.52-.04.17-.07.33-.11.5,0,0-.01,0-.02,0-4.11,14.7-20.74,14.56-23.25,14.56H2.83c-1.56,0-2.83,1.27-2.83,2.83v40.63c0,.78.32,1.49.83,2l10.25-10.25h0v-24.13h35.4c8.58,0,16.31-3.61,21.73-9.4,2.65-2.76,4.71-6.06,6.1-9.63,3.99-9.68,1.92-21.88-4.61-29.63Z" style="fill:#3498d6;"/></svg></div>
       <div class="brand-text">
-        <h1>Chinês</h1>
-        <p>com Prof. Brune</p>
+        <h1 data-i18n="brand.title.zh">Chinês</h1>
+        <p data-i18n="brand.byline">com Prof. Brune</p>
       </div>
     </div>
     <div class="stats-pills-wrap">
@@ -3276,26 +3457,21 @@ body.hide-pinyin .prompt-pinyin{
         <!-- Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila"
              removido de vez; "Origem" (Fase 4 do sistema de alunas
              particulares) subiu pro topo do painel. -->
-        <div id="review-tag-filter-wrap" hidden>
-          <div class="section-label">Tags</div>
-          <div id="review-tag-chips" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px;"></div>
-          <button type="button" class="admin-select-link" id="review-tag-clear" hidden style="background:none; border:none; cursor:pointer; padding:0;">Limpar filtro de tags</button>
-        </div>
         <div id="review-origin-select-wrap" hidden>
-          <div class="section-label">Origem</div>
+          <div data-i18n="review.settings.origin" class="section-label">Origem</div>
           <select class="review-settings-select" id="review-origin-select"></select>
         </div>
         <div data-i18n="ui.review.frequency" class="section-label">Frequência de revisão</div>
         <select class="review-settings-select" id="review-frequency-select">
           <option data-i18n="ui.review.freq.frequent" value="frequent">Mais frequente (revisa mais cedo e mais vezes)</option>
-          <option value="balanced">Equilibrada (recomendado)</option>
+          <option data-i18n="review.settings.freq.balanced" value="balanced">Equilibrada (recomendado)</option>
           <option data-i18n="ui.review.freq.spaced" value="spaced">Mais espaçada (intervalos mais longos entre revisões)</option>
         </select>
         <div data-i18n="ui.review.newPerDay" class="section-label">Novas palavras por dia</div>
         <select class="review-settings-select" id="review-newcards-select">
           <option data-i18n="ui.review.newPerDay.0" value="0">0 (nenhuma, só revisar o que já viu)</option>
           <option data-i18n="ui.review.newPerDay.5" value="5">5 (ritmo mais lento)</option>
-          <option value="10">10 (recomendado)</option>
+          <option data-i18n="review.settings.newPerDay.10" value="10">10 (recomendado)</option>
           <option data-i18n="ui.review.newPerDay.15" value="15">15 (ritmo mais rápido)</option>
           <option data-i18n="ui.review.newPerDay.20" value="20">20 (ritmo bem rápido)</option>
           <option data-i18n="ui.review.newPerDay.unlimited" value="9999">Sem limite (todas as pendentes de uma vez)</option>
@@ -3303,25 +3479,23 @@ body.hide-pinyin .prompt-pinyin{
         <div data-i18n="ui.review.intensity" class="section-label">Intensidade da sessão</div>
         <select class="review-settings-select" id="review-intensity-select">
           <option data-i18n="ui.review.intensity.light" value="light">Leve (sessões mais curtas)</option>
-          <option value="normal">Normal (recomendado)</option>
+          <option data-i18n="review.settings.intensity.normal" value="normal">Normal (recomendado)</option>
           <option data-i18n="ui.review.intensity.intense" value="intense">Intensa (sessões mais longas)</option>
         </select>
-        <p data-i18n="ui.review.settingsNote" class="settings-more-note">Estes ajustes controlam o motor de revisão nos bastidores -- você não precisa entender os detalhes técnicos.</p>
       </div>
 
-      <div class="section-label">Decks</div>
-      <div class="deck-table-wrap" id="review-decks-table"></div>
       <div id="review-today-widget"></div>
+      <div class="deck-table-wrap" id="review-decks-table"></div>
 
-      <div class="section-label" data-i18n="ui.review.otherModes">Outros modos</div>
-      <p class="review-section-hint" data-i18n="ui.review.otherModesHint">Speed Review usa a sessão de hoje (palavras novas e revisões); Palavras difíceis e Combinar funcionam a qualquer hora.</p>
+      <div class="review-modes-spacer" aria-hidden="true"></div>
       <div class="review-mode-cards review-mode-cards-row" id="review-mode-cards-praticar"></div>
+      <div id="review-week"></div>
     </div>
 
     <div id="review-deck-wrap" style="display:none;"></div>
 
     <div id="review-session-wrap" style="display:none;">
-      <button class="back-link" id="review-back-to-modes">← Voltar aos modos</button>
+      <button data-i18n="review.backToModes" class="back-link" id="review-back-to-modes">← Voltar aos modos</button>
       <div id="review-content"></div>
       <div id="speed-review-content" style="display:none;"></div>
       <div id="match-review-content" style="display:none;"></div>
@@ -3342,12 +3516,18 @@ body.hide-pinyin .prompt-pinyin{
     <div id="leaderboard-content"></div>
   </div>
 
+  <!-- ===== AMIGOS (Perfil > Amigos) ===== -->
+  <div class="view" id="view-friends">
+    <div id="friends-content"></div>
+  </div>
+
   <!-- ===== PROGRESSO ===== -->
   <div class="view" id="view-progress">
     <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil" data-i18n-attr="aria-label:profile.subnavAria">
       <button data-i18n="profile.tabOverview" class="leaderboard-tab" data-tab="profile">Visão geral</button>
       <button class="leaderboard-tab" data-tab="goals">Metas</button>
       <button class="leaderboard-tab active" data-tab="progress">Progresso</button>
+      <button data-i18n="profile.tabFriends" class="leaderboard-tab" data-tab="friends">Amigos</button>
     </div>
     <div class="path-header">
       <h2 data-i18n="ui.stats.title">Seu progresso</h2>
@@ -3369,6 +3549,7 @@ body.hide-pinyin .prompt-pinyin{
       <button data-i18n="profile.tabOverview" class="leaderboard-tab" data-tab="profile">Visão geral</button>
       <button class="leaderboard-tab active" data-tab="goals">Metas</button>
       <button class="leaderboard-tab" data-tab="progress">Progresso</button>
+      <button data-i18n="profile.tabFriends" class="leaderboard-tab" data-tab="friends">Amigos</button>
     </div>
     <div class="path-header">
       <h2>Minhas metas</h2>
@@ -4048,7 +4229,7 @@ body.hide-pinyin .prompt-pinyin{
   <div class="streak-modal-body">
     <div class="streak-flame">🔥</div>
     <div class="streak-week-row" id="streak-week-row"></div>
-    <h2 class="streak-headline">Você está em uma sequência de <span id="streak-days-num">0</span> dias!</h2>
+    <h2 class="streak-headline">Você está em uma sequência de <span id="streak-days-num">0</span> <span id="streak-days-unit">dias</span>!</h2>
     <p data-i18n="ui.streak.sub" class="streak-subtext">Continue assim: sua série será zerada se você não estudar amanhã.</p>
   </div>
   <div class="streak-modal-footer">
@@ -4134,11 +4315,13 @@ body.hide-pinyin .prompt-pinyin{
 <script src="../shared/own-flashcards.js"></script>
 <script src="../shared/deck-data.js"></script>
 <script src="../shared/my-flashcards.js"></script>
+<script src="../shared/review-extras.js"></script>
 <script src="../shared/deck-browser.js"></script>
 <script src="../shared/anki-import-ui.js"></script>
 <script src="../shared/admin-analytics.js"></script>
 <script src="../shared/admin-notifications.js"></script>
 <script src="../shared/admin-reports.js"></script>
+<script src="../shared/friends.js"></script>
 <script src="../shared/leaderboard.js"></script>
 <script src="../shared/public-profile.js"></script>
 <script src="../shared/public-deck.js"></script>

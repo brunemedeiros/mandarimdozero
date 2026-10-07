@@ -1,7 +1,7 @@
 ---
 name: code-architecture-reviewer
 description: Review recently written code for best practices, architectural consistency, and system integration. Use when reviewing code, checking implementations, after completing significant code changes, or when asking for a code review.
-model: inherit
+model: opus
 permissionMode: default
 color: blue
 ---

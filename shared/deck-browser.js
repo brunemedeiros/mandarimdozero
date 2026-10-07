@@ -8,8 +8,9 @@
 //   Revisão (início)  -> tabela "Deck | Novo | Aprendendo | Revisar",
 //                        começando pelos Decks de topo (Trilha de Estudo,
 //                        Meus Decks, Cartões da professora). Sem botão
-//                        "Estudar" na tabela (seção 12). Embaixo: Criar
-//                        Deck, Importar arquivo, Exportar.
+//                        "Estudar" na tabela (seção 12). "+ Criar Deck"
+//                        é um link discreto abaixo de Meus Decks; Importar
+//                        e Exportar ficam no "⋯" da barra do topo.
 //   Clique no Deck    -> tela do Deck (seção 13), no formato do Anki:
 //                        nome, Novo/Aprendendo/Revisar e "Estudar agora".
 //   Painel            -> JANELA por cima da tela (seção 14), no formato do
@@ -72,7 +73,17 @@ async function deckBrowserEnsureLoaded(){
   await deckBrowserLoadTeacherLink();
 }
 
-const DECK_BROWSER_LANG_LABELS = { frances: 'Francês', mandarim: 'Mandarim', portugues: 'Português' };
+// Textos da tela vêm do catálogo do idioma do site (shared/i18n). Português
+// continua idêntico ao que era escrito aqui.
+const DECK_BROWSER_LANG_LABELS = {
+  get frances(){ return t('review.deck.lang.frances'); },
+  get mandarim(){ return t('review.deck.lang.mandarim'); },
+  get portugues(){ return t('review.deck.lang.portugues'); },
+};
+// Plural como no código original (n === 1 ? um : outro), sem Intl: em
+// português o zero continua no plural ("0 cartões").
+function deckBrowserWord(baseKey, n){ return t(baseKey + (n === 1 ? '.one' : '.other')); }
+function deckBrowserWordT(baseKey, n, params){ return t(baseKey + (n === 1 ? '.one' : '.other'), params); }
 
 // Link de compartilhamento de cartões (#import=...) capturado no carregamento
 // da página, antes de o roteador trocar o endereço.
@@ -116,13 +127,13 @@ function deckBrowserCourseRoot(decks){
 // (pedido da autora); personal_root como "Meus Decks".
 function deckBrowserDeckLabel(deck){
   if (!deck) return '';
-  if (deck.kind === 'personal_root') return 'Meus Decks';
-  if (deck.kind === 'teacher_root') return 'Cartões da professora';
-  if (deck.kind === 'course' && deck.course_unit_id == null && deck.parent_deck_id == null) return 'Trilha de Estudo';
+  if (deck.kind === 'personal_root') return t('review.deck.myDecks');
+  if (deck.kind === 'teacher_root') return t('review.deck.teacherCards');
+  if (deck.kind === 'course' && deck.course_unit_id == null && deck.parent_deck_id == null) return t('review.deck.studyPath');
   return deck.name || '';
 }
 function deckBrowserLangLabel(){
-  return DECK_BROWSER_LANG_LABELS[APP_KEY] || 'Idioma';
+  return DECK_BROWSER_LANG_LABELS[APP_KEY] || t('review.deck.lang.fallback');
 }
 
 // Filhos exibidos. 'lang' é a raiz virtual (todos os Decks do idioma): a
@@ -175,13 +186,13 @@ function deckBrowserCounts(decks, nodeId, pool){
 }
 
 function deckBrowserNodeLabel(decks, nodeId){
-  if (nodeId === 'lang') return 'Todos os Decks';
+  if (nodeId === 'lang') return t('review.deck.allDecks');
   return deckBrowserDeckLabel(getDeckById(decks, nodeId));
 }
 
 // Caminho do Deck ("Meus Decks › Verbos"), sem a raiz da conta.
 function deckBrowserBreadcrumb(decks, nodeId){
-  if (nodeId === 'lang') return ['Todos os Decks'];
+  if (nodeId === 'lang') return [t('review.deck.allDecks')];
   const chain = getDeckAncestors(decks, nodeId).slice().reverse()
     .filter(d => d.kind !== 'root')
     .map(deckBrowserDeckLabel);
@@ -213,11 +224,21 @@ async function deckBrowserLoadOwnContext(){
 function deckTopbarHTML(nodeId){
   const canAdd = !!deckBrowserUserId();
   const onHome = nodeId === 'lang';
-  return `<nav class="deck-topbar" aria-label="Decks">
-      <button type="button" class="deck-topbar-btn ${onHome ? 'is-active' : ''}" data-topbar-decks ${onHome ? 'aria-current="page"' : ''}>Decks</button>
-      ${canAdd ? `<button type="button" class="deck-topbar-btn" data-topbar-add>Adicionar</button>` : ''}
-      <button type="button" class="deck-topbar-btn" data-topbar-panel>Painel</button>
-      ${typeof toggleReviewSettingsPanel === 'function' ? `<button type="button" class="deck-topbar-btn" data-topbar-settings>Configurar</button>` : ''}
+  // "Decks" fica marcado também dentro de um Deck (a pessoa está na área de
+  // Decks); só a tela inicial é a "página atual".
+  return `<nav class="deck-topbar" aria-label="${escapeHTML(t('review.deck.decks'))}">
+      <button type="button" class="deck-topbar-btn is-active" data-topbar-decks aria-current="${onHome ? 'page' : 'location'}">${escapeHTML(t('review.deck.decks'))}</button>
+      ${canAdd ? `<button type="button" class="deck-topbar-btn" data-topbar-add>${escapeHTML(t('review.deck.add'))}</button>` : ''}
+      <button type="button" class="deck-topbar-btn" data-topbar-panel>${escapeHTML(t('review.deck.browse'))}</button>
+      ${typeof toggleReviewSettingsPanel === 'function' ? `<button type="button" class="deck-topbar-btn" data-topbar-settings>${escapeHTML(t('review.deck.settings'))}</button>` : ''}
+      ${canAdd ? `<details class="deck-more-menu">
+        <summary class="deck-topbar-btn deck-topbar-more" aria-label="${escapeHTML(t('review.deck.moreOptions'))}">⋯</summary>
+        <div class="deck-more-menu-list" role="menu">
+          <button type="button" role="menuitem" data-deck-import>${escapeHTML(t('review.deck.importFile'))}</button>
+          <button type="button" role="menuitem" data-deck-export>${escapeHTML(t('review.deck.export'))}</button>
+        </div>
+      </details>
+      <input type="file" data-deck-import-file accept=".apkg,.json,application/json" hidden>` : ''}
     </nav>`;
 }
 
@@ -230,6 +251,17 @@ function wireDeckTopbar(container, nodeId){
   container.querySelector('[data-topbar-panel]')?.addEventListener('click', () => openDeckPanel(nodeId));
   // Abre os ajustes numa janela, sem sair da tela atual.
   container.querySelector('[data-topbar-settings]')?.addEventListener('click', () => openReviewSettingsModal());
+  // Menu "⋯" (Importar / Exportar), ao lado de Configurar.
+  wireDeckMoreMenuGlobal();
+  const fileInput = container.querySelector('[data-deck-import-file]');
+  const closeMore = () => { const m = container.querySelector('.deck-more-menu'); if (m) m.open = false; };
+  container.querySelector('[data-deck-import]')?.addEventListener('click', () => { closeMore(); if (fileInput) fileInput.click(); });
+  fileInput?.addEventListener('change', () => {
+    const file = fileInput.files && fileInput.files[0];
+    fileInput.value = '';
+    if (file) deckBrowserImportFile(file);
+  });
+  container.querySelector('[data-deck-export]')?.addEventListener('click', () => { closeMore(); deckBrowserExport(); });
 }
 
 // ---------- Configurar (janela) ----------
@@ -273,8 +305,8 @@ function openReviewSettingsModal(){
   overlay.innerHTML = `
     <div class="app-modal review-settings-modal" role="dialog" aria-modal="true" aria-labelledby="review-settings-modal-title">
       <div class="app-modal-header">
-        <h3 id="review-settings-modal-title">Configurar</h3>
-        <button type="button" class="app-modal-close" data-review-settings-close aria-label="Fechar">✕</button>
+        <h3 id="review-settings-modal-title">${escapeHTML(t('review.deck.settings'))}</h3>
+        <button type="button" class="app-modal-close" data-review-settings-close aria-label="${escapeHTML(t('common.close'))}">✕</button>
       </div>
       <div class="app-modal-body" id="review-settings-modal-body"></div>
     </div>`;
@@ -316,7 +348,7 @@ async function renderReviewDeckTable(){
   if (top){ top.innerHTML = deckTopbarHTML('lang'); wireDeckTopbar(top, 'lang'); }
   if (!box) return;
   const token = ++DECK_BROWSER_RENDER_TOKEN;
-  if (!((STATE.decks || []).length)) box.innerHTML = `<p class="profile-edit-hint">Carregando seus Decks…</p>`;
+  if (!((STATE.decks || []).length)) box.innerHTML = `<p class="profile-edit-hint">${escapeHTML(t('review.deck.loadingDecks'))}</p>`;
   try {
     await deckBrowserEnsureLoaded();
   } catch (e) {
@@ -341,13 +373,14 @@ function deckBrowserTableHTML(){
   const pool = deckBrowserPool();
   const collapsed = deckBrowserLoadCollapsed() || deckBrowserDefaultCollapsed(decks);
   const rows = [];
+  const logged = !!deckBrowserUserId();
   const walk = (nodeId, depth) => {
     const kids = deckBrowserChildren(decks, nodeId);
     const c = deckBrowserCounts(decks, nodeId, pool);
     const isCollapsed = collapsed.has(String(nodeId));
     const label = deckBrowserNodeLabel(decks, nodeId);
     const toggle = kids.length
-      ? `<button type="button" class="deck-table-toggle" data-deck-toggle="${nodeId}" aria-label="${isCollapsed ? 'Abrir' : 'Fechar'} ${escapeHTML(label)}" aria-expanded="${isCollapsed ? 'false' : 'true'}">${isCollapsed ? '+' : '−'}</button>`
+      ? `<button type="button" class="deck-table-toggle" data-deck-toggle="${nodeId}" aria-label="${escapeHTML(t(isCollapsed ? 'review.deck.expand' : 'review.deck.collapse'))} ${escapeHTML(label)}" aria-expanded="${isCollapsed ? 'false' : 'true'}">${isCollapsed ? '+' : '−'}</button>`
       : `<span class="deck-table-toggle-spacer"></span>`;
     const num = (n, cls) => `<td class="deck-table-num ${n ? cls : 'is-zero'}">${n}</td>`;
     rows.push(`<tr data-deck-row="${nodeId}">
@@ -355,22 +388,33 @@ function deckBrowserTableHTML(){
       ${num(c.new, 'is-new')}${num(c.learning, 'is-learning')}${num(c.review, 'is-review')}
     </tr>`);
     if (!isCollapsed) kids.forEach(k => walk(k.id, depth + 1));
+    // "+ Criar Deck": link discreto logo abaixo do grupo "Meus Decks".
+    const node = typeof nodeId === 'number' ? getDeckById(decks, nodeId) : null;
+    if (logged && node && node.kind === 'personal_root'){
+      rows.push(`<tr class="deck-table-create-row"><td colspan="4"><div class="deck-table-name" style="padding-left:${(depth + 1) * 18}px;"><span class="deck-table-toggle-spacer"></span><button type="button" class="deck-table-create-link" data-deck-create>${escapeHTML(t('review.deck.createLink'))}</button></div></td></tr>`);
+    }
   };
   deckBrowserChildren(decks, 'lang').forEach(d => walk(d.id, 0));
-  const logged = !!deckBrowserUserId();
   const orphans = deckBrowserOrphanCount();
   return `<table class="deck-table">
-      <thead><tr><th scope="col">Deck</th><th scope="col">Novo</th><th scope="col">Aprendendo</th><th scope="col">Revisar</th></tr></thead>
-      <tbody>${rows.length ? rows.join('') : `<tr><td colspan="4" class="profile-edit-hint">Nenhum Deck ainda. Conclua uma lição ou crie um Deck.</td></tr>`}</tbody>
+      <thead><tr><th scope="col">${escapeHTML(t('review.deck.colDeck'))}</th><th scope="col">${escapeHTML(t('review.count.new'))}</th><th scope="col">${escapeHTML(t('review.count.learning'))}</th><th scope="col">${escapeHTML(t('review.count.review'))}</th></tr></thead>
+      <tbody>${rows.length ? rows.join('') : `<tr><td colspan="4" class="profile-edit-hint">${escapeHTML(t('review.deck.noneYet'))}</td></tr>`}</tbody>
     </table>
-    ${orphans ? `<p class="profile-edit-hint deck-table-hint">${orphans} dos seus cartões antigos ainda não estão em nenhum Deck. Abra o Painel para vê-los e movê-los.</p>` : ''}
-    ${logged ? `<div class="deck-home-actions">
-      <button type="button" class="btn btn-secondary deck-home-btn" data-deck-create>Criar Deck</button>
-      <button type="button" class="btn btn-secondary deck-home-btn" data-deck-import>Importar arquivo</button>
-      <button type="button" class="btn btn-secondary deck-home-btn" data-deck-export>Exportar</button>
-      <input type="file" data-deck-import-file accept=".apkg,.json,application/json" hidden>
-    </div>
-    <div data-deck-create-box></div>` : ''}`;
+    ${orphans ? `<p class="profile-edit-hint deck-table-hint">${escapeHTML(deckBrowserWordT('review.deck.orphans', orphans, { n: orphans }))}</p>` : ''}
+    ${logged ? `<div data-deck-create-box></div>` : ''}`;
+}
+
+// Fecha o menu "⋯" ao clicar fora dele ou apertar Esc (1 listener só).
+let DECK_MORE_MENU_WIRED = false;
+function wireDeckMoreMenuGlobal(){
+  if (DECK_MORE_MENU_WIRED) return;
+  DECK_MORE_MENU_WIRED = true;
+  document.addEventListener('click', (e) => {
+    document.querySelectorAll('.deck-more-menu[open]').forEach(m => { if (!m.contains(e.target)) m.open = false; });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') document.querySelectorAll('.deck-more-menu[open]').forEach(m => { m.open = false; });
+  });
 }
 
 function wireDeckBrowserTable(box){
@@ -384,14 +428,6 @@ function wireDeckBrowserTable(box){
   }));
   box.querySelectorAll('[data-deck-open]').forEach(btn => btn.addEventListener('click', () => openDeckDetail(Number(btn.dataset.deckOpen))));
   box.querySelector('[data-deck-create]')?.addEventListener('click', () => openCreateDeckForm(box.querySelector('[data-deck-create-box]'), null));
-  const fileInput = box.querySelector('[data-deck-import-file]');
-  box.querySelector('[data-deck-import]')?.addEventListener('click', () => fileInput && fileInput.click());
-  fileInput?.addEventListener('change', () => {
-    const file = fileInput.files && fileInput.files[0];
-    fileInput.value = '';
-    if (file) deckBrowserImportFile(file);
-  });
-  box.querySelector('[data-deck-export]')?.addEventListener('click', deckBrowserExport);
 }
 
 // ---------- Criar Deck / Renomear ----------
@@ -402,16 +438,16 @@ function openCreateDeckForm(box, parentId){
   if (!box) return;
   const decks = deckBrowserDecks();
   const options = (typeof orderedPersonalDecks === 'function' ? orderedPersonalDecks(decks) : []);
-  if (!options.length){ box.innerHTML = `<p class="profile-edit-error">Não foi possível carregar "Meus Decks". Recarregue a página.</p>`; return; }
-  box.innerHTML = `<div class="deck-inline-form" role="group" aria-label="Criar Deck">
-      <label class="profile-edit-label" for="deck-create-name">Nome do Deck</label>
-      <input type="text" id="deck-create-name" class="profile-edit-input" maxlength="60" placeholder="Ex.: Verbos">
-      <label class="profile-edit-label" for="deck-create-parent">Dentro de</label>
+  if (!options.length){ box.innerHTML = `<p class="profile-edit-error">${escapeHTML(t('review.deck.createLoadError'))}</p>`; return; }
+  box.innerHTML = `<div class="deck-inline-form" role="group" aria-label="${escapeHTML(t('review.deck.create'))}">
+      <label class="profile-edit-label" for="deck-create-name">${escapeHTML(t('review.deck.nameLabel'))}</label>
+      <input type="text" id="deck-create-name" class="profile-edit-input" maxlength="60" placeholder="${escapeHTML(t('review.deck.namePlaceholder'))}">
+      <label class="profile-edit-label" for="deck-create-parent">${escapeHTML(t('review.deck.insideLabel'))}</label>
       <select id="deck-create-parent" class="profile-edit-input">${options.map(d => `<option value="${d.id}" ${d.id === parentId ? 'selected' : ''}>${'  '.repeat(Math.max(0, personalDeckDepth(decks, d) - 1))}${escapeHTML(deckBrowserDeckLabel(d))}</option>`).join('')}</select>
       <p class="profile-edit-error" data-deck-create-error></p>
       <div class="deck-inline-actions">
-        <button type="button" class="btn btn-secondary" data-deck-create-cancel>Cancelar</button>
-        <button type="button" class="btn btn-primary" data-deck-create-save>Criar Deck</button>
+        <button type="button" class="btn btn-secondary" data-deck-create-cancel>${escapeHTML(t('review.deck.cancel'))}</button>
+        <button type="button" class="btn btn-primary" data-deck-create-save>${escapeHTML(t('review.deck.create'))}</button>
       </div>
     </div>`;
   const nameEl = box.querySelector('#deck-create-name');
@@ -427,7 +463,7 @@ function openCreateDeckForm(box, parentId){
     if (!res.ok){ errEl.textContent = res.error; return; }
     STATE.decks = (STATE.decks || []).concat([res.deck]);
     if (typeof MY_FLASHCARDS_STATE !== 'undefined') MY_FLASHCARDS_STATE._decks = STATE.decks;
-    if (typeof showToast === 'function') showToast(`✓ Deck "${res.deck.name}" criado.`);
+    if (typeof showToast === 'function') showToast(t('review.deck.created', { name: res.deck.name }));
     box.innerHTML = '';
     deckBrowserRefresh();
   };
@@ -437,13 +473,13 @@ function openCreateDeckForm(box, parentId){
 
 function openRenameDeckForm(box, deck){
   if (!box) return;
-  box.innerHTML = `<div class="deck-inline-form" role="group" aria-label="Renomear Deck">
-      <label class="profile-edit-label" for="deck-rename-name">Novo nome</label>
+  box.innerHTML = `<div class="deck-inline-form" role="group" aria-label="${escapeHTML(t('review.deck.renameAria'))}">
+      <label class="profile-edit-label" for="deck-rename-name">${escapeHTML(t('review.deck.newName'))}</label>
       <input type="text" id="deck-rename-name" class="profile-edit-input" maxlength="60" value="${escapeHTML(deck.name || '')}">
       <p class="profile-edit-error" data-deck-rename-error></p>
       <div class="deck-inline-actions">
-        <button type="button" class="btn btn-secondary" data-deck-rename-cancel>Cancelar</button>
-        <button type="button" class="btn btn-primary" data-deck-rename-save>Salvar</button>
+        <button type="button" class="btn btn-secondary" data-deck-rename-cancel>${escapeHTML(t('review.deck.cancel'))}</button>
+        <button type="button" class="btn btn-primary" data-deck-rename-save>${escapeHTML(t('review.deck.save'))}</button>
       </div>
     </div>`;
   const nameEl = box.querySelector('#deck-rename-name');
@@ -476,7 +512,7 @@ async function deckBrowserImportFile(file){
   try {
     payload = JSON.parse(await file.text());
   } catch (e) {
-    if (typeof showToast === 'function') showToast('Não foi possível ler este arquivo. Use um .apkg do Anki ou um .json exportado por este site.');
+    if (typeof showToast === 'function') showToast(t('review.deck.importReadError'));
     return;
   }
   await deckBrowserImportPayload(payload);
@@ -484,7 +520,7 @@ async function deckBrowserImportFile(file){
 
 async function deckBrowserImportPayload(payload){
   const ctx = await deckBrowserLoadOwnContext();
-  if (!ctx){ if (typeof showToast === 'function') showToast('Entre na sua conta para importar cartões.'); return; }
+  if (!ctx){ if (typeof showToast === 'function') showToast(t('review.deck.importLoginRequired')); return; }
   const errorEl = { set textContent(v){ if (v && typeof showToast === 'function') showToast(v); } };
   await confirmAndImportMyFlashcards(payload, errorEl);
 }
@@ -497,7 +533,7 @@ function deckBrowserMaybeImportFromLink(){
   try {
     payload = JSON.parse(decodeURIComponent(escape(atob(DECK_BROWSER_PENDING_IMPORT))));
   } catch (e) {
-    if (typeof showToast === 'function') showToast('O link de cartões compartilhados está incompleto ou corrompido.');
+    if (typeof showToast === 'function') showToast(t('review.deck.importLinkBroken'));
     return;
   }
   deckBrowserImportPayload(payload);
@@ -507,7 +543,7 @@ async function deckBrowserExport(){
   const ctx = await deckBrowserLoadOwnContext();
   if (!ctx) return;
   if (!ctx.activeCards.length){
-    if (typeof showToast === 'function') showToast('Você ainda não tem cartões próprios para exportar.');
+    if (typeof showToast === 'function') showToast(t('review.deck.exportNone'));
     return;
   }
   openMyFlashcardsExportModal(ctx.activeCards);
@@ -565,41 +601,47 @@ function renderDeckDetail(){
   const isPersonal = deck.kind === 'personal';
   const canHaveChildren = deck.kind === 'personal_root' || isPersonal;
   let hint = '';
-  if (deck.kind === 'course') hint = 'Os cartões da Trilha de Estudo vêm das lições: cada lição concluída libera os cartões dela.';
-  else if (deck.kind === 'teacher_root' || deck.kind === 'teacher') hint = 'Estes cartões são organizados pela sua professora. Aqui você só estuda.';
+  if (deck.kind === 'course') hint = t('review.deck.hintCourse');
+  else if (deck.kind === 'teacher_root' || deck.kind === 'teacher') hint = t('review.deck.hintTeacher');
   const crumbs = deckBrowserBreadcrumb(decks, nodeId);
-  const totalLine = `${c.total} ${c.total === 1 ? 'cartão' : 'cartões'}${getDeckChildren(decks, nodeId).length ? ' neste Deck e nos subdecks' : ''}${c.newTotal > c.new ? ` · ${c.newTotal} novos no total (entram até ${c.new} por dia, conforme "Novas palavras por dia")` : ''}`;
+  const totalLine = `${c.total} ${deckBrowserWord('review.deck.cardWord', c.total)}${getDeckChildren(decks, nodeId).length ? t('review.deck.inSubdecks') : ''}${c.newTotal > c.new ? `${t('review.deck.newCapPrefix')}${c.new} ${deckBrowserWord('review.deck.newWord', c.new)}${t('review.deck.perDay')}` : ''}`;
+  const canAddHere = deckBrowserCanAddCard(deck);
+  const count = (n, cls, label) => `<div class="deck-overview-count"><dt>${label}</dt><dd class="${n ? cls : 'is-zero'}">${n}</dd></div>`;
+  const pathHTML = crumbs.length > 1 ? `<span class="deck-overview-path">${crumbs.slice(0, -1).map(escapeHTML).join(' › ')} › </span>` : '';
+  const studyHTML = c.total
+    ? `<button type="button" class="btn btn-primary deck-overview-study" data-deck-study>${escapeHTML(t('review.deck.studyNow'))}</button>`
+    : `<div class="deck-overview-empty"><p class="deck-overview-empty-msg">${escapeHTML(t('review.deck.emptyDeck'))}</p>${canAddHere ? `<button type="button" class="btn btn-primary deck-overview-study" data-deck-empty-add>${escapeHTML(t('review.deck.addCard'))}</button>` : ''}</div>`;
   wrap.innerHTML = `
-    <div class="path-header"><h2>Revisão</h2></div>
+    <div class="path-header"><h2>${escapeHTML(t('admin.reports.screen.review'))}</h2></div>
     ${deckTopbarHTML(nodeId)}
     <div class="deck-overview">
-      <h2 class="deck-overview-title">${crumbs.map(escapeHTML).join(' › ')}</h2>
+      <h2 class="deck-overview-title">${pathHTML}<span class="deck-overview-name">${escapeHTML(crumbs[crumbs.length - 1] || '')}</span></h2>
       <div class="deck-overview-body">
         <dl class="deck-overview-counts">
-          <dt>Novo:</dt><dd class="${c.new ? 'is-new' : 'is-zero'}">${c.new}</dd>
-          <dt>Aprendendo:</dt><dd class="${c.learning ? 'is-learning' : 'is-zero'}">${c.learning}</dd>
-          <dt>Revisar:</dt><dd class="${c.review ? 'is-review' : 'is-zero'}">${c.review}</dd>
+          ${count(c.new, 'is-new', escapeHTML(t('review.count.new')))}${count(c.learning, 'is-learning', escapeHTML(t('review.count.learning')))}${count(c.review, 'is-review', escapeHTML(t('review.count.review')))}
         </dl>
-        <button type="button" class="btn btn-primary deck-overview-study" data-deck-study ${c.total ? '' : 'disabled'}>Estudar agora</button>
+        ${studyHTML}
       </div>
-      <p class="deck-overview-total">${escapeHTML(totalLine)}.</p>
+      ${c.total && typeof deckMemoryStrengthHTML === 'function' ? deckMemoryStrengthHTML(deckBrowserScope(decks, nodeId, pool)) : ''}
+      ${c.total ? `<p class="deck-overview-total">${escapeHTML(totalLine)}</p>` : ''}
       ${hint ? `<p class="profile-edit-hint deck-overview-hint">${escapeHTML(hint)}</p>` : ''}
     </div>
     ${canHaveChildren ? `<div class="deck-overview-footer">
-      <button type="button" class="btn btn-secondary deck-home-btn" data-deck-subdeck>Criar subdeck</button>
-      ${isPersonal ? `<button type="button" class="btn btn-secondary deck-home-btn" data-deck-rename>Renomear</button>` : ''}
-      ${isPersonal && typeof openPublishBox === 'function' ? `<button type="button" class="btn btn-secondary deck-home-btn" data-deck-publish>${deck.is_public ? '🌐 Público' : 'Publicar'}</button>` : ''}
-      ${isPersonal ? `<button type="button" class="btn btn-secondary deck-home-btn deck-overview-danger" data-deck-delete>Excluir</button>` : ''}
+      <button type="button" class="btn btn-secondary deck-home-btn" data-deck-subdeck>${escapeHTML(t('review.deck.createSubdeck'))}</button>
+      ${isPersonal ? `<button type="button" class="btn btn-secondary deck-home-btn" data-deck-rename>${escapeHTML(t('review.deck.rename'))}</button>` : ''}
+      ${isPersonal && typeof openPublishBox === 'function' ? `<button type="button" class="btn btn-secondary deck-home-btn" data-deck-publish>${escapeHTML(t(deck.is_public ? 'review.deck.isPublic' : 'review.deck.publish'))}</button>` : ''}
+      ${isPersonal ? `<button type="button" class="btn btn-secondary deck-home-btn deck-overview-danger" data-deck-delete>${escapeHTML(t('review.deck.delete'))}</button>` : ''}
     </div>
     <div class="deck-overview-extra" data-deck-extra-box></div>` : ''}`;
   wireDeckTopbar(wrap, nodeId);
   const extra = wrap.querySelector('[data-deck-extra-box]');
-  wrap.querySelector('[data-deck-study]').addEventListener('click', () => deckBrowserStudy(nodeId));
+  wrap.querySelector('[data-deck-study]')?.addEventListener('click', () => deckBrowserStudy(nodeId));
+  wrap.querySelector('[data-deck-empty-add]')?.addEventListener('click', () => openAddCardModal({ deckId: deck.id }));
   wrap.querySelector('[data-deck-subdeck]')?.addEventListener('click', () => openCreateDeckForm(extra, deck.id));
   wrap.querySelector('[data-deck-rename]')?.addEventListener('click', () => openRenameDeckForm(extra, deck));
   wrap.querySelector('[data-deck-publish]')?.addEventListener('click', (ev) => {
     const btn = ev.currentTarget;
-    openPublishBox(deck, extra, (d) => { btn.textContent = d.is_public ? '🌐 Público' : 'Publicar'; });
+    openPublishBox(deck, extra, (d) => { btn.textContent = t(d.is_public ? 'review.deck.isPublic' : 'review.deck.publish'); });
   });
   wrap.querySelector('[data-deck-delete]')?.addEventListener('click', () => openDeckDeleteDialog(deck, extra));
 }
@@ -660,7 +702,7 @@ function deckBrowserNewNoteState(){
 async function openAddCardModal(opts){
   const deckId = opts && opts.deckId != null ? opts.deckId : null;
   if (!deckBrowserUserId()){
-    if (typeof showToast === 'function') showToast('Entre na sua conta para criar cartões.');
+    if (typeof showToast === 'function') showToast(t('review.deck.loginToCreate'));
     return;
   }
   closeAddCardModal();
@@ -677,10 +719,10 @@ async function openAddCardModal(opts){
   overlay.innerHTML = `
     <div class="app-modal add-card-modal" role="dialog" aria-modal="true" aria-labelledby="add-card-modal-title">
       <div class="app-modal-header">
-        <h3 id="add-card-modal-title">Adicionar cartão</h3>
-        <button type="button" class="app-modal-close" data-add-card-close aria-label="Fechar">✕</button>
+        <h3 id="add-card-modal-title">${escapeHTML(t('review.deck.addCard'))}</h3>
+        <button type="button" class="app-modal-close" data-add-card-close aria-label="${escapeHTML(t('common.close'))}">✕</button>
       </div>
-      <div class="app-modal-body" id="add-card-modal-body"><p class="profile-edit-hint">Carregando…</p></div>
+      <div class="app-modal-body" id="add-card-modal-body"><p class="profile-edit-hint">${escapeHTML(t('review.deck.loading'))}</p></div>
     </div>`;
   document.body.appendChild(overlay);
   overlay.querySelector('[data-add-card-close]').addEventListener('click', closeAddCardModal);
@@ -697,7 +739,7 @@ async function renderAddCardModalBody(deckId){
     ctx = await loadMyFlashcardsContext();
   } catch (e) {
     console.error('Erro ao abrir Adicionar cartão:', e);
-    if (document.getElementById('add-card-modal-body')) body.innerHTML = `<p class="profile-edit-error">Não foi possível carregar. Tente de novo.</p>`;
+    if (document.getElementById('add-card-modal-body')) body.innerHTML = `<p class="profile-edit-error">${escapeHTML(t('review.deck.loadError'))}</p>`;
     return;
   }
   if (!document.getElementById('add-card-modal-body')) return; // fechou enquanto carregava
@@ -713,7 +755,7 @@ async function renderAddCardModalBody(deckId){
     renderAddCardModalBody(keepDeck && keepDeck.value ? Number(keepDeck.value) : deckId).then(() => {
       if (ADD_CARD_MODAL_CREATED){
         const h = document.querySelector('#add-card-modal-body .section-label');
-        if (h && !h.querySelector('.add-card-done')) h.insertAdjacentHTML('beforeend', `<span class="pill add-card-done">✓ ${ADD_CARD_MODAL_CREATED} criado${ADD_CARD_MODAL_CREATED === 1 ? '' : 's'}</span>`);
+        if (h && !h.querySelector('.add-card-done')) h.insertAdjacentHTML('beforeend', `<span class="pill add-card-done">${escapeHTML(deckBrowserWordT('review.deck.createdCount', ADD_CARD_MODAL_CREATED, { n: ADD_CARD_MODAL_CREATED }))}</span>`);
       }
     });
   });
@@ -739,14 +781,14 @@ function openDeckDeleteDialog(deck, box){
   const targets = deckBrowserMoveTargets(decks, deck);
   box.innerHTML = `
     <div class="deck-delete-dialog" role="alertdialog" aria-labelledby="deck-delete-title">
-      <p id="deck-delete-title"><strong>Excluir este deck irá excluir todos os cartões dentro dele</strong></p>
-      <p class="profile-edit-hint">"${escapeHTML(deck.name)}" tem ${noteCount} ${noteCount === 1 ? 'cartão' : 'cartões'}${subdecks ? ` e ${subdecks} ${subdecks === 1 ? 'subdeck' : 'subdecks'} (que também serão excluídos)` : ''}. Se preferir guardar os cartões, mova-os antes.</p>
-      ${noteCount ? `<label class="profile-edit-label" for="deck-delete-target">Mover os cartões para</label>
+      <p id="deck-delete-title"><strong>${escapeHTML(t('review.deck.deleteTitle'))}</strong></p>
+      <p class="profile-edit-hint">${escapeHTML(t('review.deck.deleteHas', { name: deck.name }))} ${noteCount} ${deckBrowserWord('review.deck.cardWord', noteCount)}${subdecks ? `${escapeHTML(t('review.deck.and'))}${subdecks} ${deckBrowserWord('review.deck.subdeckWord', subdecks)}${escapeHTML(t('review.deck.alsoDeleted'))}` : ''}${escapeHTML(t('review.deck.moveFirst'))}</p>
+      ${noteCount ? `<label class="profile-edit-label" for="deck-delete-target">${escapeHTML(t('review.deck.moveCardsTo'))}</label>
       <select id="deck-delete-target" class="profile-edit-input">${targets.map(d => `<option value="${d.id}">${escapeHTML(deckBrowserDeckLabel(d))}</option>`).join('')}</select>` : ''}
       <div class="deck-inline-actions">
-        ${noteCount ? `<button type="button" class="btn btn-secondary" data-deck-delete-move>Mover para outro deck</button>` : ''}
-        <button type="button" class="btn btn-primary deck-delete-confirm" data-deck-delete-perm>Excluir permanentemente</button>
-        <button type="button" class="btn btn-secondary" data-deck-delete-cancel>Cancelar</button>
+        ${noteCount ? `<button type="button" class="btn btn-secondary" data-deck-delete-move>${escapeHTML(t('review.deck.moveToOther'))}</button>` : ''}
+        <button type="button" class="btn btn-primary deck-delete-confirm" data-deck-delete-perm>${escapeHTML(t('review.deck.deletePermanently'))}</button>
+        <button type="button" class="btn btn-secondary" data-deck-delete-cancel>${escapeHTML(t('review.deck.cancel'))}</button>
       </div>
       <p class="profile-edit-error" data-deck-delete-error></p>
     </div>`;
@@ -762,7 +804,7 @@ function openDeckDeleteDialog(deck, box){
     deckBrowserAfterDelete(subtree, res, dest);
   });
   box.querySelector('[data-deck-delete-perm]').addEventListener('click', async () => {
-    if (!window.confirm(`Excluir "${deck.name}" e ${noteCount} ${noteCount === 1 ? 'cartão' : 'cartões'} para sempre? O histórico de revisão também será apagado. Isso não pode ser desfeito.`)) return;
+    if (!window.confirm(t('review.deck.deleteConfirm', { name: deck.name, n: noteCount, cards: deckBrowserWord('review.deck.cardWord', noteCount) }))) return;
     setBusy(true); errEl.textContent = '';
     const res = await deletePersonalDeckTree({ deck, decks, mode: 'delete', expectedNotes: noteCount });
     setBusy(false);
@@ -784,8 +826,8 @@ function deckBrowserAfterDelete(subtree, res, destination){
   if (typeof saveState === 'function') saveState();
   if (typeof showToast === 'function'){
     showToast(destination
-      ? `Deck excluído. ${res.notes} ${res.notes === 1 ? 'cartão foi movido' : 'cartões foram movidos'} para "${deckBrowserDeckLabel(destination)}".`
-      : `Deck excluído com ${res.notes} ${res.notes === 1 ? 'cartão' : 'cartões'}.`);
+      ? t('review.deck.deletedMoved', { n: res.notes, what: deckBrowserWord('review.deck.movedWhat', res.notes), dest: deckBrowserDeckLabel(destination) })
+      : t('review.deck.deletedWith', { n: res.notes, cards: deckBrowserWord('review.deck.cardWord', res.notes) }));
   }
   backToDeckTable();
 }
@@ -808,10 +850,17 @@ function deckBrowserCardTexts(card){
 }
 
 const DECK_BROWSER_CARD_TYPE_LABELS = {
-  normal: 'Normal', normal_reversed: 'Normal com reverso', multiple_choice: 'Múltipla escolha',
-  type_answer: 'Digite a resposta', cloze: 'Completar a frase',
+  get normal(){ return t('admin.flashcards.cardType.normal'); },
+  get normal_reversed(){ return t('admin.flashcards.cardType.normalReversed'); },
+  get multiple_choice(){ return t('admin.flashcards.cardType.multipleChoice'); },
+  get type_answer(){ return t('admin.flashcards.cardType.typeAnswer'); },
+  get cloze(){ return t('review.panel.type.cloze'); },
 };
-const DECK_BROWSER_ORIGIN_LABELS = { study: 'Trilha de Estudo', self: 'Meus cartões', teacher: 'Professora' };
+const DECK_BROWSER_ORIGIN_LABELS = {
+  get study(){ return t('review.panel.origin.study'); },
+  get self(){ return t('review.panel.origin.self'); },
+  get teacher(){ return t('review.panel.origin.teacher'); },
+};
 
 // Agrupa CardInstances irmãs pela Note (mesmo objeto `note`): o Painel
 // trabalha no nível de Note (seção 14) e mostra os cartões dela juntos.
@@ -838,22 +887,26 @@ function deckBrowserNotes(cards){
       archived: first.origin !== 'study' && siblings.every(c => c.flashcardStatus === 'archived'),
       // Trilha: cartão de lição ainda não estudada (fica fora da Revisão).
       locked: first.origin === 'study' && typeof isCardLessonCompleted === 'function' && !siblings.some(c => isCardLessonCompleted(c)),
-      typeLabel: DECK_BROWSER_CARD_TYPE_LABELS[mode] || DECK_BROWSER_CARD_TYPE_LABELS[first.cardInstance && first.cardInstance.cardTypeId] || 'Normal',
+      typeLabel: DECK_BROWSER_CARD_TYPE_LABELS[mode] || DECK_BROWSER_CARD_TYPE_LABELS[first.cardInstance && first.cardInstance.cardTypeId] || DECK_BROWSER_CARD_TYPE_LABELS.normal,
     };
   });
 }
 
+// Devolve o id do estado ('Novo' | 'Aprendendo' | 'Revisar', usado no filtro);
+// o texto na tela vem de deckBrowserNoteStateLabel().
+const DECK_BROWSER_STATE_LABEL_KEYS = { Novo: 'review.count.new', Aprendendo: 'review.count.learning', Revisar: 'review.count.review' };
+function deckBrowserNoteStateLabel(stateId){ return DECK_BROWSER_STATE_LABEL_KEYS[stateId] ? t(DECK_BROWSER_STATE_LABEL_KEYS[stateId]) : stateId; }
 function deckBrowserNoteState(note){
   const b = note.cards.map(c => cardStudyBucket(c));
   if (b.every(x => x === 'new')) return 'Novo';
   if (b.some(x => x === 'learning')) return 'Aprendendo';
-  return 'Revisão';
+  return 'Revisar';
 }
 
 const DECK_PANEL_ID = 'deck-panel-modal';
 const DECK_PANEL_STATES = [
-  { id: 'all', label: 'Todos' }, { id: 'Novo', label: 'Novo' },
-  { id: 'Aprendendo', label: 'Aprendendo' }, { id: 'Revisão', label: 'Revisão' },
+  { id: 'all', get label(){ return t('review.panel.all'); } }, { id: 'Novo', get label(){ return t('review.count.new'); } },
+  { id: 'Aprendendo', get label(){ return t('review.count.learning'); } }, { id: 'Revisar', get label(){ return t('review.count.review'); } },
 ];
 
 function deckPanelIsMobile(){ return window.matchMedia ? window.matchMedia('(max-width: 760px)').matches : window.innerWidth <= 760; }
@@ -890,22 +943,22 @@ function deckPanelMount(){
   overlay.innerHTML = `
     <div class="app-modal deck-panel-modal" role="dialog" aria-modal="true" aria-labelledby="deck-panel-title">
       <div class="deck-panel-head">
-        <h3 id="deck-panel-title">Painel</h3>
-        <input type="search" class="profile-edit-input deck-panel-search" data-panel-search placeholder="Buscar cartões e notas" aria-label="Buscar cartões">
-        <button type="button" class="app-modal-close" data-panel-close aria-label="Fechar">✕</button>
+        <h3 id="deck-panel-title">${escapeHTML(t('review.deck.browse'))}</h3>
+        <input type="search" class="profile-edit-input deck-panel-search" data-panel-search placeholder="${escapeHTML(t('review.panel.searchPlaceholder'))}" aria-label="${escapeHTML(t('review.panel.searchAria'))}">
+        <button type="button" class="app-modal-close" data-panel-close aria-label="${escapeHTML(t('common.close'))}">✕</button>
       </div>
       <div class="deck-panel-grid" data-panel-grid>
         <details class="deck-panel-side" data-panel-side ${deckPanelIsMobile() ? '' : 'open'}>
-          <summary>Filtros</summary>
+          <summary>${escapeHTML(t('review.panel.filters'))}</summary>
           <div data-panel-side-body></div>
         </details>
-        <section class="deck-panel-listpane" aria-label="Cartões">
+        <section class="deck-panel-listpane" aria-label="${escapeHTML(t('review.panel.cardsAria'))}">
           <div class="deck-panel-bulk" data-panel-bulk hidden></div>
-          <div class="deck-panel-listhead"><span>Frente</span><span>Verso</span></div>
-          <div class="deck-panel-list" data-panel-list role="listbox" aria-label="Lista de cartões"></div>
+          <div class="deck-panel-listhead"><span>${escapeHTML(t('review.panel.front'))}</span><span>${escapeHTML(t('review.panel.back'))}</span></div>
+          <div class="deck-panel-list" data-panel-list role="listbox" aria-label="${escapeHTML(t('review.panel.listAria'))}"></div>
           <p class="profile-edit-hint deck-panel-count" data-panel-count></p>
         </section>
-        <section class="deck-panel-editor" data-panel-editor aria-label="Editor"></section>
+        <section class="deck-panel-editor" data-panel-editor aria-label="${escapeHTML(t('review.panel.editorAria'))}"></section>
       </div>
     </div>`;
   document.body.appendChild(overlay);
@@ -916,7 +969,8 @@ function deckPanelMount(){
   document.addEventListener('keydown', deckPanelOnKey);
   if (typeof MY_FLASHCARDS_STATE !== 'undefined') MY_FLASHCARDS_STATE.onChange = deckPanelAfterEdit;
   renderDeckPanel();
-  search.focus();
+  // No celular, não abre o teclado sozinho.
+  if (!window.matchMedia || !window.matchMedia('(max-width: 600px)').matches) search.focus();
 }
 
 function deckPanelOnKey(e){
@@ -1019,7 +1073,7 @@ function renderDeckPanelSide(){
   const scopeInCourse = course && p.scopeId !== 'lang' && (p.scopeId === course.id || getDeckSubtreeIds(decks, course.id).includes(p.scopeId));
   const deckItems = [];
   const deckBtn = (id, label, depth) => `<button type="button" class="deck-panel-side-item ${p.scopeId === id ? 'is-active' : ''}" data-panel-scope="${id}" style="padding-left:${10 + depth * 14}px;" ${p.scopeId === id ? 'aria-current="true"' : ''}>${escapeHTML(label)}</button>`;
-  deckItems.push(deckBtn('lang', 'Todos os Decks', 0));
+  deckItems.push(deckBtn('lang', t('review.deck.allDecks'), 0));
   const walk = (deck, depth) => {
     deckItems.push(deckBtn(deck.id, deckBrowserDeckLabel(deck), depth));
     // Unidades da Trilha só aparecem quando a Trilha está selecionada.
@@ -1037,14 +1091,14 @@ function renderDeckPanelSide(){
   const archivedCount = deckBrowserPanelNotes().filter(n => n.archived).length;
   const logged = !!deckBrowserUserId();
   body.innerHTML = `
-    <div class="deck-panel-side-group"><div class="deck-panel-side-label">Decks</div>${deckItems.join('')}</div>
-    <div class="deck-panel-side-group"><div class="deck-panel-side-label">Estado</div>
-      ${DECK_PANEL_STATES.map(s => `<button type="button" class="deck-panel-side-item ${!p.archived && p.state === s.id ? 'is-active' : ''}" data-panel-state="${s.id}">${s.label}</button>`).join('')}
-      ${archivedCount ? `<button type="button" class="deck-panel-side-item ${p.archived ? 'is-active' : ''}" data-panel-archived>Arquivados (${archivedCount})</button>` : ''}
+    <div class="deck-panel-side-group"><div class="deck-panel-side-label">${escapeHTML(t('review.deck.decks'))}</div>${deckItems.join('')}</div>
+    <div class="deck-panel-side-group"><div class="deck-panel-side-label">${escapeHTML(t('review.panel.state'))}</div>
+      ${DECK_PANEL_STATES.map(s => `<button type="button" class="deck-panel-side-item ${!p.archived && p.state === s.id ? 'is-active' : ''}" data-panel-state="${s.id}">${escapeHTML(s.label)}</button>`).join('')}
+      ${archivedCount ? `<button type="button" class="deck-panel-side-item ${p.archived ? 'is-active' : ''}" data-panel-archived>${escapeHTML(t('review.panel.archived', { n: archivedCount }))}</button>` : ''}
     </div>
-    <div class="deck-panel-side-group"><div class="deck-panel-side-label">Tags</div>
-      ${tags.length ? tags.map(t => `<button type="button" class="deck-panel-side-item ${p.tags.includes(t) ? 'is-active' : ''}" data-panel-tag="${escapeHTML(t)}" aria-pressed="${p.tags.includes(t) ? 'true' : 'false'}">#${escapeHTML(t)}</button>`).join('') : `<p class="profile-edit-hint deck-panel-side-empty">Nenhuma tag.</p>`}
-      ${logged ? `<button type="button" class="deck-panel-side-item deck-panel-side-link ${p.mode === 'tags' ? 'is-active' : ''}" data-panel-manage-tags>Gerenciar tags</button>` : ''}
+    <div class="deck-panel-side-group"><div class="deck-panel-side-label">${escapeHTML(t('review.panel.tags'))}</div>
+      ${tags.length ? tags.map(t => `<button type="button" class="deck-panel-side-item ${p.tags.includes(t) ? 'is-active' : ''}" data-panel-tag="${escapeHTML(t)}" aria-pressed="${p.tags.includes(t) ? 'true' : 'false'}" title="#${escapeHTML(t)}">${escapeHTML(friendlyTagLabel(t))}</button>`).join('') : `<p class="profile-edit-hint deck-panel-side-empty">${escapeHTML(t('review.panel.noTags'))}</p>`}
+      ${logged ? `<button type="button" class="deck-panel-side-item deck-panel-side-link ${p.mode === 'tags' ? 'is-active' : ''}" data-panel-manage-tags>${escapeHTML(t('review.panel.manageTags'))}</button>` : ''}
     </div>`;
   body.querySelectorAll('[data-panel-scope]').forEach(b => b.addEventListener('click', () => {
     const raw = b.dataset.panelScope;
@@ -1081,17 +1135,17 @@ function renderDeckPanelList(){
   const visibleKeys = new Set(notes.map(n => n.key));
   Array.from(p.selected).forEach(k => { if (!visibleKeys.has(k)) p.selected.delete(k); });
   root.querySelector('[data-panel-count]').textContent = notes.length
-    ? `${notes.length} ${notes.length === 1 ? 'conteúdo' : 'conteúdos'}.`
+    ? `${notes.length} ${deckBrowserWord('review.deck.cardWord', notes.length)}`
     : '';
   if (!notes.length){
     const filtered = p.query || p.tags.length || p.state !== 'all' || p.archived;
-    list.innerHTML = `<p class="profile-empty-note">${filtered ? 'Nenhum cartão encontrado com esse filtro.' : 'Nenhum cartão aqui ainda. Os cartões da Trilha aparecem conforme você conclui as lições.'}</p>`;
+    list.innerHTML = `<p class="profile-empty-note">${escapeHTML(t(filtered ? 'review.panel.noMatch' : 'review.panel.emptyScope'))}</p>`;
   } else {
     list.innerHTML = notes.map(n => {
       const own = n.origin === 'self';
       const active = p.mode === 'note' && p.activeKey === n.key;
       return `<div class="deck-panel-item ${active ? 'is-active' : ''} ${n.archived ? 'is-archived' : ''}" role="option" aria-selected="${active ? 'true' : 'false'}" tabindex="0" data-panel-open-note="${escapeHTML(n.key)}">
-        ${own ? `<input type="checkbox" data-panel-select="${escapeHTML(n.key)}" ${p.selected.has(n.key) ? 'checked' : ''} aria-label="Selecionar ${escapeHTML(n.front)}">` : `<span class="deck-panel-lock" title="Somente leitura" aria-label="Somente leitura">🔒</span>`}
+        ${own ? `<input type="checkbox" data-panel-select="${escapeHTML(n.key)}" ${p.selected.has(n.key) ? 'checked' : ''} aria-label="${t('review.panel.selectNamed', { name: escapeHTML(n.front) })}">` : `<span class="deck-panel-lock" title="${escapeHTML(t('review.panel.readOnly'))}" aria-label="${escapeHTML(t('review.panel.readOnly'))}">🔒</span>`}
         <span class="deck-panel-cell deck-panel-front">${escapeHTML(n.front)}</span>
         <span class="deck-panel-cell deck-panel-back">${escapeHTML(n.back)}</span>
       </div>`;
@@ -1127,11 +1181,11 @@ function renderDeckPanelBulk(){
   if (!n){ bulk.innerHTML = ''; return; }
   const uid = deckBrowserUserId();
   const targets = deckBrowserDecks().filter(d => ['personal_root', 'personal'].includes(d.kind) && d.owner_id === uid);
-  bulk.innerHTML = `<span>${n} ${n === 1 ? 'selecionado' : 'selecionados'}</span>
-    ${targets.length ? `<select class="profile-edit-input" data-panel-move-target aria-label="Mover para">${targets.map(d => `<option value="${d.id}">${escapeHTML(deckBrowserDeckLabel(d))}</option>`).join('')}</select>
-    <button type="button" class="btn btn-secondary btn-sm" data-panel-move>Mover</button>` : ''}
-    <button type="button" class="btn btn-secondary btn-sm" data-panel-delete>Excluir</button>
-    <button type="button" class="admin-select-link deck-panel-linkbtn" data-panel-clear>Limpar seleção</button>
+  bulk.innerHTML = `<span>${n} ${escapeHTML(deckBrowserWord('review.panel.selectedWord', n))}</span>
+    ${targets.length ? `<select class="profile-edit-input" data-panel-move-target aria-label="${escapeHTML(t('review.panel.moveTo'))}">${targets.map(d => `<option value="${d.id}">${escapeHTML(deckBrowserDeckLabel(d))}</option>`).join('')}</select>
+    <button type="button" class="btn btn-secondary btn-sm" data-panel-move>${escapeHTML(t('review.panel.move'))}</button>` : ''}
+    <button type="button" class="btn btn-secondary btn-sm" data-panel-delete>${escapeHTML(t('review.deck.delete'))}</button>
+    <button type="button" class="admin-select-link deck-panel-linkbtn" data-panel-clear>${escapeHTML(t('review.panel.clearSelection'))}</button>
     <p class="profile-edit-error" data-panel-error></p>`;
   bulk.querySelector('[data-panel-clear]').addEventListener('click', () => { DECK_BROWSER.panel.selected.clear(); renderDeckPanelList(); });
   bulk.querySelector('[data-panel-move]')?.addEventListener('click', deckPanelMoveSelected);
@@ -1153,29 +1207,29 @@ function renderDeckPanelEditor(opts){
   if (!pane) return;
   const p = DECK_BROWSER.panel;
   const grid = root.querySelector('[data-panel-grid]');
-  const backBtn = `<button type="button" class="back-link deck-panel-backbtn" data-panel-back>← Lista</button>`;
+  const backBtn = `<button type="button" class="back-link deck-panel-backbtn" data-panel-back>${escapeHTML(t('review.panel.backToList'))}</button>`;
   grid.classList.toggle('has-editor', p.mode === 'tags' || !!p.activeKey);
   if (p.mode === 'tags'){
-    pane.innerHTML = `${backBtn}<div class="section-label">Gerenciar tags</div><div data-panel-tag-manager></div>`;
+    pane.innerHTML = `${backBtn}<div class="section-label">${escapeHTML(t('review.panel.manageTags'))}</div><div data-panel-tag-manager></div>`;
     pane.querySelector('[data-panel-back]').addEventListener('click', deckPanelBackToList);
     renderTagManagerInto(pane.querySelector('[data-panel-tag-manager]'), { scope: 'own', onChanged: () => deckPanelReload() });
     return;
   }
   const note = deckPanelActiveNote();
   if (!note){
-    pane.innerHTML = `<p class="profile-empty-note deck-panel-editor-empty">Escolha um cartão na lista para ver ou editar.</p>`;
+    pane.innerHTML = `<p class="profile-empty-note deck-panel-editor-empty">${escapeHTML(t('review.panel.pickCard'))}</p>`;
     return;
   }
   const decks = deckBrowserDecks();
   const deck = getDeckById(decks, note.deckId);
-  const meta = `${escapeHTML(note.typeLabel)} · ${note.cards.length > 1 ? `${note.cards.length} cartões` : '1 cartão'} · ${deckBrowserNoteState(note)}${deck ? ' · ' + escapeHTML(deckBrowserDeckLabel(deck)) : ''}${note.archived ? ' · arquivado' : ''}`;
+  const meta = `${escapeHTML(note.typeLabel)} · ${note.cards.length} ${escapeHTML(deckBrowserWord('review.deck.cardWord', note.cards.length))} · ${escapeHTML(deckBrowserNoteStateLabel(deckBrowserNoteState(note)))}${deck ? ' · ' + escapeHTML(deckBrowserDeckLabel(deck)) : ''}${note.archived ? escapeHTML(t('review.panel.archivedSuffix')) : ''}`;
   if (note.origin !== 'self'){
-    const why = note.origin === 'study' ? 'Os cartões da Trilha de Estudo vêm das lições e não podem ser editados aqui.' : 'Cartões da professora: só ela pode editar.';
+    const why = t(note.origin === 'study' ? 'review.panel.whyStudy' : 'review.panel.whyTeacher');
     pane.innerHTML = `${backBtn}
       <p class="deck-panel-meta">${meta}</p>
-      <div class="deck-panel-field"><div class="deck-panel-field-label">Frente</div><div class="deck-panel-field-value">${escapeHTML(note.front)}</div></div>
-      <div class="deck-panel-field"><div class="deck-panel-field-label">Verso</div><div class="deck-panel-field-value">${escapeHTML(note.back)}</div></div>
-      ${note.tags.length ? `<div class="deck-panel-field"><div class="deck-panel-field-label">Tags</div><div>${noteTagChipsHTML(note.tags)}</div></div>` : ''}
+      <div class="deck-panel-field"><div class="deck-panel-field-label">${escapeHTML(t('review.panel.front'))}</div><div class="deck-panel-field-value">${escapeHTML(note.front)}</div></div>
+      <div class="deck-panel-field"><div class="deck-panel-field-label">${escapeHTML(t('review.panel.back'))}</div><div class="deck-panel-field-value">${escapeHTML(note.back)}</div></div>
+      ${note.tags.length ? `<div class="deck-panel-field"><div class="deck-panel-field-label">${escapeHTML(t('review.panel.tags'))}</div><div>${noteTagChipsHTML(note.tags)}</div></div>` : ''}
       <p class="profile-edit-hint">🔒 ${escapeHTML(why)}</p>`;
     pane.querySelector('[data-panel-back]').addEventListener('click', deckPanelBackToList);
     return;
@@ -1183,7 +1237,7 @@ function renderDeckPanelEditor(opts){
   const ctx = p.ctx;
   const row = ctx && ctx.cards.find(r => r.id === note.rowId);
   if (!row){
-    pane.innerHTML = `${backBtn}<p class="deck-panel-meta">${meta}</p><p class="profile-edit-hint">${ctx ? 'Não foi possível carregar este cartão.' : 'Carregando…'}</p>`;
+    pane.innerHTML = `${backBtn}<p class="deck-panel-meta">${meta}</p><p class="profile-edit-hint">${escapeHTML(t(ctx ? 'review.panel.loadCardError' : 'review.deck.loading'))}</p>`;
     pane.querySelector('[data-panel-back]').addEventListener('click', deckPanelBackToList);
     return;
   }
@@ -1197,32 +1251,32 @@ function renderDeckPanelEditor(opts){
   pane.innerHTML = `${backBtn}
     <p class="deck-panel-meta">${meta}</p>
     <div class="deck-panel-editor-actions">
-      ${row.status === 'archived' ? `<button type="button" class="btn btn-secondary btn-sm" data-panel-reactivate>↺ Reativar</button>` : ''}
-      <button type="button" class="btn btn-secondary btn-sm" data-panel-visibility aria-pressed="${row.hidden_from_profile ? 'false' : 'true'}">${row.hidden_from_profile ? '🙈 Escondido do perfil' : '👁️ Visível no perfil'}</button>
-      <button type="button" class="btn btn-secondary btn-sm deck-overview-danger" data-panel-delete-one>🗑 Excluir</button>
+      ${row.status === 'archived' ? `<button type="button" class="btn btn-secondary btn-sm" data-panel-reactivate>${escapeHTML(t('review.panel.reactivate'))}</button>` : ''}
+      <button type="button" class="btn btn-secondary btn-sm" data-panel-visibility aria-pressed="${row.hidden_from_profile ? 'false' : 'true'}">${escapeHTML(t(row.hidden_from_profile ? 'review.panel.hiddenFromProfile' : 'review.panel.visibleOnProfile'))}</button>
+      <button type="button" class="btn btn-secondary btn-sm deck-overview-danger" data-panel-delete-one>${escapeHTML(t('review.panel.deleteOne'))}</button>
     </div>
     <div class="deck-panel-editor-form">${myFlashcardRowHTML(row, premium)}</div>`;
   pane.querySelector('[data-panel-back]').addEventListener('click', deckPanelBackToList);
   pane.querySelector('[data-panel-reactivate]')?.addEventListener('click', async () => {
     await setOwnFlashcardStatus(row.id, 'active');
     if (typeof updateSelfFlashcardStatusInState === 'function') updateSelfFlashcardStatusInState(row.id, 'active');
-    if (typeof showToast === 'function') showToast('✓ Cartão reativado.');
+    if (typeof showToast === 'function') showToast(t('review.panel.reactivated'));
     DECK_BROWSER.panel.archived = false;
     deckPanelReload();
   });
   pane.querySelector('[data-panel-visibility]').addEventListener('click', async () => {
     const res = await setOwnFlashcardHidden(row.id, !row.hidden_from_profile);
-    if (res && res.ok === false){ if (typeof showToast === 'function') showToast('Não foi possível mudar agora.'); return; }
+    if (res && res.ok === false){ if (typeof showToast === 'function') showToast(t('review.panel.changeError')); return; }
     row.hidden_from_profile = !row.hidden_from_profile;
     renderDeckPanelEditor();
   });
   pane.querySelector('[data-panel-delete-one]').addEventListener('click', async () => {
-    if (!window.confirm('Isso vai apagar o cartão e todo o histórico de revisão permanentemente. Não pode ser desfeito. Continuar?')) return;
+    if (!window.confirm(t('review.panel.deleteOneConfirm'))) return;
     const res = await deleteOwnFlashcardPermanently(row.id);
-    if (!res.ok){ if (typeof showToast === 'function') showToast('Não foi possível apagar o cartão agora.'); return; }
+    if (!res.ok){ if (typeof showToast === 'function') showToast(t('review.panel.deleteOneError')); return; }
     if (typeof removeSelfFlashcardFromState === 'function') removeSelfFlashcardFromState(row.id);
     if (typeof saveState === 'function') saveState();
-    if (typeof showToast === 'function') showToast('✓ Cartão apagado.');
+    if (typeof showToast === 'function') showToast(t('review.panel.deletedOne'));
     DECK_BROWSER.panel.activeKey = null;
     deckPanelReload();
   });
@@ -1261,9 +1315,9 @@ async function deckPanelMoveSelected(){
   }
   DECK_BROWSER.panel.selected.clear();
   if (typeof saveState === 'function') saveState();
-  if (typeof showToast === 'function' && moved) showToast(`${moved} ${moved === 1 ? 'conteúdo movido' : 'conteúdos movidos'} para "${deckBrowserDeckLabel(dest)}".`);
+  if (typeof showToast === 'function' && moved) showToast(t('review.panel.movedToast', { n: moved, what: deckBrowserWord('review.panel.movedWhat', moved), dest: deckBrowserDeckLabel(dest) }));
   renderDeckPanel();
-  if (failed.length && typeof showToast === 'function') showToast(`Não foi possível mover: ${failed.slice(0, 5).join(', ')}${failed.length > 5 ? '…' : ''}`);
+  if (failed.length && typeof showToast === 'function') showToast(`${t('review.panel.moveFailed', { list: failed.slice(0, 5).join(', ') })}${failed.length > 5 ? '…' : ''}`);
 }
 
 async function deckPanelDeleteSelected(){
@@ -1271,7 +1325,7 @@ async function deckPanelDeleteSelected(){
   const notes = deckPanelSelectedNotes();
   if (!notes.length) return;
   const total = notes.reduce((s, n) => s + n.cards.length, 0);
-  if (!window.confirm(`Excluir ${notes.length} ${notes.length === 1 ? 'conteúdo' : 'conteúdos'} (${total} ${total === 1 ? 'cartão' : 'cartões'}) para sempre? O histórico de revisão também será apagado.`)) return;
+  if (!window.confirm(t('review.panel.deleteManyConfirm', { n: notes.length, items: deckBrowserWord('review.panel.itemWord', notes.length), total, cards: deckBrowserWord('review.deck.cardWord', total) }))) return;
   root.querySelectorAll('[data-panel-bulk] button').forEach(b => { b.disabled = true; });
   let deleted = 0;
   for (const n of notes){
@@ -1284,6 +1338,6 @@ async function deckPanelDeleteSelected(){
   DECK_BROWSER.panel.selected.clear();
   if (notes.some(n => n.key === DECK_BROWSER.panel.activeKey)) DECK_BROWSER.panel.activeKey = null;
   if (typeof saveState === 'function') saveState();
-  if (typeof showToast === 'function') showToast(`${deleted} ${deleted === 1 ? 'conteúdo excluído' : 'conteúdos excluídos'}.`);
+  if (typeof showToast === 'function') showToast(`${deleted} ${deckBrowserWord('review.panel.deletedWhat', deleted)}.`);
   deckPanelReload();
 }

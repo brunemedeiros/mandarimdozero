@@ -317,15 +317,37 @@ function planOwnCardInstanceCut({ activeRows, hasTeacherLink, editorStates, lang
 // importação", "Este Deck"...). Nunca promete checkout: não existe
 // pagamento no app -- o convite manda falar com a administração.
 function ownCardInstanceCutMessage({ requested, keptInstances, limit, used, what }){
-  const subject = what || 'Esta importação';
-  const plural = n => (n === 1 ? 'cartão' : 'cartões');
-  const already = used > 0 ? ` (você já tinha ${used} ${plural(used)})` : '';
+  // i18n: textos nas chaves limitCut.* (pt-BR/en). Sem t() (Node/testes), cai no
+  // português abaixo, idêntico ao catálogo pt-BR.
+  const PT = {
+    'limitCut.subject.deck': 'Este Deck',
+    'limitCut.subject.import': 'Esta importação',
+    'limitCut.subject.selection': 'Esta seleção',
+    'limitCut.cardOne': '{n} cartão',
+    'limitCut.cardMany': '{n} cartões',
+    'limitCut.already': ' (você já tinha {cards})',
+    'limitCut.resultMany': 'Por isso, apenas os primeiros {n} cartões foram criados.',
+    'limitCut.resultOne': 'Por isso, apenas o primeiro cartão foi criado.',
+    'limitCut.resultNone': 'Por isso, nenhum cartão foi criado.',
+    'limitCut.main': '{subject} criaria {requested}, mas sua conta pode possuir apenas {limit} no plano grátis{already}. {result}',
+  };
+  const tr = (key, params) => {
+    let str = PT[key];
+    if (typeof t === 'function'){
+      const v = t(key, params);
+      if (v && v !== key) return v;
+    }
+    return String(str).replace(/\{(\w+)\}/g, (m, k) => (params && params[k] != null ? params[k] : m));
+  };
+  const cards = n => tr(n === 1 ? 'limitCut.cardOne' : 'limitCut.cardMany', { n });
+  // `what`: 'deck' | 'import' | 'selection' (chaves) ou, por compatibilidade, um texto já pronto.
+  const subject = !what ? tr('limitCut.subject.import')
+    : PT['limitCut.subject.' + what] ? tr('limitCut.subject.' + what) : what;
+  const already = used > 0 ? tr('limitCut.already', { cards: cards(used) }) : '';
   const result = keptInstances > 1
-    ? `Por isso, apenas os primeiros ${keptInstances} cartões foram criados.`
-    : keptInstances === 1
-      ? 'Por isso, apenas o primeiro cartão foi criado.'
-      : 'Por isso, nenhum cartão foi criado.';
-  return `${subject} criaria ${requested} ${plural(requested)}, mas sua conta pode possuir apenas ${limit} no plano grátis${already}. ${result}`;
+    ? tr('limitCut.resultMany', { n: keptInstances })
+    : keptInstances === 1 ? tr('limitCut.resultOne') : tr('limitCut.resultNone');
+  return tr('limitCut.main', { subject, requested: cards(requested), limit, already, result });
 }
 
 // ============================================================

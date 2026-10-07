@@ -932,6 +932,8 @@ const STATE = {
   // resetado por leitura (ensurePeriodXp), sem job/cron.
   periodXp: { weekStart: null, amount: 0 },
   activityLog: {}, // 'YYYY-MM-DD' -> contagem de respostas naquele dia (para o heatmap)
+  reviewRecords: { speedBestScore: 0, speedBestStreak: 0, matchBestMs: null, hardSeenIds: [] }, // recordes dos modos (shared/review-extras.js)
+  reviewTimeStats: { cards: 0, ms: 0 }, // tempo por cartão (estimativa de minutos e sessão de 5 min)
   // sem trilha de níveis no Mandarim — a meta é sempre o curso completo (dailyMinutes 0 = ainda não definida)
   studyGoal: {
     objective: null,
@@ -1039,6 +1041,8 @@ function refreshStudyCardTexts(){
   STATE.cards.forEach((c) => {
     if (c.origin !== 'study') return;
     const u = UNITS.find((x) => x.id === c.unitId);
+    // Cartão "Na frase": só a etiqueta muda com o idioma do site.
+    if (u && c.vocabIdx == null && c.gateVocabIdx != null){ c.unitTitle = studyPhraseCardTitle(u.title); return; }
     if (!u || !u.vocab || !u.vocab[c.vocabIdx]) return;
     // Palavra diferente no slot (país do aluno etc.): o progresso segue a palavra,
     // não a posição (shared/card-variants.js).
@@ -1255,6 +1259,8 @@ function serializeState(){
     lastStudyDay: STATE.lastStudyDay,
     lastReviewReminderDay: STATE.lastReviewReminderDay,
     activityLog: STATE.activityLog,
+    reviewRecords: STATE.reviewRecords,
+    reviewTimeStats: STATE.reviewTimeStats,
     studyGoal: STATE.studyGoal,
     studySettings: STATE.studySettings,
     dailyMinutesLog: STATE.dailyMinutesLog,
@@ -1308,6 +1314,8 @@ function applySerializedState(data){
   if (data.dailyMinutesLog) Object.assign(STATE.dailyMinutesLog, data.dailyMinutesLog);
   if (data.dailyLessonsLog) Object.assign(STATE.dailyLessonsLog, data.dailyLessonsLog);
   if (data.activityLog) Object.assign(STATE.activityLog, data.activityLog);
+  if (data.reviewRecords && typeof data.reviewRecords === 'object') STATE.reviewRecords = Object.assign({ speedBestScore: 0, speedBestStreak: 0, matchBestMs: null, hardSeenIds: [] }, data.reviewRecords);
+  if (data.reviewTimeStats && typeof data.reviewTimeStats === 'object') STATE.reviewTimeStats = { cards: Number(data.reviewTimeStats.cards) || 0, ms: Number(data.reviewTimeStats.ms) || 0 };
   if (data.hanziLessonProgress) Object.assign(STATE.hanziLessonProgress, data.hanziLessonProgress);
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
   if (data.hadStreakComeback) STATE.hadStreakComeback = true;
@@ -1397,6 +1405,7 @@ function showStreakCelebration(){
   // Fase 1 do sistema de notificações.
   fireNotificationEvent('streak_completed', 'streak', { days: STATE.streak });
   document.getElementById('streak-days-num').textContent = STATE.streak;
+  { const u = document.getElementById('streak-days-unit'); if (u) u.textContent = STATE.streak === 1 ? 'dia' : 'dias'; }
   document.getElementById('streak-week-row').innerHTML = buildStreakWeekData().map(d => `
     <div class="streak-day-item ${d.done ? 'done' : ''} ${d.isToday ? 'today' : ''}">
       <div class="streak-day-circle">${d.done ? '✓' : ''}</div>
@@ -1904,6 +1913,16 @@ function seedEarnedBadges(){
 
 let badgeCelebrationQueue = [];
 let badgeCelebrationShowing = false;
+// Durante uma sessão de revisão (Flashcard/Palavras difíceis/Speed Review/
+// Deck), a conquista fica guardada e aparece só na tela de fim ("Revisão
+// concluída"), para não cobrir o cartão. Fora da sessão, aparece na hora.
+let badgeCelebrationHeld = false;
+function holdBadgeCelebrations(){ badgeCelebrationHeld = true; }
+function releaseBadgeCelebrations(){
+  if (!badgeCelebrationHeld) return;
+  badgeCelebrationHeld = false;
+  processBadgeCelebrationQueue();
+}
 
 function checkAndCelebrateBadges(){
   const newlyEarned = [];
@@ -1930,7 +1949,7 @@ function checkAndCelebrateBadges(){
 // cruza 500 no mesmo golpe que termina o nível), mostra um de cada vez --
 // nunca dois cartões sobrepostos brigando pela mesma área da tela.
 function processBadgeCelebrationQueue(){
-  if (badgeCelebrationShowing || !badgeCelebrationQueue.length) return;
+  if (badgeCelebrationHeld || badgeCelebrationShowing || !badgeCelebrationQueue.length) return;
   badgeCelebrationShowing = true;
   const badge = badgeCelebrationQueue.shift();
   showBadgeUnlockCelebration(badge, () => {
@@ -2265,9 +2284,12 @@ function buildUnitBlock(u){
         // aplica com Admin Mode ON -- OFF cai exatamente na mesma regra
         // usada por qualquer aluno (unlocked && já concluída), sem
         // segunda implementação (Fase 11 da spec de Admin Mode).
-        const clickable = (isAdminUser() && isAdminModeOn()) || (unlocked && (st === 'done' || st === 'skipped') && !l.isCheckpoint);
+        // A lição atual (a próxima a fazer) abre de verdade pelo próprio título e
+        // conta progresso, igual a clicar no cabeçalho da unidade (2026-10-07).
+        const opensForReal = unlocked && st === 'current';
+        const clickable = opensForReal || (isAdminUser() && isAdminModeOn()) || (unlocked && (st === 'done' || st === 'skipped') && !l.isCheckpoint);
         return `
-          <div class="ub-lesson-row ${st}${clickable ? ' clickable' : ''}" ${clickable ? `data-lesson-idx="${i}"` : ''}>
+          <div class="ub-lesson-row ${st}${clickable ? ' clickable' : ''}" ${clickable ? `data-lesson-idx="${i}"${opensForReal ? ' data-lesson-open="1"' : ''} role="button" tabindex="0"` : ''}>
             <div class="ub-lesson-dot ${st}">${st === 'done' ? '✓' : (st === 'skipped' ? '•' : i + 1)}</div>
             <div class="ub-lesson-title">${l.title}</div>
           </div>
@@ -2305,7 +2327,11 @@ function buildUnitBlock(u){
     row.addEventListener('click', (e) => {
       e.stopPropagation();
       const idx = parseInt(row.dataset.lessonIdx, 10);
-      openLessonReview(u.id, idx);
+      if (row.dataset.lessonOpen) openUnitDetail(u.id);
+      else openLessonReview(u.id, idx);
+    });
+    row.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); row.click(); }
     });
   });
   return block;
@@ -4447,7 +4473,25 @@ function buildFullSentenceExercises(unit){
       }
     }
 
+    // Uma frase errada continua com cara de frase: a pontuação final só no
+    // fim (nunca "一个姐姐。有我") e a maiúscula do pinyin só na primeira
+    // palavra. Nomes próprios (maiúscula fora do 1º bloco) ficam como estão.
+    const endPunctC = (phrase.blocks[phrase.blocks.length - 1].c.match(/[。！？]+$/) || [''])[0];
+    const endPunctP = (phrase.blocks[phrase.blocks.length - 1].p.match(/[.!?]+$/) || [''])[0];
+    const firstBlock = phrase.blocks[0];
+    const tidyDistractor = (blocks) => {
+      const out = blocks.map(b => ({
+        c: b.c.replace(/[。！？]+$/, ''),
+        p: (b === firstBlock ? b.p.charAt(0).toLowerCase() + b.p.slice(1) : b.p).replace(/[.!?]+$/, '')
+      })).filter(b => b.c);
+      if (!out.length) return out;
+      out[out.length - 1] = { c: out[out.length - 1].c + endPunctC, p: out[out.length - 1].p + endPunctP };
+      out[0] = { c: out[0].c, p: out[0].p.charAt(0).toUpperCase() + out[0].p.slice(1) };
+      return out;
+    };
+
     const distractorSentences = distractors
+      .map(tidyDistractor)
       .filter(blocks => blocks.map(b => b.c).join('') !== phrase.blocks.map(b => b.c).join('')) // nunca deixa um distrator coincidir com a frase correta
       .reduce((unique, blocks) => { // deduplica por texto final (hanzi), não por referência de array
         const text = blocks.map(b => b.c).join('');
@@ -4574,6 +4618,12 @@ document.addEventListener('keydown', (e) => {
   if (anyAppModalOpen()) return;
 
   if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey){
+    // Enter digitado DENTRO de um campo de resposta é do próprio campo (ele
+    // chama Verificar). Sem isto, o mesmo Enter que mostra o painel de erro
+    // também clicava "Continuar" dele na hora, e o aluno nunca via o
+    // resultado (relato de 2026-10-07: "haizi" no ditado de pinyin).
+    const tgt = e.target;
+    if (tgt && (tgt.tagName === 'INPUT' || tgt.tagName === 'TEXTAREA' || tgt.isContentEditable)) return;
     const target = findEnterAdvanceTarget();
     if (target){
       e.preventDefault();
@@ -5353,6 +5403,9 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
 // visual abaixo de cada bloco). Toca nos blocos na ordem certa para reconstruir
 // a frase. Foco na ordem gramatical, não em reconhecer hanzi isolado.
 // ---------- Exercício de frase completa (PT -> escolher entre 4 frases) ----------
+// Sem botão de áudio nas opções (2026-10-07): as frases erradas são montadas na
+// hora e não têm mp3 gravado, então tocavam com a voz do navegador (bem pior) e a
+// diferença entregava a certa. O áudio da frase certa vem no painel de resultado.
 function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
   const optionsHTML = ex.options.map((opt, i) => `
     <div class="exercise-option exercise-option-sentence" role="button" tabindex="0" data-idx="${i}">
@@ -5360,7 +5413,6 @@ function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
         <div class="pinyin opt-pinyin-sentence">${opt.p}</div>
         <div class="opt-hanzi-sentence">${opt.c}</div>
       </div>
-      ${audioBtnHTML(opt.c)}
     </div>
   `).join('');
 
@@ -5670,6 +5722,7 @@ const SPEED_STATE = {
   score: 0,
   correctCount: 0,
   streak: 0,
+  bestStreak: 0, // maior sequência de acertos da rodada (recorde do Speed Review)
   timerStart: 0,
   timerHandle: null,
   answered: false,
@@ -5795,9 +5848,12 @@ function matchesReviewOriginFilter(card){
 // CardInstances irmãos (reverso, Cloze) passam/ficam juntos. Só SELECIONA
 // cards elegíveis: nunca toca FSRS, Deck nem origem. cardMatchesTagFilter()
 // vive em shared/flashcard-model.js (fonte única).
+// 2026-10-06 (pedido da autora): o filtro de tags saiu de "Configurar" e
+// fica só no Painel. Sem tela para mudar o valor, um filtro salvo antes
+// restringiria a revisão sem a pessoa ver -- por isso a sessão não aplica
+// mais nenhum filtro de tag (o valor salvo é ignorado).
 function activeReviewTagFilter(){
-  const f = STATE.studySettings.reviewTagFilter;
-  return Array.isArray(f) ? f : [];
+  return [];
 }
 function matchesReviewTagFilter(card){
   return cardMatchesTagFilter(card, activeReviewTagFilter());
@@ -5968,7 +6024,7 @@ function reviewSessionFilterSummary(){
   const origin = STATE.studySettings.reviewOriginFilter || 'all';
   if (origin !== 'all') parts.push(REVIEW_ORIGIN_LABELS[origin] || origin);
   const tags = activeReviewTagFilter();
-  if (tags.length) parts.push(tags.map(t => '#' + t).join(', '));
+  if (tags.length) parts.push(tags.map(t => friendlyTagLabel(t)).join(', '));
   return parts.join(' · ');
 }
 
@@ -5979,16 +6035,30 @@ function renderReviewTodayWidget(){
   const wrap = document.getElementById('review-today-widget');
   if (!wrap) return;
   const pool = eligibleReviewPool();
-  const trueCount = getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay }).length;
+  const queue = getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay });
+  const split = { new: 0, learning: 0, review: 0 };
+  queue.forEach(c => { split[cardStudyBucket(c)]++; });
+  const trueCount = queue.length;
   const filterSummary = reviewSessionFilterSummary();
   const filterNote = filterSummary
-    ? `<div class="review-today-filter">Filtro da sessão: ${escapeHTML(filterSummary)} · <button type="button" class="admin-select-link review-today-filter-clear" id="review-today-filter-clear">Limpar filtro</button></div>`
+    ? `<div class="review-today-filter">${t('review.today.filter', { filter: escapeHTML(filterSummary) })} · <button type="button" class="admin-select-link review-today-filter-clear" id="review-today-filter-clear">${escapeHTML(t('review.today.clearFilter'))}</button></div>`
     : '';
+  const num = (n, cls, label) => `<div class="review-today-col"><div class="review-today-count ${n ? cls : 'is-zero'}">${n}</div><div class="review-today-col-label">${label}</div></div>`;
   wrap.innerHTML = `
-    ${trueCount ? `<button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">${t('review.studyAll')}</button>` : ''}
+    <div class="review-today-strip">
+      <div class="review-today-split" aria-label="${escapeHTML(t('review.today.aria', { new: split.new, learning: split.learning, review: split.review }))}">
+        ${num(split.new, 'is-new', escapeHTML(t('review.count.new')))}${num(split.learning, 'is-learning', escapeHTML(t('review.count.learning')))}${num(split.review, 'is-review', escapeHTML(t('review.count.review')))}
+      </div>
+      <div class="review-today-go">
+        ${trueCount ? `<button class="btn btn-secondary review-short-btn" id="review-short-btn" title="${escapeHTML(t('review.today.shortTitle'))}">${escapeHTML(t('review.today.short'))}</button>
+        <button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">${escapeHTML(t('review.today.studyAll', { n: trueCount }))}</button>`
+        : `<span class="review-today-done">${escapeHTML(t('review.today.upToDate'))}</span>`}
+      </div>
+    </div>
     ${filterNote}
   `;
   document.getElementById('review-study-all-btn')?.addEventListener('click', () => openReviewSession('flashcard'));
+  document.getElementById('review-short-btn')?.addEventListener('click', () => openReviewSession('flashcard', { short: true }));
   document.getElementById('review-today-filter-clear')?.addEventListener('click', () => {
     updateStudySetting({ reviewOriginFilter: 'all', reviewTagFilter: [] });
     renderReviewModeSelect();
@@ -6045,7 +6115,13 @@ function renderReviewModeSelect(){
   // -- "precisa revisar agora" (REVISAR) e "é uma palavra difícil"
   // (PRATICAR) são perguntas diferentes. getStudyQueue(scope:'hard') usa
   // o difficulty do FSRS, nunca due.
-  const hardCount = getStudyQueue(pool, { scope: 'hard' }).length;
+  const hardCards = getStudyQueue(pool, { scope: 'hard' });
+  const hardCount = hardCards.length;
+  // Recordes (shared/review-extras.js). Ja saíram da lista = palavras que já
+  // estiveram em Palavras difíceis e hoje não estão mais.
+  if (updateHardSeen(hardCards)) saveState();
+  const hardLeft = hardLeftCount(pool, hardCards);
+  const rec = reviewRecords();
 
   renderReviewTodayWidget();
   // Navegador de Decks (shared/deck-browser.js): tabela Deck | Novo | Aprendendo | Revisar.
@@ -6057,34 +6133,35 @@ function renderReviewModeSelect(){
   praticarEl.innerHTML = `
     <button class="review-mode-card" id="mode-card-speed" ${trueCount === 0 ? 'disabled' : ''}>
       <div class="icon">⚡</div>
-      <div class="count speed-split" aria-label="Novo ${speedSplit.new}, Aprendendo ${speedSplit.learning}, Revisar ${speedSplit.review}">
+      <div class="name">${t('review.mode.speed.name')}</div>
+      <div class="count speed-split" aria-label="${escapeHTML(t('review.today.speedSplitAria', { new: speedSplit.new, learning: speedSplit.learning, review: speedSplit.review }))}">
         <span class="${speedSplit.new ? 'is-new' : 'is-zero'}">${speedSplit.new}</span>
         <span class="${speedSplit.learning ? 'is-learning' : 'is-zero'}">${speedSplit.learning}</span>
         <span class="${speedSplit.review ? 'is-review' : 'is-zero'}">${speedSplit.review}</span>
       </div>
-      <div class="speed-split-legend">novo · aprend. · revisar</div>
-      <div class="name">Speed Review</div>
-      <div class="desc">Revisão rápida</div>
+      <div class="desc">${rec.speedBestScore ? t('review.records.yourRecord', { record: speedRecordText(rec) }) : t('review.records.againstClock')}</div>
     </button>
     <button class="review-mode-card" id="mode-card-hard" ${hardCount === 0 ? 'disabled' : ''}>
       <div class="icon">🔥</div>
-      <div class="count">${hardCount}</div>
       <div class="name">${t('review.mode.hard.name')}</div>
-      <div class="desc">${t('review.mode.hard.desc')}</div>
+      <div class="count">${hardCount}</div>
+      <div class="desc">${hardLeft ? t('review.records.leftList', { n: hardLeft }) : t('review.mode.hard.desc')}</div>
     </button>
     <button class="review-mode-card" id="mode-card-match" ${matchWordCount < 10 ? 'disabled' : ''}>
       <div class="icon">🧩</div>
-      <div class="count">${matchWordCount}</div>
       <div class="name">${t('review.mode.match.name')}</div>
-      <div class="desc">${t('review.mode.match.desc')}</div>
+      <div class="count">${matchWordCount}</div>
+      <div class="desc">${rec.matchBestMs ? t('review.records.yourRecord', { record: formatRecordSeconds(rec.matchBestMs) }) : t('review.mode.match.desc')}</div>
     </button>
   `;
+  const weekEl = document.getElementById('review-week');
+  if (weekEl) weekEl.innerHTML = reviewWeekHTML(pool);
   document.getElementById('mode-card-speed').addEventListener('click', () => openReviewSession('speed'));
   document.getElementById('mode-card-hard').addEventListener('click', () => openReviewSession('hard'));
   document.getElementById('mode-card-match').addEventListener('click', () => openReviewSession('match'));
 }
 
-function openReviewSession(mode){
+function openReviewSession(mode, opts){
   document.getElementById('review-mode-select-wrap').style.display = 'none';
   document.getElementById('review-session-wrap').style.display = 'block';
   document.getElementById('review-content').style.display = mode === 'speed' || mode === 'match' ? 'none' : 'block';
@@ -6099,14 +6176,16 @@ function openReviewSession(mode){
   if (mode === 'flashcard'){
     STATE.reviewSessionUnitFilter = null;
     STATE.reviewSessionDeckId = null; // Fase D -- entrada normal (sem Deck) nunca herda escopo de uma sessão anterior
-    startReviewSession();
+    startReviewSession(opts);
   } else if (mode === 'hard'){
+    holdBadgeCelebrations();
     STATE.reviewSessionUnitFilter = null;
     STATE.reviewSessionDeckId = null; // Fase D -- idem
     // Fase 4: getStudyQueue(scope:'hard') -- mesmo critério de hardWordsPool()
     STATE.reviewQueue = shuffle(getStudyQueue(eligibleReviewPool(), { scope: 'hard' }));
     STATE.reviewIndex = 0;
     STATE.reviewCardState = null;
+    STATE.reviewSessionStartedAt = Date.now(); // nunca herda o início de uma sessão anterior abandonada
     renderReviewView();
   } else if (mode === 'match'){
     renderMatchSizePicker();
@@ -6121,7 +6200,24 @@ function openReviewSession(mode){
 // tela de escolha -- usada pelo link "← Voltar aos modos" e pelos botões
 // "Praticar mais" das telas de conclusão (Fase 6 do projeto: terminar uma
 // revisão leva pra PRATICAR, nunca repete a mesma bateria sozinha).
+// Rótulo do cartão: cartões próprios/da professora mostram o nome do Deck.
+function reviewCardTagLabel(card){
+  if (card && card.deckId != null && Array.isArray(STATE.decks)){
+    const d = STATE.decks.find(x => x.id === card.deckId);
+    if (d && d.name) return d.name;
+  }
+  return cardOriginTitle(card);
+}
+
+// Link de voltar da sessão: "Voltar ao Deck" quando a sessão veio de um Deck.
+function syncReviewBackLink(){
+  const el = document.getElementById('review-back-to-modes');
+  if (el) el.textContent = t(STATE.reviewSessionDeckId != null ? 'review.backToDeck' : 'review.backToModes');
+}
+
 function backToReviewModeSelect(){
+  releaseBadgeCelebrations();
+  const returnDeckId = STATE.reviewSessionDeckId;
   stopSpeedTimer();
   SPEED_STATE.active = false;
   document.getElementById('review-mode-select-wrap').style.display = 'block';
@@ -6129,8 +6225,14 @@ function backToReviewModeSelect(){
   const deckWrap = document.getElementById('review-deck-wrap');
   if (deckWrap) deckWrap.style.display = 'none';
   STATE.reviewSessionDeckId = null; // K2-H: sair da sessão não deixa escopo de Deck stale
+  STATE.reviewSessionStartedAt = null; // sessão abandonada não entra na média de tempo
+  syncReviewBackLink();
   renderReviewModeSelect();
 
+  if (returnDeckId != null && typeof openDeckDetail === 'function'){
+    openDeckDetail(returnDeckId);
+    return;
+  }
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'tab', tab: 'review' });
 }
 
@@ -6210,6 +6312,7 @@ function startMatchGame(){
   MATCH_STATE.matchedCount = 0;
   MATCH_STATE.attempts = 0;
   MATCH_STATE.busy = false;
+  MATCH_STATE.startedAt = Date.now();
 
   renderMatchGame();
 }
@@ -6301,6 +6404,8 @@ function onMatchTileClick(btn){
         STATE.totalReviews += MATCH_STATE.pairs.length;
         registerDailyMatchGame();
         trackEvent('lesson_complete', 'match_game', { pairs: MATCH_STATE.pairs.length });
+        const matchMs = MATCH_STATE.startedAt ? Date.now() - MATCH_STATE.startedAt : 0;
+        const matchIsRecord = recordMatchTime(matchMs);
         saveState();
         renderTopbarStats();
         setTimeout(() => {
@@ -6310,6 +6415,7 @@ function onMatchTileClick(btn){
               <div class="big-emoji">🎉</div>
               <h3>${t('review.match.allMatched')}</h3>
               <div class="score-num">${tp('review.match.attempts', MATCH_STATE.attempts)}</div>
+              ${matchMs ? `<p class="review-record-line">${t('review.records.time', { time: formatRecordSeconds(matchMs) })} · ${matchIsRecord ? t('review.records.newRecord') : t('review.records.yourRecord', { record: formatRecordSeconds(reviewRecords().matchBestMs) })}</p>` : ''}
               <button class="btn btn-primary" id="match-restart-btn">${t('review.match.playAgain')}</button>
             </div>
           `;
@@ -6331,6 +6437,7 @@ function onMatchTileClick(btn){
 }
 
 function startSpeedReview(){
+  holdBadgeCelebrations();
   trackEvent('lesson_start', 'speed_review', null);
   SPEED_STATE.queue = buildSpeedQueue();
   SPEED_STATE.index = 0;
@@ -6338,6 +6445,7 @@ function startSpeedReview(){
   SPEED_STATE.score = 0;
   SPEED_STATE.correctCount = 0;
   SPEED_STATE.streak = 0;
+  SPEED_STATE.bestStreak = 0;
   SPEED_STATE.active = true;
   SPEED_STATE.dailyCounted = false;
   renderSpeedReview();
@@ -6400,15 +6508,21 @@ function renderSpeedReview(){
     }
     maybeShowStreakCelebration();
     trackEvent('lesson_complete', 'speed_review', { score: SPEED_STATE.score });
+    const speedScoreRecord = recordSpeedReviewScore(SPEED_STATE.score);
+    const speedStreakRecord = recordSpeedReviewStreak(SPEED_STATE.bestStreak || 0);
+    const speedIsRecord = speedScoreRecord || speedStreakRecord;
+    if (speedIsRecord) saveState();
     // Fase 6 do projeto: nunca oferecer "Jogar de novo" repetindo a mesma
     // bateria de revisão -- Voltar/Praticar mais, igual à conclusão do
     // Flashcard (ver renderReviewView).
+    releaseBadgeCelebrations();
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">💔</div>
         <h3>${t('review.speed.gameOver')}</h3>
         <div class="score-num">${SPEED_STATE.score} pts</div>
         <p>${tp('review.speed.answered', SPEED_STATE.index)}</p>
+        <p class="review-record-line">${speedIsRecord ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) })}</p>
         <div class="review-complete-actions">
           <button class="btn btn-secondary" id="speed-back-btn">${t('review.back')}</button>
           <button class="btn btn-primary" id="speed-practice-btn">${t('review.practiceMore')}</button>
@@ -6444,11 +6558,16 @@ function renderSpeedReview(){
     // Fase 6 do projeto: idem -- sem "Jogar de novo" (a fila devida já foi
     // zerada de verdade nesta sessão; "de novo" mostraria vazio ou
     // reaproveitaria cartões que acabaram de ser respondidos).
+    const speedIsRecord2 = recordSpeedReviewScore(SPEED_STATE.score);
+    const speedStreakRecord2 = recordSpeedReviewStreak(SPEED_STATE.bestStreak || 0);
+    if (speedIsRecord2 || speedStreakRecord2) saveState();
+    releaseBadgeCelebrations();
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">🏆</div>
         <h3>${t('review.complete.title')}</h3>
         <div class="score-num">${SPEED_STATE.score} pts</div>
+        <p class="review-record-line">${speedIsRecord2 || speedStreakRecord2 ? `${t('review.records.newRecord')} ${speedRecordText(reviewRecords())}` : t('review.records.yourRecord', { record: speedRecordText(reviewRecords()) })}</p>
         <div class="review-complete-actions">
           <button class="btn btn-secondary" id="speed-back-btn">${t('review.back')}</button>
           <button class="btn btn-primary" id="speed-practice-btn">${t('review.practiceMore')}</button>
@@ -6543,6 +6662,7 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
     SPEED_STATE.score += speedBonus;
     SPEED_STATE.correctCount += 1;
     SPEED_STATE.streak += 1;
+    if (SPEED_STATE.streak > (SPEED_STATE.bestStreak || 0)) SPEED_STATE.bestStreak = SPEED_STATE.streak;
     if (SPEED_STATE.streak > 0 && SPEED_STATE.streak % 15 === 0 && SPEED_STATE.hearts < 3){
       SPEED_STATE.hearts += 1; // vida extra a cada 15 acertos seguidos
       showToast(t('toast.extraLife'));
@@ -6599,7 +6719,8 @@ function isCardLessonCompleted(card){
   return lessonIdx < prog.lessonIdx;
 }
 
-function startReviewSession(){
+function startReviewSession(opts){
+  holdBadgeCelebrations();
   trackEvent('lesson_start', 'flashcard_review', null);
   // eligibleReviewPool() (não STATE.cards.filter(isCardLessonCompleted)
   // solto): mesma função que a tela de modo/hero widget já usa pra contar
@@ -6639,6 +6760,8 @@ function startReviewSession(){
   // ordem. Unidade específica continua embaralhada, como sempre.
   const shouldShuffle = !!STATE.reviewSessionUnitFilter;
   STATE.reviewQueue = shouldShuffle ? shuffle(queue) : queue;
+  // Sessão de 5 minutos (shared/review-extras.js): mesma fila, mais curta.
+  if (opts && opts.short && !STATE.reviewSessionUnitFilter) STATE.reviewQueue = shortReviewQueue(STATE.reviewQueue);
   STATE.reviewIndex = 0;
   // Fase 6C.1/6C.2/6C.3 -- descarta o localState (Normal/Múltipla escolha/
   // Digite a resposta/Cloze) da sessão anterior, se houver; renderReviewView()
@@ -6647,6 +6770,7 @@ function startReviewSession(){
   // eliminou STATE.reviewClozeAnswered (Cloze migrou 100% pra este slot
   // único, mesmo padrão dos outros 3 tipos) -- não há mais nenhum campo
   // solto de tipo pra zerar aqui.
+  STATE.reviewSessionStartedAt = Date.now();
   STATE.reviewCardState = null;
   renderReviewView();
 }
@@ -6756,6 +6880,7 @@ function deckReviewSummary(deckId){
 // primeiro" continuam valendo sem nenhum código de limite novo (D6). Direção
 // (K2-G): estrutural do CardInstance -- a sessão de Deck só escolhe quais entram.
 async function startDeckReviewSession(deckId, opts){
+  holdBadgeCelebrations();
   const restore = !!(opts && opts.restore);
   trackEvent('lesson_start', 'flashcard_review', null);
   const decks = await ensureDecksLoadedForReview();
@@ -6787,6 +6912,7 @@ async function startDeckReviewSession(deckId, opts){
   document.getElementById('speed-review-content').style.display = 'none';
   document.getElementById('match-review-content').style.display = 'none';
 
+  STATE.reviewSessionStartedAt = Date.now();
   renderReviewView();
   if (typeof routerNavigate === 'function') routerNavigate({ type: 'reviewSession', mode: 'flashcard', deckId });
   } finally {
@@ -6914,7 +7040,7 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
-      <div class="flashcard-tag">${cardOriginTitle(card)}</div>
+      <div class="flashcard-tag">${escapeHTML(reviewCardTagLabel(card))}</div>
       ${promptImageUrl ? `<img src="${promptImageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="flashcard-hanzi">${escapeHTML(view.prompt.text)}${promptSpeakable ? ` ${audioBtnHTML(view.prompt.text, 'audio-btn-lg')}` : ''}${customAudioUrl ? customAudioBtnHTML(customAudioUrl) : ''}</div>
       <div class="flashcard-pinyin pinyin">${escapeHTML(view.prompt.pinyinText || '')}</div>
@@ -6927,7 +7053,8 @@ function renderMultipleChoiceCard(mountEl, card, localState, callbacks){
           if (opt.correct) cls += ' correct';
           else if (i === localState.selectedIndex) cls += ' incorrect';
         }
-        return `<button class="${cls}" data-idx="${i}"${answered ? ' disabled' : ''}>${escapeHTML(opt.text)}</button>`;
+        const mark = answered ? (opt.correct ? '<span class="mc-mark" aria-hidden="true">✓ </span>' : (i === localState.selectedIndex ? '<span class="mc-mark" aria-hidden="true">✗ </span>' : '')) : '';
+        return `<button class="${cls}" data-idx="${i}"${answered ? ' disabled' : ''}>${mark}${escapeHTML(opt.text)}</button>`;
       }).join('')}
     </div>
     ${answered ? `<button class="btn btn-primary btn-block mc-continue-btn" id="mc-continue-btn">${t('common.continue')}</button>` : ''}
@@ -7016,7 +7143,7 @@ function renderClozeCard(mountEl, card, localState, callbacks){
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
-      <div class="flashcard-tag">${cardOriginTitle(card)}</div>
+      <div class="flashcard-tag">${escapeHTML(reviewCardTagLabel(card))}</div>
       ${clozeImageUrl ? `<img src="${clozeImageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="cloze-sentence">
         <div class="cloze-hanzi">${sentenceHTML}</div>
@@ -7097,7 +7224,7 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
-      <div class="flashcard-tag">${cardOriginTitle(card)}</div>
+      <div class="flashcard-tag">${escapeHTML(reviewCardTagLabel(card))}</div>
       ${promptImageUrl ? `<img src="${promptImageUrl}" class="flashcard-image" alt="">` : ''}
       <div class="flashcard-hanzi">${escapeHTML(view.prompt.text)}${promptSpeakable ? ` ${audioBtnHTML(view.prompt.text, 'audio-btn-lg')}` : ''}${view.prompt.audioUrl ? customAudioBtnHTML(view.prompt.audioUrl) : ''}</div>
       <div class="flashcard-pinyin pinyin">${escapeHTML(view.prompt.pinyinText || '')}</div>
@@ -7156,10 +7283,12 @@ function renderTypeAnswerCard(mountEl, card, localState, callbacks){
 }
 
 function renderReviewView(){
+  syncReviewBackLink();
   stopExerciseAudio();
   const el = document.getElementById('review-content');
 
   if (!STATE.reviewQueue.length){
+    releaseBadgeCelebrations();
     // Mesma fonte que startReviewSession()/Speed Review usam de verdade
     // (todaysReviewCount, com os mesmos tetos de novas/dia e intensidade)
     // -- senão esse número prometeria mais do que "Revisar tudo disponível"
@@ -7185,10 +7314,16 @@ function renderReviewView(){
   }
 
   if (STATE.reviewIndex >= STATE.reviewQueue.length){
+    releaseBadgeCelebrations();
     // Streak conta aqui -- fim da SESSÃO inteira de Flashcard/Palavras
     // difíceis (os dois usam esta mesma tela, ver openReviewSession) -- não
     // a cada cartão avaliado (ver gradeCurrentCard).
     registerStudyToday();
+    if (STATE.reviewSessionStartedAt){
+      recordReviewSessionTime(STATE.reviewQueue.length, Date.now() - STATE.reviewSessionStartedAt);
+      STATE.reviewSessionStartedAt = null;
+      saveState();
+    }
     maybeShowStreakCelebration();
     trackEvent('lesson_complete', 'flashcard_review', { count: STATE.reviewQueue.length });
     // Fase 6 do projeto de reorganização: terminar a revisão nunca deve
@@ -7378,7 +7513,7 @@ function renderNormalCard(mountEl, card, localState, callbacks){
   mountEl.innerHTML = `
     ${reviewProgressBarHTML(card)}
     <div class="flashcard" id="flashcard">
-      <div class="flashcard-tag">${cardOriginTitle(card)}</div>
+      <div class="flashcard-tag">${escapeHTML(reviewCardTagLabel(card))}</div>
       ${resolvedFrontImageUrl ? `<img src="${resolvedFrontImageUrl}" class="flashcard-image" alt="">` : ''}
       ${frontHTML}
       ${localState.revealed ? `
@@ -7784,7 +7919,8 @@ const switchTab = createTabSwitcher({
     'admin-badges': renderAdminPanelView,
     'my-flashcards': renderMyFlashcardsView,
     'support-materials': renderSupportMaterialsView,
-    leaderboard: renderLeaderboardView,
+    leaderboard: openLeaderboardView,
+    friends: renderFriendsView,
     path: renderUnitsGrid,
   }
 });
@@ -7871,7 +8007,7 @@ function renderReviewTagFilter(){
   chipsEl.innerHTML = all.map(t => {
     const n = universe.filter(c => (c.tags || []).includes(t)).length;
     const on = selected.includes(t);
-    return `<button type="button" class="leaderboard-tab ${on ? 'active' : ''}" data-review-tag="${escapeHTML(t)}" aria-pressed="${on}">#${escapeHTML(t)} (${n})</button>`;
+    return `<button type="button" class="leaderboard-tab ${on ? 'active' : ''}" data-review-tag="${escapeHTML(t)}" aria-pressed="${on}" title="#${escapeHTML(t)}">${escapeHTML(friendlyTagLabel(t))} (${n})</button>`;
   }).join(' ');
   const clearBtn = document.getElementById('review-tag-clear');
   if (clearBtn) clearBtn.hidden = selected.length === 0;

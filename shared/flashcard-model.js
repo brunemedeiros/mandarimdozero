@@ -252,15 +252,39 @@ const FIELD_AUDIO_UPLOAD_MAX_BYTES = 5242880; // 5 MiB
 // impede um upload malicioso. `file.name`/extensão NUNCA entram nesta
 // checagem (Seção 15 -- nunca confiar no nome de arquivo pra decisão de
 // segurança).
+// Mensagens de erro de envio de mídia: idioma do site quando t() existe
+// (fora do navegador, nos testes, fica o texto em português).
+function mediaErrorText(key, pt){
+  if (typeof t !== 'function') return pt;
+  const v = t(key);
+  return (v && v !== key) ? v : pt;
+}
+
 function validateFieldAudioUploadFile(file){
-  if (!file) return { ok: false, error: 'Nenhum arquivo selecionado.' };
-  if (typeof file.size === 'number' && file.size <= 0) return { ok: false, error: 'Arquivo vazio.' };
+  if (!file) return { ok: false, error: mediaErrorText('media.noFile', 'Nenhum arquivo selecionado.') };
+  if (typeof file.size === 'number' && file.size <= 0) return { ok: false, error: mediaErrorText('media.emptyFile', 'Arquivo vazio.') };
   if (typeof file.size === 'number' && file.size > FIELD_AUDIO_UPLOAD_MAX_BYTES){
-    return { ok: false, error: 'Arquivo maior que 5 MB -- escolha um arquivo de áudio menor.' };
+    return { ok: false, error: mediaErrorText('media.audioTooBig', 'Arquivo maior que 5 MB -- escolha um arquivo de áudio menor.') };
   }
   const type = file.type || '';
   if (!FIELD_AUDIO_UPLOAD_MIME_TYPES.includes(type)){
-    return { ok: false, error: 'Formato de áudio não suportado. Use MP3, M4A/AAC, OGG, WAV ou WEBM.' };
+    return { ok: false, error: mediaErrorText('media.audioBadType', 'Formato de áudio não suportado. Use MP3, M4A/AAC, OGG, WAV ou WEBM.') };
+  }
+  return { ok: true };
+}
+
+// Imagem por campo (botão discreto do editor, 2026-10-06). Mesmo bucket
+// `flashcard-media` e mesmo teto de 5 MB do áudio; a migration 072 libera
+// estes tipos no bucket.
+const FIELD_IMAGE_UPLOAD_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+function validateFieldImageUploadFile(file){
+  if (!file) return { ok: false, error: mediaErrorText('media.noFile', 'Nenhum arquivo selecionado.') };
+  if (typeof file.size === 'number' && file.size <= 0) return { ok: false, error: mediaErrorText('media.emptyFile', 'Arquivo vazio.') };
+  if (typeof file.size === 'number' && file.size > FIELD_AUDIO_UPLOAD_MAX_BYTES){
+    return { ok: false, error: mediaErrorText('media.imageTooBig', 'Imagem maior que 5 MB. Escolha uma imagem menor.') };
+  }
+  if (!FIELD_IMAGE_UPLOAD_MIME_TYPES.includes(file.type || '')){
+    return { ok: false, error: mediaErrorText('media.imageBadType', 'Formato de imagem não suportado. Use JPG, PNG, WEBP ou GIF.') };
   }
   return { ok: true };
 }
@@ -277,9 +301,9 @@ function validateFieldAudioUploadFile(file){
 const FIELD_AUDIO_URL_MAX_LENGTH = 2000;
 function validateFieldAudioUrl(url){
   const clean = (url || '').trim();
-  if (!clean) return { ok: false, error: 'Cole o link do áudio.' };
-  if (clean.length > FIELD_AUDIO_URL_MAX_LENGTH) return { ok: false, error: 'Link muito longo.' };
-  if (!/^https:\/\//i.test(clean)) return { ok: false, error: 'O link precisa começar com https://.' };
+  if (!clean) return { ok: false, error: mediaErrorText('media.urlEmpty', 'Cole o link do áudio.') };
+  if (clean.length > FIELD_AUDIO_URL_MAX_LENGTH) return { ok: false, error: mediaErrorText('media.urlTooLong', 'Link muito longo.') };
+  if (!/^https:\/\//i.test(clean)) return { ok: false, error: mediaErrorText('media.urlNeedsHttps', 'O link precisa começar com https://.') };
   return { ok: true, url: clean };
 }
 
@@ -300,7 +324,16 @@ function validateFieldAudioUrl(url){
 // invalida o cache de TODO Field TTS já gerado (generationKey muda pra
 // todo mundo), sem nenhuma migração de dado.
 const TTS_PROVIDER_MODEL_ID = 'google-chirp3-hd'; // Google Cloud TTS, Chirp 3 HD (ver Edge Function tts-generate)
-const TTS_CONFIG_VERSION = 1;
+const TTS_CONFIG_VERSION = 2;
+// Versão das regras de "texto falado" POR IDIOMA (tts_core.mjs /
+// spoken_text.py). Entra no generationKey junto com TTS_CONFIG_VERSION:
+// mudar a regra de um idioma invalida só os áudios daquele idioma.
+const TTS_SPOKEN_RULES_VERSION_BY_LANG = { fr: 4, pt: 1, zh: 0 };
+function ttsConfigVersionFor(language){
+  const l = String(language || '').trim().toLowerCase();
+  const fam = l.startsWith('fr') ? 'fr' : l.startsWith('pt') ? 'pt' : (l.startsWith('zh') || l.startsWith('cmn')) ? 'zh' : 'x';
+  return `${TTS_CONFIG_VERSION}:${fam}${TTS_SPOKEN_RULES_VERSION_BY_LANG[fam] ?? 0}`;
+}
 
 // Limite de caracteres por geração -- controle de custo (auditoria Fase
 // 7f, Seção 14/15: "nunca gerar um texto absurdamente longo"). Mesmo
@@ -325,7 +358,7 @@ async function computeTtsGenerationKey(effectiveText, language, voiceId, rate){
     voiceId || '',
     (rate === null || rate === undefined) ? '' : String(rate),
     TTS_PROVIDER_MODEL_ID,
-    String(TTS_CONFIG_VERSION),
+    ttsConfigVersionFor(language),
   ];
   const input = parts.map(p => encodeURIComponent(p)).join('\u001F');
   const bytes = new TextEncoder().encode(input);
