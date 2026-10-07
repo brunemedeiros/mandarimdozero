@@ -3872,6 +3872,13 @@ function renderUnitCompleteScreen(u, xpEarned){
   maybeShowStreakCelebration();
 
   const competencies = (u.lessons || []).filter(l => !l.isCheckpoint).map(l => l.title).filter(Boolean);
+  // Todas as palavras novas da unidade, na ordem das lições (sem agrupar,
+  // sem destacar erradas), com áudio, pinyin e tradução.
+  const seenWords = new Set();
+  const unitWords = [];
+  const pushWord = i => { const v = u.vocab && u.vocab[i]; if (v && !seenWords.has(i)){ seenWords.add(i); unitWords.push(v); } };
+  (u.lessons || []).forEach(l => (l.vocabIdx || []).forEach(pushWord));
+  (u.vocab || []).forEach((_, i) => pushWord(i));
 
   contentEl.innerHTML = `
     <div class="lesson-complete tier-bounce">
@@ -3887,6 +3894,17 @@ function renderUnitCompleteScreen(u, xpEarned){
           ${competencies.map(c => `<div class="unit-skill-item"><span class="unit-skill-check">✓</span><span>${c}</span></div>`).join('')}
         </div>
       ` : ''}
+      ${unitWords.length ? `
+        <div class="lesson-recap">
+          <div class="lesson-recap-label">O que você aprendeu: ${unitWords.length} ${unitWords.length > 1 ? 'palavras novas' : 'palavra nova'}</div>
+          ${unitWords.map(item => `
+            <div class="lesson-recap-item">
+              <div class="lesson-recap-french">${audioBtnHTML(item.c)}<span>${item.c}</span><span class="lesson-recap-pinyin">${item.p}</span></div>
+              <div class="lesson-recap-trans">${item.t}</div>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
       ${u.goal ? `
         <div class="unit-skills">
           <div class="unit-skills-label">Objetivo comunicacional atingido</div>
@@ -3898,6 +3916,7 @@ function renderUnitCompleteScreen(u, xpEarned){
   // Marco de fim de UNIDADE (tier 3) -- confete + contador subindo, o peso
   // que antes (por engano) a tela de "Lição concluída" do checkpoint levava
   // pra si mesma (ver comentário histórico removido de renderLessonCompleteScreen).
+  wireAudioButtons(contentEl);
   spawnConfetti(20, 1800);
   animateCount(document.getElementById('uc-stat-xp'), xpEarned, { prefix: '+', suffix: ' ⚡' });
 
@@ -4027,25 +4046,7 @@ function renderStep(){
     nextBtn.style.display = 'none';
 
   } else if (stepKey === 'dialogue'){
-    contentEl.innerHTML = `
-      <div class="section-label">Diálogo</div>
-      <div class="dialogue-box" id="ud-dialogue"></div>
-    `;
-    const dialogueEl = document.getElementById('ud-dialogue');
-    dialogueEl.innerHTML = `<div class="dialogue-title">${u.dialogue.title}</div>` +
-      u.dialogue.lines.map(l => `
-        <div class="dialogue-line">
-          <div class="dialogue-spk">${l.spk}</div>
-          <div class="dialogue-content">
-            <div class="hanzi">${l.c} ${audioBtnHTML(l.c)}</div>
-            <div class="pinyin">${l.p}</div>
-            <div class="trans">${l.t}</div>
-          </div>
-        </div>
-      `).join('');
-    wireAudioButtons(dialogueEl);
-    nextBtn.textContent = 'Continuar →';
-    nextBtn.style.display = 'flex';
+    renderDialogueStep(u, contentEl, nextBtn);
 
   } else if (stepKey === 'usage'){
     const note = u.usageNote;
@@ -4058,6 +4059,314 @@ function renderStep(){
     nextBtn.textContent = 'Continuar →';
     nextBtn.style.display = 'flex';
   }
+}
+
+// ============================================================
+// RENDER: Diálogo da lição (balões, áudio em sequência, vocabulário
+// destacado e micro-checagem "Você entendeu?") -- mesma experiência do
+// francês, com hanzi + pinyin em cada fala.
+// ============================================================
+// Dados extras de cada diálogo (content.js): `scene` (contexto), `speakers`
+// ({<spk>:{n,e}} -- nome e emoji de cada falante) e `check` (3 perguntas).
+// Tudo opcional: sem `speakers` cai no próprio `spk`, sem `check` o botão
+// Continuar aparece direto. O 1º falante fica à esquerda, o 2º à direita.
+const DLG = { run: 0, check: null };
+const DLG_AUTOPLAY_KEY = 'dlg_autoplay';
+
+function dlgAutoplayOn(){
+  try { return localStorage.getItem(DLG_AUTOPLAY_KEY) !== '0'; } catch(e){ return true; }
+}
+function dlgSetAutoplay(on){
+  try { localStorage.setItem(DLG_AUTOPLAY_KEY, on ? '1' : '0'); } catch(e){}
+}
+
+// Termos do vocabulário da unidade que valem destaque nas falas (hanzi).
+function dlgVocabTerms(u){
+  const terms = [];
+  (u.vocab || []).forEach(v => { if (v.c) terms.push({ t: v.c, tr: v.t, py: v.p }); });
+  terms.sort((a, b) => b.t.length - a.t.length);
+  return terms;
+}
+
+// HTML da fala com as palavras da unidade sublinhadas (data-tr = significado,
+// mostrado num toast ao tocar). Tudo que não casa é escapado.
+function dlgHighlight(text, terms){
+  if (!terms.length) return escapeHTML(text);
+  const esc = x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp('(' + terms.map(x => esc(x.t)).join('|') + ')', 'g');
+  const map = new Map(terms.map(x => [x.t, x]));
+  let out = '', last = 0, m;
+  while ((m = re.exec(text))){
+    out += escapeHTML(text.slice(last, m.index));
+    const t = map.get(m[1]) || {};
+    out += `<span class="dlg-new" data-tr="${escapeHTML(t.tr || '')}" data-w="${escapeHTML(m[1])}" data-py="${escapeHTML(t.py || '')}">${escapeHTML(m[1])}</span>`;
+    last = m.index + m[1].length;
+  }
+  return out + escapeHTML(text.slice(last));
+}
+
+// Toca UMA fala e resolve quando ela termina: true = terminou, false =
+// interrompida/erro, 'blocked' = o navegador bloqueou o autoplay.
+function dlgPlayLine(text){
+  return new Promise(resolve => {
+    registerAudioPlay();
+    stopExerciseAudio();
+    const file = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
+    if (file){
+      const a = new Audio('audio/' + file);
+      exerciseAudioEl = a;
+      let done = false;
+      const fin = v => { if (done) return; done = true; if (exerciseAudioEl === a) exerciseAudioEl = null; resolve(v); };
+      a.addEventListener('ended', () => fin(true));
+      a.addEventListener('pause', () => fin(a.ended));
+      a.addEventListener('error', () => fin(false));
+      a.play().catch(() => fin('blocked'));
+      return;
+    }
+    if (!TTS.supported) return resolve(false);
+    if (!TTS.voice) loadChineseVoice();
+    if (!TTS.voice) return resolve(false);
+    window.speechSynthesis.resume();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'zh-CN'; u.voice = TTS.voice; u.rate = 0.85;
+    let started = false, done = false;
+    const fin = v => { if (done) return; done = true; resolve(v); };
+    u.onstart = () => { started = true; };
+    u.onend = () => fin(true);
+    u.onerror = () => fin(false);
+    window.speechSynthesis.speak(u);
+    setTimeout(() => { if (!started){ window.speechSynthesis.cancel(); fin(false); } }, 1800);
+  });
+}
+
+function dlgSleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+function dlgSpeakerSide(dlg, spk){
+  const first = dlg.lines[0].spk;
+  return spk === first ? 'a' : 'b';
+}
+
+function renderDialogueStep(u, contentEl, nextBtn){
+  const dlg = u.dialogue;
+  const token = ++DLG.run;
+  const sp = dlg.speakers || {};
+  const who = k => sp[k] || { n: k, e: '' };
+  const terms = dlgVocabTerms(u);
+  const checks = Array.isArray(dlg.check) ? dlg.check : [];
+  DLG.check = { qi: 0, correct: 0 };
+
+  const rowsHTML = dlg.lines.map((l, i) => {
+    const side = dlgSpeakerSide(dlg, l.spk);
+    const w = who(l.spk);
+    return `
+      <div class="dlg-row ${side}" data-i="${i}" role="button" tabindex="0" aria-label="${escapeHTML(w.n)}: ouvir a partir desta fala">
+        <div class="dlg-avatar"><span class="dlg-emoji" aria-hidden="true">${w.e || escapeHTML(l.spk.slice(0, 1))}</span><span class="dlg-name">${escapeHTML(w.n)}</span></div>
+        <div class="dlg-bubble">
+          <div class="dlg-hz">${dlgHighlight(l.c, terms)}<span class="dlg-wave" aria-hidden="true"><i></i><i></i><i></i></span></div>
+          <div class="dlg-py">${escapeHTML(l.p)}</div>
+          <div class="dlg-tr">${escapeHTML(l.t)}</div>
+          <button type="button" class="dlg-trbtn" aria-label="Mostrar a tradução desta fala" aria-pressed="false">🌐</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  contentEl.innerHTML = `
+    <div class="section-label">Diálogo</div>
+    <div class="dlg-title">${escapeHTML(dlg.title)}</div>
+    ${dlg.scene ? `<div class="dlg-scene">📍 ${escapeHTML(dlg.scene)}</div>` : ''}
+    <div class="dlg-tools">
+      <button class="btn btn-secondary dlg-play-btn" id="dlg-play-btn">▶ Ouvir tudo</button>
+      <button class="dlg-chip" id="dlg-auto-btn" aria-pressed="${dlgAutoplayOn()}">Áudio automático: ${dlgAutoplayOn() ? 'ligado' : 'desligado'}</button>
+    </div>
+    <div class="dlg-chat" id="ud-dialogue">${rowsHTML}</div>
+    <div class="dlg-float"><button class="dlg-chip dlg-chip-float" id="dlg-trans-btn" aria-pressed="false">🌐 Mostrar traduções</button></div>
+    ${terms.length ? `<div class="dlg-legend">As palavras sublinhadas são do vocabulário desta unidade. Toque numa delas para ver o significado.</div>` : ''}
+    <div class="dlg-check" id="dlg-check" ${checks.length ? '' : 'hidden'}></div>
+  `;
+
+  const chat = document.getElementById('ud-dialogue');
+  const playBtn = document.getElementById('dlg-play-btn');
+  const transBtn = document.getElementById('dlg-trans-btn');
+  const autoBtn = document.getElementById('dlg-auto-btn');
+  const rows = [...chat.querySelectorAll('.dlg-row')];
+
+  function setPlaying(on){
+    chat.classList.toggle('playing', on);
+    playBtn.textContent = on ? '⏸ Parar' : '▶ Ouvir tudo';
+    if (!on) rows.forEach(r => r.classList.remove('speaking'));
+  }
+  function setTranslations(on){
+    chat.classList.toggle('show-trans', on);
+    transBtn.setAttribute('aria-pressed', String(on));
+    transBtn.textContent = on ? '🌐 Ocultar traduções' : '🌐 Mostrar traduções';
+    rows.forEach(r => { r.classList.remove('show-tr'); r.querySelector('.dlg-trbtn')?.setAttribute('aria-pressed', 'false'); });
+  }
+  function stillHere(){ return token === DLG.run && document.body.contains(chat); }
+
+  async function playFrom(start, viaAutoplay){
+    const myRun = ++DLG.run;
+    const alive = () => myRun === DLG.run && document.body.contains(chat);
+    setPlaying(true);
+    for (let i = start; i < dlg.lines.length; i++){
+      if (!alive()) return;
+      rows.forEach(r => r.classList.toggle('speaking', Number(r.dataset.i) === i));
+      rows[i].scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'nearest' });
+      const res = await dlgPlayLine(dlg.lines[i].c);
+      if (!alive()) return;
+      if (res === 'blocked'){
+        setPlaying(false);
+        if (viaAutoplay) showToast('🔇 Toque em "Ouvir tudo" para ouvir a conversa');
+        return;
+      }
+      if (!res){ setPlaying(false); return; }
+      if (i < dlg.lines.length - 1) await dlgSleep(380);
+    }
+    if (!alive()) return;
+    setPlaying(false);
+    setTranslations(true); // ao fim da conversa completa, as traduções aparecem
+  }
+
+  playBtn.addEventListener('click', () => {
+    if (chat.classList.contains('playing')){ DLG.run++; stopExerciseAudio(); setPlaying(false); }
+    else playFrom(0, false);
+  });
+  transBtn.addEventListener('click', () => setTranslations(!chat.classList.contains('show-trans')));
+  autoBtn.addEventListener('click', () => {
+    const on = !dlgAutoplayOn();
+    dlgSetAutoplay(on);
+    autoBtn.setAttribute('aria-pressed', String(on));
+    autoBtn.textContent = 'Áudio automático: ' + (on ? 'ligado' : 'desligado');
+  });
+  rows.forEach(r => {
+    const tb = r.querySelector('.dlg-trbtn');
+    if (tb) tb.addEventListener('click', e => {
+      e.stopPropagation();   // não toca o áudio: só mostra/esconde a tradução desta fala
+      const on = !r.classList.contains('show-tr');
+      r.classList.toggle('show-tr', on);
+      tb.setAttribute('aria-pressed', String(on));
+    });
+    const go = () => playFrom(Number(r.dataset.i), false);
+    r.addEventListener('click', go);
+    r.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); go(); } });
+  });
+  chat.querySelectorAll('.dlg-new').forEach(w => w.addEventListener('click', e => {
+    e.stopPropagation();
+    if (w.dataset.tr) showToast(`${w.dataset.w}${w.dataset.py ? ' (' + w.dataset.py + ')' : ''} = ${w.dataset.tr}`);
+  }));
+
+  if (checks.length){
+    nextBtn.style.display = 'none';   // só libera depois da micro-checagem
+    renderDialogueCheck(u, dlg, who, checks, nextBtn, rows);
+  } else {
+    nextBtn.textContent = 'Continuar →';
+    nextBtn.style.display = 'flex';
+  }
+
+  const canHear = dlg.lines.some(l => canSpeakChinese(l.c));
+  if (!canHear) playBtn.disabled = true;
+  else if (dlgAutoplayOn()) setTimeout(() => { if (stillHere()) playFrom(0, true); }, 350);
+}
+
+function dlgShuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Micro-checagem "Você entendeu?" -- 3 perguntas, uma de cada vez. Não dá
+// para pular (o Continuar só aparece no fim); errar não reprova, mostra a
+// resposta certa e acende a fala correspondente no diálogo.
+function renderDialogueCheck(u, dlg, who, checks, nextBtn, rows){
+  const box = document.getElementById('dlg-check');
+  const st = DLG.check;
+  const L = dlg.lines;
+  const zhOpt = o => `<span class="dlg-hz">${escapeHTML(o.c)}</span><span class="dlg-py">${escapeHTML(o.p)}</span>`;
+  const bubble = (idx, blank) => {
+    const l = L[idx];
+    const side = dlgSpeakerSide(dlg, l.spk);
+    const w = who(l.spk);
+    return `<div class="dlg-row ${side} static"><div class="dlg-avatar"><span class="dlg-emoji" aria-hidden="true">${w.e || escapeHTML(l.spk.slice(0, 1))}</span><span class="dlg-name">${escapeHTML(w.n)}</span></div>
+      <div class="dlg-bubble">${blank ? '<div class="dlg-hz"><span class="dlg-blank">· · · · ·</span></div>' : `<div class="dlg-hz">${escapeHTML(l.c)}</div><div class="dlg-py">${escapeHTML(l.p)}</div>`}</div></div>`;
+  };
+
+  function showQuestion(){
+    const q = checks[st.qi];
+    let label = '', ctx = '', opts = [], flashIdx = -1;
+    if (q.k === 'fill'){
+      label = 'Complete a resposta';
+      ctx = `<div class="dlg-q-ctx">${bubble(q.line - 1, false)}${bubble(q.line, true)}</div>`;
+      opts = dlgShuffle([{ o: L[q.line], ok: true }, ...q.bad.map(o => ({ o, ok: false }))]);
+      flashIdx = q.line;
+    } else if (q.k === 'listen'){
+      label = 'Ouça e escolha a resposta';
+      ctx = `<div class="dlg-q-listen"><button class="audio-btn audio-btn-lg" id="dlg-q-audio" aria-label="Ouvir a fala">🔊</button><div class="prompt-audio-hint">toque para ouvir de novo</div></div>`;
+      opts = dlgShuffle([{ o: L[q.line + 1], ok: true }, ...q.bad.map(o => ({ o, ok: false }))]);
+      flashIdx = q.line + 1;
+    } else {
+      label = 'Compreensão';
+      ctx = `<div class="dlg-q-text">${escapeHTML(q.q)}</div>`;
+      opts = q.opts.map((t, i) => ({ t, ok: i === q.ok }));
+      flashIdx = -1;
+    }
+    const optHTML = o => o.o ? zhOpt(o.o) : escapeHTML(o.t);
+    const dots = checks.map((_, i) => `<span class="dlg-dot${i < st.qi ? ' done' : (i === st.qi ? ' on' : '')}"></span>`).join('');
+    box.innerHTML = `
+      <div class="dlg-check-head"><span>Você entendeu?</span><span class="dlg-dots" role="img" aria-label="Pergunta ${st.qi + 1} de ${checks.length}">${dots}</span></div>
+      <div class="exercise-prompt-label">${label}</div>
+      ${ctx}
+      <div class="dlg-opts">${opts.map((o, i) => `<button class="dlg-opt" data-i="${i}">${optHTML(o)}</button>`).join('')}</div>
+      <div class="dlg-fb-slot"></div>`;
+    if (q.k === 'listen'){
+      const a = document.getElementById('dlg-q-audio');
+      const line = L[q.line].c;
+      a.addEventListener('click', () => speakChinese(line, a));
+      if (canSpeakChinese(line)) speakChinese(line, a, true);
+    }
+    box.querySelectorAll('.dlg-opt').forEach(btn => btn.addEventListener('click', () => {
+      const o = opts[Number(btn.dataset.i)];
+      box.querySelectorAll('.dlg-opt').forEach((b, i) => {
+        b.disabled = true;
+        b.classList.add('locked');
+        if (opts[i].ok) b.classList.add('correct');
+      });
+      if (!o.ok) btn.classList.add('incorrect');
+      playFeedbackSound(o.ok);
+      if (o.ok) st.correct += 1;
+      if (flashIdx >= 0 && rows[flashIdx]){
+        rows[flashIdx].classList.add('flash');
+        setTimeout(() => rows[flashIdx] && rows[flashIdx].classList.remove('flash'), 2400);
+      }
+      const right = optHTML(opts.find(x => x.ok));
+      const last = st.qi === checks.length - 1;
+      box.querySelector('.dlg-fb-slot').innerHTML = `
+        <div class="dlg-fb ${o.ok ? 'ok' : 'no'}">
+          <div class="dlg-fb-title">${o.ok ? '✅ Isso mesmo!' : 'Quase! A resposta certa era:'}</div>
+          ${o.ok ? '' : `<div class="dlg-fb-right">${right}</div>`}
+          <button class="btn btn-primary btn-block" id="dlg-q-next">${last ? 'Concluir' : 'Próxima pergunta →'}</button>
+        </div>`;
+      document.getElementById('dlg-q-next').addEventListener('click', () => {
+        if (last) finish(); else { st.qi += 1; showQuestion(); }
+      });
+      document.getElementById('dlg-q-next').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }));
+  }
+
+  function finish(){
+    stopExerciseAudio();
+    box.innerHTML = `
+      <div class="dlg-check-head"><span>Você entendeu?</span></div>
+      <div class="dlg-sum">${st.correct} de ${checks.length} certas. ${st.correct === checks.length ? 'Conversa entendida!' : 'Ouça de novo e tente outra vez quando quiser.'}</div>
+      <button class="dlg-chip" id="dlg-redo">Refazer as perguntas</button>`;
+    document.getElementById('dlg-redo').addEventListener('click', () => { st.qi = 0; st.correct = 0; showQuestion(); nextBtn.style.display = 'none'; });
+    nextBtn.textContent = 'Continuar →';
+    nextBtn.style.display = 'flex';
+    nextBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  showQuestion();
 }
 
 document.getElementById('step-back-btn').addEventListener('click', () => {
@@ -4777,6 +5086,12 @@ function showAnswerPanel(contentEl, ex, opts = {}){
   panel.innerHTML = `
     <div class="feedback-card-body">
       <div class="wrong-feedback-header">${revealed ? '👀 Resposta revelada' : (opts.toneOnly ? (opts.toneOnly === 'wrong' ? '🎯 Quase! O tom não é esse' : '🎯 Quase! Faltou o tom') : '❌ Não foi dessa vez')}</div>
+      ${opts.attemptHTML ? `
+        <div class="wrong-feedback-why">
+          <div class="wrong-feedback-why-label">Sua resposta</div>
+          <div class="feedback-inner-box">${opts.attemptHTML}</div>
+        </div>
+      ` : ''}
       ${explanation ? `
         <div class="wrong-feedback-why">
           <div class="wrong-feedback-why-label">${ex && (ex.format === 'cloze' || ex.format === 'fullsentence') ? (ex.format === 'cloze' ? 'Frase completa' : 'Resposta certa') : (revealed ? 'Resposta' : 'Por que não foi essa')}</div>
@@ -4798,7 +5113,7 @@ function showAnswerPanel(contentEl, ex, opts = {}){
 }
 
 function showWrongAnswerPanel(contentEl, ex, opts = {}){
-  showAnswerPanel(contentEl, ex, { revealed: false, toneOnly: opts.toneOnly || false });
+  showAnswerPanel(contentEl, ex, { revealed: false, toneOnly: opts.toneOnly || false, attemptHTML: opts.attemptHTML });
 }
 
 // Aviso "Quase! ..." na revisão, quando o erro foi só de tom (ver
@@ -5523,7 +5838,14 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
       addStudyMinutes();
       setTimeout(() => showCorrectFeedbackPanel(contentEl, phraseFeedbackDetailHTML(ex.phrase, ex.phrase.t)), 500);
     } else {
-      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
+      // "Sua resposta" com cada bloco marcado: vermelho = não pertence à
+      // frase (isca); amarelo sublinhado = bloco certo no lugar errado.
+      const attemptHTML = `<div class="reorder-attempt">${chosenSequence.map((blockIdx, pos) => {
+        const block = ex.shuffledBlocks[blockIdx];
+        const cls = block === correctOrder[pos] ? 'ok' : (correctOrder.includes(block) ? 'near' : 'bad');
+        return `<span class="reorder-attempt-w ${cls}"><div class="pinyin">${block.p}</div><div class="hanzi">${block.c}</div></span>`;
+      }).join('')}</div>`;
+      setTimeout(() => showWrongAnswerPanel(contentEl, ex, { attemptHTML }), 500);
     }
   }
 

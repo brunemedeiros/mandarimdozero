@@ -141,6 +141,13 @@ const UNITS = [
     ],
     dialogue: {
       title: "Encontro na rua",
+      scene: "Duas pessoas se encontram na rua pela manhã.",
+      speakers: { "A": { n: "小李", e: "🧑" }, "B": { n: "老王", e: "👨" } },
+      check: [
+        { k: "fill", line: 1, bad: [{ c: "谢谢！", p: "Xièxie!" }, { c: "对不起！", p: "Duìbuqǐ!" }] },
+        { k: "listen", line: 2, bad: [{ c: "不客气！", p: "Bú kèqi!" }, { c: "早上好！", p: "Zǎoshang hǎo!" }] },
+        { k: "understand", q: "Em que parte do dia acontece essa conversa?", opts: ["De manhã", "À noite", "Não dá para saber"], ok: 0 }
+      ],
       lines: [
         { spk: "A", p: "Nǐ hǎo!", c: "你好！", t: "Olá!" },
         { spk: "B", p: "Nǐ hǎo! Zǎo shang hǎo.", c: "你好！早上好。", t: "Olá! Bom dia." },
@@ -266,6 +273,13 @@ const UNITS = [
     ],
     dialogue: {
       title: "Primeiro encontro",
+      scene: "Brune conhece Xiao Li num evento de intercâmbio.",
+      speakers: { "A": { n: "小李", e: "🧑" }, "B": { n: "Brune", e: "🙋‍♀️" } },
+      check: [
+        { k: "fill", line: 3, bad: [{ c: "我是中国人。", p: "Wǒ shì Zhōngguó rén." }, { c: "我叫巴西。", p: "Wǒ jiào Bāxī." }] },
+        { k: "listen", line: 0, bad: [{ c: "我是巴西人。", p: "Wǒ shì Bāxī rén." }, { c: "再见！", p: "Zàijiàn!" }] },
+        { k: "understand", q: "De que país Brune é?", opts: ["Brasil", "China", "A conversa não diz"], ok: 0 }
+      ],
       lines: [
         { spk: "A", p: "Nǐ hǎo, nǐ jiào shénme míngzi?", c: "你好，你叫什么名字？", t: "Olá, qual é o seu nome?" },
         { spk: "B", p: "Wǒ jiào Brune. Nǐ ne?", c: "我叫Brune。你呢？", t: "Eu me chamo Brune. E você?" },
@@ -402,6 +416,13 @@ const UNITS = [
     ],
     dialogue: {
       title: "Perguntando a idade",
+      scene: "Dois colegas de curso conversam no intervalo da aula.",
+      speakers: { "A": { n: "小张", e: "🧑" }, "B": { n: "小美", e: "👩" } },
+      check: [
+        { k: "fill", line: 1, bad: [{ c: "我是巴西人。", p: "Wǒ shì Bāxī rén." }, { c: "我叫小李。", p: "Wǒ jiào Xiǎo Lǐ." }] },
+        { k: "listen", line: 0, bad: [{ c: "我很高。", p: "Wǒ hěn gāo." }, { c: "谢谢！", p: "Xièxie!" }] },
+        { k: "understand", q: "Quem tem 30 anos?", opts: ["Quem fez a primeira pergunta", "Quem respondeu primeiro", "Nenhum dos dois"], ok: 0 }
+      ],
       lines: [
         { spk: "A", p: "Nǐ duō dà?", c: "你多大？", t: "Quantos anos você tem?" },
         { spk: "B", p: "Wǒ èr shí bā suì. Nǐ ne?", c: "我二十八岁。你呢？", t: "Eu tenho 28 anos. E você?" },
@@ -534,6 +555,13 @@ const UNITS = [
     ],
     dialogue: {
       title: "Falando da família",
+      scene: "Duas amigas olham fotos de família.",
+      speakers: { "A": { n: "小陈", e: "👩" }, "B": { n: "小雨", e: "🧑‍🦱" } },
+      check: [
+        { k: "fill", line: 3, bad: [{ c: "有，我有妹妹。", p: "Yǒu, wǒ yǒu mèimei." }, { c: "我家有四口人。", p: "Wǒ jiā yǒu sì kǒu rén." }] },
+        { k: "listen", line: 0, bad: [{ c: "我家有三口人。", p: "Wǒ jiā yǒu sān kǒu rén." }, { c: "我家有五口人。", p: "Wǒ jiā yǒu wǔ kǒu rén." }] },
+        { k: "understand", q: "Quantas pessoas tem a família de quem responde?", opts: ["3", "4", "5"], ok: 1 }
+      ],
       lines: [
         { spk: "A", p: "Nǐ jiā yǒu jǐ kǒu rén?", c: "你家有几口人？", t: "Quantas pessoas há na sua família?" },
         { spk: "B", p: "Wǒ jiā yǒu sì kǒu rén: bàba, māma, gēge hé wǒ.", c: "我家有四口人：爸爸，妈妈，哥哥和我。", t: "Minha família tem 4 pessoas: pai, mãe, irmão mais velho e eu." },
@@ -637,6 +665,13 @@ const UNITS = [
     ],
     dialogue: {
       title: "No restaurante",
+      scene: "Brune pede o almoço num restaurante.",
+      speakers: { "Garçom": { n: "服务员", e: "🧑‍🍳" }, "Brune": { n: "Brune", e: "🙋‍♀️" } },
+      check: [
+        { k: "fill", line: 1, bad: [{ c: "我喜欢咖啡。", p: "Wǒ xǐhuan kāfēi." }, { c: "再见，谢谢。", p: "Zàijiàn, xièxie." }] },
+        { k: "listen", line: 2, bad: [{ c: "要，谢谢。我喜欢喝咖啡。", p: "Yào, xièxie. Wǒ xǐhuan hē kāfēi." }, { c: "没关系，我不吃米饭。", p: "Méi guānxi, wǒ bù chī mǐfàn." }] },
+        { k: "understand", q: "O que Brune pede para beber?", opts: ["Chá", "Café", "Água"], ok: 0 }
+      ],
       lines: [
         { spk: "Garçom", p: "Nǐ hǎo, nǐ yào chī shénme?", c: "你好，你要吃什么？", t: "Olá, o que você quer comer?" },
         { spk: "Brune", p: "Wǒ yào mǐfàn hé chá.", c: "我要米饭和茶。", t: "Eu quero arroz e chá." },
@@ -754,6 +789,13 @@ const UNITS = [
     ],
     dialogue: {
       title: "Perguntando sobre a rotina",
+      scene: "Dois colegas de trabalho conversam no corredor do escritório.",
+      speakers: { "A": { n: "小刘", e: "🧑" }, "B": { n: "小周", e: "👩" } },
+      check: [
+        { k: "fill", line: 3, bad: [{ c: "今天七点起床。", p: "Jīntiān qī diǎn qǐchuáng." }, { c: "我每天八点上班。", p: "Wǒ měitiān bā diǎn shàngbān." }] },
+        { k: "listen", line: 0, bad: [{ c: "今天五点下班。", p: "Jīntiān wǔ diǎn xiàbān." }, { c: "现在三点。", p: "Xiànzài sān diǎn." }] },
+        { k: "understand", q: "A que horas quem responde começa a trabalhar?", opts: ["7h", "8h", "5h"], ok: 1 }
+      ],
       lines: [
         { spk: "A", p: "Nǐ měitiān jǐ diǎn qǐchuáng?", c: "你每天几点起床？", t: "Que horas você levanta todos os dias?" },
         { spk: "B", p: "Wǒ měitiān qī diǎn qǐchuáng, bā diǎn shàngbān.", c: "我每天七点起床，八点上班。", t: "Eu levanto às 7h e vou trabalhar às 8h todos os dias." },
@@ -825,6 +867,13 @@ const UNITS = [
     ],
     dialogue: {
       title: "Pedindo direções na rua",
+      scene: "Num shopping, alguém procura o banheiro e pergunta a uma senhora.",
+      speakers: { "A": { n: "小林", e: "🧑" }, "B": { n: "王阿姨", e: "👵" } },
+      check: [
+        { k: "fill", line: 3, bad: [{ c: "很远。", p: "Hěn yuǎn." }, { c: "在后面，右边。", p: "Zài hòumiàn, yòubiān." }] },
+        { k: "listen", line: 0, bad: [{ c: "在后面，右边。", p: "Zài hòumiàn, yòubiān." }, { c: "不远，很近。", p: "Bù yuǎn, hěn jìn." }] },
+        { k: "understand", q: "Onde fica o banheiro?", opts: ["Na frente, à esquerda", "Atrás, à direita", "Longe daqui"], ok: 0 }
+      ],
       lines: [
         { spk: "A", p: "Duì bu qǐ, cèsuǒ zài nǎlǐ?", c: "对不起，厕所在哪里？", t: "Com licença, onde fica o banheiro?" },
         { spk: "B", p: "Zài qiánmiàn, zuǒ biān.", c: "在前面，左边。", t: "Fica na frente, do lado esquerdo." },
@@ -959,6 +1008,13 @@ const UNITS = [
     ],
     dialogue: {
       title: "No mercado",
+      scene: "Brune pechincha numa banca de feira.",
+      speakers: { "Brune": { n: "Brune", e: "🙋‍♀️" }, "Vendedor": { n: "摊主", e: "🧑‍🌾" } },
+      check: [
+        { k: "fill", line: 3, bad: [{ c: "不行，三十块。", p: "Bù xíng, sān shí kuài." }, { c: "好吧，三十五块。", p: "Hǎo ba, sān shí wǔ kuài." }] },
+        { k: "listen", line: 0, bad: [{ c: "好吧，二十五块。", p: "Hǎo ba, èr shí wǔ kuài." }, { c: "太贵了！", p: "Tài guì le!" }] },
+        { k: "understand", q: "Quanto Brune paga no final?", opts: ["30 yuans", "25 yuans", "20 yuans"], ok: 1 }
+      ],
       lines: [
         { spk: "Brune", p: "Zhège duōshao qián?", c: "这个多少钱？", t: "Quanto custa isso?" },
         { spk: "Vendedor", p: "Sān shí kuài.", c: "三十块。", t: "30 yuans." },
@@ -1044,6 +1100,13 @@ const UNITS = [
     ],
     dialogue: {
       title: "Comentando o clima",
+      scene: "Dois amigos olham a previsão do tempo.",
+      speakers: { "A": { n: "小马", e: "🧑" }, "B": { n: "小杨", e: "👩" } },
+      check: [
+        { k: "fill", line: 1, bad: [{ c: "今天下雨，很冷。", p: "Jīntiān xià yǔ, hěn lěng." }, { c: "明天会下雨。", p: "Míngtiān huì xià yǔ." }] },
+        { k: "listen", line: 2, bad: [{ c: "今天很热，晴天。", p: "Jīntiān hěn rè, qíngtiān." }, { c: "明天很热。", p: "Míngtiān hěn rè." }] },
+        { k: "understand", q: "Como será o tempo amanhã?", opts: ["Chuva e um pouco de frio", "Sol e calor", "Vento forte"], ok: 0 }
+      ],
       lines: [
         { spk: "A", p: "Jīntiān tiānqì zěnmeyàng?", c: "今天天气怎么样？", t: "Como está o tempo hoje?" },
         { spk: "B", p: "Jīntiān hěn rè, qíngtiān.", c: "今天很热，晴天。", t: "Hoje está bem quente, ensolarado." },
@@ -1149,6 +1212,13 @@ const UNITS = [
     ],
     dialogue: {
       title: "Perguntando como chegar",
+      scene: "Na recepção de um hotel, um hóspede pergunta como chegar ao aeroporto.",
+      speakers: { "A": { n: "小高", e: "🧳" }, "B": { n: "前台", e: "👩‍💼" } },
+      check: [
+        { k: "fill", line: 1, bad: [{ c: "我要一张票。", p: "Wǒ yào yì zhāng piào." }, { c: "地铁站在前面。", p: "Dìtiě zhàn zài qiánmiàn." }] },
+        { k: "listen", line: 2, bad: [{ c: "在后面，很远。", p: "Zài hòumiàn, hěn yuǎn." }, { c: "一张票。", p: "Yì zhāng piào." }] },
+        { k: "understand", q: "Que transportes a recepcionista sugere?", opts: ["Metrô ou táxi", "Ônibus ou a pé", "Só avião"], ok: 0 }
+      ],
       lines: [
         { spk: "A", p: "Qù jīchǎng zěnme qù?", c: "去机场怎么去？", t: "Como se vai para o aeroporto?" },
         { spk: "B", p: "Nǐ kěyǐ zuò dìtiě huò chūzūchē.", c: "你可以坐地铁或出租车。", t: "Você pode ir de metrô ou de táxi." },
@@ -1239,6 +1309,13 @@ const UNITS = [
     ],
     dialogue: {
       title: "Não estou me sentindo bem",
+      scene: "Um amigo percebe que o outro não está bem.",
+      speakers: { "A": { n: "小赵", e: "🧑" }, "B": { n: "小孙", e: "🤒" } },
+      check: [
+        { k: "fill", line: 1, bad: [{ c: "我很好，谢谢。", p: "Wǒ hěn hǎo, xièxie." }, { c: "我去医院。", p: "Wǒ qù yīyuàn." }] },
+        { k: "listen", line: 2, bad: [{ c: "不用，谢谢。", p: "Bú yòng, xièxie." }, { c: "我在医院工作。", p: "Wǒ zài yīyuàn gōngzuò." }] },
+        { k: "understand", q: "O que está doendo em quem não se sente bem?", opts: ["A cabeça", "A barriga", "A perna"], ok: 0 }
+      ],
       lines: [
         { spk: "A", p: "Nǐ zěnme le?", c: "你怎么了？", t: "O que houve com você?" },
         { spk: "B", p: "Wǒ bù shūfu, tóu hěn téng.", c: "我不舒服，头很疼。", t: "Não estou bem, minha cabeça está doendo muito." },
@@ -1330,6 +1407,13 @@ const UNITS = [
     ],
     dialogue: {
       title: "Combinando um programa",
+      scene: "Dois colegas combinam um programa para o fim de semana.",
+      speakers: { "A": { n: "小吴", e: "🧑" }, "B": { n: "小郑", e: "👩" } },
+      check: [
+        { k: "fill", line: 1, bad: [{ c: "有空！我们去看电影吧。", p: "Yǒu kòng! Wǒmen qù kàn diànyǐng ba." }, { c: "再见，周末见！", p: "Zàijiàn, zhōumò jiàn!" }] },
+        { k: "listen", line: 2, bad: [{ c: "我喜欢看电影和跳舞。", p: "Wǒ xǐhuan kàn diànyǐng hé tiàowǔ." }, { c: "我的爱好是什么？", p: "Wǒ de àihào shì shénme?" }] },
+        { k: "understand", q: "O que quem responde primeiro gosta de fazer?", opts: ["Assistir filme e dançar", "Fazer exercício", "Cantar e ler"], ok: 0 }
+      ],
       lines: [
         { spk: "A", p: "Nǐ de àihào shì shénme?", c: "你的爱好是什么？", t: "Qual é o seu hobby?" },
         { spk: "B", p: "Wǒ xǐhuan kàn diànyǐng hé tiàowǔ. Nǐ ne?", c: "我喜欢看电影和跳舞。你呢？", t: "Eu gosto de assistir filme e dançar. E você?" },
@@ -1405,6 +1489,13 @@ const UNITS = [
     ],
     dialogue: {
       title: "Falando sobre o futuro",
+      scene: "Dois amigos falam dos planos para o futuro.",
+      speakers: { "A": { n: "小冯", e: "👩" }, "B": { n: "小韩", e: "🧑" } },
+      check: [
+        { k: "fill", line: 1, bad: [{ c: "我昨天学习了。", p: "Wǒ zuótiān xuéxí le." }, { c: "我很好，谢谢。", p: "Wǒ hěn hǎo, xièxie." }] },
+        { k: "listen", line: 2, bad: [{ c: "不要，谢谢。", p: "Bú yào, xièxie." }, { c: "我打算学习中文。", p: "Wǒ dǎsuàn xuéxí Zhōngwén." }] },
+        { k: "understand", q: "O que quem responde pretende fazer na semana que vem?", opts: ["Estudar chinês", "Viajar à China", "Trabalhar"], ok: 0 }
+      ],
       lines: [
         { spk: "A", p: "Nǐ xià ge xīngqī yǒu shénme jìhuà?", c: "你下个星期有什么计划？", t: "Quais são seus planos para semana que vem?" },
         { spk: "B", p: "Wǒ dǎsuàn xuéxí Zhōngwén.", c: "我打算学习中文。", t: "Eu pretendo estudar chinês." },
@@ -1478,6 +1569,13 @@ const UNITS = [
     ],
     dialogue: {
       title: "Comparando idiomas",
+      scene: "Dois colegas de turma conversam sobre estudar idiomas.",
+      speakers: { "A": { n: "小曹", e: "🧑" }, "B": { n: "小丁", e: "👩" } },
+      check: [
+        { k: "fill", line: 1, bad: [{ c: "法文比中文更难。", p: "Fǎwén bǐ Zhōngwén gèng nán." }, { c: "中文很贵，但是很好吃。", p: "Zhōngwén hěn guì, dànshì hěn hǎochī." }] },
+        { k: "listen", line: 2, bad: [{ c: "不难。", p: "Bù nán." }, { c: "谢谢，再见！", p: "Xièxie, zàijiàn!" }] },
+        { k: "understand", q: "Qual idioma quem responde acha mais difícil?", opts: ["Chinês", "Francês", "Italiano"], ok: 0 }
+      ],
       lines: [
         { spk: "A", p: "Nǐ juéde Zhōngwén nán ma?", c: "你觉得中文难吗？", t: "Você acha o chinês difícil?" },
         { spk: "B", p: "Zhōngwén bǐ Fǎwén gèng nán, dànshì hěn yǒu yìsi.", c: "中文比法文更难，但是很有意思。", t: "Chinês é ainda mais difícil que francês, mas é bem interessante." },
@@ -1604,6 +1702,13 @@ const UNITS = [
     ],
     dialogue: {
       title: "Convite para o cinema",
+      scene: "Um amigo convida o outro para ir ao cinema.",
+      speakers: { "A": { n: "小彭", e: "🧑" }, "B": { n: "小蔡", e: "👩" } },
+      check: [
+        { k: "fill", line: 1, bad: [{ c: "在电影院。", p: "Zài diànyǐngyuàn." }, { c: "我叫小蔡。", p: "Wǒ jiào Xiǎo Cài." }] },
+        { k: "listen", line: 0, bad: [{ c: "我是巴西人。", p: "Wǒ shì Bāxī rén." }, { c: "晚上七点。", p: "Wǎnshang qī diǎn." }] },
+        { k: "understand", q: "A que horas é o filme?", opts: ["19h", "17h", "21h"], ok: 0 }
+      ],
       lines: [
         { spk: "A", p: "Wǒ xiǎng qù kàn diànyǐng, nǐ néng lái ma?", c: "我想去看电影，你能来吗？", t: "Eu quero ir ver um filme, você consegue vir?" },
         { spk: "B", p: "Néng! Jǐ diǎn?", c: "能！几点？", t: "Consigo! Que horas?" },
@@ -1732,6 +1837,13 @@ const UNITS = [
     ],
     dialogue: {
       title: "Marcando um encontro",
+      scene: "Dois amigos marcam de se ver no fim de semana.",
+      speakers: { "A": { n: "小罗", e: "🧑" }, "B": { n: "小梁", e: "👩" } },
+      check: [
+        { k: "fill", line: 1, bad: [{ c: "今天星期天，八月五号。", p: "Jīntiān xīngqītiān, bā yuè wǔ hào." }, { c: "明天星期五。", p: "Míngtiān xīngqīwǔ." }] },
+        { k: "listen", line: 2, bad: [{ c: "今天星期五。", p: "Jīntiān xīngqīwǔ." }, { c: "八月十五号。", p: "Bā yuè shíwǔ hào." }] },
+        { k: "understand", q: "Em que dia eles vão se encontrar?", opts: ["Domingo", "Sexta-feira", "Sábado"], ok: 0 }
+      ],
       lines: [
         { spk: "A", p: "Jīntiān xīngqī jǐ?", c: "今天星期几？", t: "Que dia da semana é hoje?" },
         { spk: "B", p: "Jīntiān xīngqīwǔ, bā yuè shíwǔ hào.", c: "今天星期五，八月十五号。", t: "Hoje é sexta-feira, 15 de agosto." },
@@ -1923,6 +2035,13 @@ const UNITS = [
     ],
     dialogue: {
       title: "Já comeu?",
+      scene: "Dois colegas conversam na hora do jantar.",
+      speakers: { "A": { n: "小许", e: "👩" }, "B": { n: "小何", e: "🧑" } },
+      check: [
+        { k: "fill", line: 1, bad: [{ c: "我昨天吃了苹果。", p: "Wǒ zuótiān chī le píngguǒ." }, { c: "我叫小何。", p: "Wǒ jiào Xiǎo Hé." }] },
+        { k: "listen", line: 0, bad: [{ c: "谢谢，不客气。", p: "Xièxie, bú kèqi." }, { c: "今天很饿。", p: "Jīntiān hěn è." }] },
+        { k: "understand", q: "O que a pessoa que comeu disse que comeu?", opts: ["Duas maçãs", "Arroz", "Nada"], ok: 0 }
+      ],
       lines: [
         { spk: "A", p: "Nǐ chī fàn le ma?", c: "你吃饭了吗？", t: "Você já comeu?" },
         { spk: "B", p: "Hái méi, wǒ hái zài gōngzuò.", c: "还没，我还在工作。", t: "Ainda não, ainda estou trabalhando." },
@@ -2053,6 +2172,13 @@ const UNITS = [
     ],
     dialogue: {
       title: "Apresentando um amigo",
+      scene: "Alguém pergunta ao amigo quem é a moça da foto.",
+      speakers: { "A": { n: "小唐", e: "👩" }, "B": { n: "小宋", e: "🧑" } },
+      check: [
+        { k: "fill", line: 1, bad: [{ c: "这是我爸爸，他是医生。", p: "Zhè shì wǒ bàba, tā shì yīshēng." }, { c: "这是我哥哥，他是学生。", p: "Zhè shì wǒ gēge, tā shì xuéshēng." }] },
+        { k: "listen", line: 2, bad: [{ c: "她在医院工作。", p: "Tā zài yīyuàn gōngzuò." }, { c: "这是我女朋友。", p: "Zhè shì wǒ nǚpéngyou." }] },
+        { k: "understand", q: "O que a namorada faz?", opts: ["Estuda numa escola", "Trabalha num hospital", "É médica"], ok: 0 }
+      ],
       lines: [
         { spk: "A", p: "Zhè shì shéi?", c: "这是谁？", t: "Quem é essa?" },
         { spk: "B", p: "Zhè shì wǒ nǚpéngyou, tā shì xuéshēng.", c: "这是我女朋友，她是学生。", t: "Essa é minha namorada, ela é estudante." },
