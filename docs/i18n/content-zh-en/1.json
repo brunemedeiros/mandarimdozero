@@ -1,0 +1,187 @@
+{
+ "unit": 1,
+ "en": {
+  "title": "Greeting and saying goodbye",
+  "goal": "Greet someone, say goodbye and say thank you in a basic interaction.",
+  "lessons": {
+   "cumprimentar": "Greeting and saying thanks",
+   "desculpas": "Apologizing and replying",
+   "saudacoes": "Greeting in the morning and at night",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "hello",
+   "goodbye / see you later",
+   "thank you",
+   "you're welcome",
+   "sorry / excuse me",
+   "it's okay / no problem",
+   "good morning",
+   "good evening (greeting)"
+  ],
+  "phrases": [
+   {
+    "t": "Hello! My name is Brune."
+   },
+   {
+    "t": "Thank you!"
+   },
+   {
+    "t": "Sorry, I don't understand."
+   },
+   {
+    "t": "Oh, yes! Me too."
+   }
+  ],
+  "dialogue": {
+   "title": "Meeting on the street",
+   "lines": [
+    "Hello!",
+    "Hello! Good morning.",
+    "Thank you, see you later!",
+    "See you later!"
+   ]
+  },
+  "concepts": {
+   "duibuqi-vs-meiguanxi": [
+    {
+     "title": "\"Duìbuqǐ\" or \"méi guānxi\"?",
+     "body": "<strong>Duìbuqǐ</strong> (对不起) is what you say to apologize. <strong>Méi guānxi</strong> (没关系) is the reply from the person receiving the apology — \"it's okay, no problem.\" They are the two halves of one exchange, not synonyms: you never use méi guānxi to apologize, or duìbuqǐ to reassure someone.",
+     "examples": [
+      "sorry (the one apologizing)",
+      "it's okay (the one replying)"
+     ]
+    }
+   ],
+   "bu-negation": [
+    {
+     "title": "不 (bù) — the standard negation",
+     "body": "不 (bù) is the most common negation in Chinese — it always comes before the verb or adjective you want to negate. 不 doesn't change with person or tense and needs no helper verb (no don't/doesn't): simply put 不 before the verb or adjective.",
+     "examples": [
+      "I don't understand",
+      "not expensive"
+     ]
+    }
+   ],
+   "zaijian-baibai": [
+    {
+     "title": "\"再见\" often becomes \"拜拜\" in everyday speech",
+     "body": "<strong>再见 (zàijiàn)</strong> is the standard goodbye and is always correct. In everyday speech, especially among younger people, it's very common to hear <strong>拜拜 (bàibài)</strong> — borrowed from English \"bye-bye\" — instead of 再见, especially on the phone or in messages.",
+     "examples": [
+      "bye (informal, from English \"bye-bye\")"
+     ]
+    }
+   ],
+   "duibuqi-buhaoyisi": [
+    {
+     "title": "For small things, \"对不起\" often becomes \"不好意思\"",
+     "body": "<strong>对不起 (duìbuqǐ)</strong> is the standard way to apologize, but in everyday life it can sound too heavy for small things — bumping into someone, arriving a little late, interrupting. For those situations, it's much more common to hear <strong>不好意思 (bù hǎoyìsi)</strong>, a lighter apology, a bit like \"my bad\" or \"excuse me.\"",
+     "examples": [
+      "my bad / excuse me (light apology, small things)"
+     ]
+    }
+   ],
+   "zaoshang-hao-zao": [
+    {
+     "title": "\"早上好\" often becomes just \"早\" in everyday speech",
+     "body": "<strong>早上好 (zǎoshang hǎo)</strong> is the full, polite way to say \"good morning.\" In everyday life, among people who already know each other — coworkers, neighbors, friends — it's much more common to hear just <strong>早 (zǎo)</strong>, literally \"early.\" Using the full form with someone close can even sound a bit too formal.",
+     "examples": [
+      "good morning (informal, short)"
+     ]
+    }
+   ]
+  },
+  "trueFalse": [
+   {
+    "claim": "This is what we say when we receive a gift from someone.",
+    "whyNote": "Correct — <strong>谢谢 (xièxiè)</strong> means \"thank you,\" used whenever someone does something for you, including giving you a gift."
+   }
+  ]
+ },
+ "review": [
+  {
+   "path": "vocab[0]",
+   "pt": "olá",
+   "en": "hello",
+   "conf": "media",
+   "why": "nǐ hǎo; fine, listed for register check only"
+  },
+  {
+   "path": "vocab[1]",
+   "pt": "tchau / até logo",
+   "en": "goodbye / see you later",
+   "conf": "media",
+   "why": "duas glosas PT; ordem de registro"
+  },
+  {
+   "path": "vocab[2]",
+   "pt": "obrigado(a)",
+   "en": "thank you",
+   "conf": "media",
+   "why": "PT marca gênero; inglês não tem equivalente"
+  },
+  {
+   "path": "vocab[4]",
+   "pt": "desculpe",
+   "en": "sorry / excuse me",
+   "conf": "media",
+   "why": "várias traduções corretas"
+  },
+  {
+   "path": "vocab[5]",
+   "pt": "tudo bem / não tem problema",
+   "en": "it's okay / no problem",
+   "conf": "media",
+   "why": "várias traduções corretas"
+  },
+  {
+   "path": "vocab[7]",
+   "pt": "boa noite (saudação)",
+   "en": "good evening (greeting)",
+   "conf": "media",
+   "why": "PT 'boa noite' cobre evening; 'good night' seria despedida"
+  },
+  {
+   "path": "phrases[0]",
+   "pt": "Olá! Eu me chamo Brune.",
+   "en": "Hello! My name is Brune.",
+   "conf": "media",
+   "why": "idiomático"
+  },
+  {
+   "path": "phrases[3]",
+   "pt": "Ah, sim! Eu também.",
+   "en": "Oh, yes! Me too.",
+   "conf": "media",
+   "why": "是啊 = 'yes, indeed'; várias traduções"
+  },
+  {
+   "path": "concepts.duibuqi-buhaoyisi[0].examples[0]",
+   "pt": "foi mal / com licença",
+   "en": "my bad / excuse me",
+   "conf": "media",
+   "why": "idiomático; 'foi mal' -> 'my bad' (informal)"
+  },
+  {
+   "path": "concepts.duibuqi-buhaoyisi[0].body",
+   "pt": "quase como 'foi mal'",
+   "en": "a bit like 'my bad' or 'excuse me'",
+   "conf": "media",
+   "why": "adaptado do português"
+  },
+  {
+   "path": "concepts.bu-negation[0].body",
+   "pt": "Diferente do português, não muda de forma...",
+   "en": "不 doesn't change with person or tense and needs no helper verb (no don't/doesn't)",
+   "conf": "media",
+   "why": "Removed the PT-based contrast (\"different from Portuguese\"); English-based note about helper verbs instead."
+  },
+  {
+   "path": "concepts.zaoshang-hao-zao[0].examples[0]",
+   "pt": "bom dia (informal, curto)",
+   "en": "good morning (informal, short)",
+   "conf": "media",
+   "why": "cultural/registro"
+  }
+ ]
+}

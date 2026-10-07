@@ -234,9 +234,9 @@ function openFlashcardResetConfirm(onConfirm){
 // só o TEXTO de apoio embaixo do rótulo, explicando onde cada recurso aparece
 // NAQUELE modo específico -- nenhuma mudança de visibilidade/comportamento.
 const FLASHCARD_RESOURCES_HINT = {
-  flip: 'Imagem e áudio aparecem junto da frente do cartão. Nota é um lembrete só seu -- o aluno nunca vê.',
-  mc: 'Imagem e áudio aparecem junto da pergunta, acima das opções de múltipla escolha. Nota é um lembrete só seu -- o aluno nunca vê.',
-  cloze: 'Imagem e áudio aparecem junto da frase com a lacuna. Nota é um lembrete só seu -- o aluno nunca vê.',
+  get flip(){ return t('admin.flashcards.hint.flip'); },
+  get mc(){ return t('admin.flashcards.hint.mc'); },
+  get cloze(){ return t('admin.flashcards.hint.cloze'); },
 };
 
 // Fase 6D.2 da reestruturação Note/CardType/CardInstance (ver CLAUDE.md) --
@@ -251,11 +251,11 @@ const FLASHCARD_RESOURCES_HINT = {
 // persistência nativa (gravar fields/card_generation_mode de verdade) é a
 // Fase 6D.6, o editor de Fields completo é a 6D.3+.
 const CARD_TYPE_UI_META = [
-  { id: 'normal', label: 'Normal' },
-  { id: 'normal_reversed', label: 'Normal com reverso' },
-  { id: 'multiple_choice', label: 'Múltipla escolha' },
-  { id: 'type_answer', label: 'Digite a resposta' },
-  { id: 'cloze', label: 'Completar a frase (Cloze)' },
+  { id: 'normal', get label(){ return t('admin.flashcards.cardType.normal'); } },
+  { id: 'normal_reversed', get label(){ return t('admin.flashcards.cardType.normalReversed'); } },
+  { id: 'multiple_choice', get label(){ return t('admin.flashcards.cardType.multipleChoice'); } },
+  { id: 'type_answer', get label(){ return t('admin.flashcards.cardType.typeAnswer'); } },
+  { id: 'cloze', get label(){ return t('admin.flashcards.cardType.cloze'); } },
 ];
 
 // CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- matriz Free/Premium aprovada no
@@ -287,30 +287,30 @@ function adminFlashcardDirectionLabels(selectedStudents){
   const pair = eligibleKeys.length === 1 ? FLASHCARD_DIRECTION_LANGUAGE_LABELS[eligibleKeys[0]] : null;
   if (!pair){
     return {
-      targetFirst: 'Frente no idioma estudado, verso na tradução (padrão)',
-      nativeFirst: 'Frente na tradução, verso no idioma estudado',
+      targetFirst: t('myFlashcards.dir.generic.targetFirst'),
+      nativeFirst: t('myFlashcards.dir.generic.nativeFirst'),
     };
   }
   return {
-    targetFirst: `Frente em ${pair.target} (com áudio), verso com tradução em ${pair.native}`,
-    nativeFirst: `Frente na tradução em ${pair.native}, verso em ${pair.target} (com áudio)`,
+    targetFirst: t('myFlashcards.dir.targetFirst', { target: myFlashcardLangName(pair.target), native: myFlashcardLangName(pair.native) }),
+    nativeFirst: t('myFlashcards.dir.nativeFirst', { target: myFlashcardLangName(pair.target), native: myFlashcardLangName(pair.native) }),
   };
 }
 
 function flashcardStudentLabel(s){
   return s.display_name
     ? `${escapeHTML(s.display_name)} (@${escapeHTML(s.username || '?')})`
-    : `@${escapeHTML(s.username || '(usuário removido)')}`;
+    : `@${escapeHTML(s.username || t('admin.common.removedUser'))}`;
 }
 
 // Badges curtos indicando os formatos extras do cartão, só quando
 // presentes (cartão comum não ganha nenhum badge novo).
 function flashcardFormatBadgesHTML(c){
   return [
-    c.image_url ? '🖼️ imagem' : '',
-    c.audio_url ? '🎧 áudio' : '',
-    (c.choices && c.choices.length) ? '🔤 múltipla escolha' : '',
-    c.cloze_sentence ? '📝 completar frase' : '',
+    c.image_url ? t('admin.flashcards.badge.image') : '',
+    c.audio_url ? t('admin.flashcards.badge.audio') : '',
+    (c.choices && c.choices.length) ? t('admin.flashcards.badge.mc') : '',
+    c.cloze_sentence ? t('admin.flashcards.badge.cloze') : '',
   ].filter(Boolean).join(' · ');
 }
 
@@ -345,25 +345,25 @@ function flashcardEditFormHTML(c){
   const choices = c.choices || [];
   return `
     <div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:8px;">
-      <div class="section-label" style="margin:0;">Editar cartão</div>
-      <button type="button" class="admin-select-link" id="edit-flashcard-use-native" style="align-self:flex-start; background:none; border:none; cursor:pointer; padding:0;">🧪 Usar o novo editor de campos (nativo) -- preserva o conteúdo já digitado</button>
+      <div class="section-label" style="margin:0;">${t('admin.flashcards.edit.title')}</div>
+      <button type="button" class="admin-select-link" id="edit-flashcard-use-native" style="align-self:flex-start; background:none; border:none; cursor:pointer; padding:0;">${t('myFlashcards.edit.useNative')}</button>
       <p class="profile-edit-error" id="edit-flashcard-use-native-error"></p>
 
       <div>
         <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
-          <input type="radio" name="edit-flashcard-mode" value="flip" ${mode === 'flip' ? 'checked' : ''}> Flashcard normal
+          <input type="radio" name="edit-flashcard-mode" value="flip" ${mode === 'flip' ? 'checked' : ''}>${t('admin.flashcards.edit.modeFlip')}
         </label>
         <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
-          <input type="radio" name="edit-flashcard-mode" value="mc" ${mode === 'mc' ? 'checked' : ''}> Múltipla escolha
+          <input type="radio" name="edit-flashcard-mode" value="mc" ${mode === 'mc' ? 'checked' : ''}>${t('admin.flashcards.edit.modeMc')}
         </label>
         <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
-          <input type="radio" name="edit-flashcard-mode" value="cloze" ${mode === 'cloze' ? 'checked' : ''}> Completar a frase
+          <input type="radio" name="edit-flashcard-mode" value="cloze" ${mode === 'cloze' ? 'checked' : ''}>${t('admin.flashcards.edit.modeCloze')}
         </label>
       </div>
 
       ${!isMandarim ? `
       <div id="edit-flashcard-direction-wrap" style="${mode === 'cloze' ? 'display:none;' : ''}">
-        <div class="section-label" style="margin:0 0 4px;">Idioma de cada lado</div>
+        <div class="section-label" style="margin:0 0 4px;">${t('myFlashcards.edit.sideLanguage')}</div>
         <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
           <input type="radio" name="edit-flashcard-direction" value="target-front" ${direction === 'target-front' ? 'checked' : ''}> ${adminFlashcardDirectionLabels([c]).targetFirst}
         </label>
@@ -373,48 +373,48 @@ function flashcardEditFormHTML(c){
       </div>` : ''}
 
       <div id="edit-flashcard-content-main" style="${mode === 'cloze' ? 'display:none;' : ''}">
-        <label class="profile-edit-label" id="edit-flashcard-front-label">${mode === 'mc' ? 'Pergunta/termo' : 'Frente'}</label>
+        <label class="profile-edit-label" id="edit-flashcard-front-label">${mode === 'mc' ? t('admin.flashcards.edit.question') : t('myFlashcards.edit.front')}</label>
         <textarea id="edit-flashcard-front" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(c.front || '')}</textarea>
         ${isMandarim ? `
-        <label class="profile-edit-label">Pinyin</label>
+        <label class="profile-edit-label">${t('myFlashcards.edit.pinyin')}</label>
         <input type="text" id="edit-flashcard-pinyin" class="profile-edit-input" value="${escapeHTML(c.front_pinyin || '')}">` : ''}
-        <label class="profile-edit-label" id="edit-flashcard-back-label">${mode === 'mc' ? 'Resposta correta' : 'Verso'}</label>
+        <label class="profile-edit-label" id="edit-flashcard-back-label">${mode === 'mc' ? t('mcEditor.answerLabel') : t('myFlashcards.edit.back')}</label>
         <textarea id="edit-flashcard-back" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(c.back_trans || '')}</textarea>
         <div id="edit-flashcard-mc-fields" style="${mode === 'mc' ? '' : 'display:none;'} margin:4px 0 0;">
-          <label class="profile-edit-label">Outras opções -- opção errada 1</label>
+          <label class="profile-edit-label">${t('admin.flashcards.edit.mc1')}</label>
           <input type="text" id="edit-flashcard-mc-1" class="profile-edit-input" value="${escapeHTML(choices[0] || '')}">
-          <label class="profile-edit-label">Opção errada 2 (opcional)</label>
+          <label class="profile-edit-label">${t('admin.flashcards.edit.mc2')}</label>
           <input type="text" id="edit-flashcard-mc-2" class="profile-edit-input" value="${escapeHTML(choices[1] || '')}">
-          <label class="profile-edit-label">Opção errada 3 (opcional)</label>
+          <label class="profile-edit-label">${t('admin.flashcards.edit.mc3')}</label>
           <input type="text" id="edit-flashcard-mc-3" class="profile-edit-input" value="${escapeHTML(choices[2] || '')}">
         </div>
       </div>
 
       <div id="edit-flashcard-content-cloze" style="${mode === 'cloze' ? '' : 'display:none;'}">
-        <label class="profile-edit-label">Frase com lacuna (use ___ pra marcar o espaço)</label>
+        <label class="profile-edit-label">${t('admin.flashcards.edit.clozeSentence')}</label>
         <input type="text" id="edit-flashcard-cloze-sentence" class="profile-edit-input" value="${escapeHTML(c.cloze_sentence || '')}">
-        <label class="profile-edit-label">Resposta certa</label>
+        <label class="profile-edit-label">${t('admin.flashcards.edit.clozeAnswer')}</label>
         <input type="text" id="edit-flashcard-cloze-answer" class="profile-edit-input" value="${escapeHTML(c.cloze_answer || '')}">
         ${isMandarim ? `
-        <label class="profile-edit-label">Pinyin da resposta</label>
+        <label class="profile-edit-label">${t('admin.flashcards.edit.clozePinyin')}</label>
         <input type="text" id="edit-flashcard-cloze-pinyin" class="profile-edit-input" value="${escapeHTML(c.cloze_answer_pinyin || '')}">` : ''}
-        <label class="profile-edit-label">Tradução</label>
+        <label class="profile-edit-label">${t('clozeEditor.translationTitle')}</label>
         <textarea id="edit-flashcard-cloze-trans" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(c.back_trans || '')}</textarea>
       </div>
 
       <div>
-        <label class="profile-edit-label">Nota</label>
+        <label class="profile-edit-label">${t('publicProfile.labelNote')}</label>
         <textarea id="edit-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(c.note || '')}</textarea>
-        <label class="profile-edit-label">Imagem${c.image_url ? ' (já tem uma -- escolha um arquivo só pra trocar)' : ''}</label>
+        <label class="profile-edit-label">${t('admin.flashcards.edit.image')}${c.image_url ? t('admin.flashcards.edit.hasOne') : ''}</label>
         <input type="file" id="edit-flashcard-image" class="profile-edit-input" accept="image/*">
-        <label class="profile-edit-label">Áudio próprio${c.audio_url ? ' (já tem um -- escolha um arquivo só pra trocar)' : ''}</label>
+        <label class="profile-edit-label">${t('admin.flashcards.edit.ownAudio')}${c.audio_url ? t('admin.flashcards.edit.hasOneAudio') : ''}</label>
         <input type="file" id="edit-flashcard-audio" class="profile-edit-input" accept="audio/*">
       </div>
 
       <p class="profile-edit-error" id="edit-flashcard-error"></p>
       <div style="display:flex; gap:10px;">
-        <button type="button" class="btn btn-secondary" id="edit-flashcard-cancel" style="flex:1;">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="edit-flashcard-save" style="flex:1;">Salvar</button>
+        <button type="button" class="btn btn-secondary" id="edit-flashcard-cancel" style="flex:1;">${t('myFlashcards.edit.cancel')}</button>
+        <button type="button" class="btn btn-primary" id="edit-flashcard-save" style="flex:1;">${t('profile.save')}</button>
       </div>
     </div>
   `;
@@ -441,8 +441,8 @@ function wireFlashcardEditForm(c, container){
       if (directionWrap) directionWrap.style.display = mode === 'cloze' ? 'none' : '';
       const frontLabel = document.getElementById('edit-flashcard-front-label');
       const backLabel = document.getElementById('edit-flashcard-back-label');
-      if (frontLabel) frontLabel.textContent = mode === 'mc' ? 'Pergunta/termo' : 'Frente';
-      if (backLabel) backLabel.textContent = mode === 'mc' ? 'Resposta correta' : 'Verso';
+      if (frontLabel) frontLabel.textContent = mode === 'mc' ? t('admin.flashcards.edit.question') : t('myFlashcards.edit.front');
+      if (backLabel) backLabel.textContent = mode === 'mc' ? t('mcEditor.answerLabel') : t('myFlashcards.edit.back');
     });
   });
 
@@ -470,14 +470,6 @@ function wireFlashcardEditForm(c, container){
     // mutar em seguida) -- é contra ISTO que o save compara pra decidir
     // se revision precisa incrementar (ver wireFlashcardNativeEditForm).
     ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = cloneNoteEditorState(ADMIN_FLASHCARDS_STATE.editingNativeState);
-    if (c.image_url){
-      // Seção 10 -- limitação conhecida (registrada em
-      // shared/flashcard-native-persistence.js, attachLegacyMediaToFields):
-      // a URL da imagem é preservada no Field, mas ainda não é exibida na
-      // Revisão pro caminho nativo (gap fora do escopo desta fase) --
-      // avisa em vez de deixar a professora achar que a imagem sumiu.
-      showToast('⚠️ A imagem deste cartão foi preservada nos dados, mas ainda não aparece na tela de Revisão pra cartões do novo editor.');
-    }
     const cardsBox = document.getElementById('admin-flashcards-cards-box');
     const selectedStudents = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
     cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
@@ -501,18 +493,18 @@ function wireFlashcardEditForm(c, container){
     const direction = container.querySelector('input[name="edit-flashcard-direction"]:checked')?.value || 'target-front';
 
     if (!isCloze){
-      if (!document.getElementById('edit-flashcard-front').value.trim()){ errorEl.textContent = 'Digite a frente.'; return; }
-      if (!document.getElementById('edit-flashcard-back').value.trim()){ errorEl.textContent = 'Digite o verso.'; return; }
+      if (!document.getElementById('edit-flashcard-front').value.trim()){ errorEl.textContent = t('admin.flashcards.edit.err.front'); return; }
+      if (!document.getElementById('edit-flashcard-back').value.trim()){ errorEl.textContent = t('admin.flashcards.edit.err.back'); return; }
       if (isMC){
         const anyChoice = ['edit-flashcard-mc-1', 'edit-flashcard-mc-2', 'edit-flashcard-mc-3'].some(id => document.getElementById(id).value.trim());
-        if (!anyChoice){ errorEl.textContent = 'Digite pelo menos 1 opção errada.'; return; }
+        if (!anyChoice){ errorEl.textContent = t('admin.flashcards.edit.err.oneWrongOption'); return; }
       }
     } else {
       const sentence = document.getElementById('edit-flashcard-cloze-sentence').value.trim();
-      if ((sentence.match(/___/g) || []).length !== 1){ errorEl.textContent = 'A frase precisa ter exatamente um espaço marcado com ___.'; return; }
-      if (!document.getElementById('edit-flashcard-cloze-answer').value.trim()){ errorEl.textContent = 'Digite a resposta certa.'; return; }
-      if (isMandarim && !document.getElementById('edit-flashcard-cloze-pinyin').value.trim()){ errorEl.textContent = 'Digite o pinyin da resposta.'; return; }
-      if (!document.getElementById('edit-flashcard-cloze-trans').value.trim()){ errorEl.textContent = 'Digite a tradução.'; return; }
+      if ((sentence.match(/___/g) || []).length !== 1){ errorEl.textContent = t('admin.flashcards.edit.err.oneBlank'); return; }
+      if (!document.getElementById('edit-flashcard-cloze-answer').value.trim()){ errorEl.textContent = t('admin.flashcards.edit.err.answer'); return; }
+      if (isMandarim && !document.getElementById('edit-flashcard-cloze-pinyin').value.trim()){ errorEl.textContent = t('admin.flashcards.edit.err.pinyin'); return; }
+      if (!document.getElementById('edit-flashcard-cloze-trans').value.trim()){ errorEl.textContent = t('admin.flashcards.edit.err.trans'); return; }
     }
 
     openFlashcardResetConfirm(async () => {
@@ -557,7 +549,7 @@ function wireFlashcardEditForm(c, container){
       });
       if (saveBtn) saveBtn.disabled = false;
       if (!result.ok){ errorEl.textContent = result.error; return; }
-      showToast('✓ Cartão editado. O progresso de revisão foi reiniciado.');
+      showToast(t('myFlashcards.toast.editedReset'));
       ADMIN_FLASHCARDS_STATE.editingCardId = null;
       updateFlashcardsSelectionDependentUI(document.getElementById('admin-flashcards-content'));
     });
@@ -578,21 +570,21 @@ function wireFlashcardEditForm(c, container){
 function flashcardNativeEditFormHTML(c, editorState){
   return `
     <div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:8px;">
-      <div class="section-label" style="margin:0;">Editar cartão (editor nativo)</div>
-      <p class="profile-edit-hint" style="margin:0;">Este cartão usa o novo modelo de campos -- editando aqui, o conteúdo é gravado em fields/card_generation_mode, nunca nas colunas antigas.</p>
-      <div class="section-label" style="margin:6px 0 4px;">Card Type</div>
+      <div class="section-label" style="margin:0;">${t('myFlashcards.native.title')}</div>
+      <p class="profile-edit-hint" style="margin:0;">${t('myFlashcards.native.hint')}</p>
+      <div class="section-label" style="margin:6px 0 4px;">${t('myFlashcards.native.cardType')}</div>
       <select id="edit-native-flashcard-card-type" class="profile-edit-input">
         ${CARD_TYPE_UI_META.map(t => `<option value="${t.id}" ${t.id === editorState.cardGenerationMode ? 'selected' : ''}>${t.label}</option>`).join('')}
       </select>
       <div id="edit-native-flashcard-fields"></div>
       <div id="edit-native-flashcard-tags"></div>
-      <button type="button" class="admin-select-link" id="edit-native-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; align-self:flex-start; padding:0;">👁️ Pré-visualizar</button>
-      <label class="profile-edit-label">Nota (privada -- o aluno nunca vê)</label>
+      <button type="button" class="admin-select-link" id="edit-native-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; align-self:flex-start; padding:0;">${t('myFlashcards.preview')}</button>
+      <label class="profile-edit-label">${t('admin.flashcards.native.privateNote')}</label>
       <textarea id="edit-native-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(editorState.privateNote || '')}</textarea>
       <p class="profile-edit-error" id="edit-native-flashcard-error"></p>
       <div style="display:flex; gap:10px;">
-        <button type="button" class="btn btn-secondary" id="edit-native-flashcard-cancel" style="flex:1;">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="edit-native-flashcard-save" style="flex:1;">Salvar</button>
+        <button type="button" class="btn btn-secondary" id="edit-native-flashcard-cancel" style="flex:1;">${t('myFlashcards.edit.cancel')}</button>
+        <button type="button" class="btn btn-primary" id="edit-native-flashcard-save" style="flex:1;">${t('profile.save')}</button>
       </div>
     </div>
   `;
@@ -680,7 +672,7 @@ function wireFlashcardNativeEditForm(c, editorState, container){
         return;
       }
       clearFreshMediaUploads(editorState);
-      showToast(nextRevision > (c.revision || 0) ? '✓ Cartão editado. O progresso de revisão foi reiniciado.' : '✓ Cartão editado.');
+      showToast(nextRevision > (c.revision || 0) ? t('myFlashcards.toast.editedReset') : t('myFlashcards.toast.edited'));
       ADMIN_FLASHCARDS_STATE.editingCardId = null;
       ADMIN_FLASHCARDS_STATE.editingNativeState = null;
       ADMIN_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
@@ -741,7 +733,7 @@ function teacherTreeForStudent(studentId, languageAppKey){
 }
 
 function teacherDeckLabel(deck){
-  return deck.kind === 'teacher_root' ? 'Cartões da professora (padrão)' : deck.name;
+  return deck.kind === 'teacher_root' ? t('admin.flashcards.dest.rootDefault') : deck.name;
 }
 
 function teacherDeckOptionsHTML(tree, selectedId){
@@ -753,9 +745,9 @@ function teacherDeckOptionsHTML(tree, selectedId){
 
 // Rótulo do Deck de um cartão já criado (destino sempre visível na lista).
 function teacherCardDeckLabelHTML(c){
-  if (c.deck_id == null) return '📂 <em>sem Deck (cartão anterior aos Decks)</em> · ';
+  if (c.deck_id == null) return t('admin.flashcards.dest.noDeck');
   const deck = getDeckById(ADMIN_FLASHCARDS_STATE.decksByLang[c.language_app_key] || [], c.deck_id);
-  return `📂 ${escapeHTML(deck ? teacherDeckLabel(deck) : 'Deck')} · `;
+  return `📂 ${escapeHTML(deck ? teacherDeckLabel(deck) : t('admin.flashcards.dest.deckFallback'))} · `;
 }
 
 // Mover cartão entre Teacher Decks do MESMO aluno (a Note inteira -- os
@@ -764,8 +756,8 @@ function teacherCardDeckLabelHTML(c){
 function teacherCardMoveSelectHTML(c){
   const tree = teacherTreeForStudent(c.student_id, c.language_app_key);
   if (!tree.length) return '';
-  return `<select class="profile-edit-input" data-move-card="${c.id}" title="Mover este cartão para outro Deck deste aluno" style="width:auto; max-width:190px; padding:2px 4px;">
-    <option value="">Mover para…</option>
+  return `<select class="profile-edit-input" data-move-card="${c.id}" title="${t('admin.flashcards.dest.moveTitle')}" style="width:auto; max-width:190px; padding:2px 4px;">
+    <option value="">${t('admin.flashcards.dest.moveTo')}</option>
     ${orderedTeacherDecks(tree, tree).filter(({ deck }) => deck.id !== c.deck_id).map(({ deck, depth }) =>
       `<option value="${deck.id}">${'  '.repeat(depth)}${escapeHTML(teacherDeckLabel(deck))}</option>`).join('')}
   </select>`;
@@ -790,23 +782,23 @@ async function fillTeacherTreeLists(box, selected, problems){
       const kids = tree.filter(d => d.parent_deck_id === deck.id).length;
       const deletable = deck.kind === 'teacher' && kids === 0 && own === 0;
       const del = deck.kind === 'teacher'
-        ? `<button type="button" class="admin-badge-delete-btn" data-tree-delete="${deck.id}" ${deletable ? '' : 'disabled'} title="${deletable ? 'Apagar este Deck (vazio)' : 'Só é possível apagar um Deck sem subdecks e sem cartões'}">🗑</button>`
+        ? `<button type="button" class="admin-badge-delete-btn" data-tree-delete="${deck.id}" ${deletable ? '' : 'disabled'} title="${deletable ? t('admin.flashcards.dest.deleteTitle') : t('admin.flashcards.dest.deleteDisabledTitle')}">🗑</button>`
         : '';
       return `<div class="admin-badge-row" data-tree-row="${deck.id}" style="padding-left:${depth * 16}px;">
-        <span style="flex:1;">${escapeHTML(teacherDeckLabel(deck))} <span class="profile-edit-hint">(${own} cartão(ões)${kids ? `, ${kids} subdeck(s)` : ''})</span></span>${del}
+        <span style="flex:1;">${escapeHTML(teacherDeckLabel(deck))} <span class="profile-edit-hint">${t('admin.flashcards.dest.countCards', { n: own })}${kids ? t('admin.flashcards.dest.countSubdecks', { n: kids }) : ''})</span></span>${del}
       </div>`;
     }).join('');
-    holder.innerHTML = `<div class="section-label">Árvore de Decks</div>${rows}`;
+    holder.innerHTML = `<div class="section-label">${t('admin.flashcards.dest.treeTitle')}</div>${rows}`;
     holder.querySelectorAll('[data-tree-delete]').forEach(btn => {
       btn.addEventListener('click', async () => {
         const list = S.decksByLang[s.language_app_key] || [];
         const deck = getDeckById(list, Number(btn.dataset.treeDelete));
-        if (!deck || !confirm(`Apagar o Deck "${deck.name}"? Ele está vazio.`)) return;
+        if (!deck || !confirm(t('admin.flashcards.dest.deleteConfirm', { name: deck.name }))) return;
         const res = await deleteTeacherDeck({ deck, decks: list });
-        if (!res.ok){ showToast(res.error || 'Não foi possível apagar o Deck.'); return; }
+        if (!res.ok){ showToast(res.error || t('admin.flashcards.dest.deleteFailed')); return; }
         S.decksByLang[s.language_app_key] = list.filter(d => d.id !== deck.id);
         if (S.destByStudent[adminDestKey(s)] === deck.id) delete S.destByStudent[adminDestKey(s)];
-        showToast('✓ Deck apagado.');
+        showToast(t('admin.flashcards.dest.deleted'));
         renderTeacherDestinationRows(box, selected, problems || {});
       });
     });
@@ -824,13 +816,13 @@ function renderTeacherDestinationRows(box, selected, problems){
     const chosen = tree.some(d => d.id === S.destByStudent[adminDestKey(s)]) ? S.destByStudent[adminDestKey(s)] : (root ? root.id : null);
     return `<div class="admin-badge-row" data-dest-row="${s.student_id}" style="flex-direction:column; align-items:stretch; gap:6px;">
       ${head}
-      <select class="profile-edit-input" data-dest-select="${s.student_id}" aria-label="Deck de destino de ${escapeHTML(s.username || '')}">${teacherDeckOptionsHTML(tree, chosen)}</select>
+      <select class="profile-edit-input" data-dest-select="${s.student_id}" aria-label="${t('admin.flashcards.dest.destAria', { username: s.username || '' })}">${teacherDeckOptionsHTML(tree, chosen)}</select>
       <div style="display:flex; gap:6px; flex-wrap:wrap;">
-        <input type="text" class="profile-edit-input" data-dest-subname="${s.student_id}" placeholder="Nome do novo subdeck (dentro do Deck escolhido)" maxlength="60" style="flex:1; min-width:140px;">
-        <button type="button" class="btn btn-secondary" data-dest-newsub="${s.student_id}">+ Subdeck</button>
+        <input type="text" class="profile-edit-input" data-dest-subname="${s.student_id}" placeholder="${t('admin.flashcards.dest.subnamePlaceholder')}" maxlength="60" style="flex:1; min-width:140px;">
+        <button type="button" class="btn btn-secondary" data-dest-newsub="${s.student_id}">${t('admin.flashcards.dest.newSub')}</button>
       </div>
       <p class="profile-edit-error" data-dest-err="${s.student_id}"></p>
-      <div data-tree-list="${s.student_id}" aria-label="Árvore de Decks de ${escapeHTML(s.username || '')}"></div>
+      <div data-tree-list="${s.student_id}" aria-label="${t('admin.flashcards.dest.treeAria', { username: s.username || '' })}"></div>
     </div>`;
   }).join('');
   // Fase H (H1/H4) -- árvore visível por aluno+idioma, com exclusão de
@@ -851,7 +843,7 @@ function renderTeacherDestinationRows(box, selected, problems){
       list.push(res.deck);
       S.destByStudent[adminDestKey(s)] = res.deck.id;
       renderTeacherDestinationRows(box, selected, problems);
-      showToast('✓ Subdeck criado.');
+      showToast(t('admin.flashcards.dest.subCreated'));
     });
   });
 }
@@ -865,10 +857,10 @@ async function refreshTeacherDestinationsUI(){
   const selected = adminSelectedStudents(S._studentsCache);
   const token = ++S._destToken;
   if (!selected.length){
-    box.innerHTML = '<p class="profile-edit-hint">Selecione ao menos um aluno para escolher o Deck de destino.</p>';
+    box.innerHTML = `<p class="profile-edit-hint">${t('admin.flashcards.dest.pickStudent')}</p>`;
     return;
   }
-  box.innerHTML = '<p class="profile-edit-hint">Preparando os Decks…</p>';
+  box.innerHTML = `<p class="profile-edit-hint">${t('admin.flashcards.dest.preparing')}</p>`;
   const problems = {};
   const freshLangs = new Set();
   await Promise.all(selected.map(async s => {
@@ -925,15 +917,15 @@ function flashcardCardRowHTML(c, showUsername){
     <div class="admin-badge-row">
       <div class="admin-badge-info">
         <div class="admin-badge-name">${showUsername ? `<span style="opacity:.6">@${escapeHTML(c.__studentUsername || '?')}</span> · ` : ''}${flashcardFrontSummaryHTML(c)} → ${escapeHTML(c.back_trans)}</div>
-        <div class="admin-badge-desc">${teacherCardDeckLabelHTML(c)}${c.note ? escapeHTML(c.note) + ' · ' : ''}criado em ${new Date(c.created_at).toLocaleDateString('pt-BR')}${flashcardFormatBadgesHTML(c) ? ' · ' + flashcardFormatBadgesHTML(c) : ''}</div>
+        <div class="admin-badge-desc">${teacherCardDeckLabelHTML(c)}${c.note ? escapeHTML(c.note) + ' · ' : ''}${t('myFlashcards.row.createdOn', { date: fmtDate(c.created_at) })}${flashcardFormatBadgesHTML(c) ? ' · ' + flashcardFormatBadgesHTML(c) : ''}</div>
         ${(c.tags && c.tags.length) ? `<div data-row-tags style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">${noteTagChipsHTML(c.tags)}</div>` : ''}
       </div>
       <div style="display:flex; gap:6px; align-items:center;">
         ${teacherCardMoveSelectHTML(c)}
-        <button class="admin-badge-delete-btn" data-preview-flashcard="${c.id}" title="Pré-visualizar como o aluno vai ver na Revisão">👁</button>
-        <button class="admin-badge-delete-btn" data-edit-flashcard="${c.id}" title="Editar">✏️</button>
-        ${c.status === 'archived' ? `<button class="admin-badge-delete-btn" data-toggle-flashcard="${c.id}" data-next-status="active" title="Reativar (tirar do arquivo histórico)">↺</button>` : ''}
-        <button class="admin-badge-delete-btn" data-delete-flashcard="${c.id}" title="Apagar permanentemente">🗑</button>
+        <button class="admin-badge-delete-btn" data-preview-flashcard="${c.id}" title="${t('admin.flashcards.row.previewTitle')}">👁</button>
+        <button class="admin-badge-delete-btn" data-edit-flashcard="${c.id}" title="${t('myFlashcards.row.editTitle')}">✏️</button>
+        ${c.status === 'archived' ? `<button class="admin-badge-delete-btn" data-toggle-flashcard="${c.id}" data-next-status="active" title="${t('myFlashcards.row.reactivateTitle')}">↺</button>` : ''}
+        <button class="admin-badge-delete-btn" data-delete-flashcard="${c.id}" title="${t('myFlashcards.row.deleteTitle')}">🗑</button>
       </div>
     </div>
   `;
@@ -967,12 +959,12 @@ async function buildFlashcardsCardsBoxHTML(selectedStudents){
   // existir, mas nenhum daqui pra frente).
   return `
     <div class="profile-section">
-      <div class="section-label">Cartões ativos (${activeCards.length})</div>
-      ${activeCards.length ? activeCards.map(c => flashcardCardRowHTML(c, showUsername)).join('') : `<p class="profile-empty-note">Nenhum cartão ainda pra${selectedStudents.length > 1 ? ' esses alunos' : selectedStudents.length === 1 ? ' este aluno' : ' nenhum aluno selecionado'}.</p>`}
+      <div class="section-label">${t('admin.flashcards.list.activeTitle', { n: activeCards.length })}</div>
+      ${activeCards.length ? activeCards.map(c => flashcardCardRowHTML(c, showUsername)).join('') : `<p class="profile-empty-note">${t('admin.flashcards.list.emptyFor')}${adminEmptyForSuffix(selectedStudents.length)}.</p>`}
     </div>
     ${archivedCards.length ? `
     <div class="profile-section">
-      <div class="section-label">Arquivados historicamente (${archivedCards.length})</div>
+      <div class="section-label">${t('myFlashcards.archived.title', { n: archivedCards.length })}</div>
       ${archivedCards.map(c => flashcardCardRowHTML(c, showUsername)).join('')}
     </div>` : ''}
   `;
@@ -990,7 +982,7 @@ function wireFlashcardsCardsBox(cardsBox){
     btn.addEventListener('click', () => {
       const id = Number(btn.dataset.previewFlashcard);
       const card = ADMIN_FLASHCARDS_STATE._cardsCache.find(c => c.id === id);
-      if (!card){ openFlashcardPreviewWithError('Não foi possível carregar este cartão pra pré-visualizar.'); return; }
+      if (!card){ openFlashcardPreviewWithError(t('myFlashcards.err.previewLoad')); return; }
       openFlashcardPreviewFromRow(card, { appKey: card.language_app_key, origin: 'teacher' });
     });
   });
@@ -1000,9 +992,9 @@ function wireFlashcardsCardsBox(cardsBox){
       const card = ADMIN_FLASHCARDS_STATE._cardsCache.find(c => c.id === Number(sel.dataset.moveCard));
       const list = card ? (ADMIN_FLASHCARDS_STATE.decksByLang[card.language_app_key] || []) : [];
       const destination = getDeckById(list, Number(sel.value));
-      const res = card ? await setTeacherFlashcardDeck({ note: card, destination, decks: list }) : { ok: false, error: 'Cartão não encontrado.' };
-      if (!res.ok){ showToast(res.error || 'Não foi possível mover o cartão.'); sel.value = ''; return; }
-      showToast('✓ Cartão movido.');
+      const res = card ? await setTeacherFlashcardDeck({ note: card, destination, decks: list }) : { ok: false, error: t('admin.flashcards.move.notFound') };
+      if (!res.ok){ showToast(res.error || t('admin.flashcards.move.failed')); sel.value = ''; return; }
+      showToast(t('admin.flashcards.move.moved'));
       const selectedStudents = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
       cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
       wireFlashcardsCardsBox(cardsBox);
@@ -1036,9 +1028,9 @@ function wireFlashcardsCardsBox(cardsBox){
   });
   cardsBox.querySelectorAll('[data-delete-flashcard]').forEach(btn => {
     btn.addEventListener('click', async () => {
-      if (!confirm('Isso vai apagar o cartão e todo o histórico de revisão permanentemente. Não pode ser desfeito. Continuar?')) return;
+      if (!confirm(t('myFlashcards.confirm.delete'))) return;
       await deleteFlashcardPermanently(btn.dataset.deleteFlashcard);
-      showToast('Cartão apagado.');
+      showToast(t('admin.flashcards.delete.deleted'));
       const selectedStudents = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
       cardsBox.innerHTML = await buildFlashcardsCardsBoxHTML(selectedStudents);
       wireFlashcardsCardsBox(cardsBox);
@@ -1080,11 +1072,7 @@ async function updateFlashcardsSelectionDependentUI(wrap){
   // dispara re-render da caixa "Campos" (que só re-renderiza por sua
   // própria mudança estrutural).
   ADMIN_FLASHCARDS_STATE.nativeCardState.languageAppKey = anyMandarim ? 'mandarim' : null;
-  const selectionCountLabel = selectedStudents.length === 0
-    ? 'Nenhum aluno selecionado'
-    : selectedStudents.length === 1
-      ? '1 aluno selecionado'
-      : `${selectedStudents.length} alunos selecionados`;
+  const selectionCountLabel = adminSelectionCountLabel(selectedStudents.length);
 
   const counterEl = document.getElementById('admin-flashcard-selection-counter');
   if (counterEl) counterEl.textContent = selectionCountLabel;
@@ -1092,7 +1080,7 @@ async function updateFlashcardsSelectionDependentUI(wrap){
   const subtitleEl = document.getElementById('admin-flashcard-content-subtitle');
   if (subtitleEl) subtitleEl.textContent = selectedStudents.length === 1
     ? ` -- ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
-    : selectedStudents.length > 1 ? ` -- ${selectedStudents.length} alunos selecionados` : '';
+    : selectedStudents.length > 1 ? ` -- ${tp('admin.common.selectedCount', selectedStudents.length)}` : '';
 
   const contentHint = document.getElementById('admin-flashcard-content-hint');
   if (contentHint) contentHint.style.display = selectedStudents.length ? 'none' : '';
@@ -1100,7 +1088,7 @@ async function updateFlashcardsSelectionDependentUI(wrap){
   const btn = document.getElementById('admin-create-flashcard-btn');
   if (btn){
     btn.disabled = !selectedStudents.length;
-    btn.textContent = `Criar cartão${selectedStudents.length > 1 ? ` pra ${selectedStudents.length} alunos` : ''}`;
+    btn.textContent = `${t('myFlashcards.create')}${adminForStudentsSuffix(selectedStudents.length)}`;
   }
 
   await refreshTeacherDestinationsUI();
@@ -1140,7 +1128,7 @@ async function renderAdminFlashcardsView(){
   const wrap = document.getElementById('admin-flashcards-content');
   if (!wrap) return;
   if (!isAdminUser()){
-    wrap.innerHTML = `<p class="profile-empty-note">Esta tela é só pra administração da plataforma.</p>`;
+    wrap.innerHTML = `<p class="profile-empty-note">${t('admin.common.adminOnly')}</p>`;
     return;
   }
   // Fase 6D.2 (ver CLAUDE.md) -- nativeCardState reinicia a cada render
@@ -1161,7 +1149,7 @@ async function renderAdminFlashcardsView(){
   // não cria Teacher Decks nem Teacher Cards (o banco também recusa, 055).
   const students = (await fetchMyStudents()).filter(x => x.status === 'active');
   if (!students.length){
-    wrap.innerHTML = `<p class="profile-empty-note">Vincule um aluno primeiro, na aba "🎓 Alunos", pra poder criar flashcards pra ele.</p>`;
+    wrap.innerHTML = `<p class="profile-empty-note">${t('admin.flashcards.linkFirst')}</p>`;
     return;
   }
   ADMIN_FLASHCARDS_STATE._studentsCache = students;
@@ -1185,11 +1173,7 @@ async function renderAdminFlashcardsView(){
   // mandarim precisa) -- nunca escolhe um idioma "representante" arbitrário
   // pra seleção mista, só o booleano relevante pra validação.
   ADMIN_FLASHCARDS_STATE.nativeCardState.languageAppKey = anyMandarim ? 'mandarim' : null;
-  const selectionCountLabel = selectedStudents.length === 0
-    ? 'Nenhum aluno selecionado'
-    : selectedStudents.length === 1
-      ? '1 aluno selecionado'
-      : `${selectedStudents.length} alunos selecionados`;
+  const selectionCountLabel = adminSelectionCountLabel(selectedStudents.length);
 
   // Filtro de idioma: pills construídas a partir dos idiomas REALMENTE
   // presentes nos alunos desta professora (nunca hardcoded fr/pt/mandarim)
@@ -1204,7 +1188,7 @@ async function renderAdminFlashcardsView(){
   // criação. Sempre exatamente 1 idioma ativo quando há 2+ presentes -- o
   // filtro deixa de ser "visualização", vira a própria trava de seleção.
   const langFilterHTML = langsPresent.length > 1 ? `
-    <div class="leaderboard-tabs" role="tablist" aria-label="Filtrar por idioma" style="justify-content:flex-start; margin-bottom:8px;">
+    <div class="leaderboard-tabs" role="tablist" aria-label="${t('admin.common.langFilterAria')}" style="justify-content:flex-start; margin-bottom:8px;">
       ${langsPresent.map(key => `<button type="button" class="leaderboard-tab ${ADMIN_FLASHCARDS_STATE.langFilter === key ? 'active' : ''}" data-lang-filter="${key}">${STUDENT_LANGUAGE_LABELS[key] || key} (${students.filter(s => s.language_app_key === key).length})</button>`).join('')}
     </div>
   ` : '';
@@ -1222,36 +1206,36 @@ async function renderAdminFlashcardsView(){
   const newCardSubtitle = selectedStudents.length === 1
     ? ` -- ${STUDENT_LANGUAGE_LABELS[selectedStudents[0].language_app_key] || selectedStudents[0].language_app_key}`
     : selectedStudents.length > 1
-      ? ` -- ${selectedStudents.length} alunos selecionados`
+      ? ` -- ${tp('admin.common.selectedCount', selectedStudents.length)}`
       : '';
 
   wrap.innerHTML = `
     <div class="profile-section">
-      <div class="section-label">Alunos</div>
-      <p class="profile-edit-hint">Selecione os alunos que vão receber este cartão.</p>
+      <div class="section-label">${t('admin.common.students')}</div>
+      <p class="profile-edit-hint">${t('admin.flashcards.pickStudentsHint')}</p>
       <div class="admin-recipients-summary">
         <span class="pill" id="admin-flashcard-selection-counter">${selectionCountLabel}</span>
         <div class="admin-recipients-actions">
-          <a href="#" id="admin-flashcard-select-all" class="admin-select-link">Selecionar todos</a>
-          <a href="#" id="admin-flashcard-select-none" class="admin-select-link">Limpar seleção</a>
+          <a href="#" id="admin-flashcard-select-all" class="admin-select-link">${t('publicProfile.selectAll')}</a>
+          <a href="#" id="admin-flashcard-select-none" class="admin-select-link">${t('publicProfile.clear')}</a>
         </div>
       </div>
       ${langFilterHTML}
-      <input type="text" id="admin-flashcard-search" class="profile-edit-input" placeholder="Buscar por nome ou @usuário..." autocomplete="off" style="margin-bottom:8px;">
+      <input type="text" id="admin-flashcard-search" class="profile-edit-input" placeholder="${t('admin.common.searchPlaceholder')}" autocomplete="off" style="margin-bottom:8px;">
       <div class="profile-edit-input" style="height:auto; max-height:180px; overflow-y:auto; display:flex; flex-direction:column;">
         ${studentCheckboxesHTML}
       </div>
     </div>
 
     <div class="profile-section" id="admin-flashcard-dest-section">
-      <div class="section-label">Destino (Deck de cada aluno)</div>
-      <p class="profile-edit-hint">Cada aluno tem a sua própria árvore de Decks. Por padrão o cartão vai para "Cartões da professora" do aluno; escolha um subdeck se quiser organizar.</p>
+      <div class="section-label">${t('admin.flashcards.destTitle')}</div>
+      <p class="profile-edit-hint">${t('admin.flashcards.destHint')}</p>
       <div id="admin-flashcard-destinations"></div>
     </div>
 
     <div class="profile-section">
-      <div class="section-label">Cartão<span id="admin-flashcard-content-subtitle">${newCardSubtitle}</span></div>
-      <p class="profile-edit-hint" id="admin-flashcard-content-hint" style="${selectedStudents.length ? 'display:none;' : ''}">Selecione ao menos um aluno acima pra poder criar o cartão.</p>
+      <div class="section-label">${t('admin.flashcards.cardTitle')}<span id="admin-flashcard-content-subtitle">${newCardSubtitle}</span></div>
+      <p class="profile-edit-hint" id="admin-flashcard-content-hint" style="${selectedStudents.length ? 'display:none;' : ''}">${t('admin.flashcards.needStudent')}</p>
       <!-- CONSOLIDAÇÃO-1 (ver CLAUDE.md) -- único fluxo de criação: Tipo de
            cartão -> Campos -> Pré-visualizar -> Salvar. O formulário legado
            (Modo de prática/Idioma de cada lado/Frente-Verso/Recursos
@@ -1262,22 +1246,22 @@ async function renderAdminFlashcardsView(){
            próprio -- cada Field agora escolhe seu próprio idioma
            (renderFieldEditorHTML, shared/flashcard-field-editor.js). -->
       <form id="admin-create-flashcard-form" class="profile-edit-form">
-        <div class="section-label" style="margin:0 0 4px;">Tipo de cartão</div>
+        <div class="section-label" style="margin:0 0 4px;">${t('myFlashcards.cardType')}</div>
         <select id="admin-flashcard-card-type-preview" class="profile-edit-input">
           ${CARD_TYPE_UI_META.map(t => `<option value="${t.id}" ${t.id === 'normal' ? 'selected' : ''}>${t.label}</option>`).join('')}
         </select>
 
-        <div class="section-label" style="margin:14px 0 4px;">Campos</div>
-        <p class="profile-edit-hint" style="margin-top:-2px;">Adicione os campos deste cartão -- por exemplo, Frente e Verso pra um cartão Normal. Cada campo tem seu próprio idioma e seus próprios recursos de áudio.</p>
+        <div class="section-label" style="margin:14px 0 4px;">${t('myFlashcards.fields.title')}</div>
+        <p class="profile-edit-hint" style="margin-top:-2px;">${t('myFlashcards.fields.hint')}</p>
         <div id="admin-flashcard-native-fields"></div>
         <div id="admin-flashcard-tags"></div>
-        <button type="button" class="admin-select-link" id="admin-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; margin:6px 0 0;">👁️ Pré-visualizar</button>
+        <button type="button" class="admin-select-link" id="admin-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; margin:6px 0 0;">${t('myFlashcards.preview')}</button>
 
-        <label class="profile-edit-label" for="admin-flashcard-note" style="margin-top:14px;">Nota (privada -- o aluno nunca vê)</label>
-        <textarea id="admin-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="contexto, dica de uso..."></textarea>
+        <label class="profile-edit-label" for="admin-flashcard-note" style="margin-top:14px;">${t('admin.flashcards.native.privateNote')}</label>
+        <textarea id="admin-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="${t('myFlashcards.note.placeholder')}"></textarea>
 
         <p class="profile-edit-error" id="admin-create-flashcard-error"></p>
-        <button type="submit" class="btn btn-primary btn-block" id="admin-create-flashcard-btn" ${selectedStudents.length ? '' : 'disabled'}>Criar cartão${selectedStudents.length > 1 ? ` pra ${selectedStudents.length} alunos` : ''}</button>
+        <button type="submit" class="btn btn-primary btn-block" id="admin-create-flashcard-btn" ${selectedStudents.length ? '' : 'disabled'}>${t('myFlashcards.create')}${adminForStudentsSuffix(selectedStudents.length)}</button>
       </form>
     </div>
 
@@ -1406,7 +1390,7 @@ async function renderAdminFlashcardsView(){
 
     const selectedNow = adminSelectedStudents(ADMIN_FLASHCARDS_STATE._studentsCache);
     if (!selectedNow.length){
-      errorEl.textContent = 'Selecione ao menos um aluno.';
+      errorEl.textContent = t('admin.common.selectAtLeastOne');
       return;
     }
 
@@ -1478,9 +1462,9 @@ async function renderAdminFlashcardsView(){
     clearFreshMediaUploads(nativeState);
     const okCount = results.length - failed.length;
     if (failed.length){
-      showToast(`✓ ${okCount} cartão(ões) criado(s); falhou pra: ${failed.map(f => '@' + (f.student.username || '?')).join(', ')}.`);
+      showToast(t('admin.flashcards.createdPartial', { ok: okCount, failed: failed.map(f => '@' + (f.student.username || '?')).join(', ') }));
     } else {
-      showToast(results.length > 1 ? `✓ ${okCount} cartões criados.` : '✓ Cartão criado.');
+      showToast(results.length > 1 ? t('admin.flashcards.createdN', { n: okCount }) : t('admin.flashcards.created'));
     }
     // Único ponto onde um re-render COMPLETO acontece por causa da seleção
     // -- e é intencional aqui: um submit bem sucedido deve mesmo limpar o

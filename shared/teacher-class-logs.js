@@ -40,7 +40,7 @@ async function createClassLog({ studentId, languageAppKey, classDate, topic, hom
   const cleanObservations = (observations || '').trim();
   const cleanNotes = (notes || '').trim();
   if (!cleanTopic && !cleanHomework && !cleanObservations && !cleanNotes){
-    return { ok: false, error: 'Preencha pelo menos um campo (tópico, lição de casa, observações ou texto livre).' };
+    return { ok: false, error: t('teacherLogs.err.needOneField') };
   }
   const { data, error } = await supabaseClient
     .from('teacher_class_logs')
@@ -56,7 +56,7 @@ async function createClassLog({ studentId, languageAppKey, classDate, topic, hom
     })
     .select()
     .single();
-  if (error){ console.error('Erro ao criar registro de aula:', error); return { ok: false, error: 'Não foi possível salvar o registro agora.' }; }
+  if (error){ console.error('Erro ao criar registro de aula:', error); return { ok: false, error: t('teacherLogs.err.saveFailed') }; }
   return { ok: true, log: data };
 }
 
@@ -68,7 +68,7 @@ async function updateClassLog(id, { classDate, topic, homework, observations, no
   const cleanObservations = (observations || '').trim();
   const cleanNotes = (notes || '').trim();
   if (!cleanTopic && !cleanHomework && !cleanObservations && !cleanNotes){
-    return { ok: false, error: 'Preencha pelo menos um campo (tópico, lição de casa, observações ou texto livre).' };
+    return { ok: false, error: t('teacherLogs.err.needOneField') };
   }
   const { error } = await supabaseClient
     .from('teacher_class_logs')
@@ -81,7 +81,7 @@ async function updateClassLog(id, { classDate, topic, homework, observations, no
       updated_at: new Date().toISOString(),
     })
     .eq('id', id);
-  if (error){ console.error('Erro ao editar registro de aula:', error); return { ok: false, error: 'Não foi possível salvar a edição agora.' }; }
+  if (error){ console.error('Erro ao editar registro de aula:', error); return { ok: false, error: t('ownFlashcards.err.saveEditFailed') }; }
   return { ok: true };
 }
 

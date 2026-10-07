@@ -26,16 +26,30 @@
 // nem avisos de sistema no sino. "Social" não existe (ver seção 4 da
 // arquitetura: sem recurso social hoje, sem preferência pra configurar).
 const NOTIFICATION_PREF_CATEGORIES = [
-  { id: 'estudo', label: '📘 Estudo' },
-  { id: 'revisao', label: '🔄 Revisão' },
-  { id: 'streak', label: '🔥 Sequência' },
-  { id: 'gamificacao', label: '⭐ Conquistas e XP' },
-  { id: 'ranking', label: '🏆 Ranking' },
-  { id: 'desafios', label: '🎯 Desafios' },
-  { id: 'conteudo', label: '📚 Novidades' },
-  { id: 'reengajamento', label: '👋 Reengajamento' },
-  { id: 'sistema', label: '⚙️ Sistema' },
+  { id: 'estudo', labelKey: 'notif.cat.estudo' },
+  { id: 'revisao', labelKey: 'notif.cat.revisao' },
+  { id: 'streak', labelKey: 'notif.cat.streak' },
+  { id: 'gamificacao', labelKey: 'notif.cat.gamificacao' },
+  { id: 'ranking', labelKey: 'notif.cat.ranking' },
+  { id: 'desafios', labelKey: 'notif.cat.desafios' },
+  { id: 'conteudo', labelKey: 'notif.cat.conteudo' },
+  { id: 'reengajamento', labelKey: 'notif.cat.reengajamento' },
+  { id: 'sistema', labelKey: 'notif.cat.sistema' },
+  // Amigos (migration 073/074): só existe aviso NO APP (o servidor grava só
+  // in_app em _friends_notify); push/e-mail ficam desativados na matriz. Sem
+  // preferência salva o servidor entrega (default ligado), então a matriz
+  // também mostra ligado -- ver notifPrefEffectiveChannels.
+  { id: 'amigos', labelKey: 'notif.cat.amigos', inAppOnly: true },
 ];
+
+// Canais efetivos de uma categoria: o que está salvo; para categoria só-in_app
+// sem nada salvo, o padrão do servidor (ligado) -- evita mostrar desmarcado
+// algo que na verdade chega.
+function notifPrefEffectiveChannels(prefs, c){
+  const saved = prefs && prefs.channels ? prefs.channels[c.id] : undefined;
+  if (Array.isArray(saved)) return c.inAppOnly ? saved.filter(ch => ch === 'in_app') : saved;
+  return c.inAppOnly ? ['in_app'] : [];
+}
 
 function notifPrefHourOptionsHTML(selected){
   const sel = selected === null || selected === undefined ? '' : String(selected);
@@ -50,13 +64,13 @@ async function renderNotificationPreferencesView(){
   const wrap = document.getElementById('settings-notifications-content');
   if (!wrap) return;
   if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER){
-    wrap.innerHTML = `<p class="profile-empty-note">Crie uma conta pra configurar notificações -- o modo convidado não guarda preferências.</p>`;
+    wrap.innerHTML = `<p class="profile-empty-note">${t('notif.pref.guest')}</p>`;
     return;
   }
   wrap.innerHTML = loadingHTML();
   const prefs = await ensureNotificationPreferencesLoaded(true);
   if (!prefs){
-    wrap.innerHTML = `<p class="profile-empty-note">Não foi possível carregar suas preferências agora.</p>`;
+    wrap.innerHTML = `<p class="profile-empty-note">${t('notif.pref.loadFailed')}</p>`;
     return;
   }
 
@@ -68,68 +82,70 @@ async function renderNotificationPreferencesView(){
   const localPushSubscription = typeof getLocalPushSubscription === 'function' ? await getLocalPushSubscription() : null;
   const pushSubscribedHere = !!localPushSubscription;
 
-  const anyInAppOn = NOTIFICATION_PREF_CATEGORIES.some(c => (prefs.channels?.[c.id] || []).includes('in_app'));
-  const anyEmailOn = NOTIFICATION_PREF_CATEGORIES.some(c => (prefs.channels?.[c.id] || []).includes('email'));
+  const anyInAppOn = NOTIFICATION_PREF_CATEGORIES.some(c => notifPrefEffectiveChannels(prefs, c).includes('in_app'));
+  const anyEmailOn = NOTIFICATION_PREF_CATEGORIES.filter(c => !c.inAppOnly).some(c => (prefs.channels?.[c.id] || []).includes('email'));
 
   const matrixRowsHTML = NOTIFICATION_PREF_CATEGORIES.map(c => {
-    const inAppChecked = (prefs.channels?.[c.id] || []).includes('in_app') ? 'checked' : '';
-    const pushChecked = (prefs.channels?.[c.id] || []).includes('push') ? 'checked' : '';
-    const emailChecked = (prefs.channels?.[c.id] || []).includes('email') ? 'checked' : '';
+    const eff = notifPrefEffectiveChannels(prefs, c);
+    const inAppChecked = eff.includes('in_app') ? 'checked' : '';
+    const pushChecked = eff.includes('push') ? 'checked' : '';
+    const emailChecked = eff.includes('email') ? 'checked' : '';
+    const offAttr = c.inAppOnly ? `disabled title="${t('notif.pref.inAppOnly')}"` : '';
     return `
       <div class="notif-pref-matrix-row">
-        <span class="notif-pref-matrix-label">${c.label}</span>
-        <label class="notif-pref-matrix-cell" title="No app"><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="in_app" ${inAppChecked}></label>
-        <label class="notif-pref-matrix-cell" title="Push"><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="push" ${pushChecked}></label>
-        <label class="notif-pref-matrix-cell" title="E-mail"><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="email" ${emailChecked}></label>
+        <span class="notif-pref-matrix-label">${t(c.labelKey)}</span>
+        <label class="notif-pref-matrix-cell" title="${t('notif.pref.titleMatrixInApp')}"><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="in_app" ${inAppChecked}></label>
+        <label class="notif-pref-matrix-cell" title="${t('notif.pref.titleMatrixPush')}"><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="push" ${pushChecked} ${offAttr}></label>
+        <label class="notif-pref-matrix-cell" title="${t('notif.pref.titleMatrixEmail')}"><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="email" ${emailChecked} ${offAttr}></label>
       </div>
     `;
   }).join('');
 
   wrap.innerHTML = `
-    <div class="section-label">Notificações</div>
+    <div class="section-label">${t('notif.pref.sectionTitle')}</div>
     <div class="pref-row">
       <div class="pref-row-text">
-        <div class="pref-row-title">Notificações no app</div>
-        <div class="pref-row-sub">Sino na topbar + central de notificações. Desligar aqui silencia tudo de uma vez -- ajuste fino por categoria em "Personalizar por categoria" abaixo.</div>
+        <div class="pref-row-title">${t('notif.pref.inApp.title')}</div>
+        <div class="pref-row-sub">${t('notif.pref.inApp.sub')}</div>
       </div>
       <button class="pref-switch" id="notif-pref-inapp-switch" role="switch" aria-checked="${anyInAppOn}"><span class="pref-switch-knob"></span></button>
     </div>
     <div class="pref-row">
       <div class="pref-row-text">
-        <div class="pref-row-title">Alertas no navegador (push)</div>
-        <div class="pref-row-sub">Avisa mesmo com o app fechado. Liga por categoria em "Personalizar" abaixo -- este interruptor cuida da permissão do navegador e liga tudo de uma vez.</div>
+        <div class="pref-row-title">${t('notif.pref.push.title')}</div>
+        <div class="pref-row-sub">${t('notif.pref.push.sub')}</div>
       </div>
       <button class="pref-switch" id="notif-pref-push-switch" role="switch" aria-checked="${pushSubscribedHere}"><span class="pref-switch-knob"></span></button>
     </div>
     <div class="pref-row">
       <div class="pref-row-text">
-        <div class="pref-row-title">E-mails</div>
-        <div class="pref-row-sub">Manda pro e-mail da sua conta em alguns casos (ex: quando você some por um tempo). Liga por categoria em "Personalizar" abaixo -- este interruptor liga tudo de uma vez.</div>
+        <div class="pref-row-title">${t('notif.pref.email.title')}</div>
+        <div class="pref-row-sub">${t('notif.pref.email.sub')}</div>
       </div>
       <button class="pref-switch" id="notif-pref-email-switch" role="switch" aria-checked="${anyEmailOn}"><span class="pref-switch-knob"></span></button>
     </div>
 
-    <div class="section-label">Horário silencioso</div>
+    <div class="section-label">${t('notif.pref.quiet.section')}</div>
     <div class="pref-row">
       <div class="pref-row-text">
-        <div class="pref-row-title">Não notificar entre</div>
-        <div class="pref-row-sub">Vale pras notificações calculadas automaticamente (revisão, sequência...) -- as que acontecem na hora (XP, badge) continuam aparecendo. Horário aproximado (ainda não ajustado ao seu fuso).</div>
+        <div class="pref-row-title">${t('notif.pref.quiet.title')}</div>
+        <div class="pref-row-sub">${t('notif.pref.quiet.sub')}</div>
       </div>
       <div class="notif-pref-quiet-hours">
-        <select id="notif-pref-quiet-start" aria-label="Início do horário silencioso">${notifPrefHourOptionsHTML(prefs.quiet_hours_start)}</select>
-        <span>até</span>
-        <select id="notif-pref-quiet-end" aria-label="Fim do horário silencioso">${notifPrefHourOptionsHTML(prefs.quiet_hours_end)}</select>
+        <select id="notif-pref-quiet-start" aria-label="${t('notif.pref.quiet.startAria')}">${notifPrefHourOptionsHTML(prefs.quiet_hours_start)}</select>
+        <span>${t('notif.pref.quiet.until')}</span>
+        <select id="notif-pref-quiet-end" aria-label="${t('notif.pref.quiet.endAria')}">${notifPrefHourOptionsHTML(prefs.quiet_hours_end)}</select>
       </div>
     </div>
 
     <details class="notif-pref-advanced">
-      <summary>Personalizar por categoria</summary>
+      <summary>${t('notif.pref.advanced.summary')}</summary>
       <div class="notif-pref-matrix">
         <div class="notif-pref-matrix-row notif-pref-matrix-head">
           <span class="notif-pref-matrix-label"></span>
-          <span class="notif-pref-matrix-cell">App</span>
-          <span class="notif-pref-matrix-cell">Push</span>
-          <span class="notif-pref-matrix-cell">E-mail</span>
+          <span class="notif-pref-matrix-cell">${t('notif.pref.matrix.app')}</span>
+          <span class="notif-pref-matrix-cell">${t('notif.pref.matrix.push')}</span>
+          <span class="notif-pref-matrix-cell">${t('notif.pref.matrix.email')}</span>
         </div>
         ${matrixRowsHTML}
       </div>
@@ -156,11 +172,11 @@ async function renderNotificationPreferencesView(){
         return;
       }
       await setAllCategoriesChannel('push', true);
-      showToast('✓ Alertas do navegador ativados.');
+      showToast(t('notif.pref.toast.pushOn'));
     } else {
       await unsubscribeFromPush();
       await setAllCategoriesChannel('push', false);
-      showToast('Alertas do navegador desativados.');
+      showToast(t('notif.pref.toast.pushOff'));
     }
     renderNotificationPreferencesView();
   });
@@ -184,10 +200,10 @@ async function renderNotificationPreferencesView(){
 
 function notificationPushErrorMessage(reason){
   switch (reason){
-    case 'unsupported': return 'Seu navegador não suporta notificações push.';
-    case 'blocked': return 'As notificações estão bloqueadas nas configurações do seu navegador -- libere por lá e tente de novo.';
-    case 'denied': return 'Você não permitiu as notificações. Pode tentar de novo quando quiser.';
-    default: return 'Não foi possível ativar agora. Tente de novo.';
+    case 'unsupported': return t('notif.pref.push.unsupported');
+    case 'blocked': return t('notif.pref.push.blocked');
+    case 'denied': return t('notif.pref.push.denied');
+    default: return t('notif.pref.push.error');
   }
 }
 
@@ -202,7 +218,9 @@ async function setCategoryChannel(category, channel, enabled){
   const prefs = await ensureNotificationPreferencesLoaded();
   if (!prefs) return;
   const channels = { ...(prefs.channels || {}) };
-  const current = new Set(channels[category] || []);
+  const cat = NOTIFICATION_PREF_CATEGORIES.find(c => c.id === category);
+  if (cat && cat.inAppOnly && channel !== 'in_app') return; // só existe aviso no app
+  const current = new Set(cat ? notifPrefEffectiveChannels(prefs, cat) : (channels[category] || []));
   if (enabled) current.add(channel); else current.delete(channel);
   channels[category] = [...current];
   await saveNotificationPreferenceChannels(channels);
@@ -213,7 +231,8 @@ async function setAllCategoriesChannel(channel, enabled){
   if (!prefs) return;
   const channels = { ...(prefs.channels || {}) };
   NOTIFICATION_PREF_CATEGORIES.forEach(c => {
-    const current = new Set(channels[c.id] || []);
+    if (c.inAppOnly && channel !== 'in_app') return;
+    const current = new Set(notifPrefEffectiveChannels(prefs, c));
     if (enabled) current.add(channel); else current.delete(channel);
     channels[c.id] = [...current];
   });
@@ -230,5 +249,5 @@ async function saveNotificationQuietHours(){
   const { error } = await supabaseClient.from('notification_preferences').update(payload).eq('user_id', CURRENT_USER.id);
   if (error){ console.error('Erro ao salvar horário silencioso:', error); return; }
   if (NOTIFICATION_PREFERENCES_CACHE) Object.assign(NOTIFICATION_PREFERENCES_CACHE, payload);
-  showToast('✓ Preferências salvas.');
+  showToast(t('notif.pref.toast.saved'));
 }

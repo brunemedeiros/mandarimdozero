@@ -43,28 +43,80 @@ async function getCurrentLearningLanguage(userId){
   return null;
 }
 
-// Grava o novo idioma atual, preservando o progresso de todos os idiomas já
-// salvos (mesmo padrão de merge de shared/auth.js: lê o que existe, só
-// sobrescreve a chave _meta).
-async function setCurrentLearningLanguage(userId, langId){
+// Helper ÚNICO de merge de data._meta (usado pelo idioma estudado e pelo
+// idioma do site): lê a linha FRESCA logo antes de gravar e só sobrescreve
+// as chaves de `patch` dentro de _meta, preservando o progresso de todos os
+// idiomas já salvos e qualquer outra chave de _meta. Nunca passa por
+// serializeState() (que é por idioma estudado).
+async function mergeProgressMeta(userId, patch){
   const { data: existing, error: fetchError } = await supabaseClient
     .from('progress')
     .select('data')
     .eq('user_id', userId)
     .maybeSingle();
   if (fetchError){
-    console.error('Erro ao ler progresso antes de trocar idioma:', fetchError);
+    console.error('Erro ao ler progresso antes de gravar _meta:', fetchError);
     throw fetchError;
   }
   const existingMeta = (existing && existing.data && existing.data._meta) || {};
   const merged = Object.assign({}, existing && existing.data, {
-    _meta: Object.assign({}, existingMeta, { currentLearningLanguage: langId }),
+    _meta: Object.assign({}, existingMeta, patch),
   });
   const { error } = await supabaseClient
     .from('progress')
     .upsert({ user_id: userId, data: merged }, { onConflict: 'user_id' });
   if (error){
-    console.error('Erro ao salvar idioma atual:', error);
+    console.error('Erro ao salvar _meta:', error);
     throw error;
   }
+}
+
+// Grava o novo idioma atual, preservando o progresso de todos os idiomas já
+// salvos (mesmo padrão de merge de shared/auth.js: lê o que existe, só
+// sobrescreve a chave _meta).
+async function setCurrentLearningLanguage(userId, langId){
+  await mergeProgressMeta(userId, { currentLearningLanguage: langId });
+}
+
+// ---------- Idioma do site (interface + conteúdo), por conta ----------
+// Guardado em data._meta.uiLanguage ('pt-BR' | 'en'). Eixo SEPARADO do
+// idioma estudado (nunca derivado de APP_KEY/currentLearningLanguage).
+// Ordem de leitura: conta > navegador (localStorage 'ui-language') > pt-BR.
+// A conta é aplicada por shared/auth.js depois de loadState(); este arquivo
+// só lê/grava o valor.
+const ACCOUNT_UI_LANGUAGES = ['pt-BR', 'en'];
+
+function normalizeAccountUiLanguage(v){
+  if (typeof v !== 'string') return null;
+  const s = v.trim().toLowerCase();
+  for (const lang of ACCOUNT_UI_LANGUAGES){
+    if (lang.toLowerCase() === s) return lang;
+  }
+  return null;
+}
+
+// Extrai o idioma do site de um progress.data já lido (sem rede).
+function uiLanguageFromProgressData(progressData){
+  const meta = progressData && progressData._meta;
+  return normalizeAccountUiLanguage(meta && meta.uiLanguage);
+}
+
+async function getAccountUiLanguage(userId){
+  const { data, error } = await supabaseClient
+    .from('progress')
+    .select('data')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (error){
+    console.error('Erro ao ler idioma do site da conta:', error);
+    return null;
+  }
+  return uiLanguageFromProgressData(data && data.data);
+}
+
+async function setAccountUiLanguage(userId, lang){
+  const norm = normalizeAccountUiLanguage(lang);
+  if (!norm) throw new Error('idioma do site inválido: ' + lang);
+  await mergeProgressMeta(userId, { uiLanguage: norm });
+  return norm;
 }

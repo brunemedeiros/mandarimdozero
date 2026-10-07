@@ -66,17 +66,27 @@ const MY_FLASHCARDS_STATE = { _decks: [], editingCardId: null, editingNativeStat
 // entrada no mapa (nunca deveria acontecer pro fr/zh reais, mas evita
 // mostrar "undefined" se um idioma novo for adicionado sem atualizar
 // FLASHCARD_DIRECTION_LANGUAGE_LABELS em admin-students.js).
+// Nomes de idioma vêm de FLASHCARD_DIRECTION_LANGUAGE_LABELS (admin-students.js,
+// em português) -- mapeados pra chaves pra aparecerem no idioma do site.
+function myFlashcardLangName(ptName){
+  if (ptName === 'francês') return t('myFlashcards.lang.fr');
+  if (ptName === 'português') return t('myFlashcards.lang.pt');
+  if (ptName === 'inglês') return t('myFlashcards.lang.en');
+  if (ptName === 'mandarim') return t('myFlashcards.lang.zh');
+  return ptName;
+}
+
 function myFlashcardDirectionLabels(){
   const pair = FLASHCARD_DIRECTION_LANGUAGE_LABELS[APP_KEY];
   if (!pair){
     return {
-      targetFirst: 'Frente no idioma estudado, verso na tradução (padrão)',
-      nativeFirst: 'Frente na tradução, verso no idioma estudado',
+      targetFirst: t('myFlashcards.dir.generic.targetFirst'),
+      nativeFirst: t('myFlashcards.dir.generic.nativeFirst'),
     };
   }
   return {
-    targetFirst: `Frente em ${pair.target} (com áudio), verso com tradução em ${pair.native}`,
-    nativeFirst: `Frente na tradução em ${pair.native}, verso em ${pair.target} (com áudio)`,
+    targetFirst: t('myFlashcards.dir.targetFirst', { target: myFlashcardLangName(pair.target), native: myFlashcardLangName(pair.native) }),
+    nativeFirst: t('myFlashcards.dir.nativeFirst', { target: myFlashcardLangName(pair.target), native: myFlashcardLangName(pair.native) }),
   };
 }
 
@@ -110,7 +120,7 @@ function orderedPersonalDecks(decks){
 function personalDeckOptionsHTML(decks){
   return orderedPersonalDecks(decks).map(d => {
     const pad = '\u00A0\u00A0'.repeat(Math.max(0, personalDeckDepth(decks, d) - 1));
-    return `<option value="${d.id}">${pad}${escapeHTML(d.kind === 'personal_root' ? 'Meus Decks' : d.name)}</option>`;
+    return `<option value="${d.id}">${pad}${escapeHTML(d.kind === 'personal_root' ? t('deck.myDecks') : d.name)}</option>`;
   }).join('');
 }
 
@@ -123,9 +133,9 @@ function personalDecksListHTML(decks){
     const pad = Math.max(0, personalDeckDepth(decks, d) - 1) * 16;
     const c = getDeckCounts(decks, d.id, pool);
     return `<div class="admin-badge-row" style="padding-left:${pad}px;" data-personal-deck-row="${d.id}">
-      <span style="flex:1;">${escapeHTML(d.kind === 'personal_root' ? 'Meus Decks' : d.name)} <span class="profile-edit-hint">(${c.total} cartões · ${c.new} novos · ${c.learning} aprendendo · ${c.review} para revisar · ${c.due} devidos)</span></span>
-      <button type="button" class="btn btn-secondary" data-study-deck="${d.id}">Estudar este Deck</button>
-      ${d.kind === 'personal' && typeof publishBoxHTML === 'function' ? `<button type="button" class="btn btn-secondary" data-publish-deck="${d.id}">${d.is_public ? '🌐 Público' : 'Publicar'}</button>` : ''}
+      <span style="flex:1;">${escapeHTML(d.kind === 'personal_root' ? t('deck.myDecks') : d.name)} <span class="profile-edit-hint">(${t('deck.countsFull', { total: c.total, new: c.new, learning: c.learning, review: c.review, due: c.due })})</span></span>
+      <button type="button" class="btn btn-secondary" data-study-deck="${d.id}">${t('deck.studyThis')}</button>
+      ${d.kind === 'personal' && typeof publishBoxHTML === 'function' ? `<button type="button" class="btn btn-secondary" data-publish-deck="${d.id}">${d.is_public ? t('deck.publicBadge') : t('deck.publish')}</button>` : ''}
     </div>
     ${d.kind === 'personal' ? `<div data-publish-box="${d.id}" style="display:none; padding-left:${pad}px;"></div>` : ''}`;
   }).join('');
@@ -158,7 +168,8 @@ function teacherTagsReadOnlyHTML(cards){
 // Deck" (Deck AND Tag). Aviso visível + atalho para limpar, pra o filtro
 // nunca parecer um "Deck vazio" inexplicável.
 function tagFilterNoticeHTML(){
-  const f = (typeof STATE !== 'undefined' && STATE.studySettings && Array.isArray(STATE.studySettings.reviewTagFilter)) ? STATE.studySettings.reviewTagFilter : [];
+  // A sessão não aplica mais filtro de tag (só o Painel filtra), ver activeReviewTagFilter().
+  const f = (typeof activeReviewTagFilter === 'function') ? activeReviewTagFilter() : [];
   if (!f.length) return '';
   return `<p class="profile-edit-hint" data-tag-filter-notice>Filtro de tags ativo na Revisão: ${noteTagChipsHTML(f)} — vale também para "Estudar este Deck". <button type="button" class="admin-select-link" data-clear-review-tag-filter style="background:none;border:none;cursor:pointer;padding:0;">Limpar</button></p>`;
 }
@@ -179,15 +190,15 @@ function teacherDecksReadOnlyHTML(decks){
     const pool = (typeof eligibleDeckReviewPool === 'function') ? eligibleDeckReviewPool() : cards;
     const c = getDeckCounts(decks, deck.id, pool);
     const n = c.total;
-    const label = deck.kind === 'teacher_root' ? 'Cartões da professora' : deck.name;
+    const label = deck.kind === 'teacher_root' ? t('deck.teacherRoot') : deck.name;
     return `<div class="admin-badge-row" style="padding-left:${depth * 16}px;" data-teacher-deck-row="${deck.id}">
-      <span style="flex:1;">${escapeHTML(label)} <span class="profile-edit-hint">(${n} cartões · ${c.new} novos · ${c.learning} aprendendo · ${c.review} para revisar · ${c.due} devidos)</span></span>
-      <button type="button" class="btn btn-secondary" data-study-deck="${deck.id}" ${n ? '' : 'disabled'}>Estudar este Deck</button>
+      <span style="flex:1;">${escapeHTML(label)} <span class="profile-edit-hint">(${t('deck.countsFull', { total: n, new: c.new, learning: c.learning, review: c.review, due: c.due })})</span></span>
+      <button type="button" class="btn btn-secondary" data-study-deck="${deck.id}" ${n ? '' : 'disabled'}>${t('deck.studyThis')}</button>
     </div>`;
   }).join('');
   return `<div class="profile-section" id="teacher-decks-section">
-      <div class="section-label">Cartões da professora</div>
-      <p class="profile-edit-hint">Decks organizados pela sua professora. Aqui você só estuda; ela cuida da organização.</p>
+      <div class="section-label">${t('myFlashcards.teacherDecks.title')}</div>
+      <p class="profile-edit-hint">${t('myFlashcards.teacherDecks.hint')}</p>
       ${teacherTagsReadOnlyHTML(cards)}
       <div id="teacher-decks-list">${rows}</div>
     </div>`;
@@ -259,10 +270,10 @@ async function loadMyFlashcardsContext(){
   // separado do eixo de PREMIUM (formatos ricos) -- ver comentário em
   // shared/roles.js. Uma conta pode mostrar os dois selos juntos.
   const tierBadgeHTML = premium
-    ? `<span class="pill">⭐ Premium — cartões ilimitados</span>`
+    ? `<span class="pill">${t('myFlashcards.badge.premiumUnlimited')}</span>`
     : (hasLink
-      ? `<span class="pill">✨ Aluno vinculado — cartões ilimitados</span>`
-      : `<span class="pill">🔒 Plano grátis — ${usedInstances}/${FREE_OWN_FLASHCARD_LIMIT} cartões</span>`);
+      ? `<span class="pill">${t('myFlashcards.badge.linked')}</span>`
+      : `<span class="pill">${t('myFlashcards.badge.free', { used: usedInstances, limit: FREE_OWN_FLASHCARD_LIMIT })}</span>`);
 
   return { cards, hasLink, premium, decks, activeCards, archivedCards, usedInstances, unlimited, atLimit, tierBadgeHTML };
 }
@@ -271,7 +282,7 @@ async function loadMyFlashcardsContext(){
 function myCreateFlashcardFormHTML({ premium, decks, atLimit, tierBadgeHTML }){
   return `
   <div class="section-label" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-    <span>Novo cartão</span>
+    <span>${t('myFlashcards.new.title')}</span>
     ${tierBadgeHTML}
   </div>
   <form id="my-create-flashcard-form" class="profile-edit-form">
@@ -286,22 +297,24 @@ function myCreateFlashcardFormHTML({ premium, decks, atLimit, tierBadgeHTML }){
          cartão LEGADO já existente continua no formulário legado de
          sempre (myFlashcardEditFormHTML, intocado) -- isto é só
          CRIAÇÃO de um cartão novo. -->
-    ${premium ? '' : `<p class="profile-edit-hint">🔒 No plano grátis você cria cartões do tipo Normal, com upload de imagem/áudio por campo (URL externa também disponível). <strong>Premium</strong> desbloqueia Normal com reverso, Múltipla escolha, Completar a frase, Digite a resposta, além de gerar áudio por texto e gravar áudio pelo microfone.</p>`}
-    <div class="section-label" style="margin:0 0 4px;">Tipo de cartão</div>
+    <label class="profile-edit-label" for="my-flashcard-deck" style="margin-top:0;">${t('myFlashcards.deckDest')}</label>
+    <select id="my-flashcard-deck" class="profile-edit-input">${personalDeckOptionsHTML(decks)}</select>
+    ${premium ? '' : `<p class="profile-edit-hint">${t('myFlashcards.free.hint')}</p>`}
+    <div class="section-label" style="margin:0 0 4px;">${t('myFlashcards.cardType')}</div>
     <select id="my-flashcard-card-type-preview" class="profile-edit-input">
-      ${cardTypeUIMetaForEntitlement(premium).map(t => `<option value="${t.id}" ${t.id === 'normal' ? 'selected' : ''}>${t.label}</option>`).join('')}
+      ${cardTypeUIMetaForEntitlement(premium).map(ct => `<option value="${ct.id}" ${ct.id === 'normal' ? 'selected' : ''}>${ct.label}</option>`).join('')}
     </select>
-    <div class="section-label" style="margin:14px 0 4px;">Campos</div>
-    <p class="profile-edit-hint" style="margin-top:-2px;">Adicione os campos deste cartão -- por exemplo, Frente e Verso pra um cartão Normal. Cada campo tem seu próprio idioma e seus próprios recursos de áudio.</p>
+    <div class="section-label" style="margin:14px 0 4px;">${t('myFlashcards.fields.title')}</div>
+    <p class="profile-edit-hint" style="margin-top:-2px;">${t('myFlashcards.fields.hint')}</p>
     <div id="my-flashcard-native-fields"></div>
     <div id="my-flashcard-tags"></div>
-    <button type="button" class="admin-select-link" id="my-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; margin:6px 0 0;">👁️ Pré-visualizar</button>
-    <label class="profile-edit-label" for="my-flashcard-deck" style="margin-top:14px;">Deck de destino</label>
-    <select id="my-flashcard-deck" class="profile-edit-input">${personalDeckOptionsHTML(decks)}</select>
-    <label class="profile-edit-label" for="my-flashcard-note" style="margin-top:14px;">Nota (opcional)</label>
-    <textarea id="my-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="contexto, dica de uso..."></textarea>
-    <p class="profile-edit-error" id="my-create-flashcard-error"></p>
-    <button type="submit" class="btn btn-primary btn-block" id="my-create-flashcard-btn" ${atLimit ? 'disabled' : ''}>${atLimit ? 'Limite atingido' : 'Criar cartão'}</button>
+    <button type="button" class="admin-select-link" id="my-flashcard-preview-btn" data-touch44 style="background:none; border:none; cursor:pointer; margin:6px 0 0;">${t('myFlashcards.preview')}</button>
+    <label class="profile-edit-label" for="my-flashcard-note" style="margin-top:14px;">${t('myFlashcards.note.label')}</label>
+    <textarea id="my-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2" placeholder="${t('myFlashcards.note.placeholder')}"></textarea>
+    <div class="add-card-submit-bar">
+      <p class="profile-edit-error" id="my-create-flashcard-error"></p>
+      <button type="submit" class="btn btn-primary btn-block" id="my-create-flashcard-btn" ${atLimit ? 'disabled' : ''}>${atLimit ? t('myFlashcards.limitReached') : t('myFlashcards.create')}</button>
+    </div>
   </form>`;
 }
 
@@ -317,7 +330,7 @@ async function renderMyFlashcardsView(opts){
   const wrap = document.getElementById('my-flashcards-content');
   if (!wrap) return;
   if (!CURRENT_USER){
-    wrap.innerHTML = `<p class="profile-empty-note">Entre na sua conta pra criar seus próprios cartões.</p>`;
+    wrap.innerHTML = `<p class="profile-empty-note">${t('myFlashcards.guest')}</p>`;
     return;
   }
   // Fase 6D.2/6D.5 (ver CLAUDE.md) -- nativeCardState reinicia a cada
@@ -356,13 +369,13 @@ async function renderMyFlashcardsView(opts){
     </div>
 
     <div class="profile-section" id="my-decks-section">
-      <div class="section-label">Meus Decks</div>
+      <div class="section-label">${t('myFlashcards.decks.title')}</div>
       ${tagFilterNoticeHTML()}
       <div id="my-decks-list">${personalDecksListHTML(decks)}</div>
       <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
-        <input type="text" id="my-deck-new-name" class="profile-edit-input" placeholder="Nome do novo Deck" maxlength="60" style="flex:1; min-width:140px;">
+        <input type="text" id="my-deck-new-name" class="profile-edit-input" placeholder="${t('myFlashcards.decks.newNamePlaceholder')}" maxlength="60" style="flex:1; min-width:140px;">
         <select id="my-deck-new-parent" class="profile-edit-input" style="flex:1; min-width:140px;">${personalDeckOptionsHTML(decks)}</select>
-        <button type="button" class="btn btn-secondary" id="my-deck-new-btn">+ Criar Deck</button>
+        <button type="button" class="btn btn-secondary" id="my-deck-new-btn">${t('myFlashcards.decks.create')}</button>
       </div>
       <p class="profile-edit-error" id="my-deck-error"></p>
     </div>
@@ -378,32 +391,32 @@ async function renderMyFlashcardsView(opts){
 
     <div class="profile-section">
       <div class="section-label" style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
-        <span>Seus cartões ativos (${activeCards.length})</span>
-        ${cards.length ? `<button type="button" class="admin-select-link" id="my-flashcards-export-btn" style="background:none; border:none; cursor:pointer;">⬇️ Exportar / compartilhar</button>` : ''}
+        <span>${t('myFlashcards.active.title', { n: activeCards.length })}</span>
+        ${cards.length ? `<button type="button" class="admin-select-link" id="my-flashcards-export-btn" style="background:none; border:none; cursor:pointer;">${t('myFlashcards.export.btn')}</button>` : ''}
       </div>
       <div id="my-flashcards-active-box">
-        ${activeCards.length ? activeCards.map(c => myFlashcardRowHTML(c, premium)).join('') : `<p class="profile-empty-note">Você ainda não criou nenhum cartão. Use o formulário acima pra adicionar palavras/frases que quer memorizar, mesmo que não estejam na trilha.</p>`}
+        ${activeCards.length ? activeCards.map(c => myFlashcardRowHTML(c, premium)).join('') : `<p class="profile-empty-note">${t('myFlashcards.active.empty')}</p>`}
       </div>
     </div>
 
     ${archivedCards.length ? `
     <div class="profile-section">
-      <div class="section-label">Arquivados historicamente (${archivedCards.length})</div>
+      <div class="section-label">${t('myFlashcards.archived.title', { n: archivedCards.length })}</div>
       <div id="my-flashcards-archived-box">
         ${archivedCards.map(c => myFlashcardRowHTML(c, premium)).join('')}
       </div>
     </div>` : ''}
 
     <div class="profile-section">
-      <div class="section-label">Importar cartões</div>
-      <p class="profile-edit-hint">Recebeu um arquivo .json de outro aluno, ou um link de compartilhamento? Importe aqui -- só cartões do MESMO idioma que você está estudando (${isMandarim ? 'mandarim' : 'francês'}) podem ser importados.</p>
+      <div class="section-label">${t('myFlashcards.import.title')}</div>
+      <p class="profile-edit-hint">${t('myFlashcards.import.hint', { lang: isMandarim ? t('myFlashcards.lang.zh') : t('myFlashcards.lang.fr') })}</p>
       <input type="file" id="my-flashcards-import-file" accept="application/json" style="margin-top:6px;">
       <p class="profile-edit-error" id="my-flashcards-import-error"></p>
     </div>
 
     <div class="profile-section">
-      <div class="section-label">📥 Importar do Anki (.apkg)</div>
-      <p class="profile-edit-hint">Tem um baralho do Anki? Escolha o arquivo .apkg exportado de lá -- você confere um resumo (quantos cartões, tipos, avisos) antes de confirmar, nada é importado sem sua confirmação.</p>
+      <div class="section-label">${t('myFlashcards.anki.title')}</div>
+      <p class="profile-edit-hint">${t('myFlashcards.anki.hint')}</p>
       <input type="file" id="anki-import-file" accept=".apkg" style="margin-top:6px;">
     </div>
   `;
@@ -474,15 +487,15 @@ function myFlashcardRowHTML(c, premium){
     <div class="admin-badge-row">
       <div class="admin-badge-info">
         <div class="admin-badge-name">${escapeHTML(c.front)}${c.front_pinyin ? ` (${escapeHTML(c.front_pinyin)})` : ''} → ${escapeHTML(c.back_trans)}</div>
-        <div class="admin-badge-desc">${c.note ? escapeHTML(c.note) + ' · ' : ''}criado em ${new Date(c.created_at).toLocaleDateString('pt-BR')}</div>
+        <div class="admin-badge-desc">${c.note ? escapeHTML(c.note) + ' · ' : ''}${t('myFlashcards.row.createdOn', { date: fmtDate(c.created_at) })}</div>
         ${(c.tags && c.tags.length) ? `<div data-row-tags style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">${noteTagChipsHTML(c.tags)}</div>` : ''}
       </div>
       <div style="display:flex; gap:6px;">
-        <button class="admin-badge-delete-btn" data-preview-own-flashcard="${c.id}" title="Pré-visualizar como vai aparecer na Revisão">🔎</button>
-        <button class="admin-badge-delete-btn" data-edit-own-flashcard="${c.id}" title="Editar">✏️</button>
-        ${c.status === 'archived' ? `<button class="admin-badge-delete-btn" data-toggle-own-flashcard="${c.id}" data-next-status="active" title="Reativar (tirar do arquivo histórico)">↺</button>` : ''}
-        <button class="admin-badge-delete-btn" data-toggle-own-flashcard-visibility="${c.id}" data-next-hidden="${c.hidden_from_profile ? 'false' : 'true'}" title="${c.hidden_from_profile ? 'Escondido do perfil -- clique pra tornar visível' : 'Visível no perfil (se a conta for pública) -- clique pra esconder'}">${c.hidden_from_profile ? '🙈' : '👁️'}</button>
-        <button class="admin-badge-delete-btn" data-delete-own-flashcard="${c.id}" title="Apagar permanentemente">🗑</button>
+        <button class="admin-badge-delete-btn" data-preview-own-flashcard="${c.id}" title="${t('myFlashcards.row.previewTitle')}">🔎</button>
+        <button class="admin-badge-delete-btn" data-edit-own-flashcard="${c.id}" title="${t('myFlashcards.row.editTitle')}">✏️</button>
+        ${c.status === 'archived' ? `<button class="admin-badge-delete-btn" data-toggle-own-flashcard="${c.id}" data-next-status="active" title="${t('myFlashcards.row.reactivateTitle')}">↺</button>` : ''}
+        <button class="admin-badge-delete-btn" data-toggle-own-flashcard-visibility="${c.id}" data-next-hidden="${c.hidden_from_profile ? 'false' : 'true'}" title="${c.hidden_from_profile ? t('myFlashcards.row.hiddenTitle') : t('myFlashcards.row.visibleTitle')}">${c.hidden_from_profile ? '🙈' : '👁️'}</button>
+        <button class="admin-badge-delete-btn" data-delete-own-flashcard="${c.id}" title="${t('myFlashcards.row.deleteTitle')}">🗑</button>
       </div>
     </div>
   `;
@@ -499,10 +512,10 @@ function myFlashcardEditFormHTML(c, premium){
   const direction = c.front_is_target_language === false ? 'target-back' : 'target-front';
   return `
     <div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:10px;">
-      ${MY_FLASHCARDS_STATE._legacyConversionError ? `<p class="profile-edit-error" style="margin:0;">Este cartão não pôde abrir no editor novo: ${escapeHTML(MY_FLASHCARDS_STATE._legacyConversionError)}</p>` : ''}
+      ${MY_FLASHCARDS_STATE._legacyConversionError ? `<p class="profile-edit-error" style="margin:0;">${t('myFlashcards.edit.legacyConversionError', { reason: escapeHTML(MY_FLASHCARDS_STATE._legacyConversionError) })}</p>` : ''}
       ${!isMandarim ? `
       <div>
-        <div class="section-label" style="margin:0 0 4px;">Idioma de cada lado</div>
+        <div class="section-label" style="margin:0 0 4px;">${t('myFlashcards.edit.sideLanguage')}</div>
         <label class="profile-edit-label" style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:400;">
           <input type="radio" name="edit-my-flashcard-direction" value="target-front" ${direction === 'target-front' ? 'checked' : ''}> ${myFlashcardDirectionLabels().targetFirst}
         </label>
@@ -511,20 +524,20 @@ function myFlashcardEditFormHTML(c, premium){
         </label>
       </div>` : ''}
       <div>
-        <label class="profile-edit-label">Frente</label>
+        <label class="profile-edit-label">${t('myFlashcards.edit.front')}</label>
         <textarea id="edit-my-flashcard-front" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(c.front || '')}</textarea>
         ${isMandarim ? `
-        <label class="profile-edit-label">Pinyin</label>
+        <label class="profile-edit-label">${t('myFlashcards.edit.pinyin')}</label>
         <input type="text" id="edit-my-flashcard-pinyin" class="profile-edit-input" value="${escapeHTML(c.front_pinyin || '')}">` : ''}
-        <label class="profile-edit-label">Verso</label>
+        <label class="profile-edit-label">${t('myFlashcards.edit.back')}</label>
         <textarea id="edit-my-flashcard-back" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(c.back_trans || '')}</textarea>
-        <label class="profile-edit-label">Nota (opcional)</label>
+        <label class="profile-edit-label">${t('myFlashcards.note.label')}</label>
         <textarea id="edit-my-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(c.note || '')}</textarea>
       </div>
       <p class="profile-edit-error" id="edit-my-flashcard-error"></p>
       <div style="display:flex; gap:10px;">
-        <button type="button" class="btn btn-secondary" id="edit-my-flashcard-cancel" style="flex:1;">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="edit-my-flashcard-save" style="flex:1;">Salvar edição</button>
+        <button type="button" class="btn btn-secondary" id="edit-my-flashcard-cancel" style="flex:1;">${t('myFlashcards.edit.cancel')}</button>
+        <button type="button" class="btn btn-primary" id="edit-my-flashcard-save" style="flex:1;">${t('myFlashcards.edit.save')}</button>
       </div>
     </div>
   `;
@@ -552,9 +565,6 @@ function wireMyFlashcardEditForm(c, wrap, premium){
     // shared/admin-flashcards.js) -- é contra ISTO que o save compara pra
     // decidir se revision precisa incrementar.
     MY_FLASHCARDS_STATE.editingNativeConversionBaseline = cloneNoteEditorState(MY_FLASHCARDS_STATE.editingNativeState);
-    if (c.image_url){
-      showToast('⚠️ A imagem deste cartão foi preservada nos dados, mas ainda não aparece na tela de Revisão pra cartões do novo editor.');
-    }
     // CONSOLIDAÇÃO-2 (ver CLAUDE.md) -- `preserveEditingNativeState:true`
     // é obrigatório aqui: sem ele, o topo de renderMyFlashcardsView()
     // zeraria de volta o editingNativeState que acabamos de setar, no
@@ -574,8 +584,8 @@ function wireMyFlashcardEditForm(c, wrap, premium){
     const errorEl = document.getElementById('edit-my-flashcard-error');
     const front = document.getElementById('edit-my-flashcard-front').value;
     const back = document.getElementById('edit-my-flashcard-back').value;
-    if (!front.trim()){ errorEl.textContent = 'Digite o texto da frente do cartão.'; return; }
-    if (!back.trim()){ errorEl.textContent = 'Digite a tradução (verso do cartão).'; return; }
+    if (!front.trim()){ errorEl.textContent = t('ownFlashcards.err.frontRequired'); return; }
+    if (!back.trim()){ errorEl.textContent = t('ownFlashcards.err.backRequired'); return; }
     const directionRadio = document.querySelector('input[name="edit-my-flashcard-direction"]:checked');
     const frontIsTargetLanguage = directionRadio ? directionRadio.value !== 'target-back' : true;
     // Computado UMA vez só e reaproveitado nas duas chamadas abaixo -- nunca
@@ -600,7 +610,7 @@ function wireMyFlashcardEditForm(c, wrap, premium){
       if (typeof replaceSelfFlashcardInState === 'function'){
         replaceSelfFlashcardInState(c.id, { ...c, front, back_trans: back, note, front_pinyin: frontPinyinValue, front_is_target_language: frontIsTargetLanguage, revision: nextRevision });
       }
-      showToast('✓ Cartão editado. O progresso de revisão foi reiniciado.');
+      showToast(t('myFlashcards.toast.editedReset'));
       MY_FLASHCARDS_STATE.editingCardId = null;
       myFlashcardsAfterChange();
     });
@@ -626,20 +636,20 @@ function myFlashcardNativeEditFormHTML(c, editorState, premium){
   }
   return `
     <div class="admin-badge-row" style="flex-direction:column; align-items:stretch; gap:10px;">
-      <div class="section-label" style="margin:0;">Editar cartão</div>
-      <div class="section-label" style="margin:6px 0 4px;">Tipo de cartão</div>
+      <div class="section-label" style="margin:0;">${t('myFlashcards.native.title')}</div>
+      <div class="section-label" style="margin:6px 0 4px;">${t('myFlashcards.native.cardType')}</div>
       <select id="edit-my-native-flashcard-card-type" class="profile-edit-input">
-        ${typeOptions.map(t => `<option value="${t.id}" ${t.id === editorState.cardGenerationMode ? 'selected' : ''}>${t.label}</option>`).join('')}
+        ${typeOptions.map(ct => `<option value="${ct.id}" ${ct.id === editorState.cardGenerationMode ? 'selected' : ''}>${ct.label}</option>`).join('')}
       </select>
       <div id="edit-my-native-flashcard-fields"></div>
       <div id="edit-my-native-flashcard-tags"></div>
-      <button type="button" class="admin-select-link" id="edit-my-native-flashcard-preview-btn" style="background:none; border:none; cursor:pointer; align-self:flex-start; padding:0;">👁️ Pré-visualizar</button>
-      <label class="profile-edit-label">Nota (opcional)</label>
+      <button type="button" class="admin-select-link" id="edit-my-native-flashcard-preview-btn" data-touch44 style="background:none; border:none; cursor:pointer; align-self:flex-start; padding:0;">${t('myFlashcards.preview')}</button>
+      <label class="profile-edit-label">${t('myFlashcards.note.label')}</label>
       <textarea id="edit-my-native-flashcard-note" class="profile-edit-input profile-edit-textarea" rows="2">${escapeHTML(editorState.privateNote || '')}</textarea>
       <p class="profile-edit-error" id="edit-my-native-flashcard-error"></p>
       <div style="display:flex; gap:10px;">
-        <button type="button" class="btn btn-secondary" id="edit-my-native-flashcard-cancel" style="flex:1;">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="edit-my-native-flashcard-save" style="flex:1;">Salvar edição</button>
+        <button type="button" class="btn btn-secondary" id="edit-my-native-flashcard-cancel" style="flex:1;">${t('myFlashcards.edit.cancel')}</button>
+        <button type="button" class="btn btn-primary" id="edit-my-native-flashcard-save" style="flex:1;">${t('myFlashcards.edit.save')}</button>
       </div>
     </div>
   `;
@@ -721,7 +731,7 @@ function wireMyFlashcardNativeEditForm(c, editorState, wrap, premium){
       if (typeof replaceSelfFlashcardInState === 'function'){
         replaceSelfFlashcardInState(c.id, Object.assign({}, c, { revision: nextRevision }, nativeContentColumnsFromEditorState(editorState)));
       }
-      showToast(nextRevision > (c.revision || 0) ? '✓ Cartão editado. O progresso de revisão foi reiniciado.' : '✓ Cartão editado.');
+      showToast(nextRevision > (c.revision || 0) ? t('myFlashcards.toast.editedReset') : t('myFlashcards.toast.edited'));
       MY_FLASHCARDS_STATE.editingCardId = null;
       MY_FLASHCARDS_STATE.editingNativeState = null;
       MY_FLASHCARDS_STATE.editingNativeConversionBaseline = null;
@@ -840,7 +850,9 @@ function wireMyFlashcardsForm(wrap, atLimit, premium, onCreated){
       limit: FREE_OWN_FLASHCARD_LIMIT,
     });
     if (!pre.ok){
-      errorEl.textContent = `Este cartão geraria ${pre.requested} cartão(ões) de estudo, mas restam só ${pre.remaining} no plano grátis.`;
+      errorEl.textContent = (typeof window.tp === 'function')
+        ? window.tp('flashcardLimit.wouldGenerate', pre.requested, { n: pre.requested, remaining: pre.remaining })
+        : `Este cartão geraria ${pre.requested} cartão(ões) de estudo, mas restam só ${pre.remaining} no plano grátis.`;
       openFlashcardLimitModal();
       return;
     }
@@ -867,7 +879,7 @@ function wireMyFlashcardsForm(wrap, atLimit, premium, onCreated){
     // cartão recém-criado direto, pra "já entra na fila de revisão" no toast
     // abaixo ser verdade AGORA, não só depois de recarregar a página.
     if (typeof addSelfFlashcardToState === 'function') addSelfFlashcardToState(result.card);
-    showToast('✓ Cartão criado. Ele já entra na sua fila de revisão.');
+    showToast(t('myFlashcards.toast.created'));
     if (typeof onCreated === 'function') onCreated(result.card);
     else renderMyFlashcardsView();
   });
@@ -881,7 +893,7 @@ function wireMyFlashcardsCardButtons(wrap){
     btn.addEventListener('click', () => {
       const id = Number(btn.dataset.previewOwnFlashcard);
       const card = MY_FLASHCARDS_STATE._cardsCache.find(c => c.id === id);
-      if (!card){ openFlashcardPreviewWithError('Não foi possível carregar este cartão pra pré-visualizar.'); return; }
+      if (!card){ openFlashcardPreviewWithError(t('myFlashcards.err.previewLoad')); return; }
       openFlashcardPreviewFromRow(card, { appKey: APP_KEY, origin: 'self' });
     });
   });
@@ -940,11 +952,11 @@ function wireMyFlashcardsCardButtons(wrap){
   wrap.querySelectorAll('[data-delete-own-flashcard]').forEach(btn => {
     btn.addEventListener('click', async () => {
       const id = btn.dataset.deleteOwnFlashcard;
-      if (!confirm('Isso vai apagar o cartão e todo o histórico de revisão permanentemente. Não pode ser desfeito. Continuar?')) return;
+      if (!confirm(t('myFlashcards.confirm.delete'))) return;
       const result = await deleteOwnFlashcardPermanently(id);
-      if (!result.ok){ showToast('Não foi possível apagar o cartão agora.'); return; }
+      if (!result.ok){ showToast(t('myFlashcards.err.deleteFailed')); return; }
       if (typeof removeSelfFlashcardFromState === 'function') removeSelfFlashcardFromState(id);
-      showToast('✓ Cartão apagado.');
+      showToast(t('myFlashcards.toast.deleted'));
       myFlashcardsAfterChange();
     });
   });
@@ -1017,7 +1029,7 @@ function myFlashcardsExportPayload(cardsToExport){
 }
 
 function openMyFlashcardsExportModal(cardsToExport){
-  if (!cardsToExport.length){ showToast('Você não tem nenhum cartão ativo pra exportar.'); return; }
+  if (!cardsToExport.length){ showToast(t('myFlashcards.export.noneActive')); return; }
   const payload = myFlashcardsExportPayload(cardsToExport);
   if (!payload.cards.length){ showToast('Nenhum dos cartões selecionados cabe neste formato (só frente e verso).'); return; }
   const json = JSON.stringify(payload, null, 2);
@@ -1035,15 +1047,15 @@ function openMyFlashcardsExportModal(cardsToExport){
   modal.innerHTML = `
     <div class="app-modal">
       <div class="app-modal-header">
-        <h3>⬇️ Exportar cartões (${payload.cards.length})</h3>
-        <button class="app-modal-close" id="my-flashcards-export-close" aria-label="Fechar">✕</button>
+        <h3>${t('myFlashcards.export.modalTitle', { n: payload.cards.length })}</h3>
+        <button class="app-modal-close" id="my-flashcards-export-close" aria-label="${t('common.close')}">✕</button>
       </div>
       <div class="app-modal-body">
-        ${payload.cards.length < cardsToExport.length ? `<p class="profile-edit-hint">${cardsToExport.length - payload.cards.length} cartão(ões) de Completar a frase ficaram de fora: este formato só leva frente e verso.</p>` : ''}
-        <p class="profile-edit-hint">Baixe um arquivo .json pra dar pra outro aluno importar, ou copie o link de compartilhamento -- os dois têm o mesmo conteúdo.</p>
+        ${payload.cards.length < cardsToExport.length ? `<p class="profile-edit-hint">${t('myFlashcards.export.leftOut', { n: cardsToExport.length - payload.cards.length })}</p>` : ''}
+        <p class="profile-edit-hint">${t('myFlashcards.export.hint')}</p>
         <div style="display:flex; gap:10px; margin:10px 0;">
-          <button type="button" class="btn btn-secondary" id="my-flashcards-export-download" style="flex:1;">⬇️ Baixar .json</button>
-          <button type="button" class="btn btn-secondary" id="my-flashcards-export-copy-link" style="flex:1;">🔗 Copiar link</button>
+          <button type="button" class="btn btn-secondary" id="my-flashcards-export-download" style="flex:1;">${t('myFlashcards.export.download')}</button>
+          <button type="button" class="btn btn-secondary" id="my-flashcards-export-copy-link" style="flex:1;">${t('myFlashcards.export.copyLink')}</button>
         </div>
         <p class="profile-edit-error" id="my-flashcards-export-feedback" style="color:var(--jade);"></p>
       </div>
@@ -1066,7 +1078,7 @@ function openMyFlashcardsExportModal(cardsToExport){
   document.getElementById('my-flashcards-export-copy-link').onclick = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
-      document.getElementById('my-flashcards-export-feedback').textContent = '✓ Link copiado!';
+      document.getElementById('my-flashcards-export-feedback').textContent = t('myFlashcards.export.linkCopied');
     } catch {
       document.getElementById('my-flashcards-export-feedback').textContent = shareUrl;
     }
@@ -1082,7 +1094,7 @@ async function handleMyFlashcardsImportFile(file){
     const payload = JSON.parse(text);
     await confirmAndImportMyFlashcards(payload, errorEl);
   } catch {
-    errorEl.textContent = 'Não foi possível ler este arquivo. Confirme que é um .json exportado por esta tela.';
+    errorEl.textContent = t('myFlashcards.import.errRead');
   }
 }
 
@@ -1107,11 +1119,11 @@ function maybeAutoImportFromUrl(){
 
 async function confirmAndImportMyFlashcards(payload, errorEl){
   if (!payload || !Array.isArray(payload.cards) || !payload.cards.length){
-    if (errorEl) errorEl.textContent = 'Arquivo/link não tem nenhum cartão pra importar.';
+    if (errorEl) errorEl.textContent = t('myFlashcards.import.errEmpty');
     return;
   }
   if (payload.languageAppKey !== APP_KEY){
-    if (errorEl) errorEl.textContent = `Esses cartões são de outro idioma (${payload.languageAppKey}) -- não podem ser importados aqui.`;
+    if (errorEl) errorEl.textContent = t('myFlashcards.import.errLang', { lang: payload.languageAppKey });
     return;
   }
   // Fase F -- preflight único (mesma regra canônica da criação manual) e
@@ -1129,7 +1141,7 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
   });
   const cutMessage = cutPlan.cut ? ownCardInstanceCutMessage({
     requested: cutPlan.requested, keptInstances: cutPlan.keptInstances,
-    limit: FREE_OWN_FLASHCARD_LIMIT, used: cutPlan.used, what: 'Esta importação',
+    limit: FREE_OWN_FLASHCARD_LIMIT, used: cutPlan.used, what: 'import',
   }) : null;
   if (cutPlan.keepCount === 0){
     openFlashcardLimitModal({ cutMessage });
@@ -1139,8 +1151,8 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
   const dest = await resolveOwnCreationDeck({ languageAppKey: APP_KEY });
   if (!dest.ok){ if (errorEl) errorEl.textContent = dest.error; return; }
   const confirmText = cutPlan.cut
-    ? `O arquivo tem ${payload.cards.length} cartão(ões), mas só os primeiros ${cardsToCreate.length} cabem no plano grátis. Importar esses ${cardsToCreate.length}?`
-    : `Importar ${payload.cards.length} cartão(ões) pra sua conta?`;
+    ? t('myFlashcards.import.confirmCut', { total: payload.cards.length, kept: cardsToCreate.length })
+    : tp('myFlashcards.import.confirm', payload.cards.length);
   if (!confirm(confirmText)) return;
   let importedCount = 0;
   for (const card of cardsToCreate){
@@ -1157,7 +1169,7 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
       if (typeof addSelfFlashcardToState === 'function') addSelfFlashcardToState(result.card);
     }
   }
-  showToast(`✓ ${importedCount} cartão(ões) importado(s). ${summarizeDroppedImportTags(importStates.slice(0, cutPlan.keepCount))}`.trim());
+  showToast(`${tp('myFlashcards.import.done', importedCount)} ${summarizeDroppedImportTags(importStates.slice(0, cutPlan.keepCount))}`.trim());
   await myFlashcardsAfterChange();
   if (cutMessage) openFlashcardLimitModal({ cutMessage });
 }

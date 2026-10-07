@@ -1,0 +1,111 @@
+{
+ "unit": "A1-g10",
+ "en": {
+  "title": "Numbers from 70 to 99",
+  "goal": "Understand and correctly form the numbers from seventy to ninety-nine.",
+  "grammar": {
+   "blocks": [
+    {
+     "title": "Up to sixty, it is regular",
+     "body": "Trente (30), quarante (40), cinquante (50) and soixante (60) follow the normal pattern, one word for each ten — just like in English. The trouble starts after sixty: unlike English, standard French simply has no word of its own for seventy, eighty or ninety.",
+     "examples": [
+      "I am thirty years old.",
+      "It costs sixty euros."
+     ]
+    },
+    {
+     "title": "70 = 60 + 10",
+     "body": "Seventy (soixante-dix) is literally \"sixty-ten\". From 71 to 79, you keep adding to sixty: soixante et onze (71), soixante-douze (72)... up to soixante-dix-neuf (79).",
+     "examples": [
+      "He is seventy years old. (60+10)",
+      "That makes seventy-five euros. (60+15)"
+     ]
+    },
+    {
+     "title": "80 = 4 × 20",
+     "body": "Eighty (quatre-vingts) is \"four twenties\". From 81 to 89, you add on without \"et\": quatre-vingt-un (81), quatre-vingt-deux (82)... The \"s\" of vingts disappears as soon as another number follows.",
+     "examples": [
+      "She is eighty years old. (4×20)",
+      "There are eighty-three people. (4×20+3)"
+     ]
+    },
+    {
+     "title": "90 = 4 × 20 + 10",
+     "body": "Ninety (quatre-vingt-dix) combines the two rules: four twenties, plus ten. From 91 to 99, same logic as 80: quatre-vingt-onze (91)... quatre-vingt-dix-neuf (99).",
+     "examples": [
+      "My grandfather is ninety years old. (4×20+10)",
+      "It costs ninety-nine euros. (4×20+19)"
+     ]
+    },
+    {
+     "title": "Très bien! 🎉",
+     "body": "To sum up the logic of the tens from 70 to 90 — the secret is remembering that soixante-dix and quatre-vingt-dix are the base for adding again:",
+     "examples": [],
+     "table": [
+      {
+       "label": "Tens",
+       "pronouns": [
+        "70",
+        "71",
+        "80",
+        "81",
+        "90",
+        "91",
+        "99"
+       ]
+      }
+     ]
+    }
+   ],
+   "exercises": [
+    {
+     "prompt": "70 in French:",
+     "hint": "60 + 10"
+    },
+    {
+     "prompt": "71 in French:",
+     "hint": "60 + 11 (with et)"
+    },
+    {
+     "prompt": "80 in French:",
+     "hint": "4 × 20"
+    },
+    {
+     "prompt": "81 in French:",
+     "hint": "4×20 + 1 (no et)"
+    },
+    {
+     "prompt": "90 in French:",
+     "hint": "4×20 + 10"
+    },
+    {
+     "prompt": "99 in French:",
+     "hint": "4×20 + 19"
+    }
+   ]
+  }
+ },
+ "review": [
+  {
+   "path": "grammar.blocks[0].body",
+   "pt": "... uma palavra pra cada dezena — igual em português. ... o francês simplesmente não tem uma palavra própria pra setenta, oitenta ou noventa.",
+   "en": "... one word for each ten — just like in English. ... unlike English, standard French simply has no word of its own for seventy, eighty or ninety.",
+   "conf": "media",
+   "why": "Comparison adapted from Portuguese to English; \"standard French\" added because Belgium/Switzerland use septante/huitante/nonante (the exercises already accept those)."
+  },
+  {
+   "path": "grammar.blocks[1].body",
+   "pt": "Setenta (soixante-dix) é literalmente \"sessenta e dez\".",
+   "en": "Seventy (soixante-dix) is literally \"sixty-ten\".",
+   "conf": "media",
+   "why": "Literal gloss in English; wording choice."
+  },
+  {
+   "path": "grammar.exercises[0].prompt",
+   "pt": "70 em francês:",
+   "en": "70 in French:",
+   "conf": "media",
+   "why": "Only the Portuguese part of the prompt was translated; answers unchanged."
+  }
+ ]
+}

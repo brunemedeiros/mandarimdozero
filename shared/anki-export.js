@@ -232,9 +232,11 @@ async function collectExportMediaAssets(exportCards){
   return { mediaForCard, manifest, zipFiles, failedCount };
 }
 
+const ANKI_CLOZE_TRANSLATION_FIELD_DEFAULT = "Tradução";
+
 async function generateApkg(config){
   const statusEl = document.getElementById('export-status');
-  statusEl.textContent = 'Gerando arquivo...';
+  statusEl.textContent = t('ankiExport.generating');
   statusEl.className = 'export-status';
 
   try{
@@ -281,7 +283,7 @@ async function generateApkg(config){
     const exportCards = config.cards(exportSelectedUnit);
 
     if (!exportCards.length){
-      statusEl.textContent = 'Nenhum cartão para exportar nessa seleção.';
+      statusEl.textContent = t('ankiExport.empty');
       statusEl.className = 'export-status err';
       return;
     }
@@ -339,18 +341,23 @@ async function generateApkg(config){
       };
     }
     if (hasClozeCards){
+      // i18n Fase 7 -- nome do campo de tradução do modelo Cloze vem do
+      // config do idioma quando definido; default "Tradução" (export idêntico).
+      // O import nunca depende deste nome (Cloze é reconhecido por
+      // model.type===1 e a tradução pela posição -- ver anki-import.js).
+      const clozeTranslationFieldName = config.clozeTranslationFieldName || ANKI_CLOZE_TRANSLATION_FIELD_DEFAULT;
       model[clozeModelId] = {
         id: clozeModelId, name: `${config.modelName} - Cloze`, type: 1, mod: now, usn: -1,
         sortf: 0, did: deckId,
         flds: [
           { name: "Text", ord:0, font: "Arial", size: 22 },
-          { name: "Tradução", ord:1, font: "Arial", size: 18 },
+          { name: clozeTranslationFieldName, ord:1, font: "Arial", size: 18 },
         ],
         tmpls: [
           {
             name: "Cloze", ord:0,
             qfmt: "{{cloze:Text}}",
-            afmt: "{{cloze:Text}}<hr id='answer'><div style='text-align:center;font-size:18px;'>{{Tradução}}</div>",
+            afmt: `{{cloze:Text}}<hr id='answer'><div style='text-align:center;font-size:18px;'>{{${clozeTranslationFieldName}}}</div>`,
             bqfmt:"", bafmt:"", did: null
           }
         ],
@@ -432,14 +439,14 @@ async function generateApkg(config){
     setTimeout(() => URL.revokeObjectURL(url), 4000);
 
     const mediaNote = media.failedCount > 0
-      ? ` (${media.failedCount} arquivo(s) de mídia não puderam ser incluídos -- os cartões foram exportados mesmo assim, só sem esse áudio/imagem específico.)`
+      ? tp('ankiExport.mediaNote', media.failedCount)
       : '';
-    statusEl.textContent = `Exportado! ${exportCards.length} cartão(ões) no arquivo .apkg — importe direto no Anki.${mediaNote}`;
+    statusEl.textContent = tp('ankiExport.done', exportCards.length, { mediaNote });
     statusEl.className = `export-status ${media.failedCount > 0 ? 'err' : 'ok'}`;
 
   }catch(err){
     console.error(err);
-    statusEl.textContent = 'Não foi possível gerar o arquivo agora. Tente novamente.';
+    statusEl.textContent = t('ankiExport.failed');
     statusEl.className = 'export-status err';
   }
 }

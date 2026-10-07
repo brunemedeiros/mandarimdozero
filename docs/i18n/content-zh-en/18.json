@@ -1,0 +1,180 @@
+{
+ "unit": 18,
+ "en": {
+  "title": "Everyday questions",
+  "goal": "Ask a variety of open questions: who, why, where someone lives or works, whether there is something in a place.",
+  "lessons": {
+   "quem-porque": "Asking who and why",
+   "escola": "Talking about school and students",
+   "apresentar-trabalho": "Introducing someone and saying where they work",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "who",
+   "why",
+   "because",
+   "here",
+   "school",
+   "student",
+   "girlfriend",
+   "boyfriend",
+   "some, a bit of",
+   "to work (at a place)"
+  ],
+  "phrases": [
+   {
+    "t": "Who are you?"
+   },
+   {
+    "t": "Why aren't you going?"
+   },
+   {
+    "t": "Because I'm very busy."
+   },
+   {
+    "t": "I work in Shanghai."
+   },
+   {
+    "t": "There's some coffee here."
+   },
+   {
+    "t": "This is my girlfriend."
+   }
+  ],
+  "dialogue": {
+   "title": "Introducing a friend",
+   "lines": [
+    "Who is this?",
+    "This is my girlfriend, she's a student.",
+    "Where does she work or study?",
+    "She studies at the school, and there are some of her books here."
+   ]
+  },
+  "concepts": {
+   "shei": [
+    {
+     "title": "谁 (shéi) — asking \"who\"",
+     "body": "谁 (shéi) asks about a person, and it takes the same place in the sentence that the answer would — if the answer is \"I\" at the start of the sentence, 谁 also goes at the start.",
+     "examples": [
+      "who are you?"
+     ]
+    }
+   ],
+   "weishenme-yinwei": [
+    {
+     "title": "\"Wèishénme\" or \"yīnwèi\"?",
+     "body": "<strong>Wèishénme</strong> (为什么) is the question: \"why?\". <strong>Yīnwèi</strong> (因为) is the answer: \"because\". They always go together, as a pair.",
+     "examples": [
+      "why aren't you going?",
+      "because I'm very busy"
+     ]
+    }
+   ],
+   "meiyou-de": [
+    {
+     "title": "Close possession without 的",
+     "body": "For very close personal relationships (family, boyfriend/girlfriend), Chinese sometimes leaves out the 的 that would normally mark possession.",
+     "examples": [
+      "my girlfriend"
+     ]
+    }
+   ],
+   "difang-you": [
+    {
+     "title": "Place + 有 + Object — saying what exists in a place",
+     "body": "To say that something exists in a certain place (\"there's coffee here\"), the structure is: Place + 有 + Object — the place comes first, whereas English often puts it at the end (\"there's coffee here\").",
+     "examples": [
+      "there's some coffee here"
+     ]
+    },
+    {
+     "title": "一些 (yìxiē) — \"some\" or \"a bit of\"",
+     "body": "一些 (yìxiē) indicates a small, non-specific amount of something — it equals \"some\" (countable things) or \"a bit of\" (uncountable things, like liquids).",
+     "examples": [
+      "some books"
+     ]
+    }
+   ],
+   "zai-difang-verb": [
+    {
+     "title": "在 + Place + Verb — where the action happens",
+     "body": "When you want to say where an action happens (not just where something is sitting), 在 + Place goes before the verb — different from when 在 alone only shows the position of something.",
+     "examples": [
+      "I work in Shanghai"
+     ]
+    }
+   ]
+  },
+  "trueFalse": [
+   {
+    "claim": "This question asks where someone lives.",
+    "whyNote": "Wrong — <strong>你为什么不去？</strong> asks for the REASON (为什么 = why) for not going, not where the person lives. \"Where do you live?\" would be \"你住在哪里？\"."
+   }
+  ]
+ },
+ "review": [
+  {
+   "path": "vocab[8]",
+   "pt": "alguns, um pouco de",
+   "en": "some, a bit of",
+   "conf": "media",
+   "why": "duas glosas (contável/incontável)"
+  },
+  {
+   "path": "vocab[9]",
+   "pt": "trabalhar (em um lugar)",
+   "en": "to work (at a place)",
+   "conf": "media",
+   "why": "glosa com rótulo"
+  },
+  {
+   "path": "vocab[6]/vocab[7]",
+   "pt": "namorada / namorado",
+   "en": "girlfriend / boyfriend",
+   "conf": "media",
+   "why": "女朋友/男朋友; 'partner' seria neutro, mantive o sentido do PT"
+  },
+  {
+   "path": "concepts.difang-you[0].body",
+   "pt": "bem diferente da ordem em português, onde o lugar viria depois",
+   "en": "the place comes first, whereas English often puts it at the end",
+   "conf": "media",
+   "why": "adaptado: comparação refeita com o inglês; 'often' porque 'Here there's coffee' também é possível"
+  },
+  {
+   "path": "dialogue.lines[0]",
+   "pt": "Quem é essa?",
+   "en": "Who is this?",
+   "conf": "media",
+   "why": "这是谁 não marca gênero; o PT 'essa' vem do contexto (namorada); mantido neutro"
+  },
+  {
+   "path": "dialogue.lines[2]",
+   "pt": "Onde ela trabalha ou estuda?",
+   "en": "Where does she work or study?",
+   "conf": "media",
+   "why": "她在哪里工作或学习 — mantido"
+  },
+  {
+   "path": "dialogue.lines[3]",
+   "pt": "Ela estuda na escola, aqui tem alguns livros dela.",
+   "en": "She studies at the school, and there are some of her books here.",
+   "conf": "media",
+   "why": "acrescentei 'and' para fluência"
+  },
+  {
+   "path": "concepts.meiyou-de[0].body",
+   "pt": "família, namorado(a)",
+   "en": "family, boyfriend/girlfriend",
+   "conf": "media",
+   "why": "fiel ao PT; conferir se o fato linguístico está correto"
+  },
+  {
+   "path": "trueFalse[0].whyNote",
+   "pt": "Onde mora seria \"你住在哪里？\".",
+   "en": "\"Where do you live?\" would be \"你住在哪里？\".",
+   "conf": "media",
+   "why": "adaptado para inglês (pergunta explícita)"
+  }
+ ]
+}

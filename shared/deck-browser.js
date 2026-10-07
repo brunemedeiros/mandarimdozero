@@ -8,8 +8,9 @@
 //   Revisão (início)  -> tabela "Deck | Novo | Aprendendo | Revisar",
 //                        começando pelos Decks de topo (Trilha de Estudo,
 //                        Meus Decks, Cartões da professora). Sem botão
-//                        "Estudar" na tabela (seção 12). Embaixo: Criar
-//                        Deck, Importar arquivo, Exportar.
+//                        "Estudar" na tabela (seção 12). "+ Criar Deck"
+//                        é um link discreto abaixo de Meus Decks; Importar
+//                        e Exportar ficam no "⋯" da barra do topo.
 //   Clique no Deck    -> tela do Deck (seção 13), no formato do Anki:
 //                        nome, Novo/Aprendendo/Revisar e "Estudar agora".
 //   Painel            -> JANELA por cima da tela (seção 14), no formato do
@@ -213,11 +214,21 @@ async function deckBrowserLoadOwnContext(){
 function deckTopbarHTML(nodeId){
   const canAdd = !!deckBrowserUserId();
   const onHome = nodeId === 'lang';
+  // "Decks" fica marcado também dentro de um Deck (a pessoa está na área de
+  // Decks); só a tela inicial é a "página atual".
   return `<nav class="deck-topbar" aria-label="Decks">
-      <button type="button" class="deck-topbar-btn ${onHome ? 'is-active' : ''}" data-topbar-decks ${onHome ? 'aria-current="page"' : ''}>Decks</button>
+      <button type="button" class="deck-topbar-btn is-active" data-topbar-decks aria-current="${onHome ? 'page' : 'location'}">Decks</button>
       ${canAdd ? `<button type="button" class="deck-topbar-btn" data-topbar-add>Adicionar</button>` : ''}
       <button type="button" class="deck-topbar-btn" data-topbar-panel>Painel</button>
       ${typeof toggleReviewSettingsPanel === 'function' ? `<button type="button" class="deck-topbar-btn" data-topbar-settings>Configurar</button>` : ''}
+      ${canAdd ? `<details class="deck-more-menu">
+        <summary class="deck-topbar-btn deck-topbar-more" aria-label="Mais opções: importar e exportar">⋯</summary>
+        <div class="deck-more-menu-list" role="menu">
+          <button type="button" role="menuitem" data-deck-import>Importar arquivo (.apkg ou .json)</button>
+          <button type="button" role="menuitem" data-deck-export>Exportar</button>
+        </div>
+      </details>
+      <input type="file" data-deck-import-file accept=".apkg,.json,application/json" hidden>` : ''}
     </nav>`;
 }
 
@@ -230,6 +241,17 @@ function wireDeckTopbar(container, nodeId){
   container.querySelector('[data-topbar-panel]')?.addEventListener('click', () => openDeckPanel(nodeId));
   // Abre os ajustes numa janela, sem sair da tela atual.
   container.querySelector('[data-topbar-settings]')?.addEventListener('click', () => openReviewSettingsModal());
+  // Menu "⋯" (Importar / Exportar), ao lado de Configurar.
+  wireDeckMoreMenuGlobal();
+  const fileInput = container.querySelector('[data-deck-import-file]');
+  const closeMore = () => { const m = container.querySelector('.deck-more-menu'); if (m) m.open = false; };
+  container.querySelector('[data-deck-import]')?.addEventListener('click', () => { closeMore(); if (fileInput) fileInput.click(); });
+  fileInput?.addEventListener('change', () => {
+    const file = fileInput.files && fileInput.files[0];
+    fileInput.value = '';
+    if (file) deckBrowserImportFile(file);
+  });
+  container.querySelector('[data-deck-export]')?.addEventListener('click', () => { closeMore(); deckBrowserExport(); });
 }
 
 // ---------- Configurar (janela) ----------
@@ -341,6 +363,7 @@ function deckBrowserTableHTML(){
   const pool = deckBrowserPool();
   const collapsed = deckBrowserLoadCollapsed() || deckBrowserDefaultCollapsed(decks);
   const rows = [];
+  const logged = !!deckBrowserUserId();
   const walk = (nodeId, depth) => {
     const kids = deckBrowserChildren(decks, nodeId);
     const c = deckBrowserCounts(decks, nodeId, pool);
@@ -355,22 +378,33 @@ function deckBrowserTableHTML(){
       ${num(c.new, 'is-new')}${num(c.learning, 'is-learning')}${num(c.review, 'is-review')}
     </tr>`);
     if (!isCollapsed) kids.forEach(k => walk(k.id, depth + 1));
+    // "+ Criar Deck": link discreto logo abaixo do grupo "Meus Decks".
+    const node = typeof nodeId === 'number' ? getDeckById(decks, nodeId) : null;
+    if (logged && node && node.kind === 'personal_root'){
+      rows.push(`<tr class="deck-table-create-row"><td colspan="4"><div class="deck-table-name" style="padding-left:${(depth + 1) * 18}px;"><span class="deck-table-toggle-spacer"></span><button type="button" class="deck-table-create-link" data-deck-create>+ Criar Deck</button></div></td></tr>`);
+    }
   };
   deckBrowserChildren(decks, 'lang').forEach(d => walk(d.id, 0));
-  const logged = !!deckBrowserUserId();
   const orphans = deckBrowserOrphanCount();
   return `<table class="deck-table">
       <thead><tr><th scope="col">Deck</th><th scope="col">Novo</th><th scope="col">Aprendendo</th><th scope="col">Revisar</th></tr></thead>
       <tbody>${rows.length ? rows.join('') : `<tr><td colspan="4" class="profile-edit-hint">Nenhum Deck ainda. Conclua uma lição ou crie um Deck.</td></tr>`}</tbody>
     </table>
     ${orphans ? `<p class="profile-edit-hint deck-table-hint">${orphans} dos seus cartões antigos ainda não estão em nenhum Deck. Abra o Painel para vê-los e movê-los.</p>` : ''}
-    ${logged ? `<div class="deck-home-actions">
-      <button type="button" class="btn btn-secondary deck-home-btn" data-deck-create>Criar Deck</button>
-      <button type="button" class="btn btn-secondary deck-home-btn" data-deck-import>Importar arquivo</button>
-      <button type="button" class="btn btn-secondary deck-home-btn" data-deck-export>Exportar</button>
-      <input type="file" data-deck-import-file accept=".apkg,.json,application/json" hidden>
-    </div>
-    <div data-deck-create-box></div>` : ''}`;
+    ${logged ? `<div data-deck-create-box></div>` : ''}`;
+}
+
+// Fecha o menu "⋯" ao clicar fora dele ou apertar Esc (1 listener só).
+let DECK_MORE_MENU_WIRED = false;
+function wireDeckMoreMenuGlobal(){
+  if (DECK_MORE_MENU_WIRED) return;
+  DECK_MORE_MENU_WIRED = true;
+  document.addEventListener('click', (e) => {
+    document.querySelectorAll('.deck-more-menu[open]').forEach(m => { if (!m.contains(e.target)) m.open = false; });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') document.querySelectorAll('.deck-more-menu[open]').forEach(m => { m.open = false; });
+  });
 }
 
 function wireDeckBrowserTable(box){
@@ -384,14 +418,6 @@ function wireDeckBrowserTable(box){
   }));
   box.querySelectorAll('[data-deck-open]').forEach(btn => btn.addEventListener('click', () => openDeckDetail(Number(btn.dataset.deckOpen))));
   box.querySelector('[data-deck-create]')?.addEventListener('click', () => openCreateDeckForm(box.querySelector('[data-deck-create-box]'), null));
-  const fileInput = box.querySelector('[data-deck-import-file]');
-  box.querySelector('[data-deck-import]')?.addEventListener('click', () => fileInput && fileInput.click());
-  fileInput?.addEventListener('change', () => {
-    const file = fileInput.files && fileInput.files[0];
-    fileInput.value = '';
-    if (file) deckBrowserImportFile(file);
-  });
-  box.querySelector('[data-deck-export]')?.addEventListener('click', deckBrowserExport);
 }
 
 // ---------- Criar Deck / Renomear ----------
@@ -568,21 +594,26 @@ function renderDeckDetail(){
   if (deck.kind === 'course') hint = 'Os cartões da Trilha de Estudo vêm das lições: cada lição concluída libera os cartões dela.';
   else if (deck.kind === 'teacher_root' || deck.kind === 'teacher') hint = 'Estes cartões são organizados pela sua professora. Aqui você só estuda.';
   const crumbs = deckBrowserBreadcrumb(decks, nodeId);
-  const totalLine = `${c.total} ${c.total === 1 ? 'cartão' : 'cartões'}${getDeckChildren(decks, nodeId).length ? ' neste Deck e nos subdecks' : ''}${c.newTotal > c.new ? ` · ${c.newTotal} novos no total (entram até ${c.new} por dia, conforme "Novas palavras por dia")` : ''}`;
+  const totalLine = `${c.total} ${c.total === 1 ? 'cartão' : 'cartões'}${getDeckChildren(decks, nodeId).length ? ' neste Deck e nos subdecks' : ''}${c.newTotal > c.new ? ` · até ${c.new} ${c.new === 1 ? 'novo' : 'novos'} por dia` : ''}`;
+  const canAddHere = deckBrowserCanAddCard(deck);
+  const count = (n, cls, label) => `<div class="deck-overview-count"><dt>${label}</dt><dd class="${n ? cls : 'is-zero'}">${n}</dd></div>`;
+  const pathHTML = crumbs.length > 1 ? `<span class="deck-overview-path">${crumbs.slice(0, -1).map(escapeHTML).join(' › ')} › </span>` : '';
+  const studyHTML = c.total
+    ? `<button type="button" class="btn btn-primary deck-overview-study" data-deck-study>Estudar agora</button>`
+    : `<div class="deck-overview-empty"><p class="deck-overview-empty-msg">Este Deck ainda não tem cartões.</p>${canAddHere ? `<button type="button" class="btn btn-primary deck-overview-study" data-deck-empty-add>Adicionar cartão</button>` : ''}</div>`;
   wrap.innerHTML = `
     <div class="path-header"><h2>Revisão</h2></div>
     ${deckTopbarHTML(nodeId)}
     <div class="deck-overview">
-      <h2 class="deck-overview-title">${crumbs.map(escapeHTML).join(' › ')}</h2>
+      <h2 class="deck-overview-title">${pathHTML}<span class="deck-overview-name">${escapeHTML(crumbs[crumbs.length - 1] || '')}</span></h2>
       <div class="deck-overview-body">
         <dl class="deck-overview-counts">
-          <dt>Novo:</dt><dd class="${c.new ? 'is-new' : 'is-zero'}">${c.new}</dd>
-          <dt>Aprendendo:</dt><dd class="${c.learning ? 'is-learning' : 'is-zero'}">${c.learning}</dd>
-          <dt>Revisar:</dt><dd class="${c.review ? 'is-review' : 'is-zero'}">${c.review}</dd>
+          ${count(c.new, 'is-new', 'Novo')}${count(c.learning, 'is-learning', 'Aprendendo')}${count(c.review, 'is-review', 'Revisar')}
         </dl>
-        <button type="button" class="btn btn-primary deck-overview-study" data-deck-study ${c.total ? '' : 'disabled'}>Estudar agora</button>
+        ${studyHTML}
       </div>
-      <p class="deck-overview-total">${escapeHTML(totalLine)}.</p>
+      ${c.total && typeof deckMemoryStrengthHTML === 'function' ? deckMemoryStrengthHTML(deckBrowserScope(decks, nodeId, pool)) : ''}
+      ${c.total ? `<p class="deck-overview-total">${escapeHTML(totalLine)}</p>` : ''}
       ${hint ? `<p class="profile-edit-hint deck-overview-hint">${escapeHTML(hint)}</p>` : ''}
     </div>
     ${canHaveChildren ? `<div class="deck-overview-footer">
@@ -594,7 +625,8 @@ function renderDeckDetail(){
     <div class="deck-overview-extra" data-deck-extra-box></div>` : ''}`;
   wireDeckTopbar(wrap, nodeId);
   const extra = wrap.querySelector('[data-deck-extra-box]');
-  wrap.querySelector('[data-deck-study]').addEventListener('click', () => deckBrowserStudy(nodeId));
+  wrap.querySelector('[data-deck-study]')?.addEventListener('click', () => deckBrowserStudy(nodeId));
+  wrap.querySelector('[data-deck-empty-add]')?.addEventListener('click', () => openAddCardModal({ deckId: deck.id }));
   wrap.querySelector('[data-deck-subdeck]')?.addEventListener('click', () => openCreateDeckForm(extra, deck.id));
   wrap.querySelector('[data-deck-rename]')?.addEventListener('click', () => openRenameDeckForm(extra, deck));
   wrap.querySelector('[data-deck-publish]')?.addEventListener('click', (ev) => {
@@ -847,13 +879,13 @@ function deckBrowserNoteState(note){
   const b = note.cards.map(c => cardStudyBucket(c));
   if (b.every(x => x === 'new')) return 'Novo';
   if (b.some(x => x === 'learning')) return 'Aprendendo';
-  return 'Revisão';
+  return 'Revisar';
 }
 
 const DECK_PANEL_ID = 'deck-panel-modal';
 const DECK_PANEL_STATES = [
   { id: 'all', label: 'Todos' }, { id: 'Novo', label: 'Novo' },
-  { id: 'Aprendendo', label: 'Aprendendo' }, { id: 'Revisão', label: 'Revisão' },
+  { id: 'Aprendendo', label: 'Aprendendo' }, { id: 'Revisar', label: 'Revisar' },
 ];
 
 function deckPanelIsMobile(){ return window.matchMedia ? window.matchMedia('(max-width: 760px)').matches : window.innerWidth <= 760; }
@@ -916,7 +948,8 @@ function deckPanelMount(){
   document.addEventListener('keydown', deckPanelOnKey);
   if (typeof MY_FLASHCARDS_STATE !== 'undefined') MY_FLASHCARDS_STATE.onChange = deckPanelAfterEdit;
   renderDeckPanel();
-  search.focus();
+  // No celular, não abre o teclado sozinho.
+  if (!window.matchMedia || !window.matchMedia('(max-width: 600px)').matches) search.focus();
 }
 
 function deckPanelOnKey(e){
@@ -1043,7 +1076,7 @@ function renderDeckPanelSide(){
       ${archivedCount ? `<button type="button" class="deck-panel-side-item ${p.archived ? 'is-active' : ''}" data-panel-archived>Arquivados (${archivedCount})</button>` : ''}
     </div>
     <div class="deck-panel-side-group"><div class="deck-panel-side-label">Tags</div>
-      ${tags.length ? tags.map(t => `<button type="button" class="deck-panel-side-item ${p.tags.includes(t) ? 'is-active' : ''}" data-panel-tag="${escapeHTML(t)}" aria-pressed="${p.tags.includes(t) ? 'true' : 'false'}">#${escapeHTML(t)}</button>`).join('') : `<p class="profile-edit-hint deck-panel-side-empty">Nenhuma tag.</p>`}
+      ${tags.length ? tags.map(t => `<button type="button" class="deck-panel-side-item ${p.tags.includes(t) ? 'is-active' : ''}" data-panel-tag="${escapeHTML(t)}" aria-pressed="${p.tags.includes(t) ? 'true' : 'false'}" title="#${escapeHTML(t)}">${escapeHTML(friendlyTagLabel(t))}</button>`).join('') : `<p class="profile-edit-hint deck-panel-side-empty">Nenhuma tag.</p>`}
       ${logged ? `<button type="button" class="deck-panel-side-item deck-panel-side-link ${p.mode === 'tags' ? 'is-active' : ''}" data-panel-manage-tags>Gerenciar tags</button>` : ''}
     </div>`;
   body.querySelectorAll('[data-panel-scope]').forEach(b => b.addEventListener('click', () => {
@@ -1081,7 +1114,7 @@ function renderDeckPanelList(){
   const visibleKeys = new Set(notes.map(n => n.key));
   Array.from(p.selected).forEach(k => { if (!visibleKeys.has(k)) p.selected.delete(k); });
   root.querySelector('[data-panel-count]').textContent = notes.length
-    ? `${notes.length} ${notes.length === 1 ? 'conteúdo' : 'conteúdos'}.`
+    ? `${notes.length} ${notes.length === 1 ? 'cartão' : 'cartões'}`
     : '';
   if (!notes.length){
     const filtered = p.query || p.tags.length || p.state !== 'all' || p.archived;

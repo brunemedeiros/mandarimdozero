@@ -29,7 +29,7 @@ from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional, Tuple
 
 # Sobe quando o comportamento de qualquer regra muda (regenerar o que a regra afeta).
-SPOKEN_RULES_VERSION = 4
+SPOKEN_RULES_VERSION = 5
 
 
 @dataclass(frozen=True)
@@ -43,8 +43,13 @@ class SpokenRule:
     # 'approved' = decidida com a autora; 'pending-lab' = depende de OUVIR
     # variantes (audio_lab.py) antes de ser ligada.
     status: str = "approved"
+    # Regra que não cabe num re.sub simples (ex.: gênero entre parênteses,
+    # que olha várias ocorrências juntas): função texto -> texto.
+    fn: Optional[Callable[[str], str]] = None
 
     def apply(self, text: str) -> str:
+        if self.fn is not None:
+            return self.fn(text)
         return re.sub(self.pattern, self.replacement, text)
 
 
@@ -105,11 +110,160 @@ _FR_RULES: List[SpokenRule] = [
 # ---------------------------------------------------------------------------
 _ZH_RULES: List[SpokenRule] = []
 
-# Idiomas futuros (ex.: português, com sandhi consonantal "os carros azuis" ->
-# ligação s+a) entram como mais uma lista aqui -- nunca misturadas com as do fr.
+# ---------------------------------------------------------------------------
+# Português (pt-BR) -- aprovadas pela autora em 2026-10-06 (docs/pt-tts-
+# proposta.md + docs/pt-tts-revisao.md). Usadas hoje só pelo TTS por campo
+# (Edge Function tts-generate, porte em tts_core.mjs -- mesma ordem e mesmo
+# resultado, conferido por teste de paridade). Sandhi, siglas, números,
+# hífen de pronome e acentos ficam com a voz (não são regra de texto).
+# Letra = [^\W\d_] (equivale a \p{L} do JS, com acentos).
+# ---------------------------------------------------------------------------
+_L = r"[^\W\d_]"
+
+_PT_TITLES = {
+    "Sr": "Senhor", "Sra": "Senhora", "Srta": "Senhorita", "Srs": "Senhores", "Sras": "Senhoras",
+    "Dr": "Doutor", "Dra": "Doutora", "Drs": "Doutores", "Dras": "Doutoras",
+    "Prof": "Professor", "Profa": "Professora",
+}
+_PT_TITLES_FEM = {"Sr": "Senhora", "Dr": "Doutora", "Prof": "Professora"}
+_PT_TITLE_AFTER = r"(?=\s|[,;:!?)]|$)"
+
+
+def _pt_titles(text: str) -> str:
+    def end_dot(m, word):
+        return word + ("." if m.end() == len(m.string) and m.group(0).endswith(".") else "")
+    # "Sr.(a)" / "Sr(a)." -> "Senhor ou Senhora"
+    text = re.sub(rf"(?<!{_L})Sr\.?\(a\)\.?", lambda m: end_dot(m, "Senhor ou Senhora"), text)
+    # "Sr.ª", "Dr.ª", "Prof.ª", "Profª"
+    text = re.sub(rf"(?<!{_L})(Sr|Dr|Prof)\.?ª{_PT_TITLE_AFTER}", lambda m: _PT_TITLES_FEM[m.group(1)], text)
+    # Com ponto: expande sempre que vier espaço, pontuação ou fim do texto.
+    text = re.sub(rf"(?<!{_L})(Srta|Sras|Srs|Sra|Sr|Dras|Drs|Dra|Dr|Profa|Prof)\.{_PT_TITLE_AFTER}",
+                  lambda m: end_dot(m, _PT_TITLES[m.group(1)]), text)
+    # Sem ponto, antes de nome com maiúscula ("Dr Paulo").
+    text = re.sub(rf"(?<!{_L})(Sra|Sr|Dra|Dr)(?= [A-ZÀ-ÖØ-Þ])", lambda m: _PT_TITLES[m.group(1)], text)
+    return text
+
+
+_PT_VOWELS = "aeiouáéíóúâêôãõ"
+
+
+def _pt_gender_variant(word: str, suf: str):
+    if suf == "a":
+        if word.endswith("o"):
+            return word, word[:-1] + "a"
+        if word.endswith("O"):
+            return word, word[:-1] + "A"
+        if word.endswith("or"):
+            return word, word + "a"
+        return None
+    if suf == "as":
+        return (word, word[:-2] + "as") if word.endswith("os") else None
+    if suf == "s":
+        return (word, word + "s") if word[-1:].lower() in _PT_VOWELS else None
+    if suf == "es":
+        return (word, word + "es") if word[-1:].lower() in "rz" else None
+    return None
+
+
+_PT_GENDER_RE = re.compile(rf"(?<!{_L})({_L}(?:{_L}|-)*)\((as|es|a|s)\)")
+
+
+def _pt_gender(text: str) -> str:
+    """"obrigado(a)" -> "obrigado, obrigada"; com vários marcadores, repete o
+    trecho inteiro: "o(a) aluno(a)" -> "o aluno, a aluna". Só -o(a), -or(a),
+    -os(as), vogal+(s), r/z+(es); o resto (ex.: "inglês(a)") fica igual."""
+    valid = []
+    for m in _PT_GENDER_RE.finditer(text):
+        v = _pt_gender_variant(m.group(1), m.group(2))
+        if v:
+            valid.append((m.start(), m.end(), v))
+    if not valid:
+        return text
+    start, end = valid[0][0], valid[-1][1]
+
+    def build(idx):
+        out, pos = [], start
+        for s0, e0, v in valid:
+            out.append(text[pos:s0])
+            out.append(v[idx])
+            pos = e0
+        out.append(text[pos:end])
+        return "".join(out)
+
+    return text[:start] + build(0) + ", " + build(1) + text[end:]
+
+
+_PT_UNITS = ["", "primeiro", "segundo", "terceiro", "quarto", "quinto", "sexto", "sétimo", "oitavo", "nono"]
+_PT_TENS = ["", "décimo", "vigésimo", "trigésimo", "quadragésimo", "quinquagésimo",
+            "sexagésimo", "septuagésimo", "octogésimo", "nonagésimo"]
+
+
+def _pt_ordinal_word(n: int, fem: bool):
+    if n < 1 or n > 100:
+        return None
+    if n == 100:
+        words = ["centésimo"]
+    else:
+        words = ([_PT_TENS[n // 10]] if n >= 10 else []) + ([_PT_UNITS[n % 10]] if n % 10 else [])
+    if fem:
+        words = [w[:-1] + "a" for w in words]
+    return " ".join(words)
+
+
+def _pt_ordinals(text: str) -> str:
+    def repl(m):
+        w = _pt_ordinal_word(int(m.group(1)), m.group(2) == "ª")
+        return w if w else m.group(0)
+    return re.sub(rf"(?<!\d)(?<!{_L})(\d{{1,3}})\.?([ºª])(?!\d)(?!{_L})", repl, text)
+
+
+_PT_RULES: List[SpokenRule] = [
+    SpokenRule(
+        id="pt.title-abbreviations", lang="pt",
+        reason='"Sra. Silva", "Dr. Paulo", "Sr.(a)": o TTS pode soletrar ou pausar no ponto. Lê "Senhora", "Doutor", "Senhor ou Senhora".',
+        pattern="", replacement="", fn=_pt_titles,
+    ),
+    SpokenRule(
+        id="pt.number-abbreviation", lang="pt",
+        reason='"nº 5" / "n.º 5": lê "número 5".',
+        pattern=r"(?<![^\W\d_])([Nn])\.?º\s*(?=\d)",
+        replacement="", fn=lambda t: re.sub(r"(?<![^\W\d_])([Nn])\.?º\s*(?=\d)",
+                                           lambda m: "Número " if m.group(1) == "N" else "número ", t),
+    ),
+    SpokenRule(
+        id="pt.gender-parenthetical", lang="pt",
+        reason='"obrigado(a)", "o(a) aluno(a)", "livro(s)": lê as duas formas ("obrigado, obrigada"; "o aluno, a aluna").',
+        pattern="", replacement="", fn=_pt_gender,
+    ),
+    SpokenRule(
+        id="pt.parenthetical-particle", lang="pt",
+        reason='"gostar (de)": lê a preposição sem a pausa do parêntese. Lista fechada; parêntese explicativo ("você (informal)") fica igual.',
+        pattern=r"\s+\((de|em|a|com|por|para|do|da|no|na)\)",
+        replacement=r" \1…",
+    ),
+    SpokenRule(
+        id="pt.slash-alternatives", lang="pt",
+        reason='"bonito / bonita": lê as duas formas com uma pausa curta. Barra sem espaço ("e/ou", "km/h") fica igual.',
+        pattern=r"\s+/\s+",
+        replacement=", ",
+    ),
+    SpokenRule(
+        id="pt.ordinal-indicators", lang="pt",
+        reason='"1º andar", "2ª aula", "21º": lê "primeiro", "segunda", "vigésimo primeiro" (1 a 100). "1°" (grau) fica igual.',
+        pattern="", replacement="", fn=_pt_ordinals,
+    ),
+    SpokenRule(
+        id="pt.strip-symbols", lang="pt",
+        reason="Emoji, setas e marcadores de lista (•, →, ✓, * solto) não devem ser lidos.",
+        pattern="[\u2022\u2190-\u21FF\u2600-\u27BF\uFE0F\u200D\U0001F000-\U0001FAFF]|(?<!\S)\*+(?!\S)",
+        replacement=" ",
+    ),
+]
+
 RULES_BY_LANG: Dict[str, List[SpokenRule]] = {
     "fr": _FR_RULES,
     "zh": _ZH_RULES,
+    "pt": _PT_RULES,
 }
 
 # Correção manual pontual, quando nenhuma regra genérica resolve: texto exibido
@@ -121,6 +275,7 @@ SPOKEN_OVERRIDES: Dict[str, Dict[str, str]] = {
         "une bouteille (de)": "une bouteille (de)",
     },
     "zh": {},
+    "pt": {},
 }
 
 

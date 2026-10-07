@@ -78,7 +78,16 @@ const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 // cache de TODO Field TTS já gerado, de propósito (áudio de um provedor
 // diferente É um resultado diferente).
 const TTS_PROVIDER_MODEL_ID = 'google-chirp3-hd';
-const TTS_CONFIG_VERSION = 1;
+const TTS_CONFIG_VERSION = 2;
+// Versão das regras de "texto falado" POR IDIOMA (tts_core.mjs /
+// spoken_text.py). Entra no generationKey junto com TTS_CONFIG_VERSION:
+// mudar a regra de um idioma invalida só os áudios daquele idioma.
+const TTS_SPOKEN_RULES_VERSION_BY_LANG: Record<string, number> = { fr: 4, pt: 1, zh: 0 };
+function ttsConfigVersionFor(language: string | null): string {
+  const l = String(language || '').trim().toLowerCase();
+  const fam = l.startsWith('fr') ? 'fr' : l.startsWith('pt') ? 'pt' : (l.startsWith('zh') || l.startsWith('cmn')) ? 'zh' : 'x';
+  return `${TTS_CONFIG_VERSION}:${fam}${TTS_SPOKEN_RULES_VERSION_BY_LANG[fam] ?? 0}`;
+}
 const TTS_TEXT_MAX_LENGTH = 500;
 const TTS_RATE_LIMIT = 20;
 const TTS_RATE_LIMIT_WINDOW_MINUTES = 10;
@@ -95,7 +104,7 @@ async function computeTtsGenerationKey(
     voiceId || '',
     rate === null || rate === undefined ? '' : String(rate),
     TTS_PROVIDER_MODEL_ID,
-    String(TTS_CONFIG_VERSION),
+    ttsConfigVersionFor(language),
   ];
   const input = parts.map((p) => encodeURIComponent(p)).join('\u001F');
   const bytes = new TextEncoder().encode(input);

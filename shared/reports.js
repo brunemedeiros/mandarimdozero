@@ -35,14 +35,14 @@
 // sem o chamador precisar saber nada sobre isso.
 
 const REPORT_CATEGORIES = [
-  { id: 'bug_tecnico', label: 'Bug / erro técnico', kind: 'problema' },
-  { id: 'erro_conteudo', label: 'Erro de conteúdo', kind: 'problema' },
-  { id: 'traducao', label: 'Tradução incorreta', kind: 'problema' },
-  { id: 'audio', label: 'Áudio / pronúncia incorreta', kind: 'problema' },
-  { id: 'visual', label: 'Problema visual', kind: 'problema' },
-  { id: 'comportamento_inesperado', label: 'Algo não funciona como deveria', kind: 'problema' },
-  { id: 'sugestao_melhoria', label: 'Sugestão de melhoria', kind: 'sugestao' },
-  { id: 'outro', label: 'Outro', kind: 'problema' },
+  { id: 'bug_tecnico', label: 'Bug / erro técnico', labelKey: 'report.category.bug_tecnico', kind: 'problema' },
+  { id: 'erro_conteudo', label: 'Erro de conteúdo', labelKey: 'report.category.erro_conteudo', kind: 'problema' },
+  { id: 'traducao', label: 'Tradução incorreta', labelKey: 'report.category.traducao', kind: 'problema' },
+  { id: 'audio', label: 'Áudio / pronúncia incorreta', labelKey: 'report.category.audio', kind: 'problema' },
+  { id: 'visual', label: 'Problema visual', labelKey: 'report.category.visual', kind: 'problema' },
+  { id: 'comportamento_inesperado', label: 'Algo não funciona como deveria', labelKey: 'report.category.comportamento_inesperado', kind: 'problema' },
+  { id: 'sugestao_melhoria', label: 'Sugestão de melhoria', labelKey: 'report.category.sugestao_melhoria', kind: 'sugestao' },
+  { id: 'outro', label: 'Outro', labelKey: 'report.category.outro', kind: 'problema' },
 ];
 
 // Gravidade PERCEBIDA pelo usuário -- nunca a prioridade técnica final (essa
@@ -50,11 +50,26 @@ const REPORT_CATEGORIES = [
 // isso quebraria o fluxo rápido pedido na auditoria ("clicar → escolher
 // categoria → descrever → enviar").
 const REPORT_SEVERITIES = [
-  { id: 'impede', label: 'Impede continuar' },
-  { id: 'dificulta', label: 'Dificulta a atividade' },
-  { id: 'pequeno', label: 'Problema pequeno' },
-  { id: 'sugestao', label: 'Apenas sugestão' },
+  { id: 'impede', label: 'Impede continuar', labelKey: 'report.severity.impede' },
+  { id: 'dificulta', label: 'Dificulta a atividade', labelKey: 'report.severity.dificulta' },
+  { id: 'pequeno', label: 'Problema pequeno', labelKey: 'report.severity.pequeno' },
+  { id: 'sugestao', label: 'Apenas sugestão', labelKey: 'report.severity.sugestao' },
 ];
+
+// ---------- i18n (Etapa 2 -- piloto) ----------
+// `label` acima continua sendo o texto pt-BR literal (usado pelo Painel de
+// Admin, shared/admin-reports.js, ainda não migrado); o formulário mostra
+// t(labelKey). reportT cai no texto pt-BR original se o núcleo de i18n não
+// tiver carregado por algum motivo -- o modal nunca fica sem texto.
+function reportT(key, fallback){
+  try {
+    if (typeof t === 'function'){
+      const v = t(key);
+      if (v && v !== key) return v;
+    }
+  } catch (e) {}
+  return fallback;
+}
 
 const REPORT_SCREENSHOT_MAX_BYTES = 8 * 1024 * 1024;
 
@@ -296,7 +311,7 @@ async function reportCheckRateLimit(){
         .gte('created_at', since);
       if (error) return { ok: true }; // falha na checagem não deve travar o envio
       if ((count || 0) >= REPORT_RATE_MAX_LOGGED){
-        return { ok: false, error: 'Você já enviou vários reports recentemente. Aguarde alguns minutos antes de enviar outro.' };
+        return { ok: false, error: reportT('report.error.rateLimitLogged', 'Você já enviou vários reports recentemente. Aguarde alguns minutos antes de enviar outro.') };
       }
       return { ok: true };
     } catch (e) { return { ok: true }; }
@@ -307,7 +322,7 @@ async function reportCheckRateLimit(){
     const now = Date.now();
     const recent = list.filter(t => now - t < REPORT_RATE_WINDOW_MS);
     if (recent.length >= REPORT_RATE_MAX_GUEST){
-      return { ok: false, error: 'Você já enviou vários reports recentemente. Aguarde alguns minutos ou crie uma conta.' };
+      return { ok: false, error: reportT('report.error.rateLimitGuest', 'Você já enviou vários reports recentemente. Aguarde alguns minutos ou crie uma conta.') };
     }
     return { ok: true };
   } catch (e) { return { ok: true }; }
@@ -340,21 +355,21 @@ function reportScreenshotPath(file){
 }
 async function uploadReportScreenshot(file){
   if (!file.type || !file.type.startsWith('image/')){
-    return { ok: false, error: 'O anexo precisa ser uma imagem.' };
+    return { ok: false, error: reportT('report.error.attachNotImage', 'O anexo precisa ser uma imagem.') };
   }
   if (file.size > REPORT_SCREENSHOT_MAX_BYTES){
-    return { ok: false, error: 'Imagem muito grande (máx. 8MB).' };
+    return { ok: false, error: reportT('report.error.attachTooLarge', 'Imagem muito grande (máx. 8MB).') };
   }
   try {
     const path = reportScreenshotPath(file);
     const { error } = await supabaseClient.storage
       .from('report-screenshots')
       .upload(path, file, { contentType: file.type, cacheControl: '3600' });
-    if (error) return { ok: false, error: 'Não foi possível enviar a imagem.' };
+    if (error) return { ok: false, error: reportT('report.error.attachUploadFailed', 'Não foi possível enviar a imagem.') };
     const { data } = supabaseClient.storage.from('report-screenshots').getPublicUrl(path);
     return { ok: true, url: data?.publicUrl || null };
   } catch (e) {
-    return { ok: false, error: 'Não foi possível enviar a imagem.' };
+    return { ok: false, error: reportT('report.error.attachUploadFailed', 'Não foi possível enviar a imagem.') };
   }
 }
 
@@ -368,7 +383,7 @@ function populateReportOptionButtons(){
   const catWrap = document.getElementById('report-category-options');
   if (catWrap && !catWrap.dataset.built){
     catWrap.innerHTML = REPORT_CATEGORIES.map((c, i) =>
-      `<button type="button" class="report-option-btn" data-category="${c.id}">${i + 1}. ${c.label}</button>`
+      `<button type="button" class="report-option-btn" data-category="${c.id}">${i + 1}. ${reportT(c.labelKey, c.label)}</button>`
     ).join('');
     catWrap.dataset.built = '1';
     catWrap.addEventListener('click', (e) => {
@@ -383,7 +398,7 @@ function populateReportOptionButtons(){
   const sevWrap = document.getElementById('report-severity-options');
   if (sevWrap && !sevWrap.dataset.built){
     sevWrap.innerHTML = REPORT_SEVERITIES.map(s =>
-      `<button type="button" class="report-severity-btn" data-severity="${s.id}">${s.label}</button>`
+      `<button type="button" class="report-severity-btn" data-severity="${s.id}">${reportT(s.labelKey, s.label)}</button>`
     ).join('');
     sevWrap.dataset.built = '1';
     sevWrap.addEventListener('click', (e) => {
@@ -395,6 +410,20 @@ function populateReportOptionButtons(){
       if (!wasSelected) btn.classList.add('selected');
     });
   }
+}
+
+// Re-traduz os botões já montados (categorias/gravidades) -- montados uma
+// vez só em populateReportOptionButtons(), antes do catálogo en/es (carregado
+// sob demanda) ter chegado. Chamado ao abrir o modal e em 'i18n:change'.
+function refreshReportOptionLabels(){
+  document.querySelectorAll('#report-category-options .report-option-btn').forEach((btn, i) => {
+    const c = REPORT_CATEGORIES.find(x => x.id === btn.dataset.category);
+    if (c) btn.textContent = `${i + 1}. ${reportT(c.labelKey, c.label)}`;
+  });
+  document.querySelectorAll('#report-severity-options .report-severity-btn').forEach(btn => {
+    const sv = REPORT_SEVERITIES.find(x => x.id === btn.dataset.severity);
+    if (sv) btn.textContent = reportT(sv.labelKey, sv.label);
+  });
 }
 
 function resetReportForm(){
@@ -421,7 +450,7 @@ function resetReportForm(){
   const errEl = document.getElementById('report-error');
   if (errEl) errEl.textContent = '';
   const submitBtn = document.getElementById('report-submit-btn');
-  if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = 'Enviar'; }
+  if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = reportT('report.modal.submit', 'Enviar'); }
   const formView = document.getElementById('report-form-view');
   const successView = document.getElementById('report-success-view');
   if (formView) formView.style.display = '';
@@ -437,6 +466,7 @@ function openReportModal(extraContext){
   const modal = document.getElementById('report-modal');
   if (!modal) return;
   REPORT_MODAL_CONTEXT = captureReportContext(extraContext || null);
+  refreshReportOptionLabels();
   resetReportForm();
   // Campo de e-mail só faz sentido pra convidado -- é a ÚNICA forma da
   // admin conseguir responder um report de quem não tem conta (ver Painel
@@ -486,29 +516,29 @@ async function submitReport(){
   if (errEl) errEl.textContent = '';
 
   if (!REPORT_SELECTED_CATEGORY){
-    if (errEl) errEl.textContent = 'Escolha uma categoria.';
+    if (errEl) errEl.textContent = reportT('report.error.chooseCategory', 'Escolha uma categoria.');
     return;
   }
   const descEl = document.getElementById('report-description');
   const description = (descEl?.value || '').trim();
   if (!description){
-    if (errEl) errEl.textContent = 'Descreva o que aconteceu.';
+    if (errEl) errEl.textContent = reportT('report.error.describe', 'Descreva o que aconteceu.');
     return;
   }
 
   const categoryDef = REPORT_CATEGORIES.find(c => c.id === REPORT_SELECTED_CATEGORY);
   const hash = reportDedupHash(REPORT_SELECTED_CATEGORY, description, REPORT_MODAL_CONTEXT?.url);
   if (reportIsDuplicate(hash)){
-    if (errEl) errEl.textContent = 'Você já enviou isso agora há pouco -- obrigada!';
+    if (errEl) errEl.textContent = reportT('report.error.duplicate', 'Você já enviou isso agora há pouco -- obrigada!');
     return;
   }
 
-  if (submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Enviando...'; }
+  if (submitBtn){ submitBtn.disabled = true; submitBtn.textContent = reportT('report.modal.sending', 'Enviando...'); }
 
   const rateCheck = await reportCheckRateLimit();
   if (!rateCheck.ok){
     if (errEl) errEl.textContent = rateCheck.error;
-    if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = 'Enviar'; }
+    if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = reportT('report.modal.submit', 'Enviar'); }
     return;
   }
 
@@ -517,7 +547,7 @@ async function submitReport(){
     const upload = await uploadReportScreenshot(REPORT_MODAL_SCREENSHOT_FILE);
     if (!upload.ok){
       if (errEl) errEl.textContent = upload.error;
-      if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = 'Enviar'; }
+      if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = reportT('report.modal.submit', 'Enviar'); }
       return;
     }
     screenshotUrl = upload.url;
@@ -554,8 +584,8 @@ async function submitReport(){
     const { error } = await supabaseClient.from('reports').insert([row]);
     if (error) throw error;
   } catch (e) {
-    if (errEl) errEl.textContent = 'Não foi possível enviar. Verifique sua conexão e tente de novo.';
-    if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = 'Enviar'; }
+    if (errEl) errEl.textContent = reportT('report.error.sendFailed', 'Não foi possível enviar. Verifique sua conexão e tente de novo.');
+    if (submitBtn){ submitBtn.disabled = false; submitBtn.textContent = reportT('report.modal.submit', 'Enviar'); }
     return;
   }
 
@@ -569,10 +599,11 @@ async function submitReport(){
   const successView = document.getElementById('report-success-view');
   if (formView) formView.style.display = 'none';
   if (successView) successView.style.display = '';
-  if (typeof showToast === 'function') showToast('✓ Report enviado. Obrigada por ajudar!');
+  if (typeof showToast === 'function') showToast(reportT('report.toast.success', '✓ Report enviado. Obrigada por ajudar!'));
 }
 
 wireReportModal();
+window.addEventListener('i18n:change', refreshReportOptionLabels);
 
 // Delegado: a bandeira contextual [data-report-flag] fica fixa na barra de
 // foco da lição (#report-flag-lesson-btn, ao lado dos outros pills --

@@ -1,0 +1,150 @@
+{
+ "unit": 10,
+ "en": {
+  "title": "Transportation",
+  "goal": "Ask how to get somewhere by public transport or taxi.",
+  "lessons": {
+   "meios-transporte": "Naming means of transport",
+   "como-chegar": "Asking how to get somewhere",
+   "passagem": "Buying a ticket",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "bus",
+   "subway",
+   "taxi",
+   "to walk / go on foot",
+   "how to get there",
+   "station / stop",
+   "ticket",
+   "one ticket (张 is the measure word here)"
+  ],
+  "phrases": [
+   {
+    "t": "How do you get to the airport?"
+   },
+   {
+    "t": "I'm going by subway."
+   },
+   {
+    "t": "I want to buy a ticket."
+   },
+   {
+    "t": "How did you get here?"
+   }
+  ],
+  "dialogue": {
+   "title": "Asking how to get somewhere",
+   "lines": [
+    "How do you get to the airport?",
+    "You can take the subway or a taxi.",
+    "Where is the subway station?",
+    "Up ahead, very close."
+   ]
+  },
+  "concepts": {
+   "zenme": [
+    {
+     "title": "怎么 (zěnme) — asking \"how\"",
+     "body": "怎么 (zěnme) asks about the way something is done, and usually comes before the verb — it's like \"how\" in English when you ask about the method or way of doing something.",
+     "examples": [
+      "how do you get to the airport?"
+     ]
+    }
+   ],
+   "qu-lai": [
+    {
+     "title": "去 (qù) and 来 (lái) — \"go\" and \"come\"",
+     "body": "去 (qù) means \"to go\" and is followed directly by the destination, with no preposition. 来 (lái) means \"to come\" — together, they are the two basic directional verbs in Chinese, showing movement away from or toward the speaker.",
+     "examples": [
+      "I'm going to the airport"
+     ]
+    }
+   ],
+   "zoulu-vs-zuo": [
+    {
+     "title": "\"Zǒu lù\" or \"zuò dìtiě\"?",
+     "body": "To go on foot, you just say <strong>zǒu lù</strong> (走路, to walk), with no other verb. For any vehicle you get into and sit in, you use <strong>zuò</strong> (坐, literally \"to sit\") before the means of transport — the same \"zuò\" as sitting on a chair; think of it as \"to go sitting in\".",
+     "examples": [
+      "I'm going by subway"
+     ]
+    }
+   ],
+   "zuo-chuzuche-dache": [
+    {
+     "title": "In everyday speech, \"zuò chūzūchē\" becomes \"dǎchē\"",
+     "body": "Instead of the full structure <strong>zuò chūzūchē</strong> (to go by taxi), the everyday verb for \"taking a taxi\" (or a ride-hailing car) is <strong>dǎchē</strong> (打车, literally \"to hit a car\") — used all the time instead of the longer phrase.",
+     "examples": [
+      "to take a taxi / hail a car (everyday speech)"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "vocab[0]",
+   "pt": "ônibus",
+   "en": "bus",
+   "conf": "media",
+   "why": "EN-US 'bus' ok; city bus"
+  },
+  {
+   "path": "vocab[3]",
+   "pt": "ir a pé",
+   "en": "to walk / go on foot",
+   "conf": "media",
+   "why": "two glosses given"
+  },
+  {
+   "path": "vocab[5]",
+   "pt": "estação/parada",
+   "en": "station / stop",
+   "conf": "media",
+   "why": "PT gloss ambiguous"
+  },
+  {
+   "path": "vocab[6]",
+   "pt": "passagem/bilhete",
+   "en": "ticket",
+   "conf": "media",
+   "why": "EN-US 'ticket' covers both"
+  },
+  {
+   "path": "vocab[7]",
+   "pt": "uma passagem (张 em contexto)",
+   "en": "one ticket (张 is the measure word here)",
+   "conf": "media",
+   "why": "adapted note on measure word"
+  },
+  {
+   "path": "phrases[3]",
+   "pt": "Como você veio?",
+   "en": "How did you get here?",
+   "conf": "media",
+   "why": "alternative: 'How did you come?'"
+  },
+  {
+   "path": "concepts.zenme[0].body",
+   "pt": "equivale a 'como' em português",
+   "en": "it's like 'how' in English",
+   "conf": "media",
+   "why": "comparison adapted PT->EN"
+  },
+  {
+   "path": "concepts.zoulu-vs-zuo[0].body",
+   "pt": "o mesmo 'zuò' de sentar numa cadeira",
+   "en": "the same 'zuò' as sitting on a chair",
+   "conf": "media",
+   "why": "kept literal gloss; no comparison needed"
+  },
+  {
+   "path": "concepts.zuo-chuzuche-dache[0].body",
+   "pt": "bater carro",
+   "en": "to hit a car",
+   "conf": "media",
+   "why": "literal gloss of 打 as 'hit'; kept as in PT"
+  }
+ ]
+}

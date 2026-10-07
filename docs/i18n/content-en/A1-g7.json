@@ -1,0 +1,57 @@
+{
+ "unit": "A1-g7",
+ "en": {
+  "title": "Comparatives",
+  "goal": "Compare people and things using plus, moins and aussi... que.",
+  "grammar": {
+   "blocks": [
+    {
+     "title": "Plus... que (more... than)",
+     "body": "To say that something has \"more\" of a quality than something else, you use plus + adjective + que. It's the most common comparison structure in French.",
+     "examples": [
+      "My brother is taller than me.",
+      "This dress is prettier than the other one."
+     ]
+    },
+    {
+     "title": "Moins... que / aussi... que",
+     "body": "On the other side, moins... que expresses inferiority (\"less... than\") and aussi... que expresses equality (\"as... as\"). The structure is always the same; only the little word in the middle changes.",
+     "examples": [
+      "She is less tall than him.",
+      "He is as kind as his brother."
+     ]
+    },
+    {
+     "title": "An irregularity: bon → meilleur",
+     "body": "Just like in English \"good\" doesn't become \"more good\" but \"better\", in French bon also breaks the pattern: there is no \"plus bon\" — the correct form is meilleur. The same happens with the adverb bien (well), which becomes mieux (better) in the comparative.",
+     "examples": [
+      "This cake is better than the other one.",
+      "She sings better than me."
+     ]
+    },
+    {
+     "title": "Très bien! 🎉",
+     "body": "Recapping the three comparison structures and the bon/bien exception — it's worth memorizing this table, because bon → meilleur is a very common mistake among beginners:",
+     "examples": [],
+     "table": [
+      {"label": "Comparatives", "pronouns": ["superiority (more... than)", "inferiority (less... than)", "equality (as... as)", "bon (good) → irregular", "bien (well) → irregular"]}
+     ]
+    }
+   ],
+   "exercises": [
+    {"hint": "superiority"},
+    {"hint": "inferiority"},
+    {"hint": "equality"},
+    {"hint": "bon → irregular"},
+    {"hint": "equality"},
+    {"hint": "inferiority"}
+   ]
+  }
+ },
+ "review": [
+  {"path": "grammar.blocks[1].examples[0]", "pt": "Ela é menos alta que ele.", "en": "She is less tall than him.", "conf": "media", "why": "kept literal to mirror 'moins grande'; natural English would be 'shorter than him'"},
+  {"path": "grammar.blocks[1].examples[1]", "pt": "Ele é tão gentil quanto o irmão.", "en": "He is as kind as his brother.", "conf": "media", "why": "'gentil' = kind"},
+  {"path": "grammar.blocks[2].body", "pt": "Assim como em português \"bom\" não vira \"mais bom\"...", "en": "Just like in English \"good\" doesn't become \"more good\"...", "conf": "media", "why": "comparison with Portuguese adapted to English (same irregularity good → better); content adapted"},
+  {"path": "grammar.blocks[3].table[0].pronouns", "pt": "tão... quanto", "en": "as... as", "conf": "media", "why": "PT 'tão... quanto' adapted to EN 'as... as'"}
+ ]
+}

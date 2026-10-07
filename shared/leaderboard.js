@@ -73,7 +73,7 @@ function leaderboardDaysRemaining(weekStart){
 
 function leaderboardDaysRemainingLabel(weekStart){
   const days = leaderboardDaysRemaining(weekStart);
-  return days === 1 ? '1 dia restante' : `${days} dias restantes`;
+  return tp('leaderboard.daysLeft', days);
 }
 
 // Soma o XP de todas as linhas da semana (todos os idiomas, se scope
@@ -160,25 +160,25 @@ async function renderSideRankingCard(){
   if (seq !== SIDE_RANKING_RENDER_SEQ) return;
 
   const tabsHTML = loggedIn ? `
-    <div class="side-ranking-tabs" role="tablist" aria-label="Tipo de ranking">
-      <button type="button" class="side-ranking-tab ${mode === 'friends' ? 'active' : ''}" role="tab" aria-selected="${mode === 'friends'}" data-side-mode="friends">Amigos</button>
-      <button type="button" class="side-ranking-tab ${mode === 'all' ? 'active' : ''}" role="tab" aria-selected="${mode === 'all'}" data-side-mode="all">Geral</button>
+    <div class="side-ranking-tabs" role="tablist" aria-label="${t('friends.mode.aria')}">
+      <button type="button" class="side-ranking-tab ${mode === 'friends' ? 'active' : ''}" role="tab" aria-selected="${mode === 'friends'}" data-side-mode="friends">${t('friends.mode.friends')}</button>
+      <button type="button" class="side-ranking-tab ${mode === 'all' ? 'active' : ''}" role="tab" aria-selected="${mode === 'all'}" data-side-mode="all">${t('friends.mode.all')}</button>
     </div>` : '';
 
   let html = tabsHTML;
-  let linkLabel = 'Ver ranking completo →';
+  let linkLabel = t('leaderboard.viewFull');
   if (mode === 'friends' && rows === null){
-    html += `<p class="profile-empty-note">Não foi possível carregar agora.</p>`;
+    html += `<p class="profile-empty-note">${t('friends.rank.loadError')}</p>`;
   } else if (mode === 'friends' && (rows || []).length <= 1){
-    html += `<p class="profile-empty-note">Você ainda não tem amigos no ranking.</p>`;
-    linkLabel = 'Adicionar amigo →';
+    html += `<p class="profile-empty-note">${t('friends.rank.sideNoFriends')}</p>`;
+    linkLabel = t('friends.rank.addFriendLink');
   } else if (!(rows || []).length){
-    html += `<p class="profile-empty-note">Ninguém pontuou essa semana ainda.</p>`;
+    html += `<p class="profile-empty-note">${t('leaderboard.sideEmpty')}</p>`;
   } else {
     const top3 = rows.slice(0, 3);
     const me = CURRENT_USER ? rows.find(r => r.user_id === CURRENT_USER.id) : null;
     const rowHTML = (r) => {
-      const name = r.profile?.display_name || r.profile?.username || 'Aluno(a)';
+      const name = r.profile?.display_name || r.profile?.username || t('leaderboard.anonymous');
       const isMe = !!(CURRENT_USER && r.user_id === CURRENT_USER.id);
       return `
         <div class="side-ranking-row ${isMe ? 'me' : ''}">
@@ -227,7 +227,7 @@ function resolveFeaturedBadge(badgeId, catalog){
   const special = SPECIAL_BADGES.find(b => b.id === badgeId);
   if (special) return { icon: special.icon, name: special.name, desc: special.desc };
   const custom = (catalog || []).find(b => b.id === badgeId);
-  if (custom) return { icon: custom.icon, name: custom.name, desc: custom.description };
+  if (custom) return { icon: custom.icon, name: catalogBadgeText(custom.id, 'name', custom.name), desc: catalogBadgeText(custom.id, 'desc', custom.description) };
   return null;
 }
 
@@ -265,7 +265,7 @@ async function fetchUserEarnedBadges(userId){
 async function renderLeaderboardView(){
   const wrap = document.getElementById('leaderboard-content');
   if (!wrap) return;
-  wrap.innerHTML = loadingHTML('Carregando ranking...');
+  wrap.innerHTML = loadingHTML(t('leaderboard.loading'));
   const renderSeq = ++LEADERBOARD_RENDER_SEQ;
 
   const weekStart = leaderboardCurrentWeekStart();
@@ -289,28 +289,28 @@ async function renderLeaderboardView(){
   // um idioma por vez), não botões soltos -- deixa um leitor de tela
   // anunciar "aba X de Y, selecionada" em vez de só "botão".
   const scopeTabsHTML = [
-    { key: 'all', label: 'Geral' },
+    { key: 'all', label: t('leaderboard.tabAll') },
     ...AVAILABLE_LANGUAGES.filter(l => l.enabled).map(l => ({ key: l.appKey, label: l.name })),
-  ].map(t => `<button class="leaderboard-tab ${t.key === scope ? 'active' : ''}" role="tab" aria-selected="${t.key === scope}" data-scope="${t.key}">${t.label}</button>`).join('');
+  ].map(tab => `<button class="leaderboard-tab ${tab.key === scope ? 'active' : ''}" role="tab" aria-selected="${tab.key === scope}" data-scope="${tab.key}">${tab.label}</button>`).join('');
 
   const modeTabsHTML = loggedIn ? `
-    <div class="leaderboard-tabs leaderboard-mode-tabs" role="tablist" aria-label="Tipo de ranking">
-      <button class="leaderboard-tab ${mode === 'friends' ? 'active' : ''}" role="tab" aria-selected="${mode === 'friends'}" data-mode="friends">👥 Amigos</button>
-      <button class="leaderboard-tab ${mode === 'all' ? 'active' : ''}" role="tab" aria-selected="${mode === 'all'}" data-mode="all">🌎 Geral</button>
+    <div class="leaderboard-tabs leaderboard-mode-tabs" role="tablist" aria-label="${t('friends.mode.aria')}">
+      <button class="leaderboard-tab ${mode === 'friends' ? 'active' : ''}" role="tab" aria-selected="${mode === 'friends'}" data-mode="friends">👥 ${t('friends.mode.friends')}</button>
+      <button class="leaderboard-tab ${mode === 'all' ? 'active' : ''}" role="tab" aria-selected="${mode === 'all'}" data-mode="all">🌎 ${t('friends.mode.all')}</button>
     </div>` : '';
 
   const emptyHTML = loadFailed ? `
-    <div class="review-empty"><div class="big-emoji">⚠️</div><h3>Não foi possível carregar</h3>
-      <p>Tente de novo em instantes.</p><button type="button" class="btn btn-secondary" id="leaderboard-retry">Tentar de novo</button></div>`
+    <div class="review-empty"><div class="big-emoji">⚠️</div><h3>${t('friends.rank.failTitle')}</h3>
+      <p>${t('friends.rank.failText')}</p><button type="button" class="btn btn-secondary" id="leaderboard-retry">${t('friends.retry')}</button></div>`
     : noFriendsYet ? `
-    <div class="review-empty leaderboard-empty-friends"><div class="big-emoji">👥</div><h3>Compare seu XP com amigos</h3>
-      <p>Adicione amigos para ver quem está estudando mais essa semana.</p>
-      <button type="button" class="btn btn-primary" id="leaderboard-add-friends">Adicionar amigo</button></div>`
+    <div class="review-empty leaderboard-empty-friends"><div class="big-emoji">👥</div><h3>${t('friends.rank.noFriendsTitle')}</h3>
+      <p>${t('friends.rank.noFriendsText')}</p>
+      <button type="button" class="btn btn-primary" id="leaderboard-add-friends">${t('friends.rank.noFriendsBtn')}</button></div>`
     : `
     <div class="review-empty">
       <div class="big-emoji">🏆</div>
-      <h3>Seja a primeira pessoa no ranking</h3>
-      <p>Ninguém pontuou nessa categoria ainda essa semana.</p>
+      <h3>${t('leaderboard.emptyTitle')}</h3>
+      <p>${t('leaderboard.emptyText')}</p>
     </div>`;
 
   const rowsHTML = (rows.length && !noFriendsYet && !loadFailed) ? rows.map(r => {
@@ -319,11 +319,11 @@ async function renderLeaderboardView(){
     // sistema (ver createInitialProfile / migration 060), não o nome pelo
     // qual a pessoa se reconhece; o nome exibido (ou o próprio identificador
     // como texto simples, se ela nunca tiver definido um nome) basta.
-    const name = r.profile?.display_name || r.profile?.username || 'Aluno(a)';
+    const name = r.profile?.display_name || r.profile?.username || t('leaderboard.anonymous');
     const initials = avatarInitials(name);
     const color = avatarColor(r.user_id);
     const avatarHTML = r.profile?.avatar_url
-      ? `<img class="leaderboard-avatar" src="${escapeAttr(r.profile.avatar_url)}" alt="Foto de perfil">`
+      ? `<img class="leaderboard-avatar" src="${escapeAttr(r.profile.avatar_url)}" alt="${t('leaderboard.avatarAlt')}">`
       : `<div class="leaderboard-avatar" style="background:${color};">${initials}</div>`;
     const featured = resolveFeaturedBadge(r.profile?.featured_badge_id, catalog);
     const badgeHTML = featured
@@ -334,10 +334,10 @@ async function renderLeaderboardView(){
     // sem essa descrição resumida na própria linha (role="listitem" +
     // aria-label), então os pedaços visuais internos ficam aria-hidden.
     const rowLabel = [
-      `Posição ${r.rank}`,
+      t('leaderboard.rowPosition', { rank: r.rank }),
       name,
-      isMe ? 'você' : null,
-      featured ? `badge ${featured.name}` : null,
+      isMe ? t('leaderboard.rowYou') : null,
+      featured ? t('leaderboard.rowBadge', { name: featured.name }) : null,
       `${r.amount} XP`,
     ].filter(Boolean).join(', ');
     return `
@@ -346,7 +346,7 @@ async function renderLeaderboardView(){
         ${avatarHTML}
         <div class="leaderboard-info">
           <div class="leaderboard-name" aria-hidden="true">
-            <span class="leaderboard-name-text">${escapeHTML(name)}</span>${badgeHTML}${isMe ? ' <span class="leaderboard-you-tag">(você)</span>' : ''}
+            <span class="leaderboard-name-text">${escapeHTML(name)}</span>${badgeHTML}${isMe ? ` <span class="leaderboard-you-tag">${t('leaderboard.youTag')}</span>` : ''}
           </div>
         </div>
         <div class="leaderboard-xp" aria-hidden="true">⭐ ${r.amount}</div>
@@ -357,11 +357,9 @@ async function renderLeaderboardView(){
   wrap.innerHTML = `
     <div class="leaderboard-week-label">${leaderboardDaysRemainingLabel(weekStart)}</div>
     ${modeTabsHTML}
-    <div class="leaderboard-tabs" role="tablist" aria-label="Escopo do ranking">${scopeTabsHTML}</div>
+    <div class="leaderboard-tabs" role="tablist" aria-label="${t('leaderboard.scopeAria')}">${scopeTabsHTML}</div>
     <div class="leaderboard-list" role="list">${rowsHTML}</div>
-    <p class="leaderboard-footnote">${mode === 'friends'
-      ? 'O ranking reinicia toda segunda-feira. Amigos que ainda não ganharam XP aparecem no fim.'
-      : 'O ranking reinicia toda segunda-feira. Só aparece quem já ganhou XP essa semana.'}</p>
+    <p class="leaderboard-footnote">${mode === 'friends' ? t('friends.rank.footnoteFriends') : t('leaderboard.footnote')}</p>
   `;
 
   wrap.querySelectorAll('[data-mode]').forEach(btn => {

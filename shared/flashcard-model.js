@@ -31,6 +31,25 @@
 
 const STUDY_LANG_FOR_APP_KEY = { frances: 'fr', mandarim: 'zh' };
 
+// i18n Fase 7 -- idioma da TRADUÇÃO (back_trans) de uma linha LEGADA.
+// Todo cartão legado existente foi escrito com a tradução em português, então
+// o default é e continua 'pt-BR' (comportamento idêntico). NUNCA derivado do
+// idioma do site no momento da leitura: o idioma é do DADO, não de quem lê
+// (um aluno com o site em inglês continua vendo um back_trans em português).
+// Quem um dia gravar linhas legadas com tradução em outro idioma passa
+// `opts.nativeLang` explicitamente.
+const LEGACY_TRANSLATION_LANG_DEFAULT = 'pt-BR';
+function legacyTranslationLang(opts){
+  return (opts && typeof opts.nativeLang === 'string' && opts.nativeLang) || LEGACY_TRANSLATION_LANG_DEFAULT;
+}
+
+// i18n Fase 7 -- unitTitle de cartão de professora/aluna. A string em PT é só
+// EXIBIÇÃO (tag do flashcard), nunca comparada em lógica (confirmado por grep).
+// O card ganha também `unitTitleKey` (chave estável) pra a fase de interface
+// (fase 6) resolver por catálogo; `unitTitle` continua idêntico.
+const FLASHCARD_ORIGIN_TITLE_KEYS = { teacher: 'flashcards.origin.teacherTitle', self: 'flashcards.origin.selfTitle' };
+const FLASHCARD_ORIGIN_TITLES_PT = { teacher: 'Da sua professora', self: 'Meus cartões' };
+
 // Fase 2 v2, ressalva da autora: helper de idioma, nunca de direção/áudio/
 // apresentação. Único uso nesta fase: heurística de interpretação do
 // audio_url legado (ver interpretNoteFromRow).
@@ -246,6 +265,22 @@ function validateFieldAudioUploadFile(file){
   return { ok: true };
 }
 
+// Imagem por campo (botão discreto do editor, 2026-10-06). Mesmo bucket
+// `flashcard-media` e mesmo teto de 5 MB do áudio; a migration 072 libera
+// estes tipos no bucket.
+const FIELD_IMAGE_UPLOAD_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+function validateFieldImageUploadFile(file){
+  if (!file) return { ok: false, error: 'Nenhum arquivo selecionado.' };
+  if (typeof file.size === 'number' && file.size <= 0) return { ok: false, error: 'Arquivo vazio.' };
+  if (typeof file.size === 'number' && file.size > FIELD_AUDIO_UPLOAD_MAX_BYTES){
+    return { ok: false, error: 'Imagem maior que 5 MB. Escolha uma imagem menor.' };
+  }
+  if (!FIELD_IMAGE_UPLOAD_MIME_TYPES.includes(file.type || '')){
+    return { ok: false, error: 'Formato de imagem não suportado. Use JPG, PNG, WEBP ou GIF.' };
+  }
+  return { ok: true };
+}
+
 // ---------- Fase 7h.1 (UI completa de áudio por Field, ver CLAUDE.md) ----------
 //
 // Validação PURA de uma URL externa de áudio -- nunca faz I/O (nunca busca
@@ -281,7 +316,16 @@ function validateFieldAudioUrl(url){
 // invalida o cache de TODO Field TTS já gerado (generationKey muda pra
 // todo mundo), sem nenhuma migração de dado.
 const TTS_PROVIDER_MODEL_ID = 'google-chirp3-hd'; // Google Cloud TTS, Chirp 3 HD (ver Edge Function tts-generate)
-const TTS_CONFIG_VERSION = 1;
+const TTS_CONFIG_VERSION = 2;
+// Versão das regras de "texto falado" POR IDIOMA (tts_core.mjs /
+// spoken_text.py). Entra no generationKey junto com TTS_CONFIG_VERSION:
+// mudar a regra de um idioma invalida só os áudios daquele idioma.
+const TTS_SPOKEN_RULES_VERSION_BY_LANG = { fr: 4, pt: 1, zh: 0 };
+function ttsConfigVersionFor(language){
+  const l = String(language || '').trim().toLowerCase();
+  const fam = l.startsWith('fr') ? 'fr' : l.startsWith('pt') ? 'pt' : (l.startsWith('zh') || l.startsWith('cmn')) ? 'zh' : 'x';
+  return `${TTS_CONFIG_VERSION}:${fam}${TTS_SPOKEN_RULES_VERSION_BY_LANG[fam] ?? 0}`;
+}
 
 // Limite de caracteres por geração -- controle de custo (auditoria Fase
 // 7f, Seção 14/15: "nunca gerar um texto absurdamente longo"). Mesmo
@@ -306,7 +350,7 @@ async function computeTtsGenerationKey(effectiveText, language, voiceId, rate){
     voiceId || '',
     (rate === null || rate === undefined) ? '' : String(rate),
     TTS_PROVIDER_MODEL_ID,
-    String(TTS_CONFIG_VERSION),
+    ttsConfigVersionFor(language),
   ];
   const input = parts.map(p => encodeURIComponent(p)).join('\u001F');
   const bytes = new TextEncoder().encode(input);
@@ -348,12 +392,12 @@ async function isTtsAudioStale(field){
 // servidor (2ª camada real, nunca confia só nisto).
 function validateTtsGenerationRequest({ text, language }){
   const cleanText = (text || '').trim();
-  if (!cleanText) return { ok: false, error: 'Digite o texto a sintetizar.' };
+  if (!cleanText) return { ok: false, error: t('flashcardModel.tts.missingText') };
   if (cleanText.length > TTS_TEXT_MAX_LENGTH){
-    return { ok: false, error: `Texto muito longo (máximo ${TTS_TEXT_MAX_LENGTH} caracteres).` };
+    return { ok: false, error: t('flashcardModel.tts.textTooLong', { max: TTS_TEXT_MAX_LENGTH }) };
   }
   if (!language || typeof language !== 'string'){
-    return { ok: false, error: 'Escolha o idioma da síntese.' };
+    return { ok: false, error: t('flashcardModel.tts.missingLanguage') };
   }
   return { ok: true };
 }
@@ -366,21 +410,21 @@ function validateTtsGenerationRequest({ text, language }){
 // duplicado no mesmo escopo global de documento (mesmo problema já
 // corrigido na Fase 6D.2 pra CARD_TYPE_UI_META).
 const TTS_GENERATION_ERROR_LABELS = {
-  provider_not_configured: 'Geração de áudio por texto ainda não está ativada no servidor.',
-  provider_not_implemented: 'Geração de áudio por texto ainda não está disponível.',
-  provider_error: 'O serviço de voz não conseguiu gerar o áudio agora -- tente de novo em instantes.',
-  provider_rate_limited: 'O serviço de voz está sobrecarregado -- tente de novo em alguns minutos.',
-  rate_limited: 'Muitas gerações de áudio em pouco tempo -- espere alguns minutos e tente de novo.',
-  monthly_quota_exceeded: 'Você atingiu o limite mensal de áudios gerados. Tente de novo no próximo mês.',
-  quota_check_failed: 'Não foi possível conferir seu limite de áudios agora -- tente de novo em instantes.',
-  unsupported_language: 'Este idioma ainda não tem voz para gerar áudio.',
-  invalid_voice: 'Voz inválida para este idioma -- deixe o campo "Voz" em branco para usar a voz padrão.',
-  not_authorized: 'Sem permissão para gerar áudio para este cartão.',
-  invalid_session: 'Sessão expirada -- faça login de novo.',
-  text_too_long: `Texto muito longo (máximo ${TTS_TEXT_MAX_LENGTH} caracteres).`,
-  missing_text: 'Digite o texto a sintetizar.',
-  missing_language: 'Escolha o idioma da síntese.',
-  upload_failed: 'Áudio gerado, mas não foi possível salvá-lo -- tente de novo.',
+  get provider_not_configured(){ return t('flashcardModel.tts.providerNotConfigured'); },
+  get provider_not_implemented(){ return t('flashcardModel.tts.providerNotImplemented'); },
+  get provider_error(){ return t('flashcardModel.tts.providerError'); },
+  get provider_rate_limited(){ return t('flashcardModel.tts.providerRateLimited'); },
+  get rate_limited(){ return t('flashcardModel.tts.rateLimited'); },
+  get monthly_quota_exceeded(){ return t('flashcardModel.tts.monthlyQuotaExceeded'); },
+  get quota_check_failed(){ return t('flashcardModel.tts.quotaCheckFailed'); },
+  get unsupported_language(){ return t('flashcardModel.tts.unsupportedLanguage'); },
+  get invalid_voice(){ return t('flashcardModel.tts.invalidVoice'); },
+  get not_authorized(){ return t('flashcardModel.tts.notAuthorized'); },
+  get invalid_session(){ return t('flashcardModel.tts.invalidSession'); },
+  get text_too_long(){ return t('flashcardModel.tts.textTooLong', { max: TTS_TEXT_MAX_LENGTH }); },
+  get missing_text(){ return t('flashcardModel.tts.missingText'); },
+  get missing_language(){ return t('flashcardModel.tts.missingLanguage'); },
+  get upload_failed(){ return t('flashcardModel.tts.uploadFailed'); },
 };
 
 const FLASHCARD_MODEL_FSRS_DEFAULTS = Object.freeze({
@@ -837,6 +881,7 @@ function interpretNoteFromRow(row, opts){
   const { origin, appKey, idPrefix } = opts;
   const isZh = appKey === 'mandarim';
   const studyLang = STUDY_LANG_FOR_APP_KEY[appKey];
+  const translationLang = legacyTranslationLang(opts);
   const cardId = flashcardIdForRow(idPrefix, row);
 
   // Fase 6B (ver CLAUDE.md) -- Note NATIVA: fields+card_generation_mode
@@ -911,7 +956,7 @@ function interpretNoteFromRow(row, opts){
         ...noteBase,
         fields: [
           textField,
-          { lang: 'pt-BR', text: row.back_trans },
+          { lang: translationLang, text: row.back_trans },
         ],
         fieldOrder: [0, 1],
       };
@@ -948,7 +993,7 @@ function interpretNoteFromRow(row, opts){
       ...noteBase,
       fields: [
         textField,
-        { lang: 'pt-BR', text: row.back_trans },
+        { lang: translationLang, text: row.back_trans },
       ],
       fieldOrder: [0, 1],
     };
@@ -971,7 +1016,7 @@ function interpretNoteFromRow(row, opts){
     fields = [
       { lang: 'zh', text: row.front, pinyinFieldIndex: 1 },
       { lang: 'zh-pinyin', text: row.front_pinyin || '' },
-      { lang: 'pt-BR', text: row.back_trans },
+      { lang: translationLang, text: row.back_trans },
     ];
     frontFieldIndex = 0; backFieldIndex = 2;
   } else {
@@ -982,11 +1027,11 @@ function interpretNoteFromRow(row, opts){
     // como a coluna do banco já era).
     fields = [
       { lang: studyLang, text: row.front },
-      { lang: 'pt-BR', text: row.back_trans },
+      { lang: translationLang, text: row.back_trans },
     ];
     frontFieldIndex = 0; backFieldIndex = 1;
     if (row.front_is_target_language === false){
-      fields[0].lang = 'pt-BR';
+      fields[0].lang = translationLang;
       fields[1].lang = studyLang;
     }
   }
@@ -1285,7 +1330,9 @@ function buildReversedCardInstancePair(noteId, frontFieldIndex, backFieldIndex){
 // existir (Fase 6+).
 function buildEngineCardsFromRow(row, opts){
   const { note, cards } = interpretNoteFromRow(row, opts);
-  const unitTitle = note.origin === 'teacher' ? 'Da sua professora' : 'Meus cartões';
+  const originTitleKey = note.origin === 'teacher' ? 'teacher' : 'self';
+  const unitTitle = FLASHCARD_ORIGIN_TITLES_PT[originTitleKey];
+  const unitTitleKey = FLASHCARD_ORIGIN_TITLE_KEYS[originTitleKey];
   // Tags (CONSOLIDAÇÃO-5) -- pertencem à Note, nunca à CardInstance.
   // Lidas direto de `row` (nunca via interpretNoteFromRow()/
   // interpretNativeNoteFromRow(), que continuam sem ler tags -- essa
@@ -1309,6 +1356,7 @@ function buildEngineCardsFromRow(row, opts){
       rowId: note.legacyRowId,
       unitId: null,
       unitTitle,
+      unitTitleKey,
       vocabIdx: null,
       type: 'vocab',
       origin: note.origin,

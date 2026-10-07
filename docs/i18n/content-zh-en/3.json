@@ -1,0 +1,177 @@
+{
+ "unit": 3,
+ "en": {
+  "title": "Numbers and age",
+  "goal": "Count from 0 to 100 and say or ask someone's age.",
+  "lessons": {
+   "numeros-1": "Counting to two",
+   "numeros-2": "Counting to five",
+   "numeros-3": "Counting to eight",
+   "numeros-idade": "Counting to ten and saying your age",
+   "idade-altura": "Asking about age and height",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "zero",
+   "one",
+   "two",
+   "three",
+   "four",
+   "five",
+   "six",
+   "seven",
+   "eight",
+   "nine",
+   "ten",
+   "years old (age)",
+   "how old",
+   "tall"
+  ],
+  "phrases": [
+   {
+    "t": "How old are you?"
+   },
+   {
+    "t": "I'm 28 years old."
+   },
+   {
+    "t": "How tall is he?"
+   }
+  ],
+  "dialogue": {
+   "title": "Asking someone's age",
+   "lines": [
+    "How old are you?",
+    "I'm 28. And you?",
+    "I'm 30."
+   ]
+  },
+  "concepts": {
+   "number-structure": [
+    {
+     "title": "How numbers work in Chinese",
+     "body": "The numbers from 0 to 10 each have their own word. From there, Chinese builds larger numbers by combining those words in a very logical way: 十一 (shí yī) is literally \"ten-one\" (11), 二十 (èr shí) is \"two-ten\" (20). It's more regular than English in this respect.",
+     "examples": [
+      "11 = ten + one",
+      "25 = two + ten + five"
+     ]
+    },
+    {
+     "title": "岁 (suì) — counting age",
+     "body": "To say your age, the number is followed by 岁 (suì), which works like the unit \"years old\" — without using the verb \"to have\" or \"to be.\" The structure is: Subject + Number + 岁.",
+     "examples": [
+      "I'm 28 years old"
+     ]
+    }
+   ],
+   "ji-vs-duo": [
+    {
+     "title": "几 vs. 多 — two ways to ask \"how many / how much\"",
+     "body": "几 (jǐ) is used to ask about small, expected numbers, usually up to 10. 多 (duō) before an adjective asks about degree or a larger amount, without expecting a specific small number.",
+     "examples": [
+      "how tall is he?"
+     ]
+    },
+    {
+     "title": "\"Nǐ jǐ suì\" or \"nǐ duō dà\"?",
+     "body": "<strong>Jǐ suì</strong> (几岁) is used to ask the age of <strong>children</strong>, since 几 expects a small number. For adults, the neutral and most common form is <strong>duō dà</strong> (多大) — asking an adult \"jǐ suì\" can sound odd.",
+     "examples": [
+      "how old are you? (child)",
+      "how old are you? (adult)"
+     ]
+    }
+   ],
+   "xusui-ano-novo": [
+    {
+     "title": "In traditional China, your age changes at New Year — not on your birthday",
+     "body": "In the traditional Chinese system (<strong>虚岁, xūsuì</strong>, \"nominal age\"), a baby is born already 1 year old, and everyone gains a year together at Chinese New Year — not on their own birthday. Today the Western system (actual age, 周岁) is the most used in daily life, but 虚岁 still appears in traditional contexts.",
+     "examples": [
+      "nominal age (traditional system)"
+     ]
+    }
+   ],
+   "si-numero-azarado": [
+    {
+     "title": "Why the number 4 is avoided in China",
+     "body": "四 (sì, \"four\") sounds very similar to 死 (sǐ, \"death\") — because of that similarity in sound, many people avoid the number 4 in daily life: it's common for buildings to skip the 4th floor (or apartment number), and phone numbers or license plates with a 4 can be considered less desirable. It's the same kind of superstition that the number 13 has in many Western countries.",
+     "examples": [
+      "four",
+      "death / to die"
+     ]
+    }
+   ]
+  }
+ },
+ "review": [
+  {
+   "path": "vocab[11]",
+   "pt": "anos (idade)",
+   "en": "years old (age)",
+   "conf": "media",
+   "why": "岁 é unidade; 'years old' vs 'years of age'"
+  },
+  {
+   "path": "vocab[12]",
+   "pt": "quantos anos",
+   "en": "how old",
+   "conf": "media",
+   "why": "várias traduções corretas"
+  },
+  {
+   "path": "phrases[0]",
+   "pt": "Quantos anos você tem?",
+   "en": "How old are you?",
+   "conf": "media",
+   "why": "PT 'ter' vs EN 'be'; idiomático"
+  },
+  {
+   "path": "phrases[2]",
+   "pt": "Quão alto ele é?",
+   "en": "How tall is he?",
+   "conf": "media",
+   "why": "idiomático"
+  },
+  {
+   "path": "concepts.number-structure[0].body",
+   "pt": "É mais regular que o português nesse sentido.",
+   "en": "It's more regular than English in this respect.",
+   "conf": "media",
+   "why": "comparação adaptada PT->EN (inglês tem eleven/twelve/teens irregulares: afirmação válida)"
+  },
+  {
+   "path": "concepts.number-structure[1].body",
+   "pt": "sem usar o verbo 'ter' como em português",
+   "en": "without using the verb 'to have' or 'to be'",
+   "conf": "media",
+   "why": "adaptado: em inglês é 'to be'; acrescenta-se 'to be' para ficar correto"
+  },
+  {
+   "path": "concepts.ji-vs-duo[0].body",
+   "pt": "几/多",
+   "en": "how many / how much",
+   "conf": "media",
+   "why": "glosa PT 'quanto' ambígua"
+  },
+  {
+   "path": "concepts.ji-vs-duo[1].examples",
+   "pt": "quantos anos (criança)/(adulto)",
+   "en": "how old are you? (child)/(adult)",
+   "conf": "media",
+   "why": "reescrito como pergunta completa"
+  },
+  {
+   "path": "concepts.xusui-ano-novo[0].body",
+   "pt": "idade nominal / sistema ocidental",
+   "en": "nominal age / Western system",
+   "conf": "media",
+   "why": "fato cultural preservado; sem acrescentar"
+  },
+  {
+   "path": "concepts.si-numero-azarado[0].body",
+   "pt": "mesma superstição do 13",
+   "en": "same kind of superstition as 13",
+   "conf": "media",
+   "why": "cultural; preservado do PT"
+  }
+ ]
+}
