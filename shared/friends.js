@@ -15,7 +15,57 @@
 // (showToast). openPublicProfileModalForUsername/switchTab são só chamados
 // dentro de funções.
 
-const FRIENDS_STATE = { pendingCount: 0, searchSeq: 0 };
+const FRIENDS_STATE = { pendingCount: 0, searchSeq: 0, rankScope: 'all', rankSeq: 0, inviteUsername: null };
+
+// ---------- convite por link (?amigo=usuario) ----------
+// O link de convite abre o site com ?amigo=<usuario>. Guardamos o usuário no
+// aparelho (a pessoa pode ainda precisar criar conta/entrar) e limpamos o
+// endereço. Depois do login, friendsConsumePendingInvite() abre a aba Amigos
+// com esse usuário já buscado -- NUNCA envia o pedido sozinho.
+const FRIENDS_INVITE_KEY = 'pendingFriendInvite';
+const FRIENDS_INVITE_RE = /^[a-z0-9._-]{2,40}$/;
+(function captureFriendInviteParam(){
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has('amigo')) return;
+    const u = (params.get('amigo') || '').trim().toLowerCase();
+    if (FRIENDS_INVITE_RE.test(u)) window.localStorage.setItem(FRIENDS_INVITE_KEY, u);
+    params.delete('amigo');
+    const qs = params.toString();
+    window.history.replaceState(null, '', window.location.pathname + (qs ? `?${qs}` : '') + window.location.hash);
+  } catch (e) { /* storage bloqueado: o convite simplesmente não é lembrado */ }
+})();
+
+function friendsConsumePendingInvite(){
+  if (typeof CURRENT_USER === 'undefined' || !CURRENT_USER) return;
+  let u = null;
+  try { u = window.localStorage.getItem(FRIENDS_INVITE_KEY); window.localStorage.removeItem(FRIENDS_INVITE_KEY); } catch (e) { return; }
+  if (!u || !FRIENDS_INVITE_RE.test(u)) return;
+  if (typeof PROFILE_CACHE !== 'undefined' && PROFILE_CACHE && PROFILE_CACHE.username === u) return; // convite do próprio link
+  FRIENDS_STATE.inviteUsername = u;
+  if (typeof switchTab === 'function') switchTab('friends');
+}
+
+async function friendsMyInviteLink(){
+  let username = (typeof PROFILE_CACHE !== 'undefined' && PROFILE_CACHE && PROFILE_CACHE.username) || null;
+  if (!username && typeof ensureProfileLoaded === 'function'){
+    try { const p = await ensureProfileLoaded(); username = p && p.username; } catch (e) { /* segue sem */ }
+  }
+  if (!username) return null;
+  const base = window.location.origin + window.location.pathname.replace(/index\.html$/, '');
+  return `${base}?amigo=${encodeURIComponent(username)}`;
+}
+
+function friendsTimeAgo(iso){
+  const t = new Date(iso).getTime();
+  if (!t) return '';
+  const mins = Math.floor((Date.now() - t) / 60000);
+  if (mins < 60) return 'agora há pouco';
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `há ${hours} ${hours === 1 ? 'hora' : 'horas'}`;
+  const days = Math.floor(hours / 24);
+  return `há ${days} ${days === 1 ? 'dia' : 'dias'}`;
+}
 
 const FRIENDS_ERROR_LABELS = {
   not_authenticated: 'Entre na sua conta para usar os amigos.',
@@ -29,6 +79,7 @@ const FRIENDS_ERROR_LABELS = {
   target_friend_limit: 'Essa pessoa atingiu o limite de amigos.',
   no_pending_request: 'Esse pedido não existe mais.',
   not_friends: 'Vocês não são mais amigos.',
+  not_accepting_requests: 'Essa pessoa não está aceitando novos pedidos de amizade no momento.',
 };
 
 function friendsErrorMessage(code){
@@ -203,7 +254,9 @@ async function renderFriendsView(){
     return;
   }
   // Mantém o que a pessoa está digitando na busca durante re-renders.
-  const keepQuery = document.getElementById('friends-search-input')?.value || '';
+  const inviteUser = FRIENDS_STATE.inviteUsername;
+  FRIENDS_STATE.inviteUsername = null;
+  const keepQuery = inviteUser || document.getElementById('friends-search-input')?.value || '';
   wrap.innerHTML = `${subnav}${loadingHTML('Carregando amigos...')}`;
   const ov = await fetchFriendshipOverview();
   if (!ov){
@@ -219,7 +272,11 @@ async function renderFriendsView(){
       <div class="friends-row-actions">${friendsRelationActionsHTML('received', i.userId)}</div>
     </div>`).join(''), 'friends-incoming') : '';
 
+  const inviteBannerHTML = inviteUser
+    ? `<p class="friends-invite-banner" role="status">👋 Você abriu o convite de <strong>@${escapeHTML(inviteUser)}</strong>. Toque em "Adicionar" para enviar o pedido.</p>`
+    : '';
   const searchHTML = friendsSectionHTML('Adicionar amigo', null, `
+    ${inviteBannerHTML}
     <label class="profile-edit-label" for="friends-search-input">Buscar por nome ou @usuário</label>
     <input type="search" class="profile-edit-input" id="friends-search-input" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="40" placeholder="Digite pelo menos 3 letras" value="${escapeAttr(keepQuery)}">
     <div id="friends-search-results" aria-live="polite"></div>`, 'friends-add');
@@ -238,10 +295,138 @@ async function renderFriendsView(){
       <div class="friends-row-actions">${friendsRelationActionsHTML('sent', i.userId)}</div>
     </div>`).join(''), 'friends-outgoing') : '';
 
-  wrap.innerHTML = `${subnav}${incomingHTML}${searchHTML}${friendsHTML}${outgoingHTML}`;
+  const rankHTML = ov.friends.length ? friendsSectionHTML('Ranking dos amigos (semana)', null, '<div id="friends-mini-rank"></div>', 'friends-rank') : '';
+  const activityHTML = ov.friends.length ? friendsSectionHTML('Atividade dos amigos', null, '<div id="friends-activity"></div>', 'friends-activity') : '';
+  const inviteHTML = friendsSectionHTML('Convidar amigos', null, `
+    <p class="profile-edit-hint">Quer estudar com alguém? Mande seu link: quem abrir já encontra seu perfil para pedir amizade.</p>
+    <div class="friends-invite-actions">
+      <button type="button" class="btn btn-secondary friends-action" data-friends-invite="copy">🔗 Copiar link de convite</button>
+      <button type="button" class="btn btn-secondary friends-action" data-friends-invite="share" ${navigator.share ? '' : 'hidden'}>📤 Compartilhar</button>
+    </div>`, 'friends-invite');
+  const prefsHTML = friendsSectionHTML('Preferências', null, `
+    <details class="friends-prefs" id="friends-prefs">
+      <summary>Avisos e pedidos de amizade</summary>
+      <div id="friends-prefs-body">${loadingHTML('Carregando...')}</div>
+    </details>`, 'friends-prefs-section');
+
+  wrap.innerHTML = `${subnav}${incomingHTML}${rankHTML}${searchHTML}${friendsHTML}${activityHTML}${outgoingHTML}${inviteHTML}${prefsHTML}`;
   renderFriendsBadges();
   wireFriendsView(wrap);
+  if (ov.friends.length){ loadFriendsMiniRank(); loadFriendsActivity(); }
+  loadFriendsPrefs();
   if (keepQuery.trim().length >= 3) runFriendsSearch(keepQuery);
+}
+
+// ---------- ranking dos amigos (resumo no topo da aba) ----------
+async function loadFriendsMiniRank(){
+  const box = document.getElementById('friends-mini-rank');
+  if (!box) return;
+  if (typeof fetchFriendsLeaderboard !== 'function' || typeof leaderboardCurrentWeekStart !== 'function') return;
+  const seq = ++FRIENDS_STATE.rankSeq;
+  const scope = FRIENDS_STATE.rankScope;
+  const langs = (typeof AVAILABLE_LANGUAGES !== 'undefined' ? AVAILABLE_LANGUAGES.filter(l => l.enabled) : []);
+  const scopes = [{ key: 'all', label: 'Todos' }, ...langs.map(l => ({ key: l.appKey, label: l.name }))];
+  const chips = `<div class="leaderboard-tabs friends-rank-scopes" role="tablist" aria-label="Idioma do ranking dos amigos">${scopes.map(t =>
+    `<button type="button" class="leaderboard-tab ${t.key === scope ? 'active' : ''}" role="tab" aria-selected="${t.key === scope}" data-friends-rank-scope="${escapeAttr(t.key)}">${escapeHTML(t.label)}</button>`).join('')}</div>`;
+  box.innerHTML = `${chips}<div id="friends-mini-rank-rows">${loadingHTML('Carregando...')}</div>`;
+  const rows = await fetchFriendsLeaderboard(scope, leaderboardCurrentWeekStart());
+  if (seq !== FRIENDS_STATE.rankSeq) return;
+  const rowsBox = document.getElementById('friends-mini-rank-rows');
+  if (!rowsBox) return;
+  if (rows == null){ rowsBox.innerHTML = '<p class="profile-edit-error">Não foi possível carregar o ranking agora.</p>'; return; }
+  const me = CURRENT_USER && CURRENT_USER.id;
+  const top = rows.slice(0, 5);
+  const meRow = rows.find(r => r.user_id === me);
+  const shown = (meRow && !top.includes(meRow)) ? [...top, meRow] : top;
+  rowsBox.innerHTML = shown.map(r => {
+    const name = r.profile?.display_name || r.profile?.username || 'Aluno(a)';
+    const isMe = r.user_id === me;
+    return `<div class="friends-row friends-rank-row ${isMe ? 'is-me' : ''}">
+      <span class="friends-rank-pos">${typeof leaderboardRankBadge === 'function' ? leaderboardRankBadge(r.rank) : r.rank}</span>
+      ${friendAvatarHTML(r.profile, r.user_id)}
+      <span class="friends-person-text"><span class="friends-person-name">${escapeHTML(name)}${isMe ? ' (você)' : ''}</span></span>
+      <span class="friends-rank-xp">${Number(r.amount || 0)} XP</span>
+    </div>`;
+  }).join('') + `<button type="button" class="btn btn-secondary friends-action friends-rank-more" data-friends-rank-more="1">Ver ranking completo</button>`;
+}
+
+// ---------- atividade dos amigos (conquistas dos últimos 30 dias) ----------
+async function loadFriendsActivity(){
+  const box = document.getElementById('friends-activity');
+  if (!box) return;
+  box.innerHTML = loadingHTML('Carregando...');
+  const appKey = (typeof APP_KEY !== 'undefined') ? APP_KEY : 'frances';
+  const { data, error } = await supabaseClient.rpc('friends_activity', { p_language: appKey, p_limit: 20 });
+  const el = document.getElementById('friends-activity');
+  if (!el) return;
+  if (error){ console.error('Erro ao carregar atividade dos amigos:', error); el.innerHTML = '<p class="profile-edit-error">Não foi possível carregar a atividade agora.</p>'; return; }
+  const catalog = (typeof BADGES !== 'undefined' && Array.isArray(BADGES)) ? BADGES : [];
+  const items = (data || []).map(r => ({ r, badge: catalog.find(b => b.id === r.badge_id) })).filter(x => x.badge);
+  if (!items.length){ el.innerHTML = '<p class="profile-empty-note">Nada de novo nos últimos 30 dias. Quando seus amigos ganharem conquistas, elas aparecem aqui.</p>'; return; }
+  el.innerHTML = items.slice(0, 10).map(({ r, badge }) => {
+    const name = r.display_name || r.username || 'Um amigo';
+    return `<div class="friends-row friends-activity-row">
+      ${friendAvatarHTML({ username: r.username, display_name: r.display_name, avatar_url: r.avatar_url }, r.user_id)}
+      <span class="friends-person-text">
+        <span class="friends-person-name">${escapeHTML(name)} ganhou ${escapeHTML(badge.icon || '🏅')} ${escapeHTML(badge.name || '')}</span>
+        <span class="friends-person-user">${escapeHTML(friendsTimeAgo(r.earned_at))}</span>
+      </span>
+    </div>`;
+  }).join('');
+}
+
+// ---------- preferências (avisos + "aceitar novos pedidos") ----------
+const FRIENDS_PREF_FIELDS = [
+  { key: 'notify_requests', label: 'Avisar quando alguém me enviar um pedido de amizade' },
+  { key: 'notify_accepts', label: 'Avisar quando aceitarem meu pedido' },
+  { key: 'notify_overtakes', label: 'Avisar quando um amigo me passar no ranking' },
+  { key: 'accept_requests', label: 'Aceitar novos pedidos de amizade' },
+];
+
+async function loadFriendsPrefs(){
+  const body = document.getElementById('friends-prefs-body');
+  if (!body || typeof CURRENT_USER === 'undefined' || !CURRENT_USER) return;
+  const { data, error } = await supabaseClient.from('friend_settings').select('*').eq('user_id', CURRENT_USER.id).maybeSingle();
+  const box = document.getElementById('friends-prefs-body');
+  if (!box) return;
+  if (error){ console.error('Erro ao carregar preferências de amigos:', error); box.innerHTML = '<p class="profile-edit-error">Não foi possível carregar as preferências agora.</p>'; return; }
+  const cur = data || {};
+  box.innerHTML = FRIENDS_PREF_FIELDS.map(f => `
+    <label class="friends-pref-row">
+      <input type="checkbox" data-friends-pref="${f.key}" ${cur[f.key] === false ? '' : 'checked'}>
+      <span>${escapeHTML(f.label)}</span>
+    </label>`).join('') + '<p class="profile-edit-hint">Se você desligar "Aceitar novos pedidos", quem tentar te adicionar vê que você não está aceitando pedidos agora. Seus amigos atuais não mudam.</p>';
+}
+
+async function saveFriendsPref(key, value, input){
+  if (!FRIENDS_PREF_FIELDS.some(f => f.key === key)) return;
+  input.disabled = true;
+  const { error } = await supabaseClient.from('friend_settings')
+    .upsert({ user_id: CURRENT_USER.id, [key]: value, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+  input.disabled = false;
+  if (error){
+    console.error('Erro ao salvar preferência de amigos:', error);
+    input.checked = !value;
+    showToast('Não foi possível salvar agora. Tente de novo.');
+    return;
+  }
+  showToast('✓ Preferência salva.');
+}
+
+async function friendsInviteAction(kind){
+  const link = await friendsMyInviteLink();
+  if (!link){ showToast('Não foi possível gerar seu link agora.'); return; }
+  const text = 'Quer estudar comigo? Entre aqui e me adicione como amigo:';
+  if (kind === 'share' && navigator.share){
+    try { await navigator.share({ title: 'Estudar comigo', text, url: link }); } catch (e) { /* cancelado */ }
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(link);
+    showToast('✓ Link copiado!');
+  } catch (e) {
+    window.prompt('Copie seu link de convite:', link);
+  }
 }
 
 async function runFriendsSearch(rawQuery){
@@ -280,9 +465,22 @@ function wireFriendsView(wrap){
       if (typeof openPublicProfileModalForUsername === 'function') openPublicProfileModalForUsername(person.dataset.openProfile);
       return;
     }
+    const chip = e.target.closest('[data-friends-rank-scope]');
+    if (chip){ FRIENDS_STATE.rankScope = chip.dataset.friendsRankScope; loadFriendsMiniRank(); return; }
+    if (e.target.closest('[data-friends-rank-more]')){
+      if (typeof LEADERBOARD_PENDING_MODE !== 'undefined') LEADERBOARD_PENDING_MODE = 'friends';
+      if (typeof switchTab === 'function') switchTab('leaderboard');
+      return;
+    }
+    const invite = e.target.closest('[data-friends-invite]');
+    if (invite){ friendsInviteAction(invite.dataset.friendsInvite); return; }
     const btn = e.target.closest('[data-friend-action]');
     if (!btn || btn.disabled) return;
     await handleFriendAction(btn.dataset.friendAction, btn.dataset.userId, btn);
+  });
+  wrap.addEventListener('change', (e) => {
+    const pref = e.target.closest('[data-friends-pref]');
+    if (pref) saveFriendsPref(pref.dataset.friendsPref, pref.checked, pref);
   });
 }
 

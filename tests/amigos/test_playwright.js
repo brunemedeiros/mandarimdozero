@@ -40,6 +40,13 @@ const STUB = `
       if (prop === 'neq') return (k, v) => { st.ne.push([k, v]); return b; };
       if (prop === 'in') return (k, vs) => { st.inn.push([k, vs]); return b; };
       if (prop === 'or') return (s) => { st.or = s; return b; };
+      if (prop === 'upsert') return (row) => {
+        (window.__upserts = window.__upserts || []).push({ table, row });
+        const arr = (window.__DB[table] = window.__DB[table] || []);
+        const i = arr.findIndex(r => r.user_id === row.user_id);
+        if (i >= 0) Object.assign(arr[i], row); else arr.push({ ...row });
+        return Promise.resolve({ data: null, error: null });
+      };
       if (prop === 'maybeSingle' || prop === 'single') return () => Promise.resolve({ data: rows()[0] || null, error: null });
       return () => b;
     }});
@@ -129,6 +136,12 @@ async function setup(page, opts){
         return { user_id: id, amount: amt, username: p.username, display_name: p.display_name, avatar_url: null, featured_badge_id: null, is_me: id === 'me' };
       }).sort((a, b) => b.amount - a.amount);
     };
+    window.__RPC.friends_activity = () => ([
+      { user_id: 'bia', username: 'ubia', display_name: 'Bia Lima', avatar_url: null, language_app_key: APP_KEY, badge_id: BADGES[0].id, earned_at: new Date(Date.now() - 2 * 86400000).toISOString() },
+      { user_id: 'caio', username: 'ucaio', display_name: 'Caio Reis', avatar_url: null, language_app_key: APP_KEY, badge_id: 'badge-que-nao-existe-aqui', earned_at: new Date(Date.now() - 3600000).toISOString() },
+    ]);
+    window.__DB.friend_settings = [];
+    PROFILE_CACHE = { user_id: 'me', username: 'u1me', display_name: 'Eu Mesma' };
     window.__rpc.length = 0;
   }, opts || {});
 }
@@ -279,6 +292,87 @@ async function run(browser, lang, port){
   await ctx.close();
 }
 
+// Novidades da 074: ranking dos amigos no topo, atividade, convite, preferências.
+async function runNew(browser, lang, port){
+  const L = lang;
+  const { page, errors, ctx } = await bootPage(browser, lang, port);
+  await setup(page);
+  await page.evaluate(() => { Object.defineProperty(navigator, 'clipboard', { value: { writeText: async (t) => { window.__copied = t; } }, configurable: true }); });
+  await page.evaluate(() => switchTab('friends'));
+  await page.waitForSelector('#friends-mini-rank-rows .friends-rank-row');
+  const rankIds = await page.locator('#friends-mini-rank-rows .friends-rank-row .friends-person-name').allTextContents();
+  check(`${L}: mini ranking mostra eu + amigos (3 linhas)`, rankIds.length === 3, rankIds);
+  check(`${L}: mini ranking: Bia (180 XP) em 1º`, /Bia/.test(rankIds[0] || ''), rankIds);
+  check(`${L}: mini ranking marca "(você)"`, rankIds.some(n => /você/.test(n)), rankIds);
+  const appKey = await page.evaluate(() => APP_KEY);
+  await page.evaluate(() => { __rpc.length = 0; });
+  await page.click(`#friends-mini-rank [data-friends-rank-scope="${appKey}"]`);
+  await page.waitForFunction((k) => __rpc.some(r => r.name === 'friends_leaderboard' && r.args.p_scope === k), appKey);
+  check(`${L}: seletor de idioma do mini ranking chama a RPC com o idioma`, true);
+  await page.waitForSelector('#friends-mini-rank-rows .friends-rank-row');
+  check(`${L}: chip do idioma fica ativo`, (await page.locator('#friends-mini-rank .leaderboard-tab.active').getAttribute('data-friends-rank-scope')) === appKey);
+  await page.click('#friends-mini-rank [data-friends-rank-scope="all"]');
+  await page.waitForFunction(() => document.querySelector('#friends-mini-rank .leaderboard-tab.active')?.dataset.friendsRankScope === 'all');
+  // atividade
+  await page.waitForSelector('#friends-activity .friends-activity-row');
+  const act = await page.locator('#friends-activity .friends-activity-row').allTextContents();
+  check(`${L}: atividade mostra 1 conquista (a desconhecida é ignorada)`, act.length === 1, act);
+  check(`${L}: atividade cita o amigo, a conquista e "há 2 dias"`, /Bia Lima ganhou/.test(act[0]) && /há 2 dias/.test(act[0]), act[0]);
+  // "Ver ranking completo" abre o ranking na aba Amigos
+  await page.click('#friends-mini-rank [data-friends-rank-more]');
+  await page.waitForSelector('#leaderboard-content .leaderboard-mode-tabs');
+  check(`${L}: "Ver ranking completo" abre Ranking em Amigos`, (await page.locator('#leaderboard-content .leaderboard-mode-tabs .active').getAttribute('data-mode')) === 'friends');
+  // preferências
+  await page.evaluate(() => switchTab('friends'));
+  await page.waitForSelector('#friends-prefs-body [data-friends-pref]', { state: 'attached' });
+  check(`${L}: 4 interruptores, todos ligados por padrão`, (await page.locator('#friends-prefs-body [data-friends-pref]:checked').count()) === 4);
+  await page.evaluate(() => { document.getElementById('friends-prefs').open = true; });
+  await page.uncheck('#friends-prefs-body [data-friends-pref="accept_requests"]');
+  await page.waitForFunction(() => (window.__upserts || []).length === 1);
+  const up = await page.evaluate(() => window.__upserts[0]);
+  check(`${L}: desligar "aceitar pedidos" grava em friend_settings`, up.table === 'friend_settings' && up.row.user_id === 'me' && up.row.accept_requests === false, up);
+  await page.evaluate(() => renderFriendsView());
+  await page.waitForSelector('#friends-prefs-body [data-friends-pref]', { state: 'attached' });
+  check(`${L}: preferência persiste ao recarregar a aba`, (await page.locator('#friends-prefs-body [data-friends-pref="accept_requests"]').isChecked()) === false);
+  check(`${L}: os outros 3 continuam ligados`, (await page.locator('#friends-prefs-body [data-friends-pref]:checked').count()) === 3);
+  // convite: copiar link
+  await page.click('[data-friends-invite="copy"]');
+  await page.waitForFunction(() => !!window.__copied);
+  const copied = await page.evaluate(() => window.__copied);
+  check(`${L}: link de convite traz ?amigo=<meu usuário>`, /\?amigo=u1me$/.test(copied), copied);
+  check(`${L}: link de convite não carrega index.html`, !/index\.html/.test(copied), copied);
+  // convite: consumir link (abre Amigos já buscando, sem enviar nada)
+  await page.evaluate(() => { __rpc.length = 0; localStorage.setItem('pendingFriendInvite', 'ujoao'); friendsConsumePendingInvite(); });
+  await page.waitForSelector('#friends-search-results [data-friend-row="joao"]');
+  check(`${L}: convite abre Amigos com a pessoa já buscada`, (await page.inputValue('#friends-search-input')) === 'ujoao');
+  check(`${L}: banner de convite aparece`, (await page.locator('.friends-invite-banner').textContent()).includes('@ujoao'));
+  check(`${L}: convite NÃO envia pedido sozinho`, await page.evaluate(() => !__rpc.some(r => r.name === 'send_friend_request')));
+  check(`${L}: convite foi consumido do aparelho`, await page.evaluate(() => localStorage.getItem('pendingFriendInvite') === null));
+  await page.evaluate(() => { localStorage.setItem('pendingFriendInvite', 'u1me'); friendsConsumePendingInvite(); });
+  check(`${L}: convite do próprio link é ignorado`, await page.evaluate(() => FRIENDS_STATE.inviteUsername === null));
+  // erro específico de "não aceita pedidos"
+  check(`${L}: mensagem de pedido não aceito`, await page.evaluate(() => /não está aceitando/.test(friendsErrorMessage('not_accepting_requests'))));
+  // sem amigos: sem ranking/atividade, mas convite e preferências ficam
+  await setup(page, { noFriends: true });
+  await page.evaluate(() => renderFriendsView());
+  await page.waitForSelector('#friends-invite');
+  check(`${L}: sem amigos: sem mini ranking nem atividade`, (await page.locator('#friends-rank').count()) === 0 && (await page.locator('#friends-activity').count()) === 0);
+  check(`${L}: sem amigos: convite e preferências continuam`, (await page.locator('#friends-invite').count()) === 1 && (await page.locator('#friends-prefs').count()) === 1);
+  check(`${L}: sem erro de página (novidades)`, errors.length === 0, errors);
+  await ctx.close();
+
+  // captura do ?amigo= ao abrir o site
+  const b = await bootPage(browser, lang, port);
+  await b.page.goto(`http://127.0.0.1:${port}/${lang}/index.html?amigo=UJoao`);
+  await b.page.waitForFunction(() => typeof friendsConsumePendingInvite === 'function');
+  check(`${L}: ?amigo= é guardado em minúsculas`, await b.page.evaluate(() => localStorage.getItem('pendingFriendInvite') === 'ujoao'));
+  check(`${L}: endereço fica limpo (sem ?amigo=)`, await b.page.evaluate(() => !/amigo=/.test(location.search)));
+  await b.page.goto(`http://127.0.0.1:${port}/${lang}/index.html?amigo=%3Cscript%3E`);
+  await b.page.waitForFunction(() => typeof friendsConsumePendingInvite === 'function');
+  check(`${L}: valor inválido em ?amigo= não é guardado por cima do válido`, await b.page.evaluate(() => localStorage.getItem('pendingFriendInvite') === 'ujoao'));
+  await b.ctx.close();
+}
+
 // Visual: tema escuro e celular (sem estouro horizontal, selo visível).
 async function visual(browser, lang, port){
   for (const [theme, vp, tag] of [['dark', { width: 1280, height: 900 }, 'dark'], ['light', { width: 390, height: 800 }, 'mobile'], ['dark', { width: 390, height: 800 }, 'mobile-dark']]){
@@ -287,6 +381,8 @@ async function visual(browser, lang, port){
     await page.evaluate(() => refreshFriendRequestCount());
     await page.evaluate(() => switchTab('friends'));
     await page.waitForSelector('#friends-list');
+    await page.waitForSelector('#friends-mini-rank-rows .friends-rank-row');
+    await page.waitForSelector('#friends-activity .friends-activity-row');
     await page.fill('#friends-search-input', 'joão');
     await page.waitForSelector('#friends-search-results [data-friend-row="joao"]');
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -312,7 +408,7 @@ async function visual(browser, lang, port){
   const port = server.address().port;
   const browser = await chromium.launch();
   try {
-    for (const lang of ['fr', 'zh']){ await run(browser, lang, port); await visual(browser, lang, port); }
+    for (const lang of ['fr', 'zh']){ await run(browser, lang, port); await runNew(browser, lang, port); await visual(browser, lang, port); }
   } finally { await browser.close(); server.close(); }
   console.log(`\nAmigos: ${passed} ok, ${failed} falhas`);
   process.exit(failed ? 1 : 0);

@@ -223,6 +223,8 @@ async function onUserLoggedIn(user){
   applyPendingLevelTestOffer();
   if (typeof applyPendingNotificationTab === 'function') applyPendingNotificationTab();
   if (typeof applyInitialRoute === 'function') applyInitialRoute();
+  // Convite por link (?amigo=usuario): abre Amigos já buscando a pessoa.
+  if (typeof friendsConsumePendingInvite === 'function') friendsConsumePendingInvite();
 }
 
 // ---------- Admin Mode ON/OFF (topbar) ----------
