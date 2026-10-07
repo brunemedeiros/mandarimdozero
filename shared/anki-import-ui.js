@@ -358,7 +358,7 @@ async function confirmAnkiImport(body){
   });
   const cutMessage = cutPlan.cut ? ownCardInstanceCutMessage({
     requested: cutPlan.requested, keptInstances: cutPlan.keptInstances,
-    limit: FREE_OWN_FLASHCARD_LIMIT, used: cutPlan.used, what: 'Este Deck',
+    limit: FREE_OWN_FLASHCARD_LIMIT, used: cutPlan.used, what: 'deck',
   }) : null;
   if (cutPlan.keepCount === 0){
     if (typeof openFlashcardLimitModal !== 'function' || !openFlashcardLimitModal({ cutMessage })){
