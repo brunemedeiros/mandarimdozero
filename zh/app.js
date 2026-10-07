@@ -5072,7 +5072,7 @@ function answerExplanationHTML(ex){
     return phraseHTML + (noteOrConceptReviewHTML() || '');
   }
   if (ex && ex.item){
-    const itemHTML = `<p class="usage-note-body"><strong>${ex.item.c}</strong> ${audioBtnHTML(ex.item.c)} (${ex.item.p}) = ${ex.item.t}</p>`;
+    const itemHTML = `<div class="feedback-correct-line">Resposta certa: <strong>${ex.item.c}</strong> ${audioBtnHTML(ex.item.c)} <span class="pinyin">(${ex.item.p})</span></div><div class="feedback-phrase-trans">${ex.item.t}</div>`;
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
     const origin = findMatchingPhrase(ex.item, u);
     // Sem frase de origem: só cai pra nota de conceito quando ela REALMENTE

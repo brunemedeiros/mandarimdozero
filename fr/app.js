@@ -4984,7 +4984,7 @@ function answerExplanationHTML(ex){
   }
   if (ex && ex.phrase){
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
-    return `<p class="usage-note-body"><strong>${ex.phrase.f}</strong><br>${ex.phrase.t}</p>${noteOrConceptReviewHTML(u) || ''}`;
+    return `<div class="feedback-phrase-zh"><strong>${ex.phrase.f}</strong> ${audioBtnHTML(ex.phrase.f)}</div><div class="feedback-phrase-trans">${ex.phrase.t}</div>${noteOrConceptReviewHTML(u) || ''}`;
   }
   if (ex && ex.item){
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
@@ -4997,7 +4997,7 @@ function answerExplanationHTML(ex){
     const originHTML = origin
       ? `<div class="usage-note-title">Onde você já viu isso</div><p class="usage-note-body"><strong>${origin.f}</strong><br>${origin.t}</p>`
       : (noteOrConceptReviewHTML(u, ex.vocabIdx, true) || '');
-    return `<p class="usage-note-body"><strong>${ex.item.f}</strong> ${audioBtnHTML(ex.item.f)} = ${ex.item.t}</p>${originHTML}`;
+    return `<div class="feedback-correct-line">Resposta certa: <strong>${ex.item.f}</strong> ${audioBtnHTML(ex.item.f)}</div><div class="feedback-phrase-trans">${ex.item.t}</div>${originHTML}`;
   }
   if (ex && ex.format === 'trueFalse' && ex.whyNote){
     return `<p class="usage-note-body">${ex.whyNote}</p>`;
