@@ -67,7 +67,7 @@ Todos passando:
 
 ## Ajustes depois da sua resposta (07/10/2026)
 - **Estimativa removida:** o "cerca de N min" saiu do topo.
-- **Tempo no Speed Review:** o recorde agora mostra pontos e tempo, por exemplo "Seu recorde: 30 pts · 2,4 s por palavra".
-  - O tempo é a média por palavra, porque cada rodada tem um número diferente de palavras e o tempo total não daria para comparar.
+- **Tempo no Speed Review:** o recorde agora mostra pontos e tempo, por exemplo "Seu recorde: 30 pts · 41 s".
+  - O tempo é o tempo total da rodada (você preferiu ao tempo médio por palavra).
   - Só conta rodada completa: todas as palavras respondidas, sem perder as 3 vidas, com pelo menos 5 palavras.
   - Testes: Proposta A 58/58, Deck browser 206/206, Ajustes 48/48, K1 30/30, K3 20/20, K5 18/18, K6 28/28.

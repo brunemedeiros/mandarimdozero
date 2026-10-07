@@ -228,12 +228,12 @@ const SHOTS = process.env.SHOT_DIR || require('os').tmpdir();
         saved: JSON.stringify(ser.reviewRecords || null), savedTime: !!ser.reviewTimeStats };
     });
     check(lang + ' recorde do Speed Review só sobe', rec.a === true && rec.b === false && /Seu recorde: 30 pts/.test(rec.speed), rec);
-    check(lang + ' Speed Review também guarda tempo (média por palavra, rodada de 5+)', rec.t1 === false && rec.t2 === true && rec.t3 === false && /30 pts · 2,4 s por palavra/.test(rec.speed), rec);
+    check(lang + ' Speed Review também guarda tempo total (rodada de 5+, menor vence)', rec.t1 === false && rec.t2 === true && rec.t3 === false && /30 pts · 24 s/.test(rec.speed), rec);
     check(lang + ' recorde do Combinar só desce (melhor tempo)', rec.c === true && rec.d === false && /Seu recorde: 41 s/.test(rec.match), rec);
     check(lang + ' "Já saíram da lista" conta quem saiu de Palavras difíceis', !/saíram/.test(rec.hardBefore) && /Já saíram da lista: \d+/.test(rec.hardAfter), rec);
-    check(lang + ' recordes e tempo vão no progresso salvo', /"speedBestScore":30/.test(rec.saved) && /"speedBestMsPerCard":2400/.test(rec.saved) && /"matchBestMs":41000/.test(rec.saved) && rec.savedTime, rec);
+    check(lang + ' recordes e tempo vão no progresso salvo', /"speedBestScore":30/.test(rec.saved) && /"speedBestMs":24000/.test(rec.saved) && /"matchBestMs":41000/.test(rec.saved) && rec.savedTime, rec);
     const restored = await page.evaluate(() => { const ser = serializeState(); STATE.reviewRecords = null; applySerializedState(JSON.parse(JSON.stringify(ser))); return reviewRecords(); });
-    check(lang + ' recordes voltam ao recarregar', restored.speedBestScore === 30 && restored.speedBestMsPerCard === 2400 && restored.matchBestMs === 41000, restored);
+    check(lang + ' recordes voltam ao recarregar', restored.speedBestScore === 30 && restored.speedBestMs === 24000 && restored.matchBestMs === 41000, restored);
     const matchStart = await page.evaluate(() => { startMatchGame(); const m = typeof MATCH_STATE.startedAt === 'number'; startSpeedReview(); const sp = typeof SPEED_STATE.startedAt === 'number'; stopSpeedTimer(); SPEED_STATE.active = false; return m && sp; });
     check(lang + ' Combinar e Speed Review marcam o início para medir o tempo', matchStart, matchStart);
 
