@@ -81,3 +81,19 @@ Plano de migrations (proposto):
 - 077: índice único parcial `teacher_students (student_id, language_app_key) where status='active'`.
 - JS: menu Professora (Alunos, Flashcards, Aulas, Material de apoio, abre em Alunos) separado do menu Admin;
   `isTeacherUser()`; `effectivePlanTier` = premium para professora; aba Admin para conceder Professora.
+
+## Etapa 1 -- decisões da autora sobre a auditoria (2026-10-07)
+- Corrigir o furo de Aulas/Material de apoio (papel Professora + vínculo ativo). Hoje: "📚 Material de apoio" aparece
+  no menu de toda conta logada (lista vazia se não houver material); "📝 Aulas" é só da professora (aluno não lê).
+  Proposto: Material de apoio só aparece para quem tem vínculo ativo.
+- A autora fica com **Admin E Professora** ao mesmo tempo (papéis acumuláveis, não um valor único).
+- Decks da aluna: só a professora **vinculada** à aluna pode criá-los (além da admin).
+- Badge ao vincular: "Aluno/a do/a Prof. {nome da professora}". Futuro: destacar o badge da autora.
+- TTS: admin isenta da cota; professora pode ter cota maior que o Premium (valor a decidir).
+- Vínculo por **convite**: a professora convida, o aluno aceita.
+- "1 professora por aluno por idioma" = um aluno tem no máximo 1 professora ativa em cada idioma; a professora pode
+  ter quantos alunos quiser.
+- **Matriz de permissões**: a admin concede/revoga permissões por tipo de conta (user free, premium basic, premium pro,
+  student, teacher) na aba ⭐ Premium (que também concede/remove Professora; separar depois se crescer). Uma conta
+  com vários tipos fica com a soma das permissões (vale sempre a mais generosa; limites numéricos = o maior).
+  Professora é um Premium com mais permissões (assinatura mais cara no futuro).
