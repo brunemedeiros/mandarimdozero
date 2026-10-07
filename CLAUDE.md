@@ -17734,3 +17734,7 @@ Pedido da autora: guardar aqui o que só faz sentido (ou só é seguro) depois d
 **Conferir no dia de ligar**
 9. Com o paywall ligado, testar com uma conta Free e outra Premium: lista de Desafios (cadeado), Ditados, Decks públicos (importar é Premium), Meus Cartões (formatos), TTS.
 10. A RLS atual (`challenges_public_read_published`) deixa qualquer um ler todos os desafios publicados pela API: só fecha com o passo 3 da 008.
+
+## Decks: migração dos cartões antigos e regra de 1 professora por aluno (2026-10-07)
+- **Migração feita em produção (autorizada pela autora)**: os 5 `own_flashcards` e os 5 `teacher_flashcards` com `deck_id` NULL foram colocados no `personal_root` do dono / `teacher_root` do aluno (criados antes com `ensure_user_decks`/`ensure_teacher_decks`). Um único bloco transacional, só `deck_id` mudou: hash de id/front/back/fields/modo/tags/revision/status idêntico antes e depois; hoje 0 cartões sem Deck.
+- **Decisão de produto: um aluno não pode ter duas professoras** (por idioma). Hoje não existe nenhum caso (0 alunos com 2 vínculos ativos no mesmo idioma), então não há raízes "Cartões da professora" duplicadas. Ainda NÃO imposto no banco; se for impor, índice único parcial em `teacher_students (student_id, language_app_key) where status='active'` (migration nova, com autorização).
