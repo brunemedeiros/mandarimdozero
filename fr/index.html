@@ -4021,20 +4021,20 @@ footer.app-footer img{ height:40px; opacity:.85; }
              removido de vez; "Origem" (Fase 4 do sistema de alunas
              particulares) subiu pro topo do painel. -->
         <div id="review-origin-select-wrap" hidden>
-          <div class="section-label">Origem</div>
+          <div data-i18n="review.settings.origin" class="section-label">Origem</div>
           <select class="review-settings-select" id="review-origin-select"></select>
         </div>
         <div data-i18n="ui.review.frequency" class="section-label">Frequência de revisão</div>
         <select class="review-settings-select" id="review-frequency-select">
           <option data-i18n="ui.review.freq.frequent" value="frequent">Mais frequente (revisa mais cedo e mais vezes)</option>
-          <option value="balanced">Equilibrada (recomendado)</option>
+          <option data-i18n="review.settings.freq.balanced" value="balanced">Equilibrada (recomendado)</option>
           <option data-i18n="ui.review.freq.spaced" value="spaced">Mais espaçada (intervalos mais longos entre revisões)</option>
         </select>
         <div data-i18n="ui.review.newPerDay" class="section-label">Novas palavras por dia</div>
         <select class="review-settings-select" id="review-newcards-select">
           <option data-i18n="ui.review.newPerDay.0" value="0">0 (nenhuma, só revisar o que já viu)</option>
           <option data-i18n="ui.review.newPerDay.5" value="5">5 (ritmo mais lento)</option>
-          <option value="10">10 (recomendado)</option>
+          <option data-i18n="review.settings.newPerDay.10" value="10">10 (recomendado)</option>
           <option data-i18n="ui.review.newPerDay.15" value="15">15 (ritmo mais rápido)</option>
           <option data-i18n="ui.review.newPerDay.20" value="20">20 (ritmo bem rápido)</option>
           <option data-i18n="ui.review.newPerDay.unlimited" value="9999">Sem limite (todas as pendentes de uma vez)</option>
@@ -4042,7 +4042,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <div data-i18n="ui.review.intensity" class="section-label">Intensidade da sessão</div>
         <select class="review-settings-select" id="review-intensity-select">
           <option data-i18n="ui.review.intensity.light" value="light">Leve (sessões mais curtas)</option>
-          <option value="normal">Normal (recomendado)</option>
+          <option data-i18n="review.settings.intensity.normal" value="normal">Normal (recomendado)</option>
           <option data-i18n="ui.review.intensity.intense" value="intense">Intensa (sessões mais longas)</option>
         </select>
       </div>
@@ -4058,7 +4058,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <div id="review-deck-wrap" style="display:none;"></div>
 
     <div id="review-session-wrap" style="display:none;">
-      <button class="back-link" id="review-back-to-modes">← Voltar aos modos</button>
+      <button data-i18n="review.backToModes" class="back-link" id="review-back-to-modes">← Voltar aos modos</button>
       <div id="review-content"></div>
       <div id="speed-review-content" style="display:none;"></div>
       <div id="match-review-content" style="display:none;"></div>

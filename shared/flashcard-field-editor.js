@@ -859,10 +859,10 @@ function renderFieldImageBlockHTML(field, opts){
   if (!url && !canUpload) return '';
   return `
     <div class="field-image-block" data-field-image-field="${field.id}">
-      ${url ? `<img class="field-image-thumb" src="${escapeHTML(url)}" alt="Imagem do campo">` : ''}
+      ${url ? `<img class="field-image-thumb" src="${escapeHTML(url)}" alt="${escapeHTML(t('review.image.alt'))}">` : ''}
       ${canUpload ? `<div class="field-image-actions">
-        <button type="button" class="field-image-link" data-field-image-pick>${url ? 'Trocar imagem' : '🖼️ Imagem'}</button>
-        ${url ? `<button type="button" class="field-image-link" data-field-image-remove>Remover</button>` : ''}
+        <button type="button" class="field-image-link" data-field-image-pick>${escapeHTML(t(url ? 'review.image.change' : 'review.image.add'))}</button>
+        ${url ? `<button type="button" class="field-image-link" data-field-image-remove>${escapeHTML(t('review.image.remove'))}</button>` : ''}
         <span class="field-image-status" data-field-image-status></span>
       </div>
       <input type="file" accept="${FIELD_IMAGE_UPLOAD_MIME_TYPES.join(',')}" data-field-image-input hidden>
@@ -889,14 +889,14 @@ function wireFieldImageBlockFor(block, editorState, fieldId, onChange, opts){
     if (!v.ok){ if (errorEl) errorEl.textContent = v.error; input.value = ''; return; }
     if (typeof opts.uploadFn !== 'function') return;
     input.disabled = true;
-    if (statusEl) statusEl.textContent = 'Enviando imagem...';
+    if (statusEl) statusEl.textContent = t('review.image.uploading');
     const up = await opts.uploadFn(file, 'image', fieldId);
     if (!block.isConnected) return;
     input.disabled = false;
     input.value = '';
     if (statusEl) statusEl.textContent = '';
     if (!up || !up.ok){
-      if (errorEl) errorEl.textContent = (up && up.error) || 'Não foi possível enviar a imagem agora.';
+      if (errorEl) errorEl.textContent = (up && up.error) || t('review.image.uploadError');
       return; // a imagem anterior (se havia) continua
     }
     editorState.__freshMediaUploads = editorState.__freshMediaUploads || [];

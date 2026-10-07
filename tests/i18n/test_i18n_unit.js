@@ -128,7 +128,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   const nonEmpty = (v) => typeof v === 'string' ? v.trim() !== '' : (v && typeof v === 'object' && Object.values(v).length > 0 && Object.values(v).every(x => typeof x === 'string' && x.trim() !== ''));
   check('nenhum valor vazio', [pt, en, es].every(c => Object.values(c).every(nonEmpty)));
   // Valores legitimamente iguais nos dois idiomas (nomes próprios, abreviações, números).
-  const EN_SAME_AS_PT_OK = ['myFlashcards.badge.premium', 'badge.beta_tester.name', 'badge.xp_100.name', 'badge.xp_500.name', 'myFlashcards.edit.pinyin', 'myFlashcards.native.cardType', 'notif.pref.matrix.app', 'notif.pref.matrix.push', 'notif.pref.titleMatrixPush', 'notif.time.day', 'notif.time.hour', 'notif.time.min', 'review.mode.flashcard.name', 'review.mode.speed.name', 'review.speed.points', 'toast.pointsGain', 'toast.xpGain', 'trail.premiumBadge', 'preview.err.detail', 'review.interval.min', 'review.interval.hour', 'leaderboard.rowBadge', 'publicProfile.labelPinyin', 'publicProfile.sectionFlashcards', 'fieldEditor.lang.zhPinyin', 'fieldEditor.audio.rate.normal', 'taEditor.pinyinLabel', 'admin.analytics.tech.perf', 'admin.badges.create.icon', 'admin.badges.grant.badge', 'admin.badges.grant.usernamePh', 'admin.modal.report.status', 'admin.modal.report.title', 'admin.mode.off', 'admin.mode.on', 'admin.mode.pillLabel', 'admin.mode.title', 'admin.panel.tab.analytics', 'admin.panel.tab.tags', 'admin.panel.tab.flashcards', 'admin.panel.tab.premium', 'admin.panel.tab.badges', 'admin.panel.tab.reports', 'adminChallenges.import.itemN', 'admin.flashcards.cardType.normal', 'admin.flashcards.dest.countSubdecks', 'admin.flashcards.dest.deckFallback', 'admin.flashcards.dest.newSub', 'admin.materials.badgeLink'];
+  const EN_SAME_AS_PT_OK = ['myFlashcards.badge.premium', 'badge.beta_tester.name', 'badge.xp_100.name', 'badge.xp_500.name', 'myFlashcards.edit.pinyin', 'myFlashcards.native.cardType', 'notif.pref.matrix.app', 'notif.pref.matrix.push', 'notif.pref.titleMatrixPush', 'notif.time.day', 'notif.time.hour', 'notif.time.min', 'review.mode.flashcard.name', 'review.mode.speed.name', 'review.speed.points', 'toast.pointsGain', 'toast.xpGain', 'trail.premiumBadge', 'preview.err.detail', 'review.interval.min', 'review.interval.hour', 'leaderboard.rowBadge', 'publicProfile.labelPinyin', 'publicProfile.sectionFlashcards', 'fieldEditor.lang.zhPinyin', 'fieldEditor.audio.rate.normal', 'taEditor.pinyinLabel', 'admin.analytics.tech.perf', 'admin.badges.create.icon', 'admin.badges.grant.badge', 'admin.badges.grant.usernamePh', 'admin.modal.report.status', 'admin.modal.report.title', 'admin.mode.off', 'admin.mode.on', 'admin.mode.pillLabel', 'admin.mode.title', 'admin.panel.tab.analytics', 'admin.panel.tab.tags', 'admin.panel.tab.flashcards', 'admin.panel.tab.premium', 'admin.panel.tab.badges', 'admin.panel.tab.reports', 'adminChallenges.import.itemN', 'admin.flashcards.cardType.normal', 'admin.flashcards.dest.countSubdecks', 'admin.flashcards.dest.deckFallback', 'admin.flashcards.dest.newSub', 'admin.materials.badgeLink', 'review.deck.decks', 'review.deck.colDeck', 'review.panel.tags', 'review.deck.subdeckWord.one', 'review.deck.subdeckWord.other'];
   const sameKeys = ptKeys.filter(k => !EN_SAME_AS_PT_OK.includes(k) && JSON.stringify(en[k]) === JSON.stringify(pt[k]));
   check('en difere de pt-BR (traduzido)', sameKeys.length === 0, sameKeys);
   // comentário de confiança em cada linha de chave de en/es
@@ -155,16 +155,23 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   // ce8c3b1 = ponta da branch da Revisão antes do merge com o i18n (2026-10-07): o HTML
   // e os textos em pt-BR daquela branch passam a ser a referência.
   const PREV = process.env.I18N_PREV || 'ce8c3b1';
+  // 9969e3c = main antes da tradução da Revisão nova (tabela de Decks, Painel,
+  // semana, recordes; 2026-10-07). Os arquivos convertidos nesse passo e o HTML
+  // são comparados também contra ele (em ce8c3b1 parte desses textos ainda não existia).
+  const PREV2 = process.env.I18N_PREV2 || '9969e3c';
   // Mudanças DELIBERADAS de texto em português (aprovadas pela dona do projeto) desde o
   // commit PREV: aplicadas ao texto antigo antes de comparar. Qualquer outra diferença falha.
   const DELIBERATE_PT_CHANGES = [['arquive algum cartão que já não usa, ou peça', 'apague algum cartão, ou peça'], ['exportado de lá Você confere', 'exportado de lá. Você confere']];
   const prev = (f) => DELIBERATE_PT_CHANGES.reduce((acc, [o, n]) => acc.split(o).join(n), execSync(`git show ${PREV}:${f}`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 }));
   const prevFr = prev('fr/index.html'), prevZh = prev('zh/index.html');
-  const prevJs = ['shared/my-flashcards.js', 'shared/public-profile.js', 'shared/anki-import-ui.js', 'fr/app.js', 'zh/app.js', 'shared/flashcard-model.js', 'shared/own-flashcards.js', 'shared/flashcard-preview.js', 'shared/notifications.js', 'shared/notification-preferences.js', 'shared/deck-data.js', 'shared/admin-students.js', 'shared/profile.js', 'shared/leaderboard.js', 'shared/auth.js', 'shared/support-materials-view.js', 'shared/anki-export.js', 'shared/flashcard-field-editor.js', 'shared/flashcard-mc-editor.js', 'shared/flashcard-typeanswer-editor.js', 'shared/flashcard-cloze-editor.js', 'shared/admin-flashcards.js', 'shared/admin-class-logs.js', 'shared/admin-support-materials.js', 'shared/admin-premium.js', 'shared/teacher-flashcards.js', 'shared/teacher-class-logs.js', 'shared/teacher-support-materials.js', 'shared/admin-analytics.js', 'shared/admin-badges.js', 'shared/admin-notifications.js', 'shared/admin-reports.js', 'shared/flashcard-field-audio-recorder.js', 'shared/wizard.js', 'shared/language-switcher.js', 'shared/fsrs.js', 'shared/deck-engine.js', 'shared/checkpoint-exam.js'].map(prev).join('\n');
-  const all = origFr + origZh + origRep + prevFr + prevZh + prevJs;
+  const prevJs = ['shared/my-flashcards.js', 'shared/public-profile.js', 'shared/anki-import-ui.js', 'fr/app.js', 'zh/app.js', 'shared/flashcard-model.js', 'shared/own-flashcards.js', 'shared/flashcard-preview.js', 'shared/notifications.js', 'shared/notification-preferences.js', 'shared/deck-data.js', 'shared/admin-students.js', 'shared/profile.js', 'shared/leaderboard.js', 'shared/auth.js', 'shared/support-materials-view.js', 'shared/anki-export.js', 'shared/flashcard-field-editor.js', 'shared/flashcard-mc-editor.js', 'shared/flashcard-typeanswer-editor.js', 'shared/flashcard-cloze-editor.js', 'shared/admin-flashcards.js', 'shared/admin-class-logs.js', 'shared/admin-support-materials.js', 'shared/admin-premium.js', 'shared/teacher-flashcards.js', 'shared/teacher-class-logs.js', 'shared/teacher-support-materials.js', 'shared/admin-analytics.js', 'shared/admin-badges.js', 'shared/admin-notifications.js', 'shared/admin-reports.js', 'shared/flashcard-field-audio-recorder.js', 'shared/wizard.js', 'shared/language-switcher.js', 'shared/fsrs.js', 'shared/deck-engine.js', 'shared/checkpoint-exam.js', 'shared/deck-browser.js', 'shared/review-extras.js', 'shared/study-trail-model.js'].map(prev).join('\n');
+  const prev2 = (f) => execSync(`git show ${PREV2}:${f}`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 });
+  const prev2Fr = prev2('fr/index.html'), prev2Zh = prev2('zh/index.html');
+  const prev2Js = ['shared/deck-browser.js', 'shared/review-extras.js', 'shared/study-trail-model.js', 'shared/flashcard-tags-editor.js', 'shared/flashcard-field-editor.js', 'fr/app.js', 'zh/app.js'].map(prev2).join('\n');
+  const all = origFr + origZh + origRep + prevFr + prevZh + prevJs + prev2Fr + prev2Zh + prev2Js;
   // Textos NOVOS (não existiam antes): só o seletor de idioma.
   const NEW_KEYS = ['ui.profileEdit.country', 'ui.profileEdit.countryHint', 'ui.profileEdit.countryNone', 'ui.profileEdit.gender', 'ui.profileEdit.genderHint', 'ui.profileEdit.genderNone', 'ui.profileEdit.gender.masculine', 'ui.profileEdit.gender.feminine', 'ui.profileEdit.gender.other', 'ui.profileEdit.gender.undisclosed' /* País de origem e Gênero (placeholders de perfil) */, 'settings.uiLanguage.title', 'settings.uiLanguage.sub', 'settings.uiLanguage.confirm.title', 'settings.uiLanguage.confirm.toEn', 'settings.uiLanguage.confirm.toPt' /* aviso novo ao trocar o idioma do site */, 'content.untranslatedNotice', 'fr.challenge.inEnglish', 'nav.study', 'nav.challenges', 'nav.profile', 'side.streakDays', 'fr.challenge.lt.placeholder' /* Fase 9: "{lang}" parametriza o idioma da tradução; com lang=português o texto final é idêntico ao original "Sua tradução em português..." */]; // Fase 8: aviso novo (só aparece fora do pt-BR)
-  const NESTED_TEMPLATE_KEYS = ['limitCut.main', 'limitCut.already', 'admin.reports.reply.lastSent', 'admin.reports.reply.lastSentTo'];
+  const NESTED_TEMPLATE_KEYS = ['review.deck.createdCount.other' /* original: criado${n === 1 ? '' : 's'} */, 'limitCut.main', 'limitCut.already', 'admin.reports.reply.lastSent', 'admin.reports.reply.lastSentTo'];
   const escRe = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   for (const k of ptKeys){
     if (NEW_KEYS.includes(k) || k.startsWith('badge.catalog.')) continue; // badge.catalog.*: texto vem do banco (badge_catalog), não do código
@@ -193,7 +200,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
     check(`${lang}: modal atual sem data-i18n == modal original`, strip(modal(cur)) === modal(o));
     // Passo "modais pequenos + seletor": contra o commit anterior (PREV), a
     // única diferença além dos atributos data-i18n* é o bloco do seletor.
-    const p = lang === 'fr' ? prevFr : prevZh;
+    const p0 = lang === 'fr' ? prev2Fr : prev2Zh;
     const selStart = cur.indexOf('      <div class="pref-row">\n        <div class="pref-row-text">\n          <div class="pref-row-title" data-i18n="settings.uiLanguage.title">');
     const selEnd = cur.indexOf('</select>\n      </div>\n', selStart) + '</select>\n      </div>\n'.length;
     check(`${lang}: bloco do seletor encontrado`, selStart > 0 && selEnd > selStart);
@@ -207,7 +214,19 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
     const curNoGender = curNoSel.slice(0, gS) + curNoSel.slice(gE).replace(/^\n/, '');
     const cmS2 = curNoGender.indexOf('<div id="ui-language-confirm-modal"'), cmE2 = curNoGender.indexOf('<div id="flashcard-reset-confirm-modal"');
     const curClean = curNoGender.slice(0, cmS2) + curNoGender.slice(cmE2);
-    check(`${lang}: HTML inteiro sem data-i18n* e sem o seletor == commit anterior (${PREV})`, strip(curClean) === strip(p));
+    // O commit de referência (PREV) já tem seletor, campo Gênero e aviso de idioma:
+    // tira os mesmos blocos dele antes de comparar.
+    const cleanBlocks = (h) => {
+      const a = h.indexOf('      <div class="pref-row">\n        <div class="pref-row-text">\n          <div class="pref-row-title" data-i18n="settings.uiLanguage.title">');
+      if (a > 0){ const b = h.indexOf('</select>\n      </div>\n', a) + '</select>\n      </div>\n'.length; h = h.slice(0, a) + h.slice(b); }
+      const g = h.indexOf('        <label data-i18n="ui.profileEdit.gender"');
+      if (g > 0){ const ge = h.indexOf('</p>\n', h.indexOf('data-i18n="ui.profileEdit.genderHint"')) + 5; h = h.slice(0, g) + h.slice(ge).replace(/^\n/, ''); }
+      const m1 = h.indexOf('<div id="ui-language-confirm-modal"'), m2 = h.indexOf('<div id="flashcard-reset-confirm-modal"');
+      if (m1 > 0 && m2 > m1) h = h.slice(0, m1) + h.slice(m2);
+      return h;
+    };
+    const p = cleanBlocks(p0);
+    check(`${lang}: HTML inteiro sem data-i18n* e sem o seletor == commit anterior (${PREV2})`, strip(curClean) === strip(p));
     check(`${lang}: seletor só oferece pt-BR e English`, /<option value="pt-BR" lang="pt-BR">Português \(Brasil\)<\/option>\s*<option value="en" lang="en">English<\/option>\s*<\/select>/.test(cur.slice(selStart, selEnd)));
     const usedHtml = [...cur.matchAll(/data-i18n-html="([^"]+)"/g)].map(m => m[1]);
     check(`${lang}: todo data-i18n-html existe em pt-BR`, usedHtml.every(k => k in pt));

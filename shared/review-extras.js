@@ -16,7 +16,9 @@ const REVIEW_WEEK_GOAL_DAYS = 5;
 const REVIEW_SHORT_SESSION_SECONDS = 300;
 const REVIEW_DEFAULT_SECONDS_PER_CARD = 10;
 const REVIEW_MAX_SECONDS_PER_CARD = 60;
-const REVIEW_WEEKDAY_LABELS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+// Rótulos dos dias vêm do idioma do site (shared/i18n), segunda a domingo.
+const REVIEW_WEEKDAY_KEYS = ['review.week.day.mon', 'review.week.day.tue', 'review.week.day.wed', 'review.week.day.thu', 'review.week.day.fri', 'review.week.day.sat', 'review.week.day.sun'];
+function reviewWeekdayLabel(i){ return t(REVIEW_WEEKDAY_KEYS[i]); }
 
 function reviewDateKey(d){
   const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -68,7 +70,7 @@ function reviewWeekForecast(pool, opts){
   let studiedDays = 0;
   const days = reviewWeekDates(now).map((d, i) => {
     const key = reviewDateKey(d);
-    const day = { key, label: REVIEW_WEEKDAY_LABELS[i], isToday: key === todayKey, isPast: key < todayKey, studied: !!log[key], newCount: 0, dueCount: 0 };
+    const day = { key, label: reviewWeekdayLabel(i), isToday: key === todayKey, isPast: key < todayKey, studied: !!log[key], newCount: 0, dueCount: 0 };
     if (day.studied && key <= todayKey) studiedDays++;
     if (day.isToday){
       day.newCount = todayNew;
@@ -156,10 +158,10 @@ function recordSpeedReviewStreak(streak){
 }
 
 function speedRecordText(rec){
-  const pts = `${rec.speedBestScore || 0} pts`;
+  const pts = t('review.speed.points', { n: rec.speedBestScore || 0 });
   const n = rec.speedBestStreak || 0;
   if (!(n > 0)) return pts;
-  return `${pts} · ${n} ${n === 1 ? 'acerto seguido' : 'acertos seguidos'}`;
+  return `${pts} · ${n} ${t(n === 1 ? 'review.records.streakWord.one' : 'review.records.streakWord.other')}`;
 }
 
 function recordMatchTime(ms){
@@ -209,11 +211,11 @@ function deckMemoryStrengthHTML(cards){
   const total = s.weak + s.medium + s.strong;
   if (!total) return '';
   const seg = (n, tier) => n ? `<span class="mem-bar-seg" data-tier="${tier}" style="flex-grow:${n};"></span>` : '';
-  const item = (n, tier, label) => `<span class="mem-legend-item"><i class="mem-swatch" data-tier="${tier}"></i>${label} <b>${n}</b></span>`;
-  return `<div class="deck-memory" aria-label="Força da memória: ${s.weak} fracas, ${s.medium} médias, ${s.strong} fortes">
-    <div class="deck-memory-title">Força da memória</div>
+  const item = (n, tier, label) => `<span class="mem-legend-item"><i class="mem-swatch" data-tier="${tier}"></i>${escapeHTML(label)} <b>${n}</b></span>`;
+  return `<div class="deck-memory" aria-label="${escapeHTML(t('review.memory.aria', { weak: s.weak, medium: s.medium, strong: s.strong }))}">
+    <div class="deck-memory-title">${escapeHTML(t('review.memory.title'))}</div>
     <div class="mem-bar">${seg(s.weak, 'weak')}${seg(s.medium, 'mid')}${seg(s.strong, 'strong')}</div>
-    <div class="mem-legend">${item(s.weak, 'weak', 'Fraca')}${item(s.medium, 'mid', 'Média')}${item(s.strong, 'strong', 'Forte')}</div>
+    <div class="mem-legend">${item(s.weak, 'weak', t('review.memory.weak'))}${item(s.medium, 'mid', t('review.memory.medium'))}${item(s.strong, 'strong', t('review.memory.strong'))}</div>
   </div>`;
 }
 
@@ -224,7 +226,7 @@ function reviewWeekHTML(pool){
   const max = Math.max(1, ...w.days.map(d => d.newCount + d.dueCount));
   const done = w.studiedDays >= w.goal;
   const cols = w.days.map(d => {
-    const label = d.isToday ? 'Hoje' : d.label;
+    const label = d.isToday ? t('review.week.today') : d.label;
     let body;
     if (d.isPast){
       body = `<span class="week-check${d.studied ? ' is-done' : ''}" aria-hidden="true">${d.studied ? '✓' : ''}</span>`;
@@ -236,19 +238,19 @@ function reviewWeekHTML(pool){
         ${d.isToday && d.studied ? '<span class="week-check is-done week-check-small" aria-hidden="true">✓</span>' : ''}`;
     }
     const aria = d.isPast
-      ? `${d.label}: ${d.studied ? 'estudou' : 'não estudou'}`
-      : `${label}: ${d.dueCount} para revisar, ${d.newCount} novas${d.isToday && d.studied ? ', já estudou' : ''}`;
-    return `<li class="week-day${d.isToday ? ' is-today' : ''}${d.isPast ? ' is-past' : ''}" aria-label="${aria}">
+      ? `${d.label}: ${t(d.studied ? 'review.week.studied' : 'review.week.notStudied')}`
+      : `${t('review.week.ariaFuture', { day: label, due: d.dueCount, new: d.newCount })}${d.isToday && d.studied ? t('review.week.alreadyStudied') : ''}`;
+    return `<li class="week-day${d.isToday ? ' is-today' : ''}${d.isPast ? ' is-past' : ''}" aria-label="${escapeHTML(aria)}">
       <div class="week-day-body">${body}</div>
-      <div class="week-day-label">${label}</div>
+      <div class="week-day-label">${escapeHTML(label)}</div>
     </li>`;
   }).join('');
   return `<div class="review-week">
     <div class="review-week-head">
-      <div class="review-week-title">Sua semana de revisão</div>
-      <div class="review-week-goal${done ? ' is-done' : ''}">${done ? 'Meta da semana cumprida' : 'Meta da semana'}: <b>${Math.min(w.studiedDays, 7)} de ${w.goal}</b> dias de estudo</div>
+      <div class="review-week-title">${escapeHTML(t('review.week.title'))}</div>
+      <div class="review-week-goal${done ? ' is-done' : ''}">${escapeHTML(t(done ? 'review.week.goalDone' : 'review.week.goal'))}${t('review.week.goalCount', { n: Math.min(w.studiedDays, 7), goal: w.goal })}</div>
     </div>
     <ol class="review-week-days">${cols}</ol>
-    <p class="review-week-legend">Dias que passaram: ✓ quando você estudou. Dias que vêm: <span class="week-key week-key-due"></span>cartões que vencem e <span class="week-key week-key-new"></span>palavras novas.</p>
+    <p class="review-week-legend">${escapeHTML(t('review.week.legendPast'))}<span class="week-key week-key-due"></span>${escapeHTML(t('review.week.legendDue'))}<span class="week-key week-key-new"></span>${escapeHTML(t('review.week.legendNew'))}</p>
   </div>`;
 }

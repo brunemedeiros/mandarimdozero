@@ -17715,3 +17715,9 @@ Testes: desafios-modulo 75/75, desafios-conclusao 19/19, test_answer_validation 
 - **Enter em campo de resposta** (fr/zh, atalho global de teclado): o Enter digitado dentro de um campo é só do campo. Antes, o mesmo Enter que mostrava o painel de erro clicava "Continuar" na hora e o resultado nunca aparecia (ditado de pinyin com "haizi" etc.).
 - **zh**: teclas de tom quebram linha (como as de acento do fr); opções de "Complete a frase" com pinyin em cima do hanzi; "Selecione a frase correta" sem áudio nas opções (as erradas não têm mp3 e tocavam com a voz do navegador, entregando a certa; o áudio vem no painel de resultado) e frases erradas com a pontuação final só no fim e maiúscula só no início.
 - Teste: `tests/checkpoint-zh/test_playwright.js` (25).
+
+## Revisão em inglês (2026-10-07)
+- Tela nova da Revisão (`shared/deck-browser.js`, `shared/review-extras.js`, faixa de hoje e recordes em fr/zh `app.js`, Configurar, Painel, Adicionar) passou para `t()`: 193 chaves `review.*` em pt-BR/en (es congelado). Português byte a byte igual.
+- Plural feito com chaves `.one`/`.other` escolhidas por `n === 1` (como o código antigo), não `tp()`: em pt-BR o `Intl.PluralRules` trata 0 como singular.
+- `tests/i18n/test_i18n_unit.js`: `PREV2 = '9969e3c'` cobre os arquivos convertidos; 2090/2090.
+- Ficou em português: a etiqueta "Na frase · <unidade>" (montada ao criar o cartão) e erros de upload de imagem (`shared/flashcard-model.js`). Fora da Revisão, ainda em português no modo inglês: "Francês" no topo e "Desafios" na barra de baixo.
