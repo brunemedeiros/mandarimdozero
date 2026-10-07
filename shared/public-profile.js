@@ -273,6 +273,7 @@ async function renderPublicProfileInto(bodyEl, username){
       <div class="public-profile-name">${escapeHTML(name)}</div>
       <div class="public-profile-username">@${escapeHTML(profile.username)}</div>
       ${profile.bio ? `<p class="public-profile-bio">${escapeHTML(profile.bio)}</p>` : ''}
+      <div id="public-profile-friend-slot"></div>
     </div>
     ${badgesHTML}
     <div class="public-profile-langs-section">
@@ -286,6 +287,9 @@ async function renderPublicProfileInto(bodyEl, username){
     ${decksHTML}
     ${cardsHTML}
   `;
+
+  // Amigos: botão Adicionar/Aceitar/etc. (só logada e nunca na própria pessoa).
+  if (typeof CURRENT_USER !== 'undefined' && CURRENT_USER && typeof renderFriendProfileAction === 'function') renderFriendProfileAction(bodyEl, profile);
 
   bodyEl.querySelectorAll('.public-profile-badge-chip').forEach(el => {
     el.addEventListener('click', () => {

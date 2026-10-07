@@ -19,6 +19,19 @@
 
 const LEADERBOARD_TOP_N = 50;
 let LEADERBOARD_SCOPE = 'all'; // 'all' ou o appKey de um idioma específico
+// Aba de cima do Ranking: 'all' (Geral, padrão -- sempre abre nela) ou
+// 'friends' (você + seus amigos aceitos, ver shared/friends.js / migration 073).
+// O card da lateral tem seu próprio estado, mas usa as MESMAS funções de dados.
+let LEADERBOARD_MODE = 'all';
+let SIDE_RANKING_MODE = 'all';
+// "Ver ranking completo" do card leva à tela já na aba que o card mostrava;
+// qualquer outra entrada (menu, sidebar, notificação) abre SEMPRE em Geral.
+let LEADERBOARD_PENDING_MODE = null;
+function openLeaderboardView(){
+  LEADERBOARD_MODE = LEADERBOARD_PENDING_MODE || 'all';
+  LEADERBOARD_PENDING_MODE = null;
+  return renderLeaderboardView();
+}
 
 // Última posição vista pela PRÓPRIA pessoa, guardada localmente -- é o que
 // permite animar "subiu/desceu" ao reabrir o Ranking (ver o final de
@@ -92,6 +105,27 @@ async function fetchLeaderboard(scope, weekStart){
   return ranked.map((r, i) => ({ ...r, rank: i + 1, profile: byId[r.user_id] || null }));
 }
 
+// Ranking de amigos: você + amigos aceitos, mesma semana/escopo do Geral. Mesmo
+// formato de linha de fetchLeaderboard() ({user_id, amount, rank, profile}),
+// então as duas telas desenham Geral e Amigos pelo mesmo código. Amigos com 0
+// XP entram no fim (num grupo pequeno é útil ver quem ainda não pontuou).
+async function fetchFriendsLeaderboard(scope, weekStart){
+  const { data, error } = await supabaseClient.rpc('friends_leaderboard', { p_scope: scope, p_week: weekStart });
+  if (error){ console.error('Erro ao carregar ranking de amigos:', error); return null; }
+  return (data || []).map((r, i) => ({
+    user_id: r.user_id,
+    amount: r.amount,
+    rank: i + 1,
+    profile: { user_id: r.user_id, username: r.username, display_name: r.display_name, avatar_url: r.avatar_url, featured_badge_id: r.featured_badge_id },
+  }));
+}
+
+// Chamada por shared/friends.js depois de aceitar/desfazer amizade.
+function refreshFriendsRankingViews(){
+  renderSideRankingCard();
+  if (document.getElementById('view-leaderboard')?.classList.contains('active')) renderLeaderboardView();
+}
+
 // Card "Ranking" -- teaser dos 3 primeiros do ranking Geral da semana + a
 // posição da própria pessoa se ela não estiver entre eles, reaproveitando
 // fetchLeaderboard() (mesma fonte de dados do Ranking completo, sem
@@ -113,11 +147,28 @@ async function renderSideRankingCard(){
       return !cards || getComputedStyle(cards).display !== 'none';
     });
   if (!targets.length) return;
+  const loggedIn = !!(typeof CURRENT_USER !== 'undefined' && CURRENT_USER);
+  if (!loggedIn) SIDE_RANKING_MODE = 'all';
+  const mode = SIDE_RANKING_MODE;
   targets.forEach(body => { body.innerHTML = loadingHTML(); });
-  const rows = await fetchLeaderboard('all', leaderboardCurrentWeekStart());
-  let html;
-  if (!rows.length){
-    html = `<p class="profile-empty-note">Ninguém pontuou essa semana ainda.</p>`;
+  const weekStart = leaderboardCurrentWeekStart();
+  const rows = mode === 'friends' ? await fetchFriendsLeaderboard('all', weekStart) : await fetchLeaderboard('all', weekStart);
+
+  const tabsHTML = loggedIn ? `
+    <div class="side-ranking-tabs" role="tablist" aria-label="Tipo de ranking">
+      <button type="button" class="side-ranking-tab ${mode === 'friends' ? 'active' : ''}" role="tab" aria-selected="${mode === 'friends'}" data-side-mode="friends">Amigos</button>
+      <button type="button" class="side-ranking-tab ${mode === 'all' ? 'active' : ''}" role="tab" aria-selected="${mode === 'all'}" data-side-mode="all">Geral</button>
+    </div>` : '';
+
+  let html = tabsHTML;
+  let linkLabel = 'Ver ranking completo →';
+  if (mode === 'friends' && rows === null){
+    html += `<p class="profile-empty-note">Não foi possível carregar agora.</p>`;
+  } else if (mode === 'friends' && (rows || []).length <= 1){
+    html += `<p class="profile-empty-note">Você ainda não tem amigos no ranking.</p>`;
+    linkLabel = 'Adicionar amigo →';
+  } else if (!(rows || []).length){
+    html += `<p class="profile-empty-note">Ninguém pontuou essa semana ainda.</p>`;
   } else {
     const top3 = rows.slice(0, 3);
     const me = CURRENT_USER ? rows.find(r => r.user_id === CURRENT_USER.id) : null;
@@ -132,12 +183,20 @@ async function renderSideRankingCard(){
         </div>
       `;
     };
-    html = top3.map(rowHTML).join('') + (me && me.rank > 3 ? rowHTML(me) : '');
+    html += top3.map(rowHTML).join('') + (me && me.rank > 3 ? rowHTML(me) : '');
   }
-  html += `<button class="side-card-link">Ver ranking completo →</button>`;
+  html += `<button class="side-card-link" data-side-link="${mode === 'friends' && (rows || []).length <= 1 ? 'add' : 'full'}">${linkLabel}</button>`;
   targets.forEach(body => {
     body.innerHTML = html;
-    body.querySelector('.side-card-link').addEventListener('click', () => switchTab('leaderboard'));
+    body.querySelectorAll('[data-side-mode]').forEach(btn => {
+      btn.addEventListener('click', () => { SIDE_RANKING_MODE = btn.dataset.sideMode; renderSideRankingCard(); });
+    });
+    body.querySelector('.side-card-link').addEventListener('click', (e) => {
+      if (e.currentTarget.dataset.sideLink === 'add'){ switchTab('friends'); return; }
+      // "Ver ranking completo" abre na mesma aba que o card está mostrando.
+      LEADERBOARD_PENDING_MODE = mode;
+      switchTab('leaderboard');
+    });
   });
 }
 
@@ -207,7 +266,17 @@ async function renderLeaderboardView(){
   const scope = LEADERBOARD_SCOPE;
   // Catálogo só é buscado se algum badge em destaque de fato precisar dele
   // -- fetchLeaderboard() já roda em paralelo com isso.
-  const [rows, catalog] = await Promise.all([fetchLeaderboard(scope, weekStart), fetchBadgeCatalog()]);
+  const loggedIn = !!(typeof CURRENT_USER !== 'undefined' && CURRENT_USER);
+  if (!loggedIn) LEADERBOARD_MODE = 'all';
+  const mode = LEADERBOARD_MODE;
+  const [fetched, catalog] = await Promise.all([
+    mode === 'friends' ? fetchFriendsLeaderboard(scope, weekStart) : fetchLeaderboard(scope, weekStart),
+    fetchBadgeCatalog(),
+  ]);
+  const loadFailed = mode === 'friends' && fetched === null;
+  const rows = fetched || [];
+  // Sem nenhum amigo, o ranking de amigos só teria você: mostra o convite.
+  const noFriendsYet = mode === 'friends' && !loadFailed && rows.length <= 1;
 
   // role="tablist"/"tab": são páginas alternativas do mesmo painel (Geral /
   // um idioma por vez), não botões soltos -- deixa um leitor de tela
@@ -217,7 +286,27 @@ async function renderLeaderboardView(){
     ...AVAILABLE_LANGUAGES.filter(l => l.enabled).map(l => ({ key: l.appKey, label: l.name })),
   ].map(t => `<button class="leaderboard-tab ${t.key === scope ? 'active' : ''}" role="tab" aria-selected="${t.key === scope}" data-scope="${t.key}">${t.label}</button>`).join('');
 
-  const rowsHTML = rows.length ? rows.map(r => {
+  const modeTabsHTML = loggedIn ? `
+    <div class="leaderboard-tabs leaderboard-mode-tabs" role="tablist" aria-label="Tipo de ranking">
+      <button class="leaderboard-tab ${mode === 'friends' ? 'active' : ''}" role="tab" aria-selected="${mode === 'friends'}" data-mode="friends">👥 Amigos</button>
+      <button class="leaderboard-tab ${mode === 'all' ? 'active' : ''}" role="tab" aria-selected="${mode === 'all'}" data-mode="all">🌎 Geral</button>
+    </div>` : '';
+
+  const emptyHTML = loadFailed ? `
+    <div class="review-empty"><div class="big-emoji">⚠️</div><h3>Não foi possível carregar</h3>
+      <p>Tente de novo em instantes.</p><button type="button" class="btn btn-secondary" id="leaderboard-retry">Tentar de novo</button></div>`
+    : noFriendsYet ? `
+    <div class="review-empty leaderboard-empty-friends"><div class="big-emoji">👥</div><h3>Compare seu XP com amigos</h3>
+      <p>Adicione amigos para ver quem está estudando mais essa semana.</p>
+      <button type="button" class="btn btn-primary" id="leaderboard-add-friends">Adicionar amigo</button></div>`
+    : `
+    <div class="review-empty">
+      <div class="big-emoji">🏆</div>
+      <h3>Seja a primeira pessoa no ranking</h3>
+      <p>Ninguém pontuou nessa categoria ainda essa semana.</p>
+    </div>`;
+
+  const rowsHTML = (rows.length && !noFriendsYet && !loadFailed) ? rows.map(r => {
     const isMe = !!(CURRENT_USER && r.user_id === CURRENT_USER.id);
     // Sem @username na linha -- o username é um identificador gerado pelo
     // sistema (ver createInitialProfile / migration 060), não o nome pelo
@@ -256,20 +345,23 @@ async function renderLeaderboardView(){
         <div class="leaderboard-xp" aria-hidden="true">⭐ ${r.amount}</div>
       </div>
     `;
-  }).join('') : `
-    <div class="review-empty">
-      <div class="big-emoji">🏆</div>
-      <h3>Seja a primeira pessoa no ranking</h3>
-      <p>Ninguém pontuou nessa categoria ainda essa semana.</p>
-    </div>
-  `;
+  }).join('') : emptyHTML;
 
   wrap.innerHTML = `
     <div class="leaderboard-week-label">${leaderboardDaysRemainingLabel(weekStart)}</div>
+    ${modeTabsHTML}
     <div class="leaderboard-tabs" role="tablist" aria-label="Escopo do ranking">${scopeTabsHTML}</div>
     <div class="leaderboard-list" role="list">${rowsHTML}</div>
-    <p class="leaderboard-footnote">O ranking reinicia toda segunda-feira. Só aparece quem já ganhou XP essa semana.</p>
+    <p class="leaderboard-footnote">${mode === 'friends'
+      ? 'O ranking reinicia toda segunda-feira. Amigos que ainda não ganharam XP aparecem no fim.'
+      : 'O ranking reinicia toda segunda-feira. Só aparece quem já ganhou XP essa semana.'}</p>
   `;
+
+  wrap.querySelectorAll('[data-mode]').forEach(btn => {
+    btn.addEventListener('click', () => { LEADERBOARD_MODE = btn.dataset.mode; renderLeaderboardView(); });
+  });
+  wrap.querySelector('#leaderboard-retry')?.addEventListener('click', renderLeaderboardView);
+  wrap.querySelector('#leaderboard-add-friends')?.addEventListener('click', () => switchTab('friends'));
 
   wrap.querySelectorAll('[data-scope]').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -300,7 +392,8 @@ async function renderLeaderboardView(){
   const meRow = wrap.querySelector('.leaderboard-row.me');
   meRow?.scrollIntoView({ block: 'center' });
 
-  animateOwnRowRankChange(meRow, scope, weekStart, rows);
+  // A animação/notificação de "subiu/desceu" é só do ranking Geral (ver abaixo).
+  if (mode === 'all') animateOwnRowRankChange(meRow, scope, weekStart, rows);
 }
 
 // "Bloco desliza ultrapassando quem estava acima/abaixo", como na

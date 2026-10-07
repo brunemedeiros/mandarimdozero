@@ -424,6 +424,7 @@ async function renderProfileView(){
   const profile = await ensureProfileLoaded();
   renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, isGuest: false });
   renderSideRankingCard();
+  if (typeof refreshFriendRequestCount === 'function') refreshFriendRequestCount();
 }
 
 function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, isGuest }){
@@ -491,6 +492,7 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
       <button class="leaderboard-tab active" data-tab="profile">Visão geral</button>
       <button class="leaderboard-tab" data-tab="goals">Metas</button>
       <button class="leaderboard-tab" data-tab="progress">Progresso</button>
+      <button class="leaderboard-tab" data-tab="friends">Amigos</button>
     </div>
     ${guestNote}
     <div class="profile-identity">
