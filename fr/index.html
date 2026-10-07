@@ -2776,6 +2776,27 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .fb-cmp{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
 .fb-cmp .listen-translate-feedback-row{ margin-bottom:0; overflow-wrap:anywhere; }
 @media (max-width:340px){ .fb-cmp{ grid-template-columns:1fr; } }
+/* Marcação palavra a palavra (Ouça e traduza): sublinhado + fundo tintado,
+   nunca só cor (daltonismo). Texto segue --ink, legível nos 2 temas. */
+.tw-ok{ color:inherit; }
+.tw-bad, .tw-near, .tw-miss{ color:var(--ink); border-radius:4px; padding:0 3px; font-weight:700; text-decoration-line:underline; text-underline-offset:3px; }
+.tw-bad{ background:color-mix(in srgb, var(--error-red) 22%, transparent); text-decoration-style:wavy; text-decoration-color:var(--error-red); }
+.tw-near{ background:color-mix(in srgb, #B7791F 24%, transparent); text-decoration-style:dotted; text-decoration-color:#B7791F; }
+.tw-miss{ background:color-mix(in srgb, var(--jade) 22%, transparent); text-decoration-style:dashed; text-decoration-color:var(--jade); }
+:root[data-theme="dark"] .tw-near{ background:color-mix(in srgb, #E0A93B 26%, transparent); text-decoration-color:#E0A93B; }
+/* Lista de Expressões: busca, filtros e anel por nível */
+.challenges-toolbar{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px; }
+.challenges-search{ flex:1 1 200px; min-height:44px; padding:0 14px; border:1.5px solid var(--paper-line); border-radius:12px; background:var(--paper); color:var(--ink); font:inherit; }
+.challenges-search:focus-visible{ outline:3px solid color-mix(in srgb, var(--seal-red) 55%, transparent); outline-offset:1px; }
+.challenges-filter-chips{ display:flex; gap:6px; flex-wrap:wrap; }
+.challenges-filter-chip{ min-height:44px; padding:0 14px; border:1.5px solid var(--paper-line); border-radius:999px; background:var(--paper); color:var(--ink); font:inherit; font-weight:700; cursor:pointer; }
+.challenges-filter-chip.active{ background:color-mix(in srgb, var(--seal-red) 16%, var(--paper)); border-color:var(--seal-red); }
+.challenges-filter-chip:focus-visible{ outline:3px solid color-mix(in srgb, var(--seal-red) 55%, transparent); outline-offset:2px; }
+.challenges-level-ring{ position:relative; width:40px; height:40px; flex:none; display:grid; place-items:center; border-radius:50%; font-size:10.5px; font-weight:800; font-variant-numeric:tabular-nums; background:var(--paper-warm); color:var(--ink); margin:0 4px; }
+.challenges-level-ring::before{ content:''; position:absolute; inset:-3px; border-radius:50%; background:conic-gradient(var(--seal-red) calc(var(--p, 0) * 1%), var(--paper-line) 0);
+  -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px)); mask:radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px)); }
+.challenges-level-ring[data-complete="1"]::before{ background:var(--jade); }
+.tw-legend{ display:flex; flex-wrap:wrap; gap:8px; font-size:.8rem; margin:-4px 0 12px; }
 
 /* Lista: concluído sólido, pendente tracejado, premium trancado quente */
 .challenge-card, .dictation-card{ border-radius:16px; min-height:64px; }
