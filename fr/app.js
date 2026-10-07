@@ -4101,26 +4101,311 @@ function renderStep(){
     renderExerciseStep();
 
   } else if (stepKey === 'dialogue'){
-    contentEl.innerHTML = `
-      <div class="section-label">Diálogo</div>
-      <div class="dialogue-box" id="ud-dialogue"></div>
-    `;
-    const dialogueEl = document.getElementById('ud-dialogue');
-    dialogueEl.innerHTML = `<div class="dialogue-title">${u.dialogue.title}</div>` +
-      u.dialogue.lines.map(l => `
-        <div class="dialogue-line">
-          <div class="dialogue-spk">${l.spk}</div>
-          <div class="dialogue-content">
-            <div class="french">${l.f} ${audioBtnHTML(l.f)}</div>
-            <div class="trans">${l.t}</div>
-          </div>
-        </div>
-      `).join('');
-    wireAudioButtons(dialogueEl);
-    nextBtn.textContent = 'Continuar →';
-    nextBtn.style.display = 'flex';
+    renderDialogueStep(u, contentEl, nextBtn);
 
   }
+}
+
+// ============================================================
+// RENDER: Diálogo da lição (balões, áudio em sequência, vocabulário
+// destacado e micro-checagem "Você entendeu?")
+// ============================================================
+// Dados extras de cada diálogo (content.js): `scene` (contexto), `speakers`
+// ({A:{n,e}, B:{n,e}} -- nome e emoji de cada falante) e `check` (3 perguntas
+// de compreensão). Tudo opcional: sem `speakers` cai em "A"/"B", sem `check`
+// o botão Continuar aparece direto.
+const DLG = { run: 0, check: null };
+const DLG_AUTOPLAY_KEY = 'dlg_autoplay';
+
+function dlgAutoplayOn(){
+  try { return localStorage.getItem(DLG_AUTOPLAY_KEY) !== '0'; } catch(e){ return true; }
+}
+function dlgSetAutoplay(on){
+  try { localStorage.setItem(DLG_AUTOPLAY_KEY, on ? '1' : '0'); } catch(e){}
+}
+
+// Termos do vocabulário da unidade que valem destaque nas falas. "français /
+// française" vira dois termos; "(de)" e outros parênteses saem do termo.
+function dlgVocabTerms(u){
+  const terms = [];
+  (u.vocab || []).forEach(v => {
+    String(v.f || '').split(' / ').forEach(part => {
+      const t = part.replace(/\s*\([^)]*\)/g, '').trim();
+      if (!t) return;
+      terms.push({ t, tr: v.t });
+      // Substantivos aparecem nas falas com outro artigo ("la sœur" -> "une
+      // sœur"): também marca o substantivo sem artigo (aceita plural em -s).
+      const bare = t.replace(/^(le|la|les|l'|un|une|des) ?/i, '');
+      if (bare !== t && bare.length >= 3) terms.push({ t: bare, tr: v.t, plural: true });
+    });
+  });
+  terms.sort((a, b) => b.t.length - a.t.length);
+  return terms;
+}
+
+// Devolve o HTML da fala com as palavras da unidade sublinhadas (data-tr com
+// o significado, mostrado num toast ao tocar). Tudo que não casa é escapado.
+function dlgHighlight(text, terms){
+  if (!terms.length) return escapeHTML(text);
+  const esc = x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp("(?<![\\p{L}'’-])(" + terms.map(x => esc(x.t) + (x.plural ? 's?' : '')).join('|') + ")(?![\\p{L}-])", 'giu');
+  const map = new Map(terms.map(x => [x.t.toLowerCase(), x.tr]));
+  let out = '', last = 0, m;
+  while ((m = re.exec(text))){
+    out += escapeHTML(text.slice(last, m.index));
+    const low = m[1].toLowerCase();
+    const tr = map.get(low) || map.get(low.replace(/s$/, '')) || '';
+    out += `<span class="dlg-new" data-tr="${escapeHTML(tr)}" data-w="${escapeHTML(m[1])}">${escapeHTML(m[1])}</span>`;
+    last = m.index + m[1].length;
+  }
+  return out + escapeHTML(text.slice(last));
+}
+
+// Toca UMA fala e resolve quando ela termina: true = terminou, false =
+// interrompida/erro, 'blocked' = o navegador bloqueou o autoplay.
+function dlgPlayLine(text){
+  return new Promise(resolve => {
+    registerAudioPlay();
+    stopExerciseAudio();
+    const file = typeof AUDIO_MANIFEST !== 'undefined' && AUDIO_MANIFEST[text];
+    if (file){
+      const a = new Audio('audio/' + file);
+      a.playbackRate = PREGEN_AUDIO_RATE;
+      exerciseAudioEl = a;
+      let done = false;
+      const fin = v => { if (done) return; done = true; if (exerciseAudioEl === a) exerciseAudioEl = null; resolve(v); };
+      a.addEventListener('ended', () => fin(true));
+      a.addEventListener('pause', () => fin(a.ended));
+      a.addEventListener('error', () => fin(false));
+      a.play().catch(() => fin('blocked'));
+      return;
+    }
+    if (!TTS.supported) return resolve(false);
+    if (!TTS.voice) loadFrenchVoice();
+    if (!TTS.voice) return resolve(false);
+    window.speechSynthesis.resume();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'fr-FR'; u.voice = TTS.voice; u.rate = 0.9;
+    let started = false, done = false;
+    const fin = v => { if (done) return; done = true; resolve(v); };
+    u.onstart = () => { started = true; };
+    u.onend = () => fin(true);
+    u.onerror = () => fin(false);
+    window.speechSynthesis.speak(u);
+    setTimeout(() => { if (!started){ window.speechSynthesis.cancel(); fin(false); } }, 1800);
+  });
+}
+
+function dlgSleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+function renderDialogueStep(u, contentEl, nextBtn){
+  const dlg = u.dialogue;
+  const token = ++DLG.run;
+  const sp = dlg.speakers || { A: { n: 'A', e: '' }, B: { n: 'B', e: '' } };
+  const terms = dlgVocabTerms(u);
+  const checks = Array.isArray(dlg.check) ? dlg.check : [];
+  DLG.check = { qi: 0, correct: 0 };
+
+  const rowsHTML = dlg.lines.map((l, i) => {
+    const side = l.spk === 'B' ? 'b' : 'a';
+    const who = sp[l.spk] || { n: l.spk, e: '' };
+    return `
+      <div class="dlg-row ${side}" data-i="${i}" role="button" tabindex="0" aria-label="${escapeHTML(who.n)}: ouvir a partir desta fala">
+        <div class="dlg-avatar"><span class="dlg-emoji" aria-hidden="true">${who.e || escapeHTML(l.spk)}</span><span class="dlg-name">${escapeHTML(who.n)}</span></div>
+        <div class="dlg-bubble">
+          <div class="dlg-fr">${dlgHighlight(l.f, terms)}<span class="dlg-wave" aria-hidden="true"><i></i><i></i><i></i></span></div>
+          <div class="dlg-tr">${escapeHTML(l.t)}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  contentEl.innerHTML = `
+    <div class="section-label">Diálogo</div>
+    <div class="dlg-title">${escapeHTML(dlg.title)}</div>
+    ${dlg.scene ? `<div class="dlg-scene">📍 ${escapeHTML(dlg.scene)}</div>` : ''}
+    <div class="dlg-tools">
+      <button class="btn btn-secondary dlg-play-btn" id="dlg-play-btn">▶ Ouvir tudo</button>
+      <button class="dlg-chip" id="dlg-trans-btn" aria-pressed="false">Mostrar traduções</button>
+      <button class="dlg-chip" id="dlg-auto-btn" aria-pressed="${dlgAutoplayOn()}">Áudio automático: ${dlgAutoplayOn() ? 'ligado' : 'desligado'}</button>
+    </div>
+    <div class="dlg-chat" id="ud-dialogue">${rowsHTML}</div>
+    ${terms.length ? `<div class="dlg-legend">As palavras sublinhadas são do vocabulário desta unidade. Toque numa delas para ver o significado.</div>` : ''}
+    <div class="dlg-check" id="dlg-check" ${checks.length ? '' : 'hidden'}></div>
+  `;
+
+  const chat = document.getElementById('ud-dialogue');
+  const playBtn = document.getElementById('dlg-play-btn');
+  const transBtn = document.getElementById('dlg-trans-btn');
+  const autoBtn = document.getElementById('dlg-auto-btn');
+  const rows = [...chat.querySelectorAll('.dlg-row')];
+
+  function setPlaying(on){
+    chat.classList.toggle('playing', on);
+    playBtn.textContent = on ? '⏸ Parar' : '▶ Ouvir tudo';
+    if (!on) rows.forEach(r => r.classList.remove('speaking'));
+  }
+  function setTranslations(on){
+    chat.classList.toggle('show-trans', on);
+    transBtn.setAttribute('aria-pressed', String(on));
+    transBtn.textContent = on ? 'Ocultar traduções' : 'Mostrar traduções';
+  }
+  function stillHere(){ return token === DLG.run && document.body.contains(chat); }
+
+  async function playFrom(start, viaAutoplay){
+    const myRun = ++DLG.run;
+    const alive = () => myRun === DLG.run && document.body.contains(chat);
+    setPlaying(true);
+    for (let i = start; i < dlg.lines.length; i++){
+      if (!alive()) return;
+      rows.forEach(r => r.classList.toggle('speaking', Number(r.dataset.i) === i));
+      rows[i].scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'nearest' });
+      const res = await dlgPlayLine(dlg.lines[i].f);
+      if (!alive()) return;
+      if (res === 'blocked'){
+        setPlaying(false);
+        if (viaAutoplay) showToast('🔇 Toque em "Ouvir tudo" para ouvir a conversa');
+        return;
+      }
+      if (!res){ setPlaying(false); return; }
+      if (i < dlg.lines.length - 1) await dlgSleep(380);
+    }
+    if (!alive()) return;
+    setPlaying(false);
+    setTranslations(true); // ao fim da conversa completa, as traduções aparecem
+  }
+
+  playBtn.addEventListener('click', () => {
+    if (chat.classList.contains('playing')){ DLG.run++; stopExerciseAudio(); setPlaying(false); }
+    else playFrom(0, false);
+  });
+  transBtn.addEventListener('click', () => setTranslations(!chat.classList.contains('show-trans')));
+  autoBtn.addEventListener('click', () => {
+    const on = !dlgAutoplayOn();
+    dlgSetAutoplay(on);
+    autoBtn.setAttribute('aria-pressed', String(on));
+    autoBtn.textContent = 'Áudio automático: ' + (on ? 'ligado' : 'desligado');
+  });
+  rows.forEach(r => {
+    const go = () => playFrom(Number(r.dataset.i), false);
+    r.addEventListener('click', go);
+    r.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); go(); } });
+  });
+  chat.querySelectorAll('.dlg-new').forEach(w => w.addEventListener('click', e => {
+    e.stopPropagation();
+    if (w.dataset.tr) showToast(`“${w.dataset.w}” = ${w.dataset.tr}`);
+  }));
+
+  if (checks.length){
+    nextBtn.style.display = 'none';   // só libera depois da micro-checagem
+    renderDialogueCheck(u, dlg, sp, checks, nextBtn, rows);
+  } else {
+    nextBtn.textContent = 'Continuar →';
+    nextBtn.style.display = 'flex';
+  }
+
+  const canHear = dlg.lines.some(l => canSpeakFrench(l.f));
+  if (!canHear) playBtn.disabled = true;
+  else if (dlgAutoplayOn()) setTimeout(() => { if (stillHere()) playFrom(0, true); }, 350);
+}
+
+function dlgShuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Micro-checagem "Você entendeu?" -- 3 perguntas, uma de cada vez. Não dá
+// para pular (o Continuar só aparece no fim); errar não reprova, mostra a
+// resposta certa e acende a fala correspondente no diálogo.
+function renderDialogueCheck(u, dlg, sp, checks, nextBtn, rows){
+  const box = document.getElementById('dlg-check');
+  const st = DLG.check;
+  const L = dlg.lines;
+  const bubble = (idx, text, blank) => {
+    const l = L[idx];
+    const side = l.spk === 'B' ? 'b' : 'a';
+    const who = sp[l.spk] || { n: l.spk, e: '' };
+    return `<div class="dlg-row ${side} static"><div class="dlg-avatar"><span class="dlg-emoji" aria-hidden="true">${who.e || escapeHTML(l.spk)}</span><span class="dlg-name">${escapeHTML(who.n)}</span></div>
+      <div class="dlg-bubble"><div class="dlg-fr">${blank ? '<span class="dlg-blank">· · · · ·</span>' : escapeHTML(text)}</div></div></div>`;
+  };
+
+  function showQuestion(){
+    const q = checks[st.qi];
+    let label = '', ctx = '', opts = [], flashIdx = -1;
+    if (q.k === 'fill'){
+      label = 'Complete a resposta';
+      ctx = `<div class="dlg-q-ctx">${bubble(q.line - 1, L[q.line - 1].f, false)}${bubble(q.line, '', true)}</div>`;
+      opts = dlgShuffle([{ t: L[q.line].f, ok: true }, ...q.bad.map(t => ({ t, ok: false }))]);
+      flashIdx = q.line;
+    } else if (q.k === 'listen'){
+      label = 'Ouça e escolha a resposta';
+      ctx = `<div class="dlg-q-listen"><button class="audio-btn audio-btn-lg" id="dlg-q-audio" aria-label="Ouvir a fala">🔊</button><div class="prompt-audio-hint">toque para ouvir de novo</div></div>`;
+      opts = dlgShuffle([{ t: L[q.line + 1].f, ok: true }, ...q.bad.map(t => ({ t, ok: false }))]);
+      flashIdx = q.line + 1;
+    } else {
+      label = 'Compreensão';
+      ctx = `<div class="dlg-q-text">${escapeHTML(q.q)}</div>`;
+      opts = q.opts.map((t, i) => ({ t, ok: i === q.ok }));
+      flashIdx = -1;
+    }
+    const dots = checks.map((_, i) => `<span class="dlg-dot${i < st.qi ? ' done' : (i === st.qi ? ' on' : '')}"></span>`).join('');
+    box.innerHTML = `
+      <div class="dlg-check-head"><span>Você entendeu?</span><span class="dlg-dots" role="img" aria-label="Pergunta ${st.qi + 1} de ${checks.length}">${dots}</span></div>
+      <div class="exercise-prompt-label">${label}</div>
+      ${ctx}
+      <div class="dlg-opts">${opts.map((o, i) => `<button class="dlg-opt" data-i="${i}">${escapeHTML(o.t)}</button>`).join('')}</div>
+      <div class="dlg-fb-slot"></div>`;
+    if (q.k === 'listen'){
+      const a = document.getElementById('dlg-q-audio');
+      const line = L[q.line].f;
+      a.addEventListener('click', () => speakFrench(line, a));
+      if (canSpeakFrench(line)) speakFrench(line, a, true);
+    }
+    box.querySelectorAll('.dlg-opt').forEach(btn => btn.addEventListener('click', () => {
+      const o = opts[Number(btn.dataset.i)];
+      box.querySelectorAll('.dlg-opt').forEach((b, i) => {
+        b.disabled = true;
+        b.classList.add('locked');
+        if (opts[i].ok) b.classList.add('correct');
+      });
+      if (!o.ok) btn.classList.add('incorrect');
+      playFeedbackSound(o.ok);
+      if (o.ok) st.correct += 1;
+      if (flashIdx >= 0 && rows[flashIdx]){
+        rows[flashIdx].classList.add('flash');
+        setTimeout(() => rows[flashIdx] && rows[flashIdx].classList.remove('flash'), 2400);
+      }
+      const right = opts.find(x => x.ok).t;
+      const last = st.qi === checks.length - 1;
+      box.querySelector('.dlg-fb-slot').innerHTML = `
+        <div class="dlg-fb ${o.ok ? 'ok' : 'no'}">
+          <div class="dlg-fb-title">${o.ok ? '✅ Isso mesmo!' : 'Quase! A resposta certa era:'}</div>
+          ${o.ok ? '' : `<div class="dlg-fb-right">${escapeHTML(right)}</div>`}
+          <button class="btn btn-primary btn-block" id="dlg-q-next">${last ? 'Concluir' : 'Próxima pergunta →'}</button>
+        </div>`;
+      document.getElementById('dlg-q-next').addEventListener('click', () => {
+        if (last) finish(); else { st.qi += 1; showQuestion(); }
+      });
+      document.getElementById('dlg-q-next').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }));
+  }
+
+  function finish(){
+    stopExerciseAudio();
+    box.innerHTML = `
+      <div class="dlg-check-head"><span>Você entendeu?</span></div>
+      <div class="dlg-sum">${st.correct} de ${checks.length} certas. ${st.correct === checks.length ? 'Conversa entendida!' : 'Ouça de novo e tente outra vez quando quiser.'}</div>
+      <button class="dlg-chip" id="dlg-redo">Refazer as perguntas</button>`;
+    document.getElementById('dlg-redo').addEventListener('click', () => { st.qi = 0; st.correct = 0; showQuestion(); nextBtn.style.display = 'none'; });
+    nextBtn.textContent = 'Continuar →';
+    nextBtn.style.display = 'flex';
+    nextBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  showQuestion();
 }
 
 document.getElementById('step-back-btn').addEventListener('click', () => {
@@ -5246,13 +5531,20 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
         <div class="exercise-prompt">
           <div class="prompt-translation">${ex.phrase.t}</div>
         </div>
-      ` : ''}
+      ` : `
+        <div class="exercise-prompt reorder-target">
+          <div class="prompt-translation">${ex.phrase.t}</div>
+          ${audioBtnHTML(ex.phrase.f, 'audio-btn-lg')}
+        </div>
+        <div class="reorder-wrap-hint">Toque nas palavras na ordem certa. Toque numa já colocada para devolvê-la.</div>
+      `}
       <div class="reorder-answer-slots" id="reorder-answer-slots"></div>
       <div class="reorder-blocks" id="reorder-blocks"></div>
       <button class="exercise-dontknow" id="exercise-dontknow-btn">Não sei</button>
     </div>
   `;
 
+  wireAudioButtons(contentEl);
   const slotsEl = document.getElementById('reorder-answer-slots');
   const blocksEl = document.getElementById('reorder-blocks');
 
@@ -5317,8 +5609,11 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
     );
     playFeedbackSound(isCorrect);
 
-    slotsEl.querySelectorAll('.reorder-slot').forEach(slot => {
-      slot.classList.add(isCorrect ? 'correct' : 'incorrect');
+    // Acerto: tudo verde. Erro: só os blocos fora do lugar ficam vermelhos,
+    // os que já estavam na posição certa ficam verdes (dica de onde errou).
+    slotsEl.querySelectorAll('.reorder-slot').forEach((slot, pos) => {
+      const here = ex.shuffledBlocks[chosenSequence[pos]] === correctOrder[pos];
+      slot.classList.add(isCorrect || here ? 'correct' : 'incorrect');
     });
     // Com a frase completa, todo bloco já foi usado (visibility:hidden --
     // preserva a posição pra "desfazer" clicando num slot) -- mas essa
@@ -5337,7 +5632,9 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
       // repeti-lo aqui seria redundante; mostra a frase francesa completa
       // (o aluno só viu ela em pedaços separados até agora) como
       // confirmação nova de verdade.
-      const detail = ex.mode === 'translate' ? ex.phrase.f : ex.phrase.t;
+      // A frase montada, inteira e em tamanho de leitura, com áudio e tradução:
+      // é a recompensa pedagógica de quem acabou de montá-la.
+      const detail = `<div class="reorder-final"><div class="reorder-final-fr">${ex.phrase.f} ${audioBtnHTML(ex.phrase.f)}</div><div class="reorder-final-tr">${ex.phrase.t}</div></div>`;
       setTimeout(() => showCorrectFeedbackPanel(contentEl, detail), 500);
     } else {
       setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
