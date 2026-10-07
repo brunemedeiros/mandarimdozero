@@ -100,6 +100,8 @@ async function setup(page){
       { id: 9100, kind: 'teacher_root', name: 'Cartões da professora', owner_id: U, teacher_id: 't', language_app_key: A, parent_deck_id: 9000 },
       { id: 9200, kind: 'course', name: 'Curso', owner_id: null, language_app_key: A, parent_deck_id: null, course_unit_id: null },
       { id: 9201, kind: 'course', name: unit.title, owner_id: null, language_app_key: A, parent_deck_id: 9200, course_unit_id: String(unit.id) },
+      // Unidade que o aluno nunca abriu: não pode aparecer como Deck.
+      { id: 9202, kind: 'course', name: 'Unidade bloqueada', owner_id: null, language_app_key: A, parent_deck_id: 9200, course_unit_id: String((UNITS.find(u => u.id !== unit.id && (u.vocab || []).length) || {}).id) },
     ];
     STATE.courseDecksLoaded = true;
     assignCourseDeckIds(STATE.cards, buildCourseDeckIndex(STATE.decks, A));
@@ -118,7 +120,8 @@ async function setup(page){
     // 1 cartão da professora no teacher_root
     buildCardFromTeacherFlashcard({ id: 601, teacher_id: 't', student_id: U, language_app_key: A, status: 'active', revision: 0, front: 'prof', back_trans: 'p', front_is_target_language: true, tags: ['aula'], deck_id: 9100 }).forEach(c => STATE.cards.push(c));
     try { localStorage.removeItem('deckBrowserCollapsed:' + A); } catch (e) {}
-    return { unitTitle: unit.title, courseCards: STATE.cards.filter(c => c.deckId === 9201).length };
+    const kidsIds = deckBrowserChildren(STATE.decks, 9200).map(d => d.id);
+    return { lockedHidden: !kidsIds.includes(9202) && kidsIds.includes(9201), unitTitle: unit.title, courseCards: STATE.cards.filter(c => c.deckId === 9201).length };
   });
 }
 
@@ -165,6 +168,7 @@ const listRows = page => page.evaluate(() => Array.from(document.querySelectorAl
     console.log('== ' + lang);
     const { page, errors, ctx } = await bootPage(browser, lang, port);
     const s = await setup(page);
+    check('unidade bloqueada/não vista fica oculta, a em andamento aparece (' + lang + ')', s.lockedHidden, s);
     await stubOwn(page);
     check(lang + ' setup: cartões da trilha no Course Deck da unidade', s.courseCards > 0, s);
 
