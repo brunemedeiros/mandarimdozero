@@ -2567,6 +2567,7 @@ function renderUnitsGrid(){
 const STEP_DEFS = [
   { key: 'vocab', label: 'Vocabulário' },
   { key: 'dialogue', label: 'Diálogo' },
+  { key: 'dialogueCheck', label: 'Você entendeu?' },
   { key: 'usage', label: 'Dica de uso' },
   { key: 'exercises', label: 'Exercícios' }
 ];
@@ -2592,10 +2593,13 @@ function currentStepDefs(){
     if (lesson.isCheckpoint) return [{ key: 'checkpointExercises', label: 'Ponto de verificação' }];
     const steps = [];
     if (lesson.vocabIdx && lesson.vocabIdx.length) steps.push({ key: 'vocab', label: 'Vocabulário' });
-    if (lesson.includesDialogue) steps.push({ key: 'dialogue', label: 'Diálogo' });
+    if (lesson.includesDialogue){
+      steps.push({ key: 'dialogue', label: 'Diálogo' });
+      if (u.dialogue && Array.isArray(u.dialogue.check) && u.dialogue.check.length) steps.push({ key: 'dialogueCheck', label: 'Você entendeu?' });
+    }
     return steps;
   }
-  return STEP_DEFS.filter(s => s.key !== 'usage' || (u && u.usageNote));
+  return STEP_DEFS.filter(s => (s.key !== 'usage' || (u && u.usageNote)) && (s.key !== 'dialogueCheck' || (u && u.dialogue && Array.isArray(u.dialogue.check) && u.dialogue.check.length)));
 }
 
 // ---------- Lições (Modelo B) ----------
@@ -4124,6 +4128,9 @@ function renderStep(){
   } else if (stepKey === 'dialogue'){
     renderDialogueStep(u, contentEl, nextBtn);
 
+  } else if (stepKey === 'dialogueCheck'){
+    renderDialogueCheckStep(u, contentEl, nextBtn);
+
   }
 }
 
@@ -4252,7 +4259,6 @@ function renderDialogueStep(u, contentEl, nextBtn){
     <div class="dlg-chat" id="ud-dialogue">${rowsHTML}</div>
     <div class="dlg-float"><button class="dlg-chip dlg-chip-float" id="dlg-trans-btn" aria-pressed="false">🌐 Mostrar traduções</button></div>
     ${terms.length ? `<div class="dlg-legend">As palavras sublinhadas são do vocabulário desta unidade. Toque numa delas para ver o significado.</div>` : ''}
-    <div class="dlg-check" id="dlg-check" ${checks.length ? '' : 'hidden'}></div>
   `;
 
   const chat = document.getElementById('ud-dialogue');
@@ -4326,17 +4332,32 @@ function renderDialogueStep(u, contentEl, nextBtn){
     if (w.dataset.tr) showToast(`“${w.dataset.w}” = ${w.dataset.tr}`);
   }));
 
-  if (checks.length){
-    nextBtn.style.display = 'none';   // só libera depois da micro-checagem
-    renderDialogueCheck(u, dlg, sp, checks, nextBtn, rows);
-  } else {
-    nextBtn.textContent = 'Continuar →';
-    nextBtn.style.display = 'flex';
-  }
+  // A micro-checagem é um passo à parte (dialogueCheck), depois deste:
+  // na mesma tela daria para rolar e copiar a resposta do próprio diálogo.
+  nextBtn.textContent = 'Continuar →';
+  nextBtn.style.display = 'flex';
 
   const canHear = dlg.lines.some(l => canSpeakFrench(l.f));
   if (!canHear) playBtn.disabled = true;
   else if (dlgAutoplayOn()) setTimeout(() => { if (stillHere()) playFrom(0, true); }, 350);
+}
+
+// Passo "Você entendeu?" -- só as perguntas, SEM o diálogo na tela (quem quiser
+// conferir precisa lembrar). Não dá para pular: o Continuar só aparece no fim.
+function renderDialogueCheckStep(u, contentEl, nextBtn){
+  const dlg = u.dialogue;
+  DLG.run++; stopExerciseAudio();
+  const sp = dlg.speakers || { A: { n: 'A', e: '' }, B: { n: 'B', e: '' } };
+  const checks = Array.isArray(dlg.check) ? dlg.check : [];
+  DLG.check = { qi: 0, correct: 0 };
+  contentEl.innerHTML = `
+    <div class="section-label">Diálogo</div>
+    <div class="dlg-title">${escapeHTML(dlg.title)}</div>
+    <div class="dlg-scene">Sem olhar o diálogo: o que você entendeu da conversa?</div>
+    <div class="dlg-check" id="dlg-check"></div>
+  `;
+  nextBtn.style.display = 'none';
+  renderDialogueCheck(u, dlg, sp, checks, nextBtn, []);
 }
 
 function dlgShuffle(arr){
