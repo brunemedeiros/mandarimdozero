@@ -367,7 +367,7 @@ function wireCustomAudioButtons(container){
 // então não ganha este botão extra.
 const SLOW_AUDIO_RATE = 0.65;
 function slowAudioBtnHTML(id){
-  return `<button class="dictation-play-btn dictation-play-btn-slow" id="${id}" title="${t('fr.audio.listenSlower')}">🐢 Lentement</button>`;
+  return `<button class="dictation-play-btn dictation-play-btn-slow" id="${id}" title="${t('fr.audio.listenSlower')}">🐢 ${chT('ch.slow')}</button>`;
 }
 function slowAudioIconBtnHTML(id){
   return `<button class="audio-btn audio-btn-slow" id="${id}" aria-label="${t('fr.audio.listenSlowly')}" title="${t('fr.audio.listenSlowly')}">🐢</button>`;
@@ -9907,7 +9907,7 @@ const CHALLENGE_I18N = {
     'ch.cloze.instruction': 'Escolha a forma certa para cada lacuna:',
     'ch.cloze.blank': 'Lacuna {n}',
     'ch.cloze.chooseAll': 'Escolha uma opção para cada lacuna antes de verificar.',
-    'ch.cloze.right': '✅ Bonne réponse.',
+    'ch.cloze.right': '✅ Resposta certa.',
     'ch.cloze.yourAnswer': 'Sua resposta',
     'ch.cloze.correct': 'Resposta certa',
     'ch.cloze.translation': 'Tradução',
@@ -9934,18 +9934,19 @@ const CHALLENGE_I18N = {
     'ch.queue.levelDoneSub': 'Você terminou todos os exercícios desse nível.',
     'ch.queue.back': 'Voltar aos níveis',
     'ch.listenPron': 'Ouvir pronúncia',
-    'ch.expr.reveal': 'Voir les réponses',
+    'ch.expr.reveal': 'Ver as respostas',
     'ch.expr.yourAnswer': 'Sua resposta: {chosen}<br>Resposta certa: <strong>{correct}</strong>',
-    'ch.expr.signifies': 'signifie <strong>{fr}</strong>.',
+    'ch.expr.signifies': 'significa <strong>{fr}</strong>.',
     'ch.expr.inPt': 'Em português: <strong>{pt}</strong>.',
-    'ch.expr.example1': 'Exemple 1',
-    'ch.expr.example2': 'Exemple 2',
-    'ch.listenFr': '▶ Écouter',
-    'ch.expr.yourTurn': 'À vous de jouer',
-    'ch.expr.showAnswer': 'Voir la réponse',
-    'ch.expr.right': '✅ Bonne réponse.',
-    'ch.notQuite': '❌ Pas tout à fait.',
-    'ch.lt.hint': 'Montrer un indice',
+    'ch.expr.example1': 'Exemplo 1',
+    'ch.expr.example2': 'Exemplo 2',
+    'ch.listenFr': '▶ Ouvir',
+    'ch.slow': 'Devagar',
+    'ch.expr.yourTurn': 'Sua vez',
+    'ch.expr.showAnswer': 'Ver a resposta',
+    'ch.expr.right': '✅ Resposta certa.',
+    'ch.notQuite': '❌ Ainda não.',
+    'ch.lt.hint': 'Mostrar dica',
     'ch.lt.label': 'Digite sua tradução:',
     'ch.lt.placeholder': 'Sua tradução em português...',
     'ch.verify': 'Vérifier',
@@ -9970,14 +9971,14 @@ const CHALLENGE_I18N = {
     'ch.lt.expected': 'Resposta esperada',
     'ch.lt.original': 'Frase original',
     'ch.lt.explanation': 'Explicação',
-    'ch.listenAgain': '▶ Écouter encore',
-    'ch.lt.right': '✅ Bonne traduction.',
-    'ch.lt.partial': '🟡 Presque : bonne idée, mais vérifiez les détails.',
+    'ch.listenAgain': '▶ Ouvir de novo',
+    'ch.lt.right': '✅ Tradução certa.',
+    'ch.lt.partial': '🟡 Quase: a ideia está certa, mas confira os detalhes.',
     'ch.accent.label': 'Digite o que você ouviu:',
     'ch.accent.yours': 'Sua resposta: <strong>{answer}</strong>',
-    'ch.accent.right': '✅ Correct.',
-    'ch.accent.partial': '🟡 Presque : vérifiez les accents.',
-    'ch.accent.wrong': '❌ Incorrect.',
+    'ch.accent.right': '✅ Certo.',
+    'ch.accent.partial': '🟡 Quase: confira os acentos.',
+    'ch.accent.wrong': '❌ Errado.',
     'ch.static.back': '← Voltar às categorias',
     'ch.static.backChallenges': '← Voltar aos desafios',
     'ch.static.backTrail': '← Voltar à trilha',
@@ -10066,7 +10067,7 @@ const CHALLENGE_I18N = {
     'ch.cloze.instruction': "Choose the right form for each blank:",
     'ch.cloze.blank': "Blank {n}",
     'ch.cloze.chooseAll': "Choose an option for each blank before checking.",
-    'ch.cloze.right': "✅ Bonne réponse.",
+    'ch.cloze.right': "✅ Correct answer.",
     'ch.cloze.yourAnswer': "Your answer",
     'ch.cloze.correct': "Correct answer",
     'ch.cloze.translation': "Translation",
@@ -10093,18 +10094,19 @@ const CHALLENGE_I18N = {
     'ch.queue.levelDoneSub': "You have finished all the exercises in this level.",
     'ch.queue.back': "Back to levels",
     'ch.listenPron': "Listen to pronunciation",
-    'ch.expr.reveal': "Voir les réponses",
+    'ch.expr.reveal': "See the answers",
     'ch.expr.yourAnswer': "Your answer: {chosen}<br>Correct answer: <strong>{correct}</strong>",
-    'ch.expr.signifies': "signifie <strong>{fr}</strong>.",
+    'ch.expr.signifies': "means <strong>{fr}</strong>.",
     'ch.expr.inPt': "In English: <strong>{pt}</strong>.",
-    'ch.expr.example1': "Exemple 1",
-    'ch.expr.example2': "Exemple 2",
-    'ch.listenFr': "▶ Écouter",
-    'ch.expr.yourTurn': "À vous de jouer",
-    'ch.expr.showAnswer': "Voir la réponse",
-    'ch.expr.right': "✅ Bonne réponse.",
-    'ch.notQuite': "❌ Pas tout à fait.",
-    'ch.lt.hint': "Montrer un indice",
+    'ch.expr.example1': "Example 1",
+    'ch.expr.example2': "Example 2",
+    'ch.listenFr': "▶ Listen",
+    'ch.slow': "Slowly",
+    'ch.expr.yourTurn': "Your turn",
+    'ch.expr.showAnswer': "See the answer",
+    'ch.expr.right': "✅ Correct answer.",
+    'ch.notQuite': "❌ Not quite.",
+    'ch.lt.hint': "Show a hint",
     'ch.lt.label': "Type your translation:",
     'ch.lt.placeholder': "Your translation in English...",
     'ch.verify': "Vérifier",
@@ -10118,13 +10120,13 @@ const CHALLENGE_I18N = {
     'ch.lt.expected': "Expected answer",
     'ch.lt.original': "Original sentence",
     'ch.lt.explanation': "Explanation",
-    'ch.listenAgain': "▶ Écouter encore",
-    'ch.lt.right': "✅ Bonne traduction.",
-    'ch.lt.partial': "🟡 Presque : bonne idée, mais vérifiez les détails.",
+    'ch.listenAgain': "▶ Listen again",
+    'ch.lt.right': "✅ Correct translation.",
+    'ch.lt.partial': "🟡 Almost: right idea, but check the details.",
     'ch.accent.label': "Type what you heard:",
     'ch.accent.yours': "Your answer: <strong>{answer}</strong>",
     'ch.accent.right': "✅ Correct.",
-    'ch.accent.partial': "🟡 Presque : vérifiez les accents.",
+    'ch.accent.partial': "🟡 Almost: check the accents.",
     'ch.accent.wrong': "❌ Incorrect.",
     'ch.static.back': "← Back to categories",
     'ch.static.backChallenges': "← Back to challenges",
@@ -11386,8 +11388,6 @@ function checkListenTranslateAnswer(c){
   const marked = (outcome !== 'ok' && studentAnswer && analysis) ? markTranslationWords(studentAnswer, analysis.bestRef || c.referenceTranslations[0]) : null;
   const yoursHTML = marked ? markedWordsHTML(marked.student) : escapeHtmlChallenge(studentAnswer || '—');
   const expectedHTML = marked ? markedWordsHTML(marked.reference) : escapeHtmlChallenge((analysis && analysis.bestRef) || lt.refs[0]);
-  const legendHTML = marked && (marked.student.some(p => p.cls === 'bad' || p.cls === 'near') || marked.reference.some(p => p.cls === 'miss'))
-    ? `<p class="tw-legend"><span class="tw-bad">${chT('ch.lt.legend.bad')}</span> <span class="tw-near">${chT('ch.lt.legend.near')}</span> <span class="tw-miss">${chT('ch.lt.legend.miss')}</span></p>` : '';
   const ltBodyHTML = `
       ${personMismatch ? `<p class="listen-translate-feedback-warning">${chT('ch.lt.agreement', { pronoun: escapeHtmlChallenge(personMismatch.pronoun), verb: escapeHtmlChallenge(personMismatch.verb) })}</p>` : ''}
       ${analysis ? translationAlertsHTML(analysis, outcome) : ''}
@@ -11395,7 +11395,6 @@ function checkListenTranslateAnswer(c){
         <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.yours')}</strong>${yoursHTML}</p>
         <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.expected')}</strong>${expectedHTML}</p>
       </div>
-      ${legendHTML}
       <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.original')}</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
       ${lt.explanation ? `<p class="listen-translate-feedback-row"><strong>${chT('ch.lt.explanation')}</strong>${escapeHtmlChallenge(lt.explanation)}</p>` : ''}
       <div class="audio-btn-row">
