@@ -820,7 +820,7 @@ const STATE = {
   // resetado por leitura (ensurePeriodXp), sem job/cron.
   periodXp: { weekStart: null, amount: 0 },
   activityLog: {},
-  reviewRecords: { speedBestScore: 0, speedBestMs: null, matchBestMs: null, hardSeenIds: [] }, // recordes dos modos (shared/review-extras.js)
+  reviewRecords: { speedBestScore: 0, speedBestStreak: 0, matchBestMs: null, hardSeenIds: [] }, // recordes dos modos (shared/review-extras.js)
   reviewTimeStats: { cards: 0, ms: 0 }, // tempo por cartão (estimativa de minutos e sessão de 5 min)
   studyGoal: {
     objective: null, levels: [],
@@ -1126,7 +1126,7 @@ function applySerializedState(data){
   if (data.dailyMinutesLog) Object.assign(STATE.dailyMinutesLog, data.dailyMinutesLog);
   if (data.dailyLessonsLog) Object.assign(STATE.dailyLessonsLog, data.dailyLessonsLog);
   if (data.activityLog) Object.assign(STATE.activityLog, data.activityLog);
-  if (data.reviewRecords && typeof data.reviewRecords === 'object') STATE.reviewRecords = Object.assign({ speedBestScore: 0, speedBestMs: null, matchBestMs: null, hardSeenIds: [] }, data.reviewRecords);
+  if (data.reviewRecords && typeof data.reviewRecords === 'object') STATE.reviewRecords = Object.assign({ speedBestScore: 0, speedBestStreak: 0, matchBestMs: null, hardSeenIds: [] }, data.reviewRecords);
   if (data.reviewTimeStats && typeof data.reviewTimeStats === 'object') STATE.reviewTimeStats = { cards: Number(data.reviewTimeStats.cards) || 0, ms: Number(data.reviewTimeStats.ms) || 0 };
   if (typeof data.totalReviews === 'number') STATE.totalReviews = data.totalReviews;
   if (data.hadStreakComeback) STATE.hadStreakComeback = true;
@@ -5475,6 +5475,7 @@ const SPEED_STATE = {
   score: 0,
   correctCount: 0,
   streak: 0,
+  bestStreak: 0, // maior sequência de acertos da rodada (recorde do Speed Review)
   timerStart: 0,
   timerHandle: null,
   answered: false,
@@ -6197,9 +6198,9 @@ function startSpeedReview(){
   SPEED_STATE.score = 0;
   SPEED_STATE.correctCount = 0;
   SPEED_STATE.streak = 0;
+  SPEED_STATE.bestStreak = 0;
   SPEED_STATE.active = true;
   SPEED_STATE.dailyCounted = false;
-  SPEED_STATE.startedAt = Date.now();
   renderSpeedReview();
 }
 
@@ -6260,7 +6261,9 @@ function renderSpeedReview(){
     }
     maybeShowStreakCelebration();
     trackEvent('lesson_complete', 'speed_review', { score: SPEED_STATE.score });
-    const speedIsRecord = recordSpeedReviewScore(SPEED_STATE.score);
+    const speedScoreRecord = recordSpeedReviewScore(SPEED_STATE.score);
+    const speedStreakRecord = recordSpeedReviewStreak(SPEED_STATE.bestStreak || 0);
+    const speedIsRecord = speedScoreRecord || speedStreakRecord;
     if (speedIsRecord) saveState();
     // Fase 6 do projeto: nunca oferecer "Jogar de novo" repetindo a mesma
     // bateria de revisão -- Voltar/Praticar mais, igual à conclusão do
@@ -6272,7 +6275,7 @@ function renderSpeedReview(){
         <h3>Fim de jogo!</h3>
         <div class="score-num">${SPEED_STATE.score} pts</div>
         <p>Você respondeu ${SPEED_STATE.index} palavra(s) nesta rodada.</p>
-        <p class="review-record-line">${speedIsRecord ? '🏅 Novo recorde!' : `Seu recorde: ${speedRecordText(reviewRecords())}`}</p>
+        <p class="review-record-line">${speedIsRecord ? `🏅 Novo recorde! ${speedRecordText(reviewRecords())}` : `Seu recorde: ${speedRecordText(reviewRecords())}`}</p>
         <div class="review-complete-actions">
           <button class="btn btn-secondary" id="speed-back-btn">Voltar</button>
           <button class="btn btn-primary" id="speed-practice-btn">Praticar mais</button>
@@ -6309,15 +6312,15 @@ function renderSpeedReview(){
     // zerada de verdade nesta sessão; "de novo" mostraria vazio ou
     // reaproveitaria cartões que acabaram de ser respondidos).
     const speedIsRecord2 = recordSpeedReviewScore(SPEED_STATE.score);
-    const speedTimeRecord = recordSpeedReviewTime(Date.now() - (SPEED_STATE.startedAt || Date.now()), SPEED_STATE.index);
-    if (speedIsRecord2 || speedTimeRecord) saveState();
+    const speedStreakRecord2 = recordSpeedReviewStreak(SPEED_STATE.bestStreak || 0);
+    if (speedIsRecord2 || speedStreakRecord2) saveState();
     releaseBadgeCelebrations();
     el.innerHTML = `
       <div class="speed-gameover">
         <div class="big-emoji">🏆</div>
         <h3>Revisão concluída!</h3>
         <div class="score-num">${SPEED_STATE.score} pts</div>
-        <p class="review-record-line">${speedIsRecord2 || speedTimeRecord ? `🏅 Novo recorde! ${speedRecordText(reviewRecords())}` : `Seu recorde: ${speedRecordText(reviewRecords())}`}</p>
+        <p class="review-record-line">${speedIsRecord2 || speedStreakRecord2 ? `🏅 Novo recorde! ${speedRecordText(reviewRecords())}` : `Seu recorde: ${speedRecordText(reviewRecords())}`}</p>
         <div class="review-complete-actions">
           <button class="btn btn-secondary" id="speed-back-btn">Voltar</button>
           <button class="btn btn-primary" id="speed-practice-btn">Praticar mais</button>
@@ -6410,6 +6413,7 @@ function answerSpeedQuestion(isCorrect, el, chosenIdx){
     SPEED_STATE.score += speedBonus;
     SPEED_STATE.correctCount += 1;
     SPEED_STATE.streak += 1;
+    if (SPEED_STATE.streak > (SPEED_STATE.bestStreak || 0)) SPEED_STATE.bestStreak = SPEED_STATE.streak;
     if (SPEED_STATE.streak > 0 && SPEED_STATE.streak % 15 === 0 && SPEED_STATE.hearts < 3){
       SPEED_STATE.hearts += 1;
       showToast('❤️ Vida extra!');

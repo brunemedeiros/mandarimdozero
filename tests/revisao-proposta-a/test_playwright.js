@@ -216,7 +216,7 @@ const SHOTS = process.env.SHOT_DIR || require('os').tmpdir();
     const rec = await page.evaluate(() => {
       const a = recordSpeedReviewScore(30), b = recordSpeedReviewScore(20);
       const c = recordMatchTime(41000), d = recordMatchTime(60000);
-      const t1 = recordSpeedReviewTime(3000, 3), t2 = recordSpeedReviewTime(24000, 10), t3 = recordSpeedReviewTime(30000, 10);
+      const t1 = recordSpeedReviewStreak(0), t2 = recordSpeedReviewStreak(14), t3 = recordSpeedReviewStreak(9);
       renderReviewModeSelect();
       const hardBefore = document.querySelector('#mode-card-hard .desc').textContent;
       // 502 sai da lista de difíceis
@@ -228,14 +228,16 @@ const SHOTS = process.env.SHOT_DIR || require('os').tmpdir();
         saved: JSON.stringify(ser.reviewRecords || null), savedTime: !!ser.reviewTimeStats };
     });
     check(lang + ' recorde do Speed Review só sobe', rec.a === true && rec.b === false && /Seu recorde: 30 pts/.test(rec.speed), rec);
-    check(lang + ' Speed Review também guarda tempo total (rodada de 5+, menor vence)', rec.t1 === false && rec.t2 === true && rec.t3 === false && /30 pts · 24 s/.test(rec.speed), rec);
+    check(lang + ' Speed Review guarda a maior sequência de acertos (só sobe)', rec.t1 === false && rec.t2 === true && rec.t3 === false && /30 pts · 14 acertos seguidos/.test(rec.speed), rec);
     check(lang + ' recorde do Combinar só desce (melhor tempo)', rec.c === true && rec.d === false && /Seu recorde: 41 s/.test(rec.match), rec);
     check(lang + ' "Já saíram da lista" conta quem saiu de Palavras difíceis', !/saíram/.test(rec.hardBefore) && /Já saíram da lista: \d+/.test(rec.hardAfter), rec);
-    check(lang + ' recordes e tempo vão no progresso salvo', /"speedBestScore":30/.test(rec.saved) && /"speedBestMs":24000/.test(rec.saved) && /"matchBestMs":41000/.test(rec.saved) && rec.savedTime, rec);
+    check(lang + ' recordes e tempo vão no progresso salvo', /"speedBestScore":30/.test(rec.saved) && /"speedBestStreak":14/.test(rec.saved) && /"matchBestMs":41000/.test(rec.saved) && rec.savedTime, rec);
     const restored = await page.evaluate(() => { const ser = serializeState(); STATE.reviewRecords = null; applySerializedState(JSON.parse(JSON.stringify(ser))); return reviewRecords(); });
-    check(lang + ' recordes voltam ao recarregar', restored.speedBestScore === 30 && restored.speedBestMs === 24000 && restored.matchBestMs === 41000, restored);
-    const matchStart = await page.evaluate(() => { startMatchGame(); const m = typeof MATCH_STATE.startedAt === 'number'; startSpeedReview(); const sp = typeof SPEED_STATE.startedAt === 'number'; stopSpeedTimer(); SPEED_STATE.active = false; return m && sp; });
-    check(lang + ' Combinar e Speed Review marcam o início para medir o tempo', matchStart, matchStart);
+    check(lang + ' recordes voltam ao recarregar', restored.speedBestScore === 30 && restored.speedBestStreak === 14 && restored.matchBestMs === 41000, restored);
+    const matchStart = await page.evaluate(() => { startMatchGame(); const m = typeof MATCH_STATE.startedAt === 'number'; SPEED_STATE.bestStreak = 5; startSpeedReview(); const sp = SPEED_STATE.bestStreak === 0; stopSpeedTimer(); SPEED_STATE.active = false; return m && sp; });
+    check(lang + ' Combinar marca o início e Speed Review zera a sequência da rodada', matchStart, matchStart);
+    const over = await page.evaluate(() => { stopSpeedTimer(); SPEED_STATE.active = true; SPEED_STATE.hearts = 0; SPEED_STATE.bestStreak = 20; SPEED_STATE.score = 5; renderSpeedReview(); const t = (document.querySelector('.speed-gameover') || {}).textContent || ''; stopSpeedTimer(); SPEED_STATE.active = false; return { t, best: reviewRecords().speedBestStreak }; });
+    check(lang + ' rodada que perde as 3 vidas também conta a sequência', over.best === 20 && /Novo recorde! 30 pts · 20 acertos seguidos/.test(over.t), over);
 
     // ---- 5) Força da memória na tela do Deck ----
     await page.evaluate(() => { STATE.cards.filter(c => c.rowId === 502).forEach(c => Object.assign(c, { lapses: 2 })); openDeckDetail(9001); });

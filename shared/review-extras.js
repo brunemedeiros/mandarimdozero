@@ -9,7 +9,7 @@
 // (shared/analytics-metrics.js, a mesma conta de "Suas palavras").
 //
 // Dados novos (salvos com o resto do progresso, por idioma):
-//   STATE.reviewRecords   = { speedBestScore, speedBestMs, matchBestMs, hardSeenIds[] }
+//   STATE.reviewRecords   = { speedBestScore, speedBestStreak, matchBestMs, hardSeenIds[] }
 //   STATE.reviewTimeStats = { cards, ms }  (tempo médio por cartão)
 
 const REVIEW_WEEK_GOAL_DAYS = 5;
@@ -125,11 +125,11 @@ function shortReviewQueue(queue, stats){
 // ---------- recordes ----------
 
 function reviewRecords(){
-  if (typeof STATE === 'undefined') return { speedBestScore: 0, speedBestMs: null, matchBestMs: null, hardSeenIds: [] };
+  if (typeof STATE === 'undefined') return { speedBestScore: 0, speedBestStreak: 0, matchBestMs: null, hardSeenIds: [] };
   const r = STATE.reviewRecords && typeof STATE.reviewRecords === 'object' ? STATE.reviewRecords : {};
   STATE.reviewRecords = {
     speedBestScore: Number(r.speedBestScore) || 0,
-    speedBestMs: Number(r.speedBestMs) > 0 ? Number(r.speedBestMs) : null,
+    speedBestStreak: Number(r.speedBestStreak) > 0 ? Number(r.speedBestStreak) : 0,
     matchBestMs: Number(r.matchBestMs) > 0 ? Number(r.matchBestMs) : null,
     hardSeenIds: Array.isArray(r.hardSeenIds) ? r.hardSeenIds : []
   };
@@ -144,21 +144,22 @@ function recordSpeedReviewScore(score){
   return true;
 }
 
-// Tempo do Speed Review: tempo total da rodada (decisão da autora). Só conta
-// rodada completa (todas as palavras respondidas, sem perder as 3 vidas) com
-// pelo menos SPEED_TIME_MIN_CARDS palavras; o melhor é o menor tempo.
-const SPEED_TIME_MIN_CARDS = 5;
-function recordSpeedReviewTime(ms, cards){
+// Speed Review: maior sequência de acertos seguidos numa rodada (decisão da
+// autora, 2026-10-07). Conta também a rodada que termina com as 3 vidas
+// perdidas; responder devagar não ajuda (só acertar conta). Substituiu o
+// recorde de tempo total (speedBestMs), que premiava rodadas curtas.
+function recordSpeedReviewStreak(streak){
   const r = reviewRecords();
-  if (!(ms > 0) || !(cards >= SPEED_TIME_MIN_CARDS)) return false;
-  if (r.speedBestMs != null && ms >= r.speedBestMs) return false;
-  r.speedBestMs = ms;
+  if (!(streak > r.speedBestStreak)) return false;
+  r.speedBestStreak = streak;
   return true;
 }
 
 function speedRecordText(rec){
   const pts = `${rec.speedBestScore || 0} pts`;
-  return rec.speedBestMs > 0 ? `${pts} · ${formatRecordSeconds(rec.speedBestMs)}` : pts;
+  const n = rec.speedBestStreak || 0;
+  if (!(n > 0)) return pts;
+  return `${pts} · ${n} ${n === 1 ? 'acerto seguido' : 'acertos seguidos'}`;
 }
 
 function recordMatchTime(ms){
