@@ -2282,9 +2282,12 @@ function buildUnitBlock(u){
         // aplica com Admin Mode ON -- OFF cai exatamente na mesma regra
         // usada por qualquer aluno (unlocked && já concluída), sem
         // segunda implementação (Fase 11 da spec de Admin Mode).
-        const clickable = (isAdminUser() && isAdminModeOn()) || (unlocked && (st === 'done' || st === 'skipped') && !l.isCheckpoint);
+        // A lição atual (a próxima a fazer) abre de verdade pelo próprio título e
+        // conta progresso, igual a clicar no cabeçalho da unidade (2026-10-07).
+        const opensForReal = unlocked && st === 'current';
+        const clickable = opensForReal || (isAdminUser() && isAdminModeOn()) || (unlocked && (st === 'done' || st === 'skipped') && !l.isCheckpoint);
         return `
-          <div class="ub-lesson-row ${st}${clickable ? ' clickable' : ''}" ${clickable ? `data-lesson-idx="${i}"` : ''}>
+          <div class="ub-lesson-row ${st}${clickable ? ' clickable' : ''}" ${clickable ? `data-lesson-idx="${i}"${opensForReal ? ' data-lesson-open="1"' : ''} role="button" tabindex="0"` : ''}>
             <div class="ub-lesson-dot ${st}">${st === 'done' ? '✓' : (st === 'skipped' ? '•' : i + 1)}</div>
             <div class="ub-lesson-title">${l.title}</div>
           </div>
@@ -2322,7 +2325,11 @@ function buildUnitBlock(u){
     row.addEventListener('click', (e) => {
       e.stopPropagation();
       const idx = parseInt(row.dataset.lessonIdx, 10);
-      openLessonReview(u.id, idx);
+      if (row.dataset.lessonOpen) openUnitDetail(u.id);
+      else openLessonReview(u.id, idx);
+    });
+    row.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); row.click(); }
     });
   });
   return block;
@@ -4464,7 +4471,25 @@ function buildFullSentenceExercises(unit){
       }
     }
 
+    // Uma frase errada continua com cara de frase: a pontuação final só no
+    // fim (nunca "一个姐姐。有我") e a maiúscula do pinyin só na primeira
+    // palavra. Nomes próprios (maiúscula fora do 1º bloco) ficam como estão.
+    const endPunctC = (phrase.blocks[phrase.blocks.length - 1].c.match(/[。！？]+$/) || [''])[0];
+    const endPunctP = (phrase.blocks[phrase.blocks.length - 1].p.match(/[.!?]+$/) || [''])[0];
+    const firstBlock = phrase.blocks[0];
+    const tidyDistractor = (blocks) => {
+      const out = blocks.map(b => ({
+        c: b.c.replace(/[。！？]+$/, ''),
+        p: (b === firstBlock ? b.p.charAt(0).toLowerCase() + b.p.slice(1) : b.p).replace(/[.!?]+$/, '')
+      })).filter(b => b.c);
+      if (!out.length) return out;
+      out[out.length - 1] = { c: out[out.length - 1].c + endPunctC, p: out[out.length - 1].p + endPunctP };
+      out[0] = { c: out[0].c, p: out[0].p.charAt(0).toUpperCase() + out[0].p.slice(1) };
+      return out;
+    };
+
     const distractorSentences = distractors
+      .map(tidyDistractor)
       .filter(blocks => blocks.map(b => b.c).join('') !== phrase.blocks.map(b => b.c).join('')) // nunca deixa um distrator coincidir com a frase correta
       .reduce((unique, blocks) => { // deduplica por texto final (hanzi), não por referência de array
         const text = blocks.map(b => b.c).join('');
@@ -4591,6 +4616,12 @@ document.addEventListener('keydown', (e) => {
   if (anyAppModalOpen()) return;
 
   if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey){
+    // Enter digitado DENTRO de um campo de resposta é do próprio campo (ele
+    // chama Verificar). Sem isto, o mesmo Enter que mostra o painel de erro
+    // também clicava "Continuar" dele na hora, e o aluno nunca via o
+    // resultado (relato de 2026-10-07: "haizi" no ditado de pinyin).
+    const tgt = e.target;
+    if (tgt && (tgt.tagName === 'INPUT' || tgt.tagName === 'TEXTAREA' || tgt.isContentEditable)) return;
     const target = findEnterAdvanceTarget();
     if (target){
       e.preventDefault();
@@ -5370,6 +5401,9 @@ function renderClozeExercise(ex, contentEl, nextBtn, total){
 // visual abaixo de cada bloco). Toca nos blocos na ordem certa para reconstruir
 // a frase. Foco na ordem gramatical, não em reconhecer hanzi isolado.
 // ---------- Exercício de frase completa (PT -> escolher entre 4 frases) ----------
+// Sem botão de áudio nas opções (2026-10-07): as frases erradas são montadas na
+// hora e não têm mp3 gravado, então tocavam com a voz do navegador (bem pior) e a
+// diferença entregava a certa. O áudio da frase certa vem no painel de resultado.
 function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
   const optionsHTML = ex.options.map((opt, i) => `
     <div class="exercise-option exercise-option-sentence" role="button" tabindex="0" data-idx="${i}">
@@ -5377,7 +5411,6 @@ function renderFullSentenceExercise(ex, contentEl, nextBtn, total){
         <div class="pinyin opt-pinyin-sentence">${opt.p}</div>
         <div class="opt-hanzi-sentence">${opt.c}</div>
       </div>
-      ${audioBtnHTML(opt.c)}
     </div>
   `).join('');
 
