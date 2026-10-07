@@ -180,25 +180,27 @@ O que já existe e não se refaz: painel 📊 do aluno (Painel de Admin > 🎓 A
 na produção), Analytics de produto (`shared/admin-analytics.js`), contrato K.2 (`shared/analytics-metrics.js`).
 
 Decisões da autora:
-- Botão "📊 Analytics" do aluno em dois lugares: Painel de Admin > 🎓 Alunos (já existe) e perfil público
-  `#/user/<username>`. Os dois só aparecem com Admin Mode ON (hoje o da aba Alunos não consulta o Admin Mode).
+- Botão "📊 Analytics" do aluno em dois lugares: aba 🎓 Alunos (já existe) e perfil público `#/user/<username>`
+  (aqui só para a professora do aluno). A aba Alunos já some com Admin Mode OFF, então não muda nada nela agora;
+  a autora propôs separar o menu em "Admin" (desligável) e "Professora" (papel próprio, não desligável), em
+  discussão -- se aprovado, Alunos/Flashcards/Aulas/Material de apoio vão para "Professora" e o Analytics do aluno
+  segue o papel Professora, não o Admin Mode.
 - Decks pessoais do aluno: a professora vê **nome + Novo/Aprendendo/Revisar**, sem abrir os cartões.
 - Quantas pessoas adicionaram um Deck público: veem a admin (Analytics) e o autor do Deck.
-- Grátis x Premium: Analytics do aluno é ferramenta da admin; o contador do autor é **só Premium**
+- Grátis x Premium: Analytics do aluno é ferramenta da professora (hoje só a autora); o contador do autor é **só Premium**
   (checado no servidor por `profiles.plan_tier = 'premium'`, como a 061; hoje todas as contas são free, então
   nenhum autor vê o contador até existir Premium).
 
 Etapas (cada uma com autorização própria):
 - **K.9 -- Decks do aluno (servidor)**: RPC nova `SECURITY DEFINER` `get_teacher_student_deck_counts(student, lang)`,
-  mesma porta da 059 (vínculo ativo em `teacher_students`) e exigindo `profiles.admin_mode = true` de quem chama.
+  mesma porta da 059 (vínculo ativo em `teacher_students` com quem chama).
   Devolve a árvore de Decks do aluno (curso, Meus Decks e subdecks, Cartões da Professora) com contagens por
   subárvore, nas regras de `cardStudyBucket`/`structuralCounts` (Novo = sem histórico; Aprendendo = learning +
   relearning; Revisar = review vencido). Deck do cartão: `own_flashcards.deck_id`, `teacher_flashcards.deck_id`,
   trilha pelo Deck de curso da unidade. Sem conteúdo dos cartões. Limitação herdada da 059: só conta o que o aluno
   já sincronizou em `progress`. Teste de paridade SQL x `getDeckCounts` com as mesmas fixtures.
 - **K.10 -- UI**: seção "Decks" no painel 📊 (tabela Deck / Novo / Aprendendo / Revisar); botão no perfil público
-  (só `isAdminUser() && isAdminModeOn()` e aluno com vínculo ativo), abrindo o mesmo painel; botão da aba Alunos
-  passa a respeitar o Admin Mode. Validar fr/zh × claro/escuro.
+  (só para a professora com vínculo ativo com aquele aluno), abrindo o mesmo painel. Validar fr/zh × claro/escuro.
 - **K.8 -- cópias de Deck público**: tabela `public_deck_copies (deck_id, user_id, first_copied_at, last_copied_at)`,
   uma linha por pessoa (recópia só atualiza a data), gravada dentro de `copy_public_deck` (novo `create or replace`
   sobre o corpo da 068, sem `DROP`). Sem leitura direta (RLS fechada); RPC `get_public_deck_copy_count(deck)` para o
