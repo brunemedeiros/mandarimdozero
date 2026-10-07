@@ -482,6 +482,19 @@ window.I18N_CATALOG['en'] = {
   'fr.checkpoint.question': 'Question {i} of {n}', // ALTA
   'fr.checkpoint.moduleDone': 'Module complete! 🏆', // ALTA
   'fr.checkpoint.finishSection': 'Finish section ✓', // ALTA
+  'fr.checkpoint.exam.word': 'How do you say "{w}" in French?', // ALTA
+  'fr.checkpoint.exam.phrase': 'Write in French: "{p}"', // ALTA
+  'fr.checkpoint.exam.listen': 'Listen and write what you heard', // ALTA
+  'limitCut.subject.deck': 'This Deck', // ALTA
+  'limitCut.subject.import': 'This import', // ALTA
+  'limitCut.subject.selection': 'This selection', // ALTA
+  'limitCut.cardOne': '{n} card', // ALTA
+  'limitCut.cardMany': '{n} cards', // ALTA
+  'limitCut.already': ' (you already had {cards})', // ALTA
+  'limitCut.resultMany': 'So only the first {n} cards were created.', // ALTA
+  'limitCut.resultOne': 'So only the first card was created.', // ALTA
+  'limitCut.resultNone': 'So no cards were created.', // ALTA
+  'limitCut.main': '{subject} would create {requested}, but your account can hold only {limit} on the free plan{already}. {result}', // ALTA
   'fr.levelTest.goStraightTo': 'You can move straight on to {next}', // ALTA
   'fr.levelTest.finishLevel': 'Finish level {level} ✓', // ALTA
   'zh.audio.listenPronunciation': 'Listen to pronunciation', // ALTA

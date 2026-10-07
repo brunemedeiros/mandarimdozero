@@ -1141,7 +1141,7 @@ async function confirmAndImportMyFlashcards(payload, errorEl){
   });
   const cutMessage = cutPlan.cut ? ownCardInstanceCutMessage({
     requested: cutPlan.requested, keptInstances: cutPlan.keptInstances,
-    limit: FREE_OWN_FLASHCARD_LIMIT, used: cutPlan.used, what: 'Esta importação',
+    limit: FREE_OWN_FLASHCARD_LIMIT, used: cutPlan.used, what: 'import',
   }) : null;
   if (cutPlan.keepCount === 0){
     openFlashcardLimitModal({ cutMessage });

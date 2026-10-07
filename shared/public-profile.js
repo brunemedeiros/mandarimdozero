@@ -537,7 +537,7 @@ async function importSelectedPublicFlashcards(box){
   });
   const cutMessage = cutPlan.cut ? ownCardInstanceCutMessage({
     requested: cutPlan.requested, keptInstances: cutPlan.keptInstances,
-    limit, used: cutPlan.used, what: 'Esta seleção',
+    limit, used: cutPlan.used, what: 'selection',
   }) : null;
   const showCut = () => {
     if (typeof openFlashcardLimitModal === 'function' && openFlashcardLimitModal({ cutMessage })) return;
