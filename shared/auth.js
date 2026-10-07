@@ -216,6 +216,7 @@ async function onUserLoggedIn(user){
   // por causa disso (mesmo padrão do upsert de weekly_xp em saveState()).
   if (typeof ensureProfileLoaded === 'function') ensureProfileLoaded().catch(() => {});
   if (typeof refreshNotificationUnreadCount === 'function') refreshNotificationUnreadCount();
+  if (typeof refreshFriendRequestCount === 'function') refreshFriendRequestCount();
   if (typeof ensureNotificationPreferencesLoaded === 'function') ensureNotificationPreferencesLoaded();
   progressAccountUiLanguage = null;
   await loadStateAndRender();
@@ -230,6 +231,8 @@ async function onUserLoggedIn(user){
   applyPendingLevelTestOffer();
   if (typeof applyPendingNotificationTab === 'function') applyPendingNotificationTab();
   if (typeof applyInitialRoute === 'function') applyInitialRoute();
+  // Convite por link (?amigo=usuario): abre Amigos já buscando a pessoa.
+  if (typeof friendsConsumePendingInvite === 'function') friendsConsumePendingInvite();
 }
 
 // ---------- Admin Mode ON/OFF (topbar) ----------

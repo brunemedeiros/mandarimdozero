@@ -1859,6 +1859,45 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .profile-special-badge-icon{ display:flex; align-items:center; font-size:14px; line-height:1; }
 .profile-special-badge-icon svg{ width:16px; height:16px; display:block; }
 
+/* ---------- Amigos (Perfil > Amigos) + selo "+N" + ranking de amigos ---------- */
+.tab-btn{ position:relative; }
+.friends-badge{
+  display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:18px; padding:0 5px;
+  margin-left:6px; border-radius:999px; background:var(--error-red); color:var(--on-vivid);
+  font-size:11px; font-weight:800; line-height:1; flex-shrink:0;
+}
+.tab-btn > .friends-badge{ position:absolute; top:2px; right:4px; margin-left:0; border:2px solid var(--paper); box-sizing:content-box; }
+.friends-section{ margin-top:18px; }
+.friends-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 0; border-bottom:1px solid var(--paper-line); }
+.friends-row:last-child{ border-bottom:none; }
+.friends-person{ display:flex; align-items:center; gap:10px; flex:1; min-width:180px; background:none; border:none; padding:0; text-align:left; cursor:pointer; color:var(--ink); font:inherit; }
+.friends-person:disabled{ cursor:default; }
+.friends-avatar{ width:40px; height:40px; border-radius:50%; flex-shrink:0; object-fit:cover; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:15px; }
+.friends-person-text{ display:flex; flex-direction:column; min-width:0; }
+.friends-person-name{ font-weight:700; font-size:14px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.friends-person-user{ font-size:12px; color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.friends-row-actions{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.friends-action{ padding:7px 14px; font-size:13px; width:auto; }
+.friends-chip{ font-size:12.5px; font-weight:700; color:var(--ink-soft); }
+.friends-profile-actions{ display:flex; justify-content:center; align-items:center; gap:8px; flex-wrap:wrap; margin-top:10px; }
+.leaderboard-mode-tabs{ margin-bottom:8px; }
+.leaderboard-empty-friends{ text-align:center; padding:22px 10px; }
+.leaderboard-empty-friends p{ color:var(--ink-soft); font-size:13.5px; margin:6px 0 12px; }
+.friends-rank-row{ gap:8px; }
+.friends-rank-row.is-me{ background:var(--paper-warm); border-radius:8px; padding-left:6px; padding-right:6px; }
+.friends-rank-pos{ width:26px; text-align:center; font-weight:800; font-size:14px; color:var(--ink-soft); flex-shrink:0; }
+.friends-rank-xp{ margin-left:auto; font-weight:800; font-size:13px; color:var(--ink); white-space:nowrap; }
+.friends-rank-scopes{ margin-bottom:6px; }
+.friends-rank-more{ margin-top:10px; }
+.friends-invite-banner{ background:var(--paper-warm); border:1px solid var(--paper-line); border-radius:8px; padding:10px 12px; font-size:13.5px; color:var(--ink); margin:0 0 10px; }
+.friends-invite-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+.friends-prefs summary{ cursor:pointer; font-weight:700; font-size:14px; color:var(--ink); padding:6px 0; }
+.friends-pref-row{ display:flex; align-items:center; gap:10px; padding:8px 0; font-size:14px; color:var(--ink); cursor:pointer; }
+.friends-pref-row input{ width:18px; height:18px; flex-shrink:0; }
+.side-ranking-tabs{ display:flex; gap:6px; margin-bottom:8px; }
+.side-ranking-tab{ flex:1; background:var(--paper-warm); border:1px solid var(--paper-line); color:var(--ink-soft); border-radius:999px; padding:4px 8px; font-size:12px; font-weight:700; cursor:pointer; }
+.side-ranking-tab.active{ background:var(--seal-red); border-color:var(--seal-red); color:#fff; }
+
 /* ---------- Ranking (Leaderboard) ---------- */
 .leaderboard-week-label{ font-size:12.5px; color:var(--ink-soft); font-weight:700; text-align:center; margin-bottom:10px; }
 .leaderboard-tabs{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-bottom:14px; }
@@ -3844,8 +3883,8 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <div class="brand">
       <div class="brand-seal"><svg viewBox="0 0 83.44 94.95" xmlns="http://www.w3.org/2000/svg"><path d="M82.19,54.16c-.25-.82-1.05-3.05-1.06-3.07-2.71-6.58-11.08-1.57-9.93,3.9.31,1.46.68,2.86.68,2.86,3.51,12.91-6.77,26.21-20.18,26.02,0,0-40.62,0-40.62,0L.83,94.12c.51.51,1.22.83,2,.83h48.7c9.66,0,18.32-4.29,24.17-11.08,6.81-7.58,9.57-19.61,6.49-29.71Z" style="fill:#e36bca;"/><path d="M45.92,31.12H11.08V11.07h0L.83.82C.32,1.34,0,2.04,0,2.83v36.55c0,1.56,1.27,2.83,2.83,2.83h44.95c2.8,0,10.09.14,12.52,1.15,0,0,2.62-1.92,4.67-9.26-4.14-1.95-14.19-2.97-19.05-2.97Z" style="fill:#e36bca;"/><path d="M69.7,11.08C64.22,4.32,55.86,0,46.48,0H2.83c-.78,0-1.49.32-2,.83l10.25,10.25h32.67c12.91,0,24.17,9.85,21.35,22.52-.04.17-.07.33-.11.5,0,0-.01,0-.02,0-4.11,14.7-20.74,14.56-23.25,14.56H2.83c-1.56,0-2.83,1.27-2.83,2.83v40.63c0,.78.32,1.49.83,2l10.25-10.25h0v-24.13h35.4c8.58,0,16.31-3.61,21.73-9.4,2.65-2.76,4.71-6.06,6.1-9.63,3.99-9.68,1.92-21.88-4.61-29.63Z" style="fill:#3498d6;"/></svg></div>
       <div class="brand-text">
-        <h1>Francês</h1>
-        <p>com Prof. Brune</p>
+        <h1 data-i18n="brand.title.fr">Francês</h1>
+        <p data-i18n="brand.byline">com Prof. Brune</p>
       </div>
     </div>
     <div class="stats-pills">
@@ -3904,7 +3943,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
     </button>
     <button class="tab-btn" data-tab="challenges">
       <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#FCA5A5"/><circle cx="12" cy="12" r="5.5" fill="#EF4444"/><circle cx="12" cy="12" r="2" fill="#FFFFFF"/></svg>
-      <span>Desafios</span>
+      <span data-i18n="nav.challenges">Desafios</span>
     </button>
     <button class="tab-btn" data-tab="profile">
       <svg class="tab-icon bottom-nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="#FBBF24"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6" fill="#7C3AED"/></svg>
@@ -4021,20 +4060,20 @@ footer.app-footer img{ height:40px; opacity:.85; }
              removido de vez; "Origem" (Fase 4 do sistema de alunas
              particulares) subiu pro topo do painel. -->
         <div id="review-origin-select-wrap" hidden>
-          <div class="section-label">Origem</div>
+          <div data-i18n="review.settings.origin" class="section-label">Origem</div>
           <select class="review-settings-select" id="review-origin-select"></select>
         </div>
         <div data-i18n="ui.review.frequency" class="section-label">Frequência de revisão</div>
         <select class="review-settings-select" id="review-frequency-select">
           <option data-i18n="ui.review.freq.frequent" value="frequent">Mais frequente (revisa mais cedo e mais vezes)</option>
-          <option value="balanced">Equilibrada (recomendado)</option>
+          <option data-i18n="review.settings.freq.balanced" value="balanced">Equilibrada (recomendado)</option>
           <option data-i18n="ui.review.freq.spaced" value="spaced">Mais espaçada (intervalos mais longos entre revisões)</option>
         </select>
         <div data-i18n="ui.review.newPerDay" class="section-label">Novas palavras por dia</div>
         <select class="review-settings-select" id="review-newcards-select">
           <option data-i18n="ui.review.newPerDay.0" value="0">0 (nenhuma, só revisar o que já viu)</option>
           <option data-i18n="ui.review.newPerDay.5" value="5">5 (ritmo mais lento)</option>
-          <option value="10">10 (recomendado)</option>
+          <option data-i18n="review.settings.newPerDay.10" value="10">10 (recomendado)</option>
           <option data-i18n="ui.review.newPerDay.15" value="15">15 (ritmo mais rápido)</option>
           <option data-i18n="ui.review.newPerDay.20" value="20">20 (ritmo bem rápido)</option>
           <option data-i18n="ui.review.newPerDay.unlimited" value="9999">Sem limite (todas as pendentes de uma vez)</option>
@@ -4042,7 +4081,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
         <div data-i18n="ui.review.intensity" class="section-label">Intensidade da sessão</div>
         <select class="review-settings-select" id="review-intensity-select">
           <option data-i18n="ui.review.intensity.light" value="light">Leve (sessões mais curtas)</option>
-          <option value="normal">Normal (recomendado)</option>
+          <option data-i18n="review.settings.intensity.normal" value="normal">Normal (recomendado)</option>
           <option data-i18n="ui.review.intensity.intense" value="intense">Intensa (sessões mais longas)</option>
         </select>
       </div>
@@ -4058,7 +4097,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <div id="review-deck-wrap" style="display:none;"></div>
 
     <div id="review-session-wrap" style="display:none;">
-      <button class="back-link" id="review-back-to-modes">← Voltar aos modos</button>
+      <button data-i18n="review.backToModes" class="back-link" id="review-back-to-modes">← Voltar aos modos</button>
       <div id="review-content"></div>
       <div id="speed-review-content" style="display:none;"></div>
       <div id="match-review-content" style="display:none;"></div>
@@ -4117,12 +4156,18 @@ footer.app-footer img{ height:40px; opacity:.85; }
     <div id="leaderboard-content"></div>
   </div>
 
+  <!-- ===== AMIGOS (Perfil > Amigos) ===== -->
+  <div class="view" id="view-friends">
+    <div id="friends-content"></div>
+  </div>
+
   <!-- ===== PROGRESSO ===== -->
   <div class="view" id="view-progress">
     <div class="leaderboard-tabs profile-subnav" role="tablist" aria-label="Seção do Perfil" data-i18n-attr="aria-label:profile.subnavAria">
       <button data-i18n="profile.tabOverview" class="leaderboard-tab" data-tab="profile">Visão geral</button>
       <button class="leaderboard-tab" data-tab="goals">Metas</button>
       <button class="leaderboard-tab active" data-tab="progress">Progresso</button>
+      <button data-i18n="profile.tabFriends" class="leaderboard-tab" data-tab="friends">Amigos</button>
     </div>
     <div class="path-header">
       <h2 data-i18n="ui.stats.title">Seu progresso</h2>
@@ -4144,6 +4189,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
       <button data-i18n="profile.tabOverview" class="leaderboard-tab" data-tab="profile">Visão geral</button>
       <button class="leaderboard-tab active" data-tab="goals">Metas</button>
       <button class="leaderboard-tab" data-tab="progress">Progresso</button>
+      <button data-i18n="profile.tabFriends" class="leaderboard-tab" data-tab="friends">Amigos</button>
     </div>
     <div class="path-header">
       <h2>Minhas metas</h2>
@@ -4954,6 +5000,7 @@ footer.app-footer img{ height:40px; opacity:.85; }
 <script src="../shared/admin-analytics.js"></script>
 <script src="../shared/admin-notifications.js"></script>
 <script src="../shared/admin-reports.js"></script>
+<script src="../shared/friends.js"></script>
 <script src="../shared/leaderboard.js"></script>
 <script src="../shared/public-profile.js"></script>
 <script src="../shared/public-deck.js"></script>
