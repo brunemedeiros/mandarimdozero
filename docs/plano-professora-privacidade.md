@@ -44,7 +44,7 @@ Decidido:
 | Ranking geral | **Continua aparecendo** para quem está logado; a conta pode se esconder só de visitantes sem login |
 | XP e sequência | Continuam visíveis (restringir a amigos fica para quando houver mais usuários) |
 | Busca de amigos | Só aparece para quem digitar o @ exato |
-| Decks | Cada Deck tem a própria chave público/privado; padrão segue a conta (conta pública → Deck público; conta privada → Deck privado) |
+| Decks | Cada Deck pessoal tem a própria chave. Conta pública: Deck **nasce público** (botão "Tornar privado"). Conta privada: Deck nasce privado (botão "Tornar público"). Decidido em 2026-10-07 |
 | Professora com vínculo | **Vê tudo; a privacidade nunca vale para a professora do aluno** |
 - Contas novas continuam nascendo públicas.
 - Grátis x Premium: perfil privado é grátis para todos.
