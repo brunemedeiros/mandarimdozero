@@ -5007,6 +5007,12 @@ function showAnswerPanel(contentEl, ex, opts = {}){
   panel.innerHTML = `
     <div class="feedback-card-body">
       <div class="wrong-feedback-header">${revealed ? '👀 Resposta revelada' : '❌ Não foi dessa vez'}</div>
+      ${opts.attemptHTML ? `
+        <div class="wrong-feedback-why">
+          <div class="wrong-feedback-why-label">Sua resposta</div>
+          <div class="feedback-inner-box">${opts.attemptHTML}</div>
+        </div>
+      ` : ''}
       ${explanation ? `
         <div class="wrong-feedback-why">
           <div class="wrong-feedback-why-label">${ex && ex.format === 'cloze' ? 'Frase completa' : (revealed ? 'Resposta' : 'Por que não foi essa')}</div>
@@ -5027,8 +5033,8 @@ function showAnswerPanel(contentEl, ex, opts = {}){
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function showWrongAnswerPanel(contentEl, ex){
-  showAnswerPanel(contentEl, ex, { revealed: false });
+function showWrongAnswerPanel(contentEl, ex, opts = {}){
+  showAnswerPanel(contentEl, ex, { revealed: false, attemptHTML: opts.attemptHTML });
 }
 
 // ---------- Exercício de múltipla escolha (meaning / listen) ----------
@@ -5637,7 +5643,14 @@ function renderReorderExercise(ex, contentEl, nextBtn, total){
       const detail = `<div class="reorder-final"><div class="reorder-final-fr">${ex.phrase.f} ${audioBtnHTML(ex.phrase.f)}</div><div class="reorder-final-tr">${ex.phrase.t}</div></div>`;
       setTimeout(() => showCorrectFeedbackPanel(contentEl, detail), 500);
     } else {
-      setTimeout(() => showWrongAnswerPanel(contentEl, ex), 500);
+      // "Sua resposta" com cada bloco marcado: vermelho = não pertence à
+      // frase (isca) ; amarelo sublinhado = palavra certa no lugar errado.
+      const attemptHTML = `<div class="reorder-attempt">${chosenSequence.map((blockIdx, pos) => {
+        const block = ex.shuffledBlocks[blockIdx];
+        const cls = block === correctOrder[pos] ? 'ok' : (correctOrder.includes(block) ? 'near' : 'bad');
+        return `<span class="reorder-attempt-w ${cls}">${block.f}</span>`;
+      }).join(' ')}</div>`;
+      setTimeout(() => showWrongAnswerPanel(contentEl, ex, { attemptHTML }), 500);
     }
   }
 
