@@ -49,3 +49,35 @@ Decidido:
 - Contas novas continuam nascendo públicas.
 - Grátis x Premium: perfil privado é grátis para todos.
 - Futuro (com mais usuários): tirar a conta privada do ranking geral e mostrar XP/sequência só a amigos.
+
+## Etapa 1 -- auditoria (2026-10-07, só leitura; repo + produção ao vivo)
+Produção: 18 policies + 3 funções usam o e-mail da autora (`ensure_user_decks`, `profiles_protect_plan_role`,
+`profiles_protect_plan_role_insert`; policies de badge_*, challenges, decks_admin_write, notification_*, reports,
+teacher_flashcards_admin_write, teacher_students_admin_write, usage_events). profiles: 1 `admin` (a autora, também a
+única `premium`), 26 `user`, nenhum `teacher`.
+
+Já escopado por `teacher_id = auth.uid()` (sem checar papel): leitura de vínculos/cartões da professora, decks
+`kind='teacher'`, `teacher_class_logs`, `teacher_support_materials`, buckets `flashcard-media`/`support-materials`,
+RPCs 059/070/053 e triggers de vínculo ativo (055).
+
+Achados:
+- **Furo atual**: `teacher_class_logs_owner_all` e `teacher_support_materials_teacher_all` (confirmado ao vivo) só
+  checam `teacher_id = auth.uid()`; qualquer conta logada pode gravar registro/material para qualquer `student_id`,
+  sem vínculo, e o aluno passa a ver o material. Corrigir exigindo papel Professora + vínculo ativo.
+- **Conceder Premium pela aba ⭐ Premium provavelmente não funciona**: `setPlanTier` faz UPDATE em profiles de outra
+  conta e só existe `profiles_owner_update`; deve afetar 0 linhas sem erro. Conferir no Staging; trocar por RPC.
+- `ensure_user_decks` bloqueia quem não é a autora: uma professora nova falharia ao criar os Decks da aluna.
+- `profiles_public_read` (anon) expõe `role`, `plan_tier`, `admin_mode`.
+- `assignStudentToTeacher` dá o badge "Aluno/a da Prof. Brune" (admin-only); outra professora falharia em silêncio.
+- TTS: só a admin é isenta da cota mensal (Edge Function `tts-generate`).
+- "1 professora por aluno por idioma" não existe no banco (só `unique (teacher_id, student_id, language_app_key)`).
+
+Plano de migrations (proposto):
+- 075 (sem DROP, ferramenta): `is_admin()` (e-mail OU role admin, e-mail fica de reserva), `is_teacher()` (role
+  teacher ou admin), `has_premium(uid)` (premium OU teacher/admin); RPCs `admin_set_role`, `admin_set_plan_tier`.
+- 076 (com DROP POLICY, SQL Editor da autora): policies de teacher_students/teacher_flashcards/class_logs/materials
+  com `is_teacher()` + vínculo ativo; `ensure_user_decks` liberado para professora com vínculo; 063/066 via
+  `is_admin()`; as 5 checagens Premium de Deck público via `has_premium()`.
+- 077: índice único parcial `teacher_students (student_id, language_app_key) where status='active'`.
+- JS: menu Professora (Alunos, Flashcards, Aulas, Material de apoio, abre em Alunos) separado do menu Admin;
+  `isTeacherUser()`; `effectivePlanTier` = premium para professora; aba Admin para conceder Professora.
