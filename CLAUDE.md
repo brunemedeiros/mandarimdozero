@@ -17715,3 +17715,22 @@ Testes: desafios-modulo 75/75, desafios-conclusao 19/19, test_answer_validation 
 - **Enter em campo de resposta** (fr/zh, atalho global de teclado): o Enter digitado dentro de um campo é só do campo. Antes, o mesmo Enter que mostrava o painel de erro clicava "Continuar" na hora e o resultado nunca aparecia (ditado de pinyin com "haizi" etc.).
 - **zh**: teclas de tom quebram linha (como as de acento do fr); opções de "Complete a frase" com pinyin em cima do hanzi; "Selecione a frase correta" sem áudio nas opções (as erradas não têm mp3 e tocavam com a voz do navegador, entregando a certa; o áudio vem no painel de resultado) e frases erradas com a pontuação final só no fim e maiúscula só no início.
 - Teste: `tests/checkpoint-zh/test_playwright.js` (25).
+
+## ⏰ LEMBRETE: pendências para DEPOIS que o paywall for ligado (registrado em 2026-10-07)
+Pedido da autora: guardar aqui o que só faz sentido (ou só é seguro) depois de ligar o paywall, para ela lembrar. Quando o paywall for ligado, rodar esta lista na ordem.
+
+**Desafios (fr)**
+1. Migration `fr/scripts/supabase_migrations/007_allow_cloze_grammar_type.sql`: **já aplicada pela autora** (2026-10-07).
+2. Migration `008_challenges_server_side_premium_gating.sql`: **NÃO aplicar antes do paywall.** Ordem: aplicar os passos 1-2 -> publicar o código com `CHALLENGES_SERVER_GATING=true` e `CHALLENGE_PAYWALL_ENABLED=true` (`fr/app.js`) -> só então o passo 3 (restringe a leitura pública de `challenges`). Aplicar primeiro no Staging; sem `DROP` no passo 1-2 deve ir pela ferramenta, o passo 3 conferir antes.
+3. Regra Free dos Desafios: **1 atividade por categoria, no total** (de preferência a do 1º módulo). Isso substitui o "1 ditado Free por módulo" (o Free do Ditado cai de 6 para 1): ajustar o campo `free` em `fr/dictations.js` e nos lotes de Desafios.
+4. Desafios do chinês: o zh não tem aba de Desafios nem módulos; decidir os módulos e criar a aba antes de aplicar a regra Free x Premium ao zh.
+
+**Premium / cobrança (nada disto existe ainda)**
+5. Não há Stripe nem checkout: o modal de aviso Premium só convida a entrar em contato. Decidir o fluxo de pagamento junto do paywall.
+6. TTS por Field (Google) é só Premium e tem cota de 300/mês por conta: conferir se a cota combina com o preço do plano.
+7. Limite de 20 cartões do plano grátis é só trava de tela (duas abas abertas ao mesmo tempo podem passar de 20). Se virar argumento de venda, impor no banco (trigger em `own_flashcards`).
+8. Premium tem cartões ilimitados e formatos ricos (imagem/áudio/múltipla escolha/completar frase); o grátis só Normal + upload/link. Rever essa matriz quando definir os preços.
+
+**Conferir no dia de ligar**
+9. Com o paywall ligado, testar com uma conta Free e outra Premium: lista de Desafios (cadeado), Ditados, Decks públicos (importar é Premium), Meus Cartões (formatos), TTS.
+10. A RLS atual (`challenges_public_read_published`) deixa qualquer um ler todos os desafios publicados pela API: só fecha com o passo 3 da 008.
