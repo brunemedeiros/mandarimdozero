@@ -2060,4 +2060,18 @@ window.I18N_CATALOG['en'] = {
   'badge.catalog.pioneer.desc': 'Among the first people to use the app in its early phase', // MÉDIA
   'badge.catalog.student.name': 'Prof. Brune\'s student', // MÉDIA
   'badge.catalog.student.desc': 'Prof. Brune\'s student', // MÉDIA
+
+  // Erros de envio de mídia e topo do site.
+  'media.noFile': 'No file selected.', // ALTA
+  'media.emptyFile': 'Empty file.', // ALTA
+  'media.audioTooBig': 'File larger than 5 MB. Choose a smaller audio file.', // ALTA
+  'media.audioBadType': 'Audio format not supported. Use MP3, M4A/AAC, OGG, WAV or WEBM.', // ALTA
+  'media.imageTooBig': 'Image larger than 5 MB. Choose a smaller image.', // ALTA
+  'media.imageBadType': 'Image format not supported. Use JPG, PNG, WEBP or GIF.', // ALTA
+  'media.urlEmpty': 'Paste the audio link.', // ALTA
+  'media.urlTooLong': 'Link too long.', // ALTA
+  'media.urlNeedsHttps': 'The link must start with https://.', // ALTA
+  'brand.title.fr': 'French', // ALTA
+  'brand.title.zh': 'Chinese', // ALTA
+  'brand.byline': 'with Prof. Brune', // ALTA
 };

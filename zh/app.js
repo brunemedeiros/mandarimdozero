@@ -1041,6 +1041,8 @@ function refreshStudyCardTexts(){
   STATE.cards.forEach((c) => {
     if (c.origin !== 'study') return;
     const u = UNITS.find((x) => x.id === c.unitId);
+    // Cartão "Na frase": só a etiqueta muda com o idioma do site.
+    if (u && c.vocabIdx == null && c.gateVocabIdx != null){ c.unitTitle = studyPhraseCardTitle(u.title); return; }
     if (!u || !u.vocab || !u.vocab[c.vocabIdx]) return;
     // Palavra diferente no slot (país do aluno etc.): o progresso segue a palavra,
     // não a posição (shared/card-variants.js).

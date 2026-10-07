@@ -2080,4 +2080,18 @@ window.I18N_CATALOG['pt-BR'] = {
   'badge.catalog.pioneer.desc': 'Primeiras pessoas a usar o app em sua fase inicial',
   'badge.catalog.student.name': 'Aluno/a da Prof. Brune',
   'badge.catalog.student.desc': 'Aluno/a da Prof. Brune',
+
+  // Erros de envio de mídia e topo do site.
+  'media.noFile': 'Nenhum arquivo selecionado.',
+  'media.emptyFile': 'Arquivo vazio.',
+  'media.audioTooBig': 'Arquivo maior que 5 MB -- escolha um arquivo de áudio menor.',
+  'media.audioBadType': 'Formato de áudio não suportado. Use MP3, M4A/AAC, OGG, WAV ou WEBM.',
+  'media.imageTooBig': 'Imagem maior que 5 MB. Escolha uma imagem menor.',
+  'media.imageBadType': 'Formato de imagem não suportado. Use JPG, PNG, WEBP ou GIF.',
+  'media.urlEmpty': 'Cole o link do áudio.',
+  'media.urlTooLong': 'Link muito longo.',
+  'media.urlNeedsHttps': 'O link precisa começar com https://.',
+  'brand.title.fr': 'Francês',
+  'brand.title.zh': 'Chinês',
+  'brand.byline': 'com Prof. Brune',
 };

@@ -222,7 +222,7 @@ function buildStudyPhraseCards(units, appKey){
         c.gateVocabIdx = vIdx;
         c.phraseIdx = m.idx;
         c.phraseSource = { unitId: m.unitId, kind: m.kind };
-        c.unitTitle = `Na frase · ${unit.title}`; // etiqueta do cartão na Revisão
+        c.unitTitle = studyPhraseCardTitle(unit.title); // etiqueta do cartão na Revisão
         c.deckId = null;
         cards.push(c);
       });
@@ -364,6 +364,8 @@ const STUDY_TRAIL_TAG_LABEL_PT = {
   'review.tagLabel.studyPath': 'Trilha de Estudo', 'review.tagLabel.word': 'Palavra', 'review.tagLabel.inPhrase': 'Na frase',
   'review.tagLabel.general': ' (geral)', 'review.tagLabel.level': 'Nível', 'review.tagLabel.module': 'Módulo', 'review.tagLabel.lesson': 'Lição',
 };
+// Etiqueta do cartão "Na frase" na Revisão (segue o idioma do site).
+function studyPhraseCardTitle(unitTitle){ return `${studyTrailTagText('review.tagLabel.inPhrase')} · ${unitTitle}`; }
 function studyTrailTagText(key){ return typeof t === 'function' ? t(key) : STUDY_TRAIL_TAG_LABEL_PT[key]; }
 function friendlyTagLabel(tag){
   const s = String(tag || '');
