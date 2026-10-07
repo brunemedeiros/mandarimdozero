@@ -2773,6 +2773,10 @@ button.correct-feedback-continue{ background: var(--jade); color: var(--on-vivid
 .challenge-retry-actions .btn, .challenge-complete-btn{ min-height:52px; width:100%; border-radius:14px; }
 .challenge-retry-actions .btn-secondary{ background:transparent; border:1px solid var(--paper-line); }
 
+.fb-cmp{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+.fb-cmp .listen-translate-feedback-row{ margin-bottom:0; overflow-wrap:anywhere; }
+@media (max-width:340px){ .fb-cmp{ grid-template-columns:1fr; } }
+
 /* Lista: concluído sólido, pendente tracejado, premium trancado quente */
 .challenge-card, .dictation-card{ border-radius:16px; min-height:64px; }
 .challenge-card:not(.completed):not(.locked), .dictation-card:not(.completed):not(.locked){ border-style:dashed; }

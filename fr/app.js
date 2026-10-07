@@ -10996,8 +10996,10 @@ function checkListenTranslateAnswer(c){
   const ltBodyHTML = `
       ${personMismatch ? `<p class="listen-translate-feedback-warning">${chT('ch.lt.agreement', { pronoun: escapeHtmlChallenge(personMismatch.pronoun), verb: escapeHtmlChallenge(personMismatch.verb) })}</p>` : ''}
       ${translationAlertsHTML(analysis, outcome)}
-      <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.yours')}</strong>${escapeHtmlChallenge(studentAnswer || '—')}</p>
-      <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.expected')}</strong>${escapeHtmlChallenge(c.referenceTranslations[0])}</p>
+      <div class="fb-cmp">
+        <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.yours')}</strong>${escapeHtmlChallenge(studentAnswer || '—')}</p>
+        <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.expected')}</strong>${escapeHtmlChallenge(c.referenceTranslations[0])}</p>
+      </div>
       <p class="listen-translate-feedback-row"><strong>${chT('ch.lt.original')}</strong>${escapeHtmlChallenge(c.sentenceFr)}</p>
       ${c.explanation ? `<p class="listen-translate-feedback-row"><strong>${chT('ch.lt.explanation')}</strong>${escapeHtmlChallenge(c.explanation)}</p>` : ''}
       <div class="audio-btn-row">
