@@ -17734,3 +17734,10 @@ Testes: desafios-modulo 75/75, desafios-conclusao 19/19, test_answer_validation 
 - **Enter em campo de resposta** (fr/zh, atalho global de teclado): o Enter digitado dentro de um campo é só do campo. Antes, o mesmo Enter que mostrava o painel de erro clicava "Continuar" na hora e o resultado nunca aparecia (ditado de pinyin com "haizi" etc.).
 - **zh**: teclas de tom quebram linha (como as de acento do fr); opções de "Complete a frase" com pinyin em cima do hanzi; "Selecione a frase correta" sem áudio nas opções (as erradas não têm mp3 e tocavam com a voz do navegador, entregando a certa; o áudio vem no painel de resultado) e frases erradas com a pontuação final só no fim e maiúscula só no início.
 - Teste: `tests/checkpoint-zh/test_playwright.js` (25).
+
+### Amigos -- fechamento (2026-10-07)
+- **Migrations 073 e 074 aplicadas** no Staging e na produção (073 pelo SQL Editor, pela autora; 074 pela ferramenta; produção `eigjocalzwamisgqilhg`, 074 em 2026-10-07). `notification-cron` publicado na produção (v21) chamando `process_friend_overtakes`.
+- **Matriz de Notificações**: linha "👥 Amigos" (`amigos`, `inAppOnly`). Só existe aviso no app (o servidor só grava `in_app`), então push/e-mail aparecem desativados nessa linha; sem preferência salva o servidor entrega e a matriz mostra ligado (`notifPrefEffectiveChannels`). Os interruptores mestre de push/e-mail ignoram Amigos.
+- **i18n**: textos de Amigos/Ranking de Amigos passaram para `shared/i18n` (chaves `friends.*`, `profile.tabFriends`, `notif.cat.amigos`, `notif.pref.inAppOnly`; en espelha pt-BR; es congelado). O teste `tests/i18n` isenta essas chaves da regressão byte a byte e o HTML de Amigos da comparação com o commit-base. A única falha restante do teste (zh, HTML) já existe na `main`.
+- **PR**: branch `claude/fervent-heisenberg-rlf8va` -> `main` aberto depois do merge com a `main`.
+
