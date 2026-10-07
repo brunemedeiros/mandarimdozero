@@ -135,6 +135,8 @@ window.I18N_CATALOG['en'] = {
   'notif.cat.conteudo': '📚 What\'s new', // ALTA
   'notif.cat.reengajamento': '👋 Re-engagement', // MÉDIA
   'notif.cat.sistema': '⚙️ System', // ALTA
+  'notif.cat.amigos': '👥 Friends', // ALTA
+  'notif.pref.inAppOnly': 'Friends only has in-app notifications', // ALTA
   'notif.pref.guest': 'Create an account to set up notifications -- guest mode does not save preferences.', // ALTA
   'notif.pref.loadFailed': 'Could not load your preferences right now.', // ALTA
   'notif.pref.sectionTitle': 'Notifications', // ALTA
@@ -1866,4 +1868,93 @@ window.I18N_CATALOG['en'] = {
   'badge.catalog.pioneer.desc': 'Among the first people to use the app in its early phase', // MÉDIA
   'badge.catalog.student.name': 'Prof. Brune\'s student', // MÉDIA
   'badge.catalog.student.desc': 'Prof. Brune\'s student', // MÉDIA
+  // ---- Amigos + Ranking de Amigos ----
+  'friends.timeNow': 'just now', // ALTA
+  'friends.timeHours': { one: '{n} hour ago', other: '{n} hours ago' }, // ALTA
+  'friends.timeDays': { one: '{n} day ago', other: '{n} days ago' }, // ALTA
+  'friends.error.not_authenticated': 'Sign in to use friends.', // ALTA
+  'friends.error.invalid_target': 'You can\'t add yourself.', // ALTA
+  'friends.error.not_found': 'We couldn\'t find that person.', // ALTA
+  'friends.error.already_friends': 'You\'re already friends.', // ALTA
+  'friends.error.already_sent': 'You already sent a request to this person.', // ALTA
+  'friends.error.declined_recently': 'That request was declined recently. Try again in a few days.', // ALTA
+  'friends.error.daily_request_limit': 'You\'ve reached the limit of 20 requests per day. Try again tomorrow.', // ALTA
+  'friends.error.friend_limit_reached': 'You\'ve reached the limit of 100 friends.', // ALTA
+  'friends.error.target_friend_limit': 'This person has reached the friend limit.', // ALTA
+  'friends.error.no_pending_request': 'That request doesn\'t exist anymore.', // ALTA
+  'friends.error.not_friends': 'You\'re no longer friends.', // ALTA
+  'friends.error.not_accepting_requests': 'This person isn\'t accepting new friend requests right now.', // ALTA
+  'friends.error.generic': 'Couldn\'t complete that right now. Try again.', // ALTA
+  'friends.ariaNewRequests': { one: 'Friends, {n} new request', other: 'Friends, {n} new requests' }, // ALTA
+  'friends.chip.unavailable': 'Unavailable for now', // ALTA
+  'friends.chip.sent': 'Request sent', // ALTA
+  'friends.btn.cancel': 'Cancel', // ALTA
+  'friends.btn.accept': 'Accept', // ALTA
+  'friends.btn.decline': 'Decline', // ALTA
+  'friends.btn.add': 'Add', // ALTA
+  'friends.guestNote': 'Sign in to add friends and see the ranking among you.', // ALTA
+  'friends.loading': 'Loading friends...', // ALTA
+  'friends.loadError': 'Couldn\'t load your friends right now.', // ALTA
+  'friends.retry': 'Try again', // ALTA
+  'friends.section.incoming': 'Received requests', // ALTA
+  'friends.inviteBanner': 'You opened {user}\'s invite. Tap "Add" to send the request.', // ALTA
+  'friends.section.add': 'Add a friend', // ALTA
+  'friends.searchLabel': 'Search by name or @username', // ALTA
+  'friends.searchPlaceholder': 'Type at least 3 letters', // ALTA
+  'friends.section.friends': 'Your friends', // ALTA
+  'friends.btn.remove': 'Unfriend', // ALTA
+  'friends.empty': 'You don\'t have any friends yet. Search for someone above to send a request.', // ALTA
+  'friends.section.outgoing': 'Sent requests', // ALTA
+  'friends.section.rank': 'Friends\' ranking (this week)', // ALTA
+  'friends.section.activity': 'Friends\' activity', // ALTA
+  'friends.section.invite': 'Invite friends', // ALTA
+  'friends.inviteHint': 'Want to study with someone? Send your link: whoever opens it finds your profile to send a request.', // ALTA
+  'friends.inviteCopy': 'Copy invite link', // ALTA
+  'friends.inviteShare': 'Share', // ALTA
+  'friends.section.prefs': 'Preferences', // ALTA
+  'friends.prefsSummary': 'Notifications and friend requests', // ALTA
+  'friends.loadingShort': 'Loading...', // ALTA
+  'friends.scopeAll': 'All', // ALTA
+  'friends.scopeAria': 'Friends\' ranking language', // ALTA
+  'friends.rank.miniError': 'Couldn\'t load the ranking right now.', // ALTA
+  'friends.rank.seeFull': 'See full ranking', // ALTA
+  'friends.activity.error': 'Couldn\'t load the activity right now.', // ALTA
+  'friends.activity.empty': 'Nothing new in the last 30 days. When your friends earn achievements, they show up here.', // ALTA
+  'friends.activity.aFriend': 'A friend', // ALTA
+  'friends.activity.earned': '{name} earned {badge}', // ALTA
+  'friends.pref.notify_requests': 'Notify me when someone sends me a friend request', // ALTA
+  'friends.pref.notify_accepts': 'Notify me when someone accepts my request', // ALTA
+  'friends.pref.notify_overtakes': 'Notify me when a friend passes me in the ranking', // ALTA
+  'friends.pref.accept_requests': 'Accept new friend requests', // ALTA
+  'friends.prefs.error': 'Couldn\'t load your preferences right now.', // ALTA
+  'friends.prefs.hint': 'If you turn off "Accept new requests", anyone who tries to add you sees that you aren\'t accepting requests right now. Your current friends don\'t change.', // ALTA
+  'friends.toast.saveError': 'Couldn\'t save right now. Try again.', // ALTA
+  'friends.toast.prefSaved': '✓ Preference saved.', // ALTA
+  'friends.toast.linkError': 'Couldn\'t generate your link right now.', // ALTA
+  'friends.shareText': 'Want to study with me? Come in and add me as a friend:', // ALTA
+  'friends.shareTitle': 'Study with me', // ALTA
+  'friends.toast.linkCopied': '✓ Link copied!', // ALTA
+  'friends.promptCopy': 'Copy your invite link:', // ALTA
+  'friends.searchMin': 'Type at least 3 letters.', // ALTA
+  'friends.searching': 'Searching...', // ALTA
+  'friends.searchError': 'Couldn\'t search right now.', // ALTA
+  'friends.searchEmpty': 'No one found. Check the name or @username.', // ALTA
+  'friends.confirmRemove': 'Unfriend? You\'ll no longer appear in each other\'s ranking.', // ALTA
+  'friends.toast.nowFriends': 'You\'re now friends! 🎉', // ALTA
+  'friends.toast.sent': 'Request sent!', // ALTA
+  'friends.toast.accepted': 'Friendship accepted! 🎉', // ALTA
+  'friends.toast.removed': 'Friendship removed.', // ALTA
+  'friends.mode.aria': 'Ranking type', // ALTA
+  'friends.mode.friends': 'Friends', // ALTA
+  'friends.mode.all': 'Global', // ALTA
+  'friends.rank.loadError': 'Couldn\'t load right now.', // ALTA
+  'friends.rank.sideNoFriends': 'You don\'t have any friends in the ranking yet.', // ALTA
+  'friends.rank.addFriendLink': 'Add a friend →', // ALTA
+  'friends.rank.failTitle': 'Couldn\'t load', // ALTA
+  'friends.rank.failText': 'Try again in a moment.', // ALTA
+  'friends.rank.noFriendsTitle': 'Compare your XP with friends', // ALTA
+  'friends.rank.noFriendsText': 'Add friends to see who is studying the most this week.', // ALTA
+  'friends.rank.noFriendsBtn': 'Add a friend', // ALTA
+  'friends.rank.footnoteFriends': 'The ranking resets every Monday. Friends who haven\'t earned XP yet appear at the end.', // ALTA
+  'profile.tabFriends': 'Friends', // ALTA
 };

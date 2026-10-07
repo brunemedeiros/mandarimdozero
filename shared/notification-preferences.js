@@ -35,7 +35,21 @@ const NOTIFICATION_PREF_CATEGORIES = [
   { id: 'conteudo', labelKey: 'notif.cat.conteudo' },
   { id: 'reengajamento', labelKey: 'notif.cat.reengajamento' },
   { id: 'sistema', labelKey: 'notif.cat.sistema' },
+  // Amigos (migration 073/074): só existe aviso NO APP (o servidor grava só
+  // in_app em _friends_notify); push/e-mail ficam desativados na matriz. Sem
+  // preferência salva o servidor entrega (default ligado), então a matriz
+  // também mostra ligado -- ver notifPrefEffectiveChannels.
+  { id: 'amigos', labelKey: 'notif.cat.amigos', inAppOnly: true },
 ];
+
+// Canais efetivos de uma categoria: o que está salvo; para categoria só-in_app
+// sem nada salvo, o padrão do servidor (ligado) -- evita mostrar desmarcado
+// algo que na verdade chega.
+function notifPrefEffectiveChannels(prefs, c){
+  const saved = prefs && prefs.channels ? prefs.channels[c.id] : undefined;
+  if (Array.isArray(saved)) return c.inAppOnly ? saved.filter(ch => ch === 'in_app') : saved;
+  return c.inAppOnly ? ['in_app'] : [];
+}
 
 function notifPrefHourOptionsHTML(selected){
   const sel = selected === null || selected === undefined ? '' : String(selected);
@@ -68,19 +82,21 @@ async function renderNotificationPreferencesView(){
   const localPushSubscription = typeof getLocalPushSubscription === 'function' ? await getLocalPushSubscription() : null;
   const pushSubscribedHere = !!localPushSubscription;
 
-  const anyInAppOn = NOTIFICATION_PREF_CATEGORIES.some(c => (prefs.channels?.[c.id] || []).includes('in_app'));
-  const anyEmailOn = NOTIFICATION_PREF_CATEGORIES.some(c => (prefs.channels?.[c.id] || []).includes('email'));
+  const anyInAppOn = NOTIFICATION_PREF_CATEGORIES.some(c => notifPrefEffectiveChannels(prefs, c).includes('in_app'));
+  const anyEmailOn = NOTIFICATION_PREF_CATEGORIES.filter(c => !c.inAppOnly).some(c => (prefs.channels?.[c.id] || []).includes('email'));
 
   const matrixRowsHTML = NOTIFICATION_PREF_CATEGORIES.map(c => {
-    const inAppChecked = (prefs.channels?.[c.id] || []).includes('in_app') ? 'checked' : '';
-    const pushChecked = (prefs.channels?.[c.id] || []).includes('push') ? 'checked' : '';
-    const emailChecked = (prefs.channels?.[c.id] || []).includes('email') ? 'checked' : '';
+    const eff = notifPrefEffectiveChannels(prefs, c);
+    const inAppChecked = eff.includes('in_app') ? 'checked' : '';
+    const pushChecked = eff.includes('push') ? 'checked' : '';
+    const emailChecked = eff.includes('email') ? 'checked' : '';
+    const offAttr = c.inAppOnly ? `disabled title="${t('notif.pref.inAppOnly')}"` : '';
     return `
       <div class="notif-pref-matrix-row">
         <span class="notif-pref-matrix-label">${t(c.labelKey)}</span>
         <label class="notif-pref-matrix-cell" title="${t('notif.pref.titleMatrixInApp')}"><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="in_app" ${inAppChecked}></label>
-        <label class="notif-pref-matrix-cell" title="${t('notif.pref.titleMatrixPush')}"><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="push" ${pushChecked}></label>
-        <label class="notif-pref-matrix-cell" title="${t('notif.pref.titleMatrixEmail')}"><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="email" ${emailChecked}></label>
+        <label class="notif-pref-matrix-cell" title="${t('notif.pref.titleMatrixPush')}"><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="push" ${pushChecked} ${offAttr}></label>
+        <label class="notif-pref-matrix-cell" title="${t('notif.pref.titleMatrixEmail')}"><input type="checkbox" data-pref-category="${c.id}" data-pref-channel="email" ${emailChecked} ${offAttr}></label>
       </div>
     `;
   }).join('');
@@ -202,7 +218,9 @@ async function setCategoryChannel(category, channel, enabled){
   const prefs = await ensureNotificationPreferencesLoaded();
   if (!prefs) return;
   const channels = { ...(prefs.channels || {}) };
-  const current = new Set(channels[category] || []);
+  const cat = NOTIFICATION_PREF_CATEGORIES.find(c => c.id === category);
+  if (cat && cat.inAppOnly && channel !== 'in_app') return; // só existe aviso no app
+  const current = new Set(cat ? notifPrefEffectiveChannels(prefs, cat) : (channels[category] || []));
   if (enabled) current.add(channel); else current.delete(channel);
   channels[category] = [...current];
   await saveNotificationPreferenceChannels(channels);
@@ -213,7 +231,8 @@ async function setAllCategoriesChannel(channel, enabled){
   if (!prefs) return;
   const channels = { ...(prefs.channels || {}) };
   NOTIFICATION_PREF_CATEGORIES.forEach(c => {
-    const current = new Set(channels[c.id] || []);
+    if (c.inAppOnly && channel !== 'in_app') return;
+    const current = new Set(notifPrefEffectiveChannels(prefs, c));
     if (enabled) current.add(channel); else current.delete(channel);
     channels[c.id] = [...current];
   });
