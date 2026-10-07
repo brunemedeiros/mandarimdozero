@@ -4978,8 +4978,9 @@ function answerExplanationHTML(ex){
     return '';
   }
   if (ex && ex.format === 'scenario' && ex.phrase){
-    // a frase em francês já aparece destacada entre as opções — só a tradução é informação nova
-    return `<p class="usage-note-body">${ex.phrase.t}</p>`;
+    // Mesmo padrão do "Complete a frase": resposta certa (com áudio) + tradução.
+    // A frase vem da própria unidade, então ela mesma já é o "onde você viu".
+    return `<div class="feedback-correct-line">Resposta certa: <strong>${ex.phrase.f}</strong> ${audioBtnHTML(ex.phrase.f)}</div><div class="feedback-phrase-trans">${ex.phrase.t}</div>`;
   }
   if (ex && ex.phrase){
     const u = UNITS.find(x => x.id === STATE.currentUnitId);
