@@ -3717,8 +3717,9 @@ function renderLessonCompleteScreen(u, lesson, { challengesBefore, xpEarned, sco
 // unidade (decisão explícita, ver Q6 da grilagem), substituindo o toast
 // "Unidade concluída! 🏮" que markUnitCompleted mostrava antes (Q5). Roda
 // DEPOIS da tela de "Lição concluída" do checkpoint (que já mostrou
-// vocabulário/nota daquela lição) -- por isso NUNCA repete vocabulário aqui,
-// só o que a unidade como um todo desenvolveu: competências (títulos das
+// vocabulário/nota daquela lição) -- a lista "O que você aprendeu" (todas as
+// palavras da unidade, uma vez) foi pedida pela autora; o resto é só o que a
+// unidade como um todo desenvolveu: competências (títulos das
 // lições não-checkpoint desta unidade) e o objetivo comunicacional
 // (unit.goal), ambos já autorados em content.js, nunca inventados (ver
 // CLAUDE.md, "Coerência pedagógica entre funcionalidades").
@@ -3736,6 +3737,14 @@ function renderUnitCompleteScreen(u, xpEarned){
   maybeShowStreakCelebration();
 
   const competencies = (u.lessons || []).filter(l => !l.isCheckpoint).map(l => l.title).filter(Boolean);
+  // Todas as palavras novas da unidade, na ordem das lições (decisão da
+  // autora: sem agrupar e sem destacar erradas), com áudio e tradução.
+  // Sem vocabIdx nas lições, cai na ordem do próprio vocabulário.
+  const seenWords = new Set();
+  const unitWords = [];
+  const pushWord = i => { const v = u.vocab && u.vocab[i]; if (v && !seenWords.has(i)){ seenWords.add(i); unitWords.push(v); } };
+  (u.lessons || []).forEach(l => (l.vocabIdx || []).forEach(pushWord));
+  (u.vocab || []).forEach((_, i) => pushWord(i));
 
   contentEl.innerHTML = `
     <div class="lesson-complete tier-bounce">
@@ -3751,6 +3760,17 @@ function renderUnitCompleteScreen(u, xpEarned){
           ${competencies.map(c => `<div class="unit-skill-item"><span class="unit-skill-check">✓</span><span>${c}</span></div>`).join('')}
         </div>
       ` : ''}
+      ${unitWords.length ? `
+        <div class="lesson-recap">
+          <div class="lesson-recap-label">O que você aprendeu: ${unitWords.length} ${unitWords.length > 1 ? 'palavras novas' : 'palavra nova'}</div>
+          ${unitWords.map(item => `
+            <div class="lesson-recap-item">
+              <div class="lesson-recap-french">${audioBtnHTML(item.f)}<span>${item.f}</span></div>
+              <div class="lesson-recap-trans">${item.t}</div>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
       ${u.goal ? `
         <div class="unit-skills">
           <div class="unit-skills-label">Objetivo comunicacional atingido</div>
@@ -3762,6 +3782,7 @@ function renderUnitCompleteScreen(u, xpEarned){
   // Marco de fim de UNIDADE (tier 3) -- confete + contador subindo, o peso
   // que antes (por engano) a tela de "Lição concluída" do checkpoint levava
   // pra si mesma (ver comentário histórico removido de renderLessonCompleteScreen).
+  wireAudioButtons(contentEl);
   spawnConfetti(20, 1800);
   animateCount(document.getElementById('uc-stat-xp'), xpEarned, { prefix: '+', suffix: ' ⚡' });
 
@@ -4215,6 +4236,7 @@ function renderDialogueStep(u, contentEl, nextBtn){
         <div class="dlg-bubble">
           <div class="dlg-fr">${dlgHighlight(l.f, terms)}<span class="dlg-wave" aria-hidden="true"><i></i><i></i><i></i></span></div>
           <div class="dlg-tr">${escapeHTML(l.t)}</div>
+          <button type="button" class="dlg-trbtn" aria-label="Mostrar a tradução desta fala" aria-pressed="false">🌐</button>
         </div>
       </div>`;
   }).join('');
@@ -4225,10 +4247,10 @@ function renderDialogueStep(u, contentEl, nextBtn){
     ${dlg.scene ? `<div class="dlg-scene">📍 ${escapeHTML(dlg.scene)}</div>` : ''}
     <div class="dlg-tools">
       <button class="btn btn-secondary dlg-play-btn" id="dlg-play-btn">▶ Ouvir tudo</button>
-      <button class="dlg-chip" id="dlg-trans-btn" aria-pressed="false">Mostrar traduções</button>
       <button class="dlg-chip" id="dlg-auto-btn" aria-pressed="${dlgAutoplayOn()}">Áudio automático: ${dlgAutoplayOn() ? 'ligado' : 'desligado'}</button>
     </div>
     <div class="dlg-chat" id="ud-dialogue">${rowsHTML}</div>
+    <div class="dlg-float"><button class="dlg-chip dlg-chip-float" id="dlg-trans-btn" aria-pressed="false">🌐 Mostrar traduções</button></div>
     ${terms.length ? `<div class="dlg-legend">As palavras sublinhadas são do vocabulário desta unidade. Toque numa delas para ver o significado.</div>` : ''}
     <div class="dlg-check" id="dlg-check" ${checks.length ? '' : 'hidden'}></div>
   `;
@@ -4247,7 +4269,9 @@ function renderDialogueStep(u, contentEl, nextBtn){
   function setTranslations(on){
     chat.classList.toggle('show-trans', on);
     transBtn.setAttribute('aria-pressed', String(on));
-    transBtn.textContent = on ? 'Ocultar traduções' : 'Mostrar traduções';
+    transBtn.textContent = on ? '🌐 Ocultar traduções' : '🌐 Mostrar traduções';
+    // o botão geral manda em todas as falas; os 🌐 individuais acompanham
+    rows.forEach(r => { r.classList.remove('show-tr'); r.querySelector('.dlg-trbtn')?.setAttribute('aria-pressed', 'false'); });
   }
   function stillHere(){ return token === DLG.run && document.body.contains(chat); }
 
@@ -4286,6 +4310,13 @@ function renderDialogueStep(u, contentEl, nextBtn){
     autoBtn.textContent = 'Áudio automático: ' + (on ? 'ligado' : 'desligado');
   });
   rows.forEach(r => {
+    const tb = r.querySelector('.dlg-trbtn');
+    if (tb) tb.addEventListener('click', e => {
+      e.stopPropagation();   // não toca o áudio: só mostra/esconde a tradução desta fala
+      const on = !r.classList.contains('show-tr');
+      r.classList.toggle('show-tr', on);
+      tb.setAttribute('aria-pressed', String(on));
+    });
     const go = () => playFrom(Number(r.dataset.i), false);
     r.addEventListener('click', go);
     r.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); go(); } });

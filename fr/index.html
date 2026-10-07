@@ -960,7 +960,12 @@ body.lesson-focus #pwa-update-banner{ display:none !important; }
 .dlg-row.b .dlg-bubble{ background: color-mix(in srgb, var(--imperial-gold) 14%, var(--paper)); border-color: color-mix(in srgb, var(--imperial-gold) 50%, transparent); border-bottom-right-radius:4px; }
 .dlg-fr{ font-size:15.5px; font-weight:700; line-height:1.45; color: var(--ink); }
 .dlg-tr{ display:none; font-size:12.5px; line-height:1.4; color: var(--ink-soft); margin-top:6px; padding-top:6px; border-top:1px dashed var(--paper-line); }
-.dlg-chat.show-trans .dlg-tr{ display:block; }
+.dlg-chat.show-trans .dlg-tr, .dlg-row.show-tr .dlg-tr{ display:block; }
+.dlg-trbtn{ display:block; margin:6px 0 0 auto; border:0; background:transparent; font-size:15px; line-height:1; padding:4px 6px; border-radius:8px; cursor:pointer; opacity:.7; }
+.dlg-trbtn:hover, .dlg-trbtn[aria-pressed="true"]{ opacity:1; background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.dlg-row.show-tr .dlg-trbtn, .dlg-chat.show-trans .dlg-trbtn{ display:none; }
+.dlg-float{ position:sticky; bottom:14px; display:flex; justify-content:flex-end; margin-top:8px; z-index:5; pointer-events:none; }
+.dlg-chip-float{ pointer-events:auto; background: var(--paper); box-shadow: 0 4px 14px rgba(0,0,0,.18); }
 .dlg-new{ font-weight:800; text-decoration: underline; text-decoration-color: var(--seal-red-dark); text-decoration-thickness:2.5px; text-underline-offset:3px; cursor:help; }
 .dlg-blank{ letter-spacing:.15em; color: var(--ink-soft); }
 
