@@ -1,0 +1,173 @@
+{
+ "unit": "A1-10",
+ "en": {
+  "title": "Shopping",
+  "goal": "Ask prices (with numbers up to one hundred), try on clothes and buy in a store.",
+  "lessons": {
+   "roupas-e-preco": "Pants, dress and expensive",
+   "tamanho-e-loja": "Cheap, size and store",
+   "numeros-30-50": "Numbers: thirty to fifty",
+   "numeros-60-80": "Numbers: sixty to eighty",
+   "numeros-90-100": "Numbers: ninety and one hundred",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "the pants",
+   "the dress",
+   "expensive",
+   "cheap / inexpensive",
+   "the size",
+   "the store",
+   "thirty",
+   "forty",
+   "fifty",
+   "sixty",
+   "seventy",
+   "eighty",
+   "ninety",
+   "one hundred"
+  ],
+  "phrases": [
+   {
+    "t": "How much is this?",
+    "scenario": "You're in a store and want to know the price of a product. What do you ask?"
+   },
+   {
+    "t": "It costs forty euros.",
+    "scenario": "A customer asks the price of a product that costs forty euros. What do you answer?"
+   },
+   {
+    "t": "Can I try on these pants?",
+    "scenario": "You're in a clothing store and want to try on pants before buying. What do you ask?"
+   },
+   {
+    "t": "That's one hundred euros, please.",
+    "scenario": "You're the salesperson and need to charge the customer one hundred euros. What do you say?"
+   },
+   {
+    "t": "The pants are too big."
+   },
+   {
+    "t": "The dress is very pretty."
+   },
+   {
+    "t": "It's not expensive at all."
+   },
+   {
+    "t": "The size is too small."
+   },
+   {
+    "t": "The store closes at 7 p.m."
+   },
+   {
+    "t": "This jacket costs thirty euros."
+   },
+   {
+    "t": "These shoes cost fifty euros."
+   },
+   {
+    "t": "The coat costs seventy euros."
+   },
+   {
+    "t": "This dress costs eighty euros."
+   },
+   {
+    "t": "This bag costs ninety euros."
+   }
+  ],
+  "dialogue": {
+   "title": "In a store",
+   "lines": [
+    "Hello, I'm looking for a dress.",
+    "What size are you?",
+    "I'm a 38. How much is it?",
+    "It costs sixty euros.",
+    "Perfect, I'll take it!"
+   ]
+  },
+  "concepts": {
+   "voudrais-vs-peux": [
+    {
+     "title": "\"Je voudrais\" or \"je peux\"?",
+     "body": "<strong>Je voudrais</strong> (I would like) is the politest way to ask for something in a store — it sounds kinder than \"je veux\" (I want). <strong>Je peux...?</strong> (Can I...?) is used to ask permission, like trying on clothes: <strong>je peux</strong> essayer ce pantalon? Both are polite, but they serve different moments: asking for something vs. asking permission.",
+     "examples": []
+    }
+   ],
+   "combien-ca-coute-wh-in-situ": [
+    {
+     "title": "\"Combien ça coûte ?\" also becomes \"Ça coûte combien ?\"",
+     "body": "Notice that the dialogue you just read already uses the everyday form: <strong>Ça coûte combien ?</strong> instead of \"Combien ça coûte ?\". In everyday speech, it's common to move the question word to the end of the sentence. In the exercises here, keep using \"Combien ça coûte ?\" — it's the form the exercises ask for.",
+     "examples": [
+      "how much is it? (everyday speech)"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "vocab[3]",
+   "pt": "barato",
+   "en": "cheap / inexpensive",
+   "conf": "media",
+   "why": "FR 'pas cher' is neutral ('not expensive'); EN 'cheap' can sound negative, so I added 'inexpensive'"
+  },
+  {
+   "path": "vocab[0]",
+   "pt": "a calça",
+   "en": "the pants",
+   "conf": "media",
+   "why": "EN-US 'pants' (EN-GB 'trousers'); FR 'pantalon' is singular but EN is plural"
+  },
+  {
+   "path": "phrases[0].t",
+   "pt": "Quanto custa isso?",
+   "en": "How much is this?",
+   "conf": "media",
+   "why": "FR 'ça' is generic 'it/this'"
+  },
+  {
+   "path": "phrases[3].t",
+   "pt": "São cem euros, por favor.",
+   "en": "That's one hundred euros, please.",
+   "conf": "media",
+   "why": "'Ça fait' = 'that makes/comes to'; formal 'vous' register (salesperson)"
+  },
+  {
+   "path": "phrases[8].t",
+   "pt": "A loja fecha às dezenove horas.",
+   "en": "The store closes at 7 p.m.",
+   "conf": "media",
+   "why": "FR uses 24h 'dix-neuf heures'; converted to 7 p.m. for natural EN-US"
+  },
+  {
+   "path": "dialogue.lines[1]",
+   "pt": "Qual é o seu tamanho?",
+   "en": "What size are you?",
+   "conf": "media",
+   "why": "FR 'Quelle taille faites-vous ?' is formal (vous); EN 'What size do you wear?' also works"
+  },
+  {
+   "path": "dialogue.lines[2]",
+   "pt": "Eu uso 38.",
+   "en": "I'm a 38.",
+   "conf": "media",
+   "why": "'Je fais du 38' = 'I wear a 38'; European sizing"
+  },
+  {
+   "path": "dialogue.lines[4]",
+   "pt": "Perfeito, vou levar!",
+   "en": "Perfect, I'll take it!",
+   "conf": "media",
+   "why": "'Je la prends' = 'I'll take it' (feminine 'robe')"
+  },
+  {
+   "path": "concepts.voudrais-vs-peux[0].body",
+   "pt": "Posso...?",
+   "en": "Can I...?",
+   "conf": "media",
+   "why": "'May I...?' is more formal and also correct"
+  }
+ ]
+}

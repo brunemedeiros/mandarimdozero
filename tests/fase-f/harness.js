@@ -61,7 +61,7 @@ function makeFakeSupabase(db, userId){
 
 function load(appKey, userId){
   const db = { decks: [], own_flashcards: [] };
-  const ctx = vm.createContext({ console, Date, Math, JSON, Map, Set, Promise, Object, Array, String, Number, Error, RegExp });
+  const ctx = vm.createContext(require('../i18n/vm-t').installT({ console, Date, Math, JSON, Map, Set, Promise, Object, Array, String, Number, Error, RegExp }));
   ctx.window = ctx; ctx.APP_KEY = appKey; ctx.CURRENT_USER = { id: userId };
   ctx.supabaseClient = makeFakeSupabase(db, userId);
   ctx.escapeHTML = s => String(s);

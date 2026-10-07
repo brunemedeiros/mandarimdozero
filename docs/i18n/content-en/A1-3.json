@@ -1,0 +1,177 @@
+{
+ "unit": "A1-3",
+ "en": {
+  "title": "Numbers and age",
+  "goal": "Count from zero to one hundred and say or ask someone's age.",
+  "lessons": {
+   "primeiros-numeros": "First numbers",
+   "contar-ate-vinte": "Counting to twenty",
+   "idade": "Asking and saying your age",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "zero",
+   "one (m. / f.)",
+   "two",
+   "three",
+   "ten",
+   "twenty",
+   "age",
+   "to have",
+   "years (old)",
+   "how much / how many"
+  ],
+  "phrases": [
+   {
+    "t": "How old are you?",
+    "scenario": "You want to know a new friend's age. What do you ask?"
+   },
+   {
+    "t": "I'm twenty years old.",
+    "scenario": "Someone asks your age and you're twenty. What do you answer?"
+   },
+   {
+    "t": "He's ten years old.",
+    "scenario": "You're introducing your ten-year-old nephew. What do you say about his age?"
+   },
+   {
+    "t": "There are ten of us.",
+    "scenario": "The waiter asks how many people are in your group, which has ten people. What do you say?"
+   },
+   {
+    "t": "How much does it cost?"
+   },
+   {
+    "t": "It's zero degrees outside."
+   },
+   {
+    "t": "I have two brothers and three sisters."
+   },
+   {
+    "t": "How old is your father?"
+   }
+  ],
+  "dialogue": {
+   "title": "At the park",
+   "lines": [
+    "How old is your daughter?",
+    "She's eight. And your son?",
+    "He's ten.",
+    "They're so big!"
+   ]
+  },
+  "concepts": {
+   "avoir-age": [
+    {
+     "title": "\"J'ai vingt ans\" — why \"ai\" and not \"suis\"?",
+     "body": "In English we say \"I <strong>am</strong> twenty\" or \"I'm <strong>twenty years old</strong>\", but in French age always uses the verb <strong>avoir</strong> (to have): <strong>j'ai</strong> vingt ans, never \"je suis vingt ans\". It's a common mistake for people who translate directly from English — it's worth memorizing this structure.",
+     "examples": [
+      "to have",
+      "age"
+     ]
+    }
+   ],
+   "vingt-to-quatrevingts": [
+    {
+     "title": "\"Vingt\" is the base of an odd system",
+     "body": "In France, after 69 the numbers jump to a base of 20: 70 is <strong>soixante-dix</strong> (\"sixty-ten\"), 80 is <strong>quatre-vingts</strong> (\"four-twenties\") — the \"vingt\" you just learned, multiplied! But it isn't like this everywhere French is spoken.",
+     "examples": [],
+     "variants": [
+      "France",
+      "Belgium and Switzerland",
+      "Switzerland (only there)"
+     ]
+    }
+   ],
+   "quel-age-wh-in-situ": [
+    {
+     "title": "\"Quel âge as-tu ?\" also becomes \"T'as quel âge ?\"",
+     "body": "In everyday speech, \"tu as\" often shrinks to <strong>t'as</strong>, and the question word (\"quel âge\") can go at the end of the sentence — <strong>t'as quel âge ?</strong> instead of \"quel âge as-tu ?\". In the exercises here, keep using the form \"quel âge as-tu ?\" — it's the form the exercises ask for.",
+     "examples": [
+      "how old are you? (everyday speech)"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "vocab[1]",
+   "pt": "um / uma",
+   "en": "one (m. / f.)",
+   "conf": "media",
+   "why": "un/une gender pair; also the article 'a/an'"
+  },
+  {
+   "path": "vocab[8]",
+   "pt": "anos",
+   "en": "years (old)",
+   "conf": "media",
+   "why": "'ans' only appears with age"
+  },
+  {
+   "path": "vocab[9]",
+   "pt": "quanto / quantos",
+   "en": "how much / how many",
+   "conf": "media",
+   "why": "EN splits by countable/uncountable"
+  },
+  {
+   "path": "phrases[3].t",
+   "pt": "Somos dez (pessoas).",
+   "en": "There are ten of us.",
+   "conf": "media",
+   "why": "FR 'Nous sommes dix' ('we are ten'); EN idiomatic form"
+  },
+  {
+   "path": "phrases[3].scenario",
+   "pt": "O garçom pergunta quantas pessoas são no seu grupo, que tem dez pessoas. O que você diz?",
+   "en": "The waiter asks how many people are in your group, which has ten people. What do you say?",
+   "conf": "media",
+   "why": "fine, but PT 'garçom' -> 'waiter' (gender-neutral 'server' also possible)"
+  },
+  {
+   "path": "phrases[5].t",
+   "pt": "Está zero grau lá fora.",
+   "en": "It's zero degrees outside.",
+   "conf": "media",
+   "why": "'degrees' (zero degrees) vs singular; Celsius assumed, EN-US users think Fahrenheit"
+  },
+  {
+   "path": "dialogue.lines[3]",
+   "pt": "Eles estão grandes!",
+   "en": "They're so big!",
+   "conf": "baixa",
+   "why": "FR 'Ils sont grands' is plain; PT 'estão grandes' means they've grown; EN 'so big' adds emphasis for naturalness"
+  },
+  {
+   "path": "concepts.vingt-to-quatrevingts[0].body",
+   "pt": "...soixante-dez (\"sessenta-dez\")...",
+   "en": "...(\"sixty-ten\")...",
+   "conf": "media",
+   "why": "literal translations of number names, verified"
+  },
+  {
+   "path": "concepts.vingt-to-quatrevingts[0].variants",
+   "pt": "França / Bélgica e Suíça / Suíça (só lá)",
+   "en": "France / Belgium and Switzerland / Switzerland (only there)",
+   "conf": "media",
+   "why": "region labels only; sentence-case labels"
+  },
+  {
+   "path": "concepts.avoir-age[0].body",
+   "pt": "Em português dizemos 'eu sou/tenho vinte anos'",
+   "en": "In English we say 'I am twenty years old'",
+   "conf": "media",
+   "why": "PT contrast (sou/tenho) does not map to EN; I adapted it to EN contrast (am vs have), which changes the teaching point slightly"
+  },
+  {
+   "path": "concepts.quel-age-wh-in-situ[0].examples[0]",
+   "pt": "quantos anos você tem? (fala cotidiana)",
+   "en": "how old are you? (everyday speech)",
+   "conf": "media",
+   "why": "register note"
+  }
+ ]
+}

@@ -1,0 +1,180 @@
+{
+ "unit": "A1-19",
+ "en": {
+  "title": "Leisure and activities",
+  "goal": "Talk about hobbies and make weekend plans.",
+  "lessons": {
+   "cinema-musica-esporte": "Movies, music and sports",
+   "ler-jogar-dancar": "Reading, playing and dancing",
+   "cantar-fim-de-semana-sair-filme": "Singing, the weekend, going out and the movie",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "the movies / the cinema",
+   "music",
+   "sport / sports",
+   "to read",
+   "to play (a game) / to play (an instrument)",
+   "to dance",
+   "to sing",
+   "the weekend",
+   "to go out",
+   "the movie / the film"
+  ],
+  "phrases": [
+   {
+    "t": "What do you do on the weekend?",
+    "scenario": "You want to know what a friend usually does on weekends. What do you ask?"
+   },
+   {
+    "t": "I like reading books.",
+    "scenario": "Someone asks what your favorite hobby is, and it's reading books. What do you say?"
+   },
+   {
+    "t": "Shall we go to the movies tonight?",
+    "scenario": "You want to invite a friend to the movies tonight. What do you ask?"
+   },
+   {
+    "t": "He plays the guitar.",
+    "scenario": "Someone asks what your brother can do — he plays the guitar. What do you answer?"
+   },
+   {
+    "t": "The movie theater is closed tonight."
+   },
+   {
+    "t": "I love listening to music."
+   },
+   {
+    "t": "Sports are good for your health."
+   },
+   {
+    "t": "Children like to play outside."
+   },
+   {
+    "t": "She loves dancing and singing."
+   },
+   {
+    "t": "We're going out on Saturday night."
+   },
+   {
+    "t": "The movie starts at eight o'clock."
+   }
+  ],
+  "dialogue": {
+   "title": "The weekend",
+   "lines": [
+    "Do you have any plans for the weekend?",
+    "Yes, I'm going to the movies with friends.",
+    "Which movie are you going to see?",
+    "We don't know yet!"
+   ]
+  },
+  "concepts": {
+   "jouer-de-vs-jouer-a": [
+    {
+     "title": "\"Jouer DE la guitare\" or \"jouer AU foot\"?",
+     "body": "For musical instruments, use <strong>jouer de</strong>: jouer <strong>de la</strong> guitare, jouer <strong>du</strong> piano. For sports and games, use <strong>jouer à</strong>: jouer <strong>au</strong> foot, jouer <strong>aux</strong> cartes. It's a simple little rule, but without it you can mix everything up — worth memorizing this pair of prepositions.",
+     "examples": [
+      "to play (a game) / to play (an instrument)"
+     ]
+    }
+   ],
+   "cinema-nasceu-na-franca": [
+    {
+     "title": "Cinema was born in France",
+     "body": "In 1895, the brothers <strong>Auguste and Louis Lumière</strong> held in Paris the first public, paid screening of films in history, using the cinematograph they had invented themselves. That's why France is considered the birthplace of cinema — and it still has a highly valued film scene today, with the Cannes Film Festival among the most important in the world.",
+     "examples": [
+      "the movies / the cinema"
+     ]
+    }
+   ],
+   "ne-drop-on-sait-pas": [
+    {
+     "title": "In everyday speech, \"On ne sait pas encore !\" loses its \"ne\"",
+     "body": "In everyday speech, the <strong>ne</strong> of the negation almost always disappears — <strong>on sait pas encore</strong> instead of \"on ne sait pas encore\". It's probably the most common simplification in all of spoken French, and it applies to any \"ne... pas\" negation. In the exercises here, keep writing the \"ne\" — it's the form the exercises ask for.",
+     "examples": [
+      "we don't know yet (everyday speech)"
+     ]
+    }
+   ]
+  },
+  "trueFalse": [
+   {
+    "claim": "This is a way of inviting someone out.",
+    "whyNote": "Correct — <strong>on va...?</strong> is a casual way of suggesting plans, like \"shall we go to the movies tonight?\"."
+   }
+  ]
+ },
+ "review": [
+  {
+   "path": "vocab[4]",
+   "pt": "jogar / tocar (instrumento)",
+   "en": "to play (a game) / to play (an instrument)",
+   "conf": "media",
+   "why": "English uses 'play' for both; the French distinction (jouer à / jouer de) is the lesson point, kept in the concept note."
+  },
+  {
+   "path": "vocab[0]",
+   "pt": "o cinema",
+   "en": "the movies / the cinema",
+   "conf": "media",
+   "why": "EN-US 'the movies' (activity) vs 'cinema' (building/art); both shown."
+  },
+  {
+   "path": "phrases[2].t",
+   "pt": "A gente vai ao cinema hoje à noite?",
+   "en": "Shall we go to the movies tonight?",
+   "conf": "media",
+   "why": "'on' = informal 'we'; 'Are we going to the movies tonight?' is the literal alternative. 'Shall we' is more of a suggestion, chosen for the invitation sense."
+  },
+  {
+   "path": "phrases[7].t",
+   "pt": "As crianças gostam de brincar lá fora.",
+   "en": "Children like to play outside.",
+   "conf": "media",
+   "why": "'Les enfants' generic; 'The children like...' also possible."
+  },
+  {
+   "path": "phrases[9].t",
+   "pt": "Vamos sair no sábado à noite.",
+   "en": "We're going out on Saturday night.",
+   "conf": "media",
+   "why": "'On va sortir' = informal near future; 'Let's go out' is a possible reading but PT says 'Vamos sair' as statement."
+  },
+  {
+   "path": "phrases[10].t",
+   "pt": "O filme começa às vinte horas.",
+   "en": "The movie starts at eight o'clock.",
+   "conf": "media",
+   "why": "French 24-hour 'vingt heures' = 8 PM; English would say 8 p.m. Kept 'eight o'clock' (PM implied). Could be '8 p.m.'."
+  },
+  {
+   "path": "phrases[4].t",
+   "pt": "O cinema está fechado hoje à noite.",
+   "en": "The movie theater is closed tonight.",
+   "conf": "media",
+   "why": "EN-US 'movie theater' for the building."
+  },
+  {
+   "path": "concepts.cinema-nasceu-na-franca[0].title",
+   "pt": "O cinema nasceu na França",
+   "en": "Cinema was born in France",
+   "conf": "media",
+   "why": "Cultural note translated faithfully; 'birthplace of cinema' wording follows PT."
+  },
+  {
+   "path": "concepts.ne-drop-on-sait-pas[0].body",
+   "pt": "A gente ainda não sabe",
+   "en": "we don't know yet (everyday speech)",
+   "conf": "media",
+   "why": "Reality note; 'a gente' = informal 'we' lost in English."
+  },
+  {
+   "path": "trueFalse[0].claim",
+   "pt": "Essa é uma forma de convidar alguém pra sair.",
+   "en": "This is a way of inviting someone out.",
+   "conf": "media",
+   "why": "'pra sair' = to go out/hang out; 'inviting someone out' natural."
+  }
+ ]
+}

@@ -1,0 +1,128 @@
+{
+ "unit": 13,
+ "en": {
+  "title": "Future plans",
+  "goal": "Express plans and intentions using 要 and 打算.",
+  "lessons": {
+   "planos": "Saying what you plan to do",
+   "viagem-estudo": "Talking about travel and study plans",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "to plan / intend",
+   "tomorrow",
+   "next week",
+   "to travel / tourism",
+   "to study",
+   "plan",
+   "later / in the future"
+  ],
+  "phrases": [
+   {
+    "t": "What are your plans for tomorrow?"
+   },
+   {
+    "t": "I plan to study Chinese."
+   },
+   {
+    "t": "In the future I want to travel to China."
+   }
+  ],
+  "dialogue": {
+   "title": "Talking about the future",
+   "lines": [
+    "What are your plans for next week?",
+    "I plan to study Chinese.",
+    "Do you want to go to China in the future?",
+    "Yes! I want to travel to China."
+   ]
+  },
+  "concepts": {
+   "dasuan": [
+    {
+     "title": "打算 (dǎsuàn) — future plans",
+     "body": "打算 (dǎsuàn) means \"to plan\" or \"to intend\", and is followed directly by a verb — it is one of the most common ways to talk about future plans in Chinese.",
+     "examples": [
+      "I plan to study Chinese"
+     ]
+    }
+   ],
+   "yihou": [
+    {
+     "title": "以后 (yǐhòu) — \"after\"",
+     "body": "以后 (yǐhòu) means \"after\" or \"in the future\", and comes after the time reference it relates to — the whole structure (time + 以后) works as a unit meaning \"after that moment\".",
+     "examples": [
+      "in the future I want to travel to China"
+     ]
+    },
+    {
+     "title": "\"Dǎsuàn\" or \"yào\"?",
+     "body": "<strong>Dǎsuàn</strong> (打算) is a more thought-out plan, with some organization. <strong>Yào</strong> (要, which you saw back in Unit 5) can express a more immediate or simple intention, \"I'm going to do it\". Dǎsuàn sounds a bit more formal and deliberate than yào.",
+     "examples": [
+      "I plan to study Chinese (plan)",
+      "I want to travel to China (intention)"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "vocab[0]",
+   "pt": "planejar/pretender",
+   "en": "to plan / intend",
+   "conf": "media",
+   "why": "two glosses"
+  },
+  {
+   "path": "vocab[3]",
+   "pt": "viajar/turismo",
+   "en": "to travel / tourism",
+   "conf": "media",
+   "why": "verb and noun"
+  },
+  {
+   "path": "vocab[6]",
+   "pt": "depois/no futuro",
+   "en": "later / in the future",
+   "conf": "media",
+   "why": "two glosses"
+  },
+  {
+   "path": "phrases[2]",
+   "pt": "No futuro eu quero viajar para a China.",
+   "en": "In the future I want to travel to China.",
+   "conf": "media",
+   "why": "word order natural alternative: 'I want to travel to China in the future'"
+  },
+  {
+   "path": "dialogue.lines[3]",
+   "pt": "Quero! Eu quero viajar para a China.",
+   "en": "Yes! I want to travel to China.",
+   "conf": "media",
+   "why": "answer to 要 question; alt 'I do!'"
+  },
+  {
+   "path": "concepts.yihou[0].title",
+   "pt": "\"depois de\"",
+   "en": "\"after\"",
+   "conf": "media",
+   "why": "PT 'depois de' kept as 'after'"
+  },
+  {
+   "path": "concepts.yihou[1].body",
+   "pt": "vou fazer isso",
+   "en": "I'm going to do it",
+   "conf": "media",
+   "why": "idiomatic; yào ~ 'want to / going to'"
+  },
+  {
+   "path": "concepts.yihou[1].body",
+   "pt": "Dǎsuàn soa um pouco mais formal e deliberado que yào",
+   "en": "Dǎsuàn sounds a bit more formal and deliberate than yào",
+   "conf": "baixa",
+   "why": "register claim copied from PT source; not checked independently"
+  }
+ ]
+}

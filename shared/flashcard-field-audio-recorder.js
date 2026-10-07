@@ -132,11 +132,12 @@ function buildFieldAudioRecordingFile(blob, baseType){
   return blob;
 }
 
+// Getters: t() só roda quando a mensagem é lida (nunca no carregamento do módulo).
 const FIELD_AUDIO_RECORDING_ERROR_LABELS = {
-  permission_denied: 'Permissão de microfone negada -- não foi possível gravar. Você pode permitir o acesso ao microfone nas configurações do navegador e tentar de novo.',
-  no_device: 'Nenhum microfone disponível neste navegador/dispositivo.',
-  recording_error: 'Ocorreu um erro durante a gravação -- tente de novo.',
-  upload_error: 'Gravação concluída, mas não foi possível salvá-la -- tente de novo.',
+  get permission_denied(){ return t('recorder.err.permissionDenied'); },
+  get no_device(){ return t('recorder.err.noDevice'); },
+  get recording_error(){ return t('recorder.err.recordingError'); },
+  get upload_error(){ return t('recorder.err.uploadError'); },
 };
 
 // ---------- Máquina de estados PURA ----------
@@ -341,7 +342,7 @@ function createFieldAudioRecorder(opts){
     if (recorder && recorder.state !== 'inactive'){
       try { recorder.stop(); } catch (err){
         resetCapture();
-        setState(fieldAudioRecorderReducer(state, { type: 'RECORDER_ERROR', error: 'Não foi possível finalizar a gravação.' }));
+        setState(fieldAudioRecorderReducer(state, { type: 'RECORDER_ERROR', error: t('recorder.err.finishFailed') }));
       }
     }
   }
@@ -363,7 +364,7 @@ function createFieldAudioRecorder(opts){
   async function uploadRecordedBlob(blob, mimeType, durationMs){
     const baseType = baseAudioMimeType(mimeType);
     if (typeof cb.uploadFn !== 'function'){
-      setState(fieldAudioRecorderReducer(state, { type: 'UPLOAD_FAILURE', error: 'Upload de gravação não está disponível nesta tela.' }));
+      setState(fieldAudioRecorderReducer(state, { type: 'UPLOAD_FAILURE', error: t('recorder.err.uploadUnavailable') }));
       return;
     }
     const file = buildFieldAudioRecordingFile(blob, baseType);
@@ -378,7 +379,7 @@ function createFieldAudioRecorder(opts){
       // minimamente nesta fase pra aceitar os dois valores de `kind`).
       res = await cb.uploadFn(file, 'recording', cb.fieldId || null);
     } catch (err){
-      res = { ok: false, error: 'Não foi possível salvar a gravação agora.' };
+      res = { ok: false, error: t('recorder.err.saveFailed') };
     }
     if (!res || !res.ok){
       setState(fieldAudioRecorderReducer(state, { type: 'UPLOAD_FAILURE', error: (res && res.error) || undefined }));

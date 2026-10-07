@@ -1,0 +1,151 @@
+{
+ "unit": 12,
+ "en": {
+  "title": "Hobbies and free time",
+  "goal": "Talk about hobbies, likes and what you do in your free time.",
+  "lessons": {
+   "hobbies-leitura": "Talking about hobbies: reading and listening to music",
+   "atividades": "Watching movies, exercising and singing",
+   "dancar-tempo-livre": "Inviting someone to dance",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "hobby",
+   "to read (a book)",
+   "to listen to music",
+   "to watch a movie",
+   "to exercise / play sports",
+   "to sing",
+   "to dance",
+   "to be free / have free time"
+  ],
+  "phrases": [
+   {
+    "t": "What is your hobby?"
+   },
+   {
+    "t": "I like reading books and listening to music."
+   },
+   {
+    "t": "Are you free this weekend?"
+   }
+  ],
+  "dialogue": {
+   "title": "Making plans",
+   "lines": [
+    "What is your hobby?",
+    "I like watching movies and dancing. And you?",
+    "I like to exercise. Are you free this weekend?",
+    "I am! Let's go see a movie."
+   ]
+  },
+  "concepts": {
+   "de-posse": [
+    {
+     "title": "的 (de) — showing possession",
+     "body": "的 (de) is used to show possession, like \"my\", \"your\", \"someone's\". It works like English 's / \"of\": 我的书 = my book, with no separate possessive forms. It always goes between the owner and the thing owned. The structure is: Owner + 的 + Thing.",
+     "examples": [
+      "what is your hobby?"
+     ]
+    }
+   ],
+   "kan-vs-ting": [
+    {
+     "title": "\"Kàn\" or \"tīng\"?",
+     "body": "<strong>Kàn</strong> (看) is used for visual activities: reading, watching a movie. <strong>Tīng</strong> (听) is used for listening activities. Mixing the two up is a common mistake — \"listening to a movie\" or \"watching music\" sounds odd in Chinese, just as it would in English.",
+     "examples": [
+      "to read a book (visual activity)",
+      "to listen to music (listening activity)"
+     ]
+    }
+   ],
+   "guangchangwu-danca-praca": [
+    {
+     "title": "Square dancing: a very Chinese hobby",
+     "body": "In squares and parks all over China, it's common to see groups — usually middle-aged and older women — gathering every late afternoon to dance together to music, in a tradition known as <strong>guǎngchǎng wǔ</strong> (广场舞, \"square dance\"). It is both physical exercise and an important social moment for that generation.",
+     "examples": [
+      "square dancing"
+     ]
+    }
+   ]
+  },
+  "trueFalse": [
+   {
+    "claim": "This is a way of inviting someone to do something.",
+    "whyNote": "Correct — <strong>你有空吗？</strong> asks whether the person is free/available, a common way to invite someone to do something on the weekend."
+   }
+  ]
+ },
+ "review": [
+  {
+   "path": "vocab[0]",
+   "pt": "hobby",
+   "en": "hobby",
+   "conf": "media",
+   "why": "PT uses the English loan; 爱好 = hobby/interest"
+  },
+  {
+   "path": "vocab[4]",
+   "pt": "fazer exercício/esporte",
+   "en": "to exercise / play sports",
+   "conf": "media",
+   "why": "two glosses"
+  },
+  {
+   "path": "vocab[7]",
+   "pt": "ter tempo livre",
+   "en": "to be free / have free time",
+   "conf": "media",
+   "why": "two natural renderings"
+  },
+  {
+   "path": "dialogue.title",
+   "pt": "Combinando um programa",
+   "en": "Making plans",
+   "conf": "media",
+   "why": "idiomatic; PT 'combinar um programa' = arrange an outing"
+  },
+  {
+   "path": "dialogue.lines[3]",
+   "pt": "Tenho! Vamos assistir um filme.",
+   "en": "I am! Let's go see a movie.",
+   "conf": "media",
+   "why": "有空 answered as 'I am (free)'; alt 'Yes!'"
+  },
+  {
+   "path": "lessons.dancar-tempo-livre",
+   "pt": "Convidar alguém pra dançar",
+   "en": "Inviting someone to dance",
+   "conf": "media",
+   "why": "lesson title"
+  },
+  {
+   "path": "concepts.de-posse[0].body",
+   "pt": "parecido com o \"'s\" do inglês, mas mais simples",
+   "en": "works like English 's / \"of\": 我的书 = my book, no separate possessive forms",
+   "conf": "media",
+   "why": "Reworded to drop the \"but simpler\" contrast that came from the PT word-order comparison."
+  },
+  {
+   "path": "concepts.kan-vs-ting[0].body",
+   "pt": "igual soariam em português",
+   "en": "just as it would in English",
+   "conf": "media",
+   "why": "comparison adapted PT->EN"
+  },
+  {
+   "path": "concepts.guangchangwu-danca-praca[0]",
+   "pt": "dança de praça",
+   "en": "square dancing",
+   "conf": "media",
+   "why": "cultural note; 'square dance' also names a US folk dance, so kept the chinese term alongside"
+  },
+  {
+   "path": "trueFalse[0].claim",
+   "pt": "Essa é uma forma de convidar alguém pra fazer algo.",
+   "en": "This is a way of inviting someone to do something.",
+   "conf": "media",
+   "why": "idiomatic"
+  }
+ ]
+}

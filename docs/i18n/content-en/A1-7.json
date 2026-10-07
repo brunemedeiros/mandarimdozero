@@ -1,0 +1,136 @@
+{
+ "unit": "A1-7",
+ "en": {
+  "title": "Days and months",
+  "goal": "Say the days of the week and the months, and arrange to meet someone.",
+  "lessons": {
+   "dias-da-semana": "Days of the week and today",
+   "ontem-amanha-semana": "Tomorrow, yesterday and the week",
+   "meses-e-data": "Months and the date",
+   "checkpoint": "Checkpoint"
+  },
+  "vocab": [
+   "Monday",
+   "Tuesday",
+   "today",
+   "tomorrow",
+   "yesterday",
+   "the week",
+   "the month",
+   "January",
+   "December",
+   "the date"
+  ],
+  "phrases": [
+   {
+    "t": "What day is it today?",
+    "scenario": "You've lost track of the day of the week. What do you ask?"
+   },
+   {
+    "t": "Today is Monday.",
+    "scenario": "Someone asks what day it is, and it's Monday. What do you answer?"
+   },
+   {
+    "t": "My birthday is in March.",
+    "scenario": "Someone asks which month your birthday is in — March. What do you say?"
+   },
+   {
+    "t": "See you tomorrow!",
+    "scenario": "You're saying goodbye to a coworker and you'll see them again tomorrow. What do you say?"
+   },
+   {
+    "t": "Today the weather is nice."
+   },
+   {
+    "t": "Next week, I'm going on a trip."
+   },
+   {
+    "t": "The month of January is very cold."
+   },
+   {
+    "t": "My birthday is in December."
+   },
+   {
+    "t": "What's the date today?"
+   }
+  ],
+  "dialogue": {
+   "title": "Arranging to meet",
+   "lines": [
+    "What day shall we meet?",
+    "Tuesday, does that work for you?",
+    "No, I work on Tuesday. What about Wednesday?",
+    "Perfect, see you Wednesday then!"
+   ]
+  },
+  "concepts": {
+   "a-demain-vs-a-bientot": [
+    {
+     "title": "\"À demain\" or \"à bientôt\"?",
+     "body": "French goodbyes vary depending on how long until you meet again: <strong>à demain</strong> when you know you'll see the person tomorrow, and <strong>à bientôt</strong> when the reunion is more uncertain, just \"see you soon\". <strong>Au revoir</strong>, on the other hand, is neutral and works for any goodbye, without saying when the next meeting will be.",
+     "examples": [
+      "tomorrow",
+      "yesterday"
+     ]
+    }
+   ],
+   "dias-semana-deuses-romanos": [
+    {
+     "title": "Where do the names of the days of the week come from?",
+     "body": "The French days of the week come from Roman gods/planets: <strong>lundi</strong> is the day of the Moon (Lune), <strong>mardi</strong> is the day of Mars (Mars). The pattern continues: mercredi (Mercury), jeudi (Jupiter), vendredi (Venus), samedi (Saturn) — only dimanche breaks the rule, coming from the Latin for \"the Lord's day\".",
+     "examples": [
+      "Monday — day of the Moon",
+      "Tuesday — day of Mars"
+     ]
+    }
+   ],
+   "nous-sommes-on-est": [
+    {
+     "title": "\"Nous sommes lundi\" becomes \"On est lundi\" in everyday speech",
+     "body": "In everyday speech, <strong>on</strong> has practically replaced <strong>nous</strong> as \"we\" — <strong>on est</strong> lundi instead of \"nous sommes lundi\". The verb conjugates like \"il/elle\" (on est, on a, on va), not like \"nous\". In the exercises here, keep using \"nous\" — it's the form the exercises ask for.",
+     "examples": [
+      "it's Monday (everyday speech)"
+     ]
+    }
+   ]
+  },
+  "trueFalse": []
+ },
+ "review": [
+  {
+   "path": "phrases[0].t",
+   "pt": "Que dia é hoje?",
+   "en": "What day is it today?",
+   "conf": "media",
+   "why": "FR 'Quel jour sommes-nous ?' is formal-ish; EN also 'What day is today?'"
+  },
+  {
+   "path": "phrases[4].t",
+   "pt": "Hoje está bonito.",
+   "en": "Today the weather is nice.",
+   "conf": "media",
+   "why": "FR 'il fait beau' = the weather is nice; PT 'está bonito' is vague, so I made the weather explicit"
+  },
+  {
+   "path": "concepts.nous-sommes-on-est[0].examples[0]",
+   "pt": "hoje é segunda (fala cotidiana)",
+   "en": "it's Monday (everyday speech)",
+   "conf": "media",
+   "why": "'on est lundi' also fits 'we're on Monday'; chose the natural 'it's Monday'"
+  },
+  {
+   "path": "concepts.nous-sommes-on-est[0].body",
+   "pt": "\"a gente\"/\"nós\"",
+   "en": "\"we\"",
+   "conf": "media",
+   "why": "PT 'a gente' has no EN equivalent; collapsed to 'we'"
+  },
+  {
+   "path": "concepts.dias-semana-deuses-romanos[0].body",
+   "pt": "dia do Senhor",
+   "en": "the Lord's day",
+   "conf": "media",
+   "why": "Latin 'dies Dominicus'; 'the Lord's day' is the standard rendering"
+  }
+ ]
+}

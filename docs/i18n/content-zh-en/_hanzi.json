@@ -1,0 +1,1046 @@
+{
+ "你": {
+  "meaning": "you",
+  "radicals": [
+   "person",
+   "you (phonetic)"
+  ]
+ },
+ "好": {
+  "meaning": "good, well",
+  "radicals": [
+   "woman",
+   "child"
+  ],
+  "mnemonic": "A woman (女) beside a child (子) — the traditional image of a family together, something good and complete."
+ },
+ "再": {
+  "meaning": "again, once more",
+  "radicals": []
+ },
+ "见": {
+  "meaning": "to see, to meet",
+  "radicals": []
+ },
+ "谢": {
+  "meaning": "to thank",
+  "radicals": [
+   "speech",
+   "to shoot (phonetic)"
+  ]
+ },
+ "不": {
+  "meaning": "not; no",
+  "radicals": []
+ },
+ "客": {
+  "meaning": "guest",
+  "radicals": [
+   "roof/house",
+   "each (phonetic)"
+  ]
+ },
+ "气": {
+  "meaning": "air, energy",
+  "radicals": []
+ },
+ "对": {
+  "meaning": "correct, right; toward",
+  "radicals": []
+ },
+ "起": {
+  "meaning": "to get up, to start",
+  "radicals": [
+   "to walk",
+   "oneself (phonetic)"
+  ]
+ },
+ "没": {
+  "meaning": "not have, there is not",
+  "radicals": [
+   "water",
+   "tool (phonetic)"
+  ]
+ },
+ "关": {
+  "meaning": "to close; relation",
+  "radicals": []
+ },
+ "系": {
+  "meaning": "system, connection",
+  "radicals": []
+ },
+ "早": {
+  "meaning": "early, morning",
+  "radicals": [
+   "sun",
+   "ten"
+  ],
+  "mnemonic": "The sun (日) rising just above the horizon line (十, like the first rays of light) — the image of the start of the morning."
+ },
+ "上": {
+  "meaning": "up, on top; to go up",
+  "radicals": []
+ },
+ "晚": {
+  "meaning": "night, evening",
+  "radicals": [
+   "sun",
+   "to avoid (phonetic)"
+  ]
+ },
+ "我": {
+  "meaning": "I, me",
+  "radicals": []
+ },
+ "叫": {
+  "meaning": "to be called, to shout",
+  "radicals": [
+   "mouth",
+   "to curl (phonetic)"
+  ]
+ },
+ "名": {
+  "meaning": "name",
+  "radicals": [
+   "evening",
+   "mouth"
+  ]
+ },
+ "字": {
+  "meaning": "character, word",
+  "radicals": [
+   "roof/house",
+   "child"
+  ]
+ },
+ "是": {
+  "meaning": "to be",
+  "radicals": []
+ },
+ "人": {
+  "meaning": "person",
+  "radicals": []
+ },
+ "巴": {
+  "char": "美",
+  "pinyin": "měi",
+  "meaning": "beautiful (the 美 in Měiguó, United States)",
+  "radicals": []
+ },
+ "西": {
+  "meaning": "west",
+  "radicals": []
+ },
+ "中": {
+  "meaning": "middle, center",
+  "radicals": []
+ },
+ "国": {
+  "meaning": "country",
+  "radicals": [
+   "enclosure, border",
+   "jade (treasure)"
+  ]
+ },
+ "哪": {
+  "meaning": "which",
+  "radicals": [
+   "mouth",
+   "that (phonetic)"
+  ]
+ },
+ "零": {
+  "meaning": "zero",
+  "radicals": []
+ },
+ "一": {
+  "meaning": "one",
+  "radicals": []
+ },
+ "二": {
+  "meaning": "two",
+  "radicals": []
+ },
+ "三": {
+  "meaning": "three",
+  "radicals": []
+ },
+ "四": {
+  "meaning": "four",
+  "radicals": []
+ },
+ "五": {
+  "meaning": "five",
+  "radicals": []
+ },
+ "六": {
+  "meaning": "six",
+  "radicals": []
+ },
+ "七": {
+  "meaning": "seven",
+  "radicals": []
+ },
+ "八": {
+  "meaning": "eight",
+  "radicals": []
+ },
+ "九": {
+  "meaning": "nine",
+  "radicals": []
+ },
+ "十": {
+  "meaning": "ten",
+  "radicals": []
+ },
+ "岁": {
+  "meaning": "years old (age)",
+  "radicals": []
+ },
+ "多": {
+  "meaning": "many, much; how many",
+  "radicals": [
+   "evening",
+   "evening (repeated)"
+  ]
+ },
+ "大": {
+  "meaning": "big",
+  "radicals": []
+ },
+ "家": {
+  "meaning": "family, home",
+  "radicals": [
+   "roof/house",
+   "pig"
+  ],
+  "mnemonic": "A pig (豕) under a roof (宀) — in ancient China, having a pig at home was a sign that the family was settled and well off."
+ },
+ "爸": {
+  "meaning": "dad",
+  "radicals": [
+   "father",
+   "(phonetic)"
+  ]
+ },
+ "妈": {
+  "meaning": "mom",
+  "radicals": [
+   "woman",
+   "horse (phonetic)"
+  ]
+ },
+ "哥": {
+  "meaning": "older brother",
+  "radicals": [
+   "can (phonetic)",
+   "can (repeated)"
+  ]
+ },
+ "弟": {
+  "meaning": "younger brother",
+  "radicals": []
+ },
+ "姐": {
+  "meaning": "older sister",
+  "radicals": [
+   "woman",
+   "moreover (phonetic)"
+  ]
+ },
+ "妹": {
+  "meaning": "younger sister",
+  "radicals": [
+   "woman",
+   "not yet (phonetic)"
+  ]
+ },
+ "孩": {
+  "meaning": "child",
+  "radicals": [
+   "child",
+   "(phonetic)"
+  ]
+ },
+ "子": {
+  "meaning": "son, child",
+  "radicals": []
+ },
+ "有": {
+  "meaning": "to have; there is",
+  "radicals": []
+ },
+ "几": {
+  "meaning": "how many",
+  "radicals": []
+ },
+ "个": {
+  "meaning": "(general measure word)",
+  "radicals": []
+ },
+ "口": {
+  "meaning": "mouth; (measure word for family members)",
+  "radicals": []
+ },
+ "吃": {
+  "meaning": "to eat",
+  "radicals": [
+   "mouth",
+   "to beg (phonetic)"
+  ]
+ },
+ "喝": {
+  "meaning": "to drink",
+  "radicals": [
+   "mouth",
+   "(phonetic)"
+  ]
+ },
+ "米": {
+  "meaning": "rice (grain)",
+  "radicals": []
+ },
+ "饭": {
+  "meaning": "rice (cooked), meal",
+  "radicals": [
+   "food",
+   "reverse (phonetic)"
+  ]
+ },
+ "面": {
+  "meaning": "noodles; face",
+  "radicals": []
+ },
+ "水": {
+  "meaning": "water",
+  "radicals": []
+ },
+ "茶": {
+  "meaning": "tea",
+  "radicals": [
+   "plant",
+   "remainder (phonetic)"
+  ]
+ },
+ "咖": {
+  "meaning": "(part of kāfēi, coffee)",
+  "radicals": [
+   "mouth",
+   "to add (phonetic)"
+  ]
+ },
+ "啡": {
+  "meaning": "(part of kāfēi, coffee)",
+  "radicals": [
+   "mouth",
+   "not (phonetic)"
+  ]
+ },
+ "喜": {
+  "meaning": "to like, joy",
+  "radicals": []
+ },
+ "欢": {
+  "meaning": "joyful (in xǐhuan, to like)",
+  "radicals": []
+ },
+ "要": {
+  "meaning": "to want, to need",
+  "radicals": []
+ },
+ "杯": {
+  "meaning": "cup, glass",
+  "radicals": [
+   "wood",
+   "not (phonetic)"
+  ]
+ },
+ "点": {
+  "meaning": "o'clock; dot",
+  "radicals": []
+ },
+ "床": {
+  "meaning": "bed",
+  "radicals": [
+   "shelter",
+   "wood"
+  ]
+ },
+ "班": {
+  "meaning": "shift, class (in shàngbān, to go to work)",
+  "radicals": []
+ },
+ "下": {
+  "meaning": "down, below; to go down",
+  "radicals": []
+ },
+ "睡": {
+  "meaning": "to sleep",
+  "radicals": [
+   "eye",
+   "to hang (phonetic)"
+  ]
+ },
+ "觉": {
+  "meaning": "sleep (in shuìjiào, to sleep)",
+  "radicals": []
+ },
+ "每": {
+  "meaning": "every, each",
+  "radicals": []
+ },
+ "天": {
+  "meaning": "day, sky",
+  "radicals": []
+ },
+ "现": {
+  "meaning": "present, current",
+  "radicals": [
+   "jade/king",
+   "to see (phonetic)"
+  ]
+ },
+ "在": {
+  "meaning": "to be (located); at",
+  "radicals": []
+ },
+ "今": {
+  "meaning": "today, present",
+  "radicals": []
+ },
+ "里": {
+  "meaning": "inside",
+  "radicals": []
+ },
+ "左": {
+  "meaning": "left",
+  "radicals": []
+ },
+ "右": {
+  "meaning": "right",
+  "radicals": []
+ },
+ "前": {
+  "meaning": "front, before",
+  "radicals": []
+ },
+ "后": {
+  "meaning": "behind, after",
+  "radicals": []
+ },
+ "离": {
+  "meaning": "distance from, away from",
+  "radicals": []
+ },
+ "近": {
+  "meaning": "near",
+  "radicals": [
+   "to walk",
+   "axe (phonetic)"
+  ]
+ },
+ "远": {
+  "meaning": "far",
+  "radicals": [
+   "to walk",
+   "origin (phonetic)"
+  ]
+ },
+ "买": {
+  "meaning": "to buy",
+  "radicals": []
+ },
+ "卖": {
+  "meaning": "to sell",
+  "radicals": []
+ },
+ "少": {
+  "meaning": "few, little",
+  "radicals": []
+ },
+ "钱": {
+  "meaning": "money",
+  "radicals": [
+   "metal",
+   "small (phonetic)"
+  ]
+ },
+ "块": {
+  "meaning": "piece; unit of currency",
+  "radicals": [
+   "earth",
+   "(phonetic)"
+  ]
+ },
+ "便": {
+  "meaning": "cheap (in piányi)",
+  "radicals": []
+ },
+ "宜": {
+  "meaning": "suitable (in piányi, cheap)",
+  "radicals": [
+   "roof/house",
+   "moreover"
+  ]
+ },
+ "贵": {
+  "meaning": "expensive, precious",
+  "radicals": []
+ },
+ "这": {
+  "meaning": "this",
+  "radicals": [
+   "to walk",
+   "writing (phonetic)"
+  ]
+ },
+ "那": {
+  "meaning": "that",
+  "radicals": []
+ },
+ "衣": {
+  "meaning": "clothes",
+  "radicals": []
+ },
+ "服": {
+  "meaning": "clothes, to wear (in yīfu)",
+  "radicals": []
+ },
+ "鞋": {
+  "meaning": "shoe",
+  "radicals": [
+   "leather",
+   "jade (phonetic)"
+  ]
+ },
+ "热": {
+  "meaning": "hot",
+  "radicals": [
+   "hand",
+   "fire"
+  ]
+ },
+ "冷": {
+  "meaning": "cold",
+  "radicals": [
+   "ice",
+   "order (phonetic)"
+  ]
+ },
+ "雨": {
+  "meaning": "rain",
+  "radicals": []
+ },
+ "晴": {
+  "meaning": "sunny",
+  "radicals": [
+   "sun",
+   "blue-green (phonetic)"
+  ]
+ },
+ "阴": {
+  "meaning": "cloudy, overcast",
+  "radicals": []
+ },
+ "风": {
+  "meaning": "wind",
+  "radicals": []
+ },
+ "怎": {
+  "meaning": "how (in zěnme)",
+  "radicals": []
+ },
+ "么": {
+  "meaning": "(interrogative particle)",
+  "radicals": []
+ },
+ "样": {
+  "meaning": "kind, appearance",
+  "radicals": [
+   "wood",
+   "sheep (phonetic)"
+  ]
+ },
+ "公": {
+  "meaning": "public",
+  "radicals": []
+ },
+ "共": {
+  "meaning": "common, together",
+  "radicals": []
+ },
+ "汽": {
+  "meaning": "steam (in qìchē, car)",
+  "radicals": [
+   "water",
+   "air (phonetic)"
+  ]
+ },
+ "车": {
+  "meaning": "car, vehicle",
+  "radicals": []
+ },
+ "地": {
+  "meaning": "earth, ground (in dìtiě, subway)",
+  "radicals": [
+   "earth",
+   "also (phonetic)"
+  ]
+ },
+ "铁": {
+  "meaning": "iron (in dìtiě, subway)",
+  "radicals": [
+   "metal",
+   "to lose (phonetic)"
+  ]
+ },
+ "出": {
+  "meaning": "to go out",
+  "radicals": []
+ },
+ "租": {
+  "meaning": "to rent (in chūzūchē, taxi)",
+  "radicals": [
+   "grain",
+   "moreover (phonetic)"
+  ]
+ },
+ "走": {
+  "meaning": "to walk, to go on foot",
+  "radicals": []
+ },
+ "路": {
+  "meaning": "road, path",
+  "radicals": [
+   "foot",
+   "each (phonetic)"
+  ]
+ },
+ "去": {
+  "meaning": "to go",
+  "radicals": []
+ },
+ "站": {
+  "meaning": "station, stop",
+  "radicals": [
+   "to stand",
+   "to occupy (phonetic)"
+  ]
+ },
+ "票": {
+  "meaning": "ticket",
+  "radicals": []
+ },
+ "张": {
+  "meaning": "(measure word for flat objects)",
+  "radicals": [
+   "bow",
+   "long (phonetic)"
+  ]
+ },
+ "身": {
+  "meaning": "body",
+  "radicals": []
+ },
+ "体": {
+  "meaning": "body (in shēntǐ)",
+  "radicals": [
+   "person",
+   "root/origin"
+  ]
+ },
+ "头": {
+  "meaning": "head",
+  "radicals": []
+ },
+ "肚": {
+  "meaning": "belly",
+  "radicals": [
+   "flesh/body",
+   "earth (phonetic)"
+  ]
+ },
+ "疼": {
+  "meaning": "to hurt, to ache",
+  "radicals": [
+   "illness",
+   "winter (phonetic)"
+  ]
+ },
+ "生": {
+  "meaning": "to be born, life (in shēngbìng, to get sick)",
+  "radicals": []
+ },
+ "病": {
+  "meaning": "illness",
+  "radicals": [
+   "illness",
+   "third (phonetic)"
+  ]
+ },
+ "医": {
+  "meaning": "medicine, doctor",
+  "radicals": []
+ },
+ "院": {
+  "meaning": "courtyard, institution (in yīyuàn, hospital)",
+  "radicals": [
+   "hill/place",
+   "complete (phonetic)"
+  ]
+ },
+ "舒": {
+  "meaning": "comfortable (in bù shūfu)",
+  "radicals": []
+ },
+ "爱": {
+  "meaning": "love, to like a lot",
+  "radicals": []
+ },
+ "看": {
+  "meaning": "to look, to watch",
+  "radicals": [
+   "hand",
+   "eye"
+  ],
+  "mnemonic": "A hand (手) shielding the eye (目) from the sun — the gesture of shading your eyes with your hand to see something far away better."
+ },
+ "书": {
+  "meaning": "book",
+  "radicals": []
+ },
+ "听": {
+  "meaning": "to listen",
+  "radicals": [
+   "mouth",
+   "axe (phonetic)"
+  ]
+ },
+ "音": {
+  "meaning": "sound",
+  "radicals": []
+ },
+ "乐": {
+  "meaning": "music (in yīnyuè)",
+  "radicals": []
+ },
+ "电": {
+  "meaning": "electricity",
+  "radicals": []
+ },
+ "影": {
+  "meaning": "shadow, film (in diànyǐng)",
+  "radicals": []
+ },
+ "运": {
+  "meaning": "to move, luck (in yùndòng, sports)",
+  "radicals": [
+   "to walk",
+   "cloud (phonetic)"
+  ]
+ },
+ "动": {
+  "meaning": "to move (in yùndòng, sports)",
+  "radicals": []
+ },
+ "唱": {
+  "meaning": "to sing",
+  "radicals": [
+   "mouth",
+   "prosperous (phonetic)"
+  ]
+ },
+ "歌": {
+  "meaning": "song",
+  "radicals": []
+ },
+ "跳": {
+  "meaning": "to jump, to dance",
+  "radicals": [
+   "foot",
+   "omen (phonetic)"
+  ]
+ },
+ "舞": {
+  "meaning": "dance (in tiàowǔ)",
+  "radicals": []
+ },
+ "空": {
+  "meaning": "empty, free time (in yǒu kòng)",
+  "radicals": [
+   "cave/hole",
+   "work (phonetic)"
+  ]
+ },
+ "打": {
+  "meaning": "to hit, to do (in dǎsuàn, to plan)",
+  "radicals": [
+   "hand",
+   "nail (phonetic)"
+  ]
+ },
+ "算": {
+  "meaning": "to calculate, to plan (in dǎsuàn)",
+  "radicals": []
+ },
+ "明": {
+  "meaning": "bright, tomorrow (in míngtiān)",
+  "radicals": [
+   "sun",
+   "moon"
+  ],
+  "mnemonic": "The sun (日) and the moon (月) side by side — together, the two greatest lights in the sky, illuminating everything: hence the meaning \"bright\" and \"clear\"."
+ },
+ "星": {
+  "meaning": "star (in xīngqī, week)",
+  "radicals": [
+   "sun",
+   "to be born (phonetic)"
+  ]
+ },
+ "期": {
+  "meaning": "period (in xīngqī, week)",
+  "radicals": []
+ },
+ "旅": {
+  "meaning": "to travel",
+  "radicals": []
+ },
+ "游": {
+  "meaning": "to stroll, to swim (in lǚyóu, to travel)",
+  "radicals": [
+   "water",
+   "(phonetic)"
+  ]
+ },
+ "学": {
+  "meaning": "to study, to learn",
+  "radicals": []
+ },
+ "习": {
+  "meaning": "to practice (in xuéxí, to study)",
+  "radicals": []
+ },
+ "计": {
+  "meaning": "to calculate, plan (in jìhuà)",
+  "radicals": [
+   "speech",
+   "ten (phonetic)"
+  ]
+ },
+ "划": {
+  "meaning": "to plan (in jìhuà, plan)",
+  "radicals": []
+ },
+ "以": {
+  "meaning": "with, by means of (in yǐhòu, after)",
+  "radicals": []
+ },
+ "比": {
+  "meaning": "to compare, more than",
+  "radicals": []
+ },
+ "更": {
+  "meaning": "even more",
+  "radicals": []
+ },
+ "最": {
+  "meaning": "the most (superlative)",
+  "radicals": []
+ },
+ "还": {
+  "meaning": "still; or (in háishi)",
+  "radicals": [
+   "to walk",
+   "not (phonetic)"
+  ]
+ },
+ "高": {
+  "meaning": "tall, high",
+  "radicals": []
+ },
+ "毛": {
+  "meaning": "fur; dime (1/10 of a kuài)",
+  "radicals": []
+ },
+ "想": {
+  "meaning": "to want, to think about",
+  "radicals": [
+   "mutual (phonetic)",
+   "heart"
+  ]
+ },
+ "会": {
+  "meaning": "to know how to (learned skill)",
+  "radicals": []
+ },
+ "能": {
+  "meaning": "to be able to, can",
+  "radicals": []
+ },
+ "请": {
+  "meaning": "please, to invite",
+  "radicals": [
+   "speech",
+   "blue-green (phonetic)"
+  ]
+ },
+ "坐": {
+  "meaning": "to sit",
+  "radicals": [
+   "person",
+   "earth"
+  ],
+  "mnemonic": "Two people (人, doubled in the strokes) sitting directly on the ground (土) — the simplest possible image of sitting down."
+ },
+ "都": {
+  "meaning": "all, both",
+  "radicals": []
+ },
+ "也": {
+  "meaning": "also",
+  "radicals": []
+ },
+ "说": {
+  "meaning": "to speak",
+  "radicals": [
+   "speech",
+   "to exchange (phonetic)"
+  ]
+ },
+ "来": {
+  "meaning": "to come",
+  "radicals": []
+ },
+ "号": {
+  "meaning": "day of the month (spoken usage)",
+  "radicals": []
+ },
+ "月": {
+  "meaning": "month; moon",
+  "radicals": []
+ },
+ "年": {
+  "meaning": "year",
+  "radicals": []
+ },
+ "分": {
+  "meaning": "minute; to divide",
+  "radicals": [
+   "to divide/eight",
+   "knife"
+  ]
+ },
+ "百": {
+  "meaning": "hundred",
+  "radicals": []
+ },
+ "了": {
+  "meaning": "particle of completion/change of state",
+  "radicals": []
+ },
+ "苹": {
+  "meaning": "(part of píngguǒ, apple)",
+  "radicals": [
+   "plant",
+   "flat (phonetic)"
+  ]
+ },
+ "果": {
+  "meaning": "fruit; result (in píngguǒ, apple)",
+  "radicals": []
+ },
+ "昨": {
+  "meaning": "yesterday (in zuótiān)",
+  "radicals": [
+   "sun",
+   "suddenly (phonetic)"
+  ]
+ },
+ "完": {
+  "meaning": "to finish, to end",
+  "radicals": [
+   "roof/house",
+   "origin (phonetic)"
+  ]
+ },
+ "工": {
+  "meaning": "work (in gōngzuò)",
+  "radicals": []
+ },
+ "作": {
+  "meaning": "to do, to work (in gōngzuò)",
+  "radicals": [
+   "person",
+   "suddenly (phonetic)"
+  ]
+ },
+ "酒": {
+  "meaning": "alcohol, alcoholic drink",
+  "radicals": [
+   "water",
+   "wine jar"
+  ]
+ },
+ "吧": {
+  "meaning": "suggestion particle; bar (in jiǔbā)",
+  "radicals": [
+   "mouth",
+   "(phonetic)"
+  ]
+ },
+ "谁": {
+  "meaning": "who",
+  "radicals": [
+   "speech",
+   "bird (phonetic)"
+  ]
+ },
+ "为": {
+  "meaning": "for, because of (in wèishénme, why)",
+  "radicals": []
+ },
+ "什": {
+  "meaning": "what (in shénme/wèishénme)",
+  "radicals": [
+   "person",
+   "ten"
+  ]
+ },
+ "因": {
+  "meaning": "cause (in yīnwèi, because)",
+  "radicals": []
+ },
+ "校": {
+  "meaning": "school (in xuéxiào)",
+  "radicals": [
+   "wood",
+   "to compare (phonetic)"
+  ]
+ },
+ "女": {
+  "meaning": "woman (in nǚpéngyou, girlfriend)",
+  "radicals": []
+ },
+ "朋": {
+  "meaning": "friend (in péngyou)",
+  "radicals": []
+ },
+ "友": {
+  "meaning": "friend (in péngyou)",
+  "radicals": []
+ },
+ "男": {
+  "meaning": "man (in nánpéngyou, boyfriend)",
+  "radicals": [
+   "field",
+   "strength"
+  ],
+  "mnemonic": "A farm field (田) above physical strength/vigor (力) — in traditional agricultural society, the man was the one who worked the land with his strength."
+ },
+ "些": {
+  "meaning": "some, a little (in yìxiē)",
+  "radicals": []
+ }
+}

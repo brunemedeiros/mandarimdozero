@@ -158,8 +158,8 @@ const UNITS = [
       { f: "à bientôt", t: "até breve" }
     ],
     phrases: [
-      { f: "Bonjour ! Je m'appelle Brune.", t: "Olá! Eu me chamo Brune.",
-        blocks: [{f:"Bonjour !"},{f:"Je m'appelle"},{f:"Brune."}],
+      { f: "Bonjour ! Je m'appelle {nome}.", t: "Olá! Eu me chamo {nome}.",
+        blocks: [{f:"Bonjour !"},{f:"Je m'appelle"},{f:"{nome}."}],
         scenario: "Você encontra alguém novo numa festa e quer se apresentar. O que você diz?", scenarioEmoji: "🎉" },
       { f: "Merci beaucoup !", t: "Muito obrigada!",
         blocks: [{f:"Merci"},{f:"beaucoup !"}],
@@ -282,9 +282,9 @@ const UNITS = [
       { f: "Comment tu t'appelles ?", t: "Qual é o seu nome?",
         blocks: [{f:"Comment"},{f:"tu"},{f:"t'appelles ?"}],
         scenario: "Você conhece alguém novo e quer saber o nome dela. O que você pergunta?", scenarioEmoji: "🤝" },
-      { f: "Je suis brésilienne.", t: "Eu sou brasileira.",
-        blocks: [{f:"Je"},{f:"suis"},{f:"brésilienne."}],
-        scenario: "Alguém pergunta de onde você é. Você quer dizer que é brasileira. O que você diz?", scenarioEmoji: "🇧🇷" },
+      { f: "Je suis {nacionalidade}.", t: "Eu sou {nacionalidade_t}.",
+        blocks: [{f:"Je"},{f:"suis"},{f:"{nacionalidade}."}],
+        scenario: "Alguém pergunta de onde você é. Você quer dizer que é {nacionalidade_t}. O que você diz?", scenarioEmoji: "🇧🇷" },
       { f: "Tu es de quel pays ?", t: "De que país você é?",
         blocks: [{f:"Tu"},{f:"es de"},{f:"quel pays ?"}],
         scenario: "Você quer saber de que país uma pessoa nova veio. O que você pergunta?", scenarioEmoji: "🌍" },
@@ -1278,8 +1278,8 @@ const UNITS = [
       { f: "venir de", t: "vir de (um lugar)" }
     ],
     phrases: [
-      { f: "Je suis brésilienne.", t: "Eu sou brasileira.",
-        blocks: [{f:"Je suis"},{f:"brésilienne."}],
+      { f: "Je suis {nacionalidade}.", t: "Eu sou {nacionalidade_t}.",
+        blocks: [{f:"Je suis"},{f:"{nacionalidade}."}],
         scenario: "Alguém te pergunta sua nacionalidade numa entrevista de trabalho. O que você diz?", scenarioEmoji: "🇧🇷" },
       { f: "Il est français, elle est espagnole.", t: "Ele é francês, ela é espanhola.",
         blocks: [{f:"Il est français,"},{f:"elle est"},{f:"espagnole."}],
