@@ -546,6 +546,8 @@ function buildCardsFromUnits(units, appKey = 'mandarim'){
       buildStudyWordCards(u, v, idx, appKey).forEach(c => cards.push(c));
     });
   });
+  // Cartões "Na frase": 1 por frase de exemplo do curso (shared/study-trail-model.js).
+  buildStudyPhraseCards(units, appKey).forEach(c => cards.push(c));
   return cards;
 }
 
@@ -1999,11 +2001,15 @@ function unitProgressFraction(u){
   return total ? learned / total : 0;
 }
 
+// Trilha de um grupo só (sem níveis/módulos visíveis ainda).
+function trailGroups(){
+  return [UNITS];
+}
+
 function recalculateUnlockedUnits(){
-  UNITS.forEach((u, i) => {
-    const prog = STATE.unitProgress[u.id];
-    prog.unlocked = i === 0 || STATE.unitProgress[UNITS[i-1].id]?.completed || prog.unlocked;
-  });
+  // Regra única em shared/trail-state-model.js (recalcUnlocked): trilha de um
+  // grupo só; a 1ª unidade liberada, as demais quando a anterior foi concluída.
+  recalcUnlocked(trailGroups(), STATE.unitProgress);
 }
 
 // Ícones temáticos por unidade — substituem o número na trilha, dando
@@ -2157,12 +2163,12 @@ document.getElementById('search-input').addEventListener('input', (e) => {
 // olhar lessonIdx -- finishCurrentLesson zera lessonIdx ao fechar a unidade
 // (pra permitir reabrir do início como revisão), então lessonIdx sozinho
 // mentiria "0 de 4" numa unidade que na verdade já terminou.
+// Fase 2: agora vem de trailItemState (shared/trail-state-model.js) --
+// 'done' | 'skipped' | 'current' (só UMA por trilha) | 'available' | 'locked'.
 function unitBlockState(u){
-  const prog = STATE.unitProgress[u.id];
-  if (prog.completed) return 'done';
-  if (prog.unlocked) return 'current';
-  return 'locked';
+  return trailItemState(u, trailGroups(), STATE.unitProgress);
 }
+
 
 // Modo admin: só a conta da autora do curso -- deixa REVISAR qualquer lição
 // de qualquer unidade (mesmo travada pros demais usuários), sem nunca
@@ -2184,6 +2190,7 @@ function isAdminUser(){
 
 // Estado de UMA lição dentro do bloco expandido da unidade.
 function lessonRowState(u, idx){
+  if (unitBlockState(u) === 'skipped') return 'skipped';
   if (STATE.unitProgress[u.id].completed) return 'done';
   const cur = currentLessonIdx(u.id);
   if (idx < cur) return 'done';
@@ -2212,6 +2219,7 @@ function wireHeaderActivation(el, handler){
 function buildUnitBlock(u){
   const state = unitBlockState(u);
   const unlocked = state !== 'locked';
+  const isFinished = state === 'done' || state === 'skipped';
   // Só unidades com 2+ lições (Modelo B) ganham a lista expansível -- uma
   // unidade do motor antigo não tem lições reais pra mostrar (ver "Hierarquia
   // da Trilha", seção 11), então vira uma linha só, sem seta.
@@ -2226,7 +2234,7 @@ function buildUnitBlock(u){
   const pct = Math.round(unitProgressFraction(u) * 100);
   let fracLabel;
   if (hasLessons){
-    const doneLessons = state === 'done' ? u.lessons.length : currentLessonIdx(u.id);
+    const doneLessons = isFinished ? u.lessons.length : currentLessonIdx(u.id);
     fracLabel = t('trail.unit.lessonsProgress', { done: doneLessons, total: u.lessons.length });
   } else fracLabel = `${pct}%`;
   if (dueForReview > 0) fracLabel += ` · 🔁 ${dueForReview}`;
@@ -2235,10 +2243,14 @@ function buildUnitBlock(u){
   block.className = 'unit-block'
     + (state === 'locked' ? ' locked' : '')
     + (state === 'done' ? ' done' : '')
+    + (state === 'skipped' ? ' skipped' : '')
     + (state === 'current' ? ' current' : '')
+    + (state === 'available' ? ' available' : '')
     + (expanded ? ' expanded' : '');
+  if (state === 'current') block.setAttribute('aria-current', 'step');
 
-  const badgeHTML = state === 'done' ? `<span class="ub-badge">✓</span>` : '';
+  const badgeHTML = state === 'done' ? `<span class="ub-badge">✓</span>`
+    : state === 'skipped' ? `<span class="ub-badge ub-badge-skipped" title="${t('trail.unit.skippedTitle')}">⏭ 跳过</span>` : '';
   const chevronHTML = hasLessons ? `<button class="ub-chevron" type="button" aria-label="${t('zh.path.unit.expandLessons')}">▾</button>` : '';
   // Só lições JÁ concluídas (e que não são o Ponto de verificação, cujo
   // reteste tem efeitos colaterais bem mais pesados -- desbloqueio de
@@ -2253,10 +2265,10 @@ function buildUnitBlock(u){
         // aplica com Admin Mode ON -- OFF cai exatamente na mesma regra
         // usada por qualquer aluno (unlocked && já concluída), sem
         // segunda implementação (Fase 11 da spec de Admin Mode).
-        const clickable = (isAdminUser() && isAdminModeOn()) || (unlocked && st === 'done' && !l.isCheckpoint);
+        const clickable = (isAdminUser() && isAdminModeOn()) || (unlocked && (st === 'done' || st === 'skipped') && !l.isCheckpoint);
         return `
           <div class="ub-lesson-row ${st}${clickable ? ' clickable' : ''}" ${clickable ? `data-lesson-idx="${i}"` : ''}>
-            <div class="ub-lesson-dot ${st}">${st === 'done' ? '✓' : i + 1}</div>
+            <div class="ub-lesson-dot ${st}">${st === 'done' ? '✓' : (st === 'skipped' ? '•' : i + 1)}</div>
             <div class="ub-lesson-title">${l.title}</div>
           </div>
         `;
@@ -2305,7 +2317,11 @@ function buildUnitBlock(u){
 // sincronizar entre dispositivos).
 const CHALLENGES_STRIP_COLLAPSE_KEY = 'mandarim_challenges_collapsed';
 function isDailyChallengesStripCollapsed(){
-  return localStorageSafeGet(CHALLENGES_STRIP_COLLAPSE_KEY) === '1';
+  const v = localStorageSafeGet(CHALLENGES_STRIP_COLLAPSE_KEY);
+  // Fase 3: sem preferência salva, a faixa começa recolhida no celular (ocupava
+  // ~208px antes da primeira unidade) e aberta no desktop.
+  if (v === null || v === undefined) return !!(window.matchMedia && window.matchMedia('(max-width: 899px)').matches);
+  return v === '1';
 }
 
 // Faixa compacta e SEMPRE visível com as 3 Missões do dia (ex-"Desafios de
@@ -2360,6 +2376,75 @@ function renderDailyChallengesStrip(){
   });
 }
 
+// ---------- Fase 7 da trilha: modo Mapa ----------
+// DOM/seleção/painel em shared/trail-map.js; aqui só o modelo (estados reais) e o que cada botão faz.
+const TRAIL_VIEW_KEY = 'mandarim_trail_view';
+
+function mapUnitDescribe(u, moduleId){
+  const st = unitBlockState(u);
+  const hasLessons = isLessonUnit(u) && u.lessons.length > 0;
+  const lines = [];
+  if (hasLessons){
+    const done = (st === 'done' || st === 'skipped') ? u.lessons.length : currentLessonIdx(u.id);
+    lines.push(`${done} de ${u.lessons.length} lições concluídas`);
+  }
+  const { dueForReview } = unitCardCounts(u.id);
+  if (dueForReview > 0) lines.push(`🔁 ${dueForReview} para revisar`);
+  const actions = [];
+  if (st === 'locked'){
+    lines.push('Complete a unidade anterior para liberar esta.');
+    if (moduleId && trailSkipAllowed()) actions.push({ label: 'Fazer Ponto de verificação para pular', primary: false, onClick: () => openCheckpoint(moduleId) });
+    else if (moduleId) lines.push('Pular unidades é do plano Premium (ou de alunos da professora).');
+  } else if (st === 'done' || st === 'skipped'){
+    actions.push({ label: 'Abrir de novo', primary: false, onClick: () => openUnitDetail(u.id) });
+  } else {
+    const started = !!(STATE.unitProgress[u.id] && STATE.unitProgress[u.id].started);
+    actions.push({ label: started ? 'Continuar' : 'Começar', primary: true, onClick: () => openUnitDetail(u.id) });
+  }
+  return { eyebrow: unitTypeOf(u) === 'grammar' ? 'Gramática' : 'Unidade', title: u.title, status: TRAIL_MAP_STATE_LABEL[st], goal: u.goal || '', lines, actions };
+}
+
+function renderTrailMapView(container){
+  const nodes = UNITS.map(u => {
+    const st = unitBlockState(u);
+    return { key: 'u:' + u.id, kind: 'unit', icon: UNIT_ICONS[u.id] || '📖', label: u.title, state: st, current: st === 'current',
+      aria: `${u.title}, ${TRAIL_MAP_STATE_LABEL[st]}` };
+  });
+  const describe = (key) => mapUnitDescribe(UNITS.find(u => String(u.id) === key.slice(2)), null);
+  renderTrailMap(container, { sections: [{ title: 'Unidades', nodes }] }, describe);
+}
+
+// Fase 2 da trilha: cartão "Continuar" no topo. Fonte única = nextTrailItem
+// (shared/trail-state-model.js); aqui só desenha. A métrica mostrada é a
+// oficial: lições concluídas.
+function buildTrailContinueCard(){
+  const groups = trailGroups();
+  const next = nextTrailItem(groups, STATE.unitProgress);
+  const { done, total } = trailLessonCounts(groups, STATE.unitProgress);
+  const card = document.createElement('div');
+  card.className = 'trail-continue';
+  const metric = `${done} de ${total} lições concluídas`;
+  if (!next){
+    card.classList.add('complete');
+    card.innerHTML = `<div class="tc-info"><div class="tc-eyebrow">Sua trilha</div><div class="tc-title">Você concluiu toda a trilha 🎉</div><div class="tc-sub">${metric}</div></div>`;
+    return card;
+  }
+  const u = UNITS.find(x => x.id === next.unitId);
+  const lessonLabel = next.lessonCount ? ` · lição ${next.lessonIdx + 1} de ${next.lessonCount}` : '';
+  const started = done > 0 || !!(STATE.unitProgress[u.id] && STATE.unitProgress[u.id].started);
+  card.innerHTML = `
+    <div class="tc-info">
+      <div class="tc-eyebrow">${started ? 'Continue de onde parou' : 'Comece por aqui'}</div>
+      <div class="tc-title">${u.title}${lessonLabel}</div>
+      <div class="tc-sub">${metric}</div>
+    </div>
+    <button type="button" class="btn btn-primary tc-cta">${started ? 'Continuar' : 'Começar'}</button>
+  `;
+  card.querySelector('.tc-cta').addEventListener('click', () => openUnitDetail(u.id));
+  setTimeout(() => watchTrailContinueCard(card), 0);
+  return card;
+}
+
 function renderUnitsGrid(){
   recalculateUnlockedUnits();
   renderDailyGoalChip();
@@ -2372,6 +2457,15 @@ function renderUnitsGrid(){
   if (levelBadge) levelBadge.style.display = UNITS.every(u => STATE.unitProgress[u.id]?.completed) ? '' : 'none';
   const grid = document.getElementById('units-grid');
   grid.innerHTML = '';
+  grid.appendChild(buildTrailViewToggle(TRAIL_VIEW_KEY, () => renderUnitsGrid()));
+  grid.appendChild(buildTrailContinueCard());
+  if (trailViewPref(TRAIL_VIEW_KEY) === 'map'){
+    const mapRoot = document.createElement('div');
+    mapRoot.style.gridColumn = '1 / -1';
+    grid.appendChild(mapRoot);
+    renderTrailMapView(mapRoot);
+    return;
+  }
   UNITS.forEach((u) => {
     const prog = STATE.unitProgress[u.id];
     grid.appendChild(buildUnitBlock(u));
@@ -5755,7 +5849,8 @@ function vocabStrengthBuckets(){
   // K.3: força é por NOTE (conteúdo) -- A+B da trilha, reverso e Cloze contam
   // uma vez. Nenhuma irmã estudada = notStarted (nunca "fraca"); com estudadas
   // = a mais fraca entre elas. Fonte: shared/analytics-metrics.js.
-  const st = contentMetrics(pool).strength;
+  // Cartões "Na frase" não são palavras: ficam fora de "Suas palavras".
+  const st = contentMetrics(pool.filter(c => !isStudyTrailPhraseCard(c))).strength;
   return { notStarted: st.not_started, weak: st.weak, medium: st.medium, strong: st.strong };
 }
 
@@ -5866,17 +5961,38 @@ const REVIEW_ORIGIN_LABELS = {
 // filtro. Prop 5 (ver CLAUDE.md, "7 propostas") -- "Filtro de fila" (e o
 // indicador "Filtro: X" que ficava aqui embaixo do número) foi removido
 // da UI de propósito.
+// Filtros de sessão (origem/tag, em "Configurar") valem para "Estudar
+// tudo", mas não para a tabela de Decks. Resumo para avisar quando estão ativos.
+function reviewSessionFilterSummary(){
+  const parts = [];
+  const origin = STATE.studySettings.reviewOriginFilter || 'all';
+  if (origin !== 'all') parts.push(REVIEW_ORIGIN_LABELS[origin] || origin);
+  const tags = activeReviewTagFilter();
+  if (tags.length) parts.push(tags.map(t => '#' + t).join(', '));
+  return parts.join(' · ');
+}
+
+// "Estudar tudo" (todos os Decks juntos) fica embaixo da tabela de Decks; as
+// contagens por Deck já estão na tabela, então aqui não há números. Aviso
+// quando um filtro de sessão (origem/tag, em "Configurar") está ativo.
 function renderReviewTodayWidget(){
   const wrap = document.getElementById('review-today-widget');
   if (!wrap) return;
   const pool = eligibleReviewPool();
-  const trueCount = trueDueReviewCount(pool);
-  if (pool.length === 0 || trueCount === 0){ wrap.innerHTML = ''; return; }
-
+  const trueCount = getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay }).length;
+  const filterSummary = reviewSessionFilterSummary();
+  const filterNote = filterSummary
+    ? `<div class="review-today-filter">Filtro da sessão: ${escapeHTML(filterSummary)} · <button type="button" class="admin-select-link review-today-filter-clear" id="review-today-filter-clear">Limpar filtro</button></div>`
+    : '';
   wrap.innerHTML = `
-    <div class="review-today-label">${t('review.today.label')}</div>
-    <div class="review-today-count">${trueCount}</div>
+    ${trueCount ? `<button class="btn btn-primary review-study-all-btn" id="review-study-all-btn">${t('review.studyAll')}</button>` : ''}
+    ${filterNote}
   `;
+  document.getElementById('review-study-all-btn')?.addEventListener('click', () => openReviewSession('flashcard'));
+  document.getElementById('review-today-filter-clear')?.addEventListener('click', () => {
+    updateStudySetting({ reviewOriginFilter: 'all', reviewTagFilter: [] });
+    renderReviewModeSelect();
+  });
 }
 
 // Altura do "pote" proporcional à maior das 3 categorias (não à contagem
@@ -5919,6 +6035,12 @@ function renderReviewModeSelect(){
   // dueCount é só um subconjunto capado dele (2ª sessão de grilling: nunca
   // usar o número cortado pra decidir "tem ou não tem revisão").
   const trueCount = trueDueReviewCount(pool);
+  // Speed Review mostra a mesma divisão da tabela de Decks (Novo/Aprendendo/
+  // Revisar) em vez de um número só -- o total inclui as palavras novas do
+  // dia, e um número único parecia contradizer o "Revisar 0" da tabela.
+  const speedSplit = { new: 0, learning: 0, review: 0 };
+  getStudyQueue(pool, { scope: 'due', newCardsLimit: STATE.studySettings.newCardsPerDay })
+    .forEach(c => { speedSplit[cardStudyBucket(c)]++; });
   // Fase 7 (projeto anterior): Palavras Difíceis NÃO depende de estar due
   // -- "precisa revisar agora" (REVISAR) e "é uma palavra difícil"
   // (PRATICAR) são perguntas diferentes. getStudyQueue(scope:'hard') usa
@@ -5926,47 +6048,24 @@ function renderReviewModeSelect(){
   const hardCount = getStudyQueue(pool, { scope: 'hard' }).length;
 
   renderReviewTodayWidget();
-
-  const revisarLabel = document.getElementById('review-mode-revisar-label');
-  if (revisarLabel) revisarLabel.textContent = t('review.mode.reviewLabel');
-
-  const revisarEl = document.getElementById('review-mode-cards-revisar');
-  if (trueCount === 0){
-    const emptyTitle = pool.length === 0 ? t('review.empty.noneYetTitle') : t('review.empty.upToDateTitle');
-    const emptyDesc = pool.length === 0
-      ? t('review.empty.noneYetDesc')
-      : t('review.empty.upToDateDesc');
-    revisarEl.innerHTML = `
-      <div class="review-mode-empty">
-        <div class="icon">🍵</div>
-        <div class="review-mode-empty-title">${emptyTitle}</div>
-        <div class="review-mode-empty-desc">${emptyDesc}</div>
-      </div>
-    `;
-  } else {
-    // Sem .count aqui de propósito -- o número já está no bloco hero acima
-    // (Flashcard e Speed Review são a mesma fila filtrada, mostrar o mesmo
-    // valor duas vezes a mais era puramente decorativo).
-    revisarEl.innerHTML = `
-      <button class="review-mode-card" id="mode-card-flashcard">
-        <div class="icon">📇</div>
-        <div class="name">Flashcard</div>
-        <div class="desc">${t('review.mode.flashcard.desc')}</div>
-      </button>
-      <button class="review-mode-card" id="mode-card-speed">
-        <div class="icon">⚡</div>
-        <div class="name">Speed Review</div>
-        <div class="desc">${t('review.mode.speed.desc')}</div>
-      </button>
-    `;
-    document.getElementById('mode-card-flashcard').addEventListener('click', () => openReviewSession('flashcard'));
-    document.getElementById('mode-card-speed').addEventListener('click', () => openReviewSession('speed'));
-  }
+  // Navegador de Decks (shared/deck-browser.js): tabela Deck | Novo | Aprendendo | Revisar.
+  if (typeof renderReviewDeckTable === 'function') renderReviewDeckTable();
 
   // K2-F: Combinar é vocabulário -> conta palavras (projeção A na trilha), não CardInstances.
   const matchWordCount = projectStudyWordsToA(pool).length;
   const praticarEl = document.getElementById('review-mode-cards-praticar');
   praticarEl.innerHTML = `
+    <button class="review-mode-card" id="mode-card-speed" ${trueCount === 0 ? 'disabled' : ''}>
+      <div class="icon">⚡</div>
+      <div class="count speed-split" aria-label="Novo ${speedSplit.new}, Aprendendo ${speedSplit.learning}, Revisar ${speedSplit.review}">
+        <span class="${speedSplit.new ? 'is-new' : 'is-zero'}">${speedSplit.new}</span>
+        <span class="${speedSplit.learning ? 'is-learning' : 'is-zero'}">${speedSplit.learning}</span>
+        <span class="${speedSplit.review ? 'is-review' : 'is-zero'}">${speedSplit.review}</span>
+      </div>
+      <div class="speed-split-legend">novo · aprend. · revisar</div>
+      <div class="name">Speed Review</div>
+      <div class="desc">Revisão rápida</div>
+    </button>
     <button class="review-mode-card" id="mode-card-hard" ${hardCount === 0 ? 'disabled' : ''}>
       <div class="icon">🔥</div>
       <div class="count">${hardCount}</div>
@@ -5980,6 +6079,7 @@ function renderReviewModeSelect(){
       <div class="desc">${t('review.mode.match.desc')}</div>
     </button>
   `;
+  document.getElementById('mode-card-speed').addEventListener('click', () => openReviewSession('speed'));
   document.getElementById('mode-card-hard').addEventListener('click', () => openReviewSession('hard'));
   document.getElementById('mode-card-match').addEventListener('click', () => openReviewSession('match'));
 }
@@ -6026,6 +6126,8 @@ function backToReviewModeSelect(){
   SPEED_STATE.active = false;
   document.getElementById('review-mode-select-wrap').style.display = 'block';
   document.getElementById('review-session-wrap').style.display = 'none';
+  const deckWrap = document.getElementById('review-deck-wrap');
+  if (deckWrap) deckWrap.style.display = 'none';
   STATE.reviewSessionDeckId = null; // K2-H: sair da sessão não deixa escopo de Deck stale
   renderReviewModeSelect();
 
@@ -6482,9 +6584,15 @@ function isCardLessonCompleted(card){
   // own_flashcards) segue exatamente o mesmo caso.
   if (card.origin === 'teacher' || card.origin === 'self') return card.flashcardStatus === 'active';
   const prog = STATE.unitProgress[card.unitId];
+  // A0 (Fase 0 da trilha, 06/10/2026): unidade CONCLUÍDA libera todos os
+  // cartões dela. Antes só `lessonIdx < prog.lessonIdx` decidia, mas
+  // `lessonIdx` volta a 0 ao concluir a unidade -- o cartão saía da Revisão.
+  if (prog?.completed) return true;
   if (!prog?.started) return false;
   const unit = UNITS.find(u => u.id === card.unitId);
-  const lessonIdx = unit ? lessonIndexForVocabIdx(unit, card.vocabIdx) : -1;
+  // Cartão "Na frase": entra com a lição da palavra que o apresenta (gateVocabIdx).
+  const gateIdx = card.vocabIdx != null ? card.vocabIdx : card.gateVocabIdx;
+  const lessonIdx = unit ? lessonIndexForVocabIdx(unit, gateIdx) : -1;
   // Sem lição conhecida pra esse vocabIdx: só libera se a unidade inteira
   // já foi concluída (mais seguro que arriscar mostrar algo nunca ensinado).
   if (lessonIdx === -1) return !!prog.completed;
@@ -6887,10 +6995,12 @@ function renderClozeCard(mountEl, card, localState, callbacks){
   const view = resolveCardContentView(card);
   const answered = localState.answered;
   const blankHTML = answered
-    ? `<span class="cloze-blank ${localState.wasCorrect ? 'correct' : 'incorrect'}" id="cloze-blank">${view.displayAnswerText}</span>`
+    ? `<span class="cloze-blank ${localState.wasCorrect ? 'correct' : 'incorrect'}" id="cloze-blank">${escapeHTML(view.displayAnswerText)}</span>`
     : `<span class="cloze-blank" id="cloze-blank">___</span>`;
   const hiddenSentence = renderClozeText(view.rawSentenceText, view.markId, { reveal: false });
-  const sentenceHTML = hiddenSentence.replace('___', blankHTML);
+  // Texto autorado: escapado ANTES de inserir o HTML da lacuna (escapeHTML
+  // não altera '___').
+  const sentenceHTML = escapeHTML(hiddenSentence).replace('___', () => blankHTML);
   // Fase 7a (ver CLAUDE.md) -- imagem/áudio agora resolvidos via o MESMO
   // Field de texto que carrega a frase inteira (`resolveClozeCardView()`
   // usa resolveCardField() por baixo agora, nunca mais lia `.audio.url`
@@ -7164,7 +7274,7 @@ function renderReviewView(){
   // callbacks). A SESSÃO (aqui) é quem cria/descarta STATE.reviewCardState
   // -- o renderer nunca lê/escreve STATE por nome, só recebe a referência
   // como parâmetro. Criação é preguiçosa (só quando ainda não existe --
-  // gradeCurrentCard()/reviewMoreCurrentCard() já o zeram ao avançar a
+  // gradeCurrentCard() já o zera ao avançar a
   // fila, então "ausente" aqui sempre significa "cartão novo, começar do
   // zero"; re-renderizações do MESMO cartão -- ex: depois de revelar --
   // reaproveitam a mesma referência, nunca recriam).
@@ -7173,7 +7283,6 @@ function renderReviewView(){
   }
   renderNormalCard(el, card, STATE.reviewCardState, {
     onAnswered: (wasCorrect, grade) => gradeCurrentCard(grade),
-    onReviewMore: () => reviewMoreCurrentCard(),
   });
 }
 
@@ -7280,7 +7389,6 @@ function renderNormalCard(mountEl, card, localState, callbacks){
     </div>
     ${localState.revealed ? `
       ${gradeButtonsHTML(card)}
-      <button class="review-more-link" id="review-more-btn">${t('review.reviewMore')}</button>
     ` : ''}
   `;
 
@@ -7314,15 +7422,6 @@ function renderNormalCard(mountEl, card, localState, callbacks){
   }
 
   if (localState.revealed){
-    // Fase 11: PRATICAR != REVISAR -- "Rever mais" só reinsere o cartão
-    // mais à frente na fila DESTA sessão (efêmero, nunca persistido). Não
-    // chama applyMemoryGrade nem addXP -- só ser mostrada de novo não é
-    // evidência de recuperação, então não pode alterar o agendamento
-    // (devido/stability) sem uma resposta real que justifique isso.
-    mountEl.querySelector('#review-more-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      callbacks.onReviewMore();
-    });
     mountEl.querySelectorAll('.grade-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -7342,24 +7441,6 @@ function reviewXP(intervalBefore, grade){
   if (intervalBefore >= 60) return Math.max(1, Math.round(base * 0.4));
   if (intervalBefore >= 21) return Math.max(1, Math.round(base * 0.7));
   return base;
-}
-
-// Fase 11 -- PRATICAR fora do agendamento: reinsere o cartão atual alguns
-// lugares à frente na fila DESTA sessão, sem tocar em due/stability/reps
-// nem conceder XP. Diferente de "Errei" (grade 0), que É uma resposta real
-// e reagenda de verdade -- "Rever mais" nunca é resposta, só pedido de
-// mais exposição. STATE.reviewQueue nunca é persistido (é sempre
-// reconstruído do zero por startReviewSession), então crescer a fila aqui
-// não vaza pra próxima sessão nem pro banco.
-function reviewMoreCurrentCard(){
-  const card = STATE.reviewQueue[STATE.reviewIndex];
-  const reinsertAt = Math.min(STATE.reviewQueue.length, STATE.reviewIndex + 4);
-  STATE.reviewQueue.splice(reinsertAt, 0, card);
-  STATE.reviewIndex += 1;
-  // Fase 6C.1 -- avançou a posição da fila, descarta o localState de
-  // Normal desta exibição (renderReviewView cria um novo pro próximo card).
-  STATE.reviewCardState = null;
-  renderReviewView();
 }
 
 function gradeCurrentCard(grade){
@@ -7409,6 +7490,7 @@ function gradeCurrentCard(grade){
 function markUnitCompleted(unitId, scorePct, { skipToast = false } = {}){
   if (STATE.unitProgress[unitId].completed) return;
   STATE.unitProgress[unitId].completed = true;
+  stampUnitCompletion(STATE.unitProgress[unitId], 'lessons', todayStr());
   const idx = UNITS.findIndex(u => u.id === unitId);
   if (idx >= 0 && idx+1 < UNITS.length){
     STATE.unitProgress[UNITS[idx+1].id].unlocked = true;
@@ -7782,7 +7864,8 @@ function renderReviewTagFilter(){
   if (!wrap || !chipsEl) return;
   const selected = activeReviewTagFilter();
   const universe = reviewTagUniverse();
-  const available = collectTagsFromCards(universe);
+  // Tags finas da trilha (unidade/lição/palavra) ficam fora dos chips.
+  const available = reviewFilterVisibleTags(universe);
   const all = Array.from(new Set(available.concat(selected))).sort();
   wrap.hidden = all.length === 0;
   chipsEl.innerHTML = all.map(t => {
@@ -7878,23 +7961,16 @@ document.getElementById('review-tag-clear')?.addEventListener('click', () => {
 // antes era um botão de texto solto entre o dropdown e REVISAR, a autora
 // não gostou) -- recolhido por padrão, sincroniza ao abrir (4 controles
 // de sessão, ver renderReviewSettingsView).
-// Prop 3 (ver CLAUDE.md, "7 propostas") -- "Meus Cartões" ganhou um botão
-// de verdade no topo da tela de Revisão, substituindo a entrada que
-// existia (e foi removida) do menu do avatar.
-document.getElementById('review-my-flashcards-btn')?.addEventListener('click', () => {
-  switchTab('my-flashcards');
-});
-const reviewHeaderSettingsBtn = document.getElementById('review-header-settings-btn');
-if (reviewHeaderSettingsBtn){
-  reviewHeaderSettingsBtn.addEventListener('click', () => {
-    const panel = document.getElementById('review-settings-panel');
-    if (panel.hasAttribute('hidden')){
-      panel.removeAttribute('hidden');
-      renderReviewSettingsView();
-    } else {
-      panel.setAttribute('hidden', '');
-    }
-  });
+// "Configurar" (barra Decks/Adicionar/Painel/Configurar, shared/deck-browser.js):
+// abre/fecha o painel de ajustes da sessão na tela inicial da Revisão.
+// Abre os ajustes numa janela por cima da tela atual (inclusive dentro
+// de um Deck), como Adicionar e Painel -- ver openReviewSettingsModal.
+function toggleReviewSettingsPanel(){
+  if (typeof openReviewSettingsModal === 'function'){ openReviewSettingsModal(); return; }
+  const panel = document.getElementById('review-settings-panel');
+  if (!panel) return;
+  panel.removeAttribute('hidden');
+  renderReviewSettingsView();
 }
 document.querySelectorAll('[data-settings-section]').forEach(btn => {
   btn.addEventListener('click', () => switchSettingsSection(btn.dataset.settingsSection));

@@ -2333,3 +2333,7 @@ Todas com confiança ALTA, exceto onde indicado. As linhas em inglês de `notifi
 | 11 |  | Where are you? Your Mandarin is still here, on the same page you left it 📖 |
 
 **Conquistas** (`badge.*` em `shared/i18n/en.js`): 16 do app + Fundadora/Beta Tester, ALTA. As 3 do catálogo do banco (Embaixador/a, Pioneiro/a, Aluno/a da Prof. Brune), MÉDIA: "Ambassador", "Pioneer", "Prof. Brune's student".
+
+## Aprovado em 2026-10-07 (dona do projeto)
+- Rótulos de gênero em inglês (Masculine, Feminine, Other, Prefer not to say) e textos de País de origem/Gênero.
+- Formas neutras em português ("português·a", "francês·a", "japonês·a", "chinês·a", "alemão·ã") e os textos novos em inglês da migration 073.

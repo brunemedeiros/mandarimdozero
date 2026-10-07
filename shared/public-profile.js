@@ -213,7 +213,7 @@ async function renderPublicProfileInto(bodyEl, username){
   const initials = avatarInitials(name);
   const color = avatarColor(profile.user_id);
   const avatarHTML = profile.avatar_url
-    ? `<img class="public-profile-avatar" src="${profile.avatar_url}" alt="${t('publicProfile.avatarAlt')}">`
+    ? `<img class="public-profile-avatar" src="${escapeAttr(profile.avatar_url)}" alt="${t('publicProfile.avatarAlt')}">`
     : `<div class="public-profile-avatar" style="background:${color};">${initials}</div>`;
 
   const badgesHTML = badges.length ? `
@@ -517,26 +517,34 @@ function reportPublicFlashcard(cardId){
 async function importSelectedPublicFlashcards(box){
   const errorEl = box.querySelector('#public-profile-cards-import-error');
   if (errorEl) errorEl.textContent = '';
-  const ids = [...PUBLIC_PROFILE_IMPORT_STATE.selectedIds];
+  // Ordem da lista (não a ordem de clique): o corte do plano grátis fica com "os primeiros N" da lista.
+  const ids = PUBLIC_PROFILE_IMPORT_STATE.cardsCache.map(c => c.id).filter(id => PUBLIC_PROFILE_IMPORT_STATE.selectedIds.has(id));
   if (!ids.length) return;
 
-  const importStates = ids
+  const selectedCards = ids
     .map(id => PUBLIC_PROFILE_IMPORT_STATE.cardsCache.find(x => x.id === id))
-    .filter(Boolean)
-    .map(c => nativeNoteEditorStateFromImportPayload(c, APP_KEY));
-  const pre = preflightOwnCardInstanceCreation({
+    .filter(Boolean);
+  const importStates = selectedCards.map(c => nativeNoteEditorStateFromImportPayload(c, APP_KEY));
+  // "Corta e avisa" (arquitetura seção 17) -- mesma regra única dos outros
+  // imports (shared/deck-engine.js): só as primeiras Notes que cabem.
+  const limit = typeof FREE_OWN_FLASHCARD_LIMIT === 'number' ? FREE_OWN_FLASHCARD_LIMIT : 20;
+  const cutPlan = planOwnCardInstanceCut({
     activeRows: PUBLIC_PROFILE_IMPORT_STATE.myCards,
     hasTeacherLink: PUBLIC_PROFILE_IMPORT_STATE.hasLink,
     editorStates: importStates,
     languageAppKey: APP_KEY,
-    limit: typeof FREE_OWN_FLASHCARD_LIMIT === 'number' ? FREE_OWN_FLASHCARD_LIMIT : 20,
+    limit,
   });
-  if (!pre.ok){
-    const modal = document.getElementById('flashcard-limit-modal');
-    if (modal) modal.style.display = 'flex';
-    else if (errorEl) errorEl.textContent = (typeof window.t === 'function') ? window.t('flashcardLimit.fallbackError') : 'Você atingiu o limite de cartões do plano grátis.';
-    return;
-  }
+  const cutMessage = cutPlan.cut ? ownCardInstanceCutMessage({
+    requested: cutPlan.requested, keptInstances: cutPlan.keptInstances,
+    limit, used: cutPlan.used, what: 'Esta seleção',
+  }) : null;
+  const showCut = () => {
+    if (typeof openFlashcardLimitModal === 'function' && openFlashcardLimitModal({ cutMessage })) return;
+    if (errorEl) errorEl.textContent = cutMessage;
+  };
+  if (cutPlan.keepCount === 0){ showCut(); return; }
+  const idsToCreate = selectedCards.slice(0, cutPlan.keepCount).map(c => c.id);
 
   // Deck padrão (personal_root) resolvido UMA vez pro lote inteiro; sem
   // destino válido, nada é criado.
@@ -547,7 +555,7 @@ async function importSelectedPublicFlashcards(box){
   if (btn){ btn.disabled = true; btn.textContent = t('publicProfile.adding'); }
 
   let importedCount = 0;
-  for (const id of ids){
+  for (const id of idsToCreate){
     const c = PUBLIC_PROFILE_IMPORT_STATE.cardsCache.find(x => x.id === id);
     if (!c) continue;
     // Q7 do grilling: SEMPRE uma cópia independente -- createOwnFlashcard()
@@ -572,9 +580,9 @@ async function importSelectedPublicFlashcards(box){
   }
 
   if (importedCount > 0 && typeof showToast === 'function'){
-    showToast(`${tp('publicProfile.imported', importedCount)} ${summarizeDroppedImportTags(importStates, { ignoreSystem: true })}`.trim());
+    showToast(`${tp('publicProfile.imported', importedCount)} ${summarizeDroppedImportTags(importStates.slice(0, cutPlan.keepCount), { ignoreSystem: true })}`.trim());
   }
-  if (importedCount < ids.length && errorEl){
+  if (importedCount < idsToCreate.length && errorEl){
     errorEl.textContent = t('publicProfile.importPartial');
   }
   // Re-renderiza a caixa inteira -- reflete o espaço restante novo (pode
@@ -584,6 +592,7 @@ async function importSelectedPublicFlashcards(box){
   // (modal ou página standalone) -- estrutura fixa montada acima, nunca
   // varia por contexto.
   await renderPublicProfileCardsBox(box.parentElement.parentElement, PUBLIC_PROFILE_IMPORT_STATE.username);
+  if (cutMessage) showCut();
 }
 
 document.getElementById('public-flashcard-preview-close')?.addEventListener('click', () => {

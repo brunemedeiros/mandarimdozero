@@ -22,11 +22,11 @@ for (const lang of ['fr', 'zh']){
   const T = (id, row, o) => Object.assign({ id, origin: 'teacher', rowId: row, flashcardStatus: 'active', reps: 1, state: 'review', interval: 10, lapses: 0, due: 1 }, o);
   const S = (id, row, o) => T(id, row, Object.assign({ origin: 'self' }, o));
   fresh(); ctx.STATE.cards.push(T('t1', 1), S('s1', 1));
-  check(lang + ' 2: total = todas as palavras do curso (nº de Notes da trilha), Teacher/Self fora', P().total === total && total === ctx.STATE.cards.filter(c => c.origin === 'study').length / 2 && P().learned === 0);
+  check(lang + ' 2: total = todas as palavras do curso (nº de Notes da trilha), Teacher/Self fora', P().total === total && total === ctx.STATE.cards.filter(c => c.origin === 'study' && !ctx.isStudyTrailPhraseCard(c)).length / 2 && P().learned === 0);
   check(lang + ' 2: gráfico (datas) só trilha', ctx.wordLevelFirstLearnedDates(ctx.STATE.cards.concat([T('t9', 9, { firstLearnedDate: '2026-01-01' })])).length === 0);
   // 3. Unidade
   fresh(); let uc = ctx.unitCardCounts(u0.id);
-  check(lang + ' 3: unidade = N palavras / 2N cartões', uc.total === N && uc.totalCards === 2 * N && uc.learned === 0, uc);
+  check(lang + ' 3: unidade = N palavras / 2N cartões', uc.total === N && uc.totalCards === 2 * N + ctx.STATE.cards.filter(c => c.unitId === u0.id && ctx.isStudyTrailPhraseCard(c)).length && uc.learned === 0, uc);
   for (let i = 0; i < N; i++) study(A(i));   // B New em todas
   check(lang + ' 3: B New não bloqueia conclusão', (ctx.checkUnitCompletion(u0.id), completed.includes(u0.id)));
   uc = ctx.unitCardCounts(u0.id); check(lang + ' 3: percentual não duplica A/B (learned=N de N)', uc.learned === N && uc.total === N, uc);
@@ -50,6 +50,6 @@ for (const lang of ['fr', 'zh']){
   check(lang + ' 10: Teacher/Self separados, mesmo rowId', ctx.ownContentProgress(ctx.STATE.cards, 'teacher').total === 1 && ctx.ownContentProgress(ctx.STATE.cards, 'self').total === 1);
   // 11. numerador <= denominador; Notes != CardInstances
   const w = P(), t = ctx.ownContentProgress(ctx.STATE.cards, 'teacher');
-  check(lang + ' 11: numerador <= denominador e Notes != CardInstances', w.learned <= w.total && t.studied <= t.total && w.total * 2 === ctx.STATE.cards.filter(c => c.origin === 'study').length);
+  check(lang + ' 11: numerador <= denominador e Notes != CardInstances', w.learned <= w.total && t.studied <= t.total && w.total * 2 === ctx.STATE.cards.filter(c => c.origin === 'study' && !ctx.isStudyTrailPhraseCard(c)).length);
 }
 summary('K.4 progresso');

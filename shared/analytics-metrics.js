@@ -160,7 +160,9 @@ function contentMetrics(cards){
 // Numerador = palavras com alguma irmã estudada; conteúdo futuro nunca entra
 // sem evidência. Teacher/Self nunca entram.
 function studyTrailWordProgress(cards, courseWordTotal){
-  const m = contentMetrics((cards || []).filter(c => c.origin === 'study'));
+  // Cartões "Na frase" (study-trail-model) não são palavras.
+  const isPhrase = c => typeof isStudyTrailPhraseCard === 'function' && isStudyTrailPhraseCard(c);
+  const m = contentMetrics((cards || []).filter(c => c.origin === 'study' && !isPhrase(c)));
   const total = courseWordTotal != null ? courseWordTotal : m.notes;
   return { total, learned: m.studied, notStarted: Math.max(0, total - m.studied), strength: m.strength };
 }

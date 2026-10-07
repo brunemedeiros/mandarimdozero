@@ -1,0 +1,16 @@
+{
+  "_doc": "Mapa de INPUT das unidades de gramática do A1 (regra curricular: a gramática sistematiza o que o aluno já ouviu/leu). 'forms' são expressões regulares (heurística) das formas-alvo; check_grammar_input.js conta quantas aparecem nas unidades ANTERIORES (ordem real dos módulos) e AVISA (não erra) quando há pouco input. Os números são uma triagem para a professora, não um veredito pedagógico.",
+  "minInputBefore": 3,
+  "units": {
+    "A1-g1":  { "structure": "avoir e être no presente", "forms": ["\\b(j'ai|tu as|il a|elle a|nous avons|vous avez|ils ont|elles ont)\\b", "\\b(je suis|tu es|il est|elle est|nous sommes|vous êtes|ils sont|elles sont)\\b"] },
+    "A1-g2":  { "structure": "adjetivos possessivos (mon/ma/mes, ton…, notre/votre)", "forms": ["\\b(mon|ma|mes|ton|ta|tes|son|sa|ses)\\b"], "extraForms": { "notre/votre/nos/vos/leur": "\\b(notre|nos|votre|vos|leur|leurs)\\b" } },
+    "A1-g3":  { "structure": "verbos em -er e pronominais", "forms": ["\\b(j'|je |tu |il |elle |nous |vous )(habit|parl|aim|mang|travaill|regard|march|cherch)\\w*", "\\b(je m'|tu t'|il s'|elle s'|nous nous |vous vous |je me |tu te )\\w+"] },
+    "A1-g4":  { "structure": "preposições com cidades e países (à/en/au/aux)", "forms": ["\\b(en|au|aux) (France|Brésil|Chine|Espagne|Italie|Allemagne|Portugal|Japon|Angleterre|États-Unis|Canada|Suisse|Belgique)\\b", "\\bà (Paris|Lyon|Marseille|Rio|Pékin|Lisbonne|Madrid|Rome|Londres)\\b"] },
+    "A1-g10": { "structure": "números 70–99", "forms": ["soixante-dix|soixante et onze|soixante-\\w+|quatre-vingt\\w*"] },
+    "A1-g5":  { "structure": "faire e prendre", "forms": ["\\b(fais|fait|faisons|faites|font|faire|prends|prend|prenons|prenez|prennent|prendre)\\b"] },
+    "A1-g6":  { "structure": "verbos modais e il faut (vouloir/pouvoir/devoir/savoir)", "forms": ["\\b(veux|veut|voulons|voulez|veulent|peux|peut|pouvons|pouvez|peuvent|dois|doit|devons|devez|doivent)\\b", "\\b(sais|sait|savons|savez|savent)\\b", "\\bil faut\\b"] },
+    "A1-g7":  { "structure": "comparativos (plus/moins/aussi … que)", "forms": ["\\b(plus|moins|aussi) [^.?!]{0,30}\\bque\\b"] },
+    "A1-g8":  { "structure": "advérbios de frequência (toujours/souvent/parfois/jamais)", "forms": ["\\b(toujours|souvent|parfois|quelquefois|jamais|rarement|d'habitude)\\b"] },
+    "A1-g9":  { "structure": "passé composé (avoir e être)", "forms": ["\\b(j'ai|tu as|il a|elle a|nous avons|vous avez|ils ont|elles ont|on a) (\\w+é|\\w+i|\\w+u|fait|pris|eu|été|vu|dit|mis|bu|lu)\\b", "\\b(je suis|tu es|il est|elle est|nous sommes|ils sont) (allé|venu|parti|arrivé|né|resté|sorti|entré|tombé)\\w*"] }
+  }
+}

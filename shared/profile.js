@@ -551,7 +551,7 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
   ` : '';
 
   const avatarHTML = profile?.avatar_url
-    ? `<img class="profile-avatar" src="${profile.avatar_url}" alt="${t('profile.avatarAlt')}">`
+    ? `<img class="profile-avatar" src="${escapeAttr(profile.avatar_url)}" alt="${t('profile.avatarAlt')}">`
     : `<div class="profile-avatar" style="background:${color};">${initials}</div>`;
 
   wrap.innerHTML = `
@@ -614,10 +614,19 @@ function renderProfileBody(wrap, { profile, langs, earnedBadges, specialBadges, 
 
 // Escapa o campo "Sobre mim" antes de renderizar -- texto livre digitado
 // pelo aluno, nunca deve ser interpretado como HTML.
+// Também escapa aspas: o resultado é usado dentro de atributos HTML
+// (aria-label, value, data-*), e sem isto um texto com `"` (nome de Deck
+// vindo de um .apkg, frente de cartão importado) abriria um atributo novo.
 function escapeHTML(str){
   const div = document.createElement('div');
   div.textContent = str;
-  return div.innerHTML;
+  return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// Escapa texto para uso DENTRO de um atributo HTML entre aspas (ex.: src="...").
+// escapeHTML acima não troca aspas, então não serve para atributos.
+function escapeAttr(str){
+  return String(str == null ? '' : str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 // Preview do avatar dentro do modal de edição -- mesma regra de fallback
@@ -629,7 +638,7 @@ function renderAvatarPreview(profile){
   const removeBtn = document.getElementById('profile-edit-avatar-remove-btn');
   if (!preview) return;
   if (profile?.avatar_url){
-    preview.innerHTML = `<img src="${profile.avatar_url}" alt="${t('profile.avatarAlt')}">`;
+    preview.innerHTML = `<img src="${escapeAttr(profile.avatar_url)}" alt="${t('profile.avatarAlt')}">`;
     if (removeBtn) removeBtn.style.display = '';
   } else {
     const name = profileDisplayName(profile);

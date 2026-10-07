@@ -55,7 +55,6 @@ window.I18N_CATALOG['en'] = {
 
   'flashcardLimit.modal.title': '🔒 Free plan limit', // ALTA
   'flashcardLimit.modal.bodyHtml': 'You\'ve reached the free plan\'s limit of <strong>20 active cards of your own</strong>. To create more, delete a card, or ask your teacher to link your account -- students linked to a teacher get unlimited cards of their own.', // MÉDIA -- política Free; PT e EN falam em apagar, a ação que a interface oferece (🗑); arquivar saiu na CONSOLIDAÇÃO-3
-  'flashcardLimit.fallbackError': 'You\'ve reached the free plan\'s card limit.', // MÉDIA -- política Free
   'flashcardLimit.wouldGenerate': { one: 'This card would create {n} study card, but you only have {remaining} left on the free plan.', other: 'This card would create {n} study cards, but you only have {remaining} left on the free plan.' }, // MÉDIA -- política Free; plural real em EN (o PT usa "cartão(ões)")
 
   'flashcardReset.modal.title': '⚠️ Confirm edit', // ALTA
@@ -190,7 +189,6 @@ window.I18N_CATALOG['en'] = {
   'review.origin.study': 'From the course path', // MÉDIA -- "trilha" = Study Trail; alternativa: "From the study path"
   'review.origin.teacher': 'From the teacher', // ALTA
   'review.origin.self': 'My cards', // ALTA
-  'review.today.label': 'Reviews due', // ALTA
   'review.strength.title': 'Your words', // ALTA
   'review.strength.weak': 'Weak', // ALTA
   'review.strength.notStarted': 'Not started', // ALTA
@@ -200,10 +198,7 @@ window.I18N_CATALOG['en'] = {
   'review.mode.reviewLabel': 'Review', // ALTA
   'review.empty.noneYetTitle': 'No reviews yet', // ALTA
   'review.empty.upToDateTitle': 'You\'re all caught up!', // ALTA
-  'review.empty.noneYetDesc': 'Complete a lesson in Study to start having words to review.', // MÉDIA -- "Estudo" = aba Study
-  'review.empty.upToDateDesc': 'Practice is still available right below, whenever you like.', // ALTA
   'review.mode.flashcard.name': 'Flashcard', // ALTA
-  'review.mode.flashcard.desc': 'Full review', // ALTA
   'review.mode.speed.name': 'Speed Review', // ALTA -- nome do modo
   'review.mode.speed.desc': 'Quick review', // ALTA
   'review.mode.hard.name': 'Hard words', // ALTA
@@ -240,7 +235,6 @@ window.I18N_CATALOG['en'] = {
   'review.cloze.placeholder': 'Type the missing word', // ALTA
   'review.typeAnswer.placeholder': 'Type the answer', // ALTA
   'review.tapToReveal': 'tap to see the answer', // ALTA
-  'review.reviewMore': '🔁 Review more (doesn\'t count as an answer)', // ALTA
   'review.grade.again': 'Again', // MÉDIA -- botão de nota; PT "Errei" = "I got it wrong"; EN segue o padrão Anki
   'review.grade.hard': 'Hard', // ALTA
   'review.grade.good': 'Good', // ALTA
@@ -257,6 +251,13 @@ window.I18N_CATALOG['en'] = {
   'trail.levelTest.sub': 'Already know French at level {level}? Take this test and go straight to {next} — no need to complete the units first.', // ALTA -- fr
   'trail.levelTest.redo': 'Retake →', // ALTA
   'trail.levelTest.start': 'Start →', // ALTA
+  'trail.unit.skipped': 'Skipped', // ALTA
+  'trail.unit.skippedTitle': 'Completed through the Checkpoint', // ALTA
+  'trail.unit.skippedBadge': '⏭ Skipped', // ALTA
+  'trail.unit.grammarChip': 'Grammar', // ALTA
+  'trail.checkpoint.skipLocked': 'Skipping units is a Premium plan feature (or for the teacher\'s students).', // ALTA
+  'review.studyAll': '▶ Study all Decks', // ALTA
+  'review.listen.placeholder': 'Write what you heard', // ALTA
   'trail.unit.done': 'Completed', // ALTA
   'trail.unit.lessonsProgress': '{done} of {total} lessons', // ALTA
   'trail.checkpoint.title': 'Checkpoint', // ALTA
@@ -337,9 +338,9 @@ window.I18N_CATALOG['en'] = {
   'myFlashcards.edit.imageNotice': '⚠️ This card\'s image was kept in the data, but it doesn\'t show up in Review yet for cards from the new editor.', // MÉDIA
   'myFlashcards.toast.editedReset': '✓ Card edited. Its review progress was reset.', // ALTA
   'myFlashcards.toast.edited': '✓ Card edited.', // ALTA
-  'myFlashcards.native.title': 'Edit card (native editor)', // MÉDIA
+  'myFlashcards.native.title': 'Edit card', // MÉDIA
   'myFlashcards.native.hint': 'This card uses the new field model -- editing here, the content is saved to fields/card_generation_mode, never to the old columns.', // MÉDIA
-  'myFlashcards.native.cardType': 'Card Type', // MÉDIA
+  'myFlashcards.native.cardType': 'Card type', // MÉDIA
   'myFlashcards.toast.created': '✓ Card created. It\'s already in your review queue.', // ALTA
   'myFlashcards.err.previewLoad': 'Could not load this card to preview.', // ALTA
   'myFlashcards.confirm.delete': 'This will permanently delete the card and its entire review history. This cannot be undone. Continue?', // ALTA
@@ -351,6 +352,8 @@ window.I18N_CATALOG['en'] = {
   'myFlashcards.export.download': '⬇️ Download .json', // ALTA
   'myFlashcards.export.copyLink': '🔗 Copy link', // ALTA
   'myFlashcards.export.linkCopied': '✓ Link copied!', // ALTA
+  'myFlashcards.export.leftOut': '{n} Fill-in-the-blank card(s) were left out: this format only carries front and back.', // ALTA
+  'myFlashcards.import.confirmCut': 'The file has {total} card(s), but only the first {kept} fit in the free plan. Import those {kept}?', // ALTA
   'myFlashcards.import.errRead': 'Could not read this file. Make sure it is a .json exported from this screen.', // ALTA
   'myFlashcards.import.errEmpty': 'The file/link has no cards to import.', // ALTA
   'myFlashcards.import.errLang': 'These cards are in another language ({lang}) -- they can\'t be imported here.', // ALTA
@@ -477,7 +480,6 @@ window.I18N_CATALOG['en'] = {
   'common.seeResultArrow': 'See result →', // ALTA
   'common.nextArrow': 'Next →', // ALTA
   'fr.checkpoint.question': 'Question {i} of {n}', // ALTA
-  'fr.checkpoint.howToSay': 'How do you say "{t}" in French?', // ALTA
   'fr.checkpoint.moduleDone': 'Module complete! 🏆', // ALTA
   'fr.checkpoint.finishSection': 'Finish section ✓', // ALTA
   'fr.levelTest.goStraightTo': 'You can move straight on to {next}', // ALTA
@@ -817,8 +819,6 @@ window.I18N_CATALOG['en'] = {
   'ankiImport.noDeck': 'No deck', // ALTA
   'ankiImport.pillMedia': '🎧🖼️ media', // ALTA
   'ankiImport.pillDuplicate': '⚠️ possible duplicate', // ALTA
-  'ankiImport.decks.title': '📚 Decks found in Anki:', // ALTA
-  'ankiImport.decks.note': 'This app does not have Decks yet -- all confirmed cards go straight into "My Cards", without this organization for now. Once Decks exist, this hierarchy (already recognized and saved) will be able to recreate the same structure automatically.', // MÉDIA
   'ankiImport.tags.title': '🏷️ Tags found ({n}):', // ALTA
   'ankiImport.tags.note': 'Tags will be saved on each card (Note) exactly as in Anki (normalized -- lowercase, no accents, spaces become "-") and will be available for filtering once the Dashboard exists.', // MÉDIA
   'ankiImport.summary.found': { one: '<strong>{n}</strong> card found in the file --', other: '<strong>{n}</strong> cards found in the file --' }, // ALTA
@@ -837,9 +837,14 @@ window.I18N_CATALOG['en'] = {
   'ankiImport.savingBatches': 'Saving... ({n} batch(es) ok)', // ALTA
   'ankiImport.saveError': 'Error saving.', // ALTA
   'ankiImport.skippedFallback': 'Card skipped.', // ALTA
-  'ankiImport.result.ok': { one: '✓ <strong>{imported}</strong> of {n} selected card was imported successfully to "My Cards".', other: '✓ <strong>{imported}</strong> of {n} selected cards were imported successfully to "My Cards".' }, // ALTA
+  'ankiImport.result.ok': { one: '✓ <strong>{imported}</strong> of {n} selected card was imported successfully.', other: '✓ <strong>{imported}</strong> of {n} selected cards were imported successfully.' }, // ALTA
   'ankiImport.result.partial': '⚠️ The import stopped halfway -- <strong>{imported}</strong> of {requested} cards were already saved successfully before the failure. Those already imported will NOT be duplicated if you try again (that attempt will detect the ones that already exist).', // ALTA
   'ankiImport.result.mediaWarn': { one: '⚠️ {n} media file could not be included (the card text was imported normally): {list}{more}', other: '⚠️ {n} media files could not be included (the card text was imported normally): {list}{more}' }, // ALTA
+  'ankiImport.destDeck': '📚 Import into Deck:', // ALTA
+  'ankiImport.keepFolders': 'Keep the Anki folders (recreate them as Decks inside the chosen Deck)', // ALTA
+  'ankiImport.result.decksCreated': '{n} Deck(s) created from the Anki folders.', // ALTA
+  'ankiImport.result.cutTail': '({n} Anki card(s) were left out.)', // ALTA
+  'ankiImport.result.deckFailed': '({n} card(s) were not imported.)', // ALTA
   'ankiImport.result.skippedTitle': 'Skipped cards ({n})', // ALTA
   'ankiExport.generating': 'Generating file...', // ALTA
   'ankiExport.empty': 'No cards to export in this selection.', // ALTA
@@ -1690,6 +1695,8 @@ window.I18N_CATALOG['en'] = {
   'ui.review.intensity.light': 'Light (shorter sessions)', // ALTA
   'ui.review.intensity.intense': 'Intense (longer sessions)', // ALTA
   'ui.review.settingsNote': 'These settings control the review engine behind the scenes -- you don\'t need to understand the technical details.', // ALTA
+  'ui.review.otherModes': 'Other modes', // ALTA
+  'ui.review.otherModesHint': 'Speed Review uses today\'s session (new words and reviews); Hard words and Match work any time.', // ALTA
   'ui.review.practiceHint': 'Keep practicing whenever you like, even with no reviews due.', // ALTA
   'ui.conj.sub': 'Choose the verb tenses and verb categories. You always practice all 6 persons.', // ALTA
   'ui.conj.topN': 'Number of verbs (most common first)', // ALTA

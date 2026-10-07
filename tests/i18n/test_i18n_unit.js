@@ -152,7 +152,7 @@ function makeEnv({ search = '', stored = null, debug = false } = {}){
   const BASE = process.env.I18N_BASELINE || 'e88fabb';
   const orig = (f) => execSync(`git show ${BASE}:${f}`, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 << 20 });
   const origFr = orig('fr/index.html'), origZh = orig('zh/index.html'), origRep = orig('shared/reports.js');
-  const PREV = process.env.I18N_PREV || 'e036566';
+  const PREV = process.env.I18N_PREV || '957a154';
   // Mudanças DELIBERADAS de texto em português (aprovadas pela dona do projeto) desde o
   // commit PREV: aplicadas ao texto antigo antes de comparar. Qualquer outra diferença falha.
   const DELIBERATE_PT_CHANGES = [['arquive algum cartão que já não usa, ou peça', 'apague algum cartão, ou peça']];

@@ -915,12 +915,30 @@ function fieldIsPinyinSatellite(field, fields){
   return fields.some(f => f.pinyinFieldId === field.id);
 }
 
+// Idioma inicial de um campo novo (só um ponto de partida; a pessoa troca
+// no seletor). Pedido da autora: o 1º campo começa no idioma estudado e o
+// 2º em português. Pergunta (role 'prompt') = idioma estudado; resposta e
+// opções erradas = português. Sem idioma conhecido do site, fica em branco.
+function defaultLangForNewField(editorState, role){
+  const studyLang = (typeof STUDY_LANG_FOR_APP_KEY !== 'undefined' && editorState) ? STUDY_LANG_FOR_APP_KEY[editorState.languageAppKey] : null;
+  if (!studyLang) return null;
+  if (role === 'prompt') return studyLang;
+  if (role === 'answer' || role === 'distractor') return 'pt-BR';
+  const fields = (editorState.fields || []).filter(f => !fieldIsPinyinSatellite(f, editorState.fields));
+  return fields.length === 0 ? studyLang : 'pt-BR';
+}
+
 // Cria um Field NOVO (id gerado por createFieldState, Fase 6D.1) e o
 // adiciona ao FIM de editorState.fields. `fields` continua sendo só a
 // ordem estrutural/editorial -- nunca interpretado como frente/verso por
 // este módulo.
 function addFieldToEditorState(editorState, overrides){
-  const field = createFieldState(overrides || {});
+  const o = Object.assign({}, overrides || {});
+  if (o.lang === undefined){
+    const lang = defaultLangForNewField(editorState, o.role);
+    if (lang) o.lang = lang;
+  }
+  const field = createFieldState(o);
   editorState.fields = editorState.fields.concat([field]);
   return field;
 }

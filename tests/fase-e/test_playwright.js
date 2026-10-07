@@ -134,7 +134,7 @@ async function bootPage(browser, lang, port){
 
     // 5) lesson completion continua sendo regra pedagógica
     const info = await ev(() => { const u = UNITS.find(x => x.type !== 'grammar' && x.vocab && x.vocab.length); const idx = buildCourseDeckIndex(STATE.decks, APP_KEY);
-      return { unitId: u.id, deckId: courseDeckIdForUnit(idx, u.id), vocab: u.vocab.length * 2 /* K2-C: A+B por palavra (CardInstances) */, rootId: idx.rootId }; });
+      return { unitId: u.id, deckId: courseDeckIdForUnit(idx, u.id), vocab: u.vocab.length * 2 + STATE.cards.filter(c => c.unitId === u.id && isStudyTrailPhraseCard(c)).length /* K2-C: A+B por palavra + 1 por frase "Na frase" */, rootId: idx.rootId }; });
     r = await ev(id => { STATE.unitProgress = {}; return deckReviewSummary(id); }, info.deckId);
     check(lang + ' Deck com cards mas lição não concluída: 0 elegíveis', r.totalCards === info.vocab && r.eligibleCards === 0 && r.new === 0, r);
     r = await ev(async i => { STATE.unitProgress[i.unitId] = { started: true, completed: true, lessonIdx: 99, lessonMisses: {} }; return deckReviewSummary(i.deckId); }, info);

@@ -187,17 +187,20 @@ async function fillNormalLike(page, type, front, back, deckId){
     await page.waitForSelector('#my-create-flashcard-btn:disabled', { timeout: 8000 });
     L('D Free: no teto o botão vira "Limite atingido"', (await page.textContent('#my-create-flashcard-btn')).includes('Limite'));
 
-    // E) Free com 19 usados: importar 2 cartões (2 CardInstances) bloqueia ANTES de gravar
+    // E) Free com 19 usados: importar 2 cartões (2 CardInstances). Regra nova
+    // "corta e avisa" (arquitetura seção 17, tests/limite-corte): cria só o
+    // 1º (cabe) e avisa -- antes este teste esperava o bloqueio total.
     await ev(() => { window.__DB.own_flashcards.length = 19; });
     await openMeusCartoes(page, false, false);
     const n0 = await ev(() => window.__DB.own_flashcards.length);
     const over = { languageAppKey: lang === 'fr' ? 'frances' : 'mandarim', cards: [{ front: 'over1', backTrans: 'y1', frontIsTargetLanguage: true }, { front: 'over2', backTrans: 'y2', frontIsTargetLanguage: true }] };
+    page.once('dialog', d => d.accept());
     await page.setInputFiles('#my-flashcards-import-file', { name: 'o.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(over)) });
-    await page.waitForTimeout(500);
-    L('E Free 19/20 + 2 CardInstances é bloqueado pelo preflight', await ev(n => window.__DB.own_flashcards.length === n && document.getElementById('flashcard-limit-modal').style.display === 'flex', n0));
-    L('E nada foi persistido (sem Note parcial)', await ev(() => window.__inserts.filter(r => r.fields && r.fields[0] && r.fields[0].content.value === 'over1').length === 0));
+    await page.waitForFunction(() => document.getElementById('flashcard-limit-modal').style.display === 'flex', null, { timeout: 8000 });
+    L('E Free 19/20 + 2 CardInstances: corta (só o 1º criado) e avisa', await ev(n => window.__DB.own_flashcards.length === n + 1 && document.getElementById('flashcard-limit-modal').innerText.includes('apenas o primeiro cartão foi criado'), n0));
+    L('E o 2º não foi persistido (sem Note parcial)', await ev(() => window.__inserts.filter(r => r.fields && r.fields[0] && r.fields[0].content.value === 'over2').length === 0));
     // Premium: sem teto (limite é do plano grátis)
-    await ev(() => { document.getElementById('flashcard-limit-modal').style.display = 'none'; });
+    await ev(() => { document.getElementById('flashcard-limit-modal').style.display = 'none'; window.__DB.own_flashcards.length = 19; });
     await openMeusCartoes(page, true, false);
     L('E Premium: selo "cartões ilimitados"', (await page.textContent('#view-my-flashcards')).includes('Premium — cartões ilimitados'));
     await fillNormalLike(page, 'normal_reversed', 'r1', 'r2');

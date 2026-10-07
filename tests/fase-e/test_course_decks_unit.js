@@ -78,24 +78,27 @@ for (const lang of ['fr', 'zh']){
   ctx.STATE.decks = decks;
   ctx.STATE.unitProgress = {};
   const scopeAll = ctx.getStudyScopeForDeck(decks, d0.id, ctx.STATE.cards);
-  check(lang + ' escopo do Unit Deck = cards da unidade', scopeAll.length === unit0.vocab.length * 2 && scopeAll.every(c => c.unitId === unit0.id));
+  // Cartões "Na frase" da unidade (1 por frase de exemplo) somam aos A+B das palavras.
+  const nPh = ctx.STATE.cards.filter(c => c.unitId === unit0.id && ctx.isStudyTrailPhraseCard(c)).length;
+  const unitCards = unit0.vocab.length * 2 + nPh;
+  check(lang + ' escopo do Unit Deck = cards da unidade', scopeAll.length === unitCards && scopeAll.every(c => c.unitId === unit0.id));
   const rootScope = ctx.getStudyScopeForDeck(decks, root.id, ctx.STATE.cards);
   check(lang + ' escopo do root = subtree (todos os cards)', rootScope.length === ctx.STATE.cards.length);
   // lesson completion: pertencer ao Deck NÃO torna elegível
   check(lang + ' sem lição concluída: nada elegível', ctx.eligibleReviewPool().length === 0);
   const sumBefore = ctx.deckReviewSummary(d0.id);
-  check(lang + ' summary: total>0 mas elegíveis=0 e counts=0', sumBefore.totalCards === unit0.vocab.length * 2 && sumBefore.eligibleCards === 0 && sumBefore.new === 0);
+  check(lang + ' summary: total>0 mas elegíveis=0 e counts=0', sumBefore.totalCards === unitCards && sumBefore.eligibleCards === 0 && sumBefore.new === 0);
   // conclui a unidade -> passa a valer
   ctx.STATE.unitProgress[unit0.id] = { started: true, completed: true, lessonIdx: 99, lessonMisses: {} };
   const sumAfter = ctx.deckReviewSummary(d0.id);
-  check(lang + ' unidade concluída: elegíveis = vocab da unidade', sumAfter.eligibleCards === unit0.vocab.length * 2, sumAfter);
-  check(lang + ' contagem por CardInstance (K2-C: A+B por palavra): new = 2 x vocab', sumAfter.new === unit0.vocab.length * 2);
+  check(lang + ' unidade concluída: elegíveis = vocab da unidade', sumAfter.eligibleCards === unitCards, sumAfter);
+  check(lang + ' contagem por CardInstance (K2-C: A+B por palavra): new = 2 x vocab', sumAfter.new === unitCards);
   // lição parcial: só as palavras das lições já concluídas
   ctx.STATE.unitProgress[unit0.id] = { started: true, completed: false, lessonIdx: 1, lessonMisses: {} };
   const lesson0 = (unit0.lessons || [])[0];
   if (lesson0 && lesson0.vocabIdx){
     const partialSum = ctx.deckReviewSummary(d0.id);
-    check(lang + ' lição parcial: só vocab da lição 1', partialSum.eligibleCards === lesson0.vocabIdx.length * 2, [partialSum.eligibleCards, lesson0.vocabIdx.length]);
+    check(lang + ' lição parcial: só vocab da lição 1', partialSum.eligibleCards === lesson0.vocabIdx.length * 2 + ctx.STATE.cards.filter(c => c.unitId === unit0.id && ctx.isStudyTrailPhraseCard(c) && lesson0.vocabIdx.includes(c.gateVocabIdx)).length, [partialSum.eligibleCards, lesson0.vocabIdx.length]);
   }
   // FSRS preservado: estado do card não é tocado pelo escopo/contagem
   const fs0 = JSON.stringify(ctx.STATE.cards.map(c => [c.stability, c.difficulty, c.state, c.reps, c.due, c.lapses]));
@@ -119,7 +122,7 @@ for (const lang of ['fr', 'zh']){
   ctx.applySerializedState({ cards: saved });
   check(lang + ' save defasado não sobrescreve deckId', target.deckId === freshDeckId);
   check(lang + ' progresso FSRS restaurado normalmente', target.reps === 7 && target.due === 12345 && target.stability === 3.5, [target.reps, target.due, target.stability]);
-  check(lang + ' ids estáveis (u<unit>-v<idx>)', ctx.STATE.cards.every(c => c.id === `u${c.unitId}-v${c.vocabIdx}` || c.id === `u${c.unitId}-v${c.vocabIdx}-b`));
+  check(lang + ' ids estáveis (u<unit>-v<idx>)', ctx.STATE.cards.every(c => ctx.isStudyTrailPhraseCard(c) ? /^u.+-[pd]\d+$/.test(c.id) : (c.id === `u${c.unitId}-v${c.vocabIdx}` || c.id === `u${c.unitId}-v${c.vocabIdx}-b`)));
   // compat: save antigo sem nenhum deckId
   const old = JSON.parse(JSON.stringify(ctx.STATE.cards)).map(c => { delete c.deckId; return c; });
   ctx.STATE.cards = ctx.buildCardsFromUnits(ctx.UNITS);
